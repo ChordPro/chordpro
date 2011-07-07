@@ -7,7 +7,7 @@ use warnings;
 use feature 'switch';
 
 sub generate_songbook {
-    my ($sb, $options) = @_;
+    my ($self, $sb, $options) = @_;
     my @book;
     my $tmpl = std_template();
     @book = split( /\n/, $tmpl );

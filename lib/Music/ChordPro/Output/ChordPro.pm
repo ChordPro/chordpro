@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 sub generate_songbook {
-    my ($sb, $options) = @_;
+    my ($self, $sb, $options) = @_;
     my @book;
 
     foreach my $song ( @{$sb->{songs}} ) {
@@ -39,6 +39,16 @@ sub generate_song {
 
     foreach my $elt ( @{$s->{body}} ) {
 
+	if ( $elt->{type} eq "empty" ) {
+	    push(@s, "");
+	    next;
+	}
+
+	if ( $elt->{type} eq "colb" ) {
+	    push(@s, "{colb}");
+	    next;
+	}
+
 	if ( $elt->{type} eq "song" ) {
 	    push(@s, songline($elt));
 	    next;
@@ -48,6 +58,10 @@ sub generate_song {
 	    push(@s, "") if $tidy;
 	    push(@s, "{start_of_chorus}");
 	    foreach my $e ( @{$elt->{body}} ) {
+		if ( $e->{type} eq "empty" ) {
+		    push(@s, "");
+		    next;
+		}
 		if ( $e->{type} eq "song" ) {
 		    push(@s, songline($e));
 		    next;

@@ -7,7 +7,7 @@ use warnings;
 use Data::Dumper;
 
 sub generate_songbook {
-    my ($sb, $options) = @_;
+    my ($self, $sb, $options) = @_;
 
     my $ps = page_settings();
     $ps->{pr} = PDFWriter->new( $ps );
@@ -35,12 +35,41 @@ sub generate_song {
     my $y = $ps->{papersize}->[1] - $ps->{margintop};
     my $sb = $s->{body};
 
+    if ( $s->{title} ) {
+	$ps->{pr}->text( $s->{title}, $x, $y, $ps->{fonts}->{title} );
+	$y -= $ps->{fonts}->{title}->{size};
+    }
+
+    if ( $s->{subtitle} ) {
+	for ( @{$s->{subtitle}} ) {
+	    $ps->{pr}->text( $_, $x, $y, $ps->{fonts}->{text} );
+	    $y -= $ps->{fonts}->{text}->{size};
+	}
+    }
+
+    if ( $s->{title} or $s->{subtitle} ) {
+	$y -= $ps->{headspace};
+    }
+
     foreach my $elt ( @{$sb} ) {
 
+	if ( $elt->{type} eq "colb" ) {
+	    $ps->{pr}->newpage;
+	    $x = $ps->{marginleft} + $ps->{offsets}->[0];
+	    $y = $ps->{papersize}->[1] - $ps->{margintop};
+	    next;
+	}
+
+	if ( $elt->{type} eq "empty" ) {
+	    $y -= $ps->{lineheight};
+	    next;
+	}
+
 	if ( $elt->{type} eq "song" ) {
-	    my $haschords = 0;
+	    my $haschords = 1;
 	    if ( $options->{a} ) { # TODO: better name :)
-		$haschords = join( "", @{ $elt->{chords} } ) =~ /\W/;
+		$haschords = 0
+		  unless join( "", @{ $elt->{chords} } ) =~ /\S/;
 	    }
 	    $y += $ps->{lineheight} unless $haschords;
 	    songline( $elt, $x, $y, $ps );
@@ -54,6 +83,10 @@ sub generate_song {
 		if ( $e->{type} eq "song" ) {
 		    songline( $e, $x, $y, $ps );
 		    $y -= $ps->{lineheight} * 2;
+		    next;
+		}
+		elsif ( $e->{type} eq "empty" ) {
+		    $y -= $ps->{lineheight};
 		    next;
 		}
 	    }
@@ -110,15 +143,18 @@ sub page_settings {
     margintop     => 40,
     marginbottom  => 40,
     marginright   => 40,
+    headspace     => 20,
     offsets       => [ 0, 0 ],		# col 1, col 2
     lineheight    => 14,
     fonts      => {
-	text =>  { name => 'Times-Roman',
-		   size => 12 },
-        chord => { name => 'Helvetica-Oblique',
-		   size => 12 },
+	title   => { name => 'Times-Bold',
+		     size => 14 },
+	text    => { name => 'Times-Roman',
+		     size => 12 },
+        chord   => { name => 'Helvetica-Oblique',
+		     size => 12 },
         comment => { name => 'Times-Roman',
-		   size => 12 },
+		     size => 12 },
     },
     xxfonts         => {
         text =>  { file => $ENV{HOME}.'/.fonts/DejaVuSerif.ttf',

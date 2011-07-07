@@ -76,7 +76,7 @@ sub parsefile {
 		     });
 	    }
 	    else {
-		push( @{$self->{songs}->[-1]->{body}, { type => "empty" } );
+		push( @{$self->{songs}->[-1]->{body}}, { type => "empty" } );
 	    }
 	}
     }
@@ -114,17 +114,29 @@ sub directive {
     return "tab"    if $d =~ /^start_of_tab|sot$/;
     return ""       if $d =~ /^end_of_tab|eot$/;
 
+    if ( $d =~ /^colb$/ ) {
+	push(@{$self->{songs}->[-1]->{body}},
+	     { type => "colb" });
+	next;
+    }
+
     if ( $d =~ /^(?:title|t):\s*(.*)/ ) {
 	$self->{songs}->[-1]->{title} = $1;
+	next;
     }
-    elsif ( $d =~ /^(?:subtitle|st):\s*(.*)/ ) {
+
+    if ( $d =~ /^(?:subtitle|st):\s*(.*)/ ) {
 	push(@{$self->{songs}->[-1]->{subtitle}}, $1);
+	next;
     }
-    elsif ( $d =~ /^(?:comment|c):\s*(.*)/ ) {
+
+    if ( $d =~ /^(?:comment|c):\s*(.*)/ ) {
 	push(@{$self->{songs}->[-1]->{body}},
 	     { type => "comment", text => $1 });
+	next;
     }
-    elsif ( $d =~ /^define\s+([^:]+):\s+
+
+    if ( $d =~ /^define\s+([^:]+):\s+
 		   base-fret\s+(\d+)\s+
 		   frets\s+([0-9---xX])\s+
 		   ([0-9---xX])\s+
@@ -150,13 +162,15 @@ sub directive {
 	       $2 ? ( base => $2 ) : (),
 	       frets => [ map { $_ =~ /^\d+/ ? $_ : '-' } @f ],
 	     });
+	next;
     }
-    elsif ( $d =~ /^(?:new_song|ns)$/ ) {
+
+    if ( $d =~ /^(?:new_song|ns)$/ ) {
 	push(@{$self->{songs}}, bless {}, 'Music::ChordPro::Song');
+	next;
     }
-    else {
-	warn("Unknown directive: $d\n");
-    }
+
+    warn("Unknown directive: $d\n");
     "";
 }
 

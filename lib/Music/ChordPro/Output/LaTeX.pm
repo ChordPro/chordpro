@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 sub generate_songbook {
-    my ($sb, $options) = @_;
+    my ($self, $sb, $options) = @_;
     my @book;
 
     push(@book, "\\documentclass{article}");
