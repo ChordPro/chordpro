@@ -5,9 +5,6 @@ package Music::ChordPro::Output::Text;
 use strict;
 use warnings;
 
-my $single_space = 0;		# suppress chords line when empty
-				# if > 1, suppress chords line when nonempty
-
 sub generate_songbook {
     my ($self, $sb, $options) = @_;
     my @book;
@@ -24,13 +21,15 @@ sub generate_songbook {
     \@book;
 }
 
-*Music::ChordPro::Songbook::generate_text = \&generate_songbook;
+my $single_space = 0;		# suppress chords line when empty
+my $lyrics_only = 0;		# suppress all chords lines
 
 sub generate_song {
     my ($s, $options) = @_;
 
     my $tidy = $options->{tidy};
     $single_space = $options->{'single-space'};
+    $lyrics_only = $options->{'lyrics-only'};
 
     my @s;
 
@@ -106,12 +105,15 @@ sub generate_song {
 
 sub songline {
     my ($elt) = @_;
+
     my $t_line = "";
-    unless ( $single_space ) {
-	foreach ( 0..$#{$elt->{chords}} ) {
-	    $t_line .= $elt->{phrases}->[$_];
-	}
-	s/\s+$// for ( $t_line );
+
+    if ( $lyrics_only
+	 or
+	 $single_space && ! ( $elt->{chords} && join( "", @{ $elt->{chords} } ) =~ /\S/ )
+       ) {
+	$t_line = join( "", @{ $elt->{phrases} } );
+	$t_line =~ s/\s+$//;
 	return $t_line;
     }
 
@@ -120,11 +122,10 @@ sub songline {
 	$c_line .= $elt->{chords}->[$_] . " ";
 	$t_line .= $elt->{phrases}->[$_];
 	my $d = length($c_line) - length($t_line);
-	$t_line .= "-" x $d if $d > 0 && $single_space == 1;
+	$t_line .= "-" x $d if $d > 0;
 	$c_line .= " " x -$d if $d < 0;
     }
     s/\s+$// for ( $t_line, $c_line );
-    return $t_line if $single_space > 1 || $c_line !~ /\S/;
     return $c_line . "\n" . $t_line;
 }
 

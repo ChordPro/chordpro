@@ -17,15 +17,17 @@ sub generate_songbook {
 	push(@book, @{generate_song($song, $options)});
     }
 
+    push( @book, "");
     \@book;
 }
 
-*Music::ChordPro::Songbook::generate_chordpro = \&generate_songbook;
+my $lyrics_only = 0;
 
 sub generate_song {
     my ($s, $options) = @_;
 
     my $tidy = $options->{tidy};
+    $lyrics_only = $options->{'lyrics-only'};
 
     my @s;
 
@@ -33,6 +35,12 @@ sub generate_song {
       if defined $s->{title};
     if ( defined $s->{subtitle} ) {
 	push(@s, map { +"{subtitle: $_}" } @{$s->{subtitle}});
+    }
+
+    if ( $s->{settings} ) {
+	foreach ( sort keys %{ $s->{settings} } ) {
+	    push(@s, "{$_: " . $s->{settings}->{$_} . "}");
+	}
     }
 
     push(@s, "") if $tidy;
@@ -45,7 +53,12 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "colb" ) {
-	    push(@s, "{colb}");
+	    push(@s, "{column_break}");
+	    next;
+	}
+
+	if ( $elt->{type} eq "newpage" ) {
+	    push(@s, "{new_page}");
 	    next;
 	}
 
@@ -81,12 +94,13 @@ sub generate_song {
 	    next;
 	}
 
-	if ( $elt->{type} eq "comment" ) {
+	if ( $elt->{type} eq "comment" || $elt->{type} eq "comment_italic" ) {
 	    push(@s, "") if $tidy;
-	    push(@s, "{comment: " . $elt->{text} . "}");
+	    push(@s, "{" . $elt->{type} . ": " . $elt->{text} . "}");
 	    push(@s, "") if $tidy;
 	    next;
 	}
+
     }
 
 
@@ -95,6 +109,11 @@ sub generate_song {
 
 sub songline {
     my ($elt) = @_;
+
+    if ( $lyrics_only ) {
+	return join( "", @{ $elt->{phrases} } );
+    }
+
     my $line = "";
     foreach ( 0..$#{$elt->{chords}} ) {
 	$line .= "[" . $elt->{chords}->[$_] . "]" . $elt->{phrases}->[$_];

@@ -46,7 +46,11 @@ sub parsefile {
     while ( <$fh> ) {
 	chomp;
 
+	s/^#({t:)/$1/;
 	next if /^#/;
+
+	# For practical reasons: a prime should always be an apostroph.
+	s/'/\x{2019}/g;
 
 	if ( /\{(.*)\}\s*$/ ) {
 	    $flush->();
@@ -85,7 +89,6 @@ sub parsefile {
 
 sub decompose {
     my ($self, $line) = @_;
-    $line =~ s/^\s+//;
     $line =~ s/\s+$//;
     my @a = split(/(\[.*?\])/, $line, -1);
 
@@ -114,26 +117,38 @@ sub directive {
     return "tab"    if $d =~ /^start_of_tab|sot$/;
     return ""       if $d =~ /^end_of_tab|eot$/;
 
-    if ( $d =~ /^colb$/ ) {
+    if ( $d =~ /^(?:colb|column_break)$/i ) {
 	push(@{$self->{songs}->[-1]->{body}},
 	     { type => "colb" });
-	next;
+	return "";
     }
 
-    if ( $d =~ /^(?:title|t):\s*(.*)/ ) {
+    if ( $d =~ /^(?:new_page|np)$/i ) {
+	push(@{$self->{songs}->[-1]->{body}},
+	     { type => "newpage" });
+	return "";
+    }
+
+    if ( $d =~ /^(?:title|t):\s*(.*)/i ) {
 	$self->{songs}->[-1]->{title} = $1;
-	next;
+	return "";
     }
 
-    if ( $d =~ /^(?:subtitle|st):\s*(.*)/ ) {
+    if ( $d =~ /^(?:subtitle|st):\s*(.*)/i ) {
 	push(@{$self->{songs}->[-1]->{subtitle}}, $1);
-	next;
+	return "";
     }
 
-    if ( $d =~ /^(?:comment|c):\s*(.*)/ ) {
+    if ( $d =~ /^(?:comment|c):\s*(.*)/i ) {
 	push(@{$self->{songs}->[-1]->{body}},
 	     { type => "comment", text => $1 });
-	next;
+	return "";
+    }
+
+    if ( $d =~ /^(?:comment_italic|ci):\s*(.*)/i ) {
+	push(@{$self->{songs}->[-1]->{body}},
+	     { type => "comment_italic", text => $1 });
+	return "";
     }
 
     if ( $d =~ /^define\s+([^:]+):\s+
@@ -144,7 +159,7 @@ sub directive {
 		   ([0-9---xX])\s+
 		   ([0-9---xX])\s+
 		   ([0-9---xX])
-		  /x
+		  /xi
 	    ||
 	    $d =~ /^define:\s+(\S+)\s+
 		   base-fret\s+(\d+)\s+
@@ -154,7 +169,7 @@ sub directive {
 		   ([0-9---xX])\s+
 		   ([0-9---xX])\s+
 		   ([0-9---xX])
-		  /x
+		  /xi
 	  ) {
 	my @f = ($3, $4, $5, $6, $7, $8);
 	push(@{$self->{songs}->[-1]->{define}},
@@ -162,12 +177,22 @@ sub directive {
 	       $2 ? ( base => $2 ) : (),
 	       frets => [ map { $_ =~ /^\d+/ ? $_ : '-' } @f ],
 	     });
-	next;
+	return "";
     }
 
-    if ( $d =~ /^(?:new_song|ns)$/ ) {
+    if ( $d =~ /^(?:new_song|ns)$/i ) {
 	push(@{$self->{songs}}, bless {}, 'Music::ChordPro::Song');
-	next;
+	return "";
+    }
+
+    if ( $d =~ /^(?:titles\s*:\s*)(left|right|center|centre)$/i ) {
+	$self->{songs}->[-1]->{settings}->{titles} = $1;
+	return "";
+    }
+
+    if ( $d =~ /^(?:columns\s*:\s*)(\d+)$/i ) {
+	$self->{songs}->[-1]->{settings}->{columns} = $1;
+	return "";
     }
 
     warn("Unknown directive: $d\n");

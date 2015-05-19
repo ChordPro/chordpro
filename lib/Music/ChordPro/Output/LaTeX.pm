@@ -21,8 +21,6 @@ sub generate_songbook {
     \@book;
 }
 
-*Music::ChordPro::Songbook::generate_latex = \&generate_songbook;
-
 sub generate_song {
     my ($s, $options) = @_;
 

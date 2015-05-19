@@ -18,8 +18,6 @@ sub generate_songbook {
     \@book;
 }
 
-*Music::ChordPro::Songbook::generate_lilypond = \&generate_songbook;
-
 sub generate_song {
     my ($book, $s, $options) = @_;
 
@@ -94,6 +92,8 @@ sub generate_song {
 
 }
 
+my $pchord;
+
 sub songline {
     my ( $l, $m, $c, $elt) = @_;
 
@@ -109,7 +109,8 @@ sub songline {
 	$lline .= $phrase;
 	my $t = scalar( split ( ' ', $phrase ) );
 	$mline .= ( "c4 " x $t );
-	$cline .= lp($elt->{chords}->[$i]||'r', $t) . " ";
+	$pchord = $elt->{chords}->[$i] || $pchord || 'r';
+	$cline .= lp($pchord, $t) . " ";
     }
 
     push( @$l, $lline );
@@ -173,7 +174,10 @@ sub std_template {
 
 \score {
   <<
-    \new ChordNames { \theChords }
+    \new ChordNames {
+       \set chordChanges = ##t
+       \theChords
+    }
     \new Devnull = "vocal" { \theMelody }
     \new Lyrics \lyricsto "vocal" \theLyrics
   >>
@@ -189,3 +193,51 @@ EOD
 }
 
 1;
+
+__END__
+# An alternative approach:
+
+\version "2.18"
+
+the_words = \lyricmode {
+  "Swing"1
+  "low, sweet"
+  "chari-"
+  "ot, coming for to carry me"
+  "home."
+  \break
+  "Swing"
+  "low, sweet"
+  "chari-"
+  "ot, coming for to"
+  "carry me"
+  "home."
+}
+
+the_chords = \chordmode {
+  s1
+  c
+  f
+  c
+  g
+  s
+  c
+  f
+  c
+  g
+  c
+}
+
+\score {
+  <<
+    \new ChordNames \the_chords
+    %\new FretBoards \the_chords
+    \new Lyrics \the_words
+  >>
+  \layout {
+    indent = 0
+    ragged-right = ##t
+    \override LyricText.self-alignment-X = #LEFT
+    \context { \Score \remove "Bar_number_engraver" }
+  }
+}
