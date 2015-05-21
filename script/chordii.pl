@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
 # Last Modified By: Johan Vromans
-# Last Modified On: Tue May 19 14:33:11 2015
-# Update Count    : 163
+# Last Modified On: Thu May 21 09:50:38 2015
+# Update Count    : 165
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -20,7 +20,8 @@ use Data::Dumper;
 ################ Setup  ################
 
 # Process command line options, config files, and such.
-my $options = app_setup("pchord", "0.10");
+my $options;
+$options = app_setup("pchord", "0.10") unless $::__EMBEDDED__;
 
 ################ Presets ################
 
@@ -29,7 +30,7 @@ $options->{verbose} = 1 if $options->{trace};
 
 ################ Activate ################
 
-main($options);
+main($options) unless $::__EMBEDDED__;
 
 ################ The Process ################
 
@@ -290,3 +291,5 @@ sub app_config {
 
     # Process config data, filling $options ...
 }
+
+1;
