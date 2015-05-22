@@ -27,7 +27,7 @@ sub generate_song {
     my ($s, $options) = @_;
 
     my $tidy = $options->{tidy};
-    $lyrics_only = $options->{'lyrics-only'};
+    $lyrics_only = 2 * $options->{'lyrics-only'};
 
     my @s;
 
@@ -101,6 +101,12 @@ sub generate_song {
 	    next;
 	}
 
+	if ( $elt->{type} eq "control" ) {
+	    if ( $elt->{name} eq "lyrics-only" ) {
+		$lyrics_only = $elt->{value}
+		  unless $lyrics_only > 1;
+	    }
+	}
     }
 
 

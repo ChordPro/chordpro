@@ -9,7 +9,7 @@ use Data::Dumper;
 sub generate_songbook {
     my ($self, $sb, $options) = @_;
 
-    my $ps = page_settings();
+    my $ps = page_settings( $options );
     $ps->{pr} = PDFWriter->new( $ps, $options->{output} || "__new__.pdf" );
     my @tm = gmtime(time);
     $ps->{pr}->info( Title => "A nicely formatted song sheet", 
@@ -46,7 +46,7 @@ sub generate_song {
     my $st = $s->{settings}->{titles} || "";
 
     $single_space = $options->{'single-space'};
-    $lyrics_only = $options->{'lyrics-only'};
+    $lyrics_only = 2 * $options->{'lyrics-only'};
 
     for ( $options->{'text-font'} ) {
 	next unless $_ && m;/;;
@@ -202,6 +202,13 @@ sub generate_song {
 	    $ps->{pr}->text( $elt->{text}, $x, $y );
 	    $y -= $ps->{lineheight};
 	    next;
+	}
+
+	if ( $elt->{type} eq "control" ) {
+	    if ( $elt->{name} eq "lyrics-only" ) {
+		$lyrics_only = $elt->{value}
+		  unless $lyrics_only > 1;
+	    }
 	}
     }
 }

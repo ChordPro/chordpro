@@ -97,6 +97,12 @@ sub generate_song {
 	    next;
 	}
 
+	if ( $elt->{type} eq "control" ) {
+	    if ( $elt->{name} eq "lyrics-only" ) {
+		$lyrics_only = $elt->{value}
+		  unless $lyrics_only > 1;
+	    }
+	}
     }
 
 

@@ -151,6 +151,7 @@ sub directive {
 	return "";
     }
 
+    #### TODO: other # strings (ukelele, banjo, ...)
     if ( $d =~ /^define\s+([^:]+):\s+
 		   base-fret\s+(\d+)\s+
 		   frets\s+([0-9---xX])\s+
@@ -192,6 +193,15 @@ sub directive {
 
     if ( $d =~ /^(?:columns\s*:\s*)(\d+)$/i ) {
 	$self->{songs}->[-1]->{settings}->{columns} = $1;
+	return "";
+    }
+
+    if ( $d =~ /^([-+])([-\w]+)$/i ) {
+	push(@{$self->{songs}->[-1]->{body}},
+	     { type => "control",
+	       name => $2,
+	       value => $1 eq "+" ? "1" : "0",
+	     });
 	return "";
     }
 
