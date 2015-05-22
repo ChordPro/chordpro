@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
 # Last Modified By: Johan Vromans
-# Last Modified On: Thu May 21 09:50:38 2015
-# Update Count    : 165
+# Last Modified On: Fri May 22 09:25:32 2015
+# Update Count    : 171
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -123,6 +123,7 @@ sub app_setup {
        ### ADD OPTIONS HERE ###
 
        'vertical-space' => 0,		# extra vertical space between lines
+       'lyrics-only'	=> 0,		# suppress all chords
 
        # Development options (not shown with -help).
        debug		=> 0,		# debugging
@@ -281,6 +282,8 @@ EndOfUsage
     exit $exit if defined $exit;
 }
 
+use Config::Tiny;
+
 sub app_config {
     my ($options, $opts, $config) = @_;
     return if $opts->{"no$config"};
@@ -289,7 +292,23 @@ sub app_config {
     my $verbose = $opts->{verbose} || $opts->{trace} || $opts->{debug};
     warn("Loading $config: $cfg\n") if $verbose;
 
+    my $c = Config::Tiny->read( $cfg, 'utf8' );
+
     # Process config data, filling $options ...
+
+    foreach ( keys %$c ) {
+	foreach ( keys %$_ ) {
+	    s;^~/;$ENV{HOME}/;;
+	}
+    }
+
+    my $store = sub {
+	my ( $sect, $key, $opt ) = @_;
+	eval {
+	    $config->{$opt} = $c->{$sect}->{$key};
+	};
+    };
+
 }
 
 1;
