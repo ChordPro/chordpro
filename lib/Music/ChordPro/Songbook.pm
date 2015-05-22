@@ -60,7 +60,7 @@ sub parsefile {
 	    push(@$tab, $_);
 	}
 	elsif ( $type eq "chorus" ) {
-	    if ( /\W/ ) {
+	    if ( /\S/ ) {
 		# Basically, we could recurse here...
 		push(@$chorus,
 		     { type => "song",
@@ -72,7 +72,7 @@ sub parsefile {
 	    }
 	}
 	else {
-	    if ( /\W/ ) {
+	    if ( /\S/ ) {
 		push(@{$self->{songs}->[-1]->{body}},
 		     { type => "song",
 		       $type ? ( flag => $type ) : (),

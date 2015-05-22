@@ -43,7 +43,7 @@ sub generate_song {
     my $sb = $s->{body};
     $ps->{column} = 0;
     $ps->{columns} = $s->{settings}->{columns} || 1;
-    my $st = $s->{settings}->{titles} || "";
+    my $st = $s->{settings}->{titles} || "left";
 
     $single_space = $options->{'single-space'};
     $lyrics_only = 2 * $options->{'lyrics-only'};
@@ -69,7 +69,7 @@ sub generate_song {
 
     my $show = sub {
 	my ( $text, $font ) = @_;
-	my $x;
+	my $x = $x;
 	if ( $st eq "right" ) {
 	    $ps->{pr}->setfont($font);
 	    $x = $ps->{papersize}->[0]
@@ -246,7 +246,6 @@ sub page_settings {
     marginright   => 40,
     headspace     => 20,
     offsets       => [ 0, 250 ],	# col 1, col 2
-    lineheight    => 14,
     xxfonts      => {
 	title   => { name => 'Times-Bold',
 		     size => 14 },
@@ -260,15 +259,15 @@ sub page_settings {
 		     size => 12 },
     },
     fonts         => {
-	title   => { name => 'Times-Bold',
+	title   => { file => $ENV{HOME}.'/.fonts/ITCGaramond-Light.ttf',
 		     size => 14 },
-	subtitle=> { name => 'Times-Bold',
+	subtitle=> { file => $ENV{HOME}.'/.fonts/ITCGaramond-Light.ttf',
 		     size => 12 },
-        text =>  { file => $ENV{HOME}.'/.fonts/DejaVuSerif.ttf',
+        text =>  { file => $ENV{HOME}.'/.fonts/ITCGaramond-Light.ttf',
 		   size => 12 },
-        chord => { file => $ENV{HOME}.'/.fonts/GillSans-Italic.ttf',
+        chord => { file => $ENV{HOME}.'/.fonts/Myriad-CnSemibold.ttf',
 		   size => 12 },
-        comment => { name => 'Times-Roman',
+        comment => { file => $ENV{HOME}.'/.fonts/GillSans.ttf',
 		     size => 12 },
         comment_italic => { file => $ENV{HOME}.'/.fonts/GillSans-Italic.ttf',
 		     size => 12 },
