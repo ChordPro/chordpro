@@ -46,7 +46,7 @@ sub parsefile {
     while ( <$fh> ) {
 	chomp;
 
-	s/^#({t:)/$1/;
+	#s/^#({t:)/$1/;
 	next if /^#/;
 
 	# For practical reasons: a prime should always be an apostroph.

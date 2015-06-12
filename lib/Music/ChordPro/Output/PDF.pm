@@ -12,8 +12,8 @@ sub generate_songbook {
     my $ps = page_settings( $options );
     $ps->{pr} = PDFWriter->new( $ps, $options->{output} || "__new__.pdf" );
     my @tm = gmtime(time);
-    $ps->{pr}->info( Title => "A nicely formatted song sheet", 
-		     Creator => "Chordii [$options->{_name} $options->{_version}]",
+    $ps->{pr}->info( Title => $sb->{songs}->[0]->{title},
+		     Creator => "pChord [$options->{_name} $options->{_version}]",
 		     CreationDate =>
 		     sprintf("D:%04d%02d%02d%02d%02d%02d+00'00'",
 			     1900+$tm[5], 1+$tm[4], @tm[3,2,1,0]),
@@ -64,8 +64,9 @@ sub generate_song {
 	next unless $_;
 	$ps->{fonts}->{chord}->{size} = $_;
     }
-    $ps->{lineheight} = $ps->{fonts}->{text}->{size} + 2 + $options->{'vertical-space'};
+    $ps->{lineheight} = $ps->{fonts}->{text}->{size} - 1; # chordii
     $ps->{chordheight} = $ps->{fonts}->{chord}->{size};
+    $ps->{'vertical-space'} = $options->{'vertical-space'};
 
     my $show = sub {
 	my ( $text, $font ) = @_;
@@ -103,8 +104,11 @@ sub generate_song {
     }
 
     my $y0 = $y;
+    my $cskip = 0;
 
     foreach my $elt ( @{$sb} ) {
+
+	$cskip = 0 unless $elt->{type} =~ /^comment/;
 
 	if ( $elt->{type} eq "newpage" ) {
 	    $ps->{pr}->newpage;
@@ -127,7 +131,8 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "empty" ) {
-	    $y -= $ps->{lineheight};
+	    my $y0 = $y;
+	    $y -= $ps->{lineheight} + 4 + $ps->{'vertical-space'}; # chordii
 	    next;
 	}
 
@@ -137,14 +142,14 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "chorus" ) {
-	    my $cy = $y + $ps->{lineheight} - 2;
+	    my $cy = $y + $ps->{lineheight} - 2 + $ps->{'vertical-space'};
 	    foreach my $e ( @{$elt->{body}} ) {
 		if ( $e->{type} eq "song" ) {
 		    $y = songline( $e, $x, $y, $ps );
 		    next;
 		}
 		elsif ( $e->{type} eq "empty" ) {
-		    $y -= $ps->{lineheight};
+		    $y -= $ps->{lineheight} + $ps->{'vertical-space'};
 		    next;
 		}
 	    }
@@ -154,7 +159,7 @@ sub generate_song {
 	    $ps->{pr}->{pdfcfx}
 	      ->move( $cx, $cy )
 	      ->linewidth(1)
-	      ->vline( $y + $ps->{lineheight} )
+	      ->vline( $y + $ps->{lineheight} + $ps->{'vertical-space'} )
 	      ->stroke;
 	    next;
 	}
@@ -164,6 +169,7 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "comment" ) {
+	    $y += $ps->{'vertical-space'} if $cskip++;
 	    my $font = $ps->{fonts}->{comment} || $ps->{fonts}->{text};
 	    $ps->{pr}->setfont( $font );
 	    my $text = $elt->{text};
@@ -192,7 +198,7 @@ sub generate_song {
 		   "Q");
 	    }
 	    $ps->{pr}->text( $text, $x, $y );
-	    $y -= $ps->{lineheight};
+	    $y -= $ps->{lineheight} + $ps->{'vertical-space'};
 	    next;
 	}
 
@@ -200,7 +206,7 @@ sub generate_song {
 	    my $font = $ps->{fonts}->{comment_italic} || $ps->{fonts}->{chord};
 	    $ps->{pr}->setfont( $font );
 	    $ps->{pr}->text( $elt->{text}, $x, $y );
-	    $y -= $ps->{lineheight};
+	    $y -= $ps->{lineheight} + $ps->{'vertical-space'};
 	    next;
 	}
 
@@ -222,7 +228,7 @@ sub songline {
 	 $single_space && ! ( $elt->{chords} && join( "", @{ $elt->{chords} } ) =~ /\S/ )
        ) {
 	$ps->{pr}->text( join( "", @{ $elt->{phrases} } ), $x, $y+2, $ftext );
-	return $y - $ps->{lineheight};
+	return $y - ($ps->{lineheight} + $ps->{'vertical-space'});
     }
 
     my $fchord = $ps->{fonts}->{chord};
@@ -230,18 +236,22 @@ sub songline {
 	my $chord = $elt->{chords}->[$_];
 	my $phrase = $elt->{phrases}->[$_];
 	my $xt0 = $ps->{pr}->text( $chord." ", $x, $y, $fchord );
-	my $xt1 = $ps->{pr}->text( $phrase, $x, $y-$ps->{lineheight}+2, $ftext );
+	my $xt1 = $ps->{pr}->text( $phrase, $x, $y-$ps->{lineheight}, $ftext );
 	$x = $xt0 > $xt1 ? $xt0 : $xt1;
     }
-    return $y - $ps->{lineheight} - $ps->{chordheight};
+    return $y - ($ps->{lineheight} + $ps->{'vertical-space'}) - $ps->{chordheight};
 }
 
 sub page_settings {
   # Pretty hardwired for now.
+
+  # Add font dirs.
+  PDF::API2::addFontDirs( $ENV{HOME} . "/.fonts" );
+
   my $ret =
-  { papersize     => [ 595, 840 ],	# A4, portrait
-    marginleft    => 40,
-    margintop     => 40,
+  { papersize     => [ 595, 842 ],	# A4, portrait
+    marginleft    => 130,
+    margintop     => 66,
     marginbottom  => 40,
     marginright   => 40,
     headspace     => 20,
@@ -251,25 +261,28 @@ sub page_settings {
 		     size => 14 },
 	subtitle=> { name => 'Times-Bold',
 		     size => 12 },
-	text    => { name => 'Times-Roman',
-		     size => 12 },
-        chord   => { name => 'Helvetica-Oblique',
-		     size => 12 },
+	text    => { name => 'Garamond-Light',
+		     size => 14 },
+        chord   => { name => 'Helvetica-LightOblique',
+		     size => 10 },
         comment => { name => 'Times-Roman',
 		     size => 12 },
     },
     fonts         => {
-	title   => { file => $ENV{HOME}.'/.fonts/ITCGaramond-Light.ttf',
+	title   => { file => 'ITCGaramond-Light.ttf',
 		     size => 14 },
-	subtitle=> { file => $ENV{HOME}.'/.fonts/ITCGaramond-Light.ttf',
+	subtitle=> { file => 'ITCGaramond-Light.ttf',
 		     size => 12 },
-        text =>  { file => $ENV{HOME}.'/.fonts/ITCGaramond-Light.ttf',
-		   size => 12 },
-        chord => { file => $ENV{HOME}.'/.fonts/Myriad-CnSemibold.ttf',
-		   size => 12 },
-        comment => { file => $ENV{HOME}.'/.fonts/GillSans.ttf',
+        text =>  { file => 'ITCGaramond-Light.ttf',
+		   size => 14 },
+        xxchord => { file    => 'Helvetica-LightOblique.pfb',
+		   metrics => 'Helvetica-LightOblique.afm',
+		   size    => 10 },
+        chord => { file => 'Myriad-CnSemibold.ttf',
+		   size => 14 },
+        comment => { file => 'GillSans.ttf',
 		     size => 12 },
-        comment_italic => { file => $ENV{HOME}.'/.fonts/GillSans-Italic.ttf',
+        comment_italic => { file => 'GillSans-Italic.ttf',
 		     size => 12 },
     },
   };
@@ -296,6 +309,7 @@ sub new {
     my ( $pkg, $ps, @file ) = @_;
     my $self = bless { ps => $ps }, $pkg;
     $self->{pdf} = PDF::API2->new( -file => $file[0] );
+    $self->{pdf}->{forcecompress} = 0;
     $self->newpage;
     $self;
 }
@@ -313,7 +327,6 @@ sub text {
     $self->setfont($font, $size);
 
     $text = encode( "cp1250", $text ) unless $font->{file};
-
     $self->{pdftext}->translate( $x, $y );
     return $x + $self->{pdftext}->text($text);
 }
@@ -329,8 +342,20 @@ sub _getfont {
     my ( $self, $font ) = @_;
     $self->{font} = $font;
     if ( $font->{file} ) {
-	return $fonts{$font->{file}} ||=
-	  $self->{pdf}->ttfont( $font->{file}, -dokern => 1 );
+	if ( $font->{file} =~ /\.[ot]tf$/ ) {
+	    return $fonts{$font->{file}} ||=
+	      $self->{pdf}->ttfont( $font->{file},
+				    -dokern => 1 );
+	}
+	elsif ( $font->{file} =~ /\.pf[ab]$/ ) {
+	    return $fonts{$font->{file}} ||=
+	      $self->{pdf}->psfont( $font->{file},
+				    -afmfile => $font->{metrics},
+				    -dokern  => 1 );
+	}
+	else {
+	    return $self->{pdf}->corefont( 'Courier' );
+	}
     }
     else {
 	return $fonts{$font->{name}} ||=
