@@ -48,7 +48,7 @@ sub generate_song {
     foreach my $elt ( @{$s->{body}} ) {
 
 	if ( $elt->{type} eq "empty" ) {
-	    push(@s, "");
+	    push(@s, "***SHOULD NOT HAPPEN***");
 	    next;
 	}
 
@@ -64,6 +64,22 @@ sub generate_song {
 
 	if ( $elt->{type} eq "song" ) {
 	    push(@s, songline($elt));
+	    next;
+	}
+
+	if ( $elt->{type} eq "verse" ) {
+	    push(@s, "") if $tidy;
+	    foreach my $e ( @{$elt->{body}} ) {
+		if ( $e->{type} eq "empty" ) {
+		    push(@s, "***SHOULD NOT HAPPEN***");
+		    next;
+		}
+		if ( $e->{type} eq "song" ) {
+		    push(@s, songline($e));
+		    next;
+		}
+	    }
+	    push(@s, "") if $tidy;
 	    next;
 	}
 

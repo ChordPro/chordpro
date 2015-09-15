@@ -25,6 +25,7 @@ sub generate_songbook {
 	    $ps->{pr}->newpage;
 	    push(@book, "{new_song}");
 	}
+	showlayout($ps);
 	generate_song( $song, { ps => $ps, $options ? %$options : () } );
     }
     $ps->{pr}->finish;
@@ -40,6 +41,9 @@ sub generate_song {
     my $ps = $options->{ps};
     my $x = $ps->{marginleft} + $ps->{offsets}->[0];
     my $y = $ps->{papersize}->[1] - $ps->{margintop};
+    $s->structurize
+      if ( $options->{'backend-option'}->{structure} // '' ) eq 'structured';
+
     my $sb = $s->{body};
     $ps->{column} = 0;
     $ps->{columns} = $s->{settings}->{columns} || 1;
@@ -112,6 +116,7 @@ sub generate_song {
 
 	if ( $elt->{type} eq "newpage" ) {
 	    $ps->{pr}->newpage;
+	    showlayout($ps);
 	    $x = $ps->{marginleft} + $ps->{offsets}->[$ps->{column} = 0];
 	    $y0 = $y = $ps->{papersize}->[1] - $ps->{margintop} - $ps->{headspace};
 	    next;
@@ -120,6 +125,7 @@ sub generate_song {
 	if ( $elt->{type} eq "colb" ) {
 	    if ( ++$ps->{column} >= $ps->{columns}) {
 		$ps->{pr}->newpage;
+		showlayout($ps);
 		$x = $ps->{marginleft} + $ps->{offsets}->[$ps->{column} = 0];
 		$y = $ps->{papersize}->[1] - $ps->{margintop};
 	    }
@@ -132,23 +138,38 @@ sub generate_song {
 
 	if ( $elt->{type} eq "empty" ) {
 	    my $y0 = $y;
+	    warn("***SHOULD NOT HAPPEN1***")
+	      if $s->{structure} eq "structured";
 	    $y -= $ps->{lineheight} + 4 + $ps->{'vertical-space'}; # chordii
 	    next;
 	}
 
-	if ( $elt->{type} eq "song" ) {
-	    $y = songline( $elt, $x, $y, $ps );
+	if ( $elt->{type} eq "songline" ) {
+	    if ( $elt->{context} eq "chorus" ) {
+		my $cy = $y + $ps->{lineheight} - 2 + $ps->{'vertical-space'};
+		$y = songline( $elt, $x, $y, $ps );
+		my $cx = $ps->{marginleft} + $ps->{offsets}->[0] - 10;
+		$ps->{pr}->{pdfgfx}
+		  ->move( $cx, $cy+1 )
+		  ->linewidth(1)
+		  ->vline( $y - 2 + $ps->{lineheight} + $ps->{'vertical-space'} )
+		  ->stroke;
+	    }
+	    else {
+		$y = songline( $elt, $x, $y, $ps );
+	    }
 	    next;
 	}
 
 	if ( $elt->{type} eq "chorus" ) {
 	    my $cy = $y + $ps->{lineheight} - 2 + $ps->{'vertical-space'};
 	    foreach my $e ( @{$elt->{body}} ) {
-		if ( $e->{type} eq "song" ) {
+		if ( $e->{type} eq "songline" ) {
 		    $y = songline( $e, $x, $y, $ps );
 		    next;
 		}
 		elsif ( $e->{type} eq "empty" ) {
+		    warn("***SHOULD NOT HAPPEN2***");
 		    $y -= $ps->{lineheight} + $ps->{'vertical-space'};
 		    next;
 		}
@@ -156,15 +177,47 @@ sub generate_song {
 	    my $cx = $ps->{marginleft} + $ps->{offsets}->[0] - 10;
 #	    sprintf( "%d %d m %d %d l S",
 #		     $cx, $cy, $cx, $y+$ps->{lineheight} )
-	    $ps->{pr}->{pdfcfx}
+	    $ps->{pr}->{pdfgfx}
 	      ->move( $cx, $cy )
 	      ->linewidth(1)
 	      ->vline( $y + $ps->{lineheight} + $ps->{'vertical-space'} )
 	      ->stroke;
+	    $y -= $ps->{lineheight} + 4 + $ps->{'vertical-space'}; # chordii
+	    next;
+	}
+
+	if ( $elt->{type} eq "verse" ) {
+	    foreach my $e ( @{$elt->{body}} ) {
+		if ( $e->{type} eq "songline" ) {
+		    $y = songline( $e, $x, $y, $ps );
+		    next;
+		}
+		elsif ( $e->{type} eq "empty" ) {
+		    warn("***SHOULD NOT HAPPEN2***");
+		    $y -= $ps->{lineheight} + $ps->{'vertical-space'};
+		    next;
+		}
+	    }
+	    $y -= $ps->{lineheight} + 4 + $ps->{'vertical-space'}; # chordii
 	    next;
 	}
 
 	if ( $elt->{type} eq "tab" ) {
+	    $ps->{pr}->setfont( $ps->{fonts}->{tab} );
+	    my $dy = $ps->{fonts}->{tab}->{size};
+	    foreach my $e ( @{$elt->{body}} ) {
+		next unless $e->{type} eq "tabline";
+		$ps->{pr}->text( $e->{text}, $x, $y );
+		$y -= $dy;
+	    }
+	    next;
+	}
+
+	if ( $elt->{type} eq "tabline" ) {
+	    $ps->{pr}->setfont( $ps->{fonts}->{tab} );
+	    my $dy = $ps->{fonts}->{tab}->{size};
+	    $ps->{pr}->text( $elt->{text}, $x, $y );
+	    $y -= $dy;
 	    next;
 	}
 
@@ -231,6 +284,8 @@ sub songline {
 	return $y - ($ps->{lineheight} + $ps->{'vertical-space'});
     }
 
+    $elt->{chords} //= [ '' ];
+
     my $fchord = $ps->{fonts}->{chord};
     foreach ( 0..$#{$elt->{chords}} ) {
 	my $chord = $elt->{chords}->[$_];
@@ -280,6 +335,8 @@ sub page_settings {
 		   size    => 10 },
         chord => { file => 'Myriad-CnSemibold.ttf',
 		   size => 14 },
+        tab => { name => 'Courier',
+		   size => 10 },
         comment => { file => 'GillSans.ttf',
 		     size => 12 },
         comment_italic => { file => 'GillSans-Italic.ttf',
@@ -295,12 +352,28 @@ sub page_settings {
     return $ret;
 }
 
+sub showlayout {
+    my ( $ps ) = @_;
+    $ps->{pr}->{pdfgfx}
+      ->linewidth(0.5)
+      ->rectxy( $ps->{marginleft},
+		$ps->{marginbottom},
+		$ps->{papersize}->[0]-$ps->{marginright},
+		$ps->{papersize}->[1]-$ps->{margintop} )
+      ->stroke;
+    $ps->{pr}->{pdfgfx}
+      ->linewidth(0.25)
+      ->move( $ps->{marginleft}+$ps->{offsets}->[1],
+	      $ps->{marginbottom} )
+      ->vline( $ps->{papersize}->[1]-$ps->{margintop} )
+      ->stroke;
+}
+
 package PDFWriter;
 
 use strict;
 use warnings;
 use PDF::API2;
-use Data::Dumper;
 use Encode;
 
 my %fonts;
@@ -377,7 +450,7 @@ sub newpage {
     $self->{pdfpage} = $self->{pdf}->page;
     $self->{pdfpage}->mediabox('A4');
     $self->{pdftext} = $self->{pdfpage}->text;
-    $self->{pdfcfx}  = $self->{pdfpage}->gfx;
+    $self->{pdfgfx}  = $self->{pdfpage}->gfx;
 }
 
 sub add {

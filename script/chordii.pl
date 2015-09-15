@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
 # Last Modified By: Johan Vromans
-# Last Modified On: Fri May 22 09:25:32 2015
-# Update Count    : 171
+# Last Modified On: Tue Sep 15 14:09:57 2015
+# Update Count    : 175
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -43,7 +43,7 @@ sub main {
 
     my $s = Music::ChordPro::Songbook->new;
 
-    $s->parsefile( $ARGV[0] );
+    $s->parsefile( $_ ) foreach @ARGV;
     #$s->transpose(-2);		# NYI
 
     warn(Dumper($s), "\n") if $options->{debug};
@@ -70,7 +70,7 @@ sub main {
     $options->{generate} ||= "ChordPro";
     my $pkg = "Music::ChordPro::Output::".$options->{generate};
     eval "require $pkg;";
-    die("No backend for ", $options->{generate}, "\n") if $@;
+    die("No backend for ", $options->{generate}, "\n$@") if $@;
 
     my $res = $pkg->generate_songbook( $s, $options );
 
@@ -151,6 +151,7 @@ sub app_setup {
 
 	  "lyrics-only",		# Suppress all chords
 	  "generate=s",
+	  "backend-option|bo=s\%",
 
 	  ### Standard Chordii Options ###
 

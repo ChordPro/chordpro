@@ -31,6 +31,9 @@ sub generate_song {
     $single_space = $options->{'single-space'};
     $lyrics_only = $options->{'lyrics-only'};
 
+    $s->structurize
+      if ( $options->{'backend-option'}->{structure} // '' ) eq 'structured';
+
     my @s;
 
     push(@s, "-- Title: " . $s->{title})
@@ -44,7 +47,8 @@ sub generate_song {
     foreach my $elt ( @{$s->{body}} ) {
 
 	if ( $elt->{type} eq "empty" ) {
-	    push(@s, "");
+	    push(@s, "***SHOULD NOT HAPPEN***")
+	      if $s->{structure} eq 'structured';
 	    next;
 	}
 
@@ -58,7 +62,7 @@ sub generate_song {
 	    next;
 	}
 
-	if ( $elt->{type} eq "song" ) {
+	if ( $elt->{type} eq "songline" ) {
 	    push(@s, songline($elt));
 	    next;
 	}
@@ -71,7 +75,7 @@ sub generate_song {
 		    push(@s, "");
 		    next;
 		}
-		if ( $e->{type} eq "song" ) {
+		if ( $e->{type} eq "songline" ) {
 		    push(@s, songline($e));
 		    next;
 		}
@@ -84,8 +88,35 @@ sub generate_song {
 	if ( $elt->{type} eq "tab" ) {
 	    push(@s, "") if $tidy;
 	    push(@s, "-- Start of tab");
-	    push(@s, @{$elt->{body}});
+	    push(@s, map { $_->{text} } @{$elt->{body}} );
 	    push(@s, "-- End of tab");
+	    push(@s, "") if $tidy;
+	    next;
+	}
+
+	if ( $elt->{type} eq "verse" ) {
+	    push(@s, "") if $tidy;
+	    push(@s, "-- Start of verse");
+	    foreach my $e ( @{$elt->{body}} ) {
+		if ( $e->{type} eq "empty" ) {
+		    push(@s, "***SHOULD NOT HAPPEN***")
+		      if $s->{structure} eq 'structured';
+		    next;
+		}
+		if ( $e->{type} eq "songline" ) {
+		    push(@s, songline($e));
+		    next;
+		}
+		if ( $e->{type} eq "comment" ) {
+		    push(@s, "-c- " . $e->{text});
+		    next;
+		}
+		if ( $e->{type} eq "comment_italic" ) {
+		    push(@s, "-i- " . $e->{text});
+		    next;
+		}
+	    }
+	    push(@s, "-- End of verse");
 	    push(@s, "") if $tidy;
 	    next;
 	}
@@ -121,6 +152,10 @@ sub songline {
 	$t_line = join( "", @{ $elt->{phrases} } );
 	$t_line =~ s/\s+$//;
 	return $t_line;
+    }
+
+    unless ( $elt->{chords} ) {
+	return "\n" . join( " ", @{ $elt->{phrases} } );
     }
 
     my $c_line = "";
