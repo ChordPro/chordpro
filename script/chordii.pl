@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
 # Last Modified By: Johan Vromans
-# Last Modified On: Tue Sep 15 14:09:57 2015
-# Update Count    : 175
+# Last Modified On: Sun Dec 27 21:10:03 2015
+# Update Count    : 176
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -64,6 +64,9 @@ sub main {
 	}
 	elsif ( $of =~ /\.(crd|txt)$/i ) {
 	    $options->{generate} ||= "Text";
+	}
+	elsif ( $of =~ /\.(debug)$/i ) {
+	    $options->{generate} ||= "Debug";
 	}
     }
 
