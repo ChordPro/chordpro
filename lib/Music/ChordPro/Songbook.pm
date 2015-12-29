@@ -16,7 +16,7 @@ my $def_context = "";
 my $in_context = $def_context;
 
 sub parsefile {
-    my ($self, $filename) = @_;
+    my ( $self, $filename, $options ) = @_;
 
     open(my $fh, '<', $filename)
       or croak("$filename: $!\n");
@@ -30,8 +30,13 @@ sub parsefile {
 	s/[\r\n]+$//;
 
 	my $line;
-	eval { $line = decode( "UTF-8", $_, 1 ) };
-	$line = decode( "iso-8859-1", $_ ) if $@;
+	if ( $options->{encoding} ) {
+	    $line = decode( $options->{encoding}, $_, 1 );
+	}
+	else {
+	    eval { $line = decode( "UTF-8", $_, 1 ) };
+	    $line = decode( "iso-8859-1", $_ ) if $@;
+	}
 	$_ = $line;
 
 	#s/^#({t:)/$1/;

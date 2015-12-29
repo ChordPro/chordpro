@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
 # Last Modified By: Johan Vromans
-# Last Modified On: Sun Dec 27 21:10:03 2015
-# Update Count    : 176
+# Last Modified On: Tue Dec 29 14:28:11 2015
+# Update Count    : 180
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -43,7 +43,7 @@ sub main {
 
     my $s = Music::ChordPro::Songbook->new;
 
-    $s->parsefile( $_ ) foreach @ARGV;
+    $s->parsefile( $_, $options ) foreach @ARGV;
     #$s->transpose(-2);		# NYI
 
     warn(Dumper($s), "\n") if $options->{debug};
@@ -123,6 +123,8 @@ sub app_setup {
     my $options =
       {
        verbose		=> 0,		# verbose processing
+       encoding		=> "",		# input encoding, default UTF-8
+
        ### ADD OPTIONS HERE ###
 
        'vertical-space' => 0,		# extra vertical space between lines
@@ -155,6 +157,7 @@ sub app_setup {
 	  "lyrics-only",		# Suppress all chords
 	  "generate=s",
 	  "backend-option|bo=s\%",
+	  "encoding=s",
 
 	  ### Standard Chordii Options ###
 
@@ -250,6 +253,7 @@ Options:
     --chord-size=N  -c            Sets chord size [9]
     --dump-chords  -D             Dumps chords definitions (PostScript)
     --dump-chords-text  -d        Dumps chords definitions (Text)
+    --encoding=ENC		  Encoding for input files (UTF-8)
     --even-pages-number-left  -L  Even pages numbers on left
     --lyrics-only  -l             Only prints lyrics
     --no-chord-grids  -G          Disables printing of chord grids
