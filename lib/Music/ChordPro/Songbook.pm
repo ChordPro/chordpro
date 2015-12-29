@@ -4,6 +4,7 @@ package Music::ChordPro::Songbook;
 
 use strict;
 use warnings;
+use Encode qw(decode);
 use Carp;
 
 sub new {
@@ -19,7 +20,6 @@ sub parsefile {
 
     open(my $fh, '<', $filename)
       or croak("$filename: $!\n");
-    binmode( $fh, ':encoding(utf-8)' );
 
     #### TODO: parsing config and rc file?
     push( @{ $self->{songs} }, Music::ChordPro::Song->new )
@@ -28,6 +28,11 @@ sub parsefile {
 
     while ( <$fh> ) {
 	s/[\r\n]+$//;
+
+	my $line;
+	eval { $line = decode( "UTF-8", $_, 1 ) };
+	$line = decode( "iso-8859-1", $_ ) if $@;
+	$_ = $line;
 
 	#s/^#({t:)/$1/;
 	next if /^#/;
@@ -146,7 +151,7 @@ sub directive {
 
     # Comments. Strictly speaking they do not belong here.
 
-    if ( $d =~ /^(?:comment|c):\s*(.*)/i ) {
+    if ( $d =~ /^(?:comment|c|highlight):\s*(.*)/i ) {
 	$self->add( type => "comment", text => $1 );
 	return;
     }
@@ -176,6 +181,29 @@ sub directive {
 		    name => $2,
 		    value => $1 eq "+" ? "1" : "0",
 		  );
+	return;
+    }
+
+    # Formatting.
+    if ( $d =~ /^(text|chord|tab)(font|size|colou?r):\s*(.*)$/ ) {
+	my $item = $1;
+	my $prop = $2;
+	my $value = $3;
+	if ( $prop eq "size" ) {
+	    unless ( $value =~ /^\d+(?:\.\d+)?\%?$/ ) {
+		warn("Illegal value \"$value\" for $item$prop\n");
+		return;
+	    }
+	}
+	if ( $prop =~ /^colou?r$/  ) {
+	    unless ( get_colour($value) ) {
+		warn("Illegal value \"$value\" for $item$prop\n");
+		return;
+	    }
+	}
+	$self->add( type => "control",
+		    name => "$item-$prop",
+		    value => $value );
 	return;
     }
 
@@ -211,7 +239,13 @@ sub directive {
 	return;
     }
 
-    warn("Unknown directive: $d\n");
+    # Metadata extensions. Ignore for now.
+    if ( $d =~ /^(artist|composer|album|key|time|tempo)$/ ) {
+	return;
+    }
+
+    # Warn about unknowns, unless they are x_... form.
+    warn("Unknown directive: $d\n") unless $d =~ /^x_/;
     return "";
 }
 
