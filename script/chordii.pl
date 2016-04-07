@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
 # Last Modified By: Johan Vromans
-# Last Modified On: Tue Dec 29 14:28:11 2015
-# Update Count    : 180
+# Last Modified On: Thu Apr  7 13:45:23 2016
+# Update Count    : 181
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -158,6 +158,7 @@ sub app_setup {
 	  "generate=s",
 	  "backend-option|bo=s\%",
 	  "encoding=s",
+	  "pagedefs=s",
 
 	  ### Standard Chordii Options ###
 

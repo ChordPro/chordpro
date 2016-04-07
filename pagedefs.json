@@ -1,0 +1,45 @@
+{
+    "pdf" : {
+
+	"papersize" : [ 595, 842 ],
+	"offsets"   : [ 0, 250 ],
+
+	"margintop"    :  66,
+	"marginbottom" :  40,
+	"marginleft"   :  40,
+	"marginright"  :  40,
+	"headspace"    :  20,
+
+	"fontdir" : "/home/jv/.fonts",
+	"fonts" : {
+	    "title" : {
+		"file" : "ITCGaramond-Light.ttf",
+		"size" : 14
+	    },
+	    "subtitle" : {
+		"file" : "ITCGaramond-Light.ttf",
+		"size" : 12
+	    },
+	    "text" : {
+		"file" : "ITCGaramond-Light.ttf",
+		"size" : 14
+	    },
+	    "chord" : {
+		"file" : "Myriad-CnSemibold.ttf",
+		"size" : 14
+	    },
+	    "comment" : {
+		"file" : "GillSans.ttf",
+		"size" : 12
+	    },
+	    "comment_italic" : {
+		"file" : "GillSans-Italic.ttf",
+		"size" : 12
+	    },
+	    "tab" : {
+		"name" : "Courier",
+		"size" : 10
+	    }
+	}
+    }
+}
