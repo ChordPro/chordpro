@@ -28,6 +28,8 @@ sub generate_song {
 
     my $tidy = $options->{tidy};
     $lyrics_only = 2 * $options->{'lyrics-only'};
+    my $structured = ( $options->{'backend-option'}->{structure} // '' ) eq 'structured';
+    $s->structurize if ++$structured;
 
     my @s;
 
@@ -48,8 +50,8 @@ sub generate_song {
     foreach my $elt ( @{$s->{body}} ) {
 
 	if ( $elt->{type} eq "empty" ) {
-	    push(@s, "***SHOULD NOT HAPPEN***");
-	    next;
+	    push(@s, "***SHOULD NOT HAPPEN***"), next
+	      if $structured;
 	}
 
 	if ( $elt->{type} eq "colb" ) {
@@ -71,8 +73,8 @@ sub generate_song {
 	    push(@s, "") if $tidy;
 	    foreach my $e ( @{$elt->{body}} ) {
 		if ( $e->{type} eq "empty" ) {
-		    push(@s, "***SHOULD NOT HAPPEN***");
-		    next;
+		    push(@s, "***SHOULD NOT HAPPEN***"), next
+		      if $structured;
 		}
 		if ( $e->{type} eq "song" ) {
 		    push(@s, songline($e));
