@@ -128,6 +128,18 @@ sub generate_song {
 	    next;
 	}
 
+	if ( $elt->{type} eq "image" ) {
+	    my @args = ( "image:", $elt->{uri} );
+	    while ( my($k,$v) = each( %{ $elt->{opts} } ) ) {
+		push( @args, "$k=$v" );
+	    }
+	    foreach ( @args ) {
+		next unless /\s/;
+		$_ = '"' . $_ . '"';
+	    }
+	    push( @s, "+ @args" );
+	}
+
 	if ( $elt->{type} eq "control" ) {
 	    if ( $elt->{name} eq "lyrics-only" ) {
 		$lyrics_only = $elt->{value}

@@ -127,6 +127,22 @@ sub generate_song {
 	    next;
 	}
 
+	if ( $elt->{type} eq "image" ) {
+	    my @args;
+	    while ( my($k,$v) = each( %{ $elt->{opts} } ) ) {
+		push( @args, "$k=\"$v\"" );
+	    }
+	    # First shot code. Fortunately (not surprisingly :))
+	    # HTML understands most arguments.
+	    push( @s,
+		  '<div class="' . $elt->{type} . '">' .
+		  '<img src="' . $elt->{uri} . '" ' .
+		  "@args" . "/>" .
+		  '</div>' );
+	    push( @s, "" ) if $tidy;
+
+	}
+
 	if ( $elt->{type} eq "control" ) {
 	    if ( $elt->{name} eq "lyrics-only" ) {
 		$lyrics_only = $elt->{value}

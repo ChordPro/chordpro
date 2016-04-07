@@ -212,6 +212,46 @@ sub directive {
 	return;
     }
 
+    # Images.
+    if ( $d =~ /^image:\s*(.*)$/ ) {
+	use Text::ParseWords qw(shellwords);
+	my @args = shellwords($1);
+	my $uri;
+	my %opts;
+	foreach ( @args ) {
+	    if ( /^(width|height|border|center)=(\d+)$/i ) {
+		$opts{lc($1)} = $2;
+	    }
+	    elsif ( /^(scale)=(\d(?:\.\d+)?)$/i ) {
+		$opts{lc($1)} = $2;
+	    }
+	    elsif ( /^(center|border)$/i ) {
+		$opts{lc($_)} = 1;
+	    }
+	    elsif ( /^(src|uri)=(.+)$/i ) {
+		$uri = $2;
+	    }
+	    elsif ( /^(title)=(.*)$/i ) {
+		$opts{title} = $1;
+	    }
+	    elsif ( /^(.+)=(.*)$/i ) {
+		warn( "Unknown image attribute: $1\n" );
+		next;
+	    }
+	    else {
+		$uri = $_;
+	    }
+	}
+	unless ( $uri ) {
+	    warn( "Missing image source\n" );
+	    return;
+	}
+	$self->add( type => "image",
+		    uri  => $uri,
+		    opts => \%opts );
+	return;
+    }
+
     #### TODO: other # strings (ukelele, banjo, ...)
     # define A: basefret N frets N N N N N N
     # define: A basefret N frets N N N N N N
@@ -245,7 +285,7 @@ sub directive {
     }
 
     # Metadata extensions. Ignore for now.
-    if ( $d =~ /^(artist|composer|album|key|time|tempo)$/ ) {
+    if ( $d =~ /^(artist|composer|album|key|time|tempo):.*$/ ) {
 	return;
     }
 
