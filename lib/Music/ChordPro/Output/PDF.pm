@@ -11,6 +11,8 @@ sub generate_songbook {
 
     my $ps = page_settings( $options );
     $ps->{pr} = PDFWriter->new( $ps, $options->{output} || "__new__.pdf" );
+    $ps->{pr}->{pdf}->mediabox( $ps->{papersize}->[0],
+				$ps->{papersize}->[1] );
     my @tm = gmtime(time);
     $ps->{pr}->info( Title => $sb->{songs}->[0]->{title},
 		     Creator => "pChord [$options->{_name} $options->{_version}]",
@@ -22,7 +24,7 @@ sub generate_songbook {
     my @book;
     foreach my $song ( @{$sb->{songs}} ) {
 	if ( @book ) {
-	    $ps->{pr}->newpage;
+	    $ps->{pr}->newpage($ps);
 	    push(@book, "{new_song}");
 	}
 	showlayout($ps);
@@ -34,6 +36,8 @@ sub generate_songbook {
 
 my $single_space = 0;		# suppress chords line when empty
 my $lyrics_only = 0;		# suppress all chord lines
+
+use constant SIZE_ITEMS => [ qw (chord text ) ];
 
 sub generate_song {
     my ($s, $options) = @_;
@@ -52,25 +56,26 @@ sub generate_song {
     $single_space = $options->{'single-space'};
     $lyrics_only = 2 * $options->{'lyrics-only'};
 
-    for ( $options->{'text-font'} ) {
-	next unless $_ && m;/;;
-	$ps->{fonts}->{text}->{file} = $_;
+    for my $item ( @{ SIZE_ITEMS() } ) {
+	for ( $options->{"$item-font"} ) {
+	    next unless $_ && m;/;;
+	    $ps->{fonts}->{$item}->{file} = $_;
+	}
+	for ( $options->{"$item-size"} ) {
+	    next unless $_;
+	    $ps->{fonts}->{$item}->{size} = $_;
+	}
     }
-    for ( $options->{'text-size'} ) {
-	next unless $_;
-	$ps->{fonts}->{text}->{size} = $_;
-    }
-    for ( $options->{'chord-font'} ) {
-	next unless $_ && m;/;;
-	$ps->{fonts}->{chord}->{file} = $_;
-    }
-    for ( $options->{'chord-size'} ) {
-	next unless $_;
-	$ps->{fonts}->{chord}->{size} = $_;
-    }
-    $ps->{lineheight} = $ps->{fonts}->{text}->{size} - 1; # chordii
-    $ps->{chordheight} = $ps->{fonts}->{chord}->{size};
+
+    my $set_sizes = sub {
+	$ps->{lineheight} = $ps->{fonts}->{text}->{size} - 1; # chordii
+	$ps->{chordheight} = $ps->{fonts}->{chord}->{size};
+    };
+    $set_sizes->();
     $ps->{'vertical-space'} = $options->{'vertical-space'};
+    for ( @{ SIZE_ITEMS() } ) {
+	$ps->{fonts}->{$_}->{_size} = $ps->{fonts}->{chord}->{size};
+    }
 
     my $show = sub {
 	my ( $text, $font ) = @_;
@@ -93,6 +98,19 @@ sub generate_song {
 	$y -= $font->{size};
     };
 
+    my $do_size = sub {
+	my ( $tag, $value ) = @_;
+	if ( $value =~ /^(.+)\%$/ ) {
+	    $ps->{fonts}->{$tag}->{size} =
+	      ( $1 / 100 ) * $ps->{fonts}->{$tag}->{_size};
+	}
+	else {
+	    $ps->{fonts}->{$tag}->{size} =
+	      $ps->{fonts}->{$tag}->{_size} = $value;
+	}
+	$set_sizes->();
+    };
+
     if ( $s->{title} ) {
 	$show->( $s->{title}, $ps->{fonts}->{title} );
     }
@@ -110,17 +128,33 @@ sub generate_song {
     my $y0 = $y;
     my $cskip = 0;
 
+    my $newpage = sub {
+	$ps->{pr}->newpage($ps);
+	showlayout($ps);
+	$x = $ps->{marginleft} + $ps->{offsets}->[$ps->{column} = 0];
+	$y0 = $y = $ps->{papersize}->[1] - $ps->{margintop} - $ps->{headspace};
+    };
+
+    my $vsp = sub {
+	my $extra = $_[0] || 0;
+	$ps->{linespace} * $ps->{lineheight} +
+	  $ps->{'vertical-space'} + $extra;
+    };
+
+    my $checkspace = sub {
+	my $vsp = $_[0];
+	$newpage->() if $y - $vsp <= $ps->{marginbottom};
+    };
+
     foreach my $elt ( @{$sb} ) {
 
 	$cskip = 0 unless $elt->{type} =~ /^comment/;
 
 	if ( $elt->{type} eq "newpage" ) {
-	    $ps->{pr}->newpage;
-	    showlayout($ps);
-	    $x = $ps->{marginleft} + $ps->{offsets}->[$ps->{column} = 0];
-	    $y0 = $y = $ps->{papersize}->[1] - $ps->{margintop} - $ps->{headspace};
+	    $newpage->();
 	    next;
 	}
+	$checkspace->(0);
 
 	if ( $elt->{type} eq "colb" ) {
 	    if ( ++$ps->{column} >= $ps->{columns}) {
@@ -140,19 +174,24 @@ sub generate_song {
 	    my $y0 = $y;
 	    warn("***SHOULD NOT HAPPEN1***")
 	      if $s->{structure} eq "structured";
-	    $y -= $ps->{lineheight} + 4 + $ps->{'vertical-space'}; # chordii
+	    $y -= $vsp->(4);	# chordii
 	    next;
 	}
 
 	if ( $elt->{type} eq "songline" ) {
+	    $checkspace->(songline_vsp( $elt, $ps ));
 	    if ( $elt->{context} eq "chorus" ) {
-		my $cy = $y + $ps->{lineheight} - 2 + $ps->{'vertical-space'};
+		if ( $ps->{chorusindent} ) {
+		    $y = songline( $elt, $x + $ps->{chorusindent}, $y, $ps );
+		    next;
+		}
+		my $cy = $y + $vsp->(-2);
 		$y = songline( $elt, $x, $y, $ps );
 		my $cx = $ps->{marginleft} + $ps->{offsets}->[0] - 10;
 		$ps->{pr}->{pdfgfx}
 		  ->move( $cx, $cy+1 )
 		  ->linewidth(1)
-		  ->vline( $y - 2 + $ps->{lineheight} + $ps->{'vertical-space'} )
+		  ->vline( $y + $vsp->(-2) )
 		  ->stroke;
 	    }
 	    else {
@@ -162,7 +201,7 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "chorus" ) {
-	    my $cy = $y + $ps->{lineheight} - 2 + $ps->{'vertical-space'};
+	    my $cy = $y + $vsp->(-2); # ####TODO????
 	    foreach my $e ( @{$elt->{body}} ) {
 		if ( $e->{type} eq "songline" ) {
 		    $y = songline( $e, $x, $y, $ps );
@@ -170,35 +209,34 @@ sub generate_song {
 		}
 		elsif ( $e->{type} eq "empty" ) {
 		    warn("***SHOULD NOT HAPPEN2***");
-		    $y -= $ps->{lineheight} + $ps->{'vertical-space'};
+		    $y -= $vsp->();
 		    next;
 		}
 	    }
 	    my $cx = $ps->{marginleft} + $ps->{offsets}->[0] - 10;
-#	    sprintf( "%d %d m %d %d l S",
-#		     $cx, $cy, $cx, $y+$ps->{lineheight} )
 	    $ps->{pr}->{pdfgfx}
 	      ->move( $cx, $cy )
 	      ->linewidth(1)
-	      ->vline( $y + $ps->{lineheight} + $ps->{'vertical-space'} )
+	      ->vline( $y + $vsp->())
 	      ->stroke;
-	    $y -= $ps->{lineheight} + 4 + $ps->{'vertical-space'}; # chordii
+	    $y -= $vsp->(4); # chordii
 	    next;
 	}
 
 	if ( $elt->{type} eq "verse" ) {
 	    foreach my $e ( @{$elt->{body}} ) {
 		if ( $e->{type} eq "songline" ) {
+		    $checkspace->(songline_vsp( $e, $ps ));
 		    $y = songline( $e, $x, $y, $ps );
 		    next;
 		}
 		elsif ( $e->{type} eq "empty" ) {
 		    warn("***SHOULD NOT HAPPEN2***");
-		    $y -= $ps->{lineheight} + $ps->{'vertical-space'};
+		    $y -= $vsp->();
 		    next;
 		}
 	    }
-	    $y -= $ps->{lineheight} + 4 + $ps->{'vertical-space'}; # chordii
+	    $y -= $vsp->(4);	# chordii
 	    next;
 	}
 
@@ -229,29 +267,24 @@ sub generate_song {
 	    my $w = $ps->{pr}->strwidth( $text );
 	    my $y0 = $y;
 	    my $y1 = $y0 + 0.8*($font->{size});
-	    $y0 -= 0.2*($font->{size});
-	    my $grey = "0.9";
+	    $y0 = $y1 - $font->{size};
 	    my $x1 = $x + $w;
-	    if ( 0 ) {
-		# This causes the text to be hidden behind the grey.
-		$ps->{pr}->{pdftext}->fillcolor("#E5E5E5");
-		$ps->{pr}->{pdftext}->strokecolor("#E5E5E5");
-		$ps->{pr}->{pdftext}
-		  ->rectxy( $x, $y, $x1, $y1 )
-		  ->linewidth(3)
+
+	    # Draw background.
+	    my $gfx = $ps->{pr}->{pdfpage}->gfx(1);
+	    my $bgcol = $font->{background} || "#E5E5E5";
+	    $gfx->save;
+	    $gfx->fillcolor($bgcol);
+	    $gfx->strokecolor($bgcol);
+	    $gfx
+	      ->rectxy( $x, $y0, $x1, $y1 )
+		->linewidth(3)
 		  ->fillstroke;
-	    }
-	    else {
-		# This works, but is too lowlevel.
-		$ps->{pr}->{pdftext}->add
-		  ("q",
-		   "$grey $grey $grey rg $grey $grey $grey RG",
-		   "3 w",
-		   "$x $y0 m $x $y1 l $x1 $y1 l $x1 $y0 l b",
-		   "Q");
-	    }
+	    $gfx->restore;
+
+	    # Draw text.
 	    $ps->{pr}->text( $text, $x, $y );
-	    $y -= $ps->{lineheight} + $ps->{'vertical-space'};
+	    $y -= $vsp->();
 	    next;
 	}
 
@@ -259,12 +292,61 @@ sub generate_song {
 	    my $font = $ps->{fonts}->{comment_italic} || $ps->{fonts}->{chord};
 	    $ps->{pr}->setfont( $font );
 	    $ps->{pr}->text( $elt->{text}, $x, $y );
-	    $y -= $ps->{lineheight} + $ps->{'vertical-space'};
+	    $y -= $vsp->();
+	    next;
+	}
+
+	if ( $elt->{type} eq "image" ) {
+	    my $opts = $elt->{opts};
+	    my $img = $ps->{pr}->{pdf}->image_png($elt->{uri});
+	    my $pw = $ps->{papersize}->[0] - $ps->{marginleft} - $ps->{marginright};
+	    my $ph = $ps->{papersize}->[1] - $ps->{margintop} - $ps->{marginbottom};
+	    # First shot...
+	    my $scale = 1;
+	    my ( $w, $h ) = ( $opts->{width}  || $img->width,
+			      $opts->{height} || $img->height );
+	    if ( defined $opts->{scale} ) {
+		$scale = $opts->{scale} || 1;
+	    }
+	    else {
+		if ( $w > $pw ) {
+		    $scale = $pw / $w;
+		}
+		if ( $h*$scale > $ph ) {
+		    $scale = $ph / $h;
+		}
+	    }
+	    $h *= $scale;
+	    $w *= $scale;
+
+	    my $x = $x;
+	    $x += ($pw - $w) / 2 if $opts->{center} // 1;
+	    $y += $vsp->() / 2;
+	    if ( $y - $h < $ps->{marginbottom} ) {
+		$newpage->();
+	    }
+	    my $gfx = $ps->{pr}->{pdfpage}->gfx(1);
+	    $gfx->save;
+	    $gfx->image( $img, $x, $y-$h, $w, $h );
+	    if ( $opts->{border} ) {
+		$gfx->rect( $x, $y-$h, $w, $h )
+		  ->linewidth($opts->{border})
+		    ->stroke;
+	    }
+	    $gfx->restore;
+	    $y -= $h;
+	    $y -= 1.5 * $vsp->();
 	    next;
 	}
 
 	if ( $elt->{type} eq "control" ) {
-	    if ( $elt->{name} eq "lyrics-only" ) {
+	    if ( $elt->{name} eq "text-size" ) {
+		$do_size->( "text", $elt->{value} );
+	    }
+	    elsif ( $elt->{name} eq "chord-size" ) {
+		$do_size->( "chord", $elt->{value} );
+	    }
+	    elsif ( $elt->{name} eq "lyrics-only" ) {
 		$lyrics_only = $elt->{value}
 		  unless $lyrics_only > 1;
 	    }
@@ -276,12 +358,19 @@ sub songline {
     my ( $elt, $x, $y, $ps ) = @_;
     my $ftext = $ps->{fonts}->{text};
 
+    my $vsp = sub {
+	if ( $ps->{linespace} ) {
+	    return $ps->{linespace} * $ps->{lineheight};
+	}
+	$ps->{lineheight} + $ps->{'vertical-space'};
+    };
+
     if ( $lyrics_only
 	 or
 	 $single_space && ! ( $elt->{chords} && join( "", @{ $elt->{chords} } ) =~ /\S/ )
        ) {
 	$ps->{pr}->text( join( "", @{ $elt->{phrases} } ), $x, $y+2, $ftext );
-	return $y - ($ps->{lineheight} + $ps->{'vertical-space'});
+	return $y - $vsp->();
     }
 
     $elt->{chords} //= [ '' ];
@@ -290,61 +379,109 @@ sub songline {
     foreach ( 0..$#{$elt->{chords}} ) {
 	my $chord = $elt->{chords}->[$_];
 	my $phrase = $elt->{phrases}->[$_];
+
+	if ( $fchord->{background} && $chord ne "" ) {
+	    # Draw background.
+	    my $w = $ps->{pr}->strwidth($chord." ");
+	    my $y0 = $y;
+	    my $y1 = $y0 + 0.8*($fchord->{size});
+	    $y0 = $y1 - $fchord->{size};
+	    my $bgcol = $fchord->{background};
+	    my $x1 = $x + $w - $ps->{pr}->strwidth(" ")/2;
+	    my $gfx = $ps->{pr}->{pdfpage}->gfx(1);
+	    $gfx->save;
+	    $gfx->fillcolor($bgcol);
+	    $gfx->strokecolor($bgcol);
+	    $gfx->rectxy( $x, $y0, $x1, $y1 )
+	      ->linewidth(3)
+		->fillstroke;
+	    $gfx->restore;
+	}
+
 	my $xt0 = $ps->{pr}->text( $chord." ", $x, $y, $fchord );
 	my $xt1 = $ps->{pr}->text( $phrase, $x, $y-$ps->{lineheight}, $ftext );
 	$x = $xt0 > $xt1 ? $xt0 : $xt1;
     }
-    return $y - ($ps->{lineheight} + $ps->{'vertical-space'}) - $ps->{chordheight};
+    return $y - $vsp->() - $ps->{chordheight};
+}
+
+sub songline_vsp {
+    my ( $elt, $ps ) = @_;
+    my $ftext = $ps->{fonts}->{text};
+
+    my $vsp = sub {
+	if ( $ps->{linespace} ) {
+	    return $ps->{linespace} * $ps->{lineheight};
+	}
+	$ps->{lineheight} + $ps->{'vertical-space'};
+    };
+
+    if ( $lyrics_only
+	 or
+	 $single_space && ! ( $elt->{chords} && join( "", @{ $elt->{chords} } ) =~ /\S/ )
+       ) {
+	return $vsp->();
+    }
+
+    $vsp->() + $ps->{chordheight};
 }
 
 sub page_settings {
-  # Pretty hardwired for now.
+    my ( $options ) = @_;
 
-  # Add font dirs.
-  PDF::API2::addFontDirs( $ENV{HOME} . "/.fonts" );
+    use JSON qw(decode_json);
 
-  my $ret =
-  { papersize     => [ 595, 842 ],	# A4, portrait
-    marginleft    => 130,
-    margintop     => 66,
-    marginbottom  => 40,
-    marginright   => 40,
-    headspace     => 20,
-    offsets       => [ 0, 250 ],	# col 1, col 2
-    xxfonts      => {
-	title   => { name => 'Times-Bold',
-		     size => 14 },
-	subtitle=> { name => 'Times-Bold',
-		     size => 12 },
-	text    => { name => 'Garamond-Light',
-		     size => 14 },
-        chord   => { name => 'Helvetica-LightOblique',
-		     size => 10 },
-        comment => { name => 'Times-Roman',
-		     size => 12 },
-    },
-    fonts         => {
-	title   => { file => 'ITCGaramond-Light.ttf',
-		     size => 14 },
-	subtitle=> { file => 'ITCGaramond-Light.ttf',
-		     size => 12 },
-        text =>  { file => 'ITCGaramond-Light.ttf',
-		   size => 14 },
-        xxchord => { file    => 'Helvetica-LightOblique.pfb',
-		   metrics => 'Helvetica-LightOblique.afm',
-		   size    => 10 },
-        chord => { file => 'Myriad-CnSemibold.ttf',
-		   size => 14 },
-        tab => { name => 'Courier',
-		   size => 10 },
-        comment => { file => 'GillSans.ttf',
-		     size => 12 },
-        comment_italic => { file => 'GillSans-Italic.ttf',
-		     size => 12 },
-    },
-  };
+    my $ret = {};
+    if ( open( my $fd, "<:utf8", $options->{pagedefs} || "pagedefs.json" ) ) {
+	local $/;
+	$ret = decode_json( scalar( <$fd> ) );
+	$fd->close;
+    }
+    elsif ( $options->{pagedefs} ) {
+	die("Cannot open ", $options->{pagedefs}, " [$!]\n");
+    }
 
-    # Sanitize.
+    # Add font dirs.
+    my $fontdir = $ret->{pdf}->{fontdir} || $ENV{FONTDIR};
+    if ( $fontdir ) {
+	if ( -d $fontdir ) {
+	    PDF::API2::addFontDirs($fontdir);
+	}
+	else {
+	    warn("PDF: Ignoring fontdir $fontdir [$!]\n");
+	    undef $fontdir;
+	}
+    }
+    else {
+	undef $fontdir;
+    }
+
+    $ret = $ret->{pdf};
+    my $def =
+      { papersize     => [ 595, 842 ],	# A4, portrait
+	marginleft    => 130,
+	margintop     =>  66,
+	marginbottom  =>  40,
+	marginright   =>  40,
+	headspace     =>  20,
+	offsets       => [ 0, 250 ],	# col 1, col 2
+	linespace     =>   1,
+      };
+
+    # Use fallback values, if necessary.
+    $ret->{$_} ||= $def->{$_} foreach keys(%$def);
+
+    my $stdfonts =
+      { title   => { name => 'Times-Bold',        size => 14 },
+	text    => { name => 'Times-Roman',       size => 14 },
+	chord   => { name => 'Helvetica-Oblique', size => 10 },
+	tab     => { name => 'Courier',           size => 10 },
+      };
+
+    # Use fallback fonts, if necessary.
+    $ret->{fonts}->{$_} ||= $stdfonts->{$_} foreach keys(%$stdfonts);
+
+    # Sanitize, if necessary.
     $ret->{fonts}->{subtitle}       ||= $ret->{fonts}->{text};
     $ret->{fonts}->{comment_italic} ||= $ret->{fonts}->{chord};
     $ret->{fonts}->{comment}        ||= $ret->{fonts}->{text};
@@ -354,19 +491,23 @@ sub page_settings {
 
 sub showlayout {
     my ( $ps ) = @_;
+#    return;
     $ps->{pr}->{pdfgfx}
       ->linewidth(0.5)
       ->rectxy( $ps->{marginleft},
 		$ps->{marginbottom},
 		$ps->{papersize}->[0]-$ps->{marginright},
 		$ps->{papersize}->[1]-$ps->{margintop} )
-      ->stroke;
-    $ps->{pr}->{pdfgfx}
-      ->linewidth(0.25)
-      ->move( $ps->{marginleft}+$ps->{offsets}->[1],
-	      $ps->{marginbottom} )
-      ->vline( $ps->{papersize}->[1]-$ps->{margintop} )
-      ->stroke;
+	->stroke;
+    foreach my $i ( 0 .. @{ $ps->{offsets} }-1 ) {
+	next unless $i;
+	$ps->{pr}->{pdfgfx}
+	  ->linewidth(0.25)
+	    ->move( $ps->{marginleft}+$ps->{offsets}->[$i],
+		    $ps->{marginbottom} )
+	      ->vline( $ps->{papersize}->[1]-$ps->{margintop} )
+		->stroke;
+    }
 }
 
 package PDFWriter;
@@ -383,7 +524,7 @@ sub new {
     my $self = bless { ps => $ps }, $pkg;
     $self->{pdf} = PDF::API2->new( -file => $file[0] );
     $self->{pdf}->{forcecompress} = 0;
-    $self->newpage;
+    $self->newpage($ps);
     $self;
 }
 
@@ -445,10 +586,11 @@ sub strwidth {
 }
 
 sub newpage {
-    my ( $self ) = @_;
+    my ( $self, $ps ) = @_;
     #$self->{pdftext}->textend if $self->{pdftext};
     $self->{pdfpage} = $self->{pdf}->page;
-    $self->{pdfpage}->mediabox('A4');
+    $self->{pdfpage}->mediabox( $ps->{papersize}->[0],
+				$ps->{papersize}->[1] );
     $self->{pdftext} = $self->{pdfpage}->text;
     $self->{pdfgfx}  = $self->{pdfpage}->gfx;
 }
@@ -460,7 +602,6 @@ sub add {
 
 sub finish {
     my $self = shift;
-    #$self->{pdftext}->textend if $self->{pdftext};
     $self->{pdf}->save;
 }
 
