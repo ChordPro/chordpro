@@ -51,6 +51,8 @@ sub generate_song {
     my $sb = $s->{body};
     $ps->{column} = 0;
     $ps->{columns} = $s->{settings}->{columns} || 1;
+    $ps->{columns} = @{$ps->{offsets}}
+      if $ps->{columns} > @{$ps->{offsets}};
     my $st = $s->{settings}->{titles} || "left";
 
     $single_space = $options->{'single-space'};
@@ -127,11 +129,12 @@ sub generate_song {
 
     my $y0 = $y;
     my $cskip = 0;
+    my $col = 0;
 
     my $newpage = sub {
 	$ps->{pr}->newpage($ps);
 	showlayout($ps);
-	$x = $ps->{marginleft} + $ps->{offsets}->[$ps->{column} = 0];
+	$x = $ps->{marginleft} + $ps->{offsets}->[$col = 0];
 	$y0 = $y = $ps->{papersize}->[1] - $ps->{margintop} - $ps->{headspace};
     };
 
@@ -157,14 +160,11 @@ sub generate_song {
 	$checkspace->(0);
 
 	if ( $elt->{type} eq "colb" ) {
-	    if ( ++$ps->{column} >= $ps->{columns}) {
-		$ps->{pr}->newpage;
-		showlayout($ps);
-		$x = $ps->{marginleft} + $ps->{offsets}->[$ps->{column} = 0];
-		$y = $ps->{papersize}->[1] - $ps->{margintop};
+	    if ( ++$col >= $ps->{columns}) {
+		$newpage->();
 	    }
 	    else {
-		$x = $ps->{marginleft} + $ps->{offsets}->[$ps->{column}];
+		$x = $ps->{marginleft} + $ps->{offsets}->[$col];
 		$y = $y0;
 	    }
 	    next;
@@ -179,6 +179,11 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "songline" ) {
+	    if ( $elt->{context} eq "grid" ) {
+		$checkspace->( $ps->{fonts}->{chord}->{size} );
+		$y = gridline( $elt, $x, $y, $ps );
+		next;
+	    }
 	    $checkspace->(songline_vsp( $elt, $ps ));
 	    if ( $elt->{context} eq "chorus" ) {
 		if ( $ps->{chorusindent} ) {
@@ -187,7 +192,7 @@ sub generate_song {
 		}
 		my $cy = $y + $vsp->(-2);
 		$y = songline( $elt, $x, $y, $ps );
-		my $cx = $ps->{marginleft} + $ps->{offsets}->[0] - 10;
+		my $cx = $ps->{marginleft} + $ps->{offsets}->[$col] - 10;
 		$ps->{pr}->{pdfgfx}
 		  ->move( $cx, $cy+1 )
 		  ->linewidth(1)
@@ -213,7 +218,7 @@ sub generate_song {
 		    next;
 		}
 	    }
-	    my $cx = $ps->{marginleft} + $ps->{offsets}->[0] - 10;
+	    my $cx = $ps->{marginleft} + $ps->{offsets}->[$col] - 10;
 	    $ps->{pr}->{pdfgfx}
 	      ->move( $cx, $cy )
 	      ->linewidth(1)
@@ -259,9 +264,10 @@ sub generate_song {
 	    next;
 	}
 
-	if ( $elt->{type} eq "comment" ) {
+	if ( $elt->{type} eq "comment"
+	     or $elt->{type} eq "comment_italic" ) {
 	    $y += $ps->{'vertical-space'} if $cskip++;
-	    my $font = $ps->{fonts}->{comment} || $ps->{fonts}->{text};
+	    my $font = $ps->{fonts}->{$elt->{type}};
 	    $ps->{pr}->setfont( $font );
 	    my $text = $elt->{text};
 	    my $w = $ps->{pr}->strwidth( $text );
@@ -272,26 +278,21 @@ sub generate_song {
 
 	    # Draw background.
 	    my $gfx = $ps->{pr}->{pdfpage}->gfx(1);
-	    my $bgcol = $font->{background} || "#E5E5E5";
-	    $gfx->save;
-	    $gfx->fillcolor($bgcol);
-	    $gfx->strokecolor($bgcol);
-	    $gfx
-	      ->rectxy( $x, $y0, $x1, $y1 )
-		->linewidth(3)
-		  ->fillstroke;
-	    $gfx->restore;
+	    my $bgcol = $font->{background};
+	    $bgcol ||= "#E5E5E5" if $elt->{type} eq "comment";
+	    if ( $bgcol ) {
+		$gfx->save;
+		$gfx->fillcolor($bgcol);
+		$gfx->strokecolor($bgcol);
+		$gfx
+		  ->rectxy( $x, $y0, $x1, $y1 )
+		    ->linewidth(3)
+		      ->fillstroke;
+		$gfx->restore;
+	    }
 
 	    # Draw text.
 	    $ps->{pr}->text( $text, $x, $y );
-	    $y -= $vsp->();
-	    next;
-	}
-
-	if ( $elt->{type} eq "comment_italic" ) {
-	    my $font = $ps->{fonts}->{comment_italic} || $ps->{fonts}->{chord};
-	    $ps->{pr}->setfont( $font );
-	    $ps->{pr}->text( $elt->{text}, $x, $y );
 	    $y -= $vsp->();
 	    next;
 	}
@@ -382,7 +383,7 @@ sub songline {
 
 	if ( $fchord->{background} && $chord ne "" ) {
 	    # Draw background.
-	    my $w = $ps->{pr}->strwidth($chord." ");
+	    my $w = $ps->{pr}->strwidth( $chord." ", $fchord );
 	    my $y0 = $y;
 	    my $y1 = $y0 + 0.8*($fchord->{size});
 	    $y0 = $y1 - $fchord->{size};
@@ -403,6 +404,27 @@ sub songline {
 	$x = $xt0 > $xt1 ? $xt0 : $xt1;
     }
     return $y - $vsp->() - $ps->{chordheight};
+}
+
+sub gridline {
+    my ( $elt, $x, $y, $ps ) = @_;
+    my $ftext = $ps->{fonts}->{text};
+    my $fchord = $ps->{fonts}->{chord};
+    my $cnw = $ps->{pr}->strwidth( "n", $fchord );
+
+    $elt->{chords} //= [ '' ];
+
+    foreach ( 0..$#{$elt->{chords}} ) {
+	my $chord = $elt->{chords}->[$_];
+	my $phrase = $elt->{phrases}->[$_];
+
+	my $xt0 = $x + length($chord) * $cnw;
+	$ps->{pr}->text( $chord, $x, $y, $fchord );
+	my $xt1 = $x + length($phrase.$chord) * $cnw;
+	$xt0 = 0;
+	$x = $xt0 > $xt1 ? $xt0 : $xt1;
+    }
+    return $y - $ps->{chordheight} * $ps->{linespace};
 }
 
 sub songline_vsp {
@@ -429,12 +451,12 @@ sub songline_vsp {
 sub page_settings {
     my ( $options ) = @_;
 
-    use JSON qw(decode_json);
+    use JSON::PP qw(from_json);
 
     my $ret = {};
     if ( open( my $fd, "<:utf8", $options->{pagedefs} || "pagedefs.json" ) ) {
 	local $/;
-	$ret = decode_json( scalar( <$fd> ) );
+	$ret = JSON::PP->new->utf8->relaxed->decode( scalar( <$fd> ) );
 	$fd->close;
     }
     elsif ( $options->{pagedefs} ) {
@@ -486,12 +508,18 @@ sub page_settings {
     $ret->{fonts}->{comment_italic} ||= $ret->{fonts}->{chord};
     $ret->{fonts}->{comment}        ||= $ret->{fonts}->{text};
 
+    # Set default font size.
+    if ( $ret->{textsize} ) {
+	$_->{size} ||= $ret->{textsize}
+	  foreach values( %{ $ret->{fonts} } );
+    }
+
     return $ret;
 }
 
 sub showlayout {
     my ( $ps ) = @_;
-#    return;
+    return;
     $ps->{pr}->{pdfgfx}
       ->linewidth(0.5)
       ->rectxy( $ps->{marginleft},
