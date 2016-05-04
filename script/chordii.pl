@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
 # Last Modified By: Johan Vromans
-# Last Modified On: Thu Apr  7 13:45:23 2016
-# Update Count    : 181
+# Last Modified On: Thu Apr 14 12:48:34 2016
+# Update Count    : 182
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -14,6 +14,7 @@
 use strict;
 use warnings;
 use FindBin;
+use lib "$FindBin::Bin/../CPAN";
 use lib "$FindBin::Bin/../lib";
 use Data::Dumper;
 
