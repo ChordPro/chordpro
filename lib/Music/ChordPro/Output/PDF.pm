@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+use utf8;
+
 package Music::ChordPro::Output::PDF;
 
 use strict;
@@ -149,8 +151,17 @@ sub generate_song {
 	$newpage->() if $y - $vsp <= $ps->{marginbottom};
     };
 
-    foreach my $elt ( @{$sb} ) {
+    my @elts = @{$sb};
+    my $elt;			# current element
+    my $prev;			# previous element
+    my @chorus;			# chorus elements, if any
 
+    my $grid_cellwidth;
+    my $grid_barwidth = 8;	# tentative
+    $grid_barwidth *= 1.5;		#####
+
+    while ( @elts ) {
+	$elt = shift(@elts);
 	$cskip = 0 unless $elt->{type} =~ /^comment/;
 
 	if ( $elt->{type} eq "newpage" ) {
@@ -178,13 +189,16 @@ sub generate_song {
 	    next;
 	}
 
+	# Collect chorus elements so they can be recalled.
+	if ( $elt->{context} eq "chorus" ) {
+	    @chorus = () unless $prev && $prev->{context} eq "chorus";
+	    push( @chorus, $elt );
+	}
+
 	if ( $elt->{type} eq "songline" ) {
-	    if ( $elt->{context} eq "grid" ) {
-		$checkspace->( $ps->{fonts}->{chord}->{size} );
-		$y = gridline( $elt, $x, $y, $ps );
-		next;
-	    }
+
 	    $checkspace->(songline_vsp( $elt, $ps ));
+
 	    if ( $elt->{context} eq "chorus" ) {
 		if ( $ps->{chorusindent} ) {
 		    $y = songline( $elt, $x + $ps->{chorusindent}, $y, $ps );
@@ -195,13 +209,13 @@ sub generate_song {
 		my $cx = $ps->{marginleft} + $ps->{offsets}->[$col] - 10;
 		$ps->{pr}->{pdfgfx}
 		  ->move( $cx, $cy+1 )
-		  ->linewidth(1)
-		  ->vline( $y + $vsp->(-2) )
-		  ->stroke;
+		    ->linewidth(1)
+		      ->vline( $y + $vsp->(-2) )
+			->stroke;
+		next;
 	    }
-	    else {
-		$y = songline( $elt, $x, $y, $ps );
-	    }
+
+	    $y = songline( $elt, $x, $y, $ps );
 	    next;
 	}
 
@@ -245,6 +259,32 @@ sub generate_song {
 	    next;
 	}
 
+	if ( $elt->{type} eq "gridline" ) {
+
+	    $checkspace->(songline_vsp( $elt, $ps ));
+
+	    if ( $elt->{context} eq "chorus" ) {
+		if ( $ps->{chorusindent} ) {
+		    $y = gridline( $elt, $x + $ps->{chorusindent}, $y, $ps );
+		    next;
+		}
+		my $cy = $y + $vsp->(-2);
+		$y = gridline( $elt, $x, $y,
+			       $grid_cellwidth, $grid_barwidth, $ps );
+		my $cx = $ps->{marginleft} + $ps->{offsets}->[$col] - 10;
+		$ps->{pr}->{pdfgfx}
+		  ->move( $cx, $cy+1 )
+		    ->linewidth(1)
+		      ->vline( $y + $vsp->(-2) )
+			->stroke;
+		next;
+	    }
+
+	    $y = gridline( $elt, $x, $y,
+			   $grid_cellwidth, $grid_barwidth, $ps );
+	    next;
+	}
+
 	if ( $elt->{type} eq "tab" ) {
 	    $ps->{pr}->setfont( $ps->{fonts}->{tab} );
 	    my $dy = $ps->{fonts}->{tab}->{size};
@@ -265,9 +305,10 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "comment"
+	     or $elt->{type} eq "comment_box"
 	     or $elt->{type} eq "comment_italic" ) {
 	    $y += $ps->{'vertical-space'} if $cskip++;
-	    my $font = $ps->{fonts}->{$elt->{type}};
+	    my $font = $ps->{fonts}->{$elt->{type}} || $ps->{fonts}->{comment};
 	    $ps->{pr}->setfont( $font );
 	    my $text = $elt->{text};
 	    my $w = $ps->{pr}->strwidth( $text );
@@ -275,9 +316,9 @@ sub generate_song {
 	    my $y1 = $y0 + 0.8*($font->{size});
 	    $y0 = $y1 - $font->{size};
 	    my $x1 = $x + $w;
+	    my $gfx = $ps->{pr}->{pdfpage}->gfx(1);
 
 	    # Draw background.
-	    my $gfx = $ps->{pr}->{pdfpage}->gfx(1);
 	    my $bgcol = $font->{background};
 	    $bgcol ||= "#E5E5E5" if $elt->{type} eq "comment";
 	    if ( $bgcol ) {
@@ -288,6 +329,17 @@ sub generate_song {
 		  ->rectxy( $x, $y0, $x1, $y1 )
 		    ->linewidth(3)
 		      ->fillstroke;
+		$gfx->restore;
+	    }
+
+	    # Draw box.
+	    if ( $elt->{type} eq "comment_box" ) {
+		$gfx->save;
+		$gfx->strokecolor("#000000"); # black
+		$gfx
+		  ->rectxy( $x-1, $y0-1, $x1+1, $y1+1 )
+		    ->linewidth(1)
+		      ->stroke;
 		$gfx->restore;
 	    }
 
@@ -340,6 +392,11 @@ sub generate_song {
 	    next;
 	}
 
+	if ( $elt->{type} eq "rechorus" ) {
+	    unshift( @elts, @chorus );
+	    next;
+	}
+
 	if ( $elt->{type} eq "control" ) {
 	    if ( $elt->{name} eq "text-size" ) {
 		$do_size->( "text", $elt->{value} );
@@ -351,7 +408,27 @@ sub generate_song {
 		$lyrics_only = $elt->{value}
 		  unless $lyrics_only > 1;
 	    }
+	    elsif ( $elt->{name} eq "gridparams" ) {
+		my @v = @{ $elt->{value} };
+		my $cells;
+		my $bars = 8;
+		if ( $v[1] ) {
+		    $cells = $v[0] * $v[1];
+		    $bars = $v[0];
+		}
+		else {
+		    $cells = $v[0];
+		}
+		$grid_cellwidth = ( $ps->{papersize}->[0]
+				    - $ps->{marginleft}
+				    - $ps->{marginright}
+				    - (1+$bars)*$grid_barwidth
+				  ) / $cells;
+	    }
 	}
+    }
+    continue {
+	$prev = $elt;
     }
 }
 
@@ -384,18 +461,20 @@ sub songline {
 	if ( $fchord->{background} && $chord ne "" ) {
 	    # Draw background.
 	    my $w = $ps->{pr}->strwidth( $chord." ", $fchord );
+#	    my $w = $ps->{pr}->strwidth( $chord, $fchord );
 	    my $y0 = $y;
 	    my $y1 = $y0 + 0.8*($fchord->{size});
 	    $y0 = $y1 - $fchord->{size};
 	    my $bgcol = $fchord->{background};
 	    my $x1 = $x + $w - $ps->{pr}->strwidth(" ")/2;
+	    my $x = $x - $ps->{pr}->strwidth(" ")/2;
+#	    my $x1 = $x + $w;
 	    my $gfx = $ps->{pr}->{pdfpage}->gfx(1);
 	    $gfx->save;
 	    $gfx->fillcolor($bgcol);
 	    $gfx->strokecolor($bgcol);
 	    $gfx->rectxy( $x, $y0, $x1, $y1 )
-	      ->linewidth(3)
-		->fillstroke;
+		->fill;
 	    $gfx->restore;
 	}
 
@@ -406,25 +485,113 @@ sub songline {
     return $y - $vsp->() - $ps->{chordheight};
 }
 
+my %smap =
+  ( "%"        => "\x{e500}",
+    "%%"       => "\x{e501}",
+    "\x{2030}" => "\x{e501}",
+  );
+
+my %sbmap =
+  ( "|"	   => "\x{e030}",
+    "||"   => "\x{e031}",
+    "|."   => "\x{e032}",
+    "|:"   => "\x{e040}",
+    ":|"   => "\x{e041}",
+    ":|:"  => "\x{e042}",
+    " %"   => "\x{e501}",
+  );
+
+sub is_bar {
+#    $_[0] =~ /^(\||\|\||\\|:|:\||\|\.)$/
+    $sbmap{$_[0]};
+}
+
 sub gridline {
-    my ( $elt, $x, $y, $ps ) = @_;
-    my $ftext = $ps->{fonts}->{text};
-    my $fchord = $ps->{fonts}->{chord};
-    my $cnw = $ps->{pr}->strwidth( "n", $fchord );
+    my ( $elt, $x, $y, $cellwidth, $barwidth, $ps ) = @_;
 
-    $elt->{chords} //= [ '' ];
+    # Grid context.
 
-    foreach ( 0..$#{$elt->{chords}} ) {
-	my $chord = $elt->{chords}->[$_];
-	my $phrase = $elt->{phrases}->[$_];
+    $x += $barwidth/2;
 
-	my $xt0 = $x + length($chord) * $cnw;
-	$ps->{pr}->text( $chord, $x, $y, $fchord );
-	my $xt1 = $x + length($phrase.$chord) * $cnw;
-	$xt0 = 0;
-	$x = $xt0 > $xt1 ? $xt0 : $xt1;
+    my $fchord = { %{ $ps->{fonts}->{chord} } };
+    delete($fchord->{background});
+    my $schord = { %{ $ps->{fonts}->{symbols} } };
+    delete($schord->{background});
+    $schord->{size} = $fchord->{size};
+
+    $schord = $fchord;		####
+
+    $elt->{tokens} //= [ '' ];
+
+    my $firstbar;
+    my $lastbar;
+#    foreach my $i ( 0 .. $#{ $elt->{tokens} } ) {
+#	next unless is_bar( $elt->{tokens}->[$i] );
+#	$lastbar = $i;
+#	$firstbar //= $i;
+#    }
+
+    my $prevbar;
+    my @tokens = @{ $elt->{tokens} };
+    my $t;
+    foreach my $i ( 0 .. $#tokens ) {
+	my $token = $tokens[$i];
+	if ( $t = is_bar($token) ) {
+	    $t = $token;
+	    $t = "{" if $t eq "|:";
+	    $t = "}" if $t eq ":|";
+	    $t = "}{" if $t eq ":|:";
+	    my $y = $y;
+	    $y += $schord->{size} / 2 if $t eq "\x{e501}";
+	    $ps->{pr}->setfont($schord);
+	    my $w = $ps->{pr}->strwidth($t);
+	    if ( defined $firstbar ) {
+		my $x = $x;
+		$x -= $w/2 if $i > $firstbar;
+		$x -= $w/2 if $i == $lastbar;
+		$ps->{pr}->text( $t, $x, $y );
+	    }
+	    else {
+		$ps->{pr}->text( $t, $x + $barwidth/2 - $w/2, $y );
+	    }
+	    $x += $barwidth;
+	    $prevbar = $i;
+	}
+	elsif ( ( $t = $smap{$token} || "" ) eq "\x{e500}" ) {
+	    $t = $token;
+	    my $k = $prevbar + 1;
+	    while ( $k <= $#tokens
+		    && !is_bar($tokens[$k]) ) {
+		$k++;
+	    }
+	    $ps->{pr}->setfont($schord);
+	    my $y = $y;
+	    $y += $schord->{size} / 2 if $t eq "\x{e500}";
+	    my $w = $ps->{pr}->strwidth($t);
+	    $ps->{pr}->text( $t,
+			     $x + ($k - $prevbar - 1)*$cellwidth/2 - $w/2,
+			     $y );
+	    $x += $cellwidth;
+	}
+	elsif ( ( $t = $smap{$token} || "" ) eq "\x{e501}" ) {
+	    $t = $token;
+	    my $k = $prevbar + 1;
+	    while ( $k <= $#tokens
+		    && !is_bar($tokens[$k]) ) {
+		$k++;
+	    }
+	    $tokens[$k] = " %";
+	    $x += $cellwidth;
+	}
+	else {
+	    $ps->{pr}->setfont($fchord),
+	    $ps->{pr}->text( $token, $x, $y )
+	      unless $token eq ".";
+	    $x += $cellwidth;
+	}
     }
-    return $y - $ps->{chordheight} * $ps->{linespace};
+    return $y - $ps->{chordheight} * $ps->{linespace}
+      - $ps->{'vertical-space'};
 }
 
 sub songline_vsp {
@@ -451,7 +618,7 @@ sub songline_vsp {
 sub page_settings {
     my ( $options ) = @_;
 
-    use JSON::PP qw(from_json);
+    use JSON::PP ();
 
     my $ret = {};
     if ( open( my $fd, "<:utf8", $options->{pagedefs} || "pagedefs.json" ) ) {
@@ -497,6 +664,7 @@ sub page_settings {
       { title   => { name => 'Times-Bold',        size => 14 },
 	text    => { name => 'Times-Roman',       size => 14 },
 	chord   => { name => 'Helvetica-Oblique', size => 10 },
+	symbols => { file => '/home/jv/src/Data-iRealPro/res/fonts/Bravura.ttf',      size => 10 },
 	tab     => { name => 'Courier',           size => 10 },
       };
 
@@ -506,6 +674,7 @@ sub page_settings {
     # Sanitize, if necessary.
     $ret->{fonts}->{subtitle}       ||= $ret->{fonts}->{text};
     $ret->{fonts}->{comment_italic} ||= $ret->{fonts}->{chord};
+    $ret->{fonts}->{comment_box}    ||= $ret->{fonts}->{chord};
     $ret->{fonts}->{comment}        ||= $ret->{fonts}->{text};
 
     # Set default font size.
@@ -600,15 +769,17 @@ sub _getfont {
 	}
     }
     else {
+	use Data::Dumper;
+	warn(Dumper($font)) unless $font->{name};
 	return $fonts{$font->{name}} ||=
-	  $self->{pdf}->corefont( $font->{name} );
+	  $self->{pdf}->corefont( $font->{name}, -dokern => 1 );
     }
 }
 
 sub strwidth {
     my ( $self, $text, $font, $size ) = @_;
     $font ||= $self->{font};
-    $size ||= $font->{size};
+    $size ||= $self->{fontsize} || $font->{size};
     $self->setfont( $font, $size );
     $self->{pdftext}->advancewidth($text);
 }
