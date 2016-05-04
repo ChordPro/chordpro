@@ -14,6 +14,7 @@ sub new {
 
 my $def_context = "";
 my $in_context = $def_context;
+my $xpose;
 
 sub parsefile {
     my ( $self, $filename, $options ) = @_;
@@ -25,6 +26,7 @@ sub parsefile {
     push( @{ $self->{songs} }, Music::ChordPro::Song->new )
       if exists($self->{songs}->[-1]->{body});
     $self->{songs}->[-1]->{structure} = "linear";
+    $xpose = $options->{transpose};
 
     while ( <$fh> ) {
 	s/[\r\n]+$//;
@@ -55,6 +57,11 @@ sub parsefile {
 	    next;
 	}
 
+	if ( $in_context eq "grid" ) {
+	    $self->add( type => "gridline", $self->decompose_grid($_) );
+	    next;
+	}
+
 	if ( /\S/ ) {
 	    $self->add( type => "songline", $self->decompose($_) );
 	}
@@ -70,6 +77,39 @@ sub add {
     push( @{$self->{songs}->[-1]->{body}},
 	  { context => $in_context,
 	    @_ } );
+}
+
+my $notesS  = [ split( ' ', "A A#  B C C#  D D#  E F F#  G G#" ) ];
+my $notesF  = [ split( ' ', "A Bb  B C Db  D Eb  E F Gb  G Ab" ) ];
+my %notes = ( A => 1, H => 2, B => 3, C => 4, D => 6, E => 8, F => 9, G => 11 );
+
+sub transpose {
+    return $_[0] unless $xpose;
+    my $c = $_[0];
+    return $c unless $c =~ m/
+				^ (
+				    [CF](?:is|\#)? |
+				    [DG](?:is|\#|es|b)? |
+				    A(?:is|\#|s|b)? |
+				    E(?:s|b)? |
+				    B(?:es|b)? |
+				    H
+				  )
+				  (.*)
+			    /x;
+    my ( $r, $rest ) = ( $1, $2 );
+    my $mod = 0;
+    $mod-- if $r =~ s/(e?s|b)$//;
+    $mod++ if $r =~ s/(is|\#)$//;
+    warn("WRONG NOTE: '$c' '$r' '$rest'") unless $r = $notes{$r};
+    $r = ($r - 1 + $mod + $xpose) % 12;
+    return ( $xpose > 0 ? $notesS : $notesF )->[$r] . $rest;
+}
+
+sub cxpose {
+    my ( $t ) = @_;
+    $t =~ s/\[(.+?)\]/transpose($1)/ge;
+    return $t;
 }
 
 sub decompose {
@@ -92,11 +132,19 @@ sub decompose {
     while ( @a ) {
 	my $t = shift(@a);
 	$t =~ s/^\[(.*)\]$/$1/;
-	push(@chords, $t);
+	push(@chords, transpose($t));
 	push(@phrases, shift(@a));
     }
 
     return ( phrases => \@phrases, chords  => \@chords );
+}
+
+sub decompose_grid {
+    my ($self, $line) = @_;
+    $line =~ s/^\s+//;
+    $line =~ s/\s+$//;
+    my @tokens = map { transpose($_) } split( ' ', $line );
+    return ( tokens => \@tokens );
 }
 
 sub directive {
@@ -109,17 +157,32 @@ sub directive {
     elsif ( $d eq "eoc" ) { $d = "end_of_chorus"   }
     elsif ( $d eq "eot" ) { $d = "end_of_tab"      }
 
-
-    if ( $d =~ /^start_of_(\w+)$/ ) {
+    if ( $d =~ /^start_of_(\w+)\s*(.*)$/ ) {
 	warn("Already in " . ucfirst($in_context) . " context\n")
 	  if $in_context;
 	$in_context = $1;
+	my $par = $2;
+	if ( $1 eq "grid" && $par && $par =~ /^(\d+)(?:x(\d+))?$/ ) {
+	    warn("Invalid grid params: $par (must be non-zero)"), return
+	      unless $1;
+	    $self->add( type => "control",
+			name => "gridparams",
+			value => [ $1, $2 ] );
+	}
+	else {
+	    warn("Garbage in start_of_$1: $par (ignored)\n")
+	      if $par;
+	}
 	return;
     }
     if ( $d =~ /^end_of_(\w+)$/ ) {
 	warn("Not in " . ucfirst($1) . " context\n")
 	  unless $in_context eq $1;
 	$in_context = $def_context;
+	return;
+    }
+    if ( $d =~ /^chorus$/i ) {
+	$self->add( type => "rechorus" );
 	return;
     }
 
@@ -157,12 +220,17 @@ sub directive {
     # Comments. Strictly speaking they do not belong here.
 
     if ( $d =~ /^(?:comment|c|highlight):\s*(.*)/i ) {
-	$self->add( type => "comment", text => $1 );
+	$self->add( type => "comment", text => cxpose($1) );
 	return;
     }
 
     if ( $d =~ /^(?:comment_italic|ci):\s*(.*)/i ) {
-	$self->add( type => "comment_italic", text => $1 );
+	$self->add( type => "comment_italic", text => cxpose($1) );
+	return;
+    }
+
+    if ( $d =~ /^(?:comment_box|cb):\s*(.*)/i ) {
+	$self->add( type => "comment_box", text => cxpose($1) );
 	return;
     }
 
