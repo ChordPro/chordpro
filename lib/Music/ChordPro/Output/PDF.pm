@@ -590,6 +590,12 @@ sub gridline {
 	    $x += $cellwidth;
 	}
     }
+    if ( $elt->{comment} ) {
+	my $c = $elt->{comment};
+	$ps->{pr}->setfont($ps->{fonts}->{comment});
+	$c = " " . $c;
+	$ps->{pr}->text( $c, $x, $y );
+    }
     return $y - $ps->{chordheight} * $ps->{linespace}
       - $ps->{'vertical-space'};
 }

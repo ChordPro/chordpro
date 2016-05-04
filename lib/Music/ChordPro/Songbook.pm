@@ -143,8 +143,13 @@ sub decompose_grid {
     my ($self, $line) = @_;
     $line =~ s/^\s+//;
     $line =~ s/\s+$//;
+    my $rest;
+    if ( $line =~ /(.*\|\S*)\s([^\|]*)$/ ) {
+	$line = $1;
+	$rest = cxpose($2);
+    }
     my @tokens = map { transpose($_) } split( ' ', $line );
-    return ( tokens => \@tokens );
+    return ( tokens => \@tokens, $rest ? ( comment => $rest ) : () );
 }
 
 sub directive {
