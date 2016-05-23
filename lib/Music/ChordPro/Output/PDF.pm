@@ -38,8 +38,17 @@ sub generate_songbook {
 
 my $single_space = 0;		# suppress chords line when empty
 my $lyrics_only = 0;		# suppress all chord lines
+my $chordscol = 0;		# chords in a separate column
+my $chordscapo = 0;		# capo in a separate column
 
 use constant SIZE_ITEMS => [ qw (chord text ) ];
+
+sub vsp {
+    my ( $ps, $extra ) = @_;
+    $extra ||=  0;
+    $ps->{linespace} * $ps->{lineheight} +
+      $ps->{'vertical-space'} + $extra;
+}
 
 sub generate_song {
     my ($s, $options) = @_;
@@ -58,7 +67,9 @@ sub generate_song {
     my $st = $s->{settings}->{titles} || "left";
 
     $single_space = $options->{'single-space'};
+    $chordscol = $options->{'chords-column'};
     $lyrics_only = 2 * $options->{'lyrics-only'};
+    $chordscapo = $s->{meta}->{capo};
 
     for my $item ( @{ SIZE_ITEMS() } ) {
 	for ( $options->{"$item-font"} ) {
@@ -140,12 +151,6 @@ sub generate_song {
 	$y0 = $y = $ps->{papersize}->[1] - $ps->{margintop} - $ps->{headspace};
     };
 
-    my $vsp = sub {
-	my $extra = $_[0] || 0;
-	$ps->{linespace} * $ps->{lineheight} +
-	  $ps->{'vertical-space'} + $extra;
-    };
-
     my $checkspace = sub {
 	my $vsp = $_[0];
 	$newpage->() if $y - $vsp <= $ps->{marginbottom};
@@ -185,7 +190,7 @@ sub generate_song {
 	    my $y0 = $y;
 	    warn("***SHOULD NOT HAPPEN1***")
 	      if $s->{structure} eq "structured";
-	    $y -= $vsp->(4);	# chordii
+	    $y -= vsp($ps,4);	# chordii
 	    next;
 	}
 
@@ -204,13 +209,16 @@ sub generate_song {
 		    $y = songline( $elt, $x + $ps->{chorusindent}, $y, $ps );
 		    next;
 		}
-		my $cy = $y + $vsp->(-2);
+		my $cy = $y + vsp($ps,-2);
+		$cy -= $ps->{chordheight} if $chordscol;
 		$y = songline( $elt, $x, $y, $ps );
+		my $y1 = $y + vsp($ps,-2);
+		$y1 -= $ps->{chordheight} if $chordscol;
 		my $cx = $ps->{marginleft} + $ps->{offsets}->[$col] - 10;
 		$ps->{pr}->{pdfgfx}
 		  ->move( $cx, $cy+1 )
 		    ->linewidth(1)
-		      ->vline( $y + $vsp->(-2) )
+		      ->vline( $y1 )
 			->stroke;
 		next;
 	    }
@@ -220,7 +228,7 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "chorus" ) {
-	    my $cy = $y + $vsp->(-2); # ####TODO????
+	    my $cy = $y + vsp($ps,-2); # ####TODO????
 	    foreach my $e ( @{$elt->{body}} ) {
 		if ( $e->{type} eq "songline" ) {
 		    $y = songline( $e, $x, $y, $ps );
@@ -228,7 +236,7 @@ sub generate_song {
 		}
 		elsif ( $e->{type} eq "empty" ) {
 		    warn("***SHOULD NOT HAPPEN2***");
-		    $y -= $vsp->();
+		    $y -= vsp($ps);
 		    next;
 		}
 	    }
@@ -236,9 +244,9 @@ sub generate_song {
 	    $ps->{pr}->{pdfgfx}
 	      ->move( $cx, $cy )
 	      ->linewidth(1)
-	      ->vline( $y + $vsp->())
+	      ->vline( $y + vsp($ps))
 	      ->stroke;
-	    $y -= $vsp->(4); # chordii
+	    $y -= vsp($ps,4); # chordii
 	    next;
 	}
 
@@ -251,11 +259,11 @@ sub generate_song {
 		}
 		elsif ( $e->{type} eq "empty" ) {
 		    warn("***SHOULD NOT HAPPEN2***");
-		    $y -= $vsp->();
+		    $y -= vsp($ps);
 		    next;
 		}
 	    }
-	    $y -= $vsp->(4);	# chordii
+	    $y -= vsp($ps,4);	# chordii
 	    next;
 	}
 
@@ -268,14 +276,14 @@ sub generate_song {
 		    $y = gridline( $elt, $x + $ps->{chorusindent}, $y, $ps );
 		    next;
 		}
-		my $cy = $y + $vsp->(-2);
+		my $cy = $y + vsp($ps,-2);
 		$y = gridline( $elt, $x, $y,
 			       $grid_cellwidth, $grid_barwidth, $ps );
 		my $cx = $ps->{marginleft} + $ps->{offsets}->[$col] - 10;
 		$ps->{pr}->{pdfgfx}
 		  ->move( $cx, $cy+1 )
 		    ->linewidth(1)
-		      ->vline( $y + $vsp->(-2) )
+		      ->vline( $y + vsp($ps,-2) )
 			->stroke;
 		next;
 	    }
@@ -345,7 +353,7 @@ sub generate_song {
 
 	    # Draw text.
 	    $ps->{pr}->text( $text, $x, $y );
-	    $y -= $vsp->();
+	    $y -= vsp($ps);
 	    next;
 	}
 
@@ -374,7 +382,7 @@ sub generate_song {
 
 	    my $x = $x;
 	    $x += ($pw - $w) / 2 if $opts->{center} // 1;
-	    $y += $vsp->() / 2;
+	    $y += vsp($ps) / 2;
 	    if ( $y - $h < $ps->{marginbottom} ) {
 		$newpage->();
 	    }
@@ -388,7 +396,7 @@ sub generate_song {
 	    }
 	    $gfx->restore;
 	    $y -= $h;
-	    $y -= 1.5 * $vsp->();
+	    $y -= 1.5 * vsp($ps);
 	    next;
 	}
 
@@ -407,6 +415,10 @@ sub generate_song {
 	    elsif ( $elt->{name} eq "lyrics-only" ) {
 		$lyrics_only = $elt->{value}
 		  unless $lyrics_only > 1;
+	    }
+	    elsif ( $elt->{name} eq "chords-column" ) {
+		$chordscol = $elt->{value}
+		  unless $chordscol > 1;
 	    }
 	    elsif ( $elt->{name} eq "gridparams" ) {
 		my @v = @{ $elt->{value} };
@@ -434,6 +446,40 @@ sub generate_song {
 
 sub songline {
     my ( $elt, $x, $y, $ps ) = @_;
+
+    # songline draws text in boxes as follows:
+    #
+    # +------------------------------
+    # |  C   F    G
+    # |
+    # +------------------------------
+    # |  Lyrics text
+    # +------------------------------
+    #
+    # Variants are:
+    #
+    # +------------------------------
+    # |  Lyrics text (lyrics-only, or single-space and no chords)
+    # +------------------------------
+    #
+    # And:
+    #
+    # +-----------------------+-------
+    # |  Lyrics text          | C F G
+    # +-----------------------+-------
+    #
+    # Problem is that we are dealing with baselines, and that chords
+    # may have a different height than lyrics.
+    #
+    # To find the upper/lower extents, the ratio
+    #
+    #  $font->ascender / $font->descender
+    #
+    # can be used. E.g., a font of size 16 with descender -250 and
+    # ascender 750 will get to 4 points below the baseline.
+
+
+
     my $ftext = $ps->{fonts}->{text};
 
     my $vsp = sub {
@@ -454,11 +500,16 @@ sub songline {
     $elt->{chords} //= [ '' ];
 
     my $fchord = $ps->{fonts}->{chord};
+    my $chordsx = $x + $ps->{chordscolumn};
+    if ( $chordsx < 0 ) {
+	($x, $chordsx) = (-$chordsx, $x);
+    }
+    my @chords;
     foreach ( 0..$#{$elt->{chords}} ) {
 	my $chord = $elt->{chords}->[$_];
 	my $phrase = $elt->{phrases}->[$_];
 
-	if ( $fchord->{background} && $chord ne "" ) {
+	if ( $fchord->{background} && $chord ne "" && !$chordscol ) {
 	    # Draw background.
 	    my $w = $ps->{pr}->strwidth( $chord." ", $fchord );
 #	    my $w = $ps->{pr}->strwidth( $chord, $fchord );
@@ -478,27 +529,100 @@ sub songline {
 	    $gfx->restore;
 	}
 
-	my $xt0 = $ps->{pr}->text( $chord." ", $x, $y, $fchord );
-	my $xt1 = $ps->{pr}->text( $phrase, $x, $y-$ps->{lineheight}, $ftext );
-	$x = $xt0 > $xt1 ? $xt0 : $xt1;
+	if ( $chordscol && $chord ne "" ) {
+	    my $y = $y - $ps->{lineheight};
+
+	    if ( $chordscapo ) {
+		$ps->{pr}->text("Capo: " . $chordscapo,
+				$chordsx, $y + $ps->{lineheight},
+				$ps->{fonts}->{chord} );
+		undef $chordscapo
+	    }
+
+	    # Underline the first word of the phrase, to indicate
+	    # the actual chord position.
+	    $phrase = " " if $phrase eq "";
+	    my ( $pre, $word, $rest ) = $phrase =~ /^([^[:alpha:]]*)(.[[:alpha:]]*)(.+)?/;
+	    $word = $phrase unless defined $rest;
+	    my $x0 = $x;
+	    my $w = $ps->{pr}->strwidth( $word, $ftext );
+	    $w *= 0.75 unless defined($rest);
+	    my $x1 = $x0 = $ps->{pr}->text( $pre, $x0, $y, $ftext ) if defined($pre);
+#	    $x0 = $ps->{pr}->textu( $word, $x0, $y, $ftext );
+	    $x0 = $ps->{pr}->text( $word, $x0, $y, $ftext );
+	    my $gfx = $ps->{pr}->{pdfpage}->gfx;
+	    $gfx->save;
+	    $gfx->strokecolor("#000000"); # black
+	    $gfx->linewidth(0.25);
+	    $gfx->move( $x, $y +
+			$ps->{pr}->_getfont($ps->{fonts}->{text})->underlineposition/1024*$ftext->{size} );
+	    $gfx->hline( $x + $w );
+	    $gfx->stroke;
+	    $gfx->restore;
+
+	    $x0 = $ps->{pr}->text( $rest, $x0, $y, $ftext ) if defined($rest);
+	    $x = $x0;
+
+	    # Chords at the right.
+	    push(@chords, $chord);
+	}
+	else {
+	    my $xt0 = $ps->{pr}->text( $chord." ", $x, $y, $fchord );
+	    my $xt1 = $ps->{pr}->text( $phrase, $x, $y-$ps->{lineheight}, $ftext );
+	    $x = $xt0 > $xt1 ? $xt0 : $xt1;
+	}
     }
-    return $y - $vsp->() - $ps->{chordheight};
+    $ps->{pr}->text( join(",  ", @chords),
+		     $chordsx, $y - $ps->{lineheight}, $fchord )
+      if @chords;
+    return $y - $vsp->() - ($chordscol ? 0 : $ps->{chordheight});
 }
 
-my %smap =
-  ( "%"        => "\x{e500}",
-    "%%"       => "\x{e501}",
-    "\x{2030}" => "\x{e501}",
+# SMUFL mappings of common symbols.
+my %smufl =
+  ( brace		=> "\x{e000}",
+    reversedBrace	=> "\x{e001}",
+    barlineSingle	=> "\x{e030}",
+    barlineDouble	=> "\x{e031}",
+    barlineFinal	=> "\x{e032}",
+    repeatLeft		=> "\x{e040}",
+    repeatRight		=> "\x{e041}",
+    repeatRightLeft	=> "\x{e042}",
+    repeatDots		=> "\x{e043}",
+    dalSegno		=> "\x{e045}",
+    daCapo		=> "\x{e046}",
+    segno		=> "\x{e047}",
+    coda		=> "\x{e048}",
+    timeSig0		=> "\x{e080}", # timeSig1, ...etc...
+    flat		=> "\x{e260}",
+    sharp		=> "\x{e262}",
+    fermata		=> "\x{e4c0}",
+    repeat1Bar		=> "\x{e500}",
+    repeat2Bars		=> "\x{e501}",
+    repeat4Bars		=> "\x{e502}",
+    csymDiminished	=> "\x{e870}",
+    csymHalfDiminished	=> "\x{e871}",
+    csymAugmented	=> "\x{e872}",
+    csymMajorSeventh	=> "\x{e873}",
+    csymMinor		=> "\x{e874}",
   );
 
+# Map ASCII bars (and pseudo-bar) to SMUFL code.
 my %sbmap =
-  ( "|"	   => "\x{e030}",
-    "||"   => "\x{e031}",
-    "|."   => "\x{e032}",
-    "|:"   => "\x{e040}",
-    ":|"   => "\x{e041}",
-    ":|:"  => "\x{e042}",
-    " %"   => "\x{e501}",
+  ( "|"        => $smufl{barlineSingle},
+    "||"       => $smufl{barlineDouble},
+    "|."       => $smufl{barlineFinal},
+    "|:"       => $smufl{repeatLeft},
+    ":|"       => $smufl{repeatRight},
+    ":|:"      => $smufl{repeatRightLeft},
+    " %"       => $smufl{repeat2Bars},
+  );
+
+# Map ASCII and UTF8 measure repeats to SMUFL code.
+my %smap =
+  ( "%"        => $smufl{repeat1Bar},
+    "%%"       => $smufl{repeat2Bars},
+    "\x{2030}" => $smufl{repeat2Bars}, # permille
   );
 
 sub is_bar {
@@ -511,6 +635,8 @@ sub gridline {
 
     # Grid context.
 
+    my $smufl = 0;		# use SMUFL font
+
     $x += $barwidth/2;
 
     my $fchord = { %{ $ps->{fonts}->{chord} } };
@@ -519,17 +645,17 @@ sub gridline {
     delete($schord->{background});
     $schord->{size} = $fchord->{size};
 
-    $schord = $fchord;		####
+    $schord = $fchord unless $smufl;
 
     $elt->{tokens} //= [ '' ];
 
     my $firstbar;
     my $lastbar;
-#    foreach my $i ( 0 .. $#{ $elt->{tokens} } ) {
-#	next unless is_bar( $elt->{tokens}->[$i] );
-#	$lastbar = $i;
-#	$firstbar //= $i;
-#    }
+    foreach my $i ( 0 .. $#{ $elt->{tokens} } ) {
+	next unless is_bar( $elt->{tokens}->[$i] );
+	$lastbar = $i;
+	$firstbar //= $i;
+    }
 
     my $prevbar;
     my @tokens = @{ $elt->{tokens} };
@@ -537,28 +663,33 @@ sub gridline {
     foreach my $i ( 0 .. $#tokens ) {
 	my $token = $tokens[$i];
 	if ( $t = is_bar($token) ) {
-	    $t = $token;
+	    $t = $token unless $smufl;
 	    $t = "{" if $t eq "|:";
 	    $t = "}" if $t eq ":|";
 	    $t = "}{" if $t eq ":|:";
 	    my $y = $y;
-	    $y += $schord->{size} / 2 if $t eq "\x{e501}";
 	    $ps->{pr}->setfont($schord);
-	    my $w = $ps->{pr}->strwidth($t);
-	    if ( defined $firstbar ) {
-		my $x = $x;
-		$x -= $w/2 if $i > $firstbar;
-		$x -= $w/2 if $i == $lastbar;
-		$ps->{pr}->text( $t, $x, $y );
-	    }
-	    else {
-		$ps->{pr}->text( $t, $x + $barwidth/2 - $w/2, $y );
+	    my @t = ( $t );
+	    push( @t, $smufl{barlineSingle} ) if $t eq $smufl{repeat2Bars};
+	    for my $t ( @t ) {
+		my $w = $ps->{pr}->strwidth($t);
+		my $y = $y;
+		$y += $schord->{size} / 2 if $t eq $smufl{repeat2Bars};
+		if ( defined $firstbar ) {
+		    my $x = $x;
+		    $x -= $w/2 if $i > $firstbar;
+		    $x -= $w/2 if $i == $lastbar;
+		    $ps->{pr}->text( $t, $x, $y );
+		}
+		else {
+		    $ps->{pr}->text( $t, $x + $barwidth/2 - $w/2, $y );
+		}
 	    }
 	    $x += $barwidth;
 	    $prevbar = $i;
 	}
-	elsif ( ( $t = $smap{$token} || "" ) eq "\x{e500}" ) {
-	    $t = $token;
+	elsif ( ( $t = $smap{$token} || "" ) eq $smufl{repeat1Bar} ) {
+	    $t = $token unless $smufl;
 	    my $k = $prevbar + 1;
 	    while ( $k <= $#tokens
 		    && !is_bar($tokens[$k]) ) {
@@ -566,15 +697,15 @@ sub gridline {
 	    }
 	    $ps->{pr}->setfont($schord);
 	    my $y = $y;
-	    $y += $schord->{size} / 2 if $t eq "\x{e500}";
+	    $y += $schord->{size} / 2 if $t eq $smufl{repeat1Bar};
 	    my $w = $ps->{pr}->strwidth($t);
 	    $ps->{pr}->text( $t,
 			     $x + ($k - $prevbar - 1)*$cellwidth/2 - $w/2,
 			     $y );
 	    $x += $cellwidth;
 	}
-	elsif ( ( $t = $smap{$token} || "" ) eq "\x{e501}" ) {
-	    $t = $token;
+	elsif ( ( $t = $smap{$token} || "" ) eq $smufl{repeat2Bars} ) {
+	    # For repeat2Bars, change the next bar line to pseudo-bar.
 	    my $k = $prevbar + 1;
 	    while ( $k <= $#tokens
 		    && !is_bar($tokens[$k]) ) {
@@ -635,6 +766,7 @@ sub page_settings {
     elsif ( $options->{pagedefs} ) {
 	die("Cannot open ", $options->{pagedefs}, " [$!]\n");
     }
+    my $pd = $ret;
 
     # Add font dirs.
     my $fontdir = $ret->{pdf}->{fontdir} || $ENV{FONTDIR};
@@ -651,20 +783,51 @@ sub page_settings {
 	undef $fontdir;
     }
 
-    $ret = $ret->{pdf};
+    $ret = $ret->{pdf} || {};
     my $def =
-      { papersize     => [ 595, 842 ],	# A4, portrait
-	marginleft    => 130,
-	margintop     =>  66,
-	marginbottom  =>  40,
-	marginright   =>  40,
-	headspace     =>  20,
-	offsets       => [ 0, 250 ],	# col 1, col 2
-	linespace     =>   1,
+      { papersize     => 'a4',		# [w,h], or known name
+	marginleft    => 130,		# pt
+	margintop     =>  66,		# pt
+	marginbottom  =>  40,		# pt
+	marginright   =>  40,		# pt
+	headspace     =>  20,		# pt
+	offsets       => [ 0, 250 ],	# col 1, col 2, pt
+	chordscolumn  => 400,		# pt
+	linespace     =>   1,		# factor
+
+	# Spacings. All as a factor of the font size * line spacing.
+	# Spacing between lyrics lines.
+	"inter-lyrics-spacing" => 1.2,
+	# Spacing between chords and lyrics lines.
+	"inter-chords-lyrics-spacing" => 1.2,
+	# Spacing before/after verse.
+	"before-verse-spacing" => 1.5,
+	"after-verse-spacing" => 1.5,
+	# Spacing before/after chorus.
+	"before-chorus-spacing" => 1.5,
+	"after-chorus-spacing" => 1.5,
+	# Spacing before/after tab.
+	"before-tab-spacing" => 1.5,
+	"after-tab-spacing" => 1.5,
+	"inter-tab-spacing" => 1.0,
+	# Spacing before/after grid.
+	"before-grid-spacing" => 1.5,
+	"after-grid-spacing" => 1.5,
+	"inter-grid-spacing" => 1.2,
       };
 
-    # Use fallback values, if necessary.
+    # Merge fallback values, if necessary.
+    # Use Hash::Merge::Simple if anything more complex is required.
     $ret->{$_} ||= $def->{$_} foreach keys(%$def);
+
+    # Map papersize name to [ width, height ].
+    unless ( eval { $ret->{papersize}->[0] } ) {
+	require PDF::API2::Resource::PaperSizes;
+	my %ps = PDF::API2::Resource::PaperSizes->get_paper_sizes;
+	die("Unhandled paper size: ", $ret->{papersize}, "\n")
+	  unless exists $ps{lc $ret->{papersize}};
+	$ret->{papersize} = $ps{lc $ret->{papersize}}
+    }
 
     my $stdfonts =
       { title   => { name => 'Times-Bold',        size => 14 },
@@ -687,6 +850,13 @@ sub page_settings {
     if ( $ret->{textsize} ) {
 	$_->{size} ||= $ret->{textsize}
 	  foreach values( %{ $ret->{fonts} } );
+    }
+
+    # Write resultant pagedefds, if needed.
+    if ( 0 ) {
+	open( my $fd, '>:utf8', 'pagedefs.new' );
+	$fd->print(JSON::PP->new->utf8->canonical->indent(4)->pretty->encode($pd));
+	$fd->close;
     }
 
     return $ret;
@@ -746,6 +916,19 @@ sub text {
     $text = encode( "cp1250", $text ) unless $font->{file};
     $self->{pdftext}->translate( $x, $y );
     return $x + $self->{pdftext}->text($text);
+}
+
+sub textu {
+    my ( $self, $text, $x, $y, $font, $size ) = @_;
+    $font ||= $self->{font};
+    $size ||= $font->{size};
+
+    $self->setfont($font, $size);
+
+    $text = encode( "cp1250", $text ) unless $font->{file};
+    $self->{pdftext}->translate( $x, $y );
+    return $x + $self->{pdftext}->text($text,
+				       -underline => [ 1.5, 0.25 ] );
 }
 
 sub setfont {
