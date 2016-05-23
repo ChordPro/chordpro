@@ -1,7 +1,8 @@
 {
     "pdf" : {
 
-	"papersize" : [ 595, 842 ],
+	# Papersize, 'a4' or [ 595, 842 ] etc.
+	"papersize" : "a4",
 	"offsets"   : [ 0, 250 ],
 
 	"margintop"    :  66,
@@ -9,6 +10,26 @@
 	"marginleft"   :  40,
 	"marginright"  :  40,
 	"headspace"    :  20,
+
+	# Spacings. All as a factor of the font size.
+	# Spacing between lyrics lines.
+	"inter-lyrics-spacing" : 1.2,
+	# Spacing between chords and lyrics lines.
+	"inter-chords-lyrics-spacing" : 1.2,
+	# Spacing before/after verse.
+	"before-verse-spacing" : 1.5,
+	"after-verse-spacing" : 1.5,
+	# Spacing before/after chorus.
+	"before-chorus-spacing" : 1.5,
+	"after-chorus-spacing" : 1.5,
+	# Spacing before/after tab.
+	"before-tab-spacing" : 1.5,
+	"after-tab-spacing" : 1.5,
+	"inter-tab-spacing" : 1.0,
+	# Spacing before/after grid.
+	"before-grid-spacing" : 1.5,
+	"after-grid-spacing" : 1.5,
+	"inter-grid-spacing" : 1.2,
 
 	"fontdir" : "/home/jv/.fonts",
 	"fonts" : {
