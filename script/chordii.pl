@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
 # Last Modified By: Johan Vromans
-# Last Modified On: Thu Apr 14 12:48:34 2016
-# Update Count    : 182
+# Last Modified On: Mon May 23 13:58:33 2016
+# Update Count    : 184
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -126,10 +126,14 @@ sub app_setup {
        verbose		=> 0,		# verbose processing
        encoding		=> "",		# input encoding, default UTF-8
 
-       ### ADD OPTIONS HERE ###
+       ### ADDITIONAL CLI OPTIONS ###
 
        'vertical-space' => 0,		# extra vertical space between lines
        'lyrics-only'	=> 0,		# suppress all chords
+
+       ### NON-CLI OPTIONS ###
+
+       'chords-column'	=> 0,		# chords in a separate column
 
        # Development options (not shown with -help).
        debug		=> 0,		# debugging
