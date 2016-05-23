@@ -357,8 +357,9 @@ sub directive {
 	return;
     }
 
-    # Metadata extensions. Ignore for now.
-    if ( $d =~ /^(artist|composer|album|key|time|tempo):.*$/ ) {
+    # Metadata extensions.
+    if ( $d =~ /^(artist|composer|album|key|time|tempo|capo):\s*(.*)$/ ) {
+	$self->{songs}->[-1]->{meta}->{$1} = $2;
 	return;
     }
 
