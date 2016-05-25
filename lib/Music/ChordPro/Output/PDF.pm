@@ -21,25 +21,39 @@ sub generate_songbook {
 			  $ps->{papersize}->[1] );
     my @tm = gmtime(time);
     $pr->info( Title => $sb->{songs}->[0]->{title},
-	       Creator => "pChord [$options->{_name} $options->{_version}]",
+	       Creator => "ChordPro [$options->{_name} $options->{_version}]",
 	       CreationDate =>
 	       sprintf("D:%04d%02d%02d%02d%02d%02d+00'00'",
 		       1900+$tm[5], 1+$tm[4], @tm[3,2,1,0]),
 	     );
 
     my @book;
+    my $page = 1;
     foreach my $song ( @{$sb->{songs}} ) {
-	if ( @book ) {
-	    $pr->newpage($ps);
-	    push(@book, "{new_song}");
-	}
 
-	# For development.
-	showlayout($ps) if $ps->{showlayout};
-
-	generate_song( $song, { ps => $ps, $options ? %$options : () } );
+	$options->{startpage} = $page;
+	push( @book, [ $song->{title}, $page ] );
+	$page += generate_song( $song, { pr => $pr, $options ? %$options : () } );
     }
+
+    if ( $options->{toc} ) {
+	$options->{startpage} = $page;
+	my $song =
+	  { title => "Contents",
+	    structure => "linear",
+	    body => [
+		     map { +{ type    => "tocline",
+			      context => "toc",
+			      title   => $_->[0],
+			      page    => $_->[1],
+			    } } @book,
+	    ],
+	    meta => {},
+	  };
+	$page += generate_song( $song, { pr => $pr, $options ? %$options : () } );     }
+
     $pr->finish;
+
     []
 }
 
@@ -54,9 +68,12 @@ use constant SIZE_ITEMS => [ qw (chord text tab grid) ];
 sub generate_song {
     my ($s, $options) = @_;
 
-    my $ps = $options->{ps};
+    my $ps = page_settings( $options );
+    my $pr = $options->{pr};
+    $ps->{pr} = $pr;
+    $pr->{ps} = $ps;
+    $pr->init_fonts();
     my $fonts = $ps->{fonts};
-    my $pr = $ps->{pr};
 
     my $x = $ps->{marginleft} + $ps->{offsets}->[0];
     my $y = $ps->{papersize}->[1] - $ps->{margintop};
@@ -71,7 +88,7 @@ sub generate_song {
       if $ps->{columns} > @{$ps->{offsets}};
     my $st = $s->{settings}->{titles} || "left";
 
-    $single_space = $options->{'single-space'};
+    $single_space = $options->{'single-space'} || $ps->{'suppress-empty-chords'};
     $chordscol = $options->{'chords-column'} || $ps->{chordscolumn};
     $lyrics_only = 2 * $options->{'lyrics-only'};
     $chordscapo = $s->{meta}->{capo};
@@ -136,42 +153,44 @@ sub generate_song {
 	$set_sizes->();
     };
 
-    $y = $ps->{papersize}->[1] - $ps->{margintop} + $ps->{headspace};
-    if ( $s->{title} ) {
-	$show->( $s->{title}, $fonts->{title} );
-    }
-
-    if ( $s->{subtitle} ) {
-	for ( @{$s->{subtitle}} ) {
-	    $show->( $_, $fonts->{subtitle} );
-	}
-    }
-
-    if ( $s->{title} or $s->{subtitle} ) {
-    }
-    $y = $ps->{papersize}->[1] - $ps->{margintop};
-
-    my $y0 = $y;
-    my $col = 0;
-    my $vsp_ignorefirst = 1;
-    my $pages = 1;
+    my $y0;
+    my $col;
+    my $vsp_ignorefirst;
+    my $startpage = $options->{startpage} || 1;
+    my $thispage = $startpage - 1;
 
     my $newpage = sub {
 	$pr->newpage($ps);
 	showlayout($ps) if $ps->{showlayout};
 	$x = $ps->{marginleft} + $ps->{offsets}->[$col = 0];
 	$y = $ps->{papersize}->[1] - $ps->{margintop} + $ps->{headspace};
-	$show->( $s->{title}, $fonts->{subtitle} );
-	$y = $ps->{marginbottom} - $ps->{footspace};
-	my $t = "Page " . ++$pages;
-	if ( $s->{title} ) {
-	    substr( $t, 0, 1, $s->{title} . " \x{2014} p" );
+
+	if ( ++$thispage == $startpage ) {
+	    $show->( $s->{title}, $fonts->{title} )
+	      if $s->{title};
+	    if ( $s->{subtitle} ) {
+		for ( @{$s->{subtitle}} ) {
+		    $show->( $_, $fonts->{subtitle} );
+		}
+	    }
 	}
-	$pr->setfont( $fonts->{footer} );
-	$pr->text( $t,$ps->{papersize}->[0] - $ps->{marginright} - $pr->strwidth($t), $y );
+	elsif ( $s->{title} ) {
+	    $y = $ps->{marginbottom} - $ps->{footspace};
+	    $pr->setfont( $fonts->{footer} );
+	    $pr->text( $s->{title}, $ps->{marginleft}, $y );
+	}
+	if ( $thispage > 1 ) {
+	    $y = $ps->{marginbottom} - $ps->{footspace};
+	    my $t = "Page " . $thispage;
+	    $pr->setfont( $fonts->{footer} );
+	    $pr->text( $t, $ps->{papersize}->[0] - $ps->{marginright} - $pr->strwidth($t), $y );
+	}
+
 	$y0 = $y = $ps->{papersize}->[1] - $ps->{margintop};
+	$col = 0;
 	$vsp_ignorefirst = 1;
     };
+    $newpage->();
 
     my $checkspace = sub {
 	my $vsp = $_[0];
@@ -196,7 +215,6 @@ sub generate_song {
 	    $newpage->();
 	    next;
 	}
-	$checkspace->(0);
 
 	if ( $elt->{type} eq "colb" ) {
 	    if ( ++$col >= $ps->{columns}) {
@@ -387,8 +405,7 @@ sub generate_song {
 	    $checkspace->($vsp);
 	    $pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
 
-	    $pr->setfont( $fonts->{tab} );
-	    $pr->text( $elt->{text}, $x, $y-font_bl($fonts->{tab}) );
+	    songline( $elt, $x, $y, $ps );
 
 	    $y -= $vsp;
 	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
@@ -456,6 +473,17 @@ sub generate_song {
 	    next;
 	}
 
+	if ( $elt->{type} eq "tocline" ) {
+	    my $vsp = toc_vsp( $elt, $ps );
+	    $checkspace->($vsp);
+	    $pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+
+	    tocline( $elt, $x, $y, $ps );
+
+	    $y -= $vsp;
+	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+	}
+
 	if ( $elt->{type} eq "control" ) {
 	    if ( $elt->{name} eq "text-size" ) {
 		$do_size->( "text", $elt->{value} );
@@ -493,6 +521,8 @@ sub generate_song {
     continue {
 	$prev = $elt;
     }
+
+    return $thispage - $startpage + 1;
 }
 
 sub font_bl {
@@ -816,18 +846,38 @@ sub gridline {
 	    $x += $cellwidth;
 	}
 	else {
-	    $pr->setfont($fchord),
-	    $pr->text( $token, $x, $y )
+	    $pr->text( $token, $x, $y, $fchord )
 	      unless $token eq ".";
 	    $x += $cellwidth;
 	}
     }
     if ( $elt->{comment} ) {
-	my $c = $elt->{comment};
-	$pr->setfont($fonts->{comment});
-	$c = " " . $c;
-	$pr->text( $c, $x, $y );
+	$pr->text( " " . $elt->{comment}, $x, $y, $fonts->{comment} );
     }
+}
+
+sub tocline {
+    my ( $elt, $x, $y, $ps ) = @_;
+
+    my $pr = $ps->{pr};
+    my $fonts = $ps->{fonts};
+    my $y0 = $y;
+
+    my $ftoc = $fonts->{text};
+    $y -= font_bl($ftoc);
+    $pr->setfont($ftoc);
+    $ps->{pr}->text( $elt->{title}, $x, $y );
+    my $p = "" . $elt->{page};
+    $ps->{pr}->text( $p,
+		     $ps->{papersize}->[0]
+		     - $ps->{marginleft}
+		     - $pr->strwidth($p),
+		     $y );
+
+    my $ann = $pr->{pdfpage}->annotation;
+    $ann->link($pr->{pdf}->openpage($elt->{page}));
+    $ann->rect( $ps->{marginleft}, $y0 - $ftoc->{size},
+		$ps->{papersize}->[0]-$ps->{marginright}, $y0 );
 }
 
 sub has_visible_chords {
@@ -871,19 +921,9 @@ sub _vsp {
     $font->{size} * $ps->{spacing}->{$itype};
 }
 
-sub grid_vsp {
-    my ( $elt, $ps ) = @_;
-
-    # Calculate the vertical span of this comment.
-
-    my $font = $ps->{fonts}->{grid} || $ps->{fonts}->{chord};
-    $font->{size} * $ps->{spacing}->{grid};
-}
-
-sub tab_vsp {
-    my ( $elt, $ps ) = @_;
-    _vsp( "tab", $ps );
-}
+sub grid_vsp { _vsp( "grid", $_[1] ) }
+sub tab_vsp  { _vsp( "tab",  $_[1] ) }
+sub toc_vsp  { _vsp( "toc",  $_[1] ) }
 
 sub text_vsp {
     my ( $elt, $ps ) = @_;
@@ -950,8 +990,11 @@ sub page_settings {
 		    lyrics  => 1.2,
 		    chords  => 1.2,
 		    tab	    => 1.0,
+		    toc	    => 1.4,
 		    grid    => 1.2,
 	},
+
+	'suppress-empty-chords' => 1,
 
 	fonts => {
 	    title   => { name => 'Times-Bold',        size => 14 },
@@ -979,11 +1022,12 @@ sub page_settings {
     }
 
     # Sanitize, if necessary.
-    $ret->{fonts}->{subtitle}       ||= $ret->{fonts}->{text};
-    $ret->{fonts}->{comment_italic} ||= $ret->{fonts}->{chord};
-    $ret->{fonts}->{comment_box}    ||= $ret->{fonts}->{chord};
-    $ret->{fonts}->{comment}        ||= $ret->{fonts}->{text};
-    $ret->{fonts}->{grid}           ||= $ret->{fonts}->{chord};
+    $ret->{fonts}->{subtitle}       ||= { %{ $ret->{fonts}->{text}  } };
+    $ret->{fonts}->{comment_italic} ||= { %{ $ret->{fonts}->{chord} } };
+    $ret->{fonts}->{comment_box}    ||= { %{ $ret->{fonts}->{chord} } };
+    $ret->{fonts}->{comment}        ||= { %{ $ret->{fonts}->{text}  } };
+    $ret->{fonts}->{toc}	    ||= { %{ $ret->{fonts}->{text}  } };
+    $ret->{fonts}->{grid}           ||= { %{ $ret->{fonts}->{chord} } };
 
     # Default footer is small subtitle.
     unless ( $ret->{fonts}->{footer} ) {
@@ -1089,7 +1133,7 @@ sub new {
     my $self = bless { ps => $ps }, $pkg;
     $self->{pdf} = PDF::API2->new( -file => $file[0] );
     $self->{pdf}->{forcecompress} = 0;
-    $self->newpage($ps);
+#    $self->newpage($ps);
     $self;
 }
 
