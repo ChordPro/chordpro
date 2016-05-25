@@ -1200,6 +1200,8 @@ sub init_fonts {
     die("Unhandled fonts detected -- aborted\n") if $fail;
 }
 
+my %fontcache;			# speeds up 2 seconds per song
+
 sub init_font {
     my ( $self, $ff ) = @_;
     my $ps = $self->{ps};
@@ -1208,21 +1210,26 @@ sub init_font {
     if ( $font->{file} ) {
 	if ( $font->{file} =~ /\.[ot]tf$/ ) {
 	    $font->{font} =
+	      $fontcache{$font->{file}} ||=
 	      $self->{pdf}->ttfont( $font->{file},
 				    -dokern => 1 );
 	}
 	elsif ( $font->{file} =~ /\.pf[ab]$/ ) {
 	    $font->{font} =
+	      $fontcache{$font->{file}} ||=
 	      $self->{pdf}->psfont( $font->{file},
 				    -afmfile => $font->{metrics},
 				    -dokern  => 1 );
 	}
 	else {
-	    $font->{font} = $self->{pdf}->corefont( 'Courier' );
+	    $font->{font} =
+	      $fontcache{"__default__"} ||=
+	      $self->{pdf}->corefont( 'Courier' );
 	}
     }
     else {
 	$font->{font} =
+	  $fontcache{"__core__".$font->{name}} ||=
 	  $self->{pdf}->corefont( $font->{name}, -dokern => 1 );
     }
 
