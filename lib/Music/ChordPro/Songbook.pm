@@ -254,6 +254,14 @@ sub directive {
 	return;
     }
 
+    if ( $d =~ /^([-+])([-\w]+)\s*:\s*(.+)$/i ) {
+	$self->add( type => "control",
+		    name => $2,
+		    value => $3,
+		  );
+	return;
+    }
+
     if ( $d =~ /^([-+])([-\w]+)$/i ) {
 	$self->add( type => "control",
 		    name => $2,
@@ -263,7 +271,7 @@ sub directive {
     }
 
     # Formatting.
-    if ( $d =~ /^(text|chord|tab)(font|size|colou?r):\s*(.*)$/ ) {
+    if ( $d =~ /^(text|chord|tab|grid)(font|size|colou?r):\s*(.*)$/ ) {
 	my $item = $1;
 	my $prop = $2;
 	my $value = $3;
