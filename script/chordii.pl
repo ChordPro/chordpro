@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
 # Last Modified By: Johan Vromans
-# Last Modified On: Mon May 23 13:58:33 2016
-# Update Count    : 184
+# Last Modified On: Thu May 26 17:39:33 2016
+# Update Count    : 191
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -22,7 +22,7 @@ use Data::Dumper;
 
 # Process command line options, config files, and such.
 my $options;
-$options = app_setup("pchord", "0.10") unless $::__EMBEDDED__;
+$options = app_setup("ChordPro", "0.10") unless $::__EMBEDDED__;
 
 ################ Presets ################
 
@@ -130,6 +130,7 @@ sub app_setup {
 
        'vertical-space' => 0,		# extra vertical space between lines
        'lyrics-only'	=> 0,		# suppress all chords
+       pagedefs		=> [ ],
 
        ### NON-CLI OPTIONS ###
 
@@ -157,13 +158,13 @@ sub app_setup {
     if ( !GetOptions
 	 ($clo,
 
-	  ### ADD OPTIONS HERE ###
+	  ### Options ###
 
 	  "lyrics-only",		# Suppress all chords
 	  "generate=s",
 	  "backend-option|bo=s\%",
 	  "encoding=s",
-	  "pagedefs=s",
+	  "pagedefs|pd=s@",
 
 	  ### Standard Chordii Options ###
 
@@ -214,6 +215,7 @@ sub app_setup {
     }
     # GNU convention: message to STDOUT upon request.
     app_usage(\*STDOUT, 0) if $help;
+    app_ident(\*STDOUT, 0) if $clo->{version};
     app_ident(\*STDOUT) if $ident;
 
     # If the user specified a config, it must exist.
@@ -267,6 +269,7 @@ Options:
     --output=FILE  -o             Saves the output to FILE
     --page-number-logical  -n     Numbers logical pages, not physical
     --page-size=FMT  -P           Specifies page size [letter, a4 (default)]
+    --pagedefs=JSON --pd          Page layout definitions
     --single-space  -a            Automatic single space lines without chords
     --start-page-number=N  -p     Starting page number [1]
     --text-size=N  -t             Sets text size [12]

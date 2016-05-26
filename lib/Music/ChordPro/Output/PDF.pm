@@ -33,10 +33,16 @@ sub generate_songbook {
 
 	$options->{startpage} = $page;
 	push( @book, [ $song->{title}, $page ] );
-	$page += generate_song( $song, { pr => $pr, $options ? %$options : () } );
+	$page += generate_song( $song,
+				{ pr => $pr, $options ? %$options : () } );
     }
 
     if ( $options->{toc} ) {
+
+	$pr->newpage($ps), $page++
+	  if $ps->{'even-pages-number-left'} && $page % 2 == 0;
+
+	# Create a pseudo-song for the table of contents.
 	$options->{startpage} = $page;
 	my $song =
 	  { title => "Contents",
@@ -50,7 +56,8 @@ sub generate_songbook {
 	    ],
 	    meta => {},
 	  };
-	$page += generate_song( $song, { pr => $pr, $options ? %$options : () } );     }
+	$page += generate_song( $song,
+				{ pr => $pr, $options ? %$options : () } );     }
 
     $pr->finish;
 
@@ -179,9 +186,14 @@ sub generate_song {
 	}
 	if ( $thispage > 1 ) {
 	    $y = $ps->{marginbottom} - $ps->{footspace};
-	    my $t = "Page " . $thispage;
+	    my $t = "" . $thispage;
 	    $pr->setfont( $fonts->{footer} );
-	    $pr->text( $t, $ps->{papersize}->[0] - $ps->{marginright} - $pr->strwidth($t), $y );
+	    if ( $ps->{"even-pages-number-left"} && $thispage % 2 == 0 ) {
+		$pr->text( $t, $x, $y );
+	    }
+	    else {
+		$pr->text( $t, $ps->{papersize}->[0] - $ps->{marginright} - $pr->strwidth($t), $y );
+	    }
 	}
 
 	$y0 = $y = $ps->{papersize}->[1] - $ps->{margintop};
@@ -238,7 +250,7 @@ sub generate_song {
 	    my $y0 = $y;
 	    warn("***SHOULD NOT HAPPEN1***")
 	      if $s->{structure} eq "structured";
-	    next if $vsp_ignorefirst--;
+	    $vsp_ignorefirst = 0, next if $vsp_ignorefirst;
 	    $pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
 	    my $vsp = text_vsp( $elt, $ps );
 	    $y -= $vsp;
@@ -990,15 +1002,21 @@ sub page_settings {
     use JSON::PP ();
 
     my $ret = {};
-    if ( open( my $fd, "<:utf8", $options->{pagedefs} || "pagedefs.json" ) ) {
-	local $/;
-	$ret = JSON::PP->new->utf8->relaxed->decode( scalar( <$fd> ) );
-	$fd->close;
+
+    my $pp = JSON::PP->new->utf8->relaxed;
+    my $pd = $options->{pagedefs};
+    $pd = [ "pagedefs.json" ] unless $pd && @$pd;
+    foreach my $file ( @$pd ) {
+	if ( open( my $fd, "<:utf8", $file ) ) {
+	    local $/;
+	    $ret = hmerge( $ret, $pp->decode( scalar( <$fd> ) ) );
+	    $fd->close;
+	}
+	elsif ( $options->{pagedefs} ) {
+	    die("Cannot open $file [$!]\n");
+	}
     }
-    elsif ( $options->{pagedefs} ) {
-	die("Cannot open ", $options->{pagedefs}, " [$!]\n");
-    }
-    my $pd = $ret;
+    $pd = $ret;
 
     # Add font dirs.
     my $fontdir = $ret->{pdf}->{fontdir} || $ENV{FONTDIR};
@@ -1045,6 +1063,7 @@ sub page_settings {
 
 	'suppress-empty-chords' => 1,
 	'titles-flush' => 'center',
+	'even-pages-number-left' => 1,
 
 	fonts => {
 	    title   => { name => 'Times-Bold',        size => 14 },
