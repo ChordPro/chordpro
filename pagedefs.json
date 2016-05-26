@@ -1,10 +1,19 @@
+// Layout definitions for ChordPro PDF.
+//
+// This is a relaxed JSON document, so comments are possible.
+
 {
     "pdf" : {
 
-	# Papersize, 'a4' or [ 595, 842 ] etc.
+	// Papersize, 'a4' or [ 595, 842 ] etc.
 	"papersize" : "a4",
-	"offsets"   : [ 0, 250 ],
 
+	// Number of columns.
+	// Can be overridden with {columns} directive.
+	// "columns"   : 2,
+
+	// Page margins.
+	// Note that top/bottom exclude the head/footspace.
 	"margintop"    :  90,
 	"marginbottom" :  40,
 	"marginleft"   :  40,
@@ -12,55 +21,78 @@
 	"headspace"    :  50,
 	"footspace"    :  20,
 
-	# Spacings. Baseline distances as a factor of the font size.
+	// Spacings.
+	// Baseline distances as a factor of the font size.
 	"spacing" : {
 	    "title"  : 1.2,
 	    "lyrics" : 1.2,
 	    "chords" : 1.2,
 	    "grid"   : 1.2,
 	    "tab"    : 1.0,
+	    "toc"    : 1.4,
 	},
 
-	# Style of chorus indicator.
-	"chorustype"        : "bar",
-	"chorus-indent"     : 20,
+	// Style of chorus indicator.
+	// "chorus-indent"     : 20,
 	"chorus-bar-offset" :  8,
+	"chorus-bar-width"  :  1,
+	"chorus-bar-color"  : "black",
 
-	# Alternative songlines with chords in a side column.
-	# Value is the column position.
-	# "chordscolumn" : 400,
+	// Alternative songlines with chords in a side column.
+	// Value is the column position.
+	// "chordscolumn" : 400,
 
-	# Fonts.
-	"fontdir" : "/home/jv/.fonts",
+	// Suppress empty chord lines.
+	// Overrides the -a (--single-space) command line options.
+	"suppress-empty-chords" : 1,
+
+	// Flush titles.
+	"titles-flush" : "center",
+
+	// Fonts.
+	// Fonts can be specified by name (for the corefonts)
+	// or a filename (for TrueType/OpenType fonts).
+	// Relative filenames are looked up in the fontdir.
+	// "fontdir" : "/home/jv/.fonts",
+
+	// Fonts for chords and comments can have a background
+	// colour associated.
+	// Colours are "#RRGGBB" or predefined names like "black", "white",
+	// and lots of others.
+	
 	"fonts" : {
 	    "title" : {
-		"file" : "ITCGaramond-Light.ttf",
+		"name" : "Times-Bold",
 		"size" : 14
 	    },
-	    "subtitle" : {
-		"file" : "ITCGaramond-Light.ttf",
-		"size" : 12
-	    },
 	    "text" : {
-		"file" : "ITCGaramond-Light.ttf",
+		"name" : "Times-Roman",
 		"size" : 14
 	    },
 	    "chord" : {
-		"file" : "Myriad-CnSemibold.ttf",
-		"size" : 14
+		"name" : "Helvetica-Oblique",
+		"size" : 10
 	    },
 	    "comment" : {
-		"file" : "GillSans.ttf",
-		"size" : 12
-	    },
-	    "comment_italic" : {
-		"file" : "GillSans-Italic.ttf",
+		"name" : "Helvetica",
 		"size" : 12
 	    },
 	    "tab" : {
 		"name" : "Courier",
 		"size" : 10
-	    }
-	}
+	    },
+	},
+
+	// Fonts that can be specified, but need not.
+	// subtitle       --> text
+	// comment        --> text
+	// comment_italic --> chord
+	// comment_box    --> chord
+	// toc            --> text
+	// grid           --> chord
+	// footer         --> subtitle @ 60%
+
+	// This will show the page layout.
+	// "showlayout" : 1,
     }
 }
