@@ -75,18 +75,13 @@ sub generate_song {
     $pr->init_fonts();
     my $fonts = $ps->{fonts};
 
-    my $x = $ps->{marginleft} + $ps->{offsets}->[0];
-    my $y = $ps->{papersize}->[1] - $ps->{margintop};
-
     $structured = ( $options->{'backend-option'}->{structure} // '' ) eq 'structured';
     $s->structurize if $structured;
 
     my $sb = $s->{body};
-    $ps->{column} = 0;
-    $ps->{columns} = $s->{settings}->{columns} || 1;
-    $ps->{columns} = @{$ps->{offsets}}
-      if $ps->{columns} > @{$ps->{offsets}};
-    my $st = $s->{settings}->{titles} || "left";
+    my $st = $s->{settings}->{titles} || $ps->{"titles-flush"};
+
+    set_columns( $ps, $s->{settings}->{columns} );
 
     $single_space = $options->{'single-space'} || $ps->{'suppress-empty-chords'};
     $chordscol = $options->{'chords-column'} || $ps->{chordscolumn};
@@ -118,6 +113,9 @@ sub generate_song {
     for ( @{ SIZE_ITEMS() } ) {
 	$fonts->{$_}->{_size} = $fonts->{$_}->{size};
     }
+
+    my $x = $ps->{marginleft} + $ps->{columnoffsets}->[0];
+    my $y = $ps->{papersize}->[1] - $ps->{margintop};
 
     my $show = sub {
 	my ( $text, $font ) = @_;
@@ -162,7 +160,7 @@ sub generate_song {
     my $newpage = sub {
 	$pr->newpage($ps);
 	showlayout($ps) if $ps->{showlayout};
-	$x = $ps->{marginleft} + $ps->{offsets}->[$col = 0];
+	$x = $ps->{marginleft} + $ps->{columnoffsets}->[$col = 0];
 	$y = $ps->{papersize}->[1] - $ps->{margintop} + $ps->{headspace};
 
 	if ( ++$thispage == $startpage ) {
@@ -193,9 +191,24 @@ sub generate_song {
     $newpage->();
 
     my $checkspace = sub {
+
+	# Verify that the amount of space if still available.
+	# If not, perform a column break or page break.
+	# Use negative argument to force a break.
+	# Returns true if there was space.
+
 	my $vsp = $_[0];
-	$newpage->(), return if $y - $vsp <= $ps->{marginbottom};
-	return 1;
+	return 1 if $vsp >= 0 && $y - $vsp >= $ps->{marginbottom};
+
+	if ( ++$col >= $ps->{columns}) {
+	    $newpage->();
+	}
+	else {
+	    $x = $ps->{marginleft} + $ps->{columnoffsets}->[$col];
+	    $y = $y0;
+	}
+
+	return;
     };
 
     my @elts = @{$sb};
@@ -217,13 +230,7 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "colb" ) {
-	    if ( ++$col >= $ps->{columns}) {
-		$newpage->();
-	    }
-	    else {
-		$x = $ps->{marginleft} + $ps->{offsets}->[$col];
-		$y = $y0;
-	    }
+	    $checkspace->(-1);
 	    next;
 	}
 
@@ -273,18 +280,21 @@ sub generate_song {
 	    # Handle decorations.
 
 	    if ( $elt->{context} eq "chorus" ) {
-		if ( $ps->{chorustype} eq "indent" ) {
-		    $indent = $ps->{'chorus-indent'};
-		}
-		if ( $ps->{chorustype} eq "bar" ) {
+		$indent = $ps->{'chorus-indent'};
+		if ( $ps->{'chorus-bar-offset'} ) {
 		    my $cx = $ps->{marginleft}
-		      + $ps->{offsets}->[$col]
-			- $ps->{'chorus-bar-offset'};
-		    $pr->{pdfgfx}
+		      + $ps->{columnoffsets}->[$col]
+			- $ps->{'chorus-bar-offset'}
+			  + $indent;
+		    my $gfx = $pr->{pdfgfx};
+		    $gfx->save;
+		    $gfx->linewidth($ps->{'chorus-bar-width'});
+		    $gfx->strokecolor($ps->{'chorus-bar-color'});
+		    $gfx
 		      ->move( $cx, $y )
-			->linewidth(1)
-			  ->vline( $y - $vsp )
-			    ->stroke;
+			->vline( $y - $vsp )
+			  ->stroke;
+		    $gfx->restore;
 		}
 	    }
 
@@ -314,7 +324,7 @@ sub generate_song {
 	    # Draw box.
 	    if ( $elt->{type} eq "comment_box" ) {
 		$gfx->save;
-		$gfx->strokecolor("#000000"); # black
+		$gfx->strokecolor("black");
 		$gfx
 		  ->rectxy( $x - 1, $y - 1, $x + $w + 1, $y - $vsp + 1 )
 		    ->linewidth(1)
@@ -344,12 +354,16 @@ sub generate_song {
 		    next;
 		}
 	    }
-	    my $cx = $ps->{marginleft} + $ps->{offsets}->[$col] - $ps->{'chorus-bar-offset'};
+	    my $cx = $ps->{marginleft}
+	      + $ps->{columnoffsets}->[$col] - $ps->{'chorus-bar-offset'};
 	    $pr->{pdfgfx}
+	      ->save
 	      ->move( $cx, $cy )
 	      ->linewidth(1)
+	      ->strokecolor($ps->{'chorus-bar-color'})
 	      ->vline( $y + vsp($ps))
-	      ->stroke;
+	      ->stroke
+	      ->restore;
 	    $y -= vsp($ps,4); # chordii
 	    next;
 	}
@@ -414,55 +428,21 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "image" ) {
-	    my $opts = $elt->{opts};
 
-	    my $img;
-	    for ( $elt->{uri} ) {
-		$img = $pr->{pdf}->image_png($_)  if /\.png$/i;
-		$img = $pr->{pdf}->image_jpeg($_) if /\.jpe?g$/i;
-		$img = $pr->{pdf}->image_gif($_)  if /\.gif$/i;
-	    }
-	    unless ( $img ) {
-		warn("Unhandled image type: ", $elt->{uri}, "\n");
-		next;
-	    }
+	    # Slightly more complex.
+	    # Only after establishing the desired height we can issue
+	    # the checkspace call, and we must get $y after that.
 
-	    my $pw = $ps->{papersize}->[0] - $ps->{marginleft} - $ps->{marginright};
-	    my $ph = $ps->{papersize}->[1] - $ps->{margintop} - $ps->{marginbottom};
-	    # First shot...
-	    my $scale = 1;
-	    my ( $w, $h ) = ( $opts->{width}  || $img->width,
-			      $opts->{height} || $img->height );
-	    if ( defined $opts->{scale} ) {
-		$scale = $opts->{scale} || 1;
-	    }
-	    else {
-		if ( $w > $pw ) {
-		    $scale = $pw / $w;
-		}
-		if ( $h*$scale > $ph ) {
-		    $scale = $ph / $h;
-		}
-	    }
-	    $h *= $scale;
-	    $w *= $scale;
-	    my $x = $x;
-	    $x += ($pw - $w) / 2 if $opts->{center} // 1;
+	    my $gety = sub {
+		my $h = shift;
+		$checkspace->($h);
+		$ps->{pr}->show_vpos( $y, 1 ) if DEBUG_SPACING;
+		return $y;
+	    };
 
-	    $checkspace->($h);
-	    $pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+	    my $vsp = imageline( $elt, $x, $ps, $gety );
 
-	    my $gfx = $pr->{pdfpage}->gfx(1); # under
-	    $gfx->save;
-	    $gfx->image( $img, $x, $y-$h, $w, $h );
-	    if ( $opts->{border} ) {
-		$gfx->rect( $x, $y-$h, $w, $h )
-		  ->linewidth($opts->{border})
-		    ->stroke;
-	    }
-	    $gfx->restore;
-
-	    $y -= $h;
+	    $y -= $vsp;
 	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
 
 	    next;
@@ -676,7 +656,7 @@ sub songline {
 
 	    my $gfx = $pr->{pdfpage}->gfx;
 	    $gfx->save;
-	    $gfx->strokecolor("#000000"); # black
+	    $gfx->strokecolor("black");
 	    $gfx->linewidth(0.25);
 	    $gfx->move( $ulstart, $ytext + font_ul($ftext) );
 	    $gfx->hline( $ulstart + $w );
@@ -856,6 +836,75 @@ sub gridline {
     }
 }
 
+sub imageline_vsp {
+}
+
+sub imageline {
+    my ( $elt, $x, $ps, $gety ) = @_;
+
+    my $opts = $elt->{opts};
+    my $pr = $ps->{pr};
+
+    my $img;
+    for ( $elt->{uri} ) {
+	$img = $pr->{pdf}->image_png($_)  if /\.png$/i;
+	$img = $pr->{pdf}->image_jpeg($_) if /\.jpe?g$/i;
+	$img = $pr->{pdf}->image_gif($_)  if /\.gif$/i;
+    }
+    unless ( $img ) {
+	warn("Unhandled image type: ", $elt->{uri}, "\n");
+	return 0;
+    }
+
+    # Available width and height.
+    my $pw;
+    if ( @{$ps->{columnoffsets}} > 1 ) {
+	$pw = $ps->{columnoffsets}->[1]
+	  - $ps->{columnoffsets}->[0]
+	    - $ps->{columnspace};
+    }
+    else {
+	$pw = $ps->{papersize}->[0]
+	  - $ps->{marginleft}
+	    - $ps->{marginright};
+    }
+
+    my $ph = $ps->{papersize}->[1] - $ps->{margintop} - $ps->{marginbottom};
+
+    my $scale = 1;
+    my ( $w, $h ) = ( $opts->{width}  || $img->width,
+		      $opts->{height} || $img->height );
+    if ( defined $opts->{scale} ) {
+	$scale = $opts->{scale} || 1;
+    }
+    else {
+	if ( $w > $pw ) {
+	    $scale = $pw / $w;
+	}
+	if ( $h*$scale > $ph ) {
+	    $scale = $ph / $h;
+	}
+    }
+    $h *= $scale;
+    $w *= $scale;
+    $x += ($pw - $w) / 2 if $opts->{center} // 1;
+
+    my $y = $gety->($h);	# may have been changed by checkspace
+
+    my $gfx = $ps->{pr}->{pdfpage}->gfx(1); # under
+
+    $gfx->save;
+    $gfx->image( $img, $x, $y-$h, $w, $h );
+    if ( $opts->{border} ) {
+	$gfx->rect( $x, $y-$h, $w, $h )
+	  ->linewidth($opts->{border})
+	    ->stroke;
+    }
+    $gfx->restore;
+
+    return $h;			# vertical size
+}
+
 sub tocline {
     my ( $elt, $x, $y, $ps ) = @_;
 
@@ -975,14 +1024,14 @@ sub page_settings {
 	marginright   =>  40,		# pt
 	headspace     =>  50,		# pt
 	footspace     =>  20,		# pt
-	offsets       => [ 0, 250 ],	# col 1, col 2, pt
+	columnspace   =>  20,		# pt
 	chordscolumn  =>   0,		# pt
 #	chordscolumn  => 300,		# pt
 
-#	chorustype    => 'bar',
-	chorustype    => 'indent',
 	'chorus-bar-offset' => 8,
-	'chorus-indent' => 20,
+	'chorus-bar-color'  => 'black',
+	'chorus-bar-width'  => 1,
+	'chorus-indent'     => 0,
 
 	# Spacings. Baseline distances as a factor of the font size.
 	spacing => {
@@ -995,6 +1044,7 @@ sub page_settings {
 	},
 
 	'suppress-empty-chords' => 1,
+	'titles-flush' => 'center',
 
 	fonts => {
 	    title   => { name => 'Times-Bold',        size => 14 },
@@ -1006,7 +1056,7 @@ sub page_settings {
 	},
 
 	# For development.
-#	showlayout => 1,
+	# showlayout => 1,
       };
 
     # Merge defaultvalues, if necessary.
@@ -1047,6 +1097,21 @@ sub page_settings {
     return $ret;
 }
 
+sub set_columns {
+    my ( $ps, $cols ) = @_;
+    $ps->{columns} = $cols ||= 1;
+    $ps->{columnoffsets} = [ 0 ];
+    return unless $cols > 1;
+
+    my $w = $ps->{papersize}->[0]
+      - $ps->{marginright} - $ps->{marginleft};
+    my $d = ( $w - ( $cols - 1 ) * $ps->{columnspace} ) / $cols;
+    $d += $ps->{columnspace};
+    for ( 1 .. $cols-1 ) {
+	push( @{ $ps->{columnoffsets} }, $_ * $d );
+    }
+}
+
 sub showlayout {
     my ( $ps ) = @_;
     my $pr = $ps->{pr};
@@ -1073,13 +1138,19 @@ sub showlayout {
 	  ->hline( $ps->{papersize}->[0]-$ps->{marginright} )
 	    ->stroke;
 
-    my @off = @{ $ps->{offsets} };
+    my @off = @{ $ps->{columnoffsets} };
     @off = ( $ps->{chordscolumn} ) if $ps->{chordscolumn};
     foreach my $i ( 0 .. @off-1 ) {
 	next unless $off[$i];
 	$ps->{pr}->{pdfgfx}
 	  ->linewidth(0.25)
 	    ->move( $ps->{marginleft}+$off[$i],
+		    $ps->{marginbottom} )
+	      ->vline( $ps->{papersize}->[1]-$ps->{margintop} )
+		->stroke;
+	$ps->{pr}->{pdfgfx}
+	  ->linewidth(0.25)
+	    ->move( $ps->{marginleft}+$off[$i]-$ps->{columnspace},
 		    $ps->{marginbottom} )
 	      ->vline( $ps->{papersize}->[1]-$ps->{margintop} )
 		->stroke;
