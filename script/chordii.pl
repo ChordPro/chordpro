@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
 # Last Modified By: Johan Vromans
-# Last Modified On: Thu May 26 17:39:33 2016
-# Update Count    : 191
+# Last Modified On: Wed Jun  1 20:42:40 2016
+# Update Count    : 204
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -160,6 +160,7 @@ sub app_setup {
 
 	  ### Options ###
 
+          "output|o=s",			# Saves the output to FILE
 	  "lyrics-only",		# Suppress all chords
 	  "generate=s",
 	  "backend-option|bo=s\%",
@@ -177,12 +178,11 @@ sub app_setup {
           "dump-chords-text|d",		# Dumps chords definitions (Text)
           "even-pages-number-left|L",	# Even pages numbers on left
           "lyrics-only|l",		# Only prints lyrics
-          "no-chord-grids|G",		# Disables printing of chord grids
-          "no-easy-chord-grids|g",	# Doesn't print grids for builtin "easy" chords.
-          "output|o=s",			# Saves the output to FILE
+          "chord-grids|G!",		# En[dis]ables printing of chord grids
+          "easy-chord-grids|g!",	# Do[esn't] print grids for builtin "easy" chords.
           "page-number-logical|n",	# Numbers logical pages, not physical
           "page-size|P=s",		# Specifies page size [letter, a4 (default)]
-          "single-space|a",		# Automatic single space lines without chords
+          "single-space|a!",		# Automatic single space lines without chords
           "start-page-number|p=i",	# Starting page number [1]
           "text-size|t=i",		# Sets text size [12]
           "text-font|T=s",		# Sets text font
@@ -217,6 +217,7 @@ sub app_setup {
     app_usage(\*STDOUT, 0) if $help;
     app_ident(\*STDOUT, 0) if $clo->{version};
     app_ident(\*STDOUT) if $ident;
+    app_about(\*STDOUT, 0) if $clo->{about};
 
     # If the user specified a config, it must exist.
     # Otherwise, set to a default.
@@ -239,12 +240,33 @@ sub app_setup {
 }
 
 sub app_ident {
-    my ($fh) = @_;
+    my ($fh, $exit) = @_;
     print {$fh} ("This is ",
 		 $my_package
 		 ? "$my_package [$my_name $my_version]"
 		 : "$my_name version $my_version",
 		 "\n");
+    exit $exit if defined $exit;
+}
+
+sub app_about {
+    my ($fh, $exit) = @_;
+    app_ident($fh);
+    print ${fh} <<EndOfAbout;
+
+ChordPro: A lyrics and chords formatting program.
+
+ChordPro will read a text file containing the lyrics of one or many
+songs plus chord information. ChordPro will then generate a
+photo-ready, professional looking, impress-your-friends sheet-music
+suitable for printing on your nearest printer.
+
+To learn more about ChordPro, look for the man page or do
+"chordpro --help" for the list of options.
+
+For more information, see http://www.chordpro.org .
+EndOfAbout
+    exit $exit if defined $exit;
 }
 
 sub app_usage {
@@ -254,47 +276,51 @@ sub app_usage {
 Usage: $0 [ options ] [ file ... ]
 
 Options:
-    --about  -A                   About Chordii...
-    --chord-font=FONT  -C         Sets chord font
-    --chord-grid-size=N  -s       Sets chord grid size [30]
-    --chord-grids-sorted  -S      Prints chord grids alphabetically
-    --chord-size=N  -c            Sets chord size [9]
-    --dump-chords  -D             Dumps chords definitions (PostScript)
-    --dump-chords-text  -d        Dumps chords definitions (Text)
+    --about  -A                   About ChordPro...
     --encoding=ENC		  Encoding for input files (UTF-8)
-    --even-pages-number-left  -L  Even pages numbers on left
     --lyrics-only  -l             Only prints lyrics
-    --no-chord-grids  -G          Disables printing of chord grids
-    --no-easy-chord-grids  -g     Doesn't print grids for builtin "easy" chords.
     --output=FILE  -o             Saves the output to FILE
-    --page-number-logical  -n     Numbers logical pages, not physical
-    --page-size=FMT  -P           Specifies page size [letter, a4 (default)]
-    --pagedefs=JSON --pd          Page layout definitions
-    --single-space  -a            Automatic single space lines without chords
+    --pagedefs=JSON --pd          Page layout definitions (multiple)
     --start-page-number=N  -p     Starting page number [1]
-    --text-size=N  -t             Sets text size [12]
-    --text-font=FONT  -T          Sets text font
-    --toc  -i                     Generates a table of contents
+    --toc --notoc -i              Generates/suppresses a table of contents
     --transpose=N  -x             Transposes by N semi-tones
-    --version  -V                 Prints Chordii version and exits
-    --vertical-space=N  -w        Extra vertical space between lines
-    --2-up  -2                    2 pages per sheet
-    --4-up  -4                    4 pages per sheet
+    --version  -V                 Prints version and exits
+
+Chordii compatibility.
+Options marked with * are better specified in the pagedefs file.
+Options marked with - are ignored.
+    --chord-font=FONT  -C         *Sets chord font
+    --chord-grid-size=N  -s       *Sets chord grid size [30]
+    --chord-grids-sorted  -S      *Prints chord grids alphabetically
+    --chord-size=N  -c            *Sets chord size [9]
+    --dump-chords  -D             -Dumps chords definitions (PostScript)
+    --dump-chords-text  -d        -Dumps chords definitions (Text)
+    --even-pages-number-left  -L  *Even pages numbers on left
+    --no-chord-grids  -G          *Disables printing of chord grids
+    --no-easy-chord-grids  -g     -Doesn't print grids for builtin "easy" chords.
+    --page-number-logical  -n     -Numbers logical pages, not physical
+    --page-size=FMT  -P           *Specifies page size [letter, a4 (default)]
+    --single-space  -a            *Automatic single space lines without chords
+    --text-size=N  -t             *Sets text size [12]
+    --text-font=FONT  -T          *Sets text font
+    --vertical-space=N  -w        *Extra vertical space between lines
+    --2-up  -2                    -2 pages per sheet
+    --4-up  -4                    -4 pages per sheet
 
 Configuration options:
-    --config=CFG	project specific config file ($configs{config})
-    --noconfig		don't use a project specific config file
-    --userconfig=CFG	user specific config file ($configs{userconfig})
-    --nouserconfig	don't use a user specific config file
-    --sysconfig=CFG	system specific config file ($configs{sysconfig})
-    --nosysconfig	don't use a system specific config file
-    --define key=value  define or override a configuration option
+    --config=CFG	Project specific config file ($configs{config})
+    --noconfig		Don't use a project specific config file
+    --userconfig=CFG	User specific config file ($configs{userconfig})
+    --nouserconfig	Don't use a user specific config file
+    --sysconfig=CFG	System specific config file ($configs{sysconfig})
+    --nosysconfig	Don't use a system specific config file
+    --define key=value  Define or override a configuration option
 Missing default configuration files are silently ignored.
 
 Miscellaneous options:
-    --help  -h		this message
-    --ident		show identification
-    --verbose		verbose information
+    --help  -h		This message
+    --ident		Show identification
+    --verbose		Verbose information
 EndOfUsage
     exit $exit if defined $exit;
 }

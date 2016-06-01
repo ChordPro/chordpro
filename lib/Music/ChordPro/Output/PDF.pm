@@ -17,18 +17,13 @@ sub generate_songbook {
     my $pr = PDFWriter->new( $ps, $options->{output} || "__new__.pdf" );
     $ps->{pr} = $pr;
     $pr->init_fonts();
-    $pr->{pdf}->mediabox( $ps->{papersize}->[0],
-			  $ps->{papersize}->[1] );
-    my @tm = gmtime(time);
     $pr->info( Title => $sb->{songs}->[0]->{title},
 	       Creator => "ChordPro [$options->{_name} $options->{_version}]",
-	       CreationDate =>
-	       sprintf("D:%04d%02d%02d%02d%02d%02d+00'00'",
-		       1900+$tm[5], 1+$tm[4], @tm[3,2,1,0]),
 	     );
+    set_columns( $ps, 1 );
 
     my @book;
-    my $page = 1;
+    my $page = $options->{"start-page-number"} || 1;
     foreach my $song ( @{$sb->{songs}} ) {
 
 	$options->{startpage} = $page;
@@ -70,7 +65,7 @@ my $lyrics_only = 0;		# suppress all chord lines
 my $chordscol = 0;		# chords in a separate column
 my $chordscapo = 0;		# capo in a separate column
 
-use constant SIZE_ITEMS => [ qw (chord text tab grid) ];
+use constant SIZE_ITEMS => [ qw (chord text tab grid toc title footer) ];
 
 sub generate_song {
     my ($s, $options) = @_;
@@ -90,10 +85,10 @@ sub generate_song {
 
     set_columns( $ps, $s->{settings}->{columns} );
 
-    $single_space = $options->{'single-space'} || $ps->{'suppress-empty-chords'};
-    $chordscol = $options->{'chords-column'} || $ps->{chordscolumn};
-    $lyrics_only = 2 * $options->{'lyrics-only'};
-    $chordscapo = $s->{meta}->{capo};
+    $single_space = $ps->{'suppress-empty-chords'};
+    $chordscol    = $ps->{chordscolumn};
+    $lyrics_only  = $ps->{'lyrics-only'};
+    $chordscapo   = $s->{meta}->{capo};
 
     my $fail;
     for my $item ( @{ SIZE_ITEMS() } ) {
@@ -477,11 +472,21 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "control" ) {
-	    if ( $elt->{name} eq "text-size" ) {
-		$do_size->( "text", $elt->{value} );
+	    if ( $elt->{name} =~ /^(text|chord|grid|toc|tab)-size$/ ) {
+		$do_size->( $1, $elt->{value} );
 	    }
-	    elsif ( $elt->{name} eq "chord-size" ) {
-		$do_size->( "chord", $elt->{value} );
+	    elsif ( $elt->{name} =~ /^(text|chord|grid|toc|tab)-font$/ ) {
+		my $f = $1;
+		if ( $elt->{value} =~ m;/; ) {
+		    $ps->{fonts}->{$1}->{file} = $elt->{value};
+		}
+		else {
+		    $ps->{fonts}->{$1}->{name} = $elt->{value};
+		}
+		$pr->init_font($ps->{fonts}->{$f});
+	    }
+	    elsif ( $elt->{name} =~ /^(text|chord|grid|toc|tab)-color$/ ) {
+		$ps->{fonts}->{$1}->{color} = $elt->{value};
 	    }
 	    elsif ( $elt->{name} eq "lyrics-only" ) {
 		$lyrics_only = $elt->{value}
@@ -489,7 +494,7 @@ sub generate_song {
 	    }
 	    elsif ( $elt->{name} eq "chords-column" ) {
 		$chordscol = $elt->{value}
-		  unless $chordscol > 1;
+		  unless $chordscol > 1; ####TODO
 	    }
 	    elsif ( $elt->{name} eq "gridparams" ) {
 		my @v = @{ $elt->{value} };
@@ -996,14 +1001,168 @@ sub text_vsp {
     _vsp( "text", $ps, "lyrics" );
 }
 
+use JSON::PP ();
+
+sub page_defaults {
+    return <<EndOfDefs
+// Layout definitions for ChordPro PDF.
+//
+// This is a relaxed JSON document, so comments are possible.
+
+{
+    "pdf" : {
+
+	// Papersize, 'a4' or [ 595, 842 ] etc.
+	"papersize" : "a4",
+
+	// Number of columns.
+	// Can be overridden with {columns} directive.
+	// "columns"   : 2,
+	// Space between columns, in pt.
+	"columnspace"  :  20,
+
+	// Page margins.
+	// Note that top/bottom exclude the head/footspace.
+	"margintop"    :  90,
+	"marginbottom" :  40,
+	"marginleft"   :  40,
+	"marginright"  :  40,
+	"headspace"    :  50,
+	"footspace"    :  20,
+
+	// Spacings.
+	// Baseline distances as a factor of the font size.
+	"spacing" : {
+	    "title"  : 1.2,
+	    "lyrics" : 1.2,
+	    "chords" : 1.2,
+	    "grid"   : 1.2,
+	    "tab"    : 1.0,
+	    "toc"    : 1.4,
+	},
+
+	// Style of chorus indicator.
+	"chorus-indent"     :  0,
+	"chorus-bar-offset" :  8,
+	"chorus-bar-width"  :  1,
+	"chorus-bar-color"  : "black",
+
+	// Alternative songlines with chords in a side column.
+	// Value is the column position.
+	// "chordscolumn" : 400,
+	"chordscolumn" :  0,
+
+	// Suppress empty chord lines.
+	// Overrides the -a (--single-space) command line options.
+	"suppress-empty-chords" : 1,
+
+	// Flush titles.
+	"titles-flush" : "center",
+
+	// Right/Left page numbers.
+	"even-pages-number-left" : 1,
+
+	// Fonts.
+	// Fonts can be specified by name (for the corefonts)
+	// or a filename (for TrueType/OpenType fonts).
+	// Relative filenames are looked up in the fontdir.
+	// "fontdir" : "/home/jv/.fonts",
+
+	// Fonts for chords and comments can have a background
+	// colour associated.
+	// Colours are "#RRGGBB" or predefined names like "black", "white",
+	// and lots of others.
+
+	"fonts" : {
+	    "title" : {
+		"name" : "Times-Bold",
+		"size" : 14
+	    },
+	    "text" : {
+		"name" : "Times-Roman",
+		"size" : 14
+	    },
+	    "chord" : {
+		"name" : "Helvetica-Oblique",
+		"size" : 10
+	    },
+	    "comment" : {
+		"name" : "Helvetica",
+		"size" : 12
+	    },
+	    "tab" : {
+		"name" : "Courier",
+		"size" : 10
+	    },
+	},
+
+	// Fonts that can be specified, but need not.
+	// subtitle       --> text
+	// comment        --> text
+	// comment_italic --> chord
+	// comment_box    --> chord
+	// toc            --> text
+	// grid           --> chord
+	// footer         --> subtitle @ 60%
+
+	// This will show the page layout.
+	// "showlayout" : 1,
+    }
+}
+EndOfDefs
+}
+
 sub page_settings {
     my ( $options ) = @_;
 
-    use JSON::PP ();
-
-    my $ret = {};
-
     my $pp = JSON::PP->new->utf8->relaxed;
+
+    # Default page settings.
+    my $ret = $pp->decode( page_defaults() );
+
+    # Apply Chordii command line compatibility.
+
+    # Command line only takes text and chord fonts.
+    for my $type ( qw( text chord ) ) {
+	for ( $options->{"$type-font"} ) {
+	    next unless $_;
+	    if ( m;/; ) {
+		$ret->{pdf}->{fonts}->{$type}->{file} = $_;
+	    }
+	    else {
+		$ret->{pdf}->{fonts}->{$type}->{name} = $_;
+	    }
+	}
+	for ( $options->{"$type-size"} ) {
+	    $ret->{pdf}->{fonts}->{$type}->{size} = $_ if $_;
+	}
+    }
+
+    for ( $options->{"page-size"} ) {
+	$ret->{pdf}->{papersize} = $_ if $_;
+    }
+    for ( $options->{"vertical-space"} ) {
+	next unless $_;
+	$ret->{pdf}->{spacing}->{lyrics} +=
+	  $_ / $ret->{pdf}->{fonts}->{text}->{size};
+    }
+    for ( $options->{"lyrics-only"} ) {
+	next unless defined $_;
+	# If set on the command line, it cannot be overridden
+	# by pagedefs and {controls}.
+	$ret->{pdf}->{"lyrics-only"} = 2 * $_;
+    }
+    for ( $options->{"single-space"} ) {
+	next unless defined $_;
+	$ret->{pdf}->{"suppress-empty-chords"} = $_;
+    }
+    for ( $options->{"even-pages-number-left"} ) {
+	next unless defined $_;
+	$ret->{pdf}->{"even-pages-number-left"} = $_;
+    }
+
+    # Process the pagedef files(s).
+
     my $pd = $options->{pagedefs};
     $pd = [ "pagedefs.json" ] unless $pd && @$pd;
     foreach my $file ( @$pd ) {
@@ -1033,53 +1192,7 @@ sub page_settings {
 	undef $fontdir;
     }
 
-    $ret = $ret->{pdf} || {};
-    my $def =
-      { papersize     => 'a4',		# [w,h], or known name
-	marginleft    =>  60,		# pt
-	margintop     =>  90,		# pt
-	marginbottom  =>  40,		# pt
-	marginright   =>  40,		# pt
-	headspace     =>  50,		# pt
-	footspace     =>  20,		# pt
-	columnspace   =>  20,		# pt
-	chordscolumn  =>   0,		# pt
-#	chordscolumn  => 300,		# pt
-
-	'chorus-bar-offset' => 8,
-	'chorus-bar-color'  => 'black',
-	'chorus-bar-width'  => 1,
-	'chorus-indent'     => 0,
-
-	# Spacings. Baseline distances as a factor of the font size.
-	spacing => {
-		    title   => 1.2,
-		    lyrics  => 1.2,
-		    chords  => 1.2,
-		    tab	    => 1.0,
-		    toc	    => 1.4,
-		    grid    => 1.2,
-	},
-
-	'suppress-empty-chords' => 1,
-	'titles-flush' => 'center',
-	'even-pages-number-left' => 1,
-
-	fonts => {
-	    title   => { name => 'Times-Bold',        size => 14 },
-	    text    => { name => 'Times-Roman',       size => 14 },
-	    chord   => { name => 'Helvetica-Oblique', size => 10 },
-	    symbols => { file => '/home/jv/src/Data-iRealPro/res/fonts/Bravura.ttf',
-			 size => 10 },
-	    tab     => { name => 'Courier',           size => 10 },
-	},
-
-	# For development.
-	# showlayout => 1,
-      };
-
-    # Merge defaultvalues, if necessary.
-    $ret = $pd->{pdf} = hmerge( $def, $ret );
+    $ret = $ret->{pdf};
 
     # Map papersize name to [ width, height ].
     unless ( eval { $ret->{papersize}->[0] } ) {
@@ -1223,12 +1336,20 @@ sub new {
     my $self = bless { ps => $ps }, $pkg;
     $self->{pdf} = PDF::API2->new( -file => $file[0] );
     $self->{pdf}->{forcecompress} = 0;
+    $self->{pdf}->mediabox( $ps->{papersize}->[0],
+			    $ps->{papersize}->[1] );
 #    $self->newpage($ps);
     $self;
 }
 
 sub info {
     my ( $self, %info ) = @_;
+    unless ( $info{CreationDate} ) {
+	my @tm = gmtime(time);
+	$info{CreationDate} =
+	  sprintf("D:%04d%02d%02d%02d%02d%02d+00'00'",
+		  1900+$tm[5], 1+$tm[4], @tm[3,2,1,0]);
+    }
     $self->{pdf}->info( %info );
 }
 
@@ -1240,8 +1361,17 @@ sub text {
     $self->setfont($font, $size);
 
     $text = encode( "cp1250", $text ) unless $font->{file};
+    if ( $font->{color} ) {
+	$self->{pdftext}->strokecolor( $font->{color} );
+	$self->{pdftext}->fillcolor( $font->{color} );
+    }
     $self->{pdftext}->translate( $x, $y );
-    return $x + $self->{pdftext}->text($text);
+    $x += $self->{pdftext}->text($text);
+    if ( $font->{color} ) {
+	$self->{pdftext}->strokecolor("black");
+	$self->{pdftext}->fillcolor("black");
+    }
+    return $x;
 }
 
 sub setfont {
