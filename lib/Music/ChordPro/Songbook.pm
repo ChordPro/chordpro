@@ -79,8 +79,8 @@ sub add {
 	    @_ } );
 }
 
-my $notesS  = [ split( ' ', "A A#  B C C#  D D#  E F F#  G G#" ) ];
-my $notesF  = [ split( ' ', "A Bb  B C Db  D Eb  E F Gb  G Ab" ) ];
+my $notesS  = [ split( ' ', "A A# B C C# D D# E F F# G G#" ) ];
+my $notesF  = [ split( ' ', "A Bb B C Db D Eb E F Gb G Ab" ) ];
 my %notes = ( A => 1, H => 2, B => 3, C => 4, D => 6, E => 8, F => 9, G => 11 );
 
 sub transpose {
@@ -239,60 +239,6 @@ sub directive {
 	return;
     }
 
-    # Song / Global settings.
-
-    # $cur = ???;
-
-    if ( $d =~ /^(?:titles\s*:\s*)(left|right|center|centre)$/i ) {
-	$cur->{settings}->{titles} =
-	  $1 eq "centre" ? "center" : $1;
-	return;
-    }
-
-    if ( $d =~ /^(?:columns\s*:\s*)(\d+)$/i ) {
-	$cur->{settings}->{columns} = $1;
-	return;
-    }
-
-    if ( $d =~ /^([-+])([-\w]+)\s*:\s*(.+)$/i ) {
-	$self->add( type => "control",
-		    name => $2,
-		    value => $3,
-		  );
-	return;
-    }
-
-    if ( $d =~ /^([-+])([-\w]+)$/i ) {
-	$self->add( type => "control",
-		    name => $2,
-		    value => $1 eq "+" ? "1" : "0",
-		  );
-	return;
-    }
-
-    # Formatting.
-    if ( $d =~ /^(text|chord|tab|grid)(font|size|colou?r):\s*(.*)$/ ) {
-	my $item = $1;
-	my $prop = $2;
-	my $value = $3;
-	if ( $prop eq "size" ) {
-	    unless ( $value =~ /^\d+(?:\.\d+)?\%?$/ ) {
-		warn("Illegal value \"$value\" for $item$prop\n");
-		return;
-	    }
-	}
-	if ( $prop =~ /^colou?r$/  ) {
-	    unless ( get_colour($value) ) {
-		warn("Illegal value \"$value\" for $item$prop\n");
-		return;
-	    }
-	}
-	$self->add( type => "control",
-		    name => "$item-$prop",
-		    value => $value );
-	return;
-    }
-
     # Images.
     if ( $d =~ /^image:\s*(.*)$/ ) {
 	use Text::ParseWords qw(shellwords);
@@ -333,6 +279,77 @@ sub directive {
 	return;
     }
 
+    # Metadata extensions.
+    if ( $d =~ /^(artist|composer|album|key|time|tempo|capo):\s*(.*)$/ ) {
+	$self->{songs}->[-1]->{meta}->{$1} = $2;
+	return;
+    }
+
+    return if $self->global_directive($d);
+
+    # Warn about unknowns, unless they are x_... form.
+    warn("Unknown directive: $d\n") unless $d =~ /^x_/;
+    return;
+}
+
+sub global_directive {
+    my ($self, $d) = @_;
+
+    my $cur = $self->{songs}->[-1];
+
+    # Song / Global settings.
+
+    if ( $d =~ /^(?:titles\s*:\s*)(left|right|center|centre)$/i ) {
+	$cur->{settings}->{titles} =
+	  $1 eq "centre" ? "center" : $1;
+	return 1;
+    }
+
+    if ( $d =~ /^(?:columns\s*:\s*)(\d+)$/i ) {
+	$cur->{settings}->{columns} = $1;
+	return 1;
+    }
+
+    if ( $d =~ /^([-+])([-\w]+)\s*:\s*(.+)$/i ) {
+	$self->add( type => "control",
+		    name => $2,
+		    value => $3,
+		  );
+	return 1;
+    }
+
+    if ( $d =~ /^([-+])([-\w]+)$/i ) {
+	$self->add( type => "control",
+		    name => $2,
+		    value => $1 eq "+" ? "1" : "0",
+		  );
+	return 1;
+    }
+
+    # Formatting.
+    if ( $d =~ /^(text|chord|tab|grid|title|footer|toc)(font|size|colou?r):\s*(.*)$/ ) {
+	my $item = $1;
+	my $prop = $2;
+	$prop = "color" if $prop eq "colour";
+	my $value = $3;
+	if ( $prop eq "size" ) {
+	    unless ( $value =~ /^\d+(?:\.\d+)?\%?$/ ) {
+		warn("Illegal value \"$value\" for $item$prop\n");
+		return 1;
+	    }
+	}
+	if ( $prop =~ /^colou?r$/  ) {
+	    unless ( get_color($value) ) {
+		warn("Illegal value \"$value\" for $item$prop\n");
+		return 1;
+	    }
+	}
+	$self->add( type => "control",
+		    name => "$item-$prop",
+		    value => $value );
+	return 1;
+    }
+
     #### TODO: other # strings (ukelele, banjo, ...)
     # define A: basefret N frets N N N N N N
     # define: A basefret N frets N N N N N N
@@ -362,18 +379,9 @@ sub directive {
 	       $2 ? ( base => $2 ) : (),
 	       frets => [ map { $_ =~ /^\d+/ ? $_ : '-' } @f ],
 	     });
-	return;
+	return 1;
     }
-
-    # Metadata extensions.
-    if ( $d =~ /^(artist|composer|album|key|time|tempo|capo):\s*(.*)$/ ) {
-	$self->{songs}->[-1]->{meta}->{$1} = $2;
-	return;
-    }
-
-    # Warn about unknowns, unless they are x_... form.
-    warn("Unknown directive: $d\n") unless $d =~ /^x_/;
-    return "";
+    return;
 }
 
 sub structurize {
@@ -382,6 +390,10 @@ sub structurize {
     foreach my $song ( @{ $self->{songs} } ) {
 	$song->structurize;
     }
+}
+
+sub get_color {
+    $_[0];
 }
 
 package Music::ChordPro::Song;
