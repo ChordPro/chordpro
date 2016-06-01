@@ -11,6 +11,8 @@
 	// Number of columns.
 	// Can be overridden with {columns} directive.
 	// "columns"   : 2,
+	// Space between columns, in pt.
+	"columnspace"  :  20,
 
 	// Page margins.
 	// Note that top/bottom exclude the head/footspace.
@@ -33,7 +35,7 @@
 	},
 
 	// Style of chorus indicator.
-	// "chorus-indent"     : 20,
+	"chorus-indent"     :  0,
 	"chorus-bar-offset" :  8,
 	"chorus-bar-width"  :  1,
 	"chorus-bar-color"  : "black",
@@ -41,6 +43,7 @@
 	// Alternative songlines with chords in a side column.
 	// Value is the column position.
 	// "chordscolumn" : 400,
+	"chordscolumn" :  0,
 
 	// Suppress empty chord lines.
 	// Overrides the -a (--single-space) command line options.
@@ -48,6 +51,9 @@
 
 	// Flush titles.
 	"titles-flush" : "center",
+
+	// Right/Left page numbers.
+	"even-pages-number-left" : 1,
 
 	// Fonts.
 	// Fonts can be specified by name (for the corefonts)
@@ -59,7 +65,7 @@
 	// colour associated.
 	// Colours are "#RRGGBB" or predefined names like "black", "white",
 	// and lots of others.
-	
+
 	"fonts" : {
 	    "title" : {
 		"name" : "Times-Bold",
