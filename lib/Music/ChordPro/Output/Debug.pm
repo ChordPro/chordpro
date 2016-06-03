@@ -14,6 +14,7 @@ sub generate_songbook {
 	    $_->structurize;
 	}
     }
+    $Data::Dumper::Sortkeys = 1;
     $Data::Dumper::Indent = 1;
     my @book;
     push( @book, Data::Dumper->Dump( [ $sb, $options ], [ "song", "options" ] ) );
