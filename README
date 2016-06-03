@@ -1,14 +1,16 @@
-pchord -- perl version of Chord / Chordii
+ChordPro -- perl version of Chord / Chordii
 
 Features:
 
+* Support for the new ChordPro 5.0 standard
 * Native PDF generation
 * Unicode support (all input is UTF8)
 * Support for external TrueType fonts
 * Font kerning (with external TrueType fonts)
-* Long chords on short syllables do not overwrite the next chord
 * Customizable layout, fonts and sizes
 * Customizable backends for ChordPro, LilyPond, LaTeX and PDF
   output
 
-And more to come...
+Enhancements w.r.t. Chordii:
+
+* Long chords on short syllables do not overwrite the next chord

@@ -11,7 +11,7 @@ sub generate_songbook {
 
     foreach my $song ( @{$sb->{songs}} ) {
 	if ( @book ) {
-	    push(@book, "") if $options->{tidy};
+	    push(@book, "") if $options->{'backend-option'}->{tidy};
 	    push(@book, "{new_song}");
 	}
 	push(@book, @{generate_song($song, $options)});
@@ -26,10 +26,10 @@ my $lyrics_only = 0;
 sub generate_song {
     my ($s, $options) = @_;
 
-    my $tidy = $options->{tidy};
+    my $tidy = $options->{'backend-option'}->{tidy};
     $lyrics_only = 2 * $options->{'lyrics-only'};
     my $structured = ( $options->{'backend-option'}->{structure} // '' ) eq 'structured';
-    $s->structurize if ++$structured;
+    # $s->structurize if ++$structured;
 
     my @s;
 
@@ -47,11 +47,19 @@ sub generate_song {
 
     push(@s, "") if $tidy;
 
+    my $ctx = "";
     foreach my $elt ( @{$s->{body}} ) {
+
+	if ( $elt->{context} ne $ctx ) {
+	    push(@s, "{end_of_$ctx}") if $ctx;
+	    push(@s, "{start_of_$ctx}") if $ctx = $elt->{context};
+	}
 
 	if ( $elt->{type} eq "empty" ) {
 	    push(@s, "***SHOULD NOT HAPPEN***"), next
 	      if $structured;
+	    push( @s, "" );
+	    next;
 	}
 
 	if ( $elt->{type} eq "colb" ) {
@@ -64,8 +72,13 @@ sub generate_song {
 	    next;
 	}
 
-	if ( $elt->{type} eq "song" ) {
+	if ( $elt->{type} eq "songline" ) {
 	    push(@s, songline($elt));
+	    next;
+	}
+
+	if ( $elt->{type} eq "tabline" ) {
+	    push(@s, $elt->{text} );
 	    next;
 	}
 
@@ -87,18 +100,18 @@ sub generate_song {
 
 	if ( $elt->{type} eq "chorus" ) {
 	    push(@s, "") if $tidy;
-	    push(@s, "{start_of_chorus}");
+	    push(@s, "{start_of_chorus*}");
 	    foreach my $e ( @{$elt->{body}} ) {
 		if ( $e->{type} eq "empty" ) {
 		    push(@s, "");
 		    next;
 		}
-		if ( $e->{type} eq "song" ) {
+		if ( $e->{type} eq "songline" ) {
 		    push(@s, songline($e));
 		    next;
 		}
 	    }
-	    push(@s, "{end_of_chorus}");
+	    push(@s, "{end_of_chorus*}");
 	    push(@s, "") if $tidy;
 	    next;
 	}
@@ -112,11 +125,23 @@ sub generate_song {
 	    next;
 	}
 
-	if ( $elt->{type} eq "comment" || $elt->{type} eq "comment_italic" ) {
+	if ( $elt->{type} =~ /^comment(?:_italic|_box)?$/ ) {
 	    push(@s, "") if $tidy;
 	    push(@s, "{" . $elt->{type} . ": " . $elt->{text} . "}");
 	    push(@s, "") if $tidy;
 	    next;
+	}
+
+	if ( $elt->{type} eq "image" ) {
+	    my @args = ( "image:", $elt->{uri} );
+	    while ( my($k,$v) = each( %{ $elt->{opts} } ) ) {
+		push( @args, "$k=$v" );
+	    }
+	    foreach ( @args ) {
+		next unless /\s/;
+		$_ = '"' . $_ . '"';
+	    }
+	    push( @s, "{@args}" );
 	}
 
 	if ( $elt->{type} eq "control" ) {
@@ -126,7 +151,7 @@ sub generate_song {
 	    }
 	}
     }
-
+    push(@s, "{end_of_$ctx}") if $ctx;
 
     \@s;
 }
@@ -134,7 +159,7 @@ sub generate_song {
 sub songline {
     my ($elt) = @_;
 
-    if ( $lyrics_only ) {
+    if ( $lyrics_only || !exists($elt->{chords}) ) {
 	return join( "", @{ $elt->{phrases} } );
     }
 

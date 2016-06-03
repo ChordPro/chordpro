@@ -11,7 +11,7 @@ sub generate_songbook {
 
     foreach my $song ( @{$sb->{songs}} ) {
 	if ( @book ) {
-	    push(@book, "") if $options->{tidy};
+	    push(@book, "") if $options->{'backend-option'}->{tidy};
 	    push(@book, "-- New song");
 	}
 	push(@book, @{generate_song($song, $options)});
@@ -27,7 +27,7 @@ my $lyrics_only = 0;		# suppress all chords lines
 sub generate_song {
     my ($s, $options) = @_;
 
-    my $tidy = $options->{tidy};
+    my $tidy = $options->{'backend-option'}->{tidy};
     $single_space = $options->{'single-space'};
     $lyrics_only = $options->{'lyrics-only'};
 
@@ -44,21 +44,28 @@ sub generate_song {
 
     push(@s, "") if $tidy;
 
+    my $ctx = "";
     foreach my $elt ( @{$s->{body}} ) {
+
+	if ( $elt->{context} ne $ctx ) {
+	    push(@s, "-- End of $ctx") if $ctx;
+	    push(@s, "-- Start of $ctx") if $ctx = $elt->{context};
+	}
 
 	if ( $elt->{type} eq "empty" ) {
 	    push(@s, "***SHOULD NOT HAPPEN***")
 	      if $s->{structure} eq 'structured';
+	    push(@s, "");
 	    next;
 	}
 
 	if ( $elt->{type} eq "colb" ) {
-	    # push(@s, "{column_break}");
+	    push(@s, "-- Column break");
 	    next;
 	}
 
 	if ( $elt->{type} eq "newpage" ) {
-	    # push(@s, "{new_page}");
+	    push(@s, "-- New page");
 	    next;
 	}
 
@@ -67,9 +74,14 @@ sub generate_song {
 	    next;
 	}
 
+	if ( $elt->{type} eq "tabline" ) {
+	    push(@s, $elt->{text});
+	    next;
+	}
+
 	if ( $elt->{type} eq "chorus" ) {
 	    push(@s, "") if $tidy;
-	    push(@s, "-- Start of chorus");
+	    push(@s, "-- Start of chorus*");
 	    foreach my $e ( @{$elt->{body}} ) {
 		if ( $e->{type} eq "empty" ) {
 		    push(@s, "");
@@ -80,7 +92,7 @@ sub generate_song {
 		    next;
 		}
 	    }
-	    push(@s, "-- End of chorus");
+	    push(@s, "-- End of chorus*");
 	    push(@s, "") if $tidy;
 	    next;
 	}
@@ -121,7 +133,7 @@ sub generate_song {
 	    next;
 	}
 
-	if ( $elt->{type} eq "comment" || $elt->{type} eq "comment_italic" ) {
+	if ( $elt->{type} =~ /^comment(?:_italic|_box)?$/ ) {
 	    push(@s, "") if $tidy;
 	    push(@s, "-- $elt->{text}");
 	    push(@s, "") if $tidy;
@@ -147,7 +159,7 @@ sub generate_song {
 	    }
 	}
     }
-
+    push(@s, "-- End of $ctx") if $ctx;
 
     \@s;
 }
@@ -167,7 +179,7 @@ sub songline {
     }
 
     unless ( $elt->{chords} ) {
-	return "\n" . join( " ", @{ $elt->{phrases} } );
+	return ( "", join( " ", @{ $elt->{phrases} } ) );
     }
 
     my $c_line = "";
@@ -179,7 +191,7 @@ sub songline {
 	$c_line .= " " x -$d if $d < 0;
     }
     s/\s+$// for ( $t_line, $c_line );
-    return $c_line . "\n" . $t_line;
+    return ( $c_line, $t_line );
 }
 
 1;

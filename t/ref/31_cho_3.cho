@@ -1,34 +1,31 @@
--- Title: Swing Low Sweet Chariot
--- Subtitle: Traditional
+{title: Swing Low Sweet Chariot}
+{subtitle: Traditional}
+{columns: 2}
+{titles: center}
 
--- Start of chorus
+{start_of_chorus}
 Swing low, sweet chariot,
 Comin’ for to carry me home.
 Swing low, sweet chariot,
 Comin’ for to carry me home.
--- End of chorus
-
+{end_of_chorus}
 
 I looked over Jordan, and what did I see,
      “Comin’ for to carry me home.”
 A band of angels comin’ after me,
-     Comin’ for to carry me home.
+     Comin’ for to carry me home.               
 
--- New page
--- Chorus
-
-If you get there before I do,
-     Comin’ for to carry me home.
-Just tell my friends that I’m a comin’ too.
-     Comin’ for to carry me home.
-
--- Column break
--- Chorus
-
+{start_of_tab}
 I’m sometimes up and sometimes down,
      Comin’ for to carry me home.
 But still my soul feels heavenly bound.
      Comin’ for to carry me home.
+{end_of_tab}
+{comment: Chorus}
 
--- Chorus
--- And a final chorus
+{start_of_tab}
+I’m sometimes up and sometimes down,
+     Comin’ for to carry me home.
+But still my soul feels heavenly bound.
+     Comin’ for to carry me home.
+{end_of_tab}

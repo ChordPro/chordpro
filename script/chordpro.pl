@@ -1,12 +1,12 @@
 #!/usr/bin/perl
 
-# pChord -- perl version of Chord/Chordii
+# ChordPro -- perl version of Chord/Chordii
 
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
 # Last Modified By: Johan Vromans
-# Last Modified On: Fri Jun  3 13:52:59 2016
-# Update Count    : 228
+# Last Modified On: Fri Jun  3 14:25:51 2016
+# Update Count    : 231
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -20,10 +20,13 @@ use Data::Dumper;
 
 ################ Setup  ################
 
+use Music::ChordPro;
+
 # Process command line options, config files, and such.
 our $config;
 my $options;
-$options = app_setup("ChordPro", "0.10") unless $::__EMBEDDED__;
+$options = app_setup( "ChordPro", $Music::ChordPro::VERSION )
+  unless $::__EMBEDDED__;
 
 ################ Presets ################
 
