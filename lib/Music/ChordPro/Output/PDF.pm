@@ -13,14 +13,11 @@ use constant DEBUG_SPACING => 0;
 sub generate_songbook {
     my ($self, $sb, $options) = @_;
 
-    my $ps = page_settings( $options );
+    my $ps = $::config->{pdf};
     my $pr = PDFWriter->new( $ps, $options->{output} || "__new__.pdf" );
-    $ps->{pr} = $pr;
-    $pr->init_fonts();
     $pr->info( Title => $sb->{songs}->[0]->{title},
 	       Creator => "ChordPro [$options->{_name} $options->{_version}]",
 	     );
-    set_columns( $ps, 1 );
 
     my @book;
     my $page = $options->{"start-page-number"} || 1;
@@ -70,7 +67,7 @@ use constant SIZE_ITEMS => [ qw (chord text tab grid toc title footer) ];
 sub generate_song {
     my ($s, $options) = @_;
 
-    my $ps = page_settings( $options );
+    my $ps = $::config->clone->{pdf};
     my $pr = $options->{pr};
     $ps->{pr} = $pr;
     $pr->{ps} = $ps;
@@ -1001,234 +998,6 @@ sub text_vsp {
     _vsp( "text", $ps, "lyrics" );
 }
 
-use JSON::PP ();
-
-sub page_defaults {
-    return <<EndOfDefs
-// Layout definitions for ChordPro PDF.
-//
-// This is a relaxed JSON document, so comments are possible.
-
-{
-    "pdf" : {
-
-	// Papersize, 'a4' or [ 595, 842 ] etc.
-	"papersize" : "a4",
-
-	// Number of columns.
-	// Can be overridden with {columns} directive.
-	// "columns"   : 2,
-	// Space between columns, in pt.
-	"columnspace"  :  20,
-
-	// Page margins.
-	// Note that top/bottom exclude the head/footspace.
-	"margintop"    :  90,
-	"marginbottom" :  40,
-	"marginleft"   :  40,
-	"marginright"  :  40,
-	"headspace"    :  50,
-	"footspace"    :  20,
-
-	// Spacings.
-	// Baseline distances as a factor of the font size.
-	"spacing" : {
-	    "title"  : 1.2,
-	    "lyrics" : 1.2,
-	    "chords" : 1.2,
-	    "grid"   : 1.2,
-	    "tab"    : 1.0,
-	    "toc"    : 1.4,
-	},
-
-	// Style of chorus indicator.
-	"chorus-indent"     :  0,
-	"chorus-bar-offset" :  8,
-	"chorus-bar-width"  :  1,
-	"chorus-bar-color"  : "black",
-
-	// Alternative songlines with chords in a side column.
-	// Value is the column position.
-	// "chordscolumn" : 400,
-	"chordscolumn" :  0,
-
-	// Suppress empty chord lines.
-	// Overrides the -a (--single-space) command line options.
-	"suppress-empty-chords" : 1,
-
-	// Flush titles.
-	"titles-flush" : "center",
-
-	// Right/Left page numbers.
-	"even-pages-number-left" : 1,
-
-	// Fonts.
-	// Fonts can be specified by name (for the corefonts)
-	// or a filename (for TrueType/OpenType fonts).
-	// Relative filenames are looked up in the fontdir.
-	// "fontdir" : "/home/jv/.fonts",
-
-	// Fonts for chords and comments can have a background
-	// colour associated.
-	// Colours are "#RRGGBB" or predefined names like "black", "white",
-	// and lots of others.
-
-	"fonts" : {
-	    "title" : {
-		"name" : "Times-Bold",
-		"size" : 14
-	    },
-	    "text" : {
-		"name" : "Times-Roman",
-		"size" : 14
-	    },
-	    "chord" : {
-		"name" : "Helvetica-Oblique",
-		"size" : 10
-	    },
-	    "comment" : {
-		"name" : "Helvetica",
-		"size" : 12
-	    },
-	    "tab" : {
-		"name" : "Courier",
-		"size" : 10
-	    },
-	},
-
-	// Fonts that can be specified, but need not.
-	// subtitle       --> text
-	// comment        --> text
-	// comment_italic --> chord
-	// comment_box    --> chord
-	// toc            --> text
-	// grid           --> chord
-	// footer         --> subtitle @ 60%
-
-	// This will show the page layout.
-	// "showlayout" : 1,
-    }
-}
-EndOfDefs
-}
-
-sub page_settings {
-    my ( $options ) = @_;
-
-    my $pp = JSON::PP->new->utf8->relaxed;
-
-    # Default page settings.
-    my $ret = $pp->decode( page_defaults() );
-
-    # Apply Chordii command line compatibility.
-
-    # Command line only takes text and chord fonts.
-    for my $type ( qw( text chord ) ) {
-	for ( $options->{"$type-font"} ) {
-	    next unless $_;
-	    if ( m;/; ) {
-		$ret->{pdf}->{fonts}->{$type}->{file} = $_;
-	    }
-	    else {
-		$ret->{pdf}->{fonts}->{$type}->{name} = $_;
-	    }
-	}
-	for ( $options->{"$type-size"} ) {
-	    $ret->{pdf}->{fonts}->{$type}->{size} = $_ if $_;
-	}
-    }
-
-    for ( $options->{"page-size"} ) {
-	$ret->{pdf}->{papersize} = $_ if $_;
-    }
-    for ( $options->{"vertical-space"} ) {
-	next unless $_;
-	$ret->{pdf}->{spacing}->{lyrics} +=
-	  $_ / $ret->{pdf}->{fonts}->{text}->{size};
-    }
-    for ( $options->{"lyrics-only"} ) {
-	next unless defined $_;
-	# If set on the command line, it cannot be overridden
-	# by pagedefs and {controls}.
-	$ret->{pdf}->{"lyrics-only"} = 2 * $_;
-    }
-    for ( $options->{"single-space"} ) {
-	next unless defined $_;
-	$ret->{pdf}->{"suppress-empty-chords"} = $_;
-    }
-    for ( $options->{"even-pages-number-left"} ) {
-	next unless defined $_;
-	$ret->{pdf}->{"even-pages-number-left"} = $_;
-    }
-
-    # Process the pagedef files(s).
-
-    my $pd = $options->{pagedefs};
-    $pd = [ "pagedefs.json" ] unless $pd && @$pd;
-    foreach my $file ( @$pd ) {
-	if ( open( my $fd, "<:utf8", $file ) ) {
-	    local $/;
-	    $ret = hmerge( $ret, $pp->decode( scalar( <$fd> ) ) );
-	    $fd->close;
-	}
-	elsif ( $options->{pagedefs} ) {
-	    die("Cannot open $file [$!]\n");
-	}
-    }
-    $pd = $ret;
-
-    # Add font dirs.
-    my $fontdir = $ret->{pdf}->{fontdir} || $ENV{FONTDIR};
-    if ( $fontdir ) {
-	if ( -d $fontdir ) {
-	    PDF::API2::addFontDirs($fontdir);
-	}
-	else {
-	    warn("PDF: Ignoring fontdir $fontdir [$!]\n");
-	    undef $fontdir;
-	}
-    }
-    else {
-	undef $fontdir;
-    }
-
-    $ret = $ret->{pdf};
-
-    # Map papersize name to [ width, height ].
-    unless ( eval { $ret->{papersize}->[0] } ) {
-	require PDF::API2::Resource::PaperSizes;
-	my %ps = PDF::API2::Resource::PaperSizes->get_paper_sizes;
-	die("Unhandled paper size: ", $ret->{papersize}, "\n")
-	  unless exists $ps{lc $ret->{papersize}};
-	$ret->{papersize} = $ps{lc $ret->{papersize}}
-    }
-
-    # Sanitize, if necessary.
-    $ret->{fonts}->{subtitle}       ||= { %{ $ret->{fonts}->{text}  } };
-    $ret->{fonts}->{comment_italic} ||= { %{ $ret->{fonts}->{chord} } };
-    $ret->{fonts}->{comment_box}    ||= { %{ $ret->{fonts}->{chord} } };
-    $ret->{fonts}->{comment}        ||= { %{ $ret->{fonts}->{text}  } };
-    $ret->{fonts}->{toc}	    ||= { %{ $ret->{fonts}->{text}  } };
-    $ret->{fonts}->{grid}           ||= { %{ $ret->{fonts}->{chord} } };
-
-    # Default footer is small subtitle.
-    unless ( $ret->{fonts}->{footer} ) {
-	$ret->{fonts}->{footer} = { %{ $ret->{fonts}->{subtitle} } };
-	$ret->{fonts}->{footer}->{size}
-	  = 0.6 * $ret->{fonts}->{subtitle}->{size};
-    }
-
-    # Write resultant pagedefs, if needed.
-    my $pd_new = "pagedefs.new";
-    if ( -e $pd_new && ! -s _ ) {
-	open( my $fd, '>:utf8', $pd_new );
-	$fd->print(JSON::PP->new->utf8->canonical->indent(4)->pretty->encode($pd));
-	$fd->close;
-    }
-
-    return $ret;
-}
-
 sub set_columns {
     my ( $ps, $cols ) = @_;
     $ps->{columns} = $cols ||= 1;
@@ -1289,37 +1058,92 @@ sub showlayout {
     }
 }
 
-sub hmerge {
+sub configurator {
+    my ( $cfg, $options ) = @_;
 
-    # Merge hashes. Right takes precedence.
-    # Based on Hash::Merge::Simple by Robert Krimen.
+    # From here, we're mainly dealing with the PDF settings.
+    my $pdf   = $cfg->{pdf};
+    my $fonts = $pdf->{fonts};
 
-    my ( @hashes ) = @_;
-    my $left = shift(@hashes);
+    # Apply Chordii command line compatibility.
 
-    return $left unless @hashes;
-
-    return merge( $left, hmerge(@hashes) ) if @hashes > 1;
-
-    my $right = shift(@hashes);
-
-    my %res = %$left;
-
-    for my $key ( keys(%$right) ) {
-
-        if ( ref($right->{$key}) eq 'HASH'
-	     and
-	     ref($left->{$key}) eq 'HASH' ) {
-
-	    # Both hashes. Recurse.
-            $res{$key} = hmerge( $left->{$key}, $right->{$key} );
-        }
-        else {
-            $res{$key} = $right->{$key};
-        }
+    # Command line only takes text and chord fonts.
+    for my $type ( qw( text chord ) ) {
+	for ( $options->{"$type-font"} ) {
+	    next unless $_;
+	    if ( m;/; ) {
+		$fonts->{$type}->{file} = $_;
+	    }
+	    else {
+		$fonts->{$type}->{name} = $_;
+	    }
+	}
+	for ( $options->{"$type-size"} ) {
+	    $fonts->{$type}->{size} = $_ if $_;
+	}
     }
 
-    return \%res;
+    for ( $options->{"page-size"} ) {
+	$pdf->{papersize} = $_ if $_;
+    }
+    for ( $options->{"vertical-space"} ) {
+	next unless $_;
+	$pdf->{spacing}->{lyrics} +=
+	  $_ / $fonts->{text}->{size};
+    }
+    for ( $options->{"lyrics-only"} ) {
+	next unless defined $_;
+	# If set on the command line, it cannot be overridden
+	# by pagedefs and {controls}.
+	$pdf->{"lyrics-only"} = 2 * $_;
+    }
+    for ( $options->{"single-space"} ) {
+	next unless defined $_;
+	$pdf->{"suppress-empty-chords"} = $_;
+    }
+    for ( $options->{"even-pages-number-left"} ) {
+	next unless defined $_;
+	$pdf->{"even-pages-number-left"} = $_;
+    }
+
+    # Add font dirs.
+    my $fontdir = $pdf->{fontdir} || $ENV{FONTDIR};
+    if ( $fontdir ) {
+	if ( -d $fontdir ) {
+	    PDF::API2::addFontDirs($fontdir);
+	}
+	else {
+	    warn("PDF: Ignoring fontdir $fontdir [$!]\n");
+	    undef $fontdir;
+	}
+    }
+    else {
+	undef $fontdir;
+    }
+
+    # Map papersize name to [ width, height ].
+    unless ( eval { $pdf->{papersize}->[0] } ) {
+	require PDF::API2::Resource::PaperSizes;
+	my %ps = PDF::API2::Resource::PaperSizes->get_paper_sizes;
+	die("Unhandled paper size: ", $pdf->{papersize}, "\n")
+	  unless exists $ps{lc $pdf->{papersize}};
+	$pdf->{papersize} = $ps{lc $pdf->{papersize}}
+    }
+
+    # Sanitize, if necessary.
+    $fonts->{subtitle}       ||= { %{ $fonts->{text}  } };
+    $fonts->{comment_italic} ||= { %{ $fonts->{chord} } };
+    $fonts->{comment_box}    ||= { %{ $fonts->{chord} } };
+    $fonts->{comment}        ||= { %{ $fonts->{text}  } };
+    $fonts->{toc}	     ||= { %{ $fonts->{text}  } };
+    $fonts->{grid}           ||= { %{ $fonts->{chord} } };
+
+    # Default footer is small subtitle.
+    unless ( $fonts->{footer} ) {
+	$fonts->{footer} = { %{ $fonts->{subtitle} } };
+	$fonts->{footer}->{size}
+	  = 0.6 * $fonts->{subtitle}->{size};
+    }
 }
 
 package PDFWriter;

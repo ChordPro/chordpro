@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
 # Last Modified By: Johan Vromans
-# Last Modified On: Wed Jun  1 20:42:40 2016
-# Update Count    : 204
+# Last Modified On: Fri Jun  3 13:52:59 2016
+# Update Count    : 228
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -21,6 +21,7 @@ use Data::Dumper;
 ################ Setup  ################
 
 # Process command line options, config files, and such.
+our $config;
 my $options;
 $options = app_setup("ChordPro", "0.10") unless $::__EMBEDDED__;
 
@@ -37,18 +38,8 @@ main($options) unless $::__EMBEDDED__;
 
 sub main {
     my ($options) = @_;
-    print Dumper($options) if $options->{debug};
-    binmode( STDOUT, ':utf8' );
 
-    use Music::ChordPro::Songbook;
-
-    my $s = Music::ChordPro::Songbook->new;
-
-    $s->parsefile( $_, $options ) foreach @ARGV;
-    #$s->transpose(-2);		# NYI
-
-    warn(Dumper($s), "\n") if $options->{debug};
-
+    # Establish backend.
     my $of = $options->{output};
     if ( $of ) {
 	if ( $of =~ /\.pdf$/i ) {
@@ -71,19 +62,35 @@ sub main {
 	}
     }
 
-    $options->{generate} ||= "ChordPro";
+    $options->{generate} ||= "PDF";
     my $pkg = "Music::ChordPro::Output::".$options->{generate};
     eval "require $pkg;";
     die("No backend for ", $options->{generate}, "\n$@") if $@;
+    $options->{backend} = $pkg;
 
+    # One configurator to bind them all.
+    use Music::ChordPro::Config;
+    $::config = Music::ChordPro::Config::configurator($options);
+
+    # Parse the input(s).
+    use Music::ChordPro::Songbook;
+    my $s = Music::ChordPro::Songbook->new;
+    $s->parsefile( $_, $options ) foreach @ARGV;
+
+    warn(Dumper($s), "\n") if $options->{debug};
+
+    # Generate the songbook.
     my $res = $pkg->generate_songbook( $s, $options );
 
+    # Some backends write output themselves, others return an
+    # array of lines to be written.
     if ( $res && @$res > 0 ) {
 	if ( $of && $of ne "-" ) {
 	    open( STDOUT, '>', $of );
 	}
 	binmode( STDOUT, ":utf8" );
 	print( join( "\n", @$res ) );
+	close(STDOUT);
     }
 }
 
@@ -114,12 +121,30 @@ sub app_setup {
 	($my_name, $my_version) = qw( MyProg 0.01 );
     }
 
-    %configs =
-      ( sysconfig  => File::Spec->catfile ("/", "etc", lc($my_name) . ".conf"),
-	userconfig => File::Spec->catfile($ENV{HOME}, ".".lc($my_name), "conf"),
-	config     => "." . lc($my_name) .".conf",
-#	config     => lc($my_name) .".conf",
-      );
+    # Config files.
+    my $app_lc = lc($my_name);
+    if ( -d "/etc" ) {		# some *ux
+	$configs{sysconfig} =
+	  File::Spec->catfile( "/", "etc", "$app_lc.json" );
+    }
+
+    if ( $ENV{HOME} && -d $ENV{HOME} ) {
+	if ( -d File::Spec->catfile( $ENV{HOME}, ".config" ) ) {
+	    $configs{userconfig} =
+	      File::Spec->catfile( $ENV{HOME}, ".config", $app_lc, "$app_lc.json" );
+	}
+	else {
+	    $configs{userconfig} =
+	      File::Spec->catfile( $ENV{HOME}, ".$app_lc", "$app_lc.json" );
+	}
+    }
+
+    if ( -s ".$app_lc.json" ) {
+	$configs{config} = ".$app_lc.json";
+    }
+    else {
+	$configs{config} = "$app_lc.json";
+    }
 
     my $options =
       {
@@ -130,7 +155,6 @@ sub app_setup {
 
        'vertical-space' => 0,		# extra vertical space between lines
        'lyrics-only'	=> 0,		# suppress all chords
-       pagedefs		=> [ ],
 
        ### NON-CLI OPTIONS ###
 
@@ -165,7 +189,6 @@ sub app_setup {
 	  "generate=s",
 	  "backend-option|bo=s\%",
 	  "encoding=s",
-	  "pagedefs|pd=s@",
 
 	  ### Standard Chordii Options ###
 
@@ -194,18 +217,17 @@ sub app_setup {
           "4-up|4",			# 4 pages per sheet
 
 	  # Configuration handling.
-	  'config=s',
+	  'config=s@',
 	  'noconfig',
 	  'sysconfig=s',
 	  'nosysconfig',
 	  'userconfig=s',
 	  'nouserconfig',
-	  'define|D=s%' => sub { $clo->{$_[1]} = $_[2] },
 
 	  # Standard options.
 	  'ident'		=> \$ident,
 	  'help|h|?'		=> \$help,
-	  'verbose',
+	  'verbose|v',
 	  'trace',
 	  'debug',
 	 ) )
@@ -221,21 +243,37 @@ sub app_setup {
 
     # If the user specified a config, it must exist.
     # Otherwise, set to a default.
-    for my $config ( qw(sysconfig userconfig config) ) {
+    for my $config ( qw(sysconfig userconfig) ) {
 	for ( $clo->{$config} ) {
 	    if ( defined($_) ) {
-		croak("$_: $!\n") if ! -r $_;
+		die("$_: $!\n") unless -r $_;
 		next;
 	    }
 	    $_ = $configs{$config};
 	    undef($_) unless -r $_;
 	}
-	app_config($options, $clo, $config);
+    }
+    for my $config ( qw(config) ) {
+	for ( $clo->{$config} ) {
+	    if ( defined($_) ) {
+		foreach ( @$_ ) {
+		    die("$_: $!\n") unless -r $_;
+		}
+		next;
+	    }
+	    $_ = [ $configs{$config} ];
+	    undef($_) unless -r $_->[0];
+	}
+    }
+    # If no config was specified, and no default is available, force no.
+    for my $config ( qw(sysconfig userconfig config) ) {
+	$clo->{"no$config"} = 1 unless $clo->{$config};
     }
 
     # Plug in command-line options.
     @{$options}{keys %$clo} = values %$clo;
 
+    # Return result.
     $options;
 }
 
@@ -280,7 +318,7 @@ Options:
     --encoding=ENC		  Encoding for input files (UTF-8)
     --lyrics-only  -l             Only prints lyrics
     --output=FILE  -o             Saves the output to FILE
-    --pagedefs=JSON --pd          Page layout definitions (multiple)
+    --config=JSON  --cfg          Config definitions (multiple)
     --start-page-number=N  -p     Starting page number [1]
     --toc --notoc -i              Generates/suppresses a table of contents
     --transpose=N  -x             Transposes by N semi-tones
@@ -314,7 +352,6 @@ Configuration options:
     --nouserconfig	Don't use a user specific config file
     --sysconfig=CFG	System specific config file ($configs{sysconfig})
     --nosysconfig	Don't use a system specific config file
-    --define key=value  Define or override a configuration option
 Missing default configuration files are silently ignored.
 
 Miscellaneous options:
@@ -323,35 +360,6 @@ Miscellaneous options:
     --verbose		Verbose information
 EndOfUsage
     exit $exit if defined $exit;
-}
-
-use Config::Tiny;
-
-sub app_config {
-    my ($options, $opts, $config) = @_;
-    return if $opts->{"no$config"};
-    my $cfg = $opts->{$config};
-    return unless defined $cfg && -s $cfg;
-    my $verbose = $opts->{verbose} || $opts->{trace} || $opts->{debug};
-    warn("Loading $config: $cfg\n") if $verbose;
-
-    my $c = Config::Tiny->read( $cfg, 'utf8' );
-
-    # Process config data, filling $options ...
-
-    foreach ( keys %$c ) {
-	foreach ( keys %$_ ) {
-	    s;^~/;$ENV{HOME}/;;
-	}
-    }
-
-    my $store = sub {
-	my ( $sect, $key, $opt ) = @_;
-	eval {
-	    $config->{$opt} = $c->{$sect}->{$key};
-	};
-    };
-
 }
 
 1;
