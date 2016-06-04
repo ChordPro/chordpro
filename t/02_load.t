@@ -24,4 +24,6 @@ my $test;
 ++$test; use_ok("App::Music::ChordPro::Output::ChordPro");
 ++$test; use_ok("App::Music::ChordPro::Output::PDF");
 
+diag( "Testing App::Music::ChordPro $App::Music::ChordPro::VERSION, Perl $], $^X" );
+
 done_testing($test);
