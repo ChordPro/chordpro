@@ -17,6 +17,7 @@ WriteMakefile
 		    'PDF::API2'   => 2.021,
 		    'Font::TTF'   => 1.05,
 		    'IO::String'  => 1.08,
+		    'Clone::PP'   => 1.06,
 		   },
  TEST_REQUIRES  => {
 		    'Test::More'  => 0,

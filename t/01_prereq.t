@@ -10,5 +10,6 @@ my $test;
 ++$test; use_ok( "Clone",      0.38  );
 ++$test; use_ok( "IO::String", 1.08  );
 ++$test; use_ok( "JSON::PP",   2.237 );
+++$test; use_ok( "Clone::PP",  1.06  );
 
 done_testing($test);

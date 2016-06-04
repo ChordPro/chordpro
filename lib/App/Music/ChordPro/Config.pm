@@ -206,11 +206,11 @@ sub hmerge($$) {
     return \%res;
 }
 
-use Clone ();
+use Clone::PP ();
 
 sub clone {
     my $self = shift;
-    my $h = Clone::clone($self);
+    my $h = Clone::PP::clone($self);
     bless( $h, ref($self) );
 }
 
