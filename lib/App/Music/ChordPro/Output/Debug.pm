@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-package Music::ChordPro::Output::Debug;
+package App::Music::ChordPro::Output::Debug;
 
 use strict;
 use warnings;

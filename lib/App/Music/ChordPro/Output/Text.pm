@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-package Music::ChordPro::Output::Text;
+package App::Music::ChordPro::Output::Text;
 
 use strict;
 use warnings;

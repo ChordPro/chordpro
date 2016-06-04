@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-package Music::ChordPro::Output::LaTeX;
+package App::Music::ChordPro::Output::LaTeX;
 
 use strict;
 use warnings;

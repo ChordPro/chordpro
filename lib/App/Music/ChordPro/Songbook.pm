@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-package Music::ChordPro::Songbook;
+package App::Music::ChordPro::Songbook;
 
 use strict;
 use warnings;
@@ -9,7 +9,7 @@ use Carp;
 
 sub new {
     my ($pkg) = @_;
-    bless { songs => [ Music::ChordPro::Song->new ] }, $pkg;
+    bless { songs => [ App::Music::ChordPro::Song->new ] }, $pkg;
 }
 
 my $def_context = "";
@@ -23,7 +23,7 @@ sub parsefile {
       or croak("$filename: $!\n");
 
     #### TODO: parsing config and rc file?
-    push( @{ $self->{songs} }, Music::ChordPro::Song->new )
+    push( @{ $self->{songs} }, App::Music::ChordPro::Song->new )
       if exists($self->{songs}->[-1]->{body});
     $self->{songs}->[-1]->{structure} = "linear";
     $xpose = $options->{transpose};
@@ -218,7 +218,7 @@ sub directive {
     }
 
     if ( $d =~ /^(?:new_song|ns)$/i ) {
-	push(@{$self->{songs}}, Music::ChordPro::Song->new );
+	push(@{$self->{songs}}, App::Music::ChordPro::Song->new );
 	return;
     }
 
@@ -396,7 +396,7 @@ sub get_color {
     $_[0];
 }
 
-package Music::ChordPro::Song;
+package App::Music::ChordPro::Song;
 
 sub new {
     my ( $pkg, %init ) = @_;

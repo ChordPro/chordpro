@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-package Music::ChordPro::Output::LilyPond;
+package App::Music::ChordPro::Output::LilyPond;
 
 use strict;
 use warnings;

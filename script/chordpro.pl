@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
 # Last Modified By: Johan Vromans
-# Last Modified On: Fri Jun  3 14:25:51 2016
-# Update Count    : 231
+# Last Modified On: Sat Jun  4 14:30:49 2016
+# Update Count    : 234
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -20,12 +20,12 @@ use Data::Dumper;
 
 ################ Setup  ################
 
-use Music::ChordPro;
+use App::Music::ChordPro;
 
 # Process command line options, config files, and such.
 our $config;
 my $options;
-$options = app_setup( "ChordPro", $Music::ChordPro::VERSION )
+$options = app_setup( "ChordPro", $App::Music::ChordPro::VERSION )
   unless $::__EMBEDDED__;
 
 ################ Presets ################
@@ -66,18 +66,18 @@ sub main {
     }
 
     $options->{generate} ||= "PDF";
-    my $pkg = "Music::ChordPro::Output::".$options->{generate};
+    my $pkg = "App::Music::ChordPro::Output::".$options->{generate};
     eval "require $pkg;";
     die("No backend for ", $options->{generate}, "\n$@") if $@;
     $options->{backend} = $pkg;
 
     # One configurator to bind them all.
-    use Music::ChordPro::Config;
-    $::config = Music::ChordPro::Config::configurator($options);
+    use App::Music::ChordPro::Config;
+    $::config = App::Music::ChordPro::Config::configurator($options);
 
     # Parse the input(s).
-    use Music::ChordPro::Songbook;
-    my $s = Music::ChordPro::Songbook->new;
+    use App::Music::ChordPro::Songbook;
+    my $s = App::Music::ChordPro::Songbook->new;
     $s->parsefile( $_, $options ) foreach @ARGV;
 
     warn(Dumper($s), "\n") if $options->{debug};

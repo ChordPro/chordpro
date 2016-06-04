@@ -28,7 +28,7 @@ my @argv = ( "--noconfig", "--nouserconfig", "--nosysconfig", "$basic.cho" );
 
 my $out = "${base}_" . ++$test . ".$backend";
 
-@ARGV = ( @argv, "--output=out/$out" );
+@ARGV = ( @argv, "--no-single-space", "--output=out/$out" );
 
 main( app_setup( "testing", "0.00" ) );
 

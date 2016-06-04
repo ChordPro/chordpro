@@ -1,6 +1,6 @@
 #! perl
 
-package Music::ChordPro::Config;
+package App::Music::ChordPro::Config;
 
 use strict;
 use warnings;

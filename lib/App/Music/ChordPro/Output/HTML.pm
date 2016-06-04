@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-package Music::ChordPro::Output::HTML;
+package App::Music::ChordPro::Output::HTML;
 
 use strict;
 use warnings;

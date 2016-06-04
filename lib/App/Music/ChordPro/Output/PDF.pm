@@ -2,7 +2,7 @@
 
 use utf8;
 
-package Music::ChordPro::Output::PDF;
+package App::Music::ChordPro::Output::PDF;
 
 use strict;
 use warnings;
@@ -1153,7 +1153,7 @@ use warnings;
 use PDF::API2;
 use Encode;
 
-my %fonts;
+my %fontcache;			# speeds up 2 seconds per song
 
 sub new {
     my ( $pkg, $ps, @file ) = @_;
@@ -1163,13 +1163,14 @@ sub new {
     $self->{pdf}->mediabox( $ps->{papersize}->[0],
 			    $ps->{papersize}->[1] );
 #    $self->newpage($ps);
+    %fontcache = () if $::__EMBEDDED__;
     $self;
 }
 
 sub info {
     my ( $self, %info ) = @_;
     unless ( $info{CreationDate} ) {
-	my @tm = gmtime(time);
+	my @tm = gmtime( $::__EMBEDDED__ ? 1465041600 : time );
 	$info{CreationDate} =
 	  sprintf("D:%04d%02d%02d%02d%02d%02d+00'00'",
 		  1900+$tm[5], 1+$tm[4], @tm[3,2,1,0]);
@@ -1243,8 +1244,6 @@ sub init_fonts {
     }
     die("Unhandled fonts detected -- aborted\n") if $fail;
 }
-
-my %fontcache;			# speeds up 2 seconds per song
 
 sub init_font {
     my ( $self, $ff ) = @_;
