@@ -2,7 +2,7 @@
 
 package App::Music::ChordPro;
 
-our $VERSION = "0.52";
+our $VERSION = "0.52.1";
 
 =head1 NAME
 
@@ -527,7 +527,7 @@ sub app_setup {
                 die("$_: $!\n") unless -r $_;
                 next;
             }
-            $_ = $configs{$config};
+            $_ = $configs{$config} || next;
             undef($_) unless -r $_;
         }
     }
@@ -535,7 +535,7 @@ sub app_setup {
         for ( $clo->{$config} ) {
             if ( defined($_) ) {
                 foreach ( @$_ ) {
-                    die("$_: $!\n") unless -r $_;
+                    die("$_: $!\n") unless -r $_ || next;
                 }
                 next;
             }
