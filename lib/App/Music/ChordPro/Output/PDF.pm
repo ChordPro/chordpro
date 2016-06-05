@@ -13,6 +13,8 @@ use constant DEBUG_SPACING => 0;
 sub generate_songbook {
     my ($self, $sb, $options) = @_;
 
+    return [] unless $sb->{songs}->[0]->{body}; # no songs
+
     my $ps = $::config->{pdf};
     my $pr = PDFWriter->new( $ps, $options->{output} || "__new__.pdf" );
     $pr->info( Title => $sb->{songs}->[0]->{title},
@@ -66,6 +68,8 @@ use constant SIZE_ITEMS => [ qw (chord text tab grid toc title footer) ];
 
 sub generate_song {
     my ($s, $options) = @_;
+
+    return 0 unless $s->{body};	# empty song
 
     my $ps = $::config->clone->{pdf};
     my $pr = $options->{pr};
@@ -1094,7 +1098,7 @@ sub configurator {
     for ( $options->{"lyrics-only"} ) {
 	next unless defined $_;
 	# If set on the command line, it cannot be overridden
-	# by pagedefs and {controls}.
+	# by configs and {controls}.
 	$pdf->{"lyrics-only"} = 2 * $_;
     }
     for ( $options->{"single-space"} ) {
