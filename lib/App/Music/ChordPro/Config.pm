@@ -7,9 +7,9 @@ use warnings;
 
 use PDF::API2;
 use JSON::PP ();
-use Hash::Util qw(lock_hash_recurse unlock_hash_recurse);
 
 sub hmerge($$);
+sub clone($);
 
 sub config_defaults {
 
@@ -176,7 +176,13 @@ sub configurator {
 
     # For convenience...
     bless( $cfg, __PACKAGE__ );
-    lock_hash_recurse(%$cfg) if $] >= 5.018000;
+
+    # Locking the hash is mainly for development.
+    if ( $] >= 5.018000 ) {
+	require Hash::Util;
+	Hash::Util::lock_hash_recurse($cfg);
+    }
+
     return $cfg;
 }
 
@@ -206,12 +212,61 @@ sub hmerge($$) {
     return \%res;
 }
 
-use Clone::PP ();
+=begin later
 
-sub clone {
+my $cloner;
+
+sub clone($) {
     my $self = shift;
-    my $h = Clone::PP::clone($self);
+
+    unless ( $cloner ) {
+	eval { require Clone; $cloner = \&Clone::clone }
+	  or
+	eval { require Clone::PP; $cloner = \&Clone::PP::clone }
+    }
+    my $h = $cloner->($self);
     bless( $h, ref($self) );
+}
+
+=cut
+
+sub clone($) {
+    my ( $source ) = @_;
+
+    return if not defined($source);
+
+    my $ref_type = ref($source);
+
+    # Non-reference values are copied as is.
+    return $source unless $ref_type;
+
+    # Ignore blessed objects unless it's me.
+    my $class;
+    if ( "$source" =~ /^\Q$ref_type\E\=(\w+)\(0x[0-9a-f]+\)$/ ) {
+	$class = $ref_type;
+	$ref_type = $1;
+	return unless $class eq __PACKAGE__;
+    }
+
+    my $copy;
+    if ( $ref_type eq 'HASH' ) {
+	$copy = {};
+	%$copy = map { !ref($_) ? $_ : clone($_) } %$source;
+    }
+    elsif ( $ref_type eq 'ARRAY' ) {
+	$copy = [];
+	@$copy = map { !ref($_) ? $_ : clone($_) } @$source;
+    }
+    elsif ( $ref_type eq 'REF' or $ref_type eq 'SCALAR' ) {
+	$copy = \( my $var = "" );
+	$$copy = clone($$source);
+    }
+    else {
+	# Plain copy anything else.
+	$copy = $source;
+    }
+    bless( $copy, $class ) if $class;
+    return $copy;
 }
 
 1;

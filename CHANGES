@@ -1,6 +1,16 @@
+0.51.3	Jun 05 2016
+
+	Eliminate Clone as a dependency.
+	Eliminate IO::String as an explicit dependency. It's implied
+	by Font::TTF.
+
+0.51.2	Jun 04 2016
+
+	Better Makefile.PL (no_index of namespace).
+
 0.51.1	Jun 04 2016
 
-	Better Makefile.PL
+	Better Makefile.PL.
 
 0.51	Jun 04 2016
 

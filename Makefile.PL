@@ -16,8 +16,6 @@ WriteMakefile
  PREREQ_PM      => {
 		    'PDF::API2'   => 2.021,
 		    'Font::TTF'   => 1.05,
-		    'IO::String'  => 1.08,
-		    'Clone::PP'   => 1.06,
 		   },
  TEST_REQUIRES  => {
 		    'Test::More'  => 0,
@@ -28,11 +26,10 @@ WriteMakefile
      license          => "perl_5",
      resources        => { homepage => "http://www.chordpro.org" },
      provides         => {
-         ChordPro => { file => "lib/App/Music/Chordpro.pm" },
          chordpro => { file => "script/chordpro" }
      },
      no_index         => {
-         package => [
+         namespace => [
 	    "App::Music::ChordPro",
 	 ],
      },
