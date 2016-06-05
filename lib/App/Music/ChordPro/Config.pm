@@ -176,7 +176,7 @@ sub configurator {
 
     # For convenience...
     bless( $cfg, __PACKAGE__ );
-    lock_hash_recurse(%$cfg);
+    lock_hash_recurse(%$cfg) if $] >= 5.018000;
     return $cfg;
 }
 
