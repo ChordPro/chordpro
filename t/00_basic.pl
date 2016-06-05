@@ -10,11 +10,9 @@ if ( -d "t" ) {
 }
 mkdir("out") unless -d "out";
 
-use lib "../script";
 require "differ.pl";
 
-$::__EMBEDDED__ = 1;
-require "chordpro.pl";
+use App::Music::ChordPro;
 
 my $test;
 
@@ -30,7 +28,7 @@ my $out = "${base}_" . ++$test . ".$backend";
 
 @ARGV = ( @argv, "--no-single-space", "--output=out/$out" );
 
-main( app_setup( "testing", "0.00" ) );
+::run();
 
 ok( !differ( "out/$out", "ref/$out" ) );
 
@@ -40,7 +38,7 @@ $out = "${base}_" . ++$test . ".$backend";
 
 @ARGV = ( @argv, "--single-space", "--output=out/$out" );
 
-main( app_setup( "testing", "0.00" ) );
+::run();
 
 ok( !differ( "out/$out", "ref/$out" ) );
 
@@ -50,7 +48,7 @@ $out = "${base}_" . ++$test . ".$backend";
 
 @ARGV = ( @argv, "--lyrics-only", "--output=out/$out" );
 
-main( app_setup( "testing", "0.00" ) );
+::run();
 
 ok( !differ( "out/$out", "ref/$out" ) );
 
