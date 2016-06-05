@@ -1,6 +1,6 @@
-# $Id: differ.pl,v 1.1 2001-06-23 12:35:56+02 jv Exp $
+#! perl 
 
-sub differ {
+sub cmp {
     # Perl version of the 'cmp' program.
     # Returns 1 if the files differ, 0 if the contents are equal.
     my ($old, $new) = @_;
@@ -20,6 +20,24 @@ sub differ {
 	return 0 if $len1 == $len2 && $len1 == 0;
 	return 1 if $len1 != $len2 || ( $len1 && $buf1 ne $buf2 );
     }
+}
+
+sub differ {
+    my ($file1, $file2) = @_;
+    $file2 = "$file1" unless $file2;
+    $file1 = "$file1";
+    my ($str1, $str2);
+    local($/);
+    open(my $fd1, "<:encoding(utf-8)", $file1) or die("$file1: $!\n");
+    $str1 = <$fd1>;
+    close($fd1);
+    open(my $fd2, "<:encoding(utf-8)", $file2) or die("$file2: $!\n");
+    $str2 = <$fd2>;
+    close($fd2);
+    $str1 =~ s/[\n\r]+/\n/;
+    $str2 =~ s/[\n\r]+/\n/;
+    return 0 if $str1 eq $str2;
+    1;
 }
 
 1;

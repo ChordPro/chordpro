@@ -2,22 +2,16 @@
 
 use strict;
 use Test::More;
-use FindBin;
-
-if ( -d "t" ) {
-    chdir "t";
-    $0 =~ s;(^|/)t/;$1;;
-}
-mkdir("out") unless -d "out";
 
 require "differ.pl";
+
+mkdir("out") unless -d "out";
 
 use App::Music::ChordPro;
 
 my $test;
 
-my ( $num, $basic, $backend ) =
-  $FindBin::Script =~ /^(\d\d)_(\w+)_(\w+)\.t$/;
+my ( $num, $basic, $backend ) = @::params;
 my $base = "${num}_${backend}";
 
 my @argv = ( "--noconfig", "--nouserconfig", "--nosysconfig", "$basic.cho" );
