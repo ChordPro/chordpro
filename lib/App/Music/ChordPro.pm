@@ -102,11 +102,16 @@ sub main {
     # array of lines to be written.
     if ( $res && @$res > 0 ) {
         if ( $of && $of ne "-" ) {
-            open( STDOUT, '>', $of );
+            open( my $fd, '>', $of );
+	    $fd->binmode(":utf8");
+	    $fd->print( join( "\n", @$res ) );
+	    $fd->close;
         }
-        binmode( STDOUT, ":utf8" );
-        print( join( "\n", @$res ) );
-        close(STDOUT);
+	else {
+	    binmode( STDOUT, ":utf8" );
+	    print( join( "\n", @$res ) );
+	}
+	# Don't close STDOUT!
     }
 }
 
@@ -527,7 +532,9 @@ sub app_setup {
                 die("$_: $!\n") unless -r $_;
                 next;
             }
-            $_ = $configs{$config} || next;
+	    # Use default.
+	    next unless $configs{$config};
+            $_ = $configs{$config};
             undef($_) unless -r $_;
         }
     }
@@ -535,10 +542,12 @@ sub app_setup {
         for ( $clo->{$config} ) {
             if ( defined($_) ) {
                 foreach ( @$_ ) {
-                    die("$_: $!\n") unless -r $_ || next;
+                    die("$_: $!\n") unless -r $_;
                 }
                 next;
             }
+	    # Use default.
+	    next unless $configs{$config};
             $_ = [ $configs{$config} ];
             undef($_) unless -r $_->[0];
         }
