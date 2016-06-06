@@ -2,7 +2,7 @@
 
 package App::Music::ChordPro;
 
-our $VERSION = "0.52.1";
+our $VERSION = "0.52.2";
 
 =head1 NAME
 
@@ -164,7 +164,7 @@ A functional equivalent version of the ChordPro input.
 =item B<--config=>I<JSON> (shorter: B<--cfg>)
 
 A JSON file that defines the behaviour of the program and the layout
-of the output. See section L<CONFIGURATION>.
+of the output. See section L</CONFIGURATION>.
 
 This option may be specified more than once. Each additional config
 file overrides the corresponding definitions that are currently
@@ -208,7 +208,7 @@ Options marked with * are better specified in the config file.
 Sets the font used to print lyrics and comments.
 
 I<FONT> can be either a full path name to a TrueType font file, or the
-name of one of the standard fonts. See section L<FONTS> for more
+name of one of the standard fonts. See section L</FONTS> for more
 details.
 
 =item B<--text-size=>I<N> (short: B<-t>) *
@@ -220,7 +220,7 @@ Sets the font size for lyrics and comments.
 Sets the font used to print the chord names.
 
 I<FONT> can be either a full path name to a TrueType font file, or the
-name of one of the standard fonts. See section L<FONTS> for more
+name of one of the standard fonts. See section L</FONTS> for more
 details.
 
 =item B<--chord-size=>I<N> (short: B<-c>) *
@@ -285,10 +285,11 @@ Not supported.
 
 =head2 Configuration options
 
-See section L<CONFIGURATION> for details about the configuration
+See section L</CONFIGURATION> for details about the configuration
 files.
 
 Note that missing default configuration files are silently ignored.
+Also, B<chordpro> will never create nor write configuration files.
 
 =over
 
@@ -471,7 +472,7 @@ sub app_setup {
           "even-pages-number-left|L",   # Even pages numbers on left
           "lyrics-only|l",              # Only prints lyrics
           "chord-grids|G!",             # En[dis]ables printing of chord grids
-          "easy-chord-grids|g!",        # Do[esn't] print grids for builtin "easy" chords.
+          "easy-chord-grids|g!",        # Do[esn't] print grids for built-in "easy" chords.
           "page-number-logical|n",      # Numbers logical pages, not physical
           "page-size|P=s",              # Specifies page size [letter, a4 (default)]
           "single-space|a!",            # Automatic single space lines without chords
@@ -621,7 +622,7 @@ Options marked with - are ignored.
     --dump-chords-text  -d        -Dumps chords definitions (Text)
     --even-pages-number-left  -L  *Even pages numbers on left
     --no-chord-grids  -G          *Disables printing of chord grids
-    --no-easy-chord-grids  -g     -Doesn't print grids for builtin "easy" chords.
+    --no-easy-chord-grids  -g     -Doesn't print grids for built-in "easy" chords.
     --page-number-logical  -n     -Numbers logical pages, not physical
     --page-size=FMT  -P           *Specifies page size [letter, a4 (default)]
     --single-space  -a            *Automatic single space lines without chords
