@@ -2,7 +2,7 @@
 
 package App::Music::ChordPro;
 
-our $VERSION = "0.52.3";
+our $VERSION = "0.52.4";
 
 =head1 NAME
 

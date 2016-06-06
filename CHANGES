@@ -1,3 +1,8 @@
+0.52.4	Jun 06 2016
+
+	Improve Makefile.PL.
+
+
 0.52.3	Jun 06 2016
 
 	Move configuration pod to Config.pod. Will it be indexed?

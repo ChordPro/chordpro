@@ -13,7 +13,6 @@ WriteMakefile
  EXE_FILES	=> [ 'script/chordpro' ],
  PL_FILES	=> {
 		    'script/chordpro.PL' => 'script/chordpro',
-#		    'lib/App/Music/ChordPro/Config.PL' => 'lib/App/Music/ChordPro/Config.pod',
 		   },
 
  PREREQ_PM      => {
@@ -25,11 +24,14 @@ WriteMakefile
 		   },
 
  META_MERGE => {
-     release_status   => "unstable",
      license          => "perl_5",
      resources        => { homepage => "http://www.chordpro.org" },
      provides         => {
-         chordpro => { file => "script/chordpro" }
+         chordpro => { file => "script/chordpro" },
+	 "App::Music::ChordPro"
+		  => { file => "lib/App/Music/ChordPro.pm" },
+	 "App::Music::ChordPro::Config"
+		  => { file => "lib/App/Music/ChordPro/Config.pm" },
      },
      no_index         => {
          namespace => [
