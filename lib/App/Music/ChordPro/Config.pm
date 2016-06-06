@@ -44,6 +44,9 @@ sub config_defaults {
 	"headspace"    :  50,
 	"footspace"    :  20,
 
+	// Special: head on first page only, larger pages.
+	"head-first-only" : 1,
+
 	// Spacings.
 	// Baseline distances as a factor of the font size.
 	"spacing" : {
@@ -57,6 +60,7 @@ sub config_defaults {
 
 	// Style of chorus indicator.
 	"chorus-indent"     :  0,
+	// Chorus side bar. Suppress by setting offset and width to zero.
 	"chorus-bar-offset" :  8,
 	"chorus-bar-width"  :  1,
 	"chorus-bar-color"  : "black",

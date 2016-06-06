@@ -173,7 +173,14 @@ sub generate_song {
 	my $t = $s->{title};
 	my $leftpage = $ps->{"even-pages-number-left"} && $thispage % 2 == 0;
 
-	if ( ++$thispage == $startpage ) {
+	$thispage++;
+	my $firstonly = $ps->{"head-first-only"};
+
+	if ( $ps->{headspace} && $thispage == $startpage ) {
+	    if ( $firstonly ) {
+		$firstonly = $ps->{headspace};
+		$y -= $ps->{headspace};
+	    }
 	    $show->( $t, $fonts->{title} ) if $t;
 	    if ( $s->{subtitle} ) {
 		for ( @{$s->{subtitle}} ) {
@@ -181,35 +188,41 @@ sub generate_song {
 		}
 	    }
 	}
-	elsif ( $t ) {
-	    $y = $ps->{marginbottom} - $ps->{footspace};
-	    $pr->setfont( $fonts->{footer} );
-	    if ( $leftpage )  {
-		$pr->text( $t,
-			   $ps->{papersize}->[0] - $ps->{marginright}
-			     - $pr->strwidth($t),
-			   $y );
-	    }
-	    else {
-		$pr->text( $t, $x, $y );
-	    }
+	else {
+	   $firstonly = 0;
 	}
-	if ( $thispage > 1 ) {
-	    $y = $ps->{marginbottom} - $ps->{footspace};
-	    $t = "" . $thispage;
-	    $pr->setfont( $fonts->{footer} );
-	    if ( $leftpage ) {
-		$pr->text( $t, $x, $y );
+
+	if ( $ps->{footspace} ) {
+	    if ( $t && $thispage != $startpage ) {
+		$y = $ps->{marginbottom} - $ps->{footspace};
+		$pr->setfont( $fonts->{footer} );
+		if ( $leftpage )  {
+		    $pr->text( $t,
+			       $ps->{papersize}->[0] - $ps->{marginright}
+			       - $pr->strwidth($t),
+			       $y );
+		}
+		else {
+		    $pr->text( $t, $x, $y );
+		}
 	    }
-	    else {
-		$pr->text( $t,
-			   $ps->{papersize}->[0] - $ps->{marginright}
-			     - $pr->strwidth($t),
-			   $y );
+	    if ( $thispage > 1 ) {
+		$y = $ps->{marginbottom} - $ps->{footspace};
+		$t = "" . $thispage;
+		$pr->setfont( $fonts->{footer} );
+		if ( $leftpage ) {
+		    $pr->text( $t, $x, $y );
+		}
+		else {
+		    $pr->text( $t,
+			       $ps->{papersize}->[0] - $ps->{marginright}
+			       - $pr->strwidth($t),
+			       $y );
+		}
 	    }
 	}
 
-	$y0 = $y = $ps->{papersize}->[1] - $ps->{margintop};
+	$y0 = $y = $ps->{papersize}->[1] - $ps->{margintop} - $firstonly;
 	$col = 0;
 	$vsp_ignorefirst = 1;
     };
@@ -306,7 +319,7 @@ sub generate_song {
 
 	    if ( $elt->{context} eq "chorus" ) {
 		$indent = $ps->{'chorus-indent'};
-		if ( $ps->{'chorus-bar-offset'} ) {
+		if ( $ps->{'chorus-bar-offset'} && $ps->{'chorus-bar-width'} ) {
 		    my $cx = $ps->{marginleft}
 		      + $ps->{columnoffsets}->[$col]
 			- $ps->{'chorus-bar-offset'}
@@ -325,15 +338,14 @@ sub generate_song {
 
 	    # Comment decorations.
 
-	    my $font = $fonts->{$elt->{type}} || $fonts->{comment};
-	    $pr->setfont( $font );
+	    $pr->setfont( $ftext );
 	    my $text = $elt->{text};
 	    my $w = $pr->strwidth( $text );
 	    my $x1 = $x + $w;
 	    my $gfx = $pr->{pdfpage}->gfx(1); # under
 
 	    # Draw background.
-	    my $bgcol = $font->{background};
+	    my $bgcol = $ftext->{background};
 	    $bgcol ||= "#E5E5E5" if $elt->{type} eq "comment";
 	    if ( $bgcol ) {
 		$gfx->save;
