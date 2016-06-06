@@ -487,7 +487,7 @@ sub app_setup {
           "4-up|4",                     # 4 pages per sheet
 
           # Configuration handling.
-          'config=s@',
+          'config|cfg=s@',
           'noconfig',
           'sysconfig=s',
           'nosysconfig',
