@@ -162,33 +162,50 @@ sub generate_song {
 
     my $newpage = sub {
 	$pr->newpage($ps);
+
+	# Prepare for printing.
 	showlayout($ps) if $ps->{showlayout};
 	$x = $ps->{marginleft} + $ps->{columnoffsets}->[$col = 0];
 	$y = $ps->{papersize}->[1] - $ps->{margintop} + $ps->{headspace};
 
+	# Put titles and footer.
+
+	my $t = $s->{title};
+	my $leftpage = $ps->{"even-pages-number-left"} && $thispage % 2 == 0;
+
 	if ( ++$thispage == $startpage ) {
-	    $show->( $s->{title}, $fonts->{title} )
-	      if $s->{title};
+	    $show->( $t, $fonts->{title} ) if $t;
 	    if ( $s->{subtitle} ) {
 		for ( @{$s->{subtitle}} ) {
 		    $show->( $_, $fonts->{subtitle} );
 		}
 	    }
 	}
-	elsif ( $s->{title} ) {
+	elsif ( $t ) {
 	    $y = $ps->{marginbottom} - $ps->{footspace};
 	    $pr->setfont( $fonts->{footer} );
-	    $pr->text( $s->{title}, $ps->{marginleft}, $y );
+	    if ( $leftpage )  {
+		$pr->text( $t,
+			   $ps->{papersize}->[0] - $ps->{marginright}
+			     - $pr->strwidth($t),
+			   $y );
+	    }
+	    else {
+		$pr->text( $t, $x, $y );
+	    }
 	}
 	if ( $thispage > 1 ) {
 	    $y = $ps->{marginbottom} - $ps->{footspace};
-	    my $t = "" . $thispage;
+	    $t = "" . $thispage;
 	    $pr->setfont( $fonts->{footer} );
-	    if ( $ps->{"even-pages-number-left"} && $thispage % 2 == 0 ) {
+	    if ( $leftpage ) {
 		$pr->text( $t, $x, $y );
 	    }
 	    else {
-		$pr->text( $t, $ps->{papersize}->[0] - $ps->{marginright} - $pr->strwidth($t), $y );
+		$pr->text( $t,
+			   $ps->{papersize}->[0] - $ps->{marginright}
+			     - $pr->strwidth($t),
+			   $y );
 	    }
 	}
 
