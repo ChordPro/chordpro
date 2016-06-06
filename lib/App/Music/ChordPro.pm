@@ -2,7 +2,7 @@
 
 package App::Music::ChordPro;
 
-our $VERSION = "0.52.2";
+our $VERSION = "0.52.3";
 
 =head1 NAME
 
@@ -164,7 +164,7 @@ A functional equivalent version of the ChordPro input.
 =item B<--config=>I<JSON> (shorter: B<--cfg>)
 
 A JSON file that defines the behaviour of the program and the layout
-of the output. See section L</CONFIGURATION>.
+of the output. See L<App::Music::ChordPro::Config> for details.
 
 This option may be specified more than once. Each additional config
 file overrides the corresponding definitions that are currently
@@ -285,7 +285,7 @@ Not supported.
 
 =head2 Configuration options
 
-See section L</CONFIGURATION> for details about the configuration
+See L<App::Music::ChordPro::Config> for details about the configuration
 files.
 
 Note that missing default configuration files are silently ignored.
@@ -338,6 +338,19 @@ You can specify multiple config files. The settings are accumulated.
 
 Don't use the specific config file, even if it exists.
 
+=item B<--print-default-config>
+
+Prints the default configuration, and exits.
+
+The default configuration is commented to explain its contents.
+
+=item B<--print-final-config>
+
+Prints the final configuration (after processing all system, user and
+other config files), and exits.
+
+The final configuration is not commented. Sorry.
+
 =back
 
 =head2 Miscellaneous options
@@ -380,6 +393,8 @@ sub app_setup {
     my $ident = 0;              # handled locally
     my $about = 0;              # handled locally
     my $version = 0;            # handled locally
+    my $defcfg = 0;		# handled locally
+    my $fincfg = 0;		# handled locally
 
     # Package name.
     $my_package = $args{package};
@@ -493,6 +508,8 @@ sub app_setup {
           'nosysconfig',
           'userconfig=s',
           'nouserconfig',
+	  'print-default-config' => \$defcfg,
+	  'print-final-config'   => \$fincfg,
 
           # Standard options.
           'ident'               => \$ident,
@@ -561,6 +578,12 @@ sub app_setup {
     # Plug in command-line options.
     @{$options}{keys %$clo} = values %$clo;
 
+    if ( $defcfg || $fincfg ) {
+	print App::Music::ChordPro::Config::config_defaults() if $defcfg;
+	print App::Music::ChordPro::Config::config_final($options)    if $fincfg;
+	exit 0;
+    }
+
     # Return result.
     $options;
 }
@@ -577,7 +600,6 @@ sub app_ident {
 
 sub app_about {
     my ($fh, $exit) = @_;
-    app_ident($fh);
     print ${fh} <<EndOfAbout;
 
 ChordPro: A lyrics and chords formatting program.
@@ -639,6 +661,8 @@ Configuration options:
     --nouserconfig      Don't use a user specific config file
     --sysconfig=CFG     System specific config file ($configs{sysconfig})
     --nosysconfig       Don't use a system specific config file
+    --print-default-config   Prints the default config and exits
+    --print-final-config   Prints the resultant config and exits
 Missing default configuration files are silently ignored.
 
 Miscellaneous options:
@@ -649,123 +673,6 @@ Miscellaneous options:
 EndOfUsage
     exit $exit if defined $exit;
 }
-
-=head1 CONFIGURATION
-
-The configurations files are 'relaxed' JSON files. This means that
-they may contain comments and trailing comma's.
-
-Currently, most settings in the configuration files are for the PDF
-backend.
-
-This is the current built-in configuration file, showing all settings.
-
-  // Configuration (mostly layout definitions) for ChordPro.
-  //
-  // This is a relaxed JSON document, so comments are possible.
-
-  {
-      // Layout definitions for PDF output.
-
-      "pdf" : {
-
-	  // Papersize, 'a4' or [ 595, 842 ] etc.
-	  "papersize" : "a4",
-
-	  // Number of columns.
-	  // Can be overridden with {columns} directive.
-	  // "columns"   : 2,
-	  // Space between columns, in pt.
-	  "columnspace"  :  20,
-
-	  // Page margins.
-	  // Note that top/bottom exclude the head/footspace.
-	  "margintop"    :  90,
-	  "marginbottom" :  40,
-	  "marginleft"   :  40,
-	  "marginright"  :  40,
-	  "headspace"    :  50,
-	  "footspace"    :  20,
-
-	  // Spacings.
-	  // Baseline distances as a factor of the font size.
-	  "spacing" : {
-	      "title"  : 1.2,
-	      "lyrics" : 1.2,
-	      "chords" : 1.2,
-	      "grid"   : 1.2,
-	      "tab"    : 1.0,
-	      "toc"    : 1.4,
-	  },
-
-	  // Style of chorus indicator.
-	  "chorus-indent"     :  0,
-	  "chorus-bar-offset" :  8,
-	  "chorus-bar-width"  :  1,
-	  "chorus-bar-color"  : "black",
-
-	  // Alternative songlines with chords in a side column.
-	  // Value is the column position.
-	  // "chordscolumn" : 400,
-	  "chordscolumn" :  0,
-
-	  // Suppress empty chord lines.
-	  // Overrides the -a (--single-space) command line options.
-	  "suppress-empty-chords" : 1,
-
-	  // Flush titles.
-	  "titles-flush" : "center",
-
-	  // Right/Left page numbers.
-	  "even-pages-number-left" : 1,
-
-	  // Fonts.
-	  // Fonts can be specified by name (for the corefonts)
-	  // or a filename (for TrueType/OpenType fonts).
-	  // Relative filenames are looked up in the fontdir.
-	  // "fontdir" : "/home/jv/.fonts",
-
-	  // Fonts for chords and comments can have a background
-	  // colour associated.
-	  // Colours are "#RRGGBB" or predefined names like "black", "white",
-	  // and lots of others.
-
-	  "fonts" : {
-	      "title" : {
-		  "name" : "Times-Bold",
-		  "size" : 14
-	      },
-	      "text" : {
-		  "name" : "Times-Roman",
-		  "size" : 14
-	      },
-	      "chord" : {
-		  "name" : "Helvetica-Oblique",
-		  "size" : 10
-	      },
-	      "comment" : {
-		  "name" : "Helvetica",
-		  "size" : 12
-	      },
-	      "tab" : {
-		  "name" : "Courier",
-		  "size" : 10
-	      },
-	  },
-
-	  // Fonts that can be specified, but need not.
-	  // subtitle       --> text
-	  // comment        --> text
-	  // comment_italic --> chord
-	  // comment_box    --> chord
-	  // toc            --> text
-	  // grid           --> chord
-	  // footer         --> subtitle @ 60%
-
-	  // This will show the page layout.
-	  // "showlayout" : 1,
-      }
-  }
 
 =head1 FONTS
 

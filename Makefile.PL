@@ -11,7 +11,10 @@ WriteMakefile
 
  INSTALLDIRS	=> 'site',
  EXE_FILES	=> [ 'script/chordpro' ],
- PL_FILES	=> { 'script/chordpro.PL' => 'script/chordpro' },
+ PL_FILES	=> {
+		    'script/chordpro.PL' => 'script/chordpro',
+#		    'lib/App/Music/ChordPro/Config.PL' => 'lib/App/Music/ChordPro/Config.pod',
+		   },
 
  PREREQ_PM      => {
 		    'PDF::API2'   => 2.021,

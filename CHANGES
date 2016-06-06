@@ -1,3 +1,17 @@
+0.52.3	Jun 06 2016
+
+	Move configuration pod to Config.pod. Will it be indexed?
+
+	Add --print-default-config and --print-final-config options.
+	
+	Fix problems with songline colours.
+	
+	Fix headings.
+	
+	Add head-first-only setting.
+	
+	Fix page footers.
+
 0.52.2	Jun 06 2016
 
 	Minor documentation changes.

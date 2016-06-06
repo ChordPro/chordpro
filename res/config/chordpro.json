@@ -1,8 +1,10 @@
-// Layout definitions for ChordPro PDF.
+// Configuration (mostly layout definitions) for ChordPro.
 //
 // This is a relaxed JSON document, so comments are possible.
 
 {
+    // Layout definitions for PDF output.
+
     "pdf" : {
 
 	// Papersize, 'a4' or [ 595, 842 ] etc.
@@ -23,6 +25,9 @@
 	"headspace"    :  50,
 	"footspace"    :  20,
 
+	// Special: head on first page only, larger pages.
+	"head-first-only" : 0,
+
 	// Spacings.
 	// Baseline distances as a factor of the font size.
 	"spacing" : {
@@ -36,6 +41,7 @@
 
 	// Style of chorus indicator.
 	"chorus-indent"     :  0,
+	// Chorus side bar. Suppress by setting offset and width to zero.
 	"chorus-bar-offset" :  8,
 	"chorus-bar-width"  :  1,
 	"chorus-bar-color"  : "black",
