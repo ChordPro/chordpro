@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
 # Last Modified By: Johan Vromans
-# Last Modified On: Sun Jun  5 16:12:13 2016
-# Update Count    : 238
+# Last Modified On: Mon Jun  6 10:01:33 2016
+# Update Count    : 239
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -22,7 +22,7 @@ songs plus chord information. B<chordpro> will then generate a
 photo-ready, professional looking, impress-your-friends sheet-music
 suitable for printing on your nearest printer.
 
-B<chordpro> is a wrapper around L<App:Music::ChordPro>, which does all
+B<chordpro> is a wrapper around L<App::Music::ChordPro>, which does all
 of the work.
 
 =cut
