@@ -466,7 +466,16 @@ sub generate_song {
 
 	if ( $elt->{type} eq "image" ) {
 
-	    # Slightly more complex.
+	    # Turn missing images into a comment.
+	    unless ( -r $elt->{uri} ) {
+		unshift( @elts, { %$elt,
+				  type => "comment_box",
+				  text => $elt->{uri} . ": $!",
+				} );
+		redo;
+	    }
+
+	    # Images are slightly more complex.
 	    # Only after establishing the desired height we can issue
 	    # the checkspace call, and we must get $y after that.
 
