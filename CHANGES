@@ -1,3 +1,8 @@
+0.53	Jun 07 2016
+
+	Add built-in chords and the --dump-chords-text facility.
+	(PDF) Turn missing images into a comment.
+
 0.52.6	Jun 07 2016
 
 	Fix POD problem in Config.pm.
@@ -13,15 +18,10 @@
 0.52.3	Jun 06 2016
 
 	Move configuration pod to Config.pod. Will it be indexed?
-
 	Add --print-default-config and --print-final-config options.
-	
 	Fix problems with songline colours.
-	
 	Fix headings.
-	
 	Add head-first-only setting.
-	
 	Fix page footers.
 
 0.52.2	Jun 06 2016

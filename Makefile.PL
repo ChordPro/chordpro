@@ -42,6 +42,7 @@ WriteMakefile
      no_index         => {
          file => [
 	    "lib/App/Music/ChordPro/Songbook.pm",
+	    "lib/App/Music/ChordPro/Chords.pm",
 	 ],
          directory => [
 	    "lib/App/Music/ChordPro/Output",

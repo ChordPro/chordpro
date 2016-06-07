@@ -2,7 +2,7 @@
 
 package App::Music::ChordPro;
 
-our $VERSION = "0.52.6";
+our $VERSION = "0.55";
 
 =head1 NAME
 
@@ -279,7 +279,8 @@ Not supported.
 
 =item B<--dump-chords-text> (short: B<-d>)
 
-Not supported.
+Dumps a list of built-in chords in the form of C<define> directives,
+and exits.
 
 =back
 
@@ -395,6 +396,7 @@ sub app_setup {
     my $version = 0;            # handled locally
     my $defcfg = 0;		# handled locally
     my $fincfg = 0;		# handled locally
+    my $dump_chords = 0;	# handled locally
 
     # Package name.
     $my_package = $args{package};
@@ -483,7 +485,7 @@ sub app_setup {
           "chord-grids-sorted|S",       # Prints chord grids alphabetically
           "chord-size|c=i",             # Sets chord size [9]
           "dump-chords|D",              # Dumps chords definitions (PostScript)
-          "dump-chords-text|d",         # Dumps chords definitions (Text)
+          "dump-chords-text|d" => \$dump_chords,  # Dumps chords definitions (Text)
           "even-pages-number-left|L",   # Even pages numbers on left
           "lyrics-only|l",              # Only prints lyrics
           "chord-grids|G!",             # En[dis]ables printing of chord grids
@@ -534,7 +536,7 @@ sub app_setup {
     };
 
     # GNU convention: message to STDOUT upon request.
-    app_ident(\*STDOUT) if $ident || $help || $manual || $about;
+    app_ident(\*STDOUT) if $ident || $help || $manual;
     if ( $manual or $help ) {
         app_usage(\*STDOUT, 0) if $help;
         $pod2usage->(VERBOSE => 2) if $manual;
@@ -579,8 +581,16 @@ sub app_setup {
     @{$options}{keys %$clo} = values %$clo;
 
     if ( $defcfg || $fincfg ) {
-	print App::Music::ChordPro::Config::config_defaults() if $defcfg;
-	print App::Music::ChordPro::Config::config_final($options)    if $fincfg;
+	print App::Music::ChordPro::Config::config_defaults()
+	  if $defcfg;
+	print App::Music::ChordPro::Config::config_final($options)
+	  if $fincfg;
+	exit 0;
+    }
+
+    if ( $dump_chords ) {
+	require App::Music::ChordPro::Chords;
+	App::Music::ChordPro::Chords::dump_chords();
 	exit 0;
     }
 
@@ -613,7 +623,16 @@ To learn more about ChordPro, look for the man page or do
 "chordpro --help" for the list of options.
 
 For more information, see http://www.chordpro.org .
+
 EndOfAbout
+
+    my $fmt = " %-22.22s %s\n";
+
+    print( "Run-time information:\n" );
+    printf( $fmt, "ChordPro version", "v$VERSION" );
+    printf( $fmt, "Perl version", $^V );
+    printf( $fmt, App::Packager::Packager(), "v$App::Packager::VERSION" )
+      if $App::Packager::PACKAGED;
     exit $exit if defined $exit;
 }
 
@@ -640,7 +659,7 @@ Options marked with - are ignored.
     --chord-grid-size=N  -s       *Sets chord grid size [30]
     --chord-grids-sorted  -S      *Prints chord grids alphabetically
     --chord-size=N  -c            *Sets chord size [9]
-    --dump-chords  -D             -Dumps chords definitions (PostScript)
+    --dump-chords  -D             Dumps chords definitions (PostScript)
     --dump-chords-text  -d        -Dumps chords definitions (Text)
     --even-pages-number-left  -L  *Even pages numbers on left
     --no-chord-grids  -G          *Disables printing of chord grids
