@@ -1,4 +1,8 @@
-0.52.5	
+0.52.6	Jun 07 2016
+
+	Fix POD problem in Config.pm.
+
+0.52.5	Jun 07 2016
 
 	Improve Makefile.PL to get indexing right.
 
