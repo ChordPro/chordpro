@@ -2,11 +2,14 @@
 
 use ExtUtils::MakeMaker;
 
+my $master = 'lib/App/Music/ChordPro.pm';
+my $version = MM->parse_version($master);
+
 WriteMakefile
 (
  NAME		=> 'App::Music::ChordPro',
- ABSTRACT_FROM  => 'lib/App/Music/ChordPro.pm',
- VERSION_FROM	=> 'lib/App/Music/ChordPro.pm',
+ ABSTRACT_FROM  => $master,
+ VERSION_FROM	=> $master,
  AUTHOR	        => 'Johan Vromans <jvromans@squirrel.nl>',
 
  INSTALLDIRS	=> 'site',
@@ -27,17 +30,27 @@ WriteMakefile
      license          => "perl_5",
      resources        => { homepage => "http://www.chordpro.org" },
      provides         => {
-         chordpro => { file => "script/chordpro" },
+	 chordpro => { file => "script/chordpro",
+		       version => $version },
 	 "App::Music::ChordPro"
-		  => { file => "lib/App/Music/ChordPro.pm" },
+		  => { file => "lib/App/Music/ChordPro.pm",
+		       version => $version },
 	 "App::Music::ChordPro::Config"
-		  => { file => "lib/App/Music/ChordPro/Config.pm" },
+		  => { file => "lib/App/Music/ChordPro/Config.pm",
+		       version => $version },
      },
      no_index         => {
-         namespace => [
-	    "App::Music::ChordPro",
+         file => [
+	    "lib/App/Music/ChordPro/Songbook.pm",
+	 ],
+         directory => [
+	    "lib/App/Music/ChordPro/Output",
 	 ],
      },
  },
 
 );
+
+# Note about the no_index: CPAN and MetaCPAN have differing opinions
+# on how no_index must be interpreted, in particular in combination
+# with provides.

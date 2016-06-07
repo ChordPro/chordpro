@@ -1,7 +1,10 @@
+0.52.5	
+
+	Improve Makefile.PL to get indexing right.
+
 0.52.4	Jun 06 2016
 
 	Improve Makefile.PL.
-
 
 0.52.3	Jun 06 2016
 
