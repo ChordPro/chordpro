@@ -2,6 +2,6 @@
 
 my $src = shift;
 open( my $fd, ">", $src);
-open( my $fi, "<", "$src.pl" );
-$fd->print( <$fi> );
-$fd->close;
+open( my $fi, "<", "$src-script.pl" );
+print { $fd } ( <$fi> );
+close($fd);
