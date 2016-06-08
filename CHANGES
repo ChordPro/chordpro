@@ -1,3 +1,9 @@
+0.54	Jun 08 2016
+
+	Fix bug #115156: Will not build on Mac OSX.
+	Fix bug #115159: IO::File is not loaded automatically in older
+	perls ( < 5.12.6 ).
+
 0.53.1	Jun 08 2016
 
 	Improve Makefile.PL to get indexing right.

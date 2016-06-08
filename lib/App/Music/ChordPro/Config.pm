@@ -194,7 +194,7 @@ sub configurator {
 	if ( open( my $fd, "<:utf8", $file ) ) {
 	    local $/;
 	    $cfg = hmerge( $cfg, $pp->decode( scalar( <$fd> ) ) );
-	    $fd->close;
+	    close($fd);
 	}
 	else {
 	    ### Should not happen -- it's been checked in app_setup.

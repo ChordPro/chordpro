@@ -2,7 +2,7 @@
 
 package App::Music::ChordPro;
 
-our $VERSION = "0.53.1";
+our $VERSION = "0.54";
 
 =head1 NAME
 
@@ -103,9 +103,9 @@ sub main {
     if ( $res && @$res > 0 ) {
         if ( $of && $of ne "-" ) {
             open( my $fd, '>', $of );
-	    $fd->binmode(":utf8");
-	    $fd->print( join( "\n", @$res ) );
-	    $fd->close;
+	    binmode( $fd, ":utf8" );
+	    print { $fd } ( join( "\n", @$res ) );
+	    close($fd);
         }
 	else {
 	    binmode( STDOUT, ":utf8" );
