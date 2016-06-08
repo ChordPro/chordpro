@@ -1,3 +1,7 @@
+0.53.1	Jun 08 2016
+
+	Improve Makefile.PL to get indexing right.
+
 0.53	Jun 07 2016
 
 	Add built-in chords and the --dump-chords-text facility.

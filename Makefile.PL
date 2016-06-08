@@ -35,9 +35,6 @@ WriteMakefile
 	 "App::Music::ChordPro"
 		  => { file => "lib/App/Music/ChordPro.pm",
 		       version => $version },
-	 "App::Music::ChordPro::Config"
-		  => { file => "lib/App/Music/ChordPro/Config.pm",
-		       version => $version },
      },
      no_index         => {
          file => [
