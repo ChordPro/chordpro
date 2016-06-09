@@ -1,5 +1,7 @@
 #! perl
 
+use 5.010;
+
 package App::Music::ChordPro;
 
 our $VERSION = "0.54";

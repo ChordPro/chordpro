@@ -1,5 +1,8 @@
 #! perl
 
+# Ease the life of the CPAN testers.
+exit 0 if $ENV{AUTOMATED_TESTING} && $] < 5.010000;
+
 use ExtUtils::MakeMaker;
 
 my $master = 'lib/App/Music/ChordPro.pm';

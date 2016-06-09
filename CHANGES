@@ -1,3 +1,7 @@
+0.54.x	Jun 09 2016
+
+	Require perl version v5.10.
+
 0.54	Jun 08 2016
 
 	Fix bug #115156: Will not build on Mac OSX.
