@@ -34,21 +34,21 @@ sub generate_songbook {
     if ( $options->{toc} ) {
 
 	$pr->newpage($ps), $page++
-	  if $ps->{'even-pages-number-left'} && $page % 2 == 0;
+	  if $ps->{'even-odd-pages'} && $page % 2 == 0;
 
 	# Create a pseudo-song for the table of contents.
 	$options->{startpage} = $page;
 	my $song =
-	  { title => "Contents",
+	  { title     => get_format( $ps, 1, "toc-title" ),
 	    structure => "linear",
-	    body => [
+	    body      => [
 		     map { +{ type    => "tocline",
 			      context => "toc",
 			      title   => $_->[0],
 			      page    => $_->[1],
 			    } } @book,
 	    ],
-	    meta => {},
+	    meta      => {},
 	  };
 	$page += generate_song( $song,
 				{ pr => $pr, $options ? %$options : () } );     }
@@ -120,26 +120,8 @@ sub generate_song {
     my $x = $ps->{marginleft} + $ps->{columnoffsets}->[0];
     my $y = $ps->{papersize}->[1] - $ps->{margintop};
 
-    my $show = sub {
-	my ( $text, $font ) = @_;
-	my $x = $x;
-	if ( $st eq "right" ) {
-	    $pr->setfont($font);
-	    $x = $ps->{papersize}->[0]
-		 - $ps->{marginright}
-		 - $pr->strwidth($text);
-	}
-	elsif ( $st eq "center" || $st eq "centre" ) {
-	    $pr->setfont($font);
-	    $x = $ps->{marginleft} +
-	         ( $ps->{papersize}->[0]
-		   - $ps->{marginright}
-		   - $ps->{marginleft}
-		   - $pr->strwidth($text) ) / 2;
-	}
-	$pr->text( $text, $x, $y-font_bl($font), $font );
-	$y -= $font->{size} * $ps->{spacing}->{title};
-    };
+    $ps->{'even-odd-pages'} =  1 if $options->{'even-pages-number-left'};
+    $ps->{'even-odd-pages'} = -1 if $options->{'odd-pages-number-left'};
 
     my $do_size = sub {
 	my ( $tag, $value ) = @_;
@@ -154,78 +136,68 @@ sub generate_song {
 	$set_sizes->();
     };
 
-    my $y0;
     my $col;
     my $vsp_ignorefirst;
     my $startpage = $options->{startpage} || 1;
     my $thispage = $startpage - 1;
 
+    # Physical newpage handler.
     my $newpage = sub {
+
+	# Add page to the PDF.
 	$pr->newpage($ps);
 
 	# Prepare for printing.
 	showlayout($ps) if $ps->{showlayout};
-	$x = $ps->{marginleft} + $ps->{columnoffsets}->[$col = 0];
-	$y = $ps->{papersize}->[1] - $ps->{margintop} + $ps->{headspace};
 
 	# Put titles and footer.
 
-	my $t = $s->{title};
-	my $leftpage = $ps->{"even-pages-number-left"} && $thispage % 2 == 0;
+	# If even/odd pages, leftpage signals whether the
+	# header/footer parts must be swapped.
+	my $leftpage;
+	if ( $ps->{"even-odd-pages"} ) {
+	    # Even/odd printing...
+	    $leftpage = $thispage % 2 != 0;
+	    # Odd/even printing...
+	    $leftpage = !$leftpage if $ps->{'even-odd-pages'} < 0;
+	}
 
 	$thispage++;
-	my $firstonly = $ps->{"head-first-only"};
 
-	if ( $ps->{headspace} && $thispage == $startpage ) {
-	    if ( $firstonly ) {
-		$firstonly = $ps->{headspace};
-		$y -= $ps->{headspace};
-	    }
-	    $show->( $t, $fonts->{title} ) if $t;
-	    if ( $s->{subtitle} ) {
-		for ( @{$s->{subtitle}} ) {
-		    $show->( $_, $fonts->{subtitle} );
-		}
-	    }
+	#### Temporarily not supported.
+	# my $firstonly = $ps->{"head-first-only"};
+
+	# Determine page class.
+	my $class = 2;		# default
+	if ( $thispage == 1 ) {
+	    $class = 0;		# very first page
 	}
-	else {
-	   $firstonly = 0;
+	elsif ( $thispage == $startpage ) {
+	    $class = 1;		# first of a song
+	}
+	$s->{page} = $thispage;
+
+	# Three-part title handlers.
+	my $tpt = sub { tpt( $ps, $class, $_[0], $leftpage, $x, $y, $s ) };
+
+	$x = $ps->{marginleft};
+	if ( $ps->{headspace} ) {
+	    $y = $ps->{papersize}->[1] - $ps->{margintop} + $ps->{headspace};
+	    $y = $tpt->("title");
+	    $y = $tpt->("subtitle");
 	}
 
 	if ( $ps->{footspace} ) {
-	    if ( $t && $thispage != $startpage ) {
-		$y = $ps->{marginbottom} - $ps->{footspace};
-		$pr->setfont( $fonts->{footer} );
-		if ( $leftpage )  {
-		    $pr->text( $t,
-			       $ps->{papersize}->[0] - $ps->{marginright}
-			       - $pr->strwidth($t),
-			       $y );
-		}
-		else {
-		    $pr->text( $t, $x, $y );
-		}
-	    }
-	    if ( $thispage > 1 ) {
-		$y = $ps->{marginbottom} - $ps->{footspace};
-		$t = "" . $thispage;
-		$pr->setfont( $fonts->{footer} );
-		if ( $leftpage ) {
-		    $pr->text( $t, $x, $y );
-		}
-		else {
-		    $pr->text( $t,
-			       $ps->{papersize}->[0] - $ps->{marginright}
-			       - $pr->strwidth($t),
-			       $y );
-		}
-	    }
+	    $y = $ps->{marginbottom} - $ps->{footspace};
+	    $tpt->("footer");
 	}
 
-	$y0 = $y = $ps->{papersize}->[1] - $ps->{margintop} - $firstonly;
+	$y = $ps->{papersize}->[1] - $ps->{margintop};
 	$col = 0;
 	$vsp_ignorefirst = 1;
     };
+
+    # Get going.
     $newpage->();
 
     my $checkspace = sub {
@@ -243,7 +215,7 @@ sub generate_song {
 	}
 	else {
 	    $x = $ps->{marginleft} + $ps->{columnoffsets}->[$col];
-	    $y = $y0;
+	    $y = $ps->{papersize}->[1] - $ps->{margintop};
 	}
 
 	return;
@@ -303,6 +275,9 @@ sub generate_song {
 	    }
 	    elsif ( $type =~ /^comment/ ) {
 		$ftext = $fonts->{$type} || $fonts->{comment};
+	    }
+	    elsif ( $type eq "tabline" ) {
+		$ftext = $fonts->{tab};
 	    }
 
 	    # Get vertical space the songline will occupy.
@@ -967,17 +942,13 @@ sub tocline {
     my $pr = $ps->{pr};
     my $fonts = $ps->{fonts};
     my $y0 = $y;
-
-    my $ftoc = $fonts->{text};
+    $x += 20;
+    my $ftoc = $fonts->{toc};
     $y -= font_bl($ftoc);
     $pr->setfont($ftoc);
     $ps->{pr}->text( $elt->{title}, $x, $y );
-    my $p = "" . $elt->{page};
-    $ps->{pr}->text( $p,
-		     $ps->{papersize}->[0]
-		     - $ps->{marginleft}
-		     - $pr->strwidth($p),
-		     $y );
+    my $p = $elt->{page} . ".";
+    $ps->{pr}->text( $p, $x - 5 - $pr->strwidth($p), $y );
 
     my $ann = $pr->{pdfpage}->annotation;
     $ann->link($pr->{pdf}->openpage($elt->{page}));
@@ -1187,6 +1158,85 @@ sub configurator {
 	  = 0.6 * $fonts->{subtitle}->{size};
     }
 }
+
+# Get a format string for a given page class and type.
+# Page classes have fallbacks.
+sub get_format {
+    my ( $ps, $class, $type ) = @_;
+    my @classes = qw( first title default );
+    for ( my $i = $class; $i < @classes; $i++ ) {
+	next unless exists($ps->{formats}->{$classes[$i]}->{$type});
+	return $ps->{formats}->{$classes[$i]}->{$type};
+    }
+    return;
+}
+
+# Substitute %X sequences in title formats.
+sub fmt_subst {
+    my ( $s, $t ) = @_;
+    my $res = "";
+    while ( $t =~ /^(.*)\%(.)(.*)/ ) {
+	$res .= $1;
+	$t = $3;
+	my $f = $2;
+	if ( $f eq '%' ) {
+	    $res .= '%';
+	}
+	elsif ( $f eq 't' ) {
+	    $res .= $s->{title} if $s->{title};
+	}
+	elsif ( $f eq 's' ) {
+	    $res .= $s->{subtitle}->[0]
+	      if $s->{subtitle} && $s->{subtitle}->[0];
+	}
+	elsif ( $f eq 'p' ) {
+	    $res .= $s->{page} if $s->{page};
+	}
+	elsif ( $f eq 'P' ) {
+	    $res .= $s->{page};
+	}
+    }
+    $res . $t;
+}
+
+# Three-part titles.
+# Note: baseline printing.
+sub tpt {
+    my ( $ps, $class, $type, $leftpage, $x, $y, $s ) = @_;
+    my $fmt = get_format( $ps, $class, $type );
+    return unless $fmt;
+
+    # @fmt = ( left-fmt, center-fmt, right-fmt )
+
+    my @fmt = @{$fmt};
+    @fmt = @fmt[2,1,0] if $leftpage; # swap
+
+    my $pr = $ps->{pr};
+    my $font = $ps->{fonts}->{$type};
+
+    $pr->setfont($font);
+    my $rm = $ps->{papersize}->[0] - $ps->{marginright};
+
+    # Left part. Easiest.
+    $pr->text( fmt_subst( $s, $fmt[0] ), $x, $y ) if $fmt[0];
+
+    # Center part.
+    if ( $fmt[1] ) {
+	my $t = fmt_subst( $s, $fmt[1] );
+	$pr->text( $t, ($rm+$x-$pr->strwidth($t))/2, $y );
+    }
+
+    # Right part.
+    if ( $fmt[2] ) {
+	my $t = fmt_subst( $s, $fmt[2] );
+	$pr->text( $t, $rm-$pr->strwidth($t), $y );
+    }
+
+    # Return updated baseline.
+    return $y - $font->{size} * ($ps->{spacing}->{$type} || 1);
+}
+
+################################################################
 
 package PDFWriter;
 

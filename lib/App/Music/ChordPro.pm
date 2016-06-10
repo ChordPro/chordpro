@@ -4,7 +4,7 @@ use 5.010;
 
 package App::Music::ChordPro;
 
-our $VERSION = "0.54";
+our $VERSION = "0.55";
 
 =head1 NAME
 
@@ -250,6 +250,10 @@ easy.
 
 Prints even/odd pages with pages numbers left on even pages.
 
+=item B<--odd-pages-number-left>
+
+Prints even/odd pages with pages numbers left on odd pages.
+
 =item B<--page-size=>I<FMT> (short: B<-P>) *
 
 Specifies page size, e.g. C<a4> (default), C<letter>.
@@ -489,6 +493,7 @@ sub app_setup {
           "dump-chords|D",              # Dumps chords definitions (PostScript)
           "dump-chords-text|d" => \$dump_chords,  # Dumps chords definitions (Text)
           "even-pages-number-left|L",   # Even pages numbers on left
+          "odd-pages-number-left",      # Odd pages numbers on left
           "lyrics-only|l",              # Only prints lyrics
           "chord-grids|G!",             # En[dis]ables printing of chord grids
           "easy-chord-grids|g!",        # Do[esn't] print grids for built-in "easy" chords.
@@ -664,6 +669,7 @@ Options marked with - are ignored.
     --dump-chords  -D             Dumps chords definitions (PostScript)
     --dump-chords-text  -d        -Dumps chords definitions (Text)
     --even-pages-number-left  -L  *Even pages numbers on left
+    --odd-pages-number-left       *Odd pages numbers on left
     --no-chord-grids  -G          *Disables printing of chord grids
     --no-easy-chord-grids  -g     -Doesn't print grids for built-in "easy" chords.
     --page-number-logical  -n     -Numbers logical pages, not physical

@@ -43,7 +43,7 @@ This is the current built-in configuration file, showing all settings.
   	"marginbottom" :  40,
   	"marginleft"   :  40,
   	"marginright"  :  40,
-  	"headspace"    :  50,
+  	"headspace"    :  60,
   	"footspace"    :  20,
   
   	// Special: head on first page only, larger pages.
@@ -79,8 +79,42 @@ This is the current built-in configuration file, showing all settings.
   	// Flush titles.
   	"titles-flush" : "center",
   
-  	// Right/Left page numbers.
-  	"even-pages-number-left" : 1,
+  	// Even/odd pages. A value of -1 denotes odd/even pages.
+  	"even-odd-pages" : 1,
+  
+  	// Formats.
+  	"formats" : {
+  	    // Titles/Footers.
+
+  	    // Titles/footers have 3 parts, which are printed left,
+  	    // centered and right.
+  	    // For even/odd printing, the order is reversed.
+
+  	    // By default, a page has:
+  	    "default" : {
+  	        // No title/subtitle.
+  	    	"title"     : null,
+  	    	"subtitle"  : null,
+  		// Footer is title -- page number.
+  	    	"footer"    : [ "%t", "", "%p" ],
+  		// Title for ToC.
+  		"toc-title" : "Table of Contents",
+  	    },
+  	    // The first page of a song has:
+  	    "title" : {
+  	        // Title and subtitle.
+  	    	"title"     : [ "", "%t", "" ],
+  	    	"subtitle"  : [ "", "%s", "" ],
+  		// Footer with page number.
+  	    	"footer"    : [ "", "", "%p" ],
+  	    },
+  	    // The very first output page is slightly different:
+  	    "first" : {
+  	    	// It has title and subtitle, like normal 'first' pages.
+  		// But no footer.
+  	    	"footer"    : null,
+  	    },
+  	},
   
   	// Fonts.
   	// Fonts can be specified by name (for the corefonts)
@@ -113,6 +147,10 @@ This is the current built-in configuration file, showing all settings.
   	    "tab" : {
   		"name" : "Courier",
   		"size" : 10
+  	    },
+  	    "toc" : {
+  		"name" : "Times-Roman",
+  		"size" : 11
   	    },
   	},
   
@@ -167,6 +205,7 @@ sub config_defaults {
 	}
 	if ( $copy ) {
 	    s/[\r\n]+$//;
+	    $_ = ( " " x $pfx ) . $_ if $_ =~ /^\t/;
 	    push( @lines, /\W/ ? substr( $_, $pfx ) : "" );
 	    last if $_ =~ m;^(\s+)// End of config\.;;
 	}
