@@ -1,4 +1,4 @@
-0.55.x	Jun 1x 2016
+0.56	Jun 13 2016
 
 	Handle {titles} directive.
 	Add support for head-first-only. Titles are now top-printed.
