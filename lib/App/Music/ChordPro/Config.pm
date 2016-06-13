@@ -46,7 +46,8 @@ This is the current built-in configuration file, showing all settings.
   	"headspace"    :  60,
   	"footspace"    :  20,
   
-  	// Special: head on first page only, larger pages.
+  	// Special: head on first page only, add the headspace to
+	// the other pages so they become larger.
   	"head-first-only" : 0,
   
   	// Spacings.
@@ -60,6 +61,9 @@ This is the current built-in configuration file, showing all settings.
   	    "toc"    : 1.4,
 	    "empty"  : 1.0,
   	},
+  	// Note: By setting the font size and spacing for empty lines to
+	// smaller values, you get a fine(r)-grained control over the
+	// spacing between the various parts of the song.
   
   	// Style of chorus indicator.
   	"chorus-indent"     :  0,
@@ -164,6 +168,7 @@ This is the current built-in configuration file, showing all settings.
   	// toc            --> text
   	// grid           --> chord
   	// footer         --> subtitle @ 60%
+  	// empty          --> text
 
   	// This will show the page layout.
   	// "showlayout" : 1,

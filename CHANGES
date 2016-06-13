@@ -1,6 +1,9 @@
 0.55.x	Jun 1x 2016
 
 	Handle {titles} directive.
+	Add support for head-first-only. Titles are now top-printed.
+	Move low-level primitives to PRWriter module.
+	Add font and spacing for 'empty' lines.
 
 0.55	Jun 10 2016
 

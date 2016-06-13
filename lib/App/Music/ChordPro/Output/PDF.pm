@@ -277,7 +277,7 @@ sub generate_song {
 	      if $s->{structure} eq "structured";
 	    $vsp_ignorefirst = 0, next if $vsp_ignorefirst;
 	    $pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
-	    my $vsp = text_vsp( $elt, $ps );
+	    my $vsp = empty_vsp( $elt, $ps );
 	    $y -= $vsp;
 	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
 	    next;
@@ -967,25 +967,24 @@ sub songline_vsp {
 }
 
 sub _vsp {
-    my ( $eltype, $ps, $itype ) = @_;
-    $itype ||= $eltype;
+    my ( $eltype, $ps, $sptype ) = @_;
+    $sptype ||= $eltype;
 
     # Calculate the vertical span of this element.
 
     my $font = $ps->{fonts}->{$eltype};
-    $font->{size} * $ps->{spacing}->{$itype};
+    $font->{size} * $ps->{spacing}->{$sptype};
 }
 
-sub grid_vsp { _vsp( "grid", $_[1] ) }
-sub tab_vsp  { _vsp( "tab",  $_[1] ) }
-sub toc_vsp  { _vsp( "toc",  $_[1] ) }
+sub empty_vsp { _vsp( "empty", $_[1] ) }
+sub grid_vsp  { _vsp( "grid",  $_[1] ) }
+sub tab_vsp   { _vsp( "tab",   $_[1] ) }
+sub toc_vsp   { _vsp( "toc",   $_[1] ) }
 
 sub text_vsp {
     my ( $elt, $ps ) = @_;
 
     # Calculate the vertical span of this line.
-
-    return 0 if $elt->{type} eq "empty" && $structured;
 
     _vsp( "text", $ps, "lyrics" );
 }
@@ -1125,6 +1124,7 @@ sub configurator {
     $fonts->{comment_box}    ||= { %{ $fonts->{chord} } };
     $fonts->{comment}        ||= { %{ $fonts->{text}  } };
     $fonts->{toc}	     ||= { %{ $fonts->{text}  } };
+    $fonts->{empty}	     ||= { %{ $fonts->{text}  } };
     $fonts->{grid}           ||= { %{ $fonts->{chord} } };
     $fonts->{subtitle}->{size}       ||= $fonts->{text}->{size};
     $fonts->{comment_italic}->{size} ||= $fonts->{text}->{size};
