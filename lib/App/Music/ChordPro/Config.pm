@@ -58,6 +58,7 @@ This is the current built-in configuration file, showing all settings.
   	    "grid"   : 1.2,
   	    "tab"    : 1.0,
   	    "toc"    : 1.4,
+	    "empty"  : 1.0,
   	},
   
   	// Style of chorus indicator.
@@ -76,8 +77,9 @@ This is the current built-in configuration file, showing all settings.
   	// Overrides the -a (--single-space) command line options.
   	"suppress-empty-chords" : 1,
   
-  	// Flush titles.
-  	"titles-flush" : "center",
+	// A {titles: left} may conflict with customized formats.
+	// Set to non-zero to ignore the directive.
+	"titles-directive-ignore" : 0,
   
   	// Even/odd pages. A value of -1 denotes odd/even pages.
   	"even-odd-pages" : 1,

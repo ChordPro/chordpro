@@ -123,6 +123,29 @@ sub generate_song {
     $ps->{'even-odd-pages'} =  1 if $options->{'even-pages-number-left'};
     $ps->{'even-odd-pages'} = -1 if $options->{'odd-pages-number-left'};
 
+    if ( defined( $s->{settings}->{titles} )
+	 && ! $pr->{'titles-directive-ignore'} ) {
+	my $swap = sub {
+	    my ( $from, $to ) = @_;
+	    for my $class ( qw( default title first ) ) {
+		for ( qw( title subtitle footer ) ) {
+		    next unless exists $ps->{formats}->{$class}->{$_};
+		    ( $ps->{formats}->{$class}->{$_}->[$from],
+		      $ps->{formats}->{$class}->{$_}->[$to] ) =
+			( $ps->{formats}->{$class}->{$_}->[$to],
+			  $ps->{formats}->{$class}->{$_}->[$from] );
+		}
+	    }
+	};
+
+	if ( $s->{settings}->{titles} eq "left" ) {
+	    $swap->(0,1);
+	}
+	if ( $s->{settings}->{titles} eq "right" ) {
+	    $swap->(2,1);
+	}
+    }
+
     my $do_size = sub {
 	my ( $tag, $value ) = @_;
 	if ( $value =~ /^(.+)\%$/ ) {
