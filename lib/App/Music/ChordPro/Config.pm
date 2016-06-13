@@ -39,7 +39,7 @@ This is the current built-in configuration file, showing all settings.
   
   	// Page margins.
   	// Note that top/bottom exclude the head/footspace.
-  	"margintop"    :  90,
+  	"margintop"    :  80,
   	"marginbottom" :  40,
   	"marginleft"   :  40,
   	"marginright"  :  40,

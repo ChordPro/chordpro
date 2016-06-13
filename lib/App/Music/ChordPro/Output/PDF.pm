@@ -187,9 +187,6 @@ sub generate_song {
 
 	$thispage++;
 
-	#### Temporarily not supported.
-	# my $firstonly = $ps->{"head-first-only"};
-
 	# Determine page class.
 	my $class = 2;		# default
 	if ( $thispage == 1 ) {
@@ -206,7 +203,13 @@ sub generate_song {
 	$x = $ps->{marginleft};
 	if ( $ps->{headspace} ) {
 	    $y = $ps->{papersize}->[1] - $ps->{margintop} + $ps->{headspace};
-	    $y = $tpt->("title");
+	    $y -= font_bl($fonts->{title});
+	    $tpt->("title");
+	    $y -= ( - ( $fonts->{title}->{font}->descender / 1024 )
+		      * $fonts->{title}->{size}
+		    + ( $fonts->{subtitle}->{font}->ascender / 1024 )
+		      * $fonts->{subtitle}->{size} )
+		  * $ps->{spacing}->{title};
 	    $y = $tpt->("subtitle");
 	}
 
@@ -216,6 +219,7 @@ sub generate_song {
 	}
 
 	$y = $ps->{papersize}->[1] - $ps->{margintop};
+	$y += $ps->{headspace} if $ps->{'head-first-only'} && $class;
 	$col = 0;
 	$vsp_ignorefirst = 1;
     };
@@ -1020,12 +1024,12 @@ sub showlayout {
 
     $pr->hline( $ps->{marginleft},
 		$ps->{papersize}->[1]-$ps->{margintop}+$ps->{headspace},
-		$ps->{papersize}->[0]-$ps->{marginright},
+		$ps->{papersize}->[0]-$ps->{marginleft}-$ps->{marginright},
 		$lw, $col );
 
     $pr->hline( $ps->{marginleft},
 		$ps->{marginbottom}-$ps->{footspace},
-		$ps->{papersize}->[0]-$ps->{marginright},
+		$ps->{papersize}->[0]-$ps->{marginleft}-$ps->{marginright},
 		$lw, $col );
 
     my @off = @{ $ps->{columnoffsets} };
