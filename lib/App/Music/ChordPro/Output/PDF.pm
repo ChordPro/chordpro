@@ -322,15 +322,9 @@ sub generate_song {
 		      + $ps->{columnoffsets}->[$col]
 			- $ps->{'chorus-bar-offset'}
 			  + $indent;
-		    my $gfx = $pr->{pdfgfx};
-		    $gfx->save;
-		    $gfx->linewidth($ps->{'chorus-bar-width'});
-		    $gfx->strokecolor($ps->{'chorus-bar-color'});
-		    $gfx
-		      ->move( $cx, $y )
-			->vline( $y - $vsp )
-			  ->stroke;
-		    $gfx->restore;
+		    $pr->vline( $cx, $y, $vsp,
+				$ps->{'chorus-bar-width'},
+				$ps->{'chorus-bar-color'} );
 		}
 	    }
 
@@ -340,34 +334,23 @@ sub generate_song {
 	    my $text = $elt->{text};
 	    my $w = $pr->strwidth( $text );
 	    my $x1 = $x + $w;
-	    my $gfx = $pr->{pdfpage}->gfx(1); # under
 
 	    # Draw background.
 	    my $bgcol = $ftext->{background};
 	    $bgcol ||= "#E5E5E5" if $elt->{type} eq "comment";
 	    if ( $bgcol ) {
-		$gfx->save;
-		$gfx->fillcolor($bgcol);
-		$gfx->strokecolor($bgcol);
-		$gfx
-		  ->rectxy( $x, $y, $x + $w, $y - $vsp )
-		    ->linewidth(3)
-		      ->fillstroke;
-		$gfx->restore;
+		$pr->rectxy( $x, $y, $x + $w, $y - $vsp, 3, $bgcol );
 	    }
 
 	    # Draw box.
+	    my $x0 = $x;
 	    if ( $elt->{type} eq "comment_box" ) {
-		$gfx->save;
-		$gfx->strokecolor("black");
-		$gfx
-		  ->rectxy( $x - 1, $y - 1, $x + $w + 1, $y - $vsp + 1 )
-		    ->linewidth(1)
-		      ->stroke;
-		$gfx->restore;
+		$x0 += 0.25;	# add some offset for the box
+		$pr->rectxy( $x0, $y + 1, $x0 + $w + 1, $y - $vsp + 1,
+			     0.5, undef, "black" );
 	    }
 
-	    songline( $elt, $x, $y, $ps, indent => $indent );
+	    songline( $elt, $x0, $y, $ps, indent => $indent );
 
 	    $y -= $vsp;
 	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
@@ -391,14 +374,7 @@ sub generate_song {
 	    }
 	    my $cx = $ps->{marginleft}
 	      + $ps->{columnoffsets}->[$col] - $ps->{'chorus-bar-offset'};
-	    $pr->{pdfgfx}
-	      ->save
-	      ->move( $cx, $cy )
-	      ->linewidth(1)
-	      ->strokecolor($ps->{'chorus-bar-color'})
-	      ->vline( $y + vsp($ps))
-	      ->stroke
-	      ->restore;
+	    $pr->vline( $cx, $cy, vsp($ps), 1, $ps->{'chorus-bar-color'} );
 	    $y -= vsp($ps,4); # chordii
 	    next;
 	}
@@ -464,15 +440,6 @@ sub generate_song {
 
 	if ( $elt->{type} eq "image" ) {
 
-	    # Turn missing images into a comment.
-	    unless ( -r $elt->{uri} ) {
-		unshift( @elts, { %$elt,
-				  type => "comment_box",
-				  text => $elt->{uri} . ": $!",
-				} );
-		redo;
-	    }
-
 	    # Images are slightly more complex.
 	    # Only after establishing the desired height we can issue
 	    # the checkspace call, and we must get $y after that.
@@ -485,6 +452,15 @@ sub generate_song {
 	    };
 
 	    my $vsp = imageline( $elt, $x, $ps, $gety );
+
+	    # Turn error into comment.
+	    unless ( $vsp =~ /^\d/ ) {
+		unshift( @elts, { %$elt,
+				  type => "comment_box",
+				  text => $vsp,
+				} );
+		redo;
+	    }
 
 	    $y -= $vsp;
 	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
@@ -673,18 +649,11 @@ sub songline {
 
 	if ( $fchord->{background} && $chord ne "" && !$chordscol ) {
 	    # Draw background.
-	    my $w = $pr->strwidth( $chord." ", $fchord );
-	    my $y1 = $ytop - $fchord->{size};
-	    my $bgcol = $fchord->{background};
-	    my $x1 = $x + $w - $pr->strwidth(" ")/2;
-	    my $x = $x - $pr->strwidth(" ")/2;
-	    my $gfx = $pr->{pdfpage}->gfx(1); # under
-	    $gfx->save;
-	    $gfx->fillcolor($bgcol);
-	    $gfx->strokecolor($bgcol);
-	    $gfx->rectxy( $x, $ytop, $x1, $y1 );
-	    $gfx->fill;
-	    $gfx->restore;
+	    my $w1 = $pr->strwidth( $chord." ", $fchord );
+	    my $w2 = $pr->strwidth(" ") /  2;
+	    $pr->rectxy( $x - $w2, $ytop, $x + $w1 - $w2,
+			 $ytop - $fchord->{size}, 1,
+			 $fchord->{background} );
 	}
 
 	if ( $chordscol && $chord ne "" ) {
@@ -708,14 +677,8 @@ sub songline {
 	    # Avoid running together of syllables.
 	    $w *= 0.75 unless defined($rest);
 
-	    my $gfx = $pr->{pdfpage}->gfx;
-	    $gfx->save;
-	    $gfx->strokecolor("black");
-	    $gfx->linewidth(0.25);
-	    $gfx->move( $ulstart, $ytext + font_ul($ftext) );
-	    $gfx->hline( $ulstart + $w );
-	    $gfx->stroke;
-	    $gfx->restore;
+	    $pr->hline( $ulstart, $ytext + font_ul($ftext), $w,
+			0.25, "black" );
 
 	    # Print the text.
 	    $x = $pr->text( $phrase, $x, $ytext, $ftext );
@@ -899,15 +862,13 @@ sub imageline {
     my $opts = $elt->{opts};
     my $pr = $ps->{pr};
 
-    my $img;
-    for ( $elt->{uri} ) {
-	$img = $pr->{pdf}->image_png($_)  if /\.png$/i;
-	$img = $pr->{pdf}->image_jpeg($_) if /\.jpe?g$/i;
-	$img = $pr->{pdf}->image_gif($_)  if /\.gif$/i;
+    unless ( -s $elt->{uri} ) {
+	return "$!: " . $elt->{uri};
     }
+
+    my $img = eval { $pr->get_image( $elt->{uri} ) };
     unless ( $img ) {
-	warn("Unhandled image type: ", $elt->{uri}, "\n");
-	return 0;
+	return "Unhandled image type: " . $elt->{uri};
     }
 
     # Available width and height.
@@ -945,16 +906,7 @@ sub imageline {
 
     my $y = $gety->($h);	# may have been changed by checkspace
 
-    my $gfx = $ps->{pr}->{pdfpage}->gfx(1); # under
-
-    $gfx->save;
-    $gfx->image( $img, $x, $y-$h, $w, $h );
-    if ( $opts->{border} ) {
-	$gfx->rect( $x, $y-$h, $w, $h )
-	  ->linewidth($opts->{border})
-	    ->stroke;
-    }
-    $gfx->restore;
+    $pr->add_image( $img, $x, $y, $w, $h, $opts->{border} || 0 );
 
     return $h;			# vertical size
 }
@@ -1036,7 +988,12 @@ sub text_vsp {
 
 sub set_columns {
     my ( $ps, $cols ) = @_;
-    $ps->{columns} = $cols ||= 1;
+    unless ( $cols ) {
+	$cols = $ps->{columns} ||= 1;
+    }
+    else {
+	$ps->{columns} = $cols ||= 1;
+    }
     $ps->{columnoffsets} = [ 0 ];
     return unless $cols > 1;
 
@@ -1052,45 +1009,37 @@ sub set_columns {
 sub showlayout {
     my ( $ps ) = @_;
     my $pr = $ps->{pr};
+    my $col = "black";
+    my $lw = 0.5;
 
-    $pr->{pdfgfx}
-      ->linewidth(0.5)
-	->rectxy( $ps->{marginleft},
-		  $ps->{marginbottom},
-		  $ps->{papersize}->[0]-$ps->{marginright},
-		  $ps->{papersize}->[1]-$ps->{margintop} )
-	  ->stroke;
+    $pr->rectxy( $ps->{marginleft},
+		 $ps->{marginbottom},
+		 $ps->{papersize}->[0]-$ps->{marginright},
+		 $ps->{papersize}->[1]-$ps->{margintop},
+		 $lw, undef, $col);
 
-    $pr->{pdfgfx}
-      ->linewidth(0.5)
-	->move( $ps->{marginleft},
-		$ps->{papersize}->[1]-$ps->{margintop}+$ps->{headspace} )
-	  ->hline( $ps->{papersize}->[0]-$ps->{marginright} )
-	    ->stroke;
+    $pr->hline( $ps->{marginleft},
+		$ps->{papersize}->[1]-$ps->{margintop}+$ps->{headspace},
+		$ps->{papersize}->[0]-$ps->{marginright},
+		$lw, $col );
 
-    $pr->{pdfgfx}
-      ->linewidth(0.5)
-	->move( $ps->{marginleft},
-		$ps->{marginbottom}-$ps->{footspace} )
-	  ->hline( $ps->{papersize}->[0]-$ps->{marginright} )
-	    ->stroke;
+    $pr->hline( $ps->{marginleft},
+		$ps->{marginbottom}-$ps->{footspace},
+		$ps->{papersize}->[0]-$ps->{marginright},
+		$lw, $col );
 
     my @off = @{ $ps->{columnoffsets} };
     @off = ( $ps->{chordscolumn} ) if $ps->{chordscolumn};
     foreach my $i ( 0 .. @off-1 ) {
 	next unless $off[$i];
-	$ps->{pr}->{pdfgfx}
-	  ->linewidth(0.25)
-	    ->move( $ps->{marginleft}+$off[$i],
-		    $ps->{marginbottom} )
-	      ->vline( $ps->{papersize}->[1]-$ps->{margintop} )
-		->stroke;
-	$ps->{pr}->{pdfgfx}
-	  ->linewidth(0.25)
-	    ->move( $ps->{marginleft}+$off[$i]-$ps->{columnspace},
-		    $ps->{marginbottom} )
-	      ->vline( $ps->{papersize}->[1]-$ps->{margintop} )
-		->stroke;
+	$pr->vline( $ps->{marginleft}+$off[$i],
+		    $ps->{marginbottom},
+		    $ps->{margintop}-$ps->{papersize}->[1]+$ps->{marginbottom},
+		    $lw, $col );
+	$pr->vline( $ps->{marginleft}+$off[$i]-$ps->{columnspace},
+		    $ps->{marginbottom},
+		    $ps->{margintop}-$ps->{papersize}->[1]+$ps->{marginbottom},
+		    $lw, $col );
     }
 }
 
@@ -1173,6 +1122,10 @@ sub configurator {
     $fonts->{comment}        ||= { %{ $fonts->{text}  } };
     $fonts->{toc}	     ||= { %{ $fonts->{text}  } };
     $fonts->{grid}           ||= { %{ $fonts->{chord} } };
+    $fonts->{subtitle}->{size}       ||= $fonts->{text}->{size};
+    $fonts->{comment_italic}->{size} ||= $fonts->{text}->{size};
+    $fonts->{comment_box}->{size}    ||= $fonts->{text}->{size};
+    $fonts->{comment}->{size}        ||= $fonts->{text}->{size};
 
     # Default footer is small subtitle.
     unless ( $fonts->{footer} ) {
@@ -1305,6 +1258,10 @@ sub text {
 	$self->{pdftext}->strokecolor( $font->{color} );
 	$self->{pdftext}->fillcolor( $font->{color} );
     }
+    else {
+	$self->{pdftext}->strokecolor("black");
+	$self->{pdftext}->fillcolor("black");
+    }
     $self->{pdftext}->translate( $x, $y );
     $x += $self->{pdftext}->text($text);
     if ( $font->{color} ) {
@@ -1327,6 +1284,69 @@ sub strwidth {
     $size ||= $self->{fontsize} || $font->{size};
     $self->setfont( $font, $size );
     $self->{pdftext}->advancewidth($text);
+}
+
+sub hline {
+    my ( $self, $x, $y, $w, $lw, $color ) = @_;
+    my $gfx = $self->{pdfpage}->gfx;
+    $gfx->save;
+    $gfx->strokecolor($color ||= "black");
+    $gfx->linewidth($lw||1);
+    $gfx->move( $x, $y );
+    $gfx->hline( $x + $w );
+    $gfx->stroke;
+    $gfx->restore;
+}
+
+sub vline {
+    my ( $self, $x, $y, $h, $lw, $color ) = @_;
+    my $gfx = $self->{pdfpage}->gfx;
+    $gfx->save;
+    $gfx->strokecolor($color ||= "black");
+    $gfx->linewidth($lw||1);
+    $gfx->move( $x, $y );
+    $gfx->vline( $y - $h );
+    $gfx->stroke;
+    $gfx->restore;
+}
+
+sub rectxy {
+    my ( $self, $x, $y, $x1, $y1, $lw, $fillcolor, $strokecolor ) = @_;
+    my $gfx = $self->{pdfpage}->gfx(1); # under
+    $gfx->save;
+    $gfx->strokecolor($strokecolor) if $strokecolor;
+    $gfx->fillcolor($fillcolor) if $fillcolor;
+    $gfx->linewidth($lw||1);
+    $gfx->rectxy( $x, $y, $x1, $y1 );
+    $gfx->fill if $fillcolor;
+    $gfx->stroke if $strokecolor;
+    $gfx->restore;
+}
+
+sub get_image {
+    my ( $self, $uri ) = @_;
+    my $img;
+    for ( $uri ) {
+	$img = $self->{pdf}->image_png($_)  if /\.png$/i;
+	$img = $self->{pdf}->image_jpeg($_) if /\.jpe?g$/i;
+	$img = $self->{pdf}->image_gif($_)  if /\.gif$/i;
+    }
+    return $img;
+}
+
+sub add_image {
+    my ( $self, $img, $x, $y, $w, $h, $border ) = @_;
+
+    my $gfx = $self->{pdfpage}->gfx(1); # under
+
+    $gfx->save;
+    $gfx->image( $img, $x, $y-$h, $w, $h );
+    if ( $border ) {
+	$gfx->rect( $x, $y-$h, $w, $h )
+	  ->linewidth($border)
+	    ->stroke;
+    }
+    $gfx->restore;
 }
 
 sub newpage {
