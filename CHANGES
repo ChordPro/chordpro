@@ -1,5 +1,6 @@
 0.56.x	Jun 18 2016
 
+	Move transpose code to Chords module.
 	Default grid font to comment, not font.
 
 0.56	Jun 13 2016

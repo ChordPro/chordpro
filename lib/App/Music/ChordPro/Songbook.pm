@@ -4,6 +4,11 @@ package App::Music::ChordPro::Songbook;
 
 use strict;
 use warnings;
+
+use App::Music::ChordPro::Chords;
+
+*transpose = \&App::Music::ChordPro::Chords::transpose;
+
 use Encode qw(decode);
 use Carp;
 
@@ -79,36 +84,9 @@ sub add {
 	    @_ } );
 }
 
-my $notesS  = [ split( ' ', "A A# B C C# D D# E F F# G G#" ) ];
-my $notesF  = [ split( ' ', "A Bb B C Db D Eb E F Gb G Ab" ) ];
-my %notes = ( A => 1, H => 2, B => 3, C => 4, D => 6, E => 8, F => 9, G => 11 );
-
-sub transpose {
-    return $_[0] unless $xpose;
-    my $c = $_[0];
-    return $c unless $c =~ m/
-				^ (
-				    [CF](?:is|\#)? |
-				    [DG](?:is|\#|es|b)? |
-				    A(?:is|\#|s|b)? |
-				    E(?:s|b)? |
-				    B(?:es|b)? |
-				    H
-				  )
-				  (.*)
-			    /x;
-    my ( $r, $rest ) = ( $1, $2 );
-    my $mod = 0;
-    $mod-- if $r =~ s/(e?s|b)$//;
-    $mod++ if $r =~ s/(is|\#)$//;
-    warn("WRONG NOTE: '$c' '$r' '$rest'") unless $r = $notes{$r};
-    $r = ($r - 1 + $mod + $xpose) % 12;
-    return ( $xpose > 0 ? $notesS : $notesF )->[$r] . $rest;
-}
-
 sub cxpose {
     my ( $t ) = @_;
-    $t =~ s/\[(.+?)\]/transpose($1)/ge;
+    $t =~ s/\[(.+?)\]/transpose($1,$xpose)/ge;
     return $t;
 }
 
@@ -132,7 +110,7 @@ sub decompose {
     while ( @a ) {
 	my $t = shift(@a);
 	$t =~ s/^\[(.*)\]$/$1/;
-	push(@chords, transpose($t));
+	push(@chords, transpose($t,$xpose));
 	push(@phrases, shift(@a));
     }
 
@@ -148,7 +126,7 @@ sub decompose_grid {
 	$line = $1;
 	$rest = cxpose($2);
     }
-    my @tokens = map { transpose($_) } split( ' ', $line );
+    my @tokens = map { transpose($_,$xpose) } split( ' ', $line );
     return ( tokens => \@tokens, $rest ? ( comment => $rest ) : () );
 }
 
