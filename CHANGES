@@ -2,6 +2,7 @@
 
 	Move transpose code to Chords module.
 	Default grid font to comment, not font.
+	Register user defined fonts.
 
 0.56	Jun 13 2016
 

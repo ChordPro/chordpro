@@ -399,11 +399,26 @@ my $chords =
  "G#m9(maj7)"  => [  N, N, 1, 3, 0, 3,	 1, CHORD_BUILTIN, CHORD_HARD ],
 
 };
+my $song_chords;
+
+sub reset_song_chords {
+    $song_chords = {};
+}
+
+sub add_song_chord {
+    my ( $name, $base, $frets ) = @_;
+    $song_chords->{$name} = [ @$frets, $base, CHORD_USER, CHORD_HARD ];
+}
 
 sub chord_info {
     my ( $chord ) = @_;
-    return unless exists($chords->{$chord});
-    my @info = @{ $chords->{$chord} };
+    my @info;
+    for ( $song_chords, $chords ) {
+	next unless exists($_->{$chord});
+	@info = @{ $_->{$chord} };
+	last;
+    }
+    return unless @info;
     {	name    => $chord,
 	strings => [ @info[0..5] ],
 	base    => $info[6]-1,

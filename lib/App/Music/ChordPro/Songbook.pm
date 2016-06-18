@@ -7,8 +7,6 @@ use warnings;
 
 use App::Music::ChordPro::Chords;
 
-*transpose = \&App::Music::ChordPro::Chords::transpose;
-
 use Encode qw(decode);
 use Carp;
 
@@ -20,6 +18,8 @@ sub new {
 my $def_context = "";
 my $in_context = $def_context;
 my $xpose;
+my @used_chords;
+my %used_chords;
 
 sub parsefile {
     my ( $self, $filename, $options ) = @_;
@@ -32,6 +32,9 @@ sub parsefile {
       if exists($self->{songs}->[-1]->{body});
     $self->{songs}->[-1]->{structure} = "linear";
     $xpose = $options->{transpose};
+    @used_chords = ();
+    %used_chords = ();
+    App::Music::ChordPro::Chords::reset_song_chords();
 
     while ( <$fh> ) {
 	s/[\r\n]+$//;
@@ -74,6 +77,7 @@ sub parsefile {
 	    $self->add( type => "empty" );
 	}
     }
+    $self->{songs}->[-1]->{chords} = [ @used_chords ];
     # $self->{songs}->[-1]->structurize;
 }
 
@@ -84,9 +88,27 @@ sub add {
 	    @_ } );
 }
 
+sub chord {
+    my ( $c ) = @_;
+    return $c unless length($c);
+    return $used_chords{$c} if exists $used_chords{$c};
+
+    my $info = App::Music::ChordPro::Chords::chord_info($c);
+    warn("Unknown chord: $c\n") unless $info;
+    my $xc = App::Music::ChordPro::Chords::transpose( $c, $xpose );
+    if ( $xc ) {
+	$used_chords{$c} = $xc;
+    }
+    else {
+	$xc = $c;
+    }
+    push( @used_chords, $xc ) if $info;
+    return $xc;
+}
+
 sub cxpose {
     my ( $t ) = @_;
-    $t =~ s/\[(.+?)\]/transpose($1,$xpose)/ge;
+    $t =~ s/\[(.+?)\]/chord($1)/ge;
     return $t;
 }
 
@@ -110,7 +132,7 @@ sub decompose {
     while ( @a ) {
 	my $t = shift(@a);
 	$t =~ s/^\[(.*)\]$/$1/;
-	push(@chords, transpose($t,$xpose));
+	push(@chords, chord($t));
 	push(@phrases, shift(@a));
     }
 
@@ -126,7 +148,7 @@ sub decompose_grid {
 	$line = $1;
 	$rest = cxpose($2);
     }
-    my @tokens = map { transpose($_,$xpose) } split( ' ', $line );
+    my @tokens = map { chord($_) } split( ' ', $line );
     return ( tokens => \@tokens, $rest ? ( comment => $rest ) : () );
 }
 
@@ -329,8 +351,8 @@ sub global_directive {
     }
 
     #### TODO: other # strings (ukelele, banjo, ...)
-    # define A: basefret N frets N N N N N N
-    # define: A basefret N frets N N N N N N
+    # define A: base-fret N frets N N N N N N
+    # define: A base-fret N frets N N N N N N
     if ( $d =~ /^define\s+([^:]+):\s+
 		   base-fret\s+(\d+)\s+
 		   frets\s+([0-9---xX])\s+
@@ -352,11 +374,15 @@ sub global_directive {
 		  /xi
 	  ) {
 	my @f = ($3, $4, $5, $6, $7, $8);
-	push(@{$cur->{define}},
-	     { name => $1,
-	       $2 ? ( base => $2 ) : (),
-	       frets => [ map { $_ =~ /^\d+/ ? $_ : '-' } @f ],
-	     });
+	my $ci = { name => $1,
+		   $2 ? ( base => $2 ) : (),
+		   frets => [ map { $_ =~ /^\d+/ ? $_ : -1 } @f ],
+		 };
+	push( @{$cur->{define}}, $ci );
+	App::Music::ChordPro::Chords::add_song_chord
+	    ( $ci->{name},
+	      $ci->{base} || 1,
+	      $ci->{frets} );
 	return 1;
     }
     return;
