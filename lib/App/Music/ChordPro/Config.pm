@@ -166,7 +166,7 @@ This is the current built-in configuration file, showing all settings.
   	// comment_italic --> chord
   	// comment_box    --> chord
   	// toc            --> text
-  	// grid           --> chord
+  	// grid           --> comment
   	// footer         --> subtitle @ 60%
   	// empty          --> text
 

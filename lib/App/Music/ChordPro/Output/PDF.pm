@@ -765,17 +765,22 @@ sub gridline {
     my $pr = $ps->{pr};
     my $fonts = $ps->{fonts};
 
-    my $smufl = 0;		# use SMUFL font
+    my $smufl = 1;		# use SMUFL font
 
     $x += $barwidth/2;
 
-    my $fchord = { %{ $fonts->{chord} } };
+    my $fchord = { %{ $fonts->{grid} || $fonts->{chord} } };
     delete($fchord->{background});
-    my $schord = { %{ $fonts->{symbols} } };
-    delete($schord->{background});
-    $schord->{size} = $fchord->{size};
-
-    $schord = $fchord unless $smufl;
+    my $schord;
+    if ( $smufl && $fonts->{symbols} ) {
+	$schord = { %{ $fonts->{symbols} } };
+    }
+    else {
+	$schord = { %{ $fchord } };
+	delete($schord->{background});
+	$smufl = 0;
+    }
+#    $schord->{size} = $fchord->{size};
 
     $y -= font_bl($fchord);
 
@@ -799,7 +804,6 @@ sub gridline {
 	    $t = "{" if $t eq "|:";
 	    $t = "}" if $t eq ":|";
 	    $t = "}{" if $t eq ":|:";
-	    my $y = $y;
 	    $pr->setfont($schord);
 	    my @t = ( $t );
 	    push( @t, $smufl{barlineSingle} ) if $t eq $smufl{repeat2Bars};
@@ -832,8 +836,8 @@ sub gridline {
 	    $y += $schord->{size} / 2 if $t eq $smufl{repeat1Bar};
 	    my $w = $pr->strwidth($t);
 	    $pr->text( $t,
-			     $x + ($k - $prevbar - 1)*$cellwidth/2 - $w/2,
-			     $y );
+		       $x + ($k - $prevbar - 1)*$cellwidth/2 - $w/2,
+		       $y );
 	    $x += $cellwidth;
 	}
 	elsif ( ( $t = $smap{$token} || "" ) eq $smufl{repeat2Bars} ) {
@@ -1125,7 +1129,7 @@ sub configurator {
     $fonts->{comment}        ||= { %{ $fonts->{text}  } };
     $fonts->{toc}	     ||= { %{ $fonts->{text}  } };
     $fonts->{empty}	     ||= { %{ $fonts->{text}  } };
-    $fonts->{grid}           ||= { %{ $fonts->{chord} } };
+    $fonts->{grid}           ||= { %{ $fonts->{comment} } };
     $fonts->{subtitle}->{size}       ||= $fonts->{text}->{size};
     $fonts->{comment_italic}->{size} ||= $fonts->{text}->{size};
     $fonts->{comment_box}->{size}    ||= $fonts->{text}->{size};

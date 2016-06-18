@@ -1,3 +1,7 @@
+0.56.x	Jun 18 2016
+
+	Default grid font to comment, not font.
+
 0.56	Jun 13 2016
 
 	Handle {titles} directive.
