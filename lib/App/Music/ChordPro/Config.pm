@@ -85,6 +85,22 @@ This is the current built-in configuration file, showing all settings.
 	// Set to non-zero to ignore the directive.
 	"titles-directive-ignore" : 0,
   
+    	// Chord grids.
+  	// A chord grid consists of a number of cells.
+  	// Cell dimensions are specified by "width" and "height".
+  	// The horizontal number of cells depends on the number of strings.
+  	// The vertical number of cells is "vcells", which should
+	// be 4 or larger to accomodate most chords.
+  	// The horizontal distance between grids is "hspace" cells.
+  	// The vertical distance is "vspace" cells.
+  	"chordgrid" : {
+	    "width"    :  6,
+  	    "height"   :  6,
+  	    "hspace"   :  3.95,
+  	    "vspace"   :  3,
+  	    "vcells"   :  4,
+  	},
+  
   	// Even/odd pages. A value of -1 denotes odd/even pages.
   	"even-odd-pages" : 1,
   

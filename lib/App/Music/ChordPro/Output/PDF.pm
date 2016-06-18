@@ -8,7 +8,7 @@ use strict;
 use warnings;
 use Data::Dumper;
 
-use constant DEBUG_SPACING => 0;
+use constant DEBUG_SPACING => 1;
 
 sub generate_songbook {
     my ($self, $sb, $options) = @_;
@@ -249,6 +249,14 @@ sub generate_song {
     };
 
     my @elts = @{$sb};
+    if ( $options->{'chord-grids'} ) {
+	push( @elts,
+	      { type => "chord-grids",
+		context => "",
+		chords => [ @{ $s->{chords} } ]
+	      } );
+    }
+
     my $elt;			# current element
 
     my $prev;			# previous element
@@ -486,6 +494,30 @@ sub generate_song {
 
 	    $y -= $vsp;
 	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+	}
+
+	if ( $elt->{type} eq "chord-grids" ) {
+	    my @chords = @{ $elt->{chords} };
+	    my $vsp = chordgrid_vsp( $elt, $ps );
+	    my $hsp = chordgrid_hsp( $elt, $ps );
+	    my $h = int( ( $ps->{papersize}->[0]
+			   - $ps->{marginleft}
+			   - $ps->{marginright}
+			   + $ps->{chordgrid}->{hspace}
+			     * $ps->{chordgrid}->{width} ) / $hsp );
+	    while ( @chords ) {
+		my $x = $x;
+		$checkspace->($vsp);
+		$pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+
+		for ( 1..$h ) {
+		    last unless @chords;
+		    $x += chordgrid( shift(@chords), $x, $y, $ps );
+		}
+
+		$y -= $vsp;
+		$pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+	    }
 	}
 
 	if ( $elt->{type} eq "control" ) {
@@ -993,6 +1025,78 @@ sub text_vsp {
     _vsp( "text", $ps, "lyrics" );
 }
 
+sub chordgrid_vsp {
+    my ( $elt, $ps ) = @_;
+    $ps->{fonts}->{comment}->{size} * $ps->{spacing}->{chords}
+      + 0.40 * $ps->{chordgrid}->{width}
+	+ $ps->{chordgrid}->{vcells} * $ps->{chordgrid}->{height}
+	  + $ps->{chordgrid}->{vspace} * $ps->{chordgrid}->{height};
+}
+
+sub chordgrid_hsp {
+    my ( $elt, $ps ) = @_;
+    App::Music::ChordPro::Chords::strings() * $ps->{chordgrid}->{width}
+      + $ps->{chordgrid}->{hspace} * $ps->{chordgrid}->{width};
+}
+
+my @Roman = qw( I II III IV V VI VI VII VIII IX X XI XII );
+
+sub chordgrid {
+    my ( $name, $x, $y, $ps ) = @_;
+    my $x0 = $x;
+
+    my $gw = $ps->{chordgrid}->{width};
+    my $gh = $ps->{chordgrid}->{height};
+    my $dot = 0.80 * $gw;
+    my $lw  = 0.10 * $gw;
+
+    my $info = App::Music::ChordPro::Chords::chord_info($name);
+    die("Unknown chord? $name?\n") unless $info;
+
+    my $pr = $ps->{pr};
+
+    my $w = $gw * $#{ $info->{strings} };
+
+    # Draw font name.
+    my $font = $ps->{fonts}->{comment};
+    $pr->setfont($font);
+    $name .= "*" unless $info->{builtin};
+    $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y - font_bl($font) );
+    $y -= $font->{size} * $ps->{spacing}->{chords} + $dot/2;
+
+    if ( $info->{base} ) {
+	my $i = @Roman[$info->{base}] . " ";
+	$pr->setfont( $ps->{fonts}->{text}, $gh );
+	$pr->text( $i, $x-$pr->strwidth($i), $y-$gh/2,
+		   $ps->{fonts}->{text}, $gh );
+    }
+
+    my $v = $ps->{chordgrid}->{vcells};
+    my $h = @{ $info->{strings} };
+    $pr->hline( $x, $y - $_*$gh, $w, $lw ) for 0..$v;
+    $pr->vline( $x + $_*$gw, $y, $gh*$v, $lw ) for 0..$h-1;
+
+    $x -= $gw/2;
+    for my $fret ( @{ $info->{strings} } ) {
+	if ( $fret > 0 ) {
+	    $pr->circle( $x+$gw/2, $y-$fret*$gh+$gh/2, $dot/2, $lw,
+			 "black", "black");
+	}
+	elsif ( $fret < 0 ) {
+	    $pr->cross( $x+$gw/2, $y+$gh/3, $dot/3, $lw, "black");
+	}
+	else {
+	    $pr->circle( $x+$gw/2, $y+$gh/3, $dot/3, $lw,
+			 undef, "black");
+	}
+    }
+    continue {
+	$x += $gw;
+    }
+
+    return $gw * ( $ps->{chordgrid}->{hspace} + @{ $info->{strings} } );
+}
+
 sub set_columns {
     my ( $ps, $cols ) = @_;
     unless ( $cols ) {
@@ -1326,7 +1430,37 @@ sub rectxy {
     $gfx->fillcolor($fillcolor) if $fillcolor;
     $gfx->linewidth($lw||1);
     $gfx->rectxy( $x, $y, $x1, $y1 );
+    $gfx->close;
     $gfx->fill if $fillcolor;
+    $gfx->stroke if $strokecolor;
+    $gfx->restore;
+}
+
+sub circle {
+    my ( $self, $x, $y, $r, $lw, $fillcolor, $strokecolor ) = @_;
+    my $gfx = $self->{pdfpage}->gfx;
+    $gfx->save;
+    $gfx->strokecolor($strokecolor) if $strokecolor;
+    $gfx->fillcolor($fillcolor) if $fillcolor;
+    $gfx->linewidth($lw||1);
+    $gfx->circle( $x, $y, $r );
+    $gfx->fill if $fillcolor;
+    $gfx->stroke if $strokecolor;
+    $gfx->restore;
+}
+
+sub cross {
+    my ( $self, $x, $y, $r, $lw, $strokecolor ) = @_;
+    my $gfx = $self->{pdfpage}->gfx;
+    $gfx->save;
+    $gfx->strokecolor($strokecolor) if $strokecolor;
+    $gfx->linewidth($lw||1);
+    $r = 0.9 * $r;
+    $gfx->move( $x-$r, $y-$r );
+    $gfx->line( $x+$r, $y+$r );
+    $gfx->stroke if $strokecolor;
+    $gfx->move( $x-$r, $y+$r );
+    $gfx->line( $x+$r, $y-$r );
     $gfx->stroke if $strokecolor;
     $gfx->restore;
 }

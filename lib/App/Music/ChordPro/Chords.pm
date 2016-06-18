@@ -10,6 +10,7 @@ use constant CHORD_USER    =>  1;
 use constant CHORD_EASY    =>  0;
 use constant CHORD_HARD    =>  1;
 use constant N             => -1;
+use constant STRINGS	   =>  6; # for now
 
 my $chords =
 {
@@ -366,7 +367,7 @@ my $chords =
  "G7(sus4)"    => [  3, 3, 0, 0, 1, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
  "Gmaj"	       => [  3, 2, 0, 0, 0, 3,	 1, CHORD_BUILTIN, CHORD_HARD ],
  "Gmaj7"       => [  N, N, 4, 3, 2, 1,	 2, CHORD_BUILTIN, CHORD_HARD ],
- "Gmaj7sus4"   => [ N, N, 0, 0, 1, 2,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Gmaj7sus4"   => [  N, N, 0, 0, 1, 2,	 1, CHORD_BUILTIN, CHORD_HARD ],
  "Gmaj9"       => [  1, 1, 4, 1, 2, 1,	 2, CHORD_BUILTIN, CHORD_HARD ],
  "Gm"	       => [  1, 3, 3, 1, 1, 1,	 3, CHORD_BUILTIN, CHORD_EASY ],
  "Gmin"	       => [  1, 3, 3, 1, 1, 1,	 3, CHORD_BUILTIN, CHORD_EASY ],
@@ -409,6 +410,8 @@ sub add_song_chord {
     my ( $name, $base, $frets ) = @_;
     $song_chords->{$name} = [ @$frets, $base, CHORD_USER, CHORD_HARD ];
 }
+
+sub strings { STRINGS }
 
 sub chord_info {
     my ( $chord ) = @_;
