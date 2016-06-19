@@ -1,9 +1,11 @@
-0.56.x	Jun 18 2016
+0.57	Jun 19 2016
 
 	Move transpose code to Chords module.
 	Default grid font to comment, not font.
 	Register user defined fonts.
-	First shots at printing chord grids.
+	First shot at printing chord grids.
+	Second shot at printing chord grids.
+	Support -D, but use backend to generate the grids.
 
 0.56	Jun 13 2016
 

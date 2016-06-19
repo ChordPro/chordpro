@@ -77,7 +77,8 @@ sub parsefile {
 	    $self->add( type => "empty" );
 	}
     }
-    $self->{songs}->[-1]->{chords} = [ @used_chords ];
+    #### TODO: sorting
+    $self->add( type => "chord-grids", chords => [ @used_chords ] );
     # $self->{songs}->[-1]->structurize;
 }
 

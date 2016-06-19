@@ -4,7 +4,7 @@ use 5.010;
 
 package App::Music::ChordPro;
 
-our $VERSION = "0.56";
+our $VERSION = "0.57";
 
 =head1 NAME
 
@@ -94,6 +94,41 @@ sub main {
     use App::Music::ChordPro::Songbook;
     my $s = App::Music::ChordPro::Songbook->new;
     $s->parsefile( $_, $options ) foreach @::ARGV;
+
+    if ( $options->{'dump-chords'} ) {
+	my $d = App::Music::ChordPro::Song->new;
+	$d->{title} = "ChordPro $VERSION Built-in Chords";
+	$d->{subtitle} = [ "http://www.chordpro.org" ];
+	my @body;
+	my @chords;
+
+	my $prev = "";
+	foreach my $c ( @{ App::Music::ChordPro::Chords::chordnames() } ) {
+	    if ( $c =~ /^(.[b#]?)/ and $1 ne $prev )  {
+		$prev = $1;
+		push( @body, { type => "chord-grids",
+			       context => "__CLI__",
+			       chords => [ @chords ]
+			     } ) if @chords;
+		@chords = ();
+	    }
+	    push( @chords, $c );
+	}
+
+	push( @body, { type => "chord-grids",
+		       context => "__CLI__",
+		       chords => [ @chords ]
+		     } ) if @chords;
+
+	$d->{body} = \@body;
+	if ( @{ $s->{songs} } == 1
+	     && !exists $s->{songs}->[0]->{body} ) {
+	    $s->{songs} = [ $d ];
+	}
+	else {
+	    push( @{ $s->{songs} }, $d );
+	}
+    }
 
     warn(Dumper($s), "\n") if $options->{debug};
 
@@ -281,7 +316,9 @@ Not supported.
 
 =item B<--dump-chords> (short: B<-D>)
 
-Not supported.
+Dumps a list of built-in chords in a form dependent of the backend used.
+The PDF backend will produce neat pages of chord diagrams.
+The ChordPro backend will produce a list of C<defined> directives.
 
 =item B<--dump-chords-text> (short: B<-d>)
 
@@ -512,11 +549,11 @@ sub app_setup {
 
           # Configuration handling.
           'config|cfg=s@',
-          'noconfig',
+          'noconfig|no-config',
           'sysconfig=s',
-          'nosysconfig',
+          'nosysconfig|no-sysconfig',
           'userconfig=s',
-          'nouserconfig',
+          'nouserconfig|no-userconfig',
 	  'print-default-config' => \$defcfg,
 	  'print-final-config'   => \$fincfg,
 
@@ -667,7 +704,7 @@ Options marked with - are ignored.
     --chord-grids-sorted  -S      *Prints chord grids alphabetically
     --chord-size=N  -c            *Sets chord size [9]
     --dump-chords  -D             Dumps chords definitions (PostScript)
-    --dump-chords-text  -d        -Dumps chords definitions (Text)
+    --dump-chords-text  -d        Dumps chords definitions (Text)
     --even-pages-number-left  -L  *Even pages numbers on left
     --odd-pages-number-left       *Odd pages numbers on left
     --no-chord-grids  -G          *Disables printing of chord grids

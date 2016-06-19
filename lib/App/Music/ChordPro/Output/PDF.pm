@@ -8,7 +8,7 @@ use strict;
 use warnings;
 use Data::Dumper;
 
-use constant DEBUG_SPACING => 1;
+use constant DEBUG_SPACING => 0;
 
 sub generate_songbook {
     my ($self, $sb, $options) = @_;
@@ -249,14 +249,6 @@ sub generate_song {
     };
 
     my @elts = @{$sb};
-    if ( $options->{'chord-grids'} ) {
-	push( @elts,
-	      { type => "chord-grids",
-		context => "",
-		chords => [ @{ $s->{chords} } ]
-	      } );
-    }
-
     my $elt;			# current element
 
     my $prev;			# previous element
@@ -1065,7 +1057,7 @@ sub chordgrid {
     $y -= $font->{size} * $ps->{spacing}->{chords} + $dot/2;
 
     if ( $info->{base} ) {
-	my $i = @Roman[$info->{base}] . " ";
+	my $i = @Roman[$info->{base}] . "  ";
 	$pr->setfont( $ps->{fonts}->{text}, $gh );
 	$pr->text( $i, $x-$pr->strwidth($i), $y-$gh/2,
 		   $ps->{fonts}->{text}, $gh );

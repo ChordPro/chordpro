@@ -12,118 +12,8 @@ use constant CHORD_HARD    =>  1;
 use constant N             => -1;
 use constant STRINGS	   =>  6; # for now
 
-my $chords =
-{
- "Ab"	       => [  1, 3, 3, 2, 1, 1,	 4, CHORD_BUILTIN, CHORD_HARD ],
- "Ab+"	       => [  N, N, 2, 1, 1, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Ab4"	       => [  N, N, 1, 1, 2, 4,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Ab7"	       => [  N, N, 1, 1, 1, 2,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Ab11"	       => [  1, 3, 1, 3, 1, 1,	 4, CHORD_BUILTIN, CHORD_HARD ],
- "Absus"       => [  N, N, 1, 1, 2, 4,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Absus4"      => [  N, N, 1, 1, 2, 4,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Abdim"       => [  N, N, 0, 1, 0, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Abmaj"       => [  1, 3, 3, 2, 1, 1,	 4, CHORD_BUILTIN, CHORD_HARD ],
- "Abmaj7"      => [  N, N, 1, 1, 1, 3,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Abm"	       => [  1, 3, 3, 1, 1, 1,	 4, CHORD_BUILTIN, CHORD_HARD ],
- "Abmin"       => [  1, 3, 3, 1, 1, 1,	 4, CHORD_BUILTIN, CHORD_HARD ],
- "Abm7"	       => [  N, N, 1, 1, 1, 1,	 4, CHORD_BUILTIN, CHORD_HARD ],
-
- "A"	       => [  N, 0, 2, 2, 2, 0,	 1, CHORD_BUILTIN, CHORD_EASY ],
- "A+"	       => [  N, 0, 3, 2, 2, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "A4"	       => [  0, 0, 2, 2, 0, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "A6"	       => [  N, N, 2, 2, 2, 2,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "A7"	       => [  N, 0, 2, 0, 2, 0,	 1, CHORD_BUILTIN, CHORD_EASY ],
- "A7+"	       => [  N, N, 3, 2, 2, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "A7(9+)"      => [  N, 2, 2, 2, 2, 3,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "A9"	       => [  N, 0, 2, 1, 0, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "A11"	       => [  N, 4, 2, 4, 3, 3,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "A13"	       => [  N, 0, 1, 2, 3, 1,	 5, CHORD_BUILTIN, CHORD_HARD ],
- "A7sus4"      => [  0, 0, 2, 0, 3, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "A9sus"       => [  N, 0, 2, 1, 0, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Asus"	       => [  N, N, 2, 2, 3, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Asus2"       => [  0, 0, 2, 2, 0, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Asus4"       => [  N, N, 2, 2, 3, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Adim"	       => [  N, N, 1, 2, 1, 2,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Amaj"	       => [  N, 0, 2, 2, 2, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Amaj7"       => [  N, 0, 2, 1, 2, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Am"	       => [  N, 0, 2, 2, 1, 0,	 1, CHORD_BUILTIN, CHORD_EASY ],
- "Amin"	       => [  N, 0, 2, 2, 1, 0,	 1, CHORD_BUILTIN, CHORD_EASY ],
- "A/D"	       => [  N, N, 0, 0, 2, 2,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "A/F#"	       => [  2, 0, 2, 2, 2, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "A/G#"	       => [  4, 0, 2, 2, 2, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
-
- "Am#7"	       => [  N, N, 2, 1, 1, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Am(7#)"      => [  N, 0, 2, 2, 1, 4,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Am6"	       => [  N, 0, 2, 2, 1, 2,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Am7"	       => [  N, 0, 2, 2, 1, 3,	 1, CHORD_BUILTIN, CHORD_EASY ],
- "Am7sus4"     => [  0, 0, 0, 0, 3, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Am9"	       => [  N, 0, 1, 1, 1, 3,	 5, CHORD_BUILTIN, CHORD_HARD ],
- "Am/G"	       => [  3, 0, 2, 2, 1, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Amadd9"      => [  0, 2, 2, 2, 1, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Am(add9)"    => [  0, 2, 2, 2, 1, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
-
- "A#"	       => [  N, 1, 3, 3, 3, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "A#+"	       => [  N, N, 0, 3, 3, 2,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "A#4"	       => [  N, N, 3, 3, 4, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "A#7"	       => [  N, N, 1, 1, 1, 2,	 3, CHORD_BUILTIN, CHORD_HARD ],
- "A#sus"       => [  N, N, 3, 3, 4, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "A#sus4"      => [  N, N, 3, 3, 4, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "A#maj"       => [  N, 1, 3, 3, 3, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "A#maj7"      => [  N, 1, 3, 2, 3, N,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "A#dim"       => [  N, N, 2, 3, 2, 3,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "A#m"	       => [  N, 1, 3, 3, 2, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "A#min"       => [  N, 1, 3, 3, 2, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "A#m7"	       => [  N, 1, 3, 1, 2, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
-
- "Bb"	       => [  N, 1, 3, 3, 3, 1,	 1, CHORD_BUILTIN, CHORD_EASY ],
- "Bb+"	       => [  N, N, 0, 3, 3, 2,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Bb4"	       => [  N, N, 3, 3, 4, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Bb6"	       => [  N, N, 3, 3, 3, 3,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Bb7"	       => [  N, N, 1, 1, 1, 2,	 3, CHORD_BUILTIN, CHORD_HARD ],
- "Bb9"	       => [  1, 3, 1, 2, 1, 3,	 6, CHORD_BUILTIN, CHORD_HARD ],
- "Bb11"	       => [  1, 3, 1, 3, 4, 1,	 6, CHORD_BUILTIN, CHORD_HARD ],
- "Bbsus"       => [  N, N, 3, 3, 4, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Bbsus4"      => [  N, N, 3, 3, 4, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Bbmaj"       => [  N, 1, 3, 3, 3, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Bbmaj7"      => [  N, 1, 3, 2, 3, N,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Bbdim"       => [  N, N, 2, 3, 2, 3,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Bbm"	       => [  N, 1, 3, 3, 2, 1,	 1, CHORD_BUILTIN, CHORD_EASY ],
- "Bbmin"       => [  N, 1, 3, 3, 2, 1,	 1, CHORD_BUILTIN, CHORD_EASY ],
- "Bbm7"	       => [  N, 1, 3, 1, 2, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Bbm9"	       => [  N, N, N, 1, 1, 3,	 6, CHORD_BUILTIN, CHORD_HARD ],
-
- "B"	       => [  N, 2, 4, 4, 4, 2,	 1, CHORD_BUILTIN, CHORD_EASY ],
- "B+"	       => [  N, N, 1, 0, 0, 4,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "B4"	       => [  N, N, 3, 3, 4, 1,	 2, CHORD_BUILTIN, CHORD_HARD ],
- "B7"	       => [  0, 2, 1, 2, 0, 2,	 1, CHORD_BUILTIN, CHORD_EASY ],
- "B7+"	       => [  N, 2, 1, 2, 0, 3,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "B7+5"	       => [  N, 2, 1, 2, 0, 3,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "B7#9"	       => [  N, 2, 1, 2, 3, N,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "B7(#9)"      => [  N, 2, 1, 2, 3, N,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "B9"	       => [  1, 3, 1, 2, 1, 3,	 7, CHORD_BUILTIN, CHORD_HARD ],
- "B11"	       => [  1, 3, 3, 2, 0, 0,	 7, CHORD_BUILTIN, CHORD_HARD ],
- "B11/13"      => [  N, 1, 1, 1, 1, 3,	 2, CHORD_BUILTIN, CHORD_HARD ],
- "B13"	       => [  N, 2, 1, 2, 0, 4,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Bsus"	       => [  N, N, 3, 3, 4, 1,	 2, CHORD_BUILTIN, CHORD_HARD ],
- "Bsus4"       => [  N, N, 3, 3, 4, 1,	 2, CHORD_BUILTIN, CHORD_HARD ],
- "Bmaj"	       => [  N, 2, 4, 3, 4, N,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Bmaj7"       => [  N, 2, 4, 3, 4, N,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Bdim"	       => [  N, N, 0, 1, 0, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Bm"	       => [  N, 2, 4, 4, 3, 2,	 1, CHORD_BUILTIN, CHORD_EASY ],
- "Bmin"	       => [  N, 2, 4, 4, 3, 2,	 1, CHORD_BUILTIN, CHORD_EASY ],
- "B/F#"	       => [  0, 2, 2, 2, 0, 0,	 2, CHORD_BUILTIN, CHORD_HARD ],
- "BaddE"       => [  N, 2, 4, 4, 0, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "B(addE)"     => [  N, 2, 4, 4, 0, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "BaddE/F#"    => [  2, N, 4, 4, 0, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
-
- "Bm6"	       => [  N, N, 4, 4, 3, 4,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Bm7"	       => [  N, 1, 3, 1, 2, 1,	 2, CHORD_BUILTIN, CHORD_EASY ],
- "Bmmaj7"      => [  N, 1, 4, 4, 3, N,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Bm(maj7)"    => [  N, 1, 4, 4, 3, N,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Bmsus9"      => [  N, N, 4, 4, 2, 2,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Bm(sus9)"    => [  N, N, 4, 4, 2, 2,	 1, CHORD_BUILTIN, CHORD_HARD ],
- "Bm7b5"       => [  1, 2, 4, 2, 3, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
-
+my @raw_chords =
+(
  "C"	       => [  N, 3, 2, 0, 1, 0,	 1, CHORD_BUILTIN, CHORD_EASY ],
  "C+"	       => [  N, N, 2, 1, 1, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
  "C4"	       => [  N, N, 3, 0, 1, 3,	 1, CHORD_BUILTIN, CHORD_HARD ],
@@ -269,9 +159,9 @@ my $chords =
  "Emaj"	       => [  0, 2, 2, 1, 0, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
  "Emaj7"       => [  0, 2, 1, 1, 0, N,	 1, CHORD_BUILTIN, CHORD_HARD ],
  "Edim"	       => [  N, N, 2, 3, 2, 3,	 1, CHORD_BUILTIN, CHORD_HARD ],
+
  "Em"	       => [  0, 2, 2, 0, 0, 0,	 1, CHORD_BUILTIN, CHORD_EASY ],
  "Emin"	       => [  0, 2, 2, 0, 0, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
-
  "Em6"	       => [  0, 2, 2, 0, 2, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
  "Em7"	       => [  0, 2, 2, 0, 3, 0,	 1, CHORD_BUILTIN, CHORD_EASY ],
  "Em/B"	       => [  N, 2, 2, 0, 0, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
@@ -399,23 +289,161 @@ my $chords =
  "G#m9maj7"    => [  N, N, 1, 3, 0, 3,	 1, CHORD_BUILTIN, CHORD_HARD ],
  "G#m9(maj7)"  => [  N, N, 1, 3, 0, 3,	 1, CHORD_BUILTIN, CHORD_HARD ],
 
-};
+ "Ab"	       => [  1, 3, 3, 2, 1, 1,	 4, CHORD_BUILTIN, CHORD_HARD ],
+ "Ab+"	       => [  N, N, 2, 1, 1, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Ab4"	       => [  N, N, 1, 1, 2, 4,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Ab7"	       => [  N, N, 1, 1, 1, 2,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Ab11"	       => [  1, 3, 1, 3, 1, 1,	 4, CHORD_BUILTIN, CHORD_HARD ],
+ "Absus"       => [  N, N, 1, 1, 2, 4,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Absus4"      => [  N, N, 1, 1, 2, 4,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Abdim"       => [  N, N, 0, 1, 0, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Abmaj"       => [  1, 3, 3, 2, 1, 1,	 4, CHORD_BUILTIN, CHORD_HARD ],
+ "Abmaj7"      => [  N, N, 1, 1, 1, 3,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Abm"	       => [  1, 3, 3, 1, 1, 1,	 4, CHORD_BUILTIN, CHORD_HARD ],
+ "Abmin"       => [  1, 3, 3, 1, 1, 1,	 4, CHORD_BUILTIN, CHORD_HARD ],
+ "Abm7"	       => [  N, N, 1, 1, 1, 1,	 4, CHORD_BUILTIN, CHORD_HARD ],
+
+ "A"	       => [  N, 0, 2, 2, 2, 0,	 1, CHORD_BUILTIN, CHORD_EASY ],
+ "A+"	       => [  N, 0, 3, 2, 2, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "A4"	       => [  0, 0, 2, 2, 0, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "A6"	       => [  N, N, 2, 2, 2, 2,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "A7"	       => [  N, 0, 2, 0, 2, 0,	 1, CHORD_BUILTIN, CHORD_EASY ],
+ "A7+"	       => [  N, N, 3, 2, 2, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "A7(9+)"      => [  N, 2, 2, 2, 2, 3,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "A9"	       => [  N, 0, 2, 1, 0, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "A11"	       => [  N, 4, 2, 4, 3, 3,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "A13"	       => [  N, 0, 1, 2, 3, 1,	 5, CHORD_BUILTIN, CHORD_HARD ],
+ "A7sus4"      => [  0, 0, 2, 0, 3, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "A9sus"       => [  N, 0, 2, 1, 0, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Asus"	       => [  N, N, 2, 2, 3, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Asus2"       => [  0, 0, 2, 2, 0, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Asus4"       => [  N, N, 2, 2, 3, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Adim"	       => [  N, N, 1, 2, 1, 2,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Amaj"	       => [  N, 0, 2, 2, 2, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Amaj7"       => [  N, 0, 2, 1, 2, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Am"	       => [  N, 0, 2, 2, 1, 0,	 1, CHORD_BUILTIN, CHORD_EASY ],
+ "Amin"	       => [  N, 0, 2, 2, 1, 0,	 1, CHORD_BUILTIN, CHORD_EASY ],
+ "A/D"	       => [  N, N, 0, 0, 2, 2,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "A/F#"	       => [  2, 0, 2, 2, 2, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "A/G#"	       => [  4, 0, 2, 2, 2, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
+
+ "Am#7"	       => [  N, N, 2, 1, 1, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Am(7#)"      => [  N, 0, 2, 2, 1, 4,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Am6"	       => [  N, 0, 2, 2, 1, 2,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Am7"	       => [  N, 0, 2, 2, 1, 3,	 1, CHORD_BUILTIN, CHORD_EASY ],
+ "Am7sus4"     => [  0, 0, 0, 0, 3, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Am9"	       => [  N, 0, 1, 1, 1, 3,	 5, CHORD_BUILTIN, CHORD_HARD ],
+ "Am/G"	       => [  3, 0, 2, 2, 1, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Amadd9"      => [  0, 2, 2, 2, 1, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Am(add9)"    => [  0, 2, 2, 2, 1, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
+
+ "A#"	       => [  N, 1, 3, 3, 3, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "A#+"	       => [  N, N, 0, 3, 3, 2,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "A#4"	       => [  N, N, 3, 3, 4, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "A#7"	       => [  N, N, 1, 1, 1, 2,	 3, CHORD_BUILTIN, CHORD_HARD ],
+ "A#sus"       => [  N, N, 3, 3, 4, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "A#sus4"      => [  N, N, 3, 3, 4, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "A#maj"       => [  N, 1, 3, 3, 3, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "A#maj7"      => [  N, 1, 3, 2, 3, N,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "A#dim"       => [  N, N, 2, 3, 2, 3,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "A#m"	       => [  N, 1, 3, 3, 2, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "A#min"       => [  N, 1, 3, 3, 2, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "A#m7"	       => [  N, 1, 3, 1, 2, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
+
+ "Bb"	       => [  N, 1, 3, 3, 3, 1,	 1, CHORD_BUILTIN, CHORD_EASY ],
+ "Bb+"	       => [  N, N, 0, 3, 3, 2,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Bb4"	       => [  N, N, 3, 3, 4, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Bb6"	       => [  N, N, 3, 3, 3, 3,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Bb7"	       => [  N, N, 1, 1, 1, 2,	 3, CHORD_BUILTIN, CHORD_HARD ],
+ "Bb9"	       => [  1, 3, 1, 2, 1, 3,	 6, CHORD_BUILTIN, CHORD_HARD ],
+ "Bb11"	       => [  1, 3, 1, 3, 4, 1,	 6, CHORD_BUILTIN, CHORD_HARD ],
+ "Bbsus"       => [  N, N, 3, 3, 4, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Bbsus4"      => [  N, N, 3, 3, 4, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Bbmaj"       => [  N, 1, 3, 3, 3, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Bbmaj7"      => [  N, 1, 3, 2, 3, N,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Bbdim"       => [  N, N, 2, 3, 2, 3,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Bbm"	       => [  N, 1, 3, 3, 2, 1,	 1, CHORD_BUILTIN, CHORD_EASY ],
+ "Bbmin"       => [  N, 1, 3, 3, 2, 1,	 1, CHORD_BUILTIN, CHORD_EASY ],
+ "Bbm7"	       => [  N, 1, 3, 1, 2, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Bbm9"	       => [  N, N, N, 1, 1, 3,	 6, CHORD_BUILTIN, CHORD_HARD ],
+
+ "B"	       => [  N, 2, 4, 4, 4, 2,	 1, CHORD_BUILTIN, CHORD_EASY ],
+ "B+"	       => [  N, N, 1, 0, 0, 4,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "B4"	       => [  N, N, 3, 3, 4, 1,	 2, CHORD_BUILTIN, CHORD_HARD ],
+ "B7"	       => [  0, 2, 1, 2, 0, 2,	 1, CHORD_BUILTIN, CHORD_EASY ],
+ "B7+"	       => [  N, 2, 1, 2, 0, 3,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "B7+5"	       => [  N, 2, 1, 2, 0, 3,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "B7#9"	       => [  N, 2, 1, 2, 3, N,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "B7(#9)"      => [  N, 2, 1, 2, 3, N,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "B9"	       => [  1, 3, 1, 2, 1, 3,	 7, CHORD_BUILTIN, CHORD_HARD ],
+ "B11"	       => [  1, 3, 3, 2, 0, 0,	 7, CHORD_BUILTIN, CHORD_HARD ],
+ "B11/13"      => [  N, 1, 1, 1, 1, 3,	 2, CHORD_BUILTIN, CHORD_HARD ],
+ "B13"	       => [  N, 2, 1, 2, 0, 4,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Bsus"	       => [  N, N, 3, 3, 4, 1,	 2, CHORD_BUILTIN, CHORD_HARD ],
+ "Bsus4"       => [  N, N, 3, 3, 4, 1,	 2, CHORD_BUILTIN, CHORD_HARD ],
+ "Bmaj"	       => [  N, 2, 4, 3, 4, N,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Bmaj7"       => [  N, 2, 4, 3, 4, N,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Bdim"	       => [  N, N, 0, 1, 0, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Bm"	       => [  N, 2, 4, 4, 3, 2,	 1, CHORD_BUILTIN, CHORD_EASY ],
+ "Bmin"	       => [  N, 2, 4, 4, 3, 2,	 1, CHORD_BUILTIN, CHORD_EASY ],
+ "B/F#"	       => [  0, 2, 2, 2, 0, 0,	 2, CHORD_BUILTIN, CHORD_HARD ],
+ "BaddE"       => [  N, 2, 4, 4, 0, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "B(addE)"     => [  N, 2, 4, 4, 0, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "BaddE/F#"    => [  2, N, 4, 4, 0, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Bm6"	       => [  N, N, 4, 4, 3, 4,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Bm7"	       => [  N, 1, 3, 1, 2, 1,	 2, CHORD_BUILTIN, CHORD_EASY ],
+ "Bmmaj7"      => [  N, 1, 4, 4, 3, N,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Bm(maj7)"    => [  N, 1, 4, 4, 3, N,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Bmsus9"      => [  N, N, 4, 4, 2, 2,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Bm(sus9)"    => [  N, N, 4, 4, 2, 2,	 1, CHORD_BUILTIN, CHORD_HARD ],
+ "Bm7b5"       => [  1, 2, 4, 2, 3, 1,	 1, CHORD_BUILTIN, CHORD_HARD ],
+
+);
+
+# Chords info, as a hash by chord name.
+my $chords = {};
+# Chord names, in the order of the list above.
+my $chordnames = [];
+
+# Transfer the info from the raw list into $chords and $chordnames.
+# This can be done only once.
+sub fill_chords {
+    while ( @raw_chords ) {
+	my $name = shift( @raw_chords );
+	my $info = shift( @raw_chords );
+	push( @$chordnames, $name );
+	$chords->{$name} = $info;
+    }
+}
+
+# Additional chords, defined by the user.
 my $song_chords;
 
+# Reset user defined songs. Should be done for each new song.
 sub reset_song_chords {
     $song_chords = {};
 }
 
+# Add a user defined chord.
 sub add_song_chord {
     my ( $name, $base, $frets ) = @_;
     $song_chords->{$name} = [ @$frets, $base, CHORD_USER, CHORD_HARD ];
 }
 
+# Return the number of strings supported. Currently fixed.
 sub strings { STRINGS }
 
+# Returns a list of all chord names in the order of @raw_chords.
+sub chordnames {
+    fill_chords();
+    @$chordnames;
+}
+
+# Returns info about an individual chord.
 sub chord_info {
     my ( $chord ) = @_;
     my @info;
+    fill_chords();
     for ( $song_chords, $chords ) {
 	next unless exists($_->{$chord});
 	@info = @{ $_->{$chord} };
@@ -429,6 +457,42 @@ sub chord_info {
 	easy    => $info[8] == CHORD_EASY,
     };
 }
+
+sub chordcompare {		# DOESN'T WORK YET
+    my ( $chorda, $chordb ) = ( $a, $b );
+
+    # C Cm C# Db D Dm D# ,,,
+
+    $chorda =~ s/^([AB])/sprintf("%c", ord($1)+12)/e;
+    $chordb =~ s/^([AB])/sprintf("%c", ord($1)+12)/e;
+    my ( $a0, $a1, $arest ) = $chorda =~ /^(.)(.?)(.*)/;
+    my ( $b0, $b1, $brest ) = $chordb =~ /^(.)(.?)(.*)/;
+    return $a0 cmp $b0 if $a0 ne $b0;
+    return $arest cmp $brest if $a1 eq $b1;
+
+    # b < #
+    # b < m
+    # b < .
+    # # < b
+    # # > m
+    # # > .
+    # m > b
+    # m < #
+    # m > .
+    # . > b
+    # . < #
+    # . < m
+
+    return -1 if $a1 eq "b";
+    return  1 if $a1 eq "#";
+    return -1 if $a1 eq "m" && $b1 eq "#";
+    return  1 if $a1 eq "m";
+    return  1 if $b1 eq "b";
+    return -1 if $b1 eq "m" || $b1 eq "#";
+    return $arest cmp $brest;
+}
+
+################ Transposition ################
 
 my $notesS  = [ split( ' ', "A A# B C C# D D# E F F# G G#" ) ];
 my $notesF  = [ split( ' ', "A Bb B C Db D Eb E F Gb G Ab" ) ];
@@ -457,7 +521,11 @@ sub transpose {
     return ( $xpose > 0 ? $notesS : $notesF )->[$r] . $rest;
 }
 
+# Dump a textual list of chord definitions.
+# Should be handled by the ChordPro backend?
+
 sub dump_chords {
+    fill_chords();
     print( "# CHORD CHART\n",
 	   "# Generated by ChordPro ", $App::Music::ChordPro::VERSION, "\n",
 	   "# http://www.chordpro.org\n",
@@ -465,7 +533,7 @@ sub dump_chords {
 	   "#            ", " " x 35, "-------strings-------\n",
 	   "#       Chord", " " x 35, "E   A   D   G   B   E\n",
 	 );
-    foreach my $chord ( sort keys %$chords ) {
+    foreach my $chord ( chordnames() ) {
 	my $info = chord_info($chord);
 	printf( "{define %-15.15s base-fret %2d    ".
 		"frets %3.3s %3.3s %3.3s %3.3s %3.3s %3.3s}\n",
@@ -475,6 +543,5 @@ sub dump_chords {
 }
 
 unless ( caller ) {
-    use Data::Dumper;
-    warn(Dumper(chord_info(shift)));
+    dump_chords();
 }
