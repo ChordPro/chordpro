@@ -6,7 +6,8 @@ use strict;
 use warnings;
 
 use constant CHORD_BUILTIN =>  0;
-use constant CHORD_USER    =>  1;
+use constant CHORD_CONFIG  =>  1;
+use constant CHORD_SONG    =>  1;
 use constant CHORD_EASY    =>  0;
 use constant CHORD_HARD    =>  1;
 use constant N             => -1;
@@ -401,33 +402,56 @@ my @raw_chords =
 );
 
 # Chords info, as a hash by chord name.
-my $chords = {};
+my %chords;
 # Chord names, in the order of the list above.
-my $chordnames = [];
+my @chordnames;
 
-# Transfer the info from the raw list into $chords and $chordnames.
+# Transfer the info from the raw list into %chords and @chordnames.
 # This can be done only once.
 sub fill_chords {
     while ( @raw_chords ) {
 	my $name = shift( @raw_chords );
 	my $info = shift( @raw_chords );
-	push( @$chordnames, $name );
-	$chords->{$name} = $info;
+	push( @chordnames, $name );
+	$chords{$name} = $info;
     }
 }
 
+# Additional chords, defined by the configs.
+my %config_chords;
+
+# Add a config defined chord.
+sub add_config_chord {
+    my ( $name, $base, $frets, $easy ) = @_;
+    unless ( @$frets == STRINGS ) {
+	return scalar(@$frets) . " strings";
+    }
+    unless ( $base > 0 && $base < 12 ) {
+	return "base-fret $base out of range";
+    }
+    $easy //= CHORD_HARD;
+    $config_chords{$name} = [ @$frets, $base, CHORD_CONFIG, $easy ];
+    return;
+}
+
 # Additional chords, defined by the user.
-my $song_chords;
+my %song_chords;
 
 # Reset user defined songs. Should be done for each new song.
 sub reset_song_chords {
-    $song_chords = {};
+    %song_chords = ();
 }
 
 # Add a user defined chord.
 sub add_song_chord {
     my ( $name, $base, $frets ) = @_;
-    $song_chords->{$name} = [ @$frets, $base, CHORD_USER, CHORD_HARD ];
+    unless ( @$frets == STRINGS ) {
+	return scalar(@$frets) . " strings";
+    }
+    unless ( $base > 0 && $base < 12 ) {
+	return "base-fret $base out of range";
+    }
+    $song_chords{$name} = [ @$frets, $base, CHORD_SONG, CHORD_HARD ];
 }
 
 # Return the number of strings supported. Currently fixed.
@@ -436,7 +460,7 @@ sub strings { STRINGS }
 # Returns a list of all chord names in the order of @raw_chords.
 sub chordnames {
     fill_chords();
-    @$chordnames;
+    @chordnames;
 }
 
 # Returns info about an individual chord.
@@ -444,7 +468,7 @@ sub chord_info {
     my ( $chord ) = @_;
     my @info;
     fill_chords();
-    for ( $song_chords, $chords ) {
+    for ( \%song_chords, \%config_chords, \%chords ) {
 	next unless exists($_->{$chord});
 	@info = @{ $_->{$chord} };
 	last;
@@ -454,6 +478,7 @@ sub chord_info {
 	strings => [ @info[0..5] ],
 	base    => $info[6]-1,
 	builtin => $info[7] == CHORD_BUILTIN,
+	origin  => $info[7],
 	easy    => $info[8] == CHORD_EASY,
     };
 }
@@ -543,5 +568,6 @@ sub dump_chords {
 }
 
 unless ( caller ) {
+    $App::Music::ChordPro::VERSION = "";
     dump_chords();
 }

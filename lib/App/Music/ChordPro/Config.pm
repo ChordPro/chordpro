@@ -188,7 +188,21 @@ This is the current built-in configuration file, showing all settings.
 
   	// This will show the page layout.
   	// "showlayout" : 1,
-      }
+      },
+  
+      // User defined chords.
+      // "base" defaults to 1.
+      // "easy" defaults to 0.
+      // Use 0 for an empty string, and -1 for a muted string.
+      "chords" : [
+          {
+  	    "name"  : "Bb",
+  	    "base"  : 1,
+  	    "frets" : [ 1, 1, 3, 3, 3, 1 ],
+  	    "easy"  : 1,
+  	  },
+      ],
+  
   }
   // End of config.
 
@@ -272,6 +286,14 @@ sub configurator {
 	else {
 	    $add_config->( $options->{$config} );
 	}
+    }
+
+    foreach ( @{ $cfg->{chords} } ) {
+	my $res =
+	  App::Music::ChordPro::Chords::add_config_chord
+	      ( $_->{name}, $_->{base}||1, $_->{frets}, $_->{easy} );
+	warn( "Invalid chord in config: ",
+	      $_->{name}, ": ", $res, "\n" ) if $res;
     }
 
     return $cfg if $options->{'cfg-print'};

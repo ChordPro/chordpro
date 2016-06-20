@@ -380,10 +380,10 @@ sub global_directive {
 		   frets => [ map { $_ =~ /^\d+/ ? $_ : -1 } @f ],
 		 };
 	push( @{$cur->{define}}, $ci );
-	App::Music::ChordPro::Chords::add_song_chord
-	    ( $ci->{name},
-	      $ci->{base} || 1,
-	      $ci->{frets} );
+	my $res =
+	  App::Music::ChordPro::Chords::add_song_chord
+	      ( $ci->{name}, $ci->{base} || 1, $ci->{frets} );
+	warn("Invalid chord: ", $ci->{name}, ": ", $res, "\n") if $res;
 	return 1;
     }
     return;
