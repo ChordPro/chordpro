@@ -107,7 +107,8 @@ sub main {
 	    if ( $c =~ /^(.[b#]?)/ and $1 ne $prev )  {
 		$prev = $1;
 		push( @body, { type => "chord-grids",
-			       context => "__CLI__",
+			       context => "",
+			       origin => "__CLI__",
 			       chords => [ @chords ]
 			     } ) if @chords;
 		@chords = ();
@@ -116,7 +117,8 @@ sub main {
 	}
 
 	push( @body, { type => "chord-grids",
-		       context => "__CLI__",
+		       context => "",
+		       origin => "__CLI__",
 		       chords => [ @chords ]
 		     } ) if @chords;
 
@@ -796,6 +798,8 @@ supports most of the features of Chordii, and a lot more:
 * Native PDF generation
 
 * Unicode support (all input is UTF8)
+
+* User defined chords and tuning, not limited to 6 strings.
 
 * Support for external TrueType fonts
 

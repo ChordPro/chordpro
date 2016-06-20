@@ -42,6 +42,8 @@ CURRENT STATUS
 
     * Unicode support (all input is UTF8)
 
+    * User defined chords and tunings, not limited to 6 strings.
+
     * Support for external TrueType fonts
 
     * Font kerning (with external TrueType fonts)

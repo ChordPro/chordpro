@@ -190,6 +190,10 @@ This is the current built-in configuration file, showing all settings.
   	// "showlayout" : 1,
       },
   
+      // Strings and tuning.
+      // Note that using this will discard all built-in chords!
+      // "tuning" : [ "E2", "A2", "D3", "G3", "B3", "E4" ],
+  
       // User defined chords.
       // "base" defaults to 1.
       // "easy" defaults to 0.
@@ -286,6 +290,13 @@ sub configurator {
 	else {
 	    $add_config->( $options->{$config} );
 	}
+    }
+
+    if ( $cfg->{tuning} ) {
+	my $res =
+	  App::Music::ChordPro::Chords::set_tuning( $cfg->{tuning} );
+	warn( "Invalid tuning in config: ",
+	      $res, "\n" ) if $res;
     }
 
     foreach ( @{ $cfg->{chords} } ) {
