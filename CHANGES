@@ -1,9 +1,10 @@
-0.57.x	Jun xx 2016
+0.58	Jun 20 2016
 
 	Handle --chord-grid-size.
 	Add chord definitions in configuration.
 	Add chords sorting.
 	Add user defined chords and tunings.
+	Handle --no-easy-chord-grids and --chord-grids-sorted.
 
 0.57	Jun 19 2016
 

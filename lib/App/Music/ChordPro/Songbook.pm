@@ -78,7 +78,18 @@ sub parsefile {
 	}
     }
     #### TODO: sorting
-    $self->add( type => "chord-grids", chords => [ @used_chords ] );
+    if ( $::config->{chordgrid}->{hard} ) {
+	@used_chords =
+	  grep { ! App::Music::ChordPro::Chords::chord_info($_)->{easy} } @used_chords;
+    }
+    if ( $::config->{chordgrid}->{sorted} ) {
+	@used_chords =
+	  sort App::Music::ChordPro::Chords::chordcompare @used_chords;
+    }
+
+    $self->add( type => "chord-grids",
+		origin => "song",
+		chords => [ @used_chords ] );
     # $self->{songs}->[-1]->structurize;
 }
 

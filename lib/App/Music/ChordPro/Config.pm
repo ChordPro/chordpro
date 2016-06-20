@@ -93,12 +93,17 @@ This is the current built-in configuration file, showing all settings.
 	// be 4 or larger to accomodate most chords.
   	// The horizontal distance between grids is "hspace" cells.
   	// The vertical distance is "vspace" cells.
+	// "hard": only prints the hard chords. This includes user
+  	// defined chords.
+	// "sorted": order the chords by key.
   	"chordgrid" : {
 	    "width"    :  6,
   	    "height"   :  6,
   	    "hspace"   :  3.95,
   	    "vspace"   :  3,
   	    "vcells"   :  4,
+	    "hard"     :  1,
+	    "sorted"   :  1,
   	},
   
   	// Even/odd pages. A value of -1 denotes odd/even pages.
@@ -207,6 +212,16 @@ This is the current built-in configuration file, showing all settings.
   	  },
       ],
   
+      // Printing chord grids.
+      // "show": prints the chords used in the song.
+      // "hard": only prints the hard chords. This includes user
+      // defined chords.
+      // "sorted": order the chords by key.
+      "chordgrid" : {
+	  "show"     :  1,
+	  "hard"     :  1,
+	  "sorted"   :  0,
+      },
   }
   // End of config.
 
@@ -290,6 +305,16 @@ sub configurator {
 	else {
 	    $add_config->( $options->{$config} );
 	}
+    }
+
+    if ( defined $options->{'easy-chord-grids'} ) {
+	$cfg->{chordgrid}->{hard} = !$options->{'easy-chord-grids'};
+    }
+    if ( defined $options->{'chord-grids'} ) {
+	$cfg->{chordgrid}->{show} = !$options->{'chord-grids'};
+    }
+    if ( defined $options->{'chord-grids-sorted'} ) {
+	$cfg->{chordgrid}->{sorted} = $options->{'chord-grids-sorted'};
     }
 
     if ( $cfg->{tuning} ) {

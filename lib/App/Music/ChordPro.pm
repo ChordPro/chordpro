@@ -4,7 +4,7 @@ use 5.010;
 
 package App::Music::ChordPro;
 
-our $VERSION = "0.57";
+our $VERSION = "0.58";
 
 =head1 NAME
 
@@ -270,18 +270,31 @@ Sets the font size for the chord names.
 
 Sets chord grid size (the total width of a chord grid).
 
-=item B<--chord-grids-sorted> (short: B<-S>) *
+=item B<--chord-grids>
 
-NYI. Prints chord grids alphabetically.
+Prints chord grids of the chords used in a song.
 
 =item B<--no-chord-grids> (short: B<-G>) *
 
-NYI. Disables printing of chord grids.
+Disables printing of chord grids of the chords used in a song.
 
-=item B<--no-easy-chord-grids> (short: B<-g>)
+=item B<--easy-chord-grids> *
 
-NYI. Suppress the printing of grids for built-in chords that are considered
-easy.
+In printing chord grids, includes the grids for built-in chords that
+are considered easy.
+
+=item B<--no-easy-chord-grids> (short: B<-g>) *
+
+Suppress the printing of easy chords.
+
+=item B<--chord-grids-sorted> (short: B<-S>) *
+
+Prints chord grids of the chords used in a song, ordered by key and
+type.
+
+=item B<--no-chord-grids-sorted> *
+
+Prints chord grids in the order they appear in the song.
 
 =item B<--even-pages-number-left> (short B<-L>)
 
@@ -527,7 +540,7 @@ sub app_setup {
           "about|A" => \$about,         # About...
           "chord-font|C=s",             # Sets chord font
           "chord-grid-size|s=f",        # Sets chord grid size [30]
-          "chord-grids-sorted|S",       # Prints chord grids alphabetically
+          "chord-grids-sorted|S!",      # Prints chord grids ordered
           "chord-size|c=i",             # Sets chord size [9]
           "dump-chords|D",              # Dumps chords definitions (PostScript)
           "dump-chords-text|d" => \$dump_chords,  # Dumps chords definitions (Text)
@@ -703,14 +716,14 @@ Options marked with * are better specified in the config file.
 Options marked with - are ignored.
     --chord-font=FONT  -C         *Sets chord font
     --chord-grid-size=N  -s       *Sets chord grid size [30]
-    --chord-grids-sorted  -S      *Prints chord grids alphabetically
+    --chord-grids-sorted  -S      *Prints chord grids ordered by key
     --chord-size=N  -c            *Sets chord size [9]
     --dump-chords  -D             Dumps chords definitions (PostScript)
     --dump-chords-text  -d        Dumps chords definitions (Text)
     --even-pages-number-left  -L  *Even pages numbers on left
     --odd-pages-number-left       *Odd pages numbers on left
     --no-chord-grids  -G          *Disables printing of chord grids
-    --no-easy-chord-grids  -g     -Doesn't print grids for built-in "easy" chords.
+    --no-easy-chord-grids  -g     *Doesn't print grids for built-in "easy" chords.
     --page-number-logical  -n     -Numbers logical pages, not physical
     --page-size=FMT  -P           *Specifies page size [letter, a4 (default)]
     --single-space  -a            *Automatic single space lines without chords

@@ -476,6 +476,7 @@ sub add_song_chord {
 sub strings { STRINGS }
 
 # Returns a list of all chord names in the order of @raw_chords.
+sub chordcompare($$);
 sub chordnames {
     fill_chords();
     [ sort chordcompare @chordnames ];
@@ -501,12 +502,12 @@ sub chord_info {
     };
 }
 
-sub chordcompare {
-    my ( $chorda, $chordb ) = ( $a, $b );
+sub chordcompare($$) {
+    my ( $chorda, $chordb ) = @_;
     my ( $a0, $arest ) = $chorda =~ /^([A-G][b#]?)(.*)/;
     my ( $b0, $brest ) = $chordb =~ /^([A-G][b#]?)(.*)/;
-    $a0 = $chordorderkey{$a0}//die("XX $a0");
-    $b0 = $chordorderkey{$b0}//die("XX $b0");
+    $a0 = $chordorderkey{$a0}//die("XX $a");
+    $b0 = $chordorderkey{$b0}//die("XX $b");
     return $a0 <=> $b0 if $a0 != $b0;
     $a0++ if $arest =~ /^m(?:in)?(?!aj)/;
     $b0++ if $brest =~ /^m(?:in)?(?!aj)/;
