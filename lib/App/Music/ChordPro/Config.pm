@@ -19,11 +19,40 @@ backend.
 
 This is the current built-in configuration file, showing all settings.
 
-  // Configuration (mostly layout definitions) for ChordPro.
+  // Configuration for ChordPro.
   //
   // This is a relaxed JSON document, so comments are possible.
   
   {
+  
+      // Strings and tuning.
+      // Note that using this will discard all built-in chords!
+      // "tuning" : [ "E2", "A2", "D3", "G3", "B3", "E4" ],
+  
+      // User defined chords.
+      // "base" defaults to 1.
+      // "easy" defaults to 0.
+      // Use 0 for an empty string, and -1 for a muted string.
+      "chords" : [
+          {
+  	    "name"  : "Bb",
+  	    "base"  : 1,
+  	    "frets" : [ 1, 1, 3, 3, 3, 1 ],
+  	    "easy"  : 1,
+  	  },
+      ],
+  
+      // Printing chord grids.
+      // "show": prints the chords used in the song.
+      // "hard": only prints the hard chords. This includes user
+      // defined chords.
+      // "sorted": order the chords by key.
+      "chordgrid" : {
+	  "show"     :  1,
+	  "hard"     :  1,
+	  "sorted"   :  0,
+      },
+  
       // Layout definitions for PDF output.
   
       "pdf" : {
@@ -193,34 +222,6 @@ This is the current built-in configuration file, showing all settings.
 
   	// This will show the page layout.
   	// "showlayout" : 1,
-      },
-  
-      // Strings and tuning.
-      // Note that using this will discard all built-in chords!
-      // "tuning" : [ "E2", "A2", "D3", "G3", "B3", "E4" ],
-  
-      // User defined chords.
-      // "base" defaults to 1.
-      // "easy" defaults to 0.
-      // Use 0 for an empty string, and -1 for a muted string.
-      "chords" : [
-          {
-  	    "name"  : "Bb",
-  	    "base"  : 1,
-  	    "frets" : [ 1, 1, 3, 3, 3, 1 ],
-  	    "easy"  : 1,
-  	  },
-      ],
-  
-      // Printing chord grids.
-      // "show": prints the chords used in the song.
-      // "hard": only prints the hard chords. This includes user
-      // defined chords.
-      // "sorted": order the chords by key.
-      "chordgrid" : {
-	  "show"     :  1,
-	  "hard"     :  1,
-	  "sorted"   :  0,
       },
   }
   // End of config.

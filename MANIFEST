@@ -13,6 +13,7 @@ lib/App/Music/ChordPro/Output/PDF.pm
 lib/App/Music/ChordPro/Output/Text.pm
 lib/App/Music/ChordPro/Songbook.pm
 res/config/chordpro.json
+res/config/ukulele.json
 script/chordpro-script.pl
 script/chordpro.PL
 t/00_basic.pl

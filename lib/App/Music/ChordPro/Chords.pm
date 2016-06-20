@@ -441,7 +441,7 @@ my %config_chords;
 # Add a config defined chord.
 sub add_config_chord {
     my ( $name, $base, $frets, $easy ) = @_;
-    unless ( @$frets == STRINGS ) {
+    unless ( @$frets == strings() ) {
 	return scalar(@$frets) . " strings";
     }
     unless ( $base > 0 && $base < 12 ) {
@@ -449,6 +449,7 @@ sub add_config_chord {
     }
     $easy //= CHORD_HARD;
     $config_chords{$name} = [ @$frets, $base, CHORD_CONFIG, $easy ];
+    push( @chordnames, $name );
     return;
 }
 
@@ -463,7 +464,7 @@ sub reset_song_chords {
 # Add a user defined chord.
 sub add_song_chord {
     my ( $name, $base, $frets ) = @_;
-    unless ( @$frets == STRINGS ) {
+    unless ( @$frets == strings() ) {
 	return scalar(@$frets) . " strings";
     }
     unless ( $base > 0 && $base < 12 ) {
@@ -473,7 +474,7 @@ sub add_song_chord {
 }
 
 # Return the number of strings supported. Currently fixed.
-sub strings { STRINGS }
+sub strings { scalar(@tuning) }
 
 # Returns a list of all chord names in the order of @raw_chords.
 sub chordcompare($$);
@@ -493,12 +494,13 @@ sub chord_info {
 	last;
     }
     return unless @info;
+    my $s = strings();
     {	name    => $chord,
-	strings => [ @info[0..5] ],
-	base    => $info[6]-1,
-	builtin => $info[7] == CHORD_BUILTIN,
-	origin  => $info[7],
-	easy    => $info[8] == CHORD_EASY,
+	strings => [ @info[0..$s-1] ],
+	base    => $info[$s]-1,
+	builtin => $info[$s+1] == CHORD_BUILTIN,
+	origin  => $info[$s+1],
+	easy    => $info[$s+2] == CHORD_EASY,
     };
 }
 
