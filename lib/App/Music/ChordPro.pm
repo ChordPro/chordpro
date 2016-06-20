@@ -266,19 +266,19 @@ Sets the font size for the chord names.
 
 =item B<--chord-grid-size=>I<N> (short: B<-s>) *
 
-Sets chord grid size.
+Sets chord grid size (the total width of a chord grid).
 
 =item B<--chord-grids-sorted> (short: B<-S>) *
 
-Prints chord grids alphabetically.
+NYI. Prints chord grids alphabetically.
 
 =item B<--no-chord-grids> (short: B<-G>) *
 
-Disables printing of chord grids.
+NYI. Disables printing of chord grids.
 
 =item B<--no-easy-chord-grids> (short: B<-g>)
 
-Suppress the printing of grids for built-in chords that are considered
+NYI. Suppress the printing of grids for built-in chords that are considered
 easy.
 
 =item B<--even-pages-number-left> (short B<-L>)
@@ -318,7 +318,7 @@ Not supported.
 
 Dumps a list of built-in chords in a form dependent of the backend used.
 The PDF backend will produce neat pages of chord diagrams.
-The ChordPro backend will produce a list of C<defined> directives.
+The ChordPro backend will produce a list of C<define> directives.
 
 =item B<--dump-chords-text> (short: B<-d>)
 
@@ -524,7 +524,7 @@ sub app_setup {
 
           "about|A" => \$about,         # About...
           "chord-font|C=s",             # Sets chord font
-          "chord-grid-size|s=i",        # Sets chord grid size [30]
+          "chord-grid-size|s=f",        # Sets chord grid size [30]
           "chord-grids-sorted|S",       # Prints chord grids alphabetically
           "chord-size|c=i",             # Sets chord size [9]
           "dump-chords|D",              # Dumps chords definitions (PostScript)
@@ -543,7 +543,7 @@ sub app_setup {
           "toc|i",                      # Generates a table of contents
           "transpose|x=i",              # Transposes by N semi-tones
           "version|V" => \$version,     # Prints version and exits
-          "vertical-space|w=i",         # Extra vertical space between lines
+          "vertical-space|w=f",         # Extra vertical space between lines
           "2-up|2",                     # 2 pages per sheet
           "4-up|4",                     # 4 pages per sheet
 

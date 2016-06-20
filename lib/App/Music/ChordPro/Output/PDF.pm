@@ -1194,6 +1194,14 @@ sub configurator {
 	$pdf->{"even-pages-number-left"} = $_;
     }
 
+    # Chord grid width.
+    if ( $options->{'chord-grid-size'} ) {
+	$pdf->{chordgrid}->{width} =
+	  $pdf->{chordgrid}->{height} =
+	    $options->{'chord-grid-size'} /
+	      App::Music::ChordPro::Chords::strings();
+    }
+
     # Add font dirs.
     my $fontdir = $pdf->{fontdir} || $ENV{FONTDIR};
     if ( $fontdir ) {
