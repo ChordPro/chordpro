@@ -38,19 +38,20 @@ CURRENT STATUS
     This program provides alpha support for ChordPro version 5. It supports
     most of the features of Chordii, and a lot more:
 
-    * Native PDF generation
+    * Native PDF generation.
 
-    * Unicode support (all input is UTF8)
+    * Unicode support (all input is UTF8).
 
     * User defined chords and tunings, not limited to 6 strings.
 
-    * Support for external TrueType fonts
+    * Support for external TrueType and OpenType fonts.
 
-    * Font kerning (with external TrueType fonts)
+    * Font kerning (with external fonts).
 
-    * Customizable layout, fonts and sizes
+    * Fully customizable layout, fonts and sizes.
 
-    * Customizable backends for PDF, ChordPro, LilyPond*, LaTeX* and HTML.
+    * Customizable backends for PDF, ChordPro, LilyPond*, LaTeX* and HTML*.
+      (* = under development)
 
 LICENSE
 

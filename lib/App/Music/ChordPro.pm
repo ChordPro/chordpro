@@ -814,13 +814,15 @@ supports most of the features of Chordii, and a lot more:
 
 * User defined chords and tuning, not limited to 6 strings.
 
-* Support for external TrueType fonts
+* Support for external TrueType and OpenType fonts
 
 * Font kerning (with external TrueType fonts)
 
-* Customizable layout, fonts and sizes
+* Fully customizable layout, fonts and sizes
 
-* Customizable backends for PDF, ChordPro, LilyPond*, LaTeX* and HTML.
+* Customizable backends for PDF, ChordPro, LilyPond*, LaTeX* and HTML*.
+
+(* = under development)
 
 =head1 LICENSE
 
