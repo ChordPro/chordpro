@@ -21,13 +21,14 @@ my $xpose;
 my @used_chords;
 my %used_chords;
 
+my $diag;			# fir diagnostics
+
 sub parsefile {
     my ( $self, $filename, $options ) = @_;
 
     open(my $fh, '<', $filename)
       or croak("$filename: $!\n");
 
-    #### TODO: parsing config and rc file?
     push( @{ $self->{songs} }, App::Music::ChordPro::Song->new )
       if exists($self->{songs}->[-1]->{body});
     $self->{songs}->[-1]->{structure} = "linear";
@@ -35,9 +36,14 @@ sub parsefile {
     @used_chords = ();
     %used_chords = ();
     App::Music::ChordPro::Chords::reset_song_chords();
+    $diag->{format} = $options->{diagformat}
+      || $::config->{diagnostics}->{format};
+    $diag->{file} = $filename;
 
     while ( <$fh> ) {
 	s/[\r\n]+$//;
+	$diag->{line} = $.;
+	$diag->{orig} = $_;
 
 	my $line;
 	if ( $options->{encoding} ) {
@@ -106,7 +112,7 @@ sub chord {
     return $used_chords{$c} if exists $used_chords{$c};
 
     my $info = App::Music::ChordPro::Chords::chord_info($c);
-    warn("Unknown chord: $c\n") unless $info;
+    do_warn("Unknown chord: $c\n") unless $info;
     my $xc = App::Music::ChordPro::Chords::transpose( $c, $xpose );
     if ( $xc ) {
 	$used_chords{$c} = $xc;
@@ -175,25 +181,25 @@ sub directive {
     elsif ( $d eq "eot" ) { $d = "end_of_tab"      }
 
     if ( $d =~ /^start_of_(\w+)\s*(.*)$/ ) {
-	warn("Already in " . ucfirst($in_context) . " context\n")
+	do_warn("Already in " . ucfirst($in_context) . " context\n")
 	  if $in_context;
 	$in_context = $1;
 	my $par = $2;
 	if ( $1 eq "grid" && $par && $par =~ /^(\d+)(?:x(\d+))?$/ ) {
-	    warn("Invalid grid params: $par (must be non-zero)"), return
+	    do_warn("Invalid grid params: $par (must be non-zero)"), return
 	      unless $1;
 	    $self->add( type => "control",
 			name => "gridparams",
 			value => [ $1, $2 ] );
 	}
 	else {
-	    warn("Garbage in start_of_$1: $par (ignored)\n")
+	    do_warn("Garbage in start_of_$1: $par (ignored)\n")
 	      if $par;
 	}
 	return;
     }
     if ( $d =~ /^end_of_(\w+)$/ ) {
-	warn("Not in " . ucfirst($1) . " context\n")
+	do_warn("Not in " . ucfirst($1) . " context\n")
 	  unless $in_context eq $1;
 	$in_context = $def_context;
 	return;
@@ -274,7 +280,7 @@ sub directive {
 		$opts{title} = $1;
 	    }
 	    elsif ( /^(.+)=(.*)$/i ) {
-		warn( "Unknown image attribute: $1\n" );
+		do_warn( "Unknown image attribute: $1\n" );
 		next;
 	    }
 	    else {
@@ -282,7 +288,7 @@ sub directive {
 	    }
 	}
 	unless ( $uri ) {
-	    warn( "Missing image source\n" );
+	    do_warn( "Missing image source\n" );
 	    return;
 	}
 	$self->add( type => "image",
@@ -300,7 +306,7 @@ sub directive {
     return if $self->global_directive($d);
 
     # Warn about unknowns, unless they are x_... form.
-    warn("Unknown directive: $d\n") unless $d =~ /^x_/;
+    do_warn("Unknown directive: $d\n") unless $d =~ /^x_/;
     return;
 }
 
@@ -346,13 +352,13 @@ sub global_directive {
 	my $value = $3;
 	if ( $prop eq "size" ) {
 	    unless ( $value =~ /^\d+(?:\.\d+)?\%?$/ ) {
-		warn("Illegal value \"$value\" for $item$prop\n");
+		do_warn("Illegal value \"$value\" for $item$prop\n");
 		return 1;
 	    }
 	}
 	if ( $prop =~ /^colou?r$/  ) {
 	    unless ( get_color($value) ) {
-		warn("Illegal value \"$value\" for $item$prop\n");
+		do_warn("Illegal value \"$value\" for $item$prop\n");
 		return 1;
 	    }
 	}
@@ -394,7 +400,7 @@ sub global_directive {
 	my $res =
 	  App::Music::ChordPro::Chords::add_song_chord
 	      ( $ci->{name}, $ci->{base} || 1, $ci->{frets} );
-	warn("Invalid chord: ", $ci->{name}, ": ", $res, "\n") if $res;
+	do_warn("Invalid chord: ", $ci->{name}, ": ", $res, "\n") if $res;
 	return 1;
     }
     return;
@@ -410,6 +416,23 @@ sub structurize {
 
 sub get_color {
     $_[0];
+}
+
+sub msg {
+    my $m = join("", @_);
+    $m =~ s/\n+$//;
+    my $t = $diag->{format};
+    $t =~ s/\%f/$diag->{file}/g;
+    $t =~ s/\%n/$diag->{line}/g;
+    $t =~ s/\%l/$diag->{orig}/g;
+    $t =~ s/\%m/$m/g;
+    $t =~ s/\\n/\n/g;
+    $t =~ s/\\t/\t/g;
+    $t;
+}
+
+sub do_warn {
+    warn(msg(@_)."\n");
 }
 
 package App::Music::ChordPro::Song;

@@ -53,6 +53,11 @@ This is the current built-in configuration file, showing all settings.
 	  "sorted"   :  0,
       },
   
+      // Diagnostig messages.
+      "diagnostics" : {
+	  "format" : "\"%f\", line %n, %m\n\t%l",
+      },
+  
       // Layout definitions for PDF output.
   
       "pdf" : {
