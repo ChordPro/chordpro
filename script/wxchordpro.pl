@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use Wx 0.9921 qw[:allclasses];
+use Wx 0.9912 qw[:allclasses];
 
 use strict;
 use warnings;

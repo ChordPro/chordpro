@@ -1,5 +1,8 @@
 #! perl
 
+use strict;
+use warnings;
+
 # Implementation of App::Music::ChordPro::Wx::Main_wxg details.
 
 package App::Music::ChordPro::Wx::Main;
@@ -82,6 +85,10 @@ sub openfile {
 	return;
     }
     $self->{_currentfile} = $file;
+    if ( $self->{t_source}->GetValue =~ /^\{\s*title[: ]+([^\}]*)\}/m ) {
+	Wx::LogStatus("Loaded: $1");
+	$self->{sz_source}->GetStaticBox->SetLabel($1);
+    }
 }
 
 my ( $preview_cho, $preview_pdf );
@@ -119,26 +126,27 @@ sub preview {
     use App::Music::ChordPro::Songbook;
     my $s = App::Music::ChordPro::Songbook->new;
 
+    my @msgs;
     $SIG{__WARN__} = sub {
 	push( @msgs, join("", @_) );
 	Wx::LogWarning($msgs[-1]);
     };
 
-    $options->{msgfmt} = 'Line %n, %m';
+    $options->{diagformat} = 'Line %n, %m';
     $s->parsefile( $preview_cho, $options );
 
     if ( @msgs ) {
-	$self->{l_msgs}->SetLabel( @msgs . " message" .
-				   ( @msgs == 1 ? "" : "s" ) . "." );
+	Wx::LogStatus( @msgs . " message" .
+		       ( @msgs == 1 ? "" : "s" ) . "." );
 	Wx::LogError("Problems found!");
 	return;
     }
 
-    
     # Generate the songbook.
     my $res = App::Music::ChordPro::Output::PDF->generate_songbook( $s, $options );
 
     if ( -e $preview_pdf ) {
+	Wx::LogStatus("Output generated, starting previewer");
 #	my $ft = wxTheMimeTypesManager->GetFileTypeFromExtension("pdf");
 #	my $cmd = $ft->GetOpenCommand($pdf);
 #	Wx::Execute($cmd);
@@ -152,7 +160,7 @@ sub preview {
 sub saveas {
     my ( $self, $file ) = @_;
     $self->{t_source}->SaveFile($file);
-    $self->{l_msgs}->SetLabel( "Saved." );
+    Wx::LogStatus( "Saved." );
 }
 
 ################ Event handlers ################
@@ -161,6 +169,20 @@ sub saveas {
 
 sub OnOpen {
     my ($self, $event) = @_;
+    if ( $self->{t_source} && $self->{t_source}->IsModified ) {
+	my $md = Wx::MessageDialog->new
+	  ( $self,
+	    "File " . $self->{_currentfile} . " has been changed.\n".
+	    "Do you want to save your changes?",
+	    "File has changed",
+	    0 | wxCANCEL | wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION );
+	my $ret = $md->ShowModal;
+	$md->Destroy;
+	return if $ret == wxID_CANCEL;
+	if ( $ret == wxID_YES ) {
+	    $self->saveas( $self->{_currentfile} );
+	}
+    }
     $self->opendialog;
 }
 
@@ -191,7 +213,44 @@ sub OnPreview {
 
 sub OnExit {
     my ( $self, $event ) = @_;
+    if ( $self->{t_source} && $self->{t_source}->IsModified ) {
+	my $md = Wx::MessageDialog->new
+	  ( $self,
+	    "File " . $self->{_currentfile} . " has been changed.\n".
+	    "Do you want to save your changes?",
+	    "File has changed",
+	    0 | wxCANCEL | wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION );
+	my $ret = $md->ShowModal;
+	$md->Destroy;
+	return if $ret == wxID_CANCEL;
+	if ( $ret == wxID_YES ) {
+	    $self->saveas( $self->{_currentfile} );
+	}
+    }
     $self->quit;
+}
+
+sub OnCut {
+    my ($self, $event) = @_;
+    $self->{t_source}->Cut;
+}
+
+
+sub OnCopy {
+    my ($self, $event) = @_;
+    $self->{t_source}->Copy;
+}
+
+
+sub OnPaste {
+    my ($self, $event) = @_;
+    $self->{t_source}->Paste;
+}
+
+sub OnDelete {
+    my ($self, $event) = @_;
+    my ( $from, $to ) = $self->{t_source}->GetSelection;
+    $self->{t_source}->Remove( $from, $to ) if $from < $to;
 }
 
 sub OnAbout {
@@ -213,6 +272,7 @@ sub OnAbout {
 	$ai->AddDeveloper("CAVA Packager version " . $dd->($Cava::Packager::VERSION))
 	  if $Cava::Packager::PACKAGED;
 	$ai->AddDeveloper("GUI design with wxGlade");
+	$ai->AddDeveloper("Some icons by www.flaticon.com");
 	$ai->SetWebSite("http://www.chordpro.org");
 	Wx::AboutBox($ai);
     }
@@ -227,7 +287,7 @@ sub OnAbout {
 	   "wxWidgets version " . $dd->(Wx::wxVERSION)."\n".
 	   ( $Cava::Packager::PACKAGED
 	     ? "CAVA Packager version " . $dd->($Cava::Packager::VERSION)."\n"
-	     : () ),
+	     : "" ),
 	   "About ChordPro",
 	   wxOK|wxICON_INFORMATION,
 	   wxDefaultPosition);
