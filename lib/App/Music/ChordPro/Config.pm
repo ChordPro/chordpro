@@ -99,12 +99,17 @@ This is the current built-in configuration file, showing all settings.
 	// smaller values, you get a fine(r)-grained control over the
 	// spacing between the various parts of the song.
   
-  	// Style of chorus indicator.
-  	"chorus-indent"     :  0,
-  	// Chorus side bar. Suppress by setting offset and width to zero.
-  	"chorus-bar-offset" :  8,
-  	"chorus-bar-width"  :  1,
-  	"chorus-bar-color"  : "black",
+  	// Style of chorus.
+  	"chorus" : {
+	    "indent"     :  0,
+  	    // Chorus side bar.
+	    // Suppress by setting offset and/or width to zero.
+  	    "bar" : {
+		"offset" :  8,
+		"width"  :  1,
+		"color"  : "black",
+	    },
+	},
   
   	// Alternative songlines with chords in a side column.
   	// Value is the column position.
@@ -127,17 +132,12 @@ This is the current built-in configuration file, showing all settings.
 	// be 4 or larger to accomodate most chords.
   	// The horizontal distance between grids is "hspace" cells.
   	// The vertical distance is "vspace" cells.
-	// "hard": only prints the hard chords. This includes user
-  	// defined chords.
-	// "sorted": order the chords by key.
   	"chordgrid" : {
 	    "width"    :  6,
   	    "height"   :  6,
   	    "hspace"   :  3.95,
   	    "vspace"   :  3,
   	    "vcells"   :  4,
-	    "hard"     :  1,
-	    "sorted"   :  1,
   	},
   
   	// Even/odd pages. A value of -1 denotes odd/even pages.

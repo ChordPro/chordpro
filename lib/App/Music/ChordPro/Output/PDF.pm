@@ -320,15 +320,16 @@ sub generate_song {
 	    # Handle decorations.
 
 	    if ( $elt->{context} eq "chorus" ) {
-		$indent = $ps->{'chorus-indent'};
-		if ( $ps->{'chorus-bar-offset'} && $ps->{'chorus-bar-width'} ) {
+		my $style = $ps->{chorus};
+		$indent = $style->{indent};
+		if ( $style->{bar}->{offset} && $style->{bar}->{width} ) {
 		    my $cx = $ps->{marginleft}
 		      + $ps->{columnoffsets}->[$col]
-			- $ps->{'chorus-bar-offset'}
+			- $style->{bar}->{offset}
 			  + $indent;
 		    $pr->vline( $cx, $y, $vsp,
-				$ps->{'chorus-bar-width'},
-				$ps->{'chorus-bar-color'} );
+				$style->{bar}->{width},
+				$style->{bar}->{color} );
 		}
 	    }
 
@@ -376,9 +377,10 @@ sub generate_song {
 		    next;
 		}
 	    }
+	    my $style = $ps->{chorus};
 	    my $cx = $ps->{marginleft}
-	      + $ps->{columnoffsets}->[$col] - $ps->{'chorus-bar-offset'};
-	    $pr->vline( $cx, $cy, vsp($ps), 1, $ps->{'chorus-bar-color'} );
+	      + $ps->{columnoffsets}->[$col] - $style->{bar}->{offset};
+	    $pr->vline( $cx, $cy, vsp($ps), 1, $style->{bar}->{color} );
 	    $y -= vsp($ps,4); # chordii
 	    next;
 	}
