@@ -224,6 +224,8 @@ This is the current built-in configuration file, showing all settings.
   	// grid           --> comment
   	// footer         --> subtitle @ 60%
   	// empty          --> text
+	// chordgrid	  --> comment
+	// chordgrid_capo --> text (but at a small size)
 
   	// This will show the page layout.
   	// "showlayout" : 1,

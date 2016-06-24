@@ -1,8 +1,9 @@
-0.59.x	Jun xx 2016
+0.60	Jun 23 2016
 
 	Bring chorus layout attributes under a single topic.
+	Add chordgrid and chordgrid_capo chords.
 
-0.59	Jun 24 2016
+0.59	Jun 23 2016
 
 	We have a Ukulele.
 	And a GUI.

@@ -1021,7 +1021,7 @@ sub text_vsp {
 
 sub chordgrid_vsp {
     my ( $elt, $ps ) = @_;
-    $ps->{fonts}->{comment}->{size} * $ps->{spacing}->{chords}
+    $ps->{fonts}->{chordgrid}->{size} * $ps->{spacing}->{chords}
       + 0.40 * $ps->{chordgrid}->{width}
 	+ $ps->{chordgrid}->{vcells} * $ps->{chordgrid}->{height}
 	  + $ps->{chordgrid}->{vspace} * $ps->{chordgrid}->{height};
@@ -1052,7 +1052,7 @@ sub chordgrid {
     my $w = $gw * $#{ $info->{strings} };
 
     # Draw font name.
-    my $font = $ps->{fonts}->{comment};
+    my $font = $ps->{fonts}->{chordgrid};
     $pr->setfont($font);
     $name .= "*" unless $info->{builtin};
     $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y - font_bl($font) );
@@ -1060,9 +1060,9 @@ sub chordgrid {
 
     if ( $info->{base} ) {
 	my $i = @Roman[$info->{base}] . "  ";
-	$pr->setfont( $ps->{fonts}->{text}, $gh );
+	$pr->setfont( $ps->{fonts}->{chordgrid_capo}, $gh );
 	$pr->text( $i, $x-$pr->strwidth($i), $y-$gh/2,
-		   $ps->{fonts}->{text}, $gh );
+		   $ps->{fonts}->{chordgrid_capo}, $gh );
     }
 
     my $v = $ps->{chordgrid}->{vcells};
@@ -1236,6 +1236,8 @@ sub configurator {
     $fonts->{toc}	     ||= { %{ $fonts->{text}  } };
     $fonts->{empty}	     ||= { %{ $fonts->{text}  } };
     $fonts->{grid}           ||= { %{ $fonts->{comment} } };
+    $fonts->{chordgrid}      ||= { %{ $fonts->{comment} } };
+    $fonts->{chordgrid_capo} ||= { %{ $fonts->{text} } };
     $fonts->{subtitle}->{size}       ||= $fonts->{text}->{size};
     $fonts->{comment_italic}->{size} ||= $fonts->{text}->{size};
     $fonts->{comment_box}->{size}    ||= $fonts->{text}->{size};
