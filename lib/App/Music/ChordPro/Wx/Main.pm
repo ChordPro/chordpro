@@ -151,8 +151,11 @@ sub preview {
 #	my $cmd = $ft->GetOpenCommand($pdf);
 #	Wx::Execute($cmd);
 
-	#### NOTE: LINUX ONLY
-	system("evince", "--preview", $preview_pdf );
+#	#### NOTE: LINUX ONLY
+#	system("evince", "--preview", $preview_pdf );
+
+	use Wx::PdfDocument;
+	Wx::PdfDocument::LaunchPdfViewer($preview_pdf);
     }
     unlink( $preview_cho );
 }

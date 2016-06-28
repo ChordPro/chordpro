@@ -1,3 +1,8 @@
+0.61	Jun 28 2016
+
+	Improve packaging.
+	Add support for PAR packaging.
+
 0.60	Jun 23 2016
 
 	Bring chorus layout attributes under a single topic.

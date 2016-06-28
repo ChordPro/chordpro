@@ -203,6 +203,8 @@
 	// grid           --> comment
 	// footer         --> subtitle @ 60%
 	// empty          --> text
+	// chordgrid	  --> comment
+	// chordgrid_capo --> text (but at a small size)
 
 	// This will show the page layout.
 	// "showlayout" : 1,

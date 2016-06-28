@@ -194,7 +194,7 @@ CPAN/PDF/API2/Resource/XObject.pm
 CPAN/PDF/API2/UniWrap.pm
 CPAN/PDF/API2/Util.pm
 lib/App/Packager.pm
-lib/App/Music/ChordPro/Output/Bundle.pm
+lib/App/Music/ChordPro/Bundle.pm
 lib/App/Music/ChordPro/Output/HTML.pm
 lib/App/Music/ChordPro/Output/LaTeX.pm
 lib/App/Music/ChordPro/Output/LilyPond.pm

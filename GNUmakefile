@@ -6,6 +6,7 @@
 all :	cleanup
 	perl Makefile.PL
 	$(MAKE) -f Makefile all
+	perl lib/App/Music/ChordPro/Config.pm > res/config/chordpro.json
 
 .PHONY : test
 test :
@@ -23,6 +24,7 @@ cleanup :
 
 .PHONY : dist
 dist :
+	perl lib/App/Music/ChordPro/Config.pm > res/config/chordpro.json
 	$(MAKE) -f Makefile dist
 
 .PHONY : install
@@ -49,6 +51,8 @@ CPW_DST = ${HOME}/tmp/${PROJECT}
 cpw_prep :
 	rsync -avH --files-from=MANIFEST ./ ${CPW_DST}/
 	rsync -avH --files-from=MANIFEST.WX ./ ${CPW_DST}/
+	rsync -avH --files-from=MANIFEST.PP ./ ${CPW_DST}/
+	perl lib/App/Music/ChordPro/Config.pm > ${CPW_DST}/res/config/chordpro.json
 
 cpw_prep_cpan :
 	rsync -avH --files-from=MANIFEST.CPAN ./ ${CPW_DST}/
