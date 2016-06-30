@@ -1,3 +1,9 @@
+0.6x	Jul xx 2016
+
+	Improve support for PAR packaging.
+	Add Undo/Redo (MSW only?).
+	Better viewer launching.
+
 0.61	Jun 28 2016
 
 	Improve packaging.
