@@ -23,13 +23,6 @@ our $VERSION = $App::Music::ChordPro::VERSION;
 sub new {
     my $self = bless $_[0]->SUPER::new(), __PACKAGE__;
 
-    # See https://sourceforge.net/p/wxglade/mailman/message/20840497/
-#    Wx::Event::EVT_MENU($self, wxID_OPEN, \&OnOpen);
-#    Wx::Event::EVT_MENU($self, wxID_EXIT, \&OnExit);
-#    Wx::Event::EVT_MENU($self, wxID_ABOUT, \&OnAbout);
-#    Wx::Event::EVT_BUTTON($self, $self->{b_save}->GetId, \&OnSave);
-#    Wx::Event::EVT_BUTTON($self, $self->{b_preview}->GetId, \&OnPreview);
-
     $self;
 }
 
@@ -84,9 +77,13 @@ sub openfile {
 	$md->Destroy;
 	return;
     }
+    #### TODO: Get rid of selection on Windows
     $self->{_currentfile} = $file;
     if ( $self->{t_source}->GetValue =~ /^\{\s*title[: ]+([^\}]*)\}/m ) {
-	Wx::LogStatus("Loaded: $1");
+	my $n = $self->{t_source}->GetNumberOfLines;
+	Wx::LogStatus("Loaded: $1 ($n line" .
+		      ( $n == 1 ? "" : "s" ) .
+		      ")");
 	$self->{sz_source}->GetStaticBox->SetLabel($1);
     }
 }
@@ -147,15 +144,15 @@ sub preview {
 
     if ( -e $preview_pdf ) {
 	Wx::LogStatus("Output generated, starting previewer");
-#	my $ft = wxTheMimeTypesManager->GetFileTypeFromExtension("pdf");
-#	my $cmd = $ft->GetOpenCommand($pdf);
-#	Wx::Execute($cmd);
-
-#	#### NOTE: LINUX ONLY
-#	system("evince", "--preview", $preview_pdf );
-
-	use Wx::PdfDocument;
-	Wx::PdfDocument::LaunchPdfViewer($preview_pdf);
+	my $wxTheMimeTypesManager = Wx::MimeTypesManager->new;
+	my $ft = $wxTheMimeTypesManager->GetFileTypeFromExtension("pdf");
+	if ( $ft ) {
+	    my $cmd = $ft->GetOpenCommand($preview_pdf);
+	    Wx::ExecuteCommand($cmd);
+	}
+	else {
+	    Wx::LaunchDefaultBrowser("file://" . $preview_pdf);
+	}
     }
     unlink( $preview_cho );
 }
@@ -233,11 +230,24 @@ sub OnExit {
     $self->quit;
 }
 
+sub OnUndo {
+    my ($self, $event) = @_;
+    $self->{t_source}->CanUndo
+      ? $self->{t_source}->Undo
+	: Wx::LogStatus("Sorry, can't undo yet");
+}
+
+sub OnRedo {
+    my ($self, $event) = @_;
+    $self->{t_source}->CanRedo
+      ? $self->{t_source}->Redo
+	: Wx::LogStatus("Sorry, can't redo yet");
+}
+
 sub OnCut {
     my ($self, $event) = @_;
     $self->{t_source}->Cut;
 }
-
 
 sub OnCopy {
     my ($self, $event) = @_;
@@ -272,8 +282,8 @@ sub OnAbout {
 	$ai->AddDeveloper("Johan Vromans");
 	$ai->AddDeveloper("Perl version " . $dd->(sprintf("%vd",$^V)));
 	$ai->AddDeveloper("wxWidgets version " . $dd->(Wx::wxVERSION));
-	$ai->AddDeveloper("CAVA Packager version " . $dd->($Cava::Packager::VERSION))
-	  if $Cava::Packager::PACKAGED;
+	$ai->AddDeveloper(App::Packager::Packager() . " version " . $dd->($App::Packager::VERSION))
+	  if $App::Packager::PACKAGED;
 	$ai->AddDeveloper("GUI design with wxGlade");
 	$ai->AddDeveloper("Some icons by www.flaticon.com");
 	$ai->SetWebSite("http://www.chordpro.org");
@@ -288,8 +298,8 @@ sub OnAbout {
 	   "Perl version " . $dd->(sprintf("%vd",$^V))."\n".
 	   "wxPerl version " . $dd->($Wx::VERSION)."\n".
 	   "wxWidgets version " . $dd->(Wx::wxVERSION)."\n".
-	   ( $Cava::Packager::PACKAGED
-	     ? "CAVA Packager version " . $dd->($Cava::Packager::VERSION)."\n"
+	   ( $App::Packager::PACKAGED
+	     ? App::Packager::Packager() . " version " . $dd->($App::Packager::VERSION)."\n"
 	     : "" ),
 	   "About ChordPro",
 	   wxOK|wxICON_INFORMATION,
