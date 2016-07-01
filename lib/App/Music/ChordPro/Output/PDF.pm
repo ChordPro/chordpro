@@ -239,6 +239,7 @@ sub generate_song {
 
 	if ( ++$col >= $ps->{columns}) {
 	    $newpage->();
+	    $vsp_ignorefirst = 0;
 	}
 	else {
 	    $x = $ps->{marginleft} + $ps->{columnoffsets}->[$col];
