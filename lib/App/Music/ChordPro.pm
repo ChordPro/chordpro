@@ -4,7 +4,7 @@ use 5.010;
 
 package App::Music::ChordPro;
 
-our $VERSION = "0.61";
+our $VERSION = "0.62";
 
 =head1 NAME
 
@@ -575,6 +575,7 @@ sub app_setup {
           # Standard options.
           'ident'               => \$ident,
           'help|h|?'            => \$help,
+          'help-config'         => sub { $manual = 2 },
           'manual'              => \$manual,
           'verbose|v',
           'trace',
@@ -588,9 +589,10 @@ sub app_setup {
     my $pod2usage = sub {
         # Load Pod::Usage only if needed.
         require Pod::Usage;
-        require Pod::Find;
         Pod::Usage->import;
-        unshift( @_, -input => Pod::Find::pod_where( { -inc => 1 }, __PACKAGE__ ) );
+        unshift( @_,
+		 -input => App::Packager::GetResource
+		 ( $manual == 2 ? "pod/Config.pod" : "pod/ChordPro.pod" ) );
         &pod2usage;
     };
 
@@ -688,9 +690,9 @@ EndOfAbout
     my $fmt = " %-22.22s %s\n";
 
     print( "Run-time information:\n" );
-    printf( $fmt, "ChordPro version", "v$VERSION" );
+    printf( $fmt, "ChordPro version", $VERSION );
     printf( $fmt, "Perl version", $^V );
-    printf( $fmt, App::Packager::Packager(), "v$App::Packager::VERSION" )
+    printf( $fmt, App::Packager::Packager(), App::Packager::Version() )
       if $App::Packager::PACKAGED;
     exit $exit if defined $exit;
 }
@@ -746,6 +748,7 @@ Missing default configuration files are silently ignored.
 
 Miscellaneous options:
     --help  -h          This message
+    --help-config       Help for ChordPro configuration
     --manual            The full manual.
     --ident             Show identification
     --verbose           Verbose information
