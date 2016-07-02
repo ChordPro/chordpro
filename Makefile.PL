@@ -16,9 +16,9 @@ WriteMakefile
  AUTHOR	        => 'Johan Vromans <jvromans@squirrel.nl>',
 
  INSTALLDIRS	=> 'site',
- EXE_FILES	=> [ 'script/chordpro' ],
+ EXE_FILES	=> [ 'script/chordpro', 'script/wxchordpro' ],
  PL_FILES	=> {
-		    'script/chordpro.PL' => 'script/chordpro',
+		    'script/chordpro.PL' => [ 'script/chordpro', 'script/wxchordpro' ]
 		   },
 
  PREREQ_PM      => {
