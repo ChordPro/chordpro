@@ -237,7 +237,7 @@ This is the current built-in configuration file, showing all settings.
 
 use JSON::PP ();
 
-sub hmerge($$);
+sub hmerge($$$);
 sub clone($);
 
 my $default_config;
@@ -289,6 +289,23 @@ sub configurator {
     # Load defaults.
     my $cfg = $pp->decode( config_defaults() );
 
+    # Add some extra entries to prevent warnings.
+    for ( qw(tuning) ) {
+	$cfg->{$_} //= undef;
+    }
+    for ( qw(columns fontdir) ) {
+	$cfg->{pdf}->{$_} //= undef;
+    }
+    for my $ff ( qw(chord
+		    chordgrid chordgrid_capo
+		    comment comment_box comment_italic
+		    tab text toc
+		    empty footer grid subtitle title) ) {
+	for ( qw(name file size background) ) {
+	    $cfg->{pdf}->{fonts}->{$ff}->{$_} //= undef;
+	}
+    }
+
     # Apply config files
 
     my $add_config = sub {
@@ -296,7 +313,7 @@ sub configurator {
 	warn("Config: $file\n") if $options->{verbose};
 	if ( open( my $fd, "<:utf8", $file ) ) {
 	    local $/;
-	    $cfg = hmerge( $cfg, $pp->decode( scalar( <$fd> ) ) );
+	    $cfg = hmerge( $cfg, $pp->decode( scalar( <$fd> ) ), "" );
 	    close($fd);
 	}
 	else {
@@ -312,6 +329,28 @@ sub configurator {
 	}
 	else {
 	    $add_config->( $options->{$config} );
+	}
+    }
+
+    # Sanitize added extra entries.
+    for ( qw(tuning) ) {
+	delete( $cfg->{$_} )
+	  unless defined( $cfg->{$_} );
+    }
+    for ( qw(columns fontdir) ) {
+	delete( $cfg->{pdf}->{$_} )
+	  unless defined( $cfg->{pdf}->{$_} );
+    }
+    my @allfonts = keys(%{$cfg->{pdf}->{fonts}});
+    for my $ff ( @allfonts ) {
+	unless ( $cfg->{pdf}->{fonts}->{$ff}->{name}
+		 || $cfg->{pdf}->{fonts}->{$ff}->{file} ) {
+	    delete( $cfg->{pdf}->{fonts}->{$ff} );
+	    next;
+	}
+	for ( qw(name file size background) ) {
+	    delete( $cfg->{pdf}->{fonts}->{$ff}->{$_} )
+	      unless defined( $cfg->{pdf}->{fonts}->{$ff}->{$_} );
 	}
     }
 
@@ -366,12 +405,13 @@ sub config_final {
     $pp->encode($cfg);
 }
 
-sub hmerge($$) {
+sub hmerge($$$) {
 
     # Merge hashes. Right takes precedence.
     # Based on Hash::Merge::Simple by Robert Krimen.
 
-    my ( $left, $right ) = @_;
+    my ( $left, $right, $path ) = @_;
+    $path ||= "";
 
     my %res = %$left;
 
@@ -382,9 +422,11 @@ sub hmerge($$) {
 	     ref($left->{$key}) eq 'HASH' ) {
 
 	    # Both hashes. Recurse.
-            $res{$key} = hmerge( $left->{$key}, $right->{$key} );
+            $res{$key} = hmerge( $left->{$key}, $right->{$key}, "$path$key:" );
         }
         else {
+	    warn("Config error: unknown item $path$key\n")
+	      unless exists $res{$key};
             $res{$key} = $right->{$key};
         }
     }
