@@ -146,8 +146,7 @@ sub preview {
 	Wx::LogStatus("Output generated, starting previewer");
 	my $wxTheMimeTypesManager = Wx::MimeTypesManager->new;
 	my $ft = $wxTheMimeTypesManager->GetFileTypeFromExtension("pdf");
-	if ( $ft ) {
-	    my $cmd = $ft->GetOpenCommand($preview_pdf);
+	if ( $ft && ( my $cmd = $ft->GetOpenCommand($preview_pdf) ) ) {
 	    Wx::ExecuteCommand($cmd);
 	}
 	else {
