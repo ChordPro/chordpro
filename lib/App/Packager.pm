@@ -25,11 +25,22 @@ sub import {
 	*GetResourcePath  = sub { $ENV{PAR_TEMP} . "/inc/res" };
 	*GetResource      = sub { $ENV{PAR_TEMP} . "/inc/res/" . $_[0] };
 	*Packager         = sub { "PAR Packer" };
+	my $pp_vf = GetResource("PAR-Packer-Version.pl");
+	if ( -s $pp_vf ) {
+	    my $pp_version = "";
+	    eval { $pp_version = require $pp_vf };
+	    *Version      = sub { "$pp_version (PAR version $PAR::VERSION)" };
+	}
+	else {
+	    *Version      = sub { "$PAR::VERSION (PAR)" };
+	}
 	return;
     }
 
     if ( $Cava::Packager::PACKAGED ) {
+	$VERSION    = $Cava::Packager::VERSION;
 	*Packager   = sub { "Cava Packager" };
+	*Version    = sub { "$VERSION" };
 	*IsPackaged = sub { 1 };
     }
     else {
