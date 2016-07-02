@@ -1522,6 +1522,7 @@ sub init_fonts {
     my $fail;
 
     foreach my $ff ( keys( %{ $ps->{fonts} } ) ) {
+	next unless $ps->{fonts}->{$ff}->{name} || $ps->{fonts}->{$ff}->{file};
 	$self->init_font($ff) or $fail++;
     }
     die("Unhandled fonts detected -- aborted\n") if $fail;
