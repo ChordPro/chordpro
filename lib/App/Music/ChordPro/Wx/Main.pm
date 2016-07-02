@@ -278,10 +278,10 @@ sub OnAbout {
 	$ai->SetName("ChordPro Preview Editor");
 	$ai->SetVersion( $dd->($VERSION) );
 	$ai->SetCopyright("Copyright $year Johan Vromans <jvromans\@squirrel.nl>");
-	$ai->AddDeveloper("Johan Vromans");
+	$ai->AddDeveloper("Johan Vromans <jvromans\@squirrel.nl>");
 	$ai->AddDeveloper("Perl version " . $dd->(sprintf("%vd",$^V)));
 	$ai->AddDeveloper("wxWidgets version " . $dd->(Wx::wxVERSION));
-	$ai->AddDeveloper(App::Packager::Packager() . " version " . $dd->($App::Packager::VERSION))
+	$ai->AddDeveloper(App::Packager::Packager() . " version " . App::Packager::Version())
 	  if $App::Packager::PACKAGED;
 	$ai->AddDeveloper("GUI design with wxGlade");
 	$ai->AddDeveloper("Some icons by www.flaticon.com");
@@ -298,7 +298,7 @@ sub OnAbout {
 	   "wxPerl version " . $dd->($Wx::VERSION)."\n".
 	   "wxWidgets version " . $dd->(Wx::wxVERSION)."\n".
 	   ( $App::Packager::PACKAGED
-	     ? App::Packager::Packager() . " version " . $dd->($App::Packager::VERSION)."\n"
+	     ? App::Packager::Packager() . " version " . App::Packager::Version()."\n"
 	     : "" ),
 	   "About ChordPro",
 	   wxOK|wxICON_INFORMATION,
