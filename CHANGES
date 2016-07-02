@@ -3,6 +3,9 @@
 	Improve support for PAR packaging.
 	Add Undo/Redo (MSW only?).
 	Better viewer launching.
+	Use separate PODs for --manual and --help-config.
+	Add wxchordpro to the kit.
+	Bump to 0.62.
 
 0.61	Jun 28 2016
 
