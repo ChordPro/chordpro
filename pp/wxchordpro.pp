@@ -1,3 +1,4 @@
+@chordpro.pp
 --gui
 --module=Wx::DND
 --module=Wx::DocView

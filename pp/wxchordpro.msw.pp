@@ -1,3 +1,4 @@
+@wxchordpro.pp
 --link=wxbase28u_gcc_citrusperl.dll
 --link=wxmsw28u_adv_gcc_citrusperl.dll
 --link=wxmsw28u_core_gcc_citrusperl.dll

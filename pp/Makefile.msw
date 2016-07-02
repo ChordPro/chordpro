@@ -7,4 +7,4 @@ chordpro.exe : chordpro.pp
 # PATH must be set accordingly.
 wxchordpro.exe : chordpro.pp wxchordpro.pp wxchordpro.msw.pp
 	set path=C:\\CitrusPerl\\vendor\\lib\\Alien\\wxWidgets\\msw_2_8_12_uni_gcc_3_4\\lib;%path%
-	pp --output=wxchordpro.exe @chordpro.pp @wxchordpro.pp @wxchordpro.msw.pp ../script/wxchordpro.pl
+	pp --output=wxchordpro.exe @wxchordpro.msw.pp ../script/wxchordpro.pl
