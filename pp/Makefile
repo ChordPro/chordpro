@@ -2,7 +2,7 @@
 
 .PHONY : chordpro wxchordpro
 
-# Use pp from path, not necessaroly /usr/bin.
+# Use pp from path, not necessarily /usr/bin.
 PP := perl -S pp
 
 chordpro : res
@@ -13,7 +13,6 @@ wxchordpro : res
 
 res :
 	: test -f ../GNUmakefile && make -C .. pod config
-	perl -MPAR::Packer -E 'say qq{"$$PAR::Packer::VERSION";};' > ../res/PAR-Packer-Version.pl
 
 clean ::
 	rm -f *.pp.deps *~ chordpro wxchordpro
