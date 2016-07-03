@@ -22,9 +22,9 @@ res/pod/ChordPro.pod
 res/pod/Config.pod
 res/config/chordpro.json
 res/config/ukulele.json
-script/chordpro-script.pl
-script/wxchordpro-script.pl
-script/chordpro.PL
+script/chordpro.pl
+script/wxchordpro.pl
+script/ppchordpro.PL
 t/00_basic.pl
 t/01_prereq.t
 t/02_load.t
