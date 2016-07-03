@@ -18,7 +18,7 @@ WriteMakefile
  INSTALLDIRS	=> 'site',
  EXE_FILES	=> [ 'script/chordpro', 'script/wxchordpro' ],
  PL_FILES	=> {
-		    'script/chordpro.PL' => [ 'script/chordpro', 'script/wxchordpro' ]
+		    'script/ppchordpro.PL' => [ 'script/chordpro', 'script/wxchordpro' ]
 		   },
 
  PREREQ_PM      => {
