@@ -3,10 +3,9 @@
 ################ Pass-through ################
 
 .PHONY : all
-all :	cleanup
+all :	cleanup config pod
 	perl Makefile.PL
 	$(MAKE) -f Makefile all
-	perl lib/App/Music/ChordPro/Config.pm > res/config/chordpro.json
 
 .PHONY : test
 test :
@@ -23,13 +22,25 @@ cleanup :
 	fi
 
 .PHONY : dist
-dist :
-	perl lib/App/Music/ChordPro/Config.pm > res/config/chordpro.json
+dist :	config pod
 	$(MAKE) -f Makefile dist
 
 .PHONY : install
 install :
 	$(MAKE) -f Makefile install
+
+config : res/config/chordpro.json
+
+res/config/chordpro.json : lib/App/Music/ChordPro/Config.pm
+	perl $< > $@
+
+pod : res/pod/ChordPro.pod res/pod/Config.pod
+
+res/pod/ChordPro.pod : lib/App/Music/ChordPro.pm
+	podselect $< > $@
+
+res/pod/Config.pod : lib/App/Music/ChordPro/Config.pm
+	podselect $< > $@
 
 ################ Extensions ################
 
