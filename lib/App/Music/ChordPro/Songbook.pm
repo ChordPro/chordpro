@@ -83,19 +83,30 @@ sub parsefile {
 	    $self->add( type => "empty" );
 	}
     }
-    #### TODO: sorting
-    if ( $::config->{chordgrid}->{hard} ) {
-	@used_chords =
-	  grep { ! App::Music::ChordPro::Chords::chord_info($_)->{easy} } @used_chords;
+
+    my $showgrids;
+    if ( exists($self->{songs}->[-1]->{settings}->{showgrids} ) ) {
+	$showgrids = $self->{songs}->[-1]->{settings}->{showgrids};
     }
-    if ( $::config->{chordgrid}->{sorted} ) {
-	@used_chords =
-	  sort App::Music::ChordPro::Chords::chordcompare @used_chords;
+    else {
+	$showgrids = $::config->{chordgrid}->{show};
     }
 
-    $self->add( type => "chord-grids",
-		origin => "song",
-		chords => [ @used_chords ] );
+    if ( $showgrids ) {
+	if ( $::config->{chordgrid}->{hard} ) {
+	    @used_chords =
+	      grep { ! App::Music::ChordPro::Chords::chord_info($_)->{easy} } @used_chords;
+	}
+	if ( $::config->{chordgrid}->{sorted} ) {
+	    @used_chords =
+	      sort App::Music::ChordPro::Chords::chordcompare @used_chords;
+	}
+
+	$self->add( type => "chord-grids",
+		    origin => "song",
+		    chords => [ @used_chords ] );
+    }
+
     # $self->{songs}->[-1]->structurize;
 }
 
@@ -325,6 +336,15 @@ sub global_directive {
 
     if ( $d =~ /^(?:columns\s*:\s*)(\d+)$/i ) {
 	$cur->{settings}->{columns} = $1;
+	return 1;
+    }
+
+    if ( $d =~ /^(?:grid|g)$/i ) {
+	$cur->{settings}->{showgrids} = 1;
+	return 1;
+    }
+    if ( $d =~ /^(?:no_grid|ng)$/i ) {
+	$cur->{settings}->{showgrids} = 0;
 	return 1;
     }
 
