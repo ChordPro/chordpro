@@ -1,3 +1,8 @@
+0.63	Jul 06 2016
+
+	Add support for {grid} and friends.
+	More pp stuff.
+
 0.62	Jul 03 2016
 
 	Improve support for PAR packaging.
@@ -5,7 +10,6 @@
 	Better viewer launching.
 	Use separate PODs for --manual and --help-config.
 	Add wxchordpro to the kit.
-	Bump to 0.62.
 
 0.61	Jun 28 2016
 

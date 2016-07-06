@@ -1,7 +1,7 @@
 # nmake file for MS Windows + CitrusPerl
 
 chordpro.exe : chordpro.pp
-	pp --output=chordpro.exe @chordpro.pp ../script/chordpro-script.pl
+	pp --output=chordpro.exe @chordpro.pp ../script/chordpro.pl
 
 # For wxWidgets, explicit libraries are specified in wxchordpro.pp and the
 # PATH must be set accordingly.

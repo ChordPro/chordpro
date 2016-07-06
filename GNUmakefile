@@ -3,12 +3,12 @@
 ################ Pass-through ################
 
 .PHONY : all
-all :	cleanup config pod
-	perl Makefile.PL
+all :	Makefile cleanup
+	mv Makefile.old Makefile
 	$(MAKE) -f Makefile all
 
 .PHONY : test
-test :
+test : Makefile
 	$(MAKE) -f Makefile test
 
 .PHONY : clean
@@ -16,55 +16,31 @@ clean : cleanup
 	rm -f *~
 
 .PHONY : cleanup
-cleanup :
-	if test -f Makefile; then \
-	    $(MAKE) -f Makefile clean; \
-	fi
+cleanup : Makefile
+	$(MAKE) -f Makefile clean
 
 .PHONY : dist
-dist :	config pod
-	$(MAKE) -f Makefile dist
+dist : Makefile
+	$(MAKE) -f Makefile resources dist
 
 .PHONY : install
-install :
+install : Makefile
 	$(MAKE) -f Makefile install
 
-config : res/config/chordpro.json
-
-res/config/chordpro.json : lib/App/Music/ChordPro/Config.pm
-	perl $< > $@
-
-pod : res/pod/ChordPro.pod res/pod/Config.pod
-
-res/pod/ChordPro.pod : lib/App/Music/ChordPro.pm
-	podselect $< > $@
-
-res/pod/Config.pod : lib/App/Music/ChordPro/Config.pm
-	podselect $< > $@
+Makefile : Makefile.PL
+	perl Makefile.PL
 
 ################ Extensions ################
 
 PROJECT := ChordPro
-CAVADIR := cava
+TMP_DST = ${HOME}/tmp/${PROJECT}
 
-cp_build :
-	cavaconsole --scan --build --makeins --project=${CAVADIR}
+to_tmp :
+	make -f Makefile resources
+	rsync -avH --files-from=MANIFEST    ./ ${TMP_DST}/
+	rsync -avH --files-from=MANIFEST.WX ./ ${TMP_DST}/
+	rsync -avH --files-from=MANIFEST.PP ./ ${TMP_DST}/
 
-cp_build_noscan :
-	cavaconsole --build --makeins --project=${CAVADIR}
-
-cp_clean :
-	rm -r ${CAVADIR}/release/${PROJECT}
-	rm ${CAVADIR}/installer/*
-
-CPW_DST = ${HOME}/tmp/${PROJECT}
-
-cpw_prep :
-	rsync -avH --files-from=MANIFEST ./ ${CPW_DST}/
-	rsync -avH --files-from=MANIFEST.WX ./ ${CPW_DST}/
-	rsync -avH --files-from=MANIFEST.PP ./ ${CPW_DST}/
-	perl lib/App/Music/ChordPro/Config.pm > ${CPW_DST}/res/config/chordpro.json
-
-cpw_prep_cpan :
-	rsync -avH --files-from=MANIFEST.CPAN ./ ${CPW_DST}/
+to_tmp_cpan :
+	rsync -avH --files-from=MANIFEST.CPAN ./ ${TMP_DST}/
 

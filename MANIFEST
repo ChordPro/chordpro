@@ -12,11 +12,12 @@ lib/App/Music/ChordPro/Songbook.pm
 lib/App/Music/ChordPro/Wx/Main.pm
 lib/App/Music/ChordPro/Wx/Main_wxg.pm
 lib/App/Packager.pm
-pp/Makefile
+pp/README
+pp/Makefile.lnx
 pp/Makefile.msw
 pp/chordpro.pp
-pp/wxchordpro.all.pp
-pp/wxchordpro.allsos
+pp/wxchordpro.pp
+pp/wxchordpro.lnx.pp
 pp/wxchordpro.msw.pp
 res/pod/ChordPro.pod
 res/pod/Config.pod

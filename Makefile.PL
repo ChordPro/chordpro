@@ -22,8 +22,8 @@ WriteMakefile
 		   },
 
  PREREQ_PM      => {
-		    'PDF::API2'   => 2.021,
-		    'Font::TTF'   => 1.05,
+		    'PDF::API2'   => 2.020,
+		    'Font::TTF'   => 1.04,
 		   },
  TEST_REQUIRES  => {
 		    'Test::More'  => 0,
@@ -55,3 +55,23 @@ WriteMakefile
 # Note about the no_index: CPAN and MetaCPAN have differing opinions
 # on how no_index must be interpreted, in particular in combination
 # with provides.
+
+sub MY::postamble {
+    my $ret = <<'EOD';
+
+# Actualize resources.
+
+resources : res/config/chordpro.json \
+	    res/pod/ChordPro.pod \
+	    res/pod/Config.pod
+
+res/config/chordpro.json : lib/App/Music/ChordPro/Config.pm
+	$(PERLRUN) $< > $@
+
+res/pod/ChordPro.pod : lib/App/Music/ChordPro.pm
+	podselect $< > $@
+
+res/pod/Config.pod :lib/App/Music/ChordPro/Config.pm
+	podselect $< > $@
+EOD
+}

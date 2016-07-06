@@ -12,7 +12,7 @@ wxchordpro : res
 	${PP} --output=wxchordpro @wxchordpro.pp ../script/wxchordpro.pl ../script/chordpro.pl
 
 res :
-	: test -f ../GNUmakefile && make -C .. pod config
+	: test -f ../Makefile && make -C .. -f Makefile resources
 
 clean ::
 	rm -f *.pp.deps *~ chordpro wxchordpro
