@@ -11,6 +11,10 @@ chordpro : res
 wxchordpro : res
 	${PP} --output=wxchordpro @wxchordpro.pp ../script/wxchordpro.pl
 
+wxchordpro-sa : res
+	env LD_LIBRARY_PATH=/lib64 \
+	${PP} --output=wxchordpro @wxchordpro.lnx.pp ../script/wxchordpro.pl
+
 res :
 	: test -f ../Makefile && make -C .. -f Makefile resources
 
