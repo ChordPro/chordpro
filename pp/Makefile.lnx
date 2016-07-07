@@ -9,7 +9,7 @@ chordpro : res
 	${PP} --output=chordpro @chordpro.pp ../script/chordpro.pl
 
 wxchordpro : res
-	${PP} --output=wxchordpro @wxchordpro.pp ../script/wxchordpro.pl ../script/chordpro.pl
+	${PP} --output=wxchordpro @wxchordpro.pp ../script/wxchordpro.pl
 
 res :
 	: test -f ../Makefile && make -C .. -f Makefile resources
