@@ -49,7 +49,7 @@ This is the current built-in configuration file, showing all settings.
       // "sorted": order the chords by key.
       "chordgrid" : {
 	  "show"     :  1,
-	  "hard"     :  1,
+	  "hard"     :  0,
 	  "sorted"   :  0,
       },
   
