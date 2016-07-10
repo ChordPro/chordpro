@@ -2,6 +2,10 @@
 {subtitle: Traditional}
 {columns: 2}
 {titles: center}
+{define D:              base-fret  1    frets   X   X   0   2   3   2   }
+{define G:              base-fret  1    frets   3   2   0   0   0   3   }
+{define A7:             base-fret  1    frets   X   0   2   0   2   0   }
+{define D7:             base-fret  1    frets   X   X   0   2   1   2   }
 
 {start_of_chorus}
 Swing low, sweet chariot,

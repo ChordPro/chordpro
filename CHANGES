@@ -1,3 +1,11 @@
+0.64	Jul 10 2016
+
+	Add support for Chord/Chordii legacy config.
+	Add --no-legacy-config to suppress legacy config.
+	Add --no-default-configs (-X) to suppress all default configs.
+	Do not make "no easy chords" default.
+	More pp stuff.
+
 0.63	Jul 06 2016
 
 	Add support for {grid} and friends.

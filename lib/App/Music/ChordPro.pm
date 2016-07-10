@@ -4,7 +4,7 @@ use 5.010;
 
 package App::Music::ChordPro;
 
-our $VERSION = "0.63";
+our $VERSION = "0.64";
 
 =head1 NAME
 
@@ -468,6 +468,7 @@ sub app_setup {
 
     # Config files.
     my $app_lc = lc($my_name);
+    my $e = $ENV{CHORDIIRC} || $ENV{CHORDRC};
     if ( -d "/etc" ) {          # some *ux
         $configs{sysconfig} =
           File::Spec->catfile( "/", "etc", "$app_lc.json" );
@@ -482,7 +483,10 @@ sub app_setup {
             $configs{userconfig} =
               File::Spec->catfile( $ENV{HOME}, ".$app_lc", "$app_lc.json" );
         }
+	$e ||= File::Spec->catfile( $ENV{HOME}, ".chordrc" );
     }
+    $e ||= "/chordrc";		# Windows, most likely
+    $configs{legacyconfig} = $e if -s $e && -r _;
 
     if ( -s ".$app_lc.json" ) {
         $configs{config} = ".$app_lc.json";
@@ -569,6 +573,8 @@ sub app_setup {
           'nosysconfig|no-sysconfig',
           'userconfig=s',
           'nouserconfig|no-userconfig',
+	  'nolegacyconfig|no-legacy-config',
+	  'nodefaultconfigs|no-default-configs|X',
 	  'print-default-config' => \$defcfg,
 	  'print-final-config'   => \$fincfg,
 
@@ -607,13 +613,14 @@ sub app_setup {
 
     # If the user specified a config, it must exist.
     # Otherwise, set to a default.
-    for my $config ( qw(sysconfig userconfig) ) {
+    for my $config ( qw(sysconfig userconfig legacyconfig) ) {
         for ( $clo->{$config} ) {
             if ( defined($_) ) {
                 die("$_: $!\n") unless -r $_;
                 next;
             }
 	    # Use default.
+	    next if $clo->{nodefaultconfigs};
 	    next unless $configs{$config};
             $_ = $configs{$config};
             undef($_) unless -r $_;
@@ -628,18 +635,20 @@ sub app_setup {
                 next;
             }
 	    # Use default.
+	    next if $clo->{nodefaultconfigs};
 	    next unless $configs{$config};
             $_ = [ $configs{$config} ];
             undef($_) unless -r $_->[0];
         }
     }
     # If no config was specified, and no default is available, force no.
-    for my $config ( qw(sysconfig userconfig config) ) {
+    for my $config ( qw(sysconfig userconfig config legacyconfig) ) {
         $clo->{"no$config"} = 1 unless $clo->{$config};
     }
 
     # Plug in command-line options.
     @{$options}{keys %$clo} = values %$clo;
+    # warn(Dumper($options), "\n") if $options->{debug};
 
     if ( $defcfg || $fincfg ) {
 	print App::Music::ChordPro::Config::config_defaults()
@@ -742,6 +751,8 @@ Configuration options:
     --nouserconfig      Don't use a user specific config file
     --sysconfig=CFG     System specific config file ($configs{sysconfig})
     --nosysconfig       Don't use a system specific config file
+    --nolegacyconfig    Don't use a Chord/Chordii legacy config file
+    --nodefaultconfigs  -X  Don't use any default config files
     --print-default-config   Prints the default config and exits
     --print-final-config   Prints the resultant config and exits
 Missing default configuration files are silently ignored.

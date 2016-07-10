@@ -24,6 +24,14 @@ This is the current built-in configuration file, showing all settings.
   // This is a relaxed JSON document, so comments are possible.
   
   {
+      // General settings, to be changed by legacy configs and
+      // command line.
+      "settings" : {
+        // Titles flush: default center.
+	"titles" : "center",
+        // Columns, default one.
+        "columns" : 1,
+      },
   
       // Strings and tuning.
       // Note that using this will discard all built-in chords!
@@ -65,9 +73,6 @@ This is the current built-in configuration file, showing all settings.
   	// Papersize, 'a4' or [ 595, 842 ] etc.
   	"papersize" : "a4",
   
-  	// Number of columns.
-  	// Can be overridden with {columns} directive.
-  	// "columns"   : 2,
   	// Space between columns, in pt.
   	"columnspace"  :  20,
   
@@ -227,8 +232,8 @@ This is the current built-in configuration file, showing all settings.
 	// chordgrid	  --> comment
 	// chordgrid_capo --> text (but at a small size)
 
-  	// This will show the page layout.
-  	// "showlayout" : 1,
+  	// This will show the page layout if non-zero.
+  	"showlayout" : 0,
       },
   }
   // End of config.
@@ -309,23 +314,19 @@ sub configurator {
     # Apply config files
 
     my $add_config = sub {
-	my ( $file ) = @_;
-	warn("Config: $file\n") if $options->{verbose};
-	if ( open( my $fd, "<:utf8", $file ) ) {
-	    local $/;
-	    $cfg = hmerge( $cfg, $pp->decode( scalar( <$fd> ) ), "" );
-	    close($fd);
-	}
-	else {
-	    ### Should not happen -- it's been checked in app_setup.
-	    die("Cannot open $file [$!]\n");
-	}
+	$cfg = add_config( $cfg, $options, shift, $pp );
+    };
+    my $add_legacy = sub {
+	$cfg = add_legacy( $cfg, $options, shift, $pp );
     };
 
-    foreach my $config ( qw( sysconfig userconfig config ) ) {
+    foreach my $config ( qw( sysconfig legacyconfig userconfig config ) ) {
 	next if $options->{"no$config"};
 	if ( ref($options->{$config}) eq 'ARRAY' ) {
 	    $add_config->($_) foreach @{ $options->{$config} };
+	}
+	elsif ( $config eq "legacyconfig" ) {
+	    $add_legacy->( $options->{$config} );
 	}
 	else {
 	    $add_config->( $options->{$config} );
@@ -391,6 +392,71 @@ sub configurator {
     if ( $] >= 5.018000 ) {
 	require Hash::Util;
 	Hash::Util::lock_hash_recurse($cfg);
+    }
+
+    return $cfg;
+}
+
+sub add_config {
+    my ( $cfg, $options, $file, $pp ) = @_;
+    warn("Config: $file\n") if $options->{verbose};
+    if ( open( my $fd, "<:utf8", $file ) ) {
+	local $/;
+	$cfg = hmerge( $cfg, $pp->decode( scalar( <$fd> ) ), "" );
+	close($fd);
+    }
+    else {
+	### Should not happen -- it's been checked in app_setup.
+	die("Cannot open $file [$!]\n");
+    }
+    return $cfg;
+}
+
+sub add_legacy {
+    my ( $cfg, $options, $file, $pp ) = @_;
+    warn("Config: $file (legacy)\n") if $options->{verbose};
+    $options->{_legacy} = 1;
+    require App::Music::ChordPro::Songbook;
+    my $s = App::Music::ChordPro::Songbook->new;
+    $s->parsefile( $file, $options );
+    delete( $options->{_legacy} );
+
+    my $song = $s->{songs}->[0];
+    foreach ( keys( %{$song->{settings}} ) ) {
+	if ( $_ eq "titles" ) {
+	    $cfg->{settings}->{titles} = $song->{settings}->{titles};
+	    next;
+	}
+	if ( $_ eq "columns" ) {
+	    $cfg->{settings}->{columns} = $song->{settings}->{columns};
+	    next;
+	}
+	if ( $_ eq "showgrids" ) {
+	    $cfg->{chordgrid}->{show} = $song->{settings}->{showgrids};
+	    next;
+	}
+	die("Cannot happen");
+    }
+    foreach ( @{$song->{body}} ) {
+	unless ( $_->{type} eq "control" ) {
+	    die("Cannot happen");
+	}
+	my $name = $_->{name};
+	my $value = $_->{value};
+	unless ( $name =~ /^(text|chord|tab)-(font|size)$/ ) {
+	    die("Cannot happen");
+	}
+	$name = $1;
+	my $prop = $2;
+	if ( $prop eq "font" ) {
+	    if ( $value =~ /.+\.(?:ttf|otf)$/i ) {
+		$prop = "file"
+	    }
+	    else {
+		$prop = "name";
+	    }
+	}
+	$cfg->{pdf}->{fonts}->{$name}->{$prop} = $value;
     }
 
     return $cfg;

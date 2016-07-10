@@ -3,6 +3,14 @@
 // This is a relaxed JSON document, so comments are possible.
 
 {
+    // General settings, to be changed by legacy configs and
+    // command line.
+    "settings" : {
+      // Titles flush: default center.
+	"titles" : "center",
+      // Columns, default one.
+      "columns" : 1,
+    },
 
     // Strings and tuning.
     // Note that using this will discard all built-in chords!
@@ -44,9 +52,6 @@
 	// Papersize, 'a4' or [ 595, 842 ] etc.
 	"papersize" : "a4",
 
-	// Number of columns.
-	// Can be overridden with {columns} directive.
-	// "columns"   : 2,
 	// Space between columns, in pt.
 	"columnspace"  :  20,
 

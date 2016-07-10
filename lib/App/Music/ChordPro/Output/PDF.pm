@@ -82,9 +82,9 @@ sub generate_song {
     $s->structurize if $structured;
 
     my $sb = $s->{body};
-    my $st = $s->{settings}->{titles} || $ps->{"titles-flush"};
 
-    set_columns( $ps, $s->{settings}->{columns} );
+    set_columns( $ps,
+		 $s->{settings}->{columns} || $::config->{settings}->{columns} );
 
     $single_space = $ps->{'suppress-empty-chords'};
     $chordscol    = $ps->{chordscolumn};
@@ -123,7 +123,8 @@ sub generate_song {
     $ps->{'even-odd-pages'} =  1 if $options->{'even-pages-number-left'};
     $ps->{'even-odd-pages'} = -1 if $options->{'odd-pages-number-left'};
 
-    if ( defined( $s->{settings}->{titles} )
+    my $st = $s->{settings}->{titles} || $::config->{settings}->{titles};
+    if ( defined($st)
 	 && ! $pr->{'titles-directive-ignore'} ) {
 	my $swap = sub {
 	    my ( $from, $to ) = @_;
@@ -138,10 +139,10 @@ sub generate_song {
 	    }
 	};
 
-	if ( $s->{settings}->{titles} eq "left" ) {
+	if ( $st eq "left" ) {
 	    $swap->(0,1);
 	}
-	if ( $s->{settings}->{titles} eq "right" ) {
+	if ( $st eq "right" ) {
 	    $swap->(2,1);
 	}
     }

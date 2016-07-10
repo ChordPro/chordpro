@@ -14,7 +14,7 @@ my $test;
 my ( $num, $basic, $backend ) = @::params;
 my $base = "${num}_${backend}";
 
-my @argv = ( "--noconfig", "--nouserconfig", "--nosysconfig", "$basic.cho" );
+my @argv = ( "--no-default-configs", "$basic.cho" );
 
 # Some basic tests.
 

@@ -62,7 +62,9 @@ sub parsefile {
 	s/'/\x{2019}/g;
 
 	if ( /\{(.*)\}\s*$/ ) {
-	    $self->directive($1);
+	    $options->{_legacy}
+	      ? $self->global_directive( $1, 1 )
+	      : $self->directive($1);
 	    next;
 	}
 
@@ -314,7 +316,7 @@ sub directive {
 	return;
     }
 
-    return if $self->global_directive($d);
+    return if $self->global_directive( $d, 0 );
 
     # Warn about unknowns, unless they are x_... form.
     do_warn("Unknown directive: $d\n") unless $d =~ /^x_/;
@@ -322,7 +324,7 @@ sub directive {
 }
 
 sub global_directive {
-    my ($self, $d) = @_;
+    my ($self, $d, $legacy ) = @_;
 
     my $cur = $self->{songs}->[-1];
 
@@ -349,6 +351,7 @@ sub global_directive {
     }
 
     if ( $d =~ /^([-+])([-\w]+)\s*:\s*(.+)$/i ) {
+	return if $legacy;
 	$self->add( type => "control",
 		    name => $2,
 		    value => $3,
@@ -357,6 +360,7 @@ sub global_directive {
     }
 
     if ( $d =~ /^([-+])([-\w]+)$/i ) {
+	return if $legacy;
 	$self->add( type => "control",
 		    name => $2,
 		    value => $1 eq "+" ? "1" : "0",
@@ -368,8 +372,11 @@ sub global_directive {
     if ( $d =~ /^(text|chord|tab|grid|title|footer|toc)(font|size|colou?r):\s*(.*)$/ ) {
 	my $item = $1;
 	my $prop = $2;
-	$prop = "color" if $prop eq "colour";
 	my $value = $3;
+	return if $legacy
+	  && ! ( $item =~ /^(text|chord|tab)$/ && $prop =~ /^(font|size)$/ );
+
+	$prop = "color" if $prop eq "colour";
 	if ( $prop eq "size" ) {
 	    unless ( $value =~ /^\d+(?:\.\d+)?\%?$/ ) {
 		do_warn("Illegal value \"$value\" for $item$prop\n");
@@ -377,10 +384,12 @@ sub global_directive {
 	    }
 	}
 	if ( $prop =~ /^colou?r$/  ) {
-	    unless ( get_color($value) ) {
+	    my $v;
+	    unless ( $v = get_color($value) ) {
 		do_warn("Illegal value \"$value\" for $item$prop\n");
 		return 1;
 	    }
+	    $value = $v;
 	}
 	$self->add( type => "control",
 		    name => "$item-$prop",
@@ -459,7 +468,7 @@ package App::Music::ChordPro::Song;
 
 sub new {
     my ( $pkg, %init ) = @_;
-    bless { structure => "linear", %init }, $pkg;
+    bless { structure => "linear", settings => {}, %init }, $pkg;
 }
 
 sub structurize {
