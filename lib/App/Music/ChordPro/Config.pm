@@ -231,7 +231,7 @@ This is the current built-in configuration file, showing all settings.
   	// empty          --> text
 	// chordgrid	  --> comment
 	// chordgrid_capo --> text (but at a small size)
-
+  
   	// This will show the page layout if non-zero.
   	"showlayout" : 0,
       },
@@ -332,6 +332,18 @@ sub configurator {
 	    $add_config->( $options->{$config} );
 	}
     }
+
+    # Handle defines from the command line.
+    my $ccfg = {};
+    while ( my ($k, $v) = each( %{ $options->{define} } ) ) {
+	my @k = split( /:/, $k );
+	my $c = \$ccfg;
+	foreach ( @k ) {
+	    $c = \($$c->{$_});
+	}
+	$$c = $v;
+    }
+    $cfg = hmerge( $cfg, $ccfg, "" );
 
     # Sanitize added extra entries.
     for ( qw(tuning) ) {

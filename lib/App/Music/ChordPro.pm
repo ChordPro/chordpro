@@ -366,6 +366,10 @@ paper size, assuming that all printers use the same size.
 
 Don't use the system specific config file, even if it exists.
 
+=item B<--nolegacyconfig>
+
+Don't use a legacy config file, even if it exists.
+
 =item B<--userconfig=>I<CFG>
 
 Designates the config file for the user.
@@ -396,6 +400,23 @@ You can specify multiple config files. The settings are accumulated.
 =item B<--noconfig>
 
 Don't use the specific config file, even if it exists.
+
+=item B<--define=>I<item>
+
+Sets a configuration item. I<item> must be in the format of
+colon-separated configuration keys, an equal sign, and the value. For
+example, the equivalent of B<--no-chord-grids> is
+B<--define=chordgrid:show=0>.
+
+B<--define> may be used multiple times to set multiple items.
+
+=item B<--no-default-configs> (short: B<-X>)
+
+Do not use any config files except the ones mentioned explicitly on
+the command line.
+
+This guarantees that the program is running with the default
+configuration.
 
 =item B<--print-default-config>
 
@@ -575,6 +596,7 @@ sub app_setup {
           'nouserconfig|no-userconfig',
 	  'nolegacyconfig|no-legacy-config',
 	  'nodefaultconfigs|no-default-configs|X',
+	  'define=s%',
 	  'print-default-config' => \$defcfg,
 	  'print-final-config'   => \$fincfg,
 
@@ -753,6 +775,7 @@ Configuration options:
     --nosysconfig       Don't use a system specific config file
     --nolegacyconfig    Don't use a Chord/Chordii legacy config file
     --nodefaultconfigs  -X  Don't use any default config files
+    --define=XXX=YYY	Sets config item XXX to value YYY
     --print-default-config   Prints the default config and exits
     --print-final-config   Prints the resultant config and exits
 Missing default configuration files are silently ignored.

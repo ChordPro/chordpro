@@ -211,8 +211,8 @@
 	// chordgrid	  --> comment
 	// chordgrid_capo --> text (but at a small size)
 
-	// This will show the page layout.
-	// "showlayout" : 1,
+	// This will show the page layout if non-zero.
+	"showlayout" : 0,
     },
 }
 // End of config.
