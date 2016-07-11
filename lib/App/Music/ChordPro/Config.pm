@@ -186,7 +186,7 @@ This is the current built-in configuration file, showing all settings.
   	// Fonts can be specified by name (for the corefonts)
   	// or a filename (for TrueType/OpenType fonts).
   	// Relative filenames are looked up in the fontdir.
-  	// "fontdir" : "/home/jv/.fonts",
+  	"fontdir" : null,
   
   	// Fonts for chords and comments can have a background
   	// colour associated.
@@ -298,9 +298,6 @@ sub configurator {
     for ( qw(tuning) ) {
 	$cfg->{$_} //= undef;
     }
-    for ( qw(columns fontdir) ) {
-	$cfg->{pdf}->{$_} //= undef;
-    }
     for my $ff ( qw(chord
 		    chordgrid chordgrid_capo
 		    comment comment_box comment_italic
@@ -349,10 +346,6 @@ sub configurator {
     for ( qw(tuning) ) {
 	delete( $cfg->{$_} )
 	  unless defined( $cfg->{$_} );
-    }
-    for ( qw(columns fontdir) ) {
-	delete( $cfg->{pdf}->{$_} )
-	  unless defined( $cfg->{pdf}->{$_} );
     }
     my @allfonts = keys(%{$cfg->{pdf}->{fonts}});
     for my $ff ( @allfonts ) {

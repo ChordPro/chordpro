@@ -1,6 +1,7 @@
 0.6x	Jul xx 2016
 
 	Add --define to set config items from the command line.
+	Smooth some config trickeries.
 
 0.64	Jul 10 2016
 
