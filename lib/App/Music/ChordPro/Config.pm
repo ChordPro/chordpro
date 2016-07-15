@@ -33,9 +33,17 @@ This is the current built-in configuration file, showing all settings.
         "columns" : 1,
       },
   
+      // Mapping meta-data. This can be used to change the treatment
+      // of specific meta-data items.
+      "meta-map" : {
+        // For example, treat artist as subtitle.
+        // "artist" : "subtitle",
+      },
+  
       // Strings and tuning.
       // Note that using this will discard all built-in chords!
       // "tuning" : [ "E2", "A2", "D3", "G3", "B3", "E4" ],
+      "tuning" : null,
   
       // User defined chords.
       // "base" defaults to 1.
@@ -298,6 +306,9 @@ sub configurator {
     for ( qw(tuning) ) {
 	$cfg->{$_} //= undef;
     }
+    for ( qw( title subtitle artist composer key tempo time album ) ) {
+	$cfg->{'meta-map'}->{$_} //= undef;
+    }
     for my $ff ( qw(chord
 		    chordgrid chordgrid_capo
 		    comment comment_box comment_italic
@@ -346,6 +357,10 @@ sub configurator {
     for ( qw(tuning) ) {
 	delete( $cfg->{$_} )
 	  unless defined( $cfg->{$_} );
+    }
+    for ( qw( title subtitle artist composer key tempo time album ) ) {
+	delete( $cfg->{'meta-map'}->{$_} )
+	  unless defined( $cfg->{'meta-map'}->{$_} );
     }
     my @allfonts = keys(%{$cfg->{pdf}->{fonts}});
     for my $ff ( @allfonts ) {

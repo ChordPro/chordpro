@@ -226,16 +226,6 @@ sub directive {
 
     my $cur = $self->{songs}->[-1];
 
-    if ( $d =~ /^(?:title|t):\s*(.*)/i ) {
-	$cur->{title} = $1;
-	return;
-    }
-
-    if ( $d =~ /^(?:subtitle|st):\s*(.*)/i ) {
-	push(@{$cur->{subtitle}}, $1);
-	return;
-    }
-
     # Breaks.
 
     if ( $d =~ /^(?:colb|column_break)$/i ) {
@@ -310,8 +300,25 @@ sub directive {
 	return;
     }
 
+    # Metadata.
+    my $md = $d;
+    if ( $md =~ /^(\w+):\s*(.*)/i
+	 && exists( $::config->{'meta-map'}->{$1} ) ) {
+	$md = $::config->{'meta-map'}->{$1} . ": $2";
+    }
+
+    if ( $md =~ /^(?:title|t):\s*(.*)/i ) {
+	$cur->{title} = $1;
+	return;
+    }
+
+    if ( $md =~ /^(?:subtitle|st):\s*(.*)/i ) {
+	push(@{$cur->{subtitle}}, $1);
+	return;
+    }
+
     # Metadata extensions.
-    if ( $d =~ /^(artist|composer|album|key|time|tempo|capo):\s*(.*)$/ ) {
+    if ( $md =~ /^(artist|composer|album|key|time|tempo|capo):\s*(.*)$/ ) {
 	$self->{songs}->[-1]->{meta}->{$1} = $2;
 	return;
     }

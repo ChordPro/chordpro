@@ -2,6 +2,7 @@
 
 	Add --define to set config items from the command line.
 	Smooth some config trickeries.
+	Add meta-map config to treat metadata items differently.
 
 0.64	Jul 10 2016
 
