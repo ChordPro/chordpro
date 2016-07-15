@@ -21,7 +21,7 @@ my $xpose;
 my @used_chords;
 my %used_chords;
 
-my $diag;			# fir diagnostics
+my $diag;			# for diagnostics
 
 sub parsefile {
     my ( $self, $filename, $options ) = @_;
@@ -183,17 +183,31 @@ sub decompose_grid {
     return ( tokens => \@tokens, $rest ? ( comment => $rest ) : () );
 }
 
+sub dir_split {
+    my ( $d ) = @_;
+    $d =~ s/^[: ]+//;
+    $d =~ s/\s+$//;
+    my $dir = lc($d);
+    my $arg = "";
+    if ( $d =~ /^(.*?)[: ]\s*(.*)/ ) {
+	( $dir, $arg ) = ( lc($1), $2 );
+    }
+    $dir =~ s/[: ]+$//;
+    ( $dir, $arg );
+}
+
 sub directive {
     my ($self, $d) = @_;
+    my ( $dir, $arg ) = dir_split($d);
 
     # Context flags.
 
-    if    ( $d eq "soc" ) { $d = "start_of_chorus" }
-    elsif ( $d eq "sot" ) { $d = "start_of_tab"    }
-    elsif ( $d eq "eoc" ) { $d = "end_of_chorus"   }
-    elsif ( $d eq "eot" ) { $d = "end_of_tab"      }
+    if    ( $dir eq "soc" ) { $dir = "start_of_chorus" }
+    elsif ( $dir eq "sot" ) { $dir = "start_of_tab"    }
+    elsif ( $dir eq "eoc" ) { $dir = "end_of_chorus"   }
+    elsif ( $dir eq "eot" ) { $dir = "end_of_tab"      }
 
-    if ( $d =~ /^start_of_(\w+)\s*(.*)$/ ) {
+    if ( $dir =~ /^start_of_(\w+)\s*(.*)$/ ) {
 	do_warn("Already in " . ucfirst($in_context) . " context\n")
 	  if $in_context;
 	$in_context = $1;
@@ -211,13 +225,13 @@ sub directive {
 	}
 	return;
     }
-    if ( $d =~ /^end_of_(\w+)$/ ) {
+    if ( $dir =~ /^end_of_(\w+)$/ ) {
 	do_warn("Not in " . ucfirst($1) . " context\n")
 	  unless $in_context eq $1;
 	$in_context = $def_context;
 	return;
     }
-    if ( $d =~ /^chorus$/i ) {
+    if ( $dir =~ /^chorus$/i ) {
 	$self->add( type => "rechorus" );
 	return;
     }
@@ -228,42 +242,42 @@ sub directive {
 
     # Breaks.
 
-    if ( $d =~ /^(?:colb|column_break)$/i ) {
+    if ( $dir =~ /^(?:colb|column_break)$/i ) {
 	$self->add( type => "colb" );
 	return;
     }
 
-    if ( $d =~ /^(?:new_page|np)$/i ) {
+    if ( $dir =~ /^(?:new_page|np)$/i ) {
 	$self->add( type => "newpage" );
 	return;
     }
 
-    if ( $d =~ /^(?:new_song|ns)$/i ) {
+    if ( $dir =~ /^(?:new_song|ns)$/i ) {
 	push(@{$self->{songs}}, App::Music::ChordPro::Song->new );
 	return;
     }
 
     # Comments. Strictly speaking they do not belong here.
 
-    if ( $d =~ /^(?:comment|c|highlight):\s*(.*)/i ) {
-	$self->add( type => "comment", text => cxpose($1) );
+    if ( $dir =~ /^(?:comment|c|highlight)$/ ) {
+	$self->add( type => "comment", text => cxpose($arg) );
 	return;
     }
 
-    if ( $d =~ /^(?:comment_italic|ci):\s*(.*)/i ) {
-	$self->add( type => "comment_italic", text => cxpose($1) );
+    if ( $dir =~ /^(?:comment_italic|ci)$/ ) {
+	$self->add( type => "comment_italic", text => cxpose($arg) );
 	return;
     }
 
-    if ( $d =~ /^(?:comment_box|cb):\s*(.*)/i ) {
-	$self->add( type => "comment_box", text => cxpose($1) );
+    if ( $dir =~ /^(?:comment_box|cb)$/ ) {
+	$self->add( type => "comment_box", text => cxpose($arg) );
 	return;
     }
 
     # Images.
-    if ( $d =~ /^image:\s*(.*)$/ ) {
+    if ( $dir eq "image" ) {
 	use Text::ParseWords qw(shellwords);
-	my @args = shellwords($1);
+	my @args = shellwords($arg);
 	my $uri;
 	my %opts;
 	foreach ( @args ) {
@@ -301,25 +315,23 @@ sub directive {
     }
 
     # Metadata.
-    my $md = $d;
-    if ( $md =~ /^(\w+):\s*(.*)/i
-	 && exists( $::config->{'meta-map'}->{$1} ) ) {
-	$md = $::config->{'meta-map'}->{$1} . ": $2";
+    if ( exists( $::config->{'meta-map'}->{$dir} ) ) {
+	$dir = $::config->{'meta-map'}->{$dir};
     }
 
-    if ( $md =~ /^(?:title|t):\s*(.*)/i ) {
-	$cur->{title} = $1;
+    if ( $dir =~ /^(?:title|t)$/ ) {
+	$cur->{title} = $arg;
 	return;
     }
 
-    if ( $md =~ /^(?:subtitle|st):\s*(.*)/i ) {
-	push(@{$cur->{subtitle}}, $1);
+    if ( $dir =~ /^(?:subtitle|st)$/ ) {
+	push(@{$cur->{subtitle}}, $arg);
 	return;
     }
 
     # Metadata extensions.
-    if ( $md =~ /^(artist|composer|album|key|time|tempo|capo):\s*(.*)$/ ) {
-	$self->{songs}->[-1]->{meta}->{$1} = $2;
+    if ( $dir =~ /^(artist|composer|album|key|time|tempo|capo)$/ ) {
+	$self->{songs}->[-1]->{meta}->{$1} = $arg;
 	return;
     }
 
@@ -332,37 +344,31 @@ sub directive {
 
 sub global_directive {
     my ($self, $d, $legacy ) = @_;
+    my ( $dir, $arg ) = dir_split($d);
 
     my $cur = $self->{songs}->[-1];
 
     # Song / Global settings.
 
-    if ( $d =~ /^(?:titles\s*:\s*)(left|right|center|centre)$/i ) {
+    if ( $dir eq "titles"
+	 && $arg =~ /^(left|right|center|centre)$/i ) {
 	$cur->{settings}->{titles} =
-	  $1 eq "centre" ? "center" : $1;
+	  lc($1) eq "centre" ? "center" : lc($1);
 	return 1;
     }
 
-    if ( $d =~ /^(?:columns\s*:\s*)(\d+)$/i ) {
-	$cur->{settings}->{columns} = $1;
+    if ( $dir eq "columns"
+	 && $arg =~ /^(\d+)$/ ) {
+	$cur->{settings}->{columns} = $arg;
 	return 1;
     }
 
-    if ( $d =~ /^(?:grid|g)$/i ) {
+    if ( $dir =~ /^(?:grid|g)$/ ) {
 	$cur->{settings}->{showgrids} = 1;
 	return 1;
     }
-    if ( $d =~ /^(?:no_grid|ng)$/i ) {
+    if ( $dir =~ /^(?:no_grid|ng)$/ ) {
 	$cur->{settings}->{showgrids} = 0;
-	return 1;
-    }
-
-    if ( $d =~ /^([-+])([-\w]+)\s*:\s*(.+)$/i ) {
-	return if $legacy;
-	$self->add( type => "control",
-		    name => $2,
-		    value => $3,
-		  );
 	return 1;
     }
 
@@ -375,11 +381,20 @@ sub global_directive {
 	return 1;
     }
 
+    if ( $dir =~ /^([-+])([-\w]+)$/ ) {
+	return if $legacy;
+	$self->add( type => "control",
+		    name => $2,
+		    value => $arg,
+		  );
+	return 1;
+    }
+
     # Formatting.
-    if ( $d =~ /^(text|chord|tab|grid|title|footer|toc)(font|size|colou?r):\s*(.*)$/ ) {
+    if ( $dir =~ /^(text|chord|tab|grid|title|footer|toc)(font|size|colou?r)$/ ) {
 	my $item = $1;
 	my $prop = $2;
-	my $value = $3;
+	my $value = lc($arg);
 	return if $legacy
 	  && ! ( $item =~ /^(text|chord|tab)$/ && $prop =~ /^(font|size)$/ );
 
@@ -404,30 +419,26 @@ sub global_directive {
 	return 1;
     }
 
-    #### TODO: other # strings (ukelele, banjo, ...)
+    # TODO: Simplify.
     # define A: base-fret N frets N N N N N N
     # define: A base-fret N frets N N N N N N
-    if ( $d =~ /^define\s+([^:]+):\s+
+    if (    $d =~ /^define\s+([^: ]+)[: ]\s*
 		   base-fret\s+(\d+)\s+
-		   frets\s+([0-9---xX])\s+
-		   ([0-9---xX])\s+
-		   ([0-9---xX])\s+
-		   ([0-9---xX])\s+
-		   ([0-9---xX])\s+
-		   ([0-9---xX])
+		   frets\s+
+		   ((?:[0-9---xX]\s+)*
+		    [0-9---xX])
+		   \s*$
 		  /xi
 	    ||
-	    $d =~ /^define:\s+(\S+)\s+
+	    $d =~ /^define\s*:\s*(\S+)\s+
 		   base-fret\s+(\d+)\s+
-		   frets\s+([0-9---xX])\s+
-		   ([0-9---xX])\s+
-		   ([0-9---xX])\s+
-		   ([0-9---xX])\s+
-		   ([0-9---xX])\s+
-		   ([0-9---xX])
+		   frets\s+
+		   ((?:[0-9---xX]\s+)*
+		    [0-9---xX])
+		   \s*$
 		  /xi
 	  ) {
-	my @f = ($3, $4, $5, $6, $7, $8);
+	my @f = split(' ', $3);
 	my $ci = { name => $1,
 		   $2 ? ( base => $2 ) : (),
 		   frets => [ map { $_ =~ /^\d+/ ? $_ : -1 } @f ],

@@ -325,6 +325,8 @@ sub configurator {
 	$cfg = add_config( $cfg, $options, shift, $pp );
     };
     my $add_legacy = sub {
+	# Legacy parser may need a ::config...
+	$::config = $cfg;
 	$cfg = add_legacy( $cfg, $options, shift, $pp );
     };
 

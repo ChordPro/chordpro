@@ -471,6 +471,7 @@ sub add_song_chord {
 	return "base-fret $base out of range";
     }
     $song_chords{$name} = [ @$frets, $base, CHORD_SONG, CHORD_HARD ];
+    return;
 }
 
 # Return the number of strings supported. Currently fixed.

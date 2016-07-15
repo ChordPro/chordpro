@@ -1,8 +1,11 @@
-0.6x	Jul xx 2016
+0.65	Jul 15 2016
 
 	Add --define to set config items from the command line.
 	Smooth some config trickeries.
 	Add meta-map config to treat metadata items differently.
+	Normalize directives parsing to be (more) Chord/Chordii
+	compatible.
+	Handle defining chords with flexible number of strings.
 
 0.64	Jul 10 2016
 
