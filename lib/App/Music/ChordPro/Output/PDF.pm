@@ -71,6 +71,7 @@ sub generate_song {
 
     return 0 unless $s->{body};	# empty song
 
+    $single_space = $::config->{settings}->{'suppress-empty-chords'};
     my $ps = $::config->clone->{pdf};
     my $pr = $options->{pr};
     $ps->{pr} = $pr;
@@ -86,7 +87,6 @@ sub generate_song {
     set_columns( $ps,
 		 $s->{settings}->{columns} || $::config->{settings}->{columns} );
 
-    $single_space = $ps->{'suppress-empty-chords'};
     $chordscol    = $ps->{chordscolumn};
     $lyrics_only  = $ps->{'lyrics-only'};
     $chordscapo   = $s->{meta}->{capo};
@@ -1051,7 +1051,8 @@ sub chordgrid {
 
     my $pr = $ps->{pr};
 
-    my $w = $gw * $#{ $info->{strings} };
+    my $strings = App::Music::ChordPro::Chords::strings();
+    my $w = $gw * ($strings - 1);
 
     # Draw font name.
     my $font = $ps->{fonts}->{chordgrid};
@@ -1060,7 +1061,7 @@ sub chordgrid {
     $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y - font_bl($font) );
     $y -= $font->{size} * $ps->{spacing}->{chords} + $dot/2;
 
-    if ( $info->{base} ) {
+    if ( $info->{base} > 0 ) {
 	my $i = @Roman[$info->{base}] . "  ";
 	$pr->setfont( $ps->{fonts}->{chordgrid_capo}, $gh );
 	$pr->text( $i, $x-$pr->strwidth($i), $y-$gh/2,
@@ -1068,7 +1069,7 @@ sub chordgrid {
     }
 
     my $v = $ps->{chordgrid}->{vcells};
-    my $h = @{ $info->{strings} };
+    my $h = $strings;
     $pr->hline( $x, $y - $_*$gh, $w, $lw ) for 0..$v;
     $pr->vline( $x + $_*$gw, $y, $gh*$v, $lw ) for 0..$h-1;
 
@@ -1081,7 +1082,7 @@ sub chordgrid {
 	elsif ( $fret < 0 ) {
 	    $pr->cross( $x+$gw/2, $y+$gh/3, $dot/3, $lw, "black");
 	}
-	else {
+	elsif ( $info->{base} >= 0 ) {
 	    $pr->circle( $x+$gw/2, $y+$gh/3, $dot/3, $lw,
 			 undef, "black");
 	}
@@ -1090,7 +1091,7 @@ sub chordgrid {
 	$x += $gw;
     }
 
-    return $gw * ( $ps->{chordgrid}->{hspace} + @{ $info->{strings} } );
+    return $gw * ( $ps->{chordgrid}->{hspace} + $strings );
 }
 
 sub set_columns {

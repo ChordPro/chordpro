@@ -125,7 +125,11 @@ sub chord {
     return $used_chords{$c} if exists $used_chords{$c};
 
     my $info = App::Music::ChordPro::Chords::chord_info($c);
-    do_warn("Unknown chord: $c\n") unless $info;
+    unless ( $info ) {
+	do_warn("Unknown chord: $c\n");
+	$info = App::Music::ChordPro::Chords::add_unknown_chord($c)
+	  if $::config->{chordgrid}->{auto};
+    }
     my $xc = App::Music::ChordPro::Chords::transpose( $c, $xpose );
     if ( $xc ) {
 	$used_chords{$c} = $xc;

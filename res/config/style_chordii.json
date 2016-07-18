@@ -1,44 +1,14 @@
-// Configuration for ChordPro.
+// Chordii compatible configuration for ChordPro.
 //
-// This is a relaxed JSON document, so comments are possible.
 
 {
     // General settings, to be changed by legacy configs and
     // command line.
     "settings" : {
-      // Titles flush: default center.
-	"titles" : "center",
-      // Columns, default one.
-      "columns" : 1,
-	// Suppress empty chord lines.
-	// Overrides the -a (--single-space) command line options.
-	"suppress-empty-chords" : 1,
+      // Suppress empty chord lines.
+      // Overrides the -a (--single-space) command line options.
+      "suppress-empty-chords" : 0,
     },
-
-    // Mapping meta-data. This can be used to change the treatment
-    // of specific meta-data items.
-    "meta-map" : {
-      // For example, treat artist as subtitle.
-      // "artist" : "subtitle",
-    },
-
-    // Strings and tuning.
-    // Note that using this will discard all built-in chords!
-    // "tuning" : [ "E2", "A2", "D3", "G3", "B3", "E4" ],
-    "tuning" : null,
-
-    // User defined chords.
-    // "base" defaults to 1.
-    // "easy" defaults to 0.
-    // Use 0 for an empty string, and -1 for a muted string.
-    "chords" : [
-        {
-	    "name"  : "Bb",
-	    "base"  : 1,
-	    "frets" : [ 1, 1, 3, 3, 3, 1 ],
-	    "easy"  : 1,
-	  },
-    ],
 
     // Printing chord grids.
     // "auto": automatically add unknown chords as empty grids.
@@ -47,50 +17,45 @@
     // defined chords.
     // "sorted": order the chords by key.
     "chordgrid" : {
-        "auto"     :  0,
-	  "show"     :  1,
-	  "hard"     :  0,
-	  "sorted"   :  0,
-    },
-
-    // Diagnostig messages.
-    "diagnostics" : {
-	  "format" : "\"%f\", line %n, %m\n\t%l",
+	"auto"     :  1,
+	"show"     :  1,
+	"hard"     :  0,
+	"sorted"   :  0,
     },
 
     // Layout definitions for PDF output.
 
     "pdf" : {
 
-	// Papersize, 'a4' or [ 595, 842 ] etc.
-	"papersize" : "a4",
+  	// Papersize, 'a4' or [ 595, 842 ] etc.
+  	"papersize" : "letter",
 
 	// Space between columns, in pt.
 	"columnspace"  :  20,
 
 	// Page margins.
 	// Note that top/bottom exclude the head/footspace.
-	"margintop"    :  80,
+	"margintop"    :  88,
 	"marginbottom" :  40,
-	"marginleft"   :  40,
+	"marginleft"   :  72,
 	"marginright"  :  40,
-	"headspace"    :  60,
+	"headspace"    :  57,
 	"footspace"    :  20,
 
 	// Special: head on first page only, add the headspace to
 	// the other pages so they become larger.
-	"head-first-only" : 0,
+	"head-first-only" : 1,
 
 	// Spacings.
 	// Baseline distances as a factor of the font size.
 	"spacing" : {
-	    "title"  : 1.2,
-	    "lyrics" : 1.2,
-	    "chords" : 1.2,
+	    "title"  : 1.5,
+	    "lyrics" : 1.0,
+	    "chords" : 1.0,
 	    "grid"   : 1.2,
 	    "tab"    : 1.0,
 	    "toc"    : 1.4,
-	    "empty"  : 1.0,
+	    "empty"  : 1.7,
 	},
 	// Note: By setting the font size and spacing for empty lines to
 	// smaller values, you get a fine(r)-grained control over the
@@ -173,9 +138,6 @@
 	// Fonts.
 	// Fonts can be specified by name (for the corefonts)
 	// or a filename (for TrueType/OpenType fonts).
-	// Relative filenames are looked up in the fontdir.
-	"fontdir" : null,
-
 	// Fonts for chords and comments can have a background
 	// colour associated.
 	// Colours are "#RRGGBB" or predefined names like "black", "white",
@@ -183,28 +145,32 @@
 
 	"fonts" : {
 	    "title" : {
-		"name" : "Times-Bold",
-		"size" : 14
+		"name" : "Times-Roman",
+		"size" : 17
 	    },
 	    "text" : {
 		"name" : "Times-Roman",
-		"size" : 14
+		"size" : 12
 	    },
 	    "chord" : {
 		"name" : "Helvetica-Oblique",
-		"size" : 10
+		"size" : 9
 	    },
 	    "comment" : {
-		"name" : "Helvetica",
+		"name" : "Times-Roman",
 		"size" : 12
 	    },
 	    "tab" : {
 		"name" : "Courier",
 		"size" : 10
 	    },
+	    "chordgrid" : {
+		"name" : "Times-Roman",
+		"size" : 10
+	    },
 	    "toc" : {
 		"name" : "Times-Roman",
-		"size" : 11
+		"size" : 12
 	    },
 	},
 

@@ -1,3 +1,10 @@
+0.6x	Jul xx 2016
+
+	Change the way unknown chords are dealt with, for
+	Chord/Chordii compatibility.
+	Add res/config/style_chordii.json with as much Chord/Chordii
+	compatibility as can be reasonably achieved.
+
 0.65	Jul 15 2016
 
 	Add --define to set config items from the command line.

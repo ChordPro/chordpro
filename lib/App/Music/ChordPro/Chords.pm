@@ -474,6 +474,22 @@ sub add_song_chord {
     return;
 }
 
+# Add an unknown chord.
+sub add_unknown_chord {
+    my ( $name ) = @_;
+    my $base = 0;
+    my $frets = [ (0) x strings() ];
+    $song_chords{$name} = [ @$frets, $base, CHORD_SONG, CHORD_HARD ];
+    return +{
+	     name    => $name,
+	     strings => [ ],
+	     base    => 0,
+	     builtin => 1,
+	     origin  => CHORD_SONG,
+	     easy    => 0,
+	    };
+}
+
 # Return the number of strings supported. Currently fixed.
 sub strings { scalar(@tuning) }
 
@@ -496,12 +512,23 @@ sub chord_info {
     }
     return unless @info;
     my $s = strings();
-    {	name    => $chord,
-	strings => [ @info[0..$s-1] ],
-	base    => $info[$s]-1,
-	builtin => $info[$s+1] == CHORD_BUILTIN,
-	origin  => $info[$s+1],
-	easy    => $info[$s+2] == CHORD_EASY,
+    if ( $info[$s] <= 0 ) {
+	return +{
+		 name    => $chord,
+		 strings => [ ],
+		 base    => 0,
+		 builtin => 1,
+		 origin  => CHORD_SONG,
+		 easy    => 0,
+		 };
+    }
+    return +{
+	     name    => $chord,
+	     strings => [ @info[0..$s-1] ],
+	     base    => $info[$s]-1,
+	     builtin => $info[$s+1] == CHORD_BUILTIN,
+	     origin  => $info[$s+1],
+	     easy    => $info[$s+2] == CHORD_EASY,
     };
 }
 

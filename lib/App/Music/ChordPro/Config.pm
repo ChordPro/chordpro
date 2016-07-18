@@ -31,6 +31,9 @@ This is the current built-in configuration file, showing all settings.
 	"titles" : "center",
         // Columns, default one.
         "columns" : 1,
+  	// Suppress empty chord lines.
+  	// Overrides the -a (--single-space) command line options.
+  	"suppress-empty-chords" : 1,
       },
   
       // Mapping meta-data. This can be used to change the treatment
@@ -59,11 +62,13 @@ This is the current built-in configuration file, showing all settings.
       ],
   
       // Printing chord grids.
+      // "auto": automatically add unknown chords as empty grids.
       // "show": prints the chords used in the song.
       // "hard": only prints the hard chords. This includes user
       // defined chords.
       // "sorted": order the chords by key.
       "chordgrid" : {
+          "auto"     :  0,
 	  "show"     :  1,
 	  "hard"     :  0,
 	  "sorted"   :  0,
@@ -128,10 +133,6 @@ This is the current built-in configuration file, showing all settings.
   	// Value is the column position.
   	// "chordscolumn" : 400,
   	"chordscolumn" :  0,
-  
-  	// Suppress empty chord lines.
-  	// Overrides the -a (--single-space) command line options.
-  	"suppress-empty-chords" : 1,
   
 	// A {titles: left} may conflict with customized formats.
 	// Set to non-zero to ignore the directive.
