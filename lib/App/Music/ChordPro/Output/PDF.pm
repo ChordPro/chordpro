@@ -17,7 +17,7 @@ sub generate_songbook {
 
     my $ps = $::config->{pdf};
     my $pr = PDFWriter->new( $ps, $options->{output} || "__new__.pdf" );
-    $pr->info( Title => $sb->{songs}->[0]->{title},
+    $pr->info( Title => $sb->{songs}->[0]->{meta}->{title}->[0],
 	       Creator => "ChordPro [$options->{_name} $options->{_version}]",
 	     );
 
@@ -26,7 +26,7 @@ sub generate_songbook {
     foreach my $song ( @{$sb->{songs}} ) {
 
 	$options->{startpage} = $page;
-	push( @book, [ $song->{title}, $page ] );
+	push( @book, [ $song->{meta}->{title}->[0], $page ] );
 	$page += generate_song( $song,
 				{ pr => $pr, $options ? %$options : () } );
     }
@@ -88,7 +88,7 @@ sub generate_song {
 		 $s->{settings}->{columns} || $::config->{settings}->{columns} );
 
     $chordscol    = $ps->{chordscolumn};
-    $lyrics_only  = $ps->{'lyrics-only'};
+    $lyrics_only  = $::config->{settings}->{'lyrics-only'};
     $chordscapo   = $s->{meta}->{capo};
 
     my $fail;
@@ -357,7 +357,7 @@ sub generate_song {
 			     0.5, undef, "black" );
 	    }
 
-	    songline( $elt, $x0, $y, $ps, indent => $indent );
+	    songline( $elt, $x0, $y, $ps, song => $s, indent => $indent );
 
 	    $y -= $vsp;
 	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
@@ -625,8 +625,9 @@ sub songline {
     if ( $type =~ /^comment/ ) {
 	$ftext = $fonts->{$type} || $fonts->{comment};
 	$ytext  = $ytop - font_bl($ftext);
+	my $song   = $opts{song};
 	$x += $opts{indent} if $opts{indent};
-	$pr->text( $elt->{text}, $x, $ytext, $ftext );
+	$pr->text( fmt_subst( $song, $elt->{text}, 1), $x, $ytext, $ftext );
 	return;
     }
     if ( $type eq "tabline" ) {
@@ -1268,27 +1269,49 @@ sub get_format {
 
 # Substitute %X sequences in title formats.
 sub fmt_subst {
-    my ( $s, $t ) = @_;
+    my ( $s, $t, $strict ) = @_;
     my $res = "";
-    while ( $t =~ /^(.*)\%(.)(.*)/ ) {
+    my $m = $s->{meta};
+    while ( $t =~ /^(.*?)\%(.)(.*)/ ) {
 	$res .= $1;
 	$t = $3;
 	my $f = $2;
+
+	if ( $f eq '{' && $t =~ /^(.*?)\}(.*)/ ) {
+	    my ( $key, $rest ) = ( lc($1), $2 );
+	    ( $key, my $inx ) = ( $1, $2 ) if $key =~ /^(.*)\.(\d+)$/;
+	    if ( defined $m->{$key} ) {
+		if ( $inx ) {
+		    if ( $inx > 0 && $inx <= @{ $m->{$key} } ) {
+			$res .= $m->{$key}->[$inx-1];
+		    }
+		}
+		else {
+		    $res .= join( $::config->{metadata}->{separator}, @{ $m->{$key} } );
+		}
+	    }
+	    $t = $rest;
+	    next;
+	}
+	next if $strict;
+
 	if ( $f eq '%' ) {
 	    $res .= '%';
 	}
 	elsif ( $f eq 't' ) {
-	    $res .= $s->{title} if $s->{title};
+	    $res .= $m->{title}->[0] if $m->{title}->[0];
 	}
 	elsif ( $f eq 's' ) {
-	    $res .= $s->{subtitle}->[0]
-	      if $s->{subtitle} && $s->{subtitle}->[0];
+	    $res .= $m->{subtitle}->[0] if $m->{subtitle}->[0];
 	}
 	elsif ( $f eq 'p' ) {
 	    $res .= $s->{page} if $s->{page};
 	}
 	elsif ( $f eq 'P' ) {
-	    $res .= $s->{page};
+	    $res .= $s->{page};	####FIXME
+	}
+	else {
+	    warn("Ignoring unknown %$f sequence in title.");
 	}
     }
     $res . $t;

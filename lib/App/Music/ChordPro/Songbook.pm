@@ -20,6 +20,7 @@ my $in_context = $def_context;
 my $xpose;
 my @used_chords;
 my %used_chords;
+my $re_meta;
 
 my $diag;			# for diagnostics
 
@@ -39,6 +40,17 @@ sub parsefile {
     $diag->{format} = $options->{diagformat}
       || $::config->{diagnostics}->{format};
     $diag->{file} = $filename;
+
+    # Build regex for the known metadata items.
+    if ( $::config->{metadata}->{keys} ) {
+	$re_meta = '^(' .
+	  join( '|', map { quotemeta } @{$::config->{metadata}->{keys}} )
+	    . ')$';
+	$re_meta = qr/$re_meta/;
+    }
+    else {
+	undef $re_meta;
+    }
 
     while ( <$fh> ) {
 	s/[\r\n]+$//;
@@ -318,24 +330,46 @@ sub directive {
 	return;
     }
 
-    # Metadata.
-    if ( exists( $::config->{'meta-map'}->{$dir} ) ) {
-	$dir = $::config->{'meta-map'}->{$dir};
-    }
-
     if ( $dir =~ /^(?:title|t)$/ ) {
 	$cur->{title} = $arg;
+	push( @{ $self->{songs}->[-1]->{meta}->{title} }, $arg );
 	return;
     }
 
     if ( $dir =~ /^(?:subtitle|st)$/ ) {
 	push(@{$cur->{subtitle}}, $arg);
+	push( @{ $self->{songs}->[-1]->{meta}->{subtitle} }, $arg );
 	return;
     }
 
-    # Metadata extensions.
-    if ( $dir =~ /^(artist|composer|album|key|time|tempo|capo)$/ ) {
-	$self->{songs}->[-1]->{meta}->{$1} = $arg;
+    # Metadata extensions (legacy). Should use meta instead.
+    # Only accept the list from config.
+    if ( $re_meta && $dir =~ $re_meta ) {
+	push( @{ $self->{songs}->[-1]->{meta}->{$1} }, $arg );
+	return;
+    }
+
+    # More metadata.
+    if ( $dir =~ /^(meta)$/ ) {
+	if ( $arg =~ /([^ :]+)[ :]+(.*)/ ) {
+	    my $key = lc $1;
+	    my $val = $2;
+	    if ( $re_meta && $key =~ $re_meta ) {
+		# Known.
+		push( @{ $self->{songs}->[-1]->{meta}->{$key} }, $val );
+	    }
+	    elsif ( $::config->{metadata}->{strict} ) {
+		# Unknown, and strict.
+		do_warn("Unknown metadata item: $key");
+	    }
+	    else {
+		# Allow.
+		push( @{ $self->{songs}->[-1]->{meta}->{$key} }, $val );
+	    }
+	}
+	else {
+	    do_warn("Incomplete meta directive: $d\n");
+	}
 	return;
     }
 

@@ -1,5 +1,10 @@
-0.6x	Jul xx 2016
+0.66	Aug 22 2016
 
+	Uploaded to GitHub.
+
+	Added support for {meta} directives.
+	Make the list of known metatada configurable.
+	Allow using metadata in titles and comments.
 	Change the way unknown chords are dealt with, for
 	Chord/Chordii compatibility.
 	Add res/config/style_chordii.json with as much Chord/Chordii

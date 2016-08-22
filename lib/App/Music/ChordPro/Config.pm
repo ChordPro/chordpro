@@ -27,20 +27,30 @@ This is the current built-in configuration file, showing all settings.
       // General settings, to be changed by legacy configs and
       // command line.
       "settings" : {
-        // Titles flush: default center.
-	"titles" : "center",
-        // Columns, default one.
-        "columns" : 1,
+  	// Titles flush: default center.
+  	"titles" : "center",
+  	// Columns, default one.
+  	"columns" : 1,
   	// Suppress empty chord lines.
   	// Overrides the -a (--single-space) command line options.
   	"suppress-empty-chords" : 1,
+  	// Suppress chords.
+  	// Overrides --lyrics-only command line option.
+  	"lyrics-only" : 0,
       },
   
-      // Mapping meta-data. This can be used to change the treatment
-      // of specific meta-data items.
-      "meta-map" : {
-        // For example, treat artist as subtitle.
-        // "artist" : "subtitle",
+      // Metadata.
+      // For these keys you can use {meta key ...} as well as {key ...}.
+      // If strict is nonzero, only the keys named here are allowed.
+      // If strict is zero, {meta ...} will accept any key.
+      // Important: "title" and "subtitle" must always be in this list.
+      // The separator is used to concatenate multiple values.
+      "metadata" : {
+        "keys" : [ "title", "subtitle",
+                   "artist", "composer", "album",
+                   "key", "time", "tempo", "capo" ],
+        "strict" : 1,
+        "separator" : "; ",
       },
   
       // Strings and tuning.
@@ -171,17 +181,17 @@ This is the current built-in configuration file, showing all settings.
   	    	"title"     : null,
   	    	"subtitle"  : null,
   		// Footer is title -- page number.
-  	    	"footer"    : [ "%t", "", "%p" ],
+  	    	"footer"    : [ "%{title}", "", "%{page}" ],
   		// Title for ToC.
   		"toc-title" : "Table of Contents",
   	    },
   	    // The first page of a song has:
   	    "title" : {
   	        // Title and subtitle.
-  	    	"title"     : [ "", "%t", "" ],
-  	    	"subtitle"  : [ "", "%s", "" ],
+  	    	"title"     : [ "", "%{title}", "" ],
+  	    	"subtitle"  : [ "", "%{subtitle}", "" ],
   		// Footer with page number.
-  	    	"footer"    : [ "", "", "%p" ],
+  	    	"footer"    : [ "", "", "%{page}" ],
   	    },
   	    // The very first output page is slightly different:
   	    "first" : {

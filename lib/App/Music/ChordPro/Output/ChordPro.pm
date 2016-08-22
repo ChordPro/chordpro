@@ -33,10 +33,17 @@ sub generate_song {
 
     my @s;
 
-    push(@s, "{title: " . $s->{title} . "}")
-      if defined $s->{title};
+    push(@s, "{title: " . $s->{meta}->{title}->[0] . "}")
+      if defined $s->{meta}->{title};
     if ( defined $s->{subtitle} ) {
 	push(@s, map { +"{subtitle: $_}" } @{$s->{subtitle}});
+    }
+
+    if ( $s->{meta} ) {
+	foreach ( sort keys %{ $s->{meta} } ) {
+	    next if /^(?:title|subtitle)$/;
+	    push( @s, map { +"{meta: $_}" } @{ $s->{meta}->{$_} } );
+	}
     }
 
     if ( $s->{settings} ) {
