@@ -142,7 +142,7 @@ This is the current built-in configuration file, showing all settings.
             "recall" : {
                  "tag"   : "Chorus",
                  "type"  : "comment",
-                 "quote" : 1,
+                 "quote" : 0,
             },
 	},
   
