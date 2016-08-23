@@ -623,14 +623,17 @@ sub list_chords {
 
     foreach my $chord ( @$chords ) {
 	my $info = chord_info($chord);
+	next unless $info;
 	push( @s,
-	      sprintf( "{define %-15.15s base-fret %2d    ".
+	      sprintf( "{define: %-15.15s base-fret %2d    ".
 		       "frets   %s}",
-		       $info->{name} . ":", $info->{base} + 1,
-		       join("",
-			    map { sprintf("%-4s", $_) }
-			    map { $_ < 0 ? "X" : $_ }
-			    @{ $info->{strings} } ) ) );
+		       $info->{name}, $info->{base} + 1,
+		       @{ $info->{strings} }
+		       ? join("",
+			      map { sprintf("%-4s", $_) }
+			      map { $_ < 0 ? "X" : $_ }
+			      @{ $info->{strings} } )
+		       : ("    " x strings() ) ) )
     }
     \@s;
 }
