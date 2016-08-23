@@ -489,12 +489,12 @@ sub app_setup {
 
     # Config files.
     my $app_lc = lc($my_name);
-    my $e = $ENV{CHORDIIRC} || $ENV{CHORDRC};
     if ( -d "/etc" ) {          # some *ux
         $configs{sysconfig} =
           File::Spec->catfile( "/", "etc", "$app_lc.json" );
     }
 
+    my $e = $ENV{CHORDIIRC} || $ENV{CHORDRC};
     if ( $ENV{HOME} && -d $ENV{HOME} ) {
         if ( -d File::Spec->catfile( $ENV{HOME}, ".config" ) ) {
             $configs{userconfig} =
