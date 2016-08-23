@@ -226,7 +226,7 @@ This is the current built-in configuration file, showing all settings.
   	    },
   	    "text" : {
   		"name" : "Times-Roman",
-  		"size" : 14
+  		"size" : 12
   	    },
   	    "chord" : {
   		"name" : "Helvetica-Oblique",

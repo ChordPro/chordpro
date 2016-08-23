@@ -1,7 +1,10 @@
-0.6x	Aug  2016
+0.68	Aug 23 2016
 
 	Extend chorus recall. Chorus may be quoted, and/or referred
 	with a tag text.
+	Handle {pagesize} in legacy config.
+	Minor adjustments to the default configuration to match the
+	documentation.
 
 0.67	Aug 23 2016
 
