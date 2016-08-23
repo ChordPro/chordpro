@@ -134,7 +134,10 @@ sub add {
 sub chord {
     my ( $c ) = @_;
     return $c unless length($c);
-    return $used_chords{$c} if exists $used_chords{$c};
+    my $parens = $c =~ s/^\((.*)\)$/$1/;
+    if ( exists $used_chords{$c} ) {
+	return $parens ? "($used_chords{$c})" : $used_chords{$c};
+    }
 
     my $info = App::Music::ChordPro::Chords::chord_info($c);
     unless ( $info ) {
@@ -150,7 +153,7 @@ sub chord {
 	$xc = $c;
     }
     push( @used_chords, $xc ) if $info;
-    return $xc;
+    return $parens ? "($xc)" : $xc;
 }
 
 sub cxpose {
@@ -345,6 +348,9 @@ sub directive {
     # Metadata extensions (legacy). Should use meta instead.
     # Only accept the list from config.
     if ( $re_meta && $dir =~ $re_meta ) {
+	if ( $xpose && $1 eq "key" ) {
+	    $arg = App::Music::ChordPro::Chords::transpose( $arg, $xpose );
+	}
 	push( @{ $self->{songs}->[-1]->{meta}->{$1} }, $arg );
 	return;
     }
@@ -354,6 +360,9 @@ sub directive {
 	if ( $arg =~ /([^ :]+)[ :]+(.*)/ ) {
 	    my $key = lc $1;
 	    my $val = $2;
+	    if ( $xpose && $key eq "key" ) {
+		$val = App::Music::ChordPro::Chords::transpose( $val, $xpose );
+	    }
 	    if ( $re_meta && $key =~ $re_meta ) {
 		# Known.
 		push( @{ $self->{songs}->[-1]->{meta}->{$key} }, $val );
@@ -457,35 +466,33 @@ sub global_directive {
 	return 1;
     }
 
-    # TODO: Simplify.
     # define A: base-fret N frets N N N N N N
     # define: A base-fret N frets N N N N N N
-    if (    $d =~ /^define\s+([^: ]+)[: ]\s*
-		   base-fret\s+(\d+)\s+
-		   frets\s+
-		   ((?:[0-9---xX]\s+)*
-		    [0-9---xX])
-		   \s*$
-		  /xi
-	    ||
-	    $d =~ /^define\s*:\s*(\S+)\s+
-		   base-fret\s+(\d+)\s+
-		   frets\s+
-		   ((?:[0-9---xX]\s+)*
-		    [0-9---xX])
+    # optional: base-fret N (defaults to 1)
+    # optional: N N N N N N (for unknown chords)
+    if (    $d =~ /^define[: ]([^: ]+)[: ]\s*
+		   (?:base-fret\s+(\d+)\s+)?
+		   frets
+		   ((?:\s+[0-9---xX])*
+		    \s+[0-9---xX])?
 		   \s*$
 		  /xi
 	  ) {
-	my @f = split(' ', $3);
+	my @f = split(' ', $3||'');
 	my $ci = { name => $1,
 		   $2 ? ( base => $2 ) : (),
 		   frets => [ map { $_ =~ /^\d+/ ? $_ : -1 } @f ],
 		 };
 	push( @{$cur->{define}}, $ci );
-	my $res =
-	  App::Music::ChordPro::Chords::add_song_chord
-	      ( $ci->{name}, $ci->{base} || 1, $ci->{frets} );
-	do_warn("Invalid chord: ", $ci->{name}, ": ", $res, "\n") if $res;
+	if ( @f ) {
+	    my $res =
+	      App::Music::ChordPro::Chords::add_song_chord
+		  ( $ci->{name}, $ci->{base} || 1, $ci->{frets} );
+	    do_warn("Invalid chord: ", $ci->{name}, ": ", $res, "\n") if $res;
+	}
+	else {
+	    App::Music::ChordPro::Chords::add_unknown_chord( $ci->{name} );
+	}
 	return 1;
     }
     return;

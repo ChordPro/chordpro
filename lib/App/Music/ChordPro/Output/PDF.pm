@@ -508,7 +508,9 @@ sub generate_song {
 
 		for ( 1..$h ) {
 		    last unless @chords;
-		    $x += chordgrid( shift(@chords), $x, $y, $ps );
+		    my $t = chordgrid( shift(@chords), $x, $y, $ps );
+		    redo unless $t;
+		    $x += $t;
 		}
 
 		$y -= $vsp;
@@ -1048,7 +1050,10 @@ sub chordgrid {
     my $lw  = 0.10 * $gw;
 
     my $info = App::Music::ChordPro::Chords::chord_info($name);
-    die("Unknown chord? $name?\n") unless $info;
+    unless ( $info ) {
+	warn("PDF: Skipping grid for unknown chord $name\n");
+	return;
+    }
 
     my $pr = $ps->{pr};
 

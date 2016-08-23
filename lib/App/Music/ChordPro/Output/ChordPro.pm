@@ -41,7 +41,7 @@ sub generate_song {
 
     if ( $s->{meta} ) {
 	foreach my $k ( sort keys %{ $s->{meta} } ) {
-	    next if /^(?:title|subtitle)$/;
+	    next if $k =~ /^(?:title|subtitle)$/;
 	    push( @s, map { +"{meta: $k $_}" } @{ $s->{meta}->{$k} } );
 	}
     }
