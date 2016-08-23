@@ -1,3 +1,11 @@
+0.67	Aug 23 2016
+
+	Overhaul of chord definitions and transpositions.
+	Chords may now be parenthesised.
+	{defined: name ...} is now preferred.
+	"base-fret NN" may be omitted.
+	All strings may be omitted to define an unknown chord.
+
 0.66	Aug 22 2016
 
 	Uploaded to GitHub.
@@ -5,6 +13,7 @@
 	Added support for {meta} directives.
 	Make the list of known metatada configurable.
 	Allow using metadata in titles and comments.
+	Remove meta-mapping (no longer needed).
 	Change the way unknown chords are dealt with, for
 	Chord/Chordii compatibility.
 	Add res/config/style_chordii.json with as much Chord/Chordii
