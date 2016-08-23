@@ -463,6 +463,10 @@ sub add_legacy {
 
     my $song = $s->{songs}->[0];
     foreach ( keys( %{$song->{settings}} ) ) {
+	if ( $_ eq "papersize" ) {
+	    $cfg->{pdf}->{papersize} = $song->{settings}->{papersize};
+	    next;
+	}
 	if ( $_ eq "titles" ) {
 	    $cfg->{settings}->{titles} = $song->{settings}->{titles};
 	    next;
@@ -478,8 +482,9 @@ sub add_legacy {
 	die("Cannot happen");
     }
     foreach ( @{$song->{body}} ) {
+	next if $_->{type} eq "chord-grids"; # added by parser
 	unless ( $_->{type} eq "control" ) {
-	    die("Cannot happen");
+	    die("Cannot happen " . $_->{type} . " " . $_->{name});
 	}
 	my $name = $_->{name};
 	my $value = $_->{value};

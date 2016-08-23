@@ -410,6 +410,11 @@ sub global_directive {
 	return 1;
     }
 
+    if ( $dir eq "pagetype" || $dir eq "pagesize" ) {
+	$cur->{settings}->{papersize} = $arg;
+	return 1;
+    }
+
     if ( $dir =~ /^(?:grid|g)$/ ) {
 	$cur->{settings}->{showgrids} = 1;
 	return 1;
