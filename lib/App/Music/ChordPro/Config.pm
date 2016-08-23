@@ -137,6 +137,13 @@ This is the current built-in configuration file, showing all settings.
 		"width"  :  1,
 		"color"  : "black",
 	    },
+            // Recall style: Print the tag using the type.
+            // Optionally quote the lines of the preceding chorus.
+            "recall" : {
+                 "tag"   : "Chorus",
+                 "type"  : "comment",
+                 "quote" : 1,
+            },
 	},
   
   	// Alternative songlines with chords in a side column.
@@ -357,7 +364,7 @@ sub configurator {
     # Handle defines from the command line.
     my $ccfg = {};
     while ( my ($k, $v) = each( %{ $options->{define} } ) ) {
-	my @k = split( /:/, $k );
+	my @k = split( /[:.]/, $k );
 	my $c = \$ccfg;
 	foreach ( @k ) {
 	    $c = \($$c->{$_});

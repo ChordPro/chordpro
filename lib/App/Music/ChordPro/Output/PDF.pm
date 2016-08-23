@@ -477,8 +477,17 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "rechorus" ) {
-	    unshift( @elts, @chorus );
-	    next;
+	    my $t = $ps->{chorus}->{recall};
+	    if ( $t->{quote} ) {
+		unshift( @elts, @chorus );
+	    }
+	    if ( $t->{tag} && $t->{type} =~ /^comment(?:_(?:box|italic))?/ ) {
+		unshift( @elts, { %$elt,
+				  type => $t->{type},
+				  text => $t->{tag},
+				 } );
+	    }
+	    redo;
 	}
 
 	if ( $elt->{type} eq "tocline" ) {
