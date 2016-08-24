@@ -1,0 +1,44 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use utf8;
+use Test::More tests => 3;
+
+use App::Music::ChordPro::Config;
+use App::Music::ChordPro::Songbook;
+
+my $config = App::Music::ChordPro::Config::configurator;
+my $s = App::Music::ChordPro::Songbook->new;
+
+my $data = <<EOD;
+{title: Swing Low Sweet Chariot}
+{subtitle: Sub Title 1}
+{subtitle: Sub Title 2}
+EOD
+
+eval { $s->parsefile(\$data) } or diag("$@");
+
+ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
+isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
+
+my $song = {
+	    'settings' => {},
+	    'meta' => {
+		       'title' => [
+				   'Swing Low Sweet Chariot'
+				  ],
+		       'subtitle' => [
+				   'Sub Title 1',
+				   'Sub Title 2',
+				  ]
+		      },
+	    'title' => 'Swing Low Sweet Chariot',
+	    'structure' => 'linear',
+	    'subtitle' => [
+			   'Sub Title 1',
+			   'Sub Title 2',
+			  ]
+	   };
+
+is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );

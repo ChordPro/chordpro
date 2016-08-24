@@ -131,6 +131,8 @@ sub parsefile {
     }
 
     # $self->{songs}->[-1]->structurize;
+
+    return 1;
 }
 
 sub add {

@@ -312,13 +312,13 @@ sub config_defaults {
 sub configurator {
     my ( $options ) = @_;
 
-    my $backend_configurator =
-      UNIVERSAL::can( $options->{backend}, "configurator" );
-
     my $pp = JSON::PP->new->utf8->relaxed;
 
     # Load defaults.
     my $cfg = $pp->decode( config_defaults() );
+
+    # For testing.
+    return $cfg unless $options;
 
     # Add some extra entries to prevent warnings.
     for ( qw(tuning) ) {
@@ -337,6 +337,9 @@ sub configurator {
 	}
     }
 
+    my $backend_configurator =
+      UNIVERSAL::can( $options->{backend}, "configurator" );
+
     # Apply config files
 
     my $add_config = sub {
@@ -349,7 +352,7 @@ sub configurator {
     };
 
     foreach my $config ( qw( sysconfig legacyconfig userconfig config ) ) {
-	next if $options->{"no$config"};
+	next if $options->{"no$config"} || $options->{nodefaultconfigs};
 	if ( ref($options->{$config}) eq 'ARRAY' ) {
 	    $add_config->($_) foreach @{ $options->{$config} };
 	}
