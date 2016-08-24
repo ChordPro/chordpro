@@ -7,7 +7,7 @@ use warnings;
 
 use App::Music::ChordPro::Chords;
 
-use Encode qw(decode);
+use Encode qw(decode encode);
 use Carp;
 
 sub new {
@@ -27,8 +27,17 @@ my $diag;			# for diagnostics
 sub parsefile {
     my ( $self, $filename, $options ) = @_;
 
-    open(my $fh, '<', $filename)
-      or croak("$filename: $!\n");
+    my $fh;
+    if ( ref($filename) ) {
+	my $data = encode("UTF-8", $$filename);
+	$filename = "__STRING__";
+	open($fh, '<', \$data)
+	  or croak("$filename: $!\n");
+    }
+    else {
+	open($fh, '<', $filename)
+	  or croak("$filename: $!\n");
+    }
 
     push( @{ $self->{songs} }, App::Music::ChordPro::Song->new )
       if exists($self->{songs}->[-1]->{body});
@@ -272,6 +281,7 @@ sub directive {
     }
 
     if ( $dir =~ /^(?:new_song|ns)$/i ) {
+	return unless $self->{songs}->[-1]->{body};
 	push(@{$self->{songs}}, App::Music::ChordPro::Song->new );
 	return;
     }
