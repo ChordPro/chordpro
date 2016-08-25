@@ -277,7 +277,7 @@ sub directive {
 	return;
     }
 
-    if ( $dir =~ /^(?:new_page|np)$/i ) {
+    if ( $dir =~ /^(?:new_page|np|new_physical_page|npp)$/i ) {
 	$self->add( type => "newpage" );
 	return;
     }
