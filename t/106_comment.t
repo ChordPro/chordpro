@@ -8,12 +8,15 @@ use Test::More tests => 3;
 use App::Music::ChordPro::Config;
 use App::Music::ChordPro::Songbook;
 
-my $config = App::Music::ChordPro::Config::configurator;
+our $config = App::Music::ChordPro::Config::configurator;
+# Prevent a dummy {body} for chord grids.
+$config->{chordgrid}->{show} = 0;
 my $s = App::Music::ChordPro::Songbook->new;
 
 my $data = <<EOD;
 {t Swing Low Sweet Chariot}
 {c This is a comment}
+{highlight This is also a comment}
 {ci This is a comment_italic}
 {cb This is a comment_box}
 EOD
@@ -36,6 +39,11 @@ my $song = {
 			'type' => 'comment',
 			'context' => '',
 			'text' => 'This is a comment'
+		       },
+		       {
+			'type' => 'comment',
+			'context' => '',
+			'text' => 'This is also a comment'
 		       },
 		       {
 			'context' => '',

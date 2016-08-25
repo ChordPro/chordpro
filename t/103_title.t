@@ -8,7 +8,9 @@ use Test::More tests => 4;
 use App::Music::ChordPro::Config;
 use App::Music::ChordPro::Songbook;
 
-my $config = App::Music::ChordPro::Config::configurator;
+our $config = App::Music::ChordPro::Config::configurator;
+# Prevent a dummy {body} for chord grids.
+$config->{chordgrid}->{show} = 0;
 my $s = App::Music::ChordPro::Songbook->new;
 
 my $data = <<EOD;

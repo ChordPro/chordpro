@@ -13,13 +13,12 @@ our $config = App::Music::ChordPro::Config::configurator;
 $config->{chordgrid}->{show} = 0;
 my $s = App::Music::ChordPro::Songbook->new;
 
-# Recall chorus.
+# Fonts definitions.
 my $data = <<EOD;
 {title: Swing Low Sweet Chariot}
-{start_of_chorus}
-Swing [D]low, sweet [G]chari[D]ot,
-{end_of_chorus}
-{chorus}
+{textfont: Times-Italic}
+{textsize: 80%}
+{textcolour: Yellow}
 EOD
 
 eval { $s->parsefile(\$data) } or diag("$@");
@@ -29,35 +28,33 @@ isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
 #use Data::Dumper; warn(Dumper($s));
 my $song = {
 	    'settings' => {},
+	    'title' => 'Swing Low Sweet Chariot',
+	    'structure' => 'linear',
 	    'meta' => {
 		       'title' => [
 				   'Swing Low Sweet Chariot'
-				  ],
+				  ]
 		      },
-	    'title' => 'Swing Low Sweet Chariot',
 	    'body' => [
 		       {
-			'chords' => [
-				     '',
-				     'D',
-				     'G',
-				     'D'
-				    ],
-			'context' => 'chorus',
-			'phrases' => [
-				      'Swing ',
-				      'low, sweet ',
-				      'chari',
-				      'ot,'
-				     ],
-			'type' => 'songline'
+			'type' => 'control',
+			'name' => 'text-font',
+			'value' => 'Times-Italic',
+			'context' => ''
 		       },
 		       {
 			'context' => '',
-			'type' => 'rechorus'
+			'type' => 'control',
+			'value' => '80%',
+			'name' => 'text-size'
+		       },
+		       {
+			'context' => '',
+			'type' => 'control',
+			'value' => 'yellow',
+			'name' => 'text-color'
 		       }
- 		      ],
-	    'structure' => 'linear',
-	   };
+		      ]
+ 	   };
 
 is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );

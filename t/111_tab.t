@@ -13,13 +13,12 @@ our $config = App::Music::ChordPro::Config::configurator;
 $config->{chordgrid}->{show} = 0;
 my $s = App::Music::ChordPro::Songbook->new;
 
-# Recall chorus.
+# Tabs.
 my $data = <<EOD;
 {title: Swing Low Sweet Chariot}
-{start_of_chorus}
+{start_of_tab}
 Swing [D]low, sweet [G]chari[D]ot,
-{end_of_chorus}
-{chorus}
+{end_of_tab}
 EOD
 
 eval { $s->parsefile(\$data) } or diag("$@");
@@ -37,26 +36,11 @@ my $song = {
 	    'title' => 'Swing Low Sweet Chariot',
 	    'body' => [
 		       {
-			'chords' => [
-				     '',
-				     'D',
-				     'G',
-				     'D'
-				    ],
-			'context' => 'chorus',
-			'phrases' => [
-				      'Swing ',
-				      'low, sweet ',
-				      'chari',
-				      'ot,'
-				     ],
-			'type' => 'songline'
-		       },
-		       {
-			'context' => '',
-			'type' => 'rechorus'
+			'context' => 'tab',
+			'text' => 'Swing [D]low, sweet [G]chari[D]ot,',
+			'type' => 'tabline'
 		       }
- 		      ],
+		      ],
 	    'structure' => 'linear',
 	   };
 

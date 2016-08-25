@@ -458,7 +458,7 @@ sub global_directive {
     if ( $dir =~ /^(text|chord|tab|grid|title|footer|toc)(font|size|colou?r)$/ ) {
 	my $item = $1;
 	my $prop = $2;
-	my $value = lc($arg);
+	my $value = $arg;
 	return if $legacy
 	  && ! ( $item =~ /^(text|chord|tab)$/ && $prop =~ /^(font|size)$/ );
 
@@ -479,7 +479,7 @@ sub global_directive {
 	}
 	$self->add( type => "control",
 		    name => "$item-$prop",
-		    value => $value );
+		    value => $prop eq 'font' ? $value : lc($value) );
 	return 1;
     }
 
@@ -487,7 +487,7 @@ sub global_directive {
     # define: A base-fret N frets N N N N N N
     # optional: base-fret N (defaults to 1)
     # optional: N N N N N N (for unknown chords)
-    if (    $d =~ /^define[: ]([^: ]+)[: ]\s*
+    if (    $d =~ /^define[: ]+([^: ]+)[: ]\s*
 		   (?:base-fret\s+(\d+)\s+)?
 		   frets
 		   ((?:\s+[0-9---xX])*
@@ -497,7 +497,7 @@ sub global_directive {
 	  ) {
 	my @f = split(' ', $3||'');
 	my $ci = { name => $1,
-		   $2 ? ( base => $2 ) : (),
+		   base => $2 || 1,
 		   frets => [ map { $_ =~ /^\d+/ ? $_ : -1 } @f ],
 		 };
 	push( @{$cur->{define}}, $ci );

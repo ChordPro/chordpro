@@ -8,7 +8,7 @@ use Test::More tests => 2;
 use App::Music::ChordPro::Config;
 use App::Music::ChordPro::Songbook;
 
-my $config;
+our $config;
 
 eval {
   $config = App::Music::ChordPro::Config::configurator;
