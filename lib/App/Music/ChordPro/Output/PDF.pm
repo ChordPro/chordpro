@@ -10,6 +10,11 @@ use Data::Dumper;
 
 use constant DEBUG_SPACING => 0;
 
+# For regression testing, run perl with PERL_HASH_SEED set to zero.
+# This eliminates the arbitrary order of font definitions and triggers
+# us to pinpoint some other data that would otherwise be varying.
+my $regtest = defined($ENV{PERL_HASH_SEED}) && $ENV{PERL_HASH_SEED} == 0;
+
 sub generate_songbook {
     my ($self, $sb, $options) = @_;
 
@@ -18,7 +23,10 @@ sub generate_songbook {
     my $ps = $::config->{pdf};
     my $pr = PDFWriter->new( $ps, $options->{output} || "__new__.pdf" );
     $pr->info( Title => $sb->{songs}->[0]->{meta}->{title}->[0],
-	       Creator => "ChordPro [$options->{_name} $options->{_version}]",
+	       Creator =>
+	       $regtest
+	       ? "ChordPro [$options->{_name} (regression testing)]"
+	       : "ChordPro [$options->{_name} $options->{_version}]",
 	     );
 
     my @book;
@@ -1377,13 +1385,15 @@ use warnings;
 use PDF::API2;
 use Encode;
 
+my $faketime = 1465041600;
+
 my %fontcache;			# speeds up 2 seconds per song
 
 sub new {
     my ( $pkg, $ps, @file ) = @_;
     my $self = bless { ps => $ps }, $pkg;
     $self->{pdf} = PDF::API2->new( -file => $file[0] );
-    $self->{pdf}->{forcecompress} = 0;
+    $self->{pdf}->{forcecompress} = 0 if $regtest;
     $self->{pdf}->mediabox( $ps->{papersize}->[0],
 			    $ps->{papersize}->[1] );
 #    $self->newpage($ps);
@@ -1394,7 +1404,7 @@ sub new {
 sub info {
     my ( $self, %info ) = @_;
     unless ( $info{CreationDate} ) {
-	my @tm = gmtime( $::__EMBEDDED__ ? 1465041600 : time );
+	my @tm = gmtime( $regtest ? $faketime : time );
 	$info{CreationDate} =
 	  sprintf("D:%04d%02d%02d%02d%02d%02d+00'00'",
 		  1900+$tm[5], 1+$tm[4], @tm[3,2,1,0]);
@@ -1604,6 +1614,7 @@ sub init_font {
 	      || $font->{name}
 	      || Dumper($font), "\n" );
     }
+    $font->{font}->{Name}->{val} =~ s/~.*/~$faketime/ if $regtest;
     $font->{font};
 }
 
