@@ -352,7 +352,7 @@ sub configurator {
     };
 
     foreach my $config ( qw( sysconfig legacyconfig userconfig config ) ) {
-	next if $options->{"no$config"} || $options->{nodefaultconfigs};
+	next if $options->{"no$config"};
 	if ( ref($options->{$config}) eq 'ARRAY' ) {
 	    $add_config->($_) foreach @{ $options->{$config} };
 	}
