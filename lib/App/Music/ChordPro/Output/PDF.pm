@@ -1080,7 +1080,7 @@ sub chordgrid {
     # Draw font name.
     my $font = $ps->{fonts}->{chordgrid};
     $pr->setfont($font);
-    $name .= "*" unless $info->{builtin};
+    $name .= "*" unless $info->{builtin} || $::config->{chordgrid}->{hard} == 2;
     $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y - font_bl($font) );
     $y -= $font->{size} * $ps->{spacing}->{chords} + $dot/2;
 
