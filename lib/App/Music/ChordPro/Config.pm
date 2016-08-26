@@ -74,8 +74,9 @@ This is the current built-in configuration file, showing all settings.
       // Printing chord grids.
       // "auto": automatically add unknown chords as empty grids.
       // "show": prints the chords used in the song.
-      // "hard": only prints the hard chords. This includes user
+      // "hard": 1 only prints the hard chords. This includes user
       // defined chords.
+      // "hard": 2 only prints user defined chords.
       // "sorted": order the chords by key.
       "chordgrid" : {
           "auto"     :  0,
