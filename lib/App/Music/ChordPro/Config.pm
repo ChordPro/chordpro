@@ -328,7 +328,7 @@ sub configurator {
 		    comment comment_box comment_italic
 		    tab text toc
 		    empty footer grid subtitle title) ) {
-	for ( qw(name file size background) ) {
+	for ( qw(name file size color background) ) {
 	    $cfg->{pdf}->{fonts}->{$ff}->{$_} //= undef;
 	}
     }
@@ -384,7 +384,7 @@ sub configurator {
 	    delete( $cfg->{pdf}->{fonts}->{$ff} );
 	    next;
 	}
-	for ( qw(name file size background) ) {
+	for ( qw(name file size color background) ) {
 	    delete( $cfg->{pdf}->{fonts}->{$ff}->{$_} )
 	      unless defined( $cfg->{pdf}->{fonts}->{$ff}->{$_} );
 	}
