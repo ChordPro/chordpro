@@ -110,15 +110,21 @@ sub parsefile {
     my $showgrids;
     if ( exists($self->{songs}->[-1]->{settings}->{showgrids} ) ) {
 	$showgrids = $self->{songs}->[-1]->{settings}->{showgrids};
+	$showgrids &&= $::config->{chordgrid}->{show} || "all";
     }
     else {
 	$showgrids = $::config->{chordgrid}->{show};
     }
 
     if ( $showgrids ) {
-	if ( $::config->{chordgrid}->{hard} ) {
+	if ( $showgrids eq "user" ) {
 	    @used_chords =
-	      grep { ! App::Music::ChordPro::Chords::chord_info($_)->{easy} } @used_chords;
+	      grep { App::Music::ChordPro::Chords::chord_info($_)->{origin} == 1 } @used_chords;
+	}
+	elsif ( $showgrids eq "all" ) {
+	}
+	else {
+	    @used_chords = ();	# "none"
 	}
 	if ( $::config->{chordgrid}->{sorted} ) {
 	    @used_chords =

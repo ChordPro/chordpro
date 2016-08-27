@@ -53,14 +53,13 @@
     // Printing chord grids.
     // "auto": automatically add unknown chords as empty grids.
     // "show": prints the chords used in the song.
-    // "hard": only prints the hard chords. This includes user
-    // defined chords.
+    //         "all": all chords used.
+    //         "user": only prints user defined chords.
     // "sorted": order the chords by key.
     "chordgrid" : {
         "auto"     :  0,
-	  "show"     :  1,
-	  "hard"     :  0,
-	  "sorted"   :  0,
+        "show"     :  "all",
+        "sorted"   :  0,
     },
 
     // Diagnostig messages.

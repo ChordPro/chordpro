@@ -74,15 +74,13 @@ This is the current built-in configuration file, showing all settings.
       // Printing chord grids.
       // "auto": automatically add unknown chords as empty grids.
       // "show": prints the chords used in the song.
-      // "hard": 1 only prints the hard chords. This includes user
-      // defined chords.
-      // "hard": 2 only prints user defined chords.
+      //         "all": all chords used.
+      //         "user": only prints user defined chords.
       // "sorted": order the chords by key.
       "chordgrid" : {
           "auto"     :  0,
-	  "show"     :  1,
-	  "hard"     :  0,
-	  "sorted"   :  0,
+          "show"     :  "all",
+          "sorted"   :  0,
       },
   
       // Diagnostig messages.
@@ -325,9 +323,6 @@ sub configurator {
     for ( qw(tuning) ) {
 	$cfg->{$_} //= undef;
     }
-    for ( qw( title subtitle artist composer key tempo time album ) ) {
-	$cfg->{'meta-map'}->{$_} //= undef;
-    }
     for my $ff ( qw(chord
 		    chordgrid chordgrid_capo
 		    comment comment_box comment_italic
@@ -382,10 +377,6 @@ sub configurator {
 	delete( $cfg->{$_} )
 	  unless defined( $cfg->{$_} );
     }
-    for ( qw( title subtitle artist composer key tempo time album ) ) {
-	delete( $cfg->{'meta-map'}->{$_} )
-	  unless defined( $cfg->{'meta-map'}->{$_} );
-    }
     my @allfonts = keys(%{$cfg->{pdf}->{fonts}});
     for my $ff ( @allfonts ) {
 	unless ( $cfg->{pdf}->{fonts}->{$ff}->{name}
@@ -399,11 +390,13 @@ sub configurator {
 	}
     }
 
-    if ( defined $options->{'easy-chord-grids'} ) {
-	$cfg->{chordgrid}->{hard} = !$options->{'easy-chord-grids'};
+    if ( defined $options->{'user-chord-grids'} ) {
+	$cfg->{chordgrid}->{show} =
+	  $options->{'user-chord-grids'} ? "user" : 0;
     }
-    if ( defined $options->{'chord-grids'} ) {
-	$cfg->{chordgrid}->{show} = !$options->{'chord-grids'};
+    elsif ( defined $options->{'chord-grids'} ) {
+	$cfg->{chordgrid}->{show} =
+	  $options->{'chord-grids'} ? "all" : 0;
     }
     if ( defined $options->{'chord-grids-sorted'} ) {
 	$cfg->{chordgrid}->{sorted} = $options->{'chord-grids-sorted'};
