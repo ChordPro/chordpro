@@ -150,13 +150,15 @@ sub generate_song {
 		$_ = '"' . $_ . '"';
 	    }
 	    push( @s, "+ @args" );
+	    next;
 	}
 
-	if ( $elt->{type} eq "control" ) {
+	if ( $elt->{type} eq "set" ) {
 	    if ( $elt->{name} eq "lyrics-only" ) {
 		$lyrics_only = $elt->{value}
 		  unless $lyrics_only > 1;
 	    }
+	    next;
 	}
     }
     push(@s, "-- End of $ctx") if $ctx;

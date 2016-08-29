@@ -552,13 +552,12 @@ sub generate_song {
 	    elsif ( $elt->{name} =~ /^(text|chord|grid|toc|tab)-color$/ ) {
 		$ps->{fonts}->{$1}->{color} = $elt->{value};
 	    }
-	    elsif ( $elt->{name} eq "lyrics-only" ) {
+	}
+
+	if ( $elt->{type} eq "set" ) {
+	    if ( $elt->{name} eq "lyrics-only" ) {
 		$lyrics_only = $elt->{value}
 		  unless $lyrics_only > 1;
-	    }
-	    elsif ( $elt->{name} eq "chords-column" ) {
-		$chordscol = $elt->{value}
-		  unless $chordscol > 1; ####TODO
 	    }
 	    elsif ( $elt->{name} eq "gridparams" ) {
 		my @v = @{ $elt->{value} };
@@ -578,6 +577,7 @@ sub generate_song {
 				  ) / $cells;
 	    }
 	}
+
     }
     continue {
 	$prev = $elt;

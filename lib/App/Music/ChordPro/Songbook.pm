@@ -442,19 +442,20 @@ sub global_directive {
 	return 1;
     }
 
-    if ( $d =~ /^([-+])([-\w]+)$/i ) {
+    # Private hacks.
+    if ( $d =~ /^([-+])([-\w.]+)$/i ) {
 	return if $legacy;
-	$self->add( type => "control",
+	$self->add( type => "set",
 		    name => $2,
-		    value => $1 eq "+" ? "1" : "0",
+		    value => $1 eq "+" ? 1 : 0,
 		  );
 	return 1;
     }
 
-    if ( $dir =~ /^([-+])([-\w]+)$/ ) {
+    if ( $dir =~ /^\+([-\w.]+)$/ ) {
 	return if $legacy;
-	$self->add( type => "control",
-		    name => $2,
+	$self->add( type => "set",
+		    name => $1,
 		    value => $arg,
 		  );
 	return 1;

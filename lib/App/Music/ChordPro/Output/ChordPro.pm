@@ -158,6 +158,7 @@ sub generate_song {
 		$_ = '"' . $_ . '"';
 	    }
 	    push( @s, "{@args}" );
+	    next;
 	}
 
 	if ( $elt->{type} eq "chord-grids" ) {
@@ -166,13 +167,15 @@ sub generate_song {
 		      ( $elt->{chords},
 			$dumphdr && $elt->{origin} eq "__CLI__" ) } );
 	    $dumphdr = 0;
+	    next;
 	}
 
-	if ( $elt->{type} eq "control" ) {
+	if ( $elt->{type} eq "set" ) {
 	    if ( $elt->{name} eq "lyrics-only" ) {
 		$lyrics_only = $elt->{value}
 		  unless $lyrics_only > 1;
 	    }
+	    next;
 	}
     }
     push(@s, "{end_of_$ctx}") if $ctx;
