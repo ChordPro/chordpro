@@ -1,6 +1,7 @@
-0.6x	Aug xx 2016
+0.6x	 xx 2016
 
 	Add parser tests.
+	Prevent nasty errors when transposing unknown chords.
 
 0.68	Aug 23 2016
 

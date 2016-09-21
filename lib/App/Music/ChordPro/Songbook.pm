@@ -119,7 +119,7 @@ sub parsefile {
     if ( $showgrids ) {
 	if ( $showgrids eq "user" ) {
 	    @used_chords =
-	      grep { App::Music::ChordPro::Chords::chord_info($_)->{origin} == 1 } @used_chords;
+	      grep { safe_chord_info($_)->{origin} == 1 } @used_chords;
 	}
 	elsif ( $showgrids eq "all" ) {
 	}
@@ -146,6 +146,12 @@ sub add {
     push( @{$self->{songs}->[-1]->{body}},
 	  { context => $in_context,
 	    @_ } );
+}
+
+sub safe_chord_info {
+    my ( $c ) = @_;
+    my $info = App::Music::ChordPro::Chords::chord_info($c);
+    return $info || { origin => 0 };
 }
 
 sub chord {
