@@ -343,6 +343,12 @@ sub generate_song {
 		}
 	    }
 
+	    # Substitute metadata in comments.
+	    if ( $elt->{type} =~ /^comment/ ) {
+		$elt = { %$elt };
+		$elt->{text} = fmt_subst( $s, $elt->{text}, 1 );
+	    }
+
 	    # Comment decorations.
 
 	    $pr->setfont( $ftext );
@@ -646,7 +652,7 @@ sub songline {
 	$ytext  = $ytop - font_bl($ftext);
 	my $song   = $opts{song};
 	$x += $opts{indent} if $opts{indent};
-	$pr->text( fmt_subst( $song, $elt->{text}, 1), $x, $ytext, $ftext );
+	$pr->text( $elt->{text}, $x, $ytext, $ftext );
 	return;
     }
     if ( $type eq "tabline" ) {
