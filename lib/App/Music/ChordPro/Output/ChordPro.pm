@@ -5,6 +5,8 @@ package App::Music::ChordPro::Output::ChordPro;
 use strict;
 use warnings;
 
+use App::Music::ChordPro::Output::Common;
+
 sub generate_songbook {
     my ($self, $sb, $options) = @_;
     my @book;
