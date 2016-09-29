@@ -5,6 +5,7 @@ lib/App/Music/ChordPro.pm
 lib/App/Music/ChordPro/Chords.pm
 lib/App/Music/ChordPro/Config.pm
 lib/App/Music/ChordPro/Output/ChordPro.pm
+lib/App/Music/ChordPro/Output/Common.pm
 lib/App/Music/ChordPro/Output/Debug.pm
 lib/App/Music/ChordPro/Output/PDF.pm
 lib/App/Music/ChordPro/Output/Text.pm

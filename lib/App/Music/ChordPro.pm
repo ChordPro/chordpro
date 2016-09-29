@@ -4,7 +4,7 @@ use 5.010;
 
 package App::Music::ChordPro;
 
-our $VERSION = "0.68";
+our $VERSION = "0.69";
 
 =head1 NAME
 
@@ -71,6 +71,10 @@ sub main {
         }
         elsif ( $of =~ /\.cho$/i ) {
             $options->{generate} ||= "ChordPro";
+        }
+        elsif ( $of =~ /\.msp$/i ) {
+            $options->{generate} ||= "ChordPro";
+            $options->{'backend-option'}->{variant} = "msp";
         }
         elsif ( $of =~ /\.(crd|txt)$/i ) {
             $options->{generate} ||= "Text";

@@ -30,6 +30,7 @@ sub generate_song {
     $lyrics_only = 2 * $options->{'lyrics-only'};
     my $structured = ( $options->{'backend-option'}->{structure} // '' ) eq 'structured';
     # $s->structurize if ++$structured;
+    my $variant = $options->{'backend-option'}->{variant} || 'cho';
 
     my @s;
 
@@ -42,7 +43,12 @@ sub generate_song {
     if ( $s->{meta} ) {
 	foreach my $k ( sort keys %{ $s->{meta} } ) {
 	    next if $k =~ /^(?:title|subtitle)$/;
-	    push( @s, map { +"{meta: $k $_}" } @{ $s->{meta}->{$k} } );
+	    if ( $variant eq 'msp' ) {
+		push( @s, map { +"{$k: $_}" } @{ $s->{meta}->{$k} } );
+	    }
+	    else {
+		push( @s, map { +"{meta: $k $_}" } @{ $s->{meta}->{$k} } );
+	    }
 	}
     }
 
@@ -79,11 +85,13 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "colb" ) {
+	    next if $variant eq 'msp';
 	    push(@s, "{column_break}");
 	    next;
 	}
 
 	if ( $elt->{type} eq "newpage" ) {
+	    next if $variant eq 'msp';
 	    push(@s, "{new_page}");
 	    next;
 	}
@@ -142,8 +150,18 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} =~ /^comment(?:_italic|_box)?$/ ) {
+	    my $type = $elt->{type};
+	    my $text = $elt->{orig};
+	    if ( $variant eq 'msp' ) {
+		$type = $type eq 'comment'
+		  ? 'highlight'
+		    : $type eq 'comment_italic'
+		      ? 'comment'
+			: $type;
+		$text = fmt_subst( $s, $elt->{text} );
+	    }
 	    push(@s, "") if $tidy;
-	    push(@s, "{" . $elt->{type} . ": " . $elt->{text} . "}");
+	    push(@s, "{" . $type . ": " . $text . "}");
 	    push(@s, "") if $tidy;
 	    next;
 	}
@@ -196,6 +214,11 @@ sub songline {
     }
     $line =~ s/^\[\]//;
     $line;
+}
+
+# Substitute %X sequences in title formats.
+sub fmt_subst {
+    goto \&App::Music::ChordPro::Output::Common::fmt_subst;
 }
 
 1;

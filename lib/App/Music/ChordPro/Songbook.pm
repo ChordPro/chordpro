@@ -217,12 +217,14 @@ sub decompose_grid {
     $line =~ s/^\s+//;
     $line =~ s/\s+$//;
     my $rest;
+    my $orig;
     if ( $line =~ /(.*\|\S*)\s([^\|]*)$/ ) {
 	$line = $1;
-	$rest = cxpose($2);
+	$rest = cxpose( $orig = $2 );
     }
     my @tokens = map { chord($_) } split( ' ', $line );
-    return ( tokens => \@tokens, $rest ? ( comment => $rest ) : () );
+    return ( tokens => \@tokens,
+	     $rest ? ( comment => $rest, orig => $orig ) : () );
 }
 
 sub dir_split {
@@ -303,17 +305,20 @@ sub directive {
     # Comments. Strictly speaking they do not belong here.
 
     if ( $dir =~ /^(?:comment|c|highlight)$/ ) {
-	$self->add( type => "comment", text => cxpose($arg) );
+	$self->add( type => "comment", text => cxpose($arg),
+		    orig => $arg );
 	return;
     }
 
     if ( $dir =~ /^(?:comment_italic|ci)$/ ) {
-	$self->add( type => "comment_italic", text => cxpose($arg) );
+	$self->add( type => "comment_italic", text => cxpose($arg),
+		    orig => $arg );
 	return;
     }
 
     if ( $dir =~ /^(?:comment_box|cb)$/ ) {
-	$self->add( type => "comment_box", text => cxpose($arg) );
+	$self->add( type => "comment_box", text => cxpose($arg),
+		    orig => $arg );
 	return;
     }
 

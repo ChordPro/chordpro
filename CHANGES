@@ -1,7 +1,10 @@
-0.6x	 xx 2016
+0.69	Sep 29 2016
 
 	Add parser tests.
 	Prevent nasty errors when transposing unknown chords.
+	(PDF) Fix comment decorations that were off due to
+	substituting metadata.
+	(ChordPro) Add msp as output variant.
 
 0.68	Aug 23 2016
 

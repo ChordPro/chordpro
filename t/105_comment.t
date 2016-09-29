@@ -37,15 +37,18 @@ my $song = {
 		       {
 			'type' => 'comment',
 			'context' => '',
-			'text' => 'This is a comment'
+			'text' => 'This is a comment',
+			'orig' => 'This is a comment'
 		       },
 		       {
 			'context' => '',
 			'type' => 'comment_italic',
-			'text' => 'This is a comment_italic'
+			'text' => 'This is a comment_italic',
+			'orig' => 'This is a comment_italic'
 		       },
 		       {
 			'text' => 'This is a comment_box',
+			'orig' => 'This is a comment_box',
 			'context' => '',
 			'type' => 'comment_box'
 		       }
