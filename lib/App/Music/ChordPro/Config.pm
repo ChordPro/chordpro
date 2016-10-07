@@ -63,12 +63,12 @@ This is the current built-in configuration file, showing all settings.
       // "easy" defaults to 0.
       // Use 0 for an empty string, and -1 for a muted string.
       "chords" : [
-          {
-  	    "name"  : "Bb",
-  	    "base"  : 1,
-  	    "frets" : [ 1, 1, 3, 3, 3, 1 ],
-  	    "easy"  : 1,
-  	  },
+        //  {
+  	//    "name"  : "Bb",
+  	//    "base"  : 1,
+  	//    "frets" : [ 1, 1, 3, 3, 3, 1 ],
+  	//    "easy"  : 1,
+  	//  },
       ],
   
       // Printing chord grids.
