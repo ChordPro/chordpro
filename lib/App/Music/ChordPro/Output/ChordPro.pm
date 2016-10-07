@@ -72,11 +72,19 @@ sub generate_song {
 
     my $ctx = "";
     my $dumphdr = 1;
-    foreach my $elt ( @{$s->{body}} ) {
+    my @chorus;			# for chorus recall
+
+    my @elts = @{$s->{body}};
+    while ( @elts ) {
+	my $elt = shift(@elts);
 
 	if ( $elt->{context} ne $ctx ) {
 	    push(@s, "{end_of_$ctx}") if $ctx;
 	    push(@s, "{start_of_$ctx}") if $ctx = $elt->{context};
+	    @chorus = ( $elt ) if $ctx && $ctx eq "chorus";
+	}
+	elsif ( $elt->{context} eq "chorus" ) {
+	    push( @chorus, $elt );
 	}
 
 	if ( $elt->{type} eq "empty" ) {
@@ -142,6 +150,15 @@ sub generate_song {
 	    next;
 	}
 
+	if ( $elt->{type} eq "rechorus" ) {
+	    if ( $variant eq 'msp' ) {
+		push( @s, "{chorus}" );
+	    }
+	    else {
+		unshift( @elts, @chorus );
+	    }
+	}
+
 	if ( $elt->{type} eq "tab" ) {
 	    push(@s, "") if $tidy;
 	    push(@s, "{start_of_tab}");
@@ -163,7 +180,8 @@ sub generate_song {
 		$text = fmt_subst( $s, $elt->{text} );
 	    }
 	    push(@s, "") if $tidy;
-	    push(@s, "{" . $type . ": " . $text . "}");
+	    push(@s, "{$type: $text}");
+	    push(@chorus, "{$type: $text}") if $elt->{context} eq "chorus";
 	    push(@s, "") if $tidy;
 	    next;
 	}
