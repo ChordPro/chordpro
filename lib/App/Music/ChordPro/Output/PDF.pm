@@ -230,7 +230,7 @@ sub generate_song {
 	}
 
 	$y = $ps->{papersize}->[1] - $ps->{margintop};
-	$y += $ps->{headspace} if $ps->{'head-first-only'} && $class;
+	$y += $ps->{headspace} if $ps->{'head-first-only'} && $class == 2;
 	$col = 0;
 	$vsp_ignorefirst = 1;
     };
@@ -362,14 +362,16 @@ sub generate_song {
 	    my $bgcol = $ftext->{background};
 	    $bgcol ||= "#E5E5E5" if $elt->{type} eq "comment";
 	    if ( $bgcol ) {
-		$pr->rectxy( $x, $y, $x + $w, $y - $vsp, 3, $bgcol );
+		$pr->rectxy( $x + $indent - 2, $y + 2,
+			     $x + $indent + $w + 2, $y - $vsp, 3, $bgcol );
 	    }
 
 	    # Draw box.
 	    my $x0 = $x;
 	    if ( $elt->{type} eq "comment_box" ) {
 		$x0 += 0.25;	# add some offset for the box
-		$pr->rectxy( $x0, $y + 1, $x0 + $w + 1, $y - $vsp + 1,
+		$pr->rectxy( $x0 + $indent, $y + 1,
+			     $x0 + $indent + $w + 1, $y - $vsp + 1,
 			     0.5, undef, "black" );
 	    }
 
