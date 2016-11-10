@@ -4,7 +4,7 @@ use 5.010;
 
 package App::Music::ChordPro;
 
-our $VERSION = "0.69";
+our $VERSION = "0.70";
 
 =head1 NAME
 
@@ -588,7 +588,8 @@ sub app_setup {
           "start-page-number|p=i",      # Starting page number [1]
           "text-size|t=i",              # Sets text size [12]
           "text-font|T=s",              # Sets text font
-          "toc|i",                      # Generates a table of contents
+          "i" => sub { $clo->{toc} = 1 },
+          "toc!",                       # Generates a table of contents
           "transpose|x=i",              # Transposes by N semi-tones
           "version|V" => \$version,     # Prints version and exits
           "vertical-space|w=f",         # Extra vertical space between lines
