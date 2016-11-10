@@ -1,3 +1,12 @@
+0.70	Nov 10 2016
+
+	(ChordPro) Fix require of Common.
+	(Config) Comment example chord definition.
+	(ChordPro) Add rechorus handling.
+	(ChordPro) Fix --toc/--notoc command line option.
+	(PDF) Fix background colour in indented chorus.
+	(PDF) Fix wrong headspace on continuation pages.
+
 0.69	Sep 29 2016
 
 	Add parser tests.
