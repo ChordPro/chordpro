@@ -194,6 +194,10 @@ correspond to one of the backends that are currently supported:
 
 Portable document format (PDF).
 
+If a table of contents is generated with the PDF, ChordPro also writes
+a CSV file containing titles and page numbers. This CSV file has the
+same name as the PDF, with extenstion C<pdf> replaced by <csv>.
+
 =item txt
 
 A textual representation of the input, mostly for visual inspection.
@@ -220,6 +224,9 @@ Sets the starting page number for the output.
 =item B<--toc> (short: B<-i>)
 
 Includes a table of contents.
+
+By default a table of contents is included in the PDF output when
+it contains more than one song.
 
 =item B<--no-toc>
 
