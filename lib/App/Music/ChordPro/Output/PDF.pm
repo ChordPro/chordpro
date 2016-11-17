@@ -7,6 +7,7 @@ package App::Music::ChordPro::Output::PDF;
 use strict;
 use warnings;
 use Data::Dumper;
+use Encode qw( encode_utf8 );
 
 use App::Music::ChordPro::Output::Common;
 
@@ -60,10 +61,29 @@ sub generate_songbook {
 	    ],
 	    meta      => {},
 	  };
+	push( @book, [ $song->{title}, $page ] );
 	$page += generate_song( $song,
-				{ pr => $pr, $options ? %$options : () } );     }
+				{ pr => $pr, $options ? %$options : () } );         }
 
     $pr->finish;
+
+    if ( $options->{toc} ) {
+
+	# Create an MSPro compatible CSV for this PDF.
+	( my $csv = $options->{output} ) =~ s/\.pdf$/.csv/i;
+	open( my $fd, '>:utf8', encode_utf8($csv) )
+	  or die( encode_utf8($csv), ": $!\n" );
+	print $fd ( "title;pages;\n" );
+	for ( my $p = 1; $p < @book-1; $p++ ) {
+	    print $fd ( join(';',
+			     $book[$p]->[0],
+			     $book[$p+1]->[1] > $book[$p]->[1]+1
+			     ? ( $book[$p]->[1] ."-". ($book[$p+1]->[1]-1) )
+			     : $book[$p]->[1]),
+			"\n" );
+	}
+	close($fd);
+    }
 
     []
 }
@@ -517,10 +537,16 @@ sub generate_song {
 
 	    $y -= $vsp;
 	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+	    next;
 	}
 
 	if ( $elt->{type} eq "chord-grids" ) {
+
 	    my @chords = @{ $elt->{chords} };
+
+	    local $::config->{chordgrid}->{show} =
+	      $elt->{show} || $::config->{chordgrid}->{show};
+
 	    my $vsp = chordgrid_vsp( $elt, $ps );
 	    my $hsp = chordgrid_hsp( $elt, $ps );
 	    my $h = int( ( $ps->{papersize}->[0]
@@ -543,6 +569,7 @@ sub generate_song {
 		$y -= $vsp;
 		$pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
 	    }
+	    next;
 	}
 
 	if ( $elt->{type} eq "control" ) {
@@ -562,6 +589,7 @@ sub generate_song {
 	    elsif ( $elt->{name} =~ /^(text|chord|grid|toc|tab)-color$/ ) {
 		$ps->{fonts}->{$1}->{color} = $elt->{value};
 	    }
+	    next;
 	}
 
 	if ( $elt->{type} eq "set" ) {
@@ -586,8 +614,10 @@ sub generate_song {
 				    - (1+$bars)*$grid_barwidth
 				  ) / $cells;
 	    }
+	    next;
 	}
 
+	warn("PDF: Unhandled operator: ", $elt->{type}, " (ignored)\n");
     }
     continue {
 	$prev = $elt;

@@ -9,6 +9,10 @@ use App::Music::ChordPro::Output::Common;
 
 sub generate_songbook {
     my ($self, $sb, $options) = @_;
+
+    # Skip empty songbooks.
+    return [] unless eval { $sb->{songs}->[0]->{body} };
+
     my @book;
 
     foreach my $song ( @{$sb->{songs}} ) {
@@ -200,10 +204,11 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "chord-grids" ) {
+	    $dumphdr = 0 unless $elt->{origin} eq "__CLI__";
 	    push( @s,
 		  @{ App::Music::ChordPro::Chords::list_chords
-		      ( $elt->{chords},
-			$dumphdr && $elt->{origin} eq "__CLI__" ) } );
+		      ( $elt->{chords}, $elt->{origin},
+			$dumphdr ) } );
 	    $dumphdr = 0;
 	    next;
 	}

@@ -46,6 +46,7 @@ t/112_verse.t
 t/120_meta.t
 t/130_image.t
 t/140_chords.t
+t/141_chords.t
 t/150_fonts.t
 t/151_fonts.t
 t/160_grids.t

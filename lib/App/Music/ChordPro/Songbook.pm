@@ -505,17 +505,23 @@ sub global_directive {
     # define: A base-fret N frets N N N N N N
     # optional: base-fret N (defaults to 1)
     # optional: N N N N N N (for unknown chords)
-    if (    $d =~ /^define[: ]+([^: ]+)[: ]\s*
-		   (?:base-fret\s+(\d+)\s+)?
-		   frets
-		   ((?:\s+[0-9---xX])*
-		    \s+[0-9---xX])?
-		   \s*$
-		  /xi
-	  ) {
-	my @f = split(' ', $3||'');
-	my $ci = { name => $1,
-		   base => $2 || 1,
+    if ( $d =~ /^
+		(define|chord) [: ]+
+		([^: ]+) [: ] \s*
+		(?: base-fret \s+ (\d+) \s+ )?
+		frets
+		((?: \s+ [0-9---xX])*
+		     \s+ [0-9---xX])?
+		\s*$
+	       /xi
+       ) {
+
+	my $show = $1 eq "chord";
+	return if $legacy && $show;
+
+	my @f = split(' ', $4||'');
+	my $ci = { name => $2,
+		   base => $3 || 1,
 		   frets => [ map { $_ =~ /^\d+/ ? $_ : -1 } @f ],
 		 };
 	push( @{$cur->{define}}, $ci );
@@ -523,10 +529,27 @@ sub global_directive {
 	    my $res =
 	      App::Music::ChordPro::Chords::add_song_chord
 		  ( $ci->{name}, $ci->{base} || 1, $ci->{frets} );
-	    do_warn("Invalid chord: ", $ci->{name}, ": ", $res, "\n") if $res;
+	    if ( $res ) {
+		do_warn("Invalid chord: ", $ci->{name}, ": ", $res, "\n");
+		$show = 0;
+	    }
 	}
 	else {
 	    App::Music::ChordPro::Chords::add_unknown_chord( $ci->{name} );
+	}
+
+	if ( $show) {
+	    # Combine consecutive entries.
+	    if ( $self->{songs}->[-1]->{body}->[-1]->{type} eq "chord-grids" ) {
+		push( @{ $self->{songs}->[-1]->{body}->[-1]->{chords} },
+		      $ci->{name} );
+	    }
+	    else {
+		$self->add( type => "chord-grids",
+			    show => "user",
+			    origin => "chord",
+			    chords => [ $ci->{name} ] );
+	    }
 	}
 	return 1;
     }

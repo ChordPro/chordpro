@@ -602,7 +602,7 @@ sub transpose {
 # Should be handled by the ChordPro backend?
 
 sub list_chords {
-    my ( $chords, $hdr ) = @_;
+    my ( $chords, $origin, $hdr ) = @_;
     fill_chords();
     my @s;
     if ( $hdr ) {
@@ -625,8 +625,9 @@ sub list_chords {
 	my $info = chord_info($chord);
 	next unless $info;
 	push( @s,
-	      sprintf( "{define: %-15.15s base-fret %2d    ".
+	      sprintf( "{%s: %-15.15s base-fret %2d    ".
 		       "frets   %s}",
+		       $origin eq "chord" ? "chord" : "define",
 		       $info->{name}, $info->{base} + 1,
 		       @{ $info->{strings} }
 		       ? join("",
@@ -640,7 +641,7 @@ sub list_chords {
 
 sub dump_chords {
     fill_chords();
-    print( join( "\n", @{ list_chords(\@chordnames, 1) } ), "\n" );
+    print( join( "\n", @{ list_chords(\@chordnames, "__CLI__", 1) } ), "\n" );
 }
 
 unless ( caller ) {
