@@ -40,7 +40,7 @@
     // User defined chords.
     // "base" defaults to 1.
     // "easy" defaults to 0.
-    // Use 0 for an empty string, and -1 for a muted string.
+    // Use 0 for an open string, and -1 for a muted string.
     "chords" : [
       //  {
 	//    "name"  : "Bb",
