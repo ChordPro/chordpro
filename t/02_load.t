@@ -15,14 +15,8 @@ $::__EMBEDDED__ = 1;
 
 my $test;
 
-++$test; use_ok("App::Music::ChordPro");
-++$test; use_ok("App::Music::ChordPro::Config");
-++$test; use_ok("App::Music::ChordPro::Songbook");
-++$test; use_ok("App::Music::ChordPro::Output::Debug");
-++$test; use_ok("App::Music::ChordPro::Output::Text");
-++$test; use_ok("App::Music::ChordPro::Output::ChordPro");
-++$test; use_ok("App::Music::ChordPro::Output::PDF");
+++$test; use_ok("App::Music::ChordPro::Wx::Main");
 
-diag( "Testing App::Music::ChordPro $App::Music::ChordPro::VERSION, Perl $], $^X" );
+diag( "Testing App::Music::ChordPro::Wx $App::Music::ChordPro::VERSION, Perl $], $^X" );
 
 done_testing($test);

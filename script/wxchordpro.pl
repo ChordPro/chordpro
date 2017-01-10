@@ -23,6 +23,11 @@ sub OnInit {
 
     my $main = App::Music::ChordPro::Wx::Main->new();
     exit unless $main->init;
+
+#    my $icon = Wx::Icon->new();
+#    $icon->CopyFromBitmap(Wx::Bitmap->new("wxchordpro.jpg", wxBITMAP_TYPE_ANY));
+#    $main->SetIcon($icon);
+
     $self->SetTopWindow($main);
     $main->Show(1);
 
