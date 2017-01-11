@@ -1,4 +1,13 @@
-0.71	Jan 09 2017
+0.700.4 Jan 11 2017
+
+	Remove res/version.dat. Use a fixed version for the ChordPro
+	dependency.
+
+0.700.x Jan 10 2017
+
+	The ususal movements to get packaging right.
+
+0.70	Jan 09 2017
 
 	Split WxChordPro into its own package.
 
