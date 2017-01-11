@@ -5,24 +5,24 @@ exit 0 if $ENV{AUTOMATED_TESTING} && $] < 5.010000;
 
 use ExtUtils::MakeMaker;
 
-my $master = 'res/version.dat';
+my $master = 'lib/App/Music/ChordPro/Wx.pm';
 my $version = MM->parse_version($master);
 
 WriteMakefile
 (
  NAME		=> 'App::Music::ChordPro::Wx',
- ABSTRACT_FROM  => $master,
- VERSION_FROM	=> $master,
+ ABSTRACT       => 'Simple Wx-based GUI wrapper for ChordPro.',
+ VERSION	=> $version,
  AUTHOR	        => 'Johan Vromans <jvromans@squirrel.nl>',
 
  INSTALLDIRS	=> 'site',
  EXE_FILES	=> [ 'script/wxchordpro' ],
  PL_FILES	=> {
-		    'script/ppchordpro.PL' => [ 'script/wxchordpro' ]
+		    'script/pp.PL' => [ 'script/wxchordpro' ]
 		   },
 
  PREREQ_PM      => {
-		    'App::Music::ChordPro'   => $version,
+		    'App::Music::ChordPro'   => '0.70',
 		    'Wx' => 0.9912,
 		   },
  TEST_REQUIRES  => {
@@ -35,6 +35,9 @@ WriteMakefile
      provides         => {
 	 wxchordpro => { file => "script/wxchordpro",
 		         version => $version },
+	 "App::Music::ChordPro::Wx"
+		  => { file => "lib/App/Music/ChordPro/Wx.pm",
+		       version => $version },
      },
      no_index         => {
          directory => [
