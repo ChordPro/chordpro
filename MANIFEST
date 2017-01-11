@@ -1,6 +1,7 @@
 README
 CHANGES
 Makefile.PL
+lib/App/Music/ChordPro/Wx.pm
 lib/App/Music/ChordPro/Wx/Main.pm
 lib/App/Music/ChordPro/Wx/Main_wxg.pm
 script/wxchordpro.pl
