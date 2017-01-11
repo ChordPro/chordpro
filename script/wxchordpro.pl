@@ -47,7 +47,7 @@ wxchordpro - a simple Wx-based GUI wrapper for ChordPro
 
 =head1 SYNOPSIS
 
-  wxchordpro
+  wxchordpro [ file ]
 
 =head1 DESCRIPTION
 

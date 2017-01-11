@@ -15,10 +15,11 @@ use base qw( App::Music::ChordPro::Wx::Main_wxg );
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
 
+use App::Music::ChordPro::Wx;
 use App::Music::ChordPro;
 use File::Temp qw( tempfile );
 
-our $VERSION = $App::Music::ChordPro::VERSION;
+our $VERSION = $App::Music::ChordPro::Wx::VERSION;
 
 sub new {
     my $self = bless $_[0]->SUPER::new(), __PACKAGE__;
@@ -265,10 +266,19 @@ sub OnDelete {
     $self->{t_source}->Remove( $from, $to ) if $from < $to;
 }
 
+sub OnHelp_ChordPro {
+    my ($self, $event) = @_;
+    Wx::LaunchDefaultBrowser("http://www.chordpro.org/chordpro/index.html");
+}
+
 sub OnAbout {
     my ($self, $event) = @_;
 
+    my $firstyear = 2016;
     my $year = 1900 + (localtime(time))[5];
+    if ( $year != $firstyear ) {
+	$year = "$firstyear,$year";
+    }
 
     # Sometimes version numbers are localized...
     my $dd = sub { my $v = $_[0]; $v =~ s/,/./g; $v };
@@ -279,6 +289,7 @@ sub OnAbout {
 	$ai->SetVersion( $dd->($VERSION) );
 	$ai->SetCopyright("Copyright $year Johan Vromans <jvromans\@squirrel.nl>");
 	$ai->AddDeveloper("Johan Vromans <jvromans\@squirrel.nl>");
+	$ai->AddDeveloper("ChordPro version " . $dd->($App::Music::ChordPro::VERSION));
 	$ai->AddDeveloper("Perl version " . $dd->(sprintf("%vd",$^V)));
 	$ai->AddDeveloper("wxWidgets version " . $dd->(Wx::wxVERSION));
 	$ai->AddDeveloper(App::Packager::Packager() . " version " . App::Packager::Version())
@@ -294,6 +305,7 @@ sub OnAbout {
 	   "Copyright $year Johan Vromans <jvromans\@squirrel.nl>\n".
 	   "\n".
 	   "GUI design with wxGlade, http://wxglade.sourceforge.net\n\n".
+	   "ChordPro version " . $dd->($App::Music::ChordPro::VERSION) . "\n".
 	   "Perl version " . $dd->(sprintf("%vd",$^V))."\n".
 	   "wxPerl version " . $dd->($Wx::VERSION)."\n".
 	   "wxWidgets version " . $dd->(Wx::wxVERSION)."\n".
