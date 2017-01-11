@@ -9,13 +9,14 @@ opening of files, make changes, and preview (optionally print) the
 formatted result.
 
 For more information about the ChordPro file format, see
-L<http://www.chordpro.org>.
+http://www.chordpro.org .
 
-For more information about ChordPro program, see L<App::Music::ChordPro>.
+For more information about ChordPro program, see
+https://metacpan.org/pod/App::Music::ChordPro .
 
 LICENSE
 
-Copyright (C) 2010,2017 Johan Vromans,
+Copyright (C) 2016,2017 Johan Vromans,
 
 This module is free software. You can redistribute it and/or
 modify it under the terms of the Artistic License 2.0.
