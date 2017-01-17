@@ -6,7 +6,7 @@ use utf8;
 
 package App::Music::ChordPro::Wx;
 
-our $VERSION = "0.700.4";
+our $VERSION = "0.71";
 
 1;
 
@@ -16,7 +16,7 @@ wxchordpro - a simple Wx-based GUI wrapper for ChordPro
 
 =head1 SYNOPSIS
 
-  wxchordpro
+  wxchordpro [ ChordPro file ]
 
 =head1 DESCRIPTION
 

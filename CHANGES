@@ -1,3 +1,8 @@
+0.71    Jan 17 2017
+
+	Add preferences dialog to select a custon config file and a
+	PDF previewer.
+
 0.700.4 Jan 11 2017
 
 	Remove res/version.dat. Use a fixed version for the ChordPro
