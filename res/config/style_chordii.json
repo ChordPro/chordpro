@@ -18,8 +18,7 @@
     // "sorted": order the chords by key.
     "chordgrid" : {
 	"auto"     :  1,
-	"show"     :  1,
-	"hard"     :  0,
+	"show"     :  "all",
 	"sorted"   :  0,
     },
 
