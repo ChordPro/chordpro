@@ -36,7 +36,7 @@ sub init {
     $prefctl ||=
       {
        configfile => "",
-       pdfviewer => "pdf",
+       pdfviewer => "",
       };
 
     if ( $^O =~ /^mswin/i ) {
@@ -198,10 +198,7 @@ sub preview {
 		$cmd .= " \"$preview_pdf\"";
 	    }
 	    elsif ( $cmd =~ /\%u/ ) {
-		my $u = $preview_pdf;
-		$u =~ s/([^a-z0-9---_\/.])/sprintf("%%%02X", ord($1))/eg;
-		$u =~ s/^%2F/\//;
-		$u = "file://$u";
+		my $u = _makeurl($preview_pdf);
 		$cmd =~ s/\%u/$u/g;
 	    }
 	    Wx::ExecuteCommand($cmd);
@@ -213,11 +210,19 @@ sub preview {
 		Wx::ExecuteCommand($cmd);
 	    }
 	    else {
-		Wx::LaunchDefaultBrowser("file://" . $preview_pdf);
+		Wx::LaunchDefaultBrowser($preview_pdf);
 	    }
 	}
     }
     unlink( $preview_cho );
+}
+
+sub _makeurl {
+    my $u = shift;
+    $u =~ s;\\;/;g;
+    $u =~ s/([^a-z0-9---_\/.])/sprintf("%%%02X", ord($1))/ieg;
+    $u =~ s/^%2F/\//i;
+    return "file://$u";
 }
 
 sub saveas {
