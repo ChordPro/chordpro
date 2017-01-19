@@ -1,3 +1,4 @@
+lib/App/Music/ChordPro/Bundle.pm
 pp/Makefile.lnx
 pp/Makefile.msw
 pp/chordpro.pp
