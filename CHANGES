@@ -1,3 +1,8 @@
+0.710.3 Jan 21 2017
+
+	Fix URL generation (Windows).
+	Add help for ChordPro config.
+
 0.710.2 Jan 18 2017
 
 	Fix PDF previewer startup on Windows.

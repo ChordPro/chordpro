@@ -373,6 +373,11 @@ sub OnHelp_ChordPro {
     Wx::LaunchDefaultBrowser("http://www.chordpro.org/chordpro/index.html");
 }
 
+sub OnHelp_Config {
+    my ($self, $event) = @_;
+    Wx::LaunchDefaultBrowser("https://metacpan.org/pod/distribution/App-Music-ChordPro/res/pod/Config.pod");
+}
+
 sub OnPreferences {
     my ($self, $event) = @_;
 
