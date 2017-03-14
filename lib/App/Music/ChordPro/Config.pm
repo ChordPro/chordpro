@@ -47,8 +47,9 @@ This is the current built-in configuration file, showing all settings.
       // The separator is used to concatenate multiple values.
       "metadata" : {
         "keys" : [ "title", "subtitle",
-                   "artist", "composer", "album",
-                   "key", "time", "tempo", "capo" ],
+                   "artist", "composer", "lyricist", "arranger",
+                   "album", "copyright", "year",
+                   "key", "time", "tempo", "capo", "duration" ],
         "strict" : 1,
         "separator" : "; ",
       },
