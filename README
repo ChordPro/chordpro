@@ -35,7 +35,7 @@ MOTIVATION
 
 CURRENT STATUS
 
-    This program provides alpha support for ChordPro version 5. It supports
+    This program provides support for ChordPro version 5. It supports
     most of the features of Chordii, and a lot more:
 
     * Native PDF generation.
@@ -50,12 +50,14 @@ CURRENT STATUS
 
     * Fully customizable layout, fonts and sizes.
 
+    * A basic but effective GUI version (optional).
+
     * Customizable backends for PDF, ChordPro, LilyPond*, LaTeX* and HTML*.
       (* = under development)
 
 LICENSE
 
-    Copyright (C) 2010,2016 Johan Vromans,
+    Copyright (C) 2010,2017 Johan Vromans,
 
     This module is free software. You can redistribute it and/or modify it
     under the terms of the Artistic License 2.0.
