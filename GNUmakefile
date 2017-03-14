@@ -44,3 +44,7 @@ to_tmp :
 to_tmp_cpan :
 	rsync -avH --files-from=MANIFEST.CPAN ./ ${TMP_DST}/
 
+release :
+	${MAKE} -C ../WxChordPro to_src
+	perl Makefile.PL
+	${MAKE} -f Makefile all test dist
