@@ -163,12 +163,14 @@ This is the current built-in configuration file, showing all settings.
 	// be 4 or larger to accomodate most chords.
   	// The horizontal distance between grids is "hspace" cells.
   	// The vertical distance is "vspace" cells.
+	// "linewidth" is the thickness of the lines as a fraction of "width".
   	"chordgrid" : {
 	    "width"    :  6,
   	    "height"   :  6,
   	    "hspace"   :  3.95,
   	    "vspace"   :  3,
   	    "vcells"   :  4,
+	    "linewidth" : 0.1,
   	},
   
   	// Even/odd pages. A value of -1 denotes odd/even pages.

@@ -1104,7 +1104,7 @@ sub chordgrid {
     my $gw = $ps->{chordgrid}->{width};
     my $gh = $ps->{chordgrid}->{height};
     my $dot = 0.80 * $gw;
-    my $lw  = 0.10 * $gw;
+    my $lw  = ($ps->{chordgrid}->{linewidth} || 0.10) * $gw;
 
     my $info = App::Music::ChordPro::Chords::chord_info($name);
     unless ( $info ) {
@@ -1123,7 +1123,7 @@ sub chordgrid {
     $name .= "*"
       unless $info->{builtin} || $::config->{chordgrid}->{show} eq "user";
     $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y - font_bl($font) );
-    $y -= $font->{size} * $ps->{spacing}->{chords} + $dot/2;
+    $y -= $font->{size} * $ps->{spacing}->{chords} + $dot/2 + $lw;
 
     if ( $info->{base} > 0 ) {
 	my $i = @Roman[$info->{base}] . "  ";
@@ -1144,10 +1144,10 @@ sub chordgrid {
 			 "black", "black");
 	}
 	elsif ( $fret < 0 ) {
-	    $pr->cross( $x+$gw/2, $y+$gh/3, $dot/3, $lw, "black");
+	    $pr->cross( $x+$gw/2, $y+$lw+$gh/3, $dot/3, $lw, "black");
 	}
 	elsif ( $info->{base} >= 0 ) {
-	    $pr->circle( $x+$gw/2, $y+$gh/3, $dot/3, $lw,
+	    $pr->circle( $x+$gw/2, $y+$lw+$gh/3, $dot/3, $lw,
 			 undef, "black");
 	}
     }
@@ -1453,6 +1453,7 @@ sub hline {
     my $gfx = $self->{pdfpage}->gfx;
     $gfx->save;
     $gfx->strokecolor($color ||= "black");
+    $gfx->linecap(2);
     $gfx->linewidth($lw||1);
     $gfx->move( $x, $y );
     $gfx->hline( $x + $w );
@@ -1465,6 +1466,7 @@ sub vline {
     my $gfx = $self->{pdfpage}->gfx;
     $gfx->save;
     $gfx->strokecolor($color ||= "black");
+    $gfx->linecap(2);
     $gfx->linewidth($lw||1);
     $gfx->move( $x, $y );
     $gfx->vline( $y - $h );
@@ -1478,6 +1480,7 @@ sub rectxy {
     $gfx->save;
     $gfx->strokecolor($strokecolor) if $strokecolor;
     $gfx->fillcolor($fillcolor) if $fillcolor;
+    $gfx->linecap(2);
     $gfx->linewidth($lw||1);
     $gfx->rectxy( $x, $y, $x1, $y1 );
     $gfx->close;

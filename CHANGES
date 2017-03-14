@@ -1,6 +1,10 @@
 0.73	xx xx 2017
 
 	(WxChordPro) Update to 0.710.3.
+	(Config) Add more meta data: lyricist, arranger, copyright,
+	year, duration.
+	(PDF) Improve grids drawing: add config for line thickness, add space
+	for the crosses/circles.
 
 0.72	Jan 18 2017
 
