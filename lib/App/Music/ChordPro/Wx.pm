@@ -6,7 +6,7 @@ use utf8;
 
 package App::Music::ChordPro::Wx;
 
-our $VERSION = "0.710.2";
+our $VERSION = "0.710.3";
 
 1;
 

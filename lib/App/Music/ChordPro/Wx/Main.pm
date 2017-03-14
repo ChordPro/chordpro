@@ -220,8 +220,8 @@ sub preview {
 sub _makeurl {
     my $u = shift;
     $u =~ s;\\;/;g;
-    $u =~ s/([^a-z0-9---_\/.])/sprintf("%%%02X", ord($1))/ieg;
-    $u =~ s/^%2F/\//i;
+    $u =~ s/([^a-z0-9---_\/.~])/sprintf("%%%02X", ord($1))/ieg;
+    $u =~ s/^([a-z])%3a/\/$1:/i;	# Windows
     return "file://$u";
 }
 
@@ -371,6 +371,11 @@ sub OnDelete {
 sub OnHelp_ChordPro {
     my ($self, $event) = @_;
     Wx::LaunchDefaultBrowser("http://www.chordpro.org/chordpro/index.html");
+}
+
+sub OnHelp_Config {
+    my ($self, $event) = @_;
+    Wx::LaunchDefaultBrowser("https://metacpan.org/pod/distribution/App-Music-ChordPro/res/pod/Config.pod");
 }
 
 sub OnPreferences {
