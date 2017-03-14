@@ -8,7 +8,7 @@ lib/App/Music/ChordPro/Wx/PreferencesDialog.pm
 lib/App/Music/ChordPro/Wx/PreferencesDialog.wxg
 lib/App/Music/ChordPro/Wx/PreferencesDialog_wxg.pm
 script/wxchordpro.pl
-script/ppchordpro.PL
+script/pp.PL
 t/01_prereq.t
 t/02_load.t
 MANIFEST
