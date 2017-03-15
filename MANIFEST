@@ -10,8 +10,11 @@ lib/App/Music/ChordPro/Output/Debug.pm
 lib/App/Music/ChordPro/Output/PDF.pm
 lib/App/Music/ChordPro/Output/Text.pm
 lib/App/Music/ChordPro/Songbook.pm
+lib/App/Music/ChordPro/Wx.pm
 lib/App/Music/ChordPro/Wx/Main.pm
 lib/App/Music/ChordPro/Wx/Main_wxg.pm
+lib/App/Music/ChordPro/Wx/PreferencesDialog.pm
+lib/App/Music/ChordPro/Wx/PreferencesDialog_wxg.pm
 lib/App/Packager.pm
 pp/README
 pp/Makefile.lnx
