@@ -779,7 +779,34 @@ sub songline {
 	    push(@chords, $chord);
 	}
 	else {
-	    my $xt0 = $pr->text( $chord." ", $x, $ychord, $fchord );
+	    my $info = App::Music::ChordPro::Chords::chord_info($chord);
+	    my $xt0;
+	    if ( $info && $info->{builtin} eq "R" ) {
+		$xt0 = $pr->text( $info->{root}, $x, $ychord, $fchord );
+		$xt0 = $pr->text( $info->{quality}, $xt0,
+				   $ychord + $fchord->{size} * 0.2,
+				   $fchord,
+				   $fchord->{size} * 0.8
+				 );
+		$xt0 = $pr->text( " ", $xt0, $ychord, $fchord );
+	    }
+	    elsif ( $info && $info->{builtin} eq "N" ) {
+		$xt0 = $pr->text( $info->{root}, $x, $ychord, $fchord );
+		if ( $info->{minor} ) {
+		    my $m = $info->{minor};
+		    # $m = "\x{0394}" if $m eq "^";
+		    $xt0 = $pr->text( $m, $xt0, $ychord, $fchord );
+		}
+		$xt0 = $pr->text( $info->{quality}, $xt0,
+				   $ychord + $fchord->{size} * 0.2,
+				   $fchord,
+				   $fchord->{size} * 0.8,
+				 );
+		$xt0 = $pr->text( " ", $xt0, $ychord, $fchord );
+	    }
+	    else {
+		$xt0 = $pr->text( $chord." ", $x, $ychord, $fchord );
+	    }
 	    my $xt1 = $pr->text( $phrase, $x, $ytext, $ftext );
 	    $x = $xt0 > $xt1 ? $xt0 : $xt1;
 	}

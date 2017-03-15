@@ -402,6 +402,72 @@ my @raw_chords =
 
 );
 
+my @chordqualities = (
+ "",
+ "+",
+ "-",
+ "-#5",
+ "-11",
+ "-6",
+ "-69",
+ "-7",
+ "-7b5",
+ "-9",
+ "-^7",
+ "-^9",
+ "-b6",
+ "11",
+ "13",
+ "13#11",
+ "13#9",
+ "13b9",
+ "13sus",
+ "2",
+ "5",
+ "6",
+ "69",
+ "7",
+ "7#11",
+ "7#5",
+ "7#9",
+ "7#9#11",
+ "7#9#5",
+ "7#9b5",
+ "7alt",
+ "7b13",
+ "7b13sus",
+ "7b5",
+ "7b9",
+ "7b9#11",
+ "7b9#5",
+ "7b9#9",
+ "7b9b13",
+ "7b9b5",
+ "7b9sus",
+ "7sus",
+ "7susadd3",
+ "9",
+ "9#11",
+ "9#5",
+ "9b5",
+ "9sus",
+ "^",
+ "^13",
+ "^7",
+ "^7#11",
+ "^7#5",
+ "^9",
+ "^9#11",
+ "add9",
+ "alt",
+ "h",
+ "h7",
+ "h9",
+ "o",
+ "o7",
+ "sus",
+);
+
 # Current tuning.
 my @tuning = @{ TUNING() };
 
@@ -411,6 +477,8 @@ my %chords;
 my @chordnames;
 # Chord order ordinals.
 my %chordorderkey;
+# Chord qualities.
+my %chordqualities;
 
 # Transfer the info from the raw list into %chords and @chordnames.
 my $chords_filled;
@@ -431,6 +499,13 @@ sub fill_chords {
 	for ( split( ' ', "C C# Db D D# Eb E F F# Gb G G# Ab A A# Bb B" ) ) {
 	    $chordorderkey{$_} = $ord;
 	    $ord += 2;
+	}
+    }
+
+    unless ( %chordqualities ) {
+	for ( @chordqualities ) {
+	    next if /^-/;
+	    $chordqualities{$_} = 1;
 	}
     }
 }
@@ -505,6 +580,36 @@ sub chord_info {
     my ( $chord ) = @_;
     my @info;
     fill_chords();
+
+    # Nashville Number System.
+    if ( $chord =~ /^([b#]?[1-7])([-^]?)(.*)$/i && $chordqualities{$3} ) {
+	return +{
+		 name    => $chord,
+		 strings => [ ],
+		 base    => 0,
+		 builtin => "N",
+		 root	 => $1,
+		 minor	 => $2,
+		 quality => $3,
+		 origin  => CHORD_BUILTIN,
+		 easy    => 0,
+		};
+    }
+
+    # Roman Number System.
+    if ( $chord =~ /^(iv|i{1,3}|vi{0,2})(.*)$/i && $chordqualities{$2} ) {
+	return +{
+		 name    => $chord,
+		 strings => [ ],
+		 base    => 0,
+		 builtin => "R",
+		 root	 => $1,
+		 quality => $2,
+		 origin  => CHORD_BUILTIN,
+		 easy    => 0,
+		};
+    }
+
     for ( \%song_chords, \%config_chords, \%chords ) {
 	next unless exists($_->{$chord});
 	@info = @{ $_->{$chord} };
@@ -648,3 +753,31 @@ unless ( caller ) {
     $App::Music::ChordPro::VERSION = "";
     dump_chords();
 }
+
+1;
+
+__END__
+
+*** Roman Numeral Chord Notation
+
+Major chord: I, II, III, etc.
+
+Minor chord: i, ii, iii, etc.
+
+Augmented chord: I+, II+, III+, etc.
+
+Diminished chord: vi°, vii°, etc.
+
+Half-diminished chord: viiØ7, etc.
+
+Extended chords: ii7, V9, V13, etc.
+
+Altered tones or chords: #iv, ii#7
+
+*** The Nashville Number System, (also referred to as NNS) is similar
+to (movable-do) Solfège, which uses "Do Re Mi Fa Sol La Ti" to
+represent the seven scale degrees of the Major scale. However the NNS
+instead uses numbers to represent each of the scale degrees. In the
+key of C, the numbers would correspond as follows: C=1, D=2, E=3, F=4,
+G=5, A=6, B=7.
+
