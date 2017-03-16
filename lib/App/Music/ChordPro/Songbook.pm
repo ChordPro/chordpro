@@ -64,7 +64,6 @@ sub parsefile {
     while ( <$fh> ) {
 	s/[\r\n]+$//;
 	$diag->{line} = $.;
-	$diag->{orig} = $_;
 
 	my $line;
 	if ( $options->{encoding} ) {
@@ -74,7 +73,7 @@ sub parsefile {
 	    eval { $line = decode( "UTF-8", $_, 1 ) };
 	    $line = decode( "iso-8859-1", $_ ) if $@;
 	}
-	$_ = $line;
+	$diag->{orig} = $_ = $line;
 
 	#s/^#({t:)/$1/;
 	next if /^#/;

@@ -49,6 +49,8 @@ package App::Music::ChordPro;
 
 sub ::run {
     my $options = app_setup( "ChordPro", $VERSION );
+    binmode(STDERR, ':utf8');
+    binmode(STDOUT, ':utf8');
     $options->{trace}   = 1 if $options->{debug};
     $options->{verbose} = 1 if $options->{trace};
     main($options);
