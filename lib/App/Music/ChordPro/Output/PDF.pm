@@ -63,7 +63,8 @@ sub generate_songbook {
 	  };
 	push( @book, [ $song->{title}, $page ] );
 	$page += generate_song( $song,
-				{ pr => $pr, $options ? %$options : () } );         }
+				{ pr => $pr, $options ? %$options : () } );
+    }
 
     $pr->finish( $options->{output} || "__new__.pdf" );
 
