@@ -7,7 +7,8 @@
 	year, duration.
 	(PDF) Improve grids drawing: add config for line thickness, add space
 	for the crosses/circles.
-	(PDF) Allow PDF to be written to standard output.
+	(PDF) Allow PDF to be written to standard output. Output file
+	will now be named after the input file if there's only one.
 
 0.72	Jan 18 2017
 
