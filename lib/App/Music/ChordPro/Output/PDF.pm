@@ -24,7 +24,7 @@ sub generate_songbook {
     return [] unless $sb->{songs}->[0]->{body}; # no songs
 
     my $ps = $::config->{pdf};
-    my $pr = PDFWriter->new( $ps, $options->{output} || "__new__.pdf" );
+    my $pr = PDFWriter->new($ps);
     $pr->info( Title => $sb->{songs}->[0]->{meta}->{title}->[0],
 	       Creator =>
 	       $regtest
@@ -65,7 +65,7 @@ sub generate_songbook {
 	$page += generate_song( $song,
 				{ pr => $pr, $options ? %$options : () } );         }
 
-    $pr->finish;
+    $pr->finish( $options->{output} || "__new__.pdf" );
 
     if ( $options->{toc} ) {
 
@@ -1413,9 +1413,9 @@ my $faketime = 1465041600;
 my %fontcache;			# speeds up 2 seconds per song
 
 sub new {
-    my ( $pkg, $ps, @file ) = @_;
+    my ( $pkg, $ps ) = @_;
     my $self = bless { ps => $ps }, $pkg;
-    $self->{pdf} = PDF::API2->new( -file => $file[0] );
+    $self->{pdf} = PDF::API2->new;
     $self->{pdf}->{forcecompress} = 0 if $regtest;
     $self->{pdf}->mediabox( $ps->{papersize}->[0],
 			    $ps->{papersize}->[1] );
@@ -1587,8 +1587,16 @@ sub add {
 }
 
 sub finish {
-    my $self = shift;
-    $self->{pdf}->save;
+    my ( $self, $file ) = @_;
+
+    if ( $file && $file ne "-" ) {
+	$self->{pdf}->saveas($file);
+    }
+    else {
+	binmode(STDOUT);
+	print STDOUT ( $self->{pdf}->stringify );
+	close(STDOUT);
+    }
 }
 
 sub init_fonts {
