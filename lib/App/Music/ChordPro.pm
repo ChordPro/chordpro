@@ -61,7 +61,8 @@ sub main {
 
     # Establish backend.
     my $of = $options->{output};
-    if ( $of ) {
+
+    if ( defined($of) && $of ne "" ) {
         if ( $of =~ /\.pdf$/i ) {
             $options->{generate} ||= "PDF";
         }
@@ -84,6 +85,23 @@ sub main {
         elsif ( $of =~ /\.(debug)$/i ) {
             $options->{generate} ||= "Debug";
         }
+    }
+    elsif ( -t STDOUT ) {
+	# No output, and stdout is terminal.
+	# Derive output name from input name.
+	if ( @ARGV > 1 ) {
+	    # No default if more than one input document.
+	    die("Please use \"--output\" to specify the output file name\n");
+	}
+	my $f = $ARGV[0];
+	$f =~ s/\.\w+$/.pdf/;
+	$f .= ".pdf" if $f eq $ARGV[0];
+	$options->{output} = $f;
+	warn("Writing output to $f\n") if $options->{verbose};
+    }
+    else {
+	# Write output to stdout.
+	$options->{output} = "-";
     }
 
     $options->{generate} ||= "PDF";
