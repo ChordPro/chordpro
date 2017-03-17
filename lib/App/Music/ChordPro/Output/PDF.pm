@@ -1443,7 +1443,6 @@ sub text {
 
     $self->setfont($font, $size);
 
-    $text = encode( "cp1250", $text ) unless $font->{file};
     if ( $font->{color} ) {
 	$self->{pdftext}->strokecolor( $font->{color} );
 	$self->{pdftext}->fillcolor( $font->{color} );
@@ -1640,7 +1639,7 @@ sub init_font {
     else {
 	$font->{font} =
 	  $fontcache{"__core__".$font->{name}} ||=
-	  $self->{pdf}->corefont( $font->{name}, -dokern => 1 );
+	    $self->{pdf}->corefont( $font->{name}, -dokern => 1 );
     }
 
     unless ( $font->{font} ) {
