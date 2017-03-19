@@ -20,7 +20,6 @@ WriteMakefile
  PL_FILES	=> {
 		    'script/ppchordpro.PL' => [ 'script/chordpro', 'script/wxchordpro' ]
 		   },
-
  PREREQ_PM      => {
 		    'PDF::API2'   => 2.020,
 		    'Font::TTF'   => 1.04,
