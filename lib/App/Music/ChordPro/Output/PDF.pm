@@ -1300,7 +1300,7 @@ sub configurator {
     }
 
     # Add font dirs.
-    my $fontdir = $pdf->{fontdir} || $ENV{FONTDIR};
+    my $fontdir = $pdf->{fontdir} || ::findlib("fonts") || $ENV{FONTDIR};
     if ( $fontdir ) {
 	if ( -d $fontdir ) {
 	    PDF::API2::addFontDirs($fontdir);

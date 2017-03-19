@@ -830,6 +830,30 @@ EndOfUsage
     exit $exit if defined $exit;
 }
 
+################ Resources ################
+
+sub ::findlib {
+    my ( $file ) = @_;
+
+    # Packaged.
+    if ( $App::Packager::PACKAGED ) {
+	my $found = App::Packager::GetUserFile($file);
+	return $found if -e $found;
+	$found = App::Packager::GetResource($file);
+	return $found if -e $found;
+    }
+
+    ( my $me = __PACKAGE__ ) =~ s;::;/;g;
+    foreach ( @INC ) {
+	return "$_/$me/user/$file" if -e "$_/$me/user/$file";
+	return "$_/$me/res/$file"  if -e "$_/$me/res/$file";
+	return "$_/$me/$file"      if -e "$_/$me/$file";
+    }
+    undef;
+}
+
+use lib ( grep { defined } ::findlib("CPAN") );
+
 =head1 FONTS
 
 There are two ways to specify fonts: with a font filename, and a
@@ -891,6 +915,8 @@ supports most of the features of Chordii, and a lot more:
 
 * User defined chords and tuning, not limited to 6 strings.
 
+* Support for Nashville Numbering and Roman Numbering.
+
 * Support for external TrueType and OpenType fonts
 
 * Font kerning (with external TrueType fonts)
@@ -901,11 +927,23 @@ supports most of the features of Chordii, and a lot more:
 
 (* = under development)
 
+=head1 AUTHOR
+
+Johan Vromans C<< <jv at CPAN dot org > >>
+
+=head1 SUPPORT
+
+ChordPro (the program) development is hosted on GitHub, repository
+L<https://github.com/sciurius/chordpro>.
+
+Please report any bugs or feature requests to the GitHub issue tracker,
+L<https://github.com/sciurius/chordpro/issues>.
+
 =head1 LICENSE
 
-Copyright (C) 2010,2016 Johan Vromans,
+Copyright (C) 2010,2017 Johan Vromans,
 
-This module is free software. You can redistribute it and/or
+This program is free software. You can redistribute it and/or
 modify it under the terms of the Artistic License 2.0.
 
 This program is distributed in the hope that it will be useful,

@@ -20,8 +20,8 @@ cleanup : Makefile
 	$(MAKE) -f Makefile clean
 
 .PHONY : dist
-dist : Makefile
-	$(MAKE) -f Makefile resources dist
+dist : Makefile resources
+	$(MAKE) -f Makefile dist
 
 .PHONY : install
 install : Makefile
@@ -32,11 +32,11 @@ Makefile : Makefile.PL
 
 ################ Extensions ################
 
+PERLRUN := perl
 PROJECT := ChordPro
-TMP_DST = ${HOME}/tmp/${PROJECT}
+TMP_DST := ${HOME}/tmp/${PROJECT}
 
-to_tmp :
-	make -f Makefile resources
+to_tmp : resources
 	rsync -avH --files-from=MANIFEST    ./ ${TMP_DST}/
 	rsync -avH --files-from=MANIFEST.WX ./ ${TMP_DST}/
 	rsync -avH --files-from=MANIFEST.PP ./ ${TMP_DST}/
@@ -46,5 +46,16 @@ to_tmp_cpan :
 
 release :
 	${MAKE} -C ../WxChordPro to_src
-	perl Makefile.PL
+	${PERL} Makefile.PL
 	${MAKE} -f Makefile all test dist
+
+# Actualize resources.
+
+LIB := lib/App/Music/ChordPro
+RES := ${LIB}/res
+
+resources : ${RES}/config/chordpro.json
+
+${RES}/config/chordpro.json : ${LIB}/Config.pm
+	$(PERL) $< > $@
+
