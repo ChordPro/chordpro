@@ -43,9 +43,11 @@ WriteMakefile
          file => [
 	    "lib/App/Music/ChordPro/Songbook.pm",
 	    "lib/App/Music/ChordPro/Chords.pm",
+	    "lib/App/Music/ChordPro/Wx.pm",
 	 ],
          directory => [
 	    "lib/App/Music/ChordPro/Output",
+	    "lib/App/Music/ChordPro/Wx",
 	 ],
      },
  },
