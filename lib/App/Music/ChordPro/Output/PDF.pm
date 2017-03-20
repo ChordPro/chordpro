@@ -782,7 +782,7 @@ sub songline {
 	else {
 	    my $info = App::Music::ChordPro::Chords::chord_info($chord);
 	    my $xt0;
-	    if ( $info && $info->{builtin} eq "R" ) {
+	    if ( $info && $info->{system} eq "R" ) {
 		$xt0 = $pr->text( $info->{root}, $x, $ychord, $fchord );
 		$xt0 = $pr->text( $info->{quality}, $xt0,
 				   $ychord + $fchord->{size} * 0.2,
@@ -791,7 +791,7 @@ sub songline {
 				 );
 		$xt0 = $pr->text( " ", $xt0, $ychord, $fchord );
 	    }
-	    elsif ( $info && $info->{builtin} eq "N" ) {
+	    elsif ( $info && $info->{system} eq "N" ) {
 		$xt0 = $pr->text( $info->{root}, $x, $ychord, $fchord );
 		if ( $info->{minor} ) {
 		    my $m = $info->{minor};
@@ -1149,7 +1149,7 @@ sub chordgrid {
     my $font = $ps->{fonts}->{chordgrid};
     $pr->setfont($font);
     $name .= "*"
-      unless $info->{builtin} || $::config->{chordgrid}->{show} eq "user";
+      unless $info->{system} || $::config->{chordgrid}->{show} eq "user";
     $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y - font_bl($font) );
     $y -= $font->{size} * $ps->{spacing}->{chords} + $dot/2 + $lw;
 

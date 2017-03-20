@@ -44,6 +44,8 @@ CURRENT STATUS
 
     * User defined chords and tunings, not limited to 6 strings.
 
+    * Support for Nashville Numbering and Roman Numbering.
+
     * Support for external TrueType and OpenType fonts.
 
     * Font kerning (with external fonts).
@@ -78,7 +80,7 @@ INSTALLATION
     Step two for Linux and Strawberry Perl: at the command prompt,
     type
 
-      cpan App::cpanm
+      cpan App::cpanminus
       cpanm wxchordpro
 
     This will pull in ChordPro from the CPAN archives and install it
@@ -97,6 +99,14 @@ INSTALLATION
     Alternatively, you can clone the GitHub repository and run the
     programs in the scripts directory. You may have to manually add
     dependencies with "cpan" or "ppm", just as described above.
+
+SUPPORT
+
+    ChordPro (the program) development is hosted on GitHub, repository
+    https://github.com/sciurius/chordpro .
+
+    Please report any bugs or feature requests to the GitHub issue tracker,
+    https://github.com/sciurius/chordpro/issues .
 
 LICENSE
 

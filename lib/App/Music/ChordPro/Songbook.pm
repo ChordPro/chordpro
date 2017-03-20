@@ -18,6 +18,7 @@ sub new {
 my $def_context = "";
 my $in_context = $def_context;
 my $xpose;
+my $chordtype;
 my @used_chords;
 my %used_chords;
 my $re_meta;
@@ -76,6 +77,7 @@ sub parsefile {
 	$diag->{orig} = $_ = $line;
 
 	if ( /^#/ ) {
+	    # Collect pre-title stuff separately.
 	    if ( exists $self->{songs}->[-1]->{title} ) {
 		$self->add( type => "ignore", text => $line );
 	    }
@@ -112,6 +114,7 @@ sub parsefile {
 	    $self->add( type => "empty" );
 	}
 	else {
+	    # Collect pre-title stuff separately.
 	    push( @{ $self->{songs}->[-1]->{preamble} }, $line );
 	}
     }
@@ -164,7 +167,7 @@ sub safe_chord_info {
 }
 
 sub chord {
-    my ( $c ) = @_;
+    my ( $self, $c ) = @_;
     return $c unless length($c);
     my $parens = $c =~ s/^\((.*)\)$/$1/;
     if ( exists $used_chords{$c} ) {
@@ -172,25 +175,38 @@ sub chord {
     }
 
     my $info = App::Music::ChordPro::Chords::chord_info($c);
-    unless ( $info ) {
+    if ( $info ) {
+	if ( defined $chordtype ) {
+	    if ( $chordtype ne $info->{system} ) {
+		$chordtype = $info->{system};
+		do_warn("Mixed chord systems detected in song");
+	    }
+	}
+	else {
+	    $chordtype = $info->{system};
+	}
+    }
+    else {
 	do_warn("Unknown chord: $c\n");
 	$info = App::Music::ChordPro::Chords::add_unknown_chord($c)
 	  if $::config->{chordgrid}->{auto};
     }
     my $xc = App::Music::ChordPro::Chords::transpose( $c, $xpose );
-    if ( $xc ) {
-	$used_chords{$c} = $xc;
+    if ( $info->{system} eq "" ) {
+	if ( $xc ) {
+	    $used_chords{$c} = $xc;
+	}
+	else {
+	    $xc = $c;
+	}
+	push( @used_chords, $xc ) if $info;
     }
-    else {
-	$xc = $c;
-    }
-    push( @used_chords, $xc ) if $info;
     return $parens ? "($xc)" : $xc;
 }
 
 sub cxpose {
-    my ( $t ) = @_;
-    $t =~ s/\[(.+?)\]/chord($1)/ge;
+    my ( $self, $t ) = @_;
+    $t =~ s/\[(.+?)\]/$self->chord($1)/ge;
     return $t;
 }
 
@@ -214,7 +230,7 @@ sub decompose {
     while ( @a ) {
 	my $t = shift(@a);
 	$t =~ s/^\[(.*)\]$/$1/;
-	push(@chords, chord($t));
+	push(@chords, $self->chord($t));
 	push(@phrases, shift(@a));
     }
 
@@ -229,9 +245,9 @@ sub decompose_grid {
     my $orig;
     if ( $line =~ /(.*\|\S*)\s([^\|]*)$/ ) {
 	$line = $1;
-	$rest = cxpose( $orig = $2 );
+	$rest = $self->cxpose( $orig = $2 );
     }
-    my @tokens = map { chord($_) } split( ' ', $line );
+    my @tokens = map { $self->chord($_) } split( ' ', $line );
     return ( tokens => \@tokens,
 	     $rest ? ( comment => $rest, orig => $orig ) : () );
 }
@@ -314,19 +330,19 @@ sub directive {
     # Comments. Strictly speaking they do not belong here.
 
     if ( $dir =~ /^(?:comment|c|highlight)$/ ) {
-	$self->add( type => "comment", text => cxpose($arg),
+	$self->add( type => "comment", text => $self->cxpose($arg),
 		    orig => $arg );
 	return;
     }
 
     if ( $dir =~ /^(?:comment_italic|ci)$/ ) {
-	$self->add( type => "comment_italic", text => cxpose($arg),
+	$self->add( type => "comment_italic", text => $self->cxpose($arg),
 		    orig => $arg );
 	return;
     }
 
     if ( $dir =~ /^(?:comment_box|cb)$/ ) {
-	$self->add( type => "comment_box", text => cxpose($arg),
+	$self->add( type => "comment_box", text => $self->cxpose($arg),
 		    orig => $arg );
 	return;
     }

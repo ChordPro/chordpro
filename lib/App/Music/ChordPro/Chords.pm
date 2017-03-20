@@ -587,7 +587,8 @@ sub chord_info {
 		 name    => $chord,
 		 strings => [ ],
 		 base    => 0,
-		 builtin => "N",
+		 builtin => 0,
+		 system	 => "N",
 		 root	 => $1,
 		 minor	 => $2,
 		 quality => $3,
@@ -597,12 +598,13 @@ sub chord_info {
     }
 
     # Roman Number System.
-    if ( $chord =~ /^(iv|i{1,3}|vi{0,2})(.*)$/i && $chordqualities{$2} ) {
+    if ( $chord =~ /^([b#]?(?:iv|i{1,3}|vi{0,2}))(.*)$/i && $chordqualities{$2} ) {
 	return +{
 		 name    => $chord,
 		 strings => [ ],
 		 base    => 0,
-		 builtin => "R",
+		 builtin => 0,
+		 system  => "R",
 		 root	 => $1,
 		 quality => $2,
 		 origin  => CHORD_BUILTIN,
@@ -623,6 +625,7 @@ sub chord_info {
 		 strings => [ ],
 		 base    => 0,
 		 builtin => 1,
+		 system  => "",
 		 origin  => CHORD_SONG,
 		 easy    => 0,
 		 };
@@ -632,6 +635,7 @@ sub chord_info {
 	     strings => [ @info[0..$s-1] ],
 	     base    => $info[$s]-1,
 	     builtin => $info[$s+1] == CHORD_BUILTIN,
+	     system  => "",
 	     origin  => $info[$s+1],
 	     easy    => $info[$s+2] == CHORD_EASY,
     };
