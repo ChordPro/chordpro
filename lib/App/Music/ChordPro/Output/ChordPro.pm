@@ -40,6 +40,10 @@ sub generate_song {
 
     my @s;
 
+    if ( $s->{preamble} ) {
+	@s = @{ $s->{preamble} };
+    }
+ 
     push(@s, "{title: " . $s->{meta}->{title}->[0] . "}")
       if defined $s->{meta}->{title};
     if ( defined $s->{subtitle} ) {
@@ -218,6 +222,11 @@ sub generate_song {
 		$lyrics_only = $elt->{value}
 		  unless $lyrics_only > 1;
 	    }
+	    next;
+	}
+
+	if ( $elt->{type} eq "ignore" ) {
+	    push( @s, $elt->{text} );
 	    next;
 	}
     }

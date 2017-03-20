@@ -9,6 +9,8 @@
 	for the crosses/circles.
 	(PDF) Allow PDF to be written to standard output. Output file
 	will now be named after the input file if there's only one.
+	Keep track of #-comments in ChordPro input and reproduce in
+	CHordPro output.
 
 0.72	Jan 18 2017
 

@@ -75,8 +75,15 @@ sub parsefile {
 	}
 	$diag->{orig} = $_ = $line;
 
-	#s/^#({t:)/$1/;
-	next if /^#/;
+	if ( /^#/ ) {
+	    if ( exists $self->{songs}->[-1]->{title} ) {
+		$self->add( type => "ignore", text => $line );
+	    }
+	    else {
+		push( @{ $self->{songs}->[-1]->{preamble} }, $line );
+	    }
+	    next;
+	}
 
 	# For practical reasons: a prime should always be an apostroph.
 	s/'/\x{2019}/g;
@@ -101,8 +108,11 @@ sub parsefile {
 	if ( /\S/ ) {
 	    $self->add( type => "songline", $self->decompose($_) );
 	}
-	else {
+	elsif ( exists $self->{songs}->[-1]->{title} ) {
 	    $self->add( type => "empty" );
+	}
+	else {
+	    push( @{ $self->{songs}->[-1]->{preamble} }, $line );
 	}
     }
 

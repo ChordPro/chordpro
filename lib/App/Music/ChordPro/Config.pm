@@ -483,6 +483,7 @@ sub add_legacy {
     }
     foreach ( @{$song->{body}} ) {
 	next if $_->{type} eq "chord-grids"; # added by parser
+	next if $_->{type} eq "ignore"; # ignored
 	unless ( $_->{type} eq "control" ) {
 	    die("Cannot happen " . $_->{type} . " " . $_->{name});
 	}
