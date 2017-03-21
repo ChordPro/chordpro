@@ -580,12 +580,12 @@ sub generate_song {
 	    elsif ( $elt->{name} =~ /^(text|chord|grid|toc|tab)-font$/ ) {
 		my $f = $1;
 		if ( $elt->{value} =~ m;/; ) {
-		    $ps->{fonts}->{$1}->{file} = $elt->{value};
+		    $ps->{fonts}->{$f}->{file} = $elt->{value};
 		}
 		else {
-		    $ps->{fonts}->{$1}->{name} = $elt->{value};
+		    $ps->{fonts}->{$f}->{name} = $elt->{value};
 		}
-		$pr->init_font($ps->{fonts}->{$f});
+		$pr->init_font($f);
 	    }
 	    elsif ( $elt->{name} =~ /^(text|chord|grid|toc|tab)-color$/ ) {
 		$ps->{fonts}->{$1}->{color} = $elt->{value};
