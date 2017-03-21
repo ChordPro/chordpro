@@ -4,6 +4,7 @@ package App::Music::ChordPro::Chords;
 
 use strict;
 use warnings;
+use utf8;
 
 use constant CHORD_BUILTIN =>  0;
 use constant CHORD_CONFIG  =>  1;
@@ -506,6 +507,9 @@ sub fill_chords {
 	for ( @chordqualities ) {
 	    next if /^-/;
 	    $chordqualities{$_} = 1;
+	    $chordqualities{"\x{00f8}$1"} = 1 if /^h(.*)/;
+	    $chordqualities{"\x{00b0}$1"} = 1 if /^o(.*)/;
+	    $chordqualities{"\x{0394}$1"} = 1 if /^^(.*)/;
 	}
     }
 }
@@ -582,7 +586,7 @@ sub chord_info {
     fill_chords();
 
     # Nashville Number System.
-    if ( $chord =~ /^([b#]?[1-7])([-^]?)(.*)$/i && $chordqualities{$3} ) {
+    if ( $chord =~ /^([b#\x{266d}\x{266f}]?[1-7])([-^]?)(.*)$/i && $chordqualities{$3} ) {
 	return +{
 		 name    => $chord,
 		 strings => [ ],
@@ -598,7 +602,7 @@ sub chord_info {
     }
 
     # Roman Number System.
-    if ( $chord =~ /^([b#]?(?:iv|i{1,3}|vi{0,2}))(.*)$/i && $chordqualities{$2} ) {
+    if ( $chord =~ /^([b#\x{266d}\x{266f}]?(?:iv|i{1,3}|vi{0,2}))(.*)$/i && $chordqualities{$2} ) {
 	return +{
 		 name    => $chord,
 		 strings => [ ],
