@@ -1,0 +1,30 @@
+// Configuration for Nashville Notaion System.
+
+{
+    // Printing chord grids.
+    "chordgrid" : {
+        "show"     :  "none",
+    },
+
+    // Layout definitions for PDF output.
+
+    "pdf" : {
+
+	// Fonts.
+
+	"fonts" : {
+
+	    // For Nashville and Roman chord notation, it is best to use
+	    // a serif font.
+	    // FreeSerif is advised since it has additional glyphs for
+	    // flat and sharp.
+	    "chord" : {
+		"name" : "Times-Roman",
+#		"file" : "/usr/share/fonts/gnu-free/FreeSerif.ttf",
+		"size" : 10,
+	    },
+	},
+
+    },
+}
+// End of config.
