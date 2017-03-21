@@ -1,4 +1,4 @@
-// Configuration for Nashville Notaion System.
+// Configuration for Nashville Notation System.
 
 {
     // Printing chord grids.
@@ -14,13 +14,13 @@
 
 	"fonts" : {
 
-	    // For Nashville and Roman chord notation, it is best to use
-	    // a serif font.
-	    // FreeSerif is advised since it has additional glyphs for
+	    // For Nashville chord notation, it is best to use
+	    // a non-italic font.
+	    // FreeSans is advised since it has additional glyphs for
 	    // flat and sharp.
 	    "chord" : {
-		"name" : "Times-Roman",
-#		"file" : "/usr/share/fonts/gnu-free/FreeSerif.ttf",
+		"name" : "Helvetica",
+#		"file" : "/usr/share/fonts/gnu-free/FreeSans.ttf",
 		"size" : 10,
 	    },
 	},
