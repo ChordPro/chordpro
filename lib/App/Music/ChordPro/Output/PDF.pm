@@ -617,6 +617,9 @@ sub generate_song {
 	    }
 	    next;
 	}
+	if ( $elt->{type} eq "ignore" ) {
+	    next;
+	}
 
 	warn("PDF: Unhandled operator: ", $elt->{type}, " (ignored)\n");
     }
