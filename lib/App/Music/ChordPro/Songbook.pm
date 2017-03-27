@@ -17,7 +17,6 @@ sub new {
 
 my $def_context = "";
 my $in_context = $def_context;
-my $xpose;
 my $chordtype;
 my @used_chords;
 my %used_chords;
@@ -43,7 +42,6 @@ sub parsefile {
     push( @{ $self->{songs} }, App::Music::ChordPro::Song->new )
       if exists($self->{songs}->[-1]->{body});
     $self->{songs}->[-1]->{structure} = "linear";
-    $xpose = $options->{transpose};
     @used_chords = ();
     %used_chords = ();
     App::Music::ChordPro::Chords::reset_song_chords();
@@ -148,6 +146,10 @@ sub parsefile {
 		    chords => [ @used_chords ] );
     }
 
+    if ( $options->{transpose} ) {
+	$self->{songs}->[-1]->transpose( $options->{transpose} );
+    }
+
     # $self->{songs}->[-1]->structurize;
 
     return 1;
@@ -191,7 +193,7 @@ sub chord {
 	$info = App::Music::ChordPro::Chords::add_unknown_chord($c)
 	  if $::config->{chordgrid}->{auto};
     }
-    my $xc = App::Music::ChordPro::Chords::transpose( $c, $xpose );
+    my $xc = App::Music::ChordPro::Chords::transpose( $c, 0 );
     if ( $info->{system} eq "" ) {
 	if ( $xc ) {
 	    $used_chords{$c} = $xc;
@@ -202,12 +204,6 @@ sub chord {
 	push( @used_chords, $xc ) if $info;
     }
     return $parens ? "($xc)" : $xc;
-}
-
-sub cxpose {
-    my ( $self, $t ) = @_;
-    $t =~ s/\[(.+?)\]/$self->chord($1)/ge;
-    return $t;
 }
 
 sub decompose {
@@ -237,6 +233,13 @@ sub decompose {
     return ( phrases => \@phrases, chords  => \@chords );
 }
 
+sub cdecompose {
+    my ( $self, $line ) = @_;
+    my %res = $self->decompose($line);
+    return ( text => $line ) unless $res{chords};
+    return %res;
+}
+
 sub decompose_grid {
     my ($self, $line) = @_;
     $line =~ s/^\s+//;
@@ -245,7 +248,7 @@ sub decompose_grid {
     my $orig;
     if ( $line =~ /(.*\|\S*)\s([^\|]*)$/ ) {
 	$line = $1;
-	$rest = $self->cxpose( $orig = $2 );
+	$rest = $orig = $2;
     }
     my @tokens = map { $self->chord($_) } split( ' ', $line );
     return ( tokens => \@tokens,
@@ -330,19 +333,19 @@ sub directive {
     # Comments. Strictly speaking they do not belong here.
 
     if ( $dir =~ /^(?:comment|c|highlight)$/ ) {
-	$self->add( type => "comment", text => $self->cxpose($arg),
+	$self->add( type => "comment", $self->cdecompose($arg),
 		    orig => $arg );
 	return;
     }
 
     if ( $dir =~ /^(?:comment_italic|ci)$/ ) {
-	$self->add( type => "comment_italic", text => $self->cxpose($arg),
+	$self->add( type => "comment_italic", $self->cdecompose($arg),
 		    orig => $arg );
 	return;
     }
 
     if ( $dir =~ /^(?:comment_box|cb)$/ ) {
-	$self->add( type => "comment_box", text => $self->cxpose($arg),
+	$self->add( type => "comment_box", $self->cdecompose($arg),
 		    orig => $arg );
 	return;
     }
@@ -402,9 +405,6 @@ sub directive {
     # Metadata extensions (legacy). Should use meta instead.
     # Only accept the list from config.
     if ( $re_meta && $dir =~ $re_meta ) {
-	if ( $xpose && $1 eq "key" ) {
-	    $arg = App::Music::ChordPro::Chords::transpose( $arg, $xpose );
-	}
 	push( @{ $self->{songs}->[-1]->{meta}->{$1} }, $arg );
 	return;
     }
@@ -414,9 +414,6 @@ sub directive {
 	if ( $arg =~ /([^ :]+)[ :]+(.*)/ ) {
 	    my $key = lc $1;
 	    my $val = $2;
-	    if ( $xpose && $key eq "key" ) {
-		$val = App::Music::ChordPro::Chords::transpose( $val, $xpose );
-	    }
 	    if ( $re_meta && $key =~ $re_meta ) {
 		# Known.
 		push( @{ $self->{songs}->[-1]->{meta}->{$key} }, $val );
@@ -581,6 +578,15 @@ sub global_directive {
     return;
 }
 
+sub transpose {
+    my ( $self, $xpose ) = @_;
+    return unless $xpose;
+
+    foreach my $song ( @{ $self->{songs} } ) {
+	$song->transpose($xpose);
+    }
+}
+
 sub structurize {
     my ( $self ) = @_;
 
@@ -610,11 +616,57 @@ sub do_warn {
     warn(msg(@_)."\n");
 }
 
+################################################################
+
 package App::Music::ChordPro::Song;
 
 sub new {
     my ( $pkg, %init ) = @_;
     bless { structure => "linear", settings => {}, %init }, $pkg;
+}
+
+sub transpose {
+    my ( $self, $xpose ) = @_;
+    return unless $xpose;
+
+    # Transpose meta data (key).
+    if ( exists $self->{meta}->{key} ) {
+	foreach ( @{ $self->{meta}->{key} } ) {
+	    $_ = $self->xpchord( $_, $xpose );
+	}
+    }
+
+    # Transpose song lines and comments.
+    foreach my $item ( @{ $self->{body} } ) {
+	if ( $item->{type} eq "songline" ) {
+	    foreach ( @{ $item->{chords} } ) {
+		$_ = $self->xpchord( $_, $xpose );
+	    }
+	    next;
+	}
+	if ( $item->{type} =~ /^comment/ ) {
+	    next unless $item->{chords};
+	    foreach ( @{ $item->{chords} } ) {
+		$_ = $self->xpchord( $_, $xpose );
+	    }
+	    next;
+	}
+	if ( $item->{type} eq "chord-grids" ) {
+	    foreach ( @{ $item->{chords} } ) {
+		$_ = $self->xpchord( $_, $xpose );
+	    }
+	    next;
+	}
+    }
+}
+
+sub xpchord {
+    my ( $self, $c, $xpose ) = @_;
+    return $c unless length($c);
+    my $parens = $c =~ s/^\((.*)\)$/$1/;
+    my $xc = App::Music::ChordPro::Chords::transpose( $c, $xpose );
+    $xc ||= $c;
+    return $parens ? "($xc)" : $xc;
 }
 
 sub structurize {

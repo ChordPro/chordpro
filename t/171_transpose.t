@@ -15,6 +15,7 @@ my $s = App::Music::ChordPro::Songbook->new;
 
 my $data = <<EOD;
 {title: Swing Low Sweet Chariot}
+{key: D}
 I [D]looked over Jordan, and [G]what did I [D]see,
 EOD
 
@@ -26,6 +27,7 @@ isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
 my $song = {
 	    'settings' => {},
 	    'meta' => {
+		       'key' => [ 'Bb' ],
 		       'title' => [
 				   'Swing Low Sweet Chariot'
 				  ],
