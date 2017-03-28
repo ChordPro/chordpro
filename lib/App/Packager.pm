@@ -24,6 +24,7 @@ sub import {
 	*GetAppRoot       = sub { $ENV{PAR_TEMP} };
 	*GetResourcePath  = sub { $ENV{PAR_TEMP} . "/inc/res" };
 	*GetResource      = sub { $ENV{PAR_TEMP} . "/inc/res/" . $_[0] };
+	*GetUserFile      = sub { $ENV{PAR_TEMP} . "/inc/user/" . $_[0] };
 	*Packager         = sub { "PAR" };
 	*Version          = sub { "$PAR::VERSION" };
 	return;
