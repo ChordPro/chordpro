@@ -17,6 +17,7 @@ sub new {
 
 my $def_context = "";
 my $in_context = $def_context;
+my $xpose;			# local transposition
 my $chordtype;
 my @used_chords;
 my %used_chords;
@@ -42,6 +43,7 @@ sub parsefile {
     push( @{ $self->{songs} }, App::Music::ChordPro::Song->new )
       if exists($self->{songs}->[-1]->{body});
     $self->{songs}->[-1]->{structure} = "linear";
+    $xpose = 0;
     @used_chords = ();
     %used_chords = ();
     App::Music::ChordPro::Chords::reset_song_chords();
@@ -146,6 +148,7 @@ sub parsefile {
 		    chords => [ @used_chords ] );
     }
 
+    # Global transposition.
     if ( $options->{transpose} ) {
 	$self->{songs}->[-1]->transpose( $options->{transpose} );
     }
@@ -172,10 +175,12 @@ sub chord {
     my ( $self, $c ) = @_;
     return $c unless length($c);
     my $parens = $c =~ s/^\((.*)\)$/$1/;
-    if ( exists $used_chords{$c} ) {
-	return $parens ? "($used_chords{$c})" : $used_chords{$c};
-    }
 
+    #### TODO -- NEEDS REWORK
+    # Chords are lookud up and/or added using the current key.
+    # When transposing, this is wrong. It could lead to chords being added
+    # which are unknown in the current key, but have a valid definition
+    # after being transposed.
     my $info = App::Music::ChordPro::Chords::chord_info($c);
     if ( $info ) {
 	if ( defined $chordtype ) {
@@ -193,17 +198,28 @@ sub chord {
 	$info = App::Music::ChordPro::Chords::add_unknown_chord($c)
 	  if $::config->{chordgrid}->{auto};
     }
-    my $xc = App::Music::ChordPro::Chords::transpose( $c, 0 );
+    my $xc = App::Music::ChordPro::Chords::transpose( $c, $xpose );
     if ( $info->{system} eq "" ) {
 	if ( $xc ) {
-	    $used_chords{$c} = $xc;
+	    unless ( $used_chords{$xc} ) {
+		$used_chords{$xc} = $xc;
+		push( @used_chords, $xc ) if $info;
+	    }
 	}
 	else {
 	    $xc = $c;
 	}
-	push( @used_chords, $xc ) if $info;
+	unless ( $used_chords{$xc} ) {
+	    push( @used_chords, $xc ) if $info;
+	}
     }
     return $parens ? "($xc)" : $xc;
+}
+
+sub cxpose {
+    my ( $self, $t ) = @_;
+    $t =~ s/\[(.+?)\]/$self->chord($1)/ge;
+    return $t;
 }
 
 sub decompose {
@@ -248,7 +264,7 @@ sub decompose_grid {
     my $orig;
     if ( $line =~ /(.*\|\S*)\s([^\|]*)$/ ) {
 	$line = $1;
-	$rest = $orig = $2;
+	$rest = $self->cxpose( $orig = $2 );
     }
     my @tokens = map { $self->chord($_) } split( ' ', $line );
     return ( tokens => \@tokens,
@@ -405,6 +421,9 @@ sub directive {
     # Metadata extensions (legacy). Should use meta instead.
     # Only accept the list from config.
     if ( $re_meta && $dir =~ $re_meta ) {
+	if ( $xpose && $1 eq "key" ) {
+	    $arg = App::Music::ChordPro::Chords::transpose( $arg, $xpose );
+	}
 	push( @{ $self->{songs}->[-1]->{meta}->{$1} }, $arg );
 	return;
     }
@@ -414,6 +433,9 @@ sub directive {
 	if ( $arg =~ /([^ :]+)[ :]+(.*)/ ) {
 	    my $key = lc $1;
 	    my $val = $2;
+	    if ( $xpose && $key eq "key" ) {
+		$val = App::Music::ChordPro::Chords::transpose( $val, $xpose );
+	    }
 	    if ( $re_meta && $key =~ $re_meta ) {
 		# Known.
 		push( @{ $self->{songs}->[-1]->{meta}->{$key} }, $val );
@@ -476,6 +498,17 @@ sub global_directive {
     }
 
     # Private hacks.
+    if ( $d =~ /^\+transpose[: ]+([-+]?\d+)\s*$/ ) {
+	return if $legacy;
+	$xpose = $1;
+	return 1;
+    }
+    if ( $dir =~ /^\+transpose\s*$/ ) {
+	return if $legacy;
+	$xpose = 0;
+	return 1;
+    }
+
     if ( $d =~ /^([-+])([-\w.]+)$/i ) {
 	return if $legacy;
 	$self->add( type => "set",
@@ -636,7 +669,7 @@ sub transpose {
 	}
     }
 
-    # Transpose song lines and comments.
+    # Transpose body contents.
     foreach my $item ( @{ $self->{body} } ) {
 	if ( $item->{type} eq "songline" ) {
 	    foreach ( @{ $item->{chords} } ) {
@@ -662,7 +695,7 @@ sub transpose {
 
 sub xpchord {
     my ( $self, $c, $xpose ) = @_;
-    return $c unless length($c);
+    return $c unless length($c) && $xpose;
     my $parens = $c =~ s/^\((.*)\)$/$1/;
     my $xc = App::Music::ChordPro::Chords::transpose( $c, $xpose );
     $xc ||= $c;
