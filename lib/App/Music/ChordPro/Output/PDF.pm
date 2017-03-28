@@ -369,6 +369,13 @@ sub generate_song {
 	    # Substitute metadata in comments.
 	    if ( $elt->{type} =~ /^comment/ ) {
 		$elt = { %$elt };
+		# Flatten chords/phrases.
+		if ( $elt->{chords} ) {
+		    $elt->{text} = "";
+		    for ( 0..$#{ $elt->{chords} } ) {
+			$elt->{text} .= $elt->{chords}->[$_] . $elt->{phrases}->[$_];
+		    }
+		}
 		$elt->{text} = fmt_subst( $s, $elt->{text}, 1 );
 	    }
 

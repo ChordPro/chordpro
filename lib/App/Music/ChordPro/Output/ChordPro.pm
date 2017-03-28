@@ -165,6 +165,7 @@ sub generate_song {
 	    else {
 		unshift( @elts, @chorus );
 	    }
+	    next;
 	}
 
 	if ( $elt->{type} eq "tab" ) {
@@ -185,6 +186,15 @@ sub generate_song {
 		    : $type eq 'comment_italic'
 		      ? 'comment'
 			: $type;
+		# Flatten chords/phrases.
+		if ( $elt->{chords} ) {
+		    $elt->{text} = "";
+		    for ( 0..$#{ $elt->{chords} } ) {
+			$elt->{text} .= "[" . $elt->{chords}->[$_] . "]"
+			  if $elt->{chords}->[$_] ne "";
+			$elt->{text} .= $elt->{phrases}->[$_];
+		    }
+		}
 		$text = fmt_subst( $s, $elt->{text} );
 	    }
 	    push(@s, "") if $tidy;
