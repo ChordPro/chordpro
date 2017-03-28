@@ -118,6 +118,8 @@ sub parsefile {
 	    push( @{ $self->{songs}->[-1]->{preamble} }, $line );
 	}
     }
+    do_warn("Unterminated context in song: $in_context")
+      if $in_context;
 
     my $showgrids;
     if ( exists($self->{songs}->[-1]->{settings}->{showgrids} ) ) {
@@ -320,6 +322,10 @@ sub directive {
 	return;
     }
     if ( $dir =~ /^chorus$/i ) {
+	if ( $in_context ) {
+	    do_warn("{chorus} encountered while in $in_context context -- ignored\n");
+	    return;
+	}
 	$self->add( type => "rechorus" );
 	return;
     }
@@ -497,7 +503,8 @@ sub global_directive {
 	return 1;
     }
 
-    # Private hacks.
+    # Private hack: transpose at parse time.
+    # Usefulness is a bit limited since it doesn't apply to {chorus}.
     if ( $d =~ /^\+transpose[: ]+([-+]?\d+)\s*$/ ) {
 	return if $legacy;
 	$xpose = $1;
@@ -509,6 +516,7 @@ sub global_directive {
 	return 1;
     }
 
+    # More private hacks.
     if ( $d =~ /^([-+])([-\w.]+)$/i ) {
 	return if $legacy;
 	$self->add( type => "set",
