@@ -790,11 +790,12 @@ sub songline {
 	    push(@chords, $chord);
 	}
 	else {
-	    my $info = App::Music::ChordPro::Chords::chord_info($chord);
+	    my $info = App::Music::ChordPro::Chords::identify($chord);
 	    my $xt0;
 	    if ( $info && $info->{system} eq "R" ) {
-		$xt0 = $pr->text( $info->{root}, $x, $ychord, $fchord );
-		$xt0 = $pr->text( $info->{quality}, $xt0,
+		$xt0 = $pr->text( $info->{dproot}.$info->{qual},
+				  $x, $ychord, $fchord );
+		$xt0 = $pr->text( $info->{adds}, $xt0,
 				   $ychord + $fchord->{size} * 0.2,
 				   $fchord,
 				   $fchord->{size} * 0.8
@@ -802,13 +803,14 @@ sub songline {
 		$xt0 = $pr->text( " ", $xt0, $ychord, $fchord );
 	    }
 	    elsif ( $info && $info->{system} eq "N" ) {
-		$xt0 = $pr->text( $info->{root}, $x, $ychord, $fchord );
-		if ( $info->{minor} ) {
-		    my $m = $info->{minor};
-		    # $m = "\x{0394}" if $m eq "^";
-		    $xt0 = $pr->text( $m, $xt0, $ychord, $fchord );
-		}
-		$xt0 = $pr->text( $info->{quality}, $xt0,
+		$xt0 = $pr->text( $info->{dproot}.$info->{qual},
+				  $x, $ychord, $fchord );
+#		if ( $info->{minor} ) {
+#		    my $m = $info->{minor};
+#		    # $m = "\x{0394}" if $m eq "^";
+#		    $xt0 = $pr->text( $m, $xt0, $ychord, $fchord );
+#		}
+		$xt0 = $pr->text( $info->{adds}, $xt0,
 				   $ychord + $fchord->{size} * 0.2,
 				   $fchord,
 				   $fchord->{size} * 0.8,
@@ -1159,7 +1161,7 @@ sub chordgrid {
     my $font = $ps->{fonts}->{chordgrid};
     $pr->setfont($font);
     $name .= "*"
-      unless $info->{system} || $::config->{chordgrid}->{show} eq "user";
+      unless $info->{origin} == 0 || $::config->{chordgrid}->{show} eq "user";
     $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y - font_bl($font) );
     $y -= $font->{size} * $ps->{spacing}->{chords} + $dot/2 + $lw;
 

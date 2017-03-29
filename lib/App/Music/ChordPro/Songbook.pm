@@ -15,12 +15,22 @@ sub new {
     bless { songs => [ App::Music::ChordPro::Song->new ] }, $pkg;
 }
 
+# Parser context.
 my $def_context = "";
 my $in_context = $def_context;
-my $xpose;			# local transposition
+
+# Local transposition.
+my $xpose;
+
+# Chord type for this song, used to detect mixing types.
 my $chordtype;
+
+# Used chords, in order of appearance.
 my @used_chords;
-my %used_chords;
+
+# Keep track of unknown chords, to avoid dup warnings.
+my %warned_chords;
+
 my $re_meta;
 
 my $diag;			# for diagnostics
@@ -45,7 +55,7 @@ sub parsefile {
     $self->{songs}->[-1]->{structure} = "linear";
     $xpose = 0;
     @used_chords = ();
-    %used_chords = ();
+    %warned_chords = ();
     App::Music::ChordPro::Chords::reset_song_chords();
     $diag->{format} = $options->{diagformat}
       || $::config->{diagnostics}->{format};
@@ -130,23 +140,29 @@ sub parsefile {
 	$showgrids = $::config->{chordgrid}->{show};
     }
 
-    if ( $showgrids ) {
+    if ( $showgrids =~ /^(user|all)$/ && $chordtype =~ /^[RN]$/ ) {
+	$diag->{orig} = "(End of Song)";
+	do_warn("Chord grids suppressed for Nasville/Roman chords");
+	$showgrids = "none";
+    }
+
+    if ( $showgrids =~ /^(user|all)$/ ) {
+	my %h;
+	@used_chords = map { $h{$_}++ ? () : $_ } @used_chords;
+
 	if ( $showgrids eq "user" ) {
 	    @used_chords =
-	      grep { safe_chord_info($_)->{origin} == 1 } @used_chords;
+	    grep { safe_chord_info($_)->{origin} == 1 } @used_chords;
 	}
-	elsif ( $showgrids eq "all" ) {
-	}
-	else {
-	    @used_chords = ();	# "none"
-	}
+
 	if ( $::config->{chordgrid}->{sorted} ) {
 	    @used_chords =
 	      sort App::Music::ChordPro::Chords::chordcompare @used_chords;
 	}
 
-	$self->add( type => "chord-grids",
+	$self->add( type   => "chord-grids",
 		    origin => "song",
+		    show   => $showgrids,
 		    chords => [ @used_chords ] );
     }
 
@@ -167,24 +183,13 @@ sub add {
 	    @_ } );
 }
 
-sub safe_chord_info {
-    my ( $c ) = @_;
-    my $info = App::Music::ChordPro::Chords::chord_info($c);
-    return $info || { origin => 0 };
-}
-
 sub chord {
     my ( $self, $c ) = @_;
     return $c unless length($c);
     my $parens = $c =~ s/^\((.*)\)$/$1/;
 
-    #### TODO -- NEEDS REWORK
-    # Chords are lookud up and/or added using the current key.
-    # When transposing, this is wrong. It could lead to chords being added
-    # which are unknown in the current key, but have a valid definition
-    # after being transposed.
-    my $info = App::Music::ChordPro::Chords::chord_info($c);
-    if ( $info ) {
+    my $info = App::Music::ChordPro::Chords::identify($c);
+    if ( $info->{system} ) {
 	if ( defined $chordtype ) {
 	    if ( $chordtype ne $info->{system} ) {
 		$chordtype = $info->{system};
@@ -195,27 +200,32 @@ sub chord {
 	    $chordtype = $info->{system};
 	}
     }
-    else {
-	do_warn("Unknown chord: $c\n");
-	$info = App::Music::ChordPro::Chords::add_unknown_chord($c)
-	  if $::config->{chordgrid}->{auto};
+    elsif ( $info->{warning} && ! $warned_chords{$c}++ ) {
+	do_warn("Mysterious chord: $c")
+	  unless $c =~ /^n\.?c\.?$/i;
     }
-    my $xc = App::Music::ChordPro::Chords::transpose( $c, $xpose );
-    if ( $info->{system} eq "" ) {
-	if ( $xc ) {
-	    unless ( $used_chords{$xc} ) {
-		$used_chords{$xc} = $xc;
-		push( @used_chords, $xc ) if $info;
-	    }
-	}
-	else {
-	    $xc = $c;
-	}
-	unless ( $used_chords{$xc} ) {
-	    push( @used_chords, $xc ) if $info;
-	}
+    elsif ( $info->{error} && ! $warned_chords{$c}++ ) {
+	do_warn("Unrecognizable chord: $c")
+	  unless $c =~ /^n\.?c\.?$/i;
     }
-    return $parens ? "($xc)" : $xc;
+
+    # Local transpose, if requested.
+    if ( $xpose ) {
+	$_ = App::Music::ChordPro::Chords::transpose( $c, $xpose )
+	  and
+	    $c = $_;
+    }
+
+    push( @used_chords, $c );
+
+    return $parens ? "($c)" : $c;
+}
+
+sub safe_chord_info {
+    my ( $chord ) = @_;
+    my $info = App::Music::ChordPro::Chords::chord_info($chord);
+    $info->{origin} //= 1;
+    return $info;
 }
 
 sub cxpose {
