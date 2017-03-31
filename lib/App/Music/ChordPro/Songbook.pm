@@ -307,21 +307,20 @@ sub directive {
     elsif ( $dir eq "eoc" ) { $dir = "end_of_chorus"   }
     elsif ( $dir eq "eot" ) { $dir = "end_of_tab"      }
 
-    if ( $dir =~ /^start_of_(\w+)\s*(.*)$/ ) {
+    if ( $dir =~ /^start_of_(\w+)$/ ) {
 	do_warn("Already in " . ucfirst($in_context) . " context\n")
 	  if $in_context;
 	$in_context = $1;
-	my $par = $2;
-	if ( $1 eq "grid" && $par && $par =~ /^(\d+)(?:x(\d+))?$/ ) {
-	    do_warn("Invalid grid params: $par (must be non-zero)"), return
+	if ( $in_context eq "grid" && $arg && $arg =~ /^(\d+)(?:x(\d+))?$/ ) {
+	    do_warn("Invalid grid params: $arg (must be non-zero)"), return
 	      unless $1;
-	    $self->add( type => "control",
+	    $self->add( type => "set",
 			name => "gridparams",
 			value => [ $1, $2 ] );
 	}
 	else {
-	    do_warn("Garbage in start_of_$1: $par (ignored)\n")
-	      if $par;
+	    do_warn("Garbage in start_of_$1: $arg (ignored)\n")
+	      if $arg;
 	}
 	return;
     }
