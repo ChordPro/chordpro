@@ -461,12 +461,12 @@ sub chord_info {
 	last;
     }
 
-    if ( ! $info && $::config->{chordgrid} eq "auto" ) {
-	$info = { %$info, add_unknown_chord($chord) };
+    my $s = strings();
+    if ( ! $info && $::config->{chordgrid}->{auto} ) {
+	$info = [ (0) x $s, -1 ];
     }
 
     return unless $info;
-    my $s = strings();
     if ( $info->[$s] <= 0 ) {
 	return +{
 		 name    => $chord,
@@ -740,13 +740,11 @@ my %notes2canon; {
     $notes2canon{H} = $notes2canon{Bb};
 }
 
-
-# Try to identify the argument as a valid chord.
-
 my %tmap = ( C => 0, D => 2, E => 4, F => 5,
 	     G => 7, A => 9, B => 11 );
 my %nmap = ( 1 => 0, 2 => 2, 3 => 4, 4 => 5,
 	     5 => 7, 6 => 9, 7 => 11 );
+my @nmap = qw( I II III IV V VI VI );
 my %rmap = ( I => 0, II => 2, III => 4, IV => 5,
 	     V => 7, VI => 9, VII => 11 );
 my $npat = qr{ ([b#]?) ([1-7]) }x;
@@ -759,7 +757,26 @@ my $tpat = qr{ ( [CDEFGAB] )
 	       )?)
 	 }x;
 
+sub troot {
+    $notes_sharp[$_[0]];
+}
+
+sub nroot {
+    my $t = &troot;
+    $t =~ s/(.)([#b])/$2$1/;
+    $t =~ tr/CDEFGAB/1234567/;
+    $t;
+}
+
+sub rroot {
+    my $t = &nroot;
+    $t =~ s/([1234567])/$nmap[$1-1]/e;
+    $t;
+}
+
 my $ident_cache = {};
+
+# Try to identify the argument as a valid chord.
 
 sub identify {
     my ( $name ) = @_;
