@@ -28,6 +28,7 @@ sub generate_songbook {
 }
 
 my $lyrics_only = 0;
+my @gridparams;
 
 sub generate_song {
     my ($s, $options) = @_;
@@ -88,8 +89,16 @@ sub generate_song {
 
 	if ( $elt->{context} ne $ctx ) {
 	    push(@s, "{end_of_$ctx}") if $ctx;
-	    push(@s, "{start_of_$ctx}") if $ctx = $elt->{context};
-	    @chorus = ( $elt ) if $ctx && $ctx eq "chorus";
+	    $ctx = $elt->{context};
+	    if ( $ctx ) {
+		if ( @gridparams ) {
+		    push(@s, "{start_of_$ctx " . join("x", @gridparams) . "}");
+		}
+		else {
+		    push(@s, "{start_of_$ctx}");
+		}
+		@chorus = ( $elt ) if $ctx eq "chorus";
+	    }
 	}
 	elsif ( $elt->{context} eq "chorus" ) {
 	    push( @chorus, $elt );
@@ -121,6 +130,11 @@ sub generate_song {
 
 	if ( $elt->{type} eq "tabline" ) {
 	    push(@s, $elt->{text} );
+	    next;
+	}
+
+	if ( $elt->{type} eq "gridline" ) {
+	    push(@s, gridline($elt));
 	    next;
 	}
 
@@ -232,6 +246,9 @@ sub generate_song {
 		$lyrics_only = $elt->{value}
 		  unless $lyrics_only > 1;
 	    }
+	    elsif ( $elt->{name} eq "gridparams" ) {
+		@gridparams = @{ $elt->{value} };
+	    }
 	    next;
 	}
 
@@ -257,6 +274,39 @@ sub songline {
 	$line .= "[" . $elt->{chords}->[$_] . "]" . $elt->{phrases}->[$_];
     }
     $line =~ s/^\[\]//;
+    $line;
+}
+
+sub gridline {
+    my ($elt) = @_;
+
+    my $line = "";
+    for ( @{ $elt->{tokens} } ) {
+	$line .= " " if $line;
+	if ( $_->{class} eq "chord" ) {
+	    $line .= $_->{chord};
+	}
+	else {
+	    $line .= $_->{symbol};
+	}
+    }
+
+    if ( $elt->{comment} ) {
+	$line .= " " if $line;
+	my $res = "";
+	my $t = $elt->{comment};
+	if ( $t->{chords} ) {
+	    for ( 0..$#{ $t->{chords} } ) {
+		$res .= "[" . $t->{chords}->[$_] . "]" . $t->{phrases}->[$_];
+	    }
+	}
+	else {
+	    $res .= $t->{comment};
+	}
+	$res =~ s/^\[\]//;
+	$line .= $res;
+    }
+
     $line;
 }
 

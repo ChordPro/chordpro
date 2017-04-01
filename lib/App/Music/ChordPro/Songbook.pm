@@ -276,9 +276,41 @@ sub decompose_grid {
     my $orig;
     if ( $line =~ /(.*\|\S*)\s([^\|]*)$/ ) {
 	$line = $1;
-	$rest = $self->cxpose( $orig = $2 );
+	$rest = { $self->cdecompose( $orig = $2 ) };
     }
-    my @tokens = map { $self->chord($_) } split( ' ', $line );
+    my @tokens = split( ' ', $line );
+    foreach ( @tokens ) {
+	if ( $_ eq "|:" || $_ eq "{" ) {
+	    $_ = { symbol => $_, class => "bar" };
+	}
+	elsif ( $_ eq ":|" || $_ eq "}" ) {
+	    $_ = { symbol => $_, class => "bar" };
+	}
+	elsif ( $_ eq ":|:" || $_ eq "}{" ) {
+	    $_ = { symbol => $_, class => "bar" };
+	}
+	elsif ( $_ eq "|" ) {
+	    $_ = { symbol => $_, class => "bar" };
+	}
+	elsif ( $_ eq "||" ) {
+	    $_ = { symbol => $_, class => "bar" };
+	}
+	elsif ( $_ eq "|." ) {
+	    $_ = { symbol => $_, class => "bar" };
+	}
+	elsif ( $_ eq "%" ) {
+	    $_ = { symbol => $_, class => "repeat1" };
+	}
+	elsif ( $_ eq '%%' ) {
+	    $_ = { symbol => $_, class => "repeat2" };
+	}
+	elsif ( $_ eq "." ) {
+	    $_ = { symbol => $_, class => "space" };
+	}
+	else {
+	    $_ = { chord => $self->chord($_), class => "chord" };
+	}
+    }
     return ( tokens => \@tokens,
 	     $rest ? ( comment => $rest, orig => $orig ) : () );
 }
@@ -698,6 +730,18 @@ sub transpose {
 	    next unless $item->{chords};
 	    foreach ( @{ $item->{chords} } ) {
 		$_ = $self->xpchord( $_, $xpose );
+	    }
+	    next;
+	}
+	if ( $item->{type} eq "gridline" ) {
+	    foreach ( @{ $item->{tokens} } ) {
+		next unless $_->{class} eq "chord";
+		$_->{chord} = $self->xpchord( $_->{chord}, $xpose );
+	    }
+	    if ( $item->{comment} && exists $item->{comment}->{chords} ) {
+		foreach ( @{ $item->{comment}->{chords} } ) {
+		    $_ = $self->xpchord( $_, $xpose );
+		}
 	    }
 	    next;
 	}

@@ -24,6 +24,15 @@ sub generate_songbook {
     return [] unless $sb->{songs}->[0]->{body}; # no songs
 
     my $ps = $::config->{pdf};
+
+=for later
+
+    Hash::Util::unlock_hash_recurse($ps);
+    $ps->{fonts}->{symbols}->{file} = $ENV{HOME} . "/.fonts/Bravura.otf";
+    $ps->{fonts}->{symbols}->{size} = 12;
+
+=cut
+
     my $pr = PDFWriter->new($ps);
     $pr->info( Title => $sb->{songs}->[0]->{meta}->{title}->[0],
 	       Creator =>
@@ -881,8 +890,9 @@ my %smap =
   );
 
 sub is_bar {
-#    $_[0] =~ /^(\||\|\||\\|:|:\||\|\.)$/
-    $sbmap{$_[0]};
+    #    $_[0] =~ /^(\||\|\||\\|:|:\||\|\.)$/;
+    #    $sbmap{$_[0]};
+    exists( $_[0]->{class} ) && $_[0]->{class} eq "bar";
 }
 
 sub gridline {
@@ -912,7 +922,7 @@ sub gridline {
 
     $y -= font_bl($fchord);
 
-    $elt->{tokens} //= [ '' ];
+    $elt->{tokens} //= [ {} ];
 
     my $firstbar;
     my $lastbar;
@@ -927,11 +937,29 @@ sub gridline {
     my $t;
     foreach my $i ( 0 .. $#tokens ) {
 	my $token = $tokens[$i];
-	if ( $t = is_bar($token) ) {
-	    $t = $token unless $smufl;
-	    $t = "{" if $t eq "|:";
-	    $t = "}" if $t eq ":|";
-	    $t = "}{" if $t eq ":|:";
+	if ( exists $token->{chord} ) {
+	    $pr->text( $token->{chord}, $x, $y, $fchord )
+	      unless $token eq ".";
+	    $x += $cellwidth;
+	}
+	elsif ( $token->{class} eq "space" ) {
+	    $x += $cellwidth;
+	}
+	elsif ( $token->{class} eq "bar" ) {
+	    $t = $token->{symbol};
+	    if ( $smufl ) {
+		$t = $sbmap{$t};
+	    }
+	    elsif ( 0 ) {
+		$t = "{" if $t eq "|:";
+		$t = "}" if $t eq ":|";
+		$t = "}{" if $t eq ":|:";
+	    }
+	    else {
+		$t = "|:" if $t eq "{";
+		$t = ":|" if $t eq "}";
+		$t = ":|:" if $t eq "}{";
+	    }
 	    $pr->setfont($schord);
 	    my @t = ( $t );
 	    push( @t, $smufl{barlineSingle} ) if $t eq $smufl{repeat2Bars};
@@ -942,7 +970,7 @@ sub gridline {
 		if ( defined $firstbar ) {
 		    my $x = $x;
 		    $x -= $w/2 if $i > $firstbar;
-		    $x -= $w/2 if $i == $lastbar;
+		    $x -= $w/2 if $i == $lastbar && $t ne "|.";
 		    $pr->text( $t, $x, $y );
 		}
 		else {
@@ -952,8 +980,9 @@ sub gridline {
 	    $x += $barwidth;
 	    $prevbar = $i;
 	}
-	elsif ( ( $t = $smap{$token} || "" ) eq $smufl{repeat1Bar} ) {
-	    $t = $token unless $smufl;
+	elsif ( $token->{class} eq "repeat1" ) {
+	    $t = $token->{symbol};
+	    $t = $smap{$t} if $smufl;
 	    my $k = $prevbar + 1;
 	    while ( $k <= $#tokens
 		    && !is_bar($tokens[$k]) ) {
@@ -964,28 +993,33 @@ sub gridline {
 	    $y += $schord->{size} / 2 if $t eq $smufl{repeat1Bar};
 	    my $w = $pr->strwidth($t);
 	    $pr->text( $t,
-		       $x + ($k - $prevbar - 1)*$cellwidth/2 - $w/2,
+		       $x + ($k - $prevbar - 1)*$cellwidth/2 - $w/2 - $barwidth/2,
 		       $y );
 	    $x += $cellwidth;
 	}
-	elsif ( ( $t = $smap{$token} || "" ) eq $smufl{repeat2Bars} ) {
+	elsif ( $token->{class} eq "repeat2" ) {
 	    # For repeat2Bars, change the next bar line to pseudo-bar.
 	    my $k = $prevbar + 1;
 	    while ( $k <= $#tokens
 		    && !is_bar($tokens[$k]) ) {
 		$k++;
 	    }
-	    $tokens[$k] = " %";
-	    $x += $cellwidth;
-	}
-	else {
-	    $pr->text( $token, $x, $y, $fchord )
-	      unless $token eq ".";
+	    $tokens[$k] = { symbol => " %", class => "bar" };
 	    $x += $cellwidth;
 	}
     }
     if ( $elt->{comment} ) {
-	$pr->text( " " . $elt->{comment}, $x, $y, $fonts->{comment} );
+	my $t = $elt->{comment};
+	if ( $t->{chords} ) {
+	    $t->{text} = "";
+	    for ( 0..$#{ $t->{chords} } ) {
+		$t->{text} .= $t->{chords}->[$_] . $t->{phrases}->[$_];
+	    }
+	}
+	else {
+	    $t->{text} = $t->{comment};
+	}
+	$pr->text( " " . $t->{text}, $x, $y, $fonts->{comment} );
     }
 }
 
