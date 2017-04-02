@@ -4,7 +4,7 @@ use 5.010;
 
 package App::Music::ChordPro;
 
-our $VERSION = "0.72";
+our $VERSION = "0.73";
 
 =head1 NAME
 

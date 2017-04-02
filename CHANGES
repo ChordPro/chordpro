@@ -1,4 +1,4 @@
-0.73	xx xx 2017
+0.74 xx xx 2017
 
 	Experimental support for Nashville Numbering System and Roman
 	Numbered Chords.
@@ -11,6 +11,11 @@
 	will now be named after the input file if there's only one.
 	Keep track of #-comments in ChordPro input and reproduce in
 	CHordPro output.
+
+0.73	Apr 02 2017
+
+	Fix problems with dot-less @INC in newer perls.
+	(WxChordPro) Update to 0.710.3.
 
 0.72	Jan 18 2017
 
