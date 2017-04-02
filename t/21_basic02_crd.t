@@ -9,4 +9,4 @@ if ( -d "t" ) {
 
 @::params = qw( 21 basic02 crd );
 
-require "00_basic.pl";
+require "./00_basic.pl";
