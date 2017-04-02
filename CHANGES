@@ -1,5 +1,6 @@
 0.73	xx xx 2017
 
+	Fix problems with dot-less @INC in newer perls.
 	(WxChordPro) Update to 0.710.3.
 
 0.72	Jan 18 2017
