@@ -4,7 +4,7 @@ use 5.010;
 
 package App::Music::ChordPro;
 
-our $VERSION = "0.73";
+our $VERSION = "0.74";
 
 =head1 NAME
 
@@ -870,9 +870,11 @@ There are two ways to specify fonts: with a font filename, and a
 built-in font name.
 
 A font filename must be either and absolute filename, or a relative
-filename which is interpreted relative to the configuration setting
-C<fontdir>. In any case, the filename should point to a valid TrueType
-(C<.ttf>) or OpenType (C<.otf>) font.
+filename which is interpreted relative to the i<font path>, which
+consists of configuration setting C<fontdir>, the C<fonts> resource
+dir, and the contents of environment variable C<FONTDIR>. In any case,
+the filename should point to a valid TrueType (C<.ttf>) or OpenType
+(C<.otf>) font.
 
 If it is not a filename, it must be the name one of the built-in fonts.
 

@@ -10,7 +10,10 @@
 	(PDF) Allow PDF to be written to standard output. Output file
 	will now be named after the input file if there's only one.
 	Keep track of #-comments in ChordPro input and reproduce in
-	CHordPro output.
+	ChordPro output.
+	(PDF) Fonts are now looked up in a font path consisting of the
+	fontdir config setting, the application's fonts resource
+	directory, and the value of environment variable FONTDIR.
 
 0.73	Apr 02 2017
 

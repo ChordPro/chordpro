@@ -1346,8 +1346,8 @@ sub configurator {
     }
 
     # Add font dirs.
-    my $fontdir = $pdf->{fontdir} || ::findlib("fonts") || $ENV{FONTDIR};
-    if ( $fontdir ) {
+    for my $fontdir ( $pdf->{fontdir}, ::findlib("fonts"), $ENV{FONTDIR} ) {
+	next unless $fontdir;
 	if ( -d $fontdir ) {
 	    PDF::API2::addFontDirs($fontdir);
 	}
@@ -1355,9 +1355,6 @@ sub configurator {
 	    warn("PDF: Ignoring fontdir $fontdir [$!]\n");
 	    undef $fontdir;
 	}
-    }
-    else {
-	undef $fontdir;
     }
 
     # Map papersize name to [ width, height ].
