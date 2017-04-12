@@ -870,7 +870,7 @@ There are two ways to specify fonts: with a font filename, and a
 built-in font name.
 
 A font filename must be either and absolute filename, or a relative
-filename which is interpreted relative to the i<font path>, which
+filename which is interpreted relative to the I<font path>, which
 consists of configuration setting C<fontdir>, the C<fonts> resource
 dir, and the contents of environment variable C<FONTDIR>. In any case,
 the filename should point to a valid TrueType (C<.ttf>) or OpenType
