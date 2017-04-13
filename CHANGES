@@ -2,7 +2,6 @@
 
 	Experimental support for Nashville Numbering System and Roman
 	Numbered Chords.
-	(WxChordPro) Update to 0.710.3.
 	(Config) Add more meta data: lyricist, arranger, copyright,
 	year, duration.
 	(PDF) Improve grids drawing: add config for line thickness, add space
@@ -14,6 +13,8 @@
 	(PDF) Fonts are now looked up in a font path consisting of the
 	fontdir config setting, the application's fonts resource
 	directory, and the value of environment variable FONTDIR.
+	(Packager) Use App::Packager from CPAN.
+	(WxChordPro) Update to 0.74.
 
 0.73	Apr 02 2017
 

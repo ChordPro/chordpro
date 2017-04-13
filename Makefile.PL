@@ -21,6 +21,7 @@ WriteMakefile
 		    'script/ppchordpro.PL' => [ 'script/chordpro', 'script/wxchordpro' ]
 		   },
  PREREQ_PM      => {
+		    'App::Packager' => 1.420,
 		    'PDF::API2'   => 2.020,
 		    'Font::TTF'   => 1.04,
 		   },

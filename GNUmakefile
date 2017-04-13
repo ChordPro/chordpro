@@ -32,7 +32,7 @@ Makefile : Makefile.PL
 
 ################ Extensions ################
 
-PERLRUN := perl
+PERL := perl
 PROJECT := ChordPro
 TMP_DST := ${HOME}/tmp/${PROJECT}
 

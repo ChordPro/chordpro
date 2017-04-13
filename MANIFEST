@@ -17,7 +17,6 @@ lib/App/Music/ChordPro/Wx/PreferencesDialog.pm
 lib/App/Music/ChordPro/Wx/PreferencesDialog_wxg.pm
 lib/App/Music/ChordPro/res/config/chordpro.json
 lib/App/Music/ChordPro/res/config/ukulele.json
-lib/App/Packager.pm
 pp/README
 pp/Makefile.lnx
 pp/Makefile.msw

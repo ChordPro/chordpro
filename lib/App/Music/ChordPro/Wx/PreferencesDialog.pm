@@ -49,15 +49,63 @@ sub OnConfigFileDialog {
     $fd->Destroy;
 }
 
+#               C      D      E  F      G      A        B
+my @xpmap = qw( 0 1  1 2 3  3 4  5 6  6 7 8  8 9 10 10 11 );
+my @sfmap = qw( 0 7 -5 2 9 -3 4 -1 6 -6 1 8 -4 3 10 -2  5 );
+
 sub OnAccept {
     my ( $self, $event ) = @_;
+
     $self->GetParent->{prefs_configfile} = $self->{t_configfiledialog}->GetValue;
     $self->GetParent->{prefs_pdfviewer} = $self->{t_pdfviewer}->GetValue;
+
+    my $xp = $xpmap[$self->{ch_xpose_to}->GetSelection]
+      - $xpmap[$self->{ch_xpose_from}->GetSelection];
+    $xp += 12 if $xp < 0;
+    $xp = $xp - 12 if $self->{rb_xpose_flat }->GetValue;
+    $self->GetParent->{prefs_xpose} = $xp;
+
     $event->Skip;
 }
 
 sub OnCancel {
     my ( $self, $event ) = @_;
+    $event->Skip;
+}
+
+sub OnXposeFrom {
+    my ( $self, $event ) = @_;
+    $event->Skip;
+}
+
+sub OnXposeTo {
+    my ( $self, $event ) = @_;
+    my $sel = $self->{ch_xpose_to}->GetSelection;
+    my $sf = $sfmap[$sel];
+    if ( $sf < 0 ) {
+	$self->{rb_xpose_flat }->SetValue(1);
+	$self->{rb_xpose_sharp}->SetValue(0);
+    }
+    elsif ( $sf > 0 ) {
+	$self->{rb_xpose_flat }->SetValue(0);
+	$self->{rb_xpose_sharp}->SetValue(1);
+    }
+    else {
+	$self->{rb_xpose_flat }->SetValue(0);
+	$self->{rb_xpose_sharp}->SetValue(0);
+    }
+    $event->Skip;
+}
+
+sub OnXposeSharp {
+    my ( $self, $event ) = @_;
+    $self->{rb_xpose_flat }->SetValue(0);
+    $event->Skip;
+}
+
+sub onXposeFlat {
+    my ( $self, $event ) = @_;
+    $self->{rb_xpose_sharp}->SetValue(0);
     $event->Skip;
 }
 
