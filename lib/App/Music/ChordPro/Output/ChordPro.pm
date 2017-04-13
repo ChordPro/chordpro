@@ -28,6 +28,7 @@ sub generate_songbook {
 }
 
 my $lyrics_only = 0;
+my @gridparams;
 
 sub generate_song {
     my ($s, $options) = @_;
@@ -40,6 +41,10 @@ sub generate_song {
 
     my @s;
 
+    if ( $s->{preamble} ) {
+	@s = @{ $s->{preamble} };
+    }
+ 
     push(@s, "{title: " . $s->{meta}->{title}->[0] . "}")
       if defined $s->{meta}->{title};
     if ( defined $s->{subtitle} ) {
@@ -84,8 +89,16 @@ sub generate_song {
 
 	if ( $elt->{context} ne $ctx ) {
 	    push(@s, "{end_of_$ctx}") if $ctx;
-	    push(@s, "{start_of_$ctx}") if $ctx = $elt->{context};
-	    @chorus = ( $elt ) if $ctx && $ctx eq "chorus";
+	    $ctx = $elt->{context};
+	    if ( $ctx ) {
+		if ( @gridparams ) {
+		    push(@s, "{start_of_$ctx " . join("x", @gridparams) . "}");
+		}
+		else {
+		    push(@s, "{start_of_$ctx}");
+		}
+		@chorus = ( $elt ) if $ctx eq "chorus";
+	    }
 	}
 	elsif ( $elt->{context} eq "chorus" ) {
 	    push( @chorus, $elt );
@@ -117,6 +130,11 @@ sub generate_song {
 
 	if ( $elt->{type} eq "tabline" ) {
 	    push(@s, $elt->{text} );
+	    next;
+	}
+
+	if ( $elt->{type} eq "gridline" ) {
+	    push(@s, gridline($elt));
 	    next;
 	}
 
@@ -161,6 +179,7 @@ sub generate_song {
 	    else {
 		unshift( @elts, @chorus );
 	    }
+	    next;
 	}
 
 	if ( $elt->{type} eq "tab" ) {
@@ -181,6 +200,15 @@ sub generate_song {
 		    : $type eq 'comment_italic'
 		      ? 'comment'
 			: $type;
+		# Flatten chords/phrases.
+		if ( $elt->{chords} ) {
+		    $elt->{text} = "";
+		    for ( 0..$#{ $elt->{chords} } ) {
+			$elt->{text} .= "[" . $elt->{chords}->[$_] . "]"
+			  if $elt->{chords}->[$_] ne "";
+			$elt->{text} .= $elt->{phrases}->[$_];
+		    }
+		}
 		$text = fmt_subst( $s, $elt->{text} );
 	    }
 	    push(@s, "") if $tidy;
@@ -218,6 +246,14 @@ sub generate_song {
 		$lyrics_only = $elt->{value}
 		  unless $lyrics_only > 1;
 	    }
+	    elsif ( $elt->{name} eq "gridparams" ) {
+		@gridparams = @{ $elt->{value} };
+	    }
+	    next;
+	}
+
+	if ( $elt->{type} eq "ignore" ) {
+	    push( @s, $elt->{text} );
 	    next;
 	}
     }
@@ -238,6 +274,39 @@ sub songline {
 	$line .= "[" . $elt->{chords}->[$_] . "]" . $elt->{phrases}->[$_];
     }
     $line =~ s/^\[\]//;
+    $line;
+}
+
+sub gridline {
+    my ($elt) = @_;
+
+    my $line = "";
+    for ( @{ $elt->{tokens} } ) {
+	$line .= " " if $line;
+	if ( $_->{class} eq "chord" ) {
+	    $line .= $_->{chord};
+	}
+	else {
+	    $line .= $_->{symbol};
+	}
+    }
+
+    if ( $elt->{comment} ) {
+	$line .= " " if $line;
+	my $res = "";
+	my $t = $elt->{comment};
+	if ( $t->{chords} ) {
+	    for ( 0..$#{ $t->{chords} } ) {
+		$res .= "[" . $t->{chords}->[$_] . "]" . $t->{phrases}->[$_];
+	    }
+	}
+	else {
+	    $res .= $t->{comment};
+	}
+	$res =~ s/^\[\]//;
+	$line .= $res;
+    }
+
     $line;
 }
 

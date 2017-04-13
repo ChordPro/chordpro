@@ -47,8 +47,9 @@ This is the current built-in configuration file, showing all settings.
       // The separator is used to concatenate multiple values.
       "metadata" : {
         "keys" : [ "title", "subtitle",
-                   "artist", "composer", "album",
-                   "key", "time", "tempo", "capo" ],
+                   "artist", "composer", "lyricist", "arranger",
+                   "album", "copyright", "year",
+                   "key", "time", "tempo", "capo", "duration" ],
         "strict" : 1,
         "separator" : "; ",
       },
@@ -162,12 +163,14 @@ This is the current built-in configuration file, showing all settings.
 	// be 4 or larger to accomodate most chords.
   	// The horizontal distance between grids is "hspace" cells.
   	// The vertical distance is "vspace" cells.
+	// "linewidth" is the thickness of the lines as a fraction of "width".
   	"chordgrid" : {
 	    "width"    :  6,
   	    "height"   :  6,
   	    "hspace"   :  3.95,
   	    "vspace"   :  3,
   	    "vcells"   :  4,
+	    "linewidth" : 0.1,
   	},
   
   	// Even/odd pages. A value of -1 denotes odd/even pages.
@@ -480,6 +483,7 @@ sub add_legacy {
     }
     foreach ( @{$song->{body}} ) {
 	next if $_->{type} eq "chord-grids"; # added by parser
+	next if $_->{type} eq "ignore"; # ignored
 	unless ( $_->{type} eq "control" ) {
 	    die("Cannot happen " . $_->{type} . " " . $_->{name});
 	}

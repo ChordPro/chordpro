@@ -116,6 +116,8 @@ sub openfile {
 		      ")");
 	$self->{sz_source}->GetStaticBox->SetLabel($1);
     }
+
+    $self->{prefs_xpose} = 0;
 }
 
 sub newfile {
@@ -126,6 +128,7 @@ sub newfile {
 
 EOD
     Wx::LogStatus("New file");
+    $self->{prefs_xpose} = 0;
 }
 
 my ( $preview_cho, $preview_pdf );
@@ -154,6 +157,7 @@ sub preview {
     $options->{output} = $preview_pdf;
     $options->{generate} = "PDF";
     $options->{backend} = "App::Music::ChordPro::Output::PDF";
+    $options->{transpose} = $self->{prefs_xpose} if $self->{prefs_xpose};
 
     # Setup configuration.
     use App::Music::ChordPro::Config;

@@ -49,6 +49,8 @@ package App::Music::ChordPro;
 
 sub ::run {
     my $options = app_setup( "ChordPro", $VERSION );
+    binmode(STDERR, ':utf8');
+    binmode(STDOUT, ':utf8');
     $options->{trace}   = 1 if $options->{debug};
     $options->{verbose} = 1 if $options->{trace};
     main($options);
@@ -59,7 +61,8 @@ sub main {
 
     # Establish backend.
     my $of = $options->{output};
-    if ( $of ) {
+
+    if ( defined($of) && $of ne "" ) {
         if ( $of =~ /\.pdf$/i ) {
             $options->{generate} ||= "PDF";
         }
@@ -83,6 +86,23 @@ sub main {
             $options->{generate} ||= "Debug";
         }
     }
+    elsif ( -t STDOUT ) {
+	# No output, and stdout is terminal.
+	# Derive output name from input name.
+	if ( @ARGV > 1 ) {
+	    # No default if more than one input document.
+	    die("Please use \"--output\" to specify the output file name\n");
+	}
+	my $f = $ARGV[0];
+	$f =~ s/\.\w+$/.pdf/;
+	$f .= ".pdf" if $f eq $ARGV[0];
+	$options->{output} = $f;
+	warn("Writing output to $f\n") if $options->{verbose};
+    }
+    else {
+	# Write output to stdout.
+	$options->{output} = "-";
+    }
 
     $options->{generate} ||= "PDF";
     my $pkg = "App::Music::ChordPro::Output::".$options->{generate};
@@ -98,6 +118,11 @@ sub main {
     use App::Music::ChordPro::Songbook;
     my $s = App::Music::ChordPro::Songbook->new;
     $s->parsefile( $_, $options ) foreach @::ARGV;
+
+    # Transpose is already handled by parsefile.
+    if ( 0 && $options->{transpose} ) {
+	$s->transpose( $options->{transpose} );
+    }
 
     if ( $options->{'dump-chords'} ) {
 	my $d = App::Music::ChordPro::Song->new;
@@ -670,8 +695,13 @@ sub app_setup {
     for my $config ( qw(config) ) {
         for ( $clo->{$config} ) {
             if ( defined($_) ) {
-                foreach ( @$_ ) {
-                    die("$_: $!\n") unless -r $_;
+                foreach my $c ( @$_ ) {
+		    # Check for resource names.
+		    if ( ! -r $c && $c !~ m;[/.]; ) {
+			my $t = ::findlib( "config/$c.json" );
+			$c = $t if $t;
+		    }
+                    die("$c: $!\n") unless -r $c;
                 }
                 next;
             }
@@ -810,15 +840,41 @@ EndOfUsage
     exit $exit if defined $exit;
 }
 
+################ Resources ################
+
+sub ::findlib {
+    my ( $file ) = @_;
+
+    # Packaged.
+    if ( $App::Packager::PACKAGED ) {
+	my $found = App::Packager::GetUserFile($file);
+	return $found if -e $found;
+	$found = App::Packager::GetResource($file);
+	return $found if -e $found;
+    }
+
+    ( my $me = __PACKAGE__ ) =~ s;::;/;g;
+    foreach ( @INC ) {
+	return "$_/$me/user/$file" if -e "$_/$me/user/$file";
+	return "$_/$me/res/$file"  if -e "$_/$me/res/$file";
+	return "$_/$me/$file"      if -e "$_/$me/$file";
+    }
+    undef;
+}
+
+use lib ( grep { defined } ::findlib("CPAN") );
+
 =head1 FONTS
 
 There are two ways to specify fonts: with a font filename, and a
 built-in font name.
 
 A font filename must be either and absolute filename, or a relative
-filename which is interpreted relative to the configuration setting
-C<fontdir>. In any case, the filename should point to a valid TrueType
-(C<.ttf>) or OpenType (C<.otf>) font.
+filename which is interpreted relative to the I<font path>, which
+consists of configuration setting C<fontdir>, the C<fonts> resource
+dir, and the contents of environment variable C<FONTDIR>. In any case,
+the filename should point to a valid TrueType (C<.ttf>) or OpenType
+(C<.otf>) font.
 
 If it is not a filename, it must be the name one of the built-in fonts.
 
@@ -871,6 +927,8 @@ supports most of the features of Chordii, and a lot more:
 
 * User defined chords and tuning, not limited to 6 strings.
 
+* Support for Nashville Numbering and Roman Numbering.
+
 * Support for external TrueType and OpenType fonts
 
 * Font kerning (with external TrueType fonts)
@@ -881,11 +939,23 @@ supports most of the features of Chordii, and a lot more:
 
 (* = under development)
 
+=head1 AUTHOR
+
+Johan Vromans C<< <jv at CPAN dot org > >>
+
+=head1 SUPPORT
+
+ChordPro (the program) development is hosted on GitHub, repository
+L<https://github.com/sciurius/chordpro>.
+
+Please report any bugs or feature requests to the GitHub issue tracker,
+L<https://github.com/sciurius/chordpro/issues>.
+
 =head1 LICENSE
 
-Copyright (C) 2010,2016 Johan Vromans,
+Copyright (C) 2010,2017 Johan Vromans,
 
-This module is free software. You can redistribute it and/or
+This program is free software. You can redistribute it and/or
 modify it under the terms of the Artistic License 2.0.
 
 This program is distributed in the hope that it will be useful,

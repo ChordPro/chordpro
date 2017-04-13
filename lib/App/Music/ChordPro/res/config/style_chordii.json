@@ -1,0 +1,194 @@
+// Chordii compatible configuration for ChordPro.
+//
+
+{
+    // General settings, to be changed by legacy configs and
+    // command line.
+    "settings" : {
+      // Suppress empty chord lines.
+      // Overrides the -a (--single-space) command line options.
+      "suppress-empty-chords" : 0,
+    },
+
+    // Printing chord grids.
+    // "auto": automatically add unknown chords as empty grids.
+    // "show": prints the chords used in the song.
+    // "hard": only prints the hard chords. This includes user
+    // defined chords.
+    // "sorted": order the chords by key.
+    "chordgrid" : {
+	"auto"     :  1,
+	"show"     :  "all",
+	"sorted"   :  0,
+    },
+
+    // Layout definitions for PDF output.
+
+    "pdf" : {
+
+  	// Papersize, 'a4' or [ 595, 842 ] etc.
+  	"papersize" : "letter",
+
+	// Space between columns, in pt.
+	"columnspace"  :  20,
+
+	// Page margins.
+	// Note that top/bottom exclude the head/footspace.
+	"margintop"    :  88,
+	"marginbottom" :  40,
+	"marginleft"   :  72,
+	"marginright"  :  40,
+	"headspace"    :  57,
+	"footspace"    :  20,
+
+	// Special: head on first page only, add the headspace to
+	// the other pages so they become larger.
+	"head-first-only" : 1,
+
+	// Spacings.
+	// Baseline distances as a factor of the font size.
+	"spacing" : {
+	    "title"  : 1.5,
+	    "lyrics" : 1.0,
+	    "chords" : 1.0,
+	    "grid"   : 1.2,
+	    "tab"    : 1.0,
+	    "toc"    : 1.4,
+	    "empty"  : 1.7,
+	},
+	// Note: By setting the font size and spacing for empty lines to
+	// smaller values, you get a fine(r)-grained control over the
+	// spacing between the various parts of the song.
+
+	// Style of chorus.
+	"chorus" : {
+	    "indent"     :  0,
+	    // Chorus side bar.
+	    // Suppress by setting offset and/or width to zero.
+	    "bar" : {
+		"offset" :  8,
+		"width"  :  1,
+		"color"  : "black",
+	    },
+	},
+
+	// Alternative songlines with chords in a side column.
+	// Value is the column position.
+	// "chordscolumn" : 400,
+	"chordscolumn" :  0,
+
+	// A {titles: left} may conflict with customized formats.
+	// Set to non-zero to ignore the directive.
+	"titles-directive-ignore" : 0,
+
+  	// Chord grids.
+	// A chord grid consists of a number of cells.
+	// Cell dimensions are specified by "width" and "height".
+	// The horizontal number of cells depends on the number of strings.
+	// The vertical number of cells is "vcells", which should
+	// be 4 or larger to accomodate most chords.
+	// The horizontal distance between grids is "hspace" cells.
+	// The vertical distance is "vspace" cells.
+	// "linewidth" is the thickness of the lines as a fraction of "width".
+	"chordgrid" : {
+	    "width"    :  6,
+	    "height"   :  6,
+	    "hspace"   :  3.95,
+	    "vspace"   :  3,
+	    "vcells"   :  4,
+	    "linewidth" : 0.15,
+	},
+
+	// Even/odd pages. A value of -1 denotes odd/even pages.
+	"even-odd-pages" : 1,
+
+	// Formats.
+	"formats" : {
+	    // Titles/Footers.
+
+	    // Titles/footers have 3 parts, which are printed left,
+	    // centered and right.
+	    // For even/odd printing, the order is reversed.
+
+	    // By default, a page has:
+	    "default" : {
+	        // No title/subtitle.
+	    	"title"     : null,
+	    	"subtitle"  : null,
+		// Footer is title -- page number.
+	    	"footer"    : [ "%t", "", "%p" ],
+		// Title for ToC.
+		"toc-title" : "Table of Contents",
+	    },
+	    // The first page of a song has:
+	    "title" : {
+	        // Title and subtitle.
+	    	"title"     : [ "", "%t", "" ],
+	    	"subtitle"  : [ "", "%s", "" ],
+		// Footer with page number.
+	    	"footer"    : [ "", "", "%p" ],
+	    },
+	    // The very first output page is slightly different:
+	    "first" : {
+	    	// It has title and subtitle, like normal 'first' pages.
+		// But no footer.
+	    	"footer"    : null,
+	    },
+	},
+
+	// Fonts.
+	// Fonts can be specified by name (for the corefonts)
+	// or a filename (for TrueType/OpenType fonts).
+	// Fonts for chords and comments can have a background
+	// colour associated.
+	// Colours are "#RRGGBB" or predefined names like "black", "white",
+	// and lots of others.
+
+	"fonts" : {
+	    "title" : {
+		"name" : "Times-Roman",
+		"size" : 17
+	    },
+	    "text" : {
+		"name" : "Times-Roman",
+		"size" : 12
+	    },
+	    "chord" : {
+		"name" : "Helvetica-Oblique",
+		"size" : 9
+	    },
+	    "comment" : {
+		"name" : "Times-Roman",
+		"size" : 12
+	    },
+	    "tab" : {
+		"name" : "Courier",
+		"size" : 10
+	    },
+	    "chordgrid" : {
+		"name" : "Times-Roman",
+		"size" : 10
+	    },
+	    "toc" : {
+		"name" : "Times-Roman",
+		"size" : 12
+	    },
+	},
+
+	// Fonts that can be specified, but need not.
+	// subtitle       --> text
+	// comment        --> text
+	// comment_italic --> chord
+	// comment_box    --> chord
+	// toc            --> text
+	// grid           --> comment
+	// footer         --> subtitle @ 60%
+	// empty          --> text
+	// chordgrid	  --> comment
+	// chordgrid_capo --> text (but at a small size)
+
+	// This will show the page layout if non-zero.
+	"showlayout" : 0,
+    },
+}
+// End of config.

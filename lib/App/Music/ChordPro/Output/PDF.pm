@@ -24,7 +24,16 @@ sub generate_songbook {
     return [] unless $sb->{songs}->[0]->{body}; # no songs
 
     my $ps = $::config->{pdf};
-    my $pr = PDFWriter->new( $ps, $options->{output} || "__new__.pdf" );
+
+=for later
+
+    Hash::Util::unlock_hash_recurse($ps);
+    $ps->{fonts}->{symbols}->{file} = $ENV{HOME} . "/.fonts/Bravura.otf";
+    $ps->{fonts}->{symbols}->{size} = 12;
+
+=cut
+
+    my $pr = PDFWriter->new($ps);
     $pr->info( Title => $sb->{songs}->[0]->{meta}->{title}->[0],
 	       Creator =>
 	       $regtest
@@ -63,9 +72,10 @@ sub generate_songbook {
 	  };
 	push( @book, [ $song->{title}, $page ] );
 	$page += generate_song( $song,
-				{ pr => $pr, $options ? %$options : () } );         }
+				{ pr => $pr, $options ? %$options : () } );
+    }
 
-    $pr->finish;
+    $pr->finish( $options->{output} || "__new__.pdf" );
 
     if ( $options->{toc} ) {
 
@@ -368,6 +378,13 @@ sub generate_song {
 	    # Substitute metadata in comments.
 	    if ( $elt->{type} =~ /^comment/ ) {
 		$elt = { %$elt };
+		# Flatten chords/phrases.
+		if ( $elt->{chords} ) {
+		    $elt->{text} = "";
+		    for ( 0..$#{ $elt->{chords} } ) {
+			$elt->{text} .= $elt->{chords}->[$_] . $elt->{phrases}->[$_];
+		    }
+		}
 		$elt->{text} = fmt_subst( $s, $elt->{text}, 1 );
 	    }
 
@@ -579,12 +596,12 @@ sub generate_song {
 	    elsif ( $elt->{name} =~ /^(text|chord|grid|toc|tab)-font$/ ) {
 		my $f = $1;
 		if ( $elt->{value} =~ m;/; ) {
-		    $ps->{fonts}->{$1}->{file} = $elt->{value};
+		    $ps->{fonts}->{$f}->{file} = $elt->{value};
 		}
 		else {
-		    $ps->{fonts}->{$1}->{name} = $elt->{value};
+		    $ps->{fonts}->{$f}->{name} = $elt->{value};
 		}
-		$pr->init_font($ps->{fonts}->{$f});
+		$pr->init_font($f);
 	    }
 	    elsif ( $elt->{name} =~ /^(text|chord|grid|toc|tab)-color$/ ) {
 		$ps->{fonts}->{$1}->{color} = $elt->{value};
@@ -614,6 +631,9 @@ sub generate_song {
 				    - (1+$bars)*$grid_barwidth
 				  ) / $cells;
 	    }
+	    next;
+	}
+	if ( $elt->{type} eq "ignore" ) {
 	    next;
 	}
 
@@ -779,7 +799,36 @@ sub songline {
 	    push(@chords, $chord);
 	}
 	else {
-	    my $xt0 = $pr->text( $chord." ", $x, $ychord, $fchord );
+	    my $info = App::Music::ChordPro::Chords::identify($chord);
+	    my $xt0;
+	    if ( $info && $info->{system} eq "R" ) {
+		$xt0 = $pr->text( $info->{dproot}.$info->{qual},
+				  $x, $ychord, $fchord );
+		$xt0 = $pr->text( $info->{adds}, $xt0,
+				   $ychord + $fchord->{size} * 0.2,
+				   $fchord,
+				   $fchord->{size} * 0.8
+				 );
+		$xt0 = $pr->text( " ", $xt0, $ychord, $fchord );
+	    }
+	    elsif ( $info && $info->{system} eq "N" ) {
+		$xt0 = $pr->text( $info->{dproot}.$info->{qual},
+				  $x, $ychord, $fchord );
+#		if ( $info->{minor} ) {
+#		    my $m = $info->{minor};
+#		    # $m = "\x{0394}" if $m eq "^";
+#		    $xt0 = $pr->text( $m, $xt0, $ychord, $fchord );
+#		}
+		$xt0 = $pr->text( $info->{adds}, $xt0,
+				   $ychord + $fchord->{size} * 0.2,
+				   $fchord,
+				   $fchord->{size} * 0.8,
+				 );
+		$xt0 = $pr->text( " ", $xt0, $ychord, $fchord );
+	    }
+	    else {
+		$xt0 = $pr->text( $chord." ", $x, $ychord, $fchord );
+	    }
 	    my $xt1 = $pr->text( $phrase, $x, $ytext, $ftext );
 	    $x = $xt0 > $xt1 ? $xt0 : $xt1;
 	}
@@ -841,8 +890,9 @@ my %smap =
   );
 
 sub is_bar {
-#    $_[0] =~ /^(\||\|\||\\|:|:\||\|\.)$/
-    $sbmap{$_[0]};
+    #    $_[0] =~ /^(\||\|\||\\|:|:\||\|\.)$/;
+    #    $sbmap{$_[0]};
+    exists( $_[0]->{class} ) && $_[0]->{class} eq "bar";
 }
 
 sub gridline {
@@ -872,7 +922,7 @@ sub gridline {
 
     $y -= font_bl($fchord);
 
-    $elt->{tokens} //= [ '' ];
+    $elt->{tokens} //= [ {} ];
 
     my $firstbar;
     my $lastbar;
@@ -887,11 +937,29 @@ sub gridline {
     my $t;
     foreach my $i ( 0 .. $#tokens ) {
 	my $token = $tokens[$i];
-	if ( $t = is_bar($token) ) {
-	    $t = $token unless $smufl;
-	    $t = "{" if $t eq "|:";
-	    $t = "}" if $t eq ":|";
-	    $t = "}{" if $t eq ":|:";
+	if ( exists $token->{chord} ) {
+	    $pr->text( $token->{chord}, $x, $y, $fchord )
+	      unless $token eq ".";
+	    $x += $cellwidth;
+	}
+	elsif ( $token->{class} eq "space" ) {
+	    $x += $cellwidth;
+	}
+	elsif ( $token->{class} eq "bar" ) {
+	    $t = $token->{symbol};
+	    if ( $smufl ) {
+		$t = $sbmap{$t};
+	    }
+	    elsif ( 0 ) {
+		$t = "{" if $t eq "|:";
+		$t = "}" if $t eq ":|";
+		$t = "}{" if $t eq ":|:";
+	    }
+	    else {
+		$t = "|:" if $t eq "{";
+		$t = ":|" if $t eq "}";
+		$t = ":|:" if $t eq "}{";
+	    }
 	    $pr->setfont($schord);
 	    my @t = ( $t );
 	    push( @t, $smufl{barlineSingle} ) if $t eq $smufl{repeat2Bars};
@@ -902,7 +970,7 @@ sub gridline {
 		if ( defined $firstbar ) {
 		    my $x = $x;
 		    $x -= $w/2 if $i > $firstbar;
-		    $x -= $w/2 if $i == $lastbar;
+		    $x -= $w/2 if $i == $lastbar && $t ne "|.";
 		    $pr->text( $t, $x, $y );
 		}
 		else {
@@ -912,8 +980,9 @@ sub gridline {
 	    $x += $barwidth;
 	    $prevbar = $i;
 	}
-	elsif ( ( $t = $smap{$token} || "" ) eq $smufl{repeat1Bar} ) {
-	    $t = $token unless $smufl;
+	elsif ( $token->{class} eq "repeat1" ) {
+	    $t = $token->{symbol};
+	    $t = $smap{$t} if $smufl;
 	    my $k = $prevbar + 1;
 	    while ( $k <= $#tokens
 		    && !is_bar($tokens[$k]) ) {
@@ -924,28 +993,33 @@ sub gridline {
 	    $y += $schord->{size} / 2 if $t eq $smufl{repeat1Bar};
 	    my $w = $pr->strwidth($t);
 	    $pr->text( $t,
-		       $x + ($k - $prevbar - 1)*$cellwidth/2 - $w/2,
+		       $x + ($k - $prevbar - 1)*$cellwidth/2 - $w/2 - $barwidth/2,
 		       $y );
 	    $x += $cellwidth;
 	}
-	elsif ( ( $t = $smap{$token} || "" ) eq $smufl{repeat2Bars} ) {
+	elsif ( $token->{class} eq "repeat2" ) {
 	    # For repeat2Bars, change the next bar line to pseudo-bar.
 	    my $k = $prevbar + 1;
 	    while ( $k <= $#tokens
 		    && !is_bar($tokens[$k]) ) {
 		$k++;
 	    }
-	    $tokens[$k] = " %";
-	    $x += $cellwidth;
-	}
-	else {
-	    $pr->text( $token, $x, $y, $fchord )
-	      unless $token eq ".";
+	    $tokens[$k] = { symbol => " %", class => "bar" };
 	    $x += $cellwidth;
 	}
     }
     if ( $elt->{comment} ) {
-	$pr->text( " " . $elt->{comment}, $x, $y, $fonts->{comment} );
+	my $t = $elt->{comment};
+	if ( $t->{chords} ) {
+	    $t->{text} = "";
+	    for ( 0..$#{ $t->{chords} } ) {
+		$t->{text} .= $t->{chords}->[$_] . $t->{phrases}->[$_];
+	    }
+	}
+	else {
+	    $t->{text} = $t->{comment};
+	}
+	$pr->text( " " . $t->{text}, $x, $y, $fonts->{comment} );
     }
 }
 
@@ -1104,7 +1178,7 @@ sub chordgrid {
     my $gw = $ps->{chordgrid}->{width};
     my $gh = $ps->{chordgrid}->{height};
     my $dot = 0.80 * $gw;
-    my $lw  = 0.10 * $gw;
+    my $lw  = ($ps->{chordgrid}->{linewidth} || 0.10) * $gw;
 
     my $info = App::Music::ChordPro::Chords::chord_info($name);
     unless ( $info ) {
@@ -1121,9 +1195,9 @@ sub chordgrid {
     my $font = $ps->{fonts}->{chordgrid};
     $pr->setfont($font);
     $name .= "*"
-      unless $info->{builtin} || $::config->{chordgrid}->{show} eq "user";
+      unless $info->{origin} == 0 || $::config->{chordgrid}->{show} eq "user";
     $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y - font_bl($font) );
-    $y -= $font->{size} * $ps->{spacing}->{chords} + $dot/2;
+    $y -= $font->{size} * $ps->{spacing}->{chords} + $dot/2 + $lw;
 
     if ( $info->{base} > 0 ) {
 	my $i = @Roman[$info->{base}] . "  ";
@@ -1144,10 +1218,10 @@ sub chordgrid {
 			 "black", "black");
 	}
 	elsif ( $fret < 0 ) {
-	    $pr->cross( $x+$gw/2, $y+$gh/3, $dot/3, $lw, "black");
+	    $pr->cross( $x+$gw/2, $y+$lw+$gh/3, $dot/3, $lw, "black");
 	}
 	elsif ( $info->{base} >= 0 ) {
-	    $pr->circle( $x+$gw/2, $y+$gh/3, $dot/3, $lw,
+	    $pr->circle( $x+$gw/2, $y+$lw+$gh/3, $dot/3, $lw,
 			 undef, "black");
 	}
     }
@@ -1272,8 +1346,8 @@ sub configurator {
     }
 
     # Add font dirs.
-    my $fontdir = $pdf->{fontdir} || $ENV{FONTDIR};
-    if ( $fontdir ) {
+    for my $fontdir ( $pdf->{fontdir}, ::findlib("fonts"), $ENV{FONTDIR} ) {
+	next unless $fontdir;
 	if ( -d $fontdir ) {
 	    PDF::API2::addFontDirs($fontdir);
 	}
@@ -1281,9 +1355,6 @@ sub configurator {
 	    warn("PDF: Ignoring fontdir $fontdir [$!]\n");
 	    undef $fontdir;
 	}
-    }
-    else {
-	undef $fontdir;
     }
 
     # Map papersize name to [ width, height ].
@@ -1386,9 +1457,9 @@ my $faketime = 1465041600;
 my %fontcache;			# speeds up 2 seconds per song
 
 sub new {
-    my ( $pkg, $ps, @file ) = @_;
+    my ( $pkg, $ps ) = @_;
     my $self = bless { ps => $ps }, $pkg;
-    $self->{pdf} = PDF::API2->new( -file => $file[0] );
+    $self->{pdf} = PDF::API2->new;
     $self->{pdf}->{forcecompress} = 0 if $regtest;
     $self->{pdf}->mediabox( $ps->{papersize}->[0],
 			    $ps->{papersize}->[1] );
@@ -1415,7 +1486,6 @@ sub text {
 
     $self->setfont($font, $size);
 
-    $text = encode( "cp1250", $text ) unless $font->{file};
     if ( $font->{color} ) {
 	$self->{pdftext}->strokecolor( $font->{color} );
 	$self->{pdftext}->fillcolor( $font->{color} );
@@ -1453,6 +1523,7 @@ sub hline {
     my $gfx = $self->{pdfpage}->gfx;
     $gfx->save;
     $gfx->strokecolor($color ||= "black");
+    $gfx->linecap(2);
     $gfx->linewidth($lw||1);
     $gfx->move( $x, $y );
     $gfx->hline( $x + $w );
@@ -1465,6 +1536,7 @@ sub vline {
     my $gfx = $self->{pdfpage}->gfx;
     $gfx->save;
     $gfx->strokecolor($color ||= "black");
+    $gfx->linecap(2);
     $gfx->linewidth($lw||1);
     $gfx->move( $x, $y );
     $gfx->vline( $y - $h );
@@ -1478,6 +1550,7 @@ sub rectxy {
     $gfx->save;
     $gfx->strokecolor($strokecolor) if $strokecolor;
     $gfx->fillcolor($fillcolor) if $fillcolor;
+    $gfx->linecap(2);
     $gfx->linewidth($lw||1);
     $gfx->rectxy( $x, $y, $x1, $y1 );
     $gfx->close;
@@ -1557,8 +1630,16 @@ sub add {
 }
 
 sub finish {
-    my $self = shift;
-    $self->{pdf}->save;
+    my ( $self, $file ) = @_;
+
+    if ( $file && $file ne "-" ) {
+	$self->{pdf}->saveas($file);
+    }
+    else {
+	binmode(STDOUT);
+	print STDOUT ( $self->{pdf}->stringify );
+	close(STDOUT);
+    }
 }
 
 sub init_fonts {
@@ -1601,7 +1682,7 @@ sub init_font {
     else {
 	$font->{font} =
 	  $fontcache{"__core__".$font->{name}} ||=
-	  $self->{pdf}->corefont( $font->{name}, -dokern => 1 );
+	    $self->{pdf}->corefont( $font->{name}, -dokern => 1 );
     }
 
     unless ( $font->{font} ) {

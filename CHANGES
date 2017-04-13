@@ -1,4 +1,22 @@
-0.74	Apr 12 2017
+0.75	Apr 13 2017
+
+	Experimental support for Nashville Numbering System and Roman
+	Numbered Chords.
+	(Config) Add more meta data: lyricist, arranger, copyright,
+	year, duration.
+	(PDF) Improve grids drawing: add config for line thickness, add space
+	for the crosses/circles.
+	(PDF) Allow PDF to be written to standard output. Output file
+	will now be named after the input file if there's only one.
+	Keep track of #-comments in ChordPro input and reproduce in
+	ChordPro output.
+	(PDF) Fonts are now looked up in a font path consisting of the
+	fontdir config setting, the application's fonts resource
+	directory, and the value of environment variable FONTDIR.
+	(Packager) Use App::Packager from CPAN.
+	(WxChordPro) Update to 0.74.
+
+0.74	Apr 02 2017
 
 	Fix problems with dot-less @INC in newer perls.
 

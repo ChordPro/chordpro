@@ -14,6 +14,7 @@ my $s = App::Music::ChordPro::Songbook->new;
 # Chord grids. Added automatically.
 my $data = <<EOD;
 {title: Swing Low Sweet Chariot}
+[G]Swing [D]low, sweet [G]chari[D]ot,
 EOD
 
 eval { $s->parsefile(\$data) } or diag("$@");
@@ -32,15 +33,32 @@ my $song = {
 		      },
 	    'body' => [
 		       {
-			'chords' => [],
+			'chords' => [
+				     'G',
+				     'D',
+				     'G',
+				     'D'
+				    ],
+			'type' => 'songline',
+			'phrases' => [
+				      'Swing ',
+				      'low, sweet ',
+				      'chari',
+				      'ot,'
+				     ],
+			'context' => ''
+		       },
+		       {
+			'chords' => [ 'G', 'D' ],
 			'context' => '',
 			'origin' => 'song',
+			'show' => 'all',
 			'type' => 'chord-grids'
 		       }
 		      ],
 	   };
 
-is_deeply( { %{ $s->{songs}->[0] } }, $song,
+is_deeply( { %{ $s->{songs}->[-1] } }, $song,
 	   "Grids are shown by default" );
 
 $s = App::Music::ChordPro::Songbook->new;
@@ -104,6 +122,7 @@ $song = {
 			'chords' => [],
 			'context' => '',
 			'origin' => 'song',
+			'show' => 'all',
 			'type' => 'chord-grids'
 		       }
 		      ],

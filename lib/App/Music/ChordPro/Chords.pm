@@ -4,17 +4,21 @@ package App::Music::ChordPro::Chords;
 
 use strict;
 use warnings;
+use utf8;
+
+################ Section: Built-In Chords ################
 
 use constant CHORD_BUILTIN =>  0;
 use constant CHORD_CONFIG  =>  1;
 use constant CHORD_SONG    =>  1;
+use constant CHORD_EXT     =>  2;
 use constant CHORD_EASY    =>  0;
 use constant CHORD_HARD    =>  1;
 use constant N             => -1;
 use constant TUNING	   => [ "E2", "A2", "D3", "G3", "B3", "E4" ];
 use constant STRINGS	   => scalar(@{TUNING()});
 
-my @raw_chords =
+my @builtin_chords =
 (
  "C"	       => [  N, 3, 2, 0, 1, 0,	 1, CHORD_BUILTIN, CHORD_EASY ],
  "C+"	       => [  N, N, 2, 1, 1, 0,	 1, CHORD_BUILTIN, CHORD_HARD ],
@@ -402,133 +406,86 @@ my @raw_chords =
 
 );
 
-# Current tuning.
-my @tuning = @{ TUNING() };
-
 # Chords info, as a hash by chord name.
 my %chords;
 # Chord names, in the order of the list above.
 my @chordnames;
-# Chord order ordinals.
-my %chordorderkey;
-
-# Transfer the info from the raw list into %chords and @chordnames.
-my $chords_filled;
-sub fill_chords {
-
-    unless ( $chords_filled++ ) {
-	my @r = @raw_chords;
-	while ( @r ) {
-	    my $name = shift( @r );
-	    my $info = shift( @r );
-	    push( @chordnames, $name );
-	    $chords{$name} = $info;
-	}
-    }
-
-    unless ( %chordorderkey ) {
-	my $ord = 0;
-	for ( split( ' ', "C C# Db D D# Eb E F F# Gb G G# Ab A A# Bb B" ) ) {
-	    $chordorderkey{$_} = $ord;
-	    $ord += 2;
-	}
+# Chord order ordinals, for sorting.
+my %chordorderkey; {
+    my $ord = 0;
+    for ( split( ' ', "C C# Db D D# Eb E F F# Gb G G# Ab A A# Bb B" ) ) {
+	$chordorderkey{$_} = $ord;
+	$ord += 2;
     }
 }
 
 # Additional chords, defined by the configs.
 my %config_chords;
 
-# Add a config defined chord.
-sub add_config_chord {
-    my ( $name, $base, $frets, $easy ) = @_;
-    unless ( @$frets == strings() ) {
-	return scalar(@$frets) . " strings";
-    }
-    unless ( $base > 0 && $base < 12 ) {
-	return "base-fret $base out of range";
-    }
-    $easy //= CHORD_HARD;
-    $config_chords{$name} = [ @$frets, $base, CHORD_CONFIG, $easy ];
-    push( @chordnames, $name );
-    return;
-}
-
 # Additional chords, defined by the user.
 my %song_chords;
 
-# Reset user defined songs. Should be done for each new song.
-sub reset_song_chords {
-    %song_chords = ();
-}
+# Current tuning.
+my @tuning = @{ TUNING() };
 
-# Add a user defined chord.
-sub add_song_chord {
-    my ( $name, $base, $frets ) = @_;
-    unless ( @$frets == strings() ) {
-	return scalar(@$frets) . " strings";
+# Transfer the info from the raw list into %chords and @chordnames.
+my $chords_filled;
+sub fill_tables {
+
+    return if $chords_filled++;
+    my @r = @builtin_chords;
+    while ( @r ) {
+	my $name = shift( @r );
+	my $info = shift( @r );
+	push( @chordnames, $name );
+	$chords{$name} = $info;
     }
-    unless ( $base > 0 && $base < 12 ) {
-	return "base-fret $base out of range";
-    }
-    $song_chords{$name} = [ @$frets, $base, CHORD_SONG, CHORD_HARD ];
-    return;
 }
 
-# Add an unknown chord.
-sub add_unknown_chord {
-    my ( $name ) = @_;
-    my $base = 0;
-    my $frets = [ (0) x strings() ];
-    $song_chords{$name} = [ @$frets, $base, CHORD_SONG, CHORD_HARD ];
-    return +{
-	     name    => $name,
-	     strings => [ ],
-	     base    => 0,
-	     builtin => 1,
-	     origin  => CHORD_SONG,
-	     easy    => 0,
-	    };
-}
-
-# Return the number of strings supported. Currently fixed.
-sub strings { scalar(@tuning) }
-
-# Returns a list of all chord names in the order of @raw_chords.
+# Returns a list of all chord names in the order of @builtin_chords.
 sub chordcompare($$);
 sub chordnames {
-    fill_chords();
+    fill_tables();
     [ sort chordcompare @chordnames ];
 }
 
 # Returns info about an individual chord.
 sub chord_info {
     my ( $chord ) = @_;
-    my @info;
-    fill_chords();
+    my $info;
+    fill_tables();
+
     for ( \%song_chords, \%config_chords, \%chords ) {
 	next unless exists($_->{$chord});
-	@info = @{ $_->{$chord} };
+	$info = $_->{$chord};
 	last;
     }
-    return unless @info;
+
     my $s = strings();
-    if ( $info[$s] <= 0 ) {
+    if ( ! $info && $::config->{chordgrid}->{auto} ) {
+	$info = [ (0) x $s, -1 ];
+    }
+
+    return unless $info;
+    if ( $info->[$s] <= 0 ) {
 	return +{
 		 name    => $chord,
 		 strings => [ ],
 		 base    => 0,
 		 builtin => 1,
+		 system  => "",
 		 origin  => CHORD_SONG,
 		 easy    => 0,
 		 };
     }
     return +{
 	     name    => $chord,
-	     strings => [ @info[0..$s-1] ],
-	     base    => $info[$s]-1,
-	     builtin => $info[$s+1] == CHORD_BUILTIN,
-	     origin  => $info[$s+1],
-	     easy    => $info[$s+2] == CHORD_EASY,
+	     strings => [ @{$info}[0..$s-1] ],
+	     base    => $info->[$s]-1,
+	     builtin => $info->[$s+1] == CHORD_BUILTIN,
+	     system  => "",
+	     origin  => $info->[$s+1],
+	     easy    => $info->[$s+2] == CHORD_EASY,
     };
 }
 
@@ -549,61 +506,12 @@ sub chordcompare($$) {
     }
     $a0 <=> $b0 || $arest cmp $brest;
 }
-
-################ Tuning ################
-
-sub set_tuning {
-    my ( $t ) = @_;
-    return "Invalid tuning (not array)" unless ref($t) eq "ARRAY";
-    @tuning = @$t;		# need more checks
-    fill_chords();
-    @chordnames = ();
-    %chords = ();
-    %config_chords = ();
-    return;
-
-}
-
-sub reset_tuning {
-    $chords_filled = 0;
-    fill_chords();
-}
-
-################ Transposition ################
-
-my $notesS  = [ split( ' ', "A A# B C C# D D# E F F# G G#" ) ];
-my $notesF  = [ split( ' ', "A Bb B C Db D Eb E F Gb G Ab" ) ];
-my %notes = ( A => 1, H => 2, B => 3, C => 4, D => 6, E => 8, F => 9, G => 11 );
-
-sub transpose {
-    my ( $c, $xpose ) = @_;
-    return $c unless $xpose;
-    return $c unless $c =~ m/
-				^ (
-				    [CF](?:is|\#)? |
-				    [DG](?:is|\#|es|b)? |
-				    A(?:is|\#|s|b)? |
-				    E(?:s|b)? |
-				    B(?:es|b)? |
-				    H
-				  )
-				  (.*)
-			    /x;
-    my ( $r, $rest ) = ( $1, $2 );
-    my $mod = 0;
-    $mod-- if $r =~ s/(e?s|b)$//;
-    $mod++ if $r =~ s/(is|\#)$//;
-    warn("WRONG NOTE: '$c' '$r' '$rest'") unless $r = $notes{$r};
-    $r = ($r - 1 + $mod + $xpose) % 12;
-    return ( $xpose > 0 ? $notesS : $notesF )->[$r] . $rest;
-}
-
 # Dump a textual list of chord definitions.
 # Should be handled by the ChordPro backend?
 
 sub list_chords {
     my ( $chords, $origin, $hdr ) = @_;
-    fill_chords();
+    fill_tables();
     my @s;
     if ( $hdr ) {
 	my $t = "-" x (((@tuning - 1) * 4) + 1);
@@ -640,11 +548,422 @@ sub list_chords {
 }
 
 sub dump_chords {
-    fill_chords();
+    fill_tables();
     print( join( "\n", @{ list_chords(\@chordnames, "__CLI__", 1) } ), "\n" );
 }
 
+################ Section Tuning ################
+
+# Return the number of strings supported.
+sub strings { scalar(@tuning) }
+
+sub set_tuning {
+    my ( $t ) = @_;
+    return "Invalid tuning (not array)" unless ref($t) eq "ARRAY";
+    @tuning = @$t;		# need more checks
+    fill_tables();
+    @chordnames = ();
+    %chords = ();
+    %config_chords = ();
+    return;
+
+}
+
+sub reset_tuning {
+    $chords_filled = 0;
+    fill_tables();
+}
+
+################ Section Config Chords ################
+
+# Add a config defined chord.
+sub add_config_chord {
+    my ( $name, $base, $frets, $easy ) = @_;
+    unless ( @$frets == strings() ) {
+	return scalar(@$frets) . " strings";
+    }
+    unless ( $base > 0 && $base < 12 ) {
+	return "base-fret $base out of range";
+    }
+    $easy //= CHORD_HARD;
+    $config_chords{$name} = [ @$frets, $base, CHORD_CONFIG, $easy ];
+    push( @chordnames, $name );
+    return;
+}
+
+################ Section User (Song) Chords ################
+
+# Reset user defined songs. Should be done for each new song.
+sub reset_song_chords {
+    %song_chords = ();
+}
+
+# Add a user defined chord.
+sub add_song_chord {
+    my ( $name, $base, $frets ) = @_;
+    unless ( @$frets == strings() ) {
+	return scalar(@$frets) . " strings";
+    }
+    unless ( $base > 0 && $base < 12 ) {
+	return "base-fret $base out of range";
+    }
+    $song_chords{$name} = [ @$frets, $base, CHORD_SONG, CHORD_HARD ];
+    return;
+}
+
+# Add an unknown chord.
+sub add_unknown_chord {
+    my ( $name ) = @_;
+    my $base = 0;
+    my $frets = [ (0) x strings() ];
+    $song_chords{$name} = [ @$frets, $base, CHORD_SONG, CHORD_HARD ];
+    return +{
+	     name    => $name,
+	     strings => [ ],
+	     base    => 0,
+	     builtin => 1,
+	     origin  => CHORD_SONG,
+	     easy    => 0,
+	    };
+}
+
+################ Section Chords Parser ################
+
+my $additions_maj =
+  {
+   map { $_ => $_ }
+   "",
+   "11",
+   "13",
+   "13#11",
+   "13#9",
+   "13b9",
+   "13sus",
+   "2",
+   "5",
+   "6",
+   "69",
+   "7",
+   "7#11",
+   "7#5",
+   "7#9",
+   "7#9#11",
+   "7#9#5",
+   "7#9b5",
+   "7alt",
+   "7b13",
+   "7b13sus",
+   "7b5",
+   "7b9",
+   "7b9#11",
+   "7b9#5",
+   "7b9#9",
+   "7b9b13",
+   "7b9b5",
+   "7b9sus",
+   "7sus",
+   "7susadd3",
+   "9",
+   "9#11",
+   "9#5",
+   "9b5",
+   "9sus",
+   ( map { ( "maj$_", "^$_" ) }
+     "",
+     "13",
+     "7",
+     "7#11",
+     "7#5",
+     "9",
+     "9#11",
+   ),
+   "add9",
+   "alt",
+   "h",
+   "h7",
+   "h9",
+   ( map { "sus$_" } "", "2", "4", "9" ),
+  };
+
+my $additions_min =
+  {
+   map { $_ => $_ }
+   "",
+   "#5",
+   "11",
+   "6",
+   "69",
+   "7b5",
+   ( map { ( "$_", "maj$_", "^$_" ) }
+     "7",
+     "9",
+   ),
+   "b6",
+  };
+
+my $additions_aug =
+  {
+   map { $_ => $_ }
+   "",
+  };
+
+my $additions_dim =
+  {
+   map { $_ => $_ }
+   "",
+   "7",
+  };
+
+my %additions_map =
+  ( ""  => $additions_maj,
+    "-" => $additions_min,
+    "+" => $additions_aug,
+    "0" => $additions_dim,
+  );
+
+# Notes, sharp series ( C, C#, D, D#, ... )
+my @notes_sharp = split( ' ', "C C# D D# E F F# G G# A A# B" );
+# Notes, flat series ( C, Dd, D, Eb, ... )
+my @notes_flat  = split( ' ', "C Db D Eb E F Gb G Ab A Bb B" );
+# Notes -> canonical ( C = 0, D = 2, ... )
+my %notes2canon; {
+    my $ord = 0;
+    for ( @notes_sharp ) {
+	$notes2canon{$_} = $ord;
+	$ord++;
+    }
+    $ord = 0;
+    for ( @notes_flat ) {
+	$notes2canon{$_} = $ord;
+	$ord++;
+    }
+    $notes2canon{H} = $notes2canon{Bb};
+}
+
+my %tmap = ( C => 0, D => 2, E => 4, F => 5,
+	     G => 7, A => 9, B => 11 );
+my %nmap = ( 1 => 0, 2 => 2, 3 => 4, 4 => 5,
+	     5 => 7, 6 => 9, 7 => 11 );
+my @nmap = qw( I II III IV V VI VI );
+my %rmap = ( I => 0, II => 2, III => 4, IV => 5,
+	     V => 7, VI => 9, VII => 11 );
+my $npat = qr{ ([b#]?) ([1-7]) }x;
+my $rpat = qr{ ([b#]?) (IV|I{1,3}|VI{1,2}|V) }ix;
+my $tpat = qr{ ( [CDEFGAB] )
+	       ((?: [b#]
+		    | (?<= [DGB]  ) es
+		    | (?<= [EA]   ) s
+		    | (?<= [CDFG] ) is
+	       )?)
+	 }x;
+
+sub troot {
+    $notes_sharp[$_[0]];
+}
+
+sub nroot {
+    my $t = &troot;
+    $t =~ s/(.)([#b])/$2$1/;
+    $t =~ tr/CDEFGAB/1234567/;
+    $t;
+}
+
+sub rroot {
+    my $t = &nroot;
+    $t =~ s/([1234567])/$nmap[$1-1]/e;
+    $t;
+}
+
+my $ident_cache = {};
+
+# Try to identify the argument as a valid chord.
+
+sub identify {
+    my ( $name ) = @_;
+    return $ident_cache->{$name} if defined $ident_cache->{$name};
+
+    my $rem = $name;
+    my %info = ( name => $name, system => "" );
+
+    # First some basic simplifications.
+    $rem =~ tr/\x{266d}\x{266f}\x{0394}\x{f8}\x{b0}/b#^h0/;
+
+    # Split off the bass part, if present.
+    my $bass = "";
+    my $rootless;
+    if ( $rem =~ m;^(.*)/(.*); ) {
+	$bass = $2;
+	$rem = $1;
+	if ( $rem eq "" ) {
+	    # Rootless. Fake a root by setting it to the bass.
+	    # We'll remove the root info later.
+	    $rootless++;
+	    $rem = $bass;
+	}
+    }
+
+    # Root processing.
+    # Try: Traditional chord naming.
+    if ( $rem =~ /^$tpat(.*)/ ) {
+
+	$info{system} = "T";
+
+	$info{dproot} = $1;
+	my $root = $tmap{uc($1)};
+	if ( $2 ) {
+	    $root++ if $2 eq "#" || $2 eq "is";
+	    $root-- if $2 eq "b" || $2 eq "es" || $1 eq "s";
+	}
+	$info{root} = $root % 12;
+	$rem = $3;
+
+	# Same for the bass.
+	if ( $bass =~ m/^$tpat$/ ) {
+	    $root = $tmap{uc($1)};
+	    if ( $2 ) {
+		$root++ if $2 eq "#" || $2 eq "is";
+		$root-- if $2 eq "b" || $2 eq "es" || $1 eq "s";
+	    }
+	    $info{bass} = $root % 12;
+	    $bass = "";
+	}
+    }
+
+    # Try: Nashville Number System.
+    elsif ( $rem =~ /^$npat(.*)/ ) {
+
+	$info{system} = "N";
+
+	$info{dproot} = $2;
+	my $root = $nmap{$2};
+	$root++ if $1 eq "#";
+	$root-- if $1 eq "b";
+	$info{root} = $root % 12;
+	$rem = $3;
+
+	# Same for the bass.
+	if ( $bass =~ /^$npat$/ ) {
+	    $root = $nmap{$2};
+	    $root++ if $1 eq "#";
+	    $root-- if $1 eq "b";
+	    $info{bass} = $root % 12;
+	    $bass = "";
+	}
+    }
+
+    # Try: Roman Number System.
+    elsif ( $rem =~ /^$rpat(.*)/ ) {
+
+	$info{system} = "R";
+
+	$info{dproot} = $2;
+	my $root = $rmap{uc($2)};
+	$root++ if $1 eq "#";
+	$root-- if $1 eq "b";
+	$info{root} = $root % 12;
+	$info{qual} = $2 eq lc($2) ? "-" : ""; # implied by case
+	$rem = $3;
+
+	if ( $bass =~ m/^$rpat$/ ) {
+	    $root = $rmap{uc($2)};
+	    $root++ if $1 eq "#";
+	    $root-- if $1 eq "b";
+	    $info{bass} = $root % 12;
+	    $bass = "";
+	}
+    }
+
+    # Fallback to known chords. Maybe it is user defined.
+    else {
+	fill_tables();
+	for ( \%song_chords, \%config_chords ) {
+	    next unless exists($_->{$name});
+	    $info{system} = "U";
+	    return $ident_cache->{$name} = \%info;
+	}
+
+	# Final fallback to built-in chords.
+	for ( \%chords ) {
+	    next unless exists($_->{$name});
+	    $info{system} = "B";
+	    return $ident_cache->{$name} = \%info;
+	}
+
+	# Unknown/unparsable.
+	$info{error} = $rem;
+	$info{error} .= "/$bass" if $bass ne "";
+	return $ident_cache->{$name} = \%info;
+    }
+
+    $info{nonroot} = $rem;
+
+    # Chord quality, based on triads.
+    $info{qual} //= "";
+    if ( $rem =~ /^ ( aug | dim | min | m(?!aj) | [-+0] ) (.*) /x ) {
+	$info{qual} = "+" if $1 eq "aug" || $1 eq "+";
+	$info{qual} = "0" if $1 eq "dim" || $1 eq "0";
+	$info{qual} = "-" if $1 eq "min" || $1 eq "-" || $1 eq "m";
+	$rem = $2;
+    }
+
+    if ( $rem ne "") {
+	$info{adds} = $rem;
+	$rem = "";
+	unless ( exists $additions_map{$info{qual}}{$rem} ) {
+	    $info{warning} = "";
+	    $info{warning} = $rem if $rem ne "";
+	    $info{warning} .= "/$bass" if $bass ne "";
+	}
+    }
+
+    # Did we process everything?
+    if ( $rem ne "" || $bass ne "" ) {
+	# Signal error.
+	$info{error} = "";
+	$info{error} = $rem if $rem ne "";
+	$info{error} .= "/$bass" if $bass ne "";
+    }
+    # Remove fake root, if any.
+    elsif ( $rootless ) {
+	delete @info{ qw(root qual adds) };
+    }
+
+    return $ident_cache->{$name} = \%info;
+}
+
+################ Section Transposition ################
+
+sub transpose {
+    my ( $c, $xpose ) = @_;
+    return $c unless $xpose;
+    fill_tables();
+    return $c unless $c =~ m/
+				^ (
+				    [CF](?:is|\#)? |
+				    [DG](?:is|\#|es|b)? |
+				    A(?:is|\#|s|b)? |
+				    E(?:s|b)? |
+				    B(?:es|b)? |
+				    H
+				  )
+				  (.*)
+			    /x;
+    my ( $r, $rest ) = ( $1, $2 );
+    my $mod = 0;
+    $mod-- if $r =~ s/(e?s|b)$//;
+    $mod++ if $r =~ s/(is|\#)$//;
+    warn("WRONG NOTE: '$c' '$r' '$rest'") unless defined $notes2canon{$r};
+    $r = ($notes2canon{$r} + $mod + $xpose) % 12;
+    return ( $xpose > 0 ? \@notes_sharp : \@notes_flat )->[$r] . $rest;
+}
+
+
 unless ( caller ) {
     $App::Music::ChordPro::VERSION = "";
-    dump_chords();
+    #    dump_chords();
+    require DDumper;
+    DDumper(identify($_)) foreach @ARGV;
+#    DDumper( $additions_maj );
 }
+
+1;

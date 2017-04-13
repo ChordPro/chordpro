@@ -1,0 +1,30 @@
+// Configuration for Nashville Notation System.
+
+{
+    // Printing chord grids.
+    "chordgrid" : {
+        "show"     :  "none",
+    },
+
+    // Layout definitions for PDF output.
+
+    "pdf" : {
+
+	// Fonts.
+
+	"fonts" : {
+
+	    // For Nashville chord notation, it is best to use
+	    // a non-italic font.
+	    // FreeSans is advised since it has additional glyphs for
+	    // flat and sharp.
+	    "chord" : {
+		"name" : "Helvetica",
+#		"file" : "/usr/share/fonts/gnu-free/FreeSans.ttf",
+		"size" : 10,
+	    },
+	},
+
+    },
+}
+// End of config.
