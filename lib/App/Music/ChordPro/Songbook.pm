@@ -585,6 +585,14 @@ sub global_directive {
 	  && ! ( $item =~ /^(text|chord|tab)$/ && $prop =~ /^(font|size)$/ );
 
 	$prop = "color" if $prop eq "colour";
+
+	if ( $value eq "" ) {
+	    $self->add( type => "control",
+			name => "$item-$prop",
+			value => undef );
+	    return 1;
+	}
+
 	if ( $prop eq "size" ) {
 	    unless ( $value =~ /^\d+(?:\.\d+)?\%?$/ ) {
 		do_warn("Illegal value \"$value\" for $item$prop\n");
