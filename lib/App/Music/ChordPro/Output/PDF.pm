@@ -1163,6 +1163,9 @@ sub songline_vsp {
 
     return $vsp if $single_space && ! has_visible_chords($elt);
 
+    # No text printing if no text.
+    $vsp = 0 if join( "", @{ $elt->{phrases} } ) eq "";
+
     # We must show chords above lyrics, so add chords span.
     $vsp + $fonts->{chord}->{size} * $ps->{spacing}->{chords};
 }

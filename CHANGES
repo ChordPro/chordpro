@@ -1,6 +1,7 @@
 0.76	xxx xx xxxx
 
 	Allow text properties to stack/unstack.
+	Suppress empty text line if there's only [Chords].
 
 0.75	Apr 13 2017
 
