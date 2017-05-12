@@ -30,6 +30,7 @@ script/ppchordpro.PL
 t/00_basic.pl
 t/01_prereq.t
 t/02_load.t
+t/15_subst.t
 t/100_basic.t
 t/101_empty.t
 t/102_new_song.t

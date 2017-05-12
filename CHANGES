@@ -2,6 +2,7 @@
 
 	Allow text properties to stack/unstack.
 	Suppress empty text line if there's only [Chords].
+	Enhance parameter substitution in titles/comments.
 
 0.75	Apr 13 2017
 
