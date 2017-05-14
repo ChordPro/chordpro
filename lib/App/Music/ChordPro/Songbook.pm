@@ -626,30 +626,47 @@ sub global_directive {
 		     \s+ [0-9---xX])?
 		\s*$
 	       /xi
+	 or
+	 $d =~ /^
+		(chord) [: ]+
+		([^: ]+) [: ]? \s*$
+	       /xi
        ) {
 
 	my $show = $1 eq "chord";
 	return if $legacy && $show;
 
-	my @f = split(' ', $4||'');
-	my $ci = { name => $2,
-		   base => $3 || 1,
-		   frets => [ map { $_ =~ /^\d+/ ? $_ : -1 } @f ],
-		 };
-	push( @{$cur->{define}}, $ci );
-	if ( @f ) {
-	    my $res =
-	      App::Music::ChordPro::Chords::add_song_chord
-		  ( $ci->{name}, $ci->{base} || 1, $ci->{frets} );
-	    if ( $res ) {
-		do_warn("Invalid chord: ", $ci->{name}, ": ", $res, "\n");
-		$show = 0;
+	my $ci;
+	if ( $4 ) {
+	    my @f = split(' ', $4||'');
+	    $ci = { name => $2,
+		    base => $3 || 1,
+		    frets => [ map { $_ =~ /^\d+/ ? $_ : -1 } @f ],
+		  };
+	    push( @{$cur->{define}}, $ci );
+	    if ( @f ) {
+		my $res =
+		  App::Music::ChordPro::Chords::add_song_chord
+		      ( $ci->{name}, $ci->{base} || 1, $ci->{frets} );
+		if ( $res ) {
+		    do_warn("Invalid chord: ", $ci->{name}, ": ", $res, "\n");
+		    $show = 0;
+		}
+	    }
+	    else {
+		App::Music::ChordPro::Chords::add_unknown_chord( $ci->{name} );
 	    }
 	}
 	else {
-	    App::Music::ChordPro::Chords::add_unknown_chord( $ci->{name} );
+	    my $name = $2;
+	    if ( App::Music::ChordPro::Chords::chord_info($name) ) {
+		$ci = { name => $name };
+	    }
+	    else {
+		do_warn("Unknown chord: $name\n");
+		return 1;
+	    }
 	}
-
 	if ( $show) {
 	    # Combine consecutive entries.
 	    if ( $self->{songs}->[-1]->{body}->[-1]->{type} eq "chord-grids" ) {
