@@ -7,7 +7,7 @@
     "settings" : {
       // Suppress empty chord lines.
       // Overrides the -a (--single-space) command line options.
-      "suppress-empty-chords" : 0,
+      "suppress-empty-chords" : false,
     },
 
     // Printing chord grids.
@@ -17,9 +17,9 @@
     // defined chords.
     // "sorted": order the chords by key.
     "chordgrid" : {
-	"auto"     :  1,
+	"auto"     :  true,
 	"show"     :  "all",
-	"sorted"   :  0,
+	"sorted"   :  false,
     },
 
     // Layout definitions for PDF output.
@@ -43,7 +43,7 @@
 
 	// Special: head on first page only, add the headspace to
 	// the other pages so they become larger.
-	"head-first-only" : 1,
+	"head-first-only" : true,
 
 	// Spacings.
 	// Baseline distances as a factor of the font size.
@@ -79,7 +79,7 @@
 
 	// A {titles: left} may conflict with customized formats.
 	// Set to non-zero to ignore the directive.
-	"titles-directive-ignore" : 0,
+	"titles-directive-ignore" : false,
 
   	// Chord grids.
 	// A chord grid consists of a number of cells.
@@ -188,7 +188,7 @@
 	// chordgrid_capo --> text (but at a small size)
 
 	// This will show the page layout if non-zero.
-	"showlayout" : 0,
+	"showlayout" : false,
     },
 }
 // End of config.

@@ -10,7 +10,7 @@
       "columns" : 1,
       // Suppress empty chord lines.
       // Overrides the -a (--single-space) command line options.
-      "suppress-empty-chords" : 1,
+      "suppress-empty-chords" : true,
     },
 
     // Layout definitions for PDF output.
@@ -34,7 +34,7 @@
 
 	// Special: head on first page only, add the headspace to
 	// the other pages so they become larger.
-	"head-first-only" : 0,
+	"head-first-only" : false,
 
 	// Spacings.
 	// Baseline distances as a factor of the font size.
@@ -65,7 +65,7 @@
 
 	// A {titles: left} may conflict with customized formats.
 	// Set to non-zero to ignore the directive.
-	"titles-directive-ignore" : 1,
+	"titles-directive-ignore" : true,
 
 	// Even/odd pages. A value of -1 denotes odd/even pages.
 	"even-odd-pages" : 1,
@@ -149,7 +149,7 @@
 	// chordgrid_capo --> text (but at a small size)
 
 	// This will show the page layout if non-zero.
-	"showlayout" : 0,
+	"showlayout" : false,
     },
 }
 // End of config.

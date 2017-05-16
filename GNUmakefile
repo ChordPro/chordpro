@@ -59,3 +59,14 @@ resources : ${RES}/config/chordpro.json
 ${RES}/config/chordpro.json : ${LIB}/Config.pm
 	$(PERL) $< > $@
 
+# Verify JSON data
+
+CFGLIB := ${LIB}/res/config.
+
+checkjson :
+	for i in ${CFGLIB}/*.json ; \
+	do \
+	  echo "Verifying $$i..."; \
+	  json_pp -json_opt relaxed < $$i | \
+	  jsonschema -i /dev/stdin ${CFGLIB}/config.schema; \
+	done
