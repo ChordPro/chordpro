@@ -33,10 +33,10 @@ This is the current built-in configuration file, showing all settings.
   	"columns" : 1,
   	// Suppress empty chord lines.
   	// Overrides the -a (--single-space) command line options.
-  	"suppress-empty-chords" : 1,
+  	"suppress-empty-chords" : true,
   	// Suppress chords.
   	// Overrides --lyrics-only command line option.
-  	"lyrics-only" : 0,
+  	"lyrics-only" : false,
       },
   
       // Metadata.
@@ -50,7 +50,7 @@ This is the current built-in configuration file, showing all settings.
                    "artist", "composer", "lyricist", "arranger",
                    "album", "copyright", "year",
                    "key", "time", "tempo", "capo", "duration" ],
-        "strict" : 1,
+        "strict" : true,
         "separator" : "; ",
       },
   
@@ -68,7 +68,7 @@ This is the current built-in configuration file, showing all settings.
   	//    "name"  : "Bb",
   	//    "base"  : 1,
   	//    "frets" : [ 1, 1, 3, 3, 3, 1 ],
-  	//    "easy"  : 1,
+  	//    "easy"  : true,
   	//  },
       ],
   
@@ -79,9 +79,9 @@ This is the current built-in configuration file, showing all settings.
       //         "user": only prints user defined chords.
       // "sorted": order the chords by key.
       "chordgrid" : {
-          "auto"     :  0,
+          "auto"     :  false,
           "show"     :  "all",
-          "sorted"   :  0,
+          "sorted"   :  false,
       },
   
       // Diagnostig messages.
@@ -110,7 +110,7 @@ This is the current built-in configuration file, showing all settings.
   
   	// Special: head on first page only, add the headspace to
 	// the other pages so they become larger.
-  	"head-first-only" : 0,
+  	"head-first-only" : false,
   
   	// Spacings.
   	// Baseline distances as a factor of the font size.
@@ -142,7 +142,7 @@ This is the current built-in configuration file, showing all settings.
             "recall" : {
                  "tag"   : "Chorus",
                  "type"  : "comment",
-                 "quote" : 0,
+                 "quote" : false,
             },
 	},
   
@@ -153,7 +153,7 @@ This is the current built-in configuration file, showing all settings.
   
 	// A {titles: left} may conflict with customized formats.
 	// Set to non-zero to ignore the directive.
-	"titles-directive-ignore" : 0,
+	"titles-directive-ignore" : false,
   
     	// Chord grids.
   	// A chord grid consists of a number of cells.
@@ -261,7 +261,7 @@ This is the current built-in configuration file, showing all settings.
 	// chordgrid_capo --> text (but at a small size)
   
   	// This will show the page layout if non-zero.
-  	"showlayout" : 0,
+  	"showlayout" : false,
       },
   }
   // End of config.
