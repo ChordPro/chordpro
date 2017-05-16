@@ -61,7 +61,7 @@ ${RES}/config/chordpro.json : ${LIB}/Config.pm
 
 # Verify JSON data
 
-CFGLIB := ${LIB}/res/config.
+CFGLIB := ${LIB}/res/config
 
 checkjson :
 	for i in ${CFGLIB}/*.json ; \
