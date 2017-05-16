@@ -1,3 +1,7 @@
+0.77	xxx
+
+	Fix meaning of clo -G (was negated).
+
 0.76	May 16 2017
 
 	Allow text properties to stack/unstack.
