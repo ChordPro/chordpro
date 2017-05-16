@@ -1,8 +1,11 @@
-0.76	xxx xx xxxx
+0.76	May 16 2017
 
 	Allow text properties to stack/unstack.
 	Suppress empty text line if there's only [Chords].
 	Enhance parameter substitution in titles/comments.
+	Allow {chord NAME} to designate known chords.
+	Some more fix problems with dot-less @INC in newer perls.
+	Add schema to verify (and edit) json config files.
 
 0.75	Apr 13 2017
 

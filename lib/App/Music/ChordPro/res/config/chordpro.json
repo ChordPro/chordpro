@@ -26,8 +26,9 @@
     // The separator is used to concatenate multiple values.
     "metadata" : {
       "keys" : [ "title", "subtitle",
-                 "artist", "composer", "album",
-                 "key", "time", "tempo", "capo" ],
+                 "artist", "composer", "lyricist", "arranger",
+                 "album", "copyright", "year",
+                 "key", "time", "tempo", "capo", "duration" ],
       "strict" : true,
       "separator" : "; ",
     },
@@ -40,7 +41,7 @@
     // User defined chords.
     // "base" defaults to 1.
     // "easy" defaults to 0.
-    // Use 0 for an open string, and -1 for a muted string.
+    // Use 0 for an empty string, and -1 for a muted string.
     "chords" : [
       //  {
 	//    "name"  : "Bb",
@@ -141,12 +142,14 @@
 	// be 4 or larger to accomodate most chords.
 	// The horizontal distance between grids is "hspace" cells.
 	// The vertical distance is "vspace" cells.
+	// "linewidth" is the thickness of the lines as a fraction of "width".
 	"chordgrid" : {
 	    "width"    :  6,
 	    "height"   :  6,
 	    "hspace"   :  3.95,
 	    "vspace"   :  3,
 	    "vcells"   :  4,
+	    "linewidth" : 0.1,
 	},
 
 	// Even/odd pages. A value of -1 denotes odd/even pages.
