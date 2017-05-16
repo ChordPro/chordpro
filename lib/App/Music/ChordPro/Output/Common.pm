@@ -9,7 +9,7 @@ use warnings;
 use Text::Balanced qw( extract_bracketed );
 
 sub fmt_subst {
-    my ( $s, $t, $strict ) = @_;
+    my ( $s, $t, $strict, $cur ) = @_;
     my $res = "";
     my $m = $s->{meta};
 
@@ -25,7 +25,7 @@ sub fmt_subst {
 	    # things like "%{capo|CAPO %{}}".
 	    if ( $t =~ /^}(.*)/ ) {
 		$t = $1;
-		$res .= $s->{__current__value__} // "";
+		$res .= $cur // "";
 		next;
 	    }
 
@@ -102,14 +102,12 @@ sub fmt_subst {
 	    # Use the true/false parts to get a new value.
 	    if ( defined($val) && $val ne "" ) {
 		if ( defined $then ) {
-		    local $s->{__current__value__} = $val;
-		    $val = fmt_subst( $s, $then, $strict );
+		    $val = fmt_subst( $s, $then, $strict, $val );
 		}
 		# else use the value as is.
 	    }
 	    elsif ( defined $else ) {
-		local $s->{__current__value__} = "";
-		$val = fmt_subst( $s, $else, $strict );
+		$val = fmt_subst( $s, $else, $strict, "" );
 	    }
 
 	    # Append and continue.
