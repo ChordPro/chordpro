@@ -3,7 +3,7 @@
 use strict;
 use Test::More;
 
-require "differ.pl";
+require "./differ.pl";
 
 mkdir("out") unless -d "out";
 
