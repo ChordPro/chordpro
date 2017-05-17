@@ -10,7 +10,7 @@
 	},
 	"fontspec": {
 	    "description": "Font specification.",
-	    "additionalProperties": "false",
+	    "additionalProperties": {},
 	    "properties": {
 		"name": {
 		    "type": "string"
@@ -43,10 +43,10 @@
     },
 
     "properties": {
-	"additionalProperties": false,
+	"additionalProperties": {},
 
 	"settings": {
-	    "additionalProperties": false,
+	    "additionalProperties": {},
 	    "properties": {
 
 		"columns": {
@@ -79,11 +79,11 @@
 		    ]
 		}
 	    },
-	    "additionalProperties": false
+	    "additionalProperties": {}
 	},
 
 	"chordgrid": {
-	    "additionalProperties": "false",
+	    "additionalProperties": {},
 	    "properties": {
 
 		"auto": {
@@ -111,7 +111,7 @@
 	    "description": "Chord definitions.",
 	    "type": [ "array", "null" ],
 	    "items": {
-		"additionalProperties": false,
+		"additionalProperties": {},
 		"properties": {
 		    "name": { "type": "string" },
 		    "base": {
@@ -136,7 +136,7 @@
 	},
 
 	"diagnostics": {
-	    "additionalProperties": false,
+	    "additionalProperties": {},
 	    "properties": {
 		"format": {
 		    "description": "Format for error messages.",
@@ -147,7 +147,7 @@
 	},
 
 	"metadata": {
-	    "additionalProperties": false,
+	    "additionalProperties": {},
 	    "properties": {
 		"keys": {
 		    "description": "Known metadata items.",
@@ -178,11 +178,11 @@
 	},
 
 	"pdf": {
-            "additionalProperties": false,
+            "additionalProperties": {},
 	    "properties": {
 
 		"chordgrid": {
-		    "additionalProperties": false,
+		    "additionalProperties": {},
 		    "properties": {
 			"height": {
 			    "default": 6,
@@ -225,17 +225,17 @@
 		},
 
 		"chorus": {
-		    "additionalProperties": false,
+		    "additionalProperties": {},
 		    "properties": {
 			"bar": {
-			    "additionalProperties": false,
+			    "additionalProperties": {},
 			    "properties": {
 				"color": {
+				    "description": "Bar colour.",
 				    "allOf": [
 					{ "$ref": "#/definitions/colorspec" },
 					{ "default": "black" }
-				    ],
-				    "description": "Bar colour."
+				    ]
 				},
 				"offset": {
 				    "default": 8,
@@ -258,7 +258,7 @@
 			    "type": "number"
 			},
 			"recall": {
-			    "additionalProperties": false,
+			    "additionalProperties": {},
 			    "properties": {
 				"quote": {
 				    "default": false,
@@ -324,7 +324,7 @@
 					"default": 10,
 					"type": "number"
 				    },
-				    "additionalProperties": false
+				    "additionalProperties": {}
 				} } ]
 			},
 			"comment": {
@@ -339,7 +339,7 @@
 					"default": 12,
 					"type": "number"
 				    },
-				    "additionalProperties": false
+				    "additionalProperties": {}
 				} } ]
 			},
 			"tab": {
@@ -354,7 +354,7 @@
 					"default": 10,
 					"type": "number"
 				    },
-				    "additionalProperties": false
+				    "additionalProperties": {}
 				} } ]
 			},
 			"text": {
@@ -369,7 +369,7 @@
 					"default": 12,
 					"type": "number"
 				    },
-				    "additionalProperties": false
+				    "additionalProperties": {}
 				} } ]
 			},
 			"title": {
@@ -384,7 +384,7 @@
 					"default": 14,
 					"type": "number"
 				    },
-				    "additionalProperties": false
+				    "additionalProperties": {}
 				} } ]
 			},
 			"toc": {
@@ -399,7 +399,7 @@
 					"default": 11,
 					"type": "number"
 				    },
-				    "additionalProperties": false
+				    "additionalProperties": {}
 				} } ]
 			}
 		    }
@@ -413,10 +413,10 @@
 		},
 
 		"formats": {
-		    "additionalProperties": false,
+		    "additionalProperties": {},
 		    "properties": {
 			"default": {
-			    "additionalProperties": false,
+			    "additionalProperties": {},
 			    "properties": {
 				"title": {
 				    "allOf": [
@@ -440,7 +440,7 @@
 			    }
 			},
 			"title": {
-			    "additionalProperties": false,
+			    "additionalProperties": {},
 			    "properties": {
 				"title": {
 				    "allOf": [
@@ -460,7 +460,7 @@
 			    }
 			},
 			"first": {
-			    "additionalProperties": false,
+			    "additionalProperties": {},
 			    "properties": {
 				"footer": {
 				    "allOf": [
@@ -515,8 +515,11 @@
 
 		"papersize": {
 		    "default": "a4",
-		    "description": "An explanation about the purpose of this instance.",
-		    "type": "string"
+		    "description": "Dimensions of output page.",
+		    "type": [ "string", "array" ],
+		    "items" : { "type" : "number" },
+		    "minItems" : 2,
+		    "maxItems" : 2
 		},
 
 		"showlayout": {
@@ -526,7 +529,7 @@
 		},
 
 		"spacing": {
-		    "additionalProperties": false,
+		    "additionalProperties": {},
 		    "properties": {
 			"chords": {
 			    "default": 1.2,
@@ -572,7 +575,7 @@
 		    "type": "boolean"
 		}
 	    },
-	    "additionalProperties": false
+	    "additionalProperties": {}
 	},
 
 	"tuning": {
@@ -585,6 +588,6 @@
 	}
     },
 
-    "additionalProperties": false
+    "additionalProperties": {}
 }
 
