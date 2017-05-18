@@ -68,6 +68,7 @@ This is the current built-in configuration file, showing all settings.
   	//    "name"  : "Bb",
   	//    "base"  : 1,
   	//    "frets" : [ 1, 1, 3, 3, 3, 1 ],
+  	//    "fingers" : [ 1, 1, 2, 3, 4, 1 ],
   	//    "easy"  : true,
   	//  },
       ],

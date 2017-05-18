@@ -1,5 +1,7 @@
 0.77	xxx
 
+	Add support for chord fingerings, as suggested by Christian
+	Erickson (author of the Songsheet Generator).
 	Fix meaning of clo -G (was negated).
 
 0.76	May 16 2017

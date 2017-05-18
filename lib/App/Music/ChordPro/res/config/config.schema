@@ -131,12 +131,22 @@
 			    "default": 0
 			}
 		    },
+		    "fingers": {
+			"description": "Fingers from low string to hight string.",
+			"type": "array",
+			"items": {
+			    "type": "integer",
+			    "minimum": -1,
+			    "default": 0
+			}
+		    },
 		    "easy": {
 			"description": "Deprecated.",
 			"type": "boolean",
 			"default": true
 		    }
 		},
+		"required": [ "name", "frets" ],
 		"additionalProperties": {}
 	    }
 	},

@@ -1247,13 +1247,26 @@ sub chordgrid {
     my $v = $ps->{chordgrid}->{vcells};
     my $h = $strings;
     $pr->hline( $x, $y - $_*$gh, $w, $lw ) for 0..$v;
-    $pr->vline( $x + $_*$gw, $y, $gh*$v, $lw ) for 0..$h-1;
 
     $x -= $gw/2;
-    for my $fret ( @{ $info->{strings} } ) {
+    for my $sx ( 0 .. @{ $info->{strings} }-1 ) {
+	my $fret = $info->{strings}->[$sx];
+	my $fing;
+	$fing = $info->{fingers}->[$sx] if $info->{fingers};
 	if ( $fret > 0 ) {
-	    $pr->circle( $x+$gw/2, $y-$fret*$gh+$gh/2, $dot/2, $lw,
-			 "black", "black");
+	    my $glyph = "\x{6c}";
+	    if ( $fing && $fing > 0 ) {
+		# Note: circle must go under the text.
+		$pr->circle( $x+$gw/2, $y-$fret*$gh+$gh/2, $dot/2, $lw,
+			     "white", undef);
+		$glyph = pack( "C", 0xca + $fing - 1 );
+	    }
+	    my $dot = $dot/0.7;
+	    $pr->setfont( $ps->{fonts}->{chordfingers}, $dot );
+	    $pr->text( $glyph,
+		       $x+$gw/2-$pr->strwidth($glyph)/2,
+		       $y-$fret*$gh+$gh/2-$pr->strwidth($glyph)/2+$lw/2,
+		       $ps->{fonts}->{chordfingers}, $dot ) ;
 	}
 	elsif ( $fret < 0 ) {
 	    $pr->cross( $x+$gw/2, $y+$lw+$gh/3, $dot/3, $lw, "black");
@@ -1266,6 +1279,8 @@ sub chordgrid {
     continue {
 	$x += $gw;
     }
+    # Note: vline must go under the circle.
+    $pr->vline( $x0 + $_*$gw, $y, $gh*$v, $lw ) for 0..$h-1;
 
     return $gw * ( $ps->{chordgrid}->{hspace} + $strings );
 }
@@ -1414,6 +1429,7 @@ sub configurator {
     $fonts->{grid}           ||= { %{ $fonts->{comment} } };
     $fonts->{chordgrid}      ||= { %{ $fonts->{comment} } };
     $fonts->{chordgrid_capo} ||= { %{ $fonts->{text} } };
+    $fonts->{chordfingers}     = { name => 'ZapfDingbats' };
     $fonts->{subtitle}->{size}       ||= $fonts->{text}->{size};
     $fonts->{comment_italic}->{size} ||= $fonts->{text}->{size};
     $fonts->{comment_box}->{size}    ||= $fonts->{text}->{size};
@@ -1571,7 +1587,7 @@ sub hline {
 
 sub vline {
     my ( $self, $x, $y, $h, $lw, $color ) = @_;
-    my $gfx = $self->{pdfpage}->gfx;
+    my $gfx = $self->{pdfpage}->gfx(1); # under
     $gfx->save;
     $gfx->strokecolor($color ||= "black");
     $gfx->linecap(2);
@@ -1599,7 +1615,7 @@ sub rectxy {
 
 sub circle {
     my ( $self, $x, $y, $r, $lw, $fillcolor, $strokecolor ) = @_;
-    my $gfx = $self->{pdfpage}->gfx;
+    my $gfx = $self->{pdfpage}->gfx(1); # under
     $gfx->save;
     $gfx->strokecolor($strokecolor) if $strokecolor;
     $gfx->fillcolor($fillcolor) if $fillcolor;

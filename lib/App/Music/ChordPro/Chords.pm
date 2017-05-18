@@ -481,6 +481,7 @@ sub chord_info {
     return +{
 	     name    => $chord,
 	     strings => [ @{$info}[0..$s-1] ],
+	     @$info > $s+3 ? ( fingers => [ @{$info}[$s+3..2*$s+2] ] ) : (),
 	     base    => $info->[$s]-1,
 	     builtin => $info->[$s+1] == CHORD_BUILTIN,
 	     system  => "",
@@ -534,7 +535,7 @@ sub list_chords {
 	next unless $info;
 	push( @s,
 	      sprintf( "{%s: %-15.15s base-fret %2d    ".
-		       "frets   %s}",
+		       "frets   %s%s}",
 		       $origin eq "chord" ? "chord" : "define",
 		       $info->{name}, $info->{base} + 1,
 		       @{ $info->{strings} }
@@ -542,7 +543,14 @@ sub list_chords {
 			      map { sprintf("%-4s", $_) }
 			      map { $_ < 0 ? "X" : $_ }
 			      @{ $info->{strings} } )
-		       : ("    " x strings() ) ) )
+		       : ("    " x strings() ),
+		       $info->{fingers} && @{ $info->{fingers} }
+		       ? join("", "fingers ",
+			      map { sprintf("%-4s", $_) }
+			      map { $_ < 0 ? "X" : $_ }
+			      @{ $info->{fingers} } )
+		       : ("    " x strings() ),
+	    ) )
     }
     \@s;
 }
@@ -600,14 +608,18 @@ sub reset_song_chords {
 
 # Add a user defined chord.
 sub add_song_chord {
-    my ( $name, $base, $frets ) = @_;
-    unless ( @$frets == strings() ) {
+    my ( $name, $base, $frets, $fingers ) = @_;
+    if ( @$frets != strings() ) {
+	return scalar(@$frets) . " strings";
+    }
+    if ( $fingers && @$fingers && @$fingers != strings() ) {
 	return scalar(@$frets) . " strings";
     }
     unless ( $base > 0 && $base < 12 ) {
 	return "base-fret $base out of range";
     }
-    $song_chords{$name} = [ @$frets, $base, CHORD_SONG, CHORD_HARD ];
+    $song_chords{$name} = [ @$frets, $base, CHORD_SONG, CHORD_HARD,
+			    $fingers && @$fingers ? @$fingers : () ];
     return;
 }
 

@@ -613,10 +613,11 @@ sub global_directive {
 	return 1;
     }
 
-    # define A: base-fret N frets N N N N N N
-    # define: A base-fret N frets N N N N N N
+    # define A: base-fret N frets N N N N N N fingers N N N N N N
+    # define: A base-fret N frets N N N N N N fingers N N N N N N
     # optional: base-fret N (defaults to 1)
     # optional: N N N N N N (for unknown chords)
+    # optional: fingers N N N N N N
     if ( $d =~ /^
 		(define|chord) [: ]+
 		([^: ]+) [: ] \s*
@@ -624,6 +625,9 @@ sub global_directive {
 		frets
 		((?: \s+ [0-9---xX])*
 		     \s+ [0-9---xX])?
+		(?: \s+ fingers
+		((?: \s+ [0-9---xX])*
+		     \s+ [0-9---xX])? )?
 		\s*$
 	       /xi
 	 or
@@ -643,11 +647,13 @@ sub global_directive {
 		    base => $3 || 1,
 		    frets => [ map { $_ =~ /^\d+/ ? $_ : -1 } @f ],
 		  };
+	    $ci->{fingers} = [ map { $_ =~ /^\d+/ ? $_ : -1 } split(' ',$5) ]
+	      if defined $5;
 	    push( @{$cur->{define}}, $ci );
 	    if ( @f ) {
 		my $res =
 		  App::Music::ChordPro::Chords::add_song_chord
-		      ( $ci->{name}, $ci->{base} || 1, $ci->{frets} );
+		      ( $ci->{name}, $ci->{base} || 1, $ci->{frets}, $ci->{fingers} );
 		if ( $res ) {
 		    do_warn("Invalid chord: ", $ci->{name}, ": ", $res, "\n");
 		    $show = 0;
