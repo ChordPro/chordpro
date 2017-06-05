@@ -1,0 +1,3 @@
+For a good understanding it is important to know that ChordPro is basically a file transformation program. It reads a file containing lyrics and chords according to the ChordPro File Standard, and produces a neatly formatted PDF document that you can view and print.
+
+When you start the `wxchordpro` program it will therefore show a _file open_ dialog where you can designate an existing ChordPro file. If you have one, select it and its contents will be shown in a new window. If you don't have one, press `Cancel` and an empty window will be shown.
