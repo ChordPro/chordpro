@@ -1,8 +1,8 @@
 Welcome to the ChordPro wiki!
 
-The ChordPro 5.0 standard
+[[The ChordPro File Standard]]
 
 [[The ChordPro Reference Implementation]]
-* Installation
-* Configuration
-* User guide
+* [[ChordPro Installation|Installation]]
+* [[ChordPro Configuration|Configuration]]
+* [[Using ChordPro|User guide]]
