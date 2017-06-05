@@ -2,7 +2,7 @@ Welcome to the ChordPro wiki!
 
 The ChordPro 5.0 standard
 
-The ChordPro Reference Implementation
+[[The ChordPro Reference Implementation]]
 * Installation
 * Configuration
 * User guide
