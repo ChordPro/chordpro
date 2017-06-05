@@ -229,6 +229,39 @@ sub _makeurl {
     return "file://$u";
 }
 
+sub checksaved {
+    my ( $self ) = @_;
+    return 1 unless ( $self->{t_source} && $self->{t_source}->IsModified );
+    if ( $self->{_currentfile} ) {
+	my $md = Wx::MessageDialog->new
+	  ( $self,
+	    "File " . $self->{_currentfile} . " has been changed.\n".
+	    "Do you want to save your changes?",
+	    "File has changed",
+	    0 | wxCANCEL | wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION );
+	my $ret = $md->ShowModal;
+	$md->Destroy;
+	return if $ret == wxID_CANCEL;
+	if ( $ret == wxID_YES ) {
+	    $self->saveas( $self->{_currentfile} );
+	}
+    }
+    else {
+	my $md = Wx::MessageDialog->new
+	  ( $self,
+	    "Do you want to save your changes?",
+	    "Contents has changed",
+	    0 | wxCANCEL | wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION );
+	my $ret = $md->ShowModal;
+	$md->Destroy;
+	return if $ret == wxID_CANCEL;
+	if ( $ret == wxID_YES ) {
+	    return if $self->OnSaveAs == wxID_CANCEL;
+	}
+    }
+    return 1;
+}
+
 sub saveas {
     my ( $self, $file ) = @_;
     $self->{t_source}->SaveFile($file);
@@ -259,20 +292,7 @@ sub SavePreferences {
 
 sub OnOpen {
     my ( $self, $event, $create ) = @_;
-    if ( $self->{t_source} && $self->{t_source}->IsModified ) {
-	my $md = Wx::MessageDialog->new
-	  ( $self,
-	    "File " . $self->{_currentfile} . " has been changed.\n".
-	    "Do you want to save your changes?",
-	    "File has changed",
-	    0 | wxCANCEL | wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION );
-	my $ret = $md->ShowModal;
-	$md->Destroy;
-	return if $ret == wxID_CANCEL;
-	if ( $ret == wxID_YES ) {
-	    $self->saveas( $self->{_currentfile} );
-	}
-    }
+    return unless $self->checksaved;
 
     if ( $create ) {
 	$self->newfile;
@@ -292,14 +312,16 @@ sub OnSaveAs {
     my $fd = Wx::FileDialog->new
       ($self, _T("Choose output file"),
        "", "",
-       "*.txt",
+       "*.cho",
        0|wxFD_SAVE|wxFD_OVERWRITE_PROMPT,
        wxDefaultPosition);
     my $ret = $fd->ShowModal;
     if ( $ret == wxID_OK ) {
-	$self->export( $fd->GetPath );
+	$self->{t_source}->SaveFile($fd->GetPath);
+	Wx::LogStatus( "Saved." );
     }
     $fd->Destroy;
+    return $ret;
 }
 
 sub OnSave {
@@ -314,21 +336,8 @@ sub OnPreview {
 
 sub OnQuit {
     my ( $self, $event ) = @_;
+    return unless $self->checksaved;
     $self->SavePreferences;
-    if ( $self->{t_source} && $self->{t_source}->IsModified ) {
-	my $md = Wx::MessageDialog->new
-	  ( $self,
-	    "File " . $self->{_currentfile} . " has been changed.\n".
-	    "Do you want to save your changes?",
-	    "File has changed",
-	    0 | wxCANCEL | wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION );
-	my $ret = $md->ShowModal;
-	$md->Destroy;
-	return if $ret == wxID_CANCEL;
-	if ( $ret == wxID_YES ) {
-	    $self->saveas( $self->{_currentfile} );
-	}
-    }
     $self->Close;
 }
 
@@ -360,7 +369,6 @@ sub OnCopy {
     $self->{t_source}->Copy;
 }
 
-
 sub OnPaste {
     my ($self, $event) = @_;
     $self->{t_source}->Paste;
@@ -380,6 +388,14 @@ sub OnHelp_ChordPro {
 sub OnHelp_Config {
     my ($self, $event) = @_;
     Wx::LaunchDefaultBrowser("https://metacpan.org/pod/distribution/App-Music-ChordPro/res/pod/Config.pod");
+}
+
+sub OnHelp_Example {
+    my ($self, $event) = @_;
+    return unless $self->checksaved;
+    $self->openfile( ::findlib( "res/examples/swinglow.cho" ) );
+    undef $self->{_currentfile};
+    $self->{t_source}->SetModified(1);
 }
 
 sub OnPreferences {
