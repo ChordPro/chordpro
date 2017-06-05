@@ -145,7 +145,9 @@ sub preview {
 	unlink( $preview_cho, $preview_pdf );
     }
 
+    my $mod = $self->{t_source}->IsModified;
     $self->{t_source}->SaveFile($preview_cho);
+    $self->{t_source}->SetModified($mod);
 
     #### ChordPro
 
