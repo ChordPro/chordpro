@@ -5,7 +5,7 @@ Microsoft Windows systems are not standard equipped with the Perl application en
 Currently, there are three easy options (and several harder ones that will not be discussed here).
 
 * [[ActiveState Perl|Install Windows ActiveState]]  
-This is a commercial Perl implementation that is free to use for individuals.
+This is a commercial Perl implementation but it provides a Community Edition that is free to use for individuals.
 * [[Citrus Perl|Install Windows Citrus]]  
 This is an open source Perl distribution which includes many tools.
 * [[Strawberry Perl|Install Windows Strawberry]]  
