@@ -41,8 +41,8 @@ organizing collections of ChordPro songs.
 ## Formatting directives
 
 * [[comment|Directives comment]] (short: c)
-* [[comment_italic|Directives comment_italic]] (short: ci)
-* [[comment_box|Directives comment_box]] (short: cb)
+* [[comment_italic|Directives comment]] (short: ci)
+* [[comment_box|Directives comment]] (short: cb)
 * [[chorus|Directives chorus]]
 * [[image|Directives image]]
 
