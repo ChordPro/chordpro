@@ -17,7 +17,7 @@ For directives that take arguments, the arguments are separated from the directi
 
 ## Preamble directives
 
-* [[new_song|Directives new_song]] or ns
+* [[new_song|Directives new_song]] (short: ns)
 
 ## Meta-data directives
 
@@ -30,3 +30,25 @@ For directives that take arguments, the arguments are separated from the directi
 * [[time|Directives time]]
 * [[tempo|Directives tempo]]
 * [[capo|Directives capo]]
+* [[meta|Directives meta]]
+
+## Formatting directives
+
+* [[comment|Directives comment]] (short: c)
+* [[comment_italic|Directives comment_italic]] (short: ci)
+* [[comment_box|Directives comment_box]] (short: cb)
+* [[chorus|Directives chorus]]
+* [[image|Directives image]]
+
+## Environment directives
+
+Environment directives always come in pairs, one to start the environment and one to end the environment.
+
+* [[start_of_chorus|Directives env_chorus]] (short: soc)
+* [[end_of_chorus|Directives env_chorus]] (short: eoc)
+* [[start_of_verse|Directives env_verse]]
+* [[end_of_verse|Directives env_verse]]
+* [[start_of_tab|Directives env_tab]] (short: sot)
+* [[end_of_tab|Directives env_tab]] (short: eot)
+* [[start_of_grid|Directives env_grid]]
+* [[end_of_grid|Directives env_grid]]
