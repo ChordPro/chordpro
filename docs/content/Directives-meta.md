@@ -16,7 +16,7 @@ For convenience and backward compatibility, the following meta-data are consider
 [[arranger|Directives arranger]],
 [[copyright|Directive copyright]],
 [[album|Directives album]],
-[[album|Directives year]],
+[[year|Directives year]],
 [[key|Directives key]],
 [[time|Directives time]],
 [[tempo|Directives tempo]],
