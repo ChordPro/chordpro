@@ -13,6 +13,7 @@ For convenience and backward compatibility, the following meta-data are consider
 [[artist|Directives artist]],
 [[composer|Directives composer]],
 [[lyricist|Directives lyricist]],
+[[arranger|Directives arranger]],
 [[album|Directives album]],
 [[key|Directives key]],
 [[time|Directives time]],
