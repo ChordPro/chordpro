@@ -7,8 +7,8 @@ Many ChordPro implementations (formatters) provide chord diagrams at the end of 
 For transposition it is slightly easier. For example, when you're transposing from A to C, you can replace everything chord-like that starts with ‘A’ by ‘C’ and whatever follows the ‘A’. ‘Am7’ becomes ‘Cm7’ and ‘Alpha’ would become ‘Clpha’, who cares?
 
 Although the ChordPro File Format Specification deliberately doesn't say anything about valid chords, it is advised to stick to commonly accepted chords and chord forms. The ChordPro Reference Implementation supports:
-* A, B, C, …, G
-* Use `b` for flat, and `#` for sharp
-* Common postfixes like `m`, '7', 'dim`, etc.
-* For Roman notation: I, II, III, …, VII
-* For Nashville notation: 1, 2, 3, …, 7
+* A, B, C, …, G (European/Dutch)
+* I, II, III, …, VII (Roman)
+* 1, 2, 3, …, 7 (Nashville)
+* `b` for flat, and `#` for sharp
+* Common postfixes like `m`, `7`, `dim`, etc.
