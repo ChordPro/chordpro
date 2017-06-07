@@ -52,3 +52,53 @@ Environment directives always come in pairs, one to start the environment and on
 * [[end_of_tab|Directives env_tab]] (short: eot)
 * [[start_of_grid|Directives env_grid]]
 * [[end_of_grid|Directives env_grid]]
+
+## Chord diagrams
+
+* [[define|Directives define]]
+* [[chord|Directives chord]]
+
+## Fonts, sizes and colours
+
+These directives can be used to temporarily change the font, size and/or colour for lyrics, chords and titles. These directives are legacy from the old `chord` program. The modern reference implementation uses much more powerful configuration files for this purpose.
+
+* [[textfont|Directives fonts_sizes_legacy]]
+* [[textsize|Directives fonts_sizes_legacy]]
+* [[textcolour|Directives fonts_sizes_legacy]]
+* [[chordfont|Directives fonts_sizes_legacy]]
+* [[chordsize|Directives fonts_sizes_legacy]]
+* [[chordcolour|Directives fonts_sizes_legacy]]
+* [[titlefont|Directives fonts_sizes_legacy]]
+* [[titlesize|Directives fonts_sizes_legacy]]
+* [[titlecolour|Directives fonts_sizes_legacy]]
+* [[footerfont|Directives fonts_sizes_legacy]]
+* [[footersize|Directives fonts_sizes_legacy]]
+* [[footercolour|Directives fonts_sizes_legacy]]
+* [[tocfont|Directives fonts_sizes_legacy]]
+* [[tocsize|Directives fonts_sizes_legacy]]
+* [[toccolour|Directives fonts_sizes_legacy]]
+* [[tabfont|Directives fonts_sizes_legacy]]
+* [[tabsize|Directives fonts_sizes_legacy]]
+* [[tabcolour|Directives fonts_sizes_legacy]]
+* [[gridfont|Directives fonts_sizes_legacy]]
+* [[gridsize|Directives fonts_sizes_legacy]]
+* [[gridcolour|Directives fonts_sizes_legacy]]
+
+## Output related directives
+
+* [[new_page|Directives new_page]] (short: np)
+* [[new_physical_page|Directives new_physical_page]] (short: npp)
+* [[column_break|Directive column_break]] (short: cb)
+
+The following directives are legacy from the old `chord` program. The modern reference implementation uses much more powerful configuration files for this purpose.
+
+* [[grid|Directives grid_lecacy]] (short: g)
+* [[no_grid|Directives grid_lecacy]] (short: ng)
+* [[titles|Directives titles_legacy]]
+* [[columns|Directive columns]] (short: col)
+
+## Custom extensions
+
+To facilitate using custom extensions for application specific purposes, any directive with a name starting with `x_` should be completely ignored by applications that do not handle this directive. In particular, no warning should be generated when an unsupported `x_`directive is encountered.
+
+It is advised to follow the `x_` prefix by a tag that identifies the application (namespace). For example, a directive  to control a specific pedal setting for the MobilsSheetsPro program could be named `x_mspro_pedal_setting`.
