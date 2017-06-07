@@ -28,6 +28,7 @@ organizing collections of ChordPro songs.
 * [[subtitle|Directives subtitle]]
 * [[artist|Directives artist]]
 * [[composer|Directives composer]]
+* [[lyricist|Directives lyricist]]
 * [[album|Directives album]]
 * [[key|Directives key]]
 * [[time|Directives time]]
