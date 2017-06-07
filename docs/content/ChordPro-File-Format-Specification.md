@@ -37,8 +37,14 @@ defines the _title_ of the song, which will most likely be placed on top of the 
 
 The directives `{start_of_chorus}` and `{end_of_chorus}` indicate that the lines contained form the chorus of the song. This allows the chorus to be printed in an outstanding way. Finally, `{comment: Chorus}` will result in a text line containing the text `Chorus` as an indicator that the chorus should be played here.
 
-In print, this song could look like this ([View PDF](http://www.chordpro.org/wiki/images/simple.pdf)):
+In print, this song could look like this:
 
-![simple.png](http://www.chordpro.org/wiki/images/simple.png)
+![simple.png](http://www.chordpro.org/wiki/images/simple.png)  
+[View PDF](http://www.chordpro.org/wiki/images/simple.pdf)
 
+## Printing?
+
+In the early days of ChordPro, the only way to get a nicely formatted lead sheet was to print it on a LaserWriter. The original `chord` program created a so called PostScript document that could be send to the printer.
+
+Much has changed. Nowadays PDF documents are used for printed output, but they can also be viewed on PC, phone and tablets. The ChordPro reference implementation produces PDF by default. Nevertheless, in this document we will still use the term ‘printing’ when referring to the result of processing ChordPro files.
 See <http://www.chordpro.org/chordpro/v50.html>.
