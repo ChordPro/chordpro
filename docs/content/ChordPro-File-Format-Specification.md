@@ -1,6 +1,6 @@
 # ChordPro: The File Format Specification
 
-In 1992 Martin Leclerc and Mario Dorion developed a simple text file format to write _lead sheets_, songs with lyrics and chords, and a tool to create neatly printed lead sheets out of these text files. The tool was called `chord`, and the text files were called `chord` files. It soon became a popular way to write lead sheets and many users and tools adopted this format for similar tools. For still unknown reasons people started calling the files `chordpro` files.
+In 1992 Martin Leclerc and Mario Dorion developed a simple text file format to write _lead sheets_, songs with lyrics and chords, and a tool to create neatly printed lead sheets out of these text files. The tool was called `chord`, and the text files were called `chord` files. It soon became a popular way to write lead sheets and many users and tools adopted this format for similar purposes. For still unknown reasons people started calling the files `chordpro` files.
 
 As mentioned, the ChordPro file format is a simple text file format. Any text editor or word processor can be used to create and maintain them.
 
