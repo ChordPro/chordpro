@@ -20,7 +20,7 @@ For the `frets` and the `fingers` positions, there must be exactly as many posit
 Example:
 
     {define: Bes offset 1 frets 1 1 3 3 3 1 fingers 1 1 2 3 4 1}
-    {define: As offset 4 frets 1 3 3 2 1 1 fingers 1 3 4 2 1 1}
+    {define: As  offset 4 frets 1 3 3 2 1 1 fingers 1 3 4 2 1 1}
 
 The resultant chord diagrams are:
 
