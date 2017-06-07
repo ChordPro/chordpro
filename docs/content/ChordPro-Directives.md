@@ -34,6 +34,7 @@ organizing collections of ChordPro songs.
 * [[key|Directives key]]
 * [[time|Directives time]]
 * [[tempo|Directives tempo]]
+* [[duration|Directives duration]]
 * [[capo|Directives capo]]
 * [[meta|Directives meta]]
 
