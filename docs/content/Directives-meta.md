@@ -14,13 +14,13 @@ For convenience and backward compatibility, the following meta-data are consider
 [[composer|Directives composer]],
 [[lyricist|Directives lyricist]],
 [[arranger|Directives arranger]],
-[[copyright|Directive copyright]],
+[[copyright|Directives copyright]],
 [[album|Directives album]],
 [[year|Directives year]],
 [[key|Directives key]],
 [[time|Directives time]],
 [[tempo|Directives tempo]],
-[[duration|Directive duration]]
+[[duration|Directives duration]]
 and
 [[capo|Directives capo]].
 
