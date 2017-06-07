@@ -31,7 +31,7 @@ organizing collections of ChordPro songs.
 * [[lyricist|Directives lyricist]]
 * [[copyright|Directive copyright]]
 * [[album|Directives album]]
-* [[year|Directive year]]
+* [[year|Directives year]]
 * [[key|Directives key]]
 * [[time|Directives time]]
 * [[tempo|Directives tempo]]
