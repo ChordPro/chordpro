@@ -29,7 +29,7 @@ organizing collections of ChordPro songs.
 * [[artist|Directives artist]]
 * [[composer|Directives composer]]
 * [[lyricist|Directives lyricist]]
-* [[copyright||Directive copyright]]
+* [[copyright|Directive copyright]]
 * [[album|Directives album]]
 * [[key|Directives key]]
 * [[time|Directives time]]
