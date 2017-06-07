@@ -1,5 +1,5 @@
 **ChordPro**
 
-* **[[The File Standard|The ChordPro File Standard]]**
+* **[[The File Format Specification|ChordPro File Format Specification]]**
 
-* **[[The Reference Implementation|The ChordPro Reference Implementation]]**
+* **[[The Reference Implementation|ChordPro Reference Implementation]]**
