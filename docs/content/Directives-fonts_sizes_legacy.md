@@ -33,3 +33,33 @@ Example:
 Assuming default settings, all lyrics lines will be printed in black except the second line that will be red.
 
 ![](images/ex_textcolour.png)
+
+# chordfont, chordsize, chordcolour
+
+These directives change the font, size and colour of the song chords that follow.
+
+Example:
+
+    I [D]looked over Jordan, and [G]what did I [D]see,
+    {chordcolour: green}
+    Comin’ for to carry me [A7]home.
+    {chordcolour}
+    A [D]band of angels [G]comin’ after [D]me,
+
+The chords of the second song line will be printed in green.
+
+![](images/ex_chordcolour.png)
+
+# titlefont, titlesize, titlecolour
+
+
+# footerfont, footersize, footercolour
+
+
+# tocfont, tocsize, toccolour
+
+
+# tabfont, tabsize, tabcolour
+
+
+# gridfont, gridsize, gridcolour
