@@ -52,9 +52,11 @@ The chords of the second song line will be printed in green.
 
 # titlefont, titlesize, titlecolour
 
+These directives change the font, size and colour of the titles (page headings).
 
 # footerfont, footersize, footercolour
 
+These directives change the font, size and colour of the page footers.
 
 # tocfont, tocsize, toccolour
 
