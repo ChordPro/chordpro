@@ -26,6 +26,6 @@ and
 
 Examples:
 
-    {meta artist The Beatles}
+    {meta: artist The Beatles}
 
 
