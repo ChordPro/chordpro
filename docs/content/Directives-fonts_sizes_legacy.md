@@ -1,8 +1,6 @@
 # textfont, textsize, textcolour
 
-Note 1. Everything described here about `text` also applies to `chord`, `title`, `footer`, `toc`, `tab` and `grid`.
-
-Note 2. If the intention is to change the appearance for the whole song, or collection of songs, it is much better to use [[configuration files|ChordPro Configuration]] instead.
+Note: If the intention is to change the appearance for the whole song, or collection of songs, it is much better to use [[configuration files|ChordPro Configuration]] instead.
 
     {textfont: Times-Roman}
     {textsize: 12}
@@ -38,6 +36,8 @@ Assuming default settings, all lyrics lines will be printed in black except the 
 
 These directives change the font, size and colour of the song chords that follow.
 
+For valid values, see the description of `textfont` and friends.
+
 Example:
 
     I [D]looked over Jordan, and [G]what did I [D]see,
@@ -50,18 +50,4 @@ The chords of the second song line will be printed in green.
 
 ![](images/ex_chordcolour.png)
 
-# titlefont, titlesize, titlecolour
 
-These directives change the font, size and colour of the titles (page headings).
-
-# footerfont, footersize, footercolour
-
-These directives change the font, size and colour of the page footers.
-
-# tocfont, tocsize, toccolour
-
-
-# tabfont, tabsize, tabcolour
-
-
-# gridfont, gridsize, gridcolour
