@@ -75,6 +75,9 @@ These directives can be used to temporarily change the font, size and/or colour 
 * [[chordfont|Directives fonts_sizes_legacy]]
 * [[chordsize|Directives fonts_sizes_legacy]]
 * [[chordcolour|Directives fonts_sizes_legacy]]
+* [[tabfont|Directives fonts_sizes_legacy]]
+* [[tabsize|Directives fonts_sizes_legacy]]
+* [[tabcolour|Directives fonts_sizes_legacy]]
 
 ## Output related directives
 
