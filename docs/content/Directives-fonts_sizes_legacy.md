@@ -32,4 +32,4 @@ Example:
 
 Assuming default settings, all lyrics lines will be printed in black except the second line that will be red.
 
-![](http://www.chordpro.org/wiki/images/ex_textcolour.png)
+![](images/ex_textcolour.png)
