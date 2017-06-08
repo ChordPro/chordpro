@@ -43,7 +43,7 @@ Finally, all lines that start with a `#` are ignored. These can be used to inser
 
 In print, this song could look like this (click on the thumbnail to view the full PDF):
 
-[![simple.png](http://www.chordpro.org/wiki/images/simple.png)](http://www.chordpro.org/wiki/images/simple.pdf)
+[![simple.png](images/simple.png)](images/simple.pdf)
 
 ## Is this all?
 
@@ -55,4 +55,4 @@ In the early days of ChordPro, the only way to get a nicely formatted lead sheet
 
 Much has changed. Nowadays PDF documents are used for printed output, but they can also be viewed on PC, phone and tablets. The [[ChordPro reference implementation|ChordPro Reference Implementation]] produces PDF by default. Nevertheless, in this document we will still use the term ‘printing’ when referring to the result of processing ChordPro files.
 
-See <http://www.chordpro.org/chordpro/v50.html>.
+See also <http://www.chordpro.org/chordpro/v50.html>.

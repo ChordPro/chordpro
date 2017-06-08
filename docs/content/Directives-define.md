@@ -24,6 +24,6 @@ Example:
 
 The resultant chord diagrams are:
 
-![](http://www.chordpro.org/wiki/images/ex_define.png)
+![](images/ex_define.png)
 
 See also: [[chord|Directives chord]].

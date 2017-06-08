@@ -18,6 +18,6 @@ Example:
 
 The resultant will be similar to:
 
-![](http://www.chordpro.org/wiki/images/ex_chord.png)
+![](images/ex_chord.png)
 
 See also: [[define|Directives define]].
