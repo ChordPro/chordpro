@@ -80,14 +80,14 @@ These directives can be used to temporarily change the font, size and/or colour 
 
 * [[new_page|Directives new_page]] (short: np)
 * [[new_physical_page|Directives new_physical_page]] (short: npp)
-* [[column_break|Directive column_break]] (short: cb)
+* [[column_break|Directives column_break]] (short: cb)
 
 The following directives are legacy from the old `chord` program. The modern reference implementation uses much more powerful configuration files for this purpose.
 
 * [[grid|Directives grid_lecacy]] (short: g)
 * [[no_grid|Directives grid_lecacy]] (short: ng)
 * [[titles|Directives titles_legacy]]
-* [[columns|Directive columns]] (short: col)
+* [[columns|Directives columns]] (short: col)
 
 ## Custom extensions
 
