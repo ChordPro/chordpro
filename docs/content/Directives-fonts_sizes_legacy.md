@@ -78,7 +78,7 @@ Example:
 	E|---------------------------------||
 	{end_of_tab}
 
-The second TAB section will be printed in blue with a larger font size.
+The second TAB section will be printed in blue with a 20% larger font size.
 
 ![](images/ex_tabcolour.png)
 
