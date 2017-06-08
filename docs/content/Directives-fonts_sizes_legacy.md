@@ -10,7 +10,7 @@ These directives change the font, size and colour of the song lyrics that follow
 
 The font must be a [[known font name|ChordPro Fonts]], or the name of a file containing a TrueType or OpenType font.
 
-The size must be a valid number, like `12` and `10.5`.
+The size must be a valid number like `12` or `10.5`, or a percentage like `120%`. If a percentage is given, it is taken relative to the current value for the size.
 
 The colour must be a [[known colour|ChordPro Colours]], or a hexadecimal colour code like `#4491ff`.
 
@@ -49,5 +49,38 @@ Example:
 The chords of the second song line will be printed in green.
 
 ![](images/ex_chordcolour.png)
+
+# tabfont, tabsize, tabcolour
+
+These directives change the font, size and colour of the guitar TAB that follow.
+
+For valid values, see the description of `textfont` and friends.
+
+Example:
+
+	{start_of_tab}
+	E|-3-----3-2--------2-----2-0------||
+	B|---5-------3--------3-------2----||
+	G|-----4-------4--------2-------2--|| x4
+	D|---------------------------------||
+	A|---------------------------------||
+	E|---------------------------------||
+	{end_of_tab}
+
+	{tabcolour: blue}
+	{tabsize: 120%}
+	{start_of_tab}
+	E|-3-----3-2--------2-----2-0------||
+	B|---5-------3--------3-------2----||
+	G|-----4-------4--------2-------2--|| x4
+	D|---------------------------------||
+	A|---------------------------------||
+	E|---------------------------------||
+	{end_of_tab}
+
+The second TAB section will be printed in blue with a larger font size.
+
+![](images/ex_tabcolour.png)
+
 
 
