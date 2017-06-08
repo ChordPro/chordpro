@@ -67,7 +67,7 @@ Environment directives always come in pairs, one to start the environment and on
 
 ## Fonts, sizes and colours
 
-These directives can be used to temporarily change the font, size and/or colour for lyrics and chords. These directives are legacy from the old `chord` program. The modern reference implementation uses much more powerful configuration files for this purpose.
+These directives can be used to temporarily change the font, size and/or colour for lyrics and chords. To permanently change these the reference implementation uses much more powerful [[configuration files|ChordPro Configuration]].
 
 * [[textfont|Directives fonts_sizes_legacy]]
 * [[textsize|Directives fonts_sizes_legacy]]
