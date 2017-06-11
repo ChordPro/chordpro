@@ -69,15 +69,15 @@ Environment directives always come in pairs, one to start the environment and on
 
 These directives can be used to temporarily change the font, size and/or colour for lyrics and chords. To permanently change these the reference implementation uses much more powerful [[configuration files|ChordPro Configuration]].
 
-* [[textfont|Directives fonts_sizes_legacy]]
-* [[textsize|Directives fonts_sizes_legacy]]
-* [[textcolour|Directives fonts_sizes_legacy]]
-* [[chordfont|Directives fonts_sizes_legacy]]
-* [[chordsize|Directives fonts_sizes_legacy]]
-* [[chordcolour|Directives fonts_sizes_legacy]]
-* [[tabfont|Directives fonts_sizes_legacy]]
-* [[tabsize|Directives fonts_sizes_legacy]]
-* [[tabcolour|Directives fonts_sizes_legacy]]
+* [[textfont|Directives props_text_legacy]]
+* [[textsize|Directives props_text_legacy]]
+* [[textcolour|Directives props_text_legacy]]
+* [[chordfont|Directives props_chord_legacy]]
+* [[chordsize|Directives props_chord_legacy]]
+* [[chordcolour|Directives props_chord_legacy]]
+* [[tabfont|Directives props_tab_legacy]]
+* [[tabsize|Directives props_tab_legacy]]
+* [[tabcolour|Directives props_tab_legacy]]
 
 ## Output related directives
 
