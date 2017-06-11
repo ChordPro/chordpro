@@ -16,7 +16,7 @@ Example:
     {chord: Bes base-fret 1 frets 1 1 3 3 3 1 fingers 1 1 2 3 4 1}
     {chord: As  base-fret 4 frets 1 3 3 2 1 1 fingers 1 3 4 2 1 1}
 
-The resultant will be similar to:
+The resultant chord diagrams are:
 
 ![](images/ex_chord.png)
 
