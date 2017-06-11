@@ -15,7 +15,7 @@ Strings are enumerated from left (lowest) to right (highest), as they appear in 
 
 `fingers` _pos_ _pos_ … _pos_ defines finger settings. This part may be omitted.
 
-For the `frets` and the `fingers` positions, there must be exactly as many positions as there are strings, which is 6 by default.
+For the `frets` and the `fingers` positions, there must be exactly as many positions as there are strings, which is 6 by default. For the `fingers` positions, values corresponding to open or damped strings are ignored.
 
 Example:
 
