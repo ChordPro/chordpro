@@ -88,7 +88,7 @@ These directives can be used to temporarily change the font, size and/or colour 
 The following directives are legacy from the old `chord` program. The modern reference implementation uses much more powerful configuration files for this purpose.
 
 * [[grid|Directives grid_lecacy]] (short: g)
-* [[no_grid|Directives grid_lecacy]] (short: ng)
+* [[no_grid|Directives no_grid_lecacy]] (short: ng)
 * [[titles|Directives titles_legacy]]
 * [[columns|Directives columns]] (short: col)
 
