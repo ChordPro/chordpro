@@ -1107,7 +1107,7 @@ sub imageline {
     }
     $h *= $scale;
     $w *= $scale;
-    $x += ($pw - $w) / 2 if $opts->{center} // 1;
+    $x += ($pw - $w) / 2 if $opts->{center};
 
     my $y = $gety->($h);	# may have been changed by checkspace
 
