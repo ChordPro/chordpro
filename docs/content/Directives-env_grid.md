@@ -2,6 +2,8 @@
 
 This directive indicates that the lines that follow define a chord grid in the style of [Jazz Grilles](https://fr.wikipedia.org/wiki/Grille_harmonique).
 
+Note: Grids must not be confused with _chord diagrams_ that, unfortunately, in some parts of the documentation and implementation also are referred to as ‘chord grids’.
+
 In a grid only chords are used, no lyrics, and the chords are arranged in a rectangular pattern for a quick view on the structure of the song. Symbols for bar lines and repeats can also be included in a grid. The chords are subject to transposition.
 
 For example, to create a grid for ‘The House of the Rising Sun’:
