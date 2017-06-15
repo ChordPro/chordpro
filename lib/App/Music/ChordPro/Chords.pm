@@ -533,24 +533,23 @@ sub list_chords {
     foreach my $chord ( @$chords ) {
 	my $info = chord_info($chord);
 	next unless $info;
-	push( @s,
-	      sprintf( "{%s: %-15.15s base-fret %2d    ".
-		       "frets   %s%s}",
-		       $origin eq "chord" ? "chord" : "define",
-		       $info->{name}, $info->{base} + 1,
-		       @{ $info->{strings} }
-		       ? join("",
-			      map { sprintf("%-4s", $_) }
-			      map { $_ < 0 ? "X" : $_ }
-			      @{ $info->{strings} } )
-		       : ("    " x strings() ),
-		       $info->{fingers} && @{ $info->{fingers} }
-		       ? join("", "fingers ",
-			      map { sprintf("%-4s", $_) }
-			      map { $_ < 0 ? "X" : $_ }
-			      @{ $info->{fingers} } )
-		       : ("    " x strings() ),
-	    ) )
+	my $s = sprintf( "{%s: %-15.15s base-fret %2d    ".
+			 "frets   %s",
+			 $origin eq "chord" ? "chord" : "define",
+			 $info->{name}, $info->{base} + 1,
+			 @{ $info->{strings} }
+			 ? join("",
+				map { sprintf("%-4s", $_) }
+				map { $_ < 0 ? "X" : $_ }
+				@{ $info->{strings} } )
+			 : ("    " x strings() ));
+	$s .= join("", "    fingers ",
+		   map { sprintf("%-4s", $_) }
+		   map { $_ < 0 ? "X" : $_ }
+		   @{ $info->{fingers} } )
+	  if $info->{fingers} && @{ $info->{fingers} };
+	$s .= "}";
+	push( @s, $s );
     }
     \@s;
 }
@@ -799,6 +798,13 @@ sub identify {
 
     # First some basic simplifications.
     $rem =~ tr/\x{266d}\x{266f}\x{0394}\x{f8}\x{b0}/b#^h0/;
+
+    # Split off the duration, if present.
+    if ( $rem =~ m;^(.*):(\d\.*)?(?:x(\d+))?$; ) {
+	$rem = $1;
+	$info{duration} = $2 // 1;
+	$info{repeat} = $3;
+    }
 
     # Split off the bass part, if present.
     my $bass = "";
