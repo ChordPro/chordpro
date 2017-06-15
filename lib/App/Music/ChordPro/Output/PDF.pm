@@ -24,15 +24,6 @@ sub generate_songbook {
     return [] unless $sb->{songs}->[0]->{body}; # no songs
 
     my $ps = $::config->{pdf};
-
-=for later
-
-    Hash::Util::unlock_hash_recurse($ps);
-    $ps->{fonts}->{symbols}->{file} = $ENV{HOME} . "/.fonts/Bravura.otf";
-    $ps->{fonts}->{symbols}->{size} = 12;
-
-=cut
-
     my $pr = PDFWriter->new($ps);
     $pr->info( Title => $sb->{songs}->[0]->{meta}->{title}->[0],
 	       Creator =>
@@ -297,8 +288,7 @@ sub generate_song {
     my @chorus;			# chorus elements, if any
 
     my $grid_cellwidth;
-    my $grid_barwidth = 8;	# tentative
-    $grid_barwidth *= 1.5;		#####
+    my $grid_barwidth = 0.5 * $fonts->{chord}->{size};
 
     my %propstack;
 
@@ -663,7 +653,7 @@ sub generate_song {
 		$grid_cellwidth = ( $ps->{papersize}->[0]
 				    - $ps->{marginleft}
 				    - $ps->{marginright}
-				    - (1+$bars)*$grid_barwidth
+				    - (1+$cells)*$grid_barwidth
 				  ) / $cells;
 	    }
 	    next;
@@ -877,56 +867,7 @@ sub songline {
     return;
 }
 
-# SMUFL mappings of common symbols.
-my %smufl =
-  ( brace		=> "\x{e000}",
-    reversedBrace	=> "\x{e001}",
-    barlineSingle	=> "\x{e030}",
-    barlineDouble	=> "\x{e031}",
-    barlineFinal	=> "\x{e032}",
-    repeatLeft		=> "\x{e040}",
-    repeatRight		=> "\x{e041}",
-    repeatRightLeft	=> "\x{e042}",
-    repeatDots		=> "\x{e043}",
-    dalSegno		=> "\x{e045}",
-    daCapo		=> "\x{e046}",
-    segno		=> "\x{e047}",
-    coda		=> "\x{e048}",
-    timeSig0		=> "\x{e080}", # timeSig1, ...etc...
-    flat		=> "\x{e260}",
-    sharp		=> "\x{e262}",
-    fermata		=> "\x{e4c0}",
-    repeat1Bar		=> "\x{e500}",
-    repeat2Bars		=> "\x{e501}",
-    repeat4Bars		=> "\x{e502}",
-    csymDiminished	=> "\x{e870}",
-    csymHalfDiminished	=> "\x{e871}",
-    csymAugmented	=> "\x{e872}",
-    csymMajorSeventh	=> "\x{e873}",
-    csymMinor		=> "\x{e874}",
-  );
-
-# Map ASCII bars (and pseudo-bar) to SMUFL code.
-my %sbmap =
-  ( "|"        => $smufl{barlineSingle},
-    "||"       => $smufl{barlineDouble},
-    "|."       => $smufl{barlineFinal},
-    "|:"       => $smufl{repeatLeft},
-    ":|"       => $smufl{repeatRight},
-    ":|:"      => $smufl{repeatRightLeft},
-    " %"       => $smufl{repeat2Bars},
-  );
-
-# Map ASCII and UTF8 measure repeats to SMUFL code.
-my %smap =
-  ( "%"        => $smufl{repeat1Bar},
-    "%%"       => $smufl{repeat2Bars},
-    "\x{2030}" => $smufl{repeat2Bars}, # permille
-  );
-
 sub is_bar {
-    #    $_[0] =~ /^(\||\|\||\\|:|:\||\|\.)$/;
-    #    $sbmap{$_[0]};
     exists( $_[0]->{class} ) && $_[0]->{class} eq "bar";
 }
 
@@ -938,23 +879,12 @@ sub gridline {
     my $pr = $ps->{pr};
     my $fonts = $ps->{fonts};
 
-    my $smufl = 1;		# use SMUFL font
-
     $x += $barwidth/2;
+    $cellwidth += $barwidth;
 
+    # Use the chords font for the chords, and for the symbols size.
     my $fchord = { %{ $fonts->{grid} || $fonts->{chord} } };
     delete($fchord->{background});
-    my $schord;
-    if ( $smufl && $fonts->{symbols} ) {
-	$schord = { %{ $fonts->{symbols} } };
-    }
-    else {
-	$schord = { %{ $fchord } };
-	delete($schord->{background});
-	$smufl = 0;
-    }
-#    $schord->{size} = $fchord->{size};
-
     $y -= font_bl($fchord);
 
     $elt->{tokens} //= [ {} ];
@@ -970,6 +900,7 @@ sub gridline {
     my $prevbar;
     my @tokens = @{ $elt->{tokens} };
     my $t;
+
     foreach my $i ( 0 .. $#tokens ) {
 	my $token = $tokens[$i];
 	if ( exists $token->{chord} ) {
@@ -981,11 +912,9 @@ sub gridline {
 	    $x += $cellwidth;
 	}
 	elsif ( $token->{class} eq "bar" ) {
+	    $x -= $barwidth;
 	    $t = $token->{symbol};
-	    if ( $smufl ) {
-		$t = $sbmap{$t};
-	    }
-	    elsif ( 0 ) {
+	    if ( 0 ) {
 		$t = "{" if $t eq "|:";
 		$t = "}" if $t eq ":|";
 		$t = "}{" if $t eq ":|:";
@@ -995,41 +924,49 @@ sub gridline {
 		$t = ":|" if $t eq "}";
 		$t = ":|:" if $t eq "}{";
 	    }
-	    $pr->setfont($schord);
-	    my @t = ( $t );
-	    push( @t, $smufl{barlineSingle} ) if $t eq $smufl{repeat2Bars};
-	    for my $t ( @t ) {
-		my $w = $pr->strwidth($t);
-		my $y = $y;
-		$y += $schord->{size} / 2 if $t eq $smufl{repeat2Bars};
-		if ( defined $firstbar ) {
-		    my $x = $x;
-		    $x -= $w/2 if $i > $firstbar;
-		    $x -= $w/2 if $i == $lastbar && $t ne "|.";
-		    $pr->text( $t, $x, $y );
-		}
-		else {
-		    $pr->text( $t, $x + $barwidth/2 - $w/2, $y );
-		}
+
+	    my $lcr = -1;	# left, center, right
+	    $lcr = 0 if $i > $firstbar;
+	    $lcr = 1 if $i == $lastbar;
+
+	    my $sz = $fchord->{size};
+
+	    if ( $t eq "|" ) {
+		pr_barline( $x, $y, $lcr, $sz, $pr );
+	    }
+	    elsif ( $t eq "||" ) {
+		pr_dbarline( $x, $y, $lcr, $sz, $pr );
+	    }
+	    elsif ( $t eq "|:" ) {
+		pr_rptstart( $x, $y, $lcr, $sz, $pr );
+	    }
+	    elsif ( $t eq ":|" ) {
+		pr_rptend( $x, $y, $lcr, $sz, $pr );
+	    }
+	    elsif ( $t eq ":|:" ) {
+		pr_rptendstart( $x, $y, $lcr, $sz, $pr );
+	    }
+	    elsif ( $t eq "|." ) {
+		pr_endline( $x, $y, $lcr, $sz, $pr );
+	    }
+	    elsif ( $t eq " %" ) { # repeat2Bars
+		pr_repeat( $x+$sz/2, $y, 0, $sz, $pr );
+	    }
+	    else {
+		die($t);	# can't happen
 	    }
 	    $x += $barwidth;
 	    $prevbar = $i;
 	}
 	elsif ( $token->{class} eq "repeat1" ) {
 	    $t = $token->{symbol};
-	    $t = $smap{$t} if $smufl;
 	    my $k = $prevbar + 1;
 	    while ( $k <= $#tokens
 		    && !is_bar($tokens[$k]) ) {
 		$k++;
 	    }
-	    $pr->setfont($schord);
-	    my $y = $y;
-	    $y += $schord->{size} / 2 if $t eq $smufl{repeat1Bar};
-	    my $w = $pr->strwidth($t);
-	    $pr->text( $t,
-		       $x + ($k - $prevbar - 1)*$cellwidth/2 - $w/2 - $barwidth/2,
-		       $y );
+	    pr_repeat( $x + ($k - $prevbar - 1)*$cellwidth/2, $y,
+		       0, $fchord->{size}, $pr );
 	    $x += $cellwidth;
 	}
 	elsif ( $token->{class} eq "repeat2" ) {
@@ -1043,6 +980,7 @@ sub gridline {
 	    $x += $cellwidth;
 	}
     }
+
     if ( $elt->{comment} ) {
 	my $t = $elt->{comment};
 	if ( $t->{chords} ) {
@@ -1051,11 +989,79 @@ sub gridline {
 		$t->{text} .= $t->{chords}->[$_] . $t->{phrases}->[$_];
 	    }
 	}
-	else {
-	    $t->{text} = $t->{comment};
-	}
 	$pr->text( " " . $t->{text}, $x, $y, $fonts->{comment} );
     }
+}
+
+sub pr_barline {
+    my ( $x, $y, $lcr, $sz, $pr ) = @_;
+    my $w = $sz / 10;		# glyph width = $w
+    $x -= $w / 2 * ($lcr + 1);
+    $pr->vline( $x, $y+0.9*$sz, $sz, $w );
+}
+
+sub pr_dbarline {
+    my ( $x, $y, $lcr, $sz, $pr ) = @_;
+    my $w = $sz / 10;		# glyph width = 3 * $w
+    $x -= 1.5 * $w * ($lcr + 1);
+    $pr->vline( $x, $y+0.9*$sz, $sz, $w );
+    $x += 2 * $w;
+    $pr->vline( $x, $y+0.9*$sz, $sz, $w );
+}
+
+sub pr_rptstart {
+    my ( $x, $y, $lcr, $sz, $pr ) = @_;
+    my $w = $sz / 10;		# glyph width = 3 * $w
+    $x -= 1.5 * $w * ($lcr + 1);
+    $pr->vline( $x, $y+0.9*$sz, $sz, $w );
+    $x += 2 * $w;
+    $y += 0.55 * $sz;
+    $pr->line( $x, $y, $x, $y+$w, $w );
+    $y -= 0.4 * $sz;
+    $pr->line( $x, $y, $x, $y+$w, $w );
+}
+
+sub pr_rptend {
+    my ( $x, $y, $lcr, $sz, $pr ) = @_;
+    my $w = $sz / 10;		# glyph width = 3 * $w
+    $x -= 1.5 * $w * ($lcr + 1);
+    $pr->vline( $x + 2*$w, $y+0.9*$sz, $sz, $w );
+    $y += 0.55 * $sz;
+    $pr->line( $x, $y, $x, $y+$w, $w );
+    $y -= 0.4 * $sz;
+    $pr->line( $x, $y, $x, $y+$w, $w );
+}
+
+sub pr_rptendstart {
+    my ( $x, $y, $lcr, $sz, $pr ) = @_;
+    my $w = $sz / 10;		# glyph width = 5 * $w
+    $x -= 2.5 * $w * ($lcr + 1);
+    $pr->vline( $x + 2*$w, $y+0.9*$sz, $sz, $w );
+    $y += 0.55 * $sz;
+    $pr->line( $x,      $y, $x     , $y+$w, $w );
+    $pr->line( $x+4*$w, $y, $x+4*$w, $y+$w, $w );
+    $y -= 0.4 * $sz;
+    $pr->line( $x,      $y, $x,      $y+$w, $w );
+    $pr->line( $x+4*$w, $y, $x+4*$w, $y+$w, $w );
+}
+
+sub pr_repeat {
+    my ( $x, $y, $lcr, $sz, $pr ) = @_;
+    my $w = $sz / 3;		# glyph width = 3 * $w
+    $x -= 1.5 * $w * ($lcr + 1);
+    my $lw = $sz / 10;
+    $x -= $w / 2;
+    $pr->line( $x, $y+0.2*$sz, $x + $w, $y+0.7*$sz, $lw );
+    $pr->line( $x, $y+0.6*$sz, $x + 0.07*$sz , $y+0.7*$sz, $lw );
+    $x += $w;
+    $pr->line( $x - 0.05*$sz, $y+0.2*$sz, $x + 0.02*$sz, $y+0.3*$sz, $lw );
+}
+
+sub pr_endline {
+    my ( $x, $y, $lcr, $sz, $pr ) = @_;
+    my $w = $sz / 10;		# glyph width = 2 * $w
+    $x -= 0.75 * $w * ($lcr + 1);
+    $pr->vline( $x, $y+0.85*$sz, 0.9*$sz, 2*$w );
 }
 
 sub imageline_vsp {
@@ -1570,6 +1576,19 @@ sub strwidth {
     $size ||= $self->{fontsize} || $font->{size};
     $self->setfont( $font, $size );
     $self->{pdftext}->advancewidth($text);
+}
+
+sub line {
+    my ( $self, $x0, $y0, $x1, $y1, $lw, $color ) = @_;
+    my $gfx = $self->{pdfpage}->gfx;
+    $gfx->save;
+    $gfx->strokecolor($color ||= "black");
+    $gfx->linecap(1);
+    $gfx->linewidth($lw||1);
+    $gfx->move( $x0, $y0 );
+    $gfx->line( $x1, $y1 );
+    $gfx->stroke;
+    $gfx->restore;
 }
 
 sub hline {
