@@ -890,7 +890,7 @@ Built-in 'Adobe Core Fonts':
   Helvetica-BoldOblique
   Helvetica-Oblique
 
-Buitl-in 'Windows Fonts':
+Built-in 'Windows Fonts':
 
   Georgia                             Webdings
   Georgia,Bold                        Wingdings
