@@ -49,12 +49,12 @@ Other symbols that can be used:
 
 Example:
 
-{start_of_grid 4x2}
-|| G7 . | % . | %% . | . . |
-| C7 . | %  . || G7 . | % . ||
-|: C7 . | %  . :|: G7 . | % . :| repeat 4 times
-| D7 . | Eb7 | D7 | G7 . | % . |.
-{end_of_grid}
+    {start_of_grid 4x2}
+    || G7 . | % . | %% . | . . |
+    | C7 . | %  . || G7 . | % . ||
+    |: C7 . | %  . :|: G7 . | % . :| repeat 4 times
+    | D7 . | Eb7 | D7 | G7 . | % . |.
+    {end_of_grid}
 
 The result will be similar to:
 
