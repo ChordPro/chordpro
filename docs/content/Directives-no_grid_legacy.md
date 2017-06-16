@@ -2,7 +2,7 @@
 
 Abbreviation: `ng`.
 
-Suppresses printing of the list of chord grids at the end of the current song.
+Suppresses printing of the list of chord diagrams at the end of the current song.
 
 For persistent use, this can also be set in the [[configuration files|ChordPro Configuration]].
 
