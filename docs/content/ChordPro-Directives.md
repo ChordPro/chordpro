@@ -24,8 +24,8 @@ For directives that take arguments, the arguments are separated from the directi
 Each song can have meta-data associated, for example the song title. Meta-data are mostly used by programs that help
 organizing collections of ChordPro songs.
 
-* [[title|Directives title]]
-* [[subtitle|Directives subtitle]]
+* [[title|Directives title]] (short: t)
+* [[subtitle|Directives subtitle]] (short: st)
 * [[artist|Directives artist]]
 * [[composer|Directives composer]]
 * [[lyricist|Directives lyricist]]
