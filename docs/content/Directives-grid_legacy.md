@@ -8,4 +8,8 @@ For persistent use, this can also be set in the [[configuration files|ChordPro C
 
 The name `grid` is an unfortunate legacy from the original chord program and must not be confused with the [[chord grids|Directives env_grid]] facility.
 
-See also: [[no_grid|Directives no_grid_legacy]].
+## no_grid
+
+Abbreviation: `ng`.
+
+Disables printing of the list of chord diagrams at the end of the current song.
