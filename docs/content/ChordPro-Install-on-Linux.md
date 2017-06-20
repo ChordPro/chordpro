@@ -1,27 +1,20 @@
-Linux systems always have the Perl environment installed. At least, they should have...
+# Installing with cpan
 
-If the Perl environment is correctly installed, there will be an administrator command `cpan`. Open a command prompt window and type at the prompt:
+Assuming your Linux systems has the Perl environment correctly installed (standard on nearly all distros), there will be an administrator command `cpan`. In a terminal, simply run the appropriate command from the options below for the version you want to install. It will ask the administrator (super user) password and then install everything neccessary to run ChordPro.
+
+## GUI (graphical) interface version
 
 `sudo cpan install wxchordpro`
 
-This will ask the administrator (super user) password and then install everything neccessary to run the ChordPro GUI program. Upon completion, you should be able to type at the command prompt:
+Then, to open the program, run `wxchordpro` at a terminal prompt. 
+You will get a file open dialog. To close the program, you can press `Cancel` and terminate the program with `File` > `Exit`.
 
-`wxchordpro`
-
-You will get a file open dialog. Just press `Cancel` and terminate the program with `File` > `Exit`.
-
-You may proceed to [[Getting Started|ChordPro Getting Started]].
-
-If you are familiar with the Linux command line tools, you can install the (much smaller) ChordPro command line program instead:
+## CLI (command-line) interface version
 
 `sudo cpan install chordpro`
 
-Upon completion, you should be able to type at the command prompt:
+To check for successful install, run `chordpro --version`. That should return a result like `This is ChordPro version 5.00.00`.
 
-`chordpro --version`
+# Running Chordpro on Linux
 
-and get a response similar to:
-
-`This is ChordPro version 5.00.00`
-
-You're all set to go now. You may proceed to [[Getting Started|ChordPro Getting Started]].
+Whether using GUI or CLI version, you may proceed to [[Getting Started|ChordPro Getting Started]].
