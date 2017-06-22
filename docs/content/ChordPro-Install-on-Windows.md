@@ -1,4 +1,4 @@
-_This information may be sub-optimal and/or incomplete. Please help improving it._
+![](images/maintenance.png)
 
 Microsoft Windows systems are not standard equipped with the Perl application environment. You need to download and install Perl yourself.
 
