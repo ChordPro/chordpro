@@ -1,4 +1,4 @@
-_This information may be sub-optimal and/or incomplete. Please help improving it._
+![](images/maintenance.png)
 
 Download ActiveState Perl, Community Edition, from <https://www.activestate.com/activeperl/downloads>.
 Install according to the directions on the site.
