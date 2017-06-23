@@ -11,10 +11,10 @@ Note that the syntax of file names may depend on the platforms and tools used. A
 The optional _options_ can be used to control the appearance of the image. Single or double quotes can be used if spaces are to be included in the option values.
 
 `width=`_width_  
-Specifies the desired width of the image in typographic points (1/72 inch or 0.3528 mm). If neccessary the original image is scaled to fit.	
+Specifies the desired width of the image in typographic points (1/72 inch or 0.3528 mm). If necessary the original image is scaled to fit.
 
 `height=`_height_  
-Specifies the desired height of the image. If neccessary the original image is scaled to fit.	
+Specifies the desired height of the image. If necessary the original image is scaled to fit.	
 
 `scale=`_factor_  
 Scales the image with the factor.	

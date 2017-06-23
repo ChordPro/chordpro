@@ -1,6 +1,6 @@
 # Installing with cpan
 
-Assuming your Linux systems has the Perl environment correctly installed (standard on nearly all distros), there will be an administrator command `cpan`. In a terminal, simply run the appropriate command from the options below for the version you want to install. It will ask the administrator (super user) password and then install everything neccessary to run ChordPro.
+Assuming your Linux systems has the Perl environment correctly installed (standard on nearly all distros), there will be an administrator command `cpan`. In a terminal, simply run the appropriate command from the options below for the version you want to install. It will ask the administrator (super user) password and then install everything necessary to run ChordPro.
 
 ## GUI (graphical) interface version
 
