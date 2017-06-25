@@ -1,6 +1,6 @@
 _This information may be sub-optimal and/or incomplete. Please help improving it._
 
-Download Citrus Perl from <https://sourceforge.net/projects/citrusperl/files>.
+Download Citrus Perl from <http://www.citrusperl.com/p/download.html>.
 Install according to the directions on the site.
 
 One of the desktop icons that will be installed is `citrusterm`. With this tool you can start a command prompt window that is preconfigured for Citrus Perl. In this command prompt window type:
