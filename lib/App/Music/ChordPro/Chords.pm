@@ -494,8 +494,8 @@ sub chordcompare($$) {
     my ( $chorda, $chordb ) = @_;
     my ( $a0, $arest ) = $chorda =~ /^([A-G][b#]?)(.*)/;
     my ( $b0, $brest ) = $chordb =~ /^([A-G][b#]?)(.*)/;
-    $a0 = $chordorderkey{$a0}//die("XX $a");
-    $b0 = $chordorderkey{$b0}//die("XX $b");
+    $a0 = $chordorderkey{$a0}//return 0;
+    $b0 = $chordorderkey{$b0}//return 0;
     return $a0 <=> $b0 if $a0 != $b0;
     $a0++ if $arest =~ /^m(?:in)?(?!aj)/;
     $b0++ if $brest =~ /^m(?:in)?(?!aj)/;
