@@ -1,5 +1,7 @@
 ![](images/maintenance.png)
 
+**ActiveState repository is currently having problems distributing recent Perl modules. You may wish to try [[CitrusPerl|Install Windows Citrus]] instead.**
+
 Download ActiveState Perl, Community Edition, from <https://www.activestate.com/activeperl/downloads>.
 Install according to the directions on the site.
 
