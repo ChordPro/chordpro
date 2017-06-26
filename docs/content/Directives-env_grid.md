@@ -27,6 +27,13 @@ The desired number of cells per line can be specified as an argument to the `sta
 
 There is no semantic difference between the two forms, just pick the one that is most convenient.
 
+It is possible to specify room for margin notes, both left side and right side, by adding the desired number of cells as follows:
+
+`{start_of_grid` _left_ `+` _cells_ `+` _right_ `}`  
+`{start_of_grid` _left_ `+` _measures_ `x` _beats_ `+` _right_ `}`
+
+Both margins are optional and may be omitted together with their `+` symbols.
+
 The grid input lines consist of space-separated tokens, which are either valid chords or special symbols. Spaces are not significant but can be used e.g. to align chords in the input lines. 
 
 Chords are put into the cells. If a cell does not need to contain a chord, the placeholder `.` (period) can be used to designate an empty cell.
@@ -42,7 +49,7 @@ The following bar line symbols are valid:
 * `:|` stop repeat bar line
 * `:|:` combined stop/start repeat bar line
 
-Each line must start and end with a bar line. However, the last bar line may be followed by comment text that is included in the grid for display purposes.
+Each line should contain at least one bar line symbol. Everything before the first bar line will be put in the left margin, and everythinh following the last bar symbol will be put in the right margin. If the line doesn't contain a bar symbol it is printed completely in the left margin.
 
 Other symbols that can be used:
 
@@ -51,11 +58,11 @@ Other symbols that can be used:
 
 Example:
 
-    {start_of_grid 4x2}
-    || G7 . | % . | %% . | . . |
-    | C7 . | %  . || G7 . | % . ||
-    |: C7 . | %  . :|: G7 . | % . :| repeat 4 times
-    | D7 . | Eb7 | D7 | G7 . | % . |.
+    {start_of_grid 1+4x2+4}
+    A    || G7 . | % . | %% . | . . |
+         | C7 . | %  . || G7 . | % . ||
+         |: C7 . | %  . :|: G7 . | % . :| repeat 4 times
+    Coda | D7 . | Eb7 | D7 | G7 . | % . |.
     {end_of_grid}
 
 The result will be similar to:
