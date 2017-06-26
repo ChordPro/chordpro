@@ -1,5 +1,6 @@
 0.77	xxx
 
+	Finalize design and implementation of chord grids.
 	Add support for chord fingerings, as suggested by Christian
 	Erickson (author of the Songsheet Generator).
 	Fix meaning of clo -G (was negated).

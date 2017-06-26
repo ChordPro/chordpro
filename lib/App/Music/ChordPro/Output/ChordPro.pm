@@ -91,8 +91,17 @@ sub generate_song {
 	    push(@s, "{end_of_$ctx}") if $ctx;
 	    $ctx = $elt->{context};
 	    if ( $ctx ) {
+		if ( $elt->{type} eq "set" &&
+		     $elt->{name} eq "gridparams" ) {
+		    @gridparams = @{ $elt->{value} };
+		}
 		if ( @gridparams ) {
-		    push(@s, "{start_of_$ctx " . join("x", @gridparams) . "}");
+		    my $t = "{start_of_$ctx ";
+		    $t .= $gridparams[2] . "+" if $gridparams[2];
+		    $t .= $gridparams[0];
+		    $t .= "x" . $gridparams[1] if $gridparams[1];
+		    $t .= "+" . $gridparams[3] if $gridparams[3];
+		    push( @s, $t );
 		}
 		else {
 		    push(@s, "{start_of_$ctx}");
@@ -301,7 +310,7 @@ sub gridline {
 	    }
 	}
 	else {
-	    $res .= $t->{comment};
+	    $res .= $t->{text};
 	}
 	$res =~ s/^\[\]//;
 	$line .= $res;

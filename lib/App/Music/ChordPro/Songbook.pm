@@ -272,12 +272,23 @@ sub decompose_grid {
     my ($self, $line) = @_;
     $line =~ s/^\s+//;
     $line =~ s/\s+$//;
-    my $rest;
     my $orig;
-    if ( $line =~ /(.*\|\S*)\s([^\|]*)$/ ) {
-	$line = $1;
-	$rest = { $self->cdecompose( $orig = $2 ) };
+    my %res;
+    if ( $line !~ /\|/ ) {
+	$res{margin} = { $self->cdecompose($line), orig => $line };
+	$line = "";
     }
+    else {
+	if ( $line =~ /(.*\|\S*)\s([^\|]*)$/ ) {
+	    $line = $1;
+	    $res{comment} = { $self->cdecompose($2), orig => $2 };
+	}
+	if ( $line =~ /^([^|]+?)\s*(\|.*)/ ) {
+	    $line = $2;
+	    $res{margin} = { $self->cdecompose($1), orig => $1 };
+	}
+    }
+
     my @tokens = split( ' ', $line );
     foreach ( @tokens ) {
 	if ( $_ eq "|:" || $_ eq "{" ) {
@@ -311,8 +322,7 @@ sub decompose_grid {
 	    $_ = { chord => $self->chord($_), class => "chord" };
 	}
     }
-    return ( tokens => \@tokens,
-	     $rest ? ( comment => $rest, orig => $orig ) : () );
+    return ( tokens => \@tokens, %res );
 }
 
 sub dir_split {
@@ -343,12 +353,17 @@ sub directive {
 	do_warn("Already in " . ucfirst($in_context) . " context\n")
 	  if $in_context;
 	$in_context = $1;
-	if ( $in_context eq "grid" && $arg && $arg =~ /^(\d+)(?:x(\d+))?$/ ) {
+	if ( $in_context eq "grid" && $arg &&
+	     $arg =~ m/^
+		       (?: (\d+) \+)?
+		       (\d+) (?: x (\d+) )?
+		       (?:\+ (\d+) )?
+		       $/x ) {
 	    do_warn("Invalid grid params: $arg (must be non-zero)"), return
-	      unless $1;
+	      unless $2;
 	    $self->add( type => "set",
 			name => "gridparams",
-			value => [ $1, $2 ] );
+			value => [ $2, $3, $1, $4 ] );
 	}
 	else {
 	    do_warn("Garbage in start_of_$1: $arg (ignored)\n")
@@ -768,6 +783,11 @@ sub transpose {
 	    foreach ( @{ $item->{tokens} } ) {
 		next unless $_->{class} eq "chord";
 		$_->{chord} = $self->xpchord( $_->{chord}, $xpose );
+	    }
+	    if ( $item->{margin} && exists $item->{margin}->{chords} ) {
+		foreach ( @{ $item->{margin}->{chords} } ) {
+		    $_ = $self->xpchord( $_, $xpose );
+		}
 	    }
 	    if ( $item->{comment} && exists $item->{comment}->{chords} ) {
 		foreach ( @{ $item->{comment}->{chords} } ) {

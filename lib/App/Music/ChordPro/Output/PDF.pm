@@ -289,6 +289,7 @@ sub generate_song {
 
     my $grid_cellwidth;
     my $grid_barwidth = 0.5 * $fonts->{chord}->{size};
+    my $grid_margin;
 
     my %propstack;
 
@@ -459,7 +460,10 @@ sub generate_song {
 	    $pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
 
 	    gridline( $elt, $x, $y,
-		      $grid_cellwidth, $grid_barwidth, $ps );
+		      $grid_cellwidth,
+		      $grid_barwidth,
+		      $grid_margin,
+		      $ps );
 
 	    $y -= $vsp;
 	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
@@ -643,6 +647,7 @@ sub generate_song {
 		my @v = @{ $elt->{value} };
 		my $cells;
 		my $bars = 8;
+		$grid_margin = [ 0, 0 ];
 		if ( $v[1] ) {
 		    $cells = $v[0] * $v[1];
 		    $bars = $v[0];
@@ -650,10 +655,12 @@ sub generate_song {
 		else {
 		    $cells = $v[0];
 		}
+		$cells += $grid_margin->[0] = $v[2] if $v[2];
+		$cells += $grid_margin->[1] = $v[3] if $v[3];
 		$grid_cellwidth = ( $ps->{papersize}->[0]
 				    - $ps->{marginleft}
 				    - $ps->{marginright}
-				    - (1+$cells)*$grid_barwidth
+				    - ($cells)*$grid_barwidth
 				  ) / $cells;
 	    }
 	    next;
@@ -872,14 +879,14 @@ sub is_bar {
 }
 
 sub gridline {
-    my ( $elt, $x, $y, $cellwidth, $barwidth, $ps ) = @_;
+    my ( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps ) = @_;
 
     # Grid context.
 
     my $pr = $ps->{pr};
     my $fonts = $ps->{fonts};
 
-    $x += $barwidth/2;
+    $x += $barwidth;
     $cellwidth += $barwidth;
 
     # Use the chords font for the chords, and for the symbols size.
@@ -900,6 +907,21 @@ sub gridline {
     my $prevbar;
     my @tokens = @{ $elt->{tokens} };
     my $t;
+
+    if ( $margin->[0] ) {
+	$x -= $barwidth;
+	if ( $elt->{margin} ) {
+	    my $t = $elt->{margin};
+	    if ( $t->{chords} ) {
+		$t->{text} = "";
+		for ( 0..$#{ $t->{chords} } ) {
+		    $t->{text} .= $t->{chords}->[$_] . $t->{phrases}->[$_];
+		}
+	    }
+	    $pr->text( $t->{text}, $x, $y, $fonts->{comment} );
+	}
+	$x += $margin->[0] * $cellwidth + $barwidth;
+    }
 
     foreach my $i ( 0 .. $#tokens ) {
 	my $token = $tokens[$i];
@@ -981,7 +1003,7 @@ sub gridline {
 	}
     }
 
-    if ( $elt->{comment} ) {
+    if ( $margin->[1] && $elt->{comment} ) {
 	my $t = $elt->{comment};
 	if ( $t->{chords} ) {
 	    $t->{text} = "";
@@ -1432,7 +1454,7 @@ sub configurator {
     $fonts->{comment}        ||= { %{ $fonts->{text}  } };
     $fonts->{toc}	     ||= { %{ $fonts->{text}  } };
     $fonts->{empty}	     ||= { %{ $fonts->{text}  } };
-    $fonts->{grid}           ||= { %{ $fonts->{comment} } };
+    $fonts->{grid}           ||= { %{ $fonts->{chord} } };
     $fonts->{chordgrid}      ||= { %{ $fonts->{comment} } };
     $fonts->{chordgrid_capo} ||= { %{ $fonts->{text} } };
     $fonts->{chordfingers}     = { name => 'ZapfDingbats' };
