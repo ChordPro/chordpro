@@ -86,7 +86,7 @@ sub opendialog {
     my $fd = Wx::FileDialog->new
       ($self, _T("Choose ChordPro file"),
        "", "",
-       "ChordPro files (*.cho,*.crd,*.chopro,*.chord,*.chordpro)|*.cho;*.crd;*.chopro;*.chord;*.chordpro|All files|*.*",
+       "ChordPro files (*.cho,*.crd,*.chopro,*.chord,*.chordpro,*.pro)|*.cho;*.crd;*.chopro;*.chord;*.chordpro;*.pro|All files|*.*",
        0|wxFD_OPEN|wxFD_FILE_MUST_EXIST,
        wxDefaultPosition);
     my $ret = $fd->ShowModal;
