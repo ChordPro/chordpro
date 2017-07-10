@@ -6,6 +6,6 @@ lib/App/Music/ChordPro/Wx/Main_wxg.pm
 lib/App/Music/ChordPro/Wx/PreferencesDialog.pm
 lib/App/Music/ChordPro/Wx/PreferencesDialog.wxg
 lib/App/Music/ChordPro/Wx/PreferencesDialog_wxg.pm
-res/icons/chordpro.ico
-res/icons/chordpro.svg
+lib/App/Music/ChordPro/res/icons/chordpro.ico
+lib/App/Music/ChordPro/res/icons/chordpro.svg
 script/wxchordpro.pl
