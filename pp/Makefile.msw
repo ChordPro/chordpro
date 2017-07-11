@@ -1,4 +1,5 @@
 # nmake file for MS Windows + CitrusPerl
+# Based on 32-bit nmake and CitrusPerl 5.16 with wxWidgets 2.8.
 
 chordpro.exe : chordpro.pp
 	pp --output=chordpro.exe @chordpro.pp ../script/chordpro.pl

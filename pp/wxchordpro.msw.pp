@@ -8,3 +8,6 @@
 --link=wxmsw30u_aui_gcc_citrusperl.dll
 --link=wxbase30u_xml_gcc_citrusperl.dll
 --link=wxbase30u_net_gcc_citrusperl.dll
+--link=wxmsw30u_propgrid_gcc_citrusperl.dll
+--link=wxmsw30u_webview_gcc_citrusperl.dll
+--link=wxmsw30u_ribbon_gcc_citrusperl.dll
