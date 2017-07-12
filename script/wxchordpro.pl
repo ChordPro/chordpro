@@ -16,6 +16,11 @@ use App::Packager;
 # App::Music::ChordPro::Wx::Main is the main entry of the program.
 use base qw(Wx::App App::Music::ChordPro::Wx::Main);
 
+if ( @ARGV == 1 && $ARGV[0] eq "--quit" ) {
+    # This is to allow installers to fake an initial run.
+    exit;
+}
+
 sub OnInit {
     my ( $self ) = shift;
 
