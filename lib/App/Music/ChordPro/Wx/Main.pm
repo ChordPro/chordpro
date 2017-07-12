@@ -395,7 +395,7 @@ sub OnHelp_Config {
 sub OnHelp_Example {
     my ($self, $event) = @_;
     return unless $self->checksaved;
-    $self->openfile( ::findlib( "res/examples/swinglow.cho" ) );
+    $self->openfile( ::findlib( "examples/swinglow.cho" ) );
     undef $self->{_currentfile};
     $self->{t_source}->SetModified(1);
 }
