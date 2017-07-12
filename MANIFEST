@@ -25,6 +25,8 @@ pp/GNUmakefile.lnx
 pp/Makefile.msw
 pp/README
 pp/chordpro.pp
+pp/chordproinst.bmp
+pp/innosetup.iss
 pp/wxchordpro.lnx.pp
 pp/wxchordpro.msw.pp
 pp/wxchordpro.pp
