@@ -3,7 +3,9 @@ _This information may be sub-optimal and/or incomplete. Please help improving it
 Download Citrus Perl from <http://www.citrusperl.com/p/download.html>.
 Install according to the directions on the site.
 
-One of the desktop icons that will be installed is `citrusterm`. With this tool you can start a command prompt window that is preconfigured for Citrus Perl. In this command prompt window type:
+An important tool is `citrusterm` which you can find in the CitrusPerl `bin` folder. With this tool you can start a command prompt window that is preconfigured for Citrus Perl. It may be convenient to create a desktop shortcut for this.
+
+Start `citrusterm` and in the command prompt window type:
 
 `cpan install App::Music::ChordPro::Wx`
 
