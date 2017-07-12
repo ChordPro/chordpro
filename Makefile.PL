@@ -22,7 +22,7 @@ WriteMakefile
 		   },
 
  PREREQ_PM      => {
-		    'App::Music::ChordPro'   => '0.70',
+		    'App::Music::ChordPro'   => $version,
 		    'Wx' => 0.9912,
 		   },
  TEST_REQUIRES  => {
