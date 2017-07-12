@@ -9,6 +9,6 @@ Start `citrusterm` and in the command prompt window type:
 
 `cpan install App::Music::ChordPro::Wx`
 
-This will download and install the ChordPro program `wxchordpro`. It can be executed from the citrusterm command prompt. Alternatively, you can add a shortcut icon to the desktop.
+This will download and install the ChordPro program `wxchordpro`. It will be installed in the CitrusPerl `bin` folder and can be executed from the citrusterm command prompt. Alternatively, you can add a shortcut icon to the desktop.
 
 You may now proceed to [[Getting Started|ChordPro Getting Started]].
