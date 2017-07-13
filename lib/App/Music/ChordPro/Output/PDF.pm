@@ -1248,7 +1248,7 @@ sub chordgrid {
 
     my $info = App::Music::ChordPro::Chords::chord_info($name);
     unless ( $info ) {
-	warn("PDF: Skipping grid for unknown chord $name\n");
+	warn("PDF: Skipping diagram for unknown chord $name\n");
 	return;
     }
 
