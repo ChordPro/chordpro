@@ -783,6 +783,10 @@ EndOfAbout
 
 sub app_usage {
     my ($fh, $exit) = @_;
+    my %cfg;
+    for ( qw( config userconfig sysconfig) ) {
+	$cfg{$_} = $configs{$_} || "no default";
+    }
     print ${fh} <<EndOfUsage;
 Usage: $0 [ options ] [ file ... ]
 
@@ -821,11 +825,11 @@ Options marked with - are ignored.
     --4-up  -4                    Not supported
 
 Configuration options:
-    --config=CFG        Project specific config file ($configs{config})
+    --config=CFG        Project specific config file ($cfg{config})
     --noconfig          Don't use a project specific config file
-    --userconfig=CFG    User specific config file ($configs{userconfig})
+    --userconfig=CFG    User specific config file ($cfg{userconfig})
     --nouserconfig      Don't use a user specific config file
-    --sysconfig=CFG     System specific config file ($configs{sysconfig})
+    --sysconfig=CFG     System specific config file ($cfg{sysconfig})
     --nosysconfig       Don't use a system specific config file
     --nolegacyconfig    Don't use a Chord/Chordii legacy config file
     --nodefaultconfigs  -X  Don't use any default config files
