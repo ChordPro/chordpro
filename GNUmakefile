@@ -52,11 +52,18 @@ release :
 
 LIB := lib/App/Music/ChordPro
 RES := ${LIB}/res
+PODSELECT := podselect
 
-resources : ${RES}/config/chordpro.json
+resources : ${RES}/config/chordpro.json ${RES}/pod/ChordPro.pod ${RES}/pod/Config.pod
 
 ${RES}/config/chordpro.json : ${LIB}/Config.pm
 	$(PERL) $< > $@
+
+${RES}/pod/ChordPro.pod : ${LIB}.pm
+	${PODSELECT} $< > $@
+
+${RES}/pod/Config.pod : ${LIB}/Config.pm
+	${PODSELECT} $< > $@
 
 # Verify JSON data
 
