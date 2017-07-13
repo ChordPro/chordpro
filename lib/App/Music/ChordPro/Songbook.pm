@@ -140,7 +140,9 @@ sub parsefile {
 	$showgrids = $::config->{chordgrid}->{show};
     }
 
-    if ( $showgrids =~ /^(user|all)$/ && $chordtype =~ /^[RN]$/ ) {
+    if ( $showgrids =~ /^(user|all)$/
+	 && defined($chordtype)
+	 && $chordtype =~ /^[RN]$/ ) {
 	$diag->{orig} = "(End of Song)";
 	do_warn("Chord grids suppressed for Nasville/Roman chords");
 	$showgrids = "none";
