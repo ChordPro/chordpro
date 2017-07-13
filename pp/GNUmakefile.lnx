@@ -16,7 +16,7 @@ wxchordpro-sa : res
 	${PP} --output=wxchordpro @wxchordpro.lnx.pp ../script/wxchordpro.pl
 
 res :
-	: test -f ../Makefile && make -C .. -f Makefile resources
+	test -f ../GNUmakefile && make -C .. -f GNUmakefile resources
 
 clean ::
 	rm -f *.pp.deps *~ chordpro wxchordpro
