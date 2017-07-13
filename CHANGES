@@ -1,3 +1,12 @@
+0.80	Jul 13 2017
+
+	(PDF) Improve terminology in warning about unkown chords.
+	Prevent undefined warnings when a song has no chords.
+	(pp) Allow resource updating.
+	Prevent undefined warnings when the system provides no configs.
+	Add missing POD resources for packaged binaries.
+	Supply usage info and exit when run without action/file arguments.
+
 0.79	Jul 12 2017
 
 	Mostly packing/packaging fixes.

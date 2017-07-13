@@ -20,6 +20,8 @@ lib/App/Music/ChordPro/Wx/PreferencesDialog_wxg.pm
 lib/App/Music/ChordPro/res/config/chordpro.json
 lib/App/Music/ChordPro/res/config/ukulele.json
 lib/App/Music/ChordPro/res/examples/swinglow.cho
+lib/App/Music/ChordPro/res/pod/ChordPro.pod
+lib/App/Music/ChordPro/res/pod/Config.pod
 pp/GNUmakefile.msw
 pp/GNUmakefile.lnx
 pp/Makefile.msw
