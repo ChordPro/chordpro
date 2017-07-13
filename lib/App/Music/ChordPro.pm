@@ -736,6 +736,9 @@ sub app_setup {
 	exit 0;
     }
 
+    # At this point, there should be filename argument(s).
+    app_usage(\*STDERR, 1) unless @ARGV;
+
     # Return result.
     $options;
 }
