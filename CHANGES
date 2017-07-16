@@ -1,4 +1,4 @@
-0.81
+0.81	Jul 16 2017
 
 	Fixed problem where wxChordPro couldn't preview.
 	Restructured the files for packaging support.
