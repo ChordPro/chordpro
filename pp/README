@@ -1,31 +1,39 @@
-EXPERIMENTAL support for PAR packaging
-======================================
+Support for PAR packaging
+=========================
 
-GNUmakefile.lnx : Makefile for Linux
+For consistency, CitrusPerl is used. Currently 5.24.1.
+
+linux
+-----
+
+  GNUmakefile : Makefile
 
   Targets: chordpro (standalone binary)
   	   wxchordpro (standalone binary)
 
-  For wxchordpro you need to have wxPerl and Alien-wxWidgets
-  installed.
+  wxchordpro.pp : pp options for wxchordpro
+		  (Linux, wxWidgets 3.0, all Wx libraries packaged)
 
-Makefile.msw : Makefile (dmake) for Microsoft Windows.
-GNUmakefile.msw : Makefile (gmake) for Microsoft Windows.
+windows
+-------
 
-  Based on CitrusPerl 5.24.1 with wxWidgets 3.0.
-  (gmake comes with CitrusPerl)
-  
+  ** Note: Make must be run from a CitrusTerm window.
+
+  Makefile : Makefile (dmake) for Microsoft Windows. Obsolete.
+  GNUmakefile : Makefile (gmake) for Microsoft Windows.
+
   Targets: chordpro.exe (standalone binary)
   	   wxchordpro.exe (standalone binary)
 
-chordpro.pp : pp options for chordpro (generic)
+  wxchordpro.pp : pp options for wxchordpro
+		  (MSWindows, all Wx libraries packaged)
 
-wxchordpro.pp : pp options for wxchordpro (generic)
+common
+------
 
-wxchordpro.lnx.pp : pp options for wxchordpro
-		    (Linux, wxWidgets 3.0, all Wx libraries packaged)
+  chordpro.pp : pp options for chordpro (generic)
 
-wxchordpro.msw.pp : pp options for wxchordpro
-		    (MSWindows, all Wx libraries packaged)
+  wxchordpro.pp : pp options for wxchordpro (generic)
+
 
 
