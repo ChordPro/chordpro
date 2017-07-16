@@ -4,7 +4,7 @@ use 5.010;
 
 package App::Music::ChordPro;
 
-our $VERSION = "0.80";
+our $VERSION = "0.81";
 
 =head1 NAME
 
@@ -736,8 +736,9 @@ sub app_setup {
 	exit 0;
     }
 
-    # At this point, there should be filename argument(s).
-    app_usage(\*STDERR, 1) unless @ARGV;
+    # At this point, there should be filename argument(s)
+    # unless we're embedded.
+    app_usage(\*STDERR, 1) unless $::__EMBEDDED__ || @ARGV;
 
     # Return result.
     $options;
