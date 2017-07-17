@@ -1,4 +1,5 @@
 @../common/wxchordpro.pp
+--module=Wx::WebView
 --link=wxbase30u_gcc_citrusperl.dll
 --link=wxbase30u_net_gcc_citrusperl.dll
 --link=wxbase30u_xml_gcc_citrusperl.dll
