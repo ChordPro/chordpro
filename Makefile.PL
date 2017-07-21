@@ -31,16 +31,24 @@ WriteMakefile
 		   },
 
  META_MERGE => {
-     license          => "perl_5",
-     resources        => { homepage => "http://www.chordpro.org" },
-     provides         => {
+     license   => "perl_5",
+     resources => {
+	 license    => "http://dev.perl.org/licenses/",
+	 homepage   => "http://www.chordpro.org",
+	 repository => {
+	     web  => "https://github.com/sciurius/chordpro",
+	     url  => "git://github.com/sciurius/chordpro.git",
+	     type => "git",
+	 },
+     },
+     provides => {
 	 chordpro => { file => "script/chordpro",
 		       version => $version },
 	 "App::Music::ChordPro"
 		  => { file => "lib/App/Music/ChordPro.pm",
 		       version => $version },
      },
-     no_index         => {
+     no_index => {
          file => [
 	    "lib/App/Music/ChordPro/Songbook.pm",
 	    "lib/App/Music/ChordPro/Chords.pm",
