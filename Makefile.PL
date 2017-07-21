@@ -5,14 +5,15 @@ exit 0 if $ENV{AUTOMATED_TESTING} && $] < 5.010000;
 
 use ExtUtils::MakeMaker;
 
-my $master = 'lib/App/Music/ChordPro.pm';
+my $master = 'lib/App/Music/ChordPro/Version.pm';
 my $version = MM->parse_version($master);
+$master =~ s;/Version;;;
 
 WriteMakefile
 (
  NAME		=> 'App::Music::ChordPro',
  ABSTRACT_FROM  => $master,
- VERSION_FROM	=> $master,
+ VERSION	=> $version,
  AUTHOR	        => 'Johan Vromans <jvromans@squirrel.nl>',
 
  INSTALLDIRS	=> 'site',
