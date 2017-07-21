@@ -12,6 +12,7 @@ lib/App/Music/ChordPro/Output/Debug.pm
 lib/App/Music/ChordPro/Output/PDF.pm
 lib/App/Music/ChordPro/Output/Text.pm
 lib/App/Music/ChordPro/Songbook.pm
+lib/App/Music/ChordPro/Version.pm
 lib/App/Music/ChordPro/Wx.pm
 lib/App/Music/ChordPro/Wx/Main.pm
 lib/App/Music/ChordPro/Wx/Main_wxg.pm
