@@ -18,6 +18,7 @@ sub new {
 # Parser context.
 my $def_context = "";
 my $in_context = $def_context;
+my $grid_arg;
 
 # Local transposition.
 my $xpose;
@@ -54,6 +55,7 @@ sub parsefile {
       if exists($self->{songs}->[-1]->{body});
     $self->{songs}->[-1]->{structure} = "linear";
     $xpose = 0;
+    $grid_arg = '1+4x4+1';
     @used_chords = ();
     %warned_chords = ();
     App::Music::ChordPro::Chords::reset_song_chords();
@@ -355,6 +357,7 @@ sub directive {
 	do_warn("Already in " . ucfirst($in_context) . " context\n")
 	  if $in_context;
 	$in_context = $1;
+	$arg = $grid_arg if $in_context eq "grid" && $arg eq "";
 	if ( $in_context eq "grid" && $arg &&
 	     $arg =~ m/^
 		       (?: (\d+) \+)?
@@ -366,6 +369,7 @@ sub directive {
 	    $self->add( type => "set",
 			name => "gridparams",
 			value => [ $2, $3, $1, $4 ] );
+	    $grid_arg = $arg;
 	}
 	else {
 	    do_warn("Garbage in start_of_$1: $arg (ignored)\n")
