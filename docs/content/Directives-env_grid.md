@@ -34,6 +34,8 @@ It is possible to specify room for margin notes, both left side and right side, 
 
 Both margins are optional and may be omitted together with their `+` symbols.
 
+If no argument is supplied to `start_of_grid` then the values from the preceding grid, if any, are used. If the first `start_of_grid` does not have an argument, a default value `1+4x4+1` is used.
+
 The grid input lines consist of space-separated tokens, which are either valid chords or special symbols. Spaces are not significant but can be used e.g. to align chords in the input lines. 
 
 Chords are put into the cells. If a cell does not need to contain a chord, the placeholder `.` (period) can be used to designate an empty cell.
