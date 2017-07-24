@@ -19,6 +19,11 @@ lib/App/Music/ChordPro/Wx/Main_wxg.pm
 lib/App/Music/ChordPro/Wx/PreferencesDialog.pm
 lib/App/Music/ChordPro/Wx/PreferencesDialog_wxg.pm
 lib/App/Music/ChordPro/res/config/chordpro.json
+lib/App/Music/ChordPro/res/config/nashville.json
+lib/App/Music/ChordPro/res/config/roman.json
+lib/App/Music/ChordPro/res/config/style_chordii.json
+lib/App/Music/ChordPro/res/config/style_modern1.json
+lib/App/Music/ChordPro/res/config/style_modern2.json
 lib/App/Music/ChordPro/res/config/ukulele.json
 lib/App/Music/ChordPro/res/examples/swinglow.cho
 lib/App/Music/ChordPro/res/pod/ChordPro.pod
