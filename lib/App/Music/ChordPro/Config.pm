@@ -247,6 +247,10 @@ This is the current built-in configuration file, showing all settings.
   		"name" : "Times-Roman",
   		"size" : 11
   	    },
+  	    "grid" : {
+  		"name" : "Helvetica",
+  		"size" : 10
+  	    },
   	},
   
   	// Fonts that can be specified, but need not.
