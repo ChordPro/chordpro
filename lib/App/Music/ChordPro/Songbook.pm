@@ -19,6 +19,7 @@ sub new {
 my $def_context = "";
 my $in_context = $def_context;
 my $grid_arg;
+my $grid_cells;
 
 # Local transposition.
 my $xpose;
@@ -56,6 +57,7 @@ sub parsefile {
     $self->{songs}->[-1]->{structure} = "linear";
     $xpose = 0;
     $grid_arg = '1+4x4+1';
+    $in_context = $def_context;
     @used_chords = ();
     %warned_chords = ();
     App::Music::ChordPro::Chords::reset_song_chords();
@@ -102,7 +104,8 @@ sub parsefile {
 	# For practical reasons: a prime should always be an apostroph.
 	s/'/\x{2019}/g;
 
-	if ( /\{(.*)\}\s*$/ ) {
+	# For now, directives should go on their own lines.
+	if ( /^\s*\{(.*)\}\s*$/ ) {
 	    $options->{_legacy}
 	      ? $self->global_directive( $1, 1 )
 	      : $self->directive($1);
@@ -243,7 +246,7 @@ sub decompose {
     $line =~ s/\s+$//;
     my @a = split(/(\[.*?\])/, $line, -1);
 
-    die("Illegal line $.:\n$_\n") unless @a; #### TODO
+    die(msg("Illegal line")."\n") unless @a; #### TODO
 
     if ( @a == 1 ) {
 	return ( phrases => [ $line ] );
@@ -276,6 +279,8 @@ sub decompose_grid {
     my ($self, $line) = @_;
     $line =~ s/^\s+//;
     $line =~ s/\s+$//;
+    return ( tokens => [] ) if $line eq "";
+
     my $orig;
     my %res;
     if ( $line !~ /\|/ ) {
@@ -286,14 +291,19 @@ sub decompose_grid {
 	if ( $line =~ /(.*\|\S*)\s([^\|]*)$/ ) {
 	    $line = $1;
 	    $res{comment} = { $self->cdecompose($2), orig => $2 };
+	    do_warn( "No margin cell for trailing comment" )
+	      unless $grid_cells->[2];
 	}
 	if ( $line =~ /^([^|]+?)\s*(\|.*)/ ) {
 	    $line = $2;
 	    $res{margin} = { $self->cdecompose($1), orig => $1 };
+	    do_warn( "No cell for margin text" )
+	      unless $grid_cells->[1];
 	}
     }
 
     my @tokens = split( ' ', $line );
+    my $nbt;			# non-bar tokens
     foreach ( @tokens ) {
 	if ( $_ eq "|:" || $_ eq "{" ) {
 	    $_ = { symbol => $_, class => "bar" };
@@ -321,10 +331,15 @@ sub decompose_grid {
 	}
 	elsif ( $_ eq "." ) {
 	    $_ = { symbol => $_, class => "space" };
+	    $nbt++;
 	}
 	else {
 	    $_ = { chord => $self->chord($_), class => "chord" };
+	    $nbt++;
 	}
+    }
+    if ( $nbt > $grid_cells->[0] ) {
+	do_warn( "Too few cells for grid content" );
     }
     return ( tokens => \@tokens, %res );
 }
@@ -370,6 +385,7 @@ sub directive {
 			name => "gridparams",
 			value => [ $2, $3, $1, $4 ] );
 	    $grid_arg = $arg;
+	    $grid_cells = [ $2 * ( $3//1 ), ($1//0), ($4//0) ];
 	}
 	else {
 	    do_warn("Garbage in start_of_$1: $arg (ignored)\n")
