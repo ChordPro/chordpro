@@ -35,6 +35,7 @@ sub init {
 
     $prefctl ||=
       {
+       cfgpreset => "Default",
        configfile => "",
        pdfviewer => "",
       };
@@ -99,10 +100,11 @@ sub opendialog {
 sub openfile {
     my ( $self, $file ) = @_;
     unless ( $self->{t_source}->LoadFile($file) ) {
-	my $md = Wx::MessageDialog( $self,
-				    "Error opening $file: $!",
-				    "File open error",
-				    wxOK | wxICON_ERROR );
+	my $md = Wx::MessageDialog->new
+	  ( $self,
+	    "Error opening $file: $!",
+	    "File open error",
+	    wxOK | wxICON_ERROR );
 	$md->ShowModal;
 	$md->Destroy;
 	return;
@@ -164,9 +166,9 @@ sub preview {
     # Setup configuration.
     use App::Music::ChordPro::Config;
     $options->{nouserconfig} = 1;
-    if ( $self->{prefs_configfile} ) {
+    if ( $self->{_cfgpresetfile} ) {
 	$options->{noconfig} = 0;
-	$options->{config} = $self->{prefs_configfile};
+	$options->{config} = $self->{_cfgpresetfile};
     }
     else {
 	$options->{noconfig} = 1;
@@ -177,24 +179,41 @@ sub preview {
     use App::Music::ChordPro::Songbook;
     my $s = App::Music::ChordPro::Songbook->new;
 
-    my @msgs;
-    local $SIG{__WARN__} = sub {
-	push( @msgs, join("", @_) );
-	Wx::LogWarning($msgs[-1]);
+    my $msgs;
+    my $fatal;
+    $SIG{__WARN__} = sub {
+	Wx::LogWarning(@_);
+	$msgs++;
     };
 
     $options->{diagformat} = 'Line %n, %m';
-    $s->parsefile( $preview_cho, $options );
+    eval { $s->parsefile( $preview_cho, $options ) };
+    if ( $@ ) {
+	Wx::LogError($@);
+	$msgs++;
+	$fatal++;
+    }
 
-    if ( @msgs ) {
-	Wx::LogStatus( @msgs . " message" .
-		       ( @msgs == 1 ? "" : "s" ) . "." );
-	Wx::LogError("Problems found!");
-	return;
+    if ( $msgs ) {
+	Wx::LogStatus( $msgs . " message" .
+		       ( $msgs == 1 ? "" : "s" ) . "." );
+	if ( $fatal ) {
+	    Wx::LogError( "Fatal problems found!" );
+	    return;
+	}
+	else {
+	    Wx::LogWarning( "Problems found!" );
+	}
     }
 
     # Generate the songbook.
-    my $res = App::Music::ChordPro::Output::PDF->generate_songbook( $s, $options );
+    eval {
+	App::Music::ChordPro::Output::PDF->generate_songbook( $s, $options )
+    };
+    if ( $@ ) {
+	Wx::LogError($@);
+	return;
+    }
 
     if ( -e $preview_pdf ) {
 	Wx::LogStatus("Output generated, starting previewer");
@@ -422,7 +441,7 @@ sub OnAbout {
 
     if ( rand > 0.5 ) {
 	my $ai = Wx::AboutDialogInfo->new;
-	$ai->SetName("ChordPro Preview Editor");
+	$ai->SetName("ChordPro Preview *Editor");
 	$ai->SetVersion( $dd->($VERSION) );
 	$ai->SetCopyright("Copyright $year Johan Vromans <jvromans\@squirrel.nl>");
 	$ai->AddDeveloper("Johan Vromans <jvromans\@squirrel.nl>");
