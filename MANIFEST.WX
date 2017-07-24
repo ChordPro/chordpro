@@ -1,7 +1,5 @@
 lib/App/Music/ChordPro/Wx.pm
 lib/App/Music/ChordPro/Wx/Main.pm
-lib/App/Music/ChordPro/Wx/Main.pm
-lib/App/Music/ChordPro/Wx/Main_wxg.pm
 lib/App/Music/ChordPro/Wx/Main_wxg.pm
 lib/App/Music/ChordPro/Wx/PreferencesDialog.pm
 lib/App/Music/ChordPro/Wx/PreferencesDialog.wxg
