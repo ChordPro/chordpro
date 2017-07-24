@@ -1001,6 +1001,11 @@ sub gridline {
 	    $tokens[$k] = { symbol => " %", class => "bar" };
 	    $x += $cellwidth;
 	}
+	if ( $x > $ps->{papersize}->[0] ) {
+	    # This should be signalled by the parser.
+	    # warn("PDF: Too few cells for content\n");
+	    last;
+	}
     }
 
     if ( $margin->[1] && $elt->{comment} ) {
@@ -1454,7 +1459,7 @@ sub configurator {
     $fonts->{comment}        ||= { %{ $fonts->{text}  } };
     $fonts->{toc}	     ||= { %{ $fonts->{text}  } };
     $fonts->{empty}	     ||= { %{ $fonts->{text}  } };
-    $fonts->{grid}           ||= { %{ $fonts->{chord} } };
+    $fonts->{grid}           ||= { %{ $fonts->{comment} } };
     $fonts->{chordgrid}      ||= { %{ $fonts->{comment} } };
     $fonts->{chordgrid_capo} ||= { %{ $fonts->{text} } };
     $fonts->{chordfingers}     = { name => 'ZapfDingbats' };
