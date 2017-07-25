@@ -6,7 +6,7 @@ From the `Edit` menu choose `Preferences...`.
 
 ![](images/prf_cr_cfg_1.png)
 
-From the dropdown list, select `Custom`.
+From the Configuration dropdown list, select `Custom`.
 
 ![](images/prf_cr_cfg_2.png)
 
