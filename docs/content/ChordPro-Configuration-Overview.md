@@ -14,3 +14,8 @@ ChordPro tries to read several configuration files and combines their contents t
 4. A project specific configuration file is read from either:
 * `chordpro.json`
 * `.chordpro.json`
+
+Instead of a project specific configuration file you can specify arbitrary configuration files.
+
+* In the GUI, select `Preferences...` from the `Edit` menu. Using the configuration dropdown list, choose `Custom`. Click `...` for a file dialog to choose the desired configuration file.
+* On the command line, pass the name of the configuration file with `--config`, for example `--config=myconfig.json`. 
