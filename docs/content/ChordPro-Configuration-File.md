@@ -26,8 +26,11 @@ Layout doesn't matter, this document might as well have been written as:
 
     {"chordgrid":{"show":"none"}}
 
-The ChordPro configuration file consists of two parts, all optional. The first part is for generic settings, the second part is for output specific settings.
+The ChordPro configuration file consists of two parts, all optional.
 
-* [[The Generic Part|ChordPro Configuration Generic]]
-* [[PDF Output|ChordPro Configuration PDF]]
+* [[The Generic Part|ChordPro Configuration Generic]]  
+Generic settings.
+
+* [[PDF Output|ChordPro Configuration PDF]]  
+Specific settings for PDF output.
 
