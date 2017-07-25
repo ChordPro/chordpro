@@ -1,6 +1,6 @@
 ## Create a sample configuration using the command line
 
-_Note that the appearance of dialogs and file names may differ between systems._
+_Note that the syntax of file names may differ between systems._
 
 From the command prompt, type
 
