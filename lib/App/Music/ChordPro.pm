@@ -701,7 +701,7 @@ sub app_setup {
                 foreach my $c ( @$_ ) {
 		    # Check for resource names.
 		    if ( ! -r $c && $c !~ m;[/.]; ) {
-			my $t = ::findlib( "config/$c.json" );
+			my $t = ::findlib( "config/",lc($c).".json" );
 			$c = $t if $t;
 		    }
                     die("$c: $!\n") unless -r $c;
