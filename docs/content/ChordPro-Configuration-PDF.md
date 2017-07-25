@@ -2,15 +2,32 @@
 
 Layout definitions for PDF output are stored in the configuration under the key `"pdf"`.
 
+    {
+       // ... generic part ...
+       "pdf" : {
+         // ... layout definitions ...
+       },
+    }
 
-        // Papersize, 'a4' or [ 595, 842 ] etc.
+#### Papersize
+
+The size of the paper for which output must be formatted. The size can be specified either as the name of a known page size, e.g. `"a4"`, or as a 2-element list containing the width and height of the page in _PDF units_ (_DTP points_, _pt_, 1/72 inch).
+
         "papersize" : "a4",
+        // Same as: "papersize" : [ 595, 842 ]
 
-        // Space between columns, in pt.
+#### Inter-column space
+
+When output is produced in multiple columns, this is the space between the columns, in pt.
+
         "columnspace"  :  20,
 
-        // Page margins.
-        // Note that top/bottom exclude the head/footspace.
+#### Page margins
+
+Click on the image for a larger version.
+
+[![layout.png](images/layout.png)](images/layout-large.png)
+
         "margintop"    :  80,
         "marginbottom" :  40,
         "marginleft"   :  40,
@@ -18,12 +35,16 @@ Layout definitions for PDF output are stored in the configuration under the key 
         "headspace"    :  60,
         "footspace"    :  20,
 
-        // Special: head on first page only, add the headspace to
-        // the other pages so they become larger.
+#### Heading on first page only
+
+Put the heading on the first page only, and add the headspace to the other pages so they become larger.
+
         "head-first-only" : false,
 
-        // Spacings.
-        // Baseline distances as a factor of the font size.
+#### Spacing
+
+This controls the distance between lines as a factor of the font size.
+
         "spacing" : {
             "title"  : 1.2,
             "lyrics" : 1.2,
@@ -33,28 +54,33 @@ Layout definitions for PDF output are stored in the configuration under the key 
             "toc"    : 1.4,
             "empty"  : 1.0,
         },
-        // Note: By setting the font size and spacing for empty lines to
-        // smaller values, you get a fine(r)-grained control over the
-        // spacing between the various parts of the song.
 
-        // Style of chorus.
+Note: By setting the font size and spacing for empty lines to smaller values, you get fine-grained control over the spacing between the various parts of the song.
+
+#### Chorus style
+
+ChordPro can format a chorus in several different ways.
+
         "chorus" : {
+            // Indentation of the chorus.
             "indent"     :  0,
             // Chorus side bar.
             // Suppress by setting offset and/or width to zero.
             "bar" : {
-                "offset" :  8,
-                "width"  :  1,
-                "color"  : "black",
+                 "offset" :  8,
+                 "width"  :  1,
+                 "color"  : "black",
             },
-          // Recall style: Print the tag using the type.
-          // Optionally quote the lines of the preceding chorus.
-          "recall" : {
-               "tag"   : "Chorus",
-               "type"  : "comment",
-               "quote" : false,
-          },
+            // Recall style: Print the tag using the type.
+            // Optionally quote the lines of the preceding chorus.
+            "recall" : {
+                 "tag"   : "Chorus",
+                 "type"  : "comment",
+                 "quote" : false,
+            },
         },
+
+####
 
         // Alternative songlines with chords in a side column.
         // Value is the column position.
