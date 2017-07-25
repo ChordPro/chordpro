@@ -33,10 +33,14 @@ A special style for songs that use Nashville numbering notation.
 
 [![style_nashville.png](images/style_nashville.png)](images/style_nashville.pdf)
 
+This style only sets the font for the chords, so it can be used in combination with other styles.
+
 ### Roman
 A special style for songs that use Roman numbering notation.
 
 [![style_roman.png](images/style_roman.png)](images/style_roman.pdf)
+
+This style only sets the font for the chords, so it can be used in combination with other styles.
 
 ### Ukulele
 This preset adds 4-chord tuning and ukulele chords.
