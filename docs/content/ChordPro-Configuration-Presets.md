@@ -4,7 +4,7 @@ ChordPro comes with a number of standard configurations.
 It is important to know that ChordPro always loads the default configuration and then adds the other configurations.
 
 * In the GUI, there is a dropdown list for the presets in the Preferences dialog.
-* On the command line, use `--config=`, e.g., `--config=myconf.json`.
+* On the command line, use `--config`, e.g., `--config=myconf.json`.
 
 _Click on the page thumbnails to see the full size version._
 
