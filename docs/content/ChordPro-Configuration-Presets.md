@@ -6,6 +6,8 @@ It is important to realise that ChordPro always loads the default configuration 
 * In the GUI, there is a dropdown list for the presets in the Preferences dialog.
 * On the command line, use `--config=`_NAME_.
 
+_Click on the page thumbnails to see the full size version._
+
 ### Default
 As the name implies, this is the default configuration. It accepts all ChordPro version 5 input.
 
