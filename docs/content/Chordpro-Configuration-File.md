@@ -76,7 +76,7 @@ Setting the tuning to any value except `"null"` will discard all built-in chords
 
     "tuning" : null,
 
-For example to specify tuning for a 4-string ukulele:
+For example, to specify tuning for a 4-string [soprano ukulele](https://en.wikipedia.org/wiki/Ukulele#Tuning):
 
     "tuning" : [ "G4", "C4", "E4", "A4" ],
 
@@ -94,7 +94,7 @@ The configuration file can hold any number of predefined chords.
             "frets" : [ 1, 1, 3, 3, 3, 1 ],
             "fingers" : [ 1, 1, 2, 3, 4, 1 ],
             "easy"  : true,
-	},
+        },
     ],
 
 ### Printing chord diagrams
