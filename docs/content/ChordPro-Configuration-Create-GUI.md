@@ -1,3 +1,5 @@
+## Create a sample configuration using the GUI
+
 _Note that the appearance of dialogs and file names may differ between systems._
 
 From the `Edit` menu choose `Preferences...`.
