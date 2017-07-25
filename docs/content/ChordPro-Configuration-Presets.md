@@ -1,7 +1,7 @@
 ## Preset configurations
 ChordPro comes with a number of standard configurations.
 
-It is important to realise that ChordPro always loads the default configuration and then adds the other configurations.
+It is important to know that ChordPro always loads the default configuration and then adds the other configurations.
 
 * In the GUI, there is a dropdown list for the presets in the Preferences dialog.
 * On the command line, use `--config=`_NAME_.
