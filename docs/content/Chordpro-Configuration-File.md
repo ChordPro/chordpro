@@ -72,7 +72,7 @@ Important: the keys `title` and `subtitle` must always be in this list.
 
 ### Strings and Tuning
 
-Setting the tuning to any value except `"null"` will discard all built-in chords!
+Setting the tuning to any value except `null` will discard all built-in chords!
 
     "tuning" : null,
 
