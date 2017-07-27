@@ -55,11 +55,15 @@ This controls the distance between lines as a factor of the font size.
             "empty"  : 1.0,
         },
 
-Note: By setting the font size and spacing for empty lines to smaller values, you get fine-grained control over the spacing between the various parts of the song.
+Note: By setting the spacing for `empt` to a small value, you get fine-grained control over the spacing between the various parts of the song.
 
 #### Chorus style
 
-ChordPro can format a chorus in several different ways.
+ChordPro can format a chorus in several different ways:
+
+* the chorus part can be indented;
+* a side bar can be drawn to the left of the chorus part;
+* the `{chorus}` directive can print a comment text (tag), or quote the preceding chorus, or both.
 
         "chorus" : {
             // Indentation of the chorus.
@@ -80,26 +84,36 @@ ChordPro can format a chorus in several different ways.
             },
         },
 
-####
+#### Chords in a side column
 
-        // Alternative songlines with chords in a side column.
-        // Value is the column position.
+This is an alternative style where the chords are placed in a separate column at the right of the lyrics. Chord changes are marked by underlining the lyrics.
+
+[![style_modern2.png](images/style_modern2.png)](images/style_modern2.pdf)
+
+        // This style is enabled by setting "chordscolumn" to a nonzero value.
+        // Value is the column position. 
         // "chordscolumn" : 400,
         "chordscolumn" :  0,
 
-        // A {titles: left} may conflict with customized formats.
-        // Set to non-zero to ignore the directive.
+#### Ignore {titles} directives
+
+Traditionally, the `{titles}` directive was used to control titles flush. ChordPro has a much more powerful mechanism but this can conflict with legacy `{titles}` directives. If you use custom title formatting, setting `titles-directive-ignore` to a true makes ChordPro ignore the legacy directives.
+
         "titles-directive-ignore" : false,
 
-        // Chord grids.
-        // A chord grid consists of a number of cells.
-        // Cell dimensions are specified by "width" and "height".
-        // The horizontal number of cells depends on the number of strings.
-        // The vertical number of cells is "vcells", which should
-        // be 4 or larger to accomodate most chords.
-        // The horizontal distance between grids is "hspace" cells.
-        // The vertical distance is "vspace" cells.
-        // "linewidth" is the thickness of the lines as a fraction of "width".
+#### Chord diagrams
+
+Chord diagrams are printed at the end of the song to show the chords used in the song.
+
+A chord diagram consists of a number of cells. Cell dimensions are specified by `width` and `height`.  
+The horizontal number of cells depends on the number of strings.  
+The vertical number of cells is `vcells`, which should be 4 or larger to accomodate most common chords.
+
+The horizontal distance between diagrams is `hspace` times the cell width.  
+The vertical distance between lines of diagrams is `vspace` times the cell height.
+
+`linewidth` is the thickness of the diagram lines as a fraction of the cell width.
+
         "chordgrid" : {
             "width"    :  6,
             "height"   :  6,
@@ -109,16 +123,29 @@ ChordPro can format a chorus in several different ways.
             "linewidth" : 0.1,
         },
 
+#### Even/odd page printing
+
+Pages can be printed neutrally (all pages the same) or with differing left and right pages.  
+This affects the page titles and footers.
+
         // Even/odd pages. A value of -1 denotes odd/even pages.
         "even-odd-pages" : 1,
 
-        // Formats.
-        "formats" : {
-            // Titles/Footers.
+#### Page headers and footers
 
-            // Titles/footers have 3 parts, which are printed left,
-            // centered and right.
-            // For even/odd printing, the order is reversed.
+ChordPro distinguishes three types of output pages:
+
+* the first page of the output: `first`;
+* the first page of a song: `title`;
+* all other pages: `default`.
+
+Each of these page types can have settings for a page title, subtitle and footer. The settings inherit from `default` to `title` to `first`. So a `title` page has everything a `default` page has, and a `first` page has everything a `title` page has.
+
+Each title, subtitle and footer has three parts, which are printed to the left of the page, centered, and right. When even/odd page printing is selected, the left and right parts are swapped on even pages.
+
+All heading strings may contain references to metadata in the form `%{`_NAME_`}`, for example `%{title}`. The current page number can be obtained with `%{page}`. For a complete descrition on how to use metadata in heading strings, see [[here|ChordPro Configuration Format Strings]].
+
+        "formats" : {
 
             // By default, a page has:
             "default" : {
@@ -130,6 +157,7 @@ ChordPro can format a chorus in several different ways.
                 // Title for ToC.
                 "toc-title" : "Table of Contents",
             },
+
             // The first page of a song has:
             "title" : {
                 // Title and subtitle.
@@ -138,6 +166,7 @@ ChordPro can format a chorus in several different ways.
                 // Footer with page number.
                 "footer"    : [ "", "", "%{page}" ],
             },
+
             // The very first output page is slightly different:
             "first" : {
                 // It has title and subtitle, like normal 'first' pages.
@@ -145,6 +174,8 @@ ChordPro can format a chorus in several different ways.
                 "footer"    : null,
             },
         },
+
+#### Fonts
 
         // Fonts.
         // Fonts can be specified by name (for the corefonts)
@@ -200,6 +231,11 @@ ChordPro can format a chorus in several different ways.
         // chordgrid      --> comment
         // chordgrid_capo --> text (but at a small size)
 
-        // This will show the page layout if non-zero.
+#### Helping develop a layout
+
+If `showlayout` is true, the margins and other page layout details are shown on the page. This can be helpful to determine the optimal settings for your desired layout.
+
+See also [Page margins](#configuration-file-contents-pdf-output_page-margins) above.
+
         "showlayout" : false,
 
