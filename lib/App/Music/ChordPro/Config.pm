@@ -73,8 +73,8 @@ This is the current built-in configuration file, showing all settings.
   	//  },
       ],
   
-      // Printing chord grids.
-      // "auto": automatically add unknown chords as empty grids.
+      // Printing chord diagrams.
+      // "auto": automatically add unknown chords as empty diagrams.
       // "show": prints the chords used in the song.
       //         "all": all chords used.
       //         "user": only prints user defined chords.
@@ -156,13 +156,13 @@ This is the current built-in configuration file, showing all settings.
 	// Set to non-zero to ignore the directive.
 	"titles-directive-ignore" : false,
   
-    	// Chord grids.
-  	// A chord grid consists of a number of cells.
+    	// Chord diagrams.
+  	// A chord diagram consists of a number of cells.
   	// Cell dimensions are specified by "width" and "height".
   	// The horizontal number of cells depends on the number of strings.
   	// The vertical number of cells is "vcells", which should
 	// be 4 or larger to accomodate most chords.
-  	// The horizontal distance between grids is "hspace" cells.
+  	// The horizontal distance between diagrams is "hspace" cells.
   	// The vertical distance is "vspace" cells.
 	// "linewidth" is the thickness of the lines as a fraction of "width".
   	"chordgrid" : {
