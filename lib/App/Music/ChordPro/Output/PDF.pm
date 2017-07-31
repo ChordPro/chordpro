@@ -95,7 +95,7 @@ my $lyrics_only = 0;		# suppress all chord lines
 my $chordscol = 0;		# chords in a separate column
 my $chordscapo = 0;		# capo in a separate column
 
-use constant SIZE_ITEMS => [ qw (chord text tab grid toc title footer) ];
+use constant SIZE_ITEMS => [ qw (chord text tab grid diagram toc title footer) ];
 
 sub generate_song {
     my ($s, $options) = @_;
@@ -553,20 +553,20 @@ sub generate_song {
 	    next;
 	}
 
-	if ( $elt->{type} eq "chord-grids" ) {
+	if ( $elt->{type} eq "diagrams" ) {
 
 	    my @chords = @{ $elt->{chords} };
 
-	    local $::config->{chordgrid}->{show} =
-	      $elt->{show} || $::config->{chordgrid}->{show};
+	    local $::config->{diagrams}->{show} =
+	      $elt->{show} || $::config->{diagrams}->{show};
 
 	    my $vsp = chordgrid_vsp( $elt, $ps );
 	    my $hsp = chordgrid_hsp( $elt, $ps );
 	    my $h = int( ( $ps->{papersize}->[0]
 			   - $ps->{marginleft}
 			   - $ps->{marginright}
-			   + $ps->{chordgrid}->{hspace}
-			     * $ps->{chordgrid}->{width} ) / $hsp );
+			   + $ps->{diagrams}->{hspace}
+			     * $ps->{diagrams}->{width} ) / $hsp );
 	    while ( @chords ) {
 		my $x = $x;
 		$checkspace->($vsp);
@@ -1228,16 +1228,16 @@ sub text_vsp {
 
 sub chordgrid_vsp {
     my ( $elt, $ps ) = @_;
-    $ps->{fonts}->{chordgrid}->{size} * $ps->{spacing}->{chords}
-      + 0.40 * $ps->{chordgrid}->{width}
-	+ $ps->{chordgrid}->{vcells} * $ps->{chordgrid}->{height}
-	  + $ps->{chordgrid}->{vspace} * $ps->{chordgrid}->{height};
+    $ps->{fonts}->{diagrams}->{size} * $ps->{spacing}->{chords}
+      + 0.40 * $ps->{diagrams}->{width}
+	+ $ps->{diagrams}->{vcells} * $ps->{diagrams}->{height}
+	  + $ps->{diagrams}->{vspace} * $ps->{diagrams}->{height};
 }
 
 sub chordgrid_hsp {
     my ( $elt, $ps ) = @_;
-    App::Music::ChordPro::Chords::strings() * $ps->{chordgrid}->{width}
-      + $ps->{chordgrid}->{hspace} * $ps->{chordgrid}->{width};
+    App::Music::ChordPro::Chords::strings() * $ps->{diagrams}->{width}
+      + $ps->{diagrams}->{hspace} * $ps->{diagrams}->{width};
 }
 
 my @Roman = qw( I II III IV V VI VI VII VIII IX X XI XII );
@@ -1246,10 +1246,10 @@ sub chordgrid {
     my ( $name, $x, $y, $ps ) = @_;
     my $x0 = $x;
 
-    my $gw = $ps->{chordgrid}->{width};
-    my $gh = $ps->{chordgrid}->{height};
+    my $gw = $ps->{diagrams}->{width};
+    my $gh = $ps->{diagrams}->{height};
     my $dot = 0.80 * $gw;
-    my $lw  = ($ps->{chordgrid}->{linewidth} || 0.10) * $gw;
+    my $lw  = ($ps->{diagrams}->{linewidth} || 0.10) * $gw;
 
     my $info = App::Music::ChordPro::Chords::chord_info($name);
     unless ( $info ) {
@@ -1263,10 +1263,10 @@ sub chordgrid {
     my $w = $gw * ($strings - 1);
 
     # Draw font name.
-    my $font = $ps->{fonts}->{chordgrid};
+    my $font = $ps->{fonts}->{diagrams};
     $pr->setfont($font);
     $name .= "*"
-      unless $info->{origin} == 0 || $::config->{chordgrid}->{show} eq "user";
+      unless $info->{origin} == 0 || $::config->{diagrams}->{show} eq "user";
     $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y - font_bl($font) );
     $y -= $font->{size} * $ps->{spacing}->{chords} + $dot/2 + $lw;
 
@@ -1277,7 +1277,7 @@ sub chordgrid {
 		   $ps->{fonts}->{chordgrid_capo}, $gh );
     }
 
-    my $v = $ps->{chordgrid}->{vcells};
+    my $v = $ps->{diagrams}->{vcells};
     my $h = $strings;
     $pr->hline( $x, $y - $_*$gh, $w, $lw ) for 0..$v;
 
@@ -1315,7 +1315,7 @@ sub chordgrid {
     # Note: vline must go under the circle.
     $pr->vline( $x0 + $_*$gw, $y, $gh*$v, $lw ) for 0..$h-1;
 
-    return $gw * ( $ps->{chordgrid}->{hspace} + $strings );
+    return $gw * ( $ps->{diagrams}->{hspace} + $strings );
 }
 
 sub set_columns {
@@ -1425,8 +1425,8 @@ sub configurator {
 
     # Chord grid width.
     if ( $options->{'chord-grid-size'} ) {
-	$pdf->{chordgrid}->{width} =
-	  $pdf->{chordgrid}->{height} =
+	$pdf->{diagrams}->{width} =
+	  $pdf->{diagrams}->{height} =
 	    $options->{'chord-grid-size'} /
 	      App::Music::ChordPro::Chords::strings();
     }
@@ -1459,8 +1459,10 @@ sub configurator {
     $fonts->{comment}        ||= { %{ $fonts->{text}  } };
     $fonts->{toc}	     ||= { %{ $fonts->{text}  } };
     $fonts->{empty}	     ||= { %{ $fonts->{text}  } };
-    $fonts->{grid}           ||= { %{ $fonts->{comment} } };
-    $fonts->{chordgrid}      ||= { %{ $fonts->{comment} } };
+    $fonts->{grid}           ||= { %{ $fonts->{chord} } };
+    $fonts->{grid_margin}    ||= { %{ $fonts->{comment} } };
+    $fonts->{diagram}        ||= { %{ $fonts->{comment} } };
+    $fonts->{diagram_capo}   ||= { %{ $fonts->{comment} } };
     $fonts->{chordgrid_capo} ||= { %{ $fonts->{text} } };
     $fonts->{chordfingers}     = { name => 'ZapfDingbats' };
     $fonts->{subtitle}->{size}       ||= $fonts->{text}->{size};

@@ -81,8 +81,8 @@
 	    "additionalProperties": {}
 	},
 
-	"chordgrid": {
-	    "description": "Chord grids at the end of songs.",
+	"diagrams": {
+	    "description": "Chord diagrams at the end of songs.",
 	    "properties": {
 
 		"auto": {
@@ -92,7 +92,7 @@
 		},
 
 		"show": {
-		    "description": "Show selected or all chord grids at end.",
+		    "description": "Show selected or all chord diagrams at end.",
 		    "type": "string",
 		    "enum": [ "all", "user", "none" ],
 		    "default": "all"
@@ -100,7 +100,7 @@
 
 		"sorted": {
 		    "default": false,
-		    "description": "Sort the grids.",
+		    "description": "Sort the diagrams.",
 		    "type": "boolean"
 		}
 	    },
@@ -638,9 +638,10 @@
 		"type": "string",
 		"pattern": "^[A-G][b#]?[1-9]$"
 	    }
-	}
+	},
+	"additionalProperties": false
     },
 
-    "additionalProperties": {}
+    "additionalProperties": false
 }
 

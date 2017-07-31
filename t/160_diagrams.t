@@ -53,7 +53,7 @@ my $song = {
 			'context' => '',
 			'origin' => 'song',
 			'show' => 'all',
-			'type' => 'chord-grids'
+			'type' => 'diagrams'
 		       }
 		      ],
 	   };
@@ -76,7 +76,7 @@ isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
 #use Data::Dumper; warn(Dumper($s));
 $song = {
 	    'settings' => {
-			   'showgrids' => 0
+			   'diagrams' => 0
 			  },
 	    'title' => 'Swing Low Sweet Chariot',
 	    'structure' => 'linear',
@@ -91,7 +91,7 @@ is_deeply( { %{ $s->{songs}->[0] } }, $song,
 	   "Grids suppressed" );
 
 # Prevent a dummy {body} for chord grids.
-$config->{chordgrid}->{show} = 0;
+$config->{diagrams}->{show} = 0;
 
 $s = App::Music::ChordPro::Songbook->new;
 
@@ -108,7 +108,7 @@ isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
 #use Data::Dumper; warn(Dumper($s));
 $song = {
 	    'settings' => {
-			   'showgrids' => 1
+			   'diagrams' => 1
 			  },
 	    'title' => 'Swing Low Sweet Chariot',
 	    'structure' => 'linear',
@@ -123,7 +123,7 @@ $song = {
 			'context' => '',
 			'origin' => 'song',
 			'show' => 'all',
-			'type' => 'chord-grids'
+			'type' => 'diagrams'
 		       }
 		      ],
 	   };

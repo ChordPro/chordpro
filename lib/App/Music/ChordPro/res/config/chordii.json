@@ -16,7 +16,7 @@
     // "hard": only prints the hard chords. This includes user
     // defined chords.
     // "sorted": order the chords by key.
-    "chordgrid" : {
+    "diagrams" : {
 	"auto"     :  true,
 	"show"     :  "all",
 	"sorted"   :  false,
@@ -90,7 +90,7 @@
 	// The horizontal distance between grids is "hspace" cells.
 	// The vertical distance is "vspace" cells.
 	// "linewidth" is the thickness of the lines as a fraction of "width".
-	"chordgrid" : {
+	"diagrams" : {
 	    "width"    :  6,
 	    "height"   :  6,
 	    "hspace"   :  3.95,
@@ -165,7 +165,7 @@
 		"name" : "Courier",
 		"size" : 10
 	    },
-	    "chordgrid" : {
+	    "diagrams" : {
 		"name" : "Times-Roman",
 		"size" : 10
 	    },

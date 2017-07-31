@@ -79,7 +79,7 @@ This is the current built-in configuration file, showing all settings.
       //         "all": all chords used.
       //         "user": only prints user defined chords.
       // "sorted": order the chords by key.
-      "chordgrid" : {
+      "diagrams" : {
           "auto"     :  false,
           "show"     :  "all",
           "sorted"   :  false,
@@ -165,7 +165,7 @@ This is the current built-in configuration file, showing all settings.
   	// The horizontal distance between diagrams is "hspace" cells.
   	// The vertical distance is "vspace" cells.
 	// "linewidth" is the thickness of the lines as a fraction of "width".
-  	"chordgrid" : {
+  	"diagrams" : {
 	    "width"    :  6,
   	    "height"   :  6,
   	    "hspace"   :  3.95,
@@ -259,11 +259,12 @@ This is the current built-in configuration file, showing all settings.
   	// comment_italic --> chord
   	// comment_box    --> chord
   	// toc            --> text
-  	// grid           --> comment
+  	// grid           --> chord
+  	// grid_margin	  --> comment
   	// footer         --> subtitle @ 60%
   	// empty          --> text
-	// chordgrid	  --> comment
-	// chordgrid_capo --> text (but at a small size)
+	// diagram	  --> comment
+	// diagram_capo	  --> text (but at a small size)
   
   	// This will show the page layout if non-zero.
   	"showlayout" : false,
@@ -332,10 +333,10 @@ sub configurator {
 	$cfg->{$_} //= undef;
     }
     for my $ff ( qw(chord
-		    chordgrid chordgrid_capo
+		    diagram diagram_capo
 		    comment comment_box comment_italic
 		    tab text toc
-		    empty footer grid subtitle title) ) {
+		    empty footer grid grid_margin subtitle title) ) {
 	for ( qw(name file size color background) ) {
 	    $cfg->{pdf}->{fonts}->{$ff}->{$_} //= undef;
 	}
@@ -398,16 +399,22 @@ sub configurator {
 	}
     }
 
-    if ( defined $options->{'user-chord-grids'} ) {
-	$cfg->{chordgrid}->{show} =
+    if ( defined $options->{diagrams} ) {
+	warn( "Invalid value for diagrams: ",
+	      $options->{diagrams}, "\n" )
+	  unless $options->{diagrams} =~ /^(all|none|user)$/i;
+	$cfg->{diagrams}->{show} = lc $options->{'diagrams'};
+    }
+    elsif ( defined $options->{'user-chord-grids'} ) {
+	$cfg->{diagrams}->{show} =
 	  $options->{'user-chord-grids'} ? "user" : 0;
     }
     elsif ( defined $options->{'chord-grids'} ) {
-	$cfg->{chordgrid}->{show} =
+	$cfg->{diagrams}->{show} =
 	  $options->{'chord-grids'} ? "all" : 0;
     }
     if ( defined $options->{'chord-grids-sorted'} ) {
-	$cfg->{chordgrid}->{sorted} = $options->{'chord-grids-sorted'};
+	$cfg->{diagrams}->{sorted} = $options->{'chord-grids-sorted'};
     }
 
     if ( $cfg->{tuning} ) {
@@ -480,14 +487,14 @@ sub add_legacy {
 	    $cfg->{settings}->{columns} = $song->{settings}->{columns};
 	    next;
 	}
-	if ( $_ eq "showgrids" ) {
-	    $cfg->{chordgrid}->{show} = $song->{settings}->{showgrids};
+	if ( $_ eq "diagrams" ) {
+	    $cfg->{diagrams}->{show} = $song->{settings}->{diagrams};
 	    next;
 	}
 	die("Cannot happen");
     }
     foreach ( @{$song->{body}} ) {
-	next if $_->{type} eq "chord-grids"; # added by parser
+	next if $_->{type} eq "diagrams"; # added by parser
 	next if $_->{type} eq "ignore"; # ignored
 	unless ( $_->{type} eq "control" ) {
 	    die("Cannot happen " . $_->{type} . " " . $_->{name});

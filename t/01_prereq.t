@@ -6,7 +6,7 @@ use Test::More;
 
 my $test;
 ++$test; ok( $] >= 5.010,
-	     "Perl $] is too old, version 5.10 or later is required." );
+	     "Perl version $] is newer than 5.010." );
 ++$test; use_ok( "IO::String", 1.08  ); # for Font::TTF
 ++$test; use_ok( "Font::TTF",  1.04  ); # for PDF::API2
 ++$test; use_ok( "PDF::API2",  2.020 );

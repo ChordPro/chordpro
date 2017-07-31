@@ -2,7 +2,7 @@
 
 {
     // Printing chord grids.
-    "chordgrid" : {
+    "diagrams" : {
         "show"     :  "none",
     },
 

@@ -136,40 +136,40 @@ sub parsefile {
     do_warn("Unterminated context in song: $in_context")
       if $in_context;
 
-    my $showgrids;
-    if ( exists($self->{songs}->[-1]->{settings}->{showgrids} ) ) {
-	$showgrids = $self->{songs}->[-1]->{settings}->{showgrids};
-	$showgrids &&= $::config->{chordgrid}->{show} || "all";
+    my $diagrams;
+    if ( exists($self->{songs}->[-1]->{settings}->{diagrams} ) ) {
+	$diagrams = $self->{songs}->[-1]->{settings}->{diagrams};
+	$diagrams &&= $::config->{diagrams}->{show} || "all";
     }
     else {
-	$showgrids = $::config->{chordgrid}->{show};
+	$diagrams = $::config->{diagrams}->{show};
     }
 
-    if ( $showgrids =~ /^(user|all)$/
+    if ( $diagrams =~ /^(user|all)$/
 	 && defined($chordtype)
 	 && $chordtype =~ /^[RN]$/ ) {
 	$diag->{orig} = "(End of Song)";
-	do_warn("Chord grids suppressed for Nasville/Roman chords");
-	$showgrids = "none";
+	do_warn("Chord diagrams suppressed for Nasville/Roman chords");
+	$diagrams = "none";
     }
 
-    if ( $showgrids =~ /^(user|all)$/ ) {
+    if ( $diagrams =~ /^(user|all)$/ ) {
 	my %h;
 	@used_chords = map { $h{$_}++ ? () : $_ } @used_chords;
 
-	if ( $showgrids eq "user" ) {
+	if ( $diagrams eq "user" ) {
 	    @used_chords =
 	    grep { safe_chord_info($_)->{origin} == 1 } @used_chords;
 	}
 
-	if ( $::config->{chordgrid}->{sorted} ) {
+	if ( $::config->{diagrams}->{sorted} ) {
 	    @used_chords =
 	      sort App::Music::ChordPro::Chords::chordcompare @used_chords;
 	}
 
-	$self->add( type   => "chord-grids",
+	$self->add( type   => "diagrams",
 		    origin => "song",
-		    show   => $showgrids,
+		    show   => $diagrams,
 		    chords => [ @used_chords ] );
     }
 
@@ -573,11 +573,11 @@ sub global_directive {
     }
 
     if ( $dir =~ /^(?:grid|g)$/ ) {
-	$cur->{settings}->{showgrids} = 1;
+	$cur->{settings}->{diagrams} = 1;
 	return 1;
     }
     if ( $dir =~ /^(?:no_grid|ng)$/ ) {
-	$cur->{settings}->{showgrids} = 0;
+	$cur->{settings}->{diagrams} = 0;
 	return 1;
     }
 
@@ -614,7 +614,7 @@ sub global_directive {
     }
 
     # Formatting.
-    if ( $dir =~ /^(text|chord|tab|grid|title|footer|toc)(font|size|colou?r)$/ ) {
+    if ( $dir =~ /^(text|chord|tab|grid|diagrams|title|footer|toc)(font|size|colou?r)$/ ) {
 	my $item = $1;
 	my $prop = $2;
 	my $value = $arg;
@@ -712,12 +712,12 @@ sub global_directive {
 	}
 	if ( $show) {
 	    # Combine consecutive entries.
-	    if ( $self->{songs}->[-1]->{body}->[-1]->{type} eq "chord-grids" ) {
+	    if ( $self->{songs}->[-1]->{body}->[-1]->{type} eq "diagrams" ) {
 		push( @{ $self->{songs}->[-1]->{body}->[-1]->{chords} },
 		      $ci->{name} );
 	    }
 	    else {
-		$self->add( type => "chord-grids",
+		$self->add( type => "diagrams",
 			    show => "user",
 			    origin => "chord",
 			    chords => [ $ci->{name} ] );
@@ -818,7 +818,7 @@ sub transpose {
 	    }
 	    next;
 	}
-	if ( $item->{type} eq "chord-grids" ) {
+	if ( $item->{type} eq "diagrams" ) {
 	    foreach ( @{ $item->{chords} } ) {
 		$_ = $self->xpchord( $_, $xpose );
 	    }

@@ -73,7 +73,7 @@ sub generate_song {
 
     # Move a trailing list of chords to the beginning, so the chords
     # are defined when the song is parsed.
-    if ( @{ $s->{body} } && $s->{body}->[-1]->{type} eq "chord-grids"
+    if ( @{ $s->{body} } && $s->{body}->[-1]->{type} eq "diagrams"
 	 && $s->{body}->[-1]->{origin} ne "__CLI__"
        ) {
 	unshift( @{ $s->{body} }, pop( @{ $s->{body} } ) );
@@ -240,7 +240,7 @@ sub generate_song {
 	    next;
 	}
 
-	if ( $elt->{type} eq "chord-grids" ) {
+	if ( $elt->{type} eq "diagrams" ) {
 	    $dumphdr = 0 unless $elt->{origin} eq "__CLI__";
 	    push( @s,
 		  @{ App::Music::ChordPro::Chords::list_chords

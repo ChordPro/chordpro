@@ -462,7 +462,7 @@ sub chord_info {
     }
 
     my $s = strings();
-    if ( ! $info && $::config->{chordgrid}->{auto} ) {
+    if ( ! $info && $::config->{diagrams}->{auto} ) {
 	$info = [ (0) x $s, -1 ];
     }
 

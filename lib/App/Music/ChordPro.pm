@@ -137,7 +137,7 @@ sub main {
 	foreach my $c ( @{ App::Music::ChordPro::Chords::chordnames() } ) {
 	    if ( $c =~ /^(.[b#]?)/ and $1 ne $prev )  {
 		$prev = $1;
-		push( @body, { type => "chord-grids",
+		push( @body, { type => "diagrams",
 			       context => "",
 			       origin => "__CLI__",
 			       chords => [ @chords ]
@@ -147,7 +147,7 @@ sub main {
 	    push( @chords, $c );
 	}
 
-	push( @body, { type => "chord-grids",
+	push( @body, { type => "diagrams",
 		       context => "",
 		       origin => "__CLI__",
 		       chords => [ @chords ]
@@ -194,6 +194,14 @@ sub main {
 =item B<--about> (short: B<-A>)
 
 About ChordPro.
+
+=item B<--diagrams=>I<WHICH>
+
+Prints diagrams of chords used in a song.
+
+I<WHICH> can be C<all> to print all chords used, C<user> to only print
+the user-defined chords, and C<none> to suppress printing of chord
+diagrams.
 
 =item B<--encoding=>I<ENC>
 
@@ -265,10 +273,6 @@ Transposes all songs by I<N> semi-tones. Note that I<N> may be
 specified as B<+>I<N> to transpose upward, using sharps, or as
 B<->I<N> to transpose downward, using flats.
 
-=item B<--user-chord-grids>
-
-Prints chord grids of all user defined chords used in a song.
-
 =item B<--version> (short: B<-V>)
 
 Prints the program version and exits.
@@ -310,15 +314,15 @@ Sets the font size for the chord names.
 
 =item B<--chord-grid-size=>I<N> (short: B<-s>) *
 
-Sets chord grid size (the total width of a chord grid).
+Sets chord diagram size (the total width of a chord diagram).
 
 =item B<--chord-grids>
 
-Prints chord grids of all chords used in a song.
+Prints chord diagrams of all chords used in a song.
 
 =item B<--no-chord-grids> (short: B<-G>) *
 
-Disables printing of chord grids of the chords used in a song.
+Disables printing of chord diagrams of the chords used in a song.
 
 =item B<--easy-chord-grids>
 
@@ -330,12 +334,16 @@ Not supported.
 
 =item B<--chord-grids-sorted> (short: B<-S>) *
 
-Prints chord grids of the chords used in a song, ordered by key and
+Prints chord diagrams of the chords used in a song, ordered by key and
 type.
 
 =item B<--no-chord-grids-sorted> *
 
-Prints chord grids in the order they appear in the song.
+Prints chord diagrams in the order they appear in the song.
+
+=item B<--user-chord-grids> *
+
+Prints chord diagrams of all user defined chords used in a song.
 
 =item B<--even-pages-number-left> (short B<-L>)
 
@@ -446,8 +454,8 @@ Don't use the specific config file, even if it exists.
 
 Sets a configuration item. I<item> must be in the format of
 colon-separated configuration keys, an equal sign, and the value. For
-example, the equivalent of B<--no-chord-grids> is
-B<--define=chordgrid:show=0>.
+example, the equivalent of B<--diagrams=none> is
+B<--define=diagrams:show=0>.
 
 B<--define> may be used multiple times to set multiple items.
 
@@ -599,24 +607,25 @@ sub app_setup {
           "lyrics-only",                # Suppress all chords
           "generate=s",
           "backend-option|bo=s\%",
+	  "diagrams=s",			# Prints chord diagrams
           "encoding=s",
-          "user-chord-grids!",          # Do[esn't] print grids for user defined chords.
 
           ### Standard Chordii Options ###
 
           "about|A" => \$about,         # About...
           "chord-font|C=s",             # Sets chord font
-          "chord-grid-size|s=f",        # Sets chord grid size [30]
-          "chord-grids-sorted|S!",      # Prints chord grids ordered
+          "chord-grid-size|s=f",        # Sets chord diagram size [30]
+          "chord-grids-sorted|S!",      # Prints chord diagrams ordered
           "chord-size|c=i",             # Sets chord size [9]
+	  "diagrams=s",			# Prints chords diagrams
           "dump-chords|D",              # Dumps chords definitions (PostScript)
           "dump-chords-text|d" => \$dump_chords,  # Dumps chords definitions (Text)
           "even-pages-number-left|L",   # Even pages numbers on left
           "odd-pages-number-left",      # Odd pages numbers on left
           "lyrics-only|l",              # Only prints lyrics
           "G" => sub { $clo->{'chord-grids'} = 0 },
-          "chord-grids!",               # En[dis]ables printing of chord grids
-          "easy-chord-grids|g!",        # Do[esn't] print grids for built-in "easy" chords. Ignored.
+          "chord-grids!",               # En[dis]ables printing of chord diagrams
+          "easy-chord-grids|g!",        # Do[esn't] print diagrams for built-in "easy" chords. Ignored.
           "page-number-logical|n",      # Numbers logical pages, not physical
           "page-size|P=s",              # Specifies page size [letter, a4 (default)]
           "single-space|a!",            # Automatic single space lines without chords
@@ -626,6 +635,7 @@ sub app_setup {
           "i" => sub { $clo->{toc} = 1 },
           "toc!",                       # Generates a table of contents
           "transpose|x=i",              # Transposes by N semi-tones
+          "user-chord-grids!",          # Do[esn't] print diagrams for user defined chords.
           "version|V" => \$version,     # Prints version and exits
           "vertical-space|w=f",         # Extra vertical space between lines
           "2-up|2",                     # 2 pages per sheet
@@ -701,7 +711,7 @@ sub app_setup {
                 foreach my $c ( @$_ ) {
 		    # Check for resource names.
 		    if ( ! -r $c && $c !~ m;[/.]; ) {
-			my $t = ::findlib( "config/",lc($c).".json" );
+			my $t = ::findlib( "config/".lc($c).".json" );
 			$c = $t if $t;
 		    }
                     die("$c: $!\n") unless -r $c;
@@ -795,6 +805,7 @@ Usage: $0 [ options ] [ file ... ]
 
 Options:
     --about  -A                   About ChordPro...
+    --diagrams=WHICH		  Prints chord diagrams
     --encoding=ENC                Encoding for input files (UTF-8)
     --lyrics-only  -l             Only prints lyrics
     --output=FILE  -o             Saves the output to FILE
@@ -802,27 +813,27 @@ Options:
     --start-page-number=N  -p     Starting page number [1]
     --toc --notoc -i              Generates/suppresses a table of contents
     --transpose=N  -x             Transposes by N semi-tones
-    --user-chord-grids		  Prints the user defined chords in the song
     --version  -V                 Prints version and exits
 
 Chordii compatibility.
 Options marked with * are better specified in the config file.
 Options marked with - are ignored.
     --chord-font=FONT  -C         *Sets chord font
-    --chord-grid-size=N  -s       *Sets chord grid size [30]
-    --chord-grids-sorted  -S      *Prints chord grids ordered by key
+    --chord-grid-size=N  -s       *Sets chord diagram size [30]
+    --chord-grids-sorted  -S      *Prints chord diagrams ordered by key
     --chord-size=N  -c            *Sets chord size [9]
     --dump-chords  -D             Dumps chords definitions (PostScript)
     --dump-chords-text  -d        Dumps chords definitions (Text)
     --even-pages-number-left  -L  *Even pages numbers on left
     --odd-pages-number-left       *Odd pages numbers on left
-    --no-chord-grids  -G          *Disables printing of chord grids
+    --no-chord-grids  -G          *Disables printing of chord diagrams
     --no-easy-chord-grids  -g     Not supported
     --page-number-logical  -n     -Numbers logical pages, not physical
     --page-size=FMT  -P           *Specifies page size [letter, a4 (default)]
     --single-space  -a            *Automatic single space lines without chords
     --text-size=N  -t             *Sets text size [12]
     --text-font=FONT  -T          *Sets text font
+    --user-chord-grids		  *Prints the user defined chords in the song
     --vertical-space=N  -w        *Extra vertical space between lines
     --2-up  -2                    Not supported
     --4-up  -4                    Not supported

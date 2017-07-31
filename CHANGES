@@ -1,6 +1,10 @@
 0.83
 
 	Supply default '1+4x4+1' for first start_of_grid.
+	Supply default straight font for grid lines.
+	Allow empty lines in grids.
+	Improve WxChordPro integration.
+	Change old terminology "chordgrid" into "diagrams".
 
 0.82	Jul 21 2017
 
