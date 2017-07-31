@@ -441,11 +441,11 @@ sub OnAbout {
 
     if ( rand > 0.5 ) {
 	my $ai = Wx::AboutDialogInfo->new;
-	$ai->SetName("ChordPro Preview *Editor");
-	$ai->SetVersion( $dd->($VERSION) );
+	$ai->SetName("ChordPro Preview Editor");
+	$ai->SetVersion( $dd->($App::Music::ChordPro::VERSION) );
 	$ai->SetCopyright("Copyright $year Johan Vromans <jvromans\@squirrel.nl>");
 	$ai->AddDeveloper("Johan Vromans <jvromans\@squirrel.nl>");
-	$ai->AddDeveloper("ChordPro version " . $dd->($App::Music::ChordPro::VERSION));
+	$ai->AddDeveloper("Editor core " . $dd->($VERSION));
 	$ai->AddDeveloper("Perl version " . $dd->(sprintf("%vd",$^V)));
 	$ai->AddDeveloper("wxWidgets version " . $dd->(Wx::wxVERSION));
 	$ai->AddDeveloper(App::Packager::Packager() . " version " . App::Packager::Version())
