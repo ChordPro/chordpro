@@ -1,3 +1,7 @@
+0.84	Jul 31 2017
+
+	Emergency fix for PDF font problem.
+
 0.83	Jul 31 2017
 
 	Supply default '1+4x4+1' for first start_of_grid.
@@ -5,6 +9,7 @@
 	Allow empty lines in grids.
 	Improve WxChordPro integration.
 	Change old terminology "chordgrid" into "diagrams".
+	(WxChordPro) Update to 0.83.
 
 0.82	Jul 21 2017
 

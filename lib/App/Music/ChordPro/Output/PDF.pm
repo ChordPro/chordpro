@@ -1228,7 +1228,7 @@ sub text_vsp {
 
 sub chordgrid_vsp {
     my ( $elt, $ps ) = @_;
-    $ps->{fonts}->{diagrams}->{size} * $ps->{spacing}->{chords}
+    $ps->{fonts}->{diagram}->{size} * $ps->{spacing}->{chords}
       + 0.40 * $ps->{diagrams}->{width}
 	+ $ps->{diagrams}->{vcells} * $ps->{diagrams}->{height}
 	  + $ps->{diagrams}->{vspace} * $ps->{diagrams}->{height};
@@ -1263,7 +1263,7 @@ sub chordgrid {
     my $w = $gw * ($strings - 1);
 
     # Draw font name.
-    my $font = $ps->{fonts}->{diagrams};
+    my $font = $ps->{fonts}->{diagram};
     $pr->setfont($font);
     $name .= "*"
       unless $info->{origin} == 0 || $::config->{diagrams}->{show} eq "user";
@@ -1272,9 +1272,9 @@ sub chordgrid {
 
     if ( $info->{base} > 0 ) {
 	my $i = @Roman[$info->{base}] . "  ";
-	$pr->setfont( $ps->{fonts}->{chordgrid_capo}, $gh );
+	$pr->setfont( $ps->{fonts}->{diagram_capo}, $gh );
 	$pr->text( $i, $x-$pr->strwidth($i), $y-$gh/2,
-		   $ps->{fonts}->{chordgrid_capo}, $gh );
+		   $ps->{fonts}->{diagram_capo}, $gh );
     }
 
     my $v = $ps->{diagrams}->{vcells};
@@ -1463,7 +1463,6 @@ sub configurator {
     $fonts->{grid_margin}    ||= { %{ $fonts->{comment} } };
     $fonts->{diagram}        ||= { %{ $fonts->{comment} } };
     $fonts->{diagram_capo}   ||= { %{ $fonts->{comment} } };
-    $fonts->{chordgrid_capo} ||= { %{ $fonts->{text} } };
     $fonts->{chordfingers}     = { name => 'ZapfDingbats' };
     $fonts->{subtitle}->{size}       ||= $fonts->{text}->{size};
     $fonts->{comment_italic}->{size} ||= $fonts->{text}->{size};
