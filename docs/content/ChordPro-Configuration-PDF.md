@@ -114,7 +114,7 @@ The vertical distance between lines of diagrams is `vspace` times the cell heigh
 
 `linewidth` is the thickness of the diagram lines as a fraction of the cell width.
 
-        "chordgrid" : {
+        "diagram" : {
             "width"    :  6,
             "height"   :  6,
             "hspace"   :  3.95,
@@ -225,11 +225,12 @@ All heading strings may contain references to metadata in the form `%{`_NAME_`}`
         // comment_italic --> chord
         // comment_box    --> chord
         // toc            --> text
-        // grid           --> comment
+        // grid           --> chord
+        // grid_margin    --> comment
         // footer         --> subtitle @ 60%
         // empty          --> text
-        // chordgrid      --> comment
-        // chordgrid_capo --> text (but at a small size)
+        // diagram        --> comment
+        // diagram_capo   --> text (but at a small size)
 
 #### Helping develop a layout
 

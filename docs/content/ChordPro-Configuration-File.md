@@ -6,8 +6,8 @@ For example, this JSON document is accepted by ChordPro:
 
     // Configuration to suppress printing of chord diagrams.
     {
-        // Printing chord grids.
-        "chordgrid" : {
+        // Printing chord diagrams.
+        "diagrams" : {
             "show"     :  "none",
         },
     }
@@ -15,7 +15,7 @@ For example, this JSON document is accepted by ChordPro:
 In its strict form, this must be:
 
     {
-        "chordgrid" : {
+        "diagrams" : {
             "show"     :  "none"
         }
     }
@@ -24,7 +24,7 @@ The relaxed format is much easier to maintain.
 
 Layout doesn't matter, this document might as well have been written as:
 
-    {"chordgrid":{"show":"none"}}
+    {"diagrams":{"show":"none"}}
 
 The ChordPro configuration file consists of two parts, all optional.
 

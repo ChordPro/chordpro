@@ -71,12 +71,12 @@ The configuration file can hold any number of predefined chords.
 
 By default, ChordPro will include diagrams for all known chords that have been used in a song.
 
-    // "auto": automatically add unknown chords as empty grids.
+    // "auto": automatically add unknown chords as empty diagrams.
     // "show": prints the chords used in the song.
     //         "all": all chords used.
     //         "user": only prints user defined chords.
     // "sorted": order the chords by key.
-    "chordgrid" : {
+    "diagrams" : {
         "auto"     :  false,
         "show"     :  "all",
         "sorted"   :  false,
