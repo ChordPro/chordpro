@@ -42,30 +42,38 @@ Important: the keys `title` and `subtitle` must always be in this list.
 
 ### Strings and Tuning
 
-Setting the tuning to any value except `null` will discard all built-in chords!
-
-    "tuning" : null,
+Define the instrument tuning as a list of notes in [scientific pitch notation](https://en.wikipedia.org/wiki/Scientific_pitch_notation).
 
 For example, to specify tuning for a 4-string [soprano ukulele](https://en.wikipedia.org/wiki/Ukulele#Tuning):
 
     "tuning" : [ "G4", "C4", "E4", "A4" ],
+
+Setting the tuning to any value except `null` will discard all built-in chords!
 
 ### User defined chords
 
 The configuration file can hold any number of predefined chords.
 
     // "base" defaults to 1.
-    // "easy" defaults to 0.
     // Use 0 for an empty string, and -1 for a muted string.
     "chords" : [
         {
-            "name"  : "Bb",
+            "name"  : "Bb(low)",
             "base"  : 1,
             "frets" : [ 1, 1, 3, 3, 3, 1 ],
             "fingers" : [ 1, 1, 2, 3, 4, 1 ],
-            "easy"  : true,
+        },
+        {
+            "name"  : "Bb(high)",
+            "base"  : 6,
+            "frets" : [ 1, 3, 3, 2, 1, 1 ],
+            "fingers" : [ 1, 3, 4, 2, 1, 1 ],
         },
     ],
+
+The resulting chords will look similar to:
+
+![](images/ex_chords.png)
 
 ### Printing chord diagrams
 
@@ -75,12 +83,15 @@ By default, ChordPro will include diagrams for all known chords that have been u
     // "show": prints the chords used in the song.
     //         "all": all chords used.
     //         "user": only prints user defined chords.
+    //         "none": no song chords will ne printed.
     // "sorted": order the chords by key.
     "diagrams" : {
         "auto"     :  false,
         "show"     :  "all",
         "sorted"   :  false,
     },
+
+If `auto` is set to true, unknown chords will be printed as empty diagrams. This makes it easy to manually put the finger positions on paper. Of course, adding a [chord definition](#configuration-file-contents-generic_user-defined-chords) is usually a better alternative.
 
 ### Diagnostic message format
 
