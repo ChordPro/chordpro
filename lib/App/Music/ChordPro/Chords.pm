@@ -585,15 +585,19 @@ sub reset_tuning {
 
 # Add a config defined chord.
 sub add_config_chord {
-    my ( $name, $base, $frets, $easy ) = @_;
+    my ( $name, $base, $frets, $easy, $fingers ) = @_;
     unless ( @$frets == strings() ) {
+	return scalar(@$frets) . " strings";
+    }
+    if ( $fingers && @$fingers && @$fingers != strings() ) {
 	return scalar(@$frets) . " strings";
     }
     unless ( $base > 0 && $base < 12 ) {
 	return "base-fret $base out of range";
     }
     $easy //= CHORD_HARD;
-    $config_chords{$name} = [ @$frets, $base, CHORD_CONFIG, $easy ];
+    $config_chords{$name} = [ @$frets, $base, CHORD_CONFIG, $easy,
+			    $fingers && @$fingers ? @$fingers : () ];
     push( @chordnames, $name );
     return;
 }

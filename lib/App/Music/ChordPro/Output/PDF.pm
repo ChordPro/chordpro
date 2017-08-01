@@ -1272,9 +1272,9 @@ sub chordgrid {
 
     if ( $info->{base} > 0 ) {
 	my $i = @Roman[$info->{base}] . "  ";
-	$pr->setfont( $ps->{fonts}->{diagram_capo}, $gh );
+	$pr->setfont( $ps->{fonts}->{diagram_base}, $gh );
 	$pr->text( $i, $x-$pr->strwidth($i), $y-$gh/2,
-		   $ps->{fonts}->{diagram_capo}, $gh );
+		   $ps->{fonts}->{diagram_base}, $gh );
     }
 
     my $v = $ps->{diagrams}->{vcells};
@@ -1462,7 +1462,7 @@ sub configurator {
     $fonts->{grid}           ||= { %{ $fonts->{chord} } };
     $fonts->{grid_margin}    ||= { %{ $fonts->{comment} } };
     $fonts->{diagram}        ||= { %{ $fonts->{comment} } };
-    $fonts->{diagram_capo}   ||= { %{ $fonts->{comment} } };
+    $fonts->{diagram_base}   ||= { %{ $fonts->{comment} } };
     $fonts->{chordfingers}     = { name => 'ZapfDingbats' };
     $fonts->{subtitle}->{size}       ||= $fonts->{text}->{size};
     $fonts->{comment_italic}->{size} ||= $fonts->{text}->{size};

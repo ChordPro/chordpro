@@ -1,5 +1,7 @@
 0.85	
 
+	Rename config pdf.fonts.diagram_capo to pdf.fonts.diagram_base.
+	Fix missing fingers in config defined chords.
 	(WxChordPro) Update to 0.84.
 
 0.84	Jul 31 2017
@@ -12,7 +14,7 @@
 	Supply default straight font for grid lines.
 	Allow empty lines in grids.
 	Improve WxChordPro integration.
-	Change old terminology "chordgrid" into "diagrams".
+	Change old terminology "chordgrid" to "diagrams".
 	(WxChordPro) Update to 0.83.
 
 0.82	Jul 21 2017

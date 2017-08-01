@@ -264,7 +264,7 @@ This is the current built-in configuration file, showing all settings.
   	// footer         --> subtitle @ 60%
   	// empty          --> text
 	// diagram	  --> comment
-	// diagram_capo	  --> text (but at a small size)
+	// diagram_base	  --> text (but at a small size)
   
   	// This will show the page layout if non-zero.
   	"showlayout" : false,
@@ -427,7 +427,7 @@ sub configurator {
     foreach ( @{ $cfg->{chords} } ) {
 	my $res =
 	  App::Music::ChordPro::Chords::add_config_chord
-	      ( $_->{name}, $_->{base}||1, $_->{frets}, $_->{easy} );
+	      ( $_->{name}, $_->{base}||1, $_->{frets}, $_->{easy}, $_->{fingers} );
 	warn( "Invalid chord in config: ",
 	      $_->{name}, ": ", $res, "\n" ) if $res;
     }
