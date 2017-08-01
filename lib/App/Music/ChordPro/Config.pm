@@ -332,6 +332,9 @@ sub configurator {
     for ( qw(tuning) ) {
 	$cfg->{$_} //= undef;
     }
+    for ( qw(title subtitle footer) ) {
+       $cfg->{pdf}->{formats}->{first}->{$_} //= undef;
+    }
     for my $ff ( qw(chord
 		    diagram diagram_capo
 		    comment comment_box comment_italic

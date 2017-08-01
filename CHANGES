@@ -1,6 +1,7 @@
 0.85	
 
 	Rename config pdf.fonts.diagram_capo to pdf.fonts.diagram_base.
+	Fix some (well, several) layout issues with odd/even page printing.
 	Fix missing fingers in config defined chords.
 	(WxChordPro) Update to 0.84.
 

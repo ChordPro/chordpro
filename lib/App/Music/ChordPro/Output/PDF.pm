@@ -148,7 +148,7 @@ sub generate_song {
 	$fonts->{$_}->{_size} = $fonts->{$_}->{size};
     }
 
-    my $x = $ps->{marginleft} + $ps->{columnoffsets}->[0];
+    my $x;
     my $y = $ps->{papersize}->[1] - $ps->{margintop};
 
     $ps->{'even-odd-pages'} =  1 if $options->{'even-pages-number-left'};
@@ -192,6 +192,22 @@ sub generate_song {
     };
 
     my $col;
+
+    my $col_adjust = sub {
+	return if $ps->{columns} <= 1;
+	$x = $ps->{_leftmargin} + $ps->{columnoffsets}->[$col];
+	$ps->{__leftmargin} = $x;
+	$ps->{__rightmargin} =
+	  $ps->{_leftmargin}
+	    + $ps->{columnoffsets}->[$col+1];
+	$ps->{__rightmargin} -= $ps->{columnspace}
+	  if $col < $ps->{columns}-1;
+	warn("C=$col, L=", $ps->{__leftmargin},
+	     ", R=", $ps->{__rightmargin},
+	     "\n") if DEBUG_SPACING;
+	$y = $ps->{papersize}->[1] - $ps->{margintop};
+    };
+
     my $vsp_ignorefirst;
     my $startpage = $options->{startpage} || 1;
     my $thispage = $startpage - 1;
@@ -202,22 +218,29 @@ sub generate_song {
 	# Add page to the PDF.
 	$pr->newpage($ps);
 
-	# Prepare for printing.
-	showlayout($ps) if $ps->{showlayout};
-
 	# Put titles and footer.
 
 	# If even/odd pages, leftpage signals whether the
 	# header/footer parts must be swapped.
-	my $leftpage;
+	my $rightpage = 1;
 	if ( $ps->{"even-odd-pages"} ) {
 	    # Even/odd printing...
-	    $leftpage = $thispage % 2 != 0;
+	    $rightpage = $thispage % 2 == 0;
 	    # Odd/even printing...
-	    $leftpage = !$leftpage if $ps->{'even-odd-pages'} < 0;
+	    $rightpage = !$rightpage if $ps->{'even-odd-pages'} < 0;
 	}
+	if ( $rightpage ) {
+	    $ps->{_leftmargin}  = $ps->{marginleft};
+	    $ps->{_rightmargin} = $ps->{marginright};
+	}
+	else {
+	    $ps->{_leftmargin}  = $ps->{marginright};
+	    $ps->{_rightmargin} = $ps->{marginleft};
+	}
+	showlayout($ps) if $ps->{showlayout};
 
 	$thispage++;
+	$s->{meta}->{page} = [ $s->{page} = $thispage ];
 
 	# Determine page class.
 	my $class = 2;		# default
@@ -227,12 +250,13 @@ sub generate_song {
 	elsif ( $thispage == $startpage ) {
 	    $class = 1;		# first of a song
 	}
-	$s->{page} = $thispage;
 
 	# Three-part title handlers.
-	my $tpt = sub { tpt( $ps, $class, $_[0], $leftpage, $x, $y, $s ) };
+	my $tpt = sub { tpt( $ps, $class, $_[0], $rightpage, $x, $y, $s ) };
 
-	$x = $ps->{marginleft};
+	$ps->{__leftmargin} = $x = $ps->{_leftmargin};
+	$ps->{__rightmargin} = $ps->{papersize}->[0] - $ps->{_rightmargin};
+
 	if ( $ps->{headspace} ) {
 	    $y = $ps->{papersize}->[1] - $ps->{margintop} + $ps->{headspace};
 	    $y -= font_bl($fonts->{title});
@@ -254,6 +278,7 @@ sub generate_song {
 	$y += $ps->{headspace} if $ps->{'head-first-only'} && $class == 2;
 	$col = 0;
 	$vsp_ignorefirst = 1;
+	$col_adjust->();
     };
 
     # Get going.
@@ -273,11 +298,7 @@ sub generate_song {
 	    $newpage->();
 	    $vsp_ignorefirst = 0;
 	}
-	else {
-	    $x = $ps->{marginleft} + $ps->{columnoffsets}->[$col];
-	    $y = $ps->{papersize}->[1] - $ps->{margintop};
-	}
-
+	$col_adjust->();
 	return;
     };
 
@@ -358,10 +379,9 @@ sub generate_song {
 		my $style = $ps->{chorus};
 		$indent = $style->{indent};
 		if ( $style->{bar}->{offset} && $style->{bar}->{width} ) {
-		    my $cx = $ps->{marginleft}
-		      + $ps->{columnoffsets}->[$col]
-			- $style->{bar}->{offset}
-			  + $indent;
+		    my $cx = $ps->{__leftmargin}
+		      - $style->{bar}->{offset}
+			+ $indent;
 		    $pr->vline( $cx, $y, $vsp,
 				$style->{bar}->{width},
 				$style->{bar}->{color} );
@@ -428,8 +448,7 @@ sub generate_song {
 		}
 	    }
 	    my $style = $ps->{chorus};
-	    my $cx = $ps->{marginleft}
-	      + $ps->{columnoffsets}->[$col] - $style->{bar}->{offset};
+	    my $cx = $ps->{__leftmargin} - $style->{bar}->{offset};
 	    $pr->vline( $cx, $cy, vsp($ps), 1, $style->{bar}->{color} );
 	    $y -= vsp($ps,4); # chordii
 	    next;
@@ -458,6 +477,16 @@ sub generate_song {
 	    my $vsp = grid_vsp( $elt, $ps );
 	    $checkspace->($vsp);
 	    $pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+
+	    my $cells = $grid_margin->[2];
+	    $grid_cellwidth = ( $ps->{__rightmargin}
+				- $ps->{__leftmargin}
+				- ($cells)*$grid_barwidth
+			      ) / $cells;
+	    warn("L=", $ps->{__leftmargin},
+		 ", R=", $ps->{__rightmargin},
+		 ", C=$cells, W=", $grid_cellwidth,
+		 "\n") if DEBUG_SPACING;
 
 	    gridline( $elt, $x, $y,
 		      $grid_cellwidth,
@@ -562,11 +591,10 @@ sub generate_song {
 
 	    my $vsp = chordgrid_vsp( $elt, $ps );
 	    my $hsp = chordgrid_hsp( $elt, $ps );
-	    my $h = int( ( $ps->{papersize}->[0]
-			   - $ps->{marginleft}
-			   - $ps->{marginright}
+	    my $h = int( ( $ps->{__rightmargin}
+			   - $ps->{__leftmargin}
 			   + $ps->{diagrams}->{hspace}
-			     * $ps->{diagrams}->{width} ) / $hsp );
+			   * $ps->{diagrams}->{width} ) / $hsp );
 	    while ( @chords ) {
 		my $x = $x;
 		$checkspace->($vsp);
@@ -657,11 +685,7 @@ sub generate_song {
 		}
 		$cells += $grid_margin->[0] = $v[2] if $v[2];
 		$cells += $grid_margin->[1] = $v[3] if $v[3];
-		$grid_cellwidth = ( $ps->{papersize}->[0]
-				    - $ps->{marginleft}
-				    - $ps->{marginright}
-				    - ($cells)*$grid_barwidth
-				  ) / $cells;
+		$grid_margin->[2] = $cells;
 	    }
 	    next;
 	}
@@ -1111,15 +1135,13 @@ sub imageline {
 
     # Available width and height.
     my $pw;
-    if ( @{$ps->{columnoffsets}} > 1 ) {
+    if ( $ps->{columns} > 1 ) {
 	$pw = $ps->{columnoffsets}->[1]
 	  - $ps->{columnoffsets}->[0]
 	    - $ps->{columnspace};
     }
     else {
-	$pw = $ps->{papersize}->[0]
-	  - $ps->{marginleft}
-	    - $ps->{marginright};
+	$pw = $ps->{__rightmargin} - $ps->{_leftmargin};
     }
 
     my $ph = $ps->{papersize}->[1] - $ps->{margintop} - $ps->{marginbottom};
@@ -1165,8 +1187,9 @@ sub tocline {
 
     my $ann = $pr->{pdfpage}->annotation;
     $ann->link($pr->{pdf}->openpage($elt->{page}));
-    $ann->rect( $ps->{marginleft}, $y0 - $ftoc->{size},
-		$ps->{papersize}->[0]-$ps->{marginright}, $y0 );
+    $ann->rect( $ps->{_leftmargin}, $y0 - $ftoc->{size},
+		$ps->{papersize}->[0]-$ps->{_rightmargin}, $y0 );
+    ####CHECK MARGIN RIGHT
 }
 
 sub has_visible_chords {
@@ -1326,16 +1349,22 @@ sub set_columns {
     else {
 	$ps->{columns} = $cols ||= 1;
     }
-    $ps->{columnoffsets} = [ 0 ];
-    return unless $cols > 1;
 
+    # Note that _leftmargin and _rightmargin may not yet have been set.
+    # Luckily, marginleft + marginright is always equal to
+    # _leftmargin + _rightmargin.
     my $w = $ps->{papersize}->[0]
-      - $ps->{marginright} - $ps->{marginleft};
+      - $ps->{marginleft} - $ps->{marginright};
+
+    $ps->{columnoffsets} = [ 0 ];
+     push( @{ $ps->{columnoffsets} }, $w ), return unless $cols > 1;
+
     my $d = ( $w - ( $cols - 1 ) * $ps->{columnspace} ) / $cols;
     $d += $ps->{columnspace};
     for ( 1 .. $cols-1 ) {
 	push( @{ $ps->{columnoffsets} }, $_ * $d );
     }
+    push( @{ $ps->{columnoffsets} }, $w );
 }
 
 sub showlayout {
@@ -1344,34 +1373,35 @@ sub showlayout {
     my $col = "black";
     my $lw = 0.5;
 
-    $pr->rectxy( $ps->{marginleft},
+    my $mr = $ps->{_rightmargin};
+    my $ml = $ps->{_leftmargin};
+
+    $pr->rectxy( $ml,
 		 $ps->{marginbottom},
-		 $ps->{papersize}->[0]-$ps->{marginright},
+		 $ps->{papersize}->[0]-$mr,
 		 $ps->{papersize}->[1]-$ps->{margintop},
 		 $lw, undef, $col);
 
-    $pr->hline( $ps->{marginleft},
-		$ps->{papersize}->[1]-$ps->{margintop}+$ps->{headspace},
-		$ps->{papersize}->[0]-$ps->{marginleft}-$ps->{marginright},
-		$lw, $col );
-
-    $pr->hline( $ps->{marginleft},
-		$ps->{marginbottom}-$ps->{footspace},
-		$ps->{papersize}->[0]-$ps->{marginleft}-$ps->{marginright},
-		$lw, $col );
+    my @a = ( $ml,
+	      $ps->{papersize}->[1]-$ps->{margintop}+$ps->{headspace},
+	      $ps->{papersize}->[0]-$ml-$mr,
+	      $lw, $col );
+    $pr->hline(@a);
+    $a[1] = $ps->{marginbottom}-$ps->{footspace};
+    $pr->hline(@a);
 
     my @off = @{ $ps->{columnoffsets} };
+    pop(@off);
     @off = ( $ps->{chordscolumn} ) if $ps->{chordscolumn};
     foreach my $i ( 0 .. @off-1 ) {
 	next unless $off[$i];
-	$pr->vline( $ps->{marginleft}+$off[$i],
-		    $ps->{marginbottom},
-		    $ps->{margintop}-$ps->{papersize}->[1]+$ps->{marginbottom},
-		    $lw, $col );
-	$pr->vline( $ps->{marginleft}+$off[$i]-$ps->{columnspace},
-		    $ps->{marginbottom},
-		    $ps->{margintop}-$ps->{papersize}->[1]+$ps->{marginbottom},
-		    $lw, $col );
+	@a = ( $ml+$off[$i],
+	       $ps->{marginbottom},
+	       $ps->{margintop}-$ps->{papersize}->[1]+$ps->{marginbottom},
+	       $lw, $col );
+	$pr->vline(@a);
+	$a[0] -= $ps->{columnspace};
+	$pr->vline(@a);
     }
 }
 
@@ -1497,20 +1527,20 @@ sub fmt_subst {
 # Three-part titles.
 # Note: baseline printing.
 sub tpt {
-    my ( $ps, $class, $type, $leftpage, $x, $y, $s ) = @_;
+    my ( $ps, $class, $type, $rightpage, $x, $y, $s ) = @_;
     my $fmt = get_format( $ps, $class, $type );
     return unless $fmt;
 
     # @fmt = ( left-fmt, center-fmt, right-fmt )
 
     my @fmt = @{$fmt};
-    @fmt = @fmt[2,1,0] if $leftpage; # swap
+    @fmt = @fmt[2,1,0] unless $rightpage; # swap
 
     my $pr = $ps->{pr};
     my $font = $ps->{fonts}->{$type};
 
     $pr->setfont($font);
-    my $rm = $ps->{papersize}->[0] - $ps->{marginright};
+    my $rm = $ps->{papersize}->[0] - $ps->{_rightmargin};
 
     # Left part. Easiest.
     $pr->text( fmt_subst( $s, $fmt[0] ), $x, $y ) if $fmt[0];
