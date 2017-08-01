@@ -32,3 +32,8 @@ While this may be considered a feature, it is in fact a necessity since most bas
 
 Traditionally a command line program, `chord` was not a trivial tool for users of Windows based systems. ChordPro adds WxChordPro, a GUI version of the program.
 
+### More information
+
+* [[Installation|ChordPro Installation]]
+* [[Configuration|ChordPro Configuration]]
+* [[User guide|Using ChordPro]]
