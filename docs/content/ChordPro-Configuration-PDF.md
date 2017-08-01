@@ -123,6 +123,10 @@ The vertical distance between lines of diagrams is `vspace` times the cell heigh
             "linewidth" : 0.1,
         },
 
+With the above settings, chord diagrams will look like:
+
+![](images/ex_chords.png)
+
 #### Even/odd page printing
 
 Pages can be printed neutrally (all pages the same) or with differing left and right pages.  
@@ -175,13 +179,35 @@ All heading strings may contain references to metadata in the form `%{`_NAME_`}`
             },
         },
 
-#### Fonts
+#### Font libraries
 
-        // Fonts.
-        // Fonts can be specified by name (for the corefonts)
-        // or a filename (for TrueType/OpenType fonts).
+You can either designate a built-in font by its name, or give the filename of a TrueType (ttf) or OpenType font (otf).  
+The filename should be the full name of a file on disk, or a relative filename which will be looked up in system dependent font libraries.
+
+The `fontdir` setting can be used to add a private font directory to the font libraries.
+
         // Relative filenames are looked up in the fontdir.
         "fontdir" : null,
+
+#### Fonts
+
+All printable items like lyrics, chords and comments can be associated with a font specification. This allows fine-grained control over the printed output.
+
+A font specification consists of the following settings:
+
+* `name` or `file`  
+You can either designate a built-in font by its name, or give the filename of a TrueType (ttf) or OpenType font (otf).  
+The filename should be the full name of a file on disk, or a relative filename which will be looked up in system dependent font libraries. See [Font libraries](#configuration-file-contents-pdf-output_font-libraries).
+* `size`  
+The size of the font, in PDF units (1/72 inch).
+* `color`  
+The color of the font.
+* `background`  
+The background color. Note that this works currently only for chords and comments.
+
+
+
+        // Fonts.
 
         // Fonts for chords and comments can have a background
         // colour associated.
