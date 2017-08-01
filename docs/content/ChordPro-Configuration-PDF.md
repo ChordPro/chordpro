@@ -202,7 +202,7 @@ For example:
             "title" : {
                 "name" : "Times-Bold",
                 "size" : 14,
-				"color" : "blue",
+                "color" : "blue",
             },
             ...
         },
@@ -219,6 +219,8 @@ The colour of the font. See [[ChordPro Colours|ChordPro-Colours]] for
 details on colours.
 * `background`  
 The background color. Note that this works currently only for chords and comments.
+
+The following printable items can have fonts associated.
 
 * `title`  
 The font used for page titles.  
@@ -237,6 +239,10 @@ Default is "Helvetica-Oblique" at size 10.
 * `comment`  
 The font used for comments.  
 Default is "Helvetica" at size 12.
+* `comment_italic`  
+Default is the setting for `chord`.
+* `comment_boxed`  
+Default is the setting for `chord`. Note that a box is drawn around the comment.
 * `tab`  
 The font used for the contents of
 [[tab environments|Directives-env_tab]].  
@@ -245,15 +251,11 @@ Default is "Courier" at size 10.
 The font used for the table of contents.  
 Default is "Times-Roman" at size 11.
 * `grid`  
-The font used for grid elements.__
+The font used for grid elements.  
 Default is the setting for `chord`.
 * `grid_margin`  
-The font used for grid margin texts.__
+The font used for grid margin texts.  
 Default is the setting for `comment`.
-* `comment_italic`  
-Default is the setting for `chord`.
-* `comment_boxed`  
-Default is the setting for `chord`.
 * `empty`  
 The font used for empty lines. While this may not seem very relevant
 at first, by setting the font's _size_ you can get a precise control
