@@ -184,15 +184,29 @@ All heading strings may contain references to metadata in the form `%{`_NAME_`}`
 You can either designate a built-in font by its name, or give the filename of a TrueType (ttf) or OpenType font (otf).  
 The filename should be the full name of a file on disk, or a relative filename which will be looked up in system dependent font libraries.
 
-The `fontdir` setting can be used to add a private font directory to the font libraries.
+The `fontdir` setting can be used to add a private font directory to
+the font libraries. The private directory will be searched first.
 
         // Relative filenames are looked up in the fontdir.
         "fontdir" : null,
+
+See also [[ChordPro Fonts]].
 
 #### Fonts
 
 All printable items like lyrics, chords and comments can be associated with a font specification. This allows fine-grained control over the printed output.
 
+For example:
+
+        "fonts" : {
+            "title" : {
+                "name" : "Times-Bold",
+                "size" : 14,
+				"color" : "blue",
+            },
+            ...
+        },
+			
 A font specification consists of the following settings:
 
 * `name` or `file`  
@@ -201,62 +215,56 @@ The filename should be the full name of a file on disk, or a relative filename w
 * `size`  
 The size of the font, in PDF units (1/72 inch).
 * `color`  
-The color of the font.
+The colour of the font. See [[ChordPro Colours|ChordPro-Colours]] for
+details on colours.
 * `background`  
 The background color. Note that this works currently only for chords and comments.
 
-
-
-        // Fonts.
-
-        // Fonts for chords and comments can have a background
-        // colour associated.
-        // Colours are "#RRGGBB" or predefined names like "black", "white",
-        // and lots of others.
-
-        "fonts" : {
-            "title" : {
-                "name" : "Times-Bold",
-                "size" : 14
-            },
-            "text" : {
-                "name" : "Times-Roman",
-                "size" : 12
-            },
-            "chord" : {
-                "name" : "Helvetica-Oblique",
-                "size" : 10
-            },
-            "comment" : {
-                "name" : "Helvetica",
-                "size" : 12
-            },
-            "tab" : {
-                "name" : "Courier",
-                "size" : 10
-            },
-            "toc" : {
-                "name" : "Times-Roman",
-                "size" : 11
-            },
-            "grid" : {
-                "name" : "Helvetica",
-                "size" : 10
-            },
-        },
-
-        // Fonts that can be specified, but need not.
-        // subtitle       --> text
-        // comment        --> text
-        // comment_italic --> chord
-        // comment_box    --> chord
-        // toc            --> text
-        // grid           --> chord
-        // grid_margin    --> comment
-        // footer         --> subtitle @ 60%
-        // empty          --> text
-        // diagram        --> comment
-        // diagram_capo   --> text (but at a small size)
+* `title`  
+The font used for page titles.  
+Default is "Times-Bold" at size 14.
+* `subtitle`  
+The font used for page subtitles.  
+Default is the setting for `text`.
+* `footer`  
+Default is the setting for `subtitle` at 60% size.
+* `text`  
+The font used for lyrics texts.  
+Default is "Times-Roman" at size 12.
+* `chord`  
+The font used for chords above the lyrics.  
+Default is "Helvetica-Oblique" at size 10.
+* `comment`  
+The font used for comments.  
+Default is "Helvetica" at size 12.
+* `tab`  
+The font used for the contents of
+[[tab environments|Directives-env_tab]].  
+Default is "Courier" at size 10.
+* `toc`  
+The font used for the table of contents.  
+Default is "Times-Roman" at size 11.
+* `grid`  
+The font used for grid elements.__
+Default is the setting for `chord`.
+* `grid_margin`  
+The font used for grid margin texts.__
+Default is the setting for `comment`.
+* `comment_italic`  
+Default is the setting for `chord`.
+* `comment_boxed`  
+Default is the setting for `chord`.
+* `empty`  
+The font used for empty lines. While this may not seem very relevant
+at first, by setting the font's _size_ you can get a precise control
+over the amount of vertical whitespace in the output.  
+Default is the setting for `text`.
+* `diagram`  
+The font for the chord names above chord diagrams.  
+Default is the setting for `comment`.
+* `diagram_base`  
+The font for the base fret numbers in chord diagrams.  
+Default is the setting for `text` but at a small size.
 
 #### Helping develop a layout
 
