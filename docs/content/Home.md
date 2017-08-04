@@ -1,4 +1,4 @@
-# Welcome to the ChordPro wiki
+# Welcome to ChordPro!
 
 ## ChordPro: The File Format Specification
 * [[Overview|ChordPro File Format Specification]]
