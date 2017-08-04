@@ -1,10 +1,10 @@
-## start_of_tab
+# Directives: start_of_tab
 
 Abbreviation: `sob`.
 
 This directive indicates that the lines that follow form a section of guitar TAB instructions.
 
-## end_of_tab
+# Directives: end_of_tab
 
 Abbreviation: `eot`.
 

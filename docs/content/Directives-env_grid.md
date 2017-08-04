@@ -1,4 +1,4 @@
-## start_of_grid
+# Directives: start_of_grid
 
 This directive indicates that the lines that follow define a chord grid in the style of [Jazz Grilles](https://fr.wikipedia.org/wiki/Grille_harmonique).
 
@@ -71,6 +71,6 @@ The result will be similar to:
 
 ![](images/ex_grid2.png)
 
-## end_of_grid
+# Directives: end_of_grid
 
 This directive indicates the end of the grid.

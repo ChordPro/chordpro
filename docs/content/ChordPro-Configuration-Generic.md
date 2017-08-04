@@ -1,6 +1,6 @@
 # Configuration file contents - Generic
 
-### General settings
+## General settings
 
 These settings control global behaviour of the ChordPro program and can be changed from the command line.
 
@@ -19,7 +19,7 @@ These settings control global behaviour of the ChordPro program and can be chang
         "lyrics-only" : false,
     },
 
-### Metadata
+## Metadata
 
 The `metadata` setting contains three items:
 
@@ -40,7 +40,7 @@ Important: the keys `title` and `subtitle` must always be in this list.
         "separator" : "; ",
     },
 
-### Strings and Tuning
+## Strings and Tuning
 
 Define the instrument tuning as a list of notes in [scientific pitch notation](https://en.wikipedia.org/wiki/Scientific_pitch_notation).
 
@@ -50,7 +50,7 @@ For example, to specify tuning for a 4-string [soprano ukulele](https://en.wikip
 
 Setting the tuning to any value except `null` will discard all built-in chords!
 
-### User defined chords
+## User defined chords
 
 The configuration file can hold any number of predefined chords.
 
@@ -75,7 +75,7 @@ The resulting chords will look similar to:
 
 ![](images/ex_chords.png)
 
-### Printing chord diagrams
+## Printing chord diagrams
 
 By default, ChordPro will include diagrams for all known chords that have been used in a song.
 
@@ -93,7 +93,7 @@ By default, ChordPro will include diagrams for all known chords that have been u
 
 If `auto` is set to true, unknown chords will be printed as empty diagrams. This makes it easy to manually put the finger positions on paper. Of course, adding a [chord definition](#configuration-file-contents-generic_user-defined-chords) is usually a better alternative.
 
-### Diagnostic message format
+## Diagnostic message format
 
 When ChordPro detects errors while analyzing a song, it will use this format to show diagnostic messages.
 

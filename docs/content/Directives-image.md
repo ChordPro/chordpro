@@ -1,4 +1,4 @@
-## image
+# Directives: image
 
 `{image:` `src=`_filename_ _options_ `}`
 

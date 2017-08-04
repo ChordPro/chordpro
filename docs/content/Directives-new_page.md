@@ -1,4 +1,4 @@
-## new_page
+# Directives: new_page
 
 Abbreviation: `np`.
 

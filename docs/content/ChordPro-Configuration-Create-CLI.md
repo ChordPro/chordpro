@@ -1,3 +1,5 @@
+# Creating a config (CLI)
+
 ## Create a sample configuration using the command line
 
 _Note that the syntax of file names may differ between systems._

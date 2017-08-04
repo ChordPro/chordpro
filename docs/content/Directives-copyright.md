@@ -1,4 +1,4 @@
-## copyright
+# Directives: copyright
 
 `{copyright: `_year_` `_owner_`}`
 

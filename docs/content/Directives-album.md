@@ -1,4 +1,4 @@
-## album
+# Directives: album
 
 This directive defines an album this song occurs on. Multiple albums can be specified using multiple directives.
 

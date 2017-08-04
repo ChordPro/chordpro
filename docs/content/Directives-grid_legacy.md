@@ -1,4 +1,4 @@
-## grid
+# Directives: grid
 
 Abbreviation: `g`.
 
@@ -10,7 +10,7 @@ You may consider the [[chord|Directives chord]] directive as an alternative.
 
 The name `grid` is an unfortunate legacy from the original chord program and must not be confused with the [[chord grids|Directives env_grid]] facility.
 
-## no_grid
+# Directives: no_grid
 
 Abbreviation: `ng`.
 

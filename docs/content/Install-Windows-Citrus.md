@@ -1,4 +1,4 @@
-_This information may be sub-optimal and/or incomplete. Please help improving it._
+# Citrus Perl on Microsoft Windows
 
 Download Citrus Perl from <http://www.citrusperl.com/p/download.html>.
 Install according to the directions on the site.

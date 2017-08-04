@@ -1,4 +1,4 @@
-## new_song
+# Directives: new_song
 
 Abbreviation: `ns`.
 

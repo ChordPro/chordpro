@@ -1,4 +1,4 @@
-## composer
+# Directives: composer
 
 This directive defines a composer. Multiple composers can be specified using multiple directives.
 

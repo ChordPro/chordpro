@@ -1,4 +1,4 @@
-## arranger
+# Directives: arranger
 
 This directive defines the arranger of the song. Multiple arrangers can be specified using multiple directives.
 

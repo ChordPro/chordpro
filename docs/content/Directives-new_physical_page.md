@@ -1,4 +1,4 @@
-## new_physical_page
+# Directives: new_physical_page
 
 Abbreviation: `npp`.
 

@@ -1,4 +1,4 @@
-# ChordPro Chords
+# ChordPro Implementation: Chords
 
 In ChordPro files, lyrics are interspersed with chords between brackets `[` and `]`. Strictly speaking it doesn't matter what you put between the `[]`, it is put on top of the syllable whatever it is. But there are situations where it **does** matter: for chord diagrams and transpositions.
 

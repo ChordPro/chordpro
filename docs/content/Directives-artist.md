@@ -1,4 +1,4 @@
-## artist
+# Directives: artist
 
 This directive defines an artist. Multiple artists can be specified using multiple directives.
 

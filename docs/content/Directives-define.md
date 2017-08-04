@@ -1,4 +1,4 @@
-## define
+# Directives: define
 
 This directive defines a chord in terms of fret/string positions and, optional, finger settings.
 

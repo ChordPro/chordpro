@@ -1,4 +1,4 @@
-# Configuration file contents - PDF output
+# Configuration for PDF output
 
 Layout definitions for PDF output are stored in the configuration under the key `"pdf"`.
 
@@ -9,20 +9,20 @@ Layout definitions for PDF output are stored in the configuration under the key 
        },
     }
 
-#### Papersize
+## Papersize
 
 The size of the paper for which output must be formatted. The size can be specified either as the name of a known page size, e.g. `"a4"`, or as a 2-element list containing the width and height of the page in _PDF units_ (_DTP points_, _pt_, 1/72 inch).
 
         "papersize" : "a4",
         // Same as: "papersize" : [ 595, 842 ]
 
-#### Inter-column space
+## Inter-column space
 
 When output is produced in multiple columns, this is the space between the columns, in pt.
 
         "columnspace"  :  20,
 
-#### Page margins
+## Page margins
 
 Click on the image for a larger version.
 
@@ -35,13 +35,13 @@ Click on the image for a larger version.
         "headspace"    :  60,
         "footspace"    :  20,
 
-#### Heading on first page only
+## Heading on first page only
 
 Put the heading on the first page only, and add the headspace to the other pages so they become larger.
 
         "head-first-only" : false,
 
-#### Spacing
+## Spacing
 
 This controls the distance between lines as a factor of the font size.
 
@@ -57,7 +57,7 @@ This controls the distance between lines as a factor of the font size.
 
 Note: By setting the spacing for `empt` to a small value, you get fine-grained control over the spacing between the various parts of the song.
 
-#### Chorus style
+## Chorus style
 
 ChordPro can format a chorus in several different ways:
 
@@ -84,7 +84,7 @@ ChordPro can format a chorus in several different ways:
             },
         },
 
-#### Chords in a side column
+## Chords in a side column
 
 This is an alternative style where the chords are placed in a separate column at the right of the lyrics. Chord changes are marked by underlining the lyrics.
 
@@ -95,13 +95,13 @@ This is an alternative style where the chords are placed in a separate column at
         // "chordscolumn" : 400,
         "chordscolumn" :  0,
 
-#### Ignore {titles} directives
+## Ignore {titles} directives
 
 Traditionally, the `{titles}` directive was used to control titles flush. ChordPro has a much more powerful mechanism but this can conflict with legacy `{titles}` directives. If you use custom title formatting, setting `titles-directive-ignore` to a true makes ChordPro ignore the legacy directives.
 
         "titles-directive-ignore" : false,
 
-#### Chord diagrams
+## Chord diagrams
 
 Chord diagrams are printed at the end of the song to show the chords used in the song.
 
@@ -127,7 +127,7 @@ With the above settings, chord diagrams will look like:
 
 ![](images/ex_chords.png)
 
-#### Even/odd page printing
+## Even/odd page printing
 
 Pages can be printed neutrally (all pages the same) or with differing left and right pages.  
 This affects the page titles and footers.
@@ -135,7 +135,7 @@ This affects the page titles and footers.
         // Even/odd pages. A value of -1 denotes odd/even pages.
         "even-odd-pages" : 1,
 
-#### Page headers and footers
+## Page headers and footers
 
 ChordPro distinguishes three types of output pages:
 
@@ -179,7 +179,7 @@ All heading strings may contain references to metadata in the form `%{`_NAME_`}`
             },
         },
 
-#### Font libraries
+## Font libraries
 
 You can either designate a built-in font by its name, or give the filename of a TrueType (ttf) or OpenType font (otf).  
 The filename should be the full name of a file on disk, or a relative filename which will be looked up in system dependent font libraries.
@@ -192,7 +192,7 @@ the font libraries. The private directory will be searched first.
 
 See also [[ChordPro Fonts]].
 
-#### Fonts
+## Fonts
 
 All printable items like lyrics, chords and comments can be associated with a font specification. This allows fine-grained control over the printed output.
 
@@ -268,7 +268,7 @@ Default is the setting for `comment`.
 The font for the base fret numbers in chord diagrams.  
 Default is the setting for `text` but at a small size.
 
-#### Helping develop a layout
+## Helping develop a layout
 
 If `showlayout` is true, the margins and other page layout details are shown on the page. This can be helpful to determine the optimal settings for your desired layout.
 

@@ -1,4 +1,4 @@
-# ChordPro Directives
+# ChordPro directives
 
 ChordPro directives are used to control the appearance of the printed output. They define meta-data like titles, add new chords, control page and column breaks. Therefore it is not always easy to make a distinction between the semantics of a directive, and the way these semantics are implemented in the ChordPro processing program, the _formatter_.
 

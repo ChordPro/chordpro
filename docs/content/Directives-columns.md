@@ -1,4 +1,4 @@
-## columns
+# Directives: columns
 
 Abbreviation: `col`.
 

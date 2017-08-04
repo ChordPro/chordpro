@@ -1,4 +1,4 @@
-## titles
+# Directives: titles
 
 **Deprecated.** Use the [[configuration files|ChordPro Configuration]] instead.
 

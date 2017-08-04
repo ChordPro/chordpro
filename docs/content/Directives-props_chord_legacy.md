@@ -1,4 +1,4 @@
-# chordfont, chordsize, chordcolour
+# Directives: chordfont, chordsize, chordcolour
 
 Note: If the intention is to change the appearance for the whole song, or collection of songs, it is much better to use [[configuration files|ChordPro Configuration]] instead.
 

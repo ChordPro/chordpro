@@ -1,4 +1,4 @@
-## meta
+# Directives: meta
 
 This directive defines a meta-data item.
 
@@ -28,4 +28,4 @@ Examples:
 
     {meta: artist The Beatles}
 
-
+See also [[Using metadata in texts]].

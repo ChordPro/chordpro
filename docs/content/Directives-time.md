@@ -1,4 +1,4 @@
-## time
+# Directives: time
 
 This directive specifies a time signature. Multiple signatures are possible, each specification is assumed to apply from where it was specified.
 

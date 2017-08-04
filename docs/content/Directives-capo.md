@@ -1,4 +1,4 @@
-## capo
+# Directives: capo
 
 This directive specifies the [capo](https://en.wikipedia.org/wiki/Capo) setting for the song. 
 

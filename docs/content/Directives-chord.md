@@ -1,4 +1,4 @@
-## chord
+# Directives: chord
 
 This directive is similar to [[define|Directives define]] but it also displays the chord immedeately in the song where the directive occurs.
 

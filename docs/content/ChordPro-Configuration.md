@@ -1,4 +1,5 @@
-## Configuration
+# ChordPro Configuration
+
 * [[Overview|ChordPro Configuration Overview]]
 * [[Preset configurations|Chordpro Configuration Presets]]
 * [[Create a sample configuration using the GUI|Chordpro Configuration Create GUI]]

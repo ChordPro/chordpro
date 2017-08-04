@@ -1,4 +1,4 @@
-## subtitle
+# Directives: subtitle
 
 Abbreviation: `st`.
 
