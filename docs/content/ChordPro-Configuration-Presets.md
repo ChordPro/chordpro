@@ -1,4 +1,4 @@
-# Configurations presets
+# Preset configurations
 
 ChordPro comes with a number of standard configurations.
 
