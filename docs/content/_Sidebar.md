@@ -11,4 +11,4 @@
 * [[Configuration|ChordPro Configuration]]
 * [[User guide|Using ChordPro]]
 
-**[[Links|Links.html]]**
+**[[Links]]**
