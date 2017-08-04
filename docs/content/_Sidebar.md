@@ -10,3 +10,5 @@
 * [[Installation|ChordPro Installation]]
 * [[Configuration|ChordPro Configuration]]
 * [[User guide|Using ChordPro]]
+
+**[[Links]]**
