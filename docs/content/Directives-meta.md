@@ -28,4 +28,4 @@ Examples:
 
     {meta: artist The Beatles}
 
-See also [[Using metadata in texts]].
+See also [[Using metadata in texts|ChordPro Configuration Format Strings]].
