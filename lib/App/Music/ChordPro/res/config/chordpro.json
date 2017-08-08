@@ -243,7 +243,7 @@
 	// footer         --> subtitle @ 60%
 	// empty          --> text
 	// diagram	  --> comment
-	// diagram_capo	  --> text (but at a small size)
+	// diagram_base	  --> text (but at a small size)
 
 	// This will show the page layout if non-zero.
 	"showlayout" : false,
