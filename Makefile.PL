@@ -3,11 +3,14 @@
 # Ease the life of the CPAN testers.
 exit 0 if $ENV{AUTOMATED_TESTING} && $] < 5.010000;
 
-use ExtUtils::MakeMaker;
+# EU::MM 6.5503 is the first version to understand *_REQUIRES.
+use ExtUtils::MakeMaker 6.5503;
 
 my $master = 'lib/App/Music/ChordPro/Version.pm';
 my $version = MM->parse_version($master);
 $master =~ s;/Version;;;
+
+my @bins = qw( chordpro wxchordpro );
 
 WriteMakefile
 (
@@ -15,17 +18,27 @@ WriteMakefile
  ABSTRACT_FROM  => $master,
  VERSION	=> $version,
  AUTHOR	        => 'Johan Vromans <jvromans@squirrel.nl>',
-
+ LICENSE	=> "perl",
+ MIN_PERL_VERSION => 5.010000,
  INSTALLDIRS	=> 'site',
- EXE_FILES	=> [ 'script/chordpro', 'script/wxchordpro' ],
+ EXE_FILES	=> [ map { "script/$_" } @bins ],
  PL_FILES	=> {
-		    'script/ppchordpro.PL' => [ 'script/chordpro', 'script/wxchordpro' ]
+		    'script/ppchordpro.PL' => [ map { "script/$_" } @bins ]
 		   },
+
  PREREQ_PM      => {
 		    'App::Packager' => 1.420,
 		    'PDF::API2'   => 2.020,
 		    'Font::TTF'   => 1.04,
 		   },
+
+ CONFIGURE_REQUIRES => {
+    "ExtUtils::MakeMaker" => 6.5503,
+ },
+
+# BUILD_REQUIRES => {
+# },
+
  TEST_REQUIRES  => {
 		    'Test::More'  => 0,
 		   },
@@ -73,17 +86,31 @@ sub MY::postamble {
 
 # Actualize resources.
 
-resources : res/config/chordpro.json \
-	    res/pod/ChordPro.pod \
-	    res/pod/Config.pod
+LIB = lib/App/Music/ChordPro
+RES = ${LIB}/res
+PODSELECT = podselect
 
-res/config/chordpro.json : lib/App/Music/ChordPro/Config.pm
-	$(PERLRUN) $< > $@
+resources : ${RES}/config/chordpro.json ${RES}/pod/ChordPro.pod ${RES}/pod/Config.pod
 
-res/pod/ChordPro.pod : lib/App/Music/ChordPro.pm
-	podselect $< > $@
+${RES}/config/chordpro.json : ${LIB}/Config.pm
+        $(PERL) $< > $@
 
-res/pod/Config.pod :lib/App/Music/ChordPro/Config.pm
-	podselect $< > $@
+${RES}/pod/ChordPro.pod : ${LIB}.pm
+        ${PODSELECT} $< > $@
+
+${RES}/pod/Config.pod : ${LIB}/Config.pm
+        ${PODSELECT} $< > $@
+
+# Verify JSON data
+
+CFGLIB := ${LIB}/res/config
+
+checkjson :
+        for i in ${CFGLIB}/*.json ; \
+        do \
+          echo "Verifying $$i..."; \
+          json_pp -json_opt relaxed < $$i | \
+          jsonschema -i /dev/stdin ${CFGLIB}/config.schema; \
+        done
 EOD
 }
