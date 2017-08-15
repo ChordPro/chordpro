@@ -4,12 +4,20 @@ use strict;
 use warnings;
 use Test::More;
 
+my $pdfapi = "PDF::API2";
+my $pdfapiv = "2.020";
+eval { require PDF::Builder;
+       $pdfapiv = "3.004";
+       $pdfapi = "PDF::Builder";
+};
+
 my $test;
 ++$test; ok( $] >= 5.010,
 	     "Perl version $] is newer than 5.010." );
 ++$test; use_ok( "IO::String", 1.08  ); # for Font::TTF
 ++$test; use_ok( "Font::TTF",  1.04  ); # for PDF::API2
-++$test; use_ok( "PDF::API2",  2.020 );
+++$test; use_ok( $pdfapi,  $pdfapiv );
+diag("Using $pdfapi for PDF generation");
 ++$test; use_ok( "JSON::PP",   2.237 );
 
 done_testing($test);

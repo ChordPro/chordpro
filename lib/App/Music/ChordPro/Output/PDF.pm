@@ -11,6 +11,15 @@ use Encode qw( encode_utf8 );
 
 use App::Music::ChordPro::Output::Common;
 
+my $pdfapi;
+BEGIN {
+    eval { require PDF::Builder; $pdfapi = "PDF::Builder"; }
+      or
+    eval { require PDF::API2; $pdfapi = "PDF::API2"; }
+      or
+    die("Missing PDF::API package\n");
+}
+
 use constant DEBUG_SPACING => 0;
 
 # For regression testing, run perl with PERL_HASH_SEED set to zero.
@@ -1465,7 +1474,7 @@ sub configurator {
     for my $fontdir ( $pdf->{fontdir}, ::findlib("fonts"), $ENV{FONTDIR} ) {
 	next unless $fontdir;
 	if ( -d $fontdir ) {
-	    PDF::API2::addFontDirs($fontdir);
+	    $pdfapi->can("addFontDirs")->($fontdir);
 	}
 	else {
 	    warn("PDF: Ignoring fontdir $fontdir [$!]\n");
@@ -1475,8 +1484,8 @@ sub configurator {
 
     # Map papersize name to [ width, height ].
     unless ( eval { $pdf->{papersize}->[0] } ) {
-	require PDF::API2::Resource::PaperSizes;
-	my %ps = PDF::API2::Resource::PaperSizes->get_paper_sizes;
+	eval "require ${pdfapi}::Resource::PaperSizes";
+	my %ps = "${pdfapi}::Resource::PaperSizes"->get_paper_sizes;
 	die("Unhandled paper size: ", $pdf->{papersize}, "\n")
 	  unless exists $ps{lc $pdf->{papersize}};
 	$pdf->{papersize} = $ps{lc $pdf->{papersize}}
@@ -1567,7 +1576,6 @@ package PDFWriter;
 
 use strict;
 use warnings;
-use PDF::API2;
 use Encode;
 
 my $faketime = 1465041600;
@@ -1577,7 +1585,7 @@ my %fontcache;			# speeds up 2 seconds per song
 sub new {
     my ( $pkg, $ps ) = @_;
     my $self = bless { ps => $ps }, $pkg;
-    $self->{pdf} = PDF::API2->new;
+    $self->{pdf} = $pdfapi->new;
     $self->{pdf}->{forcecompress} = 0 if $regtest;
     $self->{pdf}->mediabox( $ps->{papersize}->[0],
 			    $ps->{papersize}->[1] );
