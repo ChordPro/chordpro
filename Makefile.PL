@@ -93,24 +93,24 @@ PODSELECT = podselect
 resources : ${RES}/config/chordpro.json ${RES}/pod/ChordPro.pod ${RES}/pod/Config.pod
 
 ${RES}/config/chordpro.json : ${LIB}/Config.pm
-        $(PERL) $< > $@
+	$(PERL) $< > $@
 
 ${RES}/pod/ChordPro.pod : ${LIB}.pm
-        ${PODSELECT} $< > $@
+	${PODSELECT} $< > $@
 
 ${RES}/pod/Config.pod : ${LIB}/Config.pm
-        ${PODSELECT} $< > $@
+	${PODSELECT} $< > $@
 
 # Verify JSON data
 
 CFGLIB := ${LIB}/res/config
 
 checkjson :
-        for i in ${CFGLIB}/*.json ; \
-        do \
-          echo "Verifying $$i..."; \
-          json_pp -json_opt relaxed < $$i | \
-          jsonschema -i /dev/stdin ${CFGLIB}/config.schema; \
-        done
+	for i in ${CFGLIB}/*.json ; \
+	do \
+	  echo "Verifying $$i..."; \
+	  json_pp -json_opt relaxed < $$i | \
+	  jsonschema -i /dev/stdin ${CFGLIB}/config.schema; \
+	done
 EOD
 }
