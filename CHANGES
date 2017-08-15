@@ -1,8 +1,10 @@
-0.85	
+0.85	Aug 15 2017
 
 	Rename config pdf.fonts.diagram_capo to pdf.fonts.diagram_base.
 	Fix some (well, several) layout issues with odd/even page printing.
 	Fix missing fingers in config defined chords.
+	Allow PDF::Builder to be used instead of PDF::API2.
+	Improve define/chord parsing and diagnostics.
 	(WxChordPro) Update to 0.84.
 
 0.84	Jul 31 2017
