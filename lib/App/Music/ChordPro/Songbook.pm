@@ -655,76 +655,127 @@ sub global_directive {
     # optional: base-fret N (defaults to 1)
     # optional: N N N N N N (for unknown chords)
     # optional: fingers N N N N N N
-    if ( $d =~ /^
-		(define|chord) [: ]+
-		([^: ]+) [: ] \s*
-		(?: base-fret \s+ (\d+) \s+ )?
-		frets
-		((?: \s+ [0-9---xX])*
-		     \s+ [0-9---xX])?
-		(?: \s+ fingers
-		((?: \s+ [0-9---xX])*
-		     \s+ [0-9---xX])? )?
-		\s*$
-	       /xi
-	 or
-	 $d =~ /^
-		(chord) [: ]+
-		([^: ]+) [: ]? \s*$
-	       /xi
-       ) {
 
-	my $show = $1 eq "chord";
+    if ( $dir =~ /^define|chord$/ ) {
+	my $show = $dir eq "chord";
 	return if $legacy && $show;
 
-	my $ci;
-	if ( $4 ) {
-	    my @f = split(' ', $4||'');
-	    $ci = { name => $2,
-		    base => $3 || 1,
-		    frets => [ map { $_ =~ /^\d+/ ? $_ : -1 } @f ],
-		  };
-	    $ci->{fingers} = [ map { $_ =~ /^\d+/ ? $_ : -1 } split(' ',$5) ]
-	      if defined $5;
-	    push( @{$cur->{define}}, $ci );
-	    if ( @f ) {
+	# Split the arguments and keep a copy for error messages.
+	my @a = split( /[: ]+/, $arg );
+	my @orig = @a;
+
+	# Result structure.
+	my $res = { name => shift(@a) };
+
+	my $strings = App::Music::ChordPro::Chords::strings;
+	my $fail = 0;
+
+	while ( @a ) {
+	    my $a = shift(@a);
+
+	    # base-fret N
+	    if ( $a eq "base-fret" ) {
+		if ( $a[0] =~ /^\d+$/ ) {
+		    $res->{base} = shift(@a);
+		}
+		else {
+		    do_warn("Invalid base-fret value: $a[0]\n");
+		    $fail++;
+		    last;
+		}
+	    }
+
+	    # frets N N ... N
+	    elsif ( $a eq "frets" ) {
+		my @f;
+		while ( @a && $a[0] =~ /^[0-9---xXN]$/ ) {
+		    push( @f, shift(@a) );
+		}
+		if ( @f == $strings ) {
+		    $res->{frets} = [ map { $_ =~ /^\d+/ ? $_ : -1 } @f ];
+		}
+		else {
+		    do_warn("Incorrect number of fret positions (" .
+			    scalar(@f) . ", should be $strings)\n");
+		    $fail++;
+		    last;
+		}
+	    }
+
+	    # fingers N N ... N
+	    elsif ( $a eq "fingers" ) {
+		my @f;
+		# It is tempting to limit the fingers to 1..5 ...
+		while ( @a && $a[0] =~ /^[0-9---xXN]$/ ) {
+		    push( @f, shift(@a) );
+		}
+		if ( @f == $strings ) {
+		    $res->{fingers} = [ map { $_ =~ /^\d+/ ? $_ : -1 } @f ];
+		}
+		else {
+		    do_warn("Incorrect number of finger settings (" .
+			    scalar(@f) . ", should be $strings)\n");
+		    $fail++;
+		    last;
+		}
+	    }
+
+	    # Wrong...
+	    else {
+		# Insert a marker to show how far we got.
+		splice( @orig, @orig-@a, 0, "<<<" );
+		splice( @orig, @orig-@a-2, 0, ">>>" );
+		do_warn("Invalid chord definition: @orig\n");
+		$fail++;
+		last;
+	    }
+	}
+	return 1 if $fail;
+
+	if ( ( $res->{fingers} || $res->{base} ) && ! $res->{frets} ) {
+	    do_warn("Missing fret positions: $res->{name}\n");
+	    return 1;
+	}
+
+	if ( $res->{frets} || $res->{base} || $res->{fingers} ) {
+	    $res->{base} ||= 1;
+	    push( @{$cur->{define}}, $res );
+	    if ( $res->{frets} ) {
 		my $res =
 		  App::Music::ChordPro::Chords::add_song_chord
-		      ( $ci->{name}, $ci->{base} || 1, $ci->{frets}, $ci->{fingers} );
+		      ( $res->{name}, $res->{base}, $res->{frets}, $res->{fingers} );
 		if ( $res ) {
-		    do_warn("Invalid chord: ", $ci->{name}, ": ", $res, "\n");
-		    $show = 0;
+		    do_warn("Invalid chord: ", $res->{name}, ": ", $res, "\n");
+		    return 1;
 		}
 	    }
 	    else {
-		App::Music::ChordPro::Chords::add_unknown_chord( $ci->{name} );
+		App::Music::ChordPro::Chords::add_unknown_chord( $res->{name} );
 	    }
 	}
 	else {
-	    my $name = $2;
-	    if ( App::Music::ChordPro::Chords::chord_info($name) ) {
-		$ci = { name => $name };
-	    }
-	    else {
-		do_warn("Unknown chord: $name\n");
+	    unless ( App::Music::ChordPro::Chords::chord_info($res->{name}) ) {
+		do_warn("Unknown chord: $res->{name}\n");
 		return 1;
 	    }
 	}
+
 	if ( $show) {
 	    # Combine consecutive entries.
 	    if ( $self->{songs}->[-1]->{body}->[-1]->{type} eq "diagrams" ) {
 		push( @{ $self->{songs}->[-1]->{body}->[-1]->{chords} },
-		      $ci->{name} );
+		      $res->{name} );
 	    }
 	    else {
 		$self->add( type => "diagrams",
 			    show => "user",
 			    origin => "chord",
-			    chords => [ $ci->{name} ] );
+			    chords => [ $res->{name} ] );
 	    }
 	}
 	return 1;
     }
+
     return;
 }
 

@@ -616,7 +616,7 @@ sub add_song_chord {
 	return scalar(@$frets) . " strings";
     }
     if ( $fingers && @$fingers && @$fingers != strings() ) {
-	return scalar(@$frets) . " strings";
+	return scalar(@$fingers) . " strings for fingers";
     }
     unless ( $base > 0 && $base < 12 ) {
 	return "base-fret $base out of range";
