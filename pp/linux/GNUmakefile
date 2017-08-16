@@ -1,4 +1,6 @@
 #! /bin/make -f
+# GNUmakefile for Linux + CitrusPerl
+# Based on CitrusPerl 5.24 with wxWidgets 3.0.
 
 .PHONY : chordpro wxchordpro
 
@@ -18,7 +20,7 @@ wxchordpro : res chordpro.pp ${COMMON}/chordpro.pp ${COMMON}/wxchordpro.pp
 	${PP} --output=wxchordpro @wxchordpro.pp ${SCRIPT}/wxchordpro.pl
 
 res :
-	test -f ${ROOT}/GNUmakefile && make -C ${ROOT} -f GNUmakefile resources
+	test -f ${ROOT}/GNUmakefile && make -C ${ROOT} -f GNUmakefile resources || true
 
 clean ::
 	rm -f *.pp.deps *~ chordpro wxchordpro
