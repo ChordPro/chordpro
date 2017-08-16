@@ -3,6 +3,8 @@
 * [Official ChordPro site](http://www.chordpro.org)  
   Contact us via [email](mai&#x6c;to&#58;info&#64;chordpro.org).
 
+* Follow us on [Twitter](https://twitter.com/ChordPro_Org).
+
 * [Chordie.com](http://www.chordie.com)  
   Searchable web site with a vast collection of ChordPro notated
   songs.
