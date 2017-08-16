@@ -1,3 +1,8 @@
+0.86	Aug 16 2017
+
+	Fix problems with disappearing page titles.
+	Fix some packing issues.
+
 0.85	Aug 15 2017
 
 	Rename config pdf.fonts.diagram_capo to pdf.fonts.diagram_base.

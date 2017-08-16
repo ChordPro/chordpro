@@ -170,7 +170,11 @@ sub generate_song {
 	    my ( $from, $to ) = @_;
 	    for my $class ( qw( default title first ) ) {
 		for ( qw( title subtitle footer ) ) {
-		    next unless exists $ps->{formats}->{$class}->{$_};
+		    next unless defined $ps->{formats}->{$class}->{$_};
+		    unless ( ref($ps->{formats}->{$class}->{$_}) eq 'ARRAY' ) {
+			warn("Oops -- pdf.formats.$class.$_ is not an array\n");
+			next;
+		    }
 		    ( $ps->{formats}->{$class}->{$_}->[$from],
 		      $ps->{formats}->{$class}->{$_}->[$to] ) =
 			( $ps->{formats}->{$class}->{$_}->[$to],
@@ -1541,8 +1545,10 @@ sub tpt {
     return unless $fmt;
 
     # @fmt = ( left-fmt, center-fmt, right-fmt )
-
-    my @fmt = @{$fmt};
+    unless ( @$fmt == 3 ) {
+	die("ASSERT: " . scalar(@$fmt)," part format $class $type");
+    }
+    my @fmt = ( @$fmt );
     @fmt = @fmt[2,1,0] unless $rightpage; # swap
 
     my $pr = $ps->{pr};
