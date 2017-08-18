@@ -7,7 +7,9 @@ use Test::More;
 my $pdfapi = "PDF::API2";
 my $pdfapiv = "2.020";
 eval { require PDF::Builder;
-       $pdfapiv = "3.004";
+       # We need to explicitly check here, since 3.004 will bail out.
+       PDF::Builder->VERSION("3.005");
+       $pdfapiv = "3.005";
        $pdfapi = "PDF::Builder";
 };
 

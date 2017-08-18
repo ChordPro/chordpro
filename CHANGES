@@ -1,3 +1,8 @@
+0.87	Aug xx 2017
+
+	Fix test failures with PDF::Builder 3.004, issue
+	https://rt.cpan.org/Ticket/Display.html?id=122815 .
+
 0.86	Aug 16 2017
 
 	Fix problems with disappearing page titles.
