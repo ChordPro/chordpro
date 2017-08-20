@@ -840,6 +840,10 @@ sub transpose {
     # Transpose body contents.
     foreach my $item ( @{ $self->{body} } ) {
 	if ( $item->{type} eq "songline" ) {
+	    # Prevent chords to be autovivified.
+	    # The ChordPro backend relies on it.
+	    next unless exists $item->{chords};
+
 	    foreach ( @{ $item->{chords} } ) {
 		$_ = $self->xpchord( $_, $xpose );
 	    }

@@ -1,3 +1,8 @@
+0.87	xxx
+
+	Fix problem where songlines without chords yielded empty lines
+	in the ChordPro backend after transposition.
+	
 0.860.1	Aug 18 2017
 
 	Fix test failures with PDF::Builder 3.004, issue
