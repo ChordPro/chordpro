@@ -7,11 +7,24 @@ use warnings;
 
 use App::Music::ChordPro::Output::Common;
 
+my $re_meta;
+
 sub generate_songbook {
     my ($self, $sb, $options) = @_;
 
     # Skip empty songbooks.
     return [] unless eval { $sb->{songs}->[0]->{body} };
+
+    # Build regex for the known metadata items.
+    if ( $::config->{metadata}->{keys} ) {
+	$re_meta = '^(' .
+	  join( '|', map { quotemeta } @{$::config->{metadata}->{keys}} )
+	    . ')$';
+	$re_meta = qr/$re_meta/;
+    }
+    else {
+	undef $re_meta;
+    }
 
     my @book;
 
@@ -54,7 +67,7 @@ sub generate_song {
     if ( $s->{meta} ) {
 	foreach my $k ( sort keys %{ $s->{meta} } ) {
 	    next if $k =~ /^(?:title|subtitle)$/;
-	    if ( $variant eq 'msp' ) {
+	    if ( $variant eq 'msp' || $k =~ $re_meta ) {
 		push( @s, map { +"{$k: $_}" } @{ $s->{meta}->{$k} } );
 	    }
 	    else {
