@@ -47,6 +47,10 @@ sub parsefile {
 	open($fh, '<', \$data)
 	  or croak("$filename: $!\n");
     }
+    elsif ( $filename eq '-' ) {
+	$filename = "__STDIN__";
+	$fh = \*STDIN;
+    }
     else {
 	open($fh, '<', $filename)
 	  or croak("$filename: $!\n");
