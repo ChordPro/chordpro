@@ -21,6 +21,7 @@ wxchordpro.exe :: chordpro.pp wxchordpro.pp ../common/wxchordpro.pp
 ISC := 	"C:\\Program Files (x86)\\Inno Setup 5\\Compil32.exe"
 
 iss ::	install innosetup.iss
+	perl vfix.pl
 	${ISC} /cc innosetup.iss
 
 # NOTE: THIS IS FOR TESTING/DEVELOPMENT ONLY.

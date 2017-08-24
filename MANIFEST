@@ -40,6 +40,7 @@ pp/windows/chordpro.pp
 pp/windows/chordproinst.bmp
 pp/windows/innosetup.iss
 pp/windows/wxchordpro.pp
+pp/windows/vfix.pl
 script/chordpro.pl
 script/ppchordpro.PL
 script/wxchordpro.pl

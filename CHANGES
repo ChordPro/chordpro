@@ -4,6 +4,7 @@
 	in the ChordPro backend after transposition.
 	Allow "-" as filename for standard input.
 	(ChordPro) Do not use {meta} for known meta keys.
+	(Windows) Handle version number setting in iss file.
 	
 0.860.1	Aug 18 2017
 
