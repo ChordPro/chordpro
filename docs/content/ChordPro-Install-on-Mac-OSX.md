@@ -1,5 +1,12 @@
 # Installation on Mac OS/X
 
-![](images/maintenance.png)
 
-There are Mac OS/X versions of ActiveState Perl and Citrus Perl. Maybe the information in the [[Microsoft Windows section|ChordPro Install on Windows]] of this wiki is usable?
+Modern versions of Mac OS/X come with a pre-installed version of Perl that is capable of running the command line version of ChordPro. Just open a command terminal window and type
+
+`sudo cpan chordpro`
+
+Your individual configuration file can be placed at
+
+`/Users/USER/.config/chordpro/chordpro.json`
+
+![](images/maintenance.png)
