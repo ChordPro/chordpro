@@ -3,6 +3,7 @@
 	Fix problem where songlines without chords yielded empty lines
 	in the ChordPro backend after transposition.
 	Allow "-" as filename for standard input.
+	Handle Byte Order Mark in input files.
 	(ChordPro) Do not use {meta} for known meta keys.
 	(Windows) Handle version number setting in iss file.
 	

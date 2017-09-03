@@ -40,21 +40,73 @@ my $diag;			# for diagnostics
 sub parsefile {
     my ( $self, $filename, $options ) = @_;
 
-    my $fh;
+    my $data;			# slurped file data
+    my $encoded;		# already encoded
+
+    # Gather data from the input.
     if ( ref($filename) ) {
-	my $data = encode("UTF-8", $$filename);
+	$data = $$filename;
 	$filename = "__STRING__";
-	open($fh, '<', \$data)
-	  or croak("$filename: $!\n");
+	$encoded++;
     }
     elsif ( $filename eq '-' ) {
 	$filename = "__STDIN__";
-	$fh = \*STDIN;
+	$data = do { local $/; <STDIN> };
     }
     else {
-	open($fh, '<', $filename)
+	open( my $fh, '<', $filename)
 	  or croak("$filename: $!\n");
+	$data = do { local $/; <$fh> };
     }
+
+    if ( $encoded ) {
+	# Nothing to do, already dealt with.
+    }
+
+    # Detect Byte Order Mark.
+    elsif ( $data =~ /\xEF\xBB\xBF/ ) {
+	warn("Input is UTF-8 (BOM)\n") if $options->{debug};
+	$data = decode( "UTF-8", substr($data, 2) );
+    }
+    elsif ( $data =~ /\xFE\xFF/ ) {
+	warn("Input is UTF-16BE (BOM)\n") if $options->{debug};
+	$data = decode( "UTF-16BE", substr($data, 2) );
+    }
+    elsif ( $data =~ /\xFF\xFE\x00\x00/ ) {
+	warn("Input is UTF-32LE (BOM)\n") if $options->{debug};
+	$data = decode( "UTF-32LE", substr($data, 4) );
+    }
+    elsif ( $data =~ /\xFF\xFE/ ) {
+	warn("Input is UTF-16LE (BOM)\n") if $options->{debug};
+	$data = decode( "UTF-16LE", substr($data, 2) );
+    }
+    elsif ( $data =~ /\x00\x00\xFE\xFF/ ) {
+	warn("Input is UTF-32BE (BOM)\n") if $options->{debug};
+	$data = decode( "UTF-32BE", substr($data, 4) );
+    }
+
+    # No BOM, did user specify an encoding?
+    elsif ( $options->{encoding} ) {
+	warn("Input is ", $options->{encoding}, " (--encoding)\n")
+	  if $options->{debug};
+	$data = decode( $options->{encoding}, $data, 1 );
+    }
+
+    # Try UTF8, fallback to ISO-8895.1.
+    else {
+	my $d = eval { decode( "UTF-8", $data, 1 ) };
+	if ( $@ ) {
+	    warn("Input is ISO-8859.1 (assumed)\n") if $options->{debug};
+	    $data = decode( "iso-8859-1", $data );
+	}
+	else {
+	    warn("Input is UTF-8 (detected)\n") if $options->{debug};
+	    $data = $d;
+	}
+    }
+
+    # Split in lines;
+    my @lines = split( /\r\n|\n|\r/, $data );
 
     push( @{ $self->{songs} }, App::Music::ChordPro::Song->new )
       if exists($self->{songs}->[-1]->{body});
@@ -80,27 +132,18 @@ sub parsefile {
 	undef $re_meta;
     }
 
-    while ( <$fh> ) {
-	s/[\r\n]+$//;
-	$diag->{line} = $.;
-
-	my $line;
-	if ( $options->{encoding} ) {
-	    $line = decode( $options->{encoding}, $_, 1 );
-	}
-	else {
-	    eval { $line = decode( "UTF-8", $_, 1 ) };
-	    $line = decode( "iso-8859-1", $_ ) if $@;
-	}
-	$diag->{orig} = $_ = $line;
+    my $linecnt;
+    while ( @lines ) {
+	$diag->{line} = ++$linecnt;
+	$diag->{orig} = $_ = shift(@lines);
 
 	if ( /^#/ ) {
 	    # Collect pre-title stuff separately.
 	    if ( exists $self->{songs}->[-1]->{title} ) {
-		$self->add( type => "ignore", text => $line );
+		$self->add( type => "ignore", text => $_ );
 	    }
 	    else {
-		push( @{ $self->{songs}->[-1]->{preamble} }, $line );
+		push( @{ $self->{songs}->[-1]->{preamble} }, $_ );
 	    }
 	    next;
 	}
@@ -134,7 +177,7 @@ sub parsefile {
 	}
 	else {
 	    # Collect pre-title stuff separately.
-	    push( @{ $self->{songs}->[-1]->{preamble} }, $line );
+	    push( @{ $self->{songs}->[-1]->{preamble} }, $_ );
 	}
     }
     do_warn("Unterminated context in song: $in_context")
