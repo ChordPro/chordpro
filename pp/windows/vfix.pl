@@ -6,7 +6,7 @@ use lib "../../lib";
 use App::Music::ChordPro::Version;
 my $vv = $App::Music::ChordPro::Version::VERSION;
 
-my ( $maj, $min, $aux ) = $vv =~ /^(\d+)\.(\d+)(?:_(\d+))/;
+my ( $maj, $min, $aux ) = $vv =~ /^(\d+)\.(\d+)(?:_(\d+))?/;
 
 @ARGV = qw( innosetup.iss ) unless @ARGV;
 
