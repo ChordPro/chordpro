@@ -8,7 +8,7 @@ my $vv = $App::Music::ChordPro::Version::VERSION;
 
 my ( $maj, $min, $aux ) = $vv =~ /^(\d+)\.(\d+)(?:_(\d+))/;
 
-my @ARGV = qw( innosetup.iss ) unless @ARGV;
+@ARGV = qw( innosetup.iss ) unless @ARGV;
 
 $^I = ".bak";
 

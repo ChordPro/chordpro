@@ -1,4 +1,4 @@
-0.87	xxx
+0.87	Sep 04 2017
 
 	Fix problem where songlines without chords yielded empty lines
 	in the ChordPro backend after transposition.
