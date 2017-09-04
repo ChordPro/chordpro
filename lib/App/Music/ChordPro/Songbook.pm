@@ -64,23 +64,23 @@ sub parsefile {
     }
 
     # Detect Byte Order Mark.
-    elsif ( $data =~ /\xEF\xBB\xBF/ ) {
+    elsif ( $data =~ /^\xEF\xBB\xBF/ ) {
 	warn("Input is UTF-8 (BOM)\n") if $options->{debug};
-	$data = decode( "UTF-8", substr($data, 2) );
+	$data = decode( "UTF-8", substr($data, 3) );
     }
-    elsif ( $data =~ /\xFE\xFF/ ) {
+    elsif ( $data =~ /^\xFE\xFF/ ) {
 	warn("Input is UTF-16BE (BOM)\n") if $options->{debug};
 	$data = decode( "UTF-16BE", substr($data, 2) );
     }
-    elsif ( $data =~ /\xFF\xFE\x00\x00/ ) {
+    elsif ( $data =~ /^\xFF\xFE\x00\x00/ ) {
 	warn("Input is UTF-32LE (BOM)\n") if $options->{debug};
 	$data = decode( "UTF-32LE", substr($data, 4) );
     }
-    elsif ( $data =~ /\xFF\xFE/ ) {
+    elsif ( $data =~ /^\xFF\xFE/ ) {
 	warn("Input is UTF-16LE (BOM)\n") if $options->{debug};
 	$data = decode( "UTF-16LE", substr($data, 2) );
     }
-    elsif ( $data =~ /\x00\x00\xFE\xFF/ ) {
+    elsif ( $data =~ /^\x00\x00\xFE\xFF/ ) {
 	warn("Input is UTF-32BE (BOM)\n") if $options->{debug};
 	$data = decode( "UTF-32BE", substr($data, 4) );
     }
