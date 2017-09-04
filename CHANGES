@@ -1,3 +1,7 @@
+x.xx
+
+	Improve JSON config validation.
+
 0.87	Sep 04 2017
 
 	Fix problem where songlines without chords yielded empty lines

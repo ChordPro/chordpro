@@ -165,7 +165,7 @@
 		"name" : "Courier",
 		"size" : 10
 	    },
-	    "diagrams" : {
+	    "diagram" : {
 		"name" : "Times-Roman",
 		"size" : 10
 	    },
@@ -184,8 +184,8 @@
 	// grid           --> comment
 	// footer         --> subtitle @ 60%
 	// empty          --> text
-	// chordgrid	  --> comment
-	// chordgrid_capo --> text (but at a small size)
+	// diagram	  --> comment
+	// diagram_base   --> text (but at a small size)
 
 	// This will show the page layout if non-zero.
 	"showlayout" : false,
