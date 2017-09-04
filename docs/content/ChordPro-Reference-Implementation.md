@@ -12,7 +12,7 @@ While PostScript was a good choice 25 years ago, nowadays PDF is much better. No
 
 ## Unicode support
 
-The original `chord` program was already revolutionary in supporting the ISO-8859.1 character set for input, allowing most european languages to be processed. ChordPro takes all input in UTF-8 encoded UNICODE but falls back to ISO-8859.1 is needed.
+The original `chord` program was already revolutionary in supporting the ISO-8859.1 character set for input, allowing most european languages to be processed. ChordPro takes all input in UTF-8 encoded UNICODE but falls back to ISO-8859.1 if needed. When the input files contain a [Byte Order Mark](https://en.wikipedia.org/wiki/Byte_order_mark), UTF-16 and UTF-32 are also handled automatically.
 
 ## User defined chords and tunings, not limited to 6 strings
 
