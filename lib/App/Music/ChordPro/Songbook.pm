@@ -350,7 +350,7 @@ sub decompose_grid {
     }
 
     my @tokens = split( ' ', $line );
-    my $nbt;			# non-bar tokens
+    my $nbt = 0;		# non-bar tokens
     foreach ( @tokens ) {
 	if ( $_ eq "|:" || $_ eq "{" ) {
 	    $_ = { symbol => $_, class => "bar" };
