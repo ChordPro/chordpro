@@ -53,26 +53,34 @@ sub generate_songbook {
 
     if ( $options->{toc} ) {
 
-	$pr->newpage($ps), $page++
-	  if $ps->{'even-odd-pages'} && $page % 2 == 0;
-
 	# Create a pseudo-song for the table of contents.
-	$options->{startpage} = $page;
+	my $t = get_format( $ps, 1, "toc-title" );
 	my $song =
-	  { title     => get_format( $ps, 1, "toc-title" ),
+	  { title     => $t,
+	    meta => { title => [ $t ] },
 	    structure => "linear",
 	    body      => [
 		     map { +{ type    => "tocline",
 			      context => "toc",
 			      title   => $_->[0],
-			      page    => $_->[1],
+			      pageno  => $_->[1],
+			      page    => $pr->{pdf}->openpage($_->[1]),
 			    } } @book,
 	    ],
-	    meta      => {},
 	  };
+
+	# Prepend the toc.
+	$options->{startpage} = 1;
+	$page = generate_song( $song,
+			       { pr => $pr, prepend => 1,
+				 $options ? %$options : () } );
+
+	# Align.
+	$pr->newpage($ps, $page+1), $page++
+	  if $ps->{'even-odd-pages'} && $page % 2;
+
+	# For CSV.
 	push( @book, [ $song->{title}, $page ] );
-	$page += generate_song( $song,
-				{ pr => $pr, $options ? %$options : () } );
     }
 
     $pr->finish( $options->{output} || "__new__.pdf" );
@@ -84,12 +92,12 @@ sub generate_songbook {
 	open( my $fd, '>:utf8', encode_utf8($csv) )
 	  or die( encode_utf8($csv), ": $!\n" );
 	print $fd ( "title;pages;\n" );
-	for ( my $p = 1; $p < @book-1; $p++ ) {
+	for ( my $p = 0; $p < @book-1; $p++ ) {
 	    print $fd ( join(';',
 			     $book[$p]->[0],
 			     $book[$p+1]->[1] > $book[$p]->[1]+1
-			     ? ( $book[$p]->[1] ."-". ($book[$p+1]->[1]-1) )
-			     : $book[$p]->[1]),
+			     ? ( $page+$book[$p]->[1] ."-". ($page+$book[$p+1]->[1]-1) )
+			     : $page+$book[$p]->[1]),
 			"\n" );
 	}
 	close($fd);
@@ -229,7 +237,7 @@ sub generate_song {
     my $newpage = sub {
 
 	# Add page to the PDF.
-	$pr->newpage($ps);
+	$pr->newpage($ps, $options->{prepend} ? $thispage+1 : () );
 
 	# Put titles and footer.
 
@@ -1195,11 +1203,11 @@ sub tocline {
     $y -= font_bl($ftoc);
     $pr->setfont($ftoc);
     $ps->{pr}->text( $elt->{title}, $x, $y );
-    my $p = $elt->{page} . ".";
+    my $p = $elt->{pageno} . ".";
     $ps->{pr}->text( $p, $x - 5 - $pr->strwidth($p), $y );
 
     my $ann = $pr->{pdfpage}->annotation;
-    $ann->link($pr->{pdf}->openpage($elt->{page}));
+    $ann->link($elt->{page});
     $ann->rect( $ps->{_leftmargin}, $y0 - $ftoc->{size},
 		$ps->{papersize}->[0]-$ps->{_rightmargin}, $y0 );
     ####CHECK MARGIN RIGHT
@@ -1760,9 +1768,9 @@ sub add_image {
 }
 
 sub newpage {
-    my ( $self, $ps ) = @_;
+    my ( $self, $ps, $page ) = @_;
     #$self->{pdftext}->textend if $self->{pdftext};
-    $self->{pdfpage} = $self->{pdf}->page;
+    $self->{pdfpage} = $self->{pdf}->page($page);
     $self->{pdfpage}->mediabox( $ps->{papersize}->[0],
 				$ps->{papersize}->[1] );
     $self->{pdftext} = $self->{pdfpage}->text;
