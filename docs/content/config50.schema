@@ -10,7 +10,7 @@
 	},
 	"fontspec": {
 	    "description": "Font specification.",
-	    "additionalProperties": {},
+	    "additionalProperties": false,
 	    "properties": {
 		"name": {
 		    "type": "string"
@@ -78,7 +78,7 @@
 		    ]
 		}
 	    },
-	    "additionalProperties": {}
+	    "additionalProperties": false
 	},
 
 	"diagrams": {
@@ -104,7 +104,7 @@
 		    "type": "boolean"
 		}
 	    },
-	    "additionalProperties": {}
+	    "additionalProperties": false
 	},
 
 	"chords": {
@@ -147,7 +147,7 @@
 		    }
 		},
 		"required": [ "name", "frets" ],
-		"additionalProperties": {}
+		"additionalProperties": false
 	    }
 	},
 
@@ -160,7 +160,7 @@
 		    "default": "\"%f\", line %n, %m\n\t%l"
 		}
 	    },
-	    "additionalProperties": {}
+	    "additionalProperties": false
 	},
 
 	"metadata": {
@@ -192,15 +192,15 @@
 		    "default": true
 		}
 	    },
-	    "additionalProperties": {}
+	    "additionalProperties": false
 	},
 
 	"pdf": {
 	    "description": "Settings for PDF output.",
 	    "properties": {
 
-		"chordgrid": {
-		    "description": "Appearance of chord grids.",
+		"diagrams": {
+		    "description": "Appearance of chord diagrams.",
 		    "properties": {
 			"height": {
 			    "description": "Distance between frets.",
@@ -215,13 +215,13 @@
 			    "type": "number"
 			},
 			"hspace": {
-			    "description": "Horizontal space between grids.",
+			    "description": "Horizontal space between diagrams.",
 			    "default": 3.95,
 			    "minimum": 0,
 			    "type": "number"
 			},
 			"linewidth": {
-			    "description": "Thickness of the grid lines as a fraction of 'width'.",
+			    "description": "Thickness of the diagram lines as a fraction of 'width'.",
 			    "default": 0.1,
 			    "minimum": 0,
 			    "type": "number"
@@ -233,13 +233,13 @@
 			    "type": "number"
 			},
 			"vspace": {
-			    "description": "Vertical space between grids.",
+			    "description": "Vertical space between diagrams.",
 			    "default": 3,
 			    "minimum": 0,
 			    "type": "number"
 			}
 		    },
-		    "additionalProperties": {}
+		    "additionalProperties": false
 		},
 
 		"chordscolumn": {
@@ -275,7 +275,7 @@
 				    "type": "number"
 				}
 			    },
-			    "additionalProperties": {}
+			    "additionalProperties": false
 			},
 			"indent": {
 			    "description": "Chorus indent.",
@@ -310,10 +310,10 @@
 				    "type": "string"
 				}
 			    },
-			    "additionalProperties": {}
+			    "additionalProperties": false
 			}
 		    },
-		    "additionalProperties": {}
+		    "additionalProperties": false
 		},
 
 		"columnspace": {
@@ -351,7 +351,7 @@
 					"default": 10,
 					"type": "number"
 				    },
-				    "additionalProperties": {}
+				    "additionalProperties": false
 				} } ]
 			},
 			"comment": {
@@ -367,7 +367,7 @@
 					"default": 12,
 					"type": "number"
 				    },
-				    "additionalProperties": {}
+				    "additionalProperties": false
 				} } ]
 			},
 			"tab": {
@@ -383,7 +383,7 @@
 					"default": 10,
 					"type": "number"
 				    },
-				    "additionalProperties": {}
+				    "additionalProperties": false
 				} } ]
 			},
 			"text": {
@@ -399,7 +399,7 @@
 					"default": 12,
 					"type": "number"
 				    },
-				    "additionalProperties": {}
+				    "additionalProperties": false
 				} } ]
 			},
 			"title": {
@@ -415,7 +415,7 @@
 					"default": 14,
 					"type": "number"
 				    },
-				    "additionalProperties": {}
+				    "additionalProperties": false
 				} } ]
 			},
 			"toc": {
@@ -431,10 +431,15 @@
 					"default": 11,
 					"type": "number"
 				    },
-				    "additionalProperties": {}
+				    "additionalProperties": false
 				} } ]
 			}
-		    }
+		    },
+		    "patternProperties" : {
+		      "^(grid|subtitle|comment_italic|comment_box|grid_margin|footer|empty|diagram|diagram_base)$" :
+		        { "$ref": "#/definitions/fontspec" }
+		    },
+		    "additionalProperties" : false
 		},
 
 		"footspace": {
@@ -470,7 +475,7 @@
 				    "default": "Table of Contents"
 				}
 			    },
-			    "additionalProperties": {}
+			    "additionalProperties": false
 			},
 			"title": {
 			    "description": "Properties for per-song title pages.",
@@ -495,7 +500,7 @@
 				    "type": "string"
 				}
 			    },
-			    "additionalProperties": {}
+			    "additionalProperties": false
 			},
 			"first": {
 			    "description": "Properties of the very first page.",
@@ -518,10 +523,10 @@
 				    "type": "string"
 				}
 			    },
-			    "additionalProperties": {}
+			    "additionalProperties": false
 			}
 		    },
-		    "additionalProperties": {}
+		    "additionalProperties": false
 		},
 
 		"head-first-only": {
@@ -619,7 +624,7 @@
 			    "type": "number"
 			}
 		    },
-		    "additionalProperties": {}
+		    "additionalProperties": false
 		},
 
 		"titles-directive-ignore": {
@@ -628,7 +633,7 @@
 		    "type": "boolean"
 		}
 	    },
-	    "additionalProperties": {}
+	    "additionalProperties": false
 	},
 
 	"tuning": {
