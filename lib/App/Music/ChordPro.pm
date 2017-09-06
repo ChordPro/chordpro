@@ -267,11 +267,29 @@ it contains more than one song.
 
 Suppresses the table of contents.
 
+=item B<--csv>
+
+When generating PDF output, also write a CSV file with titles and page
+numbers. Some tools, e.g., MobileSheets, can use the CSV to process
+the PDF as a collection of independent songs.
+
+The CSV has the same name  as the PDF, with extension C<.pdf> replaced
+by C<.csv>.
+
+=item B<--no-csv>
+
+Suppresses the CSV file.
+
 =item B<--transpose=>I<N> (short: -x)
 
 Transposes all songs by I<N> semi-tones. Note that I<N> may be
 specified as B<+>I<N> to transpose upward, using sharps, or as
 B<->I<N> to transpose downward, using flats.
+
+=item B<--cover=>I<FILE>
+
+Prepends the contents of the named PDF document to the output. This can
+be used to produce documents with cover pages.
 
 =item B<--version> (short: B<-V>)
 
@@ -609,6 +627,8 @@ sub app_setup {
           "backend-option|bo=s\%",
 	  "diagrams=s",			# Prints chord diagrams
           "encoding=s",
+	  "csv!",			# Generates contents CSV
+	  "cover=s",			# Cover page(s)
 
           ### Standard Chordii Options ###
 

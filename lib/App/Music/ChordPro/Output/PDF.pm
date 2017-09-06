@@ -51,7 +51,7 @@ sub generate_songbook {
 				{ pr => $pr, $options ? %$options : () } );
     }
 
-    if ( $options->{toc} ) {
+    if ( $options->{toc} // @book > 1 ) {
 
 	# Create a pseudo-song for the table of contents.
 	my $t = get_format( $ps, 1, "toc-title" );
@@ -78,16 +78,28 @@ sub generate_songbook {
 	# Align.
 	$pr->newpage($ps, $page+1), $page++
 	  if $ps->{'even-odd-pages'} && $page % 2;
+    }
+    else {
+	$page = 1;
+    }
 
-	# For CSV.
-	push( @book, [ $song->{title}, $page ] );
+    if ( $options->{cover} ) {
+	my $cover = $pdfapi->open( $options->{cover} );
+	die("Missing cover: ", $options->{cover}, "\n") unless $cover;
+	for ( 1 .. $cover->pages ) {
+	    $pr->{pdf}->importpage( $cover, $_, $_ );
+	    $page++;
+	}
+	$pr->newpage( $ps, 1+$cover->pages ), $page++
+	  if $ps->{'even-odd-pages'} && $page % 2;
     }
 
     $pr->finish( $options->{output} || "__new__.pdf" );
 
-    if ( $options->{toc} ) {
+    if ( $options->{csv} ) {
 
 	# Create an MSPro compatible CSV for this PDF.
+	push( @book, [ "CSV", $page ] );
 	( my $csv = $options->{output} ) =~ s/\.pdf$/.csv/i;
 	open( my $fd, '>:utf8', encode_utf8($csv) )
 	  or die( encode_utf8($csv), ": $!\n" );

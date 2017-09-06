@@ -1,6 +1,10 @@
 x.xx
 
 	Put the Table of Contents (if any) at the beginning.
+	Fix a bug that caused no TOC to be produced with multiple song
+	input.
+	Add --csv command line option to request writing the CSV.
+	Add --cover command line option to prepend cover pages.
 	Improve JSON config validation.
 
 0.87	Sep 04 2017
