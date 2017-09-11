@@ -43,11 +43,11 @@ Prints version information about the ChordPro program. No other processing will 
 `--config=`_JSON_ (shorter: `--cfg`)
 
 A JSON file that defines the behaviour of the program and the layout
-        of the output. See App::Music::ChordPro::Config for details.
+of the output. See [[configuration files|ChordPro-Configuration]] for details.
 
 This option may be specified more than once. Each additional config
-        file overrides the corresponding definitions that are currently
-        active.
+file overrides the corresponding definitions that are currently
+active.
 
 ### cover
 
@@ -90,7 +90,7 @@ See also: [`--chord-grids`](#using-chordpro_general-command-line-options_chord-g
 `--encoding=`_ENC_
 
 Specifies the encoding for input files. Default is UTF-8. ISO-8859.1
-        (Latin-1) encoding is automatically sensed.
+(Latin-1) encoding is automatically sensed.
 
 ### lyrics-only
 
@@ -99,7 +99,7 @@ Specifies the encoding for input files. Default is UTF-8. ISO-8859.1
 Only prints lyrics. All chords are suppressed.
 
 Useful to make prints for singers and other musicians that do not
-        require chords.
+require chords.
 
 ### no-csv
 
@@ -122,26 +122,24 @@ See [`--toc`](#using-chordpro_general-command-line-options_toc).
 `--output=`_FILE_ (short: `-o`)
 
 Designates the name of the output file where the results are written
-        to.
+to.
 
 The filename extension determines the type of the output. It should
-        correspond to one of the backends that are currently supported:
+correspond to one of the backends that are currently supported:
 
 * pdf  
 Portable document format (PDF).
 
-If a table of contents is generated with the PDF, ChordPro
-              also writes a CSV file containing titles and page numbers.
-              This CSV file has the same name as the PDF, with extenstion
-              "pdf" replaced by <csv>.
+If a table of contents is generated with the PDF, ChordPro also writes
+a CSV file containing titles and page numbers. This CSV file has the
+same name as the PDF, with extenstion "pdf" replaced by <csv>.
 
 * txt  
 A textual representation of the input, mostly for visual
-              inspection.
+inspection.
 
 * cho  
 A functional equivalent version of the ChordPro input.
-
 
 ### start-page-number
 
@@ -156,15 +154,15 @@ Sets the starting page number for the output.
 Includes a table of contents.
 
 By default a table of contents is included in the PDF output when it
-        contains more than one song.
+contains more than one song.
 
 ### transpose
 
 `--transpose=`_N_ (short: `-x`)
 
-Transposes all songs by _N_ semi-tones. Note that _N_ may be
-        specified as `+`_N_ to transpose upward, using sharps, or as `-`_N_ to
-        transpose downward, using flats.
+Transposes all songs by _N_ semi-tones. Note that _N_ may be specified
+as `+`_N_ to transpose upward, using sharps, or as `-`_N_ to transpose
+downward, using flats.
 
 ### version
 
@@ -174,15 +172,24 @@ Prints the program version and exits.
 
 ## Chordii compatibility options
 
-    The following Chordii command line options are recognized. Note that not
-    all of them actually do something.
+The original Chordii program did not have configuration files, so it
+had a large number of command line options to control the appearance
+of the output.
 
-    Options marked with * are better specified in the config file.
+For compatibility, ChordPro recognizes most Chordii command line
+options. Note that not all of them actually do something.
 
-    --text-font=*FONT* (short: -T) *
-        Sets the font used to print lyrics and comments.
+### text-font
 
-        *FONT* can be either a full path name to a TrueType font file, or
+`--text-font=`_FONT_ (short: `-T`)
+
+Sets the font used to print lyrics and comments.
+
+See also [[ChordPro Fonts|ChordPro-Fonts]].
+
+Configuration file setting: [`pdf.fonts.text`](ChordPro-Configuration-PDF#configuration-for-pdf-output_fonts).
+
+*FONT* can be either a full path name to a TrueType font file, or
         the name of one of the standard fonts. See section "FONTS" for more
         details.
 
