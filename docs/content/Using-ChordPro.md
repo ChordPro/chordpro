@@ -10,17 +10,16 @@ First of all, please read the
 ChordPro recognises a vast number of command line options.
 
 * Short options  
-
 Short options are in the form `-A`, a dash (minus) followed by a
 letter.
 
 * Long options  
-
 Long options are in the form `--about`, a double-dash followed by the
 option name.
 
-Options can have arguments, for example to specify `song.pdf` as the name of the
-output file for ChordPro, the following options are equivalent:
+Some options can have arguments. For example, to specify `song.pdf` as
+the name of the output file for ChordPro, the following options are
+equivalent:
 
     --output=song.pdf
     --output song.pdf
