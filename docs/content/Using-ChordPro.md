@@ -7,45 +7,61 @@ First of all, please read the
 
 ## General command line options
 
+### about
+
 `--about` (short: `-A`)
 
 Prints version information about the ChordPro program. No other processing will be done.
+
+### encoding
 
 `--encoding=`_ENC_
 
 Specifies the encoding for input files. Default is UTF-8. ISO-8859.1
         (Latin-1) encoding is automatically sensed.
 
-    --lyrics-only (short: -l)
-        Only prints lyrics. All chords are suppressed.
+### lyrics-only
 
-        Useful to make prints for singers and other musicians that do not
+`--lyrics-only` (short: `-l`)
+
+Only prints lyrics. All chords are suppressed.
+
+Useful to make prints for singers and other musicians that do not
         require chords.
 
-    --output=*FILE* (short: -o)
-        Designates the name of the output file where the results are written
+### output
+
+`--output=`_FILE_ (short: `-o`)
+
+Designates the name of the output file where the results are written
         to.
 
-        The filename extension determines the type of the output. It should
+The filename extension determines the type of the output. It should
         correspond to one of the backends that are currently supported:
 
-        pdf   Portable document format (PDF).
+* pdf  
+Portable document format (PDF).
 
-              If a table of contents is generated with the PDF, ChordPro
+If a table of contents is generated with the PDF, ChordPro
               also writes a CSV file containing titles and page numbers.
               This CSV file has the same name as the PDF, with extenstion
               "pdf" replaced by <csv>.
 
-        txt   A textual representation of the input, mostly for visual
+* txt  
+A textual representation of the input, mostly for visual
               inspection.
 
-        cho   A functional equivalent version of the ChordPro input.
+* cho  
+A functional equivalent version of the ChordPro input.
 
-    --config=*JSON* (shorter: --cfg)
-        A JSON file that defines the behaviour of the program and the layout
+### config
+
+`--config=`_JSON_ (shorter: `--cfg`)
+
+A JSON file that defines the behaviour of the program and the layout
         of the output. See App::Music::ChordPro::Config for details.
 
-        This option may be specified more than once. Each additional config
+This option may be specified more than once. Each additional config
         file overrides the corresponding definitions that are currently
         active.
 
