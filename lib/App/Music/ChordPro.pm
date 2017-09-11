@@ -825,6 +825,7 @@ Usage: $0 [ options ] [ file ... ]
 
 Options:
     --about  -A                   About ChordPro...
+    --cover=FILE                  Add cover pages from PDF document
     --diagrams=WHICH		  Prints chord diagrams
     --encoding=ENC                Encoding for input files (UTF-8)
     --lyrics-only  -l             Only prints lyrics
