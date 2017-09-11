@@ -208,7 +208,7 @@ Configuration file setting:
 Prints chord diagrams of all chords used in a song.
 
 Configuration file setting:
-[[`diagrams.show`|ChordPro-Configuration-Generic#configuration-file-contents-generic_printing-chord-diagrams]].
+[`diagrams.show`](ChordPro-Configuration-Generic#configuration-file-contents-generic_printing-chord-diagrams).
 
 ### chord-grids-sorted
 
@@ -218,7 +218,7 @@ Prints chord diagrams of the chords used in a song, ordered by key and
 type.
 
 Configuration file setting:
-[[`diagrams.sorted`|ChordPro-Configuration-Generic#configuration-file-contents-generic_printing-chord-diagrams]].
+[`diagrams.sorted`](ChordPro-Configuration-Generic#configuration-file-contents-generic_printing-chord-diagrams).
 
 ### chord-size
 
@@ -256,7 +256,7 @@ Not supported.
 Prints even/odd pages with pages numbers left on even pages.
 
 Configuration file settings:
-[[`pdf.even-odd-pages`|ChordPro-Configuration-PDF#configuration-for-pdf-output_even-odd-page-printing]]
+[`pdf.even-odd-pages`](ChordPro-Configuration-PDF#configuration-for-pdf-output_even-odd-page-printing)
 and [[Page headers and footers|ChordPro-Configuration-PDF#configuration-for-pdf-output_page-headers-and-footers]].
 
 ### no-easy-chord-grids
@@ -272,7 +272,7 @@ Not supported.
 Disables printing of chord diagrams of the chords used in a song.
 
 Configuration file setting:
-[[`diagrams.show`|ChordPro-Configuration-Generic#configuration-file-contents-generic_printing-chord-diagrams]].
+[`diagrams.show`](ChordPro-Configuration-Generic#configuration-file-contents-generic_printing-chord-diagrams).
 
 ### no-chord-grids-sorted
 
@@ -281,7 +281,7 @@ Configuration file setting:
 Prints chord grids in the order they appear in the song.
 
 Configuration file setting:
-[[`diagrams.sorted`|ChordPro-Configuration-Generic#configuration-file-contents-generic_printing-chord-diagrams]].
+[`diagrams.sorted`](ChordPro-Configuration-Generic#configuration-file-contents-generic_printing-chord-diagrams).
 
 ### odd-pages-number-left
 
@@ -290,7 +290,7 @@ Configuration file setting:
 Prints even/odd pages with pages numbers left on odd pages.
 
 Configuration file settings:
-[[`pdf.even-odd-pages`|ChordPro-Configuration-PDF#configuration-for-pdf-output_even-odd-page-printing]]
+[`pdf.even-odd-pages`](ChordPro-Configuration-PDF#configuration-for-pdf-output_even-odd-page-printing)
 and [[Page headers and footers|ChordPro-Configuration-PDF#configuration-for-pdf-output_page-headers-and-footers]].
 
 ### page-number-logical
@@ -306,7 +306,7 @@ Not supported.
 Specifies the page size for the PDF output, e.g. `a4` (default), `letter`.
 
 Configuration file setting:
-[[`pdf.papersize`|ChordPro-Configuration-PDF#configuration-for-pdf-output_papersize]].
+[`pdf.papersize`](ChordPro-Configuration-PDF#configuration-for-pdf-output_papersize).
 
 ### single-space
 
@@ -316,7 +316,7 @@ When a lyrics line has no chords associated, suppresses the vertical
 space normally occupied by the chords.
 
 Configuration file setting:
-[[`settings.suppress-empty-chords`|ChordPro-Configuration-Generic#configuration-file-contents-generic_general-settings]].
+[`settings.suppress-empty-chords`](ChordPro-Configuration-Generic#configuration-file-contents-generic_general-settings).
 
 ### text-font
 
@@ -343,7 +343,7 @@ Configuration file setting: [`pdf.fonts.text`](ChordPro-Configuration-PDF#config
 Prints chord grids of all user defined chords used in a song.
 
 Configuration file setting:
-[[`diagrams.show`|ChordPro-Configuration-Generic#configuration-file-contents-generic_printing-chord-diagrams]].
+[`diagrams.show`](ChordPro-Configuration-Generic#configuration-file-contents-generic_printing-chord-diagrams).
 
 ### vertical-space
 
