@@ -3,8 +3,6 @@
 First of all, please read the
 [[Getting Started|ChordPro-Getting-Started]] page.
 
-![](images/maintenance.png)
-
 ## Command line options
 
 ChordPro recognises a vast number of command line options.
@@ -69,10 +67,10 @@ diagrams.
 Configuration file setting:
 [[Printing chord diagrams|ChordPro-Configuration-Generic#configuration-file-contents-generic_printing-chord-diagrams]].
 
-See also: [`--chord-grids`](#using-chordpro_general-command-line-options_chord-grids),
-[`--easy-chord-grids`](#using-chordpro_general-command-line-options_easy-chord-grids),
-[`--user-chord-grids`](#using-chordpro_general-command-line-options_user-chord-grids),
-[`--chord-grids-sorted`](#using-chordpro_general-command-line-options_chord-grids-sorted).
+See also: [`--chord-grids`](#using-chordpro_general-command-line-options_chordii-compatibility-options_chord-grids),
+[`--easy-chord-grids`](#using-chordpro_general-command-line-options_chordii-compatibility-options_easy-chord-grids),
+[`--user-chord-grids`](#using-chordpro_general-command-line-options_chordii-compatibility-options_user-chord-grids),
+[`--chord-grids-sorted`](#using-chordpro_general-command-line-options_chordii-compatibility-options_chord-grids-sorted).
 		
 ### encoding
 
@@ -357,8 +355,8 @@ Not supported.
 
 ## Configuration options
 
-See [[Configuration files|ChordPro Configuration Overview]] for details about
-the configuration files.
+See [[Configuration Files Overview|ChordPro Configuration Overview]]
+for details about the configuration files.
 
 Note that missing default configuration files are silently ignored.
 ChordPro will never create nor modify configuration files.
@@ -368,7 +366,7 @@ ChordPro will never create nor modify configuration files.
 `--config=`_JSON_ (shorter: `--cfg`)
 
 A JSON file that defines the behaviour of the program and the layout
-of the output. See [[configuration files|ChordPro-Configuration]] for details.
+of the output. See [[Configuration Files|ChordPro-Configuration]] for details.
 
 This option may be specified more than once. Each additional config
 file overrides the corresponding definitions that are currently
