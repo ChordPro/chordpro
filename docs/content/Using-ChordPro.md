@@ -24,6 +24,35 @@ This option may be specified more than once. Each additional config
         file overrides the corresponding definitions that are currently
         active.
 
+### cover
+
+`--cover=`_FILE_
+
+Prepends the contents of the named PDF document to the output. This can
+be used to produce documents with cover pages.
+
+### csv
+
+`--csv`
+
+When generating PDF output, also writes a CSV file with titles and page
+numbers. Some tools, e.g., MobileSheets, can use the CSV to process
+the PDF as a collection of independent songs.
+
+The CSV has the same name  as the PDF, with extension `.pdf` replaced
+by `.csv`.
+
+### diagrams
+
+`--diagrams=`_WHICH_
+
+Prints diagrams of chords used in a song.
+
+_WHICH_ can be `all` to print all chords used, `user` to only print
+the user-defined chords, and `none` to suppress printing of chord
+diagrams.
+
+
 ### encoding
 
 `--encoding=`_ENC_
@@ -40,13 +69,21 @@ Only prints lyrics. All chords are suppressed.
 Useful to make prints for singers and other musicians that do not
         require chords.
 
+### no-csv
+
+`--no-csv`
+
+Suppresses the generation of a CSV file.
+
+See [`--csv`](#using-chordpro_general-command-line-options_csv).
+
 ### no-toc
 
 `--no-toc`
 
 Suppresses the table of contents.
 
-See [`toc`](#toc).
+See [`--toc`](#using-chordpro_general-command-line-options_toc).
 
 ### output
 
@@ -89,16 +126,19 @@ Includes a table of contents.
 By default a table of contents is included in the PDF output when it
         contains more than one song.
 
-    --transpose=*N* (short: -x)
-        Transposes all songs by *N* semi-tones. Note that *N* may be
-        specified as +*N* to transpose upward, using sharps, or as -*N* to
+### transpose
+
+`--transpose=`_N_ (short: `-x`)
+
+Transposes all songs by _N_ semi-tones. Note that _N_ may be
+        specified as `+`_N_ to transpose upward, using sharps, or as `-`_N_ to
         transpose downward, using flats.
 
-    --user-chord-grids
-        Prints chord grids of all user defined chords used in a song.
+### version
 
-    --version (short: -V)
-        Prints the program version and exits.
+`--version` (short: `-V`)
+
+Prints the program version and exits.
 
 ## Chordii compatibility options
 
@@ -161,6 +201,9 @@ By default a table of contents is included in the PDF output when it
     --single-space (short -a)) *
         When a lyrics line has no chords associated, suppresses the vertical
         space normally occupied by the chords.
+
+    --user-chord-grids
+        Prints chord grids of all user defined chords used in a song.
 
     --vertical-space=*N* (short: -w) *
         Adds some extra vertical space between the lines.
