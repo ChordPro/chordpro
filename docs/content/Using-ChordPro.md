@@ -25,6 +25,11 @@ equivalent:
     --output song.pdf
     -o song.pdf
 
+Most options have corresponding settings in the
+[[configuration files|ChordPro-Configuration]]. When used on the
+command line, the option overrides the corresponding settings in the
+configuration files.
+
 ## General command line options
 
 ### about
@@ -72,7 +77,14 @@ _WHICH_ can be `all` to print all chords used, `user` to only print
 the user-defined chords, and `none` to suppress printing of chord
 diagrams.
 
+Configuration file setting:
+[[Printing chord diagrams|ChordPro-Configuration-Generic#configuration-file-contents-generic_printing-chord-diagrams]].
 
+See also: [`--chord-grids`](#using-chordpro_general-command-line-options_chord-grids),
+[`--easy-chord-grids`](#using-chordpro_general-command-line-options_easy-chord-grids),
+[`--user-chord-grids`](#using-chordpro_general-command-line-options_user-chord-grids),
+[`--chord-grids-sorted`](#using-chordpro_general-command-line-options_chord-grids-sorted).
+		
 ### encoding
 
 `--encoding=`_ENC_
