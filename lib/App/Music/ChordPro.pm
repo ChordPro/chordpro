@@ -193,7 +193,31 @@ sub main {
 
 =item B<--about> (short: B<-A>)
 
-About ChordPro.
+Prints version information about the ChordPro program. No other
+processing will be done.
+
+=item B<--config=>I<JSON> (shorter: B<--cfg>)
+
+A JSON file that defines the behaviour of the program and the layout
+of the output. See L<App::Music::ChordPro::Config> for details.
+
+This option may be specified more than once. Each additional config
+file overrides the corresponding definitions that are currently
+active.
+
+=item B<--cover=>I<FILE>
+
+Prepends the contents of the named PDF document to the output. This can
+be used to produce documents with cover pages.
+
+=item B<--csv>
+
+When generating PDF output, also write a CSV file with titles and page
+numbers. Some tools, e.g., MobileSheets, can use the CSV to process
+the PDF as a collection of independent songs.
+
+The CSV has the same name  as the PDF, with extension C<.pdf> replaced
+by C<.csv>.
 
 =item B<--diagrams=>I<WHICH>
 
@@ -215,6 +239,14 @@ Only prints lyrics. All chords are suppressed.
 Useful to make prints for singers and other musicians that do not
 require chords.
 
+=item B<--no-csv>
+
+Suppresses generating the CSV file. See B<--toc>.
+
+=item B<--no-toc>
+
+Suppresses the table of contents. See B<--toc>.
+
 =item B<--output=>I<FILE> (short: B<-o>)
 
 Designates the name of the output file where the results are written
@@ -229,10 +261,6 @@ correspond to one of the backends that are currently supported:
 
 Portable document format (PDF).
 
-If a table of contents is generated with the PDF, ChordPro also writes
-a CSV file containing titles and page numbers. This CSV file has the
-same name as the PDF, with extenstion C<pdf> replaced by <csv>.
-
 =item txt
 
 A textual representation of the input, mostly for visual inspection.
@@ -242,15 +270,6 @@ A textual representation of the input, mostly for visual inspection.
 A functional equivalent version of the ChordPro input.
 
 =back
-
-=item B<--config=>I<JSON> (shorter: B<--cfg>)
-
-A JSON file that defines the behaviour of the program and the layout
-of the output. See L<App::Music::ChordPro::Config> for details.
-
-This option may be specified more than once. Each additional config
-file overrides the corresponding definitions that are currently
-active.
 
 =item B<--start-page-number=>I<N> (short: B<-p>)
 
@@ -263,33 +282,11 @@ Includes a table of contents.
 By default a table of contents is included in the PDF output when
 it contains more than one song.
 
-=item B<--no-toc>
-
-Suppresses the table of contents.
-
-=item B<--csv>
-
-When generating PDF output, also write a CSV file with titles and page
-numbers. Some tools, e.g., MobileSheets, can use the CSV to process
-the PDF as a collection of independent songs.
-
-The CSV has the same name  as the PDF, with extension C<.pdf> replaced
-by C<.csv>.
-
-=item B<--no-csv>
-
-Suppresses the CSV file.
-
 =item B<--transpose=>I<N> (short: -x)
 
 Transposes all songs by I<N> semi-tones. Note that I<N> may be
 specified as B<+>I<N> to transpose upward, using sharps, or as
 B<->I<N> to transpose downward, using flats.
-
-=item B<--cover=>I<FILE>
-
-Prepends the contents of the named PDF document to the output. This can
-be used to produce documents with cover pages.
 
 =item B<--version> (short: B<-V>)
 
@@ -303,6 +300,9 @@ The following Chordii command line options are recognized. Note that
 not all of them actually do something.
 
 Options marked with * are better specified in the config file.
+
+B<Note:> Chordii used the term _grid_ for chord diagrams. It
+should not be confused with ChordPro grids.
 
 =over 4
 
@@ -332,7 +332,7 @@ Sets the font size for the chord names.
 
 =item B<--chord-grid-size=>I<N> (short: B<-s>) *
 
-Sets chord diagram size (the total width of a chord diagram).
+Sets the total width of a chord diagram.
 
 =item B<--chord-grids>
 
@@ -373,7 +373,7 @@ Prints even/odd pages with pages numbers left on odd pages.
 
 =item B<--page-size=>I<FMT> (short: B<-P>) *
 
-Specifies page size, e.g. C<a4> (default), C<letter>.
+Specifies the page size for the PDF output, e.g. C<a4> (default), C<letter>.
 
 =item B<--single-space> (short B<-a>)) *
 
@@ -487,14 +487,14 @@ configuration.
 
 =item B<--print-default-config>
 
-Prints the default configuration, and exits.
+Prints the default configuration to standard output, and exits.
 
 The default configuration is commented to explain its contents.
 
 =item B<--print-final-config>
 
 Prints the final configuration (after processing all system, user and
-other config files), and exits.
+other config files)  to standard output, and exits.
 
 The final configuration is not commented. Sorry.
 
@@ -506,11 +506,11 @@ The final configuration is not commented. Sorry.
 
 =item B<--help> (short: -h)
 
-Prints help message. No other output is produced.
+Prints a help message. No other output is produced.
 
 =item B<--manual>
 
-Prints the manual. No other output is produced.
+Prints the manual page. No other output is produced.
 
 =item B<--ident>
 
@@ -695,9 +695,14 @@ sub app_setup {
         # Load Pod::Usage only if needed.
         require Pod::Usage;
         Pod::Usage->import;
-        unshift( @_,
-		 -input => App::Packager::GetResource
-		 ( $manual == 2 ? "pod/Config.pod" : "pod/ChordPro.pod" ) );
+	my $f = $manual == 2 ? "pod/Config.pod" : "pod/ChordPro.pod";
+	if ( $App::Packager::PACKAGED ) {
+	    $f = App::Packager::GetResource($f);
+	}
+	else {
+	    $f = ::findlib($f);
+	}
+        unshift( @_, -input => $f );
         &pod2usage;
     };
 
