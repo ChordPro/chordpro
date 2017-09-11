@@ -38,17 +38,6 @@ configuration files.
 
 Prints version information about the ChordPro program. No other processing will be done.
 
-### config
-
-`--config=`_JSON_ (shorter: `--cfg`)
-
-A JSON file that defines the behaviour of the program and the layout
-of the output. See [[configuration files|ChordPro-Configuration]] for details.
-
-This option may be specified more than once. Each additional config
-file overrides the corresponding definitions that are currently
-active.
-
 ### cover
 
 `--cover=`_FILE_
@@ -368,93 +357,126 @@ Not supported.
 
 ## Configuration options
 
-See [[Configuration files|ChordPro Config]] for details about the configuration
-files.
+See [[Configuration files|ChordPro Configuration Overview]] for details about
+the configuration files.
 
 Note that missing default configuration files are silently ignored.
 ChordPro will never create nor modify configuration files.
 
-    --sysconfig=*CFG*
-        Designates a system specific config file.
+### config
 
-        The default system config file depends on the operating system and
-        user environment. A common value is "/etc/chordpro.json" on Linux
-        systems.
+`--config=`_JSON_ (shorter: `--cfg`)
 
-        This is the place where the system manager can put settings like the
-        paper size, assuming that all printers use the same size.
+A JSON file that defines the behaviour of the program and the layout
+of the output. See [[configuration files|ChordPro-Configuration]] for details.
 
-    --nosysconfig
-        Don't use the system specific config file, even if it exists.
+This option may be specified more than once. Each additional config
+file overrides the corresponding definitions that are currently
+active.
 
-    --nolegacyconfig
-        Don't use a legacy config file, even if it exists.
+### define
 
-    --userconfig=*CFG*
-        Designates the config file for the user.
+`--define=`_item_
 
-        The default user config file depends on the operating system and
-        user environment. Common values are
-        "$HOME/.config/chordpro/chordpro.json" and
-        "$HOME/.chordpro/chordpro.json", where $HOME indicates the user home
-        directory.
+Sets a configuration item. _item_ must be in the format of
+period-separated configuration keys, an equal sign, and the value.
 
-        Here you can put settings for your preferred fonts and other layout
-        parameters that you want to apply to all chordpro runs.
+For example, the equivalent of command line option `--no-chord-grids` is
+`--define=chordgrid.show=0`.
 
-    --nouserconfig
-        Don't use the user specific config file, even if it exists.
+You can also use colons to separate the keys, e.g., `chordgrid:show`.
 
-    --config=*CFG* (shorter: --cfg)
-        Designates the config file specific for this run.
+`--define` may be used more than once to set multiple items.
 
-        Default is a file named "chordpro.json" in the current directory.
+### no-default-configs
 
-        Here you can put settings that apply to the files in this directory
-        only.
+`--no-default-configs` (short: `-X`)
 
-        You can specify multiple config files. The settings are accumulated.
+Do not use any config files except the ones mentioned explicitly on
+the command line.
 
-    --noconfig
-        Don't use the specific config file, even if it exists.
+This guarantees that the program is running with the default
+configuration.
 
-    --define=*item*
-        Sets a configuration item. *item* must be in the format of
-        colon-separated configuration keys, an equal sign, and the value.
-        For example, the equivalent of --no-chord-grids is
-        --define=chordgrid:show=0.
+### noconfig
 
-        --define may be used multiple times to set multiple items.
+`--noconfig`
 
-    --no-default-configs (short: -X)
-        Do not use any config files except the ones mentioned explicitly on
-        the command line.
+Don't use the specific config file, even if it exists.
 
-        This guarantees that the program is running with the default
-        configuration.
+### nolegacyconfig
 
-    --print-default-config
-        Prints the default configuration, and exits.
+`--nolegacyconfig`
 
-        The default configuration is commented to explain its contents.
+Don't use a legacy config file, even if it exists.
 
-    --print-final-config
-        Prints the final configuration (after processing all system, user
-        and other config files), and exits.
+### nosysconfig
 
-        The final configuration is not commented. Sorry.
+`--nosysconfig`
+
+Don't use the system specific config file, even if it exists.
+
+### nouserconfig
+
+`--nouserconfig`
+
+Don't use the user specific config file, even if it exists.
+
+### print-default-config
+
+`--print-default-config`
+
+Prints the default configuration to standard output, and exits.
+
+The default configuration is fully commented to explain its contents.
+
+### print-final-config
+
+`--print-final-config`
+
+Prints the final configuration (after processing all system, user
+and other config files) to standard output, and exits.
+
+The final configuration is not commented. Sorry.
+
+### sysconfig
+
+`--sysconfig=`_CFG_
+
+Designates a system specific config file.
+
+### userconfig
+
+`--userconfig=`_CFG_
+
+Designates the config file for the user.
 
 ## Miscellaneous options
 
-    --help (short: -h)
-        Prints help message. No other output is produced.
+### help
 
-    --manual
-        Prints the manual. No other output is produced.
+`--help` (short: `-h`)
 
-    --ident
-        Shows the program name and version.
+Prints a help message. No other output is produced.
 
-    --verbose
-        Provides more verbose information of what is going on.
+### ident
+
+`--ident`
+
+Shows the program name and version.
+
+### manual
+
+`--manual`
+
+Prints the manual page. No other output is produced.
+
+### verbose
+
+`--verbose`
+
+Provides more verbose information of what is going on.
+
+In particular, ChordPro will print the names of the configuration
+files that it processed. This may be revealing information.
 
