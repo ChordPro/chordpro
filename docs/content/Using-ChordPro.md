@@ -67,10 +67,10 @@ diagrams.
 Configuration file setting:
 [[Printing chord diagrams|ChordPro-Configuration-Generic#configuration-file-contents-generic_printing-chord-diagrams]].
 
-See also: [`--chord-grids`](#using-chordpro_general-command-line-options_chordii-compatibility-options_chord-grids),
-[`--easy-chord-grids`](#using-chordpro_general-command-line-options_chordii-compatibility-options_easy-chord-grids),
-[`--user-chord-grids`](#using-chordpro_general-command-line-options_chordii-compatibility-options_user-chord-grids),
-[`--chord-grids-sorted`](#using-chordpro_general-command-line-options_chordii-compatibility-options_chord-grids-sorted).
+See also: [`--chord-grids`](#using-chordpro_chordii-compatibility-options_chord-grids),
+[`--easy-chord-grids`](#using-chordpro_chordii-compatibility-options_easy-chord-grids),
+[`--user-chord-grids`](#using-chordpro_chordii-compatibility-options_user-chord-grids),
+[`--chord-grids-sorted`](#using-chordpro_chordii-compatibility-options_chord-grids-sorted).
 		
 ### encoding
 
