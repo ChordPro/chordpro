@@ -179,6 +179,9 @@ of the output.
 For compatibility, ChordPro recognizes most Chordii command line
 options. Note that not all of them actually do something.
 
+*Note:* Chordii used the term _grid_ for chord diagrams. It
+should not be confused with ChordPro grids.
+
 ### text-font
 
 `--text-font=`_FONT_ (short: `-T`)
@@ -189,57 +192,129 @@ See also [[ChordPro Fonts|ChordPro-Fonts]].
 
 Configuration file setting: [`pdf.fonts.text`](ChordPro-Configuration-PDF#configuration-for-pdf-output_fonts).
 
-*FONT* can be either a full path name to a TrueType font file, or
-        the name of one of the standard fonts. See section "FONTS" for more
-        details.
+### text-size
 
-    --text-size=*N* (short: -t) *
-        Sets the font size for lyrics and comments.
+`--text-size=`_N_ (short: `-t`)
 
-    --chord-font=*FONT* (short: -C) *
-        Sets the font used to print the chord names.
+Sets the font size for lyrics and comments.
 
-        *FONT* can be either a full path name to a TrueType font file, or
-        the name of one of the standard fonts. See section "FONTS" for more
-        details.
+Configuration file setting: [`pdf.fonts.text`](ChordPro-Configuration-PDF#configuration-for-pdf-output_fonts).
 
-    --chord-size=*N* (short: -c) *
-        Sets the font size for the chord names.
+### chord-font
 
-    --chord-grid-size=*N* (short: -s) *
-        Sets chord grid size (the total width of a chord grid).
+`--chord-font=`_FONT_ (short: `-C`)
 
-    --chord-grids
-        Prints chord grids of all chords used in a song.
+Sets the font used to print the chord names.
 
-    --no-chord-grids (short: -G) *
-        Disables printing of chord grids of the chords used in a song.
+See also [[ChordPro Fonts|ChordPro-Fonts]].
 
-    --easy-chord-grids
-        Not supported.
+Configuration file setting: [`pdf.fonts.chord`](ChordPro-Configuration-PDF#configuration-for-pdf-output_fonts).
 
-    --no-easy-chord-grids (short: -g)
-        Not supported.
+### chord-size
 
-    --chord-grids-sorted (short: -S) *
-        Prints chord grids of the chords used in a song, ordered by key and
-        type.
+`--chord-size=`_N_ (short: `-c`)
 
-    --no-chord-grids-sorted *
-        Prints chord grids in the order they appear in the song.
+Sets the font size for the chord names.
 
-    --even-pages-number-left (short -L)
-        Prints even/odd pages with pages numbers left on even pages.
+Configuration file setting: [`pdf.fonts.chord`](ChordPro-Configuration-PDF#configuration-for-pdf-output_fonts).
 
-    --odd-pages-number-left
-        Prints even/odd pages with pages numbers left on odd pages.
+### chord-grid-size
 
-    --page-size=*FMT* (short: -P) *
-        Specifies page size, e.g. "a4" (default), "letter".
+`--chord-grid-size=`_N_ (short: `-s`)
 
-    --single-space (short -a)) *
-        When a lyrics line has no chords associated, suppresses the vertical
-        space normally occupied by the chords.
+Sets the total width of a chord diagram.
+
+Configuration file setting:
+[`pdf.diagram`](ChordPro-Configuration-PDF#configuration-for-pdf-output_chord-diagrams).
+
+### chord-grids
+
+`--chord-grids`
+
+Prints chord diagrams of all chords used in a song.
+
+Configuration file setting:
+[[Printing chord diagrams|ChordPro-Configuration-Generic#configuration-file-contents-generic_printing-chord-diagrams]].
+
+### no-chord-grids
+
+`--no-chord-grids` (short: `-G`)
+
+Disables printing of chord diagrams of the chords used in a song.
+
+Configuration file setting:
+[[Printing chord diagrams|ChordPro-Configuration-Generic#configuration-file-contents-generic_printing-chord-diagrams]].
+
+### easy-chord-grids
+
+`--easy-chord-grids`
+
+Not supported.
+
+### no-easy-chord-grids
+
+`--no-easy-chord-grids` (short: `-g`)
+
+Not supported.
+
+### chord-grids-sorted
+
+`--chord-grids-sorted` (short: `-S`)
+
+Prints chord diagrams of the chords used in a song, ordered by key and
+type.
+
+Configuration file setting:
+[[Printing chord diagrams|ChordPro-Configuration-Generic#configuration-file-contents-generic_printing-chord-diagrams]].
+
+### no-chord-grids-sorted
+
+`--no-chord-grids-sorted`
+
+Prints chord grids in the order they appear in the song.
+
+Configuration file setting:
+[[Printing chord diagrams|ChordPro-Configuration-Generic#configuration-file-contents-generic_printing-chord-diagrams]].
+
+### even-pages-number-left
+
+`--even-pages-number-left` (short `-L`)
+
+Prints even/odd pages with pages numbers left on even pages.
+
+Configuration file settings:
+[[Even/odd page printing|ChordPro-Configuration-PDF#configuration-for-pdf-output_even-odd-page-printing]]
+and [[Page headers and footers|ChordPro-Configuration-PDF#configuration-for-pdf-output_page-headers-and-footers]].
+
+
+### odd-pages-number-left
+
+`--odd-pages-number-left`
+
+Prints even/odd pages with pages numbers left on odd pages.
+
+Configuration file settings:
+[[Even/odd page printing|ChordPro-Configuration-PDF#configuration-for-pdf-output_even-odd-page-printing]]
+and [[Page headers and footers|ChordPro-Configuration-PDF#configuration-for-pdf-output_page-headers-and-footers]].
+
+### page-size
+
+`--page-size=`_FMT_ (short: `-P`)
+
+Specifies the page size for the PDF output, e.g. `a4` (default), `letter`.
+
+Configuration file setting:
+[[Papersize|ChordPro-Configuration-PDF#configuration-for-pdf-output_papersize]].
+
+### single-space
+
+`--single-space` (short `-a`))
+
+When a lyrics line has no chords associated, suppresses the vertical
+space normally occupied by the chords.
+
+Configuration file setting:
+[[`settings.suppress-empty-chords`|ChordPro-Configuration-Generic#configuration-file-contents-generic_general-settings]].
 
     --user-chord-grids
         Prints chord grids of all user defined chords used in a song.
