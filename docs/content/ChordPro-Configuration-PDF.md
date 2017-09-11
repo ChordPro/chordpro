@@ -55,7 +55,7 @@ This controls the distance between lines as a factor of the font size.
             "empty"  : 1.0,
         },
 
-Note: By setting the spacing for `empt` to a small value, you get fine-grained control over the spacing between the various parts of the song.
+Note: By setting the spacing for `empty` to a small value, you get fine-grained control over the spacing between the various parts of the song.
 
 ## Chorus style
 
