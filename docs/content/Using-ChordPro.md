@@ -13,6 +13,17 @@ First of all, please read the
 
 Prints version information about the ChordPro program. No other processing will be done.
 
+### config
+
+`--config=`_JSON_ (shorter: `--cfg`)
+
+A JSON file that defines the behaviour of the program and the layout
+        of the output. See App::Music::ChordPro::Config for details.
+
+This option may be specified more than once. Each additional config
+        file overrides the corresponding definitions that are currently
+        active.
+
 ### encoding
 
 `--encoding=`_ENC_
@@ -28,6 +39,14 @@ Only prints lyrics. All chords are suppressed.
 
 Useful to make prints for singers and other musicians that do not
         require chords.
+
+### no-toc
+
+`--no-toc`
+
+Suppresses the table of contents.
+
+See [`toc`](#toc).
 
 ### output
 
@@ -54,28 +73,21 @@ A textual representation of the input, mostly for visual
 * cho  
 A functional equivalent version of the ChordPro input.
 
-### config
 
-`--config=`_JSON_ (shorter: `--cfg`)
+### start-page-number
 
-A JSON file that defines the behaviour of the program and the layout
-        of the output. See App::Music::ChordPro::Config for details.
+`--start-page-number=`_N_ (short: `-p`)
 
-This option may be specified more than once. Each additional config
-        file overrides the corresponding definitions that are currently
-        active.
+Sets the starting page number for the output.
 
-    --start-page-number=*N* (short: -p)
-        Sets the starting page number for the output.
+### toc
 
-    --toc (short: -i)
-        Includes a table of contents.
+`--toc` (short: `-i`)
 
-        By default a table of contents is included in the PDF output when it
+Includes a table of contents.
+
+By default a table of contents is included in the PDF output when it
         contains more than one song.
-
-    --no-toc
-        Suppresses the table of contents.
 
     --transpose=*N* (short: -x)
         Transposes all songs by *N* semi-tones. Note that *N* may be
