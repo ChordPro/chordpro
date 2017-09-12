@@ -1,0 +1,412 @@
+# Release info
+
+## 0.89
+
+Under development
+
+* Update built-in documentation.
+* Fix problem with locating manual page.
+* Normalize CHANGES according to CPAN:Changes::Spec.
+
+## 0.88
+
+Released: 2017-09-11
+
+* Put the Table of Contents (if any) at the beginning.
+* Fix a bug that caused no TOC to be produced with multiple song input.
+* Add --csv command line option to request writing the CSV.
+* Add --cover command line option to prepend cover pages.
+* Improve JSON config validation.
+
+## 0.87
+
+Released: 2017-09-04
+
+* Fix problem where songlines without chords yielded empty lines in the ChordPro backend after transposition.
+* Allow "-" as filename for standard input.
+* Handle Byte Order Mark in input files.
+* (ChordPro) Do not use {meta} for known meta keys.
+* (Windows) Handle version number setting in iss file.
+
+## 0.860.1
+
+Released: 2017-08-18
+
+* Fix test failures with PDF::Builder 3.004, issue https://rt.cpan.org/Ticket/Display.html?id=122815 .
+
+## 0.86
+
+Released: 2017-08-16
+
+* Fix problems with disappearing page titles.
+* Fix some packing issues.
+
+## 0.85
+
+Released: 2017-08-15
+
+* Rename config pdf.fonts.diagram_capo to pdf.fonts.diagram_base.
+* Fix some (well, several) layout issues with odd/even page printing.
+* Fix missing fingers in config defined chords.
+* Allow PDF::Builder to be used instead of PDF::API2.
+* Improve define/chord parsing and diagnostics.
+* (WxChordPro) Update to 0.84.
+
+## 0.84
+
+Released: 2017-07-31
+
+* Emergency fix for PDF font problem.
+
+## 0.83
+
+Released: 2017-07-31
+
+* Supply default '1+4x4+1' for first start_of_grid.
+* Supply default straight font for grid lines.
+* Allow empty lines in grids.
+* Improve WxChordPro integration.
+* Change old terminology "chordgrid" to "diagrams".
+* (WxChordPro) Update to 0.83.
+
+## 0.82
+
+Released: 2017-07-21
+
+* Add Version.pm.
+
+## 0.81
+
+Released: 2017-07-16
+
+* Fixed problem where wxChordPro couldn't preview.
+* Restructured the files for packaging support.
+
+## 0.80
+
+Released: 2017-07-13
+
+* (PDF) Improve terminology in warning about unkown chords.
+* Prevent undefined warnings when a song has no chords.
+* (pp) Allow resource updating.
+* Prevent undefined warnings when the system provides no configs.
+* Add missing POD resources for packaged binaries.
+* Supply usage info and exit when run without action/file arguments.
+
+## 0.79
+
+Released: 2017-07-12
+
+* Mostly packing/packaging fixes.
+* (WxChordPro) Update to 0.79.
+
+## 0.78
+
+Released: 2017-07-12
+
+* Mostly packaging fixes.
+* (WxChordPro) Update to 0.78.
+
+## 0.77
+
+Released: 2017-06-26
+
+* Finalize design and implementation of chord grids.
+* Add support for chord fingerings, as suggested by Christian
+* Erickson (author of the Songsheet Generator).
+* Fix meaning of clo -G (was negated).
+* Add song examples.
+* (WxChordPro) Update to 0.76.
+
+## 0.76
+
+Released: 2017-05-16
+
+* Allow text properties to stack/unstack.
+* Suppress empty text line if there's only [Chords].
+* Enhance parameter substitution in titles/comments.
+* Allow {chord NAME} to designate known chords.
+* Some more fix problems with dot-less @INC in newer perls.
+* Add schema to verify (and edit) json config files.
+
+## 0.75
+
+Released: 2017-04-13
+
+* Experimental support for Nashville Numbering System and Roman
+* Numbered Chords.
+* (Config) Add more meta data: lyricist, arranger, copyright, year, duration.
+* (PDF) Improve grids drawing: add config for line thickness, add space for the crosses/circles.
+* (PDF) Allow PDF to be written to standard output. Output file will now be named after the input file if there's only one.
+* Keep track of #-comments in ChordPro input and reproduce in
+* ChordPro output.
+* (PDF) Fonts are now looked up in a font path consisting of the fontdir config setting, the application's fonts resource
+* directory, and the value of environment variable FONTDIR.
+* (Packager) Use App::Packager from CPAN.
+* (WxChordPro) Update to 0.74.
+
+## 0.74
+
+Released: 2017-04-02
+
+* Fix problems with dot-less @INC in newer perls.
+
+## 0.73
+
+Released: 2017-04-04
+
+* (WxChordPro) Update to 0.710.3.
+
+## 0.72
+
+Released: 2017-01-18
+
+* (WxChordPro) Update to 0.710.2.
+* Fix style_chordii sample config.
+
+## 0.71
+
+Released: 2017-01-17
+
+* Produce CSV with PDF and toc.
+* Implement {chord...} directive.
+
+## 0.70
+
+Released: 2016-11-10
+
+* (ChordPro) Fix require of Common.
+* (Config) Comment example chord definition.
+* (ChordPro) Add rechorus handling.
+* (ChordPro) Fix --toc/--notoc command line option.
+* (PDF) Fix background colour in indented chorus.
+* (PDF) Fix wrong headspace on continuation pages.
+
+## 0.69
+
+Released: 2016-09-29
+
+* Add parser tests.
+* Prevent nasty errors when transposing unknown chords.
+* (PDF) Fix comment decorations that were off due to substituting metadata.
+* (ChordPro) Add msp as output variant.
+
+## 0.68
+
+Released: 2016-08-23
+
+* Extend chorus recall. Chorus may be quoted, and/or referred with a tag text.
+* Handle {pagesize} in legacy config.
+* Minor adjustments to the default configuration to match the documentation.
+
+## 0.67
+
+Released: 2016-08-23
+
+* Overhaul of chord definitions and transpositions.
+* Chords may now be parenthesised.
+* {defined: name ...} is now preferred.
+* "base-fret NN" may be omitted.
+* All strings may be omitted to define an unknown chord.
+
+## 0.66
+
+Released: 2016-08-22
+
+* Uploaded to GitHub.
+* Added support for {meta} directives.
+* Make the list of known metatada configurable.
+* Allow using metadata in titles and comments.
+* Remove meta-mapping (no longer needed).
+* Change the way unknown chords are dealt with, for
+* Chord/Chordii compatibility.
+* Add res/config/style_chordii.json with as much Chord/Chordii compatibility as can be reasonably achieved.
+
+## 0.65
+
+Released: 2016-07-15
+
+* Add --define to set config items from the command line.
+* Smooth some config trickeries.
+* Add meta-map config to treat metadata items differently.
+* Normalize directives parsing to be (more) Chord/Chordii compatible.
+* Handle defining chords with flexible number of strings.
+
+## 0.64
+
+Released: 2016-07-10
+
+* Add support for Chord/Chordii legacy config.
+* Add --no-legacy-config to suppress legacy config.
+* Add --no-default-configs (-X) to suppress all default configs.
+* Do not make "no easy chords" default.
+* More pp stuff.
+
+## 0.63
+
+Released: 2016-07-06
+
+* Add support for {grid} and friends.
+* More pp stuff.
+
+## 0.62
+
+Released: 2016-07-03
+
+* Improve support for PAR packaging.
+* Add Undo/Redo (MSW only?).
+* Better viewer launching.
+* Use separate PODs for --manual and --help-config.
+* Add wxchordpro to the kit.
+
+## 0.61
+
+Released: 2016-06-28
+
+* Improve packaging.
+* Add support for PAR packaging.
+
+## 0.60
+
+Released: 2016-06-23
+
+* Bring chorus layout attributes under a single topic.
+* Add chordgrid and chordgrid_capo chords.
+
+## 0.59
+
+Released: 2016-06-23
+
+* We have a Ukulele.
+* And a GUI.
+
+## 0.58
+
+Released: 2016-06-20
+
+* Handle --chord-grid-size.
+* Add chord definitions in configuration.
+* Add chords sorting.
+* Add user defined chords and tunings.
+* Handle --no-easy-chord-grids and --chord-grids-sorted.
+
+## 0.57
+
+Released: 2016-06-19
+
+* Move transpose code to Chords module.
+* Default grid font to comment, not font.
+* Register user defined fonts.
+* First shot at printing chord grids.
+* Second shot at printing chord grids.
+* Support -D, but use backend to generate the grids.
+
+## 0.56
+
+Released: 2016-06-13
+
+* Handle {titles} directive.
+* Add support for head-first-only. Titles are now top-printed.
+* Move low-level primitives to PRWriter module.
+* Add font and spacing for 'empty' lines.
+
+## 0.55
+
+Released: 2016-06-10
+
+* Detailed page headers/footers control.
+* Require perl version v5.10.
+
+## 0.54
+
+Released: 2016-06-08
+
+* Fix bug #115156: Will not build on Mac OSX.
+* Fix bug #115159: IO::File is not loaded automatically in older perls ( < 5.12.6 ).
+
+## 0.53.1
+
+Released: 2016-06-08
+
+* Improve Makefile.PL to get indexing right.
+
+## 0.53
+
+Released: 2016-06-07
+
+* Add built-in chords and the --dump-chords-text facility.
+* (PDF) Turn missing images into a comment.
+
+## 0.52.6
+
+Released: 2016-06-07
+
+* Fix POD problem in Config.pm.
+
+## 0.52.5
+
+Released: 2016-06-07
+
+* Improve Makefile.PL to get indexing right.
+
+## 0.52.4
+
+Released: 2016-06-06
+
+* Improve Makefile.PL.
+
+## 0.52.3
+
+Released: 2016-06-06
+
+* Move configuration pod to Config.pod. Will it be indexed?
+* Add --print-default-config and --print-final-config options.
+* Fix problems with songline colours.
+* Fix headings.
+* Add head-first-only setting.
+* Fix page footers.
+
+## 0.52.2
+
+Released: 2016-06-06
+
+* Minor documentation changes.
+
+## 0.52.1
+
+Released: 2016-06-05
+
+* Some fixes for tests on Windows.
+
+## 0.52
+
+Released: 2016-06-05
+
+* Move runnable code from chordpro script to ChordPro.pm module. The script is now a simple wrapper.
+* Add documentation.
+
+## 0.51.3
+
+Released: 2016-06-05
+
+* Eliminate Clone as a dependency.
+* Eliminate IO::String as an explicit dependency. It's implied by Font::TTF.
+
+## 0.51.2
+
+Released: 2016-06-04
+
+* Better Makefile.PL (no_index of namespace).
+
+## 0.51.1
+
+Released: 2016-06-04
+
+* Better Makefile.PL.
+
+## 0.51
+
+Released: 2016-06-04
+
+* First alpha version released.
+
