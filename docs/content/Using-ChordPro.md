@@ -67,10 +67,10 @@ diagrams.
 Configuration file setting:
 [[Printing chord diagrams|ChordPro-Configuration-Generic#configuration-file-contents-generic_printing-chord-diagrams]].
 
-See also: [`--chord-grids`](#using-chordpro_chordii-compatibility-options_chord-grids),
-[`--easy-chord-grids`](#using-chordpro_chordii-compatibility-options_easy-chord-grids),
-[`--user-chord-grids`](#using-chordpro_chordii-compatibility-options_user-chord-grids),
-[`--chord-grids-sorted`](#using-chordpro_chordii-compatibility-options_chord-grids-sorted).
+See also: [`--chord-grids`](#chordii-compatibility-options_chord-grids),
+[`--easy-chord-grids`](#chordii-compatibility-options_easy-chord-grids),
+[`--user-chord-grids`](#chordii-compatibility-options_user-chord-grids),
+[`--chord-grids-sorted`](#chordii-compatibility-options_chord-grids-sorted).
 		
 ### encoding
 
@@ -94,7 +94,7 @@ require chords.
 
 Suppresses the generation of a CSV file.
 
-See [`--csv`](#using-chordpro_general-command-line-options_csv).
+See [`--csv`](#general-command-line-options_csv).
 
 ### no-toc
 
@@ -102,7 +102,7 @@ See [`--csv`](#using-chordpro_general-command-line-options_csv).
 
 Suppresses the table of contents.
 
-See [`--toc`](#using-chordpro_general-command-line-options_toc).
+See [`--toc`](#general-command-line-options_toc).
 
 ### output
 
