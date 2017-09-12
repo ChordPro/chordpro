@@ -39,3 +39,4 @@ Traditionally a command line program, `chord` was not a trivial tool for users o
 * [[Installation|ChordPro Installation]]
 * [[Configuration|ChordPro Configuration]]
 * [[User guide|Using ChordPro]]
+* [[Release info|ChordPro Reference RelNotes]]
