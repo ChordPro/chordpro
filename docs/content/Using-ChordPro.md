@@ -177,7 +177,7 @@ Sets the font used to print the chord names.
 
 See also [[ChordPro Fonts|ChordPro-Fonts]].
 
-Configuration file setting: [`pdf.fonts.chord`](ChordPro-Configuration-PDF#configuration-for-pdf-output_fonts).
+Configuration file setting: [`pdf.fonts.chord`](ChordPro-Configuration-PDF#fonts).
 
 ### chord-grid-size
 
@@ -186,7 +186,7 @@ Configuration file setting: [`pdf.fonts.chord`](ChordPro-Configuration-PDF#confi
 Sets the total width of a chord diagram.
 
 Configuration file setting:
-[`pdf.diagram`](ChordPro-Configuration-PDF#configuration-for-pdf-output_chord-diagrams).
+[`pdf.diagram`](ChordPro-Configuration-PDF#chord-diagrams).
 
 ### chord-grids
 
@@ -195,7 +195,7 @@ Configuration file setting:
 Prints chord diagrams of all chords used in a song.
 
 Configuration file setting:
-[`diagrams.show`](ChordPro-Configuration-Generic#configuration-file-contents-generic_printing-chord-diagrams).
+[`diagrams.show`](ChordPro-Configuration-Generic#printing-chord-diagrams).
 
 ### chord-grids-sorted
 
@@ -205,7 +205,7 @@ Prints chord diagrams of the chords used in a song, ordered by key and
 type.
 
 Configuration file setting:
-[`diagrams.sorted`](ChordPro-Configuration-Generic#configuration-file-contents-generic_printing-chord-diagrams).
+[`diagrams.sorted`](ChordPro-Configuration-Generic#printing-chord-diagrams).
 
 ### chord-size
 
@@ -213,7 +213,7 @@ Configuration file setting:
 
 Sets the font size for the chord names.
 
-Configuration file setting: [`pdf.fonts.chord`](ChordPro-Configuration-PDF#configuration-for-pdf-output_fonts).
+Configuration file setting: [`pdf.fonts.chord`](ChordPro-Configuration-PDF#fonts).
 
 ### dump-chords
 
@@ -243,8 +243,8 @@ Not supported.
 Prints even/odd pages with pages numbers left on even pages.
 
 Configuration file settings:
-[`pdf.even-odd-pages`](ChordPro-Configuration-PDF#configuration-for-pdf-output_even-odd-page-printing)
-and [[Page headers and footers|ChordPro-Configuration-PDF#configuration-for-pdf-output_page-headers-and-footers]].
+[`pdf.even-odd-pages`](ChordPro-Configuration-PDF#even-odd-page-printing)
+and [[Page headers and footers|ChordPro-Configuration-PDF#page-headers-and-footers]].
 
 ### no-easy-chord-grids
 
@@ -259,7 +259,7 @@ Not supported.
 Disables printing of chord diagrams of the chords used in a song.
 
 Configuration file setting:
-[`diagrams.show`](ChordPro-Configuration-Generic#configuration-file-contents-generic_printing-chord-diagrams).
+[`diagrams.show`](ChordPro-Configuration-Generic#printing-chord-diagrams).
 
 ### no-chord-grids-sorted
 
@@ -268,7 +268,7 @@ Configuration file setting:
 Prints chord grids in the order they appear in the song.
 
 Configuration file setting:
-[`diagrams.sorted`](ChordPro-Configuration-Generic#configuration-file-contents-generic_printing-chord-diagrams).
+[`diagrams.sorted`](ChordPro-Configuration-Generic#printing-chord-diagrams).
 
 ### odd-pages-number-left
 
@@ -277,8 +277,8 @@ Configuration file setting:
 Prints even/odd pages with pages numbers left on odd pages.
 
 Configuration file settings:
-[`pdf.even-odd-pages`](ChordPro-Configuration-PDF#configuration-for-pdf-output_even-odd-page-printing)
-and [[Page headers and footers|ChordPro-Configuration-PDF#configuration-for-pdf-output_page-headers-and-footers]].
+[`pdf.even-odd-pages`](ChordPro-Configuration-PDF#even-odd-page-printing)
+and [[Page headers and footers|ChordPro-Configuration-PDF#page-headers-and-footers]].
 
 ### page-number-logical
 
@@ -293,7 +293,7 @@ Not supported.
 Specifies the page size for the PDF output, e.g. `a4` (default), `letter`.
 
 Configuration file setting:
-[`pdf.papersize`](ChordPro-Configuration-PDF#configuration-for-pdf-output_papersize).
+[`pdf.papersize`](ChordPro-Configuration-PDF#papersize).
 
 ### single-space
 
@@ -303,7 +303,7 @@ When a lyrics line has no chords associated, suppresses the vertical
 space normally occupied by the chords.
 
 Configuration file setting:
-[`settings.suppress-empty-chords`](ChordPro-Configuration-Generic#configuration-file-contents-generic_general-settings).
+[`settings.suppress-empty-chords`](ChordPro-Configuration-Generic#general-settings).
 
 ### text-font
 
@@ -313,7 +313,7 @@ Sets the font used to print lyrics and comments.
 
 See also [[ChordPro Fonts|ChordPro-Fonts]].
 
-Configuration file setting: [`pdf.fonts.text`](ChordPro-Configuration-PDF#configuration-for-pdf-output_fonts).
+Configuration file setting: [`pdf.fonts.text`](ChordPro-Configuration-PDF#fonts).
 
 ### text-size
 
@@ -321,7 +321,7 @@ Configuration file setting: [`pdf.fonts.text`](ChordPro-Configuration-PDF#config
 
 Sets the font size for lyrics and comments.
 
-Configuration file setting: [`pdf.fonts.text`](ChordPro-Configuration-PDF#configuration-for-pdf-output_fonts).
+Configuration file setting: [`pdf.fonts.text`](ChordPro-Configuration-PDF#fonts).
 
 ### user-chord-grids
 
@@ -330,7 +330,7 @@ Configuration file setting: [`pdf.fonts.text`](ChordPro-Configuration-PDF#config
 Prints chord grids of all user defined chords used in a song.
 
 Configuration file setting:
-[`diagrams.show`](ChordPro-Configuration-Generic#configuration-file-contents-generic_printing-chord-diagrams).
+[`diagrams.show`](ChordPro-Configuration-Generic#printing-chord-diagrams).
 
 ### vertical-space
 
@@ -339,7 +339,7 @@ Configuration file setting:
 Adds some extra vertical space between the lines.
 
 Configuration file setting:
-[[Spacing|ChordPro-Configuration-PDF#configuration-for-pdf-output_spacing]].
+[Spacing](ChordPro-Configuration-PDF#spacing).
 
 ### 2-up
 

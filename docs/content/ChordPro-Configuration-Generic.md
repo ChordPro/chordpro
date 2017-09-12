@@ -91,7 +91,7 @@ By default, ChordPro will include diagrams for all known chords that have been u
         "sorted"   :  false,
     },
 
-If `auto` is set to true, unknown chords will be printed as empty diagrams. This makes it easy to manually put the finger positions on paper. Of course, adding a [chord definition](#configuration-file-contents-generic_user-defined-chords) is usually a better alternative.
+If `auto` is set to true, unknown chords will be printed as empty diagrams. This makes it easy to manually put the finger positions on paper. Of course, adding a [chord definition](#user-defined-chords) is usually a better alternative.
 
 ## Diagnostic message format
 

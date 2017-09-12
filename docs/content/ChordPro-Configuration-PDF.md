@@ -211,7 +211,7 @@ A font specification consists of the following settings:
 
 * `name` or `file`  
 You can either designate a built-in font by its name, or give the filename of a TrueType (ttf) or OpenType font (otf).  
-The filename should be the full name of a file on disk, or a relative filename which will be looked up in system dependent font libraries. See [Font libraries](#configuration-file-contents-pdf-output_font-libraries).
+The filename should be the full name of a file on disk, or a relative filename which will be looked up in system dependent font libraries. See [Font libraries](#font-libraries).
 * `size`  
 The size of the font, in PDF units (1/72 inch).
 * `color`  
@@ -272,7 +272,7 @@ Default is the setting for `text` but at a small size.
 
 If `showlayout` is true, the margins and other page layout details are shown on the page. This can be helpful to determine the optimal settings for your desired layout.
 
-See also [Page margins](#configuration-file-contents-pdf-output_page-margins) above.
+See also [Page margins](#page-margins) above.
 
         "showlayout" : false,
 
