@@ -94,7 +94,6 @@ sub generate_song {
 
     my $ctx = "";
     my $dumphdr = 1;
-    my @chorus;			# for chorus recall
 
     my @elts = @{$s->{body}};
     while ( @elts ) {
@@ -119,11 +118,7 @@ sub generate_song {
 		else {
 		    push(@s, "{start_of_$ctx}");
 		}
-		@chorus = ( $elt ) if $ctx eq "chorus";
 	    }
-	}
-	elsif ( $elt->{context} eq "chorus" ) {
-	    push( @chorus, $elt );
 	}
 
 	if ( $elt->{type} eq "empty" ) {
@@ -199,7 +194,7 @@ sub generate_song {
 		push( @s, "{chorus}" );
 	    }
 	    else {
-		unshift( @elts, @chorus );
+		unshift( @elts, @{ $elt->{chorus} } );
 	    }
 	    next;
 	}
@@ -235,7 +230,6 @@ sub generate_song {
 	    }
 	    push(@s, "") if $tidy;
 	    push(@s, "{$type: $text}");
-	    push(@chorus, "{$type: $text}") if $elt->{context} eq "chorus";
 	    push(@s, "") if $tidy;
 	    next;
 	}
@@ -270,6 +264,8 @@ sub generate_song {
 	    }
 	    elsif ( $elt->{name} eq "gridparams" ) {
 		@gridparams = @{ $elt->{value} };
+	    }
+	    elsif ( $elt->{name} eq "transpose" ) {
 	    }
 	    next;
 	}

@@ -1,5 +1,8 @@
 0.89	xxx
 
+    - Add {transpose}. Have it apply to chorus recall too. Note that
+      the ChordPro output back-end currently doesn't handle all
+      transpositions correctly.
     - Update built-in documentation.
     - Fix problem with locating manual page.
     - Normalize CHANGES according to CPAN:Changes::Spec.

@@ -53,8 +53,26 @@ my $song = {
 			'type' => 'songline'
 		       },
 		       {
+			'chorus' => [
+				     { 'chords' => [
+						    '',
+						    'D',
+						    'G',
+						    'D'
+						   ],
+				       'context' => 'chorus',
+				       'phrases' => [
+						     'Swing ',
+						     'low, sweet ',
+						     'chari',
+						     'ot,'
+						    ],
+				       'type' => 'songline'
+				     },
+				    ],
 			'context' => '',
-			'type' => 'rechorus'
+			'type' => 'rechorus',
+			'transpose' => 0,
 		       }
  		      ],
 	    'structure' => 'linear',

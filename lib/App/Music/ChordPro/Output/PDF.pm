@@ -339,7 +339,6 @@ sub generate_song {
     my $elt;			# current element
 
     my $prev;			# previous element
-    my @chorus;			# chorus elements, if any
 
     my $grid_cellwidth;
     my $grid_barwidth = 0.5 * $fonts->{chord}->{size};
@@ -370,12 +369,6 @@ sub generate_song {
 	    $y -= $vsp;
 	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
 	    next;
-	}
-
-	# Collect chorus elements so they can be recalled.
-	if ( $elt->{context} eq "chorus" ) {
-	    @chorus = () unless $prev && $prev->{context} eq "chorus";
-	    push( @chorus, $elt );
 	}
 
 	if ( $elt->{type} eq "songline"
@@ -592,7 +585,7 @@ sub generate_song {
 	if ( $elt->{type} eq "rechorus" ) {
 	    my $t = $ps->{chorus}->{recall};
 	    if ( $t->{quote} ) {
-		unshift( @elts, @chorus );
+		unshift( @elts, @{ $elt->{chorus} } ) if $elt->{chorus};
 	    }
 	    if ( $t->{tag} && $t->{type} =~ /^comment(?:_(?:box|italic))?/ ) {
 		unshift( @elts, { %$elt,

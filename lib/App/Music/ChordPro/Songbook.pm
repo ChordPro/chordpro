@@ -22,13 +22,16 @@ my $grid_arg;
 my $grid_cells;
 
 # Local transposition.
-my $xpose;
+my $xpose = 0;
 
 # Chord type for this song, used to detect mixing types.
 my $chordtype;
 
 # Used chords, in order of appearance.
 my @used_chords;
+
+# Chorus lines, if any.
+my @chorus;
 
 # Keep track of unknown chords, to avoid dup warnings.
 my %warned_chords;
@@ -221,9 +224,7 @@ sub parsefile {
     }
 
     # Global transposition.
-    if ( $options->{transpose} ) {
 	$self->{songs}->[-1]->transpose( $options->{transpose} );
-    }
 
     # $self->{songs}->[-1]->structurize;
 
@@ -235,6 +236,8 @@ sub add {
     push( @{$self->{songs}->[-1]->{body}},
 	  { context => $in_context,
 	    @_ } );
+    push( @chorus, { context => $in_context, @_ } )
+      if $in_context eq "chorus";
 }
 
 sub chord {
@@ -438,6 +441,7 @@ sub directive {
 	    do_warn("Garbage in start_of_$1: $arg (ignored)\n")
 	      if $arg;
 	}
+	@chorus = () if $in_context eq "chorus";
 	return;
     }
     if ( $dir =~ /^end_of_(\w+)$/ ) {
@@ -451,7 +455,12 @@ sub directive {
 	    do_warn("{chorus} encountered while in $in_context context -- ignored\n");
 	    return;
 	}
-	$self->add( type => "rechorus" );
+	$self->add( type => "rechorus",
+		    @chorus
+		    ? ( "chorus" => App::Music::ChordPro::Config::clone(\@chorus),
+			"transpose" => $xpose )
+		    : (),
+		  );
 	return;
     }
 
@@ -628,16 +637,24 @@ sub global_directive {
 	return 1;
     }
 
-    # Private hack: transpose at parse time.
-    # Usefulness is a bit limited since it doesn't apply to {chorus}.
-    if ( $d =~ /^\+transpose[: ]+([-+]?\d+)\s*$/ ) {
+    if ( $d =~ /^transpose[: ]+([-+]?\d+)\s*$/ ) {
 	return if $legacy;
 	$xpose = $1;
+	# Transposition is handled by the parser, but sometimes a back
+	# end wants to know...
+	$self->add( type => "set",
+		    name => "transpose",
+		    value => $xpose,
+		  );
 	return 1;
     }
-    if ( $dir =~ /^\+transpose\s*$/ ) {
+    if ( $dir =~ /^transpose\s*$/ ) {
 	return if $legacy;
 	$xpose = 0;
+	$self->add( type => "set",
+		    name => "transpose",
+		    value => $xpose,
+		  );
 	return 1;
     }
 
@@ -875,57 +892,77 @@ sub new {
 
 sub transpose {
     my ( $self, $xpose ) = @_;
-    return unless $xpose;
 
     # Transpose meta data (key).
-    if ( exists $self->{meta}->{key} ) {
+    if ( exists $self->{meta} && exists $self->{meta}->{key} ) {
 	foreach ( @{ $self->{meta}->{key} } ) {
 	    $_ = $self->xpchord( $_, $xpose );
 	}
     }
 
     # Transpose body contents.
-    foreach my $item ( @{ $self->{body} } ) {
-	if ( $item->{type} eq "songline" ) {
-	    # Prevent chords to be autovivified.
-	    # The ChordPro backend relies on it.
-	    next unless exists $item->{chords};
+    if ( exists $self->{body} ) {
+	foreach my $item ( @{ $self->{body} } ) {
+	    $self->_transpose( $item, $xpose );
+	}
+    }
+}
 
-	    foreach ( @{ $item->{chords} } ) {
+sub _transpose {
+    my ( $self, $item, $xpose ) = @_;
+    $xpose //= 0;
+
+    if ( $item->{type} eq "rechorus" ) {
+	return unless $item->{chorus};
+	for ( @{ $item->{chorus} } ) {
+	    $self->_transpose( $_, $xpose + $item->{transpose} );
+	}
+	return;
+    }
+    return unless $xpose;
+
+    if ( $item->{type} eq "songline" ) {
+	# Prevent chords to be autovivified.
+	# The ChordPro backend relies on it.
+	return unless exists $item->{chords};
+
+	foreach ( @{ $item->{chords} } ) {
+	    $_ = $self->xpchord( $_, $xpose );
+	}
+	return;
+    }
+
+    if ( $item->{type} =~ /^comment/ ) {
+	return unless $item->{chords};
+	foreach ( @{ $item->{chords} } ) {
+	    $_ = $self->xpchord( $_, $xpose );
+	}
+	return;
+    }
+
+    if ( $item->{type} eq "gridline" ) {
+	foreach ( @{ $item->{tokens} } ) {
+	    return unless $_->{class} eq "chord";
+	    $_->{chord} = $self->xpchord( $_->{chord}, $xpose );
+	}
+	if ( $item->{margin} && exists $item->{margin}->{chords} ) {
+	    foreach ( @{ $item->{margin}->{chords} } ) {
 		$_ = $self->xpchord( $_, $xpose );
 	    }
-	    next;
 	}
-	if ( $item->{type} =~ /^comment/ ) {
-	    next unless $item->{chords};
-	    foreach ( @{ $item->{chords} } ) {
+	if ( $item->{comment} && exists $item->{comment}->{chords} ) {
+	    foreach ( @{ $item->{comment}->{chords} } ) {
 		$_ = $self->xpchord( $_, $xpose );
 	    }
-	    next;
 	}
-	if ( $item->{type} eq "gridline" ) {
-	    foreach ( @{ $item->{tokens} } ) {
-		next unless $_->{class} eq "chord";
-		$_->{chord} = $self->xpchord( $_->{chord}, $xpose );
-	    }
-	    if ( $item->{margin} && exists $item->{margin}->{chords} ) {
-		foreach ( @{ $item->{margin}->{chords} } ) {
-		    $_ = $self->xpchord( $_, $xpose );
-		}
-	    }
-	    if ( $item->{comment} && exists $item->{comment}->{chords} ) {
-		foreach ( @{ $item->{comment}->{chords} } ) {
-		    $_ = $self->xpchord( $_, $xpose );
-		}
-	    }
-	    next;
+	return;
+    }
+
+    if ( $item->{type} eq "diagrams" ) {
+	foreach ( @{ $item->{chords} } ) {
+	    $_ = $self->xpchord( $_, $xpose );
 	}
-	if ( $item->{type} eq "diagrams" ) {
-	    foreach ( @{ $item->{chords} } ) {
-		$_ = $self->xpchord( $_, $xpose );
-	    }
-	    next;
-	}
+	return;
     }
 }
 
