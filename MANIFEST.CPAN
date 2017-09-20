@@ -1,8 +1,4 @@
 CPAN/App/Packager.pm
-CPAN/Cava/Packager.pm
-CPAN/Cava/Packager/Rule.pm
-CPAN/Cava/Packager/Version1.pm
-CPAN/Cava/Packager/Version2.pm
 CPAN/Font/TTF/AATKern.pm
 CPAN/Font/TTF/AATutils.pm
 CPAN/Font/TTF/Anchor.pm
