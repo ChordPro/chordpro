@@ -224,7 +224,7 @@ sub parsefile {
     }
 
     # Global transposition.
-	$self->{songs}->[-1]->transpose( $options->{transpose} );
+    $self->{songs}->[-1]->transpose( $options->{transpose} );
 
     # $self->{songs}->[-1]->structurize;
 
@@ -602,6 +602,8 @@ sub directive {
     return;
 }
 
+my %propstack;
+
 sub global_directive {
     my ($self, $d, $legacy ) = @_;
     my ( $dir, $arg ) = dir_split($d);
@@ -686,11 +688,20 @@ sub global_directive {
 	  && ! ( $item =~ /^(text|chord|tab)$/ && $prop =~ /^(font|size)$/ );
 
 	$prop = "color" if $prop eq "colour";
+	my $name = "$item-$prop";
+	$propstack{$name} //= [];
 
 	if ( $value eq "" ) {
-	    $self->add( type => "control",
-			name => "$item-$prop",
-			value => undef );
+	    if ( @{ $propstack{$name} } ) {
+		$value = pop( @{ $propstack{$name} } );
+	    }
+	    else {
+		do_warn("No saved value for property $item$prop\n" );
+		$value = undef;
+	    }
+	    $self->add( type  => "control",
+			name  => $name,
+			value => $value );
 	    return 1;
 	}
 
@@ -708,9 +719,11 @@ sub global_directive {
 	    }
 	    $value = $v;
 	}
-	$self->add( type => "control",
-		    name => "$item-$prop",
-		    value => $prop eq 'font' ? $value : lc($value) );
+	$value = $prop eq 'font' ? $value : lc($value);
+	$self->add( type  => "control",
+		    name  => $name,
+		    value => $value );
+	push( @{ $propstack{$name} }, $value );
 	return 1;
     }
 

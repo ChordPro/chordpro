@@ -344,8 +344,6 @@ sub generate_song {
     my $grid_barwidth = 0.5 * $fonts->{chord}->{size};
     my $grid_margin;
 
-    my %propstack;
-
     while ( @elts ) {
 	$elt = shift(@elts);
 
@@ -640,53 +638,37 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "control" ) {
-	    $propstack{ $elt->{name} } //= [];
 	    if ( $elt->{name} =~ /^(text|chord|grid|toc|tab)-size$/ ) {
 		if ( defined $elt->{value} ) {
-		    push( @{ $propstack{ $elt->{name} } }, $fonts->{$1}->{size} );
 		    $do_size->( $1, $elt->{value} );
 		}
-		elsif ( @{ $propstack{ $elt->{name} } } ) {
-		    $do_size->( $1, pop( @{ $propstack{ $elt->{name} } } ) );
-		}
 		else {
-		    warn("PDF: No saved value for property $1-size\n" );
+		    warn("PDF: No value for property $1-size\n" );
 		}
 	    }
 	    elsif ( $elt->{name} =~ /^(text|chord|grid|toc|tab)-font$/ ) {
 		my $f = $1;
-		my $okey = $ps->{fonts}->{$f}->{file} ? "file" : "name";
-		my $orig = $ps->{fonts}->{$f}->{$okey};
 		if ( defined $elt->{value} ) {
-		    push( @{ $propstack{ $elt->{name} } }, [ $okey => $orig ] );
 		    if ( $elt->{value} =~ m;/; ) {
+			delete $ps->{fonts}->{$f}->{name};
 			$ps->{fonts}->{$f}->{file} = $elt->{value};
 		    }
 		    else {
+			delete $ps->{fonts}->{$f}->{file};
 			$ps->{fonts}->{$f}->{name} = $elt->{value};
 		    }
 		    $pr->init_font($f);
 		}
-		elsif ( @{ $propstack{ $elt->{name} } } ) {
-		    my ( $k, $v ) = @{ pop( @{ $propstack{ $elt->{name} } } ) };
-		    $ps->{fonts}->{$f}->{$k} = $v;
-		    delete $ps->{fonts}->{$f}->{name} if $k eq "file";
-		    $pr->init_font($f);
-		}
 		else {
-		    warn("PDF: No saved value for property $1-font\n" );
+		    warn("PDF: No value for property $1-font\n" );
 		}
 	    }
 	    elsif ( $elt->{name} =~ /^(text|chord|grid|toc|tab)-color$/ ) {
 		if ( defined $elt->{value} ) {
-		    push( @{ $propstack{ $elt->{name} } }, $fonts->{$1}->{color} );
 		    $ps->{fonts}->{$1}->{color} = $elt->{value};
 		}
-		elsif ( @{ $propstack{ $elt->{name} } } ) {
-		    $ps->{fonts}->{$1}->{color} = pop( @{ $propstack{ $elt->{name} } } );
-		}
 		else {
-		    warn("PDF: No saved value for property $1-color\n" );
+		    warn("PDF: No value for property $1-color\n" );
 		}
 	    }
 	    next;
