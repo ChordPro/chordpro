@@ -39,6 +39,8 @@ organizing collections of ChordPro songs.
 * [[capo|Directives capo]]
 * [[meta|Directives meta]]
 
+See also [[Using metadata in texts|ChordPro Configuration Format Strings]].
+
 ## Formatting directives
 
 * [[comment|Directives comment]] (short: c)
