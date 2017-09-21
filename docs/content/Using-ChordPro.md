@@ -151,6 +151,8 @@ Transposes all songs by _N_ semi-tones. Note that _N_ may be specified
 as `+`_N_ to transpose upward, using sharps, or as `-`_N_ to transpose
 downward, using flats.
 
+See also the [[transpose|Directives transpose]] directive.
+
 ### version
 
 `--version` (short: `-V`)
