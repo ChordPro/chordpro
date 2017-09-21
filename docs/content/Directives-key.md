@@ -7,4 +7,4 @@ Examples:
     {key: C}
     {meta: key C}
 
-See also: [[meta|Directives meta]].
+See also: [[meta|Directives meta]] and [[transpose|Directives transpose]].
