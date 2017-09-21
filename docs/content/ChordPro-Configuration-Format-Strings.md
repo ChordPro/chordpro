@@ -12,3 +12,10 @@ If metadata item _name_, the controling item, has a value, the _true-text_ is su
 For even more power, _true-text_ and _false-text_ may contain other metadata subtitutions. The special `%{}` can be used to substitute the value of the controling item.
 
 For example, if metadata item `album` has the value "Yes", `%{album|Album: %{}}` expands to "Album: Yes". If `album` did not have a value, the expansion would be empty.
+
+All metadata items can have multiple values. To get multiple values, just issue multiple directives. For example:
+
+    {album: Cover Stories}
+    {album: Greatest Hits}
+
+Now `album` has two values. When substituted, the values are concatenated using the configuration setting [`metadata.separator`](ChordPro-Configuration-Generic#metadata). To access the individual values, use `album.1` for the first value, `album.2` for the second value, and so on.
