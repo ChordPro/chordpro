@@ -28,7 +28,6 @@ install : Makefile
 	$(MAKE) -f Makefile install
 
 Makefile : Makefile.PL lib/App/Music/ChordPro/Version.pm
-	git-version lib/App/Music/ChordPro/Version.pm
 	perl Makefile.PL
 
 ################ Extensions ################
