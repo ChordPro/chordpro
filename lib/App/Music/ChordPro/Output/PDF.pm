@@ -425,7 +425,7 @@ sub generate_song {
 			$elt->{text} .= $elt->{chords}->[$_] . $elt->{phrases}->[$_];
 		    }
 		}
-		$elt->{text} = fmt_subst( $s, $elt->{text}, 1 );
+		$elt->{text} = fmt_subst( $s, $elt->{text} );
 	    }
 
 	    # Comment decorations.

@@ -29,7 +29,7 @@ while ( <DATA> ) {
     chomp;
 
     my ( $tpl, $exp ) = split( /\t+/, $_ );
-    my $res = App::Music::ChordPro::Output::Common::fmt_subst( $s, $tpl, 0 );
+    my $res = App::Music::ChordPro::Output::Common::fmt_subst( $s, $tpl );
     is( $res, $exp, "$tpl -> $exp" );
 
     $tests++;
@@ -41,14 +41,14 @@ __END__
 # No substitutions
 abcd			abcd
 
-# Double percent -> %
-ab%%cd			ab%cd
+# Percent -> %
+ab%%cd			ab%%cd
 
 # Lone brace
 ab}cd			ab}cd
 
-# Short (single character) variable
-ab%pead			ab24ead
+# Short (single character) variable -- nope, we don't do this anymore.
+ab%pead			ab%pead
 
 # Meta variable
 ab%{head}def		abyesdef
