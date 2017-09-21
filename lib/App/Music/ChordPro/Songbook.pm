@@ -641,22 +641,30 @@ sub global_directive {
 
     if ( $d =~ /^transpose[: ]+([-+]?\d+)\s*$/ ) {
 	return if $legacy;
-	$xpose = $1;
-	# Transposition is handled by the parser, but sometimes a back
-	# end wants to know...
-	$self->add( type => "set",
-		    name => "transpose",
-		    value => $xpose,
-		  );
+	$propstack{transpose} //= [];
+	push( @{ $propstack{transpose} }, $xpose );
+	my %a = ( type => "control",
+		  name => "transpose",
+		  previous => $xpose,
+		);
+	$xpose += $1;
+	$self->add( %a, value => $xpose );
 	return 1;
     }
     if ( $dir =~ /^transpose\s*$/ ) {
 	return if $legacy;
-	$xpose = 0;
-	$self->add( type => "set",
-		    name => "transpose",
-		    value => $xpose,
-		  );
+	$propstack{transpose} //= [];
+	my %a = ( type => "control",
+		  name => "transpose",
+		  previous => $xpose,
+		);
+	if ( @{ $propstack{transpose} } ) {
+	    $xpose = pop( @{ $propstack{transpose} } );
+	}
+	else {
+	    $xpose = 0;
+	}
+	$self->add( %a, value => $xpose );
 	return 1;
     }
 

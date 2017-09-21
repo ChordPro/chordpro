@@ -150,6 +150,9 @@ sub generate_song {
     $chordscol    = $ps->{chordscolumn};
     $lyrics_only  = $::config->{settings}->{'lyrics-only'};
     $chordscapo   = $s->{meta}->{capo};
+    if ( $s->{meta}->{key} ) {
+	$s->{meta}->{key_actual} = [ $s->{meta}->{key}->[0] ];
+    }
 
     my $fail;
     for my $item ( @{ SIZE_ITEMS() } ) {
@@ -671,6 +674,13 @@ sub generate_song {
 		    warn("PDF: No value for property $1-color\n" );
 		}
 	    }
+	    elsif ( $elt->{name} eq "transpose" && $s->{meta}->{key} ) {
+		$s->{meta}->{key_from} =
+		  $s->{meta}->{key_actual} // [ $s->{meta}->{key}->[0] ];
+		$s->{meta}->{key_actual} =
+		  [ App::Music::ChordPro::Chords::transpose( $s->{meta}->{key}->[0],
+							     $elt->{value} ) ];
+	    }
 	    next;
 	}
 
@@ -694,6 +704,17 @@ sub generate_song {
 		$cells += $grid_margin->[0] = $v[2] if $v[2];
 		$cells += $grid_margin->[1] = $v[3] if $v[3];
 		$grid_margin->[2] = $cells;
+	    }
+	    # Arbitrary config values.
+	    elsif ( $elt->{name} =~ /^pdf\.(.+)/ ) {
+		my @k = split( /[.]/, $1 );
+		my $cc = {};
+		my $c = \$cc;
+		foreach ( @k ) {
+		    $c = \($$c->{$_});
+		}
+		$$c = $elt->{value};
+		$ps = App::Music::ChordPro::Config::hmerge( $ps, $cc, "" );
 	    }
 	    next;
 	}

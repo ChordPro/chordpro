@@ -75,6 +75,12 @@ t/164_pagesize.t
 t/169_custom.t
 t/170_transpose.t
 t/171_transpose.t
+t/172_transpose.t
+t/173_transpose.t
+t/172_transpose.t
+t/173_transpose.t
+t/174_transpose.cho
+t/174_transpose.t
 t/180_grids.t
 t/20_basic01_crd.t
 t/21_basic02_crd.t
@@ -96,3 +102,7 @@ t/ref/30_cho_3.cho
 t/ref/31_cho_1.cho
 t/ref/31_cho_2.cho
 t/ref/31_cho_3.cho
+t/ref/174_crd_1.crd
+t/ref/174_crd_2.crd
+t/ref/174_crd_3.crd
+

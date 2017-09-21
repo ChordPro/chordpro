@@ -84,7 +84,7 @@ sub fmt_subst {
 	    }
 
 	    my $key = lc($if);
-	    ( $key, my $inx ) = ( $1, $2 ) if $key =~ /^(.*)\.(\d+)$/;
+	    ( $key, my $inx ) = ( $1, $2 ) if $key =~ /^(.*)\.(-?\d+)$/;
 
 	    # Establish the value for this key.
 	    my $val;
@@ -92,6 +92,9 @@ sub fmt_subst {
 		if ( $inx ) {
 		    if ( $inx > 0 && $inx <= @{ $m->{$key} } ) {
 			$val = $m->{$key}->[$inx-1];
+		    }
+		    else {
+			$val = $m->{$key}->[$inx];
 		    }
 		}
 		else {

@@ -135,7 +135,17 @@ sub generate_song {
 
 	if ( $elt->{type} =~ /^comment(?:_italic|_box)?$/ ) {
 	    push(@s, "") if $tidy;
-	    push(@s, "-- $elt->{text}");
+	    my $text = $elt->{text};
+	    if ( $elt->{chords} ) {
+		$text = "";
+		for ( 0..$#{ $elt->{chords} } ) {
+		    $text .= "[" . $elt->{chords}->[$_] . "]"
+		      if $elt->{chords}->[$_] ne "";
+		    $text .= $elt->{phrases}->[$_];
+		}
+	    }
+	    $text = fmt_subst( $s, $text );
+	    push(@s, "-- $text");
 	    push(@s, "") if $tidy;
 	    next;
 	}
@@ -159,6 +169,16 @@ sub generate_song {
 		  unless $lyrics_only > 1;
 	    }
 	    next;
+	}
+
+	if ( $elt->{type} eq "control" ) {
+	    if ( $elt->{name} eq "transpose" && $s->{meta}->{key} ) {
+		$s->{meta}->{key_from} =
+		  $s->{meta}->{key_actual} // [ $s->{meta}->{key}->[0] ];
+		$s->{meta}->{key_actual} =
+		  [ App::Music::ChordPro::Chords::transpose( $s->{meta}->{key}->[0],
+							     $elt->{value} ) ];
+	    }
 	}
     }
     push(@s, "-- End of $ctx") if $ctx;
@@ -194,6 +214,12 @@ sub songline {
     }
     s/\s+$// for ( $t_line, $c_line );
     return ( $c_line, $t_line );
+}
+
+# Substitute %X sequences in title formats and comments.
+sub fmt_subst {
+    use App::Music::ChordPro::Output::Common;
+    goto \&App::Music::ChordPro::Output::Common::fmt_subst;
 }
 
 1;
