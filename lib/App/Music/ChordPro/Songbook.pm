@@ -6,6 +6,7 @@ use strict;
 use warnings;
 
 use App::Music::ChordPro::Chords;
+use App::Music::ChordPro::Output::Common;
 
 use Encode qw(decode encode);
 use Carp;
@@ -36,7 +37,11 @@ my @chorus;
 # Keep track of unknown chords, to avoid dup warnings.
 my %warned_chords;
 
-my $re_meta;
+my $re_meta;			# for metadata
+
+# Normally, transposition and subtitutions are handled by the parser.
+my $no_transpose;		# NYI
+my $no_substitute;
 
 my $diag;			# for diagnostics
 
@@ -110,6 +115,9 @@ sub parsefile {
 
     # Split in lines;
     my @lines = split( /\r\n|\n|\r/, $data );
+
+    $no_transpose = $options->{'no-transpose'};
+    $no_substitute = $options->{'no-substitute'};
 
     push( @{ $self->{songs} }, App::Music::ChordPro::Song->new )
       if exists($self->{songs}->[-1]->{body});
@@ -320,6 +328,9 @@ sub decompose {
 
 sub cdecompose {
     my ( $self, $line ) = @_;
+    $line = App::Music::ChordPro::Output::Common::fmt_subst( $self->{songs}->[-1],
+						     $line )
+      unless $no_substitute;
     my %res = $self->decompose($line);
     return ( text => $line ) unless $res{chords};
     return %res;
@@ -647,8 +658,17 @@ sub global_directive {
 		  name => "transpose",
 		  previous => $xpose,
 		);
+	my $m = $self->{songs}->[-1]->{meta};
+	if ( $m->{key} ) {
+	    $m->{key_actual} =
+	      [ App::Music::ChordPro::Chords::transpose( $m->{key}->[-1],
+							 $xpose+$1 ) ];
+	    $m->{key_from} =
+	      [ App::Music::ChordPro::Chords::transpose( $m->{key}->[-1],
+							 $xpose ) ];
+	}
 	$xpose += $1;
-	$self->add( %a, value => $xpose );
+	$self->add( %a, value => $xpose ) if $no_transpose;
 	return 1;
     }
     if ( $dir =~ /^transpose\s*$/ ) {
@@ -658,13 +678,24 @@ sub global_directive {
 		  name => "transpose",
 		  previous => $xpose,
 		);
+	my $m = $self->{songs}->[-1]->{meta};
+	if ( $m->{key} ) {
+	    $m->{key_from} =
+	      [ App::Music::ChordPro::Chords::transpose( $m->{key}->[-1],
+							 $xpose ) ];
+	}
 	if ( @{ $propstack{transpose} } ) {
 	    $xpose = pop( @{ $propstack{transpose} } );
 	}
 	else {
 	    $xpose = 0;
 	}
-	$self->add( %a, value => $xpose );
+	if ( $m->{key} ) {
+	    $m->{key_actual} =
+	      [ App::Music::ChordPro::Chords::transpose( $m->{key}->[-1],
+							 $xpose ) ];
+	}
+	$self->add( %a, value => $xpose ) if $no_transpose;
 	return 1;
     }
 

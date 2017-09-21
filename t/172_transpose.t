@@ -116,13 +116,6 @@ my $song = {
       type => 'empty',
     },
     {
-      context => '',
-      name => 'transpose',
-      previous => 0,
-      type => 'control',
-      value => 2,
-    },
-    {
       chords => [
         '',
         'E',
@@ -164,13 +157,6 @@ my $song = {
     {
       context => '',
       type => 'empty',
-    },
-    {
-      context => '',
-      name => 'transpose',
-      previous => 2,
-      type => 'control',
-      value => 4,
     },
     {
       chords => [
@@ -216,13 +202,6 @@ my $song = {
       type => 'empty',
     },
     {
-      context => '',
-      name => 'transpose',
-      previous => 4,
-      type => 'control',
-      value => 2,
-    },
-    {
       chords => [
         '',
         'E',
@@ -264,13 +243,6 @@ my $song = {
     {
       context => '',
       type => 'empty',
-    },
-    {
-      context => '',
-      name => 'transpose',
-      previous => 2,
-      type => 'control',
-      value => 0,
     },
     {
       chords => [
@@ -315,6 +287,12 @@ my $song = {
   meta => {
     key => [
       'D',
+    ],
+    key_actual => [
+      'D',
+    ],
+    key_from => [
+      'E',
     ],
     title => [
       'Transpositions',

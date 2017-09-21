@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 3;
+use Test::More tests => 6;
 
 use App::Music::ChordPro::Config;
 use App::Music::ChordPro::Songbook;
@@ -23,7 +23,10 @@ my $data = <<EOD;
 {cb This is a comment_box}
 EOD
 
-eval { $s->parsefile(\$data, { transpose => 2 } ) } or diag("$@");
+eval { $s->parsefile( \$data,
+		      { transpose => 2, 'no-substitute' => 1 }
+		    )
+     } or diag("$@");
 
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
@@ -74,4 +77,18 @@ my $song = {
 	    'structure' => 'linear',
 	   };
 
+is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );
+
+# Same, with substitutions.
+$s = App::Music::ChordPro::Songbook->new;
+eval { $s->parsefile( \$data,
+		      { transpose => 2 }
+		    )
+     } or diag("$@");
+
+ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
+
+isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
+
+$song->{body}->[1]->{phrases}->[0] =~ s/\%\{title\}/$song->{title}/e;
 is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );

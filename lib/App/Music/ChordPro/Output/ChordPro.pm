@@ -87,9 +87,24 @@ sub generate_song {
     # Move a trailing list of chords to the beginning, so the chords
     # are defined when the song is parsed.
     if ( @{ $s->{body} } && $s->{body}->[-1]->{type} eq "diagrams"
-	 && $s->{body}->[-1]->{origin} ne "__CLI__"
+    	 && $s->{body}->[-1]->{origin} ne "__CLI__"
        ) {
-	unshift( @{ $s->{body} }, pop( @{ $s->{body} } ) );
+    	unshift( @{ $s->{body} }, pop( @{ $s->{body} } ) );
+    }
+
+    if ( $s->{define} ) {
+	foreach my $info ( @{ $s->{define} } ) {
+	    my $t = "{define: " . $info->{name};
+	    $t .= " base-fret " . $info->{base};
+	    $t .= " frets " .
+	      join(" ", map { $_ < 0 ? "N" : $_ } @{$info->{frets}})
+		if $info->{frets};
+	    $t .= " fingers " .
+	      join(" ", map { $_ < 0 ? "N" : $_ } @{$info->{fingers}})
+		if $info->{fingers};
+	    push(@s, $t);
+	}
+	push(@s, "") if $tidy;
     }
 
     my $ctx = "";

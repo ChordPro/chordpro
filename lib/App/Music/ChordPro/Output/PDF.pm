@@ -150,9 +150,6 @@ sub generate_song {
     $chordscol    = $ps->{chordscolumn};
     $lyrics_only  = $::config->{settings}->{'lyrics-only'};
     $chordscapo   = $s->{meta}->{capo};
-    if ( $s->{meta}->{key} ) {
-	$s->{meta}->{key_actual} = [ $s->{meta}->{key}->[0] ];
-    }
 
     my $fail;
     for my $item ( @{ SIZE_ITEMS() } ) {
@@ -673,13 +670,6 @@ sub generate_song {
 		else {
 		    warn("PDF: No value for property $1-color\n" );
 		}
-	    }
-	    elsif ( $elt->{name} eq "transpose" && $s->{meta}->{key} ) {
-		$s->{meta}->{key_from} =
-		  $s->{meta}->{key_actual} // [ $s->{meta}->{key}->[0] ];
-		$s->{meta}->{key_actual} =
-		  [ App::Music::ChordPro::Chords::transpose( $s->{meta}->{key}->[0],
-							     $elt->{value} ) ];
 	    }
 	    next;
 	}

@@ -121,11 +121,6 @@ sub main {
     my $s = App::Music::ChordPro::Songbook->new;
     $s->parsefile( $_, $options ) foreach @::ARGV;
 
-    # Transpose is already handled by parsefile.
-    if ( 0 && $options->{transpose} ) {
-	$s->transpose( $options->{transpose} );
-    }
-
     if ( $options->{'dump-chords'} ) {
 	my $d = App::Music::ChordPro::Song->new;
 	$d->{title} = "ChordPro $VERSION Built-in Chords";

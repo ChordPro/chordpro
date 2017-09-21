@@ -144,7 +144,7 @@ sub generate_song {
 		    $text .= $elt->{phrases}->[$_];
 		}
 	    }
-	    $text = fmt_subst( $s, $text );
+	    # $text = fmt_subst( $s, $text );
 	    push(@s, "-- $text");
 	    push(@s, "") if $tidy;
 	    next;
@@ -172,13 +172,6 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "control" ) {
-	    if ( $elt->{name} eq "transpose" && $s->{meta}->{key} ) {
-		$s->{meta}->{key_from} =
-		  $s->{meta}->{key_actual} // [ $s->{meta}->{key}->[0] ];
-		$s->{meta}->{key_actual} =
-		  [ App::Music::ChordPro::Chords::transpose( $s->{meta}->{key}->[0],
-							     $elt->{value} ) ];
-	    }
 	}
     }
     push(@s, "-- End of $ctx") if $ctx;

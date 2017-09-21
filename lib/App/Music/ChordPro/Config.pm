@@ -575,24 +575,6 @@ sub hmerge($$$) {
     return \%res;
 }
 
-=begin later
-
-my $cloner;
-
-sub clone($) {
-    my $self = shift;
-
-    unless ( $cloner ) {
-	eval { require Clone; $cloner = \&Clone::clone }
-	  or
-	eval { require Clone::PP; $cloner = \&Clone::PP::clone }
-    }
-    my $h = $cloner->($self);
-    bless( $h, ref($self) );
-}
-
-=cut
-
 sub clone($) {
     my ( $source ) = @_;
 
