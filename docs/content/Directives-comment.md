@@ -21,3 +21,5 @@ A comment that historically was shown using a box around the text.
 This is an alternative to `comment`.
 
 *Note that de actual appearance of these comments is usually controlled by the formatting program.*
+
+See also [[Using metadata in texts|ChordPro Configuration Format Strings]].
