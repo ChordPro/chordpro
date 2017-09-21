@@ -40,6 +40,8 @@ Important: the keys `title` and `subtitle` must always be in this list.
         "separator" : "; ",
     },
 
+See also [[Using metadata in texts|ChordPro Configuration Format Strings]].
+
 ## Strings and Tuning
 
 Define the instrument tuning as a list of notes in [scientific pitch notation](https://en.wikipedia.org/wiki/Scientific_pitch_notation).
