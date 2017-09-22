@@ -36,6 +36,7 @@ sub init {
     $prefctl ||=
       {
        cfgpreset => "Default",
+       skipstdcfg => 1,
        configfile => "",
        pdfviewer => "",
       };
@@ -165,7 +166,8 @@ sub preview {
 
     # Setup configuration.
     use App::Music::ChordPro::Config;
-    $options->{nouserconfig} = 1;
+    $options->{nouserconfig} =
+      $options->{nolegacyconfig} = $self->{prefs_skipstdcfg};
     if ( $self->{_cfgpresetfile} ) {
 	$options->{noconfig} = 0;
 	$options->{config} = $self->{_cfgpresetfile};
@@ -444,27 +446,30 @@ sub OnAbout {
 	$ai->SetName("ChordPro Preview Editor");
 	$ai->SetVersion( $dd->($App::Music::ChordPro::VERSION) );
 	$ai->SetCopyright("Copyright $year Johan Vromans <jvromans\@squirrel.nl>");
-	$ai->AddDeveloper("Johan Vromans <jvromans\@squirrel.nl>");
-	$ai->AddDeveloper("Editor core " . $dd->($VERSION));
+	$ai->AddDeveloper("Johan Vromans <jvromans\@squirrel.nl>\n");
+	$ai->AddDeveloper("ChordPro version " .
+			  $dd->($App::Music::ChordPro::VERSION));
+	$ai->AddDeveloper("GUI wrapper " . $dd->($VERSION) . " " .
+			  "designed with wxGlade\n");
 	$ai->AddDeveloper("Perl version " . $dd->(sprintf("%vd",$^V)));
 	$ai->AddDeveloper("wxWidgets version " . $dd->(Wx::wxVERSION));
 	$ai->AddDeveloper(App::Packager::Packager() . " version " . App::Packager::Version())
 	  if $App::Packager::PACKAGED;
-	$ai->AddDeveloper("GUI design with wxGlade");
 	$ai->AddDeveloper("Some icons by www.flaticon.com");
-	$ai->SetWebSite("http://www.chordpro.org");
+	$ai->SetWebSite("https://www.chordpro.org");
 	Wx::AboutBox($ai);
     }
     else {
 	my $md = Wx::MessageDialog->new
-	  ($self, "ChordPro Preview Editor version " . $dd->($VERSION) . "\n".
+	  ($self, "ChordPro Preview Editor version " . $dd->($App::Music::ChordPro::VERSION) . "\n".
 	   "Copyright $year Johan Vromans <jvromans\@squirrel.nl>\n".
 	   "\n".
-	   "GUI design with wxGlade, http://wxglade.sourceforge.net\n\n".
-	   "ChordPro version " . $dd->($App::Music::ChordPro::VERSION) . "\n".
+	   "GUI wrapper " . $dd->($VERSION) . " ".
+	   "designed with wxGlade\n\n".
 	   "Perl version " . $dd->(sprintf("%vd",$^V))."\n".
 	   "wxPerl version " . $dd->($Wx::VERSION)."\n".
-	   "wxWidgets version " . $dd->(Wx::wxVERSION)."\n".
+	   "wxWidgets version " . $dd->(Wx::wxVERSION)."\n\n".
+	   "https://www.chordpro.org\n".
 	   ( $App::Packager::PACKAGED
 	     ? App::Packager::Packager() . " version " . App::Packager::Version()."\n"
 	     : "" ),
