@@ -139,7 +139,7 @@
         </object>
         <object class="wxStatusBar" name="f_main_statusbar" base="EditStatusBar">
             <fields>
-                <field width="-1">f_main_statusbar</field>
+                <field width="-1"></field>
             </fields>
             <style>wxSTB_ELLIPSIZE_END</style>
         </object>

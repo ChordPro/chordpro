@@ -83,6 +83,28 @@ sub init {
 
 ################ Internal methods ################
 
+my @stylelist;
+sub stylelist {
+    return \@stylelist if @stylelist;
+    my $cfglib = ::findlib("config");
+    @stylelist = ( [ _T("Default") ] );
+    if ( -d $cfglib ) {
+	opendir( my $dh, $cfglib );
+	foreach ( sort readdir($dh) ) {
+	    next unless /^(.*)\.json$/;
+	    my $base = $1;
+	    next if $base eq "chordpro"; # default
+	    my $t = ucfirst(lc($1));
+	    $t =~ s/_/ /g;
+	    $t =~ s/^Style /Style: /;
+	    $t =~ s/ (.)/" ".uc($1)/eg;
+	    push( @stylelist, [ _T($t), "$cfglib/$base.json" ] );
+	}
+    }
+    push( @stylelist, [ _T("Custom") ] );
+    return \@stylelist;
+}
+
 sub opendialog {
     my ($self) = @_;
     my $fd = Wx::FileDialog->new
@@ -296,6 +318,21 @@ sub GetPreferences {
     my $conf = Wx::ConfigBase::Get;
     for ( keys( %$prefctl ) ) {
 	$self->{"prefs_$_"} = $conf->Read( "preferences/$_", $prefctl->{$_} );
+    }
+
+    # Find config setting.
+    if ( exists $self->{prefs_cfgpreset}
+	 && $self->{prefs_cfgpreset} ne _T("Default") ) {
+	if ( $self->{prefs_cfgpreset} eq _T("Custom") ) {
+	    $self->{_cfgpresetfile} = $self->{prefs_configfile};
+	}
+	else {
+	    for ( @{ $self->stylelist } ) {
+		next unless $_->[0] eq $self->{prefs_cfgpreset};
+		$self->{_cfgpresetfile} = $_->[1];
+		last;
+	    }
+	}
     }
 }
 
