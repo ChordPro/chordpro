@@ -34,6 +34,16 @@ While this may be considered a feature, it is in fact a necessity since most bas
 
 Traditionally a command line program, `chord` was not a trivial tool for users of Windows based systems. ChordPro adds WxChordPro, a GUI version of the program.
 
+## What is missing?
+
+There are just a few features that ChordPro does not, and will not, support:
+
+* The notion of ‘easy’ and ‘hard’ chords.  
+The [[chord|Directives chord]] directive can be used if you want diagrams for specific chords.
+
+* Logical pages, i.e. 2-up and 4-up printing.  
+PDF viewers and print tools can do that for you.
+
 ### More information
 
 * [[Installation|ChordPro Installation]]
