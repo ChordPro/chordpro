@@ -28,6 +28,7 @@ sub __set_properties {
       if $self->GetParent->{prefs_configfile};
     $self->{t_pdfviewer}->SetValue($self->GetParent->{prefs_pdfviewer})
       if $self->GetParent->{prefs_pdfviewer};
+    $self->{cb_skipstdcfg}->SetValue($self->GetParent->{prefs_skipstdcfg});
 
     my $cfglib = ::findlib("config");
     my $ctl = $self->{ch_config};
@@ -153,11 +154,18 @@ sub OnAccept {
     $xp += 12 if $xp < 0;
     $xp = $xp - 12 if $self->{rb_xpose_flat }->GetValue;
     $self->GetParent->{prefs_xpose} = $xp;
+    $self->GetParent->{prefs_skipstdcfg} =
+      $self->{cb_skipstdcfg}->IsChecked ? 1 : 0;
 
     $event->Skip;
 }
 
 sub OnCancel {
+    my ( $self, $event ) = @_;
+    $event->Skip;
+}
+
+sub OnSkipStdCfg {
     my ( $self, $event ) = @_;
     $event->Skip;
 }
