@@ -115,7 +115,7 @@ sub __set_properties {
 
     # statusbar fields
     my( @f_main_statusbar_fields ) = (
-        _T("f_main_statusbar"),
+        _T(""),
     );
 
     if( @f_main_statusbar_fields ) {
