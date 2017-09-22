@@ -86,17 +86,17 @@
 	    	"title"     : null,
 	    	"subtitle"  : null,
 		// Footer is title -- page number.
-	    	"footer"    : [ "%t", "", "%p" ],
+	    	"footer"    : [ "%{title}", "", "%{page}" ],
 		// Title for ToC.
 		"toc-title" : "Table of Contents",
 	    },
 	    // The first page of a song has:
 	    "title" : {
 	        // Title and subtitle.
-	    	"title"     : [ "%t", "", "" ],
-	    	"subtitle"  : [ "%{s|%{}|%{subtitle}}", "", "" ],
+	    	"title"     : [ "%{title}", "", "" ],
+	    	"subtitle"  : [ "%{subtitle|%{}|%{subtitle}}", "", "" ],
 		// Footer with page number.
-	    	"footer"    : [ "", "", "%p" ],
+	    	"footer"    : [ "", "", "%{page}" ],
 	    },
 	    // The very first output page is slightly different:
 	    "first" : {
