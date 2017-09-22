@@ -2,9 +2,12 @@
 
 ## 0.89
 
-Under development
+Released: 2017-09-22
 
+* Add {transpose} directive.
+* Transpositions and metadata substitutions are now handled at parse time.
 * Update built-in documentation.
+* Upgrade WxChordPro to 0.89.
 * Fix problem with locating manual page.
 * Normalize CHANGES according to CPAN:Changes::Spec.
 
