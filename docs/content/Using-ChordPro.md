@@ -221,7 +221,7 @@ Configuration file setting: [`pdf.fonts.chord`](ChordPro-Configuration-PDF#fonts
 
 `--dump-chords` (short: `-D`)
 
-Dumps a list of built-in chords in a form dependent of the backend
+Dumps a list of all built-in chords in a form dependent of the backend
 used. The PDF backend will produce neat pages of chord diagrams. The
 ChordPro backend will produce a list of `define` directives.
 
@@ -229,7 +229,7 @@ ChordPro backend will produce a list of `define` directives.
 
 `--dump-chords-text` (short: `-d`)
 
-Dumps a list of built-in chords in the form of `define` directives,
+Dumps a list of all built-in chords in the form of `define` directives,
 and exits.
 
 ### easy-chord-grids
