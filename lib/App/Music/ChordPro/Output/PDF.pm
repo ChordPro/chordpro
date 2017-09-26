@@ -1308,7 +1308,7 @@ sub chordgrid {
     my $font = $ps->{fonts}->{diagram};
     $pr->setfont($font);
     $name .= "*"
-      unless $info->{origin} == 0 || $::config->{diagrams}->{show} eq "user";
+      unless $info->{origin} <= 1 || $::config->{diagrams}->{show} eq "user";
     $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y - font_bl($font) );
     $y -= $font->{size} * $ps->{spacing}->{chords} + $dot/2 + $lw;
 

@@ -10,8 +10,7 @@ use utf8;
 
 use constant CHORD_BUILTIN =>  0;
 use constant CHORD_CONFIG  =>  1;
-use constant CHORD_SONG    =>  1;
-use constant CHORD_EXT     =>  2;
+use constant CHORD_SONG    =>  2;
 use constant CHORD_EASY    =>  0;
 use constant CHORD_HARD    =>  1;
 use constant N             => -1;

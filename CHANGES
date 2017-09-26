@@ -1,3 +1,8 @@
+0.90	2017-09-xx
+
+    - Fix dependencies in Makefile.PL.
+    - Do not mark config defined chords as being user defined.
+
 0.89	2017-09-22
 
     - Add {transpose} directive.
