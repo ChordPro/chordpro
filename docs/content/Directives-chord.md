@@ -1,6 +1,6 @@
 # Directives: chord
 
-This directive is similar to [[define|Directives define]] but it also displays the chord immedeately in the song where the directive occurs.
+This directive is similar to [[define|Directives define]] but it only displays the chord immedeately in the song where the directive occurs.
 
 `{chord:` _name_`}`  
 `{chord:` _name_ `base-fret` _offset_ `frets` _pos_ _pos_ … _pos_`}`  
