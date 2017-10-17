@@ -530,7 +530,17 @@ sub list_chords {
     }
 
     foreach my $chord ( @$chords ) {
-	my $info = chord_info($chord);
+	my $info;
+	if ( eval{ $chord->{name} } ) {
+	    $info = $chord;
+	}
+	elsif ( $origin eq "chord" ) {
+	    push( @s, sprintf( "{%s: %s}", "chord", $chord ) );
+	    next;
+	}
+	else {
+	    $info = chord_info($chord);
+	}
 	next unless $info;
 	my $s = sprintf( "{%s: %-15.15s base-fret %2d    ".
 			 "frets   %s",
