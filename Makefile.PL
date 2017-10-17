@@ -30,6 +30,8 @@ WriteMakefile
 		    'App::Packager' => 1.420,
 		    'PDF::API2'   => 2.020,
 		    'Font::TTF'   => 1.04,
+		    'JSON::PP'	  => 2.27203,
+		    'Text::Balanced' => 2.0.0
 		   },
 
  CONFIGURE_REQUIRES => {
@@ -41,6 +43,8 @@ WriteMakefile
 
  TEST_REQUIRES  => {
 		    'Test::More'  => 0,
+		    'JSON::PP'	  => 2.27203,
+		    'Text::Balanced' => 2.0.0
 		   },
 
  META_MERGE => {

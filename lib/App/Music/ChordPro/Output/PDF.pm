@@ -1293,7 +1293,16 @@ sub chordgrid {
     my $dot = 0.80 * $gw;
     my $lw  = ($ps->{diagrams}->{linewidth} || 0.10) * $gw;
 
-    my $info = App::Music::ChordPro::Chords::chord_info($name);
+    my $info;
+    if ( eval{ $name->{name} } ) {
+	$info = $name;
+	$info->{origin} = 0;
+	$name = $info->{name};
+	$info->{base}--;
+    }
+    else {
+	$info = App::Music::ChordPro::Chords::chord_info($name);
+    }
     unless ( $info ) {
 	warn("PDF: Skipping diagram for unknown chord $name\n");
 	return;
@@ -1308,7 +1317,7 @@ sub chordgrid {
     my $font = $ps->{fonts}->{diagram};
     $pr->setfont($font);
     $name .= "*"
-      unless $info->{origin} == 0 || $::config->{diagrams}->{show} eq "user";
+      unless $info->{origin} <= 1 || $::config->{diagrams}->{show} eq "user";
     $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y - font_bl($font) );
     $y -= $font->{size} * $ps->{spacing}->{chords} + $dot/2 + $lw;
 

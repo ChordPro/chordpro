@@ -853,7 +853,31 @@ sub global_directive {
 	    return 1;
 	}
 
-	if ( $res->{frets} || $res->{base} || $res->{fingers} ) {
+	if ( $show) {
+	    my $ci;
+	    if ( $res->{frets} || $res->{base} || $res->{fingers} ) {
+		$ci = { name => $res->{name},
+			base => $res->{base} ? $res->{base} : 0,
+			strings => $res->{frets},
+			$res->{fingers} ? ( fingers => $res->{fingers} ) : (),
+		      };
+	    }
+	    else {
+		$ci = $res->{name};
+	    }
+	    # Combine consecutive entries.
+	    if ( $self->{songs}->[-1]->{body}->[-1]->{type} eq "diagrams" ) {
+		push( @{ $self->{songs}->[-1]->{body}->[-1]->{chords} },
+		      $ci );
+	    }
+	    else {
+		$self->add( type => "diagrams",
+			    show => "user",
+			    origin => "chord",
+			    chords => [ $ci ] );
+	    }
+	}
+	elsif ( $res->{frets} || $res->{base} || $res->{fingers} ) {
 	    $res->{base} ||= 1;
 	    push( @{$cur->{define}}, $res );
 	    if ( $res->{frets} ) {
@@ -876,19 +900,6 @@ sub global_directive {
 	    }
 	}
 
-	if ( $show) {
-	    # Combine consecutive entries.
-	    if ( $self->{songs}->[-1]->{body}->[-1]->{type} eq "diagrams" ) {
-		push( @{ $self->{songs}->[-1]->{body}->[-1]->{chords} },
-		      $res->{name} );
-	    }
-	    else {
-		$self->add( type => "diagrams",
-			    show => "user",
-			    origin => "chord",
-			    chords => [ $res->{name} ] );
-	    }
-	}
 	return 1;
     }
 
@@ -1021,6 +1032,7 @@ sub _transpose {
 sub xpchord {
     my ( $self, $c, $xpose ) = @_;
     return $c unless length($c) && $xpose;
+    return $c if ref $c;
     my $parens = $c =~ s/^\((.*)\)$/$1/;
     my $xc = App::Music::ChordPro::Chords::transpose( $c, $xpose );
     $xc ||= $c;

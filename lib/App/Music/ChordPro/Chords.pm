@@ -10,8 +10,7 @@ use utf8;
 
 use constant CHORD_BUILTIN =>  0;
 use constant CHORD_CONFIG  =>  1;
-use constant CHORD_SONG    =>  1;
-use constant CHORD_EXT     =>  2;
+use constant CHORD_SONG    =>  2;
 use constant CHORD_EASY    =>  0;
 use constant CHORD_HARD    =>  1;
 use constant N             => -1;
@@ -531,7 +530,17 @@ sub list_chords {
     }
 
     foreach my $chord ( @$chords ) {
-	my $info = chord_info($chord);
+	my $info;
+	if ( eval{ $chord->{name} } ) {
+	    $info = $chord;
+	}
+	elsif ( $origin eq "chord" ) {
+	    push( @s, sprintf( "{%s: %s}", "chord", $chord ) );
+	    next;
+	}
+	else {
+	    $info = chord_info($chord);
+	}
 	next unless $info;
 	my $s = sprintf( "{%s: %-15.15s base-fret %2d    ".
 			 "frets   %s",
