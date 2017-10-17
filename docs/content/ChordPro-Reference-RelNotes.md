@@ -1,5 +1,13 @@
 # Release info
 
+## 0.90
+
+Released: 2017-10-17
+
+* Fix dependencies in Makefile.PL.
+* Do not mark config defined chords as being user defined.
+* Fix some problems with '{chord}' chords.
+
 ## 0.89
 
 Released: 2017-09-22
