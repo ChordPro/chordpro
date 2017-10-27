@@ -31,7 +31,12 @@ WriteMakefile
 
  META_MERGE => {
      license          => "perl_5",
-     resources        => { homepage => "http://www.chordpro.org" },
+     resources        =>
+		{
+		 homepage   => "http://www.chordpro.org",
+		 repository => "https://github.com/sciurius/wxchordpro",
+		 bugtracker => "https://github.com/sciurius/wxchordpro/issues",
+		},
      provides         => {
 	 wxchordpro => { file => "script/wxchordpro",
 		         version => $version },
