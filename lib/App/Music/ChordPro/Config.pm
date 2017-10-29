@@ -61,7 +61,7 @@ This is the current built-in configuration file, showing all settings.
   
       // User defined chords.
       // "base" defaults to 1.
-      // "easy" defaults to 0.
+      // "easy" is ignored.
       // Use 0 for an empty string, and -1 for a muted string.
       "chords" : [
         //  {
@@ -444,7 +444,7 @@ sub configurator {
     foreach ( @{ $cfg->{chords} } ) {
 	my $res =
 	  App::Music::ChordPro::Chords::add_config_chord
-	      ( $_->{name}, $_->{base}||1, $_->{frets}, $_->{easy}, $_->{fingers} );
+	      ( $_->{name}, $_->{base}||1, $_->{frets}, $_->{fingers} );
 	warn( "Invalid chord in config: ",
 	      $_->{name}, ": ", $res, "\n" ) if $res;
     }
