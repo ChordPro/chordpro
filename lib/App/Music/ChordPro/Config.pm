@@ -152,6 +152,10 @@ This is the current built-in configuration file, showing all settings.
   	// "chordscolumn" : 400,
   	"chordscolumn" :  0,
   
+  	// Alternative placement for chord diagrams.
+  	// Value is the column position.
+  	"diagramscolumn" :  0,
+  
 	// A {titles: left} may conflict with customized formats.
 	// Set to non-zero to ignore the directive.
 	"titles-directive-ignore" : false,

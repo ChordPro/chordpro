@@ -312,6 +312,44 @@ sub generate_song {
 	$col = 0;
 	$vsp_ignorefirst = 1;
 	$col_adjust->();
+
+	# If chord diagrams are to be printed in the right column, put
+	# them on the first page.
+	if ( $ps->{diagramscolumn} && $class <= 1 ) {
+	    my @chords;
+	    @chords = @{ $sb->[-1]->{chords} }
+	      if $sb->[-1]->{type} eq "diagrams";
+
+	    my $ww = ( $ps->{__rightmargin}
+		       - $ps->{__leftmargin}
+		       - $ps->{diagramscolumn} );
+
+	    # Number of diagrams, based on minimal required interspace.
+	    my $h = int( ( $ww
+			   # Add one interspace (cuts off right)
+			   + chordgrid_hsp1(undef,$ps) )
+			 / chordgrid_hsp(undef,$ps) );
+
+	    # Adjust actual width to fill the column.
+	    my $hsp = chordgrid_hsp0(undef,$ps)
+	      + ( $ww
+		  - $ps->{diagrams}->{width} * 0.4
+		  - $h * chordgrid_hsp0(undef,$ps) ) / ( $h-1 );
+
+	    my $y = $y;
+	    my $vsp = chordgrid_vsp( undef, $ps );
+	    while ( @chords ) {
+		my $x = $x + $ps->{diagramscolumn};
+
+		for ( 0..$h-1 ) {
+		    last unless @chords;
+		    chordgrid( shift(@chords), $x + $_*$hsp, $y, $ps )
+		      or redo;
+		}
+
+		$y -= $vsp;
+	    }
+	}
     };
 
     # Get going.
@@ -607,6 +645,7 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "diagrams" ) {
+	    next if $ps->{diagramscolumn};
 
 	    my @chords = @{ $elt->{chords} };
 
@@ -628,7 +667,7 @@ sub generate_song {
 		    last unless @chords;
 		    my $t = chordgrid( shift(@chords), $x, $y, $ps );
 		    redo unless $t;
-		    $x += $t;
+		    $x += $hsp;
 		}
 
 		$y -= $vsp;
@@ -822,7 +861,8 @@ sub songline {
 
     $elt->{chords} //= [ '' ];
 
-    my $chordsx = $x + $ps->{chordscolumn};
+    my $chordsx = $x;
+    $chordsx += $ps->{chordscolumn} if $chordscol;
     if ( $chordsx < 0 ) {	#### EXPERIMENTAL
 	($x, $chordsx) = (-$chordsx, $x);
     }
@@ -1276,10 +1316,19 @@ sub chordgrid_vsp {
 	  + $ps->{diagrams}->{vspace} * $ps->{diagrams}->{height};
 }
 
+sub chordgrid_hsp0 {
+    my ( $elt, $ps ) = @_;
+    (App::Music::ChordPro::Chords::strings() - 1) * $ps->{diagrams}->{width};
+}
+
+sub chordgrid_hsp1 {
+    my ( $elt, $ps ) = @_;
+    $ps->{diagrams}->{hspace} * $ps->{diagrams}->{width};
+}
+
 sub chordgrid_hsp {
     my ( $elt, $ps ) = @_;
-    App::Music::ChordPro::Chords::strings() * $ps->{diagrams}->{width}
-      + $ps->{diagrams}->{hspace} * $ps->{diagrams}->{width};
+    chordgrid_hsp0( $elt, $ps ) + chordgrid_hsp1( $elt, $ps );
 }
 
 my @Roman = qw( I II III IV V VI VI VII VIII IX X XI XII );
@@ -1420,7 +1469,8 @@ sub showlayout {
 
     my @off = @{ $ps->{columnoffsets} };
     pop(@off);
-    @off = ( $ps->{chordscolumn} ) if $ps->{chordscolumn};
+    @off = ( $ps->{chordscolumn} ) if $chordscol;
+    @off = ( $ps->{diagramscolumn} ) if $ps->{diagramscolumn};
     foreach my $i ( 0 .. @off-1 ) {
 	next unless $off[$i];
 	@a = ( $ml+$off[$i],
