@@ -5,7 +5,11 @@ ChordPro comes with a number of standard configurations.
 It is important to know that ChordPro always loads the default configuration and then adds the other configurations.
 
 * In the GUI, there is a dropdown list for the presets in the Preferences dialog.
-* On the command line, use `--config`, e.g., `--config=myconf.json`.
+* On the command line, use `--config`, e.g., `--config=modern1`.
+
+Some of the presets define a full style, e.g., `chordii` and `modern1`. Other
+presets modify the current style, e.g., `nashville` and `ukulele`. So
+you can combine presets to form new styles. For example, `--config=modern1,nashville`
 
 _Click on the page thumbnails to see the full size version._
 
