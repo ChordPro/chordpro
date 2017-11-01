@@ -29,6 +29,11 @@ An alternative modern style.
 
 [![style_modern2.png](images/style_modern2.png)](images/style_modern2.pdf)
 
+## Modern3
+A style with chord diagrams in a right column on the first page instead of at the end of the song.
+
+[![style_modern3.png](images/style_modern3.png)](images/style_modern3.pdf)
+
 ## Nashville
 A special style for songs that use Nashville numbering notation.
 
