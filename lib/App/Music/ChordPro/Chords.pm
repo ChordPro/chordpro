@@ -434,7 +434,8 @@ sub fill_tables {
     while ( @r ) {
 	my ( $name, $info ) = splice( @r, 0, 2 );
 	push( @chordnames, $name );
-	$chords{$name} = [ @$info, CHORD_BUILTIN ];
+	my @i = @$info;
+	$chords{$name} = [ CHORD_BUILTIN, pop(@i), @i ];
     }
 }
 
@@ -459,11 +460,11 @@ sub chord_info {
 
     my $s = strings();
     if ( ! $info && $::config->{diagrams}->{auto} ) {
-	$info = [ (0) x $s, -1 ];
+	$info = [ CHORD_SONG, -1, (0) x $s ];
     }
 
     return unless $info;
-    if ( $info->[$s] <= 0 ) {
+    if ( $info->[1] <= 0 ) {
 	return +{
 		 name    => $chord,
 		 strings => [ ],
@@ -475,12 +476,12 @@ sub chord_info {
     }
     return +{
 	     name    => $chord,
-	     strings => [ @{$info}[0..$s-1] ],
-	     @$info > $s+3 ? ( fingers => [ @{$info}[$s+3..2*$s+2] ] ) : (),
-	     base    => $info->[$s]-1,
-	     builtin => $info->[$s+1] == CHORD_BUILTIN,
+	     strings => [ @{$info}[2..$s+1] ],
+	     @$info > $s+2 ? ( fingers => [ @{$info}[$s+2..2*$s+1] ] ) : (),
+	     base    => $info->[1]-1,
+	     builtin => $info->[0] == CHORD_BUILTIN,
 	     system  => "",
-	     origin  => $info->[$s+1],
+	     origin  => $info->[0],
     };
 }
 
@@ -599,8 +600,8 @@ sub add_config_chord {
     unless ( $base > 0 && $base < 12 ) {
 	return "base-fret $base out of range";
     }
-    $config_chords{$name} = [ @$frets, $base, CHORD_CONFIG,
-			    $fingers && @$fingers ? @$fingers : () ];
+    $config_chords{$name} = [ CHORD_CONFIG, $base, @$frets,
+			      $fingers && @$fingers ? @$fingers : () ];
     push( @chordnames, $name );
     return;
 }
@@ -624,7 +625,7 @@ sub add_song_chord {
     unless ( $base > 0 && $base < 12 ) {
 	return "base-fret $base out of range";
     }
-    $song_chords{$name} = [ @$frets, $base, CHORD_SONG,
+    $song_chords{$name} = [ CHORD_SONG, $base, @$frets,
 			    $fingers && @$fingers ? @$fingers : () ];
     return;
 }
@@ -634,7 +635,7 @@ sub add_unknown_chord {
     my ( $name ) = @_;
     my $base = 0;
     my $frets = [ (0) x strings() ];
-    $song_chords{$name} = [ @$frets, $base, CHORD_SONG ];
+    $song_chords{$name} = [ CHORD_SONG, $base, @$frets ];
     return +{
 	     name    => $name,
 	     strings => [ ],

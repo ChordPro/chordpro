@@ -2,7 +2,8 @@
 
     - Add PDF config "diagramscolumn". This will have the song chord
       diagrams printed on the first page, in a side column.
-
+    - Fix problem with misnumbered fingers in non-builtin chords.
+    
 0.90	2017-10-17
 
     - Fix dependencies in Makefile.PL.
