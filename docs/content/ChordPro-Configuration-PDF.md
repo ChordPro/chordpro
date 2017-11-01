@@ -103,7 +103,10 @@ Traditionally, the `{titles}` directive was used to control titles flush. ChordP
 
 ## Chord diagrams
 
-Chord diagrams are printed at the end of the song to show the chords used in the song.
+Chord diagrams are added to the song to show the chords used in the
+song. By default the diagrams are at the end of the song but it is
+also possible to have them in a side column on the first page of the
+song. See [Chords diagrams in a side column](#chords-diagrams-in-a-side-column) below.
 
 A chord diagram consists of a number of cells. Cell dimensions are specified by `width` and `height`.  
 The horizontal number of cells depends on the number of strings.  
@@ -126,6 +129,19 @@ The vertical distance between lines of diagrams is `vspace` times the cell heigh
 With the above settings, chord diagrams will look like:
 
 ![](images/ex_chords.png)
+
+## Chords diagrams in a side column
+
+This is an alternative style where the chord diagrams are placed in a
+separate column at the right of the lyrics instead of at the end of
+the song.
+
+[![style_modern3.png](images/style_modern3.png)](images/style_modern3.pdf)
+
+        // This style is enabled by setting "diagramscolumn" to a nonzero value.
+        // Value is the column position. 
+        // "diagramscolumn" : 350,
+        "diagramscolumn" :  0,
 
 ## Even/odd page printing
 
