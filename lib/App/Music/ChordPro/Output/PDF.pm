@@ -1123,7 +1123,7 @@ sub pr_rptstart {
     my ( $x, $y, $lcr, $sz, $pr ) = @_;
     my $w = $sz / 10;		# glyph width = 3 * $w
     $x -= 1.5 * $w * ($lcr + 1);
-    $pr->vline( $x, $y+0.9*$sz, $sz, $w );
+    $pr->vline( $x, $y+0.9*$sz, $sz, $w  );
     $x += 2 * $w;
     $y += 0.55 * $sz;
     $pr->line( $x, $y, $x, $y+$w, $w );
@@ -1379,19 +1379,65 @@ sub chordgrid {
 
     my $v = $ps->{diagrams}->{vcells};
     my $h = $strings;
-    $pr->hline( $x, $y - $_*$gh, $w, $lw ) for 0..$v;
 
+    # Draw the grid.
+    $pr->hline( $x, $y - $_*$gh, $w, $lw ) for 0..$v;
+    $pr->vline( $x0 + $_*$gw, $y, $gh*$v, $lw ) for 0..$h-1;
+
+    # Bar detection.
+    my $bar;
+    if ( $info->{fingers} ) {
+	my %h;
+	my $str = 0;
+	my $got = 0;
+	foreach ( @{ $info->{fingers} } ) {
+	    $str++, next unless $info->{strings}->[$str] > 0;
+	    if ( $bar->{$_} ) {
+		# Same finger on multiple strings -> bar.
+		$got++;
+		$bar->{$_}->[-1] = $str;
+	    }
+	    else {
+		# Register.
+		$bar->{$_} = [ $_, $info->{strings}->[$str], $str, $str ];
+	    }
+	    $str++;
+	}
+	if ( $got ) {
+	    foreach (sort keys %$bar ) {
+		my @bi = @{ $bar->{$_} };
+		if ( $bi[-2] == $bi[-1] ) { # not a bar
+		    delete $bar->{$_};
+		    next;
+		}
+		# Print the bar line.
+		$pr->hline( $x+$bi[2]*$gw, $y-$bi[1]*$gh+$gh/2,
+			    ($bi[3]-$bi[2])*$gw,
+			    6*$lw, "black" );
+	    }
+	}
+    }
+
+    # Process the strings and fingers.
     $x -= $gw/2;
     for my $sx ( 0 .. @{ $info->{strings} }-1 ) {
 	my $fret = $info->{strings}->[$sx];
 	my $fing;
 	$fing = $info->{fingers}->[$sx] if $info->{fingers};
+
+	# For bars, only the first and last finger.
+	if ( $fing && $bar && $bar->{$fing} ) {
+	    next unless $sx == $bar->{$fing}->[2]
+	      || $sx == $bar->{$fing}->[3];
+	}
+
 	if ( $fret > 0 ) {
 	    my $glyph = "\x{6c}";
 	    if ( $fing && $fing > 0 ) {
-		# Note: circle must go under the text.
-		$pr->circle( $x+$gw/2, $y-$fret*$gh+$gh/2, $dot/2, $lw,
-			     "white", undef);
+		# The dingbat glyphs are open, so we need a white
+		# background circle.
+		$pr->circle( $x+$gw/2, $y-$fret*$gh+$gh/2, $dot/2, 1,
+			     "white", "black" );
 		$glyph = pack( "C", 0xca + $fing - 1 );
 	    }
 	    my $dot = $dot/0.7;
@@ -1412,8 +1458,6 @@ sub chordgrid {
     continue {
 	$x += $gw;
     }
-    # Note: vline must go under the circle.
-    $pr->vline( $x0 + $_*$gw, $y, $gh*$v, $lw ) for 0..$h-1;
 
     return $gw * ( $ps->{diagrams}->{hspace} + $strings );
 }
@@ -1717,7 +1761,7 @@ sub strwidth {
 
 sub line {
     my ( $self, $x0, $y0, $x1, $y1, $lw, $color ) = @_;
-    my $gfx = $self->{pdfpage}->gfx;
+    my $gfx = $self->{pdfgfx};
     $gfx->save;
     $gfx->strokecolor($color ||= "black");
     $gfx->linecap(1);
@@ -1730,7 +1774,7 @@ sub line {
 
 sub hline {
     my ( $self, $x, $y, $w, $lw, $color ) = @_;
-    my $gfx = $self->{pdfpage}->gfx;
+    my $gfx = $self->{pdfgfx};
     $gfx->save;
     $gfx->strokecolor($color ||= "black");
     $gfx->linecap(2);
@@ -1743,7 +1787,7 @@ sub hline {
 
 sub vline {
     my ( $self, $x, $y, $h, $lw, $color ) = @_;
-    my $gfx = $self->{pdfpage}->gfx(1); # under
+    my $gfx = $self->{pdfgfx};
     $gfx->save;
     $gfx->strokecolor($color ||= "black");
     $gfx->linecap(2);
@@ -1756,7 +1800,7 @@ sub vline {
 
 sub rectxy {
     my ( $self, $x, $y, $x1, $y1, $lw, $fillcolor, $strokecolor ) = @_;
-    my $gfx = $self->{pdfpage}->gfx(1); # under
+    my $gfx = $self->{pdfgfx};
     $gfx->save;
     $gfx->strokecolor($strokecolor) if $strokecolor;
     $gfx->fillcolor($fillcolor) if $fillcolor;
@@ -1771,7 +1815,7 @@ sub rectxy {
 
 sub circle {
     my ( $self, $x, $y, $r, $lw, $fillcolor, $strokecolor ) = @_;
-    my $gfx = $self->{pdfpage}->gfx(1); # under
+    my $gfx = $self->{pdfgfx};
     $gfx->save;
     $gfx->strokecolor($strokecolor) if $strokecolor;
     $gfx->fillcolor($fillcolor) if $fillcolor;
@@ -1784,7 +1828,7 @@ sub circle {
 
 sub cross {
     my ( $self, $x, $y, $r, $lw, $strokecolor ) = @_;
-    my $gfx = $self->{pdfpage}->gfx;
+    my $gfx = $self->{pdfgfx};
     $gfx->save;
     $gfx->strokecolor($strokecolor) if $strokecolor;
     $gfx->linewidth($lw||1);
@@ -1812,7 +1856,7 @@ sub get_image {
 sub add_image {
     my ( $self, $img, $x, $y, $w, $h, $border ) = @_;
 
-    my $gfx = $self->{pdfpage}->gfx(1); # under
+    my $gfx = $self->{pdfgfx};
 
     $gfx->save;
     $gfx->image( $img, $x, $y-$h, $w, $h );
@@ -1830,8 +1874,8 @@ sub newpage {
     $self->{pdfpage} = $self->{pdf}->page($page);
     $self->{pdfpage}->mediabox( $ps->{papersize}->[0],
 				$ps->{papersize}->[1] );
-    $self->{pdftext} = $self->{pdfpage}->text;
     $self->{pdfgfx}  = $self->{pdfpage}->gfx;
+    $self->{pdftext} = $self->{pdfpage}->text;
 }
 
 sub add {
