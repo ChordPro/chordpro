@@ -26,4 +26,7 @@ The resultant chord diagrams are:
 
 ![](images/ex_define.png)
 
+The asterisk after the chord names indiciates that the chords have
+been defined in the song, possibly overriding built-in definitions.
+
 See also: [[chord|Directives chord]].
