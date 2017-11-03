@@ -3,250 +3,46 @@
 1 0 obj << /Type /Catalog /PageLayout /SinglePage /PageMode /UseNone /Pages 2 0 R /ViewerPreferences << /NonFullScreenPageMode /UseNone >> >> endobj
 2 0 obj << /Type /Pages /Count 1 /Kids [ 11 0 R ] /MediaBox [ 0 0 595 842 ] /Resources 3 0 R >> endobj
 3 0 obj << /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ] >> endobj
-4 0 obj << /CreationDate (D:20170725101412+00'00') /Creator (ChordPro [ChordPro 0.82]) /Producer (PDF::API2 2.021 [linux]) /Title <FEFF005300770069006E00670020004C006F0077002000530077006500650074002000430068006100720069006F0074> >> endobj
-5 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Times-Roman /Encoding << /Type /Encoding /BaseEncoding /WinAnsiEncoding /Differences [ 0 /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /space /exclam /quotedbl /numbersign /dollar /percent /ampersand /quotesingle /parenleft /parenright /asterisk /plus /comma /hyphen /period /slash /zero /one /two /three /four /five /six /seven /eight /nine /colon /semicolon /less /equal /greater /question /at /A /B /C /D /E /F /G /H /I /J /K /L /M /N /O /P /Q /R /S /T /U /V /W /X /Y /Z /bracketleft /backslash /bracketright /asciicircum /underscore /grave /a /b /c /d /e /f /g /h /i /j /k /l /m /n /o /p /q /r /s /t /u /v /w /x /y /z /braceleft /bar /braceright /asciitilde /bullet /Euro /bullet /quotesinglbase /florin /quotedblbase /ellipsis /dagger /daggerdbl /circumflex /perthousand /Scaron /guilsinglleft /OE /bullet /Zcaron /bullet /bullet /quoteleft /quoteright /quotedblleft /quotedblright /bullet /endash /emdash /tilde /trademark /scaron /guilsinglright /oe /bullet /zcaron /Ydieresis /space /exclamdown /cent /sterling /currency /yen /brokenbar /section /dieresis /copyright /ordfeminine /guillemotleft /logicalnot /hyphen /registered /macron /degree /plusminus /twosuperior /threesuperior /acute /mu /paragraph /periodcentered /cedilla /onesuperior /ordmasculine /guillemotright /onequarter /onehalf /threequarters /questiondown /Agrave /Aacute /Acircumflex /Atilde /Adieresis /Aring /AE /Ccedilla /Egrave /Eacute /Ecircumflex /Edieresis /Igrave /Iacute /Icircumflex /Idieresis /Eth /Ntilde /Ograve /Oacute /Ocircumflex /Otilde /Odieresis /multiply /Oslash /Ugrave /Uacute /Ucircumflex /Udieresis /Yacute /Thorn /germandbls /agrave /aacute /acircumflex /atilde /adieresis /aring /ae /ccedilla /egrave /eacute /ecircumflex /edieresis /igrave /iacute /icircumflex /idieresis /eth /ntilde /ograve /oacute /ocircumflex /otilde /odieresis /divide /oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /ydieresis ] >> /FirstChar 32 /LastChar 255 /Name /TiRoCBB~1500977652 /Widths [ 250 333 408 500 500 833 778 180 333 333 500 564 250 333 250 278 500 500 500 500 500 500 500 500 500 500 278 278 564 564 564 444 921 722 667 667 722 611 556 722 722 333 389 722 611 889 722 722 556 722 667 556 611 722 722 944 722 722 611 333 278 333 469 500 333 444 500 444 500 444 333 500 500 278 278 500 278 778 500 500 500 500 333 389 278 500 500 722 500 500 444 480 200 480 541 350 500 350 333 500 444 1000 500 500 333 1000 556 333 889 350 611 350 350 333 333 444 444 350 500 1000 333 980 389 333 722 350 444 722 250 333 500 500 500 500 200 500 333 760 276 500 564 333 760 333 400 564 300 300 333 500 453 250 333 300 310 500 750 750 750 444 722 722 722 722 722 722 889 667 611 611 611 611 333 333 333 333 722 722 722 722 722 722 722 564 722 722 722 722 722 722 556 500 444 444 444 444 444 444 667 444 444 444 444 444 278 278 278 278 500 500 500 500 500 500 500 564 500 500 500 500 500 500 500 500 ] >> endobj
-6 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Times-Bold /Encoding << /Type /Encoding /BaseEncoding /WinAnsiEncoding /Differences [ 0 /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /space /exclam /quotedbl /numbersign /dollar /percent /ampersand /quotesingle /parenleft /parenright /asterisk /plus /comma /hyphen /period /slash /zero /one /two /three /four /five /six /seven /eight /nine /colon /semicolon /less /equal /greater /question /at /A /B /C /D /E /F /G /H /I /J /K /L /M /N /O /P /Q /R /S /T /U /V /W /X /Y /Z /bracketleft /backslash /bracketright /asciicircum /underscore /grave /a /b /c /d /e /f /g /h /i /j /k /l /m /n /o /p /q /r /s /t /u /v /w /x /y /z /braceleft /bar /braceright /asciitilde /bullet /Euro /bullet /quotesinglbase /florin /quotedblbase /ellipsis /dagger /daggerdbl /circumflex /perthousand /Scaron /guilsinglleft /OE /bullet /Zcaron /bullet /bullet /quoteleft /quoteright /quotedblleft /quotedblright /bullet /endash /emdash /tilde /trademark /scaron /guilsinglright /oe /bullet /zcaron /Ydieresis /space /exclamdown /cent /sterling /currency /yen /brokenbar /section /dieresis /copyright /ordfeminine /guillemotleft /logicalnot /hyphen /registered /macron /degree /plusminus /twosuperior /threesuperior /acute /mu /paragraph /periodcentered /cedilla /onesuperior /ordmasculine /guillemotright /onequarter /onehalf /threequarters /questiondown /Agrave /Aacute /Acircumflex /Atilde /Adieresis /Aring /AE /Ccedilla /Egrave /Eacute /Ecircumflex /Edieresis /Igrave /Iacute /Icircumflex /Idieresis /Eth /Ntilde /Ograve /Oacute /Ocircumflex /Otilde /Odieresis /multiply /Oslash /Ugrave /Uacute /Ucircumflex /Udieresis /Yacute /Thorn /germandbls /agrave /aacute /acircumflex /atilde /adieresis /aring /ae /ccedilla /egrave /eacute /ecircumflex /edieresis /igrave /iacute /icircumflex /idieresis /eth /ntilde /ograve /oacute /ocircumflex /otilde /odieresis /divide /oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /ydieresis ] >> /FirstChar 32 /LastChar 255 /Name /TiBoCBC~1500977652 /Widths [ 250 333 555 500 500 1000 833 278 333 333 500 570 250 333 250 278 500 500 500 500 500 500 500 500 500 500 333 333 570 570 570 500 930 722 667 722 722 667 611 778 778 389 500 778 667 944 722 778 611 778 722 556 667 722 722 1000 722 722 667 333 278 333 581 500 333 500 556 444 556 444 333 500 556 278 333 556 278 833 556 500 556 556 444 389 333 556 500 722 500 500 444 394 220 394 520 350 500 350 333 500 500 1000 500 500 333 1000 556 333 1000 350 667 350 350 333 333 500 500 350 500 1000 333 1000 389 333 722 350 444 722 250 333 500 500 500 500 220 500 333 747 300 500 570 333 747 333 400 570 300 300 333 556 540 250 333 300 330 500 750 750 750 500 722 722 722 722 722 722 1000 722 667 667 667 667 389 389 389 389 722 722 778 778 778 778 778 570 778 722 722 722 722 722 611 556 500 500 500 500 500 500 722 444 444 444 444 444 278 278 278 278 500 556 500 500 500 500 500 570 500 556 556 556 556 500 556 500 ] >> endobj
-7 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding << /Type /Encoding /BaseEncoding /WinAnsiEncoding /Differences [ 0 /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /space /exclam /quotedbl /numbersign /dollar /percent /ampersand /quotesingle /parenleft /parenright /asterisk /plus /comma /hyphen /period /slash /zero /one /two /three /four /five /six /seven /eight /nine /colon /semicolon /less /equal /greater /question /at /A /B /C /D /E /F /G /H /I /J /K /L /M /N /O /P /Q /R /S /T /U /V /W /X /Y /Z /bracketleft /backslash /bracketright /asciicircum /underscore /grave /a /b /c /d /e /f /g /h /i /j /k /l /m /n /o /p /q /r /s /t /u /v /w /x /y /z /braceleft /bar /braceright /asciitilde /bullet /Euro /bullet /quotesinglbase /florin /quotedblbase /ellipsis /dagger /daggerdbl /circumflex /perthousand /Scaron /guilsinglleft /OE /bullet /Zcaron /bullet /bullet /quoteleft /quoteright /quotedblleft /quotedblright /bullet /endash /emdash /tilde /trademark /scaron /guilsinglright /oe /bullet /zcaron /Ydieresis /space /exclamdown /cent /sterling /currency /yen /brokenbar /section /dieresis /copyright /ordfeminine /guillemotleft /logicalnot /hyphen /registered /macron /degree /plusminus /twosuperior /threesuperior /acute /mu /paragraph /periodcentered /cedilla /onesuperior /ordmasculine /guillemotright /onequarter /onehalf /threequarters /questiondown /Agrave /Aacute /Acircumflex /Atilde /Adieresis /Aring /AE /Ccedilla /Egrave /Eacute /Ecircumflex /Edieresis /Igrave /Iacute /Icircumflex /Idieresis /Eth /Ntilde /Ograve /Oacute /Ocircumflex /Otilde /Odieresis /multiply /Oslash /Ugrave /Uacute /Ucircumflex /Udieresis /Yacute /Thorn /germandbls /agrave /aacute /acircumflex /atilde /adieresis /aring /ae /ccedilla /egrave /eacute /ecircumflex /edieresis /igrave /iacute /icircumflex /idieresis /eth /ntilde /ograve /oacute /ocircumflex /otilde /odieresis /divide /oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /ydieresis ] >> /FirstChar 32 /LastChar 255 /Name /HelvCBD~1500977652 /Widths [ 278 278 355 556 556 889 667 191 333 333 389 584 278 333 278 278 556 556 556 556 556 556 556 556 556 556 278 278 584 584 584 556 1015 667 667 722 722 667 611 778 722 278 500 667 556 833 722 778 667 778 722 667 611 722 667 944 667 667 611 278 278 278 469 556 333 556 556 500 556 556 278 556 556 222 222 500 222 833 556 556 556 556 333 500 278 556 500 722 500 500 500 334 260 334 584 350 556 350 222 556 333 1000 556 556 333 1000 667 333 1000 350 611 350 350 222 222 333 333 350 556 1000 333 1000 500 333 944 350 500 667 278 333 556 556 556 556 260 556 333 737 370 556 584 333 737 333 400 584 333 333 333 556 537 278 333 333 365 556 834 834 834 611 667 667 667 667 667 667 1000 722 667 667 667 667 278 278 278 278 722 722 778 778 778 778 778 584 778 722 722 722 722 667 667 611 556 556 556 556 556 556 889 500 556 556 556 556 278 278 278 278 556 556 556 556 556 556 556 584 611 556 556 556 556 500 556 500 ] >> endobj
-8 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique /Encoding << /Type /Encoding /BaseEncoding /WinAnsiEncoding /Differences [ 0 /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /space /exclam /quotedbl /numbersign /dollar /percent /ampersand /quotesingle /parenleft /parenright /asterisk /plus /comma /hyphen /period /slash /zero /one /two /three /four /five /six /seven /eight /nine /colon /semicolon /less /equal /greater /question /at /A /B /C /D /E /F /G /H /I /J /K /L /M /N /O /P /Q /R /S /T /U /V /W /X /Y /Z /bracketleft /backslash /bracketright /asciicircum /underscore /grave /a /b /c /d /e /f /g /h /i /j /k /l /m /n /o /p /q /r /s /t /u /v /w /x /y /z /braceleft /bar /braceright /asciitilde /bullet /Euro /bullet /quotesinglbase /florin /quotedblbase /ellipsis /dagger /daggerdbl /circumflex /perthousand /Scaron /guilsinglleft /OE /bullet /Zcaron /bullet /bullet /quoteleft /quoteright /quotedblleft /quotedblright /bullet /endash /emdash /tilde /trademark /scaron /guilsinglright /oe /bullet /zcaron /Ydieresis /space /exclamdown /cent /sterling /currency /yen /brokenbar /section /dieresis /copyright /ordfeminine /guillemotleft /logicalnot /hyphen /registered /macron /degree /plusminus /twosuperior /threesuperior /acute /mu /paragraph /periodcentered /cedilla /onesuperior /ordmasculine /guillemotright /onequarter /onehalf /threequarters /questiondown /Agrave /Aacute /Acircumflex /Atilde /Adieresis /Aring /AE /Ccedilla /Egrave /Eacute /Ecircumflex /Edieresis /Igrave /Iacute /Icircumflex /Idieresis /Eth /Ntilde /Ograve /Oacute /Ocircumflex /Otilde /Odieresis /multiply /Oslash /Ugrave /Uacute /Ucircumflex /Udieresis /Yacute /Thorn /germandbls /agrave /aacute /acircumflex /atilde /adieresis /aring /ae /ccedilla /egrave /eacute /ecircumflex /edieresis /igrave /iacute /icircumflex /idieresis /eth /ntilde /ograve /oacute /ocircumflex /otilde /odieresis /divide /oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /ydieresis ] >> /FirstChar 32 /LastChar 255 /Name /HeItCBE~1500977652 /Widths [ 278 278 355 556 556 889 667 191 333 333 389 584 278 333 278 278 556 556 556 556 556 556 556 556 556 556 278 278 584 584 584 556 1015 667 667 722 722 667 611 778 722 278 500 667 556 833 722 778 667 778 722 667 611 722 667 944 667 667 611 278 278 278 469 556 333 556 556 500 556 556 278 556 556 222 222 500 222 833 556 556 556 556 333 500 278 556 500 722 500 500 500 334 260 334 584 350 556 350 222 556 333 1000 556 556 333 1000 667 333 1000 350 611 350 350 222 222 333 333 350 556 1000 333 1000 500 333 944 350 500 667 278 333 556 556 556 556 260 556 333 737 370 556 584 333 737 333 400 584 333 333 333 556 537 278 333 333 365 556 834 834 834 611 667 667 667 667 667 667 1000 722 667 667 667 667 278 278 278 278 722 722 778 778 778 778 778 584 778 722 722 722 722 667 667 611 556 556 556 556 556 556 889 500 556 556 556 556 278 278 278 278 556 556 556 556 556 556 556 584 611 556 556 556 556 500 556 500 ] >> endobj
-9 0 obj << /Type /Font /Subtype /Type1 /BaseFont /ZapfDingbats /Encoding << /Type /Encoding /BaseEncoding /WinAnsiEncoding /Differences [ 0 /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /space /a1 /a2 /a202 /a3 /a4 /a5 /a119 /a118 /a117 /a11 /a12 /a13 /a14 /a15 /a16 /a105 /a17 /a18 /a19 /a20 /a21 /a22 /a23 /a24 /a25 /a26 /a27 /a28 /a6 /a7 /a8 /a9 /a10 /a29 /a30 /a31 /a32 /a33 /a34 /a35 /a36 /a37 /a38 /a39 /a40 /a41 /a42 /a43 /a44 /a45 /a46 /a47 /a48 /a49 /a50 /a51 /a52 /a53 /a54 /a55 /a56 /a57 /a58 /a59 /a60 /a61 /a62 /a63 /a64 /a65 /a66 /a67 /a68 /a69 /a70 /a71 /a72 /a73 /a74 /a203 /a75 /a204 /a76 /a77 /a78 /a79 /a81 /a82 /a83 /a84 /a97 /a98 /a99 /a100 /.notdef /a89 /a90 /a93 /a94 /a91 /a92 /a205 /a85 /a206 /a86 /a87 /a88 /a95 /a96 /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /a101 /a102 /a103 /a104 /a106 /a107 /a108 /a112 /a111 /a110 /a109 /a120 /a121 /a122 /a123 /a124 /a125 /a126 /a127 /a128 /a129 /a130 /a131 /a132 /a133 /a134 /a135 /a136 /a137 /a138 /a139 /a140 /a141 /a142 /a143 /a144 /a145 /a146 /a147 /a148 /a149 /a150 /a151 /a152 /a153 /a154 /a155 /a156 /a157 /a158 /a159 /a160 /a161 /a163 /a164 /a196 /a165 /a192 /a166 /a167 /a168 /a169 /a170 /a171 /a172 /a173 /a162 /a174 /a175 /a176 /a177 /a178 /a179 /a193 /a180 /a199 /a181 /a200 /a182 /.notdef /a201 /a183 /a184 /a197 /a185 /a194 /a198 /a186 /a195 /a187 /a188 /a189 /a190 /a191 /.notdef ] >> /FirstChar 32 /LastChar 255 /Name /ZapfCBF~1500977652 /Widths [ 278 974 961 974 980 719 789 790 791 690 960 939 549 855 911 933 911 945 974 755 846 762 761 571 677 763 760 759 754 494 552 537 577 692 786 788 788 790 793 794 816 823 789 841 823 833 816 831 923 744 723 749 790 792 695 776 768 792 759 707 708 682 701 826 815 789 789 707 687 696 689 786 787 713 791 785 791 873 761 762 762 759 759 892 892 788 784 438 138 277 415 392 392 668 668 278 390 390 317 317 276 276 509 509 410 410 234 234 334 334 278 278 278 278 278 278 278 278 278 278 278 278 278 278 278 278 278 278 278 732 544 544 910 667 760 760 776 595 694 626 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 894 838 1016 458 748 924 748 918 927 928 928 834 873 828 924 924 917 930 931 463 883 836 836 867 867 696 696 874 278 874 760 946 771 865 771 888 967 888 831 873 927 970 918 278 ] >> endobj
-10 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Courier /Encoding << /Type /Encoding /BaseEncoding /WinAnsiEncoding /Differences [ 0 /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /space /exclam /quotedbl /numbersign /dollar /percent /ampersand /quotesingle /parenleft /parenright /asterisk /plus /comma /hyphen /period /slash /zero /one /two /three /four /five /six /seven /eight /nine /colon /semicolon /less /equal /greater /question /at /A /B /C /D /E /F /G /H /I /J /K /L /M /N /O /P /Q /R /S /T /U /V /W /X /Y /Z /bracketleft /backslash /bracketright /asciicircum /underscore /grave /a /b /c /d /e /f /g /h /i /j /k /l /m /n /o /p /q /r /s /t /u /v /w /x /y /z /braceleft /bar /braceright /asciitilde /bullet /Euro /bullet /quotesinglbase /florin /quotedblbase /ellipsis /dagger /daggerdbl /circumflex /perthousand /Scaron /guilsinglleft /OE /bullet /Zcaron /bullet /bullet /quoteleft /quoteright /quotedblleft /quotedblright /bullet /endash /emdash /tilde /trademark /scaron /guilsinglright /oe /bullet /zcaron /Ydieresis /space /exclamdown /cent /sterling /currency /yen /brokenbar /section /dieresis /copyright /ordfeminine /guillemotleft /logicalnot /hyphen /registered /macron /degree /plusminus /twosuperior /threesuperior /acute /mu /paragraph /periodcentered /cedilla /onesuperior /ordmasculine /guillemotright /onequarter /onehalf /threequarters /questiondown /Agrave /Aacute /Acircumflex /Atilde /Adieresis /Aring /AE /Ccedilla /Egrave /Eacute /Ecircumflex /Edieresis /Igrave /Iacute /Icircumflex /Idieresis /Eth /Ntilde /Ograve /Oacute /Ocircumflex /Otilde /Odieresis /multiply /Oslash /Ugrave /Uacute /Ucircumflex /Udieresis /Yacute /Thorn /germandbls /agrave /aacute /acircumflex /atilde /adieresis /aring /ae /ccedilla /egrave /eacute /ecircumflex /edieresis /igrave /iacute /icircumflex /idieresis /eth /ntilde /ograve /oacute /ocircumflex /otilde /odieresis /divide /oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /ydieresis ] >> /FirstChar 32 /LastChar 255 /Name /CourCBG~1500977652 /Widths [ 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 ] >> endobj
-11 0 obj << /Type /Page /Contents [ 59 0 R 58 0 R 57 0 R 56 0 R 50 0 R 49 0 R 48 0 R 47 0 R 46 0 R 45 0 R 44 0 R 38 0 R 37 0 R 36 0 R 35 0 R 34 0 R 28 0 R 27 0 R 26 0 R 25 0 R 24 0 R 18 0 R 17 0 R 16 0 R 15 0 R 14 0 R 12 0 R 13 0 R 19 0 R 20 0 R 21 0 R 22 0 R 23 0 R 29 0 R 30 0 R 31 0 R 32 0 R 33 0 R 39 0 R 40 0 R 41 0 R 42 0 R 43 0 R 51 0 R 52 0 R 53 0 R 54 0 R 55 0 R ] /MediaBox [ 0 0 595 842 ] /Parent 2 0 R /Resources << /Font << /HeItCBE~1500977652 8 0 R /HelvCBD~1500977652 7 0 R /TiBoCBC~1500977652 6 0 R /TiRoCBB~1500977652 5 0 R /ZapfCBF~1500977652 9 0 R >> /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ] >> >> endobj
-12 0 obj << /Filter [ /FlateDecode ] /Length 748 >> stream
-xœÕ˜ËnÛ0Då.Û"`ù~,#9Í]%Z¥èBåX¨m²£›~D¿¸´l%d‘¸HÈD6¼1@`x4. ‹:³y–ÿ&c£”‡bò¢Ü}.O·_š[ İ”d(hBÓPÌá¼»ZÕ‹[ølWpµªªòiÙÔ¶}_¡¸XïrévÉ‚]èvÿg¯ì SiÊhDÉ–¬hÊqİÖvQÎbhÎªó6ÏN‚¼›†cP‚#Ê·$ğßıwkq÷p&ğ»|œbH*b{AŸrfWG°ìJ¨9Oc8;5òfÕ<AÑ	ì}HÛ^ªÖ?§4é%ñşir;¯`bh-Ü”MóæUTFœûŒ„ÄÇ*î6Š>÷ÔÎ+4À9`‚x¢sZ#œ¼E|ÀQ”í[Å 3aø Ñ5@¦ª‘ÀÊ5@R#R	„SÅW$¯‘ïAedu¬å|Ğ„`Fæc#èƒTp’I$S%„2Dûç9qœKdŒá¢ï}Â™µß«1Ø»ªÛŒËÅ”‹qTR¤@,Ä«ºO½š–-Œë1DL‰3$¥Á½ º¬ª!:àdƒ¿0òa|µÑ) N2:Ü5‹Ğ,Ù+Üíò~<±Ü½™¥K| ü^Ğ'ü¶®;qmr[Í–q“GR„¸‘ÃÓFĞÇ½Ù»œ´®	c`µk–ĞÛ^Ğ‡Ñ)B¨d× ÁùÃT˜t
-(ãç¨ 4aİ˜)æ¨ 4h»³jv—g£Gsğì•İ§J”wÉÚæçò­!(bÌffŒ>ô×åI}òİ+B(Òm÷j«Oã2…¨ÖÀ]Yˆû‰loi9;(Z³ƒöâ¨»Ûè0§ûGƒİı`Øw­R‡@K0u·¯aãHGŠ…q<Vû›GÂôú¿î~FÃy¦)"ÿ¼PöÙ2{*f{H+‰ÖĞƒ¢Õícõ' üæZÈ{
+4 0 obj << /CreationDate (D:20171103101052+00'00') /Creator (ChordPro [ChordPro 0.900_007]) /Producer (PDF::API2 2.021 [linux]) /Title <FEFF005300770069006E00670020004C006F0077002000530077006500650074002000430068006100720069006F0074> >> endobj
+5 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding << /Type /Encoding /BaseEncoding /WinAnsiEncoding /Differences [ 0 /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /space /exclam /quotedbl /numbersign /dollar /percent /ampersand /quotesingle /parenleft /parenright /asterisk /plus /comma /hyphen /period /slash /zero /one /two /three /four /five /six /seven /eight /nine /colon /semicolon /less /equal /greater /question /at /A /B /C /D /E /F /G /H /I /J /K /L /M /N /O /P /Q /R /S /T /U /V /W /X /Y /Z /bracketleft /backslash /bracketright /asciicircum /underscore /grave /a /b /c /d /e /f /g /h /i /j /k /l /m /n /o /p /q /r /s /t /u /v /w /x /y /z /braceleft /bar /braceright /asciitilde /bullet /Euro /bullet /quotesinglbase /florin /quotedblbase /ellipsis /dagger /daggerdbl /circumflex /perthousand /Scaron /guilsinglleft /OE /bullet /Zcaron /bullet /bullet /quoteleft /quoteright /quotedblleft /quotedblright /bullet /endash /emdash /tilde /trademark /scaron /guilsinglright /oe /bullet /zcaron /Ydieresis /space /exclamdown /cent /sterling /currency /yen /brokenbar /section /dieresis /copyright /ordfeminine /guillemotleft /logicalnot /hyphen /registered /macron /degree /plusminus /twosuperior /threesuperior /acute /mu /paragraph /periodcentered /cedilla /onesuperior /ordmasculine /guillemotright /onequarter /onehalf /threequarters /questiondown /Agrave /Aacute /Acircumflex /Atilde /Adieresis /Aring /AE /Ccedilla /Egrave /Eacute /Ecircumflex /Edieresis /Igrave /Iacute /Icircumflex /Idieresis /Eth /Ntilde /Ograve /Oacute /Ocircumflex /Otilde /Odieresis /multiply /Oslash /Ugrave /Uacute /Ucircumflex /Udieresis /Yacute /Thorn /germandbls /agrave /aacute /acircumflex /atilde /adieresis /aring /ae /ccedilla /egrave /eacute /ecircumflex /edieresis /igrave /iacute /icircumflex /idieresis /eth /ntilde /ograve /oacute /ocircumflex /otilde /odieresis /divide /oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /ydieresis ] >> /FirstChar 32 /LastChar 255 /Name /HelvCBB~1509703852 /Widths [ 278 278 355 556 556 889 667 191 333 333 389 584 278 333 278 278 556 556 556 556 556 556 556 556 556 556 278 278 584 584 584 556 1015 667 667 722 722 667 611 778 722 278 500 667 556 833 722 778 667 778 722 667 611 722 667 944 667 667 611 278 278 278 469 556 333 556 556 500 556 556 278 556 556 222 222 500 222 833 556 556 556 556 333 500 278 556 500 722 500 500 500 334 260 334 584 350 556 350 222 556 333 1000 556 556 333 1000 667 333 1000 350 611 350 350 222 222 333 333 350 556 1000 333 1000 500 333 944 350 500 667 278 333 556 556 556 556 260 556 333 737 370 556 584 333 737 333 400 584 333 333 333 556 537 278 333 333 365 556 834 834 834 611 667 667 667 667 667 667 1000 722 667 667 667 667 278 278 278 278 722 722 778 778 778 778 778 584 778 722 722 722 722 667 667 611 556 556 556 556 556 556 889 500 556 556 556 556 278 278 278 278 556 556 556 556 556 556 556 584 611 556 556 556 556 500 556 500 ] >> endobj
+6 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Courier /Encoding << /Type /Encoding /BaseEncoding /WinAnsiEncoding /Differences [ 0 /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /space /exclam /quotedbl /numbersign /dollar /percent /ampersand /quotesingle /parenleft /parenright /asterisk /plus /comma /hyphen /period /slash /zero /one /two /three /four /five /six /seven /eight /nine /colon /semicolon /less /equal /greater /question /at /A /B /C /D /E /F /G /H /I /J /K /L /M /N /O /P /Q /R /S /T /U /V /W /X /Y /Z /bracketleft /backslash /bracketright /asciicircum /underscore /grave /a /b /c /d /e /f /g /h /i /j /k /l /m /n /o /p /q /r /s /t /u /v /w /x /y /z /braceleft /bar /braceright /asciitilde /bullet /Euro /bullet /quotesinglbase /florin /quotedblbase /ellipsis /dagger /daggerdbl /circumflex /perthousand /Scaron /guilsinglleft /OE /bullet /Zcaron /bullet /bullet /quoteleft /quoteright /quotedblleft /quotedblright /bullet /endash /emdash /tilde /trademark /scaron /guilsinglright /oe /bullet /zcaron /Ydieresis /space /exclamdown /cent /sterling /currency /yen /brokenbar /section /dieresis /copyright /ordfeminine /guillemotleft /logicalnot /hyphen /registered /macron /degree /plusminus /twosuperior /threesuperior /acute /mu /paragraph /periodcentered /cedilla /onesuperior /ordmasculine /guillemotright /onequarter /onehalf /threequarters /questiondown /Agrave /Aacute /Acircumflex /Atilde /Adieresis /Aring /AE /Ccedilla /Egrave /Eacute /Ecircumflex /Edieresis /Igrave /Iacute /Icircumflex /Idieresis /Eth /Ntilde /Ograve /Oacute /Ocircumflex /Otilde /Odieresis /multiply /Oslash /Ugrave /Uacute /Ucircumflex /Udieresis /Yacute /Thorn /germandbls /agrave /aacute /acircumflex /atilde /adieresis /aring /ae /ccedilla /egrave /eacute /ecircumflex /edieresis /igrave /iacute /icircumflex /idieresis /eth /ntilde /ograve /oacute /ocircumflex /otilde /odieresis /divide /oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /ydieresis ] >> /FirstChar 32 /LastChar 255 /Name /CourCBC~1509703852 /Widths [ 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 600 ] >> endobj
+7 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Times-Roman /Encoding << /Type /Encoding /BaseEncoding /WinAnsiEncoding /Differences [ 0 /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /space /exclam /quotedbl /numbersign /dollar /percent /ampersand /quotesingle /parenleft /parenright /asterisk /plus /comma /hyphen /period /slash /zero /one /two /three /four /five /six /seven /eight /nine /colon /semicolon /less /equal /greater /question /at /A /B /C /D /E /F /G /H /I /J /K /L /M /N /O /P /Q /R /S /T /U /V /W /X /Y /Z /bracketleft /backslash /bracketright /asciicircum /underscore /grave /a /b /c /d /e /f /g /h /i /j /k /l /m /n /o /p /q /r /s /t /u /v /w /x /y /z /braceleft /bar /braceright /asciitilde /bullet /Euro /bullet /quotesinglbase /florin /quotedblbase /ellipsis /dagger /daggerdbl /circumflex /perthousand /Scaron /guilsinglleft /OE /bullet /Zcaron /bullet /bullet /quoteleft /quoteright /quotedblleft /quotedblright /bullet /endash /emdash /tilde /trademark /scaron /guilsinglright /oe /bullet /zcaron /Ydieresis /space /exclamdown /cent /sterling /currency /yen /brokenbar /section /dieresis /copyright /ordfeminine /guillemotleft /logicalnot /hyphen /registered /macron /degree /plusminus /twosuperior /threesuperior /acute /mu /paragraph /periodcentered /cedilla /onesuperior /ordmasculine /guillemotright /onequarter /onehalf /threequarters /questiondown /Agrave /Aacute /Acircumflex /Atilde /Adieresis /Aring /AE /Ccedilla /Egrave /Eacute /Ecircumflex /Edieresis /Igrave /Iacute /Icircumflex /Idieresis /Eth /Ntilde /Ograve /Oacute /Ocircumflex /Otilde /Odieresis /multiply /Oslash /Ugrave /Uacute /Ucircumflex /Udieresis /Yacute /Thorn /germandbls /agrave /aacute /acircumflex /atilde /adieresis /aring /ae /ccedilla /egrave /eacute /ecircumflex /edieresis /igrave /iacute /icircumflex /idieresis /eth /ntilde /ograve /oacute /ocircumflex /otilde /odieresis /divide /oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /ydieresis ] >> /FirstChar 32 /LastChar 255 /Name /TiRoCBD~1509703852 /Widths [ 250 333 408 500 500 833 778 180 333 333 500 564 250 333 250 278 500 500 500 500 500 500 500 500 500 500 278 278 564 564 564 444 921 722 667 667 722 611 556 722 722 333 389 722 611 889 722 722 556 722 667 556 611 722 722 944 722 722 611 333 278 333 469 500 333 444 500 444 500 444 333 500 500 278 278 500 278 778 500 500 500 500 333 389 278 500 500 722 500 500 444 480 200 480 541 350 500 350 333 500 444 1000 500 500 333 1000 556 333 889 350 611 350 350 333 333 444 444 350 500 1000 333 980 389 333 722 350 444 722 250 333 500 500 500 500 200 500 333 760 276 500 564 333 760 333 400 564 300 300 333 500 453 250 333 300 310 500 750 750 750 444 722 722 722 722 722 722 889 667 611 611 611 611 333 333 333 333 722 722 722 722 722 722 722 564 722 722 722 722 722 722 556 500 444 444 444 444 444 444 667 444 444 444 444 444 278 278 278 278 500 500 500 500 500 500 500 564 500 500 500 500 500 500 500 500 ] >> endobj
+8 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Times-Bold /Encoding << /Type /Encoding /BaseEncoding /WinAnsiEncoding /Differences [ 0 /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /space /exclam /quotedbl /numbersign /dollar /percent /ampersand /quotesingle /parenleft /parenright /asterisk /plus /comma /hyphen /period /slash /zero /one /two /three /four /five /six /seven /eight /nine /colon /semicolon /less /equal /greater /question /at /A /B /C /D /E /F /G /H /I /J /K /L /M /N /O /P /Q /R /S /T /U /V /W /X /Y /Z /bracketleft /backslash /bracketright /asciicircum /underscore /grave /a /b /c /d /e /f /g /h /i /j /k /l /m /n /o /p /q /r /s /t /u /v /w /x /y /z /braceleft /bar /braceright /asciitilde /bullet /Euro /bullet /quotesinglbase /florin /quotedblbase /ellipsis /dagger /daggerdbl /circumflex /perthousand /Scaron /guilsinglleft /OE /bullet /Zcaron /bullet /bullet /quoteleft /quoteright /quotedblleft /quotedblright /bullet /endash /emdash /tilde /trademark /scaron /guilsinglright /oe /bullet /zcaron /Ydieresis /space /exclamdown /cent /sterling /currency /yen /brokenbar /section /dieresis /copyright /ordfeminine /guillemotleft /logicalnot /hyphen /registered /macron /degree /plusminus /twosuperior /threesuperior /acute /mu /paragraph /periodcentered /cedilla /onesuperior /ordmasculine /guillemotright /onequarter /onehalf /threequarters /questiondown /Agrave /Aacute /Acircumflex /Atilde /Adieresis /Aring /AE /Ccedilla /Egrave /Eacute /Ecircumflex /Edieresis /Igrave /Iacute /Icircumflex /Idieresis /Eth /Ntilde /Ograve /Oacute /Ocircumflex /Otilde /Odieresis /multiply /Oslash /Ugrave /Uacute /Ucircumflex /Udieresis /Yacute /Thorn /germandbls /agrave /aacute /acircumflex /atilde /adieresis /aring /ae /ccedilla /egrave /eacute /ecircumflex /edieresis /igrave /iacute /icircumflex /idieresis /eth /ntilde /ograve /oacute /ocircumflex /otilde /odieresis /divide /oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /ydieresis ] >> /FirstChar 32 /LastChar 255 /Name /TiBoCBE~1509703852 /Widths [ 250 333 555 500 500 1000 833 278 333 333 500 570 250 333 250 278 500 500 500 500 500 500 500 500 500 500 333 333 570 570 570 500 930 722 667 722 722 667 611 778 778 389 500 778 667 944 722 778 611 778 722 556 667 722 722 1000 722 722 667 333 278 333 581 500 333 500 556 444 556 444 333 500 556 278 333 556 278 833 556 500 556 556 444 389 333 556 500 722 500 500 444 394 220 394 520 350 500 350 333 500 500 1000 500 500 333 1000 556 333 1000 350 667 350 350 333 333 500 500 350 500 1000 333 1000 389 333 722 350 444 722 250 333 500 500 500 500 220 500 333 747 300 500 570 333 747 333 400 570 300 300 333 556 540 250 333 300 330 500 750 750 750 500 722 722 722 722 722 722 1000 722 667 667 667 667 389 389 389 389 722 722 778 778 778 778 778 570 778 722 722 722 722 722 611 556 500 500 500 500 500 500 722 444 444 444 444 444 278 278 278 278 500 556 500 500 500 500 500 570 500 556 556 556 556 500 556 500 ] >> endobj
+9 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique /Encoding << /Type /Encoding /BaseEncoding /WinAnsiEncoding /Differences [ 0 /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /space /exclam /quotedbl /numbersign /dollar /percent /ampersand /quotesingle /parenleft /parenright /asterisk /plus /comma /hyphen /period /slash /zero /one /two /three /four /five /six /seven /eight /nine /colon /semicolon /less /equal /greater /question /at /A /B /C /D /E /F /G /H /I /J /K /L /M /N /O /P /Q /R /S /T /U /V /W /X /Y /Z /bracketleft /backslash /bracketright /asciicircum /underscore /grave /a /b /c /d /e /f /g /h /i /j /k /l /m /n /o /p /q /r /s /t /u /v /w /x /y /z /braceleft /bar /braceright /asciitilde /bullet /Euro /bullet /quotesinglbase /florin /quotedblbase /ellipsis /dagger /daggerdbl /circumflex /perthousand /Scaron /guilsinglleft /OE /bullet /Zcaron /bullet /bullet /quoteleft /quoteright /quotedblleft /quotedblright /bullet /endash /emdash /tilde /trademark /scaron /guilsinglright /oe /bullet /zcaron /Ydieresis /space /exclamdown /cent /sterling /currency /yen /brokenbar /section /dieresis /copyright /ordfeminine /guillemotleft /logicalnot /hyphen /registered /macron /degree /plusminus /twosuperior /threesuperior /acute /mu /paragraph /periodcentered /cedilla /onesuperior /ordmasculine /guillemotright /onequarter /onehalf /threequarters /questiondown /Agrave /Aacute /Acircumflex /Atilde /Adieresis /Aring /AE /Ccedilla /Egrave /Eacute /Ecircumflex /Edieresis /Igrave /Iacute /Icircumflex /Idieresis /Eth /Ntilde /Ograve /Oacute /Ocircumflex /Otilde /Odieresis /multiply /Oslash /Ugrave /Uacute /Ucircumflex /Udieresis /Yacute /Thorn /germandbls /agrave /aacute /acircumflex /atilde /adieresis /aring /ae /ccedilla /egrave /eacute /ecircumflex /edieresis /igrave /iacute /icircumflex /idieresis /eth /ntilde /ograve /oacute /ocircumflex /otilde /odieresis /divide /oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /ydieresis ] >> /FirstChar 32 /LastChar 255 /Name /HeItCBF~1509703852 /Widths [ 278 278 355 556 556 889 667 191 333 333 389 584 278 333 278 278 556 556 556 556 556 556 556 556 556 556 278 278 584 584 584 556 1015 667 667 722 722 667 611 778 722 278 500 667 556 833 722 778 667 778 722 667 611 722 667 944 667 667 611 278 278 278 469 556 333 556 556 500 556 556 278 556 556 222 222 500 222 833 556 556 556 556 333 500 278 556 500 722 500 500 500 334 260 334 584 350 556 350 222 556 333 1000 556 556 333 1000 667 333 1000 350 611 350 350 222 222 333 333 350 556 1000 333 1000 500 333 944 350 500 667 278 333 556 556 556 556 260 556 333 737 370 556 584 333 737 333 400 584 333 333 333 556 537 278 333 333 365 556 834 834 834 611 667 667 667 667 667 667 1000 722 667 667 667 667 278 278 278 278 722 722 778 778 778 778 778 584 778 722 722 722 722 667 667 611 556 556 556 556 556 556 889 500 556 556 556 556 278 278 278 278 556 556 556 556 556 556 556 584 611 556 556 556 556 500 556 500 ] >> endobj
+10 0 obj << /Type /Font /Subtype /Type1 /BaseFont /ZapfDingbats /Encoding << /Type /Encoding /BaseEncoding /WinAnsiEncoding /Differences [ 0 /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /space /a1 /a2 /a202 /a3 /a4 /a5 /a119 /a118 /a117 /a11 /a12 /a13 /a14 /a15 /a16 /a105 /a17 /a18 /a19 /a20 /a21 /a22 /a23 /a24 /a25 /a26 /a27 /a28 /a6 /a7 /a8 /a9 /a10 /a29 /a30 /a31 /a32 /a33 /a34 /a35 /a36 /a37 /a38 /a39 /a40 /a41 /a42 /a43 /a44 /a45 /a46 /a47 /a48 /a49 /a50 /a51 /a52 /a53 /a54 /a55 /a56 /a57 /a58 /a59 /a60 /a61 /a62 /a63 /a64 /a65 /a66 /a67 /a68 /a69 /a70 /a71 /a72 /a73 /a74 /a203 /a75 /a204 /a76 /a77 /a78 /a79 /a81 /a82 /a83 /a84 /a97 /a98 /a99 /a100 /.notdef /a89 /a90 /a93 /a94 /a91 /a92 /a205 /a85 /a206 /a86 /a87 /a88 /a95 /a96 /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /a101 /a102 /a103 /a104 /a106 /a107 /a108 /a112 /a111 /a110 /a109 /a120 /a121 /a122 /a123 /a124 /a125 /a126 /a127 /a128 /a129 /a130 /a131 /a132 /a133 /a134 /a135 /a136 /a137 /a138 /a139 /a140 /a141 /a142 /a143 /a144 /a145 /a146 /a147 /a148 /a149 /a150 /a151 /a152 /a153 /a154 /a155 /a156 /a157 /a158 /a159 /a160 /a161 /a163 /a164 /a196 /a165 /a192 /a166 /a167 /a168 /a169 /a170 /a171 /a172 /a173 /a162 /a174 /a175 /a176 /a177 /a178 /a179 /a193 /a180 /a199 /a181 /a200 /a182 /.notdef /a201 /a183 /a184 /a197 /a185 /a194 /a198 /a186 /a195 /a187 /a188 /a189 /a190 /a191 /.notdef ] >> /FirstChar 32 /LastChar 255 /Name /ZapfCBG~1509703852 /Widths [ 278 974 961 974 980 719 789 790 791 690 960 939 549 855 911 933 911 945 974 755 846 762 761 571 677 763 760 759 754 494 552 537 577 692 786 788 788 790 793 794 816 823 789 841 823 833 816 831 923 744 723 749 790 792 695 776 768 792 759 707 708 682 701 826 815 789 789 707 687 696 689 786 787 713 791 785 791 873 761 762 762 759 759 892 892 788 784 438 138 277 415 392 392 668 668 278 390 390 317 317 276 276 509 509 410 410 234 234 334 334 278 278 278 278 278 278 278 278 278 278 278 278 278 278 278 278 278 278 278 732 544 544 910 667 760 760 776 595 694 626 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 788 894 838 1016 458 748 924 748 918 927 928 928 834 873 828 924 924 917 930 931 463 883 836 836 867 867 696 696 874 278 874 760 946 771 865 771 888 967 888 831 873 927 970 918 278 ] >> endobj
+11 0 obj << /Type /Page /Contents [ 12 0 R 13 0 R ] /MediaBox [ 0 0 595 842 ] /Parent 2 0 R /Resources << /Font << /HeItCBF~1509703852 9 0 R /HelvCBB~1509703852 5 0 R /TiBoCBE~1509703852 8 0 R /TiRoCBD~1509703852 7 0 R /ZapfCBG~1509703852 10 0 R >> /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ] >> >> endobj
+12 0 obj << /Filter [ /FlateDecode ] /Length 1299 >> stream
+xœXK²]'Ü
+uø+HUfI–àÊgâ‰·ÔBØ~ç¸<¡ï“@j5}¹ÿ…kıûíçÃ/!…/¡äĞ(‡×¢Ü‘Â?á÷ğkø tEHğ5b~^+˜zı1X"$ø¦Xwpì£_e|gñù¯µC™;ôpçÎ;Ô©Qø)Í=>ÿş~{æÅM|	õ
+uÜ|æİ×â»åíĞ>4”o¡¡å-´5åÅ[hBhz]miÎS(!”ŞBï²òkhw¼~/TÃFœÇ·%(=Íõ}F=^y¢ÚúB9…O—!¸®Ø,€cJZ¨•Úãà	LÜûDıš‡Œ¹¤4ñêXS_8ÑD9-¥—¹à ÛÀÇÏË–Ğbéİm×bUNjñJÍJ Øi¸)¶lÕS¤+[cïœ]Û¬çšŒ”©nĞ…5iØ|=,…Ëé{CŠ\×§}Í¶P	˜w™¼A“~¤	Š%ïîHˆÖ)&%Iˆ¡xU£Œ„Gª¹´I—PŒaZëR
+À˜Qj@j‡<¤-ˆMCZB	DW†Wã'6ÅİSl*ow{3	_Ö!áÏæ¡áe‡?ˆ„/‘ğgÑğ´Ãï±kÕ2ŸÂÛoïá£l"Ë„¯xÿØXz‰ÅŒÅ ß^çm,Œ’7Æ×6ş:f,ó»ÉcÚÆÂèVcáeñÆÂ8mcaŒEÉkaPÇşCŞÖÂèòÖÒç—ŸX/Û¶F··ÆÕ¬…AÙÖÂ({kaœ¶µLd„aM†Ûb)ëÙ†zËì¸uQÉºV¦Ş]kbİlë„ˆË[‹³ü”˜$	b.F¼c,Ø
+[ç`˜RFUR=$"A@hòR ¼2¼"Í%å²ì{ªœùÕõÃ­Ğ„å/šğl0H(.áÑb4ayŒ&<›’Kx¼ÙGÓ–ü˜0\Âø~µZ‚¬_ŒûÇPÎmnƒ5ß”k„[5Qwf³0.ädf3Ñ]öM¸tÜó‰äu²–WÚŞ0ÉÛÎ1ÁmÀ±ØÍDiØŸTáš•ñÊÑ=ùª=.ÃRV9ææ«Ì1åİCŞÍñ¥Ì¾ó{İ¼¤ÅƒR@Ä²¬u·lO½y)›ÛXëÂZ•z›­‡u×­9Rä±"a¼,1ÊÈ¸$e’’}¼íÉfc»éØä(¨V¡ó¶UÚE›SYßª1eåŞtİáC¿Á¥h[¶º3(äeËèíÄ6YN¶ŒÙ2v²eÙòò-ßH'ÛùÓd«WeËhË¶T/[F‡lC¶¼t²etÈ–±“m©»¹rÊ–±“íD›²âekhÎY2 ì‰ñ•j“E2tT	I š#åá-x‚22.I™„lÁ¾ÆÓ)[ŒM"/[ÌÛj$/[Š6G§l¡1e¥mºZx“mİo;¬çøw¿“-£C¶ÛdçlÙ2:dËØÉ–dËËC¶ü½àdËhËV¿>T¶Œ¶lëåeËè-cÈ¶^^¶ŒÙ2v²]?ùU¶ã+ÙC¶ÃËv²^¶ãí8e»“É¢:ª„$êåe‹æHy8d^D† ŒŒKR&![°¯ñù”-Æ&Ge/[ÌÛjÌ^¶*m.Ÿ²…Æ„•jÏ»­Éç×İë½^óñŞ^w’ ¯;IxyİiBq	Ï¯;I×$¼¼î4!¹„ç§”oÚ’ŸZÚ	²~Kh.¡ı@‚qÿmÿš¬/¦
 endstream endobj
-13 0 obj << /Filter [ /FlateDecode ] /Length 8 >> stream
-xœ    
-endstream endobj
-14 0 obj << /Filter [ /FlateDecode ] /Length 45 >> stream
-xœS(T0 Ã w#/C…rc#s3#…\0ÃØTÏL!G!X!P Å!è
-endstream endobj
-15 0 obj << /Filter [ /FlateDecode ] /Length 47 >> stream
-xœS(T0 Ã w#/C…rc#scS=3…\0ÓÀRÏH!G!X!P Öå	I
-endstream endobj
-16 0 obj << /Filter [ /FlateDecode ] /Length 48 >> stream
-xœS(T0 Ã w#/C…rc#sK=#…\ÓÌÂHÏB!G!X!P Öá	L
-endstream endobj
-17 0 obj << /Filter [ /FlateDecode ] /Length 47 >> stream
-xœS(T0 Ã w#/C…rc#3#=…\0ÓÔLÏD!G!X!P ×@	O
-endstream endobj
-18 0 obj << /Filter [ /FlateDecode ] /Length 63 >> stream
-xœS(T0Ğ³°´00¶ÄÂ(JW0RğR0V(W0¶P05²Ğ³P01Ò337SĞ54Ó3Q(JUÈPHST  B-
-endstream endobj
-19 0 obj << /Filter [ /FlateDecode ] /Length 45 >> stream
-xœS(T0 Ã w#/=3…rKS…\S0#G!X!P ÅKô
-endstream endobj
-20 0 obj << /Filter [ /FlateDecode ] /Length 45 >> stream
-xœS(T0 Ã w#/=3…rK…\S0#G!X!P Å”ú
-endstream endobj
-21 0 obj << /Filter [ /FlateDecode ] /Length 45 >> stream
-xœS(T0 Ã w#/=3…rc…\S0#G!X!P Äşî
-endstream endobj
-22 0 obj << /Filter [ /FlateDecode ] /Length 45 >> stream
-xœS(T0 Ã w#/=3…rss…\S0#G!X!P ÅGô
-endstream endobj
-23 0 obj << /Filter [ /FlateDecode ] /Length 45 >> stream
-xœS(T0 Ã w#/=3…rsC…\S0#G!X!P Ä±è
-endstream endobj
-24 0 obj << /Filter [ /FlateDecode ] /Length 266 >> stream
-xœM’KrÄ0D¯¢PÉ|Nu2G˜M6Yd•ë„‘\Såá¹°ènÑ~[_¿¯ÖÛ_»Ìÿ¦‰?(F}]æ¤Ğ)hŠ."lïàaÉsõRÂ¥8p‘ŒhU0‹Uƒ´Ç‹’‘¢„®Ù8Q#.ğézŞ$ V¯ÅçÑş@`¨>@›9I £l	ÊöÈ ´Õ3p§mŒá"zØf˜w(N;®ªùn[0ì|ârôÈàºŞg‡­Râ/éÈô$ı¤	†AÇgiï2†>wdœ9rF½Âåz¶Ö•ÔAu[kJ]d
-¨k.y÷¤öZ´UËS¦kµ2’ZºaÏm|·ïöjŸíÉ‡y
-endstream endobj
-25 0 obj << /Filter [ /FlateDecode ] /Length 45 >> stream
-xœS(T0 Ã w#/=3…rKS…\0ÃÜP!G!X!P Ä¬å
-endstream endobj
-26 0 obj << /Filter [ /FlateDecode ] /Length 45 >> stream
-xœS(T0 Ã w#/=3…r3KS…\0ÃÜP!G!X!P Årñ
-endstream endobj
-27 0 obj << /Filter [ /FlateDecode ] /Length 45 >> stream
-xœS(T0 Ã w#/=3…rS#KS…\0ÃÜP!G!X!P Åë
-endstream endobj
-28 0 obj << /Filter [ /FlateDecode ] /Length 45 >> stream
-xœS(T0 Ã w#/=3…rSKS…\0ÃÜP!G!X!P Å×÷
-endstream endobj
-29 0 obj << /Filter [ /FlateDecode ] /Length 48 >> stream
-xœS(T0 Ã w#/=3…rs=sKS…\CS(;G!X!P ô	ò
-endstream endobj
-30 0 obj << /Filter [ /FlateDecode ] /Length 48 >> stream
-xœS(T0 Ã w#/=3…rs=sK…\CS(;G!X!P ôï	ø
-endstream endobj
-31 0 obj << /Filter [ /FlateDecode ] /Length 48 >> stream
-xœS(T0 Ã w#/=3…rs=sc…\CS(;G!X!P ôG	ì
-endstream endobj
-32 0 obj << /Filter [ /FlateDecode ] /Length 48 >> stream
-xœS(T0 Ã w#/=3…rs=sss…\CS(;G!X!P ô™	ò
-endstream endobj
-33 0 obj << /Filter [ /FlateDecode ] /Length 48 >> stream
-xœS(T0 Ã w#/=3…rs=ssC…\CS(;G!X!P óñ	æ
-endstream endobj
-34 0 obj << /Filter [ /FlateDecode ] /Length 262 >> stream
-xœM’1v(!E·Â
-8‚ÎVúÿ,aš4)ReûQtÎ4Üåñ€~¨¬ïÿı’9WjŞ|0™±^>È¸è$é¶H…îÉÅƒÛÈ5~à²	VeQ¯3ÕVÛ:½
-ù«è¹X$ŠØbYg—:ãş„÷„æç@M_WŠÙëA°y‹Zà.}‹ _ğ—DpÓ­\‹îÖÀªúj,M¶-ƒ¶aãI[Pı\é,v]÷)7úV†™ãgÔhb\ÑÓÂˆh}ÔzL
-cÀ¥mËN"R–Á8ÆGr%ŸÊ‰­:9Ì£NÏ„ú\‘h,(ÛÎõ
-Srñª¿7ò¦/ú¤ô¾ˆ¡
-endstream endobj
-35 0 obj << /Filter [ /FlateDecode ] /Length 47 >> stream
-xœS(T0 Ã w#/=3…rs=sKS…\(ÓÜP!G!X!P ëJ	Å
-endstream endobj
-36 0 obj << /Filter [ /FlateDecode ] /Length 47 >> stream
-xœS(T0 Ã w#/=3…rKc=sKS…\(ÓÜP!G!X!P ê×	¿
-endstream endobj
-37 0 obj << /Filter [ /FlateDecode ] /Length 47 >> stream
-xœS(T0 Ã w#/=3…rKK=sKS…\(ÓÜP!G!X!P ëÁ	Ë
-endstream endobj
-38 0 obj << /Filter [ /FlateDecode ] /Length 48 >> stream
-xœS(T0 Ã w#/=3…rCS=sKS…\ÛÜP!G!X!P ı
-
-endstream endobj
-39 0 obj << /Filter [ /FlateDecode ] /Length 49 >> stream
-xœS(T0 Ã w#/=3…rCcS=KS…\CSc(;G!X!P ıc
-
-endstream endobj
-40 0 obj << /Filter [ /FlateDecode ] /Length 49 >> stream
-xœS(T0 Ã w#/=3…rCcS=K…\CSc(;G!X!P ıµ
-
-endstream endobj
-41 0 obj << /Filter [ /FlateDecode ] /Length 49 >> stream
-xœS(T0 Ã w#/=3…rCcS=c…\CSc(;G!X!P ı
-
-endstream endobj
-42 0 obj << /Filter [ /FlateDecode ] /Length 49 >> stream
-xœS(T0 Ã w#/=3…rCcS=ss…\CSc(;G!X!P ı_
-
-endstream endobj
-43 0 obj << /Filter [ /FlateDecode ] /Length 49 >> stream
-xœS(T0 Ã w#/=3…rCcS=sC…\CSc(;G!X!P ü·
-
-endstream endobj
-44 0 obj << /Filter [ /FlateDecode ] /Length 245 >> stream
-xœM’»q1„[QÌ	q<*pl»'N8rûÖÀşâævàûÁøW~oã"c.¶ãŸûÜ¡RèVN§rOÅs|•N)Uª¥nOu¯T¶Pº*ë•İ$"Ã+Cº<orN=5•V–Sâ*œqRBáı—Å³§ĞxNH¸çb{N)4¹=H›[üt¾È¥¹¬ä d/¡¯ÂT+ú/£éİs#z<…EÏ±‘rO©$†)¥²‹Ûœ‚ƒ•˜ŒÒä²!K#ÓÃRA2!kÓG=vsºamõ6Š)°ï3#®êP`Wt|ãÆ@Å—ßãs¼«‡-
-endstream endobj
-45 0 obj << /Filter [ /FlateDecode ] /Length 244 >> stream
-xœM’±q1D[¡FBÒ
-*pl»'N8rûÖ _Ü\Â8XVĞ/5ÿ>Ş¨1èú4š¶Oüscí'T6Rnâ¤ê$¾‚g”"h©ÓN{déˆ¬Föt˜f6¹©ÁâÜá„ÈŠÃÌ8
-»İØ´şo{ö/Ëqà)¥,û©Ü¥v@-·Øä¹ùbåËrÒ²àUè4¬ş:ÊµzéÃ¶•0¤Té;UÎÈ©å>ì€.Yê¾€Û,Ëp½D:é&£ÜÏú|›Û-Ÿ-Få‹¦Š|ï«1¯!7ˆCÉåòŠîŞycéŠ•]v}ü¦Oz§ÏÀ‡À
-endstream endobj
-46 0 obj << /Filter [ /FlateDecode ] /Length 246 >> stream
-xœMR1r1ûŠ_ÀlcxAê$O¸&ÍWåûÙ€Îìlƒ-–íÕz|_­“¶ßÆkµéûªŸ§6¾ÊI®2êÈ,p{$8“ª‰–Z#Ğ ìZv¯	Ó=Ê%uâ “À¬4»`¢N"ûi	¹Õ_BÛï3…–ã9¡)¥CHö]¥Ky2ÇärwÎd³ráÈ‘½¾‰†×_›Øj¦Ò%ìçô_ùÑ¡¤R*•æ†Ê™İ!eN‘ÃNÀjä¢ÔgE¦'KE’²Vúàc7gÖ–Oa£P}¸8ÈC9\ÑñC*«âZ'ÇŸöİ>Û	‡-
-endstream endobj
-47 0 obj << /Filter [ /FlateDecode ] /Length 48 >> stream
-xœS(T0 Ã w#/=3…rCcS=KS…\ÛÜP!G!X!P ı/
-
-endstream endobj
-48 0 obj << /Filter [ /FlateDecode ] /Length 48 >> stream
-xœS(T0 Ã w#/=3…rCC=KS…\ÛÜP!G!X!P ü¹
-
-endstream endobj
-49 0 obj << /Filter [ /FlateDecode ] /Length 48 >> stream
-xœS(T0 Ã w#/=3…rCs=KS…\ÛÜP!G!X!P ı©
-
-endstream endobj
-50 0 obj << /Filter [ /FlateDecode ] /Length 48 >> stream
-xœS(T0 Ã w#/=3…rCSc=KS…\ÛÜP!G!X!P ı3
-
-endstream endobj
-51 0 obj << /Filter [ /FlateDecode ] /Length 49 >> stream
-xœS(T0 Ã w#/=3…rCc=CKS…\#C(;G!X!P üó
-
-endstream endobj
-52 0 obj << /Filter [ /FlateDecode ] /Length 49 >> stream
-xœS(T0 Ã w#/=3…rCc=CK…\#C(;G!X!P ıE
-
-endstream endobj
-53 0 obj << /Filter [ /FlateDecode ] /Length 49 >> stream
-xœS(T0 Ã w#/=3…rCc=Cc…\#C(;G!X!P ü
-
-
-endstream endobj
-54 0 obj << /Filter [ /FlateDecode ] /Length 49 >> stream
-xœS(T0 Ã w#/=3…rCc=Css…\#C(;G!X!P üï
-
-endstream endobj
-55 0 obj << /Filter [ /FlateDecode ] /Length 49 >> stream
-xœS(T0 Ã w#/=3…rCc=CsC…\#C(;G!X!P üG
-
-endstream endobj
-56 0 obj << /Filter [ /FlateDecode ] /Length 48 >> stream
-xœS(T0 Ã w#/=3…rCc=CKS…\ÛÜP!G!X!P ıE
-
-endstream endobj
-57 0 obj << /Filter [ /FlateDecode ] /Length 48 >> stream
-xœS(T0 Ã w#/=3…rCK=CKS…\ÛÜP!G!X!P ş5
-
-endstream endobj
-58 0 obj << /Filter [ /FlateDecode ] /Length 48 >> stream
-xœS(T0 Ã w#/=3…rCKS=CKS…\ÛÜP!G!X!P ı¿
-
-endstream endobj
-59 0 obj << /Filter [ /FlateDecode ] /Length 48 >> stream
-xœS(T0 Ã w#/=3…r#C=CKS…\ÛÜP!G!X!P ûÑ
-
+13 0 obj << /Filter [ /FlateDecode ] /Length 745 >> stream
+xœÕ˜ËnÛ0Då.[ `ù~,-;ut•hÕ 5’c¡¶YÈjŒnúıâÒÅd‘ºHÈD6²1@`x4.å ò:³ÃìüØ(Ì´ @8ä“­àÍßõx÷£¹²ùA€ƒMbò9ÜÂ»›U½¸‡Ov7«ªja8-šÚ¶ïáäWë]®İ.£`ºÛÿÙ+ÈFšƒ2Q²#Ë›¢¬ÛÚ.ŠYÍEuÙ³Á
+>LÃ1(Áå;øïş‡µ¸{8øİ	¾ N1$G1„ O9³«3XnJ¨9Ç1œ5ònÕ<AÑ	ì}HÛõ^ªÖ¯Sšôx÷4C;¯¿abh-ÜMóæUTFœûŒ„Äw
+[EŸ{jçêá0A<Ñ9H­NŞ">à(Êöb€™°F|Ğè	 SÕH`e‚	 {©©Â©â+	’O×HŒ÷Î €2²:Ör>hÂ†0#ó±ôA{*8É$’©B¢İó\Æ8Î%2F†pQw‚>áÌÚoU	ö¡jàÊ6e±8ƒbQF%E
+ÄBì¸ªÛêùÔ«iÑBY—e0%Î”w‚>ê²ªúè<‚“şÂÈı øj£S@œdt
+¸{j¡Y²V¸Ûåã(8ˆ±Ü}™¥K| üNĞ'üº®;qmr_Í–q“GR„¸‘ÃÓVĞÇ½Û»˜´®	c`µk–ĞÛNĞ‡÷Ñ)B¨d× Áù~*L:G”ñsT š°îÌsT ´İE5{fÙ“9xöÊáS%Ê»dOmócùÖîÅ–f{3FÃçâûd˜}=÷…Šlv{µÕÓ2…¨ÖÀ]WˆÇìhi9;)Zs€öÒèš3¦q|´iîîë's¾oi•:	ZyÀÛ7J#¡îê.Ã4ÔÑZF¨\ÿc€kÓ£eR"Îşúœ±e’"fNå&RŸ­â§D«ñ†ö©v„ó ş Í¿Ç€
 endstream endobj
 xref
-0 60
+0 14
 0000000000 65535 f 
 0000000015 00000 n 
 0000000164 00000 n 
 0000000267 00000 n 
 0000000336 00000 n 
-0000000575 00000 n 
-0000003764 00000 n 
-0000006957 00000 n 
-0000010148 00000 n 
-0000013347 00000 n 
-0000016057 00000 n 
-0000019240 00000 n 
-0000019871 00000 n 
-0000020696 00000 n 
-0000020779 00000 n 
-0000020900 00000 n 
-0000021023 00000 n 
-0000021147 00000 n 
-0000021270 00000 n 
-0000021409 00000 n 
-0000021530 00000 n 
-0000021651 00000 n 
-0000021772 00000 n 
-0000021893 00000 n 
-0000022014 00000 n 
-0000022357 00000 n 
-0000022478 00000 n 
-0000022599 00000 n 
-0000022720 00000 n 
-0000022841 00000 n 
-0000022965 00000 n 
-0000023089 00000 n 
-0000023213 00000 n 
-0000023337 00000 n 
-0000023461 00000 n 
-0000023800 00000 n 
-0000023923 00000 n 
-0000024046 00000 n 
-0000024169 00000 n 
-0000024293 00000 n 
-0000024418 00000 n 
-0000024543 00000 n 
-0000024668 00000 n 
-0000024793 00000 n 
-0000024918 00000 n 
-0000025240 00000 n 
-0000025561 00000 n 
-0000025884 00000 n 
-0000026008 00000 n 
-0000026132 00000 n 
-0000026256 00000 n 
-0000026380 00000 n 
-0000026505 00000 n 
-0000026630 00000 n 
-0000026755 00000 n 
-0000026880 00000 n 
-0000027005 00000 n 
-0000027129 00000 n 
-0000027253 00000 n 
-0000027377 00000 n 
+0000000580 00000 n 
+0000003771 00000 n 
+0000006953 00000 n 
+0000010142 00000 n 
+0000013335 00000 n 
+0000016534 00000 n 
+0000019245 00000 n 
+0000019555 00000 n 
+0000020932 00000 n 
 trailer
-<< /Info 4 0 R /Root 1 0 R /Size 60 >>
+<< /Info 4 0 R /Root 1 0 R /Size 14 >>
 startxref
-27501
+21754
 %%EOF
