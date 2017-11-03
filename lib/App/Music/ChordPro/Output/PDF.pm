@@ -682,7 +682,9 @@ sub generate_song {
 		    $do_size->( $1, $elt->{value} );
 		}
 		else {
-		    warn("PDF: No value for property $1-size\n" );
+		    # Restore default.
+		    $ps->{fonts}->{$1}->{size} =
+		      $::config->{pdf}->{fonts}->{$1}->{size};
 		}
 	    }
 	    elsif ( $elt->{name} =~ /^(text|chord|grid|toc|tab)-font$/ ) {
@@ -699,7 +701,9 @@ sub generate_song {
 		    $pr->init_font($f);
 		}
 		else {
-		    warn("PDF: No value for property $1-font\n" );
+		    # Restore default.
+		    $ps->{fonts}->{$1} =
+		      %{ $::config->{pdf}->{fonts}->{$1} };
 		}
 	    }
 	    elsif ( $elt->{name} =~ /^(text|chord|grid|toc|tab)-color$/ ) {
@@ -707,7 +711,8 @@ sub generate_song {
 		    $ps->{fonts}->{$1}->{color} = $elt->{value};
 		}
 		else {
-		    warn("PDF: No value for property $1-color\n" );
+		    # Restore default.
+		    delete( $ps->{fonts}->{$1}->{color} );
 		}
 	    }
 	    next;
