@@ -339,7 +339,7 @@
 
 		"fontdir": {
 		    "description": "The location of font files.",
-		    "type": [ "string", "null" ]
+		    "type": [ "array", "string", "null" ]
 		},
 
 		"fonts": {

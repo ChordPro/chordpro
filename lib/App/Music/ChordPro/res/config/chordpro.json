@@ -198,6 +198,7 @@
 	// Fonts can be specified by name (for the corefonts)
 	// or a filename (for TrueType/OpenType fonts).
 	// Relative filenames are looked up in the fontdir.
+	// "fontdir" : [ "/usr/share/fonts/liberation", "/home/me/fonts" ],
 	"fontdir" : null,
 
 	// Fonts for chords and comments can have a background

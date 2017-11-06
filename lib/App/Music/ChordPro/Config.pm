@@ -219,6 +219,7 @@ This is the current built-in configuration file, showing all settings.
   	// Fonts can be specified by name (for the corefonts)
   	// or a filename (for TrueType/OpenType fonts).
   	// Relative filenames are looked up in the fontdir.
+	// "fontdir" : [ "/usr/share/fonts/liberation", "/home/me/fonts" ],
   	"fontdir" : null,
   
   	// Fonts for chords and comments can have a background
@@ -407,6 +408,25 @@ sub configurator {
 	      unless @$t == 3;
 	}
     }
+
+    if ( $cfg->{pdf}->{fontdir} ) {
+	my @a;
+	if ( ref($cfg->{pdf}->{fontdir}) eq 'ARRAY' ) {
+	    @a = @{ $cfg->{pdf}->{fontdir} };
+	}
+	else {
+	    @a = ( $cfg->{pdf}->{fontdir} );
+	}
+	$cfg->{pdf}->{fontdir} = [];
+	my $split = $^O =~ /^MS*/ ? qr(;) : qr(:);
+	foreach ( @a ) {
+	    push( @{ $cfg->{pdf}->{fontdir} }, split( $split, $_ ) );
+	}
+    }
+    else {
+	$cfg->{pdf}->{fontdir} = [];
+    }
+
     my @allfonts = keys(%{$cfg->{pdf}->{fonts}});
     for my $ff ( @allfonts ) {
 	unless ( $cfg->{pdf}->{fonts}->{$ff}->{name}

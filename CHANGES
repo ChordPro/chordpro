@@ -1,6 +1,9 @@
 0.91
 
     - Add printing of bars in chord diagrams.
+    - Allow PDF config "fontdir" to take an array of paths. Also,
+      allow the path elements to be a colon-(Windows: semicolon)-separated
+      list of paths.
     - Add PDF config "diagramscolumn". This will have the song chord
       diagrams printed on the first page, in a side column.
     - Fix problem with misnumbered fingers in non-builtin chords.
