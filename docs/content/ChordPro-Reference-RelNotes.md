@@ -1,5 +1,15 @@
 # Release info
 
+## 0.91
+
+Released: 2017-11-09
+
+* Add printing of bars in chord diagrams.
+* Allow PDF config "fontdir" to take an array of paths. Also, allow the path elements to be a colon-(Windows: semicolon)-separated list of paths.
+* Add PDF config "diagramscolumn". This will have the song chord diagrams printed on the first page, in a side column.
+* Fix problem with misnumbered fingers in non-builtin chords.
+* Fix problem with restoring defaults for {textsize} and friends.
+
 ## 0.90
 
 Released: 2017-10-17
