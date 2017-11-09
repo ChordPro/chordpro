@@ -1,0 +1,9 @@
+{title: }
+{chordfont Arial}
+{no_grid}
+{start_of_grid 1+4x2+4}
+A    || G7 . | % . | %% . | . . |
+     | C7 . | %  . || G7 . | % . ||
+     |: C7 . | %  . :|: G7 . | % . :| repeat 4 times
+Coda | D7 . | Eb7 | D7 | G7 . | % . |.
+{end_of_grid}

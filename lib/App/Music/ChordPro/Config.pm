@@ -61,7 +61,7 @@ This is the current built-in configuration file, showing all settings.
   
       // User defined chords.
       // "base" defaults to 1.
-      // "easy" defaults to 0.
+      // "easy" is ignored.
       // Use 0 for an empty string, and -1 for a muted string.
       "chords" : [
         //  {
@@ -152,6 +152,10 @@ This is the current built-in configuration file, showing all settings.
   	// "chordscolumn" : 400,
   	"chordscolumn" :  0,
   
+  	// Alternative placement for chord diagrams.
+  	// Value is the column position.
+  	"diagramscolumn" :  0,
+  
 	// A {titles: left} may conflict with customized formats.
 	// Set to non-zero to ignore the directive.
 	"titles-directive-ignore" : false,
@@ -215,6 +219,7 @@ This is the current built-in configuration file, showing all settings.
   	// Fonts can be specified by name (for the corefonts)
   	// or a filename (for TrueType/OpenType fonts).
   	// Relative filenames are looked up in the fontdir.
+	// "fontdir" : [ "/usr/share/fonts/liberation", "/home/me/fonts" ],
   	"fontdir" : null,
   
   	// Fonts for chords and comments can have a background
@@ -403,6 +408,25 @@ sub configurator {
 	      unless @$t == 3;
 	}
     }
+
+    if ( $cfg->{pdf}->{fontdir} ) {
+	my @a;
+	if ( ref($cfg->{pdf}->{fontdir}) eq 'ARRAY' ) {
+	    @a = @{ $cfg->{pdf}->{fontdir} };
+	}
+	else {
+	    @a = ( $cfg->{pdf}->{fontdir} );
+	}
+	$cfg->{pdf}->{fontdir} = [];
+	my $split = $^O =~ /^MS*/ ? qr(;) : qr(:);
+	foreach ( @a ) {
+	    push( @{ $cfg->{pdf}->{fontdir} }, split( $split, $_ ) );
+	}
+    }
+    else {
+	$cfg->{pdf}->{fontdir} = [];
+    }
+
     my @allfonts = keys(%{$cfg->{pdf}->{fonts}});
     for my $ff ( @allfonts ) {
 	unless ( $cfg->{pdf}->{fonts}->{$ff}->{name}
@@ -444,7 +468,7 @@ sub configurator {
     foreach ( @{ $cfg->{chords} } ) {
 	my $res =
 	  App::Music::ChordPro::Chords::add_config_chord
-	      ( $_->{name}, $_->{base}||1, $_->{frets}, $_->{easy}, $_->{fingers} );
+	      ( $_->{name}, $_->{base}||1, $_->{frets}, $_->{fingers} );
 	warn( "Invalid chord in config: ",
 	      $_->{name}, ": ", $res, "\n" ) if $res;
     }

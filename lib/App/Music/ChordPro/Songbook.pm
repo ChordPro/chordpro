@@ -731,11 +731,16 @@ sub global_directive {
 	$propstack{$name} //= [];
 
 	if ( $value eq "" ) {
+	    # Pop current value from stack.
 	    if ( @{ $propstack{$name} } ) {
-		$value = pop( @{ $propstack{$name} } );
+		pop( @{ $propstack{$name} } );
+	    }
+	    # Use new current value, if any.
+	    if ( @{ $propstack{$name} } ) {
+		$value = $propstack{$name}->[-1]
 	    }
 	    else {
-		do_warn("No saved value for property $item$prop\n" );
+		# do_warn("No saved value for property $item$prop\n" );
 		$value = undef;
 	    }
 	    $self->add( type  => "control",

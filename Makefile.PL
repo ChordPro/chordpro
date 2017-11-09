@@ -52,11 +52,8 @@ WriteMakefile
      resources => {
 	 license    => "http://dev.perl.org/licenses/",
 	 homepage   => "http://www.chordpro.org",
-	 repository => {
-	     web  => "https://github.com/sciurius/chordpro",
-	     url  => "git://github.com/sciurius/chordpro.git",
-	     type => "git",
-	 },
+	 repository => "https://github.com/sciurius/chordpro",
+	 bugtracker => "https://github.com/sciurius/chordpro/issues",
      },
      provides => {
 	 chordpro => { file => "script/chordpro",

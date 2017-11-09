@@ -312,6 +312,44 @@ sub generate_song {
 	$col = 0;
 	$vsp_ignorefirst = 1;
 	$col_adjust->();
+
+	# If chord diagrams are to be printed in the right column, put
+	# them on the first page.
+	if ( $ps->{diagramscolumn} && $class <= 1 ) {
+	    my @chords;
+	    @chords = @{ $sb->[-1]->{chords} }
+	      if $sb->[-1]->{type} eq "diagrams";
+
+	    my $ww = ( $ps->{__rightmargin}
+		       - $ps->{__leftmargin}
+		       - $ps->{diagramscolumn} );
+
+	    # Number of diagrams, based on minimal required interspace.
+	    my $h = int( ( $ww
+			   # Add one interspace (cuts off right)
+			   + chordgrid_hsp1(undef,$ps) )
+			 / chordgrid_hsp(undef,$ps) );
+
+	    # Adjust actual width to fill the column.
+	    my $hsp = chordgrid_hsp0(undef,$ps)
+	      + ( $ww
+		  - $ps->{diagrams}->{width} * 0.4
+		  - $h * chordgrid_hsp0(undef,$ps) ) / ( $h-1 );
+
+	    my $y = $y;
+	    my $vsp = chordgrid_vsp( undef, $ps );
+	    while ( @chords ) {
+		my $x = $x + $ps->{diagramscolumn};
+
+		for ( 0..$h-1 ) {
+		    last unless @chords;
+		    chordgrid( shift(@chords), $x + $_*$hsp, $y, $ps )
+		      or redo;
+		}
+
+		$y -= $vsp;
+	    }
+	}
     };
 
     # Get going.
@@ -607,6 +645,7 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "diagrams" ) {
+	    next if $ps->{diagramscolumn};
 
 	    my @chords = @{ $elt->{chords} };
 
@@ -628,7 +667,7 @@ sub generate_song {
 		    last unless @chords;
 		    my $t = chordgrid( shift(@chords), $x, $y, $ps );
 		    redo unless $t;
-		    $x += $t;
+		    $x += $hsp;
 		}
 
 		$y -= $vsp;
@@ -643,7 +682,9 @@ sub generate_song {
 		    $do_size->( $1, $elt->{value} );
 		}
 		else {
-		    warn("PDF: No value for property $1-size\n" );
+		    # Restore default.
+		    $ps->{fonts}->{$1}->{size} =
+		      $::config->{pdf}->{fonts}->{$1}->{size};
 		}
 	    }
 	    elsif ( $elt->{name} =~ /^(text|chord|grid|toc|tab)-font$/ ) {
@@ -660,7 +701,9 @@ sub generate_song {
 		    $pr->init_font($f);
 		}
 		else {
-		    warn("PDF: No value for property $1-font\n" );
+		    # Restore default.
+		    $ps->{fonts}->{$1} =
+		      %{ $::config->{pdf}->{fonts}->{$1} };
 		}
 	    }
 	    elsif ( $elt->{name} =~ /^(text|chord|grid|toc|tab)-color$/ ) {
@@ -668,7 +711,8 @@ sub generate_song {
 		    $ps->{fonts}->{$1}->{color} = $elt->{value};
 		}
 		else {
-		    warn("PDF: No value for property $1-color\n" );
+		    # Restore default.
+		    delete( $ps->{fonts}->{$1}->{color} );
 		}
 	    }
 	    next;
@@ -822,7 +866,8 @@ sub songline {
 
     $elt->{chords} //= [ '' ];
 
-    my $chordsx = $x + $ps->{chordscolumn};
+    my $chordsx = $x;
+    $chordsx += $ps->{chordscolumn} if $chordscol;
     if ( $chordsx < 0 ) {	#### EXPERIMENTAL
 	($x, $chordsx) = (-$chordsx, $x);
     }
@@ -1083,7 +1128,7 @@ sub pr_rptstart {
     my ( $x, $y, $lcr, $sz, $pr ) = @_;
     my $w = $sz / 10;		# glyph width = 3 * $w
     $x -= 1.5 * $w * ($lcr + 1);
-    $pr->vline( $x, $y+0.9*$sz, $sz, $w );
+    $pr->vline( $x, $y+0.9*$sz, $sz, $w  );
     $x += 2 * $w;
     $y += 0.55 * $sz;
     $pr->line( $x, $y, $x, $y+$w, $w );
@@ -1276,10 +1321,19 @@ sub chordgrid_vsp {
 	  + $ps->{diagrams}->{vspace} * $ps->{diagrams}->{height};
 }
 
+sub chordgrid_hsp0 {
+    my ( $elt, $ps ) = @_;
+    (App::Music::ChordPro::Chords::strings() - 1) * $ps->{diagrams}->{width};
+}
+
+sub chordgrid_hsp1 {
+    my ( $elt, $ps ) = @_;
+    $ps->{diagrams}->{hspace} * $ps->{diagrams}->{width};
+}
+
 sub chordgrid_hsp {
     my ( $elt, $ps ) = @_;
-    App::Music::ChordPro::Chords::strings() * $ps->{diagrams}->{width}
-      + $ps->{diagrams}->{hspace} * $ps->{diagrams}->{width};
+    chordgrid_hsp0( $elt, $ps ) + chordgrid_hsp1( $elt, $ps );
 }
 
 my @Roman = qw( I II III IV V VI VI VII VIII IX X XI XII );
@@ -1330,19 +1384,65 @@ sub chordgrid {
 
     my $v = $ps->{diagrams}->{vcells};
     my $h = $strings;
-    $pr->hline( $x, $y - $_*$gh, $w, $lw ) for 0..$v;
 
+    # Draw the grid.
+    $pr->hline( $x, $y - $_*$gh, $w, $lw ) for 0..$v;
+    $pr->vline( $x0 + $_*$gw, $y, $gh*$v, $lw ) for 0..$h-1;
+
+    # Bar detection.
+    my $bar;
+    if ( $info->{fingers} ) {
+	my %h;
+	my $str = 0;
+	my $got = 0;
+	foreach ( @{ $info->{fingers} } ) {
+	    $str++, next unless $info->{strings}->[$str] > 0;
+	    if ( $bar->{$_} ) {
+		# Same finger on multiple strings -> bar.
+		$got++;
+		$bar->{$_}->[-1] = $str;
+	    }
+	    else {
+		# Register.
+		$bar->{$_} = [ $_, $info->{strings}->[$str], $str, $str ];
+	    }
+	    $str++;
+	}
+	if ( $got ) {
+	    foreach (sort keys %$bar ) {
+		my @bi = @{ $bar->{$_} };
+		if ( $bi[-2] == $bi[-1] ) { # not a bar
+		    delete $bar->{$_};
+		    next;
+		}
+		# Print the bar line.
+		$pr->hline( $x+$bi[2]*$gw, $y-$bi[1]*$gh+$gh/2,
+			    ($bi[3]-$bi[2])*$gw,
+			    6*$lw, "black" );
+	    }
+	}
+    }
+
+    # Process the strings and fingers.
     $x -= $gw/2;
     for my $sx ( 0 .. @{ $info->{strings} }-1 ) {
 	my $fret = $info->{strings}->[$sx];
 	my $fing;
 	$fing = $info->{fingers}->[$sx] if $info->{fingers};
+
+	# For bars, only the first and last finger.
+	if ( $fing && $bar && $bar->{$fing} ) {
+	    next unless $sx == $bar->{$fing}->[2]
+	      || $sx == $bar->{$fing}->[3];
+	}
+
 	if ( $fret > 0 ) {
 	    my $glyph = "\x{6c}";
 	    if ( $fing && $fing > 0 ) {
-		# Note: circle must go under the text.
-		$pr->circle( $x+$gw/2, $y-$fret*$gh+$gh/2, $dot/2, $lw,
-			     "white", undef);
+		# The dingbat glyphs are open, so we need a white
+		# background circle.
+		$pr->circle( $x+$gw/2, $y-$fret*$gh+$gh/2, $dot/2, 1,
+			     "white", "black" );
 		$glyph = pack( "C", 0xca + $fing - 1 );
 	    }
 	    my $dot = $dot/0.7;
@@ -1363,8 +1463,6 @@ sub chordgrid {
     continue {
 	$x += $gw;
     }
-    # Note: vline must go under the circle.
-    $pr->vline( $x0 + $_*$gw, $y, $gh*$v, $lw ) for 0..$h-1;
 
     return $gw * ( $ps->{diagrams}->{hspace} + $strings );
 }
@@ -1420,7 +1518,8 @@ sub showlayout {
 
     my @off = @{ $ps->{columnoffsets} };
     pop(@off);
-    @off = ( $ps->{chordscolumn} ) if $ps->{chordscolumn};
+    @off = ( $ps->{chordscolumn} ) if $chordscol;
+    @off = ( $ps->{diagramscolumn} ) if $ps->{diagramscolumn};
     foreach my $i ( 0 .. @off-1 ) {
 	next unless $off[$i];
 	@a = ( $ml+$off[$i],
@@ -1490,7 +1589,7 @@ sub configurator {
     }
 
     # Add font dirs.
-    for my $fontdir ( $pdf->{fontdir}, ::findlib("fonts"), $ENV{FONTDIR} ) {
+    for my $fontdir ( @{$pdf->{fontdir}}, ::findlib("fonts"), $ENV{FONTDIR} ) {
 	next unless $fontdir;
 	if ( -d $fontdir ) {
 	    $pdfapi->can("addFontDirs")->($fontdir);
@@ -1667,7 +1766,7 @@ sub strwidth {
 
 sub line {
     my ( $self, $x0, $y0, $x1, $y1, $lw, $color ) = @_;
-    my $gfx = $self->{pdfpage}->gfx;
+    my $gfx = $self->{pdfgfx};
     $gfx->save;
     $gfx->strokecolor($color ||= "black");
     $gfx->linecap(1);
@@ -1680,7 +1779,7 @@ sub line {
 
 sub hline {
     my ( $self, $x, $y, $w, $lw, $color ) = @_;
-    my $gfx = $self->{pdfpage}->gfx;
+    my $gfx = $self->{pdfgfx};
     $gfx->save;
     $gfx->strokecolor($color ||= "black");
     $gfx->linecap(2);
@@ -1693,7 +1792,7 @@ sub hline {
 
 sub vline {
     my ( $self, $x, $y, $h, $lw, $color ) = @_;
-    my $gfx = $self->{pdfpage}->gfx(1); # under
+    my $gfx = $self->{pdfgfx};
     $gfx->save;
     $gfx->strokecolor($color ||= "black");
     $gfx->linecap(2);
@@ -1706,7 +1805,7 @@ sub vline {
 
 sub rectxy {
     my ( $self, $x, $y, $x1, $y1, $lw, $fillcolor, $strokecolor ) = @_;
-    my $gfx = $self->{pdfpage}->gfx(1); # under
+    my $gfx = $self->{pdfgfx};
     $gfx->save;
     $gfx->strokecolor($strokecolor) if $strokecolor;
     $gfx->fillcolor($fillcolor) if $fillcolor;
@@ -1721,7 +1820,7 @@ sub rectxy {
 
 sub circle {
     my ( $self, $x, $y, $r, $lw, $fillcolor, $strokecolor ) = @_;
-    my $gfx = $self->{pdfpage}->gfx(1); # under
+    my $gfx = $self->{pdfgfx};
     $gfx->save;
     $gfx->strokecolor($strokecolor) if $strokecolor;
     $gfx->fillcolor($fillcolor) if $fillcolor;
@@ -1734,7 +1833,7 @@ sub circle {
 
 sub cross {
     my ( $self, $x, $y, $r, $lw, $strokecolor ) = @_;
-    my $gfx = $self->{pdfpage}->gfx;
+    my $gfx = $self->{pdfgfx};
     $gfx->save;
     $gfx->strokecolor($strokecolor) if $strokecolor;
     $gfx->linewidth($lw||1);
@@ -1762,7 +1861,7 @@ sub get_image {
 sub add_image {
     my ( $self, $img, $x, $y, $w, $h, $border ) = @_;
 
-    my $gfx = $self->{pdfpage}->gfx(1); # under
+    my $gfx = $self->{pdfgfx};
 
     $gfx->save;
     $gfx->image( $img, $x, $y-$h, $w, $h );
@@ -1780,8 +1879,8 @@ sub newpage {
     $self->{pdfpage} = $self->{pdf}->page($page);
     $self->{pdfpage}->mediabox( $ps->{papersize}->[0],
 				$ps->{papersize}->[1] );
-    $self->{pdftext} = $self->{pdfpage}->text;
     $self->{pdfgfx}  = $self->{pdfpage}->gfx;
+    $self->{pdftext} = $self->{pdfpage}->text;
 }
 
 sub add {

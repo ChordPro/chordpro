@@ -199,49 +199,6 @@
 	    "description": "Settings for PDF output.",
 	    "properties": {
 
-		"diagrams": {
-		    "description": "Appearance of chord diagrams.",
-		    "properties": {
-			"height": {
-			    "description": "Distance between frets.",
-			    "default": 6,
-			    "minimum": 0,
-			    "type": "number"
-			},
-			"width": {
-			    "description": "Distance between strings.",
-			    "default": 6,
-			    "minimum": 0,
-			    "type": "number"
-			},
-			"hspace": {
-			    "description": "Horizontal space between diagrams.",
-			    "default": 3.95,
-			    "minimum": 0,
-			    "type": "number"
-			},
-			"linewidth": {
-			    "description": "Thickness of the diagram lines as a fraction of 'width'.",
-			    "default": 0.1,
-			    "minimum": 0,
-			    "type": "number"
-			},
-			"vcells": {
-			    "description": "The number of frets shown.",
-			    "default": 4,
-			    "minimum": 3,
-			    "type": "number"
-			},
-			"vspace": {
-			    "description": "Vertical space between diagrams.",
-			    "default": 3,
-			    "minimum": 0,
-			    "type": "number"
-			}
-		    },
-		    "additionalProperties": false
-		},
-
 		"chordscolumn": {
 		    "description": "Chords position in alternative formatting, if greater than 0.",
 		    "default": 0,
@@ -323,6 +280,56 @@
 		    "type": "number"
 		},
 
+		"diagrams": {
+		    "description": "Appearance of chord diagrams.",
+		    "properties": {
+			"height": {
+			    "description": "Distance between frets.",
+			    "default": 6,
+			    "minimum": 0,
+			    "type": "number"
+			},
+			"width": {
+			    "description": "Distance between strings.",
+			    "default": 6,
+			    "minimum": 0,
+			    "type": "number"
+			},
+			"hspace": {
+			    "description": "Horizontal space between diagrams.",
+			    "default": 3.95,
+			    "minimum": 0,
+			    "type": "number"
+			},
+			"linewidth": {
+			    "description": "Thickness of the diagram lines as a fraction of 'width'.",
+			    "default": 0.1,
+			    "minimum": 0,
+			    "type": "number"
+			},
+			"vcells": {
+			    "description": "The number of frets shown.",
+			    "default": 4,
+			    "minimum": 3,
+			    "type": "number"
+			},
+			"vspace": {
+			    "description": "Vertical space between diagrams.",
+			    "default": 3,
+			    "minimum": 0,
+			    "type": "number"
+			}
+		    },
+		    "additionalProperties": false
+		},
+
+		"diagramscolumn": {
+		    "description": "Chords diagrams are printed in a right column. Value is the column offset.",
+		    "default": 0,
+		    "minimum": 0,
+		    "type": "number"
+		},
+
 		"even-odd-pages": {
 		    "default": 1,
 		    "description": "Even/odd pages (1), odd/even (-1) or odd (0).",
@@ -332,7 +339,7 @@
 
 		"fontdir": {
 		    "description": "The location of font files.",
-		    "type": [ "string", "null" ]
+		    "type": [ "array", "string", "null" ]
 		},
 
 		"fonts": {

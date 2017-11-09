@@ -40,7 +40,7 @@
 
     // User defined chords.
     // "base" defaults to 1.
-    // "easy" defaults to 0.
+    // "easy" is ignored.
     // Use 0 for an empty string, and -1 for a muted string.
     "chords" : [
       //  {
@@ -131,6 +131,10 @@
 	// "chordscolumn" : 400,
 	"chordscolumn" :  0,
 
+	// Alternative placement for chord diagrams.
+	// Value is the column position.
+	"diagramscolumn" :  0,
+
 	// A {titles: left} may conflict with customized formats.
 	// Set to non-zero to ignore the directive.
 	"titles-directive-ignore" : false,
@@ -194,6 +198,7 @@
 	// Fonts can be specified by name (for the corefonts)
 	// or a filename (for TrueType/OpenType fonts).
 	// Relative filenames are looked up in the fontdir.
+	// "fontdir" : [ "/usr/share/fonts/liberation", "/home/me/fonts" ],
 	"fontdir" : null,
 
 	// Fonts for chords and comments can have a background
