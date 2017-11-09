@@ -1,4 +1,4 @@
-0.91
+0.91	2017-11-09
 
     - Add printing of bars in chord diagrams.
     - Allow PDF config "fontdir" to take an array of paths. Also,
