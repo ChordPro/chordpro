@@ -1,5 +1,13 @@
 # Release info
 
+## 0.91.1
+
+Released: 2017-11-09
+
+* Add modern3 style.
+
+### [Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.
+
 ## 0.91
 
 Released: 2017-11-09
