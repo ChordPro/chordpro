@@ -22,6 +22,7 @@ lib/App/Music/ChordPro/res/config/chordii.json
 lib/App/Music/ChordPro/res/config/chordpro.json
 lib/App/Music/ChordPro/res/config/modern1.json
 lib/App/Music/ChordPro/res/config/modern2.json
+lib/App/Music/ChordPro/res/config/modern3.json
 lib/App/Music/ChordPro/res/config/nashville.json
 lib/App/Music/ChordPro/res/config/roman.json
 lib/App/Music/ChordPro/res/config/ukulele.json
