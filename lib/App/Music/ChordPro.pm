@@ -769,8 +769,9 @@ sub app_setup {
     }
 
     # At this point, there should be filename argument(s)
-    # unless we're embedded.
-    app_usage(\*STDERR, 1) unless $::__EMBEDDED__ || @ARGV;
+    # unless we're embedded or just dumping chords.
+    app_usage(\*STDERR, 1)
+      unless $::__EMBEDDED__ || $clo->{'dump-chords'} || @ARGV;
 
     # Return result.
     $options;
