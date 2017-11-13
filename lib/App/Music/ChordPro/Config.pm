@@ -493,7 +493,7 @@ sub configurator {
 sub add_config {
     my ( $cfg, $options, $file, $pp ) = @_;
     warn("Config: $file\n") if $options->{verbose};
-    if ( open( my $fd, "<:utf8", $file ) ) {
+    if ( open( my $fd, "<:raw", $file ) ) {
 	local $/;
 	$cfg = hmerge( $cfg, $pp->decode( scalar( <$fd> ) ), "" );
 	close($fd);
