@@ -13,7 +13,4 @@
 
 **[[Support]]**
 
-* [[User Forum|Support User Forum]]
-* [[FAQ|Support FAQ]]
-
 **[[Links]]**
