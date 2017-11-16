@@ -382,9 +382,9 @@ Sets a configuration item. _item_ must be in the format of
 period-separated configuration keys, an equal sign, and the value.
 
 For example, the equivalent of command line option `--no-chord-grids` is
-`--define=chordgrid.show=0`.
+`--define=diagrams.show=0`.
 
-You can also use colons to separate the keys, e.g., `chordgrid:show`.
+You can also use colons to separate the keys, e.g., `diagrams:show`.
 
 `--define` may be used more than once to set multiple items.
 
