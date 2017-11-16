@@ -74,7 +74,7 @@
 	  // Title for ToC.
 	  "title" : "Table of Contents",
 	  // Sorting order.
-	  // Currently only sorting by page number is implemented.
+	  // Currently only sorting by page number and alpha is implemented.
 	  "order" : "page",
     },
 

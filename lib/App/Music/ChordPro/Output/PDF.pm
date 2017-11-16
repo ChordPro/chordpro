@@ -127,6 +127,7 @@ my $single_space = 0;		# suppress chords line when empty
 my $lyrics_only = 0;		# suppress all chord lines
 my $chordscol = 0;		# chords in a separate column
 my $chordscapo = 0;		# capo in a separate column
+my $i_tag;
 
 use constant SIZE_ITEMS => [ qw (chord text tab grid diagram toc title footer) ];
 
@@ -243,6 +244,7 @@ sub generate_song {
 	     ", R=", $ps->{__rightmargin},
 	     "\n") if DEBUG_SPACING;
 	$y = $ps->{papersize}->[1] - $ps->{margintop};
+	$x += $ps->{indent};
     };
 
     my $vsp_ignorefirst;
@@ -311,6 +313,7 @@ sub generate_song {
 	    $tpt->("footer");
 	}
 
+	$x += $ps->{indent};
 	$y = $ps->{papersize}->[1] - $ps->{margintop};
 	$y += $ps->{headspace} if $ps->{'head-first-only'} && $class == 2;
 	$col = 0;
@@ -445,7 +448,7 @@ sub generate_song {
 		my $style = $ps->{chorus};
 		$indent = $style->{indent};
 		if ( $style->{bar}->{offset} && $style->{bar}->{width} ) {
-		    my $cx = $ps->{__leftmargin}
+		    my $cx = $ps->{__leftmargin} + $ps->{indent}
 		      - $style->{bar}->{offset}
 			+ $indent;
 		    $pr->vline( $cx, $y, $vsp,
@@ -719,6 +722,9 @@ sub generate_song {
 		    delete( $ps->{fonts}->{$1}->{color} );
 		}
 	    }
+	    elsif ( $elt->{name} eq "tag" ) {
+		$i_tag = $elt->{value};
+	    }
 	    next;
 	}
 
@@ -823,6 +829,8 @@ sub songline {
 
     my $ftext;
     my $ytext;
+    my $tag = $i_tag // "";
+    $i_tag = "";
 
     if ( $type =~ /^comment/ ) {
 	$ftext = $fonts->{$type} || $fonts->{comment};
@@ -836,6 +844,7 @@ sub songline {
 	$ftext = $fonts->{tab};
 	$ytext  = $ytop - font_bl($ftext);
 	$x += $opts{indent} if $opts{indent};
+	$pr->text( $tag, $x-$ps->{indent}, $ytext, $ftext ) if $tag ne "";
 	$pr->text( $elt->{text}, $x, $ytext, $ftext );
 	return;
     }
@@ -854,6 +863,7 @@ sub songline {
        ) {
 	my $x = $x;
 	$x += $opts{indent} if $opts{indent};
+	$pr->text( $tag, $x-$ps->{indent}, $ytext, $ftext ) if $tag ne "";
 	$pr->text( join( "", @{ $elt->{phrases} } ), $x, $ytext, $ftext );
 	return;
     }
@@ -917,6 +927,8 @@ sub songline {
 			0.25, "black" );
 
 	    # Print the text.
+	    $pr->text( $tag, $x-$ps->{indent}, $ytext, $ftext ) if $tag ne "";
+	    $tag = "";
 	    $x = $pr->text( $phrase, $x, $ytext, $ftext );
 
 	    # Collect chords to be printed in the side column.
@@ -953,6 +965,8 @@ sub songline {
 	    else {
 		$xt0 = $pr->text( $chord." ", $x, $ychord, $fchord );
 	    }
+	    $pr->text( $tag, $x-$ps->{indent}, $ytext, $ftext ) if $tag ne "";
+	    $tag = "";
 	    my $xt1 = $pr->text( $phrase, $x, $ytext, $ftext );
 	    $x = $xt0 > $xt1 ? $xt0 : $xt1;
 	}
@@ -1524,14 +1538,19 @@ sub showlayout {
     pop(@off);
     @off = ( $ps->{chordscolumn} ) if $chordscol;
     @off = ( $ps->{diagramscolumn} ) if $ps->{diagramscolumn};
+    @a = ( undef,
+	   $ps->{marginbottom},
+	   $ps->{margintop}-$ps->{papersize}->[1]+$ps->{marginbottom},
+	   $lw, $col );
     foreach my $i ( 0 .. @off-1 ) {
 	next unless $off[$i];
-	@a = ( $ml+$off[$i],
-	       $ps->{marginbottom},
-	       $ps->{margintop}-$ps->{papersize}->[1]+$ps->{marginbottom},
-	       $lw, $col );
+	$a[0] = $ml + $off[$i];
 	$pr->vline(@a);
 	$a[0] -= $ps->{columnspace};
+	$pr->vline(@a);
+    }
+    if ( $ps->{indent} ) {
+	$a[0] = $ml + $ps->{indent};
 	$pr->vline(@a);
     }
 }

@@ -448,6 +448,11 @@ sub directive {
 	    $grid_arg = $arg;
 	    $grid_cells = [ $2 * ( $3//1 ), ($1//0), ($4//0) ];
 	}
+	elsif ( 1 ) {
+	    $self->add( type  => "control",
+			name  => "tag",
+			value => $arg );
+	}
 	else {
 	    do_warn("Garbage in start_of_$1: $arg (ignored)\n")
 	      if $arg;

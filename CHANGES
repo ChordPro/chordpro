@@ -7,6 +7,7 @@
       Supersedes pdf.formats.default.toc-title.
     - Fix JSON problem with loading UTF8 config files.
     - Fix the need for a bogus file argument when dumping chords.
+    - Experimental support for indenting and margin labels.
 
 0.910.1	2017-11-09
 

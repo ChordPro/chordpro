@@ -147,6 +147,7 @@ This is the current built-in configuration file, showing all settings.
 		"width"  :  1,
 		"color"  : "black",
 	    },
+	    "tag" : "Chorus",
             // Recall style: Print the tag using the type.
             // Optionally quote the lines of the preceding chorus.
             "recall" : {
@@ -155,6 +156,10 @@ This is the current built-in configuration file, showing all settings.
                  "quote" : false,
             },
 	},
+  
+	// Indent for lyrics.
+  	// "indent" : 70,
+  	"indent" :  0,
   
   	// Alternative songlines with chords in a side column.
   	// Value is the column position.
