@@ -11,6 +11,14 @@
       "suppress-empty-chords" : true,
     },
 
+    // Table of contents.
+    "toc" : {
+	  // Title for ToC.
+	  "title" : "Table of Contents",
+	  // Sorting order.
+	  "order" : "page",
+    },
+
     // Layout definitions for PDF output.
 
     "pdf" : {
@@ -87,8 +95,6 @@
 	    	"subtitle"  : null,
 		// Footer is title -- page number.
 	    	"footer"    : [ "%{title}", "", "%{page}" ],
-		// Title for ToC.
-		"toc-title" : "Table of Contents",
 	    },
 	    // The first page of a song has:
 	    "title" : {

@@ -1,5 +1,10 @@
 0.92
 
+    - Add configurable sort methods for table of contents.
+      Config option: toc.order, values "page" or "alpha".
+      Default is "page".
+      Config option: toc.title, default "Table of Contents".
+      Supersedes pdf.formats.default.toc-title.
     - Fix JSON problem with loading UTF8 config files.
     - Fix the need for a bogus file argument when dumping chords.
 

@@ -51,10 +51,14 @@ sub generate_songbook {
 				{ pr => $pr, $options ? %$options : () } );
     }
 
+    if ( $::config->{toc}->{order} eq "alpha" ) {
+	@book = sort { lc($a->[0]) cmp lc($b->[0]) } @book;
+    }
+
     if ( $options->{toc} // @book > 1 ) {
 
 	# Create a pseudo-song for the table of contents.
-	my $t = get_format( $ps, 1, "toc-title" );
+	my $t = $::config->{toc}->{title};
 	my $song =
 	  { title     => $t,
 	    meta => { title => [ $t ] },

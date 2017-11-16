@@ -476,11 +476,7 @@
 				    "allOf": [
 					{ "$ref": "#/definitions/tptspec" },
 					{ "default": [ "%{title}", "", "%{page}" ] }
-				    ] },
-				"toc-title": {
-				    "type": "string",
-				    "default": "Table of Contents"
-				}
+				    ] }
 			    },
 			    "additionalProperties": false
 			},
@@ -501,11 +497,7 @@
 				    "allOf": [
 					{ "$ref": "#/definitions/tptspec" },
 					{ "default": [ "", "", "%{page}" ] }
-				    ] },
-				"toc-title": {
-				    "description": "Defaults to default.",
-				    "type": "string"
-				}
+				    ] }
 			    },
 			    "additionalProperties": false
 			},
@@ -524,11 +516,7 @@
 				    "allOf": [
 					{ "$ref": "#/definitions/tptspec" },
 					{ "default": null }
-				    ] },
-				"toc-title": {
-				    "description": "Defaults to default.",
-				    "type": "string"
-				}
+				    ] }
 			    },
 			    "additionalProperties": false
 			}
@@ -638,6 +626,24 @@
 		    "description": "Ignore titles directives in the songs.",
 		    "default": false,
 		    "type": "boolean"
+		}
+	    },
+	    "additionalProperties": false
+	},
+
+	"toc": {
+	    "description": "Table of Contents",
+	    "properties": {
+	        "title": {
+		    "description": "Title for the Table of Contents",
+		    "default": "Table of Contents",
+		    "type": "string"
+		},
+		"order": {
+		    "description": "Sorting order for song titles",
+		    "enum": [ "page", "alpha" ],
+		    "default": "page",
+		    "type": "string"
 		}
 	    },
 	    "additionalProperties": false

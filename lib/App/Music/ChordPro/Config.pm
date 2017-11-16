@@ -90,6 +90,15 @@ This is the current built-in configuration file, showing all settings.
 	  "format" : "\"%f\", line %n, %m\n\t%l",
       },
   
+      // Table of contents.
+      "toc" : {
+  	  // Title for ToC.
+  	  "title" : "Table of Contents",
+	  // Sorting order.
+	  // Currently only sorting by page number and alpha is implemented.
+	  "order" : "page",
+      },
+  
       // Layout definitions for PDF output.
   
       "pdf" : {
@@ -196,8 +205,6 @@ This is the current built-in configuration file, showing all settings.
   	    	"subtitle"  : null,
   		// Footer is title -- page number.
   	    	"footer"    : [ "%{title}", "", "%{page}" ],
-  		// Title for ToC.
-  		"toc-title" : "Table of Contents",
   	    },
   	    // The first page of a song has:
   	    "title" : {
@@ -337,6 +344,7 @@ sub configurator {
     for ( qw(tuning) ) {
 	$cfg->{$_} //= undef;
     }
+    $cfg->{pdf}->{formats}->{default}->{"toc-title"} //= undef;
     for ( qw(title subtitle footer) ) {
 	next if exists($cfg->{pdf}->{formats}->{first}->{$_});
 	$cfg->{pdf}->{formats}->{first}->{$_} = "";
@@ -408,6 +416,9 @@ sub configurator {
 	      unless @$t == 3;
 	}
     }
+    $cfg->{toc}->{title} = $cfg->{pdf}->{formats}->{default}->{"toc-title"}
+      if defined $cfg->{pdf}->{formats}->{default}->{"toc-title"};
+    delete( $cfg->{pdf}->{formats}->{default}->{"toc-title"} );
 
     if ( $cfg->{pdf}->{fontdir} ) {
 	my @a;
