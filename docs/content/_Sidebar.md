@@ -11,4 +11,9 @@
 * [[Configuration|ChordPro Configuration]]
 * [[User guide|Using ChordPro]]
 
+**[[Support]]**
+
+* [[User Forum|Support User Forum]]
+* [[FAQ|Support FAQ]]
+
 **[[Links]]**
