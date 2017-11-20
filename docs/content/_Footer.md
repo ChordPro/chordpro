@@ -1,2 +1,2 @@
-Official web site: <http://www.chordpro.org/>.  
-Help improving this site - visit <https://github.com/sciurius/chordpro/wiki>
+Official web site: <https://www.chordpro.org/>.  
+Help improving this documentation - visit <https://github.com/sciurius/chordpro/wiki>
