@@ -183,7 +183,13 @@ This is the current built-in configuration file, showing all settings.
   	// The horizontal distance between diagrams is "hspace" cells.
   	// The vertical distance is "vspace" cells.
 	// "linewidth" is the thickness of the lines as a fraction of "width".
+	// Diagrams for all chords of the song can be shown at the
+  	// "top" of the first page, the "bottom" of the last page
+  	// (default), "left" on the first page and "right" on the first
+  	// page. "left" and "right" take the value of "diagramscolumn"
+  	// for the width of the column.
   	"diagrams" : {
+	    "show"     :  "bottom",
 	    "width"    :  6,
   	    "height"   :  6,
   	    "hspace"   :  3.95,

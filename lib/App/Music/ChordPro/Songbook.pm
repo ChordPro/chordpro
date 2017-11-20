@@ -113,14 +113,31 @@ sub parsefile {
 	}
     }
 
+    $diag->{format} = $options->{diagformat}
+      || $::config->{diagnostics}->{format};
+    $diag->{file} = $filename;
+
     # Split in lines;
     my @lines = split( /\r\n|\n|\r/, $data );
+
+    my $linecnt = 0;
+    $self->parse_song( \@lines, \$linecnt, $options ) while @lines;
+
+    return 1;
+}
+
+sub parse_song {
+    my ( $self, $lines, $linecnt, $options ) = @_;
 
     $no_transpose = $options->{'no-transpose'};
     $no_substitute = $options->{'no-substitute'};
 
-    push( @{ $self->{songs} }, App::Music::ChordPro::Song->new )
-      if exists($self->{songs}->[-1]->{body});
+    if ( exists($self->{songs}->[-1]->{body}) ) {
+	push( @{ $self->{songs} }, App::Music::ChordPro::Song->new );
+    }
+    else {
+	$self->{songs} = [ App::Music::ChordPro::Song->new ];
+    }
     $self->{songs}->[-1]->{structure} = "linear";
     $xpose = 0;
     $grid_arg = '1+4x4+1';
@@ -128,9 +145,6 @@ sub parsefile {
     @used_chords = ();
     %warned_chords = ();
     App::Music::ChordPro::Chords::reset_song_chords();
-    $diag->{format} = $options->{diagformat}
-      || $::config->{diagnostics}->{format};
-    $diag->{file} = $filename;
 
     # Build regex for the known metadata items.
     if ( $::config->{metadata}->{keys} ) {
@@ -143,10 +157,14 @@ sub parsefile {
 	undef $re_meta;
     }
 
-    my $linecnt;
-    while ( @lines ) {
-	$diag->{line} = ++$linecnt;
-	$diag->{orig} = $_ = shift(@lines);
+    while ( @$lines ) {
+	$diag->{line} = ++$$linecnt;
+	$diag->{orig} = $_ = shift(@$lines);
+
+	if ( /^\s*\{(new_song|ns)\}\s*$/ ) {
+	    last if $self->{songs}->[-1]->{body};
+	    next;
+	}
 
 	if ( /^#/ ) {
 	    # Collect pre-title stuff separately.
@@ -224,11 +242,12 @@ sub parsefile {
 	    @used_chords =
 	      sort App::Music::ChordPro::Chords::chordcompare @used_chords;
 	}
-
-	$self->add( type   => "diagrams",
-		    origin => "song",
-		    show   => $diagrams,
-		    chords => [ @used_chords ] );
+	$self->{songs}->[-1]->{chords} =
+	  { type   => "diagrams",
+	    origin => "song",
+	    show   => $diagrams,
+	    chords => [ @used_chords ],
+	  };
     }
 
     # Global transposition.
@@ -497,9 +516,7 @@ sub directive {
     }
 
     if ( $dir =~ /^(?:new_song|ns)$/i ) {
-	return unless $self->{songs}->[-1]->{body};
-	push(@{$self->{songs}}, App::Music::ChordPro::Song->new );
-	return;
+	die("FATAL - cannot start a new song now\n");
     }
 
     # Comments. Strictly speaking they do not belong here.

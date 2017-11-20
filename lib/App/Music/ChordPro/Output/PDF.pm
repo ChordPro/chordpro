@@ -319,13 +319,74 @@ sub generate_song {
 	$col = 0;
 	$vsp_ignorefirst = 1;
 	$col_adjust->();
+    };
 
+    my $checkspace = sub {
+
+	# Verify that the amount of space if still available.
+	# If not, perform a column break or page break.
+	# Use negative argument to force a break.
+	# Returns true if there was space.
+
+	my $vsp = $_[0];
+	return 1 if $vsp >= 0 && $y - $vsp >= $ps->{marginbottom};
+
+	if ( ++$col >= $ps->{columns}) {
+	    $newpage->();
+	    $vsp_ignorefirst = 0;
+	}
+	$col_adjust->();
+	return;
+    };
+
+    my $chorddiagrams = sub {
+	my ( $chords, $show ) = @_;
+
+	if ( $chords ) {
+	    my $vsp = chordgrid_vsp( undef, $ps );
+	    my $hsp = chordgrid_hsp( undef, $ps );
+	    my $h = int( ( $ps->{__rightmargin}
+			   - $ps->{__leftmargin}
+			   + $ps->{diagrams}->{hspace}
+			   * $ps->{diagrams}->{width} ) / $hsp );
+	    my @chords = @$chords;
+	    while ( @chords ) {
+		my $x = $x;
+		$checkspace->($vsp);
+		$pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+
+		for ( 1..$h ) {
+		    last unless @chords;
+		    my $t = chordgrid( shift(@chords), $x, $y, $ps );
+		    redo unless $t;
+		    $x += $hsp;
+		}
+
+		$y -= $vsp;
+		$pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+	    }
+	    return;
+	}
+
+	my @chords;
+	@chords = $s->{chords}
+	  ? @{ $s->{chords}->{chords} }
+	    : ();
+	return unless @chords;
+
+	# Determine page class.
+	my $class = 2;		# default
+	if ( $thispage == 1 ) {
+	    $class = 0;		# very first page
+	}
+	elsif ( $thispage == $startpage ) {
+	    $class = 1;		# first of a song
+	}
 	# If chord diagrams are to be printed in the right column, put
 	# them on the first page.
-	if ( $ps->{diagramscolumn} && $class <= 1 ) {
-	    my @chords;
-	    @chords = @{ $sb->[-1]->{chords} }
-	      if $sb->[-1]->{type} eq "diagrams";
+	if ( $ps->{diagrams}->{show} eq "right" && $class <= 1 ) {
+	    $ps->{diagramscolumn} ||=
+	      ( $ps->{__rightmargin} - $ps->{__leftmargin} ) * 0.75;
 
 	    my $ww = ( $ps->{__rightmargin}
 		       - $ps->{__leftmargin}
@@ -357,28 +418,60 @@ sub generate_song {
 		$y -= $vsp;
 	    }
 	}
+	elsif ( $ps->{diagrams}->{show} eq "top" && $class <= 1 ) {
+
+	    my $ww = ( $ps->{__rightmargin} - $ps->{__leftmargin} );
+
+	    # Number of diagrams, based on minimal required interspace.
+	    my $h = int( ( $ww
+			   # Add one interspace (cuts off right)
+			   + chordgrid_hsp1(undef,$ps) )
+			 / chordgrid_hsp(undef,$ps) );
+
+	    my $hsp = chordgrid_hsp(undef,$ps);
+	    my $vsp = chordgrid_vsp( undef, $ps );
+	    while ( @chords ) {
+		my $x = $x + $ps->{diagramscolumn} - $ps->{indent};
+
+		for ( 0..$h-1 ) {
+		    last unless @chords;
+		    chordgrid( shift(@chords), $x + $_*$hsp, $y, $ps )
+		      or redo;
+		}
+
+		$y -= $vsp;
+	    }
+	}
+	elsif ( $ps->{diagrams}->{show} eq "bottom" ) {
+
+	    local $::config->{diagrams}->{show} = $show;
+
+	    my $vsp = chordgrid_vsp( undef, $ps );
+	    my $hsp = chordgrid_hsp( undef, $ps );
+	    my $h = int( ( $ps->{__rightmargin}
+			   - $ps->{__leftmargin}
+			   + $ps->{diagrams}->{hspace}
+			   * $ps->{diagrams}->{width} ) / $hsp );
+	    while ( @chords ) {
+		my $x = $x;
+		$checkspace->($vsp);
+		$pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+
+		for ( 1..$h ) {
+		    last unless @chords;
+		    my $t = chordgrid( shift(@chords), $x, $y, $ps );
+		    redo unless $t;
+		    $x += $hsp;
+		}
+
+		$y -= $vsp;
+		$pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+	    }
+	}
     };
 
     # Get going.
     $newpage->();
-
-    my $checkspace = sub {
-
-	# Verify that the amount of space if still available.
-	# If not, perform a column break or page break.
-	# Use negative argument to force a break.
-	# Returns true if there was space.
-
-	my $vsp = $_[0];
-	return 1 if $vsp >= 0 && $y - $vsp >= $ps->{marginbottom};
-
-	if ( ++$col >= $ps->{columns}) {
-	    $newpage->();
-	    $vsp_ignorefirst = 0;
-	}
-	$col_adjust->();
-	return;
-    };
 
     my @elts = @{$sb};
     my $elt;			# current element
@@ -388,6 +481,7 @@ sub generate_song {
     my $grid_cellwidth;
     my $grid_barwidth = 0.5 * $fonts->{chord}->{size};
     my $grid_margin;
+    my $did = 0;
 
     while ( @elts ) {
 	$elt = shift(@elts);
@@ -400,6 +494,11 @@ sub generate_song {
 	if ( $elt->{type} eq "colb" ) {
 	    $checkspace->(-1);
 	    next;
+	}
+
+	if ( $elt->{type} ne "set" && !$did++ ) {
+	    # Insert top/left/right chord diagrams.
+ 	    $chorddiagrams->() unless $ps->{diagrams}->{show} eq "bottom";
 	}
 
 	if ( $elt->{type} eq "empty" ) {
@@ -652,34 +751,8 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "diagrams" ) {
-	    next if $ps->{diagramscolumn};
-
-	    my @chords = @{ $elt->{chords} };
-
-	    local $::config->{diagrams}->{show} =
-	      $elt->{show} || $::config->{diagrams}->{show};
-
-	    my $vsp = chordgrid_vsp( $elt, $ps );
-	    my $hsp = chordgrid_hsp( $elt, $ps );
-	    my $h = int( ( $ps->{__rightmargin}
-			   - $ps->{__leftmargin}
-			   + $ps->{diagrams}->{hspace}
-			   * $ps->{diagrams}->{width} ) / $hsp );
-	    while ( @chords ) {
-		my $x = $x;
-		$checkspace->($vsp);
-		$pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
-
-		for ( 1..$h ) {
-		    last unless @chords;
-		    my $t = chordgrid( shift(@chords), $x, $y, $ps );
-		    redo unless $t;
-		    $x += $hsp;
-		}
-
-		$y -= $vsp;
-		$pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
-	    }
+	    $chorddiagrams->( $elt->{chords},
+			      $elt->{show} || $::config->{diagrams}->{show} );
 	    next;
 	}
 
@@ -759,6 +832,7 @@ sub generate_song {
 		}
 		$$c = $elt->{value};
 		$ps = App::Music::ChordPro::Config::hmerge( $ps, $cc, "" );
+# 	    warn("YYY ", $ps->{diagrams}->{show} );
 	    }
 	    next;
 	}
@@ -770,6 +844,10 @@ sub generate_song {
     }
     continue {
 	$prev = $elt;
+    }
+
+    if ( $ps->{diagrams}->{show} eq "bottom" ) {
+	$chorddiagrams->();
     }
 
     return $thispage - $startpage + 1;
