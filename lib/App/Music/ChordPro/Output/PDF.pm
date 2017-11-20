@@ -346,7 +346,7 @@ sub generate_song {
 	    my $y = $y;
 	    my $vsp = chordgrid_vsp( undef, $ps );
 	    while ( @chords ) {
-		my $x = $x + $ps->{diagramscolumn};
+		my $x = $x + $ps->{diagramscolumn} - $ps->{indent};
 
 		for ( 0..$h-1 ) {
 		    last unless @chords;
