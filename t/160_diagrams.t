@@ -48,14 +48,13 @@ my $song = {
 				     ],
 			'context' => ''
 		       },
-		       {
+		      ],
+	    'chords' => {
 			'chords' => [ 'G', 'D' ],
-			'context' => '',
 			'origin' => 'song',
 			'show' => 'all',
 			'type' => 'diagrams'
-		       }
-		      ],
+		       },
 	   };
 
 is_deeply( { %{ $s->{songs}->[-1] } }, $song,
@@ -117,15 +116,12 @@ $song = {
 				   'Swing Low Sweet Chariot'
 				  ]
 		      },
-	    'body' => [
-		       {
+	    'chords' => {
 			'chords' => [],
-			'context' => '',
 			'origin' => 'song',
 			'show' => 'all',
 			'type' => 'diagrams'
-		       }
-		      ],
+		       },
 	   };
 
 is_deeply( { %{ $s->{songs}->[0] } }, $song,

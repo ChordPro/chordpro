@@ -467,7 +467,7 @@ sub directive {
 	    $grid_arg = $arg;
 	    $grid_cells = [ $2 * ( $3//1 ), ($1//0), ($4//0) ];
 	}
-	elsif ( 1 ) {
+	elsif ( $arg && $arg ne "" ) {
 	    $self->add( type  => "control",
 			name  => "tag",
 			value => $arg );
