@@ -5,5 +5,4 @@ perl:
  - "5.10"
 os:
  - linux
- - windows
  - osx
