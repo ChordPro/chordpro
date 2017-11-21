@@ -139,6 +139,9 @@ sub parse_song {
 	$self->{songs} = [ App::Music::ChordPro::Song->new ];
     }
     $self->{songs}->[-1]->{structure} = "linear";
+    $self->{songs}->[-1]->{source} =
+      { file => $diag->{file}, line => 1 + $$linecnt };
+
     $xpose = 0;
     $grid_arg = '1+4x4+1';
     $in_context = $def_context;

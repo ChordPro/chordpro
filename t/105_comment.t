@@ -53,6 +53,7 @@ my $song = {
 			'type' => 'comment_box'
 		       }
 		      ],
+	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear',
 	   };
 

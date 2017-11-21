@@ -52,6 +52,7 @@ my $song = {
 			 'type' => 'songline'
 		       }
 		      ],
+	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear',
 	   };
 

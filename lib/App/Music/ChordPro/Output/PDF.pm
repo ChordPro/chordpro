@@ -122,6 +122,7 @@ sub generate_songbook {
     []
 }
 
+my $source;			# song source
 my $structured = 0;		# structured data
 my $single_space = 0;		# suppress chords line when empty
 my $lyrics_only = 0;		# suppress all chord lines
@@ -135,6 +136,7 @@ sub generate_song {
     my ($s, $options) = @_;
 
     return 0 unless $s->{body};	# empty song
+    $source = $s->{source};
 
     $single_space = $::config->{settings}->{'suppress-empty-chords'};
     my $ps = $::config->clone->{pdf};
@@ -1454,7 +1456,11 @@ sub chordgrid {
 	$info = App::Music::ChordPro::Chords::chord_info($name);
     }
     unless ( $info ) {
-	warn("PDF: Skipping diagram for unknown chord $name\n");
+	warn("PDF: Unknown chord $name",
+	     $source ? ( " in song starting at line " .
+			 $source->{line} . " in " . $source->{file} ) : (),
+	     "\n"
+	    );
 	return;
     }
 

@@ -25,7 +25,8 @@ isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
 
 my $song = {
 	    'settings' => {},
-	    'structure' => 'linear'
+	    'structure' => 'linear',
+	    'source' => { file => "__STRING__", line => 1 },
 	   };
 
 is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );

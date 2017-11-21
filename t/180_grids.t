@@ -33,6 +33,7 @@ my $song = {
         title => ['Grids'],
       },
       settings => {},
+      source => { file => "__STRING__", line => 1 },
       structure => 'linear',
       title => 'Grids',
       body => [

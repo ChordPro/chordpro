@@ -30,6 +30,7 @@ my $song = {
 				  ]
 		      },
 	    'title' => 'Swing Low Sweet Chariot',
+	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear'
 	   };
 
