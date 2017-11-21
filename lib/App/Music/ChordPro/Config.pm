@@ -166,10 +166,6 @@ This is the current built-in configuration file, showing all settings.
   	// "chordscolumn" : 400,
   	"chordscolumn" :  0,
   
-  	// Alternative placement for chord diagrams.
-  	// Value is the column position.
-  	"diagramscolumn" :  0,
-  
 	// A {titles: left} may conflict with customized formats.
 	// Set to non-zero to ignore the directive.
 	"titles-directive-ignore" : false,
@@ -186,8 +182,7 @@ This is the current built-in configuration file, showing all settings.
 	// Diagrams for all chords of the song can be shown at the
   	// "top" of the first page, the "bottom" of the last page
   	// (default), "left" on the first page and "right" on the first
-  	// page. "left" and "right" take the value of "diagramscolumn"
-  	// for the width of the column.
+  	// page. "left" is not implemented.
   	"diagrams" : {
 	    "show"     :  "bottom",
 	    "width"    :  6,
@@ -355,7 +350,6 @@ sub configurator {
     for ( qw(tuning) ) {
 	$cfg->{$_} //= undef;
     }
-    $cfg->{pdf}->{formats}->{default}->{"toc-title"} //= undef;
     for ( qw(title subtitle footer) ) {
 	next if exists($cfg->{pdf}->{formats}->{first}->{$_});
 	$cfg->{pdf}->{formats}->{first}->{$_} = "";
@@ -427,9 +421,6 @@ sub configurator {
 	      unless @$t == 3;
 	}
     }
-    $cfg->{toc}->{title} = $cfg->{pdf}->{formats}->{default}->{"toc-title"}
-      if defined $cfg->{pdf}->{formats}->{default}->{"toc-title"};
-    delete( $cfg->{pdf}->{formats}->{default}->{"toc-title"} );
 
     if ( $cfg->{pdf}->{fontdir} ) {
 	my @a;
@@ -517,7 +508,22 @@ sub add_config {
     warn("Config: $file\n") if $options->{verbose};
     if ( open( my $fd, "<:raw", $file ) ) {
 	local $/;
-	$cfg = hmerge( $cfg, $pp->decode( scalar( <$fd> ) ), "" );
+	my $new = $pp->decode( scalar( <$fd> ) );
+
+	# Handle obsolete keys.
+	if ( exists $new->{pdf}->{diagramscolumn} ) {
+	    $new->{pdf}->{diagrams}->{show} //= "right";
+	    delete $new->{pdf}->{diagramscolumn};
+	    warn("$file: pdf.diagramscolumn is obsolete, use pdf.diagrams.show instead\n");
+	}
+	if ( exists $new->{pdf}->{formats}->{default}->{'toc-title'} ) {
+	    $new->{toc}->{title} //= $new->{pdf}->{formats}->{default}->{'toc-title'};
+	    delete $new->{pdf}->{formats}->{default}->{'toc-title'};
+	    warn("$file: pdf.formats.default.toc-title is obsolete, use toc.title instead\n");
+	}
+
+	# Merge final.
+	$cfg = hmerge( $cfg, $new, "" );
 	close($fd);
     }
     else {
@@ -609,7 +615,7 @@ sub hmerge($$$) {
 	     ref($left->{$key}) eq 'HASH' ) {
 
 	    # Both hashes. Recurse.
-            $res{$key} = hmerge( $left->{$key}, $right->{$key}, "$path$key:" );
+            $res{$key} = hmerge( $left->{$key}, $right->{$key}, "$path$key." );
         }
         else {
 	    warn("Config error: unknown item $path$key\n")

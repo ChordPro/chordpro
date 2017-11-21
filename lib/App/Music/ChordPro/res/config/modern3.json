@@ -75,15 +75,15 @@
 
 	// Chord diagrams in a side column.
 	// Value is the column position.
-	"diagramscolumn" :  350,
 	"chordscolumn"   :  0,
 
 	// Slightly larger diagrams.
 	"diagrams" : {
+	    "show"     :  "right",
 	    "width"    :  8,
   	    "height"   :  8,
-  	    "hspace"   :  1,
-  	    "vspace"   :  3,
+	    "hspace"   :  3.95,
+	    "vspace"   :  3,
   	    "vcells"   :  4,
 	    "linewidth" : 0.1,
 	},

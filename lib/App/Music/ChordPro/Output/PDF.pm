@@ -278,7 +278,6 @@ sub generate_song {
 	    $ps->{_leftmargin}  = $ps->{marginright};
 	    $ps->{_rightmargin} = $ps->{marginleft};
 	}
-	showlayout($ps) if $ps->{showlayout};
 
 	$thispage++;
 	$s->{meta}->{page} = [ $s->{page} = $thispage ];
@@ -359,7 +358,7 @@ sub generate_song {
 
 		for ( 1..$h ) {
 		    last unless @chords;
-		    my $t = chordgrid( shift(@chords), $x, $y, $ps );
+		    my $t = chordgrid( getchordinfo(shift(@chords)), $x, $y, $ps );
 		    redo unless $t;
 		    $x += $hsp;
 		}
@@ -371,9 +370,12 @@ sub generate_song {
 	}
 
 	my @chords;
-	@chords = $s->{chords}
-	  ? @{ $s->{chords}->{chords} }
-	    : ();
+	if ( $s->{chords} ) {
+	    foreach ( @{ $s->{chords}->{chords} } ) {
+		my $i = getchordinfo($_);
+		push( @chords, $i ) if $i;
+	    }
+	}
 	return unless @chords;
 
 	# Determine page class.
@@ -384,37 +386,29 @@ sub generate_song {
 	elsif ( $thispage == $startpage ) {
 	    $class = 1;		# first of a song
 	}
+
 	# If chord diagrams are to be printed in the right column, put
 	# them on the first page.
 	if ( $ps->{diagrams}->{show} eq "right" && $class <= 1 ) {
-	    $ps->{diagramscolumn} ||=
-	      ( $ps->{__rightmargin} - $ps->{__leftmargin} ) * 0.75;
-
-	    my $ww = ( $ps->{__rightmargin}
-		       - $ps->{__leftmargin}
-		       - $ps->{diagramscolumn} );
-
-	    # Number of diagrams, based on minimal required interspace.
-	    my $h = int( ( $ww
-			   # Add one interspace (cuts off right)
-			   + chordgrid_hsp1(undef,$ps) )
-			 / chordgrid_hsp(undef,$ps) );
-
-	    # Adjust actual width to fill the column.
-	    my $hsp = chordgrid_hsp0(undef,$ps)
-	      + ( $ww
-		  - $ps->{diagrams}->{width} * 0.4
-		  - $h * chordgrid_hsp0(undef,$ps) ) / ( $h-1 );
-
-	    my $y = $y;
 	    my $vsp = chordgrid_vsp( undef, $ps );
-	    while ( @chords ) {
-		my $x = $x + $ps->{diagramscolumn} - $ps->{indent};
 
-		for ( 0..$h-1 ) {
+	    my $v = int( ( $ps->{papersize}->[1] - $ps->{margintop} - $ps->{marginbottom} ) / $vsp );
+	    my $c = int( ( @chords - 1) / $v ) + 1;
+	    # warn("XXX ", scalar(@chords), ", $c colums of $v max\n");
+	    my $column =
+	      ( $ps->{__rightmargin} - $ps->{__leftmargin}
+		- ($c-1) * chordgrid_hsp(undef,$ps)
+		- chordgrid_hsp0(undef,$ps)
+		- $ps->{diagrams}->{width} * 0.4 );
+
+	    my $hsp = chordgrid_hsp(undef,$ps);
+	    my $y = $y;
+	    while ( @chords ) {
+		my $x = $x + $column - $ps->{indent};
+
+		for ( 0..$c-1 ) {
 		    last unless @chords;
-		    chordgrid( shift(@chords), $x + $_*$hsp, $y, $ps )
-		      or redo;
+		    chordgrid( shift(@chords), $x + $_*$hsp, $y, $ps );
 		}
 
 		$y -= $vsp;
@@ -433,12 +427,11 @@ sub generate_song {
 	    my $hsp = chordgrid_hsp(undef,$ps);
 	    my $vsp = chordgrid_vsp( undef, $ps );
 	    while ( @chords ) {
-		my $x = $x + $ps->{diagramscolumn} - $ps->{indent};
+		my $x = $x - $ps->{indent};
 
 		for ( 0..$h-1 ) {
 		    last unless @chords;
-		    chordgrid( shift(@chords), $x + $_*$hsp, $y, $ps )
-		      or redo;
+		    chordgrid( shift(@chords), $x + $_*$hsp, $y, $ps );
 		}
 
 		$y -= $vsp;
@@ -461,8 +454,7 @@ sub generate_song {
 
 		for ( 1..$h ) {
 		    last unless @chords;
-		    my $t = chordgrid( shift(@chords), $x, $y, $ps );
-		    redo unless $t;
+		    chordgrid( shift(@chords), $x, $y, $ps );
 		    $x += $hsp;
 		}
 
@@ -499,6 +491,7 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} ne "set" && !$did++ ) {
+	    showlayout($ps) if $ps->{showlayout};
 	    # Insert top/left/right chord diagrams.
  	    $chorddiagrams->() unless $ps->{diagrams}->{show} eq "bottom";
 	}
@@ -1436,15 +1429,8 @@ sub chordgrid_hsp {
 
 my @Roman = qw( I II III IV V VI VI VII VIII IX X XI XII );
 
-sub chordgrid {
-    my ( $name, $x, $y, $ps ) = @_;
-    my $x0 = $x;
-
-    my $gw = $ps->{diagrams}->{width};
-    my $gh = $ps->{diagrams}->{height};
-    my $dot = 0.80 * $gw;
-    my $lw  = ($ps->{diagrams}->{linewidth} || 0.10) * $gw;
-
+sub getchordinfo {
+    my ( $name ) = @_;
     my $info;
     if ( eval{ $name->{name} } ) {
 	$info = $name;
@@ -1455,15 +1441,25 @@ sub chordgrid {
     else {
 	$info = App::Music::ChordPro::Chords::chord_info($name);
     }
-    unless ( $info ) {
-	warn("PDF: Unknown chord $name",
-	     $source ? ( " in song starting at line " .
-			 $source->{line} . " in " . $source->{file} ) : (),
-	     "\n"
-	    );
-	return;
-    }
+    return $info if $info;
+    warn("PDF: Unknown chord $name",
+	 $source ? ( " in song starting at line " .
+		     $source->{line} . " in " . $source->{file} ) : (),
+	 "\n"
+	);
+    return;
+}
 
+sub chordgrid {
+    my ( $info, $x, $y, $ps ) = @_;
+    return unless $info;
+
+    my $x0 = $x;
+
+    my $gw = $ps->{diagrams}->{width};
+    my $gh = $ps->{diagrams}->{height};
+    my $dot = 0.80 * $gw;
+    my $lw  = ($ps->{diagrams}->{linewidth} || 0.10) * $gw;
     my $pr = $ps->{pr};
 
     my $strings = App::Music::ChordPro::Chords::strings();
@@ -1472,6 +1468,7 @@ sub chordgrid {
     # Draw font name.
     my $font = $ps->{fonts}->{diagram};
     $pr->setfont($font);
+    my $name = $info->{name};
     $name .= "*"
       unless $info->{origin} <= 1 || $::config->{diagrams}->{show} eq "user";
     $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y - font_bl($font) );
@@ -1621,7 +1618,6 @@ sub showlayout {
     my @off = @{ $ps->{columnoffsets} };
     pop(@off);
     @off = ( $ps->{chordscolumn} ) if $chordscol;
-    @off = ( $ps->{diagramscolumn} ) if $ps->{diagramscolumn};
     @a = ( undef,
 	   $ps->{marginbottom},
 	   $ps->{margintop}-$ps->{papersize}->[1]+$ps->{marginbottom},
