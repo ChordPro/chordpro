@@ -8,7 +8,7 @@ use warnings;
 use App::Music::ChordPro::Chords;
 use App::Music::ChordPro::Output::Common;
 
-use Encode qw(decode encode);
+use Encode qw(decode decode_utf8 encode);
 use Carp;
 
 sub new {
@@ -62,7 +62,9 @@ sub parsefile {
 	$data = do { local $/; <STDIN> };
     }
     else {
-	open( my $fh, '<', $filename)
+	my $name = $filename;
+	$filename = decode_utf8($name);
+	open( my $fh, '<', $name)
 	  or croak("$filename: $!\n");
 	$data = do { local $/; <$fh> };
     }
