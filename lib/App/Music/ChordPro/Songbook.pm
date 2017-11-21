@@ -13,7 +13,7 @@ use Carp;
 
 sub new {
     my ($pkg) = @_;
-    bless { songs => [ App::Music::ChordPro::Song->new ] }, $pkg;
+    bless { songs => [ ] }, $pkg;
 }
 
 # Parser context.
@@ -121,10 +121,19 @@ sub parsefile {
     my @lines = split( /\r\n|\n|\r/, $data );
 
     my $linecnt = 0;
-    $self->parse_song( \@lines, \$linecnt, $options ) while @lines;
-
+    while ( @lines ) {
+	my $song = $self->parse_song( \@lines, \$linecnt, $options );
+#	if ( exists($self->{songs}->[-1]->{body}) ) {
+	    push( @{ $self->{songs} }, $song );
+#	}
+#	else {
+#	    $self->{songs} = [ $song ];
+#	}
+    }
     return 1;
 }
+
+my $song;			# current song
 
 sub parse_song {
     my ( $self, $lines, $linecnt, $options ) = @_;
@@ -132,15 +141,10 @@ sub parse_song {
     $no_transpose = $options->{'no-transpose'};
     $no_substitute = $options->{'no-substitute'};
 
-    if ( exists($self->{songs}->[-1]->{body}) ) {
-	push( @{ $self->{songs} }, App::Music::ChordPro::Song->new );
-    }
-    else {
-	$self->{songs} = [ App::Music::ChordPro::Song->new ];
-    }
-    $self->{songs}->[-1]->{structure} = "linear";
-    $self->{songs}->[-1]->{source} =
-      { file => $diag->{file}, line => 1 + $$linecnt };
+    $song = App::Music::ChordPro::Song->new
+      ( source => { file => $diag->{file}, line => 1 + $$linecnt },
+	structure => "linear",
+      );
 
     $xpose = 0;
     $grid_arg = '1+4x4+1';
@@ -165,17 +169,17 @@ sub parse_song {
 	$diag->{orig} = $_ = shift(@$lines);
 
 	if ( /^\s*\{(new_song|ns)\}\s*$/ ) {
-	    last if $self->{songs}->[-1]->{body};
+	    last if $song->{body};
 	    next;
 	}
 
 	if ( /^#/ ) {
 	    # Collect pre-title stuff separately.
-	    if ( exists $self->{songs}->[-1]->{title} ) {
+	    if ( exists $song->{title} ) {
 		$self->add( type => "ignore", text => $_ );
 	    }
 	    else {
-		push( @{ $self->{songs}->[-1]->{preamble} }, $_ );
+		push( @{ $song->{preamble} }, $_ );
 	    }
 	    next;
 	}
@@ -204,20 +208,20 @@ sub parse_song {
 	if ( /\S/ ) {
 	    $self->add( type => "songline", $self->decompose($_) );
 	}
-	elsif ( exists $self->{songs}->[-1]->{title} ) {
+	elsif ( exists $song->{title} ) {
 	    $self->add( type => "empty" );
 	}
 	else {
 	    # Collect pre-title stuff separately.
-	    push( @{ $self->{songs}->[-1]->{preamble} }, $_ );
+	    push( @{ $song->{preamble} }, $_ );
 	}
     }
     do_warn("Unterminated context in song: $in_context")
       if $in_context;
 
     my $diagrams;
-    if ( exists($self->{songs}->[-1]->{settings}->{diagrams} ) ) {
-	$diagrams = $self->{songs}->[-1]->{settings}->{diagrams};
+    if ( exists($song->{settings}->{diagrams} ) ) {
+	$diagrams = $song->{settings}->{diagrams};
 	$diagrams &&= $::config->{diagrams}->{show} || "all";
     }
     else {
@@ -245,7 +249,7 @@ sub parse_song {
 	    @used_chords =
 	      sort App::Music::ChordPro::Chords::chordcompare @used_chords;
 	}
-	$self->{songs}->[-1]->{chords} =
+	$song->{chords} =
 	  { type   => "diagrams",
 	    origin => "song",
 	    show   => $diagrams,
@@ -254,16 +258,16 @@ sub parse_song {
     }
 
     # Global transposition.
-    $self->{songs}->[-1]->transpose( $options->{transpose} );
+    $song->transpose( $options->{transpose} );
 
-    # $self->{songs}->[-1]->structurize;
+    # $song->structurize;
 
-    return 1;
+    return $song;
 }
 
 sub add {
     my $self = shift;
-    push( @{$self->{songs}->[-1]->{body}},
+    push( @{$song->{body}},
 	  { context => $in_context,
 	    @_ } );
     push( @chorus, { context => $in_context, @_ } )
@@ -350,7 +354,7 @@ sub decompose {
 
 sub cdecompose {
     my ( $self, $line ) = @_;
-    $line = App::Music::ChordPro::Output::Common::fmt_subst( $self->{songs}->[-1],
+    $line = App::Music::ChordPro::Output::Common::fmt_subst( $song,
 						     $line )
       unless $no_substitute;
     my %res = $self->decompose($line);
@@ -504,8 +508,6 @@ sub directive {
 
     # Song settings.
 
-    my $cur = $self->{songs}->[-1];
-
     # Breaks.
 
     if ( $dir =~ /^(?:colb|column_break)$/i ) {
@@ -583,14 +585,14 @@ sub directive {
     }
 
     if ( $dir =~ /^(?:title|t)$/ ) {
-	$cur->{title} = $arg;
-	push( @{ $self->{songs}->[-1]->{meta}->{title} }, $arg );
+	$song->{title} = $arg;
+	push( @{ $song->{meta}->{title} }, $arg );
 	return;
     }
 
     if ( $dir =~ /^(?:subtitle|st)$/ ) {
-	push(@{$cur->{subtitle}}, $arg);
-	push( @{ $self->{songs}->[-1]->{meta}->{subtitle} }, $arg );
+	push( @{ $song->{subtitle} }, $arg );
+	push( @{ $song->{meta}->{subtitle} }, $arg );
 	return;
     }
 
@@ -600,7 +602,7 @@ sub directive {
 	if ( $xpose && $1 eq "key" ) {
 	    $arg = App::Music::ChordPro::Chords::transpose( $arg, $xpose );
 	}
-	push( @{ $self->{songs}->[-1]->{meta}->{$1} }, $arg );
+	push( @{ $song->{meta}->{$1} }, $arg );
 	return;
     }
 
@@ -614,7 +616,7 @@ sub directive {
 	    }
 	    if ( $re_meta && $key =~ $re_meta ) {
 		# Known.
-		push( @{ $self->{songs}->[-1]->{meta}->{$key} }, $val );
+		push( @{ $song->{meta}->{$key} }, $val );
 	    }
 	    elsif ( $::config->{metadata}->{strict} ) {
 		# Unknown, and strict.
@@ -622,7 +624,7 @@ sub directive {
 	    }
 	    else {
 		# Allow.
-		push( @{ $self->{songs}->[-1]->{meta}->{$key} }, $val );
+		push( @{ $song->{meta}->{$key} }, $val );
 	    }
 	}
 	else {
@@ -644,34 +646,32 @@ sub global_directive {
     my ($self, $d, $legacy ) = @_;
     my ( $dir, $arg ) = dir_split($d);
 
-    my $cur = $self->{songs}->[-1];
-
     # Song / Global settings.
 
     if ( $dir eq "titles"
 	 && $arg =~ /^(left|right|center|centre)$/i ) {
-	$cur->{settings}->{titles} =
+	$song->{settings}->{titles} =
 	  lc($1) eq "centre" ? "center" : lc($1);
 	return 1;
     }
 
     if ( $dir eq "columns"
 	 && $arg =~ /^(\d+)$/ ) {
-	$cur->{settings}->{columns} = $arg;
+	$song->{settings}->{columns} = $arg;
 	return 1;
     }
 
     if ( $dir eq "pagetype" || $dir eq "pagesize" ) {
-	$cur->{settings}->{papersize} = $arg;
+	$song->{settings}->{papersize} = $arg;
 	return 1;
     }
 
     if ( $dir =~ /^(?:grid|g)$/ ) {
-	$cur->{settings}->{diagrams} = 1;
+	$song->{settings}->{diagrams} = 1;
 	return 1;
     }
     if ( $dir =~ /^(?:no_grid|ng)$/ ) {
-	$cur->{settings}->{diagrams} = 0;
+	$song->{settings}->{diagrams} = 0;
 	return 1;
     }
 
@@ -683,7 +683,7 @@ sub global_directive {
 		  name => "transpose",
 		  previous => $xpose,
 		);
-	my $m = $self->{songs}->[-1]->{meta};
+	my $m = $song->{meta};
 	if ( $m->{key} ) {
 	    $m->{key_actual} =
 	      [ App::Music::ChordPro::Chords::transpose( $m->{key}->[-1],
@@ -703,7 +703,7 @@ sub global_directive {
 		  name => "transpose",
 		  previous => $xpose,
 		);
-	my $m = $self->{songs}->[-1]->{meta};
+	my $m = $song->{meta};
 	if ( $m->{key} ) {
 	    $m->{key_from} =
 	      [ App::Music::ChordPro::Chords::transpose( $m->{key}->[-1],
@@ -896,8 +896,8 @@ sub global_directive {
 		$ci = $res->{name};
 	    }
 	    # Combine consecutive entries.
-	    if ( $self->{songs}->[-1]->{body}->[-1]->{type} eq "diagrams" ) {
-		push( @{ $self->{songs}->[-1]->{body}->[-1]->{chords} },
+	    if ( $song->{body}->[-1]->{type} eq "diagrams" ) {
+		push( @{ $song->{body}->[-1]->{chords} },
 		      $ci );
 	    }
 	    else {
@@ -909,7 +909,7 @@ sub global_directive {
 	}
 	elsif ( $res->{frets} || $res->{base} || $res->{fingers} ) {
 	    $res->{base} ||= 1;
-	    push( @{$cur->{define}}, $res );
+	    push( @{$song->{define}}, $res );
 	    if ( $res->{frets} ) {
 		my $res =
 		  App::Music::ChordPro::Chords::add_song_chord

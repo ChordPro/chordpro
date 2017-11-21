@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 3;
+use Test::More tests => 1;
 
 use App::Music::ChordPro::Config;
 use App::Music::ChordPro::Songbook;
@@ -18,13 +18,13 @@ my $data = <<EOD;
 EOD
 
 eval { $s->parsefile(\$data); 1 } or diag("$@");
-
-ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
-isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
-
-my $song = {
-	    'settings' => {},
-	    'structure' => 'linear'
-	   };
-
-is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );
+#use DDumper; DDumper( $s->{songs} );
+ok( scalar( @{ $s->{songs} } ) == 0, "No song" );
+#isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
+#
+#my $song = {
+#	    'settings' => {},
+#	    'structure' => 'linear'
+#	   };
+#
+#is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );

@@ -18,7 +18,7 @@ my $data = <<EOD;
 EOD
 
 eval { $s->parsefile(\$data) } or diag("$@");
-
+#use DDumper; DDumper( $s->{songs} );
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
 
