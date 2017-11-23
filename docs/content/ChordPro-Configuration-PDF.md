@@ -182,8 +182,6 @@ All heading strings may contain references to metadata in the form `%{`_NAME_`}`
                 "subtitle"  : null,
                 // Footer is title -- page number.
                 "footer"    : [ "%{title}", "", "%{page}" ],
-                // Title for ToC.
-                "toc-title" : "Table of Contents",
             },
 
             // The first page of a song has:
