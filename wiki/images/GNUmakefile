@@ -12,7 +12,7 @@ CVT_WBORDER := -compose copy -bordercolor white -border 10
 
 default : all
 
-all : styles examples simple.png
+all : styles examples simple.png labels.png
 
 #### Styles.
 
@@ -96,6 +96,11 @@ ex_clean :
 simple.png : ${RES}/examples/swinglow.cho 
 	${CHORDPRO} ${RES}/examples/swinglow.cho --output=simple.pdf
 	${CONVERT} -alpha remove -resize 300x300 ${CVT_BORDER} simple.pdf $@
+
+labels.png : labels.cho 
+	${CHORDPRO} labels.cho --output=labels.pdf \
+	  --define pdf.indent=70
+	${CONVERT} -alpha remove -resize 300x300 ${CVT_BORDER} labels.pdf $@
 
 #### Publish.
 
