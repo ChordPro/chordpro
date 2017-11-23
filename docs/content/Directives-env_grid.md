@@ -71,6 +71,13 @@ The result will be similar to:
 
 ![](images/ex_grid2.png)
 
+This directive may include an optional label, to be printed in the
+left margin. For example:,
+
+    {start_of_grid: Intro}
+
+See also [[indent|ChordPro Configuration PDF#indent]].
+
 # Directives: end_of_grid
 
 This directive indicates the end of the grid.

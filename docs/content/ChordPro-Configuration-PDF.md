@@ -57,6 +57,14 @@ This controls the distance between lines as a factor of the font size.
 
 Note: By setting the spacing for `empty` to a small value, you get fine-grained control over the spacing between the various parts of the song.
 
+## Indent
+
+When `indent` is set to a positive value, the lyrics and associated
+chords will be indented by this amount. This will create a left
+margin where labels can be printed. See e.g. [[start_of_verse|Directives env_verse]].
+
+[![labels.png](images/labels.png)](images/labels.pdf)
+
 ## Chorus style
 
 ChordPro can format a chorus in several different ways:
