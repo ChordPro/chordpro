@@ -126,6 +126,7 @@ my $source;			# song source
 my $structured = 0;		# structured data
 my $single_space = 0;		# suppress chords line when empty
 my $lyrics_only = 0;		# suppress all chord lines
+my $inlinechords = 0;		# chords inline
 my $chordscol = 0;		# chords in a separate column
 my $chordscapo = 0;		# capo in a separate column
 my $i_tag;
@@ -139,6 +140,7 @@ sub generate_song {
     $source = $s->{source};
 
     $single_space = $::config->{settings}->{'suppress-empty-chords'};
+    $inlinechords = $::config->{settings}->{'inline-chords'};
     my $ps = $::config->clone->{pdf};
     my $pr = $options->{pr};
     $ps->{pr} = $pr;
@@ -941,7 +943,7 @@ sub songline {
 	return;
     }
 
-    if ( $chordscol ) {
+    if ( $chordscol || $inlinechords ) {
 	$ytext  = $ychord if $ytext  > $ychord;
 	$ychord = $ytext;
     }
@@ -960,6 +962,16 @@ sub songline {
     }
     $x += $opts{indent} if $opts{indent};
 
+    # How to embed the chords.
+    my ( $pre, $post ) = ( "", " " );
+    if ( $inlinechords ) {
+	$pre = "[";
+	$post = "]";
+	( $pre, $post ) = ( $1, $2 )
+	  if $inlinechords =~ /^(.*?)\%[cs](.*)/;
+	$ychord = $ytext;
+    }
+
     my @chords;
     foreach ( 0..$#{$elt->{chords}} ) {
 
@@ -968,8 +980,8 @@ sub songline {
 
 	if ( $fchord->{background} && $chord ne "" && !$chordscol ) {
 	    # Draw background.
-	    my $w1 = $pr->strwidth( $chord." ", $fchord );
-	    my $w2 = $pr->strwidth(" ") /  2;
+	    my $w1 = $pr->strwidth( $pre.$chord.$post, $fchord );
+	    my $w2 = $inlinechords ? 0 : $pr->strwidth(" ") /  2;
 	    $pr->rectxy( $x - $w2, $ytop, $x + $w1 - $w2,
 			 $ytop - $fchord->{size}, 1,
 			 $fchord->{background} );
@@ -1011,17 +1023,17 @@ sub songline {
 	    my $info = App::Music::ChordPro::Chords::identify($chord);
 	    my $xt0;
 	    if ( $info && $info->{system} eq "R" ) {
-		$xt0 = $pr->text( $info->{dproot}.$info->{qual},
+		$xt0 = $pr->text( $pre.$info->{dproot}.$info->{qual},
 				  $x, $ychord, $fchord );
 		$xt0 = $pr->text( $info->{adds}, $xt0,
 				   $ychord + $fchord->{size} * 0.2,
 				   $fchord,
 				   $fchord->{size} * 0.8
 				 );
-		$xt0 = $pr->text( " ", $xt0, $ychord, $fchord );
+		$xt0 = $pr->text( $post, $xt0, $ychord, $fchord );
 	    }
 	    elsif ( $info && $info->{system} eq "N" ) {
-		$xt0 = $pr->text( $info->{dproot}.$info->{qual},
+		$xt0 = $pr->text( $pre.$info->{dproot}.$info->{qual},
 				  $x, $ychord, $fchord );
 #		if ( $info->{minor} ) {
 #		    my $m = $info->{minor};
@@ -1033,15 +1045,23 @@ sub songline {
 				   $fchord,
 				   $fchord->{size} * 0.8,
 				 );
-		$xt0 = $pr->text( " ", $xt0, $ychord, $fchord );
+		$xt0 = $pr->text( $post, $xt0, $ychord, $fchord );
+	    }
+	    elsif ( $info->{dproot} || $_ > 0 ) {
+		$xt0 = $pr->text( $pre.$chord.$post, $x, $ychord, $fchord );
 	    }
 	    else {
-		$xt0 = $pr->text( $chord." ", $x, $ychord, $fchord );
+		$xt0 = $x;
 	    }
 	    $pr->text( $tag, $x-$ps->{indent}, $ytext, $ftext ) if $tag ne "";
 	    $tag = "";
-	    my $xt1 = $pr->text( $phrase, $x, $ytext, $ftext );
-	    $x = $xt0 > $xt1 ? $xt0 : $xt1;
+	    if ( $inlinechords ) {
+		$x = $pr->text( $phrase, $xt0, $ytext, $ftext );
+	    }
+	    else {
+		my $xt1 = $pr->text( $phrase, $x, $ytext, $ftext );
+		$x = $xt0 > $xt1 ? $xt0 : $xt1;
+	    }
 	}
     }
 
@@ -1367,8 +1387,9 @@ sub songline_vsp {
 	return $ftext->{size} * $ps->{spacing}->{tab};
     }
 
-    # Vertical span of the lyrics.
+    # Vertical span of the lyrics and chords.
     my $vsp = $fonts->{text}->{size} * $ps->{spacing}->{lyrics};
+    my $csp = $fonts->{chord}->{size} * $ps->{spacing}->{chords};
 
     return $vsp if $lyrics_only || $chordscol;
 
@@ -1377,8 +1398,14 @@ sub songline_vsp {
     # No text printing if no text.
     $vsp = 0 if join( "", @{ $elt->{phrases} } ) eq "";
 
-    # We must show chords above lyrics, so add chords span.
-    $vsp + $fonts->{chord}->{size} * $ps->{spacing}->{chords};
+    if ( $inlinechords ) {
+	$vsp = $csp if $csp > $vsp;
+    }
+    else {
+	# We must show chords above lyrics, so add chords span.
+	$vsp += $csp;
+    }
+    return $vsp;
 }
 
 sub _vsp {

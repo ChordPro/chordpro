@@ -16,6 +16,10 @@
 	// Suppress chords.
 	// Overrides --lyrics-only command line option.
 	"lyrics-only" : false,
+	// Chords inline.
+	// May be a string containing pretext %s posttext.
+	// Defaults to "[%s]" if true.
+	"inline-chords" : false,
     },
 
     // Metadata.
@@ -145,10 +149,6 @@
 	// "chordscolumn" : 400,
 	"chordscolumn" :  0,
 
-	// Alternative placement for chord diagrams.
-	// Value is the column position.
-	"diagramscolumn" :  0,
-
 	// A {titles: left} may conflict with customized formats.
 	// Set to non-zero to ignore the directive.
 	"titles-directive-ignore" : false,
@@ -165,8 +165,7 @@
 	// Diagrams for all chords of the song can be shown at the
 	// "top" of the first page, the "bottom" of the last page
 	// (default), "left" on the first page and "right" on the first
-	// page. "left" and "right" take the value of "diagramscolumn"
-	// for the width of the column.
+	// page. "left" is not implemented.
 	"diagrams" : {
 	    "show"     :  "bottom",
 	    "width"    :  6,

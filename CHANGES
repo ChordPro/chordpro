@@ -11,6 +11,9 @@
     - Obsolete pdf.diagramscolumn in favour of pdf.diagrams.show.
     - Provide song source for unknown chords message.
     - Handle UTF-8 encoded filenames correctly.
+    - Implement in-line printing of chords, config:
+      settings.inline-chords.
+      Add style 'inline'.
 
 0.910.1	2017-11-09
 
