@@ -16,7 +16,9 @@ my $s = App::Music::ChordPro::Songbook->new;
 # Song line with leading / trailing chords.
 my $data = <<EOD;
 {title: Swing Low Sweet Chariot}
+
 [D]I looked over Jordan, and [G]what did I see,[D]
+
 EOD
 
 eval { $s->parsefile(\$data) } or diag("$@");
@@ -33,6 +35,10 @@ my $song = {
 		      },
 	    'title' => 'Swing Low Sweet Chariot',
 	    'body' => [
+		       {
+			'type' => 'empty',
+			'context' => ''
+		       },
                        {
 			 'context' => '',
 			 'phrases' => [
@@ -46,6 +52,10 @@ my $song = {
 				       'D'
 				     ],
 			 'type' => 'songline'
+		       },
+		       {
+			'type' => 'empty',
+			'context' => ''
 		       }
 		      ],
 	    'source' => { file => "__STRING__", line => 1 },

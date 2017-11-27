@@ -120,7 +120,10 @@ sub parsefile {
     $diag->{file} = $filename;
 
     # Split in lines;
-    my @lines = split( /\r\n|\n|\r/, $data );
+    $data =~ s/^\s+//s;
+    my @lines;
+    # We need to maintain trailing newlines.
+    push( @lines, $1 ) while $data =~ /(.*)(?:\r\n|\n|\r)/g;
 
     my $linecnt = 0;
     while ( @lines ) {

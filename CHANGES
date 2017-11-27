@@ -15,6 +15,7 @@
       settings.inline-chords.
       Add style 'inline'.
     - Fix problem with font restore after {textfont} cs.
+    - Fix problem that trailing empty lines were discarded.
 
 0.910.1	2017-11-09
 
