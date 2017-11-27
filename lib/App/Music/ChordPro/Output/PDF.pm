@@ -775,13 +775,13 @@ sub generate_song {
 			delete $ps->{fonts}->{$f}->{file};
 			$ps->{fonts}->{$f}->{name} = $elt->{value};
 		    }
-		    $pr->init_font($f);
 		}
 		else {
 		    # Restore default.
-		    $ps->{fonts}->{$1} =
-		      %{ $::config->{pdf}->{fonts}->{$1} };
+		    $ps->{fonts}->{$f} =
+		      { %{ $::config->{pdf}->{fonts}->{$f} } };
 		}
+		$pr->init_font($f);
 	    }
 	    elsif ( $elt->{name} =~ /^(text|chord|grid|toc|tab)-color$/ ) {
 		if ( defined $elt->{value} ) {

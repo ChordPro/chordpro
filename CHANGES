@@ -14,6 +14,7 @@
     - Implement in-line printing of chords, config:
       settings.inline-chords.
       Add style 'inline'.
+    - Fix problem with font restore after {textfont} cs.
 
 0.910.1	2017-11-09
 
