@@ -138,10 +138,7 @@ the song.
 
 [![style_modern3.png](images/style_modern3.png)](images/style_modern3.pdf)
 
-        // This style is enabled by setting "diagramscolumn" to a nonzero value.
-        // Value is the column position. 
-        // "diagramscolumn" : 350,
-        "diagramscolumn" :  0,
+
 
 ## Even/odd page printing
 
