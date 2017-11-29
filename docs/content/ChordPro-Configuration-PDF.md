@@ -202,7 +202,7 @@ All heading strings may contain references to metadata in the form `%{`_NAME_`}`
 The effect of the default settings can be seen in the following
 picture.
 
-![](images/pages.png)
+![](images/pageformats.png)
 
 Pages 2 and 4 are normal (`default`) pages. They have no heading and
 have the page number and song title in the footer.
