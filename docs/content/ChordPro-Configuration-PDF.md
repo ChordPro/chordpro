@@ -199,6 +199,25 @@ All heading strings may contain references to metadata in the form `%{`_NAME_`}`
             },
         },
 
+The effect of the default settings can be seen in the following
+picture.
+
+![](images/pages.png)]
+
+Pages 2 and 4 are normal (`default`) pages. They have no heading and
+have the page number and song title in the footer.
+
+Page 3 is the first page of a song (`title`). It has the song title
+and subtitle in the heading, and only the page number in the footer.
+
+Page 1 is the very first output page (`first`). It is like a `title`
+page but, according to typesetting conventions, doesn't have the page
+number in the footer.
+
+Note that by default ChordPro produces different odd and even pages.
+Therefore the page number on (odd) page 3 is at the left side, while it is at
+the right side on (even) pages 2 and 4.
+
 ## Font libraries
 
 You can either designate a built-in font by its name, or give the filename of a TrueType (ttf) or OpenType font (otf).  
