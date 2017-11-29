@@ -223,6 +223,8 @@ sub generate_song {
     my $do_size = sub {
 	my ( $tag, $value ) = @_;
 	if ( $value =~ /^(.+)\%$/ ) {
+#$	    $fonts->{$tag}->{_size} //=
+#$	      $::config->{pdf}->{fonts}->{$tag}->{size};
 	    $fonts->{$tag}->{size} =
 	      ( $1 / 100 ) * $fonts->{$tag}->{_size};
 	}

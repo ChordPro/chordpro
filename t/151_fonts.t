@@ -16,6 +16,9 @@ my $s = App::Music::ChordPro::Songbook->new;
 # Fonts definitions.
 my $data = <<EOD;
 {title: Swing Low Sweet Chariot}
+{textfont: Times}
+{textsize: 80%}
+{textcolour: magenta}
 {chordfont: Times-Italic}
 {chordsize: 80%}
 {chordcolour: Yellow}
@@ -52,6 +55,24 @@ my $song = {
 				  ]
 		      },
 	    'body' => [
+		       {
+			'name' => 'text-font',
+			'type' => 'control',
+			'value' => 'Times',
+			'context' => ''
+		       },
+		       {
+			'name' => 'text-size',
+			'type' => 'control',
+			'value' => '80%',
+			'context' => ''
+		       },
+		       {
+			'type' => 'control',
+			'name' => 'text-color',
+			'context' => '',
+			'value' => 'magenta'
+		       },
 		       {
 			'name' => 'chord-font',
 			'type' => 'control',

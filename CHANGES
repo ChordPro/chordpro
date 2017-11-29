@@ -17,6 +17,7 @@
     - Fix problem with font restore after {textfont} cs.
     - Fix problem that trailing empty lines were discarded.
     - Fix final line discard if input is not newline terminated.
+    - Fix issue#31 (textsize directive with percentage raises error).
 
 0.910.1	2017-11-09
 
