@@ -12,7 +12,7 @@ CVT_WBORDER := -compose copy -bordercolor white -border 10
 
 default : all
 
-all : styles examples simple.png labels.png
+all : styles examples simple.png labels.png pageformats.png
 
 #### Styles.
 
@@ -102,6 +102,13 @@ labels.png : labels.cho
 	  --define pdf.indent=70
 	${CONVERT} -alpha remove -resize 300x300 ${CVT_BORDER} labels.pdf $@
 
+pageformats.png : pageformats.cho pageformats.json
+	${CHORDPRO} pageformats.cho --no-toc --config pageformats.json --output=x.pdf
+	rm -f x-*.png
+	${CONVERT} -alpha remove -resize 300x300 ${CVT_BORDER} x.pdf x.png
+	${CONVERT} +append x-*.png $@
+	rm -f x.pdf x-*.png
+
 #### Publish.
 
 DST := ../../../ChordPro-Wiki/images
@@ -110,4 +117,4 @@ publish : all
 	rsync -avHi *.pdf *.png ${DST}/
 
 clean :: ex_clean
-	rm -f ex_*.png style_*.pdf style_*.png simple.png *~ 
+	rm -f ex_*.png style_*.pdf style_*.png simple.png x-*.png *~ 
