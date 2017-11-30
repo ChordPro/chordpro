@@ -223,11 +223,15 @@ the right side on (even) pages 2 and 4.
 You can either designate a built-in font by its name, or give the filename of a TrueType (ttf) or OpenType font (otf).  
 The filename should be the full name of a file on disk, or a relative filename which will be looked up in system dependent font libraries.
 
-The `fontdir` setting can be used to add a private font directory to
-the font libraries. The private directory will be searched first.
+The `fontdir` setting can be used to add one or more private font directories to
+the font libraries. The private directories will be searched first.
 
-        // Relative filenames are looked up in the fontdir.
-        "fontdir" : null,
+		// Fonts.
+		// Fonts can be specified by name (for the corefonts)
+		// or a filename (for TrueType/OpenType fonts).
+		// Relative filenames are looked up in the fontdir.
+		// "fontdir" : [ "/usr/share/fonts/liberation", "/home/me/fonts" ],
+		"fontdir" : null,
 
 See also [[ChordPro Fonts]].
 
