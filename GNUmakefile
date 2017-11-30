@@ -78,6 +78,6 @@ checkjson :
 	done
 
 wiki ::
-	cp ${CFGLIB}/config.schema ../ChordPro-Wiki/
-	cp ${CFGLIB}/modern1.json ../ChordPro-Wiki/
-	cp ${CFGLIB}/nashville.json ../ChordPro-Wiki/
+	-cp ${CFGLIB}/config.schema  ../ChordPro-Wiki/
+	-cp ${CFGLIB}/modern1.json   ../ChordPro-Wiki/
+	-cp ${CFGLIB}/nashville.json ../ChordPro-Wiki/
