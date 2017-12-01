@@ -452,7 +452,7 @@ sub generate_song {
 			   + $ps->{diagrams}->{hspace}
 			   * $ps->{diagrams}->{width} ) / $hsp );
 	    while ( @chords ) {
-		my $x = $x;
+		my $x = $x - $ps->{indent};
 		$checkspace->($vsp);
 		$pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
 
