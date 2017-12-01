@@ -1655,8 +1655,12 @@ sub showlayout {
 	next unless $off[$i];
 	$a[0] = $ml + $off[$i];
 	$pr->vline(@a);
-	$a[0] -= $ps->{columnspace};
+	$a[0] = $ml + $off[$i] - $ps->{columnspace};
 	$pr->vline(@a);
+	if ( $ps->{indent} ) {
+	    $a[0] = $ml + $off[$i] + $ps->{indent};
+	    $pr->vline(@a);
+	}
     }
     if ( $ps->{indent} ) {
 	$a[0] = $ml + $ps->{indent};
