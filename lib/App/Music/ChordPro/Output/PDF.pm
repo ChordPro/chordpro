@@ -159,7 +159,7 @@ sub generate_song {
     $chordscol    = $ps->{chordscolumn};
     $lyrics_only  = $::config->{settings}->{'lyrics-only'};
     $chordscapo   = $s->{meta}->{capo};
-    $ps->{indent} = $ps->{labels}->{width};
+    $ps->{_indent} = $ps->{labels}->{width};
 
     my $fail;
     for my $item ( @{ SIZE_ITEMS() } ) {
@@ -250,8 +250,8 @@ sub generate_song {
 	warn("C=$col, L=", $ps->{__leftmargin},
 	     ", R=", $ps->{__rightmargin},
 	     "\n") if DEBUG_SPACING;
-	$y = $ps->{papersize}->[1] - $ps->{margintop};
-	$x += $ps->{indent};
+	$y = $ps->{_top};
+	$x += $ps->{_indent};
     };
 
     my $vsp_ignorefirst;
@@ -283,6 +283,7 @@ sub generate_song {
 	    $ps->{_leftmargin}  = $ps->{marginright};
 	    $ps->{_rightmargin} = $ps->{marginleft};
 	}
+	$ps->{_bottommargin} = $ps->{marginbottom};
 
 	$thispage++;
 	$s->{meta}->{page} = [ $s->{page} = $thispage ];
@@ -319,9 +320,10 @@ sub generate_song {
 	    $tpt->("footer");
 	}
 
-	$x += $ps->{indent};
+	$x += $ps->{_indent};
 	$y = $ps->{papersize}->[1] - $ps->{margintop};
 	$y += $ps->{headspace} if $ps->{'head-first-only'} && $class == 2;
+	$ps->{_top} = $y;
 	$col = 0;
 	$vsp_ignorefirst = 1;
 	$col_adjust->();
@@ -335,7 +337,7 @@ sub generate_song {
 	# Returns true if there was space.
 
 	my $vsp = $_[0];
-	return 1 if $vsp >= 0 && $y - $vsp >= $ps->{marginbottom};
+	return 1 if $vsp >= 0 && $y - $vsp >= $ps->{_bottommargin};
 
 	if ( ++$col >= $ps->{columns}) {
 	    $newpage->();
@@ -409,7 +411,7 @@ sub generate_song {
 	    my $hsp = chordgrid_hsp(undef,$ps);
 	    my $y = $y;
 	    while ( @chords ) {
-		my $x = $x + $column - $ps->{indent};
+		my $x = $x + $column - $ps->{_indent};
 
 		for ( 0..$c-1 ) {
 		    last unless @chords;
@@ -421,18 +423,19 @@ sub generate_song {
 	}
 	elsif ( $ps->{diagrams}->{show} eq "top" && $class <= 1 ) {
 
-	    my $ww = ( $ps->{__rightmargin} - $ps->{__leftmargin} );
+	    my $ww = ( $ps->{papersize}->[0] - $ps->{_rightmargin} - $ps->{_leftmargin} );
 
 	    # Number of diagrams, based on minimal required interspace.
 	    my $h = int( ( $ww
 			   # Add one interspace (cuts off right)
 			   + chordgrid_hsp1(undef,$ps) )
 			 / chordgrid_hsp(undef,$ps) );
+	    die("ASSERT: $h should be greater than 0") unless $h > 0;
 
 	    my $hsp = chordgrid_hsp(undef,$ps);
 	    my $vsp = chordgrid_vsp( undef, $ps );
 	    while ( @chords ) {
-		my $x = $x - $ps->{indent};
+		my $x = $x - $ps->{_indent};
 
 		for ( 0..$h-1 ) {
 		    last unless @chords;
@@ -441,8 +444,43 @@ sub generate_song {
 
 		$y -= $vsp;
 	    }
+	    $ps->{_top} = $y;
 	}
-	elsif ( $ps->{diagrams}->{show} eq "bottom" ) {
+	elsif ( $ps->{diagrams}->{show} eq "bottom" && $class <= 1 && $col == 0 ) {
+
+	    my $ww = ( $ps->{papersize}->[0] - $ps->{_rightmargin} - $ps->{_leftmargin} );
+
+	    # Number of diagrams, based on minimal required interspace.
+	    my $h = int( ( $ww
+			   # Add one interspace (cuts off right)
+			   + chordgrid_hsp1(undef,$ps) )
+			 / chordgrid_hsp(undef,$ps) );
+	    die("ASSERT: $h should be greater than 0") unless $h > 0;
+
+	    my $vsp = chordgrid_vsp( undef, $ps );
+	    my $hsp = chordgrid_hsp( undef, $ps );
+
+	    my $y = $ps->{marginbottom} + (int((@chords-1)/$h) + 1) * $vsp;
+	    $ps->{_bottommargin} = $y;
+
+	    $y -= $ps->{diagrams}->{vspace} * $ps->{diagrams}->{height};
+
+	    while ( @chords ) {
+		my $x = $x - $ps->{_indent};
+		$checkspace->($vsp);
+		$pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+
+		for ( 1..$h ) {
+		    last unless @chords;
+		    chordgrid( shift(@chords), $x, $y, $ps );
+		    $x += $hsp;
+		}
+
+		$y -= $vsp;
+		$pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+	    }
+	}
+	elsif ( $ps->{diagrams}->{show} eq "below" ) {
 
 	    local $::config->{diagrams}->{show} = $show;
 
@@ -453,7 +491,7 @@ sub generate_song {
 			   + $ps->{diagrams}->{hspace}
 			   * $ps->{diagrams}->{width} ) / $hsp );
 	    while ( @chords ) {
-		my $x = $x - $ps->{indent};
+		my $x = $x - $ps->{_indent};
 		$checkspace->($vsp);
 		$pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
 
@@ -497,8 +535,8 @@ sub generate_song {
 
 	if ( $elt->{type} ne "set" && !$did++ ) {
 	    showlayout($ps) if $ps->{showlayout};
-	    # Insert top/left/right chord diagrams.
- 	    $chorddiagrams->() unless $ps->{diagrams}->{show} eq "bottom";
+	    # Insert top/left/right/bottom chord diagrams.
+ 	    $chorddiagrams->() unless $ps->{diagrams}->{show} eq "below";
 	}
 
 	if ( $elt->{type} eq "empty" ) {
@@ -551,7 +589,7 @@ sub generate_song {
 		my $style = $ps->{chorus};
 		$indent = $style->{indent};
 		if ( $style->{bar}->{offset} && $style->{bar}->{width} ) {
-		    my $cx = $ps->{__leftmargin} + $ps->{indent}
+		    my $cx = $ps->{__leftmargin} + $ps->{_indent}
 		      - $style->{bar}->{offset}
 			+ $indent;
 		    $pr->vline( $cx, $y, $vsp,
@@ -869,7 +907,7 @@ sub font_ul {
 
 sub prlabel {
     my ( $ps, $label, $x, $y, $font) = @_;
-    return if $label eq "" || $ps->{indent} == 0;
+    return if $label eq "" || $ps->{_indent} == 0;
     my $align = $ps->{labels}->{align};
     if ( $align eq "right" ) {
 	my $avg_space_width = $ps->{pr}->strwidth("m") / 4;
@@ -879,12 +917,12 @@ sub prlabel {
     }
     elsif ( $align =~ /^cent(?:er|re)$/ ) {
 	$ps->{pr}->text( $label,
-			 $x - $ps->{indent} + $ps->{pr}->strwidth($label)/2,
+			 $x - $ps->{_indent} + $ps->{pr}->strwidth($label)/2,
 			 $y, $font );
     }
     else {
 	$ps->{pr}->text( $label,
-			 $x - $ps->{indent}, $y, $font );
+			 $x - $ps->{_indent}, $y, $font );
     }
 }
 
@@ -1683,13 +1721,13 @@ sub showlayout {
 	$pr->vline(@a);
 	$a[0] = $ml + $off[$i] - $ps->{columnspace};
 	$pr->vline(@a);
-	if ( $ps->{indent} ) {
-	    $a[0] = $ml + $off[$i] + $ps->{indent};
+	if ( $ps->{_indent} ) {
+	    $a[0] = $ml + $off[$i] + $ps->{_indent};
 	    $pr->vline(@a);
 	}
     }
-    if ( $ps->{indent} ) {
-	$a[0] = $ml + $ps->{indent};
+    if ( $ps->{_indent} ) {
+	$a[0] = $ml + $ps->{_indent};
 	$pr->vline(@a);
     }
 }
