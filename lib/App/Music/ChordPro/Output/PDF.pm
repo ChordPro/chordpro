@@ -159,6 +159,7 @@ sub generate_song {
     $chordscol    = $ps->{chordscolumn};
     $lyrics_only  = $::config->{settings}->{'lyrics-only'};
     $chordscapo   = $s->{meta}->{capo};
+    $ps->{indent} = $ps->{labels}->{width};
 
     my $fail;
     for my $item ( @{ SIZE_ITEMS() } ) {
@@ -862,6 +863,27 @@ sub font_ul {
     $font->{font}->underlineposition / 1024 * $font->{size};
 }
 
+sub prlabel {
+    my ( $ps, $label, $x, $y, $font) = @_;
+    return if $label eq "" || $ps->{indent} == 0;
+    my $align = $ps->{labels}->{align};
+    if ( $align eq "right" ) {
+	my $avg_space_width = $ps->{pr}->strwidth("m") / 4;
+	$ps->{pr}->text( $label,
+			 $x - $avg_space_width - $ps->{pr}->strwidth($label),
+			 $y, $font );
+    }
+    elsif ( $align =~ /^cent(?:er|re)$/ ) {
+	$ps->{pr}->text( $label,
+			 $x - $ps->{indent} + $ps->{pr}->strwidth($label)/2,
+			 $y, $font );
+    }
+    else {
+	$ps->{pr}->text( $label,
+			 $x - $ps->{indent}, $y, $font );
+    }
+}
+
 sub songline {
     my ( $elt, $x, $ytop, $ps, %opts ) = @_;
 
@@ -921,7 +943,7 @@ sub songline {
 	$ftext = $fonts->{tab};
 	$ytext  = $ytop - font_bl($ftext);
 	$x += $opts{indent} if $opts{indent};
-	$pr->text( $tag, $x-$ps->{indent}, $ytext, $ftext ) if $tag ne "";
+	prlabel( $ps, $tag, $x, $ytext, $ftext );
 	$pr->text( $elt->{text}, $x, $ytext, $ftext );
 	return;
     }
@@ -940,7 +962,7 @@ sub songline {
        ) {
 	my $x = $x;
 	$x += $opts{indent} if $opts{indent};
-	$pr->text( $tag, $x-$ps->{indent}, $ytext, $ftext ) if $tag ne "";
+	prlabel( $ps, $tag, $x, $ytext, $ftext );
 	$pr->text( join( "", @{ $elt->{phrases} } ), $x, $ytext, $ftext );
 	return;
     }
@@ -1014,7 +1036,7 @@ sub songline {
 			0.25, "black" );
 
 	    # Print the text.
-	    $pr->text( $tag, $x-$ps->{indent}, $ytext, $ftext ) if $tag ne "";
+	    prlabel( $ps, $tag, $x, $ytext, $ftext );
 	    $tag = "";
 	    $x = $pr->text( $phrase, $x, $ytext, $ftext );
 
@@ -1055,7 +1077,7 @@ sub songline {
 	    else {
 		$xt0 = $x;
 	    }
-	    $pr->text( $tag, $x-$ps->{indent}, $ytext, $ftext ) if $tag ne "";
+	    prlabel( $ps, $tag, $x, $ytext, $ftext );
 	    $tag = "";
 	    if ( $inlinechords ) {
 		$x = $pr->text( $phrase, $xt0, $ytext, $ftext );

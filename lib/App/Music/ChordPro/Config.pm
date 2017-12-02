@@ -161,9 +161,13 @@ This is the current built-in configuration file, showing all settings.
             },
 	},
   
-	// Indent for lyrics.
-  	// "indent" : 70,
-  	"indent" :  0,
+	// This opens a margin for margin labels.
+	"labels" : {
+	    // Margin width. Default is 0 (no margin labels).
+	    "width" : 0,
+	    // Alignment for the labels. Default is left.
+	    "align" : "left",
+	},
   
   	// Alternative songlines with chords in a side column.
   	// Value is the column position.

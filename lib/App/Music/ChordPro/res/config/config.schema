@@ -55,6 +55,15 @@
 		    "minimum": 1
 		},
 
+		"inline-chords": {
+		    "description": "Chords inline.",
+		    "default": false,
+		    "anyOf" : [
+		        { "type": "string" },
+		        { "type": "boolean" }
+		    ]
+		},
+
 		"lyrics-only": {
 		    "description": "Suppress chords.",
 		    "type": "boolean",
@@ -288,6 +297,12 @@
 		"diagrams": {
 		    "description": "Appearance of chord diagrams.",
 		    "properties": {
+		        "show": {
+			    "description": "Where to show the diagrams.",
+			    "default": "bottom",
+			    "enum": [ "top", "right", "below", "bottom" ],
+			    "type": "string"
+			},
 			"height": {
 			    "description": "Distance between frets.",
 			    "default": 6,
@@ -540,6 +555,24 @@
 		    "default": 60,
 		    "minimum": 0,
 		    "type": "number"
+		},
+
+		"labels": {
+		    "description": "Margin labels.",
+		    "properties": {
+		        "align": {
+			    "description": "Labels text alignment.",
+			    "default": "left",
+			    "enum": [ "left", "right", "center" ],
+			    "type": "string"
+			},
+			"width" : {
+			    "description": "Margin width.",
+			    "default": 0,
+			    "type": "number"
+		        }
+		    },
+		    "additionalProperties": false
 		},
 
 		"marginbottom": {
