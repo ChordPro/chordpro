@@ -224,8 +224,8 @@ sub generate_song {
     my $do_size = sub {
 	my ( $tag, $value ) = @_;
 	if ( $value =~ /^(.+)\%$/ ) {
-#$	    $fonts->{$tag}->{_size} //=
-#$	      $::config->{pdf}->{fonts}->{$tag}->{size};
+	    $fonts->{$tag}->{_size} //=
+	      $::config->{pdf}->{fonts}->{$tag}->{size};
 	    $fonts->{$tag}->{size} =
 	      ( $1 / 100 ) * $fonts->{$tag}->{_size};
 	}
@@ -511,6 +511,10 @@ sub generate_song {
 	    $y -= $vsp;
 	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
 	    next;
+	}
+
+	unless ( $elt->{type} =~ /^(?:coltrol|set|ignore)$/ ) {
+	    $vsp_ignorefirst = 0;
 	}
 
 	if ( $elt->{type} eq "songline"

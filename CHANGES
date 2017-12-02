@@ -18,7 +18,8 @@
     - Fix problem that trailing empty lines were discarded.
     - Fix final line discard if input is not newline terminated.
     - Fix issue#31 (textsize directive with percentage raises error).
-
+    - Fix problem where first empty line was inadvertently ignored.
+    
 0.910.1	2017-11-09
 
     - Add modern3 style.
