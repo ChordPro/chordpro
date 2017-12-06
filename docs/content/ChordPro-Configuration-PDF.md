@@ -126,7 +126,7 @@ The vertical distance between lines of diagrams is `vspace` times the cell heigh
 `linewidth` is the thickness of the diagram lines as a fraction of the cell width.
 
         "diagram" : {
-            "show"     :  "bottom",   // or "top", or "right"
+            "show"     :  "bottom",   // or "top", or "right", or "below"
             "width"    :  6,
             "height"   :  6,
             "hspace"   :  3.95,
@@ -139,15 +139,11 @@ With the above settings, chord diagrams will look like:
 
 ![](images/ex_chords.png)
 
-## Chords diagrams in a side column
-
-This is an alternative style where the chord diagrams are placed in a
+An example of `"show":"right"`, where the chord diagrams are placed in a
 separate column at the right of the lyrics instead of at the end of
 the song.
 
 [![style_modern3.png](images/style_modern3.png)](images/style_modern3.pdf)
-
-This style is enabled by setting the `diagrams` property `show` to `"right"`.
 
 ## Even/odd page printing
 
