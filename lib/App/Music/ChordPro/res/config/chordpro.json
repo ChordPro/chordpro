@@ -167,9 +167,8 @@
 	// The vertical distance is "vspace" cells.
 	// "linewidth" is the thickness of the lines as a fraction of "width".
 	// Diagrams for all chords of the song can be shown at the
-	// "top" of the first page, the "bottom" of the last page
-	// (default), "left" on the first page and "right" on the first
-	// page. "left" is not implemented.
+	// "top", "bottom" or "right" side of the first page,
+	// or "below" the last song line.
 	"diagrams" : {
 	    "show"     :  "bottom",
 	    "width"    :  6,

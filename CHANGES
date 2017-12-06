@@ -9,6 +9,8 @@
     - Fix the need for a bogus file argument when dumping chords.
     - Experimental support for indenting and margin labels.
     - Obsolete pdf.diagramscolumn in favour of pdf.diagrams.show.
+      This can be top, bottom, right of the first page, and below,
+      following the last song line.
     - Provide song source for unknown chords message.
     - Handle UTF-8 encoded filenames correctly.
     - Implement in-line printing of chords, config:
@@ -22,7 +24,7 @@
     
 0.910.1	2017-11-09
 
-    - Add modern3 style.
+    - Add style 'modern3'.
 
 0.91	2017-11-09
 
@@ -32,6 +34,7 @@
       list of paths.
     - Add PDF config "diagramscolumn". This will have the song chord
       diagrams printed on the first page, in a side column.
+      Experimental.
     - Fix problem with misnumbered fingers in non-builtin chords.
     - Fix problem with restoring defaults for {textsize} and friends.
     

@@ -77,7 +77,7 @@
 	// Value is the column position.
 	"chordscolumn"   :  0,
 
-	// Slightly larger diagrams.
+	// Slightly larger diagrams, shown at the right side.
 	"diagrams" : {
 	    "show"     :  "right",
 	    "width"    :  8,

@@ -153,6 +153,9 @@ sub generate_song {
 
     my $sb = $s->{body};
 
+    # set_columns needs these, set provisional values.
+    $ps->{_leftmargin}  = $ps->{marginleft};
+    $ps->{_rightmargin} = $ps->{marginright};
     set_columns( $ps,
 		 $s->{settings}->{columns} || $::config->{settings}->{columns} );
 
@@ -275,15 +278,31 @@ sub generate_song {
 	    # Odd/even printing...
 	    $rightpage = !$rightpage if $ps->{'even-odd-pages'} < 0;
 	}
+
+	# margin* are offsets from the edges of the paper.
+	# _*margin are offsets taking even/odd pages into account.
+	# _margin* are physical coordinates, taking ...
 	if ( $rightpage ) {
 	    $ps->{_leftmargin}  = $ps->{marginleft};
+	    $ps->{_marginleft}  = $ps->{marginleft};
 	    $ps->{_rightmargin} = $ps->{marginright};
+	    $ps->{_marginright} = $ps->{papersize}->[0] - $ps->{marginright};
 	}
 	else {
 	    $ps->{_leftmargin}  = $ps->{marginright};
+	    $ps->{_marginleft}  = $ps->{marginright};
 	    $ps->{_rightmargin} = $ps->{marginleft};
+	    $ps->{_marginright} = $ps->{papersize}->[0] - $ps->{marginleft};
 	}
-	$ps->{_bottommargin} = $ps->{marginbottom};
+	$ps->{_marginbottom}  = $ps->{marginbottom};
+	$ps->{_margintop}     = $ps->{papersize}->[1] - $ps->{margintop};
+	$ps->{_bottommargin}  = $ps->{marginbottom};
+
+	# Physical coordinates; will be adjusted to columns if needed.
+	$ps->{__leftmargin}   = $ps->{_marginleft};
+	$ps->{__rightmargin}  = $ps->{_marginright};
+	$ps->{__topmargin}    = $ps->{_margintop};
+	$ps->{__bottommargin} = $ps->{_marginbottom};
 
 	$thispage++;
 	$s->{meta}->{page} = [ $s->{page} = $thispage ];
@@ -300,11 +319,9 @@ sub generate_song {
 	# Three-part title handlers.
 	my $tpt = sub { tpt( $ps, $class, $_[0], $rightpage, $x, $y, $s ) };
 
-	$ps->{__leftmargin} = $x = $ps->{_leftmargin};
-	$ps->{__rightmargin} = $ps->{papersize}->[0] - $ps->{_rightmargin};
-
+	$x = $ps->{__leftmargin};
 	if ( $ps->{headspace} ) {
-	    $y = $ps->{papersize}->[1] - $ps->{margintop} + $ps->{headspace};
+	    $y = $ps->{_margintop} + $ps->{headspace};
 	    $y -= font_bl($fonts->{title});
 	    $tpt->("title");
 	    $y -= ( - ( $fonts->{title}->{font}->descender / 1024 )
@@ -321,7 +338,7 @@ sub generate_song {
 	}
 
 	$x += $ps->{_indent};
-	$y = $ps->{papersize}->[1] - $ps->{margintop};
+	$y = $ps->{_margintop};
 	$y += $ps->{headspace} if $ps->{'head-first-only'} && $class == 2;
 	$ps->{_top} = $y;
 	$col = 0;
@@ -399,19 +416,22 @@ sub generate_song {
 	if ( $ps->{diagrams}->{show} eq "right" && $class <= 1 ) {
 	    my $vsp = chordgrid_vsp( undef, $ps );
 
-	    my $v = int( ( $ps->{papersize}->[1] - $ps->{margintop} - $ps->{marginbottom} ) / $vsp );
+	    my $v = int( ( $ps->{_margintop} - $ps->{marginbottom} ) / $vsp );
 	    my $c = int( ( @chords - 1) / $v ) + 1;
 	    # warn("XXX ", scalar(@chords), ", $c colums of $v max\n");
 	    my $column =
-	      ( $ps->{__rightmargin} - $ps->{__leftmargin}
+	      ( $ps->{_marginright} - $ps->{_marginleft}
 		- ($c-1) * chordgrid_hsp(undef,$ps)
 		- chordgrid_hsp0(undef,$ps)
 		- $ps->{diagrams}->{width} * 0.4 );
 
 	    my $hsp = chordgrid_hsp(undef,$ps);
+	    my $x = $x + $column - $ps->{_indent};
+	    $ps->{_rightmargin} = $ps->{papersize}->[0] - $x + $ps->{columnspace};
+	    set_columns( $ps,
+			 $s->{settings}->{columns} || $::config->{settings}->{columns} );
 	    my $y = $y;
 	    while ( @chords ) {
-		my $x = $x + $column - $ps->{_indent};
 
 		for ( 0..$c-1 ) {
 		    last unless @chords;
@@ -423,7 +443,7 @@ sub generate_song {
 	}
 	elsif ( $ps->{diagrams}->{show} eq "top" && $class <= 1 ) {
 
-	    my $ww = ( $ps->{papersize}->[0] - $ps->{_rightmargin} - $ps->{_leftmargin} );
+	    my $ww = ( $ps->{_marginright} - $ps->{_marginleft} );
 
 	    # Number of diagrams, based on minimal required interspace.
 	    my $h = int( ( $ww
@@ -448,7 +468,7 @@ sub generate_song {
 	}
 	elsif ( $ps->{diagrams}->{show} eq "bottom" && $class <= 1 && $col == 0 ) {
 
-	    my $ww = ( $ps->{papersize}->[0] - $ps->{_rightmargin} - $ps->{_leftmargin} );
+	    my $ww = ( $ps->{_marginright} - $ps->{_marginleft} );
 
 	    # Number of diagrams, based on minimal required interspace.
 	    my $h = int( ( $ww
@@ -482,7 +502,7 @@ sub generate_song {
 	}
 	elsif ( $ps->{diagrams}->{show} eq "below" ) {
 
-	    local $::config->{diagrams}->{show} = $show;
+	    local $::config->{diagrams}->{show} = $show; # ###WHY?
 
 	    my $vsp = chordgrid_vsp( undef, $ps );
 	    my $hsp = chordgrid_hsp( undef, $ps );
@@ -493,7 +513,7 @@ sub generate_song {
 	    while ( @chords ) {
 		my $x = $x - $ps->{_indent};
 		$checkspace->($vsp);
-		$pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+		$pr->show_vpos( $y, 0 ) if 1||DEBUG_SPACING;
 
 		for ( 1..$h ) {
 		    last unless @chords;
@@ -502,7 +522,7 @@ sub generate_song {
 		}
 
 		$y -= $vsp;
-		$pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+		$pr->show_vpos( $y, 1 ) if 1||DEBUG_SPACING;
 	    }
 	}
     };
@@ -534,9 +554,9 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} ne "set" && !$did++ ) {
-	    showlayout($ps) if $ps->{showlayout};
 	    # Insert top/left/right/bottom chord diagrams.
  	    $chorddiagrams->() unless $ps->{diagrams}->{show} eq "below";
+	    showlayout($ps) if $ps->{showlayout};
 	}
 
 	if ( $elt->{type} eq "empty" ) {
@@ -793,8 +813,7 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "diagrams" ) {
-	    $chorddiagrams->( $elt->{chords},
-			      $elt->{show} || $::config->{diagrams}->{show} );
+	    warn("*** CANNOT HAPPEN - type = diagrams ***");
 	    next;
 	}
 
@@ -888,7 +907,7 @@ sub generate_song {
 	$prev = $elt;
     }
 
-    if ( $ps->{diagrams}->{show} eq "bottom" ) {
+    if ( $ps->{diagrams}->{show} eq "below" ) {
 	$chorddiagrams->();
     }
 
@@ -1385,7 +1404,7 @@ sub imageline {
 	$pw = $ps->{__rightmargin} - $ps->{_leftmargin};
     }
 
-    my $ph = $ps->{papersize}->[1] - $ps->{margintop} - $ps->{marginbottom};
+    my $ph = $ps->{_margintop} - $ps->{_marginbottom};
 
     my $scale = 1;
     my ( $w, $h ) = ( $opts->{width}  || $img->width,
@@ -1429,7 +1448,7 @@ sub tocline {
     my $ann = $pr->{pdfpage}->annotation;
     $ann->link($elt->{page});
     $ann->rect( $ps->{_leftmargin}, $y0 - $ftoc->{size},
-		$ps->{papersize}->[0]-$ps->{_rightmargin}, $y0 );
+		$ps->{__marginright}, $y0 );
     ####CHECK MARGIN RIGHT
 }
 
@@ -1668,11 +1687,8 @@ sub set_columns {
 	$ps->{columns} = $cols ||= 1;
     }
 
-    # Note that _leftmargin and _rightmargin may not yet have been set.
-    # Luckily, marginleft + marginright is always equal to
-    # _leftmargin + _rightmargin.
     my $w = $ps->{papersize}->[0]
-      - $ps->{marginleft} - $ps->{marginright};
+      - $ps->{_leftmargin} - $ps->{_rightmargin};
 
     $ps->{columnoffsets} = [ 0 ];
      push( @{ $ps->{columnoffsets} }, $w ), return unless $cols > 1;
