@@ -1,5 +1,13 @@
 # Release info
 
+## 0.93
+
+Released: 2017-12-07
+
+* Fix transposition of chord diagrams.
+
+**[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.**
+
 ## 0.92
 
 Released: 2017-12-07
@@ -17,8 +25,6 @@ Released: 2017-12-07
 * Fix final line discard if input is not newline terminated.
 * Fix issue#31 (textsize directive with percentage raises error).
 * Fix problem where first empty line was inadvertently ignored.
-
-**[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.**
 
 ## 0.910.1
 
