@@ -1000,6 +1000,13 @@ sub transpose {
 	}
     }
 
+    # Transpose song chords.
+    if ( exists $self->{chords} ) {
+	foreach my $item ( $self->{chords} ) {
+	    $self->_transpose( $item, $xpose );
+	}
+    }
+
     # Transpose body contents.
     if ( exists $self->{body} ) {
 	foreach my $item ( @{ $self->{body} } ) {
