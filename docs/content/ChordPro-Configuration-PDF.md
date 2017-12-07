@@ -57,6 +57,14 @@ This controls the distance between lines as a factor of the font size.
 
 Note: By setting the spacing for `empty` to a small value, you get fine-grained control over the spacing between the various parts of the song.
 
+## Indent
+
+When `indent` is set to a positive value, the lyrics and associated
+chords will be indented by this amount. This will create a left
+margin where labels can be printed. See e.g. [[start_of_verse|Directives env_verse]].
+
+[![labels.png](images/labels.png)](images/labels.pdf)
+
 ## Chorus style
 
 ChordPro can format a chorus in several different ways:
@@ -105,7 +113,7 @@ Traditionally, the `{titles}` directive was used to control titles flush. ChordP
 
 Chord diagrams are added to the song to show the chords used in the
 song. By default the diagrams are at the end of the song but it is
-also possible to have them in a side column on the first page of the
+also possible to have them at the bottom, or in a side column on the first page of the
 song. See [Chords diagrams in a side column](#chords-diagrams-in-a-side-column) below.
 
 A chord diagram consists of a number of cells. Cell dimensions are specified by `width` and `height`.  
@@ -118,6 +126,7 @@ The vertical distance between lines of diagrams is `vspace` times the cell heigh
 `linewidth` is the thickness of the diagram lines as a fraction of the cell width.
 
         "diagram" : {
+            "show"     :  "bottom",   // or "top", or "right", or "below"
             "width"    :  6,
             "height"   :  6,
             "hspace"   :  3.95,
@@ -130,15 +139,11 @@ With the above settings, chord diagrams will look like:
 
 ![](images/ex_chords.png)
 
-## Chords diagrams in a side column
-
-This is an alternative style where the chord diagrams are placed in a
+An example of `"show":"right"`, where the chord diagrams are placed in a
 separate column at the right of the lyrics instead of at the end of
 the song.
 
 [![style_modern3.png](images/style_modern3.png)](images/style_modern3.pdf)
-
-
 
 ## Even/odd page printing
 
@@ -171,8 +176,6 @@ All heading strings may contain references to metadata in the form `%{`_NAME_`}`
                 "subtitle"  : null,
                 // Footer is title -- page number.
                 "footer"    : [ "%{title}", "", "%{page}" ],
-                // Title for ToC.
-                "toc-title" : "Table of Contents",
             },
 
             // The first page of a song has:
@@ -192,16 +195,39 @@ All heading strings may contain references to metadata in the form `%{`_NAME_`}`
             },
         },
 
+The effect of the default settings can be seen in the following
+picture.
+
+![](images/pageformats.png)
+
+Pages 2 and 4 are normal (`default`) pages. They have no heading and
+have the page number and song title in the footer.
+
+Page 3 is the first page of a song (`title`). It has the song title
+and subtitle in the heading, and only the page number in the footer.
+
+Page 1 is the very first output page (`first`). It is like a `title`
+page but, according to typesetting conventions, doesn't have the page
+number in the footer.
+
+Note that by default ChordPro produces different odd and even pages.
+Therefore the page number on (odd) page 3 is at the left side, while it is at
+the right side on (even) pages 2 and 4.
+
 ## Font libraries
 
 You can either designate a built-in font by its name, or give the filename of a TrueType (ttf) or OpenType font (otf).  
 The filename should be the full name of a file on disk, or a relative filename which will be looked up in system dependent font libraries.
 
-The `fontdir` setting can be used to add a private font directory to
-the font libraries. The private directory will be searched first.
+The `fontdir` setting can be used to add one or more private font directories to
+the font libraries. The private directories will be searched first.
 
-        // Relative filenames are looked up in the fontdir.
-        "fontdir" : null,
+		// Fonts.
+		// Fonts can be specified by name (for the corefonts)
+		// or a filename (for TrueType/OpenType fonts).
+		// Relative filenames are looked up in the fontdir.
+		// "fontdir" : [ "/usr/share/fonts/liberation", "/home/me/fonts" ],
+		"fontdir" : null,
 
 See also [[ChordPro Fonts]].
 

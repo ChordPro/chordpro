@@ -95,6 +95,24 @@ By default, ChordPro will include diagrams for all known chords that have been u
 
 If `auto` is set to true, unknown chords will be printed as empty diagrams. This makes it easy to manually put the finger positions on paper. Of course, adding a [chord definition](#user-defined-chords) is usually a better alternative.
 
+## Table of Contents
+
+Here you can set the title text for the table of contents. By default
+this is the string `"Table of Contents"`.
+
+The song titles in the table of contents are in the same order as in
+the document. By setting `order` to `"alpha"`, the titles are sorted
+alphabetically.
+
+    // Table of contents.
+    "toc" : {
+	  // Title for ToC.
+	  "title" : "Table of Contents",
+	  // Sorting order.
+	  // Currently only sorting by page number and alpha is implemented.
+	  "order" : "page",
+    },
+
 ## Diagnostic message format
 
 When ChordPro detects errors while analyzing a song, it will use this format to show diagnostic messages.
