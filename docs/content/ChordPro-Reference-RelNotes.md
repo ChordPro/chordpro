@@ -1,12 +1,30 @@
 # Release info
 
+## 0.92
+
+Released: 2017-12-07
+
+* Add configurable sort methods for table of contents. Config option: toc.order, values "page" or "alpha". Default is "page". Config option: toc.title, default "Table of Contents". Supersedes pdf.formats.default.toc-title.
+* Fix JSON problem with loading UTF8 config files.
+* Fix the need for a bogus file argument when dumping chords.
+* Experimental support for indenting and margin labels.
+* Obsolete pdf.diagramscolumn in favour of pdf.diagrams.show. This can be top, bottom, right of the first page, and below, following the last song line.
+* Provide song source for unknown chords message.
+* Handle UTF-8 encoded filenames correctly.
+* Implement in-line printing of chords, config: settings.inline-chords. Add style 'inline'.
+* Fix problem with font restore after {textfont} cs.
+* Fix problem that trailing empty lines were discarded.
+* Fix final line discard if input is not newline terminated.
+* Fix issue#31 (textsize directive with percentage raises error).
+* Fix problem where first empty line was inadvertently ignored.
+
+**[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.**
+
 ## 0.910.1
 
 Released: 2017-11-09
 
-* Add modern3 style.
-
-**[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.**
+* Add style 'modern3'.
 
 ## 0.91
 
@@ -14,7 +32,7 @@ Released: 2017-11-09
 
 * Add printing of bars in chord diagrams.
 * Allow PDF config "fontdir" to take an array of paths. Also, allow the path elements to be a colon-(Windows: semicolon)-separated list of paths.
-* Add PDF config "diagramscolumn". This will have the song chord diagrams printed on the first page, in a side column.
+* Add PDF config "diagramscolumn". This will have the song chord diagrams printed on the first page, in a side column. Experimental.
 * Fix problem with misnumbered fingers in non-builtin chords.
 * Fix problem with restoring defaults for {textsize} and friends.
 
