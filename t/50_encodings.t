@@ -35,6 +35,7 @@ my $song = {
 				  ]
 		      },
 	    'title' => 'Swing Low Sweet Chariot',
+	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear',
 	    'subtitle' => [
 			   'Sub Títlë',
@@ -78,6 +79,7 @@ sub enctest {
     eval { $s->parsefile($fn) } or diag("$@");
     ok( scalar( @{ $s->{songs} } ) == 1, "$enc: One song" );
     isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
+    $song->{source}->{file} = $fn;
     is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );
 
     unlink($fn);

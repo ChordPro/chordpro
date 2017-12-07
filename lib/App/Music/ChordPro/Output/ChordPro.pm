@@ -110,6 +110,16 @@ sub generate_song {
     my $ctx = "";
     my $dumphdr = 1;
 
+    if ( $s->{chords} ) {
+	$dumphdr = 0 unless $s->{chords}->{origin} eq "__CLI__";
+	push( @s,
+	      @{ App::Music::ChordPro::Chords::list_chords
+		  ( $s->{chords}->{chords},
+		    $s->{chords}->{origin},
+		    $dumphdr ) } );
+	$dumphdr = 0;
+    }
+
     my @elts = @{$s->{body}};
     while ( @elts ) {
 	my $elt = shift(@elts);

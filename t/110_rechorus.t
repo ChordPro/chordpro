@@ -75,6 +75,7 @@ my $song = {
 			'transpose' => 0,
 		       }
  		      ],
+	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear',
 	   };
 

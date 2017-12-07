@@ -55,6 +55,15 @@
 		    "minimum": 1
 		},
 
+		"inline-chords": {
+		    "description": "Chords inline.",
+		    "default": false,
+		    "anyOf" : [
+		        { "type": "string" },
+		        { "type": "boolean" }
+		    ]
+		},
+
 		"lyrics-only": {
 		    "description": "Suppress chords.",
 		    "type": "boolean",
@@ -249,7 +258,7 @@
 				    "type": "boolean"
 				},
 				"tag": {
-				    "description": "Tag text for chorus.",
+				    "description": "Label for recalled chorus.",
 				    "default": "Chorus",
 				    "type": "string"
 				},
@@ -268,6 +277,11 @@
 				}
 			    },
 			    "additionalProperties": false
+			},
+			"tag": {
+			    "description": "Label for Chorus.",
+			    "type": "string",
+			    "default": "Chorus"
 			}
 		    },
 		    "additionalProperties": false
@@ -283,6 +297,12 @@
 		"diagrams": {
 		    "description": "Appearance of chord diagrams.",
 		    "properties": {
+		        "show": {
+			    "description": "Where to show the diagrams.",
+			    "default": "bottom",
+			    "enum": [ "top", "right", "below", "bottom" ],
+			    "type": "string"
+			},
 			"height": {
 			    "description": "Distance between frets.",
 			    "default": 6,
@@ -476,11 +496,7 @@
 				    "allOf": [
 					{ "$ref": "#/definitions/tptspec" },
 					{ "default": [ "%{title}", "", "%{page}" ] }
-				    ] },
-				"toc-title": {
-				    "type": "string",
-				    "default": "Table of Contents"
-				}
+				    ] }
 			    },
 			    "additionalProperties": false
 			},
@@ -501,11 +517,7 @@
 				    "allOf": [
 					{ "$ref": "#/definitions/tptspec" },
 					{ "default": [ "", "", "%{page}" ] }
-				    ] },
-				"toc-title": {
-				    "description": "Defaults to default.",
-				    "type": "string"
-				}
+				    ] }
 			    },
 			    "additionalProperties": false
 			},
@@ -524,11 +536,7 @@
 				    "allOf": [
 					{ "$ref": "#/definitions/tptspec" },
 					{ "default": null }
-				    ] },
-				"toc-title": {
-				    "description": "Defaults to default.",
-				    "type": "string"
-				}
+				    ] }
 			    },
 			    "additionalProperties": false
 			}
@@ -547,6 +555,24 @@
 		    "default": 60,
 		    "minimum": 0,
 		    "type": "number"
+		},
+
+		"labels": {
+		    "description": "Margin labels.",
+		    "properties": {
+		        "align": {
+			    "description": "Labels text alignment.",
+			    "default": "left",
+			    "enum": [ "left", "right", "center" ],
+			    "type": "string"
+			},
+			"width" : {
+			    "description": "Margin width.",
+			    "default": 0,
+			    "type": "number"
+		        }
+		    },
+		    "additionalProperties": false
 		},
 
 		"marginbottom": {
@@ -638,6 +664,24 @@
 		    "description": "Ignore titles directives in the songs.",
 		    "default": false,
 		    "type": "boolean"
+		}
+	    },
+	    "additionalProperties": false
+	},
+
+	"toc": {
+	    "description": "Table of Contents",
+	    "properties": {
+	        "title": {
+		    "description": "Title for the Table of Contents",
+		    "default": "Table of Contents",
+		    "type": "string"
+		},
+		"order": {
+		    "description": "Sorting order for song titles",
+		    "enum": [ "page", "alpha" ],
+		    "default": "page",
+		    "type": "string"
 		}
 	    },
 	    "additionalProperties": false

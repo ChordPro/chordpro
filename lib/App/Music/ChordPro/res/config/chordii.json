@@ -22,6 +22,14 @@
 	"sorted"   :  false,
     },
 
+    // Table of contents.
+    "toc" : {
+	  // Title for ToC.
+	  "title" : "Table of Contents",
+	  // Sorting order.
+	  "order" : "alpha",
+    },
+    
     // Layout definitions for PDF output.
 
     "pdf" : {
@@ -90,6 +98,9 @@
 	// The horizontal distance between grids is "hspace" cells.
 	// The vertical distance is "vspace" cells.
 	// "linewidth" is the thickness of the lines as a fraction of "width".
+	// Diagrams for all chords of the song can be shown at the
+  	// "top", "bottom" or "right" side of the first page,
+	// or "below" the last song line.
 	"diagrams" : {
 	    "width"    :  6,
 	    "height"   :  6,
@@ -97,6 +108,7 @@
 	    "vspace"   :  3,
 	    "vcells"   :  4,
 	    "linewidth" : 0.15,
+	    "show"     :  "below",
 	},
 
 	// Even/odd pages. A value of -1 denotes odd/even pages.
@@ -117,8 +129,6 @@
 	    	"subtitle"  : null,
 		// Footer is title -- page number.
 	    	"footer"    : [ "%{title}", "", "%{page}" ],
-		// Title for ToC.
-		"toc-title" : "Table of Contents",
 	    },
 	    // The first page of a song has:
 	    "title" : {

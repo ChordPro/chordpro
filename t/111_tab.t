@@ -41,6 +41,7 @@ my $song = {
 			'type' => 'tabline'
 		       }
 		      ],
+	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear',
 	   };
 

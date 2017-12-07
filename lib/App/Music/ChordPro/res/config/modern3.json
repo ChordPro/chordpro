@@ -15,6 +15,14 @@
 	"show" : "all"
     },
     
+    // Table of contents.
+    "toc" : {
+	  // Title for ToC.
+	  "title" : "Table of Contents",
+	  // Sorting order.
+	  "order" : "page",
+    },
+
     // Layout definitions for PDF output.
 
     "pdf" : {
@@ -67,15 +75,15 @@
 
 	// Chord diagrams in a side column.
 	// Value is the column position.
-	"diagramscolumn" :  350,
 	"chordscolumn"   :  0,
 
-	// Slightly larger diagrams.
+	// Slightly larger diagrams, shown at the right side.
 	"diagrams" : {
+	    "show"     :  "right",
 	    "width"    :  8,
   	    "height"   :  8,
-  	    "hspace"   :  1,
-  	    "vspace"   :  3,
+	    "hspace"   :  3.95,
+	    "vspace"   :  3,
   	    "vcells"   :  4,
 	    "linewidth" : 0.1,
 	},
@@ -102,8 +110,6 @@
 	    	"subtitle"  : null,
 		// Footer is title -- page number.
 	    	"footer"    : [ "%{title}", "", "%{page}" ],
-		// Title for ToC.
-		"toc-title" : "Table of Contents",
 	    },
 	    // The first page of a song has:
 	    "title" : {

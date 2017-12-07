@@ -46,6 +46,7 @@ my $song = {
 		       'capo' => [ '2' ],
 		      },
 	    'title' => 'Swing Low Sweet Chariot',
+	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear',
 	   };
 
@@ -116,6 +117,7 @@ $song = {
 		       'time' => [ '3/4', '4/4' ],
 		      },
 	    'title' => 'Swing Low Sweet Chariot',
+	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear',
 	   };
 

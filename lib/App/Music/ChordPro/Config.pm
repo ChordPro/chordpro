@@ -37,6 +37,10 @@ This is the current built-in configuration file, showing all settings.
   	// Suppress chords.
   	// Overrides --lyrics-only command line option.
   	"lyrics-only" : false,
+	// Chords inline.
+	// May be a string containing pretext %s posttext.
+	// Defaults to "[%s]" if true.
+	"inline-chords" : false,
       },
   
       // Metadata.
@@ -90,6 +94,15 @@ This is the current built-in configuration file, showing all settings.
 	  "format" : "\"%f\", line %n, %m\n\t%l",
       },
   
+      // Table of contents.
+      "toc" : {
+  	  // Title for ToC.
+  	  "title" : "Table of Contents",
+	  // Sorting order.
+	  // Currently only sorting by page number and alpha is implemented.
+	  "order" : "page",
+      },
+  
       // Layout definitions for PDF output.
   
       "pdf" : {
@@ -138,6 +151,7 @@ This is the current built-in configuration file, showing all settings.
 		"width"  :  1,
 		"color"  : "black",
 	    },
+	    "tag" : "Chorus",
             // Recall style: Print the tag using the type.
             // Optionally quote the lines of the preceding chorus.
             "recall" : {
@@ -147,14 +161,18 @@ This is the current built-in configuration file, showing all settings.
             },
 	},
   
+	// This opens a margin for margin labels.
+	"labels" : {
+	    // Margin width. Default is 0 (no margin labels).
+	    "width" : 0,
+	    // Alignment for the labels. Default is left.
+	    "align" : "left",
+	},
+  
   	// Alternative songlines with chords in a side column.
   	// Value is the column position.
   	// "chordscolumn" : 400,
   	"chordscolumn" :  0,
-  
-  	// Alternative placement for chord diagrams.
-  	// Value is the column position.
-  	"diagramscolumn" :  0,
   
 	// A {titles: left} may conflict with customized formats.
 	// Set to non-zero to ignore the directive.
@@ -169,7 +187,11 @@ This is the current built-in configuration file, showing all settings.
   	// The horizontal distance between diagrams is "hspace" cells.
   	// The vertical distance is "vspace" cells.
 	// "linewidth" is the thickness of the lines as a fraction of "width".
+	// Diagrams for all chords of the song can be shown at the
+  	// "top", "bottom" or "right" side of the first page,
+	// or "below" the last song line.
   	"diagrams" : {
+	    "show"     :  "bottom",
 	    "width"    :  6,
   	    "height"   :  6,
   	    "hspace"   :  3.95,
@@ -196,8 +218,6 @@ This is the current built-in configuration file, showing all settings.
   	    	"subtitle"  : null,
   		// Footer is title -- page number.
   	    	"footer"    : [ "%{title}", "", "%{page}" ],
-  		// Title for ToC.
-  		"toc-title" : "Table of Contents",
   	    },
   	    // The first page of a song has:
   	    "title" : {
@@ -493,9 +513,24 @@ sub configurator {
 sub add_config {
     my ( $cfg, $options, $file, $pp ) = @_;
     warn("Config: $file\n") if $options->{verbose};
-    if ( open( my $fd, "<:utf8", $file ) ) {
+    if ( open( my $fd, "<:raw", $file ) ) {
 	local $/;
-	$cfg = hmerge( $cfg, $pp->decode( scalar( <$fd> ) ), "" );
+	my $new = $pp->decode( scalar( <$fd> ) );
+
+	# Handle obsolete keys.
+	if ( exists $new->{pdf}->{diagramscolumn} ) {
+	    $new->{pdf}->{diagrams}->{show} //= "right";
+	    delete $new->{pdf}->{diagramscolumn};
+	    warn("$file: pdf.diagramscolumn is obsolete, use pdf.diagrams.show instead\n");
+	}
+	if ( exists $new->{pdf}->{formats}->{default}->{'toc-title'} ) {
+	    $new->{toc}->{title} //= $new->{pdf}->{formats}->{default}->{'toc-title'};
+	    delete $new->{pdf}->{formats}->{default}->{'toc-title'};
+	    warn("$file: pdf.formats.default.toc-title is obsolete, use toc.title instead\n");
+	}
+
+	# Merge final.
+	$cfg = hmerge( $cfg, $new, "" );
 	close($fd);
     }
     else {
@@ -587,7 +622,7 @@ sub hmerge($$$) {
 	     ref($left->{$key}) eq 'HASH' ) {
 
 	    # Both hashes. Recurse.
-            $res{$key} = hmerge( $left->{$key}, $right->{$key}, "$path$key:" );
+            $res{$key} = hmerge( $left->{$key}, $right->{$key}, "$path$key." );
         }
         else {
 	    warn("Config error: unknown item $path$key\n")

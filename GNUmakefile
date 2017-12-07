@@ -54,7 +54,7 @@ LIB := lib/App/Music/ChordPro
 RES := ${LIB}/res
 PODSELECT := podselect
 
-resources : ${RES}/config/chordpro.json ${RES}/pod/ChordPro.pod ${RES}/pod/Config.pod
+resources : ${RES}/config/chordpro.json ${RES}/pod/ChordPro.pod ${RES}/pod/Config.pod wiki
 
 ${RES}/config/chordpro.json : ${LIB}/Config.pm
 	$(PERL) $< > $@
@@ -76,3 +76,8 @@ checkjson :
 	  json_pp -json_opt relaxed < $$i | \
 	  jsonschema -i /dev/stdin ${CFGLIB}/config.schema; \
 	done
+
+wiki ::
+	-cp ${CFGLIB}/config.schema  ../ChordPro-Wiki/
+	-cp ${CFGLIB}/modern1.json   ../ChordPro-Wiki/
+	-cp ${CFGLIB}/nashville.json ../ChordPro-Wiki/
