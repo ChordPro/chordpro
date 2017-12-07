@@ -1,3 +1,7 @@
+0.93	2017-12-07
+
+    - Fix transposition of chord diagrams.
+
 0.92	2017-12-07
 
     - Add configurable sort methods for table of contents.

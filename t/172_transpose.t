@@ -9,8 +9,6 @@ use App::Music::ChordPro::Config;
 use App::Music::ChordPro::Songbook;
 
 our $config = App::Music::ChordPro::Config::configurator;
-# Prevent a dummy {body} for chord grids.
-$config->{diagrams}->{show} = 0;
 my $s = App::Music::ChordPro::Songbook->new;
 
 my $data = <<EOD;
@@ -284,6 +282,12 @@ my $song = {
       type => 'rechorus',
     },
   ],
+  chords => {
+    origin => 'song',
+      type => 'diagrams',
+      show => 'all',
+      chords => [ 'D', 'G', 'E', 'A', 'F#', 'B' ]
+  },
   meta => {
     key => [
       'D',
