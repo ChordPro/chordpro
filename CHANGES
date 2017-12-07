@@ -1,4 +1,4 @@
-0.92
+0.92	2017-12-07
 
     - Add configurable sort methods for table of contents.
       Config option: toc.order, values "page" or "alpha".
