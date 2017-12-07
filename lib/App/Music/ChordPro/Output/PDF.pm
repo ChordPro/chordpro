@@ -513,7 +513,7 @@ sub generate_song {
 	    while ( @chords ) {
 		my $x = $x - $ps->{_indent};
 		$checkspace->($vsp);
-		$pr->show_vpos( $y, 0 ) if 1||DEBUG_SPACING;
+		$pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
 
 		for ( 1..$h ) {
 		    last unless @chords;
@@ -522,7 +522,7 @@ sub generate_song {
 		}
 
 		$y -= $vsp;
-		$pr->show_vpos( $y, 1 ) if 1||DEBUG_SPACING;
+		$pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
 	    }
 	}
     };
