@@ -1,3 +1,8 @@
+0.930.1	
+
+    - (pp/windows) Add PDF::API2::Bundle to make sure all PDF::API2
+      and TTF::Font modules are included.
+
 0.93	2017-12-07
 
     - Fix transposition of chord diagrams.

@@ -1,6 +1,7 @@
 --lib=../../CPAN
 --lib=../../lib
+--lib=../common
 --module=App::Music::ChordPro::Bundle
---module=PDF::API2
+--module=PDF_API2_Bundle
 --addfile=../../lib/App/Music/ChordPro/res;res
 --cachedeps=chordpro.pp.deps
