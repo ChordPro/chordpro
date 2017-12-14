@@ -1,3 +1,7 @@
+0.930.x
+
+    - Allow \ { } and | to be escaped with \ in replacement strings.
+
 0.930.1	
 
     - (pp/windows) Add PDF::API2::Bundle to make sure all PDF::API2

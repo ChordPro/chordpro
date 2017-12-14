@@ -13,6 +13,12 @@ sub fmt_subst {
     my $res = "";
     my $m = $s->{meta};
 
+    # Hide escaped specials by replacing them with Unicode noncharacters.
+    $t =~ s/\\\\/\x{fdd0}/g;
+    $t =~ s/\\\{/\x{fdd1}/g;
+    $t =~ s/\\\}/\x{fdd2}/g;
+    $t =~ s/\\\|/\x{fdd3}/g;
+
     # Examine %{ sequences.
     while ( $t =~ /^(.*?)\%\{(.*)/ ) {
 	$res .= $1;
@@ -47,7 +53,7 @@ sub fmt_subst {
 	    $bal = $2;
 	}
 	else {
-	    return $res . $t; # error
+	    last; # error
 	}
 
 	# We cannot use extract_bracketed since we must also look
@@ -115,8 +121,17 @@ sub fmt_subst {
 	next;
     }
 
-    # Return new value plus the unprocessed rest.
-    $res . $t;
+    # Add the unprocessed rest.
+    $res .= $t;
+
+    # Unescape escaped specials.
+    $res =~ s/\x{fdd0}/\\/g;
+    $res =~ s/\x{fdd1}/{/g;
+    $res =~ s/\x{fdd2}/}/g;
+    $res =~ s/\x{fdd3}/|/g;
+
+    # Return new value.
+    return $res;
 }
 
 1;
