@@ -19,3 +19,8 @@ All metadata items can have multiple values. To get multiple values, just issue 
     {album: Greatest Hits}
 
 Now `album` has two values. When substituted, the values are concatenated using the configuration setting [`metadata.separator`](ChordPro-Configuration-Generic#metadata). To access the individual values, use `album.1` for the first value, `album.2` for the second value, and so on.
+
+If necessary, the special meaning of the characters `\`, `{`, `}`, and `|`
+can be escaped by preceding it a `\`. Note that in the configuration files the
+strings are JSON strings and each `\` must be doubled: `"\\{"` is an
+escaped `{`. `"\\\\"` is an escaped backslash.
