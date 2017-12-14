@@ -30,6 +30,7 @@ lib/App/Music/ChordPro/res/examples/swinglow.cho
 lib/App/Music/ChordPro/res/pod/ChordPro.pod
 lib/App/Music/ChordPro/res/pod/Config.pod
 pp/README
+pp/common/PDF_API2_Bundle.pm
 pp/common/chordpro.pp
 pp/common/wxchordpro.pp
 pp/linux/GNUmakefile
