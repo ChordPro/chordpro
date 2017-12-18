@@ -367,35 +367,12 @@ sub generate_song {
     my $chorddiagrams = sub {
 	my ( $chords, $show ) = @_;
 
-	if ( $chords ) {
-	    my $vsp = chordgrid_vsp( undef, $ps );
-	    my $hsp = chordgrid_hsp( undef, $ps );
-	    my $h = int( ( $ps->{__rightmargin}
-			   - $ps->{__leftmargin}
-			   + $ps->{diagrams}->{hspace}
-			   * $ps->{diagrams}->{width} ) / $hsp );
-	    my @chords = @$chords;
-	    while ( @chords ) {
-		my $x = $x;
-		$checkspace->($vsp);
-		$pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
-
-		for ( 1..$h ) {
-		    last unless @chords;
-		    my $t = chordgrid( getchordinfo(shift(@chords)), $x, $y, $ps );
-		    redo unless $t;
-		    $x += $hsp;
-		}
-
-		$y -= $vsp;
-		$pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
-	    }
-	    return;
-	}
-
 	my @chords;
-	if ( $s->{chords} ) {
-	    foreach ( @{ $s->{chords}->{chords} } ) {
+	$chords = $s->{chords}->{chords}
+	  if !defined($chords) && $s->{chords};
+	$show //= $ps->{diagrams}->{show};
+	if ( $chords ) {
+	    foreach ( @$chords ) {
 		my $i = getchordinfo($_);
 		push( @chords, $i ) if $i;
 	    }
@@ -413,7 +390,7 @@ sub generate_song {
 
 	# If chord diagrams are to be printed in the right column, put
 	# them on the first page.
-	if ( $ps->{diagrams}->{show} eq "right" && $class <= 1 ) {
+	if ( $show eq "right" && $class <= 1 ) {
 	    my $vsp = chordgrid_vsp( undef, $ps );
 
 	    my $v = int( ( $ps->{_margintop} - $ps->{marginbottom} ) / $vsp );
@@ -441,7 +418,7 @@ sub generate_song {
 		$y -= $vsp;
 	    }
 	}
-	elsif ( $ps->{diagrams}->{show} eq "top" && $class <= 1 ) {
+	elsif ( $show eq "top" && $class <= 1 ) {
 
 	    my $ww = ( $ps->{_marginright} - $ps->{_marginleft} );
 
@@ -466,7 +443,7 @@ sub generate_song {
 	    }
 	    $ps->{_top} = $y;
 	}
-	elsif ( $ps->{diagrams}->{show} eq "bottom" && $class <= 1 && $col == 0 ) {
+	elsif ( $show eq "bottom" && $class <= 1 && $col == 0 ) {
 
 	    my $ww = ( $ps->{_marginright} - $ps->{_marginleft} );
 
@@ -500,9 +477,7 @@ sub generate_song {
 		$pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
 	    }
 	}
-	elsif ( $ps->{diagrams}->{show} eq "below" ) {
-
-	    local $::config->{diagrams}->{show} = $show; # ###WHY?
+	elsif ( $show eq "below" ) {
 
 	    my $vsp = chordgrid_vsp( undef, $ps );
 	    my $hsp = chordgrid_hsp( undef, $ps );
@@ -813,7 +788,7 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "diagrams" ) {
-	    warn("*** CANNOT HAPPEN - type = diagrams ***");
+ 	    $chorddiagrams->( $elt->{chords}, "below" );
 	    next;
 	}
 
@@ -908,7 +883,7 @@ sub generate_song {
     }
 
     if ( $ps->{diagrams}->{show} eq "below" ) {
-	$chorddiagrams->();
+	$chorddiagrams->( undef, "below");
     }
 
     return $thispage - $startpage + 1;
