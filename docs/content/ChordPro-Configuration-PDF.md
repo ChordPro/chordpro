@@ -150,8 +150,13 @@ the song.
 Pages can be printed neutrally (all pages the same) or with differing left and right pages.  
 This affects the page titles and footers.
 
-        // Even/odd pages. A value of -1 denotes odd/even pages.
         "even-odd-pages" : 1,
+
+The value 1 means the first page is right, the second page is left, and so
+on.  
+The value -1 means the first page is left, the second page is right, and so
+on.  
+The value 0 makes all pages the same (left).
 
 ## Page headers and footers
 
