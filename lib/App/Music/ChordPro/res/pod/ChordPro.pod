@@ -68,6 +68,15 @@ diagrams.
 Specify the encoding for input files. Default is UTF-8.
 ISO-8859.1 (Latin-1) encoding is automatically sensed.
 
+=item B<--filelist=>I<FILE>
+
+Read the names of the files to be processed from the named file.
+
+This option may be specified multiple times.
+
+Song file names listed on the command line are processed I<after> the
+files from the filelist arguments.
+
 =item B<--lyrics-only> (short: B<-l>)
 
 Only prints lyrics. All chords are suppressed.
@@ -444,6 +453,9 @@ L<https://github.com/sciurius/chordpro>.
 
 Please report any bugs or feature requests to the GitHub issue tracker,
 L<https://github.com/sciurius/chordpro/issues>.
+
+A user community discussing ChordPro can be found at
+L<https://groups.google.com/forum/#!forum/chordpro>.
 
 =head1 LICENSE
 

@@ -5,10 +5,10 @@ package App::Music::ChordPro::Songbook;
 use strict;
 use warnings;
 
+use App::Music::ChordPro;
 use App::Music::ChordPro::Chords;
 use App::Music::ChordPro::Output::Common;
 
-use Encode qw(decode decode_utf8 encode);
 use Carp;
 
 sub new {
@@ -47,89 +47,16 @@ my $diag;			# for diagnostics
 
 sub parsefile {
     my ( $self, $filename, $options ) = @_;
+    $options //= {};
 
-    my $data;			# slurped file data
-    my $encoded;		# already encoded
-
-    # Gather data from the input.
-    if ( ref($filename) ) {
-	$data = $$filename;
-	$filename = "__STRING__";
-	$encoded++;
-    }
-    elsif ( $filename eq '-' ) {
-	$filename = "__STDIN__";
-	$data = do { local $/; <STDIN> };
-    }
-    else {
-	my $name = $filename;
-	$filename = decode_utf8($name);
-	open( my $fh, '<', $name)
-	  or croak("$filename: $!\n");
-	$data = do { local $/; <$fh> };
-    }
-
-    if ( $encoded ) {
-	# Nothing to do, already dealt with.
-    }
-
-    # Detect Byte Order Mark.
-    elsif ( $data =~ /^\xEF\xBB\xBF/ ) {
-	warn("Input is UTF-8 (BOM)\n") if $options->{debug};
-	$data = decode( "UTF-8", substr($data, 3) );
-    }
-    elsif ( $data =~ /^\xFE\xFF/ ) {
-	warn("Input is UTF-16BE (BOM)\n") if $options->{debug};
-	$data = decode( "UTF-16BE", substr($data, 2) );
-    }
-    elsif ( $data =~ /^\xFF\xFE\x00\x00/ ) {
-	warn("Input is UTF-32LE (BOM)\n") if $options->{debug};
-	$data = decode( "UTF-32LE", substr($data, 4) );
-    }
-    elsif ( $data =~ /^\xFF\xFE/ ) {
-	warn("Input is UTF-16LE (BOM)\n") if $options->{debug};
-	$data = decode( "UTF-16LE", substr($data, 2) );
-    }
-    elsif ( $data =~ /^\x00\x00\xFE\xFF/ ) {
-	warn("Input is UTF-32BE (BOM)\n") if $options->{debug};
-	$data = decode( "UTF-32BE", substr($data, 4) );
-    }
-
-    # No BOM, did user specify an encoding?
-    elsif ( $options->{encoding} ) {
-	warn("Input is ", $options->{encoding}, " (--encoding)\n")
-	  if $options->{debug};
-	$data = decode( $options->{encoding}, $data, 1 );
-    }
-
-    # Try UTF8, fallback to ISO-8895.1.
-    else {
-	my $d = eval { decode( "UTF-8", $data, 1 ) };
-	if ( $@ ) {
-	    warn("Input is ISO-8859.1 (assumed)\n") if $options->{debug};
-	    $data = decode( "iso-8859-1", $data );
-	}
-	else {
-	    warn("Input is UTF-8 (detected)\n") if $options->{debug};
-	    $data = $d;
-	}
-    }
-
+    my $lines = ::loadfile( $filename, $options );
     $diag->{format} = $options->{diagformat}
       || $::config->{diagnostics}->{format};
-    $diag->{file} = $filename;
-
-    # Split in lines;
-    my @lines;
-    $data =~ s/^\s+//s;
-    # Unless empty, make sure there is a final newline.
-    $data .= "\n" if $data =~ /.(?!\r\n|\n|\r)\Z/;
-    # We need to maintain trailing newlines.
-    push( @lines, $1 ) while $data =~ /(.*)(?:\r\n|\n|\r)/g;
+    $diag->{file} = $options->{_filesource};
 
     my $linecnt = 0;
-    while ( @lines ) {
-	my $song = $self->parse_song( \@lines, \$linecnt, $options );
+    while ( @$lines ) {
+	my $song = $self->parse_song( $lines, \$linecnt, $options );
 #	if ( exists($self->{songs}->[-1]->{body}) ) {
 	    push( @{ $self->{songs} }, $song );
 #	}
@@ -158,6 +85,7 @@ sub parse_song {
     $in_context = $def_context;
     @used_chords = ();
     %warned_chords = ();
+    undef $chordtype;
     App::Music::ChordPro::Chords::reset_song_chords();
 
     # Build regex for the known metadata items.
