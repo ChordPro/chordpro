@@ -85,6 +85,9 @@ sub main {
         elsif ( $of =~ /\.(crd|txt)$/i ) {
             $options->{generate} ||= "Text";
         }
+        elsif ( $of =~ /\.html?$/i ) {
+            $options->{generate} ||= "HTML";
+        }
         elsif ( $of =~ /\.(debug)$/i ) {
             $options->{generate} ||= "Debug";
         }

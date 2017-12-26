@@ -4,6 +4,7 @@
     - Fix problem that in-song chords caused CANNOT HAPPEN error.
     - Add --filelist option to read song file names from files.
     - Fix inconsistent handling of --lyrics-only in backends.
+    - Add html to list of recognized output types (even though experimental).
 
 0.930.1	
 
