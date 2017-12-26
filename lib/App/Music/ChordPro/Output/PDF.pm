@@ -1562,7 +1562,8 @@ sub chordgrid {
     $y -= $font->{size} * $ps->{spacing}->{chords} + $dot/2 + $lw;
 
     if ( $info->{base} > 0 ) {
-	my $i = @Roman[$info->{base}] . "  ";
+	# my $i = @Roman[$info->{base}] . "  ";
+	my $i = sprintf("%d  ", 1+$info->{base});
 	$pr->setfont( $ps->{fonts}->{diagram_base}, $gh );
 	$pr->text( $i, $x-$pr->strwidth($i), $y-$gh/2,
 		   $ps->{fonts}->{diagram_base}, $gh );

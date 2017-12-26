@@ -5,6 +5,8 @@
     - Add --filelist option to read song file names from files.
     - Fix inconsistent handling of --lyrics-only in backends.
     - Add html to list of recognized output types (even though experimental).
+    - Fix Chord/Chordii regression: Base frets in chord diagrams
+      should be arabic numbers, not roman.
 
 0.930.1	
 
