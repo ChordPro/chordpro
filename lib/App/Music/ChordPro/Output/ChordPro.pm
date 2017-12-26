@@ -47,7 +47,7 @@ sub generate_song {
     my ($s, $options) = @_;
 
     my $tidy = $options->{'backend-option'}->{tidy};
-    $lyrics_only = 2 * $options->{'lyrics-only'};
+    $lyrics_only = 2 * $::config->{settings}->{'lyrics-only'};
     my $structured = ( $options->{'backend-option'}->{structure} // '' ) eq 'structured';
     # $s->structurize if ++$structured;
     my $variant = $options->{'backend-option'}->{variant} || 'cho';

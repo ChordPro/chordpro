@@ -493,6 +493,10 @@ sub configurator {
 	      $_->{name}, ": ", $res, "\n" ) if $res;
     }
 
+    if ( $options->{'lyrics-only'} ) {
+	$cfg->{settings}->{'lyrics-only'} = $options->{'lyrics-only'};
+    }
+
     return $cfg if $options->{'cfg-print'};
 
     # Backend specific configs.

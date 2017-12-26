@@ -2,6 +2,8 @@
 
     - Allow \ { } and | to be escaped with \ in replacement strings.
     - Fix problem that in-song chords caused CANNOT HAPPEN error.
+    - Add --filelist option to read song file names from files.
+    - Fix inconsistent handling of --lyrics-only in backends.
 
 0.930.1	
 

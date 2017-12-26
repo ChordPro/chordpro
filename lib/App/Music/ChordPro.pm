@@ -627,7 +627,6 @@ sub app_setup {
           ### Options ###
 
           "output|o=s",                 # Saves the output to FILE
-          "lyrics-only",                # Suppress all chords
           "generate=s",
           "backend-option|bo=s\%",
 	  "diagrams=s",			# Prints chord diagrams
