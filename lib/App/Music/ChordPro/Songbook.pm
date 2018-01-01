@@ -124,6 +124,9 @@ sub parse_song {
 
 	# For now, directives should go on their own lines.
 	if ( /^\s*\{(.*)\}\s*$/ ) {
+	    $self->add( type => "ignore",
+			text => $_ )
+	      unless
 	    $options->{_legacy}
 	      ? $self->global_directive( $1, 1 )
 	      : $self->directive($1);
@@ -419,18 +422,18 @@ sub directive {
 	      if $arg;
 	}
 	@chorus = () if $in_context eq "chorus";
-	return;
+	return 1;
     }
     if ( $dir =~ /^end_of_(\w+)$/ ) {
 	do_warn("Not in " . ucfirst($1) . " context\n")
 	  unless $in_context eq $1;
 	$in_context = $def_context;
-	return;
+	return 1;
     }
     if ( $dir =~ /^chorus$/i ) {
 	if ( $in_context ) {
 	    do_warn("{chorus} encountered while in $in_context context -- ignored\n");
-	    return;
+	    return 1;
 	}
 	$self->add( type => "rechorus",
 		    @chorus
@@ -438,7 +441,7 @@ sub directive {
 			"transpose" => $xpose )
 		    : (),
 		  );
-	return;
+	return 1;
     }
 
     # Song settings.
@@ -447,12 +450,12 @@ sub directive {
 
     if ( $dir =~ /^(?:colb|column_break)$/i ) {
 	$self->add( type => "colb" );
-	return;
+	return 1;
     }
 
     if ( $dir =~ /^(?:new_page|np|new_physical_page|npp)$/i ) {
 	$self->add( type => "newpage" );
-	return;
+	return 1;
     }
 
     if ( $dir =~ /^(?:new_song|ns)$/i ) {
@@ -464,19 +467,19 @@ sub directive {
     if ( $dir =~ /^(?:comment|c|highlight)$/ ) {
 	$self->add( type => "comment", $self->cdecompose($arg),
 		    orig => $arg );
-	return;
+	return 1;
     }
 
     if ( $dir =~ /^(?:comment_italic|ci)$/ ) {
 	$self->add( type => "comment_italic", $self->cdecompose($arg),
 		    orig => $arg );
-	return;
+	return 1;
     }
 
     if ( $dir =~ /^(?:comment_box|cb)$/ ) {
 	$self->add( type => "comment_box", $self->cdecompose($arg),
 		    orig => $arg );
-	return;
+	return 1;
     }
 
     # Images.
@@ -516,19 +519,19 @@ sub directive {
 	$self->add( type => "image",
 		    uri  => $uri,
 		    opts => \%opts );
-	return;
+	return 1;
     }
 
     if ( $dir =~ /^(?:title|t)$/ ) {
 	$song->{title} = $arg;
 	push( @{ $song->{meta}->{title} }, $arg );
-	return;
+	return 1;
     }
 
     if ( $dir =~ /^(?:subtitle|st)$/ ) {
 	push( @{ $song->{subtitle} }, $arg );
 	push( @{ $song->{meta}->{subtitle} }, $arg );
-	return;
+	return 1;
     }
 
     # Metadata extensions (legacy). Should use meta instead.
@@ -538,7 +541,7 @@ sub directive {
 	    $arg = App::Music::ChordPro::Chords::transpose( $arg, $xpose );
 	}
 	push( @{ $song->{meta}->{$1} }, $arg );
-	return;
+	return 1;
     }
 
     # More metadata.
@@ -556,6 +559,7 @@ sub directive {
 	    elsif ( $::config->{metadata}->{strict} ) {
 		# Unknown, and strict.
 		do_warn("Unknown metadata item: $key");
+		return;
 	    }
 	    else {
 		# Allow.
@@ -564,11 +568,12 @@ sub directive {
 	}
 	else {
 	    do_warn("Incomplete meta directive: $d\n");
+	    return;
 	}
-	return;
+	return 1;
     }
 
-    return if $self->global_directive( $d, 0 );
+    return 1 if $self->global_directive( $d, 0 );
 
     # Warn about unknowns, unless they are x_... form.
     do_warn("Unknown directive: $d\n") unless $d =~ /^x_/;

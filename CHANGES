@@ -7,6 +7,7 @@
     - Add html to list of recognized output types (even though experimental).
     - Fix Chord/Chordii regression: Base frets in chord diagrams
       should be arabic numbers, not roman.
+    - Pass unknown directives through to backends.
 
 0.930.1	
 
