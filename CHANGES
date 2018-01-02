@@ -8,6 +8,7 @@
     - Fix Chord/Chordii regression: Base frets in chord diagrams
       should be arabic numbers, not roman.
     - Pass unknown directives through to backends.
+    - Fix labels handling for ChordPro output.
 
 0.930.1	
 

@@ -831,9 +831,6 @@ sub generate_song {
 		    delete( $ps->{fonts}->{$1}->{color} );
 		}
 	    }
-	    elsif ( $elt->{name} eq "tag" ) {
-		$i_tag = $elt->{value};
-	    }
 	    next;
 	}
 
@@ -857,6 +854,9 @@ sub generate_song {
 		$cells += $grid_margin->[0] = $v[2] if $v[2];
 		$cells += $grid_margin->[1] = $v[3] if $v[3];
 		$grid_margin->[2] = $cells;
+	    }
+	    elsif ( $elt->{name} eq "tag" ) {
+		$i_tag = $elt->{value};
 	    }
 	    # Arbitrary config values.
 	    elsif ( $elt->{name} =~ /^pdf\.(.+)/ ) {

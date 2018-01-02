@@ -413,7 +413,7 @@ sub directive {
 	    $grid_cells = [ $2 * ( $3//1 ), ($1//0), ($4//0) ];
 	}
 	elsif ( $arg && $arg ne "" ) {
-	    $self->add( type  => "control",
+	    $self->add( type  => "set",
 			name  => "tag",
 			value => $arg );
 	}
