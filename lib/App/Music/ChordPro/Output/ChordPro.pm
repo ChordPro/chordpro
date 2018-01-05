@@ -133,7 +133,7 @@ sub generate_song {
 		if ( $elt->{type} eq "set" ) {
 		    if ( $elt->{name} eq "gridparams" ) {
 			my @gridparams = @{ $elt->{value} };
-			$t .= " ";
+			$t .= ": ";
 			$t .= $gridparams[2] . "+" if $gridparams[2];
 			$t .= $gridparams[0];
 			$t .= "x" . $gridparams[1] if $gridparams[1];
@@ -141,7 +141,7 @@ sub generate_song {
 		    }
 		    elsif ( $elt->{name} eq "tag" ) {
 			my $tag = $elt->{value};
-			$t .= " " . $tag if $tag ne "";
+			$t .= ": " . $tag if $tag ne "";
 		    }
 
 		}
