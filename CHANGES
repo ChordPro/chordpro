@@ -9,6 +9,7 @@
       should be arabic numbers, not roman.
     - Pass unknown directives through to backends.
     - Fix labels handling for ChordPro output.
+    - Fix problem that bass notes in chords were not tranposed.
 
 0.930.1	
 
