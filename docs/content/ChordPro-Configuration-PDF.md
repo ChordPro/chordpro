@@ -153,9 +153,9 @@ This affects the page titles and footers, and the page margins.
         "even-odd-pages" : 1,
 
 The default value is `1`, which means that the first page is right, the second page is left, and so on.  
-The value -1 means the first page is left, the second page is right, and so
+The value `-1` means the first page is left, the second page is right, and so
 on.  
-The value 0 makes all pages the same (left).
+The value `0` makes all pages the same (left).
 
 ## Page headers and footers
 

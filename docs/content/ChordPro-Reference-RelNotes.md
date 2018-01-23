@@ -1,12 +1,32 @@
 # Release info
 
+## 0.94
+
+Released: 2018-01-23
+
+* Allow \ { } and | to be escaped with \ in replacement strings.
+* Fix problem that in-song chords caused CANNOT HAPPEN error.
+* Add --filelist option to read song file names from files.
+* Fix inconsistent handling of --lyrics-only in backends.
+* Add html to list of recognized output types (even though experimental).
+* Fix Chord/Chordii regression: Base frets in chord diagrams should be arabic numbers, not roman.
+* Pass unknown directives through to backends.
+* Fix labels handling for ChordPro output.
+* Fix problem that bass notes in chords were not tranposed.
+
+**[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.**
+
+## 0.930.1
+
+Under development
+
+* (pp/windows) Add PDF::API2::Bundle to make sure all PDF::API2 and TTF::Font modules are included.
+
 ## 0.93
 
 Released: 2017-12-07
 
 * Fix transposition of chord diagrams.
-
-**[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.**
 
 ## 0.92
 
