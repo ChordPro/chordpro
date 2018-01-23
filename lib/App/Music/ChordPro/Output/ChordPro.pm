@@ -41,13 +41,12 @@ sub generate_songbook {
 }
 
 my $lyrics_only = 0;
-my @gridparams;
 
 sub generate_song {
     my ($s, $options) = @_;
 
     my $tidy = $options->{'backend-option'}->{tidy};
-    $lyrics_only = 2 * $options->{'lyrics-only'};
+    $lyrics_only = 2 * $::config->{settings}->{'lyrics-only'};
     my $structured = ( $options->{'backend-option'}->{structure} // '' ) eq 'structured';
     # $s->structurize if ++$structured;
     my $variant = $options->{'backend-option'}->{variant} || 'cho';
@@ -128,21 +127,26 @@ sub generate_song {
 	    push(@s, "{end_of_$ctx}") if $ctx;
 	    $ctx = $elt->{context};
 	    if ( $ctx ) {
-		if ( $elt->{type} eq "set" &&
-		     $elt->{name} eq "gridparams" ) {
-		    @gridparams = @{ $elt->{value} };
+
+		my $t = "{start_of_$ctx";
+
+		if ( $elt->{type} eq "set" ) {
+		    if ( $elt->{name} eq "gridparams" ) {
+			my @gridparams = @{ $elt->{value} };
+			$t .= ": ";
+			$t .= $gridparams[2] . "+" if $gridparams[2];
+			$t .= $gridparams[0];
+			$t .= "x" . $gridparams[1] if $gridparams[1];
+			$t .= "+" . $gridparams[3] if $gridparams[3];
+		    }
+		    elsif ( $elt->{name} eq "tag" ) {
+			my $tag = $elt->{value};
+			$t .= ": " . $tag if $tag ne "";
+		    }
+
 		}
-		if ( @gridparams ) {
-		    my $t = "{start_of_$ctx ";
-		    $t .= $gridparams[2] . "+" if $gridparams[2];
-		    $t .= $gridparams[0];
-		    $t .= "x" . $gridparams[1] if $gridparams[1];
-		    $t .= "+" . $gridparams[3] if $gridparams[3];
-		    push( @s, $t );
-		}
-		else {
-		    push(@s, "{start_of_$ctx}");
-		}
+		$t .= "}";
+		push( @s, $t );
 	    }
 	}
 
@@ -287,9 +291,6 @@ sub generate_song {
 		$lyrics_only = $elt->{value}
 		  unless $lyrics_only > 1;
 	    }
-	    elsif ( $elt->{name} eq "gridparams" ) {
-		@gridparams = @{ $elt->{value} };
-	    }
 	    elsif ( $elt->{name} eq "transpose" ) {
 	    }
 	    next;
@@ -299,7 +300,9 @@ sub generate_song {
 	    push( @s, $elt->{text} );
 	    next;
 	}
+
     }
+
     push(@s, "{end_of_$ctx}") if $ctx;
 
     \@s;

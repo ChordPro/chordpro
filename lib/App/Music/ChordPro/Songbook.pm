@@ -5,10 +5,10 @@ package App::Music::ChordPro::Songbook;
 use strict;
 use warnings;
 
+use App::Music::ChordPro;
 use App::Music::ChordPro::Chords;
 use App::Music::ChordPro::Output::Common;
 
-use Encode qw(decode decode_utf8 encode);
 use Carp;
 
 sub new {
@@ -47,89 +47,16 @@ my $diag;			# for diagnostics
 
 sub parsefile {
     my ( $self, $filename, $options ) = @_;
+    $options //= {};
 
-    my $data;			# slurped file data
-    my $encoded;		# already encoded
-
-    # Gather data from the input.
-    if ( ref($filename) ) {
-	$data = $$filename;
-	$filename = "__STRING__";
-	$encoded++;
-    }
-    elsif ( $filename eq '-' ) {
-	$filename = "__STDIN__";
-	$data = do { local $/; <STDIN> };
-    }
-    else {
-	my $name = $filename;
-	$filename = decode_utf8($name);
-	open( my $fh, '<', $name)
-	  or croak("$filename: $!\n");
-	$data = do { local $/; <$fh> };
-    }
-
-    if ( $encoded ) {
-	# Nothing to do, already dealt with.
-    }
-
-    # Detect Byte Order Mark.
-    elsif ( $data =~ /^\xEF\xBB\xBF/ ) {
-	warn("Input is UTF-8 (BOM)\n") if $options->{debug};
-	$data = decode( "UTF-8", substr($data, 3) );
-    }
-    elsif ( $data =~ /^\xFE\xFF/ ) {
-	warn("Input is UTF-16BE (BOM)\n") if $options->{debug};
-	$data = decode( "UTF-16BE", substr($data, 2) );
-    }
-    elsif ( $data =~ /^\xFF\xFE\x00\x00/ ) {
-	warn("Input is UTF-32LE (BOM)\n") if $options->{debug};
-	$data = decode( "UTF-32LE", substr($data, 4) );
-    }
-    elsif ( $data =~ /^\xFF\xFE/ ) {
-	warn("Input is UTF-16LE (BOM)\n") if $options->{debug};
-	$data = decode( "UTF-16LE", substr($data, 2) );
-    }
-    elsif ( $data =~ /^\x00\x00\xFE\xFF/ ) {
-	warn("Input is UTF-32BE (BOM)\n") if $options->{debug};
-	$data = decode( "UTF-32BE", substr($data, 4) );
-    }
-
-    # No BOM, did user specify an encoding?
-    elsif ( $options->{encoding} ) {
-	warn("Input is ", $options->{encoding}, " (--encoding)\n")
-	  if $options->{debug};
-	$data = decode( $options->{encoding}, $data, 1 );
-    }
-
-    # Try UTF8, fallback to ISO-8895.1.
-    else {
-	my $d = eval { decode( "UTF-8", $data, 1 ) };
-	if ( $@ ) {
-	    warn("Input is ISO-8859.1 (assumed)\n") if $options->{debug};
-	    $data = decode( "iso-8859-1", $data );
-	}
-	else {
-	    warn("Input is UTF-8 (detected)\n") if $options->{debug};
-	    $data = $d;
-	}
-    }
-
+    my $lines = ::loadfile( $filename, $options );
     $diag->{format} = $options->{diagformat}
       || $::config->{diagnostics}->{format};
-    $diag->{file} = $filename;
-
-    # Split in lines;
-    my @lines;
-    $data =~ s/^\s+//s;
-    # Unless empty, make sure there is a final newline.
-    $data .= "\n" if $data =~ /.(?!\r\n|\n|\r)\Z/;
-    # We need to maintain trailing newlines.
-    push( @lines, $1 ) while $data =~ /(.*)(?:\r\n|\n|\r)/g;
+    $diag->{file} = $options->{_filesource};
 
     my $linecnt = 0;
-    while ( @lines ) {
-	my $song = $self->parse_song( \@lines, \$linecnt, $options );
+    while ( @$lines ) {
+	my $song = $self->parse_song( $lines, \$linecnt, $options );
 #	if ( exists($self->{songs}->[-1]->{body}) ) {
 	    push( @{ $self->{songs} }, $song );
 #	}
@@ -158,6 +85,7 @@ sub parse_song {
     $in_context = $def_context;
     @used_chords = ();
     %warned_chords = ();
+    undef $chordtype;
     App::Music::ChordPro::Chords::reset_song_chords();
 
     # Build regex for the known metadata items.
@@ -196,6 +124,9 @@ sub parse_song {
 
 	# For now, directives should go on their own lines.
 	if ( /^\s*\{(.*)\}\s*$/ ) {
+	    $self->add( type => "ignore",
+			text => $_ )
+	      unless
 	    $options->{_legacy}
 	      ? $self->global_directive( $1, 1 )
 	      : $self->directive($1);
@@ -482,7 +413,7 @@ sub directive {
 	    $grid_cells = [ $2 * ( $3//1 ), ($1//0), ($4//0) ];
 	}
 	elsif ( $arg && $arg ne "" ) {
-	    $self->add( type  => "control",
+	    $self->add( type  => "set",
 			name  => "tag",
 			value => $arg );
 	}
@@ -491,18 +422,18 @@ sub directive {
 	      if $arg;
 	}
 	@chorus = () if $in_context eq "chorus";
-	return;
+	return 1;
     }
     if ( $dir =~ /^end_of_(\w+)$/ ) {
 	do_warn("Not in " . ucfirst($1) . " context\n")
 	  unless $in_context eq $1;
 	$in_context = $def_context;
-	return;
+	return 1;
     }
     if ( $dir =~ /^chorus$/i ) {
 	if ( $in_context ) {
 	    do_warn("{chorus} encountered while in $in_context context -- ignored\n");
-	    return;
+	    return 1;
 	}
 	$self->add( type => "rechorus",
 		    @chorus
@@ -510,7 +441,7 @@ sub directive {
 			"transpose" => $xpose )
 		    : (),
 		  );
-	return;
+	return 1;
     }
 
     # Song settings.
@@ -519,12 +450,12 @@ sub directive {
 
     if ( $dir =~ /^(?:colb|column_break)$/i ) {
 	$self->add( type => "colb" );
-	return;
+	return 1;
     }
 
     if ( $dir =~ /^(?:new_page|np|new_physical_page|npp)$/i ) {
 	$self->add( type => "newpage" );
-	return;
+	return 1;
     }
 
     if ( $dir =~ /^(?:new_song|ns)$/i ) {
@@ -536,19 +467,19 @@ sub directive {
     if ( $dir =~ /^(?:comment|c|highlight)$/ ) {
 	$self->add( type => "comment", $self->cdecompose($arg),
 		    orig => $arg );
-	return;
+	return 1;
     }
 
     if ( $dir =~ /^(?:comment_italic|ci)$/ ) {
 	$self->add( type => "comment_italic", $self->cdecompose($arg),
 		    orig => $arg );
-	return;
+	return 1;
     }
 
     if ( $dir =~ /^(?:comment_box|cb)$/ ) {
 	$self->add( type => "comment_box", $self->cdecompose($arg),
 		    orig => $arg );
-	return;
+	return 1;
     }
 
     # Images.
@@ -588,19 +519,19 @@ sub directive {
 	$self->add( type => "image",
 		    uri  => $uri,
 		    opts => \%opts );
-	return;
+	return 1;
     }
 
     if ( $dir =~ /^(?:title|t)$/ ) {
 	$song->{title} = $arg;
 	push( @{ $song->{meta}->{title} }, $arg );
-	return;
+	return 1;
     }
 
     if ( $dir =~ /^(?:subtitle|st)$/ ) {
 	push( @{ $song->{subtitle} }, $arg );
 	push( @{ $song->{meta}->{subtitle} }, $arg );
-	return;
+	return 1;
     }
 
     # Metadata extensions (legacy). Should use meta instead.
@@ -610,7 +541,7 @@ sub directive {
 	    $arg = App::Music::ChordPro::Chords::transpose( $arg, $xpose );
 	}
 	push( @{ $song->{meta}->{$1} }, $arg );
-	return;
+	return 1;
     }
 
     # More metadata.
@@ -628,6 +559,7 @@ sub directive {
 	    elsif ( $::config->{metadata}->{strict} ) {
 		# Unknown, and strict.
 		do_warn("Unknown metadata item: $key");
+		return;
 	    }
 	    else {
 		# Allow.
@@ -636,11 +568,12 @@ sub directive {
 	}
 	else {
 	    do_warn("Incomplete meta directive: $d\n");
+	    return;
 	}
-	return;
+	return 1;
     }
 
-    return if $self->global_directive( $d, 0 );
+    return 1 if $self->global_directive( $d, 0 );
 
     # Warn about unknowns, unless they are x_... form.
     do_warn("Unknown directive: $d\n") unless $d =~ /^x_/;

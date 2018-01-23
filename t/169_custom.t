@@ -36,6 +36,12 @@ my $song = {
 				   'Swing Low Sweet Chariot'
 				  ]
 		      },
+	    'body' => [
+		       { type => "ignore",
+			 text => "{x_custom: foo}",
+			 context => "",
+		       },
+		      ],
 	   };
 
 is_deeply( { %{ $s->{songs}->[0] } }, $song,

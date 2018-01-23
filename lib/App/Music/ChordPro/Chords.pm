@@ -981,6 +981,11 @@ sub transpose {
     $mod++ if $r =~ s/(is|\#)$//;
     warn("WRONG NOTE: '$c' '$r' '$rest'") unless defined $notes2canon{$r};
     $r = ($notes2canon{$r} + $mod + $xpose) % 12;
+
+    if ( $rest =~ m;^(.*)/(.*); ) {
+	$rest = $1 . "/" . transpose( $2, $xpose );
+    }
+
     return ( $xpose > 0 ? \@notes_sharp : \@notes_flat )->[$r] . $rest;
 }
 

@@ -14,7 +14,7 @@ my $s = App::Music::ChordPro::Songbook->new;
 my $data = <<EOD;
 {title: Swing Low Sweet Chariot}
 {key: D}
-I [D]looked over Jordan, and [G]what did I [D]see,
+I [D]looked over Jordan, and [G/B]what did I [D]see,
 EOD
 
 eval { $s->parsefile( \$data, { transpose => 3 } ) } or diag("$@");
@@ -37,7 +37,7 @@ my $song = {
 			 'show' => 'all',
 			 'chords' => [
 				      'F',
-				      'A#'
+				      'A#/D'
 				     ]
 			},
 	    'body' => [
@@ -52,7 +52,7 @@ my $song = {
 			 'chords' => [
 				       '',
 				       'F',
-				       'A#',
+				       'A#/D',
 				       'F'
 				     ],
 			 'type' => 'songline'

@@ -29,7 +29,7 @@ sub generate_song {
 
     my $tidy = $options->{'backend-option'}->{tidy};
     $single_space = $options->{'single-space'};
-    $lyrics_only = $options->{'lyrics-only'};
+    $lyrics_only = $::config->{settings}->{'lyrics-only'};
 
     $s->structurize
       if ( $options->{'backend-option'}->{structure} // '' ) eq 'structured';

@@ -1,0 +1,96 @@
+* {
+    font-family: "sans";
+}
+div.song {
+    page-break-after: always;
+}
+div.title {
+    font-size: 18pt;
+    font-weight: bold;
+    /* position: running(title); */
+}
+div.subtitle {
+    font-size: 16pt;
+}
+div.chorus {
+    padding-left: 10pt;
+    border-left: 2pt solid black;
+}
+div.verse {
+}
+div.tab {
+    font-family: "mono";
+    font-size: 10pt;
+    white-space: pre;
+    border: 1pt solid;
+    padding: 2pt;
+}
+table tr td {
+    /* border: 1pt solid red; */
+    margin: 0pt;
+    padding: 0pt;
+}
+table.songline {
+    border-collapse: collapse;
+}
+table.songline + table.songline {
+    margin-top: 0pt;
+    margin-bottom: 0pt;
+}
+table.songline td {
+    white-space: pre;
+}
+table.songline tr.chords {
+    font-size: 12pt;
+    font-style: italic;
+    font-weight: bold;
+    color: blue;
+    page-break-after: avoid;
+}
+table.songline tr.lyrics {
+    font-size: 12pt;
+}
+table.songline td.indent {
+    padding-left: 2em;
+}
+div.comment span {
+    background: #c0c0c0;
+}
+div.comment_italic span {
+    background: #c0c0c0;
+    font-style: italic;
+}
+div.image {
+    object-fit: cover;
+}
+div + div, table + div, div + table {
+    margin-top: 15pt;
+}
+@media print {
+    @page {
+	size: A4 portrait;
+	@top-left {
+	    /* Content specified by source style element. */
+	    /* Until we have running headers and footers. */
+	    /* content: element(title, first); */
+	    font-size: 18pt;
+	    font-weight: bold;
+	}
+	@top-center {
+	    font-size: 18pt;
+	    font-weight: bold;
+	}
+	@bottom-left {
+	    font-size: 8pt;
+	    content: "Produced by ChordProPlus";
+	}
+	@bottom-right {
+	    font-size: 8pt;
+	    content: "Page " counter(page) " of " counter(pages);
+	}
+    }
+    /* Until we have running headers and footers. */
+    div.title {
+	display: none;
+    }
+}
