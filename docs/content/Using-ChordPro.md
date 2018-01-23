@@ -79,6 +79,23 @@ See also: [`--chord-grids`](#chordii-compatibility-options_chord-grids),
 Specifies the encoding for input files. Default is UTF-8. ISO-8859.1
 (Latin-1) encoding is automatically sensed.
 
+### filelist
+
+`--filelist=`_FILE_
+
+Reads the names of the files to be processed from the named file. This
+is mostly useful when you have a large collection of song files that
+you want processed, or when you want them to be processed in a
+particular order.
+
+Every line from the named file is taken to be a file name, with the
+exception of empty lines and lines that start with a `#` which are ignored.
+
+This option may be specified multiple times.
+
+Song file names listed on the command line are processed I<after> the
+files from the filelist arguments.
+
 ### lyrics-only
 
 `--lyrics-only` (short: `-l`)
