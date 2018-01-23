@@ -1,4 +1,4 @@
-0.930.x
+0.94	2018-01-23
 
     - Allow \ { } and | to be escaped with \ in replacement strings.
     - Fix problem that in-song chords caused CANNOT HAPPEN error.
