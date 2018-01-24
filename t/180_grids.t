@@ -140,20 +140,20 @@ $s = App::Music::ChordPro::Songbook->new;
 $data = <<EOD;
 {title Grids}
 {start_of_grid 1+4x3+2}
-| B . . | C . . | D . . | E . . |
+| A . . | Bb . . | C . . | D . . |
 {end_of_grid}
 {start_of_grid}
-| B . . | C . . | D . . | E . . |
+| A . . | Bb . . | C . . | D . . |
 {end_of_grid}
 {start_of_grid}
-| B . . | C . . | D . . | E . . |
+| A . . | Bb . . | C . . | D . . |
 {end_of_grid}
 {start_of_grid}
-| B . . | C . . | D . . | E . . |
+| A . . | Bb . . | C . . | D . . |
 {end_of_grid}
 EOD
 
-eval { $s->parsefile(\$data) } or diag("$@");
+eval { $s->parsefile( \$data, { transpose => 2 } ) } or diag("$@");
 
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );

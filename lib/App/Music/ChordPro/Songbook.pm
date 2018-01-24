@@ -982,7 +982,7 @@ sub _transpose {
 
     if ( $item->{type} eq "gridline" ) {
 	foreach ( @{ $item->{tokens} } ) {
-	    return unless $_->{class} eq "chord";
+	    next unless $_->{class} eq "chord";
 	    $_->{chord} = $self->xpchord( $_->{chord}, $xpose );
 	}
 	if ( $item->{margin} && exists $item->{margin}->{chords} ) {

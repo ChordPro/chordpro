@@ -1,3 +1,7 @@
+0.940.x
+
+    - Fix problem that chords in grids were not transposed.
+
 0.94	2018-01-23
 
     - Allow \ { } and | to be escaped with \ in replacement strings.
@@ -9,7 +13,7 @@
       should be arabic numbers, not roman.
     - Pass unknown directives through to backends.
     - Fix labels handling for ChordPro output.
-    - Fix problem that bass notes in chords were not tranposed.
+    - Fix problem that bass notes in chords were not transposed.
 
 0.930.1	
 
