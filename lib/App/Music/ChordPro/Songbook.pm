@@ -170,7 +170,7 @@ sub parse_song {
 	 && defined($chordtype)
 	 && $chordtype =~ /^[RN]$/ ) {
 	$diag->{orig} = "(End of Song)";
-	do_warn("Chord diagrams suppressed for Nasville/Roman chords");
+	do_warn("Chord diagrams suppressed for Nashville/Roman chords");
 	$diagrams = "none";
     }
 
