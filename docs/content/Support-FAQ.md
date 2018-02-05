@@ -10,4 +10,4 @@ Currently a placeholder page, but we hope to publish your questions and answers 
 
 ### Using ChordPro
 
-* [[ChordPro supports UNICODE. Then why can't I see my russian (vietnamese, greek, ...) characters?|FAQ - Unicode characters]]
+* [[ChordPro supports UNICODE. Then why can't I see my russian (vietnamese, greek, ...) characters?|FAQ Unicode characters]]
