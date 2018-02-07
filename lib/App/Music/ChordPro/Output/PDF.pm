@@ -1107,7 +1107,7 @@ sub songline {
 				 );
 		$xt0 = $pr->text( $post, $xt0, $ychord, $fchord );
 	    }
-	    elsif ( $info->{dproot} || $_ > 0 ) {
+	    elsif ( $chord) {
 		$xt0 = $pr->text( $pre.$chord.$post, $x, $ychord, $fchord );
 	    }
 	    else {
