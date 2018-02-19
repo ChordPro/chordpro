@@ -197,6 +197,17 @@ sub songline {
 	return ( "", join( " ", @{ $elt->{phrases} } ) );
     }
 
+    if ( my $f = $::config->{settings}->{'inline-chords'} ) {
+	$f = '[%s]' unless $f =~ /^[^%]*\%s[^%]*$/;
+	$f .= '%s';
+	foreach ( 0..$#{$elt->{chords}} ) {
+	    $t_line .= sprintf( $f,
+				$elt->{chords}->[$_],
+				$elt->{phrases}->[$_] );
+	}
+	return ( $t_line );
+    }
+
     my $c_line = "";
     foreach ( 0..$#{$elt->{chords}} ) {
 	$c_line .= $elt->{chords}->[$_] . " ";
