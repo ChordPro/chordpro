@@ -33,6 +33,7 @@ my @used_chords;
 
 # Chorus lines, if any.
 my @chorus;
+my $chorus_xpose = 0;
 
 # Keep track of unknown chords, to avoid dup warnings.
 my %warned_chords;
@@ -208,8 +209,10 @@ sub add {
     push( @{$song->{body}},
 	  { context => $in_context,
 	    @_ } );
-    push( @chorus, { context => $in_context, @_ } )
-      if $in_context eq "chorus";
+    if ( $in_context eq "chorus" ) {
+	push( @chorus, { context => $in_context, @_ } );
+	$chorus_xpose = $xpose;
+    }
 }
 
 sub chord {
@@ -421,7 +424,7 @@ sub directive {
 	    do_warn("Garbage in start_of_$1: $arg (ignored)\n")
 	      if $arg;
 	}
-	@chorus = () if $in_context eq "chorus";
+	@chorus = (), $chorus_xpose = 0 if $in_context eq "chorus";
 	return 1;
     }
     if ( $dir =~ /^end_of_(\w+)$/ ) {
@@ -438,7 +441,7 @@ sub directive {
 	$self->add( type => "rechorus",
 		    @chorus
 		    ? ( "chorus" => App::Music::ChordPro::Config::clone(\@chorus),
-			"transpose" => $xpose )
+			"transpose" => $xpose - $chorus_xpose )
 		    : (),
 		  );
 	return 1;
