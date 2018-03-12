@@ -153,6 +153,15 @@ sub generate_song {
 
     my $sb = $s->{body};
 
+    # Load song chords, if any.
+    App::Music::ChordPro::Chords::reset_song_chords();
+    if ( $s->{define} ) {
+	foreach ( @{ $s->{define} } ) {
+	    App::Music::ChordPro::Chords::add_song_chord
+		( $_->{name}, $_->{base}, $_->{frets}, $_->{fingers} );
+	}
+    }
+
     # set_columns needs these, set provisional values.
     $ps->{_leftmargin}  = $ps->{marginleft};
     $ps->{_rightmargin} = $ps->{marginright};

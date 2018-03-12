@@ -1,7 +1,10 @@
 0.940.x
 
     - Fix problem that chords in grids were not transposed.
-    - Fix issue #9 - Error in transposition of a recalled chorus.
+    - Fix issue #41 - Error in transposition of a recalled chorus.
+    - Fix issue #42 - Defining Chords Fails for Songbooks.
+      Song chord definitions were lost in multi-song songbooks except
+      for the last (or only) song.
 
 0.94	2018-01-23
 
