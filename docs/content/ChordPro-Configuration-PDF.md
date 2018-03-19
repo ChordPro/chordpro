@@ -125,7 +125,7 @@ The vertical distance between lines of diagrams is `vspace` times the cell heigh
 
 `linewidth` is the thickness of the diagram lines as a fraction of the cell width.
 
-        "diagram" : {
+        "diagrams" : {
             "show"     :  "bottom",   // or "top", or "right", or "below"
             "width"    :  6,
             "height"   :  6,
