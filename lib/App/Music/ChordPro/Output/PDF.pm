@@ -624,7 +624,12 @@ sub generate_song {
 
 	    # Draw background.
 	    my $bgcol = $ftext->{background};
-	    $bgcol ||= "#E5E5E5" if $elt->{type} eq "comment";
+	    if ( $elt->{type} eq "comment" ) {
+		# Default to grey.
+		$bgcol ||= "#E5E5E5";
+		# Since we default to grey, we need a way to cancel it.
+		undef $bgcol if $bgcol eq "none";
+	    }
 	    if ( $bgcol ) {
 		$pr->rectxy( $x + $indent - 2, $y + 2,
 			     $x + $indent + $w + 2, $y - $vsp, 3, $bgcol );
@@ -636,7 +641,8 @@ sub generate_song {
 		$x0 += 0.25;	# add some offset for the box
 		$pr->rectxy( $x0 + $indent, $y + 1,
 			     $x0 + $indent + $w + 1, $y - $vsp + 1,
-			     0.5, undef, "black" );
+			     0.5, undef,
+			     $ftext->{color} || "black" );
 	    }
 
 	    songline( $elt, $x0, $y, $ps, song => $s, indent => $indent );

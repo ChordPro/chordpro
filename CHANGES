@@ -1,5 +1,7 @@
 0.940.x
 
+    - Allow {comment} without background colour.
+    - Make {comment_box} box the same colour as its text.
     - Fix problem that chords in grids were not transposed.
     - Fix issue #41 - Error in transposition of a recalled chorus.
     - Fix issue #42 - Defining Chords Fails for Songbooks.
