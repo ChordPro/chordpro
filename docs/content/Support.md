@@ -1,10 +1,12 @@
 # Support
 
+## Support for You
+
 * [[User Forum|Support User Forum]]
 * [[Hints and Tips|Support Hints And Tips]]
 * [[FAQ|Support FAQ]]
 
-## Support ChordPro
+## Please support ChordPro
 
 The ChordPro standard and reference implementation are free products.
 Free as in speech. Development is done by motivated volunteers. They
