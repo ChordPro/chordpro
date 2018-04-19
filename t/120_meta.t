@@ -95,6 +95,7 @@ $data = <<EOD;
 {meta: tempo 320}
 {meta: capo 3}
 {tempo 220}
+{c: %%}
 EOD
 
 eval { $s->parsefile(\$data) } or diag("$@");
@@ -113,12 +114,20 @@ $song = {
 		       'album' => [ 'The Album', 'Another Album' ],
 		       'capo' => [ '2', '3' ],
 		       'key' => [ 'F', 'G' ],
+		       '_key' => [ 'G#', 'A#' ],
 		       'tempo' => [ '320', '220' ],
 		       'time' => [ '3/4', '4/4' ],
 		      },
 	    'title' => 'Swing Low Sweet Chariot',
 	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear',
+	    'body' => [
+		       { context => '',
+			 orig => '%%',
+			 text => '%%',
+			 type => 'comment',
+		       },
+		    ],
 	   };
 
 is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );

@@ -1065,7 +1065,7 @@ sub songline {
 	if ( $chordscol && $chord ne "" ) {
 
 	    if ( $chordscapo ) {
-		$pr->text("Capo: " . $chordscapo,
+		$pr->text(fmt_subst( $opts{song}, $ps->{capotag} ),
 			  $chordsx,
 			  $ytext + $ftext->{size} *
 			      $ps->{spacing}->{chords},

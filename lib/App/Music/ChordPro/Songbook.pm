@@ -543,6 +543,9 @@ sub directive {
 	if ( $xpose && $1 eq "key" ) {
 	    $arg = App::Music::ChordPro::Chords::transpose( $arg, $xpose );
 	}
+	if ( $1 eq "capo" && $song->{meta}->{capo} ) {
+	    do_warn("Multiple capo settings may yield surprising results.");
+	}
 	push( @{ $song->{meta}->{$1} }, $arg );
 	return 1;
     }
@@ -554,6 +557,9 @@ sub directive {
 	    my $val = $2;
 	    if ( $xpose && $key eq "key" ) {
 		$val = App::Music::ChordPro::Chords::transpose( $val, $xpose );
+	    }
+	    if ( $key eq "capo" && $song->{meta}->{capo} ) {
+		do_warn("Multiple capo settings may yield surprising results.");
 	    }
 	    if ( $re_meta && $key =~ $re_meta ) {
 		# Known.

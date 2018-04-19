@@ -1,7 +1,10 @@
 0.940.x
 
+    - Add (derived) meta item _key to reflect the actual song key,
+      taking capo setting into account.
     - Allow {comment} without background colour.
     - Make {comment_box} box the same colour as its text.
+    - Warn if multiple {capo} settings.
     - Fix problem that chords in grids were not transposed.
     - Fix issue #41 - Error in transposition of a recalled chorus.
     - Fix issue #42 - Defining Chords Fails for Songbooks.

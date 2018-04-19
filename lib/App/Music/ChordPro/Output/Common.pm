@@ -4,14 +4,23 @@ package App::Music::ChordPro::Output::Common;
 
 use strict;
 use warnings;
+use App::Music::ChordPro::Chords;
 
-# Substitute %X sequences in title formats.
+# Substitute %X sequences in title formats and comments.
 use Text::Balanced qw( extract_bracketed );
 
 sub fmt_subst {
     my ( $s, $t, $cur ) = @_;
     my $res = "";
     my $m = $s->{meta};
+
+    # Derived item(s).
+    $m->{_key} = $m->{key} if exists $m->{key};
+    if ( $m->{key} && $m->{capo} && (my $capo = $m->{capo}->[-1]) ) {
+	$m->{_key} =
+	  [ map { App::Music::ChordPro::Chords::transpose( $_, $capo ) }
+	        @{$m->{key}} ];
+    }
 
     # Hide escaped specials by replacing them with Unicode noncharacters.
     $t =~ s/\\\\/\x{fdd0}/g;
