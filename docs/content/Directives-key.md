@@ -16,4 +16,4 @@ For example:
 
 Now the key for the player is still `C`, but the key for fellow musicians and listeners is `D`.
 
-See also: [[meta|Directives meta]] and [[transpose|Directives transpose]].
+See also: [[capo|Directives capo]], [[meta|Directives meta]] and [[transpose|Directives transpose]].
