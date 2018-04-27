@@ -17,6 +17,12 @@ This is the current built-in configuration file, showing all settings.
   // This is a relaxed JSON document, so comments are possible.
   
   {
+      // Includes. These are processed first, before the rest of
+      // the config file.
+      //
+      // "include" takes a list of either filenames or preset names.
+      // "include" : [ "modern1", "lib/mycfg.json" ],
+  
       // General settings, to be changed by legacy configs and
       // command line.
       "settings" : {
@@ -166,7 +172,7 @@ This is the current built-in configuration file, showing all settings.
   	// Value is the column position.
   	// "chordscolumn" : 400,
   	"chordscolumn" :  0,
-  	"capotag" : "%{capo|Capo: %{}}",
+        "capoheading" : "%{capo|Capo: %{}}",
   
 	// A {titles: left} may conflict with customized formats.
 	// Set to non-zero to ignore the directive.
