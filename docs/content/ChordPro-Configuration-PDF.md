@@ -103,6 +103,13 @@ This is an alternative style where the chords are placed in a separate column at
         // "chordscolumn" : 400,
         "chordscolumn" :  0,
 
+## Capo column heading
+
+When chords are placed in a separate column at the right of the lyrics (see above) and a capo is set, then a heading indicating the current capo setting is added.
+
+        "capotag" : "%{capo|Capo: %{}}",
+
+
 ## Ignore {titles} directives
 
 Traditionally, the `{titles}` directive was used to control titles flush. ChordPro has a much more powerful mechanism but this can conflict with legacy `{titles}` directives. If you use custom title formatting, setting `titles-directive-ignore` to a true makes ChordPro ignore the legacy directives.
