@@ -306,7 +306,7 @@ This is the current built-in configuration file, showing all settings.
 
 =cut
 
-use File::Basename;
+use File::Spec;
 use JSON::PP ();
 
 sub hmerge($$$);
@@ -543,17 +543,17 @@ sub add_config {
 
 	# If there are includes, process these first.
 	if ( exists $new->{include} ) {
-	    my $dir = dirname($file);
+	    my ( $vol, $dir, undef ) = File::Spec->splitpath($file);
 	    foreach my $c ( @{ delete $new->{include} } ) {
 		# Check for resource names.
 		if ( $c !~ m;[/.]; ) {
 		    my $t = ::findlib( "config/".lc($c).".json" );
 		    $c = $t if $t;
 		}
-		else {
+		elsif ( $dir ne ""
+			&& !File::Spec->file_name_is_absolute($c) ) {
 		    # Prepend dir of the caller, if needed.
-		    $c = "$dir/$c"
-		      if $dir ne "" && $dir ne "." && $c !~ m;^(\.\.?)?/;;
+		    $c = File::Spec->catpath( $vol, $dir, $c );
 		}
 		$cfg = add_config( $cfg, $options, $c, $pp );
 	    }
