@@ -2127,17 +2127,23 @@ sub init_font {
     my $font = $ps->{fonts}->{$ff};
     if ( $font->{file} ) {
 	if ( $font->{file} =~ /\.[ot]tf$/ ) {
-	    $font->{font} =
-	      $fontcache{$font->{file}} ||=
-	      $self->{pdf}->ttfont( $font->{file},
-				    -dokern => 1 );
+	    eval {
+		$font->{font} =
+		  $fontcache{$font->{file}} ||=
+		    $self->{pdf}->ttfont( $font->{file},
+					  -dokern => 1 );
+	    }
+	    or warn("Cannot load font: ", $font->{file}, "\n");
 	}
 	elsif ( $font->{file} =~ /\.pf[ab]$/ ) {
-	    $font->{font} =
-	      $fontcache{$font->{file}} ||=
-	      $self->{pdf}->psfont( $font->{file},
-				    -afmfile => $font->{metrics},
-				    -dokern  => 1 );
+	    eval {
+		$font->{font} =
+		  $fontcache{$font->{file}} ||=
+		    $self->{pdf}->psfont( $font->{file},
+					  -afmfile => $font->{metrics},
+					  -dokern  => 1 );
+	    }
+	    or warn("Cannot load font: ", $font->{file}, "\n");
 	}
 	else {
 	    $font->{font} =
@@ -2146,9 +2152,12 @@ sub init_font {
 	}
     }
     else {
-	$font->{font} =
-	  $fontcache{"__core__".$font->{name}} ||=
-	    $self->{pdf}->corefont( $font->{name}, -dokern => 1 );
+	eval {
+	    $font->{font} =
+	      $fontcache{"__core__".$font->{name}} ||=
+		$self->{pdf}->corefont( $font->{name}, -dokern => 1 );
+	}
+	or warn("Cannot load font: ", $font->{file}, "\n");
     }
 
     unless ( $font->{font} ) {
