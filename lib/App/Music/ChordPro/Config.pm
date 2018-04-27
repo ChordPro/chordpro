@@ -24,6 +24,12 @@ This is the current built-in configuration file, showing all settings.
   // This is a relaxed JSON document, so comments are possible.
   
   {
+      // Includes. These are processed first, before the rest of
+      // the config file.
+      //
+      // "include" takes a list of either filenames or preset names.
+      // "include" : [ "modern1", "lib/mycfg.json" ],
+  
       // General settings, to be changed by legacy configs and
       // command line.
       "settings" : {
@@ -300,6 +306,7 @@ This is the current built-in configuration file, showing all settings.
 
 =cut
 
+use File::Basename;
 use JSON::PP ();
 
 sub hmerge($$$);
@@ -532,6 +539,24 @@ sub add_config {
 	    $new->{toc}->{title} //= $new->{pdf}->{formats}->{default}->{'toc-title'};
 	    delete $new->{pdf}->{formats}->{default}->{'toc-title'};
 	    warn("$file: pdf.formats.default.toc-title is obsolete, use toc.title instead\n");
+	}
+
+	# If there are includes, process these first.
+	if ( exists $new->{include} ) {
+	    my $dir = dirname($file);
+	    foreach my $c ( @{ delete $new->{include} } ) {
+		# Check for resource names.
+		if ( $c !~ m;[/.]; ) {
+		    my $t = ::findlib( "config/".lc($c).".json" );
+		    $c = $t if $t;
+		}
+		else {
+		    # Prepend dir of the caller, if needed.
+		    $c = "$dir/$c"
+		      if $dir ne "" && $dir ne "." && $c !~ m;^(\.\.?)?/;;
+		}
+		$cfg = add_config( $cfg, $options, $c, $pp );
+	    }
 	}
 
 	# Merge final.
