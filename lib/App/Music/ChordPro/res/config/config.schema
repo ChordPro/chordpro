@@ -10,7 +10,7 @@
 	},
 	"fontspec": {
 	    "description": "Font specification.",
-	    "additionalProperties": false,
+	    "additionalProperties": { "not": {} },
 	    "properties": {
 		"name": {
 		    "type": "string"
@@ -44,6 +44,12 @@
 
     "properties": {
 
+    	"include": {
+	    "description": "List of configs to be processed before this one.",
+	    "type": [ "array", "null" ],
+	    "items": { "type": "string" }
+	},
+
 	"settings": {
 	    "description": "Global settings.",
 	    "properties": {
@@ -58,7 +64,7 @@
 		"inline-chords": {
 		    "description": "Chords inline.",
 		    "default": false,
-		    "anyOf" : [
+		    "anyOf": [
 		        { "type": "string" },
 		        { "type": "boolean" }
 		    ]
@@ -87,7 +93,7 @@
 		    ]
 		}
 	    },
-	    "additionalProperties": false
+	    "additionalProperties": { "not": {} }
 	},
 
 	"diagrams": {
@@ -113,7 +119,7 @@
 		    "type": "boolean"
 		}
 	    },
-	    "additionalProperties": false
+	    "additionalProperties": { "not": {} }
 	},
 
 	"chords": {
@@ -156,7 +162,7 @@
 		    }
 		},
 		"required": [ "name", "frets" ],
-		"additionalProperties": false
+		"additionalProperties": { "not": {} }
 	    }
 	},
 
@@ -169,7 +175,7 @@
 		    "default": "\"%f\", line %n, %m\n\t%l"
 		}
 	    },
-	    "additionalProperties": false
+	    "additionalProperties": { "not": {} }
 	},
 
 	"metadata": {
@@ -201,13 +207,19 @@
 		    "default": true
 		}
 	    },
-	    "additionalProperties": false
+	    "additionalProperties": { "not": {} }
 	},
 
 	"pdf": {
 	    "description": "Settings for PDF output.",
 	    "properties": {
 
+		"capotag": {
+		    "description": "Value for Capo tag when using chordcolumn.",
+		    "type": "string",
+		    "default": ""
+		},
+		
 		"chordscolumn": {
 		    "description": "Chords position in alternative formatting, if greater than 0.",
 		    "default": 0,
@@ -241,7 +253,7 @@
 				    "type": "number"
 				}
 			    },
-			    "additionalProperties": false
+			    "additionalProperties": { "not": {} }
 			},
 			"indent": {
 			    "description": "Chorus indent.",
@@ -276,7 +288,7 @@
 				    "type": "string"
 				}
 			    },
-			    "additionalProperties": false
+			    "additionalProperties": { "not": {} }
 			},
 			"tag": {
 			    "description": "Label for Chorus.",
@@ -284,7 +296,7 @@
 			    "default": "Chorus"
 			}
 		    },
-		    "additionalProperties": false
+		    "additionalProperties": { "not": {} }
 		},
 
 		"columnspace": {
@@ -340,7 +352,7 @@
 			    "type": "number"
 			}
 		    },
-		    "additionalProperties": false
+		    "additionalProperties": { "not": {} }
 		},
 
 		"diagramscolumn": {
@@ -378,7 +390,7 @@
 					"default": 10,
 					"type": "number"
 				    },
-				    "additionalProperties": false
+				    "additionalProperties": { "not": {} }
 				} } ]
 			},
 			"comment": {
@@ -394,7 +406,7 @@
 					"default": 12,
 					"type": "number"
 				    },
-				    "additionalProperties": false
+				    "additionalProperties": { "not": {} }
 				} } ]
 			},
 			"tab": {
@@ -410,7 +422,7 @@
 					"default": 10,
 					"type": "number"
 				    },
-				    "additionalProperties": false
+				    "additionalProperties": { "not": {} }
 				} } ]
 			},
 			"text": {
@@ -426,7 +438,7 @@
 					"default": 12,
 					"type": "number"
 				    },
-				    "additionalProperties": false
+				    "additionalProperties": { "not": {} }
 				} } ]
 			},
 			"title": {
@@ -442,7 +454,7 @@
 					"default": 14,
 					"type": "number"
 				    },
-				    "additionalProperties": false
+				    "additionalProperties": { "not": {} }
 				} } ]
 			},
 			"toc": {
@@ -458,15 +470,15 @@
 					"default": 11,
 					"type": "number"
 				    },
-				    "additionalProperties": false
+				    "additionalProperties": { "not": {} }
 				} } ]
 			}
 		    },
-		    "patternProperties" : {
-		      "^(grid|subtitle|comment_italic|comment_box|grid_margin|footer|empty|diagram|diagram_base)$" :
+		    "patternProperties": {
+		      "^(grid|subtitle|comment_italic|comment_box|grid_margin|footer|empty|diagram|diagram_base)$":
 		        { "$ref": "#/definitions/fontspec" }
 		    },
-		    "additionalProperties" : false
+		    "additionalProperties": { "not": {} }
 		},
 
 		"footspace": {
@@ -498,7 +510,7 @@
 					{ "default": [ "%{title}", "", "%{page}" ] }
 				    ] }
 			    },
-			    "additionalProperties": false
+			    "additionalProperties": { "not": {} }
 			},
 			"title": {
 			    "description": "Properties for per-song title pages.",
@@ -519,7 +531,7 @@
 					{ "default": [ "", "", "%{page}" ] }
 				    ] }
 			    },
-			    "additionalProperties": false
+			    "additionalProperties": { "not": {} }
 			},
 			"first": {
 			    "description": "Properties of the very first page.",
@@ -538,10 +550,10 @@
 					{ "default": null }
 				    ] }
 			    },
-			    "additionalProperties": false
+			    "additionalProperties": { "not": {} }
 			}
 		    },
-		    "additionalProperties": false
+		    "additionalProperties": { "not": {} }
 		},
 
 		"head-first-only": {
@@ -566,13 +578,13 @@
 			    "enum": [ "left", "right", "center" ],
 			    "type": "string"
 			},
-			"width" : {
+			"width": {
 			    "description": "Margin width.",
 			    "default": 0,
 			    "type": "number"
 		        }
 		    },
-		    "additionalProperties": false
+		    "additionalProperties": { "not": {} }
 		},
 
 		"marginbottom": {
@@ -607,9 +619,9 @@
 		    "description": "Output page size, e.g. \"a4\" or [595,842].",
 		    "default": "a4",
 		    "type": [ "string", "array" ],
-		    "items" : { "type" : "number" },
-		    "minItems" : 2,
-		    "maxItems" : 2
+		    "items": { "type": "number" },
+		    "minItems": 2,
+		    "maxItems": 2
 		},
 
 		"showlayout": {
@@ -657,7 +669,7 @@
 			    "type": "number"
 			}
 		    },
-		    "additionalProperties": false
+		    "additionalProperties": { "not": {} }
 		},
 
 		"titles-directive-ignore": {
@@ -666,7 +678,7 @@
 		    "type": "boolean"
 		}
 	    },
-	    "additionalProperties": false
+	    "additionalProperties": { "not": {} }
 	},
 
 	"toc": {
@@ -684,7 +696,7 @@
 		    "type": "string"
 		}
 	    },
-	    "additionalProperties": false
+	    "additionalProperties": { "not": {} }
 	},
 
 	"tuning": {
@@ -695,9 +707,9 @@
 		"pattern": "^[A-G][b#]?[1-9]$"
 	    }
 	},
-	"additionalProperties": false
+	"additionalProperties": { "not": {} }
     },
 
-    "additionalProperties": false
+    "additionalProperties": { "not": {} }
 }
 
