@@ -102,13 +102,9 @@ This is an alternative style where the chords are placed in a separate column at
         // Value is the column position. 
         // "chordscolumn" : 400,
         "chordscolumn" :  0,
-
-## Capo column heading
-
-When chords are placed in a separate column at the right of the lyrics (see above) and a capo is set, then a heading indicating the current capo setting is added.
-
         "capotag" : "%{capo|Capo: %{}}",
 
+When a capo is set a heading indicating the current capo setting is added. The text of the heading is defined by `capotag`.
 
 ## Ignore {titles} directives
 
