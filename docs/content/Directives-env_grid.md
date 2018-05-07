@@ -76,7 +76,7 @@ left margin. For example:,
 
     {start_of_grid: Intro}
 
-See also [[indent|ChordPro Configuration PDF#indent]].
+See also [[labels|ChordPro Configuration PDF#labels]].
 
 # Directives: end_of_grid
 
