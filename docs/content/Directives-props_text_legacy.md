@@ -24,8 +24,10 @@ Example:
 
     I [D]looked over Jordan, and [G]what did I [D]see,
     {textcolour: red}
+    {textsize: 150%}
     Comin’ for to carry me [A7]home.
     {textcolour}
+    {textsize}
     A [D]band of angels [G]comin’ after [D]me,
 
 Assuming default settings, all lyrics lines will be printed in black except the second line that will be red.
