@@ -171,7 +171,24 @@ sub generate_song {
     $chordscol    = $ps->{chordscolumn};
     $lyrics_only  = $::config->{settings}->{'lyrics-only'};
     $chordscapo   = $s->{meta}->{capo};
-    $ps->{_indent} = $ps->{labels}->{width};
+
+    if ( $ps->{labels}->{width} eq "auto" ) {
+	if ( $s->{labels} && @{ $s->{labels} } ) {
+	    my $longest = 0;
+	    my $ftext = $fonts->{text};
+	    for ( @{ $s->{labels} } ) {
+		my $t = $ftext->{font}->width("$_    ") * $ftext->{size};
+		$longest = $t if $t > $longest;
+	    }
+	    $ps->{_indent} = $longest;
+	}
+	else {
+	    $ps->{_indent} = 0;
+	}
+    }
+    else {
+	$ps->{_indent} = $ps->{labels}->{width};
+    }
 
     my $fail;
     for my $item ( @{ SIZE_ITEMS() } ) {
@@ -870,7 +887,7 @@ sub generate_song {
 		$cells += $grid_margin->[1] = $v[3] if $v[3];
 		$grid_margin->[2] = $cells;
 	    }
-	    elsif ( $elt->{name} eq "tag" ) {
+	    elsif ( $elt->{name} eq "label" ) {
 		$i_tag = $elt->{value};
 	    }
 	    # Arbitrary config values.

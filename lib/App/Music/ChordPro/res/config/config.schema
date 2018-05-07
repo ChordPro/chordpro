@@ -581,7 +581,7 @@
 			"width": {
 			    "description": "Margin width.",
 			    "default": 0,
-			    "type": "number"
+			    "type": [ "number", "string" ]
 		        }
 		    },
 		    "additionalProperties": { "not": {} }

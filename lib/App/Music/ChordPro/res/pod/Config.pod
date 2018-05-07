@@ -163,7 +163,8 @@ This is the current built-in configuration file, showing all settings.
 	// This opens a margin for margin labels.
 	"labels" : {
 	    // Margin width. Default is 0 (no margin labels).
-	    "width" : 0,
+            // "auto" will automatically reserve a margin if labels are used.
+	    "width" : "auto",
 	    // Alignment for the labels. Default is left.
 	    "align" : "left",
 	},

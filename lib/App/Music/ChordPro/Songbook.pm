@@ -40,6 +40,8 @@ my %warned_chords;
 
 my $re_meta;			# for metadata
 
+my @labels;			# labels used
+
 # Normally, transposition and subtitutions are handled by the parser.
 my $no_transpose;		# NYI
 my $no_substitute;
@@ -88,6 +90,7 @@ sub parse_song {
     %warned_chords = ();
     undef $chordtype;
     App::Music::ChordPro::Chords::reset_song_chords();
+    @labels = ();
 
     # Build regex for the known metadata items.
     if ( $::config->{metadata}->{keys} ) {
@@ -157,6 +160,10 @@ sub parse_song {
     }
     do_warn("Unterminated context in song: $in_context")
       if $in_context;
+
+    if ( @labels ) {
+	$song->{labels} = \@labels;
+    }
 
     my $diagrams;
     if ( exists($song->{settings}->{diagrams} ) ) {
@@ -417,8 +424,9 @@ sub directive {
 	}
 	elsif ( $arg && $arg ne "" ) {
 	    $self->add( type  => "set",
-			name  => "tag",
+			name  => "label",
 			value => $arg );
+	    push( @labels, $arg );
 	}
 	else {
 	    do_warn("Garbage in start_of_$1: $arg (ignored)\n")

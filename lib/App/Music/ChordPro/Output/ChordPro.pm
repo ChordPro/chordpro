@@ -139,7 +139,7 @@ sub generate_song {
 			$t .= "x" . $gridparams[1] if $gridparams[1];
 			$t .= "+" . $gridparams[3] if $gridparams[3];
 		    }
-		    elsif ( $elt->{name} eq "tag" ) {
+		    elsif ( $elt->{name} eq "label" ) {
 			my $tag = $elt->{value};
 			$t .= ": " . $tag if $tag ne "";
 		    }
