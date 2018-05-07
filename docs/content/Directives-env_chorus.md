@@ -9,7 +9,7 @@ left margin. For example:,
 
     {start_of_chorus: All}
 
-See also [[indent|ChordPro Configuration PDF#indent]].
+See also [[labels|ChordPro Configuration PDF#labels]].
 
 # Directives: end_of_chorus
 

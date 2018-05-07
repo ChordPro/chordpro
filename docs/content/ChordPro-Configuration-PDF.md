@@ -57,11 +57,22 @@ This controls the distance between lines as a factor of the font size.
 
 Note: By setting the spacing for `empty` to a small value, you get fine-grained control over the spacing between the various parts of the song.
 
-## Indent
+## Labels
 
-When `indent` is set to a positive value, the lyrics and associated
-chords will be indented by this amount. This will create a left
-margin where labels can be printed. See e.g. [[start_of_verse|Directives env_verse]].
+Margin labels can be added to a specific verse, chorus or grid. See
+e.g. [[start_of_verse|Directives env_verse]].
+
+        // This opens a margin for margin labels.
+        "labels" : {
+            // Margin width. Default is 0 (no margin labels).
+            "width" : 0,
+            // Alignment for the labels. Default is left.
+            "align" : "left",
+        },
+
+When `width` is set to a positive value, the lyrics and associated
+chords will be indented by this amount. `align` will control how the
+labels are aligned in the margin.
 
 [![labels.png](images/labels.png)](images/labels.pdf)
 
