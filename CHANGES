@@ -8,6 +8,7 @@
     - Fix problem that chords in grids were not transposed.
     - Add value "auto" for pdf.labels.width to automatically reserve
       margin space when labels are used.
+    - Fix problem that titles-directive-ignore was ignored.
     - Fix issue #41 - Error in transposition of a recalled chorus.
     - Fix issue #42 - Defining Chords Fails for Songbooks.
       Song chord definitions were lost in multi-song songbooks except

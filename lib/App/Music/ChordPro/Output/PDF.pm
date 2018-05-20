@@ -224,7 +224,7 @@ sub generate_song {
 
     my $st = $s->{settings}->{titles} || $::config->{settings}->{titles};
     if ( defined($st)
-	 && ! $pr->{'titles-directive-ignore'} ) {
+	 && ! $ps->{'titles-directive-ignore'} ) {
 	my $swap = sub {
 	    my ( $from, $to ) = @_;
 	    for my $class ( qw( default title first ) ) {
