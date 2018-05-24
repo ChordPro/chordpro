@@ -1454,8 +1454,8 @@ sub tocline {
 
     my $ann = $pr->{pdfpage}->annotation;
     $ann->link($elt->{page});
-    $ann->rect( $ps->{_leftmargin}, $y0 - $ftoc->{size},
-		$ps->{__marginright}, $y0 );
+    $ann->rect( $ps->{_leftmargin}, $y0 - $ftoc->{size} * $ps->{spacing}->{toc},
+		$ps->{__rightmargin}, $y0 );
     ####CHECK MARGIN RIGHT
 }
 
