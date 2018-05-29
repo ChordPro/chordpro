@@ -5,6 +5,10 @@ Modern versions of Mac OS/X come with a pre-installed version of Perl that is ca
 
 `sudo cpan chordpro`
 
+Make sure you are running the system version of the `cpan` tool. If in doubt, type this instead:
+
+`sudo /usr/bin/cpan chordpro`
+
 Your individual configuration file can be placed at
 
 `/Users/USER/.config/chordpro/chordpro.json`
