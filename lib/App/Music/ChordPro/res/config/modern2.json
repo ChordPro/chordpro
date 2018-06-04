@@ -72,7 +72,7 @@
 	// Alternative songlines with chords in a side column.
 	// Value is the column position.
 	"chordscolumn" :  300,
-	"capotag"      :  "%{capo|Capo: %{}}",
+	"capoheading"  :  "%{capo|Capo: %{}}",
 
 	// A {titles: left} may conflict with customized formats.
 	// Set to non-zero to ignore the directive.

@@ -1,4 +1,4 @@
-0.940.x
+0.95	2018-06-04
 
     - Add (derived) meta item _key to reflect the actual song key,
       taking capo setting into account.
@@ -14,6 +14,7 @@
     - Fix issue #42 - Defining Chords Fails for Songbooks.
       Song chord definitions were lost in multi-song songbooks except
       for the last (or only) song.
+    - Fix schema validation for configs.
 
 0.94	2018-01-23
 

@@ -214,8 +214,8 @@
 	    "description": "Settings for PDF output.",
 	    "properties": {
 
-		"capotag": {
-		    "description": "Value for Capo tag when using chordcolumn.",
+		"capoheading": {
+		    "description": "Value for Capo heading when using chordcolumn.",
 		    "type": "string",
 		    "default": ""
 		},

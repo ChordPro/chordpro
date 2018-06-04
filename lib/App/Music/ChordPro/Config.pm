@@ -180,7 +180,7 @@ This is the current built-in configuration file, showing all settings.
   	// Value is the column position.
   	// "chordscolumn" : 400,
   	"chordscolumn" :  0,
-        "capoheading" : "%{capo|Capo: %{}}",
+	"capoheading" : "%{capo|Capo: %{}}",
   
 	// A {titles: left} may conflict with customized formats.
 	// Set to non-zero to ignore the directive.
