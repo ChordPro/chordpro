@@ -1,5 +1,23 @@
 # Release info
 
+## 0.95
+
+Released: 2018-06-04
+
+* Add (derived) meta item _key to reflect the actual song key, taking capo setting into account.
+* Allow {comment} without background colour.
+* Make {comment_box} box the same colour as its text.
+* Warn if multiple {capo} settings.
+* Fix problem that chords in grids were not transposed.
+* Add value "auto" for pdf.labels.width to automatically reserve margin space when labels are used.
+* Fix problem that titles-directive-ignore was ignored.
+* (PDF) Fix problem that toc entries were not clickable.
+* Fix issue #41 - Error in transposition of a recalled chorus.
+* Fix issue #42 - Defining Chords Fails for Songbooks. Song chord definitions were lost in multi-song songbooks except for the last (or only) song.
+* Fix schema validation for configs.
+
+**[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.**
+
 ## 0.94
 
 Released: 2018-01-23
@@ -12,9 +30,7 @@ Released: 2018-01-23
 * Fix Chord/Chordii regression: Base frets in chord diagrams should be arabic numbers, not roman.
 * Pass unknown directives through to backends.
 * Fix labels handling for ChordPro output.
-* Fix problem that bass notes in chords were not tranposed.
-
-**[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.**
+* Fix problem that bass notes in chords were not transposed.
 
 ## 0.930.1
 
