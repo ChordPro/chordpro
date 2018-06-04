@@ -113,6 +113,22 @@ alphabetically.
 	  "order" : "page",
     },
 
+## Includes
+
+A config file can specify a list of other config files that are to be processed *before* the contents of the current file. This makes it straightforward to create config files that extend existing config files.
+
+For example:
+
+    { "include" : [ "modern1" ],
+      "settings" : {
+          "colums" : 2
+      }
+    }
+
+This config file would first load the preset config `modern1`, and then set the number of output columns to 2.
+
+`include` takes a list of preset configs like `modern1`, or file names. If a file name is not absolute, it is taken relative to the location of the including config file.
+
 ## Diagnostic message format
 
 When ChordPro detects errors while analyzing a song, it will use this format to show diagnostic messages.

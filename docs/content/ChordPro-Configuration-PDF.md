@@ -113,6 +113,9 @@ This is an alternative style where the chords are placed in a separate column at
         // Value is the column position. 
         // "chordscolumn" : 400,
         "chordscolumn" :  0,
+        "capoheading" : "%{capo|Capo: %{}}",
+
+When a capo is set a heading indicating the current capo setting is added. The text of the heading is defined by `capoheading`.
 
 ## Ignore {titles} directives
 
