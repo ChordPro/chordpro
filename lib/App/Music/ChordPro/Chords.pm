@@ -599,7 +599,7 @@ sub add_config_chord {
     if ( $fingers && @$fingers && @$fingers != strings() ) {
 	return scalar(@$frets) . " strings";
     }
-    unless ( $base > 0 && $base < 12 ) {
+    unless ( $base > 0 && $base < 24 ) {
 	return "base-fret $base out of range";
     }
     $config_chords{$name} = [ CHORD_CONFIG, $base, @$frets,
@@ -624,7 +624,7 @@ sub add_song_chord {
     if ( $fingers && @$fingers && @$fingers != strings() ) {
 	return scalar(@$fingers) . " strings for fingers";
     }
-    unless ( $base > 0 && $base < 12 ) {
+    unless ( $base > 0 && $base < 24 ) {
 	return "base-fret $base out of range";
     }
     $song_chords{$name} = [ CHORD_SONG, $base, @$frets,
