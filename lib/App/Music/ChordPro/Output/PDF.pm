@@ -540,6 +540,7 @@ sub generate_song {
     my $grid_barwidth = 0.5 * $fonts->{chord}->{size};
     my $grid_margin;
     my $did = 0;
+    my $curctx = "";
 
     while ( @elts ) {
 	$elt = shift(@elts);
@@ -616,6 +617,24 @@ sub generate_song {
 		    $pr->vline( $cx, $y, $vsp,
 				$style->{bar}->{width},
 				$style->{bar}->{color} );
+		}
+		$curctx = "chorus";
+	    }
+	    elsif ( $elt->{context} ne $curctx ) {
+		$curctx = $elt->{context};
+		if ( $curctx ne "" ) {
+		    my $markup = $ps->{section}->{$curctx} || $ps->{section}->{fallback} || "";
+		    if ( $markup =~ /^comment(?:_(?:box|italic))?$/ ) {
+			my $e =  { type => $markup,
+				   context => $curctx,
+				   orig => $curctx,
+				   text => ucfirst($curctx) };
+			unshift( @elts, $e, $elt );
+			next;
+		    }
+		    elsif ( $markup ) {
+			warn( "Unhandled section markup: $markup\n");
+		    }
 		}
 	    }
 

@@ -167,6 +167,14 @@ This is the current built-in configuration file, showing all settings.
             },
 	},
   
+	// Markup for sections (in progress).
+  	// Define what to do with begin_of_XXX directives.
+  	// Use fallback as fallback.
+  	// Default is to ignore them.
+  	"section" : {
+  	    // "fallback" : "comment",
+  	},
+  
 	// This opens a margin for margin labels.
 	"labels" : {
 	    // Margin width. Default is 0 (no margin labels).
@@ -657,7 +665,9 @@ sub hmerge($$$) {
         }
         else {
 	    warn("Config error: unknown item $path$key\n")
-	      unless exists $res{$key};
+	      unless exists $res{$key}
+		|| $path.$key =~ /^pdf\.section\./;
+		;
             $res{$key} = $right->{$key};
         }
     }

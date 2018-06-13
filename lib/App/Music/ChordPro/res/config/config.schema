@@ -624,6 +624,16 @@
 		    "maxItems": 2
 		},
 
+		"section": {
+		    "description": "Markup for song sections.",
+		    "properties": {
+		        "fallback": {
+			    "description": "Fallback markup for sections.",
+			    "type": "string"
+			}
+		    }
+		},
+
 		"showlayout": {
 		    "description": "Show the page layout structure.",
 		    "default": false,

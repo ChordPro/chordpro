@@ -4,6 +4,7 @@
     - Fix issue #47 by Increasing base fret limit to 23.
     - Fix error handling with illegal chord definitions.
     - (wxChordPro) Fix file saving logic.
+    - Experimental: Markup for song sections.
 
 0.95	2018-06-04
 
