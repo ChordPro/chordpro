@@ -868,11 +868,11 @@ sub global_directive {
 	    $res->{base} ||= 1;
 	    push( @{$song->{define}}, $res );
 	    if ( $res->{frets} ) {
-		my $res =
+		my $ret =
 		  App::Music::ChordPro::Chords::add_song_chord
 		      ( $res->{name}, $res->{base}, $res->{frets}, $res->{fingers} );
-		if ( $res ) {
-		    do_warn("Invalid chord: ", $res->{name}, ": ", $res, "\n");
+		if ( $ret ) {
+		    do_warn("Invalid chord: ", $res->{name}, ": ", $ret, "\n");
 		    return 1;
 		}
 	    }
