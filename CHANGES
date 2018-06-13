@@ -1,3 +1,10 @@
+0.95.x
+
+    - (pp/linux/GNUmakefile) Verify we're running the right perl.
+    - Fix issue #47 by Increasing base fret limit to 23.
+    - Fix error handling with illegal chord definitions.
+    - (wxChordPro) Fix file saving logic.
+
 0.95	2018-06-04
 
     - Add (derived) meta item _key to reflect the actual song key,

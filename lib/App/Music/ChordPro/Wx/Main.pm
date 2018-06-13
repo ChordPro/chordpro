@@ -377,6 +377,7 @@ sub OnSaveAs {
        wxDefaultPosition);
     my $ret = $fd->ShowModal;
     if ( $ret == wxID_OK ) {
+	$self->{_currentfile} = $fd->GetPath;
 	$self->{t_source}->SaveFile($fd->GetPath);
 	Wx::LogStatus( "Saved." );
     }
@@ -386,6 +387,7 @@ sub OnSaveAs {
 
 sub OnSave {
     my ($self, $event) = @_;
+    goto &OnSaveAs unless $self->{_currentfile};
     $self->saveas( $self->{_currentfile} );
 }
 
