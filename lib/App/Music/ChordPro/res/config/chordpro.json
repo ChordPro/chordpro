@@ -257,7 +257,18 @@
 	    },
 	    "comment" : {
 		"name" : "Helvetica",
-		"size" : 12
+		"size" : 12,
+		"background" : "#E5E5E5"
+	    },
+	    "comment_italic" : {
+		"name" : "HelveticaOblique",
+		"size" : 12,
+		"background" : "#E5E5E5"
+	    },
+	    "comment_box" : {
+		"name" : "Helvetica",
+		"size" : 12,
+		"frame" : 1
 	    },
 	    "tab" : {
 		"name" : "Courier",

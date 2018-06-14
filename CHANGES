@@ -5,6 +5,7 @@
     - Fix error handling with illegal chord definitions.
     - (wxChordPro) Fix file saving logic.
     - Experimental: Markup for song sections.
+    - Experimental: All fonts can have background and frame.
 
 0.95	2018-06-04
 

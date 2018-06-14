@@ -654,9 +654,11 @@ sub generate_song {
 	    # Comment decorations.
 
 	    $pr->setfont( $ftext );
+
+=begin xxx
+
 	    my $text = $elt->{text};
 	    my $w = $pr->strwidth( $text );
-	    my $x1 = $x + $w;
 
 	    # Draw background.
 	    my $bgcol = $ftext->{background};
@@ -681,7 +683,9 @@ sub generate_song {
 			     $ftext->{color} || "black" );
 	    }
 
-	    songline( $elt, $x0, $y, $ps, song => $s, indent => $indent );
+=cut
+
+	    songline( $elt, $x, $y, $ps, song => $s, indent => $indent );
 
 	    $y -= $vsp;
 	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
@@ -1088,15 +1092,6 @@ sub songline {
 
 	my $chord = $elt->{chords}->[$_];
 	my $phrase = $elt->{phrases}->[$_];
-
-	if ( $fchord->{background} && $chord ne "" && !$chordscol ) {
-	    # Draw background.
-	    my $w1 = $pr->strwidth( $pre.$chord.$post, $fchord );
-	    my $w2 = $inlinechords ? 0 : $pr->strwidth(" ") /  2;
-	    $pr->rectxy( $x - $w2, $ytop, $x + $w1 - $w2,
-			 $ytop - $fchord->{size}, 1,
-			 $fchord->{background} );
-	}
 
 	if ( $chordscol && $chord ne "" ) {
 
@@ -1853,6 +1848,9 @@ sub configurator {
     }
 
     # Sanitize, if necessary.
+    my $comment = { %{ $fonts->{comment} } };
+    delete( $comment->{background} );
+    delete( $comment->{frame} );
     $fonts->{subtitle}       ||= { %{ $fonts->{text}  } };
     $fonts->{comment_italic} ||= { %{ $fonts->{chord} } };
     $fonts->{comment_box}    ||= { %{ $fonts->{chord} } };
@@ -1860,9 +1858,9 @@ sub configurator {
     $fonts->{toc}	     ||= { %{ $fonts->{text}  } };
     $fonts->{empty}	     ||= { %{ $fonts->{text}  } };
     $fonts->{grid}           ||= { %{ $fonts->{chord} } };
-    $fonts->{grid_margin}    ||= { %{ $fonts->{comment} } };
-    $fonts->{diagram}        ||= { %{ $fonts->{comment} } };
-    $fonts->{diagram_base}   ||= { %{ $fonts->{comment} } };
+    $fonts->{grid_margin}    ||= { %{ $comment } };
+    $fonts->{diagram}        ||= { %{ $comment } };
+    $fonts->{diagram_base}   ||= { %{ $comment } };
     $fonts->{chordfingers}     = { name => 'ZapfDingbats' };
     $fonts->{subtitle}->{size}       ||= $fonts->{text}->{size};
     $fonts->{comment_italic}->{size} ||= $fonts->{text}->{size};
@@ -1952,7 +1950,6 @@ sub new {
     $self->{pdf}->{forcecompress} = 0 if $regtest;
     $self->{pdf}->mediabox( $ps->{papersize}->[0],
 			    $ps->{papersize}->[1] );
-#    $self->newpage($ps);
     %fontcache = () if $::__EMBEDDED__;
     $self;
 }
@@ -1974,6 +1971,32 @@ sub text {
     $size ||= $font->{size};
 
     $self->setfont($font, $size);
+
+    # Handle decorations (background, box).
+    my $bgcol = $font->{background};
+    my $frame = $font->{frame};
+    if ( $bgcol || $frame ) {
+	my $w = $self->strwidth( $text );
+	my $vsp = $size * 1.1;
+	# Adjust for baseline.
+	my $y = $y + ( $size / ( 1 - $font->{font}->descender / $font->{font}->ascender ) );
+
+	# Draw background.
+	if ( $bgcol && $bgcol !~ /^no(?:ne)?$/i ) {
+	    $self->rectxy( $x - 2, $y + 2,
+			   $x + $w + 2, $y - $vsp, 3, $bgcol );
+	}
+
+	# Draw box.
+	if ( $frame && $frame !~ /^no(?:ne)?$/i ) {
+	    my $x0 = $x;
+	    $x0 -= 0.25;	# add some offset for the box
+	    $self->rectxy( $x0, $y + 1,
+			   $x0 + $w + 1, $y - $vsp + 1,
+			   0.5, undef,
+			   $font->{color} || "black" );
+	}
+    }
 
     if ( $font->{color} ) {
 	$self->{pdftext}->strokecolor( $font->{color} );
@@ -2124,11 +2147,6 @@ sub newpage {
 				$ps->{papersize}->[1] );
     $self->{pdfgfx}  = $self->{pdfpage}->gfx;
     $self->{pdftext} = $self->{pdfpage}->text;
-}
-
-sub add {
-    my ( $self, @text ) = @_;
-#    prAdd( "@text" );
 }
 
 sub finish {

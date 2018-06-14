@@ -26,6 +26,9 @@
 		},
 		"background": {
 		    "$ref": "#/definitions/colorspec"
+		},
+		"frame": {
+		    "type": "boolean"
 		}
 	    },
 	    "oneOf": [
