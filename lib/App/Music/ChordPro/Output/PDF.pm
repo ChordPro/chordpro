@@ -581,6 +581,28 @@ sub generate_song {
 	     or $elt->{type} eq "tabline"
 	     or $elt->{type} =~ /^comment(?:_box|_italic)?$/ ) {
 
+	    if ( $elt->{context} ne $curctx ) {
+		$curctx = $elt->{context};
+		if ( $curctx ne "" ) {
+		    # Context switch.
+		    my $markup = $ps->{section}->{$curctx}
+		      || $ps->{section}->{fallback} || "";
+		    # If we have markup, insert a comment line.
+		    if ( $ps->{fonts}->{$markup} ) {
+			my $e = { type => "comment",
+				  font => $ps->{fonts}->{$markup},
+				  context => $curctx,
+				  orig => $curctx,
+				  text => ucfirst($curctx) };
+			unshift( @elts, $e, $elt );
+			redo;
+		    }
+		    elsif ( $markup ) {
+			warn( "Unhandled section markup: $markup\n");
+		    }
+		}
+	    }
+
 	    my $fonts = $ps->{fonts};
 	    my $type   = $elt->{type};
 
@@ -619,23 +641,6 @@ sub generate_song {
 				$style->{bar}->{color} );
 		}
 		$curctx = "chorus";
-	    }
-	    elsif ( $elt->{context} ne $curctx ) {
-		$curctx = $elt->{context};
-		if ( $curctx ne "" ) {
-		    my $markup = $ps->{section}->{$curctx} || $ps->{section}->{fallback} || "";
-		    if ( $markup =~ /^comment(?:_(?:box|italic))?$/ ) {
-			my $e =  { type => $markup,
-				   context => $curctx,
-				   orig => $curctx,
-				   text => ucfirst($curctx) };
-			unshift( @elts, $e, $elt );
-			next;
-		    }
-		    elsif ( $markup ) {
-			warn( "Unhandled section markup: $markup\n");
-		    }
-		}
 	    }
 
 	    # Substitute metadata in comments.
@@ -1023,7 +1028,7 @@ sub songline {
     $i_tag = "";
 
     if ( $type =~ /^comment/ ) {
-	$ftext = $fonts->{$type} || $fonts->{comment};
+	$ftext = $elt->{font} || $fonts->{$type} || $fonts->{comment};
 	$ytext  = $ytop - font_bl($ftext);
 	my $song   = $opts{song};
 	$x += $opts{indent} if $opts{indent};
