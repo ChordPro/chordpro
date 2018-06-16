@@ -113,13 +113,13 @@ itself.
 For example:
 
 	{start_of_bridge}
-	The bridge starts with [F]F.
+	[F]The bridge starts with F.
 	{end_of_bridge}
 
 can produce output as if you wrote
 
 	{comment Bridge}
-	The bridge starts with [F]F.
+	[F]The bridge starts with F.
 
 To obtain this, use the following configuration settings:
 
