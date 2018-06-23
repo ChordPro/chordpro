@@ -449,17 +449,17 @@ Johan Vromans C<< <jv at CPAN dot org > >>
 =head1 SUPPORT
 
 ChordPro (the program) development is hosted on GitHub, repository
-L<https://github.com/sciurius/chordpro>.
+L<https://github.com/ChrdPro/chordpro>.
 
 Please report any bugs or feature requests to the GitHub issue tracker,
-L<https://github.com/sciurius/chordpro/issues>.
+L<https://github.com/ChordPro/chordpro/issues>.
 
 A user community discussing ChordPro can be found at
 L<https://groups.google.com/forum/#!forum/chordpro>.
 
 =head1 LICENSE
 
-Copyright (C) 2010,2017 Johan Vromans,
+Copyright (C) 2010,2018 Johan Vromans,
 
 This program is free software. You can redistribute it and/or
 modify it under the terms of the Artistic License 2.0.
