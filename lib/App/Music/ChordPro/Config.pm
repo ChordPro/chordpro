@@ -4,6 +4,7 @@ package App::Music::ChordPro::Config;
 
 use strict;
 use warnings;
+use App::Packager;
 
 =head1 NAME
 
@@ -567,7 +568,7 @@ sub add_config {
 	    foreach my $c ( @{ delete $new->{include} } ) {
 		# Check for resource names.
 		if ( $c !~ m;[/.]; ) {
-		    my $t = ::findlib( "config/".lc($c).".json" );
+		    my $t = findresource( "config/".lc($c).".json" );
 		    $c = $t if $t;
 		}
 		elsif ( $dir ne ""

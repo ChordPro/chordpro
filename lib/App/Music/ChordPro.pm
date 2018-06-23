@@ -4,6 +4,8 @@ use 5.010;
 
 package App::Music::ChordPro;
 
+use App::Packager;
+
 use App::Music::ChordPro::Version;
 
 our $VERSION = $App::Music::ChordPro::Version::VERSION;
@@ -704,13 +706,7 @@ sub app_setup {
         require Pod::Usage;
         Pod::Usage->import;
 	my $f = $manual == 2 ? "pod/Config.pod" : "pod/ChordPro.pod";
-	if ( $App::Packager::PACKAGED ) {
-	    $f = App::Packager::GetResource($f);
-	}
-	else {
-	    $f = ::findlib($f);
-	}
-        unshift( @_, -input => $f );
+        unshift( @_, -input => getresource($f) );
         &pod2usage;
     };
 
@@ -744,7 +740,7 @@ sub app_setup {
                 foreach my $c ( @$_ ) {
 		    # Check for resource names.
 		    if ( ! -r $c && $c !~ m;[/.]; ) {
-			my $t = ::findlib( "config/".lc($c).".json" );
+			my $t = getresource( "config/".lc($c).".json" );
 			$c = $t if $t;
 		    }
                     die("$c: $!\n") unless -r $c;
@@ -999,28 +995,7 @@ sub ::loadfile {
     return \@lines;
 }
 
-
-sub ::findlib {
-    my ( $file ) = @_;
-
-    # Packaged.
-    if ( $App::Packager::PACKAGED ) {
-	my $found = App::Packager::GetUserFile($file);
-	return $found if -e $found;
-	$found = App::Packager::GetResource($file);
-	return $found if -e $found;
-    }
-
-    ( my $me = __PACKAGE__ ) =~ s;::;/;g;
-    foreach ( @INC ) {
-	return "$_/$me/user/$file" if -e "$_/$me/user/$file";
-	return "$_/$me/res/$file"  if -e "$_/$me/res/$file";
-	return "$_/$me/$file"      if -e "$_/$me/$file";
-    }
-    undef;
-}
-
-use lib ( grep { defined } ::findlib("CPAN") );
+use lib ( grep { defined } getresource("CPAN") );
 
 =head1 FONTS
 
@@ -1104,17 +1079,17 @@ Johan Vromans C<< <jv at CPAN dot org > >>
 =head1 SUPPORT
 
 ChordPro (the program) development is hosted on GitHub, repository
-L<https://github.com/sciurius/chordpro>.
+L<https://github.com/ChrdPro/chordpro>.
 
 Please report any bugs or feature requests to the GitHub issue tracker,
-L<https://github.com/sciurius/chordpro/issues>.
+L<https://github.com/ChordPro/chordpro/issues>.
 
 A user community discussing ChordPro can be found at
 L<https://groups.google.com/forum/#!forum/chordpro>.
 
 =head1 LICENSE
 
-Copyright (C) 2010,2017 Johan Vromans,
+Copyright (C) 2010,2018 Johan Vromans,
 
 This program is free software. You can redistribute it and/or
 modify it under the terms of the Artistic License 2.0.

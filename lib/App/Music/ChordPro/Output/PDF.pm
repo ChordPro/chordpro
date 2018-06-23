@@ -8,6 +8,7 @@ use strict;
 use warnings;
 use Data::Dumper;
 use Encode qw( encode_utf8 );
+use App::Packager;
 
 use App::Music::ChordPro::Output::Common;
 
@@ -1832,7 +1833,7 @@ sub configurator {
     }
 
     # Add font dirs.
-    for my $fontdir ( @{$pdf->{fontdir}}, ::findlib("fonts"), $ENV{FONTDIR} ) {
+    for my $fontdir ( @{$pdf->{fontdir}}, getresource("fonts"), $ENV{FONTDIR} ) {
 	next unless $fontdir;
 	if ( -d $fontdir ) {
 	    $pdfapi->can("addFontDirs")->($fontdir);

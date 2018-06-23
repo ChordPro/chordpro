@@ -17,6 +17,7 @@ use Wx::Locale gettext => '_T';
 
 use App::Music::ChordPro::Wx;
 use App::Music::ChordPro;
+use App::Packager;
 use File::Temp qw( tempfile );
 
 our $VERSION = $App::Music::ChordPro::Wx::VERSION;
@@ -86,7 +87,7 @@ sub init {
 my @stylelist;
 sub stylelist {
     return \@stylelist if @stylelist;
-    my $cfglib = ::findlib("config");
+    my $cfglib = getresource("config");
     @stylelist = ( [ _T("Default") ] );
     if ( -d $cfglib ) {
 	opendir( my $dh, $cfglib );
@@ -455,7 +456,7 @@ sub OnHelp_Config {
 sub OnHelp_Example {
     my ($self, $event) = @_;
     return unless $self->checksaved;
-    $self->openfile( ::findlib( "examples/swinglow.cho" ) );
+    $self->openfile( getresource( "examples/swinglow.cho" ) );
     undef $self->{_currentfile};
     $self->{t_source}->SetModified(1);
 }
