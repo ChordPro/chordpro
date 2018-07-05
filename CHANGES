@@ -1,6 +1,8 @@
 0.95.x
 
     - (pp/linux/GNUmakefile) Verify we're running the right perl.
+    - Upgrade to App::Packager 1.43.
+    - Fix transpose of Asus and Esus chords.
     - Fix issue #47 by Increasing base fret limit to 23.
     - Fix error handling with illegal chord definitions.
     - (wxChordPro) Fix file saving logic.

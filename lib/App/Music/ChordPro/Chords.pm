@@ -968,8 +968,8 @@ sub transpose {
 				^ (
 				    [CF](?:is|\#)? |
 				    [DG](?:is|\#|es|b)? |
-				    A(?:is|\#|s|b)? |
-				    E(?:s|b)? |
+				    A(?:is|\#|s(?!us)|b)? |
+				    E(?:s(?!us)|b)? |
 				    B(?:es|b)? |
 				    H
 				  )
