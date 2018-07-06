@@ -27,7 +27,7 @@ WriteMakefile
 		   },
 
  PREREQ_PM      => {
-		    'App::Packager' => 1.420,
+		    'App::Packager' => 1.430,
 		    'PDF::API2'   => 2.020,
 		    'Font::TTF'   => 1.04,
 		    'JSON::PP'	  => 2.27203,
