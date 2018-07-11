@@ -6,7 +6,7 @@ use utf8;
 
 package App::Music::ChordPro::Wx;
 
-our $VERSION = "0.89";
+our $VERSION = "0.96";
 
 1;
 
@@ -31,7 +31,7 @@ For more information about ChordPro program, see L<App::Music::ChordPro>.
 
 =head1 LICENSE
 
-Copyright (C) 2010,2017 Johan Vromans,
+Copyright (C) 2010,2018 Johan Vromans,
 
 This module is free software. You can redistribute it and/or
 modify it under the terms of the Artistic License 2.0.

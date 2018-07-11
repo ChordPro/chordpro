@@ -399,8 +399,8 @@ sub OnPreview {
 
 sub OnQuit {
     my ( $self, $event ) = @_;
-    return unless $self->checksaved;
     $self->SavePreferences;
+    return unless $self->checksaved;
     $self->Close;
 }
 
@@ -467,6 +467,7 @@ sub OnPreferences {
     use App::Music::ChordPro::Wx::PreferencesDialog;
     $self->{d_prefs} ||= App::Music::ChordPro::Wx::PreferencesDialog->new($self, -1, "Preferences");
     my $ret = $self->{d_prefs}->ShowModal;
+    $self->SavePreferences if $ret == wxID_OK;
 }
 
 sub OnAbout {

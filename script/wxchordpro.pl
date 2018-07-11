@@ -24,6 +24,8 @@ if ( @ARGV == 1 && $ARGV[0] eq "--quit" ) {
 sub OnInit {
     my ( $self ) = shift;
 
+    $self->SetAppName("ChordPro");
+    $self->SetVendorName("ChordPro.ORG");
     Wx::InitAllImageHandlers();
 
     my $main = App::Music::ChordPro::Wx::Main->new();
