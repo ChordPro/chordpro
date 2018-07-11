@@ -103,6 +103,39 @@ ChordPro can format a chorus in several different ways:
             },
         },
 
+## Section styles
+
+If you use `{start_of_`*section*`}` and `{end_of_`*section*`}`
+directives to mark specific parts of a song, you can specify that the
+*section* name must be printed as a comment line before the section
+itself.
+
+For example:
+
+	{start_of_bridge}
+	[F]The bridge starts with F.
+	{end_of_bridge}
+
+can produce output as if you wrote
+
+	{comment Bridge}
+	[F]The bridge starts with F.
+
+To obtain this, use the following configuration settings:
+
+		// Markup for sections.
+		// Define what to do with begin_of_XXX directives.
+		// Use fallback as fallback.
+		// Default is to ignore them.
+		"section" : {
+			"bridge" : "comment",
+		},
+
+Instead of `comment`, any of the fonts as described under [Fonts](#fonts) can be used.
+
+A special section name `fallback` can be used to handle all sections
+not otherwise specified.
+
 ## Chords in a side column
 
 This is an alternative style where the chords are placed in a separate column at the right of the lyrics. Chord changes are marked by underlining the lyrics.
@@ -275,7 +308,10 @@ The size of the font, in PDF units (1/72 inch).
 The colour of the font. See [[ChordPro Colours|ChordPro-Colours]] for
 details on colours.
 * `background`  
-The background color. Note that this works currently only for chords and comments.
+The background color.
+* `frame`  
+A boolean value indicating that a frame (box) should be drawn around
+the text.
 
 The following printable items can have fonts associated.
 
@@ -295,11 +331,11 @@ The font used for chords above the lyrics.
 Default is "Helvetica-Oblique" at size 10.
 * `comment`  
 The font used for comments.  
-Default is "Helvetica" at size 12.
+Default is "Helvetica" at size 12, with a grey background.
 * `comment_italic`  
-Default is the setting for `chord`.
+Default is "HelveticaOblique" at size 12, with a grey background.
 * `comment_boxed`  
-Default is the setting for `chord`. Note that a box is drawn around the comment.
+Default is "Helvetica" at size 12, with a frame.
 * `tab`  
 The font used for the contents of
 [[tab environments|Directives-env_tab]].  

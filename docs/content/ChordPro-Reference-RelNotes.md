@@ -1,5 +1,20 @@
 # Release info
 
+## 0.96
+
+Released: 2018-07-11
+
+* (pp/linux/GNUmakefile) Verify we're running the right perl.
+* Upgrade to App::Packager 1.43.
+* Fix transpose of Asus and Esus chords.
+* Fix issue #47 by Increasing base fret limit to 23.
+* Fix error handling with illegal chord definitions.
+* (wxChordPro) Fix file saving logic.
+* Experimental: Markup for song sections.
+* Experimental: All fonts can have background and frame.
+
+**[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.**
+
 ## 0.95
 
 Released: 2018-06-04
