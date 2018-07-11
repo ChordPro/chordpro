@@ -1,4 +1,4 @@
-0.95.x
+0.96	2018-07-11
 
     - (pp/linux/GNUmakefile) Verify we're running the right perl.
     - Upgrade to App::Packager 1.43.
