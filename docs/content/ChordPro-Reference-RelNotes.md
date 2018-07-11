@@ -31,8 +31,6 @@ Released: 2018-06-04
 * Fix issue #42 - Defining Chords Fails for Songbooks. Song chord definitions were lost in multi-song songbooks except for the last (or only) song.
 * Fix schema validation for configs.
 
-**[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.**
-
 ## 0.94
 
 Released: 2018-01-23
