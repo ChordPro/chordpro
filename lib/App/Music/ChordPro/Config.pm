@@ -285,7 +285,6 @@ This is the current built-in configuration file, showing all settings.
   	    "comment_italic" : {
   		"name" : "HelveticaOblique",
   		"size" : 12,
-		"background" : "#E5E5E5"
   	    },
   	    "comment_box" : {
   		"name" : "Helvetica",

@@ -1,3 +1,7 @@
+0.96.x
+
+    - Fix grey background of comment_italic.
+
 0.96	2018-07-11
 
     - (pp/linux/GNUmakefile) Verify we're running the right perl.
