@@ -14,6 +14,7 @@ use base qw( App::Music::ChordPro::Wx::PreferencesDialog_wxg );
 
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
+use App::Packager;
 
 sub get_configfile {
     my ( $self ) = @_;
@@ -30,7 +31,7 @@ sub __set_properties {
       if $self->GetParent->{prefs_pdfviewer};
     $self->{cb_skipstdcfg}->SetValue($self->GetParent->{prefs_skipstdcfg});
 
-    my $cfglib = ::findlib("config");
+    my $cfglib = getresource("config");
     my $ctl = $self->{ch_config};
     $ctl->Clear;
     my $n = 0;

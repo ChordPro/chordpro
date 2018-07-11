@@ -10,7 +10,7 @@ package main;
 use FindBin;
 use lib "$FindBin::Bin/../CPAN";
 use lib "$FindBin::Bin/../lib";
-use App::Packager;
+use App::Packager qw( :name App::Music::ChordPro );
 
 # We need Wx::App for the mainloop.
 # App::Music::ChordPro::Wx::Main is the main entry of the program.
@@ -24,6 +24,8 @@ if ( @ARGV == 1 && $ARGV[0] eq "--quit" ) {
 sub OnInit {
     my ( $self ) = shift;
 
+    $self->SetAppName("ChordPro");
+    $self->SetVendorName("ChordPro.ORG");
     Wx::InitAllImageHandlers();
 
     my $main = App::Music::ChordPro::Wx::Main->new();

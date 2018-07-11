@@ -17,6 +17,7 @@ use Wx::Locale gettext => '_T';
 
 use App::Music::ChordPro::Wx;
 use App::Music::ChordPro;
+use App::Packager;
 use File::Temp qw( tempfile );
 
 our $VERSION = $App::Music::ChordPro::Wx::VERSION;
@@ -86,7 +87,7 @@ sub init {
 my @stylelist;
 sub stylelist {
     return \@stylelist if @stylelist;
-    my $cfglib = ::findlib("config");
+    my $cfglib = getresource("config");
     @stylelist = ( [ _T("Default") ] );
     if ( -d $cfglib ) {
 	opendir( my $dh, $cfglib );
@@ -377,6 +378,7 @@ sub OnSaveAs {
        wxDefaultPosition);
     my $ret = $fd->ShowModal;
     if ( $ret == wxID_OK ) {
+	$self->{_currentfile} = $fd->GetPath;
 	$self->{t_source}->SaveFile($fd->GetPath);
 	Wx::LogStatus( "Saved." );
     }
@@ -386,6 +388,7 @@ sub OnSaveAs {
 
 sub OnSave {
     my ($self, $event) = @_;
+    goto &OnSaveAs unless $self->{_currentfile};
     $self->saveas( $self->{_currentfile} );
 }
 
@@ -396,8 +399,8 @@ sub OnPreview {
 
 sub OnQuit {
     my ( $self, $event ) = @_;
-    return unless $self->checksaved;
     $self->SavePreferences;
+    return unless $self->checksaved;
     $self->Close;
 }
 
@@ -453,7 +456,7 @@ sub OnHelp_Config {
 sub OnHelp_Example {
     my ($self, $event) = @_;
     return unless $self->checksaved;
-    $self->openfile( ::findlib( "examples/swinglow.cho" ) );
+    $self->openfile( getresource( "examples/swinglow.cho" ) );
     undef $self->{_currentfile};
     $self->{t_source}->SetModified(1);
 }
@@ -464,6 +467,7 @@ sub OnPreferences {
     use App::Music::ChordPro::Wx::PreferencesDialog;
     $self->{d_prefs} ||= App::Music::ChordPro::Wx::PreferencesDialog->new($self, -1, "Preferences");
     my $ret = $self->{d_prefs}->ShowModal;
+    $self->SavePreferences if $ret == wxID_OK;
 }
 
 sub OnAbout {
