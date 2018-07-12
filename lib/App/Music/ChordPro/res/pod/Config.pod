@@ -152,7 +152,7 @@ This is the current built-in configuration file, showing all settings.
 	    },
 	    "tag" : "Chorus",
             // Recall style: Print the tag using the type.
-            // Optionally quote the lines of the preceding chorus.
+            // Alternatively quote the lines of the preceding chorus.
             "recall" : {
                  "tag"   : "Chorus",
                  "type"  : "comment",

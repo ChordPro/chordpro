@@ -574,7 +574,7 @@ sub generate_song {
 	    next;
 	}
 
-	unless ( $elt->{type} =~ /^(?:coltrol|set|ignore)$/ ) {
+	unless ( $elt->{type} =~ /^(?:control|set|ignore)$/ ) {
 	    $vsp_ignorefirst = 0;
 	}
 
@@ -827,7 +827,7 @@ sub generate_song {
 	    if ( $t->{quote} ) {
 		unshift( @elts, @{ $elt->{chorus} } ) if $elt->{chorus};
 	    }
-	    if ( $t->{tag} && $t->{type} =~ /^comment(?:_(?:box|italic))?/ ) {
+	    elsif ( $t->{tag} && $t->{type} =~ /^comment(?:_(?:box|italic))?/ ) {
 		unshift( @elts, { %$elt,
 				  type => $t->{type},
 				  text => $t->{tag},

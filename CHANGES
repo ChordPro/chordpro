@@ -3,6 +3,8 @@
     - Fix grey background of comment_italic.
     - Add font "label" for section labels. Defaults to text font.
     - Fix section labels when the first line is not a song line.
+    - {chorus} Do not print Chorus tag when quoting.
+    - {chorus} Allow label.
 
 0.96	2018-07-11
 

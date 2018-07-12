@@ -407,6 +407,7 @@ sub directive {
 	do_warn("Already in " . ucfirst($in_context) . " context\n")
 	  if $in_context;
 	$in_context = $1;
+	@chorus = (), $chorus_xpose = 0 if $in_context eq "chorus";
 	$arg = $grid_arg if $in_context eq "grid" && $arg eq "";
 	if ( $in_context eq "grid" && $arg &&
 	     $arg =~ m/^
@@ -432,7 +433,6 @@ sub directive {
 	    do_warn("Garbage in start_of_$1: $arg (ignored)\n")
 	      if $arg;
 	}
-	@chorus = (), $chorus_xpose = 0 if $in_context eq "chorus";
 	return 1;
     }
     if ( $dir =~ /^end_of_(\w+)$/ ) {
@@ -446,9 +446,28 @@ sub directive {
 	    do_warn("{chorus} encountered while in $in_context context -- ignored\n");
 	    return 1;
 	}
+
+	# Clone the chorus so we can modify the label, if required.
+	my $chorus =
+	  @chorus ? App::Music::ChordPro::Config::clone(\@chorus) : [];
+
+	if ( @$chorus && $arg && $arg ne "" ) {
+	    if ( $chorus->[0]->{type} eq "set" && $chorus->[0]->{name} eq "label" ) {
+		$chorus->[0]->{value} = $arg;
+	    }
+	    else {
+		unshift( @$chorus,
+			 { type => "set",
+			   name => "label",
+			   value => $arg,
+			   context => "chorus",
+			 } );
+	    }
+	    push( @labels, $arg );
+	}
 	$self->add( type => "rechorus",
-		    @chorus
-		    ? ( "chorus" => App::Music::ChordPro::Config::clone(\@chorus),
+		    @$chorus
+		    ? ( "chorus" => $chorus,
 			"transpose" => $xpose - $chorus_xpose )
 		    : (),
 		  );
