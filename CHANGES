@@ -1,6 +1,8 @@
 0.96.x
 
     - Fix grey background of comment_italic.
+    - Add font "label" for section labels. Defaults to text font.
+    - Fix section labels when the first line is not a song line.
 
 0.96	2018-07-11
 

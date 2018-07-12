@@ -176,7 +176,7 @@ sub generate_song {
     if ( $ps->{labels}->{width} eq "auto" ) {
 	if ( $s->{labels} && @{ $s->{labels} } ) {
 	    my $longest = 0;
-	    my $ftext = $fonts->{text};
+	    my $ftext = $fonts->{label} || $fonts->{text};
 	    for ( @{ $s->{labels} } ) {
 		my $t = $ftext->{font}->width("$_    ") * $ftext->{size};
 		$longest = $t if $t > $longest;
@@ -964,6 +964,7 @@ sub prlabel {
     my ( $ps, $label, $x, $y, $font) = @_;
     return if $label eq "" || $ps->{_indent} == 0;
     my $align = $ps->{labels}->{align};
+    $font ||= $ps->{fonts}->{label} || $ps->{fonts}->{text};
     if ( $align eq "right" ) {
 	my $avg_space_width = $ps->{pr}->strwidth("m") / 4;
 	$ps->{pr}->text( $label,
@@ -1033,6 +1034,7 @@ sub songline {
 	$ytext  = $ytop - font_bl($ftext);
 	my $song   = $opts{song};
 	$x += $opts{indent} if $opts{indent};
+	prlabel( $ps, $tag, $x, $ytext );
 	$pr->text( $elt->{text}, $x, $ytext, $ftext );
 	return;
     }
@@ -1040,7 +1042,7 @@ sub songline {
 	$ftext = $fonts->{tab};
 	$ytext  = $ytop - font_bl($ftext);
 	$x += $opts{indent} if $opts{indent};
-	prlabel( $ps, $tag, $x, $ytext, $ftext );
+	prlabel( $ps, $tag, $x, $ytext );
 	$pr->text( $elt->{text}, $x, $ytext, $ftext );
 	return;
     }
@@ -1059,7 +1061,7 @@ sub songline {
        ) {
 	my $x = $x;
 	$x += $opts{indent} if $opts{indent};
-	prlabel( $ps, $tag, $x, $ytext, $ftext );
+	prlabel( $ps, $tag, $x, $ytext );
 	$pr->text( join( "", @{ $elt->{phrases} } ), $x, $ytext, $ftext );
 	return;
     }
@@ -1124,7 +1126,7 @@ sub songline {
 			0.25, "black" );
 
 	    # Print the text.
-	    prlabel( $ps, $tag, $x, $ytext, $ftext );
+	    prlabel( $ps, $tag, $x, $ytext );
 	    $tag = "";
 	    $x = $pr->text( $phrase, $x, $ytext, $ftext );
 
@@ -1165,7 +1167,7 @@ sub songline {
 	    else {
 		$xt0 = $x;
 	    }
-	    prlabel( $ps, $tag, $x, $ytext, $ftext );
+	    prlabel( $ps, $tag, $x, $ytext );
 	    $tag = "";
 	    if ( $inlinechords ) {
 		$x = $pr->text( $phrase, $xt0, $ytext, $ftext );
