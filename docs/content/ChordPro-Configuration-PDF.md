@@ -59,20 +59,25 @@ Note: By setting the spacing for `empty` to a small value, you get fine-grained 
 
 ## Labels
 
-Margin labels can be added to a specific verse, chorus or grid. See
+Section labels can be added to a specific verse, chorus or grid. See
 e.g. [[start_of_verse|Directives env_verse]].
 
         // This opens a margin for margin labels.
         "labels" : {
-            // Margin width. Default is 0 (no margin labels).
-            "width" : 0,
+            // Margin width. Default is "auto".
+            "width" : "auto",
             // Alignment for the labels. Default is left.
             "align" : "left",
         },
 
 When `width` is set to a positive value, the lyrics and associated
-chords will be indented by this amount. `align` will control how the
-labels are aligned in the margin.
+chords will be indented by this amount and section labels, if any, are
+printed.
+
+When `width` is set to `"auto"`, the song will indented automatically,
+but only if labels are actually used.
+
+`align` will control how the labels are aligned in the margin.
 
 [![labels.png](images/labels.png)](images/labels.pdf)
 
@@ -340,6 +345,9 @@ Default is "Helvetica" at size 12, with a frame.
 The font used for the contents of
 [[tab environments|Directives-env_tab]].  
 Default is "Courier" at size 10.
+* `label`  
+The font used for section labels.  
+Default is the setting for `text`.
 * `toc`  
 The font used for the table of contents.  
 Default is "Times-Roman" at size 11.
