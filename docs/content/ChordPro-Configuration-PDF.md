@@ -87,7 +87,7 @@ ChordPro can format a chorus in several different ways:
 
 * the chorus part can be indented;
 * a side bar can be drawn to the left of the chorus part;
-* the `{chorus}` directive can print a comment text (tag), or quote the preceding chorus, or both.
+* the `{chorus}` directive can print a comment text (tag), or quote the preceding chorus.
 
         "chorus" : {
             // Indentation of the chorus.
@@ -100,7 +100,7 @@ ChordPro can format a chorus in several different ways:
                  "color"  : "black",
             },
             // Recall style: Print the tag using the type.
-            // Optionally quote the lines of the preceding chorus.
+            // Alternatively, quote the lines of the preceding chorus.
             "recall" : {
                  "tag"   : "Chorus",
                  "type"  : "comment",
