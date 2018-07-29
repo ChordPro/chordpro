@@ -278,9 +278,9 @@ sub decompose {
     $line =~ s/\s+$//;
     my @a = split(/(\[.*?\])/, $line, -1);
 
-    die(msg("Illegal line")."\n") unless @a; #### TODO
+#    die(msg("Illegal line")."\n") unless @a; #### TODO
 
-    if ( @a == 1 ) {
+    if ( @a <= 1 ) {
 	return ( phrases => [ $line ] );
     }
 

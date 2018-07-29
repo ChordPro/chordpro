@@ -1986,6 +1986,8 @@ sub info {
 
 sub text {
     my ( $self, $text, $x, $y, $font, $size ) = @_;
+    return $x unless length($text);
+
     $font ||= $self->{font};
     $size ||= $font->{size};
 

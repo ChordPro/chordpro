@@ -5,6 +5,8 @@
     - Fix section labels when the first line is not a song line.
     - {chorus} Do not print Chorus tag when quoting.
     - {chorus} Allow label.
+    - Allow empty comment directives.
+    - Do not print background for empty strings.
 
 0.96	2018-07-11
 
