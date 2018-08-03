@@ -863,7 +863,7 @@ sub global_directive {
 	    my $ci;
 	    if ( $res->{frets} || $res->{base} || $res->{fingers} ) {
 		$ci = { name => $res->{name},
-			base => $res->{base} ? $res->{base} : 0,
+			base => $res->{base} ? $res->{base} : 1,
 			strings => $res->{frets},
 			$res->{fingers} ? ( fingers => $res->{fingers} ) : (),
 		      };

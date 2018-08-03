@@ -385,8 +385,9 @@ sub configurator {
     warn("Config: <builtin>\n") if $options && $options->{verbose};
     my $cfg = $pp->decode( config_defaults() );
 
-    # For testing.
+    # Only tests call configurator without options arg.
     unless ( $options ) {
+	# Provide minimal config.
 	App::Music::ChordPro::Chords::set_tuning([("C0")x6]);
 	return $cfg;
     }
@@ -626,7 +627,17 @@ sub add_config {
 sub add_legacy {
     my ( $cfg, $options, $file, $pp ) = @_;
     warn("Config: $file (legacy)\n") if $options->{verbose};
+
     $options->{_legacy} = 1;
+    if ( !defined($cfg->{tuning}) ) {
+	$cfg = default_instrument( $cfg, $options, $pp );
+	my $res =
+	  App::Music::ChordPro::Chords::set_tuning( $cfg->{tuning} );
+	warn( "Invalid tuning in config: ",
+	      $res, "\n" ) if $res;
+    }
+    $::config = $cfg;
+
     require App::Music::ChordPro::Songbook;
     my $s = App::Music::ChordPro::Songbook->new;
     $s->parsefile( $file, $options );
