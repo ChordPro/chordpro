@@ -647,7 +647,6 @@ sub app_setup {
           "chord-grid-size|s=f",        # Sets chord diagram size [30]
           "chord-grids-sorted|S!",      # Prints chord diagrams ordered
           "chord-size|c=i",             # Sets chord size [9]
-	  "diagrams=s",			# Prints chords diagrams
           "dump-chords|D",              # Dumps chords definitions (PostScript)
           "dump-chords-text|d" => \$dump_chords,  # Dumps chords definitions (Text)
           "even-pages-number-left|L",   # Even pages numbers on left
