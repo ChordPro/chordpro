@@ -32,7 +32,7 @@ styles : $(foreach sty,${STYLES},style_${sty}.png)
 
 #### Examples.
 
-EXAMPLES := chordcolour chord chords define grid1 grid2 image tabcolour textcolour
+EXAMPLES := chordcolour chord chords chords2 define grid1 grid2 image tabcolour textcolour
 
 examples : $(foreach ex,${EXAMPLES},ex_${ex}.png) ex_clean
 
@@ -49,6 +49,12 @@ ex_chord.png : ex_chord.cho
 	| ${CONVERT} ${CVT_BORDER} png:- $@
 
 ex_chords.png : ex_chords.cho
+	${CHORDPRO} $< --output=t.pdf
+	${GSPNG} -r200 -sOutputFile=- t.pdf \
+	| ${CONVERT} -trim -alpha remove ${CVT_WBORDER} png:- png:- \
+	| ${CONVERT} ${CVT_BORDER} png:- $@
+
+ex_chords2.png : ex_chords2.cho
 	${CHORDPRO} $< --output=t.pdf
 	${GSPNG} -r200 -sOutputFile=- t.pdf \
 	| ${CONVERT} -trim -alpha remove ${CVT_WBORDER} png:- png:- \
