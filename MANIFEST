@@ -20,11 +20,17 @@ lib/App/Music/ChordPro/Wx/PreferencesDialog.pm
 lib/App/Music/ChordPro/Wx/PreferencesDialog_wxg.pm
 lib/App/Music/ChordPro/res/config/chordii.json
 lib/App/Music/ChordPro/res/config/chordpro.json
+lib/App/Music/ChordPro/res/config/guitar-ly.json
+lib/App/Music/ChordPro/res/config/guitar.json
+lib/App/Music/ChordPro/res/config/inline.json
+lib/App/Music/ChordPro/res/config/mandolin-ly.json
 lib/App/Music/ChordPro/res/config/modern1.json
 lib/App/Music/ChordPro/res/config/modern2.json
 lib/App/Music/ChordPro/res/config/modern3.json
 lib/App/Music/ChordPro/res/config/nashville.json
 lib/App/Music/ChordPro/res/config/roman.json
+lib/App/Music/ChordPro/res/config/roman.json
+lib/App/Music/ChordPro/res/config/ukulele-ly.json
 lib/App/Music/ChordPro/res/config/ukulele.json
 lib/App/Music/ChordPro/res/examples/swinglow.cho
 lib/App/Music/ChordPro/res/pod/ChordPro.pod

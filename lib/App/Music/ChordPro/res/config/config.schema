@@ -1,6 +1,5 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "id": "http://www.chordpro.org/config.json",
 
     "definitions": {
 	"colorspec": {
@@ -28,7 +27,7 @@
 		    "$ref": "#/definitions/colorspec"
 		},
 		"frame": {
-		    "type": "boolean"
+		    "type": [ "boolean", "integer" ]
 		}
 	    },
 	    "oneOf": [
@@ -179,6 +178,11 @@
 		}
 	    },
 	    "additionalProperties": { "not": {} }
+	},
+
+	"instrument": {
+	    "description": "Description of the instrument.",
+	    "type": [ "string", "null" ]
 	},
 
 	"metadata": {

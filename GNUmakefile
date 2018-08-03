@@ -68,8 +68,22 @@ ${RES}/pod/Config.pod : ${LIB}/Config.pm
 # Verify JSON data
 
 CFGLIB := ${LIB}/res/config
+JSONVALIDATOR = java -jar lib/jar/json-schema-validator-*-lib.jar
+JSONOPTS := --brief
 
 checkjson :
+	rm -fr .json
+	mkdir .json
+	for i in ${CFGLIB}/*.json ; \
+	do \
+	  json_pp -json_opt relaxed < $$i > .json/`basename $$i`; \
+	done
+	rm -f .json/pd_colour.json
+	${JSONVALIDATOR} ${JSONOPTS} \
+	  ${CFGLIB}/config.schema .json/*.json
+	rm -fr .json
+
+xxcheckjson :
 	for i in ${CFGLIB}/*.json ; \
 	do \
 	  echo "Verifying $$i..."; \

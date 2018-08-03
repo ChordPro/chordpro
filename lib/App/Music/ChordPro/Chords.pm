@@ -8,21 +8,11 @@ use utf8;
 
 use constant CHORD_SONG => 1;
 
-# Chords info, as a hash by chord name.
-my %chords;
-# Chord names, in the order of the list above.
-my @chordnames;
-# Chord order ordinals, for sorting.
-my %chordorderkey; {
-    my $ord = 0;
-    for ( split( ' ', "C C# Db D D# Eb E F F# Gb G G# Ab A A# Bb B" ) ) {
-	$chordorderkey{$_} = $ord;
-	$ord += 2;
-    }
-}
-
-# Additional chords, defined by the configs.
+# Chords defined by the configs.
 my %config_chords;
+
+# Names of chords loaded from configs.
+my @chordnames;
 
 # Additional chords, defined by the user.
 my %song_chords;
@@ -30,16 +20,15 @@ my %song_chords;
 # Current tuning.
 my @tuning;
 
-# Transfer the info from the raw list into %chords and @chordnames.
-my $chords_filled;
-sub fill_tables {
-    die("FATAL: No instrument?") unless @tuning;
+# Assert that an instrument is loaded.
+sub assert_tuning {
+    Carp::croak("FATAL: No instrument?") unless @tuning;
 }
 
 # Returns a list of all chord names in a nice order.
 sub chordcompare($$);
 sub chordnames {
-    fill_tables();
+    assert_tuning();
     [ sort chordcompare @chordnames ];
 }
 
@@ -47,9 +36,9 @@ sub chordnames {
 sub chord_info {
     my ( $chord ) = @_;
     my $info;
-    fill_tables();
+    assert_tuning();
 
-    for ( \%song_chords, \%config_chords, \%chords ) {
+    for ( \%song_chords, \%config_chords ) {
 	next unless exists($_->{$chord});
 	$info = $_->{$chord};
 	last;
@@ -57,7 +46,7 @@ sub chord_info {
 
     my $s = strings();
     if ( ! $info && $::config->{diagrams}->{auto} ) {
-	$info = [ CHORD_SONG, -1, (0) x $s ];
+	$info = [ CHORD_SONG, 0, (0) x $s ];
     }
 
     return unless $info;
@@ -80,6 +69,16 @@ sub chord_info {
     };
 }
 
+# Chord order ordinals, for sorting.
+my %chordorderkey; {
+    my $ord = 0;
+    for ( split( ' ', "C C# Db D D# Eb E F F# Gb G G# Ab A A# Bb B" ) ) {
+	$chordorderkey{$_} = $ord;
+	$ord += 2;
+    }
+}
+
+# Compare routine for chord names.
 sub chordcompare($$) {
     my ( $chorda, $chordb ) = @_;
     my ( $a0, $arest ) = $chorda =~ /^([A-G][b#]?)(.*)/;
@@ -102,7 +101,7 @@ sub chordcompare($$) {
 
 sub list_chords {
     my ( $chords, $origin, $hdr ) = @_;
-    fill_tables();
+    assert_tuning();
     my @s;
     if ( $hdr ) {
 	my $t = "-" x (((@tuning - 1) * 4) + 1);
@@ -156,7 +155,7 @@ sub list_chords {
 
 sub dump_chords {
     my ( $mode ) = @_;
-    fill_tables();
+    assert_tuning();
     print( join( "\n",
 		 $mode && $mode == 2
 		 ? @{ json_chords(\@chordnames ) }
@@ -165,7 +164,7 @@ sub dump_chords {
 
 sub json_chords {
     my ( $chords ) = @_;
-    fill_tables();
+    assert_tuning();
     my @s;
 
     push( @s, "// ChordPro instrument definition.",
@@ -238,48 +237,17 @@ sub set_tuning {
     my ( $t ) = @_;
     return "Invalid tuning (not array)" unless ref($t) eq "ARRAY";
     @tuning = @$t;		# need more checks
-    fill_tables();
+    assert_tuning();
     @chordnames = ();
-    %chords = ();
     %config_chords = ();
     return;
 
 }
 
-################ Section Config Chords ################
+################ Section Config & User Chords ################
 
-# Add a config defined chord.
-sub add_config_chord {
-    my ( $name, $base, $frets, $fingers ) = @_;
-    # unless ( $frets ) {
-    #	$frets = [(0) x strings()];
-    #	$base = 0;
-    # }
-    unless ( @$frets == strings() ) {
-	return scalar(@$frets) . " strings";
-    }
-    if ( $fingers && @$fingers && @$fingers != strings() ) {
-	return scalar(@$frets) . " strings";
-    }
-    unless ( $base > 0 && $base < 24 ) {
-	return "base-fret $base out of range";
-    }
-    $config_chords{$name} = [ !CHORD_SONG, $base, @$frets,
-			      $fingers && @$fingers ? @$fingers : () ];
-    push( @chordnames, $name );
-    return;
-}
-
-################ Section User (Song) Chords ################
-
-# Reset user defined songs. Should be done for each new song.
-sub reset_song_chords {
-    %song_chords = ();
-}
-
-# Add a user defined chord.
-sub add_song_chord {
-    my ( $name, $base, $frets, $fingers ) = @_;
+sub _check_chord {
+    my ( $base, $frets, $fingers ) = @_;
     if ( @$frets != strings() ) {
 	return scalar(@$frets) . " strings";
     }
@@ -289,6 +257,27 @@ sub add_song_chord {
     unless ( $base > 0 && $base < 24 ) {
 	return "base-fret $base out of range";
     }
+    return;
+}
+
+# Add a config defined chord.
+sub add_config_chord {
+    my ( $name, $base, $frets, $fingers ) = @_;
+    my $res = _check_chord( $base, $frets, $fingers );
+    return $res if $res;
+
+    $config_chords{$name} = [ !CHORD_SONG, $base, @$frets,
+			      $fingers && @$fingers ? @$fingers : () ];
+    push( @chordnames, $name );
+    return;
+}
+
+# Add a user defined chord.
+sub add_song_chord {
+    my ( $name, $base, $frets, $fingers ) = @_;
+    my $res = _check_chord( $base, $frets, $fingers );
+    return $res if $res;
+
     $song_chords{$name} = [ CHORD_SONG, $base, @$frets,
 			    $fingers && @$fingers ? @$fingers : () ];
     return;
@@ -297,15 +286,12 @@ sub add_song_chord {
 # Add an unknown chord.
 sub add_unknown_chord {
     my ( $name ) = @_;
-    my $base = 0;
-    my $frets = [ (0) x strings() ];
-    $song_chords{$name} = [ CHORD_SONG, $base, @$frets ];
-    return +{
-	     name    => $name,
-	     strings => [ ],
-	     base    => -1,
-	     user    => 1,
-	    };
+    $song_chords{$name} = [ CHORD_SONG, 0, (0) x strings() ];
+}
+
+# Reset user defined songs. Should be done for each new song.
+sub reset_song_chords {
+    %song_chords = ();
 }
 
 ################ Section Chords Parser ################
@@ -563,17 +549,10 @@ sub identify {
 
     # Fallback to known chords. Maybe it is user defined.
     else {
-	fill_tables();
+	assert_tuning();
 	for ( \%song_chords, \%config_chords ) {
 	    next unless exists($_->{$name});
 	    $info{system} = "U";
-	    return $ident_cache->{$name} = \%info;
-	}
-
-	# Final fallback to built-in chords.
-	for ( \%chords ) {
-	    next unless exists($_->{$name});
-	    $info{system} = "B";
 	    return $ident_cache->{$name} = \%info;
 	}
 
@@ -624,7 +603,7 @@ sub identify {
 sub transpose {
     my ( $c, $xpose ) = @_;
     return $c unless $xpose;
-    fill_tables();
+    assert_tuning();
     return $c unless $c =~ m/
 				^ (
 				    [CF](?:is|\#)? |
