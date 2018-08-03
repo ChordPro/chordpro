@@ -5,6 +5,7 @@ package App::Music::ChordPro::Config;
 use strict;
 use warnings;
 use App::Packager;
+use Carp;
 
 =head1 NAME
 
@@ -64,6 +65,11 @@ This is the current built-in configuration file, showing all settings.
         "strict" : true,
         "separator" : "; ",
       },
+  
+      // Instrument settings. These are usually set by a separate
+      // config file.
+      //
+      "instrument" : null,
   
       // Strings and tuning.
       // Note that using this will discard all built-in chords!
@@ -376,10 +382,14 @@ sub configurator {
     my $pp = JSON::PP->new->utf8->relaxed;
 
     # Load defaults.
+    warn("Config: <builtin>\n") if $options && $options->{verbose};
     my $cfg = $pp->decode( config_defaults() );
 
     # For testing.
-    return $cfg unless $options;
+    unless ( $options ) {
+	App::Music::ChordPro::Chords::set_tuning([("C0")x6]);
+	return $cfg;
+    }
 
     # Add some extra entries to prevent warnings.
     for ( qw(tuning) ) {
@@ -422,6 +432,7 @@ sub configurator {
 	    $add_legacy->( $options->{$config} );
 	}
 	else {
+	    warn("Adding config for $config\n") if $options->{verbose};
 	    $add_config->( $options->{$config} );
 	}
     }
@@ -439,10 +450,10 @@ sub configurator {
     $cfg = hmerge( $cfg, $ccfg, "" );
 
     # Sanitize added extra entries.
-    for ( qw(tuning) ) {
-	delete( $cfg->{$_} )
-	  unless defined( $cfg->{$_} );
-    }
+#    for ( qw(tuning) ) {
+#	delete( $cfg->{$_} )
+#	  unless defined( $cfg->{$_} );
+#    }
     for ( qw(title subtitle footer) ) {
 	delete($cfg->{pdf}->{formats}->{first}->{$_})
 	  if ($cfg->{pdf}->{formats}->{first}->{$_} // 1) eq "";
@@ -506,6 +517,10 @@ sub configurator {
 	$cfg->{diagrams}->{sorted} = $options->{'chord-grids-sorted'};
     }
 
+    unless ( $cfg->{tuning} ) {
+	$cfg = default_instrument( $cfg, $options, $pp );
+    }
+
     if ( $cfg->{tuning} ) {
 	my $res =
 	  App::Music::ChordPro::Chords::set_tuning( $cfg->{tuning} );
@@ -542,8 +557,18 @@ sub configurator {
     return $cfg;
 }
 
+sub default_instrument {
+    my ( $cfg, $options, $pp ) = @_;
+    # Load default instrument.
+    warn("Config: <instrument>\n") if $options->{verbose};
+    add_config( $cfg, $options,
+		getresource("config/guitar.json") || undef, $pp );
+}
+
 sub add_config {
     my ( $cfg, $options, $file, $pp ) = @_;
+    Carp::confess("FATAL: Insufficient config") unless @_ == 4;
+    Carp::confess("FATAL: Undefined config") unless defined $file;
     warn("Config: $file\n") if $options->{verbose};
     if ( open( my $fd, "<:raw", $file ) ) {
 	local $/;
@@ -567,7 +592,7 @@ sub add_config {
 	    foreach my $c ( @{ delete $new->{include} } ) {
 		# Check for resource names.
 		if ( $c !~ m;[/.]; ) {
-		    my $t = findresource( "config/".lc($c).".json" );
+		    my $t = getresource( "config/".lc($c).".json" );
 		    $c = $t if $t;
 		}
 		elsif ( $dir ne ""
@@ -577,6 +602,14 @@ sub add_config {
 		}
 		$cfg = add_config( $cfg, $options, $c, $pp );
 	    }
+	}
+
+	if ( defined($new->{tuning}) ) {
+	    warn("Config: <flushed chords>\n") if $options->{verbose};
+	    $cfg->{chords} = [];
+	}
+	elsif ( defined($new->{chords}) && !defined($cfg->{tuning}) ) {
+	    $cfg = default_instrument( $cfg, $options, $pp );
 	}
 
 	# Merge final.

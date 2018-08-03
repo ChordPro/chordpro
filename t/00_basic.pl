@@ -2,6 +2,7 @@
 
 use strict;
 use Test::More;
+use App::Packager qw( :name App::Music::ChordPro );
 
 require "./differ.pl";
 

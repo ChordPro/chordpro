@@ -649,6 +649,7 @@ sub app_setup {
           "chord-size|c=i",             # Sets chord size [9]
           "dump-chords|D",              # Dumps chords definitions (PostScript)
           "dump-chords-text|d" => \$dump_chords,  # Dumps chords definitions (Text)
+          "dump-chords-json" => sub { $dump_chords = 2},  # Dumps instrument defs (json).
           "even-pages-number-left|L",   # Even pages numbers on left
           "odd-pages-number-left",      # Odd pages numbers on left
           "lyrics-only|l",              # Only prints lyrics
@@ -771,8 +772,9 @@ sub app_setup {
     }
 
     if ( $dump_chords ) {
+	$::config = App::Music::ChordPro::Config::configurator($options);
 	require App::Music::ChordPro::Chords;
-	App::Music::ChordPro::Chords::dump_chords();
+	App::Music::ChordPro::Chords::dump_chords($dump_chords);
 	exit 0;
     }
 

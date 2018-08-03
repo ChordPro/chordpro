@@ -15,6 +15,8 @@ use constant N             => -1;
 use constant TUNING	   => [ "E2", "A2", "D3", "G3", "B3", "E4" ];
 use constant STRINGS	   => scalar(@{TUNING()});
 
+=begin obsolete
+
 my @builtin_chords =
 (
  "C"	       => [  N, 3, 2, 0, 1, 0,	 1 ],
@@ -158,7 +160,7 @@ my @builtin_chords =
  "E9"	       => [  1, 3, 1, 2, 1, 3,	 1 ],
  "E11"	       => [  1, 1, 1, 1, 2, 2,	 1 ],
  "Esus"	       => [  0, 2, 2, 2, 0, 0,	 1 ],
- "Esus4"       => [  0, 2, 2, 2, 0, 0,	 0 ],
+ "Esus4"       => [  0, 2, 2, 2, 0, 0,	 1 ],
  "Emaj"	       => [  0, 2, 2, 1, 0, 0,	 1 ],
  "Emaj7"       => [  0, 2, 1, 1, 0, N,	 1 ],
  "Edim"	       => [  N, N, 2, 3, 2, 3,	 1 ],
@@ -214,7 +216,7 @@ my @builtin_chords =
  "F#11"	       => [  2, 4, 2, 4, 2, 2,	 1 ],
  "F#sus"       => [  N, N, 4, 4, 2, 2,	 1 ],
  "F#sus4"      => [  N, N, 4, 4, 2, 2,	 1 ],
- "F#maj"       => [  2, 4, 4, 3, 2, 2,	 0 ],
+ "F#maj"       => [  2, 4, 4, 3, 2, 2,	 1 ],
  "F#maj7"      => [  N, N, 4, 3, 2, 1,	 1 ],
  "F#dim"       => [  N, N, 1, 2, 1, 2,	 1 ],
  "F#m"	       => [  2, 4, 4, 2, 2, 2,	 1 ],
@@ -405,6 +407,8 @@ my @builtin_chords =
 
 );
 
+=cut
+
 # Chords info, as a hash by chord name.
 my %chords;
 # Chord names, in the order of the list above.
@@ -425,13 +429,19 @@ my %config_chords;
 my %song_chords;
 
 # Current tuning.
-my @tuning = @{ TUNING() };
+my @tuning;
 
 # Transfer the info from the raw list into %chords and @chordnames.
 my $chords_filled;
 sub fill_tables {
 
+    die("FATAL: No instrument?") unless @tuning;
+
+=begin obsolete
+
     return if $chords_filled++;
+    %chords = ();
+    @chordnames = ();
     my @r = @builtin_chords;
     while ( @r ) {
 	my ( $name, $info ) = splice( @r, 0, 2 );
@@ -439,6 +449,9 @@ sub fill_tables {
 	my @i = @$info;
 	$chords{$name} = [ CHORD_BUILTIN, pop(@i), @i ];
     }
+
+=cut
+
 }
 
 # Returns a list of all chord names in a nice order.
@@ -470,7 +483,7 @@ sub chord_info {
 	return +{
 		 name    => $chord,
 		 strings => [ ],
-		 base    => 0,
+		 base    => 1,
 		 builtin => 1,
 		 system  => "",
 		 origin  => CHORD_SONG,
@@ -480,7 +493,7 @@ sub chord_info {
 	     name    => $chord,
 	     strings => [ @{$info}[2..$s+1] ],
 	     @$info > $s+2 ? ( fingers => [ @{$info}[$s+2..2*$s+1] ] ) : (),
-	     base    => $info->[1]-1,
+	     base    => $info->[1],
 	     builtin => $info->[0] == CHORD_BUILTIN,
 	     system  => "",
 	     origin  => $info->[0],
@@ -543,7 +556,7 @@ sub list_chords {
 	my $s = sprintf( "{%s: %-15.15s base-fret %2d    ".
 			 "frets   %s",
 			 $origin eq "chord" ? "chord" : "define",
-			 $info->{name}, $info->{base} + 1,
+			 $info->{name}, $info->{base},
 			 @{ $info->{strings} }
 			 ? join("",
 				map { sprintf("%-4s", $_) }
@@ -562,8 +575,76 @@ sub list_chords {
 }
 
 sub dump_chords {
+    my ( $mode ) = @_;
     fill_tables();
-    print( join( "\n", @{ list_chords(\@chordnames, "__CLI__", 1) } ), "\n" );
+    print( join( "\n",
+		 $mode && $mode == 2
+		 ? @{ json_chords(\@chordnames ) }
+		 : @{ list_chords(\@chordnames, "__CLI__", 1) } ), "\n" );
+}
+
+sub json_chords {
+    my ( $chords ) = @_;
+    fill_tables();
+    my @s;
+
+    push( @s, "// ChordPro instrument definition.",
+	  "",
+	  qq<{ "instrument" : "> .
+	  ($::config->{instrument} || "Guitar, 6 strings, standard tuning") .
+	  qq<",>,
+	  "",
+	  qq<  "tuning" : [ > .
+	  join(", ", map { qq{"$_"} } @tuning) . " ],",
+	  "",
+	  qq{  "chords" : [},
+	  "",
+	 );
+
+    my $maxl = -1;
+    foreach my $chord ( @$chords ) {
+	my $t = length( $chord );
+	$maxl < $t and $maxl = $t;
+    }
+    $maxl += 2;
+
+    foreach my $chord ( @$chords ) {
+	my $info;
+	if ( eval{ $chord->{name} } ) {
+	    $info = $chord;
+	}
+	else {
+	    $info = chord_info($chord);
+	}
+	next unless $info;
+
+	my $name = '"' . $info->{name} . '"';
+	my $s = sprintf( qq[    { "name" : %-${maxl}.${maxl}s,] .
+                         qq[ "base" : %2d,],
+			 $name, $info->{base} );
+	if ( @{ $info->{strings} } ) {
+	    $s .= qq{ "frets" : [ } .
+	      join( ", ", map { sprintf("%2s", $_) } @{ $info->{strings} } ) .
+		qq{ ],};
+	}
+	if ( $info->{fingers} && @{ $info->{fingers} } ) {
+	    $s .= qq{ "fingers" : [ } .
+	      join( ", ", map { sprintf("%2s", $_) } @{ $info->{fingers} } ) .
+		qq{ ],};
+	}
+	chop($s);
+	$s .= " },";
+	push( @s, $s );
+    }
+    chop( $s[-1] );
+    push( @s, "", "  ]," );
+    if ( $::config->{pdf}->{diagrams}->{vcells} ) {
+	push( @s, qq<  "pdf" : { "diagrams" : { "vcells" : > .
+	      $::config->{pdf}->{diagrams}->{vcells} . qq< } },> );
+    }
+    chop( $s[-1] );
+    push( @s, "}" );
+    \@s;
 }
 
 ################ Section Tuning ################
@@ -593,6 +674,10 @@ sub reset_tuning {
 # Add a config defined chord.
 sub add_config_chord {
     my ( $name, $base, $frets, $fingers ) = @_;
+    # unless ( $frets ) {
+    #	$frets = [(0) x strings()];
+    #	$base = 0;
+    # }
     unless ( @$frets == strings() ) {
 	return scalar(@$frets) . " strings";
     }
@@ -641,7 +726,7 @@ sub add_unknown_chord {
     return +{
 	     name    => $name,
 	     strings => [ ],
-	     base    => 0,
+	     base    => -1,
 	     builtin => 1,
 	     origin  => CHORD_SONG,
 	    };

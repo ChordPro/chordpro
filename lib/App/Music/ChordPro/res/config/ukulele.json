@@ -1,5 +1,7 @@
-{
+{ "instrument" : "Ukulele, 4 strings, standard tuning", 
+
   "tuning" : [ "G4", "C4", "E4", "A4" ],
+
   "chords" : [
     {
       "name"  : "C",

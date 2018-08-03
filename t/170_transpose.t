@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use utf8;
 use Test::More tests => 3;
+use App::Packager qw( :name App::Music::ChordPro );
 
 use App::Music::ChordPro::Config;
 use App::Music::ChordPro::Songbook;

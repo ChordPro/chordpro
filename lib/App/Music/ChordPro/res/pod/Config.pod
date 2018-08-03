@@ -57,6 +57,11 @@ This is the current built-in configuration file, showing all settings.
         "separator" : "; ",
       },
   
+      // Instrument settings. These are usually set by a separate
+      // config file.
+      //
+      "instrument" : null,
+  
       // Strings and tuning.
       // Note that using this will discard all built-in chords!
       // "tuning" : [ "E2", "A2", "D3", "G3", "B3", "E4" ],

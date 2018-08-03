@@ -1588,7 +1588,6 @@ sub getchordinfo {
 	$info = $name;
 	$info->{origin} = 0;
 	$name = $info->{name};
-	$info->{base}--;
     }
     else {
 	$info = App::Music::ChordPro::Chords::chord_info($name);
@@ -1626,9 +1625,9 @@ sub chordgrid {
     $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y - font_bl($font) );
     $y -= $font->{size} * $ps->{spacing}->{chords} + $dot/2 + $lw;
 
-    if ( $info->{base} > 0 ) {
+    if ( $info->{base} > 1 ) {
 	# my $i = @Roman[$info->{base}] . "  ";
-	my $i = sprintf("%d  ", 1+$info->{base});
+	my $i = sprintf("%d  ", $info->{base});
 	$pr->setfont( $ps->{fonts}->{diagram_base}, $gh );
 	$pr->text( $i, $x-$pr->strwidth($i), $y-0.85*$gh,
 		   $ps->{fonts}->{diagram_base}, 1.2*$gh );
@@ -1707,7 +1706,7 @@ sub chordgrid {
 	elsif ( $fret < 0 ) {
 	    $pr->cross( $x+$gw/2, $y+$lw+$gh/3, $dot/3, $lw, "black");
 	}
-	elsif ( $info->{base} >= 0 ) {
+	elsif ( $info->{base} > 0 ) {
 	    $pr->circle( $x+$gw/2, $y+$lw+$gh/3, $dot/3, $lw,
 			 undef, "black");
 	}

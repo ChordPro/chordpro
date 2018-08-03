@@ -1,5 +1,9 @@
 0.96.x
 
+    - Instrument defintions are now in separate config files. There
+      are no 'built-in' tunings and chords, just defaults.
+      Available instrument configs are guitar, guitar-ly, mandolin-ly,
+      and ukulele-ly. Default is guitar.
     - Fix grey background of comment_italic.
     - Add font "label" for section labels. Defaults to text font.
     - Fix section labels when the first line is not a song line.
