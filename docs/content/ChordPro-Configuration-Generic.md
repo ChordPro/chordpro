@@ -92,7 +92,7 @@ The `frets` positions are the positions in the chord diagram as shown. The follo
 
 ![](images/ex_chords2.png)
 
-The `"fingers"` part is optional.
+As can be seen, the `"fingers"` part is optional.
 
 ## Printing chord diagrams
 
