@@ -1630,8 +1630,8 @@ sub chordgrid {
 	# my $i = @Roman[$info->{base}] . "  ";
 	my $i = sprintf("%d  ", 1+$info->{base});
 	$pr->setfont( $ps->{fonts}->{diagram_base}, $gh );
-	$pr->text( $i, $x-$pr->strwidth($i), $y-$gh/2,
-		   $ps->{fonts}->{diagram_base}, $gh );
+	$pr->text( $i, $x-$pr->strwidth($i), $y-0.85*$gh,
+		   $ps->{fonts}->{diagram_base}, 1.2*$gh );
     }
 
     my $v = $ps->{diagrams}->{vcells};
