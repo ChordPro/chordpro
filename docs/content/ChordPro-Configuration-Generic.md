@@ -85,7 +85,7 @@ The configuration file can hold any number of predefined chords.
 
 ![](images/ex_chords.png)
 
-The `frets` positions are the positions in the chord diagram as shown. The following two definitions are the same chord, shown in two different ways:
+The `frets` positions are the positions in the chord diagram as shown. The following two definitions are the same chord, shown in two different positions:
 
     { "name" : "F#", "base" : 1, "frets" : [ 2, 4, 4, 3, 2, 2 ] },
     { "name" : "F#", "base" : 2, "frets" : [ 1, 3, 3, 2, 1, 1 ] },
