@@ -16,15 +16,13 @@ sub generate_songbook {
     return [] unless eval { $sb->{songs}->[0]->{body} };
 
     # Build regex for the known metadata items.
-    if ( $::config->{metadata}->{keys} ) {
-	$re_meta = '^(' .
-	  join( '|', map { quotemeta } @{$::config->{metadata}->{keys}} )
-	    . ')$';
-	$re_meta = qr/$re_meta/;
-    }
-    else {
-	undef $re_meta;
-    }
+    $re_meta = join( '|',
+		     map { quotemeta }
+		     "title", "subtitle",
+		     "artist", "composer", "lyricist", "arranger",
+		     "album", "copyright", "year",
+		     "key", "time", "tempo", "capo", "duration" );
+    $re_meta = qr/^($re_meta)$/;
 
     my @book;
 
@@ -56,7 +54,7 @@ sub generate_song {
     if ( $s->{preamble} ) {
 	@s = @{ $s->{preamble} };
     }
- 
+
     push(@s, "{title: " . $s->{meta}->{title}->[0] . "}")
       if defined $s->{meta}->{title};
     if ( defined $s->{subtitle} ) {
@@ -64,14 +62,19 @@ sub generate_song {
     }
 
     if ( $s->{meta} ) {
+	# Known ones 'as is'.
 	foreach my $k ( sort keys %{ $s->{meta} } ) {
 	    next if $k =~ /^(?:title|subtitle)$/;
-	    if ( $variant eq 'msp' || $k =~ $re_meta ) {
+	    if ( $k =~ $re_meta ) {
 		push( @s, map { +"{$k: $_}" } @{ $s->{meta}->{$k} } );
+		delete $s->{meta}->{$k};
 	    }
-	    else {
-		push( @s, map { +"{meta: $k $_}" } @{ $s->{meta}->{$k} } );
-	    }
+	}
+	# Unknowns with meta prefix.
+	foreach my $k ( sort keys %{ $s->{meta} } ) {
+	    next if $k =~ /^(?:title|subtitle)$/;
+	    next if $k =~ /^_/;
+	    push( @s, map { +"{meta: $k $_}" } @{ $s->{meta}->{$k} } );
 	}
     }
 
