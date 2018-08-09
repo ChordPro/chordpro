@@ -40,7 +40,7 @@ my $song = {
 	       { context => 'grid',
 		 name => 'gridparams',
 		 type => 'set',
-		 value => [4, 3, undef, undef]},
+		 value => [4, 3, undef, undef, '']},
 	       { context => 'grid',
 		 type => 'gridline',
 		 tokens => [
@@ -158,7 +158,7 @@ eval { $s->parsefile( \$data, { transpose => 2 } ) } or diag("$@");
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
 
-$song->{body}->[0]->{value} = [ 4, 3, 1, 2 ];
+$song->{body}->[0]->{value} = [ 4, 3, 1, 2, '' ];
 splice( @{$song->{body}}, $_, 0,
 	{ context => 'grid', name => 'gridparams',
 	  type => 'set', value => [ 4, 3, 1, 2 ] } )
