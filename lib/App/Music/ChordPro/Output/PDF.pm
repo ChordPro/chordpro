@@ -178,8 +178,10 @@ sub generate_song {
 	    my $longest = 0;
 	    my $ftext = $fonts->{label} || $fonts->{text};
 	    for ( @{ $s->{labels} } ) {
-		my $t = $ftext->{font}->width("$_    ") * $ftext->{size};
-		$longest = $t if $t > $longest;
+		for ( split( /\\n/, $_ ) ) {
+		    my $t = $ftext->{font}->width("$_    ") * $ftext->{size};
+		    $longest = $t if $t > $longest;
+		}
 	    }
 	    $ps->{_indent} = $longest;
 	}
@@ -976,20 +978,24 @@ sub prlabel {
     return if $label eq "" || $ps->{_indent} == 0;
     my $align = $ps->{labels}->{align};
     $font ||= $ps->{fonts}->{label} || $ps->{fonts}->{text};
-    if ( $align eq "right" ) {
-	my $avg_space_width = $ps->{pr}->strwidth("m") / 4;
-	$ps->{pr}->text( $label,
-			 $x - $avg_space_width - $ps->{pr}->strwidth($label),
-			 $y, $font );
-    }
-    elsif ( $align =~ /^cent(?:er|re)$/ ) {
-	$ps->{pr}->text( $label,
-			 $x - $ps->{_indent} + $ps->{pr}->strwidth($label)/2,
-			 $y, $font );
-    }
-    else {
-	$ps->{pr}->text( $label,
-			 $x - $ps->{_indent}, $y, $font );
+    for ( split( /\\n/, $label ) ) {
+	my $label = $_;
+	if ( $align eq "right" ) {
+	    my $avg_space_width = $ps->{pr}->strwidth("m") / 4;
+	    $ps->{pr}->text( $label,
+			     $x - $avg_space_width - $ps->{pr}->strwidth($label),
+			     $y, $font );
+	}
+	elsif ( $align =~ /^cent(?:er|re)$/ ) {
+	    $ps->{pr}->text( $label,
+			     $x - $ps->{_indent} + $ps->{pr}->strwidth($label)/2,
+			     $y, $font );
+	}
+	else {
+	    $ps->{pr}->text( $label,
+			     $x - $ps->{_indent}, $y, $font );
+	}
+	$y -= $font->{size} * 1.2;
     }
 }
 
