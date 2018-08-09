@@ -1261,6 +1261,10 @@ sub gridline {
 	      unless $token eq ".";
 	    $x += $cellwidth;
 	}
+	elsif ( $token->{class} eq "slash" ) {
+	    $pr->text( "/", $x, $y, $fchord );
+	    $x += $cellwidth;
+	}
 	elsif ( $token->{class} eq "space" ) {
 	    $x += $cellwidth;
 	}

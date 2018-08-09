@@ -364,6 +364,9 @@ sub decompose_grid {
 	elsif ( $_ eq '%%' ) {
 	    $_ = { symbol => $_, class => "repeat2" };
 	}
+	elsif ( $_ eq "/" ) {
+	    $_ = { symbol => $_, class => "slash" };
+	}
 	elsif ( $_ eq "." ) {
 	    $_ = { symbol => $_, class => "space" };
 	    $nbt++;
