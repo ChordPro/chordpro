@@ -7,6 +7,7 @@
     - Allow meta substitutions in title and subtitle.
     - Add slash as grid symbol.
     - Allow labels for grids.
+    - Show durations as hh:mm.
     - Fix grey background of comment_italic.
     - Add font "label" for section labels. Defaults to text font.
     - Fix section labels when the first line is not a song line.

@@ -84,7 +84,7 @@ sub parse_song {
       );
 
     $xpose = 0;
-    $grid_arg = '1+4x4+1';
+    $grid_arg = [ 4, 4, 1, 1 ];	# 1+4x4+1
     $in_context = $def_context;
     @used_chords = ();
     %warned_chords = ();
@@ -411,8 +411,12 @@ sub directive {
 	  if $in_context;
 	$in_context = $1;
 	@chorus = (), $chorus_xpose = 0 if $in_context eq "chorus";
-	$arg = $grid_arg if $in_context eq "grid" && $arg eq "";
-	if ( $in_context eq "grid" && $arg &&
+	if ( $in_context eq "grid" && $arg eq "" && $grid_arg ) {
+	    $self->add( type => "set",
+			name => "gridparams",
+			value => $grid_arg );
+	}
+	elsif ( $in_context eq "grid" && $arg &&
 	     $arg =~ m/^
 		       (?: (\d+) \+)?
 		       (\d+) (?: x (\d+) )?
@@ -420,17 +424,11 @@ sub directive {
 		       (?:\s+ (.*)? )? $/x ) {
 	    do_warn("Invalid grid params: $arg (must be non-zero)"), return
 	      unless $2;
+	    $grid_arg = [ $2, $3, $1, $4 ];
 	    $self->add( type => "set",
 			name => "gridparams",
-			value => [ $2, $3, $1, $4 ] );
-	    $grid_arg = $arg;
+			value =>  [ @$grid_arg, $5||"" ] );
 	    $grid_cells = [ $2 * ( $3//1 ), ($1//0), ($4//0) ];
-	    if ( $5 ) {
-		$self->add( type  => "set",
-			    name  => "label",
-			    value => $5 );
-		push( @labels, $5 );
-	    }
 	}
 	elsif ( $arg && $arg ne "" ) {
 	    $self->add( type  => "set",
@@ -582,6 +580,7 @@ sub directive {
 	if ( $1 eq "capo" && $song->{meta}->{capo} ) {
 	    do_warn("Multiple capo settings may yield surprising results.");
 	}
+	$arg = duration($arg) if $1 eq "duration";
 	push( @{ $song->{meta}->{$1} }, $arg );
 	return 1;
     }
@@ -596,6 +595,9 @@ sub directive {
 	    }
 	    if ( $key eq "capo" && $song->{meta}->{capo} ) {
 		do_warn("Multiple capo settings may yield surprising results.");
+	    }
+	    if ( $key eq "duration" ) {
+		$val = duration($val);
 	    }
 	    if ( $re_meta && $key =~ $re_meta ) {
 		# Known.
@@ -623,6 +625,16 @@ sub directive {
     # Warn about unknowns, unless they are x_... form.
     do_warn("Unknown directive: $d\n") unless $d =~ /^x_/;
     return;
+}
+
+sub duration {
+    my ( $dur ) = @_;
+    my $res = sprintf( "%d:%02d:%02d",
+		       int( $dur / 3600 ),
+		       int( ( $dur % 3600 ) / 60 ),
+		       $dur % 60 );
+    $res =~ s/^[0:]+//;
+    return $res;
 }
 
 my %propstack;
