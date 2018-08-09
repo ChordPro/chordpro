@@ -111,6 +111,10 @@ sub fmt_subst {
 	    }
 	    else {
 		$val = join( $::config->{metadata}->{separator}, @{ $m->{$key} } );
+		# Allow substitutions in (sub)titles.
+		if ( $key =~ /^(?:sub)?title$/ ) {
+		    $val = fmt_subst( $s, $val );
+		}
 	    }
 	}
 
