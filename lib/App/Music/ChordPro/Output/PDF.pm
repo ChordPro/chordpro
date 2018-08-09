@@ -1217,13 +1217,18 @@ sub gridline {
     my $pr = $ps->{pr};
     my $fonts = $ps->{fonts};
 
-    $x += $barwidth;
-    $cellwidth += $barwidth;
+    my $tag = $i_tag // "";
+    $i_tag = "";
 
     # Use the chords font for the chords, and for the symbols size.
     my $fchord = { %{ $fonts->{grid} || $fonts->{chord} } };
     delete($fchord->{background});
     $y -= font_bl($fchord);
+
+    prlabel( $ps, $tag, $x, $y );
+
+    $x += $barwidth;
+    $cellwidth += $barwidth;
 
     $elt->{tokens} //= [ {} ];
 

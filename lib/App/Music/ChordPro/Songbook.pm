@@ -417,7 +417,7 @@ sub directive {
 		       (?: (\d+) \+)?
 		       (\d+) (?: x (\d+) )?
 		       (?:\+ (\d+) )?
-		       $/x ) {
+		       (?:\s+ (.*)? )? $/x ) {
 	    do_warn("Invalid grid params: $arg (must be non-zero)"), return
 	      unless $2;
 	    $self->add( type => "set",
@@ -425,6 +425,12 @@ sub directive {
 			value => [ $2, $3, $1, $4 ] );
 	    $grid_arg = $arg;
 	    $grid_cells = [ $2 * ( $3//1 ), ($1//0), ($4//0) ];
+	    if ( $5 ) {
+		$self->add( type  => "set",
+			    name  => "label",
+			    value => $5 );
+		push( @labels, $5 );
+	    }
 	}
 	elsif ( $arg && $arg ne "" ) {
 	    $self->add( type  => "set",
