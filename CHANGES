@@ -1,3 +1,9 @@
+0.97
+
+	Better handling of errors and exceptions.
+
+0.96
+
 0.84	Sep 22 2017
 
 	Add checkbox to suppress user and legacy config files.

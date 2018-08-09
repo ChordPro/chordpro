@@ -158,6 +158,19 @@ EOD
 }
 
 my ( $preview_cho, $preview_pdf );
+my ( $msgs, $fatal, $died );
+
+sub _warn {
+    Wx::LogWarning(@_);
+    $msgs++;
+}
+
+sub _die {
+    Wx::LogError(@_);
+    $msgs++;
+    $fatal++;
+    $died++;
+}
 
 sub preview {
     my ( $self ) = @_;
@@ -179,6 +192,11 @@ sub preview {
 
     @ARGV = ();			# just to make sure
     $::__EMBEDDED__ = 1;
+
+    $msgs = $fatal = $died = 0;
+    $SIG{__WARN__} = \&_warn;
+#    $SIG{__DIE__}  = \&_die;
+
     my $options = App::Music::ChordPro::app_setup( "ChordPro", $VERSION );
 
     use App::Music::ChordPro::Output::PDF;
@@ -192,53 +210,38 @@ sub preview {
     $options->{nouserconfig} =
       $options->{nolegacyconfig} = $self->{prefs_skipstdcfg};
     if ( $self->{_cfgpresetfile} ) {
-	$options->{noconfig} = 0;
-	$options->{config} = $self->{_cfgpresetfile};
+	if ( -r $self->{_cfgpresetfile} ) {
+	    $options->{noconfig} = 0;
+	    $options->{config} = $self->{_cfgpresetfile};
+	}
+	else {
+	    _die( $self->{_cfgpresetfile} . ": $!\n" );
+	    goto ERROR;
+	}
     }
     else {
 	$options->{noconfig} = 1;
     }
-    $::config = App::Music::ChordPro::Config::configurator($options);
+    eval {
+	$::config = App::Music::ChordPro::Config::configurator($options);
+    };
+    _die($@), goto ERROR if $@ && !$died;
 
     # Parse the input.
     use App::Music::ChordPro::Songbook;
     my $s = App::Music::ChordPro::Songbook->new;
 
-    my $msgs;
-    my $fatal;
-    $SIG{__WARN__} = sub {
-	Wx::LogWarning(@_);
-	$msgs++;
-    };
-
     $options->{diagformat} = 'Line %n, %m';
-    eval { $s->parsefile( $preview_cho, $options ) };
-    if ( $@ ) {
-	Wx::LogError($@);
-	$msgs++;
-	$fatal++;
-    }
-
-    if ( $msgs ) {
-	Wx::LogStatus( $msgs . " message" .
-		       ( $msgs == 1 ? "" : "s" ) . "." );
-	if ( $fatal ) {
-	    Wx::LogError( "Fatal problems found!" );
-	    return;
-	}
-	else {
-	    Wx::LogWarning( "Problems found!" );
-	}
-    }
+    eval {
+	$s->parsefile( $preview_cho, $options );
+    };
+    _die($@), goto ERROR if $@ && !$died;
 
     # Generate the songbook.
     eval {
 	App::Music::ChordPro::Output::PDF->generate_songbook( $s, $options )
     };
-    if ( $@ ) {
-	Wx::LogError($@);
-	return;
-    }
+    _die($@), goto ERROR if $@ && !$died;
 
     if ( -e $preview_pdf ) {
 	Wx::LogStatus("Output generated, starting previewer");
@@ -262,6 +265,19 @@ sub preview {
 	    else {
 		Wx::LaunchDefaultBrowser($preview_pdf);
 	    }
+	}
+    }
+
+  ERROR:
+    if ( $msgs ) {
+	Wx::LogStatus( $msgs . " message" .
+		       ( $msgs == 1 ? "" : "s" ) . "." );
+	if ( $fatal ) {
+	    Wx::LogError( "Fatal problems found!" );
+	    return;
+	}
+	else {
+	    Wx::LogWarning( "Problems found!" );
 	}
     }
     unlink( $preview_cho );
