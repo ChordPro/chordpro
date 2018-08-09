@@ -629,6 +629,10 @@ sub directive {
 
 sub duration {
     my ( $dur ) = @_;
+
+    if ( $dur =~ /(?:(?:(\d+):)?(\d+):)?(\d+)/ ) {
+	$dur = $3 + ( $2 ? 60 * $2 :0 ) + ( $1 ? 3600 * $1 : 0 );
+    }
     my $res = sprintf( "%d:%02d:%02d",
 		       int( $dur / 3600 ),
 		       int( ( $dur % 3600 ) / 60 ),
