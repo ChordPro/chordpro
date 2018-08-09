@@ -748,6 +748,7 @@ sub generate_song {
 
 	    my $cells = $grid_margin->[2];
 	    $grid_cellwidth = ( $ps->{__rightmargin}
+				- $ps->{_indent}
 				- $ps->{__leftmargin}
 				- ($cells)*$grid_barwidth
 			      ) / $cells;
