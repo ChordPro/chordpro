@@ -5,6 +5,7 @@
       Available instrument configs are guitar, guitar-ly, mandolin-ly,
       and ukulele-ly. Default is guitar.
     - Allow meta substitutions in title and subtitle.
+    - Fix {transpose}, --transpose and {key} interaction.
     - Add slash as grid symbol.
     - Allow labels for grids.
     - Show durations as hh:mm.

@@ -48,6 +48,8 @@ my $no_substitute;
 
 my $diag;			# for diagnostics
 
+sub ::break() {}
+
 sub parsefile {
     my ( $self, $filename, $options ) = @_;
     $options //= {};
@@ -132,8 +134,8 @@ sub parse_song {
 			text => $_ )
 	      unless
 	    $options->{_legacy}
-	      ? $self->global_directive( $1, 1 )
-	      : $self->directive($1);
+	      ? $self->global_directive( $1, $options, 1 )
+	      : $self->directive( $1, $options );
 	    next;
 	}
 
@@ -396,7 +398,7 @@ sub dir_split {
 }
 
 sub directive {
-    my ($self, $d) = @_;
+    my ( $self, $d, $options ) = @_;
     my ( $dir, $arg ) = dir_split($d);
 
     # Context flags.
@@ -574,15 +576,8 @@ sub directive {
     # Metadata extensions (legacy). Should use meta instead.
     # Only accept the list from config.
     if ( $re_meta && $dir =~ $re_meta ) {
-	if ( $xpose && $1 eq "key" ) {
-	    $arg = App::Music::ChordPro::Chords::transpose( $arg, $xpose );
-	}
-	if ( $1 eq "capo" && $song->{meta}->{capo} ) {
-	    do_warn("Multiple capo settings may yield surprising results.");
-	}
-	$arg = duration($arg) if $1 eq "duration";
-	push( @{ $song->{meta}->{$1} }, $arg );
-	return 1;
+	$arg = "$1 $arg";
+	$dir = "meta";
     }
 
     # More metadata.
@@ -590,28 +585,29 @@ sub directive {
 	if ( $arg =~ /([^ :]+)[ :]+(.*)/ ) {
 	    my $key = lc $1;
 	    my $val = $2;
-	    if ( $xpose && $key eq "key" ) {
-		$val = App::Music::ChordPro::Chords::transpose( $val, $xpose );
+	    if ( $key eq "key" ) {
+		$val =~ s/[\[\]]//g;
+		my $xp = $xpose;
+		$xp += $options->{transpose} if $options->{transpose};
+		$val = App::Music::ChordPro::Chords::transpose( $val, $xp )
+		  if $xp;
 	    }
-	    if ( $key eq "capo" && $song->{meta}->{capo} ) {
-		do_warn("Multiple capo settings may yield surprising results.");
+	    elsif ( $key eq "capo" ) {
+		do_warn("Multiple capo settings may yield surprising results.")
+		  if $song->{meta}->{capo};
 	    }
-	    if ( $key eq "duration" ) {
+	    elsif ( $key eq "duration" ) {
 		$val = duration($val);
 	    }
-	    if ( $re_meta && $key =~ $re_meta ) {
-		# Known.
-		push( @{ $song->{meta}->{$key} }, $val );
-	    }
-	    elsif ( $::config->{metadata}->{strict} ) {
+
+	    if ( $::config->{metadata}->{strict}
+		 && ! ( $re_meta && $key =~ $re_meta ) ) {
 		# Unknown, and strict.
 		do_warn("Unknown metadata item: $key");
 		return;
 	    }
-	    else {
-		# Allow.
-		push( @{ $song->{meta}->{$key} }, $val );
-	    }
+
+	    push( @{ $song->{meta}->{$key} }, $val );
 	}
 	else {
 	    do_warn("Incomplete meta directive: $d\n");
@@ -620,7 +616,7 @@ sub directive {
 	return 1;
     }
 
-    return 1 if $self->global_directive( $d, 0 );
+    return 1 if $self->global_directive( $d, $options, 0 );
 
     # Warn about unknowns, unless they are x_... form.
     do_warn("Unknown directive: $d\n") unless $d =~ /^x_/;
@@ -644,7 +640,7 @@ sub duration {
 my %propstack;
 
 sub global_directive {
-    my ($self, $d, $legacy ) = @_;
+    my ($self, $d, $options, $legacy ) = @_;
     my ( $dir, $arg ) = dir_split($d);
 
     # Song / Global settings.
@@ -728,6 +724,10 @@ sub global_directive {
     # More private hacks.
     if ( $d =~ /^([-+])([-\w.]+)$/i ) {
 	return if $legacy;
+	if ( $2 eq "dumpmeta" ) {
+	    use Data::Dumper;
+	    warn(Dumper($song->{meta}));
+	}
 	$self->add( type => "set",
 		    name => $2,
 		    value => $1 eq "+" ? 1 : 0,
@@ -988,11 +988,11 @@ sub transpose {
     my ( $self, $xpose ) = @_;
 
     # Transpose meta data (key).
-    if ( exists $self->{meta} && exists $self->{meta}->{key} ) {
-	foreach ( @{ $self->{meta}->{key} } ) {
-	    $_ = $self->xpchord( $_, $xpose );
-	}
-    }
+#    if ( exists $self->{meta} && exists $self->{meta}->{key} ) {
+#	foreach ( @{ $self->{meta}->{key} } ) {
+#	    $_ = $self->xpchord( $_, $xpose );
+#	}
+#    }
 
     # Transpose song chords.
     if ( exists $self->{chords} ) {

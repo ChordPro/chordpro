@@ -100,6 +100,7 @@ EOD
 
 eval { $s->parsefile(\$data) } or diag("$@");
 
+diag("Expect a \"Multiple capo\" warning");
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
 #use Data::Dumper; warn(Dumper($s));

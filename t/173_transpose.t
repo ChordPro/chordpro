@@ -293,10 +293,10 @@ my $song = {
       'E',
     ],
     key_actual => [
-      'D',
+      'E',
     ],
     key_from => [
-      'E',
+      'F#',
     ],
     title => [
       'Transpositions',
