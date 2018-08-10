@@ -5,6 +5,8 @@ SCRIPT := ../../script
 
 .ONESHELL :
 
+all :	clean chordpro.exe wxchordpro.exe iss
+
 PP := pp
 
 chordpro.exe :: chordpro.pp
@@ -19,19 +21,20 @@ wxchordpro.exe :: chordpro.pp wxchordpro.pp ../common/wxchordpro.pp
 	${PP} --output=wxchordpro.exe @wxchordpro.pp ${SCRIPT}/wxchordpro.pl
 
 ISC := 	"C:\\Program Files (x86)\\Inno Setup 5\\Compil32.exe"
-
-iss ::	install innosetup.iss
-	perl vfix.pl
-	${ISC} /cc innosetup.iss
-
-# NOTE: THIS IS FOR TESTING/DEVELOPMENT ONLY.
-
-DST	:= C:\\Users\\Johan\\Documents\\ChordPro
+DST :=  "C:\\Users\\Johan\\Documents\\ChordPro"
 
 install :: chordpro.exe wxchordpro.exe chordproinst.bmp
 	copy chordpro.exe ${DST}
 	copy wxchordpro.exe ${DST}
 	copy chordproinst.bmp ${DST}
 
+iss ::	install innosetup.iss
+	perl vfix.pl
+	${ISC} /cc innosetup.iss
+	copy ${DST}\\ChordPro-GUI-*.exe .
+
+# NOTE: THIS IS FOR TESTING/DEVELOPMENT ONLY.
+
 clean ::
 	del chordpro.exe wxchordpro.exe *.pp.deps
+	del ${DST}\\*.exe
