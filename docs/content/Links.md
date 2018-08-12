@@ -1,12 +1,12 @@
 # ChordPro related links
 
-* [Official ChordPro site](http://www.chordpro.org)  
+* [Official ChordPro site](https://www.chordpro.org)  
   Contact us via [email](mai&#x6c;to&#58;info&#64;chordpro.org).
 
 * Follow us on [Twitter](https://twitter.com/ChordPro_Org) for
   announcements of new releases and other interesting things.  
 
-* [Chordie.com](http://www.chordie.com)  
+* [Chordie.com](https://www.chordie.com)  
   Searchable web site with a vast collection of ChordPro notated
   songs.
 
@@ -24,19 +24,16 @@
   format.
 
 * [MobileSheetsPro](http://www.zubersoft.com/mobilesheets/)  
-  MobileSheetsPro is a music viewer for Android. It
+  MobileSheetsPro is a music viewer for Android and Windows. It
   is aimed at musicians to replace the music papers and books. It
   supports PDF documents, images and ChordPro files.
-
-* [WebChord](http://webchord.sourceforge.net/)  
-  WebChord converts easy-to-write ChordPro files, which are in the
-  universal ASCII-format, online into formatted, easy-to-read HTML
-  files.
 
 * [Emacs ChordPro mode](https://github.com/hading/chordpro-mode/)  
   Emacs major mode for editing ChordPro files.
 
-* [Chord4](http://chord4.sourceforge.net)  
-  An attempt to a Chord successor, written in Java, by the
-  original authors. Abandoned for many years.
-
+* [ChordTransposer](https://extensions.libreoffice.org/extensions/chordtransposer/)  
+  ChordTransposer is an extension for LibreOffice and OpenOffice. It
+  allows writing lyrics and chords using ChordPro format, and then transform it
+  into a formatted section of your Office document ­ and vice versa.
+  By modifying the paragraph styles you have ultimate control over how
+  your song will look like.
