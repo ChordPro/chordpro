@@ -2,6 +2,11 @@
 
 package App::Music::ChordPro::Output::HTML;
 
+# Produce nice viewable HMTL output.
+#
+# You should be able to print it using a decent browser (notexisting)
+# or a formatting tool like weasyprint.
+
 use strict;
 use warnings;
 
@@ -14,6 +19,7 @@ sub generate_songbook {
 	  '<head>',
 	  '<meta charset="utf-8">',
 	  '<link rel="stylesheet" href="chordpro.css">',
+	  '<link rel="stylesheet" href="chordpro_print.css" media="print">',
 	  '</head>',
 	  '<body>',
 	);
@@ -43,11 +49,9 @@ sub generate_song {
 	push( @s,
 	      '<div class="song">',
 	      '<style>',
-	      '@media print {',
-	      '  @page {',
-	      '    @top-center {',
-	      '        content: counter(song) ". ' . $_ . '";',
-	      '    }',
+	      '@page {',
+	      '  @top-center {',
+	      '      content: counter(song) ". ' . $_ . '";',
 	      '  }',
 	      '}',
 	      '</style>',
