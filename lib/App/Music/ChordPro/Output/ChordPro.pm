@@ -62,6 +62,7 @@ sub generate_song {
     }
 
     if ( $s->{meta} ) {
+	$s->{meta}->{source} //= [ "Lead Sheet" ] if $variant eq 'msp';
 	# Known ones 'as is'.
 	foreach my $k ( sort keys %{ $s->{meta} } ) {
 	    next if $k =~ /^(?:title|subtitle)$/;
