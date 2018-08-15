@@ -48,6 +48,7 @@ sub generate_song {
     my $structured = ( $options->{'backend-option'}->{structure} // '' ) eq 'structured';
     # $s->structurize if ++$structured;
     my $variant = $options->{'backend-option'}->{variant} || 'cho';
+    my $seq     = $options->{'backend-option'}->{seq};
 
     my @s;
 
@@ -62,7 +63,10 @@ sub generate_song {
     }
 
     if ( $s->{meta} ) {
-	$s->{meta}->{source} //= [ "Lead Sheet" ] if $variant eq 'msp';
+	if ( $variant eq 'msp' ) {
+	    $s->{meta}->{source} //= [ "Lead Sheet" ];
+	    $s->{meta}->{custom2} //= [ $seq ] if defined $seq;
+	}
 	# Known ones 'as is'.
 	foreach my $k ( sort keys %{ $s->{meta} } ) {
 	    next if $k =~ /^(?:title|subtitle)$/;
