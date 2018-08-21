@@ -109,7 +109,7 @@ sub generate_song {
 	    $t .= " fingers " .
 	      join(" ", map { $_ < 0 ? "N" : $_ } @{$info->{fingers}})
 		if $info->{fingers};
-	    push(@s, $t);
+	    push(@s, $t . "}");
 	}
 	push(@s, "") if $tidy;
     }
@@ -117,7 +117,7 @@ sub generate_song {
     my $ctx = "";
     my $dumphdr = 1;
 
-    if ( $s->{chords} ) {
+    if ( $s->{chords} && $variant ne 'msp' ) {
 	$dumphdr = 0 unless $s->{chords}->{origin} eq "__CLI__";
 	push( @s,
 	      @{ App::Music::ChordPro::Chords::list_chords
