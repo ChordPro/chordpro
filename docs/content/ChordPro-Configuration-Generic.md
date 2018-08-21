@@ -17,6 +17,12 @@ These settings control global behaviour of the ChordPro program and can be chang
         // Suppress chords.
         // Overrides --lyrics-only command line option.
         "lyrics-only" : false,
+        // Chords inline.
+        // May be a string containing pretext %s posttext.
+        // Defaults to "[%s]" if true.
+        "inline-chords" : false,
+        // Chords under the lyrics.
+       "chords-under" : false,
     },
 
 ## Metadata
