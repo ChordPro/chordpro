@@ -4,6 +4,8 @@
       are no 'built-in' tunings and chords, just defaults.
       Available instrument configs are guitar, guitar-ly, mandolin-ly,
       and ukulele-ly. Default is guitar.
+    - Chords can be shown under the lyrics, controlled by config item
+      settings.chords-under.
     - Allow meta substitutions in title and subtitle.
     - Fix {transpose}, --transpose and {key} interaction.
     - Add slash as grid symbol.

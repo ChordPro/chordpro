@@ -27,7 +27,7 @@
 	// Defaults to "[%s]" if true.
 	"inline-chords" : false,
 	// Chords under the lyrics.
-	"chords-below" : false,
+	"chords-under" : false,
     },
 
     // Metadata.

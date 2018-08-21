@@ -217,7 +217,7 @@ sub songline {
 	$c_line .= " " x -$d if $d < 0;
     }
     s/\s+$// for ( $t_line, $c_line );
-    return $::config->{settings}->{'chords-below'}
+    return $::config->{settings}->{'chords-under'}
       ? ( $t_line, $c_line )
       : ( $c_line, $t_line )
 }

@@ -179,7 +179,7 @@ sub songline {
 
     $elt->{chords} //= [ '' ];
 
-    if ( $::config->{settings}->{'chords-below'} ) {
+    if ( $::config->{settings}->{'chords-under'} ) {
 	return ( '<table class="songline">',
 		 '  <tr class="lyrics">',
 		 '    ' . join( '',
