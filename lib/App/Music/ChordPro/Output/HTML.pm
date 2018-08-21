@@ -179,6 +179,20 @@ sub songline {
 
     $elt->{chords} //= [ '' ];
 
+    if ( $::config->{settings}->{'chords-below'} ) {
+	return ( '<table class="songline">',
+		 '  <tr class="lyrics">',
+		 '    ' . join( '',
+				map { ( $_ =~ s/^\s+// ? '<td class="indent">' : '<td>' ) . html($_) . '</td>' }
+				( @{ $elt->{phrases} } ) ),
+		 '  </tr>',
+		 '  <tr class="chords">',
+		 '    ' . join( '',
+				map { '<td>' . html($_) . ' </td>' }
+				( @{ $elt->{chords} } ) ),
+		 '  </tr>',
+		 '</table>' );
+    }
     return ( '<table class="songline">',
 	     '  <tr class="chords">',
 	     '    ' . join( '',

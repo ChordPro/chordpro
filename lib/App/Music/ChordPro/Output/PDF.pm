@@ -128,6 +128,7 @@ my $structured = 0;		# structured data
 my $single_space = 0;		# suppress chords line when empty
 my $lyrics_only = 0;		# suppress all chord lines
 my $inlinechords = 0;		# chords inline
+my $chordsbelow = 0;		# chords under the lyrics
 my $chordscol = 0;		# chords in a separate column
 my $chordscapo = 0;		# capo in a separate column
 my $i_tag;
@@ -142,6 +143,7 @@ sub generate_song {
 
     $single_space = $::config->{settings}->{'suppress-empty-chords'};
     $inlinechords = $::config->{settings}->{'inline-chords'};
+    $chordsbelow  = $::config->{settings}->{'chords-below'};
     my $ps = $::config->clone->{pdf};
     my $pr = $options->{pr};
     $ps->{pr} = $pr;
@@ -1089,10 +1091,16 @@ sub songline {
 	$ytext  = $ychord if $ytext  > $ychord;
 	$ychord = $ytext;
     }
+    elsif ( $chordsbelow ) {
+	( $ytext, $ychord ) = ( $ychord, $ytext );
+	# Adjust lyrics baseline for the chords.
+	$ychord -= $ps->{fonts}->{text}->{size}
+	  * $ps->{spacing}->{lyrics};
+    }
     else {
 	# Adjust lyrics baseline for the chords.
 	$ytext -= $ps->{fonts}->{chord}->{size}
-	          * $ps->{spacing}->{chords}
+	          * $ps->{spacing}->{chords};
     }
 
     $elt->{chords} //= [ '' ];

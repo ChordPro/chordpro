@@ -49,6 +49,8 @@ This is the current built-in configuration file, showing all settings.
 	// May be a string containing pretext %s posttext.
 	// Defaults to "[%s]" if true.
 	"inline-chords" : false,
+	// Chords under the lyrics.
+	"chords-below" : false,
       },
   
       // Metadata.

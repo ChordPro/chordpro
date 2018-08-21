@@ -217,7 +217,9 @@ sub songline {
 	$c_line .= " " x -$d if $d < 0;
     }
     s/\s+$// for ( $t_line, $c_line );
-    return ( $c_line, $t_line );
+    return $::config->{settings}->{'chords-below'}
+      ? ( $t_line, $c_line )
+      : ( $c_line, $t_line )
 }
 
 # Substitute %X sequences in title formats and comments.

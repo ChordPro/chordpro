@@ -26,6 +26,8 @@
 	// May be a string containing pretext %s posttext.
 	// Defaults to "[%s]" if true.
 	"inline-chords" : false,
+	// Chords under the lyrics.
+	"chords-below" : false,
     },
 
     // Metadata.
