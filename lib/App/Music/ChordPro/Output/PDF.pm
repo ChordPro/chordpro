@@ -397,7 +397,7 @@ sub generate_song {
 
     my $chorddiagrams = sub {
 	my ( $chords, $show ) = @_;
-
+	return unless $ps->{diagrams}->{show};
 	my @chords;
 	$chords = $s->{chords}->{chords}
 	  if !defined($chords) && $s->{chords};
@@ -1163,25 +1163,25 @@ sub songline {
 	else {
 	    my $info = App::Music::ChordPro::Chords::identify($chord);
 	    my $xt0;
-	    if ( $info && $info->{system} eq "R" ) {
-		$xt0 = $pr->text( $pre.$info->{dproot}.$info->{qual},
+	    if ( $info && $info->{system} eq "roman" ) {
+		$xt0 = $pr->text( $pre.$info->{root}.$info->{qual},
 				  $x, $ychord, $fchord );
-		$xt0 = $pr->text( $info->{adds}, $xt0,
+		$xt0 = $pr->text( $info->{ext}, $xt0,
 				   $ychord + $fchord->{size} * 0.2,
 				   $fchord,
 				   $fchord->{size} * 0.8
 				 );
 		$xt0 = $pr->text( $post, $xt0, $ychord, $fchord );
 	    }
-	    elsif ( $info && $info->{system} eq "N" ) {
-		$xt0 = $pr->text( $pre.$info->{dproot}.$info->{qual},
+	    elsif ( $info && $info->{system} eq "nashville" ) {
+		$xt0 = $pr->text( $pre.$info->{root}.$info->{qual},
 				  $x, $ychord, $fchord );
 #		if ( $info->{minor} ) {
 #		    my $m = $info->{minor};
 #		    # $m = "\x{0394}" if $m eq "^";
 #		    $xt0 = $pr->text( $m, $xt0, $ychord, $fchord );
 #		}
-		$xt0 = $pr->text( $info->{adds}, $xt0,
+		$xt0 = $pr->text( $info->{ext}, $xt0,
 				   $ychord + $fchord->{size} * 0.2,
 				   $fchord,
 				   $fchord->{size} * 0.8,
@@ -1189,6 +1189,8 @@ sub songline {
 		$xt0 = $pr->text( $post, $xt0, $ychord, $fchord );
 	    }
 	    elsif ( $chord) {
+		# Strip leading (but not sole) asterisk.
+		$chord =~ s/^\*(?=.)//;
 		$xt0 = $pr->text( $pre.$chord.$post, $x, $ychord, $fchord );
 	    }
 	    else {

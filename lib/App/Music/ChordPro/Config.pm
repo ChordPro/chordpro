@@ -4,6 +4,7 @@ package App::Music::ChordPro::Config;
 
 use strict;
 use warnings;
+use utf8;
 use App::Packager;
 use Carp;
 
@@ -45,12 +46,12 @@ This is the current built-in configuration file, showing all settings.
   	// Suppress chords.
   	// Overrides --lyrics-only command line option.
   	"lyrics-only" : false,
-	// Chords inline.
-	// May be a string containing pretext %s posttext.
-	// Defaults to "[%s]" if true.
-	"inline-chords" : false,
-	// Chords under the lyrics.
-	"chords-under" : false,
+  	// Chords inline.
+  	// May be a string containing pretext %s posttext.
+  	// Defaults to "[%s]" if true.
+  	"inline-chords" : false,
+  	// Chords under the lyrics.
+  	"chords-under" : false,
       },
   
       // Metadata.
@@ -73,6 +74,29 @@ This is the current built-in configuration file, showing all settings.
       //
       "instrument" : null,
   
+      // Note (chord root) names.
+      // In case of alternatives, the first one is used for output.
+      "notes" : {
+          "system" : "common",
+  	  "sharp" : [ "C", [ "C#", "Cis", "C♯" ],
+  		      "D", [ "D#", "Dis", "D♯" ],
+  		      "E",
+  		      "F", [ "F#", "Fis", "F♯" ],
+  		      "G", [ "G#", "Gis", "G♯" ],
+  		      "A", [ "A#", "Ais", "A♯" ],
+  		      "B",
+          ],
+  	  "flat" :  [ "C",
+  		      [ "Db", "Des", "D♭" ], "D",
+  		      [ "Eb", "Es",  "Ees", "E♭" ], "E",
+  		      "F",
+  		      [ "Gb", "Ges", "G♭" ], "G",
+  		      [ "Ab", "As",  "Aes", "A♭" ], "A",
+  		      [ "Bb", "Bes", "B♭" ], "B",
+                      // German: "B", "H",
+          ],
+      },
+
       // Strings and tuning.
       // Note that using this will discard all built-in chords!
       // "tuning" : [ "E2", "A2", "D3", "G3", "B3", "E4" ],
@@ -361,6 +385,7 @@ sub config_defaults {
     my $copy;
     my $pfx;
     seek(DATA,0,0);
+    binmode( DATA, ':raw' );
     while ( <DATA> ) {
 	if ( !$copy && m;^(\s+)// Configuration; ) {
 	    $pfx = length($1);
@@ -389,7 +414,14 @@ sub configurator {
     # Only tests call configurator without options arg.
     unless ( $options ) {
 	# Provide minimal config.
-	App::Music::ChordPro::Chords::set_tuning([("C0")x6]);
+	App::Music::ChordPro::Chords::set_tuning
+	    ( [ ("C0") x 6 ],
+	      { system => "common",
+		sharp => [ "C", "C#", "D", "D#", "E", "F",
+			   "F#", "G", "G#", "A", "A#", "B" ],
+		flat =>  [ "C", "Db", "D", "Eb", "E", "F",
+			   "Gb", "G", "Ab", "A", "Bb", "B" ] }
+	    );
 	return $cfg;
     }
 
@@ -525,7 +557,7 @@ sub configurator {
 
     if ( $cfg->{tuning} ) {
 	my $res =
-	  App::Music::ChordPro::Chords::set_tuning( $cfg->{tuning} );
+	  App::Music::ChordPro::Chords::set_tuning( $cfg->{tuning}, $cfg->{notes} );
 	warn( "Invalid tuning in config: ",
 	      $res, "\n" ) if $res;
     }

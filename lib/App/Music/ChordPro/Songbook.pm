@@ -227,6 +227,7 @@ sub add {
 sub chord {
     my ( $self, $c ) = @_;
     return $c unless length($c);
+    return $c if $c =~ /^\*/;
     my $parens = $c =~ s/^\((.*)\)$/$1/;
 
     my $info = App::Music::ChordPro::Chords::identify($c);

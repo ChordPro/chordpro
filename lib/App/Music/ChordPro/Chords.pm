@@ -5,6 +5,7 @@ package App::Music::ChordPro::Chords;
 use strict;
 use warnings;
 use utf8;
+use feature qw(state);
 
 use constant CHORD_SONG => 1;
 
@@ -24,6 +25,13 @@ my @tuning;
 sub assert_tuning {
     Carp::croak("FATAL: No instrument?") unless @tuning;
 }
+
+my %ns_tbl;			# note names, sharp
+my %nf_tbl;			# note names, flat
+my @ns_canon;			# canonical note names, sharp
+my @nf_canon;			# canonical note names, flat
+my $n_pat;			# note name pattern
+my $c_pat;			# chord name pattern
 
 # Returns a list of all chord names in a nice order.
 sub chordcompare($$);
@@ -234,9 +242,10 @@ sub strings {
 }
 
 sub set_tuning {
-    my ( $t ) = @_;
+    my ( $t, $n ) = @_;
     return "Invalid tuning (not array)" unless ref($t) eq "ARRAY";
     @tuning = @$t;		# need more checks
+    load_notes($n) if $n;
     assert_tuning();
     @chordnames = ();
     %config_chords = ();
@@ -305,12 +314,14 @@ my $additions_maj =
    "13#11",
    "13#9",
    "13b9",
-   "13sus",
    "2",
+   "3",
+   "4",
    "5",
    "6",
    "69",
    "7",
+   "711",
    "7#11",
    "7#5",
    "7#9",
@@ -331,17 +342,22 @@ my $additions_maj =
    "7sus",
    "7susadd3",
    "9",
+   "911",
    "9#11",
    "9#5",
    "9b5",
    "9sus",
+   "9add6",
    ( map { ( "maj$_", "^$_" ) }
      "",
      "13",
      "7",
+     "711",
      "7#11",
      "7#5",
+     ( map { "7sus$_" } "", "2", "4" ),
      "9",
+     "911",
      "9#11",
    ),
    "add9",
@@ -350,6 +366,9 @@ my $additions_maj =
    "h7",
    "h9",
    ( map { "sus$_" } "", "2", "4", "9" ),
+   ( map { "6sus$_" } "", "2", "4" ),
+   ( map { "7sus$_" } "", "2", "4" ),
+   ( map { "13sus$_" } "", "2", "4" ),
   };
 
 my $additions_min =
@@ -365,7 +384,12 @@ my $additions_min =
      "7",
      "9",
    ),
+   "9maj7", "9^7",
+   "add9",
    "b6",
+   "#7",
+   ( map { "sus$_" } "", "4", "9" ),
+   ( map { "7sus$_" } "", "4" ),
   };
 
 my $additions_aug =
@@ -441,6 +465,274 @@ sub rroot {
     $t;
 }
 
+sub load_notes {
+    my $n = shift;
+
+    my $rix = 0;
+    foreach my $root ( @{ $n->{sharp} } ) {
+	if ( UNIVERSAL::isa($root, 'ARRAY') ) {
+	    $ns_canon[$rix] = $root->[0];
+	    $ns_tbl{$_} = $rix foreach @$root;
+	}
+	else {
+	    $ns_canon[$rix] = $root;
+	    $ns_tbl{$root} = $rix;
+	}
+	$rix++;
+    }
+    $rix = 0;
+    foreach my $root ( @{ $n->{flat} } ) {
+	if ( UNIVERSAL::isa($root, 'ARRAY') ) {
+	    $nf_canon[$rix] = $root->[0];
+	    $nf_tbl{$_} = $rix foreach @$root;
+	}
+	else {
+	    $nf_canon[$rix] = $root;
+	    $nf_tbl{$root} = $rix;
+	}
+	$rix++;
+    }
+
+    $n_pat = '(?:' ;
+    foreach ( sort keys %ns_tbl ) {
+	$n_pat .= "$_|";
+    }
+    foreach ( sort keys %nf_tbl ) {
+	next if $ns_tbl{$_};
+	$n_pat .= "$_|";
+    }
+    substr($n_pat, -1, 1, ")");
+
+    $c_pat = "(?<root>" . $n_pat . ")";
+    $c_pat .= "(?:";
+    $c_pat .= "(?<qual>-|min|m(?!aj))".
+      "(?<ext>" . join("|", keys(%$additions_min)) . ")|";
+    $c_pat .= "(?<qual>\\+|aug)".
+      "(?<ext>" . join("|", keys(%$additions_aug)) . ")|";
+    $c_pat .= "(?<qual>0|dim)".
+      "(?<ext>" . join("|", keys(%$additions_dim)) . ")|";
+    $c_pat .= "(?<qual>)".
+      "(?<ext>" . join("|", keys(%$additions_maj)) . ")";
+    $c_pat .= ")";
+    $c_pat = qr/$c_pat/;
+    $n_pat = qr/$n_pat/;
+
+=for testing
+
+    use DDumper;
+    my @t = split(/\s+/s, <<'EOD');
+C
+D#
+Am
+D7
+D+
+D-
+D-7
+D0
+Asus
+Asus
+Assus4
+Daug
+Ddimx
+Ddim7
+Ebmaj7/G
+EOD
+    foreach ( @t ) {
+	if ( my $info = parse_chord($_) ) {
+	    DDumper($info);
+	}
+	else {
+	    warn("$_ => FAIL\n");
+	}
+    }
+    exit;
+
+=cut
+
+}
+
+my %_chord_cache;
+
+sub parse_chord {
+    my ( $chord ) = @_;
+
+    $_chord_cache{$chord} //=
+      parse_chord_common($chord)
+	|| parse_chord_nashville($chord)
+	  || parse_chord_roman($chord);
+}
+
+sub parse_chord_common {
+    my ( $chord ) = @_;
+
+    my $bass;
+    if ( $chord =~ m;^(.*)/(.*); ) {
+	$chord = $1;
+	$bass = $2;
+    }
+
+    return unless $chord =~ /^$c_pat$/;
+    return unless my $r = $+{root};
+
+    my $q = $+{qual} // "";
+    $q = "-" if $q eq "m";
+    $q = "+" if $q eq "aug";
+    $q = "0" if $q eq "dim";
+
+    my $x = $+{ext} // "";
+    $x = "sus4" if $x eq "sus";
+
+    my $info = { name => $chord,
+		 root => $r,
+		 qual => $q,
+		 ext  => $x };
+
+    my $ordmod = sub {
+	my ( $pfx ) = @_;
+	my $r = $info->{$pfx};
+	if ( defined $ns_tbl{$r} ) {
+	    $info->{"${pfx}_ord"} = $ns_tbl{$r};
+	    $info->{"${pfx}_mod"} = defined $nf_tbl{$r} ? 0 : 1;
+	    $info->{"${pfx}_canon"} = $ns_canon[$ns_tbl{$r}];
+	}
+	elsif ( defined $nf_tbl{$r} ) {
+	    $info->{"${pfx}_ord"} = $nf_tbl{$r};
+	    $info->{"${pfx}_mod"} = -1;
+	    $info->{"${pfx}_canon"} = $nf_canon[$nf_tbl{$r}];
+	}
+	else {
+	    Carp::croak("CANT HAPPEN ($r)");
+	    return;
+	}
+    };
+
+    $ordmod->("root");
+
+    return $info unless $bass;
+    return unless $bass =~ /^$n_pat$/;
+    $info->{bass} = $bass;
+    $ordmod->("bass");
+
+    return $info;
+}
+
+sub parse_chord_nashville {
+    my ( $chord ) = @_;
+
+    $chord =~ tr/\x{266d}\x{266f}\x{0394}\x{f8}\x{b0}/b#^h0/;
+
+    my $bass;
+    if ( $chord =~ m;^(.*)/(.*); ) {
+	$chord = $1;
+	$bass = $2;
+    }
+
+    state $n_pat = qr/(?<shift>[b#]?)(?<root>[1-7])/;
+
+    return unless $chord =~ /^$n_pat(?<qual>-|\+|0|aug|m(?!aj)|dim)?(?<ext>.*)$/;
+
+    my $q = $+{qual} // "";
+    $q = "-" if $q eq "m";
+    $q = "+" if $q eq "aug";
+    $q = "0" if $q eq "dim";
+
+    my $x = $+{ext} // "";
+    $x = "sus4" if $x eq "sus";
+
+    my $info = { system => "nashville",
+		 name   => $chord,
+		 root   => $+{root},
+		 qual   => $q,
+		 ext    => $x };
+
+    my $ordmod = sub {
+	my ( $pfx ) = @_;
+	my $r = 0 + $info->{$pfx};
+	$info->{"${pfx}_ord"} = $nmap{$r};
+	if ( $+{shift} eq "#" ) {
+	    $info->{"${pfx}_mod"} = 1;
+	    $info->{"${pfx}_ord"}++;
+	    $info->{"${pfx}_ord"} = 0
+	      if $info->{"${pfx}_ord"} >= 12;
+	}
+	elsif ( $+{shift} eq "b" ) {
+	    $info->{"${pfx}_mod"} = -1;
+	    $info->{"${pfx}_ord"}--;
+	    $info->{"${pfx}_ord"} += 12
+	      if $info->{"${pfx}_ord"} < 0;
+	}
+	$info->{"${pfx}_canon"} = $r;
+    };
+
+    $ordmod->("root");
+
+    return $info unless $bass;
+    return unless $bass =~ /^$n_pat$/;
+    $info->{bass} = $bass;
+    $ordmod->("bass");
+
+    return $info;
+}
+
+sub parse_chord_roman {
+    my ( $chord ) = @_;
+
+    $chord =~ tr/\x{266d}\x{266f}\x{0394}\x{f8}\x{b0}/b#^h0/;
+
+    my $bass;
+    if ( $chord =~ m;^(.*)/(.*); ) {
+	$chord = $1;
+	$bass = $2;
+    }
+
+    state $n_pat = qr/(?<shift>[b#]?)(?<root>(?i)iii|ii|iv|i|viii|vii|vi|v)/;
+
+    return unless $chord =~ /^$n_pat(?<qual>\+|0|aug|dim)?(?<ext>.*)$/;
+
+    my $r = $+{root};
+    my $q = $+{qual} // "";
+    $q = "-" if $r eq lc($r);
+    $q = "+" if $q eq "aug";
+    $q = "0" if $q eq "dim";
+
+    my $x = $+{ext} // "";
+    $x = "sus4" if $x eq "sus";
+
+    my $info = { system => "roman",
+		 name   => $chord,
+		 root   => $+{root},
+		 qual   => $q,
+		 ext    => $x };
+
+    my $ordmod = sub {
+	my ( $pfx ) = @_;
+	my $r = $info->{$pfx};
+	$info->{"${pfx}_ord"} = $rmap{uc $r};
+	if ( $+{shift} eq "#" ) {
+	    $info->{"${pfx}_mod"} = 1;
+	    $info->{"${pfx}_ord"}++;
+	    $info->{"${pfx}_ord"} = 0
+	      if $info->{"${pfx}_ord"} >= 12;
+	}
+	elsif ( $+{shift} eq "b" ) {
+	    $info->{"${pfx}_mod"} = -1;
+	    $info->{"${pfx}_ord"}--;
+	    $info->{"${pfx}_ord"} += 12
+	      if $info->{"${pfx}_ord"} < 0;
+	}
+	$info->{"${pfx}_canon"} = $r;
+    };
+
+    $ordmod->("root");
+
+    return $info unless $bass;
+    return unless $bass =~ /^$n_pat$/;
+    $info->{bass} = uc $bass;
+    $ordmod->("bass");
+
+    return $info;
+}
+
 my $ident_cache = {};
 
 # Try to identify the argument as a valid chord.
@@ -450,10 +742,13 @@ sub identify {
     return $ident_cache->{$name} if defined $ident_cache->{$name};
 
     my $rem = $name;
-    my %info = ( name => $name, system => "" );
+    my %info = ( name => $name,
+		 qual => "",
+		 ext => "",
+		 system => $::config->{notes}->{system} || "" );
 
-    # First some basic simplifications.
-    $rem =~ tr/\x{266d}\x{266f}\x{0394}\x{f8}\x{b0}/b#^h0/;
+#    # First some basic simplifications.
+#    $rem =~ tr/\x{266d}\x{266f}\x{0394}\x{f8}\x{b0}/b#^h0/;
 
     # Split off the duration, if present.
     if ( $rem =~ m;^(.*):(\d\.*)?(?:x(\d+))?$; ) {
@@ -461,6 +756,21 @@ sub identify {
 	$info{duration} = $2 // 1;
 	$info{repeat} = $3;
     }
+
+    my $i = parse_chord($rem);
+    unless ( $i ) {
+	if ( length($rem) ) {
+	    $info{error} = "Cannot recognize chord \"$name\"";
+	}
+	else {
+	    $info{root} = "";
+	}
+    }
+    else {
+	$info{$_} = $i->{$_} foreach keys %$i;
+    }
+
+=for earlier
 
     # Split off the bass part, if present.
     my $bass = "";
@@ -594,6 +904,8 @@ sub identify {
     elsif ( $rootless ) {
 	delete @info{ qw(root qual adds) };
     }
+
+=cut
 
     return $ident_cache->{$name} = \%info;
 }
