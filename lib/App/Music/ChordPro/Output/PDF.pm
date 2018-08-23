@@ -1648,7 +1648,7 @@ sub chordgrid {
     $pr->setfont($font);
     my $name = $info->{name};
     $name .= "*"
-      unless !$info->{user} || $::config->{diagrams}->{show} eq "user";
+      unless !$info->{type} || $::config->{diagrams}->{show} eq "user";
     $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y - font_bl($font) );
     $y -= $font->{size} * $ps->{spacing}->{chords} + $dot/2 + $lw;
 
@@ -1674,7 +1674,7 @@ sub chordgrid {
 	my $str = 0;
 	my $got = 0;
 	foreach ( @{ $info->{fingers} } ) {
-	    $str++, next unless $info->{strings}->[$str] > 0;
+	    $str++, next unless $info->{frets}->[$str] > 0;
 	    if ( $bar->{$_} ) {
 		# Same finger on multiple strings -> bar.
 		$got++;
@@ -1682,7 +1682,7 @@ sub chordgrid {
 	    }
 	    else {
 		# Register.
-		$bar->{$_} = [ $_, $info->{strings}->[$str], $str, $str ];
+		$bar->{$_} = [ $_, $info->{frets}->[$str], $str, $str ];
 	    }
 	    $str++;
 	}
@@ -1703,8 +1703,8 @@ sub chordgrid {
 
     # Process the strings and fingers.
     $x -= $gw/2;
-    for my $sx ( 0 .. @{ $info->{strings} }-1 ) {
-	my $fret = $info->{strings}->[$sx];
+    for my $sx ( 0 .. @{ $info->{frets} }-1 ) {
+	my $fret = $info->{frets}->[$sx];
 	my $fing;
 	$fing = $info->{fingers}->[$sx] if $info->{fingers};
 

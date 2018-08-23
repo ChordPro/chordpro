@@ -91,7 +91,7 @@ Cmaj7	{ ext => 'maj7', name => 'Cmaj7', qual => '', root => 'C', root_canon => '
 Cm	{ ext => '', name => 'Cm', qual => '-', root => 'C', root_canon => 'C', root_mod => 0, root_ord => 0 }
 Cmin	{ ext => '', name => 'Cmin', qual => 'min', root => 'C', root_canon => 'C', root_mod => 0, root_ord => 0 }
 Cdim	{ ext => '', name => 'Cdim', qual => 0, root => 'C', root_canon => 'C', root_mod => 0, root_ord => 0 }
-C/B	{ bass => 'B', bass_canon => 'B', bass_mod => 0, bass_ord => 11, ext => '', name => 'C', qual => '', root => 'C', root_canon => 'C', root_mod => 0, root_ord => 0 }
+C/B	{ bass => 'B', bass_canon => 'B', bass_mod => 0, bass_ord => 11, ext => '', name => 'C/B', qual => '', root => 'C', root_canon => 'C', root_mod => 0, root_ord => 0 }
 Cadd9	{ ext => 'add9', name => 'Cadd9', qual => '', root => 'C', root_canon => 'C', root_mod => 0, root_ord => 0 }
 C3	{ ext => 3, name => 'C3', qual => '', root => 'C', root_canon => 'C', root_mod => 0, root_ord => 0 }
 Cm7	{ ext => 7, name => 'Cm7', qual => '-', root => 'C', root_canon => 'C', root_mod => 0, root_ord => 0 }
@@ -141,22 +141,22 @@ Dmaj7	{ ext => 'maj7', name => 'Dmaj7', qual => '', root => 'D', root_canon => '
 Ddim	{ ext => '', name => 'Ddim', qual => 0, root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
 Dm	{ ext => '', name => 'Dm', qual => '-', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
 Dmin	{ ext => '', name => 'Dmin', qual => 'min', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
-D/A	{ bass => 'A', bass_canon => 'A', bass_mod => 0, bass_ord => 9, ext => '', name => 'D', qual => '', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
-D/B	{ bass => 'B', bass_canon => 'B', bass_mod => 0, bass_ord => 11, ext => '', name => 'D', qual => '', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
-D/C	{ bass => 'C', bass_canon => 'C', bass_mod => 0, bass_ord => 0, ext => '', name => 'D', qual => '', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
-D/C#	{ bass => 'C#', bass_canon => 'C#', bass_mod => 1, bass_ord => 1, ext => '', name => 'D', qual => '', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
-D/E	{ bass => 'E', bass_canon => 'E', bass_mod => 0, bass_ord => 4, ext => '', name => 'D', qual => '', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
-D/G	{ bass => 'G', bass_canon => 'G', bass_mod => 0, bass_ord => 7, ext => '', name => 'D', qual => '', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
-D5/E	{ bass => 'E', bass_canon => 'E', bass_mod => 0, bass_ord => 4, ext => 5, name => 'D5', qual => '', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
+D/A	{ bass => 'A', bass_canon => 'A', bass_mod => 0, bass_ord => 9, ext => '', name => 'D/A', qual => '', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
+D/B	{ bass => 'B', bass_canon => 'B', bass_mod => 0, bass_ord => 11, ext => '', name => 'D/B', qual => '', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
+D/C	{ bass => 'C', bass_canon => 'C', bass_mod => 0, bass_ord => 0, ext => '', name => 'D/C', qual => '', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
+D/C#	{ bass => 'C#', bass_canon => 'C#', bass_mod => 1, bass_ord => 1, ext => '', name => 'D/C#', qual => '', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
+D/E	{ bass => 'E', bass_canon => 'E', bass_mod => 0, bass_ord => 4, ext => '', name => 'D/E', qual => '', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
+D/G	{ bass => 'G', bass_canon => 'G', bass_mod => 0, bass_ord => 7, ext => '', name => 'D/G', qual => '', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
+D5/E	{ bass => 'E', bass_canon => 'E', bass_mod => 0, bass_ord => 4, ext => 5, name => 'D5/E', qual => '', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
 Dadd9	{ ext => 'add9', name => 'Dadd9', qual => '', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
 D9add6	{ ext => '9add6', name => 'D9add6', qual => '', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
 Dm7	{ ext => 7, name => 'Dm7', qual => '-', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
 Dm#5	{ ext => '#5', name => 'Dm#5', qual => '-', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
 Dm#7	{ ext => '#7', name => 'Dm#7', qual => '-', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
-Dm/A	{ bass => 'A', bass_canon => 'A', bass_mod => 0, bass_ord => 9, ext => '', name => 'Dm', qual => '-', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
-Dm/B	{ bass => 'B', bass_canon => 'B', bass_mod => 0, bass_ord => 11, ext => '', name => 'Dm', qual => '-', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
-Dm/C	{ bass => 'C', bass_canon => 'C', bass_mod => 0, bass_ord => 0, ext => '', name => 'Dm', qual => '-', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
-Dm/C#	{ bass => 'C#', bass_canon => 'C#', bass_mod => 1, bass_ord => 1, ext => '', name => 'Dm', qual => '-', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
+Dm/A	{ bass => 'A', bass_canon => 'A', bass_mod => 0, bass_ord => 9, ext => '', name => 'Dm/A', qual => '-', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
+Dm/B	{ bass => 'B', bass_canon => 'B', bass_mod => 0, bass_ord => 11, ext => '', name => 'Dm/B', qual => '-', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
+Dm/C	{ bass => 'C', bass_canon => 'C', bass_mod => 0, bass_ord => 0, ext => '', name => 'Dm/C', qual => '-', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
+Dm/C#	{ bass => 'C#', bass_canon => 'C#', bass_mod => 1, bass_ord => 1, ext => '', name => 'Dm/C#', qual => '-', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
 Dm9	{ ext => 9, name => 'Dm9', qual => '-', root => 'D', root_canon => 'D', root_mod => 0, root_ord => 2 }
 D#	{ ext => '', name => 'D#', qual => '', root => 'D#', root_canon => 'D#', root_mod => 1, root_ord => 3 }
 D#+	{ ext => '', name => 'D#+', qual => '+', root => 'D#', root_canon => 'D#', root_mod => 1, root_ord => 3 }
@@ -204,9 +204,9 @@ Em	{ ext => '', name => 'Em', qual => '-', root => 'E', root_canon => 'E', root_
 Emin	{ ext => '', name => 'Emin', qual => 'min', root => 'E', root_canon => 'E', root_mod => 0, root_ord => 4 }
 Em6	{ ext => 6, name => 'Em6', qual => '-', root => 'E', root_canon => 'E', root_mod => 0, root_ord => 4 }
 Em7	{ ext => 7, name => 'Em7', qual => '-', root => 'E', root_canon => 'E', root_mod => 0, root_ord => 4 }
-Em/B	{ bass => 'B', bass_canon => 'B', bass_mod => 0, bass_ord => 11, ext => '', name => 'Em', qual => '-', root => 'E', root_canon => 'E', root_mod => 0, root_ord => 4 }
-Em/D	{ bass => 'D', bass_canon => 'D', bass_mod => 0, bass_ord => 2, ext => '', name => 'Em', qual => '-', root => 'E', root_canon => 'E', root_mod => 0, root_ord => 4 }
-Em7/D	{ bass => 'D', bass_canon => 'D', bass_mod => 0, bass_ord => 2, ext => 7, name => 'Em7', qual => '-', root => 'E', root_canon => 'E', root_mod => 0, root_ord => 4 }
+Em/B	{ bass => 'B', bass_canon => 'B', bass_mod => 0, bass_ord => 11, ext => '', name => 'Em/B', qual => '-', root => 'E', root_canon => 'E', root_mod => 0, root_ord => 4 }
+Em/D	{ bass => 'D', bass_canon => 'D', bass_mod => 0, bass_ord => 2, ext => '', name => 'Em/D', qual => '-', root => 'E', root_canon => 'E', root_mod => 0, root_ord => 4 }
+Em7/D	{ bass => 'D', bass_canon => 'D', bass_mod => 0, bass_ord => 2, ext => 7, name => 'Em7/D', qual => '-', root => 'E', root_canon => 'E', root_mod => 0, root_ord => 4 }
 Emsus4	{ ext => 'sus4', name => 'Emsus4', qual => '-', root => 'E', root_canon => 'E', root_mod => 0, root_ord => 4 }
 Emadd9	{ ext => 'add9', name => 'Emadd9', qual => '-', root => 'E', root_canon => 'E', root_mod => 0, root_ord => 4 }
 F	{ ext => '', name => 'F', qual => '', root => 'F', root_canon => 'F', root_mod => 0, root_ord => 5 }
@@ -223,13 +223,13 @@ Fmaj7	{ ext => 'maj7', name => 'Fmaj7', qual => '', root => 'F', root_canon => '
 Fdim	{ ext => '', name => 'Fdim', qual => 0, root => 'F', root_canon => 'F', root_mod => 0, root_ord => 5 }
 Fm	{ ext => '', name => 'Fm', qual => '-', root => 'F', root_canon => 'F', root_mod => 0, root_ord => 5 }
 Fmin	{ ext => '', name => 'Fmin', qual => 'min', root => 'F', root_canon => 'F', root_mod => 0, root_ord => 5 }
-F/A	{ bass => 'A', bass_canon => 'A', bass_mod => 0, bass_ord => 9, ext => '', name => 'F', qual => '', root => 'F', root_canon => 'F', root_mod => 0, root_ord => 5 }
-F/C	{ bass => 'C', bass_canon => 'C', bass_mod => 0, bass_ord => 0, ext => '', name => 'F', qual => '', root => 'F', root_canon => 'F', root_mod => 0, root_ord => 5 }
-F/D	{ bass => 'D', bass_canon => 'D', bass_mod => 0, bass_ord => 2, ext => '', name => 'F', qual => '', root => 'F', root_canon => 'F', root_mod => 0, root_ord => 5 }
-F/G	{ bass => 'G', bass_canon => 'G', bass_mod => 0, bass_ord => 7, ext => '', name => 'F', qual => '', root => 'F', root_canon => 'F', root_mod => 0, root_ord => 5 }
-F7/A	{ bass => 'A', bass_canon => 'A', bass_mod => 0, bass_ord => 9, ext => 7, name => 'F7', qual => '', root => 'F', root_canon => 'F', root_mod => 0, root_ord => 5 }
-Fmaj7/A	{ bass => 'A', bass_canon => 'A', bass_mod => 0, bass_ord => 9, ext => 'maj7', name => 'Fmaj7', qual => '', root => 'F', root_canon => 'F', root_mod => 0, root_ord => 5 }
-Fmaj7/C	{ bass => 'C', bass_canon => 'C', bass_mod => 0, bass_ord => 0, ext => 'maj7', name => 'Fmaj7', qual => '', root => 'F', root_canon => 'F', root_mod => 0, root_ord => 5 }
+F/A	{ bass => 'A', bass_canon => 'A', bass_mod => 0, bass_ord => 9, ext => '', name => 'F/A', qual => '', root => 'F', root_canon => 'F', root_mod => 0, root_ord => 5 }
+F/C	{ bass => 'C', bass_canon => 'C', bass_mod => 0, bass_ord => 0, ext => '', name => 'F/C', qual => '', root => 'F', root_canon => 'F', root_mod => 0, root_ord => 5 }
+F/D	{ bass => 'D', bass_canon => 'D', bass_mod => 0, bass_ord => 2, ext => '', name => 'F/D', qual => '', root => 'F', root_canon => 'F', root_mod => 0, root_ord => 5 }
+F/G	{ bass => 'G', bass_canon => 'G', bass_mod => 0, bass_ord => 7, ext => '', name => 'F/G', qual => '', root => 'F', root_canon => 'F', root_mod => 0, root_ord => 5 }
+F7/A	{ bass => 'A', bass_canon => 'A', bass_mod => 0, bass_ord => 9, ext => 7, name => 'F7/A', qual => '', root => 'F', root_canon => 'F', root_mod => 0, root_ord => 5 }
+Fmaj7/A	{ bass => 'A', bass_canon => 'A', bass_mod => 0, bass_ord => 9, ext => 'maj7', name => 'Fmaj7/A', qual => '', root => 'F', root_canon => 'F', root_mod => 0, root_ord => 5 }
+Fmaj7/C	{ bass => 'C', bass_canon => 'C', bass_mod => 0, bass_ord => 0, ext => 'maj7', name => 'Fmaj7/C', qual => '', root => 'F', root_canon => 'F', root_mod => 0, root_ord => 5 }
 Fadd9	{ ext => 'add9', name => 'Fadd9', qual => '', root => 'F', root_canon => 'F', root_mod => 0, root_ord => 5 }
 Fm6	{ ext => 6, name => 'Fm6', qual => '-', root => 'F', root_canon => 'F', root_mod => 0, root_ord => 5 }
 Fm7	{ ext => 7, name => 'Fm7', qual => '-', root => 'F', root_canon => 'F', root_mod => 0, root_ord => 5 }
@@ -245,12 +245,12 @@ F#maj7	{ ext => 'maj7', name => 'F#maj7', qual => '', root => 'F#', root_canon =
 F#dim	{ ext => '', name => 'F#dim', qual => 0, root => 'F#', root_canon => 'F#', root_mod => 1, root_ord => 6 }
 F#m	{ ext => '', name => 'F#m', qual => '-', root => 'F#', root_canon => 'F#', root_mod => 1, root_ord => 6 }
 F#min	{ ext => '', name => 'F#min', qual => 'min', root => 'F#', root_canon => 'F#', root_mod => 1, root_ord => 6 }
-F#/E	{ bass => 'E', bass_canon => 'E', bass_mod => 0, bass_ord => 4, ext => '', name => 'F#', qual => '', root => 'F#', root_canon => 'F#', root_mod => 1, root_ord => 6 }
+F#/E	{ bass => 'E', bass_canon => 'E', bass_mod => 0, bass_ord => 4, ext => '', name => 'F#/E', qual => '', root => 'F#', root_canon => 'F#', root_mod => 1, root_ord => 6 }
 F#4	{ ext => 4, name => 'F#4', qual => '', root => 'F#', root_canon => 'F#', root_mod => 1, root_ord => 6 }
 F#m6	{ ext => 6, name => 'F#m6', qual => '-', root => 'F#', root_canon => 'F#', root_mod => 1, root_ord => 6 }
 F#m7	{ ext => 7, name => 'F#m7', qual => '-', root => 'F#', root_canon => 'F#', root_mod => 1, root_ord => 6 }
 F#m7b5	{ ext => '7b5', name => 'F#m7b5', qual => '-', root => 'F#', root_canon => 'F#', root_mod => 1, root_ord => 6 }
-F#m/C	{ bass => 'C', bass_canon => 'C', bass_mod => 0, bass_ord => 0, ext => '', name => 'F#m', qual => '-', root => 'F#', root_canon => 'F#', root_mod => 1, root_ord => 6 }
+F#m/C	{ bass => 'C', bass_canon => 'C', bass_mod => 0, bass_ord => 0, ext => '', name => 'F#m/C', qual => '-', root => 'F#', root_canon => 'F#', root_mod => 1, root_ord => 6 }
 Gb	{ ext => '', name => 'Gb', qual => '', root => 'Gb', root_canon => 'Gb', root_mod => -1, root_ord => 6 }
 Gb+	{ ext => '', name => 'Gb+', qual => '+', root => 'Gb', root_canon => 'Gb', root_mod => -1, root_ord => 6 }
 Gb7	{ ext => 7, name => 'Gb7', qual => '', root => 'Gb', root_canon => 'Gb', root_mod => -1, root_ord => 6 }
@@ -286,13 +286,13 @@ Gmin	{ ext => '', name => 'Gmin', qual => 'min', root => 'G', root_canon => 'G',
 Gdim	{ ext => '', name => 'Gdim', qual => 0, root => 'G', root_canon => 'G', root_mod => 0, root_ord => 7 }
 Gadd9	{ ext => 'add9', name => 'Gadd9', qual => '', root => 'G', root_canon => 'G', root_mod => 0, root_ord => 7 }
 G(add9)	{ ext => 'add9', name => 'Gadd9', qual => '', root => 'G', root_canon => 'G', root_mod => 0, root_ord => 7 }
-G/A	{ bass => 'A', bass_canon => 'A', bass_mod => 0, bass_ord => 9, ext => '', name => 'G', qual => '', root => 'G', root_canon => 'G', root_mod => 0, root_ord => 7 }
-G/B	{ bass => 'B', bass_canon => 'B', bass_mod => 0, bass_ord => 11, ext => '', name => 'G', qual => '', root => 'G', root_canon => 'G', root_mod => 0, root_ord => 7 }
-G/D	{ bass => 'D', bass_canon => 'D', bass_mod => 0, bass_ord => 2, ext => '', name => 'G', qual => '', root => 'G', root_canon => 'G', root_mod => 0, root_ord => 7 }
-G/F#	{ bass => 'F#', bass_canon => 'F#', bass_mod => 1, bass_ord => 6, ext => '', name => 'G', qual => '', root => 'G', root_canon => 'G', root_mod => 0, root_ord => 7 }
+G/A	{ bass => 'A', bass_canon => 'A', bass_mod => 0, bass_ord => 9, ext => '', name => 'G/A', qual => '', root => 'G', root_canon => 'G', root_mod => 0, root_ord => 7 }
+G/B	{ bass => 'B', bass_canon => 'B', bass_mod => 0, bass_ord => 11, ext => '', name => 'G/B', qual => '', root => 'G', root_canon => 'G', root_mod => 0, root_ord => 7 }
+G/D	{ bass => 'D', bass_canon => 'D', bass_mod => 0, bass_ord => 2, ext => '', name => 'G/D', qual => '', root => 'G', root_canon => 'G', root_mod => 0, root_ord => 7 }
+G/F#	{ bass => 'F#', bass_canon => 'F#', bass_mod => 1, bass_ord => 6, ext => '', name => 'G/F#', qual => '', root => 'G', root_canon => 'G', root_mod => 0, root_ord => 7 }
 Gm6	{ ext => 6, name => 'Gm6', qual => '-', root => 'G', root_canon => 'G', root_mod => 0, root_ord => 7 }
 Gm7	{ ext => 7, name => 'Gm7', qual => '-', root => 'G', root_canon => 'G', root_mod => 0, root_ord => 7 }
-Gm/Bb	{ bass => 'Bb', bass_canon => 'Bb', bass_mod => -1, bass_ord => 10, ext => '', name => 'Gm', qual => '-', root => 'G', root_canon => 'G', root_mod => 0, root_ord => 7 }
+Gm/Bb	{ bass => 'Bb', bass_canon => 'Bb', bass_mod => -1, bass_ord => 10, ext => '', name => 'Gm/Bb', qual => '-', root => 'G', root_canon => 'G', root_mod => 0, root_ord => 7 }
 G#	{ ext => '', name => 'G#', qual => '', root => 'G#', root_canon => 'G#', root_mod => 1, root_ord => 8 }
 G#+	{ ext => '', name => 'G#+', qual => '+', root => 'G#', root_canon => 'G#', root_mod => 1, root_ord => 8 }
 G#4	{ ext => 4, name => 'G#4', qual => '', root => 'G#', root_canon => 'G#', root_mod => 1, root_ord => 8 }
@@ -338,17 +338,17 @@ Amaj	{ ext => 'maj', name => 'Amaj', qual => '', root => 'A', root_canon => 'A',
 Amaj7	{ ext => 'maj7', name => 'Amaj7', qual => '', root => 'A', root_canon => 'A', root_mod => 0, root_ord => 9 }
 Am	{ ext => '', name => 'Am', qual => '-', root => 'A', root_canon => 'A', root_mod => 0, root_ord => 9 }
 Amin	{ ext => '', name => 'Amin', qual => 'min', root => 'A', root_canon => 'A', root_mod => 0, root_ord => 9 }
-A/C#	{ bass => 'C#', bass_canon => 'C#', bass_mod => 1, bass_ord => 1, ext => '', name => 'A', qual => '', root => 'A', root_canon => 'A', root_mod => 0, root_ord => 9 }
-A/D	{ bass => 'D', bass_canon => 'D', bass_mod => 0, bass_ord => 2, ext => '', name => 'A', qual => '', root => 'A', root_canon => 'A', root_mod => 0, root_ord => 9 }
-A/E	{ bass => 'E', bass_canon => 'E', bass_mod => 0, bass_ord => 4, ext => '', name => 'A', qual => '', root => 'A', root_canon => 'A', root_mod => 0, root_ord => 9 }
-A/F#	{ bass => 'F#', bass_canon => 'F#', bass_mod => 1, bass_ord => 6, ext => '', name => 'A', qual => '', root => 'A', root_canon => 'A', root_mod => 0, root_ord => 9 }
-A/G#	{ bass => 'G#', bass_canon => 'G#', bass_mod => 1, bass_ord => 8, ext => '', name => 'A', qual => '', root => 'A', root_canon => 'A', root_mod => 0, root_ord => 9 }
+A/C#	{ bass => 'C#', bass_canon => 'C#', bass_mod => 1, bass_ord => 1, ext => '', name => 'A/C#', qual => '', root => 'A', root_canon => 'A', root_mod => 0, root_ord => 9 }
+A/D	{ bass => 'D', bass_canon => 'D', bass_mod => 0, bass_ord => 2, ext => '', name => 'A/D', qual => '', root => 'A', root_canon => 'A', root_mod => 0, root_ord => 9 }
+A/E	{ bass => 'E', bass_canon => 'E', bass_mod => 0, bass_ord => 4, ext => '', name => 'A/E', qual => '', root => 'A', root_canon => 'A', root_mod => 0, root_ord => 9 }
+A/F#	{ bass => 'F#', bass_canon => 'F#', bass_mod => 1, bass_ord => 6, ext => '', name => 'A/F#', qual => '', root => 'A', root_canon => 'A', root_mod => 0, root_ord => 9 }
+A/G#	{ bass => 'G#', bass_canon => 'G#', bass_mod => 1, bass_ord => 8, ext => '', name => 'A/G#', qual => '', root => 'A', root_canon => 'A', root_mod => 0, root_ord => 9 }
 Am#7	{ ext => '#7', name => 'Am#7', qual => '-', root => 'A', root_canon => 'A', root_mod => 0, root_ord => 9 }
 Am6	{ ext => 6, name => 'Am6', qual => '-', root => 'A', root_canon => 'A', root_mod => 0, root_ord => 9 }
 Am7	{ ext => 7, name => 'Am7', qual => '-', root => 'A', root_canon => 'A', root_mod => 0, root_ord => 9 }
 Am7sus4	{ ext => '7sus4', name => 'Am7sus4', qual => '-', root => 'A', root_canon => 'A', root_mod => 0, root_ord => 9 }
 Am9	{ ext => 9, name => 'Am9', qual => '-', root => 'A', root_canon => 'A', root_mod => 0, root_ord => 9 }
-Am/G	{ bass => 'G', bass_canon => 'G', bass_mod => 0, bass_ord => 7, ext => '', name => 'Am', qual => '-', root => 'A', root_canon => 'A', root_mod => 0, root_ord => 9 }
+Am/G	{ bass => 'G', bass_canon => 'G', bass_mod => 0, bass_ord => 7, ext => '', name => 'Am/G', qual => '-', root => 'A', root_canon => 'A', root_mod => 0, root_ord => 9 }
 Amadd9	{ ext => 'add9', name => 'Amadd9', qual => '-', root => 'A', root_canon => 'A', root_mod => 0, root_ord => 9 }
 A#	{ ext => '', name => 'A#', qual => '', root => 'A#', root_canon => 'A#', root_mod => 1, root_ord => 10 }
 A#+	{ ext => '', name => 'A#+', qual => '+', root => 'A#', root_canon => 'A#', root_mod => 1, root_ord => 10 }
@@ -393,7 +393,7 @@ Bmaj7	{ ext => 'maj7', name => 'Bmaj7', qual => '', root => 'B', root_canon => '
 Bdim	{ ext => '', name => 'Bdim', qual => 0, root => 'B', root_canon => 'B', root_mod => 0, root_ord => 11 }
 Bm	{ ext => '', name => 'Bm', qual => '-', root => 'B', root_canon => 'B', root_mod => 0, root_ord => 11 }
 Bmin	{ ext => '', name => 'Bmin', qual => 'min', root => 'B', root_canon => 'B', root_mod => 0, root_ord => 11 }
-B/F#	{ bass => 'F#', bass_canon => 'F#', bass_mod => 1, bass_ord => 6, ext => '', name => 'B', qual => '', root => 'B', root_canon => 'B', root_mod => 0, root_ord => 11 }
+B/F#	{ bass => 'F#', bass_canon => 'F#', bass_mod => 1, bass_ord => 6, ext => '', name => 'B/F#', qual => '', root => 'B', root_canon => 'B', root_mod => 0, root_ord => 11 }
 Bm6	{ ext => 6, name => 'Bm6', qual => '-', root => 'B', root_canon => 'B', root_mod => 0, root_ord => 11 }
 Bm7	{ ext => 7, name => 'Bm7', qual => '-', root => 'B', root_canon => 'B', root_mod => 0, root_ord => 11 }
 Bmmaj7	{ ext => 'maj7', name => 'Bmmaj7', qual => '-', root => 'B', root_canon => 'B', root_mod => 0, root_ord => 11 }

@@ -52,28 +52,28 @@ sub chord_info {
 	last;
     }
 
-    my $s = strings();
     if ( ! $info && $::config->{diagrams}->{auto} ) {
-	$info = [ CHORD_SONG, 0, (0) x $s ];
+	$info = { type => CHORD_SONG,
+		  name => $chord,
+		  base => 0,
+		  frets => [],
+		  fingers => [] };
     }
 
     return unless $info;
-    if ( $info->[1] <= 0 ) {
+    if ( $info->{base} <= 0 ) {
 	return +{
 		 name    => $chord,
-		 strings => [ ],
+		 %$info,
+		 strings => [],
+		 fingers => [],
 		 base    => 1,
 		 system  => "",
-		 user    => 1,
 		 };
     }
     return +{
 	     name    => $chord,
-	     strings => [ @{$info}[2..$s+1] ],
-	     @$info > $s+2 ? ( fingers => [ @{$info}[$s+2..2*$s+1] ] ) : (),
-	     base    => $info->[1],
-	     system  => "",
-	     user    => $info->[0],
+	     %$info,
     };
 }
 
@@ -144,11 +144,11 @@ sub list_chords {
 			 "frets   %s",
 			 $origin eq "chord" ? "chord" : "define",
 			 $info->{name}, $info->{base},
-			 @{ $info->{strings} }
+			 @{ $info->{frets} }
 			 ? join("",
 				map { sprintf("%-4s", $_) }
 				map { $_ < 0 ? "X" : $_ }
-				@{ $info->{strings} } )
+				@{ $info->{frets} } )
 			 : ("    " x strings() ));
 	$s .= join("", "    fingers ",
 		   map { sprintf("%-4s", $_) }
@@ -209,9 +209,9 @@ sub json_chords {
 	my $s = sprintf( qq[    { "name" : %-${maxl}.${maxl}s,] .
                          qq[ "base" : %2d,],
 			 $name, $info->{base} );
-	if ( @{ $info->{strings} } ) {
+	if ( @{ $info->{frets} } ) {
 	    $s .= qq{ "frets" : [ } .
-	      join( ", ", map { sprintf("%2s", $_) } @{ $info->{strings} } ) .
+	      join( ", ", map { sprintf("%2s", $_) } @{ $info->{frets} } ) .
 		qq{ ],};
 	}
 	if ( $info->{fingers} && @{ $info->{fingers} } ) {
@@ -275,8 +275,14 @@ sub add_config_chord {
     my $res = _check_chord( $base, $frets, $fingers );
     return $res if $res;
 
-    $config_chords{$name} = [ !CHORD_SONG, $base, @$frets,
-			      $fingers && @$fingers ? @$fingers : () ];
+    my $info = parse_chord($name) // { name => $name };
+
+    $config_chords{$name} =
+      { type    => !CHORD_SONG,
+	%$info,
+	base    => $base,
+	frets   => [ @$frets ],
+	fingers => [ $fingers && @$fingers ? @$fingers : () ] };
     push( @chordnames, $name );
     return;
 }
@@ -287,15 +293,26 @@ sub add_song_chord {
     my $res = _check_chord( $base, $frets, $fingers );
     return $res if $res;
 
-    $song_chords{$name} = [ CHORD_SONG, $base, @$frets,
-			    $fingers && @$fingers ? @$fingers : () ];
+    my $info = parse_chord($name) // { name => $name };
+
+    $song_chords{$name} =
+      { type    => CHORD_SONG,
+	%$info,
+	base    => $base,
+	frets   => [ @$frets ],
+	fingers => [ $fingers && @$fingers ? @$fingers : () ] };
     return;
 }
 
 # Add an unknown chord.
 sub add_unknown_chord {
     my ( $name ) = @_;
-    $song_chords{$name} = [ CHORD_SONG, 0, (0) x strings() ];
+    $song_chords{$name}
+      { type    => CHORD_SONG,
+	name    => $name,
+	base    => 0,
+	frets   => [],
+	fingers => [] };
 }
 
 # Reset user defined songs. Should be done for each new song.
@@ -582,7 +599,7 @@ sub parse_chord_common {
     my $x = $+{ext} // "";
     $x = "sus4" if $x eq "sus";
 
-    my $info = { name => $chord,
+    my $info = { name => $_[0],
 		 root => $r,
 		 qual => $q,
 		 ext  => $x };
@@ -640,7 +657,7 @@ sub parse_chord_nashville {
     $x = "sus4" if $x eq "sus";
 
     my $info = { system => "nashville",
-		 name   => $chord,
+		 name   => $_[0],
 		 root   => $+{root},
 		 qual   => $q,
 		 ext    => $x };
@@ -699,7 +716,7 @@ sub parse_chord_roman {
     $x = "sus4" if $x eq "sus";
 
     my $info = { system => "roman",
-		 name   => $chord,
+		 name   => $_[0],
 		 root   => $+{root},
 		 qual   => $q,
 		 ext    => $x };
@@ -742,10 +759,10 @@ sub identify {
     return $ident_cache->{$name} if defined $ident_cache->{$name};
 
     my $rem = $name;
-    my %info = ( name => $name,
+    my $info = { name => $name,
 		 qual => "",
 		 ext => "",
-		 system => $::config->{notes}->{system} || "" );
+		 system => $::config->{notes}->{system} || "" };
 
 #    # First some basic simplifications.
 #    $rem =~ tr/\x{266d}\x{266f}\x{0394}\x{f8}\x{b0}/b#^h0/;
@@ -753,21 +770,21 @@ sub identify {
     # Split off the duration, if present.
     if ( $rem =~ m;^(.*):(\d\.*)?(?:x(\d+))?$; ) {
 	$rem = $1;
-	$info{duration} = $2 // 1;
-	$info{repeat} = $3;
+	$info->{duration} = $2 // 1;
+	$info->{repeat} = $3;
     }
 
     my $i = parse_chord($rem);
     unless ( $i ) {
 	if ( length($rem) ) {
-	    $info{error} = "Cannot recognize chord \"$name\"";
+	    $info->{error} = "Cannot recognize chord \"$name\"";
 	}
 	else {
-	    $info{root} = "";
+	    $info->{root} = "";
 	}
     }
     else {
-	$info{$_} = $i->{$_} foreach keys %$i;
+	$info->{$_} = $i->{$_} foreach keys %$i;
     }
 
 =for earlier
@@ -907,7 +924,7 @@ sub identify {
 
 =cut
 
-    return $ident_cache->{$name} = \%info;
+    return $ident_cache->{$name} = $info;
 }
 
 ################ Section Transposition ################
@@ -928,7 +945,6 @@ sub transpose {
 	$c =~ s;/.+;/$r;;
     }
 
-    warn("XP: $_[0] $xpose -> $c\n");
     return $c;
 }
 

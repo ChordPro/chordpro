@@ -925,6 +925,11 @@ sub global_directive {
 		App::Music::ChordPro::Chords::add_unknown_chord( $res->{name} );
 	    }
 	}
+	elsif ( 1 ) {
+#	    $res->{base} = 0;
+# push( @{$song->{define}}, $res );
+	    App::Music::ChordPro::Chords::add_unknown_chord( $res->{name} );
+	}
 	else {
 	    unless ( App::Music::ChordPro::Chords::chord_info($res->{name}) ) {
 		do_warn("Unknown chord: $res->{name}\n");
