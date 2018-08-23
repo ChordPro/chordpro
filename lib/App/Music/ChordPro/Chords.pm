@@ -915,6 +915,28 @@ sub identify {
 sub transpose {
     my ( $c, $xpose ) = @_;
     return $c unless $xpose;
+    my $info = parse_chord($c);
+    warn("Cannot transpose $c\n"), return unless $info;
+
+    my $r = ( $info->{root_ord} + $xpose ) % 12;
+    $r = $xpose > 0 ? $ns_canon[$r] : $nf_canon[$r];
+    substr( $c, 0, length($info->{root}), $r );
+
+    if ( $r = $info->{bass_ord} ) {
+	$r = ( $r + $xpose ) % 12;
+	$r = $xpose > 0 ? $ns_canon[$r] : $nf_canon[$r];
+	$c =~ s;/.+;/$r;;
+    }
+
+    warn("XP: $_[0] $xpose -> $c\n");
+    return $c;
+}
+
+=for earlier
+
+sub old_transpose {
+    my ( $c, $xpose ) = @_;
+    return $c unless $xpose;
     assert_tuning();
     return $c unless $c =~ m/
 				^ (
@@ -949,5 +971,7 @@ unless ( caller ) {
     DDumper(identify($_)) foreach @ARGV;
 #    DDumper( $additions_maj );
 }
+
+=cut
 
 1;
