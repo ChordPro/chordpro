@@ -190,7 +190,7 @@ sub parse_song {
 
 	if ( $diagrams eq "user" ) {
 	    @used_chords =
-	    grep { safe_chord_info($_)->{origin} == 1 } @used_chords;
+	    grep { safe_chord_info($_)->{origin} eq "user" } @used_chords;
 	}
 
 	if ( $::config->{diagrams}->{sorted} ) {

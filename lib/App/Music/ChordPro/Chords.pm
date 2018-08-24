@@ -7,8 +7,6 @@ use warnings;
 use utf8;
 use feature qw(state);
 
-use constant CHORD_SONG => 1;
-
 # Chords defined by the configs.
 my %config_chords;
 
@@ -53,11 +51,12 @@ sub chord_info {
     }
 
     if ( ! $info && $::config->{diagrams}->{auto} ) {
-	$info = { type => CHORD_SONG,
-		  name => $chord,
-		  base => 0,
-		  frets => [],
-		  fingers => [] };
+	$info = { origin  => "user",
+		  name    => $chord,
+		  base    => 0,
+		  frets   => [],
+		  fingers => [],
+		};
     }
 
     return unless $info;
@@ -75,6 +74,10 @@ sub chord_info {
 	     name    => $chord,
 	     %$info,
     };
+}
+
+sub chord_xinfo {
+    my ( $info ) = @_;
 }
 
 # Chord order ordinals, for sorting.
@@ -278,7 +281,7 @@ sub add_config_chord {
     my $info = parse_chord($name) // { name => $name };
 
     $config_chords{$name} =
-      { type    => !CHORD_SONG,
+      { origin  => "config",
 	%$info,
 	base    => $base,
 	frets   => [ @$frets ],
@@ -296,7 +299,7 @@ sub add_song_chord {
     my $info = parse_chord($name) // { name => $name };
 
     $song_chords{$name} =
-      { type    => CHORD_SONG,
+      { origin  => "user",
 	%$info,
 	base    => $base,
 	frets   => [ @$frets ],
@@ -308,7 +311,7 @@ sub add_song_chord {
 sub add_unknown_chord {
     my ( $name ) = @_;
     $song_chords{$name}
-      { type    => CHORD_SONG,
+      { origin  => "user",
 	name    => $name,
 	base    => 0,
 	frets   => [],
