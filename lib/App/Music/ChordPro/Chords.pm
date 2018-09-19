@@ -31,6 +31,32 @@ my @nf_canon;			# canonical note names, flat
 my $n_pat;			# note name pattern
 my $c_pat;			# chord name pattern
 
+# Fixed, for standard (dutch) note names
+my $_c_pat =
+  qr{ As(?!us) | Ab | A | A\# | Ais |
+      Bes      | Bb | B |
+                      C | C\# | Cis |
+      Des      | Db | D | D\# | Dis |
+      Es(?!us) | Eb | E |
+                      F | F\# | Fis |
+      Ges      | Gb | G | G\# | Gis
+  }x;
+
+my $_c_tbl =
+  { C => 0,
+    'C#' =>  1, Cis =>  1, Des =>  1, Db =>  1,
+    D => 2,
+    'D#' =>  3, Dis =>  3, Es  =>  3, Eb =>  3,
+    E => 4,
+    F => 5,
+    'F#' =>  6, Fis =>  6, Ges =>  6, Gb =>  6,
+    G => 7,
+    'G#' =>  8, Gis =>  8, As  =>  8, Ab =>  8,
+    A => 9,
+    'A#' => 10, Ais => 10, Bes => 10, Bb => 10,
+    B => 11,
+  };
+
 # Returns a list of all chord names in a nice order.
 sub chordcompare($$);
 sub chordnames {
@@ -43,11 +69,25 @@ sub chord_info {
     my ( $chord ) = @_;
     my $info;
     assert_tuning();
-
     for ( \%song_chords, \%config_chords ) {
 	next unless exists($_->{$chord});
 	$info = $_->{$chord};
 	last;
+    }
+
+    if ( ! $info ) {
+	my $i;
+#	use DDumper; DDumper(parse_chord($chord));
+	if ( $i = parse_chord($chord) and defined($i->{root_ord}) ) {
+	    $i = " ". $i->{root_ord} . " " . $i->{qual} . $i->{ext};
+	    for ( \%song_chords, \%config_chords ) {
+		next unless exists($_->{$i});
+		$info = $_->{$i};
+		$info->{name} = $chord;
+		last;
+	    }
+	}
+#	use DDumper; DDumper($i);
     }
 
     if ( ! $info && $::config->{diagrams}->{auto} ) {
@@ -279,7 +319,6 @@ sub add_config_chord {
     return $res if $res;
 
     my $info = parse_chord($name) // { name => $name };
-
     $config_chords{$name} =
       { origin  => "config",
 	%$info,
@@ -287,6 +326,18 @@ sub add_config_chord {
 	frets   => [ @$frets ],
 	fingers => [ $fingers && @$fingers ? @$fingers : () ] };
     push( @chordnames, $name );
+
+    my $i;
+    if ( !defined $info->{root_ord} ) {
+	if ( $name =~ /^($_c_pat)(.*)/ ) {
+	    $info->{root_ord} = $_c_tbl->{$1};
+	    $i = " " . $info->{root_ord} . " " . $2;
+	}
+    }
+    if ( defined $info->{root_ord} ) {
+	$config_chords{$i} = $config_chords{$name};
+	$config_chords{$i}->{origin} = " config";
+    }
     return;
 }
 

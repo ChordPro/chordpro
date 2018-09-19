@@ -32,6 +32,7 @@ This is the current built-in configuration file, showing all settings.
       //
       // "include" takes a list of either filenames or preset names.
       // "include" : [ "modern1", "lib/mycfg.json" ],
+      "include" : [ "notes_dutch", "guitar" ],
   
       // General settings, to be changed by legacy configs and
       // command line.
@@ -75,32 +76,10 @@ This is the current built-in configuration file, showing all settings.
       "instrument" : null,
   
       // Note (chord root) names.
-      // In case of alternatives, the first one is used for output.
-      "notes" : {
-          "system" : "common",
-  	  "sharp" : [ "C", [ "C#", "Cis", "C♯" ],
-  		      "D", [ "D#", "Dis", "D♯" ],
-  		      "E",
-  		      "F", [ "F#", "Fis", "F♯" ],
-  		      "G", [ "G#", "Gis", "G♯" ],
-  		      "A", [ "A#", "Ais", "A♯" ],
-  		      "B",
-          ],
-  	  "flat" :  [ "C",
-  		      [ "Db", "Des", "D♭" ], "D",
-  		      [ "Eb", "Es",  "Ees", "E♭" ], "E",
-  		      "F",
-  		      [ "Gb", "Ges", "G♭" ], "G",
-  		      [ "Ab", "As",  "Aes", "A♭" ], "A",
-  		      [ "Bb", "Bes", "B♭" ], "B",
-                      // German: "B", "H",
-          ],
-      },
-
       // Strings and tuning.
-      // Note that using this will discard all built-in chords!
-      // "tuning" : [ "E2", "A2", "D3", "G3", "B3", "E4" ],
+      // Handled by "include", see above.
       "tuning" : null,
+      "notes" : [],
   
       // User defined chords.
       // "base" defaults to 1.
@@ -410,6 +389,21 @@ sub configurator {
     # Load defaults.
     warn("Config: <builtin>\n") if $options && $options->{verbose};
     my $cfg = $pp->decode( config_defaults() );
+
+    # If there are includes, process these first.
+    if ( exists $cfg->{include} ) {
+	foreach my $c ( @{ delete $cfg->{include} } ) {
+	    # Check for resource names.
+	    if ( $c !~ m;[/.]; ) {
+		my $t = getresource( "config/".lc($c).".json" );
+		$c = $t if $t;
+	    }
+	    else {
+		die;
+	    }
+	    $cfg = add_config( $cfg, $options, $c, $pp );
+	}
+    }
 
     # Only tests call configurator without options arg.
     unless ( $options ) {
