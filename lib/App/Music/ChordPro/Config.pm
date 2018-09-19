@@ -373,7 +373,7 @@ sub config_defaults {
     if ( $App::Packager::PACKAGED ) {
 	my $defs = App::Packager::GetResourcePath() .
 	  "/config/chordpro.json";
-	open( my $fd, "<:utf8", $defs )
+	open( my $fd, "<:raw", $defs )
 	  or die("$defs: $!\n");
 	local $/;
 	return $default_config = <$fd>;
