@@ -69,7 +69,7 @@ This is the current built-in configuration file, showing all settings.
       // Strings and tuning.
       // Handled by "include", see above.
       "tuning" : null,
-      "notes" : [],
+      "notes" : {},
   
       // User defined chords.
       // "base" defaults to 1.

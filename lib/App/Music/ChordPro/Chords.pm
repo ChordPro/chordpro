@@ -328,7 +328,10 @@ sub add_config_chord {
     push( @chordnames, $name );
 
     my $i;
-    if ( !defined $info->{root_ord} ) {
+    if ( defined $info->{root_ord} ) {
+	$i = " " . $info->{root_ord} . " " . $info->{qual} . $info->{ext};
+    }
+    else {
 	if ( $name =~ /^($_c_pat)(.*)/ ) {
 	    $info->{root_ord} = $_c_tbl->{$1};
 	    $i = " " . $info->{root_ord} . " " . $2;

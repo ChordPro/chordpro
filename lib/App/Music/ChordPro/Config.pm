@@ -79,7 +79,7 @@ This is the current built-in configuration file, showing all settings.
       // Strings and tuning.
       // Handled by "include", see above.
       "tuning" : null,
-      "notes" : [],
+      "notes" : {},
   
       // User defined chords.
       // "base" defaults to 1.
@@ -390,6 +390,21 @@ sub configurator {
     warn("Config: <builtin>\n") if $options && $options->{verbose};
     my $cfg = $pp->decode( config_defaults() );
 
+    # Only tests call configurator without options arg.
+    unless ( $options ) {
+	# Provide minimal config.
+	App::Music::ChordPro::Chords::set_tuning
+	    ( [ ("C0") x 6 ],
+	      { system => "common",
+		sharp => [ "C", "C#", "D", "D#", "E", "F",
+			   "F#", "G", "G#", "A", "A#", "B" ],
+		flat =>  [ "C", "Db", "D", "Eb", "E", "F",
+			   "Gb", "G", "Ab", "A", "Bb", "B" ] }
+	    );
+	$cfg->{notes}->{system} = "common";
+	return $cfg;
+    }
+
     # If there are includes, process these first.
     if ( exists $cfg->{include} ) {
 	foreach my $c ( @{ delete $cfg->{include} } ) {
@@ -403,20 +418,6 @@ sub configurator {
 	    }
 	    $cfg = add_config( $cfg, $options, $c, $pp );
 	}
-    }
-
-    # Only tests call configurator without options arg.
-    unless ( $options ) {
-	# Provide minimal config.
-	App::Music::ChordPro::Chords::set_tuning
-	    ( [ ("C0") x 6 ],
-	      { system => "common",
-		sharp => [ "C", "C#", "D", "D#", "E", "F",
-			   "F#", "G", "G#", "A", "A#", "B" ],
-		flat =>  [ "C", "Db", "D", "Eb", "E", "F",
-			   "Gb", "G", "Ab", "A", "Bb", "B" ] }
-	    );
-	return $cfg;
     }
 
     # Add some extra entries to prevent warnings.
