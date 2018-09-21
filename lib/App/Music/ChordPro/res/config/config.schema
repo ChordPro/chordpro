@@ -56,6 +56,12 @@
 	    "description": "Global settings.",
 	    "properties": {
 
+		"chords-under": {
+		    "description": "Chords under the lyrics.",
+		    "type": "boolean",
+		    "default": false
+		},
+
 		"columns": {
 		    "description": "Number of columns.",
 		    "type": "integer",
@@ -215,6 +221,33 @@
 		}
 	    },
 	    "additionalProperties": { "not": {} }
+	},
+
+	"notes" : {
+	    "description" : "The note system used.",
+	    "properties" : {
+	        "system" : {
+		    "description" : "The note system used.",
+		    "type" : "string",
+		    "default" : "common"
+		 },
+		 "sharp" : {
+		     "description" : "Note names, using sharps.",
+		     "type" : "array",
+		     "uniqueItems" : true,
+		     "items" : {
+		         "type" : [ "string", "array" ]
+		      }
+		  },
+		 "flat" : {
+		     "description" : "Note names, using flats.",
+		     "type" : "array",
+		     "uniqueItems" : true,
+		     "items" : {
+		         "type" : [ "string", "array" ]
+		      }
+		  }
+	     }
 	},
 
 	"pdf": {

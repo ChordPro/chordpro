@@ -32,7 +32,7 @@ This is the current built-in configuration file, showing all settings.
       //
       // "include" takes a list of either filenames or preset names.
       // "include" : [ "modern1", "lib/mycfg.json" ],
-      "include" : [ "notes_dutch", "guitar" ],
+      "include" : [ "guitar" ],
   
       // General settings, to be changed by legacy configs and
       // command line.
@@ -77,9 +77,31 @@ This is the current built-in configuration file, showing all settings.
   
       // Note (chord root) names.
       // Strings and tuning.
-      // Handled by "include", see above.
-      "tuning" : null,
-      "notes" : {},
+      "tuning" : [ "E2", "A2", "D3", "G3", "B3", "E4" ],
+
+      // In case of alternatives, the first one is used for output.
+      "notes" : {
+  
+  	"system" : "common",
+  
+  	"sharp" : [ "C", [ "C#", "Cis", "C♯" ],
+  		    "D", [ "D#", "Dis", "D♯" ],
+  		    "E",
+  		    "F", [ "F#", "Fis", "F♯" ],
+  		    "G", [ "G#", "Gis", "G♯" ],
+  		    "A", [ "A#", "Ais", "A♯" ],
+  		    "B",
+  		  ],
+  
+  	"flat" :  [ "C",
+  		    [ "Db", "Des",        "D♭" ], "D",
+  		    [ "Eb", "Es",  "Ees", "E♭" ], "E",
+  		    "F",
+  		    [ "Gb", "Ges",        "G♭" ], "G",
+  		    [ "Ab", "As",  "Aes", "A♭" ], "A",
+  		    [ "Bb", "Bes",        "B♭" ], "B",
+    		  ],
+      },
   
       // User defined chords.
       // "base" defaults to 1.
@@ -392,20 +414,13 @@ sub configurator {
 
     # Only tests call configurator without options arg.
     unless ( $options ) {
-	# Provide minimal config.
+	# Finish minimal config.
 	App::Music::ChordPro::Chords::set_tuning
-	    ( [ ("C0") x 6 ],
-	      { system => "common",
-		sharp => [ "C", "C#", "D", "D#", "E", "F",
-			   "F#", "G", "G#", "A", "A#", "B" ],
-		flat =>  [ "C", "Db", "D", "Eb", "E", "F",
-			   "Gb", "G", "Ab", "A", "Bb", "B" ] }
-	    );
-	$cfg->{notes}->{system} = "common";
+	    ( $cfg->{tuning}, $cfg->{notes}, $options );
 	return $cfg;
     }
 
-    # If there are includes, process these first.
+    # If there are includes, add them.
     if ( exists $cfg->{include} ) {
 	foreach my $c ( @{ delete $cfg->{include} } ) {
 	    # Check for resource names.
@@ -421,9 +436,6 @@ sub configurator {
     }
 
     # Add some extra entries to prevent warnings.
-    for ( qw(tuning) ) {
-	$cfg->{$_} //= undef;
-    }
     for ( qw(title subtitle footer) ) {
 	next if exists($cfg->{pdf}->{formats}->{first}->{$_});
 	$cfg->{pdf}->{formats}->{first}->{$_} = "";
@@ -479,10 +491,6 @@ sub configurator {
     $cfg = hmerge( $cfg, $ccfg, "" );
 
     # Sanitize added extra entries.
-#    for ( qw(tuning) ) {
-#	delete( $cfg->{$_} )
-#	  unless defined( $cfg->{$_} );
-#    }
     for ( qw(title subtitle footer) ) {
 	delete($cfg->{pdf}->{formats}->{first}->{$_})
 	  if ($cfg->{pdf}->{formats}->{first}->{$_} // 1) eq "";
@@ -546,16 +554,9 @@ sub configurator {
 	$cfg->{diagrams}->{sorted} = $options->{'chord-grids-sorted'};
     }
 
-    unless ( $cfg->{tuning} ) {
-	$cfg = default_instrument( $cfg, $options, $pp );
-    }
-
-    if ( $cfg->{tuning} ) {
-	my $res =
-	  App::Music::ChordPro::Chords::set_tuning( $cfg->{tuning}, $cfg->{notes} );
-	warn( "Invalid tuning in config: ",
-	      $res, "\n" ) if $res;
-    }
+    my $res =
+      App::Music::ChordPro::Chords::set_tuning( $cfg->{tuning}, $cfg->{notes}, $options );
+    warn( "Invalid tuning in config: ", $res, "\n" ) if $res;
 
     foreach ( @{ $cfg->{chords} } ) {
 	my $res =
@@ -584,14 +585,6 @@ sub configurator {
     }
 
     return $cfg;
-}
-
-sub default_instrument {
-    my ( $cfg, $options, $pp ) = @_;
-    # Load default instrument.
-    warn("Config: <instrument>\n") if $options->{verbose};
-    add_config( $cfg, $options,
-		getresource("config/guitar.json") || undef, $pp );
 }
 
 sub add_config {
@@ -633,14 +626,6 @@ sub add_config {
 	    }
 	}
 
-	if ( defined($new->{tuning}) ) {
-	    warn("Config: <flushed chords>\n") if $options->{verbose};
-	    $cfg->{chords} = [];
-	}
-	elsif ( defined($new->{chords}) && !defined($cfg->{tuning}) ) {
-	    $cfg = default_instrument( $cfg, $options, $pp );
-	}
-
 	# Merge final.
 	$cfg = hmerge( $cfg, $new, "" );
 	close($fd);
@@ -657,13 +642,6 @@ sub add_legacy {
     warn("Config: $file (legacy)\n") if $options->{verbose};
 
     $options->{_legacy} = 1;
-    if ( !defined($cfg->{tuning}) ) {
-	$cfg = default_instrument( $cfg, $options, $pp );
-	my $res =
-	  App::Music::ChordPro::Chords::set_tuning( $cfg->{tuning} );
-	warn( "Invalid tuning in config: ",
-	      $res, "\n" ) if $res;
-    }
     $::config = $cfg;
 
     require App::Music::ChordPro::Songbook;
@@ -739,20 +717,36 @@ sub hmerge($$$) {
 
     for my $key ( keys(%$right) ) {
 
-        if ( ref($right->{$key}) eq 'HASH'
-	     and
-	     ref($left->{$key}) eq 'HASH' ) {
+	warn("Config error: unknown item $path$key\n")
+	  unless exists $res{$key}
+	    || $path.$key =~ /^pdf\.section\./;
 
-	    # Both hashes. Recurse.
-            $res{$key} = hmerge( $left->{$key}, $right->{$key}, "$path$key." );
+	if ( ref($right->{$key}) eq 'HASH'
+	     and
+	     ref($res{$key}) eq 'HASH' ) {
+
+	    # Hashes. Recurse.
+            $res{$key} = hmerge( $res{$key}, $right->{$key}, "$path$key." );
         }
-        else {
-	    warn("Config error: unknown item $path$key\n")
-	      unless exists $res{$key}
-		|| $path.$key =~ /^pdf\.section\./;
-		;
-            $res{$key} = $right->{$key};
+	elsif ( ref($right->{$key}) eq 'ARRAY'
+		and
+		ref($res{$key}) eq 'ARRAY' ) {
+
+	    # Arrays. Overwrite or append.
+	    if ( $right->{$key}->[0] eq "append" ) {
+		# Append the rest.
+		push( @{ $res{$key} }, $right->{$key}->[$_])
+		  for 1 .. scalar(@{ $right->{$key} } )-1;
+	    }
+	    else {
+		# Overwrite.
+		$res{$key} = $right->{$key};
+	    }
         }
+	else {
+	    # Overwrite.
+	    $res{$key} = $right->{$key};
+	}
     }
 
     return \%res;

@@ -5,6 +5,7 @@ README
 lib/App/Music/ChordPro.pm
 lib/App/Music/ChordPro/Bundle.pm
 lib/App/Music/ChordPro/Chords.pm
+lib/App/Music/ChordPro/Chords/Parser.pm
 lib/App/Music/ChordPro/Config.pm
 lib/App/Music/ChordPro/Output/ChordPro.pm
 lib/App/Music/ChordPro/Output/Common.pm

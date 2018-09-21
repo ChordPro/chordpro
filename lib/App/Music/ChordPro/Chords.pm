@@ -5,7 +5,8 @@ package App::Music::ChordPro::Chords;
 use strict;
 use warnings;
 use utf8;
-use feature qw(state);
+
+use App::Music::ChordPro::Chords::Parser;
 
 # Chords defined by the configs.
 my %config_chords;
@@ -24,100 +25,15 @@ sub assert_tuning {
     Carp::croak("FATAL: No instrument?") unless @tuning;
 }
 
-my %ns_tbl;			# note names, sharp
-my %nf_tbl;			# note names, flat
-my @ns_canon;			# canonical note names, sharp
-my @nf_canon;			# canonical note names, flat
-my $n_pat;			# note name pattern
-my $c_pat;			# chord name pattern
+################ Section Dumping Chords ################
 
-# Fixed, for standard (dutch) note names
-my $_c_pat =
-  qr{ As(?!us) | Ab | A | A\# | Ais |
-      Bes      | Bb | B |
-                      C | C\# | Cis |
-      Des      | Db | D | D\# | Dis |
-      Es(?!us) | Eb | E |
-                      F | F\# | Fis |
-      Ges      | Gb | G | G\# | Gis
-  }x;
-
-my $_c_tbl =
-  { C => 0,
-    'C#' =>  1, Cis =>  1, Des =>  1, Db =>  1,
-    D => 2,
-    'D#' =>  3, Dis =>  3, Es  =>  3, Eb =>  3,
-    E => 4,
-    F => 5,
-    'F#' =>  6, Fis =>  6, Ges =>  6, Gb =>  6,
-    G => 7,
-    'G#' =>  8, Gis =>  8, As  =>  8, Ab =>  8,
-    A => 9,
-    'A#' => 10, Ais => 10, Bes => 10, Bb => 10,
-    B => 11,
-  };
-
-# Returns a list of all chord names in a nice order.
 sub chordcompare($$);
+
+# API: Returns a list of all chord names in a nice order.
+# Used by: ChordPro, Output/ChordPro.
 sub chordnames {
     assert_tuning();
     [ sort chordcompare @chordnames ];
-}
-
-# Returns info about an individual chord.
-sub chord_info {
-    my ( $chord ) = @_;
-    my $info;
-    assert_tuning();
-    for ( \%song_chords, \%config_chords ) {
-	next unless exists($_->{$chord});
-	$info = $_->{$chord};
-	last;
-    }
-
-    if ( ! $info ) {
-	my $i;
-#	use DDumper; DDumper(parse_chord($chord));
-	if ( $i = parse_chord($chord) and defined($i->{root_ord}) ) {
-	    $i = " ". $i->{root_ord} . " " . $i->{qual} . $i->{ext};
-	    for ( \%song_chords, \%config_chords ) {
-		next unless exists($_->{$i});
-		$info = $_->{$i};
-		$info->{name} = $chord;
-		last;
-	    }
-	}
-#	use DDumper; DDumper($i);
-    }
-
-    if ( ! $info && $::config->{diagrams}->{auto} ) {
-	$info = { origin  => "user",
-		  name    => $chord,
-		  base    => 0,
-		  frets   => [],
-		  fingers => [],
-		};
-    }
-
-    return unless $info;
-    if ( $info->{base} <= 0 ) {
-	return +{
-		 name    => $chord,
-		 %$info,
-		 strings => [],
-		 fingers => [],
-		 base    => 1,
-		 system  => "",
-		 };
-    }
-    return +{
-	     name    => $chord,
-	     %$info,
-    };
-}
-
-sub chord_xinfo {
-    my ( $info ) = @_;
 }
 
 # Chord order ordinals, for sorting.
@@ -130,6 +46,7 @@ my %chordorderkey; {
 }
 
 # Compare routine for chord names.
+# API: Used by: Songbook.
 sub chordcompare($$) {
     my ( $chorda, $chordb ) = @_;
     my ( $a0, $arest ) = $chorda =~ /^([A-G][b#]?)(.*)/;
@@ -279,19 +196,35 @@ sub json_chords {
 
 ################ Section Tuning ################
 
-# Return the number of strings supported.
+# API: Return the number of strings supported.
+# Used by: Songbook, Output::PDF.
 sub strings {
     scalar(@tuning);
 }
 
+my $parser;
+
 sub set_tuning {
-    my ( $t, $n ) = @_;
+    my ( $t, $n, $options ) = @_;
     return "Invalid tuning (not array)" unless ref($t) eq "ARRAY";
+
+    if ( @tuning ) {
+	( my $t1 = "@$t" ) =~ s/\d//g;
+	( my $t2 = "@tuning" ) =~ s/\d//g;
+	if ( $t1 ne $t2 ) {
+	    warn("Tuning changed, chords flushed\n")
+	      if $options->{verbose};
+	    @chordnames = ();
+	    %config_chords = ();
+	}
+    }
+    else {
+	@chordnames = ();
+	%config_chords = ();
+    }
     @tuning = @$t;		# need more checks
-    load_notes($n) if $n;
+    $parser = App::Music::ChordPro::Chords::Parser->new( { notes => $n } );
     assert_tuning();
-    @chordnames = ();
-    %config_chords = ();
     return;
 
 }
@@ -312,7 +245,8 @@ sub _check_chord {
     return;
 }
 
-# Add a config defined chord.
+# API: Add a config defined chord.
+# Used by: Config.
 sub add_config_chord {
     my ( $name, $base, $frets, $fingers ) = @_;
     my $res = _check_chord( $base, $frets, $fingers );
@@ -327,14 +261,18 @@ sub add_config_chord {
 	fingers => [ $fingers && @$fingers ? @$fingers : () ] };
     push( @chordnames, $name );
 
+    # Also store the chord info under a neutral name so it can be
+    # found when other note name systems are used.
     my $i;
     if ( defined $info->{root_ord} ) {
 	$i = " " . $info->{root_ord} . " " . $info->{qual} . $info->{ext};
     }
     else {
-	if ( $name =~ /^($_c_pat)(.*)/ ) {
-	    $info->{root_ord} = $_c_tbl->{$1};
-	    $i = " " . $info->{root_ord} . " " . $2;
+	# Retry with default parser.
+	$i = App::Music::ChordPro::Chords::Parser->default->parse($name);
+	if ( defined $i->{root_ord} ) {
+	    $info->{root_ord} = $i->{root_ord};
+	    $i = " " . $i->{root_ord} . " " . $i->{qual} . $i->{ext};
 	}
     }
     if ( defined $info->{root_ord} ) {
@@ -344,7 +282,8 @@ sub add_config_chord {
     return;
 }
 
-# Add a user defined chord.
+# API: Add a user defined chord.
+# Used by: Songbook, Output::PDF.
 sub add_song_chord {
     my ( $name, $base, $frets, $fingers ) = @_;
     my $res = _check_chord( $base, $frets, $fingers );
@@ -361,10 +300,11 @@ sub add_song_chord {
     return;
 }
 
-# Add an unknown chord.
+# API: Add an unknown chord.
+# Used by: Songbook.
 sub add_unknown_chord {
     my ( $name ) = @_;
-    $song_chords{$name}
+    $song_chords{$name} =
       { origin  => "user",
 	name    => $name,
 	base    => 0,
@@ -372,445 +312,26 @@ sub add_unknown_chord {
 	fingers => [] };
 }
 
-# Reset user defined songs. Should be done for each new song.
+# API: Reset user defined songs. Should be done for each new song.
+# Used by: Songbook, Output::PDF.
 sub reset_song_chords {
     %song_chords = ();
 }
 
 ################ Section Chords Parser ################
 
-my $additions_maj =
-  {
-   map { $_ => $_ }
-   "",
-   "11",
-   "13",
-   "13#11",
-   "13#9",
-   "13b9",
-   "2",
-   "3",
-   "4",
-   "5",
-   "6",
-   "69",
-   "7",
-   "711",
-   "7#11",
-   "7#5",
-   "7#9",
-   "7#9#11",
-   "7#9#5",
-   "7#9b5",
-   "7alt",
-   "7b13",
-   "7b13sus",
-   "7b5",
-   "7b9",
-   "7b9#11",
-   "7b9#5",
-   "7b9#9",
-   "7b9b13",
-   "7b9b5",
-   "7b9sus",
-   "7sus",
-   "7susadd3",
-   "9",
-   "911",
-   "9#11",
-   "9#5",
-   "9b5",
-   "9sus",
-   "9add6",
-   ( map { ( "maj$_", "^$_" ) }
-     "",
-     "13",
-     "7",
-     "711",
-     "7#11",
-     "7#5",
-     ( map { "7sus$_" } "", "2", "4" ),
-     "9",
-     "911",
-     "9#11",
-   ),
-   "add9",
-   "alt",
-   "h",
-   "h7",
-   "h9",
-   ( map { "sus$_" } "", "2", "4", "9" ),
-   ( map { "6sus$_" } "", "2", "4" ),
-   ( map { "7sus$_" } "", "2", "4" ),
-   ( map { "13sus$_" } "", "2", "4" ),
-  };
-
-my $additions_min =
-  {
-   map { $_ => $_ }
-   "",
-   "#5",
-   "11",
-   "6",
-   "69",
-   "7b5",
-   ( map { ( "$_", "maj$_", "^$_" ) }
-     "7",
-     "9",
-   ),
-   "9maj7", "9^7",
-   "add9",
-   "b6",
-   "#7",
-   ( map { "sus$_" } "", "4", "9" ),
-   ( map { "7sus$_" } "", "4" ),
-  };
-
-my $additions_aug =
-  {
-   map { $_ => $_ }
-   "",
-  };
-
-my $additions_dim =
-  {
-   map { $_ => $_ }
-   "",
-   "7",
-  };
-
-my %additions_map =
-  ( ""  => $additions_maj,
-    "-" => $additions_min,
-    "+" => $additions_aug,
-    "0" => $additions_dim,
-  );
-
-# Notes, sharp series ( C, C#, D, D#, ... )
-my @notes_sharp = split( ' ', "C C# D D# E F F# G G# A A# B" );
-# Notes, flat series ( C, Dd, D, Eb, ... )
-my @notes_flat  = split( ' ', "C Db D Eb E F Gb G Ab A Bb B" );
-# Notes -> canonical ( C = 0, D = 2, ... )
-my %notes2canon; {
-    my $ord = 0;
-    for ( @notes_sharp ) {
-	$notes2canon{$_} = $ord;
-	$ord++;
-    }
-    $ord = 0;
-    for ( @notes_flat ) {
-	$notes2canon{$_} = $ord;
-	$ord++;
-    }
-    $notes2canon{H} = $notes2canon{Bb};
-}
-
-my %tmap = ( C => 0, D => 2, E => 4, F => 5,
-	     G => 7, A => 9, B => 11 );
-my %nmap = ( 1 => 0, 2 => 2, 3 => 4, 4 => 5,
-	     5 => 7, 6 => 9, 7 => 11 );
-my @nmap = qw( I II III IV V VI VI );
-my %rmap = ( I => 0, II => 2, III => 4, IV => 5,
-	     V => 7, VI => 9, VII => 11 );
-my $npat = qr{ ([b#]?) ([1-7]) }x;
-my $rpat = qr{ ([b#]?) (IV|I{1,3}|VI{1,2}|V) }ix;
-my $tpat = qr{ ( [CDEFGAB] )
-	       ((?: [b#]
-		    | (?<= [DGB]  ) es
-		    | (?<= [EA]   ) s
-		    | (?<= [CDFG] ) is
-	       )?)
-	 }x;
-
-sub troot {
-    $notes_sharp[$_[0]];
-}
-
-sub nroot {
-    my $t = &troot;
-    $t =~ s/(.)([#b])/$2$1/;
-    $t =~ tr/CDEFGAB/1234567/;
-    $t;
-}
-
-sub rroot {
-    my $t = &nroot;
-    $t =~ s/([1234567])/$nmap[$1-1]/e;
-    $t;
-}
-
-sub load_notes {
-    my $n = shift;
-
-    my $rix = 0;
-    foreach my $root ( @{ $n->{sharp} } ) {
-	if ( UNIVERSAL::isa($root, 'ARRAY') ) {
-	    $ns_canon[$rix] = $root->[0];
-	    $ns_tbl{$_} = $rix foreach @$root;
-	}
-	else {
-	    $ns_canon[$rix] = $root;
-	    $ns_tbl{$root} = $rix;
-	}
-	$rix++;
-    }
-    $rix = 0;
-    foreach my $root ( @{ $n->{flat} } ) {
-	if ( UNIVERSAL::isa($root, 'ARRAY') ) {
-	    $nf_canon[$rix] = $root->[0];
-	    $nf_tbl{$_} = $rix foreach @$root;
-	}
-	else {
-	    $nf_canon[$rix] = $root;
-	    $nf_tbl{$root} = $rix;
-	}
-	$rix++;
-    }
-
-    $n_pat = '(?:' ;
-    foreach ( sort keys %ns_tbl ) {
-	$n_pat .= "$_|";
-    }
-    foreach ( sort keys %nf_tbl ) {
-	next if $ns_tbl{$_};
-	$n_pat .= "$_|";
-    }
-    substr($n_pat, -1, 1, ")");
-
-    $c_pat = "(?<root>" . $n_pat . ")";
-    $c_pat .= "(?:";
-    $c_pat .= "(?<qual>-|min|m(?!aj))".
-      "(?<ext>" . join("|", keys(%$additions_min)) . ")|";
-    $c_pat .= "(?<qual>\\+|aug)".
-      "(?<ext>" . join("|", keys(%$additions_aug)) . ")|";
-    $c_pat .= "(?<qual>0|dim)".
-      "(?<ext>" . join("|", keys(%$additions_dim)) . ")|";
-    $c_pat .= "(?<qual>)".
-      "(?<ext>" . join("|", keys(%$additions_maj)) . ")";
-    $c_pat .= ")";
-    $c_pat = qr/$c_pat/;
-    $n_pat = qr/$n_pat/;
-
-=for testing
-
-    use DDumper;
-    my @t = split(/\s+/s, <<'EOD');
-C
-D#
-Am
-D7
-D+
-D-
-D-7
-D0
-Asus
-Asus
-Assus4
-Daug
-Ddimx
-Ddim7
-Ebmaj7/G
-EOD
-    foreach ( @t ) {
-	if ( my $info = parse_chord($_) ) {
-	    DDumper($info);
-	}
-	else {
-	    warn("$_ => FAIL\n");
-	}
-    }
-    exit;
-
-=cut
-
-}
-
-my %_chord_cache;
-
 sub parse_chord {
     my ( $chord ) = @_;
-
-    $_chord_cache{$chord} //=
-      parse_chord_common($chord)
-	|| parse_chord_nashville($chord)
-	  || parse_chord_roman($chord);
+    return $parser->parse($chord);
 }
 
-sub parse_chord_common {
-    my ( $chord ) = @_;
-
-    my $bass;
-    if ( $chord =~ m;^(.*)/(.*); ) {
-	$chord = $1;
-	$bass = $2;
-    }
-
-    return unless $chord =~ /^$c_pat$/;
-    return unless my $r = $+{root};
-
-    my $q = $+{qual} // "";
-    $q = "-" if $q eq "m";
-    $q = "+" if $q eq "aug";
-    $q = "0" if $q eq "dim";
-
-    my $x = $+{ext} // "";
-    $x = "sus4" if $x eq "sus";
-
-    my $info = { name => $_[0],
-		 root => $r,
-		 qual => $q,
-		 ext  => $x };
-
-    my $ordmod = sub {
-	my ( $pfx ) = @_;
-	my $r = $info->{$pfx};
-	if ( defined $ns_tbl{$r} ) {
-	    $info->{"${pfx}_ord"} = $ns_tbl{$r};
-	    $info->{"${pfx}_mod"} = defined $nf_tbl{$r} ? 0 : 1;
-	    $info->{"${pfx}_canon"} = $ns_canon[$ns_tbl{$r}];
-	}
-	elsif ( defined $nf_tbl{$r} ) {
-	    $info->{"${pfx}_ord"} = $nf_tbl{$r};
-	    $info->{"${pfx}_mod"} = -1;
-	    $info->{"${pfx}_canon"} = $nf_canon[$nf_tbl{$r}];
-	}
-	else {
-	    Carp::croak("CANT HAPPEN ($r)");
-	    return;
-	}
-    };
-
-    $ordmod->("root");
-
-    return $info unless $bass;
-    return unless $bass =~ /^$n_pat$/;
-    $info->{bass} = $bass;
-    $ordmod->("bass");
-
-    return $info;
-}
-
-sub parse_chord_nashville {
-    my ( $chord ) = @_;
-
-    $chord =~ tr/\x{266d}\x{266f}\x{0394}\x{f8}\x{b0}/b#^h0/;
-
-    my $bass;
-    if ( $chord =~ m;^(.*)/(.*); ) {
-	$chord = $1;
-	$bass = $2;
-    }
-
-    state $n_pat = qr/(?<shift>[b#]?)(?<root>[1-7])/;
-
-    return unless $chord =~ /^$n_pat(?<qual>-|\+|0|aug|m(?!aj)|dim)?(?<ext>.*)$/;
-
-    my $q = $+{qual} // "";
-    $q = "-" if $q eq "m";
-    $q = "+" if $q eq "aug";
-    $q = "0" if $q eq "dim";
-
-    my $x = $+{ext} // "";
-    $x = "sus4" if $x eq "sus";
-
-    my $info = { system => "nashville",
-		 name   => $_[0],
-		 root   => $+{root},
-		 qual   => $q,
-		 ext    => $x };
-
-    my $ordmod = sub {
-	my ( $pfx ) = @_;
-	my $r = 0 + $info->{$pfx};
-	$info->{"${pfx}_ord"} = $nmap{$r};
-	if ( $+{shift} eq "#" ) {
-	    $info->{"${pfx}_mod"} = 1;
-	    $info->{"${pfx}_ord"}++;
-	    $info->{"${pfx}_ord"} = 0
-	      if $info->{"${pfx}_ord"} >= 12;
-	}
-	elsif ( $+{shift} eq "b" ) {
-	    $info->{"${pfx}_mod"} = -1;
-	    $info->{"${pfx}_ord"}--;
-	    $info->{"${pfx}_ord"} += 12
-	      if $info->{"${pfx}_ord"} < 0;
-	}
-	$info->{"${pfx}_canon"} = $r;
-    };
-
-    $ordmod->("root");
-
-    return $info unless $bass;
-    return unless $bass =~ /^$n_pat$/;
-    $info->{bass} = $bass;
-    $ordmod->("bass");
-
-    return $info;
-}
-
-sub parse_chord_roman {
-    my ( $chord ) = @_;
-
-    $chord =~ tr/\x{266d}\x{266f}\x{0394}\x{f8}\x{b0}/b#^h0/;
-
-    my $bass;
-    if ( $chord =~ m;^(.*)/(.*); ) {
-	$chord = $1;
-	$bass = $2;
-    }
-
-    state $n_pat = qr/(?<shift>[b#]?)(?<root>(?i)iii|ii|iv|i|viii|vii|vi|v)/;
-
-    return unless $chord =~ /^$n_pat(?<qual>\+|0|aug|dim)?(?<ext>.*)$/;
-
-    my $r = $+{root};
-    my $q = $+{qual} // "";
-    $q = "-" if $r eq lc($r);
-    $q = "+" if $q eq "aug";
-    $q = "0" if $q eq "dim";
-
-    my $x = $+{ext} // "";
-    $x = "sus4" if $x eq "sus";
-
-    my $info = { system => "roman",
-		 name   => $_[0],
-		 root   => $+{root},
-		 qual   => $q,
-		 ext    => $x };
-
-    my $ordmod = sub {
-	my ( $pfx ) = @_;
-	my $r = $info->{$pfx};
-	$info->{"${pfx}_ord"} = $rmap{uc $r};
-	if ( $+{shift} eq "#" ) {
-	    $info->{"${pfx}_mod"} = 1;
-	    $info->{"${pfx}_ord"}++;
-	    $info->{"${pfx}_ord"} = 0
-	      if $info->{"${pfx}_ord"} >= 12;
-	}
-	elsif ( $+{shift} eq "b" ) {
-	    $info->{"${pfx}_mod"} = -1;
-	    $info->{"${pfx}_ord"}--;
-	    $info->{"${pfx}_ord"} += 12
-	      if $info->{"${pfx}_ord"} < 0;
-	}
-	$info->{"${pfx}_canon"} = $r;
-    };
-
-    $ordmod->("root");
-
-    return $info unless $bass;
-    return unless $bass =~ /^$n_pat$/;
-    $info->{bass} = uc $bass;
-    $ordmod->("bass");
-
-    return $info;
-}
+################ Section CHords Info ################
 
 my $ident_cache = {};
 
-# Try to identify the argument as a valid chord.
-
+# API: Try to identify the argument as a valid chord.
+# Basically a wrapper around parse_chord, with error message.
+# Used by: Songbook, Output::PDF.
 sub identify {
     my ( $name ) = @_;
     return $ident_cache->{$name} if defined $ident_cache->{$name};
@@ -820,9 +341,6 @@ sub identify {
 		 qual => "",
 		 ext => "",
 		 system => $::config->{notes}->{system} || "" };
-
-#    # First some basic simplifications.
-#    $rem =~ tr/\x{266d}\x{266f}\x{0394}\x{f8}\x{b0}/b#^h0/;
 
     # Split off the duration, if present.
     if ( $rem =~ m;^(.*):(\d\.*)?(?:x(\d+))?$; ) {
@@ -844,148 +362,66 @@ sub identify {
 	$info->{$_} = $i->{$_} foreach keys %$i;
     }
 
-=for earlier
-
-    # Split off the bass part, if present.
-    my $bass = "";
-    my $rootless;
-    if ( $rem =~ m;^(.*)/(.*); ) {
-	$bass = $2;
-	$rem = $1;
-	if ( $rem eq "" ) {
-	    # Rootless. Fake a root by setting it to the bass.
-	    # We'll remove the root info later.
-	    $rootless++;
-	    $rem = $bass;
-	}
-    }
-
-    # Root processing.
-    # Try: Traditional chord naming.
-    if ( $rem =~ /^$tpat(.*)/ ) {
-
-	$info{system} = "T";
-
-	$info{dproot} = $1;
-	my $root = $tmap{uc($1)};
-	if ( $2 ) {
-	    $root++ if $2 eq "#" || $2 eq "is";
-	    $root-- if $2 eq "b" || $2 eq "es" || $1 eq "s";
-	}
-	$info{root} = $root % 12;
-	$rem = $3;
-
-	# Same for the bass.
-	if ( $bass =~ m/^$tpat$/ ) {
-	    $root = $tmap{uc($1)};
-	    if ( $2 ) {
-		$root++ if $2 eq "#" || $2 eq "is";
-		$root-- if $2 eq "b" || $2 eq "es" || $1 eq "s";
-	    }
-	    $info{bass} = $root % 12;
-	    $bass = "";
-	}
-    }
-
-    # Try: Nashville Number System.
-    elsif ( $rem =~ /^$npat(.*)/ ) {
-
-	$info{system} = "N";
-
-	$info{dproot} = $2;
-	my $root = $nmap{$2};
-	$root++ if $1 eq "#";
-	$root-- if $1 eq "b";
-	$info{root} = $root % 12;
-	$rem = $3;
-
-	# Same for the bass.
-	if ( $bass =~ /^$npat$/ ) {
-	    $root = $nmap{$2};
-	    $root++ if $1 eq "#";
-	    $root-- if $1 eq "b";
-	    $info{bass} = $root % 12;
-	    $bass = "";
-	}
-    }
-
-    # Try: Roman Number System.
-    elsif ( $rem =~ /^$rpat(.*)/ ) {
-
-	$info{system} = "R";
-
-	$info{dproot} = $2;
-	my $root = $rmap{uc($2)};
-	$root++ if $1 eq "#";
-	$root-- if $1 eq "b";
-	$info{root} = $root % 12;
-	$info{qual} = $2 eq lc($2) ? "-" : ""; # implied by case
-	$rem = $3;
-
-	if ( $bass =~ m/^$rpat$/ ) {
-	    $root = $rmap{uc($2)};
-	    $root++ if $1 eq "#";
-	    $root-- if $1 eq "b";
-	    $info{bass} = $root % 12;
-	    $bass = "";
-	}
-    }
-
-    # Fallback to known chords. Maybe it is user defined.
-    else {
-	assert_tuning();
-	for ( \%song_chords, \%config_chords ) {
-	    next unless exists($_->{$name});
-	    $info{system} = "U";
-	    return $ident_cache->{$name} = \%info;
-	}
-
-	# Unknown/unparsable.
-	$info{error} = $rem;
-	$info{error} .= "/$bass" if $bass ne "";
-	return $ident_cache->{$name} = \%info;
-    }
-
-    $info{nonroot} = $rem;
-
-    # Chord quality, based on triads.
-    $info{qual} //= "";
-    if ( $rem =~ /^ ( aug | dim | min | m(?!aj) | [-+0] ) (.*) /x ) {
-	$info{qual} = "+" if $1 eq "aug" || $1 eq "+";
-	$info{qual} = "0" if $1 eq "dim" || $1 eq "0";
-	$info{qual} = "-" if $1 eq "min" || $1 eq "-" || $1 eq "m";
-	$rem = $2;
-    }
-
-    if ( $rem ne "") {
-	$info{adds} = $rem;
-	$rem = "";
-	unless ( exists $additions_map{$info{qual}}{$rem} ) {
-	    $info{warning} = "";
-	    $info{warning} = $rem if $rem ne "";
-	    $info{warning} .= "/$bass" if $bass ne "";
-	}
-    }
-
-    # Did we process everything?
-    if ( $rem ne "" || $bass ne "" ) {
-	# Signal error.
-	$info{error} = "";
-	$info{error} = $rem if $rem ne "";
-	$info{error} .= "/$bass" if $bass ne "";
-    }
-    # Remove fake root, if any.
-    elsif ( $rootless ) {
-	delete @info{ qw(root qual adds) };
-    }
-
-=cut
-
     return $ident_cache->{$name} = $info;
+}
+
+# API: Returns info about an individual chord.
+# This is basically the result of parse_chord, augmented with strings
+# and fingers, if any.
+# Used by: Songbook, Output/PDF.
+sub chord_info {
+    my ( $chord ) = @_;
+    my $info;
+    assert_tuning();
+    for ( \%song_chords, \%config_chords ) {
+	next unless exists($_->{$chord});
+	$info = $_->{$chord};
+	last;
+    }
+
+    if ( ! $info ) {
+	my $i;
+	if ( $i = parse_chord($chord) and defined($i->{root_ord}) ) {
+	    $i = " ". $i->{root_ord} . " " . $i->{qual} . $i->{ext};
+	    for ( \%song_chords, \%config_chords ) {
+		next unless exists($_->{$i});
+		$info = $_->{$i};
+		$info->{name} = $chord;
+		last;
+	    }
+	}
+    }
+
+    if ( ! $info && $::config->{diagrams}->{auto} ) {
+	$info = { origin  => "user",
+		  name    => $chord,
+		  base    => 0,
+		  frets   => [],
+		  fingers => [],
+		};
+    }
+
+    return unless $info;
+    if ( $info->{base} <= 0 ) {
+	return +{
+		 name    => $chord,
+		 %$info,
+		 strings => [],
+		 fingers => [],
+		 base    => 1,
+		 system  => "",
+		 };
+    }
+    return +{
+	     name    => $chord,
+	     %$info,
+    };
 }
 
 ################ Section Transposition ################
 
+# API: Transpose a chord.
+# Used by: Songbook.
 sub transpose {
     my ( $c, $xpose ) = @_;
     return $c unless $xpose;
@@ -993,58 +429,16 @@ sub transpose {
     warn("Cannot transpose $c\n"), return unless $info;
 
     my $r = ( $info->{root_ord} + $xpose ) % 12;
-    $r = $xpose > 0 ? $ns_canon[$r] : $nf_canon[$r];
+    $r = $parser->canon( $xpose > 0 )->[$r];
     substr( $c, 0, length($info->{root}), $r );
 
     if ( $r = $info->{bass_ord} ) {
 	$r = ( $r + $xpose ) % 12;
-	$r = $xpose > 0 ? $ns_canon[$r] : $nf_canon[$r];
+	$r = $parser->canon( $xpose > 0 )->[$r];
 	$c =~ s;/.+;/$r;;
     }
 
     return $c;
 }
-
-=for earlier
-
-sub old_transpose {
-    my ( $c, $xpose ) = @_;
-    return $c unless $xpose;
-    assert_tuning();
-    return $c unless $c =~ m/
-				^ (
-				    [CF](?:is|\#)? |
-				    [DG](?:is|\#|es|b)? |
-				    A(?:is|\#|s(?!us)|b)? |
-				    E(?:s(?!us)|b)? |
-				    B(?:es|b)? |
-				    H
-				  )
-				  (.*)
-			    /x;
-    my ( $r, $rest ) = ( $1, $2 );
-    my $mod = 0;
-    $mod-- if $r =~ s/(e?s|b)$//;
-    $mod++ if $r =~ s/(is|\#)$//;
-    warn("WRONG NOTE: '$c' '$r' '$rest'") unless defined $notes2canon{$r};
-    $r = ($notes2canon{$r} + $mod + $xpose) % 12;
-
-    if ( $rest =~ m;^(.*)/(.*); ) {
-	$rest = $1 . "/" . transpose( $2, $xpose );
-    }
-
-    return ( $xpose > 0 ? \@notes_sharp : \@notes_flat )->[$r] . $rest;
-}
-
-
-unless ( caller ) {
-    $App::Music::ChordPro::VERSION = "";
-    #    dump_chords();
-    require DDumper;
-    DDumper(identify($_)) foreach @ARGV;
-#    DDumper( $additions_maj );
-}
-
-=cut
 
 1;

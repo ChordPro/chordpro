@@ -8,7 +8,7 @@
     //
     // "include" takes a list of either filenames or preset names.
     // "include" : [ "modern1", "lib/mycfg.json" ],
-    "include" : [ "notes_dutch", "guitar" ],
+    "include" : [ "guitar" ],
 
     // General settings, to be changed by legacy configs and
     // command line.
@@ -53,9 +53,31 @@
 
     // Note (chord root) names.
     // Strings and tuning.
-    // Handled by "include", see above.
-    "tuning" : null,
-    "notes" : {},
+    "tuning" : [ "E2", "A2", "D3", "G3", "B3", "E4" ],
+
+    // In case of alternatives, the first one is used for output.
+    "notes" : {
+
+	"system" : "common",
+
+	"sharp" : [ "C", [ "C#", "Cis", "C♯" ],
+		    "D", [ "D#", "Dis", "D♯" ],
+		    "E",
+		    "F", [ "F#", "Fis", "F♯" ],
+		    "G", [ "G#", "Gis", "G♯" ],
+		    "A", [ "A#", "Ais", "A♯" ],
+		    "B",
+		  ],
+
+	"flat" :  [ "C",
+		    [ "Db", "Des",        "D♭" ], "D",
+		    [ "Eb", "Es",  "Ees", "E♭" ], "E",
+		    "F",
+		    [ "Gb", "Ges",        "G♭" ], "G",
+		    [ "Ab", "As",  "Aes", "A♭" ], "A",
+		    [ "Bb", "Bes",        "B♭" ], "B",
+  		  ],
+    },
 
     // User defined chords.
     // "base" defaults to 1.
