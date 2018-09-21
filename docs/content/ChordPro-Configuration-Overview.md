@@ -27,3 +27,42 @@ Instead of a project specific configuration file you can specify arbitrary confi
 Using the configuration dropdown list, choose `Custom`.  
 Click `...` for a file dialog to choose the desired configuration file.
 * On the command line, pass the name of the configuration file with `--config`, for example `--config=myconfig.json`. 
+
+## How config files are combined
+
+The config files are processed in order, and their contents are merged. In general, a config setting from a later file replaces the value from previous files. There are two exceptions: hashes and arrays.
+
+Hashes are merged by key. For example, assume:
+
+    { "settings" : { "titles" : "center", "columns" : 1 } }
+
+when merged with:
+
+    { "settings" : { "columns" : 2 } }
+
+the result will be:
+
+    { "settings" : { "titles" : "center", "columns" : 2 } }
+
+Arrays are either overwritten or appended. This is controlled by the first element of the new array. If this first element is the string `"append"` then the contents are appended, otherwise it is overwritten.
+
+For example:
+
+    { "keys" : [ "title", "subtitle" ] }
+
+when merged with:
+
+    { "keys" : [ "composer" ] }
+
+will result in:
+
+    { "keys" : [ "composer" ] }
+
+If, however, this was merged with:
+
+    { "keys" : [ "append", "composer" ] }
+
+the result would have been:
+
+    { "keys" : [ "title", "subtitle", "composer" ] }
+
