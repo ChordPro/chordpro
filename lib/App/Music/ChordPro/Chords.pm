@@ -202,18 +202,19 @@ sub strings {
     scalar(@tuning);
 }
 
-my $parser;
+my $parser = App::Music::ChordPro::Chords::Parser->default;
 
 sub set_tuning {
-    my ( $t, $n, $options ) = @_;
+    my ( $t, $options ) = @_;
     return "Invalid tuning (not array)" unless ref($t) eq "ARRAY";
+    $options //= { verbose => 0 };
 
     if ( @tuning ) {
 	( my $t1 = "@$t" ) =~ s/\d//g;
 	( my $t2 = "@tuning" ) =~ s/\d//g;
 	if ( $t1 ne $t2 ) {
 	    warn("Tuning changed, chords flushed\n")
-	      if $options->{verbose};
+	      if $options->{verbose} > 1;
 	    @chordnames = ();
 	    %config_chords = ();
 	}
@@ -223,10 +224,21 @@ sub set_tuning {
 	%config_chords = ();
     }
     @tuning = @$t;		# need more checks
-    $parser = App::Music::ChordPro::Chords::Parser->new( { notes => $n } );
     assert_tuning();
     return;
 
+}
+
+sub set_notes {
+    my ( $n, $options ) = @_;
+    return "Invalid notes (not hash)" if ref($n) ne "HASH";
+    $options //= { verbose => 0 };
+
+    $parser = App::Music::ChordPro::Chords::Parser->new( { notes => $n } );
+    warn( "Parser: ", $parser->{system}, "\n" )
+      if $options->{verbose} && $options->{verbose} > 1;
+
+    return;
 }
 
 ################ Section Config & User Chords ################
@@ -265,8 +277,8 @@ sub add_config_chord {
     # found when other note name systems are used.
     my $i;
     if ( defined $info->{root_ord} ) {
-	$i = " " . $i->{root_ord} . " " . $i->{qual} . $i->{ext} .
-	  ( defined $i->{bass_ord} ? " " . $i->{bass_ord} : "" );
+	$i = " " . $info->{root_ord} . " " . $info->{qual} . $info->{ext} .
+	  ( defined($info->{bass_ord}) ? " " . $info->{bass_ord} : "" );
     }
     else {
 	# Retry with default parser.
@@ -276,7 +288,7 @@ sub add_config_chord {
 	    $config_chords{$name}->{$_} = $i->{$_}
 	      for qw( root_ord ext qual );
 	    $i = " " . $i->{root_ord} . " " . $i->{qual} . $i->{ext} .
-	      ( defined $i->{bass_ord} ? " " . $i->{bass_ord} : "" );
+	      ( defined($i->{bass_ord}) ? " " . $i->{bass_ord} : "" );
 	}
     }
     if ( defined $info->{root_ord} ) {
@@ -320,6 +332,14 @@ sub add_unknown_chord {
 # Used by: Songbook, Output::PDF.
 sub reset_song_chords {
     %song_chords = ();
+}
+
+# API: Return some chord statistics.
+sub chord_stats {
+    my $res = sprintf( "%d config chords", scalar(keys(%config_chords)) );
+    $res .= sprintf( ", %d song chords", scalar(keys(%song_chords)) )
+      if %song_chords;
+    return $res;
 }
 
 ################ Section Chords Parser ################
@@ -387,7 +407,7 @@ sub chord_info {
 	my $i;
 	if ( $i = parse_chord($chord) and defined($i->{root_ord}) ) {
 	    $i = " " . $i->{root_ord} . " " . $i->{qual} . $i->{ext} .
-	      ( defined $i->{bass_ord} ? " " . $i->{bass_ord} : "" );
+	      ( defined($i->{bass_ord}) ? " " . $i->{bass_ord} : "" );
 	    for ( \%song_chords, \%config_chords ) {
 		next unless exists($_->{$i});
 		$info = $_->{$i};
@@ -434,12 +454,12 @@ sub transpose {
     warn("Cannot transpose $c\n"), return unless $info;
 
     my $r = ( $info->{root_ord} + $xpose ) % 12;
-    $r = $parser->canon( $xpose > 0 )->[$r];
+    $r = $parser->root_canon( $r, $xpose > 0 );
     substr( $c, 0, length($info->{root}), $r );
 
     if ( $r = $info->{bass_ord} ) {
 	$r = ( $r + $xpose ) % 12;
-	$r = $parser->canon( $xpose > 0 )->[$r];
+	$r = $parser->root_canon( $r, $xpose > 0 );
 	$c =~ s;/.+;/$r;;
     }
 

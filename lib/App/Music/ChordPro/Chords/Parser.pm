@@ -10,6 +10,8 @@ sub new {
     my ( $pkg, $init ) = @_;
     my $self = bless { chord_cache => {} } => $pkg;
     $self->load_notes($init->{notes});
+    $self->{system} = $init->{notes}->{system} if $init->{notes};
+    $self->{system} //= "unknown";
     return $self;
 }
 
@@ -428,9 +430,9 @@ sub load_notes {
     $self->{nf_canon} = \@nf_canon;
 }
 
-sub canon {
-    my ( $self, $sharp ) = @_;
-    $sharp ? $self->{ns_canon} : $self->{nf_canon};
+sub root_canon {
+    my ( $self, $root, $sharp ) = @_;
+    ( $sharp ? $self->{ns_canon} : $self->{nf_canon} )->[$root];
 }
 
 package main;

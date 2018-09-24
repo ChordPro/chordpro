@@ -7,6 +7,7 @@ use warnings;
 use utf8;
 use App::Packager;
 use Carp;
+use App::Music::ChordPro;
 
 =head1 NAME
 
@@ -406,7 +407,7 @@ sub config_defaults {
 sub configurator {
     my ( $options ) = @_;
 
-    my $pp = JSON::PP->new->utf8->relaxed;
+    my $pp = JSON::PP->new->relaxed;
 
     # Load defaults.
     warn("Config: <builtin>\n") if $options && $options->{verbose};
@@ -416,7 +417,9 @@ sub configurator {
     unless ( $options ) {
 	# Finish minimal config.
 	App::Music::ChordPro::Chords::set_tuning
-	    ( $cfg->{tuning}, $cfg->{notes}, $options );
+	    ( $cfg->{tuning}, $options );
+	App::Music::ChordPro::Chords::set_notes
+	    ( $cfg->{notes}, $options );
 	return $cfg;
     }
 
@@ -553,19 +556,6 @@ sub configurator {
     if ( defined $options->{'chord-grids-sorted'} ) {
 	$cfg->{diagrams}->{sorted} = $options->{'chord-grids-sorted'};
     }
-
-    my $res =
-      App::Music::ChordPro::Chords::set_tuning( $cfg->{tuning}, $cfg->{notes}, $options );
-    warn( "Invalid tuning in config: ", $res, "\n" ) if $res;
-
-    foreach ( @{ $cfg->{chords} } ) {
-	my $res =
-	  App::Music::ChordPro::Chords::add_config_chord
-	      ( $_->{name}, $_->{base}||1, $_->{frets}, $_->{fingers} );
-	warn( "Invalid chord in config: ",
-	      $_->{name}, ": ", $res, "\n" ) if $res;
-    }
-
     if ( $options->{'lyrics-only'} ) {
 	$cfg->{settings}->{'lyrics-only'} = $options->{'lyrics-only'};
     }
@@ -592,9 +582,9 @@ sub add_config {
     Carp::confess("FATAL: Insufficient config") unless @_ == 4;
     Carp::confess("FATAL: Undefined config") unless defined $file;
     warn("Config: $file\n") if $options->{verbose};
+
     if ( open( my $fd, "<:raw", $file ) ) {
-	local $/;
-	my $new = $pp->decode( scalar( <$fd> ) );
+	my $new = $pp->decode( ::loadfile ($fd, { %$options, donotsplit => 1 } ) );
 
 	# Handle obsolete keys.
 	if ( exists $new->{pdf}->{diagramscolumn} ) {
@@ -626,6 +616,8 @@ sub add_config {
 	    }
 	}
 
+	# Process.
+	process_config( $new, $file, $options );
 	# Merge final.
 	$cfg = hmerge( $cfg, $new, "" );
 	close($fd);
@@ -635,6 +627,48 @@ sub add_config {
 	die("Cannot open $file [$!]\n");
     }
     return $cfg;
+}
+
+sub process_config {
+    my ( $cfg, $file, $options ) = @_;
+
+    warn("Process: $file\n") if $options && $options->{verbose};
+
+    if ( $cfg->{tuning} ) {
+	my $res =
+	  App::Music::ChordPro::Chords::set_tuning( $cfg->{tuning},
+						    $options );
+	warn( "Invalid tuning in config: ", $res, "\n" ) if $res;
+	$cfg->{tuning} = [];
+    }
+
+    if ( $cfg->{notes} ) {
+	my $res =
+	  App::Music::ChordPro::Chords::set_notes( $cfg->{notes},
+						   $options );
+	warn( "Invalid notes in config: ", $res, "\n" ) if $res;
+	delete $cfg->{notes};
+    }
+
+    if ( $cfg->{chords} ) {
+	my $c = $cfg->{chords};
+	if ( @$c && $c->[0] eq "append" ) {
+	    shift(@$c);
+	}
+	foreach ( @$c ) {
+	    my $res =
+	      App::Music::ChordPro::Chords::add_config_chord
+		  ( $_->{name}, $_->{base}||1, $_->{frets}, $_->{fingers} );
+	    warn( "Invalid chord in config: ",
+		  $_->{name}, ": ", $res, "\n" ) if $res;
+	}
+	if ( $options->{verbose} && $options->{verbose} > 1 ) {
+	    warn( "Processed ", scalar(@$c), " chord entries\n");
+	    warn( "Totals: ",
+		  App::Music::ChordPro::Chords::chord_stats(), "\n" );
+	}
+	delete $cfg->{chords};
+    }
 }
 
 sub add_legacy {
@@ -733,7 +767,7 @@ sub hmerge($$$) {
 		ref($res{$key}) eq 'ARRAY' ) {
 
 	    # Arrays. Overwrite or append.
-	    if ( $right->{$key}->[0] eq "append" ) {
+	    if ( @{$right->{$key}} && $right->{$key}->[0] eq "append" ) {
 		# Append the rest.
 		push( @{ $res{$key} }, $right->{$key}->[$_])
 		  for 1 .. scalar(@{ $right->{$key} } )-1;

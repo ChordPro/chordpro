@@ -691,9 +691,9 @@ sub app_setup {
           'help|h|?'            => \$help,
           'help-config'         => sub { $manual = 2 },
           'manual'              => \$manual,
-          'verbose|v',
+          'verbose|v+',
           'trace',
-          'debug',
+          'debug+',
 
          ) )
     {
@@ -921,9 +921,16 @@ sub ::loadfile {
 
     # Gather data from the input.
     if ( ref($filename) ) {
-	$data = $$filename;
-	$filename = "__STRING__";
-	$encoded++;
+	if ( ref($filename) eq 'GLOB' ) {
+	    binmode( $filename, ':raw' );
+	    $data = do { local $/; <$filename> };
+	    $filename = "__GLOB__";
+	}
+	else {
+	    $data = $$filename;
+	    $filename = "__STRING__";
+	    $encoded++;
+	}
     }
     elsif ( $filename eq '-' ) {
 	$filename = "__STDIN__";
@@ -984,6 +991,8 @@ sub ::loadfile {
 	    $data = $d;
 	}
     }
+
+    return $data if $options->{donotsplit};
 
     # Split in lines;
     my @lines;

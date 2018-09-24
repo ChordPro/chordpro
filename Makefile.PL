@@ -94,7 +94,7 @@ PODSELECT = podselect
 resources : ${RES}/config/chordpro.json ${RES}/pod/ChordPro.pod ${RES}/pod/Config.pod
 
 ${RES}/config/chordpro.json : ${LIB}/Config.pm
-	$(PERL) $< > $@
+	$(PERL) -Ilib $< > $@
 
 ${RES}/pod/ChordPro.pod : ${LIB}.pm
 	${PODSELECT} $< > $@
