@@ -27,6 +27,41 @@ Likewise, to raise a note it can be postfixed with `is`, e.g. `Cis`,
 or with `es`, e.g. `Des`. In the latter case, `Ees` and `Aes` are
 usually shortened to respectively `Es` and `As`.
 
+Root notes are defined in the configuration files:
+
+    "notes" : {
+
+      "system" : "common",
+
+      "sharp" : [ "C", [ "C#", "Cis", "C♯" ],
+                  "D", [ "D#", "Dis", "D♯" ],
+                  "E",
+                  "F", [ "F#", "Fis", "F♯" ],
+                  "G", [ "G#", "Gis", "G♯" ],
+                  "A", [ "A#", "Ais", "A♯" ],
+                  "B",
+      ],
+  
+      "flat" :  [                               "C",
+                  [ "Db", "Des",        "D♭" ], "D",
+                  [ "Eb", "Es",  "Ees", "E♭" ], "E",
+                                                "F",
+                  [ "Gb", "Ges",        "G♭" ], "G",
+                  [ "Ab", "As",  "Aes", "A♭" ], "A",
+                  [ "Bb", "Bes",        "B♭" ], "B",
+        ],
+    }
+
+`"system"` sets the name of the system used.
+
+`"sharp"` and `"flat"` are two lists of note names, the first list has
+notes and raised notes, the second has notes and lowered notes. Where
+there are multiple alternative forms for a note they are in a list.
+Note that the first of a list of alternatives is the preferred way to
+show a note in diagrams and other places. The choice for the
+non-unicode variant is deliberate since many fonts do not have the
+appropriate symbols to show `♯` and `♭`.
+
 ## How are the chords ordered
 
 To transpose chords, it must know the order of the chords
