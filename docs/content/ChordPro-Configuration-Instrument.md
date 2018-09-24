@@ -79,7 +79,7 @@ Spanish and Portuguese speaking countries.
 This definition is contained in the preset configuration
 `notes_roman`.
 
-For more information see [Key signature names and translations](https://en.wikipedia.org/wiki/Key_signature_names_and_translations) on Wikipedia.
+For more information, see [Key signature names and translations](https://en.wikipedia.org/wiki/Key_signature_names_and_translations) on Wikipedia.
 
 ## How are the chords ordered
 
@@ -94,8 +94,57 @@ used when transposing down.
 
 To produce chord diagrams, ChordPro must know the number of strings of
 the instrument, how they are tuned, and where the fingers must be
-placed when playing the chord.
+placed when playing the chord. This can all be defined in the
+configuration files.
 
-## Special: Nashville Numbering System
+    "instrument" : "Guitar, 6-strings, EADGBE tuning",
+  
+    // Strings and tuning.
+    "tuning" : [ "E2", "A2", "D3", "G3", "B3", "E4" ],
 
-## Special: Roman Numbering System
+    // Chords.
+    "chords" : [
+        {
+          "name"  : "Bb",
+          "base"  : 1,
+          "frets" : [ 1, 1, 3, 3, 3, 1 ],
+          "fingers" : [ 1, 1, 2, 3, 4, 1 ],
+        },
+    ],
+
+`"instrument"` is a descriptive name of the instrument defined.
+
+`"tuning"` defines the tuning of the instrument as a list of note
+names, optionally followed by the octave number
+([Scientific pitch notation](https://en.wikipedia.org/wiki/Scientific_pitch_notation)).
+
+`"chords"` is a list of chords to be defined for this tuning. For each
+chord, `"base"` specifies the topmost position of the chord diagram.
+It must be 1 or higher. The `"frets"` positions are the positions in
+the chord diagram. `"fingers"` is optional and denotes which fingers
+are used for the chord.
+
+## Special: Nashville Number System
+
+The Nashville Number System is a method of transcribing music by
+denoting the scale degree on which a chord is built. Instead of
+absolute note names like `C`, `D`, `E` it uses numbers `0`, `1`, `2`
+and so on.
+
+No configuration settings are needed. When a song has its chords in
+Nashville Number System this is automatically detected, and
+transposition and the printing of chord diagrams is disabled.
+
+For more information, see [Nashville number system](https://en.wikipedia.org/wiki/Nashville_number_system) on Wikipedia.
+
+## Special: Roman Numeral Analysis
+
+This is like the Nashville Number System but uses roman numbers `I`,
+`II`, `III` and so on. Minor chords are written using lowercase
+letters.
+
+No configuration settings are needed. When a song has its chords in
+Roman Number System this is automatically detected, and
+transposition and the printing of chord diagrams is disabled.
+
+For more information, see [Roman Numeral Analysis](https://en.wikipedia.org/wiki/Roman_numeral_analysis) on Wikipedia.
