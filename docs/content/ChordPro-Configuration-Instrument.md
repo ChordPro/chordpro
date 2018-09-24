@@ -79,6 +79,8 @@ Spanish and Portuguese speaking countries.
 This definition is contained in the preset configuration
 `notes_roman`.
 
+For more information see [Key signature names and translations](https://en.wikipedia.org/wiki/Key_signature_names_and_translations) on Wikipedia.
+
 ## How are the chords ordered
 
 To transpose chords, it must know the order of the chords, in
@@ -93,3 +95,7 @@ used when transposing down.
 To produce chord diagrams, ChordPro must know the number of strings of
 the instrument, how they are tuned, and where the fingers must be
 placed when playing the chord.
+
+## Special: Nashville Numbering System
+
+## Special: Roman Numbering System
