@@ -30,7 +30,20 @@ Click `...` for a file dialog to choose the desired configuration file.
 
 ## How config files are combined
 
-The config files are processed in order, and their contents are merged. In general, a config setting from a later file replaces the value from previous files. There are two exceptions: hashes and arrays.
+The config files are processed in order, and their contents are merged. In general, a config setting from a later file replaces the value from previous files. There are a few exceptions: instrument definitions, hashes and arrays.
+
+### Merging instrument definitions
+
+Instrument definitions, in particular the settings `"tuning"`, `"notes"` and `"chords"`, are handled differently. These are processed immedeately after parsing a configuration file and then the setting is removed from the configuration.
+
+For example, assume `"chords_italian.json"` defines a number of chords using italian (latin) note names and `"chords_german.json"` defines some chords using german note names. Then the following sequence of configuration files will work as expected:
+
+    notes_latin           (built-in, enable latin note names)
+    chords_italian.json   (defines chords with latin note names)
+    notes_german          (built-in, enable german note names)
+    chords_german.json    (defines chords with german note names)
+
+### Merging hash valued items
 
 Hashes are merged by key. For example, assume:
 
@@ -44,7 +57,9 @@ the result will be:
 
     { "settings" : { "titles" : "center", "columns" : 2 } }
 
-Arrays are either overwritten or appended. This is controlled by the first element of the new array. If this first element is the string `"append"` then the contents are appended, otherwise it is overwritten.
+## Merging array values items
+
+Arrays are either overwritten or appended. This is controlled by the first element of the new array. If this first element is the string `"append"` then the content are appended, otherwise it is overwritten.
 
 For example:
 
@@ -65,4 +80,6 @@ If, however, this was merged with:
 the result would have been:
 
     { "keys" : [ "title", "subtitle", "composer" ] }
+
+Likewise, use `"prepend"` to prepend items.
 
