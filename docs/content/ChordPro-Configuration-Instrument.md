@@ -55,16 +55,41 @@ Root notes are defined in the configuration files:
 `"system"` sets the name of the system used.
 
 `"sharp"` and `"flat"` are two lists of note names, the first list has
-notes and raised notes, the second has notes and lowered notes. Where
-there are multiple alternative forms for a note they are in a list.
-Note that the first of a list of alternatives is the preferred way to
-show a note in diagrams and other places. The choice for the
-non-unicode variant is deliberate since many fonts do not have the
-appropriate symbols to show `♯` and `♭`.
+diatonic notes and raised notes, the second has diatonic notes and
+lowered notes. Where there are multiple alternative forms for a note
+they are in a sublist. Note that the first of a sublist of
+alternatives is the preferred way to show a note in diagrams and other
+places. The choice for the non-unicode variant is deliberate since
+many fonts do not yet have the appropriate symbols to show `♯` and
+`♭`.
+
+By default ChordPro uses the Dutch note naming system according to the
+definition shown above. Two more note naming systems are provided:
+
+* German  
+This is a variant of Dutch where `H` is used instead of `B`, and `B`
+is used instead of `B♭`.
+
+This definition is contained in the preset configuration
+`notes_german`.
+
+* Latin  
+This system consists of the diatonic note names `Do`, `Re`, `Mi`,
+`Fa`, `Sol`, `La`, and `Si`. It is often used in Italian, French,
+Spanish and Portuguese speaking countries.
+
+This definition is contained in the preset configuration
+`notes_roman`.
 
 ## How are the chords ordered
 
-To transpose chords, it must know the order of the chords
+To transpose chords, it must know the order of the chords, in
+particular the chord roots. This order is defined by the order the
+definitions appear in the `"flat"` and `"sharp"` lists above.
+
+ChordPro uses the convention that when transposing up it chooses the
+note names from the `"sharp"` list. Notes from the `"flat"` list are
+used when transposing down.
 
 ## How are chords played
 
