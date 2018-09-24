@@ -69,15 +69,12 @@ definition shown above. Two more note naming systems are provided:
 * German  
 This is a variant of Dutch where `H` is used instead of `B`, and `B`
 is used instead of `B♭`.
-
 This definition is contained in the preset configuration
 `notes_german`.
-
 * Latin  
 This system consists of the diatonic note names `Do`, `Re`, `Mi`,
 `Fa`, `Sol`, `La`, and `Si`. It is often used in Italian, French,
 Spanish and Portuguese speaking countries.
-
 This definition is contained in the preset configuration
 `notes_roman`.
 
