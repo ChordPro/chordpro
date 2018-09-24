@@ -57,7 +57,7 @@ the result will be:
 
     { "settings" : { "titles" : "center", "columns" : 2 } }
 
-## Merging array values items
+### Merging array values items
 
 Arrays are either overwritten or appended. This is controlled by the first element of the new array. If this first element is the string `"append"` then the content are appended, otherwise it is overwritten.
 
