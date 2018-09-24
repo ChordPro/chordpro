@@ -66,15 +66,16 @@ many fonts do not yet have the appropriate symbols to show `♯` and
 By default ChordPro uses the Dutch note naming system according to the
 definition shown above. Two more note naming systems are provided:
 
-* German  
+* German  
 This is a variant of Dutch where `H` is used instead of `B`, and `B`
-is used instead of `B♭`.
+is used instead of `B♭`.  
 This definition is contained in the preset configuration
 `notes_german`.
-* Latin  
+
+* Latin  
 This system consists of the diatonic note names `Do`, `Re`, `Mi`,
 `Fa`, `Sol`, `La`, and `Si`. It is often used in Italian, French,
-Spanish and Portuguese speaking countries.
+Spanish and Portuguese speaking countries.  
 This definition is contained in the preset configuration
 `notes_roman`.
 
@@ -82,8 +83,7 @@ This definition is contained in the preset configuration
 
 To transpose chords, it must know the order of the chords, in
 particular the chord roots. This order is defined by the order the
-definitions appear in the `"flat"` and `"sharp"` lists above.
-
+definitions appear in the `"flat"` and `"sharp"` lists above.  
 ChordPro uses the convention that when transposing up it chooses the
 note names from the `"sharp"` list. Notes from the `"flat"` list are
 used when transposing down.
