@@ -416,10 +416,7 @@ sub configurator {
     # Only tests call configurator without options arg.
     unless ( $options ) {
 	# Finish minimal config.
-	App::Music::ChordPro::Chords::set_tuning
-	    ( $cfg->{tuning}, $options );
-	App::Music::ChordPro::Chords::set_notes
-	    ( $cfg->{notes}, $options );
+	process_config( $cfg, "<builtin>", $options );
 	return $cfg;
     }
 
@@ -767,10 +764,22 @@ sub hmerge($$$) {
 		ref($res{$key}) eq 'ARRAY' ) {
 
 	    # Arrays. Overwrite or append.
-	    if ( @{$right->{$key}} && $right->{$key}->[0] eq "append" ) {
-		# Append the rest.
-		push( @{ $res{$key} }, $right->{$key}->[$_])
-		  for 1 .. scalar(@{ $right->{$key} } )-1;
+	    if ( @{$right->{$key}} ) {
+		my @v = @{ $right->{$key} };
+		if ( $v[0] eq "append" ) {
+		    shift(@v);
+		    # Append the rest.
+		    push( @{ $res{$key} }, @v );
+		}
+		elsif ( $v[0] eq "prepend" ) {
+		    shift(@v);
+		    # Prepend the rest.
+		    unshift( @{ $res{$key} }, @v );
+		}
+		else {
+		    # Overwrite.
+		    $res{$key} = $right->{$key};
+		}
 	    }
 	    else {
 		# Overwrite.

@@ -5,6 +5,7 @@
       Available instrument configs are guitar, guitar-ly, mandolin-ly,
       and ukulele-ly. Default is guitar.
     - Chords parsing has been completely overhauled.
+    - Config file handling has been completely overhauled.
     - Alternative note naming systems, e.g. latin (Do Re Mi ...)
       are now supported.
     - Chords can be shown under the lyrics, controlled by config item
