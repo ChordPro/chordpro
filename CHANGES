@@ -8,6 +8,8 @@
     - Config file handling has been completely overhauled.
     - Alternative note naming systems, e.g. latin (Do Re Mi ...)
       are now supported.
+    - Experimental: Chords can be transcoded between note naming
+      systems.
     - Chords can be shown under the lyrics, controlled by config item
       settings.chords-under.
     - Allow meta substitutions in title and subtitle.

@@ -166,6 +166,11 @@ sub main {
 
     warn(Dumper($s), "\n") if $options->{debug};
 
+    # Set target parser for the backend so it can find the trasncoded
+    # chord definitions.
+    App::Music::ChordPro::Chords::set_parser($options->{transcode})
+	if $options->{transcode};
+
     # Generate the songbook.
     my $res = $pkg->generate_songbook( $s, $options );
 
@@ -665,6 +670,7 @@ sub app_setup {
           "i" => sub { $clo->{toc} = 1 },
           "toc!",                       # Generates a table of contents
           "transpose|x=i",              # Transposes by N semi-tones
+          "transcode|xc=s",             # Transcodes to another notation
           "user-chord-grids!",          # Do[esn't] print diagrams for user defined chords.
           "version|V" => \$version,     # Prints version and exits
           "vertical-space|w=f",         # Extra vertical space between lines
@@ -859,6 +865,7 @@ Options:
     --config=JSON  --cfg          Config definitions (multiple)
     --start-page-number=N  -p     Starting page number [1]
     --toc --notoc -i              Generates/suppresses a table of contents
+    --transcode=SYS  -xc          Transcodes to notation system
     --transpose=N  -x             Transposes by N semi-tones
     --version  -V                 Prints version and exits
 

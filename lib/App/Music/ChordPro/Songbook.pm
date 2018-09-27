@@ -205,8 +205,8 @@ sub parse_song {
 	  };
     }
 
-    # Global transposition.
-    $song->transpose( $options->{transpose} );
+    # Global transposition and transcoding.
+    $song->transpose( $options->{transpose}, $options->{transcode} );
 
     # $song->structurize;
 
@@ -234,8 +234,8 @@ sub chord {
     if ( $info->{system} ) {
 	if ( defined $chordtype ) {
 	    if ( $chordtype ne $info->{system} ) {
+		do_warn("Mixed chord systems detected in song ($chordtype -> $info->{system})");
 		$chordtype = $info->{system};
-		do_warn("Mixed chord systems detected in song");
 	    }
 	}
 	else {
@@ -944,11 +944,11 @@ sub global_directive {
 }
 
 sub transpose {
-    my ( $self, $xpose ) = @_;
-    return unless $xpose;
+    my ( $self, $xpose, $xcode ) = @_;
+    return unless $xpose || $xcode;
 
     foreach my $song ( @{ $self->{songs} } ) {
-	$song->transpose($xpose);
+	$song->transpose( $xpose, $xcode );
     }
 }
 
@@ -991,42 +991,42 @@ sub new {
 }
 
 sub transpose {
-    my ( $self, $xpose ) = @_;
+    my ( $self, $xpose, $xcode ) = @_;
 
     # Transpose meta data (key).
-#    if ( exists $self->{meta} && exists $self->{meta}->{key} ) {
-#	foreach ( @{ $self->{meta}->{key} } ) {
-#	    $_ = $self->xpchord( $_, $xpose );
-#	}
-#    }
+    if ( exists $self->{meta} && exists $self->{meta}->{key} ) {
+	foreach ( @{ $self->{meta}->{key} } ) {
+	    $_ = $self->xpchord( $_, 0, $xcode );
+	}
+    }
 
     # Transpose song chords.
     if ( exists $self->{chords} ) {
 	foreach my $item ( $self->{chords} ) {
-	    $self->_transpose( $item, $xpose );
+	    $self->_transpose( $item, $xpose, $xcode );
 	}
     }
 
     # Transpose body contents.
     if ( exists $self->{body} ) {
 	foreach my $item ( @{ $self->{body} } ) {
-	    $self->_transpose( $item, $xpose );
+	    $self->_transpose( $item, $xpose, $xcode );
 	}
     }
 }
 
 sub _transpose {
-    my ( $self, $item, $xpose ) = @_;
+    my ( $self, $item, $xpose, $xcode ) = @_;
     $xpose //= 0;
 
     if ( $item->{type} eq "rechorus" ) {
 	return unless $item->{chorus};
 	for ( @{ $item->{chorus} } ) {
-	    $self->_transpose( $_, $xpose + $item->{transpose} );
+	    $self->_transpose( $_, $xpose + $item->{transpose}, $xcode );
 	}
 	return;
     }
-    return unless $xpose;
+    return unless $xpose || $xcode;
 
     if ( $item->{type} eq "songline" ) {
 	# Prevent chords to be autovivified.
@@ -1034,7 +1034,7 @@ sub _transpose {
 	return unless exists $item->{chords};
 
 	foreach ( @{ $item->{chords} } ) {
-	    $_ = $self->xpchord( $_, $xpose );
+	    $_ = $self->xpchord( $_, $xpose, $xcode );
 	}
 	return;
     }
@@ -1042,7 +1042,7 @@ sub _transpose {
     if ( $item->{type} =~ /^comment/ ) {
 	return unless $item->{chords};
 	foreach ( @{ $item->{chords} } ) {
-	    $_ = $self->xpchord( $_, $xpose );
+	    $_ = $self->xpchord( $_, $xpose, $xcode );
 	}
 	return;
     }
@@ -1050,16 +1050,16 @@ sub _transpose {
     if ( $item->{type} eq "gridline" ) {
 	foreach ( @{ $item->{tokens} } ) {
 	    next unless $_->{class} eq "chord";
-	    $_->{chord} = $self->xpchord( $_->{chord}, $xpose );
+	    $_->{chord} = $self->xpchord( $_->{chord}, $xpose, $xcode );
 	}
 	if ( $item->{margin} && exists $item->{margin}->{chords} ) {
 	    foreach ( @{ $item->{margin}->{chords} } ) {
-		$_ = $self->xpchord( $_, $xpose );
+		$_ = $self->xpchord( $_, $xpose, $xcode );
 	    }
 	}
 	if ( $item->{comment} && exists $item->{comment}->{chords} ) {
 	    foreach ( @{ $item->{comment}->{chords} } ) {
-		$_ = $self->xpchord( $_, $xpose );
+		$_ = $self->xpchord( $_, $xpose, $xcode );
 	    }
 	}
 	return;
@@ -1067,18 +1067,18 @@ sub _transpose {
 
     if ( $item->{type} eq "diagrams" ) {
 	foreach ( @{ $item->{chords} } ) {
-	    $_ = $self->xpchord( $_, $xpose );
+	    $_ = $self->xpchord( $_, $xpose, $xcode );
 	}
 	return;
     }
 }
 
 sub xpchord {
-    my ( $self, $c, $xpose ) = @_;
-    return $c unless length($c) && $xpose;
+    my ( $self, $c, $xpose, $xcode ) = @_;
+    return $c unless length($c) && ($xpose || $xcode);
     return $c if ref $c;
     my $parens = $c =~ s/^\((.*)\)$/$1/;
-    my $xc = App::Music::ChordPro::Chords::transpose( $c, $xpose );
+    my $xc = App::Music::ChordPro::Chords::transpose( $c, $xpose, $xcode );
     $xc ||= $c;
     return $parens ? "($xc)" : $xc;
 }

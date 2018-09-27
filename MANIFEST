@@ -95,6 +95,8 @@ t/172_transpose.t
 t/173_transpose.t
 t/174_transpose.cho
 t/174_transpose.t
+t/175_transpose.t
+t/177_transcode.t
 t/180_grids.t
 t/20_basic01_crd.t
 t/21_basic02_crd.t

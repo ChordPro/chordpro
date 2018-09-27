@@ -490,6 +490,12 @@ sub configurator {
     }
     $cfg = hmerge( $cfg, $ccfg, "" );
 
+    if ( $options->{transcode} ) {
+	unless ( App::Music::ChordPro::Chords::Parser->get_parser($options->{transcode}, 1) ) {
+	    die("No transcoder for ", $options->{transcode}, "\n");
+	}
+    }
+ 
     # Sanitize added extra entries.
     for ( qw(title subtitle footer) ) {
 	delete($cfg->{pdf}->{formats}->{first}->{$_})
@@ -654,8 +660,7 @@ sub process_config {
 	}
 	foreach ( @$c ) {
 	    my $res =
-	      App::Music::ChordPro::Chords::add_config_chord
-		  ( $_->{name}, $_->{base}||1, $_->{frets}, $_->{fingers} );
+	      App::Music::ChordPro::Chords::add_config_chord($_);
 	    warn( "Invalid chord in config: ",
 		  $_->{name}, ": ", $res, "\n" ) if $res;
 	}

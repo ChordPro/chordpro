@@ -204,6 +204,8 @@ sub strings {
 
 my $parser = App::Music::ChordPro::Chords::Parser->default;
 
+# API: Set tuning, discarding chords.
+# Used by: Config.
 sub set_tuning {
     my ( $t, $options ) = @_;
     return "Invalid tuning (not array)" unless ref($t) eq "ARRAY";
@@ -229,12 +231,27 @@ sub set_tuning {
 
 }
 
+# API: Set notation system.
+# Used by: Config.
 sub set_notes {
     my ( $n, $options ) = @_;
     return "Invalid notes (not hash)" if ref($n) ne "HASH";
     $options //= { verbose => 0 };
 
     $parser = App::Music::ChordPro::Chords::Parser->new( { notes => $n } );
+    warn( "Parser: ", $parser->{system}, "\n" )
+      if $options->{verbose} && $options->{verbose} > 1;
+
+    return;
+}
+
+# API: Set target parser.
+# Used by: ChordPro.
+sub set_parser {
+    my ( $p, $options ) = @_;
+    $options //= { verbose => 0 };
+
+    $parser = App::Music::ChordPro::Chords::Parser->get_parser($p);
     warn( "Parser: ", $parser->{system}, "\n" )
       if $options->{verbose} && $options->{verbose} > 1;
 
@@ -260,10 +277,23 @@ sub _check_chord {
 # API: Add a config defined chord.
 # Used by: Config.
 sub add_config_chord {
-    my ( $name, $base, $frets, $fingers ) = @_;
-    my $res = _check_chord( $base, $frets, $fingers );
+    my ( $def ) = @_;
+    my $res;
+    my @names;
+    @names = @{ $def->{alias} } if $def->{alias};
+    if ( $def->{copy} ) {
+	$res = $config_chords{$def->{copy}};
+	return "Cannot copy $def->{copy}"
+	  unless $res;
+	$def = $res;
+	$def->{name} = $_->{name};
+    }
+    my ( $name, $base, $frets, $fingers ) =
+      ( $def->{name}, $def->{base}||1, $def->{frets}, $def->{fingers} );
+    $res = _check_chord( $base, $frets, $fingers );
     return $res if $res;
 
+    for $name ( $name, @names ) {
     my $info = parse_chord($name) // { name => $name };
     $config_chords{$name} =
       { origin  => "config",
@@ -294,6 +324,7 @@ sub add_config_chord {
     if ( defined $info->{root_ord} ) {
 	$config_chords{$i} = $config_chords{$name};
 	$config_chords{$i}->{origin} = " config";
+    }
     }
     return;
 }
@@ -448,22 +479,12 @@ sub chord_info {
 # API: Transpose a chord.
 # Used by: Songbook.
 sub transpose {
-    my ( $c, $xpose ) = @_;
-    return $c unless $xpose;
+    my ( $c, $xpose, $xcode ) = @_;
+    return $c unless $xpose || $xcode;
     my $info = parse_chord($c);
     warn("Cannot transpose $c\n"), return unless $info;
 
-    my $r = ( $info->{root_ord} + $xpose ) % 12;
-    $r = $parser->root_canon( $r, $xpose > 0 );
-    substr( $c, 0, length($info->{root}), $r );
-
-    if ( $r = $info->{bass_ord} ) {
-	$r = ( $r + $xpose ) % 12;
-	$r = $parser->root_canon( $r, $xpose > 0 );
-	$c =~ s;/.+;/$r;;
-    }
-
-    return $c;
+    $info->transpose($xpose)->transcode($xcode)->reformat;
 }
 
 1;

@@ -70,6 +70,11 @@ while ( my ( $c, $info ) = each %tbl ) {
     my $res = App::Music::ChordPro::Chords::parse_chord($c);
     $res //= "FAIL";
     if ( UNIVERSAL::isa( $res, 'HASH' ) ) {
+	$res = {%$res};
+	delete($res->{parser});
+	delete($res->{qual_orig});
+	delete($res->{ext_orig});
+	delete($res->{root_mod}) unless $res->{root_mod};
         my $s = Data::Dumper::Dumper($res);
 	$s =~ s/\s+/ /gs;
 	$s =~ s/, \}/ }/gs;
