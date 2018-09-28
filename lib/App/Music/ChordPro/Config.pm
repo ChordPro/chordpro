@@ -54,6 +54,8 @@ This is the current built-in configuration file, showing all settings.
   	"inline-chords" : false,
   	// Chords under the lyrics.
   	"chords-under" : false,
+        // Transcoding.
+        "transcode" : null,
       },
   
       // Metadata.
@@ -490,9 +492,9 @@ sub configurator {
     }
     $cfg = hmerge( $cfg, $ccfg, "" );
 
-    if ( $options->{transcode} ) {
-	unless ( App::Music::ChordPro::Chords::Parser->get_parser($options->{transcode}, 1) ) {
-	    die("No transcoder for ", $options->{transcode}, "\n");
+    if ( $cfg->{settings}->{transcode} ) {
+	unless ( App::Music::ChordPro::Chords::Parser->get_parser($cfg->{settings}->{transcode}, 1) ) {
+	    die("No transcoder for ", $cfg->{settings}->{transcode}, "\n");
 	}
     }
  
@@ -562,7 +564,9 @@ sub configurator {
     if ( $options->{'lyrics-only'} ) {
 	$cfg->{settings}->{'lyrics-only'} = $options->{'lyrics-only'};
     }
-
+    if ( $options->{transcode} ) {
+	$cfg->{settings}->{transcode} = $options->{transcode};
+    }
     return $cfg if $options->{'cfg-print'};
 
     # Backend specific configs.

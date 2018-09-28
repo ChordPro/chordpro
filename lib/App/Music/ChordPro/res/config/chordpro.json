@@ -29,6 +29,8 @@
 	"inline-chords" : false,
 	// Chords under the lyrics.
 	"chords-under" : false,
+      // Transcoding.
+      "transcode" : null,
     },
 
     // Metadata.

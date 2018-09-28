@@ -99,6 +99,12 @@
 			"left",
 			"right"
 		    ]
+		},
+
+		"transcode": {
+		    "description": "Transcode chords.",
+		    "type": [ "string", "null" ],
+		    "default": null
 		}
 	    },
 	    "additionalProperties": { "not": {} }

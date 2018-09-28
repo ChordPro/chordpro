@@ -449,7 +449,7 @@ Johan Vromans C<< <jv at CPAN dot org > >>
 =head1 SUPPORT
 
 ChordPro (the program) development is hosted on GitHub, repository
-L<https://github.com/ChrdPro/chordpro>.
+L<https://github.com/ChordPro/chordpro>.
 
 Please report any bugs or feature requests to the GitHub issue tracker,
 L<https://github.com/ChordPro/chordpro/issues>.

@@ -166,10 +166,10 @@ sub main {
 
     warn(Dumper($s), "\n") if $options->{debug};
 
-    # Set target parser for the backend so it can find the trasncoded
+    # Set target parser for the backend so it can find the transcoded
     # chord definitions.
-    App::Music::ChordPro::Chords::set_parser($options->{transcode})
-	if $options->{transcode};
+    App::Music::ChordPro::Chords::set_parser($::config->{settings}->{transcode})
+	if $::config->{settings}->{transcode};
 
     # Generate the songbook.
     my $res = $pkg->generate_songbook( $s, $options );

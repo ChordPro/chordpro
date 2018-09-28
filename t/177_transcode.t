@@ -19,6 +19,7 @@ our $config =
 	  ( { nosysconfig => 1, nolegacyconfig => 1, nouserconfig => 1,
 	      config => [ getresource("config/notes_latin.json"),
 			  getresource("config/notes_dutch.json") ],
+	      transcode => "latin"
 	    } );
   };
 ok( $config, "got config" );
@@ -30,7 +31,7 @@ my $data = <<EOD;
 I [D]looked over Jordan, and [Gm7]what did I [D]see,
 EOD
 
-eval { $s->parsefile( \$data, { transcode => "latin" } ) } or diag("$@");
+eval { $s->parsefile( \$data ) } or diag("$@");
 
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );

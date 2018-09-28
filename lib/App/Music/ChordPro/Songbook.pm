@@ -206,7 +206,7 @@ sub parse_song {
     }
 
     # Global transposition and transcoding.
-    $song->transpose( $options->{transpose}, $options->{transcode} );
+    $song->transpose( $options->{transpose}, $::config->{settings}->{transcode} );
 
     # $song->structurize;
 
