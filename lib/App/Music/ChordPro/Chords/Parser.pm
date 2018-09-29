@@ -29,11 +29,9 @@ sub new {
 # The default parser has built-in support for common (dutch) note
 # names.
 
-my $default_parser;
-
 sub default {
     my ( $pkg ) = @_;
-    return $default_parser //=
+    return $parsers->{common} //=
       $pkg->new
       ( { "notes" =>
 	  { "system" => "common",
