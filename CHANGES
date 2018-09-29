@@ -12,6 +12,7 @@
       systems.
     - Chords can be shown under the lyrics, controlled by config item
       settings.chords-under.
+    - Nashville and Roman chord systems need to be explicitly enabled.
     - Allow meta substitutions in title and subtitle.
     - Fix {transpose}, --transpose and {key} interaction.
     - Add slash as grid symbol.

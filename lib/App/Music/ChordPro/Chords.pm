@@ -258,6 +258,11 @@ sub set_parser {
     return;
 }
 
+# Used by: Songbook.
+sub get_parser {
+    $parser->{system};
+}
+
 ################ Section Config & User Chords ################
 
 sub _check_chord {

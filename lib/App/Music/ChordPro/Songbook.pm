@@ -25,9 +25,6 @@ my $grid_cells;
 # Local transposition.
 my $xpose = 0;
 
-# Chord type for this song, used to detect mixing types.
-my $chordtype;
-
 # Used chords, in order of appearance.
 my @used_chords;
 
@@ -82,6 +79,7 @@ sub parse_song {
 
     $song = App::Music::ChordPro::Song->new
       ( source => { file => $diag->{file}, line => 1 + $$linecnt },
+	system => App::Music::ChordPro::Chords::get_parser,
 	structure => "linear",
       );
 
@@ -90,7 +88,6 @@ sub parse_song {
     $in_context = $def_context;
     @used_chords = ();
     %warned_chords = ();
-    undef $chordtype;
     App::Music::ChordPro::Chords::reset_song_chords();
     @labels = ();
 
@@ -177,10 +174,10 @@ sub parse_song {
     }
 
     if ( $diagrams =~ /^(user|all)$/
-	 && defined($chordtype)
-	 && $chordtype =~ /^[RN]$/ ) {
+	 && $song->{system} =~ /^(nashville|roman)$/ ) {
 	$diag->{orig} = "(End of Song)";
-	do_warn("Chord diagrams suppressed for Nashville/Roman chords");
+	do_warn( "Chord diagrams suppressed for " .
+		 ucfirst($song->{system}) . " chords" );
 	$diagrams = "none";
     }
 
@@ -210,6 +207,9 @@ sub parse_song {
 
     # $song->structurize;
 
+    # Tests do not anticipate this yet.
+    delete $song->{system} if $ENV{TEST_ACTIVE};
+
     return $song;
 }
 
@@ -231,24 +231,10 @@ sub chord {
     my $parens = $c =~ s/^\((.*)\)$/$1/;
 
     my $info = App::Music::ChordPro::Chords::identify($c);
-    if ( $info->{system} ) {
-	if ( defined $chordtype ) {
-	    if ( $chordtype ne $info->{system} ) {
-		do_warn("Mixed chord systems detected in song ($chordtype -> $info->{system})");
-		$chordtype = $info->{system};
-	    }
+    unless ( $info->{system} ) {
+	if ( $info->{error} && ! $warned_chords{$c}++ ) {
+	    do_warn( $info->{error} ) unless $c =~ /^n\.?c\.?$/i;
 	}
-	else {
-	    $chordtype = $info->{system};
-	}
-    }
-    elsif ( $info->{warning} && ! $warned_chords{$c}++ ) {
-	do_warn("Mysterious chord: $c")
-	  unless $c =~ /^n\.?c\.?$/i;
-    }
-    elsif ( $info->{error} && ! $warned_chords{$c}++ ) {
-	do_warn("Unrecognizable chord: $c")
-	  unless $c =~ /^n\.?c\.?$/i;
     }
 
     # Local transpose, if requested.

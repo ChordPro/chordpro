@@ -11,10 +11,18 @@ package App::Music::ChordPro::Chords::Parser;
 sub new {
     my ( $pkg, $init ) = @_;
     my $self = bless { chord_cache => {} } => $pkg;
-    $self->load_notes($init->{notes});
-    $self->{system} = $init->{notes}->{system} if $init->{notes};
-    $self->{system} //= "unknown";
-    $parsers->{$self->{system}} = $self;
+    if ( $init->{notes}->{system} eq "nashville" ) {
+	$self = $parsers->{nashville};
+    }
+    elsif ( $init->{notes}->{system} eq "roman" ) {
+	$self = $parsers->{roman};
+    }
+    else {
+	$self->load_notes($init->{notes});
+	$self->{system} = $init->{notes}->{system} if $init->{notes};
+	$self->{system} //= "unknown";
+	$parsers->{$self->{system}} = $self;
+    }
     return $self;
 }
 
@@ -52,10 +60,7 @@ sub default {
 
 sub parse {
     my ( $self, $chord ) = @_;
-    $self->{chord_cache}->{$chord} //=
-      $self->parse_chord($chord)
-      || $parsers->{nashville}->parse_chord($chord)
-      || $parsers->{roman}->parse_chord($chord);
+    $self->{chord_cache}->{$chord} //= $self->parse_chord($chord);
 }
 
 sub parse_chord {
@@ -325,7 +330,7 @@ sub intervals { $_[0]->{intervals} }
 
 package App::Music::ChordPro::Chords::Parser::Nashville;
 
-$parsers->{nashville} = __PACKAGE__;
+$parsers->{nashville} = bless { system => "nashville" } => __PACKAGE__;
 
 our @ISA = qw(App::Music::ChordPro::Chords::Parser);
 
@@ -402,7 +407,7 @@ sub load_notes { Carp::confess("OOPS") }
 
 package App::Music::ChordPro::Chords::Parser::Roman;
 
-$parsers->{roman} = __PACKAGE__;
+$parsers->{roman} = bless { system => "roman" } => __PACKAGE__;
 
 our @ISA = qw(App::Music::ChordPro::Chords::Parser);
 

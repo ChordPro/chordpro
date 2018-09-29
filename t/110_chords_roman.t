@@ -31,6 +31,8 @@ our $config =
   };
 ok( $config, "got config" );
 
+App::Music::ChordPro::Chords::set_parser("roman");
+
 use Data::Dumper qw();
 local $Data::Dumper::Sortkeys  = 1;
 local $Data::Dumper::Indent    = 1;
