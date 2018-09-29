@@ -208,7 +208,7 @@ sub parse_song {
     # $song->structurize;
 
     # Tests do not anticipate this yet.
-    delete $song->{system} if $ENV{TEST_ACTIVE};
+    delete $song->{system};
 
     return $song;
 }
