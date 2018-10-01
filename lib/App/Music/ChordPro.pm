@@ -746,8 +746,7 @@ sub app_setup {
                 foreach my $c ( @$_ ) {
 		    # Check for resource names.
 		    if ( ! -r $c && $c !~ m;[/.]; ) {
-			my $t = getresource( "config/".lc($c).".json" );
-			$c = $t if $t;
+			$c = ::rsc_or_file($c);
 		    }
                     die("$c: $!\n") unless -r $c;
                 }
@@ -780,7 +779,7 @@ sub app_setup {
 	my $xc = $clo->{transcode};
 	# Load the appropriate notes config, but retain the current parser.
 	unless ( App::Music::ChordPro::Chords::Parser->get_parser($xc, 1) ) {
-	    my $file = getresource("config/notes_$xc.json");
+	    my $file = getresource("notes/$xc.json");
 	    if ( $file and open( my $fd, "<:raw", $file ) ) {
 		my $pp = JSON::PP->new->relaxed;
 		warn("Config: $file\n") if $clo->{verbose};
@@ -945,6 +944,22 @@ EndOfUsage
 ################ Resources ################
 
 use Encode qw(decode decode_utf8 encode_utf8);
+
+sub ::rsc_or_file {
+    my ( $c ) = @_;
+    # Check for resource names.
+    if ( ! -r $c && $c !~ m;[/.]; ) {
+	my $t;
+	if ( $c =~ /^(.+):(.*)/ ) {
+	    $t = getresource( lc($1) . "/".lc($2).".json" );
+	}
+	else {
+	    $t = getresource( "config/".lc($c).".json" );
+	}
+	$c = $t if $t;
+    }
+    return $c;
+}
 
 sub ::loadfile {
     my ( $filename, $options ) = @_;

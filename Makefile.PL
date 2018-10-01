@@ -91,12 +91,12 @@ LIB = lib/App/Music/ChordPro
 RES = ${LIB}/res
 PODSELECT = podselect
 
-resources : ${RES}/config/chordpro.json ${RES}/pod/ChordPro.pod ${RES}/pod/Config.pod ${RES}/config/config_common.json
+resources : ${RES}/config/chordpro.json ${RES}/pod/ChordPro.pod ${RES}/pod/Config.pod ${RES}/notes/common.json
 
 ${RES}/config/chordpro.json : ${LIB}/Config.pm
 	$(PERL) -Ilib $< > $@
 
-${RES}/config/config_common.json : ${RES}/config/config_dutch.json
+${RES}/notes/common.json : ${RES}/notes/dutch.json
 	$(CP) $< $@
 
 ${RES}/pod/ChordPro.pod : ${LIB}.pm

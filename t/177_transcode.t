@@ -17,8 +17,8 @@ our $config =
   eval {
       App::Music::ChordPro::Config::configurator
 	  ( { nosysconfig => 1, nolegacyconfig => 1, nouserconfig => 1,
-	      config => [ getresource("config/notes_latin.json"),
-			  getresource("config/notes_dutch.json") ],
+	      config => [ getresource("notes/latin.json"),
+			  getresource("notes/dutch.json") ],
 	      transcode => "latin"
 	    } );
   };

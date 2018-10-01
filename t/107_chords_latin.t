@@ -16,7 +16,7 @@ our $config =
   eval {
       App::Music::ChordPro::Config::configurator
 	  ( { nosysconfig => 1, nolegacyconfig => 1, nouserconfig => 1,
-	      config => getresource("config/notes_latin.json") } );
+	      config => getresource("notes/latin.json") } );
   };
 
 =begin regenerate

@@ -427,11 +427,10 @@ sub configurator {
 	foreach my $c ( @{ delete $cfg->{include} } ) {
 	    # Check for resource names.
 	    if ( $c !~ m;[/.]; ) {
-		my $t = getresource( "config/".lc($c).".json" );
-		$c = $t if $t;
+		$c = ::rsc_or_file($c);
 	    }
 	    else {
-		die;
+		die("$c: Not a resource name\n");
 	    }
 	    $cfg = add_config( $cfg, $options, $c, $pp );
 	}
@@ -612,8 +611,7 @@ sub add_config {
 	    foreach my $c ( @{ delete $new->{include} } ) {
 		# Check for resource names.
 		if ( $c !~ m;[/.]; ) {
-		    my $t = getresource( "config/".lc($c).".json" );
-		    $c = $t if $t;
+		    $c = ::rsc_or_file($c);
 		}
 		elsif ( $dir ne ""
 			&& !File::Spec->file_name_is_absolute($c) ) {
