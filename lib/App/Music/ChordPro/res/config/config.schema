@@ -237,6 +237,11 @@
 		    "type" : "string",
 		    "default" : "common"
 		 },
+	         "movable" : {
+		    "description" : "Movable note system.",
+		    "type" : "boolean",
+		    "default" : false
+		 },
 		 "sharp" : {
 		     "description" : "Note names, using sharps.",
 		     "type" : "array",

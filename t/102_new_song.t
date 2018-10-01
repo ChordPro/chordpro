@@ -27,6 +27,7 @@ my $song = {
 	    'settings' => {},
 	    'structure' => 'linear',
 	    'source' => { file => "__STRING__", line => 1 },
+	    'system' => 'common',
 	   };
 
 is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );

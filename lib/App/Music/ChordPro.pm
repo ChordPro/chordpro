@@ -765,9 +765,35 @@ sub app_setup {
         $clo->{"no$config"} = 1 unless $clo->{$config};
     }
 
+    # Decode command line strings.
+    # File names are dealt with elsewhere.
+    for ( qw(transcode) ) {
+	next unless defined $clo->{$_};
+	$clo->{$_} = decode_utf8($clo->{$_});
+    }
+
     # Plug in command-line options.
     @{$options}{keys %$clo} = values %$clo;
     # warn(Dumper($options), "\n") if $options->{debug};
+
+    if ( $clo->{transcode} ) {
+	my $xc = $clo->{transcode};
+	# Load the appropriate notes config, but retain the current parser.
+	unless ( App::Music::ChordPro::Chords::Parser->get_parser($xc, 1) ) {
+	    my $file = getresource("config/notes_$xc.json");
+	    if ( $file and open( my $fd, "<:raw", $file ) ) {
+		my $pp = JSON::PP->new->relaxed;
+		warn("Config: $file\n") if $clo->{verbose};
+		my $new = $pp->decode( ::loadfile ($fd, { %$clo, donotsplit => 1 } ) );
+		App::Music::ChordPro::Chords::set_notes( $new->{notes},
+							 { %$clo,
+							   'keep-parser' => 1 } );
+	    }
+	}
+	unless ( App::Music::ChordPro::Chords::Parser->get_parser($xc, 1) ) {
+	    die("No transcoder for ", $xc, "\n");
+	}
+    }
 
     if ( $defcfg || $fincfg ) {
 	print App::Music::ChordPro::Config::config_defaults()

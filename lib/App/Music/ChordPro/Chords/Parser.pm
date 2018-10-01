@@ -3,26 +3,67 @@
 use strict;
 use warnings;
 use utf8;
+use Carp;
 
 my $parsers = {};
 
 package App::Music::ChordPro::Chords::Parser;
 
+# The parser analyses a chord and returns an object with the following
+# attributes:
+#
+#  name		name as passed to the parser (e.g. Cism7)
+#
+#  root		textual decomposition: root part (e.g. Cis)
+#  qual		textual decomposition: quality part (e.g. m)
+#  ext		textual decomposition: extension part (e.g. 7)
+#  bass		textual decomposition: bass part (a root)
+#
+#  system	notation system (common, nashville, user defined)
+#  root_canon	canonical root (e.g. Cis => C#)
+#  root_ord	root ordinal (e.g. Cis => 1)
+#  root_mod	root modifier (e.g. is => # => +1)
+#  qual_canon	canonical qualifier (e.g. m => -)
+#  ext_canon	canonical extension (e.g. sus => sus4)
+#  bass_canon	like root, for bass note
+#  bass_ord	like root, for bass note
+#  bass_mod	like root, for bass note
+#
+# The parsers are one of
+#  App::Music::ChordPro::Chords::Parser::Common
+#  App::Music::ChordPro::Chords::Parser::Nashville
+#  App::Music::ChordPro::Chords::Parser::Roman
+#
+# The objects are one of
+#  App::Music::ChordPro::Chord::Common
+#  App::Music::ChordPro::Chord::Nashville
+#  App::Music::ChordPro::Chord::Roman
+
 sub new {
     my ( $pkg, $init ) = @_;
     my $self = bless { chord_cache => {} } => $pkg;
-    if ( $init->{notes}->{system} eq "nashville" ) {
-	$self = $parsers->{nashville};
+    return App::Music::ChordPro::Chords::Parser->default
+      unless $init && $init->{notes};
+
+    my $notes = $init->{notes};
+    my $system = $notes->{system};
+    Carp::croak("Missing notes system in parser creation")
+	unless $system;
+
+    if ( $system eq "nashville" ) {
+	return App::Music::ChordPro::Chords::Parser::Nashville->new($init);
     }
-    elsif ( $init->{notes}->{system} eq "roman" ) {
-	$self = $parsers->{roman};
+    if ( $system eq "roman" ) {
+	return App::Music::ChordPro::Chords::Parser::Roman->new($init);
     }
-    else {
-	$self->load_notes($init->{notes});
-	$self->{system} = $init->{notes}->{system} if $init->{notes};
-	$self->{system} //= "unknown";
-	$parsers->{$self->{system}} = $self;
-    }
+
+    # Custom parser.
+    bless $self => 'App::Music::ChordPro::Chords::Parser::Common';
+    $self->load_notes($notes);
+    $self->{system} = $system;
+    $self->{target} = 'App::Music::ChordPro::Chord::Common';
+    $self->{movable} = $notes->{movable};
+    $parsers->{$self->{system}} = $self;
     return $self;
 }
 
@@ -32,7 +73,7 @@ sub new {
 sub default {
     my ( $pkg ) = @_;
     return $parsers->{common} //=
-      $pkg->new
+      App::Music::ChordPro::Chords::Parser::Common->new
       ( { "notes" =>
 	  { "system" => "common",
 	    "sharp" => [ "C", [ "C#", "Cis", "C♯" ],
@@ -56,10 +97,37 @@ sub default {
       );
 }
 
+# Cached version of the individual parser's parse_chord.
 sub parse {
     my ( $self, $chord ) = @_;
     $self->{chord_cache}->{$chord} //= $self->parse_chord($chord);
 }
+
+# Virtual.
+sub parse_chord {
+    Carp::confess("Virtual method 'parse_chord' not defined");
+}
+
+# Fetch a parser for a known system, with fallback.
+sub get_parser {
+    my ( $self, $system, $nofallback ) = @_;
+    return $parsers->{$system} if $parsers->{$system};
+    return if $nofallback;
+    warn("No parser for $system, falling back to default\n");
+    return $self->default;
+}
+
+# The list of instantiated parsers.
+sub parsers { return { %$parsers } }
+
+# The number of intervals for this note system.
+sub intervals { $_[0]->{intervals} }
+
+################ Parsing Common notated chords ################
+
+package App::Music::ChordPro::Chords::Parser::Common;
+
+our @ISA = qw( App::Music::ChordPro::Chords::Parser );
 
 sub parse_chord {
     my ( $self, $chord ) = @_;
@@ -80,19 +148,24 @@ sub parse_chord {
 		 parser => $self,
 		 name => $_[1],
 		 root => $r };
-    bless $info => 'App::Music::ChordPro::Chord';
+    bless $info => $self->{target};
 
     my $q = $+{qual} // "";
-    $info->{qual_orig} = $q;
-    $q = "-" if $q eq "m";
+    $info->{qual} = $q;
+    $q = "-" if $q eq "m" || $q eq "min";
     $q = "+" if $q eq "aug";
     $q = "0" if $q eq "dim";
-    $info->{qual} = $q;
+    $info->{qual_canon} = $q;
 
     my $x = $+{ext} // "";
-    $info->{ext_orig} = $x;
-    $x = "sus4" if $x eq "sus";
+    if ( !$info->{qual} ) {
+	if ( $x eq "maj" ) {
+	    $x = "";
+	}
+    }
     $info->{ext} = $x;
+    $x = "sus4" if $x eq "sus";
+    $info->{ext_canon} = $x;
 
     my $ordmod = sub {
 	my ( $pfx ) = @_;
@@ -309,32 +382,32 @@ sub root_canon {
     ( $sharp ? $self->{ns_canon} : $self->{nf_canon} )->[$root];
 }
 
-sub get_parser {
-    my ( $self, $system, $nofallback ) = @_;
-    return $parsers->{$system} if $parsers->{$system};
-    return if $nofallback;
-    warn("No parser for $system, falling back to default\n");
-    return $self->default;
-}
+# Has chord diagrams.
+sub has_diagrams { !$_[0]->{movable} }
 
-sub parsers {
-    my ( $self ) = @_;
-    return {%$parsers};
-}
-
-sub intervals { $_[0]->{intervals} }
+# Movable notes system.
+sub movable { $_[0]->{movable} }
 
 ################ Parsing Nashville notated chords ################
 
 package App::Music::ChordPro::Chords::Parser::Nashville;
 
-$parsers->{nashville} = bless { system => "nashville" } => __PACKAGE__;
+our @ISA = qw(App::Music::ChordPro::Chords::Parser::Common);
 
-our @ISA = qw(App::Music::ChordPro::Chords::Parser);
+$parsers->{nashville} = __PACKAGE__->new;
+
+sub new {
+    my ( $pkg, $init ) = @_;
+    my $self = bless { chord_cache => {} } => $pkg;
+    $self->{system} = "nashville";
+    $self->{target} = 'App::Music::ChordPro::Chord::Nashville';
+    return $self;
+}
 
 my $n_pat = qr/(?<shift>[b#]?)(?<root>[1-7])/;
 
 my %nmap = ( 1 => 0, 2 => 2, 3 => 4, 4 => 5, 5 => 7, 6 => 9, 7 => 11 );
+my @nmap = ( 1, 1, 2, 2, 3, 4, 4, 5, 5, 6, 6, 7, 1 );
 
 sub parse_chord {
     my ( $self, $chord ) = @_;
@@ -350,22 +423,23 @@ sub parse_chord {
     return unless $chord =~ /^$n_pat(?<qual>-|\+|0|aug|m(?!aj)|dim)?(?<ext>.*)$/;
 
     my $info = { system => "nashville",
+		 parser => $self,
 		 name   => $_[1],
 		 root   => $+{root},
 	       };
-    bless $info => 'App::Music::ChordPro::Chord::Nashville';
+    bless $info => $self->{target};
 
     my $q = $+{qual} // "";
-    $info->{qual_orig} = $q;
+    $info->{qual} = $q;
     $q = "-" if $q eq "m";
     $q = "+" if $q eq "aug";
     $q = "0" if $q eq "dim";
-    $info->{qual} = $q;
+    $info->{qual_canon} = $q;
 
     my $x = $+{ext} // "";
-    $info->{ext_orig} = $x;
-    $x = "sus4" if $x eq "sus";
     $info->{ext} = $x;
+    $x = "sus4" if $x eq "sus";
+    $info->{ext_canon} = $x;
 
     my $ordmod = sub {
 	my ( $pfx ) = @_;
@@ -401,13 +475,35 @@ sub parse_chord {
 
 sub load_notes { Carp::confess("OOPS") }
 
+sub root_canon {
+    my ( $self, $root, $sharp ) = @_;
+    no warnings 'qw';
+    $sharp
+      ? qw( 1 #1 2 #2 3 4 #4 5 #5 6 #6 7 )[$root]
+      : qw( 1 b2 2 b3 3 4 b5 5 b6 6 b7 7 )[$root]
+}
+
+# Has chord diagrams.
+sub has_diagrams { 0 }
+
+# Movable notes system.
+sub movable { 1 }
+
 ################ Parsing Roman notated chords ################
 
 package App::Music::ChordPro::Chords::Parser::Roman;
 
-$parsers->{roman} = bless { system => "roman" } => __PACKAGE__;
+our @ISA = qw(App::Music::ChordPro::Chords::Parser::Common);
 
-our @ISA = qw(App::Music::ChordPro::Chords::Parser);
+$parsers->{roman} = __PACKAGE__->new;
+
+sub new {
+    my ( $pkg, $init ) = @_;
+    my $self = bless { chord_cache => {} } => $pkg;
+    $self->{system} = "roman";
+    $self->{target} = 'App::Music::ChordPro::Chord::Roman';
+    return $self;
+}
 
 my $r_pat = qr/(?<shift>[b#]?)(?<root>(?i)iii|ii|iv|i|viii|vii|vi|v)/;
 
@@ -427,23 +523,24 @@ sub parse_chord {
     return unless $chord =~ /^$r_pat(?<qual>\+|0|aug|dim)?(?<ext>.*)$/;
 
     my $info = { system => "roman",
+		 parser => $self,
 		 name   => $_[1],
 		 root   => $+{root} };
-    bless $info => 'App::Music::ChordPro::Chord::Roman';
+    bless $info => $self->{target};
 
     my $r = $+{root};
     my $q = $+{qual} // "";
-    $info->{qual_orig} = $q;
+    $info->{qual} = $q;
     $q = "-" if $r eq lc($r);
     $q = "+" if $q eq "aug";
     $q = "0" if $q eq "dim";
-    $info->{qual} = $q;
+    $info->{qual_canon} = $q;
 
     my $x = $+{ext} // "";
-    $info->{ext_orig} = $x;
+    $info->{ext} = $x;
     $x = "sus4" if $x eq "sus";
     $x = "^7" if $x eq "7+";
-    $info->{ext} = $x;
+    $info->{ext_canon} = $x;
 
     my $ordmod = sub {
 	my ( $pfx ) = @_;
@@ -479,24 +576,45 @@ sub parse_chord {
 
 sub load_notes { Carp::confess("OOPS") }
 
-################ Transformations ################
+sub root_canon {
+    my ( $self, $root, $sharp, $minor ) = @_;
+    return lc( $self->root_canon( $root, $sharp ) ) if $minor;
+    no warnings 'qw';
+    $sharp
+      ? qw( I #I II #II III IV #IV V #V VI #VI VII )[$root]
+      : qw( I bII II bIII III IV bV V bVI VI bVII VII )[$root]
+}
 
-package App::Music::ChordPro::Chord;
+# Has chord diagrams.
+sub has_diagrams { 0 }
+
+# Movable notes system.
+sub movable { 1 }
+
+################ Chord objects: Common ################
+
+package App::Music::ChordPro::Chord::Common;
 
 sub clone {
     my ( $self ) = @_;
     bless { %$self } => ref($self);
 }
 
-sub reformat {
+sub show {
     my ( $self ) = @_;
-    my $res = $self->{root_canon};
-    $res .= $self->{qual_orig} if $self->{qual};
-    $res .= $self->{ext_orig} if $self->{ext};
+    my $res = $self->{root} . $self->{qual} . $self->{ext};
     if ( $self->{bass} && $self->{bass} ne "" ) {
-	$res .= "/" . $self->{bass_canon};
+	$res .= "/" . $self->{bass};
     }
     return $res;
+}
+
+# Returns a representation indepent of notation system.
+sub agnostic {
+    my ( $self ) = @_;
+    join( " ", "",
+	  $self->{root_ord}, $self->{qual_canon},
+	  $self->{ext_canon}, $self->{bass_ord} // () );
 }
 
 sub transpose {
@@ -505,10 +623,14 @@ sub transpose {
     my $info = $self->clone;
     my $p = $self->{parser};
     $info->{root_ord} = ( $self->{root_ord} + $xpose ) % $p->intervals;
-    $info->{root_canon} = $p->root_canon($info->{root_ord},$xpose > 0);
+    $info->{root_canon} = $info->{root} =
+      $p->root_canon( $info->{root_ord},
+		      $xpose > 0,
+		      $info->{qual_canon} eq "-" );
     if ( $self->{bass} && $self->{bass} ne "" ) {
 	$info->{bass_ord} = ( $self->{bass_ord} + $xpose ) % $p->intervals;
-	$info->{bass_canon} = $p->root_canon($info->{bass_ord},$xpose > 0);
+	$info->{bass_canon} = $info->{bass} =
+	  $p->root_canon($info->{bass_ord},$xpose > 0);
     }
     $info->{root_mod} = $info->{bass_mod} = $xpose <=> 0;
     $info;
@@ -517,59 +639,43 @@ sub transpose {
 sub transcode {
     my ( $self, $xcode ) = @_;
     return $self unless $xcode;
+    return $self if $self->{system} eq $xcode;
     my $info = $self->clone;
     my $p = $self->{parser}->get_parser($xcode);
-    $info->{root_canon} = $p->root_canon($info->{root_ord}, $info->{root_mod});
-    if ( $self->{bass} && $self->{bass} ne "" ) {
-	$info->{bass_canon} = $p->root_canon($info->{bass_ord},$info->{bass_mod});
+    $info->{root_canon} = $info->{root} =
+      $p->root_canon( $info->{root_ord},
+		      $info->{root_mod},
+		      $info->{qual_canon} eq "-" );
+    if ( $p->{system} eq "roman" && $info->{qual_canon} eq "-" ) {
+	# Minor quality is in the root name.
+	$info->{qual_canon} = $info->{qual} = "";
     }
-    $info;
+    if ( $self->{bass} && $self->{bass} ne "" ) {
+	$info->{bass_canon} = $info->{bass} =
+	  $p->root_canon($info->{bass_ord},$info->{bass_mod});
+    }
+    bless $info => $p->{target};
 }
+
+################ Chord objects: Nashville ################
 
 package App::Music::ChordPro::Chord::Nashville;
 
-our @ISA = 'App::Music::ChordPro::Chord';
+our @ISA = 'App::Music::ChordPro::Chord::Common';
 
-my @nmap = ( 1, 1, 2, 2, 3, 4, 4, 5, 5, 6, 6, 7, 1 );
-
-sub reformat {
-    my ( $self ) = @_;
-    my $res = sprintf( "%s%d",
-		       ("b","","#")[1+$self->{root_mod}],
-		       $nmap[$self->{root_ord}-$self->{root_mod}]);
-    $res .= $self->{qual_orig};
-    $res .= $self->{ext_orig} if $self->{ext};
-    $res .= "/" . sprintf( "%s%d",
-			   ("b","","#")[1+$self->{bass_mod}],
-			   @nmap[$self->{bass_ord}])
-      if $self->{bass};
-    return $res;
-}
+#my @nmap = ( 1, 1, 2, 2, 3, 4, 4, 5, 5, 6, 6, 7, 1 );
 
 sub intervals { 12 }
 
 sub transpose { $_[0] }
 
+################ Chord objects: Roman ################
+
 package App::Music::ChordPro::Chord::Roman;
 
-our @ISA = 'App::Music::ChordPro::Chord';
+our @ISA = 'App::Music::ChordPro::Chord::Common';
 
 my @rmap = qw( I I II II III IV IV V V VI VI VII );
-
-sub reformat {
-    my ( $self ) = @_;
-    my $res = $rmap[$self->{root_ord}];
-    if ( $self->{qual} ne '-' ) {
-	$res .= $self->{qual_orig} if $self->{qual} ne '-';
-    }
-    else {
-	$res = lc($res);
-    }
-    $res .= $self->{ext_orig} if $self->{ext_orig};
-    $res .= "/" . $rmap[$self->{bass_ord}]
-      if $self->{bass};
-    return $res;
-}
 
 sub intervals { 12 }
 
@@ -585,17 +691,19 @@ unless ( caller ) {
     binmode(STDOUT, ':utf8');
     foreach ( @ARGV ) {
 	my $info = $p->parse($_);
+	$info ||= $parsers->{nashville}->parse($_);
+	$info ||= $parsers->{roman}->parse($_);
 	print( "$_ => OOPS\n" ), next unless $info;
+	print( "$_ ($info->{system}) =>" );
+	print( " ", $info->transcode($_)->show, " ($_)" )
+	  for sort keys %$parsers;
+	print( " '", $info->agnostic, "' (agnostic)\n" );
+	print( "$_ =>" );
+	print( " ", $info->transpose($_)->show, " ($_)" ) for -2..2;
+	print( "\n" );
 	my $clone = $info->clone;
 	delete($clone->{parser});
-	print( "$_ => ",
-#	       $p->reformat($info),
-#	       " ", $p->get_parser("roman")->reformat($info),
-#	       " ", $p->get_parser("nashville")->reformat($info),
-	       " ", DDumper($clone) );
-	print( "$_ =>" );
-	print( " ", $info->transpose($_)->reformat ) for -1..1;
-	print( "\n" );
+	print( DDumper($clone), "\n" );
     }
 }
 

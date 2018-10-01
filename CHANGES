@@ -6,8 +6,8 @@
       and ukulele-ly. Default is guitar.
     - Chords parsing has been completely overhauled.
     - Config file handling has been completely overhauled.
-    - Alternative note naming systems, e.g. latin (Do Re Mi ...)
-      are now supported.
+    - Alternative note naming systems, e.g. Latin (Do Re Mi ...)
+      and Solfege are now supported.
     - Experimental: Chords can be transcoded between note naming
       systems.
     - Chords can be shown under the lyrics, controlled by config item

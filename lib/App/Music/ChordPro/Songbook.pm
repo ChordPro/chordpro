@@ -173,11 +173,12 @@ sub parse_song {
 	$diagrams = $::config->{diagrams}->{show};
     }
 
+    my $target = $::config->{settings}->{transcode} || $song->{system};
     if ( $diagrams =~ /^(user|all)$/
-	 && $song->{system} =~ /^(nashville|roman)$/ ) {
+	 && !App::Music::ChordPro::Chords::Parser->get_parser($target,1)->has_diagrams ) {
 	$diag->{orig} = "(End of Song)";
 	do_warn( "Chord diagrams suppressed for " .
-		 ucfirst($song->{system}) . " chords" );
+		 ucfirst($target) . " chords" );
 	$diagrams = "none";
     }
 
@@ -202,13 +203,24 @@ sub parse_song {
 	  };
     }
 
+
+    my $xp = $options->{transpose};
+    my $xc = $::config->{settings}->{transcode};
+    if ( $xc && App::Music::ChordPro::Chords::Parser->get_parser($xc,1)->movable ) {
+	if ( $song->{meta}->{key}
+	     && ( my $i = App::Music::ChordPro::Chords::parse_chord($song->{meta}->{key}->[0]) ) ) {
+	    $xp = - $i->{root_ord};
+	    delete $song->{meta}->{key};
+	}
+	else {
+	   $xp = 0;
+	}
+    }
+
     # Global transposition and transcoding.
-    $song->transpose( $options->{transpose}, $::config->{settings}->{transcode} );
+    $song->transpose( $xp, $xc );
 
     # $song->structurize;
-
-    # Tests do not anticipate this yet.
-    delete $song->{system};
 
     return $song;
 }

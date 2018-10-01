@@ -24,7 +24,8 @@ ok( scalar( @{ $s->{songs} } ) == 0, "No song" );
 #
 #my $song = {
 #	    'settings' => {},
-#	    'structure' => 'linear'
+#	    'structure' => 'linear',
+#	    'system' => 'common',
 #	   };
 #
 #is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );

@@ -135,6 +135,7 @@ my $song = {
   settings => {},
   source => { file => "__STRING__", line => 1 },
   structure => 'linear',
+  system => 'common',
   title => 'Transpositions',
 };
 

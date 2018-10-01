@@ -238,10 +238,12 @@ sub set_notes {
     return "Invalid notes (not hash)" if ref($n) ne "HASH";
     $options //= { verbose => 0 };
 
-    $parser = App::Music::ChordPro::Chords::Parser->new( { notes => $n } );
-    warn( "Parser: ", $parser->{system}, "\n" )
-      if $options->{verbose} && $options->{verbose} > 1;
-
+    my $p = App::Music::ChordPro::Chords::Parser->new( { notes => $n } );
+    unless ( $options->{'keep-parser'} ) {
+	$parser = $p;
+	warn( "Parser: ", $parser->{system}, "\n" )
+	  if $options->{verbose} && $options->{verbose} > 1;
+    }
     return;
 }
 
@@ -312,8 +314,7 @@ sub add_config_chord {
     # found when other note name systems are used.
     my $i;
     if ( defined $info->{root_ord} ) {
-	$i = " " . $info->{root_ord} . " " . $info->{qual} . $info->{ext} .
-	  ( defined($info->{bass_ord}) ? " " . $info->{bass_ord} : "" );
+	$i = $info->agnostic;
     }
     else {
 	# Retry with default parser.
@@ -321,9 +322,8 @@ sub add_config_chord {
 	if ( defined $i->{root_ord} ) {
 	    $info->{root_ord} = $i->{root_ord};
 	    $config_chords{$name}->{$_} = $i->{$_}
-	      for qw( root_ord ext qual );
-	    $i = " " . $i->{root_ord} . " " . $i->{qual} . $i->{ext} .
-	      ( defined($i->{bass_ord}) ? " " . $i->{bass_ord} : "" );
+	      for qw( root_ord ext_canon qual_canon );
+	    $i = $i->agnostic;
 	}
     }
     if ( defined $info->{root_ord} ) {
@@ -385,7 +385,7 @@ sub parse_chord {
     return $parser->parse($chord);
 }
 
-################ Section CHords Info ################
+################ Section Chords Info ################
 
 my $ident_cache = {};
 
@@ -442,8 +442,7 @@ sub chord_info {
     if ( ! $info ) {
 	my $i;
 	if ( $i = parse_chord($chord) and defined($i->{root_ord}) ) {
-	    $i = " " . $i->{root_ord} . " " . $i->{qual} . $i->{ext} .
-	      ( defined($i->{bass_ord}) ? " " . $i->{bass_ord} : "" );
+	    $i = $i->agnostic;
 	    for ( \%song_chords, \%config_chords ) {
 		next unless exists($_->{$i});
 		$info = $_->{$i};
@@ -489,7 +488,7 @@ sub transpose {
     my $info = parse_chord($c);
     warn("Cannot transpose $c\n"), return unless $info;
 
-    $info->transpose($xpose)->transcode($xcode)->reformat;
+    $info->transpose($xpose)->transcode($xcode)->show;
 }
 
 1;

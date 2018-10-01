@@ -1,0 +1,40 @@
+// Definitions of Note names.
+//
+// The most widely used note naming systems in the western world are
+// Dutch and Neo-Latin. The English and German systems may be
+// considered variants of Dutch.
+// In the Solfège system, note names are Do, Re, Mi, Fa,
+// So, La, Ti. Half-tones have a sharp or flat, e.g. Do# (Do diesis)
+// or Reb (Re bemolle).
+
+
+{
+    // Note (chord root) names.
+    // In case of alternatives, the first one is used for output.
+    "notes" : {
+
+	// This is for people that cannot type accented characters,
+	// also for tools that cannot handle them.
+	"system" : "solfege",
+	"movable" : true,
+	
+	"sharp" : [ "Do",  "Di",
+		    "Re",  "Ri",
+		    "Mi",
+		    "Fa",  "Fi",
+		    "So",  "Si",
+		    "La",  "Li",
+		    "Ti",
+		  ],
+
+	"flat" :  [                  "Do",
+		    "Ra",            "Re",
+		    [ "Me", "Ma"  ], "Mi",
+		                     "Fa",
+		    "Se",            "So",
+		    [ "Le", "Lo"  ], "La",
+		    [ "Te", "Ta"  ], "Ti",
+		  ],
+    },
+}
+// End of config.

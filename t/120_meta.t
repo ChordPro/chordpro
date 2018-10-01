@@ -48,6 +48,7 @@ my $song = {
 	    'title' => 'Swing Low Sweet Chariot',
 	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear',
+	    'system' => 'common',
 	   };
 
 is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );
@@ -122,6 +123,7 @@ $song = {
 	    'title' => 'Swing Low Sweet Chariot',
 	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear',
+	    'system' => 'common',
 	    'body' => [
 		       { context => '',
 			 orig => '%%',

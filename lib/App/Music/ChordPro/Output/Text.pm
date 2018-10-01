@@ -23,6 +23,7 @@ sub generate_songbook {
 
 my $single_space = 0;		# suppress chords line when empty
 my $lyrics_only = 0;		# suppress all chords lines
+my $chords_under = 0;		# chords under lyrics
 
 sub generate_song {
     my ($s, $options) = @_;
@@ -30,6 +31,7 @@ sub generate_song {
     my $tidy = $options->{'backend-option'}->{tidy};
     $single_space = $options->{'single-space'};
     $lyrics_only = $::config->{settings}->{'lyrics-only'};
+    $chords_under = $::config->{settings}->{'chords-under'};
 
     $s->structurize
       if ( $options->{'backend-option'}->{structure} // '' ) eq 'structured';
@@ -217,7 +219,7 @@ sub songline {
 	$c_line .= " " x -$d if $d < 0;
     }
     s/\s+$// for ( $t_line, $c_line );
-    return $::config->{settings}->{'chords-under'}
+    return $chords_under
       ? ( $t_line, $c_line )
       : ( $c_line, $t_line )
 }

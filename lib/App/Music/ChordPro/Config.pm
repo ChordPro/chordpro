@@ -493,11 +493,12 @@ sub configurator {
     $cfg = hmerge( $cfg, $ccfg, "" );
 
     if ( $cfg->{settings}->{transcode} ) {
-	unless ( App::Music::ChordPro::Chords::Parser->get_parser($cfg->{settings}->{transcode}, 1) ) {
-	    die("No transcoder for ", $cfg->{settings}->{transcode}, "\n");
+	my $xc = $cfg->{settings}->{transcode};
+	unless ( App::Music::ChordPro::Chords::Parser->get_parser($xc, 1) ) {
+	    die("No transcoder for ", $xc, "\n");
 	}
     }
- 
+
     # Sanitize added extra entries.
     for ( qw(title subtitle footer) ) {
 	delete($cfg->{pdf}->{formats}->{first}->{$_})

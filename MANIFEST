@@ -30,11 +30,12 @@ lib/App/Music/ChordPro/res/config/modern2.json
 lib/App/Music/ChordPro/res/config/modern3.json
 lib/App/Music/ChordPro/res/config/nashville.json
 lib/App/Music/ChordPro/res/config/notes_dutch.json
+lib/App/Music/ChordPro/res/config/notes_common.json
 lib/App/Music/ChordPro/res/config/notes_german.json
 lib/App/Music/ChordPro/res/config/notes_latin.json
 lib/App/Music/ChordPro/res/config/notes_nashville.json
 lib/App/Music/ChordPro/res/config/notes_roman.json
-lib/App/Music/ChordPro/res/config/roman.json
+lib/App/Music/ChordPro/res/config/notes_solfege.json
 lib/App/Music/ChordPro/res/config/roman.json
 lib/App/Music/ChordPro/res/config/ukulele-ly.json
 lib/App/Music/ChordPro/res/config/ukulele.json
@@ -66,6 +67,11 @@ t/101_empty.t
 t/102_new_song.t
 t/103_title.t
 t/104_subtitles.t
+t/105_chords.t
+t/107_chords_latin.t
+t/108_chords_solfege.t
+t/109_chords_nashville.t
+t/110_chords_roman.t
 t/112_comment.t
 t/113_comment.t
 t/114_songline.t
@@ -78,6 +84,7 @@ t/120_meta.t
 t/130_image.t
 t/140_chords.t
 t/141_chords.t
+t/142_chords.t
 t/150_fonts.t
 t/151_fonts.t
 t/15_subst.t
