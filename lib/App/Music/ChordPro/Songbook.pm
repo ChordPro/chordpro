@@ -178,7 +178,7 @@ sub parse_song {
 	 && !App::Music::ChordPro::Chords::Parser->get_parser($target,1)->has_diagrams ) {
 	$diag->{orig} = "(End of Song)";
 	do_warn( "Chord diagrams suppressed for " .
-		 ucfirst($target) . " chords" );
+		 ucfirst($target) . " chords" ) unless $options->{silent};
 	$diagrams = "none";
     }
 
