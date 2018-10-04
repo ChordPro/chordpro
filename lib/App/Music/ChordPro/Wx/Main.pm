@@ -63,7 +63,7 @@ sub init {
 	Wx::ConfigBase::Set
 	    (Wx::FileConfig->new
 	     ( "WxChordPro",
-	       "Squirrel Consultancy",
+	       "ChordPro_ORG",
 	       $cb,
 	       '',
 	       wxCONFIG_USE_LOCAL_FILE,
