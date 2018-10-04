@@ -19,6 +19,7 @@ use App::Music::ChordPro::Wx;
 use App::Music::ChordPro;
 use App::Packager;
 use File::Temp qw( tempfile );
+use Encode qw(decode_utf8);
 
 our $VERSION = $App::Music::ChordPro::Wx::VERSION;
 
@@ -36,7 +37,9 @@ sub init {
 
     $prefctl ||=
       {
-       cfgpreset => "Default",
+       cfgpreset => lc(_T("Default")),
+       xcode => "",
+       notation => "",
        skipstdcfg => 1,
        configfile => "",
        pdfviewer => "",
@@ -84,26 +87,45 @@ sub init {
 
 ################ Internal methods ################
 
-my @stylelist;
+# List of available config presets (styles).
+my $stylelist;
 sub stylelist {
-    return \@stylelist if @stylelist;
+    return $stylelist if $stylelist && @$stylelist;
     my $cfglib = getresource("config");
-    @stylelist = ( [ _T("Default") ] );
+    $stylelist = [];
     if ( -d $cfglib ) {
 	opendir( my $dh, $cfglib );
 	foreach ( sort readdir($dh) ) {
+	    $_ = decode_utf8($_);
 	    next unless /^(.*)\.json$/;
 	    my $base = $1;
-	    next if $base eq "chordpro"; # default
-	    my $t = ucfirst(lc($1));
-	    $t =~ s/_/ /g;
-	    $t =~ s/^Style /Style: /;
-	    $t =~ s/ (.)/" ".uc($1)/eg;
-	    push( @stylelist, [ _T($t), "$cfglib/$base.json" ] );
+	    unshift( @$stylelist, $base ), next
+	      if $base eq "chordpro"; # default
+	    push( @$stylelist, $base );
 	}
     }
-    push( @stylelist, [ _T("Custom") ] );
-    return \@stylelist;
+    push( @$stylelist, "custom" );
+    return $stylelist;
+}
+
+# List of available notation systems.
+my $notationlist;
+sub notationlist {
+    return $notationlist if $notationlist && @$notationlist;
+    my $cfglib = getresource("notes");
+    $notationlist = [ undef ];
+    if ( -d $cfglib ) {
+	opendir( my $dh, $cfglib );
+	foreach ( sort readdir($dh) ) {
+	    $_ = decode_utf8($_);
+	    next unless /^(.*)\.json$/;
+	    my $base = $1;
+	    $notationlist->[0] = "common", next
+	      if $base eq "dutch";
+	    push( @$notationlist, $base )
+	}
+    }
+    return $notationlist;
 }
 
 sub opendialog {
@@ -144,6 +166,7 @@ sub openfile {
     }
 
     $self->{prefs_xpose} = 0;
+    $self->{prefs_xposesharp} = 0;
 }
 
 sub newfile {
@@ -155,6 +178,7 @@ sub newfile {
 EOD
     Wx::LogStatus("New file");
     $self->{prefs_xpose} = 0;
+    $self->{prefs_xposesharp} = 0;
 }
 
 my ( $preview_cho, $preview_pdf );
@@ -197,6 +221,112 @@ sub preview {
     $SIG{__WARN__} = \&_warn;
 #    $SIG{__DIE__}  = \&_die;
 
+    my $haveconfig;
+    push( @ARGV, '--nouserconfig', '--nolegacyconfig' )
+      if $self->{prefs_skipstdcfg};
+    if ( $self->{prefs_cfgpreset} ) {
+	$haveconfig++;
+	push( @ARGV, '--config', $_ ) for @{ $self->{prefs_cfgpreset} };
+    }
+    if ( $self->{prefs_xcode} ) {
+	$haveconfig++;
+	push( @ARGV, '--transcode', $self->{prefs_xcode} );
+    }
+    if ( $self->{prefs_notation} ) {
+	$haveconfig++;
+	push( @ARGV, '--config', 'notes:' . $self->{prefs_notation} );
+    }
+    push( @ARGV, '--no-config' ) unless $haveconfig;
+
+    push( @ARGV, '--output', $preview_pdf );
+    push( @ARGV, '--generate', "PDF" );
+
+    push( @ARGV, '--transpose', $self->{prefs_xpose} )
+      if $self->{prefs_xpose};
+
+    push( @ARGV, $preview_cho );
+
+    my $options;
+    eval {
+	$options = App::Music::ChordPro::app_setup( "ChordPro", $VERSION );
+    };
+    _die($@), goto ERROR if $@ && !$died;
+
+    $options->{verbose} = 0;
+#    $options->{trace} = 1;
+    $options->{diagformat} = 'Line %n, %m';
+    $options->{silent} = 1;
+
+    eval {
+	App::Music::ChordPro::main($options)
+    };
+    _die($@), goto ERROR if $@ && !$died;
+
+    if ( -e $preview_pdf ) {
+	Wx::LogStatus("Output generated, starting previewer");
+
+	if ( my $cmd = $self->{prefs_pdfviewer} ) {
+	    if ( $cmd =~ s/\%f/$preview_pdf/g ) {
+		$cmd .= " \"$preview_pdf\"";
+	    }
+	    elsif ( $cmd =~ /\%u/ ) {
+		my $u = _makeurl($preview_pdf);
+		$cmd =~ s/\%u/$u/g;
+	    }
+	    Wx::ExecuteCommand($cmd);
+	}
+	else {
+	    my $wxTheMimeTypesManager = Wx::MimeTypesManager->new;
+	    my $ft = $wxTheMimeTypesManager->GetFileTypeFromExtension("pdf");
+	    if ( $ft && ( my $cmd = $ft->GetOpenCommand($preview_pdf) ) ) {
+		Wx::ExecuteCommand($cmd);
+	    }
+	    else {
+		Wx::LaunchDefaultBrowser($preview_pdf);
+	    }
+	}
+    }
+
+  ERROR:
+    if ( $msgs ) {
+	Wx::LogStatus( $msgs . " message" .
+		       ( $msgs == 1 ? "" : "s" ) . "." );
+	if ( $fatal ) {
+	    Wx::LogError( "Fatal problems found!" );
+	    return;
+	}
+	else {
+	    Wx::LogWarning( "Problems found!" );
+	}
+    }
+    unlink( $preview_cho );
+}
+
+sub xxpreview {
+    my ( $self ) = @_;
+
+    # We can not unlink temps because we do not know when the viewer
+    # is ready. So the best we can do is reuse the files.
+    unless ( $preview_cho ) {
+	( undef, $preview_cho ) = tempfile( OPEN => 0 );
+	$preview_pdf = $preview_cho . ".pdf";
+	$preview_cho .= ".cho";
+	unlink( $preview_cho, $preview_pdf );
+    }
+
+    my $mod = $self->{t_source}->IsModified;
+    $self->{t_source}->SaveFile($preview_cho);
+    $self->{t_source}->SetModified($mod);
+
+    #### ChordPro
+
+    @ARGV = ();			# just to make sure
+    $::__EMBEDDED__ = 1;
+
+    $msgs = $fatal = $died = 0;
+    $SIG{__WARN__} = \&_warn;
+#    $SIG{__DIE__}  = \&_die;
+
     my $options = App::Music::ChordPro::app_setup( "ChordPro", $VERSION );
 
     use App::Music::ChordPro::Output::PDF;
@@ -204,25 +334,50 @@ sub preview {
     $options->{generate} = "PDF";
     $options->{backend} = "App::Music::ChordPro::Output::PDF";
     $options->{transpose} = $self->{prefs_xpose} if $self->{prefs_xpose};
+    $options->{transcode} = $self->{prefs_xcode} if $self->{prefs_xcode};
+
+    if ( my $xc = $options->{transcode} ) {
+	# Load the appropriate notes config, but retain the current parser.
+	unless ( App::Music::ChordPro::Chords::Parser->get_parser($xc, 1) ) {
+	    my $file = getresource("notes/$xc.json");
+	    if ( $file and open( my $fd, "<:raw", $file ) ) {
+		my $pp = JSON::PP->new->relaxed;
+		warn("Config: $file\n") if $options->{verbose};
+		my $new = $pp->decode( ::loadfile ($fd, { %$options, donotsplit => 1 } ) );
+		App::Music::ChordPro::Chords::set_notes( $new->{notes},
+							 { %$options,
+							   'keep-parser' => 1 } );
+	    }
+	}
+	unless ( App::Music::ChordPro::Chords::Parser->get_parser($xc, 1) ) {
+	    die("No transcoder for ", $xc, "\n");
+	}
+    }
 
     # Setup configuration.
     use App::Music::ChordPro::Config;
     $options->{nouserconfig} =
       $options->{nolegacyconfig} = $self->{prefs_skipstdcfg};
-    if ( $self->{_cfgpresetfile} ) {
-	if ( -r $self->{_cfgpresetfile} ) {
-	    $options->{noconfig} = 0;
-	    $options->{config} = $self->{_cfgpresetfile};
-	}
-	else {
-	    _die( $self->{_cfgpresetfile} . ": $!\n" );
-	    goto ERROR;
-	}
+
+    $options->{config} = [];
+    $options->{noconfig} = 1;
+    if ( $self->{prefs_cfgpreset} ) {
+	$options->{noconfig} = 0;
+	$options->{config} = [ map { $_->[1] } @{ $self->{prefs_cfgpreset} } ];
     }
-    else {
-	$options->{noconfig} = 1;
+    if ( $self->{prefs_xcode} ) {
+	$options->{noconfig} = 0;
+	push( @{ $options->{config} }, $notationlist->{$self->{prefs_xcode}} );
+	$options->{transcode} = $self->{prefs_xcode};
     }
+    if ( $self->{prefs_notation} ) {
+	$options->{noconfig} = 0;
+	push( @{ $options->{config} }, $notationlist->{$self->{prefs_notation}} );
+    }
+
     eval {
+	$options->{verbose} = 2;
+	$options->{debug} = 1;
 	$::config = App::Music::ChordPro::Config::configurator($options);
     };
     _die($@), goto ERROR if $@ && !$died;
@@ -232,6 +387,7 @@ sub preview {
     my $s = App::Music::ChordPro::Songbook->new;
 
     $options->{diagformat} = 'Line %n, %m';
+    $options->{silent} = 1;
     eval {
 	$s->parsefile( $preview_cho, $options );
     };
@@ -338,25 +494,46 @@ sub GetPreferences {
     }
 
     # Find config setting.
-    if ( exists $self->{prefs_cfgpreset}
-	 && $self->{prefs_cfgpreset} ne _T("Default") ) {
-	if ( $self->{prefs_cfgpreset} eq _T("Custom") ) {
-	    $self->{_cfgpresetfile} = $self->{prefs_configfile};
-	}
-	else {
-	    for ( @{ $self->stylelist } ) {
-		next unless $_->[0] eq $self->{prefs_cfgpreset};
-		$self->{_cfgpresetfile} = $_->[1];
-		last;
-	    }
+    my $p = lc( $self->{prefs_cfgpreset} ) || $prefctl->{cfgpreset};
+    if ( ",$p" =~ quotemeta( "," . _T("Custom") ) ) {
+	$self->{_cfgpresetfile} = $self->{prefs_configfile};
+    }
+    my @presets;
+    foreach ( @{stylelist()} ) {
+	if ( ",$p" =~ quotemeta( "," . $_ ) ) {
+	    push( @presets, $_ );
 	}
     }
+    $self->{prefs_cfgpreset} = \@presets;
+
+    # Find transcode setting.
+    $p = lc $self->{prefs_xcode} || $prefctl->{xcode};
+    if ( $p ) {
+	if ( $p eq lc(_T("-----")) ) {
+	    $p = $prefctl->{xcode};
+
+	}
+	elsif ( $p eq lc(_T("Common")) ) {
+	    $p = "dutch";
+	}
+	else {
+	    my $n = "";
+	    for ( @{ $self->notationlist } ) {
+		next unless $_ eq $p;
+		$n = $p;
+		last;
+	    }
+	    $p = $n;
+	}
+    }
+    $self->{prefs_xcode} = $p;
 }
 
 sub SavePreferences {
     my ( $self ) = @_;
     return unless $self;
     my $conf = Wx::ConfigBase::Get;
+    local $self->{prefs_cfgpreset} = join( ",", @{$self->{prefs_cfgpreset}} );
     for ( keys( %$prefctl ) ) {
 	$conf->Write( "preferences/$_", $self->{"prefs_$_"} );
     }
