@@ -166,13 +166,22 @@ sub main {
 
     warn(Dumper($s), "\n") if $options->{debug};
 
-    # Set target parser for the backend so it can find the transcoded
-    # chord definitions.
-    App::Music::ChordPro::Chords::set_parser($::config->{settings}->{transcode})
-	if $::config->{settings}->{transcode};
+    my $res;
 
-    # Generate the songbook.
-    my $res = $pkg->generate_songbook( $s, $options );
+    if ( $::__EMBEDDED__ && ( my $xc = $::config->{settings}->{transcode} ) ) {
+	# Set target parser for the backend so it can find the transcoded
+	# chord definitions.
+	my $p = App::Music::ChordPro::Chords::get_parser;
+	App::Music::ChordPro::Chords::set_parser($xc);
+	# Generate the songbook.
+	$res = $pkg->generate_songbook( $s, $options );
+	# Restore parser.
+	App::Music::ChordPro::Chords::set_parser($p);
+    }
+    else {
+	# Generate the songbook.
+	$res = $pkg->generate_songbook( $s, $options );
+    }
 
     # Some backends write output themselves, others return an
     # array of lines to be written.
