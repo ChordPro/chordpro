@@ -168,7 +168,7 @@ sub main {
 
     my $res;
 
-    if ( $::__EMBEDDED__ && ( my $xc = $::config->{settings}->{transcode} ) ) {
+    if ( my $xc = $::config->{settings}->{transcode} ) {
 	# Set target parser for the backend so it can find the transcoded
 	# chord definitions.
 	my $p = App::Music::ChordPro::Chords::get_parser;
