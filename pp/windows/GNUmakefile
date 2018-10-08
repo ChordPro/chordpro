@@ -36,5 +36,5 @@ iss ::	install innosetup.iss
 # NOTE: THIS IS FOR TESTING/DEVELOPMENT ONLY.
 
 clean ::
-	del chordpro.exe wxchordpro.exe *.pp.deps
-	del ${DST}\\*.exe
+	-del chordpro.exe wxchordpro.exe *.pp.deps
+	-del ${DST}\\*.exe
