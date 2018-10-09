@@ -136,6 +136,50 @@
 	    "additionalProperties": { "not": {} }
 	},
 
+	"chordpro": {
+	    "description": "Settings for ChordPro backend.",
+	    "properties": {
+		"chorus": {
+		    "description": "Appearance of chorus.",
+		    "properties": {
+			"recall": {
+			    "description": "Appearance of chorus recall.",
+			    "properties": {
+				"quote": {
+				    "description": "Quote the chorus.",
+				    "default": false,
+				    "type": "boolean"
+				},
+				"tag": {
+				    "description": "Label for recalled chorus.",
+				    "default": "Chorus",
+				    "type": "string"
+				},
+				"type": {
+				    "description": "Type for tag text.",
+				    "default": "comment",
+				    "enum": [
+					"comment",
+					"comment_italic",
+					"comment_box",
+					""
+				    ],
+				    "type": "string"
+				}
+			    },
+			    "additionalProperties": { "not": {} }
+			},
+			"tag": {
+			    "description": "Label for Chorus.",
+			    "type": "string",
+			    "default": "Chorus"
+			}
+		    },
+		    "additionalProperties": { "not": {} }
+		}
+	    }
+	},
+
 	"chords": {
 	    "description": "Additional chord definitions.",
 	    "type": [ "array", "null" ],
@@ -770,6 +814,7 @@
 	},
 	"additionalProperties": { "not": {} }
     },
+    
 
     "additionalProperties": { "not": {} }
 }

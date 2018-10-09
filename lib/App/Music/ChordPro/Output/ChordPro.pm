@@ -45,6 +45,7 @@ sub generate_song {
 
     my $tidy = $options->{'backend-option'}->{tidy};
     $lyrics_only = 2 * $::config->{settings}->{'lyrics-only'};
+    my $rechorus = $::config->{chordpro}->{chorus}->{recall};
     my $structured = ( $options->{'backend-option'}->{structure} // '' ) eq 'structured';
     # $s->structurize if ++$structured;
     my $variant = $options->{'backend-option'}->{variant} || 'cho';
@@ -234,8 +235,14 @@ sub generate_song {
 	    if ( $variant eq 'msp' ) {
 		push( @s, "{chorus}" );
 	    }
-	    else {
+	    elsif ( $rechorus->{quote} ) {
 		unshift( @elts, @{ $elt->{chorus} } );
+	    }
+	    elsif ( $rechorus->{type} &&  $rechorus->{tag} ) {
+		push( @s, "{".$rechorus->{type}.": ".$rechorus->{tag}."}" );
+	    }
+	    else {
+		push( @s, "{chorus}" );
 	    }
 	    next;
 	}

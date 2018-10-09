@@ -356,6 +356,23 @@ This is the current built-in configuration file, showing all settings.
   	// This will show the page layout if non-zero.
   	"showlayout" : false,
       },
+  
+      // Settings for ChordPro backend.
+      "chordpro" : {
+  	  // Style of chorus.
+  	  "chorus" : {
+  	      // Recall style: Print the tag using the type.
+  	      // Alternatively quote the lines of the preceding chorus.
+	      // If no tag+type or quote: use {chorus}.
+	      // Note: Variant 'msp' always uses {chorus}.
+  	      "recall" : {
+  		   // "tag"   : "Chorus", "type"  : "comment",
+  		   "tag"   : "", "type"  : "",
+  		   // "quote" : false,
+  		   "quote" : false,
+  	      },
+  	  },
+      }
   }
   // End of config.
 
