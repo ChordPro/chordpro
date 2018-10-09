@@ -15,7 +15,7 @@
     - Nashville and Roman chord systems need to be explicitly enabled.
     - Allow meta substitutions in title and subtitle.
     - Fix {transpose}, --transpose and {key} interaction.
-    - Upgrade WxChordPro to 0.960_057.
+    - Upgrade WxChordPro to 0.960_059.
     - Add slash as grid symbol.
     - Allow labels for grids.
     - Show durations as hh:mm.
