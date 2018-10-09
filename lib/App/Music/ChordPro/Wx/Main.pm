@@ -29,6 +29,26 @@ sub new {
     $self;
 }
 
+use constant FONTSIZE => 12;
+
+my @fonts =
+  ( { name => "Monospace",
+      font => Wx::Font->new( FONTSIZE, wxFONTFAMILY_TELETYPE,
+			     wxFONTSTYLE_NORMAL,
+			     wxFONTWEIGHT_NORMAL ),
+    },
+    { name => "Serif",
+      font => Wx::Font->new( FONTSIZE, wxFONTFAMILY_ROMAN,
+			     wxFONTSTYLE_NORMAL,
+			     wxFONTWEIGHT_NORMAL ),
+    },
+    { name => "Sans serif",
+      font => Wx::Font->new( FONTSIZE, wxFONTFAMILY_SWISS,
+			     wxFONTSTYLE_NORMAL,
+			     wxFONTWEIGHT_NORMAL ),
+    },
+  );
+
 my $prefctl;
 
 # Explicit (re)initialisation of this class.
@@ -43,6 +63,8 @@ sub init {
        skipstdcfg => 1,
        configfile => "",
        pdfviewer => "",
+       editfont => 0,
+       editsize => FONTSIZE,
       };
 
     if ( $^O =~ /^mswin/i ) {
@@ -71,8 +93,8 @@ sub init {
     }
 
     $self->GetPreferences;
-    my $font = Wx::Font->new( 12, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL,
-			      wxFONTWEIGHT_NORMAL );
+    my $font = $fonts[$self->{prefs_editfont}]->{font};
+    $font->SetPointSize($self->{prefs_editsize});
     $self->{t_source}->SetFont($font);
     Wx::Log::SetTimestamp(' ');
     if ( @ARGV && -s $ARGV[0] ) {
@@ -127,6 +149,8 @@ sub notationlist {
     }
     return $notationlist;
 }
+
+sub fonts { \@fonts }
 
 sub opendialog {
     my ($self) = @_;

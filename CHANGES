@@ -1,6 +1,8 @@
 0.97
 
 	Better handling of errors and exceptions.
+	Add support for multiple configs, notation systems and transcoding.
+	Add setting of editor font and size.
 
 0.96
 

@@ -37,22 +37,23 @@ sub get_configfile {
 sub __set_properties {
     my ( $self ) = @_;
     $self->SUPER::__set_properties;
-    $self->{t_configfiledialog}->SetValue($self->GetParent->{prefs_configfile})
-      if $self->GetParent->{prefs_configfile};
-    $self->{t_pdfviewer}->SetValue($self->GetParent->{prefs_pdfviewer})
-      if $self->GetParent->{prefs_pdfviewer};
-    $self->{cb_skipstdcfg}->SetValue($self->GetParent->{prefs_skipstdcfg});
+    my $parent = $self->GetParent;
+    $self->{t_configfiledialog}->SetValue($parent->{prefs_configfile})
+      if $parent->{prefs_configfile};
+    $self->{t_pdfviewer}->SetValue($parent->{prefs_pdfviewer})
+      if $parent->{prefs_pdfviewer};
+    $self->{cb_skipstdcfg}->SetValue($parent->{prefs_skipstdcfg});
 
     my $ctl = $self->{ch_config};
     $ctl->Clear;
-    for ( @{ $self->GetParent->stylelist } ) {
+    for ( @{ $parent->stylelist } ) {
 	my $t = ucfirst(lc($_));
 	$t =~ s/_/ /g;
 	$t =~ s/ (.)/" ".uc($1)/eg;
 	$ctl->Append($t);
     }
 
-    my $p = $self->GetParent->{prefs_cfgpreset};
+    my $p = $parent->{prefs_cfgpreset};
     foreach ( @$p ) {
 	my $t = ucfirst(lc($_));
 	$t =~ s/_/ /g;
@@ -64,13 +65,18 @@ sub __set_properties {
     }
     $self->_enablecustom;
 
+    $ctl = $self->{ch_editfont};
+    $ctl->SetSelection( $parent->{prefs_editfont} );
+    $ctl = $self->{sp_editfont};
+    $ctl->SetValue( $parent->{prefs_editsize} );
+
     $ctl = $self->{ch_notation};
     $ctl->Clear;
     my $n = 0;
     my $check = 0;
-    for ( @{ $self->GetParent->notationlist } ) {
+    for ( @{ $parent->notationlist } ) {
 	my $s = $_ eq "dutch" ? _T("Common") : ucfirst($_);
-	$check = $n if $_ eq lc $self->GetParent->{prefs_notation};
+	$check = $n if $_ eq lc $parent->{prefs_notation};
 	$s .= " (" . $notdesc->{lc($s)} .")" if $notdesc->{lc($s)};
 	$ctl->Append($s);
 	$ctl->SetClientData( $n, $_);
@@ -82,9 +88,9 @@ sub __set_properties {
     $ctl->Clear;
     $ctl->Append("-----");
     $n = 1;
-    for ( @{ $self->GetParent->notationlist } ) {
+    for ( @{ $parent->notationlist } ) {
 	my $s = $_ eq "dutch" ? _T("Common") : ucfirst($_);
-	$check = $n if $_ eq lc $self->GetParent->{prefs_xcode};
+	$check = $n if $_ eq lc $parent->{prefs_xcode};
 	$s .= " (" . $notdesc->{lc($s)} .")" if $notdesc->{lc($s)};
 	$ctl->Append($s);
 	$ctl->SetClientData( $n, $_);
@@ -277,11 +283,37 @@ sub onXposeFlat {
 sub OnChNotation {
     my ( $self, $event ) = @_;
     my $n = $self->{ch_notation}->GetSelection;
+    $event->Skip;
 }
 
 sub OnChTranscode {
     my ( $self, $event ) = @_;
     my $n = $self->{ch_transcode}->GetSelection;
+    $event->Skip;
+}
+
+sub OnChEditFont {
+    my ($self, $event) = @_;
+    my $p = $self->GetParent;
+    my $n = $self->{ch_editfont}->GetSelection;
+    my $ctl = $p->{t_source};
+    my $font = $p->fonts->[$n]->{font};
+    $font->SetPointSize($p->{prefs_editsize});
+    $ctl->SetFont($font);
+    $p->{prefs_editfont} = $n;
+    $event->Skip;
+}
+
+sub OnSpEditFont {
+    my ($self, $event) = @_;
+    my $p = $self->GetParent;
+    my $n = $self->{sp_editfont}->GetValue;
+    my $ctl = $p->{t_source};
+    my $font = $ctl->GetFont;
+    $font->SetPointSize($n);
+    $ctl->SetFont($font);
+    $p->{prefs_editsize} = $n;
+    $event->Skip;
 }
 
 1;
