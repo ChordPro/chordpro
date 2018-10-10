@@ -1585,7 +1585,7 @@ sub text_vsp {
 
 sub chordgrid_vsp {
     my ( $elt, $ps ) = @_;
-    $ps->{fonts}->{diagram}->{size} * $ps->{spacing}->{chords}
+    $ps->{fonts}->{diagram}->{size} * 1.2
       + 0.40 * $ps->{diagrams}->{width}
 	+ $ps->{diagrams}->{vcells} * $ps->{diagrams}->{height}
 	  + $ps->{diagrams}->{vspace} * $ps->{diagrams}->{height};
@@ -1651,7 +1651,7 @@ sub chordgrid {
       unless $info->{origin} ne "user"
 	|| $::config->{diagrams}->{show} eq "user";
     $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y - font_bl($font) );
-    $y -= $font->{size} * $ps->{spacing}->{chords} + $dot/2 + $lw;
+    $y -= $font->{size} * 1.2 + $dot/2 + $lw;
 
     if ( $info->{base} > 1 ) {
 	# my $i = @Roman[$info->{base}] . "  ";
