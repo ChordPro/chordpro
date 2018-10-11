@@ -250,7 +250,14 @@ sub preview {
       if $self->{prefs_skipstdcfg};
     if ( $self->{prefs_cfgpreset} ) {
 	$haveconfig++;
-	push( @ARGV, '--config', $_ ) for @{ $self->{prefs_cfgpreset} };
+	foreach ( @{ $self->{prefs_cfgpreset} } ) {
+	    if ( $_ eq "custom" ) {
+		push( @ARGV, '--config', $self->{prefs_configfile} );
+	    }
+	    else {
+		push( @ARGV, '--config', $_ );
+	    }
+	}
     }
     if ( $self->{prefs_xcode} ) {
 	$haveconfig++;
