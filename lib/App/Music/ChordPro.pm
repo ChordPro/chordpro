@@ -653,6 +653,7 @@ sub app_setup {
 	  "csv!",			# Generates contents CSV
 	  "cover=s",			# Cover page(s)
 	  "filelist=s@",		# List of input files
+	  "meta=s\%",			# Command line meta data
 
           ### Standard Chordii Options ###
 

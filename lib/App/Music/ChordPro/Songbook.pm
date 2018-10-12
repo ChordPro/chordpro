@@ -91,6 +91,13 @@ sub parse_song {
     App::Music::ChordPro::Chords::reset_song_chords();
     @labels = ();
 
+    # Pre-fill meta data, if any.
+    if ( $options->{meta} ) {
+	while ( my ($k, $v ) = each( %{ $options->{meta} } ) ) {
+	    $song->{meta}->{$k} = [ $v ];
+	}
+    }
+
     # Build regex for the known metadata items.
     if ( $::config->{metadata}->{keys} ) {
 	$re_meta = '^(' .
@@ -99,6 +106,7 @@ sub parse_song {
 	$re_meta = qr/$re_meta/;
     }
     else {
+	# HUH?
 	undef $re_meta;
     }
 
@@ -502,21 +510,21 @@ sub directive {
 
     # Comments. Strictly speaking they do not belong here.
 
+    my $comment;
     if ( $dir =~ /^(?:comment|c|highlight)$/ ) {
-	$self->add( type => "comment", $self->cdecompose($arg),
-		    orig => $arg );
-	return 1;
+	$comment = "comment";
     }
-
-    if ( $dir =~ /^(?:comment_italic|ci)$/ ) {
-	$self->add( type => "comment_italic", $self->cdecompose($arg),
-		    orig => $arg );
-	return 1;
+    elsif ( $dir =~ /^(?:comment_italic|ci)$/ ) {
+	$comment = "comment_italic";
     }
-
-    if ( $dir =~ /^(?:comment_box|cb)$/ ) {
-	$self->add( type => "comment_box", $self->cdecompose($arg),
-		    orig => $arg );
+    elsif ( $dir =~ /^(?:comment_box|cb)$/ ) {
+	$comment = "comment_box";
+    }
+    if ( $comment ) {
+	my %res = $self->cdecompose($arg);
+	$self->add( type => $comment, %res,
+		    orig => $arg )
+	  unless exists($res{text}) && $res{text} =~ /^[ \t]*$/;
 	return 1;
     }
 
