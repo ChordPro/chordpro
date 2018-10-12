@@ -5,6 +5,7 @@ package App::Music::ChordPro::Output::Common;
 use strict;
 use warnings;
 use App::Music::ChordPro::Chords;
+use utf8;
 
 # Substitute %X sequences in title formats and comments.
 use Text::Balanced qw( extract_bracketed );
@@ -95,8 +96,19 @@ sub fmt_subst {
 	    $else = join( "", @a );
 	}
 
-	my $key = lc($if);
-	( $key, my $inx ) = ( $1, $2 ) if $key =~ /^(.*)\.(-?\d+)$/;
+	my ( $key, $op, $test );
+	if ( $if =~ /^(.+?)([=])(.*)/ ) {
+	    $key  = lc $1; #fmt_subst( $s, $1);
+	    $op   = $2;
+	    $test = $3; #fmt_subst( $s, $3 );
+	}
+	else {
+	    $key = lc $if;
+	    $op = "";
+	}
+
+	( $key, my $inx ) = ( $1, $2 )
+	  if $key =~ /^(.*)\.(-?\d+)$/;
 
 	# Establish the value for this key.
 	my $val;
@@ -119,7 +131,12 @@ sub fmt_subst {
 	}
 
 	# Use the true/false parts to get a new value.
-	if ( defined($val) && $val ne "" ) {
+	$val //= "";
+	if ( ( $val ne "" || $op ne "" )
+	     && ( $op eq '='
+		  ? $val eq $test
+		  : 1 )
+	   ) {
 	    if ( defined $then ) {
 		$val = fmt_subst( $s, $then, $val );
 	    }

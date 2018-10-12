@@ -54,6 +54,7 @@ ab%pead			ab%pead
 ab%{head}def		abyesdef
 ab%{head}def%{head}xy	abyesdefyesxy
 %{head}def		yesdef
+%{h}def			Zdef
 X%{}Y			XY
 
 # Subtitute the value
@@ -65,9 +66,16 @@ X%{hexd|foo}Y		XY
 
 # %{} refers to the value of the key.
 X%{head|This is %{}!}Y	XThis is yes!Y
+X%{head=yes|This is %{}!}Y	XThis is yes!Y
 
 # Subtitute the 'false' part
+X%{head=no|foo|bar}Y	XbarY
 X%{hexd|foo|bar}Y	XbarY
+X%{hexd=yes|foo|bar}Y	XbarY
+X%{hexd=no|foo|bar}Y	XbarY
+X%{hexd=|foo|bar}Y	XfooY
+X%{h|foo|bar}Y		XfooY
+X%{h=Z|foo|bar}Y	XfooY
 
 # Nested.
 X%{head|x%{foo}y|bar}Y	XxyY
