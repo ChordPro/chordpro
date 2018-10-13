@@ -486,7 +486,16 @@ sub transpose {
     my ( $c, $xpose, $xcode ) = @_;
     return $c unless $xpose || $xcode;
     my $info = parse_chord($c);
-    warn("Cannot transpose $c\n"), return unless $info;
+    unless ( $info ) {
+	assert_tuning();
+	for ( \%song_chords, \%config_chords ) {
+	    return if exists($_->{$c});
+	}
+	$xpose
+	  ? warn("Cannot transpose $c\n")
+	  : warn("Cannot transcode $c\n");
+	return;
+    }
 
     $info->transpose($xpose)->transcode($xcode)->show;
 }
