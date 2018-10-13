@@ -1619,7 +1619,17 @@ sub getchordinfo {
     else {
 	$info = App::Music::ChordPro::Chords::chord_info($name);
     }
-    return $info if $info;
+    if ( $info ) {
+	if ( $info->{frets} ) {
+	    # Suppress if NC.
+	    foreach ( @{ $info->{frets} } ) {
+		return $info if $_ >= 0;
+	    }
+	    return;
+	}
+	return $info;
+    }
+
     warn("PDF: Unknown chord $name",
 	 $source ? ( " in song starting at line " .
 		     $source->{line} . " in " . $source->{file} ) : (),

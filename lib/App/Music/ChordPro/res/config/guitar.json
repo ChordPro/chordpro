@@ -366,7 +366,9 @@
     { "name" : "Bm(maj7)"  , "base" :  1, "frets" : [ -1,  1,  4,  4,  3, -1 ] },
     { "name" : "Bmsus9"    , "base" :  1, "frets" : [ -1, -1,  4,  4,  2,  2 ] },
     { "name" : "Bm(sus9)"  , "base" :  1, "frets" : [ -1, -1,  4,  4,  2,  2 ] },
-    { "name" : "Bm7b5"     , "base" :  1, "frets" : [  1,  2,  4,  2,  3,  1 ] }
+    { "name" : "Bm7b5"     , "base" :  1, "frets" : [  1,  2,  4,  2,  3,  1 ] },
+    { "name" : "NC"        , "base" :  1, "frets" : [ -1, -1, -1, -1, -1, -1 ] },
+    { "name" : "N.C."      , "base" :  1, "frets" : [ -1, -1, -1, -1, -1, -1 ] },
 
   ],
   "pdf" : { "diagrams" : { "vcells" : 4 } }
