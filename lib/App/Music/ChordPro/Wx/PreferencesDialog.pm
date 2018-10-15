@@ -20,6 +20,7 @@ use App::Packager;
 # BUilt-in descriptions for some notation systems.
 my $notdesc =
   { "common"	 => "C, D, E, F, G, A, B",
+    "dutch"	 => "C, D, E, F, G, A, B",
     "german"	 => "C, D, E, F, G, A, H",
     "latin"	 => "Do, Re, Mi, Fa, Sol, ...",
     "solfege"	 => "Do, Re, Mi, Fa, So, ...",
