@@ -33,6 +33,7 @@ lib/App/Music/ChordPro/res/config/roman.json
 lib/App/Music/ChordPro/res/config/ukulele-ly.json
 lib/App/Music/ChordPro/res/config/ukulele.json
 lib/App/Music/ChordPro/res/examples/swinglow.cho
+lib/App/Music/ChordPro/res/notes/common.json
 lib/App/Music/ChordPro/res/notes/dutch.json
 lib/App/Music/ChordPro/res/notes/german.json
 lib/App/Music/ChordPro/res/notes/latin.json

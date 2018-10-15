@@ -12,7 +12,8 @@
     // In case of alternatives, the first one is used for output.
     "notes" : {
 
-	"system" : "common",
+	// System dutch is the same as common.
+	"system" : "dutch",
 
 	"sharp" : [ "C", [ "C#", "Cis", "C♯" ],
 		    "D", [ "D#", "Dis", "D♯" ],
