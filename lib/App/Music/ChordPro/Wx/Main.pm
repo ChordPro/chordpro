@@ -53,7 +53,7 @@ my $prefctl;
 
 # Explicit (re)initialisation of this class.
 sub init {
-    my ( $self ) = @_;
+    my ( $self, $options ) = @_;
 
     $prefctl ||=
       {
@@ -91,6 +91,10 @@ sub init {
 	       wxCONFIG_USE_LOCAL_FILE,
 	     ));
     }
+
+    $self->{_verbose} = $options->{verbose};
+    $self->{_trace}   = $options->{trace};
+    $self->{_debug}   = $options->{debug};
 
     $self->GetPreferences;
     my $font = $fonts[$self->{prefs_editfont}]->{font};
@@ -283,8 +287,9 @@ sub preview {
     };
     _die($@), goto ERROR if $@ && !$died;
 
-    $options->{verbose} = 0;
-#    $options->{trace} = 1;
+    $options->{verbose} = $self->{_verbose} || 0;
+    $options->{trace} = $self->{_trace} || 0;
+    $options->{debug} = $self->{_debug} || 0;
     $options->{diagformat} = 'Line %n, %m';
     $options->{silent} = 1;
 
