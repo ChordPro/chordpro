@@ -48,6 +48,8 @@ This is the current built-in configuration file, showing all settings.
   	// Suppress chords.
   	// Overrides --lyrics-only command line option.
   	"lyrics-only" : false,
+	// Memorize chords in sections, to be recalled by [^].
+	"memorize" : false,
   	// Chords inline.
   	// May be a string containing pretext %s posttext.
   	// Defaults to "[%s]" if true.

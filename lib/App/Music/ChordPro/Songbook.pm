@@ -32,9 +32,16 @@ my @used_chords;
 my @chorus;
 my $chorus_xpose = 0;
 
+# Memorized chords.
+my %memchords;			# all sections
+my $memchords;			# current section
+my $memcrdinx;			# chords tally
+my $memorizing;			# if memorizing (a.o.t. recalling)
+
 # Keep track of unknown chords, to avoid dup warnings.
 my %warned_chords;
 
+my $re_chords;			# for chords
 my $re_meta;			# for metadata
 
 my @labels;			# labels used
@@ -88,6 +95,7 @@ sub parse_song {
     $in_context = $def_context;
     @used_chords = ();
     %warned_chords = ();
+    %memchords = ();
     App::Music::ChordPro::Chords::reset_song_chords();
     @labels = ();
 
@@ -96,6 +104,14 @@ sub parse_song {
 	while ( my ($k, $v ) = each( %{ $options->{meta} } ) ) {
 	    $song->{meta}->{$k} = [ $v ];
 	}
+    }
+
+    # Build regexp to split out chords.
+    if ( $::config->{settings}->{memorize} ) {
+	$re_chords = qr/(\[.*?\]|\^)/;
+    }
+    else {
+	$re_chords = qr/(\[.*?\])/;
     }
 
     # Build regex for the known metadata items.
@@ -285,7 +301,7 @@ sub cxpose {
 sub decompose {
     my ($self, $line) = @_;
     $line =~ s/\s+$//;
-    my @a = split(/(\[.*?\])/, $line, -1);
+    my @a = split( $re_chords, $line, -1);
 
 #    die(msg("Illegal line")."\n") unless @a; #### TODO
 
@@ -294,16 +310,50 @@ sub decompose {
     }
 
     shift(@a) if $a[0] eq "";
-    unshift(@a, '[]') if $a[0] !~ /^\[/;
-
+    unshift(@a, '[]') if $a[0] !~ $re_chords;
 
     my @phrases;
     my @chords;
     while ( @a ) {
-	my $t = shift(@a);
-	$t =~ s/^\[(.*)\]$/$1/;
-	push(@chords, $self->chord($t));
+	my $chord = shift(@a);
 	push(@phrases, shift(@a));
+
+	# Normal chords.
+	if ( $chord =~ s/^\[(.*)\]$/$1/ && $chord ne "^" ) {
+	    push(@chords, $self->chord($chord));
+	    if ( $memchords ) {
+		if ( $memcrdinx == 0 ) {
+		    $memorizing++;
+		}
+		if ( $memorizing ) {
+		    push( @$memchords, $chords[-1] );
+		}
+		$memcrdinx++;
+	    }
+	}
+
+	# Recall memorized chords.
+	elsif ( $memchords ) {
+	    if ( $memcrdinx == 0 && @$memchords == 0 ) {
+		do_warn("No chords memorized for $in_context");
+		push( @chords, $chord );
+		undef $memchords;
+	    }
+	    elsif ( $memcrdinx >= @$memchords ) {
+		do_warn("Not enough chords memorized for $in_context");
+		push( @chords, $chord );
+	    }
+	    else {
+		push( @chords, $memchords->[$memcrdinx]);
+	    }
+	    $memcrdinx++;
+	}
+
+	# Not memorizing.
+	else {
+	    #do_warn("No chords memorized for $in_context");
+	    push( @chords, $chord );
+	}
     }
 
     return ( phrases => \@phrases, chords  => \@chords );
@@ -449,12 +499,21 @@ sub directive {
 	    do_warn("Garbage in start_of_$1: $arg (ignored)\n")
 	      if $arg;
 	}
+
+	# Enabling this always would allow [^] to recall anyway.
+	# Feature?
+	if ( $::config->{settings}->{memorize} ) {
+	    $memchords = $memchords{$1} //= [];
+	    $memcrdinx = 0;
+	    $memorizing = 0;
+	}
 	return 1;
     }
     if ( $dir =~ /^end_of_(\w+)$/ ) {
 	do_warn("Not in " . ucfirst($1) . " context\n")
 	  unless $in_context eq $1;
 	$in_context = $def_context;
+	undef $memchords;
 	return 1;
     }
     if ( $dir =~ /^chorus$/i ) {

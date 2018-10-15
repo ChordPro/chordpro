@@ -84,6 +84,12 @@
 		    "default": false
 		},
 
+		"memorize": {
+		    "description": "Memorize the chords from sections.",
+		    "type": "boolean",
+		    "default": false
+		},
+
 		"suppress-empty-chords": {
 		    "description": "Suppress empty chord lines.",
 		    "type": "boolean",

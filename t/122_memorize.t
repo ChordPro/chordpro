@@ -1,0 +1,232 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use utf8;
+use Test::More tests => 4;
+
+use App::Music::ChordPro::Config;
+use App::Music::ChordPro::Songbook;
+
+our $config = App::Music::ChordPro::Config::configurator;
+$config->{settings}->{memorize} = 1;
+# Prevent a dummy {body} for chord grids.
+$config->{diagrams}->{show} = 0;
+my $s = App::Music::ChordPro::Songbook->new;
+
+#### meta as meta.
+
+my $data = <<EOD;
+{title: Test Memorize}
+{start_of_verse}
+[A]The quick [B]brown [F]ox jumps over the lazy [D]dog
+[A]The quick [NC]brown [F]ox jumps over the lazy [D]dog
+{end_of_verse}
+{start_of_verse2}
+[E]The quick [B]brown [F]ox jumps over the lazy [D]dog
+[E]The quick [C]brown [F]ox jumps over the lazy [D]dog
+{end_of_verse2}
+{start_of_verse}
+^The quick ^brown ^ox jumps over the lazy ^dog
+^The quick [G]brown ^ox jumps over the lazy ^dog
+{end_of_verse}
+{start_of_verse2}
+^The quick ^brown ^ox jumps over the lazy ^dog
+^The quick ^brown ^ox jumps over the lazy ^dog
+{end_of_verse2}
+{start_of_verse3}
+^The quick ^brown ^ox jumps over the lazy ^dog
+^The quick ^brown ^ox jumps over the lazy ^dog
+{end_of_verse3}
+EOD
+
+my $warning;
+{
+    local $SIG{__WARN__} = sub { $warning = "@_" };
+    eval { $s->parsefile(\$data) } or diag("$@");
+}
+
+ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
+ok( $warning =~ /No chords memorized for verse3/, "You have been warned" );
+isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
+#use Data::Dumper; warn(Dumper($s));
+my $song = {
+	    'meta' => {
+		       'title' => [
+				   'Test Memorize'
+				  ]
+		      },
+	    'body' => [
+		       {
+			'type' => 'songline',
+			'phrases' => [
+				      'The quick ',
+				      'brown ',
+				      'ox jumps over the lazy ',
+				      'dog'
+				     ],
+			'context' => 'verse',
+			'chords' => [
+				     'A',
+				     'B',
+				     'F',
+				     'D'
+				    ]
+		       },
+		       {
+			'chords' => [
+				     'A',
+				     'NC',
+				     'F',
+				     'D'
+				    ],
+			'context' => 'verse',
+			'phrases' => [
+				      'The quick ',
+				      'brown ',
+				      'ox jumps over the lazy ',
+				      'dog'
+				     ],
+			'type' => 'songline'
+		       },
+		       {
+			'type' => 'songline',
+			'phrases' => [
+				      'The quick ',
+				      'brown ',
+				      'ox jumps over the lazy ',
+				      'dog'
+				     ],
+			'context' => 'verse2',
+			'chords' => [
+				     'E',
+				     'B',
+				     'F',
+				     'D'
+				    ]
+		       },
+		       {
+			'type' => 'songline',
+			'chords' => [
+				     'E',
+				     'C',
+				     'F',
+				     'D'
+				    ],
+			'context' => 'verse2',
+			'phrases' => [
+				      'The quick ',
+				      'brown ',
+				      'ox jumps over the lazy ',
+				      'dog'
+				     ]
+		       },
+		       {
+			'phrases' => [
+				      'The quick ',
+				      'brown ',
+				      'ox jumps over the lazy ',
+				      'dog'
+				     ],
+			'context' => 'verse',
+			'chords' => [
+				     'A',
+				     'B',
+				     'F',
+				     'D'
+				    ],
+			'type' => 'songline'
+		       },
+		       {
+			'chords' => [
+				     'A',
+				     'G',
+				     'F',
+				     'D'
+				    ],
+			'context' => 'verse',
+			'phrases' => [
+				      'The quick ',
+				      'brown ',
+				      'ox jumps over the lazy ',
+				      'dog'
+				     ],
+			'type' => 'songline'
+		       },
+		       {
+			'chords' => [
+				     'E',
+				     'B',
+				     'F',
+				     'D'
+				    ],
+			'context' => 'verse2',
+			'phrases' => [
+				      'The quick ',
+				      'brown ',
+				      'ox jumps over the lazy ',
+				      'dog'
+				     ],
+			'type' => 'songline'
+		       },
+		       {
+			'type' => 'songline',
+			'chords' => [
+				     'E',
+				     'C',
+				     'F',
+				     'D'
+				    ],
+			'context' => 'verse2',
+			'phrases' => [
+				      'The quick ',
+				      'brown ',
+				      'ox jumps over the lazy ',
+				      'dog'
+				     ]
+		       },
+		       {
+			'phrases' => [
+				      'The quick ',
+				      'brown ',
+				      'ox jumps over the lazy ',
+				      'dog'
+				     ],
+			'chords' => [
+				     '^',
+				     '^',
+				     '^',
+				     '^'
+				    ],
+			'type' => 'songline',
+			'context' => 'verse3'
+		       },
+		       {
+			'phrases' => [
+				      'The quick ',
+				      'brown ',
+				      'ox jumps over the lazy ',
+				      'dog'
+				     ],
+			'chords' => [
+				     '^',
+				     '^',
+				     '^',
+				     '^'
+				    ],
+			'type' => 'songline',
+			'context' => 'verse3'
+		       }
+		      ],
+	    'source' => {
+			 'line' => 1,
+			 'file' => '__STRING__'
+			},
+	    'title' => 'Test Memorize',
+	    'system' => 'common',
+	    'structure' => 'linear',
+	    'settings' => {},
+	   };
+
+is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );
+
