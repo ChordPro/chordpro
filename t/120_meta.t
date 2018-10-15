@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 9;
+use Test::More tests => 10;
 
 use App::Music::ChordPro::Config;
 use App::Music::ChordPro::Songbook;
@@ -99,10 +99,15 @@ $data = <<EOD;
 {c: %%}
 EOD
 
-eval { $s->parsefile(\$data) } or diag("$@");
 
-diag("Expect a \"Multiple capo\" warning");
+my $warning;
+{
+    local $SIG{__WARN__} = sub { $warning = "@_" };
+    eval { $s->parsefile(\$data) } or diag("$@");
+}
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
+ok( $warning =~ /Multiple capo settings may yield surprising results/,
+    "You have been warned" );
 isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
 #use Data::Dumper; warn(Dumper($s));
 $song = {
