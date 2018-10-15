@@ -75,7 +75,7 @@ sub __set_properties {
     my $n = 0;
     my $check = 0;
     for ( @{ $parent->notationlist } ) {
-	my $s = $_ eq "dutch" ? _T("Common") : ucfirst($_);
+	my $s = ucfirst($_);
 	$check = $n if $_ eq lc $parent->{prefs_notation};
 	$s .= " (" . $notdesc->{lc($s)} .")" if $notdesc->{lc($s)};
 	$ctl->Append($s);
@@ -89,7 +89,7 @@ sub __set_properties {
     $ctl->Append("-----");
     $n = 1;
     for ( @{ $parent->notationlist } ) {
-	my $s = $_ eq "dutch" ? _T("Common") : ucfirst($_);
+	my $s = ucfirst($_);
 	$check = $n if $_ eq lc $parent->{prefs_xcode};
 	$s .= " (" . $notdesc->{lc($s)} .")" if $notdesc->{lc($s)};
 	$ctl->Append($s);

@@ -143,7 +143,7 @@ sub notationlist {
 	    next unless /^(.*)\.json$/;
 	    my $base = $1;
 	    $notationlist->[0] = "common", next
-	      if $base eq "dutch";
+	      if $base eq "common";
 	    push( @$notationlist, $base )
 	}
     }
@@ -543,9 +543,6 @@ sub GetPreferences {
 	if ( $p eq lc(_T("-----")) ) {
 	    $p = $prefctl->{xcode};
 
-	}
-	elsif ( $p eq lc(_T("Common")) ) {
-	    $p = "dutch";
 	}
 	else {
 	    my $n = "";
