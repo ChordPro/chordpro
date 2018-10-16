@@ -250,7 +250,7 @@ sub preview {
 #    $SIG{__DIE__}  = \&_die;
 
     my $haveconfig;
-    push( @ARGV, '--nouserconfig', '--nolegacyconfig' )
+    push( @ARGV, '--nosysconfig', '--nouserconfig', '--nolegacyconfig', '--noconfig' )
       if $self->{prefs_skipstdcfg};
     if ( $self->{prefs_cfgpreset} ) {
 	$haveconfig++;
@@ -271,7 +271,7 @@ sub preview {
 	$haveconfig++;
 	push( @ARGV, '--config', 'notes:' . $self->{prefs_notation} );
     }
-    push( @ARGV, '--no-config' ) unless $haveconfig;
+    push( @ARGV, '--noconfig' ) unless $haveconfig;
 
     push( @ARGV, '--output', $preview_pdf );
     push( @ARGV, '--generate', "PDF" );
@@ -281,6 +281,11 @@ sub preview {
 
     push( @ARGV, $preview_cho );
 
+    if ( $self->{_trace} || $self->{_debug}
+	 || $self->{_verbose} && $self->{_verbose} > 1 ) {
+	warn( "Command line: @ARGV\n" );
+	warn( "$_\n" ) for split( /\n+/, _aboutmsg() );
+    }
     my $options;
     eval {
 	$options = App::Music::ChordPro::app_setup( "ChordPro", $VERSION );
@@ -696,8 +701,8 @@ sub OnPreferences {
     $self->SavePreferences if $ret == wxID_OK;
 }
 
-sub OnAbout {
-    my ($self, $event) = @_;
+sub _aboutmsg {
+    my ( $self ) = @_;
 
     my $firstyear = 2016;
     my $year = 1900 + (localtime(time))[5];
@@ -708,44 +713,34 @@ sub OnAbout {
     # Sometimes version numbers are localized...
     my $dd = sub { my $v = $_[0]; $v =~ s/,/./g; $v };
 
-    if ( rand > 0.5 ) {
-	my $ai = Wx::AboutDialogInfo->new;
-	$ai->SetName("ChordPro Preview Editor");
-	$ai->SetVersion( $dd->($App::Music::ChordPro::VERSION) );
-	$ai->SetCopyright("Copyright $year Johan Vromans <jvromans\@squirrel.nl>");
-	$ai->AddDeveloper("Johan Vromans <jvromans\@squirrel.nl>\n");
-	$ai->AddDeveloper("ChordPro version " .
-			  $dd->($App::Music::ChordPro::VERSION));
-	$ai->AddDeveloper("GUI wrapper " . $dd->($VERSION) . " " .
-			  "designed with wxGlade\n");
-	$ai->AddDeveloper("Perl version " . $dd->(sprintf("%vd",$^V)));
-	$ai->AddDeveloper("wxWidgets version " . $dd->(Wx::wxVERSION));
-	$ai->AddDeveloper(App::Packager::Packager() . " version " . App::Packager::Version())
-	  if $App::Packager::PACKAGED;
-	$ai->AddDeveloper("Some icons by www.flaticon.com");
-	$ai->SetWebSite("https://www.chordpro.org");
-	Wx::AboutBox($ai);
-    }
-    else {
-	my $md = Wx::MessageDialog->new
-	  ($self, "ChordPro Preview Editor version " . $dd->($App::Music::ChordPro::VERSION) . "\n".
-	   "Copyright $year Johan Vromans <jvromans\@squirrel.nl>\n".
-	   "\n".
-	   "GUI wrapper " . $dd->($VERSION) . " ".
-	   "designed with wxGlade\n\n".
-	   "Perl version " . $dd->(sprintf("%vd",$^V))."\n".
-	   "wxPerl version " . $dd->($Wx::VERSION)."\n".
-	   "wxWidgets version " . $dd->(Wx::wxVERSION)."\n\n".
-	   "https://www.chordpro.org\n".
-	   ( $App::Packager::PACKAGED
-	     ? App::Packager::Packager() . " version " . App::Packager::Version()."\n"
-	     : "" ),
-	   "About ChordPro",
-	   wxOK|wxICON_INFORMATION,
-	   wxDefaultPosition);
-	$md->ShowModal;
-	$md->Destroy;
-    }
+    join( "",
+	  "ChordPro Preview Editor version ",
+	  $dd->($App::Music::ChordPro::VERSION),
+	  "\n",
+	  "Copyright $year Johan Vromans <jvromans\@squirrel.nl>\n",
+	  "\n",
+	  "GUI wrapper ", $dd->($VERSION), " designed with wxGlade\n\n",
+	  "Perl version ", $dd->(sprintf("%vd",$^V)), "\n",
+	  "wxPerl version ", $dd->($Wx::VERSION), "\n",
+	  "wxWidgets version ", $dd->(Wx::wxVERSION), "\n",
+	  "\n",
+	  "https://www.chordpro.org\n",
+	  $App::Packager::PACKAGED
+	  ? App::Packager::Packager()." version ".App::Packager::Version()."\n"
+	  : "",
+	);
+}
+
+sub OnAbout {
+    my ($self, $event) = @_;
+
+    my $md = Wx::MessageDialog->new
+      ( $self, _aboutmsg(),
+	"About ChordPro",
+	wxOK|wxICON_INFORMATION,
+	wxDefaultPosition);
+    $md->ShowModal;
+    $md->Destroy;
 }
 
 ################ End of Event handlers ################
