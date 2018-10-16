@@ -67,6 +67,7 @@ X%{hexd|foo}Y		XY
 # %{} refers to the value of the key.
 X%{head|This is %{}!}Y	XThis is yes!Y
 X%{head=yes|This is %{}!}Y	XThis is yes!Y
+X%{head=no|This is %{}!}Y	XY
 
 # Subtitute the 'false' part
 X%{head=no|foo|bar}Y	XbarY

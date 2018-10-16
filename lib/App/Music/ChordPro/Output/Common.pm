@@ -145,6 +145,9 @@ sub fmt_subst {
 	elsif ( defined $else ) {
 	    $val = fmt_subst( $s, $else, "" );
 	}
+	elsif ( $op ) {
+	    $val = "";
+	}
 
 	# Append and continue.
 	$res .= $val if defined $val;
