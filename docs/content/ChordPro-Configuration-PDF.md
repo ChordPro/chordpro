@@ -221,7 +221,7 @@ Each of these page types can have settings for a page title, subtitle and footer
 
 Each title, subtitle and footer has three parts, which are printed to the left of the page, centered, and right. When even/odd page printing is selected, the left and right parts are swapped on even pages.
 
-All heading strings may contain references to metadata in the form `%{`_NAME_`}`, for example `%{title}`. The current page number can be obtained with `%{page}`. For a complete descrition on how to use metadata in heading strings, see [[here|ChordPro Configuration Format Strings]].
+All heading strings may contain references to metadata in the form `%{`_NAME_`}`, for example `%{title}`. The current page number can be obtained with `%{page}`. For a complete description on how to use metadata in heading strings, see [[here|ChordPro Configuration Format Strings]].
 
         "formats" : {
 
