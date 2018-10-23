@@ -29,8 +29,8 @@ MOTIVATION
     to add, and the whole program centered around PostScript generation, while
     nowadays PDF would be a much better alternative.
 
-    So I decided to create a new reference implementation from the ground up.
-    I chose a programming language that is flexible and very good at handling
+    So we decided to create a new reference implementation from the ground up.
+    we chose a programming language that is flexible and very good at handling
     Unicode data. And that is fun to program in.
 
 CURRENT STATUS
@@ -51,14 +51,14 @@ INSTALLATION
 SUPPORT
 
     ChordPro (the program) development is hosted on GitHub, repository
-    <https://github.com/sciurius/chordpro>.
+    <https://github.com/ChordPro/chordpro>.
 
     Please report any bugs or feature requests to the GitHub issue tracker,
-    <https://github.com/sciurius/chordpro/issues>.
+    <https://github.com/ChordPro/chordpro/issues>.
 
 LICENSE
 
-    Copyright (C) 2010,2017 Johan Vromans,
+    Copyright (C) 2010,2018 The ChordPro Team
 
     This program is free software. You can redistribute it and/or
     modify it under the terms of the Artistic License 2.0.

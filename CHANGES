@@ -1,4 +1,4 @@
-0.96.x
+0.97	2018-10-23
 
     - Instrument defintions are now in separate config files. There
       are no 'built-in' tunings and chords, just defaults.
