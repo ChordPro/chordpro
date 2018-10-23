@@ -81,6 +81,7 @@ t/117_rechorus.t
 t/118_tab.t
 t/119_verse.t
 t/120_meta.t
+t/122_memorize.t
 t/130_image.t
 t/140_chords.t
 t/141_chords.t
@@ -97,8 +98,8 @@ t/169_custom.t
 t/170_transpose.t
 t/171_transpose.t
 t/172_transpose.t
-t/173_transpose.t
 t/172_transpose.t
+t/173_transpose.t
 t/173_transpose.t
 t/174_transpose.cho
 t/174_transpose.t
