@@ -17,6 +17,12 @@ These settings control global behaviour of the ChordPro program and can be chang
         // Suppress chords.
         // Overrides --lyrics-only command line option.
         "lyrics-only" : false,
+        // Chords inline.
+        // May be a string containing pretext %s posttext.
+        // Defaults to "[%s]" if true.
+        "inline-chords" : false,
+        // Chords under the lyrics.
+       "chords-under" : false,
     },
 
 ## Metadata
@@ -41,6 +47,14 @@ Important: the keys `title` and `subtitle` must always be in this list.
     },
 
 See also [[Using metadata in texts|ChordPro Configuration Format Strings]].
+
+## Instrument description
+
+Describes the instrument used. For example:
+
+    "instrument" : "Guitar, 6 strings, standard tuning",
+
+Other properties of an instrument are its [tuning](#strings-and-tuning) and [chord definitions](#user-defined-chords). Usually the instrument definition is maintained in a separate configuration file for maximum flexibility.
 
 ## Strings and Tuning
 
@@ -73,9 +87,18 @@ The configuration file can hold any number of predefined chords.
         },
     ],
 
-The resulting chords will look similar to:
+`base` specifies the topmost position of the chord diagram. It must be 1 or higher. If `base` is greater than 1 its value is printed at the side the diagram, as can be seen in the illustration below.
 
 ![](images/ex_chords.png)
+
+The `frets` positions are the positions in the chord diagram as shown. The following two definitions are the same chord, shown in two different positions:
+
+    { "name" : "F#", "base" : 1, "frets" : [ 2, 4, 4, 3, 2, 2 ] },
+    { "name" : "F#", "base" : 2, "frets" : [ 1, 3, 3, 2, 1, 1 ] },
+
+![](images/ex_chords2.png)
+
+As can be seen, the `"fingers"` part is optional.
 
 ## Printing chord diagrams
 

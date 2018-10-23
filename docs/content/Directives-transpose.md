@@ -32,8 +32,8 @@ This will print:
 
 A `{transpose}` directive without a value will cancel the current transposition, possibly restoring a preceding transposition.
 
-## Transposition and the `key` metadata
+## `transpose` and the `key` metadata
 
-Transposition will not affect the metadata item `key`, unless the `transpose` directive precedes the `key` directive.
+The transpose directive is effective from where it appears in the ChordPro file. It will not affect a `key` directive that precedes it.
 
 If a song has a key, a metadata item `key_actual` is automatically added and contains the actual key including transpositions. If a transposition is in effect, there is also an item `key_from` that contains the actual key _before_ the transposition.

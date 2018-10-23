@@ -105,6 +105,14 @@ Only prints lyrics. All chords are suppressed.
 Useful to make prints for singers and other musicians that do not
 require chords.
 
+### meta
+
+`--meta=`_KEY_`=`_VALUE_
+
+Presets metadata item _KEY_ to have the value _VALUE_.
+
+This option may be specified multiple times.
+
 ### no-csv
 
 `--no-csv`

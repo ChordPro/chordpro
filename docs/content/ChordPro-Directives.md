@@ -46,7 +46,6 @@ See also [[Using metadata in texts|ChordPro Configuration Format Strings]].
 * [[comment|Directives comment]] (short: c)
 * [[comment_italic|Directives comment]] (short: ci)
 * [[comment_box|Directives comment]] (short: cb)
-* [[chorus|Directives chorus]]
 * [[image|Directives image]]
 
 ## Environment directives
@@ -55,6 +54,7 @@ Environment directives always come in pairs, one to start the environment and on
 
 * [[start_of_chorus|Directives env_chorus]] (short: soc)
 * [[end_of_chorus|Directives env_chorus]] (short: eoc)
+* [[chorus|Directives env_chorus]]
 * [[start_of_verse|Directives env_verse]]
 * [[end_of_verse|Directives env_verse]]
 * [[start_of_tab|Directives env_tab]] (short: sot)

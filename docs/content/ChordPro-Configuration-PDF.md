@@ -59,20 +59,25 @@ Note: By setting the spacing for `empty` to a small value, you get fine-grained 
 
 ## Labels
 
-Margin labels can be added to a specific verse, chorus or grid. See
+Section labels can be added to a specific verse, chorus or grid. See
 e.g. [[start_of_verse|Directives env_verse]].
 
         // This opens a margin for margin labels.
         "labels" : {
-            // Margin width. Default is 0 (no margin labels).
-            "width" : 0,
+            // Margin width. Default is "auto".
+            "width" : "auto",
             // Alignment for the labels. Default is left.
             "align" : "left",
         },
 
 When `width` is set to a positive value, the lyrics and associated
-chords will be indented by this amount. `align` will control how the
-labels are aligned in the margin.
+chords will be indented by this amount and section labels, if any, are
+printed.
+
+When `width` is set to `"auto"`, the song will indented automatically,
+but only if labels are actually used.
+
+`align` will control how the labels are aligned in the margin.
 
 [![labels.png](images/labels.png)](images/labels.pdf)
 
@@ -82,7 +87,7 @@ ChordPro can format a chorus in several different ways:
 
 * the chorus part can be indented;
 * a side bar can be drawn to the left of the chorus part;
-* the `{chorus}` directive can print a comment text (tag), or quote the preceding chorus, or both.
+* the `{chorus}` directive can print a comment text (tag), or quote the preceding chorus.
 
         "chorus" : {
             // Indentation of the chorus.
@@ -95,7 +100,7 @@ ChordPro can format a chorus in several different ways:
                  "color"  : "black",
             },
             // Recall style: Print the tag using the type.
-            // Optionally quote the lines of the preceding chorus.
+            // Alternatively, quote the lines of the preceding chorus.
             "recall" : {
                  "tag"   : "Chorus",
                  "type"  : "comment",
@@ -216,7 +221,7 @@ Each of these page types can have settings for a page title, subtitle and footer
 
 Each title, subtitle and footer has three parts, which are printed to the left of the page, centered, and right. When even/odd page printing is selected, the left and right parts are swapped on even pages.
 
-All heading strings may contain references to metadata in the form `%{`_NAME_`}`, for example `%{title}`. The current page number can be obtained with `%{page}`. For a complete descrition on how to use metadata in heading strings, see [[here|ChordPro Configuration Format Strings]].
+All heading strings may contain references to metadata in the form `%{`_NAME_`}`, for example `%{title}`. The current page number can be obtained with `%{page}`. For a complete description on how to use metadata in heading strings, see [[here|ChordPro Configuration Format Strings]].
 
         "formats" : {
 
@@ -340,6 +345,9 @@ Default is "Helvetica" at size 12, with a frame.
 The font used for the contents of
 [[tab environments|Directives-env_tab]].  
 Default is "Courier" at size 10.
+* `label`  
+The font used for section labels.  
+Default is the setting for `text`.
 * `toc`  
 The font used for the table of contents.  
 Default is "Times-Roman" at size 11.
