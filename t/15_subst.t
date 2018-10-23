@@ -18,7 +18,11 @@ $config = { metadata => { separator => ":",
 
 my $s = { page => 24,
 	  meta => { title => "Hi There!",
+		    subtitle => ["%{capo|CAPO %{}}"],
+		    capo => [1],
+		    key => [ "G" ],
 		    h => ["Z"],
+		    multi => [ "Alpha", "Beta" ],
 		    head => ["yes"],
 		  },
 	};
@@ -82,5 +86,18 @@ X%{h=Z|foo|bar}Y	XfooY
 X%{head|x%{foo}y|bar}Y	XxyY
 X%{hexd|x%{foo}y|bar}Y	XbarY
 
-# Note that %{} is the value of foo (inner), not head (outer)
+# Note that %{} is the value of foo (inner), not head (outer).
 X%{head|x%{foo|ab|f%{}g}y}Y	XxfgyY
+
+# Multi values.
+%{multi}	Alpha:Beta
+%{multi.1}	Alpha
+%{multi.2}	Beta
+%{multi.-1}	Beta
+
+# Recursive substitution for (sub)title.
+%{subtitle}	CAPO 1
+
+# Transpose.
+%{key}		G
+%{_key}		G#
