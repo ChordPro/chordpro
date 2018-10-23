@@ -1,5 +1,34 @@
 # Release info
 
+## 0.97
+
+Released: 2018-10-23
+
+* Instrument defintions are now in separate config files. There are no 'built-in' tunings and chords, just defaults. Available instrument configs are guitar, guitar-ly, mandolin-ly, and ukulele-ly. Default is guitar.
+* Chords parsing has been completely overhauled.
+* Config file handling has been completely overhauled.
+* Alternative note naming systems, e.g. Latin (Do Re Mi ...) and Solfege are now supported.
+* Experimental: Chords can be transcoded between note naming systems.
+* Chords can be shown under the lyrics, controlled by config item settings.chords-under.
+* Nashville and Roman chord systems need to be explicitly enabled.
+* Allow meta substitutions in title and subtitle.
+* Fix {transpose}, --transpose and {key} interaction.
+* Experimental: Chords can be recalled from previous sections using [^] or plain ^. Requires config setting settings.memorize.
+* Upgrade WxChordPro to 0.960_059.
+* Add config settings for ChordPro backend.
+* Add slash as grid symbol.
+* Allow labels for grids.
+* Show durations as hh:mm.
+* Fix grey background of comment_italic.
+* Add font "label" for section labels. Defaults to text font.
+* Fix section labels when the first line is not a song line.
+* {chorus} Do not print Chorus tag when quoting.
+* {chorus} Allow label.
+* Allow empty comment directives.
+* Do not print background for empty strings.
+
+**[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.**
+
 ## 0.96
 
 Released: 2018-07-11
@@ -12,8 +41,6 @@ Released: 2018-07-11
 * (wxChordPro) Fix file saving logic.
 * Experimental: Markup for song sections.
 * Experimental: All fonts can have background and frame.
-
-**[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.**
 
 ## 0.95
 
