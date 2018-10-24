@@ -250,7 +250,7 @@ sub preview {
 #    $SIG{__DIE__}  = \&_die;
 
     my $haveconfig;
-    push( @ARGV, '--nosysconfig', '--nouserconfig', '--nolegacyconfig', '--noconfig' )
+    push( @ARGV, '--nosysconfig', '--nouserconfig', '--nolegacyconfig' )
       if $self->{prefs_skipstdcfg};
     if ( $self->{prefs_cfgpreset} ) {
 	$haveconfig++;
@@ -717,14 +717,13 @@ sub _aboutmsg {
 	  "ChordPro Preview Editor version ",
 	  $dd->($App::Music::ChordPro::VERSION),
 	  "\n",
+	  "https://www.chordpro.org\n",
 	  "Copyright $year Johan Vromans <jvromans\@squirrel.nl>\n",
 	  "\n",
 	  "GUI wrapper ", $dd->($VERSION), " designed with wxGlade\n\n",
 	  "Perl version ", $dd->(sprintf("%vd",$^V)), "\n",
 	  "wxPerl version ", $dd->($Wx::VERSION), "\n",
 	  "wxWidgets version ", $dd->(Wx::wxVERSION), "\n",
-	  "\n",
-	  "https://www.chordpro.org\n",
 	  $App::Packager::PACKAGED
 	  ? App::Packager::Packager()." version ".App::Packager::Version()."\n"
 	  : "",
