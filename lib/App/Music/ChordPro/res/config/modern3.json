@@ -3,79 +3,18 @@
 // This is a relaxed JSON document, so comments are possible.
 
 {
-    // General settings, to be changed by legacy configs and
-    // command line.
-    "settings" : {
-      // Suppress empty chord lines.
-      // Overrides the -a (--single-space) command line options.
-      "suppress-empty-chords" : true,
-    },
-
-    "diagrams" : {
-	"show" : "all"
-    },
-    
-    // Table of contents.
-    "toc" : {
-	  // Title for ToC.
-	  "title" : "Table of Contents",
-	  // Sorting order.
-	  "order" : "page",
-    },
-
     // Layout definitions for PDF output.
 
     "pdf" : {
-
-	// Papersize, 'a4' or [ 595, 842 ] etc.
-	"papersize" : "a4",
-
-	// Space between columns, in pt.
-	"columnspace"  :  20,
-
-	// Page margins.
-	// Note that top/bottom exclude the head/footspace.
-	"margintop"    :  80,
-	"marginbottom" :  40,
-	"marginleft"   :  40,
-	"marginright"  :  40,
-	"headspace"    :  60,
-	"footspace"    :  20,
-
-	// Special: head on first page only, add the headspace to
-	// the other pages so they become larger.
-	"head-first-only" : false,
-
-	// Spacings.
-	// Baseline distances as a factor of the font size.
-	"spacing" : {
-	    "title"  : 1.2,
-	    "lyrics" : 1.2,
-	    "chords" : 1.2,
-	    "grid"   : 1.2,
-	    "tab"    : 1.0,
-	    "toc"    : 1.4,
-	    "empty"  : 1.0,
-	},
-	// Note: By setting the font size and spacing for empty lines to
-	// smaller values, you get a fine(r)-grained control over the
-	// spacing between the various parts of the song.
 
 	// Style of chorus.
 	"chorus" : {
 	    "indent"     :  12,
 	    // Chorus side bar.
-	    // Suppress by setting offset and/or width to zero.
 	    "bar" : {
-		"offset" :  8,
 		"width"  :  0.5,
-		"color"  : "black",
 	    },
 	},
-
-	// Chord diagrams in a side column.
-	// Value is the column position.
-	"chordscolumn"   :  0,
 
 	// Slightly larger diagrams, shown at the right side.
 	"diagrams" : {
@@ -92,54 +31,25 @@
 	// Set to non-zero to ignore the directive.
 	"titles-directive-ignore" : true,
 
-	// Even/odd pages. A value of -1 denotes odd/even pages.
-	"even-odd-pages" : 1,
-
 	// Formats.
 	"formats" : {
 	    // Titles/Footers.
-
-	    // Titles/footers have 3 parts, which are printed left,
-	    // centered and right.
-	    // For even/odd printing, the order is reversed.
-
-	    // By default, a page has:
-	    "default" : {
-	        // No title/subtitle.
-	    	"title"     : null,
-	    	"subtitle"  : null,
-		// Footer is title -- page number.
-	    	"footer"    : [ "%{title}", "", "%{page}" ],
-	    },
 	    // The first page of a song has:
 	    "title" : {
 	        // Title and subtitle.
 	    	"title"     : [ "%{title}", "", "" ],
 	    	"subtitle"  : [ "%{subtitle|%{}|%{subtitle}}", "", "" ],
-		// Footer with page number.
-	    	"footer"    : [ "", "", "%{page}" ],
-	    },
-	    // The very first output page is slightly different:
-	    "first" : {
-	    	// It has title and subtitle, like normal 'first' pages.
-		// But no footer.
-	    	"footer"    : null,
 	    },
 	},
 
-	// Fonts for chords and comments can have a background
-	// colour associated.
-	// Colours are "#RRGGBB" or predefined names like "black", "white",
-	// and lots of others.
+	// Fonts.
 
 	"fonts" : {
 	    "title" : {
 		"name" : "Helvetica-Bold",
-		"size" : 14
 	    },
 	    "text" : {
 		"name" : "Helvetica",
-		"size" : 12
 	    },
 	    "chord" : {
 		"name" : "Helvetica-Bold",
@@ -149,30 +59,11 @@
 		"name" : "Helvetica",
 		"size" : 12
 	    },
-	    "tab" : {
-		"name" : "Courier",
-		"size" : 10
-	    },
 	    "toc" : {
 		"name" : "Helvetica",
 		"size" : 11
 	    },
 	},
-
-	// Fonts that can be specified, but need not.
-	// subtitle       --> text
-	// comment        --> text
-	// comment_italic --> chord
-	// comment_box    --> chord
-	// toc            --> text
-	// grid           --> comment
-	// footer         --> subtitle @ 60%
-	// empty          --> text
-	// chordgrid	  --> comment
-	// chordgrid_capo --> text (but at a small size)
-
-	// This will show the page layout if non-zero.
-	"showlayout" : false,
     },
 }
 // End of config.

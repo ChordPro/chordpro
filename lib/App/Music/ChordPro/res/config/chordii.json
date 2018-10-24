@@ -1,20 +1,17 @@
 // Chordii compatible configuration for ChordPro.
 //
+// This is a relaxed JSON document, so comments are possible.
 
 {
-    // General settings, to be changed by legacy configs and
-    // command line.
     "settings" : {
       // Suppress empty chord lines.
       // Overrides the -a (--single-space) command line options.
       "suppress-empty-chords" : false,
     },
 
-    // Printing chord grids.
-    // "auto": automatically add unknown chords as empty grids.
+    // Printing chord diagrams.
+    // "auto": automatically add unknown chords as empty diagrams.
     // "show": prints the chords used in the song.
-    // "hard": only prints the hard chords. This includes user
-    // defined chords.
     // "sorted": order the chords by key.
     "diagrams" : {
 	"auto"     :  true,
@@ -68,51 +65,12 @@
 	// smaller values, you get a fine(r)-grained control over the
 	// spacing between the various parts of the song.
 
-	// Style of chorus.
-	"chorus" : {
-	    "indent"     :  0,
-	    // Chorus side bar.
-	    // Suppress by setting offset and/or width to zero.
-	    "bar" : {
-		"offset" :  8,
-		"width"  :  1,
-		"color"  : "black",
-	    },
-	},
 
-	// Alternative songlines with chords in a side column.
-	// Value is the column position.
-	// "chordscolumn" : 400,
-	"chordscolumn" :  0,
-
-	// A {titles: left} may conflict with customized formats.
-	// Set to non-zero to ignore the directive.
-	"titles-directive-ignore" : false,
-
-  	// Chord grids.
-	// A chord grid consists of a number of cells.
-	// Cell dimensions are specified by "width" and "height".
-	// The horizontal number of cells depends on the number of strings.
-	// The vertical number of cells is "vcells", which should
-	// be 4 or larger to accomodate most chords.
-	// The horizontal distance between grids is "hspace" cells.
-	// The vertical distance is "vspace" cells.
-	// "linewidth" is the thickness of the lines as a fraction of "width".
-	// Diagrams for all chords of the song can be shown at the
-  	// "top", "bottom" or "right" side of the first page,
-	// or "below" the last song line.
+  	// Chord diagrams.
 	"diagrams" : {
-	    "width"    :  6,
-	    "height"   :  6,
-	    "hspace"   :  3.95,
-	    "vspace"   :  3,
-	    "vcells"   :  4,
-	    "linewidth" : 0.15,
 	    "show"     :  "below",
+	    "linewidth" : 0.15,
 	},
-
-	// Even/odd pages. A value of -1 denotes odd/even pages.
-	"even-odd-pages" : 1,
 
 	// Formats.
 	"formats" : {
@@ -169,36 +127,22 @@
 	    },
 	    "comment" : {
 		"name" : "Times-Roman",
-		"size" : 12
+		"size" : 12,
+		"background" : "#E5E5E5"
 	    },
 	    "tab" : {
 		"name" : "Courier",
-		"size" : 10
-	    },
-	    "diagram" : {
-		"name" : "Times-Roman",
 		"size" : 10
 	    },
 	    "toc" : {
 		"name" : "Times-Roman",
 		"size" : 12
 	    },
+	    "grid" : {
+		"name" : "Times-Roman",
+		"size" : 10
+	    },
 	},
-
-	// Fonts that can be specified, but need not.
-	// subtitle       --> text
-	// comment        --> text
-	// comment_italic --> chord
-	// comment_box    --> chord
-	// toc            --> text
-	// grid           --> comment
-	// footer         --> subtitle @ 60%
-	// empty          --> text
-	// diagram	  --> comment
-	// diagram_base   --> text (but at a small size)
-
-	// This will show the page layout if non-zero.
-	"showlayout" : false,
     },
 }
 // End of config.
