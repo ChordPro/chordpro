@@ -59,7 +59,6 @@ ab%{head}def		abyesdef
 ab%{head}def%{head}xy	abyesdefyesxy
 %{head}def		yesdef
 %{h}def			Zdef
-X%{}Y			XY
 
 # Subtitute the value
 X%{head}Y		XyesY
@@ -72,6 +71,9 @@ X%{hexd|foo}Y		XY
 X%{head|This is %{}!}Y	XThis is yes!Y
 X%{head=yes|This is %{}!}Y	XThis is yes!Y
 X%{head=no|This is %{}!}Y	XY
+
+# But only within a %{ ... }
+X%{}Y			X%{}Y
 
 # Subtitute the 'false' part
 X%{head=no|foo|bar}Y	XbarY

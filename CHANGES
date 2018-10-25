@@ -1,6 +1,7 @@
 0.xx
 
     - Minimize all configs to only override what is necessary.
+    - Use String::Interpolate::Named.
 
 0.97.1	2018-10-24
 

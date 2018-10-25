@@ -35,13 +35,14 @@ Makefile : Makefile.PL lib/App/Music/ChordPro/Version.pm
 PERL := perl
 PROJECT := ChordPro
 TMP_DST := ${HOME}/tmp/${PROJECT}
+RSYNC_ARGS := -rptgoDvHL
 
 to_tmp : resources
-	rsync -avH --files-from=MANIFEST    ./ ${TMP_DST}/
-	rsync -avH --files-from=MANIFEST.WX ./ ${TMP_DST}/
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST    ./ ${TMP_DST}/
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST.WX ./ ${TMP_DST}/
 
 to_tmp_cpan :
-	rsync -avH --files-from=MANIFEST.CPAN ./ ${TMP_DST}/
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST.CPAN ./ ${TMP_DST}/
 
 release :
 	${MAKE} -C ../WxChordPro to_src

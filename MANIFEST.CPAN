@@ -190,3 +190,4 @@ CPAN/PDF/API2/Resource/XObject/Image/TIFF.pm
 CPAN/PDF/API2/Resource/XObject.pm
 CPAN/PDF/API2/UniWrap.pm
 CPAN/PDF/API2/Util.pm
+CPAN/String/Interpolate/Named.pm
