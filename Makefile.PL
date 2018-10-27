@@ -48,7 +48,6 @@ WriteMakefile
 		   },
 
  META_MERGE => {
-     license   => "perl_5",
      resources => {
 	 license    => "http://dev.perl.org/licenses/",
 	 homepage   => "http://www.chordpro.org",
