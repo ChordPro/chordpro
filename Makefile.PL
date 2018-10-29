@@ -10,7 +10,7 @@ my $master = 'lib/App/Music/ChordPro/Version.pm';
 my $version = MM->parse_version($master);
 $master =~ s;/Version;;;
 
-my @bins = qw( chordpro wxchordpro );
+my @bins = qw( chordpro a2crd wxchordpro );
 
 WriteMakefile
 (
@@ -32,6 +32,7 @@ WriteMakefile
 		    'Font::TTF'   => 1.04,
 		    'JSON::PP'	  => 2.27203,
 		    'String::Interpolate::Named' => 0.05,
+		    'File::LoadLines' => 0.02,
 		   },
 
  CONFIGURE_REQUIRES => {

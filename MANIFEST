@@ -3,6 +3,7 @@ MANIFEST
 Makefile.PL
 README
 lib/App/Music/ChordPro.pm
+lib/App/Music/ChordPro/A2Crd.pm
 lib/App/Music/ChordPro/Bundle.pm
 lib/App/Music/ChordPro/Chords.pm
 lib/App/Music/ChordPro/Chords/Parser.pm
@@ -56,6 +57,7 @@ pp/windows/chordproinst.bmp
 pp/windows/innosetup.iss
 pp/windows/wxchordpro.pp
 pp/windows/vfix.pl
+script/a2crd.pl
 script/chordpro.pl
 script/ppchordpro.PL
 script/wxchordpro.pl

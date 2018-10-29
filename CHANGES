@@ -1,5 +1,6 @@
 0.xx
 
+    - Add a2crd script.
     - Minimize all configs to only override what is necessary.
     - Use String::Interpolate::Named.
     - (Experimental) Allow %{..} interpolations on the output file
