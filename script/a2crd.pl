@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Mon Oct 29 10:45:24 2018
 # Last Modified By: Johan Vromans
-# Last Modified On: Mon Oct 29 21:02:31 2018
-# Update Count    : 32
+# Last Modified On: Tue Oct 30 10:39:22 2018
+# Update Count    : 33
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -26,7 +26,8 @@ Note that the output will generally need some additional editing to be
 useful as input to ChordPro.
 
 B<a2crd> is a wrapper around L<App::Music::ChordPro::A2Crd>, which
-does all of the work.
+does all of the work. a2crd and App::Music::ChordPro::A2Crd do
+not use any other modules of the ChordPro package.
 
 =cut
 
