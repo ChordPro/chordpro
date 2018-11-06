@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Mon Oct 29 10:45:24 2018
 # Last Modified By: Johan Vromans
-# Last Modified On: Tue Oct 30 10:39:22 2018
-# Update Count    : 33
+# Last Modified On: Tue Nov  6 16:43:04 2018
+# Update Count    : 35
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -50,7 +50,7 @@ use File::LoadLines;
 # Package name.
 my $my_package = 'ChordPro';
 # Program name and version.
-my ($my_name, $my_version) = qw( a2crd 0.01 );
+my ($my_name, $my_version) = qw( a2crd 0.972 );
 
 ################ Command line parameters ################
 
@@ -101,6 +101,7 @@ print $fd "$_\n"
 ################ Subroutines ################
 
 sub app_options {
+    my $version = 0;		# handled locally
     my $help = 0;		# handled locally
     my $ident = 0;		# handled locally
 
@@ -111,6 +112,7 @@ sub app_options {
     if ( !GetOptions(
 		     'output=s' => \$output,
 		     'ident'	=> \$ident,
+		     'version'	=> \$version,
 		     'verbose'	=> \$verbose,
 		     'trace'	=> \$trace,
 		     'help|?'	=> \$help,
@@ -119,7 +121,8 @@ sub app_options {
     {
 	app_usage(2);
     }
-    app_ident() if $ident;
+    app_ident() if $ident || $version;
+    exit if $version;
 }
 
 sub app_ident {
