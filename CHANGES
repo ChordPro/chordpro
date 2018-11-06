@@ -6,6 +6,7 @@
     - (Experimental) Allow %{..} interpolations on the output file
       name, e.g. --output="%{artist|%{} - }%{title}.pdf".
       Command line only.
+    - Fix memorize problem with the first chord.
 
 0.97.1	2018-10-24
 

@@ -309,8 +309,9 @@ sub decompose {
 	return ( phrases => [ $line ] );
     }
 
+    my $dummy;
     shift(@a) if $a[0] eq "";
-    unshift(@a, '[]') if $a[0] !~ $re_chords;
+    unshift(@a, '[]'), $dummy++ if $a[0] !~ $re_chords;
 
     my @phrases;
     my @chords;
@@ -321,7 +322,7 @@ sub decompose {
 	# Normal chords.
 	if ( $chord =~ s/^\[(.*)\]$/$1/ && $chord ne "^" ) {
 	    push(@chords, $self->chord($chord));
-	    if ( $memchords ) {
+	    if ( $memchords && !$dummy ) {
 		if ( $memcrdinx == 0 ) {
 		    $memorizing++;
 		}
@@ -354,6 +355,7 @@ sub decompose {
 	    #do_warn("No chords memorized for $in_context");
 	    push( @chords, $chord );
 	}
+	$dummy = 0;
     }
 
     return ( phrases => \@phrases, chords  => \@chords );

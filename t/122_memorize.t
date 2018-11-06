@@ -19,19 +19,19 @@ my $s = App::Music::ChordPro::Songbook->new;
 my $data = <<EOD;
 {title: Test Memorize}
 {start_of_verse}
-[A]The quick [B]brown [F]ox jumps over the lazy [D]dog
+The [A]quick [B]brown [F]ox jumps over the lazy [D]dog
 [A]The quick [NC]brown [F]ox jumps over the lazy [D]dog
 {end_of_verse}
 {start_of_verse2}
 [E]The quick [B]brown [F]ox jumps over the lazy [D]dog
-[E]The quick [C]brown [F]ox jumps over the lazy [D]dog
+The [E]quick [C]brown [F]ox jumps over the lazy [D]dog
 {end_of_verse2}
 {start_of_verse}
 ^The quick ^brown ^ox jumps over the lazy ^dog
 ^The quick [G]brown ^ox jumps over the lazy ^dog
 {end_of_verse}
 {start_of_verse2}
-^The quick ^brown ^ox jumps over the lazy ^dog
+The ^quick ^brown ^ox jumps over the lazy ^dog
 ^The quick ^brown ^ox jumps over the lazy ^dog
 {end_of_verse2}
 {start_of_verse3}
@@ -60,13 +60,15 @@ my $song = {
 		       {
 			'type' => 'songline',
 			'phrases' => [
-				      'The quick ',
+				      'The ',
+				      'quick ',
 				      'brown ',
 				      'ox jumps over the lazy ',
 				      'dog'
 				     ],
 			'context' => 'verse',
 			'chords' => [
+				     '',
 				     'A',
 				     'B',
 				     'F',
@@ -108,6 +110,7 @@ my $song = {
 		       {
 			'type' => 'songline',
 			'chords' => [
+				     '',
 				     'E',
 				     'C',
 				     'F',
@@ -115,7 +118,8 @@ my $song = {
 				    ],
 			'context' => 'verse2',
 			'phrases' => [
-				      'The quick ',
+				      'The ',
+				      'quick ',
 				      'brown ',
 				      'ox jumps over the lazy ',
 				      'dog'
@@ -155,6 +159,7 @@ my $song = {
 		       },
 		       {
 			'chords' => [
+				     '',
 				     'E',
 				     'B',
 				     'F',
@@ -162,7 +167,8 @@ my $song = {
 				    ],
 			'context' => 'verse2',
 			'phrases' => [
-				      'The quick ',
+				      'The ',
+				      'quick ',
 				      'brown ',
 				      'ox jumps over the lazy ',
 				      'dog'
