@@ -22,8 +22,8 @@ sub a2cho {
 # Classify the line and return a single-char token.
 sub classify {
     my ( $line ) = @_;
-    return '_' if /^\s*$/;	# empty line
-    return '{' if /^\{.+/;	# directive
+    return '_' if $line =~ /^\s*$/;	# empty line
+    return '{' if $line =~ /^\{.+/;	# directive
 
     # Lyrics or Chords heuristic.
     my $len = length($line);
