@@ -58,6 +58,8 @@ WriteMakefile
      provides => {
 	 chordpro => { file => "script/chordpro",
 		       version => $version },
+	 a2crd    => { file => "script/a2crd",
+		       version => $version },
 	 "App::Music::ChordPro"
 		  => { file => "lib/App/Music/ChordPro.pm",
 		       version => $version },
