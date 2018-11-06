@@ -40,6 +40,7 @@ lib/App/Music/ChordPro/res/notes/german.json
 lib/App/Music/ChordPro/res/notes/latin.json
 lib/App/Music/ChordPro/res/notes/nashville.json
 lib/App/Music/ChordPro/res/notes/roman.json
+lib/App/Music/ChordPro/res/notes/scandinavian.json
 lib/App/Music/ChordPro/res/notes/solfege.json
 lib/App/Music/ChordPro/res/pod/ChordPro.pod
 lib/App/Music/ChordPro/res/pod/Config.pod
