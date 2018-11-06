@@ -19,14 +19,15 @@ use App::Packager;
 
 # BUilt-in descriptions for some notation systems.
 my $notdesc =
-  { "common"	 => "C, D, E, F, G, A, B",
-    "dutch"	 => "C, D, E, F, G, A, B",
-    "german"	 => "C, D, E, F, G, A, H",
-    "latin"	 => "Do, Re, Mi, Fa, Sol, ...",
-    "solfege"	 => "Do, Re, Mi, Fa, So, ...",
-    "solfège"	 => "Do, Re, Mi, Fa, So, ...",
-    "nashville"	 => "1, 2, 3, ...",
-    "roman"	 => "I, II, III, ...",
+  { "common"	   => "C, D, E, F, G, A, B",
+    "dutch"	   => "C, D, E, F, G, A, B",
+    "german"	   => "C, ... A, Ais/B, H",
+    "latin"	   => "Do, Re, Mi, Fa, Sol, ...",
+    "scandinavian" => "C, ... A, A#/Bb, H",
+    "solfege"	   => "Do, Re, Mi, Fa, So, ...",
+    "solfège"	   => "Do, Re, Mi, Fa, So, ...",
+    "nashville"	   => "1, 2, 3, ...",
+    "roman"	   => "I, II, III, ...",
   };
 
 sub get_configfile {

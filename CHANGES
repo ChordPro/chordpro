@@ -1,3 +1,8 @@
+0.972
+
+	Fix missing Eb in prefs dialog.
+	Add scandinavian notes.
+	
 0.97
 
 	Better handling of errors and exceptions.
