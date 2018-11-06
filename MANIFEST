@@ -46,13 +46,16 @@ lib/App/Music/ChordPro/res/pod/ChordPro.pod
 lib/App/Music/ChordPro/res/pod/Config.pod
 pp/README
 pp/common/PDF_API2_Bundle.pm
+pp/common/a2crd.pp
 pp/common/chordpro.pp
 pp/common/wxchordpro.pp
 pp/linux/GNUmakefile
 pp/linux/chordpro.pp
+pp/linux/a2crd.pp
 pp/linux/wxchordpro.pp
 pp/windows/GNUmakefile
 pp/windows/Makefile
+pp/windows/a2crd.pp
 pp/windows/chordpro.pp
 pp/windows/chordproinst.bmp
 pp/windows/innosetup.iss
