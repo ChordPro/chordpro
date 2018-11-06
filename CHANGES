@@ -1,12 +1,15 @@
-0.xx
+0.972	2018-11-06
 
     - Add a2crd script.
     - Minimize all configs to only override what is necessary.
+    - Split german notes into scandinavian (..., A, Bb/A#, H, C) and
+      german (..., A, Ais/B, H, C).
     - Use String::Interpolate::Named.
     - (Experimental) Allow %{..} interpolations on the output file
       name, e.g. --output="%{artist|%{} - }%{title}.pdf".
       Command line only.
     - Fix memorize problem with the first chord.
+    - Upgrade WxChordPro to 0.972.
 
 0.97.1	2018-10-24
 
