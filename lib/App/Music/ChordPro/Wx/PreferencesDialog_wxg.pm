@@ -45,9 +45,9 @@ sub new {
     $self->{ch_notation} = Wx::Choice->new($self, wxID_ANY, wxDefaultPosition, wxDefaultSize, [_T("Common (C, D, E, F, G, A, B)"), _T("German (C, D, E, F, G, A, H)"), _T("Latin (Do, Re, Mi, Fa, Sol, ...)"), _T("Solf\N{U+00e8}ge (Do, Re, Mi, Fa, So, ...)"), _T("Nashville (0, 1, 2, ...)"), _T("Roman (I, II, III, ...)")], );
     $self->{l_xpose} = Wx::StaticText->new($self, wxID_ANY, _T("Transpose"));
     $self->{l_xpose_from} = Wx::StaticText->new($self, wxID_ANY, _T("From"));
-    $self->{ch_xpose_from} = Wx::Choice->new($self, wxID_ANY, wxDefaultPosition, wxDefaultSize, [_T("C"), _T("C#"), _T("Db"), _T("D"), _T("D#"), _T("B"), _T("E"), _T("F"), _T("F#"), _T("Gb"), _T("G"), _T("G#"), _T("Ab"), _T("A"), _T("A#"), _T("Bb"), _T("B")], );
+    $self->{ch_xpose_from} = Wx::Choice->new($self, wxID_ANY, wxDefaultPosition, wxDefaultSize, [_T("C"), _T("C#"), _T("Db"), _T("D"), _T("D#"), _T("Eb"), _T("E"), _T("F"), _T("F#"), _T("Gb"), _T("G"), _T("G#"), _T("Ab"), _T("A"), _T("A#"), _T("Bb"), _T("B")], );
     $self->{l_xpose_to} = Wx::StaticText->new($self, wxID_ANY, _T("To"));
-    $self->{ch_xpose_to} = Wx::Choice->new($self, wxID_ANY, wxDefaultPosition, wxDefaultSize, [_T("C"), _T("C#"), _T("Db"), _T("D"), _T("D#"), _T("B"), _T("E"), _T("F"), _T("F#"), _T("Gb"), _T("G"), _T("G#"), _T("Ab"), _T("A"), _T("A#"), _T("Bb"), _T("B")], );
+    $self->{ch_xpose_to} = Wx::Choice->new($self, wxID_ANY, wxDefaultPosition, wxDefaultSize, [_T("C"), _T("C#"), _T("Db"), _T("D"), _T("D#"), _T("Eb"), _T("E"), _T("F"), _T("F#"), _T("Gb"), _T("G"), _T("G#"), _T("Ab"), _T("A"), _T("A#"), _T("Bb"), _T("B")], );
     $self->{rb_xpose_sharp} = Wx::RadioButton->new($self, wxID_ANY, _T("Sharp"));
     $self->{rb_xpose_flat} = Wx::RadioButton->new($self, wxID_ANY, _T("Flat"));
     $self->{l_transcode} = Wx::StaticText->new($self, wxID_ANY, _T("Transcode to"));
