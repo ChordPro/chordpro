@@ -1,3 +1,9 @@
+0.973
+
+    - Integrate a2crd into chordpro. The a2crd script is no longer
+      necessary, "chordpro --a2crd" will do the same. The a2crd script
+      will remain supported as long as convenient.
+
 0.972	2018-11-06
 
     - Add a2crd script.

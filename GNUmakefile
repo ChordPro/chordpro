@@ -55,7 +55,7 @@ LIB := lib/App/Music/ChordPro
 RES := ${LIB}/res
 PODSELECT := podselect
 
-resources : ${RES}/config/chordpro.json ${RES}/pod/ChordPro.pod ${RES}/pod/Config.pod wiki
+resources : ${RES}/config/chordpro.json ${RES}/pod/ChordPro.pod ${RES}/pod/Config.pod ${RES}/pod/A2Crd.pod wiki
 
 ${RES}/config/chordpro.json : ${LIB}/Config.pm
 	$(PERL) -Ilib $< > $@
@@ -64,6 +64,9 @@ ${RES}/pod/ChordPro.pod : ${LIB}.pm
 	${PODSELECT} $< > $@
 
 ${RES}/pod/Config.pod : ${LIB}/Config.pm
+	${PODSELECT} $< > $@
+
+${RES}/pod/A2Crd.pod : ${LIB}/A2Crd.pm
 	${PODSELECT} $< > $@
 
 # Verify JSON data
