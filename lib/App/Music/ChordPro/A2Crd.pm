@@ -20,20 +20,16 @@ App::Music::ChordPro::A2Crd - convert lyrics and chords to ChordPro
 
 (But noone does that.)
 
-When the associated B<a2crd> program has been installed correctly:
-
-  a2crd [ options ] [ file ... ]
-
 When the associated B<chordpro> program has been installed correctly:
 
   chordpro --a2crd [ options ] [ file ... ]
 
 =head1 DESCRIPTION
 
-B<a2crd> will read a text file containing the lyrics of one or many
-songs with chord information written visually above the lyrics. This
-is often referred to as I<crd> data. B<a2crd> will then generate
-equivalent ChordPro output.
+B<This program>, referred to as B<a2crd>, will read a text file
+containing the lyrics of one or many songs with chord information
+written visually above the lyrics. This is often referred to as I<crd>
+data. B<a2crd> will then generate equivalent ChordPro output.
 
 Typical a2crd input:
 
