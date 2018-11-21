@@ -95,7 +95,7 @@ sub ::run {
 sub main {
     my ( $options ) = @_;
 
-    my $lines = loadlines( @ARGV ? $ARGV[0] : \*DATA);
+    my $lines = loadlines( @ARGV ? $ARGV[0] : \*STDIN);
 
     my $fd;
     if ( $options->{output} && $options->{output} ne '-' ) {
@@ -317,10 +317,6 @@ sub app_setup {
     # Plug in command-line options.
     @{$options}{keys %$clo} = values %$clo;
     # warn(Dumper($options), "\n") if $options->{debug};
-
-    # At this point, there should be filename argument(s)
-    # unless we're embedded or just dumping chords.
-    app_usage(\*STDERR, 1) unless @ARGV;
 
     # Return result.
     $options;
