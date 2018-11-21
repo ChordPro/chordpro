@@ -50,8 +50,10 @@ sub generate_song {
     # $s->structurize if ++$structured;
     my $variant = $options->{'backend-option'}->{variant} || 'cho';
     my $seq     = $options->{'backend-option'}->{seq};
+    my $msp     = $variant eq "msp";
 
     my @s;
+    my %imgs;
 
     if ( $s->{preamble} ) {
 	@s = @{ $s->{preamble} };
@@ -64,7 +66,7 @@ sub generate_song {
     }
 
     if ( $s->{meta} ) {
-	if ( $variant eq 'msp' ) {
+	if ( $msp ) {
 	    $s->{meta}->{source} //= [ "Lead Sheet" ];
 	    $s->{meta}->{custom2} //= [ $seq ] if defined $seq;
 	}
@@ -171,13 +173,13 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "colb" ) {
-	    next if $variant eq 'msp';
+	    next if $msp;
 	    push(@s, "{column_break}");
 	    next;
 	}
 
 	if ( $elt->{type} eq "newpage" ) {
-	    next if $variant eq 'msp';
+	    next if $msp;
 	    push(@s, "{new_page}");
 	    next;
 	}
@@ -232,7 +234,7 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "rechorus" ) {
-	    if ( $variant eq 'msp' ) {
+	    if ( $msp ) {
 		push( @s, "{chorus}" );
 	    }
 	    elsif ( $rechorus->{quote} ) {
@@ -259,7 +261,7 @@ sub generate_song {
 	if ( $elt->{type} =~ /^comment(?:_italic|_box)?$/ ) {
 	    my $type = $elt->{type};
 	    my $text = $elt->{orig};
-	    if ( $variant eq 'msp' ) {
+	    if ( $msp ) {
 		$type = $type eq 'comment'
 		  ? 'highlight'
 		    : $type eq 'comment_italic'
@@ -283,7 +285,12 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "image" ) {
-	    my @args = ( "image:", $elt->{uri} );
+	    my $uri = $elt->{uri};
+	    if ( $msp && $uri !~ /^id=/ ) {
+		$imgs{$uri} //= keys(%imgs);
+		$uri = sprintf("id=img%02d", $imgs{$uri});
+	    }
+	    my @args = ( "image:", $uri );
 	    while ( my($k,$v) = each( %{ $elt->{opts} } ) ) {
 		push( @args, "$k=$v" );
 	    }
@@ -323,6 +330,28 @@ sub generate_song {
     }
 
     push(@s, "{end_of_$ctx}") if $ctx;
+
+    foreach ( sort { $imgs{$a} <=> $imgs{$b} } keys %imgs ) {
+	my $url = $_;
+	my $id = $imgs{$url};
+	my $type = "jpg";
+	$type = lc($1) if $url =~ /\.(\w+)$/;
+	use MIME::Base64;
+	my $fd;
+	unless ( open( $fd, '<:raw', $url ) ) {
+	    warn("$url: $!\n");
+	    next;
+	}
+	my $data = do { local $/; <$fd> };
+	close($fd);
+	push( @s, sprintf( "##image: id=img%02d src=%s type=%s enc=base64", $id, $url, $type ) );
+	$data = encode_base64($data, '');
+	my $i = 0;
+	while ( $i < length($data) ) {
+	    push( @s, "# ".substr($data, $i, 76) );
+	    $i += 76;
+	}
+    }
 
     \@s;
 }

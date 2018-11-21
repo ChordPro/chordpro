@@ -1,6 +1,9 @@
 0.973
 
     - Integrate a2crd into chordpro. Use "chordpro --a2crd" to invoke.
+    - Implement image assets.
+    - Allow a2crd as a filter.
+    - Fix undefined if no output file was supplied.
 
 0.972	2018-11-06
 

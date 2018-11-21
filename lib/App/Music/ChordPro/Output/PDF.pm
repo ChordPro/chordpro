@@ -132,6 +132,7 @@ my $chordsunder = 0;		# chords under the lyrics
 my $chordscol = 0;		# chords in a separate column
 my $chordscapo = 0;		# capo in a separate column
 my $i_tag;
+my $assets;
 
 use constant SIZE_ITEMS => [ qw (chord text tab grid diagram toc title footer) ];
 
@@ -140,6 +141,7 @@ sub generate_song {
 
     return 0 unless $s->{body};	# empty song
     $source = $s->{source};
+    $assets = $s->{assets} || {};
 
     $single_space = $::config->{settings}->{'suppress-empty-chords'};
     $inlinechords = $::config->{settings}->{'inline-chords'};
@@ -1451,12 +1453,17 @@ sub imageline {
     my $opts = $elt->{opts};
     my $pr = $ps->{pr};
 
-    unless ( -s $elt->{uri} ) {
+    if ( $elt->{uri} =~ /^id=(.+)/ ) {
+	return "Unknown asset: id=$1"
+	  unless exists( $assets->{$1} );
+    }
+    elsif ( ! -s $elt->{uri} ) {
 	return "$!: " . $elt->{uri};
     }
 
     my $img = eval { $pr->get_image( $elt->{uri} ) };
     unless ( $img ) {
+	warn($@);
 	return "Unhandled image type: " . $elt->{uri};
     }
 
@@ -1994,6 +2001,7 @@ package PDFWriter;
 use strict;
 use warnings;
 use Encode;
+use IO::String;
 
 my $faketime = 1465041600;
 
@@ -2173,7 +2181,23 @@ sub cross {
 
 sub get_image {
     my ( $self, $uri ) = @_;
+
     my $img;
+    if ( $uri =~ /^id=(.+)/ ) {
+	my $a = $assets->{$1};
+	my $d = $a->{data};
+	my $fh = IO::String->new($d);
+	if ( $a->{type} eq "jpg" ) {
+	    $img = $self->{pdf}->image_jpeg($fh);
+	}
+	elsif ( $a->{type} eq "png" ) {
+	    $img = $self->{pdf}->image_png($fh);
+	}
+	elsif ( $a->{type} eq "gif" ) {
+	    $img = $self->{pdf}->image_gif($fh);
+	}
+	return $img;
+    }
     for ( $uri ) {
 	$img = $self->{pdf}->image_png($_)  if /\.png$/i;
 	$img = $self->{pdf}->image_jpeg($_) if /\.jpe?g$/i;

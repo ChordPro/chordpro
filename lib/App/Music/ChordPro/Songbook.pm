@@ -136,6 +136,21 @@ sub parse_song {
 	}
 
 	if ( /^#/ ) {
+	    if ( /^##image:\s+id=(\S+)/ ) {
+		use MIME::Base64;
+		my $id = $1;
+		my $type = "jpg";
+		$type = $1 if /\btype=(\w+)/;
+		$song->{assets} //= {};
+		my $data = '';
+		while ( @$lines && $lines->[0] =~ /^# (.+)/ ) {
+		    $data .= decode_base64($1);
+		    shift(@$lines);
+		}
+		$song->{assets}->{$id} =
+		  { data => $data, type => $type, };
+		next;
+	    }
 	    # Collect pre-title stuff separately.
 	    if ( exists $song->{title} ) {
 		$self->add( type => "ignore", text => $_ );
@@ -594,6 +609,7 @@ sub directive {
 	use Text::ParseWords qw(shellwords);
 	my @args = shellwords($arg);
 	my $uri;
+	my $id;
 	my %opts;
 	foreach ( @args ) {
 	    if ( /^(width|height|border|center)=(\d+)$/i ) {
@@ -608,8 +624,11 @@ sub directive {
 	    elsif ( /^(src|uri)=(.+)$/i ) {
 		$uri = $2;
 	    }
+	    elsif ( /^(id)=(.+)$/i ) {
+		$id = $2;
+	    }
 	    elsif ( /^(title)=(.*)$/i ) {
-		$opts{title} = $1;
+		$opts{title} = $2;
 	    }
 	    elsif ( /^(.+)=(.*)$/i ) {
 		do_warn( "Unknown image attribute: $1\n" );
@@ -619,6 +638,7 @@ sub directive {
 		$uri = $_;
 	    }
 	}
+	$uri = "id=$id" if $id;
 	unless ( $uri ) {
 	    do_warn( "Missing image source\n" );
 	    return;

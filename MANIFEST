@@ -86,6 +86,7 @@ t/119_verse.t
 t/120_meta.t
 t/122_memorize.t
 t/130_image.t
+t/131_image.t
 t/140_chords.t
 t/141_chords.t
 t/142_chords.t

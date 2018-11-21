@@ -33,6 +33,7 @@ WriteMakefile
 		    'JSON::PP'	  => 2.27203,
 		    'String::Interpolate::Named' => 0.05,
 		    'File::LoadLines' => 0.02,
+		    'IO::String'  => 1.08,
 		   },
 
  CONFIGURE_REQUIRES => {
