@@ -187,13 +187,15 @@ sub main {
     warn(Dumper($s), "\n") if $options->{debug};
 
     # Try interpolations.
-    my $f = App::Music::ChordPro::Output::Common::fmt_subst
-      ( $s->{songs}->[0], $of );
-    if ( $f ne $of ) {
-	# Replace most non-alpha by underscore (but keep the extension).
-	$f =~ s;(?!\.\w+$)[^\w/-];_;g;
-	warn("Writing output to $f\n") if $options->{verbose};
-	$options->{output} = $f;
+    if ( $of ) {
+	my $f = App::Music::ChordPro::Output::Common::fmt_subst
+	  ( $s->{songs}->[0], $of );
+	if ( $f ne $of ) {
+	    # Replace most non-alpha by underscore (but keep the extension).
+	    $f =~ s;(?!\.\w+$)[^\w/-];_;g;
+	    warn("Writing output to $f\n") if $options->{verbose};
+	    $options->{output} = $f;
+	}
     }
 
     my $res;
