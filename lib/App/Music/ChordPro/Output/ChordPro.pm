@@ -331,22 +331,40 @@ sub generate_song {
 
     push(@s, "{end_of_$ctx}") if $ctx;
 
+    # Process image assets.
     foreach ( sort { $imgs{$a} <=> $imgs{$b} } keys %imgs ) {
 	my $url = $_;
 	my $id = $imgs{$url};
 	my $type = "jpg";
 	$type = lc($1) if $url =~ /\.(\w+)$/;
-	use MIME::Base64;
+	require MIME::Base64;
+	require Image::Info;
+
+	# Slurp the image.
 	my $fd;
 	unless ( open( $fd, '<:raw', $url ) ) {
-	    warn("$url: $!\n");
+	    do_warn("$url: $!\n");
 	    next;
 	}
 	my $data = do { local $/; <$fd> };
 	close($fd);
-	push( @s, sprintf( "##image: id=img%02d src=%s type=%s enc=base64", $id, $url, $type ) );
-	$data = encode_base64($data, '');
+
+	# Get info.
+	my $info = Image::Info::image_info(\$data);
+	if ( $info->{error} ) {
+	    do_warn($info->{error});
+	    next;
+	}
+
+	# Write in-line data.
+	push( @s,
+	      sprintf( "##image: id=img%02d" .
+		       " src=%s type=%s width=%d height=%d enc=base64",
+		       $id, $url, $info->{file_ext},
+		       $info->{width}, $info->{height} ) );
+	$data = MIME::Base64::encode($data, '');
 	my $i = 0;
+	# Note: 76 is the standard chunk size for base64 data.
 	while ( $i < length($data) ) {
 	    push( @s, "# ".substr($data, $i, 76) );
 	    $i += 76;

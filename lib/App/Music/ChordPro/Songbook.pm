@@ -137,18 +137,33 @@ sub parse_song {
 
 	if ( /^#/ ) {
 	    if ( /^##image:\s+id=(\S+)/ ) {
-		use MIME::Base64;
 		my $id = $1;
-		my $type = "jpg";
-		$type = $1 if /\btype=(\w+)/;
-		$song->{assets} //= {};
+
+		# In-line image asset.
+		require MIME::Base64;
+		require Image::Info;
+
+		# Read the image.
 		my $data = '';
 		while ( @$lines && $lines->[0] =~ /^# (.+)/ ) {
-		    $data .= decode_base64($1);
+		    $data .= MIME::Base64::decode($1);
 		    shift(@$lines);
 		}
+
+		# Get info.
+		my $info = Image::Info::image_info(\$data);
+		if ( $info->{error} ) {
+		    do_warn($info->{error});
+		    next;
+		}
+
+		# Store in assets.
+		$song->{assets} //= {};
 		$song->{assets}->{$id} =
-		  { data => $data, type => $type, };
+		  { data => $data, type => $info->{file_ext},
+		    width => $info->{width}, height => $info->{height},
+		  };
+
 		next;
 	    }
 	    # Collect pre-title stuff separately.

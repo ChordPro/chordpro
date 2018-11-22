@@ -1,7 +1,7 @@
 0.973
 
     - Integrate a2crd into chordpro. Use "chordpro --a2crd" to invoke.
-    - Implement image assets.
+    - Implement image assets. Requires IO::String and Image::Info.
     - Allow a2crd as a filter.
     - Fix undefined if no output file was supplied.
 

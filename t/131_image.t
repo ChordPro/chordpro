@@ -16,9 +16,11 @@ my $s = App::Music::ChordPro::Songbook->new;
 # Image (minimal).
 my $data = <<EOD;
 {title: Swing Low Sweet Chariot}
-{image id=red}
-##image: id=red type=png
-# ZGl0IGlzIGVlbiBwbGFhdGpl
+{image id=white}
+##image: id=white type=jpg height=1 width=1 enc=base64
+# /9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkI
+# CQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/wAALCAABAAEBAREA/8QAFAABAAAAAAAA
+# AAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAD8AVN//2Q==
 EOD
 
 eval { $s->parsefile(\$data) } or diag("$@");
@@ -26,6 +28,9 @@ eval { $s->parsefile(\$data) } or diag("$@");
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
 #use Data::Dumper; warn(Dumper($s));
+delete( $s->{songs}->[0]->{assets}->{white}->{data} )
+  if $s->{songs}->[0]->{assets}->{white}->{data} =~ /^\xff\xd8\xff\xe0/;
+
 my $song = {
 	    'settings' => {},
 	    'meta' => {
@@ -37,15 +42,16 @@ my $song = {
 	    'body' => [
 		       {
 			'context' => '',
-			'uri' => 'id=red',
+			'uri' => 'id=white',
 			'type' => 'image',
 			'opts' => {}
 		       }
 		      ],
 	    'assets' => {
-			 red => {
-				 data => 'dit is een plaatje',
-				 type => 'png',
+			 white => {
+				   type => 'jpg',
+				   width => 1,
+				   height => 1,
 				},
 			},
 	    'source' => { file => "__STRING__", line => 1 },
