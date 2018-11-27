@@ -53,6 +53,12 @@ my $song = {
 			'type' => 'songline'
 		       },
 		       {
+			'value' => '',
+			'context' => 'chorus',
+			'name' => 'context',
+			'type' => 'set'
+		       },
+		       {
 			'chorus' => [
 				     { 'chords' => [
 						    '',
@@ -69,6 +75,12 @@ my $song = {
 						    ],
 				       'type' => 'songline'
 				     },
+				     {
+				      'value' => '',
+				      'context' => 'chorus',
+				      'name' => 'context',
+				      'type' => 'set'
+				     }
 				    ],
 			'context' => '',
 			'type' => 'rechorus',

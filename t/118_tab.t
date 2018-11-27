@@ -39,6 +39,12 @@ my $song = {
 			'context' => 'tab',
 			'text' => 'Swing [D]low, sweet [G]chari[D]ot,',
 			'type' => 'tabline'
+		       },
+		       {
+			'value' => '',
+			'context' => 'tab',
+			'name' => 'context',
+			'type' => 'set'
 		       }
 		      ],
 	    'source' => { file => "__STRING__", line => 1 },

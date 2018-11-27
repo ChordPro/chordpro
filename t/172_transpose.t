@@ -67,6 +67,12 @@ my $song = {
       type => 'songline',
     },
     {
+     'value' => '',
+     'context' => 'chorus',
+     'name' => 'context',
+     'type' => 'set'
+    },
+    {
       context => '',
       type => 'empty',
     },
@@ -104,6 +110,12 @@ my $song = {
           ],
           type => 'songline',
         },
+	{
+	 'value' => '',
+	 'context' => 'chorus',
+	 'name' => 'context',
+	 'type' => 'set'
+	},
       ],
       context => '',
       transpose => 0,
@@ -147,6 +159,12 @@ my $song = {
           ],
           type => 'songline',
         },
+	{
+	 'value' => '',
+	 'context' => 'chorus',
+	 'name' => 'context',
+	 'type' => 'set'
+	},
       ],
       context => '',
       transpose => 2,
@@ -190,6 +208,12 @@ my $song = {
           ],
           type => 'songline',
         },
+	{
+	 'value' => '',
+	 'context' => 'chorus',
+	 'name' => 'context',
+	 'type' => 'set'
+	},
       ],
       context => '',
       transpose => 4,
@@ -233,6 +257,12 @@ my $song = {
           ],
           type => 'songline',
         },
+	{
+	 'value' => '',
+	 'context' => 'chorus',
+	 'name' => 'context',
+	 'type' => 'set'
+	},
       ],
       context => '',
       transpose => 2,
@@ -276,6 +306,12 @@ my $song = {
           ],
           type => 'songline',
         },
+	{
+	 'value' => '',
+	 'context' => 'chorus',
+	 'name' => 'context',
+	 'type' => 'set'
+	},
       ],
       context => '',
       transpose => 0,

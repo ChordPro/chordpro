@@ -50,6 +50,12 @@ my $song = {
 				       'D'
 				     ],
 			 'type' => 'songline'
+		       },
+		       {
+			'value' => '',
+			'context' => 'verse',
+			'name' => 'context',
+			'type' => 'set'
 		       }
 		      ],
 	    'source' => { file => "__STRING__", line => 1 },

@@ -92,6 +92,12 @@ my $song = {
 			'type' => 'songline'
 		       },
 		       {
+			'value' => '',
+			'context' => 'verse',
+			'name' => 'context',
+			'type' => 'set'
+		       },
+		       {
 			'type' => 'songline',
 			'phrases' => [
 				      'The quick ',
@@ -126,6 +132,12 @@ my $song = {
 				     ]
 		       },
 		       {
+			'value' => '',
+			'context' => 'verse2',
+			'name' => 'context',
+			'type' => 'set'
+		       },
+		       {
 			'phrases' => [
 				      'The quick ',
 				      'brown ',
@@ -156,6 +168,12 @@ my $song = {
 				      'dog'
 				     ],
 			'type' => 'songline'
+		       },
+		       {
+			'value' => '',
+			'context' => 'verse',
+			'name' => 'context',
+			'type' => 'set'
 		       },
 		       {
 			'chords' => [
@@ -192,6 +210,12 @@ my $song = {
 				     ]
 		       },
 		       {
+			'value' => '',
+			'context' => 'verse2',
+			'name' => 'context',
+			'type' => 'set'
+		       },
+		       {
 			'phrases' => [
 				      'The quick ',
 				      'brown ',
@@ -222,7 +246,13 @@ my $song = {
 				    ],
 			'type' => 'songline',
 			'context' => 'verse3'
-		       }
+		       },
+		       {
+			'value' => '',
+			'context' => 'verse3',
+			'name' => 'context',
+			'type' => 'set'
+		       },
 		      ],
 	    'source' => {
 			 'line' => 1,
