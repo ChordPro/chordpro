@@ -544,6 +544,9 @@ sub directive {
     if ( $dir =~ /^end_of_(\w+)$/ ) {
 	do_warn("Not in " . ucfirst($1) . " context\n")
 	  unless $in_context eq $1;
+	$self->add( type => "set",
+		    name => "context",
+		    value => $def_context );
 	$in_context = $def_context;
 	undef $memchords;
 	return 1;

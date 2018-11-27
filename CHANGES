@@ -3,7 +3,9 @@
     - Integrate a2crd into chordpro. Use "chordpro --a2crd" to invoke.
     - Implement image assets. Requires IO::String and Image::Info.
     - Allow a2crd as a filter.
+    - Use label instead of section name, if provided.
     - Fix undefined if no output file was supplied.
+    - Fix section change detection.
 
 0.972	2018-11-06
 

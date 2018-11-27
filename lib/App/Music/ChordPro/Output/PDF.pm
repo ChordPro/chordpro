@@ -599,9 +599,10 @@ sub generate_song {
 			my $e = { type => "comment",
 				  font => $ps->{fonts}->{$markup},
 				  context => $curctx,
-				  orig => $curctx,
-				  text => ucfirst($curctx) };
+				  orig => $i_tag // $curctx,
+				  text => $i_tag // ucfirst($curctx) };
 			unshift( @elts, $e, $elt );
+			$i_tag = undef;
 			redo;
 		    }
 		    elsif ( $markup ) {
@@ -938,6 +939,9 @@ sub generate_song {
 	    elsif ( $elt->{name} eq "label" ) {
 		$i_tag = $elt->{value};
 	    }
+	    elsif ( $elt->{name} eq "context" ) {
+		$curctx = $elt->{value};
+	    }
 	    # Arbitrary config values.
 	    elsif ( $elt->{name} =~ /^pdf\.(.+)/ ) {
 		my @k = split( /[.]/, $1 );
@@ -1050,7 +1054,7 @@ sub songline {
     my $ftext;
     my $ytext;
     my $tag = $i_tag // "";
-    $i_tag = "";
+    $i_tag = undef;
 
     if ( $type =~ /^comment/ ) {
 	$ftext = $elt->{font} || $fonts->{$type} || $fonts->{comment};
@@ -1231,7 +1235,7 @@ sub gridline {
     my $fonts = $ps->{fonts};
 
     my $tag = $i_tag // "";
-    $i_tag = "";
+    $i_tag = undef;
 
     # Use the chords font for the chords, and for the symbols size.
     my $fchord = { %{ $fonts->{grid} || $fonts->{chord} } };
