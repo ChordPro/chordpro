@@ -701,6 +701,10 @@ sub directive {
 	    elsif ( $key eq "capo" ) {
 		do_warn("Multiple capo settings may yield surprising results.")
 		  if $song->{meta}->{capo};
+		if ( $options->{decapo} ) {
+		    $xpose += $val;
+		    return 1;
+		}
 	    }
 	    elsif ( $key eq "duration" ) {
 		$val = duration($val);

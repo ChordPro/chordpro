@@ -266,6 +266,10 @@ the PDF as a collection of independent songs.
 The CSV has the same name  as the PDF, with extension C<.pdf> replaced
 by C<.csv>.
 
+=item B<--decapo>
+
+Eliminate capo settings by transposing the song.
+
 =item B<--diagrams=>I<WHICH>
 
 Prints diagrams of chords used in a song.
@@ -686,6 +690,7 @@ sub app_setup {
 	  "cover=s",			# Cover page(s)
 	  "filelist=s@",		# List of input files
 	  "meta=s\%",			# Command line meta data
+	  "decapo",			# remove capo
 
           ### Standard Chordii Options ###
 
@@ -932,6 +937,7 @@ Options:
     --config=JSON  --cfg          Config definitions (multiple)
     --start-page-number=N  -p     Starting page number [1]
     --toc --notoc -i              Generates/suppresses a table of contents
+    --decapo                      Eliminate capo settings
     --transcode=SYS  -xc          Transcodes to notation system
     --transpose=N  -x             Transposes by N semi-tones
     --version  -V                 Prints version and exits
@@ -1151,7 +1157,7 @@ handling Unicode data. And that is fun to program in.
 
 =head1 CURRENT STATUS
 
-This program provides alpha support for ChordPro version 5. It
+This program implements ChordPro version 5. It
 supports most of the features of Chordii, and a lot more:
 
 * Native PDF generation
