@@ -47,6 +47,7 @@ my $re_meta;			# for metadata
 my @labels;			# labels used
 
 # Normally, transposition and subtitutions are handled by the parser.
+my $decapo;
 my $no_transpose;		# NYI
 my $no_substitute;
 
@@ -83,6 +84,7 @@ sub parse_song {
 
     $no_transpose = $options->{'no-transpose'};
     $no_substitute = $options->{'no-substitute'};
+    $decapo = $options->{decapo};
 
     $song = App::Music::ChordPro::Song->new
       ( source => { file => $diag->{file}, line => 1 + $$linecnt },
@@ -703,6 +705,13 @@ sub directive {
 		  if $song->{meta}->{capo};
 		if ( $options->{decapo} ) {
 		    $xpose += $val;
+		    my $xp = $xpose;
+		    $xp += $options->{transpose} if $options->{transpose};
+		    for ( qw( key key_actual key_from ) ) {
+			next unless exists $song->{meta}->{$_};
+			$song->{meta}->{$_}->[-1] =
+			  App::Music::ChordPro::Chords::transpose( $song->{meta}->{$_}->[-1], $xp )
+		    }
 		    return 1;
 		}
 	    }
@@ -1102,6 +1111,14 @@ sub new {
 sub transpose {
     my ( $self, $xpose, $xcode ) = @_;
 
+    $xpose ||= 0;
+    my $xp = 0;
+    if ( exists $self->{meta} && exists $self->{meta}->{capo}
+	 && $decapo ) {
+	$xp = $self->{meta}->{capo}->[-1];
+	delete $self->{meta}->{capo};
+    }
+
     # Transpose meta data (key).
     if ( exists $self->{meta} && exists $self->{meta}->{key} ) {
 	foreach ( @{ $self->{meta}->{key} } ) {
@@ -1112,14 +1129,14 @@ sub transpose {
     # Transpose song chords.
     if ( exists $self->{chords} ) {
 	foreach my $item ( $self->{chords} ) {
-	    $self->_transpose( $item, $xpose, $xcode );
+	    $self->_transpose( $item, $xp+$xpose, $xcode );
 	}
     }
 
     # Transpose body contents.
     if ( exists $self->{body} ) {
 	foreach my $item ( @{ $self->{body} } ) {
-	    $self->_transpose( $item, $xpose, $xcode );
+	    $self->_transpose( $item, $xp+$xpose, $xcode );
 	}
     }
 }

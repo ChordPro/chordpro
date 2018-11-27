@@ -75,6 +75,10 @@ the PDF as a collection of independent songs.
 The CSV has the same name  as the PDF, with extension C<.pdf> replaced
 by C<.csv>.
 
+=item B<--decapo>
+
+Eliminate capo settings by transposing the song.
+
 =item B<--diagrams=>I<WHICH>
 
 Prints diagrams of chords used in a song.
@@ -441,7 +445,7 @@ handling Unicode data. And that is fun to program in.
 
 =head1 CURRENT STATUS
 
-This program provides alpha support for ChordPro version 5. It
+This program implements ChordPro version 5. It
 supports most of the features of Chordii, and a lot more:
 
 * Native PDF generation
