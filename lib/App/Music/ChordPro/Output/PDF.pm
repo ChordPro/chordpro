@@ -698,11 +698,12 @@ sub generate_song {
 
 =cut
 
-	    songline( $elt, $x, $y, $ps, song => $s, indent => $indent );
+	    my $r = songline( $elt, $x, $y, $ps, song => $s, indent => $indent );
 
 	    $y -= $vsp;
 	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
 
+	    unshift( @elts, $r ) if $r;
 	    next;
 	}
 
@@ -1061,9 +1062,11 @@ sub songline {
 	$ytext  = $ytop - font_bl($ftext);
 	my $song   = $opts{song};
 	$x += $opts{indent} if $opts{indent};
+	$x += $elt->{indent} if $elt->{indent};
 	prlabel( $ps, $tag, $x, $ytext );
-	$pr->text( $elt->{text}, $x, $ytext, $ftext );
-	return;
+	my ( $text, $ex ) = $pr->wrap( $elt->{text}, $x, $ytext, $ftext );
+	$pr->text( $text, $x, $ytext, $ftext );
+	return $ex ne "" ? { %$elt, indent => 10, text => $ex } : undef;
     }
     if ( $type eq "tabline" ) {
 	$ftext = $fonts->{tab};
@@ -1088,9 +1091,12 @@ sub songline {
        ) {
 	my $x = $x;
 	$x += $opts{indent} if $opts{indent};
+	$x += $elt->{indent} if $elt->{indent};
 	prlabel( $ps, $tag, $x, $ytext );
-	$pr->text( join( "", @{ $elt->{phrases} } ), $x, $ytext, $ftext );
-	return;
+	my ( $text, $ex ) = $pr->wrap( join( "", @{ $elt->{phrases} } ),
+				       $x, $ytext, $ftext );
+	$pr->text( $text, $x, $ytext, $ftext );
+	return $ex ne "" ? { %$elt, indent => 10, phrases => [$ex] } : undef;
     }
 
     if ( $chordscol || $inlinechords ) {
@@ -2031,6 +2037,35 @@ sub info {
 		  1900+$tm[5], 1+$tm[4], @tm[3,2,1,0]);
     }
     $self->{pdf}->info( %info );
+}
+
+sub wrap {
+    my ( $self, $text, $x, $y, $font, $size ) = @_;
+    return ( "", "" ) unless length($text);
+
+    $font ||= $self->{font};
+    $size ||= $font->{size};
+
+    $self->setfont($font, $size);
+
+    my $m = $self->{ps}->{__rightmargin} - $x;
+
+    my $ex = "";
+    my $sp = "";
+    #warn("TEXT: |$text|\n");
+    while ( $self->strwidth($text) > $m ) {
+	my ( $l, $s, $r ) = $text =~ /^(.+)([-_,.:;\s])(.+)$/;
+	return ( $text, $ex ) unless defined $s;
+	#warn("WRAP: |$text| -> |$l|$s|$r$sp$ex|\n");
+	if ( $s =~ /\S/ ) {
+	    $l .= $s;
+	    $s = "";
+	}
+	$text = $l;
+	$ex = $r . $sp . $ex;
+	$sp = $s;
+    }
+    return ( $text, $ex );
 }
 
 sub text {
