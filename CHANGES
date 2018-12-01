@@ -3,6 +3,7 @@
     - Integrate a2crd into chordpro. Use "chordpro --a2crd" to invoke.
     - Add --decapo option to eliminate {capo} settings by transposing.
     - Implement image assets. Requires IO::String and Image::Info.
+    - Implement a basic form of line wrapping (regular chords+lyrics).
     - Implement a basic form of line wrapping (comments and non-chords lyrics).
     - Allow a2crd as a filter.
     - Use label instead of section name, if provided.

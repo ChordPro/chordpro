@@ -627,6 +627,14 @@ sub generate_song {
 
 	    # Get vertical space the songline will occupy.
 	    my $vsp = songline_vsp( $elt, $ps );
+	    if ( $elt->{type} eq "songline" && !$elt->{indent} ) {
+		my $e = wrap( $pr, $elt, $x );
+		if ( @$e > 1 ) {
+		    $checkspace->($vsp * scalar( @$e ));
+		    $elt = shift( @$e );
+		    unshift( @elts, @$e );
+		}
+	    }
 
 	    # Add prespace if fit. Otherwise newpage.
 	    $checkspace->($vsp);
@@ -1064,9 +1072,9 @@ sub songline {
 	$x += $opts{indent} if $opts{indent};
 	$x += $elt->{indent} if $elt->{indent};
 	prlabel( $ps, $tag, $x, $ytext );
-	my ( $text, $ex ) = $pr->wrap( $elt->{text}, $x, $ytext, $ftext );
+	my ( $text, $ex ) = wrapsimple( $pr, $elt->{text}, $x, $ftext );
 	$pr->text( $text, $x, $ytext, $ftext );
-	return $ex ne "" ? { %$elt, indent => 10, text => $ex } : undef;
+	return $ex ne "" ? { %$elt, indent => $pr->strwidth("x"), text => $ex } : undef;
     }
     if ( $type eq "tabline" ) {
 	$ftext = $fonts->{tab};
@@ -1093,10 +1101,10 @@ sub songline {
 	$x += $opts{indent} if $opts{indent};
 	$x += $elt->{indent} if $elt->{indent};
 	prlabel( $ps, $tag, $x, $ytext );
-	my ( $text, $ex ) = $pr->wrap( join( "", @{ $elt->{phrases} } ),
-				       $x, $ytext, $ftext );
+	my ( $text, $ex ) = wrapsimple( $pr, join( "", @{ $elt->{phrases} } ),
+					$x, $ftext );
 	$pr->text( $text, $x, $ytext, $ftext );
-	return $ex ne "" ? { %$elt, indent => 10, phrases => [$ex] } : undef;
+	return $ex ne "" ? { %$elt, indent => $pr->strwidth("x"), phrases => [$ex] } : undef;
     }
 
     if ( $chordscol || $inlinechords ) {
@@ -1116,6 +1124,7 @@ sub songline {
     }
 
     $elt->{chords} //= [ '' ];
+    $x += $elt->{indent} if $elt->{indent};
 
     my $chordsx = $x;
     $chordsx += $ps->{chordscolumn} if $chordscol;
@@ -2004,6 +2013,81 @@ sub tpt {
     return $y - $font->{size} * ($ps->{spacing}->{$type} || 1);
 }
 
+sub wrap {
+    my ( $pr, $elt, $x ) = @_;
+    my $res = [];
+    my @chords  = @{ $elt->{chords} };
+    my @phrases = @{ $elt->{phrases} };
+    my @rchords;
+    my @rphrases;
+    my $m = $pr->{ps}->{__rightmargin};
+
+    while ( @chords ) {
+	my $chord  = shift(@chords);
+	my $phrase = shift(@phrases);
+	my $ex = "";
+
+	if ( @rchords ) {
+	    # Does the chord fit?
+	    my $font = $pr->{ps}->{fonts}->{chord};
+	    $pr->setfont($font);
+	    my $w = $pr->strwidth($chord);
+	    if ( $w > $m - $x ) {
+		# Nope. Move to overflow.
+		$ex = $phrase;
+	    }
+	}
+
+	if ( $ex eq "" ) {
+	    # Do lyrics fit?
+	    my $font = $pr->{ps}->{fonts}->{text};
+	    $pr->setfont($font);
+	    my $ph;
+	    ( $ph, $ex ) = $pr->wrap( $phrase, $m - $x );
+	    # If it doesn not fit, it is usually a case a bad luck.
+	    # However, we may be able to move to overflow.
+	    my $w = $pr->strwidth($ph);
+	    if ( $w > $m - $x && @rchords > 1 ) {
+		$ex = $phrase;
+	    }
+	    else {
+		push( @rchords, $chord );
+		push( @rphrases, $ph );
+		$chord = '';
+	    }
+	    $x += $w;
+	}
+
+	if ( $ex ne "" ) {	# overflow
+	    if ( $rphrases[-1] =~ /[[:alpha:]]$/
+		 && $ex =~ /^[[:alpha:]]/
+		 && $chord ne '' ) {
+		$rphrases[-1] .= "-";
+	    }
+	    unshift( @chords, $chord );
+	    unshift( @phrases, $ex );
+	    $x = $_[2];
+	    push( @$res,
+		  { %$elt, chords => [@rchords], phrases => [@rphrases] } );
+	    $res->[-1]->{indent} = $pr->strwidth("x") if @$res > 1;
+	    @rchords = ();
+	    @rphrases = ();
+	}
+    }
+    push( @$res, { %$elt, chords => \@rchords, phrases => \@rphrases } );
+    $res->[-1]->{indent} = $pr->strwidth("x") if @$res > 1;
+    return $res;
+}
+
+sub wrapsimple {
+    my ( $pr, $text, $x, $font ) = @_;
+    return ( "", "" ) unless length($text);
+
+    $font ||= $pr->{font};
+    $pr->setfont($font);
+    $pr->wrap( $text, $pr->{ps}->{__rightmargin} - $x );
+}
+
 ################################################################
 
 package PDFWriter;
@@ -2039,20 +2123,13 @@ sub info {
     $self->{pdf}->info( %info );
 }
 
+
 sub wrap {
-    my ( $self, $text, $x, $y, $font, $size ) = @_;
-    return ( "", "" ) unless length($text);
-
-    $font ||= $self->{font};
-    $size ||= $font->{size};
-
-    $self->setfont($font, $size);
-
-    my $m = $self->{ps}->{__rightmargin} - $x;
+    my ( $self, $text, $m ) = @_;
 
     my $ex = "";
     my $sp = "";
-    #warn("TEXT: |$text|\n");
+    #warn("TEXT: |$text| ($m)\n");
     while ( $self->strwidth($text) > $m ) {
 	my ( $l, $s, $r ) = $text =~ /^(.+)([-_,.:;\s])(.+)$/;
 	return ( $text, $ex ) unless defined $s;
@@ -2065,6 +2142,7 @@ sub wrap {
 	$ex = $r . $sp . $ex;
 	$sp = $s;
     }
+
     return ( $text, $ex );
 }
 
