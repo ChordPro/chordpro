@@ -69,6 +69,12 @@
 		    "minimum": 1
 		},
 
+		"decapo": {
+		    "description": "Eliminate capo by transposing chords.",
+		    "type": "boolean",
+		    "default": false
+		},
+
 		"inline-chords": {
 		    "description": "Chords inline.",
 		    "default": false,

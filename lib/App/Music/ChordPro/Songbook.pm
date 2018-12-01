@@ -84,7 +84,7 @@ sub parse_song {
 
     $no_transpose = $options->{'no-transpose'};
     $no_substitute = $options->{'no-substitute'};
-    $decapo = $options->{decapo};
+    $decapo = $options->{decapo} || $::config->{settings}->{decapo};
 
     $song = App::Music::ChordPro::Song->new
       ( source => { file => $diag->{file}, line => 1 + $$linecnt },

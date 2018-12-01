@@ -47,6 +47,8 @@ This is the current built-in configuration file, showing all settings.
   	"chords-under" : false,
         // Transcoding.
         "transcode" : null,
+	// Always decapoize.
+	"decapo" : false,
       },
   
       // Metadata.

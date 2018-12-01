@@ -58,6 +58,8 @@ This is the current built-in configuration file, showing all settings.
   	"chords-under" : false,
         // Transcoding.
         "transcode" : null,
+	// Always decapoize.
+	"decapo" : false,
       },
   
       // Metadata.
@@ -585,6 +587,9 @@ sub configurator {
     }
     if ( $options->{transcode} ) {
 	$cfg->{settings}->{transcode} = $options->{transcode};
+    }
+    if ( $options->{decapo} ) {
+	$cfg->{settings}->{decapo} = $options->{decapo};
     }
     return $cfg if $options->{'cfg-print'};
 
