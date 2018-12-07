@@ -995,18 +995,28 @@ use Encode qw(decode decode_utf8 encode_utf8);
 
 sub ::rsc_or_file {
     my ( $c ) = @_;
+    my $f = $c;
+
     # Check for resource names.
-    if ( ! -r $c && $c !~ m;[/.]; ) {
-	my $t;
+    if ( $f !~ m;[/.]; ) {
 	if ( $c =~ /^(.+):(.*)/ ) {
-	    $t = getresource( lc($1) . "/".lc($2).".json" );
+	    $f = lc($1) . "/" . lc($2) . ".json";
 	}
 	else {
-	    $t = getresource( "config/".lc($c).".json" );
+	    $f = lc($c) . ".json";
 	}
-	$c = $t if $t;
     }
-    return $c;
+
+    my @libs = split( /[:;]/, $ENV{CHORDPRO_LIB} || "." );
+    foreach my $lib ( @libs ) {
+	return $lib . "/" . $f if -r $lib . "/" . $f;
+	next if $f =~ /\//;
+	return $lib . "/config/" . $f if -r $lib . "/config/" . $f;
+    }
+
+    my $t = getresource($f);
+    $t = getresource( "config/$f" ) unless defined($t) || $f =~ /\//;
+    return defined($t) ? $t : $c;
 }
 
 sub ::loadfile {
