@@ -2016,8 +2016,8 @@ sub tpt {
 sub wrap {
     my ( $pr, $elt, $x ) = @_;
     my $res = [];
-    my @chords  = @{ $elt->{chords} };
-    my @phrases = @{ $elt->{phrases} };
+    my @chords  = @{ $elt->{chords} // [] };
+    my @phrases = @{ $elt->{phrases} // [] };
     my @rchords;
     my @rphrases;
     my $m = $pr->{ps}->{__rightmargin};

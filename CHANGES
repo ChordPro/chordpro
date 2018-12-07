@@ -9,6 +9,7 @@
     - Use label instead of section name, if provided.
     - Fix undefined if no output file was supplied.
     - Fix section change detection.
+    - Fix crash when chordless songline and not suppress-empty-chords.
 
 0.972	2018-11-06
 
