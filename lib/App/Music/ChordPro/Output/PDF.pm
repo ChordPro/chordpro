@@ -21,7 +21,7 @@ BEGIN {
     die("Missing PDF::API package\n");
 }
 
-use constant DEBUG_SPACING => 1;
+use constant DEBUG_SPACING => 0;
 
 # For regression testing, run perl with PERL_HASH_SEED set to zero.
 # This eliminates the arbitrary order of font definitions and triggers
