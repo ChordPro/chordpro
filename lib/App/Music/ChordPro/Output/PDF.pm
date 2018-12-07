@@ -21,7 +21,7 @@ BEGIN {
     die("Missing PDF::API package\n");
 }
 
-use constant DEBUG_SPACING => 0;
+use constant DEBUG_SPACING => 1;
 
 # For regression testing, run perl with PERL_HASH_SEED set to zero.
 # This eliminates the arbitrary order of font definitions and triggers
@@ -519,8 +519,8 @@ sub generate_song {
 			   + $ps->{diagrams}->{hspace}
 			   * $ps->{diagrams}->{width} ) / $hsp );
 	    while ( @chords ) {
-		my $x = $x - $ps->{_indent};
 		$checkspace->($vsp);
+		my $x = $x - $ps->{_indent};
 		$pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
 
 		for ( 1..$h ) {
