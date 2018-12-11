@@ -1646,7 +1646,7 @@ sub getchordinfo {
 	$info = App::Music::ChordPro::Chords::chord_info($name);
     }
     if ( $info ) {
-	if ( $info->{frets} ) {
+	if ( $info->{frets} && @{ $info->{frets} } ) {
 	    # Suppress if NC.
 	    foreach ( @{ $info->{frets} } ) {
 		return $info if $_ >= 0;
