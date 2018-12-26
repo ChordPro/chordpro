@@ -2,6 +2,8 @@
 
 ![](images/maintenance.png)
 
+If you're not sure which option to take, use the [[Native install kit|Install Windows Native]] and download the GUI installer. Alternative options are listed below.
+
 Microsoft Windows systems are not standard equipped with the Perl application environment. You need to download and install Perl yourself.
 
 Currently, there are some easy options (and several harder ones that will not be discussed here).
