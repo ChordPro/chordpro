@@ -2,14 +2,16 @@
 
 ![](images/maintenance.png)
 
-If you're not sure which option to take, use the [[Native install kit|Install Windows Native]] and download the GUI installer. Alternative options are listed below.
+## Binaries
+
+If you're not sure which option to take, use the [[Native install kit|Install Windows Native]] (reported to run on Windows 7, 8 and 10) and download the GUI installer. A CLI version is also available there. 
+
+## Using Perl
 
 Microsoft Windows systems are not standard equipped with the Perl application environment. You need to download and install Perl yourself.
 
 Currently, there are some easy options (and several harder ones that will not be discussed here).
 
-* [[Native install kit|Install Windows Native]]  
-A native install kit is available for modern 64-bit Windows. It is reported to run on Windows 7, 8 and 10.
 * [[Citrus Perl|Install Windows Citrus]]  
 This is an open source Perl distribution which includes many tools.
 * [[ActiveState Perl|Install Windows ActiveState]]  
