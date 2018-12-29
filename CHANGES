@@ -15,6 +15,7 @@
     - Fix misplacement of diagrams when columns and too many {chord}
       directives.
     - Fix printing of auto-added chords.
+    - Fix issue #63: Labels are lost when a new song is encountered.
 
 0.972	2018-11-06
 

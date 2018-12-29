@@ -217,7 +217,7 @@ sub parse_song {
       if $in_context;
 
     if ( @labels ) {
-	$song->{labels} = \@labels;
+	$song->{labels} = [ @labels ];
     }
 
     my $diagrams;
