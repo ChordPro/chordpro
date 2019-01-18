@@ -4,8 +4,7 @@ Assuming your Linux systems has the Perl environment correctly installed (standa
 
 ## GUI (graphical) interface version
 
-`sudo cpan install Wx`
-`sudo cpan install chordpro`
+`sudo cpan install wxchordpro`
 
 Then, to open the program, run `wxchordpro` at a terminal prompt. 
 You will get a file open dialog. To close the program, you can press `Cancel` and terminate the program with `File` > `Exit`.
