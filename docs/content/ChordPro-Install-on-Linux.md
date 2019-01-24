@@ -4,7 +4,21 @@ Assuming your Linux systems has the Perl environment correctly installed (standa
 
 ## GUI (graphical) interface version
 
-`sudo cpan install Wx chordpro`
+Use your system package manager to install the Perl Wx library. For
+Debian/Ubuntu type systems:
+
+`sudo apt-get install libwx-perl`
+
+For RPM based systems like Fedora:
+
+`sudo dnf install perl-Wx`
+
+After installing the Wx library, you can install `chordpro` with:
+
+`sudo cpan install chordpro`
+
+This will install the command line version `chordpro` as well as the
+GUI version `wxchordpro`.
 
 Then, to open the program, run `wxchordpro` at a terminal prompt. 
 You will get a file open dialog. To close the program, you can press `Cancel` and terminate the program with `File` > `Exit`.
