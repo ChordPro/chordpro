@@ -1191,6 +1191,7 @@ sub songline {
 	    if ( $info && $info->{system} eq "roman" ) {
 		$xt0 = $pr->text( $pre.$info->{root},
 				  $x, $ychord, $fchord );
+		$info->{qual} = 'ø' if $info->{qual} eq 'h';
 		$xt0 = $pr->text( $info->{qual}.$info->{ext}, $xt0,
 				   $ychord + $fchord->{size} * 0.2,
 				   $fchord,
