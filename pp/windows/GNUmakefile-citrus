@@ -1,5 +1,5 @@
-# gmake file for MS Windows + StrawberryPerl
-# Based on 64-bit gmake and StrawberryPerl 5.28 with wxWidgets 3.0.
+# gmake file for MS Windows + CitrusPerl
+# Based on 64-bit gmake and CitrusPerl 5.24 with wxWidgets 3.0.
 
 SCRIPT := ../../script
 
@@ -17,7 +17,7 @@ chordpro.exe :: chordpro.pp
 # To set PATH from the makefile, we need .ONESHELL pseudo target above.
 
 wxchordpro.exe :: chordpro.pp wxchordpro.pp ../common/wxchordpro.pp
-	set path=C:\\Strawberry\\perl\\site\\lib\\Alien\\wxWidgets\\msw_3_0_2_uni_gcc_3_4\\lib;%path%
+	set path=C:\\perl\\vendor\\lib\\Alien\\wxWidgets\\msw_3_0_2_uni_gcc_1_2\\lib;%path%
 	${PP} --output=wxchordpro.exe @wxchordpro.pp ${SCRIPT}/wxchordpro.pl
 
 ISC := 	"C:\\Program Files (x86)\\Inno Setup 5\\Compil32.exe"
