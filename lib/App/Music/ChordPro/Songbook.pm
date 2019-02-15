@@ -715,7 +715,7 @@ sub directive {
 		    return 1;
 		}
 	    }
-	    elsif ( $key eq "duration" ) {
+	    elsif ( $key eq "duration" && $val ) {
 		$val = duration($val);
 	    }
 
