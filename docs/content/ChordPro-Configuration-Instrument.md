@@ -124,6 +124,9 @@ It must be 1 or higher. The `"frets"` positions are the positions in
 the chord diagram. `"fingers"` is optional and denotes which fingers
 are used for the chord.
 
+For convenience, `"instrument"` and `"tuning"` can be used as
+substitution variables in texts, see [[Using metadata in texts|ChordPro Configuration Format Strings]].
+
 ## Special: Nashville Number System
 
 The Nashville Number System is a method of transcribing music by
