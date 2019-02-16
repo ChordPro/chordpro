@@ -121,7 +121,6 @@ $song = {
 		       'album' => [ 'The Album', 'Another Album' ],
 		       'capo' => [ '2', '3' ],
 		       'key' => [ 'F', 'G' ],
-		       '_key' => [ 'G#', 'A#' ],
 		       'tempo' => [ '320', '220' ],
 		       'time' => [ '3/4', '4/4' ],
 		      },

@@ -9,6 +9,7 @@
     - Implement user library (env. var. CHORDPRO_LIB). Experimental.
     - Allow a2crd as a filter.
     - Use label instead of section name, if provided.
+    - Make instrument and tuning accessible as meta data.
     - Fix undefined if no output file was supplied.
     - Fix section change detection.
     - Fix crash when chordless songline and not suppress-empty-chords.

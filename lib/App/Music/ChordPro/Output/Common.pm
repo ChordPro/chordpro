@@ -11,7 +11,7 @@ use utf8;
 sub fmt_subst {
     my ( $s, $t ) = @_;
     my $res = "";
-    my $m = $s->{meta};
+    my $m = { %{$s->{meta}} };
 
     # Derived item(s).
     $m->{_key} = $m->{key} if exists $m->{key};
@@ -20,6 +20,8 @@ sub fmt_subst {
 	  [ map { App::Music::ChordPro::Chords::transpose( $_, $capo ) }
 	        @{$m->{key}} ];
     }
+    $m->{tuning} //= [ join(" ", App::Music::ChordPro::Chords::get_tuning) ];
+    $m->{instrument} //= [ $::config->{instrument} ];
 
     interpolate( { %$s, args => $m,
 		   separator => $::config->{metadata}->{separator} },
