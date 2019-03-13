@@ -22,7 +22,9 @@ These settings control global behaviour of the ChordPro program and can be chang
         // Defaults to "[%s]" if true.
         "inline-chords" : false,
         // Chords under the lyrics.
-       "chords-under" : false,
+        "chords-under" : false,
+		// Memorize chords.
+		"memorize" : false,
     },
 
 ## Metadata
