@@ -1,4 +1,4 @@
-0.973
+0.973	2019-03-13
 
     - Integrate a2crd into chordpro. Use "chordpro --a2crd" to invoke.
     - Add --decapo option to eliminate {capo} settings by transposing.
