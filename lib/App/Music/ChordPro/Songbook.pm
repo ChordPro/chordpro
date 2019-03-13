@@ -47,6 +47,7 @@ my $re_meta;			# for metadata
 my @labels;			# labels used
 
 # Normally, transposition and subtitutions are handled by the parser.
+my $decapo;
 my $no_transpose;		# NYI
 my $no_substitute;
 
@@ -83,6 +84,7 @@ sub parse_song {
 
     $no_transpose = $options->{'no-transpose'};
     $no_substitute = $options->{'no-substitute'};
+    $decapo = $options->{decapo} || $::config->{settings}->{decapo};
 
     $song = App::Music::ChordPro::Song->new
       ( source => { file => $diag->{file}, line => 1 + $$linecnt },
@@ -136,6 +138,36 @@ sub parse_song {
 	}
 
 	if ( /^#/ ) {
+	    if ( /^##image:\s+id=(\S+)/ ) {
+		my $id = $1;
+
+		# In-line image asset.
+		require MIME::Base64;
+		require Image::Info;
+
+		# Read the image.
+		my $data = '';
+		while ( @$lines && $lines->[0] =~ /^# (.+)/ ) {
+		    $data .= MIME::Base64::decode($1);
+		    shift(@$lines);
+		}
+
+		# Get info.
+		my $info = Image::Info::image_info(\$data);
+		if ( $info->{error} ) {
+		    do_warn($info->{error});
+		    next;
+		}
+
+		# Store in assets.
+		$song->{assets} //= {};
+		$song->{assets}->{$id} =
+		  { data => $data, type => $info->{file_ext},
+		    width => $info->{width}, height => $info->{height},
+		  };
+
+		next;
+	    }
 	    # Collect pre-title stuff separately.
 	    if ( exists $song->{title} ) {
 		$self->add( type => "ignore", text => $_ );
@@ -185,7 +217,7 @@ sub parse_song {
       if $in_context;
 
     if ( @labels ) {
-	$song->{labels} = \@labels;
+	$song->{labels} = [ @labels ];
     }
 
     my $diagrams;
@@ -514,6 +546,9 @@ sub directive {
     if ( $dir =~ /^end_of_(\w+)$/ ) {
 	do_warn("Not in " . ucfirst($1) . " context\n")
 	  unless $in_context eq $1;
+	$self->add( type => "set",
+		    name => "context",
+		    value => $def_context );
 	$in_context = $def_context;
 	undef $memchords;
 	return 1;
@@ -594,6 +629,7 @@ sub directive {
 	use Text::ParseWords qw(shellwords);
 	my @args = shellwords($arg);
 	my $uri;
+	my $id;
 	my %opts;
 	foreach ( @args ) {
 	    if ( /^(width|height|border|center)=(\d+)$/i ) {
@@ -608,8 +644,11 @@ sub directive {
 	    elsif ( /^(src|uri)=(.+)$/i ) {
 		$uri = $2;
 	    }
+	    elsif ( /^(id)=(.+)$/i ) {
+		$id = $2;
+	    }
 	    elsif ( /^(title)=(.*)$/i ) {
-		$opts{title} = $1;
+		$opts{title} = $2;
 	    }
 	    elsif ( /^(.+)=(.*)$/i ) {
 		do_warn( "Unknown image attribute: $1\n" );
@@ -619,6 +658,7 @@ sub directive {
 		$uri = $_;
 	    }
 	}
+	$uri = "id=$id" if $id;
 	unless ( $uri ) {
 	    do_warn( "Missing image source\n" );
 	    return;
@@ -663,8 +703,19 @@ sub directive {
 	    elsif ( $key eq "capo" ) {
 		do_warn("Multiple capo settings may yield surprising results.")
 		  if $song->{meta}->{capo};
+		if ( $options->{decapo} ) {
+		    $xpose += $val;
+		    my $xp = $xpose;
+		    $xp += $options->{transpose} if $options->{transpose};
+		    for ( qw( key key_actual key_from ) ) {
+			next unless exists $song->{meta}->{$_};
+			$song->{meta}->{$_}->[-1] =
+			  App::Music::ChordPro::Chords::transpose( $song->{meta}->{$_}->[-1], $xp )
+		    }
+		    return 1;
+		}
 	    }
-	    elsif ( $key eq "duration" ) {
+	    elsif ( $key eq "duration" && $val ) {
 		$val = duration($val);
 	    }
 
@@ -1060,6 +1111,14 @@ sub new {
 sub transpose {
     my ( $self, $xpose, $xcode ) = @_;
 
+    $xpose ||= 0;
+    my $xp = 0;
+    if ( exists $self->{meta} && exists $self->{meta}->{capo}
+	 && $decapo ) {
+	$xp = $self->{meta}->{capo}->[-1];
+	delete $self->{meta}->{capo};
+    }
+
     # Transpose meta data (key).
     if ( exists $self->{meta} && exists $self->{meta}->{key} ) {
 	foreach ( @{ $self->{meta}->{key} } ) {
@@ -1070,14 +1129,14 @@ sub transpose {
     # Transpose song chords.
     if ( exists $self->{chords} ) {
 	foreach my $item ( $self->{chords} ) {
-	    $self->_transpose( $item, $xpose, $xcode );
+	    $self->_transpose( $item, $xp+$xpose, $xcode );
 	}
     }
 
     # Transpose body contents.
     if ( exists $self->{body} ) {
 	foreach my $item ( @{ $self->{body} } ) {
-	    $self->_transpose( $item, $xpose, $xcode );
+	    $self->_transpose( $item, $xp+$xpose, $xcode );
 	}
     }
 }

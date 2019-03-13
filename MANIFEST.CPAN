@@ -76,6 +76,10 @@ CPAN/Font/TTF/Woff.pm
 CPAN/Font/TTF/Woff/PrivateData.pm
 CPAN/Font/TTF/XMLparse.pm
 CPAN/IO/String.pm
+CPAN/Image/Info.pm
+CPAN/Image/Info/GIF.pm
+CPAN/Image/Info/JPEG.pm
+CPAN/Image/Info/PNG.pm
 CPAN/JSON/PP/Boolean.pm
 CPAN/JSON/PP.pm
 CPAN/PDF/API2/Annotation.pm

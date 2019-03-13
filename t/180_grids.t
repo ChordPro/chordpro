@@ -130,6 +130,12 @@ my $song = {
 			   { class => 'bar', symbol => '|' },
 			  ],
 	       },
+	       {
+		'value' => '',
+		'context' => 'grid',
+		'name' => 'context',
+		'type' => 'set'
+	       },
 	      ],
 	   };
 
@@ -161,7 +167,8 @@ isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
 
 $song->{body}->[0]->{value} = [ 4, 3, 1, 2, '' ];
 splice( @{$song->{body}}, $_, 0,
+	{ context => 'grid', value => '', name => 'context', type => 'set' },
 	{ context => 'grid', name => 'gridparams',
 	  type => 'set', value => [ 4, 3, 1, 2 ] } )
-  for 2, 4, 6;
+  for 2, 5, 8;
 is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );

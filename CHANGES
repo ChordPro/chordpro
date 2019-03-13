@@ -1,3 +1,25 @@
+0.973	2019-03-13
+
+    - Integrate a2crd into chordpro. Use "chordpro --a2crd" to invoke.
+    - Add --decapo option to eliminate {capo} settings by transposing.
+    - Implement image assets. Requires IO::String and Image::Info.
+    - Implement a basic form of line wrapping (regular chords+lyrics).
+    - Implement a basic form of line wrapping (comments and non-chords
+      lyrics).
+    - Implement user library (env. var. CHORDPRO_LIB). Experimental.
+    - Allow a2crd as a filter.
+    - Use label instead of section name, if provided.
+    - Make instrument and tuning accessible as meta data.
+    - Fix undefined if no output file was supplied.
+    - Fix section change detection.
+    - Fix crash when chordless songline and not suppress-empty-chords.
+    - Fix misplacement of diagrams when columns and too many {chord}
+      directives.
+    - Fix printing of auto-added chords.
+    - Fix issue #63: Labels are lost when a new song is encountered.
+    - Fix crash when --dump-chords and no meta.
+    - (PDF) Fix label width.
+
 0.972	2018-11-06
 
     - Add a2crd script.

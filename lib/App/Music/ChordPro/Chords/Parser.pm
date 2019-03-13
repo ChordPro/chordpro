@@ -520,7 +520,7 @@ sub parse_chord {
 	$bass = $2;
     }
 
-    return unless $chord =~ /^$r_pat(?<qual>\+|0|aug|dim)?(?<ext>.*)$/;
+    return unless $chord =~ /^$r_pat(?<qual>\+|0|aug|dim|h)?(?<ext>.*)$/;
 
     my $info = { system => "roman",
 		 parser => $self,

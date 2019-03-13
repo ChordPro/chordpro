@@ -29,6 +29,26 @@ one or many songs plus chord information. B<chordpro> will then
 generate a photo-ready, professional looking, impress-your-friends
 sheet-music suitable for printing on your nearest printer.
 
+Typical ChordPro input:
+
+    {title: Swing Low Sweet Chariot}
+    {subtitle: Traditional}
+
+    {start_of_chorus}
+    Swing [D]low, sweet [G]chari[D]ot,
+    Comin’ for to carry me [A7]home.
+    Swing [D7]low, sweet [G]chari[D]ot,
+    Comin’ for to [A7]carry me [D]home.
+    {end_of_chorus}
+
+    # Verse
+    I [D]looked over Jordan, and [G]what did I [D]see,
+    Comin’ for to carry me [A7]home.
+    A [D]band of angels [G]comin’ after [D]me,
+    Comin’ for to [A7]carry me [D]home.
+
+    {c: Chorus}
+
 B<chordpro> is a rewrite of the Chordii program, see
 L<http://www.chordii.org>.
 
@@ -167,13 +187,15 @@ sub main {
     warn(Dumper($s), "\n") if $options->{debug};
 
     # Try interpolations.
-    my $f = App::Music::ChordPro::Output::Common::fmt_subst
-      ( $s->{songs}->[0], $of );
-    if ( $f ne $of ) {
-	# Replace most non-alpha by underscore (but keep the extension).
-	$f =~ s;(?!\.\w+$)[^\w/-];_;g;
-	warn("Writing output to $f\n") if $options->{verbose};
-	$options->{output} = $f;
+    if ( $of ) {
+	my $f = App::Music::ChordPro::Output::Common::fmt_subst
+	  ( $s->{songs}->[0], $of );
+	if ( $f ne $of ) {
+	    # Replace most non-alpha by underscore (but keep the extension).
+	    $f =~ s;(?!\.\w+$)[^\w/-];_;g;
+	    warn("Writing output to $f\n") if $options->{verbose};
+	    $options->{output} = $f;
+	}
     }
 
     my $res;
@@ -243,6 +265,10 @@ the PDF as a collection of independent songs.
 
 The CSV has the same name  as the PDF, with extension C<.pdf> replaced
 by C<.csv>.
+
+=item B<--decapo>
+
+Eliminate capo settings by transposing the song.
 
 =item B<--diagrams=>I<WHICH>
 
@@ -664,6 +690,7 @@ sub app_setup {
 	  "cover=s",			# Cover page(s)
 	  "filelist=s@",		# List of input files
 	  "meta=s\%",			# Command line meta data
+	  "decapo",			# remove capo
 
           ### Standard Chordii Options ###
 
@@ -910,6 +937,7 @@ Options:
     --config=JSON  --cfg          Config definitions (multiple)
     --start-page-number=N  -p     Starting page number [1]
     --toc --notoc -i              Generates/suppresses a table of contents
+    --decapo                      Eliminate capo settings
     --transcode=SYS  -xc          Transcodes to notation system
     --transpose=N  -x             Transposes by N semi-tones
     --version  -V                 Prints version and exits
@@ -967,18 +995,28 @@ use Encode qw(decode decode_utf8 encode_utf8);
 
 sub ::rsc_or_file {
     my ( $c ) = @_;
+    my $f = $c;
+
     # Check for resource names.
-    if ( ! -r $c && $c !~ m;[/.]; ) {
-	my $t;
+    if ( $f !~ m;[/.]; ) {
 	if ( $c =~ /^(.+):(.*)/ ) {
-	    $t = getresource( lc($1) . "/".lc($2).".json" );
+	    $f = lc($1) . "/" . lc($2) . ".json";
 	}
 	else {
-	    $t = getresource( "config/".lc($c).".json" );
+	    $f = lc($c) . ".json";
 	}
-	$c = $t if $t;
     }
-    return $c;
+
+    my @libs = split( /[:;]/, $ENV{CHORDPRO_LIB} || "." );
+    foreach my $lib ( @libs ) {
+	return $lib . "/" . $f if -r $lib . "/" . $f;
+	next if $f =~ /\//;
+	return $lib . "/config/" . $f if -r $lib . "/config/" . $f;
+    }
+
+    my $t = getresource($f);
+    $t = getresource( "config/$f" ) unless defined($t) || $f =~ /\//;
+    return defined($t) ? $t : $c;
 }
 
 sub ::loadfile {
@@ -1129,7 +1167,7 @@ handling Unicode data. And that is fun to program in.
 
 =head1 CURRENT STATUS
 
-This program provides alpha support for ChordPro version 5. It
+This program implements ChordPro version 5. It
 supports most of the features of Chordii, and a lot more:
 
 * Native PDF generation

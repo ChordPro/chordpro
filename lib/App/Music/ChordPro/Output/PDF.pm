@@ -132,6 +132,7 @@ my $chordsunder = 0;		# chords under the lyrics
 my $chordscol = 0;		# chords in a separate column
 my $chordscapo = 0;		# capo in a separate column
 my $i_tag;
+my $assets;
 
 use constant SIZE_ITEMS => [ qw (chord text tab grid diagram toc title footer) ];
 
@@ -140,6 +141,7 @@ sub generate_song {
 
     return 0 unless $s->{body};	# empty song
     $source = $s->{source};
+    $assets = $s->{assets} || {};
 
     $single_space = $::config->{settings}->{'suppress-empty-chords'};
     $inlinechords = $::config->{settings}->{'inline-chords'};
@@ -153,6 +155,10 @@ sub generate_song {
 
     $structured = ( $options->{'backend-option'}->{structure} // '' ) eq 'structured';
     $s->structurize if $structured;
+
+    # Diagrams drawer.
+    require App::Music::ChordPro::Output::PDF::StringDiagrams;
+    my $dd = App::Music::ChordPro::Output::PDF::StringDiagrams->new;
 
     my $sb = $s->{body};
 
@@ -422,18 +428,18 @@ sub generate_song {
 	# If chord diagrams are to be printed in the right column, put
 	# them on the first page.
 	if ( $show eq "right" && $class <= 1 ) {
-	    my $vsp = chordgrid_vsp( undef, $ps );
+	    my $vsp = $dd->vsp( undef, $ps );
 
 	    my $v = int( ( $ps->{_margintop} - $ps->{marginbottom} ) / $vsp );
 	    my $c = int( ( @chords - 1) / $v ) + 1;
 	    # warn("XXX ", scalar(@chords), ", $c colums of $v max\n");
 	    my $column =
 	      ( $ps->{_marginright} - $ps->{_marginleft}
-		- ($c-1) * chordgrid_hsp(undef,$ps)
-		- chordgrid_hsp0(undef,$ps)
+		- ($c-1) * $dd->hsp(undef,$ps)
+		- $dd->hsp0(undef,$ps)
 		- $ps->{diagrams}->{width} * 0.4 );
 
-	    my $hsp = chordgrid_hsp(undef,$ps);
+	    my $hsp = $dd->hsp(undef,$ps);
 	    my $x = $x + $column - $ps->{_indent};
 	    $ps->{_rightmargin} = $ps->{papersize}->[0] - $x + $ps->{columnspace};
 	    set_columns( $ps,
@@ -443,7 +449,7 @@ sub generate_song {
 
 		for ( 0..$c-1 ) {
 		    last unless @chords;
-		    chordgrid( shift(@chords), $x + $_*$hsp, $y, $ps );
+		    $dd->draw( shift(@chords), $x + $_*$hsp, $y, $ps );
 		}
 
 		$y -= $vsp;
@@ -456,18 +462,18 @@ sub generate_song {
 	    # Number of diagrams, based on minimal required interspace.
 	    my $h = int( ( $ww
 			   # Add one interspace (cuts off right)
-			   + chordgrid_hsp1(undef,$ps) )
-			 / chordgrid_hsp(undef,$ps) );
+			   + $dd->hsp1(undef,$ps) )
+			 / $dd->hsp(undef,$ps) );
 	    die("ASSERT: $h should be greater than 0") unless $h > 0;
 
-	    my $hsp = chordgrid_hsp(undef,$ps);
-	    my $vsp = chordgrid_vsp( undef, $ps );
+	    my $hsp = $dd->hsp(undef,$ps);
+	    my $vsp = $dd->vsp( undef, $ps );
 	    while ( @chords ) {
 		my $x = $x - $ps->{_indent};
 
 		for ( 0..$h-1 ) {
 		    last unless @chords;
-		    chordgrid( shift(@chords), $x + $_*$hsp, $y, $ps );
+		    $dd->draw( shift(@chords), $x + $_*$hsp, $y, $ps );
 		}
 
 		$y -= $vsp;
@@ -481,12 +487,12 @@ sub generate_song {
 	    # Number of diagrams, based on minimal required interspace.
 	    my $h = int( ( $ww
 			   # Add one interspace (cuts off right)
-			   + chordgrid_hsp1(undef,$ps) )
-			 / chordgrid_hsp(undef,$ps) );
+			   + $dd->hsp1(undef,$ps) )
+			 / $dd->hsp(undef,$ps) );
 	    die("ASSERT: $h should be greater than 0") unless $h > 0;
 
-	    my $vsp = chordgrid_vsp( undef, $ps );
-	    my $hsp = chordgrid_hsp( undef, $ps );
+	    my $vsp = $dd->vsp( undef, $ps );
+	    my $hsp = $dd->hsp( undef, $ps );
 
 	    my $y = $ps->{marginbottom} + (int((@chords-1)/$h) + 1) * $vsp;
 	    $ps->{_bottommargin} = $y;
@@ -500,7 +506,7 @@ sub generate_song {
 
 		for ( 1..$h ) {
 		    last unless @chords;
-		    chordgrid( shift(@chords), $x, $y, $ps );
+		    $dd->draw( shift(@chords), $x, $y, $ps );
 		    $x += $hsp;
 		}
 
@@ -510,20 +516,20 @@ sub generate_song {
 	}
 	elsif ( $show eq "below" ) {
 
-	    my $vsp = chordgrid_vsp( undef, $ps );
-	    my $hsp = chordgrid_hsp( undef, $ps );
+	    my $vsp = $dd->vsp( undef, $ps );
+	    my $hsp = $dd->hsp( undef, $ps );
 	    my $h = int( ( $ps->{__rightmargin}
 			   - $ps->{__leftmargin}
 			   + $ps->{diagrams}->{hspace}
 			   * $ps->{diagrams}->{width} ) / $hsp );
 	    while ( @chords ) {
-		my $x = $x - $ps->{_indent};
 		$checkspace->($vsp);
+		my $x = $x - $ps->{_indent};
 		$pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
 
 		for ( 1..$h ) {
 		    last unless @chords;
-		    chordgrid( shift(@chords), $x, $y, $ps );
+		    $dd->draw( shift(@chords), $x, $y, $ps );
 		    $x += $hsp;
 		}
 
@@ -597,9 +603,10 @@ sub generate_song {
 			my $e = { type => "comment",
 				  font => $ps->{fonts}->{$markup},
 				  context => $curctx,
-				  orig => $curctx,
-				  text => ucfirst($curctx) };
+				  orig => $i_tag // $curctx,
+				  text => $i_tag // ucfirst($curctx) };
 			unshift( @elts, $e, $elt );
+			$i_tag = undef;
 			redo;
 		    }
 		    elsif ( $markup ) {
@@ -624,6 +631,14 @@ sub generate_song {
 
 	    # Get vertical space the songline will occupy.
 	    my $vsp = songline_vsp( $elt, $ps );
+	    if ( $elt->{type} eq "songline" && !$elt->{indent} ) {
+		my $e = wrap( $pr, $elt, $x );
+		if ( @$e > 1 ) {
+		    $checkspace->($vsp * scalar( @$e ));
+		    $elt = shift( @$e );
+		    unshift( @elts, @$e );
+		}
+	    }
 
 	    # Add prespace if fit. Otherwise newpage.
 	    $checkspace->($vsp);
@@ -695,11 +710,12 @@ sub generate_song {
 
 =cut
 
-	    songline( $elt, $x, $y, $ps, song => $s, indent => $indent );
+	    my $r = songline( $elt, $x, $y, $ps, song => $s, indent => $indent );
 
 	    $y -= $vsp;
 	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
 
+	    unshift( @elts, $r ) if $r;
 	    next;
 	}
 
@@ -936,6 +952,9 @@ sub generate_song {
 	    elsif ( $elt->{name} eq "label" ) {
 		$i_tag = $elt->{value};
 	    }
+	    elsif ( $elt->{name} eq "context" ) {
+		$curctx = $elt->{value};
+	    }
 	    # Arbitrary config values.
 	    elsif ( $elt->{name} =~ /^pdf\.(.+)/ ) {
 		my @k = split( /[.]/, $1 );
@@ -982,10 +1001,11 @@ sub prlabel {
     return if $label eq "" || $ps->{_indent} == 0;
     my $align = $ps->{labels}->{align};
     $font ||= $ps->{fonts}->{label} || $ps->{fonts}->{text};
+    $ps->{pr}->setfont($font);	# for strwidth.
     for ( split( /\\n/, $label ) ) {
 	my $label = $_;
 	if ( $align eq "right" ) {
-	    my $avg_space_width = $ps->{pr}->strwidth("m") / 4;
+	    my $avg_space_width = $ps->{pr}->strwidth("m");
 	    $ps->{pr}->text( $label,
 			     $x - $avg_space_width - $ps->{pr}->strwidth($label),
 			     $y, $font );
@@ -1048,16 +1068,18 @@ sub songline {
     my $ftext;
     my $ytext;
     my $tag = $i_tag // "";
-    $i_tag = "";
+    $i_tag = undef;
 
     if ( $type =~ /^comment/ ) {
 	$ftext = $elt->{font} || $fonts->{$type} || $fonts->{comment};
 	$ytext  = $ytop - font_bl($ftext);
 	my $song   = $opts{song};
 	$x += $opts{indent} if $opts{indent};
+	$x += $elt->{indent} if $elt->{indent};
 	prlabel( $ps, $tag, $x, $ytext );
-	$pr->text( $elt->{text}, $x, $ytext, $ftext );
-	return;
+	my ( $text, $ex ) = wrapsimple( $pr, $elt->{text}, $x, $ftext );
+	$pr->text( $text, $x, $ytext, $ftext );
+	return $ex ne "" ? { %$elt, indent => $pr->strwidth("x"), text => $ex } : undef;
     }
     if ( $type eq "tabline" ) {
 	$ftext = $fonts->{tab};
@@ -1082,9 +1104,12 @@ sub songline {
        ) {
 	my $x = $x;
 	$x += $opts{indent} if $opts{indent};
+	$x += $elt->{indent} if $elt->{indent};
 	prlabel( $ps, $tag, $x, $ytext );
-	$pr->text( join( "", @{ $elt->{phrases} } ), $x, $ytext, $ftext );
-	return;
+	my ( $text, $ex ) = wrapsimple( $pr, join( "", @{ $elt->{phrases} } ),
+					$x, $ftext );
+	$pr->text( $text, $x, $ytext, $ftext );
+	return $ex ne "" ? { %$elt, indent => $pr->strwidth("x"), phrases => [$ex] } : undef;
     }
 
     if ( $chordscol || $inlinechords ) {
@@ -1104,6 +1129,7 @@ sub songline {
     }
 
     $elt->{chords} //= [ '' ];
+    $x += $elt->{indent} if $elt->{indent};
 
     my $chordsx = $x;
     $chordsx += $ps->{chordscolumn} if $chordscol;
@@ -1164,9 +1190,10 @@ sub songline {
 	    my $info = App::Music::ChordPro::Chords::identify($chord);
 	    my $xt0;
 	    if ( $info && $info->{system} eq "roman" ) {
-		$xt0 = $pr->text( $pre.$info->{root}.$info->{qual},
+		$xt0 = $pr->text( $pre.$info->{root},
 				  $x, $ychord, $fchord );
-		$xt0 = $pr->text( $info->{ext}, $xt0,
+		$info->{qual} = 'ø' if $info->{qual} eq 'h';
+		$xt0 = $pr->text( $info->{qual}.$info->{ext}, $xt0,
 				   $ychord + $fchord->{size} * 0.2,
 				   $fchord,
 				   $fchord->{size} * 0.8
@@ -1229,7 +1256,7 @@ sub gridline {
     my $fonts = $ps->{fonts};
 
     my $tag = $i_tag // "";
-    $i_tag = "";
+    $i_tag = undef;
 
     # Use the chords font for the chords, and for the symbols size.
     my $fchord = { %{ $fonts->{grid} || $fonts->{chord} } };
@@ -1451,12 +1478,17 @@ sub imageline {
     my $opts = $elt->{opts};
     my $pr = $ps->{pr};
 
-    unless ( -s $elt->{uri} ) {
+    if ( $elt->{uri} =~ /^id=(.+)/ ) {
+	return "Unknown asset: id=$1"
+	  unless exists( $assets->{$1} );
+    }
+    elsif ( ! -s $elt->{uri} ) {
 	return "$!: " . $elt->{uri};
     }
 
     my $img = eval { $pr->get_image( $elt->{uri} ) };
     unless ( $img ) {
+	warn($@);
 	return "Unhandled image type: " . $elt->{uri};
     }
 
@@ -1583,31 +1615,6 @@ sub text_vsp {
     _vsp( "text", $ps, "lyrics" );
 }
 
-sub chordgrid_vsp {
-    my ( $elt, $ps ) = @_;
-    $ps->{fonts}->{diagram}->{size} * 1.2
-      + 0.40 * $ps->{diagrams}->{width}
-	+ $ps->{diagrams}->{vcells} * $ps->{diagrams}->{height}
-	  + $ps->{diagrams}->{vspace} * $ps->{diagrams}->{height};
-}
-
-sub chordgrid_hsp0 {
-    my ( $elt, $ps ) = @_;
-    (App::Music::ChordPro::Chords::strings() - 1) * $ps->{diagrams}->{width};
-}
-
-sub chordgrid_hsp1 {
-    my ( $elt, $ps ) = @_;
-    $ps->{diagrams}->{hspace} * $ps->{diagrams}->{width};
-}
-
-sub chordgrid_hsp {
-    my ( $elt, $ps ) = @_;
-    chordgrid_hsp0( $elt, $ps ) + chordgrid_hsp1( $elt, $ps );
-}
-
-my @Roman = qw( I II III IV V VI VI VII VIII IX X XI XII );
-
 sub getchordinfo {
     my ( $name ) = @_;
     my $info;
@@ -1620,7 +1627,7 @@ sub getchordinfo {
 	$info = App::Music::ChordPro::Chords::chord_info($name);
     }
     if ( $info ) {
-	if ( $info->{frets} ) {
+	if ( $info->{frets} && @{ $info->{frets} } ) {
 	    # Suppress if NC.
 	    foreach ( @{ $info->{frets} } ) {
 		return $info if $_ >= 0;
@@ -1636,124 +1643,6 @@ sub getchordinfo {
 	 "\n"
 	);
     return;
-}
-
-sub chordgrid {
-    my ( $info, $x, $y, $ps ) = @_;
-    return unless $info;
-
-    my $x0 = $x;
-
-    my $gw = $ps->{diagrams}->{width};
-    my $gh = $ps->{diagrams}->{height};
-    my $dot = 0.80 * $gw;
-    my $lw  = ($ps->{diagrams}->{linewidth} || 0.10) * $gw;
-    my $pr = $ps->{pr};
-
-    my $strings = App::Music::ChordPro::Chords::strings();
-    my $w = $gw * ($strings - 1);
-
-    # Draw font name.
-    my $font = $ps->{fonts}->{diagram};
-    $pr->setfont($font);
-    my $name = $info->{name};
-    $name .= "*"
-      unless $info->{origin} ne "user"
-	|| $::config->{diagrams}->{show} eq "user";
-    $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y - font_bl($font) );
-    $y -= $font->{size} * 1.2 + $dot/2 + $lw;
-
-    if ( $info->{base} > 1 ) {
-	# my $i = @Roman[$info->{base}] . "  ";
-	my $i = sprintf("%d  ", $info->{base});
-	$pr->setfont( $ps->{fonts}->{diagram_base}, $gh );
-	$pr->text( $i, $x-$pr->strwidth($i), $y-0.85*$gh,
-		   $ps->{fonts}->{diagram_base}, 1.2*$gh );
-    }
-
-    my $v = $ps->{diagrams}->{vcells};
-    my $h = $strings;
-
-    # Draw the grid.
-    $pr->hline( $x, $y - $_*$gh, $w, $lw ) for 0..$v;
-    $pr->vline( $x0 + $_*$gw, $y, $gh*$v, $lw ) for 0..$h-1;
-
-    # Bar detection.
-    my $bar;
-    if ( $info->{fingers} ) {
-	my %h;
-	my $str = 0;
-	my $got = 0;
-	foreach ( @{ $info->{fingers} } ) {
-	    $str++, next unless $info->{frets}->[$str] > 0;
-	    if ( $bar->{$_} ) {
-		# Same finger on multiple strings -> bar.
-		$got++;
-		$bar->{$_}->[-1] = $str;
-	    }
-	    else {
-		# Register.
-		$bar->{$_} = [ $_, $info->{frets}->[$str], $str, $str ];
-	    }
-	    $str++;
-	}
-	if ( $got ) {
-	    foreach (sort keys %$bar ) {
-		my @bi = @{ $bar->{$_} };
-		if ( $bi[-2] == $bi[-1] ) { # not a bar
-		    delete $bar->{$_};
-		    next;
-		}
-		# Print the bar line.
-		$pr->hline( $x+$bi[2]*$gw, $y-$bi[1]*$gh+$gh/2,
-			    ($bi[3]-$bi[2])*$gw,
-			    6*$lw, "black" );
-	    }
-	}
-    }
-
-    # Process the strings and fingers.
-    $x -= $gw/2;
-    for my $sx ( 0 .. @{ $info->{frets} }-1 ) {
-	my $fret = $info->{frets}->[$sx];
-	my $fing;
-	$fing = $info->{fingers}->[$sx] if $info->{fingers};
-
-	# For bars, only the first and last finger.
-	if ( $fing && $bar && $bar->{$fing} ) {
-	    next unless $sx == $bar->{$fing}->[2]
-	      || $sx == $bar->{$fing}->[3];
-	}
-
-	if ( $fret > 0 ) {
-	    my $glyph = "\x{6c}";
-	    if ( $fing && $fing > 0 ) {
-		# The dingbat glyphs are open, so we need a white
-		# background circle.
-		$pr->circle( $x+$gw/2, $y-$fret*$gh+$gh/2, $dot/2, 1,
-			     "white", "black" );
-		$glyph = pack( "C", 0xca + $fing - 1 );
-	    }
-	    my $dot = $dot/0.7;
-	    $pr->setfont( $ps->{fonts}->{chordfingers}, $dot );
-	    $pr->text( $glyph,
-		       $x+$gw/2-$pr->strwidth($glyph)/2,
-		       $y-$fret*$gh+$gh/2-$pr->strwidth($glyph)/2+$lw/2,
-		       $ps->{fonts}->{chordfingers}, $dot ) ;
-	}
-	elsif ( $fret < 0 ) {
-	    $pr->cross( $x+$gw/2, $y+$lw+$gh/3, $dot/3, $lw, "black");
-	}
-	elsif ( $info->{base} > 0 ) {
-	    $pr->circle( $x+$gw/2, $y+$lw+$gh/3, $dot/3, $lw,
-			 undef, "black");
-	}
-    }
-    continue {
-	$x += $gw;
-    }
-
-    return $gw * ( $ps->{diagrams}->{hspace} + $strings );
 }
 
 sub set_columns {
@@ -1987,6 +1876,81 @@ sub tpt {
     return $y - $font->{size} * ($ps->{spacing}->{$type} || 1);
 }
 
+sub wrap {
+    my ( $pr, $elt, $x ) = @_;
+    my $res = [];
+    my @chords  = @{ $elt->{chords} // [] };
+    my @phrases = @{ $elt->{phrases} // [] };
+    my @rchords;
+    my @rphrases;
+    my $m = $pr->{ps}->{__rightmargin};
+
+    while ( @chords ) {
+	my $chord  = shift(@chords);
+	my $phrase = shift(@phrases);
+	my $ex = "";
+
+	if ( @rchords ) {
+	    # Does the chord fit?
+	    my $font = $pr->{ps}->{fonts}->{chord};
+	    $pr->setfont($font);
+	    my $w = $pr->strwidth($chord);
+	    if ( $w > $m - $x ) {
+		# Nope. Move to overflow.
+		$ex = $phrase;
+	    }
+	}
+
+	if ( $ex eq "" ) {
+	    # Do lyrics fit?
+	    my $font = $pr->{ps}->{fonts}->{text};
+	    $pr->setfont($font);
+	    my $ph;
+	    ( $ph, $ex ) = $pr->wrap( $phrase, $m - $x );
+	    # If it doesn not fit, it is usually a case a bad luck.
+	    # However, we may be able to move to overflow.
+	    my $w = $pr->strwidth($ph);
+	    if ( $w > $m - $x && @rchords > 1 ) {
+		$ex = $phrase;
+	    }
+	    else {
+		push( @rchords, $chord );
+		push( @rphrases, $ph );
+		$chord = '';
+	    }
+	    $x += $w;
+	}
+
+	if ( $ex ne "" ) {	# overflow
+	    if ( $rphrases[-1] =~ /[[:alpha:]]$/
+		 && $ex =~ /^[[:alpha:]]/
+		 && $chord ne '' ) {
+		$rphrases[-1] .= "-";
+	    }
+	    unshift( @chords, $chord );
+	    unshift( @phrases, $ex );
+	    $x = $_[2];
+	    push( @$res,
+		  { %$elt, chords => [@rchords], phrases => [@rphrases] } );
+	    $res->[-1]->{indent} = $pr->strwidth("x") if @$res > 1;
+	    @rchords = ();
+	    @rphrases = ();
+	}
+    }
+    push( @$res, { %$elt, chords => \@rchords, phrases => \@rphrases } );
+    $res->[-1]->{indent} = $pr->strwidth("x") if @$res > 1;
+    return $res;
+}
+
+sub wrapsimple {
+    my ( $pr, $text, $x, $font ) = @_;
+    return ( "", "" ) unless length($text);
+
+    $font ||= $pr->{font};
+    $pr->setfont($font);
+    $pr->wrap( $text, $pr->{ps}->{__rightmargin} - $x );
+}
+
 ################################################################
 
 package PDFWriter;
@@ -1994,6 +1958,7 @@ package PDFWriter;
 use strict;
 use warnings;
 use Encode;
+use IO::String;
 
 my $faketime = 1465041600;
 
@@ -2019,6 +1984,29 @@ sub info {
 		  1900+$tm[5], 1+$tm[4], @tm[3,2,1,0]);
     }
     $self->{pdf}->info( %info );
+}
+
+
+sub wrap {
+    my ( $self, $text, $m ) = @_;
+
+    my $ex = "";
+    my $sp = "";
+    #warn("TEXT: |$text| ($m)\n");
+    while ( $self->strwidth($text) > $m ) {
+	my ( $l, $s, $r ) = $text =~ /^(.+)([-_,.:;\s])(.+)$/;
+	return ( $text, $ex ) unless defined $s;
+	#warn("WRAP: |$text| -> |$l|$s|$r$sp$ex|\n");
+	if ( $s =~ /\S/ ) {
+	    $l .= $s;
+	    $s = "";
+	}
+	$text = $l;
+	$ex = $r . $sp . $ex;
+	$sp = $s;
+    }
+
+    return ( $text, $ex );
 }
 
 sub text {
@@ -2173,7 +2161,23 @@ sub cross {
 
 sub get_image {
     my ( $self, $uri ) = @_;
+
     my $img;
+    if ( $uri =~ /^id=(.+)/ ) {
+	my $a = $assets->{$1};
+	my $d = $a->{data};
+	my $fh = IO::String->new($d);
+	if ( $a->{type} eq "jpg" ) {
+	    $img = $self->{pdf}->image_jpeg($fh);
+	}
+	elsif ( $a->{type} eq "png" ) {
+	    $img = $self->{pdf}->image_png($fh);
+	}
+	elsif ( $a->{type} eq "gif" ) {
+	    $img = $self->{pdf}->image_gif($fh);
+	}
+	return $img;
+    }
     for ( $uri ) {
 	$img = $self->{pdf}->image_png($_)  if /\.png$/i;
 	$img = $self->{pdf}->image_jpeg($_) if /\.jpe?g$/i;

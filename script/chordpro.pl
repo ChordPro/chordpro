@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
 # Last Modified By: Johan Vromans
-# Last Modified On: Thu Jul  5 21:07:06 2018
-# Update Count    : 250
+# Last Modified On: Wed Nov  7 19:34:56 2018
+# Update Count    : 253
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -25,6 +25,10 @@ suitable for printing on your nearest printer.
 B<chordpro> is a wrapper around L<App::Music::ChordPro>, which does all
 of the work.
 
+When invoked as B<a2crd>, or with first argument B<--a2crd>, the input
+will be interpreted as an 'chords over lyrics' file, converted to
+ChordPro and written to standard output.
+
 =cut
 
 use strict;
@@ -35,7 +39,12 @@ use lib "$FindBin::Bin/../CPAN";
 use lib "$FindBin::Bin/../lib";
 use App::Packager qw( :name App::Music::ChordPro );
 
-use App::Music::ChordPro;
+if ( @ARGV && $ARGV[0] eq "--a2crd" && shift ) {
+    require App::Music::ChordPro::A2Crd;
+}
+else {
+    require App::Music::ChordPro;
+}
 
 run();
 

@@ -22,5 +22,7 @@ my $test;
 diag("Using $pdfapi for PDF generation");
 ++$test; use_ok( "JSON::PP",   2.237 );
 ++$test; use_ok( "String::Interpolate::Named", 0.05 );
+++$test; use_ok( "File::LoadLines", 0.02 );
+++$test; use_ok( "Image::Info", 1.41 );
 
 done_testing($test);

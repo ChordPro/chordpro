@@ -47,6 +47,12 @@ my $song = {
       ],
       'type' => 'songline'
     },
+	{
+	 'value' => '',
+	 'context' => 'chorus',
+	 'name' => 'context',
+	 'type' => 'set'
+	},
     {
       'chords' => [
 	'G'
@@ -68,7 +74,13 @@ my $song = {
 	    'Chorus line in D.'
 	  ],
 	  'type' => 'songline'
-	}
+	},
+	{
+	 'value' => '',
+	 'context' => 'chorus',
+	 'name' => 'context',
+	 'type' => 'set'
+	},
       ],
       'context' => '',
       'transpose' => 0,
@@ -95,7 +107,13 @@ my $song = {
 	    'Chorus line in D.'
 	  ],
 	  'type' => 'songline'
-	}
+	},
+	{
+	 'value' => '',
+	 'context' => 'chorus',
+	 'name' => 'context',
+	 'type' => 'set'
+	},
       ],
       'context' => '',
       'transpose' => 0,
@@ -112,7 +130,13 @@ my $song = {
 	    'Chorus line in D.'
 	  ],
 	  'type' => 'songline'
-	}
+	},
+	{
+	 'value' => '',
+	 'context' => 'chorus',
+	 'name' => 'context',
+	 'type' => 'set'
+	},
       ],
       'context' => '',
       'transpose' => 2,

@@ -74,7 +74,7 @@ $song = {
 		       {
 			'type' => 'image',
 			'opts' => {
-				   'title' => 'title',
+				   'title' => 'A red image',
 				   'height' => '150',
 				   'border' => '2',
 				   'scale' => '4',

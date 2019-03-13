@@ -231,6 +231,12 @@ sub set_tuning {
 
 }
 
+# API: Get tuning.
+# Used by: String substitution.
+sub get_tuning {
+    @{[@tuning]};
+}
+
 # API: Set notation system.
 # Used by: Config.
 sub set_notes {

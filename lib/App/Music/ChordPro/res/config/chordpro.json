@@ -33,6 +33,8 @@
 	"chords-under" : false,
       // Transcoding.
       "transcode" : null,
+	// Always decapoize.
+	"decapo" : false,
     },
 
     // Metadata.
