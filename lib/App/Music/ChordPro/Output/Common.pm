@@ -11,7 +11,7 @@ use utf8;
 sub fmt_subst {
     my ( $s, $t ) = @_;
     my $res = "";
-    my $m = { %{$s->{meta}} };
+    my $m = { %{$s->{meta} || {} } };
 
     # Derived item(s).
     $m->{_key} = $m->{key} if exists $m->{key};
