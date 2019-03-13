@@ -1,5 +1,47 @@
 # Release info
 
+## 0.973
+
+Released: 2019-03-13
+
+* Integrate a2crd into chordpro. Use "chordpro --a2crd" to invoke.
+* Add --decapo option to eliminate {capo} settings by transposing.
+* Implement image assets. Requires IO::String and Image::Info.
+* Implement a basic form of line wrapping (regular chords+lyrics).
+* Implement a basic form of line wrapping (comments and non-chords lyrics).
+* Implement user library (env. var. CHORDPRO_LIB). Experimental.
+* Allow a2crd as a filter.
+* Use label instead of section name, if provided.
+* Make instrument and tuning accessible as meta data.
+* Fix undefined if no output file was supplied.
+* Fix section change detection.
+* Fix crash when chordless songline and not suppress-empty-chords.
+* Fix misplacement of diagrams when columns and too many {chord} directives.
+* Fix printing of auto-added chords.
+* Fix issue #63: Labels are lost when a new song is encountered.
+* Fix crash when --dump-chords and no meta.
+* (PDF) Fix label width.
+
+**[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.**
+
+## 0.972
+
+Released: 2018-11-06
+
+* Add a2crd script.
+* Minimize all configs to only override what is necessary.
+* Split german notes into scandinavian (..., A, Bb/A#, H, C) and german (..., A, Ais/B, H, C).
+* Use String::Interpolate::Named.
+* (Experimental) Allow %{..} interpolations on the output file name, e.g. --output="%{artist|%{} - }%{title}.pdf". Command line only.
+* Fix memorize problem with the first chord.
+* Upgrade WxChordPro to 0.972.
+
+## 0.97.1
+
+Released: 2018-10-24
+
+* Upgrade WxChordPro to 0.970 to fix problem with custom config.
+
 ## 0.97
 
 Released: 2018-10-23
@@ -26,8 +68,6 @@ Released: 2018-10-23
 * {chorus} Allow label.
 * Allow empty comment directives.
 * Do not print background for empty strings.
-
-**[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.**
 
 ## 0.96
 
