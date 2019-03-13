@@ -18,6 +18,7 @@
     - Fix printing of auto-added chords.
     - Fix issue #63: Labels are lost when a new song is encountered.
     - Fix crash when --dump-chords and no meta.
+    - (PDF) Fix label width.
 
 0.972	2018-11-06
 

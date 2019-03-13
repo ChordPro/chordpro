@@ -1001,10 +1001,11 @@ sub prlabel {
     return if $label eq "" || $ps->{_indent} == 0;
     my $align = $ps->{labels}->{align};
     $font ||= $ps->{fonts}->{label} || $ps->{fonts}->{text};
+    $ps->{pr}->setfont($font);	# for strwidth.
     for ( split( /\\n/, $label ) ) {
 	my $label = $_;
 	if ( $align eq "right" ) {
-	    my $avg_space_width = $ps->{pr}->strwidth("m") / 4;
+	    my $avg_space_width = $ps->{pr}->strwidth("m");
 	    $ps->{pr}->text( $label,
 			     $x - $avg_space_width - $ps->{pr}->strwidth($label),
 			     $y, $font );
