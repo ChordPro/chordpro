@@ -54,6 +54,15 @@ the PDF as a collection of independent songs.
 The CSV has the same name  as the PDF, with extension `.pdf` replaced
 by `.csv`.
 
+### decapo
+
+`--decapo`
+
+If a song has a capo directive, do not show the capo setting in the
+output but transpose the chords of the song instead. Useful for
+musicians that want to play along and do not have capo capabilities,
+e.g. a bass player.
+
 ### diagrams
 
 `--diagrams=`_WHICH_

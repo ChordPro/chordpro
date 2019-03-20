@@ -25,6 +25,10 @@ These settings control global behaviour of the ChordPro program and can be chang
         "chords-under" : false,
 		// Memorize chords.
 		"memorize" : false,
+		// Transcoding.
+        "transcode" : null,
+	    // Always decapoize.
+	    "decapo" : false,
     },
 
 ## Metadata
@@ -131,11 +135,11 @@ alphabetically.
 
     // Table of contents.
     "toc" : {
-	  // Title for ToC.
-	  "title" : "Table of Contents",
-	  // Sorting order.
-	  // Currently only sorting by page number and alpha is implemented.
-	  "order" : "page",
+        // Title for ToC.
+        "title" : "Table of Contents",
+        // Sorting order.
+        // Currently only sorting by page number and alpha is implemented.
+        "order" : "page",
     },
 
 ## Includes
