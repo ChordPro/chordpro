@@ -23,12 +23,12 @@ These settings control global behaviour of the ChordPro program and can be chang
         "inline-chords" : false,
         // Chords under the lyrics.
         "chords-under" : false,
-		// Memorize chords.
-		"memorize" : false,
-		// Transcoding.
+        // Memorize chords.
+        "memorize" : false,
+        // Transcoding.
         "transcode" : null,
-	    // Always decapoize.
-	    "decapo" : false,
+        // Always decapoize.
+        "decapo" : false,
     },
 
 ## Metadata
