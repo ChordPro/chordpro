@@ -63,21 +63,30 @@ places. The choice for the non-unicode variant is deliberate since
 many fonts do not yet have the appropriate symbols to show `♯` and
 `♭`.
 
-By default ChordPro uses the Dutch note naming system according to the
-definition shown above. Two more note naming systems are provided:
+By default ChordPro uses the Common (a.k.a. Dutch) note naming system
+according to the definition shown above. Some other note naming
+systems are provided:
 
 * German  
 This is a variant of Dutch where `H` is used instead of `B`, and `B`
-is used instead of `B♭`.  
+is used instead of `B♭`. Flats and sharps are denoted by `is` and `es`
+suffixes, not symbols.  
 This definition is contained in the preset configuration
 `notes_german`.
 
+* Scandinavian  
+This is a variant of German where `H` means `B`, and `B♭`
+means B flat. Flats and sharps are denoted by the appropriate symbols.  
+This definition is contained in the preset configuration
+`notes_scandinavian`.
+
 * Latin  
 This system consists of the diatonic note names `Do`, `Re`, `Mi`,
-`Fa`, `Sol`, `La`, and `Si`. It is often used in Italian, French,
+`Fa`, `Sol`, `La`, and `Si`. Flats and sharps are denoted by the
+appropriate symbols. It is often used in Italian, French,
 Spanish and Portuguese speaking countries.  
 This definition is contained in the preset configuration
-`notes_roman`.
+`notes_latin`.
 
 For more information, see [Key signature names and translations](https://en.wikipedia.org/wiki/Key_signature_names_and_translations) on Wikipedia.
 
