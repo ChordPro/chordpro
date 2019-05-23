@@ -62,6 +62,8 @@ Describes the instrument used. For example:
 
 Other properties of an instrument are its [tuning](#strings-and-tuning) and [chord definitions](#user-defined-chords). Usually the instrument definition is maintained in a separate configuration file for maximum flexibility.
 
+See [Defining an instrument](Chordpro-Configuration-Instrument.html) for details.
+
 ## Strings and Tuning
 
 Define the instrument tuning as a list of notes in [scientific pitch notation](https://en.wikipedia.org/wiki/Scientific_pitch_notation).
