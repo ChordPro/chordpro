@@ -30,5 +30,8 @@ Examples:
 
 In the second form, the argument is used as a label for the chorus. 
 
+If multiple choruses are defined in a song, `{chorus}` applies to the
+last definition that precedes this directive.
+
 See also: [[labels|ChordPro Configuration PDF#labels]],
 	[[Chorus style|ChordPro Configuration PDF#chorus-style]].
