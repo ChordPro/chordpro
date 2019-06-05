@@ -308,11 +308,13 @@ sub preview {
 
 	if ( my $cmd = $self->{prefs_pdfviewer} ) {
 	    if ( $cmd =~ s/\%f/$preview_pdf/g ) {
-		$cmd .= " \"$preview_pdf\"";
 	    }
 	    elsif ( $cmd =~ /\%u/ ) {
 		my $u = _makeurl($preview_pdf);
 		$cmd =~ s/\%u/$u/g;
+	    }
+	    else {
+		$cmd .= " \"$preview_pdf\"";
 	    }
 	    Wx::ExecuteCommand($cmd);
 	}
