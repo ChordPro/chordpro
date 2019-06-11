@@ -1,5 +1,6 @@
 0.974
 
+    - Fix erroneous transposing of transcoded chords.
     - Fix erroneous recall of chorus from previous song.
 
 0.973	2019-03-13

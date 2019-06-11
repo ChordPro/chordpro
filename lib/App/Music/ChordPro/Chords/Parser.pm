@@ -644,7 +644,7 @@ sub transcode {
     my $p = $self->{parser}->get_parser($xcode);
     $info->{root_canon} = $info->{root} =
       $p->root_canon( $info->{root_ord},
-		      $info->{root_mod},
+		      $info->{root_mod} >= 0,
 		      $info->{qual_canon} eq "-" );
     if ( $p->{system} eq "roman" && $info->{qual_canon} eq "-" ) {
 	# Minor quality is in the root name.
