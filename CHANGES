@@ -1,3 +1,7 @@
+0.974
+
+    - Fix erroneous recall of chorus from previous song.
+
 0.973	2019-03-13
 
     - Integrate a2crd into chordpro. Use "chordpro --a2crd" to invoke.

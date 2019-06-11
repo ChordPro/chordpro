@@ -100,6 +100,7 @@ sub parse_song {
     %memchords = ();
     App::Music::ChordPro::Chords::reset_song_chords();
     @labels = ();
+    @chorus = ();
 
     # Pre-fill meta data, if any.
     if ( $options->{meta} ) {
