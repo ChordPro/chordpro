@@ -185,12 +185,12 @@ Transcode all songs to the named notation system. Supported values
 are:
 
 * `common` (C, D, E, F, G, A, B)
-* `dutch` (C, D, E, F, G, A, B)
+* `dutch` (same as `common`)
 * `german` (C, ... A, Ais/B, H)
 * `latin` (Do, Re, Mi, Fa, Sol, ...)
 * `scandinavian` (C, ... A, A#/Bb, H)
-* `solfege` (Do, Re, Mi, Fa, So, ...)
 * `solfège` (Do, Re, Mi, Fa, So, ...)
+* `solfege` (same as `solfège`)
 * `nashville` (1, 2, 3, ...)
 * `roman` (I, II, III, ...)
 
