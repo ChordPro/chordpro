@@ -177,6 +177,23 @@ Includes a table of contents.
 By default a table of contents is included in the PDF output when it
 contains more than one song.
 
+### transcode
+
+`--transcode=`_notation_
+
+Transcode all songs to the named notation system. Supported values
+are:
+
+* `common` (C, D, E, F, G, A, B)
+* `dutch` (C, D, E, F, G, A, B)
+* `german` (C, ... A, Ais/B, H)
+* `latin` (Do, Re, Mi, Fa, Sol, ...)
+* `scandinavian` (C, ... A, A#/Bb, H)
+* `solfege` (Do, Re, Mi, Fa, So, ...)
+* `solfège` (Do, Re, Mi, Fa, So, ...)
+* `nashville` (1, 2, 3, ...)
+* `roman` (I, II, III, ...)
+
 ### transpose
 
 `--transpose=`_N_ (short: `-x`)
