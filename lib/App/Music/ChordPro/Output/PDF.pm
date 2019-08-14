@@ -9,19 +9,9 @@ use warnings;
 use Data::Dumper;
 use Encode qw( encode_utf8 );
 use App::Packager;
-
 use App::Music::ChordPro::Output::Common;
 
-my $pdfapi;
-BEGIN {
-    eval { require PDF::Builder; $pdfapi = "PDF::Builder"; }
-      or
-    eval { require PDF::API2; $pdfapi = "PDF::API2"; }
-      or
-    die("Missing PDF::API package\n");
-}
-
-use constant DEBUG_SPACING => 0;
+use constant DEBUG_SPACING => 1;
 
 # For regression testing, run perl with PERL_HASH_SEED set to zero.
 # This eliminates the arbitrary order of font definitions and triggers
@@ -34,7 +24,7 @@ sub generate_songbook {
     return [] unless $sb->{songs}->[0]->{body}; # no songs
 
     my $ps = $::config->{pdf};
-    my $pr = PDFWriter->new($ps);
+    my $pr = PDFWriter->new( $ps, $options->{output} || "__new__.pdf" );
     $pr->info( Title => $sb->{songs}->[0]->{meta}->{title}->[0],
 	       Creator =>
 	       $regtest
@@ -89,7 +79,7 @@ sub generate_songbook {
     }
 
     if ( $options->{cover} ) {
-	my $cover = $pdfapi->open( $options->{cover} );
+	my $cover; # TODO = $pdfapi->open( $options->{cover} );
 	die("Missing cover: ", $options->{cover}, "\n") unless $cover;
 	for ( 1 .. $cover->pages ) {
 	    $pr->{pdf}->importpage( $cover, $_, $_ );
@@ -99,7 +89,7 @@ sub generate_songbook {
 	  if $ps->{'even-odd-pages'} && $page % 2;
     }
 
-    $pr->finish( $options->{output} || "__new__.pdf" );
+    $pr->finish();
 
     if ( $options->{csv} ) {
 
@@ -361,12 +351,15 @@ sub generate_song {
 	    $y = $ps->{_margintop} + $ps->{headspace};
 	    $y -= font_bl($fonts->{title});
 	    $tpt->("title");
-	    $y -= ( - ( $fonts->{title}->{font}->descender / 1024 )
-		      * $fonts->{title}->{size}
-		    + ( $fonts->{subtitle}->{font}->ascender / 1024 )
-		      * $fonts->{subtitle}->{size} )
-		  * $ps->{spacing}->{title};
+#TODO	    $y -= ( - ( $fonts->{title}->{font}->descender / 1024 )
+#		      * $fonts->{title}->{size}
+#		    + ( $fonts->{subtitle}->{font}->ascender / 1024 )
+#		      * $fonts->{subtitle}->{size} )
+	    #		  * $ps->{spacing}->{title};
+	    $y += 10;
 	    $y = $tpt->("subtitle");
+	    $y += 10;
+	    $ps->{pr}->text("Gggg", 100, 200 );
 	}
 
 	if ( $ps->{footspace} ) {
@@ -569,7 +562,7 @@ sub generate_song {
 	if ( $elt->{type} ne "set" && !$did++ ) {
 	    # Insert top/left/right/bottom chord diagrams.
  	    $chorddiagrams->() unless $ps->{diagrams}->{show} eq "below";
-	    showlayout($ps) if $ps->{showlayout};
+	    showlayout($ps); #TODO if $ps->{showlayout};
 	}
 
 	if ( $elt->{type} eq "empty" ) {
@@ -988,6 +981,7 @@ sub generate_song {
 
 sub font_bl {
     my ( $font ) = @_;
+    return $font->{size} * 0.6;	# TODO
     $font->{size} / ( 1 - $font->{font}->descender / $font->{font}->ascender );
 }
 
@@ -1775,7 +1769,7 @@ sub configurator {
     for my $fontdir ( @{$pdf->{fontdir}}, getresource("fonts"), $ENV{FONTDIR} ) {
 	next unless $fontdir;
 	if ( -d $fontdir ) {
-	    $pdfapi->can("addFontDirs")->($fontdir);
+#TODO	    $pdfapi->can("addFontDirs")->($fontdir);
 	}
 	else {
 	    warn("PDF: Ignoring fontdir $fontdir [$!]\n");
@@ -1785,11 +1779,12 @@ sub configurator {
 
     # Map papersize name to [ width, height ].
     unless ( eval { $pdf->{papersize}->[0] } ) {
-	eval "require ${pdfapi}::Resource::PaperSizes";
-	my %ps = "${pdfapi}::Resource::PaperSizes"->get_paper_sizes;
-	die("Unhandled paper size: ", $pdf->{papersize}, "\n")
-	  unless exists $ps{lc $pdf->{papersize}};
-	$pdf->{papersize} = $ps{lc $pdf->{papersize}}
+#TODO	eval "require ${pdfapi}::Resource::PaperSizes";
+#	my %ps = "${pdfapi}::Resource::PaperSizes"->get_paper_sizes;
+#	die("Unhandled paper size: ", $pdf->{papersize}, "\n")
+#	  unless exists $ps{lc $pdf->{papersize}};
+#	$pdf->{papersize} = $ps{lc $pdf->{papersize}}
+	$pdf->{papersize} = [ 595, 842 ]; # TODO
     }
 
     # Sanitize, if necessary.
@@ -1958,32 +1953,33 @@ package PDFWriter;
 use strict;
 use warnings;
 use Encode;
-use IO::String;
+use Cairo;
+use Pango;
 
 my $faketime = 1465041600;
 
 my %fontcache;			# speeds up 2 seconds per song
 
 sub new {
-    my ( $pkg, $ps ) = @_;
+    my ( $pkg, $ps, $output ) = @_;
     my $self = bless { ps => $ps }, $pkg;
-    $self->{pdf} = $pdfapi->new;
-    $self->{pdf}->{forcecompress} = 0 if $regtest;
-    $self->{pdf}->mediabox( $ps->{papersize}->[0],
-			    $ps->{papersize}->[1] );
+    $self->{surface} = Cairo::PdfSurface->create( $output,
+						  $ps->{papersize}->[0],
+						  $ps->{papersize}->[1] );
+    $self->{cr} = Cairo::Context->create( $self->{surface} );
     %fontcache = () if $::__EMBEDDED__;
     $self;
 }
 
 sub info {
-    my ( $self, %info ) = @_;
-    unless ( $info{CreationDate} ) {
-	my @tm = gmtime( $regtest ? $faketime : time );
-	$info{CreationDate} =
-	  sprintf("D:%04d%02d%02d%02d%02d%02d+00'00'",
-		  1900+$tm[5], 1+$tm[4], @tm[3,2,1,0]);
-    }
-    $self->{pdf}->info( %info );
+#    my ( $self, %info ) = @_;
+#    unless ( $info{CreationDate} ) {
+#	my @tm = gmtime( $regtest ? $faketime : time );
+#	$info{CreationDate} =
+#	  sprintf("D:%04d%02d%02d%02d%02d%02d+00'00'",
+#		  1900+$tm[5], 1+$tm[4], @tm[3,2,1,0]);
+#    }
+#    $self->{pdf}->info( %info );
 }
 
 
@@ -2025,7 +2021,7 @@ sub text {
 	my $w = $self->strwidth( $text );
 	my $vsp = $size * 1.1;
 	# Adjust for baseline.
-	my $y = $y + ( $size / ( 1 - $font->{font}->descender / $font->{font}->ascender ) );
+	my $y = $y; #TODO + ( $size / ( 1 - $font->{font}->descender / $font->{font}->ascender ) );
 
 	# Draw background.
 	if ( $bgcol && $bgcol !~ /^no(?:ne)?$/i ) {
@@ -2045,18 +2041,20 @@ sub text {
     }
 
     if ( $font->{color} ) {
-	$self->{pdftext}->strokecolor( $font->{color} );
-	$self->{pdftext}->fillcolor( $font->{color} );
+#	$self->{pdftext}->strokecolor( $font->{color} );
+#	$self->{pdftext}->fillcolor( $font->{color} );
     }
     else {
-	$self->{pdftext}->strokecolor("black");
-	$self->{pdftext}->fillcolor("black");
+#	$self->{pdftext}->strokecolor("black");
+#	$self->{pdftext}->fillcolor("black");
     }
-    $self->{pdftext}->translate( $x, $y );
-    $x += $self->{pdftext}->text($text);
+    $self->{cr}->move_to( $x, $y );
+    $self->{cr}->set_source_rgb( 1, 0, 0);
+    $self->{cr}->show_text($text);
+    $x += length($text) * 4; # TODO
     if ( $font->{color} ) {
-	$self->{pdftext}->strokecolor("black");
-	$self->{pdftext}->fillcolor("black");
+#	$self->{pdftext}->strokecolor("black");
+#	$self->{pdftext}->fillcolor("black");
     }
     return $x;
 }
@@ -2065,7 +2063,7 @@ sub setfont {
     my ( $self, $font, $size ) = @_;
     $self->{font} = $font;
     $self->{fontsize} = $size ||= $font->{size};
-    $self->{pdftext}->font( $font->{font}, $size );
+#    $self->{pdftext}->font( $font->{font}, $size );
 }
 
 sub strwidth {
@@ -2073,94 +2071,96 @@ sub strwidth {
     $font ||= $self->{font};
     $size ||= $self->{fontsize} || $font->{size};
     $self->setfont( $font, $size );
+    return length($text) * 5; # TODO
     $self->{pdftext}->advancewidth($text);
 }
 
 sub line {
     my ( $self, $x0, $y0, $x1, $y1, $lw, $color ) = @_;
-    my $gfx = $self->{pdfgfx};
-    $gfx->save;
-    $gfx->strokecolor($color ||= "black");
-    $gfx->linecap(1);
-    $gfx->linewidth($lw||1);
-    $gfx->move( $x0, $y0 );
-    $gfx->line( $x1, $y1 );
-    $gfx->stroke;
-    $gfx->restore;
+    my $cr = $self->{cr};
+    $cr->save;
+#    $cr->strokecolor($color ||= "black");
+    $cr->set_line_cap('round');
+    $cr->set_line_width($lw||1);
+    $cr->move_to( $x0, $y0 );
+    $cr->line_to( $x1, $y1 );
+    $cr->stroke;
+    $cr->restore;
 }
 
 sub hline {
     my ( $self, $x, $y, $w, $lw, $color ) = @_;
-    my $gfx = $self->{pdfgfx};
-    $gfx->save;
-    $gfx->strokecolor($color ||= "black");
-    $gfx->linecap(2);
-    $gfx->linewidth($lw||1);
-    $gfx->move( $x, $y );
-    $gfx->hline( $x + $w );
-    $gfx->stroke;
-    $gfx->restore;
+    my $cr = $self->{cr};
+    $cr->save;
+#    $cr->strokecolor($color ||= "black");
+    $cr->set_line_cap('square');
+    $cr->set_line_width($lw||1);
+    $cr->move_to( $x, $y );
+    $cr->line_to( $x + $w, $y );
+    $cr->stroke;
+    $cr->restore;
 }
 
 sub vline {
     my ( $self, $x, $y, $h, $lw, $color ) = @_;
-    my $gfx = $self->{pdfgfx};
-    $gfx->save;
-    $gfx->strokecolor($color ||= "black");
-    $gfx->linecap(2);
-    $gfx->linewidth($lw||1);
-    $gfx->move( $x, $y );
-    $gfx->vline( $y - $h );
-    $gfx->stroke;
-    $gfx->restore;
+    my $cr = $self->{cr};
+    $cr->save;
+#    $cr->strokecolor($color ||= "black");
+    $cr->set_line_cap('square');
+    $cr->set_line_width($lw||1);
+    $cr->move_to( $x, $y );
+    $cr->line_to( $x, $y - $h );
+    $cr->stroke;
+    $cr->restore;
 }
 
 sub rectxy {
     my ( $self, $x, $y, $x1, $y1, $lw, $fillcolor, $strokecolor ) = @_;
-    my $gfx = $self->{pdfgfx};
-    $gfx->save;
-    $gfx->strokecolor($strokecolor) if $strokecolor;
-    $gfx->fillcolor($fillcolor) if $fillcolor;
-    $gfx->linecap(2);
-    $gfx->linewidth($lw||1);
-    $gfx->rectxy( $x, $y, $x1, $y1 );
-    $gfx->close;
-    $gfx->fill if $fillcolor;
-    $gfx->stroke if $strokecolor;
-    $gfx->restore;
+    my $cr = $self->{cr};
+    $cr->save;
+#    $cr->strokecolor($strokecolor) if $strokecolor;
+#    $cr->fillcolor($fillcolor) if $fillcolor;
+    $cr->set_line_cap('square');
+    $cr->set_line_width($lw||1);
+#    $cr->rectangle( $x, $y, $x1-$x, $y1-$y );
+    $cr->set_source_rgb(0,1,0);$cr->rectangle( 100, 100, 300, 500 );$cr->fill;
+    $cr->fill if $fillcolor;
+    $cr->stroke if $strokecolor;
+    $cr->restore;
 }
 
 sub circle {
     my ( $self, $x, $y, $r, $lw, $fillcolor, $strokecolor ) = @_;
-    my $gfx = $self->{pdfgfx};
-    $gfx->save;
-    $gfx->strokecolor($strokecolor) if $strokecolor;
-    $gfx->fillcolor($fillcolor) if $fillcolor;
-    $gfx->linewidth($lw||1);
-    $gfx->circle( $x, $y, $r );
-    $gfx->fill if $fillcolor;
-    $gfx->stroke if $strokecolor;
-    $gfx->restore;
+    my $cr = $self->{cr};
+    $cr->save;
+#    $cr->strokecolor($strokecolor) if $strokecolor;
+#    $cr->fillcolor($fillcolor) if $fillcolor;
+    $cr->set_line_width($lw||1);
+    $cr->arc( $x+$r, $y+$r, $r, 0, 4*atan2(1,1) ); # TODO
+    $cr->fill if $fillcolor;
+    $cr->stroke if $strokecolor;
+    $cr->restore;
 }
 
 sub cross {
     my ( $self, $x, $y, $r, $lw, $strokecolor ) = @_;
-    my $gfx = $self->{pdfgfx};
-    $gfx->save;
-    $gfx->strokecolor($strokecolor) if $strokecolor;
-    $gfx->linewidth($lw||1);
+    my $cr = $self->{cr};
+    $cr->save;
+#    $cr->strokecolor($strokecolor) if $strokecolor;
+    $cr->set_line_width($lw||1);
     $r = 0.9 * $r;
-    $gfx->move( $x-$r, $y-$r );
-    $gfx->line( $x+$r, $y+$r );
-    $gfx->stroke if $strokecolor;
-    $gfx->move( $x-$r, $y+$r );
-    $gfx->line( $x+$r, $y-$r );
-    $gfx->stroke if $strokecolor;
-    $gfx->restore;
+    $cr->move_to( $x-$r, $y-$r );
+    $cr->line_to( $x+$r, $y+$r );
+    $cr->stroke if $strokecolor;
+    $cr->move_to( $x-$r, $y+$r );
+    $cr->line_to( $x+$r, $y-$r );
+    $cr->stroke if $strokecolor;
+    $cr->restore;
 }
 
 sub get_image {
     my ( $self, $uri ) = @_;
+    return;			# TODO
 
     my $img;
     if ( $uri =~ /^id=(.+)/ ) {
@@ -2188,6 +2188,7 @@ sub get_image {
 
 sub add_image {
     my ( $self, $img, $x, $y, $w, $h, $border ) = @_;
+    return;	# TODO
 
     my $gfx = $self->{pdfgfx};
 
@@ -2203,25 +2204,22 @@ sub add_image {
 
 sub newpage {
     my ( $self, $ps, $page ) = @_;
-    #$self->{pdftext}->textend if $self->{pdftext};
-    $self->{pdfpage} = $self->{pdf}->page($page);
-    $self->{pdfpage}->mediabox( $ps->{papersize}->[0],
-				$ps->{papersize}->[1] );
-    $self->{pdfgfx}  = $self->{pdfpage}->gfx;
-    $self->{pdftext} = $self->{pdfpage}->text;
+    $self->{cr}->show_page;
 }
 
 sub finish {
-    my ( $self, $file ) = @_;
-
-    if ( $file && $file ne "-" ) {
-	$self->{pdf}->saveas($file);
-    }
-    else {
-	binmode(STDOUT);
-	print STDOUT ( $self->{pdf}->stringify );
-	close(STDOUT);
-    }
+    my ( $self ) = @_;
+    $self->{cr}->show_page;
+    return;
+    
+#    if ( $file && $file ne "-" ) {
+#	$self->{pdf}->saveas($file);
+#    }
+#    else {
+#	binmode(STDOUT);
+#	print STDOUT ( $self->{pdf}->stringify );
+#	close(STDOUT);
+#    }
 }
 
 sub init_fonts {
@@ -2238,6 +2236,8 @@ sub init_fonts {
 
 sub init_font {
     my ( $self, $ff ) = @_;
+    return 1;			# TODO
+
     my $ps = $self->{ps};
 
     my $font = $ps->{fonts}->{$ff};
@@ -2288,7 +2288,12 @@ sub init_font {
 
 sub show_vpos {
     my ( $self, $y, $w ) = @_;
-    $self->{pdfgfx}->move(100*$w,$y)->linewidth(0.25)->hline(100*(1+$w))->stroke;
+    for ( $self->{cr} ) {
+	$_->move_to(100*$w,$y);
+	$_->set_line_width(0.25);
+	$_->line_to(100*$w+100*(1+$w), $y);
+	$_->stroke;
+    }
 }
 
 1;

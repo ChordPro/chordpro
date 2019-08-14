@@ -19,7 +19,7 @@ WriteMakefile
  VERSION	=> $version,
  AUTHOR	        => 'Johan Vromans <jvromans@squirrel.nl>',
  LICENSE	=> "perl",
- MIN_PERL_VERSION => 5.010000,
+ MIN_PERL_VERSION => 5.010001,
  INSTALLDIRS	=> 'site',
  EXE_FILES	=> [ map { "script/$_" } @bins ],
  PL_FILES	=> {
@@ -28,13 +28,13 @@ WriteMakefile
 
  PREREQ_PM      => {
 		    'App::Packager' => 1.430,
-		    'PDF::API2'   => 2.020,
-		    'Font::TTF'   => 1.04,
-		    'JSON::PP'	  => 2.27203,
+		    'Pango'         => 1.227,
+		    'Cairo'         => 1.106,
+		    'JSON::PP'	    => 2.27203,
 		    'String::Interpolate::Named' => 0.05,
 		    'File::LoadLines' => 0.02,
-		    'IO::String'  => 1.08,
-		    'Image::Info' => 1.41,
+		    'IO::String'    => 1.08,
+		    'Image::Info'   => 1.41,
 		   },
 
  CONFIGURE_REQUIRES => {
