@@ -1,5 +1,6 @@
 0.974
 
+    - Allow chord definitions with multiple names. See the docs.
     - Fix erroneous transposing of transcoded chords.
     - Fix erroneous recall of chorus from previous song.
 
