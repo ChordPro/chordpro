@@ -1,5 +1,8 @@
 0.974
 
+    - Restructure chord definitions. Default is now an orthogonal set
+      of basic chords. Additional legacy weirdo's are available in
+      "guitar-legacy.json".
     - Allow chord definitions with multiple names. See the docs.
     - Fix erroneous transposing of transcoded chords.
     - Fix erroneous recall of chorus from previous song.
