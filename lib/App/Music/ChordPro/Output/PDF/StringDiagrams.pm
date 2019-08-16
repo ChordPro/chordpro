@@ -66,7 +66,7 @@ sub draw {
       unless $info->{origin} ne "user"
 	|| $::config->{diagrams}->{show} eq "user";
     $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y - font_bl($font) );
-    $y -= $font->{size} * 1.2 + $dot/2 + $lw;
+    $y += $font->{size} * 1.2 + $dot/2 + $lw;
 
     if ( $info->{base} > 1 ) {
 	# my $i = @Roman[$info->{base}] . "  ";
@@ -80,7 +80,7 @@ sub draw {
     my $h = $strings;
 
     # Draw the grid.
-    $pr->hline( $x, $y - $_*$gh, $w, $lw ) for 0..$v;
+    $pr->hline( $x, $y + $_*$gh, $w, $lw ) for 0..$v;
     $pr->vline( $x0 + $_*$gw, $y, $gh*$v, $lw ) for 0..$h-1;
 
     # Bar detection.
@@ -110,7 +110,7 @@ sub draw {
 		    next;
 		}
 		# Print the bar line.
-		$pr->hline( $x+$bi[2]*$gw, $y-$bi[1]*$gh+$gh/2,
+		$pr->hline( $x+$bi[2]*$gw, $y+$bi[1]*$gh+$gh/2,
 			    ($bi[3]-$bi[2])*$gw,
 			    6*$lw, "black" );
 	    }
@@ -131,26 +131,29 @@ sub draw {
 	}
 
 	if ( $fret > 0 ) {
-	    my $glyph = "\x{6c}";
-	    if ( $fing && $fing > 0 ) {
+	    if ( 0 && $fing && $fing > 0 ) {  #TODO
 		# The dingbat glyphs are open, so we need a white
 		# background circle.
-		$pr->circle( $x+$gw/2, $y-$fret*$gh+$gh/2, $dot/2, 1,
+		$pr->circle( $x+$gw/2, $y+$fret*$gh-$gh/2, $dot/2, 1,
 			     "white", "black" );
-		$glyph = pack( "C", 0xca + $fing - 1 );
+		#my $glyph = pack( "C", 0xca + $fing - 1 );
+		#my $dot = $dot/0.7;
+		#$pr->setfont( $ps->{fonts}->{chordfingers}, $dot );
+		#$pr->text( $glyph,
+		#	   $x+$gw/2-$pr->strwidth($glyph)/2,
+		#	   $y+$fret*$gh+$gh/2+$pr->strwidth($glyph)/2+$lw/2,
+		#	   $ps->{fonts}->{chordfingers}, $dot ) ;
 	    }
-	    my $dot = $dot/0.7;
-	    $pr->setfont( $ps->{fonts}->{chordfingers}, $dot );
-	    $pr->text( $glyph,
-		       $x+$gw/2-$pr->strwidth($glyph)/2,
-		       $y-$fret*$gh+$gh/2-$pr->strwidth($glyph)/2+$lw/2,
-		       $ps->{fonts}->{chordfingers}, $dot ) ;
+	    else {
+		$pr->circle( $x+$gw/2, $y+$fret*$gh-$gh/2, $dot/2, 1,
+			     "black", "black" );
+	    }
 	}
 	elsif ( $fret < 0 ) {
-	    $pr->cross( $x+$gw/2, $y+$lw+$gh/3, $dot/3, $lw, "black");
+	    $pr->cross( $x+$gw/2, $y-$lw-$gh/3, $dot/3, $lw, "black");
 	}
 	elsif ( $info->{base} > 0 ) {
-	    $pr->circle( $x+$gw/2, $y+$lw+$gh/3, $dot/3, $lw,
+	    $pr->circle( $x+$gw/2, $y-$lw-$gh/3, $dot/3, $lw,
 			 undef, "black");
 	}
     }

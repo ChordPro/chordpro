@@ -296,6 +296,7 @@ This is the current built-in configuration file, showing all settings.
   	// or a filename (for TrueType/OpenType fonts).
   	// Relative filenames are looked up in the fontdir.
 	// "fontdir" : [ "/usr/share/fonts/liberation", "/home/me/fonts" ],
+	// NOTE: fontdir is ignored when using Pango.
   	"fontdir" : null,
   
   	// Fonts for chords and comments can have a background
@@ -305,42 +306,51 @@ This is the current built-in configuration file, showing all settings.
   
   	"fonts" : {
   	    "title" : {
-  		"name" : "Times-Bold",
-  		"size" : 14
+  		"name"  : "Times-Bold",
+  		"pango" : "Times Bold",
+  		"size"  : 14
   	    },
   	    "text" : {
-  		"name" : "Times-Roman",
-  		"size" : 12
+  		"name"  : "Times-Roman",
+  		"pango" : "Times",
+  		"size"  : 12
   	    },
   	    "chord" : {
-  		"name" : "Helvetica-Oblique",
-  		"size" : 10
+  		"name"  : "Helvetica-Oblique",
+  		"pango" : "Helvetica Italic",
+  		"size"  : 10
   	    },
   	    "comment" : {
-  		"name" : "Helvetica",
-  		"size" : 12,
+  		"name"  : "Helvetica",
+  		"pango" : "Helvetica",
+  		"size"  : 12,
 		"background" : "#E5E5E5"
   	    },
   	    "comment_italic" : {
-  		"name" : "HelveticaOblique",
-  		"size" : 12,
+  		"name"  : "HelveticaOblique",
+  		"pango" : "Sans Oblique",
+  		"size"  : 12,
   	    },
   	    "comment_box" : {
-  		"name" : "Helvetica",
-  		"size" : 12,
+  		"name"  : "Helvetica",
+  		"pango" : "Sans",
+  		"size"  : 12,
 		"frame" : 1
   	    },
   	    "tab" : {
-  		"name" : "Courier",
-  		"size" : 10
+  		"name"  : "Courier",
+  		"pango" : "Mono",
+  		"size"  : 10
   	    },
   	    "toc" : {
-  		"name" : "Times-Roman",
-  		"size" : 11
+  		"name"  : "Times-Roman",
+  		"pango" : "Serif",
+  		"size"  : 11
   	    },
   	    "grid" : {
-  		"name" : "Helvetica",
-  		"size" : 10
+  		"name"  : "Helvetica",
+  		"pango" : "Sans",
+  		"size"  : 10
   	    },
   	},
   

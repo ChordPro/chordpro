@@ -10,6 +10,7 @@ use Data::Dumper;
 use Encode qw( encode_utf8 );
 use App::Packager;
 use App::Music::ChordPro::Output::Common;
+use Carp;
 
 use constant DEBUG_SPACING => 1;
 
@@ -218,7 +219,7 @@ sub generate_song {
     }
 
     my $x;
-    my $y = $ps->{papersize}->[1] - $ps->{margintop};
+    my $y = $ps->{margintop};
 
     $ps->{'even-odd-pages'} =  1 if $options->{'even-pages-number-left'};
     $ps->{'even-odd-pages'} = -1 if $options->{'odd-pages-number-left'};
@@ -321,15 +322,28 @@ sub generate_song {
 	    $ps->{_rightmargin} = $ps->{marginleft};
 	    $ps->{_marginright} = $ps->{papersize}->[0] - $ps->{marginleft};
 	}
-	$ps->{_marginbottom}  = $ps->{marginbottom};
-	$ps->{_margintop}     = $ps->{papersize}->[1] - $ps->{margintop};
-	$ps->{_bottommargin}  = $ps->{marginbottom};
+	$ps->{_marginbottom}  = $ps->{papersize}->[1] - $ps->{marginbottom};
+	$ps->{_margintop}     = $ps->{margintop};
+	$ps->{_bottommargin}  = $ps->{papersize}->[1] - $ps->{marginbottom};
 
 	# Physical coordinates; will be adjusted to columns if needed.
 	$ps->{__leftmargin}   = $ps->{_marginleft};
 	$ps->{__rightmargin}  = $ps->{_marginright};
 	$ps->{__topmargin}    = $ps->{_margintop};
 	$ps->{__bottommargin} = $ps->{_marginbottom};
+
+	if ( DEBUG_SPACING ) {
+	    warn("NEWPAGE margintblr   = ",
+		 join( " ", map { sprintf("%5.1f", $_) } $ps->{margintop}, $ps->{marginbottom}, $ps->{marginleft}, $ps->{marginright} ),
+		 "\n");
+	    warn("NEWPAGE _margintblr  = ",
+		 join( " ", map { sprintf("%5.1f", $_) } $ps->{_margintop}, $ps->{_marginbottom}, $ps->{_marginleft}, $ps->{_marginright} ),
+		 "\n");
+	    warn("NEWPAGE __tblrmargin = ",
+		 join( " ", map { sprintf("%5.1f", $_) } $ps->{__topmargin}, $ps->{__bottommargin}, $ps->{__leftmargin}, $ps->{__rightmargin} ),
+		 "\n");
+	}
+	showlayout($ps) if $ps->{showlayout} || DEBUG_SPACING;
 
 	$thispage++;
 	$s->{meta}->{page} = [ $s->{page} = $thispage ];
@@ -348,22 +362,20 @@ sub generate_song {
 
 	$x = $ps->{__leftmargin};
 	if ( $ps->{headspace} ) {
-	    $y = $ps->{_margintop} + $ps->{headspace};
-	    $y -= font_bl($fonts->{title});
+	    $y = $ps->{_margintop} - $ps->{headspace};
+#	    $y -= font_bl($fonts->{title});
 	    $tpt->("title");
-#TODO	    $y -= ( - ( $fonts->{title}->{font}->descender / 1024 )
+#TODO	    $y += ( - ( $fonts->{title}->{font}->descender / 1024 )
 #		      * $fonts->{title}->{size}
 #		    + ( $fonts->{subtitle}->{font}->ascender / 1024 )
 #		      * $fonts->{subtitle}->{size} )
 	    #		  * $ps->{spacing}->{title};
-	    $y += 10;
+	    $y += 15;
 	    $y = $tpt->("subtitle");
-	    $y += 10;
-	    $ps->{pr}->text("Gggg", 100, 200 );
 	}
 
 	if ( $ps->{footspace} ) {
-	    $y = $ps->{marginbottom} - $ps->{footspace};
+	    $y = $ps->{papersize}->[1] - $ps->{marginbottom} + $ps->{footspace};
 	    $tpt->("footer");
 	}
 
@@ -384,7 +396,7 @@ sub generate_song {
 	# Returns true if there was space.
 
 	my $vsp = $_[0];
-	return 1 if $vsp >= 0 && $y - $vsp >= $ps->{_bottommargin};
+	return 1 if $vsp >= 0 && $y + $vsp < $ps->{_bottommargin};
 
 	if ( ++$col >= $ps->{columns}) {
 	    $newpage->();
@@ -445,7 +457,7 @@ sub generate_song {
 		    $dd->draw( shift(@chords), $x + $_*$hsp, $y, $ps );
 		}
 
-		$y -= $vsp;
+		$y += $vsp;
 	    }
 	}
 	elsif ( $show eq "top" && $class <= 1 ) {
@@ -469,7 +481,7 @@ sub generate_song {
 		    $dd->draw( shift(@chords), $x + $_*$hsp, $y, $ps );
 		}
 
-		$y -= $vsp;
+		$y += $vsp;
 	    }
 	    $ps->{_top} = $y;
 	}
@@ -487,10 +499,11 @@ sub generate_song {
 	    my $vsp = $dd->vsp( undef, $ps );
 	    my $hsp = $dd->hsp( undef, $ps );
 
-	    my $y = $ps->{marginbottom} + (int((@chords-1)/$h) + 1) * $vsp;
+	    # TODO
+	    my $y = $ps->{_marginbottom} - (int((@chords-1)/$h) + 1) * $vsp;
 	    $ps->{_bottommargin} = $y;
 
-	    $y -= $ps->{diagrams}->{vspace} * $ps->{diagrams}->{height};
+	    $y += $ps->{diagrams}->{vspace} * $ps->{diagrams}->{height};
 
 	    while ( @chords ) {
 		my $x = $x - $ps->{_indent};
@@ -503,7 +516,7 @@ sub generate_song {
 		    $x += $hsp;
 		}
 
-		$y -= $vsp;
+		$y += $vsp;
 		$pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
 	    }
 	}
@@ -526,7 +539,7 @@ sub generate_song {
 		    $x += $hsp;
 		}
 
-		$y -= $vsp;
+		$y += $vsp;
 		$pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
 	    }
 	}
@@ -562,7 +575,7 @@ sub generate_song {
 	if ( $elt->{type} ne "set" && !$did++ ) {
 	    # Insert top/left/right/bottom chord diagrams.
  	    $chorddiagrams->() unless $ps->{diagrams}->{show} eq "below";
-	    showlayout($ps); #TODO if $ps->{showlayout};
+	    showlayout($ps) if $ps->{showlayout} || DEBUG_SPACING;
 	}
 
 	if ( $elt->{type} eq "empty" ) {
@@ -572,7 +585,7 @@ sub generate_song {
 	    $vsp_ignorefirst = 0, next if $vsp_ignorefirst;
 	    $pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
 	    my $vsp = empty_vsp( $elt, $ps );
-	    $y -= $vsp;
+	    $y += $vsp;
 	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
 	    next;
 	}
@@ -705,7 +718,7 @@ sub generate_song {
 
 	    my $r = songline( $elt, $x, $y, $ps, song => $s, indent => $indent );
 
-	    $y -= $vsp;
+	    $y += $vsp;
 	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
 
 	    unshift( @elts, $r ) if $r;
@@ -714,7 +727,7 @@ sub generate_song {
 
 	if ( $elt->{type} eq "chorus" ) {
 	    warn("NYI: type => chorus\n");
-	    my $cy = $y + vsp($ps,-2); # ####TODO????
+	    my $cy = $y - vsp($ps,-2); # ####TODO
 	    foreach my $e ( @{$elt->{body}} ) {
 		if ( $e->{type} eq "songline" ) {
 		    $y = songline( $e, $x, $y, $ps );
@@ -722,14 +735,14 @@ sub generate_song {
 		}
 		elsif ( $e->{type} eq "empty" ) {
 		    warn("***SHOULD NOT HAPPEN2***");
-		    $y -= vsp($ps);
+		    $y += vsp($ps);
 		    next;
 		}
 	    }
 	    my $style = $ps->{chorus};
 	    my $cx = $ps->{__leftmargin} - $style->{bar}->{offset};
 	    $pr->vline( $cx, $cy, vsp($ps), 1, $style->{bar}->{color} );
-	    $y -= vsp($ps,4); # chordii
+	    $y += vsp($ps,4); # chordii
 	    next;
 	}
 
@@ -743,11 +756,11 @@ sub generate_song {
 		}
 		elsif ( $e->{type} eq "empty" ) {
 		    warn("***SHOULD NOT HAPPEN2***");
-		    $y -= vsp($ps);
+		    $y += vsp($ps);
 		    next;
 		}
 	    }
-	    $y -= vsp($ps,4);	# chordii
+	    $y += vsp($ps,4);	# chordii
 	    next;
 	}
 
@@ -774,7 +787,7 @@ sub generate_song {
 		      $grid_margin,
 		      $ps );
 
-	    $y -= $vsp;
+	    $y += $vsp;
 	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
 
 	    next;
@@ -787,7 +800,7 @@ sub generate_song {
 	    foreach my $e ( @{$elt->{body}} ) {
 		next unless $e->{type} eq "tabline";
 		$pr->text( $e->{text}, $x, $y );
-		$y -= $dy;
+		$y += $dy;
 	    }
 	    next;
 	}
@@ -800,7 +813,7 @@ sub generate_song {
 
 	    songline( $elt, $x, $y, $ps );
 
-	    $y -= $vsp;
+	    $y += $vsp;
 	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
 
 	    next;
@@ -830,7 +843,7 @@ sub generate_song {
 		redo;
 	    }
 
-	    $y -= $vsp;
+	    $y += $vsp;
 	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
 
 	    next;
@@ -868,7 +881,7 @@ sub generate_song {
 
 	    tocline( $elt, $x, $y, $ps );
 
-	    $y -= $vsp;
+	    $y += $vsp;
 	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
 	    next;
 	}
@@ -981,6 +994,7 @@ sub generate_song {
 
 sub font_bl {
     my ( $font ) = @_;
+    return 0;
     return $font->{size} * 0.6;	# TODO
     $font->{size} / ( 1 - $font->{font}->descender / $font->{font}->ascender );
 }
@@ -1013,7 +1027,7 @@ sub prlabel {
 	    $ps->{pr}->text( $label,
 			     $x - $ps->{_indent}, $y, $font );
 	}
-	$y -= $font->{size} * 1.2;
+	$y += $font->{size} * 1.2;
     }
 }
 
@@ -1113,12 +1127,12 @@ sub songline {
     elsif ( $chordsunder ) {
 	( $ytext, $ychord ) = ( $ychord, $ytext );
 	# Adjust lyrics baseline for the chords.
-	$ychord -= $ps->{fonts}->{text}->{size}
+	$ychord += $ps->{fonts}->{text}->{size}
 	  * $ps->{spacing}->{lyrics};
     }
     else {
 	# Adjust lyrics baseline for the chords.
-	$ytext -= $ps->{fonts}->{chord}->{size}
+	$ytext += $ps->{fonts}->{chord}->{size}
 	          * $ps->{spacing}->{chords};
     }
 
@@ -1153,7 +1167,7 @@ sub songline {
 	    if ( $chordscapo ) {
 		$pr->text(fmt_subst( $opts{song}, $ps->{capoheading} ),
 			  $chordsx,
-			  $ytext + $ftext->{size} *
+			  $ytext - $ftext->{size} *
 			      $ps->{spacing}->{chords},
 			  $fonts->{chord} );
 		undef $chordscapo;
@@ -1169,7 +1183,7 @@ sub songline {
 	    # Avoid running together of syllables.
 	    $w *= 0.75 unless defined($rest);
 
-	    $pr->hline( $ulstart, $ytext + font_ul($ftext), $w,
+	    $pr->hline( $ulstart, $ytext - font_ul($ftext), $w,
 			0.25, "black" );
 
 	    # Print the text.
@@ -1188,7 +1202,7 @@ sub songline {
 				  $x, $ychord, $fchord );
 		$info->{qual} = 'ø' if $info->{qual} eq 'h';
 		$xt0 = $pr->text( $info->{qual}.$info->{ext}, $xt0,
-				   $ychord + $fchord->{size} * 0.2,
+				   $ychord - $fchord->{size} * 0.2,
 				   $fchord,
 				   $fchord->{size} * 0.8
 				 );
@@ -1203,7 +1217,7 @@ sub songline {
 #		    $xt0 = $pr->text( $m, $xt0, $ychord, $fchord );
 #		}
 		$xt0 = $pr->text( $info->{ext}, $xt0,
-				   $ychord + $fchord->{size} * 0.2,
+				   $ychord - $fchord->{size} * 0.2,
 				   $fchord,
 				   $fchord->{size} * 0.8,
 				 );
@@ -1396,16 +1410,16 @@ sub pr_barline {
     my ( $x, $y, $lcr, $sz, $pr ) = @_;
     my $w = $sz / 10;		# glyph width = $w
     $x -= $w / 2 * ($lcr + 1);
-    $pr->vline( $x, $y+0.9*$sz, $sz, $w );
+    $pr->vline( $x, $y-0.9*$sz, $sz, $w );
 }
 
 sub pr_dbarline {
     my ( $x, $y, $lcr, $sz, $pr ) = @_;
     my $w = $sz / 10;		# glyph width = 3 * $w
     $x -= 1.5 * $w * ($lcr + 1);
-    $pr->vline( $x, $y+0.9*$sz, $sz, $w );
+    $pr->vline( $x, $y-0.9*$sz, $sz, $w );
     $x += 2 * $w;
-    $pr->vline( $x, $y+0.9*$sz, $sz, $w );
+    $pr->vline( $x, $y-0.9*$sz, $sz, $w );
 }
 
 sub pr_rptstart {
@@ -1414,10 +1428,10 @@ sub pr_rptstart {
     $x -= 1.5 * $w * ($lcr + 1);
     $pr->vline( $x, $y+0.9*$sz, $sz, $w  );
     $x += 2 * $w;
-    $y += 0.55 * $sz;
-    $pr->line( $x, $y, $x, $y+$w, $w );
-    $y -= 0.4 * $sz;
-    $pr->line( $x, $y, $x, $y+$w, $w );
+    $y -= 0.55 * $sz;
+    $pr->line( $x, $y, $x, $y-$w, $w );
+    $y += 0.4 * $sz;
+    $pr->line( $x, $y, $x, $y-$w, $w );
 }
 
 sub pr_rptend {
@@ -1425,23 +1439,23 @@ sub pr_rptend {
     my $w = $sz / 10;		# glyph width = 3 * $w
     $x -= 1.5 * $w * ($lcr + 1);
     $pr->vline( $x + 2*$w, $y+0.9*$sz, $sz, $w );
-    $y += 0.55 * $sz;
-    $pr->line( $x, $y, $x, $y+$w, $w );
-    $y -= 0.4 * $sz;
-    $pr->line( $x, $y, $x, $y+$w, $w );
+    $y -= 0.55 * $sz;
+    $pr->line( $x, $y, $x, $y-$w, $w );
+    $y += 0.4 * $sz;
+    $pr->line( $x, $y, $x, $y-$w, $w );
 }
 
 sub pr_rptendstart {
     my ( $x, $y, $lcr, $sz, $pr ) = @_;
     my $w = $sz / 10;		# glyph width = 5 * $w
     $x -= 2.5 * $w * ($lcr + 1);
-    $pr->vline( $x + 2*$w, $y+0.9*$sz, $sz, $w );
-    $y += 0.55 * $sz;
-    $pr->line( $x,      $y, $x     , $y+$w, $w );
-    $pr->line( $x+4*$w, $y, $x+4*$w, $y+$w, $w );
-    $y -= 0.4 * $sz;
-    $pr->line( $x,      $y, $x,      $y+$w, $w );
-    $pr->line( $x+4*$w, $y, $x+4*$w, $y+$w, $w );
+    $pr->vline( $x + 2*$w, $y-0.9*$sz, $sz, $w );
+    $y -= 0.55 * $sz;
+    $pr->line( $x,      $y, $x     , $y-$w, $w );
+    $pr->line( $x+4*$w, $y, $x+4*$w, $y-$w, $w );
+    $y += 0.4 * $sz;
+    $pr->line( $x,      $y, $x,      $y-$w, $w );
+    $pr->line( $x+4*$w, $y, $x+4*$w, $y-$w, $w );
 }
 
 sub pr_repeat {
@@ -1450,17 +1464,17 @@ sub pr_repeat {
     $x -= 1.5 * $w * ($lcr + 1);
     my $lw = $sz / 10;
     $x -= $w / 2;
-    $pr->line( $x, $y+0.2*$sz, $x + $w, $y+0.7*$sz, $lw );
-    $pr->line( $x, $y+0.6*$sz, $x + 0.07*$sz , $y+0.7*$sz, $lw );
+    $pr->line( $x, $y-0.2*$sz, $x + $w, $y-0.7*$sz, $lw );
+    $pr->line( $x, $y-0.6*$sz, $x + 0.07*$sz , $y-0.7*$sz, $lw );
     $x += $w;
-    $pr->line( $x - 0.05*$sz, $y+0.2*$sz, $x + 0.02*$sz, $y+0.3*$sz, $lw );
+    $pr->line( $x - 0.05*$sz, $y-0.2*$sz, $x + 0.02*$sz, $y-0.3*$sz, $lw );
 }
 
 sub pr_endline {
     my ( $x, $y, $lcr, $sz, $pr ) = @_;
     my $w = $sz / 10;		# glyph width = 2 * $w
     $x -= 0.75 * $w * ($lcr + 1);
-    $pr->vline( $x, $y+0.85*$sz, 0.9*$sz, 2*$w );
+    $pr->vline( $x, $y-0.85*$sz, 0.9*$sz, 2*$w );
 }
 
 sub imageline_vsp {
@@ -1540,7 +1554,7 @@ sub tocline {
 
     my $ann = $pr->{pdfpage}->annotation;
     $ann->link($elt->{page});
-    $ann->rect( $ps->{_leftmargin}, $y0 - $ftoc->{size} * $ps->{spacing}->{toc},
+    $ann->rect( $ps->{_leftmargin}, $y0 + $ftoc->{size} * $ps->{spacing}->{toc},
 		$ps->{__rightmargin}, $y0 );
     ####CHECK MARGIN RIGHT
 }
@@ -1665,24 +1679,24 @@ sub set_columns {
 sub showlayout {
     my ( $ps ) = @_;
     my $pr = $ps->{pr};
-    my $col = "black";
+    my $col = "red";
     my $lw = 0.5;
 
     my $mr = $ps->{_rightmargin};
     my $ml = $ps->{_leftmargin};
 
     $pr->rectxy( $ml,
-		 $ps->{marginbottom},
+		 $ps->{margintop},
 		 $ps->{papersize}->[0]-$mr,
-		 $ps->{papersize}->[1]-$ps->{margintop},
+		 $ps->{papersize}->[1]-$ps->{marginbottom},
 		 $lw, undef, $col);
 
     my @a = ( $ml,
-	      $ps->{papersize}->[1]-$ps->{margintop}+$ps->{headspace},
+	      $ps->{margintop}-$ps->{headspace},
 	      $ps->{papersize}->[0]-$ml-$mr,
 	      $lw, $col );
     $pr->hline(@a);
-    $a[1] = $ps->{marginbottom}-$ps->{footspace};
+    $a[1] = $ps->{papersize}->[1]-$ps->{marginbottom}+$ps->{footspace};
     $pr->hline(@a);
 
     my @off = @{ $ps->{columnoffsets} };
@@ -1868,7 +1882,7 @@ sub tpt {
     }
 
     # Return updated baseline.
-    return $y - $font->{size} * ($ps->{spacing}->{$type} || 1);
+    return $y + $font->{size} * ($ps->{spacing}->{$type} || 1);
 }
 
 sub wrap {
@@ -1967,19 +1981,23 @@ sub new {
 						  $ps->{papersize}->[0],
 						  $ps->{papersize}->[1] );
     $self->{cr} = Cairo::Context->create( $self->{surface} );
+    $self->{layout} = Pango::Cairo::create_layout($self->{cr});
+    $self->{_pages} = 0;
     %fontcache = () if $::__EMBEDDED__;
     $self;
 }
 
 sub info {
-#    my ( $self, %info ) = @_;
-#    unless ( $info{CreationDate} ) {
-#	my @tm = gmtime( $regtest ? $faketime : time );
-#	$info{CreationDate} =
-#	  sprintf("D:%04d%02d%02d%02d%02d%02d+00'00'",
-#		  1900+$tm[5], 1+$tm[4], @tm[3,2,1,0]);
-#    }
-#    $self->{pdf}->info( %info );
+    my ( $self, %info ) = @_;
+    unless ( $info{CreationDate} ) {
+	my @tm = gmtime( $regtest ? $faketime : time );
+	$info{CreationDate} =
+	  sprintf("D:%04d%02d%02d%02d%02d%02d+00'00'",
+		  1900+$tm[5], 1+$tm[4], @tm[3,2,1,0]);
+    }
+    while ( my ( $k, $v ) = each %info ) {
+	#TODO $self->{surface}->set_metadata( $k => $v );
+    }
 }
 
 
@@ -2010,51 +2028,61 @@ sub text {
     return $x unless length($text);
 
     $font ||= $self->{font};
+    my $fdesc = $font->{font};
     $size ||= $font->{size};
+#    warn("TEXT: \"$text\" $x $y ", $font->{font}->to_string, " $size\n");
 
-    $self->setfont($font, $size);
+    # Note the 1.33 scaling is to map Pango points (96dpi) to PDF
+    # points (72dpi). There should be a better way to do this.
+    $fdesc->set_size($size*1024/1.33);
+
+    my $layout = $self->{layout};
+    $layout->set_font_description($fdesc);
+    $layout->set_text( $text );
 
     # Handle decorations (background, box).
     my $bgcol = $font->{background};
     my $frame = $font->{frame};
     if ( $bgcol || $frame ) {
-	my $w = $self->strwidth( $text );
+	my $e = ($layout->get_pixel_extents)[0]; # 0 = ink
+	my $w = $e->{width} + $e->{x};
 	my $vsp = $size * 1.1;
 	# Adjust for baseline.
-	my $y = $y; #TODO + ( $size / ( 1 - $font->{font}->descender / $font->{font}->ascender ) );
+	my $y = $y;# + $layout->get_baseline/1024;
 
 	# Draw background.
 	if ( $bgcol && $bgcol !~ /^no(?:ne)?$/i ) {
-	    $self->rectxy( $x - 2, $y + 2,
-			   $x + $w + 2, $y - $vsp, 3, $bgcol );
+	    $self->rectxy( $x + $e->{x}, $y + $e->{y},
+			   $x + $e->{width}, $y + $e->{height}, 1, $bgcol );
 	}
 
 	# Draw box.
 	if ( $frame && $frame !~ /^no(?:ne)?$/i ) {
 	    my $x0 = $x;
 	    $x0 -= 0.25;	# add some offset for the box
-	    $self->rectxy( $x0, $y + 1,
-			   $x0 + $w + 1, $y - $vsp + 1,
+	    $self->rectxy( $x0, $y - 1,
+			   $x0 + $w + 1, $y + $vsp + 1,
 			   0.5, undef,
 			   $font->{color} || "black" );
 	}
     }
 
     if ( $font->{color} ) {
-#	$self->{pdftext}->strokecolor( $font->{color} );
-#	$self->{pdftext}->fillcolor( $font->{color} );
+	$self->{cr}->setcolor( $font->{color} );
     }
     else {
-#	$self->{pdftext}->strokecolor("black");
-#	$self->{pdftext}->fillcolor("black");
+	$self->{cr}->setcolor("black");
     }
-    $self->{cr}->move_to( $x, $y );
-    $self->{cr}->set_source_rgb( 1, 0, 0);
-    $self->{cr}->show_text($text);
-    $x += length($text) * 4; # TODO
+    if ( $text eq "Swing " ) {
+	$self->hline($x,$y,50,1,"red");
+	#    $self->{cr}->move_to( $x, $y );#+ $layout->get_baseline/1024 );
+	warn("PX: ", ($layout->get_pixel_extents)[0]->{y},"\n");
+    }
+    $self->{cr}->move_to( $x, $y - ($layout->get_pixel_extents)[1]->{y});
+    Pango::Cairo::show_layout( $self->{cr}, $layout );
+    $x += ($layout->get_pixel_extents)[1]->{width};
     if ( $font->{color} ) {
-#	$self->{pdftext}->strokecolor("black");
-#	$self->{pdftext}->fillcolor("black");
+	$self->{cr}->setcolor("black");
     }
     return $x;
 }
@@ -2063,23 +2091,28 @@ sub setfont {
     my ( $self, $font, $size ) = @_;
     $self->{font} = $font;
     $self->{fontsize} = $size ||= $font->{size};
-#    $self->{pdftext}->font( $font->{font}, $size );
 }
 
 sub strwidth {
     my ( $self, $text, $font, $size ) = @_;
     $font ||= $self->{font};
     $size ||= $self->{fontsize} || $font->{size};
-    $self->setfont( $font, $size );
-    return length($text) * 5; # TODO
-    $self->{pdftext}->advancewidth($text);
+    my $layout = $self->{layout};
+    my $fdesc = $font->{font};
+    Carp::confess("FDESC") unless $fdesc;
+    $fdesc->set_size($size*1024/1.33);
+#    warn("SW: \"$text\" ", $fdesc->to_string, " $size\n");
+    $layout->set_font_description($fdesc);
+    $layout->set_text( $text );
+    my @e = $layout->get_pixel_extents;
+    $e[1]->{width};
 }
 
 sub line {
     my ( $self, $x0, $y0, $x1, $y1, $lw, $color ) = @_;
     my $cr = $self->{cr};
     $cr->save;
-#    $cr->strokecolor($color ||= "black");
+    $cr->setcolor($color || "black");
     $cr->set_line_cap('round');
     $cr->set_line_width($lw||1);
     $cr->move_to( $x0, $y0 );
@@ -2092,7 +2125,7 @@ sub hline {
     my ( $self, $x, $y, $w, $lw, $color ) = @_;
     my $cr = $self->{cr};
     $cr->save;
-#    $cr->strokecolor($color ||= "black");
+    $cr->setcolor($color || "black");
     $cr->set_line_cap('square');
     $cr->set_line_width($lw||1);
     $cr->move_to( $x, $y );
@@ -2105,11 +2138,11 @@ sub vline {
     my ( $self, $x, $y, $h, $lw, $color ) = @_;
     my $cr = $self->{cr};
     $cr->save;
-#    $cr->strokecolor($color ||= "black");
+    $cr->setcolor($color || "black");
     $cr->set_line_cap('square');
     $cr->set_line_width($lw||1);
     $cr->move_to( $x, $y );
-    $cr->line_to( $x, $y - $h );
+    $cr->line_to( $x, $y + $h );
     $cr->stroke;
     $cr->restore;
 }
@@ -2118,14 +2151,17 @@ sub rectxy {
     my ( $self, $x, $y, $x1, $y1, $lw, $fillcolor, $strokecolor ) = @_;
     my $cr = $self->{cr};
     $cr->save;
-#    $cr->strokecolor($strokecolor) if $strokecolor;
-#    $cr->fillcolor($fillcolor) if $fillcolor;
     $cr->set_line_cap('square');
     $cr->set_line_width($lw||1);
-#    $cr->rectangle( $x, $y, $x1-$x, $y1-$y );
-    $cr->set_source_rgb(0,1,0);$cr->rectangle( 100, 100, 300, 500 );$cr->fill;
-    $cr->fill if $fillcolor;
-    $cr->stroke if $strokecolor;
+    $cr->rectangle( $x, $y, $x1-$x, $y1-$y );
+    if ( $fillcolor ) {
+	$cr->setcolor($fillcolor);
+	$cr->fill;
+    }
+    if ( $strokecolor ) {
+	$cr->setcolor($strokecolor);
+	$cr->stroke;
+    }
     $cr->restore;
 }
 
@@ -2133,12 +2169,16 @@ sub circle {
     my ( $self, $x, $y, $r, $lw, $fillcolor, $strokecolor ) = @_;
     my $cr = $self->{cr};
     $cr->save;
-#    $cr->strokecolor($strokecolor) if $strokecolor;
-#    $cr->fillcolor($fillcolor) if $fillcolor;
     $cr->set_line_width($lw||1);
-    $cr->arc( $x+$r, $y+$r, $r, 0, 4*atan2(1,1) ); # TODO
-    $cr->fill if $fillcolor;
-    $cr->stroke if $strokecolor;
+    $cr->arc( $x, $y, $r, 0, 8*atan2(1,1) ); # TODO
+    if ( $fillcolor ) {
+	$cr->setcolor($fillcolor);
+	$cr->fill;
+    }
+    if ( $strokecolor ) {
+	$cr->setcolor($strokecolor);
+	$cr->stroke;
+    }
     $cr->restore;
 }
 
@@ -2146,16 +2186,44 @@ sub cross {
     my ( $self, $x, $y, $r, $lw, $strokecolor ) = @_;
     my $cr = $self->{cr};
     $cr->save;
-#    $cr->strokecolor($strokecolor) if $strokecolor;
+    $cr->setcolor($strokecolor) if $strokecolor;
     $cr->set_line_width($lw||1);
     $r = 0.9 * $r;
-    $cr->move_to( $x-$r, $y-$r );
-    $cr->line_to( $x+$r, $y+$r );
-    $cr->stroke if $strokecolor;
     $cr->move_to( $x-$r, $y+$r );
     $cr->line_to( $x+$r, $y-$r );
-    $cr->stroke if $strokecolor;
+    $cr->stroke;
+    $cr->move_to( $x-$r, $y-$r );
+    $cr->line_to( $x+$r, $y+$r );
+    $cr->stroke;
     $cr->restore;
+}
+
+my %colours =
+  ( black    => [ 0, 0, 0, 1 ],
+    white    => [ 1, 1, 1, 1 ],
+    red	     => [ 1, 0, 0, 1 ],
+    green    => [ 0, 1, 0, 1 ],
+    blue     => [ 0, 0, 1, 1 ],
+    yellow   => [ 1, 1, 0, 1 ],
+    magenta  => [ 1, 0, 1, 1 ],
+    cyan     => [ 0, 1, 1, 1 ],
+  );
+
+sub Cairo::Context::setcolor {
+    my ( $cr, $color ) = @_;
+
+    my $rgba;
+    if ( defined( $rgba = $colours{$color} ) ) {
+    }
+    elsif ( $color =~ /^\#?([0-9a-f][0-9a-f])([0-9a-f][0-9a-f])([0-9a-f][0-9a-f])([0-9a-f][0-9a-f])?$/i ) {
+	$rgba = [ map { hex($_)/255 } $1, $2, $3, $4//"ff" ];
+    }
+
+    unless ( $rgba ) {
+	warn("Unhandled colour: $color, using cyan instead\n");
+	$rgba = $colours{"cyan"};
+    }
+    $cr->set_source_rgba( @$rgba );
 }
 
 sub get_image {
@@ -2193,9 +2261,9 @@ sub add_image {
     my $gfx = $self->{pdfgfx};
 
     $gfx->save;
-    $gfx->image( $img, $x, $y-$h, $w, $h );
+    $gfx->image( $img, $x, $y+$h, $w, $h );
     if ( $border ) {
-	$gfx->rect( $x, $y-$h, $w, $h )
+	$gfx->rect( $x, $y+$h, $w, $h )
 	  ->linewidth($border)
 	    ->stroke;
     }
@@ -2204,7 +2272,7 @@ sub add_image {
 
 sub newpage {
     my ( $self, $ps, $page ) = @_;
-    $self->{cr}->show_page;
+    $self->{cr}->show_page if $self->{_pages}++;
 }
 
 sub finish {
@@ -2228,7 +2296,7 @@ sub init_fonts {
     my $fail;
 
     foreach my $ff ( keys( %{ $ps->{fonts} } ) ) {
-	next unless $ps->{fonts}->{$ff}->{name} || $ps->{fonts}->{$ff}->{file};
+	next unless $ps->{fonts}->{$ff}->{pango};
 	$self->init_font($ff) or $fail++;
     }
     die("Unhandled fonts detected -- aborted\n") if $fail;
@@ -2236,63 +2304,29 @@ sub init_fonts {
 
 sub init_font {
     my ( $self, $ff ) = @_;
-    return 1;			# TODO
 
     my $ps = $self->{ps};
 
     my $font = $ps->{fonts}->{$ff};
-    if ( $font->{file} ) {
-	if ( $font->{file} =~ /\.[ot]tf$/ ) {
-	    eval {
-		$font->{font} =
-		  $fontcache{$font->{file}} ||=
-		    $self->{pdf}->ttfont( $font->{file},
-					  -dokern => 1 );
-	    }
-	    or warn("Cannot load font: ", $font->{file}, "\n");
-	}
-	elsif ( $font->{file} =~ /\.pf[ab]$/ ) {
-	    eval {
-		$font->{font} =
-		  $fontcache{$font->{file}} ||=
-		    $self->{pdf}->psfont( $font->{file},
-					  -afmfile => $font->{metrics},
-					  -dokern  => 1 );
-	    }
-	    or warn("Cannot load font: ", $font->{file}, "\n");
-	}
-	else {
-	    $font->{font} =
-	      $fontcache{"__default__"} ||=
-	      $self->{pdf}->corefont( 'Courier' );
-	}
+    my $pango = $font->{pango};
+    if ( $pango !~ /\s+(\d+)$/ && $font->{size} ) {
+	$pango .= " " . $font->{size};
     }
-    else {
-	eval {
-	    $font->{font} =
-	      $fontcache{"__core__".$font->{name}} ||=
-		$self->{pdf}->corefont( $font->{name}, -dokern => 1 );
-	}
-	or warn("Cannot load font: ", $font->{file}, "\n");
-    }
-
-    unless ( $font->{font} ) {
-	warn( "Unhandled $ff font: ",
-	      $font->{file}
-	      || $font->{name}
-	      || Dumper($font), "\n" );
-    }
-    $font->{font}->{Name}->{val} =~ s/~.*/~$faketime/ if $regtest;
+    $font->{font} = Pango::FontDescription->from_string($pango);
+    warn("Load font: ", $font->{font}->to_string, "\n");
     $font->{font};
 }
 
 sub show_vpos {
     my ( $self, $y, $w ) = @_;
     for ( $self->{cr} ) {
+	$_->save;
 	$_->move_to(100*$w,$y);
 	$_->set_line_width(0.25);
 	$_->line_to(100*$w+100*(1+$w), $y);
+	$_->setcolor("blue");
 	$_->stroke;
+	$_->restore;
     }
 }
 

@@ -20,7 +20,6 @@ wxchordpro : res chordpro.pp ${COMMON}/chordpro.pp ${COMMON}/wxchordpro.pp
 	${PP} --output=wxchordpro @wxchordpro.pp ${SCRIPT}/wxchordpro.pl
 
 res :
-	perl -e 'exit 1 if @INC[2] !~ m;/citrus-5.24.1-wx-3.0/;'
 	test -f ${ROOT}/GNUmakefile && make -C ${ROOT} -f GNUmakefile resources || true
 
 clean ::

@@ -2,6 +2,5 @@
 --lib=../../lib
 --lib=../common
 --module=App::Music::ChordPro::Bundle
---module=PDF_API2_Bundle
 --addfile=../../lib/App/Music/ChordPro/res;res
 --cachedeps=chordpro.pp.deps
