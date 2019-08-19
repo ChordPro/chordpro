@@ -12,7 +12,7 @@ use App::Packager;
 use App::Music::ChordPro::Output::Common;
 use Carp;
 
-use constant DEBUG_SPACING => 1;
+use constant DEBUG_SPACING => 0;
 
 # For regression testing, run perl with PERL_HASH_SEED set to zero.
 # This eliminates the arbitrary order of font definitions and triggers
@@ -25,7 +25,8 @@ sub generate_songbook {
     return [] unless $sb->{songs}->[0]->{body}; # no songs
 
     my $ps = $::config->{pdf};
-    my $pr = PDFWriter->new( $ps, $options->{output} || "__new__.pdf" );
+    my $pdffile = $options->{output} || "__new__.pdf";
+    my $pr = PDFWriter->new( $ps, $pdffile );
     $pr->info( Title => $sb->{songs}->[0]->{meta}->{title}->[0],
 	       Creator =>
 	       $regtest
@@ -43,11 +44,13 @@ sub generate_songbook {
 				{ pr => $pr, $options ? %$options : () } );
     }
 
-    if ( $::config->{toc}->{order} eq "alpha" ) {
-	@book = sort { lc($a->[0]) cmp lc($b->[0]) } @book;
-    }
+    $pr->finish();
 
     if ( $options->{toc} // @book > 1 ) {
+
+	if ( $::config->{toc}->{order} eq "alpha" ) {
+	    @book = sort { lc($a->[0]) cmp lc($b->[0]) } @book;
+	}
 
 	# Create a pseudo-song for the table of contents.
 	my $t = $::config->{toc}->{title};
@@ -60,37 +63,27 @@ sub generate_songbook {
 			      context => "toc",
 			      title   => $_->[0],
 			      pageno  => $_->[1],
-			      page    => $pr->{pdf}->openpage($_->[1]),
 			    } } @book,
 	    ],
 	  };
 
-	# Prepend the toc.
-	$options->{startpage} = 1;
-	$page = generate_song( $song,
-			       { pr => $pr, prepend => 1,
-				 $options ? %$options : () } );
-
+	# Append the toc.
 	# Align.
 	$pr->newpage($ps, $page+1), $page++
 	  if $ps->{'even-odd-pages'} && $page % 2;
+	$options->{startpage} = 1;
+	$page = generate_song( $song,
+			       { pr => $pr,
+				 $options ? %$options : () } );
+
     }
     else {
 	$page = 1;
     }
 
     if ( $options->{cover} ) {
-	my $cover; # TODO = $pdfapi->open( $options->{cover} );
-	die("Missing cover: ", $options->{cover}, "\n") unless $cover;
-	for ( 1 .. $cover->pages ) {
-	    $pr->{pdf}->importpage( $cover, $_, $_ );
-	    $page++;
-	}
-	$pr->newpage( $ps, 1+$cover->pages ), $page++
-	  if $ps->{'even-odd-pages'} && $page % 2;
+	warn("No support for cover pages in this version.\n");
     }
-
-    $pr->finish();
 
     if ( $options->{csv} ) {
 
@@ -1548,15 +1541,12 @@ sub tocline {
     my $ftoc = $fonts->{toc};
     $y -= font_bl($ftoc);
     $pr->setfont($ftoc);
+    $ps->{pr}->{cr}->tag_begin("Link","dest='page".$elt->{pageno}."'");
     $ps->{pr}->text( $elt->{title}, $x, $y );
     my $p = $elt->{pageno} . ".";
     $ps->{pr}->text( $p, $x - 5 - $pr->strwidth($p), $y );
+    $ps->{pr}->{cr}->tag_end("Link");
 
-    my $ann = $pr->{pdfpage}->annotation;
-    $ann->link($elt->{page});
-    $ann->rect( $ps->{_leftmargin}, $y0 + $ftoc->{size} * $ps->{spacing}->{toc},
-		$ps->{__rightmargin}, $y0 );
-    ####CHECK MARGIN RIGHT
 }
 
 sub has_visible_chords {
@@ -1989,6 +1979,7 @@ sub new {
 
 sub info {
     my ( $self, %info ) = @_;
+    return unless $self->{surface}->can("set_metadata");
     unless ( $info{CreationDate} ) {
 	my @tm = gmtime( $regtest ? $faketime : time );
 	$info{CreationDate} =
@@ -1996,7 +1987,10 @@ sub info {
 		  1900+$tm[5], 1+$tm[4], @tm[3,2,1,0]);
     }
     while ( my ( $k, $v ) = each %info ) {
-	#TODO $self->{surface}->set_metadata( $k => $v );
+	eval {
+	    $self->{surface}->set_metadata( $k => $v );
+	};
+	warn($@) if $@;		# should not happen
     }
 }
 
@@ -2272,7 +2266,10 @@ sub add_image {
 
 sub newpage {
     my ( $self, $ps, $page ) = @_;
-    $self->{cr}->show_page if $self->{_pages}++;
+    my $cr = $self->{cr};
+    $cr->show_page if $self->{_pages}++;
+    $cr->tag_begin("cairo.dest","name='page".$self->{_pages}."'");
+    $self;
 }
 
 sub finish {
