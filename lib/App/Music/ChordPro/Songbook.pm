@@ -538,7 +538,7 @@ sub directive {
 	# Enabling this always would allow [^] to recall anyway.
 	# Feature?
 	if ( $::config->{settings}->{memorize} ) {
-	    $memchords = $memchords{$1} //= [];
+	    $memchords = $memchords{$in_context} //= [];
 	    $memcrdinx = 0;
 	    $memorizing = 0;
 	}
