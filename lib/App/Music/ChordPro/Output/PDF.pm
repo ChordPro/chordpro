@@ -356,7 +356,6 @@ sub generate_song {
 	$x = $ps->{__leftmargin};
 	if ( $ps->{headspace} ) {
 	    $y = $ps->{_margintop} - $ps->{headspace};
-#	    $y -= font_bl($fonts->{title});
 	    $tpt->("title");
 #TODO	    $y += ( - ( $fonts->{title}->{font}->descender / 1024 )
 #		      * $fonts->{title}->{size}
@@ -985,18 +984,6 @@ sub generate_song {
     return $thispage - $startpage + 1;
 }
 
-sub font_bl {
-    my ( $font ) = @_;
-    return 0;
-    return $font->{size} * 0.6;	# TODO
-    $font->{size} / ( 1 - $font->{font}->descender / $font->{font}->ascender );
-}
-
-sub font_ul {
-    my ( $font ) = @_;
-    $font->{font}->underlineposition / 1024 * $font->{size};
-}
-
 sub prlabel {
     my ( $ps, $label, $x, $y, $font) = @_;
     return if $label eq "" || $ps->{_indent} == 0;
@@ -1073,7 +1060,7 @@ sub songline {
 
     if ( $type =~ /^comment/ ) {
 	$ftext = $elt->{font} || $fonts->{$type} || $fonts->{comment};
-	$ytext  = $ytop - font_bl($ftext);
+	$ytext  = $ytop;
 	my $song   = $opts{song};
 	$x += $opts{indent} if $opts{indent};
 	$x += $elt->{indent} if $elt->{indent};
@@ -1084,7 +1071,7 @@ sub songline {
     }
     if ( $type eq "tabline" ) {
 	$ftext = $fonts->{tab};
-	$ytext  = $ytop - font_bl($ftext);
+	$ytext  = $ytop;
 	$x += $opts{indent} if $opts{indent};
 	prlabel( $ps, $tag, $x, $ytext );
 	$pr->text( $elt->{text}, $x, $ytext, $ftext );
@@ -1093,10 +1080,10 @@ sub songline {
 
     # assert $type eq "songline";
     $ftext = $fonts->{text};
-    $ytext  = $ytop - font_bl($ftext); # unless lyrics AND chords
+    $ytext  = $ytop; # unless lyrics AND chords
 
     my $fchord = $fonts->{chord};
-    my $ychord = $ytop - font_bl($fchord);
+    my $ychord = $ytop;
 
     # Just print the lyrics if no chords.
     if ( $lyrics_only
@@ -1169,15 +1156,14 @@ sub songline {
 	    # Underline the first word of the phrase, to indicate
 	    # the actual chord position. Skip leading non-letters.
 	    $phrase = " " if $phrase eq "";
-	    my ( $pre, $word, $rest ) = $phrase =~ /^(\W+)?(\w+)(.+)?$/;
-	    my $ulstart = $x;
-	    $ulstart += $pr->strwidth($pre) if defined($pre);
-	    my $w = $pr->strwidth( $word, $ftext );
-	    # Avoid running together of syllables.
-	    $w *= 0.75 unless defined($rest);
-
-	    $pr->hline( $ulstart, $ytext - font_ul($ftext), $w,
-			0.25, "black" );
+	    my ( $pre, $word, $rest ) = $phrase =~ /^((?:<.*?>|\W)*)(\w+)(.*)$/;
+	    if ( $rest ne "" ) {
+		$phrase = ($pre//"") . "<u>$word</u>$rest";
+	    }
+	    else {
+		my $c = chop($word);
+		$phrase = ($pre//"") . "<u>$word</u>$c";
+	    }
 
 	    # Print the text.
 	    prlabel( $ps, $tag, $x, $ytext );
@@ -1262,7 +1248,6 @@ sub gridline {
     # Use the chords font for the chords, and for the symbols size.
     my $fchord = { %{ $fonts->{grid} || $fonts->{chord} } };
     delete($fchord->{background});
-    $y -= font_bl($fchord);
 
     prlabel( $ps, $tag, $x, $y );
 
@@ -1403,25 +1388,25 @@ sub pr_barline {
     my ( $x, $y, $lcr, $sz, $pr ) = @_;
     my $w = $sz / 10;		# glyph width = $w
     $x -= $w / 2 * ($lcr + 1);
-    $pr->vline( $x, $y-0.9*$sz, $sz, $w );
+    $pr->vline( $x, $y+0.1*$sz, $sz, $w );
 }
 
 sub pr_dbarline {
     my ( $x, $y, $lcr, $sz, $pr ) = @_;
     my $w = $sz / 10;		# glyph width = 3 * $w
     $x -= 1.5 * $w * ($lcr + 1);
-    $pr->vline( $x, $y-0.9*$sz, $sz, $w );
+    $pr->vline( $x, $y+0.1*$sz, $sz, $w );
     $x += 2 * $w;
-    $pr->vline( $x, $y-0.9*$sz, $sz, $w );
+    $pr->vline( $x, $y+0.1*$sz, $sz, $w );
 }
 
 sub pr_rptstart {
     my ( $x, $y, $lcr, $sz, $pr ) = @_;
     my $w = $sz / 10;		# glyph width = 3 * $w
     $x -= 1.5 * $w * ($lcr + 1);
-    $pr->vline( $x, $y+0.9*$sz, $sz, $w  );
+    $pr->vline( $x, $y+0.1*$sz, $sz, $w  );
     $x += 2 * $w;
-    $y -= 0.55 * $sz;
+    $y += 0.45 * $sz;
     $pr->line( $x, $y, $x, $y-$w, $w );
     $y += 0.4 * $sz;
     $pr->line( $x, $y, $x, $y-$w, $w );
@@ -1431,8 +1416,8 @@ sub pr_rptend {
     my ( $x, $y, $lcr, $sz, $pr ) = @_;
     my $w = $sz / 10;		# glyph width = 3 * $w
     $x -= 1.5 * $w * ($lcr + 1);
-    $pr->vline( $x + 2*$w, $y+0.9*$sz, $sz, $w );
-    $y -= 0.55 * $sz;
+    $pr->vline( $x + 2*$w, $y+0.1*$sz, $sz, $w );
+    $y += 0.45 * $sz;
     $pr->line( $x, $y, $x, $y-$w, $w );
     $y += 0.4 * $sz;
     $pr->line( $x, $y, $x, $y-$w, $w );
@@ -1442,8 +1427,8 @@ sub pr_rptendstart {
     my ( $x, $y, $lcr, $sz, $pr ) = @_;
     my $w = $sz / 10;		# glyph width = 5 * $w
     $x -= 2.5 * $w * ($lcr + 1);
-    $pr->vline( $x + 2*$w, $y-0.9*$sz, $sz, $w );
-    $y -= 0.55 * $sz;
+    $pr->vline( $x + 2*$w, $y+0.1*$sz, $sz, $w );
+    $y += 0.45 * $sz;
     $pr->line( $x,      $y, $x     , $y-$w, $w );
     $pr->line( $x+4*$w, $y, $x+4*$w, $y-$w, $w );
     $y += 0.4 * $sz;
@@ -1457,17 +1442,17 @@ sub pr_repeat {
     $x -= 1.5 * $w * ($lcr + 1);
     my $lw = $sz / 10;
     $x -= $w / 2;
-    $pr->line( $x, $y-0.2*$sz, $x + $w, $y-0.7*$sz, $lw );
-    $pr->line( $x, $y-0.6*$sz, $x + 0.07*$sz , $y-0.7*$sz, $lw );
+    $pr->line( $x, $y+0.8*$sz, $x + $w, $y+0.3*$sz, $lw );
+    $pr->line( $x, $y+0.4*$sz, $x + 0.07*$sz , $y+0.3*$sz, $lw );
     $x += $w;
-    $pr->line( $x - 0.05*$sz, $y-0.2*$sz, $x + 0.02*$sz, $y-0.3*$sz, $lw );
+    $pr->line( $x - 0.05*$sz, $y+0.8*$sz, $x + 0.02*$sz, $y+0.7*$sz, $lw );
 }
 
 sub pr_endline {
     my ( $x, $y, $lcr, $sz, $pr ) = @_;
     my $w = $sz / 10;		# glyph width = 2 * $w
     $x -= 0.75 * $w * ($lcr + 1);
-    $pr->vline( $x, $y-0.85*$sz, 0.9*$sz, 2*$w );
+    $pr->vline( $x, $y+0.15*$sz, 0.9*$sz, 2*$w );
 }
 
 sub imageline_vsp {
@@ -1539,13 +1524,12 @@ sub tocline {
     my $y0 = $y;
     $x += 20;
     my $ftoc = $fonts->{toc};
-    $y -= font_bl($ftoc);
     $pr->setfont($ftoc);
-    $ps->{pr}->{cr}->tag_begin("Link","dest='page".$elt->{pageno}."'");
+    $ps->{pr}->link_jump( $elt->{pageno} );
     $ps->{pr}->text( $elt->{title}, $x, $y );
     my $p = $elt->{pageno} . ".";
     $ps->{pr}->text( $p, $x - 5 - $pr->strwidth($p), $y );
-    $ps->{pr}->{cr}->tag_end("Link");
+    $ps->{pr}->link_end;
 
 }
 
@@ -1983,12 +1967,13 @@ sub info {
     unless ( $info{CreationDate} ) {
 	my @tm = gmtime( $regtest ? $faketime : time );
 	$info{CreationDate} =
-	  sprintf("D:%04d%02d%02d%02d%02d%02d+00'00'",
+	  sprintf("%04d-%02d-%02dT%02d:%02d:%02d'",
 		  1900+$tm[5], 1+$tm[4], @tm[3,2,1,0]);
     }
     while ( my ( $k, $v ) = each %info ) {
 	eval {
-	    $self->{surface}->set_metadata( $k => $v );
+	    $k = "create-date" if $k eq "CreationDate";
+	    $self->{surface}->set_metadata( lc $k => $v );
 	};
 	warn($@) if $@;		# should not happen
     }
@@ -2032,47 +2017,37 @@ sub text {
 
     my $layout = $self->{layout};
     $layout->set_font_description($fdesc);
-    $layout->set_text( $text );
+
+    # It would be nice if we could use this for color and background,
+    # but pango background does not match the bounding box (frame).
+    # if ( $font->{color} ) {
+	# my $t = "<span";
+	# $t .= " color='" . $font->{color} . '"' if $font->{color};
+	# $t .= " background='" . $font->{background} . "'" if $font->{background};
+	# $text = "$t>$text</span>";
+    # }
+    $layout->set_markup( $text );
 
     # Handle decorations (background, box).
     my $bgcol = $font->{background};
+    undef $bgcol if $bgcol && $bgcol =~ /^no(?:ne)?$/i;
     my $frame = $font->{frame};
+    undef $frame if $frame && $frame =~ /^no(?:ne)?$/i;
     if ( $bgcol || $frame ) {
-	my $e = ($layout->get_pixel_extents)[0]; # 0 = ink
-	my $w = $e->{width} + $e->{x};
-	my $vsp = $size * 1.1;
-	# Adjust for baseline.
-	my $y = $y;# + $layout->get_baseline/1024;
-
-	# Draw background.
-	if ( $bgcol && $bgcol !~ /^no(?:ne)?$/i ) {
-	    $self->rectxy( $x + $e->{x}, $y + $e->{y},
-			   $x + $e->{width}, $y + $e->{height}, 1, $bgcol );
-	}
-
-	# Draw box.
-	if ( $frame && $frame !~ /^no(?:ne)?$/i ) {
-	    my $x0 = $x;
-	    $x0 -= 0.25;	# add some offset for the box
-	    $self->rectxy( $x0, $y - 1,
-			   $x0 + $w + 1, $y + $vsp + 1,
-			   0.5, undef,
-			   $font->{color} || "black" );
-	}
+	my $e = ($layout->get_pixel_extents)[1]; # 0 = ink, 1 = bb
+	$self->rectxy( $x + $e->{x} - 1, $y + $e->{y},
+		       $x + $e->{width} + 1, $y + $e->{height},
+		       0.5, $bgcol,
+		       $frame ? $font->{color} || "black" : undef );
     }
 
-    if ( $font->{color} ) {
-	$self->{cr}->setcolor( $font->{color} );
-    }
-    else {
-	$self->{cr}->setcolor("black");
-    }
     if ( $text eq "Swing " ) {
 	$self->hline($x,$y,50,1,"red");
 	#    $self->{cr}->move_to( $x, $y );#+ $layout->get_baseline/1024 );
 	warn("PX: ", ($layout->get_pixel_extents)[0]->{y},"\n");
     }
-    $self->{cr}->move_to( $x, $y - ($layout->get_pixel_extents)[1]->{y});
+    $self->{cr}->move_to( $x, $y);# - ($layout->get_pixel_extents)[1]->{y});
+    $self->{cr}->setcolor( $font->{color} || "black" );
     Pango::Cairo::show_layout( $self->{cr}, $layout );
     $x += ($layout->get_pixel_extents)[1]->{width};
     if ( $font->{color} ) {
@@ -2141,22 +2116,27 @@ sub vline {
     $cr->restore;
 }
 
-sub rectxy {
-    my ( $self, $x, $y, $x1, $y1, $lw, $fillcolor, $strokecolor ) = @_;
+sub rectwh {
+    my ( $self, $x, $y, $w, $h, $lw, $fillcolor, $strokecolor ) = @_;
     my $cr = $self->{cr};
     $cr->save;
     $cr->set_line_cap('square');
     $cr->set_line_width($lw||1);
-    $cr->rectangle( $x, $y, $x1-$x, $y1-$y );
+    $cr->rectangle( $x, $y, $w, $h );
     if ( $fillcolor ) {
 	$cr->setcolor($fillcolor);
-	$cr->fill;
+	$strokecolor ? $cr->fill_preserve : $cr->fill;
     }
     if ( $strokecolor ) {
 	$cr->setcolor($strokecolor);
 	$cr->stroke;
     }
     $cr->restore;
+}
+
+sub rectxy {
+    my ( $self, $x, $y, $x1, $y1, $lw, $fillcolor, $strokecolor ) = @_;
+    $self->rectwh( $x, $y, $x1-$x, $y1-$y, $lw, $fillcolor, $strokecolor );
 }
 
 sub circle {
@@ -2266,9 +2246,9 @@ sub add_image {
 
 sub newpage {
     my ( $self, $ps, $page ) = @_;
-    my $cr = $self->{cr};
-    $cr->show_page if $self->{_pages}++;
-    $cr->tag_begin("cairo.dest","name='page".$self->{_pages}."'");
+    $self->{cr}->show_page if $self->{_pages}++;
+    $self->link_set( $self->{_pages} );
+    $self->link_end;
     $self;
 }
 
@@ -2310,7 +2290,7 @@ sub init_font {
 	$pango .= " " . $font->{size};
     }
     $font->{font} = Pango::FontDescription->from_string($pango);
-    warn("Load font: ", $font->{font}->to_string, "\n");
+    # warn("Load font: ", $font->{font}->to_string, "\n");
     $font->{font};
 }
 
@@ -2325,6 +2305,30 @@ sub show_vpos {
 	$_->stroke;
 	$_->restore;
     }
+}
+
+# Hyperlinks (for Table of Contents).
+# This requires a modified version of Cairo 1.106 (hopefully 1.107).
+# For unmodified 1.106, the TOC is ok but no links.
+
+my $_tag;
+
+sub link_set {
+    my ( $self, $page ) = @_;
+    return unless $self->{cr}->can("tag_begin");
+    $self->{cr}->tag_begin( $_tag = "cairo.dest", "name='page$page'" );
+}
+
+sub link_jump {
+    my ( $self, $page ) = @_;
+    return unless $self->{cr}->can("tag_begin");
+    $self->{cr}->tag_begin( $_tag = "Link", "dest='page$page'" );
+}
+
+sub link_end {
+    my ( $self ) = @_;
+    return unless $self->{cr}->can("tag_end");
+    $self->{cr}->tag_end( $_tag );
 }
 
 1;

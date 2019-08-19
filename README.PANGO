@@ -1,0 +1,22 @@
+This version of ChordPro uses a PDF producer based on the Cairo and
+Pango toolkits.
+
+This has numerous advantages:
+
+* Fonts are dealt with as logical descriptors, e.g. "Sans 14" or
+  "Serif Bold 20". This makes it easy to substitute missing fonts, and
+  switch between font styles (see below).
+
+* No dependency on physical font file names.
+
+* Correct handling of complex language systems, like Devanagari.
+
+* Text markup like <b> ... </b> to obtain bold, italic, etc.
+
+There are some limitations as well.
+
+* Cover pages are not supported. Use an external tool to prepend cover
+  pages.
+
+* Table of Contents follows the songs. Use an external tool to
+  rearrange pages if that is important.

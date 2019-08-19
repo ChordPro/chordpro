@@ -38,10 +38,6 @@ sub hsp {
 
 my @Roman = qw( I II III IV V VI VI VII VIII IX X XI XII );
 
-sub font_bl {
-    goto &App::Music::ChordPro::Output::PDF::font_bl;
-}
-
 # The actual draw method.
 sub draw {
     my ( $self, $info, $x, $y, $ps ) = @_;
@@ -65,7 +61,7 @@ sub draw {
     $name .= "*"
       unless $info->{origin} ne "user"
 	|| $::config->{diagrams}->{show} eq "user";
-    $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y - font_bl($font) );
+    $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y );
     $y += $font->{size} * 1.2 + $dot/2 + $lw;
 
     if ( $info->{base} > 1 ) {
