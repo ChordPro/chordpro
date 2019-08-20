@@ -1011,6 +1011,37 @@ sub prlabel {
     }
 }
 
+# Propagate markup entries over the fragments so that each fragment
+# is properly terminated.
+sub defrag {
+    my ( $frag ) = @_;
+    my @stack;
+    my @res;
+
+    foreach my $f ( @$frag ) {
+	my @a = split( /(<.*?>)/, $f );
+	if ( @stack ) {
+	    unshift( @a, @stack );
+	    @stack = ();
+	}
+	foreach my $a ( @a ) {
+	    if ( $a =~ m;^<\s*/\s*(\w+)(.*)>$; ) {
+		my $k = $1;
+		#$a =~ s/\b //g;
+		#$a =~ s/ \b//g;
+		pop(@stack) if @stack && $stack[-1] =~ /^<\s*$k\b/;
+	    }
+	    elsif ( $a =~ m;^<\s*(\w+)(.*)>$; ) {
+		my $k = $1;
+		push( @stack, "<$k$2>" );
+	    }
+	}
+	push( @a, map { s;^<\s*(\w+).*;</$1>;r } reverse @stack );
+	push( @res, join("", @a ) );
+    }
+    \@res;
+}
+
 sub songline {
     my ( $elt, $x, $ytop, $ps, %opts ) = @_;
 
@@ -1137,10 +1168,11 @@ sub songline {
     }
 
     my @chords;
+    my @phrases = @{ defrag( $elt->{phrases} ) };
     foreach ( 0..$#{$elt->{chords}} ) {
 
 	my $chord = $elt->{chords}->[$_];
-	my $phrase = $elt->{phrases}->[$_];
+	my $phrase = $phrases[$_];
 
 	if ( $chordscol && $chord ne "" ) {
 
@@ -2026,6 +2058,7 @@ sub text {
 	# $t .= " background='" . $font->{background} . "'" if $font->{background};
 	# $text = "$t>$text</span>";
     # }
+    #warn("PANGO: $text\n");
     $layout->set_markup( $text );
 
     # Handle decorations (background, box).
