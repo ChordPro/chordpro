@@ -1024,20 +1024,42 @@ sub defrag {
 	    unshift( @a, @stack );
 	    @stack = ();
 	}
+	my @r;
 	foreach my $a ( @a ) {
 	    if ( $a =~ m;^<\s*/\s*(\w+)(.*)>$; ) {
 		my $k = $1;
 		#$a =~ s/\b //g;
 		#$a =~ s/ \b//g;
-		pop(@stack) if @stack && $stack[-1] =~ /^<\s*$k\b/;
+		if ( @stack ) {
+		    if ( $stack[-1] =~ /^<\s*$k\b/ ) {
+			pop(@stack);
+		    }
+		    else {
+			warn("Markup error: \"@$frag\"\n",
+			     "  Closing <$k> but $stack[-1] is open\n");
+			next;
+		    }
+		}
+		else {
+		    warn("Markup error: \"@$frag\"\n",
+			 "  Closing <$k> but no markup is open\n");
+		    next;
+		}
 	    }
 	    elsif ( $a =~ m;^<\s*(\w+)(.*)>$; ) {
 		my $k = $1;
 		push( @stack, "<$k$2>" );
 	    }
+	    push( @r, $a );
 	}
-	push( @a, map { s;^<\s*(\w+).*;</$1>;r } reverse @stack );
-	push( @res, join("", @a ) );
+	if ( @stack ) {
+	    push( @r, map { s;^<\s*(\w+).*;</$1>;r } reverse @stack );
+	}
+	push( @res, join("", @r ) );
+    }
+    if ( @stack ) {
+	warn("Markup error: \"@$frag\"\n",
+	     "  Unclosed markup: @{[ reverse @stack ]}\n" );
     }
     \@res;
 }
