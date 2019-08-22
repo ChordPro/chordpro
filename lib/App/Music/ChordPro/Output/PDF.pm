@@ -427,7 +427,7 @@ sub generate_song {
 	if ( $show eq "right" && $class <= 1 ) {
 	    my $vsp = $dd->vsp( undef, $ps );
 
-	    my $v = int( ( $ps->{_margintop} - $ps->{marginbottom} ) / $vsp );
+	    my $v = int( ( $ps->{_marginbottom} - $ps->{_margintop} ) / $vsp );
 	    my $c = int( ( @chords - 1) / $v ) + 1;
 	    # warn("XXX ", scalar(@chords), ", $c colums of $v max\n");
 	    my $column =
@@ -1071,7 +1071,6 @@ sub songline {
     #
     # +------------------------------
     # |  C   F    G
-    # |
     # +------------------------------
     # |  Lyrics text
     # +------------------------------
@@ -1079,7 +1078,17 @@ sub songline {
     # Variants are:
     #
     # +------------------------------
+    # |  Lyrics text
+    # +------------------------------
+    # |  C   F    G
+    # +------------------------------
+    #
+    # +------------------------------
     # |  Lyrics text (lyrics-only, or single-space and no chords)
+    # +------------------------------
+    #
+    # +------------------------------
+    # |  [C]Lyri[F]cs [G]text (inline chords)
     # +------------------------------
     #
     # Likewise comments and tabs (which may have different fonts /
@@ -1091,15 +1100,8 @@ sub songline {
     # |  Lyrics text          | C F G
     # +-----------------------+-------
     #
-    # Note that printing text involves baselines, and that chords
+    # (TODO) Note that printing text involves baselines, and that chords
     # may have a different height than lyrics.
-    #
-    # To find the upper/lower extents, the ratio
-    #
-    #  $font->ascender / $font->descender
-    #
-    # can be used. E.g., a font of size 16 with descender -250 and
-    # ascender 750 must be drawn at 12 points under $ytop.
 
     my $pr    = $ps->{pr};
     my $fonts = $ps->{fonts};
