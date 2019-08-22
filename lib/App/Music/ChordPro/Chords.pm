@@ -509,7 +509,10 @@ sub transpose {
     unless ( $info ) {
 	assert_tuning();
 	for ( \%song_chords, \%config_chords ) {
-	    return if exists($_->{$c});
+	    # Not sure what this is for...
+	    # Anyway, it causes unknown but {defined} fonts to silently
+	    # bypass the trans* warnings.
+	    # return if exists($_->{$c});
 	}
 	$xpose
 	  ? warn("Cannot transpose $c\n")
