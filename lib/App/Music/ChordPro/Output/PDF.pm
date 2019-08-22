@@ -189,9 +189,19 @@ sub generate_song {
     for my $item ( @{ SIZE_ITEMS() } ) {
 	for ( $options->{"$item-font"} ) {
 	    next unless $_;
+	    if ( m;/; ) {
+		warn("$item-font cannot be a filename");
+		next;
+	    }
 	    delete( $fonts->{$item}->{file} );
 	    delete( $fonts->{$item}->{name} );
-	    $fonts->{$item}->{ m;/; ? "file" : "name" } = $_;
+	    if ( m/^(.+)\s+(\d+)$/ ) {
+		$fonts->{$item}->{pango} = $1;
+		$fonts->{$item}->{size} = $2;
+	    }
+	    else {
+		$fonts->{$item}->{pango} = $_;
+	    }
 	    $pr->init_font($item) or $fail++;
 	}
 	for ( $options->{"$item-size"} ) {
@@ -491,7 +501,6 @@ sub generate_song {
 	    my $vsp = $dd->vsp( undef, $ps );
 	    my $hsp = $dd->hsp( undef, $ps );
 
-	    # TODO
 	    my $y = $ps->{_marginbottom} - (int((@chords-1)/$h) + 1) * $vsp;
 	    $ps->{_bottommargin} = $y;
 
@@ -898,12 +907,19 @@ sub generate_song {
 		my $f = $1;
 		if ( defined $elt->{value} ) {
 		    if ( $elt->{value} =~ m;/; ) {
-			delete $ps->{fonts}->{$f}->{name};
-			$ps->{fonts}->{$f}->{file} = $elt->{value};
+			warn($elt->{name}." cannot be a filename");
 		    }
 		    else {
 			delete $ps->{fonts}->{$f}->{file};
+			delete $ps->{fonts}->{$f}->{name};
 			$ps->{fonts}->{$f}->{name} = $elt->{value};
+			if ( $elt->{value} =~ m/^(.+)\s+(\d+)$/ ) {
+			    $ps->{fonts}->{$f}->{pango} = $1;
+			    $ps->{fonts}->{$f}->{size} = $2;
+			}
+			else {
+			    $ps->{fonts}->{$f}->{pango} = $_;
+			}
 		    }
 		}
 		else {
@@ -1766,11 +1782,14 @@ sub configurator {
     for my $type ( qw( text chord ) ) {
 	for ( $options->{"$type-font"} ) {
 	    next unless $_;
-	    if ( m;/; ) {
-		$fonts->{$type}->{file} = $_;
+	    delete $fonts->{$type}->{file};
+	    delete $fonts->{$type}->{name};
+	    if ( m/^(.+)\s+(\d+)$/ ) {
+		$fonts->{$type}->{pango} = $1;
+		$fonts->{$type}->{size} = $2;
 	    }
 	    else {
-		$fonts->{$type}->{name} = $_;
+		$fonts->{$type}->{pango} = $_;
 	    }
 	}
 	for ( $options->{"$type-size"} ) {
@@ -1813,10 +1832,7 @@ sub configurator {
     for my $fontdir ( @{$pdf->{fontdir}}, getresource("fonts"), $ENV{FONTDIR} ) {
 	next unless $fontdir;
 	if ( -d $fontdir ) {
-#TODO	    $pdfapi->can("addFontDirs")->($fontdir);
-	}
-	else {
-	    warn("PDF: Ignoring fontdir $fontdir [$!]\n");
+	    warn("PDF: Ignoring fontdir $fontdir [Not supported]\n");
 	    undef $fontdir;
 	}
     }
@@ -1845,7 +1861,7 @@ sub configurator {
     $fonts->{grid_margin}    ||= { %{ $comment } };
     $fonts->{diagram}        ||= { %{ $comment } };
     $fonts->{diagram_base}   ||= { %{ $comment } };
-    $fonts->{chordfingers}     = { name => 'ZapfDingbats' };
+    $fonts->{chordfingers}     = { pango => 'Helvetica Bold', color => "white" };
     $fonts->{subtitle}->{size}       ||= $fonts->{text}->{size};
     $fonts->{comment_italic}->{size} ||= $fonts->{text}->{size};
     $fonts->{comment_box}->{size}    ||= $fonts->{text}->{size};
@@ -2001,6 +2017,7 @@ use Cairo;
 use Pango;
 
 my $faketime = 1465041600;
+my $TWOPI = 8*atan2(1,1);
 
 my %fontcache;			# speeds up 2 seconds per song
 
@@ -2038,7 +2055,7 @@ sub info {
 
 sub wrap {
     my ( $self, $text, $m ) = @_;
-
+    #TODO: FAILS WHEN markup is used!
     my $ex = "";
     my $sp = "";
     #warn("TEXT: |$text| ($m)\n");
@@ -2059,13 +2076,15 @@ sub wrap {
 }
 
 sub text {
-    my ( $self, $text, $x, $y, $font, $size ) = @_;
+    my ( $self, $text, $x, $y, $font, $size, $color ) = @_;
     return $x unless length($text);
 
     $font ||= $self->{font};
     my $fdesc = $font->{font};
     $size ||= $font->{size};
-#    warn("TEXT: \"$text\" $x $y ", $font->{font}->to_string, " $size\n");
+    $color ||= $font->{color} || "black";
+    #warn("TEXT: \"$text\" $x $y ", $font->{font}->to_string, " $size $color\n")
+      ;
 
     # Note the 1.33 scaling is to map Pango points (96dpi) to PDF
     # points (72dpi). There should be a better way to do this.
@@ -2074,15 +2093,9 @@ sub text {
     my $layout = $self->{layout};
     $layout->set_font_description($fdesc);
 
-    # It would be nice if we could use this for color and background,
+    # It would be nice if we could use this for background,
     # but pango background does not match the bounding box (frame).
-    # if ( $font->{color} ) {
-	# my $t = "<span";
-	# $t .= " color='" . $font->{color} . '"' if $font->{color};
-	# $t .= " background='" . $font->{background} . "'" if $font->{background};
-	# $text = "$t>$text</span>";
-    # }
-    #warn("PANGO: $text\n");
+    $text = "<span color='$color'>$text</span>";
     $layout->set_markup( $text );
 
     # Handle decorations (background, box).
@@ -2104,12 +2117,10 @@ sub text {
 	warn("PX: ", ($layout->get_pixel_extents)[0]->{y},"\n");
     }
     $self->{cr}->move_to( $x, $y);# - ($layout->get_pixel_extents)[1]->{y});
-    $self->{cr}->setcolor( $font->{color} || "black" );
     Pango::Cairo::show_layout( $self->{cr}, $layout );
+    # For unknown reasons, a stroke is needed...???
+    $self->{cr}->stroke;
     $x += ($layout->get_pixel_extents)[1]->{width};
-    if ( $font->{color} ) {
-	$self->{cr}->setcolor("black");
-    }
     return $x;
 }
 
@@ -2201,14 +2212,44 @@ sub circle {
     my $cr = $self->{cr};
     $cr->save;
     $cr->set_line_width($lw||1);
-    $cr->arc( $x, $y, $r, 0, 8*atan2(1,1) ); # TODO
+    $cr->arc( $x, $y, $r, 0, $TWOPI );
     if ( $fillcolor ) {
 	$cr->setcolor($fillcolor);
-	$cr->fill;
+	$strokecolor ? $cr->fill_preserve : $cr->fill;
     }
     if ( $strokecolor ) {
 	$cr->setcolor($strokecolor);
 	$cr->stroke;
+    }
+    $cr->restore;
+}
+
+sub dot {
+    my ( $self, $x, $y, $w, $lw, $digit ) = @_;
+    $w *= 0.8;
+    my $cr = $self->{cr};
+    my $ly = $self->{layout};
+    $cr->save;
+    #$cr->setcolor("red");
+    #$self->hline( $x-20, $y, 40, 0.25, "red" );
+    #$self->vline( $x, $y-20, 40, 0.25, "red" );
+    $cr->set_line_width($lw||1);
+    $cr->arc( $x, $y, $w/2, 0, $TWOPI );
+    $cr->setcolor("black");
+    $cr->fill_preserve;
+    $cr->stroke;
+    if ( $digit && $digit ne "" ) {
+	my $fdesc = $self->{ps}->{fonts}->{chordfingers}->{font};
+	# Pixel units are integer, so scale a bit to get precision.
+	$fdesc->set_size(1024*$w/0.9*1024/1.33);
+	$ly->set_font_description($fdesc);
+	$ly->set_markup("<span color='white'>$digit</span>");
+	my $e = ($ly->get_pixel_extents)[0];
+	$e->{$_} /= 1024 for keys %$e;
+	$cr->translate( $x - ( $e->{width} /2 + $e->{x} ),
+			$y - ( $e->{height}/2 + $e->{y} ) );
+	$cr->scale( 1/1024, 1/1024 );
+	Pango::Cairo::show_layout( $cr, $ly );
     }
     $cr->restore;
 }
@@ -2222,7 +2263,6 @@ sub cross {
     $r = 0.9 * $r;
     $cr->move_to( $x-$r, $y+$r );
     $cr->line_to( $x+$r, $y-$r );
-    $cr->stroke;
     $cr->move_to( $x-$r, $y-$r );
     $cr->line_to( $x+$r, $y+$r );
     $cr->stroke;
@@ -2343,6 +2383,7 @@ sub init_font {
 
     my $font = $ps->{fonts}->{$ff};
     my $pango = $font->{pango};
+    warn("No pango for font $ff?\n") unless $pango;
     if ( $pango !~ /\s+(\d+)$/ && $font->{size} ) {
 	$pango .= " " . $font->{size};
     }

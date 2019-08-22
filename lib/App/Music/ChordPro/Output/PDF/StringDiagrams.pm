@@ -127,23 +127,12 @@ sub draw {
 	}
 
 	if ( $fret > 0 ) {
-	    if ( 0 && $fing && $fing > 0 ) {  #TODO
-		# The dingbat glyphs are open, so we need a white
-		# background circle.
-		$pr->circle( $x+$gw/2, $y+$fret*$gh-$gh/2, $dot/2, 1,
-			     "white", "black" );
-		#my $glyph = pack( "C", 0xca + $fing - 1 );
-		#my $dot = $dot/0.7;
-		#$pr->setfont( $ps->{fonts}->{chordfingers}, $dot );
-		#$pr->text( $glyph,
-		#	   $x+$gw/2-$pr->strwidth($glyph)/2,
-		#	   $y+$fret*$gh+$gh/2+$pr->strwidth($glyph)/2+$lw/2,
-		#	   $ps->{fonts}->{chordfingers}, $dot ) ;
-	    }
-	    else {
-		$pr->circle( $x+$gw/2, $y+$fret*$gh-$gh/2, $dot/2, 1,
-			     "black", "black" );
-	    }
+	    $pr->dot( $x+$gw/2,
+		      $y+$fret*$gh-$gh/2,
+		      $dot,
+		      $lw,
+		      $fing && $fing > 0 ? pack("C",ord("0")+$fing) : "",
+		    );
 	}
 	elsif ( $fret < 0 ) {
 	    $pr->cross( $x+$gw/2, $y-$lw-$gh/3, $dot/3, $lw, "black");
