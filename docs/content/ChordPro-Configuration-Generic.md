@@ -108,6 +108,13 @@ The `frets` positions are the positions in the chord diagram as shown. The follo
 
 As can be seen, the `"fingers"` part is optional.
 
+It is possible to define a new chord based upon an existing
+definition, e.g.
+
+    { "name" : "Bmin"      , "copy" : "Bm" },
+    { "name" : "F#"        , "copy" : "F", "base" : 2 },
+	
+
 ## Printing chord diagrams
 
 By default, ChordPro will include diagrams for all known chords that have been used in a song.
