@@ -1007,9 +1007,9 @@ sub global_directive {
 	if ( $show) {
 	    my $ci;
 	    if ( $res->{frets} || $res->{base} || $res->{fingers} ) {
-		$ci = { name => $res->{name},
-			base => $res->{base} ? $res->{base} : 1,
-			strings => $res->{frets},
+		$ci = { name  => $res->{name},
+			base  => $res->{base} ? $res->{base} : 1,
+			frets => $res->{frets},
 			$res->{fingers} ? ( fingers => $res->{fingers} ) : (),
 		      };
 	    }

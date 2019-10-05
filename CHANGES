@@ -7,6 +7,7 @@
     - Add chord types add2 and add4.
     - Fix erroneous transposing of transcoded chords.
     - Fix erroneous recall of chorus from previous song.
+    - Fix missing fret positions in {chord}.
 
 0.973	2019-03-13
 
