@@ -1,5 +1,18 @@
 # Release info
 
+## 0.974
+
+Released: 2019-10-05
+
+* Restructure chord definitions. Default is now an orthogonal set of basic chords. Additional legacy weirdo's are available in "guitar-legacy.json".
+* Allow chord definitions with multiple names. See the docs.
+* Add chord types add2 and add4.
+* Fix erroneous transposing of transcoded chords.
+* Fix erroneous recall of chorus from previous song.
+* Fix missing fret positions in {chord}.
+
+**[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.**
+
 ## 0.973
 
 Released: 2019-03-13
@@ -21,8 +34,6 @@ Released: 2019-03-13
 * Fix issue #63: Labels are lost when a new song is encountered.
 * Fix crash when --dump-chords and no meta.
 * (PDF) Fix label width.
-
-**[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.**
 
 ## 0.972
 
