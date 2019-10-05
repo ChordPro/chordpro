@@ -292,17 +292,31 @@ sub _check_chord {
 sub add_config_chord {
     my ( $def ) = @_;
     my $res;
+    my $name;
+
+    # Handle alternatives.
     my @names;
-    @names = @{ $def->{alias} } if $def->{alias};
+    if ( $def->{name} =~ /\|/ ) {
+	$def->{name} = [ split( /\|/, $def->{name} ) ];
+    }
+    if ( UNIVERSAL::isa( $def->{name}, 'ARRAY' ) ) {
+	$name = shift( @{ $def->{name} } );
+	push( @names, @{ $def->{name} } );
+    }
+    else {
+	$name = $def->{name};
+    }
+
+    # For derived chords.
     if ( $def->{copy} ) {
 	$res = $config_chords{$def->{copy}};
 	return "Cannot copy $def->{copy}"
 	  unless $res;
 	$def = $res;
-	$def->{name} = $_->{name};
     }
-    my ( $name, $base, $frets, $fingers ) =
-      ( $def->{name}, $def->{base}||1, $def->{frets}, $def->{fingers} );
+
+    my ( $base, $frets, $fingers ) =
+      ( $def->{base}||1, $def->{frets}, $def->{fingers} );
     $res = _check_chord( $base, $frets, $fingers );
     return $res if $res;
 
@@ -495,7 +509,10 @@ sub transpose {
     unless ( $info ) {
 	assert_tuning();
 	for ( \%song_chords, \%config_chords ) {
-	    return if exists($_->{$c});
+	    # Not sure what this is for...
+	    # Anyway, it causes unknown but {defined} fonts to silently
+	    # bypass the trans* warnings.
+	    # return if exists($_->{$c});
 	}
 	$xpose
 	  ? warn("Cannot transpose $c\n")

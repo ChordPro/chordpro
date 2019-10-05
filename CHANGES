@@ -1,3 +1,14 @@
+0.974	2019-10-05
+
+    - Restructure chord definitions. Default is now an orthogonal set
+      of basic chords. Additional legacy weirdo's are available in
+      "guitar-legacy.json".
+    - Allow chord definitions with multiple names. See the docs.
+    - Add chord types add2 and add4.
+    - Fix erroneous transposing of transcoded chords.
+    - Fix erroneous recall of chorus from previous song.
+    - Fix missing fret positions in {chord}.
+
 0.973	2019-03-13
 
     - Integrate a2crd into chordpro. Use "chordpro --a2crd" to invoke.

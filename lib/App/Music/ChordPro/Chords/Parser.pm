@@ -257,14 +257,14 @@ my $additions_maj =
      "911",
      "9#11",
    ),
-   "add9",
    "alt",
    "h",
    "h7",
    "h9",
-   ( map { "sus$_" } "", "2", "4", "9" ),
-   ( map { "6sus$_" } "", "2", "4" ),
-   ( map { "7sus$_" } "", "2", "4" ),
+   ( map { "add$_"   }     "2", "4", "9" ),
+   ( map { "sus$_"   } "", "2", "4", "9" ),
+   ( map { "6sus$_"  } "", "2", "4" ),
+   ( map { "7sus$_"  } "", "2", "4" ),
    ( map { "13sus$_" } "", "2", "4" ),
   };
 
@@ -644,7 +644,7 @@ sub transcode {
     my $p = $self->{parser}->get_parser($xcode);
     $info->{root_canon} = $info->{root} =
       $p->root_canon( $info->{root_ord},
-		      $info->{root_mod},
+		      $info->{root_mod} >= 0,
 		      $info->{qual_canon} eq "-" );
     if ( $p->{system} eq "roman" && $info->{qual_canon} eq "-" ) {
 	# Minor quality is in the root name.

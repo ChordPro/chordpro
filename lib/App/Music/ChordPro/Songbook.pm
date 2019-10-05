@@ -100,6 +100,7 @@ sub parse_song {
     %memchords = ();
     App::Music::ChordPro::Chords::reset_song_chords();
     @labels = ();
+    @chorus = ();
 
     # Pre-fill meta data, if any.
     if ( $options->{meta} ) {
@@ -537,7 +538,7 @@ sub directive {
 	# Enabling this always would allow [^] to recall anyway.
 	# Feature?
 	if ( $::config->{settings}->{memorize} ) {
-	    $memchords = $memchords{$1} //= [];
+	    $memchords = $memchords{$in_context} //= [];
 	    $memcrdinx = 0;
 	    $memorizing = 0;
 	}
@@ -1006,9 +1007,9 @@ sub global_directive {
 	if ( $show) {
 	    my $ci;
 	    if ( $res->{frets} || $res->{base} || $res->{fingers} ) {
-		$ci = { name => $res->{name},
-			base => $res->{base} ? $res->{base} : 1,
-			strings => $res->{frets},
+		$ci = { name  => $res->{name},
+			base  => $res->{base} ? $res->{base} : 1,
+			frets => $res->{frets},
 			$res->{fingers} ? ( fingers => $res->{fingers} ) : (),
 		      };
 	    }
