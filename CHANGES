@@ -1,4 +1,4 @@
-0.974
+0.974	2019-10-05
 
     - Restructure chord definitions. Default is now an orthogonal set
       of basic chords. Additional legacy weirdo's are available in
