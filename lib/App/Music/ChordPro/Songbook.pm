@@ -391,6 +391,8 @@ sub decompose {
 	$dummy = 0;
     }
 
+=for Devanagari
+
     # Special treatment for Davanagari Virama characters.
     # If a phrase ends with a Virama (vowel killer) then the
     # preceding chracter and the virama should be moved to the front
@@ -401,6 +403,8 @@ sub decompose {
 	    $phrases[$i] = $2 . $phrases[$i];
 	}
     }
+
+=cut
 
     return ( phrases => \@phrases, chords  => \@chords );
 }

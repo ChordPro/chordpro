@@ -1209,10 +1209,24 @@ sub songline {
 
     my @chords;
     my @phrases = @{ defrag( $elt->{phrases} ) };
-    foreach ( 0..$#{$elt->{chords}} ) {
+    my @virama;
 
-	my $chord = $elt->{chords}->[$_];
-	my $phrase = $phrases[$_];
+    # Special treatment for Davanagari Virama characters.
+    # If a phrase ends with a Virama (vowel killer) then the
+    # preceding chracter and the virama should be moved to the front
+    # of the next phrase.
+    $pr->setfont($ftext);
+    for ( my $i = 1; $i < @phrases; $i++ ) {
+	if ( $phrases[$i-1] =~ /^(.*)(.\p{Canonical_Combining_Class=Virama})$/ ) {
+	    $phrases[$i-1] = $1;
+	    $phrases[$i] = $2 . $phrases[$i];
+	    $virama[$i] = $pr->strwidth($2);
+	}
+    }
+
+    foreach my $i ( 0..$#{$elt->{chords}} ) {
+	my $chord = $elt->{chords}->[$i];
+	my $phrase = $phrases[$i];
 
 	if ( $chordscol && $chord ne "" ) {
 
@@ -1247,10 +1261,11 @@ sub songline {
 	}
 	else {
 	    my $info = App::Music::ChordPro::Chords::identify($chord);
-	    my $xt0;
+	    my $xt0 = $x;
+	    $xt0 += $virama[$i] if $virama[$i];
 	    if ( $info && $info->{system} eq "roman" ) {
 		$xt0 = $pr->text( $pre.$info->{root},
-				  $x, $ychord, $fchord );
+				  $xt0, $ychord, $fchord );
 		$info->{qual} = 'ø' if $info->{qual} eq 'h';
 		$xt0 = $pr->text( $info->{qual}.$info->{ext}, $xt0,
 				   $ychord - $fchord->{size} * 0.2,
@@ -1261,7 +1276,7 @@ sub songline {
 	    }
 	    elsif ( $info && $info->{system} eq "nashville" ) {
 		$xt0 = $pr->text( $pre.$info->{root}.$info->{qual},
-				  $x, $ychord, $fchord );
+				  $xt0, $ychord, $fchord );
 #		if ( $info->{minor} ) {
 #		    my $m = $info->{minor};
 #		    # $m = "\x{0394}" if $m eq "^";
@@ -1277,10 +1292,7 @@ sub songline {
 	    elsif ( $chord) {
 		# Strip leading (but not sole) asterisk.
 		$chord =~ s/^\*(?=.)//;
-		$xt0 = $pr->text( $pre.$chord.$post, $x, $ychord, $fchord );
-	    }
-	    else {
-		$xt0 = $x;
+		$xt0 = $pr->text( $pre.$chord.$post, $xt0, $ychord, $fchord );
 	    }
 	    prlabel( $ps, $tag, $x, $ytext );
 	    $tag = "";
@@ -1289,6 +1301,7 @@ sub songline {
 	    }
 	    else {
 		my $xt1 = $pr->text( $phrase, $x, $ytext, $ftext );
+		$xt0 -= $virama[$i+1] if $virama[$i+1];
 		$x = $xt0 > $xt1 ? $xt0 : $xt1;
 	    }
 	}
