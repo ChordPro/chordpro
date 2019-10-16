@@ -1219,8 +1219,9 @@ sub songline {
     for ( my $i = 1; $i < @phrases; $i++ ) {
 	if ( $phrases[$i-1] =~ /^(.*)(.\p{Canonical_Combining_Class=Virama})$/ ) {
 	    $phrases[$i-1] = $1;
+	    $virama[$i] = $pr->strwidth($phrases[$i]);
 	    $phrases[$i] = $2 . $phrases[$i];
-	    $virama[$i] = $pr->strwidth($2);
+	    $virama[$i] = $pr->strwidth($phrases[$i]) - $virama[$i];
 	}
     }
 
