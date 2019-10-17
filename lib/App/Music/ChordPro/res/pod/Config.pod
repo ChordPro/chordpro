@@ -280,6 +280,10 @@ This is the current built-in configuration file, showing all settings.
   	    },
   	},
   
+	// Split marker for syllables that are smaller than chord width.
+	// Suggested values are "-", " - ", "…", etc.
+	"split-marker" : "",
+  
   	// Fonts.
   	// Fonts can be specified by name (for the corefonts)
   	// or a filename (for TrueType/OpenType fonts).

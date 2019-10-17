@@ -1217,6 +1217,7 @@ sub songline {
     # of the next phrase.
     $pr->setfont($ftext);
     for ( my $i = 1; $i < @phrases; $i++ ) {
+	####TODO: Handle markup.
 	if ( $phrases[$i-1] =~ /^(.*)(.\p{Canonical_Combining_Class=Virama})$/ ) {
 	    $phrases[$i-1] = $1;
 	    $virama[$i] = $pr->strwidth($phrases[$i]);
@@ -1225,7 +1226,8 @@ sub songline {
 	}
     }
 
-    foreach my $i ( 0..$#{$elt->{chords}} ) {
+    my $n = $#{$elt->{chords}};
+    foreach my $i ( 0 .. $n ) {
 	my $chord = $elt->{chords}->[$i];
 	my $phrase = $phrases[$i];
 
@@ -1303,7 +1305,20 @@ sub songline {
 	    else {
 		my $xt1 = $pr->text( $phrase, $x, $ytext, $ftext );
 		$xt0 -= $virama[$i+1] if $virama[$i+1];
-		$x = $xt0 > $xt1 ? $xt0 : $xt1;
+		if ( $xt0 > $xt1 ) { # chord is wider
+		    # Do we need to insert a split marker?
+		    if ( $i < $n && demarkup($phrase) !~ /\s$/
+			 # And do we have one?
+			 && ( my $marker = $ps->{'split-marker'} ) ) {
+			$x = $pr->text( $marker, $xt1, $ytext, $ftext );
+		    }
+		    # Adjust the position for the chord and spit marker width.
+		    $x = $xt0 if $xt0 > $x;
+		}
+		else {
+		    # Use lyrics width.
+		    $x = $xt1;
+		}
 	    }
 	}
     }
@@ -1314,6 +1329,13 @@ sub songline {
       if @chords;
 
     return;
+}
+
+# Remove markup.
+sub demarkup {
+    my ( $t ) = @_;
+    $t =~ s;</?([-\w]+|span\s.*?)>;;g;
+    return $t;
 }
 
 sub is_bar {
