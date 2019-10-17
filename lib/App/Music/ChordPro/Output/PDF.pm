@@ -363,7 +363,8 @@ sub generate_song {
 	    $y = $ps->{_margintop} + $ps->{headspace};
 	    $y -= font_bl($fonts->{title});
 	    $tpt->("title");
-	    $y -= $pr->strheight( "X", $fonts->{subtitle} );
+	    $y -= $pr->strheight( "X", $fonts->{title} )
+	      * $ps->{spacing}->{title};
 	    $y = $tpt->("subtitle");
 	}
 
