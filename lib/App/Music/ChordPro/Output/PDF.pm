@@ -1313,9 +1313,31 @@ sub songline {
 			 && demarkup($phrases[$i+1]) !~ /^\s/
 			 # And do we have one?
 			 && ( my $marker = $ps->{'split-marker'} ) ) {
-			$x = $pr->text( $marker, $xt1, $ytext, $ftext );
-			while ( $x < $xt0 && $ps->{'split-marker-repeat'} ) {
-			    $x = $pr->text( $marker, $x, $ytext, $ftext );
+
+			# Marker has 3 parts: start, repeat, and final.
+			# final is always printed, last.
+			# start is printed if there is enough room.
+			# repeat is printed repeatedly to fill the rest.
+			$marker = [ $marker, "", "" ]
+			  unless UNIVERSAL::isa( $marker, 'ARRAY' );
+
+			# Reserve space for final.
+			my $w = 0;
+			$w = $pr->strwidth($marker->[2]) if $marker->[2];
+			$xt0 -= $w;
+
+			# start or repeat (if no start).
+			my $m = $marker->[0] || $marker->[1];
+			$x = $xt1;
+			while ( $x < $xt0 ) {
+			    $x = $pr->text( $m, $x, $ytext, $ftext );
+			    # After the first, use repeat.
+			    $m = $marker->[1];
+			    $x = $xt0, last unless $m;
+			}
+			# Print final.
+			if ( $w ) {
+			    $x = $pr->text( $marker->[2], $x, $ytext, $ftext );
 			}
 		    }
 		    # Adjust the position for the chord and spit marker width.
