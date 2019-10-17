@@ -292,8 +292,13 @@ This is the current built-in configuration file, showing all settings.
   	},
   
 	// Split marker for syllables that are smaller than chord width.
-	// Suggested values are "-", " - ", "…", etc.
-	"split-marker" : "",
+	// split-marker is a 3-part array: 'start', 'repeat', and 'final'.
+	// 'final' is always printed, last.
+	// 'start' is printed if there is enough room.
+	// 'repeat' is printed repeatedly to fill the rest.
+	// If split-marker is a single string, this is 'start'.
+	// All elements may be left empty strings.
+	"split-marker" : [ "", "", "" ],
   
   	// Fonts can be specified by name (for the corefonts)
   	// or a filename (for TrueType/OpenType fonts).

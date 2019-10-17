@@ -211,6 +211,10 @@
 			"minimum": 1,
 			"default": 1
 		    },
+		    "copy": {
+			"description": "Copy another definition.",
+			"type": "string"
+		    },
 		    "frets": {
 			"description": "Finger positions from low string to hight string.",
 			"type": "array",
@@ -235,7 +239,10 @@
 			"default": true
 		    }
 		},
-		"required": [ "name", "frets" ],
+		"anyOf" : [ 
+ 		    { "required": [ "name", "frets" ] },
+ 		    { "required": [ "name", "copy" ] }
+		],
 		"additionalProperties": { "not": {} }
 	    }
 	},
@@ -815,8 +822,11 @@
 
 		"split-marker": {
 		    "description": "Marker when syllables are too small for chord.",
-		    "default": "",
-		    "type": "string"
+		    "default": [ "", "", "" ],
+		    "type": [ "array", "string" ],
+		    "items": { "type": "string" },
+		    "minItems": 3,
+		    "maxItems": 3
 		},
 
 		"titles-directive-ignore": {
