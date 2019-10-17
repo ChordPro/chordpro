@@ -56,8 +56,8 @@ This is the current built-in configuration file, showing all settings.
   	"inline-chords" : false,
   	// Chords under the lyrics.
   	"chords-under" : false,
-        // Transcoding.
-        "transcode" : null,
+  	// Transcoding.
+  	"transcode" : null,
   	// Always decapoize.
   	"decapo" : false,
       },
@@ -69,12 +69,12 @@ This is the current built-in configuration file, showing all settings.
       // Important: "title" and "subtitle" must always be in this list.
       // The separator is used to concatenate multiple values.
       "metadata" : {
-        "keys" : [ "title", "subtitle",
-                   "artist", "composer", "lyricist", "arranger",
-                   "album", "copyright", "year",
-                   "key", "time", "tempo", "capo", "duration" ],
-        "strict" : true,
-        "separator" : "; ",
+  	"keys" : [ "title", "subtitle",
+  		   "artist", "composer", "lyricist", "arranger",
+  		   "album", "copyright", "year",
+  		   "key", "time", "tempo", "capo", "duration" ],
+  	"strict" : true,
+  	"separator" : "; ",
       },
   
       // Instrument settings. These are usually set by a separate
@@ -107,7 +107,7 @@ This is the current built-in configuration file, showing all settings.
   		    [ "Gb", "Ges",        "G♭" ], "G",
   		    [ "Ab", "As",  "Aes", "A♭" ], "A",
   		    [ "Bb", "Bes",        "B♭" ], "B",
-    		  ],
+  		  ],
       },
   
       // User defined chords.
@@ -115,7 +115,7 @@ This is the current built-in configuration file, showing all settings.
       // Use 0 for an empty string, and -1 for a muted string.
       // "fingers" is optional.
       "chords" : [
-        //  {
+  	//  {
   	//    "name"  : "Bb",
   	//    "base"  : 1,
   	//    "frets" : [ 1, 1, 3, 3, 3, 1 ],
@@ -130,9 +130,9 @@ This is the current built-in configuration file, showing all settings.
       //         "user": only prints user defined chords.
       // "sorted": order the chords by key.
       "diagrams" : {
-          "auto"     :  false,
-          "show"     :  "all",
-          "sorted"   :  false,
+  	  "auto"     :  false,
+  	  "show"     :  "all",
+  	  "sorted"   :  false,
       },
   
       // Diagnostig messages.
@@ -198,13 +198,13 @@ This is the current built-in configuration file, showing all settings.
   		"color"  : "black",
   	    },
   	    "tag" : "Chorus",
-            // Recall style: Print the tag using the type.
-            // Alternatively quote the lines of the preceding chorus.
-            "recall" : {
-                 "tag"   : "Chorus",
-                 "type"  : "comment",
-                 "quote" : false,
-            },
+  	    // Recall style: Print the tag using the type.
+  	    // Alternatively quote the lines of the preceding chorus.
+  	    "recall" : {
+  		 "tag"   : "Chorus",
+  		 "type"  : "comment",
+  		 "quote" : false,
+  	    },
   	},
   
   	// Markup for sections (in progress).
@@ -218,7 +218,7 @@ This is the current built-in configuration file, showing all settings.
   	// This opens a margin for margin labels.
   	"labels" : {
   	    // Margin width. Default is 0 (no margin labels).
-            // "auto" will automatically reserve a margin if labels are used.
+  	    // "auto" will automatically reserve a margin if labels are used.
   	    "width" : "auto",
   	    // Alignment for the labels. Default is left.
   	    "align" : "left",
@@ -234,7 +234,7 @@ This is the current built-in configuration file, showing all settings.
   	// Set to non-zero to ignore the directive.
   	"titles-directive-ignore" : false,
   
-    	// Chord diagrams.
+  	// Chord diagrams.
   	// A chord diagram consists of a number of cells.
   	// Cell dimensions are specified by "width" and "height".
   	// The horizontal number of cells depends on the number of strings.
@@ -262,45 +262,73 @@ This is the current built-in configuration file, showing all settings.
   	// Formats.
   	"formats" : {
   	    // Titles/Footers.
-  
+
   	    // Titles/footers have 3 parts, which are printed left,
   	    // centered and right.
   	    // For even/odd printing, the order is reversed.
-  
+
   	    // By default, a page has:
   	    "default" : {
-  	        // No title/subtitle.
-  	    	"title"     : null,
-  	    	"subtitle"  : null,
+  		// No title/subtitle.
+  		"title"     : null,
+  		"subtitle"  : null,
   		// Footer is title -- page number.
-  	    	"footer"    : [ "%{title}", "", "%{page}" ],
+  		"footer"    : [ "%{title}", "", "%{page}" ],
   	    },
   	    // The first page of a song has:
   	    "title" : {
-  	        // Title and subtitle.
-  	    	"title"     : [ "", "%{title}", "" ],
-  	    	"subtitle"  : [ "", "%{subtitle}", "" ],
+  		// Title and subtitle.
+  		"title"     : [ "", "%{title}", "" ],
+  		"subtitle"  : [ "", "%{subtitle}", "" ],
   		// Footer with page number.
-  	    	"footer"    : [ "", "", "%{page}" ],
+  		"footer"    : [ "", "", "%{page}" ],
   	    },
   	    // The very first output page is slightly different:
   	    "first" : {
-  	    	// It has title and subtitle, like normal 'first' pages.
+  		// It has title and subtitle, like normal 'first' pages.
   		// But no footer.
-  	    	"footer"    : null,
+  		"footer"    : null,
   	    },
   	},
   
-  	// Split marker for syllables that are smaller than chord width.
-  	// Suggested values are "-", " - ", "…", etc.
-  	"split-marker" : "",
+	// Split marker for syllables that are smaller than chord width.
+	// Suggested values are "-", " - ", "…", etc.
+	"split-marker" : "",
   
-  	// Fonts.
   	// Fonts can be specified by name (for the corefonts)
   	// or a filename (for TrueType/OpenType fonts).
   	// Relative filenames are looked up in the fontdir.
   	// "fontdir" : [ "/usr/share/fonts/liberation", "/home/me/fonts" ],
   	"fontdir" : null,
+  
+  	// Font Families.
+  	"fontfamilies" : {
+  	    // alternatives: regular r normal <empty>
+  	    // alternatives: bold b strong
+  	    // alternatives: italic i oblique o emphasis
+  	    // alternatives: bolditalic bi italicbold ib boldoblique bo obliquebold ob
+  	    "times" : {
+  		""            : "Times-Roman",
+  		"bold"        : "Times-Bold",
+  		"italic"      : "Times-Italic",
+  		"bolditalic"  : "Times-BoldItalic",
+  	    },
+  	    "helvetica" : {
+  		""            : "Helvetica",
+  		"bold"        : "Helvetica-Bold",
+  		"oblique"     : "Helvetica-Oblique",
+  		"boldoblique" : "Helvetica-BoldOblique",
+  	    },
+  	    "courier" : {
+  		""            : "Courier",
+  		"bold"        : "Courier-Bold",
+  		"italic"      : "Courier-Italic",
+  		"bolditalic"  : "Courier-BoldItalic",
+  	    },
+  	    "dingbats" : {
+  		""            : "ZapfDingbats",
+  	    },
+  	},
   
   	// Fonts for chords and comments can have a background
   	// colour associated.
@@ -310,40 +338,54 @@ This is the current built-in configuration file, showing all settings.
   	"fonts" : {
   	    "title" : {
   		"name" : "Times-Bold",
+  		"description" : "Times Bold",
   		"size" : 14
   	    },
   	    "text" : {
   		"name" : "Times-Roman",
+  		"description" : "Times",
   		"size" : 12
   	    },
   	    "chord" : {
   		"name" : "Helvetica-Oblique",
+  		"description" : "Helvetica Italic",
+  		"size" : 10
+  	    },
+  	    "chordfingers" : {
+  		"name" : "ZapfDingbats",
+  		"description" : "Dingbats",
   		"size" : 10
   	    },
   	    "comment" : {
   		"name" : "Helvetica",
+  		"description" : "Helvetica",
   		"size" : 12,
   		"background" : "#E5E5E5"
   	    },
   	    "comment_italic" : {
-  		"name" : "HelveticaOblique",
+  		"name" : "Helvetica-Oblique",
+  		"description" : "Helvetica Italic",
   		"size" : 12,
   	    },
   	    "comment_box" : {
   		"name" : "Helvetica",
+  		"description" : "Helvetica",
   		"size" : 12,
   		"frame" : 1
   	    },
   	    "tab" : {
   		"name" : "Courier",
+  		"description" : "Courier",
   		"size" : 10
   	    },
   	    "toc" : {
   		"name" : "Times-Roman",
+  		"description" : "Times",
   		"size" : 11
   	    },
   	    "grid" : {
   		"name" : "Helvetica",
+  		"description" : "Sans",
   		"size" : 10
   	    },
   	},
@@ -355,11 +397,11 @@ This is the current built-in configuration file, showing all settings.
   	// comment_box    --> chord
   	// toc            --> text
   	// grid           --> chord
-  	// grid_margin	  --> comment
+  	// grid_margin    --> comment
   	// footer         --> subtitle @ 60%
   	// empty          --> text
-  	// diagram	  --> comment
-  	// diagram_base	  --> text (but at a small size)
+  	// diagram        --> comment
+  	// diagram_base   --> text (but at a small size)
   
   	// This will show the page layout if non-zero.
   	"showlayout" : false,
@@ -793,8 +835,8 @@ sub hmerge($$$) {
 	     ref($res{$key}) eq 'HASH' ) {
 
 	    # Hashes. Recurse.
-            $res{$key} = hmerge( $res{$key}, $right->{$key}, "$path$key." );
-        }
+	    $res{$key} = hmerge( $res{$key}, $right->{$key}, "$path$key." );
+	}
 	elsif ( ref($right->{$key}) eq 'ARRAY'
 		and
 		ref($res{$key}) eq 'ARRAY' ) {
@@ -821,7 +863,7 @@ sub hmerge($$$) {
 		# Overwrite.
 		$res{$key} = $right->{$key};
 	    }
-        }
+	}
 	else {
 	    # Overwrite.
 	    $res{$key} = $right->{$key};
