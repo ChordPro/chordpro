@@ -137,8 +137,23 @@ sub strwidth {
 #    warn("SW: \"$text\" ", $fdesc->to_string, " $size\n");
     $layout->set_font_description($fdesc);
     $layout->set_markup( $text );
-    my @e = $layout->get_pixel_extents;
-    $e[1]->{width};
+    my @e = $layout->get_pixel_size;
+    $e[0];
+}
+
+sub strheight {
+    my ( $self, $text, $font, $size ) = @_;
+    $font ||= $self->{font};
+    $size ||= $self->{fontsize} || $font->{size};
+    my $layout = $self->{layout};
+    my $fdesc = $font->{font};
+    Carp::confess("FDESC") unless $fdesc;
+    $fdesc->set_size($size*1024/1.33);
+#    warn("SW: \"$text\" ", $fdesc->to_string, " $size\n");
+    $layout->set_font_description($fdesc);
+    $layout->set_markup( $text );
+    my @e = $layout->get_pixel_size;
+    $e[1];
 }
 
 sub line {
@@ -366,7 +381,8 @@ sub init_fonts {
     my $fail;
 
     foreach my $ff ( keys( %{ $ps->{fonts} } ) ) {
-	next unless $ps->{fonts}->{$ff}->{pango};
+	next unless $ps->{fonts}->{$ff}->{description}
+	  || $ps->{fonts}->{$ff}->{pango};
 	$self->init_font($ff) or $fail++;
     }
     die("Unhandled fonts detected -- aborted\n") if $fail;
@@ -378,7 +394,7 @@ sub init_font {
     my $ps = $self->{ps};
 
     my $font = $ps->{fonts}->{$ff};
-    my $pango = $font->{pango};
+    my $pango = $font->{description} || $font->{pango};
     warn("No pango for font $ff?\n") unless $pango;
     if ( $pango !~ /\s+(\d+)$/ && $font->{size} ) {
 	$pango .= " " . $font->{size};

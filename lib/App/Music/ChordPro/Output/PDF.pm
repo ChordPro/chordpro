@@ -368,12 +368,7 @@ sub generate_song {
 	if ( $ps->{headspace} ) {
 	    $y = $ps->{_margintop} - $ps->{headspace};
 	    $tpt->("title");
-#TODO	    $y += ( - ( $fonts->{title}->{font}->descender / 1024 )
-#		      * $fonts->{title}->{size}
-#		    + ( $fonts->{subtitle}->{font}->ascender / 1024 )
-#		      * $fonts->{subtitle}->{size} )
-	    #		  * $ps->{spacing}->{title};
-	    $y += 15;
+	    $y += $pr->strheight("Mj", $fonts->{title});
 	    $y = $tpt->("subtitle");
 	}
 
