@@ -391,21 +391,6 @@ sub decompose {
 	$dummy = 0;
     }
 
-=for Devanagari
-
-    # Special treatment for Davanagari Virama characters.
-    # If a phrase ends with a Virama (vowel killer) then the
-    # preceding chracter and the virama should be moved to the front
-    # of the next phrase.
-    for ( my $i = 1; $i < @phrases; $i++ ) {
-	if ( $phrases[$i-1] =~ /^(.*)(.\p{Canonical_Combining_Class=Virama})$/ ) {
-	    $phrases[$i-1] = $1;
-	    $phrases[$i] = $2 . $phrases[$i];
-	}
-    }
-
-=cut
-
     return ( phrases => \@phrases, chords  => \@chords );
 }
 
@@ -1022,9 +1007,9 @@ sub global_directive {
 	if ( $show) {
 	    my $ci;
 	    if ( $res->{frets} || $res->{base} || $res->{fingers} ) {
-		$ci = { name => $res->{name},
-			base => $res->{base} ? $res->{base} : 1,
-			strings => $res->{frets},
+		$ci = { name  => $res->{name},
+			base  => $res->{base} ? $res->{base} : 1,
+			frets => $res->{frets},
 			$res->{fingers} ? ( fingers => $res->{fingers} ) : (),
 		      };
 	    }
