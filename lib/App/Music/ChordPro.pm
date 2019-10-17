@@ -817,6 +817,10 @@ sub app_setup {
 	next unless defined $clo->{$_};
 	$clo->{$_} = decode_utf8($clo->{$_});
     }
+    ####TODO: Should decode all, and remove filename exception.
+    for ( keys %{ $clo->{define} } ) {
+	$clo->{define}->{$_} = decode_utf8($clo->{define}->{$_});
+    }
 
     # Plug in command-line options.
     @{$options}{keys %$clo} = values %$clo;
