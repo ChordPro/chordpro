@@ -145,16 +145,28 @@ sub setfont {
     $self->{pdftext}->font( $font->{fd}->{font}, $size );
 }
 
+my $tmplayout;
+
 sub strwidth {
     my ( $self, $text, $font, $size ) = @_;
     $font ||= $self->{font};
     $size ||= $self->{fontsize} || $font->{size};
-    ###TODO.
-    my $layout = Text::Layout->new( $self->{pdf} );
-    $layout->set_font_description($font->{fd});
-    $layout->set_font_size($size);
-    $layout->set_markup($text);
-    $layout->get_pixel_size->{width};
+    $tmplayout //= Text::Layout->new( $self->{pdf} );
+    $tmplayout->set_font_description($font->{fd});
+    $tmplayout->set_font_size($size);
+    $tmplayout->set_markup($text);
+    $tmplayout->get_pixel_size->{width};
+}
+
+sub strheight {
+    my ( $self, $text, $font, $size ) = @_;
+    $font ||= $self->{font};
+    $size ||= $self->{fontsize} || $font->{size};
+    $tmplayout //= Text::Layout->new( $self->{pdf} );
+    $tmplayout->set_font_description($font->{fd});
+    $tmplayout->set_font_size($size);
+    $tmplayout->set_markup($text);
+    $tmplayout->get_pixel_size->{height};
 }
 
 sub line {
