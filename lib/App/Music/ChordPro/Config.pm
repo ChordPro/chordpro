@@ -48,8 +48,8 @@ This is the current built-in configuration file, showing all settings.
   	// Suppress chords.
   	// Overrides --lyrics-only command line option.
   	"lyrics-only" : false,
-	// Memorize chords in sections, to be recalled by [^].
-	"memorize" : false,
+  	// Memorize chords in sections, to be recalled by [^].
+  	"memorize" : false,
   	// Chords inline.
   	// May be a string containing pretext %s posttext.
   	// Defaults to "[%s]" if true.
@@ -58,8 +58,8 @@ This is the current built-in configuration file, showing all settings.
   	"chords-under" : false,
         // Transcoding.
         "transcode" : null,
-	// Always decapoize.
-	"decapo" : false,
+  	// Always decapoize.
+  	"decapo" : false,
       },
   
       // Metadata.
@@ -137,16 +137,16 @@ This is the current built-in configuration file, showing all settings.
   
       // Diagnostig messages.
       "diagnostics" : {
-	  "format" : "\"%f\", line %n, %m\n\t%l",
+  	  "format" : "\"%f\", line %n, %m\n\t%l",
       },
   
       // Table of contents.
       "toc" : {
   	  // Title for ToC.
   	  "title" : "Table of Contents",
-	  // Sorting order.
-	  // Currently only sorting by page number and alpha is implemented.
-	  "order" : "page",
+  	  // Sorting order.
+  	  // Currently only sorting by page number and alpha is implemented.
+  	  "order" : "page",
       },
   
       // Layout definitions for PDF output.
@@ -169,7 +169,7 @@ This is the current built-in configuration file, showing all settings.
   	"footspace"    :  20,
   
   	// Special: head on first page only, add the headspace to
-	// the other pages so they become larger.
+  	// the other pages so they become larger.
   	"head-first-only" : false,
   
   	// Spacings.
@@ -181,23 +181,23 @@ This is the current built-in configuration file, showing all settings.
   	    "grid"   : 1.2,
   	    "tab"    : 1.0,
   	    "toc"    : 1.4,
-	    "empty"  : 1.0,
+  	    "empty"  : 1.0,
   	},
   	// Note: By setting the font size and spacing for empty lines to
-	// smaller values, you get a fine(r)-grained control over the
-	// spacing between the various parts of the song.
+  	// smaller values, you get a fine(r)-grained control over the
+  	// spacing between the various parts of the song.
   
   	// Style of chorus.
   	"chorus" : {
-	    "indent"     :  0,
+  	    "indent"     :  0,
   	    // Chorus side bar.
-	    // Suppress by setting offset and/or width to zero.
+  	    // Suppress by setting offset and/or width to zero.
   	    "bar" : {
-		"offset" :  8,
-		"width"  :  1,
-		"color"  : "black",
-	    },
-	    "tag" : "Chorus",
+  		"offset" :  8,
+  		"width"  :  1,
+  		"color"  : "black",
+  	    },
+  	    "tag" : "Chorus",
             // Recall style: Print the tag using the type.
             // Alternatively quote the lines of the preceding chorus.
             "recall" : {
@@ -205,9 +205,9 @@ This is the current built-in configuration file, showing all settings.
                  "type"  : "comment",
                  "quote" : false,
             },
-	},
+  	},
   
-	// Markup for sections (in progress).
+  	// Markup for sections (in progress).
   	// Define what to do with begin_of_XXX directives.
   	// Use fallback as fallback.
   	// Default is to ignore them.
@@ -215,45 +215,45 @@ This is the current built-in configuration file, showing all settings.
   	    // "fallback" : "comment",
   	},
   
-	// This opens a margin for margin labels.
-	"labels" : {
-	    // Margin width. Default is 0 (no margin labels).
+  	// This opens a margin for margin labels.
+  	"labels" : {
+  	    // Margin width. Default is 0 (no margin labels).
             // "auto" will automatically reserve a margin if labels are used.
-	    "width" : "auto",
-	    // Alignment for the labels. Default is left.
-	    "align" : "left",
-	},
+  	    "width" : "auto",
+  	    // Alignment for the labels. Default is left.
+  	    "align" : "left",
+  	},
   
   	// Alternative songlines with chords in a side column.
   	// Value is the column position.
   	// "chordscolumn" : 400,
   	"chordscolumn" :  0,
-	"capoheading" : "%{capo|Capo: %{}}",
+  	"capoheading" : "%{capo|Capo: %{}}",
   
-	// A {titles: left} may conflict with customized formats.
-	// Set to non-zero to ignore the directive.
-	"titles-directive-ignore" : false,
+  	// A {titles: left} may conflict with customized formats.
+  	// Set to non-zero to ignore the directive.
+  	"titles-directive-ignore" : false,
   
     	// Chord diagrams.
   	// A chord diagram consists of a number of cells.
   	// Cell dimensions are specified by "width" and "height".
   	// The horizontal number of cells depends on the number of strings.
   	// The vertical number of cells is "vcells", which should
-	// be 4 or larger to accomodate most chords.
+  	// be 4 or larger to accomodate most chords.
   	// The horizontal distance between diagrams is "hspace" cells.
   	// The vertical distance is "vspace" cells.
-	// "linewidth" is the thickness of the lines as a fraction of "width".
-	// Diagrams for all chords of the song can be shown at the
+  	// "linewidth" is the thickness of the lines as a fraction of "width".
+  	// Diagrams for all chords of the song can be shown at the
   	// "top", "bottom" or "right" side of the first page,
-	// or "below" the last song line.
+  	// or "below" the last song line.
   	"diagrams" : {
-	    "show"     :  "bottom",
-	    "width"    :  6,
+  	    "show"     :  "bottom",
+  	    "width"    :  6,
   	    "height"   :  6,
   	    "hspace"   :  3.95,
   	    "vspace"   :  3,
   	    "vcells"   :  4,
-	    "linewidth" : 0.1,
+  	    "linewidth" : 0.1,
   	},
   
   	// Even/odd pages. A value of -1 denotes odd/even pages.
@@ -262,11 +262,11 @@ This is the current built-in configuration file, showing all settings.
   	// Formats.
   	"formats" : {
   	    // Titles/Footers.
-
+  
   	    // Titles/footers have 3 parts, which are printed left,
   	    // centered and right.
   	    // For even/odd printing, the order is reversed.
-
+  
   	    // By default, a page has:
   	    "default" : {
   	        // No title/subtitle.
@@ -291,11 +291,15 @@ This is the current built-in configuration file, showing all settings.
   	    },
   	},
   
+  	// Split marker for syllables that are smaller than chord width.
+  	// Suggested values are "-", " - ", "…", etc.
+  	"split-marker" : "",
+  
   	// Fonts.
   	// Fonts can be specified by name (for the corefonts)
   	// or a filename (for TrueType/OpenType fonts).
   	// Relative filenames are looked up in the fontdir.
-	// "fontdir" : [ "/usr/share/fonts/liberation", "/home/me/fonts" ],
+  	// "fontdir" : [ "/usr/share/fonts/liberation", "/home/me/fonts" ],
   	"fontdir" : null,
   
   	// Fonts for chords and comments can have a background
@@ -319,7 +323,7 @@ This is the current built-in configuration file, showing all settings.
   	    "comment" : {
   		"name" : "Helvetica",
   		"size" : 12,
-		"background" : "#E5E5E5"
+  		"background" : "#E5E5E5"
   	    },
   	    "comment_italic" : {
   		"name" : "HelveticaOblique",
@@ -328,7 +332,7 @@ This is the current built-in configuration file, showing all settings.
   	    "comment_box" : {
   		"name" : "Helvetica",
   		"size" : 12,
-		"frame" : 1
+  		"frame" : 1
   	    },
   	    "tab" : {
   		"name" : "Courier",
@@ -354,8 +358,8 @@ This is the current built-in configuration file, showing all settings.
   	// grid_margin	  --> comment
   	// footer         --> subtitle @ 60%
   	// empty          --> text
-	// diagram	  --> comment
-	// diagram_base	  --> text (but at a small size)
+  	// diagram	  --> comment
+  	// diagram_base	  --> text (but at a small size)
   
   	// This will show the page layout if non-zero.
   	"showlayout" : false,
@@ -367,8 +371,8 @@ This is the current built-in configuration file, showing all settings.
   	  "chorus" : {
   	      // Recall style: Print the tag using the type.
   	      // Alternatively quote the lines of the preceding chorus.
-	      // If no tag+type or quote: use {chorus}.
-	      // Note: Variant 'msp' always uses {chorus}.
+  	      // If no tag+type or quote: use {chorus}.
+  	      // Note: Variant 'msp' always uses {chorus}.
   	      "recall" : {
   		   // "tag"   : "Chorus", "type"  : "comment",
   		   "tag"   : "", "type"  : "",
