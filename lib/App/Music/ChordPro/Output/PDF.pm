@@ -1308,10 +1308,15 @@ sub songline {
 		$xt0 -= $virama[$i+1] if $virama[$i+1];
 		if ( $xt0 > $xt1 ) { # chord is wider
 		    # Do we need to insert a split marker?
-		    if ( $i < $n && demarkup($phrase) !~ /\s$/
+		    if ( $i < $n
+			 && demarkup($phrase) !~ /\s$/
+			 && demarkup($phrases[$i+1]) !~ /^\s/
 			 # And do we have one?
 			 && ( my $marker = $ps->{'split-marker'} ) ) {
 			$x = $pr->text( $marker, $xt1, $ytext, $ftext );
+			while ( $x < $xt0 && $ps->{'split-marker-repeat'} ) {
+			    $x = $pr->text( $marker, $x, $ytext, $ftext );
+			}
 		    }
 		    # Adjust the position for the chord and spit marker width.
 		    $x = $xt0 if $xt0 > $x;

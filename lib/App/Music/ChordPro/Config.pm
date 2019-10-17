@@ -294,6 +294,8 @@ This is the current built-in configuration file, showing all settings.
 	// Split marker for syllables that are smaller than chord width.
 	// Suggested values are "-", " - ", "…", etc.
 	"split-marker" : "",
+	// Repeat the marker to fill all the space.
+	"split-marker-repeat" : false,
   
   	// Fonts.
   	// Fonts can be specified by name (for the corefonts)
