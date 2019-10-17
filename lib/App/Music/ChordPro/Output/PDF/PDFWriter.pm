@@ -136,7 +136,7 @@ sub strwidth {
     $fdesc->set_size($size*1024/1.33);
 #    warn("SW: \"$text\" ", $fdesc->to_string, " $size\n");
     $layout->set_font_description($fdesc);
-    $layout->set_text( $text );
+    $layout->set_markup( $text );
     my @e = $layout->get_pixel_extents;
     $e[1]->{width};
 }
