@@ -9,7 +9,7 @@ COMMON := ../common
 SCRIPT := ${ROOT}/script
 
 # Perlbrew for CitrusPerl.
-PP := perl -Ilib/perl5 -Mlocal::lib=lib/perl5 bin/pp
+PP := perl -Ilib/perl5 -Mlocal::lib=lib/perl5 bin/pp -u
 WXLIBS := /bulk/perlbrew/perls/citrus-5.24.1-wx-3.0/vendor/lib/Alien/wxWidgets/gtk_3_0_2_uni/lib
 
 chordpro : res chordpro.pp ${COMMON}/chordpro.pp
