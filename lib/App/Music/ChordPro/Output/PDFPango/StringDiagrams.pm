@@ -1,6 +1,6 @@
 #! perl
 
-package App::Music::ChordPro::Output::PDF::StringDiagrams;
+package App::Music::ChordPro::Output::PDFPango::StringDiagrams;
 
 use App::Music::ChordPro::Chords;
 

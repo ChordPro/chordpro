@@ -1,6 +1,6 @@
 #! perl
 
-package App::Music::ChordPro::Output::PDF::PDFWriter;
+package App::Music::ChordPro::Output::PDFClassic::PDFWriter;
 
 my $pdfapi;
 BEGIN {

@@ -2,7 +2,7 @@
 
 use utf8;
 
-package App::Music::ChordPro::Output::PDF;
+package App::Music::ChordPro::Output::PDFPango::PDF;
 
 use strict;
 use warnings;
@@ -10,7 +10,7 @@ use Data::Dumper;
 use Encode qw( encode_utf8 );
 use App::Packager;
 use App::Music::ChordPro::Output::Common;
-use App::Music::ChordPro::Output::PDF::PDFWriter;
+use App::Music::ChordPro::Output::PDFPango::PDFWriter;
 use Carp;
 
 use constant DEBUG_SPACING => 0;
@@ -27,7 +27,7 @@ sub generate_songbook {
 
     my $ps = $::config->{pdf};
     my $pdffile = $options->{output} || "__new__.pdf";
-    my $pr = App::Music::ChordPro::Output::PDF::PDFWriter->new( $ps, $pdffile );
+    my $pr = (__PACKAGE__."Writer")->new( $ps, $pdffile );
     $pr->info( Title => $sb->{songs}->[0]->{meta}->{title}->[0],
 	       Creator =>
 	       $regtest
@@ -142,8 +142,8 @@ sub generate_song {
     $s->structurize if $structured;
 
     # Diagrams drawer.
-    require App::Music::ChordPro::Output::PDF::StringDiagrams;
-    my $dd = App::Music::ChordPro::Output::PDF::StringDiagrams->new;
+    require App::Music::ChordPro::Output::PDFPango::StringDiagrams;
+    my $dd = App::Music::ChordPro::Output::PDFPango::StringDiagrams->new;
 
     my $sb = $s->{body};
 

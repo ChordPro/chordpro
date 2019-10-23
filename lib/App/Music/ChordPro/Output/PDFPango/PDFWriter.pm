@@ -1,6 +1,6 @@
 #! perl
 
-package App::Music::ChordPro::Output::PDF::PDFWriter;
+package App::Music::ChordPro::Output::PDFPango::PDFWriter;
 
 use strict;
 use warnings;
