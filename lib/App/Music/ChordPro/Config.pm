@@ -300,7 +300,6 @@ This is the current built-in configuration file, showing all settings.
  	// All elements may be left empty strings.
  	"split-marker" : [ "", "", "" ],
   
-  	// Fonts.
   	// Fonts can be specified by name (for the corefonts)
   	// or a filename (for TrueType/OpenType fonts).
   	// Relative filenames are looked up in the fontdir.

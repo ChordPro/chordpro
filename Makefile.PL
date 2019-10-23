@@ -26,15 +26,18 @@ WriteMakefile
 		    'script/ppchordpro.PL' => [ map { "script/$_" } @bins ]
 		   },
 
+ # Always require PDF::API2 and Text::Layout, even though
+ # we may actually be using Pango instead.
  PREREQ_PM      => {
-		    'App::Packager' => 1.430,
-		    'PDF::API2'   => 2.020,
-		    'Font::TTF'   => 1.04,
-		    'JSON::PP'	  => 2.27203,
-		    'String::Interpolate::Named' => 0.05,
-		    'File::LoadLines' => 0.02,
-		    'IO::String'  => 1.08,
-		    'Image::Info' => 1.41,
+		    'App::Packager'		  => 1.430,
+		    'PDF::API2'			  => 2.035,
+		    'Font::TTF'			  => 1.06,
+		    'JSON::PP'			  => 2.27203,
+		    'String::Interpolate::Named'  => 0.05,
+		    'File::LoadLines'		  => 0.02,
+		    'Text::Layout'		  => 0.012,
+		    'IO::String'		  => 1.08,
+		    'Image::Info'		  => 1.41,
 		   },
 
  CONFIGURE_REQUIRES => {
