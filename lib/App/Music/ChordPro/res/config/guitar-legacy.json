@@ -2,7 +2,7 @@
 
 { "instrument" : "Guitar, 6 strings, standard tuning (legacy)",
 
-  "include" : "guitar",
+  "include" : [ "guitar" ],
 
   "chords" : [
 
