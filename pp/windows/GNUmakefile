@@ -7,7 +7,7 @@ SCRIPT := ../../script
 
 all :	clean chordpro.exe wxchordpro.exe iss
 
-PP := pp
+PP := pp -u
 
 chordpro.exe :: chordpro.pp
 	${PP} --output=chordpro.exe @chordpro.pp ${SCRIPT}/chordpro.pl
