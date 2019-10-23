@@ -19,22 +19,25 @@ WriteMakefile
  VERSION	=> $version,
  AUTHOR	        => 'Johan Vromans <jvromans@squirrel.nl>',
  LICENSE	=> "perl",
- MIN_PERL_VERSION => 5.010001,
+ MIN_PERL_VERSION => 5.010000,
  INSTALLDIRS	=> 'site',
  EXE_FILES	=> [ map { "script/$_" } @bins ],
  PL_FILES	=> {
 		    'script/ppchordpro.PL' => [ map { "script/$_" } @bins ]
 		   },
 
+ # Always require PDF::API2 and Text::Layout, even though
+ # we may actually be using Pango instead.
  PREREQ_PM      => {
-		    'App::Packager' => 1.430,
-		    'Pango'         => 1.227,
-		    'Cairo'         => 1.106,
-		    'JSON::PP'	    => 2.27203,
-		    'String::Interpolate::Named' => 0.05,
-		    'File::LoadLines' => 0.02,
-		    'IO::String'    => 1.08,
-		    'Image::Info'   => 1.41,
+		    'App::Packager'		  => 1.430,
+		    'PDF::API2'			  => 2.035,
+		    'Font::TTF'			  => 1.05,
+		    'JSON::PP'			  => 2.27203,
+		    'String::Interpolate::Named'  => 0.05,
+		    'File::LoadLines'		  => 0.02,
+		    'Text::Layout'		  => 0.012,
+		    'IO::String'		  => 1.08,
+		    'Image::Info'		  => 1.41,
 		   },
 
  CONFIGURE_REQUIRES => {

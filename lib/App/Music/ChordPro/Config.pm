@@ -357,6 +357,11 @@ This is the current built-in configuration file, showing all settings.
   		"description" : "Helvetica Italic",
   		"size"  : 10
   	    },
+           "chordfingers" : {
+               "name" : "ZapfDingbats",
+               "description" : "Dingbats",
+               "size" : 10
+           },
   	    "comment" : {
   		"name"  : "Helvetica",
   		"description" : "Helvetica",
