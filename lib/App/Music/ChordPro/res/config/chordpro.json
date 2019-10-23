@@ -365,7 +365,7 @@
  	    },
  	    "grid" : {
  		"name" : "Helvetica",
- 		"description" : "Sans",
+ 		"description" : "Courier",
  		"size" : 10
  	    },
  	},

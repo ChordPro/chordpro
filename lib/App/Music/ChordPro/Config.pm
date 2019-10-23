@@ -390,7 +390,7 @@ This is the current built-in configuration file, showing all settings.
    	    },
    	    "grid" : {
    		"name" : "Helvetica",
-   		"description" : "Sans",
+   		"description" : "Courier",
    		"size" : 10
    	    },
    	},
