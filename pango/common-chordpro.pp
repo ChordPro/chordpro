@@ -1,0 +1,6 @@
+--lib=../../CPAN
+--lib=../../lib
+--lib=../common
+--module=App::Music::ChordPro::Bundle
+--addfile=../../lib/App/Music/ChordPro/res;res
+--cachedeps=chordpro.pp.deps

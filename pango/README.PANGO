@@ -1,0 +1,51 @@
+This version of ChordPro uses a PDF producer based on the Cairo and
+Pango toolkits.
+
+This has numerous advantages:
+
+* Fonts are dealt with as logical descriptors, e.g. "Sans 14" or
+  "Serif Bold 20". This makes it easy to substitute missing fonts, and
+  switch between font styles (see below).
+
+  This can also be used on the command line, e.g.
+
+     chordpro --text-font "Sans 14"
+
+  and in font directives:
+
+     {textfont Sans 14}
+
+  (And yes, this sets the font and size)
+
+* In the config files, fonts have a "pango" entry that overrides
+  "file" and "name", but not "size".
+
+     "fonts" : {
+        "text" : { "name":  "Times-Roman",
+                   "pango": "Serif",
+                   "size":  12 }
+
+* No dependency on physical font file names. Fonts cannot be
+  designated by font filenames. Fontdirs are ignored.
+
+* Correct handling of complex language systems, like Devanagari.
+
+* Text markup like <b> ... </b> to obtain bold, italic, etc.
+
+  Markup is per text line, so this is an error:
+
+    [Am]<b>Why does luck go [F]wry
+    [Am]Why do children [F]die</b>
+
+There are some limitations as well. We try to find ways to work around
+these.
+
+* Cover pages are not supported. Use an external tool to prepend cover
+  pages.
+
+* Table of Contents follows the songs. Use an external tool to
+  rearrange pages if that is important.
+
+* Only PNG images can be used in a {image ...} directive.
+
+* Wrapping miscalculates if markup is used.
