@@ -291,19 +291,50 @@ This is the current built-in configuration file, showing all settings.
   	    },
   	},
   
-	// Split marker for syllables that are smaller than chord width.
-	// Suggested values are "-", " - ", "…", etc.
-	"split-marker" : "",
-	// Repeat the marker to fill all the space.
-	"split-marker-repeat" : false,
+       // Split marker for syllables that are smaller than chord width.
+       // split-marker is a 3-part array: 'start', 'repeat', and 'final'.
+       // 'final' is always printed, last.
+       // 'start' is printed if there is enough room.
+       // 'repeat' is printed repeatedly to fill the rest.
+       // If split-marker is a single string, this is 'start'.
+       // All elements may be left empty strings.
+       "split-marker" : [ "", "", "" ],
   
-  	// Fonts.
   	// Fonts can be specified by name (for the corefonts)
   	// or a filename (for TrueType/OpenType fonts).
   	// Relative filenames are looked up in the fontdir.
 	// "fontdir" : [ "/usr/share/fonts/liberation", "/home/me/fonts" ],
 	// NOTE: fontdir is ignored when using Pango.
   	"fontdir" : null,
+  
+       // Font Families.
+       "fontfamilies" : {
+           // alternatives: regular r normal <empty>
+           // alternatives: bold b strong
+           // alternatives: italic i oblique o emphasis
+           // alternatives: bolditalic bi italicbold ib boldoblique bo obliquebold ob
+           "times" : {
+               ""            : "Times-Roman",
+               "bold"        : "Times-Bold",
+               "italic"      : "Times-Italic",
+               "bolditalic"  : "Times-BoldItalic",
+           },
+           "helvetica" : {
+               ""            : "Helvetica",
+               "bold"        : "Helvetica-Bold",
+               "oblique"     : "Helvetica-Oblique",
+               "boldoblique" : "Helvetica-BoldOblique",
+           },
+           "courier" : {
+               ""            : "Courier",
+               "bold"        : "Courier-Bold",
+               "italic"      : "Courier-Italic",
+               "bolditalic"  : "Courier-BoldItalic",
+           },
+           "dingbats" : {
+               ""            : "ZapfDingbats",
+           },
+       },
   
   	// Fonts for chords and comments can have a background
   	// colour associated.
@@ -313,49 +344,49 @@ This is the current built-in configuration file, showing all settings.
   	"fonts" : {
   	    "title" : {
   		"name"  : "Times-Bold",
-  		"pango" : "Times Bold",
+  		"description" : "Times Bold",
   		"size"  : 14
   	    },
   	    "text" : {
   		"name"  : "Times-Roman",
-  		"pango" : "Times",
+  		"description" : "Times",
   		"size"  : 12
   	    },
   	    "chord" : {
   		"name"  : "Helvetica-Oblique",
-  		"pango" : "Helvetica Italic",
+  		"description" : "Helvetica Italic",
   		"size"  : 10
   	    },
   	    "comment" : {
   		"name"  : "Helvetica",
-  		"pango" : "Helvetica",
+  		"description" : "Helvetica",
   		"size"  : 12,
 		"background" : "#E5E5E5"
   	    },
   	    "comment_italic" : {
-  		"name"  : "HelveticaOblique",
-  		"pango" : "Sans Oblique",
+  		"name"  : "Helvetica-Oblique",
+  		"description" : "Helvetica Oblique",
   		"size"  : 12,
   	    },
   	    "comment_box" : {
   		"name"  : "Helvetica",
-  		"pango" : "Sans",
+  		"description" : "Helvetica",
   		"size"  : 12,
 		"frame" : 1
   	    },
   	    "tab" : {
   		"name"  : "Courier",
-  		"pango" : "Mono",
+  		"description" : "Mono",
   		"size"  : 10
   	    },
   	    "toc" : {
   		"name"  : "Times-Roman",
-  		"pango" : "Serif",
+  		"description" : "Times",
   		"size"  : 11
   	    },
   	    "grid" : {
   		"name"  : "Helvetica",
-  		"pango" : "Sans",
+  		"description" : "Helvetica",
   		"size"  : 10
   	    },
   	},

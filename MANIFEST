@@ -103,8 +103,6 @@ t/169_custom.t
 t/170_transpose.t
 t/171_transpose.t
 t/172_transpose.t
-t/172_transpose.t
-t/173_transpose.t
 t/173_transpose.t
 t/174_transpose.cho
 t/174_transpose.t
