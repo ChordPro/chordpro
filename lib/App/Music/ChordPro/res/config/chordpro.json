@@ -266,6 +266,15 @@
 	    },
 	},
 
+// Split marker for syllables that are smaller than chord width.
+// split-marker is a 3-part array: 'start', 'repeat', and 'final'.
+// 'final' is always printed, last.
+// 'start' is printed if there is enough room.
+// 'repeat' is printed repeatedly to fill the rest.
+// If split-marker is a single string, this is 'start'.
+// All elements may be left empty strings.
+"split-marker" : [ "", "", "" ],
+
 	// Fonts.
 	// Fonts can be specified by name (for the corefonts)
 	// or a filename (for TrueType/OpenType fonts).
@@ -273,51 +282,94 @@
 	// "fontdir" : [ "/usr/share/fonts/liberation", "/home/me/fonts" ],
 	"fontdir" : null,
 
+ 	// Font Families.
+ 	"fontfamilies" : {
+ 	    // alternatives: regular r normal <empty>
+ 	    // alternatives: bold b strong
+ 	    // alternatives: italic i oblique o emphasis
+ 	    // alternatives: bolditalic bi italicbold ib boldoblique bo obliquebold ob
+ 	    "times" : {
+ 		""            : "Times-Roman",
+ 		"bold"        : "Times-Bold",
+ 		"italic"      : "Times-Italic",
+ 		"bolditalic"  : "Times-BoldItalic",
+ 	    },
+ 	    "helvetica" : {
+ 		""            : "Helvetica",
+ 		"bold"        : "Helvetica-Bold",
+ 		"oblique"     : "Helvetica-Oblique",
+ 		"boldoblique" : "Helvetica-BoldOblique",
+ 	    },
+ 	    "courier" : {
+ 		""            : "Courier",
+ 		"bold"        : "Courier-Bold",
+ 		"italic"      : "Courier-Italic",
+ 		"bolditalic"  : "Courier-BoldItalic",
+ 	    },
+ 	    "dingbats" : {
+ 		""            : "ZapfDingbats",
+ 	    },
+ 	},
+ 
 	// Fonts for chords and comments can have a background
 	// colour associated.
 	// Colours are "#RRGGBB" or predefined names like "black", "white",
 	// and lots of others.
 
-	"fonts" : {
-	    "title" : {
-		"name" : "Times-Bold",
-		"size" : 14
-	    },
-	    "text" : {
-		"name" : "Times-Roman",
-		"size" : 12
-	    },
-	    "chord" : {
-		"name" : "Helvetica-Oblique",
-		"size" : 10
-	    },
-	    "comment" : {
-		"name" : "Helvetica",
-		"size" : 12,
-		"background" : "#E5E5E5"
-	    },
-	    "comment_italic" : {
-		"name" : "HelveticaOblique",
-		"size" : 12,
-	    },
-	    "comment_box" : {
-		"name" : "Helvetica",
-		"size" : 12,
-		"frame" : 1
-	    },
-	    "tab" : {
-		"name" : "Courier",
-		"size" : 10
-	    },
-	    "toc" : {
-		"name" : "Times-Roman",
-		"size" : 11
-	    },
-	    "grid" : {
-		"name" : "Helvetica",
-		"size" : 10
-	    },
-	},
+ 	"fonts" : {
+ 	    "title" : {
+ 		"name" : "Times-Bold",
+ 		"description" : "Times Bold",
+ 		"size" : 14
+ 	    },
+ 	    "text" : {
+ 		"name" : "Times-Roman",
+ 		"description" : "Times",
+ 		"size" : 12
+ 	    },
+ 	    "chord" : {
+ 		"name" : "Helvetica-Oblique",
+ 		"description" : "Helvetica Italic",
+ 		"size" : 10
+ 	    },
+ 	    "chordfingers" : {
+ 		"name" : "ZapfDingbats",
+ 		"description" : "Dingbats",
+ 		"size" : 10
+ 	    },
+ 	    "comment" : {
+ 		"name" : "Helvetica",
+ 		"description" : "Helvetica",
+ 		"size" : 12,
+ 		"background" : "#E5E5E5"
+ 	    },
+ 	    "comment_italic" : {
+ 		"name" : "Helvetica-Oblique",
+ 		"description" : "Helvetica Italic",
+ 		"size" : 12,
+ 	    },
+ 	    "comment_box" : {
+ 		"name" : "Helvetica",
+ 		"description" : "Helvetica",
+ 		"size" : 12,
+ 		"frame" : 1
+ 	    },
+ 	    "tab" : {
+ 		"name" : "Courier",
+ 		"description" : "Courier",
+ 		"size" : 10
+ 	    },
+ 	    "toc" : {
+ 		"name" : "Times-Roman",
+ 		"description" : "Times",
+ 		"size" : 11
+ 	    },
+ 	    "grid" : {
+ 		"name" : "Helvetica",
+ 		"description" : "Sans",
+ 		"size" : 10
+ 	    },
+ 	},
 
 	// Fonts that can be specified, but need not.
 	// subtitle       --> text

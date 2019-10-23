@@ -17,6 +17,9 @@
 		"file": {
 		    "type": "string"
 		},
+ 		"description": {
+ 		    "type": "string"
+ 		},
 		"size": {
 		    "type": "number"
 		},
@@ -30,8 +33,9 @@
 		    "type": [ "boolean", "integer" ]
 		}
 	    },
-	    "oneOf": [
-		{ "required": [ "name" ] },
+ 	    "anyOf": [
+ 		{ "required": [ "description" ] },
+  		{ "required": [ "name" ] },
 		{ "required": [ "file" ] }
 	    ]
 	},
@@ -207,6 +211,10 @@
 			"minimum": 1,
 			"default": 1
 		    },
+ 		    "copy": {
+ 			"description": "Copy another definition.",
+ 			"type": "string"
+ 		    },
 		    "frets": {
 			"description": "Finger positions from low string to hight string.",
 			"type": "array",
@@ -231,7 +239,10 @@
 			"default": true
 		    }
 		},
-		"required": [ "name", "frets" ],
+ 		"anyOf" : [ 
+  		    { "required": [ "name", "frets" ] },
+  		    { "required": [ "name", "copy" ] }
+ 		],
 		"additionalProperties": { "not": {} }
 	    }
 	},
@@ -481,6 +492,10 @@
 		    "type": [ "array", "string", "null" ]
 		},
 
+ 		"fontfamilies": {
+ 		    "description": "The font families used for typesetting."
+ 		},
+ 		
 		"fonts": {
 		    "description": "The fonts used for typesetting.",
 		    "properties": {
@@ -500,6 +515,22 @@
 				    "additionalProperties": { "not": {} }
 				} } ]
 			},
+ 			"chordfingers": {
+ 			    "description": "Font for numbered chord dots.",
+ 			    "allOf": [
+ 				{ "$ref": "#/definitions/fontspec" },
+ 				{ "properties": {
+ 				    "name": {
+ 					"default": "ZapfDingpats",
+ 					"type": "string"
+ 				    },
+ 				    "size": {
+ 					"default": 10,
+ 					"type": "number"
+ 				    },
+ 				    "additionalProperties": { "not": {} }
+ 				} } ]
+ 			},
 			"comment": {
 			    "description": "Font for typesetting comment text.",
 			    "allOf": [
@@ -789,6 +820,15 @@
 		    "additionalProperties": { "not": {} }
 		},
 
+ 		"split-marker": {
+ 		    "description": "Marker when syllables are too small for chord.",
+ 		    "default": [ "", "", "" ],
+ 		    "type": [ "array", "string" ],
+ 		    "items": { "type": "string" },
+ 		    "minItems": 3,
+ 		    "maxItems": 3
+ 		},
+ 
 		"titles-directive-ignore": {
 		    "description": "Ignore titles directives in the songs.",
 		    "default": false,
