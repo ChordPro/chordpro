@@ -72,6 +72,7 @@ sub wrap {
 
 sub text {
     my ( $self, $text, $x, $y, $font, $size ) = @_;
+    $text = demarkup($text);
     return $x unless length($text);
 
     $font ||= $self->{font};
@@ -121,6 +122,8 @@ sub text {
     }
     return $x;
 }
+
+*demarkup = \&App::Music::ChordPro::Output::PDFClassic::PDF::demarkup;
 
 sub setfont {
     my ( $self, $font, $size ) = @_;
