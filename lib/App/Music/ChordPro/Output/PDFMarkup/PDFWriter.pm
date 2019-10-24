@@ -8,6 +8,7 @@ use Encode;
 use PDF::API2;
 use Text::Layout;
 use IO::String;
+use Carp;
 
 # For regression testing, run perl with PERL_HASH_SEED set to zero.
 # This eliminates the arbitrary order of font definitions and triggers
@@ -46,11 +47,12 @@ sub wrap {
 
     my $ex = "";
     my $sp = "";
-    #warn("TEXT: |$text| ($m)\n");
+    confess("XXX") if UNIVERSAL::isa($text,'ARRAY');
+    warn("TEXT: |$text| ($m)\n");
     while ( $self->strwidth($text) > $m ) {
 	my ( $l, $s, $r ) = $text =~ /^(.+)([-_,.:;\s])(.+)$/;
 	return ( $text, $ex ) unless defined $s;
-	#warn("WRAP: |$text| -> |$l|$s|$r$sp$ex|\n");
+	warn("WRAP: |$text| -> |$l|$s|$r$sp$ex|\n");
 	if ( $s =~ /\S/ ) {
 	    $l .= $s;
 	    $s = "";

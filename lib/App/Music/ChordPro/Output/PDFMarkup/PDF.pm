@@ -1992,10 +1992,9 @@ sub tpt {
 
 sub wrap {
     my ( $pr, $elt, $x ) = @_;
-    return [$elt];		# TODO
     my $res = [];
     my @chords  = @{ $elt->{chords} // [] };
-    my @phrases = defrag( $elt->{phrases} // [] );
+    my @phrases = @{ defrag( $elt->{phrases} // [] ) };
     my @rchords;
     my @rphrases;
     my $m = $pr->{ps}->{__rightmargin};
@@ -2060,7 +2059,6 @@ sub wrap {
 sub wrapsimple {
     my ( $pr, $text, $x, $font ) = @_;
     return ( "", "" ) unless length($text);
-    return ( $text, "" );	# TODO
 
     $font ||= $pr->{font};
     $pr->setfont($font);

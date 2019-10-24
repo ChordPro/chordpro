@@ -1109,7 +1109,7 @@ sub songline {
 	$x += $opts{indent} if $opts{indent};
 	$x += $elt->{indent} if $elt->{indent};
 	prlabel( $ps, $tag, $x, $ytext );
-	my ( $text, $ex ) = wrapsimple( $pr, join( "", @{ $elt->{phrases} } ),
+	my ( $text, $ex ) = wrapsimple( $pr, join( "", @phrases ),
 					$x, $ftext );
 	$pr->text( $text, $x, $ytext, $ftext );
 	return $ex ne "" ? { %$elt, indent => $pr->strwidth("x"), phrases => [$ex] } : undef;
@@ -1292,7 +1292,6 @@ sub songline {
 # Remove markup.
 sub demarkup {
     my ( $t ) = @_;
-    return $t unless defined $t;
     $t =~ s;</?([-\w]+|span\s.*?)>;;g;
     return $t;
 }
@@ -1725,7 +1724,7 @@ sub set_columns {
 sub showlayout {
     my ( $ps ) = @_;
     my $pr = $ps->{pr};
-    my $col = "black";
+    my $col = "red";
     my $lw = 0.5;
 
     my $mr = $ps->{_rightmargin};

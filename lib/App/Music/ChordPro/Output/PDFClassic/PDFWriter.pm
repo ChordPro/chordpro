@@ -188,9 +188,9 @@ sub rectxy {
     $gfx->linecap(2);
     $gfx->linewidth($lw||1);
     $gfx->rectxy( $x, $y, $x1, $y1 );
-    $gfx->close;
-    $gfx->fill if $fillcolor;
-    $gfx->stroke if $strokecolor;
+    $gfx->fill if $fillcolor && !$strokecolor;
+    $gfx->fillstroke if $fillcolor && $strokecolor;
+    $gfx->stroke if $strokecolor && !$fillcolor;
     $gfx->restore;
 }
 

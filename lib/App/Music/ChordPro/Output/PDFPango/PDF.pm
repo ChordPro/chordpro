@@ -1995,7 +1995,7 @@ sub wrap {
     my ( $pr, $elt, $x ) = @_;
     my $res = [];
     my @chords  = @{ $elt->{chords} // [] };
-    my @phrases = @{ $elt->{phrases} // [] };
+    my @phrases = @{ defrag($elt->{phrases} // []) };
     my @rchords;
     my @rphrases;
     my $m = $pr->{ps}->{__rightmargin};
