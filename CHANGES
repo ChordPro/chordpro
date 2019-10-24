@@ -1,3 +1,27 @@
+0.975
+
+    - Integration of support for Pango as PDF backend.
+      See pango/README.PANGO for details.
+
+      IMPORTANT: Pango is not required (and not automatically
+      installed) when building and installing ChordPro.
+      
+    - Use Text::Layout to support Pango Markup language with PDF::API2 if
+      Pango is not available.
+      See markup/README.MARKUP for details.
+      
+      IMPORTANT: Text::Layout is not required (and not automatically
+      installed) when building and installing ChordPro.
+      
+    - Fallback to the old (0.974) style PDF backend if neither Pango nor
+      Text::Layout is available.
+    - Add split marker to be inserted between text phrases when the
+      chord is wider than the phrase.
+    - Upgrade requirement for PDF::API2 to 2.035, Font::TTF to 1.05,
+      Text::Layout to 0.014.
+    - Fix bug where some command line arguments did not properly support
+      utf8.
+
 0.974	2019-10-05
 
     - Restructure chord definitions. Default is now an orthogonal set

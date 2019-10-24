@@ -1,5 +1,5 @@
-This version of ChordPro uses a PDF producer based on the Cairo and
-Pango toolkits.
+This version of ChordPro uses a PDF producer based on PDF::API2 (or
+PDF::Builder) and Text::Layout that implements Pango Markup language.
 
 This has numerous advantages:
 
@@ -23,12 +23,25 @@ This has numerous advantages:
      "fonts" : {
         "text" : { "name":  "Times-Roman",
                    "description": "Serif",
-                   "size":  12 }
+                   "size":  12 },
+  	...etc...
+     },
 
-* No dependency on physical font file names. Fonts cannot be
-  designated by font filenames. Fontdirs are ignored.
+* To map symbolic font names to actual fonts, and to group fonts into
+  families, use "fontfamilies":
 
-* Correct handling of complex language systems, like Devanagari.
+ 	"fontfamilies" : {
+ 	    "times" : {
+ 		""            : "Times-Roman",
+ 		"bold"        : "Times-Bold",
+ 		"italic"      : "Times-Italic",
+ 		"bolditalic"  : "Times-BoldItalic",
+ 	    },
+ 	    ...etc...
+ 	},
+
+  On Linux systems, font family lookup will use the fontconfig tool if
+  available.
 
 * Text markup like <b> ... </b> to obtain bold, italic, etc.
 
@@ -41,14 +54,6 @@ This has numerous advantages:
 
 There are some limitations as well. We try to find ways to work around
 these.
-
-* Cover pages are not supported. Use an external tool to prepend cover
-  pages.
-
-* Table of Contents follows the songs. Use an external tool to
-  rearrange pages if that is important.
-
-* Only PNG images can be used in a {image ...} directive.
 
 * Wrapping may miscalculate if a song line contains markup or wide
   chords (wider than the phrase).
