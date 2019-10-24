@@ -137,6 +137,7 @@ sub main {
     eval "require $pkg;";
     die("No backend for ", $options->{generate}, "\n$@") if $@;
     $options->{backend} = $pkg;
+    $pkg->version if $options->{verbose} && $pkg->can("version");
 
     # One configurator to bind them all.
     use App::Music::ChordPro::Config;
