@@ -2,6 +2,11 @@
 
 package App::Music::ChordPro::Output::PDFClassic::PDFWriter;
 
+use strict;
+use warnings;
+use Encode;
+use IO::String;
+
 my $pdfapi;
 BEGIN {
     eval { require PDF::Builder; $pdfapi = "PDF::Builder"; }
@@ -15,11 +20,6 @@ BEGIN {
 # This eliminates the arbitrary order of font definitions and triggers
 # us to pinpoint some other data that would otherwise be varying.
 my $regtest = defined($ENV{PERL_HASH_SEED}) && $ENV{PERL_HASH_SEED} == 0;
-
-use strict;
-use warnings;
-use Encode;
-use IO::String;
 
 my $faketime = 1465041600;
 

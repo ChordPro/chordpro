@@ -1809,8 +1809,8 @@ sub showlayout {
     pop(@off);
     @off = ( $ps->{chordscolumn} ) if $chordscol;
     @a = ( undef,
-	   $ps->{marginbottom},
-	   $ps->{margintop}-$ps->{papersize}->[1]+$ps->{marginbottom},
+	   $ps->{margintop},
+	   $ps->{papersize}->[1]-$ps->{margintop}-$ps->{marginbottom},
 	   $lw, $col );
     foreach my $i ( 0 .. @off-1 ) {
 	next unless $off[$i];
