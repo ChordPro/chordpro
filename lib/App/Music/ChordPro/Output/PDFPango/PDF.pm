@@ -379,7 +379,7 @@ sub generate_song {
 
 	$x += $ps->{_indent};
 	$y = $ps->{_margintop};
-	$y += $ps->{headspace} if $ps->{'head-first-only'} && $class == 2;
+	$y -= $ps->{headspace} if $ps->{'head-first-only'} && $class == 2;
 	$ps->{_top} = $y;
 	$col = 0;
 	$vsp_ignorefirst = 1;
