@@ -183,26 +183,6 @@ sub generate_song {
     $lyrics_only  = $::config->{settings}->{'lyrics-only'};
     $chordscapo   = $s->{meta}->{capo};
 
-    if ( $ps->{labels}->{width} eq "auto" ) {
-	if ( $s->{labels} && @{ $s->{labels} } ) {
-	    my $longest = 0;
-	    my $ftext = $fonts->{label} || $fonts->{text};
-	    for ( @{ $s->{labels} } ) {
-		for ( split( /\\n/, $_ ) ) {
-		    my $t = $ftext->{font}->{font}->width("$_    ") * $ftext->{size};
-		    $longest = $t if $t > $longest;
-		}
-	    }
-	    $ps->{_indent} = $longest;
-	}
-	else {
-	    $ps->{_indent} = 0;
-	}
-    }
-    else {
-	$ps->{_indent} = $ps->{labels}->{width};
-    }
-
     my $fail;
     for my $item ( @{ SIZE_ITEMS() } ) {
 	for ( $options->{"$item-font"} ) {
@@ -218,6 +198,26 @@ sub generate_song {
 	}
     }
     die("Unhandled fonts detected -- aborted\n") if $fail;
+
+    if ( $ps->{labels}->{width} eq "auto" ) {
+	if ( $s->{labels} && @{ $s->{labels} } ) {
+	    my $longest = 0;
+	    my $ftext = $fonts->{label} || $fonts->{text};
+	    for ( @{ $s->{labels} } ) {
+		for ( split( /\\n/, $_ ) ) {
+		    my $t = $ftext->{fd}->{font}->width("$_    ") * $ftext->{size};
+		    $longest = $t if $t > $longest;
+		}
+	    }
+	    $ps->{_indent} = $longest;
+	}
+	else {
+	    $ps->{_indent} = 0;
+	}
+    }
+    else {
+	$ps->{_indent} = $ps->{labels}->{width};
+    }
 
     my $set_sizes = sub {
 	$ps->{lineheight} = $fonts->{text}->{size} - 1; # chordii
@@ -857,7 +857,12 @@ sub generate_song {
 		unshift( @elts, { %$elt,
 				  type => "comment",
 				  font => $ps->{fonts}->{label},
-				  text => $elt->{chorus}->[0]->{value},
+				  text => $ps->{chorus}->{recall}->{tag},
+				 } );
+		unshift( @elts, { %$elt,
+				  type => "set",
+				  name => "label",
+				  value => $elt->{chorus}->[0]->{value},
 				 } );
 	    }
 	    elsif ( $t->{tag} && $t->{type} =~ /^comment(?:_(?:box|italic))?/ ) {

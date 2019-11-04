@@ -857,7 +857,12 @@ sub generate_song {
 		unshift( @elts, { %$elt,
 				  type => "comment",
 				  font => $ps->{fonts}->{label},
-				  text => $elt->{chorus}->[0]->{value},
+				  text => $ps->{chorus}->{recall}->{tag},
+				 } );
+		unshift( @elts, { %$elt,
+				  type => "set",
+				  name => "label",
+				  value => $elt->{chorus}->[0]->{value},
 				 } );
 	    }
 	    elsif ( $t->{tag} && $t->{type} =~ /^comment(?:_(?:box|italic))?/ ) {

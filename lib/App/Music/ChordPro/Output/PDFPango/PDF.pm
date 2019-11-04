@@ -166,26 +166,6 @@ sub generate_song {
     $lyrics_only  = $::config->{settings}->{'lyrics-only'};
     $chordscapo   = $s->{meta}->{capo};
 
-    if ( $ps->{labels}->{width} eq "auto" ) {
-	if ( $s->{labels} && @{ $s->{labels} } ) {
-	    my $longest = 0;
-	    my $ftext = $fonts->{label} || $fonts->{text};
-	    for ( @{ $s->{labels} } ) {
-		for ( split( /\\n/, $_ ) ) {
-		    my $t = $ftext->{font}->width("$_    ") * $ftext->{size};
-		    $longest = $t if $t > $longest;
-		}
-	    }
-	    $ps->{_indent} = $longest;
-	}
-	else {
-	    $ps->{_indent} = 0;
-	}
-    }
-    else {
-	$ps->{_indent} = $ps->{labels}->{width};
-    }
-
     my $fail;
     for my $item ( @{ SIZE_ITEMS() } ) {
 	for ( $options->{"$item-font"} ) {
@@ -298,6 +278,29 @@ sub generate_song {
 
 	# Add page to the PDF.
 	$pr->newpage($ps, $options->{prepend} ? $thispage+1 : () );
+
+	unless (defined $ps->{_indent} ) {
+	    if ( $ps->{labels}->{width} eq "auto" ) {
+		if ( $s->{labels} && @{ $s->{labels} } ) {
+		    my $longest = 0;
+		    my $ftext = $fonts->{label} || $fonts->{text};
+		    $ps->{pr}->setfont($ftext);	# for strwidth.
+		    for ( @{ $s->{labels} } ) {
+			for ( split( /\\n/, $_ ) ) {
+			    my $t = $ps->{pr}->strwidth("$_    ");
+			    $longest = $t if $t > $longest;
+			}
+		    }
+		    $ps->{_indent} = $longest;
+		}
+		else {
+		    $ps->{_indent} = 0;
+		}
+	    }
+	    else {
+		$ps->{_indent} = $ps->{labels}->{width};
+	    }
+	}
 
 	# Put titles and footer.
 
@@ -859,7 +862,12 @@ sub generate_song {
 		unshift( @elts, { %$elt,
 				  type => "comment",
 				  font => $ps->{fonts}->{label},
-				  text => $elt->{chorus}->[0]->{value},
+				  text => $ps->{chorus}->{recall}->{tag},
+				 } );
+		unshift( @elts, { %$elt,
+				  type => "set",
+				  name => "label",
+				  value => $elt->{chorus}->[0]->{value},
 				 } );
 	    }
 	    elsif ( $t->{tag} && $t->{type} =~ /^comment(?:_(?:box|italic))?/ ) {
@@ -1131,6 +1139,7 @@ sub songline {
 	my $song   = $opts{song};
 	$x += $opts{indent} if $opts{indent};
 	$x += $elt->{indent} if $elt->{indent};
+	####TODO: Fix baseline (use tabs).
 	prlabel( $ps, $tag, $x, $ytext );
 	my ( $text, $ex ) = wrapsimple( $pr, $elt->{text}, $x, $ftext );
 	$pr->text( $text, $x, $ytext, $ftext );

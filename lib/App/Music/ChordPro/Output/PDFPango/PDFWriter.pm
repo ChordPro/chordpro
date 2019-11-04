@@ -107,11 +107,6 @@ sub text {
 		       $frame ? $font->{color} || "black" : undef );
     }
 
-    if ( $text eq "Swing " ) {
-	$self->hline($x,$y,50,1,"red");
-	#    $self->{cr}->move_to( $x, $y );#+ $layout->get_baseline/1024 );
-	warn("PX: ", ($layout->get_pixel_extents)[0]->{y},"\n");
-    }
     $self->{cr}->move_to( $x, $y);# - ($layout->get_pixel_extents)[1]->{y});
     Pango::Cairo::show_layout( $self->{cr}, $layout );
     # For unknown reasons, a stroke is needed...???
