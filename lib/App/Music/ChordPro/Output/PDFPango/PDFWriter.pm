@@ -121,6 +121,7 @@ sub setfont {
     $self->{fontsize} = $size ||= $font->{size};
 }
 
+####NOTE: $self->{fontsize} overrules size....
 sub strwidth {
     my ( $self, $text, $font, $size ) = @_;
     $font ||= $self->{font};
@@ -149,6 +150,20 @@ sub strheight {
     $layout->set_markup( $text );
     my @e = $layout->get_pixel_size;
     $e[1];
+}
+
+sub strbaseline {
+    my ( $self, $text, $font, $size ) = @_;
+    $font ||= $self->{font};
+    $size ||= $self->{fontsize} || $font->{size};
+    my $layout = $self->{layout};
+    my $fdesc = $font->{font};
+    Carp::confess("FDESC") unless $fdesc;
+    $fdesc->set_size($size*1024/1.33);
+#    warn("SW: \"$text\" ", $fdesc->to_string, " $size\n");
+    $layout->set_font_description($fdesc);
+    $layout->set_markup( $text );
+    return $layout->get_baseline / 1024;
 }
 
 sub line {

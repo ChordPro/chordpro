@@ -861,7 +861,7 @@ sub generate_song {
 		    && $elt->{chorus}->[0]->{name} eq "label" ) {
 		unshift( @elts, { %$elt,
 				  type => "comment",
-				  font => $ps->{fonts}->{label},
+				  font => $ps->{fonts}->{comment},
 				  text => $ps->{chorus}->{recall}->{tag},
 				 } );
 		unshift( @elts, { %$elt,
@@ -1139,8 +1139,24 @@ sub songline {
 	my $song   = $opts{song};
 	$x += $opts{indent} if $opts{indent};
 	$x += $elt->{indent} if $elt->{indent};
-	####TODO: Fix baseline (use tabs).
-	prlabel( $ps, $tag, $x, $ytext );
+
+	if ( $tag ne "" ) {
+	    my $flab = $ps->{fonts}->{label} || $ps->{fonts}->{text};
+	    $pr->setfont($flab);
+	    my $b1 = $pr->strbaseline($tag);
+	    my ( $text, $ex ) = wrapsimple( $pr, $elt->{text}, $x, $ftext );
+	    $pr->setfont($ftext);
+	    my $b2 = $pr->strbaseline($text);
+	    if ( $b1 < $b2 ) {
+		prlabel( $ps, $tag, $x, $ytext - $b1 + $b2 );
+		$pr->text( $text, $x, $ytext, $ftext );
+	    }
+	    else {
+		prlabel( $ps, $tag, $x, $ytext );
+		$pr->text( $text, $x, $ytext + $b1 - $b2, $ftext );
+	    }
+	    return $ex ne "" ? { %$elt, indent => $pr->strwidth("x"), text => $ex } : undef;
+	}
 	my ( $text, $ex ) = wrapsimple( $pr, $elt->{text}, $x, $ftext );
 	$pr->text( $text, $x, $ytext, $ftext );
 	return $ex ne "" ? { %$elt, indent => $pr->strwidth("x"), text => $ex } : undef;
