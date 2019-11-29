@@ -33,10 +33,9 @@ For up-to-date information, see <https://www.chordpro.org/chordpro/ChordPro-Refe
 For up-to-date information, see <https://www.chordpro.org/chordpro/ChordPro-Installation.html>
 
 ## Suppport
+For general discussion, please see [google groups](https://groups.google.com/forum/#!forum/chordpro).
 
-ChordPro (the program) development is hosted on GitHub, at <https://github.com/ChordPro/chordpro>.
-
-Please report any bugs or feature requests to [the GitHub issue tracker](https://github.com/ChordPro/chordpro/issues).
+Bugs and feature requests go to [the GitHub issue tracker](https://github.com/ChordPro/chordpro/issues).
 
 ## License
 Copyright © 2010,2018 The ChordPro Team
