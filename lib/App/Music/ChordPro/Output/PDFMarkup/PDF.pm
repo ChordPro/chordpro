@@ -1287,7 +1287,8 @@ sub songline {
 	    else {
 		$xt0 = $x;
 	    }
-	    prlabel( $ps, $tag, $x, $ytext );
+	    # Do not indent chorus labels (issue #81).
+	    prlabel( $ps, $tag, $x-$opts{indent}, $ytext );
 	    $tag = "";
 	    if ( $inlinechords ) {
 		$x = $pr->text( $phrase, $xt0, $ytext, $ftext );

@@ -1318,7 +1318,8 @@ sub songline {
 		$chord =~ s/^\*(?=.)//;
 		$xt0 = $pr->text( $pre.$chord.$post, $xt0, $ychord, $fchord );
 	    }
-	    prlabel( $ps, $tag, $x, $ytext );
+	    # Do not indent chorus labels (issue #81).
+	    prlabel( $ps, $tag, $x-$opts{indent}, $ytext );
 	    $tag = "";
 	    if ( $inlinechords ) {
 		$x = $pr->text( $phrase, $xt0, $ytext, $ftext );

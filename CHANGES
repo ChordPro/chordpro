@@ -22,6 +22,7 @@
     - Fix bug where some command line arguments did not properly support
       utf8.
     - Fix handling of {chorus: label}.
+    - Do not indent chorus labels when chorus indenting (issue #81).
 
 0.974	2019-10-05
 
