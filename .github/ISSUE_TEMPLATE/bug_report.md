@@ -8,8 +8,7 @@ assignees: ''
 ---
 
 The issue tracker is for bug reporting.
-Please use the [ChordPro user
-group](https://groups.google.com/forum/#!forum/chordpro) for general questions on how to use ChordPro.
+Please use the [ChordPro user group](https://groups.google.com/forum/#!forum/chordpro) for general questions on how to use ChordPro.
 
 **Describe the bug**
 A clear and concise description of what the bug is.
