@@ -678,12 +678,12 @@ sub OnDelete {
 
 sub OnHelp_ChordPro {
     my ($self, $event) = @_;
-    Wx::LaunchDefaultBrowser("http://www.chordpro.org/chordpro/index.html");
+    Wx::LaunchDefaultBrowser("https://www.chordpro.org/chordpro/index.html");
 }
 
 sub OnHelp_Config {
     my ($self, $event) = @_;
-    Wx::LaunchDefaultBrowser("https://metacpan.org/pod/distribution/App-Music-ChordPro/res/pod/Config.pod");
+    Wx::LaunchDefaultBrowser("https://metacpan.org/pod/distribution/App-Music-ChordPro/lib/App/Music/ChordPro/Config.pm");
 }
 
 sub OnHelp_Example {
