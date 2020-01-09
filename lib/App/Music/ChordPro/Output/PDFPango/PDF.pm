@@ -40,7 +40,8 @@ sub generate_songbook {
     foreach my $song ( @{$sb->{songs}} ) {
 
 	$options->{startpage} = $page;
-	push( @book, [ $song->{meta}->{title}->[0], $page ] );
+	$song->{meta}->{tocpage} = $page;
+	push( @book, [ $song->{meta}->{title}->[0], $song ] );
 	$page += generate_song( $song,
 				{ pr => $pr, $options ? %$options : () } );
     }
@@ -55,6 +56,7 @@ sub generate_songbook {
 
 	# Create a pseudo-song for the table of contents.
 	my $t = $::config->{toc}->{title};
+	my $l = $::config->{toc}->{line};
 	my $song =
 	  { title     => $t,
 	    meta => { title => [ $t ] },
@@ -62,8 +64,8 @@ sub generate_songbook {
 	    body      => [
 		     map { +{ type    => "tocline",
 			      context => "toc",
-			      title   => $_->[0],
-			      pageno  => $_->[1],
+			      title   => fmt_subst( $_->[1], $l ),
+			      pageno  => $_->[1]->{meta}->{tocpage},
 			    } } @book,
 	    ],
 	  };
@@ -1677,6 +1679,7 @@ sub imageline {
 sub tocline {
     my ( $elt, $x, $y, $ps ) = @_;
 
+    my $song = $elt->{song};
     my $pr = $ps->{pr};
     my $fonts = $ps->{fonts};
     my $y0 = $y;
@@ -1684,9 +1687,17 @@ sub tocline {
     my $ftoc = $fonts->{toc};
     $pr->setfont($ftoc);
     $ps->{pr}->link_jump( $elt->{pageno} );
-    $ps->{pr}->text( $elt->{title}, $x, $y );
-    my $p = $elt->{pageno} . ".";
-    $ps->{pr}->text( $p, $x - 5 - $pr->strwidth($p), $y );
+    my $tpl = $elt->{title};
+    my $vsp;
+    for ( split( /\\n/, $tpl ) ) {
+	$ps->{pr}->text( $_, $x, $y );
+	unless ($vsp) {
+	    my $p = $elt->{pageno} . ".";
+	    $ps->{pr}->text( $p, $x - 5 - $pr->strwidth($p), $y );
+	    $vsp = _vsp("toc", $ps);
+	}
+	$y += $vsp;
+    }
     $ps->{pr}->link_end;
 
 }
@@ -1745,7 +1756,16 @@ sub _vsp {
 sub empty_vsp { _vsp( "empty", $_[1] ) }
 sub grid_vsp  { _vsp( "grid",  $_[1] ) }
 sub tab_vsp   { _vsp( "tab",   $_[1] ) }
-sub toc_vsp   { _vsp( "toc",   $_[1] ) }
+
+sub toc_vsp   {
+    my $vsp = _vsp( "toc",   $_[1] );
+    my $tpl = $_[0]->{title};
+    my $ret = $vsp;
+    while ( $tpl =~ /\\n/g ) {
+	$ret += $vsp;
+    }
+    return $ret;
+}
 
 sub text_vsp {
     my ( $elt, $ps ) = @_;
