@@ -59,7 +59,6 @@ sub generate_songbook {
 	@book = sort { lc($a->[0]) cmp lc($b->[0]) } @book;
     }
 
-    $pr->pagelabel( 0, { -style => 'roman' } );
     if ( $options->{toc} // @book > 1 ) {
 
 	# Create a pseudo-song for the table of contents.
@@ -82,7 +81,7 @@ sub generate_songbook {
 	# Prepend the toc.
 	$options->{startpage} = 1;
 	$page = generate_song( $song,
-			       { pr => $pr, prepend => 1,
+			       { pr => $pr, prepend => 1, roman => 1,
 				 $options ? %$options : () } );
 
 	# Align.
@@ -94,6 +93,7 @@ sub generate_songbook {
     }
 
     if ( $options->{cover} ) {
+	my $p0 = $page;
 	my $cover = $pdfapi->open( $options->{cover} );
 	die("Missing cover: ", $options->{cover}, "\n") unless $cover;
 	for ( 1 .. $cover->pages ) {
@@ -102,6 +102,11 @@ sub generate_songbook {
 	}
 	$pr->newpage( $ps, 1+$cover->pages ), $page++
 	  if $ps->{'even-odd-pages'} && $page % 2;
+	$pr->pagelabel( 0, { -style => 'arabic', -prefix => 'cover-' } );
+	$pr->pagelabel( $page-$p0, { -style => 'roman' } );
+    }
+    else {
+	$pr->pagelabel( 0, { -style => 'roman' } );
     }
     $pr->pagelabel( $page, { -style => 'arabic' } );
 
@@ -127,6 +132,10 @@ sub generate_songbook {
     }
 
     []
+}
+
+sub roman {
+    goto \&App::Music::ChordPro::Output::Common::roman;
 }
 
 my $source;			# song source
@@ -348,7 +357,8 @@ sub generate_song {
 	$ps->{__bottommargin} = $ps->{_marginbottom};
 
 	$thispage++;
-	$s->{meta}->{page} = [ $s->{page} = $thispage ];
+	$s->{meta}->{page} = [ $s->{page} = $options->{roman}
+			       ? roman($thispage) : $thispage ];
 
 	# Determine page class.
 	my $class = 2;		# default
