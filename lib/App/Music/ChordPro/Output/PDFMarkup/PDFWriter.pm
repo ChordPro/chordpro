@@ -304,6 +304,11 @@ sub newpage {
     $self->{pdftext} = $self->{pdfpage}->text;
 }
 
+sub pagelabel {
+    my ( $self, $page, $opts ) = @_;
+    $self->{pdf}->pageLabel( $page, $opts );
+}
+
 sub finish {
     my ( $self, $file ) = @_;
 

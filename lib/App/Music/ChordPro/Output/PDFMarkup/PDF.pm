@@ -59,6 +59,7 @@ sub generate_songbook {
 	@book = sort { lc($a->[0]) cmp lc($b->[0]) } @book;
     }
 
+    $pr->pagelabel( 0, { -style => 'roman' } );
     if ( $options->{toc} // @book > 1 ) {
 
 	# Create a pseudo-song for the table of contents.
@@ -102,6 +103,7 @@ sub generate_songbook {
 	$pr->newpage( $ps, 1+$cover->pages ), $page++
 	  if $ps->{'even-odd-pages'} && $page % 2;
     }
+    $pr->pagelabel( $page, { -style => 'arabic' } );
 
     $pr->finish( $options->{output} || "__new__.pdf" );
 
