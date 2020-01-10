@@ -37,7 +37,7 @@ sub generate_songbook {
 
     my $ps = $::config->{pdf};
     my $pr = (__PACKAGE__."Writer")->new( $ps, $pdfapi );
-    $pr->info( Title => $sb->{songs}->[0]->{meta}->{title}->[0],
+    $pr->info( Title => $title,
 	       Creator =>
 	       $regtest
 	       ? "ChordPro [$options->{_name} (regression testing)]"
