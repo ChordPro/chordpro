@@ -39,8 +39,8 @@ sub generate_songbook {
     $pr->info( Title => $sb->{songs}->[0]->{meta}->{title}->[0],
 	       Creator =>
 	       $regtest
-	       ? "ChordPro [$options->{_name} (regression testing)]"
-	       : "ChordPro [$options->{_name} $options->{_version}]",
+	       ? "PDF::Legacy [$options->{_name} (regression testing)]"
+	       : "PDF::Legacy [$options->{_name} $options->{_version}]",
 	     );
 
     my @book;
