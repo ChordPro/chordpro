@@ -136,9 +136,13 @@ sub classify {
     my $type = ( $len / length($line) - 1 ) < 1 ? 'l' : 'c';
     my $p = App::Music::ChordPro::Chords::Parser->default;
     if ( $type eq 'l') {
+        print ( "LYRICS: $line\n" );
         foreach (@words) {
-            if (!App::Music::ChordPro::Chords::parse_chord($_)) {
-                return 'l';
+            if (length $_ > 0) {
+                if (!App::Music::ChordPro::Chords::parse_chord($_)) {
+                    print("\"$_\" is not a valid chord.\n");
+                    return 'l';
+                }
             }
         }
         return 'c';
