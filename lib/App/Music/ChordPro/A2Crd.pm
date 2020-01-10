@@ -135,7 +135,6 @@ sub classify {
     $line =~ s/\s+//g;
     my $type = ( $len / length($line) - 1 ) < 1 ? 'l' : 'c';
     my $p = App::Music::ChordPro::Chords::Parser->default;
-    print ref($p), "\n";
     if ( $type eq 'l') {
         foreach (@words) {
             if (!App::Music::ChordPro::Chords::parse_chord($_)) {
