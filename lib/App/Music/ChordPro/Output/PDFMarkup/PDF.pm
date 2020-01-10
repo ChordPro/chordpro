@@ -48,6 +48,10 @@ sub generate_songbook {
     my $page = $options->{"start-page-number"} || 1;
     foreach my $song ( @{$sb->{songs}} ) {
 
+	# Align.
+	$pr->newpage($ps, $page+1), $page++
+	  if $ps->{'pagealign-songs'} && !($page % 2);
+
 	$options->{startpage} = $page;
 	$song->{meta}->{tocpage} = $page;
 	push( @book, [ $song->{meta}->{title}->[0], $song ] );

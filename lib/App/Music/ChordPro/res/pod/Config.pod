@@ -248,6 +248,8 @@ This is the current built-in configuration file, showing all settings.
   
   	// Even/odd pages. A value of -1 denotes odd/even pages.
   	"even-odd-pages" : 1,
+  	// Align songs to even/odd pages.
+  	"pagealign-songs" : 1,
   
   	// Formats.
   	"formats" : {
