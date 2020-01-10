@@ -7,6 +7,7 @@ package App::Music::ChordPro::A2Crd;
 use App::Packager;
 
 use App::Music::ChordPro::Version;
+use App::Music::ChordPro::Chords;
 
 our $VERSION = $App::Music::ChordPro::Version::VERSION;
 
@@ -129,9 +130,21 @@ sub classify {
     return '{' if $line =~ /^\{.+/;	# directive
 
     # Lyrics or Chords heuristic.
+    my @words = split ( /\s+/, $line );
     my $len = length($line);
     $line =~ s/\s+//g;
-    return ( $len / length($line) - 1 ) < 1 ? 'l' : 'c';
+    my $type = ( $len / length($line) - 1 ) < 1 ? 'l' : 'c';
+    my $p = App::Music::ChordPro::Chords::Parser->default;
+    print ref($p), "\n";
+    if ( $type eq 'l') {
+        foreach (@words) {
+            if (!App::Music::ChordPro::Chords::parse_chord($_)) {
+                return 'l';
+            }
+        }
+        return 'c';
+    }
+    return $type;
 }
 
 # Process the lines via the map.
