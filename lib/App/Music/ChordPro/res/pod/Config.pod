@@ -142,9 +142,6 @@ This is the current built-in configuration file, showing all settings.
       // Layout definitions for PDF output.
   
       "pdf" : {
-        // Define the title of the PDF. Fallback is the first title of the
-        // first song.
-        "title" : "",
   
   	// Papersize, 'a4' or [ 595, 842 ] etc.
   	"papersize" : "a4",

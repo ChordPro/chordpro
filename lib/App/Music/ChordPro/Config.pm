@@ -155,7 +155,7 @@ This is the current built-in configuration file, showing all settings.
       "pdf" : {
         // Define the title of the PDF. Fallback is the first title of the
         // first song.
-        "title" : "",
+        "title" : null,
   
   	// Papersize, 'a4' or [ 595, 842 ] etc.
   	"papersize" : "a4",
