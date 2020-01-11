@@ -373,16 +373,8 @@ sub newpage {
 sub finish {
     my ( $self ) = @_;
     $self->{cr}->show_page;
+    $self->{surface}->finish;
     return;
-    
-#    if ( $file && $file ne "-" ) {
-#	$self->{pdf}->saveas($file);
-#    }
-#    else {
-#	binmode(STDOUT);
-#	print STDOUT ( $self->{pdf}->stringify );
-#	close(STDOUT);
-#    }
 }
 
 sub init_fonts {
