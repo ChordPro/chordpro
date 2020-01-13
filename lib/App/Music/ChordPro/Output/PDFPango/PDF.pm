@@ -84,8 +84,11 @@ sub generate_songbook {
 	$page = 1;
     }
 
-    if ( $options->{cover} ) {
+    if ( $options->{'front-matter'} ) {
 	warn("No support for cover pages in this version.\n");
+    }
+    if ( $options->{'back-matter'} ) {
+	warn("No support for back pages in this version.\n");
     }
 
     if ( $options->{csv} ) {
