@@ -44,6 +44,16 @@ sub generate_songbook {
 	       : "PDF::Markup [$options->{_name} $options->{_version}]",
 	     );
 
+    # The book consists of 4 parts:
+    # 1. The front matter.
+    my $book_front_matter_page = 1;
+    # 2. The table of contents.
+    my $book_toc_page = 1;
+    # 1. The songs.
+    my $book_start_page = 1;
+    # 1. The back matter.
+    my $book_back_matter_page = 1;
+
     my @book;
     my $page = $options->{"start-page-number"} || 1;
     foreach my $song ( @{$sb->{songs}} ) {
@@ -58,6 +68,9 @@ sub generate_songbook {
 	$page += generate_song( $song,
 				{ pr => $pr, $options ? %$options : () } );
     }
+    $book_back_matter_page = $page;
+
+    warn("F=$book_front_matter_page, T=$book_toc_page, S=$book_start_page, B=$book_back_matter_page\n");
 
     if ( $::config->{toc}->{order} eq "alpha" ) {
 	@book = sort { lc($a->[0]) cmp lc($b->[0]) } @book;
@@ -91,28 +104,45 @@ sub generate_songbook {
 	# Align.
 	$pr->newpage($ps, $page+1), $page++
 	  if $ps->{'even-odd-pages'} && $page % 2;
-    }
-    else {
-	$page = 1;
+	$book_start_page       += $page;
+	$book_back_matter_page += $page;
     }
 
-    if ( $options->{cover} ) {
-	my $p0 = $page;
-	my $cover = $pdfapi->open( $options->{cover} );
-	die("Missing cover: ", $options->{cover}, "\n") unless $cover;
-	for ( 1 .. $cover->pages ) {
-	    $pr->{pdf}->importpage( $cover, $_, $_ );
+    warn("F=$book_front_matter_page, T=$book_toc_page, S=$book_start_page, B=$book_back_matter_page\n");
+
+    if ( $options->{'front-matter'} ) {
+	$page = 1;
+	my $matter = $pdfapi->open( $options->{'front-matter'} );
+	die("Missing front matter: ", $options->{'front-matter'}, "\n") unless $matter;
+	for ( 1 .. $matter->pages ) {
+	    $pr->{pdf}->importpage( $matter, $_, $_ );
 	    $page++;
 	}
-	$pr->newpage( $ps, 1+$cover->pages ), $page++
-	  if $ps->{'even-odd-pages'} && $page % 2;
-	$pr->pagelabel( 0, { -style => 'arabic', -prefix => 'cover-' } );
-	$pr->pagelabel( $page-$p0, { -style => 'roman' } );
+	$pr->newpage( $ps, 1+$matter->pages ), $page++
+	  if $ps->{'even-odd-pages'} && !($page % 2);
+	$book_toc_page         += $page - 1;
+	$book_start_page       += $page - 1;
+	$book_back_matter_page += $page - 1;
     }
-    else {
-	$pr->pagelabel( 0, { -style => 'roman' } );
+
+    warn("F=$book_front_matter_page, T=$book_toc_page, S=$book_start_page, B=$book_back_matter_page\n");
+
+    if ( $options->{'back-matter'} ) {
+	my $matter = $pdfapi->open( $options->{'back-matter'} );
+	die("Missing back matter: ", $options->{'back-matter'}, "\n") unless $matter;
+	$page = $book_back_matter_page;
+	$pr->newpage($ps), $page++, $book_back_matter_page++
+	  if $ps->{'even-odd-pages'} && !($page % 2);
+	for ( 1 .. $matter->pages ) {
+	    $pr->{pdf}->importpage( $matter, $_, $page );
+	    $page++;
+	}
     }
-    $pr->pagelabel( $page, { -style => 'arabic' } );
+    warn("F=$book_front_matter_page, T=$book_toc_page, S=$book_start_page, B=$book_back_matter_page\n");
+    $pr->pagelabel( $book_front_matter_page, 'arabic', 'front-' );
+    $pr->pagelabel( $book_toc_page,          'roman'            );
+    $pr->pagelabel( $book_start_page,        'arabic'           );
+    $pr->pagelabel( $book_back_matter_page,  'arabic', 'back-'  );
 
     $pr->finish( $options->{output} || "__new__.pdf" );
 

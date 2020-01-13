@@ -373,7 +373,7 @@ sub newpage {
 sub finish {
     my ( $self ) = @_;
     $self->{cr}->show_page;
-    $self->{surface}->finish;
+#    $self->{surface}->finish;
     return;
 }
 

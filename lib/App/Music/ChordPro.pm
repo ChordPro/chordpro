@@ -244,6 +244,11 @@ sub main {
 Prints version information about the ChordPro program. No other
 processing will be done.
 
+=item B<--back-matter=>I<FILE>
+
+Appends the contents of the named PDF document to the output. This can
+be used to produce documents with back matter pages.
+
 =item B<--config=>I<JSON> (shorter: B<--cfg>)
 
 A JSON file that defines the behaviour of the program and the layout
@@ -255,8 +260,7 @@ active.
 
 =item B<--cover=>I<FILE>
 
-Prepends the contents of the named PDF document to the output. This can
-be used to produce documents with cover pages.
+See B<--front-matter>.
 
 =item B<--csv>
 
@@ -292,6 +296,11 @@ This option may be specified multiple times.
 
 Song file names listed on the command line are processed I<after> the
 files from the filelist arguments.
+
+=item B<--front-matter=>I<FILE> B<--cover=>I<FILE>
+
+Prepends the contents of the named PDF document to the output. This can
+be used to produce documents with front matter (cover) pages.
 
 =item B<--lyrics-only> (short: B<-l>)
 
@@ -688,7 +697,8 @@ sub app_setup {
 	  "diagrams=s",			# Prints chord diagrams
           "encoding=s",
 	  "csv!",			# Generates contents CSV
-	  "cover=s",			# Cover page(s)
+	  "front-matter|cover=s",	# Front matter page(s)
+	  "back-matter=s",		# Back matter page(s)
 	  "filelist=s@",		# List of input files
 	  "meta=s\%",			# Command line meta data
 	  "decapo",			# remove capo

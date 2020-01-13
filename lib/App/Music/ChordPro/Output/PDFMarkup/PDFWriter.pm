@@ -297,7 +297,7 @@ sub add_image {
 sub newpage {
     my ( $self, $ps, $page ) = @_;
     #$self->{pdftext}->textend if $self->{pdftext};
-    $self->{pdfpage} = $self->{pdf}->page($page);
+    $self->{pdfpage} = $self->{pdf}->page($page||0);
     $self->{pdfpage}->mediabox( $ps->{papersize}->[0],
 				$ps->{papersize}->[1] );
     $self->{pdfgfx}  = $self->{pdfpage}->gfx;
@@ -305,7 +305,10 @@ sub newpage {
 }
 
 sub pagelabel {
-    my ( $self, $page, $opts ) = @_;
+    my ( $self, $page, $style, $prefix ) = @_;
+    my $opts = { -style => $style // 'arabic',
+		 defined $prefix ? ( -prefix => $prefix ) : (),
+		 -start => 1 };
     $self->{pdf}->pageLabel( $page, $opts );
 }
 
