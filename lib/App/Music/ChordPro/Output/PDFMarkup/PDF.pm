@@ -70,7 +70,7 @@ sub generate_songbook {
     }
     $book_back_matter_page = $page;
 
-    warn("F=$book_front_matter_page, T=$book_toc_page, S=$book_start_page, B=$book_back_matter_page\n");
+    #warn("F=$book_front_matter_page, T=$book_toc_page, S=$book_start_page, B=$book_back_matter_page\n");
 
     if ( $::config->{toc}->{order} eq "alpha" ) {
 	@book = sort { lc($a->[0]) cmp lc($b->[0]) } @book;
@@ -108,7 +108,7 @@ sub generate_songbook {
 	$book_back_matter_page += $page;
     }
 
-    warn("F=$book_front_matter_page, T=$book_toc_page, S=$book_start_page, B=$book_back_matter_page\n");
+    #warn("F=$book_front_matter_page, T=$book_toc_page, S=$book_start_page, B=$book_back_matter_page\n");
 
     if ( $options->{'front-matter'} ) {
 	$page = 1;
@@ -125,7 +125,7 @@ sub generate_songbook {
 	$book_back_matter_page += $page - 1;
     }
 
-    warn("F=$book_front_matter_page, T=$book_toc_page, S=$book_start_page, B=$book_back_matter_page\n");
+    #warn("F=$book_front_matter_page, T=$book_toc_page, S=$book_start_page, B=$book_back_matter_page\n");
 
     if ( $options->{'back-matter'} ) {
 	my $matter = $pdfapi->open( $options->{'back-matter'} );
@@ -138,7 +138,7 @@ sub generate_songbook {
 	    $page++;
 	}
     }
-    warn("F=$book_front_matter_page, T=$book_toc_page, S=$book_start_page, B=$book_back_matter_page\n");
+    #warn("F=$book_front_matter_page, T=$book_toc_page, S=$book_start_page, B=$book_back_matter_page\n");
     $pr->pagelabel( $book_front_matter_page, 'arabic', 'front-' );
     $pr->pagelabel( $book_toc_page,          'roman'            );
     $pr->pagelabel( $book_start_page,        'arabic'           );
