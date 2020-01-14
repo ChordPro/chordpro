@@ -723,6 +723,7 @@ sub process_config {
 	  App::Music::ChordPro::Chords::set_tuning( $cfg->{tuning},
 						    $options );
 	warn( "Invalid tuning in config: ", $res, "\n" ) if $res;
+	$cfg->{_tuning} = $cfg->{tuning};
 	$cfg->{tuning} = [];
     }
 
@@ -817,8 +818,9 @@ sub config_final {
     my ( $options ) = @_;
     $options->{'cfg-print'} = 1;
     my $cfg = configurator($options);
+    $cfg->{tuning} = delete $cfg->{_tuning};
 
-    my $pp = JSON::PP->new->utf8->canonical->indent(4)->pretty;
+    my $pp = JSON::PP->new->canonical->indent(4)->pretty;
     $pp->encode($cfg);
 }
 
@@ -836,6 +838,7 @@ sub hmerge($$$) {
 
 	warn("Config error: unknown item $path$key\n")
 	  unless exists $res{$key}
+	    || $key =~ /^_/
 	    || $path.$key =~ /^pdf\.section\./;
 
 	if ( ref($right->{$key}) eq 'HASH'
