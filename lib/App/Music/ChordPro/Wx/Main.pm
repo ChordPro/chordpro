@@ -26,6 +26,8 @@ our $VERSION = $App::Music::ChordPro::Wx::VERSION;
 sub new {
     my $self = bless $_[0]->SUPER::new(), __PACKAGE__;
 
+    Wx::Event::EVT_IDLE($self, $self->can('OnIdle'));
+
     $self;
 }
 
@@ -185,13 +187,14 @@ sub openfile {
     }
     #### TODO: Get rid of selection on Windows
     $self->{_currentfile} = $file;
-    if ( $self->{t_source}->GetValue =~ /^\{\s*title[: ]+([^\}]*)\}/m ) {
+    if ( $self->{t_source}->GetValue =~ /^\{\s*t(?:itle)[: ]+([^\}]*)\}/m ) {
 	my $n = $self->{t_source}->GetNumberOfLines;
 	Wx::LogStatus("Loaded: $1 ($n line" .
 		      ( $n == 1 ? "" : "s" ) .
 		      ")");
 	$self->{sz_source}->GetStaticBox->SetLabel($1);
     }
+    $self->SetTitle( $self->{_windowtitle} = $file);
 
     $self->{prefs_xpose} = 0;
     $self->{prefs_xposesharp} = 0;
@@ -526,6 +529,7 @@ sub checksaved {
 sub saveas {
     my ( $self, $file ) = @_;
     $self->{t_source}->SaveFile($file);
+    $self->SetTitle( $self->{_windowtitle} = $file);
     Wx::LogStatus( "Saved." );
 }
 
@@ -742,6 +746,13 @@ sub OnAbout {
 	wxDefaultPosition);
     $md->ShowModal;
     $md->Destroy;
+}
+
+sub OnIdle {
+    my ( $self, $event ) = @_;
+    my $f = $self->{_windowtitle} // "";
+    $f = "*$f" if $self->{t_source}->IsModified;
+    $self->SetTitle($f);
 }
 
 ################ End of Event handlers ################
