@@ -23,7 +23,7 @@ sub generate_songbook {
 	  '<html>',
 	  '<head>',
 	  '<meta charset="utf-8">' );
-    foreach ( keys %{ $cfg->{styles} } ) {
+    foreach ( sort keys %{ $cfg->{styles} } ) {
 	push( @book,
 	      '<link rel="stylesheet" href="'.$cfg->{styles}->{$_}.'"'.
 	      ( $_ =~ /^(display|default)$/ ? "" : qq{ media="$_"} ).

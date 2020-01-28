@@ -25,6 +25,7 @@
     - Do not indent chorus labels when chorus indenting (issue #81).
     - (Wx) Show filename in window title.
     - (Wx) Show asterisk if file is modified.
+    - Add config settings for HTML backend.
 
 0.974	2019-10-05
 
