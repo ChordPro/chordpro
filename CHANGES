@@ -2,6 +2,7 @@
 
 	Show filename in window title.
 	Show asterisk if file is modified.
+	Disable Undo/Redo menu entries if t_source cannot do it.
 
 0.972
 
