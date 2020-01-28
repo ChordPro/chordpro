@@ -430,7 +430,17 @@ This is the current built-in configuration file, showing all settings.
   		   "quote" : false,
   	      },
   	  },
-      }
+      },
+
+      // Settings for HTML backend.
+      "html" : {
+  	  // Stylesheet links.
+  	  "styles" : {
+  	      "display" : "chordpro.css",
+  	      "print"   : "chordpro_print.css",
+  	  },
+      },
+
   }
   // End of config.
 

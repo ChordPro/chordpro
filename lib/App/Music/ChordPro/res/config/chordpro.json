@@ -405,6 +405,16 @@
 		   "quote" : false,
 	      },
 	  },
-    }
+    },
+
+    // Settings for HTML backend.
+    "html" : {
+	  // Stylesheet links.
+	  "styles" : {
+	      "display" : "chordpro.css",
+	      "print"   : "chordpro_print.css",
+	  },
+    },
+
 }
 // End of config.
