@@ -339,7 +339,14 @@ sub init_fonts {
     foreach my $ff ( keys( %{ $ps->{fontconfig} } ) ) {
 	my @fam = split( /\s*,\s*/, $ff );
 	foreach my $s ( keys( %{ $ps->{fontconfig}->{$ff} } ) ) {
-	    $fc->register_font( $ps->{fontconfig}->{$ff}->{$s}, $fam[0], $s );
+	    my $v = $ps->{fontconfig}->{$ff}->{$s};
+	    if ( UNIVERSAL::isa( $v, 'HASH' ) ) {
+		my $file = delete( $v->{file} );
+		$fc->register_font( $file, $fam[0], $s, $v );
+	    }
+	    else {
+		$fc->register_font( $v, $fam[0], $s );
+	    }
 	}
 	$fc->register_aliases(@fam) if @fam > 1;
     }
@@ -380,6 +387,7 @@ sub init_pangofont {
 	$font->{fd}->get_font($self->{layout}); # force load
 	$font->{fd}->{font}->{Name}->{val} =~ s/~.*/~$faketime/ if $regtest;
 	$font->{_ff} = $ff;
+	$font->{fd}->set_shaping( $font->{fd}->get_shaping || $font->{shaping}//0);
     };
     $font->{fd};
 }
