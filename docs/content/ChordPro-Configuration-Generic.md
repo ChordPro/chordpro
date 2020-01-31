@@ -14,6 +14,8 @@ These settings control global behaviour of the ChordPro program and can be chang
         // Suppress empty chord lines.
         // Overrides the -a (--single-space) command line options.
         "suppress-empty-chords" : true,
+        // Suppress blank lyrics lines.
+        "suppress-empty-lyrics" : true,
         // Suppress chords.
         // Overrides --lyrics-only command line option.
         "lyrics-only" : false,
