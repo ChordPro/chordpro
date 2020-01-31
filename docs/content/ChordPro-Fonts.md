@@ -29,6 +29,46 @@ names. So you can use `"serif"` for a serif font, and leave it to the
 system to find an appropriate font for it. Other frequently used
 aliases are `"sans"` and `"mono"`.
 
+### Why is using font descriptions important?
+
+Because ChordPro allows you to use [Pango style markup](https://developer.gnome.org/pygtk/stable/pango-markup-language.html) in all your lyrics, titles and so on. For example:
+
+    [C]winkle, twinkle <bold>little</bold> [G]star
+
+When you designate a font family to be used for your lyrics, ChordPro can find the bold and italic members of the same font. With a particular font like `"myfont.ttf"` it will not possible to find the other family members.
+
+### How does the system find the appropriate fonts?
+
+Most modern systems are equipped with a facility called `fontconfig` or `fc-conf` or something similar. This facility can be used to fetch font information, e.g. the font file name, for fonts installed on the system.
+
+ChordPro also provides a font search facility. This can be used if your system does not have `fontconfig`, or when you want to override the system behaviour.
+
+In the config file in section `"pdf"` there is a section `"fontconfig"` that can be used to map family names to real font files. For example:
+
+    "fontconfig" : {
+	    "serif" : {
+		    ""            : "dejavu/DejaVuSerif-Regular.ttf",
+		    "bold"        : "dejavu/DejaVuSerif-Bold.ttf",
+		    "italic"      : "dejavu/DejaVuSerif-Italic.ttf",
+		    "bolditalic"  : "dejavu/DejaVuSerif-BoldItalic.ttf",
+      },
+    },
+
+For each family name you should specify four members: a regular font (with an empty key), a bold font (key `"bold"` or `"b"`), an italic font (key `"italic"` or `"i"` or `"oblique"` or `"o"`), and a bold-italic font.
+
+This is the short story. The longer story is that instead of a file name you can specify another set of key/value pairs, for example:
+
+    "fontconfig" : {
+	    "serif" : {
+		    ""            : {
+		      "file"      : "dejavu/DejaVuSerif-Regular.ttf",
+		      "interline" : 1,
+		    },
+		    ...
+    },
+
+`"interline"` is a font property that changes the way ChordPro deals with the font. Exact semantics of font properties are still under development.
+
 ## Using a font filename
 
 A font filename must be either and absolute filename, or a relative
