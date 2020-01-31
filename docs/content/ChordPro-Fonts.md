@@ -1,6 +1,6 @@
 # ChordPro Implementation: Fonts
 
-ChordPro uses fonts for typesetting chords, lyrics, titles and so on.
+ChordPro uses _fonts_ for typesetting chords, lyrics, titles and so on.
 
 There are several ways to specify fonts, depending on the software
 libraries that are available to ChordPro to use.
