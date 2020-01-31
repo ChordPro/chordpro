@@ -1,7 +1,7 @@
 CHANGES
 MANIFEST
 Makefile.PL
-README
+README.md
 lib/App/Music/ChordPro.pm
 lib/App/Music/ChordPro/A2Crd.pm
 lib/App/Music/ChordPro/Bundle.pm
