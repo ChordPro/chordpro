@@ -21,6 +21,7 @@
       Text::Layout to 0.014.
     - Fix bug where some command line arguments did not properly support
       utf8.
+    - Add settings.suppress-empty-lyrics to suppress blank lyrics lines.
     - Fix handling of {chorus: label}.
     - Do not indent chorus labels when chorus indenting (issue #81).
     - (Wx) Show filename in window title.

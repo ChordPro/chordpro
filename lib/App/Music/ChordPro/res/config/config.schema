@@ -106,6 +106,12 @@
 		    "default": true
 		},
 
+		"suppress-empty-lyrics": {
+		    "description": "Suppress blank lyrics lines.",
+		    "type": "boolean",
+		    "default": true
+		},
+
 		"titles": {
 		    "description": "Titles flush.",
 		    "type": "string",

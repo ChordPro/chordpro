@@ -45,6 +45,8 @@ This is the current built-in configuration file, showing all settings.
   	// Suppress empty chord lines.
   	// Overrides the -a (--single-space) command line options.
   	"suppress-empty-chords" : true,
+  	// Suppress blank lyrics lines.
+  	"suppress-empty-lyrics" : true,
   	// Suppress chords.
   	// Overrides --lyrics-only command line option.
   	"lyrics-only" : false,

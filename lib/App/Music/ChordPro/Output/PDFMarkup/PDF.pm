@@ -23,7 +23,7 @@ BEGIN {
 }
 use Text::Layout;
 
-use constant DEBUG_SPACING => 0;
+use constant DEBUG_SPACING => 1;
 
 # For regression testing, run perl with PERL_HASH_SEED set to zero.
 # This eliminates the arbitrary order of font definitions and triggers
@@ -174,7 +174,8 @@ sub roman {
 
 my $source;			# song source
 my $structured = 0;		# structured data
-my $single_space = 0;		# suppress chords line when empty
+my $suppress_empty_chordsline = 0;	# suppress chords line when empty
+my $suppress_empty_lyricsline = 0;	# suppress lyrics line when blank
 my $lyrics_only = 0;		# suppress all chord lines
 my $inlinechords = 0;		# chords inline
 my $chordsunder = 0;		# chords under the lyrics
@@ -192,7 +193,8 @@ sub generate_song {
     $source = $s->{source};
     $assets = $s->{assets} || {};
 
-    $single_space = $::config->{settings}->{'suppress-empty-chords'};
+    $suppress_empty_chordsline = $::config->{settings}->{'suppress-empty-chords'};
+    $suppress_empty_lyricsline = $::config->{settings}->{'suppress-empty-lyrics'};
     $inlinechords = $::config->{settings}->{'inline-chords'};
     $chordsunder  = $::config->{settings}->{'chords-under'};
     my $ps = $::config->clone->{pdf};
@@ -1211,7 +1213,7 @@ sub songline {
     # Just print the lyrics if no chords.
     if ( $lyrics_only
 	 or
-	 $single_space && !has_visible_chords($elt)
+	 $suppress_empty_chordsline && !has_visible_chords($elt)
        ) {
 	my $x = $x;
 	$x += $opts{indent} if $opts{indent};
@@ -1724,6 +1726,11 @@ sub has_visible_chords {
     $elt->{chords} && join( "", @{ $elt->{chords} } ) =~ /\S/;
 }
 
+sub has_visible_text {
+    my ( $elt ) = @_;
+    $elt->{phrases} && join( "", @{ $elt->{phrases} } ) =~ /\S/;
+}
+
 sub songline_vsp {
     my ( $elt, $ps ) = @_;
 
@@ -1746,10 +1753,10 @@ sub songline_vsp {
 
     return $vsp if $lyrics_only || $chordscol;
 
-    return $vsp if $single_space && ! has_visible_chords($elt);
+    return $vsp if $suppress_empty_chordsline && ! has_visible_chords($elt);
 
     # No text printing if no text.
-    $vsp = 0 if join( "", @{ $elt->{phrases} } ) eq "";
+    $vsp = 0 if $suppress_empty_lyricsline && join( "", @{ $elt->{phrases} } ) !~ /\S/;
 
     if ( $inlinechords ) {
 	$vsp = $csp if $csp > $vsp;
