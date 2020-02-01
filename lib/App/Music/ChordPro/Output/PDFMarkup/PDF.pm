@@ -905,7 +905,7 @@ sub generate_song {
 		    && $elt->{chorus}->[0]->{type} eq "set"
 		    && $elt->{chorus}->[0]->{name} eq "label" ) {
 		unshift( @elts, { %$elt,
-				  type => "comment",
+				  type => $t->{type} // "comment",
 				  font => $ps->{fonts}->{label},
 				  text => $ps->{chorus}->{recall}->{tag},
 				 } );
