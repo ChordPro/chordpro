@@ -23,6 +23,8 @@
       utf8.
     - Add settings.suppress-empty-lyrics to suppress blank lyrics lines.
     - Fix handling of {chorus: label}.
+    - Fix problem where using a {chord} directive before any song lines
+      would crash.
     - Do not indent chorus labels when chorus indenting (issue #81).
     - (Wx) Show filename in window title.
     - (Wx) Show asterisk if file is modified.
