@@ -167,6 +167,7 @@ sub generate_songbook {
 	}
 	close($fd);
     }
+    _dump($ps) if $verbose;
 
     []
 }
@@ -2193,8 +2194,19 @@ sub is_corefont {
     $corefonts{lc $_[0]};
 }
 
-END {
+sub _dump {
+    return unless $verbose;
+    my ( $ps ) = @_;
+    print STDERR ("== Font family map\n");
     Text::Layout::FontConfig->new->_dump if $verbose;
+    print STDOUT ("== Font associations\n");
+    foreach my $f ( sort keys( %{$ps->{fonts}} ) ) {
+	printf STDERR ("%-15s  %s\n", $f,
+		       $ps->{fonts}->{$f}->{description} ||
+		       $ps->{fonts}->{$f}->{file} ||
+		       $ps->{fonts}->{$f}->{name}
+		      );
+    }
 }
 
 1;
