@@ -23,7 +23,8 @@ BEGIN {
 }
 use Text::Layout;
 
-use constant DEBUG_SPACING => 1;
+my $debug_spacing = 0;
+my $verbose = 0;
 
 # For regression testing, run perl with PERL_HASH_SEED set to zero.
 # This eliminates the arbitrary order of font definitions and triggers
@@ -34,6 +35,8 @@ sub generate_songbook {
     my ($self, $sb, $options) = @_;
 
     return [] unless $sb->{songs}->[0]->{body}; # no songs
+    $verbose ||= $options->{verbose};
+    $debug_spacing = $options->{debug};
 
     my $ps = $::config->{pdf};
     my $pr = (__PACKAGE__."Writer")->new( $ps, $pdfapi );
@@ -340,7 +343,7 @@ sub generate_song {
 	  if $col < $ps->{columns}-1;
 	warn("C=$col, L=", $ps->{__leftmargin},
 	     ", R=", $ps->{__rightmargin},
-	     "\n") if DEBUG_SPACING;
+	     "\n") if $debug_spacing;
 	$y = $ps->{_top};
 	$x += $ps->{_indent};
     };
@@ -551,7 +554,7 @@ sub generate_song {
 	    while ( @chords ) {
 		my $x = $x - $ps->{_indent};
 		$checkspace->($vsp);
-		$pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+		$pr->show_vpos( $y, 0 ) if $debug_spacing;
 
 		for ( 1..$h ) {
 		    last unless @chords;
@@ -560,7 +563,7 @@ sub generate_song {
 		}
 
 		$y -= $vsp;
-		$pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+		$pr->show_vpos( $y, 1 ) if $debug_spacing;
 	    }
 	}
 	elsif ( $show eq "below" ) {
@@ -574,7 +577,7 @@ sub generate_song {
 	    while ( @chords ) {
 		$checkspace->($vsp);
 		my $x = $x - $ps->{_indent};
-		$pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+		$pr->show_vpos( $y, 0 ) if $debug_spacing;
 
 		for ( 1..$h ) {
 		    last unless @chords;
@@ -583,7 +586,7 @@ sub generate_song {
 		}
 
 		$y -= $vsp;
-		$pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+		$pr->show_vpos( $y, 1 ) if $debug_spacing;
 	    }
 	}
     };
@@ -618,7 +621,7 @@ sub generate_song {
 	if ( $elt->{type} ne "set" && !$did++ ) {
 	    # Insert top/left/right/bottom chord diagrams.
  	    $chorddiagrams->() unless $ps->{diagrams}->{show} eq "below";
-	    showlayout($ps) if $ps->{showlayout};
+	    showlayout($ps) if $ps->{showlayout} || $debug_spacing;
 	}
 
 	if ( $elt->{type} eq "empty" ) {
@@ -626,10 +629,10 @@ sub generate_song {
 	    warn("***SHOULD NOT HAPPEN1***")
 	      if $s->{structure} eq "structured";
 	    $vsp_ignorefirst = 0, next if $vsp_ignorefirst;
-	    $pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 0 ) if $debug_spacing;
 	    my $vsp = empty_vsp( $elt, $ps );
 	    $y -= $vsp;
-	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 1 ) if $debug_spacing;
 	    next;
 	}
 
@@ -692,7 +695,7 @@ sub generate_song {
 	    # Add prespace if fit. Otherwise newpage.
 	    $checkspace->($vsp);
 
-	    $pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 0 ) if $debug_spacing;
 
 	    my $indent = 0;
 
@@ -762,7 +765,7 @@ sub generate_song {
 	    my $r = songline( $elt, $x, $y, $ps, song => $s, indent => $indent );
 
 	    $y -= $vsp;
-	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 1 ) if $debug_spacing;
 
 	    unshift( @elts, $r ) if $r;
 	    next;
@@ -813,7 +816,7 @@ sub generate_song {
 
 	    my $vsp = grid_vsp( $elt, $ps );
 	    $checkspace->($vsp);
-	    $pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 0 ) if $debug_spacing;
 
 	    my $cells = $grid_margin->[2];
 	    $grid_cellwidth = ( $ps->{__rightmargin}
@@ -824,7 +827,7 @@ sub generate_song {
 	    warn("L=", $ps->{__leftmargin},
 		 ", R=", $ps->{__rightmargin},
 		 ", C=$cells, W=", $grid_cellwidth,
-		 "\n") if DEBUG_SPACING;
+		 "\n") if $debug_spacing;
 
 	    gridline( $elt, $x, $y,
 		      $grid_cellwidth,
@@ -833,7 +836,7 @@ sub generate_song {
 		      $ps );
 
 	    $y -= $vsp;
-	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 1 ) if $debug_spacing;
 
 	    next;
 	}
@@ -854,12 +857,12 @@ sub generate_song {
 
 	    my $vsp = tab_vsp( $elt, $ps );
 	    $checkspace->($vsp);
-	    $pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 0 ) if $debug_spacing;
 
 	    songline( $elt, $x, $y, $ps );
 
 	    $y -= $vsp;
-	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 1 ) if $debug_spacing;
 
 	    next;
 	}
@@ -873,7 +876,7 @@ sub generate_song {
 	    my $gety = sub {
 		my $h = shift;
 		$checkspace->($h);
-		$ps->{pr}->show_vpos( $y, 1 ) if DEBUG_SPACING;
+		$ps->{pr}->show_vpos( $y, 1 ) if $debug_spacing;
 		return $y;
 	    };
 
@@ -889,7 +892,7 @@ sub generate_song {
 	    }
 
 	    $y -= $vsp;
-	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 1 ) if $debug_spacing;
 
 	    next;
 	}
@@ -927,12 +930,12 @@ sub generate_song {
 	if ( $elt->{type} eq "tocline" ) {
 	    my $vsp = toc_vsp( $elt, $ps );
 	    $checkspace->($vsp);
-	    $pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 0 ) if $debug_spacing;
 
 	    tocline( $elt, $x, $y, $ps );
 
 	    $y -= $vsp;
-	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 1 ) if $debug_spacing;
 	    next;
 	}
 
@@ -2142,4 +2145,9 @@ sub wrapsimple {
     $pr->wrap( $text, $pr->{ps}->{__rightmargin} - $x );
 }
 
+END {
+    Text::Layout::FontConfig->new->_dump if $verbose;
+}
+
 1;
+
