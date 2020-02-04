@@ -536,7 +536,7 @@ sub configurator {
 		    comment comment_box comment_italic
 		    tab text toc
 		    empty footer grid grid_margin subtitle title) ) {
-	for ( qw(name file size color background) ) {
+	for ( qw(name file description size color background) ) {
 	    $cfg->{pdf}->{fonts}->{$ff}->{$_} //= undef;
 	}
     }
@@ -628,7 +628,7 @@ sub configurator {
 	    delete( $cfg->{pdf}->{fonts}->{$ff} );
 	    next;
 	}
-	for ( qw(name file size color background) ) {
+	for ( qw(name file description size color background) ) {
 	    delete( $cfg->{pdf}->{fonts}->{$ff}->{$_} )
 	      unless defined( $cfg->{pdf}->{fonts}->{$ff}->{$_} );
 	}
@@ -817,10 +817,14 @@ sub add_legacy {
 	my $prop = $2;
 	if ( $prop eq "font" ) {
 	    if ( $value =~ /.+\.(?:ttf|otf)$/i ) {
-		$prop = "file"
+		$prop = "file";
+		$cfg->{pdf}->{fonts}->{$name}->{name} = undef;
+		$cfg->{pdf}->{fonts}->{$name}->{description} = undef;
 	    }
 	    else {
-		$prop = "name";
+		$cfg->{pdf}->{fonts}->{$name}->{name} = undef;
+		$cfg->{pdf}->{fonts}->{$name}->{file} = undef;
+		$prop = "description";
 	    }
 	}
 	$cfg->{pdf}->{fonts}->{$name}->{$prop} = $value;

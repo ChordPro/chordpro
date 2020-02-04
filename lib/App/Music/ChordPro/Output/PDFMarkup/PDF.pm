@@ -241,7 +241,16 @@ sub generate_song {
 	    next unless $_;
 	    delete( $fonts->{$item}->{file} );
 	    delete( $fonts->{$item}->{name} );
-	    $fonts->{$item}->{ m;/; ? "file" : "name" } = $_;
+	    delete( $fonts->{$item}->{description} );
+	    if ( m;/; ) {
+		$fonts->{$item}->{file} = $_;
+	    }
+	    elsif ( is_corefont($_) ) {
+		$fonts->{$item}->{name} = $_;
+	    }
+	    else {
+		$fonts->{$item}->{description} = $_;
+	    }
 	    $pr->init_font($item) or $fail++;
 	}
 	for ( $options->{"$item-size"} ) {
@@ -257,6 +266,7 @@ sub generate_song {
 	    my $ftext = $fonts->{label} || $fonts->{text};
 	    for ( @{ $s->{labels} } ) {
 		for ( split( /\\n/, $_ ) ) {
+		    #### TODO: Use Layout
 		    my $t = $ftext->{fd}->{font}->width("$_    ") * $ftext->{size};
 		    $longest = $t if $t > $longest;
 		}
@@ -958,13 +968,22 @@ sub generate_song {
 	    elsif ( $elt->{name} =~ /^(text|chord|grid|toc|tab)-font$/ ) {
 		my $f = $1;
 		if ( defined $elt->{value} ) {
-		    if ( $elt->{value} =~ m;/; ) {
+		    if ( $elt->{value} =~ m;/;
+			 ||
+			 $elt->{value} =~ m;\.(ttf|otf)$;i ) {
+			delete $ps->{fonts}->{$f}->{description};
 			delete $ps->{fonts}->{$f}->{name};
 			$ps->{fonts}->{$f}->{file} = $elt->{value};
 		    }
-		    else {
+		    elsif ( is_corefont( $elt->{value} ) ) {
+			delete $ps->{fonts}->{$f}->{description};
 			delete $ps->{fonts}->{$f}->{file};
 			$ps->{fonts}->{$f}->{name} = $elt->{value};
+		    }
+		    else {
+			delete $ps->{fonts}->{$f}->{file};
+			delete $ps->{fonts}->{$f}->{name};
+			$ps->{fonts}->{$f}->{description} = $elt->{value};
 		    }
 		}
 		else {
@@ -2143,6 +2162,35 @@ sub wrapsimple {
     $font ||= $pr->{font};
     $pr->setfont($font);
     $pr->wrap( $text, $pr->{ps}->{__rightmargin} - $x );
+}
+
+my %corefonts = map { $_ => 1 }
+  ( "times-roman",
+    "times-bold",
+    "times-italic",
+    "times-bolditalic",
+    "helvetica",
+    "helvetica-bold",
+    "helvetica-oblique",
+    "helvetica-boldoblique",
+    "courier",
+    "courier-bold",
+    "courier-oblique",
+    "courier-boldoblique",
+    "zapfdingbats",
+    "georgia",
+    "georgia,bold",
+    "georgia,italic",
+    "georgia,bolditalic",
+    "verdana",
+    "verdana,bold",
+    "verdana,italic",
+    "verdana,bolditalic",
+    "webdings",
+    "wingdings" );
+
+sub is_corefont {
+    $corefonts{lc $_[0]};
 }
 
 END {
