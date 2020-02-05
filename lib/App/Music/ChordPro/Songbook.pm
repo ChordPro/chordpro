@@ -1017,7 +1017,8 @@ sub global_directive {
 		$ci = $res->{name};
 	    }
 	    # Combine consecutive entries.
-	    if ( $song->{body}->[-1]->{type} eq "diagrams" ) {
+	    if ( defined($song->{body})
+		 && $song->{body}->[-1]->{type} eq "diagrams" ) {
 		push( @{ $song->{body}->[-1]->{chords} },
 		      $ci );
 	    }

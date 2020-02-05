@@ -23,7 +23,8 @@ BEGIN {
 }
 use Text::Layout;
 
-use constant DEBUG_SPACING => 0;
+my $debug_spacing = 0;
+my $verbose = 0;
 
 # For regression testing, run perl with PERL_HASH_SEED set to zero.
 # This eliminates the arbitrary order of font definitions and triggers
@@ -34,6 +35,8 @@ sub generate_songbook {
     my ($self, $sb, $options) = @_;
 
     return [] unless $sb->{songs}->[0]->{body}; # no songs
+    $verbose ||= $options->{verbose};
+    $debug_spacing = $options->{debug};
 
     my $ps = $::config->{pdf};
     my $pr = (__PACKAGE__."Writer")->new( $ps, $pdfapi );
@@ -41,9 +44,19 @@ sub generate_songbook {
     $pr->info( Title => $title,
 	       Creator =>
 	       $regtest
-	       ? "ChordPro [$options->{_name} (regression testing)]"
-	       : "ChordPro [$options->{_name} $options->{_version}]",
+	       ? "PDF::Markup [$options->{_name} (regression testing)]"
+	       : "PDF::Markup [$options->{_name} $options->{_version}]",
 	     );
+
+    # The book consists of 4 parts:
+    # 1. The front matter.
+    my $book_front_matter_page = 1;
+    # 2. The table of contents.
+    my $book_toc_page = 1;
+    # 1. The songs.
+    my $book_start_page = 1;
+    # 1. The back matter.
+    my $book_back_matter_page = 1;
 
     my @book;
     my $page = $options->{"start-page-number"} || 1;
@@ -59,6 +72,9 @@ sub generate_songbook {
 	$page += generate_song( $song,
 				{ pr => $pr, $options ? %$options : () } );
     }
+    $book_back_matter_page = $page;
+
+    #warn("F=$book_front_matter_page, T=$book_toc_page, S=$book_start_page, B=$book_back_matter_page\n");
 
     if ( $::config->{toc}->{order} eq "alpha" ) {
 	@book = sort { lc($a->[0]) cmp lc($b->[0]) } @book;
@@ -92,28 +108,45 @@ sub generate_songbook {
 	# Align.
 	$pr->newpage($ps, $page+1), $page++
 	  if $ps->{'even-odd-pages'} && $page % 2;
-    }
-    else {
-	$page = 1;
+	$book_start_page       += $page;
+	$book_back_matter_page += $page;
     }
 
-    if ( $options->{cover} ) {
-	my $p0 = $page;
-	my $cover = $pdfapi->open( $options->{cover} );
-	die("Missing cover: ", $options->{cover}, "\n") unless $cover;
-	for ( 1 .. $cover->pages ) {
-	    $pr->{pdf}->importpage( $cover, $_, $_ );
+    #warn("F=$book_front_matter_page, T=$book_toc_page, S=$book_start_page, B=$book_back_matter_page\n");
+
+    if ( $options->{'front-matter'} ) {
+	$page = 1;
+	my $matter = $pdfapi->open( $options->{'front-matter'} );
+	die("Missing front matter: ", $options->{'front-matter'}, "\n") unless $matter;
+	for ( 1 .. $matter->pages ) {
+	    $pr->{pdf}->importpage( $matter, $_, $_ );
 	    $page++;
 	}
-	$pr->newpage( $ps, 1+$cover->pages ), $page++
-	  if $ps->{'even-odd-pages'} && $page % 2;
-	$pr->pagelabel( 0, { -style => 'arabic', -prefix => 'cover-' } );
-	$pr->pagelabel( $page-$p0, { -style => 'roman' } );
+	$pr->newpage( $ps, 1+$matter->pages ), $page++
+	  if $ps->{'even-odd-pages'} && !($page % 2);
+	$book_toc_page         += $page - 1;
+	$book_start_page       += $page - 1;
+	$book_back_matter_page += $page - 1;
     }
-    else {
-	$pr->pagelabel( 0, { -style => 'roman' } );
+
+    #warn("F=$book_front_matter_page, T=$book_toc_page, S=$book_start_page, B=$book_back_matter_page\n");
+
+    if ( $options->{'back-matter'} ) {
+	my $matter = $pdfapi->open( $options->{'back-matter'} );
+	die("Missing back matter: ", $options->{'back-matter'}, "\n") unless $matter;
+	$page = $book_back_matter_page;
+	$pr->newpage($ps), $page++, $book_back_matter_page++
+	  if $ps->{'even-odd-pages'} && !($page % 2);
+	for ( 1 .. $matter->pages ) {
+	    $pr->{pdf}->importpage( $matter, $_, $page );
+	    $page++;
+	}
     }
-    $pr->pagelabel( $page, { -style => 'arabic' } );
+    #warn("F=$book_front_matter_page, T=$book_toc_page, S=$book_start_page, B=$book_back_matter_page\n");
+    $pr->pagelabel( $book_front_matter_page, 'arabic', 'front-' );
+    $pr->pagelabel( $book_toc_page,          'roman'            );
+    $pr->pagelabel( $book_start_page,        'arabic'           );
+    $pr->pagelabel( $book_back_matter_page,  'arabic', 'back-'  );
 
     $pr->finish( $options->{output} || "__new__.pdf" );
 
@@ -135,6 +168,7 @@ sub generate_songbook {
 	}
 	close($fd);
     }
+    _dump($ps) if $verbose;
 
     []
 }
@@ -145,7 +179,8 @@ sub roman {
 
 my $source;			# song source
 my $structured = 0;		# structured data
-my $single_space = 0;		# suppress chords line when empty
+my $suppress_empty_chordsline = 0;	# suppress chords line when empty
+my $suppress_empty_lyricsline = 0;	# suppress lyrics line when blank
 my $lyrics_only = 0;		# suppress all chord lines
 my $inlinechords = 0;		# chords inline
 my $chordsunder = 0;		# chords under the lyrics
@@ -163,7 +198,8 @@ sub generate_song {
     $source = $s->{source};
     $assets = $s->{assets} || {};
 
-    $single_space = $::config->{settings}->{'suppress-empty-chords'};
+    $suppress_empty_chordsline = $::config->{settings}->{'suppress-empty-chords'};
+    $suppress_empty_lyricsline = $::config->{settings}->{'suppress-empty-lyrics'};
     $inlinechords = $::config->{settings}->{'inline-chords'};
     $chordsunder  = $::config->{settings}->{'chords-under'};
     my $ps = $::config->clone->{pdf};
@@ -207,7 +243,16 @@ sub generate_song {
 	    next unless $_;
 	    delete( $fonts->{$item}->{file} );
 	    delete( $fonts->{$item}->{name} );
-	    $fonts->{$item}->{ m;/; ? "file" : "name" } = $_;
+	    delete( $fonts->{$item}->{description} );
+	    if ( m;/; ) {
+		$fonts->{$item}->{file} = $_;
+	    }
+	    elsif ( is_corefont($_) ) {
+		$fonts->{$item}->{name} = $_;
+	    }
+	    else {
+		$fonts->{$item}->{description} = $_;
+	    }
 	    $pr->init_font($item) or $fail++;
 	}
 	for ( $options->{"$item-size"} ) {
@@ -223,6 +268,7 @@ sub generate_song {
 	    my $ftext = $fonts->{label} || $fonts->{text};
 	    for ( @{ $s->{labels} } ) {
 		for ( split( /\\n/, $_ ) ) {
+		    #### TODO: Use Layout
 		    my $t = $ftext->{fd}->{font}->width("$_    ") * $ftext->{size};
 		    $longest = $t if $t > $longest;
 		}
@@ -309,7 +355,7 @@ sub generate_song {
 	  if $col < $ps->{columns}-1;
 	warn("C=$col, L=", $ps->{__leftmargin},
 	     ", R=", $ps->{__rightmargin},
-	     "\n") if DEBUG_SPACING;
+	     "\n") if $debug_spacing;
 	$y = $ps->{_top};
 	$x += $ps->{_indent};
     };
@@ -520,7 +566,7 @@ sub generate_song {
 	    while ( @chords ) {
 		my $x = $x - $ps->{_indent};
 		$checkspace->($vsp);
-		$pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+		$pr->show_vpos( $y, 0 ) if $debug_spacing;
 
 		for ( 1..$h ) {
 		    last unless @chords;
@@ -529,7 +575,7 @@ sub generate_song {
 		}
 
 		$y -= $vsp;
-		$pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+		$pr->show_vpos( $y, 1 ) if $debug_spacing;
 	    }
 	}
 	elsif ( $show eq "below" ) {
@@ -543,7 +589,7 @@ sub generate_song {
 	    while ( @chords ) {
 		$checkspace->($vsp);
 		my $x = $x - $ps->{_indent};
-		$pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+		$pr->show_vpos( $y, 0 ) if $debug_spacing;
 
 		for ( 1..$h ) {
 		    last unless @chords;
@@ -552,7 +598,7 @@ sub generate_song {
 		}
 
 		$y -= $vsp;
-		$pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+		$pr->show_vpos( $y, 1 ) if $debug_spacing;
 	    }
 	}
     };
@@ -587,7 +633,7 @@ sub generate_song {
 	if ( $elt->{type} ne "set" && !$did++ ) {
 	    # Insert top/left/right/bottom chord diagrams.
  	    $chorddiagrams->() unless $ps->{diagrams}->{show} eq "below";
-	    showlayout($ps) if $ps->{showlayout};
+	    showlayout($ps) if $ps->{showlayout} || $debug_spacing;
 	}
 
 	if ( $elt->{type} eq "empty" ) {
@@ -595,10 +641,10 @@ sub generate_song {
 	    warn("***SHOULD NOT HAPPEN1***")
 	      if $s->{structure} eq "structured";
 	    $vsp_ignorefirst = 0, next if $vsp_ignorefirst;
-	    $pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 0 ) if $debug_spacing;
 	    my $vsp = empty_vsp( $elt, $ps );
 	    $y -= $vsp;
-	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 1 ) if $debug_spacing;
 	    next;
 	}
 
@@ -661,7 +707,7 @@ sub generate_song {
 	    # Add prespace if fit. Otherwise newpage.
 	    $checkspace->($vsp);
 
-	    $pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 0 ) if $debug_spacing;
 
 	    my $indent = 0;
 
@@ -731,7 +777,7 @@ sub generate_song {
 	    my $r = songline( $elt, $x, $y, $ps, song => $s, indent => $indent );
 
 	    $y -= $vsp;
-	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 1 ) if $debug_spacing;
 
 	    unshift( @elts, $r ) if $r;
 	    next;
@@ -782,7 +828,7 @@ sub generate_song {
 
 	    my $vsp = grid_vsp( $elt, $ps );
 	    $checkspace->($vsp);
-	    $pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 0 ) if $debug_spacing;
 
 	    my $cells = $grid_margin->[2];
 	    $grid_cellwidth = ( $ps->{__rightmargin}
@@ -793,7 +839,7 @@ sub generate_song {
 	    warn("L=", $ps->{__leftmargin},
 		 ", R=", $ps->{__rightmargin},
 		 ", C=$cells, W=", $grid_cellwidth,
-		 "\n") if DEBUG_SPACING;
+		 "\n") if $debug_spacing;
 
 	    gridline( $elt, $x, $y,
 		      $grid_cellwidth,
@@ -802,7 +848,7 @@ sub generate_song {
 		      $ps );
 
 	    $y -= $vsp;
-	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 1 ) if $debug_spacing;
 
 	    next;
 	}
@@ -823,12 +869,12 @@ sub generate_song {
 
 	    my $vsp = tab_vsp( $elt, $ps );
 	    $checkspace->($vsp);
-	    $pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 0 ) if $debug_spacing;
 
 	    songline( $elt, $x, $y, $ps );
 
 	    $y -= $vsp;
-	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 1 ) if $debug_spacing;
 
 	    next;
 	}
@@ -842,7 +888,7 @@ sub generate_song {
 	    my $gety = sub {
 		my $h = shift;
 		$checkspace->($h);
-		$ps->{pr}->show_vpos( $y, 1 ) if DEBUG_SPACING;
+		$ps->{pr}->show_vpos( $y, 1 ) if $debug_spacing;
 		return $y;
 	    };
 
@@ -858,7 +904,7 @@ sub generate_song {
 	    }
 
 	    $y -= $vsp;
-	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 1 ) if $debug_spacing;
 
 	    next;
 	}
@@ -874,7 +920,7 @@ sub generate_song {
 		    && $elt->{chorus}->[0]->{type} eq "set"
 		    && $elt->{chorus}->[0]->{name} eq "label" ) {
 		unshift( @elts, { %$elt,
-				  type => "comment",
+				  type => $t->{type} // "comment",
 				  font => $ps->{fonts}->{label},
 				  text => $ps->{chorus}->{recall}->{tag},
 				 } );
@@ -896,12 +942,12 @@ sub generate_song {
 	if ( $elt->{type} eq "tocline" ) {
 	    my $vsp = toc_vsp( $elt, $ps );
 	    $checkspace->($vsp);
-	    $pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 0 ) if $debug_spacing;
 
 	    tocline( $elt, $x, $y, $ps );
 
 	    $y -= $vsp;
-	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 1 ) if $debug_spacing;
 	    next;
 	}
 
@@ -924,13 +970,22 @@ sub generate_song {
 	    elsif ( $elt->{name} =~ /^(text|chord|grid|toc|tab)-font$/ ) {
 		my $f = $1;
 		if ( defined $elt->{value} ) {
-		    if ( $elt->{value} =~ m;/; ) {
+		    if ( $elt->{value} =~ m;/;
+			 ||
+			 $elt->{value} =~ m;\.(ttf|otf)$;i ) {
+			delete $ps->{fonts}->{$f}->{description};
 			delete $ps->{fonts}->{$f}->{name};
 			$ps->{fonts}->{$f}->{file} = $elt->{value};
 		    }
-		    else {
+		    elsif ( is_corefont( $elt->{value} ) ) {
+			delete $ps->{fonts}->{$f}->{description};
 			delete $ps->{fonts}->{$f}->{file};
 			$ps->{fonts}->{$f}->{name} = $elt->{value};
+		    }
+		    else {
+			delete $ps->{fonts}->{$f}->{file};
+			delete $ps->{fonts}->{$f}->{name};
+			$ps->{fonts}->{$f}->{description} = $elt->{value};
 		    }
 		}
 		else {
@@ -1182,7 +1237,7 @@ sub songline {
     # Just print the lyrics if no chords.
     if ( $lyrics_only
 	 or
-	 $single_space && !has_visible_chords($elt)
+	 $suppress_empty_chordsline && !has_visible_chords($elt)
        ) {
 	my $x = $x;
 	$x += $opts{indent} if $opts{indent};
@@ -1695,6 +1750,11 @@ sub has_visible_chords {
     $elt->{chords} && join( "", @{ $elt->{chords} } ) =~ /\S/;
 }
 
+sub has_visible_text {
+    my ( $elt ) = @_;
+    $elt->{phrases} && join( "", @{ $elt->{phrases} } ) =~ /\S/;
+}
+
 sub songline_vsp {
     my ( $elt, $ps ) = @_;
 
@@ -1717,10 +1777,10 @@ sub songline_vsp {
 
     return $vsp if $lyrics_only || $chordscol;
 
-    return $vsp if $single_space && ! has_visible_chords($elt);
+    return $vsp if $suppress_empty_chordsline && ! has_visible_chords($elt);
 
     # No text printing if no text.
-    $vsp = 0 if join( "", @{ $elt->{phrases} } ) eq "";
+    $vsp = 0 if $suppress_empty_lyricsline && join( "", @{ $elt->{phrases} } ) !~ /\S/;
 
     if ( $inlinechords ) {
 	$vsp = $csp if $csp > $vsp;
@@ -2106,4 +2166,49 @@ sub wrapsimple {
     $pr->wrap( $text, $pr->{ps}->{__rightmargin} - $x );
 }
 
+my %corefonts = map { $_ => 1 }
+  ( "times-roman",
+    "times-bold",
+    "times-italic",
+    "times-bolditalic",
+    "helvetica",
+    "helvetica-bold",
+    "helvetica-oblique",
+    "helvetica-boldoblique",
+    "courier",
+    "courier-bold",
+    "courier-oblique",
+    "courier-boldoblique",
+    "zapfdingbats",
+    "georgia",
+    "georgia,bold",
+    "georgia,italic",
+    "georgia,bolditalic",
+    "verdana",
+    "verdana,bold",
+    "verdana,italic",
+    "verdana,bolditalic",
+    "webdings",
+    "wingdings" );
+
+sub is_corefont {
+    $corefonts{lc $_[0]};
+}
+
+sub _dump {
+    return unless $verbose;
+    my ( $ps ) = @_;
+    print STDERR ("== Font family map\n");
+    Text::Layout::FontConfig->new->_dump if $verbose;
+    print STDOUT ("== Font associations\n");
+    foreach my $f ( sort keys( %{$ps->{fonts}} ) ) {
+	printf STDERR ("%-15s  %s\n", $f,
+		       $ps->{fonts}->{$f}->{description} ||
+		       $ps->{fonts}->{$f}->{file} ||
+		       $ps->{fonts}->{$f}->{name}
+		      );
+    }
+}
+
 1;
+

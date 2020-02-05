@@ -45,18 +45,20 @@ This is the current built-in configuration file, showing all settings.
   	// Suppress empty chord lines.
   	// Overrides the -a (--single-space) command line options.
   	"suppress-empty-chords" : true,
+  	// Suppress blank lyrics lines.
+  	"suppress-empty-lyrics" : true,
   	// Suppress chords.
   	// Overrides --lyrics-only command line option.
   	"lyrics-only" : false,
-	// Memorize chords in sections, to be recalled by [^].
-	"memorize" : false,
+  	// Memorize chords in sections, to be recalled by [^].
+  	"memorize" : false,
   	// Chords inline.
   	// May be a string containing pretext %s posttext.
   	// Defaults to "[%s]" if true.
   	"inline-chords" : false,
   	// Chords under the lyrics.
   	"chords-under" : false,
-	// Transcoding.
+  	// Transcoding.
   	"transcode" : null,
   	// Always decapoize.
   	"decapo" : false,
@@ -69,12 +71,12 @@ This is the current built-in configuration file, showing all settings.
       // Important: "title" and "subtitle" must always be in this list.
       // The separator is used to concatenate multiple values.
       "metadata" : {
-        "keys" : [ "title", "subtitle",
-                   "artist", "composer", "lyricist", "arranger",
-                   "album", "copyright", "year",
-                   "key", "time", "tempo", "capo", "duration" ],
-        "strict" : true,
-        "separator" : "; ",
+  	"keys" : [ "title", "subtitle",
+  		   "artist", "composer", "lyricist", "arranger",
+  		   "album", "copyright", "year",
+  		   "key", "time", "tempo", "capo", "duration" ],
+  	"strict" : true,
+  	"separator" : "; ",
       },
   
       // Instrument settings. These are usually set by a separate
@@ -85,7 +87,7 @@ This is the current built-in configuration file, showing all settings.
       // Note (chord root) names.
       // Strings and tuning.
       "tuning" : [ "E2", "A2", "D3", "G3", "B3", "E4" ],
-
+  
       // In case of alternatives, the first one is used for output.
       "notes" : {
   
@@ -107,7 +109,7 @@ This is the current built-in configuration file, showing all settings.
   		    [ "Gb", "Ges",        "G♭" ], "G",
   		    [ "Ab", "As",  "Aes", "A♭" ], "A",
   		    [ "Bb", "Bes",        "B♭" ], "B",
-    		  ],
+  		  ],
       },
   
       // User defined chords.
@@ -115,7 +117,7 @@ This is the current built-in configuration file, showing all settings.
       // Use 0 for an empty string, and -1 for a muted string.
       // "fingers" is optional.
       "chords" : [
-        //  {
+  	//  {
   	//    "name"  : "Bb",
   	//    "base"  : 1,
   	//    "frets" : [ 1, 1, 3, 3, 3, 1 ],
@@ -130,24 +132,24 @@ This is the current built-in configuration file, showing all settings.
       //         "user": only prints user defined chords.
       // "sorted": order the chords by key.
       "diagrams" : {
-          "auto"     :  false,
-          "show"     :  "all",
-          "sorted"   :  false,
+  	  "auto"     :  false,
+  	  "show"     :  "all",
+  	  "sorted"   :  false,
       },
   
       // Diagnostig messages.
       "diagnostics" : {
-	  "format" : "\"%f\", line %n, %m\n\t%l",
+  	  "format" : "\"%f\", line %n, %m\n\t%l",
       },
   
       // Table of contents.
       "toc" : {
   	  // Title for ToC.
   	  "title" : "Table of Contents",
-	  "line" : "%{title}",
-	  // Sorting order.
-	  // Currently only sorting by page number and alpha is implemented.
-	  "order" : "page",
+  	  "line" : "%{title}",
+  	  // Sorting order.
+  	  // Currently only sorting by page number and alpha is implemented.
+  	  "order" : "page",
       },
   
       // Layout definitions for PDF output.
@@ -173,7 +175,7 @@ This is the current built-in configuration file, showing all settings.
   	"footspace"    :  20,
   
   	// Special: head on first page only, add the headspace to
-	// the other pages so they become larger.
+  	// the other pages so they become larger.
   	"head-first-only" : false,
   
   	// Spacings.
@@ -185,11 +187,11 @@ This is the current built-in configuration file, showing all settings.
   	    "grid"   : 1.2,
   	    "tab"    : 1.0,
   	    "toc"    : 1.4,
-	    "empty"  : 1.0,
+  	    "empty"  : 1.0,
   	},
   	// Note: By setting the font size and spacing for empty lines to
-	// smaller values, you get a fine(r)-grained control over the
-	// spacing between the various parts of the song.
+  	// smaller values, you get a fine(r)-grained control over the
+  	// spacing between the various parts of the song.
   
   	// Style of chorus.
   	"chorus" : {
@@ -202,13 +204,13 @@ This is the current built-in configuration file, showing all settings.
   		"color"  : "black",
   	    },
   	    "tag" : "Chorus",
-	    // Recall style: Print the tag using the type.
-	    // Alternatively quote the lines of the preceding chorus.
-	    "recall" : {
-		"tag"   : "Chorus",
-		"type"  : "comment",
-		"quote" : false,
-	    },
+  	    // Recall style: Print the tag using the type.
+  	    // Alternatively quote the lines of the preceding chorus.
+  	    "recall" : {
+  		"tag"   : "Chorus",
+  		"type"  : "comment",
+  		"quote" : false,
+  	    },
   	},
   
   	// Markup for sections (in progress).
@@ -238,7 +240,7 @@ This is the current built-in configuration file, showing all settings.
   	// Set to non-zero to ignore the directive.
   	"titles-directive-ignore" : false,
   
-	// Chord diagrams.
+  	// Chord diagrams.
   	// A chord diagram consists of a number of cells.
   	// Cell dimensions are specified by "width" and "height".
   	// The horizontal number of cells depends on the number of strings.
@@ -275,25 +277,25 @@ This is the current built-in configuration file, showing all settings.
   
   	    // By default, a page has:
   	    "default" : {
-  	        // No title/subtitle.
-  	    	"title"     : null,
-  	    	"subtitle"  : null,
+  		// No title/subtitle.
+  		"title"     : null,
+  		"subtitle"  : null,
   		// Footer is title -- page number.
-  	    	"footer"    : [ "%{title}", "", "%{page}" ],
+  		"footer"    : [ "%{title}", "", "%{page}" ],
   	    },
   	    // The first page of a song has:
   	    "title" : {
-  	        // Title and subtitle.
-  	    	"title"     : [ "", "%{title}", "" ],
-  	    	"subtitle"  : [ "", "%{subtitle}", "" ],
+  		// Title and subtitle.
+  		"title"     : [ "", "%{title}", "" ],
+  		"subtitle"  : [ "", "%{subtitle}", "" ],
   		// Footer with page number.
-  	    	"footer"    : [ "", "", "%{page}" ],
+  		"footer"    : [ "", "", "%{page}" ],
   	    },
   	    // The very first output page is slightly different:
   	    "first" : {
-  	    	// It has title and subtitle, like normal 'first' pages.
+  		// It has title and subtitle, like normal 'first' pages.
   		// But no footer.
-  	    	"footer"    : null,
+  		"footer"    : null,
   	    },
   	},
   
@@ -306,67 +308,69 @@ This is the current built-in configuration file, showing all settings.
   	// All elements may be left empty strings.
   	"split-marker" : [ "", "", "" ],
   
-  	// Fonts can be specified by name (for the corefonts)
-  	// or a filename (for TrueType/OpenType fonts).
+  	// Font families and properties.
+  	// "fontconfig" maps members of font families to physical fonts.
+  	// Optionally, additional properties of the fonts can be specified.
+  	// Physical fonts can be the names of TrueType/OpenType fonts,
+  	// or names of built-in fonts (corefonts).
   	// Relative filenames are looked up in the fontdir.
   	// "fontdir" : [ "/usr/share/fonts/liberation", "/home/me/fonts" ],
-  	"fontdir" : null,
   
-   	// Font Families.
-   	"fontfamilies" : {
-   	    // alternatives: regular r normal <empty>
-   	    // alternatives: bold b strong
-   	    // alternatives: italic i oblique o emphasis
-   	    // alternatives: bolditalic bi italicbold ib boldoblique bo obliquebold ob
-   	    "times" : {
-   		""            : "Times-Roman",
-   		"bold"        : "Times-Bold",
-   		"italic"      : "Times-Italic",
-   		"bolditalic"  : "Times-BoldItalic",
-   	    },
-   	    "helvetica" : {
-   		""            : "Helvetica",
-   		"bold"        : "Helvetica-Bold",
-   		"oblique"     : "Helvetica-Oblique",
-   		"boldoblique" : "Helvetica-BoldOblique",
-   	    },
-   	    "courier" : {
-   		""            : "Courier",
-   		"bold"        : "Courier-Bold",
-   		"italic"      : "Courier-Italic",
-   		"bolditalic"  : "Courier-BoldItalic",
-   	    },
-   	    "dingbats" : {
-   		""            : "ZapfDingbats",
-   	    },
-   	},
-   
-  	// Fonts for chords and comments can have a background
-  	// colour associated.
+  	"fontdir" : null,
+  	"fontconfig" : {
+  	    // alternatives: regular r normal <empty>
+  	    // alternatives: bold b strong
+  	    // alternatives: italic i oblique o emphasis
+  	    // alternatives: bolditalic bi italicbold ib boldoblique bo obliquebold ob
+  	    "times" : {
+  		""            : "Times-Roman",
+  		"bold"        : "Times-Bold",
+  		"italic"      : "Times-Italic",
+  		"bolditalic"  : "Times-BoldItalic",
+  	    },
+  	    "helvetica" : {
+  		""            : "Helvetica",
+  		"bold"        : "Helvetica-Bold",
+  		"oblique"     : "Helvetica-Oblique",
+  		"boldoblique" : "Helvetica-BoldOblique",
+  	    },
+  	    "courier" : {
+  		""            : "Courier",
+  		"bold"        : "Courier-Bold",
+  		"italic"      : "Courier-Italic",
+  		"bolditalic"  : "Courier-BoldItalic",
+  	    },
+  	    "dingbats" : {
+  		""            : "ZapfDingbats",
+  	    },
+  	},
+  
+   	// "fonts" maps output elements to fonts as defined in "fontconfig".
+  	// The elements can have a background colour associated.
   	// Colours are "#RRGGBB" or predefined names like "black", "white",
   	// and lots of others.
   
-   	"fonts" : {
-   	    "title" : {
-   		"name" : "Times-Bold",
-   		"description" : "Times Bold",
-   		"size" : 14
-   	    },
-   	    "text" : {
-   		"name" : "Times-Roman",
-   		"description" : "Times",
-   		"size" : 12
-   	    },
-   	    "chord" : {
-   		"name" : "Helvetica-Oblique",
-   		"description" : "Helvetica Italic",
-   		"size" : 10
-   	    },
-   	    "chordfingers" : {
-   		"name" : "ZapfDingbats",
-   		"description" : "Dingbats",
-   		"size" : 10
-   	    },
+  	"fonts" : {
+  	    "title" : {
+  		"name" : "Times-Bold",
+  		"description" : "Times Bold",
+  		"size" : 14
+  	    },
+  	    "text" : {
+  		"name" : "Times-Roman",
+  		"description" : "Times",
+  		"size" : 12
+  	    },
+  	    "chord" : {
+  		"name" : "Helvetica-Oblique",
+  		"description" : "Helvetica Italic",
+  		"size" : 10
+  	    },
+  	    "chordfingers" : {
+  		"name" : "ZapfDingbats",
+  		"description" : "Dingbats",
+  		"size" : 10
+  	    },
    	    "comment" : {
    		"name" : "Helvetica",
    		"description" : "Helvetica",
@@ -401,7 +405,8 @@ This is the current built-in configuration file, showing all settings.
    	    },
    	},
   
-  	// Fonts that can be specified, but need not.
+  	// Element mappings that can be specified, but need not since
+  	// they default to other elements.
   	// subtitle       --> text
   	// comment        --> text
   	// comment_italic --> chord
@@ -433,7 +438,17 @@ This is the current built-in configuration file, showing all settings.
   		   "quote" : false,
   	      },
   	  },
-      }
+      },
+  
+      // Settings for HTML backend.
+      "html" : {
+  	  // Stylesheet links.
+  	  "styles" : {
+  	      "display" : "chordpro.css",
+  	      "print"   : "chordpro_print.css",
+  	  },
+      },
+  
   }
   // End of config.
 
@@ -524,7 +539,7 @@ sub configurator {
 		    comment comment_box comment_italic
 		    tab text toc
 		    empty footer grid grid_margin subtitle title) ) {
-	for ( qw(name file size color background) ) {
+	for ( qw(name file description size color background) ) {
 	    $cfg->{pdf}->{fonts}->{$ff}->{$_} //= undef;
 	}
     }
@@ -616,7 +631,7 @@ sub configurator {
 	    delete( $cfg->{pdf}->{fonts}->{$ff} );
 	    next;
 	}
-	for ( qw(name file size color background) ) {
+	for ( qw(name file description size color background) ) {
 	    delete( $cfg->{pdf}->{fonts}->{$ff}->{$_} )
 	      unless defined( $cfg->{pdf}->{fonts}->{$ff}->{$_} );
 	}
@@ -726,6 +741,7 @@ sub process_config {
 	  App::Music::ChordPro::Chords::set_tuning( $cfg->{tuning},
 						    $options );
 	warn( "Invalid tuning in config: ", $res, "\n" ) if $res;
+	$cfg->{_tuning} = $cfg->{tuning};
 	$cfg->{tuning} = [];
     }
 
@@ -804,10 +820,14 @@ sub add_legacy {
 	my $prop = $2;
 	if ( $prop eq "font" ) {
 	    if ( $value =~ /.+\.(?:ttf|otf)$/i ) {
-		$prop = "file"
+		$prop = "file";
+		$cfg->{pdf}->{fonts}->{$name}->{name} = undef;
+		$cfg->{pdf}->{fonts}->{$name}->{description} = undef;
 	    }
 	    else {
-		$prop = "name";
+		$cfg->{pdf}->{fonts}->{$name}->{name} = undef;
+		$cfg->{pdf}->{fonts}->{$name}->{file} = undef;
+		$prop = "description";
 	    }
 	}
 	$cfg->{pdf}->{fonts}->{$name}->{$prop} = $value;
@@ -820,8 +840,9 @@ sub config_final {
     my ( $options ) = @_;
     $options->{'cfg-print'} = 1;
     my $cfg = configurator($options);
+    $cfg->{tuning} = delete $cfg->{_tuning};
 
-    my $pp = JSON::PP->new->utf8->canonical->indent(4)->pretty;
+    my $pp = JSON::PP->new->canonical->indent(4)->pretty;
     $pp->encode($cfg);
 }
 
@@ -839,6 +860,7 @@ sub hmerge($$$) {
 
 	warn("Config error: unknown item $path$key\n")
 	  unless exists $res{$key}
+	    || $key =~ /^_/
 	    || $path.$key =~ /^pdf\.section\./;
 
 	if ( ref($right->{$key}) eq 'HASH'

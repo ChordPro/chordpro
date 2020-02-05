@@ -32,6 +32,7 @@ WriteMakefile
 		    'App::Packager'		  => 1.430,
 		    'PDF::API2'			  => 2.035,
 		    'Font::TTF'			  => 1.05,
+		    'Text::Layout'		  => 0.014,
 		    'JSON::PP'			  => 2.27203,
 		    'String::Interpolate::Named'  => 0.05,
 		    'File::LoadLines'		  => 0.02,

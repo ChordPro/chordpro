@@ -7,6 +7,8 @@
       // Suppress empty chord lines.
       // Overrides the -a (--single-space) command line options.
       "suppress-empty-chords" : false,
+      // Suppress blank lyrics lines.
+      "suppress-empty-lyrics" : false,
     },
 
     // Printing chord diagrams.

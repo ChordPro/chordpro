@@ -32,8 +32,8 @@ sub generate_songbook {
     $pr->info( Title => $title,
 	       Creator =>
 	       $regtest
-	       ? "ChordPro [$options->{_name} (regression testing)]"
-	       : "ChordPro [$options->{_name} $options->{_version}]",
+	       ? "PDF::Pango [$options->{_name} (regression testing)]"
+	       : "PDF::Pango [$options->{_name} $options->{_version}]",
 	     );
 
     my @book;
@@ -85,8 +85,11 @@ sub generate_songbook {
 	$page = 1;
     }
 
-    if ( $options->{cover} ) {
+    if ( $options->{'front-matter'} ) {
 	warn("No support for cover pages in this version.\n");
+    }
+    if ( $options->{'back-matter'} ) {
+	warn("No support for back pages in this version.\n");
     }
 
     if ( $options->{csv} ) {

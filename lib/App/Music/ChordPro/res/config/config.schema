@@ -106,6 +106,12 @@
 		    "default": true
 		},
 
+		"suppress-empty-lyrics": {
+		    "description": "Suppress blank lyrics lines.",
+		    "type": "boolean",
+		    "default": true
+		},
+
 		"titles": {
 		    "description": "Titles flush.",
 		    "type": "string",
@@ -492,12 +498,12 @@
 		    "type": [ "array", "string", "null" ]
 		},
 
- 		"fontfamilies": {
- 		    "description": "The font families used for typesetting."
+ 		"fontconfig": {
+ 		    "description": "The (physical) fonts used for typesetting."
  		},
  		
 		"fonts": {
-		    "description": "The fonts used for typesetting.",
+		    "description": "The (logical) fonts used for typesetting.",
 		    "properties": {
 			"chord": {
 			    "description": "Font for typesetting chord names.",

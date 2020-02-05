@@ -9,18 +9,27 @@ package App::Music::ChordPro::Output::HTML;
 
 use strict;
 use warnings;
+use App::Music::ChordPro::Output::Common;
 
 sub generate_songbook {
     my ($self, $sb, $options) = @_;
 
     my @book;
+    my $cfg = $::config->{html} // {};
+    $cfg->{styles}->{display} //= "chordpro.css";
+    $cfg->{styles}->{print} //= "chordpro_print.css";
+
     push( @book,
 	  '<html>',
 	  '<head>',
-	  '<meta charset="utf-8">',
-	  '<link rel="stylesheet" href="chordpro.css">',
-	  '<link rel="stylesheet" href="chordpro_print.css" media="print">',
-	  '</head>',
+	  '<meta charset="utf-8">' );
+    foreach ( sort keys %{ $cfg->{styles} } ) {
+	push( @book,
+	      '<link rel="stylesheet" href="'.$cfg->{styles}->{$_}.'"'.
+	      ( $_ =~ /^(display|default)$/ ? "" : qq{ media="$_"} ).
+	      '>' );
+    }
+    push( @book, '</head>',
 	  '<body>',
 	);
 
@@ -213,6 +222,11 @@ sub html {
     $t =~ s/</&lt;/g;
     $t =~ s/>/&gt;/g;
     $t;
+}
+
+# Substitute %X sequences in title formats.
+sub fmt_subst {
+    goto \&App::Music::ChordPro::Output::Common::fmt_subst;
 }
 
 1;
