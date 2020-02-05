@@ -16,7 +16,7 @@ In the examples below the symbol `~` denotes the user's home directory. Windows 
     `~/.config/chordpro.json`  
     `~/.chordpro/chordpro.json`
 
-4. A project specific configuration file is read from either:
+4. A project specific configuration file is read from the current directory, either:
 
     `chordpro.json`  
     `.chordpro.json`
