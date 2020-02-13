@@ -1,6 +1,6 @@
 #! perl
 
-package App::Music::ChordPro::Output::PDFMarkup::StringDiagrams;
+package App::Music::ChordPro::Output::PDF::StringDiagrams;
 
 use App::Music::ChordPro::Chords;
 
@@ -39,7 +39,7 @@ sub hsp {
 my @Roman = qw( I II III IV V VI VI VII VIII IX X XI XII );
 
 sub font_bl {
-    goto &App::Music::ChordPro::Output::PDFMarkup::PDF::font_bl;
+    goto &App::Music::ChordPro::Output::PDF::font_bl;
 }
 
 # The actual draw method.

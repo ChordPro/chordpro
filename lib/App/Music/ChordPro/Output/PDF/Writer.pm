@@ -1,37 +1,30 @@
 #! perl
 
-package App::Music::ChordPro::Output::PDFClassic::PDFWriter;
+package App::Music::ChordPro::Output::PDF::Writer;
 
 use strict;
 use warnings;
 use Encode;
+use PDF::API2;
+use Text::Layout;
 use IO::String;
-
-my $pdfapi;
-BEGIN {
-    eval { require PDF::Builder; $pdfapi = "PDF::Builder"; }
-      or
-    eval { require PDF::API2; $pdfapi = "PDF::API2"; }
-      or
-    die("Missing PDF::API package\n");
-}
 
 # For regression testing, run perl with PERL_HASH_SEED set to zero.
 # This eliminates the arbitrary order of font definitions and triggers
 # us to pinpoint some other data that would otherwise be varying.
 my $regtest = defined($ENV{PERL_HASH_SEED}) && $ENV{PERL_HASH_SEED} == 0;
-
 my $faketime = 1465041600;
 
 my %fontcache;			# speeds up 2 seconds per song
 
 sub new {
-    my ( $pkg, $ps ) = @_;
+    my ( $pkg, $ps, $pdfapi ) = @_;
     my $self = bless { ps => $ps }, $pkg;
     $self->{pdf} = $pdfapi->new;
     $self->{pdf}->{forcecompress} = 0 if $regtest;
     $self->{pdf}->mediabox( $ps->{papersize}->[0],
 			    $ps->{papersize}->[1] );
+    $self->{layout} = Text::Layout->new( $self->{pdf} );
     %fontcache = () if $::__EMBEDDED__;
     $self;
 }
@@ -72,72 +65,108 @@ sub wrap {
 
 sub text {
     my ( $self, $text, $x, $y, $font, $size ) = @_;
-    $text = demarkup($text);
-    return $x unless length($text);
-
+#    print STDERR ("T: @_\n");
     $font ||= $self->{font};
     $size ||= $font->{size};
 
-    $self->setfont($font, $size);
+    $self->{layout}->set_font_description($font->{fd});
+    $self->{layout}->set_font_size($size);
+    ####TODO: current color?
+    $self->{layout}->set_markup($text);
+    $y -= $self->{layout}->get_baseline;
+    $self->{layout}->show( $x, $y, $self->{pdftext} );
+
+    my $e = ($self->{layout}->get_pixel_extents)[1];
 
     # Handle decorations (background, box).
     my $bgcol = $font->{background};
-    my $frame = $font->{frame};
+    undef $bgcol if $bgcol && $bgcol =~ /^no(?:ne)?$/i;
+    my $debug = $ENV{CHORDPRO_DEBUG_TEXT} ? "magenta" : undef;
+    my $frame = $font->{frame} || $debug;
+    undef $frame if $frame && $frame =~ /^no(?:ne)?$/i;
     if ( $bgcol || $frame ) {
-	my $w = $self->strwidth( $text );
-	my $vsp = $size * 1.1;
-	# Adjust for baseline.
-	my $y = $y + ( $size / ( 1 - $font->{font}->descender / $font->{font}->ascender ) );
-
-	# Draw background.
-	if ( $bgcol && $bgcol !~ /^no(?:ne)?$/i ) {
-	    $self->rectxy( $x - 2, $y + 2,
-			   $x + $w + 2, $y - $vsp, 3, $bgcol );
-	}
-
-	# Draw box.
-	if ( $frame && $frame !~ /^no(?:ne)?$/i ) {
-	    my $x0 = $x;
-	    $x0 -= 0.25;	# add some offset for the box
-	    $self->rectxy( $x0, $y + 1,
-			   $x0 + $w + 1, $y - $vsp + 1,
-			   0.5, undef,
-			   $font->{color} || "black" );
-	}
+	#printf("BB: %.2f %.2f %.2f %.2f\n", @{$e}{qw( x y width height ) } );
+	# Draw background and.or frame.
+	my $d = $debug ? 0 : 1;
+	$frame = $debug || $font->{color} || "black" if $frame;
+	$self->rectxy( $x + $e->{x} - $d,
+		       $y + $e->{y} + $d,
+		       $x + $e->{x} + $e->{width} + $d,
+		       $y - $e->{height} - $d,
+		       0.5, $bgcol, $frame);
     }
 
-    if ( $font->{color} ) {
-	$self->{pdftext}->strokecolor( $font->{color} );
-	$self->{pdftext}->fillcolor( $font->{color} );
-    }
-    else {
-	$self->{pdftext}->strokecolor("black");
-	$self->{pdftext}->fillcolor("black");
-    }
-    $self->{pdftext}->translate( $x, $y );
-    $x += $self->{pdftext}->text($text);
-    if ( $font->{color} ) {
-	$self->{pdftext}->strokecolor("black");
-	$self->{pdftext}->fillcolor("black");
-    }
+    $x += $e->{width};
+#    print STDERR ("TX: $x\n");
     return $x;
 }
 
-*demarkup = \&App::Music::ChordPro::Output::PDFClassic::PDF::demarkup;
+# Identical copy of text, but without baseline correction.
+sub text_nobl {
+    my ( $self, $text, $x, $y, $font, $size ) = @_;
+#    print STDERR ("T: @_\n");
+    $font ||= $self->{font};
+    $size ||= $font->{size};
+
+    $self->{layout}->set_font_description($font->{fd});
+    $self->{layout}->set_font_size($size);
+    $self->{layout}->set_markup($text);
+    $self->{layout}->show( $x, $y, $self->{pdftext} );
+
+    my $e = ($self->{layout}->get_pixel_extents)[1];
+
+    # Handle decorations (background, box).
+    my $bgcol = $font->{background};
+    undef $bgcol if $bgcol && $bgcol =~ /^no(?:ne)?$/i;
+    my $debug = "blue";
+    my $frame = $font->{frame} || $debug;
+    undef $frame if $frame && $frame =~ /^no(?:ne)?$/i;
+    if ( $bgcol || $frame ) {
+	#printf("BB: %.2f %.2f %.2f %.2f\n", @{$e}{qw( x y width height ) } );
+	# Draw background and.or frame.
+	my $d = $debug ? 0 : 1;
+	$frame = $debug || $font->{color} || "black" if $frame;
+	$self->rectxy( $x + $e->{x} - $d,
+		       $y + $e->{y} + $d,
+		       $x + $e->{x} + $e->{width} + $d,
+		       $y - $e->{height} - $d,
+		       0.5, $bgcol, $frame);
+    }
+
+    $x += $e->{width};
+#    print STDERR ("TX: $x\n");
+    return $x;
+}
 
 sub setfont {
     my ( $self, $font, $size ) = @_;
     $self->{font} = $font;
     $self->{fontsize} = $size ||= $font->{size};
-    $self->{pdftext}->font( $font->{font}, $size );
+    $self->{pdftext}->font( $font->{fd}->{font}, $size );
 }
+
+my $tmplayout;
 
 sub strwidth {
     my ( $self, $text, $font, $size ) = @_;
     $font ||= $self->{font};
     $size ||= $self->{fontsize} || $font->{size};
-    $self->setfont( $font, $size );
-    $self->{pdftext}->advancewidth($text);
+    $tmplayout //= Text::Layout->new( $self->{pdf} );
+    $tmplayout->set_font_description($font->{fd});
+    $tmplayout->set_font_size($size);
+    $tmplayout->set_markup($text);
+    $tmplayout->get_pixel_size->{width};
+}
+
+sub strheight {
+    my ( $self, $text, $font, $size ) = @_;
+    $font ||= $self->{font};
+    $size ||= $self->{fontsize} || $font->{size};
+    $tmplayout //= Text::Layout->new( $self->{pdf} );
+    $tmplayout->set_font_description($font->{fd});
+    $tmplayout->set_font_size($size);
+    $tmplayout->set_markup($text);
+    $tmplayout->get_pixel_size->{height};
 }
 
 sub line {
@@ -268,11 +297,19 @@ sub add_image {
 sub newpage {
     my ( $self, $ps, $page ) = @_;
     #$self->{pdftext}->textend if $self->{pdftext};
-    $self->{pdfpage} = $self->{pdf}->page($page);
+    $self->{pdfpage} = $self->{pdf}->page($page||0);
     $self->{pdfpage}->mediabox( $ps->{papersize}->[0],
 				$ps->{papersize}->[1] );
     $self->{pdfgfx}  = $self->{pdfpage}->gfx;
     $self->{pdftext} = $self->{pdfpage}->text;
+}
+
+sub pagelabel {
+    my ( $self, $page, $style, $prefix ) = @_;
+    my $opts = { -style => $style // 'arabic',
+		 defined $prefix ? ( -prefix => $prefix ) : (),
+		 -start => 1 };
+    $self->{pdf}->pageLabel( $page, $opts );
 }
 
 sub finish {
@@ -293,61 +330,97 @@ sub init_fonts {
     my $ps = $self->{ps};
     my $fail;
 
+    my $fc = Text::Layout::FontConfig->new;
+
+    if ( $ps->{fontdir} ) {
+	$fc->add_fontdirs( @{ $ps->{fontdir} } );
+    }
+
+    foreach my $ff ( keys( %{ $ps->{fontconfig} } ) ) {
+	my @fam = split( /\s*,\s*/, $ff );
+	foreach my $s ( keys( %{ $ps->{fontconfig}->{$ff} } ) ) {
+	    my $v = $ps->{fontconfig}->{$ff}->{$s};
+	    if ( UNIVERSAL::isa( $v, 'HASH' ) ) {
+		my $file = delete( $v->{file} );
+		$fc->register_font( $file, $fam[0], $s, $v );
+	    }
+	    else {
+		$fc->register_font( $v, $fam[0], $s );
+	    }
+	}
+	$fc->register_aliases(@fam) if @fam > 1;
+    }
+
     foreach my $ff ( keys( %{ $ps->{fonts} } ) ) {
-	next unless $ps->{fonts}->{$ff}->{name} || $ps->{fonts}->{$ff}->{file};
 	$self->init_font($ff) or $fail++;
     }
+
     die("Unhandled fonts detected -- aborted\n") if $fail;
 }
 
 sub init_font {
     my ( $self, $ff ) = @_;
     my $ps = $self->{ps};
+    my $fd;
+    if ( !$fd && $ps->{fonts}->{$ff}->{file} ) {
+	$fd = $self->init_filefont($ff);
+    }
+    if ( !$fd && $ps->{fonts}->{$ff}->{description} ) {
+	$fd = $self->init_pangofont($ff);
+    }
+    if ( !$fd && $ps->{fonts}->{$ff}->{name} ) {
+	$fd = $self->init_corefont($ff);
+    }
+    warn("No font found for \"$ff\"\n") unless $fd;
+    $fd;
+}
 
+sub init_pangofont {
+    my ( $self, $ff ) = @_;
+
+    my $ps = $self->{ps};
     my $font = $ps->{fonts}->{$ff};
-    if ( $font->{file} ) {
-	if ( $font->{file} =~ /\.[ot]tf$/ ) {
-	    eval {
-		$font->{font} =
-		  $fontcache{$font->{file}} ||=
-		    $self->{pdf}->ttfont( $font->{file},
-					  -dokern => 1 );
-	    }
-	    or warn("Cannot load font: ", $font->{file}, "\n");
-	}
-	elsif ( $font->{file} =~ /\.pf[ab]$/ ) {
-	    eval {
-		$font->{font} =
-		  $fontcache{$font->{file}} ||=
-		    $self->{pdf}->psfont( $font->{file},
-					  -afmfile => $font->{metrics},
-					  -dokern  => 1 );
-	    }
-	    or warn("Cannot load font: ", $font->{file}, "\n");
-	}
-	else {
-	    $font->{font} =
-	      $fontcache{"__default__"} ||=
-	      $self->{pdf}->corefont( 'Courier' );
-	}
-    }
-    else {
-	eval {
-	    $font->{font} =
-	      $fontcache{"__core__".$font->{name}} ||=
-		$self->{pdf}->corefont( $font->{name}, -dokern => 1 );
-	}
-	or warn("Cannot load font: ", $font->{file}, "\n");
-    }
 
-    unless ( $font->{font} ) {
-	warn( "Unhandled $ff font: ",
-	      $font->{file}
-	      || $font->{name}
-	      || Dumper($font), "\n" );
-    }
-    $font->{font}->{Name}->{val} =~ s/~.*/~$faketime/ if $regtest;
-    $font->{font};
+    my $fc = Text::Layout::FontConfig->new;
+    eval {
+	$font->{fd} = $fc->from_string($font->{description});
+	$font->{fd}->get_font($self->{layout}); # force load
+	$font->{fd}->{font}->{Name}->{val} =~ s/~.*/~$faketime/ if $regtest;
+	$font->{_ff} = $ff;
+	$font->{fd}->set_shaping( $font->{fd}->get_shaping || $font->{shaping}//0);
+    };
+    $font->{fd};
+}
+
+sub init_filefont {
+    my ( $self, $ff ) = @_;
+
+    my $ps = $self->{ps};
+    my $font = $ps->{fonts}->{$ff};
+
+    my $fc = Text::Layout::FontConfig->new;
+    eval {
+	$font->{fd} = $fc->from_filename($font->{file});
+	$font->{fd}->get_font($self->{layout}); # force load
+	$font->{fd}->{font}->{Name}->{val} =~ s/~.*/~$faketime/ if $regtest;
+	$font->{_ff} = $ff;
+    };
+    $font->{fd};
+}
+
+sub init_corefont {
+    my ( $self, $ff ) = @_;
+
+    my $ps = $self->{ps};
+    my $font = $ps->{fonts}->{$ff};
+
+    my $fc = Text::Layout::FontConfig->new;
+    eval {
+	$font->{fd} = $fc->from_filename($font->{name});
+	$font->{fd}->get_font($self->{layout}); # force load
+	$font->{_ff} = $ff;
+    };
+    $font->{fd};
 }
 
 sub show_vpos {
