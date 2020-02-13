@@ -2202,9 +2202,10 @@ sub _dump {
     print STDOUT ("== Font associations\n");
     foreach my $f ( sort keys( %{$ps->{fonts}} ) ) {
 	printf STDERR ("%-15s  %s\n", $f,
-		       $ps->{fonts}->{$f}->{description} ||
-		       $ps->{fonts}->{$f}->{file} ||
-		       $ps->{fonts}->{$f}->{name}
+		       eval { $ps->{fonts}->{$f}->{description} } ||
+		       eval { $ps->{fonts}->{$f}->{file} } ||
+		       eval { "[".$ps->{fonts}->{$f}->{name}."]" } ||
+		       "[]"
 		      );
     }
 }
