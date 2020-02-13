@@ -624,6 +624,7 @@ sub configurator {
     my @allfonts = keys(%{$cfg->{pdf}->{fonts}});
     for my $ff ( @allfonts ) {
 	unless ( $cfg->{pdf}->{fonts}->{$ff}->{name}
+		 || $cfg->{pdf}->{fonts}->{$ff}->{description}
 		 || $cfg->{pdf}->{fonts}->{$ff}->{file} ) {
 	    delete( $cfg->{pdf}->{fonts}->{$ff} );
 	    next;
