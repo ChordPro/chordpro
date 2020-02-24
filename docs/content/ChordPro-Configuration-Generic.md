@@ -14,6 +14,8 @@ These settings control global behaviour of the ChordPro program and can be chang
         // Suppress empty chord lines.
         // Overrides the -a (--single-space) command line options.
         "suppress-empty-chords" : true,
+        // Suppress blank lyrics lines.
+        "suppress-empty-lyrics" : true,
         // Suppress chords.
         // Overrides --lyrics-only command line option.
         "lyrics-only" : false,
@@ -135,17 +137,22 @@ If `auto` is set to true, unknown chords will be printed as empty diagrams. This
 
 ## Table of Contents
 
-Here you can set the title text for the table of contents. By default
+`"title"` defines the title text for the table of contents. By default
 this is the string `"Table of Contents"`.
 
-The song titles in the table of contents are in the same order as in
-the document. By setting `order` to `"alpha"`, the titles are sorted
-alphabetically.
+`"line"` defines the content of the table of contents lines. You can
+use all song metadata, see [[here|ChordPro Configuration Format Strings]].
+
+The entries in the table of contents are in the same order as in
+the document. By setting `order` to `"alpha"`, the entries are sorted
+alphabetically by title.
 
     // Table of contents.
     "toc" : {
         // Title for ToC.
         "title" : "Table of Contents",
+        // ToC lines.
+        "line" : "%{title}",
         // Sorting order.
         // Currently only sorting by page number and alpha is implemented.
         "order" : "page",
@@ -176,3 +183,5 @@ In the format, `%f` will be replaced by the song file name, `%n` by the line num
     "diagnostics" : {
         "format" : "\"%f\", line %n, %m\n\t%l",
     },
+
+Note you cannot use song metadata here.
