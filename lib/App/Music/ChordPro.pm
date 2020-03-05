@@ -1,6 +1,6 @@
 #! perl
 
-use 5.010;
+use 5.010.1;
 
 package App::Music::ChordPro;
 
