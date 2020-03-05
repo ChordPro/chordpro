@@ -30,13 +30,11 @@ WriteMakefile
  # we may actually be using Pango instead.
  PREREQ_PM      => {
 		    'App::Packager'		  => 1.430,
-		    'PDF::API2'			  => 2.035,
-		    'Font::TTF'			  => 1.05,
-		    'Text::Layout'		  => 0.014,
+		    'PDF::API2'			  => 2.036,
+		    'Text::Layout'		  => 0.018,
 		    'JSON::PP'			  => 2.27203,
 		    'String::Interpolate::Named'  => 0.05,
 		    'File::LoadLines'		  => 0.02,
-		    'IO::String'		  => 1.08,
 		    'Image::Info'		  => 1.41,
 		   },
 
