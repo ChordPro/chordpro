@@ -102,6 +102,13 @@ sub init {
     my $font = $fonts[$self->{prefs_editfont}]->{font};
     $font->SetPointSize($self->{prefs_editsize});
     $self->{t_source}->SetFont($font);
+
+    # Disable menu items if we cannot.
+    $self->{main_menubar}->FindItem(wxID_UNDO)
+      ->Enable($self->{t_source}->CanUndo);
+    $self->{main_menubar}->FindItem(wxID_REDO)
+      ->Enable($self->{t_source}->CanRedo);
+
     Wx::Log::SetTimestamp(' ');
     if ( @ARGV && -s $ARGV[0] ) {
 	$self->openfile( shift(@ARGV) );
@@ -638,7 +645,7 @@ sub OnQuit {
     my ( $self, $event ) = @_;
     $self->SavePreferences;
     return unless $self->checksaved;
-    $self->Close;
+    $self->Close(1);
 }
 
 sub OnExit {			# called implicitly
