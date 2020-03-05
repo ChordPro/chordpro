@@ -312,7 +312,7 @@ sub add_config_chord {
 	$res = $config_chords{$def->{copy}};
 	return "Cannot copy $def->{copy}"
 	  unless $res;
-	$def = $res;
+	$def = { %$res, %$def };
     }
 
     my ( $base, $frets, $fingers ) =
@@ -321,35 +321,36 @@ sub add_config_chord {
     return $res if $res;
 
     for $name ( $name, @names ) {
-    my $info = parse_chord($name) // { name => $name };
-    $config_chords{$name} =
-      { origin  => "config",
-	%$info,
-	base    => $base,
-	frets   => [ @$frets ],
-	fingers => [ $fingers && @$fingers ? @$fingers : () ] };
-    push( @chordnames, $name );
+	my $info = parse_chord($name) // { name => $name };
+	$config_chords{$name} =
+	  { origin  => "config",
+	    %$info,
+	    display => $def->{display} // $name,
+	    base    => $base,
+	    frets   => [ @$frets ],
+	    fingers => [ $fingers && @$fingers ? @$fingers : () ] };
+	push( @chordnames, $name );
 
-    # Also store the chord info under a neutral name so it can be
-    # found when other note name systems are used.
-    my $i;
-    if ( defined $info->{root_ord} ) {
-	$i = $info->agnostic;
-    }
-    else {
-	# Retry with default parser.
-	$i = App::Music::ChordPro::Chords::Parser->default->parse($name);
-	if ( defined $i->{root_ord} ) {
-	    $info->{root_ord} = $i->{root_ord};
-	    $config_chords{$name}->{$_} = $i->{$_}
-	      for qw( root_ord ext_canon qual_canon );
-	    $i = $i->agnostic;
+	# Also store the chord info under a neutral name so it can be
+	# found when other note name systems are used.
+	my $i;
+	if ( defined $info->{root_ord} ) {
+	    $i = $info->agnostic;
 	}
-    }
-    if ( defined $info->{root_ord} ) {
-	$config_chords{$i} = $config_chords{$name};
-	$config_chords{$i}->{origin} = " config";
-    }
+	else {
+	    # Retry with default parser.
+	    $i = App::Music::ChordPro::Chords::Parser->default->parse($name);
+	    if ( defined $i->{root_ord} ) {
+		$info->{root_ord} = $i->{root_ord};
+		$config_chords{$name}->{$_} = $i->{$_}
+		  for qw( root_ord ext_canon qual_canon );
+		$i = $i->agnostic;
+	    }
+	}
+	if ( defined $info->{root_ord} ) {
+	    $config_chords{$i} = $config_chords{$name};
+	    $config_chords{$i}->{origin} = " config";
+	}
     }
     return;
 }
@@ -366,6 +367,7 @@ sub add_song_chord {
     $song_chords{$name} =
       { origin  => "user",
 	%$info,
+	display => $name,
 	base    => $base,
 	frets   => [ @$frets ],
 	fingers => [ $fingers && @$fingers ? @$fingers : () ] };
@@ -379,6 +381,7 @@ sub add_unknown_chord {
     $song_chords{$name} =
       { origin  => "user",
 	name    => $name,
+	display => $name,
 	base    => 0,
 	frets   => [],
 	fingers => [] };
@@ -475,6 +478,7 @@ sub chord_info {
     if ( ! $info && $::config->{diagrams}->{auto} ) {
 	$info = { origin  => "user",
 		  name    => $chord,
+		  display => $chord,
 		  base    => 0,
 		  frets   => [],
 		  fingers => [],
@@ -486,6 +490,7 @@ sub chord_info {
 	return +{
 		 name    => $chord,
 		 %$info,
+		 display => $info->{display} // $chord,
 		 strings => [],
 		 fingers => [],
 		 base    => 1,

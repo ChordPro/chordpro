@@ -116,12 +116,14 @@ This is the current built-in configuration file, showing all settings.
       // "base" defaults to 1.
       // Use 0 for an empty string, and -1 for a muted string.
       // "fingers" is optional.
+      // "display" (optional) can be used to change the way the chord is displayed. 
       "chords" : [
   	//  {
   	//    "name"  : "Bb",
   	//    "base"  : 1,
   	//    "frets" : [ 1, 1, 3, 3, 3, 1 ],
   	//    "fingers" : [ 1, 1, 2, 3, 4, 1 ],
+	//    "display" : "B<sub>♭</sub>",
   	//  },
       ],
   

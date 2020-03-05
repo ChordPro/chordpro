@@ -221,6 +221,10 @@
  			"description": "Copy another definition.",
  			"type": "string"
  		    },
+ 		    "display": {
+ 			"description": "How to show the chord name.",
+ 			"type": "string"
+ 		    },
 		    "frets": {
 			"description": "Finger positions from low string to hight string.",
 			"type": "array",

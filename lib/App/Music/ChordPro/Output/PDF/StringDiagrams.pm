@@ -61,7 +61,7 @@ sub draw {
     # Draw font name.
     my $font = $ps->{fonts}->{diagram};
     $pr->setfont($font);
-    my $name = $info->{name};
+    my $name = $info->{display} // $info->{name};
     $name .= "*"
       unless $info->{origin} ne "user"
 	|| $::config->{diagrams}->{show} eq "user";

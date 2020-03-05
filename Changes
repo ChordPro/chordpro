@@ -8,6 +8,7 @@
     - Fix bug where some command line arguments did not properly support
       utf8.
     - Add settings.suppress-empty-lyrics to suppress blank lyrics lines.
+    - Add display property to chords to control the way they are displayed.
     - Fix handling of {chorus: label}.
     - Fix problem where using a {chord} directive before any song lines
       would crash.

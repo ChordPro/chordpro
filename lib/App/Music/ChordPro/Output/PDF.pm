@@ -1321,10 +1321,11 @@ sub songline {
 	    $x = $pr->text( $phrase, $x, $ytext, $ftext );
 
 	    # Collect chords to be printed in the side column.
-	    push(@chords, $chord);
+	    my $info = App::Music::ChordPro::Chords::chord_info($chord);
+	    push(@chords, $info ? $info->{display} // $chord : $chord);
 	}
 	else {
-	    my $info = App::Music::ChordPro::Chords::identify($chord);
+	    my $info = App::Music::ChordPro::Chords::chord_info($chord);
 	    my $xt0;
 	    if ( $info && $info->{system} eq "roman" ) {
 		$xt0 = $pr->text( $pre.$info->{root},
@@ -1354,7 +1355,9 @@ sub songline {
 	    }
 	    elsif ( $chord) {
 		# Strip leading (but not sole) asterisk.
-		$chord =~ s/^\*(?=.)//;
+		unless ( $chord =~ s/^\*(?=.)// ) {
+		    $chord = $info->{display} // $chord;
+		}
 		$xt0 = $pr->text( $pre.$chord.$post, $x, $ychord, $fchord );
 	    }
 	    else {
