@@ -9,6 +9,7 @@
       utf8.
     - Add settings.suppress-empty-lyrics to suppress blank lyrics lines.
     - Add display property to chords to control the way they are displayed.
+    - Add guitar-br.json with Brandt-Roemer compliant chord symbols.
     - Fix handling of {chorus: label}.
     - Fix problem where using a {chord} directive before any song lines
       would crash.

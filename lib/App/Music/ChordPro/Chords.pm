@@ -325,7 +325,7 @@ sub add_config_chord {
 	$config_chords{$name} =
 	  { origin  => "config",
 	    %$info,
-	    display => $def->{display} // $name,
+	    defined($def->{display}) ? ( display => $def->{display} ) : (),
 	    base    => $base,
 	    frets   => [ @$frets ],
 	    fingers => [ $fingers && @$fingers ? @$fingers : () ] };
@@ -367,7 +367,6 @@ sub add_song_chord {
     $song_chords{$name} =
       { origin  => "user",
 	%$info,
-	display => $name,
 	base    => $base,
 	frets   => [ @$frets ],
 	fingers => [ $fingers && @$fingers ? @$fingers : () ] };
@@ -381,7 +380,6 @@ sub add_unknown_chord {
     $song_chords{$name} =
       { origin  => "user",
 	name    => $name,
-	display => $name,
 	base    => 0,
 	frets   => [],
 	fingers => [] };
@@ -478,7 +476,6 @@ sub chord_info {
     if ( ! $info && $::config->{diagrams}->{auto} ) {
 	$info = { origin  => "user",
 		  name    => $chord,
-		  display => $chord,
 		  base    => 0,
 		  frets   => [],
 		  fingers => [],
@@ -490,7 +487,6 @@ sub chord_info {
 	return +{
 		 name    => $chord,
 		 %$info,
-		 display => $info->{display} // $chord,
 		 strings => [],
 		 fingers => [],
 		 base    => 1,

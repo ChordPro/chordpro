@@ -123,7 +123,7 @@ This is the current built-in configuration file, showing all settings.
   	//    "base"  : 1,
   	//    "frets" : [ 1, 1, 3, 3, 3, 1 ],
   	//    "fingers" : [ 1, 1, 2, 3, 4, 1 ],
-	//    "display" : "B<sub>♭</sub>",
+	//    "display" : "B<sup>\u266d</sup>",
   	//  },
       ],
   

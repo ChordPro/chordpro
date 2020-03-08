@@ -26,6 +26,7 @@ lib/App/Music/ChordPro/Wx/PreferencesDialog_wxg.pm
 lib/App/Music/ChordPro/res/config/chordii.json
 lib/App/Music/ChordPro/res/config/chordpro.json
 lib/App/Music/ChordPro/res/config/guitar-ly.json
+lib/App/Music/ChordPro/res/config/guitar-br.json
 lib/App/Music/ChordPro/res/config/guitar.json
 lib/App/Music/ChordPro/res/config/inline.json
 lib/App/Music/ChordPro/res/config/mandolin-ly.json
