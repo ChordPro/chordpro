@@ -1,4 +1,4 @@
-# Pango style markup
+# Pango markup language
 
 _This information is derived from the official [Pango documentation](https://developer.gnome.org/pygtk/stable/pango-markup-language.html)._
 
@@ -9,19 +9,21 @@ markup is:
 
     <span foreground="blue" size="100">Blue text</span> is <i>cool</i>!
 
+The ChordPro reference implementation provides almost complete support
+for the Pango markup language.
+
 The most general markup tag is `<span>`. The `<span>` tag has the
 following attributes:
 
-<dl>
-<dt>font_desc</dt>
-<dd>A font description string, such as "Sans Italic 12"; note that any
+* `font_desc`  
+A font description string, such as "Sans Italic 12"; note that any
 other span attributes will override this description. So if you have
 `"Sans Italic"` and also a `style="normal"` attribute, you will get Sans
-normal, not italic.</dd>
+normal, not italic.
 
-<dt>font_family</dt>
-<dd>A font family name such as `normal`, `sans`, `serif` or
-`monospace`.</dd>
+* `font_family`  
+>A font family name such as `normal`, `sans`, `serif` or
+`monospace`.
 
 <dt>face</dt>
 <dd>A synonym for `font_family`</dd>
