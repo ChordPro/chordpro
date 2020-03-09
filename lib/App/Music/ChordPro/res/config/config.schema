@@ -509,6 +509,22 @@
 		"fonts": {
 		    "description": "The (logical) fonts used for typesetting.",
 		    "properties": {
+			"annotation": {
+			    "description": "Font for annotations.",
+			    "allOf": [
+				{ "$ref": "#/definitions/fontspec" },
+				{ "properties": {
+				    "name": {
+					"default": "Helvetica-Oblique",
+					"type": "string"
+				    },
+				    "size": {
+					"default": 10,
+					"type": "number"
+				    },
+				    "additionalProperties": { "not": {} }
+				} } ]
+			},
 			"chord": {
 			    "description": "Font for typesetting chord names.",
 			    "allOf": [
