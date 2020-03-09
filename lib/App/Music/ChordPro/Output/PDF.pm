@@ -1325,44 +1325,52 @@ sub songline {
 	    push(@chords, $info ? $info->{display} // $chord : $chord);
 	}
 	else {
-	    my $info = App::Music::ChordPro::Chords::chord_info($chord);
 	    my $xt0;
-	    if ( $info && $info->{system} eq "roman" ) {
-		$xt0 = $pr->text( $pre.$info->{root},
-				  $x, $ychord, $fchord );
-		$info->{qual} = 'ø' if $info->{qual} eq 'h';
-		$xt0 = $pr->text( $info->{qual}.$info->{ext}, $xt0,
-				   $ychord + $fchord->{size} * 0.2,
-				   $fchord,
-				   $fchord->{size} * 0.8
-				 );
-		$xt0 = $pr->text( $post, $xt0, $ychord, $fchord );
-	    }
-	    elsif ( $info && $info->{system} eq "nashville" ) {
-		$xt0 = $pr->text( $pre.$info->{root}.$info->{qual},
-				  $x, $ychord, $fchord );
-#		if ( $info->{minor} ) {
-#		    my $m = $info->{minor};
-#		    # $m = "\x{0394}" if $m eq "^";
-#		    $xt0 = $pr->text( $m, $xt0, $ychord, $fchord );
-#		}
-		$xt0 = $pr->text( $info->{ext}, $xt0,
-				   $ychord + $fchord->{size} * 0.2,
-				   $fchord,
-				   $fchord->{size} * 0.8,
-				 );
-		$xt0 = $pr->text( $post, $xt0, $ychord, $fchord );
-	    }
-	    elsif ( $chord) {
-		# Strip leading (but not sole) asterisk.
-		unless ( $chord =~ s/^\*(?=.)// ) {
-		    $chord = $info->{display} // $chord;
-		}
-		$xt0 = $pr->text( $pre.$chord.$post, $x, $ychord, $fchord );
+	    if ( $chord =~ /^\*(.*)/ ) {
+		my $ann = $1 ne "" ? $1 : "*";
+		my $fann = $fonts->{annotation};
+		$xt0 = $pr->text( $ann, $x, $ychord, $fann );
 	    }
 	    else {
-		$xt0 = $x;
+		my $info = App::Music::ChordPro::Chords::chord_info($chord);
+		if ( $info && $info->{system} eq "roman" ) {
+		    $xt0 = $pr->text( $pre.$info->{root},
+				      $x, $ychord, $fchord );
+		    $info->{qual} = 'ø' if $info->{qual} eq 'h';
+		    $xt0 = $pr->text( $info->{qual}.$info->{ext}, $xt0,
+				       $ychord + $fchord->{size} * 0.2,
+				       $fchord,
+				       $fchord->{size} * 0.8
+				     );
+		    $xt0 = $pr->text( $post, $xt0, $ychord, $fchord );
+		}
+		elsif ( $info && $info->{system} eq "nashville" ) {
+		    $xt0 = $pr->text( $pre.$info->{root}.$info->{qual},
+				      $x, $ychord, $fchord );
+    #		if ( $info->{minor} ) {
+    #		    my $m = $info->{minor};
+    #		    # $m = "\x{0394}" if $m eq "^";
+    #		    $xt0 = $pr->text( $m, $xt0, $ychord, $fchord );
+    #		}
+		    $xt0 = $pr->text( $info->{ext}, $xt0,
+				       $ychord + $fchord->{size} * 0.2,
+				       $fchord,
+				       $fchord->{size} * 0.8,
+				     );
+		    $xt0 = $pr->text( $post, $xt0, $ychord, $fchord );
+		}
+		elsif ( $chord) {
+		    # Strip leading (but not sole) asterisk.
+		    unless ( $chord =~ s/^\*(?=.)// ) {
+			$chord = $info->{display} // $chord;
+		    }
+		    $xt0 = $pr->text( $pre.$chord.$post, $x, $ychord, $fchord );
+		}
+		else {
+		    $xt0 = $x;
+		}
 	    }
+
 	    # Do not indent chorus labels (issue #81).
 	    prlabel( $ps, $tag, $x-$opts{indent}, $ytext );
 	    $tag = "";
@@ -2017,6 +2025,7 @@ sub configurator {
     $fonts->{comment_italic} ||= { %{ $fonts->{chord} } };
     $fonts->{comment_box}    ||= { %{ $fonts->{chord} } };
     $fonts->{comment}        ||= { %{ $fonts->{text}  } };
+    $fonts->{annotation}     ||= { %{ $fonts->{chord}  } };
     $fonts->{toc}	     ||= { %{ $fonts->{text}  } };
     $fonts->{empty}	     ||= { %{ $fonts->{text}  } };
     $fonts->{grid}           ||= { %{ $fonts->{chord} } };
@@ -2028,6 +2037,7 @@ sub configurator {
     $fonts->{comment_italic}->{size} ||= $fonts->{text}->{size};
     $fonts->{comment_box}->{size}    ||= $fonts->{text}->{size};
     $fonts->{comment}->{size}        ||= $fonts->{text}->{size};
+    $fonts->{annotation}->{size}     ||= $fonts->{chord}->{size};
 
     # Default footer is small subtitle.
     unless ( $fonts->{footer} ) {

@@ -410,13 +410,14 @@ This is the current built-in configuration file, showing all settings.
   	// comment        --> text
   	// comment_italic --> chord
   	// comment_box    --> chord
+	// annotation     --> chord
   	// toc            --> text
   	// grid           --> chord
-  	// grid_margin	  --> comment
+  	// grid_margin    --> comment
   	// footer         --> subtitle @ 60%
   	// empty          --> text
-  	// diagram	  --> comment
-  	// diagram_base	  --> text (but at a small size)
+  	// diagram        --> comment
+  	// diagram_base   --> text (but at a small size)
   
   	// This will show the page layout if non-zero.
   	"showlayout" : false,
