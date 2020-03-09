@@ -51,8 +51,7 @@ In print, this song could look like this (click on the thumbnail to view the ful
 
 It is possible to use _markup_ in lyrics and other texts to change the
 way how these will be typeset. The markup confirms to the [Pango
-Markup
-Language](https://developer.gnome.org/pygtk/stable/pango-markup-language.html)
+Markup Language](Pango_Markup.html)
 and can be used to change text size, color, typeface (font) and more.
 
 _Annotations_ are textual remarks placed above the lyrics, just like

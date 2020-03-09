@@ -344,6 +344,9 @@ Default is "Times-Roman" at size 12.
 * `chord`  
 The font used for chords above the lyrics.  
 Default is "Helvetica-Oblique" at size 10.
+* `annotation`  
+The font used for annotations.  
+Defaults to the `chord` font.
 * `comment`  
 The font used for comments.  
 Default is "Helvetica" at size 12, with a grey background.

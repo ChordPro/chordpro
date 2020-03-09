@@ -31,7 +31,7 @@ aliases are `"sans"` and `"mono"`.
 
 ### Why is using font descriptions important?
 
-Because ChordPro allows you to use [Pango style markup](https://developer.gnome.org/pygtk/stable/pango-markup-language.html) in all your lyrics, titles and so on. For example:
+Because ChordPro allows you to use [Pango style markup](Pango_Markup.html) in all your lyrics, titles and so on. For example:
 
     [C]winkle, twinkle <bold>little</bold> [G]star
 
