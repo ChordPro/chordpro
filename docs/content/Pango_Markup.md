@@ -22,111 +22,104 @@ other span attributes will override this description. So if you have
 normal, not italic.
 
 * `font_family`  
->A font family name such as `normal`, `sans`, `serif` or
+A font family name such as `normal`, `sans`, `serif` or
 `monospace`.
 
-<dt>face</dt>
-<dd>A synonym for `font_family`</dd>
+* `face`  
+A synonym for `font_family`
 
-<dt>size</dt>
-<dd>The font size in thousandths of a point, or one of the absolute
+* `size`  
+The font size in thousandths of a point, or one of the absolute
 sizes `xx-small`, `x-small`, `small`, `medium`, `large`, `x-large`,
-`xx-large`, or one of the relative sizes `smaller` or `larger`.</dd>
+`xx-large`, or one of the relative sizes `smaller` or `larger`.
 
-<dt>style</dt>
-<dd>The slant style - one of `normal`, `oblique`, or `italic`</dd>
+* `style`  
+The slant style - one of `normal`, `oblique`, or `italic`
 
-<dt>weight</dt>
-<dd>The font weight - one of `ultralight`, `light`, `normal`, `bold`,
+* `weight`  
+The font weight - one of `ultralight`, `light`, `normal`, `bold`,
 `ultrabold`, `heavy`, or a numeric weight.__
-Note: Only `normal` and `bold` are supported.</dd>
+Note: Only `normal` and `bold` are supported.
 
-<dt>variant</dt>
-<dd>The font variant - either `normal` or `smallcaps`.  
+* `variant`  
+The font variant - either `normal` or `smallcaps`.  
 Note: Not (yet) supported.
-</dd>
 
-<dt>stretch</dt>
-<dd>The font width - one of `ultracondensed`, `extracondensed`,
+
+* `stretch`  
+The font width - one of `ultracondensed`, `extracondensed`,
 `condensed`, `semicondensed`, `normal`, `semiexpanded`, `expanded`,
 `extraexpanded`, `ultraexpanded`.  
 Note: Not (yet) supported.
-</dd>
 
-<dt>foreground</dt>
-<dd>An RGB color specification such as `#00FF00` or a color name such
-as `red`.</dd>
 
-<dt>background</dt>
-<dd>An RGB color specification such as `#00FF00` or a color name such
+* `foreground`  
+An RGB color specification such as `#00FF00` or a color name such
+as `red`.
+
+* `background`  
+An RGB color specification such as `#00FF00` or a color name such
 as `red`.  
 Note: Not (yet) supported.
-</dd>
 
-<dt>underline</dt>
-<dd>The underline style - one of `single`, `double`, `low`, or
-`none`.</dd>
 
-<dt>rise</dt>
-<dd>The vertical displacement from the baseline, in ten thousandths of
-an em. Can be negative for subscript, positive for superscript.</dd>
+* `underline`  
+The underline style - one of `single`, `double`, `low`, or
+`none`.
 
-<dt>strikethrough</dt>
-<dd>`true` or `false` whether to strike through the text.  
+* `rise`  
+The vertical displacement from the baseline, in ten thousandths of
+an em. Can be negative for subscript, positive for superscript.
+
+* `strikethrough`  
+`true` or `false` whether to strike through the text.  
 Note: Not (yet) supported.
-</dd>
 
-<dt>fallback</dt>
-<dd>If True enable fallback to other fonts of characters are missing
+
+* `fallback`  
+If True enable fallback to other fonts of characters are missing
 from the current font. If disabled, then characters will only be used
 from the closest matching font on the system. No fallback will be done
 to other fonts on the system that might contain the characters in the
 text. Fallback is enabled by default. Most applications should not
 disable fallback.  
 Note: Not (yet) supported.
-</dd>
 
-<dt>lang</dt>
-<dd>A language code, indicating the text language.  
+
+* `lang`  
+A language code, indicating the text language.  
 Note: Not (yet) supported.
-</dd>
 
-</dl>
 
 There are a number of convenience tags that encapsulate specific span
 options:
 
-<dl>
+* `b`  
+Make the text bold.
 
-<dt>b</dt>
-<dd>Make the text bold.</dd>
+* `big`  
+Makes font relatively larger, equivalent to `<span size="larger">`.
 
-<dt>big</dt>
-<dd>Makes font relatively larger, equivalent to `<span size="larger">`.</dd>
+* `i`  
+Make the text italic.
 
-<dt>i</dt>
-<dd>Make the text italic.</dd>
-
-<dt>s</dt>
-<dd>Strikethrough the text.  
+* `s`  
+Strikethrough the text.  
 Note: Not (yet) supported.
-</dd>
 
-<dt>sub</dt>
-<dd>Subscript the text.</dd>
 
-<dt>sup</dt>
-<dd>Superscript the text.</dd>
+* `sub`  
+Subscript the text.
 
-<dt>small</dt>
-<dd>Makes font relatively smaller, equivalent to `<span size="smaller">`.</dd>
+* `sup`  
+Superscript the text.
 
-<dt>tt</dt>
-<dd>Use a monospace font.</dd>
+* `small`  
+Makes font relatively smaller, equivalent to `<span size="smaller">`.
 
-<dt>u</dt>
-<dd>Underline the text.  
+* `tt`  
+Use a monospace font.
+
+* `u`  
+Underline the text.  
 Note: Not (yet) supported.
-</dd>
-
-</dl>
