@@ -596,6 +596,7 @@ Provides more verbose information of what is going on.
 
 use Getopt::Long 2.13 qw( :config no_ignorecase );
 use File::Spec;
+use File::LoadLines;
 
 # Package name.
 my $my_package;
@@ -845,7 +846,7 @@ sub app_setup {
 	    if ( $file and open( my $fd, "<:raw", $file ) ) {
 		my $pp = JSON::PP->new->relaxed;
 		warn("Config: $file\n") if $clo->{verbose};
-		my $new = $pp->decode( ::loadfile ($fd, { %$clo, donotsplit => 1 } ) );
+		my $new = $pp->decode( loadlines ($fd, { %$clo, split => 0 } ) );
 		App::Music::ChordPro::Chords::set_notes( $new->{notes},
 							 { %$clo,
 							   'keep-parser' => 1 } );
@@ -874,7 +875,7 @@ sub app_setup {
     if ( $clo->{filelist} ) {
 	my @files;
 	foreach ( @{ $clo->{filelist} } ) {
-	    my $list = ::loadfile( $_, $clo );
+	    my $list = loadlines( $_, $clo );
 	    foreach ( @$list ) {
 		next unless /\S/;
 		next if /^#/;
@@ -1032,98 +1033,6 @@ sub ::rsc_or_file {
     my $t = getresource($f);
     $t = getresource( "config/$f" ) unless defined($t) || $f =~ /\//;
     return defined($t) ? $t : $c;
-}
-
-sub ::loadfile {
-    my ( $filename, $options ) = @_;
-
-    my $data;			# slurped file data
-    my $encoded;		# already encoded
-
-    # Gather data from the input.
-    if ( ref($filename) ) {
-	if ( ref($filename) eq 'GLOB' ) {
-	    binmode( $filename, ':raw' );
-	    $data = do { local $/; <$filename> };
-	    $filename = "__GLOB__";
-	}
-	else {
-	    $data = $$filename;
-	    $filename = "__STRING__";
-	    $encoded++;
-	}
-    }
-    elsif ( $filename eq '-' ) {
-	$filename = "__STDIN__";
-	$data = do { local $/; <STDIN> };
-    }
-    else {
-	my $name = $filename;
-	$filename = decode_utf8($name);
-	open( my $fh, '<', $name)
-	  or croak("$filename: $!\n");
-	$data = do { local $/; <$fh> };
-    }
-    $options->{_filesource} = $filename if $options;
-
-    my $name = encode_utf8($filename);
-    if ( $encoded ) {
-	# Nothing to do, already dealt with.
-    }
-
-    # Detect Byte Order Mark.
-    elsif ( $data =~ /^\xEF\xBB\xBF/ ) {
-	warn("$name is UTF-8 (BOM)\n") if $options->{debug};
-	$data = decode( "UTF-8", substr($data, 3) );
-    }
-    elsif ( $data =~ /^\xFE\xFF/ ) {
-	warn("$name is UTF-16BE (BOM)\n") if $options->{debug};
-	$data = decode( "UTF-16BE", substr($data, 2) );
-    }
-    elsif ( $data =~ /^\xFF\xFE\x00\x00/ ) {
-	warn("$name is UTF-32LE (BOM)\n") if $options->{debug};
-	$data = decode( "UTF-32LE", substr($data, 4) );
-    }
-    elsif ( $data =~ /^\xFF\xFE/ ) {
-	warn("$name is UTF-16LE (BOM)\n") if $options->{debug};
-	$data = decode( "UTF-16LE", substr($data, 2) );
-    }
-    elsif ( $data =~ /^\x00\x00\xFE\xFF/ ) {
-	warn("$name is UTF-32BE (BOM)\n") if $options->{debug};
-	$data = decode( "UTF-32BE", substr($data, 4) );
-    }
-
-    # No BOM, did user specify an encoding?
-    elsif ( $options->{encoding} ) {
-	warn("$name is ", $options->{encoding}, " (--encoding)\n")
-	  if $options->{debug};
-	$data = decode( $options->{encoding}, $data, 1 );
-    }
-
-    # Try UTF8, fallback to ISO-8895.1.
-    else {
-	my $d = eval { decode( "UTF-8", $data, 1 ) };
-	if ( $@ ) {
-	    warn("$name is ISO-8859.1 (assumed)\n") if $options->{debug};
-	    $data = decode( "iso-8859-1", $data );
-	}
-	else {
-	    warn("$name is UTF-8 (detected)\n") if $options->{debug};
-	    $data = $d;
-	}
-    }
-
-    return $data if $options->{donotsplit};
-
-    # Split in lines;
-    my @lines;
-    $data =~ s/^\s+//s;
-    # Unless empty, make sure there is a final newline.
-    $data .= "\n" if $data =~ /.(?!\r\n|\n|\r)\Z/;
-    # We need to maintain trailing newlines.
-    push( @lines, $1 ) while $data =~ /(.*)(?:\r\n|\n|\r)/g;
-
-    return \@lines;
 }
 
 use lib ( grep { defined } getresource("CPAN") );

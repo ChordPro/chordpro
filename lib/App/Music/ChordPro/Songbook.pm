@@ -8,8 +8,10 @@ use warnings;
 use App::Music::ChordPro;
 use App::Music::ChordPro::Chords;
 use App::Music::ChordPro::Output::Common;
+use App::Music::ChordPro::Utils qw( expand_tilde );
 
 use Carp;
+use File::LoadLines;
 
 sub new {
     my ($pkg) = @_;
@@ -59,7 +61,7 @@ sub parsefile {
     my ( $self, $filename, $options ) = @_;
     $options //= {};
 
-    my $lines = ::loadfile( $filename, $options );
+    my $lines = loadlines( $filename, $options );
     $diag->{format} = $options->{diagformat}
       || $::config->{diagnostics}->{format};
     $diag->{file} = $options->{_filesource};

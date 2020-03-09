@@ -8,6 +8,7 @@ use utf8;
 use App::Packager;
 use Carp;
 use App::Music::ChordPro;
+use File::LoadLines;
 
 =head1 NAME
 
@@ -456,6 +457,7 @@ This is the current built-in configuration file, showing all settings.
 
 use File::Spec;
 use JSON::PP ();
+use App::Music::ChordPro::Utils qw( expand_tilde );
 
 sub hmerge($$$);
 sub clone($);
@@ -617,7 +619,8 @@ sub configurator {
 	$cfg->{pdf}->{fontdir} = [];
 	my $split = $^O =~ /^MS*/ ? qr(;) : qr(:);
 	foreach ( @a ) {
-	    push( @{ $cfg->{pdf}->{fontdir} }, split( $split, $_ ) );
+	    push( @{ $cfg->{pdf}->{fontdir} },
+		  map { expand_tilde($_) } split( $split, $_ ) );
 	}
     }
     else {
@@ -686,9 +689,10 @@ sub add_config {
     Carp::confess("FATAL: Insufficient config") unless @_ == 4;
     Carp::confess("FATAL: Undefined config") unless defined $file;
     warn("Config: $file\n") if $options->{verbose};
+    $file = expand_tilde($file);
 
     if ( open( my $fd, "<:raw", $file ) ) {
-	my $new = $pp->decode( ::loadfile ($fd, { %$options, donotsplit => 1 } ) );
+	my $new = $pp->decode( loadlines( $fd, { %$options, split => 0 } ) );
 
 	# Handle obsolete keys.
 	if ( exists $new->{pdf}->{diagramscolumn} ) {
