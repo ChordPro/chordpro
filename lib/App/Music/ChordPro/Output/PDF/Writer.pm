@@ -71,7 +71,9 @@ sub text {
 
     $self->{layout}->set_font_description($font->{fd});
     $self->{layout}->set_font_size($size);
-    ####TODO: current color?
+    if ( $font->{color} && $font->{color} ne "black" ) {
+	$text = "<span color='" . $font->{color} . "'>" . $text . "</span>";
+    }
     $self->{layout}->set_markup($text);
     $y -= $self->{layout}->get_baseline;
     $self->{layout}->show( $x, $y, $self->{pdftext} );
@@ -110,6 +112,9 @@ sub text_nobl {
 
     $self->{layout}->set_font_description($font->{fd});
     $self->{layout}->set_font_size($size);
+    if ( $font->{color} && $font->{color} ne "black" ) {
+	$text = "<span color='" . $font->{color} . "'>" . $text . "</span>";
+    }
     $self->{layout}->set_markup($text);
     $self->{layout}->show( $x, $y, $self->{pdftext} );
 
