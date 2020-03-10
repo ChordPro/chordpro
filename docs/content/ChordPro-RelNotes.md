@@ -1,5 +1,10 @@
 # ChordPro Release info
 
+Release information for the __ChordPro file format__.
+
+For release information for the ChordPro __reference implementation__, see
+[here](ChordPro-Reference-RelNotes.html).
+
 ## ChordPro version 6
 
 ### Markup
