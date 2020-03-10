@@ -31,3 +31,10 @@ The reference implementation will produce something similar to:
 
 ![Example annotation](images/thisistheend.png)
 
+Even though they are written using chord-like syntax, it is important
+to know that annotations are _not_ chords. In particular:
+
+- ChordPro processing tools may choose to show annotations in a
+  different way than chords.
+- No attempts will be made to transpose, transcode, or draw chord
+  diagrams for annotations.
