@@ -38,6 +38,7 @@ For general discussion, please see [google groups](https://groups.google.com/for
 Bugs and feature requests go to [the GitHub issue tracker](https://github.com/ChordPro/chordpro/issues).
 
 ## License
-Copyright © 2010,2018 The ChordPro Team
+Copyright © 2010,2018,2020 The ChordPro Team
 
-This program is free software. You can redistribute it and/or modify it under the terms of the Artistic License 2.0.
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
