@@ -43,3 +43,42 @@ to know that annotations are _not_ chords. In particular:
   different way than chords.
 - No attempts will be made to transpose, transcode, or draw chord
   diagrams for annotations.
+
+### New section directives
+
+The following directives are added:
+
+* start_of_verse (short: sov)
+* end_of_verse (short: eov)
+* start_of_bridge (short: sob)
+* end_of_bridge (short: eob)
+
+The purpose of these directives is to be able to identify portions of
+the song. ChordPro processing tools may choose to use this
+information, e.g. to show a bridge in a different way than a verse.
+
+In addition to these directives it is possible to add your own section
+directives, for example `{start_of_lead}` or `{start_of_coda}`. All
+sections must be closed with the corresponding `{end_of_`_section_`}`.
+
+The reference implementation treats all sections (except `chorus`,
+`tab` and `grid`) as lyrics.
+
+### Section labels
+
+All section directives can take an optional label, which can be used
+to tag individual sections. For example:
+
+````
+{start_of_verse: Verse 1}
+[A]Hello there!
+{end_of_verse}
+ 
+{start_of_verse: Verse 2}
+[B]Nice seeing you.
+{end_of_verse}
+````
+
+The reference implementation will add a left margin to the output and
+place the label text in this margin.
+

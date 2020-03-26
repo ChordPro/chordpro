@@ -55,12 +55,14 @@ Environment directives always come in pairs, one to start the environment and on
 * [[start_of_chorus|Directives env_chorus]] (short: soc)
 * [[end_of_chorus|Directives env_chorus]] (short: eoc)
 * [[chorus|Directives env_chorus]]
-* [[start_of_verse|Directives env_verse]]
-* [[end_of_verse|Directives env_verse]]
+* [[start_of_verse|Directives env_verse]] (short: sov)
+* [[end_of_verse|Directives env_verse]] (short: eov)
+* [[start_of_bridge|Directives env_bridge]] (short: sob)
+* [[end_of_bridge|Directives env_bridge]] (short: eob)
 * [[start_of_tab|Directives env_tab]] (short: sot)
 * [[end_of_tab|Directives env_tab]] (short: eot)
-* [[start_of_grid|Directives env_grid]]
-* [[end_of_grid|Directives env_grid]]
+* [[start_of_grid|Directives env_grid]] (short: sog)
+* [[end_of_grid|Directives env_grid]] (short: eog)
 
 ## Chord diagrams
 
