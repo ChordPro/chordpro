@@ -11,9 +11,8 @@ For example:,
 
     {start_of_verse: Verse 1}
 
-The label could be printed before the chorus, or in the left margin.
-
-See also [[labels|ChordPro Configuration PDF#labels]].
+The ChordPro reference implementation prints the label in the left
+margin, see [[labels|ChordPro Configuration PDF#labels]].
 
 # Directives: end_of_verse
 

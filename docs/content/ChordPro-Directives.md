@@ -50,8 +50,10 @@ See also [[Using metadata in texts|ChordPro Configuration Format Strings]].
 
 ## Environment directives
 
-Environment directives always come in pairs, one to start the environment and one to end the environment.
+Environment directives always come in pairs, one to start the
+environment and one to end it.
 
+* [[Introduction to environments|Directives env]]
 * [[start_of_chorus|Directives env_chorus]] (short: soc)
 * [[end_of_chorus|Directives env_chorus]] (short: eoc)
 * [[chorus|Directives env_chorus]]

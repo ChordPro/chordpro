@@ -9,7 +9,8 @@ left margin. For example:,
 
     {start_of_tab: Solo}
 
-See also [[labels|ChordPro Configuration PDF#labels]].
+The ChordPro reference implementation prints the label in the left
+margin, see [[labels|ChordPro Configuration PDF#labels]].
 
 # Directives: end_of_tab
 
