@@ -657,25 +657,6 @@ sub generate_song {
 
 	    if ( $elt->{context} ne $curctx ) {
 		$curctx = $elt->{context};
-		if ( $curctx ne "" ) {
-		    # Context switch.
-		    my $markup = $ps->{section}->{$curctx}
-		      || $ps->{section}->{fallback} || "";
-		    # If we have markup, insert a comment line.
-		    if ( $ps->{fonts}->{$markup} ) {
-			my $e = { type => "comment",
-				  font => $ps->{fonts}->{$markup},
-				  context => $curctx,
-				  orig => $i_tag // $curctx,
-				  text => $i_tag // ucfirst($curctx) };
-			unshift( @elts, $e, $elt );
-			$i_tag = undef;
-			redo;
-		    }
-		    elsif ( $markup ) {
-			warn( "Unhandled section markup: $markup\n");
-		    }
-		}
 	    }
 
 	    my $fonts = $ps->{fonts};

@@ -25,7 +25,14 @@ ChordPro version 5 adds a number of new features, and this was pushing the limit
 So, we decided to create a new reference implementation from the ground up. We chose a programming language that is flexible and very good at handling Unicode data. And that is fun to program in.
 
 ## Current Status
-This program provides support for ChordPro version 5. It supports almost all of the features of Chordii, and a lot more, like native PDF generation, Unicode input and fully customizable layout, fonts and sizes.
+This program provides support for ChordPro version 5. It supports
+almost all of the features of Chordii, and a lot more, like native PDF
+generation, Unicode input and fully customizable layout, fonts and
+sizes.
+
+The development branch provides support for the ongoing ChordPro
+version 6. Prominent features of ChordPro 6 are Pango style text
+markup and a more powerful way of assigning typefaces to layout items.
 
 For up-to-date information, see <https://www.chordpro.org/chordpro/ChordPro-Reference-Implementation.html>
 

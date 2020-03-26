@@ -499,8 +499,12 @@ sub directive {
 
     if    ( $dir eq "soc" ) { $dir = "start_of_chorus" }
     elsif ( $dir eq "sot" ) { $dir = "start_of_tab"    }
+    elsif ( $dir eq "sov" ) { $dir = "start_of_verse"  }
+    elsif ( $dir eq "sob" ) { $dir = "start_of_bridge" }
     elsif ( $dir eq "eoc" ) { $dir = "end_of_chorus"   }
     elsif ( $dir eq "eot" ) { $dir = "end_of_tab"      }
+    elsif ( $dir eq "eov" ) { $dir = "end_of_verse"    }
+    elsif ( $dir eq "eob" ) { $dir = "end_of_bridge"   }
 
     if ( $dir =~ /^start_of_(\w+)$/ ) {
 	do_warn("Already in " . ucfirst($in_context) . " context\n")
