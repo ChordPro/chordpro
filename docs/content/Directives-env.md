@@ -5,7 +5,7 @@ meaningful units. For example, one of the most used environments is
 `chorus`, to indicate the chorus of a song.
 
 Environments start with a `start_of` directive, e.g.
-`{start_of_chorus}`, and ends with a corresponding `end_of` directive,
+`{start_of_chorus}`, and end with a corresponding `end_of` directive,
 e.g. `{end_of_chorus}`. As with every ChordPro directive, these
 directives should be alone on a line.
 
