@@ -1131,12 +1131,8 @@ L<https://groups.google.com/forum/#!forum/chordpro>.
 
 Copyright (C) 2010,2018 Johan Vromans,
 
-This program is free software. You can redistribute it and/or
-modify it under the terms of the Artistic License 2.0.
-
-This program is distributed in the hope that it will be useful,
-but without any warranty; without even the implied warranty of
-merchantability or fitness for a particular purpose.
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
 
 =cut
 

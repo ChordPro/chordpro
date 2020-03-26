@@ -1,4 +1,5 @@
 Changes
+LICENSE
 MANIFEST
 Makefile.PL
 README.md
@@ -140,4 +141,3 @@ t/ref/40_html_3.html
 t/ref/174_crd_1.crd
 t/ref/174_crd_2.crd
 t/ref/174_crd_3.crd
-
