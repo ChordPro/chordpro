@@ -70,8 +70,7 @@ sub parsefile {
     while ( @$lines ) {
 	my $song = $self->parse_song( $lines, \$linecnt, $options );
 #	if ( exists($self->{songs}->[-1]->{body}) ) {
-	    $song->{meta}->{songindex} = 1 + @{ $self->{songs} }
-		if @{ $self->{songs} } > 0;
+	    $song->{meta}->{songindex} = 1 + @{ $self->{songs} };
 	    push( @{ $self->{songs} }, $song );
 #	}
 #	else {

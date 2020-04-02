@@ -11,6 +11,7 @@
     - Add display property to chords to control the way they are displayed.
     - Add guitar-br.json with Brandt-Roemer compliant chord symbols.
     - Add basic support for annotations.
+    - Add meta variable songindex.
     - Fix handling of {chorus: label}.
     - Fix problem where using a {chord} directive before any song lines
       would crash.

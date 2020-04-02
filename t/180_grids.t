@@ -30,6 +30,7 @@ isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
 #use DDumper; warn(DDumper($s));
 my $song = {
       meta => {
+        songindex => 1,
         title => ['Grids'],
       },
       settings => {},

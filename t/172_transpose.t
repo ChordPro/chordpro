@@ -325,6 +325,7 @@ my $song = {
       chords => [ 'D', 'G', 'E', 'A', 'F#', 'B' ]
   },
   meta => {
+    songindex => 1,
     key => [
       'D',
     ],

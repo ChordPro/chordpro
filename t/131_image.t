@@ -34,6 +34,7 @@ delete( $s->{songs}->[0]->{assets}->{white}->{data} )
 my $song = {
 	    'settings' => {},
 	    'meta' => {
+		       'songindex' => 1,
 		       'title' => [
 				   'Swing Low Sweet Chariot'
 				  ],

@@ -152,6 +152,7 @@ my $song = {
     'type' => 'diagrams'
   },
   'meta' => {
+    'songindex' => 1,
     'title' => [
       'Transpositions'
     ]

@@ -34,6 +34,7 @@ my $song = {
 	    'structure' => 'linear',
 	    'system' => 'common',
 	    'meta' => {
+		       'songindex' => 1,
 		       'title' => [
 				   'Swing Low Sweet Chariot'
 				  ]

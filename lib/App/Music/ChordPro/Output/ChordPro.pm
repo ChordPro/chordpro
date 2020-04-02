@@ -80,7 +80,7 @@ sub generate_song {
 	}
 	# Unknowns with meta prefix.
 	foreach my $k ( sort keys %{ $s->{meta} } ) {
-	    next if $k =~ /^(?:title|subtitle)$/;
+	    next if $k =~ /^(?:title|subtitle|songindex)$/;
 	    next if $k =~ /^_/;
 	    push( @s, map { +"{meta: $k $_}" } @{ $s->{meta}->{$k} } );
 	}
