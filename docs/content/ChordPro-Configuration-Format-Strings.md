@@ -27,3 +27,17 @@ Now `album` has two values. When substituted, the values are concatenated using 
 Metadata values passed on the command line [(`--meta`)](Using-ChordPro#meta) are always inserted first.
 
 If necessary, the special meaning of the characters `\`, `{`, `}`, and `|` can be escaped by preceding it a `\`. Note that in the configuration files the strings are JSON strings and each `\` must be doubled: `"\\{"` is an escaped `{`. `"\\\\"` is an escaped backslash.
+
+## Standard meta data
+
+The ChordPro reference implementation provides additional meta data:
+
+ * `songindex`: The index (serial number) of the song in the songbook.
+ 
+ * `page`: The starting page number of the song.
+ 
+ * `tuning`: The tuning of the instrument. Usually `"E2 A2 D3 G3 B3 E4"`.
+ 
+ * `instrument`: The name of the instrument. Usually `"Guitar, 6
+   strings, standard tuning"`.
+   

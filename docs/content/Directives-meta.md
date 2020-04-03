@@ -4,7 +4,8 @@ This directive defines a meta-data item.
 
 `{meta: `_name_` `_value_`}`
 
-Sets meta-data item _name_ to the specified contents.
+Sets meta-data item _name_ to the specified contents. _name_ must be a
+single word but may include underscores.
 
 Meta-data names can be chosen freely although single lowercase words like `artist` and `composer` are advised. It is left to the ChordPro file processing tools to do something sensible with the meta-data.
 
