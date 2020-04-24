@@ -60,7 +60,6 @@ pp/common/Text_Layout_Bundle.pm
 pp/linux/Makefile
 pp/linux/chordpro.pp
 pp/linux/wxchordpro.pp
-pp/windows/GNUmakefile
 pp/windows/Makefile
 pp/windows/chordpro.pp
 pp/windows/chordproinst.bmp

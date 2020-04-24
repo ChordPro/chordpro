@@ -1,5 +1,6 @@
 #! /bin/make -f
-# GNUmakefile for Linux + CitrusPerl
+
+# GNUmakefile for Linux + wxGTK3
 
 .PHONY : chordpro wxchordpro
 

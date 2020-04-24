@@ -1,16 +1,45 @@
-# nmake file for MS Windows + CitrusPerl
-# Based on 32-bit nmake and CitrusPerl 5.16 with wxWidgets 2.8.
+# GNUmakefile for MS Windows + Strawberry Perl + wxWidgets 3.0.
+
+.PHONY : chordpro wxchordpro
+
+# Needed for the path setting.
+.ONESHELL :
+
+ROOT   := ../..
+COMMON := ../common
+SCRIPT := ${ROOT}/script
+
+PP := pp -u
+
+all : clean chordpro wxchordpro
+
+chordpro : chordpro.exe
+
+wxchordpro : wxchordpro.exe
 
 chordpro.exe : chordpro.pp
-	pp --output=chordpro.exe @chordpro.pp ../script/chordpro.pl
+	${PP} --output=chordpro.exe @chordpro.pp ${SCRIPT}/chordpro.pl
 
 # For wxWidgets, explicit libraries are specified in wxchordpro.pp and the
 # PATH must be set accordingly.
-wxchordpro.exe : chordpro.pp wxchordpro.pp wxchordpro.msw.pp
-	set path=C:\\CitrusPerl\\vendor\\lib\\Alien\\wxWidgets\\msw_2_8_12_uni_gcc_3_4\\lib;%path%
-	pp --output=wxchordpro.exe @wxchordpro.msw.pp ../script/wxchordpro.pl
+# To set PATH from the makefile, we need .ONESHELL pseudo target above.
 
-# NOTE: THIS IS FOR TESTING/DEVELOPMENT ONLY.
-refresh :
-	xcopy /s /y h:\ChordPro ..
+wxchordpro.exe : chordpro.pp wxchordpro.pp
+	set path=C:\\Strawberry\\perl\\site\\lib\\Alien\\wxWidgets\\msw_3_0_2_uni_gcc_3_4\\lib;%path%
+	${PP} --output=wxchordpro.exe @wxchordpro.pp ${SCRIPT}/wxchordpro.pl
+
+clean ::
 	del *chordpro.exe
+	del *.pp.deps
+
+#### NOTE: THIS MAY NEED ADJUSTMENT FOR YOUR SYSTEM
+
+ISC := 	"C:\\Program Files (x86)\\Inno Setup 5\\Compil32.exe"
+
+install :: chordpro.exe wxchordpro.exe chordproinst.bmp
+	copy ..\\..\\lib\\App\\Music\\ChordPro\\res\\icons\\chordpro.ico .
+
+iss ::	install innosetup.iss
+	perl vfix.pl
+	${ISC} /cc innosetup.iss
+

@@ -1,5 +1,11 @@
+# Packager settings for WxChordPro.
+
+# Strawberry Perl + wxWidgets 3.0.
+
 @../common/wxchordpro.pp
---module=Wx::WebView
+--gui
+
+# Explicitly link the wxmsw libraries.
 --link=wxbase30u_gcc_custom.dll
 --link=wxbase30u_net_gcc_custom.dll
 --link=wxbase30u_xml_gcc_custom.dll
