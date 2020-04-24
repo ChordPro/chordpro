@@ -3,5 +3,6 @@
 --lib=../common
 --module=App::Music::ChordPro::Bundle
 --module=PDF_API2_Bundle
+--module=Text_Layout_Bundle
 --addfile=../../lib/App/Music/ChordPro/res;res
 --cachedeps=chordpro.pp.deps

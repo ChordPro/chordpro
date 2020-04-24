@@ -1,5 +1,4 @@
 @chordpro.pp
---gui
 --module=Wx::AUI
 --module=Wx::Calendar
 --module=Wx::DND
@@ -16,4 +15,5 @@
 --module=Wx::Ribbon
 --module=Wx::RichText
 --module=Wx::Socket
+--module=Wx::WebView
 --cachedeps=wxchordpro.pp.deps
