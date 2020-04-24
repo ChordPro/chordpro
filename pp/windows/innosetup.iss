@@ -18,36 +18,45 @@ AppName={#APP}
 AppVersion={#V_MAJ}.{#V_MIN}.{#V_AUX}.{#BuildNum}.0
 AppVerName={#APP} {#V_MAJ}.{#V_MIN}
 AppPublisher={#PUBLISHER}
+AppPublisherURL=https://www.chordpro.org
 DefaultDirName={pf}\{#PUBLISHER}\{#APP}
 DefaultGroupName=\{#PUBLISHER}\{#APP}
-OutputDir={#DEST}
+OutputDir=.
 OutputBaseFilename={#APP}-GUI-installer-{#V_MAJ}-{#V_MIN}-{#V_AUX}-{#BuildNum}-msw-x64
 Compression=lzma/Max
 SolidCompression=true
-AppCopyright=Copyright (C) 2017 {#PUBLISHER}
+AppCopyright=Copyright (C) 2015,2017,2020 {#PUBLISHER}
 PrivilegesRequired=none
 InternalCompressLevel=Max
 ShowLanguageDialog=no
 LanguageDetectionMethod=none
-WizardImageFile={#SRC}\chordproinst.bmp
+WizardImageFile=chordproinst.bmp
+InfoAfterFile=infoafter.txt
+
+[Components]
+Name: GUI; Description: "ChordPro GUI application"; Types: full compact
+Name: CLI; Description: "ChordPro command line application"; Types: full
 
 [Tasks]
-Name: desktopicon; Description: "Create desktop icons"; GroupDescription: "Additional icons:"
-Name: desktopicon\common; Description: "For all users"; GroupDescription: "Additional icons:"; Flags: exclusive
-Name: desktopicon\user; Description: "For the current user only"; GroupDescription: "Additional icons:"; Flags: exclusive unchecked
+Name: desktopicon; Description: "Create desktop icons"; Components: GUI; GroupDescription: "Additional icons:"
+Name: desktopicon\common; Description: "For all users"; Components: GUI; GroupDescription: "Additional icons:"; Flags: exclusive
+Name: desktopicon\user; Description: "For the current user only"; Components: GUI; GroupDescription: "Additional icons:"; Flags: exclusive unchecked
 
 [Files]
-Source: {#SRC}\wxchordpro.exe; DestDir: {app}\bin; Flags: ignoreversion recursesubdirs createallsubdirs overwritereadonly 64bit;
+Source: chordpro.ico;   DestDir: {app};     Components: GUI; Flags: overwritereadonly;
+Source: wxchordpro.exe; DestDir: {app}\bin; Components: GUI; Flags: ignoreversion recursesubdirs createallsubdirs overwritereadonly 64bit;
+Source: chordpro.exe;   DestDir: {app}\bin; Components: CLI; Flags: ignoreversion recursesubdirs createallsubdirs overwritereadonly 64bit;
 
 [Icons]
-Name: {group}\{#APP}; Filename: {app}\bin\wxchordpro.exe; IconFilename: "{#SRC}\chordpro.ico";
+Name: {group}\{#APP}; Filename: {app}\bin\wxchordpro.exe; Components: GUI; IconFilename: "{app}\chordpro.ico";
 Name: "{group}\{cm:UninstallProgram,{#APP}}"; Filename: "{uninstallexe}"
 
-Name: "{commondesktop}\{#APP}"; Filename: "{app}\bin\wxchordpro.exe"; Tasks: desktopicon\common; IconFilename: "{#SRC}\chordpro.ico";
-Name: "{userdesktop}\{#APP}"; Filename: "{app}\bin\wxchordpro.exe"; Tasks: desktopicon\user; IconFilename: "{#SRC}\chordpro.ico";
+Name: "{commondesktop}\{#APP}"; Filename: "{app}\bin\wxchordpro.exe"; Tasks: desktopicon\common; IconFilename: "{app}\chordpro.ico";
+Name: "{userdesktop}\{#APP}"; Filename: "{app}\bin\wxchordpro.exe"; Tasks: desktopicon\user; IconFilename: "{app}\chordpro.ico";
 
 [Run]
-Filename: "{app}\bin\wxchordpro.exe"; Description: "Prepare"; Parameters: "--quit"; StatusMsg: "Preparing... (be patient)..."
+Filename: "{app}\bin\wxchordpro.exe"; Description: "Prepare"; Components: GUI; Parameters: "--quit"; StatusMsg: "Preparing... (be patient)..."
+Filename: "{app}\bin\chordpro.exe"; Description: "Prepare"; Components: CLI; Parameters: "--version"; StatusMsg: "Preparing... (be patient)..."
 
 [Messages]
 BeveledLabel=Perl Powered Software by Squirrel Consultancy

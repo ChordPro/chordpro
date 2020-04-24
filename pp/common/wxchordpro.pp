@@ -1,5 +1,9 @@
+# Packager settings for WxChordPro.
+
 @chordpro.pp
---gui
+--cachedeps=wxchordpro.pp.deps
+
+# Explicitly include the demand-loaded Wx modules.
 --module=Wx::AUI
 --module=Wx::Calendar
 --module=Wx::DND
@@ -16,4 +20,4 @@
 --module=Wx::Ribbon
 --module=Wx::RichText
 --module=Wx::Socket
---cachedeps=wxchordpro.pp.deps
+--module=Wx::WebView

@@ -1,7 +1,7 @@
 CHANGES
 MANIFEST
 Makefile.PL
-README
+README.md
 lib/App/Music/ChordPro.pm
 lib/App/Music/ChordPro/A2Crd.pm
 lib/App/Music/ChordPro/Bundle.pm
@@ -49,14 +49,15 @@ lib/App/Music/ChordPro/res/pod/Config.pod
 pp/README
 pp/common/chordpro.pp
 pp/common/wxchordpro.pp
-pp/linux/GNUmakefile
+pp/common/PDF_API2_Bundle.pm
 pp/linux/chordpro.pp
 pp/linux/wxchordpro.pp
-pp/windows/GNUmakefile
+pp/linux/Makefile
 pp/windows/Makefile
 pp/windows/chordpro.pp
 pp/windows/chordproinst.bmp
 pp/windows/innosetup.iss
+pp/windows/infoafter.txt
 pp/windows/wxchordpro.pp
 pp/windows/vfix.pl
 script/chordpro.pl
