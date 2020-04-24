@@ -31,6 +31,7 @@ InternalCompressLevel=Max
 ShowLanguageDialog=no
 LanguageDetectionMethod=none
 WizardImageFile=chordproinst.bmp
+InfoAfterFile=infoafter.txt
 
 [Components]
 Name: GUI; Description: "ChordPro GUI application"; Types: full compact

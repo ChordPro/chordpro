@@ -64,6 +64,7 @@ pp/windows/Makefile
 pp/windows/chordpro.pp
 pp/windows/chordproinst.bmp
 pp/windows/innosetup.iss
+pp/windows/infoafter.txt
 pp/windows/wxchordpro.pp
 pp/windows/vfix.pl
 script/chordpro.pl
