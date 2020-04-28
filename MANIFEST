@@ -41,6 +41,7 @@ lib/App/Music/ChordPro/res/config/roman.json
 lib/App/Music/ChordPro/res/config/ukulele-ly.json
 lib/App/Music/ChordPro/res/config/ukulele.json
 lib/App/Music/ChordPro/res/examples/swinglow.cho
+lib/App/Music/ChordPro/res/icons/chordpro.ico
 lib/App/Music/ChordPro/res/notes/common.json
 lib/App/Music/ChordPro/res/notes/dutch.json
 lib/App/Music/ChordPro/res/notes/german.json
@@ -54,6 +55,7 @@ lib/App/Music/ChordPro/res/pod/ChordPro.pod
 lib/App/Music/ChordPro/res/pod/Config.pod
 pp/README
 pp/common/chordpro.pp
+pp/pp2ppl.pl
 pp/common/wxchordpro.pp
 pp/common/PDF_API2_Bundle.pm
 pp/common/Text_Layout_Bundle.pm
@@ -62,10 +64,14 @@ pp/linux/chordpro.pp
 pp/linux/wxchordpro.pp
 pp/windows/Makefile
 pp/windows/chordpro.pp
+pp/windows/chordpro.rc
 pp/windows/chordproinst.bmp
+pp/windows/innosetup_par.iss
 pp/windows/innosetup.iss
+pp/windows/ppl.c
 pp/windows/infoafter.txt
 pp/windows/wxchordpro.pp
+pp/windows/wxchordpro.rc
 pp/windows/vfix.pl
 script/chordpro.pl
 script/ppchordpro.PL
