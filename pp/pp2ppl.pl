@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Mon Apr 27 15:13:18 2020
 # Last Modified By: Johan Vromans
-# Last Modified On: Mon Apr 27 17:16:42 2020
-# Update Count    : 36
+# Last Modified On: Wed Apr 29 20:33:01 2020
+# Update Count    : 37
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -150,7 +150,7 @@ sub extract_embedded {
 	my $dir = dirname($file);
 	unless ( -d $dir ) {
 	    # print STDERR "Creating directory $dir...\n";
-	    mkpath($dir) unless -d $dir;
+	    mkpath($dir);
 	}
 
 	print STDERR ("Extracting \"$file\"\n" ) if $verbose;

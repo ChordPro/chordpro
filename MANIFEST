@@ -59,6 +59,7 @@ pp/common/Text_Layout_Bundle.pm
 pp/common/chordpro.pp
 pp/common/wxchordpro.pp
 pp/linux/Makefile
+pp/linux/ppl.c
 pp/linux/chordpro.pp
 pp/linux/wxchordpro.pp
 pp/pp2ppl.pl
