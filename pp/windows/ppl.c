@@ -23,7 +23,9 @@ static const char perlexe[] = "perl.exe"; // set to NULL to disable
 #define ARGS_ADDED 1
 
 // debug output. Comment to disable debug output
+#ifdef DEBUG
 #define DEBUGOUT stderr
+#endif
 
 // PATH_MAX is obsolete since Win10?
 #define PATHBUFLEN 1000
