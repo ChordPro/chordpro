@@ -27,8 +27,10 @@ void xs_init(pTHX) {
 int main( int argc, char **argv, char **env ) {
 
   char selfpath[PATH_MAX];
+  char scriptpath[PATH_MAX];
   char scriptname[PATH_MAX];
   memset (selfpath,   0, PATH_MAX);
+  memset (scriptpath, 0, PATH_MAX);
   memset (scriptname, 0, PATH_MAX);
 
   if ( readlink ("/proc/self/exe", selfpath, PATH_MAX-1 ) > 0 ) {
@@ -54,13 +56,13 @@ int main( int argc, char **argv, char **env ) {
   }
 
   strcat( selfpath, "/" );
-
+  strcpy( scriptpath, selfpath );
 #ifdef SCRIPTPREFIX
-  strcat( selfpath, "script/" );
+  strcat( scriptpath, "script/" );
 #endif
 
-  strcat( selfpath, scriptname );
-  strcat( selfpath, ".pl" );
+  strcat( scriptpath, scriptname );
+  strcat( scriptpath, ".pl" );
 
   /* Start perl environment. */
   PERL_SYS_INIT3( &argc, &argv, &env );
@@ -78,7 +80,7 @@ int main( int argc, char **argv, char **env ) {
     /* Insert script name in argv. */
     char **ourargv = (char **)calloc( argc+2, sizeof(char**) );
     ourargv[0] = argv[0];
-    ourargv[1] = selfpath;
+    ourargv[1] = scriptpath;
     for ( int i=1; i<=argc; ++i ) {
       ourargv[i+1] = argv[i];
     }
@@ -86,6 +88,11 @@ int main( int argc, char **argv, char **env ) {
     /* Don't bother to free ourargv. */
   }
 
+  /* Set @INC to just our stuff. */
+  char cmd[PATH_MAX+100];
+  sprintf( cmd, "@INC = (q{%slib});", selfpath );
+  eval_pv( cmd, TRUE );
+  
   /* Run.... */
   int result = perl_run(my_perl);
 

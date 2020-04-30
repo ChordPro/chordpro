@@ -7,7 +7,7 @@
 ROOT   := ../..
 COMMON := ../common
 SCRIPT := ${ROOT}/script
-DEST := dist
+DEST   := build
 
 PP := pp -u
 
@@ -53,8 +53,8 @@ copy_coredll :
 	patchelf --set-soname perl530.so ${DEST}/${PERLSO}
 	cp -pL ${PERLLIB}/libpthread.so.0 ${DEST}/
 
-PFX := "\"script/\""
-CCOPTS := $(shell perl -MExtUtils::Embed -e ccopts) -DSCRIPTPREFIX=${PFX}
+PREFIX := '"script/"'
+CCOPTS := $(shell perl -MExtUtils::Embed -e ccopts) -DSCRIPTPREFIX=${PREFIX}
 LDOPTS := -Wl,--rpath=. ${PERLSO} -lpthread
 
 .PHONY :: loaders
