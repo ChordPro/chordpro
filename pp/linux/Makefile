@@ -55,7 +55,7 @@ copy_coredll :
 
 PREFIX := '"script/"'
 CCOPTS := $(shell perl -MExtUtils::Embed -e ccopts) -DSCRIPTPREFIX=${PREFIX}
-LDOPTS := -Wl,--rpath=. ${PERLSO} -lpthread
+LDOPTS := -Wl,--rpath='$${ORIGIN}' ${PERLSO} -lpthread
 
 .PHONY :: loaders
 loaders : "${DEST}/wxchordpro" "${DEST}/chordpro"
