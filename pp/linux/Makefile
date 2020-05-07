@@ -58,7 +58,12 @@ CCOPTS := $(shell perl -MExtUtils::Embed -e ccopts) -DSCRIPTPREFIX=${PREFIX}
 LDOPTS := -Wl,--rpath='$${ORIGIN}' ${PERLSO} -lpthread
 
 .PHONY :: loaders
-loaders : "${DEST}/wxchordpro" "${DEST}/chordpro" "${DEST}/poc"
+loaders : "${DEST}/wxchordpro" "${DEST}/chordpro"
+
+# For testing...
+.PHONY :: _loaders
+_loaders : "${DEST}/chordpro"
+	cp "${DEST}/chordpro" "${DEST}/perl"
 
 "${DEST}/wxchordpro" : ppl.c
 	${CC} ${CCOPTS} -o "${DEST}/wxchordpro" -L${DEST} ${LDOPTS} ppl.c
@@ -68,6 +73,8 @@ loaders : "${DEST}/wxchordpro" "${DEST}/chordpro" "${DEST}/poc"
 
 clean ::
 	rm -fr build
+
+# Truly dynamic version of loader. Rename to {wx}chordpro if you dare.
 
 "${DEST}/poc" : poc.c
 	${CC} ${CCOPTS} -o "${DEST}/poc" poc.c -ldl

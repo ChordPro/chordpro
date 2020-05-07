@@ -1,3 +1,36 @@
+/* Dynamic Perl Loader.
+
+This starter runs a Perl application by dynamically locating and
+loading the Perl runtime.
+
+The setup is to have a small Perl distribution installed in an
+arbitrary directory, and run from there. The subset is based on the
+currently installed system perl.
+
+The loader program effectively runs a Perl script named after the
+program. If invoked as 'myapp' it will start the perl runtime to run
+the script 'myapp.pl'.
+
+Finding out what files to include in the small distribution can be
+tedious. A tool like PAR::Packer can help.
+
+Compile options are provided by
+  perl -MExtUtils::Embed -e ccopts
+Link options:
+  -ldl
+
+Optional compile options are PERLSO (the name of the Perl runtime
+library) and SCRIPTDIR (where to find the scripts).
+
+Some steps:
+
+	cp -pL ${PERLLIB}/libperl.so ${DEST}/${PERLSO}
+	cp -pL ${PERLLIB}/libpthread.so.0 ${DEST}/
+	patchelf --set-soname perl530.so ${DEST}/${PERLSO}
+	find ${DEST} -name '*.so' -exec patchelf --replace-needed libperl.so.5.30 ${PERLSO} {} \;
+
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <dlfcn.h>
@@ -107,7 +140,7 @@ int main( int argc, char **argv, char **env ) {
     strcat( scriptpath, ".pl" );
 
     /* To get @INC right we execute it as a -E script. */
-    char cmd[2*PATH_MAX+100];
+    char *cmd = (char*)calloc(25+strlen(selfpath)+strlen(scriptpath),sizeof(char));
     sprintf( cmd, "@INC=(q{%slib});do q{%s};", selfpath, scriptpath );
 #ifdef DEBUG
     fprintf( stderr, "scriptpath: %s\n", scriptpath );
