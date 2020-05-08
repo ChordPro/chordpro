@@ -47,10 +47,11 @@ static pTHX;
 
 void xs_init(pTHX);
 
+static char selfpath[PATH_MAX];	/* /foo/bar */
+
 int main( int argc, char **argv, char **env ) {
 
   /* Assuming the program binary   /foo/bar/blech */
-  char selfpath[PATH_MAX];	/* /foo/bar */
   char scriptname[PATH_MAX];	/* blech */
   char dllpath[PATH_MAX];	/* /foo/bar/PERLSO */
   memset (selfpath,   0, PATH_MAX);
@@ -104,30 +105,57 @@ int main( int argc, char **argv, char **env ) {
     exit(EXIT_FAILURE);
   }
 
+  /* For clarity, we first fetch all dynamic entry points. */
+  static void (*Perl_sys_init3)( int*, char***, char*** );
+  Perl_sys_init3 = (void(*)(int*, char***, char***)) dlsym(handle, "Perl_sys_init3");
+  static tTHX (*perl_alloc)();
+  perl_alloc = (tTHX(*)()) dlsym(handle, "perl_alloc");
+  static void (*perl_construct)(pTHX);
+  perl_construct = (void(*)(pTHX)) dlsym(handle, "perl_construct");
+  static void (*perl_parse)(pTHX, void*, int, char**, char**);
+  perl_parse = (void(*)(pTHX, void*, int, char**, char**)) dlsym(handle, "perl_parse");
+  static int (*perl_run)(pTHX);
+  perl_run = (int(*)(pTHX)) dlsym(handle, "perl_run");
+  static void(*perl_destruct)(pTHX);
+  perl_destruct = (void(*)(pTHX)) dlsym(handle, "perl_destruct");
+  static void(*perl_free)(pTHX);
+  perl_free = (void(*)(pTHX)) dlsym(handle, "perl_free");
+  /* End of entry points fetching. */
+  /* The rest should look rather familiar now. */
+
   /* Start perl environment. */
   //PERL_SYS_INIT3( &argc, &argv, &env );
-  void (*Perl_sys_init3)( int*, char***, char*** );
-  Perl_sys_init3 = (void(*)(int*, char***, char***)) dlsym(handle, "Perl_sys_init3");
   (*Perl_sys_init3)(&argc, &argv, &env);
 
   /* Create a perl interpreter. */
-  tTHX (*perl_alloc)();
-  perl_alloc = (tTHX(*)()) dlsym(handle, "perl_alloc");
   my_perl = (*perl_alloc)();
 
   /* perl_construct */
-  void (*perl_construct)(pTHX);
-  perl_construct = (void(*)(pTHX)) dlsym(handle, "perl_construct");
   (*perl_construct)(aTHX);
 
-  /* perl_parse */
-  void (*perl_parse)(pTHX, void*, int, char**, char**);
-  perl_parse = (void(*)(pTHX, void*, int, char**, char**)) dlsym(handle, "perl_parse");
+  /* Strip unwanted environment variables. */
+  static char **ourenv = NULL;
+  if ( env ) {
+    int envc = 0;
+    while ( env[envc] ) envc++;
+    ourenv = (char **)calloc( envc+1, sizeof(char**) );
+    int j = 0;
+    for ( int i=0; i<envc; ++i ) {
+      if ( strncmp(env[i], "PERL", 4) && strncmp(env[i], "LD_", 3) ) {
+	ourenv[j++] = env[i];
+      }
+    }
+    ourenv[j] = NULL;
+    env = ourenv;
+  }
+
+  /* For argument fiddling. */
+  static char **ourarg = NULL;
 
   /* If we're "perl", behave like perl. */
-  if ( !strncmp( scriptname, "perl", 4 ) )
+  if ( !strncmp( scriptname, "perl", 4 ) ) {
     (*perl_parse)( aTHX, xs_init, argc, argv, env );
-
+  }
   else {
 
     /* Insert script name in argv. */
@@ -138,59 +166,76 @@ int main( int argc, char **argv, char **env ) {
 #endif
     strcat( scriptpath, scriptname );
     strcat( scriptpath, ".pl" );
-
-    /* To get @INC right we execute it as a -E script. */
-    char *cmd = (char*)calloc(25+strlen(selfpath)+strlen(scriptpath),sizeof(char));
-    sprintf( cmd, "@INC=(q{%slib});do q{%s};", selfpath, scriptpath );
 #ifdef DEBUG
     fprintf( stderr, "scriptpath: %s\n", scriptpath );
-    fprintf( stderr, "cmd:        %s\n", cmd );
 #endif
 
-#   define EXTRA_ARGS 3    
-    char **ourargv = (char **)calloc( argc+1+EXTRA_ARGS, sizeof(char**) );
-    ourargv[0] = argv[0];
-    ourargv[1] = "-E";
-    ourargv[2] = cmd;
-    ourargv[3] = "--";
+#   define EXTRA_ARGS 1
+    char **ourarg = (char **)calloc( argc+1+EXTRA_ARGS, sizeof(char**) );
+    ourarg[0] = scriptpath;	/* for FindBin and friends */
+    ourarg[1] = scriptpath;	/* script to execute */
     for ( int i=1; i<=argc; ++i ) {
-      ourargv[i+EXTRA_ARGS] = argv[i];
+      ourarg[i+EXTRA_ARGS] = argv[i];
     }
-    (*perl_parse)(aTHX, xs_init, argc+EXTRA_ARGS, ourargv, env);
+    (*perl_parse)(aTHX, xs_init, argc+EXTRA_ARGS, ourarg, env);
   }
 
-  /* Set @INC to just our stuff. But it's too late. */
-  //  char cmd[PATH_MAX+100];
-  //  sprintf( cmd, "@INC = (q{%slib});", selfpath );
-  //  SV* (*eval_pv)(pTHX, const char*, I32);
-  //  eval_pv = (SV* (*)(pTHX, const char*, I32)) dlsym( handle, "Perl_eval_pv" );
-  //  (*eval_pv)( aTHX, cmd, TRUE );
-
   /* Run... */
-  int (*perl_run)(pTHX);
-  perl_run = (int(*)(pTHX)) dlsym(handle, "perl_run");
   int result = (*perl_run)(aTHX);
 
   /* Cleanup. */
-  void(*perl_destruct)(pTHX);
-  perl_destruct = (void(*)(pTHX)) dlsym(handle, "perl_destruct");
   (*perl_destruct)(aTHX);
-  void(*perl_free)(pTHX);
-  perl_free = (void(*)(pTHX)) dlsym(handle, "perl_free");
   (*perl_free)(aTHX);
+
+  if (ourarg) free(ourarg);
+  if (ourenv) free(ourenv);
 
   return result;
 }
-
-void (*boot_DynaLoader_dyn)(pTHX, CV* cv);
-CV* (*Perl_newXS_dyn)(pTHX, const char*, XSUBADDR_t, const char*);
 
 void xs_init(pTHX) {
     static const char file[] = __FILE__;
     // dXSUB_SYS;			/* dNOOP */
     // PERL_UNUSED_CONTEXT;
 
+    /* This is probably a terrible abuse of xs_init, but it seems
+       to be the only place where @INC can be set.
+       Before perl_parse is too early (@INC doesn't exist yet),
+       after perl_parse is too late. */
+
+    char *cmd = (char*)calloc( 4+strlen(selfpath), sizeof(char) );
+    strcpy( cmd, selfpath );
+    strcat( cmd, "lib" );
+
+    /* One-shot calls. */
+    void Perl_av_clear(pTHX, AV* gv) {
+      static void (*imp)(pTHX, AV* gv);
+      imp = (void(*)(pTHX, AV* gv)) dlsym( handle, "Perl_av_clear" );
+      (*imp)(aTHX, gv);
+    }
+    void Perl_av_push(pTHX, AV* gv, SV* sv) {
+      static void (*imp)(pTHX, AV* gv, SV* sv);
+      imp = (void(*)(pTHX, AV* gv, SV* sv)) dlsym( handle, "Perl_av_push" );
+      (*imp)(aTHX, gv, sv);
+    }
+    GV* Perl_gv_add_by_type(pTHX, GV* gv, int flags) {
+      static GV* (*imp)(pTHX, GV* gv, int);
+      imp = (GV*(*)(pTHX, GV* gv, int)) dlsym( handle, "Perl_gv_add_by_type" );
+      return (*imp)(aTHX, gv, flags);
+    }
+    SV* Perl_newSVpvn(pTHX, char* sv, STRLEN len) {
+      static SV* (*imp)(pTHX, char* sv, STRLEN len);
+      imp = (SV*(*)(pTHX, char* sv, STRLEN len)) dlsym( handle, "Perl_newSVpv" );
+      return (*imp)(aTHX, sv, len);
+    }
+    av_clear(GvAVn(PL_incgv));
+    av_push(GvAVn(PL_incgv), newSVpvn(cmd, strlen(cmd)));
+    free(cmd);
+
+    /* And now for the intended purpose of xs_init... */
+    
     /* boot_DynaLoader */
+    static void (*boot_DynaLoader_dyn)(pTHX, CV* cv);
     boot_DynaLoader_dyn = (void (*)(pTHX, CV* cv)) dlsym(handle, "boot_DynaLoader");
     if ( !boot_DynaLoader_dyn ) {
       fprintf( stderr, "(boot_DynaLoader) %s\n", dlerror() );
@@ -198,9 +243,13 @@ void xs_init(pTHX) {
     }
 
     /* newXS is just Perl_newXS(aTHX, ...) */
-    Perl_newXS_dyn = (CV* (*)(pTHX, const char*, XSUBADDR_t, const char*)) dlsym( handle, "Perl_newXS" );
+    CV* Perl_newXS(pTHX, const char* c, XSUBADDR_t x, const char* s) {
+      static CV* (*imp)(pTHX, const char*, XSUBADDR_t, const char*);
+      imp = (CV*(*)(pTHX, const char*, XSUBADDR_t, const char*)) dlsym( handle, "Perl_newXS" );
+      return (*imp)(aTHX, c, x, s);
+    }
  
-    /* The following comment is mandatory. */
+    /* Note the following comment is mandatory. */
     /* DynaLoader is a special case */
-    (*Perl_newXS_dyn)( aTHX, "DynaLoader::boot_DynaLoader", *boot_DynaLoader_dyn, file );
+    newXS( "DynaLoader::boot_DynaLoader", *boot_DynaLoader_dyn, file );
 }

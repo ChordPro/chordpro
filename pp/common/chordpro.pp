@@ -30,3 +30,6 @@
 # Resources.
 --addfile=../../lib/App/Music/ChordPro/res;res
 
+# Filtering
+#--modfilter=Null=Config\.pm$
+--modfilter=Null

@@ -17,10 +17,11 @@ void xs_init(pTHX);
 
 /* Main. */
 
+static char selfpath[PATH_MAX];	/* /foo/bar */
+
 int main( int argc, char **argv, char **env ) {
 
   /* Assuming the program binary   /foo/bar/blech */
-  char selfpath[PATH_MAX];	/* /foo/bar */
   char scriptname[PATH_MAX];	/* blech */
   memset (selfpath,   0, PATH_MAX);
   memset (scriptname, 0, PATH_MAX);
@@ -68,6 +69,25 @@ int main( int argc, char **argv, char **env ) {
   my_perl = perl_alloc();
   perl_construct(my_perl);
 
+  /* Strip unwanted environment variables. */
+  static char **ourenv = NULL;
+  if ( env ) {
+    int envc = 0;
+    while ( env[envc] ) envc++;
+    ourenv = (char **)calloc( envc+1, sizeof(char**) );
+    int j = 0;
+    for ( int i=0; i<envc; ++i ) {
+      if ( strncmp(env[i], "PERL", 4) && strncmp(env[i], "LD_", 3) ) {
+	ourenv[j++] = env[i];
+      }
+    }
+    ourenv[j] = NULL;
+    env = ourenv;
+  }
+
+  /* For argument fiddling. */
+  static char **ourarg = NULL;
+
   /* If we're "perl", behave like perl. */
   if ( !strncmp( scriptname, "perl", 4 ) )
     perl_parse( my_perl, xs_init, argc, argv, env );
@@ -82,25 +102,21 @@ int main( int argc, char **argv, char **env ) {
 #endif
     strcat( scriptpath, scriptname );
     strcat( scriptpath, ".pl" );
-
-    /* To get @INC right we execute it as a -E script. */
-    char *cmd = (char*)calloc(25+strlen(selfpath)+strlen(scriptpath),sizeof(char));
-    sprintf( cmd, "@INC=(q{%slib});do q{%s};", selfpath, scriptpath );
 #ifdef DEBUG
     fprintf( stderr, "scriptpath: %s\n", scriptpath );
-    fprintf( stderr, "cmd:        %s\n", cmd );
 #endif
 
-#   define EXTRA_ARGS 3    
-    char **ourargv = (char **)calloc( argc+1+EXTRA_ARGS, sizeof(char**) );
-    ourargv[0] = argv[0];
-    ourargv[1] = "-E";
-    ourargv[2] = cmd;
-    ourargv[3] = "--";
+#   define EXTRA_ARGS 1
+    ourarg = (char **)calloc( argc+1+EXTRA_ARGS, sizeof(char**) );
+    /* Set argv0 to scriptpath for FindBin and friends. */
+    ourarg[0] = scriptpath;
+    /* Insert scriptpath for perl to execute. */
+    ourarg[1] = scriptpath;
+    /* Copy rest of the arguments. */
     for ( int i=1; i<=argc; ++i ) {
-      ourargv[i+EXTRA_ARGS] = argv[i];
+      ourarg[i+EXTRA_ARGS] = argv[i];
     }
-    (*perl_parse)(aTHX, xs_init, argc+EXTRA_ARGS, ourargv, env);
+    (*perl_parse)(aTHX, xs_init, argc+EXTRA_ARGS, ourarg, env);
   }
 
   /* Run.... */
@@ -113,6 +129,9 @@ int main( int argc, char **argv, char **env ) {
   /* Terminate perl environment. */
   PERL_SYS_TERM();
 
+  if (ourarg) free(ourarg);
+  if (ourenv) free(ourenv);
+
   exit(result);
 }
 
@@ -122,6 +141,22 @@ void xs_init(pTHX) {
     static const char file[] = __FILE__;
     dXSUB_SYS;
     PERL_UNUSED_CONTEXT;
+
+    /* This is probably a terrible abuse of xs_init, but it seems
+       to be the only place where @INC can be set.
+       Before perl_parse is too early (@INC doesn't exist yet),
+       after perl_parse is too late. */
+
+    char *cmd = (char*)calloc(5+strlen(selfpath),sizeof(char));
+    strcpy( cmd, selfpath );
+    strcat( cmd, "lib" );
+    av_clear(GvAVn(PL_incgv));
+    av_push(GvAVn(PL_incgv), newSVpv(cmd, strlen(cmd)));
+    free(cmd);
+
+    /* And now for the intended purpose of xs_init... */
+    /* Note the following comment is mandatory. */
+    /* DynaLoader is a special case */
     newXS("DynaLoader::boot_DynaLoader", boot_DynaLoader, file);
 }
 
