@@ -6,5 +6,4 @@ The ChordPro reference implementation is a program written in the Perl programmi
 * [[Installation on Microsoft Windows|ChordPro Install on Windows]]
 * [[Installation on Mac OS/X|ChordPro Install on Mac OSX]]
 
-Want to keep track of the latest developments? [[Run from Git|ChordPro
-run from Git]].
+Want to keep track of the latest developments? [[Run from Git|ChordPro run from Git]].
