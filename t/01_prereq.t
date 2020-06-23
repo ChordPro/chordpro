@@ -8,7 +8,7 @@ my $pdfapi = "PDF::API2";
 my $pdfapiv = "2.035";
 
 # PDF::API2 2.033 is ok, 2.035 is better, 2.036 is best.
-for ( qw( xPango@1.227 PDF::Builder@3.016 PDF::API2@2.035 ) ) {
+for ( qw( xPango@1.227 PDF::API2@2.035 PDF::Builder@3.016 ) ) {
     ( $pdfapi, $pdfapiv ) = split( '@', $_ );
     eval "require $pdfapi" or next;
     eval '$pdfapiv = $pdfapi->VERSION($pdfapiv)' or next;
@@ -31,6 +31,14 @@ else {
     ++$test; use_ok( $pdfapi,  $pdfapiv );
     diag("Using $pdfapi $pdfapiv for PDF generation");
 }
+++$test; use_ok( "Text::Layout",   0.018 );
+#diag("Using Text::Layout $Text::Layout::VERSION");
+eval {
+    require HarfBuzz::Shaper;
+    HarfBuzz::Shaper->VERSION(0.018);
+    diag( "Shaping enabled (HarfBuzz::Shaper $HarfBuzz::Shaper::VERSION)" );
+    1;
+} || diag( "Shaping disabled (HarfBuzz::Shaper not found)" );
 ++$test; use_ok( "JSON::PP",   2.27203 );
 ++$test; use_ok( "String::Interpolate::Named", 0.05 );
 ++$test; use_ok( "File::LoadLines", 0.02 );
