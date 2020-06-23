@@ -530,6 +530,7 @@ sub directive {
 			name => "gridparams",
 			value =>  [ @$grid_arg, $5||"" ] );
 	    $grid_cells = [ $2 * ( $3//1 ), ($1//0), ($4//0) ];
+	    push( @labels, $5 ) if length($5||"");
 	}
 	elsif ( $arg && $arg ne "" ) {
 	    $self->add( type  => "set",

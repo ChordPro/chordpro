@@ -15,6 +15,7 @@
     - Fix handling of {chorus: label}.
     - Fix problem where using a {chord} directive before any song lines
       would crash.
+    - Fix problem where the tag of a grid was ignored.
     - Add directives start/end_of_verse/bridge and short forms.
     - Remove section handling (we now have labels).
     - Do not indent chorus labels when chorus indenting (issue #81).
