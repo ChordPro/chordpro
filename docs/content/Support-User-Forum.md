@@ -1,5 +1,5 @@
 # User Forum
 
-A user forum is available on Google Groups. Feel free to subscribe and contribute.
+A user forum is available on Groups.io. Feel free to subscribe and contribute.
 
-<https://groups.google.com/forum/#!forum/chordpro>
+<https://groups.io/g/ChordPro>
