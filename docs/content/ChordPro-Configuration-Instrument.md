@@ -140,7 +140,7 @@ substitution variables in texts, see [[Using metadata in texts|ChordPro Configur
 
 The Nashville Number System is a method of transcribing music by
 denoting the scale degree on which a chord is built. Instead of
-absolute note names like `C`, `D`, `E` it uses numbers `0`, `1`, `2`
+absolute note names like `C`, `D`, `E` it uses numbers `1`, `2`, `3`
 and so on.
 
 No configuration settings are needed. When a song has its chords in
