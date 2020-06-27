@@ -67,6 +67,6 @@ Yes, this is all there is to say about the ChordPro file format. Lyrics-and-chor
 
 ## Printing?
 
-In the early days of ChordPro, the only way to get a nicely formatted lead sheet was to print it on a LaserWriter. The original `chord` program created a so called PostScript document that could be send to the printer.
+In the early days of ChordPro, the only way to get a nicely formatted lead sheet was to print it on a LaserWriter. The original `chord` program created a so called PostScript document that could be sent to the printer.
 
 Much has changed. Nowadays PDF documents are used for printed output, but they can also be viewed on PC, phone and tablets. The [[ChordPro reference implementation|ChordPro Reference Implementation]] produces PDF by default. Nevertheless, in this document we will still use the term ‘printing’ when referring to the result of processing ChordPro files.
