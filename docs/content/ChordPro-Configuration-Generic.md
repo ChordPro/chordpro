@@ -1,3 +1,8 @@
+---
+title: "Configuration file contents - Generic"
+description: "Configuration file contents - Generic"
+---
+
 # Configuration file contents - Generic
 
 ## General settings
@@ -38,7 +43,7 @@ These settings control global behaviour of the ChordPro program and can be chang
 The `metadata` setting contains three items:
 
 * `keys`: The list of recognized metadata keys.  
-For these keys you can use `{meta` _key_ ...`}` as well as `{`_key_ ...`}`.
+For these keys you can use `{meta` _key_ ...`}` as well as `{`*key* ...`}`.
 * `strict`: If true, `{meta` ...`}` will accept any key.  
 Otherwise, only the keys named in the `keys` here are allowed.
 * `separator`: To concatenate multiple values when metadata are used in title fields.
@@ -54,7 +59,7 @@ Important: the keys `title` and `subtitle` must always be in this list.
         "separator" : "; ",
     },
 
-See also [[Using metadata in texts|ChordPro Configuration Format Strings]].
+See also [Using metadata in texts]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
 
 ## Instrument description
 
@@ -62,9 +67,9 @@ Describes the instrument used. For example:
 
     "instrument" : "Guitar, 6 strings, standard tuning",
 
-Other properties of an instrument are its [tuning](#strings-and-tuning) and [chord definitions](#user-defined-chords). Usually the instrument definition is maintained in a separate configuration file for maximum flexibility.
+Other properties of an instrument are its [tuning]({{< relref "#strings-and-tuning" >}}) and [chord definitions]({{< relref "#user-defined-chords" >}}). Usually the instrument definition is maintained in a separate configuration file for maximum flexibility.
 
-See [[Defining an instrument|Chordpro Configuration Instrument]] for details.
+See [Defining an instrument]({{< relref "Chordpro-Configuration-Instrument" >}}) for details.
 
 ## Strings and Tuning
 
@@ -99,14 +104,14 @@ The configuration file can hold any number of predefined chords.
 
 `base` specifies the topmost position of the chord diagram. It must be 1 or higher. If `base` is greater than 1 its value is printed at the side the diagram, as can be seen in the illustration below.
 
-![](images/ex_chords.png)
+![]({{< asset "images/ex_chords.png" >}})
 
 The `frets` positions are the positions in the chord diagram as shown. The following two definitions are the same chord, shown in two different positions:
 
     { "name" : "F#", "base" : 1, "frets" : [ 2, 4, 4, 3, 2, 2 ] },
     { "name" : "F#", "base" : 2, "frets" : [ 1, 3, 3, 2, 1, 1 ] },
 
-![](images/ex_chords2.png)
+![]({{< asset "images/ex_chords2.png" >}})
 
 As can be seen, the `"fingers"` part is optional.
 
@@ -133,7 +138,7 @@ By default, ChordPro will include diagrams for all known chords that have been u
         "sorted"   :  false,
     },
 
-If `auto` is set to true, unknown chords will be printed as empty diagrams. This makes it easy to manually put the finger positions on paper. Of course, adding a [chord definition](#user-defined-chords) is usually a better alternative.
+If `auto` is set to true, unknown chords will be printed as empty diagrams. This makes it easy to manually put the finger positions on paper. Of course, adding a [chord definition]({{< relref "#user-defined-chords" >}}) is usually a better alternative.
 
 ## Table of Contents
 
@@ -141,7 +146,7 @@ If `auto` is set to true, unknown chords will be printed as empty diagrams. This
 this is the string `"Table of Contents"`.
 
 `"line"` defines the content of the table of contents lines. You can
-use all song metadata, see [[here|ChordPro Configuration Format Strings]].
+use all song metadata, see [here]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
 
 The entries in the table of contents are in the same order as in
 the document. By setting `order` to `"alpha"`, the entries are sorted

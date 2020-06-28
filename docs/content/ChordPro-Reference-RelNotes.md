@@ -1,3 +1,8 @@
+---
+title: "Release info"
+description: "Release info"
+---
+
 # Release info
 
 ## 0.974

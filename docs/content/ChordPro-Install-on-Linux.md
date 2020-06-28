@@ -1,3 +1,8 @@
+---
+title: "Installation on Linux"
+description: "Installation on Linux"
+---
+
 # Installation on Linux
 
 Assuming your Linux systems has the Perl environment correctly installed (standard on nearly all distros), there will be an administrator command `cpan`. In a terminal, simply run the appropriate command from the options below for the version you want to install. It will ask the administrator (super user) password and then install everything necessary to run ChordPro.
@@ -31,4 +36,4 @@ To check for successful install, run `chordpro --version`. That should return a 
 
 # Running Chordpro
 
-Whether using GUI or CLI version, you may proceed to [[Getting Started|ChordPro Getting Started]].
+Whether using GUI or CLI version, you may proceed to [Getting Started]({{< relref "ChordPro-Getting-Started" >}}).

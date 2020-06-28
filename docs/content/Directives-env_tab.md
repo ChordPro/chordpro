@@ -1,3 +1,8 @@
+---
+title: "Directives: start_of_tab"
+description: "Directives: start_of_tab"
+---
+
 # Directives: start_of_tab
 
 Abbreviation: `sob`.
@@ -9,7 +14,7 @@ left margin. For example:,
 
     {start_of_tab: Solo}
 
-See also [[labels|ChordPro Configuration PDF#labels]].
+See also [labels]({{< relref "ChordPro-Configuration-PDF#labels" >}}).
 
 # Directives: end_of_tab
 

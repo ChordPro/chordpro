@@ -1,3 +1,8 @@
+---
+title: "Defining an instrument"
+description: "Defining an instrument"
+---
+
 # Defining an instrument
 
 ChordPro deals with chords. To do so, it needs to know how chords are
@@ -134,7 +139,7 @@ the chord diagram. `"fingers"` is optional and denotes which fingers
 are used for the chord.
 
 For convenience, `"instrument"` and `"tuning"` can be used as
-substitution variables in texts, see [[Using metadata in texts|ChordPro Configuration Format Strings]].
+substitution variables in texts, see [Using metadata in texts]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
 
 ## Special: Nashville Number System
 

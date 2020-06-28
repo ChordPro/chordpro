@@ -1,3 +1,8 @@
+---
+title: "Directives: start_of_verse"
+description: "Directives: start_of_verse"
+---
+
 # Directives: start_of_verse
 
 Specifies that the following lines form a verse of the song.
@@ -9,7 +14,7 @@ left margin. For example:,
 
     {start_of_verse: Verse 1}
 
-See also [[labels|ChordPro Configuration PDF#labels]].
+See also [labels]({{< relref "ChordPro-Configuration-PDF#labels" >}}).
 
 # Directives: end_of_verse
 

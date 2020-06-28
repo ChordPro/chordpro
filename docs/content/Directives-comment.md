@@ -1,3 +1,8 @@
+---
+title: "Directives: comment, comment_italic and comment_box"
+description: "Directives: comment, comment_italic and comment_box"
+---
+
 # Directives: comment, comment_italic and comment_box
 
 These directives each introduce a _comment_ line, a piece of text that will be included in the printed output but is not part of the lyrics and chords. The names of these directives originate from the original `chord` program, the difference between these directives is the appearance of the comment text.
@@ -22,4 +27,4 @@ This is an alternative to `comment`.
 
 *Note that de actual appearance of these comments is usually controlled by the formatting program.*
 
-See also [[Using metadata in texts|ChordPro Configuration Format Strings]].
+See also [Using metadata in texts]({{< relref "ChordPro-Configuration-Format-Strings" >}}).

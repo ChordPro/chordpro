@@ -1,3 +1,8 @@
+---
+title: "ChordPro Implementation: Fonts"
+description: "ChordPro Implementation: Fonts"
+---
+
 # ChordPro Implementation: Fonts
 
 ChordPro uses _fonts_ for typesetting. In the config file fonts are specified for  chords, lyrics, titles and so on. For example, in the config file in section `"pdf"` there is a section `"fonts"` that has a specification for the page titles:
@@ -73,7 +78,7 @@ This is the short story. The longer story is that instead of a file name you can
 
 A font filename must be either and absolute filename, or a relative
 filename which is interpreted relative to the _font path_, which
-consists of [[configuration setting|ChordPro Configuration]]
+consists of [configuration setting]({{< relref "ChordPro-Configuration" >}})
 `fontdir`, the `fonts` resource dir, and the contents of environment
 variable `FONTDIR`. In any case, the filename should point to a valid
 TrueType (`.ttf`) or OpenType (`.otf`) font.

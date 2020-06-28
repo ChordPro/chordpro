@@ -8,20 +8,20 @@ Published in 2017, this is a first attempt to gather the best of several existin
 
 Some of the newer features:
 
-* [[Verse environment|Directives env_verse]]  
+* [Verse environment]({{< relref "Directives-env_verse" >}})  
   This environment can be used to mark a verse. It may be omitted.
 
-* [[Transposition|Directives transpose]]  
+* [Transposition]({{< relref "Directives-transpose" >}})  
   The `transpose` directive can be used to transpose a song, or parts of a song.
 
-* [[Meta-data directives|Directives meta]]  
+* [Meta-data directives]({{< relref "Directives-meta" >}})  
   Directives like `composer`, `album` and so on can be used for administrative purposes.
 
 ## ChordPro version 5.1
 
 Published in 2018, the following features were added.
 
-* [[Labels|Directives env_verse]]  
+* [Labels]({{< relref "Directives-env_verse" >}})  
   Sections like verse, chorus, grid and tab can have a label assigned by following the directive name with the desired text. For example:
 
     `{start_of_verse: Verse 1}`

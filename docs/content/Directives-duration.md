@@ -1,3 +1,8 @@
+---
+title: "Directives: duration"
+description: "Directives: duration"
+---
+
 # Directives: duration
 
 This directive specifiesthe duration of the song. This can be a number
@@ -13,4 +18,4 @@ Examples:
     {duration: 268}
     {meta: duration 4:28}
 
-See also: [[meta|Directives meta]].
+See also: [meta]({{< relref "Directives-meta" >}}).

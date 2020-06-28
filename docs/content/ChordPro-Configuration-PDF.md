@@ -1,3 +1,8 @@
+---
+title: "Configuration for PDF output"
+description: "Configuration for PDF output"
+---
+
 # Configuration for PDF output
 
 Layout definitions for PDF output are stored in the configuration under the key `"pdf"`.
@@ -26,7 +31,7 @@ When output is produced in multiple columns, this is the space between the colum
 
 Click on the image for a larger version.
 
-[![layout.png](images/layout.png)](images/layout-large.png)
+[![layout.png]({{< asset "images/layout.png" >}})]({{< asset "images/layout-large.png" >}})
 
         "margintop"    :  80,
         "marginbottom" :  40,
@@ -60,7 +65,7 @@ Note: By setting the spacing for `empty` to a small value, you get fine-grained 
 ## Labels
 
 Section labels can be added to a specific verse, chorus or grid. See
-e.g. [[start_of_verse|Directives env_verse]].
+e.g. [start_of_verse]({{< relref "Directives-env_verse" >}}).
 
         // This opens a margin for margin labels.
         "labels" : {
@@ -79,7 +84,7 @@ but only if labels are actually used.
 
 `align` will control how the labels are aligned in the margin.
 
-[![labels.png](images/labels.png)](images/labels.pdf)
+[![labels.png]({{< asset "images/labels.png" >}})]({{< asset "images/labels.pdf" >}})
 
 ## Chorus style
 
@@ -136,7 +141,7 @@ To obtain this, use the following configuration settings:
 			"bridge" : "comment",
 		},
 
-Instead of `comment`, any of the fonts as described under [Fonts](#fonts) can be used.
+Instead of `comment`, any of the fonts as described under [Fonts]({{< relref "#fonts" >}}) can be used.
 
 A special section name `fallback` can be used to handle all sections
 not otherwise specified.
@@ -145,7 +150,7 @@ not otherwise specified.
 
 This is an alternative style where the chords are placed in a separate column at the right of the lyrics. Chord changes are marked by underlining the lyrics.
 
-[![style_modern2.png](images/style_modern2.png)](images/style_modern2.pdf)
+[![style_modern2.png]({{< asset "images/style_modern2.png" >}})]({{< asset "images/style_modern2.pdf" >}})
 
         // This style is enabled by setting "chordscolumn" to a nonzero value.
         // Value is the column position. 
@@ -166,7 +171,7 @@ Traditionally, the `{titles}` directive was used to control titles flush. ChordP
 Chord diagrams are added to the song to show the chords used in the
 song. By default the diagrams are at the end of the song but it is
 also possible to have them at the bottom, or in a side column on the first page of the
-song. See [Chords diagrams in a side column](#chords-diagrams-in-a-side-column) below.
+song. See [Chords diagrams in a side column]({{< relref "#chords-diagrams-in-a-side-column" >}}) below.
 
 A chord diagram consists of a number of cells. Cell dimensions are specified by `width` and `height`.  
 The horizontal number of cells depends on the number of strings.  
@@ -189,13 +194,13 @@ The vertical distance between lines of diagrams is `vspace` times the cell heigh
 
 With the above settings, chord diagrams will look like:
 
-![](images/ex_chords.png)
+![]({{< asset "images/ex_chords.png" >}})
 
 An example of `"show":"right"`, where the chord diagrams are placed in a
 separate column at the right of the lyrics instead of at the end of
 the song.
 
-[![style_modern3.png](images/style_modern3.png)](images/style_modern3.pdf)
+[![style_modern3.png]({{< asset "images/style_modern3.png" >}})]({{< asset "images/style_modern3.pdf" >}})
 
 ## Even/odd page printing
 
@@ -231,7 +236,7 @@ Each of these page types can have settings for a page title, subtitle and footer
 
 Each title, subtitle and footer has three parts, which are printed to the left of the page, centered, and right. When even/odd page printing is selected, the left and right parts are swapped on even pages.
 
-All heading strings may contain references to metadata in the form `%{`_NAME_`}`, for example `%{title}`. The current page number can be obtained with `%{page}`. For a complete description on how to use metadata in heading strings, see [[here|ChordPro Configuration Format Strings]].
+All heading strings may contain references to metadata in the form `%{`*NAME*`}`, for example `%{title}`. The current page number can be obtained with `%{page}`. For a complete description on how to use metadata in heading strings, see [here]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
 
         "formats" : {
 
@@ -264,7 +269,7 @@ All heading strings may contain references to metadata in the form `%{`_NAME_`}`
 The effect of the default settings can be seen in the following
 picture.
 
-![](images/pageformats.png)
+![]({{< asset "images/pageformats.png" >}})
 
 Pages 2 and 4 are normal (`default`) pages. They have no heading and
 have the page number and song title in the footer.
@@ -295,7 +300,7 @@ the font libraries. The private directories will be searched first.
 		// "fontdir" : [ "/usr/share/fonts/liberation", "/home/me/fonts" ],
 		"fontdir" : null,
 
-See also [[ChordPro Fonts]].
+See also [ChordPro Fonts]({{< relref "ChordPro-Fonts" >}}).
 
 ## Fonts
 
@@ -316,11 +321,11 @@ A font specification consists of the following settings:
 
 * `name` or `file`  
 You can either designate a built-in font by its name, or give the filename of a TrueType (ttf) or OpenType font (otf).  
-The filename should be the full name of a file on disk, or a relative filename which will be looked up in system dependent font libraries. See [Font libraries](#font-libraries).
+The filename should be the full name of a file on disk, or a relative filename which will be looked up in system dependent font libraries. See [Font libraries]({{< relref "#font-libraries" >}}).
 * `size`  
 The size of the font, in PDF units (1/72 inch).
 * `color`  
-The colour of the font. See [[ChordPro Colours|ChordPro-Colours]] for
+The colour of the font. See [ChordPro Colours]({{< relref "ChordPro-Colours" >}}) for
 details on colours.
 * `background`  
 The background color.
@@ -353,7 +358,7 @@ Default is "HelveticaOblique" at size 12, with a grey background.
 Default is "Helvetica" at size 12, with a frame.
 * `tab`  
 The font used for the contents of
-[[tab environments|Directives-env_tab]].  
+[tab environments]({{< relref "Directives-env_tab" >}}).  
 Default is "Courier" at size 10.
 * `label`  
 The font used for section labels.  
@@ -383,7 +388,7 @@ Default is the setting for `text` but at a small size.
 
 If `showlayout` is true, the margins and other page layout details are shown on the page. This can be helpful to determine the optimal settings for your desired layout.
 
-See also [Page margins](#page-margins) above.
+See also [Page margins]({{< relref "#page-margins" >}}) above.
 
         "showlayout" : false,
 

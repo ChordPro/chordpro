@@ -1,6 +1,11 @@
+---
+title: "Directives: chord"
+description: "Directives: chord"
+---
+
 # Directives: chord
 
-This directive is similar to [[define|Directives define]] but it only displays the chord immediately in the song where the directive occurs.
+This directive is similar to [define]({{< relref "Directives-define" >}}) but it only displays the chord immediately in the song where the directive occurs.
 
 `{chord:` _name_`}`  
 `{chord:` _name_ `base-fret` _offset_ `frets` _pos_ _pos_ … _pos_`}`  
@@ -8,7 +13,7 @@ This directive is similar to [[define|Directives define]] but it only displays t
 
 * _name_ is the name to be used for this chord. If the directive is used to show a known chord the rest of the arguments may be omitted.
 
-* `base-fret`, `frets` and `fingers` are identical to the [[define|Directives define]] directive.
+* `base-fret`, `frets` and `fingers` are identical to the [define]({{< relref "Directives-define" >}}) directive.
 
 Example:
 
@@ -18,6 +23,6 @@ Example:
 
 The resultant chord diagrams are:
 
-![](images/ex_chord.png)
+![]({{< asset "images/ex_chord.png" >}})
 
-See also: [[define|Directives define]].
+See also: [define]({{< relref "Directives-define" >}}).

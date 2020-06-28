@@ -1,3 +1,8 @@
+---
+title: "Citrus Perl on Microsoft Windows"
+description: "Citrus Perl on Microsoft Windows"
+---
+
 # Citrus Perl on Microsoft Windows
 
 Download Citrus Perl from <http://www.citrusperl.com/p/download.html>.
@@ -11,4 +16,4 @@ Start `citrusterm` and in the command prompt window type:
 
 This will download and install the ChordPro program `wxchordpro`. It will be installed in the CitrusPerl `bin` folder and can be executed from the citrusterm command prompt. Alternatively, you can add a shortcut icon to the desktop.
 
-You may now proceed to [[Getting Started|ChordPro Getting Started]].
+You may now proceed to [Getting Started]({{< relref "ChordPro-Getting-Started" >}}).

@@ -1,3 +1,8 @@
+---
+title: "Configuration file contents"
+description: "Configuration file contents"
+---
+
 # Configuration file contents
 
 As already mentioned, the configuration file is a [JSON](https://json.org) document. The JSON format is very strict, but ChordPro allows the JSON documents to be slightly relaxed. This means that the ChordPro configuration files may contain comments and that the requirement that the last item of a list may not be followed by a comma is lifted.
@@ -28,9 +33,9 @@ Layout doesn't matter, this document might as well have been written as:
 
 The ChordPro configuration file consists of two parts, all optional.
 
-* [[The Generic Part|ChordPro Configuration Generic]]  
+* [The Generic Part]({{< relref "ChordPro-Configuration-Generic" >}})  
 Generic settings.
 
-* [[PDF Output|ChordPro Configuration PDF]]  
+* [PDF Output]({{< relref "ChordPro-Configuration-PDF" >}})  
 Specific settings for PDF output.
 

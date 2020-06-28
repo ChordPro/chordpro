@@ -1,3 +1,8 @@
+---
+title: "Directives: new_page"
+description: "Directives: new_page"
+---
+
 # Directives: new_page
 
 Abbreviation: `np`.

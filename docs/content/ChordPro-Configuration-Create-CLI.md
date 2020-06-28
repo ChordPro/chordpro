@@ -1,3 +1,8 @@
+---
+title: "Creating a config (CLI)"
+description: "Creating a config (CLI)"
+---
+
 # Creating a config (CLI)
 
 ## Create a sample configuration using the command line

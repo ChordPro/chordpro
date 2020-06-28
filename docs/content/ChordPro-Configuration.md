@@ -1,7 +1,12 @@
+---
+title: "ChordPro Configuration"
+description: "ChordPro Configuration"
+---
+
 # ChordPro Configuration
 
-* [[Overview|ChordPro Configuration Overview]]
-* [[Preset configurations|Chordpro Configuration Presets]]
-* [[Create a sample configuration using the GUI|Chordpro Configuration Create GUI]]
-* [[Create a sample configuration using the command line|Chordpro Configuration Create CLI]]
-* [[Configuration file contents|Chordpro Configuration File]]
+* [Overview]({{< relref "ChordPro-Configuration-Overview" >}})
+* [Preset configurations]({{< relref "Chordpro-Configuration-Presets" >}})
+* [Create a sample configuration using the GUI]({{< relref "Chordpro-Configuration-Create-GUI" >}})
+* [Create a sample configuration using the command line]({{< relref "Chordpro-Configuration-Create-CLI" >}})
+* [Configuration file contents]({{< relref "Chordpro-Configuration-File" >}})

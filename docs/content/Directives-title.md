@@ -1,3 +1,8 @@
+---
+title: "Directives: title"
+description: "Directives: title"
+---
+
 # Directives: title
 
 Abbreviation: `t`.
@@ -10,4 +15,4 @@ Examples:
     {meta: title Swing Low Sweet Chariot}
     {t: Swing Low Sweet Chariot}
 
-See also: [[meta|Directives meta]].
+See also: [meta]({{< relref "Directives-meta" >}}).

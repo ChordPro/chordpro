@@ -1,3 +1,8 @@
+---
+title: "Installation on Mac OS/X"
+description: "Installation on Mac OS/X"
+---
+
 # Installation on Mac OS/X
 
 
@@ -13,4 +18,4 @@ Your individual configuration file can be placed at
 
 `/Users/USER/.config/chordpro/chordpro.json`
 
-![](images/maintenance.png)
+![]({{< asset "images/maintenance.png" >}})
