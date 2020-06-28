@@ -1,16 +1,16 @@
-**[[The Specification|ChordPro File Format Specification]]**
+**[The Specification]({{< relref "ChordPro-File-Format-Specification" >}})**
 
-* [[Overview|ChordPro File Format Specification]]
-* [[ChordPro Directives]]
-* [[ChordPro Chords]]
+* [Overview]({{< relref "ChordPro-File-Format-Specification" >}})
+* [ChordPro Directives]({{< relref "ChordPro-Directives" >}})
+* [ChordPro Chords]({{< relref "ChordPro-Chords" >}})
 
-**[[The Implementation|ChordPro Reference Implementation]]**
+**[The Implementation]({{< relref "ChordPro-Reference-Implementation" >}})**
 
-* [[Overview|ChordPro Reference Implementation]]
-* [[Installation|ChordPro Installation]]
-* [[Configuration|ChordPro Configuration]]
-* [[User guide|Using ChordPro]]
+* [Overview]({{< relref "ChordPro-Reference-Implementation" >}})
+* [Installation]({{< relref "ChordPro-Installation" >}})
+* [Configuration]({{< relref "ChordPro-Configuration" >}})
+* [User guide]({{< relref "Using-ChordPro" >}})
 
-**[[Support]]**
+**[Support]({{< relref "Support" >}})**
 
-**[[Links]]**
+**[Links]({{< relref "Links" >}})**

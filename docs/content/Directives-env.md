@@ -1,3 +1,8 @@
+---
+title: "Environment directives"
+description: "Environment directives"
+---
+
 # Environment directives
 
 Environments, also called _sections_, group series of input lines into
@@ -20,19 +25,19 @@ the section. For example:,
     {start_of_verse: Verse 1}
 
 The ChordPro reference implementation prints the label in the left
-margin, see [[labels|ChordPro Configuration PDF#labels]].
+margin, see [labels]({{< relref "ChordPro-Configuration-PDF#labels" >}}).
 
 For legacy reasons, the following environments have a short directive
 to start and end them:
 
-* [[start_of_chorus|Directives env_chorus]] (short: soc)
-* [[end_of_chorus|Directives env_chorus]] (short: eoc)
-* [[chorus|Directives env_chorus]]
-* [[start_of_verse|Directives env_verse]] (short: sov)
-* [[end_of_verse|Directives env_verse]] (short: eov)
-* [[start_of_bridge|Directives env_bridge]] (short: sob)
-* [[end_of_bridge|Directives env_bridge]] (short: eob)
-* [[start_of_tab|Directives env_tab]] (short: sot)
-* [[end_of_tab|Directives env_tab]] (short: eot)
-* [[start_of_grid|Directives env_grid]] (short: sog)
-* [[end_of_grid|Directives env_grid]] (short: eog)
+* [start_of_chorus]({{< relref "Directives-env_chorus" >}}) (short: soc)
+* [end_of_chorus]({{< relref "Directives-env_chorus" >}}) (short: eoc)
+* [chorus]({{< relref "Directives-env_chorus" >}})
+* [start_of_verse]({{< relref "Directives-env_verse" >}}) (short: sov)
+* [end_of_verse]({{< relref "Directives-env_verse" >}}) (short: eov)
+* [start_of_bridge]({{< relref "Directives-env_bridge" >}}) (short: sob)
+* [end_of_bridge]({{< relref "Directives-env_bridge" >}}) (short: eob)
+* [start_of_tab]({{< relref "Directives-env_tab" >}}) (short: sot)
+* [end_of_tab]({{< relref "Directives-env_tab" >}}) (short: eot)
+* [start_of_grid]({{< relref "Directives-env_grid" >}}) (short: sog)
+* [end_of_grid]({{< relref "Directives-env_grid" >}}) (short: eog)

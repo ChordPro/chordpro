@@ -1,3 +1,8 @@
+---
+title: "User Forum"
+description: "User Forum"
+---
+
 # User Forum
 
 A new user forum is available on groups.io. Feel free to subscribe and contribute.

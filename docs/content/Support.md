@@ -1,10 +1,15 @@
+---
+title: "Support"
+description: "Support"
+---
+
 # Support
 
 ## Support for you
 
-* [[User Forum|Support User Forum]]
-* [[Hints and Tips|Support Hints And Tips]]
-* [[FAQ|Support FAQ]]
+* [User Forum]({{< relref "Support-User-Forum" >}})
+* [Hints and Tips]({{< relref "Support-Hints-And-Tips" >}})
+* [FAQ]({{< relref "Support-FAQ" >}})
 
 ## Support for us
 

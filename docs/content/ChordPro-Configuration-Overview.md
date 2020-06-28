@@ -1,8 +1,13 @@
+---
+title: "Configuration: Overview"
+description: "Configuration: Overview"
+---
+
 # Configuration: Overview
 
-The way the output is formatted and some behavioural aspects of the reference implementation are configurable via configuration files. These are [JSON](http://www.json.org/) files that can be created and modified using any convenient text editor. There are also several JSON editors available, often in the form of web services. For schema-based editors, the schema can be downloaded [here](config50.schema).
+The way the output is formatted and some behavioural aspects of the reference implementation are configurable via configuration files. These are [JSON](http://www.json.org/) files that can be created and modified using any convenient text editor. There are also several JSON editors available, often in the form of web services. For schema-based editors, the schema can be downloaded [here]({{< asset "pub/config50.schema" >}}).
 
-ChordPro tries to read several configuration files and combines their contents to form the actual configuration. ChordPro always starts with the built-in default configuration. Then all configuration files are processed in order, and their contents are merged into the existing configuration. So all settings accumulate. Configuration files do not need to be complete (i.e., contain all settings), it is often sufficient to only include the settings that must be changed. See for example the preset configurations [modern1](modern1.json), which is complete, and [nashville](nashville.json), which only contains a few changes.
+ChordPro tries to read several configuration files and combines their contents to form the actual configuration. ChordPro always starts with the built-in default configuration. Then all configuration files are processed in order, and their contents are merged into the existing configuration. So all settings accumulate. Configuration files do not need to be complete (i.e., contain all settings), it is often sufficient to only include the settings that must be changed. See for example the preset configurations [modern1]({{< asset "pub/modern1.json" >}}), which is complete, and [nashville]({{< asset "pub/nashville.json" >}}), which only contains a few changes.
 
 In the examples below the symbol `~` denotes the user's home directory. Windows users may need to change the forward slashes to backward slashes.
 

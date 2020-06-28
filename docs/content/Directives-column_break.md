@@ -1,3 +1,8 @@
+---
+title: "Directives: column_break"
+description: "Directives: column_break"
+---
+
 # Directives: column_break
 
 Abbreviation: `cb`.
@@ -9,4 +14,4 @@ Example:
     {column_break}
     {cb}
 
-See also: [[columns|Directives columns]].
+See also: [columns]({{< relref "Directives-columns" >}}).

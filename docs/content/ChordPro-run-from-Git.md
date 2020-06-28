@@ -1,3 +1,8 @@
+---
+title: "Running from Git"
+description: "Running from Git"
+---
+
 # Running from Git
 
 If you want to keep track of the latest developments you can run

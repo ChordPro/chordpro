@@ -1,3 +1,8 @@
+---
+title: "Getting started with ChordPro"
+description: "Getting started with ChordPro"
+---
+
 # Getting started with ChordPro
 
 For a good understanding it is important to know that ChordPro is basically a file transformation program. It reads a file containing lyrics and chords according to the ChordPro File Standard, and produces a neatly formatted PDF document that you can view and print.
@@ -19,4 +24,4 @@ This will process `mysong.cho` and produce the PDF document `mysong.pdf`.
 
 `chordpro --help` will give you a list of options that you can pass to the `chordpro` command.
 
-More information can be found in the [[User Guide|Using-ChordPro]].
+More information can be found in the [User Guide]({{< relref "Using-ChordPro" >}}).

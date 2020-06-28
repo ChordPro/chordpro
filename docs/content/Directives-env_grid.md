@@ -1,3 +1,8 @@
+---
+title: "Directives: start_of_grid"
+description: "Directives: start_of_grid"
+---
+
 # Directives: start_of_grid
 
 This directive indicates that the lines that follow define a chord grid in the style of [Jazz Grilles](https://fr.wikipedia.org/wiki/Grille_harmonique).
@@ -17,7 +22,7 @@ For example, to create a grid for ‘The House of the Rising Sun’:
 
 The result could look like:
 
-![](images/ex_grid1.png)
+![]({{< asset "images/ex_grid1.png" >}})
 
 The grid consists of a number of cells that can contain chords.
 The desired number of cells per line can be specified as an argument to the `start_of_grid` directive:
@@ -75,7 +80,7 @@ Example:
 
 The result will be similar to:
 
-![](images/ex_grid2.png)
+![]({{< asset "images/ex_grid2.png" >}})
 
 This directive may include an optional label, to be printed in the
 left margin. For example:,
@@ -83,7 +88,7 @@ left margin. For example:,
     {start_of_grid: Intro}
 
 The ChordPro reference implementation prints the label in the left
-margin, see [[labels|ChordPro Configuration PDF#labels]].
+margin, see [labels]({{< relref "ChordPro-Configuration-PDF#labels" >}}).
 
 # Directives: end_of_grid
 

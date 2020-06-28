@@ -1,7 +1,12 @@
+---
+title: "Using ChordPro"
+description: "Using ChordPro"
+---
+
 # Using ChordPro
 
 First of all, please read the
-[[Getting Started|ChordPro-Getting-Started]] page.
+[Getting Started]({{< relref "ChordPro-Getting-Started" >}}) page.
 
 ## Command line options
 
@@ -24,7 +29,7 @@ equivalent:
     -o song.pdf
 
 Most options have corresponding settings in the
-[[configuration files|ChordPro-Configuration]]. When used on the
+[configuration files]({{< relref "ChordPro-Configuration" >}}). When used on the
 command line, the option overrides the corresponding settings in the
 configuration files.
 
@@ -38,7 +43,7 @@ Prints version information about the ChordPro program. No other processing will 
 
 ### cover
 
-`--cover=`_FILE_
+`--cover=`*FILE*
 
 Prepends the contents of the named PDF document to the output. This can
 be used to produce documents with cover pages.
@@ -65,7 +70,7 @@ e.g. a bass player.
 
 ### diagrams
 
-`--diagrams=`_WHICH_
+`--diagrams=`*WHICH*
 
 Prints diagrams of chords used in a song.
 
@@ -74,23 +79,23 @@ the user-defined chords, and `none` to suppress printing of chord
 diagrams.
 
 Configuration file setting:
-[[Printing chord diagrams|ChordPro-Configuration-Generic#configuration-file-contents-generic_printing-chord-diagrams]].
+[Printing chord diagrams]({{< relref "ChordPro-Configuration-Generic#printing-chord-diagrams" >}}).
 
-See also: [`--chord-grids`](#chordii-compatibility-options_chord-grids),
-[`--easy-chord-grids`](#chordii-compatibility-options_easy-chord-grids),
-[`--user-chord-grids`](#chordii-compatibility-options_user-chord-grids),
-[`--chord-grids-sorted`](#chordii-compatibility-options_chord-grids-sorted).
+See also: [`--chord-grids`]({{< relref "#chord-grids" >}}),
+[`--easy-chord-grids`]({{< relref "#easy-chord-grids" >}}),
+[`--user-chord-grids`]({{< relref "#user-chord-grids" >}}),
+[`--chord-grids-sorted`]({{< relref "#chord-grids-sorted" >}}).
 		
 ### encoding
 
-`--encoding=`_ENC_
+`--encoding=`*ENC*
 
 Specifies the encoding for input files. Default is UTF-8. ISO-8859.1
 (Latin-1) encoding is automatically sensed.
 
 ### filelist
 
-`--filelist=`_FILE_
+`--filelist=`*FILE*
 
 Reads the names of the files to be processed from the named file. This
 is mostly useful when you have a large collection of song files that
@@ -116,7 +121,7 @@ require chords.
 
 ### meta
 
-`--meta=`_KEY_`=`_VALUE_
+`--meta=`*KEY*`=`*VALUE*
 
 Presets metadata item _KEY_ to have the value _VALUE_.
 
@@ -128,7 +133,7 @@ This option may be specified multiple times.
 
 Suppresses the generation of a CSV file.
 
-See [`--csv`](#general-command-line-options_csv).
+See [`--csv`]({{< relref "#csv" >}}).
 
 ### no-toc
 
@@ -136,11 +141,11 @@ See [`--csv`](#general-command-line-options_csv).
 
 Suppresses the table of contents.
 
-See [`--toc`](#general-command-line-options_toc).
+See [`--toc`]({{< relref "#toc" >}}).
 
 ### output
 
-`--output=`_FILE_ (short: `-o`)
+`--output=`*FILE* (short: `-o`)
 
 Designates the name of the output file where the results are written
 to.
@@ -164,7 +169,7 @@ A functional equivalent version of the ChordPro input.
 
 ### start-page-number
 
-`--start-page-number=`_N_ (short: `-p`)
+`--start-page-number=`*N* (short: `-p`)
 
 Sets the starting page number for the output.
 
@@ -179,7 +184,7 @@ contains more than one song.
 
 ### transcode
 
-`--transcode=`_notation_
+`--transcode=`*notation*
 
 Transcode all songs to the named notation system. Supported values
 are:
@@ -196,13 +201,13 @@ are:
 
 ### transpose
 
-`--transpose=`_N_ (short: `-x`)
+`--transpose=`*N* (short: `-x`)
 
 Transposes all songs by _N_ semi-tones. Note that _N_ may be specified
-as `+`_N_ to transpose upward, using sharps, or as `-`_N_ to transpose
+as `+`*N* to transpose upward, using sharps, or as `-`*N* to transpose
 downward, using flats.
 
-See also the [[transpose|Directives transpose]] directive.
+See also the [transpose]({{< relref "Directives-transpose" >}}) directive.
 
 ### version
 
@@ -224,22 +229,22 @@ should not be confused with ChordPro grids.
 
 ### chord-font
 
-`--chord-font=`_FONT_ (short: `-C`)
+`--chord-font=`*FONT* (short: `-C`)
 
 Sets the font used to print the chord names.
 
-See also [[ChordPro Fonts|ChordPro-Fonts]].
+See also [ChordPro Fonts]({{< relref "ChordPro-Fonts" >}}).
 
-Configuration file setting: [`pdf.fonts.chord`](ChordPro-Configuration-PDF#fonts).
+Configuration file setting: [`pdf.fonts.chord`]({{< relref "ChordPro-Configuration-PDF#fonts" >}}).
 
 ### chord-grid-size
 
-`--chord-grid-size=`_N_ (short: `-s`)
+`--chord-grid-size=`*N* (short: `-s`)
 
 Sets the total width of a chord diagram.
 
 Configuration file setting:
-[`pdf.diagram`](ChordPro-Configuration-PDF#chord-diagrams).
+[`pdf.diagram`]({{< relref "ChordPro-Configuration-PDF#chord-diagrams" >}}).
 
 ### chord-grids
 
@@ -248,7 +253,7 @@ Configuration file setting:
 Prints chord diagrams of all chords used in a song.
 
 Configuration file setting:
-[`diagrams.show`](ChordPro-Configuration-Generic#printing-chord-diagrams).
+[`diagrams.show`]({{< relref "ChordPro-Configuration-Generic#printing-chord-diagrams" >}}).
 
 ### chord-grids-sorted
 
@@ -258,15 +263,15 @@ Prints chord diagrams of the chords used in a song, ordered by key and
 type.
 
 Configuration file setting:
-[`diagrams.sorted`](ChordPro-Configuration-Generic#printing-chord-diagrams).
+[`diagrams.sorted`]({{< relref "ChordPro-Configuration-Generic#printing-chord-diagrams" >}}).
 
 ### chord-size
 
-`--chord-size=`_N_ (short: `-c`)
+`--chord-size=`*N* (short: `-c`)
 
 Sets the font size for the chord names.
 
-Configuration file setting: [`pdf.fonts.chord`](ChordPro-Configuration-PDF#fonts).
+Configuration file setting: [`pdf.fonts.chord`]({{< relref "ChordPro-Configuration-PDF#fonts" >}}).
 
 ### dump-chords
 
@@ -296,8 +301,8 @@ Not supported.
 Prints even/odd pages with pages numbers left on even pages.
 
 Configuration file settings:
-[`pdf.even-odd-pages`](ChordPro-Configuration-PDF#even-odd-page-printing)
-and [[Page headers and footers|ChordPro-Configuration-PDF#page-headers-and-footers]].
+[`pdf.even-odd-pages`]({{< relref "ChordPro-Configuration-PDF#even-odd-page-printing" >}})
+and [Page headers and footers]({{< relref "ChordPro-Configuration-PDF#page-headers-and-footers" >}}).
 
 ### no-easy-chord-grids
 
@@ -312,7 +317,7 @@ Not supported.
 Disables printing of chord diagrams of the chords used in a song.
 
 Configuration file setting:
-[`diagrams.show`](ChordPro-Configuration-Generic#printing-chord-diagrams).
+[`diagrams.show`]({{< relref "ChordPro-Configuration-Generic#printing-chord-diagrams" >}}).
 
 ### no-chord-grids-sorted
 
@@ -321,7 +326,7 @@ Configuration file setting:
 Prints chord grids in the order they appear in the song.
 
 Configuration file setting:
-[`diagrams.sorted`](ChordPro-Configuration-Generic#printing-chord-diagrams).
+[`diagrams.sorted`]({{< relref "ChordPro-Configuration-Generic#printing-chord-diagrams" >}}).
 
 ### odd-pages-number-left
 
@@ -330,8 +335,8 @@ Configuration file setting:
 Prints even/odd pages with pages numbers left on odd pages.
 
 Configuration file settings:
-[`pdf.even-odd-pages`](ChordPro-Configuration-PDF#even-odd-page-printing)
-and [[Page headers and footers|ChordPro-Configuration-PDF#page-headers-and-footers]].
+[`pdf.even-odd-pages`]({{< relref "ChordPro-Configuration-PDF#even-odd-page-printing" >}})
+and [Page headers and footers]({{< relref "ChordPro-Configuration-PDF#page-headers-and-footers" >}}).
 
 ### page-number-logical
 
@@ -341,12 +346,12 @@ Not supported.
 
 ### page-size
 
-`--page-size=`_FMT_ (short: `-P`)
+`--page-size=`*FMT* (short: `-P`)
 
 Specifies the page size for the PDF output, e.g. `a4` (default), `letter`.
 
 Configuration file setting:
-[`pdf.papersize`](ChordPro-Configuration-PDF#papersize).
+[`pdf.papersize`]({{< relref "ChordPro-Configuration-PDF#papersize" >}}).
 
 ### single-space
 
@@ -356,25 +361,25 @@ When a lyrics line has no chords associated, suppresses the vertical
 space normally occupied by the chords.
 
 Configuration file setting:
-[`settings.suppress-empty-chords`](ChordPro-Configuration-Generic#general-settings).
+[`settings.suppress-empty-chords`]({{< relref "ChordPro-Configuration-Generic#general-settings" >}}).
 
 ### text-font
 
-`--text-font=`_FONT_ (short: `-T`)
+`--text-font=`*FONT* (short: `-T`)
 
 Sets the font used to print lyrics and comments.
 
-See also [[ChordPro Fonts|ChordPro-Fonts]].
+See also [ChordPro Fonts]({{< relref "ChordPro-Fonts" >}}).
 
-Configuration file setting: [`pdf.fonts.text`](ChordPro-Configuration-PDF#fonts).
+Configuration file setting: [`pdf.fonts.text`]({{< relref "ChordPro-Configuration-PDF#fonts" >}}).
 
 ### text-size
 
-`--text-size=`_N_ (short: `-t`)
+`--text-size=`*N* (short: `-t`)
 
 Sets the font size for lyrics and comments.
 
-Configuration file setting: [`pdf.fonts.text`](ChordPro-Configuration-PDF#fonts).
+Configuration file setting: [`pdf.fonts.text`]({{< relref "ChordPro-Configuration-PDF#fonts" >}}).
 
 ### user-chord-grids
 
@@ -383,7 +388,7 @@ Configuration file setting: [`pdf.fonts.text`](ChordPro-Configuration-PDF#fonts)
 Prints chord grids of all user defined chords used in a song.
 
 Configuration file setting:
-[`diagrams.show`](ChordPro-Configuration-Generic#printing-chord-diagrams).
+[`diagrams.show`]({{< relref "ChordPro-Configuration-Generic#printing-chord-diagrams" >}}).
 
 ### vertical-space
 
@@ -392,7 +397,7 @@ Configuration file setting:
 Adds some extra vertical space between the lines.
 
 Configuration file setting:
-[Spacing](ChordPro-Configuration-PDF#spacing).
+[Spacing]({{< relref "ChordPro-Configuration-PDF#spacing" >}}).
 
 ### 2-up
 
@@ -408,7 +413,7 @@ Not supported.
 
 ## Configuration options
 
-See [[Configuration Files Overview|ChordPro Configuration Overview]]
+See [Configuration Files Overview]({{< relref "ChordPro-Configuration-Overview" >}})
 for details about the configuration files.
 
 Note that missing default configuration files are silently ignored.
@@ -416,10 +421,10 @@ ChordPro will never create nor modify configuration files.
 
 ### config
 
-`--config=`_JSON_ (shorter: `--cfg`)
+`--config=`*JSON* (shorter: `--cfg`)
 
 A JSON file that defines the behaviour of the program and the layout
-of the output. See [[Configuration Files|ChordPro-Configuration]] for details.
+of the output. See [Configuration Files]({{< relref "ChordPro-Configuration" >}}) for details.
 
 This option may be specified more than once. Each additional config
 file overrides the corresponding definitions that are currently
@@ -427,7 +432,7 @@ active.
 
 ### define
 
-`--define=`_item_
+`--define=`*item*
 
 Sets a configuration item. _item_ must be in the format of
 period-separated configuration keys, an equal sign, and the value.
@@ -492,13 +497,13 @@ The final configuration is not commented. Sorry.
 
 ### sysconfig
 
-`--sysconfig=`_CFG_
+`--sysconfig=`*CFG*
 
 Designates a system specific config file.
 
 ### userconfig
 
-`--userconfig=`_CFG_
+`--userconfig=`*CFG*
 
 Designates the config file for the user.
 

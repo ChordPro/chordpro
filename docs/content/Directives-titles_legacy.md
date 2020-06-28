@@ -1,6 +1,11 @@
+---
+title: "Directives: titles"
+description: "Directives: titles"
+---
+
 # Directives: titles
 
-**Deprecated.** Use the [[configuration files|ChordPro Configuration]] instead.
+**Deprecated.** Use the [configuration files]({{< relref "ChordPro-Configuration" >}}) instead.
 
 `{titles:` _flush_ `}`
 

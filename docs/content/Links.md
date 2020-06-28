@@ -1,7 +1,12 @@
+---
+title: "ChordPro related links"
+description: "ChordPro related links"
+---
+
 # ChordPro related links
 
 * [Official ChordPro site](https://www.chordpro.org)  
-  Contact us via [email](mai&#x6c;to&#58;info&#64;chordpro.org).
+  Contact us via [email](mailto:info@chordpro.org).
 
 * Follow us on [Twitter](https://twitter.com/ChordPro_Org) for
   announcements of new releases and other interesting things.  

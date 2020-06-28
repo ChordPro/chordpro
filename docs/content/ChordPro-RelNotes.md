@@ -1,9 +1,14 @@
+---
+title: "ChordPro Release info"
+description: "ChordPro Release info"
+---
+
 # ChordPro Release info
 
 Release information for the __ChordPro file format__.
 
 For release information for the ChordPro __reference implementation__, see
-[here](ChordPro-Reference-RelNotes.html).
+[here]({{< relref "ChordPro-Reference-RelNotes.html" >}}).
 
 ## ChordPro version 6
 
@@ -21,7 +26,7 @@ For example:
 	
 The reference implementation will produce something similar to:
 
-![Example markup](images/rosesarered.png)
+![Example markup]({{< asset "images/rosesarered.png" >}})
 
 ### Annotations
 
@@ -34,7 +39,7 @@ For example:
 
 The reference implementation will produce something similar to:
 
-![Example annotation](images/thisistheend.png)
+![Example annotation]({{< asset "images/thisistheend.png" >}})
 
 Even though they are written using chord-like syntax, it is important
 to know that annotations are _not_ chords. In particular:
@@ -59,7 +64,7 @@ information, e.g. to show a bridge in a different way than a verse.
 
 In addition to these directives it is possible to add your own section
 directives, for example `{start_of_lead}` or `{start_of_coda}`. All
-sections must be closed with the corresponding `{end_of_`_section_`}`.
+sections must be closed with the corresponding `{end_of_`*section*`}`.
 
 The reference implementation treats all sections (except `chorus`,
 `tab` and `grid`) as lyrics.

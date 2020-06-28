@@ -1,3 +1,8 @@
+---
+title: "Directives: start_of_verse"
+description: "Directives: start_of_verse"
+---
+
 # Directives: start_of_verse
 
 Abbreviation: `sov`.
@@ -12,7 +17,7 @@ For example:,
     {start_of_verse: Verse 1}
 
 The ChordPro reference implementation prints the label in the left
-margin, see [[labels|ChordPro Configuration PDF#labels]].
+margin, see [labels]({{< relref "ChordPro-Configuration-PDF#labels" >}}).
 
 # Directives: end_of_verse
 

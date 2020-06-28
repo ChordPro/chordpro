@@ -1,3 +1,8 @@
+---
+title: "Directives: start_of_chorus"
+description: "Directives: start_of_chorus"
+---
+
 # Directives: start_of_chorus
 
 Abbreviation: `soc`.
@@ -10,7 +15,7 @@ For example:,
     {start_of_chorus: Chorus 2}
 
 The ChordPro reference implementation prints the label in the left
-margin, see [[labels|ChordPro Configuration PDF#labels]].
+margin, see [labels]({{< relref "ChordPro-Configuration-PDF#labels" >}}).
 
 # Directives: end_of_chorus
 
@@ -32,5 +37,5 @@ In the second form, the argument is used as a label for the chorus.
 If multiple choruses are defined in a song, `{chorus}` applies to the
 last definition that precedes this directive.
 
-See also: [[labels|ChordPro Configuration PDF#labels]],
-	[[Chorus style|ChordPro Configuration PDF#chorus-style]].
+See also: [labels]({{< relref "ChordPro-Configuration-PDF#labels" >}}),
+	[Chorus style]({{< relref "ChordPro-Configuration-PDF#chorus-style" >}}).

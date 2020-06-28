@@ -1,3 +1,8 @@
+---
+title: "Directives: start_of_tab"
+description: "Directives: start_of_tab"
+---
+
 # Directives: start_of_tab
 
 Abbreviation: `sob`.
@@ -10,7 +15,7 @@ left margin. For example:,
     {start_of_tab: Solo}
 
 The ChordPro reference implementation prints the label in the left
-margin, see [[labels|ChordPro Configuration PDF#labels]].
+margin, see [labels]({{< relref "ChordPro-Configuration-PDF#labels" >}}).
 
 # Directives: end_of_tab
 

@@ -1,3 +1,8 @@
+---
+title: "ChordPro: The File Format Specification"
+description: "ChordPro: The File Format Specification"
+---
+
 # ChordPro: The File Format Specification
 
 ## Overview
@@ -45,7 +50,7 @@ Finally, all lines that start with a `#` are ignored. These can be used to inser
 
 In print, this song could look like this (click on the thumbnail to view the full PDF):
 
-[![simple.png](images/simple.png)](images/simple.pdf)
+[![simple.png]({{< asset "images/simple.png" >}})]({{< asset "images/simple.pdf" >}})
 
 ## Markup and annotations
 
@@ -55,7 +60,7 @@ Markup Language](Pango_Markup.html)
 and can be used to change text size, color, typeface (font) and more.
 
 _Annotations_ are textual remarks placed above the lyrics, just like
-chords. Annotations are specified with `[*`_text_`]`, again just like
+chords. Annotations are specified with `[*`*text*`]`, again just like
 chords. Depending on the software used to process the ChordPro data,
 annotations may be rendered in an outstanding manner.
 
@@ -63,10 +68,10 @@ Markup and anotations are available as of ChordPro version 6.
 
 ## Is this all?
 
-Yes, this is all there is to say about the ChordPro file format. Lyrics-and-chords lines, directives, empty lines and `#`-remarks. Of course, the most interesting part is what directives are possible and what effects they have. This is discussed in [[ChordPro Directives]]. Also relevant is what chords can be used, this is discussed in [[ChordPro Chords]].
+Yes, this is all there is to say about the ChordPro file format. Lyrics-and-chords lines, directives, empty lines and `#`-remarks. Of course, the most interesting part is what directives are possible and what effects they have. This is discussed in [ChordPro Directives]({{< relref "ChordPro-Directives" >}}). Also relevant is what chords can be used, this is discussed in [ChordPro Chords]({{< relref "ChordPro-Chords" >}}).
 
 ## Printing?
 
 In the early days of ChordPro, the only way to get a nicely formatted lead sheet was to print it on a LaserWriter. The original `chord` program created a so called PostScript document that could be sent to the printer.
 
-Much has changed. Nowadays PDF documents are used for printed output, but they can also be viewed on PC, phone and tablets. The [[ChordPro reference implementation|ChordPro Reference Implementation]] produces PDF by default. Nevertheless, in this document we will still use the term ‘printing’ when referring to the result of processing ChordPro files.
+Much has changed. Nowadays PDF documents are used for printed output, but they can also be viewed on PC, phone and tablets. The [ChordPro reference implementation]({{< relref "ChordPro-Reference-Implementation" >}}) produces PDF by default. Nevertheless, in this document we will still use the term ‘printing’ when referring to the result of processing ChordPro files.

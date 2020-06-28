@@ -1,3 +1,8 @@
+---
+title: "Directives: new_song"
+description: "Directives: new_song"
+---
+
 # Directives: new_song
 
 Abbreviation: `ns`.

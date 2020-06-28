@@ -1,3 +1,8 @@
+---
+title: "Directives: define"
+description: "Directives: define"
+---
+
 # Directives: define
 
 This directive defines a chord in terms of fret/string positions and, optional, finger settings.
@@ -24,9 +29,9 @@ Example:
 
 The resultant chord diagrams are:
 
-![](images/ex_define.png)
+![]({{< asset "images/ex_define.png" >}})
 
 The asterisk after the chord names indiciates that the chords have
 been defined in the song, possibly overriding built-in definitions.
 
-See also: [[chord|Directives chord]].
+See also: [chord]({{< relref "Directives-chord" >}}).

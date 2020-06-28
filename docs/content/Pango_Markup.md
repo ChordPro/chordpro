@@ -1,3 +1,8 @@
+---
+title: "Pango markup language"
+description: "Pango markup language"
+---
+
 # Pango markup language
 
 _This information is derived from the official [Pango documentation](https://developer.gnome.org/pygtk/stable/pango-markup-language.html)._
