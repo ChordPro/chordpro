@@ -25,7 +25,7 @@ The `Makefile` provides targets for:
   run a hugo server for interactive maintenance of the docs
 * production  
   generates a static (standalone) site in the `public` directory
-* dist  
+* publish  
   updates the ChordPro web site from the `public` directory, provided
   you have access to the site
 
