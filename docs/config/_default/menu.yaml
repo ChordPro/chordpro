@@ -1,0 +1,62 @@
+# Menu configuration.
+
+# This file replaces the [menu] section from the main config file.
+
+sidebar:
+
+- title: The Specification
+  identifier: spec
+  weight: 100
+
+- title: Overview
+  identifier: ChordPro-File-Format-Specification
+  parent: spec
+  weight: 110
+
+- identifier: ChordPro-Directives
+  parent: spec
+  weight: 120
+  title: ChordPro Directives
+
+- identifier: ChordPro-Chords
+  parent: spec
+  weight: 130
+  title: ChordPro Chords
+
+- title: The Implementation
+  identifier: impl
+  weight: 200
+
+- identifier: ChordPro-Reference-Implementation
+  parent: impl
+  weight: 210
+  title: Overview
+
+- identifier: ChordPro-Installation
+  parent: impl
+  weight: 220
+  title: Installation
+
+- identifier: ChordPro-Configuration
+  parent: impl
+  weight: 230
+  title: Configuration
+
+- identifier: Using-ChordPro
+  parent: impl
+  weight: 240
+  title: User guide
+
+- title: Support
+  identifier: supp
+  weight: 300
+
+- identifier: Support
+  parent: supp
+  weight: 310
+  title: Forum
+
+- identifier: Links
+  parent: supp
+  weight: 320
+  title: Links

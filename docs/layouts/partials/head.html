@@ -1,0 +1,14 @@
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8">
+  <title>{{ if not .IsHome }}{{ with .Title }}{{ . }} | {{ end }}{{ end }}{{ .Site.Title }}</title>
+  <meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ with .Summary }}{{ . }}{{ else }}{{ .Site.Params.description }}{{end }}{{ end }} ">
+  <link rel="canonical" href="{{ .Permalink }}" />
+  {{ template "_internal/opengraph.html" . }}
+  {{ template "_internal/twitter_cards.html" . }}
+  {{- with .Site.Params.keywords -}}
+    <meta name="keywords" content="{{ . | safeHTMLAttr }}">
+  {{ end -}}
+  {{ partial "head_bs4.html" . }}
+  <link rel="stylesheet" href="{{ (resources.Get "css/site.css").RelPermalink }}" />
+</head>
