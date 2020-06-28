@@ -16,7 +16,7 @@ prod ::
 	cp public/home/index.html public/
 
 dist ::
-	rsync -acvHi --delete public/ chordpro-site:www/chordpro/
+	rsync -acvHi --delete public/ chordpro-site:www/beta/
 
 clean ::
 	rm -fr public resources

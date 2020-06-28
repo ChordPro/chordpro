@@ -1,7 +1,7 @@
 # Site settings.
 
 title: ChordPro
-baseURL: https://www.chordpro.org/chordpro/
+baseURL: https://www.chordpro.org/beta/
 languageCode: en-EN
 
 # Build properties.
