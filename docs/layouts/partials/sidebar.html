@@ -1,0 +1,22 @@
+{{- $ctx := . -}}
+
+<div class="bg-light border-right" id="sidebar-wrapper">
+
+{{ range .Site.Menus.sidebar -}}
+
+{{- if .HasChildren -}}
+<div class="sidebar-heading">{{ .Title | safeHTML }}</div>
+
+{{ with .Children }}
+<div class="list-group list-group-flush">
+{{ range . }}
+<a href="{{ relref $ctx .KeyName }}"
+   class="list-group-item list-group-item-action bg-light">{{- .Title | safeHTML -}}</a>
+{{- end }}
+</div>
+{{ end -}}
+{{ end }}
+
+{{ end }}
+
+</div>
