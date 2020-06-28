@@ -1,7 +1,7 @@
 # The ChordPro documentation
 
-Here you can find all the ChordPro documentation for the current
-stable version.
+Here you can find all the ChordPro documentation for the development
+version.
 
 The documentation is in the form of a web site and can be generated
 using the [hugo](https://www.gohugo.io) framework for building
