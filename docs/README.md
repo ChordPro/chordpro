@@ -7,7 +7,7 @@ The documentation is in the form of a web site and can be generated
 using the [hugo](https://www.gohugo.io) framework for building
 websites.
 
-### Directory Structure
+### Directory structure
 
 | Item | Description |
 | ---- | ----------- |
@@ -23,9 +23,9 @@ The `Makefile` provides targets for:
 
 * server  
   run a hugo server for interactive maintenance of the docs
-* production__
+* production  
   generates a static (standalone) site in the `public` directory
-* dist__
+* dist  
   updates the ChordPro web site from the `public` directory, provided
   you have access to the site
 
