@@ -12,10 +12,10 @@ production :: prod
 prod ::
 	rm -fr public && mkdir public
 	${HUGO}
-	mv public/index.html public/allpages.html
+	mv public/index.html public/allpages/index.html
 	cp public/home/index.html public/
 
-dist ::
+publish ::
 	rsync -acvHi --delete public/ chordpro-site:www/beta/
 
 clean ::
