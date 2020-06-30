@@ -1,0 +1,4 @@
+<img src="{{ .Destination | safeURL }}"
+     class="img-fluid"
+     alt="{{ .Text }}"
+     {{ with .Title }}title="{{ . }}"{{ end }} />
