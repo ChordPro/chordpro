@@ -21,46 +21,46 @@ _Click on the page thumbnails to see the full size version._
 ## Default
 As the name implies, this is the default configuration. It accepts all ChordPro version 5 input.
 
-[![style_default.png]({{< asset "images/style_default.png" >}})]({{< asset "images/style_default.pdf" >}})
+{{< showpage "style_default" >}}
 
 ## Chordii
 This preset configuration makes the output look as closely as possible to the output of the _Chord_<sub>ii</sub> program.
 
-[![style_chordii.png]({{< asset "images/style_chordii.png" >}})]({{< asset "images/style_chordii.pdf" >}})
+{{< showpage "style_chordii" >}}
 
 ## Modern1
 A nice, modern style.
 
-[![style_modern1.png]({{< asset "images/style_modern1.png" >}})]({{< asset "images/style_modern1.pdf" >}})
+{{< showpage "style_modern1" >}}
 
 ## Modern2
 An alternative modern style.
 
-[![style_modern2.png]({{< asset "images/style_modern2.png" >}})]({{< asset "images/style_modern2.pdf" >}})
+{{< showpage "style_modern2" >}}
 
 ## Modern3
 A style with chord diagrams in a right column on the first page instead of at the end of the song.
 
-[![style_modern3.png]({{< asset "images/style_modern3.png" >}})]({{< asset "images/style_modern3.pdf" >}})
+{{< showpage "style_modern3" >}}
 
 ## Nashville
 A special style for songs that use Nashville numbering notation.
 
-[![style_nashville.png]({{< asset "images/style_nashville.png" >}})]({{< asset "images/style_nashville.pdf" >}})
+{{< showpage "style_nashville" >}}
 
 This style only sets the font for the chords, so it can be used in combination with other styles.
 
 ## Roman
 A special style for songs that use Roman numbering notation.
 
-[![style_roman.png]({{< asset "images/style_roman.png" >}})]({{< asset "images/style_roman.pdf" >}})
+{{< showpage "style_roman" >}}
 
 This style only sets the font for the chords, so it can be used in combination with other styles.
 
 ## Ukulele
 This preset adds 4-chord tuning and ukulele chords.
 
-[![style_ukulele.png]({{< asset "images/style_ukulele.png" >}})]({{< asset "images/style_ukulele.pdf" >}})
+{{< showpage "style_ukulele" >}}
 
 This style only sets the number of strings to 4 and defines the ukulele chords, so it can be used in combination with other styles.
 

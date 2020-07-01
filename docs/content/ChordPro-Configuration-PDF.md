@@ -150,7 +150,7 @@ not otherwise specified.
 
 This is an alternative style where the chords are placed in a separate column at the right of the lyrics. Chord changes are marked by underlining the lyrics.
 
-[![style_modern2.png]({{< asset "images/style_modern2.png" >}})]({{< asset "images/style_modern2.pdf" >}})
+{{< showpage "style_modern2" >}}
 
         // This style is enabled by setting "chordscolumn" to a nonzero value.
         // Value is the column position. 
@@ -200,7 +200,7 @@ An example of `"show":"right"`, where the chord diagrams are placed in a
 separate column at the right of the lyrics instead of at the end of
 the song.
 
-[![style_modern3.png]({{< asset "images/style_modern3.png" >}})]({{< asset "images/style_modern3.pdf" >}})
+{{< showpage "style_modern3" >}}
 
 ## Even/odd page printing
 

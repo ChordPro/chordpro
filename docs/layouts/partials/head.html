@@ -10,5 +10,6 @@
     <meta name="keywords" content="{{ . | safeHTMLAttr }}">
   {{ end -}}
   {{ partial "head_bs4.html" . }}
+  {{ partial "head_fancybox.html" . }}
   <link rel="stylesheet" href="{{ (resources.Get "css/site.css").RelPermalink }}" />
 </head>
