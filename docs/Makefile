@@ -5,12 +5,13 @@ HUGO := hugo
 default ::
 
 server :
+	make -C assets/images
 	${HUGO} server -D --disableFastRender --navigateToChanged --bind ${HOSTNAME} --baseURL http://${HOSTNAME}:1313
 
 production :: prod
 
 prod ::
-	rm -fr public && mkdir public
+	make -C assets/images
 	${HUGO}
 	mv public/index.html public/allpages/index.html
 	cp public/home/index.html public/
