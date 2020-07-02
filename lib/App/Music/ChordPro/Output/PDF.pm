@@ -57,6 +57,7 @@ sub generate_songbook {
     # 1. The back matter.
     my $book_back_matter_page = 1;
 
+    # The songbook...
     my @book;
     my $page = $options->{"start-page-number"} || 1;
     foreach my $song ( @{$sb->{songs}} ) {
@@ -68,6 +69,7 @@ sub generate_songbook {
 	$options->{startpage} = $page;
 	$song->{meta}->{tocpage} = $page;
 	push( @book, [ $song->{meta}->{title}->[0], $song ] );
+
 	$page += generate_song( $song,
 				{ pr => $pr, $options ? %$options : () } );
     }
@@ -146,6 +148,9 @@ sub generate_songbook {
     $pr->pagelabel( $book_toc_page,          'roman'            );
     $pr->pagelabel( $book_start_page,        'arabic'           );
     $pr->pagelabel( $book_back_matter_page,  'arabic', 'back-'  );
+
+    # Add the outlines.
+    $pr->make_outlines( [ map { $_->[1] } @book ], $book_start_page );
 
     $pr->finish( $options->{output} || "__new__.pdf" );
 

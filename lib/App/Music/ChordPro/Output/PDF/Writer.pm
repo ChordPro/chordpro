@@ -317,6 +317,127 @@ sub pagelabel {
     $self->{pdf}->pageLabel( $page, $opts );
 }
 
+# Substitute %X sequences in title formats.
+sub fmt_subst {
+    goto \&App::Music::ChordPro::Output::Common::fmt_subst;
+}
+
+sub make_outlines {
+    my ( $self, $book, $start ) = @_;
+    return unless $book && @$book; # unlikely
+
+    my @book;
+    foreach my $song ( @$book ) {
+	my $meta = $song->{meta};
+
+	# Pair titles and sorttitles.
+	my @titles;
+	if ( $meta->{title} ) {
+	    @titles =  map { [ $_ ] } @{ $meta->{title} };
+	}
+	if ( $meta->{sorttitle} ) {
+	    for ( my $i = 0; $i < @{$meta->{sorttitle}}; $i++ ) {
+		next unless defined $titles[$i];
+		push( @{$titles[$i]}, $meta->{sorttitle}->[$i] );
+	    }
+	}
+	# Pair artists and sortartists.
+	my @artists;
+	if ( $meta->{artist} ) {
+	    @artists =  map { [ $_ ] } @{ $meta->{artist} };
+	}
+	if ( $meta->{sortartist} ) {
+	    for ( my $i = 0; $i < @{$meta->{sortartist}}; $i++ ) {
+		next unless defined $artists[$i];
+		push( @{$artists[$i]}, $meta->{sortartist}->[$i] );
+	    }
+	}
+	# Build the title and artist data.
+	# Merge with (unique) copies of the song.
+	for my $title ( @titles ) {
+	    push( @book, { %$song,
+			   meta =>
+			   { %$meta,
+			     title      => [ $title->[0] ],
+			     sorttitle  => [ $title->[1] // $title->[0] ],
+			     artist     => [ $_->[0] ],
+			     sortartist => [ $_->[1] // $_->[0] ] } } )
+	      for @artists;
+	}
+    }
+
+    my $pdf = $self->{pdf};
+    my $ol_root;
+
+    # Process outline defs from config.
+    foreach my $ctl ( @{ $self->{ps}->{outlines} } ) {
+	next if $ctl->{omit};
+
+	# Sort. Need local copy since we loop.
+	my @bk;
+	if ( @{$ctl->{fields}} == 1 ) {
+	    @bk =
+	      sort { $a->[0] cmp $b->[0] }
+	      map { [ lc($_->{meta}->{$ctl->{fields}->[0]}->[0]), $_ ] }
+	      @book;
+	}
+	elsif ( @{$ctl->{fields}} == 2 ) {
+	    @bk =
+	      sort { $a->[0] cmp $b->[0] || $a->[1] cmp $b->[1] }
+	      map { [ lc($_->{meta}->{$ctl->{fields}->[0]}->[0]),
+		      lc($_->{meta}->{$ctl->{fields}->[1]}->[0]),
+		      $_ ] }
+	      @book;
+	}
+	else {
+	    croak("Too many fields for outline");
+	}
+
+	$ol_root //= $pdf->outlines;
+
+	my $outline = $ol_root->outline;
+	$outline->title( $ctl->{label} );
+	$outline->closed if $ctl->{collapse};
+
+	my %lh;			# letter hierarchy
+	for ( @bk ) {
+	    # Group on first letter.
+	    # That's why we left the sort fields in @bk.
+	    my $cur = uc(substr( $_->[0], 0, 1 ));
+	    $lh{$cur} //= [];
+	    push( @{$lh{$cur}}, $_->[-1] );
+	}
+
+	# Need letter hierarchy?
+	my $needlh = keys(%lh) >= $ctl->{letter};
+	my $cur_ol;
+	my $cur_let = "";
+
+	foreach my $let ( sort keys %lh ) {
+	    foreach my $song ( @{$lh{$let}} ) {
+		my $ol;
+		if ( $needlh ) {
+		    unless ( defined $cur_ol && $cur_let eq $let ) {
+			# Intermediate level autoline.
+			$cur_ol = $outline->outline;
+			$cur_ol->title($let);
+			$cur_let = $let;
+		    }
+		    # Leaf outline.
+		    $ol = $cur_ol->outline;
+		}
+		else {
+		    # Leaf outline.
+		    $ol = $outline->outline;
+		}
+		# Display info.
+		$ol->title( fmt_subst( $song, $ctl->{line} ) );
+		$ol->dest($pdf->openpage( $song->{meta}->{tocpage} + $start - 1 ));
+	    }
+	}
+    }
+}
+
 sub finish {
     my ( $self, $file ) = @_;
 
