@@ -1,4 +1,5 @@
 <img src="{{ .Destination | safeURL }}"
-     class="img-fluid"
-     alt="{{ .Text }}"
-     {{ with .Title }}title="{{ . }}"{{ end }} />
+     class="img-responsive img-fluid"
+     {{- with .Text }} alt="{{ . }}"{{ end -}}
+     {{- with .Title}} title="{{ . }}"{{ end -}}
+/>
