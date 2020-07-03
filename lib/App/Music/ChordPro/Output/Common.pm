@@ -92,4 +92,119 @@ sub roman($) {
     lc Roman shift;
 }
 
+# Prepare outlines.
+# This mainly untangles alternative names when being sorted on.
+# Returns a book array where each element consists of the sort items,
+# and the song.
+
+sub prep_outlines {
+    my ( $book, $ctl ) = @_;
+    return [] unless $book && @$book; # unlikely
+    return [] if $ctl->{omit};
+
+    my @fields = @{$ctl->{fields}};
+    if ( @fields > 2 ) {
+	croak("Too many fields for outline (max 2)");
+    }
+    return $book unless @fields; # ?
+
+    my @book;
+    foreach my $song ( @$book ) {
+	my $meta = $song->{meta};
+
+	my @split;
+
+	foreach my $item ( @fields ) {
+	    ( my $coreitem = $item ) =~ s/^sort//;
+	    push( @split, [] ), next unless $meta->{$coreitem};
+
+	    my @s = map { [ $_ ] } @{ $meta->{$coreitem} };
+
+	    if ( $meta->{"sort$coreitem"} ) {
+		if ( $coreitem eq $item ) {
+		    for ( my $i = 0; $i < @{$meta->{"sort$coreitem"}}; $i++ ) {
+			next unless defined $s[$i]->[0];
+			$s[$i]->[1] = $meta->{"sort$coreitem"}->[$i];
+		    }
+		}
+		else {
+		    for ( my $i = 0; $i < @{$meta->{$item}}; $i++ ) {
+			next unless defined $s[$i]->[0];
+			$s[$i]->[1] = $meta->{$item}->[$i];
+		    }
+		}
+	    }
+	    push( @split, [ $coreitem, @s ] );
+	}
+
+	# Merge with (unique) copies of the song.
+	if ( @split == 0 ) {
+	    push( @book, $song );
+	}
+	elsif ( @split == 1 ) {
+	    my $f1 = shift(@{$split[0]});
+	    my $addsort1 = $f1 =~ /^(title|artist)$/;
+	    for my $s1 ( @{$split[0]} ) {
+		push( @book,
+		      { %$song,
+			meta =>
+			{ %$meta,
+			  $f1       => [ $s1->[0] ],
+			  $addsort1
+			  ? ( "sort$f1" => [ $s1->[1] // $s1->[0] ] )
+			  : (),
+			}
+		      }
+		    );
+	    }
+	}
+	else {
+	    my $f1 = shift(@{$split[0]});
+	    my $f2 = shift(@{$split[1]});
+	    my $addsort1 = $f1 =~ /^(title|artist)$/;
+	    my $addsort2 = $f2 =~ /^(title|artist)$/;
+	    for my $s1 ( @{$split[0]} ) {
+		for my $s2 ( @{$split[1]} ) {
+		    push( @book,
+			  { %$song,
+			   meta =>
+			   { %$meta,
+			     $f1       => [ $s1->[0] ],
+			     $addsort1
+			     ? ( "sort$f1" => [ $s1->[1] // $s1->[0] ] )
+			     : (),
+			     $f2       => [ $s2->[0] ],
+			     $addsort2
+			     ? ( "sort$f2" => [ $s2->[1] // $s2->[0] ] )
+			     : (),
+			   }
+			  }
+			);
+		}
+	    }
+	}
+    }
+
+    # Sort.
+    if ( @{$ctl->{fields}} == 1 ) {
+	@book =
+	  sort { $a->[0] cmp $b->[0] }
+	  map { [ lc($_->{meta}->{$ctl->{fields}->[0]}->[0]), $_ ] }
+	  @book;
+    }
+    elsif ( @{$ctl->{fields}} == 2 ) {
+	@book =
+	  sort { $a->[0] cmp $b->[0] || $a->[1] cmp $b->[1] }
+	  map { [ lc($_->{meta}->{$ctl->{fields}->[0]}->[0]),
+		  lc($_->{meta}->{$ctl->{fields}->[1]}->[0]),
+		  $_ ] }
+	  @book;
+    }
+    else {
+	# Already asserted.
+    }
+
+    return \@book;
+}
+
 1;

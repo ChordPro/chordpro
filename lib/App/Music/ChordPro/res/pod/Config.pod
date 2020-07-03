@@ -63,6 +63,7 @@ This is the current built-in configuration file, showing all settings.
   	"keys" : [ "title", "subtitle",
   		   "artist", "composer", "lyricist", "arranger",
   		   "album", "copyright", "year",
+  		   "sorttitle", "sortartist",
   		   "key", "time", "tempo", "capo", "duration" ],
   	"strict" : true,
   	"separator" : "; ",
@@ -399,6 +400,31 @@ This is the current built-in configuration file, showing all settings.
   	// empty          --> text
   	// diagram        --> comment
   	// diagram_base   --> text (but at a small size)
+  
+  	// Bookmarks (PDF outlines).
+  	// fields:   primary and (optional) secondary fields.
+  	// label:    outline label
+  	// line:     text of the outline element
+  	// collapse: initial display is collapsed
+  	// letter:   sublevel with first letters if more
+  	// fold:     group by primary (NYI)
+  	// omit:     ignore this
+  	"outlines" : [
+  	    { "fields"   : [ "sorttitle", "sortartist" ],
+  	      "label"    : "By Title",
+  	      "line"     : "%{title}%{artist| - %{}}",
+  	      "collapse" : false,
+  	      "letter"   : 5,
+  	      "fold"     : false,
+  	    },
+  	    { "fields"   : [ "sortartist", "sorttitle" ],
+  	      "label"    : "By Artist",
+  	      "line"     : "%{artist|%{} - }%{title}",
+  	      "collapse" : false,
+  	      "letter"   : 5,
+  	      "fold"     : false,
+  	    },
+  	],
   
   	// This will show the page layout if non-zero.
   	"showlayout" : false,
