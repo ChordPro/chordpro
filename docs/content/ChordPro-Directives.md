@@ -30,8 +30,10 @@ Each song can have meta-data associated, for example the song title. Meta-data a
 organizing collections of ChordPro songs.
 
 * [title]({{< relref "Directives-title" >}}) (short: t)
+* [sorttitle]({{< relref "Directives-sorttitle" >}})
 * [subtitle]({{< relref "Directives-subtitle" >}}) (short: st)
 * [artist]({{< relref "Directives-artist" >}})
+* [sortartist]({{< relref "Directives-sortartist" >}})
 * [composer]({{< relref "Directives-composer" >}})
 * [lyricist]({{< relref "Directives-lyricist" >}})
 * [copyright]({{< relref "Directives-copyright" >}})

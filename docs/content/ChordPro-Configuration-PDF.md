@@ -389,6 +389,63 @@ Default is the setting for `comment`.
 The font for the base fret numbers in chord diagrams.  
 Default is the setting for `text` but at a small size.
 
+## Outlines
+
+Outlines (bookmarks) can be automatically generated, controlled by
+settings in the config file. Most PDF viewers can show outlines and
+use them for easy navigation.
+
+````
+  	// Bookmarks (PDF outlines).
+  	// fields:   primary and (optional) secondary fields.
+  	// label:    outline label
+  	// line:     text of the outline element
+  	// collapse: initial display is collapsed
+  	// letter:   sublevel with first letters if more
+  	// fold:     group by primary (NYI)
+  	// omit:     ignore this
+  	"outlines" : [
+  	    { "fields"   : [ "sorttitle", "sortartist" ],
+  	      "label"    : "By Title",
+  	      "line"     : "%{title}%{artist| - %{}}",
+  	      "collapse" : false,
+  	      "letter"   : 5,
+  	      "fold"     : false,
+  	    },
+  	    { "fields"   : [ "sortartist", "sorttitle" ],
+  	      "label"    : "By Artist",
+  	      "line"     : "%{artist|%{} - }%{title}",
+  	      "collapse" : false,
+  	      "letter"   : 5,
+  	      "fold"     : false,
+  	    },
+  	],
+````
+
+The default configuration generates two outlines, one labelled `By
+Title` and one labelled `By Artist`. Each outline is ordered according
+to the meta data specified in `"fields"`. The format of the outlines
+is specified in `"line"`.
+
+* `fields`  
+The ordering of the outline. You can specify one or two metadata
+items.  
+When you specify a metadata item that has multiple values they are
+split out in the outline.
+* `label`  
+The label for this outline.
+* `line`  
+The format of the outline.
+* `collapse`  
+If true, the outline is initially collapsed.
+* `letter`  
+If there are more outline items with differing first letters than the
+amount specified here, an extra level of outlines (letter index) is
+created for easy navigation.  
+A value of zero disables this.
+* `fold`  
+For future use.
+
 ## Helping develop a layout
 
 If `showlayout` is true, the margins and other page layout details are shown on the page. This can be helpful to determine the optimal settings for your desired layout.

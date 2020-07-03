@@ -15,8 +15,10 @@ single word but may include underscores.
 Meta-data names can be chosen freely although single lowercase words like `artist` and `composer` are advised. It is left to the ChordPro file processing tools to do something sensible with the meta-data.
 
 For convenience and backward compatibility, the following meta-data are considered standard. They can be defined using the `meta` directive, but also as standalone directives: [title]({{< relref "Directives-title" >}}),
+[sorttitle]({{< relref "Directives-sorttitle" >}}),
 [subtitle]({{< relref "Directives-subtitle" >}}),
 [artist]({{< relref "Directives-artist" >}}),
+[sortartist]({{< relref "Directives-sortartist" >}}),
 [composer]({{< relref "Directives-composer" >}}),
 [lyricist]({{< relref "Directives-lyricist" >}}),
 [arranger]({{< relref "Directives-arranger" >}}),
