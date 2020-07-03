@@ -142,15 +142,52 @@ If `auto` is set to true, unknown chords will be printed as empty diagrams. This
 
 ## Table of Contents
 
-`"title"` defines the title text for the table of contents. By default
-this is the string `"Table of Contents"`.
+Multiple tables of contents can be produced, controlled by settings in
+the config file.
 
-`"line"` defines the content of the table of contents lines. You can
-use all song metadata, see [here]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
+      // Table of contents.
+      "contents" : [
+          { "fields"   : [ "songindex" ],
+            "label"    : "Table of Contents",
+            "line"     : "%{title}",
+            "omit"     : false,
+          },
+          { "fields"   : [ "sorttitle", "sortartist" ],
+            "label"    : "Contents by Title",
+            "line"     : "%{title}%{artist| - %{}}",
+            "omit"     : false,
+          },
+          { "fields"   : [ "sortartist", "sorttitle" ],
+            "label"    : "Contents by Artist",
+            "line"     : "%{artist|%{} - }%{title}",
+            "omit"     : true,
+          },
+      ],
 
-The entries in the table of contents are in the same order as in
-the document. By setting `order` to `"alpha"`, the entries are sorted
-alphabetically by title.
+The default configuration generates two tables, one labelled `Table of Contents` and one labelled `Contents by Artist`. Each table is ordered according
+to the meta data specified in `"fields"`. The format of the content lines
+is specified in `"line"`.
+
+* `fields`  
+The ordering of the table. You can specify one or two metadata
+items.  
+When you specify a metadata item that has multiple values they are
+split out in the table.
+* `label`  
+The label for this table.
+* `line`  
+The format of the table lines.  
+You can use all song metadata, see [here]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
+* `omit`  
+If true, this table is omitted.
+
+Note that the first table in the default configuration is equivalent to
+the legacy table of contents.
+
+## Table of Contents (legacy)
+
+*The legacy config settings will be ignored if a new style
+specification (see above) is present*
 
     // Table of contents.
     "toc" : {
@@ -162,6 +199,19 @@ alphabetically by title.
         // Currently only sorting by page number and alpha is implemented.
         "order" : "page",
     },
+
+* `title`  
+Defines the title text for the table of contents. By default
+this is the string `"Table of Contents"`.
+
+* `line`  
+Defines the content of the table of contents lines.  
+You can use all song metadata, see [here]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
+
+* `order`  
+The entries in the table of contents are in the same order as in
+the document. By setting `order` to `"alpha"`, the entries are sorted
+alphabetically by title.
 
 ## Includes
 

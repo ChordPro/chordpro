@@ -147,6 +147,28 @@ This is the current built-in configuration file, showing all settings.
       },
   
       // Table of contents.
+      "contents" : [
+          { "fields"   : [ "songindex" ],
+            "label"    : "Table of Contents",
+            "line"     : "%{title}",
+            "fold"     : false,
+            "omit"     : false,
+          },
+          { "fields"   : [ "sorttitle", "sortartist" ],
+            "label"    : "Contents by Title",
+            "line"     : "%{title}%{artist| - %{}}",
+            "fold"     : false,
+            "omit"     : false,
+          },
+          { "fields"   : [ "sortartist", "sorttitle" ],
+            "label"    : "Contents by Artist",
+            "line"     : "%{artist|%{} - }%{title}",
+            "fold"     : false,
+            "omit"     : true,
+          },
+      ],
+      // Table of contents, old style.
+      // This will be ignored when new style contents is present.
       "toc" : {
   	  // Title for ToC.
   	  "title" : "Table of Contents",

@@ -77,15 +77,24 @@ sub generate_songbook {
 
     #warn("F=$book_front_matter_page, T=$book_toc_page, S=$book_start_page, B=$book_back_matter_page\n");
 
-    if ( $::config->{toc}->{order} eq "alpha" ) {
-	@book = sort { lc($a->[0]) cmp lc($b->[0]) } @book;
-    }
+    $::config->{contents} //=
+      [ { $::config->{toc}->{order} eq "alpha"
+	  ? ( fields => [ "title" ] )
+	  : ( fields => [ "songindex" ] ),
+	  label => $::config->{toc}->{title},
+	  line => $::config->{toc}->{line} } ];
 
-    if ( $options->{toc} // @book > 1 ) {
+    foreach my $ctl ( reverse( @{ $::config->{contents} } ) ) {
+	next unless $options->{toc} // @book > 1;
+	next if $ctl->{omit};
+
+	my $book = App::Music::ChordPro::Output::Common::prep_outlines
+	  ( [ map { $_->[1] } @book ], $ctl );
 
 	# Create a pseudo-song for the table of contents.
-	my $t = $::config->{toc}->{title};
-	my $l = $::config->{toc}->{line};
+	my $t = $ctl->{label};
+	my $l = $ctl->{line};
+	my $start = $book_start_page - 1;
 	my $song =
 	  { title     => $t,
 	    meta => { title => [ $t ] },
@@ -93,10 +102,10 @@ sub generate_songbook {
 	    body      => [
 		     map { +{ type    => "tocline",
 			      context => "toc",
-			      title   => fmt_subst( $_->[1], $l ),
-			      page    => $pr->{pdf}->openpage($_->[1]->{meta}->{tocpage}),
-			      pageno  => $_->[1]->{meta}->{tocpage},
-			    } } @book,
+			      title   => fmt_subst( $_->[-1], $l ),
+			      page    => $pr->{pdf}->openpage($_->[-1]->{meta}->{tocpage}+$start),
+			      pageno  => $_->[-1]->{meta}->{tocpage},
+			    } } @$book,
 	    ],
 	  };
 
@@ -1719,7 +1728,6 @@ sub tocline {
     my $pr = $ps->{pr};
     my $fonts = $ps->{fonts};
     my $y0 = $y;
-    $x += 20;
     my $ftoc = $fonts->{toc};
     $y -= font_bl($ftoc);
     $pr->setfont($ftoc);
@@ -1728,8 +1736,8 @@ sub tocline {
     for ( split( /\\n/, $tpl ) ) {
 	$ps->{pr}->text( $_, $x, $y );
 	unless ($vsp) {
-	    my $p = $elt->{pageno} . ".";
-	    $ps->{pr}->text( $p, $x - 5 - $pr->strwidth($p), $y );
+	    my $p = $elt->{pageno};
+	    $ps->{pr}->text( $p, $ps->{__rightmargin} - $pr->strwidth($p), $y );
 	    $vsp = _vsp("toc", $ps);
 	}
 	$y -= $vsp;

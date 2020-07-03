@@ -106,6 +106,10 @@ sub prep_outlines {
     if ( @fields > 2 ) {
 	croak("Too many fields for outline (max 2)");
     }
+    elsif ( @fields == 1 && $fields[0] eq "songindex" ) {
+	# Return in book order.
+	return [ map { [ $_->{meta}->{songindex}, $_ ] } @$book ];
+    }
     return $book unless @fields; # ?
 
     my @book;
@@ -118,7 +122,11 @@ sub prep_outlines {
 	    ( my $coreitem = $item ) =~ s/^sort//;
 	    push( @split, [] ), next unless $meta->{$coreitem};
 
-	    my @s = map { [ $_ ] } @{ $meta->{$coreitem} };
+	    my @s = map { [ $_ ] }
+	      @{ UNIVERSAL::isa( $meta->{$coreitem}, 'ARRAY' )
+		? $meta->{$coreitem}
+		: [ $meta->{$coreitem} ]
+	    };
 
 	    if ( $meta->{"sort$coreitem"} ) {
 		if ( $coreitem eq $item ) {

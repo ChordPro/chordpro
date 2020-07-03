@@ -18,6 +18,7 @@
     - Fix problem where the tag of a grid was ignored.
     - Add metadata sorttitle and sortartist.
     - Add PDF outlines (bookmarks).
+    - Revamp table of contens (finally).
     - Add directives start/end_of_verse/bridge and short forms.
     - Remove section handling (we now have labels).
     - Do not indent chorus labels when chorus indenting (issue #81).
