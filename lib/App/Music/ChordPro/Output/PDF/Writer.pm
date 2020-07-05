@@ -338,6 +338,7 @@ sub make_outlines {
     # Process outline defs from config.
     foreach my $ctl ( @{ $self->{ps}->{outlines} } ) {
 	my $book = prep_outlines( $book, $ctl );
+	next unless @$book;
 
 	# Seems not to matter whether we re-use the root or create new.
 	$ol_root //= $pdf->outlines;

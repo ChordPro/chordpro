@@ -167,8 +167,8 @@ sub prep_outlines {
 	    }
 	}
 	else {
-	    my $f1 = shift(@{$split[0]});
-	    my $f2 = shift(@{$split[1]});
+	    my $f1 = shift(@{$split[0]}) // "";
+	    my $f2 = shift(@{$split[1]}) // "";
 	    my $addsort1 = $f1 =~ /^(title|artist)$/;
 	    my $addsort2 = $f2 =~ /^(title|artist)$/;
 	    for my $s1 ( @{$split[0]} ) {
