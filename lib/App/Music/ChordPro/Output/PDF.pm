@@ -619,6 +619,9 @@ sub generate_song {
     # Get going.
     $newpage->();
 
+    # Embed source and config for debugging;
+    $pr->embed($source->{file}) if $options->{debug};
+
     my @elts = @{$sb};
     my $elt;			# current element
 

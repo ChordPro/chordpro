@@ -502,4 +502,39 @@ sub show_vpos {
     $self->{pdfgfx}->move(100*$w,$y)->linewidth(0.25)->hline(100*(1+$w))->stroke;
 }
 
+use File::Temp;
+
+my $cname;
+sub embed {
+    my ( $self, $file ) = @_;
+    my $a = $self->{pdfpage}->annotation();
+
+    # The only reliable way currently is pretend it's a movie :) .
+    $a->movie($file, "ChordPro" );
+    $a->open(1);
+
+    # Create/reuse temp file for (final) config.
+    my $cf;
+    if ( $cname ) {
+	open( $cf, '>:utf8', $cname );
+    }
+    else {
+	( $cf, $cname ) = File::Temp::tempfile( UNLINK => 0);
+    }
+
+    my $pp = JSON::PP->new->canonical->indent(4)->pretty;
+    print $cf $pp->encode( { %$::config } );
+    close($cf);
+
+    $a = $self->{pdfpage}->annotation();
+    $a->movie($cname, "ChordProConfig" );
+    $a->open(0);
+}
+
+END {
+    return unless $cname;
+    unlink($cname);
+    undef $cname;
+}
+
 1;
