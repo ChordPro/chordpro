@@ -37,6 +37,11 @@ This should say something similar to
 
     This is ChordPro version 0.974_036
 
-To run `chordpro` use
+The development version is not always equipped for global
+installation, so to run it **always** include the path to the
+`chordpro` program, e.g.:
 
 	perl script/chordpro 
+
+This is in particular important if you also have a stable version
+installed to avoid accidentally running the wrong version of the program.
