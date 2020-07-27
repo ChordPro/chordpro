@@ -325,12 +325,11 @@ sub add_config_chord {
 	$config_chords{$name} =
 	  { origin  => "config",
 	    %$info,
-	    defined($def->{display}) ? ( display => $def->{display} ) : (),
+	    %$def,
 	    base    => $base,
 	    frets   => [ @$frets ],
 	    fingers => [ $fingers && @$fingers ? @$fingers : () ] };
 	push( @chordnames, $name );
-
 	# Also store the chord info under a neutral name so it can be
 	# found when other note name systems are used.
 	my $i;
@@ -349,7 +348,7 @@ sub add_config_chord {
 	}
 	if ( defined $info->{root_ord} ) {
 	    $config_chords{$i} = $config_chords{$name};
-	    $config_chords{$i}->{origin} = " config";
+	    $config_chords{$i}->{origin} = "config";
 	}
     }
     return;
