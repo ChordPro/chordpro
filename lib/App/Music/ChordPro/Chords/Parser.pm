@@ -353,19 +353,30 @@ sub load_notes {
     substr( $n_pat, -1, 1, ")" );
 
     # Pattern to match chord names.
-    my $c_pat = "(?<root>" . $n_pat . ")";
-    $c_pat .= "(?:";
-    $c_pat .= "(?<qual>-|min|m(?!aj))".
-      "(?<ext>" . join("|", keys(%$additions_min)) . ")|";
-    $c_pat .= "(?<qual>\\+|aug)".
-      "(?<ext>" . join("|", keys(%$additions_aug)) . ")|";
-    $c_pat .= "(?<qual>0|dim)".
-      "(?<ext>" . join("|", keys(%$additions_dim)) . ")|";
-    $c_pat .= "(?<qual>)".
-      "(?<ext>" . join("|", keys(%$additions_maj)) . ")";
-    $c_pat .= ")";
-    $c_pat = qr/$c_pat/;
-    $n_pat = qr/$n_pat/;
+    my $c_pat;
+    # This works, but the SETTING DOES NOT BELONG IN THE NOTES CONFIG!
+    if ( $n->{relaxed} ) {
+	# In releaxed form, we accept anything for extension.
+	$c_pat = "(?<root>" . $n_pat . ")";
+	$c_pat .= "(?:(?<qual>-|min|m(?!aj)|\\+|aug|0|dim|)(?<ext>.*))";
+	$c_pat = qr/$c_pat/;
+	$n_pat = qr/$n_pat/;
+    }
+    else {
+	$c_pat = "(?<root>" . $n_pat . ")";
+	$c_pat .= "(?:";
+	$c_pat .= "(?<qual>-|min|m(?!aj))".
+	  "(?<ext>" . join("|", keys(%$additions_min)) . ")|";
+	$c_pat .= "(?<qual>\\+|aug)".
+	  "(?<ext>" . join("|", keys(%$additions_aug)) . ")|";
+	$c_pat .= "(?<qual>0|dim)".
+	  "(?<ext>" . join("|", keys(%$additions_dim)) . ")|";
+	$c_pat .= "(?<qual>)".
+	  "(?<ext>" . join("|", keys(%$additions_maj)) . ")";
+	$c_pat .= ")";
+	$c_pat = qr/$c_pat/;
+	$n_pat = qr/$n_pat/;
+    }
 
     # Store in the object.
     $self->{n_pat}    = $n_pat;
