@@ -63,6 +63,9 @@ This is the current built-in configuration file, showing all settings.
   	"transcode" : null,
   	// Always decapoize.
   	"decapo" : false,
+	// Chords parsing strategy.
+	// Strict (only known) or relaxed (anything that looks sane).
+	"chordnames": "strict",
       },
   
       // Metadata.
@@ -778,6 +781,7 @@ sub add_config {
 
 sub process_config {
     my ( $cfg, $file, $options ) = @_;
+    $::config = $cfg;
 
     warn("Process: $file\n") if $options && $options->{verbose};
 

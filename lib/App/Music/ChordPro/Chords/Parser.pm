@@ -354,15 +354,9 @@ sub load_notes {
 
     # Pattern to match chord names.
     my $c_pat;
-    # This works, but the SETTING DOES NOT BELONG IN THE NOTES CONFIG!
-    if ( $n->{relaxed} ) {
-	# In releaxed form, we accept anything for extension.
-	$c_pat = "(?<root>" . $n_pat . ")";
-	$c_pat .= "(?:(?<qual>-|min|m(?!aj)|\\+|aug|0|dim|)(?<ext>.*))";
-	$c_pat = qr/$c_pat/;
-	$n_pat = qr/$n_pat/;
-    }
-    else {
+    use DDumper; DDumper $::config;
+    if ( $::config->{settings}->{chordnames} eq "strict" ) {
+	# Accept root, qual, and only known extensions.
 	$c_pat = "(?<root>" . $n_pat . ")";
 	$c_pat .= "(?:";
 	$c_pat .= "(?<qual>-|min|m(?!aj))".
@@ -374,6 +368,13 @@ sub load_notes {
 	$c_pat .= "(?<qual>)".
 	  "(?<ext>" . join("|", keys(%$additions_maj)) . ")";
 	$c_pat .= ")";
+	$c_pat = qr/$c_pat/;
+	$n_pat = qr/$n_pat/;
+    }
+    else {
+	# In relaxed form, we accept anything for extension.
+	$c_pat = "(?<root>" . $n_pat . ")";
+	$c_pat .= "(?:(?<qual>-|min|m(?!aj)|\\+|aug|0|dim|)(?<ext>.*))";
 	$c_pat = qr/$c_pat/;
 	$n_pat = qr/$n_pat/;
     }

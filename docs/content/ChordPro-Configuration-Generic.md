@@ -36,6 +36,9 @@ These settings control global behaviour of the ChordPro program and can be chang
         "transcode" : null,
         // Always decapoize.
         "decapo" : false,
+        // Chords parsing strategy.
+        // Strict (only known) or relaxed (anything that looks sane).
+        "chordnames": "strict",
     },
 
 ## Metadata
