@@ -36,7 +36,7 @@ unpack :
 	perl ../pp2ppl.pl --dest=${DEST} wxchordpro --quiet
 	perl ../pp2ppl.pl --dest=${DEST} chordpro   --quiet
 	cp -p "${ROOT}/lib/App/Music/ChordPro/Config.pm" "${DEST}/lib/App/Music/ChordPro/Config.pm" 
-	cp "${DEST}/res/icons/chordpro.ico" .
+	cp "${DEST}/res/icons/chordpro.ico" ${DEST}
 	mv "${DEST}/res" "${DEST}/lib/App/Music/ChordPro/"
 
 # Copy code DLLs.
