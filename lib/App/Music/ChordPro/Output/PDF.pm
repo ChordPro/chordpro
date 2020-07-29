@@ -22,6 +22,7 @@ BEGIN {
     die("Missing PDF::API package\n");
 }
 use Text::Layout;
+use String::Interpolate::Named;
 
 my $debug_spacing = 0;
 my $verbose = 0;
@@ -1320,7 +1321,7 @@ sub songline {
 
 	    # Collect chords to be printed in the side column.
 	    my $info = App::Music::ChordPro::Chords::chord_info($chord);
-	    push(@chords, $info ? $info->{display} // $chord : $chord);
+	    push(@chords, $info ? chord_display($info) // $chord : $chord);
 	}
 	else {
 	    my $xt0;
@@ -1360,7 +1361,7 @@ sub songline {
 		elsif ( $chord) {
 		    # Strip leading (but not sole) asterisk.
 		    unless ( $chord =~ s/^\*(?=.)// ) {
-			$chord = $info->{display} // $chord;
+			$chord = chord_display($info) // $chord;
 		    }
 		    $xt0 = $pr->text( $pre.$chord.$post, $x, $ychord, $fchord );
 		}
@@ -1429,6 +1430,14 @@ sub songline {
       if @chords;
 
     return;
+}
+
+sub chord_display {
+    my ( $info ) = @_;
+    #DDumper::DDumper($info);
+    return $info->{display}
+      ? interpolate( { args => $info }, $info->{display} )
+      : $info->{name};
 }
 
 # Remove markup.
