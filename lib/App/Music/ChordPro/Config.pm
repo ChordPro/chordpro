@@ -599,7 +599,7 @@ sub configurator {
     };
     my $add_legacy = sub {
 	# Legacy parser may need a ::config...
-	$::config = $cfg;
+	local $::config = $cfg;
 	$cfg = add_legacy( $cfg, $options, shift, $pp );
     };
 
@@ -628,6 +628,21 @@ sub configurator {
 	$$c = $v;
     }
     $cfg = hmerge( $cfg, $ccfg, "" );
+
+    if ( $cfg->{settings}->{chordnames} ne "strict" ) {
+	if ( $cfg->{notes} ) {
+	    local $::config = $cfg;
+	    App::Music::ChordPro::Chords::Parser->new( $cfg );
+	}
+	elsif ( $cfg->{_notes} ) {
+	    local $::config = $cfg;
+	    App::Music::ChordPro::Chords::Parser->new( { %$cfg, notes => $cfg->{_notes} } );
+	}
+	else {
+	    warn("Cannot parse chord names relaxed without note definitions (can't happen?)\n");
+	    ::dump($cfg);
+	}
+    }
 
     if ( $cfg->{settings}->{transcode} ) {
 	my $xc = $cfg->{settings}->{transcode};
@@ -781,7 +796,7 @@ sub add_config {
 
 sub process_config {
     my ( $cfg, $file, $options ) = @_;
-    $::config = $cfg;
+    local $::config = $cfg;
 
     warn("Process: $file\n") if $options && $options->{verbose};
 
@@ -799,7 +814,7 @@ sub process_config {
 	  App::Music::ChordPro::Chords::set_notes( $cfg->{notes},
 						   $options );
 	warn( "Invalid notes in config: ", $res, "\n" ) if $res;
-	delete $cfg->{notes};
+	$cfg->{_notes} = delete $cfg->{notes};
     }
 
     if ( $cfg->{chords} ) {

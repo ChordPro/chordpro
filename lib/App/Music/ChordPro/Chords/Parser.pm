@@ -111,7 +111,20 @@ sub parse_chord {
 # Fetch a parser for a known system, with fallback.
 sub get_parser {
     my ( $self, $system, $nofallback ) = @_;
-    return $parsers->{$system} if $parsers->{$system};
+    return $parsers->{$system} //= do {
+	if ( $system eq "common" ) {
+	    App::Music::ChordPro::Chords::Parser::Common->new;
+	}
+	elsif ( $system eq "nasville" ) {
+	    App::Music::ChordPro::Chords::Parser::Nashville->new;
+	}
+	elsif ( $system eq "roman" ) {
+	    App::Music::ChordPro::Chords::Parser::Roman->new;
+	}
+	else {
+	    undef;
+	}
+    };
     return if $nofallback;
     warn("No parser for $system, falling back to default\n");
     return $self->default;
@@ -354,8 +367,13 @@ sub load_notes {
 
     # Pattern to match chord names.
     my $c_pat;
-    use DDumper; DDumper $::config;
-    if ( $::config->{settings}->{chordnames} eq "strict" ) {
+    my $strict = 1;
+    if ( exists($::config->{settings}->{chordnames})
+	 && $::config->{settings}->{chordnames} eq "relaxed"
+       ) {
+	$strict = 0;
+    }
+    if ( $strict ) {
 	# Accept root, qual, and only known extensions.
 	$c_pat = "(?<root>" . $n_pat . ")";
 	$c_pat .= "(?:";
@@ -372,6 +390,7 @@ sub load_notes {
 	$n_pat = qr/$n_pat/;
     }
     else {
+	warn("PARSING RELAXED") if "####TODO####";
 	# In relaxed form, we accept anything for extension.
 	$c_pat = "(?<root>" . $n_pat . ")";
 	$c_pat .= "(?:(?<qual>-|min|m(?!aj)|\\+|aug|0|dim|)(?<ext>.*))";
@@ -406,7 +425,7 @@ package App::Music::ChordPro::Chords::Parser::Nashville;
 
 our @ISA = qw(App::Music::ChordPro::Chords::Parser::Common);
 
-$parsers->{nashville} = __PACKAGE__->new;
+# $parsers->{nashville} = __PACKAGE__->new;
 
 sub new {
     my ( $pkg, $init ) = @_;
@@ -507,7 +526,7 @@ package App::Music::ChordPro::Chords::Parser::Roman;
 
 our @ISA = qw(App::Music::ChordPro::Chords::Parser::Common);
 
-$parsers->{roman} = __PACKAGE__->new;
+# $parsers->{roman} = __PACKAGE__->new;
 
 sub new {
     my ( $pkg, $init ) = @_;
@@ -645,6 +664,7 @@ sub transpose {
 	  $p->root_canon($info->{bass_ord},$xpose > 0);
     }
     $info->{root_mod} = $info->{bass_mod} = $xpose <=> 0;
+    delete $info->{$_} for qw( copy );
     $info;
 }
 
@@ -698,7 +718,6 @@ sub transpose { $_[0] }
 package main;
 
 unless ( caller ) {
-    require DDumper;
     my $p = App::Music::ChordPro::Chords::Parser->default;
     binmode(STDOUT, ':utf8');
     foreach ( @ARGV ) {
@@ -715,7 +734,7 @@ unless ( caller ) {
 	print( "\n" );
 	my $clone = $info->clone;
 	delete($clone->{parser});
-	print( DDumper($clone), "\n" );
+	print( ::dump($clone), "\n" );
     }
 }
 

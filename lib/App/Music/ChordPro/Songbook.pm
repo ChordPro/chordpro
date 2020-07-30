@@ -853,8 +853,7 @@ sub global_directive {
     if ( $d =~ /^([-+])([-\w.]+)$/i ) {
 	return if $legacy;
 	if ( $2 eq "dumpmeta" ) {
-	    use Data::Dumper;
-	    warn(Dumper($song->{meta}));
+	    warn(::dump($song->{meta}));
 	}
 	$self->add( type => "set",
 		    name => $2,

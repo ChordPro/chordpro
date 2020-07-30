@@ -61,7 +61,6 @@ L<http://www.chordpro.org>.
 
 use strict;
 use warnings;
-use Data::Dumper;
 use Carp;
 
 ################ The Process ################
@@ -185,7 +184,7 @@ sub main {
 	}
     }
 
-    warn(Dumper($s), "\n") if $options->{debug};
+    warn(::dump($s), "\n") if $options->{debug};
 
     # Try interpolations.
     if ( $of ) {
@@ -231,6 +230,22 @@ sub main {
 	}
 	# Don't close STDOUT!
     }
+}
+
+sub ::dump {
+    use Data::Dumper qw();
+    local $Data::Dumper::Sortkeys  = 1;
+    local $Data::Dumper::Indent    = 1;
+    local $Data::Dumper::Quotekeys = 0;
+    local $Data::Dumper::Deparse   = 1;
+    local $Data::Dumper::Terse     = 1;
+    local $Data::Dumper::Trailingcomma = 1;
+    local $Data::Dumper::Useperl = 1;
+    local $Data::Dumper::Useqq     = 0; # I want unicode visible
+
+    my $s = Data::Dumper::Dumper @_;
+    defined wantarray or warn $s;
+    return $s;
 }
 
 ################ Options and Configuration ################
@@ -836,7 +851,7 @@ sub app_setup {
 
     # Plug in command-line options.
     @{$options}{keys %$clo} = values %$clo;
-    # warn(Dumper($options), "\n") if $options->{debug};
+    # warn(::dump($options), "\n") if $options->{debug};
 
     if ( $clo->{transcode} ) {
 	my $xc = $clo->{transcode};

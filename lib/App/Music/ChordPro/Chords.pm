@@ -202,7 +202,7 @@ sub strings {
     scalar(@tuning);
 }
 
-my $parser = App::Music::ChordPro::Chords::Parser->default;
+my $parser;# = App::Music::ChordPro::Chords::Parser->default;
 
 # API: Set tuning, discarding chords.
 # Used by: Config.
@@ -402,6 +402,8 @@ sub chord_stats {
 
 sub parse_chord {
     my ( $chord ) = @_;
+    $parser //= App::Music::ChordPro::Chords::Parser->default;
+    warn("XXX ", $parser->{c_pat}, "\n");
     return $parser->parse($chord);
 }
 
@@ -510,7 +512,7 @@ sub transpose {
 	assert_tuning();
 	for ( \%song_chords, \%config_chords ) {
 	    # Not sure what this is for...
-	    # Anyway, it causes unknown but {defined} fonts to silently
+	    # Anyway, it causes unknown but {defined} chords to silently
 	    # bypass the trans* warnings.
 	    # return if exists($_->{$c});
 	}

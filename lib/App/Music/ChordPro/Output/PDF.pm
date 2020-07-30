@@ -6,7 +6,6 @@ package App::Music::ChordPro::Output::PDF;
 
 use strict;
 use warnings;
-use Data::Dumper;
 use Encode qw( encode_utf8 );
 use App::Packager;
 
@@ -1434,7 +1433,7 @@ sub songline {
 
 sub chord_display {
     my ( $info ) = @_;
-    #DDumper::DDumper($info);
+    ::dump( {%{$info // {} }, parser => {}} ) ;
     return $info->{display}
       ? interpolate( { args => $info }, $info->{display} )
       : $info->{name};
