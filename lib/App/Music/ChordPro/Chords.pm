@@ -403,7 +403,7 @@ sub chord_stats {
 sub parse_chord {
     my ( $chord ) = @_;
     $parser //= App::Music::ChordPro::Chords::Parser->default;
-    warn("XXX ", $parser->{c_pat}, "\n");
+    # warn("XXX ", $parser->{c_pat}, "\n");
     return $parser->parse($chord);
 }
 

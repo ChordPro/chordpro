@@ -115,7 +115,7 @@ sub get_parser {
 	if ( $system eq "common" ) {
 	    App::Music::ChordPro::Chords::Parser::Common->new;
 	}
-	elsif ( $system eq "nasville" ) {
+	elsif ( $system eq "nashville" ) {
 	    App::Music::ChordPro::Chords::Parser::Nashville->new;
 	}
 	elsif ( $system eq "roman" ) {
@@ -718,12 +718,18 @@ sub transpose { $_[0] }
 package main;
 
 unless ( caller ) {
-    my $p = App::Music::ChordPro::Chords::Parser->default;
+    my $p1 = App::Music::ChordPro::Chords::Parser->default;
+    print( "1 " ) if $p1;
+    my $p2 = App::Music::ChordPro::Chords::Parser->get_parser("nashville", 1);
+    print( "2 " ) if $p2;
+    my $p3 = App::Music::ChordPro::Chords::Parser->get_parser("roman", 1);
+    print( "3 " ) if $p3;
+    print( "\n" );
     binmode(STDOUT, ':utf8');
     foreach ( @ARGV ) {
-	my $info = $p->parse($_);
-	$info ||= $parsers->{nashville}->parse($_);
-	$info ||= $parsers->{roman}->parse($_);
+	my $info = $p1->parse($_);
+	$info = $p2->parse($_) if !$info && $p2;
+	$info = $p3->parse($_) if !$info && $p3;
 	print( "$_ => OOPS\n" ), next unless $info;
 	print( "$_ ($info->{system}) =>" );
 	print( " ", $info->transcode($_)->show, " ($_)" )
