@@ -39,32 +39,31 @@ package App::Music::ChordPro::Chords::Parser;
 #  App::Music::ChordPro::Chord::Nashville
 #  App::Music::ChordPro::Chord::Roman
 
+# Creates a parser based on the current (optionally augmented)
+# context.
+# Note that the appropriate way is to call
+# App::Music::ChordPro::Chords::Parser->get_parser.
+
 sub new {
     my ( $pkg, $init ) = @_;
-    my $self = bless { chord_cache => {} } => $pkg;
-    return App::Music::ChordPro::Chords::Parser->default
-      unless $init && $init->{notes};
 
-    my $notes = $init->{notes};
-    my $system = $notes->{system};
+    Carp::confess("Missing config?") unless $::config;
+    # Use current config, optionally augmented by $init.
+    my $cfg = { %{$::config//{}}, %{$init//{}} };
+
+    Carp::croak("Missing notes in parser creation")
+	unless $cfg->{notes};
+    my $system = $cfg->{notes}->{system};
     Carp::croak("Missing notes system in parser creation")
 	unless $system;
 
     if ( $system eq "nashville" ) {
-	return App::Music::ChordPro::Chords::Parser::Nashville->new($init);
+	return App::Music::ChordPro::Chords::Parser::Nashville->new($cfg);
     }
     if ( $system eq "roman" ) {
-	return App::Music::ChordPro::Chords::Parser::Roman->new($init);
+	return App::Music::ChordPro::Chords::Parser::Roman->new($cfg);
     }
-
-    # Custom parser.
-    bless $self => 'App::Music::ChordPro::Chords::Parser::Common';
-    $self->load_notes($notes);
-    $self->{system} = $system;
-    $self->{target} = 'App::Music::ChordPro::Chord::Common';
-    $self->{movable} = $notes->{movable};
-    $parsers->{$self->{system}} = $self;
-    return $self;
+    return App::Music::ChordPro::Chords::Parser::Common->new($cfg);
 }
 
 # The default parser has built-in support for common (dutch) note
@@ -74,7 +73,8 @@ sub default {
     my ( $pkg ) = @_;
     return $parsers->{common} //=
       App::Music::ChordPro::Chords::Parser::Common->new
-      ( { "notes" =>
+	( { %{$::config},
+	  "notes" =>
 	  { "system" => "common",
 	    "sharp" => [ "C", [ "C#", "Cis", "C♯" ],
 			 "D", [ "D#", "Dis", "D♯" ],
@@ -109,29 +109,41 @@ sub parse_chord {
 }
 
 # Fetch a parser for a known system, with fallback.
+# Default is a parser for the current config.
 sub get_parser {
     my ( $self, $system, $nofallback ) = @_;
-    return $parsers->{$system} //= do {
-	if ( $system eq "common" ) {
-	    App::Music::ChordPro::Chords::Parser::Common->new;
-	}
-	elsif ( $system eq "nashville" ) {
-	    App::Music::ChordPro::Chords::Parser::Nashville->new;
-	}
-	elsif ( $system eq "roman" ) {
-	    App::Music::ChordPro::Chords::Parser::Roman->new;
-	}
-	else {
-	    undef;
-	}
+
+    $system //= $::config->{notes}->{system};
+    return $parsers->{$system} if $parsers->{$system};
+
+    if ( $system eq "nashville" ) {
+	return $parsers->{$system} //=
+	  App::Music::ChordPro::Chords::Parser::Nashville->new;
+    }
+    elsif ( $system eq "roman" ) {
+	return $parsers->{$system} //=
+	  App::Music::ChordPro::Chords::Parser::Roman->new;
+    }
+    elsif ( $system ) {
+	return $parsers->{$system} //=
+	  App::Music::ChordPro::Chords::Parser::Common->new;
+    }
+    elsif ( $nofallback ) {
+	return;
     };
-    return if $nofallback;
+
     warn("No parser for $system, falling back to default\n");
-    return $self->default;
+    return $parsers->{common} //= $self->default;
 }
 
 # The list of instantiated parsers.
-sub parsers { return { %$parsers } }
+sub parsers { die }
+
+sub reset_parsers {
+    my ( $self,  @which ) = @_;
+    @which = keys(%$parsers) unless @which;
+    delete $parsers->{$_} for @which;
+}
 
 # The number of intervals for this note system.
 sub intervals { $_[0]->{intervals} }
@@ -141,6 +153,24 @@ sub intervals { $_[0]->{intervals} }
 package App::Music::ChordPro::Chords::Parser::Common;
 
 our @ISA = qw( App::Music::ChordPro::Chords::Parser );
+
+sub new {
+    my ( $pkg, $cfg ) = @_;
+    $cfg //= $::config;
+    my $self = bless { chord_cache => {} } => $pkg;
+    bless $self => 'App::Music::ChordPro::Chords::Parser::Common';
+    my $notes = $cfg->{notes};
+    $self->load_notes($cfg);
+    $self->{system} = $notes->{system};
+    $self->{target} = 'App::Music::ChordPro::Chord::Common';
+    $self->{movable} = $notes->{movable};
+#    ::dump($::config);
+    warn("Chords: Created parser for ", $self->{system},
+	 $cfg->{settings}->{chordnames} eq "relaxed"
+	 ? ", relaxed" : "",
+	 "\n") if $::options->{verbose} && $::options->{verbose} > 1;
+    return $self;
+}
 
 sub parse_chord {
     my ( $self, $chord ) = @_;
@@ -325,7 +355,9 @@ my $additions_dim =
 # configuration.
 
 sub load_notes {
-    my ( $self, $n ) = @_;
+    my ( $self, $init ) = @_;
+    my $cfg = { %{$::config//{}}, %{$init//{}} };
+    my $n = $cfg->{notes};
 
     my ( @ns_canon, %ns_tbl, @nf_canon, %nf_tbl );
 
@@ -367,13 +399,7 @@ sub load_notes {
 
     # Pattern to match chord names.
     my $c_pat;
-    my $strict = 1;
-    if ( exists($::config->{settings}->{chordnames})
-	 && $::config->{settings}->{chordnames} eq "relaxed"
-       ) {
-	$strict = 0;
-    }
-    if ( $strict ) {
+    if ( $cfg->{settings}->{chordnames} eq "strict" ) {
 	# Accept root, qual, and only known extensions.
 	$c_pat = "(?<root>" . $n_pat . ")";
 	$c_pat .= "(?:";
@@ -425,13 +451,13 @@ package App::Music::ChordPro::Chords::Parser::Nashville;
 
 our @ISA = qw(App::Music::ChordPro::Chords::Parser::Common);
 
-# $parsers->{nashville} = __PACKAGE__->new;
-
 sub new {
     my ( $pkg, $init ) = @_;
     my $self = bless { chord_cache => {} } => $pkg;
     $self->{system} = "nashville";
     $self->{target} = 'App::Music::ChordPro::Chord::Nashville';
+    warn("Chords: Created parser for ", $self->{system}, "\n")
+      if $::options->{verbose} && $::options->{verbose} > 1;
     return $self;
 }
 
@@ -526,13 +552,13 @@ package App::Music::ChordPro::Chords::Parser::Roman;
 
 our @ISA = qw(App::Music::ChordPro::Chords::Parser::Common);
 
-# $parsers->{roman} = __PACKAGE__->new;
-
 sub new {
     my ( $pkg, $init ) = @_;
     my $self = bless { chord_cache => {} } => $pkg;
     $self->{system} = "roman";
     $self->{target} = 'App::Music::ChordPro::Chord::Roman';
+    warn("Chords: Created parser for ", $self->{system}, "\n")
+      if $::options->{verbose} && $::options->{verbose} > 1;
     return $self;
 }
 
@@ -718,29 +744,35 @@ sub transpose { $_[0] }
 package main;
 
 unless ( caller ) {
-    my $p1 = App::Music::ChordPro::Chords::Parser->default;
-    print( "1 " ) if $p1;
-    my $p2 = App::Music::ChordPro::Chords::Parser->get_parser("nashville", 1);
-    print( "2 " ) if $p2;
-    my $p3 = App::Music::ChordPro::Chords::Parser->get_parser("roman", 1);
-    print( "3 " ) if $p3;
-    print( "\n" );
-    binmode(STDOUT, ':utf8');
+    select(STDERR);
+    binmode(STDERR, ':utf8');
+    $::config = { settings => { chordnames => "strict" } };
+    $::options = { verbose => 2 };
     foreach ( @ARGV ) {
+	if ( $_ eq '-' ) {
+	    $::config = { settings => { chordnames => "relaxed" } };
+	    App::Music::ChordPro::Chords::Parser->reset_parsers("common");
+	    next;
+	}
+	my $p0 = App::Music::ChordPro::Chords::Parser->default;
+	my $p1 = App::Music::ChordPro::Chords::Parser->get_parser("common", 1);
+	die unless $p0 eq $p1;
+	my $p2 = App::Music::ChordPro::Chords::Parser->get_parser("nashville", 1);
+	my $p3 = App::Music::ChordPro::Chords::Parser->get_parser("roman", 1);
 	my $info = $p1->parse($_);
 	$info = $p2->parse($_) if !$info && $p2;
 	$info = $p3->parse($_) if !$info && $p3;
 	print( "$_ => OOPS\n" ), next unless $info;
 	print( "$_ ($info->{system}) =>" );
 	print( " ", $info->transcode($_)->show, " ($_)" )
-	  for sort keys %$parsers;
+	  for qw( common nashville roman );
 	print( " '", $info->agnostic, "' (agnostic)\n" );
 	print( "$_ =>" );
 	print( " ", $info->transpose($_)->show, " ($_)" ) for -2..2;
 	print( "\n" );
-	my $clone = $info->clone;
-	delete($clone->{parser});
-	print( ::dump($clone), "\n" );
+#	my $clone = $info->clone;
+#	delete($clone->{parser});
+#	print( ::dump($clone), "\n" );
     }
 }
 

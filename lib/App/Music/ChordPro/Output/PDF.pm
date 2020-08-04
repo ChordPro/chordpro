@@ -1433,7 +1433,7 @@ sub songline {
 
 sub chord_display {
     my ( $info ) = @_;
-    ::dump( {%{$info // {} }, parser => {}} ) ;
+#    ::dump( {%{$info // {} }, parser => {}} ) ;
     return $info->{display}
       ? interpolate( { args => $info }, $info->{display} )
       : $info->{name};
@@ -2217,7 +2217,7 @@ sub _dump {
     my ( $ps ) = @_;
     print STDERR ("== Font family map\n");
     Text::Layout::FontConfig->new->_dump if $verbose;
-    print STDOUT ("== Font associations\n");
+    print STDERR ("== Font associations\n");
     foreach my $f ( sort keys( %{$ps->{fonts}} ) ) {
 	printf STDERR ("%-15s  %s\n", $f,
 		       eval { $ps->{fonts}->{$f}->{description} } ||

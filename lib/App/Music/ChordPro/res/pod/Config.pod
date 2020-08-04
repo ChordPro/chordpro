@@ -103,6 +103,9 @@ This is the current built-in configuration file, showing all settings.
   		    [ "Ab", "As",  "Aes", "A♭" ], "A",
   		    [ "Bb", "Bes",        "B♭" ], "B",
   		  ],
+
+  	 // Movable means position independent (e.g. nashville).
+  	 "movable" : false,
       },
   
       // User defined chords.

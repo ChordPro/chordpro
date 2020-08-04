@@ -10,11 +10,12 @@ my $tests = 0;
 use_ok( qw(App::Music::ChordPro::Output::Common) );
 $tests++;
 
-our $config;
+use App::Music::ChordPro::Config;
 
-$config = { metadata => { separator => ":",
-			},
-	  };
+our $config = App::Music::ChordPro::Config::configurator;
+
+$::config->{metadata}->{separator} = ":";
+our $options = { verbose => 0, debug => 0 };
 
 my $s = { page => 24,
 	  meta => { title => "Hi There!",

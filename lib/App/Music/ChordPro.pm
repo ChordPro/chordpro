@@ -77,6 +77,7 @@ sub ::run {
     binmode(STDOUT, ':utf8');
     $options->{trace}   = 1 if $options->{debug};
     $options->{verbose} = 1 if $options->{trace};
+    $options->{verbose} = 9 if $options->{debug};
     main($options);
 }
 
@@ -203,12 +204,11 @@ sub main {
     if ( my $xc = $::config->{settings}->{transcode} ) {
 	# Set target parser for the backend so it can find the transcoded
 	# chord definitions.
-	my $p = App::Music::ChordPro::Chords::get_parser;
 	App::Music::ChordPro::Chords::set_parser($xc);
 	# Generate the songbook.
 	$res = $pkg->generate_songbook( $s, $options );
 	# Restore parser.
-	App::Music::ChordPro::Chords::set_parser($p);
+	App::Music::ChordPro::Chords::set_parser($::config->{notes}->{system});
     }
     else {
 	# Generate the songbook.
@@ -851,6 +851,7 @@ sub app_setup {
 
     # Plug in command-line options.
     @{$options}{keys %$clo} = values %$clo;
+    $::options = $options;
     # warn(::dump($options), "\n") if $options->{debug};
 
     if ( $clo->{transcode} ) {
@@ -862,7 +863,7 @@ sub app_setup {
 		my $pp = JSON::PP->new->relaxed;
 		warn("Config: $file\n") if $clo->{verbose};
 		my $new = $pp->decode( loadlines ($fd, { %$clo, split => 0 } ) );
-		App::Music::ChordPro::Chords::set_notes( $new->{notes},
+		App::Music::ChordPro::Chords::set_notes( $new,
 							 { %$clo,
 							   'keep-parser' => 1 } );
 	    }

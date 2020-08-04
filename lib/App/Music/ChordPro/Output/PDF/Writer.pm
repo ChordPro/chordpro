@@ -517,13 +517,13 @@ sub embed {
     # Create/reuse temp file for (final) config.
     my $cf;
     if ( $cname ) {
-	open( $cf, '>:utf8', $cname );
+	open( $cf, '>', $cname );
     }
     else {
 	( $cf, $cname ) = File::Temp::tempfile( UNLINK => 0);
     }
-
-    my $pp = JSON::PP->new->canonical->indent(4)->pretty;
+    binmode( $cf, ':utf8' );
+    my $pp = JSON::PP->new->utf8(0)->canonical->indent(4)->pretty;
     print $cf $pp->encode( { %$::config } );
     close($cf);
 

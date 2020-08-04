@@ -91,7 +91,7 @@ sub parse_song {
 
     $song = App::Music::ChordPro::Song->new
       ( source => { file => $diag->{file}, line => 1 + $$linecnt },
-	system => App::Music::ChordPro::Chords::get_parser,
+	system => $::config->{notes}->{system},
 	structure => "linear",
       );
 

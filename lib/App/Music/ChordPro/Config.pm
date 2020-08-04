@@ -2,6 +2,7 @@
 
 package App::Music::ChordPro::Config;
 
+use feature ':5.10';		# for state
 use strict;
 use warnings;
 use utf8;
@@ -115,6 +116,9 @@ This is the current built-in configuration file, showing all settings.
   		    [ "Ab", "As",  "Aes", "A♭" ], "A",
   		    [ "Bb", "Bes",        "B♭" ], "B",
   		  ],
+
+  	 // Movable means position independent (e.g. nashville).
+  	 "movable" : false,
       },
   
       // User defined chords.
@@ -505,9 +509,9 @@ use App::Music::ChordPro::Utils qw( expand_tilde );
 sub hmerge($$$);
 sub clone($);
 
-my $default_config;
-
+# Get the raw contents of the builtin (default) config.
 sub config_defaults {
+    state $default_config;
 
     # We cannot read DATA more than once, so cache it.
     return $default_config if $default_config;
@@ -544,35 +548,127 @@ sub config_defaults {
     return $default_config = join( "\n", @lines ) . "\n";
 }
 
+# Get the decoded contents of a single config file.
+sub get_config {
+    my ( $options, $file ) = @_;
+    Carp::confess("FATAL: Insufficient config") unless @_ == 2;
+    Carp::confess("FATAL: Undefined config") unless defined $file;
+    warn("Reading: $file\n")
+      if $options && $options->{verbose} && $options->{verbose} > 1;
+    $file = expand_tilde($file);
+
+    if ( open( my $fd, "<:raw", $file ) ) {
+	my $pp = JSON::PP->new->relaxed;
+	my $new = $pp->decode( loadlines( $fd, { split => 0 } ) );
+	close($fd);
+	return $new;
+    }
+    else {
+	die("Cannot open config $file [$!]\n");
+    }
+}
+
+# Check config for includes, and prepend them.
+sub prep_configs {
+    my ( $cfg, $options, $src ) = @_;
+    $cfg->{_src} = $src;
+
+    my @res;
+
+    # If there are includes, add them first.
+    my ( $vol, $dir, undef ) = File::Spec->splitpath($cfg->{_src});
+    foreach my $c ( @{ $cfg->{include} } ) {
+	# Check for resource names.
+	if ( $c !~ m;[/.]; ) {
+	    $c = ::rsc_or_file($c);
+	}
+	elsif ( $dir ne ""
+		&& !File::Spec->file_name_is_absolute($c) ) {
+	    # Prepend dir of the caller, if needed.
+	    $c = File::Spec->catpath( $vol, $dir, $c );
+	}
+	my $cfg = get_config( $options, $c );
+	# Recurse.
+	push( @res, prep_configs( $cfg, $options, $c ) );
+    }
+
+    # Push this and return.
+    push( @res, $cfg );
+    return @res;
+}
+
 sub configurator {
     my ( $options ) = @_;
 
     my $pp = JSON::PP->new->relaxed;
 
-    # Load defaults.
-    warn("Config: <builtin>\n") if $options && $options->{verbose};
-    my $cfg = $pp->decode( config_defaults() );
-
-    # Only tests call configurator without options arg.
+    # Minimal config for test suite.
     unless ( $options ) {
-	# Finish minimal config.
+	my $cfg = $pp->decode( config_defaults() );
+
+	#### TODO: This should no longer be needed when
+	# parsers are created correctly on demand.
+	$::config = $cfg;
+	$::options->{verbose} = $::options->{debug} = 0;
 	process_config( $cfg, "<builtin>", $options );
+
 	return $cfg;
     }
 
-    # If there are includes, add them.
-    if ( exists $cfg->{include} ) {
-	foreach my $c ( @{ delete $cfg->{include} } ) {
-	    # Check for resource names.
-	    if ( $c !~ m;[/.]; ) {
-		$c = ::rsc_or_file($c);
-	    }
-	    else {
-		die("$c: Not a resource name\n");
-	    }
-	    $cfg = add_config( $cfg, $options, $c, $pp );
+    my @cfg;
+
+    # Load defaults.
+    warn("Reading: <builtin>\n")
+      if $options && $options->{verbose} && $options->{verbose} > 1;
+    my $cfg = $pp->decode( config_defaults() );
+
+    # Default first.
+    @cfg = prep_configs( $cfg, $options, "<builtin>" );
+    # Bubble default config to be the first.
+    unshift( @cfg, pop(@cfg) ) if @cfg > 1;
+
+    # Collect other config files.
+    my $add_config = sub {
+	my $fn = shift;
+	$cfg = get_config( $options, $fn );
+	push( @cfg, prep_configs( $cfg, $options, $fn ) );
+    };
+    my $add_legacy = sub {
+	my $fn = shift;
+	warn("Warning: Legacy config $fn ignored (####TODO####)\n");
+	return;
+	# Legacy parser may need a ::config...
+	local $::config = $cfg;
+	my $cfg = get_legacy( $options, $fn );
+	push( @cfg, prep_configs( $cfg, $options, $fn ) );
+    };
+
+    foreach my $config ( qw( sysconfig legacyconfig userconfig config ) ) {
+	next if $options->{"no$config"};
+	if ( ref($options->{$config}) eq 'ARRAY' ) {
+	    $add_config->($_) foreach @{ $options->{$config} };
+	}
+	elsif ( $config eq "legacyconfig" ) {
+	    $add_legacy->( $options->{$config} );
+	}
+	else {
+	    warn("Adding config for $config\n") if $options->{verbose};
+	    $add_config->( $options->{$config} );
 	}
     }
+
+    # Now we have a list of all config files. Weed out dups.
+    for ( my $a = 0; $a < @cfg; $a++ ) {
+	if ( $a && $cfg[$a]->{_src} eq $cfg[$a-1]->{_src} ) {
+	    splice( @cfg, $a, 1 );
+	    redo;
+	}
+	print STDERR ("Config[$a]: ", $cfg[$a]->{_src}, "\n" )
+	  if $options->{verbose};
+    }
+
+    $cfg = shift(@cfg);
+    warn("Process: $cfg->{_src}\n") if $options->{verbose};
 
     # Add some extra entries to prevent warnings.
     for ( qw(title subtitle footer) ) {
@@ -593,28 +689,25 @@ sub configurator {
       UNIVERSAL::can( $options->{backend}, "configurator" );
 
     # Apply config files
+    foreach my $new ( @cfg ) {
+	my $file = $new->{_src}; # for diagnostics
+	# Handle obsolete keys.
+	if ( exists $new->{pdf}->{diagramscolumn} ) {
+	    $new->{pdf}->{diagrams}->{show} //= "right";
+	    delete $new->{pdf}->{diagramscolumn};
+	    warn("$file: pdf.diagramscolumn is obsolete, use pdf.diagrams.show instead\n");
+	}
+	if ( exists $new->{pdf}->{formats}->{default}->{'toc-title'} ) {
+	    $new->{toc}->{title} //= $new->{pdf}->{formats}->{default}->{'toc-title'};
+	    delete $new->{pdf}->{formats}->{default}->{'toc-title'};
+	    warn("$file: pdf.formats.default.toc-title is obsolete, use toc.title instead\n");
+	}
 
-    my $add_config = sub {
-	$cfg = add_config( $cfg, $options, shift, $pp );
-    };
-    my $add_legacy = sub {
-	# Legacy parser may need a ::config...
+	# Process.
 	local $::config = $cfg;
-	$cfg = add_legacy( $cfg, $options, shift, $pp );
-    };
-
-    foreach my $config ( qw( sysconfig legacyconfig userconfig config ) ) {
-	next if $options->{"no$config"};
-	if ( ref($options->{$config}) eq 'ARRAY' ) {
-	    $add_config->($_) foreach @{ $options->{$config} };
-	}
-	elsif ( $config eq "legacyconfig" ) {
-	    $add_legacy->( $options->{$config} );
-	}
-	else {
-	    warn("Adding config for $config\n") if $options->{verbose};
-	    $add_config->( $options->{$config} );
-	}
+	process_config( $new, $file, $options );
+	# Merge final.
+	$cfg = hmerge( $cfg, $new, "" );
     }
 
     # Handle defines from the command line.
@@ -629,7 +722,7 @@ sub configurator {
     }
     $cfg = hmerge( $cfg, $ccfg, "" );
 
-    if ( $cfg->{settings}->{chordnames} ne "strict" ) {
+    if ( 0 and $cfg->{settings}->{chordnames} ne "strict" ) {
 	if ( $cfg->{notes} ) {
 	    local $::config = $cfg;
 	    App::Music::ChordPro::Chords::Parser->new( $cfg );
@@ -742,76 +835,26 @@ sub configurator {
     return $cfg;
 }
 
-sub add_config {
-    my ( $cfg, $options, $file, $pp ) = @_;
-    Carp::confess("FATAL: Insufficient config") unless @_ == 4;
-    Carp::confess("FATAL: Undefined config") unless defined $file;
-    warn("Config: $file\n") if $options->{verbose};
-    $file = expand_tilde($file);
-
-    if ( open( my $fd, "<:raw", $file ) ) {
-	my $new = $pp->decode( loadlines( $fd, { %$options, split => 0 } ) );
-
-	# Handle obsolete keys.
-	if ( exists $new->{pdf}->{diagramscolumn} ) {
-	    $new->{pdf}->{diagrams}->{show} //= "right";
-	    delete $new->{pdf}->{diagramscolumn};
-	    warn("$file: pdf.diagramscolumn is obsolete, use pdf.diagrams.show instead\n");
-	}
-	if ( exists $new->{pdf}->{formats}->{default}->{'toc-title'} ) {
-	    $new->{toc}->{title} //= $new->{pdf}->{formats}->{default}->{'toc-title'};
-	    delete $new->{pdf}->{formats}->{default}->{'toc-title'};
-	    warn("$file: pdf.formats.default.toc-title is obsolete, use toc.title instead\n");
-	}
-
-	# If there are includes, process these first.
-	if ( exists $new->{include} ) {
-	    my ( $vol, $dir, undef ) = File::Spec->splitpath($file);
-	    foreach my $c ( @{ delete $new->{include} } ) {
-		# Check for resource names.
-		if ( $c !~ m;[/.]; ) {
-		    $c = ::rsc_or_file($c);
-		}
-		elsif ( $dir ne ""
-			&& !File::Spec->file_name_is_absolute($c) ) {
-		    # Prepend dir of the caller, if needed.
-		    $c = File::Spec->catpath( $vol, $dir, $c );
-		}
-		$cfg = add_config( $cfg, $options, $c, $pp );
-	    }
-	}
-
-	# Process.
-	process_config( $new, $file, $options );
-	# Merge final.
-	$cfg = hmerge( $cfg, $new, "" );
-	close($fd);
-    }
-    else {
-	### Should not happen -- it's been checked in app_setup.
-	die("Cannot open $file [$!]\n");
-    }
-    return $cfg;
-}
-
 sub process_config {
     my ( $cfg, $file, $options ) = @_;
-    local $::config = $cfg;
 
-    warn("Process: $file\n") if $options && $options->{verbose};
+    warn("Process: $file\n")
+      if $options && $options->{verbose} && $options->{verbose} > 1;
 
     if ( $cfg->{tuning} ) {
 	my $res =
-	  App::Music::ChordPro::Chords::set_tuning( $cfg->{tuning},
+	  App::Music::ChordPro::Chords::set_tuning( $cfg,
 						    $options );
 	warn( "Invalid tuning in config: ", $res, "\n" ) if $res;
 	$cfg->{_tuning} = $cfg->{tuning};
 	$cfg->{tuning} = [];
     }
 
-    if ( $cfg->{notes} ) {
+    App::Music::ChordPro::Chords->reset_parser;
+    App::Music::ChordPro::Chords::Parser->reset_parsers;
+    if ( 0 && $cfg->{notes} ) {
 	my $res =
-	  App::Music::ChordPro::Chords::set_notes( $cfg->{notes},
+	  App::Music::ChordPro::Chords::set_notes( $cfg,
 						   $options );
 	warn( "Invalid notes in config: ", $res, "\n" ) if $res;
 	$cfg->{_notes} = delete $cfg->{notes};
@@ -833,16 +876,16 @@ sub process_config {
 	    warn( "Totals: ",
 		  App::Music::ChordPro::Chords::chord_stats(), "\n" );
 	}
-	delete $cfg->{chords};
+	$cfg->{_chords} = delete $cfg->{chords};
     }
 }
 
-sub add_legacy {
-    my ( $cfg, $options, $file, $pp ) = @_;
+sub get_legacy {
+    my ( $options, $file ) = @_;
     warn("Config: $file (legacy)\n") if $options->{verbose};
 
     $options->{_legacy} = 1;
-    $::config = $cfg;
+    my $cfg = { _src => $file };
 
     require App::Music::ChordPro::Songbook;
     my $s = App::Music::ChordPro::Songbook->new;

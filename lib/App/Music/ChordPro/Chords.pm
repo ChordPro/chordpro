@@ -207,7 +207,8 @@ my $parser;# = App::Music::ChordPro::Chords::Parser->default;
 # API: Set tuning, discarding chords.
 # Used by: Config.
 sub set_tuning {
-    my ( $t, $options ) = @_;
+    my ( $cfg, $options ) = @_;
+    my $t = $cfg->{tuning} // [];
     return "Invalid tuning (not array)" unless ref($t) eq "ARRAY";
     $options //= { verbose => 0 };
 
@@ -240,11 +241,12 @@ sub get_tuning {
 # API: Set notation system.
 # Used by: Config.
 sub set_notes {
-    my ( $n, $options ) = @_;
+    my ( $cfg, $options ) = @_;
+    my $n = $cfg->{notes};
     return "Invalid notes (not hash)" if ref($n) ne "HASH";
     $options //= { verbose => 0 };
 
-    my $p = App::Music::ChordPro::Chords::Parser->new( { notes => $n } );
+    my $p = App::Music::ChordPro::Chords::Parser->new($cfg);
     unless ( $options->{'keep-parser'} ) {
 	$parser = $p;
 	warn( "Parser: ", $parser->{system}, "\n" )
@@ -266,9 +268,10 @@ sub set_parser {
     return;
 }
 
-# Used by: Songbook.
-sub get_parser {
-    $parser->{system};
+# API: Reset current parser.
+# Used by: Config.
+sub reset_parser {
+    undef $parser;
 }
 
 ################ Section Config & User Chords ################
@@ -402,8 +405,10 @@ sub chord_stats {
 
 sub parse_chord {
     my ( $chord ) = @_;
-    $parser //= App::Music::ChordPro::Chords::Parser->default;
-    # warn("XXX ", $parser->{c_pat}, "\n");
+    unless ( $parser ) {
+	$parser //= App::Music::ChordPro::Chords::Parser->get_parser;
+	# warn("XXX ", $parser->{system}, " ", $parser->{n_pat}, "\n");
+    }
     return $parser->parse($chord);
 }
 

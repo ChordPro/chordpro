@@ -84,6 +84,7 @@ package App::Music::ChordPro::A2Crd;
 
 use File::LoadLines;
 
+no warnings 'redefine';
 sub ::run {
     my $options = app_setup( "a2crd", $VERSION );
     binmode(STDERR, ':utf8');
