@@ -36,7 +36,7 @@ sub generate_songbook {
 
     return [] unless $sb->{songs}->[0]->{body}; # no songs
     $verbose ||= $options->{verbose};
-    $debug_spacing = $options->{debug};
+    $debug_spacing ||= $options->{debug};
 
     my $ps = $::config->{pdf};
     my $pr = (__PACKAGE__."::Writer")->new( $ps, $pdfapi );
