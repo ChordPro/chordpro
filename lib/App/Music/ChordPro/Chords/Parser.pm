@@ -659,9 +659,13 @@ sub clone {
 
 sub show {
     my ( $self ) = @_;
-    my $res = $self->{root} . $self->{qual} . $self->{ext};
+    my $res = $self->{parser}->root_canon( $self->{root_ord},
+				 $self->{root_ord} >= 0,
+				 $self->{qual} eq '-'
+			       ) . $self->{qual} . $self->{ext};
     if ( $self->{bass} && $self->{bass} ne "" ) {
-	$res .= "/" . $self->{bass};
+	$res .= "/" .
+	  ($self->{system} eq "roman" ? lc($self->{bass}) : $self->{bass});
     }
     return $res;
 }
@@ -699,6 +703,7 @@ sub transcode {
     return $self unless $xcode;
     return $self if $self->{system} eq $xcode;
     my $info = $self->clone;
+    $info->{system} = $xcode;
     my $p = $self->{parser}->get_parser($xcode);
     $info->{root_canon} = $info->{root} =
       $p->root_canon( $info->{root_ord},

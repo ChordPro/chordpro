@@ -704,3 +704,4 @@ VII+h7	{ ext => 'h7', ext_canon => 'h7', name => 'VII+h7', qual => '+', qual_can
 vii+h7	{ ext => 'h7', ext_canon => 'h7', name => 'vii+h7', qual => '+', qual_canon => '-', root => 'vii', root_canon => 'vii', root_mod => 0, root_ord => 11, system => 'roman' }
 VII+^7	{ ext => '^7', ext_canon => '^7', name => 'VII+^7', qual => '+', qual_canon => '+', root => 'VII', root_canon => 'VII', root_mod => 0, root_ord => 11, system => 'roman' }
 vii+^7	{ ext => '^7', ext_canon => '^7', name => 'vii+^7', qual => '+', qual_canon => '-', root => 'vii', root_canon => 'vii', root_mod => 0, root_ord => 11, system => 'roman' }
+VII/II	{ bass => 'II', bass_canon => 'II', bass_mod => 0, bass_ord => 2, ext => '', ext_canon => '', name => 'VII/II', qual => '', qual_canon => '', root => 'VII', root_canon => 'VII', root_mod => 0, root_ord => 11, system => 'roman' }
