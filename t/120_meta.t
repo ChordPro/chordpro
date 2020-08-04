@@ -101,9 +101,9 @@ $data = <<EOD;
 EOD
 
 
-my $warning;
+my $warning = "";
 {
-    local $SIG{__WARN__} = sub { $warning = "@_" };
+    local $SIG{__WARN__} = sub { $warning .= "@_" };
     eval { $s->parsefile(\$data) } or diag("$@");
 }
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
