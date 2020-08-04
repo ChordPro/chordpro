@@ -660,9 +660,9 @@ sub clone {
 sub show {
     my ( $self ) = @_;
     my $res = $self->{parser}->root_canon( $self->{root_ord},
-				 $self->{root_ord} >= 0,
-				 $self->{qual} eq '-'
-			       ) . $self->{qual} . $self->{ext};
+					   $self->{root_mod} >= 0,
+					   $self->{qual} eq '-'
+					 ) . $self->{qual} . $self->{ext};
     if ( $self->{bass} && $self->{bass} ne "" ) {
 	$res .= "/" .
 	  ($self->{system} eq "roman" ? lc($self->{bass}) : $self->{bass});
