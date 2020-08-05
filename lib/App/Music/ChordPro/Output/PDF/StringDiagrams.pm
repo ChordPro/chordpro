@@ -61,7 +61,7 @@ sub draw {
     # Draw font name.
     my $font = $ps->{fonts}->{diagram};
     $pr->setfont($font);
-    my $name = $info->{display} // $info->{name};
+    my $name = App::Music::ChordPro::Output::PDF::chord_display($info);
     $name .= "*"
       unless $info->{origin} ne "user"
 	|| $::config->{diagrams}->{show} eq "user";

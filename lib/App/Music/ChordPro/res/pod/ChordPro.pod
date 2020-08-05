@@ -37,11 +37,10 @@ Typical ChordPro input:
 
     {c: Chorus}
 
-B<chordpro> is a rewrite of the Chordii program, see
-L<http://www.chordii.org>.
+B<chordpro> is a rewrite of the Chordii program.
 
 For more information about the ChordPro file format, see
-L<http://www.chordpro.org>.
+L<https://www.chordpro.org>.
 
 =head1 COMMAND LINE OPTIONS
 

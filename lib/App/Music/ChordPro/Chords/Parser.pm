@@ -136,8 +136,13 @@ sub get_parser {
     return $parsers->{common} //= $self->default;
 }
 
+sub have_parser {
+    my ( $self, $system ) = @_;
+    exists $parsers->{$system};
+}
+
 # The list of instantiated parsers.
-sub parsers { die }
+sub parsers { $parsers }
 
 sub reset_parsers {
     my ( $self,  @which ) = @_;
@@ -168,8 +173,8 @@ sub new {
     warn("Chords: Created parser for ", $self->{system},
 	 $cfg->{settings}->{chordnames} eq "relaxed"
 	 ? ", relaxed" : "",
-	 "\n") if $::options->{verbose} && $::options->{verbose} > 1;
-    return $self;
+	 "\n") if $::options->{verbose} > 1;
+    return $parsers->{$self->{system}} = $self;
 }
 
 sub parse_chord {
@@ -184,13 +189,20 @@ sub parse_chord {
     my $c_pat = $self->{c_pat};
     my $n_pat = $self->{n_pat};
 
-    return unless $chord =~ /^$c_pat$/;
-    return unless my $r = $+{root};
-
     my $info = { system => $self->{system},
 		 parser => $self,
-		 name => $_[1],
-		 root => $r };
+		 name => $_[1] };
+    if ( $chord =~ /^$c_pat$/ ) {
+	return unless $info->{root} = $+{root};
+    }
+    elsif ( ucfirst($chord) =~ /^$n_pat$/ ) {
+	$info->{root} = $chord;
+	$info->{isnote} = 1;
+    }
+    else {
+	return;
+    }
+
     bless $info => $self->{target};
 
     my $q = $+{qual} // "";
@@ -213,6 +225,7 @@ sub parse_chord {
     my $ordmod = sub {
 	my ( $pfx ) = @_;
 	my $r = $info->{$pfx};
+	$r = ucfirst($r) if $info->{isnote};
 	if ( defined $self->{ns_tbl}->{$r} ) {
 	    $info->{"${pfx}_ord"} = $self->{ns_tbl}->{$r};
 	    $info->{"${pfx}_mod"} = defined $self->{nf_tbl}->{$r} ? 0 : 1;
@@ -358,7 +371,7 @@ sub load_notes {
     my ( $self, $init ) = @_;
     my $cfg = { %{$::config//{}}, %{$init//{}} };
     my $n = $cfg->{notes};
-
+    Carp::confess("No notes?") unless $n->{system};
     my ( @ns_canon, %ns_tbl, @nf_canon, %nf_tbl );
 
     my $rix = 0;
@@ -458,7 +471,7 @@ sub new {
     $self->{target} = 'App::Music::ChordPro::Chord::Nashville';
     warn("Chords: Created parser for ", $self->{system}, "\n")
       if $::options->{verbose} && $::options->{verbose} > 1;
-    return $self;
+    return $parsers->{$self->{system}} = $self;
 }
 
 my $n_pat = qr/(?<shift>[b#]?)(?<root>[1-7])/;
@@ -559,7 +572,7 @@ sub new {
     $self->{target} = 'App::Music::ChordPro::Chord::Roman';
     warn("Chords: Created parser for ", $self->{system}, "\n")
       if $::options->{verbose} && $::options->{verbose} > 1;
-    return $self;
+    return $parsers->{$self->{system}} = $self;
 }
 
 my $r_pat = qr/(?<shift>[b#]?)(?<root>(?i)iii|ii|iv|i|viii|vii|vi|v)/;
@@ -663,6 +676,9 @@ sub show {
 					   $self->{root_mod} >= 0,
 					   $self->{qual} eq '-'
 					 ) . $self->{qual} . $self->{ext};
+    if ( $self->{isnote} ) {
+	return lcfirst($res);
+    }
     if ( $self->{bass} && $self->{bass} ne "" ) {
 	$res .= "/" .
 	  ($self->{system} eq "roman" ? lc($self->{bass}) : $self->{bass});
@@ -673,6 +689,7 @@ sub show {
 # Returns a representation indepent of notation system.
 sub agnostic {
     my ( $self ) = @_;
+    return if $self->{isnote};
     join( " ", "",
 	  $self->{root_ord}, $self->{qual_canon},
 	  $self->{ext_canon}, $self->{bass_ord} // () );
@@ -705,6 +722,8 @@ sub transcode {
     my $info = $self->clone;
     $info->{system} = $xcode;
     my $p = $self->{parser}->get_parser($xcode);
+    $info->{parser} = $p;
+    die unless $p->{system} eq $xcode;
     $info->{root_canon} = $info->{root} =
       $p->root_canon( $info->{root_ord},
 		      $info->{root_mod} >= 0,

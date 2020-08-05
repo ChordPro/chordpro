@@ -65,11 +65,10 @@ one or many songs plus chord information. B<chordpro> will then
 generate a photo-ready, professional looking, impress-your-friends
 sheet-music suitable for printing on your nearest printer.
 
-B<chordpro> is a rewrite of the Chordii program, see
-L<http://www.chordii.org>.
+B<chordpro> is a rewrite of the Chordii program.
 
 For more information about the ChordPro file format, see
-L<http://www.chordpro.org>.
+L<https://www.chordpro.org>.
 
 =cut
 
@@ -79,6 +78,13 @@ use strict;
 use warnings;
 use utf8;
 use Carp;
+
+################ The Process ################
+
+package main;
+
+our $options;
+our $config;
 
 package App::Music::ChordPro::A2Crd;
 
@@ -91,11 +97,10 @@ sub ::run {
     binmode(STDOUT, ':utf8');
     $options->{trace}   = 1 if $options->{debug};
     $options->{verbose} = 1 if $options->{trace};
-    main($options);
+    main();
 }
 
 sub main {
-    my ( $options ) = @_;
 
     my $lines = loadlines( @ARGV ? $ARGV[0] : \*STDIN);
 

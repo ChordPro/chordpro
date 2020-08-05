@@ -49,11 +49,10 @@ Typical ChordPro input:
 
     {c: Chorus}
 
-B<chordpro> is a rewrite of the Chordii program, see
-L<http://www.chordii.org>.
+B<chordpro> is a rewrite of the Chordii program.
 
 For more information about the ChordPro file format, see
-L<http://www.chordpro.org>.
+L<https://www.chordpro.org>.
 
 =cut
 
@@ -67,22 +66,24 @@ use Carp;
 
 package main;
 
+our $options;
 our $config;
 
 package App::Music::ChordPro;
 
 sub ::run {
-    my $options = app_setup( "ChordPro", $VERSION );
+    $options = app_setup( "ChordPro", $VERSION );
     binmode(STDERR, ':utf8');
     binmode(STDOUT, ':utf8');
     $options->{trace}   = 1 if $options->{debug};
     $options->{verbose} = 1 if $options->{trace};
     $options->{verbose} = 9 if $options->{debug};
-    main($options);
+    main();
 }
 
 sub main {
     my ($options) = @_;
+    $options //= $::options;
 
     # Establish backend.
     my $of = $options->{output};
@@ -141,7 +142,7 @@ sub main {
 
     # One configurator to bind them all.
     use App::Music::ChordPro::Config;
-    $::config = App::Music::ChordPro::Config::configurator($options);
+    $::config = App::Music::ChordPro::Config::configurator({});
 
     # Parse the input(s).
     use App::Music::ChordPro::Songbook;
@@ -151,7 +152,7 @@ sub main {
     if ( $options->{'dump-chords'} ) {
 	my $d = App::Music::ChordPro::Song->new;
 	$d->{title} = "ChordPro $VERSION Built-in Chords";
-	$d->{subtitle} = [ "http://www.chordpro.org" ];
+	$d->{subtitle} = [ "https://www.chordpro.org" ];
 	my @body;
 	my @chords;
 
@@ -204,11 +205,11 @@ sub main {
     if ( my $xc = $::config->{settings}->{transcode} ) {
 	# Set target parser for the backend so it can find the transcoded
 	# chord definitions.
-	App::Music::ChordPro::Chords::set_parser($xc);
+	App::Music::ChordPro::Chords::set_parser( $xc, $options );
 	# Generate the songbook.
 	$res = $pkg->generate_songbook( $s, $options );
 	# Restore parser.
-	App::Music::ChordPro::Chords::set_parser($::config->{notes}->{system});
+	App::Music::ChordPro::Chords::set_parser($::config->{notes}->{system}, $options );
     }
     else {
 	# Generate the songbook.
@@ -854,29 +855,10 @@ sub app_setup {
     $::options = $options;
     # warn(::dump($options), "\n") if $options->{debug};
 
-    if ( $clo->{transcode} ) {
-	my $xc = $clo->{transcode};
-	# Load the appropriate notes config, but retain the current parser.
-	unless ( App::Music::ChordPro::Chords::Parser->get_parser($xc, 1) ) {
-	    my $file = getresource("notes/$xc.json");
-	    if ( $file and open( my $fd, "<:raw", $file ) ) {
-		my $pp = JSON::PP->new->relaxed;
-		warn("Config: $file\n") if $clo->{verbose};
-		my $new = $pp->decode( loadlines ($fd, { %$clo, split => 0 } ) );
-		App::Music::ChordPro::Chords::set_notes( $new,
-							 { %$clo,
-							   'keep-parser' => 1 } );
-	    }
-	}
-	unless ( App::Music::ChordPro::Chords::Parser->get_parser($xc, 1) ) {
-	    die("No transcoder for ", $xc, "\n");
-	}
-    }
-
     if ( $defcfg || $fincfg ) {
-	print App::Music::ChordPro::Config::config_defaults()
+	print App::Music::ChordPro::Config::default_config()
 	  if $defcfg;
-	print App::Music::ChordPro::Config::config_final($options)
+	print App::Music::ChordPro::Config::config_final()
 	  if $fincfg;
 	exit 0;
     }
@@ -935,7 +917,7 @@ suitable for printing on your nearest printer.
 To learn more about ChordPro, look for the man page or do
 "chordpro --help" for the list of options.
 
-For more information, see http://www.chordpro.org .
+For more information, see https://www.chordpro.org .
 
 EndOfAbout
 
