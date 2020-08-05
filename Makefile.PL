@@ -105,8 +105,9 @@ ${RES}/notes/common.json : ${RES}/notes/dutch.json
 ${RES}/pod/ChordPro.pod : ${LIB}.pm
 	${PODSELECT} $< > $@
 
-${RES}/pod/Config.pod : ${LIB}/Config.pm
+${RES}/pod/Config.pod : ${LIB}/Config.pm ${RES}/config/chordpro.json
 	${PODSELECT} $< > $@
+	${PERL} -pe 's/^/  /' ${RES}/config/chordpro.json >> $@
 
 # Verify JSON data
 
