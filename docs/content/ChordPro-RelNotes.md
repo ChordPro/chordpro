@@ -69,6 +69,13 @@ sections must be closed with the corresponding `{end_of_`*section*`}`.
 The reference implementation treats all sections (except `chorus`,
 `tab` and `grid`) as lyrics.
 
+### Modified section directives
+
+In a tab section (`{start_of_tab}` or `{sot}` the lines that follow
+are taken as literally as possible. The lines will not be folded or
+changed. Markup is left as is, and directives are considered literal
+text except for `{end_of_tab}` and `{eot}`.
+
 ### Section labels
 
 All section directives can take an optional label, which can be used

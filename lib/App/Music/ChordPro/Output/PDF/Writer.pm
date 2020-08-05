@@ -64,7 +64,7 @@ sub wrap {
 }
 
 sub text {
-    my ( $self, $text, $x, $y, $font, $size ) = @_;
+    my ( $self, $text, $x, $y, $font, $size, $nomarkup ) = @_;
 #    print STDERR ("T: @_\n");
     $font ||= $self->{font};
     $size ||= $font->{size};
@@ -74,7 +74,12 @@ sub text {
     if ( $font->{color} && $font->{color} ne "black" ) {
 	$text = "<span color='" . $font->{color} . "'>" . $text . "</span>";
     }
-    $self->{layout}->set_markup($text);
+    if ( $nomarkup ) {
+	$self->{layout}->set_text($text);
+    }
+    else {
+	$self->{layout}->set_markup($text);
+    }
     $y -= $self->{layout}->get_baseline;
     $self->{layout}->show( $x, $y, $self->{pdftext} );
 

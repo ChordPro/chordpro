@@ -182,6 +182,13 @@ sub parse_song {
 	    next;
 	}
 
+	if ( $in_context eq "tab" ) {
+	    unless ( /^\s*\{(?:end_of_tab|eot)\}\s*$/ ) {
+		$self->add( type => "tabline", text => $_ );
+		next;
+	    }
+	}
+
 	# For practical reasons: a prime should always be an apostroph.
 	s/'/\x{2019}/g;
 
@@ -316,7 +323,7 @@ sub chord {
 	    $c = $_;
     }
 
-    push( @used_chords, $c );
+    push( @used_chords, $c ) unless $info->{isnote};
 
     return $parens ? "($c)" : $c;
 }

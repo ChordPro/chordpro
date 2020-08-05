@@ -1220,7 +1220,7 @@ sub songline {
 	$ytext  = $ytop - font_bl($ftext);
 	$x += $opts{indent} if $opts{indent};
 	prlabel( $ps, $tag, $x, $ytext );
-	$pr->text( $elt->{text}, $x, $ytext, $ftext );
+	$pr->text( $elt->{text}, $x, $ytext, $ftext, undef, "no markup" );
 	return;
     }
 
