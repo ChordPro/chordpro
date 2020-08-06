@@ -186,19 +186,30 @@ sub parse_chord {
 	$bass = $2;
     }
 
+    # Pattern to match chords.
     my $c_pat = $self->{c_pat};
+
+    # Use relaxed pattern if requested.
+    $c_pat = $self->{c_rpat}
+      if $self->{c_rpat} && $::config->{settings}->{chordnames} eq "relaxed";
+
+    # Pattern to match notes.
     my $n_pat = $self->{n_pat};
 
     my $info = { system => $self->{system},
 		 parser => $self,
 		 name => $_[1] };
+
     if ( $chord =~ /^$c_pat$/ ) {
 	return unless $info->{root} = $+{root};
     }
-    elsif ( ucfirst($chord) =~ /^$n_pat$/ ) {
+    # Not a chord. Try note name.
+    elsif ( $::config->{settings}->{notenames}
+	    && ucfirst($chord) =~ /^$n_pat$/ ) {
 	$info->{root} = $chord;
 	$info->{isnote} = 1;
     }
+    # Nope.
     else {
 	return;
     }
@@ -412,34 +423,30 @@ sub load_notes {
 
     # Pattern to match chord names.
     my $c_pat;
-    if ( $cfg->{settings}->{chordnames} eq "strict" ) {
-	# Accept root, qual, and only known extensions.
-	$c_pat = "(?<root>" . $n_pat . ")";
-	$c_pat .= "(?:";
-	$c_pat .= "(?<qual>-|min|m(?!aj))".
-	  "(?<ext>" . join("|", keys(%$additions_min)) . ")|";
-	$c_pat .= "(?<qual>\\+|aug)".
-	  "(?<ext>" . join("|", keys(%$additions_aug)) . ")|";
-	$c_pat .= "(?<qual>0|dim)".
-	  "(?<ext>" . join("|", keys(%$additions_dim)) . ")|";
-	$c_pat .= "(?<qual>)".
-	  "(?<ext>" . join("|", keys(%$additions_maj)) . ")";
-	$c_pat .= ")";
-	$c_pat = qr/$c_pat/;
-	$n_pat = qr/$n_pat/;
-    }
-    else {
-	warn("PARSING RELAXED") if "####TODO####";
-	# In relaxed form, we accept anything for extension.
-	$c_pat = "(?<root>" . $n_pat . ")";
-	$c_pat .= "(?:(?<qual>-|min|m(?!aj)|\\+|aug|0|dim|)(?<ext>.*))";
-	$c_pat = qr/$c_pat/;
-	$n_pat = qr/$n_pat/;
-    }
+    # Accept root, qual, and only known extensions.
+    $c_pat = "(?<root>" . $n_pat . ")";
+    $c_pat .= "(?:";
+    $c_pat .= "(?<qual>-|min|m(?!aj))".
+      "(?<ext>" . join("|", keys(%$additions_min)) . ")|";
+    $c_pat .= "(?<qual>\\+|aug)".
+      "(?<ext>" . join("|", keys(%$additions_aug)) . ")|";
+    $c_pat .= "(?<qual>0|dim)".
+      "(?<ext>" . join("|", keys(%$additions_dim)) . ")|";
+    $c_pat .= "(?<qual>)".
+      "(?<ext>" . join("|", keys(%$additions_maj)) . ")";
+    $c_pat .= ")";
+    $c_pat = qr/$c_pat/;
+    $n_pat = qr/$n_pat/;
+
+    # In relaxed form, we accept anything for extension.
+    my $c_rpat = "(?<root>" . $n_pat . ")";
+    $c_rpat .= "(?:(?<qual>-|min|m(?!aj)|\\+|aug|0|dim|)(?<ext>.*))";
+    $c_rpat = qr/$c_rpat/;
 
     # Store in the object.
     $self->{n_pat}    = $n_pat;
     $self->{c_pat}    = $c_pat;
+    $self->{c_rpat}   = $c_rpat;
     $self->{ns_tbl}   = \%ns_tbl;
     $self->{nf_tbl}   = \%nf_tbl;
     $self->{ns_canon} = \@ns_canon;
