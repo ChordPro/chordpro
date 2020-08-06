@@ -39,7 +39,7 @@ I [D]looked over Jordan, and [G]what did I [D]see,
 {chorus}
 EOD
 
-eval { $s->parsefile( \$data, { transpose => -10 } ) } or diag("$@");
+eval { $s->parse_file( \$data, { transpose => -10 } ) } or diag("$@");
 
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );

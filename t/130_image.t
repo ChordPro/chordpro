@@ -19,7 +19,7 @@ my $data = <<EOD;
 {image red.jpg}
 EOD
 
-eval { $s->parsefile(\$data) } or diag("$@");
+eval { $s->parse_file(\$data) } or diag("$@");
 
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
@@ -55,7 +55,7 @@ $data = <<EOD;
 {image red.jpg width=200 height=150 border=2 center scale=4 title="A red image"}
 EOD
 
-eval { $s->parsefile(\$data) } or diag("$@");
+eval { $s->parse_file(\$data) } or diag("$@");
 
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );

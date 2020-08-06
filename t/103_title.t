@@ -17,7 +17,7 @@ my $data = <<EOD;
 {title: Swing Low Sweet Chariot}
 EOD
 
-eval { $s->parsefile(\$data) } or diag("$@");
+eval { $s->parse_file(\$data) } or diag("$@");
 #use DDumper; DDumper( $s->{songs} );
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
@@ -42,5 +42,5 @@ $s = App::Music::ChordPro::Songbook->new;
 $data = <<EOD;
 {t: Swing Low Sweet Chariot}
 EOD
-eval { $s->parsefile(\$data) } or diag("$@");
+eval { $s->parse_file(\$data) } or diag("$@");
 is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );

@@ -1,6 +1,10 @@
 #!/usr/bin/perl
 
+package main;
+
 use utf8;
+our $config;
+our $options;
 
 package App::Music::ChordPro::Output::PDF;
 
@@ -32,13 +36,12 @@ my $verbose = 0;
 my $regtest = defined($ENV{PERL_HASH_SEED}) && $ENV{PERL_HASH_SEED} == 0;
 
 sub generate_songbook {
-    my ($self, $sb, $options) = @_;
+    my ( $self, $sb ) = @_;
 
     return [] unless $sb->{songs}->[0]->{body}; # no songs
     $verbose ||= $options->{verbose};
     $debug_spacing ||= $options->{debug};
-
-    my $ps = $::config->{pdf};
+    my $ps = $config->{pdf};
     my $pr = (__PACKAGE__."::Writer")->new( $ps, $pdfapi );
     $pr->info( Title => $sb->{songs}->[0]->{meta}->{title}->[0],
 	       Creator =>
@@ -66,12 +69,10 @@ sub generate_songbook {
 	$pr->newpage($ps, $page+1), $page++
 	  if $ps->{'pagealign-songs'} && !($page % 2);
 
-	$options->{startpage} = $page;
 	$song->{meta}->{tocpage} = $page;
 	push( @book, [ $song->{meta}->{title}->[0], $song ] );
 
-	$page += generate_song( $song,
-				{ pr => $pr, $options ? %$options : () } );
+	$page += generate_song( $song, { pr => $pr, startpage => $page } );
     }
     $book_back_matter_page = $page;
 
@@ -110,10 +111,10 @@ sub generate_songbook {
 	  };
 
 	# Prepend the toc.
-	$options->{startpage} = 1;
 	$page = generate_song( $song,
 			       { pr => $pr, prepend => 1, roman => 1,
-				 $options ? %$options : () } );
+				 startpage => 1,
+			       } );
 
 	# Align.
 	$pr->newpage($ps, $page+1), $page++
@@ -205,7 +206,7 @@ our $assets;
 use constant SIZE_ITEMS => [ qw (chord text tab grid diagram toc title footer) ];
 
 sub generate_song {
-    my ($s, $options) = @_;
+    my ( $s, $opts ) = @_;
 
     return 0 unless $s->{body};	# empty song
     $source = $s->{source};
@@ -216,7 +217,7 @@ sub generate_song {
     $inlinechords = $::config->{settings}->{'inline-chords'};
     $chordsunder  = $::config->{settings}->{'chords-under'};
     my $ps = $::config->clone->{pdf};
-    my $pr = $options->{pr};
+    my $pr = $opts->{pr};
     $ps->{pr} = $pr;
     $pr->{ps} = $ps;
     $pr->init_fonts();
@@ -374,14 +375,14 @@ sub generate_song {
     };
 
     my $vsp_ignorefirst;
-    my $startpage = $options->{startpage} || 1;
+    my $startpage = $opts->{startpage} || 1;
     my $thispage = $startpage - 1;
 
     # Physical newpage handler.
     my $newpage = sub {
 
 	# Add page to the PDF.
-	$pr->newpage($ps, $options->{prepend} ? $thispage+1 : () );
+	$pr->newpage($ps, $opts->{prepend} ? $thispage+1 : () );
 
 	# Put titles and footer.
 
@@ -421,7 +422,7 @@ sub generate_song {
 	$ps->{__bottommargin} = $ps->{_marginbottom};
 
 	$thispage++;
-	$s->{meta}->{page} = [ $s->{page} = $options->{roman}
+	$s->{meta}->{page} = [ $s->{page} = $opts->{roman}
 			       ? roman($thispage) : $thispage ];
 
 	# Determine page class.
@@ -1946,7 +1947,7 @@ sub showlayout {
 }
 
 sub configurator {
-    my ( $cfg, $options ) = @_;
+    my ( $cfg ) = @_;
 
     # From here, we're mainly dealing with the PDF settings.
     my $pdf   = $cfg->{pdf};

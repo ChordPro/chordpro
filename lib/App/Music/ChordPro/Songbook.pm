@@ -1,5 +1,10 @@
 #!/usr/bin/perl
 
+package main;
+
+our $options;
+our $config;
+
 package App::Music::ChordPro::Songbook;
 
 use strict;
@@ -57,18 +62,26 @@ my $diag;			# for diagnostics
 
 sub ::break() {}
 
-sub parsefile {
-    my ( $self, $filename, $options ) = @_;
-    $options //= {};
+sub parse_file {
+    my ( $self, $filename, $opts, $legacy ) = @_;
+    $opts //= {};
+    $legacy //= delete $opts->{legacy};
 
-    my $lines = loadlines( $filename, $options );
-    $diag->{format} = $options->{diagformat}
-      || $::config->{diagnostics}->{format};
-    $diag->{file} = $options->{_filesource};
+    # Loadlines sets $opts->{_filesource}.
+    my $lines = loadlines( $filename, $opts );
+
+    # Note: $opts are used by the tests only.
+    $opts //= {};
+    $diag->{format} = $opts->{diagformat} // $config->{diagnostics}->{format};
+    $diag->{file}   = $opts->{_filesource};
+    for ( "transpose", "no-substitute", "no-transpose" ) {
+	next unless exists $opts->{$_};
+	$options->{$_} = $opts->{$_};
+    }
 
     my $linecnt = 0;
     while ( @$lines ) {
-	my $song = $self->parse_song( $lines, \$linecnt, $options );
+	my $song = $self->parse_song( $lines, \$linecnt, $legacy );
 #	if ( exists($self->{songs}->[-1]->{body}) ) {
 	    $song->{meta}->{songindex} = 1 + @{ $self->{songs} };
 	    push( @{ $self->{songs} }, $song );
@@ -80,14 +93,19 @@ sub parsefile {
     return 1;
 }
 
+sub parse_legacy_file {
+    my ( $self, $filename, $opts ) = @_;
+    $self->parse_file( $filename, $opts, 1 );
+}
+
 my $song;			# current song
 
 sub parse_song {
-    my ( $self, $lines, $linecnt, $options ) = @_;
+    my ( $self, $lines, $linecnt, $legacy ) = @_;
 
     $no_transpose = $options->{'no-transpose'};
     $no_substitute = $options->{'no-substitute'};
-    $decapo = $options->{decapo} || $::config->{settings}->{decapo};
+    $decapo = $options->{decapo} || $config->{settings}->{decapo};
 
     $song = App::Music::ChordPro::Song->new
       ( source => { file => $diag->{file}, line => 1 + $$linecnt },
@@ -197,9 +215,9 @@ sub parse_song {
 	    $self->add( type => "ignore",
 			text => $_ )
 	      unless
-	    $options->{_legacy}
-	      ? $self->global_directive( $1, $options, 1 )
-	      : $self->directive( $1, $options );
+	    $legacy
+	      ? $self->global_directive( $1, 1 )
+	      : $self->directive( $1 );
 	    next;
 	}
 
@@ -500,7 +518,7 @@ sub dir_split {
 }
 
 sub directive {
-    my ( $self, $d, $options ) = @_;
+    my ( $self, $d ) = @_;
     my ( $dir, $arg ) = dir_split($d);
 
     # Context flags.
@@ -751,7 +769,7 @@ sub directive {
 	return 1;
     }
 
-    return 1 if $self->global_directive( $d, $options, 0 );
+    return 1 if $self->global_directive( $d, 0 );
 
     # Warn about unknowns, unless they are x_... form.
     do_warn("Unknown directive: $d\n") unless $d =~ /^x_/;
@@ -775,7 +793,7 @@ sub duration {
 my %propstack;
 
 sub global_directive {
-    my ($self, $d, $options, $legacy ) = @_;
+    my ($self, $d, $legacy ) = @_;
     my ( $dir, $arg ) = dir_split($d);
 
     # Song / Global settings.

@@ -49,7 +49,7 @@ Should sort at V
 Dual title
 EOD
 
-eval { $s->parsefile( \$data ) } or diag("$@");
+eval { $s->parse_file( \$data ) } or diag("$@");
 
 ok( scalar( @{ $s->{songs} } ) == 3, "three songs" );
 isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );

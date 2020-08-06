@@ -43,7 +43,7 @@ EOD
 my $warning;
 {
     local $SIG{__WARN__} = sub { $warning = "@_" };
-    eval { $s->parsefile(\$data) } or diag("$@");
+    eval { $s->parse_file(\$data) } or diag("$@");
 }
 
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );

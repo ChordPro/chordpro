@@ -19,7 +19,7 @@ my $data = <<EOD;
 {subtitle: Sub Títlë}
 EOD
 
-eval { $s->parsefile(\$data) } or diag("$@");
+eval { $s->parse_file(\$data) } or diag("$@");
 
 ok( scalar( @{ $s->{songs} } ) == 1, "__STRING__: One song" );
 isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
@@ -78,7 +78,7 @@ sub enctest {
     $enc .= " (no BOM)" if $nobom;
 
     my $s = App::Music::ChordPro::Songbook->new;
-    eval { $s->parsefile($fn) } or diag("$@");
+    eval { $s->parse_file($fn) } or diag("$@");
     ok( scalar( @{ $s->{songs} } ) == 1, "$enc: One song" );
     isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
     $song->{source}->{file} = $fn;

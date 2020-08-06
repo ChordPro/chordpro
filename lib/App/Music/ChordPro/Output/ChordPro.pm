@@ -1,5 +1,8 @@
 #!/usr/bin/perl
 
+our $options;
+our $config;
+
 package App::Music::ChordPro::Output::ChordPro;
 
 use strict;
@@ -10,7 +13,7 @@ use App::Music::ChordPro::Output::Common;
 my $re_meta;
 
 sub generate_songbook {
-    my ($self, $sb, $options) = @_;
+    my ( $self, $sb ) = @_;
 
     # Skip empty songbooks.
     return [] unless eval { $sb->{songs}->[0]->{body} };
@@ -31,7 +34,7 @@ sub generate_songbook {
 	    push(@book, "") if $options->{'backend-option'}->{tidy};
 	    push(@book, "{new_song}");
 	}
-	push(@book, @{generate_song($song, $options)});
+	push(@book, @{generate_song($song)});
     }
 
     push( @book, "");
@@ -41,7 +44,7 @@ sub generate_songbook {
 my $lyrics_only = 0;
 
 sub generate_song {
-    my ($s, $options) = @_;
+    my ( $s ) = @_;
 
     my $tidy = $options->{'backend-option'}->{tidy};
     $lyrics_only = 2 * $::config->{settings}->{'lyrics-only'};

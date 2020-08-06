@@ -82,8 +82,8 @@ sub ::run {
 }
 
 sub main {
-    my ($options) = @_;
-    $options //= $::options;
+    my ($opts) = @_;
+    $options = { %$options, %$opts } if $opts;
 
     # Establish backend.
     my $of = $options->{output};
@@ -142,12 +142,12 @@ sub main {
 
     # One configurator to bind them all.
     use App::Music::ChordPro::Config;
-    $::config = App::Music::ChordPro::Config::configurator({});
+    $config = App::Music::ChordPro::Config::configurator({});
 
     # Parse the input(s).
     use App::Music::ChordPro::Songbook;
     my $s = App::Music::ChordPro::Songbook->new;
-    $s->parsefile( $_, $options ) foreach @::ARGV;
+    $s->parse_file($_) foreach @::ARGV;
 
     if ( $options->{'dump-chords'} ) {
 	my $d = App::Music::ChordPro::Song->new;
@@ -205,15 +205,15 @@ sub main {
     if ( my $xc = $::config->{settings}->{transcode} ) {
 	# Set target parser for the backend so it can find the transcoded
 	# chord definitions.
-	App::Music::ChordPro::Chords::set_parser( $xc, $options );
+	App::Music::ChordPro::Chords::set_parser($xc);
 	# Generate the songbook.
-	$res = $pkg->generate_songbook( $s, $options );
+	$res = $pkg->generate_songbook($s);
 	# Restore parser.
-	App::Music::ChordPro::Chords::set_parser($::config->{notes}->{system}, $options );
+	App::Music::ChordPro::Chords::set_parser($::config->{notes}->{system} );
     }
     else {
 	# Generate the songbook.
-	$res = $pkg->generate_songbook( $s, $options );
+	$res = $pkg->generate_songbook($s);
     }
 
     # Some backends write output themselves, others return an

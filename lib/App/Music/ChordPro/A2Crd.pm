@@ -114,14 +114,14 @@ sub main {
     }
 
     print $fd "$_\n"
-      foreach a2cho($lines, $options);
+      foreach a2cho($lines);
 }
 
 ################ Subroutines ################
 
 # API: Produce ChordPro data from AsciiCRD lines.
 sub a2cho {
-    my ( $lines, $options ) = @_;
+    my ( $lines ) = @_;
     my $map = "";
     foreach ( @$lines ) {
 	$map .= classify($_);

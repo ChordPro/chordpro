@@ -13,11 +13,9 @@ use App::Music::ChordPro::Chords::Parser;
 my %tbl;
 
 our $config =
-  eval {
       App::Music::ChordPro::Config::configurator
 	  ( { nosysconfig => 1, nolegacyconfig => 1, nouserconfig => 1,
 	      config => getresource("notes/solfege.json") } );
-  };
 
 =begin regenerate
 

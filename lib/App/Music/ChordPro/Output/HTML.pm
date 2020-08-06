@@ -12,7 +12,7 @@ use warnings;
 use App::Music::ChordPro::Output::Common;
 
 sub generate_songbook {
-    my ($self, $sb, $options) = @_;
+    my ( $self, $sb ) = @_;
 
     my @book;
     my $cfg = $::config->{html} // {};
@@ -34,7 +34,7 @@ sub generate_songbook {
 	);
 
     foreach my $song ( @{$sb->{songs}} ) {
-	push( @book, @{ generate_song($song, $options) } );
+	push( @book, @{ generate_song($song) } );
     }
 
     push( @book, "</body>", "</html>" );
@@ -45,11 +45,11 @@ my $single_space = 0;		# suppress chords line when empty
 my $lyrics_only = 0;		# suppress all chords lines
 
 sub generate_song {
-    my ($s, $options) = @_;
+    my ( $s ) = @_;
 
-    my $tidy = $options->{tidy};
-    $single_space = $options->{'single-space'};
-    $lyrics_only = $::config->{settings}->{'lyrics-only'};
+    my $tidy      = $::options->{tidy};
+    $single_space = $::options->{'single-space'};
+    $lyrics_only  = $::config->{settings}->{'lyrics-only'};
     $s->structurize;
 
     my @s;

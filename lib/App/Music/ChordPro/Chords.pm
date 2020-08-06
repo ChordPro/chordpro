@@ -246,12 +246,11 @@ sub get_tuning {
 # API: Set target parser.
 # Used by: ChordPro.
 sub set_parser {
-    my ( $p, $options ) = @_;
-    $options //= { verbose => 0 };
+    my ( $p ) = @_;
 
     $parser = App::Music::ChordPro::Chords::Parser->get_parser($p);
     warn( "Parser: ", $parser->{system}, "\n" )
-      if $options->{verbose} && $options->{verbose} > 1;
+      if $options->{verbose} > 1;
 
     return;
 }

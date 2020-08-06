@@ -45,24 +45,21 @@ sub clone($);
 sub default_config();
 
 sub configurator {
-    my ( $options ) = @_;
+    my ( $opts ) = @_;
     my $pp = JSON::PP->new->relaxed;
 
     # Test programs call configurator without options.
     # Prepare a minimal config.
-    unless ( $options ) {
+    unless ( $opts ) {
 	my $cfg = $pp->decode( default_config() );
-	$::config = $cfg;
-	$::options = { verbose => 0 };
+	$config = $cfg;
+	$options = { verbose => 0 };
 	process_config( $cfg, "<builtin>" );
 	return $cfg;
     }
-    if ( keys(%$options) ) {
-	$::options = $options;
-	$::options->{verbose} //= 0;
-    }
-    else {
-	$options = $::options;
+    if ( keys(%$opts) ) {
+	$options = { %{$options//{}}, %$opts };
+	$options->{verbose} //= 0;
     }
 
     my @cfg;
@@ -93,17 +90,17 @@ sub configurator {
 	push( @cfg, prep_configs( $cfg, $fn ) );
     };
 
-    foreach my $config ( qw( sysconfig legacyconfig userconfig config ) ) {
-	next if $options->{"no$config"};
-	if ( ref($options->{$config}) eq 'ARRAY' ) {
-	    $add_config->($_) foreach @{ $options->{$config} };
+    foreach my $c ( qw( sysconfig legacyconfig userconfig config ) ) {
+	next if $options->{"no$c"};
+	if ( ref($options->{$c}) eq 'ARRAY' ) {
+	    $add_config->($_) foreach @{ $options->{$c} };
 	}
-	elsif ( $config eq "legacyconfig" ) {
-	    $add_legacy->( $options->{$config} );
+	elsif ( $c eq "legacyconfig" ) {
+	    $add_legacy->( $options->{$c} );
 	}
 	else {
 	    warn("Adding config for $config\n") if $verbose;
-	    $add_config->( $options->{$config} );
+	    $add_config->( $options->{$c} );
 	}
     }
 
@@ -257,7 +254,8 @@ sub configurator {
 	$cfg->{settings}->{'lyrics-only'} = $options->{'lyrics-only'};
     }
     if ( $options->{transcode} ) {
-	$cfg->{settings}->{transcode} = $options->{transcode};
+	# Already handled.
+	# $cfg->{settings}->{transcode} = $options->{transcode};
     }
     if ( $options->{decapo} ) {
 	$cfg->{settings}->{decapo} = $options->{decapo};
@@ -265,7 +263,7 @@ sub configurator {
     return $cfg if $options->{'cfg-print'};
 
     # Backend specific configs.
-    $backend_configurator->( $cfg, $options ) if $backend_configurator;
+    $backend_configurator->($cfg) if $backend_configurator;
 
     # For convenience...
     bless( $cfg, __PACKAGE__ );;
@@ -381,13 +379,11 @@ sub get_legacy {
     my $verbose = $options->{verbose};
     warn("Config: $file (legacy)\n") if $verbose;
 
-    $options->{_legacy} = 1;
     my $cfg = { _src => $file };
 
     require App::Music::ChordPro::Songbook;
     my $s = App::Music::ChordPro::Songbook->new;
-    $s->parsefile( $file, $options );
-    delete( $options->{_legacy} );
+    $s->parse_legacy_file($file);
 
     my $song = $s->{songs}->[0];
     foreach ( keys( %{$song->{settings}} ) ) {

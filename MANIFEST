@@ -118,8 +118,6 @@ t/170_transpose.t
 t/171_transpose.t
 t/172_transpose.t
 t/173_transpose.t
-t/174_transpose.cho
-t/174_transpose.t
 t/175_transpose.t
 t/177_transcode.t
 t/180_grids.t
@@ -129,6 +127,8 @@ t/30_basic01_cho.t
 t/31_basic02_cho.t
 t/40_basic01_html.t
 t/50_encodings.t
+t/60_transpose.cho
+t/60_transpose.t
 t/basic01.cho
 t/basic02.cho
 t/differ.pl
@@ -147,6 +147,6 @@ t/ref/31_cho_3.cho
 t/ref/40_html_1.html
 t/ref/40_html_2.html
 t/ref/40_html_3.html
-t/ref/174_crd_1.crd
-t/ref/174_crd_2.crd
-t/ref/174_crd_3.crd
+t/ref/60_crd_1.crd
+t/ref/60_crd_2.crd
+t/ref/60_crd_3.crd

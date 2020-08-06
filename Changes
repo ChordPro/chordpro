@@ -1,33 +1,45 @@
 0.975
 
-    - Use Text::Layout to support Pango Markup language.
+    - !ChordPro syntax
+    - Support Pango Markup language.
+    - Add basic support for annotations.
+    - Add directives start/end_of_verse/bridge and short forms.
+    - !ChordPro functionality
+    - Add PDF outlines (bookmarks).
+    - Revamp table of contens (finally).
+    - Remove section handling (we now have labels).
+    - Allow ~ expansion in file names.
+    - Allow relaxed parsing of chords (root name + arbitrary).
+    - Allow parsing of notes (chords with only a lc root name).
+    - (Wx) Show filename in window title.
+    - (Wx) Show asterisk if file is modified.
+    - !ChordPro configuration
     - Add split marker to be inserted between text phrases when the
       chord is wider than the phrase.
-    - Upgrade requirement for PDF::API2 to 2.035, Font::TTF to 1.05,
-      Text::Layout to 0.014.
-    - Fix bug where some command line arguments did not properly support
-      utf8.
     - Add settings.suppress-empty-lyrics to suppress blank lyrics lines.
     - Add display property to chords to control the way they are displayed.
     - Add guitar-br.json with Brandt-Roemer compliant chord symbols.
-    - Add basic support for annotations.
     - Add meta variable songindex.
+    - Add metadata sorttitle and sortartist (experimental).
+    - Add config settings for HTML backend.
+    - Add font properties in fontconfig settings.
+    - Add settings for chordnames and notenames.
+    - !Bugfixes
+    - Fix interpretation of directives and markup in tab sections.
+    - Fix bug where some command line arguments did not properly support
+      utf8.
     - Fix handling of {chorus: label}.
     - Fix problem where using a {chord} directive before any song lines
       would crash.
     - Fix problem where the tag of a grid was ignored.
-    - Add metadata sorttitle and sortartist.
-    - Add PDF outlines (bookmarks).
-    - Revamp table of contens (finally).
-    - Add directives start/end_of_verse/bridge and short forms.
-    - Remove section handling (we now have labels).
     - Do not indent chorus labels when chorus indenting (issue #81).
-    - Allow ~ expansion in file names.
+    - !Miscellaneous
+    - Use Text::Layout to support Pango Markup language.
     - Use File::LoadLines.
-    - (Wx) Show filename in window title.
-    - (Wx) Show asterisk if file is modified.
-    - Add config settings for HTML backend.
-    - Add font properties in fontconfig settings.
+    - Upgrade requirement for PDF::API2 to 2.035, Font::TTF to 1.05,
+      Text::Layout to 0.014.
+    - Packaged version no longer loads default config from chordpro.json.
+      It is now really built-in.
     - Change CHANGES to Changes.
 
 0.974	2019-10-05

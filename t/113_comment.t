@@ -23,7 +23,7 @@ my $data = <<EOD;
 {cb This is a comment_box}
 EOD
 
-eval { $s->parsefile( \$data,
+eval { $s->parse_file( \$data,
 		      { transpose => 2, 'no-substitute' => 1 }
 		    )
      } or diag("$@");
@@ -84,8 +84,8 @@ is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );
 
 # Same, with substitutions.
 $s = App::Music::ChordPro::Songbook->new;
-eval { $s->parsefile( \$data,
-		      { transpose => 2 }
+eval { $s->parse_file( \$data,
+		      { 'no-substitute' => 0, transpose => 2 }
 		    )
      } or diag("$@");
 
