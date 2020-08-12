@@ -20,7 +20,7 @@
     - Add display property to chords to control the way they are displayed.
     - Add guitar-br.json with Brandt-Roemer compliant chord symbols.
     - Add meta variable songindex.
-    - Add metadata sorttitle and sortartist (experimental).
+    - Add metadata sorttitle.
     - Add config settings for HTML backend.
     - Add font properties in fontconfig settings.
     - Add settings for chordnames and notenames.

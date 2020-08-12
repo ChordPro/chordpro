@@ -60,6 +60,13 @@
 	    "description": "Global settings.",
 	    "properties": {
 
+		"chordnames": {
+		    "description": "Strictness of parsing chord names.",
+		    "type": "string",
+		    "default": "strict",
+		    "enum": [ "strict", "relaxed" ]
+		},
+
 		"chords-under": {
 		    "description": "Chords under the lyrics.",
 		    "type": "boolean",
@@ -96,6 +103,12 @@
 
 		"memorize": {
 		    "description": "Memorize the chords from sections.",
+		    "type": "boolean",
+		    "default": false
+		},
+
+		"notenames": {
+		    "description": "Allow parsing if note names.",
 		    "type": "boolean",
 		    "default": false
 		},
@@ -257,6 +270,43 @@
 	    }
 	},
 
+	"contents": {
+	    "description": "Tables of contents.",
+	    "type": "array",
+	    "items": {
+		"properties": {
+		    "fields": {
+			"description": "The metadata for this toc.",
+			"type": "array",
+			"items": {
+			    "type": "string",
+			        "minimum": 1
+			 }
+		    },
+		    "fold": {
+			"description": "For future use.",
+			"type": "boolean",
+			"default": false
+		    },
+		    "label": {
+			"description": "The label (title) for this toc.",
+			"type": "string",
+			"default": "Table of Contents"
+		    },
+		    "line": {
+			"description": "The format for the toc lines.",
+			"type": "string"
+		    },
+		    "omit": {
+			"description": "Omit this toc.",
+			"type": "boolean",
+			"default": false
+		    }
+		},
+		"additionalProperties": { "not": {} }
+	    }
+	},
+
 	"diagnostics": {
 	    "description": "Settings for diagnostic messages.",
 	    "properties": {
@@ -267,6 +317,29 @@
 		}
 	    },
 	    "additionalProperties": { "not": {} }
+	},
+
+	"html": {
+	    "description": "Settings for HTML output.",
+	    "properties": {
+		"styles": {
+		    "description": "Stylesheets.",
+		    "properties": {
+		        "display": {
+		            "description": "Stylesheet for screen.",
+			    "type": "string",
+			    "default": "chordpro.css"
+			},
+		        "print": {
+		            "description": "Stylesheet for printing.",
+			    "type": "string",
+			    "default": "chordpro_print.css"
+			}
+		    },
+		    "additionalProperties": { "not": {} }
+		}
+            },
+            "additionalProperties": { "not": {} }
 	},
 
 	"instrument": {
@@ -779,6 +852,59 @@
 		    "type": "number"
 		},
 
+		"outlines": {
+		    "description": "PDF outlines (index).",
+		    "type": "array",
+		    "items": {
+			"properties": {
+			    "collapse": {
+				"description": "Initial display is collapsed.",
+				"type": "boolean",
+				"default": false
+			    },
+			    "fields": {
+				"description": "The metadata for this outline.",
+				"type": "array",
+				"items": {
+				    "type": "string",
+					"minimum": 1
+				 }
+			    },
+			    "fold": {
+				"description": "For future use.",
+				"type": "boolean",
+				"default": false
+			    },
+			    "label": {
+				"description": "The label (title) for this outline.",
+				"type": "string",
+				"default": "Table of Contents"
+			    },
+			    "letter": {
+				"description": "Make letter level if more entries than this value.",
+				"type": "integer",
+				"default": 5
+			    },
+			    "line": {
+				"description": "The format for the outline entries.",
+				"type": "string"
+			    },
+			    "omit": {
+				"description": "Omit this outline.",
+				"type": "boolean",
+				"default": false
+			    }
+			},
+			"additionalProperties": { "not": {} }
+		    }
+		},
+
+		"pagealign-songs": {
+		    "default": true,
+		    "description": "Page alignment for songs.",
+		    "type": [ "boolean", "integer" ]
+		},
+
 		"papersize": {
 		    "description": "Output page size, e.g. \"a4\" or [595,842].",
 		    "default": "a4",
@@ -855,17 +981,22 @@
 	},
 
 	"toc": {
-	    "description": "Table of Contents",
+	    "description": "(Obsolete) Table of Contents",
 	    "properties": {
-	        "title": {
-		    "description": "Title for the Table of Contents",
-		    "default": "Table of Contents",
+	        "line": {
+		    "description": "Format for toc lines",
+		    "default": "%{title}",
 		    "type": "string"
 		},
 		"order": {
 		    "description": "Sorting order for song titles",
 		    "enum": [ "page", "alpha" ],
 		    "default": "page",
+		    "type": "string"
+		},
+	        "title": {
+		    "description": "Title for the Table of Contents",
+		    "default": "Table of Contents",
 		    "type": "string"
 		}
 	    },
