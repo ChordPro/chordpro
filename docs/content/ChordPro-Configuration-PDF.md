@@ -405,14 +405,14 @@ use them for easy navigation.
   	// fold:     group by primary (NYI)
   	// omit:     ignore this
   	"outlines" : [
-  	    { "fields"   : [ "sorttitle", "sortartist" ],
+  	    { "fields"   : [ "sorttitle", "artist" ],
   	      "label"    : "By Title",
   	      "line"     : "%{title}%{artist| - %{}}",
   	      "collapse" : false,
   	      "letter"   : 5,
   	      "fold"     : false,
   	    },
-  	    { "fields"   : [ "sortartist", "sorttitle" ],
+  	    { "fields"   : [ "artist", "sorttitle" ],
   	      "label"    : "By Artist",
   	      "line"     : "%{artist|%{} - }%{title}",
   	      "collapse" : false,

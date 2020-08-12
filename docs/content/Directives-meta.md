@@ -18,7 +18,6 @@ For convenience and backward compatibility, the following meta-data are consider
 [sorttitle]({{< relref "Directives-sorttitle" >}}),
 [subtitle]({{< relref "Directives-subtitle" >}}),
 [artist]({{< relref "Directives-artist" >}}),
-[sortartist]({{< relref "Directives-sortartist" >}}),
 [composer]({{< relref "Directives-composer" >}}),
 [lyricist]({{< relref "Directives-lyricist" >}}),
 [arranger]({{< relref "Directives-arranger" >}}),
