@@ -39,6 +39,8 @@ These settings control global behaviour of the ChordPro program and can be chang
         // Chords parsing strategy.
         // Strict (only known) or relaxed (anything that looks sane).
         "chordnames": "strict",
+		// Interpret lowcase root-only chords as note names.
+		"notenames": false,
     },
 
 ## Metadata
@@ -57,6 +59,7 @@ Important: the keys `title` and `subtitle` must always be in this list.
         "keys" : [ "title", "subtitle",
                    "artist", "composer", "lyricist", "arranger",
                    "album", "copyright", "year",
+				   "sorttitle",
                    "key", "time", "tempo", "capo", "duration" ],
         "strict" : true,
         "separator" : "; ",
@@ -102,6 +105,7 @@ The configuration file can hold any number of predefined chords.
             "base"  : 6,
             "frets" : [ 1, 3, 3, 2, 1, 1 ],
             "fingers" : [ 1, 3, 4, 2, 1, 1 ],
+			"display" : "%{root}<sup>high</sup>",
         },
     ],
 
@@ -117,6 +121,11 @@ The `frets` positions are the positions in the chord diagram as shown. The follo
 ![]({{< asset "images/ex_chords2.png" >}})
 
 As can be seen, the `"fingers"` part is optional.
+
+The `display` part specifies the way the chord must be shown. Note the
+use of `%{root}` to show the root name.  
+See file `brandtroemer.json` in the config directory for an example of
+using `display` to get customized chord names.
 
 It is possible to define a new chord based upon an existing
 definition, e.g.
@@ -175,7 +184,10 @@ is specified in `"line"`.
 The ordering of the table. You can specify one or two metadata
 items.  
 When you specify a metadata item that has multiple values they are
-split out in the table.
+split out in the table.  
+`songindex` is a built-in meta data item that yields the sequence
+number of the song in the songbook. Sorting on `songindex` will
+produce the songs in songbook order.
 * `label`  
 The label for this table.
 * `line`  

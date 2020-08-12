@@ -51,3 +51,16 @@ supports at least:
 * `b` for flat, and `#` for sharp
 * Common qualifiers like `m`, `dim`, etc.
 * Common extensions like `7`, `alt`, etc.
+
+# ChordPro Implementation: Notes
+
+If enabled in the [config]({{< relref "chordpro-configuration-generic#general-settings" >}}), ChordPro will understand lowercase root-only
+chords to mean note names. Note names will be treated (shown,
+transposed) exactly as chords, but will not account for diagrams. 
+
+This can be used for example for intro's that start with some single
+notes before the chords:
+
+````
+{comment: Intro [f] [g] [a] [E] }
+````
