@@ -20,7 +20,7 @@ my $data = <<EOD;
 {pagesize: a4}
 EOD
 
-eval { $s->parsefile(\$data) } or diag("$@");
+eval { $s->parse_file(\$data) } or diag("$@");
 
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
@@ -34,6 +34,7 @@ my $song = {
 	    'structure' => 'linear',
 	    'system' => 'common',
 	    'meta' => {
+		       'songindex' => 1,
 		       'title' => [
 				   'Swing Low Sweet Chariot'
 				  ]
@@ -51,7 +52,7 @@ $data = <<EOD;
 {pagetype: letter}
 EOD
 
-eval { $s->parsefile(\$data) } or diag("$@");
+eval { $s->parse_file(\$data) } or diag("$@");
 
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );

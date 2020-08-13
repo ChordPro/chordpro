@@ -17,6 +17,9 @@
 		"file": {
 		    "type": "string"
 		},
+ 		"description": {
+ 		    "type": "string"
+ 		},
 		"size": {
 		    "type": "number"
 		},
@@ -30,8 +33,9 @@
 		    "type": [ "boolean", "integer" ]
 		}
 	    },
-	    "oneOf": [
-		{ "required": [ "name" ] },
+ 	    "anyOf": [
+ 		{ "required": [ "description" ] },
+  		{ "required": [ "name" ] },
 		{ "required": [ "file" ] }
 	    ]
 	},
@@ -55,6 +59,13 @@
 	"settings": {
 	    "description": "Global settings.",
 	    "properties": {
+
+		"chordnames": {
+		    "description": "Strictness of parsing chord names.",
+		    "type": "string",
+		    "default": "strict",
+		    "enum": [ "strict", "relaxed" ]
+		},
 
 		"chords-under": {
 		    "description": "Chords under the lyrics.",
@@ -96,8 +107,20 @@
 		    "default": false
 		},
 
+		"notenames": {
+		    "description": "Allow parsing if note names.",
+		    "type": "boolean",
+		    "default": false
+		},
+
 		"suppress-empty-chords": {
 		    "description": "Suppress empty chord lines.",
+		    "type": "boolean",
+		    "default": true
+		},
+
+		"suppress-empty-lyrics": {
+		    "description": "Suppress blank lyrics lines.",
 		    "type": "boolean",
 		    "default": true
 		},
@@ -207,6 +230,14 @@
 			"minimum": 1,
 			"default": 1
 		    },
+ 		    "copy": {
+ 			"description": "Copy another definition.",
+ 			"type": "string"
+ 		    },
+ 		    "display": {
+ 			"description": "How to show the chord name.",
+ 			"type": "string"
+ 		    },
 		    "frets": {
 			"description": "Finger positions from low string to hight string.",
 			"type": "array",
@@ -231,7 +262,47 @@
 			"default": true
 		    }
 		},
-		"required": [ "name", "frets" ],
+ 		"anyOf" : [ 
+  		    { "required": [ "name", "frets" ] },
+  		    { "required": [ "name", "copy" ] }
+ 		],
+		"additionalProperties": { "not": {} }
+	    }
+	},
+
+	"contents": {
+	    "description": "Tables of contents.",
+	    "type": "array",
+	    "items": {
+		"properties": {
+		    "fields": {
+			"description": "The metadata for this toc.",
+			"type": "array",
+			"items": {
+			    "type": "string",
+			        "minimum": 1
+			 }
+		    },
+		    "fold": {
+			"description": "For future use.",
+			"type": "boolean",
+			"default": false
+		    },
+		    "label": {
+			"description": "The label (title) for this toc.",
+			"type": "string",
+			"default": "Table of Contents"
+		    },
+		    "line": {
+			"description": "The format for the toc lines.",
+			"type": "string"
+		    },
+		    "omit": {
+			"description": "Omit this toc.",
+			"type": "boolean",
+			"default": false
+		    }
+		},
 		"additionalProperties": { "not": {} }
 	    }
 	},
@@ -246,6 +317,29 @@
 		}
 	    },
 	    "additionalProperties": { "not": {} }
+	},
+
+	"html": {
+	    "description": "Settings for HTML output.",
+	    "properties": {
+		"styles": {
+		    "description": "Stylesheets.",
+		    "properties": {
+		        "display": {
+		            "description": "Stylesheet for screen.",
+			    "type": "string",
+			    "default": "chordpro.css"
+			},
+		        "print": {
+		            "description": "Stylesheet for printing.",
+			    "type": "string",
+			    "default": "chordpro_print.css"
+			}
+		    },
+		    "additionalProperties": { "not": {} }
+		}
+            },
+            "additionalProperties": { "not": {} }
 	},
 
 	"instrument": {
@@ -481,9 +575,29 @@
 		    "type": [ "array", "string", "null" ]
 		},
 
+ 		"fontconfig": {
+ 		    "description": "The (physical) fonts used for typesetting."
+ 		},
+ 		
 		"fonts": {
-		    "description": "The fonts used for typesetting.",
+		    "description": "The (logical) fonts used for typesetting.",
 		    "properties": {
+			"annotation": {
+			    "description": "Font for annotations.",
+			    "allOf": [
+				{ "$ref": "#/definitions/fontspec" },
+				{ "properties": {
+				    "name": {
+					"default": "Helvetica-Oblique",
+					"type": "string"
+				    },
+				    "size": {
+					"default": 10,
+					"type": "number"
+				    },
+				    "additionalProperties": { "not": {} }
+				} } ]
+			},
 			"chord": {
 			    "description": "Font for typesetting chord names.",
 			    "allOf": [
@@ -500,6 +614,22 @@
 				    "additionalProperties": { "not": {} }
 				} } ]
 			},
+ 			"chordfingers": {
+ 			    "description": "Font for numbered chord dots.",
+ 			    "allOf": [
+ 				{ "$ref": "#/definitions/fontspec" },
+ 				{ "properties": {
+ 				    "name": {
+ 					"default": "ZapfDingpats",
+ 					"type": "string"
+ 				    },
+ 				    "size": {
+ 					"default": 10,
+ 					"type": "number"
+ 				    },
+ 				    "additionalProperties": { "not": {} }
+ 				} } ]
+ 			},
 			"comment": {
 			    "description": "Font for typesetting comment text.",
 			    "allOf": [
@@ -722,6 +852,59 @@
 		    "type": "number"
 		},
 
+		"outlines": {
+		    "description": "PDF outlines (index).",
+		    "type": "array",
+		    "items": {
+			"properties": {
+			    "collapse": {
+				"description": "Initial display is collapsed.",
+				"type": "boolean",
+				"default": false
+			    },
+			    "fields": {
+				"description": "The metadata for this outline.",
+				"type": "array",
+				"items": {
+				    "type": "string",
+					"minimum": 1
+				 }
+			    },
+			    "fold": {
+				"description": "For future use.",
+				"type": "boolean",
+				"default": false
+			    },
+			    "label": {
+				"description": "The label (title) for this outline.",
+				"type": "string",
+				"default": "Table of Contents"
+			    },
+			    "letter": {
+				"description": "Make letter level if more entries than this value.",
+				"type": "integer",
+				"default": 5
+			    },
+			    "line": {
+				"description": "The format for the outline entries.",
+				"type": "string"
+			    },
+			    "omit": {
+				"description": "Omit this outline.",
+				"type": "boolean",
+				"default": false
+			    }
+			},
+			"additionalProperties": { "not": {} }
+		    }
+		},
+
+		"pagealign-songs": {
+		    "default": true,
+		    "description": "Page alignment for songs.",
+		    "type": [ "boolean", "integer" ]
+		},
+
 		"papersize": {
 		    "description": "Output page size, e.g. \"a4\" or [595,842].",
 		    "default": "a4",
@@ -729,16 +912,6 @@
 		    "items": { "type": "number" },
 		    "minItems": 2,
 		    "maxItems": 2
-		},
-
-		"section": {
-		    "description": "Markup for song sections.",
-		    "properties": {
-		        "fallback": {
-			    "description": "Fallback markup for sections.",
-			    "type": "string"
-			}
-		    }
 		},
 
 		"showlayout": {
@@ -789,6 +962,15 @@
 		    "additionalProperties": { "not": {} }
 		},
 
+ 		"split-marker": {
+ 		    "description": "Marker when syllables are too small for chord.",
+ 		    "default": [ "", "", "" ],
+ 		    "type": [ "array", "string" ],
+ 		    "items": { "type": "string" },
+ 		    "minItems": 3,
+ 		    "maxItems": 3
+ 		},
+ 
 		"titles-directive-ignore": {
 		    "description": "Ignore titles directives in the songs.",
 		    "default": false,
@@ -799,17 +981,22 @@
 	},
 
 	"toc": {
-	    "description": "Table of Contents",
+	    "description": "(Obsolete) Table of Contents",
 	    "properties": {
-	        "title": {
-		    "description": "Title for the Table of Contents",
-		    "default": "Table of Contents",
+	        "line": {
+		    "description": "Format for toc lines",
+		    "default": "%{title}",
 		    "type": "string"
 		},
 		"order": {
 		    "description": "Sorting order for song titles",
 		    "enum": [ "page", "alpha" ],
 		    "default": "page",
+		    "type": "string"
+		},
+	        "title": {
+		    "description": "Title for the Table of Contents",
+		    "default": "Table of Contents",
 		    "type": "string"
 		}
 	    },

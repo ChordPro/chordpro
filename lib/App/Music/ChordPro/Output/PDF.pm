@@ -1,16 +1,20 @@
 #!/usr/bin/perl
 
+package main;
+
 use utf8;
+our $config;
+our $options;
 
 package App::Music::ChordPro::Output::PDF;
 
 use strict;
 use warnings;
-use Data::Dumper;
 use Encode qw( encode_utf8 );
 use App::Packager;
 
 use App::Music::ChordPro::Output::Common;
+use App::Music::ChordPro::Output::PDF::Writer;
 
 my $pdfapi;
 BEGIN {
@@ -20,8 +24,11 @@ BEGIN {
       or
     die("Missing PDF::API package\n");
 }
+use Text::Layout;
+use String::Interpolate::Named;
 
-use constant DEBUG_SPACING => 0;
+my $debug_spacing = 0;
+my $verbose = 0;
 
 # For regression testing, run perl with PERL_HASH_SEED set to zero.
 # This eliminates the arbitrary order of font definitions and triggers
@@ -29,37 +36,66 @@ use constant DEBUG_SPACING => 0;
 my $regtest = defined($ENV{PERL_HASH_SEED}) && $ENV{PERL_HASH_SEED} == 0;
 
 sub generate_songbook {
-    my ($self, $sb, $options) = @_;
+    my ( $self, $sb ) = @_;
 
     return [] unless $sb->{songs}->[0]->{body}; # no songs
-
-    my $ps = $::config->{pdf};
-    my $pr = PDFWriter->new($ps);
+    $verbose ||= $options->{verbose};
+    $debug_spacing ||= $options->{debug};
+    my $ps = $config->{pdf};
+    my $pr = (__PACKAGE__."::Writer")->new( $ps, $pdfapi );
     $pr->info( Title => $sb->{songs}->[0]->{meta}->{title}->[0],
 	       Creator =>
 	       $regtest
-	       ? "ChordPro [$options->{_name} (regression testing)]"
-	       : "ChordPro [$options->{_name} $options->{_version}]",
+	       ? "$options->{_name} (regression testing)"
+	       : "$options->{_name} $options->{_version}",
 	     );
 
+    # The book consists of 4 parts:
+    # 1. The front matter.
+    my $book_front_matter_page = 1;
+    # 2. The table of contents.
+    my $book_toc_page = 1;
+    # 1. The songs.
+    my $book_start_page = 1;
+    # 1. The back matter.
+    my $book_back_matter_page = 1;
+
+    # The songbook...
     my @book;
     my $page = $options->{"start-page-number"} || 1;
     foreach my $song ( @{$sb->{songs}} ) {
 
-	$options->{startpage} = $page;
-	push( @book, [ $song->{meta}->{title}->[0], $page ] );
-	$page += generate_song( $song,
-				{ pr => $pr, $options ? %$options : () } );
-    }
+	# Align.
+	$pr->newpage($ps, $page+1), $page++
+	  if $ps->{'pagealign-songs'} && !($page % 2);
 
-    if ( $::config->{toc}->{order} eq "alpha" ) {
-	@book = sort { lc($a->[0]) cmp lc($b->[0]) } @book;
-    }
+	$song->{meta}->{tocpage} = $page;
+	push( @book, [ $song->{meta}->{title}->[0], $song ] );
 
-    if ( $options->{toc} // @book > 1 ) {
+	$page += generate_song( $song, { pr => $pr, startpage => $page } );
+    }
+    $book_back_matter_page = $page;
+
+    #warn("F=$book_front_matter_page, T=$book_toc_page, S=$book_start_page, B=$book_back_matter_page\n");
+
+    $::config->{contents} //=
+      [ { $::config->{toc}->{order} eq "alpha"
+	  ? ( fields => [ "title" ] )
+	  : ( fields => [ "songindex" ] ),
+	  label => $::config->{toc}->{title},
+	  line => $::config->{toc}->{line} } ];
+
+    foreach my $ctl ( reverse( @{ $::config->{contents} } ) ) {
+	next unless $options->{toc} || @book > 1;
+	next if $ctl->{omit};
+
+	my $book = App::Music::ChordPro::Output::Common::prep_outlines
+	  ( [ map { $_->[1] } @book ], $ctl );
 
 	# Create a pseudo-song for the table of contents.
-	my $t = $::config->{toc}->{title};
+	my $t = $ctl->{label};
+	my $l = $ctl->{line};
+	my $start = $book_start_page - 1;
 	my $song =
 	  { title     => $t,
 	    meta => { title => [ $t ] },
@@ -67,37 +103,64 @@ sub generate_songbook {
 	    body      => [
 		     map { +{ type    => "tocline",
 			      context => "toc",
-			      title   => $_->[0],
-			      pageno  => $_->[1],
-			      page    => $pr->{pdf}->openpage($_->[1]),
-			    } } @book,
+			      title   => fmt_subst( $_->[-1], $l ),
+			      page    => $pr->{pdf}->openpage($_->[-1]->{meta}->{tocpage}+$start),
+			      pageno  => $_->[-1]->{meta}->{tocpage},
+			    } } @$book,
 	    ],
 	  };
 
 	# Prepend the toc.
-	$options->{startpage} = 1;
 	$page = generate_song( $song,
-			       { pr => $pr, prepend => 1,
-				 $options ? %$options : () } );
+			       { pr => $pr, prepend => 1, roman => 1,
+				 startpage => 1,
+			       } );
 
 	# Align.
 	$pr->newpage($ps, $page+1), $page++
 	  if $ps->{'even-odd-pages'} && $page % 2;
-    }
-    else {
-	$page = 1;
+	$book_start_page       += $page;
+	$book_back_matter_page += $page;
     }
 
-    if ( $options->{cover} ) {
-	my $cover = $pdfapi->open( $options->{cover} );
-	die("Missing cover: ", $options->{cover}, "\n") unless $cover;
-	for ( 1 .. $cover->pages ) {
-	    $pr->{pdf}->importpage( $cover, $_, $_ );
+    #warn("F=$book_front_matter_page, T=$book_toc_page, S=$book_start_page, B=$book_back_matter_page\n");
+
+    if ( $options->{'front-matter'} ) {
+	$page = 1;
+	my $matter = $pdfapi->open( $options->{'front-matter'} );
+	die("Missing front matter: ", $options->{'front-matter'}, "\n") unless $matter;
+	for ( 1 .. $matter->pages ) {
+	    $pr->{pdf}->importpage( $matter, $_, $_ );
 	    $page++;
 	}
-	$pr->newpage( $ps, 1+$cover->pages ), $page++
-	  if $ps->{'even-odd-pages'} && $page % 2;
+	$pr->newpage( $ps, 1+$matter->pages ), $page++
+	  if $ps->{'even-odd-pages'} && !($page % 2);
+	$book_toc_page         += $page - 1;
+	$book_start_page       += $page - 1;
+	$book_back_matter_page += $page - 1;
     }
+
+    #warn("F=$book_front_matter_page, T=$book_toc_page, S=$book_start_page, B=$book_back_matter_page\n");
+
+    if ( $options->{'back-matter'} ) {
+	my $matter = $pdfapi->open( $options->{'back-matter'} );
+	die("Missing back matter: ", $options->{'back-matter'}, "\n") unless $matter;
+	$page = $book_back_matter_page;
+	$pr->newpage($ps), $page++, $book_back_matter_page++
+	  if $ps->{'even-odd-pages'} && !($page % 2);
+	for ( 1 .. $matter->pages ) {
+	    $pr->{pdf}->importpage( $matter, $_, $page );
+	    $page++;
+	}
+    }
+    #warn("F=$book_front_matter_page, T=$book_toc_page, S=$book_start_page, B=$book_back_matter_page\n");
+    $pr->pagelabel( $book_front_matter_page, 'arabic', 'front-' );
+    $pr->pagelabel( $book_toc_page,          'roman'            );
+    $pr->pagelabel( $book_start_page,        'arabic'           );
+    $pr->pagelabel( $book_back_matter_page,  'arabic', 'back-'  );
+
+    # Add the outlines.
+    $pr->make_outlines( [ map { $_->[1] } @book ], $book_start_page );
 
     $pr->finish( $options->{output} || "__new__.pdf" );
 
@@ -119,35 +182,42 @@ sub generate_songbook {
 	}
 	close($fd);
     }
+    _dump($ps) if $verbose;
 
     []
 }
 
+sub roman {
+    goto \&App::Music::ChordPro::Output::Common::roman;
+}
+
 my $source;			# song source
 my $structured = 0;		# structured data
-my $single_space = 0;		# suppress chords line when empty
+my $suppress_empty_chordsline = 0;	# suppress chords line when empty
+my $suppress_empty_lyricsline = 0;	# suppress lyrics line when blank
 my $lyrics_only = 0;		# suppress all chord lines
 my $inlinechords = 0;		# chords inline
 my $chordsunder = 0;		# chords under the lyrics
 my $chordscol = 0;		# chords in a separate column
 my $chordscapo = 0;		# capo in a separate column
 my $i_tag;
-my $assets;
+our $assets;
 
 use constant SIZE_ITEMS => [ qw (chord text tab grid diagram toc title footer) ];
 
 sub generate_song {
-    my ($s, $options) = @_;
+    my ( $s, $opts ) = @_;
 
     return 0 unless $s->{body};	# empty song
     $source = $s->{source};
     $assets = $s->{assets} || {};
 
-    $single_space = $::config->{settings}->{'suppress-empty-chords'};
+    $suppress_empty_chordsline = $::config->{settings}->{'suppress-empty-chords'};
+    $suppress_empty_lyricsline = $::config->{settings}->{'suppress-empty-lyrics'};
     $inlinechords = $::config->{settings}->{'inline-chords'};
     $chordsunder  = $::config->{settings}->{'chords-under'};
     my $ps = $::config->clone->{pdf};
-    my $pr = $options->{pr};
+    my $pr = $opts->{pr};
     $ps->{pr} = $pr;
     $pr->{ps} = $ps;
     $pr->init_fonts();
@@ -181,13 +251,39 @@ sub generate_song {
     $lyrics_only  = $::config->{settings}->{'lyrics-only'};
     $chordscapo   = $s->{meta}->{capo};
 
+    my $fail;
+    for my $item ( @{ SIZE_ITEMS() } ) {
+	for ( $options->{"$item-font"} ) {
+	    next unless $_;
+	    delete( $fonts->{$item}->{file} );
+	    delete( $fonts->{$item}->{name} );
+	    delete( $fonts->{$item}->{description} );
+	    if ( m;/; ) {
+		$fonts->{$item}->{file} = $_;
+	    }
+	    elsif ( is_corefont($_) ) {
+		$fonts->{$item}->{name} = $_;
+	    }
+	    else {
+		$fonts->{$item}->{description} = $_;
+	    }
+	    $pr->init_font($item) or $fail++;
+	}
+	for ( $options->{"$item-size"} ) {
+	    next unless $_;
+	    $fonts->{$item}->{size} = $_;
+	}
+    }
+    die("Unhandled fonts detected -- aborted\n") if $fail;
+
     if ( $ps->{labels}->{width} eq "auto" ) {
 	if ( $s->{labels} && @{ $s->{labels} } ) {
 	    my $longest = 0;
 	    my $ftext = $fonts->{label} || $fonts->{text};
 	    for ( @{ $s->{labels} } ) {
 		for ( split( /\\n/, $_ ) ) {
-		    my $t = $ftext->{font}->width("$_    ") * $ftext->{size};
+		    #### TODO: Use Layout
+		    my $t = $ftext->{fd}->{font}->width("$_    ") * $ftext->{size};
 		    $longest = $t if $t > $longest;
 		}
 	    }
@@ -200,22 +296,6 @@ sub generate_song {
     else {
 	$ps->{_indent} = $ps->{labels}->{width};
     }
-
-    my $fail;
-    for my $item ( @{ SIZE_ITEMS() } ) {
-	for ( $options->{"$item-font"} ) {
-	    next unless $_;
-	    delete( $fonts->{$item}->{file} );
-	    delete( $fonts->{$item}->{name} );
-	    $fonts->{$item}->{ m;/; ? "file" : "name" } = $_;
-	    $pr->init_font($item) or $fail++;
-	}
-	for ( $options->{"$item-size"} ) {
-	    next unless $_;
-	    $fonts->{$item}->{size} = $_;
-	}
-    }
-    die("Unhandled fonts detected -- aborted\n") if $fail;
 
     my $set_sizes = sub {
 	$ps->{lineheight} = $fonts->{text}->{size} - 1; # chordii
@@ -289,20 +369,20 @@ sub generate_song {
 	  if $col < $ps->{columns}-1;
 	warn("C=$col, L=", $ps->{__leftmargin},
 	     ", R=", $ps->{__rightmargin},
-	     "\n") if DEBUG_SPACING;
+	     "\n") if $debug_spacing;
 	$y = $ps->{_top};
 	$x += $ps->{_indent};
     };
 
     my $vsp_ignorefirst;
-    my $startpage = $options->{startpage} || 1;
+    my $startpage = $opts->{startpage} || 1;
     my $thispage = $startpage - 1;
 
     # Physical newpage handler.
     my $newpage = sub {
 
 	# Add page to the PDF.
-	$pr->newpage($ps, $options->{prepend} ? $thispage+1 : () );
+	$pr->newpage($ps, $opts->{prepend} ? $thispage+1 : () );
 
 	# Put titles and footer.
 
@@ -342,7 +422,8 @@ sub generate_song {
 	$ps->{__bottommargin} = $ps->{_marginbottom};
 
 	$thispage++;
-	$s->{meta}->{page} = [ $s->{page} = $thispage ];
+	$s->{meta}->{page} = [ $s->{page} = $opts->{roman}
+			       ? roman($thispage) : $thispage ];
 
 	# Determine page class.
 	my $class = 2;		# default
@@ -361,11 +442,8 @@ sub generate_song {
 	    $y = $ps->{_margintop} + $ps->{headspace};
 	    $y -= font_bl($fonts->{title});
 	    $tpt->("title");
-	    $y -= ( - ( $fonts->{title}->{font}->descender / 1024 )
-		      * $fonts->{title}->{size}
-		    + ( $fonts->{subtitle}->{font}->ascender / 1024 )
-		      * $fonts->{subtitle}->{size} )
-		  * $ps->{spacing}->{title};
+	    $y -= $pr->strheight( "X", $fonts->{title} )
+	      * $ps->{spacing}->{title};
 	    $y = $tpt->("subtitle");
 	}
 
@@ -502,7 +580,7 @@ sub generate_song {
 	    while ( @chords ) {
 		my $x = $x - $ps->{_indent};
 		$checkspace->($vsp);
-		$pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+		$pr->show_vpos( $y, 0 ) if $debug_spacing;
 
 		for ( 1..$h ) {
 		    last unless @chords;
@@ -511,7 +589,7 @@ sub generate_song {
 		}
 
 		$y -= $vsp;
-		$pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+		$pr->show_vpos( $y, 1 ) if $debug_spacing;
 	    }
 	}
 	elsif ( $show eq "below" ) {
@@ -525,7 +603,7 @@ sub generate_song {
 	    while ( @chords ) {
 		$checkspace->($vsp);
 		my $x = $x - $ps->{_indent};
-		$pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+		$pr->show_vpos( $y, 0 ) if $debug_spacing;
 
 		for ( 1..$h ) {
 		    last unless @chords;
@@ -534,13 +612,16 @@ sub generate_song {
 		}
 
 		$y -= $vsp;
-		$pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+		$pr->show_vpos( $y, 1 ) if $debug_spacing;
 	    }
 	}
     };
 
     # Get going.
     $newpage->();
+
+    # Embed source and config for debugging;
+    $pr->embed($source->{file}) if $options->{debug};
 
     my @elts = @{$sb};
     my $elt;			# current element
@@ -569,7 +650,7 @@ sub generate_song {
 	if ( $elt->{type} ne "set" && !$did++ ) {
 	    # Insert top/left/right/bottom chord diagrams.
  	    $chorddiagrams->() unless $ps->{diagrams}->{show} eq "below";
-	    showlayout($ps) if $ps->{showlayout};
+	    showlayout($ps) if $ps->{showlayout} || $debug_spacing;
 	}
 
 	if ( $elt->{type} eq "empty" ) {
@@ -577,10 +658,10 @@ sub generate_song {
 	    warn("***SHOULD NOT HAPPEN1***")
 	      if $s->{structure} eq "structured";
 	    $vsp_ignorefirst = 0, next if $vsp_ignorefirst;
-	    $pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 0 ) if $debug_spacing;
 	    my $vsp = empty_vsp( $elt, $ps );
 	    $y -= $vsp;
-	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 1 ) if $debug_spacing;
 	    next;
 	}
 
@@ -594,25 +675,6 @@ sub generate_song {
 
 	    if ( $elt->{context} ne $curctx ) {
 		$curctx = $elt->{context};
-		if ( $curctx ne "" ) {
-		    # Context switch.
-		    my $markup = $ps->{section}->{$curctx}
-		      || $ps->{section}->{fallback} || "";
-		    # If we have markup, insert a comment line.
-		    if ( $ps->{fonts}->{$markup} ) {
-			my $e = { type => "comment",
-				  font => $ps->{fonts}->{$markup},
-				  context => $curctx,
-				  orig => $i_tag // $curctx,
-				  text => $i_tag // ucfirst($curctx) };
-			unshift( @elts, $e, $elt );
-			$i_tag = undef;
-			redo;
-		    }
-		    elsif ( $markup ) {
-			warn( "Unhandled section markup: $markup\n");
-		    }
-		}
 	    }
 
 	    my $fonts = $ps->{fonts};
@@ -643,7 +705,7 @@ sub generate_song {
 	    # Add prespace if fit. Otherwise newpage.
 	    $checkspace->($vsp);
 
-	    $pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 0 ) if $debug_spacing;
 
 	    my $indent = 0;
 
@@ -713,7 +775,7 @@ sub generate_song {
 	    my $r = songline( $elt, $x, $y, $ps, song => $s, indent => $indent );
 
 	    $y -= $vsp;
-	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 1 ) if $debug_spacing;
 
 	    unshift( @elts, $r ) if $r;
 	    next;
@@ -744,8 +806,10 @@ sub generate_song {
 	    warn("NYI: type => verse\n");
 	    foreach my $e ( @{$elt->{body}} ) {
 		if ( $e->{type} eq "songline" ) {
-		    $checkspace->(songline_vsp( $e, $ps ));
-		    $y = songline( $e, $x, $y, $ps );
+		    my $h = songline_vsp( $e, $ps );
+		    $checkspace->($h);
+		    songline( $e, $x, $y, $ps );
+		    $y -= $h;
 		    next;
 		}
 		elsif ( $e->{type} eq "empty" ) {
@@ -762,7 +826,7 @@ sub generate_song {
 
 	    my $vsp = grid_vsp( $elt, $ps );
 	    $checkspace->($vsp);
-	    $pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 0 ) if $debug_spacing;
 
 	    my $cells = $grid_margin->[2];
 	    $grid_cellwidth = ( $ps->{__rightmargin}
@@ -773,7 +837,7 @@ sub generate_song {
 	    warn("L=", $ps->{__leftmargin},
 		 ", R=", $ps->{__rightmargin},
 		 ", C=$cells, W=", $grid_cellwidth,
-		 "\n") if DEBUG_SPACING;
+		 "\n") if $debug_spacing;
 
 	    gridline( $elt, $x, $y,
 		      $grid_cellwidth,
@@ -782,7 +846,7 @@ sub generate_song {
 		      $ps );
 
 	    $y -= $vsp;
-	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 1 ) if $debug_spacing;
 
 	    next;
 	}
@@ -803,12 +867,12 @@ sub generate_song {
 
 	    my $vsp = tab_vsp( $elt, $ps );
 	    $checkspace->($vsp);
-	    $pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 0 ) if $debug_spacing;
 
 	    songline( $elt, $x, $y, $ps );
 
 	    $y -= $vsp;
-	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 1 ) if $debug_spacing;
 
 	    next;
 	}
@@ -822,7 +886,7 @@ sub generate_song {
 	    my $gety = sub {
 		my $h = shift;
 		$checkspace->($h);
-		$ps->{pr}->show_vpos( $y, 1 ) if DEBUG_SPACING;
+		$ps->{pr}->show_vpos( $y, 1 ) if $debug_spacing;
 		return $y;
 	    };
 
@@ -838,7 +902,7 @@ sub generate_song {
 	    }
 
 	    $y -= $vsp;
-	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 1 ) if $debug_spacing;
 
 	    next;
 	}
@@ -854,9 +918,14 @@ sub generate_song {
 		    && $elt->{chorus}->[0]->{type} eq "set"
 		    && $elt->{chorus}->[0]->{name} eq "label" ) {
 		unshift( @elts, { %$elt,
-				  type => "comment",
+				  type => $t->{type} // "comment",
 				  font => $ps->{fonts}->{label},
-				  text => $elt->{chorus}->[0]->{value},
+				  text => $ps->{chorus}->{recall}->{tag},
+				 } );
+		unshift( @elts, { %$elt,
+				  type => "set",
+				  name => "label",
+				  value => $elt->{chorus}->[0]->{value},
 				 } );
 	    }
 	    elsif ( $t->{tag} && $t->{type} =~ /^comment(?:_(?:box|italic))?/ ) {
@@ -871,12 +940,12 @@ sub generate_song {
 	if ( $elt->{type} eq "tocline" ) {
 	    my $vsp = toc_vsp( $elt, $ps );
 	    $checkspace->($vsp);
-	    $pr->show_vpos( $y, 0 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 0 ) if $debug_spacing;
 
 	    tocline( $elt, $x, $y, $ps );
 
 	    $y -= $vsp;
-	    $pr->show_vpos( $y, 1 ) if DEBUG_SPACING;
+	    $pr->show_vpos( $y, 1 ) if $debug_spacing;
 	    next;
 	}
 
@@ -899,13 +968,22 @@ sub generate_song {
 	    elsif ( $elt->{name} =~ /^(text|chord|grid|toc|tab)-font$/ ) {
 		my $f = $1;
 		if ( defined $elt->{value} ) {
-		    if ( $elt->{value} =~ m;/; ) {
+		    if ( $elt->{value} =~ m;/;
+			 ||
+			 $elt->{value} =~ m;\.(ttf|otf)$;i ) {
+			delete $ps->{fonts}->{$f}->{description};
 			delete $ps->{fonts}->{$f}->{name};
 			$ps->{fonts}->{$f}->{file} = $elt->{value};
 		    }
-		    else {
+		    elsif ( is_corefont( $elt->{value} ) ) {
+			delete $ps->{fonts}->{$f}->{description};
 			delete $ps->{fonts}->{$f}->{file};
 			$ps->{fonts}->{$f}->{name} = $elt->{value};
+		    }
+		    else {
+			delete $ps->{fonts}->{$f}->{file};
+			delete $ps->{fonts}->{$f}->{name};
+			$ps->{fonts}->{$f}->{description} = $elt->{value};
 		    }
 		}
 		else {
@@ -988,12 +1066,13 @@ sub generate_song {
 
 sub font_bl {
     my ( $font ) = @_;
-    $font->{size} / ( 1 - $font->{font}->descender / $font->{font}->ascender );
+#    $font->{size} / ( 1 - $font->{fd}->{font}->descender / $font->{fd}->{font}->ascender );
+    $font->{size} * $font->{fd}->{font}->ascender / 1000;
 }
 
 sub font_ul {
     my ( $font ) = @_;
-    $font->{font}->underlineposition / 1024 * $font->{size};
+    $font->{fd}->{font}->underlineposition / 1024 * $font->{size};
 }
 
 sub prlabel {
@@ -1021,6 +1100,60 @@ sub prlabel {
 	}
 	$y -= $font->{size} * 1.2;
     }
+}
+
+# Propagate markup entries over the fragments so that each fragment
+# is properly terminated.
+sub defrag {
+    my ( $frag ) = @_;
+    my @stack;
+    my @res;
+
+    foreach my $f ( @$frag ) {
+	my @a = split( /(<.*?>)/, $f );
+	if ( @stack ) {
+	    unshift( @a, @stack );
+	    @stack = ();
+	}
+	my @r;
+	foreach my $a ( @a ) {
+	    if ( $a =~ m;^<\s*/\s*(\w+)(.*)>$; ) {
+		my $k = $1;
+		#$a =~ s/\b //g;
+		#$a =~ s/ \b//g;
+		if ( @stack ) {
+		    if ( $stack[-1] =~ /^<\s*$k\b/ ) {
+			pop(@stack);
+		    }
+		    else {
+			warn("Markup error: \"@$frag\"\n",
+			     "  Closing <$k> but $stack[-1] is open\n");
+			next;
+		    }
+		}
+		else {
+		    warn("Markup error: \"@$frag\"\n",
+			 "  Closing <$k> but no markup is open\n");
+		    next;
+		}
+	    }
+	    elsif ( $a =~ m;^<\s*(\w+)(.*)>$; ) {
+		my $k = $1;
+		push( @stack, "<$k$2>" );
+	    }
+	    push( @r, $a );
+	}
+	if ( @stack ) {
+	    push( @r, map { s;^<\s*(\w+).*;</$1>;r } reverse @stack );
+	}
+	push( @res, join("", @r ) );
+    }
+    if ( @stack ) {
+	warn("Markup error: \"@$frag\"\n",
+	     "  Unclosed markup: @{[ reverse @stack ]}\n" );
+    }
+    #warn("defrag: ", join('', @res), "\n");
+    \@res;
 }
 
 sub songline {
@@ -1070,6 +1203,8 @@ sub songline {
     my $tag = $i_tag // "";
     $i_tag = undef;
 
+    my @phrases = @{ defrag( $elt->{phrases} ) };
+
     if ( $type =~ /^comment/ ) {
 	$ftext = $elt->{font} || $fonts->{$type} || $fonts->{comment};
 	$ytext  = $ytop - font_bl($ftext);
@@ -1086,7 +1221,7 @@ sub songline {
 	$ytext  = $ytop - font_bl($ftext);
 	$x += $opts{indent} if $opts{indent};
 	prlabel( $ps, $tag, $x, $ytext );
-	$pr->text( $elt->{text}, $x, $ytext, $ftext );
+	$pr->text( $elt->{text}, $x, $ytext, $ftext, undef, "no markup" );
 	return;
     }
 
@@ -1100,13 +1235,13 @@ sub songline {
     # Just print the lyrics if no chords.
     if ( $lyrics_only
 	 or
-	 $single_space && !has_visible_chords($elt)
+	 $suppress_empty_chordsline && !has_visible_chords($elt)
        ) {
 	my $x = $x;
 	$x += $opts{indent} if $opts{indent};
 	$x += $elt->{indent} if $elt->{indent};
 	prlabel( $ps, $tag, $x, $ytext );
-	my ( $text, $ex ) = wrapsimple( $pr, join( "", @{ $elt->{phrases} } ),
+	my ( $text, $ex ) = wrapsimple( $pr, join( "", @phrases ),
 					$x, $ftext );
 	$pr->text( $text, $x, $ytext, $ftext );
 	return $ex ne "" ? { %$elt, indent => $pr->strwidth("x"), phrases => [$ex] } : undef;
@@ -1149,10 +1284,11 @@ sub songline {
     }
 
     my @chords;
-    foreach ( 0..$#{$elt->{chords}} ) {
+    my $n = $#{$elt->{chords}};
+    foreach my $i ( 0 .. $n ) {
 
-	my $chord = $elt->{chords}->[$_];
-	my $phrase = $elt->{phrases}->[$_];
+	my $chord = $elt->{chords}->[$i];
+	my $phrase = $phrases[$i];
 
 	if ( $chordscol && $chord ne "" ) {
 
@@ -1184,53 +1320,106 @@ sub songline {
 	    $x = $pr->text( $phrase, $x, $ytext, $ftext );
 
 	    # Collect chords to be printed in the side column.
-	    push(@chords, $chord);
+	    my $info = App::Music::ChordPro::Chords::chord_info($chord);
+	    push(@chords, $info ? chord_display($info) // $chord : $chord);
 	}
 	else {
-	    my $info = App::Music::ChordPro::Chords::identify($chord);
 	    my $xt0;
-	    if ( $info && $info->{system} eq "roman" ) {
-		$xt0 = $pr->text( $pre.$info->{root},
-				  $x, $ychord, $fchord );
-		$info->{qual} = 'ø' if $info->{qual} eq 'h';
-		$xt0 = $pr->text( $info->{qual}.$info->{ext}, $xt0,
-				   $ychord + $fchord->{size} * 0.2,
-				   $fchord,
-				   $fchord->{size} * 0.8
-				 );
-		$xt0 = $pr->text( $post, $xt0, $ychord, $fchord );
-	    }
-	    elsif ( $info && $info->{system} eq "nashville" ) {
-		$xt0 = $pr->text( $pre.$info->{root}.$info->{qual},
-				  $x, $ychord, $fchord );
-#		if ( $info->{minor} ) {
-#		    my $m = $info->{minor};
-#		    # $m = "\x{0394}" if $m eq "^";
-#		    $xt0 = $pr->text( $m, $xt0, $ychord, $fchord );
-#		}
-		$xt0 = $pr->text( $info->{ext}, $xt0,
-				   $ychord + $fchord->{size} * 0.2,
-				   $fchord,
-				   $fchord->{size} * 0.8,
-				 );
-		$xt0 = $pr->text( $post, $xt0, $ychord, $fchord );
-	    }
-	    elsif ( $chord) {
-		# Strip leading (but not sole) asterisk.
-		$chord =~ s/^\*(?=.)//;
-		$xt0 = $pr->text( $pre.$chord.$post, $x, $ychord, $fchord );
+	    if ( $chord =~ /^\*(.*)/ ) {
+		my $ann = $1 ne "" ? $1 : "*";
+		my $fann = $fonts->{annotation};
+		$xt0 = $pr->text( $ann, $x, $ychord, $fann );
 	    }
 	    else {
-		$xt0 = $x;
+		my $info = App::Music::ChordPro::Chords::chord_info($chord);
+		if ( $info && $info->{system} eq "roman" ) {
+		    $xt0 = $pr->text( $pre.$info->{root},
+				      $x, $ychord, $fchord );
+		    $info->{qual} = 'ø' if $info->{qual} eq 'h';
+		    $xt0 = $pr->text( $info->{qual}.$info->{ext}, $xt0,
+				       $ychord + $fchord->{size} * 0.2,
+				       $fchord,
+				       $fchord->{size} * 0.8
+				     );
+		    $xt0 = $pr->text( $post, $xt0, $ychord, $fchord );
+		}
+		elsif ( $info && $info->{system} eq "nashville" ) {
+		    $xt0 = $pr->text( $pre.$info->{root}.$info->{qual},
+				      $x, $ychord, $fchord );
+    #		if ( $info->{minor} ) {
+    #		    my $m = $info->{minor};
+    #		    # $m = "\x{0394}" if $m eq "^";
+    #		    $xt0 = $pr->text( $m, $xt0, $ychord, $fchord );
+    #		}
+		    $xt0 = $pr->text( $info->{ext}, $xt0,
+				       $ychord + $fchord->{size} * 0.2,
+				       $fchord,
+				       $fchord->{size} * 0.8,
+				     );
+		    $xt0 = $pr->text( $post, $xt0, $ychord, $fchord );
+		}
+		elsif ( $chord) {
+		    # Strip leading (but not sole) asterisk.
+		    unless ( $chord =~ s/^\*(?=.)// ) {
+			$chord = chord_display($info) // $chord;
+		    }
+		    $xt0 = $pr->text( $pre.$chord.$post, $x, $ychord, $fchord );
+		}
+		else {
+		    $xt0 = $x;
+		}
 	    }
-	    prlabel( $ps, $tag, $x, $ytext );
+
+	    # Do not indent chorus labels (issue #81).
+	    prlabel( $ps, $tag, $x-$opts{indent}, $ytext );
 	    $tag = "";
 	    if ( $inlinechords ) {
 		$x = $pr->text( $phrase, $xt0, $ytext, $ftext );
 	    }
 	    else {
 		my $xt1 = $pr->text( $phrase, $x, $ytext, $ftext );
-		$x = $xt0 > $xt1 ? $xt0 : $xt1;
+		if ( $xt0 > $xt1 ) { # chord is wider
+		    # Do we need to insert a split marker?
+		    if ( $i < $n
+			 && demarkup($phrase) !~ /\s$/
+			 && demarkup($phrases[$i+1]) !~ /^\s/
+			 # And do we have one?
+			 && ( my $marker = $ps->{'split-marker'} ) ) {
+
+			# Marker has 3 parts: start, repeat, and final.
+			# final is always printed, last.
+			# start is printed if there is enough room.
+			# repeat is printed repeatedly to fill the rest.
+			$marker = [ $marker, "", "" ]
+			  unless UNIVERSAL::isa( $marker, 'ARRAY' );
+
+			# Reserve space for final.
+			my $w = 0;
+			$pr->setfont($ftext);
+			$w = $pr->strwidth($marker->[2]) if $marker->[2];
+			$xt0 -= $w;
+			# start or repeat (if no start).
+			my $m = $marker->[0] || $marker->[1];
+			$x = $xt1;
+			$x = $xt0 unless $m;
+			while ( $x < $xt0 ) {
+			    $x = $pr->text( $m, $x, $ytext, $ftext );
+			    # After the first, use repeat.
+			    $m = $marker->[1];
+			    $x = $xt0, last unless $m;
+			}
+			# Print final.
+			if ( $w ) {
+			    $x = $pr->text( $marker->[2], $x, $ytext, $ftext );
+			}
+		    }
+		    # Adjust the position for the chord and spit marker width.
+		    $x = $xt0 if $xt0 > $x;
+		}
+		else {
+		    # Use lyrics width.
+		    $x = $xt1;
+		}
 	    }
 	}
     }
@@ -1241,6 +1430,21 @@ sub songline {
       if @chords;
 
     return;
+}
+
+sub chord_display {
+    my ( $info ) = @_;
+#    ::dump( {%{$info // {} }, parser => {}} ) ;
+    return $info->{display}
+      ? interpolate( { args => $info }, $info->{display} )
+      : $info->{name};
+}
+
+# Remove markup.
+sub demarkup {
+    my ( $t ) = @_;
+    $t =~ s;</?([-\w]+|span\s.*?)>;;g;
+    return $t;
 }
 
 sub is_bar {
@@ -1536,14 +1740,20 @@ sub tocline {
     my $pr = $ps->{pr};
     my $fonts = $ps->{fonts};
     my $y0 = $y;
-    $x += 20;
     my $ftoc = $fonts->{toc};
     $y -= font_bl($ftoc);
     $pr->setfont($ftoc);
-    $ps->{pr}->text( $elt->{title}, $x, $y );
-    my $p = $elt->{pageno} . ".";
-    $ps->{pr}->text( $p, $x - 5 - $pr->strwidth($p), $y );
-
+    my $tpl = $elt->{title};
+    my $vsp;
+    for ( split( /\\n/, $tpl ) ) {
+	$ps->{pr}->text( $_, $x, $y );
+	unless ($vsp) {
+	    my $p = $elt->{pageno};
+	    $ps->{pr}->text( $p, $ps->{__rightmargin} - $pr->strwidth($p), $y );
+	    $vsp = _vsp("toc", $ps);
+	}
+	$y -= $vsp;
+    }
     my $ann = $pr->{pdfpage}->annotation;
     $ann->link($elt->{page});
     $ann->rect( $ps->{_leftmargin}, $y0 - $ftoc->{size} * $ps->{spacing}->{toc},
@@ -1554,6 +1764,11 @@ sub tocline {
 sub has_visible_chords {
     my ( $elt ) = @_;
     $elt->{chords} && join( "", @{ $elt->{chords} } ) =~ /\S/;
+}
+
+sub has_visible_text {
+    my ( $elt ) = @_;
+    $elt->{phrases} && join( "", @{ $elt->{phrases} } ) =~ /\S/;
 }
 
 sub songline_vsp {
@@ -1572,15 +1787,16 @@ sub songline_vsp {
     }
 
     # Vertical span of the lyrics and chords.
-    my $vsp = $fonts->{text}->{size} * $ps->{spacing}->{lyrics};
+#    my $vsp = $fonts->{text}->{size} * $ps->{spacing}->{lyrics};
+    my $vsp = text_vsp( $elt, $ps );
     my $csp = $fonts->{chord}->{size} * $ps->{spacing}->{chords};
 
     return $vsp if $lyrics_only || $chordscol;
 
-    return $vsp if $single_space && ! has_visible_chords($elt);
+    return $vsp if $suppress_empty_chordsline && ! has_visible_chords($elt);
 
     # No text printing if no text.
-    $vsp = 0 if join( "", @{ $elt->{phrases} } ) eq "";
+    $vsp = 0 if $suppress_empty_lyricsline && join( "", @{ $elt->{phrases} } ) !~ /\S/;
 
     if ( $inlinechords ) {
 	$vsp = $csp if $csp > $vsp;
@@ -1605,11 +1821,26 @@ sub _vsp {
 sub empty_vsp { _vsp( "empty", $_[1] ) }
 sub grid_vsp  { _vsp( "grid",  $_[1] ) }
 sub tab_vsp   { _vsp( "tab",   $_[1] ) }
-sub toc_vsp   { _vsp( "toc",   $_[1] ) }
+
+sub toc_vsp   {
+    my $vsp = _vsp( "toc",   $_[1] );
+    my $tpl = $_[0]->{title};
+    my $ret = $vsp;
+    while ( $tpl =~ /\\n/g ) {
+	$ret += $vsp;
+    }
+    return $ret;
+}
 
 sub text_vsp {
     my ( $elt, $ps ) = @_;
 
+    my $layout = Text::Layout->new( $ps->{pr}->{pdf} );
+    $layout->set_font_description( $ps->{fonts}->{text}->{fd} );
+    $layout->set_font_size( $ps->{fonts}->{text}->{size} );
+    $layout->set_markup( join( "", @{$elt->{phrases}} ) );
+    my $vsp = $layout->get_size->{height} * $ps->{spacing}->{lyrics};
+    #warn("vsp $vsp \"", $layout->get_text, "\"\n");
     # Calculate the vertical span of this line.
 
     _vsp( "text", $ps, "lyrics" );
@@ -1671,7 +1902,7 @@ sub set_columns {
 sub showlayout {
     my ( $ps ) = @_;
     my $pr = $ps->{pr};
-    my $col = "black";
+    my $col = "red";
     my $lw = 0.5;
 
     my $mr = $ps->{_rightmargin};
@@ -1716,7 +1947,7 @@ sub showlayout {
 }
 
 sub configurator {
-    my ( $cfg, $options ) = @_;
+    my ( $cfg ) = @_;
 
     # From here, we're mainly dealing with the PDF settings.
     my $pdf   = $cfg->{pdf};
@@ -1800,17 +2031,19 @@ sub configurator {
     $fonts->{comment_italic} ||= { %{ $fonts->{chord} } };
     $fonts->{comment_box}    ||= { %{ $fonts->{chord} } };
     $fonts->{comment}        ||= { %{ $fonts->{text}  } };
+    $fonts->{annotation}     ||= { %{ $fonts->{chord}  } };
     $fonts->{toc}	     ||= { %{ $fonts->{text}  } };
     $fonts->{empty}	     ||= { %{ $fonts->{text}  } };
     $fonts->{grid}           ||= { %{ $fonts->{chord} } };
     $fonts->{grid_margin}    ||= { %{ $comment } };
     $fonts->{diagram}        ||= { %{ $comment } };
     $fonts->{diagram_base}   ||= { %{ $comment } };
-    $fonts->{chordfingers}     = { name => 'ZapfDingbats' };
+#    $fonts->{chordfingers}     = { name => 'ZapfDingbats' };
     $fonts->{subtitle}->{size}       ||= $fonts->{text}->{size};
     $fonts->{comment_italic}->{size} ||= $fonts->{text}->{size};
     $fonts->{comment_box}->{size}    ||= $fonts->{text}->{size};
     $fonts->{comment}->{size}        ||= $fonts->{text}->{size};
+    $fonts->{annotation}->{size}     ||= $fonts->{chord}->{size};
 
     # Default footer is small subtitle.
     unless ( $fonts->{footer} ) {
@@ -1880,14 +2113,14 @@ sub wrap {
     my ( $pr, $elt, $x ) = @_;
     my $res = [];
     my @chords  = @{ $elt->{chords} // [] };
-    my @phrases = @{ $elt->{phrases} // [] };
+    my @phrases = @{ defrag( $elt->{phrases} // [] ) };
     my @rchords;
     my @rphrases;
     my $m = $pr->{ps}->{__rightmargin};
 
     while ( @chords ) {
 	my $chord  = shift(@chords);
-	my $phrase = shift(@phrases);
+	my $phrase = shift(@phrases) // "";
 	my $ex = "";
 
 	if ( @rchords ) {
@@ -1951,344 +2184,50 @@ sub wrapsimple {
     $pr->wrap( $text, $pr->{ps}->{__rightmargin} - $x );
 }
 
-################################################################
+my %corefonts = map { $_ => 1 }
+  ( "times-roman",
+    "times-bold",
+    "times-italic",
+    "times-bolditalic",
+    "helvetica",
+    "helvetica-bold",
+    "helvetica-oblique",
+    "helvetica-boldoblique",
+    "courier",
+    "courier-bold",
+    "courier-oblique",
+    "courier-boldoblique",
+    "zapfdingbats",
+    "georgia",
+    "georgia,bold",
+    "georgia,italic",
+    "georgia,bolditalic",
+    "verdana",
+    "verdana,bold",
+    "verdana,italic",
+    "verdana,bolditalic",
+    "webdings",
+    "wingdings" );
 
-package PDFWriter;
-
-use strict;
-use warnings;
-use Encode;
-use IO::String;
-
-my $faketime = 1465041600;
-
-my %fontcache;			# speeds up 2 seconds per song
-
-sub new {
-    my ( $pkg, $ps ) = @_;
-    my $self = bless { ps => $ps }, $pkg;
-    $self->{pdf} = $pdfapi->new;
-    $self->{pdf}->{forcecompress} = 0 if $regtest;
-    $self->{pdf}->mediabox( $ps->{papersize}->[0],
-			    $ps->{papersize}->[1] );
-    %fontcache = () if $::__EMBEDDED__;
-    $self;
+sub is_corefont {
+    $corefonts{lc $_[0]};
 }
 
-sub info {
-    my ( $self, %info ) = @_;
-    unless ( $info{CreationDate} ) {
-	my @tm = gmtime( $regtest ? $faketime : time );
-	$info{CreationDate} =
-	  sprintf("D:%04d%02d%02d%02d%02d%02d+00'00'",
-		  1900+$tm[5], 1+$tm[4], @tm[3,2,1,0]);
+sub _dump {
+    return unless $verbose;
+    my ( $ps ) = @_;
+    print STDERR ("== Font family map\n");
+    Text::Layout::FontConfig->new->_dump if $verbose;
+    print STDERR ("== Font associations\n");
+    foreach my $f ( sort keys( %{$ps->{fonts}} ) ) {
+	printf STDERR ("%-15s  %s\n", $f,
+		       eval { $ps->{fonts}->{$f}->{description} } ||
+		       eval { $ps->{fonts}->{$f}->{file} } ||
+		       eval { "[".$ps->{fonts}->{$f}->{name}."]" } ||
+		       "[]"
+		      );
     }
-    $self->{pdf}->info( %info );
-}
-
-
-sub wrap {
-    my ( $self, $text, $m ) = @_;
-
-    my $ex = "";
-    my $sp = "";
-    #warn("TEXT: |$text| ($m)\n");
-    while ( $self->strwidth($text) > $m ) {
-	my ( $l, $s, $r ) = $text =~ /^(.+)([-_,.:;\s])(.+)$/;
-	return ( $text, $ex ) unless defined $s;
-	#warn("WRAP: |$text| -> |$l|$s|$r$sp$ex|\n");
-	if ( $s =~ /\S/ ) {
-	    $l .= $s;
-	    $s = "";
-	}
-	$text = $l;
-	$ex = $r . $sp . $ex;
-	$sp = $s;
-    }
-
-    return ( $text, $ex );
-}
-
-sub text {
-    my ( $self, $text, $x, $y, $font, $size ) = @_;
-    return $x unless length($text);
-
-    $font ||= $self->{font};
-    $size ||= $font->{size};
-
-    $self->setfont($font, $size);
-
-    # Handle decorations (background, box).
-    my $bgcol = $font->{background};
-    my $frame = $font->{frame};
-    if ( $bgcol || $frame ) {
-	my $w = $self->strwidth( $text );
-	my $vsp = $size * 1.1;
-	# Adjust for baseline.
-	my $y = $y + ( $size / ( 1 - $font->{font}->descender / $font->{font}->ascender ) );
-
-	# Draw background.
-	if ( $bgcol && $bgcol !~ /^no(?:ne)?$/i ) {
-	    $self->rectxy( $x - 2, $y + 2,
-			   $x + $w + 2, $y - $vsp, 3, $bgcol );
-	}
-
-	# Draw box.
-	if ( $frame && $frame !~ /^no(?:ne)?$/i ) {
-	    my $x0 = $x;
-	    $x0 -= 0.25;	# add some offset for the box
-	    $self->rectxy( $x0, $y + 1,
-			   $x0 + $w + 1, $y - $vsp + 1,
-			   0.5, undef,
-			   $font->{color} || "black" );
-	}
-    }
-
-    if ( $font->{color} ) {
-	$self->{pdftext}->strokecolor( $font->{color} );
-	$self->{pdftext}->fillcolor( $font->{color} );
-    }
-    else {
-	$self->{pdftext}->strokecolor("black");
-	$self->{pdftext}->fillcolor("black");
-    }
-    $self->{pdftext}->translate( $x, $y );
-    $x += $self->{pdftext}->text($text);
-    if ( $font->{color} ) {
-	$self->{pdftext}->strokecolor("black");
-	$self->{pdftext}->fillcolor("black");
-    }
-    return $x;
-}
-
-sub setfont {
-    my ( $self, $font, $size ) = @_;
-    $self->{font} = $font;
-    $self->{fontsize} = $size ||= $font->{size};
-    $self->{pdftext}->font( $font->{font}, $size );
-}
-
-sub strwidth {
-    my ( $self, $text, $font, $size ) = @_;
-    $font ||= $self->{font};
-    $size ||= $self->{fontsize} || $font->{size};
-    $self->setfont( $font, $size );
-    $self->{pdftext}->advancewidth($text);
-}
-
-sub line {
-    my ( $self, $x0, $y0, $x1, $y1, $lw, $color ) = @_;
-    my $gfx = $self->{pdfgfx};
-    $gfx->save;
-    $gfx->strokecolor($color ||= "black");
-    $gfx->linecap(1);
-    $gfx->linewidth($lw||1);
-    $gfx->move( $x0, $y0 );
-    $gfx->line( $x1, $y1 );
-    $gfx->stroke;
-    $gfx->restore;
-}
-
-sub hline {
-    my ( $self, $x, $y, $w, $lw, $color ) = @_;
-    my $gfx = $self->{pdfgfx};
-    $gfx->save;
-    $gfx->strokecolor($color ||= "black");
-    $gfx->linecap(2);
-    $gfx->linewidth($lw||1);
-    $gfx->move( $x, $y );
-    $gfx->hline( $x + $w );
-    $gfx->stroke;
-    $gfx->restore;
-}
-
-sub vline {
-    my ( $self, $x, $y, $h, $lw, $color ) = @_;
-    my $gfx = $self->{pdfgfx};
-    $gfx->save;
-    $gfx->strokecolor($color ||= "black");
-    $gfx->linecap(2);
-    $gfx->linewidth($lw||1);
-    $gfx->move( $x, $y );
-    $gfx->vline( $y - $h );
-    $gfx->stroke;
-    $gfx->restore;
-}
-
-sub rectxy {
-    my ( $self, $x, $y, $x1, $y1, $lw, $fillcolor, $strokecolor ) = @_;
-    my $gfx = $self->{pdfgfx};
-    $gfx->save;
-    $gfx->strokecolor($strokecolor) if $strokecolor;
-    $gfx->fillcolor($fillcolor) if $fillcolor;
-    $gfx->linecap(2);
-    $gfx->linewidth($lw||1);
-    $gfx->rectxy( $x, $y, $x1, $y1 );
-    $gfx->close;
-    $gfx->fill if $fillcolor;
-    $gfx->stroke if $strokecolor;
-    $gfx->restore;
-}
-
-sub circle {
-    my ( $self, $x, $y, $r, $lw, $fillcolor, $strokecolor ) = @_;
-    my $gfx = $self->{pdfgfx};
-    $gfx->save;
-    $gfx->strokecolor($strokecolor) if $strokecolor;
-    $gfx->fillcolor($fillcolor) if $fillcolor;
-    $gfx->linewidth($lw||1);
-    $gfx->circle( $x, $y, $r );
-    $gfx->fill if $fillcolor;
-    $gfx->stroke if $strokecolor;
-    $gfx->restore;
-}
-
-sub cross {
-    my ( $self, $x, $y, $r, $lw, $strokecolor ) = @_;
-    my $gfx = $self->{pdfgfx};
-    $gfx->save;
-    $gfx->strokecolor($strokecolor) if $strokecolor;
-    $gfx->linewidth($lw||1);
-    $r = 0.9 * $r;
-    $gfx->move( $x-$r, $y-$r );
-    $gfx->line( $x+$r, $y+$r );
-    $gfx->stroke if $strokecolor;
-    $gfx->move( $x-$r, $y+$r );
-    $gfx->line( $x+$r, $y-$r );
-    $gfx->stroke if $strokecolor;
-    $gfx->restore;
-}
-
-sub get_image {
-    my ( $self, $uri ) = @_;
-
-    my $img;
-    if ( $uri =~ /^id=(.+)/ ) {
-	my $a = $assets->{$1};
-	my $d = $a->{data};
-	my $fh = IO::String->new($d);
-	if ( $a->{type} eq "jpg" ) {
-	    $img = $self->{pdf}->image_jpeg($fh);
-	}
-	elsif ( $a->{type} eq "png" ) {
-	    $img = $self->{pdf}->image_png($fh);
-	}
-	elsif ( $a->{type} eq "gif" ) {
-	    $img = $self->{pdf}->image_gif($fh);
-	}
-	return $img;
-    }
-    for ( $uri ) {
-	$img = $self->{pdf}->image_png($_)  if /\.png$/i;
-	$img = $self->{pdf}->image_jpeg($_) if /\.jpe?g$/i;
-	$img = $self->{pdf}->image_gif($_)  if /\.gif$/i;
-    }
-    return $img;
-}
-
-sub add_image {
-    my ( $self, $img, $x, $y, $w, $h, $border ) = @_;
-
-    my $gfx = $self->{pdfgfx};
-
-    $gfx->save;
-    $gfx->image( $img, $x, $y-$h, $w, $h );
-    if ( $border ) {
-	$gfx->rect( $x, $y-$h, $w, $h )
-	  ->linewidth($border)
-	    ->stroke;
-    }
-    $gfx->restore;
-}
-
-sub newpage {
-    my ( $self, $ps, $page ) = @_;
-    #$self->{pdftext}->textend if $self->{pdftext};
-    $self->{pdfpage} = $self->{pdf}->page($page);
-    $self->{pdfpage}->mediabox( $ps->{papersize}->[0],
-				$ps->{papersize}->[1] );
-    $self->{pdfgfx}  = $self->{pdfpage}->gfx;
-    $self->{pdftext} = $self->{pdfpage}->text;
-}
-
-sub finish {
-    my ( $self, $file ) = @_;
-
-    if ( $file && $file ne "-" ) {
-	$self->{pdf}->saveas($file);
-    }
-    else {
-	binmode(STDOUT);
-	print STDOUT ( $self->{pdf}->stringify );
-	close(STDOUT);
-    }
-}
-
-sub init_fonts {
-    my ( $self ) = @_;
-    my $ps = $self->{ps};
-    my $fail;
-
-    foreach my $ff ( keys( %{ $ps->{fonts} } ) ) {
-	next unless $ps->{fonts}->{$ff}->{name} || $ps->{fonts}->{$ff}->{file};
-	$self->init_font($ff) or $fail++;
-    }
-    die("Unhandled fonts detected -- aborted\n") if $fail;
-}
-
-sub init_font {
-    my ( $self, $ff ) = @_;
-    my $ps = $self->{ps};
-
-    my $font = $ps->{fonts}->{$ff};
-    if ( $font->{file} ) {
-	if ( $font->{file} =~ /\.[ot]tf$/ ) {
-	    eval {
-		$font->{font} =
-		  $fontcache{$font->{file}} ||=
-		    $self->{pdf}->ttfont( $font->{file},
-					  -dokern => 1 );
-	    }
-	    or warn("Cannot load font: ", $font->{file}, "\n");
-	}
-	elsif ( $font->{file} =~ /\.pf[ab]$/ ) {
-	    eval {
-		$font->{font} =
-		  $fontcache{$font->{file}} ||=
-		    $self->{pdf}->psfont( $font->{file},
-					  -afmfile => $font->{metrics},
-					  -dokern  => 1 );
-	    }
-	    or warn("Cannot load font: ", $font->{file}, "\n");
-	}
-	else {
-	    $font->{font} =
-	      $fontcache{"__default__"} ||=
-	      $self->{pdf}->corefont( 'Courier' );
-	}
-    }
-    else {
-	eval {
-	    $font->{font} =
-	      $fontcache{"__core__".$font->{name}} ||=
-		$self->{pdf}->corefont( $font->{name}, -dokern => 1 );
-	}
-	or warn("Cannot load font: ", $font->{file}, "\n");
-    }
-
-    unless ( $font->{font} ) {
-	warn( "Unhandled $ff font: ",
-	      $font->{file}
-	      || $font->{name}
-	      || Dumper($font), "\n" );
-    }
-    $font->{font}->{Name}->{val} =~ s/~.*/~$faketime/ if $regtest;
-    $font->{font};
-}
-
-sub show_vpos {
-    my ( $self, $y, $w ) = @_;
-    $self->{pdfgfx}->move(100*$w,$y)->linewidth(0.25)->hline(100*(1+$w))->stroke;
 }
 
 1;
+

@@ -17,7 +17,7 @@ my $s = App::Music::ChordPro::Songbook->new;
 my $data = <<EOD;
 EOD
 
-eval { $s->parsefile(\$data); 1 } or diag("$@");
+eval { $s->parse_file(\$data); 1 } or diag("$@");
 #use DDumper; DDumper( $s->{songs} );
 ok( scalar( @{ $s->{songs} } ) == 0, "No song" );
 #isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );

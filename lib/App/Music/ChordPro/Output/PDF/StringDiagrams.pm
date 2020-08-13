@@ -61,7 +61,7 @@ sub draw {
     # Draw font name.
     my $font = $ps->{fonts}->{diagram};
     $pr->setfont($font);
-    my $name = $info->{name};
+    my $name = App::Music::ChordPro::Output::PDF::chord_display($info);
     $name .= "*"
       unless $info->{origin} ne "user"
 	|| $::config->{diagrams}->{show} eq "user";
@@ -131,20 +131,23 @@ sub draw {
 	}
 
 	if ( $fret > 0 ) {
-	    my $glyph = "\x{6c}";
 	    if ( $fing && $fing > 0 ) {
 		# The dingbat glyphs are open, so we need a white
 		# background circle.
 		$pr->circle( $x+$gw/2, $y-$fret*$gh+$gh/2, $dot/2, 1,
 			     "white", "black" );
-		$glyph = pack( "C", 0xca + $fing - 1 );
+		my $dot = $dot/0.7;
+		my $glyph = pack( "C", 0xca + $fing - 1 );
+		$pr->setfont( $ps->{fonts}->{chordfingers}, $dot );
+		$pr->text( $glyph,
+			   $x+$gw/2-$pr->strwidth($glyph)/2,
+			   $y-$fret*$gh+$gh/2-$pr->strwidth($glyph)/2+$lw/2,
+			   $ps->{fonts}->{chordfingers}, $dot );
 	    }
-	    my $dot = $dot/0.7;
-	    $pr->setfont( $ps->{fonts}->{chordfingers}, $dot );
-	    $pr->text( $glyph,
-		       $x+$gw/2-$pr->strwidth($glyph)/2,
-		       $y-$fret*$gh+$gh/2-$pr->strwidth($glyph)/2+$lw/2,
-		       $ps->{fonts}->{chordfingers}, $dot ) ;
+	    else {
+		$pr->circle( $x+$gw/2, $y-$fret*$gh+$gh/2, $dot/2, 1,
+			     "black", "black" );
+	    }
 	}
 	elsif ( $fret < 0 ) {
 	    $pr->cross( $x+$gw/2, $y+$lw+$gh/3, $dot/3, $lw, "black");

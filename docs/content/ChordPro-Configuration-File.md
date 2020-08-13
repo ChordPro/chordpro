@@ -34,8 +34,14 @@ Layout doesn't matter, this document might as well have been written as:
 The ChordPro configuration file consists of two parts, all optional.
 
 * [The Generic Part]({{< relref "ChordPro-Configuration-Generic" >}})  
-Generic settings.
+Settings for the song parser and output backends.
 
 * [PDF Output]({{< relref "ChordPro-Configuration-PDF" >}})  
 Specific settings for PDF output.
+
+* [HTML Output]({{< relref "ChordPro-Configuration-HTML" >}})  
+Specific settings for HTML output.
+
+* [ChordPro Output]({{< relref "ChordPro-Configuration-ChordPro" >}})  
+Specific settings for ChordPro output.
 

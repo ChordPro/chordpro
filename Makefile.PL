@@ -26,15 +26,16 @@ WriteMakefile
 		    'script/ppchordpro.PL' => [ map { "script/$_" } @bins ]
 		   },
 
+ # Always require PDF::API2 and Text::Layout, even though
+ # we may actually be using Pango instead.
  PREREQ_PM      => {
-		    'App::Packager' => 1.430,
-		    'PDF::API2'   => 2.020,
-		    'Font::TTF'   => 1.04,
-		    'JSON::PP'	  => 2.27203,
-		    'String::Interpolate::Named' => 0.05,
-		    'File::LoadLines' => 0.02,
-		    'IO::String'  => 1.08,
-		    'Image::Info' => 1.41,
+		    'App::Packager'		  => 1.430,
+		    'PDF::API2'			  => 2.036,
+		    'Text::Layout'		  => 0.018,
+		    'JSON::PP'			  => 2.27203,
+		    'String::Interpolate::Named'  => 0.05,
+		    'File::LoadLines'		  => 0.02,
+		    'Image::Info'		  => 1.41,
 		   },
 
  CONFIGURE_REQUIRES => {
@@ -104,8 +105,9 @@ ${RES}/notes/common.json : ${RES}/notes/dutch.json
 ${RES}/pod/ChordPro.pod : ${LIB}.pm
 	${PODSELECT} $< > $@
 
-${RES}/pod/Config.pod : ${LIB}/Config.pm
+${RES}/pod/Config.pod : ${LIB}/Config.pm ${RES}/config/chordpro.json
 	${PODSELECT} $< > $@
+	${PERL} -pe 's/^/  /' ${RES}/config/chordpro.json >> $@
 
 # Verify JSON data
 

@@ -1,5 +1,10 @@
 #!/usr/bin/perl
 
+package main;
+
+our $options;
+our $config;
+
 package App::Music::ChordPro::Songbook;
 
 use strict;
@@ -8,8 +13,10 @@ use warnings;
 use App::Music::ChordPro;
 use App::Music::ChordPro::Chords;
 use App::Music::ChordPro::Output::Common;
+use App::Music::ChordPro::Utils qw( expand_tilde );
 
 use Carp;
+use File::LoadLines;
 
 sub new {
     my ($pkg) = @_;
@@ -55,19 +62,28 @@ my $diag;			# for diagnostics
 
 sub ::break() {}
 
-sub parsefile {
-    my ( $self, $filename, $options ) = @_;
-    $options //= {};
+sub parse_file {
+    my ( $self, $filename, $opts, $legacy ) = @_;
+    $opts //= {};
+    $legacy //= delete $opts->{legacy};
 
-    my $lines = ::loadfile( $filename, $options );
-    $diag->{format} = $options->{diagformat}
-      || $::config->{diagnostics}->{format};
-    $diag->{file} = $options->{_filesource};
+    # Loadlines sets $opts->{_filesource}.
+    my $lines = loadlines( $filename, $opts );
+
+    # Note: $opts are used by the tests only.
+    $opts //= {};
+    $diag->{format} = $opts->{diagformat} // $config->{diagnostics}->{format};
+    $diag->{file}   = $opts->{_filesource};
+    for ( "transpose", "no-substitute", "no-transpose" ) {
+	next unless exists $opts->{$_};
+	$options->{$_} = $opts->{$_};
+    }
 
     my $linecnt = 0;
     while ( @$lines ) {
-	my $song = $self->parse_song( $lines, \$linecnt, $options );
+	my $song = $self->parse_song( $lines, \$linecnt, $legacy );
 #	if ( exists($self->{songs}->[-1]->{body}) ) {
+	    $song->{meta}->{songindex} = 1 + @{ $self->{songs} };
 	    push( @{ $self->{songs} }, $song );
 #	}
 #	else {
@@ -77,18 +93,23 @@ sub parsefile {
     return 1;
 }
 
+sub parse_legacy_file {
+    my ( $self, $filename, $opts ) = @_;
+    $self->parse_file( $filename, $opts, 1 );
+}
+
 my $song;			# current song
 
 sub parse_song {
-    my ( $self, $lines, $linecnt, $options ) = @_;
+    my ( $self, $lines, $linecnt, $legacy ) = @_;
 
     $no_transpose = $options->{'no-transpose'};
     $no_substitute = $options->{'no-substitute'};
-    $decapo = $options->{decapo} || $::config->{settings}->{decapo};
+    $decapo = $options->{decapo} || $config->{settings}->{decapo};
 
     $song = App::Music::ChordPro::Song->new
       ( source => { file => $diag->{file}, line => 1 + $$linecnt },
-	system => App::Music::ChordPro::Chords::get_parser,
+	system => $::config->{notes}->{system},
 	structure => "linear",
       );
 
@@ -179,6 +200,13 @@ sub parse_song {
 	    next;
 	}
 
+	if ( $in_context eq "tab" ) {
+	    unless ( /^\s*\{(?:end_of_tab|eot)\}\s*$/ ) {
+		$self->add( type => "tabline", text => $_ );
+		next;
+	    }
+	}
+
 	# For practical reasons: a prime should always be an apostroph.
 	s/'/\x{2019}/g;
 
@@ -187,9 +215,9 @@ sub parse_song {
 	    $self->add( type => "ignore",
 			text => $_ )
 	      unless
-	    $options->{_legacy}
-	      ? $self->global_directive( $1, $options, 1 )
-	      : $self->directive( $1, $options );
+	    $legacy
+	      ? $self->global_directive( $1, 1 )
+	      : $self->directive( $1 );
 	    next;
 	}
 
@@ -313,7 +341,7 @@ sub chord {
 	    $c = $_;
     }
 
-    push( @used_chords, $c );
+    push( @used_chords, $c ) unless $info->{isnote};
 
     return $parens ? "($c)" : $c;
 }
@@ -490,15 +518,19 @@ sub dir_split {
 }
 
 sub directive {
-    my ( $self, $d, $options ) = @_;
+    my ( $self, $d ) = @_;
     my ( $dir, $arg ) = dir_split($d);
 
     # Context flags.
 
     if    ( $dir eq "soc" ) { $dir = "start_of_chorus" }
     elsif ( $dir eq "sot" ) { $dir = "start_of_tab"    }
+    elsif ( $dir eq "sov" ) { $dir = "start_of_verse"  }
+    elsif ( $dir eq "sob" ) { $dir = "start_of_bridge" }
     elsif ( $dir eq "eoc" ) { $dir = "end_of_chorus"   }
     elsif ( $dir eq "eot" ) { $dir = "end_of_tab"      }
+    elsif ( $dir eq "eov" ) { $dir = "end_of_verse"    }
+    elsif ( $dir eq "eob" ) { $dir = "end_of_bridge"   }
 
     if ( $dir =~ /^start_of_(\w+)$/ ) {
 	do_warn("Already in " . ucfirst($in_context) . " context\n")
@@ -523,6 +555,7 @@ sub directive {
 			name => "gridparams",
 			value =>  [ @$grid_arg, $5||"" ] );
 	    $grid_cells = [ $2 * ( $3//1 ), ($1//0), ($4//0) ];
+	    push( @labels, $5 ) if length($5||"");
 	}
 	elsif ( $arg && $arg ne "" ) {
 	    $self->add( type  => "set",
@@ -736,7 +769,7 @@ sub directive {
 	return 1;
     }
 
-    return 1 if $self->global_directive( $d, $options, 0 );
+    return 1 if $self->global_directive( $d, 0 );
 
     # Warn about unknowns, unless they are x_... form.
     do_warn("Unknown directive: $d\n") unless $d =~ /^x_/;
@@ -760,7 +793,7 @@ sub duration {
 my %propstack;
 
 sub global_directive {
-    my ($self, $d, $options, $legacy ) = @_;
+    my ($self, $d, $legacy ) = @_;
     my ( $dir, $arg ) = dir_split($d);
 
     # Song / Global settings.
@@ -845,8 +878,7 @@ sub global_directive {
     if ( $d =~ /^([-+])([-\w.]+)$/i ) {
 	return if $legacy;
 	if ( $2 eq "dumpmeta" ) {
-	    use Data::Dumper;
-	    warn(Dumper($song->{meta}));
+	    warn(::dump($song->{meta}));
 	}
 	$self->add( type => "set",
 		    name => $2,
@@ -1017,7 +1049,8 @@ sub global_directive {
 		$ci = $res->{name};
 	    }
 	    # Combine consecutive entries.
-	    if ( $song->{body}->[-1]->{type} eq "diagrams" ) {
+	    if ( defined($song->{body})
+		 && $song->{body}->[-1]->{type} eq "diagrams" ) {
 		push( @{ $song->{body}->[-1]->{chords} },
 		      $ci );
 	    }

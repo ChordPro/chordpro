@@ -7,6 +7,7 @@ package App::Music::ChordPro::A2Crd;
 use App::Packager;
 
 use App::Music::ChordPro::Version;
+use App::Music::ChordPro::Chords;
 
 our $VERSION = $App::Music::ChordPro::Version::VERSION;
 
@@ -64,11 +65,10 @@ one or many songs plus chord information. B<chordpro> will then
 generate a photo-ready, professional looking, impress-your-friends
 sheet-music suitable for printing on your nearest printer.
 
-B<chordpro> is a rewrite of the Chordii program, see
-L<http://www.chordii.org>.
+B<chordpro> is a rewrite of the Chordii program.
 
 For more information about the ChordPro file format, see
-L<http://www.chordpro.org>.
+L<https://www.chordpro.org>.
 
 =cut
 
@@ -79,21 +79,28 @@ use warnings;
 use utf8;
 use Carp;
 
+################ The Process ################
+
+package main;
+
+our $options;
+our $config;
+
 package App::Music::ChordPro::A2Crd;
 
 use File::LoadLines;
 
+no warnings 'redefine';
 sub ::run {
     my $options = app_setup( "a2crd", $VERSION );
     binmode(STDERR, ':utf8');
     binmode(STDOUT, ':utf8');
     $options->{trace}   = 1 if $options->{debug};
     $options->{verbose} = 1 if $options->{trace};
-    main($options);
+    main();
 }
 
 sub main {
-    my ( $options ) = @_;
 
     my $lines = loadlines( @ARGV ? $ARGV[0] : \*STDIN);
 
@@ -107,14 +114,14 @@ sub main {
     }
 
     print $fd "$_\n"
-      foreach a2cho($lines, $options);
+      foreach a2cho($lines);
 }
 
 ################ Subroutines ################
 
 # API: Produce ChordPro data from AsciiCRD lines.
 sub a2cho {
-    my ( $lines, $options ) = @_;
+    my ( $lines ) = @_;
     my $map = "";
     foreach ( @$lines ) {
 	$map .= classify($_);
@@ -129,9 +136,22 @@ sub classify {
     return '{' if $line =~ /^\{.+/;	# directive
 
     # Lyrics or Chords heuristic.
+    my @words = split ( /\s+/, $line );
     my $len = length($line);
     $line =~ s/\s+//g;
-    return ( $len / length($line) - 1 ) < 1 ? 'l' : 'c';
+    my $type = ( $len / length($line) - 1 ) < 1 ? 'l' : 'c';
+    my $p = App::Music::ChordPro::Chords::Parser->default;
+    if ( $type eq 'l') {
+        foreach (@words) {
+            if (length $_ > 0) {
+                if (!App::Music::ChordPro::Chords::parse_chord($_)) {
+                    return 'l';
+                }
+            }
+        }
+        return 'c';
+    }
+    return $type;
 }
 
 # Process the lines via the map.

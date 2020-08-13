@@ -23,13 +23,14 @@ my $data = <<EOD;
 {end_of_grid}
 EOD
 
-eval { $s->parsefile(\$data) } or diag("$@");
+eval { $s->parse_file(\$data) } or diag("$@");
 
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
 #use DDumper; warn(DDumper($s));
 my $song = {
       meta => {
+        songindex => 1,
         title => ['Grids'],
       },
       settings => {},
@@ -160,7 +161,7 @@ $data = <<EOD;
 {end_of_grid}
 EOD
 
-eval { $s->parsefile( \$data, { transpose => 2 } ) } or diag("$@");
+eval { $s->parse_file( \$data, { transpose => 2 } ) } or diag("$@");
 
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );

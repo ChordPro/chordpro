@@ -9,23 +9,32 @@ package App::Music::ChordPro::Output::HTML;
 
 use strict;
 use warnings;
+use App::Music::ChordPro::Output::Common;
 
 sub generate_songbook {
-    my ($self, $sb, $options) = @_;
+    my ( $self, $sb ) = @_;
 
     my @book;
+    my $cfg = $::config->{html} // {};
+    $cfg->{styles}->{display} //= "chordpro.css";
+    $cfg->{styles}->{print} //= "chordpro_print.css";
+
     push( @book,
 	  '<html>',
 	  '<head>',
-	  '<meta charset="utf-8">',
-	  '<link rel="stylesheet" href="chordpro.css">',
-	  '<link rel="stylesheet" href="chordpro_print.css" media="print">',
-	  '</head>',
+	  '<meta charset="utf-8">' );
+    foreach ( sort keys %{ $cfg->{styles} } ) {
+	push( @book,
+	      '<link rel="stylesheet" href="'.$cfg->{styles}->{$_}.'"'.
+	      ( $_ =~ /^(display|default)$/ ? "" : qq{ media="$_"} ).
+	      '>' );
+    }
+    push( @book, '</head>',
 	  '<body>',
 	);
 
     foreach my $song ( @{$sb->{songs}} ) {
-	push( @book, @{ generate_song($song, $options) } );
+	push( @book, @{ generate_song($song) } );
     }
 
     push( @book, "</body>", "</html>" );
@@ -36,11 +45,11 @@ my $single_space = 0;		# suppress chords line when empty
 my $lyrics_only = 0;		# suppress all chords lines
 
 sub generate_song {
-    my ($s, $options) = @_;
+    my ( $s ) = @_;
 
-    my $tidy = $options->{tidy};
-    $single_space = $options->{'single-space'};
-    $lyrics_only = $::config->{settings}->{'lyrics-only'};
+    my $tidy      = $::options->{tidy};
+    $single_space = $::options->{'single-space'};
+    $lyrics_only  = $::config->{settings}->{'lyrics-only'};
     $s->structurize;
 
     my @s;
@@ -213,6 +222,11 @@ sub html {
     $t =~ s/</&lt;/g;
     $t =~ s/>/&gt;/g;
     $t;
+}
+
+# Substitute %X sequences in title formats.
+sub fmt_subst {
+    goto \&App::Music::ChordPro::Output::Common::fmt_subst;
 }
 
 1;

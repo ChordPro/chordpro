@@ -21,7 +21,7 @@ I [D]looked over Jordan, and [G]what did I [D]see,
 {end_of_verse}
 EOD
 
-eval { $s->parsefile(\$data) } or diag("$@");
+eval { $s->parse_file(\$data) } or diag("$@");
 
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
@@ -29,6 +29,7 @@ isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
 my $song = {
 	    'settings' => {},
 	    'meta' => {
+		       'songindex' => 1,
 		       'title' => [
 				   'Swing Low Sweet Chariot'
 				  ],

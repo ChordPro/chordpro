@@ -7,9 +7,9 @@ use warnings;
 use Data::Dumper;
 
 sub generate_songbook {
-    my ($self, $sb, $options) = @_;
+    my ( $self, $sb ) = @_;
 
-    if ( ( $options->{'backend-option'}->{structure} // '' ) eq 'structured' ) {
+    if ( ( $::options->{'backend-option'}->{structure} // '' ) eq 'structured' ) {
 	foreach ( @{$sb->{songs}} ) {
 	    $_->structurize;
 	}
@@ -17,7 +17,7 @@ sub generate_songbook {
     $Data::Dumper::Sortkeys = 1;
     $Data::Dumper::Indent = 1;
     my @book;
-    push( @book, Data::Dumper->Dump( [ $sb, $options ], [ "song", "options" ] ) );
+    push( @book, Data::Dumper->Dump( [ $sb, $::options ], [ "song", "options" ] ) );
     \@book;
 }
 

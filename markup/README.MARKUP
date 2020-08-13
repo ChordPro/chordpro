@@ -1,0 +1,59 @@
+This version of ChordPro uses a PDF producer based on PDF::API2 (or
+PDF::Builder) and Text::Layout that implements Pango Markup language.
+
+This has numerous advantages:
+
+* Fonts are dealt with as logical descriptors, e.g. "Sans 14" or
+  "Serif Bold 20". This makes it easy to substitute missing fonts, and
+  switch between font styles (see below).
+
+  This can also be used on the command line, e.g.
+
+     chordpro --text-font "Sans 14"
+
+  and in font directives:
+
+     {textfont Sans 14}
+
+  (And yes, this sets the font and size)
+
+* In the config files, fonts have a "description" entry that overrides
+  "file" and "name", but not "size".
+
+     "fonts" : {
+        "text" : { "name":  "Times-Roman",
+                   "description": "Serif",
+                   "size":  12 },
+  	...etc...
+     },
+
+* To map symbolic font names to actual fonts, and to group fonts into
+  families, use "fontfamilies":
+
+ 	"fontfamilies" : {
+ 	    "times" : {
+ 		""            : "Times-Roman",
+ 		"bold"        : "Times-Bold",
+ 		"italic"      : "Times-Italic",
+ 		"bolditalic"  : "Times-BoldItalic",
+ 	    },
+ 	    ...etc...
+ 	},
+
+  On Linux systems, font family lookup will use the fontconfig tool if
+  available.
+
+* Text markup like <b> ... </b> to obtain bold, italic, etc.
+
+  Markup is per text line, so this is an error:
+
+    [Am]<b>Why does luck go [F]wry
+    [Am]Why do children [F]die</b>
+
+  See https://developer.gnome.org/pygtk/stable/pango-markup-language.html
+
+There are some limitations as well. We try to find ways to work around
+these.
+
+* Wrapping may miscalculate if a song line contains markup or wide
+  chords (wider than the phrase).

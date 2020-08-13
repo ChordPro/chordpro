@@ -1,6 +1,6 @@
 #! perl
 
-use 5.010;
+use 5.010.1;
 
 package App::Music::ChordPro;
 
@@ -49,11 +49,10 @@ Typical ChordPro input:
 
     {c: Chorus}
 
-B<chordpro> is a rewrite of the Chordii program, see
-L<http://www.chordii.org>.
+B<chordpro> is a rewrite of the Chordii program.
 
 For more information about the ChordPro file format, see
-L<http://www.chordpro.org>.
+L<https://www.chordpro.org>.
 
 =cut
 
@@ -61,28 +60,30 @@ L<http://www.chordpro.org>.
 
 use strict;
 use warnings;
-use Data::Dumper;
 use Carp;
 
 ################ The Process ################
 
 package main;
 
+our $options;
 our $config;
 
 package App::Music::ChordPro;
 
 sub ::run {
-    my $options = app_setup( "ChordPro", $VERSION );
+    $options = app_setup( "ChordPro", $VERSION );
     binmode(STDERR, ':utf8');
     binmode(STDOUT, ':utf8');
     $options->{trace}   = 1 if $options->{debug};
     $options->{verbose} = 1 if $options->{trace};
-    main($options);
+    $options->{verbose} = 9 if $options->{debug};
+    main();
 }
 
 sub main {
-    my ($options) = @_;
+    my ($opts) = @_;
+    $options = { %$options, %$opts } if $opts;
 
     # Establish backend.
     my $of = $options->{output};
@@ -137,20 +138,21 @@ sub main {
     eval "require $pkg;";
     die("No backend for ", $options->{generate}, "\n$@") if $@;
     $options->{backend} = $pkg;
+    $pkg->version if $options->{verbose} && $pkg->can("version");
 
     # One configurator to bind them all.
     use App::Music::ChordPro::Config;
-    $::config = App::Music::ChordPro::Config::configurator($options);
+    $config = App::Music::ChordPro::Config::configurator({});
 
     # Parse the input(s).
     use App::Music::ChordPro::Songbook;
     my $s = App::Music::ChordPro::Songbook->new;
-    $s->parsefile( $_, $options ) foreach @::ARGV;
+    $s->parse_file($_) foreach @::ARGV;
 
     if ( $options->{'dump-chords'} ) {
 	my $d = App::Music::ChordPro::Song->new;
 	$d->{title} = "ChordPro $VERSION Built-in Chords";
-	$d->{subtitle} = [ "http://www.chordpro.org" ];
+	$d->{subtitle} = [ "https://www.chordpro.org" ];
 	my @body;
 	my @chords;
 
@@ -184,7 +186,7 @@ sub main {
 	}
     }
 
-    warn(Dumper($s), "\n") if $options->{debug};
+    warn(::dump($s), "\n") if $options->{debug};
 
     # Try interpolations.
     if ( $of ) {
@@ -203,16 +205,15 @@ sub main {
     if ( my $xc = $::config->{settings}->{transcode} ) {
 	# Set target parser for the backend so it can find the transcoded
 	# chord definitions.
-	my $p = App::Music::ChordPro::Chords::get_parser;
 	App::Music::ChordPro::Chords::set_parser($xc);
 	# Generate the songbook.
-	$res = $pkg->generate_songbook( $s, $options );
+	$res = $pkg->generate_songbook($s);
 	# Restore parser.
-	App::Music::ChordPro::Chords::set_parser($p);
+	App::Music::ChordPro::Chords::set_parser($::config->{notes}->{system} );
     }
     else {
 	# Generate the songbook.
-	$res = $pkg->generate_songbook( $s, $options );
+	$res = $pkg->generate_songbook($s);
     }
 
     # Some backends write output themselves, others return an
@@ -232,6 +233,22 @@ sub main {
     }
 }
 
+sub ::dump {
+    use Data::Dumper qw();
+    local $Data::Dumper::Sortkeys  = 1;
+    local $Data::Dumper::Indent    = 1;
+    local $Data::Dumper::Quotekeys = 0;
+    local $Data::Dumper::Deparse   = 1;
+    local $Data::Dumper::Terse     = 1;
+    local $Data::Dumper::Trailingcomma = 1;
+    local $Data::Dumper::Useperl = 1;
+    local $Data::Dumper::Useqq     = 0; # I want unicode visible
+
+    my $s = Data::Dumper::Dumper @_;
+    defined wantarray or warn $s;
+    return $s;
+}
+
 ################ Options and Configuration ################
 
 =head1 COMMAND LINE OPTIONS
@@ -242,6 +259,11 @@ sub main {
 
 Prints version information about the ChordPro program. No other
 processing will be done.
+
+=item B<--back-matter=>I<FILE>
+
+Appends the contents of the named PDF document to the output. This can
+be used to produce documents with back matter pages.
 
 =item B<--config=>I<JSON> (shorter: B<--cfg>)
 
@@ -254,8 +276,7 @@ active.
 
 =item B<--cover=>I<FILE>
 
-Prepends the contents of the named PDF document to the output. This can
-be used to produce documents with cover pages.
+See B<--front-matter>.
 
 =item B<--csv>
 
@@ -291,6 +312,11 @@ This option may be specified multiple times.
 
 Song file names listed on the command line are processed I<after> the
 files from the filelist arguments.
+
+=item B<--front-matter=>I<FILE> B<--cover=>I<FILE>
+
+Prepends the contents of the named PDF document to the output. This can
+be used to produce documents with front matter (cover) pages.
 
 =item B<--lyrics-only> (short: B<-l>)
 
@@ -586,6 +612,7 @@ Provides more verbose information of what is going on.
 
 use Getopt::Long 2.13 qw( :config no_ignorecase );
 use File::Spec;
+use File::LoadLines;
 
 # Package name.
 my $my_package;
@@ -687,7 +714,8 @@ sub app_setup {
 	  "diagrams=s",			# Prints chord diagrams
           "encoding=s",
 	  "csv!",			# Generates contents CSV
-	  "cover=s",			# Cover page(s)
+	  "front-matter|cover=s",	# Front matter page(s)
+	  "back-matter=s",		# Back matter page(s)
 	  "filelist=s@",		# List of input files
 	  "meta=s\%",			# Command line meta data
 	  "decapo",			# remove capo
@@ -817,34 +845,20 @@ sub app_setup {
 	next unless defined $clo->{$_};
 	$clo->{$_} = decode_utf8($clo->{$_});
     }
+    ####TODO: Should decode all, and remove filename exception.
+    for ( keys %{ $clo->{define} } ) {
+	$clo->{define}->{$_} = decode_utf8($clo->{define}->{$_});
+    }
 
     # Plug in command-line options.
     @{$options}{keys %$clo} = values %$clo;
-    # warn(Dumper($options), "\n") if $options->{debug};
-
-    if ( $clo->{transcode} ) {
-	my $xc = $clo->{transcode};
-	# Load the appropriate notes config, but retain the current parser.
-	unless ( App::Music::ChordPro::Chords::Parser->get_parser($xc, 1) ) {
-	    my $file = getresource("notes/$xc.json");
-	    if ( $file and open( my $fd, "<:raw", $file ) ) {
-		my $pp = JSON::PP->new->relaxed;
-		warn("Config: $file\n") if $clo->{verbose};
-		my $new = $pp->decode( ::loadfile ($fd, { %$clo, donotsplit => 1 } ) );
-		App::Music::ChordPro::Chords::set_notes( $new->{notes},
-							 { %$clo,
-							   'keep-parser' => 1 } );
-	    }
-	}
-	unless ( App::Music::ChordPro::Chords::Parser->get_parser($xc, 1) ) {
-	    die("No transcoder for ", $xc, "\n");
-	}
-    }
+    $::options = $options;
+    # warn(::dump($options), "\n") if $options->{debug};
 
     if ( $defcfg || $fincfg ) {
-	print App::Music::ChordPro::Config::config_defaults()
+	print App::Music::ChordPro::Config::default_config()
 	  if $defcfg;
-	print App::Music::ChordPro::Config::config_final($options)
+	print App::Music::ChordPro::Config::config_final()
 	  if $fincfg;
 	exit 0;
     }
@@ -859,7 +873,7 @@ sub app_setup {
     if ( $clo->{filelist} ) {
 	my @files;
 	foreach ( @{ $clo->{filelist} } ) {
-	    my $list = ::loadfile( $_, $clo );
+	    my $list = loadlines( $_, $clo );
 	    foreach ( @$list ) {
 		next unless /\S/;
 		next if /^#/;
@@ -903,7 +917,7 @@ suitable for printing on your nearest printer.
 To learn more about ChordPro, look for the man page or do
 "chordpro --help" for the list of options.
 
-For more information, see http://www.chordpro.org .
+For more information, see https://www.chordpro.org .
 
 EndOfAbout
 
@@ -1019,98 +1033,6 @@ sub ::rsc_or_file {
     return defined($t) ? $t : $c;
 }
 
-sub ::loadfile {
-    my ( $filename, $options ) = @_;
-
-    my $data;			# slurped file data
-    my $encoded;		# already encoded
-
-    # Gather data from the input.
-    if ( ref($filename) ) {
-	if ( ref($filename) eq 'GLOB' ) {
-	    binmode( $filename, ':raw' );
-	    $data = do { local $/; <$filename> };
-	    $filename = "__GLOB__";
-	}
-	else {
-	    $data = $$filename;
-	    $filename = "__STRING__";
-	    $encoded++;
-	}
-    }
-    elsif ( $filename eq '-' ) {
-	$filename = "__STDIN__";
-	$data = do { local $/; <STDIN> };
-    }
-    else {
-	my $name = $filename;
-	$filename = decode_utf8($name);
-	open( my $fh, '<', $name)
-	  or croak("$filename: $!\n");
-	$data = do { local $/; <$fh> };
-    }
-    $options->{_filesource} = $filename if $options;
-
-    my $name = encode_utf8($filename);
-    if ( $encoded ) {
-	# Nothing to do, already dealt with.
-    }
-
-    # Detect Byte Order Mark.
-    elsif ( $data =~ /^\xEF\xBB\xBF/ ) {
-	warn("$name is UTF-8 (BOM)\n") if $options->{debug};
-	$data = decode( "UTF-8", substr($data, 3) );
-    }
-    elsif ( $data =~ /^\xFE\xFF/ ) {
-	warn("$name is UTF-16BE (BOM)\n") if $options->{debug};
-	$data = decode( "UTF-16BE", substr($data, 2) );
-    }
-    elsif ( $data =~ /^\xFF\xFE\x00\x00/ ) {
-	warn("$name is UTF-32LE (BOM)\n") if $options->{debug};
-	$data = decode( "UTF-32LE", substr($data, 4) );
-    }
-    elsif ( $data =~ /^\xFF\xFE/ ) {
-	warn("$name is UTF-16LE (BOM)\n") if $options->{debug};
-	$data = decode( "UTF-16LE", substr($data, 2) );
-    }
-    elsif ( $data =~ /^\x00\x00\xFE\xFF/ ) {
-	warn("$name is UTF-32BE (BOM)\n") if $options->{debug};
-	$data = decode( "UTF-32BE", substr($data, 4) );
-    }
-
-    # No BOM, did user specify an encoding?
-    elsif ( $options->{encoding} ) {
-	warn("$name is ", $options->{encoding}, " (--encoding)\n")
-	  if $options->{debug};
-	$data = decode( $options->{encoding}, $data, 1 );
-    }
-
-    # Try UTF8, fallback to ISO-8895.1.
-    else {
-	my $d = eval { decode( "UTF-8", $data, 1 ) };
-	if ( $@ ) {
-	    warn("$name is ISO-8859.1 (assumed)\n") if $options->{debug};
-	    $data = decode( "iso-8859-1", $data );
-	}
-	else {
-	    warn("$name is UTF-8 (detected)\n") if $options->{debug};
-	    $data = $d;
-	}
-    }
-
-    return $data if $options->{donotsplit};
-
-    # Split in lines;
-    my @lines;
-    $data =~ s/^\s+//s;
-    # Unless empty, make sure there is a final newline.
-    $data .= "\n" if $data =~ /.(?!\r\n|\n|\r)\Z/;
-    # We need to maintain trailing newlines.
-    push( @lines, $1 ) while $data =~ /(.*)(?:\r\n|\n|\r)/g;
-
-    return \@lines;
-}
-
 use lib ( grep { defined } getresource("CPAN") );
 
 =head1 FONTS
@@ -1207,12 +1129,8 @@ L<https://groups.google.com/forum/#!forum/chordpro>.
 
 Copyright (C) 2010,2018 Johan Vromans,
 
-This program is free software. You can redistribute it and/or
-modify it under the terms of the Artistic License 2.0.
-
-This program is distributed in the hope that it will be useful,
-but without any warranty; without even the implied warranty of
-merchantability or fitness for a particular purpose.
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
 
 =cut
 

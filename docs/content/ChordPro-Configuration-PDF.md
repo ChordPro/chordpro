@@ -236,7 +236,9 @@ Each of these page types can have settings for a page title, subtitle and footer
 
 Each title, subtitle and footer has three parts, which are printed to the left of the page, centered, and right. When even/odd page printing is selected, the left and right parts are swapped on even pages.
 
-All heading strings may contain references to metadata in the form `%{`*NAME*`}`, for example `%{title}`. The current page number can be obtained with `%{page}`. For a complete description on how to use metadata in heading strings, see [here]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
+All heading strings may contain references to metadata in the form
+`%{`*name*`}`, for example `%{title}`. The current page number can be
+obtained with `%{page}`, and the song index in the songbook with `%{songindex}`. For a complete description on how to use metadata in heading strings, see [here]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
 
         "formats" : {
 
@@ -349,6 +351,9 @@ Default is "Times-Roman" at size 12.
 * `chord`  
 The font used for chords above the lyrics.  
 Default is "Helvetica-Oblique" at size 10.
+* `annotation`  
+The font used for annotations.  
+Defaults to the `chord` font.
 * `comment`  
 The font used for comments.  
 Default is "Helvetica" at size 12, with a grey background.
@@ -383,6 +388,63 @@ Default is the setting for `comment`.
 * `diagram_base`  
 The font for the base fret numbers in chord diagrams.  
 Default is the setting for `text` but at a small size.
+
+## Outlines
+
+Outlines (bookmarks) can be automatically generated, controlled by
+settings in the config file. Most PDF viewers can show outlines and
+use them for easy navigation.
+
+````
+  	// Bookmarks (PDF outlines).
+  	// fields:   primary and (optional) secondary fields.
+  	// label:    outline label
+  	// line:     text of the outline element
+  	// collapse: initial display is collapsed
+  	// letter:   sublevel with first letters if more
+  	// fold:     group by primary (NYI)
+  	// omit:     ignore this
+  	"outlines" : [
+  	    { "fields"   : [ "sorttitle", "artist" ],
+  	      "label"    : "By Title",
+  	      "line"     : "%{title}%{artist| - %{}}",
+  	      "collapse" : false,
+  	      "letter"   : 5,
+  	      "fold"     : false,
+  	    },
+  	    { "fields"   : [ "artist", "sorttitle" ],
+  	      "label"    : "By Artist",
+  	      "line"     : "%{artist|%{} - }%{title}",
+  	      "collapse" : false,
+  	      "letter"   : 5,
+  	      "fold"     : false,
+  	    },
+  	],
+````
+
+The default configuration generates two outlines, one labelled `By
+Title` and one labelled `By Artist`. Each outline is ordered according
+to the meta data specified in `"fields"`. The format of the outlines
+is specified in `"line"`.
+
+* `fields`  
+The ordering of the outline. You can specify one or two metadata
+items.  
+When you specify a metadata item that has multiple values they are
+split out in the outline.
+* `label`  
+The label for this outline.
+* `line`  
+The format of the outline.
+* `collapse`  
+If true, the outline is initially collapsed.
+* `letter`  
+If there are more outline items with differing first letters than the
+amount specified here, an extra level of outlines (letter index) is
+created for easy navigation.  
+A value of zero disables this.
+* `fold`  
+For future use.
 
 ## Helping develop a layout
 

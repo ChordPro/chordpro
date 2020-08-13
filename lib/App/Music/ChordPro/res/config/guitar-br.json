@@ -1,0 +1,4 @@
+// Guitar chords with naming according to Brandt-Roemer.
+// Note that BR considers 'dim' to mean 'dim7' and shown as '0'.
+
+{ "include" : [ "guitar-ly", "brandtroemer" ] }

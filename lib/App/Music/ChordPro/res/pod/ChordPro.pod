@@ -37,11 +37,10 @@ Typical ChordPro input:
 
     {c: Chorus}
 
-B<chordpro> is a rewrite of the Chordii program, see
-L<http://www.chordii.org>.
+B<chordpro> is a rewrite of the Chordii program.
 
 For more information about the ChordPro file format, see
-L<http://www.chordpro.org>.
+L<https://www.chordpro.org>.
 
 =head1 COMMAND LINE OPTIONS
 
@@ -51,6 +50,11 @@ L<http://www.chordpro.org>.
 
 Prints version information about the ChordPro program. No other
 processing will be done.
+
+=item B<--back-matter=>I<FILE>
+
+Appends the contents of the named PDF document to the output. This can
+be used to produce documents with back matter pages.
 
 =item B<--config=>I<JSON> (shorter: B<--cfg>)
 
@@ -63,8 +67,7 @@ active.
 
 =item B<--cover=>I<FILE>
 
-Prepends the contents of the named PDF document to the output. This can
-be used to produce documents with cover pages.
+See B<--front-matter>.
 
 =item B<--csv>
 
@@ -100,6 +103,11 @@ This option may be specified multiple times.
 
 Song file names listed on the command line are processed I<after> the
 files from the filelist arguments.
+
+=item B<--front-matter=>I<FILE> B<--cover=>I<FILE>
+
+Prepends the contents of the named PDF document to the output. This can
+be used to produce documents with front matter (cover) pages.
 
 =item B<--lyrics-only> (short: B<-l>)
 
@@ -485,10 +493,6 @@ L<https://groups.google.com/forum/#!forum/chordpro>.
 
 Copyright (C) 2010,2018 Johan Vromans,
 
-This program is free software. You can redistribute it and/or
-modify it under the terms of the Artistic License 2.0.
-
-This program is distributed in the hope that it will be useful,
-but without any warranty; without even the implied warranty of
-merchantability or fitness for a particular purpose.
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
 

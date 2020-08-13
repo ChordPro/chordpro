@@ -52,6 +52,20 @@ In print, this song could look like this (click on the thumbnail to view the ful
 
 [![simple.png]({{< asset "images/simple.png" >}})]({{< asset "images/simple.pdf" >}})
 
+## Markup and annotations
+
+It is possible to use _markup_ in lyrics and other texts to change the
+way how these will be typeset. The markup confirms to the [Pango
+Markup Language](Pango_Markup.html)
+and can be used to change text size, color, typeface (font) and more.
+
+_Annotations_ are textual remarks placed above the lyrics, just like
+chords. Annotations are specified with `[*`*text*`]`, again just like
+chords. Depending on the software used to process the ChordPro data,
+annotations may be rendered in an outstanding manner.
+
+Markup and anotations are available as of ChordPro version 6.
+
 ## Is this all?
 
 Yes, this is all there is to say about the ChordPro file format. Lyrics-and-chords lines, directives, empty lines and `#`-remarks. Of course, the most interesting part is what directives are possible and what effects they have. This is discussed in [ChordPro Directives]({{< relref "ChordPro-Directives" >}}). Also relevant is what chords can be used, this is discussed in [ChordPro Chords]({{< relref "ChordPro-Chords" >}}).

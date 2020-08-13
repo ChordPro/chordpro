@@ -1,12 +1,17 @@
 #!/usr/bin/perl
 
+package main;
+
+our $options;
+our $config;
+
 package App::Music::ChordPro::Output::Text;
 
 use strict;
 use warnings;
 
 sub generate_songbook {
-    my ($self, $sb, $options) = @_;
+    my ( $self, $sb ) = @_;
     my @book;
 
     foreach my $song ( @{$sb->{songs}} ) {
@@ -14,7 +19,7 @@ sub generate_songbook {
 	    push(@book, "") if $options->{'backend-option'}->{tidy};
 	    push(@book, "-- New song");
 	}
-	push(@book, @{generate_song($song, $options)});
+	push(@book, @{generate_song($song)});
     }
 
     push( @book, "");
@@ -26,12 +31,12 @@ my $lyrics_only = 0;		# suppress all chords lines
 my $chords_under = 0;		# chords under lyrics
 
 sub generate_song {
-    my ($s, $options) = @_;
+    my ( $s ) = @_;
 
-    my $tidy = $options->{'backend-option'}->{tidy};
+    my $tidy      = $options->{'backend-option'}->{tidy};
     $single_space = $options->{'single-space'};
-    $lyrics_only = $::config->{settings}->{'lyrics-only'};
-    $chords_under = $::config->{settings}->{'chords-under'};
+    $lyrics_only  = $config->{settings}->{'lyrics-only'};
+    $chords_under = $config->{settings}->{'chords-under'};
 
     $s->structurize
       if ( $options->{'backend-option'}->{structure} // '' ) eq 'structured';

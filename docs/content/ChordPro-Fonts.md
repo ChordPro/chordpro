@@ -14,10 +14,63 @@ ChordPro uses _fonts_ for typesetting. In the config file fonts are specified fo
     },
 
 The `"file"` specifically designates a font file on the system.
-The example also has a `"name"` that designates the built-in font
-`"Times-Roman"`. The `"file"` setting takes precedence, so ChordPro
-will try to load the designated font file. If you remove the `"file"`
-setting, ChordPro will use the built-in font.
+The example also has a `"name"` that designates the built-in font `"Times-Roman"`. Depending on the software libraries that are installed on your system, ChordPro will use the description to find a suitable font, or load the designated font file, or use the built-in font.
+
+## Using a font description
+
+A font description is a flexible and system independent way to
+select a font. The description is a string containing up to four identifying items: the font *family*, the *style*, the *weight* and the *size*. A font family
+**must** be provided, the other parts are optional.
+
+For example, to select the bold version of Arial at 14 point size, the
+font description to be used is `"arial bold 14"`. The system will
+then try to find a font file for this font, e.g. `Arial-Bold.ttf` or a
+suitable replacement if this exact font could not be found.
+
+Generic family names (*aliases*) can be used instead of existing family
+names. So you can use `"serif"` for a serif font, and leave it to the
+system to find an appropriate font for it. Other frequently used
+aliases are `"sans"` and `"mono"`.
+
+### Why is using font descriptions important?
+
+Because ChordPro allows you to use [Pango style markup]({{< relref "Pango_Markup.html" >}}) in all your lyrics, titles and so on. For example:
+
+    [C]winkle, twinkle <bold>little</bold> [G]star
+
+When you designate a font family to be used for your lyrics, ChordPro can find the bold and italic members of the same font. With a particular font like `"myfont.ttf"` it will not possible to find the other family members.
+
+### How does the system find the appropriate fonts?
+
+Most modern systems are equipped with a facility called `fontconfig` or `fc-conf` or something similar. This facility can be used to fetch font information, e.g. the font file name, for fonts installed on the system.
+
+ChordPro also provides a font search facility. This can be used if your system does not have `fontconfig`, or when you want to override the system behaviour.
+
+In the config file in section `"pdf"` there is a section `"fontconfig"` that can be used to map family names to real font files. For example:
+
+    "fontconfig" : {
+	    "serif" : {
+		    ""            : "dejavu/DejaVuSerif-Regular.ttf",
+		    "bold"        : "dejavu/DejaVuSerif-Bold.ttf",
+		    "italic"      : "dejavu/DejaVuSerif-Italic.ttf",
+		    "bolditalic"  : "dejavu/DejaVuSerif-BoldItalic.ttf",
+      },
+    },
+
+For each family name you should specify four members: a regular font (with an empty key), a bold font (key `"bold"` or `"b"`), an italic font (key `"italic"` or `"i"` or `"oblique"` or `"o"`), and a bold-italic font.
+
+This is the short story. The longer story is that instead of a file name you can specify another set of key/value pairs, for example:
+
+    "fontconfig" : {
+	    "serif" : {
+		    ""            : {
+		      "file"      : "dejavu/DejaVuSerif-Regular.ttf",
+		      "interline" : 1,
+		    },
+		    ...
+    },
+
+`"interline"` is a font property that changes the way ChordPro deals with the font. Exact semantics of font properties are still under development.
 
 ## Using a font filename
 

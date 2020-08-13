@@ -18,8 +18,8 @@ In the examples below the symbol `~` denotes the user's home directory. Windows 
 3. A user specific configuration file is read from either:
 
     `~/.config/chordpro/chordpro.json`  
-    `~/.config/chordpro.json`  
-    `~/.chordpro/chordpro.json`
+    `~/.chordpro/chordpro.json`  
+  Note that if you have a `~/.config` directory ChordPro expects the configs to be there and the latter alternative will be ignored.
 
 4. A project specific configuration file is read from the current directory, either:
 
