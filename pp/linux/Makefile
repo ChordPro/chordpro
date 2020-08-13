@@ -20,7 +20,7 @@ wxchordpro : chordpro.pp ${COMMON}/chordpro.pp ${COMMON}/wxchordpro.pp
 	${PP} --output=wxchordpro @wxchordpro.pp ${SCRIPT}/wxchordpro.pl
 
 clean ::
-	rm -f *.pp.deps *~ chordpro wxchordpro build
+	rm -f *.pp.deps *~ chordpro wxchordpro
 
 # Portable Perl Launcher
 
