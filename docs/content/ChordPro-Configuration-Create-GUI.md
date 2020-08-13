@@ -5,6 +5,8 @@ description: "Creating a config (GUI)"
 
 # Creating a config (GUI)
 
+_Note: This does not work on Mac OS/X due to system constraints_
+
 ## Create a sample configuration using the GUI
 
 _Note that the appearance of dialogs and file names may differ between systems._
@@ -13,7 +15,7 @@ From the `Edit` menu choose `Preferences...`.
 
 ![]({{< asset "images/prf_cr_cfg_1.png" >}})
 
-From the Configuration dropdown list, select `Custom`.
+From the Configuration selection list, select `Custom`.
 
 ![]({{< asset "images/prf_cr_cfg_2.png" >}})
 
