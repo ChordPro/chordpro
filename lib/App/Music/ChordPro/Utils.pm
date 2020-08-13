@@ -11,7 +11,7 @@ our @EXPORT;
 
 ################ Filenames ################
 
-use File::Glob ':bsd_glob';
+use File::Glob ( $] >= 5.016 ? ":bsd_glob" : ":glob" );
 use File::Spec;
 
 # Derived from Path::ExpandTilde.
