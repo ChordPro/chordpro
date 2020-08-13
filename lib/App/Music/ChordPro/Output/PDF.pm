@@ -1144,7 +1144,7 @@ sub defrag {
 	    push( @r, $a );
 	}
 	if ( @stack ) {
-	    push( @r, map { s;^<\s*(\w+).*;</$1>;r } reverse @stack );
+	    push( @r, map { s;^<\s*(\w+).*;</$1>;; $_; } reverse @stack );
 	}
 	push( @res, join("", @r ) );
     }
