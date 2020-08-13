@@ -1,6 +1,6 @@
 // see https://docs.microsoft.com/en-us/windows/desktop/menurc/versioninfo-resource
 
-4711 ICON "chordpro.ico"
+4711 ICON "..\\..\\lib\\App\\Music\\ChordPro\\res\\icons\\chordpro.ico"
 
 1 VERSIONINFO
 FILEVERSION     0,975,0,0
