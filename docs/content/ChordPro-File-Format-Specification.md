@@ -5,6 +5,8 @@ description: "ChordPro: The File Format Specification"
 
 # ChordPro: The File Format Specification
 
+In a hurry? See the [ChordPro 6 Release information]({{< relref "ChordPro-RelNotes" >}}).
+
 ## Overview
 
 In 1992 Martin Leclerc and Mario Dorion developed a simple text file format to write _lead sheets_, songs with lyrics and chords, and a tool to create neatly printed lead sheets out of these text files. The tool was called `chord`, and the text files were called `chord` files. It soon became a popular way to write lead sheets and many users and tools adopted this format for similar purposes. For still unknown reasons people started calling the files `chordpro` files.
@@ -64,7 +66,7 @@ chords. Annotations are specified with `[*`*text*`]`, again just like
 chords. Depending on the software used to process the ChordPro data,
 annotations may be rendered in an outstanding manner.
 
-Markup and anotations are available as of ChordPro version 6.
+Markup and anotations are available as of [ChordPro version 6]({{< relref "ChordPro-RelNotes" >}}).
 
 ## Is this all?
 
