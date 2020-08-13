@@ -1,9 +1,61 @@
----
-title: "Release info"
-description: "Release info"
----
-
 # Release info
+
+## 0.975
+
+Released: 2020-08-13
+
+
+### ChordPro syntax
+
+* Support Pango Markup language.
+* Add basic support for annotations.
+* Add directives start/end_of_verse/bridge and short forms.
+
+### ChordPro functionality
+
+* Add PDF outlines (bookmarks).
+* Revamp table of contens (finally).
+* Remove section handling (we now have labels).
+* Allow ~ expansion in file names.
+* Allow relaxed parsing of chords (root name + arbitrary).
+* Allow parsing of notes (chords with only a lc root name).
+* (Wx) Show filename in window title.
+* (Wx) Show asterisk if file is modified.
+
+### ChordPro configuration
+
+* Add split marker to be inserted between text phrases when the chord is wider than the phrase.
+* Add settings.suppress-empty-lyrics to suppress blank lyrics lines.
+* Add display property to chords to control the way they are displayed.
+* Add guitar-br.json with Brandt-Roemer compliant chord symbols.
+* Add meta variable songindex.
+* Add metadata sorttitle.
+* Add config settings for HTML backend.
+* Add font properties in fontconfig settings.
+* Add settings for chordnames and notenames.
+
+### Bugfixes
+
+* Fix interpretation of directives and markup in tab sections.
+* Fix bug where some command line arguments did not properly support utf8.
+* Fix handling of {chorus: label}.
+* Fix problem where using a {chord} directive before any song lines would crash.
+* Fix problem where the tag of a grid was ignored.
+* Do not indent chorus labels when chorus indenting (issue #81).
+
+### Miscellaneous
+
+* Use Text::Layout to support Pango Markup language.
+* Use File::LoadLines.
+* Upgrade requirement for PDF::API2 to 2.035, Font::TTF to 1.05, Text::Layout to 0.014.
+* Packaged version no longer loads default config from chordpro.json. It is now really built-in.
+* Change CHANGES to Changes.
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.
+
+[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.
 
 ## 0.974
 
@@ -15,8 +67,6 @@ Released: 2019-10-05
 * Fix erroneous transposing of transcoded chords.
 * Fix erroneous recall of chorus from previous song.
 * Fix missing fret positions in {chord}.
-
-**[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.**
 
 ## 0.973
 
@@ -122,7 +172,7 @@ Released: 2018-01-23
 * Fix problem that in-song chords caused CANNOT HAPPEN error.
 * Add --filelist option to read song file names from files.
 * Fix inconsistent handling of --lyrics-only in backends.
-* Add html to list of recognized output types (even though experimental).
+* Add html to list of recognized output types (even though experimental). Note that the HTML backend is not yet included.
 * Fix Chord/Chordii regression: Base frets in chord diagrams should be arabic numbers, not roman.
 * Pass unknown directives through to backends.
 * Fix labels handling for ChordPro output.
