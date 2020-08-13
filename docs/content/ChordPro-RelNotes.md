@@ -94,3 +94,4 @@ to tag individual sections. For example:
 The reference implementation will add a left margin to the output and
 place the label text in this margin.
 
+![Example labels]({{< asset "images/verselabels.png" >}})
