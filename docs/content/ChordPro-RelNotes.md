@@ -18,7 +18,7 @@ In all texts (lyrics, titles, chordnames, comments, etc.) markup
 instructions can be used to manipulate the appearance.
 
 The markup instructions conform to the [Pango Markup
-Language](Pango_Markup.html).
+Language]({{< relref "Pango_Markup" >}}).
 
 For example:
 
