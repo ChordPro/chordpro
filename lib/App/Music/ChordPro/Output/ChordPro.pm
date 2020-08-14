@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+package main;
+
 our $options;
 our $config;
 
