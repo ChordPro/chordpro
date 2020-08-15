@@ -4,6 +4,7 @@
     - !ChordPro functionality
     - !ChordPro configuration
     - !Bugfixes
+    - Fix page numbers in CSV.
     - !Miscellaneous
 
 0.975	2020-08-13
