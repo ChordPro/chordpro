@@ -87,7 +87,7 @@ sub generate_songbook {
 	  line => $::config->{toc}->{line} } ];
 
     foreach my $ctl ( reverse( @{ $::config->{contents} } ) ) {
-	next unless $options->{toc} || @book > 1;
+	next unless $options->{toc} // @book > 1;
 	next if $ctl->{omit};
 
 	my $book = App::Music::ChordPro::Output::Common::prep_outlines

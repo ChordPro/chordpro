@@ -5,6 +5,7 @@
     - !ChordPro configuration
     - !Bugfixes
     - Fix page numbers in CSV.
+    - Fix problem that --no-toc was not honoured.
     - !Miscellaneous
 
 0.975	2020-08-13
