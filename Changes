@@ -1,3 +1,11 @@
+0.976	2020-08-16
+
+    - !Bugfixes
+    - Fix markup defragmentation (#111)
+    - Fix page numbers in CSV.
+    - Fix problem that --no-toc was not honoured.
+    - Fix a2crd crash (#115)
+
 0.975	2020-08-13
 
     - !ChordPro syntax

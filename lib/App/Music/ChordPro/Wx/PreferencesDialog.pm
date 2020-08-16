@@ -161,8 +161,8 @@ sub OnConfigFileDialog {
 	    $md->Destroy;
 	    if ( $ret == wxID_YES ) {
 		my $fd;
-		if ( open( $fd, ">", $file )
-		     and print $fd App::Music::ChordPro::Config::config_defaults()
+		if ( open( $fd, ">:utf8", $file )
+		     and print $fd App::Music::ChordPro::Config::default_config()
 		     and close($fd) ) {
 		    $self->{t_configfiledialog}->SetValue($file);
 		}

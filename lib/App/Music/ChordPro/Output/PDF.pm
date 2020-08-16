@@ -72,7 +72,8 @@ sub generate_songbook {
 	$song->{meta}->{tocpage} = $page;
 	push( @book, [ $song->{meta}->{title}->[0], $song ] );
 
-	$page += generate_song( $song, { pr => $pr, startpage => $page } );
+	$page += $song->{meta}->{pages} =
+	  generate_song( $song, { pr => $pr, startpage => $page } );
     }
     $book_back_matter_page = $page;
 
@@ -86,7 +87,7 @@ sub generate_songbook {
 	  line => $::config->{toc}->{line} } ];
 
     foreach my $ctl ( reverse( @{ $::config->{contents} } ) ) {
-	next unless $options->{toc} || @book > 1;
+	next unless $options->{toc} // @book > 1;
 	next if $ctl->{omit};
 
 	my $book = App::Music::ChordPro::Output::Common::prep_outlines
@@ -167,17 +168,19 @@ sub generate_songbook {
     if ( $options->{csv} ) {
 
 	# Create an MSPro compatible CSV for this PDF.
-	push( @book, [ "CSV", $page ] );
+	push( @book, [ "CSV", { meta => { tocpage => $page } } ] );
 	( my $csv = $options->{output} ) =~ s/\.pdf$/.csv/i;
 	open( my $fd, '>:utf8', encode_utf8($csv) )
 	  or die( encode_utf8($csv), ": $!\n" );
 	print $fd ( "title;pages;\n" );
 	for ( my $p = 0; $p < @book-1; $p++ ) {
+	    my $page = $book[$p]->[1]->{meta}->{tocpage};
+	    my $pages = $book[$p]->[1]->{meta}->{pages};
 	    print $fd ( join(';',
 			     $book[$p]->[0],
-			     $book[$p+1]->[1] > $book[$p]->[1]+1
-			     ? ( $page+$book[$p]->[1] ."-". ($page+$book[$p+1]->[1]-1) )
-			     : $page+$book[$p]->[1]),
+			     $pages > 1
+			     ? ( $page ."-". ($page+$pages) )
+			     : $page),
 			"\n" );
 	}
 	close($fd);
@@ -1144,7 +1147,9 @@ sub defrag {
 	    push( @r, $a );
 	}
 	if ( @stack ) {
-	    push( @r, map { s;^<\s*(\w+).*;</$1>;; $_; } reverse @stack );
+	    push( @r, map { my $t = $_;
+			    $t =~ s;^<\s*(\w+).*;</$1>;;
+			    $t; } reverse @stack );
 	}
 	push( @res, join("", @r ) );
     }

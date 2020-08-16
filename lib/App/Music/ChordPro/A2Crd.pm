@@ -88,11 +88,14 @@ our $config;
 
 package App::Music::ChordPro::A2Crd;
 
+use App::Music::ChordPro::Config;
+
 use File::LoadLines;
 
 no warnings 'redefine';
 sub ::run {
-    my $options = app_setup( "a2crd", $VERSION );
+    $options = app_setup( "a2crd", $VERSION );
+    $config = App::Music::ChordPro::Config::configurator;
     binmode(STDERR, ':utf8');
     binmode(STDOUT, ':utf8');
     $options->{trace}   = 1 if $options->{debug};

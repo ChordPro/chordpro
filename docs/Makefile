@@ -8,15 +8,26 @@ server :
 	make -C assets/images
 	${HUGO} server -D --disableFastRender --navigateToChanged --bind ${HOSTNAME} --baseURL http://${HOSTNAME}:1313
 
-production :: prod
-
-prod ::
+beta ::
 	make -C assets/images
 	${HUGO}
 	mv public/index.html public/allpages/index.html
 	cp public/home/index.html public/
 
-publish ::
+publish :: publish-beta
+
+publish-beta ::
+	rsync -acvHi --delete public/ chordpro-site:www/beta/
+
+production :: prod
+
+prod ::
+	make -C assets/images
+	${HUGO} --environment=stable2
+	mv public/index.html public/allpages/index.html
+	cp public/home/index.html public/
+
+publish-prod ::
 	rsync -acvHi --delete public/ chordpro-site:www/chordpro/
 
 clean ::
