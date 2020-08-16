@@ -4,8 +4,10 @@
     - !ChordPro functionality
     - !ChordPro configuration
     - !Bugfixes
+    - Fix markup defragmentation (#111)
     - Fix page numbers in CSV.
     - Fix problem that --no-toc was not honoured.
+    - Fix a2crd crash (#115)
     - !Miscellaneous
 
 0.975	2020-08-13
