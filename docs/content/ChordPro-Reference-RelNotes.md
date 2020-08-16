@@ -1,5 +1,23 @@
 # Release info
 
+## 0.976
+
+Released: 2020-08-16
+
+
+### Bugfixes
+
+* Fix markup defragmentation (#111)
+* Fix page numbers in CSV.
+* Fix problem that --no-toc was not honoured.
+* Fix a2crd crash (#115)
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.
+
+[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.
+
 ## 0.975
 
 Released: 2020-08-13
@@ -50,12 +68,6 @@ Released: 2020-08-13
 * Upgrade requirement for PDF::API2 to 2.035, Font::TTF to 1.05, Text::Layout to 0.014.
 * Packaged version no longer loads default config from chordpro.json. It is now really built-in.
 * Change CHANGES to Changes.
-
-### Social and support
-
-[User community](https://groups.io/g/ChordPro) for feedback and help.
-
-[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.
 
 ## 0.974
 
