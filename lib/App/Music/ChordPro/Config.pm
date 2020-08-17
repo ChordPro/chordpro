@@ -461,6 +461,7 @@ sub hmerge($$$) {
 
 	warn("Config error: unknown item $path$key\n")
 	  unless exists $res{$key}
+	    || $path eq "pdf.fontconfig."
 	    || $key =~ /^_/;
 
 	if ( ref($right->{$key}) eq 'HASH'
