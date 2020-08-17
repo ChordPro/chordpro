@@ -1,3 +1,11 @@
+0.977
+
+    - !ChordPro functionality
+    - Add CSV columns for sorttitle artist composer collection key year.
+    - !Bugfixes
+    - Raise requirement for Text::Layout to 0.019.
+    - Fix page numbers in CSV.
+    
 0.976	2020-08-16
 
     - !Bugfixes
