@@ -111,7 +111,7 @@ ${RES}/pod/Config.pod : ${LIB}/Config.pm ${RES}/config/chordpro.json
 
 # Verify JSON data
 
-CFGLIB := ${LIB}/res/config
+CFGLIB = ${LIB}/res/config
 
 checkjson :
 	for i in ${CFGLIB}/*.json ; \
