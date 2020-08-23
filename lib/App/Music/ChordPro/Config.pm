@@ -123,7 +123,7 @@ sub configurator {
 	$cfg->{pdf}->{formats}->{first}->{$_} = "";
     }
     for my $ff ( qw(chord
-		    diagram diagram_capo
+		    diagram diagram_capo chordfingers
 		    comment comment_box comment_italic
 		    tab text toc
 		    empty footer grid grid_margin subtitle title) ) {
