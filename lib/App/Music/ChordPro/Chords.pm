@@ -504,6 +504,7 @@ sub chord_info {
 sub transpose {
     my ( $c, $xpose, $xcode ) = @_;
     return $c unless $xpose || $xcode;
+    return $c if $c =~ /^\*/;
     my $info = parse_chord($c);
     unless ( $info ) {
 	assert_tuning();
