@@ -125,7 +125,7 @@ sub configurator {
     for my $ff ( qw(chord
 		    diagram diagram_capo chordfingers
 		    comment comment_box comment_italic
-		    tab text toc
+		    tab text toc annotation
 		    empty footer grid grid_margin subtitle title) ) {
 	for ( qw(name file description size color background) ) {
 	    $cfg->{pdf}->{fonts}->{$ff}->{$_} //= undef;
