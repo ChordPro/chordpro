@@ -11,7 +11,7 @@ description: "Installation on Microsoft Windows"
 
 If you're not sure which option to take, use the
 [Native install kit]({{< relref "Install-Windows-Native" >}}) (reported to run on
-64-bit Windows 7, 8 and 10) and download the GUI installer. A CLI version is also available there. 
+64-bit Windows 7, 8 and 10) and download the installer.
 
 ## Using Perl
 
