@@ -318,6 +318,7 @@ sub add_config_chord {
 	my $info = parse_chord($name) // { name => $name };
 	$config_chords{$name} =
 	  { origin  => "config",
+	    system  => $parser->{system},
 	    %$info,
 	    %$def,
 	    base    => $base,
@@ -359,6 +360,7 @@ sub add_song_chord {
 
     $song_chords{$name} =
       { origin  => "user",
+	system  => $parser->{system},
 	%$info,
 	base    => $base,
 	frets   => [ @$frets ],
