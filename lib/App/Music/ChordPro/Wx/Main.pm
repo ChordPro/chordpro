@@ -17,6 +17,7 @@ use Wx::Locale gettext => '_T';
 
 use App::Music::ChordPro::Wx;
 use App::Music::ChordPro;
+use App::Music::ChordPro::Output::Common;
 use App::Packager;
 use File::Temp qw( tempfile );
 use Encode qw(decode_utf8);
@@ -195,11 +196,12 @@ sub openfile {
     #### TODO: Get rid of selection on Windows
     $self->{_currentfile} = $file;
     if ( $self->{t_source}->GetValue =~ /^\{\s*t(?:itle)[: ]+([^\}]*)\}/m ) {
+	my $title = demarkup($1);
 	my $n = $self->{t_source}->GetNumberOfLines;
-	Wx::LogStatus("Loaded: $1 ($n line" .
+	Wx::LogStatus("Loaded: $title ($n line" .
 		      ( $n == 1 ? "" : "s" ) .
 		      ")");
-	$self->{sz_source}->GetStaticBox->SetLabel($1);
+	$self->{sz_source}->GetStaticBox->SetLabel($title);
     }
     $self->SetTitle( $self->{_windowtitle} = $file);
 
