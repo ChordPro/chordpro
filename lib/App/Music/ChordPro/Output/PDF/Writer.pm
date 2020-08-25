@@ -70,8 +70,8 @@ sub text {
     $font ||= $self->{font};
     $size ||= $font->{size};
 
-    $self->{layout}->set_font_size($size);
     $self->{layout}->set_font_description($font->{fd});
+    $self->{layout}->set_font_size($size);
     if ( $font->{color} && $font->{color} ne "black" ) {
 	$text = "<span color='" . $font->{color} . "'>" . $text . "</span>";
     }
@@ -116,8 +116,8 @@ sub text_nobl {
     $font ||= $self->{font};
     $size ||= $font->{size};
 
-    $self->{layout}->set_font_size($size);
     $self->{layout}->set_font_description($font->{fd});
+    $self->{layout}->set_font_size($size);
     if ( $font->{color} && $font->{color} ne "black" ) {
 	$text = "<span color='" . $font->{color} . "'>" . $text . "</span>";
     }
@@ -165,8 +165,8 @@ sub strwidth {
     $font ||= $self->{font};
     $size ||= $self->{fontsize} || $font->{size};
     $tmplayout //= Text::Layout->new( $self->{pdf} );
-    $tmplayout->set_font_size($size);
     $tmplayout->set_font_description($font->{fd});
+    $tmplayout->set_font_size($size);
     $tmplayout->set_markup($text);
     $tmplayout->get_pixel_size->{width};
 }
@@ -176,8 +176,8 @@ sub strheight {
     $font ||= $self->{font};
     $size ||= $self->{fontsize} || $font->{size};
     $tmplayout //= Text::Layout->new( $self->{pdf} );
-    $tmplayout->set_font_size($size);
     $tmplayout->set_font_description($font->{fd});
+    $tmplayout->set_font_size($size);
     $tmplayout->set_markup($text);
     $tmplayout->get_pixel_size->{height};
 }
@@ -471,6 +471,7 @@ sub init_pangofont {
 	$font->{fd}->{font}->{Name}->{val} =~ s/~.*/~$faketime/ if $regtest;
 	$font->{_ff} = $ff;
 	$font->{fd}->set_shaping( $font->{fd}->get_shaping || $font->{shaping}//0);
+	$font->{size} = $font->{fd}->get_size if $font->{fd}->get_size;
     };
     $font->{fd};
 }
