@@ -508,6 +508,7 @@ use File::Temp;
 my $cname;
 sub embed {
     my ( $self, $file ) = @_;
+    return unless -f $file;
     my $a = $self->{pdfpage}->annotation();
 
     # The only reliable way currently is pretend it's a movie :) .
@@ -523,8 +524,7 @@ sub embed {
 	( $cf, $cname ) = File::Temp::tempfile( UNLINK => 0);
     }
     binmode( $cf, ':utf8' );
-    my $pp = JSON::PP->new->utf8(0)->canonical->indent(4)->pretty;
-    print $cf $pp->encode( { %$::config } );
+    print $cf App::Music::ChordPro::Config::config_final();
     close($cf);
 
     $a = $self->{pdfpage}->annotation();
