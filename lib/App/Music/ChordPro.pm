@@ -7,6 +7,7 @@ package App::Music::ChordPro;
 use App::Packager;
 
 use App::Music::ChordPro::Version;
+use App::Music::ChordPro::Utils;
 
 our $VERSION = $App::Music::ChordPro::Version::VERSION;
 
@@ -1023,6 +1024,7 @@ sub ::rsc_or_file {
 
     my @libs = split( /[:;]/, $ENV{CHORDPRO_LIB} || "." );
     foreach my $lib ( @libs ) {
+	$lib = expand_tilde($lib);
 	return $lib . "/" . $f if -r $lib . "/" . $f;
 	next if $f =~ /\//;
 	return $lib . "/config/" . $f if -r $lib . "/config/" . $f;
