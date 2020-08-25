@@ -72,9 +72,9 @@ our $config;
 package App::Music::ChordPro;
 
 sub ::run {
-    $options = app_setup( "ChordPro", $VERSION );
     binmode(STDERR, ':utf8');
     binmode(STDOUT, ':utf8');
+    $options = app_setup( "ChordPro", $VERSION );
     $options->{trace}   = 1 if $options->{debug};
     $options->{verbose} = 1 if $options->{trace};
     $options->{verbose} = 9 if $options->{debug};
@@ -856,7 +856,7 @@ sub app_setup {
     # warn(::dump($options), "\n") if $options->{debug};
 
     if ( $defcfg || $fincfg ) {
-	print App::Music::ChordPro::Config::default_config()
+	print App::Music::ChordPro::Config::config_default()
 	  if $defcfg;
 	print App::Music::ChordPro::Config::config_final()
 	  if $fincfg;

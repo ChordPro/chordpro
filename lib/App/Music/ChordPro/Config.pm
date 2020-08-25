@@ -115,7 +115,7 @@ sub configurator {
     }
 
     $cfg = shift(@cfg);
-    warn("Process: $cfg->{_src}\n") if $verbose;
+    warn("Process: $cfg->{_src}\n") if $verbose > 1;
 
     # Add some extra entries to prevent warnings.
     for ( qw(title subtitle footer) ) {
@@ -125,7 +125,7 @@ sub configurator {
     for my $ff ( qw(chord
 		    diagram diagram_capo chordfingers
 		    comment comment_box comment_italic
-		    tab text toc annotation
+		    tab text toc annotation label
 		    empty footer grid grid_margin subtitle title) ) {
 	for ( qw(name file description size color background) ) {
 	    $cfg->{pdf}->{fonts}->{$ff}->{$_} //= undef;
@@ -438,13 +438,66 @@ sub get_legacy {
 
 sub config_final {
     $options->{'cfg-print'} = 1;
-    my $cfg = configurator();
+    my $cfg = configurator($options);
     $cfg->{tuning} = delete $cfg->{_tuning};
     $cfg->{chords} = delete $cfg->{_chords};
     delete $cfg->{chords};
+    delete $cfg->{_src};
 
-    my $pp = JSON::PP->new->canonical->indent(4)->pretty;
-    $pp->encode($cfg);
+    if ( $ENV{CHORDPRO_CFGPROPS} ) {
+	cfg2props($cfg);
+    }
+    else {
+	my $pp = JSON::PP->new->canonical->indent(4)->pretty;
+	$pp->encode($cfg);
+    }
+}
+
+sub config_default {
+    if ( $ENV{CHORDPRO_CFGPROPS} ) {
+	my $pp = JSON::PP->new->relaxed;
+	my $cfg = $pp->decode( default_config() );
+	cfg2props($cfg);
+    }
+    else {
+	default_config();
+    }
+}
+
+# Config in properties format.
+
+sub cfg2props {
+    my ( $o, $path ) = @_;
+    $path //= "";
+    my $ret = "";
+    if ( !defined $o ) {
+	$ret .= "$path: undef\n";
+    }
+    elsif ( UNIVERSAL::isa( $o, 'HASH' ) ) {
+	$path .= "." unless $path eq "";
+	for ( sort keys %$o ) {
+	    $ret .= cfg2props( $o->{$_}, $path . $_  );
+	}
+    }
+    elsif ( UNIVERSAL::isa( $o, 'ARRAY' ) ) {
+	$path .= "." unless $path eq "";
+	for ( my $i = 0; $i < @$o; $i++ ) {
+	    $ret .= cfg2props( $o->[$i], $path . "$i" );
+	}
+    }
+    elsif ( $o =~ /^\d+$/ ) {
+	$ret .= "$path: $o\n";
+    }
+    else {
+	$o =~ s/\\/\\\\/g;
+	$o =~ s/"/\\"/g;
+	$o =~ s/\n/\\n/;
+	$o =~ s/\t/\\t/;
+	$o =~ s/([^\x00-\xff])/sprintf("\\x{%x}", ord($1))/ge;
+	$ret .= "$path: \"$o\"\n";
+    }
+
+    return $ret;
 }
 
 sub hmerge($$$) {
