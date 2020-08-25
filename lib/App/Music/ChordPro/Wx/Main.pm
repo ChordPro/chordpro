@@ -304,7 +304,7 @@ sub preview {
 
     $options->{verbose} = $self->{_verbose} || 0;
     $options->{trace} = $self->{_trace} || 0;
-    $options->{debug} = $self->{_debug} || 0;
+    $options->{debug} = $self->{_debug} || $self->{_debuginfo};
     $options->{diagformat} = 'Line %n, %m';
     $options->{silent} = 1;
 
@@ -552,12 +552,12 @@ sub OnDelete {
 
 sub OnHelp_ChordPro {
     my ($self, $event) = @_;
-    Wx::LaunchDefaultBrowser("https://www.chordpro.org/chordpro/index.html");
+    Wx::LaunchDefaultBrowser("https://www.chordpro.org/chordpro/");
 }
 
 sub OnHelp_Config {
     my ($self, $event) = @_;
-    Wx::LaunchDefaultBrowser("https://metacpan.org/pod/distribution/App-Music-ChordPro/lib/App/Music/ChordPro/Config.pm");
+    Wx::LaunchDefaultBrowser("https://www.chordpro.org/chordpro/chordpro-configuration/");
 }
 
 sub OnHelp_Example {
@@ -566,6 +566,11 @@ sub OnHelp_Example {
     $self->openfile( getresource( "examples/swinglow.cho" ) );
     undef $self->{_currentfile};
     $self->{t_source}->SetModified(1);
+}
+
+sub OnHelp_DebugInfo {
+    my ($self, $event) = @_;
+    $self->{_debuginfo} = $event->IsChecked;
 }
 
 sub OnPreferences {
