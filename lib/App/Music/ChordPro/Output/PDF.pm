@@ -13,7 +13,9 @@ use warnings;
 use Encode qw( encode_utf8 );
 use App::Packager;
 
-use App::Music::ChordPro::Output::Common;
+use App::Music::ChordPro::Output::Common
+  qw( roman prep_outlines fmt_subst demarkup );
+
 use App::Music::ChordPro::Output::PDF::Writer;
 
 my $pdfapi;
@@ -90,8 +92,7 @@ sub generate_songbook {
 	next unless $options->{toc} // @book > 1;
 	next if $ctl->{omit};
 
-	my $book = App::Music::ChordPro::Output::Common::prep_outlines
-	  ( [ map { $_->[1] } @book ], $ctl );
+	my $book = prep_outlines( [ map { $_->[1] } @book ], $ctl );
 
 	# Create a pseudo-song for the table of contents.
 	my $t = $ctl->{label};
@@ -205,10 +206,6 @@ sub generate_songbook {
     _dump($ps) if $verbose;
 
     []
-}
-
-sub roman {
-    goto \&App::Music::ChordPro::Output::Common::roman;
 }
 
 my $source;			# song source
@@ -1463,11 +1460,6 @@ sub chord_display {
       : $info->{name};
 }
 
-# Remove markup.
-sub demarkup {
-    goto \&App::Music::ChordPro::Output::Common::demarkup;
-}
-
 sub is_bar {
     exists( $_[0]->{class} ) && $_[0]->{class} eq "bar";
 }
@@ -2085,11 +2077,6 @@ sub get_format {
 	return $ps->{formats}->{$classes[$i]}->{$type};
     }
     return;
-}
-
-# Substitute %X sequences in title formats.
-sub fmt_subst {
-    goto \&App::Music::ChordPro::Output::Common::fmt_subst;
 }
 
 # Three-part titles.

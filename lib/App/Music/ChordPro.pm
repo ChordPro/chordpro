@@ -8,6 +8,7 @@ use App::Packager;
 
 use App::Music::ChordPro::Version;
 use App::Music::ChordPro::Utils;
+use App::Music::ChordPro::Output::Common;
 
 our $VERSION = $App::Music::ChordPro::Version::VERSION;
 
@@ -191,8 +192,7 @@ sub main {
 
     # Try interpolations.
     if ( $of ) {
-	my $f = App::Music::ChordPro::Output::Common::fmt_subst
-	  ( $s->{songs}->[0], $of );
+	my $f = fmt_subst( $s->{songs}->[0], $of );
 	if ( $f ne $of ) {
 	    # Replace most non-alpha by underscore (but keep the extension).
 	    $f =~ s;(?!\.\w+$)[^\w/-];_;g;

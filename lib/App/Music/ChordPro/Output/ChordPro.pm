@@ -427,9 +427,4 @@ sub gridline {
     $line;
 }
 
-# Substitute %X sequences in title formats.
-sub fmt_subst {
-    goto \&App::Music::ChordPro::Output::Common::fmt_subst;
-}
-
 1;

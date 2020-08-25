@@ -13,7 +13,7 @@ use warnings;
 use App::Music::ChordPro;
 use App::Music::ChordPro::Chords;
 use App::Music::ChordPro::Output::Common;
-use App::Music::ChordPro::Utils qw( expand_tilde );
+use App::Music::ChordPro::Utils;
 
 use Carp;
 use File::LoadLines;
@@ -424,9 +424,7 @@ sub decompose {
 
 sub cdecompose {
     my ( $self, $line ) = @_;
-    $line = App::Music::ChordPro::Output::Common::fmt_subst( $song,
-						     $line )
-      unless $no_substitute;
+    $line = fmt_subst( $song, $line ) unless $no_substitute;
     my %res = $self->decompose($line);
     return ( text => $line ) unless $res{chords};
     return %res;

@@ -224,9 +224,4 @@ sub html {
     $t;
 }
 
-# Substitute %X sequences in title formats.
-sub fmt_subst {
-    goto \&App::Music::ChordPro::Output::Common::fmt_subst;
-}
-
 1;

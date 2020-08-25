@@ -8,7 +8,8 @@ use Encode;
 use PDF::API2;
 use Text::Layout;
 use IO::String;
-use App::Music::ChordPro::Output::Common;
+
+use App::Music::ChordPro::Output::Common qw( fmt_subst prep_outlines demarkup );
 
 # For regression testing, run perl with PERL_HASH_SEED set to zero.
 # This eliminates the arbitrary order of font definitions and triggers
@@ -325,16 +326,6 @@ sub pagelabel {
     $self->{pdf}->pageLabel( $page, $opts );
 }
 
-# Substitute %X sequences in title formats.
-sub fmt_subst {
-    goto \&App::Music::ChordPro::Output::Common::fmt_subst;
-}
-
-# Prepare outlines.
-sub prep_outlines {
-    goto \&App::Music::ChordPro::Output::Common::prep_outlines;
-}
-
 sub make_outlines {
     my ( $self, $book, $start ) = @_;
     return unless $book && @$book; # unlikely
@@ -388,7 +379,7 @@ sub make_outlines {
 		    $ol = $outline->outline;
 		}
 		# Display info.
-		$ol->title( App::Music::ChordPro::Output::Common::demarkup( fmt_subst( $song, $ctl->{line} ) ) );
+		$ol->title( demarkup( fmt_subst( $song, $ctl->{line} ) ) );
 		$ol->dest($pdf->openpage( $song->{meta}->{tocpage} + $start ));
 	    }
 	}

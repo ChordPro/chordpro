@@ -14,7 +14,7 @@ use utf8;
 
 use App::Packager;
 use App::Music::ChordPro;
-use App::Music::ChordPro::Utils qw( expand_tilde );
+use App::Music::ChordPro::Utils;
 use File::LoadLines;
 use File::Spec;
 use JSON::PP ();
