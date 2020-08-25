@@ -300,10 +300,12 @@ sub generate_song {
 	if ( $s->{labels} && @{ $s->{labels} } ) {
 	    my $longest = 0;
 	    my $ftext = $fonts->{label} || $fonts->{text};
+	    my $w = $pr->strwidth("    ", $ftext);
 	    for ( @{ $s->{labels} } ) {
 		for ( split( /\\n/, $_ ) ) {
-		    #### TODO: Use Layout
-		    my $t = $ftext->{fd}->{font}->width("$_    ") * $ftext->{size};
+		    my $t = $pr->strwidth( $_, $ftext ) + $w;
+#		    #### TODO: Use Layout
+#		    my $t = $ftext->{fd}->{font}->width(demarkup($_)."    ") * $ftext->{size};
 		    $longest = $t if $t > $longest;
 		}
 	    }
@@ -1860,6 +1862,7 @@ sub text_vsp {
     my $layout = Text::Layout->new( $ps->{pr}->{pdf} );
     $layout->set_font_description( $ps->{fonts}->{text}->{fd} );
     $layout->set_font_size( $ps->{fonts}->{text}->{size} );
+    #warn("vsp: ".join( "", @{$elt->{phrases}} )."\n");
     $layout->set_markup( join( "", @{$elt->{phrases}} ) );
     my $vsp = $layout->get_size->{height} * $ps->{spacing}->{lyrics};
     #warn("vsp $vsp \"", $layout->get_text, "\"\n");
