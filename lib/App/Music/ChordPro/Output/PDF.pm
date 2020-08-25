@@ -1465,9 +1465,7 @@ sub chord_display {
 
 # Remove markup.
 sub demarkup {
-    my ( $t ) = @_;
-    $t =~ s;</?([-\w]+|span\s.*?)>;;g;
-    return $t;
+    goto \&App::Music::ChordPro::Output::Common::demarkup;
 }
 
 sub is_bar {

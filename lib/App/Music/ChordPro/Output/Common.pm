@@ -197,14 +197,14 @@ sub prep_outlines {
     if ( @{$ctl->{fields}} == 1 ) {
 	@book =
 	  sort { $a->[0] cmp $b->[0] }
-	  map { [ lc($_->{meta}->{$ctl->{fields}->[0]}->[0]), $_ ] }
+	  map { [ demarkup(lc($_->{meta}->{$ctl->{fields}->[0]}->[0])), $_ ] }
 	  @book;
     }
     elsif ( @{$ctl->{fields}} == 2 ) {
 	@book =
 	  sort { $a->[0] cmp $b->[0] || $a->[1] cmp $b->[1] }
-	  map { [ lc($_->{meta}->{$ctl->{fields}->[0]}->[0]),
-		  lc($_->{meta}->{$ctl->{fields}->[1]}->[0]),
+	  map { [ demarkup(lc($_->{meta}->{$ctl->{fields}->[0]}->[0])),
+		  demarkup(lc($_->{meta}->{$ctl->{fields}->[1]}->[0])),
 		  $_ ] }
 	  @book;
     }
@@ -213,6 +213,13 @@ sub prep_outlines {
     }
 
     return \@book;
+}
+
+# Remove markup.
+sub demarkup {
+    my ( $t ) = @_;
+    $t =~ s;</?([-\w]+|span\s.*?)>;;g;
+    return $t;
 }
 
 1;

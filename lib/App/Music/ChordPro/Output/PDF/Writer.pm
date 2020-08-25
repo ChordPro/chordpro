@@ -8,6 +8,7 @@ use Encode;
 use PDF::API2;
 use Text::Layout;
 use IO::String;
+use App::Music::ChordPro::Output::Common;
 
 # For regression testing, run perl with PERL_HASH_SEED set to zero.
 # This eliminates the arbitrary order of font definitions and triggers
@@ -387,7 +388,7 @@ sub make_outlines {
 		    $ol = $outline->outline;
 		}
 		# Display info.
-		$ol->title( fmt_subst( $song, $ctl->{line} ) );
+		$ol->title( App::Music::ChordPro::Output::Common::demarkup( fmt_subst( $song, $ctl->{line} ) ) );
 		$ol->dest($pdf->openpage( $song->{meta}->{tocpage} + $start ));
 	    }
 	}
