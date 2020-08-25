@@ -304,8 +304,6 @@ sub generate_song {
 	    for ( @{ $s->{labels} } ) {
 		for ( split( /\\n/, $_ ) ) {
 		    my $t = $pr->strwidth( $_, $ftext ) + $w;
-#		    #### TODO: Use Layout
-#		    my $t = $ftext->{fd}->{font}->width(demarkup($_)."    ") * $ftext->{size};
 		    $longest = $t if $t > $longest;
 		}
 	    }
@@ -1102,6 +1100,7 @@ sub prlabel {
     return if $label eq "" || $ps->{_indent} == 0;
     my $align = $ps->{labels}->{align};
     $font ||= $ps->{fonts}->{label} || $ps->{fonts}->{text};
+    $font->{size} ||= $font->{fd}->{size};
     $ps->{pr}->setfont($font);	# for strwidth.
     for ( split( /\\n/, $label ) ) {
 	my $label = $_;

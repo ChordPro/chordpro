@@ -69,8 +69,8 @@ sub text {
     $font ||= $self->{font};
     $size ||= $font->{size};
 
-    $self->{layout}->set_font_description($font->{fd});
     $self->{layout}->set_font_size($size);
+    $self->{layout}->set_font_description($font->{fd});
     if ( $font->{color} && $font->{color} ne "black" ) {
 	$text = "<span color='" . $font->{color} . "'>" . $text . "</span>";
     }
@@ -115,8 +115,8 @@ sub text_nobl {
     $font ||= $self->{font};
     $size ||= $font->{size};
 
-    $self->{layout}->set_font_description($font->{fd});
     $self->{layout}->set_font_size($size);
+    $self->{layout}->set_font_description($font->{fd});
     if ( $font->{color} && $font->{color} ne "black" ) {
 	$text = "<span color='" . $font->{color} . "'>" . $text . "</span>";
     }
@@ -151,7 +151,9 @@ sub text_nobl {
 sub setfont {
     my ( $self, $font, $size ) = @_;
     $self->{font} = $font;
-    $self->{fontsize} = $size ||= $font->{size};
+    warn("PDF: Font ", $font->{_ff}, " should have a size!\n")
+      unless $size ||= $font->{size};
+    $self->{fontsize} = $size ||= $font->{size} || $font->{fd}->{size};
     $self->{pdftext}->font( $font->{fd}->{font}, $size );
 }
 
@@ -162,8 +164,8 @@ sub strwidth {
     $font ||= $self->{font};
     $size ||= $self->{fontsize} || $font->{size};
     $tmplayout //= Text::Layout->new( $self->{pdf} );
-    $tmplayout->set_font_description($font->{fd});
     $tmplayout->set_font_size($size);
+    $tmplayout->set_font_description($font->{fd});
     $tmplayout->set_markup($text);
     $tmplayout->get_pixel_size->{width};
 }
@@ -173,8 +175,8 @@ sub strheight {
     $font ||= $self->{font};
     $size ||= $self->{fontsize} || $font->{size};
     $tmplayout //= Text::Layout->new( $self->{pdf} );
-    $tmplayout->set_font_description($font->{fd});
     $tmplayout->set_font_size($size);
+    $tmplayout->set_font_description($font->{fd});
     $tmplayout->set_markup($text);
     $tmplayout->get_pixel_size->{height};
 }
