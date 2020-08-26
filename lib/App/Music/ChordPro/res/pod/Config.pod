@@ -16,11 +16,14 @@ This module can be run standalone and will print the default config.
 
 =encoding utf8
 
-
 =head1 DEFAULT CONFIGURATION
 
 The default configuration as built in. User and system
 configs go on top of this one.
+
+See L<https://www.chordpro.org/chordpro/chordpro-configuration/> for
+details and examples.
+
 
     // Configuration for ChordPro.
     //

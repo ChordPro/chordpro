@@ -1079,3 +1079,13 @@ unless ( caller ) {
 }
 
 1;
+
+=head1 DEFAULT CONFIGURATION
+
+The default configuration as built in. User and system
+configs go on top of this one.
+
+See L<https://www.chordpro.org/chordpro/chordpro-configuration/> for
+extensive details and examples.
+
+

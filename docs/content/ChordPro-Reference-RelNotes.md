@@ -1,5 +1,27 @@
 # Release info
 
+## 0.977
+
+Released: 2020-08-26
+
+
+### ChordPro functionality
+
+* Add CSV columns for sorttitle artist composer collection key year.
+
+### Bugfixes
+
+* Raise requirement for Text::Layout to 0.019.
+* Use only 'name' for chords in the built-in config. 'description' cannot be overridden by the user with 'name'.
+* Fix page numbers in CSV.
+* Several fixes for font descriptions and sizes.
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.
+
+[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.
+
 ## 0.976
 
 Released: 2020-08-16
@@ -11,12 +33,6 @@ Released: 2020-08-16
 * Fix page numbers in CSV.
 * Fix problem that --no-toc was not honoured.
 * Fix a2crd crash (#115)
-
-### Social and support
-
-[User community](https://groups.io/g/ChordPro) for feedback and help.
-
-[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.
 
 ## 0.975
 

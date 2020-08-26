@@ -1,4 +1,4 @@
-0.977
+0.977	2020-08-26
 
     - !ChordPro functionality
     - Add CSV columns for sorttitle artist composer collection key year.
@@ -7,6 +7,7 @@
     - Use only 'name' for chords in the built-in config. 'description'
       cannot be overridden by the user with 'name'.
     - Fix page numbers in CSV.
+    - Several fixes for font descriptions and sizes.
     
 0.976	2020-08-16
 
