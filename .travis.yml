@@ -1,6 +1,6 @@
 language: perl
 perl:
- - "5.26"
- - "5.10"
+ - "5.32"
+ - "5.10.1"
 os:
  - linux
