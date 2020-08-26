@@ -65,6 +65,13 @@ ${RES}/pod/ChordPro.pod : ${LIB}.pm
 
 ${RES}/pod/Config.pod : ${LIB}/Config.pm
 	${PODSELECT} $< > $@
+	echo "" >> $@
+	echo "=head1 DEFAULT CONFIGURATION" >> $@
+	echo "" >> $@
+	echo "The default configuration as built in. User and system" >> $@
+	echo "configs go on top of this one." >> $@
+	echo "" >> $@
+	${PERL} -pe 's/^/    /' ${RES}/config/chordpro.json >> $@
 
 ${RES}/pod/A2Crd.pod : ${LIB}/A2Crd.pm
 	${PODSELECT} $< > $@
