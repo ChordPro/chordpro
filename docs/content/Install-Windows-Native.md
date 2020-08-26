@@ -5,10 +5,26 @@ description: "Binary installation on Microsoft Windows"
 
 # Binary installation on Microsoft Windows
 
-_This information may be sub-optimal and/or incomplete. Please help improving it._
+Download ChordPro-installer-xxxx-msw-x64.exe from
+[GitHub](https://github.com/ChordPro/chordpro/releases/latest) and
+execute it. You can choose to install the GUI version of ChordPro
+and/or the command line program.
 
-Download ChordPro-GUI-installer-xxxx-msw-x64.exe from [SourceForge](https://sourceforge.net/projects/chordii/files/chordii/5.0/) and execute it. This will install the GUI version of ChordPro.
+For the command line program it may be convenient to add the install
+location to the system path so you don't have to type the full path
+name.
 
-Alternatively, you can download ChordPro-CLI-xxxx-msw-x64.zip, which contains the command line version of ChordPro. Unpacking the zip will produce the standalone `chordpro.exe` program.
+To temporarily add the default install location using the PowerShell:
+````
+$ENV:PATH="$ENV:PATH;C:\Program Files (x86)\ChordPro.ORG\ChordPro"
+````
+
+To permanently add the default install location using the PowerShell:
+````
+$reg = 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment'
+$oldpath = (Get-ItemProperty -Path $reg -Name PATH).path
+$newpath = “$oldpath;C:\Program Files (x86)\ChordPro.ORG\ChordPro”
+Set-ItemProperty -Path $reg -Name PATH -Value $newpath
+````
 
 You may now proceed to [Getting Started]({{< relref "ChordPro-Getting-Started" >}}).

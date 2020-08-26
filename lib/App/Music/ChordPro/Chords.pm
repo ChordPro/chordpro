@@ -318,6 +318,7 @@ sub add_config_chord {
 	my $info = parse_chord($name) // { name => $name };
 	$config_chords{$name} =
 	  { origin  => "config",
+	    system  => $parser->{system},
 	    %$info,
 	    %$def,
 	    base    => $base,
@@ -359,6 +360,7 @@ sub add_song_chord {
 
     $song_chords{$name} =
       { origin  => "user",
+	system  => $parser->{system},
 	%$info,
 	base    => $base,
 	frets   => [ @$frets ],
@@ -504,6 +506,7 @@ sub chord_info {
 sub transpose {
     my ( $c, $xpose, $xcode ) = @_;
     return $c unless $xpose || $xcode;
+    return $c if $c =~ /^\*/;
     my $info = parse_chord($c);
     unless ( $info ) {
 	assert_tuning();

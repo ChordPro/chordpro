@@ -8,6 +8,10 @@ use App::Music::ChordPro::Chords;
 use String::Interpolate::Named;
 use utf8;
 
+use parent qw(Exporter);
+our @EXPORT;
+our @EXPORT_OK;
+
 sub fmt_subst {
     my ( $s, $t ) = @_;
     my $res = "";
@@ -27,6 +31,7 @@ sub fmt_subst {
 		   separator => $::config->{metadata}->{separator} },
 		 $t );
 }
+push( @EXPORT, 'fmt_subst' );
 
 # Roman - functions for converting between Roman and Arabic numerals
 # 
@@ -51,6 +56,7 @@ sub isroman($) {
                 (?: L?X{0,3} | X[LC])
                 (?: V?I{0,3} | I[VX])$/ix;
 }
+push( @EXPORT_OK, 'isroman' );
 
 sub arabic($) {
     my $arg = shift;
@@ -64,6 +70,7 @@ sub arabic($) {
     }
     $arabic;
 }
+push( @EXPORT_OK, 'arabic' );
 
 sub Roman($) {
     my $arg = shift;
@@ -87,10 +94,12 @@ sub Roman($) {
     }
     $roman;
 }
+push( @EXPORT_OK, 'Roman' );
 
 sub roman($) {
     lc Roman shift;
 }
+push( @EXPORT_OK, 'roman' );
 
 # Prepare outlines.
 # This mainly untangles alternative names when being sorted on.
@@ -197,14 +206,14 @@ sub prep_outlines {
     if ( @{$ctl->{fields}} == 1 ) {
 	@book =
 	  sort { $a->[0] cmp $b->[0] }
-	  map { [ lc($_->{meta}->{$ctl->{fields}->[0]}->[0]), $_ ] }
+	  map { [ demarkup(lc($_->{meta}->{$ctl->{fields}->[0]}->[0])), $_ ] }
 	  @book;
     }
     elsif ( @{$ctl->{fields}} == 2 ) {
 	@book =
 	  sort { $a->[0] cmp $b->[0] || $a->[1] cmp $b->[1] }
-	  map { [ lc($_->{meta}->{$ctl->{fields}->[0]}->[0]),
-		  lc($_->{meta}->{$ctl->{fields}->[1]}->[0]),
+	  map { [ demarkup(lc($_->{meta}->{$ctl->{fields}->[0]}->[0])),
+		  demarkup(lc($_->{meta}->{$ctl->{fields}->[1]}->[0])),
 		  $_ ] }
 	  @book;
     }
@@ -214,5 +223,14 @@ sub prep_outlines {
 
     return \@book;
 }
+push( @EXPORT_OK, 'prep_outlines' );
+
+# Remove markup.
+sub demarkup {
+    my ( $t ) = @_;
+    $t =~ s;</?([-\w]+|span\s.*?)>;;g;
+    return $t;
+}
+push( @EXPORT, 'demarkup' );
 
 1;

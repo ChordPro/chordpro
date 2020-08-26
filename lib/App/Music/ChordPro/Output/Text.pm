@@ -7,6 +7,8 @@ our $config;
 
 package App::Music::ChordPro::Output::Text;
 
+use App::Music::ChordPro::Output::Common;
+
 use strict;
 use warnings;
 
@@ -227,12 +229,6 @@ sub songline {
     return $chords_under
       ? ( $t_line, $c_line )
       : ( $c_line, $t_line )
-}
-
-# Substitute %X sequences in title formats and comments.
-sub fmt_subst {
-    use App::Music::ChordPro::Output::Common;
-    goto \&App::Music::ChordPro::Output::Common::fmt_subst;
 }
 
 1;

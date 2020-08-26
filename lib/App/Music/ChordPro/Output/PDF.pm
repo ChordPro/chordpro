@@ -13,7 +13,9 @@ use warnings;
 use Encode qw( encode_utf8 );
 use App::Packager;
 
-use App::Music::ChordPro::Output::Common;
+use App::Music::ChordPro::Output::Common
+  qw( roman prep_outlines fmt_subst demarkup );
+
 use App::Music::ChordPro::Output::PDF::Writer;
 
 my $pdfapi;
@@ -90,8 +92,7 @@ sub generate_songbook {
 	next unless $options->{toc} // @book > 1;
 	next if $ctl->{omit};
 
-	my $book = App::Music::ChordPro::Output::Common::prep_outlines
-	  ( [ map { $_->[1] } @book ], $ctl );
+	my $book = prep_outlines( [ map { $_->[1] } @book ], $ctl );
 
 	# Create a pseudo-song for the table of contents.
 	my $t = $ctl->{label};
@@ -155,10 +156,13 @@ sub generate_songbook {
 	}
     }
     #warn("F=$book_front_matter_page, T=$book_toc_page, S=$book_start_page, B=$book_back_matter_page\n");
-    $pr->pagelabel( $book_front_matter_page, 'arabic', 'front-' );
-    $pr->pagelabel( $book_toc_page,          'roman'            );
+    $pr->pagelabel( $book_front_matter_page, 'arabic', 'front-' )
+      if $book_toc_page > $book_front_matter_page;
+    $pr->pagelabel( $book_toc_page,          'roman'            )
+      if $book_start_page > $book_toc_page;
     $pr->pagelabel( $book_start_page,        'arabic'           );
-    $pr->pagelabel( $book_back_matter_page,  'arabic', 'back-'  );
+    $pr->pagelabel( $book_back_matter_page,  'arabic', 'back-'  )
+      if $page > $book_back_matter_page;
 
     # Add the outlines.
     $pr->make_outlines( [ map { $_->[1] } @book ], $book_start_page );
@@ -167,20 +171,34 @@ sub generate_songbook {
 
     if ( $options->{csv} ) {
 
+	my $rfc4180 = sub {
+	    my ( $v ) = @_;
+	    return "" unless defined($v) && defined($v->[0]);
+	    $v = join("|", @$v);
+	    return $v unless $v =~ m/[;\s]/s;
+	    $v =~ s/"/""/g;
+	    return '"' . $v . '"';
+	};
+
+	my @cols1 = qw( title pages );
+	my @cols2 = qw( sorttitle artist composer collection key year );
 	# Create an MSPro compatible CSV for this PDF.
 	push( @book, [ "CSV", { meta => { tocpage => $page } } ] );
 	( my $csv = $options->{output} ) =~ s/\.pdf$/.csv/i;
 	open( my $fd, '>:utf8', encode_utf8($csv) )
 	  or die( encode_utf8($csv), ": $!\n" );
-	print $fd ( "title;pages;\n" );
+	print $fd ( join(";", @cols1, map{ $_."s" } @cols2), "\n" );
 	for ( my $p = 0; $p < @book-1; $p++ ) {
-	    my $page = $book[$p]->[1]->{meta}->{tocpage};
-	    my $pages = $book[$p]->[1]->{meta}->{pages};
+	    my ( $title, $song ) = @{$book[$p]};
+	    my $page = $book_start_page + $song->{meta}->{tocpage} - 1;
+	    my $pages = $song->{meta}->{pages};
 	    print $fd ( join(';',
-			     $book[$p]->[0],
+			     $rfc4180->([$title]),
 			     $pages > 1
-			     ? ( $page ."-". ($page+$pages) )
-			     : $page),
+			     ? ( $page ."-". ($page+$pages-1) )
+			     : $page,
+			     map { $rfc4180->($song->{meta}->{$_}) } @cols2
+			    ),
 			"\n" );
 	}
 	close($fd);
@@ -188,10 +206,6 @@ sub generate_songbook {
     _dump($ps) if $verbose;
 
     []
-}
-
-sub roman {
-    goto \&App::Music::ChordPro::Output::Common::roman;
 }
 
 my $source;			# song source
@@ -283,10 +297,10 @@ sub generate_song {
 	if ( $s->{labels} && @{ $s->{labels} } ) {
 	    my $longest = 0;
 	    my $ftext = $fonts->{label} || $fonts->{text};
+	    my $w = $pr->strwidth("    ", $ftext);
 	    for ( @{ $s->{labels} } ) {
 		for ( split( /\\n/, $_ ) ) {
-		    #### TODO: Use Layout
-		    my $t = $ftext->{fd}->{font}->width("$_    ") * $ftext->{size};
+		    my $t = $pr->strwidth( $_, $ftext ) + $w;
 		    $longest = $t if $t > $longest;
 		}
 	    }
@@ -1083,6 +1097,7 @@ sub prlabel {
     return if $label eq "" || $ps->{_indent} == 0;
     my $align = $ps->{labels}->{align};
     $font ||= $ps->{fonts}->{label} || $ps->{fonts}->{text};
+    $font->{size} ||= $font->{fd}->{size};
     $ps->{pr}->setfont($font);	# for strwidth.
     for ( split( /\\n/, $label ) ) {
 	my $label = $_;
@@ -1443,13 +1458,6 @@ sub chord_display {
     return $info->{display}
       ? interpolate( { args => $info }, $info->{display} )
       : $info->{name};
-}
-
-# Remove markup.
-sub demarkup {
-    my ( $t ) = @_;
-    $t =~ s;</?([-\w]+|span\s.*?)>;;g;
-    return $t;
 }
 
 sub is_bar {
@@ -1843,6 +1851,7 @@ sub text_vsp {
     my $layout = Text::Layout->new( $ps->{pr}->{pdf} );
     $layout->set_font_description( $ps->{fonts}->{text}->{fd} );
     $layout->set_font_size( $ps->{fonts}->{text}->{size} );
+    #warn("vsp: ".join( "", @{$elt->{phrases}} )."\n");
     $layout->set_markup( join( "", @{$elt->{phrases}} ) );
     my $vsp = $layout->get_size->{height} * $ps->{spacing}->{lyrics};
     #warn("vsp $vsp \"", $layout->get_text, "\"\n");
@@ -2068,11 +2077,6 @@ sub get_format {
 	return $ps->{formats}->{$classes[$i]}->{$type};
     }
     return;
-}
-
-# Substitute %X sequences in title formats.
-sub fmt_subst {
-    goto \&App::Music::ChordPro::Output::Common::fmt_subst;
 }
 
 # Three-part titles.

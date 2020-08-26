@@ -9,6 +9,8 @@ use PDF::API2;
 use Text::Layout;
 use IO::String;
 
+use App::Music::ChordPro::Output::Common qw( fmt_subst prep_outlines demarkup );
+
 # For regression testing, run perl with PERL_HASH_SEED set to zero.
 # This eliminates the arbitrary order of font definitions and triggers
 # us to pinpoint some other data that would otherwise be varying.
@@ -151,7 +153,9 @@ sub text_nobl {
 sub setfont {
     my ( $self, $font, $size ) = @_;
     $self->{font} = $font;
-    $self->{fontsize} = $size ||= $font->{size};
+    warn("PDF: Font ", $font->{_ff}, " should have a size!\n")
+      unless $size ||= $font->{size};
+    $self->{fontsize} = $size ||= $font->{size} || $font->{fd}->{size};
     $self->{pdftext}->font( $font->{fd}->{font}, $size );
 }
 
@@ -322,16 +326,6 @@ sub pagelabel {
     $self->{pdf}->pageLabel( $page, $opts );
 }
 
-# Substitute %X sequences in title formats.
-sub fmt_subst {
-    goto \&App::Music::ChordPro::Output::Common::fmt_subst;
-}
-
-# Prepare outlines.
-sub prep_outlines {
-    goto \&App::Music::ChordPro::Output::Common::prep_outlines;
-}
-
 sub make_outlines {
     my ( $self, $book, $start ) = @_;
     return unless $book && @$book; # unlikely
@@ -385,7 +379,7 @@ sub make_outlines {
 		    $ol = $outline->outline;
 		}
 		# Display info.
-		$ol->title( fmt_subst( $song, $ctl->{line} ) );
+		$ol->title( demarkup( fmt_subst( $song, $ctl->{line} ) ) );
 		$ol->dest($pdf->openpage( $song->{meta}->{tocpage} + $start ));
 	    }
 	}
@@ -468,6 +462,7 @@ sub init_pangofont {
 	$font->{fd}->{font}->{Name}->{val} =~ s/~.*/~$faketime/ if $regtest;
 	$font->{_ff} = $ff;
 	$font->{fd}->set_shaping( $font->{fd}->get_shaping || $font->{shaping}//0);
+	$font->{size} = $font->{fd}->get_size if $font->{fd}->get_size;
     };
     $font->{fd};
 }
@@ -513,6 +508,7 @@ use File::Temp;
 my $cname;
 sub embed {
     my ( $self, $file ) = @_;
+    return unless -f $file;
     my $a = $self->{pdfpage}->annotation();
 
     # The only reliable way currently is pretend it's a movie :) .
@@ -528,8 +524,7 @@ sub embed {
 	( $cf, $cname ) = File::Temp::tempfile( UNLINK => 0);
     }
     binmode( $cf, ':utf8' );
-    my $pp = JSON::PP->new->utf8(0)->canonical->indent(4)->pretty;
-    print $cf $pp->encode( { %$::config } );
+    print $cf App::Music::ChordPro::Config::config_final();
     close($cf);
 
     $a = $self->{pdfpage}->annotation();

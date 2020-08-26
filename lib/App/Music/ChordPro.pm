@@ -7,6 +7,8 @@ package App::Music::ChordPro;
 use App::Packager;
 
 use App::Music::ChordPro::Version;
+use App::Music::ChordPro::Utils;
+use App::Music::ChordPro::Output::Common;
 
 our $VERSION = $App::Music::ChordPro::Version::VERSION;
 
@@ -72,9 +74,9 @@ our $config;
 package App::Music::ChordPro;
 
 sub ::run {
-    $options = app_setup( "ChordPro", $VERSION );
     binmode(STDERR, ':utf8');
     binmode(STDOUT, ':utf8');
+    $options = app_setup( "ChordPro", $VERSION );
     $options->{trace}   = 1 if $options->{debug};
     $options->{verbose} = 1 if $options->{trace};
     $options->{verbose} = 9 if $options->{debug};
@@ -190,8 +192,7 @@ sub main {
 
     # Try interpolations.
     if ( $of ) {
-	my $f = App::Music::ChordPro::Output::Common::fmt_subst
-	  ( $s->{songs}->[0], $of );
+	my $f = fmt_subst( $s->{songs}->[0], $of );
 	if ( $f ne $of ) {
 	    # Replace most non-alpha by underscore (but keep the extension).
 	    $f =~ s;(?!\.\w+$)[^\w/-];_;g;
@@ -856,7 +857,7 @@ sub app_setup {
     # warn(::dump($options), "\n") if $options->{debug};
 
     if ( $defcfg || $fincfg ) {
-	print App::Music::ChordPro::Config::default_config()
+	print App::Music::ChordPro::Config::config_default()
 	  if $defcfg;
 	print App::Music::ChordPro::Config::config_final()
 	  if $fincfg;
@@ -1023,6 +1024,7 @@ sub ::rsc_or_file {
 
     my @libs = split( /[:;]/, $ENV{CHORDPRO_LIB} || "." );
     foreach my $lib ( @libs ) {
+	$lib = expand_tilde($lib);
 	return $lib . "/" . $f if -r $lib . "/" . $f;
 	next if $f =~ /\//;
 	return $lib . "/config/" . $f if -r $lib . "/config/" . $f;

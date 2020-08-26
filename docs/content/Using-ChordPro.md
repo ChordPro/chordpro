@@ -151,21 +151,47 @@ Designates the name of the output file where the results are written
 to.
 
 The filename extension determines the type of the output. It should
-correspond to one of the backends that are currently supported:
+correspond to one of the backends that are currently supported.
+Alternatively you can explicitly designate the requested output format
+with a `--generate` option:
 
-* pdf  
-Portable document format (PDF).
+* `pdf` (`--generate=PDF`)
 
-If a table of contents is generated with the PDF, ChordPro also writes
-a CSV file containing titles and page numbers. This CSV file has the
-same name as the PDF, with extenstion "pdf" replaced by <csv>.
+  Portable document format (PDF).
 
-* txt  
-A textual representation of the input, mostly for visual
-inspection.
+  If a table of contents is generated with the PDF, ChordPro also writes
+  a CSV file containing the following metadata:
+  title, pages, sorttitle, artist, composer, collection, key and year.
 
-* cho  
-A functional equivalent version of the ChordPro input.
+  This CSV file has the same name as the PDF, with extenstion `pdf`
+  replaced by `csv`. The contents conform to the RFC4180
+  recommendations. The column separator is a semicolon. When a
+  metadata has multiple values, these are separated with a vertical
+  bar. The CSV file is intended to be used when importing PDF documents
+  into the MobileSheetsPro application, but can be used for other
+  purposes as well.
+  
+  An example:
+  
+  ````
+  title;pages;sort title;artists;composers;collections;keys;years
+  "Throw It Away";9-10;;September;"Abbey Lincoln";September;Am;
+  ````
+  Metadata without values can leave the corresponding columns empty, but
+  the number of separators must be the same in all lines.
+
+* txt (`--generate=Text`)
+
+  A textual representation of the input, mostly for visual
+  inspection.
+
+* cho (`--generate=ChordPro`)
+
+  A functional equivalent version of the ChordPro input.
+
+* html (`--generate=HTML`)
+
+  An experimental html representation of the songs.
 
 ### start-page-number
 

@@ -346,58 +346,50 @@
       // The elements can have a background colour associated.
       // Colours are "#RRGGBB" or predefined names like "black", "white",
       // and lots of others.
+      // NOTE: In the built-in config we use only "name" since that can
+      // be overruled with user settings.
 
       "fonts" : {
 	  "title" : {
 	      "name" : "Times-Bold",
-	      "description" : "Times Bold",
 	      "size" : 14
 	  },
 	  "text" : {
 	      "name" : "Times-Roman",
-	      "description" : "Times",
 	      "size" : 12
 	  },
 	  "chord" : {
 	      "name" : "Helvetica-Oblique",
-	      "description" : "Helvetica Italic",
 	      "size" : 10
 	  },
 	  "chordfingers" : {
 	      "name" : "ZapfDingbats",
-	      "description" : "Dingbats",
 	      "size" : 10
 	  },
 	  "comment" : {
 	      "name" : "Helvetica",
-	      "description" : "Helvetica",
 	      "size" : 12,
 	      "background" : "#E5E5E5"
 	  },
 	  "comment_italic" : {
 	      "name" : "Helvetica-Oblique",
-	      "description" : "Helvetica Italic",
 	      "size" : 12,
 	  },
 	  "comment_box" : {
 	      "name" : "Helvetica",
-	      "description" : "Helvetica",
 	      "size" : 12,
 	      "frame" : 1
 	  },
 	  "tab" : {
 	      "name" : "Courier",
-	      "description" : "Courier",
 	      "size" : 10
 	  },
 	  "toc" : {
 	      "name" : "Times-Roman",
-	      "description" : "Times",
 	      "size" : 11
 	  },
 	  "grid" : {
 	      "name" : "Helvetica",
-	      "description" : "Courier",
 	      "size" : 10
 	  },
       },

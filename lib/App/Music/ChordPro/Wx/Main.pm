@@ -17,6 +17,7 @@ use Wx::Locale gettext => '_T';
 
 use App::Music::ChordPro::Wx;
 use App::Music::ChordPro;
+use App::Music::ChordPro::Output::Common;
 use App::Packager;
 use File::Temp qw( tempfile );
 use Encode qw(decode_utf8);
@@ -195,11 +196,12 @@ sub openfile {
     #### TODO: Get rid of selection on Windows
     $self->{_currentfile} = $file;
     if ( $self->{t_source}->GetValue =~ /^\{\s*t(?:itle)[: ]+([^\}]*)\}/m ) {
+	my $title = demarkup($1);
 	my $n = $self->{t_source}->GetNumberOfLines;
-	Wx::LogStatus("Loaded: $1 ($n line" .
+	Wx::LogStatus("Loaded: $title ($n line" .
 		      ( $n == 1 ? "" : "s" ) .
 		      ")");
-	$self->{sz_source}->GetStaticBox->SetLabel($1);
+	$self->{sz_source}->GetStaticBox->SetLabel($title);
     }
     $self->SetTitle( $self->{_windowtitle} = $file);
 
@@ -304,7 +306,7 @@ sub preview {
 
     $options->{verbose} = $self->{_verbose} || 0;
     $options->{trace} = $self->{_trace} || 0;
-    $options->{debug} = $self->{_debug} || 0;
+    $options->{debug} = $self->{_debug} || $self->{_debuginfo};
     $options->{diagformat} = 'Line %n, %m';
     $options->{silent} = 1;
 
@@ -552,12 +554,12 @@ sub OnDelete {
 
 sub OnHelp_ChordPro {
     my ($self, $event) = @_;
-    Wx::LaunchDefaultBrowser("https://www.chordpro.org/chordpro/index.html");
+    Wx::LaunchDefaultBrowser("https://www.chordpro.org/chordpro/");
 }
 
 sub OnHelp_Config {
     my ($self, $event) = @_;
-    Wx::LaunchDefaultBrowser("https://metacpan.org/pod/distribution/App-Music-ChordPro/lib/App/Music/ChordPro/Config.pm");
+    Wx::LaunchDefaultBrowser("https://www.chordpro.org/chordpro/chordpro-configuration/");
 }
 
 sub OnHelp_Example {
@@ -566,6 +568,11 @@ sub OnHelp_Example {
     $self->openfile( getresource( "examples/swinglow.cho" ) );
     undef $self->{_currentfile};
     $self->{t_source}->SetModified(1);
+}
+
+sub OnHelp_DebugInfo {
+    my ($self, $event) = @_;
+    $self->{_debuginfo} = $event->IsChecked;
 }
 
 sub OnPreferences {

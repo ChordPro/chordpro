@@ -65,6 +65,7 @@ ${RES}/pod/ChordPro.pod : ${LIB}.pm
 
 ${RES}/pod/Config.pod : ${LIB}/Config.pm
 	${PODSELECT} $< > $@
+	${PERL} -pe 's/^/    /' ${RES}/config/chordpro.json >> $@
 
 ${RES}/pod/A2Crd.pod : ${LIB}/A2Crd.pm
 	${PODSELECT} $< > $@
