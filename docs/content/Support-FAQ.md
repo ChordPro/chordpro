@@ -15,4 +15,6 @@ Currently a placeholder page, but we hope to publish your questions and answers 
 
 ### Using ChordPro
 
+* [How to get my fonts right?]({{< relref "Chordpro-Fonts" >}})
+
 * [ChordPro supports UNICODE. Then why can't I see my russian (vietnamese, greek, ...) characters?]({{< relref "FAQ-Unicode-characters" >}})

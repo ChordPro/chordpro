@@ -54,7 +54,7 @@ sidebar:
 - identifier: Support
   parent: supp
   weight: 310
-  title: Forum
+  title: Forum, Hints and FAQ
 
 - identifier: Links
   parent: supp
