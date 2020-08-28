@@ -40,6 +40,8 @@ The ChordPro reference implementation provides additional meta data:
  * `songindex`: The index (serial number) of the song in the songbook.
  
  * `page`: The starting page number of the song.
+
+ * `pages`: The number of pages of the song.
  
  * `tuning`: The tuning of the instrument. Usually `"E2 A2 D3 G3 B3 E4"`.
  
