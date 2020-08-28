@@ -14,6 +14,9 @@ Layout definitions for PDF output are stored in the configuration under the key 
        },
     }
 
+Topics in this document:
+{{< toc >}}
+
 ## Papersize
 
 The size of the paper for which output must be formatted. The size can be specified either as the name of a known page size, e.g. `"a4"`, or as a 2-element list containing the width and height of the page in _PDF units_ (_DTP points_, _pt_, 1/72 inch).
