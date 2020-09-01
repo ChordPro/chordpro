@@ -5,10 +5,12 @@ description: "ChordPro Implementation: Fonts"
 
 # ChordPro Implementation: Fonts
 
+{{< toc >}}
+
 TL;DR? See the [examples]({{< relref "#examples" >}}).
 
 ChordPro uses _fonts_ for PDF typesetting. In the config file fonts
-are specified for chords, lyrics, titles and so on. For example, in
+are specified for chords, lyrics, page titles and so on. For example, in
 the default config file in section `"pdf"` there is a section `"fonts"` that
 has a specification for the page titles:
 
