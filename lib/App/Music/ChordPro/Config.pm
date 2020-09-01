@@ -161,11 +161,27 @@ sub configurator {
     my $ccfg = {};
     while ( my ($k, $v) = each( %{ $options->{define} } ) ) {
 	my @k = split( /[:.]/, $k );
-	my $c = \$ccfg;
+	my $c = \$ccfg;		# new
+	my $o = $cfg;		# current
+	my $lk = pop(@k);	# last key
+
+	# Step through the keys.
 	foreach ( @k ) {
 	    $c = \($$c->{$_});
+	    $o = $o->{$_};
 	}
-	$$c = $v;
+
+	# Final key. Merge array if so.
+	if ( $lk =~ /^\d+$/ && ref($o) eq 'ARRAY' ) {
+	    unless ( ref($$c) eq 'ARRAY' ) {
+		# Only copy orig values the first time.
+		$$c->[$_] = $o->[$_] for 0..scalar(@{$o})-1;
+	    }
+	    $$c->[$lk] = $v;
+	}
+	else {
+	    $$c->{$lk} = $v;
+	}
     }
     $cfg = hmerge( $cfg, $ccfg, "" );
 

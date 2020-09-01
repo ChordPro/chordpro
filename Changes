@@ -1,3 +1,8 @@
+0.978
+
+    - !ChordPro functionality
+    - Allow array element addressing in --define.
+
 0.977	2020-08-26
 
     - !ChordPro functionality

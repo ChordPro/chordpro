@@ -460,6 +460,9 @@ active.
 
 `--define=`*item*
 
+**Warning:** This is not intended for general use. There is no guarantee
+that it will always yield the results you expect.
+
 Sets a configuration item. _item_ must be in the format of
 period-separated configuration keys, an equal sign, and the value.
 
@@ -469,6 +472,10 @@ For example, the equivalent of command line option `--no-chord-grids` is
 You can also use colons to separate the keys, e.g., `diagrams:show`.
 
 `--define` may be used more than once to set multiple items.
+
+Array items can be addressed with a (final) numeric key, e,g,
+`pdf.formats.default.footer.2` refers to the 3rd element from
+`pdf.formats.default.footer`.
 
 ### no-default-configs
 
