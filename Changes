@@ -2,6 +2,8 @@
 
     - !ChordPro functionality
     - Allow array element addressing in --define.
+    - !Bugfixes
+    - Fix chords transpose in comments with output ChordPro.
 
 0.977	2020-08-26
 
