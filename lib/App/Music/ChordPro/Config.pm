@@ -99,7 +99,7 @@ sub configurator {
 	    $add_legacy->( $options->{$c} );
 	}
 	else {
-	    warn("Adding config for $config\n") if $verbose;
+	    warn("Adding config for $c\n") if $verbose;
 	    $add_config->( $options->{$c} );
 	}
     }
