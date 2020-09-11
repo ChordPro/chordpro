@@ -2,6 +2,7 @@
 
     - !ChordPro functionality
     - Allow array element addressing in --define.
+    - Retain line numbers for backend diagnostics.
     - !Bugfixes
     - Fix chords transpose in comments with output ChordPro.
 

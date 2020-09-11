@@ -12,6 +12,8 @@ These settings control global behaviour of the ChordPro program and can be chang
     // General settings, to be changed by legacy configs and
     // command line.
     "settings" : {
+        // Add line info for backend diagnostics.
+        "lineinfo" : true,
         // Titles flush: default center.
         "titles" : "center",
         // Columns, default one.

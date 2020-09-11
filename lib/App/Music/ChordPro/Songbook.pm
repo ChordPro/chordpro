@@ -59,6 +59,7 @@ my $no_transpose;		# NYI
 my $no_substitute;
 
 my $diag;			# for diagnostics
+my $lineinfo;			# keep lineinfo
 
 sub ::break() {}
 
@@ -74,6 +75,7 @@ sub parse_file {
     $opts //= {};
     $diag->{format} = $opts->{diagformat} // $config->{diagnostics}->{format};
     $diag->{file}   = $opts->{_filesource};
+    $lineinfo = $config->{settings}->{lineinfo};
     for ( "transpose", "no-substitute", "no-transpose" ) {
 	next unless exists $opts->{$_};
 	$options->{$_} = $opts->{$_};
@@ -314,6 +316,7 @@ sub add {
     my $self = shift;
     push( @{$song->{body}},
 	  { context => $in_context,
+	    $lineinfo ? ( line => $diag->{line} ) : (),
 	    @_ } );
     if ( $in_context eq "chorus" ) {
 	push( @chorus, { context => $in_context, @_ } );

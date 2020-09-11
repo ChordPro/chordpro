@@ -55,6 +55,7 @@ sub configurator {
 	$config = $cfg;
 	$options = { verbose => 0 };
 	process_config( $cfg, "<builtin>" );
+	$cfg->{settings}->{lineinfo} = 0;
 	return $cfg;
     }
     if ( keys(%$opts) ) {
@@ -633,6 +634,8 @@ sub default_config() {
     // General settings, to be changed by legacy configs and
     // command line.
     "settings" : {
+      // Add line info for backend diagnostics.
+      "lineinfo" : true,
       // Titles flush: default center.
       "titles" : "center",
       // Columns, default one.

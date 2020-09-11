@@ -95,6 +95,12 @@
 		    ]
 		},
 
+		"lineinfo": {
+		    "description": "Retain line info for backend diagnostics.",
+		    "default": true,
+		    "type": "boolean"
+		},
+
 		"lyrics-only": {
 		    "description": "Suppress chords.",
 		    "type": "boolean",
