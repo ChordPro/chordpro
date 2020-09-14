@@ -34,6 +34,7 @@ clean ::
 
 #### NOTE: THIS MAY NEED ADJUSTMENT FOR YOUR SYSTEM
 ISC := 	"C:\Program Files (x86)\Inno Setup 6\Compil32.exe"
+ISCC := "C:\Program Files (x86)\Inno Setup 6\iscc.exe"
 
 .PHONY :: iss_par
 iss_par :: chordpro.exe wxchordpro.exe innosetup_par.iss chordproinst.bmp
@@ -88,7 +89,7 @@ loaders : "${DEST}\wxchordpro.exe" "${DEST}\chordpro.exe"
 .PHONY :: iss
 iss : "${DEST}\wxchordpro.exe" innosetup.iss
 	perl vfix.pl
-	${ISC} /cc innosetup.iss
+	${ISCC} innosetup.iss
 
 clean ::
 	-rmdir /q/s "${DEST}"
