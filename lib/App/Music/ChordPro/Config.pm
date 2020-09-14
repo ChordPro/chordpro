@@ -39,7 +39,7 @@ This module can be run standalone and will print the default config.
 
 =cut
 
-sub hmerge($$$);
+sub hmerge($$;$);
 sub clone($);
 
 sub default_config();
@@ -155,7 +155,7 @@ sub configurator {
 	local $::config = $cfg;
 	process_config( $new, $file );
 	# Merge final.
-	$cfg = hmerge( $cfg, $new, "" );
+	$cfg = hmerge( $cfg, $new );
     }
 
     # Handle defines from the command line.
@@ -184,14 +184,14 @@ sub configurator {
 	    $$c->{$lk} = $v;
 	}
     }
-    $cfg = hmerge( $cfg, $ccfg, "" );
+    $cfg = hmerge( $cfg, $ccfg );
 
     if ( $cfg->{settings}->{transcode} //= $options->{transcode} ) {
 	my $xc = $cfg->{settings}->{transcode};
 	# Load the appropriate notes config, but retain the current parser.
 	unless ( App::Music::ChordPro::Chords::Parser->have_parser($xc) ) {
 	    my $file = getresource("notes/$xc.json");
-	    my $new = hmerge( $cfg, get_config($file), "");
+	    my $new = hmerge( $cfg, get_config($file) );
 	    local $::config = $new;
 	    App::Music::ChordPro::Chords::Parser->new($new);
 	}
@@ -369,8 +369,7 @@ sub process_config {
 
     App::Music::ChordPro::Chords->reset_parser;
     App::Music::ChordPro::Chords::Parser->reset_parsers;
-    local $::config = { %$::config, %$cfg };
-
+    local $::config = hmerge( $::config, $cfg );
     if ( $cfg->{chords} ) {
 	my $c = $cfg->{chords};
 	if ( @$c && $c->[0] eq "append" ) {
@@ -517,7 +516,7 @@ sub cfg2props {
     return $ret;
 }
 
-sub hmerge($$$) {
+sub hmerge($$;$) {
 
     # Merge hashes. Right takes precedence.
     # Based on Hash::Merge::Simple by Robert Krimen.
