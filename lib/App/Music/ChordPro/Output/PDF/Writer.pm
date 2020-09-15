@@ -515,7 +515,7 @@ sub embed {
     $a->movie($file, "ChordPro" );
     $a->open(1);
 
-    # Create/reuse temp file for (final) config.
+    # Create/reuse temp file for (final) config and run time info.
     my $cf;
     if ( $cname ) {
 	open( $cf, '>', $cname );
@@ -529,6 +529,15 @@ sub embed {
 
     $a = $self->{pdfpage}->annotation();
     $a->movie($cname, "ChordProConfig" );
+    $a->open(0);
+
+    open( $cf, '>', $cname );
+    binmode( $cf, ':utf8' );
+    print $cf ::runtimeinfo();
+    close($cf);
+
+    $a = $self->{pdfpage}->annotation();
+    $a->movie($cname, "ChordProRunTime" );
     $a->open(0);
 }
 

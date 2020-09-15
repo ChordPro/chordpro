@@ -920,16 +920,40 @@ To learn more about ChordPro, look for the man page or do
 
 For more information, see https://www.chordpro.org .
 
+Run-time information:
+@{[::runtimeinfo()]}
 EndOfAbout
-
-    my $fmt = " %-22.22s %s\n";
-
-    print( "Run-time information:\n" );
-    printf( $fmt, "ChordPro version", $VERSION );
-    printf( $fmt, "Perl version", $^V );
-    printf( $fmt, App::Packager::Packager(), App::Packager::Version() )
-      if $App::Packager::PACKAGED;
     exit $exit if defined $exit;
+}
+
+sub ::runtimeinfo {
+    my $fmt = "%-22.22s %s\n";
+
+    my $msg = sprintf( $fmt, "ChordPro version", $VERSION );
+    if ( $VERSION =~ /_/ ) {
+	$msg =~ s/\n$/ (Unsupported development snapshot)\n/;
+    }
+    $msg .= sprintf( $fmt, "Perl version", $^V );
+    $msg .= sprintf( $fmt, "Perl program", $^X );
+    if ( $App::Packager::PACKAGED ) {
+	my $p = App::Packager::Packager();
+	$p .= " Packager" unless $p =~ /packager/i;
+	$msg .= sprintf( $fmt, $p, App::Packager::Version() );
+    }
+    eval { require Text::Layout;
+	$msg .= sprintf( $fmt, "Text::Layout", $Text::Layout::VERSION );
+    };
+    eval { require HarfBuzz::Shaper;
+	$msg .= sprintf( $fmt, "HarfBuzz::Shaper", $HarfBuzz::Shaper::VERSION );
+	$msg .= sprintf( $fmt, "HarfBuzz library", HarfBuzz::Shaper::hb_version_string() );
+    };
+    $msg .= sprintf( $fmt, "File::LoadLines", $File::LoadLines::VERSION );
+    eval { require PDF::API2;
+	$msg .= sprintf( $fmt, "PDF::API2", $PDF::API2::VERSION );
+    };
+    eval { require Font::TTF;
+	$msg .= sprintf( $fmt, "Font::TTF", $Font::TTF::VERSION );
+    };
 }
 
 sub app_usage {
