@@ -533,7 +533,7 @@ sub embed {
 
     open( $cf, '>', $cname );
     binmode( $cf, ':utf8' );
-    print $cf ::runtimeinfo();
+    print $cf (::runtimeinfo());
     close($cf);
 
     $a = $self->{pdfpage}->annotation();
