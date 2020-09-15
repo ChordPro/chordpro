@@ -21,6 +21,9 @@ static char selfpath[PATH_MAX];	/* /foo/bar */
 
 int main( int argc, char **argv, char **env ) {
 
+  // Make ourselves known.
+  putenv( "PPL_PACKAGED=1.00" );
+
   /* Assuming the program binary   /foo/bar/blech */
   char scriptname[PATH_MAX];	/* blech */
   memset (selfpath,   0, PATH_MAX);
