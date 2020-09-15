@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Mon Apr 27 15:13:18 2020
 # Last Modified By: Johan Vromans
-# Last Modified On: Wed Apr 29 20:33:01 2020
-# Update Count    : 37
+# Last Modified On: Tue Sep 15 12:04:52 2020
+# Update Count    : 40
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -90,8 +90,11 @@ sub extract_zip {
 	    next if $skip;
 	}
 
-	$zip->extractMember( $member, catfile( $dest, $x ) ) == AZ_OK
+	my $file = catfile( $dest, $x );
+	$zip->extractMember( $member, $file ) == AZ_OK
 	  or die("Zip extract $x error\n");
+	my $perm = (stat($file))[2] & 0777;
+	chmod( $perm | 0220, $file );
     }
 
 }
