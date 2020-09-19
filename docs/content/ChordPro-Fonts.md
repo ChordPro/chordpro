@@ -95,7 +95,25 @@ This is the short story. The longer story is that instead of a file name you can
             ...
     },
 
-`"interline"` is a font property that changes the way ChordPro deals with the font. Exact semantics of font properties are still under development.
+`"interline"` is a font property that changes the way ChordPro deals
+with the font.
+
+Another property is `"shaping"`. This property is mandatory for
+typesetting languages that need special glyph processing. For example:
+
+    "fontconfig" : {
+        "devanagari" : {
+            ""            : {
+                "file"    : "lohit-devanagari/Lohit-Devanagari.ttf",
+                "shaping" : 1,
+            },
+            ...
+    },
+
+Note that shaping requires the perl module `HarfBuzz::Shaper` to be
+installed on the system.
+
+_Exact semantics of font properties are still under development._
 
 ## Method 2: Using a font filename
 
