@@ -62,6 +62,10 @@ pp/linux/Makefile
 pp/linux/ppl.c
 pp/linux/chordpro.pp
 pp/linux/wxchordpro.pp
+pp/macos/Makefile
+pp/macos/chordpro.pp
+pp/macos/wxchordpro.pp
+pp/macos/ppl.c
 pp/pp2ppl.pl
 pp/windows/Makefile
 pp/windows/chordpro.pp
