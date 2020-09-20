@@ -36,8 +36,9 @@ unpack :
 	perl ../pp2ppl.pl --dest=${DEST} wxchordpro --quiet
 	perl ../pp2ppl.pl --dest=${DEST} chordpro   --quiet
 	cp -p "${ROOT}/lib/App/Music/ChordPro/Config.pm" "${DEST}/lib/App/Music/ChordPro/Config.pm" 
-	cp "${DEST}/res/icons/chordpro.ico" ${DEST}
+	cp "${DEST}/res/icons/chordpro.icns" ${DEST}
 	mv "${DEST}/res" "${DEST}/lib/App/Music/ChordPro/"
+	rm -f "${DEST}/script/main.pl"
 
 # Copy core DLLs.
 # We assume that the target system has the primary ddls like -ldl, -lc, ...
@@ -70,3 +71,32 @@ clean ::
 
 "${DEST}/poc" : poc.c
 	${CC} ${CCOPTS} -o "${DEST}/poc" poc.c -ldl
+
+APPDIR := ChordPro.app
+
+app : ppl app1
+
+app1 :
+	rm -fr ${APPDIR}
+	cp -a "${DEST}/" "${APPDIR}/"
+	cp "${DEST}/chordpro.icns" "${APPDIR}"
+	mkdir -p "${APPDIR}/Contents/MacOS"
+	mkdir -p "${APPDIR}/Contents/Resources"
+	cp PkgInfo Info.plist "${APPDIR}/Contents"
+	cp "${DEST}/chordpro.icns" "${APPDIR}/Contents/Resources"
+	cd "${APPDIR}"; mv chordpro wxchordpro Contents/MacOS
+	cd "${APPDIR}"; mv script lib Contents/MacOS
+	cd "${APPDIR}"; mv lib*.dylib Contents/MacOS
+	cd "${APPDIR}"; rm -f MANIFEST META.yml
+
+dmg : app dmg1
+
+dmg1 :
+	rm -f Chordpro-Installer.dmg
+	bash create-dmg \
+		--volname "ChordPro Installer" \
+		--volicon "${APPDIR}/chordpro.icns" \
+		ChordPro-Installer.dmg "${APPDIR}"
+
+clean ::
+	rm -fr ${APPDIR}
