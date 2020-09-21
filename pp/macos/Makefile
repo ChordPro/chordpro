@@ -26,7 +26,7 @@ clean ::
 
 PERLLIB := $(shell perl -MConfig -E 'say $$Config{archlib}')
 PERLINC := ${PERLLIB}/perl5/CORE
-PERLSO  := libperl.dylib
+PERLSO  := $(shell perl -MConfig -E 'say $$Config{libperl}')
 
 .PHONY :: ppl
 ppl :: clean chordpro wxchordpro unpack copy_coredll loaders
@@ -44,7 +44,7 @@ unpack :
 # We assume that the target system has the primary ddls like -ldl, -lc, ...
 copy_coredll :
 	cp -pL ${PERLLIB}/../citrus/dll/libperl.dylib ${DEST}/${PERLSO}
-	install_name_tool -id  @executable_path/libperl.dylib ${DEST}/${PERLSO}
+	install_name_tool -id  @executable_path/${PERLSO} ${DEST}/${PERLSO}
 
 PREFIX := '"script/"'
 CCOPTS := $(shell perl -MExtUtils::Embed -e ccopts) -DSCRIPTPREFIX=${PREFIX}
@@ -74,12 +74,13 @@ clean ::
 
 APPDIR := ChordPro.app
 
+# http://www.mactipsandtricks.com/website/articles/Wiley_HT_appBundles2.lasso
+
 app : ppl app1
 
 app1 :
 	rm -fr ${APPDIR}
 	cp -a "${DEST}/" "${APPDIR}/"
-	cp "${DEST}/chordpro.icns" "${APPDIR}"
 	mkdir -p "${APPDIR}/Contents/MacOS"
 	mkdir -p "${APPDIR}/Contents/Resources"
 	cp PkgInfo Info.plist "${APPDIR}/Contents"
@@ -88,6 +89,9 @@ app1 :
 	cd "${APPDIR}"; mv script lib Contents/MacOS
 	cd "${APPDIR}"; mv lib*.dylib Contents/MacOS
 	cd "${APPDIR}"; rm -f MANIFEST META.yml
+	perl reloc.pl ${APPDIR}/Contents/MacOS/libwx*.dylib
+	perl reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*.bundle
+	perl reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*/*.bundle
 
 dmg : app dmg1
 

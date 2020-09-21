@@ -18,7 +18,29 @@
   <string>APPL</string>
   <key>CFBundleSignature</key>
   <string>CHO#</string>
+  <key>CFBundleShortVersion</key>
+  <string>0.977</string>
   <key>CFBundleVersion</key>
-  <string>1.0</string>
+  <string>10.2</string>
+  <key>CFBundleDocumentTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleTypeExtensions</key>
+      <array>
+	<string>cho</string>
+	<string>chordpro</string>
+	<string>chopro</string>
+	<string>crd</string>
+      </array>
+      <key>CFBundleTypeIconFile</key>
+      <string>chordpro.icns</string>
+      <key>LSIsAppleDefaultForType</key>
+      <string>Yes</string>
+      <key>CFBundleTypeRole</key>
+      <string>Editor</string>
+      <key>CFBundleTypeName</key>
+      <string>ChordPro document</string>
+    </dict>
+  </array>
 </dict>
 </plist>

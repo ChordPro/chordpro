@@ -70,6 +70,7 @@ pp/macos/ppl.c
 pp/macos/Info.plist
 pp/macos/PkgInfo
 pp/macos/create-dmg
+pp/macos/reloc.pl
 pp/pp2ppl.pl
 pp/windows/Makefile
 pp/windows/chordpro.pp
