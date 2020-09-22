@@ -2,6 +2,8 @@
 
 # GNUmakefile for MacOS, Citrus Perl
 
+default : dmg
+
 .PHONY :: chordpro wxchordpro
 
 ROOT   := ../..
@@ -37,6 +39,7 @@ unpack :
 	perl ../pp2ppl.pl --dest=${DEST} chordpro   --quiet
 	cp -p "${ROOT}/lib/App/Music/ChordPro/Config.pm" "${DEST}/lib/App/Music/ChordPro/Config.pm" 
 	cp "${DEST}/res/icons/chordpro.icns" ${DEST}
+	cp "${DEST}/res/icons/chordpro-doc.icns" ${DEST}
 	mv "${DEST}/res" "${DEST}/lib/App/Music/ChordPro/"
 	rm -f "${DEST}/script/main.pl"
 
@@ -49,6 +52,8 @@ copy_coredll :
 PREFIX := '"script/"'
 CCOPTS := $(shell perl -MExtUtils::Embed -e ccopts) -DSCRIPTPREFIX=${PREFIX}
 LDOPTS := ${DEST}/${PERLSO} -lpthread
+WXCLIB := ${HOME}/lib/citrusperl/vendor/lib/Alien/wxWidgets/osx_cocoa_3_0_2_uni
+WXCNFG := ${WXCLIB}/bin/wx-config
 
 .PHONY :: loaders
 loaders : "${DEST}/wxchordpro" "${DEST}/chordpro"
@@ -58,8 +63,9 @@ loaders : "${DEST}/wxchordpro" "${DEST}/chordpro"
 _loaders : "${DEST}/chordpro"
 	cp "${DEST}/chordpro" "${DEST}/perl"
 
-"${DEST}/wxchordpro" : ppl.c
+"${DEST}/wxchordpro" : ppl.c dndhandler.cpp
 	${CC} ${CCOPTS} -o "${DEST}/wxchordpro" -L${DEST} ${LDOPTS} ppl.c
+	${CXX} -o "${DEST}/dndhandler" dndhandler.cpp `${WXCNFG} --cxxflags --libs`
 
 "${DEST}/chordpro" : ppl.c
 	${CC} ${CCOPTS} -o "${DEST}/chordpro" -L${DEST} ${LDOPTS} ppl.c
@@ -79,27 +85,36 @@ APPDIR := ChordPro.app
 app : ppl app1
 
 app1 :
-	rm -fr ${APPDIR}
+	rm -fr ${APPDIR} || rm -fr ${APPDIR}
 	cp -a "${DEST}/" "${APPDIR}/"
 	mkdir -p "${APPDIR}/Contents/MacOS"
 	mkdir -p "${APPDIR}/Contents/Resources"
 	cp PkgInfo Info.plist "${APPDIR}/Contents"
 	cp "${DEST}/chordpro.icns" "${APPDIR}/Contents/Resources"
-	cd "${APPDIR}"; mv chordpro wxchordpro Contents/MacOS
+	cp "${DEST}/chordpro-doc.icns" "${APPDIR}/Contents/Resources"
+	cd "${APPDIR}"; mv chordpro wxchordpro dndhandler Contents/MacOS
 	cd "${APPDIR}"; mv script lib Contents/MacOS
 	cd "${APPDIR}"; mv lib*.dylib Contents/MacOS
+	cd "${APPDIR}"; cp "${WXCLIB}/lib/libwx_osx_cocoau_xrc-3.0.dylib" Contents/MacOS
+	cd "${APPDIR}"; cp "${WXCLIB}/lib/libwx_osx_cocoau_qa-3.0.dylib" Contents/MacOS
 	cd "${APPDIR}"; rm -f MANIFEST META.yml
-	perl reloc.pl ${APPDIR}/Contents/MacOS/libwx*.dylib
-	perl reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*.bundle
-	perl reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*/*.bundle
+	perl ./reloc.pl ${APPDIR}/Contents/MacOS/dndhandler
+	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libwx*.dylib
+	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*.bundle
+	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*/*.bundle
 
 dmg : app dmg1
 
 dmg1 :
 	rm -f Chordpro-Installer.dmg
-	bash create-dmg \
+	bash ./create-dmg \
 		--volname "ChordPro Installer" \
 		--volicon "${APPDIR}/chordpro.icns" \
+		--window-pos 200 200 \
+		--window-size 600 300 \
+		--icon "${APPDIR}" 50 50 \
+		--add-file "READ ME FIRST.html" README.html 300 50 \
+		--hide-extension "READ ME FIRST.html" \
 		ChordPro-Installer.dmg "${APPDIR}"
 
 clean ::

@@ -7,7 +7,7 @@
   <key>CFBundleDevelopmentRegion</key>
   <string>English</string>
   <key>CFBundleExecutable</key>
-  <string>wxchordpro</string>
+  <string>dndhandler</string>
   <key>CFBundleIconFile</key>
   <string>chordpro.icns</string>
   <key>CFBundleIdentifier</key>
@@ -21,7 +21,9 @@
   <key>CFBundleShortVersion</key>
   <string>0.977</string>
   <key>CFBundleVersion</key>
-  <string>10.2</string>
+  <string>0.977.10.2</string>
+  <key>NSHumanReadableCopyright</key>
+  <string>ⓒ 2010,2020 The ChordPro Team, www.chordpro.org</string>
   <key>CFBundleDocumentTypes</key>
   <array>
     <dict>
@@ -33,7 +35,7 @@
 	<string>crd</string>
       </array>
       <key>CFBundleTypeIconFile</key>
-      <string>chordpro.icns</string>
+      <string>chordpro-doc.icns</string>
       <key>LSIsAppleDefaultForType</key>
       <string>Yes</string>
       <key>CFBundleTypeRole</key>

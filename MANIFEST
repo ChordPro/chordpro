@@ -43,6 +43,7 @@ lib/App/Music/ChordPro/res/config/ukulele.json
 lib/App/Music/ChordPro/res/examples/swinglow.cho
 lib/App/Music/ChordPro/res/icons/chordpro.ico
 lib/App/Music/ChordPro/res/icons/chordpro.icns
+lib/App/Music/ChordPro/res/icons/chordpro-doc.icns
 lib/App/Music/ChordPro/res/notes/common.json
 lib/App/Music/ChordPro/res/notes/dutch.json
 lib/App/Music/ChordPro/res/notes/german.json
@@ -67,10 +68,12 @@ pp/macos/Makefile
 pp/macos/chordpro.pp
 pp/macos/wxchordpro.pp
 pp/macos/ppl.c
+pp/macos/dndhandler.cpp
 pp/macos/Info.plist
 pp/macos/PkgInfo
 pp/macos/create-dmg
 pp/macos/reloc.pl
+pp/macos/README.html
 pp/pp2ppl.pl
 pp/windows/Makefile
 pp/windows/chordpro.pp
