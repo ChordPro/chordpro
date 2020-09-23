@@ -65,7 +65,9 @@ _loaders : "${DEST}/chordpro"
 
 "${DEST}/wxchordpro" : ppl.c dndhandler.cpp
 	${CC} ${CCOPTS} -o "${DEST}/wxchordpro" -L${DEST} ${LDOPTS} ppl.c
-	${CXX} -o "${DEST}/dndhandler" dndhandler.cpp `${WXCNFG} --cxxflags --libs`
+	${CXX} -o "${DEST}/dndhandler" \
+		dndhandler.cpp `${WXCNFG} --cxxflags --libs`
+	perl ./reloc.pl "${DEST}/dndhandler"
 
 "${DEST}/chordpro" : ppl.c
 	${CC} ${CCOPTS} -o "${DEST}/chordpro" -L${DEST} ${LDOPTS} ppl.c
@@ -95,10 +97,7 @@ app1 :
 	cd "${APPDIR}"; mv chordpro wxchordpro dndhandler Contents/MacOS
 	cd "${APPDIR}"; mv script lib Contents/MacOS
 	cd "${APPDIR}"; mv lib*.dylib Contents/MacOS
-	cd "${APPDIR}"; cp "${WXCLIB}/lib/libwx_osx_cocoau_xrc-3.0.dylib" Contents/MacOS
-	cd "${APPDIR}"; cp "${WXCLIB}/lib/libwx_osx_cocoau_qa-3.0.dylib" Contents/MacOS
 	cd "${APPDIR}"; rm -f MANIFEST META.yml
-	perl ./reloc.pl ${APPDIR}/Contents/MacOS/dndhandler
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libwx*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*.bundle
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*/*.bundle

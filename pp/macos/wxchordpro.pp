@@ -17,4 +17,6 @@
 --link=/Users/jv/lib/citrusperl/vendor/lib/Alien/wxWidgets/osx_cocoa_3_0_2_uni/lib/libwx_osx_cocoau_propgrid-3.0.0.dylib
 --link=/Users/jv/lib/citrusperl/vendor/lib/Alien/wxWidgets/osx_cocoa_3_0_2_uni/lib/libwx_osx_cocoau_ribbon-3.0.0.dylib
 --link=/Users/jv/lib/citrusperl/vendor/lib/Alien/wxWidgets/osx_cocoa_3_0_2_uni/lib/libwx_osx_cocoau_richtext-3.0.0.dylib
+--link=/Users/jv/lib/citrusperl/vendor/lib/Alien/wxWidgets/osx_cocoa_3_0_2_uni/lib/libwx_osx_cocoau_xrc-3.0.0.dylib
+--link=/Users/jv/lib/citrusperl/vendor/lib/Alien/wxWidgets/osx_cocoa_3_0_2_uni/lib/libwx_osx_cocoau_qa-3.0.0.dylib
 --link=/Users/jv/lib/citrusperl/vendor/lib/Alien/wxWidgets/osx_cocoa_3_0_2_uni/lib/libwx_osx_cocoau_webview-3.0.0.dylib

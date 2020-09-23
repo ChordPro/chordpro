@@ -1,28 +1,164 @@
-#include <time.h>
+/* Drag'n'Drop and Finder command handling.
+ *
+ * This small Wx program intercepts the initial Finder calls and
+ * then execs the real program.
+ */
+
 #include "wx/wx.h"
 #include "wx/wxprec.h"
+#include "wx/event.h"
+
+#ifdef DEBUG
+
+#include <time.h>
+FILE *dbgf;
+
+void openlog() {
+  if ( !dbgf ) {
+    dbgf = fopen( DEBUG, "a" );
+    time_t t;
+    time(&t);
+    fprintf( dbgf, "%s", ctime(&t) );
+  }
+}
+
+#endif
 
 class DnDHandler : public wxApp {
 
 public:
-    virtual bool OnInit();
-    virtual void MacOpenFiles(const wxArrayString &fileNames);
-    virtual void MacNewFile();
+  // The usual...
+  virtual bool OnInit();
+
+  // We're going to override these to catch Finder calls.
+  virtual void MacPrintFile(const wxString &fileName);
+  virtual void MacOpenFiles(const wxArrayString &fileNames);
+  virtual void MacNewFile();
+  virtual void MacReopenApp();
+
+  // Our Idle handler.
+  // As soon as the app becomes idle, we are done and we'll
+  // exec the real program.
+  void DoIdle(wxIdleEvent &event);
+
+  DECLARE_EVENT_TABLE()
 };
 
+// Standard Wx stuff.
 DECLARE_APP(DnDHandler)
+
+BEGIN_EVENT_TABLE( DnDHandler, wxApp )
+  EVT_IDLE( DnDHandler::DoIdle )
+END_EVENT_TABLE()
+
 IMPLEMENT_APP(DnDHandler)
 
-wxFrame *frame;
-const char *argfile;
+/* Alternatively:
+int main( int argc, char **argv ) {
+  // MyWxApp derives from wxApp
+  wxApp::SetInstance( new DnDHandler() );
+  wxEntryStart( argc, argv );
+  wxTheApp->CallOnInit();
+  fprintf( dbgf, "OnRun...\n" );
+  wxTheApp->OnRun();
+  fprintf( dbgf, "OnExit...\n" );
+  wxTheApp->OnExit();
+  fprintf( dbgf, "Cleanup...\n" );
+  wxEntryCleanup();
+}
+*/
+
+// Register Finder calls.
+const char *calltype = "Normal";
+char argfile[PATH_MAX] = "";
+
+// Chain handler.
+int chain( int argc, char **argv );
+
+// Wx init function. Must return 'true'.
+bool DnDHandler::OnInit() {
 
 #ifdef DEBUG
-FILE *f;
+  openlog();
+  fprintf( dbgf, "OnInit entry\n" );
 #endif
+
+#if 0
+
+  // A frame to show...
+  wxFrame* frame = new wxFrame( (wxFrame*) NULL, -1,
+				"Drag'n'Drop Handler" );
+  frame->Show(true);
+  SetTopWindow(frame);
+
+#endif
+
+#ifdef DEBUG
+  fprintf( dbgf, "OnInit return\n" );
+#endif
+
+  return true;
+}
+
+// Handlers for Finder calls.
+void DnDHandler::MacPrintFile(const wxString &fileName) {
+  calltype = "Print";
+  strcpy( argfile, fileName.c_str() );
+#ifdef DEBUG
+  openlog();
+  fprintf( dbgf, "MacPrintFile called (%s)\n", argfile );
+#endif
+}
+
+void DnDHandler::MacOpenFiles(const wxArrayString &fileNames) {
+#ifdef DEBUG
+  openlog();
+  fprintf( dbgf, "MacOpenFiles called, %lu args\n", fileNames.GetCount() );
+#endif
+  if ( fileNames.GetCount() > 0 ) {
+    strcpy( argfile, fileNames.Item(0).c_str() );
+  }
+  calltype = "Open";
+}
+
+void DnDHandler::MacNewFile() {
+#ifdef DEBUG
+  openlog();
+  fprintf( dbgf, "MacNewFile called\n" );
+#endif
+  // Always called. Ignore.
+}
+
+void DnDHandler::MacReopenApp() {
+#ifdef DEBUG
+  openlog();
+  fprintf( dbgf, "MacReopenApp called\n" );
+#endif
+  // Ignore.
+}
+
+// Event(ually).
+void DnDHandler::DoIdle( wxIdleEvent& evt ) {
+
+#ifdef DEBUG
+  openlog();
+  fprintf( dbgf, "DoIdle called\n" );
+#endif
+
+  // The app is set up. Pass control to the chain routine.
+  chain( wxTheApp->argc, wxTheApp->argv );
+  // We'll not supposed to get here.
+}
+
+/**************** Chain Handler ****************/
 
 static char selfpath[PATH_MAX];	/* /foo/bar */
 
-int _main( int argc, char **argv  ) {
+int chain( int argc, char **argv ) {
+
+#ifdef DEBUG
+  fprintf( dbgf, "entry: %s (%s)\n", calltype, argfile );
+#endif
 
   /* Assuming the program binary   /foo/bar/blech */
   char scriptname[PATH_MAX];	/* blech */
@@ -40,8 +176,8 @@ int _main( int argc, char **argv  ) {
       strcpy( scriptname, selfpath );
 
 #ifdef DEBUG
-    fprintf( stderr, "selfpath:   %s\n", selfpath );
-    fprintf( stderr, "scriptname: %s\n", scriptname );
+    fprintf( dbgf, "selfpath:   %s\n", selfpath );
+    fprintf( dbgf, "scriptname: %s\n", scriptname );
 #endif
   }
 
@@ -60,8 +196,8 @@ int _main( int argc, char **argv  ) {
     }
 
 #ifdef DEBUG
-    fprintf( stderr, "cwdpath:    %s\n", selfpath );
-    fprintf( stderr, "scriptname: %s\n", scriptname );
+    fprintf( dbgf, "cwdpath:    %s\n", selfpath );
+    fprintf( dbgf, "scriptname: %s\n", scriptname );
 #endif
   }
 
@@ -70,7 +206,7 @@ int _main( int argc, char **argv  ) {
   strcpy( scriptpath, selfpath );
   strcat( scriptpath, "wxchordpro" );
 #ifdef DEBUG
-  fprintf( stderr, "scriptpath: %s\n", scriptpath );
+  fprintf( dbgf, "scriptpath: %s\n", scriptpath );
 #endif
 
   static char **ourarg = NULL;
@@ -81,53 +217,19 @@ int _main( int argc, char **argv  ) {
   for ( int i=1; i<argc; ++i ) {
     ourarg[i] = argv[i];
   }
-  if ( argfile ) {
+  if ( argfile[0] ) {
     ourarg[argc] = (char*) argfile;
     argc++;
   }
+
 #ifdef DEBUG
-  fprintf( f, "+ %s\n", scriptpath );
-  fprintf( f, "& %s\n", argfile );
+  fprintf( dbgf, "+ %s\n", scriptpath );
   for ( int i=0; i<argc; ++i ) {
-    fprintf( f, "++ %s\n", ourarg[i] );
+    fprintf( dbgf, "++ %s\n", ourarg[i] );
   }
-  fclose(f);
+  fclose(dbgf);
 #endif
+
+  // Here we go...
   return execv( scriptpath, ourarg );
 }
-
-bool DnDHandler::OnInit() {
-
-#ifdef DEBUG
-  f = fopen( "/Users/jv/tmp/xx.log", "a" );
-  time_t t;
-  time(&t);
-  fprintf( f, "%s", ctime(&t) );
-  fprintf( f, "& %s\n", argfile );
-#endif
-
-#if 0
-
-  frame = new wxFrame( (wxFrame*) NULL, -1,
-		       "Hello wxWidgets World" );
-  frame->CreateStatusBar();
-  frame->SetStatusText( "Hello World" );
-  frame->Show(true);
-  SetTopWindow(frame);
-
-#endif
-
-  return true;
-}
-
-void DnDHandler::MacOpenFiles(const wxArrayString &fileNames) {
-  if ( fileNames.GetCount() > 0 ) {
-    argfile = fileNames.Item(0).c_str();
-  }
-  _main( wxGetApp().argc, wxGetApp().argv );
-}
-
-void DnDHandler::MacNewFile() {
-  _main( wxGetApp().argc, wxGetApp().argv );
-}
-

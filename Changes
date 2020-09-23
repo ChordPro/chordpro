@@ -4,6 +4,7 @@
     - Allow array element addressing in --define.
     - Retain line numbers for backend diagnostics.
     - Experimental support for MacOS.
+    - New icons.
     - !Bugfixes
     - Fix chords transpose in comments with output ChordPro.
 
