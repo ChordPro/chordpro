@@ -1,3 +1,12 @@
+0.977
+
+	Suppress initial open dialog on MacOS.
+	Add more runtime info in About.
+
+0.976
+
+	Add Help menu item for debug info in PDF.
+
 0.974
 
 	Show filename in window title.
