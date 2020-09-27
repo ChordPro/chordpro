@@ -42,6 +42,7 @@ lib/App/Music/ChordPro/res/config/ukulele-ly.json
 lib/App/Music/ChordPro/res/config/ukulele.json
 lib/App/Music/ChordPro/res/examples/swinglow.cho
 lib/App/Music/ChordPro/res/icons/chordpro.ico
+lib/App/Music/ChordPro/res/icons/chordpro-doc.ico
 lib/App/Music/ChordPro/res/icons/chordpro.icns
 lib/App/Music/ChordPro/res/icons/chordpro-doc.icns
 lib/App/Music/ChordPro/res/notes/common.json

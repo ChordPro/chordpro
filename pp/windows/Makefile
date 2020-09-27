@@ -39,6 +39,7 @@ ISCC := "C:\Program Files (x86)\Inno Setup 6\iscc.exe"
 .PHONY :: iss_par
 iss_par :: chordpro.exe wxchordpro.exe innosetup_par.iss chordproinst.bmp
 	copy ${RES}\icons\chordpro.ico .
+	copy ${RES}\icons\chordpro-doc.ico .
 	perl vfix.pl innosetup_par.iss
 	${ISC} /cc innosetup_par.iss
 
@@ -57,6 +58,7 @@ unpack :
 	perl ..\pp2ppl.pl --quiet --dest="${DEST}" wxchordpro.exe
 	copy "${ROOT}\lib\App\Music\ChordPro\Config.pm" "${DEST}\lib\App\Music\ChordPro\Config.pm" 
 	copy "${DEST}\res\icons\chordpro.ico" "${DEST}"
+	copy "${DEST}\res\icons\chordpro-doc.ico" "${DEST}"
 	move "${DEST}\res" "${DEST}\lib\App\Music\ChordPro"
 
 # The core DLLs needed for Strawberry perl. The Wx libs have been unpacked already.

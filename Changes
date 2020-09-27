@@ -5,6 +5,7 @@
     - Retain line numbers for backend diagnostics.
     - Experimental support for MacOS.
     - New icons.
+    - Windows: Installer associates ChordPro with .cho files.
     - !Bugfixes
     - Fix chords transpose in comments with output ChordPro.
 

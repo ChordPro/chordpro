@@ -27,6 +27,7 @@ ShowLanguageDialog=no
 LanguageDetectionMethod=none
 WizardImageFile=chordproinst.bmp
 InfoAfterFile=infoafter.txt
+ChangesAssociations=yes
 
 [Components]
 Name: GUI; Description: "ChordPro GUI application"; Types: full compact
@@ -46,6 +47,12 @@ Name: "{group}\{cm:UninstallProgram,{#APP}}"; Filename: "{uninstallexe}"
 
 Name: "{commondesktop}\{#APP}"; Filename: "{app}\wxchordpro.exe"; Tasks: desktopicon\common; IconFilename: "{app}\chordpro.ico";
 Name: "{userdesktop}\{#APP}"; Filename: "{app}\wxchordpro.exe"; Tasks: desktopicon\user; IconFilename: "{app}\chordpro.ico";
+
+[Registry]
+Root: HKCR; Subkey: ".cho"; ValueType: string; ValueName: ""; ValueData: "org.chordpro.chordpro"; Flags: uninsdeletevalue
+Root: HKCR; Subkey: "org.chordpro.chordpro"; ValueType: string; ValueName: ""; ValueData: "ChordPro File"; Flags: uninsdeletekey
+Root: HKCR; Subkey: "org.chordpro.chordpro\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\chordpro-doc.ico"
+Root: HKCR; Subkey: "org.chordpro.chordpro\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\wxchordpro.exe"" ""%1"""
 
 [Messages]
 BeveledLabel=Perl Powered Software by Squirrel Consultancy
