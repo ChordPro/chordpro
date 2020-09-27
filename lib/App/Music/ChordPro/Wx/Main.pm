@@ -60,14 +60,14 @@ sub init {
 
     $prefctl ||=
       {
-       cfgpreset => lc(_T("Default")),
-       xcode => "",
-       notation => "",
-       skipstdcfg => 1,
-       configfile => "",
-       pdfviewer => "",
-       editfont => 0,
-       editsize => FONTSIZE,
+       cfgpreset   => lc(_T("Default")),
+       xcode	   => "",
+       notation	   => "",
+       skipstdcfg  => 1,
+       configfile  => "",
+       pdfviewer   => "",
+       editfont	   => 0,
+       editsize	   => FONTSIZE,
       };
 
     if ( $^O =~ /^mswin/i ) {
@@ -116,7 +116,10 @@ sub init {
 	return 1;
     }
 
-    $self->opendialog;
+    # Skip initial open dialog for MacOS. Use Finder calls.
+    unless ( $^O =~ /darwin/ ) {
+	$self->opendialog;
+    }
     $self->newfile unless $self->{_currentfile};
     return 1;
 }
@@ -586,7 +589,8 @@ sub OnPreferences {
 
 sub _aboutmsg {
     my ( $self ) = @_;
-
+    my $fmt = "  %s %s\n";
+    my $fmtv = "  %s version %s\n";
     my $firstyear = 2016;
     my $year = 1900 + (localtime(time))[5];
     if ( $year != $firstyear ) {
@@ -596,21 +600,46 @@ sub _aboutmsg {
     # Sometimes version numbers are localized...
     my $dd = sub { my $v = $_[0]; $v =~ s/,/./g; $v };
 
-    join( "",
-	  "ChordPro Preview Editor version ",
-	  $dd->($App::Music::ChordPro::VERSION),
-	  "\n",
-	  "https://www.chordpro.org\n",
-	  "Copyright $year Johan Vromans <jvromans\@squirrel.nl>\n",
-	  "\n",
-	  "GUI wrapper ", $dd->($VERSION), " designed with wxGlade\n\n",
-	  "Perl version ", $dd->(sprintf("%vd",$^V)), "\n",
-	  "wxPerl version ", $dd->($Wx::VERSION), "\n",
-	  "wxWidgets version ", $dd->(Wx::wxVERSION), "\n",
-	  $App::Packager::PACKAGED
-	  ? App::Packager::Packager()." version ".App::Packager::Version()."\n"
-	  : "",
-	);
+    my $msg = join
+      ( "",
+	"ChordPro Preview Editor version ",
+	$dd->($App::Music::ChordPro::VERSION),
+	"\n",
+	"https://www.chordpro.org\n",
+	"Copyright $year Johan Vromans <jvromans\@squirrel.nl>\n",
+	"\n",
+	"GUI wrapper ", $dd->($VERSION), " designed with wxGlade\n\n",
+	"Run-time information:\n" );
+
+    $msg .= sprintf( $fmtv, "Perl", $dd->(sprintf("%vd",$^V)) );
+    $msg .= sprintf( $fmt,  "Perl program", $^X );
+    $msg .= sprintf( $fmtv, "wxPerl", $dd->($Wx::VERSION) );
+    $msg .= sprintf( $fmtv, "wxWidgets", $dd->(Wx::wxVERSION) );
+
+    if ( $App::Packager::PACKAGED ) {
+	my $p = App::Packager::Packager();
+	$p .= " Packager" unless $p =~ /packager/i;
+	$msg .= sprintf( $fmtv, $p, App::Packager::Version() );
+    }
+    eval { require Text::Layout;
+	$msg .= sprintf( $fmtv, "Text::Layout", $Text::Layout::VERSION );
+    };
+    eval { require HarfBuzz::Shaper;
+	$msg .= sprintf( $fmtv, "HarfBuzz::Shaper", $HarfBuzz::Shaper::VERSION );
+	$msg .= sprintf( $fmtv, "HarfBuzz library", HarfBuzz::Shaper::hb_version_string() );
+    };
+    $msg .= sprintf( $fmtv, "File::LoadLines", $File::LoadLines::VERSION );
+    eval { require PDF::API2;
+	$msg .= sprintf( $fmtv, "PDF::API2", $PDF::API2::VERSION );
+    } or
+    eval { require PDF::Builder;
+	$msg .= sprintf( $fmtv, "PDF::Builder", $PDF::Builder::VERSION );
+    };
+    eval { require Font::TTF;
+	$msg .= sprintf( $fmtv, "Font::TTF", $Font::TTF::VERSION );
+    };
+
+    return $msg;
 }
 
 sub OnAbout {
