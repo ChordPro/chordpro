@@ -50,6 +50,7 @@ Name: "{userdesktop}\{#APP}"; Filename: "{app}\wxchordpro.exe"; Tasks: desktopic
 
 [Registry]
 Root: HKCR; Subkey: ".cho"; ValueType: string; ValueName: ""; ValueData: "org.chordpro.chordpro"; Flags: uninsdeletevalue
+Root: HKCR; Subkey: ".crd"; ValueType: string; ValueName: ""; ValueData: "org.chordpro.chordpro"; Flags: uninsdeletevalue
 Root: HKCR; Subkey: "org.chordpro.chordpro"; ValueType: string; ValueName: ""; ValueData: "ChordPro File"; Flags: uninsdeletekey
 Root: HKCR; Subkey: "org.chordpro.chordpro\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\chordpro-doc.ico"
 Root: HKCR; Subkey: "org.chordpro.chordpro\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\wxchordpro.exe"" ""%1"""
