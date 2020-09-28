@@ -1,14 +1,17 @@
 ---
-title: "Installation on Mac OS/X"
-description: "Installation on Mac OS/X"
+title: "Installation on MacOS"
+description: "Installation on MacOS"
 ---
 
-# Installation on Mac OS/X
+# Installation on MacOS
 
 
-Modern versions of Mac OS/X come with a pre-installed version of Perl
+Modern versions of MacOS come with a pre-installed version of Perl
 that is capable of running the command line version of ChordPro. 
 It is currently not possible (well, not easy) to run the GUI version.
+To run the GUI version please use the [binary install]({{< relref
+"Install-MacOS-Native" >}}). Note that the binary install includes
+both the GUI and the command line version of ChordPro.
 
 To install the command line version of ChordPro, open a command
 terminal window and type
@@ -48,7 +51,7 @@ there:
 
 `/Users/USER/.config/chordpro/chordpro.json`
 
-where _USER_ is your Mac OS/X user name.
+where _USER_ is your MacOS user name.
 
 If there is no `.config` folder, and you do not want to create it, you
 can create a subfolder `.chordpro` in your home and place your
@@ -69,6 +72,3 @@ ChordPro, unless the user specifies the `--nodefaultconfigs` or
 This may be a good place to set system dependent settings like the
 printer paper size and font paths.
 
-![]({{< asset "images/maintenance.png" >}})
-
-Please help to get the GUI version running on Mac OS/X.

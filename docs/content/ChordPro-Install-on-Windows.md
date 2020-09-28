@@ -5,7 +5,7 @@ description: "Installation on Microsoft Windows"
 
 # Installation on Microsoft Windows
 
-![]({{< asset "images/maintenance.png" >}})
+_This information may be sub-optimal and/or incomplete. Please help improving it._
 
 ## Binaries
 
@@ -23,6 +23,9 @@ Currently, there are some easy options (and several harder ones that will not be
 This is also an open source Perl distribution, but it needs some manual work to get everything going.
 * [Citrus Perl]({{< relref "Install-Windows-Citrus" >}})  
 This is an open source Perl distribution which includes many tools.
-Unfortunately, its future is uncertain.
+Unfortunately, it seems to be abandoned.
 * [ActiveState Perl]({{< relref "Install-Windows-ActiveState" >}})  
-This is a commercial Perl implementation but it provides a Community Edition that is free to use for individuals.
+This is a commercial Perl implementation but it provides a Community
+Edition that is free to use for individuals.  
+**ActiveState repository is currently having problems distributing
+recent Perl modules. You may wish to try [Strawberry Perl]({{< relref "Install-Windows-Strawberry" >}}) instead.**
