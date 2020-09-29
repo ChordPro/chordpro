@@ -6,6 +6,7 @@
     - Experimental support for MacOS.
     - New icons.
     - Windows: Installer associates ChordPro with .cho files.
+    - Linux: Support for desktop and app icons.
     - !Bugfixes
     - Fix chords transpose in comments with output ChordPro.
 

@@ -926,6 +926,8 @@ EndOfAbout
     exit $exit if defined $exit;
 }
 
+use Cwd qw(realpath);
+
 sub ::runtimeinfo {
     my $fmt = "%-22.22s %s\n";
 
@@ -940,6 +942,8 @@ sub ::runtimeinfo {
 	$p .= " Packager" unless $p =~ /packager/i;
 	$msg .= sprintf( $fmt, $p, App::Packager::Version() );
     }
+    $msg .= sprintf( $fmt, "Resource path",
+		     realpath( App::Packager::GetResourcePath() ) );
     eval { require Text::Layout;
 	$msg .= sprintf( $fmt, "Text::Layout", $Text::Layout::VERSION );
     };

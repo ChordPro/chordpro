@@ -11,16 +11,21 @@ if [ "$1" = "uninstall" ]; then
     action="uninstall"
 fi
 
-LIB=${HOME}/src/ChordPro
+RES=`chordpro --about|perl -ne 's/^Resource path +(.+)/$1/i && print'`
+if [ "${RES}" = "" ]; then
+    echo "Error finding ChordPro resources. Is it installed?" 1>2
+    exit 1
+fi
+
 XDG=${HOME}/.local/share
 XDG_APP=${XDG}/applications
 XDG_MIME=${XDG}/mime
 XDG_ICONS=${XDG}/icons
 
 # Icons.
-ILIB=${LIB}/lib/App/Music/ChordPro/res/icons/
+ILIB=${RES}/icons
 # Templates.
-TLIB=${LIB}/pp/linux
+TLIB=${RES}/linux
 TPL=chordpro.desktop
 XML=chordpro.xml
 ISIZE=256

@@ -30,8 +30,8 @@ You will get a file open dialog. To close the program, you can press `Cancel` an
 
 If your system uses Open Desktop compliant desktop icons, you can set
 up a start icon for ChordPro on the Desktop and in the system
-applications menu by executing the script `setup_desktop.sh` **TODO**.
-
+applications menu by executing the script `setup_desktop.sh` in the
+[ChordPro resource directory]({{< relref "chordpro-resource-directory.md" >}}).
 This will also associate files with extension `.cho`, `.chordpro`,
 `.chopro`, and `.crd` with the ChordPro program.
 
