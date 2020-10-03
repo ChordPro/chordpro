@@ -1,6 +1,7 @@
 0.977
 
-	Suppress initial open dialog on MacOS.
+	Miscellaneous fixes for MacOS. Due to 'security' constraints
+	it is not possible to use file open dialogs.
 	Add more runtime info in About.
 
 0.976

@@ -30,6 +30,8 @@ my $notdesc =
     "roman"	   => "I, II, III, ...",
   };
 
+my $is_macos = $^O =~ /darwin/;
+
 sub get_configfile {
     my ( $self ) = @_;
     # warn("CF: ", $self->GetParent->{prefs_configfile} || "");
@@ -99,6 +101,24 @@ sub __set_properties {
 	$n++;
     }
     $ctl->SetSelection($check);
+
+    if ( $is_macos ) {
+	# Cannot use chooser, allow editing.
+	$self->{t_configfiledialog} =
+	  Wx::TextCtrl->new($self, wxID_ANY, "", wxDefaultPosition,
+			    wxDefaultSize, 0);
+    }
+}
+
+sub __do_layout {
+    my ( $self ) = @_;
+    $self->SUPER::__do_layout;
+
+    if ( $is_macos ) {
+	$self->{sz_configfile}->Hide($self->{b_configfiledialog});
+	$self->{sz_configfile}->Layout();
+
+    }
 }
 
 sub _enablecustom {
@@ -196,9 +216,20 @@ sub OnAccept {
 	next unless $ctl->IsChecked($n);
 	push( @p, $styles->[$n] );
 	if ( $n == $cnt - 1 ) {
+	    my $c = $self->{t_configfiledialog}->GetValue;
+	    if ( $is_macos && ! -r $c ) {
+		my $md = Wx::MessageDialog->new
+		  ( $self,
+		    "Custom config file $c can not be read.\n".
+		    "Please enter the name of an existing config file.",
+		    "Config file can not be read",
+		    0 | wxOK | wxICON_QUESTION );
+		my $ret = $md->ShowModal;
+		$md->Destroy;
+		return;
+	    }
 	    $self->GetParent->{_cfgpresetfile} =
-	      $self->GetParent->{prefs_configfile} =
-		$self->{t_configfiledialog}->GetValue;
+	      $self->GetParent->{prefs_configfile} = $c;
 	}
     }
 
