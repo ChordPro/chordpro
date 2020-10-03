@@ -28,6 +28,7 @@ sub new {
     my $self = bless $_[0]->SUPER::new(), __PACKAGE__;
 
     Wx::Event::EVT_IDLE($self, $self->can('OnIdle'));
+    Wx::Event::EVT_CLOSE($self, $self->can('OnClose'));
 
     $self;
 }
@@ -53,6 +54,8 @@ my @fonts =
   );
 
 my $prefctl;
+
+my $is_macos = $^O =~ /darwin/;
 
 # Explicit (re)initialisation of this class.
 sub init {
@@ -110,6 +113,12 @@ sub init {
     $self->{main_menubar}->FindItem(wxID_REDO)
       ->Enable($self->{t_source}->CanRedo);
 
+    # On MacOS, we cannot open arbitrary files due to sandboxing
+    # constraints.
+    if ( $is_macos ) {
+	$self->{main_menubar}->FindItem(wxID_OPEN) ->Enable(0);
+    }
+
     Wx::Log::SetTimestamp(' ');
     if ( @ARGV && -s $ARGV[0] ) {
 	$self->openfile( shift(@ARGV) );
@@ -117,7 +126,7 @@ sub init {
     }
 
     # Skip initial open dialog for MacOS. Use Finder calls.
-    unless ( $^O =~ /darwin/ ) {
+    unless ( $is_macos ) {
 	$self->opendialog;
     }
     $self->newfile unless $self->{_currentfile};
@@ -219,9 +228,15 @@ sub newfile {
 {title: New Song}
 
 EOD
+    $self->{t_source}->SetModified(0);
     Wx::LogStatus("New file");
     $self->{prefs_xpose} = 0;
     $self->{prefs_xposesharp} = 0;
+    # On MacOS, we cannot save arbitrary files due to sandboxing
+    # constraints.
+    if ( $is_macos ) {
+	$self->{main_menubar}->FindItem(wxID_SAVE) ->Enable(0);
+    }
 }
 
 my ( $preview_cho, $preview_pdf );
@@ -385,6 +400,16 @@ sub checksaved {
 	    $self->saveas( $self->{_currentfile} );
 	}
     }
+    elsif ( $is_macos ) {
+	my $md = Wx::MessageDialog->new
+	  ( $self,
+	    "Sorry, cannot save your changes due to MacOS constraints.",
+	    "Contents has changed",
+	    0 | wxOK | wxCANCEL );
+	my $ret = $md->ShowModal;
+	$md->Destroy;
+	return if $ret == wxID_CANCEL;
+    }
     else {
 	my $md = Wx::MessageDialog->new
 	  ( $self,
@@ -509,15 +534,16 @@ sub OnPreview {
     $self->preview;
 }
 
-sub OnQuit {
+sub OnClose {
     my ( $self, $event ) = @_;
     $self->SavePreferences;
     return unless $self->checksaved;
-    $self->Close(1);
+    $self->Destroy;
 }
 
-sub OnExit {			# called implicitly
+sub OnQuit {			# Exit from menu
     my ( $self, $event ) = @_;
+    $self->Close;		# will generate Close event
 }
 
 sub OnUndo {
@@ -570,7 +596,13 @@ sub OnHelp_Example {
     return unless $self->checksaved;
     $self->openfile( getresource( "examples/swinglow.cho" ) );
     undef $self->{_currentfile};
-    $self->{t_source}->SetModified(1);
+    $self->{t_source}->SetModified(0);
+
+    # On MacOS, we cannot save arbitrary files due to sandboxing
+    # constraints.
+    if ( $is_macos ) {
+	$self->{main_menubar}->FindItem(wxID_SAVE) ->Enable(0);
+    }
 }
 
 sub OnHelp_DebugInfo {
@@ -585,6 +617,11 @@ sub OnPreferences {
     $self->{d_prefs} ||= App::Music::ChordPro::Wx::PreferencesDialog->new($self, -1, "Preferences");
     my $ret = $self->{d_prefs}->ShowModal;
     $self->SavePreferences if $ret == wxID_OK;
+}
+
+sub OnText {
+    my ($self, $event) = @_;
+    $self->{t_source}->SetModified(1);
 }
 
 sub _aboutmsg {
