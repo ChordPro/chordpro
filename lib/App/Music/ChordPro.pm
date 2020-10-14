@@ -720,6 +720,7 @@ sub app_setup {
 	  "filelist=s@",		# List of input files
 	  "meta=s\%",			# Command line meta data
 	  "decapo",			# remove capo
+	  "fragment|F",			# partial (incomplete) song
 
           ### Standard Chordii Options ###
 
@@ -971,16 +972,17 @@ Usage: $0 [ options ] [ file ... ]
 
 Options:
     --about  -A                   About ChordPro...
+    --config=JSON  --cfg          Config definitions (multiple)
     --cover=FILE                  Add cover pages from PDF document
+    --decapo                      Eliminate capo settings
     --diagrams=WHICH		  Prints chord diagrams
     --encoding=ENC                Encoding for input files (UTF-8)
     --filelist=FILE               Reads song file names from FILE
+    --fragment -F                 Partial (incomplete) song
     --lyrics-only  -l             Only prints lyrics
     --output=FILE  -o             Saves the output to FILE
-    --config=JSON  --cfg          Config definitions (multiple)
     --start-page-number=N  -p     Starting page number [1]
     --toc --notoc -i              Generates/suppresses a table of contents
-    --decapo                      Eliminate capo settings
     --transcode=SYS  -xc          Transcodes to notation system
     --transpose=N  -x             Transposes by N semi-tones
     --version  -V                 Prints version and exits

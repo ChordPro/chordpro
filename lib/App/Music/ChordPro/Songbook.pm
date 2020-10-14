@@ -108,6 +108,7 @@ sub parse_song {
     $no_transpose = $options->{'no-transpose'};
     $no_substitute = $options->{'no-substitute'};
     $decapo = $options->{decapo} || $config->{settings}->{decapo};
+    my $fragment = $options->{fragment};
 
     $song = App::Music::ChordPro::Song->new
       ( source => { file => $diag->{file}, line => 1 + $$linecnt },
@@ -193,7 +194,7 @@ sub parse_song {
 		next;
 	    }
 	    # Collect pre-title stuff separately.
-	    if ( exists $song->{title} ) {
+	    if ( exists $song->{title} || $fragment ) {
 		$self->add( type => "ignore", text => $_ );
 	    }
 	    else {
@@ -223,6 +224,11 @@ sub parse_song {
 	    next;
 	}
 
+	if ( /\S/ && !$fragment && !exists $song->{title} ) {
+	    do_warn("Missing {title} -- prepare for surprising results");
+	    $song->{title} = "Untitled";
+	}
+
 	if ( $in_context eq "tab" ) {
 	    $self->add( type => "tabline", text => $_ );
 	    next;
@@ -236,7 +242,7 @@ sub parse_song {
 	if ( /\S/ ) {
 	    $self->add( type => "songline", $self->decompose($_) );
 	}
-	elsif ( exists $song->{title} ) {
+	elsif ( exists $song->{title} || $fragment ) {
 	    $self->add( type => "empty" );
 	}
 	else {
