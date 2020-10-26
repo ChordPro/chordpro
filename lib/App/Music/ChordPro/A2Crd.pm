@@ -122,14 +122,42 @@ sub main {
 
 ################ Subroutines ################
 
+# plagerized from Text::Tabs
+sub expand {
+	my @l;
+	my $pad;
+	my $tabstop=8 ;
+	for ( @_ ) {
+		my $s = '';
+		for (split(/^/m, $_, -1)) {
+			my $offs = 0;
+			s{\t}{
+				$pad = $tabstop - (pos() + $offs) % $tabstop;
+				$offs += $pad - 1;
+				" " x $pad;
+			}eg;
+			$s .= $_;
+		}
+		push(@l, $s);
+	}
+	return @l if wantarray;
+	return $l[0];
+}
+
 # API: Produce ChordPro data from AsciiCRD lines.
 sub a2cho {
     my ( $lines ) = @_;
     my $map = "";
+    my @lines_with_tabs_replaced ;
     foreach ( @$lines ) {
-	$map .= classify($_);
+        if(/\t/) {
+	    $_ = expand($_) ;
+        }
+        push @lines_with_tabs_replaced, $_ ;
+        $map .= classify($_);
     }
-    maplines( $map, $lines );
+    maplines( $map, \@lines_with_tabs_replaced );
+
 }
 
 # Classify the line and return a single-char token.
@@ -140,31 +168,61 @@ sub classify {
 
     # Lyrics or Chords heuristic.
     my @words = split ( /\s+/, $line );
-    my $len = length($line);
-    $line =~ s/\s+//g;
-    my $type = ( $len / length($line) - 1 ) < 1 ? 'l' : 'c';
+
+    my $linelen_total = length($line) ;
+    $line =~ s/\s+//g ;
+    my $linelen_nonblank = length($line) ;
+
     my $p = App::Music::ChordPro::Chords::Parser->default;
-    if ( $type eq 'l') {
-        foreach (@words) {
-            if (length $_ > 0) {
-                if (!App::Music::ChordPro::Chords::parse_chord($_)) {
-                    return 'l';
-                }
-            }
-        }
-        return 'c';
+
+    my $n_chords=0 ;
+    my $n_words=0 ;
+    #print("CL:") ; # JJW, uncomment for debugging
+
+    foreach (@words) {
+
+	if (length $_ > 0) {
+	    $n_words++ ;
+
+	    my $is_chord = App::Music::ChordPro::Chords::parse_chord($_) ? 1 : 0  ;
+	    $n_chords++ if $is_chord ;
+
+	    #print(" \'$is_chord:$_\'") ; # JJW, uncomment for debugging
+	}
     }
-    return $type;
+
+    my $type = $n_chords/$n_words > 0.4 ? 'c' : 'l' ;
+
+    if($type eq 'l') {
+	# is it likely the line had a lot of unknown chords, check
+	# the ratio of total chars to nonblank chars , if it is large then
+	# it's probably a chord line
+	$type = 'c' if $n_words > 1 && $linelen_total/$linelen_nonblank > 2. ;
+    }
+
+    #print(" --- ($n_chords/$n_words) = $type\n") ; # JJW, uncomment for debugging
+
+    return $type ;
 }
 
 # Process the lines via the map.
 sub maplines {
     my ( $map, $lines ) = @_;
     my @out;
+    my $line_number=1 ;
+    my $title_was_output=0 ;
 
     # Preamble.
     while ( $map =~ s/^([l_{])// ) {
-	push( @out, ($1 eq "l" ? "# " : "" ) . shift( @$lines ) );
+	if($line_number == 1 && $1 eq "l") {
+	    push( @out, "{title:" . shift( @$lines ) . "}");
+	    $title_was_output=1 ;
+	} elsif($title_was_output && $line_number == 2 && $1 eq "l" && length($lines->[0]) > 0) {
+	    push( @out, "{subtitle:" . shift( @$lines ) . "}");
+	} else {
+	    push( @out, ($1 eq "l" ? "# " : "" ) . shift( @$lines ) );
+	}
+	$line_number++ ;
     }
 
     # Process the lines using the map.
@@ -173,6 +231,13 @@ sub maplines {
 
 	# Blank line preceding chords: pass.
 	if ( $map =~ s/^_c/c/ ) {
+	    push( @out, '');
+	    shift(@$lines);
+	    # Fall through.
+	}
+
+	# Blank line preceding lyrics: pass.
+	if ( $map =~ s/^_l/l/ ) {
 	    push( @out, '');
 	    shift(@$lines);
 	    # Fall through.
@@ -188,11 +253,6 @@ sub maplines {
 	    push( @out, '' );
 	    shift( @$lines );
 	    push( @out, combine( shift(@$lines), shift(@$lines), "__l" ) );
-	}
-
-	# Chordless lyrics line.
-	elsif ( $map =~ s/^_l// ) {
-	    push( @out, combine( shift(@$lines), shift(@$lines), "_l" ) );
 	}
 
 	# Lone lyrics or directives.

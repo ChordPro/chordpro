@@ -71,6 +71,7 @@ sub new {
 
 sub default {
     my ( $pkg ) = @_;
+
     return $parsers->{common} //=
       App::Music::ChordPro::Chords::Parser::Common->new
 	( { %{$::config},
@@ -221,6 +222,7 @@ sub parse_chord {
     $q = "-" if $q eq "m" || $q eq "min";
     $q = "+" if $q eq "aug";
     $q = "0" if $q eq "dim";
+    $q = "0" if $q eq "o"; # JJW added
     $info->{qual_canon} = $q;
 
     my $x = $+{ext} // "";
@@ -301,6 +303,16 @@ my $additions_maj =
    "7b9b13",
    "7b9b5",
    "7b9sus",
+   "7-13",      # JJW added "-" versions of the above 7b's
+   "7-13sus",
+   "7-5",
+   "7-9",
+   "7-9#11",
+   "7-9#5",
+   "7-9#9",
+   "7-9-13",
+   "7-9-5",
+   "7-9sus",
    "7sus",
    "7susadd3",
    "7\\+",			# REGEXP!!!
@@ -310,6 +322,7 @@ my $additions_maj =
    "9#11",
    "9#5",
    "9b5",
+   "9-5",     # JJW added
    "9sus",
    "9add6",
    ( map { ( "maj$_", "^$_" ) }
@@ -346,6 +359,7 @@ my $additions_min =
    "6",
    "69",
    "7b5",
+   "7-5", # JJW added
    ( map { ( "$_", "maj$_", "^$_" ) }
      "7",
      "9",
@@ -430,7 +444,7 @@ sub load_notes {
       "(?<ext>" . join("|", keys(%$additions_min)) . ")|";
     $c_pat .= "(?<qual>\\+|aug)".
       "(?<ext>" . join("|", keys(%$additions_aug)) . ")|";
-    $c_pat .= "(?<qual>0|dim)".
+    $c_pat .= "(?<qual>0|o|dim)".				# JJW added "o|"
       "(?<ext>" . join("|", keys(%$additions_dim)) . ")|";
     $c_pat .= "(?<qual>)".
       "(?<ext>" . join("|", keys(%$additions_maj)) . ")";
@@ -440,7 +454,7 @@ sub load_notes {
 
     # In relaxed form, we accept anything for extension.
     my $c_rpat = "(?<root>" . $n_pat . ")";
-    $c_rpat .= "(?:(?<qual>-|min|m(?!aj)|\\+|aug|0|dim|)(?<ext>.*))";
+    $c_rpat .= "(?:(?<qual>-|min|m(?!aj)|\\+|aug|0|o|dim|)(?<ext>.*))";		# JJW added "o|"
     $c_rpat = qr/$c_rpat/;
 
     # Store in the object.
@@ -497,7 +511,7 @@ sub parse_chord {
 	$bass = $2;
     }
 
-    return unless $chord =~ /^$n_pat(?<qual>-|\+|0|aug|m(?!aj)|dim)?(?<ext>.*)$/;
+    return unless $chord =~ /^$n_pat(?<qual>-|\+|0|o|aug|m(?!aj)|dim)?(?<ext>.*)$/; # JJW added |o|
 
     my $info = { system => "nashville",
 		 parser => $self,
@@ -511,6 +525,7 @@ sub parse_chord {
     $q = "-" if $q eq "m";
     $q = "+" if $q eq "aug";
     $q = "0" if $q eq "dim";
+    $q = "0" if $q eq "o"; # JJW added
     $info->{qual_canon} = $q;
 
     my $x = $+{ext} // "";
@@ -597,7 +612,7 @@ sub parse_chord {
 	$bass = $2;
     }
 
-    return unless $chord =~ /^$r_pat(?<qual>\+|0|aug|dim|h)?(?<ext>.*)$/;
+    return unless $chord =~ /^$r_pat(?<qual>\+|0|o|aug|dim|h)?(?<ext>.*)$/; # JJW added "|o|"
 
     my $info = { system => "roman",
 		 parser => $self,
@@ -611,6 +626,7 @@ sub parse_chord {
     $q = "-" if $r eq lc($r);
     $q = "+" if $q eq "aug";
     $q = "0" if $q eq "dim";
+    $q = "0" if $q eq "o"; # JJW added "o"
     $info->{qual_canon} = $q;
 
     my $x = $+{ext} // "";
