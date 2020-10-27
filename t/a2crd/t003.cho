@@ -1,0 +1,11 @@
+
+
+{title: This is a song for testing spaces/tab handling}
+
+[A]The first [C]line of the [D]song is pret[E]ty [F]normal,
+[G]A line with only one chord
+A line [Am]with a single chord not right at the beginning of the line
+A[Bm] single space before the chord,
+Tw[Cm]o spaces before the chord
+A tab   [Cm]before the chord
+A [Dm]tab, th[Cm]en spaces before the chord

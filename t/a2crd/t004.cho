@@ -1,0 +1,13 @@
+# This is a song for testing chord detection
+{a directive}
+{another directive}
+
+{soc}
+[Esus4]A line [unknown]with one known, and one unknown chord
+{eoc}
+
+[D]  Sarah, [Bm7sus2]please[Bm7]
+
+[Esus4]A line [unk]with one known, [unk]and two unknown chords, chordline still detected
+
+A[Esus4] line [unk]with one known, [unk]and two unknown chords, one space chordline still detected

@@ -1086,6 +1086,14 @@ sub default_config() {
 	},
     },
 
+    // Settings for A2Crd.
+    "a2crd" : {
+	// Treat leading lyrics lines as title/subtitle lines.
+	"infer-titles" : true,
+	// Tab stop width.
+	"tabstop" : 8,
+    },
+
 }
 // End of config.
 End_Of_Config

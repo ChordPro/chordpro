@@ -122,22 +122,50 @@ sub main {
 
 ################ Subroutines ################
 
+# Replace tabs with blanks, retaining layout
+my $tabstop;
+sub expand {
+    my ( $line ) = @_;
+    return $line unless $line;
+    $tabstop //= $::config->{a2crd}->{tabstop};
+
+    my ( @l ) = split( /\t/, $line, -1 );
+    return $l[0] if @l == 1;
+
+    $line = shift(@l);
+    $line .= " " x ($tabstop-length($line)%$tabstop) . shift(@l) while @l;
+
+    return $line;
+}
+
 # API: Produce ChordPro data from AsciiCRD lines.
 sub a2cho {
     my ( $lines ) = @_;
     my $map = "";
+    my @lines_with_tabs_replaced ;
     foreach ( @$lines ) {
-	$map .= classify($_);
+        if(/\t/) {
+	    $_ = expand($_) ;
+        }
+        push @lines_with_tabs_replaced, $_ ;
+        $map .= classify($_);
     }
-    maplines( $map, $lines );
+    maplines( $map, \@lines_with_tabs_replaced );
+
 }
 
 # Classify the line and return a single-char token.
+my $classify;
 sub classify {
     my ( $line ) = @_;
     return '_' if $line =~ /^\s*$/;	# empty line
     return '{' if $line =~ /^\{.+/;	# directive
+    $classify //= \&classify_classic;
+    $classify->($line);
+}
 
+sub classify_classic {
+    my ( $line ) = @_;
     # Lyrics or Chords heuristic.
     my @words = split ( /\s+/, $line );
     my $len = length($line);
@@ -158,11 +186,27 @@ sub classify {
 }
 
 # Process the lines via the map.
+my $infer_titles;
 sub maplines {
     my ( $map, $lines ) = @_;
     my @out;
+    $infer_titles //= $::config->{a2crd}->{'infer-titles'};
 
     # Preamble.
+    # Pass empty lines.
+    while ( $map =~ s/^_// ) {
+	push( @out, shift( @$lines ) );
+    }
+
+    # Infer title/subtitle.
+    if ( $infer_titles && $map =~ s/^l// ) {
+	push( @out, "{title: " . shift( @$lines ) . "}");
+	if ( $map =~ s/^l// ) {
+	    push( @out, "{subtitle: " . shift( @$lines ) . "}");
+	}
+    }
+
+    # Pass lines until we have chords.
     while ( $map =~ s/^([l_{])// ) {
 	push( @out, ($1 eq "l" ? "# " : "" ) . shift( @$lines ) );
     }
