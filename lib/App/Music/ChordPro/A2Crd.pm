@@ -91,20 +91,17 @@ package App::Music::ChordPro::A2Crd;
 use App::Music::ChordPro::Config;
 
 use File::LoadLines;
+use Encode qw(decode decode_utf8 encode_utf8);
 
-no warnings 'redefine';
-sub ::run {
-    $options = app_setup( "a2crd", $VERSION );
-    $config = App::Music::ChordPro::Config::configurator;
-    binmode(STDERR, ':utf8');
-    binmode(STDOUT, ':utf8');
-    $options->{trace}   = 1 if $options->{debug};
-    $options->{verbose} = 1 if $options->{trace};
-    main();
-}
+# API: Main entry point.
+sub a2crd {
+    my ($opts) = @_;
+    $options = { %$options, %$opts } if $opts;
 
-sub main {
+    # One configurator to bind them all.
+    $config = App::Music::ChordPro::Config::configurator({});
 
+    # Process input.
     my $lines = loadlines( @ARGV ? $ARGV[0] : \*STDIN);
 
     my $fd;
@@ -122,12 +119,13 @@ sub main {
 
 ################ Subroutines ################
 
-# Replace tabs with blanks, retaining layout
+# Replace tabs with blanks, retaining layout.
 my $tabstop;
 sub expand {
     my ( $line ) = @_;
     return $line unless $line;
     $tabstop //= $::config->{a2crd}->{tabstop};
+    return $line unless $tabstop > 0;
 
     my ( @l ) = split( /\t/, $line, -1 );
     return $l[0] if @l == 1;
@@ -160,7 +158,14 @@ sub classify {
     my ( $line ) = @_;
     return '_' if $line =~ /^\s*$/;	# empty line
     return '{' if $line =~ /^\{.+/;	# directive
-    $classify //= \&classify_classic;
+    unless ( defined $classify ) {
+	my $classifier = $::config->{a2crd}->{classifier};
+	$classify = __PACKAGE__->can("classify_".$classifier);
+	unless ( $classify ) {
+	    warn("No such classifier: $classifier, using classic\n");
+	    $classify = \&classify_classic;
+	}
+    }
     $classify->($line);
 }
 
@@ -183,6 +188,50 @@ sub classify_classic {
         return 'c';
     }
     return $type;
+}
+
+# Alternative classifier by Jeff Welty.
+# Strategy: Percentage of recognzied chords.
+sub classify_pct_chords {
+    my ( $line ) = @_;
+
+    # Lyrics or Chords heuristic.
+    my @words = split ( /\s+/, $line );
+
+    my $linelen_total = length($line) ;
+    $line =~ s/\s+//g ;
+    my $linelen_nonblank = length($line) ;
+
+    my $p = App::Music::ChordPro::Chords::Parser->default;
+
+    my $n_chords=0 ;
+    my $n_words=0 ;
+    #print("CL:") ; # JJW, uncomment for debugging
+
+    foreach (@words) {
+
+	if (length $_ > 0) {
+	    $n_words++ ;
+
+	    my $is_chord = App::Music::ChordPro::Chords::parse_chord($_) ? 1 : 0  ;
+	    $n_chords++ if $is_chord ;
+
+	    #print(" \'$is_chord:$_\'") ; # JJW, uncomment for debugging
+	}
+    }
+
+    my $type = $n_chords/$n_words > 0.4 ? 'c' : 'l' ;
+
+    if($type eq 'l') {
+	# is it likely the line had a lot of unknown chords, check
+	# the ratio of total chars to nonblank chars , if it is large then
+	# it's probably a chord line
+	$type = 'c' if $n_words > 1 && $linelen_total/$linelen_nonblank > 2. ;
+    }
+
+    #print(" --- ($n_chords/$n_words) = $type\n") ; # JJW, uncomment for debugging
+
+    return $type ;
 }
 
 # Process the lines via the map.
@@ -208,7 +257,12 @@ sub maplines {
 
     # Pass lines until we have chords.
     while ( $map =~ s/^([l_{])// ) {
-	push( @out, ($1 eq "l" ? "# " : "" ) . shift( @$lines ) );
+	if ( $1 eq "l" ) {
+	    push( @out, "{comment: " . shift( @$lines ) ."}" );
+	}
+	else {
+	    push( @out, shift( @$lines ) );
+	}
     }
 
     # Process the lines using the map.
@@ -318,13 +372,17 @@ use Getopt::Long 2.13;
 my $my_package;
 # Program name and version.
 my ($my_name, $my_version);
+my %configs;
 
 sub app_setup {
+    goto &App::Music::ChordPro::app_setup;
     my ($appname, $appversion, %args) = @_;
     my $help = 0;               # handled locally
     my $manual = 0;             # handled locally
     my $ident = 0;              # handled locally
     my $version = 0;            # handled locally
+    my $defcfg = 0;		# handled locally
+    my $fincfg = 0;		# handled locally
 
     # Package name.
     $my_package = $args{package};
@@ -336,11 +394,51 @@ sub app_setup {
         ($my_name, $my_version) = qw( MyProg 0.01 );
     }
 
+    # Config files.
+    my $app_lc = lc("ChordPro"); # common config
+    if ( -d "/etc" ) {          # some *ux
+        $configs{sysconfig} =
+          File::Spec->catfile( "/", "etc", "$app_lc.json" );
+    }
+
+    my $e = $ENV{CHORDIIRC} || $ENV{CHORDRC};
+    if ( $ENV{HOME} && -d $ENV{HOME} ) {
+        if ( -d File::Spec->catfile( $ENV{HOME}, ".config" ) ) {
+            $configs{userconfig} =
+              File::Spec->catfile( $ENV{HOME}, ".config", $app_lc, "$app_lc.json" );
+        }
+        else {
+            $configs{userconfig} =
+              File::Spec->catfile( $ENV{HOME}, ".$app_lc", "$app_lc.json" );
+        }
+	$e ||= File::Spec->catfile( $ENV{HOME}, ".chordrc" );
+    }
+    $e ||= "/chordrc";		# Windows, most likely
+    $configs{legacyconfig} = $e if -s $e && -r _;
+
+    if ( -s ".$app_lc.json" ) {
+        $configs{config} = ".$app_lc.json";
+    }
+    else {
+        $configs{config} = "$app_lc.json";
+    }
+
     my $options =
       {
        verbose          => 0,           # verbose processing
+
+       # Development options (not shown with -help).
        debug            => 0,           # debugging
        trace            => 0,           # trace (show process)
+
+       # Service.
+       _package         => $my_package,
+       _name            => $my_name,
+       _version         => $my_version,
+       _stdin           => \*STDIN,
+       _stdout          => \*STDOUT,
+       _stderr          => \*STDERR,
+       _argv            => [ @ARGV ],
       };
 
     # Colled command line options in a hash, for they will be needed
@@ -351,6 +449,23 @@ sub app_setup {
     if ( !GetOptions
          ($clo,
           "output|o=s",                 # Saves the output to FILE
+
+          ### Configuration handling ###
+
+          'config|cfg=s@',
+          'noconfig|no-config',
+          'sysconfig=s',
+          'nosysconfig|no-sysconfig',
+          'userconfig=s',
+          'nouserconfig|no-userconfig',
+	  'nolegacyconfig|no-legacy-config',
+	  'nodefaultconfigs|no-default-configs|X',
+	  'define=s%',
+	  'print-default-config' => \$defcfg,
+	  'print-final-config'   => \$fincfg,
+
+          ### Standard options ###
+
           "version|V" => \$version,     # Prints version and exits
           'ident'               => \$ident,
           'help|h|?'            => \$help,
@@ -381,9 +496,61 @@ sub app_setup {
     }
     app_ident(\*STDOUT, 0) if $version;
 
+    # If the user specified a config, it must exist.
+    # Otherwise, set to a default.
+    for my $config ( qw(sysconfig userconfig legacyconfig) ) {
+        for ( $clo->{$config} ) {
+            if ( defined($_) ) {
+                die("$_: $!\n") unless -r $_;
+                next;
+            }
+	    # Use default.
+	    next if $clo->{nodefaultconfigs};
+	    next unless $configs{$config};
+            $_ = $configs{$config};
+            undef($_) unless -r $_;
+        }
+    }
+    for my $config ( qw(config) ) {
+        for ( $clo->{$config} ) {
+            if ( defined($_) ) {
+                foreach my $c ( @$_ ) {
+		    # Check for resource names.
+		    if ( ! -r $c && $c !~ m;[/.]; ) {
+			$c = ::rsc_or_file($c);
+		    }
+                    die("$c: $!\n") unless -r $c;
+                }
+                next;
+            }
+	    # Use default.
+	    next if $clo->{nodefaultconfigs};
+	    next unless $configs{$config};
+            $_ = [ $configs{$config} ];
+            undef($_) unless -r $_->[0];
+        }
+    }
+    # If no config was specified, and no default is available, force no.
+    for my $config ( qw(sysconfig userconfig config legacyconfig) ) {
+        $clo->{"no$config"} = 1 unless $clo->{$config};
+    }
+
+    ####TODO: Should decode all, and remove filename exception.
+    for ( keys %{ $clo->{define} } ) {
+	$clo->{define}->{$_} = decode_utf8($clo->{define}->{$_});
+    }
+
     # Plug in command-line options.
     @{$options}{keys %$clo} = values %$clo;
     # warn(Dumper($options), "\n") if $options->{debug};
+
+    if ( $defcfg || $fincfg ) {
+	print App::Music::ChordPro::Config::config_default()
+	  if $defcfg;
+	print App::Music::ChordPro::Config::config_final()
+	  if $fincfg;
+	exit 0;
+    }
 
     # Return result.
     $options;

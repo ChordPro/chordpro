@@ -1090,7 +1090,9 @@ sub default_config() {
     "a2crd" : {
 	// Treat leading lyrics lines as title/subtitle lines.
 	"infer-titles" : true,
-	// Tab stop width.
+	// Classification algorithm.
+	"classifier" : "pct_chords",
+	// Tab stop width for tab expansion. Set to zero to disable.
 	"tabstop" : 8,
     },
 

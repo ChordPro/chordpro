@@ -11,14 +11,11 @@ my $test = 2;
 
 BAIL_OUT("Missing a2crd test data") unless -d "a2crd";
 
-mkdir("out") unless -d "out";
-
 opendir( my $dh, "a2crd" ) || BAIL_OUT("Cannot open a2crd test data");
 my @files = grep { /^.+\.crd$/ } readdir($dh);
 close($dh);
 #diag("Testing ", scalar(@files), " crd files");
 
-our $config = App::Music::ChordPro::Config::configurator();
 our $options;
 $options->{fragment} = 1;
 
@@ -28,9 +25,11 @@ foreach my $file ( sort @files ) {
     #diag("Testing: $file");
     ( my $out = $file ) =~ s/\.crd/.tmp/;
     ( my $ref = $file ) =~ s/\.crd/.cho/;
-    @ARGV = ( $file );
-    $options->{output} = $out;
-    App::Music::ChordPro::A2Crd::main();
+    @ARGV = ( "--a2crd",
+	      "--no-default-configs",
+	      "--output", $out,
+	      $file );
+    ::run();
     my $ok = !differ( $out, $ref );
     ok( $ok, $file );
     unlink($out) if $ok;

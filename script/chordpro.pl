@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
 # Last Modified By: Johan Vromans
-# Last Modified On: Wed Nov  7 19:34:56 2018
-# Update Count    : 253
+# Last Modified On: Tue Oct 27 20:51:31 2020
+# Update Count    : 255
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -39,12 +39,7 @@ use lib "$FindBin::Bin/../CPAN";
 use lib "$FindBin::Bin/../lib";
 use App::Packager qw( :name App::Music::ChordPro );
 
-if ( @ARGV && $ARGV[0] eq "--a2crd" && shift ) {
-    require App::Music::ChordPro::A2Crd;
-}
-else {
-    require App::Music::ChordPro;
-}
+use App::Music::ChordPro;
 
 run();
 
