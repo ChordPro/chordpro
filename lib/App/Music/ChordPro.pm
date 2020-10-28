@@ -86,6 +86,15 @@ sub ::run {
 sub main {
     my ($opts) = @_;
     $options = { %$options, %$opts } if $opts;
+    if ( $options->{a2crd} ) {
+	require App::Music::ChordPro::A2Crd;
+	return App::Music::ChordPro::A2Crd::a2crd();
+    }
+    chordpro();
+
+}
+
+sub chordpro {
 
     # Establish backend.
     my $of = $options->{output};
@@ -644,6 +653,7 @@ sub app_setup {
 
     # Config files.
     my $app_lc = lc($my_name);
+    $app_lc = "chordpro" if $app_lc eq "a2crd";
     if ( -d "/etc" ) {          # some *ux
         $configs{sysconfig} =
           File::Spec->catfile( "/", "etc", "$app_lc.json" );
@@ -709,6 +719,7 @@ sub app_setup {
 
           ### Options ###
 
+	  "a2crd",			# perform ascii to cho
           "output|o=s",                 # Saves the output to FILE
           "generate=s",
           "backend-option|bo=s\%",

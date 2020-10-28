@@ -45,3 +45,6 @@ Specific settings for HTML output.
 * [ChordPro Output]({{< relref "ChordPro-Configuration-ChordPro" >}})  
 Specific settings for ChordPro output.
 
+* [ASCII text to ChordPro converter]({{< relref "ChordPro-Configuration-A2Crd" >}})  
+Settings for the ASCII text to ChordPro converter.
+

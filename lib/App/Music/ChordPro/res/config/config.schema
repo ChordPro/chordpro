@@ -221,6 +221,23 @@
 	    }
 	},
 
+	"a2crd": {
+	    "description": "Settings for A2Crd.",
+	    "properties": {
+		"infer-titles": {
+		    "description": "Treat leading lyrics lines as title/subtitle lines.",
+		    "type": "boolean",
+		    "default": true
+		},
+		"tabstop": {
+		    "description": "Tab width.",
+		    "type": "integer",
+		    "default": 8
+		}
+            },
+            "additionalProperties": { "not": {} }
+	},
+
 	"chords": {
 	    "description": "Additional chord definitions.",
 	    "type": [ "array", "null" ],
