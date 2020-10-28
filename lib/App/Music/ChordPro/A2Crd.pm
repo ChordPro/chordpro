@@ -165,6 +165,8 @@ sub classify {
     my ( $line ) = @_;
     return '_' if $line =~ /^\s*$/;	# empty line
     return '{' if $line =~ /^\{.+/;	# directive
+    return 'C' if $line =~ /^\s*\[.*?\]/;	# comment
+    return 't' if $line =~ /^\s*[eBGDAEbgdae]\|.*?-.*\|/;	# tab
 
     # Lyrics or Chords heuristic.
     my @words = split ( /\s+/, $line );
@@ -212,6 +214,15 @@ sub maplines {
     my $line_number=1 ;
     my $title_was_output=0 ;
 
+    #print STDERR "$map\n" ;
+    #exit ;
+
+    while ( $map =~ s/^_// ) {
+	# simply output blank lines at the start of the file
+	# but don't count the line as possible title
+	push( @out, shift( @$lines ) );
+    }
+
     # Preamble.
     while ( $map =~ s/^([l_{])// ) {
 	if($line_number == 1 && $1 eq "l") {
@@ -220,7 +231,9 @@ sub maplines {
 	} elsif($title_was_output && $line_number == 2 && $1 eq "l" && length($lines->[0]) > 0) {
 	    push( @out, "{subtitle:" . shift( @$lines ) . "}");
 	} else {
-	    push( @out, ($1 eq "l" ? "# " : "" ) . shift( @$lines ) );
+	    my $pre  = ($1 eq "l" ? "{comment:" : "" ) ;
+	    my $post = ($1 eq "l" ? "}" : "" ) ;
+	    push( @out, $pre . shift( @$lines ) . $post );
 	}
 	$line_number++ ;
     }
@@ -236,11 +249,46 @@ sub maplines {
 	    # Fall through.
 	}
 
+	# A comment line, output and continue
+	if ( $map =~ s/^C// ) {
+	    my $line = shift(@$lines);
+	    $line =~ s/\[/{comment:/ ;
+	    $line =~ s/\]/}/ ;
+	    push( @out, $line);
+	    # and Fall through.
+	}
+
+	# Tabs
+	my $in_tab=0 ;
+
+	# special case: chords before tabs, keep the chords in {sot}, which is probably
+	# what the original text intented for alignment with the tabs
+	if ( $map =~ s/^ct/t/ ) {
+	    if(! $in_tab) {
+		push( @out, "{sot}") ;
+		$in_tab=1 ;
+	    }
+	    push( @out, shift(@$lines));
+	}
+
+	while( $map =~ s/^t// ) {
+	    if(! $in_tab) {
+		push( @out, "{sot}") ;
+		$in_tab=1 ;
+	    }
+	    push( @out, shift(@$lines));
+	    # and Fall through.
+	}
+	if($in_tab) {
+	    push( @out, "{eot}") ;
+	    $in_tab=0 ;
+	    next ;
+	}
+
 	# Blank line preceding lyrics: pass.
 	if ( $map =~ s/^_l/l/ ) {
 	    push( @out, '');
 	    shift(@$lines);
-	    # Fall through.
 	}
 
 	# The normal case: chords + lyrics.
