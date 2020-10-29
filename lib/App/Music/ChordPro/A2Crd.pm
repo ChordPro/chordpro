@@ -99,7 +99,8 @@ sub a2crd {
     $options = { %$options, %$opts } if $opts;
 
     # One configurator to bind them all.
-    $config = App::Music::ChordPro::Config::configurator({});
+    # set debug to 1 for helpful debugging output
+    $config = App::Music::ChordPro::Config::configurator({ debug => 0 });
 
     # Process input.
     my $lines = loadlines( @ARGV ? $ARGV[0] : \*STDIN);
@@ -145,8 +146,21 @@ sub a2cho {
         if(/\t/) {
 	    $_ = expand($_) ;
         }
+
+	my $n_ch_chords=0 ;
+
+        #Odd format for chords, [ch]Chordname[\ch], possibly from reformated webpage
+	while(s/\[ch\](.*?)\[\/ch\]/$1/)  {
+	   $n_ch_chords++ ;
+	}
+
         push @lines_with_tabs_replaced, $_ ;
-        $map .= classify($_);
+
+	if($n_ch_chords < 1) {
+	    $map .= classify($_);
+	} else {
+	    $map .= "c" ;
+	}
     }
     maplines( $map, \@lines_with_tabs_replaced );
 
@@ -165,6 +179,8 @@ sub classify {
 	    warn("No such classifier: $classifier, using classic\n");
 	    $classify = \&classify_classic;
 	}
+
+	#warn("using classifier: $classifier\n");
     }
     $classify->($line);
 }
@@ -190,10 +206,72 @@ sub classify_classic {
     return $type;
 }
 
+# JJW attempts at using "relaxed" in the standard chordnames parser were too relaxed
+# so I made this to try to parse unspecified chords that still have well defined "parts" in the chordname
+# my use of regex is probably not optimal -- I haven't had a lot of regex experience.
+# this currently only works for the roman chord notation
+sub generic_parse_chord
+{
+    my $word = shift ;
+
+    my ($chord,$bass) ;
+    if ( $word =~ m;^(.*)/(.*); ) {
+	$chord = $1;
+	$bass = $2;
+    } else {
+	$chord=$word ;
+    }
+
+    if($bass) {
+	#return 0 if(! ($bass =~ /^[A-G]$/) ) ;
+	# allow anything after the "/"
+    }
+
+    # first part of chord needs to be [A-G]
+    return 0 if(! ($chord =~ s/^[A-G]//))  ;
+    $chord = lc($chord) ;
+
+    while( $chord =~ s/[b#]// ) {
+    }
+
+    while( $chord =~ s/^minor|major// ) {
+    }
+
+    while( $chord =~ s/^min|maj// ) {
+    }
+
+    while( $chord =~ s/^m|dim|0|o|aug// ) {
+    }
+
+    while( $chord =~ s/[\db#]// ) {
+    }
+
+    while( $chord =~ s/^b|#|flat|sharp|minor|min|m|major|maj|dim|sus|aug|add// ) {
+    }
+
+    # if all that remains are digits and  "#b-", it's probably a chord
+    my $n_ok = ($chord =~ tr/0123456789#b-//) ;
+
+    return 1 if $n_ok == length $chord ;
+}
+
 # Alternative classifier by Jeff Welty.
 # Strategy: Percentage of recognzied chords.
 sub classify_pct_chords {
     my ( $line ) = @_;
+    return 'C' if $line =~ /^\s*\[.*?\]/;	# comment
+    return 'C' if $line =~ /^\s*\#.*?/;	# comment
+    return 't' if $line =~ /^\s*?[A-G|a-g]\s*\|.*?\-.*\|/;	# tablature
+    return 't' if $line =~ /^\s*?[A-G|a-g]\s*\-.*?\-.*\|*/; # tablature
+    my $cntline = $line ;
+
+    # count number of specific characters to help identify tablature lines
+    my $n_v = ($cntline =~ tr/v//) ;
+    my $n_dash = ($cntline =~ tr/-//) ;
+    my $n_bar = ($cntline =~ tr/|//) ;
+    my $n_c_accent = ($cntline =~ tr/^//) ;
+    my $n_periods = ($cntline =~ tr/.//) ;
+    my $n_digits = ($cntline =~ tr/0123456789//) ;
 
     # Lyrics or Chords heuristic.
     my @words = split ( /\s+/, $line );
@@ -202,29 +280,44 @@ sub classify_pct_chords {
     $line =~ s/\s+//g ;
     my $linelen_nonblank = length($line) ;
 
-    my $p = App::Music::ChordPro::Chords::Parser->default;
+    return 'l' if ($n_dash == $linelen_nonblank) ;  # only dashes, meant to be a underscore indication of the previous line
+    return 't' if (($n_periods + $n_dash + $n_bar + $n_c_accent + $n_v + $n_digits)/$linelen_nonblank > 0.8) ;  # mostly characters used in tablature
+
 
     my $n_chords=0 ;
     my $n_words=0 ;
+
     #print("CL:") ; # JJW, uncomment for debugging
 
     foreach (@words) {
-
 	if (length $_ > 0) {
 	    $n_words++ ;
 
+
 	    my $is_chord = App::Music::ChordPro::Chords::parse_chord($_) ? 1 : 0  ;
+	    if(! $is_chord) {
+		if(generic_parse_chord($_)) {
+		    print STDERR "$_ detected by generic, not internal parse_chord\n" if $options->{debug} ;
+		    $is_chord=1 ;
+		}
+	    }
+
 	    $n_chords++ if $is_chord ;
+	    print STDERR " ($is_chord:$_)" if $options->{debug} ;
 
 	    #print(" \'$is_chord:$_\'") ; # JJW, uncomment for debugging
 	}
     }
+    print STDERR "\n" if $options->{debug} ;
+
+    return '_' if $n_words == 0 ;	# blank line, redundant logic with sub classify(), but makes this more robust to changes in classify() ;
 
     my $type = $n_chords/$n_words > 0.4 ? 'c' : 'l' ;
 
     if($type eq 'l') {
 	# is it likely the line had a lot of unknown chords, check
 	# the ratio of total chars to nonblank chars , if it is large then
+
 	# it's probably a chord line
 	$type = 'c' if $n_words > 1 && $linelen_total/$linelen_nonblank > 2. ;
     }
@@ -245,6 +338,14 @@ sub maplines {
     # Pass empty lines.
     while ( $map =~ s/^_// ) {
 	push( @out, shift( @$lines ) );
+    }
+
+    while ( $map =~ s/^([_C])// ) {
+	# simply output blank or comment lines at the start of the file
+	# but don't count the line as possible title
+	my $pre  = ($1 eq "C" ? "{comment:" : "" ) ;
+	my $post = ($1 eq "C" ? "}" : "" ) ;
+	push( @out, $pre . shift( @$lines ) . $post );
     }
 
     # Infer title/subtitle.
@@ -274,6 +375,56 @@ sub maplines {
 	    push( @out, '');
 	    shift(@$lines);
 	    # Fall through.
+	}
+
+	# A comment line, output and continue
+	if ( $map =~ s/^C// ) {
+	    my $line = shift(@$lines);
+	    $line =~ s/\[/{comment:/ ;
+	    $line =~ s/\]/}/ ;
+	    push( @out, $line);
+	    # and Fall through.
+	}
+
+	# Tabs
+	my $in_tab=0 ;
+
+	# special case: chords before tabs, keep the chords in {sot}, which is probably
+	# what the original text intented for alignment with the tabs
+	if ( $map =~ s/^ct/t/ ) {
+	    if(! $in_tab) {
+		push( @out, "{sot}") ;
+		$in_tab=1 ;
+	    }
+	    push( @out, shift(@$lines));
+	}
+
+	while( $map =~ s/^t// ) {
+	    if(! $in_tab) {
+		push( @out, "{sot}") ;
+		$in_tab=1 ;
+	    }
+	    push( @out, shift(@$lines));
+	    # and Fall through.
+	}
+
+	if($in_tab) {
+	    # Text line with following blank line -- make part of tablature
+	    if ( $map =~ s/^l_// ) {
+		push( @out, shift(@$lines));
+		push( @out, '');
+		shift(@$lines);
+	    }
+
+	    push( @out, "{eot}") ;
+	    $in_tab=0 ;
+	    next ;
+	}
+
+	# Blank line preceding lyrics: pass.
+	if ( $map =~ s/^_l/l/ ) {
+	    push( @out, '');
+	    shift(@$lines);
 	}
 
 	# The normal case: chords + lyrics.

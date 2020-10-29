@@ -498,7 +498,7 @@ extensive details and examples.
   	// Treat leading lyrics lines as title/subtitle lines.
   	"infer-titles" : true,
   	// Classification algorithm.
-  	"classifier" : "jwelty",
+  	"classifier" : "pct_chords",
   	// Tab stop width for tab expansion. Set to zero to disable.
   	"tabstop" : 8,
       },
