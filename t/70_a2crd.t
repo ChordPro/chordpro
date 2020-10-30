@@ -27,6 +27,7 @@ foreach my $file ( sort @files ) {
     ( my $ref = $file ) =~ s/\.crd/.cho/;
     @ARGV = ( "--a2crd",
 	      "--no-default-configs",
+	      "--generate", "ChordPro",
 	      "--output", $out,
 	      $file );
     ::run();

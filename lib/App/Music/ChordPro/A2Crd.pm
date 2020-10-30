@@ -104,17 +104,7 @@ sub a2crd {
     # Process input.
     my $lines = loadlines( @ARGV ? $ARGV[0] : \*STDIN);
 
-    my $fd;
-    if ( $options->{output} && $options->{output} ne '-' ) {
-	open( $fd, '>:utf8', $options->{output} )
-	  or croak("$options->{output}: $!\n");
-    }
-    else {
-	$fd = \*STDOUT;
-    }
-
-    print $fd "$_\n"
-      foreach a2cho($lines);
+    return [ a2cho($lines) ];
 }
 
 ################ Subroutines ################

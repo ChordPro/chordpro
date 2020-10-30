@@ -59,6 +59,24 @@ From the menu bar, choose `File` > `Preview`. If all goes well, a preview window
 
 Note that you need to have a PDF file viewer application installed, and the system must be configured to use this viewer to open files with `.pdf` extension.
 
+# Legacy ASCII input format
+
+Before ChordPro it was common to write lead sheets with chords on
+seperate lines preceding the lyrics. This is often referred to as
+**crd** format. For example
+
+          D          G    D
+    Swing low, sweet chariot,
+                           A7
+    Comin’ for to carry me home.
+
+ChordPro tries to detect whether the input files are in this legacy
+format and if so, internally converts the data to ChordPro (**cho**
+format) before processing.
+
+    Swing [D]low, sweet [G]chari[D]ot,
+    Comin’ for to carry me [A7]home.
+
 # Command Line operation
 
 If you are familiar with working on the command line, the basic command to use is:

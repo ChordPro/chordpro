@@ -16,6 +16,7 @@ use App::Music::ChordPro::Output::Common;
 use App::Music::ChordPro::Utils;
 
 use Carp;
+use List::Util qw(any);
 use File::LoadLines;
 
 sub new {
@@ -70,6 +71,11 @@ sub parse_file {
 
     # Loadlines sets $opts->{_filesource}.
     my $lines = loadlines( $filename, $opts );
+    # Sense crd input and convert if necessary.
+    if ( $options->{crd} || !any { /^{\w+/ } @$lines ) {
+	require App::Music::ChordPro::A2Crd;
+	$lines = App::Music::ChordPro::A2Crd::a2crd();
+    }
 
     # Note: $opts are used by the tests only.
     $opts //= {};

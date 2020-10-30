@@ -86,10 +86,6 @@ sub ::run {
 sub main {
     my ($opts) = @_;
     $options = { %$options, %$opts } if $opts;
-    if ( $options->{a2crd} ) {
-	require App::Music::ChordPro::A2Crd;
-	return App::Music::ChordPro::A2Crd::a2crd();
-    }
     chordpro();
 
 }
@@ -158,6 +154,16 @@ sub chordpro {
     # Parse the input(s).
     use App::Music::ChordPro::Songbook;
     my $s = App::Music::ChordPro::Songbook->new;
+    my $res;
+
+    # Shortcut a2crd conversion.
+    if ( $options->{a2crd} ) {
+	require App::Music::ChordPro::A2Crd;
+	$res = App::Music::ChordPro::A2Crd::a2crd();
+	push( @$res, '' );
+	goto WRITE_OUTPUT;
+    }
+
     $s->parse_file($_) foreach @::ARGV;
 
     if ( $options->{'dump-chords'} ) {
@@ -210,8 +216,6 @@ sub chordpro {
 	}
     }
 
-    my $res;
-
     if ( my $xc = $::config->{settings}->{transcode} ) {
 	# Set target parser for the backend so it can find the transcoded
 	# chord definitions.
@@ -226,6 +230,7 @@ sub chordpro {
 	$res = $pkg->generate_songbook($s);
     }
 
+  WRITE_OUTPUT:
     # Some backends write output themselves, others return an
     # array of lines to be written.
     if ( $res && @$res > 0 ) {
@@ -651,9 +656,13 @@ sub app_setup {
         ($my_name, $my_version) = qw( MyProg 0.01 );
     }
 
-    # Config files.
     my $app_lc = lc($my_name);
-    $app_lc = "chordpro" if $app_lc eq "a2crd";
+    if ( $app_lc eq "a2crd" ) {
+	$app_lc = "chordpro";
+	unshift( @ARGV, "--a2crd" );
+    }
+
+    # Config files.
     if ( -d "/etc" ) {          # some *ux
         $configs{sysconfig} =
           File::Spec->catfile( "/", "etc", "$app_lc.json" );
@@ -720,6 +729,7 @@ sub app_setup {
           ### Options ###
 
 	  "a2crd",			# perform ascii to cho
+	  "crd",			# input is ascii, not cho
           "output|o=s",                 # Saves the output to FILE
           "generate=s",
           "backend-option|bo=s\%",
@@ -982,9 +992,11 @@ sub app_usage {
 Usage: $0 [ options ] [ file ... ]
 
 Options:
+    --a2crd                       Perform text to ChordPro conversion only
     --about  -A                   About ChordPro...
     --config=JSON  --cfg          Config definitions (multiple)
     --cover=FILE                  Add cover pages from PDF document
+    --crd                         Input is text, not ChordPro
     --decapo                      Eliminate capo settings
     --diagrams=WHICH		  Prints chord diagrams
     --encoding=ENC                Encoding for input files (UTF-8)
