@@ -107,30 +107,6 @@ sub a2crd {
     return [ a2cho($lines) ];
 }
 
-sub a2crd_old_entry {
-    my ($opts) = @_;
-    $options = { %$options, %$opts } if $opts;
-
-    # One configurator to bind them all.
-    # set debug to 1 for helpful debugging output
-    $config = App::Music::ChordPro::Config::configurator({ debug => 0 });
-
-    # Process input.
-    my $lines = loadlines( @ARGV ? $ARGV[0] : \*STDIN);
-
-    my $fd;
-    if ( $options->{output} && $options->{output} ne '-' ) {
-	open( $fd, '>:utf8', $options->{output} )
-	  or croak("$options->{output}: $!\n");
-    }
-    else {
-	$fd = \*STDOUT;
-    }
-
-    print $fd "$_\n"
-      foreach a2cho($lines);
-}
-
 ################ Subroutines ################
 
 # Replace tabs with blanks, retaining layout.
