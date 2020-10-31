@@ -1,0 +1,64 @@
+{comment:Date: some date}
+{comment:Subject: Album/artist}
+{title: From: person *AtSign* company.com (First middle Last)}
+
+{comment:                 =========}
+                [Song]=====[Title]====
+
+[Tune][guitar][down][one]
+[whole][step][(DGCFAD)]
+
+{sot}
+E-----1----------------------
+B-----1----/10---12---6---5---
+G-----0------------------5---
+D--3-------/10---12---3-------
+A----------------------------
+E------------------------5---
+{eot}
+
+{sot}
+E-----------0----------
+B---------5---5----5---
+G------5-----------0---
+D--2h4-------------0---
+A------------------3---
+E------------------5----
+{eot}
+
+Long text with colon:
+
+{sot}
+E-----------------------
+B---/10---12---5----4----
+G------------------4----
+D---/10---12---5---------
+A-----------------------
+E------------------3----
+{eot}
+
+{sot}
+                        some more text
+E-------------0-------------------5--
+B--1h3p1p0-----3-------------------5--
+G----------4--4----0h2p0p5----5----0--
+D-------------0------------5-------0--
+A----------------------------------4--
+E----------------------------------5--
+{eot}
+
+
+        [Em]tttt tt[Em/C#] tttt      t[C]t tttt [G]ttttt
+        [D/F#]tttt ttt[Dm/F] ttttttt   [Esus]   tt [E]t tttt
+
+        CHORDS
+
+                EADGBE
+{define Em base-fret 0 frets 0 2 2 0 0 0}
+{define Em/C# base-fret 0 frets - 4 - 0 0 0}
+{define D/F# base-fret 0 frets 2 - 0 2 3 -}
+{define Dm/F base-fret 0 frets 1 - 0 2 3 -}
+{define Esus base-fret 0 frets 0 2 2 2 0 0}
+{define Am7 base-fret 0 frets - 0 2 0 1 0}
+{define G/B base-fret 0 frets - 2 0 0 3 3}
+{define Cm6 base-fret 2 frets - 2 - 1 3 -}

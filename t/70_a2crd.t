@@ -14,7 +14,7 @@ BAIL_OUT("Missing a2crd test data") unless -d "a2crd";
 opendir( my $dh, "a2crd" ) || BAIL_OUT("Cannot open a2crd test data");
 my @files = grep { /^.+\.crd$/ } readdir($dh);
 close($dh);
-#diag("Testing ", scalar(@files), " crd files");
+diag("Testing ", scalar(@files), " crd files");
 
 our $options;
 $options->{fragment} = 1;
