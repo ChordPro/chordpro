@@ -1,18 +1,18 @@
 {title: "title", by artist}
 
-{comment: quick brown fox again}
-{comment: quick brown fox again}
-{comment: quick brown fox again}
-{comment: quick brown fox again}
+{comment:quick brown fox again}
+{comment:quick brown fox again}
+{comment:quick brown fox again}
+{comment:quick brown fox again}
 
-{comment: quick brown fox again}
-{comment: quick brown fox again}
+{comment:quick brown fox again}
+{comment:quick brown fox again}
 
-{comment: John}
-{comment: jdoe@institution.org}
+{comment:John}
+{comment:jdoe@institution.org}
 
 
-{comment: Dropped D tuning, capo 4th fret}
+{comment:Dropped D tuning, capo 4th fret}
 
 {sot}
 e----------------------8--------3--------|
@@ -22,6 +22,7 @@ d-----2-----4h4--------9-----------5-----|
 a--------5-------------------7-----------|
 d--0-------------6-----------------------|
 {eot}
+
 
 From another person
 

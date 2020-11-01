@@ -2,20 +2,21 @@
 {title:     A   Title Line  - by artist }
 {subtitle:     ----------------------------}
 
-{comment:     From the album "test test"    }
+{comment:    From the album "test test"    }
 
-{comment:     Transcribed by John Doe}
-{comment:     jdoe (at) gmail (dot) com}
+{comment:    Transcribed by John Doe}
+{comment:    jdoe (at) gmail (dot) com}
 
 
-{comment: Some informational text here }
-{comment: More text text text}
-{comment: More text text text}
+{comment:Some informational text here }
+{comment:More text text text}
+{comment:More text text text}
 
-[/][=][slide]
+{comment:/ = slide                 }
 
-INTRO:
-------
+
+{comment:INTRO:}
+{comment:------}
 
 {sot}
 E-----------------------------------------------------
@@ -36,12 +37,14 @@ A---------------------------
 E---------------------------
 {eot}
 
+
 VERSE 1:
 --------
 
 [E]  Lyrics are here   [Esus2/C#]yes they           [D]are
 
 [A]  test  test testtest  [Asus2/C#]test test test test  [G]test [A/G][G][A/G][G]
+
 
 
 
@@ -74,6 +77,7 @@ D------------------------------------
 A------------------------------------
 E------------------------------------
 {eot}
+
 
  EADGBE     EADGBE     EADGBE     EADGBE     EADGBE
  x02220     x4220x     xx0232     3x000x     3x222x

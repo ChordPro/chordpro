@@ -1,11 +1,12 @@
 
 {title: Single line tablature}
 
-{comment: Tabbed By: me}
-{comment: On: today}
+{comment:Tabbed By: me}
+{comment:On: today}
 {comment:E-mail: person@domain.edu}
 
-Keyboard:
+
+{comment:Keyboard:}
 {sot}
    Gm                Gm                  Gm                  Gm
 e|-5----5\-----------5----5\-------------5-5\----------------5-5\--------|

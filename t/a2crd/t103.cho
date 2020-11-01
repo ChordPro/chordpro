@@ -1,10 +1,10 @@
 {title: Song: Title}
 {subtitle: Artist: artist}
-{comment: Composer: composer}
-{comment: Album: album}
+{comment:Composer: composer}
+{comment:Album: album}
 
-{comment: Tabbed by some person}
-{comment: 1st July 2001}
+{comment:Tabbed by some person}
+{comment:1st July 2001}
 
 {define G base-fret 0 frets 3 2 0 0 3 3}
 {define Am7 base-fret 0 frets - 0 2 0 1 0}

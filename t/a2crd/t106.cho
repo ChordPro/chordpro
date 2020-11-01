@@ -22,7 +22,7 @@
 {define Am+7 base-fret 0 frets 0 0 0 2 1 1}
 {define Am7/6 base-fret 0 frets 0 0 4 0 1 0}
 {define Am6 base-fret 0 frets 0 0 4 2 1 0}
-[Am7][alt=002013]
+Am7 alt=002013
 {define Am7-5 base-fret 0 frets 0 0 1 0 1 0}
 {define AM7 base-fret 0 frets 0 0 2 1 2 0}
 {define AM7/9 base-fret 0 frets 0 2 1 0 0}
@@ -37,7 +37,7 @@
 {define Bb9 base-fret 0 frets 1 1 0 1 1 1}
 {define Bb base-fret 1 frets 1 1 3 3 3 1}
 {define BbM7 base-fret 0 frets 0 0 3 2 3 0}
-[BbM7][alt=003234]
+BbM7 alt=003234
 {define B+ base-fret 0 frets 0 2 1 0 0 0}
 {define B7(II) base-fret 2 frets 1 1 3 1 3 1}
 {define B7/9 base-fret 1 frets - 2 1 2 2 -}
@@ -51,10 +51,10 @@
 {define Bm9 base-fret 0 frets 2 2 0 2 2 2}
 {define C/B base-fret 0 frets 0 2 0 0 1 0}
 {define C6 base-fret 0 frets - 3 2 2 1 0}
-C7alt='xx2313
+{comment:C7alt='xx2313}
 {define C7/9 base-fret 0 frets 0 3 2 3 3 0}
 {define C9 base-fret 0 frets 3 3 2 0 3 0}
-[C][alt=032013]
+C alt=032013
 {define Cdim(IV) base-fret 0 frets 0 0 4 5 4 5}
 {define Cdim base-fret 1 frets - - 1 2 1 2}
 {define Cm(7) base-fret 0 frets 0 0 5 5 4 3}
@@ -71,7 +71,7 @@ C7alt='xx2313
 {define C#m7 base-fret 4 frets - - 3 3 2 1}
 {define C#m7alt base-fret 0 frets - - 6 6 5 0}
 {define C#m base-fret 4 frets 1 1 3 3 2 1}
-[D][alt=004235]
+D alt=004235
 {define D+ base-fret 0 frets 0 0 0 3 3 2}
 {define D6/9 base-fret 0 frets 0 0 0 2 0 0}
 {define D6 base-fret 0 frets 0 0 0 2 0 2}
@@ -111,7 +111,7 @@ C7alt='xx2313
 {define Edim base-fret 0 frets 0 1 2 0 2 0}
 {define Em+5 base-fret 0 frets 0 2 2 0 2 0}
 {define Em/F# base-fret 0 frets 2 2 2 0 0 0}
-[Em6][alt=042000]
+Em6 alt=042000
 {define Em6 base-fret 0 frets 0 2 2 0 2 0}
 {define Emsus4 base-fret 0 frets 0 2 2 2 0 0}
 {define Em7-5 base-fret 0 frets 0 7 8 7 8 0}

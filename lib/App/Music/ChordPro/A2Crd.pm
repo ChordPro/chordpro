@@ -136,6 +136,10 @@ sub a2cho {
 	    $_ = expand($_) ;
         }
 
+	#s/=20/ /g ; # replace HTML coded space with ascii space, no, MUST LEAVE IN because it can mess up fingering diagrams like A/F#=202220
+	s/=3D/=/g ; # replace HTML coded equal with ascii =
+	# s/\s*$// ;  # remove all trailing whitespace -- no, MUST LEAVE IN so chords indicated above trailing whitespace will be properly formatted 
+
 	my $n_ch_chords=0 ;
 
         #An odd format for chords, [ch]Chordname[\ch], possibly from reformated webpage
@@ -280,7 +284,7 @@ sub decode_fingering
     my $valid = "[A-G]{1}\\S*?" ; # a valid chordname
 
     # ("chord:")  followed by "|x2344x|"  or "x2344x"
-    while($line =~ /$pre($valid)\:+?\s*?(\|{0,1}[xX0-9]{3,7}\|{0,1})/) {
+    while($line =~ /$pre($valid)\:+?\s*?(\|?[xX0-9]{3,7}\|?)/) {
 	my $cname=$1 ;
 	my $fingers_this=$2 ;
 	my $nobar_fingers=$fingers_this ;
@@ -297,7 +301,7 @@ sub decode_fingering
 
 
     # ("chord")  followed by "|x2344x|"  "x2344x"
-    while($line =~ /$pre($valid)\s+?(\|*?[xX0-9]{3,7}\|{0,1})/) {
+    while($line =~ /$pre($valid)\s+?(\|?[xX0-9]{3,7}\|?)/) {
 	my $cname=$1 ;
 	my $fingers_this=$2 ;
 	my $nobar_fingers=$fingers_this ;
@@ -398,14 +402,42 @@ sub classify_pct_chords {
 
     return 'C' if $line =~ /^\s*\[.+?\]/;	# comment
     return 'C' if $line =~ /^\s*\#.+?/;	# comment
-    return 'C' if $lc_line =~ /(from|email|e\-mail)\:.+?@+/ ;  # email is treated as a comment
+    return 'C' if $lc_line =~ /(from|email|e\-mail)\:?.+?@+/ ;  # email is treated as a comment
+    return 'C' if $lc_line =~ /(from|email|e\-mail)\:.+?/ ;  # same as above, but there MUST be a colon, and no @ is necessary
     return 'C' if $lc_line =~ /(date|subject)\:.+?/ ;  # most likely part of email lines is treated as a comment
 
     # check for a chord fingering specification, i.e. A=x02220
     return 'f' if decode_fingering($line,0) ;
 
-    return 't' if $line =~ /^\s*?[A-G|a-g]\s*\|.*?\-.*\|/;	# tablature
-    return 't' if $line =~ /^\s*?[A-G|a-g]\s*\-.*?\-.*\|*/; # tablature
+    if(0) {
+	#Oct 31 and before
+	return 't' if $line =~ /^\s*?[A-G|a-g]\s*\|.*?\-.*\|/;	# tablature
+	return 't' if $line =~ /^\s*?[A-G|a-g]\s*\-.*?\-.*\|*/; # tablature
+    } else {
+	# try to accomodate tablature lines with text after the tab
+
+	my $longest_tablature_string=0 ;
+	my $tmpline = $line ;
+
+	# REGEX components:
+
+	# start with any amount of whitespace
+	# ^\s*?
+	# must be one string note
+	# [A-G|a-g]
+	# one or more of : or |
+	# [:\|]+
+	# in the tablature itself, separators of : or |, modifiers of b=bend,p=pull off,h=hammer on,x=muted,0-9 fret positionsj,\/=slides,() for two digit fret positions
+	# [\-:\|bphxBPHX0-9\/\\\(\)]*?
+	# one or more of : or |
+	# [:\|]+
+
+	while($tmpline =~ s/^(\s*?[A-G|a-g][:\|]+[\-:\|bphxBPHX0-9\/\\\(\)]*?[:\|]+)//) {
+	    $longest_tablature_string = length($1) if $longest_tablature_string < length($1) ;
+	}
+
+	return 't' if $longest_tablature_string > 8 ;
+    }
 
 
     # count number of specific characters to help identify tablature lines
@@ -482,12 +514,23 @@ sub classify_pct_chords {
 	# the ratio of total chars to nonblank chars , if it is large then
 
 	# it's probably a chord line
-	$type = 'c' if $n_words > 1 && $n_tot_chars/$n_nonblank_chars > 2. ;
+	# $type = 'c' if $n_words > 1 && $n_tot_chars/$n_nonblank_chars > 2. ;
     }
 
     #print(" --- ($n_chords/$n_words) = $type\n") ; # JJW, uncomment for debugging
 
     return $type ;
+}
+
+# reformat an input line classified as a comment for the chordpro format
+sub format_comment_line
+{
+    my $line = $_[0] ;
+    # remove [] from original comment
+    $line =~ s/\[// ;
+    $line =~ s/\]// ;
+    return '' if $line eq '' ;
+    return "{comment:" . $line . "}" ;
 }
 
 # Process the lines via the map.
@@ -522,12 +565,34 @@ sub maplines {
 	}
     }
 
-    print STDERR "====== UNTIL chords =====\n" if $local_debug ;
-    # Pass lines until we have chords.
-    while ( $map =~ s/^([fl_{])// ) {
+    print STDERR "====== UNTIL chords or tablature =====\n" if $local_debug ;
+    # Pass lines until we have chords or tablature
+
+    while ($map =~ /^(.)(.)(.)/) {
+	push @out, "ULC $map" if $local_debug ;
+	# some unusual situations to handle, 
+
+	# cl. => exit this loop for normal cl processing
+	# .t => exit the loop
+	# l.t or c.t => output the l or c as comment, then exit the loop
+	# [_f{C].. => output the blank, fingering,directive or comment, and continue the loop
+
+	# we have to stop one line before tablature, in case the line before the tablature needs to be included in the
+	# tablature itself
 	print STDERR "$1 == @{$lines}[0]\n" if $local_debug ;
-	if ( $1 eq "l") {
-	    push( @out, "{comment: " . shift( @$lines ) ."}" );
+
+	last if($1 eq "c" && $2 eq "l") ;
+	last if($2 eq "t" ) ;
+
+	if(($1 eq "c" || $1 eq "l") && $3 eq "t") {
+	    push @out, format_comment_line(shift(@$lines)) ;
+	    $map =~ s/.// ;
+	    last ;
+	}
+
+	# in the remaining cases, output the line (properly handled), and continue the loop
+	if ( $1 eq "l" or $1 eq "C") {
+	    push @out, format_comment_line(shift(@$lines)) ;
 	}
 	elsif ( $1 eq "f" ) {
 	    foreach my $fchart (decode_fingering(shift( @$lines ),1) ) {
@@ -553,12 +618,14 @@ sub maplines {
 	else {
 	    push( @out, shift( @$lines ) );
 	}
+	$map =~ s/.// ;
     }
 
     push @out, "====== FINAL LOOP =====" if $local_debug ;
     # Process the lines using the map.
     while ( $map ) {
 	# warn($map);
+	push @out, "FL $map" if $local_debug ;
 	$map =~ /(.)/ ;
 	print STDERR "$1 == @{$lines}[0]\n" if $local_debug ;
 
@@ -570,21 +637,16 @@ sub maplines {
 	    next ;
 	}
 
-	# Blank line preceding chords pass.
-	if ( $map =~ s/^_c/c/ ) {
+	# Blank line - output the blank line and continue
+	if ( $map =~ s/^_// ) {
 	    push( @out, '');
 	    shift(@$lines);
-	    # Fall through.
+	    next ;
 	}
 
 	# A comment line, output and continue
 	if ( $map =~ s/^C// ) {
-	    my $line = shift(@$lines);
-
-	    # remove [] from original comment
-	    $line =~ s/\[// ;
-	    $line =~ s/\]// ;
-	    push( @out, "{comment:" . $line . "}");
+	    push @out, format_comment_line(shift(@$lines)) ;
 	    next ;
 	}
 
@@ -592,7 +654,7 @@ sub maplines {
 	my $in_tablature=0 ;
 
 	# special case: chords or lyrics before tabs, keep the chords or lyrics in {sot}, which is probably
-	# what the original text intented for alignment with the tabs
+	# what the original text intended for alignment with the tablature
 	if ( $map =~ s/^[cl]t/t/ ) {
 	    if(! $in_tablature) {
 		push( @out, "{sot}") ;

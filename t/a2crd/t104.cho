@@ -1,12 +1,13 @@
 {comment:Date: some date}
 {comment:Subject: Album/artist}
-{title: From: person *AtSign* company.com (First middle Last)}
+{comment:From: person *AtSign* company.com (First middle Last)}
 
-{comment:                 =========}
-                [Song]=====[Title]====
+{title:                 =========}
+{subtitle:                 Song Title}
+{comment:                =========}
 
-[Tune][guitar][down][one]
-[whole][step][(DGCFAD)]
+{comment:                Tune guitar down one}
+{comment:                whole step (DGCFAD)}
 
 {sot}
 E-----1----------------------
