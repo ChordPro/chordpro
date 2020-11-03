@@ -49,10 +49,11 @@ These settings control global behaviour of the ChordPro program and can be chang
 
 The `metadata` setting contains three items:
 
-* `keys`: The list of recognized metadata keys.  
+* `keys`: The list of metadata keys.  
 For these keys you can use `{meta` _key_ ...`}` as well as `{`*key* ...`}`.
-* `strict`: If true, `{meta` ...`}` will accept any key.  
-Otherwise, only the keys named in the `keys` here are allowed.
+* `strict`: If false, `{meta` ...`}` will accept any key.  
+Otherwise, only the keys named in the `keys` here are allowed.  
+`strict` is true by default.
 * `separator`: To concatenate multiple values when metadata are used in title fields.
 
 Important: the keys `title` and `subtitle` must always be in this list.
