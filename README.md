@@ -40,7 +40,7 @@ For up-to-date information, see <https://www.chordpro.org/chordpro/ChordPro-Refe
 For up-to-date information, see <https://www.chordpro.org/chordpro/ChordPro-Installation.html>
 
 ## Support
-For general discussion, please see [the user groups](https://groups.io/g/ChordPro/topics).
+For general discussion, please see [the user group](https://groups.io/g/ChordPro/topics).
 
 Bugs and feature requests go to [the GitHub issue tracker](https://github.com/ChordPro/chordpro/issues).
 
