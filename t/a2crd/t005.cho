@@ -1,6 +1,6 @@
 {title: This is a song for testing chord detection with the --a2crd funtion:}
 
-{comment: Test supplied by nomike.}
+{comment:Test supplied by nomike.}
 
 [A]The first [C]line of the [D]song is pret[E]ty [F]normal,
 [G]but as the second line has only one chord it's not detected as such.
