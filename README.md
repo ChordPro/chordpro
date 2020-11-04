@@ -39,8 +39,8 @@ For up-to-date information, see <https://www.chordpro.org/chordpro/ChordPro-Refe
 ## Installation
 For up-to-date information, see <https://www.chordpro.org/chordpro/ChordPro-Installation.html>
 
-## Suppport
-For general discussion, please see [google groups](https://groups.google.com/forum/#!forum/chordpro).
+## Support
+For general discussion, please see [the user groups](https://groups.io/g/ChordPro/topics).
 
 Bugs and feature requests go to [the GitHub issue tracker](https://github.com/ChordPro/chordpro/issues).
 
