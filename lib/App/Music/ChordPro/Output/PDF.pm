@@ -293,7 +293,10 @@ sub generate_song {
     }
     die("Unhandled fonts detected -- aborted\n") if $fail;
 
-    if ( $ps->{labels}->{width} eq "auto" ) {
+    if ( $ps->{labels}->{comment} ) {
+	$ps->{_indent} = 0;
+    }
+    elsif ( $ps->{labels}->{width} eq "auto" ) {
 	if ( $s->{labels} && @{ $s->{labels} } ) {
 	    my $longest = 0;
 	    my $ftext = $fonts->{label} || $fonts->{text};
@@ -1045,6 +1048,13 @@ sub generate_song {
 		$i_tag = $v[4];
 	    }
 	    elsif ( $elt->{name} eq "label" ) {
+		if ( $ps->{labels}->{comment} ) {
+		    unshift( @elts, { %$elt,
+				      type => $ps->{labels}->{comment},
+				      text => $elt->{value},
+				    } );
+		    redo;
+		}
 		$i_tag = $elt->{value};
 	    }
 	    elsif ( $elt->{name} eq "context" ) {

@@ -847,6 +847,8 @@ sub default_config() {
 	  "width" : "auto",
 	  // Alignment for the labels. Default is left.
 	  "align" : "left",
+	  // Alternatively, render labels as comments.
+	  "comment" : null	// "comment", "comment_italic" or "comment_box",
       },
 
       // Alternative songlines with chords in a side column.
