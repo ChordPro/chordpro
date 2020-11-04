@@ -1,0 +1,19 @@
+{title: SOME TITLE - SOME ARTIST (1934)}
+{subtitle: Chord Legend:}
+
+{define A base-fret 0 frets - 0 2 2 2 0}
+{define Amaj7 base-fret 0 frets - 0 2 1 2 0}
+{define A7 base-fret 0 frets - 0 2 0 2 0}
+{define D base-fret 0 frets - - 0 2 3 2}
+{define Dm base-fret 0 frets - - 0 2 3 1}
+{define E7sus4 base-fret 0 frets 0 2 0 2 0 0}
+{define E base-fret 0 frets 0 2 2 1 0 0}
+{define F+ base-fret 0 frets - 0 3 2 2 1}
+{define F#m base-fret 2 frets 1 3 3 1 1 1}
+
+Intro, with electric solo: G  Gmaj7  G7  G  Gm  G  D7sus4  D 
+ 
+{comment:VERSE 1: }
+[G]t ttttt tttt tttt [Bmaj7]ttttttt [G7]tttt tttttt tt [F]ttt
+[Fm]tttt ttt tttt ttttt [F]ttttttt tttt [F7sus4]ttt tt tt tt.[F] 
+
