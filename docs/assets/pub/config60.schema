@@ -211,7 +211,7 @@
 			    "additionalProperties": { "not": {} }
 			},
 			"tag": {
-			    "description": "Label for Chorus.",
+			    "description": "(Obsolete) Label for Chorus.",
 			    "type": "string",
 			    "default": "Chorus"
 			}
@@ -219,6 +219,28 @@
 		    "additionalProperties": { "not": {} }
 		}
 	    }
+	},
+
+	"a2crd": {
+	    "description": "Settings for A2Crd.",
+	    "properties": {
+		"infer-titles": {
+		    "description": "Treat leading lyrics lines as title/subtitle lines.",
+		    "type": "boolean",
+		    "default": true
+		},
+		"tabstop": {
+		    "description": "Tab width.",
+		    "type": "integer",
+		    "default": 8
+		},
+		"classifier": {
+		    "description": "Analysis strategy.",
+		    "type": "string",
+		    "default": "pct_chords"
+		}
+            },
+            "additionalProperties": { "not": {} }
 	},
 
 	"chords": {
@@ -825,6 +847,17 @@
 			    "description": "Margin width.",
 			    "default": 0,
 			    "type": [ "number", "string" ]
+			},
+			"comment": {
+			    "description": "Render labels as comments.",
+			    "default": null,
+			    "enum": [
+				"comment",
+				"comment_italic",
+				"comment_box",
+				null
+			    ],
+			    "type": [ "string", "null" ]
 		        }
 		    },
 		    "additionalProperties": { "not": {} }
