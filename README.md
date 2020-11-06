@@ -34,10 +34,10 @@ Prominent features of ChordPro 6 are Pango style text markup,
 annotations, and a more powerful way of assigning typefaces to layout
 items.
 
-For up-to-date information, see <https://www.chordpro.org/chordpro/ChordPro-Reference-Implementation.html>
+For up-to-date information, see <https://www.chordpro.org/chordpro/chordpro-reference-implementation>
 
 ## Installation
-For up-to-date information, see <https://www.chordpro.org/chordpro/ChordPro-Installation.html>
+For up-to-date information, see <https://www.chordpro.org/chordpro/chordpro-installation>
 
 ## Support
 For general discussion, please see [the user group](https://groups.io/g/ChordPro/topics).
