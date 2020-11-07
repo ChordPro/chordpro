@@ -44,6 +44,25 @@ For general discussion, please see [the user group](https://groups.io/g/ChordPro
 
 Bugs and feature requests go to [the GitHub issue tracker](https://github.com/ChordPro/chordpro/issues).
 
+## Development
+
+To compile and run `chordpro` locally, you can use `perl` and install it or use `docker`.
+
+### Docker
+
+Either pull the image from the registry:
+
+```
+# TODO: update with real docker registry link, once available
+docker pull IMAGE_NAME
+```
+
+Or build it locally using `docker build -t chordpro .`. Then run it via
+
+```
+docker run chordpro --version
+```
+
 ## License
 Copyright © 2010,2018 The ChordPro Team
 
