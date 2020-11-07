@@ -26,7 +26,7 @@ clean ::
 
 PERLLIB := /usr/lib64
 PERLINC := ${PERLLIB}/perl5/CORE
-PERLSO  := perl530.so
+PERLSO  := $(shell perl -wle 'printf("perl%d%06d.so\n",$$1,$$2) if $$] =~ /^(\d+)\.(\d\d\d\d\d\d)/')
 
 .PHONY :: ppl
 ppl :: clean chordpro wxchordpro unpack copy_coredll loaders
@@ -50,12 +50,12 @@ unpack :
 
 copy_coredll :
 	cp -pL ${PERLLIB}/libperl.so ${DEST}/${PERLSO}
-	patchelf --set-soname perl530.so ${DEST}/${PERLSO}
+	patchelf --set-soname ${PERLSO} ${DEST}/${PERLSO}
 	cp -pL ${PERLLIB}/libpthread.so.0 ${DEST}/
 
 PREFIX := '"script/"'
 CCOPTS := $(shell perl -MExtUtils::Embed -e ccopts) -DSCRIPTPREFIX=${PREFIX}
-LDOPTS := -Wl,--rpath='$${ORIGIN}' ${PERLSO} -lpthread
+LDOPTS := -Wl,--rpath='$${ORIGIN}' ${DEST}/${PERLSO} -lpthread
 
 .PHONY :: loaders
 loaders : "${DEST}/wxchordpro" "${DEST}/chordpro"
