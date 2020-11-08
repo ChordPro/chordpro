@@ -7,6 +7,7 @@
     - New icons.
     - Windows: Installer associates ChordPro with .cho files.
     - Linux: Support for desktop and app icons.
+    - Linux: Support building an AppImage.
     - Restore section label as comment (config: pdf.labels.comment).
     - !Bugfixes
     - Fix chords transpose in comments with output ChordPro.

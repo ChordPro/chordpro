@@ -74,6 +74,15 @@ _loaders : "${DEST}/chordpro"
 clean ::
 	rm -fr build
 
+# Build AppImage.
+APPIMAGETOOL := appimagetool
+
+appimage : ppl
+	cp AppRun ${DEST}
+	cd ${DEST}; ln lib/App/Music/ChordPro/res/linux/chordpro.desktop .
+	cd ${DEST}; ln lib/App/Music/ChordPro/res/icons/chordpro.png .
+	${APPIMAGETOOL} -n ${DEST} ChordPro.AppImage
+
 # Truly dynamic version of loader. Rename to {wx}chordpro if you dare.
 
 "${DEST}/poc" : poc.c
