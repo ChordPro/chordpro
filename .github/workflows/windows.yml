@@ -25,6 +25,7 @@ jobs:
       - name: Install Dependencies
         run: cpanm --installdeps --notest .
       - name: Install Optional Dependencies
+        continue-on-error: true
         run: cpanm HarfBuzz::Shaper
       - name: Make and run tests
         run: |
