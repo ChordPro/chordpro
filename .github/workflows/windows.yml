@@ -16,7 +16,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: shogo82148/actions-setup-perl@v1
-        with: distribution: strawberry
+        with:
+            distribution: strawberry
       - name: perl -V
         run: perl -V
       - name: Install Dependencies
