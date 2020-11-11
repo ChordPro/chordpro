@@ -15,7 +15,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: shogo82148/actions-setup-perl@v1
+      - name: Setup Strawberry Perl
+        uses: shogo82148/actions-setup-perl@v1
         with:
             distribution: strawberry
       - name: perl -V
@@ -23,8 +24,7 @@ jobs:
       - name: Install Dependencies
         run: cpanm --installdeps --notest .
       - name: Make and run tests
-        run: |
-            cpanm HarfBuzz::Shaper
-            perl Makefile.PL
-            gmake
-            gmake test
+        run: cpanm HarfBuzz::Shaper
+        run: perl Makefile.PL
+        run: gmake
+        run: gmake test
