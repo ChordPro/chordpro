@@ -15,14 +15,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Perl
-        run: |
-          choco install strawberryperl
-          echo "C:\strawberry\perl\bin" >> $GITHUB_PATH
-          echo "C:\strawberry\c\bin;C:\strawberry\perl\site\bin" >> $GITHUB_PATH
+      - uses: shogo82148/actions-setup-perl@v1
+        with: distribution: strawberry
       - name: perl -V
         run: perl -V
       - name: Install Dependencies
+        run: cpanm HarfBuzz::Shaper
         run: cpanm --installdeps --notest .
       - name: Make and run tests
         run: |
