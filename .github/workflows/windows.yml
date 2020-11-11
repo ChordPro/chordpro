@@ -18,11 +18,12 @@ jobs:
       - name: Set up Perl
         run: |
           choco install strawberryperl
-          echo "##[add-path]C:\strawberry\c\bin;C:\strawberry\perl\site\bin;C:\strawberry\perl\bin"
+          echo "C:\strawberry\perl\bin" >> $GITHUB_PATH
+          echo "C:\strawberry\c\bin;C:\strawberry\perl\site\bin" >> $GITHUB_PATH
       - name: perl -V
         run: perl -V
       - name: Install Dependencies
-        run: curl -sL https://git.io/cpm | perl - install -g --show-build-log-on-failure
+        run: cpanm --installdeps --notest .
       - name: Make and run tests
         run: |
             perl Makefile.PL
