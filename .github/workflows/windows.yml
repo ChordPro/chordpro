@@ -20,12 +20,11 @@ jobs:
             distribution: strawberry
       - name: perl -V
         run: perl -V
-      - name: Install Optional Dependencies
-        run: cpanm HarfBuzz::Shaper
       - name: Install Dependencies
         run: cpanm --installdeps --notest .
       - name: Make and run tests
         run: |
+            cpanm HarfBuzz::Shaper
             perl Makefile.PL
             gmake
             gmake test
