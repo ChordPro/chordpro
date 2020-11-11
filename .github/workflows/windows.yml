@@ -24,7 +24,7 @@ jobs:
       - name: Install Dependencies
         run: cpanm --installdeps --notest .
       - name: Make and run tests
-        run: cpanm HarfBuzz::Shaper
-        run: perl Makefile.PL
-        run: gmake
-        run: gmake test
+        - run: cpanm HarfBuzz::Shaper
+        - run: perl Makefile.PL
+        - run: gmake
+        - run: gmake test
