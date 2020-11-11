@@ -1,4 +1,4 @@
-name: CI Makefile
+name: CI for Linux
 
 on:
     push:
@@ -14,15 +14,18 @@ jobs:
       matrix:
         perl-version:
           - 'latest'
-          - '5.10.1'
+          - '5.10'
     container:
       image: perldocker/perl-tester:${{ matrix.perl-version }}     # https://hub.docker.com/r/perldocker/perl-tester
     name: Perl ${{ matrix.perl-version }}
     steps:
       - uses: actions/checkout@v2
-      - name: Regular tests
+      - name: perl -V
+        run: perl -V
+      - name: Install Dependencies
+        run: cpanm --installdeps --notest .
+      - name: Make and run tests
         run: |
-            cpanm --installdeps --notest .
             perl Makefile.PL
             make
             make test
