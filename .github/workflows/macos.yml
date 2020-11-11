@@ -20,6 +20,8 @@ jobs:
       - name: perl -V
         run: perl -V
       - name: Install Dependencies
-        run: cpanm --installdeps --notest .
+        run: |
+            curl -L https://cpanmin.us | perl - App::cpanminus
+            cpanm --installdeps --notest .
       - name: Run Tests
         run: prove -l t
