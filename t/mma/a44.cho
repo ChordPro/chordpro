@@ -1,0 +1,15 @@
+{title: a44}
+{key: C}
+{time: 4/4}
+{tempo: 100}
+{duration: 21}
+
+{comment: A}
+{start_of_grid 4x8}
+| C . . . | F . . . | G . . . | C . . . |
+| . . . .  | F . . . | G . . . |
+{end_of_grid}
+{start_of_grid 4x7}
+| C . Am . |
+{end_of_grid}
+

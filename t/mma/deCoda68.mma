@@ -1,0 +1,24 @@
+// title: x68
+
+Time   6/8
+Groove testing
+Tempo  100
+
+/**** End of Preamble ****/
+
+
+//   7 comment: A
+//   8 Start of grid
+//   9 | C . . . . . | F . . . . . | G . . . . . | C . . . . . |
+  1  C
+  2  F
+  3  G
+  4  C
+//  10 | . . . . . . | F . . . . . | G . . . . . |
+  5  C
+  6  F
+  7  G
+//  13 | C . . . Am . |
+  8  C / / / Am
+//  15 End of grid
+
