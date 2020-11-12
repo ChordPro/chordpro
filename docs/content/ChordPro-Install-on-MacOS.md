@@ -16,28 +16,57 @@ both the GUI and the command line version of ChordPro.
 To install the command line version of ChordPro, open a command
 terminal window and type
 
-`sudo xcode-select --install`
+    sudo xcode-select --install
 
 You need to do this only once. This may give a final error that the
 install failed, this can be ignored.
 
-Then type:
+## Using system perl
 
-`sudo cpan chordpro`
+Type:
+
+    sudo cpan chordpro
 
 Make sure you are running the system version of the `cpan` tool. If in doubt, type this instead:
 
-`sudo /usr/bin/cpan chordpro`
+    sudo /usr/bin/cpan chordpro
 
 ChordPro should now be built and installed, by default in
 `/usr/local/bin`.
 
 Try it by typing `chordpro --version`. The result should be similar to
+
 ````
 This is ChordPro version 0.977
 ````
 
 (The version number may be different.)
+
+## Using HomeBrew
+
+First, install `homebrew` if it is not yet installed. Directions can
+be found [here](https://brew.sh/).
+
+Then install perl:
+
+    brew install perl
+
+Note that this will install perl in a subdirectory of
+`/usr/local/Cellar`, e.g. `/usr/local/Cellar/perl/5.32.0/bin`. It is
+advised to add this to the front of your `PATH`.
+
+If you want to use the ChordPro GUI, install wxWidgets and wxPerl.
+
+    brew install wxmac
+    /usr/local/Cellar/perl/5.32.0/bin/cpan Wx
+
+The last command may take a while, but should complete without errors.
+
+Finally, install ChordPro:
+
+    /usr/local/Cellar/perl/5.32.0/bin/cpan chordpro
+	
+This will give you both the `chordpro` and `wxchordpro` commands.
 
 ## Personal configuration
 
