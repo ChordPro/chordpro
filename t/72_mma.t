@@ -27,8 +27,8 @@ foreach my $file ( sort @files ) {
     ( my $ref = $file ) =~ s/\.cho/.mma/;
     @ARGV = ( "--no-default-configs",
 	      "--generate", "MMA",
-	      $decoda ? ( "--bo", "decoda=1" ) : (),
-	      "--bo", "groove=testing",
+	      $decoda ? ( "--backend-option", "decoda=1" ) : (),
+	      "--backend-option", "groove=testing",
 	      "--output", $out,
 	      $file );
     ::run();

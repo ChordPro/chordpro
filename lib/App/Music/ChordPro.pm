@@ -118,6 +118,9 @@ sub chordpro {
         elsif ( $of =~ /\.html?$/i ) {
             $options->{generate} ||= "HTML";
         }
+        elsif ( $of =~ /\.mma?$/i ) {
+            $options->{generate} ||= "MMA";
+        }
         elsif ( $of =~ /\.(debug)$/i ) {
             $options->{generate} ||= "Debug";
         }
