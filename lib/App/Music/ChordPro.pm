@@ -672,7 +672,11 @@ sub app_setup {
     }
 
     my $e = $ENV{CHORDIIRC} || $ENV{CHORDRC};
-    if ( $ENV{HOME} && -d $ENV{HOME} ) {
+    if ( $ENV{XDG_CONFIG_HOME} && -d $ENV{XDG_CONFIG_HOME} ) {
+	$configs{userconfig} =
+	  File::Spec->catfile( $ENV{XDG_CONFIG_HOME}, $app_lc, "$app_lc.json" );
+    }
+    elsif ( $ENV{HOME} && -d $ENV{HOME} ) {
         if ( -d File::Spec->catfile( $ENV{HOME}, ".config" ) ) {
             $configs{userconfig} =
               File::Spec->catfile( $ENV{HOME}, ".config", $app_lc, "$app_lc.json" );
