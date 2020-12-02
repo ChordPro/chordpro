@@ -203,7 +203,7 @@ sub classify_classic {
 # so I made this to try to parse unspecified chords that still have well defined "parts" in the chordname
 # these chords probably are understandable by a human, but too out of spec for the chordpro parser to interpret
 # my use of regex is probably not optimal -- I haven't had a lot of regex experience.
-# this currently only works for the roman chord notation
+# this currently only works for the normal chord notation
 sub generic_parse_chord
 {
     my $word = shift ;
@@ -390,11 +390,12 @@ sub decode_fingering
 # 'f' = a chord fingering request
 # 't' = tablature
 # 'c' = chords, usually to be output inline with a subsequent 'l' line
+# 'p' = chords, enclosed in (), usually to be output inline with a subsequent 'l' line
 # '{' = an embedded chordpro directive found in the input file, to be output with no changes
 # '_' = a blank line, i.e. it contains only whitespace
 
 # Alternative classifier by Jeff Welty.
-# Strategy: Percentage of recognzied chords.
+# Strategy: Percentage of recognized chords.
 sub classify_pct_chords {
     my ( $line ) = @_;
     my $lc_line = lc($line) ;
@@ -468,6 +469,34 @@ sub classify_pct_chords {
 
     # Lyrics or Chords heuristic.
     my @words = split ( /\s+/, $line );
+
+    # test to see if the line is chords enclosed with parentheses
+    if(1) {
+	my $tmp_line = $line ;
+	my @paren_words ;
+	my $n_paren_chords=0 ;
+
+	while($tmp_line =~ s/\((.+?)\)//) {
+	    push @paren_words, $1 ;
+	}
+
+	foreach (@paren_words) {
+	    my $is_chord = App::Music::ChordPro::Chords::parse_chord($_) ? 1 : 0  ;
+
+	    if(! $is_chord) {
+		if(generic_parse_chord($_)) {
+		    print STDERR "$_ detected by generic, not internal parse_chord\n" if $local_debug ;
+		    $is_chord=1 ;
+		}
+	    }
+	    $n_paren_chords += $is_chord ;
+	}
+
+	return 'p' if $n_paren_chords > 0 && $n_paren_chords == @paren_words ;
+
+    }
+
+
 
     my $n_tot_chars = length($line) ;
     $line =~ s/\s+//g ;
@@ -582,9 +611,10 @@ sub maplines {
 	print STDERR "$1 == @{$lines}[0]\n" if $local_debug ;
 
 	last if($1 eq "c" && $2 eq "l") ;
+	last if($1 eq "p" && $2 eq "l") ;
 	last if($2 eq "t" ) ;
 
-	if(($1 eq "c" || $1 eq "l") && $3 eq "t") {
+	if(($1 eq "c" || $1 eq 'p' || $1 eq "l") && $3 eq "t") {
 	    push @out, format_comment_line(shift(@$lines)) ;
 	    $map =~ s/.// ;
 	    last ;
@@ -655,7 +685,7 @@ sub maplines {
 
 	# special case: chords or lyrics before tabs, keep the chords or lyrics in {sot}, which is probably
 	# what the original text intended for alignment with the tablature
-	if ( $map =~ s/^[cl]t/t/ ) {
+	if ( $map =~ s/^[cpl]t/t/ ) {
 	    if(! $in_tablature) {
 		push( @out, "{sot}") ;
 		$in_tablature=1 ;
@@ -674,7 +704,7 @@ sub maplines {
 
 	if($in_tablature) {
 	    # Text line OR chord line with following blank line or EOF -- make part of tablature
-	    if ( $map =~ s/^[cl](_|$)// ) {
+	    if ( $map =~ s/^[cpl](_|$)// ) {
 		push( @out, shift(@$lines));
 		push( @out, '');
 		shift(@$lines);
@@ -694,6 +724,11 @@ sub maplines {
 	# The normal case: chords + lyrics.
 	if ( $map =~ s/^cl// ) {
 	    push( @out, combine( shift(@$lines), shift(@$lines), "cl" ) );
+	}
+
+	# The normal case: paren_chords + lyrics.
+	elsif ( $map =~ s/^pl// ) {
+	    push( @out, combine( shift(@$lines), shift(@$lines), "pl" ) );
 	}
 
 	# Empty line preceding a chordless lyrics line.
@@ -736,6 +771,11 @@ sub maplines {
 	    push( @out, combine( shift(@$lines), '', "c" ) );
 	}
 
+	# Lone paren_chords.
+	elsif ( $map =~ s/^p// ) {
+	    push( @out, combine( shift(@$lines), '', "p" ) );
+	}
+
 	# Empty line.
 	elsif ( $map =~ s/^_// ) {
 	    push( @out, '' );
@@ -752,7 +792,14 @@ sub maplines {
 
 # Combine two lines (chords + lyrics) into lyrics with [chords].
 sub combine {
-    my ( $l1, $l2 ) = @_;
+    my ( $l1, $l2, $codes ) = @_;
+
+    if($codes =~ /^p/) {
+	# first line is a paren_chords line, need to replace ()'s with spaces
+	$l1 =~ s/\(/ /g ;
+	$l1 =~ s/\)/ /g ;
+    }
+
     my $res = "";
     while ( $l1 =~ /^(\s*)(\S+)(.*)/ ) {
 	$res .= join( '',
