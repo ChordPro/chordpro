@@ -72,10 +72,11 @@ sub parse_file {
     # Loadlines sets $opts->{_filesource}.
     my $lines = loadlines( $filename, $opts );
     # Sense crd input and convert if necessary.
-    if ( any { /\S/ } @$lines	# non-blank lines
+    if ( !$options->{fragment}
+	 and any { /\S/ } @$lines	# non-blank lines
 	 and $options->{crd} || !any { /^{\w+/ } @$lines ) {
 	require App::Music::ChordPro::A2Crd;
-	$lines = App::Music::ChordPro::A2Crd::a2crd();
+	$lines = App::Music::ChordPro::A2Crd::a2crd( { lines => $lines } );
     }
 
     # Note: $opts are used by the tests only.

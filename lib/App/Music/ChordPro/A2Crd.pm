@@ -102,7 +102,9 @@ sub a2crd {
     $config = App::Music::ChordPro::Config::configurator({});
 
     # Process input.
-    my $lines = loadlines( @ARGV ? $ARGV[0] : \*STDIN);
+    my $lines = $opts->{lines}
+      ? delete($opts->{lines})
+      : loadlines( @ARGV ? $ARGV[0] : \*STDIN);
 
     return [ a2cho($lines) ];
 }
