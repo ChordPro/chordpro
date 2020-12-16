@@ -7,6 +7,7 @@ use warnings;
 use App::Music::ChordPro::Chords;
 use String::Interpolate::Named;
 use utf8;
+use POSIX qw(setlocale LC_TIME strftime);
 
 use parent qw(Exporter);
 our @EXPORT;
@@ -26,7 +27,9 @@ sub fmt_subst {
     }
     $m->{tuning} //= [ join(" ", App::Music::ChordPro::Chords::get_tuning) ];
     $m->{instrument} //= [ $::config->{instrument} ];
-
+    setlocale( LC_TIME, "" );
+    $m->{today} //= [ strftime( $::config->{dates}->{today}->{format},
+				localtime(time) ) ];
     interpolate( { %$s, args => $m,
 		   separator => $::config->{metadata}->{separator} },
 		 $t );

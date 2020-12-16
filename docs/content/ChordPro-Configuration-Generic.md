@@ -70,6 +70,19 @@ Important: the keys `title` and `subtitle` must always be in this list.
 
 See also [Using metadata in texts]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
 
+## Dates and Times
+
+Defines the date format used by the metadata value `today`.
+
+    "dates" : {
+        "today" : {
+            "format" : "%A, %B %e, %Y"
+        }
+    },
+
+The POSIX library function `strftime` is used to render the date, so
+the format string can use anything that `strftime` understands.
+
 ## Instrument description
 
 Describes the instrument used. For example:

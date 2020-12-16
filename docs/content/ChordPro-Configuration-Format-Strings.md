@@ -43,6 +43,10 @@ The ChordPro reference implementation provides additional meta data:
 
  * `pages`: The number of pages of the song.
  
+ * `today`: The current date in the format defined in the config file.
+   See [Dates and Times]({{< relref
+   "ChordPro-Configuration-Generic#dates-and-times" >}}).
+ 
  * `tuning`: The tuning of the instrument. Usually `"E2 A2 D3 G3 B3 E4"`.
  
  * `instrument`: The name of the instrument. Usually `"Guitar, 6

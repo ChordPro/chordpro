@@ -124,7 +124,7 @@ sub configurator {
 	$cfg->{pdf}->{formats}->{first}->{$_} = "";
     }
     for my $ff ( qw(chord
-		    diagram diagram_capo chordfingers
+		    diagram diagram_base chordfingers
 		    comment comment_box comment_italic
 		    tab text toc annotation label
 		    empty footer grid grid_margin subtitle title) ) {
@@ -680,6 +680,13 @@ sub default_config() {
 		 "key", "time", "tempo", "capo", "duration" ],
       "strict" : true,
       "separator" : "; ",
+    },
+
+    // Dates.
+    "dates" : {
+        "today" : {
+            "format" : "%A, %B %e, %Y"
+        }
     },
 
     // Instrument settings. These are usually set by a separate
