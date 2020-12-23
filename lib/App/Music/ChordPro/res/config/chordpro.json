@@ -62,6 +62,13 @@
       "separator" : "; ",
     },
 
+    // Dates.
+    "dates" : {
+        "today" : {
+            "format" : "%A, %B %e, %Y"
+        }
+    },
+
     // Instrument settings. These are usually set by a separate
     // config file.
     //
