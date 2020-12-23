@@ -34,17 +34,18 @@ sub generate_songbook {
 my $groove;			# groove to use
 my $single_space = 0;		# suppress chords line when empty
 my $chords_under = 0;		# chords under lyrics
+my $st = 0;			# current MMA statement number
 
 sub safemeta {
     my ( $s, $meta, $default ) = @_;
-    return $default undef unless defined $meta && defined $s->{meta}->{$meta};
+    return $default unless defined $meta && defined $s->{meta}->{$meta};
     return $s->{meta}->{$meta}->[0];
 }
 
 sub generate_song {
     my ( $s ) = @_;
 
-    my $st = 0;			# current MMA statement number
+    $st = 0;			# current MMA statement number
     my $cur = '';		# MMA statement under construction
     my $prev = '';		# previous MMA statement
     my $did = 0;		# preamble was emitted
@@ -228,12 +229,12 @@ sub generate_song {
 	    next;
 	}
 
-	next;
-
 	if ( $elt->{type} eq "songline" ) {
 	    push(@s, songline($elt));
 	    next;
 	}
+
+	next;
 
 	if ( $elt->{type} eq "tabline" ) {
 	    push(@s, $elt->{text});
@@ -315,7 +316,7 @@ sub generate_song {
 	    next;
 	}
 
-	# Ignore everyting else.
+	# Ignore everything else.
 
     }
     push(@s, "// $line End of $ctx") if $ctx;
@@ -323,45 +324,26 @@ sub generate_song {
     \@s;
 }
 
+my $prevchord;
+
 sub songline {
     my ($elt) = @_;
 
-    my $t_line = "";
-
-    if ( $single_space && ! ( $elt->{chords} && join( "", @{ $elt->{chords} } ) =~ /\S/ )
-       ) {
-	$t_line = join( "", @{ $elt->{phrases} } );
-	$t_line =~ s/\s+$//;
-	return $t_line;
-    }
-
     unless ( $elt->{chords} ) {
-	return ( "", join( " ", @{ $elt->{phrases} } ) );
+	return ( "// " . join( " ", @{ $elt->{phrases} } ) );
     }
 
-    if ( my $f = $::config->{settings}->{'inline-chords'} ) {
-	$f = '[%s]' unless $f =~ /^[^%]*\%s[^%]*$/;
-	$f .= '%s';
-	foreach ( 0..$#{$elt->{chords}} ) {
-	    $t_line .= sprintf( $f,
-				$elt->{chords}->[$_],
-				$elt->{phrases}->[$_] );
+    my @s;
+    for ( my $i = 0; $i < @{$elt->{chords}}; $i++ ) {
+	my $chord = $elt->{chords}->[$i] || $prevchord || 'z';
+	for ( split( /\|/, $elt->{phrases}->[$i] ) ) {
+	    push( @s,
+		  sprintf( "%3d  %s [ %s ]", ++$st,
+			   $chord, $_ ) );
 	}
-	return ( $t_line );
+	$prevchord = $chord;
     }
-
-    my $c_line = "";
-    foreach ( 0..$#{$elt->{chords}} ) {
-	$c_line .= $elt->{chords}->[$_] . " ";
-	$t_line .= $elt->{phrases}->[$_];
-	my $d = length($c_line) - length($t_line);
-	$t_line .= "-" x $d if $d > 0;
-	$c_line .= " " x -$d if $d < 0;
-    }
-    s/\s+$// for ( $t_line, $c_line );
-    return $chords_under
-      ? ( $t_line, $c_line )
-      : ( $c_line, $t_line )
+    return @s;
 }
 
 sub is_bar {

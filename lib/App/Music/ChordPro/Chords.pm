@@ -453,6 +453,12 @@ sub chord_info {
     my ( $chord ) = @_;
     my $info;
     assert_tuning();
+
+    my $d = "";
+    if ( $chord =~ /^(.*):(\d+\.*)$/ ) {
+	$chord = $1;
+	$d = $2;
+    }
     for ( \%song_chords, \%config_chords ) {
 	next unless exists($_->{$chord});
 	$info = $_->{$chord};
@@ -486,6 +492,7 @@ sub chord_info {
     if ( $info->{base} <= 0 ) {
 	return +{
 		 name    => $chord,
+		 $d ne "" ? ( duration => $d ) : (),
 		 %$info,
 		 strings => [],
 		 fingers => [],
@@ -495,6 +502,7 @@ sub chord_info {
     }
     return +{
 	     name    => $chord,
+	     $d ne "" ? ( duration => $d ) : (),
 	     %$info,
     };
 }

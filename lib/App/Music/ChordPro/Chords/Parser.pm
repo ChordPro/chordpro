@@ -181,6 +181,13 @@ sub new {
 sub parse_chord {
     my ( $self, $chord ) = @_;
 
+    my $name = $chord;
+    my $duration = "";
+    if ( $chord =~ /^(.*):(\d+\.*)$/ ) {
+	( $chord, $duration ) = ( $1, $2 );
+	$name = $chord;
+    }
+
     my $bass;
     if ( $chord =~ m;^(.*)/(.*); ) {
 	$chord = $1;
@@ -199,7 +206,8 @@ sub parse_chord {
 
     my $info = { system => $self->{system},
 		 parser => $self,
-		 name => $_[1] };
+		 $duration ne "" ? ( duration => $duration ) : (),
+		 name => $name };
 
     if ( $chord =~ /^$c_pat$/ ) {
 	return unless $info->{root} = $+{root};
