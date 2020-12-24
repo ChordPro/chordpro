@@ -56,4 +56,14 @@ sub expand_tilde {
 
 push( @EXPORT, 'expand_tilde' );
 
+sub sys {
+    my ( @cmd ) = @_;
+    warn("+ @cmd\n") if $::options->{trace};
+    my $res = system(@cmd);
+    warn( sprintf("=%02x=> @cmd", $res), "\n" ) if $res;
+    return $res;
+}
+
+push( @EXPORT, 'sys' );
+
 1;

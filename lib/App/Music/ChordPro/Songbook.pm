@@ -218,6 +218,47 @@ sub parse_song {
 	    }
 	}
 
+	if ( $in_context eq "abc" ) { #### TODO: Use config settings
+
+	    # 'open' indicates open. 
+	    if ( /^\s*\{(?:end_of_abc)\}\s*$/ ) {
+		delete $song->{body}->[-1]->{open};
+		# A subsequent {start_of_abc} will reopen a new section.
+	    }
+
+	    # Ignore most information fields.
+	    # We only need (accept) K (key), L (unit note lenght),
+	    # P (parts), Q (tempo) and M (meter).
+	    # From the directives, only pass %%transpose.
+	    elsif ( /^[ABCDEFGHIJNORSTUVWXYZ+]:/i
+		    || /^%%(?!transpose)/ ) {
+		next;
+	    }
+	    else {
+		my $abc = $_;
+
+		# Add to an open ABC item.
+		if ( $song->{body}->[-1]->{context} eq "abc"
+		     && $song->{body}->[-1]->{open} ) {
+		    push( @{$song->{body}->[-1]->{data}}, $abc );
+		}
+
+		# Else start new ABC item.
+		else {
+		    my @data = ( 'X:1' );
+		    if ( $xpose || $options->{transpose} ) {
+			push( @data,
+			      '%%transpose ' .
+			      ( $xpose + ($options->{transpose}//0 ) ) );
+		    }
+		    $self->add( type => "data",
+				data => [ @data, $abc ],
+				open => 1 );
+		}
+		next;
+	    }
+	}
+
 	# For practical reasons: a prime should always be an apostroph.
 	s/'/\x{2019}/g;
 
@@ -239,6 +280,7 @@ sub parse_song {
 
 	if ( $in_context eq "tab" ) {
 	    $self->add( type => "tabline", text => $_ );
+	    warn("OOPS");
 	    next;
 	}
 

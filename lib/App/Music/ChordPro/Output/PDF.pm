@@ -12,11 +12,13 @@ use strict;
 use warnings;
 use Encode qw( encode_utf8 );
 use App::Packager;
+use File::Temp ();
 
 use App::Music::ChordPro::Output::Common
   qw( roman prep_outlines fmt_subst demarkup );
 
 use App::Music::ChordPro::Output::PDF::Writer;
+use App::Music::ChordPro::Utils;
 
 my $pdfapi;
 BEGIN {
@@ -219,6 +221,7 @@ my $chordscol = 0;		# chords in a separate column
 my $chordscapo = 0;		# capo in a separate column
 my $i_tag;
 our $assets;
+my $abctempdir;			# temp dir for ABC conversions
 
 use constant SIZE_ITEMS => [ qw (chord text tab grid diagram toc title footer) ];
 
@@ -897,8 +900,16 @@ sub generate_song {
 	    next;
 	}
 
-	if ( $elt->{type} eq "image" ) {
+	if ( $elt->{context} eq "abc" && $elt->{type} eq "data" ) {
+	    my $png = abc2png( $pr, $elt );
+	    next unless $png;
+	    $elt = { type => "image", uri => $png,
+		     opts => { center => 0 }  };
 
+	    #### FALL THROUGH to IMAGE HANDLING ####
+	}
+
+	if ( $elt->{type} eq "image" ) {
 	    # Images are slightly more complex.
 	    # Only after establishing the desired height we can issue
 	    # the checkspace call, and we must get $y after that.
@@ -1713,6 +1724,7 @@ sub imageline {
 	return "$!: " . $elt->{uri};
     }
 
+    warn("get_image ", $elt->{uri}, "\n") if $options->{debug};
     my $img = eval { $pr->get_image( $elt->{uri} ) };
     unless ( $img ) {
 	warn($@);
@@ -1746,13 +1758,22 @@ sub imageline {
 	    $scale = $ph / $h;
 	}
     }
+    warn("Image scale: $scale\n") if $options->{debug};
     $h *= $scale;
     $w *= $scale;
     $x += ($pw - $w) / 2 if $opts->{center};
 
     my $y = $gety->($h);	# may have been changed by checkspace
+    if ( defined ( my $tag = $i_tag // $opts->{label} ) ) {
+	$i_tag = undef;
+    	my $ftext = $ps->{fonts}->{comment};
+	my $ytext  = $y - font_bl($ftext);
+	prlabel( $ps, $tag, $x, $ytext );
+    }
 
+    warn("add_image\n") if $options->{debug};
     $pr->add_image( $img, $x, $y, $w, $h, $opts->{border} || 0 );
+    warn("done\n") if $options->{debug};
 
     return $h;			# vertical size
 }
@@ -2201,6 +2222,98 @@ sub wrapsimple {
     $font ||= $pr->{font};
     $pr->setfont($font);
     $pr->wrap( $text, $pr->{ps}->{__rightmargin} - $x );
+}
+
+sub abc2png {
+    my ( $pr, $elt ) = @_;
+    my $td = $abctempdir //= File::Temp::tempdir( CLEANUP => 1 );
+    my $abc  = File::Spec->catfile( $td, "abc1.abc" );
+    my $svg0 = File::Spec->catfile( $td, "abc1.svg" );
+    my $svg1 = File::Spec->catfile( $td, "abc1001.svg" );
+    my $img  = File::Spec->catfile( $td, "abc1.jpg" );
+
+    my $fd;
+    unless ( open( $fd, '>:utf8', $abc ) ) {
+	warn("Error in ABC embedding: $abc: $!\n");
+	return;
+    }
+    print $fd "$_\n" for @{$elt->{data}};
+    unless ( close($fd) ) {
+	warn("Error in ABC embedding: $abc: $!\n");
+	return;
+    }
+
+    # Available width and height.
+    my $pw;
+    my $ps = $pr->{ps};
+    if ( $ps->{columns} > 1 ) {
+	$pw = $ps->{columnoffsets}->[1]
+	  - $ps->{columnoffsets}->[0]
+	  - $ps->{columnspace};
+    }
+    else {
+	$pw = $ps->{__rightmargin} - $ps->{_leftmargin};
+    }
+    if ( sys( qw(abcm2ps -g -q -m0cm),
+	      "-w" . $pw . "pt",
+	      "-O", $svg0, $abc ) ) {
+	warn("Error in ABC embedding\n");
+	return;
+    }
+
+    # Need more investigating.
+    # $PDF::API2::VERSION >= 2.038
+    #  and eval { require PDF::API2::XS; $img =~ s/\.jpg/.png/ };
+
+    if ( sys( qw(convert -density 600 -background white -trim),
+	      $svg1, $img ) ) {
+	warn("Error in ABC embedding\n");
+	return;
+    }
+    return $img;
+}
+
+sub abc2png_via_eps {
+    my ( $pr, $elt ) = @_;
+    my $td = $abctempdir //= File::Temp::tempdir( CLEANUP => 1 );
+    my $abc  = File::Spec->catfile( $td, "abc1.abc" );
+    my $eps0 = File::Spec->catfile( $td, "abc1.eps" );
+    my $eps1 = File::Spec->catfile( $td, "abc1001.eps" );
+    my $png  = File::Spec->catfile( $td, "abc1.png" );
+
+    my $fd;
+    unless ( open( $fd, '>:utf8', $abc ) ) {
+	warn("Error in ABC embedding: $abc: $!\n");
+	return;
+    }
+    print $fd "$_\n" for @{$elt->{data}};
+    unless ( close($fd) ) {
+	warn("Error in ABC embedding: $abc: $!\n");
+	return;
+    }
+
+    # Available width and height.
+    my $pw;
+    my $ps = $pr->{ps};
+    if ( $ps->{columns} > 1 ) {
+	$pw = $ps->{columnoffsets}->[1]
+	  - $ps->{columnoffsets}->[0]
+	  - $ps->{columnspace};
+    }
+    else {
+	$pw = $ps->{__rightmargin} - $ps->{_leftmargin};
+    }
+    if ( sys( "abcm2ps", "-E", "-q",
+	      "-m", "0cm", "-w", $pw."pt",
+	      "-O", $eps0, $abc ) ) {
+	warn("Error in ABC embedding\n");
+	return;
+    }
+    if ( sys( "eps2png", "-O", $png, $eps1 ) ) {
+	warn("Error in ABC embedding\n");
+	return;
+    }
+    return $png;
 }
 
 my %corefonts = map { $_ => 1 }
