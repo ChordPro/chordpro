@@ -12,6 +12,7 @@
     - Add experimental MMA backend.
     - !Bugfixes
     - Fix chords transpose in comments with output ChordPro.
+    - Fix detection of grid params in start_of_grid.
 
 0.977	2020-08-26
 

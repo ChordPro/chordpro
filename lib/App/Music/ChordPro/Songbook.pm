@@ -594,25 +594,33 @@ sub directive {
 	  if $in_context;
 	$in_context = $1;
 	@chorus = (), $chorus_xpose = 0 if $in_context eq "chorus";
-	if ( $in_context eq "grid" && $arg eq "" && $grid_arg ) {
-	    $self->add( type => "set",
-			name => "gridparams",
-			value => $grid_arg );
-	}
-	elsif ( $in_context eq "grid" && $arg &&
-	     $arg =~ m/^
-		       (?: (\d+) \+)?
-		       (\d+) (?: x (\d+) )?
-		       (?:\+ (\d+) )?
-		       (?:\s+ (.*)? )? $/x ) {
-	    do_warn("Invalid grid params: $arg (must be non-zero)"), return
-	      unless $2;
-	    $grid_arg = [ $2, $3, $1, $4 ];
-	    $self->add( type => "set",
-			name => "gridparams",
-			value =>  [ @$grid_arg, $5||"" ] );
-	    $grid_cells = [ $2 * ( $3//1 ), ($1//0), ($4//0) ];
-	    push( @labels, $5 ) if length($5||"");
+	if ( $in_context eq "grid" ) {
+	    if ( $arg eq "" ) {
+		$self->add( type => "set",
+			    name => "gridparams",
+			    value => $grid_arg );
+	    }
+	    elsif ( $arg =~ m/^
+			      (?: (\d+) \+)?
+			      (\d+) (?: x (\d+) )?
+			      (?:\+ (\d+) )?
+			      (?:[:\s+] (.*)? )? $/x ) {
+		do_warn("Invalid grid params: $arg (must be non-zero)"), return
+		  unless $2;
+		$grid_arg = [ $2, $3//1, $1//0, $4//0 ];
+		$self->add( type => "set",
+			    name => "gridparams",
+			    value =>  [ @$grid_arg, $5||"" ] );
+		push( @labels, $5 ) if length($5||"");
+	    }
+	    elsif ( $arg ne "" ) {
+		$self->add( type => "set",
+			    name => "gridparams",
+			    value =>  [ @$grid_arg, $arg ] );
+		push( @labels, $arg );
+	    }
+	    $grid_cells = [ $grid_arg->[0] * $grid_arg->[1],
+			    $grid_arg->[2],  $grid_arg->[3] ];
 	}
 	elsif ( $arg && $arg ne "" ) {
 	    $self->add( type  => "set",
