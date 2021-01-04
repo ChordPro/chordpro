@@ -543,14 +543,26 @@ sub hmerge($$;$) {
 	elsif ( ref($right->{$key}) eq 'ARRAY'
 		and
 		ref($res{$key}) eq 'ARRAY' ) {
-
+	    warn("AMERGE $key: ",
+		 join(" ", map { qq{"$_"} } @{ $res{$key} }),
+		 " + ",
+		 join(" ", map { qq{"$_"} } @{ $right->{$key} }),
+		 " \n") if 0;
 	    # Arrays. Overwrite or append.
 	    if ( @{$right->{$key}} ) {
 		my @v = @{ $right->{$key} };
 		if ( $v[0] eq "append" ) {
 		    shift(@v);
 		    # Append the rest.
+		    warn("PRE: ",
+			 join(" ", map { qq{"$_"} } @{ $res{$key} }),
+			 " + ",
+			 join(" ", map { qq{"$_"} } @v),
+			 "\n") if 0;
 		    push( @{ $res{$key} }, @v );
+		    warn("POST: ",
+			 join(" ", map { qq{"$_"} } @{ $res{$key} }),
+			 "\n") if 0;
 		}
 		elsif ( $v[0] eq "prepend" ) {
 		    shift(@v);
