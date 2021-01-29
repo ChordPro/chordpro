@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Mon Apr 27 15:13:18 2020
 # Last Modified By: Johan Vromans
-# Last Modified On: Tue Sep 15 12:04:52 2020
-# Update Count    : 40
+# Last Modified On: Fri Jan 29 08:29:23 2021
+# Update Count    : 42
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -81,19 +81,21 @@ sub extract_zip {
 	# shlibs to root.
 	$x =~ s;^shlib/.*?([^/]+)$;$1;;
 
+	my $skip = -f catfile( $dest, $x );
 	if ( $verbose ) {
-	    my $skip = -f catfile( $dest, $x );
 	    print STDERR ( $skip ? "Skipping \"" : "Extracting \"",
 			   $member->fileName);
 	    print STDERR ("\" to \"$x") unless $x eq $member->fileName;
 	    print STDERR ("\"\n");
-	    next if $skip;
 	}
+	next if $skip;
 
 	my $file = catfile( $dest, $x );
 	$zip->extractMember( $member, $file ) == AZ_OK
 	  or die("Zip extract $x error\n");
-	my $perm = (stat($file))[2] & 0777;
+	my @st = stat($file);
+	warn("STAT $file: $!\n") unless @st;
+	my $perm = $st[2] & 0777;
 	chmod( $perm | 0220, $file );
     }
 
