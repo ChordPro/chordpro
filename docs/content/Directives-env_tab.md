@@ -5,7 +5,7 @@ description: "Directives: start_of_tab"
 
 # Directives: start_of_tab
 
-Abbreviation: `sob`.
+Abbreviation: `sot`.
 
 This directive indicates that the lines that follow form a section of
 guitar TAB instructions. The lines will not be folded or changed.
