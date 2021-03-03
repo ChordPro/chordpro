@@ -9,7 +9,7 @@ SCRIPT := ${ROOT}/script
 RES    := ..\..\lib\App\Music\ChordPro\res
 PP := pp -u
 
-all : clean chordpro wxchordpro
+all : ppl iss
 
 .PHONY :: chordpro wxchordpro
 
