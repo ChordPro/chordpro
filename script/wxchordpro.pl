@@ -12,6 +12,8 @@ use lib "$FindBin::Bin/../CPAN";
 use lib "$FindBin::Bin/../lib";
 use App::Packager qw( :name App::Music::ChordPro );
 use App::Music::ChordPro::Wx;
+use App::Music::ChordPro::Utils qw(is_msw);
+$ENV{PATH} = "$FindBin::Bin/.." . (is_msw() ? ";" : ":" ) . $ENV{PATH};
 
 # Package name.
 my $my_package = 'ChordPro';

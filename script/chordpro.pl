@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
 # Last Modified By: Johan Vromans
-# Last Modified On: Tue Oct 27 20:51:31 2020
-# Update Count    : 255
+# Last Modified On: Fri Jan  1 20:42:26 2021
+# Update Count    : 256
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -38,8 +38,9 @@ use FindBin;
 use lib "$FindBin::Bin/../CPAN";
 use lib "$FindBin::Bin/../lib";
 use App::Packager qw( :name App::Music::ChordPro );
-
 use App::Music::ChordPro;
+use App::Music::ChordPro::Utils qw(is_msw);
+$ENV{PATH} = "$FindBin::Bin/.." . (is_msw() ? ";" : ":" ) . $ENV{PATH};
 
 run();
 
