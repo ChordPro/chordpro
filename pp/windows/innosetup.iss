@@ -42,7 +42,7 @@ Name: desktopicon\user; Description: "For the current user only"; Components: GU
 Source: "build\*"; DestDir: {app}; Flags: recursesubdirs createallsubdirs overwritereadonly ignoreversion;
 
 [Icons]
-Name: {group}\{#APP}; Filename: {app}\bin\wxchordpro.exe; Components: GUI; IconFilename: "{app}\chordpro.ico";
+Name: {group}\{#APP}; Filename: {app}\wxchordpro.exe; Components: GUI; IconFilename: "{app}\chordpro.ico";
 Name: "{group}\{cm:UninstallProgram,{#APP}}"; Filename: "{uninstallexe}"
 
 Name: "{commondesktop}\{#APP}"; Filename: "{app}\wxchordpro.exe"; Tasks: desktopicon\common; IconFilename: "{app}\chordpro.ico";
