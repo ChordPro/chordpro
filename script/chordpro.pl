@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
 # Last Modified By: Johan Vromans
-# Last Modified On: Fri Jan  1 20:42:26 2021
-# Update Count    : 256
+# Last Modified On: Wed Mar  3 22:11:36 2021
+# Update Count    : 262
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -43,5 +43,10 @@ use App::Music::ChordPro::Utils qw(is_msw);
 $ENV{PATH} = "$FindBin::Bin/.." . (is_msw() ? ";" : ":" ) . $ENV{PATH};
 
 run();
+
+################ Subroutines ################
+
+# Synchronous system call. Used in Util module.
+sub ::sys { system(@_) }
 
 1;

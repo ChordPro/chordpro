@@ -221,7 +221,6 @@ my $chordscol = 0;		# chords in a separate column
 my $chordscapo = 0;		# capo in a separate column
 my $i_tag;
 our $assets;
-my $abctempdir;			# temp dir for ABC conversions
 
 use constant SIZE_ITEMS => [ qw (chord text tab grid diagram toc title footer) ];
 
@@ -900,13 +899,17 @@ sub generate_song {
 	    next;
 	}
 
-	if ( $elt->{context} eq "abc" && $elt->{type} eq "data" ) {
-	    my $png = abc2png( $pr, $elt );
-	    next unless $png;
-	    $elt = { type => "image", uri => $png,
-		     opts => { center => 0 }  };
-
-	    #### FALL THROUGH to IMAGE HANDLING ####
+	if ( $elt->{type} eq "delegate" ) {
+	    if ( $elt->{subtype} eq "image" ) {
+		my $hd = __PACKAGE__->can($elt->{handler});
+		my $img = $hd->( $s, $pr, $elt );
+		next unless $img;
+		unshift( @elts, { type => "image",
+				  uri  => $img->{src},
+				  opts => { center => 0, %$img }  } );
+		next;
+	    }
+	    die("PDF: Unsupported delegation $elt->{subtype}\n");
 	}
 
 	if ( $elt->{type} eq "image" ) {
@@ -2224,22 +2227,58 @@ sub wrapsimple {
     $pr->wrap( $text, $pr->{ps}->{__rightmargin} - $x );
 }
 
-sub abc2png {
-    my ( $pr, $elt ) = @_;
-    my $td = $abctempdir //= File::Temp::tempdir( CLEANUP => 1 );
-    my $abc  = File::Spec->catfile( $td, "abc1.abc" );
-    my $svg0 = File::Spec->catfile( $td, "abc1.svg" );
-    my $svg1 = File::Spec->catfile( $td, "abc1001.svg" );
-    my $img  = File::Spec->catfile( $td, "abc1.jpg" );
+use constant ABCDEBUG => 0;
+
+use feature 'state';
+
+sub abc2image {
+    my ( $s, $pr, $elt ) = @_;
+
+    state $imgcnt = 0;
+    state $td = File::Temp::tempdir( CLEANUP => !$options->{debug} );
+
+    $imgcnt++;
+    my $src  = File::Spec->catfile( $td, "tmp${imgcnt}.abc" );
+    my $img  = File::Spec->catfile( $td, "tmp${imgcnt}.jpg" );
 
     my $fd;
-    unless ( open( $fd, '>:utf8', $abc ) ) {
-	warn("Error in ABC embedding: $abc: $!\n");
+    unless ( open( $fd, '>:utf8', $src ) ) {
+	warn("Error in ABC embedding: $src: $!\n");
 	return;
     }
-    print $fd "$_\n" for @{$elt->{data}};
+
+    for ( keys(%{$elt->{opts}}) ) {
+	print $fd '%%'.$_." ".$elt->{opts}->{$_}."\n";
+	warn('%%'.$_." ".$elt->{opts}->{$_}."\n") if ABCDEBUG;
+    }
+    print $fd "X:1\n";
+    if ( $s->{meta}->{key} ) {
+	print $fd "K:", $s->{meta}->{_orig_key}->[0], "\n";
+	warn("K:", $s->{meta}->{_orig_key}->[0], "\n") if ABCDEBUG;
+    }
+    if ( $s->{meta}->{time} ) {
+	print $fd "M:", $s->{meta}->{time}->[0], "\n";
+	warn("M:", $s->{meta}->{time}->[0], "\n") if ABCDEBUG;
+    }
+    if ( $s->{meta}->{tempo} ) {
+	print $fd "Q:", $s->{meta}->{tempo}->[0], "\n";
+	warn("Q:", $s->{meta}->{tempo}->[0], "\n") if ABCDEBUG;
+    }
+    for ( @{$elt->{data}} ) {
+	# Ignore most information fields.
+	# We only need (accept) K (key), L (unit note lenght),
+	# P (parts), Q (tempo) and M (meter).
+	# From the directives, only pass %%transpose.
+	if ( /^[ABCDEFGHIJNORSTUVWXYZ+]:/i
+	     || /^%%(?!transpose)/ ) {
+	    next;
+	}
+	print $fd $_, "\n";
+	warn($_, "\n") if ABCDEBUG;
+    }
+
     unless ( close($fd) ) {
-	warn("Error in ABC embedding: $abc: $!\n");
+	warn("Error in ABC embedding: $src: $!\n");
 	return;
     }
 
@@ -2254,41 +2293,107 @@ sub abc2png {
     else {
 	$pw = $ps->{__rightmargin} - $ps->{_leftmargin};
     }
-    if ( sys( qw(abcm2ps -g -q -m0cm),
+
+    state $abcm2ps = findexe("abcm2ps");
+    unless ( $abcm2ps ) {
+	warn("Error in ABC embedding: missing 'abcm2ps' tool.\n");
+	return;
+    }
+
+    my $svg0 = File::Spec->catfile( $td, "tmp${imgcnt}.svg" );
+    my $svg1 = File::Spec->catfile( $td, "tmp${imgcnt}001.svg" );
+    if ( sys( $abcm2ps, qw(-g -q -m0cm),
 	      "-w" . $pw . "pt",
-	      "-O", $svg0, $abc ) ) {
+	      "-O", $svg0, $src ) ) {
 	warn("Error in ABC embedding\n");
 	return;
     }
 
-    # Need more investigating.
-    # $PDF::API2::VERSION >= 2.038
-    #  and eval { require PDF::API2::XS; $img =~ s/\.jpg/.png/ };
+    my @cmd;
+    if ( is_msw() ) {
+	state $magick = findexe("magick");
+	unless ( $magick ) {
+	    warn("Error in ABC embedding: missing 'imagemagick/convert' tool.\n");
+	    return;
+	}
+	@cmd = ( $magick, "convert" );
+    }
+    else {
+	state $convert = findexe("convert");
+	unless ( $convert ) {
+	    warn("Error in ABC embedding: missing 'imagemagick/convert' tool.\n");
+	    return;
+	}
+	@cmd = ( $convert );
+    }
 
-    if ( sys( qw(convert -density 600 -background white -trim),
+    if ( sys( @cmd, qw(-density 600 -background white -trim),
 	      $svg1, $img ) ) {
 	warn("Error in ABC embedding\n");
 	return;
     }
-    return $img;
-}
+    return { src => $img, scale => 0.16 };
 
-sub abc2png_via_eps {
-    my ( $pr, $elt ) = @_;
-    my $td = $abctempdir //= File::Temp::tempdir( CLEANUP => 1 );
-    my $abc  = File::Spec->catfile( $td, "abc1.abc" );
-    my $eps0 = File::Spec->catfile( $td, "abc1.eps" );
-    my $eps1 = File::Spec->catfile( $td, "abc1001.eps" );
-    my $png  = File::Spec->catfile( $td, "abc1.png" );
+=for later_maybe
 
-    my $fd;
-    unless ( open( $fd, '>:utf8', $abc ) ) {
-	warn("Error in ABC embedding: $abc: $!\n");
+    # abcm2ps -> SVG -> rsvg-convert -> PNG. NO TRIM.
+    my $svg0 = File::Spec->catfile( $td, "tmp${imgcnt}.svg" );
+    my $svg1 = File::Spec->catfile( $td, "tmp${imgcnt}001.svg" );
+    $img  = File::Spec->catfile( $td, "tmp${imgcnt}.png" );
+    if ( sys( qw(abcm2ps -S -g -q -m0cm),
+	      "-w" . $pw . "pt",
+	      "-O", $svg0, $src ) ) {
+	warn("Error in ABC embedding\n");
 	return;
     }
-    print $fd "$_\n" for @{$elt->{data}};
+
+    if ( sys( qw(rsvg-convert -z 6.67  --format png --background-color white),
+	      $svg1, "-o", $img ) ) {
+	warn("Error in ABC embedding\n");
+	return;
+    }
+
+    # abcm2ps -> EPS -> eps2png -> PNG. NO TRIM.
+    my $eps0 = File::Spec->catfile( $td, "tmp${imgcnt}.eps" );
+    my $eps1 = File::Spec->catfile( $td, "tmp${imgcnt}001.eps" );
+    if ( sys(qw(abcm2ps -S -E -q -m0cm),
+	     "-w", $pw."pt",
+	     "-O", $eps0, $src ) ) {
+	warn("Error in ABC embedding\n");
+	return;
+    }
+    if ( sys( "eps2png", "-O", $img, $eps1 ) ) {
+	warn("Error in ABC embedding\n");
+	return;
+    }
+=cut
+
+}
+
+sub ly2image {
+    my ( $s, $pr, $elt ) = @_;
+    state $imgcnt = 0;
+    state $td = File::Temp::tempdir( CLEANUP => !$options->{debug} );
+    my $src  = File::Spec->catfile( $td, "tmp${imgcnt}.ly" );
+    my $img  = File::Spec->catfile( $td, "tmp${imgcnt}.png" );
+
+    my $fd;
+    unless ( open( $fd, '>:utf8', $src ) ) {
+	warn("Error in Lilypond embedding: $src: $!\n");
+	return;
+    }
+
+    print $fd "\\version \"2.21.0\"\n";
+    print $fd "\\header { tagline = ##f }\n";
+    for ( keys(%{$elt->{opts}}) ) {
+	print $fd '%%'.$_." ".$elt->{opts}->{$_}."\n";
+    }
+    for ( @{$elt->{data}} ) {
+	print $fd $_, "\n";
+    }
+
     unless ( close($fd) ) {
-	warn("Error in ABC embedding: $abc: $!\n");
+	warn("Error in Lilypond embedding: $src: $!\n");
 	return;
     }
 
@@ -2303,17 +2408,42 @@ sub abc2png_via_eps {
     else {
 	$pw = $ps->{__rightmargin} - $ps->{_leftmargin};
     }
-    if ( sys( "abcm2ps", "-E", "-q",
-	      "-m", "0cm", "-w", $pw."pt",
-	      "-O", $eps0, $abc ) ) {
-	warn("Error in ABC embedding\n");
+
+    state $lilypond = findexe("lilypond");
+    unless ( $lilypond ) {
+	warn("Error in Lilypond embedding: missing 'lilypond' tool.\n");
 	return;
     }
-    if ( sys( "eps2png", "-O", $png, $eps1 ) ) {
-	warn("Error in ABC embedding\n");
+
+    my @cmd;
+    if ( is_msw() ) {
+	state $magick = findexe("magick");
+	unless ( $magick ) {
+	    warn("Error in Lilypond embedding: missing 'imagemagick/convert' tool.\n");
+	    return;
+	}
+	@cmd = ( $magick, "convert" );
+    }
+    else {
+	state $convert = findexe("convert");
+	unless ( $convert ) {
+	    warn("Error in Lilypond embedding: missing 'imagemagick/convert' tool.\n");
+	    return;
+	}
+	@cmd = ( $convert );
+    }
+
+    my $png = File::Spec->catfile( $td, "tmp${imgcnt}" );
+    if ( sys( qw(lilypond -s --png -dresolution=820),
+	      "-o", $png, $src ) ) {
+	warn("Error in Lilypond embedding\n");
 	return;
     }
-    return $png;
+    if ( sys( @cmd, qw(-background white -trim), $img, $img ) ) {
+	warn("Error in Lilypond embedding\n");
+	return;
+    }
+    return { src => $img, scale => 0.1 };
 }
 
 my %corefonts = map { $_ => 1 }

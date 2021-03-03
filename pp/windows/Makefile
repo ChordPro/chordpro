@@ -57,6 +57,7 @@ unpack :
 	perl ..\pp2ppl.pl --quiet --dest="${DEST}" chordpro.exe
 	perl ..\pp2ppl.pl --quiet --dest="${DEST}" wxchordpro.exe
 	copy "${ROOT}\lib\App\Music\ChordPro\Config.pm" "${DEST}\lib\App\Music\ChordPro\Config.pm" 
+	copy "abcm2ps.exe" "${DEST}" 
 	copy "${DEST}\res\icons\chordpro.ico" "${DEST}"
 	copy "${DEST}\res\icons\chordpro-doc.ico" "${DEST}"
 	move "${DEST}\res" "${DEST}\lib\App\Music\ChordPro"

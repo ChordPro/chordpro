@@ -218,41 +218,32 @@ sub parse_song {
 	    }
 	}
 
-	if ( $in_context eq "abc" ) { #### TODO: Use config settings
+	if ( exists $config->{delegates}->{$in_context} ) {
 
-	    # 'open' indicates open. 
-	    if ( /^\s*\{(?:end_of_abc)\}\s*$/ ) {
+	    # 'open' indicates open.
+	    if ( /^\s*\{(?:end_of_\Q$in_context\E)\}\s*$/ ) {
 		delete $song->{body}->[-1]->{open};
-		# A subsequent {start_of_abc} will reopen a new section.
-	    }
-
-	    # Ignore most information fields.
-	    # We only need (accept) K (key), L (unit note lenght),
-	    # P (parts), Q (tempo) and M (meter).
-	    # From the directives, only pass %%transpose.
-	    elsif ( /^[ABCDEFGHIJNORSTUVWXYZ+]:/i
-		    || /^%%(?!transpose)/ ) {
-		next;
+		# A subsequent {start_of_XXX} will reopen a new item
 	    }
 	    else {
-		my $abc = $_;
-
-		# Add to an open ABC item.
-		if ( $song->{body}->[-1]->{context} eq "abc"
+		# Add to an open item.
+		if ( $song->{body}->[-1]->{context} eq $in_context
 		     && $song->{body}->[-1]->{open} ) {
-		    push( @{$song->{body}->[-1]->{data}}, $abc );
+		    push( @{$song->{body}->[-1]->{data}}, $_ );
 		}
 
-		# Else start new ABC item.
+		# Else start new item.
 		else {
-		    my @data = ( 'X:1' );
+		    my %opts;
 		    if ( $xpose || $options->{transpose} ) {
-			push( @data,
-			      '%%transpose ' .
-			      ( $xpose + ($options->{transpose}//0 ) ) );
+			$opts{transpose} =
+			  $xpose + ($options->{transpose}//0 );
 		    }
-		    $self->add( type => "data",
-				data => [ @data, $abc ],
+		    $self->add( type => "delegate",
+				subtype => $config->{delegates}->{$in_context}->{type},
+				handler => $config->{delegates}->{$in_context}->{handler},
+				data => [ $_ ],
+				opts => \%opts,
 				open => 1 );
 		}
 		next;
@@ -794,6 +785,7 @@ sub directive {
 	    my $val = $2;
 	    if ( $key eq "key" ) {
 		$val =~ s/[\[\]]//g;
+#		push( @{ $song->{meta}->{_orig_key} }, $val );
 		my $xp = $xpose;
 		$xp += $options->{transpose} if $options->{transpose};
 		$val = App::Music::ChordPro::Chords::transpose( $val, $xp )
@@ -1221,6 +1213,7 @@ sub transpose {
     # Transpose meta data (key).
     if ( exists $self->{meta} && exists $self->{meta}->{key} ) {
 	foreach ( @{ $self->{meta}->{key} } ) {
+#	    push( @{ $self->{meta}->{_orig_key} }, $_ );
 	    $_ = $self->xpchord( $_, 0, $xcode );
 	}
     }

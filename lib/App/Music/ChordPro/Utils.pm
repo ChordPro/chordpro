@@ -76,7 +76,7 @@ sub findexe {
     foreach ( @path ) {
 	my $try = "$_/$prog";
 	if ( -f -x $try ) {
-	    warn("Found $prog in $_\n");
+	    #warn("Found $prog in $_\n");
 	    return $try;
 	}
     }
@@ -90,7 +90,8 @@ push( @EXPORT, 'findexe' );
 sub sys {
     my ( @cmd ) = @_;
     warn("+ @cmd\n") if $::options->{trace};
-    my $res = system(@cmd);
+    # Use outer defined subroutine, depends on Wx or not.
+    my $res = ::sys(@cmd);
     warn( sprintf("=%02x=> @cmd", $res), "\n" ) if $res;
     return $res;
 }

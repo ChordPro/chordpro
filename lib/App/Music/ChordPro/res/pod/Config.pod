@@ -196,6 +196,21 @@ extensive details and examples.
     	"order" : "page",
         },
     
+        // Delegates.
+        // Basically a delegate is a section {start_of_XXX} which content is
+        // collected and handled later by the backend.
+    
+        "delegates" : {
+            "abc" : {
+                "type" : "image",
+                "handler" : "abc2image",
+            },
+            "ly" : {
+                "type" : "image",
+                "handler" : "ly2image",
+            },
+         },
+    
         // Layout definitions for PDF output.
     
         "pdf" : {

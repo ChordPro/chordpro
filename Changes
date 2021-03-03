@@ -13,6 +13,7 @@
     - !Bugfixes
     - Fix chords transpose in comments with output ChordPro.
     - Fix detection of grid params in start_of_grid.
+    - Fix problem with path name in start menu after windows install.
 
 0.977	2020-08-26
 

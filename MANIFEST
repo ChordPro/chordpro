@@ -85,6 +85,7 @@ pp/macos/reloc.pl
 pp/macos/README.html
 pp/pp2ppl.pl
 pp/windows/Makefile
+pp/windows/abcm2ps.exe
 pp/windows/chordpro.pp
 pp/windows/chordpro.rc
 pp/windows/chordproinst.bmp
