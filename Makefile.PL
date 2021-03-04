@@ -35,6 +35,7 @@ WriteMakefile
 		    'String::Interpolate::Named'  => 0.05,
 		    'File::LoadLines'		  => 1.02,
 		    'Image::Info'		  => 1.41,
+		    'List::Util'		  => 1.33,
 		   },
 
  CONFIGURE_REQUIRES => {
