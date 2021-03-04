@@ -48,14 +48,14 @@ CLIBS := C:\Strawberry\c\bin
 DEST  := build
 
 .PHONY :: ppl
-ppl : clean chordpro.exe wxchordpro.exe unpack copy_coredll loaders
+ppl : clean wxchordpro.exe unpack copy_coredll loaders
 
 # Unpack the pp generated kits.
 # We need to restore ChordPro/Config.pm since that has been mangled by par filters.
 .PHONY :: unpack
 unpack :
-	perl ..\pp2ppl.pl --quiet --dest="${DEST}" chordpro.exe
 	perl ..\pp2ppl.pl --quiet --dest="${DEST}" wxchordpro.exe
+	copy "${ROOT}\script\chordpro.pl" "${DEST}\script\chordpro.pl" 
 	copy "${ROOT}\lib\App\Music\ChordPro\Config.pm" "${DEST}\lib\App\Music\ChordPro\Config.pm" 
 	copy "abcm2ps.exe" "${DEST}" 
 	copy "${DEST}\res\icons\chordpro.ico" "${DEST}"

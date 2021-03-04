@@ -50,6 +50,16 @@ $m->MainLoop();
 
 ################ Subroutines ################
 
+use Wx qw( wxEXEC_SYNC );
+
+# Not yet defined in this version of wxPerl.
+use constant wxEXEC_HIDE_CONSOLE => 32;
+
+# Synchronous system call. Used in Util module.
+sub ::sys { Wx::ExecuteArgs( \@_, wxEXEC_SYNC | wxEXEC_HIDE_CONSOLE ); }
+
+################ Subroutines ################
+
 use Getopt::Long 2.13;
 
 sub app_options {
