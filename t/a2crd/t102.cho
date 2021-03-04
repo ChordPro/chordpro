@@ -1,0 +1,75 @@
+{title: Author/Artist: some artist}
+{subtitle: Title: some title}
+{comment:Album: some album}
+{comment:Transcribed by: A person, february 2020}
+{comment:Email: person *AtSign* org.net}
+
+{comment:The quick brown fox jumps over the lazy dog}
+{comment:The quick brown fox jumps over the lazy dog}
+{comment:The quick brown fox jumps over the lazy dog}
+{comment:The quick brown fox jumps over the lazy dog}
+{comment:The quick brown fox jumps over the lazy dog}
+
+{comment:Notation:}
+
+{comment:b   bend note up.  This could be a full tone, half tone, or partial}
+{comment:    and could be done by hand or with floating wammy bar.  You decide...}
+
+{comment:r   release the previous bended note.  May be a fast or slow release...}
+
+{comment:/   slide up}
+{comment:\   opposite of /}
+
+{comment:h   hammer on}
+
+{comment:^   usually means note applies to the specific }
+
+{comment:The quick brown fox jumps over the lazy dog}
+{comment:The quick brown fox jumps over the lazy dog}
+{comment:The quick brown fox jumps over the lazy dog}
+{comment:The quick brown fox jumps over the lazy dog}
+{comment:The quick brown fox jumps over the lazy dog}
+
+{comment:Tuning: 4/4}
+
+{sot}
+-|----------------|----------------4-|----------------|----------------|------
+-|----6-------4---|--------------4---|6-------------4-|---------------4|------
+-|--------------\3|1----------/5-----|--------------\3|1------------5--|------
+-|----------------|------------------|----------------|----------------|------
+-|----------------|------------------|----------------|----------------|------
+-|----------------|------------------|----------------|----------------|------
+{eot}
+
+
+{sot}
+-|------------------|--------4b------------|-----------|--------------------|-
+-|6b---6b-r-4-------|---6-6----6--4--------|-----------|--------------------|-
+-|-----------5------|6b-------------3b-3-2-|3----------|--------------------|-
+-|------------------|----------------------|--3--------|--------1-2---------|-
+-|------------------|----------------------|-----------|------------3-1-3-1b|-
+-|------------------|----------------------|-----------|--------------------|-
+                             ^little bend                                     
+
+{eot}
+{sot}
+-|---------3b-----|3\1-----------|/11-11-11\----------------|------------14b|-
+-|4b---4-2--------|4\3-----------|/12-12-12\----3b3-1---1---|---15b---------|-
+-|----------------|--------------|--------------------3---1b|---------------|-
+-|----------------|--------------|--------------------------|3--------------|-
+-|----------------|--------------|--------------------------|---------------|-
+-|----------------|--------------|--------------------------|---------------|-
+                                                                 ^pedel       
+
+{eot}
+
+{sot}
+-|-------------------------|------------------3---|-------------------------|-
+-|-------------------------|---------3-3h5------5-|\------12-12-12b---12b---|-
+-|------------1---3----1-3-|----1-/5--------------|----/14------------------|-
+-|--------1-3--------------|3---------------------|-------------------------|-
+-|----1h3------------------|----------------------|-------------------------|-
+-|-------------------------|----------------------|-------------------------|-
+              ^wammy bend up, then hammer on 3 and release wammy      
+
+{eot}

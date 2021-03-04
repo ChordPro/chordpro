@@ -46,7 +46,7 @@ elsif ( $ARGV[0] =~ /\.rc$/ ) {
 		$4 != $aux and $resetbuildnum++;
 	    }
 	    $_ = sprintf("%s%d,%d,%d,%d\n",
-			 $1, $maj, $min, $aux, $resetbuildnum ? 1 : 1+$5);
+			 $1, $maj, $min, $aux//0, $resetbuildnum ? 1 : 1+$5);
 	    next;
 	}
 	if ( /^(\s*VALUE\s+"(?:Product|File)Version",\s+)/ ) {

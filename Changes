@@ -1,3 +1,21 @@
+0.978	2021-03-05
+
+    - !ChordPro functionality
+    - Allow array element addressing in --define.
+    - Retain line numbers for backend diagnostics.
+    - Experimental support for ABC.
+    - Experimental support for MacOS.
+    - New icons.
+    - Windows: Installer associates ChordPro with .cho files.
+    - Linux: Support for desktop and app icons.
+    - Linux: Support building an AppImage.
+    - Restore section label as comment (config: pdf.labels.comment).
+    - Add experimental MMA backend.
+    - !Bugfixes
+    - Fix chords transpose in comments with output ChordPro.
+    - Fix detection of grid params in start_of_grid.
+    - Fix problem with path name in start menu after windows install.
+
 0.977	2020-08-26
 
     - !ChordPro functionality

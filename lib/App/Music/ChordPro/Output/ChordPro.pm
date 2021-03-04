@@ -271,18 +271,18 @@ sub generate_song {
 		  ? 'highlight'
 		    : $type eq 'comment_italic'
 		      ? 'comment'
-			: $type;
-		# Flatten chords/phrases.
-		if ( $elt->{chords} ) {
-		    $elt->{text} = "";
-		    for ( 0..$#{ $elt->{chords} } ) {
-			$elt->{text} .= "[" . $elt->{chords}->[$_] . "]"
-			  if $elt->{chords}->[$_] ne "";
-			$elt->{text} .= $elt->{phrases}->[$_];
-		    }
-		}
-		$text = fmt_subst( $s, $elt->{text} );
+		      : $type;
 	    }
+	    # Flatten chords/phrases.
+	    if ( $elt->{chords} ) {
+		$text = "";
+		for ( 0..$#{ $elt->{chords} } ) {
+		    $text .= "[" . $elt->{chords}->[$_] . "]"
+		      if $elt->{chords}->[$_] ne "";
+		    $text .= $elt->{phrases}->[$_];
+		}
+	    }
+	    $text = fmt_subst( $s, $text ) if $msp;
 	    push(@s, "") if $tidy;
 	    push(@s, "{$type: $text}");
 	    push(@s, "") if $tidy;

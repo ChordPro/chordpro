@@ -9,8 +9,7 @@ TARGET = chordpro
 endif
 HUGO += --baseURL=https://www.chordpro.org/${TARGET}/
 
-site ::
-	make -C assets/images
+site :: assets
 	${HUGO}
 	mv public/index.html public/allpages/index.html
 	cp public/home/index.html public/
@@ -22,7 +21,9 @@ clean ::
 	rm -fr public resources
 
 # For development.
-server ::
-	make -C assets/images
+server :: assets
 	${HUGO} server --disableFastRender --navigateToChanged --bind ${HOSTNAME} --baseURL http://${HOSTNAME}:1313
 
+assets ::
+	make -C assets/images
+	cp ../lib/App/Music/ChordPro/res/config/chordpro.json assets/pub/chordpro_json.txt

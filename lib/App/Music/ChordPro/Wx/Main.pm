@@ -28,6 +28,7 @@ sub new {
     my $self = bless $_[0]->SUPER::new(), __PACKAGE__;
 
     Wx::Event::EVT_IDLE($self, $self->can('OnIdle'));
+    Wx::Event::EVT_CLOSE($self, $self->can('OnClose'));
 
     $self;
 }
@@ -54,20 +55,22 @@ my @fonts =
 
 my $prefctl;
 
+my $is_macos = $^O =~ /darwin/;
+
 # Explicit (re)initialisation of this class.
 sub init {
     my ( $self, $options ) = @_;
 
     $prefctl ||=
       {
-       cfgpreset => lc(_T("Default")),
-       xcode => "",
-       notation => "",
-       skipstdcfg => 1,
-       configfile => "",
-       pdfviewer => "",
-       editfont => 0,
-       editsize => FONTSIZE,
+       cfgpreset   => lc(_T("Default")),
+       xcode	   => "",
+       notation	   => "",
+       skipstdcfg  => 1,
+       configfile  => "",
+       pdfviewer   => "",
+       editfont	   => 0,
+       editsize	   => FONTSIZE,
       };
 
     if ( $^O =~ /^mswin/i ) {
@@ -110,13 +113,22 @@ sub init {
     $self->{main_menubar}->FindItem(wxID_REDO)
       ->Enable($self->{t_source}->CanRedo);
 
+    # On MacOS, we cannot open arbitrary files due to sandboxing
+    # constraints.
+    if ( $is_macos ) {
+	$self->{main_menubar}->FindItem(wxID_OPEN) ->Enable(0);
+    }
+
     Wx::Log::SetTimestamp(' ');
     if ( @ARGV && -s $ARGV[0] ) {
 	$self->openfile( shift(@ARGV) );
 	return 1;
     }
 
-    $self->opendialog;
+    # Skip initial open dialog for MacOS. Use Finder calls.
+    unless ( $is_macos ) {
+	$self->opendialog;
+    }
     $self->newfile unless $self->{_currentfile};
     return 1;
 }
@@ -216,9 +228,15 @@ sub newfile {
 {title: New Song}
 
 EOD
+    $self->{t_source}->SetModified(0);
     Wx::LogStatus("New file");
     $self->{prefs_xpose} = 0;
     $self->{prefs_xposesharp} = 0;
+    # On MacOS, we cannot save arbitrary files due to sandboxing
+    # constraints.
+    if ( $is_macos ) {
+	$self->{main_menubar}->FindItem(wxID_SAVE) ->Enable(0);
+    }
 }
 
 my ( $preview_cho, $preview_pdf );
@@ -382,6 +400,16 @@ sub checksaved {
 	    $self->saveas( $self->{_currentfile} );
 	}
     }
+    elsif ( $is_macos ) {
+	my $md = Wx::MessageDialog->new
+	  ( $self,
+	    "Sorry, cannot save your changes due to MacOS constraints.",
+	    "Contents has changed",
+	    0 | wxOK | wxCANCEL );
+	my $ret = $md->ShowModal;
+	$md->Destroy;
+	return if $ret == wxID_CANCEL;
+    }
     else {
 	my $md = Wx::MessageDialog->new
 	  ( $self,
@@ -506,15 +534,16 @@ sub OnPreview {
     $self->preview;
 }
 
-sub OnQuit {
+sub OnClose {
     my ( $self, $event ) = @_;
     $self->SavePreferences;
     return unless $self->checksaved;
-    $self->Close(1);
+    $self->Destroy;
 }
 
-sub OnExit {			# called implicitly
+sub OnQuit {			# Exit from menu
     my ( $self, $event ) = @_;
+    $self->Close;		# will generate Close event
 }
 
 sub OnUndo {
@@ -567,7 +596,13 @@ sub OnHelp_Example {
     return unless $self->checksaved;
     $self->openfile( getresource( "examples/swinglow.cho" ) );
     undef $self->{_currentfile};
-    $self->{t_source}->SetModified(1);
+    $self->{t_source}->SetModified(0);
+
+    # On MacOS, we cannot save arbitrary files due to sandboxing
+    # constraints.
+    if ( $is_macos ) {
+	$self->{main_menubar}->FindItem(wxID_SAVE) ->Enable(0);
+    }
 }
 
 sub OnHelp_DebugInfo {
@@ -584,9 +619,15 @@ sub OnPreferences {
     $self->SavePreferences if $ret == wxID_OK;
 }
 
+sub OnText {
+    my ($self, $event) = @_;
+    $self->{t_source}->SetModified(1);
+}
+
 sub _aboutmsg {
     my ( $self ) = @_;
-
+    my $fmt = "  %s %s\n";
+    my $fmtv = "  %s version %s\n";
     my $firstyear = 2016;
     my $year = 1900 + (localtime(time))[5];
     if ( $year != $firstyear ) {
@@ -596,21 +637,46 @@ sub _aboutmsg {
     # Sometimes version numbers are localized...
     my $dd = sub { my $v = $_[0]; $v =~ s/,/./g; $v };
 
-    join( "",
-	  "ChordPro Preview Editor version ",
-	  $dd->($App::Music::ChordPro::VERSION),
-	  "\n",
-	  "https://www.chordpro.org\n",
-	  "Copyright $year Johan Vromans <jvromans\@squirrel.nl>\n",
-	  "\n",
-	  "GUI wrapper ", $dd->($VERSION), " designed with wxGlade\n\n",
-	  "Perl version ", $dd->(sprintf("%vd",$^V)), "\n",
-	  "wxPerl version ", $dd->($Wx::VERSION), "\n",
-	  "wxWidgets version ", $dd->(Wx::wxVERSION), "\n",
-	  $App::Packager::PACKAGED
-	  ? App::Packager::Packager()." version ".App::Packager::Version()."\n"
-	  : "",
-	);
+    my $msg = join
+      ( "",
+	"ChordPro Preview Editor version ",
+	$dd->($App::Music::ChordPro::VERSION),
+	"\n",
+	"https://www.chordpro.org\n",
+	"Copyright $year Johan Vromans <jvromans\@squirrel.nl>\n",
+	"\n",
+	"GUI wrapper ", $dd->($VERSION), " designed with wxGlade\n\n",
+	"Run-time information:\n" );
+
+    $msg .= sprintf( $fmtv, "Perl", $dd->(sprintf("%vd",$^V)) );
+    $msg .= sprintf( $fmt,  "Perl program", $^X );
+    $msg .= sprintf( $fmtv, "wxPerl", $dd->($Wx::VERSION) );
+    $msg .= sprintf( $fmtv, "wxWidgets", $dd->(Wx::wxVERSION) );
+
+    if ( $App::Packager::PACKAGED ) {
+	my $p = App::Packager::Packager();
+	$p .= " Packager" unless $p =~ /packager/i;
+	$msg .= sprintf( $fmtv, $p, App::Packager::Version() );
+    }
+    eval { require Text::Layout;
+	$msg .= sprintf( $fmtv, "Text::Layout", $Text::Layout::VERSION );
+    };
+    eval { require HarfBuzz::Shaper;
+	$msg .= sprintf( $fmtv, "HarfBuzz::Shaper", $HarfBuzz::Shaper::VERSION );
+	$msg .= sprintf( $fmtv, "HarfBuzz library", HarfBuzz::Shaper::hb_version_string() );
+    };
+    $msg .= sprintf( $fmtv, "File::LoadLines", $File::LoadLines::VERSION );
+    eval { require PDF::API2;
+	$msg .= sprintf( $fmtv, "PDF::API2", $PDF::API2::VERSION );
+    } or
+    eval { require PDF::Builder;
+	$msg .= sprintf( $fmtv, "PDF::Builder", $PDF::Builder::VERSION );
+    };
+    eval { require Font::TTF;
+	$msg .= sprintf( $fmtv, "Font::TTF", $Font::TTF::VERSION );
+    };
+
+    return $msg;
 }
 
 sub OnAbout {

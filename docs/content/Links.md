@@ -20,18 +20,15 @@ description: "ChordPro related links"
   and songbooks for home, small group, or large group 
   use. The program runs on Microsoft Windows (native .exe),
   Mac OS X (Java-based native .app), and any platform that
-  supports Java 1.5 (.jar file). Song files must be provided in
-  the ChordPro format, a common text format found on the internet
-  (ChordPro files are easy to make yourself, if you can't find the
-  song you're looking for). Also Songsheet Generator will import
-  some basic tab (CRD) files, so you can print a songsheet or
-  songbook from any songs you might already have in that
-  format.
+  supports Java 1.5 (.jar file).
 
 * [MobileSheetsPro](http://www.zubersoft.com/mobilesheets/)  
-  MobileSheetsPro is a music viewer for Android and Windows. It
+  MobileSheetsPro is a music viewer for Android and Windows (and soon iOS). It
   is aimed at musicians to replace the music papers and books. It
   supports PDF documents, images and ChordPro files.
+
+* [OnSong](https://onsongapp.com/)  
+  OnSong is a MobileSheetsPro like app for Apple iOS.
 
 * [Emacs ChordPro mode](https://github.com/hading/chordpro-mode/)  
   Emacs major mode for editing ChordPro files.

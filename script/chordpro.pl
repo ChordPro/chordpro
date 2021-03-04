@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
 # Last Modified By: Johan Vromans
-# Last Modified On: Wed Nov  7 19:34:56 2018
-# Update Count    : 253
+# Last Modified On: Wed Mar  3 22:11:36 2021
+# Update Count    : 262
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -38,14 +38,15 @@ use FindBin;
 use lib "$FindBin::Bin/../CPAN";
 use lib "$FindBin::Bin/../lib";
 use App::Packager qw( :name App::Music::ChordPro );
-
-if ( @ARGV && $ARGV[0] eq "--a2crd" && shift ) {
-    require App::Music::ChordPro::A2Crd;
-}
-else {
-    require App::Music::ChordPro;
-}
+use App::Music::ChordPro;
+use App::Music::ChordPro::Utils qw(is_msw);
+$ENV{PATH} = "$FindBin::Bin/.." . (is_msw() ? ";" : ":" ) . $ENV{PATH};
 
 run();
+
+################ Subroutines ################
+
+# Synchronous system call. Used in Util module.
+sub ::sys { system(@_) }
 
 1;

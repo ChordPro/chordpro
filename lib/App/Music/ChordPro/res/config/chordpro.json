@@ -13,6 +13,8 @@
     // General settings, to be changed by legacy configs and
     // command line.
     "settings" : {
+      // Add line info for backend diagnostics.
+      "lineinfo" : true,
       // Titles flush: default center.
       "titles" : "center",
       // Columns, default one.
@@ -58,6 +60,13 @@
 		 "key", "time", "tempo", "capo", "duration" ],
       "strict" : true,
       "separator" : "; ",
+    },
+
+    // Dates.
+    "dates" : {
+        "today" : {
+            "format" : "%A, %B %e, %Y"
+        }
     },
 
     // Instrument settings. These are usually set by a separate
@@ -160,6 +169,21 @@
 	"order" : "page",
     },
 
+    // Delegates.
+    // Basically a delegate is a section {start_of_XXX} which content is
+    // collected and handled later by the backend.
+
+    "delegates" : {
+        "abc" : {
+            "type" : "image",
+            "handler" : "abc2image",
+        },
+        "ly" : {
+            "type" : "image",
+            "handler" : "ly2image",
+        },
+     },
+
     // Layout definitions for PDF output.
 
     "pdf" : {
@@ -225,6 +249,8 @@
 	  "width" : "auto",
 	  // Alignment for the labels. Default is left.
 	  "align" : "left",
+	  // Alternatively, render labels as comments.
+	  "comment" : null	// "comment", "comment_italic" or "comment_box",
       },
 
       // Alternative songlines with chords in a side column.
@@ -462,6 +488,16 @@
 	    "display" : "chordpro.css",
 	    "print"   : "chordpro_print.css",
 	},
+    },
+
+    // Settings for A2Crd.
+    "a2crd" : {
+	// Treat leading lyrics lines as title/subtitle lines.
+	"infer-titles" : true,
+	// Classification algorithm.
+	"classifier" : "pct_chords",
+	// Tab stop width for tab expansion. Set to zero to disable.
+	"tabstop" : 8,
     },
 
 }

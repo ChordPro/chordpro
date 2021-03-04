@@ -58,6 +58,7 @@ my $song = {
 	    'body' => [
                        {
 			 'context' => '',
+			 'line' => 3,
 			 'phrases' => [
 					'I ',
 					'looked over Jordan, and ',

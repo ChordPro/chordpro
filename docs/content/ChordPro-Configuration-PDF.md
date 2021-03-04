@@ -14,6 +14,9 @@ Layout definitions for PDF output are stored in the configuration under the key 
        },
     }
 
+Topics in this document:
+{{< toc >}}
+
 ## Papersize
 
 The size of the paper for which output must be formatted. The size can be specified either as the name of a known page size, e.g. `"a4"`, or as a 2-element list containing the width and height of the page in _PDF units_ (_DTP points_, _pt_, 1/72 inch).
@@ -73,9 +76,15 @@ e.g. [start_of_verse]({{< relref "Directives-env_verse" >}}).
             "width" : "auto",
             // Alignment for the labels. Default is left.
             "align" : "left",
+            // Alternatively, render labels as comments.
+            "comment" : null	// "comment", "comment_italic" or "comment_box",
         },
 
-When `width` is set to a positive value, the lyrics and associated
+When `comment` is set to one of the suported comment types, the label
+will be printed as a comment before the section contents. The settings
+of `width` and `align` are ignored.
+
+Otherwise, when `width` is set to a positive value, the lyrics and associated
 chords will be indented by this amount and section labels, if any, are
 printed.
 

@@ -39,7 +39,7 @@ This module can be run standalone and will print the default config.
 
 =cut
 
-sub hmerge($$$);
+sub hmerge($$;$);
 sub clone($);
 
 sub default_config();
@@ -55,6 +55,7 @@ sub configurator {
 	$config = $cfg;
 	$options = { verbose => 0 };
 	process_config( $cfg, "<builtin>" );
+	$cfg->{settings}->{lineinfo} = 0;
 	return $cfg;
     }
     if ( keys(%$opts) ) {
@@ -99,7 +100,7 @@ sub configurator {
 	    $add_legacy->( $options->{$c} );
 	}
 	else {
-	    warn("Adding config for $config\n") if $verbose;
+	    warn("Adding config for $c\n") if $verbose;
 	    $add_config->( $options->{$c} );
 	}
     }
@@ -123,7 +124,7 @@ sub configurator {
 	$cfg->{pdf}->{formats}->{first}->{$_} = "";
     }
     for my $ff ( qw(chord
-		    diagram diagram_capo chordfingers
+		    diagram diagram_base chordfingers
 		    comment comment_box comment_italic
 		    tab text toc annotation label
 		    empty footer grid grid_margin subtitle title) ) {
@@ -154,27 +155,43 @@ sub configurator {
 	local $::config = $cfg;
 	process_config( $new, $file );
 	# Merge final.
-	$cfg = hmerge( $cfg, $new, "" );
+	$cfg = hmerge( $cfg, $new );
     }
 
     # Handle defines from the command line.
     my $ccfg = {};
     while ( my ($k, $v) = each( %{ $options->{define} } ) ) {
 	my @k = split( /[:.]/, $k );
-	my $c = \$ccfg;
+	my $c = \$ccfg;		# new
+	my $o = $cfg;		# current
+	my $lk = pop(@k);	# last key
+
+	# Step through the keys.
 	foreach ( @k ) {
 	    $c = \($$c->{$_});
+	    $o = $o->{$_};
 	}
-	$$c = $v;
+
+	# Final key. Merge array if so.
+	if ( $lk =~ /^\d+$/ && ref($o) eq 'ARRAY' ) {
+	    unless ( ref($$c) eq 'ARRAY' ) {
+		# Only copy orig values the first time.
+		$$c->[$_] = $o->[$_] for 0..scalar(@{$o})-1;
+	    }
+	    $$c->[$lk] = $v;
+	}
+	else {
+	    $$c->{$lk} = $v;
+	}
     }
-    $cfg = hmerge( $cfg, $ccfg, "" );
+    $cfg = hmerge( $cfg, $ccfg );
 
     if ( $cfg->{settings}->{transcode} //= $options->{transcode} ) {
 	my $xc = $cfg->{settings}->{transcode};
 	# Load the appropriate notes config, but retain the current parser.
 	unless ( App::Music::ChordPro::Chords::Parser->have_parser($xc) ) {
 	    my $file = getresource("notes/$xc.json");
-	    my $new = hmerge( $cfg, get_config($file), "");
+	    my $new = hmerge( $cfg, get_config($file) );
 	    local $::config = $new;
 	    App::Music::ChordPro::Chords::Parser->new($new);
 	}
@@ -352,8 +369,7 @@ sub process_config {
 
     App::Music::ChordPro::Chords->reset_parser;
     App::Music::ChordPro::Chords::Parser->reset_parsers;
-    local $::config = { %$::config, %$cfg };
-
+    local $::config = hmerge( $::config, $cfg );
     if ( $cfg->{chords} ) {
 	my $c = $cfg->{chords};
 	if ( @$c && $c->[0] eq "append" ) {
@@ -500,7 +516,7 @@ sub cfg2props {
     return $ret;
 }
 
-sub hmerge($$$) {
+sub hmerge($$;$) {
 
     # Merge hashes. Right takes precedence.
     # Based on Hash::Merge::Simple by Robert Krimen.
@@ -527,14 +543,26 @@ sub hmerge($$$) {
 	elsif ( ref($right->{$key}) eq 'ARRAY'
 		and
 		ref($res{$key}) eq 'ARRAY' ) {
-
+	    warn("AMERGE $key: ",
+		 join(" ", map { qq{"$_"} } @{ $res{$key} }),
+		 " + ",
+		 join(" ", map { qq{"$_"} } @{ $right->{$key} }),
+		 " \n") if 0;
 	    # Arrays. Overwrite or append.
 	    if ( @{$right->{$key}} ) {
 		my @v = @{ $right->{$key} };
 		if ( $v[0] eq "append" ) {
 		    shift(@v);
 		    # Append the rest.
+		    warn("PRE: ",
+			 join(" ", map { qq{"$_"} } @{ $res{$key} }),
+			 " + ",
+			 join(" ", map { qq{"$_"} } @v),
+			 "\n") if 0;
 		    push( @{ $res{$key} }, @v );
+		    warn("POST: ",
+			 join(" ", map { qq{"$_"} } @{ $res{$key} }),
+			 "\n") if 0;
 		}
 		elsif ( $v[0] eq "prepend" ) {
 		    shift(@v);
@@ -617,6 +645,8 @@ sub default_config() {
     // General settings, to be changed by legacy configs and
     // command line.
     "settings" : {
+      // Add line info for backend diagnostics.
+      "lineinfo" : true,
       // Titles flush: default center.
       "titles" : "center",
       // Columns, default one.
@@ -662,6 +692,13 @@ sub default_config() {
 		 "key", "time", "tempo", "capo", "duration" ],
       "strict" : true,
       "separator" : "; ",
+    },
+
+    // Dates.
+    "dates" : {
+        "today" : {
+            "format" : "%A, %B %e, %Y"
+        }
     },
 
     // Instrument settings. These are usually set by a separate
@@ -764,6 +801,21 @@ sub default_config() {
 	"order" : "page",
     },
 
+    // Delegates.
+    // Basically a delegate is a section {start_of_XXX} which content is
+    // collected and handled later by the backend.
+
+    "delegates" : {
+        "abc" : {
+            "type" : "image",
+            "handler" : "abc2image",
+        },
+        "ly" : {
+            "type" : "image",
+            "handler" : "ly2image",
+        },
+     },
+
     // Layout definitions for PDF output.
 
     "pdf" : {
@@ -829,6 +881,8 @@ sub default_config() {
 	  "width" : "auto",
 	  // Alignment for the labels. Default is left.
 	  "align" : "left",
+	  // Alternatively, render labels as comments.
+	  "comment" : null	// "comment", "comment_italic" or "comment_box",
       },
 
       // Alternative songlines with chords in a side column.
@@ -1066,6 +1120,16 @@ sub default_config() {
 	    "display" : "chordpro.css",
 	    "print"   : "chordpro_print.css",
 	},
+    },
+
+    // Settings for A2Crd.
+    "a2crd" : {
+	// Treat leading lyrics lines as title/subtitle lines.
+	"infer-titles" : true,
+	// Classification algorithm.
+	"classifier" : "pct_chords",
+	// Tab stop width for tab expansion. Set to zero to disable.
+	"tabstop" : 8,
     },
 
 }

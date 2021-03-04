@@ -38,6 +38,9 @@ typedef int (* RunPerl_t)(int argc, char **argv, char **env);
 // Main.
 int main( int argc, char **argv, char **env ) {
 
+  // Make ourselves known.
+  putenv( "PPL_PACKAGED=1.00" );
+
   // to construct script path from exe path
   char scriptpath[PATHBUFLEN];
   

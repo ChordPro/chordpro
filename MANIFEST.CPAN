@@ -83,7 +83,6 @@ CPAN/Image/Info/JPEG.pm
 CPAN/Image/Info/PNG.pm
 CPAN/JSON/PP/Boolean.pm
 CPAN/JSON/PP.pm
-CPAN/PAR/Filter/Null.pm
 CPAN/PDF/API2/Annotation.pm
 CPAN/PDF/API2/Basic/PDF/Array.pm
 CPAN/PDF/API2/Basic/PDF/Bool.pm

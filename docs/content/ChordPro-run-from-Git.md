@@ -9,8 +9,8 @@ If you want to keep track of the latest developments you can run
 Chordpro directly from the Git repository.
 
 It is easiest to first install the release version of ChordPro using
-one of the techniques mentioned on the [[Installing
-ChordPro|ChordPro-Installation]] page. This will make sure most of the
+one of the techniques mentioned on the
+[Installing ChordPro]({{< relref "chordpro-installation" >}}) page. This will make sure most of the
 required dependencies are installed.
 
 Unless git is already installed, install it from the package repository.
@@ -35,7 +35,7 @@ To verify the installation, run
 
 This should say something similar to
 
-    This is ChordPro version 0.974_036
+    This is ChordPro version 0.977_036
 
 The development version is not always equipped for global
 installation, so to run it **always** include the path to the

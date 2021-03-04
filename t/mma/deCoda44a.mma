@@ -1,0 +1,29 @@
+// title: Solving deCoda clashes
+
+Time   4/4
+Groove testing
+Tempo  100
+
+/**** End of Preamble ****/
+
+
+//   7 comment: A
+//   8 Start of grid
+//   9 | C . . . . . . G | F . . . A B . . | G . . . . . . . | C . . . . . . . |
+// line 9, bar 1, beat 4: move back G
+// line 9, bar 2, beat 3: shifting B to beat 4
+//   9 | C . . G | F . A B | G . . . | C . . . |
+  1  C / / G
+  2  F / A B
+  3  G
+  4  C
+//  10 | . . . . . . . . | F . . . . . . . | G . . . . . . . |
+//  10 | . . . . | F . . . | G . . . |
+  5  C
+  6  F
+  7  G
+//  13 | C . . . . . Am . |
+//  13 | C . . Am |
+  8  C / / Am
+//  15 End of grid
+

@@ -16,6 +16,7 @@ use App::Music::ChordPro::Output::Common;
 use App::Music::ChordPro::Utils;
 
 use Carp;
+use List::Util qw(any);
 use File::LoadLines;
 
 sub new {
@@ -59,6 +60,7 @@ my $no_transpose;		# NYI
 my $no_substitute;
 
 my $diag;			# for diagnostics
+my $lineinfo;			# keep lineinfo
 
 sub ::break() {}
 
@@ -69,11 +71,19 @@ sub parse_file {
 
     # Loadlines sets $opts->{_filesource}.
     my $lines = loadlines( $filename, $opts );
+    # Sense crd input and convert if necessary.
+    if ( !$options->{fragment}
+	 and any { /\S/ } @$lines	# non-blank lines
+	 and $options->{crd} || !any { /^{\w+/ } @$lines ) {
+	require App::Music::ChordPro::A2Crd;
+	$lines = App::Music::ChordPro::A2Crd::a2crd( { lines => $lines } );
+    }
 
     # Note: $opts are used by the tests only.
     $opts //= {};
     $diag->{format} = $opts->{diagformat} // $config->{diagnostics}->{format};
     $diag->{file}   = $opts->{_filesource};
+    $lineinfo = $config->{settings}->{lineinfo};
     for ( "transpose", "no-substitute", "no-transpose" ) {
 	next unless exists $opts->{$_};
 	$options->{$_} = $opts->{$_};
@@ -106,6 +116,7 @@ sub parse_song {
     $no_transpose = $options->{'no-transpose'};
     $no_substitute = $options->{'no-substitute'};
     $decapo = $options->{decapo} || $config->{settings}->{decapo};
+    my $fragment = $options->{fragment};
 
     $song = App::Music::ChordPro::Song->new
       ( source => { file => $diag->{file}, line => 1 + $$linecnt },
@@ -191,7 +202,7 @@ sub parse_song {
 		next;
 	    }
 	    # Collect pre-title stuff separately.
-	    if ( exists $song->{title} ) {
+	    if ( exists $song->{title} || $fragment ) {
 		$self->add( type => "ignore", text => $_ );
 	    }
 	    else {
@@ -203,6 +214,38 @@ sub parse_song {
 	if ( $in_context eq "tab" ) {
 	    unless ( /^\s*\{(?:end_of_tab|eot)\}\s*$/ ) {
 		$self->add( type => "tabline", text => $_ );
+		next;
+	    }
+	}
+
+	if ( exists $config->{delegates}->{$in_context} ) {
+
+	    # 'open' indicates open.
+	    if ( /^\s*\{(?:end_of_\Q$in_context\E)\}\s*$/ ) {
+		delete $song->{body}->[-1]->{open};
+		# A subsequent {start_of_XXX} will reopen a new item
+	    }
+	    else {
+		# Add to an open item.
+		if ( $song->{body}->[-1]->{context} eq $in_context
+		     && $song->{body}->[-1]->{open} ) {
+		    push( @{$song->{body}->[-1]->{data}}, $_ );
+		}
+
+		# Else start new item.
+		else {
+		    my %opts;
+		    if ( $xpose || $options->{transpose} ) {
+			$opts{transpose} =
+			  $xpose + ($options->{transpose}//0 );
+		    }
+		    $self->add( type => "delegate",
+				subtype => $config->{delegates}->{$in_context}->{type},
+				handler => $config->{delegates}->{$in_context}->{handler},
+				data => [ $_ ],
+				opts => \%opts,
+				open => 1 );
+		}
 		next;
 	    }
 	}
@@ -221,8 +264,14 @@ sub parse_song {
 	    next;
 	}
 
+	if ( /\S/ && !$fragment && !exists $song->{title} ) {
+	    do_warn("Missing {title} -- prepare for surprising results");
+	    $song->{title} = "Untitled";
+	}
+
 	if ( $in_context eq "tab" ) {
 	    $self->add( type => "tabline", text => $_ );
+	    warn("OOPS");
 	    next;
 	}
 
@@ -234,7 +283,7 @@ sub parse_song {
 	if ( /\S/ ) {
 	    $self->add( type => "songline", $self->decompose($_) );
 	}
-	elsif ( exists $song->{title} ) {
+	elsif ( exists $song->{title} || $fragment ) {
 	    $self->add( type => "empty" );
 	}
 	else {
@@ -314,6 +363,7 @@ sub add {
     my $self = shift;
     push( @{$song->{body}},
 	  { context => $in_context,
+	    $lineinfo ? ( line => $diag->{line} ) : (),
 	    @_ } );
     if ( $in_context eq "chorus" ) {
 	push( @chorus, { context => $in_context, @_ } );
@@ -535,25 +585,33 @@ sub directive {
 	  if $in_context;
 	$in_context = $1;
 	@chorus = (), $chorus_xpose = 0 if $in_context eq "chorus";
-	if ( $in_context eq "grid" && $arg eq "" && $grid_arg ) {
-	    $self->add( type => "set",
-			name => "gridparams",
-			value => $grid_arg );
-	}
-	elsif ( $in_context eq "grid" && $arg &&
-	     $arg =~ m/^
-		       (?: (\d+) \+)?
-		       (\d+) (?: x (\d+) )?
-		       (?:\+ (\d+) )?
-		       (?:\s+ (.*)? )? $/x ) {
-	    do_warn("Invalid grid params: $arg (must be non-zero)"), return
-	      unless $2;
-	    $grid_arg = [ $2, $3, $1, $4 ];
-	    $self->add( type => "set",
-			name => "gridparams",
-			value =>  [ @$grid_arg, $5||"" ] );
-	    $grid_cells = [ $2 * ( $3//1 ), ($1//0), ($4//0) ];
-	    push( @labels, $5 ) if length($5||"");
+	if ( $in_context eq "grid" ) {
+	    if ( $arg eq "" ) {
+		$self->add( type => "set",
+			    name => "gridparams",
+			    value => $grid_arg );
+	    }
+	    elsif ( $arg =~ m/^
+			      (?: (\d+) \+)?
+			      (\d+) (?: x (\d+) )?
+			      (?:\+ (\d+) )?
+			      (?:[:\s+] (.*)? )? $/x ) {
+		do_warn("Invalid grid params: $arg (must be non-zero)"), return
+		  unless $2;
+		$grid_arg = [ $2, $3//1, $1//0, $4//0 ];
+		$self->add( type => "set",
+			    name => "gridparams",
+			    value =>  [ @$grid_arg, $5||"" ] );
+		push( @labels, $5 ) if length($5||"");
+	    }
+	    elsif ( $arg ne "" ) {
+		$self->add( type => "set",
+			    name => "gridparams",
+			    value =>  [ @$grid_arg, $arg ] );
+		push( @labels, $arg );
+	    }
+	    $grid_cells = [ $grid_arg->[0] * $grid_arg->[1],
+			    $grid_arg->[2],  $grid_arg->[3] ];
 	}
 	elsif ( $arg && $arg ne "" ) {
 	    $self->add( type  => "set",
@@ -727,6 +785,7 @@ sub directive {
 	    my $val = $2;
 	    if ( $key eq "key" ) {
 		$val =~ s/[\[\]]//g;
+#		push( @{ $song->{meta}->{_orig_key} }, $val );
 		my $xp = $xpose;
 		$xp += $options->{transpose} if $options->{transpose};
 		$val = App::Music::ChordPro::Chords::transpose( $val, $xp )
@@ -1154,6 +1213,7 @@ sub transpose {
     # Transpose meta data (key).
     if ( exists $self->{meta} && exists $self->{meta}->{key} ) {
 	foreach ( @{ $self->{meta}->{key} } ) {
+#	    push( @{ $self->{meta}->{_orig_key} }, $_ );
 	    $_ = $self->xpchord( $_, 0, $xcode );
 	}
     }

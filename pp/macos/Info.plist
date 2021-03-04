@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleName</key>
+  <string>ChordPro</string>
+  <key>CFBundleDevelopmentRegion</key>
+  <string>English</string>
+  <key>CFBundleExecutable</key>
+  <string>dndhandler</string>
+  <key>CFBundleIconFile</key>
+  <string>chordpro.icns</string>
+  <key>CFBundleIdentifier</key>
+  <string>org.chordpro.chordpro</string>
+  <key>CFBundleInfoDictionaryVersion</key>
+  <string>6.0</string>
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+  <key>CFBundleSignature</key>
+  <string>CHO#</string>
+  <key>CFBundleShortVersion</key>
+  <string>0.977</string>
+  <key>CFBundleVersion</key>
+  <string>0.977.13.1</string>
+  <key>NSHumanReadableCopyright</key>
+  <string>ⓒ 2010,2020 The ChordPro Team, www.chordpro.org</string>
+  <key>CFBundleDocumentTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleTypeExtensions</key>
+      <array>
+	<string>cho</string>
+	<string>chordpro</string>
+	<string>chopro</string>
+	<string>crd</string>
+      </array>
+      <key>CFBundleTypeIconFile</key>
+      <string>chordpro-doc.icns</string>
+      <key>LSIsAppleDefaultForType</key>
+      <string>Yes</string>
+      <key>CFBundleTypeRole</key>
+      <string>Editor</string>
+      <key>CFBundleTypeName</key>
+      <string>ChordPro document</string>
+    </dict>
+  </array>
+</dict>
+</plist>

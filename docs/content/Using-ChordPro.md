@@ -35,6 +35,22 @@ configuration files.
 
 ## General command line options
 
+### a2crd
+
+`--a2crd`
+
+Selects 'a2crd' functionality, a legacy ascii to chord converter. When
+this option is used the input is converted from **crd** (chords on top
+of lyrics) to **cho** (chords between lyrics) and the result written to
+the output. No further processing takes place.
+
+See also [Legacy ASCII input format]({{< relref
+"chordpro-getting-started#legacy-ascii-input-format" >}}).
+
+Note that `--a2crd` is slightly different from `--crd
+--generate=ChordPro`. In the latter case the inpur data *is* processed
+and then written out as a ChordPro file.
+
 ### about
 
 `--about` (short: `-A`)
@@ -47,6 +63,20 @@ Prints version information about the ChordPro program. No other processing will 
 
 Prepends the contents of the named PDF document to the output. This can
 be used to produce documents with cover pages.
+
+### crd
+
+`--crd`
+
+ChordPro automatically detects whether the input files are in legacy
+**crd** format and if so, internally converts the data to ChordPro
+(**cho** format) before processing.
+
+Using the `--crd` option _forces_ the input files to be treated as
+**crd** input.
+
+See also [Legacy ASCII input format]({{< relref
+"chordpro-getting-started#legacy-ascii-input-format" >}}).
 
 ### csv
 
@@ -460,6 +490,9 @@ active.
 
 `--define=`*item*
 
+**Warning:** This is not intended for general use. There is no guarantee
+that it will always yield the results you expect.
+
 Sets a configuration item. _item_ must be in the format of
 period-separated configuration keys, an equal sign, and the value.
 
@@ -469,6 +502,10 @@ For example, the equivalent of command line option `--no-chord-grids` is
 You can also use colons to separate the keys, e.g., `diagrams:show`.
 
 `--define` may be used more than once to set multiple items.
+
+Array items can be addressed with a (final) numeric key, e,g,
+`pdf.formats.default.footer.2` refers to the 3rd element from
+`pdf.formats.default.footer`.
 
 ### no-default-configs
 

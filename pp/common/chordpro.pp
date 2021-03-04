@@ -20,6 +20,7 @@
 # Same for Text::Layout
 --module=Text::Layout
 --module=Text_Layout_Bundle
+--module=HarfBuzz::Shaper
 
 # Same for String::Interpolate::Named
 --module=String::Interpolate::Named

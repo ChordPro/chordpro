@@ -86,6 +86,11 @@ sub ::run {
 sub main {
     my ($opts) = @_;
     $options = { %$options, %$opts } if $opts;
+    chordpro();
+
+}
+
+sub chordpro {
 
     # Establish backend.
     my $of = $options->{output};
@@ -112,6 +117,9 @@ sub main {
         }
         elsif ( $of =~ /\.html?$/i ) {
             $options->{generate} ||= "HTML";
+        }
+        elsif ( $of =~ /\.mma?$/i ) {
+            $options->{generate} ||= "MMA";
         }
         elsif ( $of =~ /\.(debug)$/i ) {
             $options->{generate} ||= "Debug";
@@ -149,6 +157,16 @@ sub main {
     # Parse the input(s).
     use App::Music::ChordPro::Songbook;
     my $s = App::Music::ChordPro::Songbook->new;
+    my $res;
+
+    # Shortcut a2crd conversion.
+    if ( $options->{a2crd} ) {
+	require App::Music::ChordPro::A2Crd;
+	$res = App::Music::ChordPro::A2Crd::a2crd();
+	push( @$res, '' );
+	goto WRITE_OUTPUT;
+    }
+
     $s->parse_file($_) foreach @::ARGV;
 
     if ( $options->{'dump-chords'} ) {
@@ -201,8 +219,6 @@ sub main {
 	}
     }
 
-    my $res;
-
     if ( my $xc = $::config->{settings}->{transcode} ) {
 	# Set target parser for the backend so it can find the transcoded
 	# chord definitions.
@@ -217,6 +233,7 @@ sub main {
 	$res = $pkg->generate_songbook($s);
     }
 
+  WRITE_OUTPUT:
     # Some backends write output themselves, others return an
     # array of lines to be written.
     if ( $res && @$res > 0 ) {
@@ -642,15 +659,24 @@ sub app_setup {
         ($my_name, $my_version) = qw( MyProg 0.01 );
     }
 
-    # Config files.
     my $app_lc = lc($my_name);
+    if ( $app_lc eq "a2crd" ) {
+	$app_lc = "chordpro";
+	unshift( @ARGV, "--a2crd" );
+    }
+
+    # Config files.
     if ( -d "/etc" ) {          # some *ux
         $configs{sysconfig} =
           File::Spec->catfile( "/", "etc", "$app_lc.json" );
     }
 
     my $e = $ENV{CHORDIIRC} || $ENV{CHORDRC};
-    if ( $ENV{HOME} && -d $ENV{HOME} ) {
+    if ( $ENV{XDG_CONFIG_HOME} && -d $ENV{XDG_CONFIG_HOME} ) {
+	$configs{userconfig} =
+	  File::Spec->catfile( $ENV{XDG_CONFIG_HOME}, $app_lc, "$app_lc.json" );
+    }
+    elsif ( $ENV{HOME} && -d $ENV{HOME} ) {
         if ( -d File::Spec->catfile( $ENV{HOME}, ".config" ) ) {
             $configs{userconfig} =
               File::Spec->catfile( $ENV{HOME}, ".config", $app_lc, "$app_lc.json" );
@@ -709,6 +735,8 @@ sub app_setup {
 
           ### Options ###
 
+	  "a2crd",			# perform ascii to cho
+	  "crd",			# input is ascii, not cho
           "output|o=s",                 # Saves the output to FILE
           "generate=s",
           "backend-option|bo=s\%",
@@ -720,6 +748,7 @@ sub app_setup {
 	  "filelist=s@",		# List of input files
 	  "meta=s\%",			# Command line meta data
 	  "decapo",			# remove capo
+	  "fragment|F",			# partial (incomplete) song
 
           ### Standard Chordii Options ###
 
@@ -920,16 +949,44 @@ To learn more about ChordPro, look for the man page or do
 
 For more information, see https://www.chordpro.org .
 
+Run-time information:
+@{[::runtimeinfo()]}
 EndOfAbout
-
-    my $fmt = " %-22.22s %s\n";
-
-    print( "Run-time information:\n" );
-    printf( $fmt, "ChordPro version", $VERSION );
-    printf( $fmt, "Perl version", $^V );
-    printf( $fmt, App::Packager::Packager(), App::Packager::Version() )
-      if $App::Packager::PACKAGED;
     exit $exit if defined $exit;
+}
+
+use Cwd qw(realpath);
+
+sub ::runtimeinfo {
+    my $fmt = "%-22.22s %s\n";
+
+    my $msg = sprintf( $fmt, "ChordPro version", $VERSION );
+    if ( $VERSION =~ /_/ ) {
+	$msg =~ s/\n$/ (Unsupported development snapshot)\n/;
+    }
+    $msg .= sprintf( $fmt, "Perl version", $^V );
+    $msg .= sprintf( $fmt, "Perl program", $^X );
+    if ( $App::Packager::PACKAGED ) {
+	my $p = App::Packager::Packager();
+	$p .= " Packager" unless $p =~ /packager/i;
+	$msg .= sprintf( $fmt, $p, App::Packager::Version() );
+    }
+    $msg .= sprintf( $fmt, "Resource path",
+		     realpath( App::Packager::GetResourcePath() ) );
+    eval { require Text::Layout;
+	$msg .= sprintf( $fmt, "Text::Layout", $Text::Layout::VERSION );
+    };
+    eval { require HarfBuzz::Shaper;
+	$msg .= sprintf( $fmt, "HarfBuzz::Shaper", $HarfBuzz::Shaper::VERSION );
+	$msg .= sprintf( $fmt, "HarfBuzz library", HarfBuzz::Shaper::hb_version_string() );
+    };
+    $msg .= sprintf( $fmt, "File::LoadLines", $File::LoadLines::VERSION );
+    eval { require PDF::API2;
+	$msg .= sprintf( $fmt, "PDF::API2", $PDF::API2::VERSION );
+    };
+    eval { require Font::TTF;
+	$msg .= sprintf( $fmt, "Font::TTF", $Font::TTF::VERSION );
+    };
 }
 
 sub app_usage {
@@ -942,17 +999,20 @@ sub app_usage {
 Usage: $0 [ options ] [ file ... ]
 
 Options:
+    --a2crd                       Perform text to ChordPro conversion only
     --about  -A                   About ChordPro...
+    --config=JSON  --cfg          Config definitions (multiple)
     --cover=FILE                  Add cover pages from PDF document
+    --crd                         Input is text, not ChordPro
+    --decapo                      Eliminate capo settings
     --diagrams=WHICH		  Prints chord diagrams
     --encoding=ENC                Encoding for input files (UTF-8)
     --filelist=FILE               Reads song file names from FILE
+    --fragment -F                 Partial (incomplete) song
     --lyrics-only  -l             Only prints lyrics
     --output=FILE  -o             Saves the output to FILE
-    --config=JSON  --cfg          Config definitions (multiple)
     --start-page-number=N  -p     Starting page number [1]
     --toc --notoc -i              Generates/suppresses a table of contents
-    --decapo                      Eliminate capo settings
     --transcode=SYS  -xc          Transcodes to notation system
     --transpose=N  -x             Transposes by N semi-tones
     --version  -V                 Prints version and exits

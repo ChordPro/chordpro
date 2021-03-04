@@ -1,0 +1,32 @@
+name: CI for Linux
+
+on:
+    push:
+        branches: '*'
+    pull_request:
+        branches: '*'
+
+jobs:
+  perl-job:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        perl-version:
+          - 'latest'
+          - '5.10'
+    container:
+      image: perldocker/perl-tester:${{ matrix.perl-version }}     # https://hub.docker.com/r/perldocker/perl-tester
+    name: Perl ${{ matrix.perl-version }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: perl -V
+        run: perl -V
+      - name: Install Dependencies
+        run: cpanm --installdeps --notest .
+      - name: Make and run tests
+        run: |
+            perl Makefile.PL
+            make
+            make test
+

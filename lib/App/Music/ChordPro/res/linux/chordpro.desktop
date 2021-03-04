@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=ChordPro
+Exec=wxchordpro
+Type=Application
+StartupNotify=true
+Icon=chordpro
+StartupWMClass=chordpro
+X-Desktop-File-Install-Version=0.24
+MimeType=application/x-chordpro;
+Categories=Graphics;

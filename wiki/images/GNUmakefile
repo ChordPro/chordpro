@@ -117,7 +117,7 @@ pageformats.png : pageformats.cho pageformats.json
 
 #### Publish.
 
-DST := ../../../ChordPro-Wiki/images
+DST := ../../docs/assets/images
 
 publish : all 
 	rsync -avHi *.pdf *.png ${DST}/

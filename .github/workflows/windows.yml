@@ -1,0 +1,33 @@
+name: CI for Microsoft Windows
+
+on:
+  push:
+    branches:
+      - '*'
+    tags-ignore:
+      - '*'
+  pull_request:
+
+jobs:
+  perl:
+
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Strawberry Perl
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          distribution: strawberry
+      - name: perl -V
+        run: perl -V
+      - name: Install Dependencies
+        run: cpanm --installdeps --notest .
+      - name: Install Optional Dependencies
+        continue-on-error: true
+        run: cpanm HarfBuzz::Shaper
+      - name: Make and run tests
+        run: |
+          perl Makefile.PL
+          gmake
+          gmake test
