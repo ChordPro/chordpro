@@ -31,12 +31,12 @@ PERLINC := ${PERLLIB}/perl5/CORE
 PERLSO  := $(shell perl -MConfig -E 'say $$Config{libperl}')
 
 .PHONY :: ppl
-ppl :: clean chordpro wxchordpro unpack copy_coredll loaders
+ppl :: clean wxchordpro unpack copy_coredll loaders
 
 .PHONY :: unpack
 unpack :
 	perl ../pp2ppl.pl --dest=${DEST} wxchordpro --quiet
-	perl ../pp2ppl.pl --dest=${DEST} chordpro   --quiet
+	cp -p "${ROOT}/script/chordpro.pl" "${DEST}/script/chordpro.pl" 
 	cp -p "${ROOT}/lib/App/Music/ChordPro/Config.pm" "${DEST}/lib/App/Music/ChordPro/Config.pm" 
 	cp "${DEST}/res/icons/chordpro.icns" ${DEST}
 	cp "${DEST}/res/icons/chordpro-doc.icns" ${DEST}
