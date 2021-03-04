@@ -29,12 +29,12 @@ PERLINC := ${PERLLIB}/perl5/CORE
 PERLSO  := $(shell perl -wle 'printf("perl%d%06d.so\n",$$1,$$2) if $$] =~ /^(\d+)\.(\d\d\d\d\d\d)/')
 
 .PHONY :: ppl
-ppl :: clean chordpro wxchordpro unpack copy_coredll loaders
+ppl :: clean wxchordpro unpack copy_coredll loaders
 
 .PHONY :: unpack
 unpack :
 	perl ../pp2ppl.pl --dest=${DEST} wxchordpro --quiet
-	perl ../pp2ppl.pl --dest=${DEST} chordpro   --quiet
+	cp -p "${ROOT}/script/chordpro.pl" "${DEST}/script/chordpro.pl" 
 	cp -p "${ROOT}/lib/App/Music/ChordPro/Config.pm" "${DEST}/lib/App/Music/ChordPro/Config.pm" 
 	cp "${DEST}/res/icons/chordpro.ico" ${DEST}
 	mv "${DEST}/res" "${DEST}/lib/App/Music/ChordPro/"
