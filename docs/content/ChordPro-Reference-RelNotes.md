@@ -1,5 +1,35 @@
 # Release info
 
+## 0.978
+
+Released: 2021-03-05
+
+
+### ChordPro functionality
+
+* Allow array element addressing in --define.
+* Retain line numbers for backend diagnostics.
+* Experimental support for ABC.
+* Experimental support for MacOS.
+* New icons.
+* Windows: Installer associates ChordPro with .cho files.
+* Linux: Support for desktop and app icons.
+* Linux: Support building an AppImage.
+* Restore section label as comment (config: pdf.labels.comment).
+* Add experimental MMA backend.
+
+### Bugfixes
+
+* Fix chords transpose in comments with output ChordPro.
+* Fix detection of grid params in start_of_grid.
+* Fix problem with path name in start menu after windows install.
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.
+
+[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.
+
 ## 0.977
 
 Released: 2020-08-26
@@ -15,12 +45,6 @@ Released: 2020-08-26
 * Use only 'name' for chords in the built-in config. 'description' cannot be overridden by the user with 'name'.
 * Fix page numbers in CSV.
 * Several fixes for font descriptions and sizes.
-
-### Social and support
-
-[User community](https://groups.io/g/ChordPro) for feedback and help.
-
-[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.
 
 ## 0.976
 

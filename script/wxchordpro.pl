@@ -12,8 +12,6 @@ use lib "$FindBin::Bin/../CPAN";
 use lib "$FindBin::Bin/../lib";
 use App::Packager qw( :name App::Music::ChordPro );
 use App::Music::ChordPro::Wx;
-use App::Music::ChordPro::Utils qw(is_msw);
-$ENV{PATH} = "$FindBin::Bin/.." . (is_msw() ? ";" : ":" ) . $ENV{PATH};
 
 # Package name.
 my $my_package = 'ChordPro';
@@ -49,14 +47,6 @@ sub OnInit {
 
 my $m = main->new();
 $m->MainLoop();
-
-################ Subroutines ################
-
-use Wx qw( wxEXEC_SYNC );
-use constant wxEXEC_HIDE_CONSOLE => 32;
-
-# Synchronous system call. Used in Util module.
-sub ::sys { Wx::ExecuteArgs(\@_, wxEXEC_SYNC|wxEXEC_HIDE_CONSOLE) }
 
 ################ Subroutines ################
 
