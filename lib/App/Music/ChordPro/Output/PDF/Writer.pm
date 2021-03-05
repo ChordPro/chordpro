@@ -436,13 +436,13 @@ sub init_font {
     my ( $self, $ff ) = @_;
     my $ps = $self->{ps};
     my $fd;
-    if ( !$fd && $ps->{fonts}->{$ff}->{file} ) {
+    if ( $ps->{fonts}->{$ff}->{file} ) {
 	$fd = $self->init_filefont($ff);
     }
-    if ( !$fd && $ps->{fonts}->{$ff}->{description} ) {
+    elsif ( $ps->{fonts}->{$ff}->{description} ) {
 	$fd = $self->init_pangofont($ff);
     }
-    if ( !$fd && $ps->{fonts}->{$ff}->{name} ) {
+    elsif ( $ps->{fonts}->{$ff}->{name} ) {
 	$fd = $self->init_corefont($ff);
     }
     warn("No font found for \"$ff\"\n") unless $fd;
@@ -475,10 +475,11 @@ sub init_filefont {
 
     my $fc = Text::Layout::FontConfig->new;
     eval {
-	$font->{fd} = $fc->from_filename($font->{file});
-	$font->{fd}->get_font($self->{layout}); # force load
-	$font->{fd}->{font}->{Name}->{val} =~ s/~.*/~$faketime/ if $regtest;
-	$font->{_ff} = $ff;
+	my $t = $fc->from_filename($font->{file});
+	$t->get_font($self->{layout}); # force load
+	$t->{font}->{Name}->{val} =~ s/~.*/~$faketime/ if $regtest;
+	$t->{_ff} = $ff;
+	$font->{fd} = $t;
     };
     $font->{fd};
 }

@@ -2,6 +2,7 @@
 
     - !ChordPro functionality
     - (musejazz) Change font to MuseJazzText.otf as downloadable from GitHub.
+    - Improve error messages for font files not found.
 
 0.978	2021-03-05
 
