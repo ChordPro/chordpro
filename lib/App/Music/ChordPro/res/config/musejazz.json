@@ -1,4 +1,6 @@
-// Chord naming according to Brandt-Roemer, fine-tuned for MuseJazz font.
+// Chord naming according to Brandt-Roemer, fine-tuned for MuseJazzText font.
+// You can download the font from
+// https://github.com/musescore/MuseScore/tree/master/fonts/musejazz
 
 { "include" : [ "guitar-ly" ],
   "chords" : [
@@ -195,10 +197,10 @@
 	"fontdir" : [ "~/.fonts" ],
 	"fonts" : {
 	    "chord" : {
-		"file" : "MuseJazz.ttf",
+		"file" : "MuseJazzText.otf",
 	    },
 	    "diagram" : {
-		"file" : "MuseJazz.ttf", "size" : 12,
+		"file" : "MuseJazzText.otf", "size" : 12,
 	    },
 	},
     },
