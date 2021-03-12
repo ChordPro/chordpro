@@ -923,6 +923,21 @@ sub default_config() {
       "pagealign-songs" : 1,
 
       // Formats.
+      // Pages have two title elements and one footer element.
+      // Topmost is "title". It uses the "title" font as defined further below.
+      // Second is "subtitle". It uses the "subtitle" font.
+      // The "footer" uses the "footer" font.
+      // All elements can have three fields, that are placed to the left side,
+      // centered, and right side of the page.
+      // The contents of all fields is defined below. You can use metadata
+      // items in the fields as shown. By default, the "title" element shows the
+      // value of metadata item "title", centered on the page. Likewise
+      // "subtitle".
+      // NOTE: The "title" and "subtitle" page elements have the same names
+      // as the default metadata values which may be confusing. To show
+      // metadata item, e.g. "artist", add its value to one of the
+      // title/subtitle fields. Don't try to add an artist page element.
+
       "formats" : {
 	  // Titles/Footers.
 
