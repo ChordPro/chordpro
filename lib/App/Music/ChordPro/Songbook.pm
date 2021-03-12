@@ -227,7 +227,8 @@ sub parse_song {
 	    }
 	    else {
 		# Add to an open item.
-		if ( $song->{body}->[-1]->{context} eq $in_context
+		if ( $song->{body} && @{ $song->{body} }
+		     && $song->{body}->[-1]->{context} eq $in_context
 		     && $song->{body}->[-1]->{open} ) {
 		    push( @{$song->{body}->[-1]->{data}}, $_ );
 		}
