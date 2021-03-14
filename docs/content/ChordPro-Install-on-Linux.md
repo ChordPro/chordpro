@@ -35,6 +35,23 @@ Module | RPM | Debian
 Do not worry if any of these packages are not available, the `cpan`
 install process will build them if necessary.
 
+## Helper programs
+
+To support ABC embedding, ChordPro requires two helper programs:
+
+* `abcm2ps`  
+This proram is used to convert ABC to a vector image.  
+Most Linux distributions have prebuilt packages available.  
+Otherwise, you can find it on [SourceForge](http://abcplus.sourceforge.net/).
+
+* `convert`  
+This is part of the ImageMagick suite of graphical manipulation
+tools. It is used to convert the vector image to a suitable bitmapped
+format for embedding.  
+Most Linux distributions have prebuilt packages available.  
+Otherwise, you can download it from the [ImageMagick web
+site](https://imagemagick.org/).
+
 ## GUI (graphical) interface version
 
 There is one critical prerequisite that must be installed manually:
