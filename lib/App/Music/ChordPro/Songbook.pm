@@ -134,6 +134,28 @@ sub parse_song {
     @labels = ();
     @chorus = ();
 
+    # Preprocessor.
+    my $prep;
+    if ( $config->{parser} ) {
+	foreach my $linetype ( keys %{ $config->{parser}->{preprocess} } ) {
+	    my @targets;
+	    my $code;
+	    foreach ( @{ $config->{parser}->{preprocess}->{$linetype} } ) {
+		push( @targets, $_->{target} );
+		# Subsequent targets override.
+		$code->{$_->{target}} = $_->{replace};
+	    }
+	    if ( @targets ) {
+		my $t = "sub { for (\$_[0]) {\n";
+		$t .= "s\0" . quotemeta($_) . "\0" .
+		  quotemeta($code->{$_}) . "\0g;\n" for @targets;
+		$t .= "}}";
+		$prep->{$linetype} = eval $t;
+		die( "CODE : $t\n$@" ) if $@;
+	    }
+	}
+    }
+
     # Pre-fill meta data, if any.
     if ( $options->{meta} ) {
 	while ( my ($k, $v ) = each( %{ $options->{meta} } ) ) {
@@ -164,6 +186,12 @@ sub parse_song {
     while ( @$lines ) {
 	$diag->{line} = ++$$linecnt;
 	$diag->{orig} = $_ = shift(@$lines);
+
+	if ( $prep->{all} ) {
+	    # warn("PRE:  ", $_, "\n");
+	    $prep->{all}->($_);
+	    # warn("POST: ", $_, "\n");
+	}
 
 	if ( /^\s*\{(new_song|ns)\}\s*$/ ) {
 	    last if $song->{body};
@@ -282,6 +310,11 @@ sub parse_song {
 	}
 
 	if ( /\S/ ) {
+	    if ( $prep->{songline} ) {
+		# warn("PRE:  ", $_, "\n");
+		$prep->{songline}->($_);
+		# warn("POST: ", $_, "\n");
+	    }
 	    $self->add( type => "songline", $self->decompose($_) );
 	}
 	elsif ( exists $song->{title} || $fragment ) {

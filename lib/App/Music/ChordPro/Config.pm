@@ -1147,6 +1147,19 @@ sub default_config() {
 	"tabstop" : 8,
     },
 
+    // Settings for the parser/preprocessor.
+    // For selected lines, you can specify a series of 
+    // { "target" : "xxx", "replace" : "yyy" }
+    // Every occurrence of "xxx" will be replaced by "yyy".
+    // Use wisely.
+    "parser" : {
+	"preprocess" : {
+	    // All lines.
+	    "all" : [],
+	    // Song lines (lyrics) only.
+            "songline" : [],
+	},
+    },
 }
 // End of config.
 End_Of_Config
