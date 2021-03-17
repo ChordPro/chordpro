@@ -900,7 +900,7 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "delegate" ) {
-	    if ( $elt->{subtype} eq "image" ) {
+	    if ( $elt->{subtype} =~ /^image(?:-(\w+))?$/ ) {
 		my $hd = __PACKAGE__->can($elt->{handler});
 		my $img = $hd->( $s, $pr, $elt );
 		next unless $img;
@@ -2240,6 +2240,9 @@ sub abc2image {
     $imgcnt++;
     my $src  = File::Spec->catfile( $td, "tmp${imgcnt}.abc" );
     my $img  = File::Spec->catfile( $td, "tmp${imgcnt}.jpg" );
+    if ( $elt->{subtype} =~ /^image-(\w+)$/ ) {
+	$img  = File::Spec->catfile( $td, "tmp${imgcnt}.$1" );
+    }
 
     my $fd;
     unless ( open( $fd, '>:utf8', $src ) ) {

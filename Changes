@@ -3,6 +3,7 @@
     - !ChordPro functionality
     - (musejazz) Change font to MuseJazzText.otf as downloadable from GitHub.
     - Improve error messages for font files not found.
+    - Experimental: Allow delegates to specify image type.
     - !BugFixes
     - Fix crash when abc section is the very first thing in a song.
 
