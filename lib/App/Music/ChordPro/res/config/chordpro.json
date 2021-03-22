@@ -516,14 +516,16 @@
     },
 
     // Settings for the parser/preprocessor.
+    // For selected lines, you can specify a series of 
+    // { "target" : "xxx", "replace" : "yyy" }
+    // Every occurrence of "xxx" will be replaced by "yyy".
+    // Use wisely.
     "parser" : {
-        "songline" : {
-	    "preprocess" : [
-		{ "target" : "\\",
-                  "replace" : "[*|]" },
-		{ "target" : "|",
-                  "replace" : "[*<span color='grey'>|</span>]" },
-	    ],
+	"preprocess" : {
+	    // All lines.
+	    "all" : [],
+	    // Song lines (lyrics) only.
+            "songline" : [],
 	},
     },
 }
