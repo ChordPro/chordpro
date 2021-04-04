@@ -3,7 +3,9 @@
     - !ChordPro functionality
     - (musejazz) Change font to MuseJazzText.otf as downloadable from GitHub.
     - Improve error messages for font files not found.
+    - Allow variable expansion on all input lines.
     - Experimental support for preprocessing.
+    - Experimental support for song-local configs.
     - !BugFixes
     - Fix crash when abc section is the very first thing in a song.
 
