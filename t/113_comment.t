@@ -50,7 +50,7 @@ my $song = {
 		       {
 			'type' => 'comment',
 			'context' => '',
-			'phrases' => [ 'This song is %{title} in the key of ',
+			'phrases' => [ 'This song is Swing Low Sweet Chariot in the key of ',
 				       '',
 				     ],
 			'chords' => [ '', 'D' ],

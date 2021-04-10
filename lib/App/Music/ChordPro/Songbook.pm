@@ -18,6 +18,7 @@ use App::Music::ChordPro::Utils;
 use Carp;
 use List::Util qw(any);
 use File::LoadLines;
+use Storable qw(dclone);
 
 sub new {
     my ($pkg) = @_;
@@ -50,7 +51,6 @@ my $memorizing;			# if memorizing (a.o.t. recalling)
 my %warned_chords;
 
 my $re_chords;			# for chords
-my $re_meta;			# for metadata
 
 my @labels;			# labels used
 
@@ -113,6 +113,8 @@ my $song;			# current song
 sub parse_song {
     my ( $self, $lines, $linecnt, $legacy ) = @_;
 
+    local $config = dclone($config);
+
     $no_transpose = $options->{'no-transpose'};
     $no_substitute = $options->{'no-substitute'};
     $decapo = $options->{decapo} || $config->{settings}->{decapo};
@@ -123,6 +125,7 @@ sub parse_song {
 	system => $::config->{notes}->{system},
 	structure => "linear",
       );
+    $self->{song} = $song;
 
     $xpose = 0;
     $grid_arg = [ 4, 4, 1, 1 ];	# 1+4x4+1
@@ -133,6 +136,28 @@ sub parse_song {
     App::Music::ChordPro::Chords::reset_song_chords();
     @labels = ();
     @chorus = ();
+
+    # Preprocessor.
+    my $prep;
+    if ( $config->{parser} ) {
+	foreach my $linetype ( keys %{ $config->{parser}->{preprocess} } ) {
+	    my @targets;
+	    my $code;
+	    foreach ( @{ $config->{parser}->{preprocess}->{$linetype} } ) {
+		push( @targets, $_->{target} );
+		# Subsequent targets override.
+		$code->{$_->{target}} = $_->{replace};
+	    }
+	    if ( @targets ) {
+		my $t = "sub { for (\$_[0]) {\n";
+		$t .= "s\0" . quotemeta($_) . "\0" .
+		  quotemeta($code->{$_}) . "\0g;\n" for @targets;
+		$t .= "}}";
+		$prep->{$linetype} = eval $t;
+		die( "CODE : $t\n$@" ) if $@;
+	    }
+	}
+    }
 
     # Pre-fill meta data, if any.
     if ( $options->{meta} ) {
@@ -149,21 +174,15 @@ sub parse_song {
 	$re_chords = qr/(\[.*?\])/;
     }
 
-    # Build regex for the known metadata items.
-    if ( $::config->{metadata}->{keys} ) {
-	$re_meta = '^(' .
-	  join( '|', map { quotemeta } @{$::config->{metadata}->{keys}} )
-	    . ')$';
-	$re_meta = qr/$re_meta/;
-    }
-    else {
-	# HUH?
-	undef $re_meta;
-    }
-
     while ( @$lines ) {
 	$diag->{line} = ++$$linecnt;
 	$diag->{orig} = $_ = shift(@$lines);
+
+	if ( $prep->{all} ) {
+	    # warn("PRE:  ", $_, "\n");
+	    $prep->{all}->($_);
+	    # warn("POST: ", $_, "\n");
+	}
 
 	if ( /^\s*\{(new_song|ns)\}\s*$/ ) {
 	    last if $song->{body};
@@ -282,6 +301,11 @@ sub parse_song {
 	}
 
 	if ( /\S/ ) {
+	    if ( $prep->{songline} ) {
+		# warn("PRE:  ", $_, "\n");
+		$prep->{songline}->($_);
+		# warn("POST: ", $_, "\n");
+	    }
 	    $self->add( type => "songline", $self->decompose($_) );
 	}
 	elsif ( exists $song->{title} || $fragment ) {
@@ -411,14 +435,18 @@ sub cxpose {
 }
 
 sub decompose {
-    my ($self, $line) = @_;
+    my ($self, $orig) = @_;
+    my $line = fmt_subst( $self->{song}, $orig );
+    undef $orig if $orig eq $line;
     $line =~ s/\s+$//;
     my @a = split( $re_chords, $line, -1);
 
 #    die(msg("Illegal line")."\n") unless @a; #### TODO
 
     if ( @a <= 1 ) {
-	return ( phrases => [ $line ] );
+	return ( phrases => [ $line ],
+		 $orig ? ( orig => $orig ) : (),
+	       );
     }
 
     my $dummy;
@@ -470,7 +498,10 @@ sub decompose {
 	$dummy = 0;
     }
 
-    return ( phrases => \@phrases, chords  => \@chords );
+    return ( phrases => \@phrases,
+	     chords  => \@chords,
+	     $orig ? ( orig => $orig ) : (),
+	   );
 }
 
 sub cdecompose {
@@ -568,7 +599,8 @@ sub dir_split {
 
 sub directive {
     my ( $self, $d ) = @_;
-    my ( $dir, $arg ) = dir_split($d);
+    my ( $dir, $orig ) = dir_split($d);
+    my $arg = fmt_subst( $self->{song}, $orig );
 
     # Context flags.
 
@@ -709,8 +741,8 @@ sub directive {
     }
     if ( $comment ) {
 	my %res = $self->cdecompose($arg);
-	$self->add( type => $comment, %res,
-		    orig => $arg )
+	$res{orig} = $orig;
+	$self->add( type => $comment, %res )
 	  unless exists($res{text}) && $res{text} =~ /^[ \t]*$/;
 	return 1;
     }
@@ -774,8 +806,8 @@ sub directive {
 
     # Metadata extensions (legacy). Should use meta instead.
     # Only accept the list from config.
-    if ( $re_meta && $dir =~ $re_meta ) {
-	$arg = "$1 $arg";
+    if ( any { $_ eq $dir } @{ $::config->{metadata}->{keys} } ) {
+	$arg = "$dir $arg";
 	$dir = "meta";
     }
 
@@ -812,7 +844,7 @@ sub directive {
 	    }
 
 	    if ( $::config->{metadata}->{strict}
-		 && ! ( $re_meta && $key =~ $re_meta ) ) {
+		 && ! any { $_ eq $key } @{ $::config->{metadata}->{keys} } ) {
 		# Unknown, and strict.
 		do_warn("Unknown metadata item: $key");
 		return;
@@ -852,7 +884,8 @@ my %propstack;
 
 sub global_directive {
     my ($self, $d, $legacy ) = @_;
-    my ( $dir, $arg ) = dir_split($d);
+    my ( $dir, $orig ) = dir_split($d);
+    my $arg = fmt_subst( $self->{song}, $orig );
 
     # Song / Global settings.
 
@@ -945,12 +978,51 @@ sub global_directive {
 	return 1;
     }
 
-    if ( $dir =~ /^\+([-\w.]+)$/ ) {
+    if ( $dir =~ /^\+([-\w.]+(?:\.[<>])?)$/ ) {
 	return if $legacy;
 	$self->add( type => "set",
 		    name => $1,
 		    value => $arg,
 		  );
+
+	# THIS IS BASICALLY A COPY OF THE CODE IN Config.pm.
+	# TODO: GENERALIZE.
+	my $ccfg = {};
+	my @k = split( /[:.]/, $1 );
+	my $c = \$ccfg;		# new
+	my $o = $::config;	# current
+	my $lk = pop(@k);	# last key
+
+	# Step through the keys.
+	foreach ( @k ) {
+	    $c = \($$c->{$_});
+	    $o = $o->{$_};
+	}
+
+	# Final key. Merge array if so.
+	if ( ( $lk =~ /^\d+$/ || $lk eq '>' || $lk eq '<' )
+	       && ref($o) eq 'ARRAY' ) {
+	    unless ( ref($$c) eq 'ARRAY' ) {
+		# Only copy orig values the first time.
+		$$c->[$_] = $o->[$_] for 0..scalar(@{$o})-1;
+	    }
+	    if ( $lk eq '>' ) {
+		push( @{$$c}, $arg );
+	    }
+	    elsif ( $lk eq '<' ) {
+		unshift( @{$$c}, $arg );
+	    }
+	    else {
+		$$c->[$lk] = $arg;
+	    }
+	}
+	else {
+	    $$c->{$lk} = $arg;
+	}
+#	use DDumper;DDumper($ccfg);
+	$ccfg = App::Music::ChordPro::Config::hmerge( $::config, $ccfg );
+	$::config = bless $ccfg => ref($::config);
+
 	return 1;
     }
 

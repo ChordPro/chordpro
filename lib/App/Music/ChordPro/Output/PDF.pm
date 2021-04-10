@@ -13,6 +13,7 @@ use warnings;
 use Encode qw( encode_utf8 );
 use App::Packager;
 use File::Temp ();
+use Storable qw(dclone);
 
 use App::Music::ChordPro::Output::Common
   qw( roman prep_outlines fmt_subst demarkup );
@@ -228,6 +229,8 @@ sub generate_song {
     my ( $s, $opts ) = @_;
 
     return 0 unless $s->{body};	# empty song
+    local $config = dclone($config);
+
     $source = $s->{source};
     $assets = $s->{assets} || {};
 
@@ -461,6 +464,8 @@ sub generate_song {
 
 	$x = $ps->{__leftmargin};
 	if ( $ps->{headspace} ) {
+	    warn("Metadata for pageheading: ", ::dump($s->{meta}), "\n")
+	      if $options->{debug};
 	    $y = $ps->{_margintop} + $ps->{headspace};
 	    $y -= font_bl($fonts->{title});
 	    $tpt->("title");
