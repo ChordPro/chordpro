@@ -151,14 +151,20 @@ sub parse_song {
 	    my @targets;
 	    my $code;
 	    foreach ( @{ $config->{parser}->{preprocess}->{$linetype} } ) {
-		push( @targets, $_->{target} );
-		# Subsequent targets override.
-		$code->{$_->{target}} = $_->{replace};
+		if ( $_->{pattern} ) {
+		    push( @targets, $_->{pattern} );
+		    # Subsequent targets override.
+		    $code->{$_->{pattern}} = $_->{replace};
+		}
+		else {
+		    push( @targets, quotemeta($_->{target}) );
+		    # Subsequent targets override.
+		    $code->{quotemeta($_->{target})} = quotemeta($_->{replace});
+		}
 	    }
 	    if ( @targets ) {
 		my $t = "sub { for (\$_[0]) {\n";
-		$t .= "s\0" . quotemeta($_) . "\0" .
-		  quotemeta($code->{$_}) . "\0g;\n" for @targets;
+		$t .= "s\0" . $_ . "\0" . $code->{$_} . "\0g;\n" for @targets;
 		$t .= "}}";
 		$prep->{$linetype} = eval $t;
 		die( "CODE : $t\n$@" ) if $@;
