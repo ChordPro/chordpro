@@ -1019,9 +1019,7 @@ sub global_directive {
 	else {
 	    $$c->{$lk} = $arg;
 	}
-#	use DDumper;DDumper($ccfg);
-	$ccfg = App::Music::ChordPro::Config::hmerge( $::config, $ccfg );
-	$::config = bless $ccfg => ref($::config);
+	$::config->augment($ccfg);
 
 	return 1;
     }

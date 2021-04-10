@@ -516,6 +516,86 @@ sub cfg2props {
     return $ret;
 }
 
+sub augment : method {
+    my ( $self, $hash, $path ) = @_;
+    $path ||= "";
+
+    if ( $] >= 5.018000 ) {
+	require Hash::Util;
+	Hash::Util::unlock_hash_recurse($self);
+    }
+
+    for my $key ( keys(%$hash) ) {
+
+	warn("Config error: unknown item $path$key\n")
+	  unless exists $self->{$key}
+	    || $path eq "pdf.fontconfig."
+	    || $key =~ /^_/;
+
+	# Hash -> Hash.
+	# Hash -> Array.
+	if ( ref($hash->{$key}) eq 'HASH' ) {
+	    if ( ref($self->{$key}) eq 'HASH' ) {
+
+		# Hashes. Recurse.
+		augment( $self->{$key}, $hash->{$key}, "$path$key." );
+	    }
+	    elsif ( ref($self->{$key}) eq 'ARRAY' ) {
+
+		# Hash -> Array.
+		# Update single array element using a hash index.
+		foreach my $ix ( keys(%{$hash->{$key}}) ) {
+		    die unless $ix =~ /^\d+$/;
+		    $self->{$key}->[$ix] = $hash->{$key}->{$ix};
+		}
+	    }
+	    else {
+		# Overwrite.
+		$self->{$key} = $hash->{$key};
+	    }
+	}
+
+	# Array -> Array.
+	elsif ( ref($hash->{$key}) eq 'ARRAY'
+		and ref($self->{$key}) eq 'ARRAY' ) {
+
+	    # Arrays. Overwrite or append.
+	    if ( @{$hash->{$key}} ) {
+		my @v = @{ $hash->{$key} };
+		if ( $v[0] eq "append" ) {
+		    shift(@v);
+		    # Append the rest.
+		    push( @{ $self->{$key} }, @v );
+		}
+		elsif ( $v[0] eq "prepend" ) {
+		    shift(@v);
+		    # Prepend the rest.
+		    unshift( @{ $self->{$key} }, @v );
+		}
+		else {
+		    # Overwrite.
+		    $self->{$key} = $hash->{$key};
+		}
+	    }
+	    else {
+		# Overwrite.
+		$self->{$key} = $hash->{$key};
+	    }
+        }
+
+	else {
+	    # Overwrite.
+	    $self->{$key} = $hash->{$key};
+	}
+    }
+
+    if ( $] >= 5.018000 ) {
+	require Hash::Util;
+	Hash::Util::lock_hash_recurse($self);
+    }
+    $self;
+}
+
 sub hmerge($$;$) {
 
     # Merge hashes. Right takes precedence.
@@ -758,10 +838,12 @@ sub default_config() {
     //         "all": all chords used.
     //         "user": only prints user defined chords.
     // "sorted": order the chords by key.
+    // "type": "strings" or "keyboard".
     "diagrams" : {
 	"auto"     :  false,
 	"show"     :  "all",
 	"sorted"   :  false,
+        "type"     :  "strings",
     },
 
     // Diagnostig messages.
@@ -915,6 +997,30 @@ sub default_config() {
 	  "vspace"   :  3,
 	  "vcells"   :  4,
 	  "linewidth" : 0.1,
+      },
+
+      // Keyboard diagrams.
+      // A keyboard diagram consists of a number of keys.
+      // Cell dimensions are specified by "width" and "height".
+      // The horizontal number of cells depends on the number of strings.
+      // The vertical number of cells is "vcells", which should
+      // be 4 or larger to accomodate most chords.
+      // The horizontal distance between diagrams is "hspace" cells.
+      // The vertical distance is "vspace" cells.
+      // "linewidth" is the thickness of the lines as a fraction of "width".
+      // Diagrams for all chords of the song can be shown at the
+      // "top", "bottom" or "right" side of the first page,
+      // or "below" the last song line.
+      "kbdiagrams" : {
+	  "show"     :  "bottom",
+	  "width"    :   4,
+	  "height"   :  20,
+	  "hspace"   :  3.95,
+	  "vspace"   :  0.3,
+	  "keys"     :  14,	// or 7, 10, 14, 17, 21
+          "base"     :  "C",	// or "F"
+	  "linewidth" : 0.1,
+          "pressed"  :  "grey",
       },
 
       // Even/odd pages. A value of -1 denotes odd/even pages.
