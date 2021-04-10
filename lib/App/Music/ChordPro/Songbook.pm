@@ -115,6 +115,13 @@ sub parse_song {
 
     local $config = dclone($config);
 
+    if ( $diag->{file} ) {
+	( my $cf = $diag->{file} ) =~ s/\.\w+$/.json/;
+	if ( -s $cf ) {
+	    $config->augment(App::Music::ChordPro::Config::get_config($cf));
+	}
+    }
+
     $no_transpose = $options->{'no-transpose'};
     $no_substitute = $options->{'no-substitute'};
     $decapo = $options->{decapo} || $config->{settings}->{decapo};
