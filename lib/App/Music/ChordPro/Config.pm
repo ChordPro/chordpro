@@ -991,36 +991,33 @@ sub default_config() {
       // or "below" the last song line.
       "diagrams" : {
 	  "show"     :  "bottom",
-	  "width"    :  6,
-	  "height"   :  6,
-	  "hspace"   :  3.95,
-	  "vspace"   :  3,
-	  "vcells"   :  4,
-	  "linewidth" : 0.1,
+	  "width"    :  6,	// of a cell
+	  "height"   :  6,	// of a cell
+	  "vcells"   :  4,	// vertically
+	  "linewidth" : 0.1,	// of a cell width
+	  "hspace"   :  3.95,	// fraction of width
+	  "vspace"   :  3,	// fraction of height
       },
 
       // Keyboard diagrams.
       // A keyboard diagram consists of a number of keys.
-      // Cell dimensions are specified by "width" and "height".
-      // The horizontal number of cells depends on the number of strings.
-      // The vertical number of cells is "vcells", which should
-      // be 4 or larger to accomodate most chords.
-      // The horizontal distance between diagrams is "hspace" cells.
-      // The vertical distance is "vspace" cells.
+      // Dimensions are specified by "width" (a key) and "height".
+      // The horizontal distance between diagrams is "hspace" * keys * width.
+      // The vertical distance is "vspace" * height.
       // "linewidth" is the thickness of the lines as a fraction of "width".
       // Diagrams for all chords of the song can be shown at the
       // "top", "bottom" or "right" side of the first page,
       // or "below" the last song line.
       "kbdiagrams" : {
 	  "show"     :  "bottom",
-	  "width"    :   4,
-	  "height"   :  20,
-	  "hspace"   :  3.95,
-	  "vspace"   :  0.3,
+	  "width"    :   4,	// of a single key
+	  "height"   :  20,	// of the diagram
 	  "keys"     :  14,	// or 7, 10, 14, 17, 21
           "base"     :  "C",	// or "F"
-	  "linewidth" : 0.1,
-          "pressed"  :  "grey",
+	  "linewidth" : 0.1,	// fraction of a single key width
+          "pressed"  :  "grey",	// colour of a pressed key
+	  "hspace"   :  3.95,	// ??
+	  "vspace"   :  0.3,	// fraction of height
       },
 
       // Even/odd pages. A value of -1 denotes odd/even pages.

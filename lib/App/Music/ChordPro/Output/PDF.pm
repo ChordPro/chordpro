@@ -249,8 +249,15 @@ sub generate_song {
     $s->structurize if $structured;
 
     # Diagrams drawer.
-    require App::Music::ChordPro::Output::PDF::StringDiagrams;
-    my $dd = App::Music::ChordPro::Output::PDF::StringDiagrams->new;
+    my $dd;
+    if ( $::config->{diagrams}->{type} eq "keyboard" ) {
+	require App::Music::ChordPro::Output::PDF::KeyboardDiagrams;
+	$dd = App::Music::ChordPro::Output::PDF::KeyboardDiagrams->new;
+    }
+    else {
+	require App::Music::ChordPro::Output::PDF::StringDiagrams;
+	$dd = App::Music::ChordPro::Output::PDF::StringDiagrams->new;
+    }
 
     my $sb = $s->{body};
 
@@ -2049,6 +2056,7 @@ sub configurator {
 
     # Chord grid width.
     if ( $options->{'chord-grid-size'} ) {
+	# Note that this is legacy, so for the chord diagrams only,
 	$pdf->{diagrams}->{width} =
 	  $pdf->{diagrams}->{height} =
 	    $options->{'chord-grid-size'} /
@@ -2374,6 +2382,7 @@ sub abc2image {
 	warn("Error in ABC embedding\n");
 	return;
     }
+
 =cut
 
 }

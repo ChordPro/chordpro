@@ -1,5 +1,7 @@
 #! perl
 
+use strict;
+
 package App::Music::ChordPro::Output::PDF::StringDiagrams;
 
 use App::Music::ChordPro::Chords;
@@ -80,8 +82,8 @@ sub draw {
     my $h = $strings;
 
     # Draw the grid.
-    $pr->hline( $x, $y - $_*$gh, $w, $lw ) for 0..$v;
-    $pr->vline( $x0 + $_*$gw, $y, $gh*$v, $lw ) for 0..$h-1;
+    my $xo = grid_xo($ps);
+    $pr->{pdfgfx}->formimage( $xo, $x, $y-$v*$gh, 1 );
 
     # Bar detection.
     my $bar;
@@ -162,6 +164,46 @@ sub draw {
     }
 
     return $gw * ( $ps->{diagrams}->{hspace} + $strings );
+}
+
+my $pdfapi = 'PDF::API2';
+my %grids;
+
+sub grid_xo {
+    my ( $ps ) = @_;
+
+    my $gw = $ps->{diagrams}->{width};
+    my $gh = $ps->{diagrams}->{height};
+    my $lw  = ($ps->{diagrams}->{linewidth} || 0.10) * $gw;
+    my $v = $ps->{diagrams}->{vcells};
+    my $strings = App::Music::ChordPro::Chords::strings();
+
+    return $grids{$gw,$gh,$lw,$v,$strings} //= do
+      {
+	my $w = $gw * ($strings - 1);
+	my $h = $strings;
+
+	# Draw the grid.
+	my $form = $pdfapi->new;
+	my $p = $form->page;
+	my $x = 0;
+	my $y = $v*$gh;
+	$p->bbox(-$lw/2, -$lw/2, ($h-1)*$gw+$lw/2, $v*$gh+$lw/2);
+	my $g = $p->gfx;
+	App::Music::ChordPro::Output::PDF::Writer::rectxy
+	    ( { pdfgfx => $g }, 0, 0, ($h-1)*$gw+$lw, $v*$gh+$lw, 0,
+	      'red' ) if 0;
+	App::Music::ChordPro::Output::PDF::Writer::hline
+	    ( { pdfgfx => $g }, $x, $y - $_*$gh, $w, $lw ) for 0..$v;
+	App::Music::ChordPro::Output::PDF::Writer::vline
+	    ( { pdfgfx => $g }, $x + $_*$gw, $y, $gh*$v, $lw ) for 0..$h-1;
+
+	# Still waste. but less...
+	$form = $form->stringify;
+	$form = $pdfapi->open_scalar($form);
+
+	$ps->{pr}->{pdf}->importPageIntoForm($form,1);
+      };
 }
 
 1;

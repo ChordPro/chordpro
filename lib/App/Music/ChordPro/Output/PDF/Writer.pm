@@ -237,6 +237,22 @@ sub rectxy {
     $gfx->restore;
 }
 
+sub poly {
+    my ( $self, $points, $lw, $fillcolor, $strokecolor ) = @_;
+    my $gfx = $self->{pdfgfx};
+    $gfx->save;
+    $gfx->strokecolor($strokecolor) if $strokecolor;
+    $gfx->fillcolor($fillcolor) if $fillcolor;
+    $gfx->linecap(2);
+    $gfx->linewidth($lw||1);
+    $gfx->poly( @$points );
+    $gfx->close;
+    $gfx->fill if $fillcolor && !$strokecolor;
+    $gfx->fillstroke if $fillcolor && $strokecolor;
+    $gfx->stroke if $strokecolor && !$fillcolor;
+    $gfx->restore;
+}
+
 sub circle {
     my ( $self, $x, $y, $r, $lw, $fillcolor, $strokecolor ) = @_;
     my $gfx = $self->{pdfgfx};

@@ -6,7 +6,8 @@
     - Experimental: Allow delegates to specify image type.
     - Allow variable expansion on all input lines.
     - Experimental support for preprocessing.
-    - Experimental support for song-local configs.
+    - Experimental support for song-local configs (WIP).
+    - Experimental support for keyboard diagrams (WIP).
     - !BugFixes
     - Fix crash when abc section is the very first thing in a song.
 
