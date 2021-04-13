@@ -239,12 +239,13 @@ sub rectxy {
 
 sub poly {
     my ( $self, $points, $lw, $fillcolor, $strokecolor ) = @_;
+    undef $strokecolor unless $lw;
     my $gfx = $self->{pdfgfx};
     $gfx->save;
     $gfx->strokecolor($strokecolor) if $strokecolor;
     $gfx->fillcolor($fillcolor) if $fillcolor;
     $gfx->linecap(2);
-    $gfx->linewidth($lw||1);
+    $gfx->linewidth($lw);
     $gfx->poly( @$points );
     $gfx->close;
     $gfx->fill if $fillcolor && !$strokecolor;

@@ -166,7 +166,6 @@ sub draw {
     return $gw * ( $ps->{diagrams}->{hspace} + $strings );
 }
 
-my $pdfapi = 'PDF::API2';
 my %grids;
 
 sub grid_xo {
@@ -183,26 +182,22 @@ sub grid_xo {
 	my $w = $gw * ($strings - 1);
 	my $h = $strings;
 
+	my $form = $ps->{pr}->{pdf}->xo_form;
+
+	# Bounding box must take linewidth into account.
+	my @bb = ( -$lw/2, -$lw/2, ($h-1)*$gw+$lw/2, $v*$gh+$lw/2 );
+	$form->bbox(@bb);
+
+	# Pseudo-object to access low level drawing routines.
+	my $dc = bless { pdfgfx => $form } =>
+	  App::Music::ChordPro::Output::PDF::Writer::;
+
 	# Draw the grid.
-	my $form = $pdfapi->new;
-	my $p = $form->page;
-	my $x = 0;
-	my $y = $v*$gh;
-	$p->bbox(-$lw/2, -$lw/2, ($h-1)*$gw+$lw/2, $v*$gh+$lw/2);
-	my $g = $p->gfx;
-	App::Music::ChordPro::Output::PDF::Writer::rectxy
-	    ( { pdfgfx => $g }, 0, 0, ($h-1)*$gw+$lw, $v*$gh+$lw, 0,
-	      'red' ) if 0;
-	App::Music::ChordPro::Output::PDF::Writer::hline
-	    ( { pdfgfx => $g }, $x, $y - $_*$gh, $w, $lw ) for 0..$v;
-	App::Music::ChordPro::Output::PDF::Writer::vline
-	    ( { pdfgfx => $g }, $x + $_*$gw, $y, $gh*$v, $lw ) for 0..$h-1;
+	$dc->rectxy( @bb, 0, 'red' ) if 0;
+	$dc->hline( 0, ($v-$_)*$gh, $w, $lw ) for 0..$v;
+	$dc->vline( $_*$gw, $v*$gh, $gh*$v, $lw ) for 0..$h-1;
 
-	# Still waste. but less...
-	$form = $form->stringify;
-	$form = $pdfapi->open_scalar($form);
-
-	$ps->{pr}->{pdf}->importPageIntoForm($form,1);
+	$form;
       };
 }
 
