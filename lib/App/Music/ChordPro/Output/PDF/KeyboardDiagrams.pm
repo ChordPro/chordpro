@@ -109,7 +109,7 @@ sub draw {
     $pr->{pdfgfx}->formimage( $xo, $x, $y-$v, 1 );
 
     # Get (or infer) keys.
-    my @keys = @{strings2keys($info)};
+    my @keys = @{getkeys($info)};
 
     my $kk = ( $keys % 7 == 0 )
       ? 12 * int( $keys / 7 )
@@ -128,6 +128,7 @@ sub draw {
     my $xr = $x + 4 * $kw / 3;
 
     for my $key ( @keys ) {
+	$key += $info->{root_ord};
 	$key += 12 if $key < 0;
 	$key -= 12 while $key >= $kk;
 	# Get octave and reduce.
@@ -230,7 +231,7 @@ sub grid_xo {
       };
 }
 
-sub strings2keys {
+sub getkeys {
     my ( $info ) = @_;
     return $info->{keys} if $info->{keys};
     return unless $info->{frets} && @{$info->{frets}};
@@ -243,9 +244,10 @@ sub strings2keys {
     for ( @{ $info->{frets} } ) {
 	$i++;
 	next if $_ < 0;
-	my $c = ( $tuning[$i] + $_ + $base ) % 12;
+	my $c = $tuning[$i] + $_ + $base;
 	$c += 12 if $c < $info->{root_ord};
-	$keys{ $c }++;
+	$c -= $info->{root_ord};
+	$keys{ $c % 12 }++;
     }
     return [ keys %keys ];
 }

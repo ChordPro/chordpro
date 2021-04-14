@@ -12,12 +12,23 @@ sub new {
 }
 
 # The vertical space the diagram requires.
-sub vsp {
+sub vsp0 {
     my ( $self, $elt, $ps ) = @_;
     $ps->{fonts}->{diagram}->{size} * 1.2
       + 0.40 * $ps->{diagrams}->{width}
-	+ $ps->{diagrams}->{vcells} * $ps->{diagrams}->{height}
-	  + $ps->{diagrams}->{vspace} * $ps->{diagrams}->{height};
+	+ $ps->{diagrams}->{vcells} * $ps->{diagrams}->{height};
+}
+
+# The advance height.
+sub vsp1 {
+    my ( $self, $elt, $ps ) = @_;
+    $ps->{diagrams}->{vspace} * $ps->{diagrams}->{height};
+}
+
+# The vertical space the diagram requires, including advance height.
+sub vsp {
+    my ( $self, $elt, $ps ) = @_;
+    $self->vsp0( $elt, $ps ) + $self->vsp1( $elt, $ps );
 }
 
 # The horizontal space the diagram requires.

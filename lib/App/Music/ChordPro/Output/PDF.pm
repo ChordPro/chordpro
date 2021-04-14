@@ -250,13 +250,16 @@ sub generate_song {
 
     # Diagrams drawer.
     my $dd;
+    my $dctl;
     if ( $::config->{diagrams}->{type} eq "keyboard" ) {
 	require App::Music::ChordPro::Output::PDF::KeyboardDiagrams;
 	$dd = App::Music::ChordPro::Output::PDF::KeyboardDiagrams->new;
+	$dctl = $ps->{kbdiagrams};
     }
     else {
 	require App::Music::ChordPro::Output::PDF::StringDiagrams;
 	$dd = App::Music::ChordPro::Output::PDF::StringDiagrams->new;
+	$dctl = $ps->{diagrams};
     }
 
     my $sb = $s->{body};
@@ -515,11 +518,11 @@ sub generate_song {
 
     my $chorddiagrams = sub {
 	my ( $chords, $show ) = @_;
-	return unless $ps->{diagrams}->{show};
+	return unless $dctl->{show};
 	my @chords;
 	$chords = $s->{chords}->{chords}
 	  if !defined($chords) && $s->{chords};
-	$show //= $ps->{diagrams}->{show};
+	$show //= $dctl->{show};
 	if ( $chords ) {
 	    foreach ( @$chords ) {
 		my $i = getchordinfo($_);
@@ -546,10 +549,9 @@ sub generate_song {
 	    my $c = int( ( @chords - 1) / $v ) + 1;
 	    # warn("XXX ", scalar(@chords), ", $c colums of $v max\n");
 	    my $column =
-	      ( $ps->{_marginright} - $ps->{_marginleft}
+	      $ps->{_marginright} - $ps->{_marginleft}
 		- ($c-1) * $dd->hsp(undef,$ps)
-		- $dd->hsp0(undef,$ps)
-		- $ps->{diagrams}->{width} * 0.4 );
+		- $dd->hsp0(undef,$ps);
 
 	    my $hsp = $dd->hsp(undef,$ps);
 	    my $x = $x + $column - $ps->{_indent};
@@ -609,7 +611,7 @@ sub generate_song {
 	    my $y = $ps->{marginbottom} + (int((@chords-1)/$h) + 1) * $vsp;
 	    $ps->{_bottommargin} = $y;
 
-	    $y -= $ps->{diagrams}->{vspace} * $ps->{diagrams}->{height};
+	    $y -= $dd->vsp1( undef, $ps ); # advance height
 
 	    while ( @chords ) {
 		my $x = $x - $ps->{_indent};
@@ -632,8 +634,7 @@ sub generate_song {
 	    my $hsp = $dd->hsp( undef, $ps );
 	    my $h = int( ( $ps->{__rightmargin}
 			   - $ps->{__leftmargin}
-			   + $ps->{diagrams}->{hspace}
-			   * $ps->{diagrams}->{width} ) / $hsp );
+			   + $dd->hsp1( undef, $ps ) ) / $hsp );
 	    while ( @chords ) {
 		$checkspace->($vsp);
 		my $x = $x - $ps->{_indent};
@@ -683,7 +684,7 @@ sub generate_song {
 
 	if ( $elt->{type} ne "set" && !$did++ ) {
 	    # Insert top/left/right/bottom chord diagrams.
- 	    $chorddiagrams->() unless $ps->{diagrams}->{show} eq "below";
+ 	    $chorddiagrams->() unless $dctl->{show} eq "below";
 	    showlayout($ps) if $ps->{showlayout} || $debug_spacing;
 	}
 
@@ -1096,7 +1097,7 @@ sub generate_song {
 		}
 		$$c = $elt->{value};
 		$ps = App::Music::ChordPro::Config::hmerge( $ps, $cc, "" );
-# 	    warn("YYY ", $ps->{diagrams}->{show} );
+# 	    warn("YYY ", $dctl->{show} );
 	    }
 	    next;
 	}
@@ -1110,7 +1111,7 @@ sub generate_song {
 	$prev = $elt;
     }
 
-    if ( $ps->{diagrams}->{show} eq "below" ) {
+    if ( $dctl->{show} eq "below" ) {
 	$chorddiagrams->( undef, "below");
     }
 
