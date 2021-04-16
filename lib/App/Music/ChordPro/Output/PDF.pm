@@ -101,6 +101,7 @@ sub generate_songbook {
 	my $t = $ctl->{label};
 	my $l = $ctl->{line};
 	my $start = $book_start_page - 1;
+	my $pgtpl = $ctl->{pageno};
 	my $song =
 	  { title     => $t,
 	    meta => { title => [ $t ] },
@@ -110,7 +111,7 @@ sub generate_songbook {
 			      context => "toc",
 			      title   => fmt_subst( $_->[-1], $l ),
 			      page    => $pr->{pdf}->openpage($_->[-1]->{meta}->{tocpage}+$start),
-			      pageno  => $_->[-1]->{meta}->{tocpage},
+			      pageno  => fmt_subst( $_->[-1], $pgtpl ),
 			    } } @$book,
 	    ],
 	  };

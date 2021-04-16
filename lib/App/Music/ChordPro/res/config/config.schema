@@ -329,6 +329,10 @@
 			"description": "Omit this toc.",
 			"type": "boolean",
 			"default": false
+		    },
+		    "pageno": {
+			"description": "The format for the page numbers in the toc.",
+			"type": "string"
 		    }
 		},
 		"additionalProperties": { "not": {} }

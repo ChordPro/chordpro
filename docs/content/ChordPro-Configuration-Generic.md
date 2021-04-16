@@ -178,16 +178,19 @@ the config file.
           { "fields"   : [ "songindex" ],
             "label"    : "Table of Contents",
             "line"     : "%{title}",
+            "pageno"   : "%{pageno},
             "omit"     : false,
           },
           { "fields"   : [ "sorttitle", "artist" ],
             "label"    : "Contents by Title",
             "line"     : "%{title}%{artist| - %{}}",
+            "pageno"   : "%{pageno},
             "omit"     : false,
           },
           { "fields"   : [ "artist", "sorttitle" ],
             "label"    : "Contents by Artist",
             "line"     : "%{artist|%{} - }%{title}",
+            "pageno"   : "%{pageno},
             "omit"     : true,
           },
       ],
@@ -208,6 +211,9 @@ produce the songs in songbook order.
 The label for this table.
 * `line`  
 The format of the table lines.  
+You can use all song metadata, see [here]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
+* `pageno`  
+The format for the page number.  
 You can use all song metadata, see [here]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
 * `omit`  
 If true, this table is omitted.
