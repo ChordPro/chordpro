@@ -93,7 +93,7 @@ sub draw {
     my $h = $strings;
 
     # Draw the grid.
-    my $xo = grid_xo($ps);
+    my $xo = $self->grid_xo($ps);
     $pr->{pdfgfx}->formimage( $xo, $x, $y-$v*$gh, 1 );
 
     # Bar detection.
@@ -177,10 +177,8 @@ sub draw {
     return $gw * ( $ps->{diagrams}->{hspace} + $strings );
 }
 
-my %grids;
-
 sub grid_xo {
-    my ( $ps ) = @_;
+    my ( $self, $ps ) = @_;
 
     my $gw = $ps->{diagrams}->{width};
     my $gh = $ps->{diagrams}->{height};
@@ -188,7 +186,7 @@ sub grid_xo {
     my $v = $ps->{diagrams}->{vcells};
     my $strings = App::Music::ChordPro::Chords::strings();
 
-    return $grids{$gw,$gh,$lw,$v,$strings} //= do
+    return $self->{grids}->{$gw,$gh,$lw,$v,$strings} //= do
       {
 	my $w = $gw * ($strings - 1);
 	my $h = $strings;

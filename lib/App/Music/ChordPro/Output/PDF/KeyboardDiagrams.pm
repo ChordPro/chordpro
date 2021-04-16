@@ -105,7 +105,7 @@ sub draw {
     $y -= $font->{size} * 1.2 + $lw;
 
     # Draw the grid.
-    my $xo = grid_xo( $ps, $lw );
+    my $xo = $self->grid_xo( $ps, $lw );
     $pr->{pdfgfx}->formimage( $xo, $x, $y-$v, 1 );
 
     # Get (or infer) keys.
@@ -189,10 +189,8 @@ sub draw {
     return $w + $ctl->{hspace};
 }
 
-my %grids;
-
 sub grid_xo {
-    my ( $ps, $lw ) = @_;
+    my ( $self, $ps, $lw ) = @_;
     my $ctl  = $ps->{kbdiagrams};
     my $kw   = $ctl->{width};
     my $kh   = $ctl->{height};
@@ -200,7 +198,7 @@ sub grid_xo {
     my $keys = $ctl->{keys};
     my $base = uc($ctl->{base}) eq "F" ? 3 : 0;
 
-    return $grids{$kw,$kh,$lw,$keys} //= do
+    return $self->{grids}->{$kw,$kh,$lw,$keys} //= do
       {
 	my $w = $kw * $keys;	# total width, excl linewidth
 	my $h = $kh;		# total height, excl linewidth
