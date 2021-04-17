@@ -162,8 +162,9 @@ sub draw {
 	$pos -= 3 if uc($ctl->{base}) ne 'C'; # must be 'F'
 
 	# Reduce to single octave and scale.
+	$pos += 7, $o-- while $pos < 0;
 	$pos %= 7;
-	$pos += 7 * $o;
+	$pos += 7 * $o if $o >= 1;
 
 	# Actual displacement.
 	my $pkw = $pos * $kw;
@@ -237,7 +238,7 @@ sub grid_xo {
 	$dc->rectxy( @bb, 0, 'yellow' ) if 0;
 	$dc->rectxy( 0, 0, $w, $kh, $lw, undef, 'black' );
 	$dc->vline( $_*$kw, $kh, $kh, $lw, 'black' ) for 1..$keys-1;
-	for my $i ( 1, 2, 4, 5, 6, 8, 9, 11, 12, 13, 15, 16, 18, 19, 20 ) {
+	for my $i ( 1, 2, 4, 5, 6, 8, 9, 11, 12, 13, 15, 16, 18, 19, 20, 22, 23 ) {
 	    next if $i < $base;
 	    last if $i > $keys + $base;
 	    my $x = ($i-$base-1)*$kw+2*$kw/3;
