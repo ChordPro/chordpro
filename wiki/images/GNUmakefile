@@ -60,6 +60,12 @@ ex_chords2.png : ex_chords2.cho
 	| ${CONVERT} -trim -alpha remove ${CVT_WBORDER} png:- png:- \
 	| ${CONVERT} ${CVT_BORDER} png:- $@
 
+ex_kbdiagram.png : ex_kbdiagram.cho
+	${CHORDPRO} --def diagrams.type=keyboard $< --output=t.pdf
+	${GSPNG} -r200 -sOutputFile=- t.pdf \
+	| ${CONVERT} -trim -alpha remove ${CVT_WBORDER} png:- png:- \
+	| ${CONVERT} ${CVT_BORDER} png:- $@
+
 ex_define.png : ex_define.cho
 	${CHORDPRO} $< --output=t.pdf
 	${GSPNG} -r200 -sOutputFile=- t.pdf \

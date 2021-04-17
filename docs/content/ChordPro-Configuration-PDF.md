@@ -211,6 +211,51 @@ the song.
 
 {{< showpage "style_modern3" >}}
 
+## Keyboard diagrams
+
+Keyboard diagrams are added to the song to show the chords used in the
+song. By default the diagrams are at the end of the song but it is
+also possible to have them at the bottom, or in a side column on the first page of the
+song. See [Chords diagrams in a side column]({{< relref "#chords-diagrams-in-a-side-column" >}}) below.
+
+By default ChordPro adds diagrams for string instruments. To add
+keyboard diagrams set `diagrams.type` to `"keyboard"`, see
+[Configuration file contents - Generic]({{< relref
+"chordpro-configuration-generic/#printing-chord-diagrams" >}}).
+
+A keyboard diagram consists of a number of keyboard keys, typically
+spanning one or two octaves. The width of a white key is specified by
+`width`, and the height of the keyboard diagram is specified by `height`.  
+The number of white keys can be specified with `keys` and should have
+one of the values 7, 10, 14, 17, or 21.  
+Diagrams can start with the key `C` or `F`. This can be specified by
+`base`.  
+
+The horizontal distance between diagrams is `hspace` times the width.  
+The vertical distance between lines of diagrams is `vspace` times the height.
+
+`linewidth` is the thickness of the diagram lines as a fraction of the key width.
+
+Finally, the colour to represent keys that are part of the chord
+(pressed) can be specified with `pressed`. It takes the name of a
+colour, or a hex format `#RRGGBB`.
+
+        "kbdiagrams" : {
+            "show"     :  "bottom",   // or "top", or "right", or "below"
+            "width"    :   4,	// of a single key
+            "height"   :  20,	// of the diagram
+            "keys"     :  14,	// or 7, 10, 14, 17, 21
+            "base"     :  "C",	// or "F"
+            "linewidth" : 0.1,	// fraction of a single key width
+            "pressed"  :  "grey",	// colour of a pressed key
+            "hspace"   :  3.95,	// ??
+            "vspace"   :  0.3,	// fraction of height
+        },
+
+With the above settings, keyboard diagrams will look like:
+
+![]({{< asset "images/ex_kbdiagram.png" >}})
+
 ## Even/odd page printing
 
 Pages can be printed neutrally (all pages the same) or with differing left and right pages.  

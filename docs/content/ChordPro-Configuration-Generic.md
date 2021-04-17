@@ -154,6 +154,7 @@ definition, e.g.
 
 By default, ChordPro will include diagrams for all known chords that have been used in a song.
 
+    // "type": either "strings" (default) or "keyboard"
     // "auto": automatically add unknown chords as empty diagrams.
     // "show": prints the chords used in the song.
     //         "all": all chords used.
@@ -161,6 +162,7 @@ By default, ChordPro will include diagrams for all known chords that have been u
     //         "none": no song chords will ne printed.
     // "sorted": order the chords by key.
     "diagrams" : {
+	    "type"     : "strings",
         "auto"     :  false,
         "show"     :  "all",
         "sorted"   :  false,
