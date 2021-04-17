@@ -254,12 +254,12 @@ sub generate_song {
     my $dctl;
     if ( $::config->{diagrams}->{type} eq "keyboard" ) {
 	require App::Music::ChordPro::Output::PDF::KeyboardDiagrams;
-	$dd = App::Music::ChordPro::Output::PDF::KeyboardDiagrams->new;
+	$dd = App::Music::ChordPro::Output::PDF::KeyboardDiagrams->new($ps);
 	$dctl = $ps->{kbdiagrams};
     }
     else {
 	require App::Music::ChordPro::Output::PDF::StringDiagrams;
-	$dd = App::Music::ChordPro::Output::PDF::StringDiagrams->new;
+	$dd = App::Music::ChordPro::Output::PDF::StringDiagrams->new($ps);
 	$dctl = $ps->{diagrams};
     }
 

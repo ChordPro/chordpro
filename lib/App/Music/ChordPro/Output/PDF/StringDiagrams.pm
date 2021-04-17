@@ -7,8 +7,17 @@ package App::Music::ChordPro::Output::PDF::StringDiagrams;
 use App::Music::ChordPro::Chords;
 
 sub new {
-    my ( $pkg, %init ) = @_;
-    bless { %init || () } => $pkg;
+    my ( $pkg, $ps ) = @_;
+
+    my $ctl = $ps->{kbdiagrams};
+
+    my $show = $ctl->{show};
+    unless ( $show =~ /^(?:top|bottom|right|below)$/i ) {
+	die("pdf.diagrams.show is \"$show\", must be one of ".
+	    "\"top\", \"bottom\", \"right\", or \"below\"\n");
+    }
+
+    bless {} => $pkg;
 }
 
 # The vertical space the diagram requires.

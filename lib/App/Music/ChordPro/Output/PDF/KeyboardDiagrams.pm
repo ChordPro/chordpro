@@ -7,8 +7,29 @@ package App::Music::ChordPro::Output::PDF::KeyboardDiagrams;
 use App::Music::ChordPro::Chords;
 
 sub new {
-    my ( $pkg, %init ) = @_;
-    bless { %init || () } => $pkg;
+    my ( $pkg, $ps ) = @_;
+
+    my $ctl = $ps->{kbdiagrams};
+    my $kw  = $ctl->{width};
+    my $kh  = $ctl->{height};
+
+    my $keys = $ctl->{keys};
+    unless ( $keys =~ /^(?:7|10|14|17|21)$/ ) {
+	die("pdf.kbdiagrams.keys is $keys, must be one of 7, 10, 14, 17, or 21\n");
+    }
+
+    my $base = $ctl->{base};
+    unless ( $base =~ /^(?:C|F)$/i ) {
+	die("pdf.kbdiagrams.base is \"$base\", must be \"C\" or \"F\"\n");
+    }
+
+    my $show = $ctl->{show};
+    unless ( $show =~ /^(?:top|bottom|right|below)$/i ) {
+	die("pdf.kbdiagrams.show is \"$show\", must be one of ".
+	    "\"top\", \"bottom\", \"right\", or \"below\"\n");
+    }
+
+    bless {} => $pkg;
 }
 
 # The vertical space the diagram requires.
@@ -86,7 +107,6 @@ sub draw {
     my $ctl = $ps->{kbdiagrams};
     my $kw = $ctl->{width};
     my $kh = $ctl->{height};
-    my $dot = 0.70 * $kw;
     my $lw  = ($ctl->{linewidth} || 0.10) * $kw;
     my $keys = $ctl->{keys};
     my $col = $ctl->{pressed} // "red";
