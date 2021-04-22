@@ -840,7 +840,7 @@ sub directive {
 	    elsif ( $key eq "capo" ) {
 		do_warn("Multiple capo settings may yield surprising results.")
 		  if $song->{meta}->{capo};
-		if ( $options->{decapo} ) {
+		if ( $decapo ) {
 		    $xpose += $val;
 		    my $xp = $xpose;
 		    $xp += $options->{transpose} if $options->{transpose};

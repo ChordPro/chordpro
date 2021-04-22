@@ -10,6 +10,7 @@
     - Experimental support for keyboard diagrams (WIP).
     - !BugFixes
     - Fix crash when abc section is the very first thing in a song.
+    - Fix decapo setting from config file (issue #140).
 
 0.978	2021-03-05
 
