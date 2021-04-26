@@ -18,6 +18,8 @@ use App::Music::ChordPro::Utils;
 use File::LoadLines;
 use File::Spec;
 use JSON::PP ();
+use Scalar::Util qw(reftype);
+use List::Util qw(any);
 
 =head1 NAME
 
@@ -277,19 +279,17 @@ sub configurator {
     if ( $options->{decapo} ) {
 	$cfg->{settings}->{decapo} = $options->{decapo};
     }
+
+    # For convenience...
+    bless( $cfg, __PACKAGE__ );;
+
     return $cfg if $options->{'cfg-print'};
 
     # Backend specific configs.
     $backend_configurator->($cfg) if $backend_configurator;
 
-    # For convenience...
-    bless( $cfg, __PACKAGE__ );;
-
     # Locking the hash is mainly for development.
-    if ( $] >= 5.018000 ) {
-	require Hash::Util;
-	Hash::Util::lock_hash_recurse($cfg);
-    }
+    $cfg->lock;
 
     if ( $options->{verbose} > 1 ) {
 	my $cp = App::Music::ChordPro::Chords::get_parser() // "";
@@ -453,19 +453,28 @@ sub get_legacy {
 }
 
 sub config_final {
+    my ( $delta ) = @_;
     $options->{'cfg-print'} = 1;
     my $cfg = configurator($options);
+
+    if ( $delta ) {
+	my $pp = JSON::PP->new->relaxed;
+	my $def = $pp->decode( default_config() );
+	$cfg->reduce($def);
+    }
+    $cfg->unlock;
     $cfg->{tuning} = delete $cfg->{_tuning};
     $cfg->{chords} = delete $cfg->{_chords};
     delete $cfg->{chords};
     delete $cfg->{_src};
+    $cfg->lock;
 
     if ( $ENV{CHORDPRO_CFGPROPS} ) {
 	cfg2props($cfg);
     }
     else {
 	my $pp = JSON::PP->new->canonical->indent(4)->pretty;
-	$pp->encode($cfg);
+	$pp->encode({%$cfg});
     }
 }
 
@@ -516,14 +525,48 @@ sub cfg2props {
     return $ret;
 }
 
-sub augment : method {
-    my ( $self, $hash, $path ) = @_;
-    $path ||= "";
+# Locking/unlocking. Locking the hash is mainly for development, to
+# trap accidental modifications.
 
-    if ( $] >= 5.018000 ) {
-	require Hash::Util;
-	Hash::Util::unlock_hash_recurse($self);
-    }
+sub lock: method {
+    my ( $self ) = @_;
+    return $self unless $] >= 5.018000;
+    require Hash::Util;
+    Hash::Util::lock_hash_recurse($self);
+}
+
+sub unlock : method {
+    my ( $self ) = @_;
+    return $self unless $] >= 5.018000;
+    require Hash::Util;
+    Hash::Util::unlock_hash_recurse($self);
+}
+
+sub is_locked : method {
+    return 0 unless $] >= 5.018000;
+    my ( $self ) = @_;
+    require Hash::Util;
+    Hash::Util::hashref_locked($self);
+}
+
+# Augment / Reduce.
+
+sub augment : method {
+    my ( $self, $hash ) = @_;
+
+    my $locked = $self->is_locked;
+    $self->unlock if $locked;
+
+    $self->_augment( $hash, "" );
+
+    $self->lock if $locked;
+
+    $self;
+}
+
+
+sub _augment {
+    my ( $self, $hash, $path ) = @_;
 
     for my $key ( keys(%$hash) ) {
 
@@ -538,7 +581,7 @@ sub augment : method {
 	    if ( ref($self->{$key}) eq 'HASH' ) {
 
 		# Hashes. Recurse.
-		augment( $self->{$key}, $hash->{$key}, "$path$key." );
+		_augment( $self->{$key}, $hash->{$key}, "$path$key." );
 	    }
 	    elsif ( ref($self->{$key}) eq 'ARRAY' ) {
 
@@ -589,11 +632,156 @@ sub augment : method {
 	}
     }
 
-    if ( $] >= 5.018000 ) {
-	require Hash::Util;
-	Hash::Util::lock_hash_recurse($self);
-    }
     $self;
+}
+
+use constant DEBUG => 0;
+
+sub reduce : method {
+    my ( $self, $hash ) = @_;
+
+    my $locked = $self->is_locked;
+
+    warn("O: ", ::qd($hash,1), "\n") if DEBUG;
+    warn("N: ", ::qd($self,1), "\n") if DEBUG;
+    my $state = _reduce( $self, $hash, "" );
+
+    $self->lock if $locked;
+
+    warn("== ", ::qd($self,1), "\n") if DEBUG;
+    return $self;
+}
+
+sub _ref {
+    reftype($_[0]) // ref($_[0]);
+}
+
+sub _reduce {
+
+    my ( $self, $orig, $path ) = @_;
+    my $state;
+
+    if ( _ref($self) eq 'HASH' && _ref($orig) eq 'HASH' ) {
+
+	warn("D: ", qd($self,1), "\n")  if DEBUG && !%$orig;
+	return 'D' unless %$orig;
+
+	my %hh = map { $_ => 1 } keys(%$self), keys(%$orig);
+	for my $key ( sort keys(%hh) ) {
+
+	    warn("Config error: unknown item $path$key\n")
+	      unless exists $self->{$key}
+		|| $key =~ /^_/;
+
+	    unless ( defined $orig->{$key} ) {
+		warn("D: $path$key\n") if DEBUG;
+		delete $self->{$key};
+		$state //= 'M';
+		next;
+	    }
+
+	    # Hash -> Hash.
+	    if (     _ref($orig->{$key}) eq 'HASH'
+		 and _ref($self->{$key}) eq 'HASH'
+		 or
+		     _ref($orig->{$key}) eq 'ARRAY'
+		 and _ref($self->{$key}) eq 'ARRAY' ) {
+		# Recurse.
+		my $m = _reduce( $self->{$key}, $orig->{$key}, "$path$key." );
+		delete $self->{$key} if $m eq 'D' || $m eq 'I';
+		$state //= 'M' if $m ne 'I';
+	    }
+
+	    elsif ( ($self->{$key}//'') eq ($orig->{$key}//'') ) {
+		warn("I: $path$key\n") if DEBUG;
+		delete $self->{$key};
+	    }
+	    else {
+		# Overwrite.
+		warn("M: $path$key => $self->{$key}\n") if DEBUG;
+		$state //= 'M';
+	    }
+	}
+	return $state // 'I';
+    }
+
+    if ( _ref($self) eq 'ARRAY' && _ref($orig) eq 'ARRAY' ) {
+
+	# Arrays.
+	if ( any { _ref($_) } @$self ) {
+	    # Complex arrays. Recurse.
+	    for ( my $key = 0; $key < @$self; $key++ ) {
+		my $m = _reduce( $self->[$key], $orig->[$key], "$path$key." );
+		#delete $self->{$key} if $m eq 'D'; # TODO
+		$state //= 'M' if $m ne 'I';
+	    }
+	    return $state // 'I';
+	}
+
+	# Simple arrays (only scalar values).
+	if ( my $dd = @$self - @$orig ) {
+	    $path =~ s/\.$//;
+	    if ( $dd > 0 ) {
+		# New is larger. Check for prepend/append.
+		# Deal with either one, not both. Maybe later.
+		my $t;
+		for ( my $ix = 0; $ix < @$orig; $ix++ ) {
+		    next if $orig->[$ix] eq $self->[$ix];
+		    $t++;
+		    last;
+		}
+		unless ( $t ) {
+		    warn("M: $path append @{$self}[-$dd..-1]\n") if DEBUG;
+		    splice( @$self, 0, $dd, "append" );
+		    return 'M';
+		}
+		undef $t;
+		for ( my $ix = $dd; $ix < @$self; $ix++ ) {
+		    next if $orig->[$ix-$dd] eq $self->[$ix];
+		    $t++;
+		    last;
+		}
+		unless ( $t ) {
+		    warn("M: $path prepend @{$self}[0..$dd-1]\n") if DEBUG;
+		    splice( @$self, $dd );
+		    unshift( @$self, "prepend" );
+		    return 'M';
+		}
+		warn("M: $path => @$self\n") if DEBUG;
+		$state = 'M';
+	    }
+	    else {
+		warn("M: $path => @$self\n") if DEBUG;
+		$state = 'M';
+	    }
+	    return $state // 'I';
+	}
+
+	# Equal length arrays with scalar values.
+	my $t;
+	for ( my $ix = 0; $ix < @$orig; $ix++ ) {
+	    next if $orig->[$ix] eq $self->[$ix];
+	    warn("M: $path$ix => $self->[$ix]\n") if DEBUG;
+	    $t++;
+	    last;
+	}
+	if ( $t ) {
+	    warn("M: $path\n") if DEBUG;
+	    return 'M';
+	}
+	warn("I: $path\[]\n") if DEBUG;
+	return 'I';
+    }
+
+    # Two scalar values.
+    $path =~ s/\.$//;
+    if ( $self eq $orig ) {
+	warn("I: $path\n") if DEBUG;
+	return 'I';
+    }
+
+    warn("M $path $self\n") if DEBUG;
+    return 'M';
 }
 
 sub hmerge($$;$) {

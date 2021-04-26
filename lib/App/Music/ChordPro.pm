@@ -647,6 +647,7 @@ sub app_setup {
     my $version = 0;            # handled locally
     my $defcfg = 0;		# handled locally
     my $fincfg = 0;		# handled locally
+    my $deltacfg = 0;		# handled locally
     my $dump_chords = 0;	# handled locally
 
     # Package name.
@@ -795,6 +796,7 @@ sub app_setup {
 	  'define=s%',
 	  'print-default-config' => \$defcfg,
 	  'print-final-config'   => \$fincfg,
+	  'print-delta-config'   => \$deltacfg,
 
           ### Standard options ###
 
@@ -885,11 +887,11 @@ sub app_setup {
     $::options = $options;
     # warn(::dump($options), "\n") if $options->{debug};
 
-    if ( $defcfg || $fincfg ) {
+    if ( $defcfg || $fincfg || $deltacfg ) {
 	print App::Music::ChordPro::Config::config_default()
 	  if $defcfg;
-	print App::Music::ChordPro::Config::config_final()
-	  if $fincfg;
+	print App::Music::ChordPro::Config::config_final($deltacfg)
+	  if $fincfg || $deltacfg;
 	exit 0;
     }
 
@@ -1052,6 +1054,7 @@ Configuration options:
     --define=XXX=YYY	Sets config item XXX to value YYY
     --print-default-config   Prints the default config and exits
     --print-final-config   Prints the resultant config and exits
+    --print-delta-config   Prints the diffs for the resultant config and exits
 Missing default configuration files are silently ignored.
 
 Miscellaneous options:
