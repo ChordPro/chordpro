@@ -36,7 +36,7 @@
       // Chords under the lyrics.
       "chords-under" : false,
       // Transcoding.
-      "transcode" : null,
+      "transcode" : "",
       // Always decapoize.
       "decapo" : false,
       // Chords parsing strategy.
@@ -72,7 +72,7 @@
     // Instrument settings. These are usually set by a separate
     // config file.
     //
-    "instrument" : null,
+    "instrument" : "",
 
     // Note (chord root) names.
     // Strings and tuning.
@@ -255,7 +255,7 @@
 	  // Alignment for the labels. Default is left.
 	  "align" : "left",
 	  // Alternatively, render labels as comments.
-	  "comment" : null	// "comment", "comment_italic" or "comment_box",
+	  "comment" : ""	// "comment", "comment_italic" or "comment_box",
       },
 
       // Alternative songlines with chords in a side column.
@@ -342,8 +342,8 @@
 	  // By default, a page has:
 	  "default" : {
 	      // No title/subtitle.
-	      "title"     : null,
-	      "subtitle"  : null,
+	      "title"     : [ "", "", "" ],
+	      "subtitle"  : [ "", "", "" ],
 	      // Footer is title -- page number.
 	      "footer"    : [ "%{title}", "", "%{page}" ],
 	  },
@@ -359,7 +359,7 @@
 	  "first" : {
 	      // It has title and subtitle, like normal 'first' pages.
 	      // But no footer.
-	      "footer"    : null,
+	      "footer"    : [ "", "", "" ],
 	  },
       },
 
@@ -380,7 +380,7 @@
       // Relative filenames are looked up in the fontdir.
       // "fontdir" : [ "/usr/share/fonts/liberation", "/home/me/fonts" ],
 
-      "fontdir" : null,
+      "fontdir" : [],
       "fontconfig" : {
 	  // alternatives: regular r normal <empty>
 	  // alternatives: bold b strong

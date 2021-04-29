@@ -85,8 +85,8 @@
 	    // By default, a page has:
 	    "default" : {
 	        // No title/subtitle.
-	    	"title"     : null,
-	    	"subtitle"  : null,
+	    	"title"     : [ "", "", "" ],
+	    	"subtitle"  : [ "", "", "" ],
 		// Footer is title -- page number.
 	    	"footer"    : [ "%{title}", "", "%{page}" ],
 	    },
@@ -102,7 +102,7 @@
 	    "first" : {
 	    	// It has title and subtitle, like normal 'first' pages.
 		// But no footer.
-	    	"footer"    : null,
+	    	"footer"    : [ "", "", "" ],
 	    },
 	},
 
