@@ -188,7 +188,7 @@ sub configurator {
     }
     $cfg = hmerge( $cfg, $ccfg );
 
-    if ( $cfg->{settings}->{transcode} //= $options->{transcode} ) {
+    if ( $cfg->{settings}->{transcode} ||= $options->{transcode} ) {
 	my $xc = $cfg->{settings}->{transcode};
 	# Load the appropriate notes config, but retain the current parser.
 	unless ( App::Music::ChordPro::Chords::Parser->have_parser($xc) ) {
@@ -313,14 +313,30 @@ sub get_config {
     warn("Reading: $file\n") if $verbose > 1;
     $file = expand_tilde($file);
 
-    if ( open( my $fd, "<:raw", $file ) ) {
-	my $pp = JSON::PP->new->relaxed;
-	my $new = $pp->decode( loadlines( $fd, { split => 0 } ) );
-	close($fd);
-	return $new;
+    if ( $file =~ /\.json$/i ) {
+	if ( open( my $fd, "<:raw", $file ) ) {
+	    my $pp = JSON::PP->new->relaxed;
+	    my $new = $pp->decode( loadlines( $fd, { split => 0 } ) );
+	    close($fd);
+	    return $new;
+	}
+	else {
+	    die("Cannot open config $file [$!]\n");
+	}
+    }
+    elsif ( $file =~ /\.prp$/i ) {
+	if ( -e -f -r $file ) {
+	    require Data::Properties;
+	    my $cfg = new Data::Properties;
+	    $cfg->parse_file($file);
+	    return $cfg->data;
+	}
+	else {
+	    die("Cannot open config $file [$!]\n");
+	}
     }
     else {
-	die("Cannot open config $file [$!]\n");
+	die("Unrecognized config type: $file\n");
     }
 }
 
@@ -464,6 +480,7 @@ sub config_final {
     }
     $cfg->unlock;
     $cfg->{tuning} = delete $cfg->{_tuning};
+    delete($cfg->{tuning}) if $delta && !defined($cfg->{tuning});
     $cfg->{chords} = delete $cfg->{_chords};
     delete $cfg->{chords};
     delete $cfg->{_src};
@@ -635,20 +652,20 @@ sub _augment {
     $self;
 }
 
-use constant DEBUG => 0;
+use constant DEBUG => 1;
 
 sub reduce : method {
     my ( $self, $hash ) = @_;
 
     my $locked = $self->is_locked;
 
-    warn("O: ", ::qd($hash,1), "\n") if DEBUG;
-    warn("N: ", ::qd($self,1), "\n") if DEBUG;
+    warn("O: ", qd($hash,1), "\n") if DEBUG;
+    warn("N: ", qd($self,1), "\n") if DEBUG;
     my $state = _reduce( $self, $hash, "" );
 
     $self->lock if $locked;
 
-    warn("== ", ::qd($self,1), "\n") if DEBUG;
+    warn("== ", qd($self,1), "\n") if DEBUG;
     return $self;
 }
 
@@ -693,6 +710,17 @@ sub _reduce {
 	    }
 
 	    elsif ( ($self->{$key}//'') eq ($orig->{$key}//'') ) {
+		warn("I: $path$key\n") if DEBUG;
+		delete $self->{$key};
+	    }
+	    elsif (     !defined($self->{$key})
+		    and _ref($orig->{$key}) eq 'ARRAY'
+		    and !@{$orig->{$key}}
+		    or
+		        !defined($orig->{$key})
+		    and _ref($self->{$key}) eq 'ARRAY'
+		    and !@{$self->{$key}} ) {
+		# Properties input [] yields undef.
 		warn("I: $path$key\n") if DEBUG;
 		delete $self->{$key};
 	    }
@@ -895,6 +923,54 @@ sub clone($) {
     return $copy;
 }
 
+## Data::Properties compatible API.
+#
+# Note: Lookup always takes the context into account.
+# Note: Always signals undefined values.
+
+my $prp_context = "";
+
+sub get_property : method {
+    my $p = shift;
+    for ( split( /\./,
+		 $prp_context eq ""
+		 ? $_[0]
+		 : "$prp_context.$_[0]" ) ) {
+	if ( /^\d+$/ ) {
+	    die("No config $_[0]\n") unless _ref($p) eq 'ARRAY';
+	    $p = $p->[$_];
+	}
+	else {
+	    die("No config $_[0]\n") unless _ref($p) eq 'HASH';
+	    $p = $p->{$_};
+	}
+    }
+    $p //= $_[1];
+    die("No config $_[0]\n") unless defined $p;
+    $p;
+}
+
+*gps = \&get_property;
+
+sub set_property : method {
+    ...;
+}
+
+sub set_context : method {
+    $prp_context = $_[1] // "";
+}
+
+sub get_context : method {
+    $prp_context;
+}
+
+use base qw(Exporter);
+our @EXPORT = qw( _c );
+
+sub _c {
+    $::config->gps(@_);
+}
+
 # Get the raw contents of the builtin (default) config.
 sub default_config() {
     return <<'End_Of_Config';
@@ -936,7 +1012,7 @@ sub default_config() {
       // Chords under the lyrics.
       "chords-under" : false,
       // Transcoding.
-      "transcode" : null,
+      "transcode" : "",
       // Always decapoize.
       "decapo" : false,
       // Chords parsing strategy.
@@ -972,7 +1048,7 @@ sub default_config() {
     // Instrument settings. These are usually set by a separate
     // config file.
     //
-    "instrument" : null,
+    "instrument" : "",
 
     // Note (chord root) names.
     // Strings and tuning.
@@ -1155,7 +1231,7 @@ sub default_config() {
 	  // Alignment for the labels. Default is left.
 	  "align" : "left",
 	  // Alternatively, render labels as comments.
-	  "comment" : null	// "comment", "comment_italic" or "comment_box",
+	  "comment" : ""	// "comment", "comment_italic" or "comment_box",
       },
 
       // Alternative songlines with chords in a side column.
@@ -1242,8 +1318,8 @@ sub default_config() {
 	  // By default, a page has:
 	  "default" : {
 	      // No title/subtitle.
-	      "title"     : null,
-	      "subtitle"  : null,
+	      "title"     : [ "", "", "" ],
+	      "subtitle"  : [ "", "", "" ],
 	      // Footer is title -- page number.
 	      "footer"    : [ "%{title}", "", "%{page}" ],
 	  },
@@ -1259,7 +1335,7 @@ sub default_config() {
 	  "first" : {
 	      // It has title and subtitle, like normal 'first' pages.
 	      // But no footer.
-	      "footer"    : null,
+	      "footer"    : [ "", "", "" ],
 	  },
       },
 
@@ -1280,7 +1356,7 @@ sub default_config() {
       // Relative filenames are looked up in the fontdir.
       // "fontdir" : [ "/usr/share/fonts/liberation", "/home/me/fonts" ],
 
-      "fontdir" : null,
+      "fontdir" : [],
       "fontconfig" : {
 	  // alternatives: regular r normal <empty>
 	  // alternatives: bold b strong
@@ -1457,6 +1533,26 @@ sub default_config() {
 }
 // End of config.
 End_Of_Config
+}
+
+# For debugging messages.
+sub qd {
+    my ( $val, $compact ) = @_;
+    use Data::Dumper qw();
+    local $Data::Dumper::Sortkeys  = 1;
+    local $Data::Dumper::Indent    = 1;
+    local $Data::Dumper::Quotekeys = 0;
+    local $Data::Dumper::Deparse   = 1;
+    local $Data::Dumper::Terse     = 1;
+    local $Data::Dumper::Trailingcomma = !$compact;
+    local $Data::Dumper::Useperl = 1;
+    local $Data::Dumper::Useqq     = 0; # I want unicode visible
+    my $x = Data::Dumper::Dumper($val);
+    if ( $compact ) {
+        $x =~ s/^bless\( (.*), '[\w:]+' \)$/$1/s;
+        $x =~ s/\s+/ /gs;
+    }
+    defined wantarray ? $x : warn($x,"\n");
 }
 
 unless ( caller ) {

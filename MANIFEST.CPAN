@@ -1,4 +1,5 @@
 CPAN/App/Packager.pm
+CPAN/Data/Properties.pm
 CPAN/File/LoadLines.pm
 CPAN/Font/TTF/AATKern.pm
 CPAN/Font/TTF/AATutils.pm
