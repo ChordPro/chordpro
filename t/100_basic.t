@@ -3,10 +3,12 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 2;
 
+use App::Music::ChordPro::Testing;
 use App::Music::ChordPro::Config;
 use App::Music::ChordPro::Songbook;
+
+plan tests => 2;
 
 our $config;
 

@@ -115,10 +115,14 @@ sub parse_song {
 
     local $config = dclone($config);
 
+    # Load song-specific config, if any.
     if ( $diag->{file} ) {
-	( my $cf = $diag->{file} ) =~ s/\.\w+$/.json/;
-	if ( -s $cf ) {
+	for ( "prp", "json" ) {
+	    ( my $cf = $diag->{file} ) =~ s/\.\w+$/.$_/;
+	    next unless -s $cf;
+	    warn("Config[song]: $cf\n") if $options->{verbose};
 	    $config->augment(App::Music::ChordPro::Config::get_config($cf));
+	    last;
 	}
     }
 
@@ -131,6 +135,7 @@ sub parse_song {
       ( source => { file => $diag->{file}, line => 1 + $$linecnt },
 	system => $::config->{notes}->{system},
 	structure => "linear",
+	config => $config,
       );
     $self->{song} = $song;
 

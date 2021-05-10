@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More;
+use App::Music::ChordPro::Testing;
 
 if ( -d "t" ) {
     chdir "t";

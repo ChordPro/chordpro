@@ -4,9 +4,10 @@ use strict;
 use warnings;
 use utf8;
 
-use Test::More tests => 3;
-
+use App::Music::ChordPro::Testing;
 use App::Music::ChordPro::Config;
+
+plan tests => 3;
 
 sub Config::new {
     my ( $pkg, $init ) = @_;

@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More;
+use App::Music::ChordPro::Testing;
 
 use App::Packager ( ':name', 'App::Music::ChordPro' );
 use App::Music::ChordPro::Config;

@@ -3,10 +3,12 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 4;
 
+use App::Music::ChordPro::Testing;
 use App::Music::ChordPro::Config;
 use App::Music::ChordPro::Songbook;
+
+plan tests => 4;
 
 our $config = App::Music::ChordPro::Config::configurator;
 $config->{settings}->{memorize} = 1;

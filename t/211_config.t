@@ -4,8 +4,10 @@ use strict;
 use warnings;
 use utf8;
 
-use Test::More tests => 12;
+use App::Music::ChordPro::Testing;
 use App::Music::ChordPro::Config;
+
+plan tests => 12;
 
 our $config = bless
   {

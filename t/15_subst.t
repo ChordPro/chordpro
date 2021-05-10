@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use utf8;
 
-use Test::More;
+use App::Music::ChordPro::Testing;
 my $tests = 0;
 
 use_ok( qw(App::Music::ChordPro::Output::Common) );

@@ -6,7 +6,7 @@
     - Experimental: Allow delegates to specify image type.
     - Allow variable expansion on all input lines.
     - Experimental support for preprocessing.
-    - Experimental support for song-local configs (WIP).
+    - Experimental support for song-specific configs (WIP).
     - Experimental support for keyboard diagrams (WIP).
     - Add --print-delta-config option.
     - !BugFixes

@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More;
+use App::Music::ChordPro::Testing;
 use Encode qw(encode from_to);
 
 use App::Music::ChordPro::Config;

@@ -1,7 +1,7 @@
 #! perl
 
 use strict;
-use Test::More;
+use App::Music::ChordPro::Testing;
 use App::Packager qw( :name App::Music::ChordPro );
 
 -d "t" && chdir "t";

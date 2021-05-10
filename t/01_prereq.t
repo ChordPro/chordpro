@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More;
+use App::Music::ChordPro::Testing;
 
 my $pdfapi = "PDF::API2";
 my $pdfapiv = "2.035";
