@@ -5,13 +5,10 @@ use warnings;
 use utf8;
 
 use App::Music::ChordPro::Testing;
-use App::Packager qw( :name App::Music::ChordPro );
-use App::Music::ChordPro::Config;
 use App::Music::ChordPro::Songbook;
 
 plan tests => 3;
 
-our $config = App::Music::ChordPro::Config::configurator;
 my $s = App::Music::ChordPro::Songbook->new;
 
 my $data = <<EOD;

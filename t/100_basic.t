@@ -10,11 +10,6 @@ use App::Music::ChordPro::Songbook;
 
 plan tests => 2;
 
-our $config;
-
-eval {
-  $config = App::Music::ChordPro::Config::configurator;
-};
 !$config && diag("$@");
 ok($config, "Configuration set up");
 

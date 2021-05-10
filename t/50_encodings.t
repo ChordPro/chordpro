@@ -3,13 +3,12 @@
 use strict;
 use warnings;
 use utf8;
-use App::Music::ChordPro::Testing;
-use Encode qw(encode from_to);
 
-use App::Music::ChordPro::Config;
+use App::Music::ChordPro::Testing;
 use App::Music::ChordPro::Songbook;
 
-our $config = App::Music::ChordPro::Config::configurator;
+use Encode qw( encode from_to );
+
 # Prevent a dummy {body} for chord grids.
 $config->{diagrams}->{show} = 0;
 my $s = App::Music::ChordPro::Songbook->new;
@@ -46,7 +45,6 @@ my $song = {
 
 is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );
 
-chdir("t") if -d "t";
 mkdir("out") unless -d "out";
 
 $data = encode("UTF-8", $data);

@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use utf8;
 
-use App::Packager ( ':name', 'App::Music::ChordPro' );
 use App::Music::ChordPro::Testing;
 use App::Music::ChordPro::Songbook;
 use App::Music::ChordPro::Output::Common;
@@ -15,7 +14,6 @@ plan tests => 4;
 # defined. The source system must be last, so it is current and used
 # to parse the the input data.
 
-our $config = App::Music::ChordPro::Config::configurator;
 ok( $config, "got config" );
 
 my $s = App::Music::ChordPro::Songbook->new;

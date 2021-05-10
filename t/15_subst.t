@@ -12,8 +12,6 @@ $tests++;
 
 use App::Music::ChordPro::Config;
 
-our $config = App::Music::ChordPro::Config::configurator;
-
 $::config->{metadata}->{separator} = ":";
 our $options = { verbose => 0, debug => 0 };
 

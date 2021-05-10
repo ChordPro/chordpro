@@ -5,12 +5,10 @@ use warnings;
 use utf8;
 
 use App::Music::ChordPro::Testing;
-use App::Music::ChordPro::Config;
 use App::Music::ChordPro::Songbook;
 
 plan tests => 1;
 
-our $config = App::Music::ChordPro::Config::configurator;
 # Prevent a dummy {body} for chord grids.
 $config->{diagrams}->{show} = 0;
 

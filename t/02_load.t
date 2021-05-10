@@ -2,7 +2,8 @@
 
 use strict;
 use warnings;
-use App::Music::ChordPro::Testing;
+
+use Test::More;
 
 if ( -d "t" ) {
     chdir "t";
@@ -17,6 +18,7 @@ my $test;
 
 ++$test; use_ok("App::Music::ChordPro");
 ++$test; use_ok("App::Music::ChordPro::Config");
+++$test; use_ok("App::Music::ChordPro::Testing");
 ++$test; use_ok("App::Music::ChordPro::Songbook");
 ++$test; use_ok("App::Music::ChordPro::Output::Debug");
 ++$test; use_ok("App::Music::ChordPro::Output::Text");

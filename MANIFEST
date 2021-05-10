@@ -158,7 +158,6 @@ t/60_transpose.cho
 t/60_transpose.t
 t/basic01.cho
 t/basic02.cho
-t/differ.pl
 t/ref/20_crd_1.crd
 t/ref/20_crd_2.crd
 t/ref/20_crd_3.crd
