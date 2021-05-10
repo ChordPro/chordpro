@@ -230,7 +230,7 @@ sub generate_song {
     my ( $s, $opts ) = @_;
 
     return 0 unless $s->{body};	# empty song
-    local $config = dclone($config);
+    local $config = dclone( $s->{config} // $config );
 
     $source = $s->{source};
     $assets = $s->{assets} || {};
@@ -2066,7 +2066,7 @@ sub configurator {
     }
 
     # Add font dirs.
-    for my $fontdir ( @{$pdf->{fontdir}}, getresource("fonts"), $ENV{FONTDIR} ) {
+    for my $fontdir ( @{$pdf->{fontdir}}, ::rsc_or_file("fonts/"), $ENV{FONTDIR} ) {
 	next unless $fontdir;
 	if ( -d $fontdir ) {
 	    $pdfapi->can("addFontDirs")->($fontdir);
