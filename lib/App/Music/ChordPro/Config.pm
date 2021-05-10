@@ -953,7 +953,7 @@ sub get_property : method {
 *gps = \&get_property;
 
 sub set_property : method {
-    ...;
+    die("...");			# 5.10 cannot handle ... yet
 }
 
 sub set_context : method {
