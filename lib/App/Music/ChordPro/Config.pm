@@ -652,7 +652,7 @@ sub _augment {
     $self;
 }
 
-use constant DEBUG => 1;
+use constant DEBUG => 0;
 
 sub reduce : method {
     my ( $self, $hash ) = @_;
