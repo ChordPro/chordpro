@@ -5,6 +5,7 @@
 	"colorspec": {
 	    "description": "Colour specification.",
 	    "type": "string",
+	    "format": "colorpicker",
 	    "pattern": "^(#[0-9A-Fa-f]{6}|[A-Za-z]+)$"
 	},
 	"fontspec": {
@@ -114,7 +115,7 @@
 		},
 
 		"notenames": {
-		    "description": "Allow parsing if note names.",
+		    "description": "Allow parsing of note names.",
 		    "type": "boolean",
 		    "default": false
 		},
@@ -329,6 +330,10 @@
 			"description": "Omit this toc.",
 			"type": "boolean",
 			"default": false
+		    },
+		    "pageno": {
+			"description": "The format for the page numbers in the toc.",
+			"type": "string"
 		    }
 		},
 		"additionalProperties": { "not": {} }
