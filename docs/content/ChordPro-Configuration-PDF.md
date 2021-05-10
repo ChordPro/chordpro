@@ -77,7 +77,7 @@ e.g. [start_of_verse]({{< relref "Directives-env_verse" >}}).
             // Alignment for the labels. Default is left.
             "align" : "left",
             // Alternatively, render labels as comments.
-            "comment" : null	// "comment", "comment_italic" or "comment_box",
+            "comment" : ""	// "comment", "comment_italic" or "comment_box",
         },
 
 When `comment` is set to one of the suported comment types, the label

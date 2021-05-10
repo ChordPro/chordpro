@@ -35,7 +35,7 @@ These settings control global behaviour of the ChordPro program and can be chang
         // Memorize chords.
         "memorize" : false,
         // Transcoding.
-        "transcode" : null,
+        "transcode" : "",
         // Always decapoize.
         "decapo" : false,
         // Chords parsing strategy.

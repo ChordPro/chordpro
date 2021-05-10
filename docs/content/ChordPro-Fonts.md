@@ -419,7 +419,7 @@ update.
 ````
 // Explicitly disable our fontconfig, so fonts will be looked up
 // by the system.
-"fontconfig" : null,
+"fontconfig" : [],
 
 // "fonts" associates output elements to font families as defined in
 // "fontconfig" above.
