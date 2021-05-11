@@ -3,6 +3,7 @@
     - !ChordPro functionality
     - (musejazz) Change font to MuseJazzText.otf as downloadable from GitHub.
     - Improve error messages for font files not found.
+    - Default CHORDPRO_LIB to ~/.config/chordpro, if present.
     - Experimental: Allow delegates to specify image type.
     - Allow variable expansion on all input lines.
     - Experimental support for preprocessing.

@@ -681,6 +681,7 @@ sub app_setup {
         if ( -d File::Spec->catfile( $ENV{HOME}, ".config" ) ) {
             $configs{userconfig} =
               File::Spec->catfile( $ENV{HOME}, ".config", $app_lc, "$app_lc.json" );
+	    $ENV{CHORDPRO_LIB} ||= File::Spec->catfile( $ENV{HOME}, ".config", $app_lc);
         }
         else {
             $configs{userconfig} =
