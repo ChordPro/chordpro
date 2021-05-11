@@ -2066,7 +2066,10 @@ sub configurator {
     }
 
     # Add font dirs.
-    for my $fontdir ( @{$pdf->{fontdir}}, ::rsc_or_file("fonts/"), $ENV{FONTDIR} ) {
+    my @d = ( @{$pdf->{fontdir}}, ::rsc_or_file("fonts/"), $ENV{FONTDIR} );
+    # Avoid rsc result if dummy.
+    splice( @d, -2, 1 ) if $d[-2] eq "fonts/";
+    for my $fontdir ( @d ) {
 	next unless $fontdir;
 	if ( -d $fontdir ) {
 	    $pdfapi->can("addFontDirs")->($fontdir);
