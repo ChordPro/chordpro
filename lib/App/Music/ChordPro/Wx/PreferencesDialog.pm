@@ -38,12 +38,15 @@ sub get_configfile {
     $self->GetParent->{prefs_configfile} || ""
 }
 
-sub __set_properties {
-    my ( $self ) = @_;
-    $self->SUPER::__set_properties;
+# As of wxGlade 1.0 __set_properties and __do_layout are gone.
+sub new {
+    my $self = shift->SUPER::new(@_);
+
     my $parent = $self->GetParent;
     $self->{t_configfiledialog}->SetValue($parent->{prefs_configfile})
       if $parent->{prefs_configfile};
+    $self->{t_tmpldialog}->SetValue($parent->{prefs_tmplfile})
+      if $parent->{prefs_tmplfile};
     $self->{t_pdfviewer}->SetValue($parent->{prefs_pdfviewer})
       if $parent->{prefs_pdfviewer};
     $self->{cb_skipstdcfg}->SetValue($parent->{prefs_skipstdcfg});
@@ -108,17 +111,13 @@ sub __set_properties {
 	  Wx::TextCtrl->new($self, wxID_ANY, "", wxDefaultPosition,
 			    wxDefaultSize, 0);
     }
-}
-
-sub __do_layout {
-    my ( $self ) = @_;
-    $self->SUPER::__do_layout;
 
     if ( $is_macos ) {
 	$self->{sz_configfile}->Hide($self->{b_configfiledialog});
 	$self->{sz_configfile}->Layout();
 
     }
+    $self;
 }
 
 sub _enablecustom {
@@ -201,6 +200,22 @@ sub OnConfigFileDialog {
     $fd->Destroy;
 }
 
+sub OnTmplFileDialog {
+    my ( $self, $event ) = @_;
+    my $fd = Wx::FileDialog->new
+      ($self, _T("Choose template for new songs"),
+       "", $self->GetParent->{prefs_tmplfile} || "",
+       "ChordPro files (*.cho,*.crd,*.chopro,*.chord,*.chordpro,*.pro)|*.cho;*.crd;*.chopro;*.chord;*.chordpro;*.pro|All files|*.*",
+       0|wxFD_OPEN|wxFD_FILE_MUST_EXIST,
+       wxDefaultPosition);
+    my $ret = $fd->ShowModal;
+    if ( $ret == wxID_OK ) {
+	my $file = $fd->GetPath;
+	$self->{t_tmpldialog}->SetValue($file);
+    }
+    $fd->Destroy;
+}
+
 #               C      D      E  F      G      A        B
 my @xpmap = qw( 0 1  1 2 3  3 4  5 6  6 7 8  8 9 10 10 11 );
 my @sfmap = qw( 0 7 -5 2 9 -3 4 -1 6 -6 1 8 -4 3 10 -2  5 );
@@ -237,6 +252,9 @@ sub OnAccept {
       $self->{cb_skipstdcfg}->IsChecked ? 1 : 0;
 
     $self->GetParent->{prefs_cfgpreset} = \@p;
+
+    $self->GetParent->{prefs_tmplfile} =
+	$self->{t_tmpldialog}->GetValue;
 
     my $n = $self->{ch_notation}->GetSelection;
     if ( $n > 0 ) {
