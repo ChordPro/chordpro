@@ -71,6 +71,7 @@ sub init {
        pdfviewer   => "",
        editfont	   => 0,
        editsize	   => FONTSIZE,
+       tmplfile    => "",
       };
 
     if ( $^O =~ /^mswin/i ) {
@@ -224,10 +225,23 @@ sub openfile {
 sub newfile {
     my ( $self ) = @_;
     undef $self->{_currentfile};
-    $self->{t_source}->SetValue( <<EOD );
-{title: New Song}
 
-EOD
+    my $file = $self->{prefs_tmplfile};
+    my $content = "{title: New Song}\n\n";
+    if ( $file ) {
+	if ( -f -r $file ) {
+	    if ( $self->{t_source}->LoadFile($file) ) {
+		$content = "";
+	    }
+	    else {
+		$content = "# Error opening template $file: $!\n\n" . $content;
+	    }
+	}
+	else {
+	    $content = "# Error opening template $file: $!\n\n" . $content;
+	}
+     }
+    $self->{t_source}->SetValue($content) unless $content eq "";
     $self->{t_source}->SetModified(0);
     Wx::LogStatus("New file");
     $self->{prefs_xpose} = 0;
