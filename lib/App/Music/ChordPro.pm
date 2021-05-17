@@ -63,6 +63,7 @@ L<https://www.chordpro.org>.
 use strict;
 use warnings;
 use Carp;
+use Text::ParseWords ();
 
 ################ The Process ################
 
@@ -167,7 +168,22 @@ sub chordpro {
 	goto WRITE_OUTPUT;
     }
 
-    $s->parse_file($_) foreach @::ARGV;
+    # Check for metadata in filelist. Actually, this works on the
+    # command line as well, but don't tell anybody.
+    foreach my $file ( @ARGV ) {
+	my $opts;
+	if ( $file =~ /(^|\s)--meta/ ) {
+	    # Break into words.
+	    my @w = Text::ParseWords::shellwords($file);
+	    my $meta = {};
+	    die("Error in filelist: $file\n")
+	      unless Getopt::Long::GetOptionsFromArray( \@w, 'meta=s%' => $meta )
+	      && @w == 1;
+	    $file = $w[0];
+	    $opts = { meta => $meta };
+	}
+	$s->parse_file( $file, $opts );
+    }
 
     if ( $options->{'dump-chords'} ) {
 	my $d = App::Music::ChordPro::Song->new;

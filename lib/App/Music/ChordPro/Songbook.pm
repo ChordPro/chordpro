@@ -68,6 +68,7 @@ sub parse_file {
     my ( $self, $filename, $opts, $legacy ) = @_;
     $opts //= {};
     $legacy //= delete $opts->{legacy};
+    my $meta = delete $opts->{meta};
 
     # Loadlines sets $opts->{_filesource}.
     my $lines = loadlines( $filename, $opts );
@@ -84,6 +85,8 @@ sub parse_file {
     $diag->{format} = $opts->{diagformat} // $config->{diagnostics}->{format};
     $diag->{file}   = $opts->{_filesource};
     $lineinfo = $config->{settings}->{lineinfo};
+
+    # Used by tests.
     for ( "transpose", "no-substitute", "no-transpose" ) {
 	next unless exists $opts->{$_};
 	$options->{$_} = $opts->{$_};
@@ -91,7 +94,7 @@ sub parse_file {
 
     my $linecnt = 0;
     while ( @$lines ) {
-	my $song = $self->parse_song( $lines, \$linecnt, $legacy );
+	my $song = $self->parse_song( $lines, \$linecnt, $meta, $legacy );
 #	if ( exists($self->{songs}->[-1]->{body}) ) {
 	    $song->{meta}->{songindex} = 1 + @{ $self->{songs} };
 	    push( @{ $self->{songs} }, $song );
@@ -111,8 +114,7 @@ sub parse_legacy_file {
 my $song;			# current song
 
 sub parse_song {
-    my ( $self, $lines, $linecnt, $legacy ) = @_;
-
+    my ( $self, $lines, $linecnt, $meta, $legacy ) = @_;
     local $config = dclone($config);
 
     # Load song-specific config, if any.
@@ -136,6 +138,7 @@ sub parse_song {
 	system => $::config->{notes}->{system},
 	structure => "linear",
 	config => $config,
+	$meta ? ( meta => $meta ) : (),
       );
     $self->{song} = $song;
 
@@ -855,6 +858,7 @@ sub directive {
 		    }
 		    return 1;
 		}
+		undef $val if $val == 0;
 	    }
 	    elsif ( $key eq "duration" && $val ) {
 		$val = duration($val);
@@ -867,7 +871,7 @@ sub directive {
 		return;
 	    }
 
-	    push( @{ $song->{meta}->{$key} }, $val );
+	    push( @{ $song->{meta}->{$key} }, $val ) if defined $val;
 	}
 	else {
 	    do_warn("Incomplete meta directive: $d\n");

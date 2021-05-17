@@ -9,6 +9,7 @@
     - Experimental support for preprocessing.
     - Experimental support for song-specific configs (WIP).
     - Experimental support for keyboard diagrams (WIP).
+    - Experimental support for metadata in filelist.
     - Add --print-delta-config option.
     - !BugFixes
     - Fix crash when abc section is the very first thing in a song.
