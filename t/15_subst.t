@@ -23,6 +23,8 @@ my $s = { page => 24,
 		    h => ["Z"],
 		    multi => [ "Alpha", "Beta" ],
 		    head => ["yes"],
+		    true => 1,
+		    false => 0,
 		  },
 	};
 
@@ -58,6 +60,8 @@ ab%{head}def		abyesdef
 ab%{head}def%{head}xy	abyesdefyesxy
 %{head}def		yesdef
 %{h}def			Zdef
+%{true}			1
+%{false}		0
 
 # Subtitute the value
 X%{head}Y		XyesY
@@ -77,6 +81,8 @@ X%{}Y			X%{}Y
 # Subtitute the 'false' part
 X%{head=no|foo|bar}Y	XbarY
 X%{hexd|foo|bar}Y	XbarY
+X%{head|0|foo}Y		X0Y
+X%{hexd|foo|0}Y		X0Y
 X%{hexd=yes|foo|bar}Y	XbarY
 X%{hexd=no|foo|bar}Y	XbarY
 X%{hexd=|foo|bar}Y	XfooY
