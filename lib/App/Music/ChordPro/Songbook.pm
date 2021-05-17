@@ -619,7 +619,6 @@ sub directive {
     my ( $self, $d ) = @_;
     my ( $dir, $orig ) = dir_split($d);
     my $arg = fmt_subst( $self->{song}, $orig );
-
     # Context flags.
 
     if    ( $dir eq "soc" ) { $dir = "start_of_chorus" }
@@ -934,52 +933,52 @@ sub global_directive {
 	return 1;
     }
 
-    if ( $d =~ /^transpose[: ]+([-+]?\d+)\s*$/ ) {
+    if ( $dir eq "transpose" ) {
 	return if $legacy;
 	$propstack{transpose} //= [];
-	push( @{ $propstack{transpose} }, $xpose );
-	my %a = ( type => "control",
-		  name => "transpose",
-		  previous => $xpose,
-		);
-	my $m = $song->{meta};
-	if ( $m->{key} ) {
-	    $m->{key_actual} =
-	      [ App::Music::ChordPro::Chords::transpose( $m->{key}->[-1],
-							 $xpose+$1 ) ];
-	    $m->{key_from} =
-	      [ App::Music::ChordPro::Chords::transpose( $m->{key}->[-1],
-							 $xpose ) ];
-	}
-	$xpose += $1;
-	$self->add( %a, value => $xpose ) if $no_transpose;
-	return 1;
-    }
-    if ( $dir =~ /^transpose\s*$/ ) {
-	return if $legacy;
-	$propstack{transpose} //= [];
-	my %a = ( type => "control",
-		  name => "transpose",
-		  previous => $xpose,
-		);
-	my $m = $song->{meta};
-	if ( $m->{key} ) {
-	    $m->{key_from} =
-	      [ App::Music::ChordPro::Chords::transpose( $m->{key}->[-1],
-							 $xpose ) ];
-	}
-	if ( @{ $propstack{transpose} } ) {
-	    $xpose = pop( @{ $propstack{transpose} } );
+
+	if ( $arg =~ /^([-+]?\d+)\s*$/ ) {
+	    push( @{ $propstack{transpose} }, $xpose );
+	    my %a = ( type => "control",
+		      name => "transpose",
+		      previous => $xpose,
+		    );
+	    my $m = $song->{meta};
+	    if ( $m->{key} ) {
+		$m->{key_actual} =
+		  [ App::Music::ChordPro::Chords::transpose( $m->{key}->[-1],
+							     $xpose+$1 ) ];
+		$m->{key_from} =
+		  [ App::Music::ChordPro::Chords::transpose( $m->{key}->[-1],
+							     $xpose ) ];
+	    }
+	    $xpose += $1;
+	    $self->add( %a, value => $xpose ) if $no_transpose;
 	}
 	else {
-	    $xpose = 0;
+	    my %a = ( type => "control",
+		      name => "transpose",
+		      previous => $xpose,
+		    );
+	    my $m = $song->{meta};
+	    if ( $m->{key} ) {
+		$m->{key_from} =
+		  [ App::Music::ChordPro::Chords::transpose( $m->{key}->[-1],
+							     $xpose ) ];
+	    }
+	    if ( @{ $propstack{transpose} } ) {
+		$xpose = pop( @{ $propstack{transpose} } );
+	    }
+	    else {
+		$xpose = 0;
+	    }
+	    if ( $m->{key} ) {
+		$m->{key_actual} =
+		  [ App::Music::ChordPro::Chords::transpose( $m->{key}->[-1],
+							     $xpose ) ];
+	    }
+	    $self->add( %a, value => $xpose ) if $no_transpose;
 	}
-	if ( $m->{key} ) {
-	    $m->{key_actual} =
-	      [ App::Music::ChordPro::Chords::transpose( $m->{key}->[-1],
-							 $xpose ) ];
-	}
-	$self->add( %a, value => $xpose ) if $no_transpose;
 	return 1;
     }
 
