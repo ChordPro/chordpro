@@ -359,9 +359,18 @@ sub make_outlines {
 	# Seems not to matter whether we re-use the root or create new.
 	$ol_root //= $pdf->outlines;
 
-	my $outline = $ol_root->outline;
-	$outline->title( $ctl->{label} );
-	$outline->closed if $ctl->{collapse};
+	my $outline;
+
+	# Skip level for a single outline.
+	if ( @{ $self->{ps}->{outlines} } == 1 ) {
+	    $outline = $ol_root;
+	    $outline->closed if $ctl->{collapse}; # TODO?
+	}
+	else {
+	    $outline = $ol_root->outline;
+	    $outline->title( $ctl->{label} );
+	    $outline->closed if $ctl->{collapse};
+	}
 
 	my %lh;			# letter hierarchy
 	for ( @$book ) {

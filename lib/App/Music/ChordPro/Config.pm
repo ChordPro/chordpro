@@ -1454,7 +1454,7 @@ sub default_config() {
 
       // Bookmarks (PDF outlines).
       // fields:   primary and (optional) secondary fields.
-      // label:    outline label
+      // label:    outline label (omitted if there's only one outline)
       // line:     text of the outline element
       // collapse: initial display is collapsed
       // letter:   sublevel with first letters if more
