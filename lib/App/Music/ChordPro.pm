@@ -180,7 +180,7 @@ sub chordpro {
 	      unless Getopt::Long::GetOptionsFromArray( \@w, 'meta=s%' => $meta )
 	      && @w == 1;
 	    $file = $w[0];
-	    $opts = { meta => $meta };
+	    $opts = { meta => { map { $_, [ $meta->{$_} ] } keys %$meta } };
 	}
 	$s->parse_file( $file, $opts );
     }
