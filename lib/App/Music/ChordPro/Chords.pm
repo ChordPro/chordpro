@@ -269,7 +269,7 @@ sub get_parser {
 
 sub _check_chord {
     my ( $base, $frets, $fingers ) = @_;
-    if ( @$frets != strings() ) {
+    if ( $frets && @$frets != strings() ) {
 	return scalar(@$frets) . " strings";
     }
     if ( $fingers && @$fingers && @$fingers != strings() ) {
@@ -322,7 +322,7 @@ sub add_config_chord {
 	    %$info,
 	    %$def,
 	    base    => $base,
-	    frets   => [ @$frets ],
+	    frets   => [ $frets && @$frets ? @$frets : () ],
 	    fingers => [ $fingers && @$fingers ? @$fingers : () ] };
 	push( @chordnames, $name );
 	# Also store the chord info under a neutral name so it can be
