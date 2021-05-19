@@ -2065,21 +2065,6 @@ sub configurator {
 	      App::Music::ChordPro::Chords::strings();
     }
 
-    # Add font dirs.
-    my @d = ( @{$pdf->{fontdir}}, ::rsc_or_file("fonts/"), $ENV{FONTDIR} );
-    # Avoid rsc result if dummy.
-    splice( @d, -2, 1 ) if $d[-2] eq "fonts/";
-    for my $fontdir ( @d ) {
-	next unless $fontdir;
-	if ( -d $fontdir ) {
-	    $pdfapi->can("addFontDirs")->($fontdir);
-	}
-	else {
-	    warn("PDF: Ignoring fontdir $fontdir [$!]\n");
-	    undef $fontdir;
-	}
-    }
-
     # Map papersize name to [ width, height ].
     unless ( eval { $pdf->{papersize}->[0] } ) {
 	eval "require ${pdfapi}::Resource::PaperSizes";
@@ -2148,22 +2133,34 @@ sub tpt {
     my $pr = $ps->{pr};
     my $font = $ps->{fonts}->{$type};
 
-    $pr->setfont($font);
+    my $havefont;
     my $rm = $ps->{papersize}->[0] - $ps->{_rightmargin};
 
     # Left part. Easiest.
-    $pr->text( fmt_subst( $s, $fmt[0] ), $x, $y ) if $fmt[0];
+    if ( $fmt[0] ) {
+	my $t = fmt_subst( $s, $fmt[0] );
+	if ( $t ne "" ) {
+	    $pr->setfont($font) unless $havefont++;
+	    $pr->text( $t, $x, $y );
+	}
+    }
 
     # Center part.
     if ( $fmt[1] ) {
 	my $t = fmt_subst( $s, $fmt[1] );
-	$pr->text( $t, ($rm+$x-$pr->strwidth($t))/2, $y );
+	if ( $t ne "" ) {
+	    $pr->setfont($font) unless $havefont++;
+	    $pr->text( $t, ($rm+$x-$pr->strwidth($t))/2, $y );
+	}
     }
 
     # Right part.
     if ( $fmt[2] ) {
 	my $t = fmt_subst( $s, $fmt[2] );
-	$pr->text( $t, $rm-$pr->strwidth($t), $y );
+	if ( $t ne "" ) {
+	    $pr->setfont($font) unless $havefont++;
+	    $pr->text( $t, $rm-$pr->strwidth($t), $y );
+	}
     }
 
     # Return updated baseline.

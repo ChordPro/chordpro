@@ -22,6 +22,7 @@ my %fontcache;			# speeds up 2 seconds per song
 sub new {
     my ( $pkg, $ps, $pdfapi ) = @_;
     my $self = bless { ps => $ps }, $pkg;
+    $self->{pdfapi} = $pdfapi;
     $self->{pdf} = $pdfapi->new;
     $self->{pdf}->{forcecompress} = 0 if $regtest;
     $self->{pdf}->mediabox( $ps->{papersize}->[0],
@@ -432,8 +433,20 @@ sub init_fonts {
 
     my $fc = Text::Layout::FontConfig->new;
 
-    if ( $ps->{fontdir} ) {
-	$fc->add_fontdirs( @{ $ps->{fontdir} } );
+    # Add font dirs.
+    my @d = ( @{$ps->{fontdir}}, ::rsc_or_file("fonts/"), $ENV{FONTDIR} );
+    # Avoid rsc result if dummy.
+    splice( @d, -2, 1 ) if $d[-2] eq "fonts/";
+    for my $fontdir ( @d ) {
+	next unless $fontdir;
+	if ( -d $fontdir ) {
+	    $self->{pdfapi}->can("addFontDirs")->($fontdir);
+	    $fc->add_fontdirs($fontdir);
+	}
+	else {
+	    warn("PDF: Ignoring fontdir $fontdir [$!]\n");
+	    undef $fontdir;
+	}
     }
 
     foreach my $ff ( keys( %{ $ps->{fontconfig} } ) ) {
