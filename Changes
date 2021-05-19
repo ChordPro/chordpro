@@ -12,6 +12,7 @@
     - Experimental support for metadata in filelist.
     - Add --print-delta-config option.
     - Suppress outline title if there is only one outline.
+    - Allow meta data definitions in config.
     - !BugFixes
     - Fix crash when abc section is the very first thing in a song.
     - Fix decapo setting from config file (issue #140).

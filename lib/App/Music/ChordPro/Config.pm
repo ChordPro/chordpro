@@ -1037,6 +1037,9 @@ sub default_config() {
       "strict" : true,
       "separator" : "; ",
     },
+    // User defined (added) meta data,
+    // This is explicitly NOT intended for the metadata items above.
+    "meta" : {},
 
     // Dates.
     "dates" : {

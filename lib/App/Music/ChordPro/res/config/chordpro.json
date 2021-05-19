@@ -61,6 +61,9 @@
       "strict" : true,
       "separator" : "; ",
     },
+    // User defined (added) meta data,
+    // This is explicitly NOT intended for the metadata items above.
+    "meta" : {},
 
     // Dates.
     "dates" : {
@@ -478,7 +481,7 @@
 
       // Bookmarks (PDF outlines).
       // fields:   primary and (optional) secondary fields.
-      // label:    outline label
+      // label:    outline label (omitted if there's only one outline)
       // line:     text of the outline element
       // collapse: initial display is collapsed
       // letter:   sublevel with first letters if more
