@@ -172,15 +172,20 @@ sub chordpro {
     # command line as well, but don't tell anybody.
     foreach my $file ( @ARGV ) {
 	my $opts;
-	if ( $file =~ /(^|\s)--meta/ ) {
+	if ( $file =~ /(^|\s)--(?:meta|config)\b/ ) {
 	    # Break into words.
 	    my @w = Text::ParseWords::shellwords($file);
-	    my $meta = {};
+	    my %meta;
+	    my @cfg;
 	    die("Error in filelist: $file\n")
-	      unless Getopt::Long::GetOptionsFromArray( \@w, 'meta=s%' => $meta )
+	      unless Getopt::Long::GetOptionsFromArray
+	      ( \@w, 'config=s@' => \@cfg, 'meta=s%' => \%meta )
 	      && @w == 1;
 	    $file = $w[0];
-	    $opts = { meta => { map { $_, [ $meta->{$_} ] } keys %$meta } };
+	    $opts = { meta => { map { $_, [ $meta{$_} ] } keys %meta } };
+	    if ( @cfg ) {
+		$opts->{meta}->{__config} = \@cfg;
+	    }
 	}
 	$s->parse_file( $file, $opts );
     }
