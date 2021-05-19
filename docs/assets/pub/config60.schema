@@ -398,6 +398,13 @@
 	    "default": ""
 	},
 
+	"meta": {
+	    "description": "User defined metadaya items.",
+            "additionalProperties": {
+	        "type" : "object"
+	    }
+	},
+
 	"metadata": {
 	    "description": "The list of metadata items.",
             "additionalProperties": false,
