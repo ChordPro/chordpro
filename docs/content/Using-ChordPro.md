@@ -137,8 +137,29 @@ exception of empty lines and lines that start with a `#` which are ignored.
 
 This option may be specified multiple times.
 
-Song file names listed on the command line are processed I<after> the
+Song file names listed on the command line are processed _after_ the
 files from the filelist arguments.
+
+You can add metadata in the filelist with `--meta` (see [below]({{< relref "#meta" >}})). This is useful to create song variants:
+````
+MySong.cho
+MySong.cho  --meta voice=bass
+MySong.cho  --meta voice=alto
+````
+
+You can override a default song-specific config with `--config`, e.g.
+````
+MySong.cho  --config=ukulele.json
+MySong.cho  --meta voice=bass
+MySong.cho  --meta voice=alto --config=ukulele.json
+````
+
+Important notice: Filelist lines that have `--meta` and/or `--config`
+**must** quote whitespace, e.g.
+
+````
+"My New Song.cho" --meta voice=soprano
+````
 
 ### lyrics-only
 

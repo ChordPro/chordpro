@@ -28,6 +28,13 @@ In the examples below the symbol `~` denotes the user's home directory. Windows 
 
 Instead of a project specific configuration file you can specify arbitrary configuration files.
 
+5. A song specific configuration file is read if it exists. The name
+   of the configuration file is the same as the song file name, with
+   the extension replaced by `prp` or `json` (in that order).  
+   Note that the scope of the song specific configuration file is the
+   song only. Every song will start with an initial config that results from
+   steps 1 through 4.
+
 * In the GUI, select `Preferences...` from the `Edit` menu.  
 Using the configuration dropdown list, choose `Custom`.  
 Click `...` for a file dialog to choose the desired configuration file.
