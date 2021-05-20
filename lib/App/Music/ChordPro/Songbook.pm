@@ -65,9 +65,8 @@ my $lineinfo;			# keep lineinfo
 sub ::break() {}
 
 sub parse_file {
-    my ( $self, $filename, $opts, $legacy ) = @_;
+    my ( $self, $filename, $opts ) = @_;
     $opts //= {};
-    $legacy //= delete $opts->{legacy};
     my $meta = delete $opts->{meta};
 
     # Loadlines sets $opts->{_filesource}.
@@ -94,7 +93,7 @@ sub parse_file {
 
     my $linecnt = 0;
     while ( @$lines ) {
-	my $song = $self->parse_song( $lines, \$linecnt, $meta, $legacy );
+	my $song = $self->parse_song( $lines, \$linecnt, $meta );
 #	if ( exists($self->{songs}->[-1]->{body}) ) {
 	    $song->{meta}->{songindex} = 1 + @{ $self->{songs} };
 	    push( @{ $self->{songs} }, $song );
@@ -106,15 +105,10 @@ sub parse_file {
     return 1;
 }
 
-sub parse_legacy_file {
-    my ( $self, $filename, $opts ) = @_;
-    $self->parse_file( $filename, $opts, 1 );
-}
-
 my $song;			# current song
 
 sub parse_song {
-    my ( $self, $lines, $linecnt, $meta, $legacy ) = @_;
+    my ( $self, $lines, $linecnt, $meta ) = @_;
     local $config = dclone($config);
 
     # Load song-specific config, if any.
@@ -298,10 +292,7 @@ sub parse_song {
 	if ( /^\s*\{(.*)\}\s*$/ ) {
 	    $self->add( type => "ignore",
 			text => $_ )
-	      unless
-	    $legacy
-	      ? $self->global_directive( $1, 1 )
-	      : $self->directive( $1 );
+	      unless $self->directive($1);
 	    next;
 	}
 
@@ -904,7 +895,7 @@ sub duration {
 my %propstack;
 
 sub global_directive {
-    my ($self, $d, $legacy ) = @_;
+    my ($self, $d ) = @_;
     my ( $dir, $orig ) = dir_split($d);
     my $arg = fmt_subst( $self->{song}, $orig );
 
@@ -938,7 +929,6 @@ sub global_directive {
     }
 
     if ( $dir eq "transpose" ) {
-	return if $legacy;
 	$propstack{transpose} //= [];
 
 	if ( $arg =~ /^([-+]?\d+)\s*$/ ) {
@@ -988,7 +978,6 @@ sub global_directive {
 
     # More private hacks.
     if ( $d =~ /^([-+])([-\w.]+)$/i ) {
-	return if $legacy;
 	if ( $2 eq "dumpmeta" ) {
 	    warn(::dump($song->{meta}));
 	}
@@ -1000,7 +989,6 @@ sub global_directive {
     }
 
     if ( $dir =~ /^\+([-\w.]+(?:\.[<>])?)$/ ) {
-	return if $legacy;
 	$self->add( type => "set",
 		    name => $1,
 		    value => $arg,
@@ -1050,8 +1038,6 @@ sub global_directive {
 	my $item = $1;
 	my $prop = $2;
 	my $value = $arg;
-	return if $legacy
-	  && ! ( $item =~ /^(text|chord|tab)$/ && $prop =~ /^(font|size)$/ );
 
 	$prop = "color" if $prop eq "colour";
 	my $name = "$item-$prop";
@@ -1106,7 +1092,6 @@ sub global_directive {
 
     if ( $dir =~ /^define|chord$/ ) {
 	my $show = $dir eq "chord";
-	return if $legacy && $show;
 
 	# Split the arguments and keep a copy for error messages.
 	my @a = split( /[: ]+/, $arg );

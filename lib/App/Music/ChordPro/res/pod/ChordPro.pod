@@ -310,10 +310,6 @@ paper size, assuming that all printers use the same size.
 
 Don't use the system specific config file, even if it exists.
 
-=item B<--nolegacyconfig>
-
-Don't use a legacy config file, even if it exists.
-
 =item B<--userconfig=>I<CFG>
 
 Designates the config file for the user.

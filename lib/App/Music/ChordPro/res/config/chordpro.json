@@ -10,7 +10,7 @@
     // "include" : [ "modern1", "lib/mycfg.json" ],
     "include" : [ "guitar" ],
 
-    // General settings, to be changed by legacy configs and
+    // General settings, to be changed by configs and
     // command line.
     "settings" : {
       // Add line info for backend diagnostics.

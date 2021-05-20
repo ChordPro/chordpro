@@ -83,23 +83,11 @@ sub configurator {
 	$cfg = get_config( $fn );
 	push( @cfg, prep_configs( $cfg, $fn ) );
     };
-    my $add_legacy = sub {
-	my $fn = shift;
-	warn("Warning: Legacy config $fn ignored (####TODO####)\n");
-	return;
-	# Legacy parser may need a ::config...
-	local $::config = $cfg;
-	my $cfg = get_legacy( $fn );
-	push( @cfg, prep_configs( $cfg, $fn ) );
-    };
 
-    foreach my $c ( qw( sysconfig legacyconfig userconfig config ) ) {
+    foreach my $c ( qw( sysconfig userconfig config ) ) {
 	next if $options->{"no$c"};
 	if ( ref($options->{$c}) eq 'ARRAY' ) {
 	    $add_config->($_) foreach @{ $options->{$c} };
-	}
-	elsif ( $c eq "legacyconfig" ) {
-	    $add_legacy->( $options->{$c} );
 	}
 	else {
 	    warn("Adding config for $c\n") if $verbose;
@@ -404,68 +392,6 @@ sub process_config {
 	}
 	$cfg->{_chords} = delete $cfg->{chords};
     }
-}
-
-sub get_legacy {
-    my ( $file ) = @_;
-    my $verbose = $options->{verbose};
-    warn("Config: $file (legacy)\n") if $verbose;
-
-    my $cfg = { _src => $file };
-
-    require App::Music::ChordPro::Songbook;
-    my $s = App::Music::ChordPro::Songbook->new;
-    $s->parse_legacy_file($file);
-
-    my $song = $s->{songs}->[0];
-    foreach ( keys( %{$song->{settings}} ) ) {
-	if ( $_ eq "papersize" ) {
-	    $cfg->{pdf}->{papersize} = $song->{settings}->{papersize};
-	    next;
-	}
-	if ( $_ eq "titles" ) {
-	    $cfg->{settings}->{titles} = $song->{settings}->{titles};
-	    next;
-	}
-	if ( $_ eq "columns" ) {
-	    $cfg->{settings}->{columns} = $song->{settings}->{columns};
-	    next;
-	}
-	if ( $_ eq "diagrams" ) {
-	    $cfg->{diagrams}->{show} = $song->{settings}->{diagrams};
-	    next;
-	}
-	die("Cannot happen");
-    }
-    foreach ( @{$song->{body}} ) {
-	next if $_->{type} eq "diagrams"; # added by parser
-	next if $_->{type} eq "ignore"; # ignored
-	unless ( $_->{type} eq "control" ) {
-	    die("Cannot happen " . $_->{type} . " " . $_->{name});
-	}
-	my $name = $_->{name};
-	my $value = $_->{value};
-	unless ( $name =~ /^(text|chord|tab)-(font|size)$/ ) {
-	    die("Cannot happen");
-	}
-	$name = $1;
-	my $prop = $2;
-	if ( $prop eq "font" ) {
-	    if ( $value =~ /.+\.(?:ttf|otf)$/i ) {
-		$prop = "file";
-		$cfg->{pdf}->{fonts}->{$name}->{name} = undef;
-		$cfg->{pdf}->{fonts}->{$name}->{description} = undef;
-	    }
-	    else {
-		$cfg->{pdf}->{fonts}->{$name}->{name} = undef;
-		$cfg->{pdf}->{fonts}->{$name}->{file} = undef;
-		$prop = "description";
-	    }
-	}
-	$cfg->{pdf}->{fonts}->{$name}->{$prop} = $value;
-    }
-
-    return $cfg;
 }
 
 sub config_final {
@@ -986,7 +912,7 @@ sub default_config() {
     // "include" : [ "modern1", "lib/mycfg.json" ],
     "include" : [ "guitar" ],
 
-    // General settings, to be changed by legacy configs and
+    // General settings, to be changed by configs and
     // command line.
     "settings" : {
       // Add line info for backend diagnostics.

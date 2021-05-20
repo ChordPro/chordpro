@@ -558,10 +558,6 @@ paper size, assuming that all printers use the same size.
 
 Don't use the system specific config file, even if it exists.
 
-=item B<--nolegacyconfig>
-
-Don't use a legacy config file, even if it exists.
-
 =item B<--userconfig=>I<CFG>
 
 Designates the config file for the user.
@@ -813,7 +809,6 @@ sub app_setup {
           'nosysconfig|no-sysconfig',
           'userconfig=s',
           'nouserconfig|no-userconfig',
-	  'nolegacyconfig|no-legacy-config',
 	  'nodefaultconfigs|no-default-configs|X',
 	  'define=s%',
 	  'print-default-config' => \$defcfg,
@@ -856,7 +851,7 @@ sub app_setup {
 
     # If the user specified a config, it must exist.
     # Otherwise, set to a default.
-    for my $config ( qw(sysconfig userconfig legacyconfig) ) {
+    for my $config ( qw(sysconfig userconfig) ) {
         for ( $clo->{$config} ) {
             if ( defined($_) ) {
                 die("$_: $!\n") unless -r $_;
@@ -889,7 +884,7 @@ sub app_setup {
         }
     }
     # If no config was specified, and no default is available, force no.
-    for my $config ( qw(sysconfig userconfig config legacyconfig) ) {
+    for my $config ( qw(sysconfig userconfig config) ) {
         $clo->{"no$config"} = 1 unless $clo->{$config};
     }
 
@@ -1071,7 +1066,6 @@ Configuration options:
     --nouserconfig      Don't use a user specific config file
     --sysconfig=CFG     System specific config file ($cfg{sysconfig})
     --nosysconfig       Don't use a system specific config file
-    --nolegacyconfig    Don't use a Chord/Chordii legacy config file
     --nodefaultconfigs  -X  Don't use any default config files
     --define=XXX=YYY	Sets config item XXX to value YYY
     --print-default-config   Prints the default config and exits
