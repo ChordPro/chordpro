@@ -9,8 +9,7 @@ description: "Configuration file contents - Generic"
 
 These settings control global behaviour of the ChordPro program and can be changed from the command line.
 
-    // General settings, to be changed by legacy configs and
-    // command line.
+    // General settings, to be changed by configs and command line.
     "settings" : {
         // Add line info for backend diagnostics.
         "lineinfo" : true,
