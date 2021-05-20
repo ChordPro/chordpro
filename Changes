@@ -15,6 +15,7 @@
     - Allow meta data definitions in config.
     - Remove support for legacy configs.
     - Suppress a directive if its argument is empty as result from %{} expansion.
+    - Add directive suppression with instrument/user selectors.
     - !BugFixes
     - Fix crash when abc section is the very first thing in a song.
     - Fix decapo setting from config file (issue #140).

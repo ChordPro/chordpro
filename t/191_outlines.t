@@ -78,6 +78,8 @@ my $xp = [
         title => [
           '24 Fietsen',
         ],
+	user => [],
+	instrument => [],
       },
     },
   ],
@@ -102,6 +104,8 @@ my $xp = [
         title => [
           '24 Fietsen',
         ],
+	user => [],
+	instrument => [],
       },
     },
   ],
@@ -126,6 +130,8 @@ my $xp = [
         title => [
           'De Fietsenstalling',
         ],
+	user => [],
+	instrument => [],
       },
     },
   ],
@@ -150,6 +156,8 @@ my $xp = [
         title => [
           'De Fietsenstalling',
         ],
+	user => [],
+	instrument => [],
       },
     },
   ],
@@ -175,6 +183,8 @@ my $xp = [
         title => [
           'De Fietspomp',
         ],
+	user => [],
+	instrument => [],
       },
     },
   ],
@@ -199,6 +209,8 @@ my $xp = [
         title => [
           'Het Fietsenhok',
         ],
+	user => [],
+	instrument => [],
       },
     },
   ],
@@ -223,6 +235,8 @@ my $xp = [
         title => [
           'Het Fietsenhok',
         ],
+	user => [],
+	instrument => [],
       },
     },
   ],

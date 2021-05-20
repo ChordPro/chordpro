@@ -33,6 +33,9 @@ sub is_deeply {
 	for ( qw( config ) ) {
 	    delete $got->{$_} unless exists $expect->{$_};
 	}
+	for ( qw( instrument user ) ) {
+	    delete $got->{meta}->{$_} unless exists $expect->{meta}->{$_};
+	}
     }
 
     Test::More::is_deeply( $got, $expect, $tag );
@@ -100,8 +103,5 @@ sub differ {
 }
 
 push( @EXPORT, 'differ' );
-
-1;
-
 
 1;

@@ -28,6 +28,7 @@ sub new {
 # Parser context.
 my $def_context = "";
 my $in_context = $def_context;
+my $skip_context = 0;
 my $grid_arg;
 my $grid_cells;
 
@@ -67,7 +68,7 @@ sub ::break() {}
 sub parse_file {
     my ( $self, $filename, $opts ) = @_;
     $opts //= {};
-    my $meta = delete $opts->{meta};
+    my $meta = { %{$config->{meta}}, %{delete $opts->{meta}//{}} };
 
     # Loadlines sets $opts->{_filesource}.
     my $lines = loadlines( $filename, $opts );
@@ -93,7 +94,7 @@ sub parse_file {
 
     my $linecnt = 0;
     while ( @$lines ) {
-	my $song = $self->parse_song( $lines, \$linecnt, $meta );
+	my $song = $self->parse_song( $lines, \$linecnt, {%$meta} );
 #	if ( exists($self->{songs}->[-1]->{body}) ) {
 	    $song->{meta}->{songindex} = 1 + @{ $self->{songs} };
 	    push( @{ $self->{songs} }, $song );
@@ -107,18 +108,78 @@ sub parse_file {
 
 my $song;			# current song
 
+my %abbrevs =
+  ( soc => "start_of_chorus" ,
+    sot => "start_of_tab"    ,
+    sov => "start_of_verse"  ,
+    sob => "start_of_bridge" ,
+    eoc => "end_of_chorus"   ,
+    eot => "end_of_tab"      ,
+    eov => "end_of_verse"    ,
+    eob => "end_of_bridge"   ,
+);
+
 sub parse_song {
     my ( $self, $lines, $linecnt, $meta ) = @_;
+    die("OOPS! Wrong meta") unless ref($meta) eq 'HASH';
     local $config = dclone($config);
 
     # Load song-specific config, if any.
     if ( $diag->{file} ) {
-	for ( "prp", "json" ) {
-	    ( my $cf = $diag->{file} ) =~ s/\.\w+$/.$_/;
-	    next unless -s $cf;
+	my $t = join("|",@{$config->{tuning}});
+	my $have;
+	if ( $meta && $meta->{__config} ) {
+	    my $cf = delete($meta->{__config})->[0];
+	    die("Missing config: $cf\n") unless -s $cf;
 	    warn("Config[song]: $cf\n") if $options->{verbose};
-	    $config->augment(App::Music::ChordPro::Config::get_config($cf));
-	    last;
+	    $have = App::Music::ChordPro::Config::get_config($cf);
+	}
+	else {
+	    for ( "prp", "json" ) {
+		( my $cf = $diag->{file} ) =~ s/\.\w+$/.$_/;
+		next unless -s $cf;
+		warn("Config[song]: $cf\n") if $options->{verbose};
+		$have = App::Music::ChordPro::Config::get_config($cf);
+		last;
+	    }
+	}
+	if ( $have ) {
+	    my $chords = $have->{chords};
+	    $config->augment($have);
+	    if ( $t ne join("|",@{$config->{tuning}}) ) {
+		my $res =
+		  App::Music::ChordPro::Chords::set_tuning($config);
+		warn( "Invalid tuning in config: ", $res, "\n" ) if $res;
+	    }
+	    App::Music::ChordPro::Chords->reset_parser;
+	    App::Music::ChordPro::Chords::Parser->reset_parsers;
+	    if ( $chords ) {
+		my $c = $chords;
+		if ( @$c && $c->[0] eq "append" ) {
+		    shift(@$c);
+		}
+		foreach ( @$c ) {
+		    my $res =
+		      App::Music::ChordPro::Chords::add_config_chord($_);
+		    warn( "Invalid chord in config: ",
+			  $_->{name}, ": ", $res, "\n" ) if $res;
+		}
+	    }
+	    if ( $options->{verbose} > 1 ) {
+		warn( "Processed ", scalar(@$chords), " chord entries\n");
+		warn( "Totals: ",
+		      App::Music::ChordPro::Chords::chord_stats(), "\n" );
+	    }
+	}
+    }
+
+    for ( keys %{ $config->{meta} } ) {
+	$meta->{$_} //= [];
+	if ( UNIVERSAL::isa($config->{meta}->{$_}, 'ARRAY') ) {
+	    push( @{ $meta->{$_} }, @{ $config->{meta}->{$_} } );
+	}
+	else {
+	    push( @{ $meta->{$_} }, $config->{meta}->{$_} );
 	}
     }
 
@@ -129,7 +190,7 @@ sub parse_song {
 
     $song = App::Music::ChordPro::Song->new
       ( source => { file => $diag->{file}, line => 1 + $$linecnt },
-	system => $::config->{notes}->{system},
+	system => $config->{notes}->{system},
 	structure => "linear",
 	config => $config,
 	$meta ? ( meta => $meta ) : (),
@@ -174,7 +235,7 @@ sub parse_song {
 	}
     }
 
-    # Pre-fill meta data, if any.
+    # Pre-fill meta data, if any. TODO? ALREADY DONE?
     if ( $options->{meta} ) {
 	while ( my ($k, $v ) = each( %{ $options->{meta} } ) ) {
 	    $song->{meta}->{$k} = [ $v ];
@@ -182,7 +243,7 @@ sub parse_song {
     }
 
     # Build regexp to split out chords.
-    if ( $::config->{settings}->{memorize} ) {
+    if ( $config->{settings}->{memorize} ) {
 	$re_chords = qr/(\[.*?\]|\^)/;
     }
     else {
@@ -197,6 +258,16 @@ sub parse_song {
 	    # warn("PRE:  ", $_, "\n");
 	    $prep->{all}->($_);
 	    # warn("POST: ", $_, "\n");
+	}
+
+	if ( $skip_context && /^\s*\{(\w+)\}\s*$/ ) {
+	    my $dir = lc($1);
+	    $dir = $abbrevs{$dir} if defined $abbrevs{$dir};
+	    if ( $dir eq "end_of_$in_context" ) {
+		$in_context = $def_context;
+		$skip_context = 0;
+		next;
+	    }
 	}
 
 	if ( /^\s*\{(new_song|ns)\}\s*$/ ) {
@@ -338,13 +409,13 @@ sub parse_song {
     my $diagrams;
     if ( exists($song->{settings}->{diagrams} ) ) {
 	$diagrams = $song->{settings}->{diagrams};
-	$diagrams &&= $::config->{diagrams}->{show} || "all";
+	$diagrams &&= $config->{diagrams}->{show} || "all";
     }
     else {
-	$diagrams = $::config->{diagrams}->{show};
+	$diagrams = $config->{diagrams}->{show};
     }
 
-    my $target = $::config->{settings}->{transcode} || $song->{system};
+    my $target = $config->{settings}->{transcode} || $song->{system};
     if ( $diagrams =~ /^(user|all)$/
 	 && !App::Music::ChordPro::Chords::Parser->get_parser($target,1)->has_diagrams ) {
 	$diag->{orig} = "(End of Song)";
@@ -362,7 +433,7 @@ sub parse_song {
 	    grep { safe_chord_info($_)->{origin} eq "user" } @used_chords;
 	}
 
-	if ( $::config->{diagrams}->{sorted} ) {
+	if ( $config->{diagrams}->{sorted} ) {
 	    @used_chords =
 	      sort App::Music::ChordPro::Chords::chordcompare @used_chords;
 	}
@@ -376,7 +447,7 @@ sub parse_song {
 
 
     my $xp = $options->{transpose};
-    my $xc = $::config->{settings}->{transcode};
+    my $xc = $config->{settings}->{transcode};
     if ( $xc && App::Music::ChordPro::Chords::Parser->get_parser($xc,1)->movable ) {
 	if ( $song->{meta}->{key}
 	     && ( my $i = App::Music::ChordPro::Chords::parse_chord($song->{meta}->{key}->[0]) ) ) {
@@ -398,6 +469,7 @@ sub parse_song {
 
 sub add {
     my $self = shift;
+    return if $skip_context;
     push( @{$song->{body}},
 	  { context => $in_context,
 	    $lineinfo ? ( line => $diag->{line} ) : (),
@@ -597,7 +669,7 @@ sub decompose_grid {
 }
 
 sub dir_split {
-    my ( $d ) = @_;
+    my ( $self, $d ) = @_;
     $d =~ s/^[: ]+//;
     $d =~ s/\s+$//;
     my $dir = lc($d);
@@ -606,28 +678,49 @@ sub dir_split {
 	( $dir, $arg ) = ( lc($1), $2 );
     }
     $dir =~ s/[: ]+$//;
-    ( $dir, $arg );
+
+    # Check for xxx-yyy selectors.
+    if ( $dir =~ /^(.*)-(.+)$/ ) {
+	my $s = $self->{song}->{meta};
+	$dir = lc($1);
+	$dir = $abbrevs{$dir} if defined $abbrevs{$dir};
+	my $sel = lc($2);
+	unless ( @{$s->{instrument}} and $sel eq $s->{instrument}->[-1]
+		 or
+		 @{$s->{user}} and $sel eq $s->{user}->[-1] ) {
+	    if ( $dir =~ /^start_of_/ ) {
+		return ( $dir, $arg, 2 );
+	    }
+	    else {
+		return ( $dir, $arg, 1 );
+	    }
+	}
+    }
+    else {
+	$dir = $abbrevs{$dir} if defined $abbrevs{$dir};
+    }
+
+    ( $dir, $arg, 0 );
 }
 
 sub directive {
     my ( $self, $d ) = @_;
-    my ( $dir, $orig ) = dir_split($d);
+    my ( $dir, $orig, $omit ) = $self->dir_split($d);
+    return 1 if $omit == 1;
     my $arg = fmt_subst( $self->{song}, $orig );
-    # Context flags.
+    return 1 if $orig =~ /\W/ && $arg !~ /\W/;
 
-    if    ( $dir eq "soc" ) { $dir = "start_of_chorus" }
-    elsif ( $dir eq "sot" ) { $dir = "start_of_tab"    }
-    elsif ( $dir eq "sov" ) { $dir = "start_of_verse"  }
-    elsif ( $dir eq "sob" ) { $dir = "start_of_bridge" }
-    elsif ( $dir eq "eoc" ) { $dir = "end_of_chorus"   }
-    elsif ( $dir eq "eot" ) { $dir = "end_of_tab"      }
-    elsif ( $dir eq "eov" ) { $dir = "end_of_verse"    }
-    elsif ( $dir eq "eob" ) { $dir = "end_of_bridge"   }
+    # Context flags.
 
     if ( $dir =~ /^start_of_(\w+)$/ ) {
 	do_warn("Already in " . ucfirst($in_context) . " context\n")
 	  if $in_context;
 	$in_context = $1;
+	if ( $omit ) {
+	    $skip_context = 1;
+	    # warn("Skipping context: $in_context\n");
+	    return 1;
+	}
 	@chorus = (), $chorus_xpose = 0 if $in_context eq "chorus";
 	if ( $in_context eq "grid" ) {
 	    if ( $arg eq "" ) {
@@ -670,7 +763,7 @@ sub directive {
 
 	# Enabling this always would allow [^] to recall anyway.
 	# Feature?
-	if ( $::config->{settings}->{memorize} ) {
+	if ( $config->{settings}->{memorize} ) {
 	    $memchords = $memchords{$in_context} //= [];
 	    $memcrdinx = 0;
 	    $memorizing = 0;
@@ -817,7 +910,7 @@ sub directive {
 
     # Metadata extensions (legacy). Should use meta instead.
     # Only accept the list from config.
-    if ( any { $_ eq $dir } @{ $::config->{metadata}->{keys} } ) {
+    if ( any { $_ eq $dir } @{ $config->{metadata}->{keys} } ) {
 	$arg = "$dir $arg";
 	$dir = "meta";
     }
@@ -837,7 +930,7 @@ sub directive {
 	    }
 	    elsif ( $key eq "capo" ) {
 		do_warn("Multiple capo settings may yield surprising results.")
-		  if $song->{meta}->{capo};
+		  if exists $song->{meta}->{capo};
 		if ( $decapo ) {
 		    $xpose += $val;
 		    my $xp = $xpose;
@@ -855,8 +948,8 @@ sub directive {
 		$val = duration($val);
 	    }
 
-	    if ( $::config->{metadata}->{strict}
-		 && ! any { $_ eq $key } @{ $::config->{metadata}->{keys} } ) {
+	    if ( $config->{metadata}->{strict}
+		 && ! any { $_ eq $key } @{ $config->{metadata}->{keys} } ) {
 		# Unknown, and strict.
 		do_warn("Unknown metadata item: $key");
 		return;
@@ -896,8 +989,10 @@ my %propstack;
 
 sub global_directive {
     my ($self, $d ) = @_;
-    my ( $dir, $orig ) = dir_split($d);
+    my ( $dir, $orig, $omit ) = $self->dir_split($d);
+    return 1 if $omit;
     my $arg = fmt_subst( $self->{song}, $orig );
+    return 1 if $orig =~ /\W/ && $arg !~ /\W/;
 
     # Song / Global settings.
 
@@ -999,7 +1094,7 @@ sub global_directive {
 	my $ccfg = {};
 	my @k = split( /[:.]/, $1 );
 	my $c = \$ccfg;		# new
-	my $o = $::config;	# current
+	my $o = $config;	# current
 	my $lk = pop(@k);	# last key
 
 	# Step through the keys.
@@ -1028,7 +1123,7 @@ sub global_directive {
 	else {
 	    $$c->{$lk} = $arg;
 	}
-	$::config->augment($ccfg);
+	$config->augment($ccfg);
 
 	return 1;
     }

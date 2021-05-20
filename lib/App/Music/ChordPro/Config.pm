@@ -912,8 +912,7 @@ sub default_config() {
     // "include" : [ "modern1", "lib/mycfg.json" ],
     "include" : [ "guitar" ],
 
-    // General settings, to be changed by configs and
-    // command line.
+    // General settings, to be changed by configs and command line.
     "settings" : {
       // Add line info for backend diagnostics.
       "lineinfo" : true,
@@ -952,10 +951,11 @@ sub default_config() {
     // For these keys you can use {meta key ...} as well as {key ...}.
     // If strict is nonzero, only the keys named here are allowed.
     // If strict is zero, {meta ...} will accept any key.
-    // Important: "title" and "subtitle" must always be in this list.
+    // Important: "title", "subtitle", "instrument" and "user" must
+    // always be in this list.
     // The separator is used to concatenate multiple values.
     "metadata" : {
-      "keys" : [ "title", "subtitle",
+      "keys" : [ "title", "subtitle", "instrument", "user",
 		 "artist", "composer", "lyricist", "arranger",
 		 "album", "copyright", "year",
 		 "sorttitle",
@@ -963,9 +963,13 @@ sub default_config() {
       "strict" : true,
       "separator" : "; ",
     },
-    // User defined (added) meta data,
-    // This is explicitly NOT intended for the metadata items above.
-    "meta" : {},
+    // Globally defined (added) meta data,
+    // This is explicitly NOT intended for the metadata items above,
+    // with the exception of intrument and user.
+    "meta" : {
+        "instrument" : [],
+        "user" : [],
+    },
 
     // Dates.
     "dates" : {
