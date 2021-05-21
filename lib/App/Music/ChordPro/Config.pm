@@ -108,6 +108,9 @@ sub configurator {
     $cfg = shift(@cfg);
     warn("Process: $cfg->{_src}\n") if $verbose > 1;
 
+    # Presets.
+    $cfg->{user}->{name} = $ENV{USER} || $ENV{LOGNAME} || lc(getlogin());
+
     # Add some extra entries to prevent warnings.
     for ( qw(title subtitle footer) ) {
 	next if exists($cfg->{pdf}->{formats}->{first}->{$_});
@@ -951,11 +954,10 @@ sub default_config() {
     // For these keys you can use {meta key ...} as well as {key ...}.
     // If strict is nonzero, only the keys named here are allowed.
     // If strict is zero, {meta ...} will accept any key.
-    // Important: "title", "subtitle", "instrument" and "user" must
-    // always be in this list.
+    // Important: "title" and "subtitle" must always be in this list.
     // The separator is used to concatenate multiple values.
     "metadata" : {
-      "keys" : [ "title", "subtitle", "instrument", "user",
+      "keys" : [ "title", "subtitle",
 		 "artist", "composer", "lyricist", "arranger",
 		 "album", "copyright", "year",
 		 "sorttitle",
@@ -964,11 +966,8 @@ sub default_config() {
       "separator" : "; ",
     },
     // Globally defined (added) meta data,
-    // This is explicitly NOT intended for the metadata items above,
-    // with the exception of intrument and user.
+    // This is explicitly NOT intended for the metadata items above.
     "meta" : {
-        "instrument" : [],
-        "user" : [],
     },
 
     // Dates.
@@ -978,10 +977,20 @@ sub default_config() {
         }
     },
 
+    // User settings. These are usually set by a separate config file.
+    //
+    "user" : {
+        "name"     : "",
+        "fullname" : "",
+    },
+
     // Instrument settings. These are usually set by a separate
     // config file.
     //
-    "instrument" : "",
+    "instrument" : {
+        "type"     : "",
+        "description" : "",
+    },
 
     // Note (chord root) names.
     // Strings and tuning.

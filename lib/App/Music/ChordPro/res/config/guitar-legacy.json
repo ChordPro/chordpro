@@ -1,6 +1,8 @@
 // ChordPro instrument definition.
 
-{ "instrument" : "Guitar, 6 strings, standard tuning (legacy)",
+{ "instrument" : {
+    "description": "Guitar, 6 strings, standard tuning (legacy)"
+  },
 
   "include" : [ "guitar" ],
 

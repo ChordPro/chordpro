@@ -394,8 +394,19 @@
 
 	"instrument": {
 	    "description": "Description of the instrument.",
-	    "type": "string",
-	    "default": ""
+	    "additionalProperties": false,
+	    "properties" : {
+	        "description" : {
+		    "description" : "Descriptive instrument name",
+		    "type": "string",
+		    "default": ""
+		 },
+	        "type" : {
+		    "description" : "Instrument type",
+		    "type": "string",
+		    "default": ""
+		 }
+	    }
 	},
 
 	"meta": {
@@ -1216,6 +1227,23 @@
 	    "items": {
 		"type": "string",
 		"pattern": "^[A-G][b#]?[1-9]$"
+	    }
+	},
+
+        "user": {
+	    "description": "User data.",
+	    "additionalProperties": false,
+	    "properties" : {
+	        "fullname" : {
+		    "description" : "Full user name",
+		    "type": "string",
+		    "default": ""
+		 },
+	        "name" : {
+		    "description" : "Short user name.",
+		    "type": "string",
+		    "default": ""
+		 }
 	    }
 	}
     }

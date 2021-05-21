@@ -1,4 +1,7 @@
-{ "instrument" : "Mandolin, 8 strings, standard tuning", 
+{ "instrument" :
+  { "description" : "Mandolin, 8 strings, standard tuning",
+    "type" : "mandolin"
+  },
 
   "tuning" : [ "G3", "D4", "A4", "E5" ],
 

@@ -260,14 +260,16 @@ sub parse_song {
 	    # warn("POST: ", $_, "\n");
 	}
 
-	if ( $skip_context && /^\s*\{(\w+)\}\s*$/ ) {
-	    my $dir = lc($1);
-	    $dir = $abbrevs{$dir} if defined $abbrevs{$dir};
-	    if ( $dir eq "end_of_$in_context" ) {
-		$in_context = $def_context;
-		$skip_context = 0;
-		next;
+	if ( $skip_context ) {
+	    if ( /^\s*\{(\w+)\}\s*$/ ) {
+		my $dir = lc($1);
+		$dir = $abbrevs{$dir} if defined $abbrevs{$dir};
+		if ( $dir eq "end_of_$in_context" ) {
+		    $in_context = $def_context;
+		    $skip_context = 0;
+		}
 	    }
+	    next;
 	}
 
 	if ( /^\s*\{(new_song|ns)\}\s*$/ ) {
@@ -681,13 +683,12 @@ sub dir_split {
 
     # Check for xxx-yyy selectors.
     if ( $dir =~ /^(.*)-(.+)$/ ) {
-	my $s = $self->{song}->{meta};
 	$dir = lc($1);
 	$dir = $abbrevs{$dir} if defined $abbrevs{$dir};
 	my $sel = lc($2);
-	unless ( @{$s->{instrument}} and $sel eq $s->{instrument}->[-1]
+	unless ( $sel eq $config->{instrument}->{type}
 		 or
-		 @{$s->{user}} and $sel eq $s->{user}->[-1] ) {
+		 $sel eq $config->{user}->{name} ) {
 	    if ( $dir =~ /^start_of_/ ) {
 		return ( $dir, $arg, 2 );
 	    }
@@ -920,6 +921,13 @@ sub directive {
 	if ( $arg =~ /([^ :]+)[ :]+(.*)/ ) {
 	    my $key = lc $1;
 	    my $val = $2;
+
+	    # User and instrument cannot be set here.
+	    if ( $key eq "user" || $key eq "instrument" ) {
+		do_warn("\"$key\" can be set from config only.\n");
+		return 1;
+	    }
+
 	    if ( $key eq "key" ) {
 		$val =~ s/[\[\]]//g;
 #		push( @{ $song->{meta}->{_orig_key} }, $val );

@@ -1,4 +1,7 @@
-{ "instrument" : "Ukulele, 4 strings, standard tuning", 
+{ "instrument" : {
+    "description" : "Ukulele, 4 strings, standard tuning",
+    "type" : "ukulele"
+  },
 
   "tuning" : [ "G4", "C4", "E4", "A4" ],
 
