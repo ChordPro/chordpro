@@ -120,7 +120,7 @@ sub draw {
     my $name = App::Music::ChordPro::Output::PDF::chord_display($info);
     $name .= "*"
       unless $info->{origin} ne "user"
-	|| $::config->{kbdiagrams}->{show} eq "user";
+	|| $ps->{kbdiagrams}->{show} eq "user";
     $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y - font_bl($font) );
     $y -= $font->{size} * 1.2 + $lw;
 
