@@ -1930,6 +1930,12 @@ sub getchordinfo {
 	return $info;
     }
 
+    # For keyboard, chords can easily be determined by name.
+    if ( $config->{diagrams}->{type} eq "keyboard" ) {
+	$info = App::Music::ChordPro::Chords::parse_chord($name);
+	return $info if $info;
+    }
+
     warn("PDF: Unknown chord $name",
 	 $source ? ( " in song starting at line " .
 		     $source->{line} . " in " . $source->{file} ) : (),

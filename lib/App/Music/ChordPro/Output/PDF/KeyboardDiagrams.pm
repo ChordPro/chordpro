@@ -250,11 +250,32 @@ sub grid_xo {
       };
 }
 
+my %keys =
+  ( ""       => [ 0, 4, 7 ],	 # major
+    "7"      => [ 0, 4, 7, 10 ], # dominant seventh
+    "maj7"   => [ 0, 4, 7, 11 ], # major seventh
+    "-"      => [ 0, 3, 7 ],	 # minor
+    "-7"     => [ 0, 3, 7, 10 ], # minor seventh
+    "+"      => [ 0, 4, 8 ],	 # augmented
+    "0"      => [ 0, 3, 6 ],	 # diminished
+    "sus4"   => [ 0, 5, 7 ],	 # suspended 4th
+    "h"      => [ 0, 3, 6, 10 ], # half-diminished seventh
+
+    #### TODO: MORE
+  );
+
 sub getkeys {
     my ( $info ) = @_;
-    return $info->{keys} if $info->{keys};
-    return unless $info->{frets} && @{$info->{frets}};
 
+    # Has keys defined.
+    return $info->{keys} if $info->{keys} && @{$info->{keys}};
+
+    # Known chords.
+    return $keys{$info->{qual_canon}.$info->{ext_canon}}
+      if defined $keys{$info->{qual_canon}.$info->{ext_canon}};
+
+    # Try to derive from guitar chords.
+    return unless $info->{frets} && @{$info->{frets}};
     my @tuning = ( 4, 9, 2, 7, 11, 4 );
     my %keys;
     my $i = -1;

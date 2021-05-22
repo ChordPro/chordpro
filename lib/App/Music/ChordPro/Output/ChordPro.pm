@@ -117,6 +117,9 @@ sub generate_song {
 	    $t .= " fingers " .
 	      join(" ", map { $_ < 0 ? "N" : $_ } @{$info->{fingers}})
 		if $info->{fingers};
+	    $t .= " keys " .
+	      join(" ", @{$info->{keys}})
+		if $info->{keys};
 	    push(@s, $t . "}");
 	}
 	push(@s, "") if $tidy;

@@ -108,17 +108,6 @@ sub parse_file {
 
 my $song;			# current song
 
-my %abbrevs =
-  ( soc => "start_of_chorus" ,
-    sot => "start_of_tab"    ,
-    sov => "start_of_verse"  ,
-    sob => "start_of_bridge" ,
-    eoc => "end_of_chorus"   ,
-    eot => "end_of_tab"      ,
-    eov => "end_of_verse"    ,
-    eob => "end_of_bridge"   ,
-);
-
 sub parse_song {
     my ( $self, $lines, $linecnt, $meta ) = @_;
     die("OOPS! Wrong meta") unless ref($meta) eq 'HASH';
@@ -262,9 +251,8 @@ sub parse_song {
 
 	if ( $skip_context ) {
 	    if ( /^\s*\{(\w+)\}\s*$/ ) {
-		my $dir = lc($1);
-		$dir = $abbrevs{$dir} if defined $abbrevs{$dir};
-		if ( $dir eq "end_of_$in_context" ) {
+		my $dir = $self->parse_directive($1);
+		if ( $dir->{name} eq "end_of_$in_context" ) {
 		    $in_context = $def_context;
 		    $skip_context = 0;
 		}
@@ -670,8 +658,36 @@ sub decompose_grid {
     return ( tokens => \@tokens, %res );
 }
 
-sub dir_split {
+################ Parsing directives ################
+
+my %abbrevs = (
+   c	      => "comment",
+   cb	      => "comment_box",
+   ci	      => "comment_italic",
+   colb	      => "column_break",
+   eob	      => "end_of_bridge",
+   eoc	      => "end_of_chorus",
+   eot	      => "end_of_tab",
+   eov	      => "end_of_verse",
+   g	      => "grid",
+   highlight  => "comment",
+   ng	      => "no_grid",
+   np	      => "new_page",
+   npp	      => "new_physical_page",
+   ns	      => "new_song",
+   sob	      => "start_of_bridge",
+   soc	      => "start_of_chorus",
+   sot	      => "start_of_tab",
+   sov	      => "start_of_verse",
+   st	      => "subtitle",
+   t	      => "title",
+);
+
+
+sub parse_directive {
     my ( $self, $d ) = @_;
+
+    # $d is the complete directive line, without leading/trailing { }.
     $d =~ s/^[: ]+//;
     $d =~ s/\s+$//;
     my $dir = lc($d);
@@ -680,36 +696,45 @@ sub dir_split {
 	( $dir, $arg ) = ( lc($1), $2 );
     }
     $dir =~ s/[: ]+$//;
+    # $dir is the lowcase directive name.
+    # $arg is the rest, if any.
 
     # Check for xxx-yyy selectors.
     if ( $dir =~ /^(.*)-(.+)$/ ) {
-	$dir = lc($1);
-	$dir = $abbrevs{$dir} if defined $abbrevs{$dir};
-	my $sel = lc($2);
+	$dir = $abbrevs{$1} // $1;
+	my $sel = $2;
 	unless ( $sel eq $config->{instrument}->{type}
 		 or
 		 $sel eq $config->{user}->{name} ) {
 	    if ( $dir =~ /^start_of_/ ) {
-		return ( $dir, $arg, 2 );
+		return { name => $dir, arg => $arg, omit => 2 };
 	    }
 	    else {
-		return ( $dir, $arg, 1 );
+		return { name => $dir, arg => $arg, omit => 1 };
 	    }
 	}
     }
     else {
-	$dir = $abbrevs{$dir} if defined $abbrevs{$dir};
+	$dir = $abbrevs{$dir} // $dir;
     }
 
-    ( $dir, $arg, 0 );
+    return { name => $dir, arg => $arg, omit => 0 }
 }
+
+my %propstack;
 
 sub directive {
     my ( $self, $d ) = @_;
-    my ( $dir, $orig, $omit ) = $self->dir_split($d);
-    return 1 if $omit == 1;
-    my $arg = fmt_subst( $self->{song}, $orig );
-    return 1 if $orig =~ /\W/ && $arg !~ /\W/;
+
+    my $dd = $self->parse_directive($d);
+    return 1 if $dd->{omit} == 1;
+
+    my $arg = $dd->{arg};
+    if ( $arg ne "" ) {
+	$arg = fmt_subst( $self->{song}, $arg );
+	return 1 if $arg !~ /\S/;
+    }
+    my $dir = $dd->{name};
 
     # Context flags.
 
@@ -717,7 +742,7 @@ sub directive {
 	do_warn("Already in " . ucfirst($in_context) . " context\n")
 	  if $in_context;
 	$in_context = $1;
-	if ( $omit ) {
+	if ( $dd->{omit} ) {
 	    $skip_context = 1;
 	    # warn("Skipping context: $in_context\n");
 	    return 1;
@@ -818,36 +843,26 @@ sub directive {
 
     # Breaks.
 
-    if ( $dir =~ /^(?:colb|column_break)$/i ) {
+    if ( $dir eq "column_break" ) {
 	$self->add( type => "colb" );
 	return 1;
     }
 
-    if ( $dir =~ /^(?:new_page|np|new_physical_page|npp)$/i ) {
+    if ( $dir eq "new_page" || $dir eq "new_physical_page" ) {
 	$self->add( type => "newpage" );
 	return 1;
     }
 
-    if ( $dir =~ /^(?:new_song|ns)$/i ) {
+    if ( $dir eq "new_song" ) {
 	die("FATAL - cannot start a new song now\n");
     }
 
     # Comments. Strictly speaking they do not belong here.
 
-    my $comment;
-    if ( $dir =~ /^(?:comment|c|highlight)$/ ) {
-	$comment = "comment";
-    }
-    elsif ( $dir =~ /^(?:comment_italic|ci)$/ ) {
-	$comment = "comment_italic";
-    }
-    elsif ( $dir =~ /^(?:comment_box|cb)$/ ) {
-	$comment = "comment_box";
-    }
-    if ( $comment ) {
+    if ( $dir =~ /^comment(_italic|_box)?$/ ) {
 	my %res = $self->cdecompose($arg);
-	$res{orig} = $orig;
-	$self->add( type => $comment, %res )
+	$res{orig} = $dd->{arg};
+	$self->add( type => $dir, %res )
 	  unless exists($res{text}) && $res{text} =~ /^[ \t]*$/;
 	return 1;
     }
@@ -897,13 +912,13 @@ sub directive {
 	return 1;
     }
 
-    if ( $dir =~ /^(?:title|t)$/ ) {
+    if ( $dir eq "title" ) {
 	$song->{title} = $arg;
 	push( @{ $song->{meta}->{title} }, $arg );
 	return 1;
     }
 
-    if ( $dir =~ /^(?:subtitle|st)$/ ) {
+    if ( $dir eq "subtitle" ) {
 	push( @{ $song->{subtitle} }, $arg );
 	push( @{ $song->{meta}->{subtitle} }, $arg );
 	return 1;
@@ -916,8 +931,8 @@ sub directive {
 	$dir = "meta";
     }
 
-    # More metadata.
-    if ( $dir =~ /^(meta)$/ ) {
+    # Metadata.
+    if ( $dir eq "meta" ) {
 	if ( $arg =~ /([^ :]+)[ :]+(.*)/ ) {
 	    my $key = lc $1;
 	    my $val = $2;
@@ -972,36 +987,6 @@ sub directive {
 	return 1;
     }
 
-    return 1 if $self->global_directive( $d, 0 );
-
-    # Warn about unknowns, unless they are x_... form.
-    do_warn("Unknown directive: $d\n") unless $d =~ /^x_/;
-    return;
-}
-
-sub duration {
-    my ( $dur ) = @_;
-
-    if ( $dur =~ /(?:(?:(\d+):)?(\d+):)?(\d+)/ ) {
-	$dur = $3 + ( $2 ? 60 * $2 :0 ) + ( $1 ? 3600 * $1 : 0 );
-    }
-    my $res = sprintf( "%d:%02d:%02d",
-		       int( $dur / 3600 ),
-		       int( ( $dur % 3600 ) / 60 ),
-		       $dur % 60 );
-    $res =~ s/^[0:]+//;
-    return $res;
-}
-
-my %propstack;
-
-sub global_directive {
-    my ($self, $d ) = @_;
-    my ( $dir, $orig, $omit ) = $self->dir_split($d);
-    return 1 if $omit;
-    my $arg = fmt_subst( $self->{song}, $orig );
-    return 1 if $orig =~ /\W/ && $arg !~ /\W/;
-
     # Song / Global settings.
 
     if ( $dir eq "titles"
@@ -1022,11 +1007,11 @@ sub global_directive {
 	return 1;
     }
 
-    if ( $dir =~ /^(?:grid|g)$/ ) {
+    if ( $dir eq "grid" ) {
 	$song->{settings}->{diagrams} = 1;
 	return 1;
     }
-    if ( $dir =~ /^(?:no_grid|ng)$/ ) {
+    if ( $dir eq "no_grid" ) {
 	$song->{settings}->{diagrams} = 0;
 	return 1;
     }
@@ -1193,8 +1178,7 @@ sub global_directive {
     # optional: N N N N N N (for unknown chords)
     # optional: fingers N N N N N N
 
-    if ( $dir =~ /^define|chord$/ ) {
-	my $show = $dir eq "chord";
+    if ( $dir eq "define" or my $show = $dir eq "chord" ) {
 
 	# Split the arguments and keep a copy for error messages.
 	my @a = split( /[: ]+/, $arg );
@@ -1256,6 +1240,22 @@ sub global_directive {
 		}
 	    }
 
+	    # keys N N ... N
+	    elsif ( $a eq "keys" ) {
+		my @f;
+		while ( @a && $a[0] =~ /^[0-9]$/ ) {
+		    push( @f, shift(@a) );
+		}
+		if ( @f ) {
+		    $res->{keys} = \@f;
+		}
+		else {
+		    do_warn("Invalid or missing keys\n");
+		    $fail++;
+		    last;
+		}
+	    }
+
 	    # Wrong...
 	    else {
 		# Insert a marker to show how far we got.
@@ -1298,13 +1298,14 @@ sub global_directive {
 			    chords => [ $ci ] );
 	    }
 	}
-	elsif ( $res->{frets} || $res->{base} || $res->{fingers} ) {
+	elsif ( $res->{frets} || $res->{base} || $res->{fingers} || $res->{keys} ) {
 	    $res->{base} ||= 1;
 	    push( @{$song->{define}}, $res );
 	    if ( $res->{frets} ) {
 		my $ret =
 		  App::Music::ChordPro::Chords::add_song_chord
-		      ( $res->{name}, $res->{base}, $res->{frets}, $res->{fingers} );
+		    ( $res->{name}, $res->{base}, $res->{frets},
+		      $res->{fingers}, $res->{keys} );
 		if ( $ret ) {
 		    do_warn("Invalid chord: ", $res->{name}, ": ", $ret, "\n");
 		    return 1;
@@ -1329,7 +1330,23 @@ sub global_directive {
 	return 1;
     }
 
+    # Warn about unknowns, unless they are x_... form.
+    do_warn("Unknown directive: $d\n") unless $d =~ /^x_/;
     return;
+}
+
+sub duration {
+    my ( $dur ) = @_;
+
+    if ( $dur =~ /(?:(?:(\d+):)?(\d+):)?(\d+)/ ) {
+	$dur = $3 + ( $2 ? 60 * $2 :0 ) + ( $1 ? 3600 * $1 : 0 );
+    }
+    my $res = sprintf( "%d:%02d:%02d",
+		       int( $dur / 3600 ),
+		       int( ( $dur % 3600 ) / 60 ),
+		       $dur % 60 );
+    $res =~ s/^[0:]+//;
+    return $res;
 }
 
 sub transpose {
