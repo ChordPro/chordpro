@@ -269,8 +269,7 @@ sub generate_song {
     App::Music::ChordPro::Chords::reset_song_chords();
     if ( $s->{define} ) {
 	foreach ( @{ $s->{define} } ) {
-	    App::Music::ChordPro::Chords::add_song_chord
-		( $_->{name}, $_->{base}, $_->{frets}, $_->{fingers} );
+	    App::Music::ChordPro::Chords::add_song_chord($_);
 	}
     }
 
@@ -1388,8 +1387,17 @@ sub songline {
 		my $fann = $fonts->{annotation};
 		$xt0 = $pr->text( $ann, $x, $ychord, $fann );
 	    }
+	    elsif ( $chord eq '' ) {
+		$xt0 = $x;
+	    }
 	    else {
-		my $info = App::Music::ChordPro::Chords::chord_info($chord);
+		my $info = $opts{song}->{chordsinfo}->{$chord};
+		unless ( $info ) {
+		    $info = App::Music::ChordPro::Chords::chord_info($chord);
+		    warn("PDF: Lookup chord $chord... ",
+			 $info ? "found" : "fail",
+			 "\n");
+		}
 		if ( $info && $info->{system} eq "roman" ) {
 		    $xt0 = $pr->text( $pre.$info->{root},
 				      $x, $ychord, $fchord );
@@ -1416,16 +1424,11 @@ sub songline {
 				     );
 		    $xt0 = $pr->text( $post, $xt0, $ychord, $fchord );
 		}
-		elsif ( $chord) {
-		    # Strip leading (but not sole) asterisk.
-		    unless ( $chord =~ s/^\*(?=.)// ) {
-			$chord = chord_display($info) // $chord;
-		    }
-		    $xt0 = $pr->text( $pre.$chord.$post, $x, $ychord, $fchord );
+		# Strip leading (but not sole) asterisk.
+		unless ( $chord =~ s/^\*(?=.)// ) {
+		    $chord = chord_display($info) // $chord;
 		}
-		else {
-		    $xt0 = $x;
-		}
+		$xt0 = $pr->text( $pre.$chord.$post, $x, $ychord, $fchord );
 	    }
 
 	    # Do not indent chorus labels (issue #81).

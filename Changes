@@ -1,5 +1,9 @@
 0.979
 
+    - !ChordPro syntax
+    - {define ...} can take key definitions for keyboards.
+    - All directives can be selected out by appending -XXX,
+      where XXX is the type of instrument or a user name.
     - !ChordPro functionality
     - (musejazz) Change font to MuseJazzText.otf as downloadable from GitHub.
     - Improve error messages for font files not found.

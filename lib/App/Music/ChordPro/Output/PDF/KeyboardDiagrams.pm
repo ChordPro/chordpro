@@ -266,16 +266,18 @@ my %keys =
 
 sub getkeys {
     my ( $info ) = @_;
-
+#    ::dump( { %$info, parser => ref($info->{parser}) });
     # Has keys defined.
     return $info->{keys} if $info->{keys} && @{$info->{keys}};
 
     # Known chords.
     return $keys{$info->{qual_canon}.$info->{ext_canon}}
-      if defined $keys{$info->{qual_canon}.$info->{ext_canon}};
+      if defined $info->{qual_canon}
+      && defined $info->{ext_canon}
+      && defined $keys{$info->{qual_canon}.$info->{ext_canon}};
 
     # Try to derive from guitar chords.
-    return unless $info->{frets} && @{$info->{frets}};
+    return [] unless $info->{frets} && @{$info->{frets}};
     my @tuning = ( 4, 9, 2, 7, 11, 4 );
     my %keys;
     my $i = -1;

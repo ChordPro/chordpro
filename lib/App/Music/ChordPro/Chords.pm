@@ -277,7 +277,9 @@ sub get_parser {
 ################ Section Config & User Chords ################
 
 sub _check_chord {
-    my ( $base, $frets, $fingers, $keys ) = @_;
+    my ( $ii ) = @_;
+    my ( $name, $base, $frets, $fingers, $keys )
+      = @$ii{qw(name base frets fingers keys)};
     if ( $frets && @$frets != strings() ) {
 	return scalar(@$frets) . " strings";
     }
@@ -325,7 +327,7 @@ sub add_config_chord {
 
     my ( $base, $frets, $fingers, $keys ) =
       ( $def->{base}||1, $def->{frets}, $def->{fingers}, $def->{keys} );
-    $res = _check_chord( $base, $frets, $fingers, $keys );
+    $res = _check_chord($def);
     return $res if $res;
 
     for $name ( $name, @names ) {
@@ -367,9 +369,11 @@ sub add_config_chord {
 # API: Add a user defined chord.
 # Used by: Songbook, Output::PDF.
 sub add_song_chord {
-    my ( $name, $base, $frets, $fingers, $keys ) = @_;
-    my $res = _check_chord( $base, $frets, $fingers, $keys );
+    my ( $ii ) = @_;
+    my $res = _check_chord($ii);
     return $res if $res;
+    my ( $name, $base, $frets, $fingers, $keys )
+      = @$ii{qw(name base frets fingers keys)};
 
     my $info = parse_chord($name) // { name => $name };
 
@@ -458,6 +462,7 @@ sub identify {
     }
     else {
 	$info->{$_} = $i->{$_} foreach keys %$i;
+	bless $info => ref($i);
     }
 
     return $ident_cache->{$name} = $info;

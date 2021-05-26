@@ -12,6 +12,7 @@ use warnings;
 
 use App::Music::ChordPro;
 use App::Music::ChordPro::Chords;
+use App::Music::ChordPro::Chords::Parser;
 use App::Music::ChordPro::Output::Common;
 use App::Music::ChordPro::Utils;
 
@@ -37,6 +38,7 @@ my $xpose = 0;
 
 # Used chords, in order of appearance.
 my @used_chords;
+my %used_chords;
 
 # Chorus lines, if any.
 my @chorus;
@@ -183,6 +185,7 @@ sub parse_song {
 	structure => "linear",
 	config => $config,
 	$meta ? ( meta => $meta ) : (),
+	chordsinfo => {},
       );
     $self->{song} = $song;
 
@@ -190,6 +193,7 @@ sub parse_song {
     $grid_arg = [ 4, 4, 1, 1 ];	# 1+4x4+1
     $in_context = $def_context;
     @used_chords = ();
+    %used_chords = ();
     %warned_chords = ();
     %memchords = ();
     App::Music::ChordPro::Chords::reset_song_chords();
@@ -418,9 +422,9 @@ sub parse_song {
 	my %h;
 	@used_chords = map { $h{$_}++ ? () : $_ } @used_chords;
 
-	if ( $diagrams eq "user" ) {
+	if ( $diagrams eq "user" && @{$song->{define}} ) {
 	    @used_chords =
-	    grep { safe_chord_info($_)->{origin} eq "user" } @used_chords;
+	    map { $_->{name} } @{$song->{define}};
 	}
 
 	if ( $config->{diagrams}->{sorted} ) {
@@ -434,7 +438,7 @@ sub parse_song {
 	    chords => [ @used_chords ],
 	  };
     }
-
+    $song->{chordsinfo} = { %used_chords };
 
     my $xp = $options->{transpose};
     my $xc = $config->{settings}->{transcode};
@@ -453,6 +457,14 @@ sub parse_song {
     $song->transpose( $xp, $xc );
 
     # $song->structurize;
+
+    ::dump( do {
+	my $a = dclone($song);
+	$a->{config} = ref(delete($a->{config}));
+	$a->{chordsinfo}{$_}{parser} = ref(delete($a->{chordsinfo}{$_}{parser}))
+	  for keys %{$a->{chordsinfo}};
+	$a;
+	} ) if $config->{debug}->{song};
 
     return $song;
 }
@@ -491,6 +503,7 @@ sub chord {
     }
 
     push( @used_chords, $c ) unless $info->{isnote};
+    $used_chords{$c} = $info unless $info->{error};
 
     return $parens ? "($c)" : $c;
 }
@@ -1183,12 +1196,18 @@ sub directive {
 	# Split the arguments and keep a copy for error messages.
 	my @a = split( /[: ]+/, $arg );
 	my @orig = @a;
+	my $fail = 0;
 
 	# Result structure.
-	my $res = { name => shift(@a) };
+	my $res = { name => $a[0] };
+	my $info = App::Music::ChordPro::Chords::parse_chord($a[0]);
+#	unless ( $info ) {
+#	    do_warn("Unrecogized chord name: $a[0]\n");
+#	    $fail++;
+#	}
+	shift(@a);
 
 	my $strings = App::Music::ChordPro::Chords::strings;
-	my $fail = 0;
 
 	while ( @a ) {
 	    my $a = shift(@a);
@@ -1266,6 +1285,7 @@ sub directive {
 		last;
 	    }
 	}
+
 	return 1 if $fail;
 
 	if ( ( $res->{fingers} || $res->{base} ) && ! $res->{frets} ) {
@@ -1297,35 +1317,24 @@ sub directive {
 			    origin => "chord",
 			    chords => [ $ci ] );
 	    }
+	    return 1;
 	}
-	elsif ( $res->{frets} || $res->{base} || $res->{fingers} || $res->{keys} ) {
+
+	if ( $res->{frets} || $res->{fingers} || $res->{keys} ) {
 	    $res->{base} ||= 1;
 	    push( @{$song->{define}}, $res );
-	    if ( $res->{frets} ) {
-		my $ret =
-		  App::Music::ChordPro::Chords::add_song_chord
-		    ( $res->{name}, $res->{base}, $res->{frets},
-		      $res->{fingers}, $res->{keys} );
-		if ( $ret ) {
-		    do_warn("Invalid chord: ", $res->{name}, ": ", $ret, "\n");
-		    return 1;
-		}
-	    }
-	    else {
-		App::Music::ChordPro::Chords::add_unknown_chord( $res->{name} );
-	    }
-	}
-	elsif ( 1 ) {
-#	    $res->{base} = 0;
-# push( @{$song->{define}}, $res );
-	    App::Music::ChordPro::Chords::add_unknown_chord( $res->{name} );
-	}
-	else {
-	    unless ( App::Music::ChordPro::Chords::chord_info($res->{name}) ) {
-		do_warn("Unknown chord: $res->{name}\n");
+	    my $ret =
+	      App::Music::ChordPro::Chords::add_song_chord($res);
+	    if ( $ret ) {
+		do_warn("Invalid chord: ", $res->{name}, ": ", $ret, "\n");
 		return 1;
 	    }
 	}
+	else {
+	    App::Music::ChordPro::Chords::add_unknown_chord( $res->{name} );
+	}
+
+	$song->{chordsinfo}->{$info->{name}} = $info if $info;
 
 	return 1;
     }
@@ -1420,6 +1429,18 @@ sub transpose {
 	foreach my $item ( $self->{chords} ) {
 	    $self->_transpose( $item, $xp+$xpose, $xcode );
 	}
+    }
+
+    # Transpose song chordsinfo.
+    if ( exists $self->{chordsinfo} ) {
+	my %new;
+	while ( my ($k,$v) = each( %{$self->{chordsinfo}} ) ) {
+	    $v = $v->transpose( $xp+$xpose );
+	    my $name = $self->xpchord($v->{name}, $xpose, $xcode);
+	    $v->{name} = $name;
+	    $new{$name} = $v;
+	}
+	$self->{chordsinfo} = \%new;
     }
 
     # Transpose body contents.

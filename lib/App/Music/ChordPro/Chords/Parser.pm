@@ -5,6 +5,8 @@ use warnings;
 use utf8;
 use Carp;
 
+use App::Music::ChordPro;
+
 my $parsers = {};
 
 package App::Music::ChordPro::Chords::Parser;
@@ -160,6 +162,8 @@ package App::Music::ChordPro::Chords::Parser::Common;
 
 our @ISA = qw( App::Music::ChordPro::Chords::Parser );
 
+use Storable qw(dclone);
+
 sub new {
     my ( $pkg, $cfg ) = @_;
     $cfg //= $::config;
@@ -170,7 +174,6 @@ sub new {
     $self->{system} = $notes->{system};
     $self->{target} = 'App::Music::ChordPro::Chord::Common';
     $self->{movable} = $notes->{movable};
-#    ::dump($::config);
     warn("Chords: Created parser for ", $self->{system},
 	 $cfg->{settings}->{chordnames} eq "relaxed"
 	 ? ", relaxed" : "",
@@ -261,7 +264,6 @@ sub parse_chord {
     return unless $bass =~ /^$n_pat$/;
     $info->{bass} = $bass;
     $ordmod->("bass");
-
     return $info;
 }
 
@@ -485,6 +487,8 @@ package App::Music::ChordPro::Chords::Parser::Nashville;
 
 our @ISA = qw(App::Music::ChordPro::Chords::Parser::Common);
 
+use Storable qw(dclone);
+
 sub new {
     my ( $pkg, $init ) = @_;
     my $self = bless { chord_cache => {} } => $pkg;
@@ -584,6 +588,8 @@ sub movable { 1 }
 ################ Parsing Roman notated chords ################
 
 package App::Music::ChordPro::Chords::Parser::Roman;
+
+use App::Music::ChordPro;
 
 our @ISA = qw(App::Music::ChordPro::Chords::Parser::Common);
 
@@ -688,9 +694,16 @@ sub movable { 1 }
 
 package App::Music::ChordPro::Chord::Common;
 
+use Storable qw(dclone);
+
+sub new {
+    my ( $pkg, %args ) = @_;
+    bless { %args } => $pkg;
+}
+
 sub clone {
-    my ( $self ) = @_;
-    bless { %$self } => ref($self);
+    my ( $self ) = shift;
+    dclone($self);
 }
 
 sub show {
@@ -732,8 +745,9 @@ sub transpose {
 	$info->{bass_ord} = ( $self->{bass_ord} + $xpose ) % $p->intervals;
 	$info->{bass_canon} = $info->{bass} =
 	  $p->root_canon($info->{bass_ord},$xpose > 0);
+	$info->{bass_mod} = $xpose <=> 0;
     }
-    $info->{root_mod} = $info->{bass_mod} = $xpose <=> 0;
+    $info->{root_mod} = $xpose <=> 0;
     delete $info->{$_} for qw( copy );
     $info;
 }

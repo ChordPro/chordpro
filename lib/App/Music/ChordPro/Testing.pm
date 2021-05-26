@@ -30,7 +30,7 @@ sub is_deeply {
     my ( $got, $expect, $tag ) = @_;
 
     if ( ref($got) eq 'HASH' && ref($expect) eq 'HASH' ) {
-	for ( qw( config ) ) {
+	for ( qw( config chordsinfo ) ) {
 	    delete $got->{$_} unless exists $expect->{$_};
 	}
 	for ( qw( instrument user ) ) {
