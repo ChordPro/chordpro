@@ -567,5 +567,11 @@
             "songline" : [],
 	},
     },
+
+    // For (debugging (internal use only).
+    "debug" : {
+        "song" : 0,
+    },
+
 }
 // End of config.

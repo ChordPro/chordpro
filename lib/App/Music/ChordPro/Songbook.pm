@@ -464,7 +464,7 @@ sub parse_song {
 	$a->{chordsinfo}{$_}{parser} = ref(delete($a->{chordsinfo}{$_}{parser}))
 	  for keys %{$a->{chordsinfo}};
 	$a;
-	} ) if $config->{debug}->{song};
+	} ) if eval { $config->{debug}->{song} };
 
     return $song;
 }
@@ -1262,7 +1262,7 @@ sub directive {
 	    # keys N N ... N
 	    elsif ( $a eq "keys" ) {
 		my @f;
-		while ( @a && $a[0] =~ /^[0-9]$/ ) {
+		while ( @a && $a[0] =~ /^[0-9]+$/ ) {
 		    push( @f, shift(@a) );
 		}
 		if ( @f ) {

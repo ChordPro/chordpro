@@ -5,6 +5,18 @@ description: "Configuration file contents - Generic"
 
 # Configuration file contents - Generic
 
+## User
+
+These (optional) settings can be used to add user information.
+
+    "user" : {
+	    "name" : "john",
+		"fullname" : "John Brooke",
+	}
+
+The value of `name` can be used for [directive selection]({{< relref
+"chordpro-directives#conditional-directives" >}})
+
 ## General settings
 
 These settings control global behaviour of the ChordPro program and can be changed from the command line.
@@ -86,11 +98,17 @@ the format string can use anything that `strftime` understands.
 
 Describes the instrument used. For example:
 
-    "instrument" : "Guitar, 6 strings, standard tuning",
+    "instrument" : {
+	    "type" : "guitar",
+		"description" : "Guitar, 6 strings, standard tuning",
+	}
 
 Other properties of an instrument are its [tuning]({{< relref "#strings-and-tuning" >}}) and [chord definitions]({{< relref "#user-defined-chords" >}}). Usually the instrument definition is maintained in a separate configuration file for maximum flexibility.
 
 See [Defining an instrument]({{< relref "Chordpro-Configuration-Instrument" >}}) for details.
+
+The value of `type` can be used for [directive selection]({{< relref
+"chordpro-directives#conditional-directives" >}})
 
 ## Strings and Tuning
 
@@ -102,7 +120,11 @@ For example, to specify tuning for a 4-string [soprano ukulele](https://en.wikip
 
 Setting the tuning to any value except `null` will discard all built-in chords!
 
-## User defined chords
+For keyboard, use
+
+    "tining" : [ 0 ],
+
+## User defined chords (string instruments)
 
 The configuration file can hold any number of predefined chords.
 
@@ -149,6 +171,27 @@ definition, e.g.
     { "name" : "F#"        , "copy" : "F", "base" : 2 },
 	
 
+## User defined chords (keyboard instruments)
+
+For keyboard instruments only the keys (notes) that form the chord are
+necessary.
+
+    "chords" : [
+        {
+            "name"  : "Eb(low)",
+            "keys" : [ 0, 4, 7 ],
+        },
+        {
+            "name"     : "Eb(inv)",
+            "display"  : "E♭¹",
+            "keys"     : [ 4, 7, 12 ],
+        },
+    ],
+
+Chord keys only depend on the chord type (quality + extension). So all
+major chords have `[0, 4, 7]`, etc. For most common chords no
+defintions are necessary, ChordPro can derive the notes from the chord type.
+
 ## Printing chord diagrams
 
 By default, ChordPro will include diagrams for all known chords that have been used in a song.
@@ -167,7 +210,7 @@ By default, ChordPro will include diagrams for all known chords that have been u
         "sorted"   :  false,
     },
 
-If `auto` is set to true, unknown chords will be printed as empty diagrams. This makes it easy to manually put the finger positions on paper. Of course, adding a [chord definition]({{< relref "#user-defined-chords" >}}) is usually a better alternative.
+If `auto` is set to true, unknown chords will be printed as empty diagrams. This makes it easy to manually put the finger positions on paper. Of course, adding a [chord definition]({{< relref "directives-define" >}}) is usually a better alternative.
 
 ## Table of Contents
 

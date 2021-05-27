@@ -3,7 +3,17 @@ title: "Defining an instrument"
 description: "Defining an instrument"
 ---
 
-# Defining an instrument
+# Defining the instrument
+
+    "instrument" : {
+	    "type" : "guitar",
+		"description" : "Guitar, 6 strings, standard tuning",
+	}
+
+The value of `type` can be used for [directive selection]({{< relref
+"chordpro-directives#conditional-directives" >}})
+
+# Defining chords
 
 ChordPro deals with chords. To do so, it needs to know how chords are
 named, how they are ordered, and how they are played.
@@ -104,14 +114,17 @@ ChordPro uses the convention that when transposing up it chooses the
 note names from the `"sharp"` list. Notes from the `"flat"` list are
 used when transposing down.
 
-## How are chords played
+## How are chords played (string instruments)
 
 To produce chord diagrams, ChordPro must know the number of strings of
 the instrument, how they are tuned, and where the fingers must be
 placed when playing the chord. This can all be defined in the
 configuration files.
 
-    "instrument" : "Guitar, 6-strings, EADGBE tuning",
+    "instrument" : {
+		"type" : "guitar",
+		"description" : "Guitar, 6-strings, EADGBE tuning",
+	},
   
     // Strings and tuning.
     "tuning" : [ "E2", "A2", "D3", "G3", "B3", "E4" ],
@@ -120,6 +133,7 @@ configuration files.
     "chords" : [
         {
           "name"  : "Bb",
+		  "display" : "B♭",
           "base"  : 1,
           "frets" : [ 1, 1, 3, 3, 3, 1 ],
           "fingers" : [ 1, 1, 2, 3, 4, 1 ],
@@ -136,10 +150,63 @@ names, optionally followed by the octave number
 chord, `"base"` specifies the topmost position of the chord diagram.
 It must be 1 or higher. The `"frets"` positions are the positions in
 the chord diagram. `"fingers"` is optional and denotes which fingers
-are used for the chord.
+are used for the chord. `"display"` is optional and defines the way
+the chord name must be shown, if different from `"name"`.
 
-For convenience, `"instrument"` and `"tuning"` can be used as
+For convenience, `"instrument.description"` and `"tuning"` can be used as
 substitution variables in texts, see [Using metadata in texts]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
+
+ChordPro comes with a couple of predefined instrument configs:
+
+- `guitar-br`  
+  Guitar with common chords (see `guitar-ly`) using Brandt-Roemer chord notation.
+- `guitar`  
+  Guitar with lots of chords.
+- `guitar-legacy`  
+  Guitar with the chords originaly included in Chordii.
+- `guitar-ly`  
+  Guitar with common chords derived from [Lilypond](https://lilypond.org) data.
+- `mandolin-ly`  
+  Mandolin with common chords derived from [Lilypond](https://lilypond.org) data.
+- `ukulele`  
+  Ukulele with lots of chords.
+- `ukulele-ly`  
+  Ukulele with common chords derived from [Lilypond](https://lilypond.org) data.
+
+## How are chords played (keyboard instruments)
+
+To produce chord diagrams, ChordPro must know the notes that make the chord.
+This can be defined in the configuration files.
+
+    "instrument" : {
+		"type" : "keyboard",
+		"description" : "Guitar, 6-strings, EADGBE tuning",
+	},
+  
+    // Tuning is not relevant. By setting the tuning to [ 0 ] all
+	// existing definitions are flushed.
+    "tuning" : [ 0 ],
+
+    // Chords.
+    "chords" : [
+        {
+          "name"  : "Bb",
+          "keys" : [ 0, 4, 7 ],
+        },
+    ],
+
+`"instrument"` is a descriptive name of the instrument defined.
+
+`"chords"` is a list of chords to be defined for this tuning. For each
+chord, `"keys"` specifies notes of the chord, relative to the root note.
+
+As opposed to string instruments, the notes of a chord are only
+dependent on the _quality_ and _extension_ of the chord. For example,
+all major chords have keys `[ 0, 4, 7 ]`. A minor7 chord will have
+`[ 0, 3, 7, 10 ]`. This implies that for most (common) chords no definitions
+are necessary.
+
+ChordPro comes with a single predefined keyboard instrument config, `keyboard`.
 
 ## Special: Nashville Number System
 

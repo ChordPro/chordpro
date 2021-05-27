@@ -72,6 +72,12 @@ ex_define.png : ex_define.cho
 	| ${CONVERT} -trim -alpha remove ${CVT_WBORDER} png:- png:- \
 	| ${CONVERT} ${CVT_BORDER} png:- $@
 
+ex_define2.png : ex_define2.cho
+	${CHORDPRO} $< --output=t.pdf
+	${GSPNG} -r200 -sOutputFile=- t.pdf \
+	| ${CONVERT} -trim -alpha remove ${CVT_WBORDER} png:- png:- \
+	| ${CONVERT} ${CVT_BORDER} png:- $@
+
 ex_grid1.png : ex_grid1.cho
 	${CHORDPRO} $< --output=t.pdf
 	${GSPNG} -r115 -sOutputFile=- t.pdf \

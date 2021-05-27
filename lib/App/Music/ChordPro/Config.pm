@@ -519,7 +519,6 @@ sub _augment {
 	warn("Config error: unknown item $path$key\n")
 	  unless exists $self->{$key}
 	    || $path eq "pdf.fontconfig."
-	    || $path eq "debug."
 	    || $key =~ /^_/;
 
 	# Hash -> Hash.
@@ -1476,6 +1475,7 @@ sub default_config() {
 
     // For (debugging (internal use only).
     "debug" : {
+        "song" : 0,
     },
 
 }

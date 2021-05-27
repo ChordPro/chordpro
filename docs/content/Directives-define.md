@@ -5,6 +5,10 @@ description: "Directives: define"
 
 # Directives: define
 
+See also: [chord]({{< relref "Directives-chord" >}}).
+
+## Defining chords for string instruments
+
 This directive defines a chord in terms of fret/string positions and,
 optionally, finger settings.
 
@@ -85,4 +89,31 @@ The resultant chord diagrams are:
 The asterisk after the chord names indiciates that the chords have
 been defined in the song, possibly overriding built-in definitions.
 
-See also: [chord]({{< relref "Directives-chord" >}}).
+## Defining chords for keyboard instruments
+
+For keyboard chords, only the chord notes relative to the root note
+must be specified:
+
+`{define:` _name_ `keys` _note_ … _note_`}`
+
+- _name_ is the name to be used for this chord. If it is an already
+  known chord the new definition will overwrite the previous one.
+
+- `keys` _note_ … _note_ defines the keys.  
+  Key `0` denotes the root note, `7` is the fifth, `11` dominant
+  seventh, and so on.
+
+  Chords in the root position always start with note `0`. The first
+  inversion starts with `4` (major) or `3` (minor) third. The second
+  inversion starts with the fifth `7`.
+
+Example:
+
+    {define: D  keys 0 4 7}
+    {define: D² keys 7 12 16}
+
+The resultant chord diagrams are:
+
+![]({{< asset "images/ex_define2.png" >}})
+
+Note that keys that would exceed the diagram are silently wrapped.
