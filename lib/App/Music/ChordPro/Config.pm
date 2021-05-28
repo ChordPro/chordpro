@@ -110,6 +110,7 @@ sub configurator {
 
     # Presets.
     $cfg->{user}->{name} = $ENV{USER} || $ENV{LOGNAME} || lc(getlogin());
+    $cfg->{user}->{fullname} = eval { (getpwuid($<))[6] } || "";
 
     # Add some extra entries to prevent warnings.
     for ( qw(title subtitle footer) ) {

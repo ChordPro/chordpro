@@ -32,7 +32,11 @@ sub fmt_subst {
     }
     $m->{tuning} //= [ join(" ", App::Music::ChordPro::Chords::get_tuning) ];
     $m->{instrument} = [ $config->{instrument}->{type} ];
+    $m->{"instrument.type"} = [ $config->{instrument}->{type} ];
+    $m->{"instrument.description"} = [ $config->{instrument}->{description} ];
     $m->{user} = [ $config->{user}->{name} ];
+    $m->{"user.name"} = [ $config->{user}->{name} ];
+    $m->{"user.fullname"} = [ $config->{user}->{fullname} ];
     setlocale( LC_TIME, "" );
     $m->{today} //= [ strftime( $config->{dates}->{today}->{format},
 				localtime(time) ) ];

@@ -153,7 +153,7 @@ the chord diagram. `"fingers"` is optional and denotes which fingers
 are used for the chord. `"display"` is optional and defines the way
 the chord name must be shown, if different from `"name"`.
 
-For convenience, `"instrument.description"` and `"tuning"` can be used as
+For convenience, `"instrument.type"`, `"instrument.description"` and `"tuning"` can be used as
 substitution variables in texts, see [Using metadata in texts]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
 
 ChordPro comes with a couple of predefined instrument configs:
