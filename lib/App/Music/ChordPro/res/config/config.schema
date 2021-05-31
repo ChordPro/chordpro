@@ -1238,6 +1238,19 @@
 		    "default": ""
 		 }
 	    }
+	},
+
+	"debug": {
+	    "description": "Miscellaneous debug settings.",
+	    "additionalProperties": false,
+	    "properties": {
+
+		"song": {
+		    "description": "Debug settig for song.",
+		    "type": "integer",
+		    "default": 0
+		}
+	    }
 	}
     }
 }

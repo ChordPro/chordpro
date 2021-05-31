@@ -1051,7 +1051,6 @@ sub default_config() {
 	"auto"     :  false,
 	"show"     :  "all",
 	"sorted"   :  false,
-        "type"     :  "strings",
     },
 
     // Diagnostig messages.
@@ -1475,7 +1474,7 @@ sub default_config() {
 	},
     },
 
-    // For (debugging (internal use only).
+    // For (debugging (internal use only)).
     "debug" : {
         "song" : 0,
     },

@@ -172,7 +172,6 @@ extensive details and examples.
   	"auto"     :  false,
   	"show"     :  "all",
   	"sorted"   :  false,
-          "type"     :  "strings",
       },
   
       // Diagnostig messages.
@@ -596,7 +595,7 @@ extensive details and examples.
   	},
       },
   
-      // For (debugging (internal use only).
+      // For (debugging (internal use only)).
       "debug" : {
           "song" : 0,
       },

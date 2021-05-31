@@ -145,7 +145,6 @@
 	"auto"     :  false,
 	"show"     :  "all",
 	"sorted"   :  false,
-        "type"     :  "strings",
     },
 
     // Diagnostig messages.
@@ -569,7 +568,7 @@
 	},
     },
 
-    // For (debugging (internal use only).
+    // For (debugging (internal use only)).
     "debug" : {
         "song" : 0,
     },
