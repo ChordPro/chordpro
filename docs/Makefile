@@ -22,6 +22,7 @@ clean ::
 
 # For development.
 server :: assets
+	( sleep 3; xdg-open  http://${HOSTNAME}:1313 ) &
 	${HUGO} server --disableFastRender --navigateToChanged --bind ${HOSTNAME} --baseURL http://${HOSTNAME}:1313
 
 assets ::
