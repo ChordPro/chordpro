@@ -12,7 +12,7 @@
     - Allow variable expansion on all input lines.
     - Experimental support for preprocessing.
     - Experimental support for song-specific configs (WIP).
-    - Experimental support for keyboard diagrams (WIP).
+    - Support for keyboard diagrams.
     - Experimental support for metadata in filelist.
     - Add --print-delta-config option.
     - Suppress outline title if there is only one outline.

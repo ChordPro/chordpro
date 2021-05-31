@@ -1045,7 +1045,8 @@ sub default_config() {
     //         "all": all chords used.
     //         "user": only prints user defined chords.
     // "sorted": order the chords by key.
-    // "type": "strings" or "keyboard".
+    // Note: The type of diagram (string or keyboard) is determined
+    // by the value of "instrument.type".
     "diagrams" : {
 	"auto"     :  false,
 	"show"     :  "all",

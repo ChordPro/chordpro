@@ -165,13 +165,6 @@
 	    "additionalProperties": false,
 	    "properties": {
 
-		"type": {
-		    "description": "Type of diagrams.",
-		    "default": "strings",
-		    "enum": [ "strings", "keyboard" ],
-		    "type": "string"
-		},
-
 		"auto": {
 		    "description": "Automatically add new chords.",
 		    "type": "boolean",

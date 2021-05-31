@@ -252,7 +252,7 @@ sub generate_song {
     # Diagrams drawer.
     my $dd;
     my $dctl;
-    if ( $::config->{diagrams}->{type} eq "keyboard" ) {
+    if ( $::config->{instrument}->{type} eq "keyboard" ) {
 	require App::Music::ChordPro::Output::PDF::KeyboardDiagrams;
 	$dd = App::Music::ChordPro::Output::PDF::KeyboardDiagrams->new($ps);
 	$dctl = $ps->{kbdiagrams};

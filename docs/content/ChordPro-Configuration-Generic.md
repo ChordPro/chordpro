@@ -10,9 +10,11 @@ description: "Configuration file contents - Generic"
 These (optional) settings can be used to add user information.
 
     "user" : {
-	    "name" : "john",
+	    "name"     : "john",
 		"fullname" : "John Brooke",
 	}
+
+ChordPro will try to establish initial values from the environment.
 
 The value of `name` can be used for [directive selection]({{< relref
 "chordpro-directives#conditional-directives" >}})
@@ -99,7 +101,7 @@ the format string can use anything that `strftime` understands.
 Describes the instrument used. For example:
 
     "instrument" : {
-	    "type" : "guitar",
+	    "type"        : "guitar",
 		"description" : "Guitar, 6 strings, standard tuning",
 	}
 
@@ -196,15 +198,15 @@ defintions are necessary, ChordPro can derive the notes from the chord type.
 
 By default, ChordPro will include diagrams for all known chords that have been used in a song.
 
-    // "type": either "strings" (default) or "keyboard"
     // "auto": automatically add unknown chords as empty diagrams.
     // "show": prints the chords used in the song.
     //         "all": all chords used.
     //         "user": only prints user defined chords.
     //         "none": no song chords will ne printed.
     // "sorted": order the chords by key.
+    // Note: The type of diagram (string or keyboard) is determined
+    // by the value of "instrument.type".
     "diagrams" : {
-	    "type"     : "strings",
         "auto"     :  false,
         "show"     :  "all",
         "sorted"   :  false,
