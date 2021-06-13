@@ -371,7 +371,7 @@ sub newpage {
 				$ps->{papersize}->[1] );
     $self->{pdfgfx}  = $self->{pdfpage}->gfx;
     $self->{pdftext} = $self->{pdfpage}->text;
-    unless ($ps->{theme}->{background} =~ /^white|none$/ ) {
+    unless ($ps->{theme}->{background} =~ /^white|none|#ffffff$/i ) {
 	for ( $self->{pdfgfx} ) {
 	    $_->save;
 	    $_->fillcolor( $ps->{theme}->{background} );
