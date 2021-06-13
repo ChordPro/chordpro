@@ -1934,7 +1934,7 @@ sub getchordinfo {
     }
 
     # For keyboard, chords can easily be determined by name.
-    if ( $config->{diagrams}->{type} eq "keyboard" ) {
+    if ( $config->{instrument}->{type} eq "keyboard" ) {
 	$info = App::Music::ChordPro::Chords::parse_chord($name);
 	return $info if $info;
     }
