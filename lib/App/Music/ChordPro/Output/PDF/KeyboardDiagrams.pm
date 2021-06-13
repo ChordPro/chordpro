@@ -147,6 +147,9 @@ sub draw {
     my $r  = $x + $kw; # 3 * $kw / 3;
     my $xr = $x + 4 * $kw / 3;
 
+    # Don't use theme colour, use black & white.
+    my $fgcol = "black"; # $ps->{theme}->{foreground};
+
     for my $key ( @keys ) {
 	$key += $info->{root_ord};
 	$key += 12 if $key < 0;
@@ -177,7 +180,7 @@ sub draw {
 			 $pkw + $mr, $m,
 			 $pkw + $r,  $m,
 			 $pkw + $r,  $b ],
-		       $lw, $col, 'black' );
+		       $lw, $col, $fgcol );
 	}
 	elsif ( $type eq "R" ) {
 	    $pr->poly( [ $pkw + $l,  $b,
@@ -186,7 +189,7 @@ sub draw {
 			 $pkw + $ml, $t,
 			 $pkw + $r,  $t,
 			 $pkw + $r,  $b ],
-		       $lw, $col, 'black' );
+		       $lw, $col, $fgcol );
 	}
 	elsif ( $type eq "M" ) {
 	    $pr->poly( [ $pkw + $l,  $b,
@@ -198,12 +201,12 @@ sub draw {
 			 $pkw + $r,  $m,
 			 $pkw + $r,  $b
 		       ],
-		       $lw, $col, 'black' );
+		       $lw, $col, $fgcol );
 	}
 	else {
 	    $pr->rectxy( $pkw + $mr,  $m,
 			 $pkw + $xr,  $t,
-			 $lw, $col, 'black' );
+			 $lw, $col, $fgcol );
 	}
     }
 
@@ -218,6 +221,8 @@ sub grid_xo {
        $lw //= ($ctl->{linewidth} || 0.10) * $kw;
     my $keys = $ctl->{keys};
     my $base = uc($ctl->{base}) eq "F" ? 3 : 0;
+    # Don't use theme colour, use black & white.
+    my $fgcol = "black"; # $ps->{theme}->{foreground};
 
     return $self->{grids}->{$kw,$kh,$lw,$keys} //= do
       {
@@ -236,14 +241,17 @@ sub grid_xo {
 
 	# Draw the grid.
 	$dc->rectxy( @bb, 0, 'yellow' ) if 0;
-	$dc->rectxy( 0, 0, $w, $kh, $lw, undef, 'black' );
-	$dc->vline( $_*$kw, $kh, $kh, $lw, 'black' ) for 1..$keys-1;
+	$dc->rectxy( @bb, 0, 'white' )
+	  unless $ps->{theme}->{background} =~ /^white|none|#ffffff$/i;
+	$dc->rectxy( 0, 0, $w, $kh, $lw, undef, $fgcol );
+	$dc->vline( $_*$kw, $kh, $kh, $lw, $fgcol ) for 1..$keys-1;
 	for my $i ( 1, 2, 4, 5, 6, 8, 9, 11, 12, 13, 15, 16, 18, 19, 20, 22, 23 ) {
 	    next if $i < $base;
 	    last if $i > $keys + $base;
 	    my $x = ($i-$base-1)*$kw+2*$kw/3;
 	    $dc->rectxy( $x, $kh/2, $x + 2*$kw/3, $kh,
-			 $lw, 'black', 'black' );
+			 $lw, $fgcol,
+			 $fgcol );
 	}
 
 	$form;

@@ -17,7 +17,7 @@ sub new {
 	    "\"top\", \"bottom\", \"right\", or \"below\"\n");
     }
 
-    bless {} => $pkg;
+    bless { ps => $ps } => $pkg;
 }
 
 # The vertical space the diagram requires.
@@ -134,7 +134,7 @@ sub draw {
 		# Print the bar line.
 		$pr->hline( $x+$bi[2]*$gw, $y-$bi[1]*$gh+$gh/2,
 			    ($bi[3]-$bi[2])*$gw,
-			    6*$lw, "black" );
+			    6*$lw, $ps->{theme}->{foreground} );
 	    }
 	}
     }
@@ -157,7 +157,7 @@ sub draw {
 		# The dingbat glyphs are open, so we need a white
 		# background circle.
 		$pr->circle( $x+$gw/2, $y-$fret*$gh+$gh/2, $dot/2, 1,
-			     "white", "black" );
+			     $ps->{theme}->{background}, $ps->{theme}->{foreground} );
 		my $dot = $dot/0.7;
 		my $glyph = pack( "C", 0xca + $fing - 1 );
 		$pr->setfont( $ps->{fonts}->{chordfingers}, $dot );
@@ -168,15 +168,16 @@ sub draw {
 	    }
 	    else {
 		$pr->circle( $x+$gw/2, $y-$fret*$gh+$gh/2, $dot/2, 1,
-			     "black", "black" );
+			     $ps->{theme}->{foreground}, $ps->{theme}->{foreground});
 	    }
 	}
 	elsif ( $fret < 0 ) {
-	    $pr->cross( $x+$gw/2, $y+$lw+$gh/3, $dot/3, $lw, "black");
+	    $pr->cross( $x+$gw/2, $y+$lw+$gh/3, $dot/3, $lw,
+			$ps->{theme}->{foreground} );
 	}
 	elsif ( $info->{base} > 0 ) {
 	    $pr->circle( $x+$gw/2, $y+$lw+$gh/3, $dot/3, $lw,
-			 undef, "black");
+			 undef, $ps->{theme}->{foreground} );
 	}
     }
     continue {
@@ -212,8 +213,9 @@ sub grid_xo {
 
 	# Draw the grid.
 	$dc->rectxy( @bb, 0, 'red' ) if 0;
-	$dc->hline( 0, ($v-$_)*$gh, $w, $lw ) for 0..$v;
-	$dc->vline( $_*$gw, $v*$gh, $gh*$v, $lw ) for 0..$h-1;
+	my $color = $ps->{theme}->{foreground};
+	$dc->hline( 0, ($v-$_)*$gh, $w, $lw, $color ) for 0..$v;
+	$dc->vline( $_*$gw, $v*$gh, $gh*$v, $lw, $color) for 0..$h-1;
 
 	$form;
       };

@@ -1183,6 +1183,27 @@
  		    "maxItems": 3
  		},
  
+		"theme": {
+		    "description": "Theme",
+		    "additionalProperties": false,
+		    "properties": {
+			"background": {
+			    "description": "Background colour",
+			    "allOf": [
+				{ "$ref": "#/definitions/colorspec" },
+				{ "default": "none" }
+			    ]
+			},
+			"foreground": {
+			    "description": "Foreground colour",
+			    "allOf": [
+				{ "$ref": "#/definitions/colorspec" },
+				{ "default": "black" }
+			    ]
+			}
+		    }
+		},
+
 		"titles-directive-ignore": {
 		    "description": "Ignore titles directives in the songs.",
 		    "default": false,
@@ -1191,7 +1212,7 @@
 	    }
 	},
 
-	"toc": {
+        "toc": {
 	    "description": "(Obsolete) Table of Contents",
 	    "additionalProperties": false,
 	    "properties": {

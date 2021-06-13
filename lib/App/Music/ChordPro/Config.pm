@@ -1115,6 +1115,11 @@ sub default_config() {
       // Papersize, 'a4' or [ 595, 842 ] etc.
       "papersize" : "a4",
 
+      "theme" : {
+          "foreground" : "black",
+          "background" : "none",
+      },
+
       // Space between columns, in pt.
       "columnspace"  :  20,
 
@@ -1154,7 +1159,7 @@ sub default_config() {
 	  "bar" : {
 	      "offset" :  8,
 	      "width"  :  1,
-	      "color"  : "black",
+	      "color"  : "foreground",
 	  },
 	  "tag" : "Chorus",
 	  // Recall style: Print the tag using the type.

@@ -802,7 +802,7 @@ sub generate_song {
 		$pr->rectxy( $x0 + $indent, $y + 1,
 			     $x0 + $indent + $w + 1, $y - $vsp + 1,
 			     0.5, undef,
-			     $ftext->{color} || "black" );
+			     $ftext->{color} || $ps->{theme}->{foreground} );
 	    }
 
 =cut
@@ -1369,7 +1369,7 @@ sub songline {
 	    $w *= 0.75 unless defined($rest);
 
 	    $pr->hline( $ulstart, $ytext + font_ul($ftext), $w,
-			0.25, "black" );
+			0.25, $ps->{theme}->{foreground} );
 
 	    # Print the text.
 	    prlabel( $ps, $tag, $x, $ytext );

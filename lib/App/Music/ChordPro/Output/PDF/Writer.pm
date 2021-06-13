@@ -8,6 +8,7 @@ use Encode;
 use PDF::API2;
 use Text::Layout;
 use IO::String;
+use Carp;
 
 use App::Music::ChordPro::Output::Common qw( fmt_subst prep_outlines demarkup );
 
@@ -66,6 +67,34 @@ sub wrap {
     return ( $text, $ex );
 }
 
+sub _fgcolor {
+    my ( $self, $col ) = @_;
+    if ( !defined($col) || $col eq "foreground" ) {
+	$col = $self->{ps}->{theme}->{foreground};
+    }
+    elsif ( $col eq "background" ) {
+	$col = $self->{ps}->{theme}->{background};
+    }
+    elsif ( !$col ) {
+	Carp::confess("Undefined fgcolor: $col");
+    }
+    $col;
+}
+
+sub _bgcolor {
+    my ( $self, $col ) = @_;
+    if ( !defined($col) || $col eq "background" ) {
+	$col = $self->{ps}->{theme}->{background};
+    }
+    elsif ( $col eq "foreground" ) {
+	$col = $self->{ps}->{theme}->{foreground};
+    }
+    elsif ( !$col ) {
+	Carp::confess("Undefined bgcolor: $col");
+    }
+    $col;
+}
+
 sub text {
     my ( $self, $text, $x, $y, $font, $size, $nomarkup ) = @_;
 #    print STDERR ("T: @_\n");
@@ -74,8 +103,12 @@ sub text {
 
     $self->{layout}->set_font_description($font->{fd});
     $self->{layout}->set_font_size($size);
-    if ( $font->{color} && $font->{color} ne "black" ) {
-	$text = "<span color='" . $font->{color} . "'>" . $text . "</span>";
+    my $col = $self->_fgcolor($font->{color});
+    if ( $col ne $self->{ps}->{theme}->{foreground} ) {
+	$text = "<span color='" . $col . "'>" . $text . "</span>";
+    }
+    else {
+	$self->{layout}->{_currentcolor} = $col;
     }
     if ( $nomarkup ) {
 	$self->{layout}->set_text($text);
@@ -98,7 +131,7 @@ sub text {
 	#printf("BB: %.2f %.2f %.2f %.2f\n", @{$e}{qw( x y width height ) } );
 	# Draw background and.or frame.
 	my $d = $debug ? 0 : 1;
-	$frame = $debug || $font->{color} || "black" if $frame;
+	$frame = $debug || $font->{color} || $self->{ps}->{theme}->{foreground} if $frame;
 	$self->rectxy( $x + $e->{x} - $d,
 		       $y + $e->{y} + $d,
 		       $x + $e->{x} + $e->{width} + $d,
@@ -120,8 +153,12 @@ sub text_nobl {
 
     $self->{layout}->set_font_description($font->{fd});
     $self->{layout}->set_font_size($size);
-    if ( $font->{color} && $font->{color} ne "black" ) {
-	$text = "<span color='" . $font->{color} . "'>" . $text . "</span>";
+    my $col = $self->_fgcolor($font->{color});
+    if ( $col ne $self->{ps}->{theme}->{foreground} ) {
+	$text = "<span color='" . $col . "'>" . $text . "</span>";
+    }
+    else {
+	$self->{layout}->{_currentcolor} = $col;
     }
     $self->{layout}->set_markup($text);
     $self->{layout}->show( $x, $y, $self->{pdftext} );
@@ -138,7 +175,7 @@ sub text_nobl {
 	#printf("BB: %.2f %.2f %.2f %.2f\n", @{$e}{qw( x y width height ) } );
 	# Draw background and.or frame.
 	my $d = $debug ? 0 : 1;
-	$frame = $debug || $font->{color} || "black" if $frame;
+	$frame = $debug || $font->{color} || $self->{ps}->{theme}->{foreground} if $frame;
 	$self->rectxy( $x + $e->{x} - $d,
 		       $y + $e->{y} + $d,
 		       $x + $e->{x} + $e->{width} + $d,
@@ -188,7 +225,7 @@ sub line {
     my ( $self, $x0, $y0, $x1, $y1, $lw, $color ) = @_;
     my $gfx = $self->{pdfgfx};
     $gfx->save;
-    $gfx->strokecolor($color ||= "black");
+    $gfx->strokecolor( $self->_fgcolor($color) );
     $gfx->linecap(1);
     $gfx->linewidth($lw||1);
     $gfx->move( $x0, $y0 );
@@ -201,7 +238,7 @@ sub hline {
     my ( $self, $x, $y, $w, $lw, $color ) = @_;
     my $gfx = $self->{pdfgfx};
     $gfx->save;
-    $gfx->strokecolor($color ||= "black");
+    $gfx->strokecolor( $self->_fgcolor($color) );
     $gfx->linecap(2);
     $gfx->linewidth($lw||1);
     $gfx->move( $x, $y );
@@ -214,7 +251,7 @@ sub vline {
     my ( $self, $x, $y, $h, $lw, $color ) = @_;
     my $gfx = $self->{pdfgfx};
     $gfx->save;
-    $gfx->strokecolor($color ||= "black");
+    $gfx->strokecolor( $self->_fgcolor($color) );
     $gfx->linecap(2);
     $gfx->linewidth($lw||1);
     $gfx->move( $x, $y );
@@ -227,8 +264,8 @@ sub rectxy {
     my ( $self, $x, $y, $x1, $y1, $lw, $fillcolor, $strokecolor ) = @_;
     my $gfx = $self->{pdfgfx};
     $gfx->save;
-    $gfx->strokecolor($strokecolor) if $strokecolor;
-    $gfx->fillcolor($fillcolor) if $fillcolor;
+    $gfx->strokecolor($self->_fgcolor($strokecolor)) if $strokecolor;
+    $gfx->fillcolor($self->_fgcolor($fillcolor)) if $fillcolor;
     $gfx->linecap(2);
     $gfx->linewidth($lw||1);
     $gfx->rectxy( $x, $y, $x1, $y1 );
@@ -243,8 +280,8 @@ sub poly {
     undef $strokecolor unless $lw;
     my $gfx = $self->{pdfgfx};
     $gfx->save;
-    $gfx->strokecolor($strokecolor) if $strokecolor;
-    $gfx->fillcolor($fillcolor) if $fillcolor;
+    $gfx->strokecolor($self->_fgcolor($strokecolor)) if $strokecolor;
+    $gfx->fillcolor($self->_fgcolor($fillcolor)) if $fillcolor;
     $gfx->linecap(2);
     $gfx->linewidth($lw);
     $gfx->poly( @$points );
@@ -259,8 +296,8 @@ sub circle {
     my ( $self, $x, $y, $r, $lw, $fillcolor, $strokecolor ) = @_;
     my $gfx = $self->{pdfgfx};
     $gfx->save;
-    $gfx->strokecolor($strokecolor) if $strokecolor;
-    $gfx->fillcolor($fillcolor) if $fillcolor;
+    $gfx->strokecolor($self->_fgcolor($strokecolor)) if $strokecolor;
+    $gfx->fillcolor($self->_fgcolor($fillcolor)) if $fillcolor;
     $gfx->linewidth($lw||1);
     $gfx->circle( $x, $y, $r );
     $gfx->fill if $fillcolor;
@@ -272,7 +309,7 @@ sub cross {
     my ( $self, $x, $y, $r, $lw, $strokecolor ) = @_;
     my $gfx = $self->{pdfgfx};
     $gfx->save;
-    $gfx->strokecolor($strokecolor) if $strokecolor;
+    $gfx->strokecolor($self->_fgcolor($strokecolor)) if $strokecolor;
     $gfx->linewidth($lw||1);
     $r = 0.9 * $r;
     $gfx->move( $x-$r, $y-$r );
@@ -334,6 +371,17 @@ sub newpage {
 				$ps->{papersize}->[1] );
     $self->{pdfgfx}  = $self->{pdfpage}->gfx;
     $self->{pdftext} = $self->{pdfpage}->text;
+    unless ($ps->{theme}->{background} =~ /^white|none$/ ) {
+	for ( $self->{pdfgfx} ) {
+	    $_->save;
+	    $_->fillcolor( $ps->{theme}->{background} );
+	    $_->linewidth(0);
+	    $_->rectxy( 0, 0, $ps->{papersize}->[0],
+			$ps->{papersize}->[1] );
+	    $_->fill;
+	    $_->restore;
+	}
+    }
 }
 
 sub pagelabel {
