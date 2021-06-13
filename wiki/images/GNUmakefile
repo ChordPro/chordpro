@@ -16,14 +16,15 @@ all : styles examples simple.png labels.png pageformats.png
 
 #### Styles.
 
-STYLES := modern1 modern2 modern3 chordii default roman nashville ukulele
+STYLES := modern1 modern2 modern3 chordii default roman nashville ukulele keyboard
 
 define STYLE_template =
  style_${1}.png :
 	${CHORDPRO} \
 	  --config=${RES}/config/${1}.json \
 	  ${RES}/examples/swinglow.cho --output=style_${1}.pdf
-	${CONVERT} -alpha remove -resize 300x300 ${CVT_BORDER} style_${1}.pdf style_${1}.png
+	${CONVERT} -alpha remove ${CVT_BORDER} -density 150 style_${1}.pdf style_${1}.png
+	${CONVERT} -resize 300x300 ${CVT_BORDER} style_${1}.png style_${1}-small.png
 endef
 
 $(foreach sty,${STYLES},$(eval $(call STYLE_template,$(sty))))
@@ -132,7 +133,7 @@ pageformats.png : pageformats.cho pageformats.json
 DST := ../../docs/assets/images
 
 publish : all 
-	rsync -avHi *.pdf *.png ${DST}/
+	rsync -avHi labels.pdf simple.pdf *.png ${DST}/
 
 clean :: ex_clean
 	rm -f ex_*.png style_*.pdf style_*.png simple.png x-*.png *~ 
