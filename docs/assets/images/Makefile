@@ -1,6 +1,6 @@
 #! /bin/make -f
 
-sources = $(wildcard style_*.pdf)
+sources = $(wildcard style_*.pdf) simple.pdf labels.pdf
 targets = $(sources:.pdf=.png) $(sources:.pdf=-small.png)
 
 all :: ${targets}

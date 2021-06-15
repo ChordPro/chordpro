@@ -132,7 +132,7 @@ but only if labels are actually used.
 
 `align` will control how the labels are aligned in the margin.
 
-[![labels.png]({{< asset "images/labels.png" >}})]({{< asset "images/labels.pdf" >}})
+{{< showpage "labels" >}}
 
 ## Chorus style
 

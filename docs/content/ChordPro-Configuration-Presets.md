@@ -45,6 +45,13 @@ A style with chord diagrams in a right column on the first page instead of at th
 
 {{< showpage "style_modern3" >}}
 
+## Dark
+A dark 'theme'.
+
+{{< showpage "style_dark" >}}
+
+This style only sets colours, so it can be used in combination with other styles.
+
 ## Nashville
 A special style for songs that use Nashville numbering notation.
 

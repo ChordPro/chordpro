@@ -16,7 +16,7 @@ all : styles examples simple.png labels.png pageformats.png
 
 #### Styles.
 
-STYLES := modern1 modern2 modern3 chordii default roman nashville ukulele keyboard
+STYLES := modern1 modern2 modern3 chordii default dark roman nashville ukulele keyboard
 
 define STYLE_template =
  style_${1}.png :
