@@ -24,19 +24,22 @@ In the examples below the symbol `~` denotes the user's home directory. Windows 
     `chordpro.json`  
     `.chordpro.json`
 
-Instead of a project specific configuration file you can specify arbitrary configuration files.
+   Instead of a project specific configuration file you can specify arbitrary configuration files.
+
+   * In the GUI, select `Preferences...` from the `Edit` menu.  
+     Using the configuration dropdown list, choose `Custom`.  
+     Click `...` for a file dialog to choose the desired configuration file.
+   * On the command line, pass the name of the configuration file with
+     `--config`, for example `--config=myconfig.json`.
 
 4. A song specific configuration file is read if it exists. The name
    of the configuration file is the same as the song file name, with
    the extension replaced by `prp` or `json` (in that order).  
+
    Note that the scope of the song specific configuration file is the
    song only. Every song will start with an initial config that results from
-   steps 1 through 3.
-
-* In the GUI, select `Preferences...` from the `Edit` menu.  
-Using the configuration dropdown list, choose `Custom`.  
-Click `...` for a file dialog to choose the desired configuration file.
-* On the command line, pass the name of the configuration file with `--config`, for example `--config=myconfig.json`. 
+   steps 1 through 3, and then its song specific configuration file if
+   it exists.
 
 ## How config files are combined
 
@@ -69,7 +72,11 @@ the result will be:
 
 ### Merging array values items
 
-Arrays are either overwritten or appended. This is controlled by the first element of the new array. If this first element is the string `"append"` then the content are appended, otherwise it is overwritten.
+Arrays are either overwritten or appended/prepended. This is
+controlled by the first element of the new array. If this first
+element is the string `"append"` then the new contents are appended, if it
+is `"prepend"` then the new contents are prepended. Otherwise the new
+contents replace the existing contents.
 
 For example:
 

@@ -24,6 +24,45 @@ The size of the paper for which output must be formatted. The size can be specif
         "papersize" : "a4",
         // Same as: "papersize" : [ 595, 842 ]
 
+## Theme
+
+These settings can be used to control the foreground and
+background colours of the PDF output.
+
+        "theme" : {
+            "foreground" : "black",
+            "background" : "none",
+        }
+
+Background `"none"` or `"white"` means there will be no background
+colour added to the output.
+
+It may be useful to put your theme settings in a separate config file,
+together with additional settings that make up the theme. For example,
+these settings define a 'dark' theme that can be applied to any style.
+
+````
+{
+    "pdf" : {
+        "theme" : {
+            "foreground" : "white",
+            "background" : "black",
+        },
+        "fonts" : {
+            "chord" : {
+                "color" : "red",
+            },
+            "comment" : {
+                "background" : "#555555",
+            },
+        },
+    },
+}
+````
+
+Other configuration settings that use colours can use `foreground` and
+`background` to refer to the colours defined in the theme.
+
 ## Inter-column space
 
 When output is produced in multiple columns, this is the space between the columns, in pt.
@@ -77,7 +116,7 @@ e.g. [start_of_verse]({{< relref "Directives-env_verse" >}}).
             // Alignment for the labels. Default is left.
             "align" : "left",
             // Alternatively, render labels as comments.
-            "comment" : ""	// "comment", "comment_italic" or "comment_box",
+            "comment" : ""  // "comment", "comment_italic" or "comment_box",
         },
 
 When `comment` is set to one of the suported comment types, the label
@@ -111,7 +150,7 @@ ChordPro can format a chorus in several different ways:
             "bar" : {
                  "offset" :  8,
                  "width"  :  1,
-                 "color"  : "black",
+                 "color"  : "foreground",
             },
             // Recall style: Print the tag using the type.
             // Alternatively, quote the lines of the preceding chorus.
@@ -131,24 +170,24 @@ itself.
 
 For example:
 
-	{start_of_bridge}
-	[F]The bridge starts with F.
-	{end_of_bridge}
+    {start_of_bridge}
+    [F]The bridge starts with F.
+    {end_of_bridge}
 
 can produce output as if you wrote
 
-	{comment Bridge}
-	[F]The bridge starts with F.
+    {comment Bridge}
+    [F]The bridge starts with F.
 
 To obtain this, use the following configuration settings:
 
-		// Markup for sections.
-		// Define what to do with begin_of_XXX directives.
-		// Use fallback as fallback.
-		// Default is to ignore them.
-		"section" : {
-			"bridge" : "comment",
-		},
+        // Markup for sections.
+        // Define what to do with begin_of_XXX directives.
+        // Use fallback as fallback.
+        // Default is to ignore them.
+        "section" : {
+            "bridge" : "comment",
+        },
 
 Instead of `comment`, any of the fonts as described under [Fonts]({{< relref "#fonts" >}}) can be used.
 
@@ -242,14 +281,14 @@ colour, or a hex format `#RRGGBB`.
 
         "kbdiagrams" : {
             "show"     :  "bottom",   // or "top", or "right", or "below"
-            "width"    :   4,	// of a single key
-            "height"   :  20,	// of the diagram
-            "keys"     :  14,	// or 7, 10, 14, 17, 21
-            "base"     :  "C",	// or "F"
-            "linewidth" : 0.1,	// fraction of a single key width
-            "pressed"  :  "grey",	// colour of a pressed key
-            "hspace"   :  3.95,	// ??
-            "vspace"   :  0.3,	// fraction of height
+            "width"    :   4,   // of a single key
+            "height"   :  20,   // of the diagram
+            "keys"     :  14,   // or 7, 10, 14, 17, 21
+            "base"     :  "C",  // or "F"
+            "linewidth" : 0.1,  // fraction of a single key width
+            "pressed"  :  "grey",   // colour of a pressed key
+            "hspace"   :  3.95, // ??
+            "vspace"   :  0.3,  // fraction of height
         },
 
 With the above settings, keyboard diagrams will look like:
@@ -349,12 +388,12 @@ The filename should be the full name of a file on disk, or a relative filename w
 The `fontdir` setting can be used to add one or more private font directories to
 the font libraries. The private directories will be searched first.
 
-		// Fonts.
-		// Fonts can be specified by name (for the corefonts)
-		// or a filename (for TrueType/OpenType fonts).
-		// Relative filenames are looked up in the fontdir.
-		// "fontdir" : [ "/usr/share/fonts/liberation", "/home/me/fonts" ],
-		"fontdir" : null,
+        // Fonts.
+        // Fonts can be specified by name (for the corefonts)
+        // or a filename (for TrueType/OpenType fonts).
+        // Relative filenames are looked up in the fontdir.
+        // "fontdir" : [ "/usr/share/fonts/liberation", "/home/me/fonts" ],
+        "fontdir" : null,
 
 See also [ChordPro Fonts]({{< relref "ChordPro-Fonts" >}}).
 
@@ -372,7 +411,7 @@ For example:
             },
             ...
         },
-			
+
 A font specification consists of the following settings:
 
 * `name` or `file`  
@@ -450,30 +489,30 @@ settings in the config file. Most PDF viewers can show outlines and
 use them for easy navigation.
 
 ````
-  	// Bookmarks (PDF outlines).
-  	// fields:   primary and (optional) secondary fields.
-  	// label:    outline label
-  	// line:     text of the outline element
-  	// collapse: initial display is collapsed
-  	// letter:   sublevel with first letters if more
-  	// fold:     group by primary (NYI)
-  	// omit:     ignore this
-  	"outlines" : [
-  	    { "fields"   : [ "sorttitle", "artist" ],
-  	      "label"    : "By Title",
-  	      "line"     : "%{title}%{artist| - %{}}",
-  	      "collapse" : false,
-  	      "letter"   : 5,
-  	      "fold"     : false,
-  	    },
-  	    { "fields"   : [ "artist", "sorttitle" ],
-  	      "label"    : "By Artist",
-  	      "line"     : "%{artist|%{} - }%{title}",
-  	      "collapse" : false,
-  	      "letter"   : 5,
-  	      "fold"     : false,
-  	    },
-  	],
+    // Bookmarks (PDF outlines).
+    // fields:   primary and (optional) secondary fields.
+    // label:    outline label
+    // line:     text of the outline element
+    // collapse: initial display is collapsed
+    // letter:   sublevel with first letters if more
+    // fold:     group by primary (NYI)
+    // omit:     ignore this
+    "outlines" : [
+        { "fields"   : [ "sorttitle", "artist" ],
+          "label"    : "By Title",
+          "line"     : "%{title}%{artist| - %{}}",
+          "collapse" : false,
+          "letter"   : 5,
+          "fold"     : false,
+        },
+        { "fields"   : [ "artist", "sorttitle" ],
+          "label"    : "By Artist",
+          "line"     : "%{artist|%{} - }%{title}",
+          "collapse" : false,
+          "letter"   : 5,
+          "fold"     : false,
+        },
+    ],
 ````
 
 The default configuration generates two outlines, one labelled `By
