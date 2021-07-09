@@ -689,7 +689,6 @@ sub app_setup {
           File::Spec->catfile( "/", "etc", "$app_lc.json" );
     }
 
-    my $e = $ENV{CHORDIIRC} || $ENV{CHORDRC};
     if ( $ENV{XDG_CONFIG_HOME} && -d $ENV{XDG_CONFIG_HOME} ) {
 	$configs{userconfig} =
 	  File::Spec->catfile( $ENV{XDG_CONFIG_HOME}, $app_lc, "$app_lc.json" );
@@ -704,10 +703,7 @@ sub app_setup {
             $configs{userconfig} =
               File::Spec->catfile( $ENV{HOME}, ".$app_lc", "$app_lc.json" );
         }
-	$e ||= File::Spec->catfile( $ENV{HOME}, ".chordrc" );
     }
-    $e ||= "/chordrc";		# Windows, most likely
-    $configs{legacyconfig} = $e if -s $e && -r _;
 
     if ( -s ".$app_lc.json" ) {
         $configs{config} = ".$app_lc.json";
@@ -807,6 +803,7 @@ sub app_setup {
           'noconfig|no-config',
           'sysconfig=s',
           'nosysconfig|no-sysconfig',
+          'nolegacyconfig|no-legacyconfig',	# legacy
           'userconfig=s',
           'nouserconfig|no-userconfig',
 	  'nodefaultconfigs|no-default-configs|X',
