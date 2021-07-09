@@ -3,10 +3,7 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More;
-
-use App::Packager ( ':name', 'App::Music::ChordPro' );
-use App::Music::ChordPro::Config;
+use App::Music::ChordPro::Testing;
 use App::Music::ChordPro::Chords;
 
 my %tbl;
@@ -23,13 +20,7 @@ while ( <DATA> ) {
 
 #=cut
 
-plan tests => 1 + keys(%tbl);
-
-our $config =
-  eval {
-      App::Music::ChordPro::Config::configurator;
-  };
-ok( $config, "got config" );
+plan tests => 0 + keys(%tbl);
 
 App::Music::ChordPro::Chords::set_parser("roman");
 

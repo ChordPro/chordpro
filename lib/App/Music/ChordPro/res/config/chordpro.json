@@ -10,8 +10,7 @@
     // "include" : [ "modern1", "lib/mycfg.json" ],
     "include" : [ "guitar" ],
 
-    // General settings, to be changed by legacy configs and
-    // command line.
+    // General settings, to be changed by configs and command line.
     "settings" : {
       // Add line info for backend diagnostics.
       "lineinfo" : true,
@@ -36,7 +35,7 @@
       // Chords under the lyrics.
       "chords-under" : false,
       // Transcoding.
-      "transcode" : null,
+      "transcode" : "",
       // Always decapoize.
       "decapo" : false,
       // Chords parsing strategy.
@@ -61,6 +60,10 @@
       "strict" : true,
       "separator" : "; ",
     },
+    // Globally defined (added) meta data,
+    // This is explicitly NOT intended for the metadata items above.
+    "meta" : {
+    },
 
     // Dates.
     "dates" : {
@@ -69,10 +72,20 @@
         }
     },
 
+    // User settings. These are usually set by a separate config file.
+    //
+    "user" : {
+        "name"     : "",
+        "fullname" : "",
+    },
+
     // Instrument settings. These are usually set by a separate
     // config file.
     //
-    "instrument" : null,
+    "instrument" : {
+        "type"     : "",
+        "description" : "",
+    },
 
     // Note (chord root) names.
     // Strings and tuning.
@@ -126,6 +139,8 @@
     //         "all": all chords used.
     //         "user": only prints user defined chords.
     // "sorted": order the chords by key.
+    // Note: The type of diagram (string or keyboard) is determined
+    // by the value of "instrument.type".
     "diagrams" : {
 	"auto"     :  false,
 	"show"     :  "all",
@@ -142,18 +157,21 @@
 	{ "fields"   : [ "songindex" ],
 	  "label"    : "Table of Contents",
 	  "line"     : "%{title}",
+          "pageno"   : "%{pageno}",
 	  "fold"     : false,
 	  "omit"     : false,
 	},
 	{ "fields"   : [ "sorttitle", "artist" ],
 	  "label"    : "Contents by Title",
 	  "line"     : "%{title}%{artist| - %{}}",
+          "pageno"   : "%{pageno}",
 	  "fold"     : false,
 	  "omit"     : false,
 	},
 	{ "fields"   : [ "artist", "sorttitle" ],
 	  "label"    : "Contents by Artist",
 	  "line"     : "%{artist|%{} - }%{title}",
+          "pageno"   : "%{pageno}",
 	  "fold"     : false,
 	  "omit"     : true,
 	},
@@ -190,6 +208,11 @@
 
       // Papersize, 'a4' or [ 595, 842 ] etc.
       "papersize" : "a4",
+
+      "theme" : {
+          "foreground" : "black",
+          "background" : "none",
+      },
 
       // Space between columns, in pt.
       "columnspace"  :  20,
@@ -230,7 +253,7 @@
 	  "bar" : {
 	      "offset" :  8,
 	      "width"  :  1,
-	      "color"  : "black",
+	      "color"  : "foreground",
 	  },
 	  "tag" : "Chorus",
 	  // Recall style: Print the tag using the type.
@@ -250,7 +273,7 @@
 	  // Alignment for the labels. Default is left.
 	  "align" : "left",
 	  // Alternatively, render labels as comments.
-	  "comment" : null	// "comment", "comment_italic" or "comment_box",
+	  "comment" : ""	// "comment", "comment_italic" or "comment_box",
       },
 
       // Alternative songlines with chords in a side column.
@@ -277,12 +300,33 @@
       // or "below" the last song line.
       "diagrams" : {
 	  "show"     :  "bottom",
-	  "width"    :  6,
-	  "height"   :  6,
-	  "hspace"   :  3.95,
-	  "vspace"   :  3,
-	  "vcells"   :  4,
-	  "linewidth" : 0.1,
+	  "width"    :  6,	// of a cell
+	  "height"   :  6,	// of a cell
+	  "vcells"   :  4,	// vertically
+	  "linewidth" : 0.1,	// of a cell width
+	  "hspace"   :  3.95,	// fraction of width
+	  "vspace"   :  3,	// fraction of height
+      },
+
+      // Keyboard diagrams.
+      // A keyboard diagram consists of a number of keys.
+      // Dimensions are specified by "width" (a key) and "height".
+      // The horizontal distance between diagrams is "hspace" * keys * width.
+      // The vertical distance is "vspace" * height.
+      // "linewidth" is the thickness of the lines as a fraction of "width".
+      // Diagrams for all chords of the song can be shown at the
+      // "top", "bottom" or "right" side of the first page,
+      // or "below" the last song line.
+      "kbdiagrams" : {
+	  "show"     :  "bottom",
+	  "width"    :   4,	// of a single key
+	  "height"   :  20,	// of the diagram
+	  "keys"     :  14,	// or 7, 10, 14, 17, 21
+          "base"     :  "C",	// or "F"
+	  "linewidth" : 0.1,	// fraction of a single key width
+          "pressed"  :  "grey",	// colour of a pressed key
+	  "hspace"   :  3.95,	// ??
+	  "vspace"   :  0.3,	// fraction of height
       },
 
       // Even/odd pages. A value of -1 denotes odd/even pages.
@@ -291,6 +335,21 @@
       "pagealign-songs" : 1,
 
       // Formats.
+      // Pages have two title elements and one footer element.
+      // Topmost is "title". It uses the "title" font as defined further below.
+      // Second is "subtitle". It uses the "subtitle" font.
+      // The "footer" uses the "footer" font.
+      // All elements can have three fields, that are placed to the left side,
+      // centered, and right side of the page.
+      // The contents of all fields is defined below. You can use metadata
+      // items in the fields as shown. By default, the "title" element shows the
+      // value of metadata item "title", centered on the page. Likewise
+      // "subtitle".
+      // NOTE: The "title" and "subtitle" page elements have the same names
+      // as the default metadata values which may be confusing. To show
+      // metadata item, e.g. "artist", add its value to one of the
+      // title/subtitle fields. Don't try to add an artist page element.
+
       "formats" : {
 	  // Titles/Footers.
 
@@ -301,8 +360,8 @@
 	  // By default, a page has:
 	  "default" : {
 	      // No title/subtitle.
-	      "title"     : null,
-	      "subtitle"  : null,
+	      "title"     : [ "", "", "" ],
+	      "subtitle"  : [ "", "", "" ],
 	      // Footer is title -- page number.
 	      "footer"    : [ "%{title}", "", "%{page}" ],
 	  },
@@ -318,7 +377,7 @@
 	  "first" : {
 	      // It has title and subtitle, like normal 'first' pages.
 	      // But no footer.
-	      "footer"    : null,
+	      "footer"    : [ "", "", "" ],
 	  },
       },
 
@@ -339,7 +398,7 @@
       // Relative filenames are looked up in the fontdir.
       // "fontdir" : [ "/usr/share/fonts/liberation", "/home/me/fonts" ],
 
-      "fontdir" : null,
+      "fontdir" : [],
       "fontconfig" : {
 	  // alternatives: regular r normal <empty>
 	  // alternatives: bold b strong
@@ -437,7 +496,7 @@
 
       // Bookmarks (PDF outlines).
       // fields:   primary and (optional) secondary fields.
-      // label:    outline label
+      // label:    outline label (omitted if there's only one outline)
       // line:     text of the outline element
       // collapse: initial display is collapsed
       // letter:   sublevel with first letters if more
@@ -498,6 +557,25 @@
 	"classifier" : "pct_chords",
 	// Tab stop width for tab expansion. Set to zero to disable.
 	"tabstop" : 8,
+    },
+
+    // Settings for the parser/preprocessor.
+    // For selected lines, you can specify a series of 
+    // { "target" : "xxx", "replace" : "yyy" }
+    // Every occurrence of "xxx" will be replaced by "yyy".
+    // Use wisely.
+    "parser" : {
+	"preprocess" : {
+	    // All lines.
+	    "all" : [],
+	    // Song lines (lyrics) only.
+            "songline" : [],
+	},
+    },
+
+    // For (debugging (internal use only)).
+    "debug" : {
+        "song" : 0,
     },
 
 }

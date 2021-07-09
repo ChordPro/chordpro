@@ -1,21 +1,43 @@
 #! perl
 
+use strict;
+
 package App::Music::ChordPro::Output::PDF::StringDiagrams;
 
 use App::Music::ChordPro::Chords;
 
 sub new {
-    my ( $pkg, %init ) = @_;
-    bless { %init || () } => $pkg;
+    my ( $pkg, $ps ) = @_;
+
+    my $ctl = $ps->{kbdiagrams};
+
+    my $show = $ctl->{show};
+    unless ( $show =~ /^(?:top|bottom|right|below)$/i ) {
+	die("pdf.diagrams.show is \"$show\", must be one of ".
+	    "\"top\", \"bottom\", \"right\", or \"below\"\n");
+    }
+
+    bless { ps => $ps } => $pkg;
 }
 
 # The vertical space the diagram requires.
-sub vsp {
+sub vsp0 {
     my ( $self, $elt, $ps ) = @_;
     $ps->{fonts}->{diagram}->{size} * 1.2
       + 0.40 * $ps->{diagrams}->{width}
-	+ $ps->{diagrams}->{vcells} * $ps->{diagrams}->{height}
-	  + $ps->{diagrams}->{vspace} * $ps->{diagrams}->{height};
+	+ $ps->{diagrams}->{vcells} * $ps->{diagrams}->{height};
+}
+
+# The advance height.
+sub vsp1 {
+    my ( $self, $elt, $ps ) = @_;
+    $ps->{diagrams}->{vspace} * $ps->{diagrams}->{height};
+}
+
+# The vertical space the diagram requires, including advance height.
+sub vsp {
+    my ( $self, $elt, $ps ) = @_;
+    $self->vsp0( $elt, $ps ) + $self->vsp1( $elt, $ps );
 }
 
 # The horizontal space the diagram requires.
@@ -80,8 +102,8 @@ sub draw {
     my $h = $strings;
 
     # Draw the grid.
-    $pr->hline( $x, $y - $_*$gh, $w, $lw ) for 0..$v;
-    $pr->vline( $x0 + $_*$gw, $y, $gh*$v, $lw ) for 0..$h-1;
+    my $xo = $self->grid_xo($ps);
+    $pr->{pdfgfx}->formimage( $xo, $x, $y-$v*$gh, 1 );
 
     # Bar detection.
     my $bar;
@@ -112,7 +134,7 @@ sub draw {
 		# Print the bar line.
 		$pr->hline( $x+$bi[2]*$gw, $y-$bi[1]*$gh+$gh/2,
 			    ($bi[3]-$bi[2])*$gw,
-			    6*$lw, "black" );
+			    6*$lw, $ps->{theme}->{foreground} );
 	    }
 	}
     }
@@ -135,7 +157,7 @@ sub draw {
 		# The dingbat glyphs are open, so we need a white
 		# background circle.
 		$pr->circle( $x+$gw/2, $y-$fret*$gh+$gh/2, $dot/2, 1,
-			     "white", "black" );
+			     $ps->{theme}->{background}, $ps->{theme}->{foreground} );
 		my $dot = $dot/0.7;
 		my $glyph = pack( "C", 0xca + $fing - 1 );
 		$pr->setfont( $ps->{fonts}->{chordfingers}, $dot );
@@ -146,15 +168,16 @@ sub draw {
 	    }
 	    else {
 		$pr->circle( $x+$gw/2, $y-$fret*$gh+$gh/2, $dot/2, 1,
-			     "black", "black" );
+			     $ps->{theme}->{foreground}, $ps->{theme}->{foreground});
 	    }
 	}
 	elsif ( $fret < 0 ) {
-	    $pr->cross( $x+$gw/2, $y+$lw+$gh/3, $dot/3, $lw, "black");
+	    $pr->cross( $x+$gw/2, $y+$lw+$gh/3, $dot/3, $lw,
+			$ps->{theme}->{foreground} );
 	}
 	elsif ( $info->{base} > 0 ) {
 	    $pr->circle( $x+$gw/2, $y+$lw+$gh/3, $dot/3, $lw,
-			 undef, "black");
+			 undef, $ps->{theme}->{foreground} );
 	}
     }
     continue {
@@ -162,6 +185,40 @@ sub draw {
     }
 
     return $gw * ( $ps->{diagrams}->{hspace} + $strings );
+}
+
+sub grid_xo {
+    my ( $self, $ps ) = @_;
+
+    my $gw = $ps->{diagrams}->{width};
+    my $gh = $ps->{diagrams}->{height};
+    my $lw  = ($ps->{diagrams}->{linewidth} || 0.10) * $gw;
+    my $v = $ps->{diagrams}->{vcells};
+    my $strings = App::Music::ChordPro::Chords::strings();
+
+    return $self->{grids}->{$gw,$gh,$lw,$v,$strings} //= do
+      {
+	my $w = $gw * ($strings - 1);
+	my $h = $strings;
+
+	my $form = $ps->{pr}->{pdf}->xo_form;
+
+	# Bounding box must take linewidth into account.
+	my @bb = ( -$lw/2, -$lw/2, ($h-1)*$gw+$lw/2, $v*$gh+$lw/2 );
+	$form->bbox(@bb);
+
+	# Pseudo-object to access low level drawing routines.
+	my $dc = bless { pdfgfx => $form } =>
+	  App::Music::ChordPro::Output::PDF::Writer::;
+
+	# Draw the grid.
+	$dc->rectxy( @bb, 0, 'red' ) if 0;
+	my $color = $ps->{theme}->{foreground};
+	$dc->hline( 0, ($v-$_)*$gh, $w, $lw, $color ) for 0..$v;
+	$dc->vline( $_*$gw, $v*$gh, $gh*$v, $lw, $color) for 0..$h-1;
+
+	$form;
+      };
 }
 
 1;

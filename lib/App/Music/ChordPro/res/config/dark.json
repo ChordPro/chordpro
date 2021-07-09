@@ -1,0 +1,16 @@
+{
+    "pdf" : {
+        "theme" : {
+            "foreground" : "white",
+            "background" : "black",
+        },
+        "fonts" : {
+            "chord" : {
+                "color" : "red",
+            },
+            "comment" : {
+                "background" : "#555555",
+            },
+        },
+    },
+}

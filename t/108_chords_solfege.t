@@ -3,10 +3,8 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More;
 
-use App::Packager ( ':name', 'App::Music::ChordPro' );
-use App::Music::ChordPro::Config;
+use App::Music::ChordPro::Testing;
 use App::Music::ChordPro::Chords;
 use App::Music::ChordPro::Chords::Parser;
 
@@ -95,9 +93,7 @@ while ( <DATA> ) {
     $tbl{$c} = $info;
 }
 
-plan tests => 1 + keys(%tbl);
-
-ok( $config, "got config" );
+plan tests => 0 + keys(%tbl);
 
 while ( my ( $c, $info ) = each %tbl ) {
     my $res = App::Music::ChordPro::Chords::parse_chord($c);

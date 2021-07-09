@@ -63,6 +63,7 @@ L<https://www.chordpro.org>.
 use strict;
 use warnings;
 use Carp;
+use Text::ParseWords ();
 
 ################ The Process ################
 
@@ -167,7 +168,27 @@ sub chordpro {
 	goto WRITE_OUTPUT;
     }
 
-    $s->parse_file($_) foreach @::ARGV;
+    # Check for metadata in filelist. Actually, this works on the
+    # command line as well, but don't tell anybody.
+    foreach my $file ( @ARGV ) {
+	my $opts;
+	if ( $file =~ /(^|\s)--(?:meta|config)\b/ ) {
+	    # Break into words.
+	    my @w = Text::ParseWords::shellwords($file);
+	    my %meta;
+	    my @cfg;
+	    die("Error in filelist: $file\n")
+	      unless Getopt::Long::GetOptionsFromArray
+	      ( \@w, 'config=s@' => \@cfg, 'meta=s%' => \%meta )
+	      && @w == 1;
+	    $file = $w[0];
+	    $opts = { meta => { map { $_, [ $meta{$_} ] } keys %meta } };
+	    if ( @cfg ) {
+		$opts->{meta}->{__config} = \@cfg;
+	    }
+	}
+	$s->parse_file( $file, $opts );
+    }
 
     if ( $options->{'dump-chords'} ) {
 	my $d = App::Music::ChordPro::Song->new;
@@ -537,10 +558,6 @@ paper size, assuming that all printers use the same size.
 
 Don't use the system specific config file, even if it exists.
 
-=item B<--nolegacyconfig>
-
-Don't use a legacy config file, even if it exists.
-
 =item B<--userconfig=>I<CFG>
 
 Designates the config file for the user.
@@ -647,6 +664,7 @@ sub app_setup {
     my $version = 0;            # handled locally
     my $defcfg = 0;		# handled locally
     my $fincfg = 0;		# handled locally
+    my $deltacfg = 0;		# handled locally
     my $dump_chords = 0;	# handled locally
 
     # Package name.
@@ -680,6 +698,7 @@ sub app_setup {
         if ( -d File::Spec->catfile( $ENV{HOME}, ".config" ) ) {
             $configs{userconfig} =
               File::Spec->catfile( $ENV{HOME}, ".config", $app_lc, "$app_lc.json" );
+	    $ENV{CHORDPRO_LIB} ||= File::Spec->catfile( $ENV{HOME}, ".config", $app_lc);
         }
         else {
             $configs{userconfig} =
@@ -790,11 +809,11 @@ sub app_setup {
           'nosysconfig|no-sysconfig',
           'userconfig=s',
           'nouserconfig|no-userconfig',
-	  'nolegacyconfig|no-legacy-config',
 	  'nodefaultconfigs|no-default-configs|X',
 	  'define=s%',
 	  'print-default-config' => \$defcfg,
 	  'print-final-config'   => \$fincfg,
+	  'print-delta-config'   => \$deltacfg,
 
           ### Standard options ###
 
@@ -832,7 +851,7 @@ sub app_setup {
 
     # If the user specified a config, it must exist.
     # Otherwise, set to a default.
-    for my $config ( qw(sysconfig userconfig legacyconfig) ) {
+    for my $config ( qw(sysconfig userconfig) ) {
         for ( $clo->{$config} ) {
             if ( defined($_) ) {
                 die("$_: $!\n") unless -r $_;
@@ -865,7 +884,7 @@ sub app_setup {
         }
     }
     # If no config was specified, and no default is available, force no.
-    for my $config ( qw(sysconfig userconfig config legacyconfig) ) {
+    for my $config ( qw(sysconfig userconfig config) ) {
         $clo->{"no$config"} = 1 unless $clo->{$config};
     }
 
@@ -885,11 +904,11 @@ sub app_setup {
     $::options = $options;
     # warn(::dump($options), "\n") if $options->{debug};
 
-    if ( $defcfg || $fincfg ) {
+    if ( $defcfg || $fincfg || $deltacfg ) {
 	print App::Music::ChordPro::Config::config_default()
 	  if $defcfg;
-	print App::Music::ChordPro::Config::config_final()
-	  if $fincfg;
+	print App::Music::ChordPro::Config::config_final($deltacfg)
+	  if $fincfg || $deltacfg;
 	exit 0;
     }
 
@@ -1047,11 +1066,11 @@ Configuration options:
     --nouserconfig      Don't use a user specific config file
     --sysconfig=CFG     System specific config file ($cfg{sysconfig})
     --nosysconfig       Don't use a system specific config file
-    --nolegacyconfig    Don't use a Chord/Chordii legacy config file
     --nodefaultconfigs  -X  Don't use any default config files
     --define=XXX=YYY	Sets config item XXX to value YYY
     --print-default-config   Prints the default config and exits
     --print-final-config   Prints the resultant config and exits
+    --print-delta-config   Prints the diffs for the resultant config and exits
 Missing default configuration files are silently ignored.
 
 Miscellaneous options:

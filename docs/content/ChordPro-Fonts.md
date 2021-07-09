@@ -22,8 +22,27 @@ has a specification for the page titles:
 The `"name"` designates the built-in font `"Times-Roman"`.
 Alternatively you can use `"file"` to designate a font file on your
 system, or `"description"` to find a suitable font using _font families_.
+The order of precedence is `"file"`, `"description"`, and `"name"`.
 
-## Method 1: Using a font description
+## Method 1: Using a font filename
+
+A font filename can be specified with `"file"` and must be either an
+absolute filename, or a relative filename which is interpreted
+relative to the _font path_, which consists of [configuration
+setting]({{< relref "ChordPro-Configuration" >}}) `fontdir`, the
+`fonts` resource dir, and the contents of environment variable
+`FONTDIR`. In any case, the filename should point to a valid TrueType
+(`.ttf`) or OpenType (`.otf`) font.
+
+If the font file cannot be found, ChordPro will abort with an
+appropriate error message.
+
+If you have quality PostScript Type1 fonts (a collection of `.pfa` or
+`.pfb`, with `.afm` and/or `.pfm` files) they can easily be converted
+to TrueType or OpenType using a tool like
+[FontForge](https://fontforge.github.io/).
+
+## Method 2: Using a font description
 
 A font description is a flexible and system independent way to select
 a font. The description is a string containing up to four identifying
@@ -114,21 +133,6 @@ Note that shaping requires the perl module `HarfBuzz::Shaper` to be
 installed on the system.
 
 _Exact semantics of font properties are still under development._
-
-## Method 2: Using a font filename
-
-A font filename can be specified with `"file"` and must be either an
-absolute filename, or a relative filename which is interpreted
-relative to the _font path_, which consists of [configuration
-setting]({{< relref "ChordPro-Configuration" >}}) `fontdir`, the
-`fonts` resource dir, and the contents of environment variable
-`FONTDIR`. In any case, the filename should point to a valid TrueType
-(`.ttf`) or OpenType (`.otf`) font.
-
-If you have quality PostScript Type1 fonts (a collection of `.pfa` or
-`.pfb`, with `.afm` and/or `.pfm` files) they can easily be converted
-to TrueType or OpenType using a tool like
-[FontForge](https://fontforge.github.io/).
 
 ## Method 3: Using a built-in font
 
@@ -415,7 +419,7 @@ update.
 ````
 // Explicitly disable our fontconfig, so fonts will be looked up
 // by the system.
-"fontconfig" : null,
+"fontconfig" : [],
 
 // "fonts" associates output elements to font families as defined in
 // "fontconfig" above.

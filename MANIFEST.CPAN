@@ -1,4 +1,5 @@
 CPAN/App/Packager.pm
+CPAN/Data/Properties.pm
 CPAN/File/LoadLines.pm
 CPAN/Font/TTF/AATKern.pm
 CPAN/Font/TTF/AATutils.pm
@@ -112,7 +113,6 @@ CPAN/PDF/API2/Outline.pm
 CPAN/PDF/API2/Outlines.pm
 CPAN/PDF/API2/Page.pm
 CPAN/PDF/API2.pm
-CPAN/PDF/API2.pm.font-location
 CPAN/PDF/API2/Resource/BaseFont.pm
 CPAN/PDF/API2/Resource/CIDFont/CJKFont/adobemingstdlightacro.data
 CPAN/PDF/API2/Resource/CIDFont/CJKFont/adobemyungjostdmediumacro.data

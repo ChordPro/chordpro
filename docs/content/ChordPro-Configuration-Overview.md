@@ -13,25 +13,33 @@ In the examples below the symbol `~` denotes the user's home directory. Windows 
 
 1. On systems that support it, a system-wide configuration file is read. On Linux systems, this is `/etc/chordpro.json`.
 
-2. A legacy config file from the older _Chord_<sub>ii</sub> program is processed. By default this is `~/.chordrc` but this can be changed using environment variables `CHORDIIRC` or `CHORDRC`.
-
-3. A user specific configuration file is read from either:
+2. A user specific configuration file is read from either:
 
     `~/.config/chordpro/chordpro.json`  
     `~/.chordpro/chordpro.json`  
   Note that if you have a `~/.config` directory ChordPro expects the configs to be there and the latter alternative will be ignored.
 
-4. A project specific configuration file is read from the current directory, either:
+3. A project specific configuration file is read from the current directory, either:
 
     `chordpro.json`  
     `.chordpro.json`
 
-Instead of a project specific configuration file you can specify arbitrary configuration files.
+   Instead of a project specific configuration file you can specify arbitrary configuration files.
 
-* In the GUI, select `Preferences...` from the `Edit` menu.  
-Using the configuration dropdown list, choose `Custom`.  
-Click `...` for a file dialog to choose the desired configuration file.
-* On the command line, pass the name of the configuration file with `--config`, for example `--config=myconfig.json`. 
+   * In the GUI, select `Preferences...` from the `Edit` menu.  
+     Using the configuration dropdown list, choose `Custom`.  
+     Click `...` for a file dialog to choose the desired configuration file.
+   * On the command line, pass the name of the configuration file with
+     `--config`, for example `--config=myconfig.json`.
+
+4. A song specific configuration file is read if it exists. The name
+   of the configuration file is the same as the song file name, with
+   the extension replaced by `prp` or `json` (in that order).  
+
+   Note that the scope of the song specific configuration file is the
+   song only. Every song will start with an initial config that results from
+   steps 1 through 3, and then its song specific configuration file if
+   it exists.
 
 ## How config files are combined
 
@@ -64,7 +72,11 @@ the result will be:
 
 ### Merging array values items
 
-Arrays are either overwritten or appended. This is controlled by the first element of the new array. If this first element is the string `"append"` then the content are appended, otherwise it is overwritten.
+Arrays are either overwritten or appended/prepended. This is
+controlled by the first element of the new array. If this first
+element is the string `"append"` then the new contents are appended, if it
+is `"prepend"` then the new contents are prepended. Otherwise the new
+contents replace the existing contents.
 
 For example:
 

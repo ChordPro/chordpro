@@ -1,14 +1,12 @@
 #! perl
 
 use strict;
-use Test::More;
-use App::Packager qw( :name App::Music::ChordPro );
+use warnings;
+use utf8;
 
-require "./differ.pl";
+use App::Music::ChordPro::Testing;
 
 mkdir("out") unless -d "out";
-
-use App::Music::ChordPro;
 
 my $test;
 

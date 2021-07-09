@@ -13,6 +13,7 @@ use warnings;
 use Encode qw( encode_utf8 );
 use App::Packager;
 use File::Temp ();
+use Storable qw(dclone);
 
 use App::Music::ChordPro::Output::Common
   qw( roman prep_outlines fmt_subst demarkup );
@@ -100,6 +101,7 @@ sub generate_songbook {
 	my $t = $ctl->{label};
 	my $l = $ctl->{line};
 	my $start = $book_start_page - 1;
+	my $pgtpl = $ctl->{pageno};
 	my $song =
 	  { title     => $t,
 	    meta => { title => [ $t ] },
@@ -109,7 +111,7 @@ sub generate_songbook {
 			      context => "toc",
 			      title   => fmt_subst( $_->[-1], $l ),
 			      page    => $pr->{pdf}->openpage($_->[-1]->{meta}->{tocpage}+$start),
-			      pageno  => $_->[-1]->{meta}->{tocpage},
+			      pageno  => fmt_subst( $_->[-1], $pgtpl ),
 			    } } @$book,
 	    ],
 	  };
@@ -228,6 +230,8 @@ sub generate_song {
     my ( $s, $opts ) = @_;
 
     return 0 unless $s->{body};	# empty song
+    local $config = dclone( $s->{config} // $config );
+
     $source = $s->{source};
     $assets = $s->{assets} || {};
 
@@ -246,8 +250,18 @@ sub generate_song {
     $s->structurize if $structured;
 
     # Diagrams drawer.
-    require App::Music::ChordPro::Output::PDF::StringDiagrams;
-    my $dd = App::Music::ChordPro::Output::PDF::StringDiagrams->new;
+    my $dd;
+    my $dctl;
+    if ( $::config->{instrument}->{type} eq "keyboard" ) {
+	require App::Music::ChordPro::Output::PDF::KeyboardDiagrams;
+	$dd = App::Music::ChordPro::Output::PDF::KeyboardDiagrams->new($ps);
+	$dctl = $ps->{kbdiagrams};
+    }
+    else {
+	require App::Music::ChordPro::Output::PDF::StringDiagrams;
+	$dd = App::Music::ChordPro::Output::PDF::StringDiagrams->new($ps);
+	$dctl = $ps->{diagrams};
+    }
 
     my $sb = $s->{body};
 
@@ -255,8 +269,7 @@ sub generate_song {
     App::Music::ChordPro::Chords::reset_song_chords();
     if ( $s->{define} ) {
 	foreach ( @{ $s->{define} } ) {
-	    App::Music::ChordPro::Chords::add_song_chord
-		( $_->{name}, $_->{base}, $_->{frets}, $_->{fingers} );
+	    App::Music::ChordPro::Chords::add_song_chord($_);
 	}
     }
 
@@ -461,6 +474,8 @@ sub generate_song {
 
 	$x = $ps->{__leftmargin};
 	if ( $ps->{headspace} ) {
+	    warn("Metadata for pageheading: ", ::dump($s->{meta}), "\n")
+	      if $options->{debug};
 	    $y = $ps->{_margintop} + $ps->{headspace};
 	    $y -= font_bl($fonts->{title});
 	    $tpt->("title");
@@ -503,11 +518,11 @@ sub generate_song {
 
     my $chorddiagrams = sub {
 	my ( $chords, $show ) = @_;
-	return unless $ps->{diagrams}->{show};
+	return unless $dctl->{show};
 	my @chords;
 	$chords = $s->{chords}->{chords}
 	  if !defined($chords) && $s->{chords};
-	$show //= $ps->{diagrams}->{show};
+	$show //= $dctl->{show};
 	if ( $chords ) {
 	    foreach ( @$chords ) {
 		my $i = getchordinfo($_);
@@ -534,10 +549,9 @@ sub generate_song {
 	    my $c = int( ( @chords - 1) / $v ) + 1;
 	    # warn("XXX ", scalar(@chords), ", $c colums of $v max\n");
 	    my $column =
-	      ( $ps->{_marginright} - $ps->{_marginleft}
+	      $ps->{_marginright} - $ps->{_marginleft}
 		- ($c-1) * $dd->hsp(undef,$ps)
-		- $dd->hsp0(undef,$ps)
-		- $ps->{diagrams}->{width} * 0.4 );
+		- $dd->hsp0(undef,$ps);
 
 	    my $hsp = $dd->hsp(undef,$ps);
 	    my $x = $x + $column - $ps->{_indent};
@@ -597,7 +611,7 @@ sub generate_song {
 	    my $y = $ps->{marginbottom} + (int((@chords-1)/$h) + 1) * $vsp;
 	    $ps->{_bottommargin} = $y;
 
-	    $y -= $ps->{diagrams}->{vspace} * $ps->{diagrams}->{height};
+	    $y -= $dd->vsp1( undef, $ps ); # advance height
 
 	    while ( @chords ) {
 		my $x = $x - $ps->{_indent};
@@ -620,8 +634,7 @@ sub generate_song {
 	    my $hsp = $dd->hsp( undef, $ps );
 	    my $h = int( ( $ps->{__rightmargin}
 			   - $ps->{__leftmargin}
-			   + $ps->{diagrams}->{hspace}
-			   * $ps->{diagrams}->{width} ) / $hsp );
+			   + $dd->hsp1( undef, $ps ) ) / $hsp );
 	    while ( @chords ) {
 		$checkspace->($vsp);
 		my $x = $x - $ps->{_indent};
@@ -671,7 +684,7 @@ sub generate_song {
 
 	if ( $elt->{type} ne "set" && !$did++ ) {
 	    # Insert top/left/right/bottom chord diagrams.
- 	    $chorddiagrams->() unless $ps->{diagrams}->{show} eq "below";
+ 	    $chorddiagrams->() unless $dctl->{show} eq "below";
 	    showlayout($ps) if $ps->{showlayout} || $debug_spacing;
 	}
 
@@ -789,7 +802,7 @@ sub generate_song {
 		$pr->rectxy( $x0 + $indent, $y + 1,
 			     $x0 + $indent + $w + 1, $y - $vsp + 1,
 			     0.5, undef,
-			     $ftext->{color} || "black" );
+			     $ftext->{color} || $ps->{theme}->{foreground} );
 	    }
 
 =cut
@@ -900,7 +913,7 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "delegate" ) {
-	    if ( $elt->{subtype} eq "image" ) {
+	    if ( $elt->{subtype} =~ /^image(?:-(\w+))?$/ ) {
 		my $hd = __PACKAGE__->can($elt->{handler});
 		my $img = $hd->( $s, $pr, $elt );
 		next unless $img;
@@ -1084,7 +1097,7 @@ sub generate_song {
 		}
 		$$c = $elt->{value};
 		$ps = App::Music::ChordPro::Config::hmerge( $ps, $cc, "" );
-# 	    warn("YYY ", $ps->{diagrams}->{show} );
+# 	    warn("YYY ", $dctl->{show} );
 	    }
 	    next;
 	}
@@ -1098,7 +1111,7 @@ sub generate_song {
 	$prev = $elt;
     }
 
-    if ( $ps->{diagrams}->{show} eq "below" ) {
+    if ( $dctl->{show} eq "below" ) {
 	$chorddiagrams->( undef, "below");
     }
 
@@ -1356,7 +1369,7 @@ sub songline {
 	    $w *= 0.75 unless defined($rest);
 
 	    $pr->hline( $ulstart, $ytext + font_ul($ftext), $w,
-			0.25, "black" );
+			0.25, $ps->{theme}->{foreground} );
 
 	    # Print the text.
 	    prlabel( $ps, $tag, $x, $ytext );
@@ -1374,8 +1387,17 @@ sub songline {
 		my $fann = $fonts->{annotation};
 		$xt0 = $pr->text( $ann, $x, $ychord, $fann );
 	    }
+	    elsif ( $chord eq '' ) {
+		$xt0 = $x;
+	    }
 	    else {
-		my $info = App::Music::ChordPro::Chords::chord_info($chord);
+		my $info = $opts{song}->{chordsinfo}->{$chord};
+		unless ( $info ) {
+		    $info = App::Music::ChordPro::Chords::chord_info($chord);
+		    warn("PDF: Lookup chord $chord... ",
+			 $info ? "found" : "fail",
+			 "\n");
+		}
 		if ( $info && $info->{system} eq "roman" ) {
 		    $xt0 = $pr->text( $pre.$info->{root},
 				      $x, $ychord, $fchord );
@@ -1402,16 +1424,11 @@ sub songline {
 				     );
 		    $xt0 = $pr->text( $post, $xt0, $ychord, $fchord );
 		}
-		elsif ( $chord) {
-		    # Strip leading (but not sole) asterisk.
-		    unless ( $chord =~ s/^\*(?=.)// ) {
-			$chord = chord_display($info) // $chord;
-		    }
-		    $xt0 = $pr->text( $pre.$chord.$post, $x, $ychord, $fchord );
+		# Strip leading (but not sole) asterisk.
+		unless ( $chord =~ s/^\*(?=.)// ) {
+		    $chord = chord_display($info) // $chord;
 		}
-		else {
-		    $xt0 = $x;
-		}
+		$xt0 = $pr->text( $pre.$chord.$post, $x, $ychord, $fchord );
 	    }
 
 	    # Do not indent chorus labels (issue #81).
@@ -1916,6 +1933,12 @@ sub getchordinfo {
 	return $info;
     }
 
+    # For keyboard, chords can easily be determined by name.
+    if ( $config->{instrument}->{type} eq "keyboard" ) {
+	$info = App::Music::ChordPro::Chords::parse_chord($name);
+	return $info if $info;
+    }
+
     warn("PDF: Unknown chord $name",
 	 $source ? ( " in song starting at line " .
 		     $source->{line} . " in " . $source->{file} ) : (),
@@ -2044,22 +2067,11 @@ sub configurator {
 
     # Chord grid width.
     if ( $options->{'chord-grid-size'} ) {
+	# Note that this is legacy, so for the chord diagrams only,
 	$pdf->{diagrams}->{width} =
 	  $pdf->{diagrams}->{height} =
 	    $options->{'chord-grid-size'} /
 	      App::Music::ChordPro::Chords::strings();
-    }
-
-    # Add font dirs.
-    for my $fontdir ( @{$pdf->{fontdir}}, getresource("fonts"), $ENV{FONTDIR} ) {
-	next unless $fontdir;
-	if ( -d $fontdir ) {
-	    $pdfapi->can("addFontDirs")->($fontdir);
-	}
-	else {
-	    warn("PDF: Ignoring fontdir $fontdir [$!]\n");
-	    undef $fontdir;
-	}
     }
 
     # Map papersize name to [ width, height ].
@@ -2130,22 +2142,34 @@ sub tpt {
     my $pr = $ps->{pr};
     my $font = $ps->{fonts}->{$type};
 
-    $pr->setfont($font);
+    my $havefont;
     my $rm = $ps->{papersize}->[0] - $ps->{_rightmargin};
 
     # Left part. Easiest.
-    $pr->text( fmt_subst( $s, $fmt[0] ), $x, $y ) if $fmt[0];
+    if ( $fmt[0] ) {
+	my $t = fmt_subst( $s, $fmt[0] );
+	if ( $t ne "" ) {
+	    $pr->setfont($font) unless $havefont++;
+	    $pr->text( $t, $x, $y );
+	}
+    }
 
     # Center part.
     if ( $fmt[1] ) {
 	my $t = fmt_subst( $s, $fmt[1] );
-	$pr->text( $t, ($rm+$x-$pr->strwidth($t))/2, $y );
+	if ( $t ne "" ) {
+	    $pr->setfont($font) unless $havefont++;
+	    $pr->text( $t, ($rm+$x-$pr->strwidth($t))/2, $y );
+	}
     }
 
     # Right part.
     if ( $fmt[2] ) {
 	my $t = fmt_subst( $s, $fmt[2] );
-	$pr->text( $t, $rm-$pr->strwidth($t), $y );
+	if ( $t ne "" ) {
+	    $pr->setfont($font) unless $havefont++;
+	    $pr->text( $t, $rm-$pr->strwidth($t), $y );
+	}
     }
 
     # Return updated baseline.
@@ -2240,6 +2264,9 @@ sub abc2image {
     $imgcnt++;
     my $src  = File::Spec->catfile( $td, "tmp${imgcnt}.abc" );
     my $img  = File::Spec->catfile( $td, "tmp${imgcnt}.jpg" );
+    if ( $elt->{subtype} =~ /^image-(\w+)$/ ) {
+	$img  = File::Spec->catfile( $td, "tmp${imgcnt}.$1" );
+    }
 
     my $fd;
     unless ( open( $fd, '>:utf8', $src ) ) {
@@ -2366,6 +2393,7 @@ sub abc2image {
 	warn("Error in ABC embedding\n");
 	return;
     }
+
 =cut
 
 }

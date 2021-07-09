@@ -1,5 +1,10 @@
 #!/usr/bin/perl
 
+package main;
+
+our $config;
+our $options;
+
 package App::Music::ChordPro::Output::Common;
 
 use strict;
@@ -26,12 +31,17 @@ sub fmt_subst {
 	        @{$m->{key}} ];
     }
     $m->{tuning} //= [ join(" ", App::Music::ChordPro::Chords::get_tuning) ];
-    $m->{instrument} //= [ $::config->{instrument} ];
+    $m->{instrument} = [ $config->{instrument}->{type} ];
+    $m->{"instrument.type"} = [ $config->{instrument}->{type} ];
+    $m->{"instrument.description"} = [ $config->{instrument}->{description} ];
+    $m->{user} = [ $config->{user}->{name} ];
+    $m->{"user.name"} = [ $config->{user}->{name} ];
+    $m->{"user.fullname"} = [ $config->{user}->{fullname} ];
     setlocale( LC_TIME, "" );
-    $m->{today} //= [ strftime( $::config->{dates}->{today}->{format},
+    $m->{today} //= [ strftime( $config->{dates}->{today}->{format},
 				localtime(time) ) ];
     interpolate( { %$s, args => $m,
-		   separator => $::config->{metadata}->{separator} },
+		   separator => $config->{metadata}->{separator} },
 		 $t );
 }
 push( @EXPORT, 'fmt_subst' );

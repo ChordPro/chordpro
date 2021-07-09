@@ -3,16 +3,13 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 2;
 
+use App::Music::ChordPro::Testing;
 use App::Music::ChordPro::Config;
 use App::Music::ChordPro::Songbook;
 
-our $config;
+plan tests => 2;
 
-eval {
-  $config = App::Music::ChordPro::Config::configurator;
-};
 !$config && diag("$@");
 ok($config, "Configuration set up");
 

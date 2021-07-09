@@ -18,6 +18,8 @@ use App::Music::ChordPro::Utils;
 use File::LoadLines;
 use File::Spec;
 use JSON::PP ();
+use Scalar::Util qw(reftype);
+use List::Util qw(any);
 
 =head1 NAME
 
@@ -81,23 +83,11 @@ sub configurator {
 	$cfg = get_config( $fn );
 	push( @cfg, prep_configs( $cfg, $fn ) );
     };
-    my $add_legacy = sub {
-	my $fn = shift;
-	warn("Warning: Legacy config $fn ignored (####TODO####)\n");
-	return;
-	# Legacy parser may need a ::config...
-	local $::config = $cfg;
-	my $cfg = get_legacy( $fn );
-	push( @cfg, prep_configs( $cfg, $fn ) );
-    };
 
-    foreach my $c ( qw( sysconfig legacyconfig userconfig config ) ) {
+    foreach my $c ( qw( sysconfig userconfig config ) ) {
 	next if $options->{"no$c"};
 	if ( ref($options->{$c}) eq 'ARRAY' ) {
 	    $add_config->($_) foreach @{ $options->{$c} };
-	}
-	elsif ( $c eq "legacyconfig" ) {
-	    $add_legacy->( $options->{$c} );
 	}
 	else {
 	    warn("Adding config for $c\n") if $verbose;
@@ -117,6 +107,10 @@ sub configurator {
 
     $cfg = shift(@cfg);
     warn("Process: $cfg->{_src}\n") if $verbose > 1;
+
+    # Presets.
+    $cfg->{user}->{name} = $ENV{USER} || $ENV{LOGNAME} || lc(getlogin());
+    $cfg->{user}->{fullname} = eval { (getpwuid($<))[6] } || "";
 
     # Add some extra entries to prevent warnings.
     for ( qw(title subtitle footer) ) {
@@ -186,7 +180,7 @@ sub configurator {
     }
     $cfg = hmerge( $cfg, $ccfg );
 
-    if ( $cfg->{settings}->{transcode} //= $options->{transcode} ) {
+    if ( $cfg->{settings}->{transcode} ||= $options->{transcode} ) {
 	my $xc = $cfg->{settings}->{transcode};
 	# Load the appropriate notes config, but retain the current parser.
 	unless ( App::Music::ChordPro::Chords::Parser->have_parser($xc) ) {
@@ -277,19 +271,17 @@ sub configurator {
     if ( $options->{decapo} ) {
 	$cfg->{settings}->{decapo} = $options->{decapo};
     }
+
+    # For convenience...
+    bless( $cfg, __PACKAGE__ );;
+
     return $cfg if $options->{'cfg-print'};
 
     # Backend specific configs.
     $backend_configurator->($cfg) if $backend_configurator;
 
-    # For convenience...
-    bless( $cfg, __PACKAGE__ );;
-
     # Locking the hash is mainly for development.
-    if ( $] >= 5.018000 ) {
-	require Hash::Util;
-	Hash::Util::lock_hash_recurse($cfg);
-    }
+    $cfg->lock;
 
     if ( $options->{verbose} > 1 ) {
 	my $cp = App::Music::ChordPro::Chords::get_parser() // "";
@@ -313,14 +305,30 @@ sub get_config {
     warn("Reading: $file\n") if $verbose > 1;
     $file = expand_tilde($file);
 
-    if ( open( my $fd, "<:raw", $file ) ) {
-	my $pp = JSON::PP->new->relaxed;
-	my $new = $pp->decode( loadlines( $fd, { split => 0 } ) );
-	close($fd);
-	return $new;
+    if ( $file =~ /\.json$/i ) {
+	if ( open( my $fd, "<:raw", $file ) ) {
+	    my $pp = JSON::PP->new->relaxed;
+	    my $new = $pp->decode( loadlines( $fd, { split => 0 } ) );
+	    close($fd);
+	    return $new;
+	}
+	else {
+	    die("Cannot open config $file [$!]\n");
+	}
+    }
+    elsif ( $file =~ /\.prp$/i ) {
+	if ( -e -f -r $file ) {
+	    require Data::Properties;
+	    my $cfg = new Data::Properties;
+	    $cfg->parse_file($file);
+	    return $cfg->data;
+	}
+	else {
+	    die("Cannot open config $file [$!]\n");
+	}
     }
     else {
-	die("Cannot open config $file [$!]\n");
+	die("Unrecognized config type: $file\n");
     }
 }
 
@@ -390,82 +398,30 @@ sub process_config {
     }
 }
 
-sub get_legacy {
-    my ( $file ) = @_;
-    my $verbose = $options->{verbose};
-    warn("Config: $file (legacy)\n") if $verbose;
-
-    my $cfg = { _src => $file };
-
-    require App::Music::ChordPro::Songbook;
-    my $s = App::Music::ChordPro::Songbook->new;
-    $s->parse_legacy_file($file);
-
-    my $song = $s->{songs}->[0];
-    foreach ( keys( %{$song->{settings}} ) ) {
-	if ( $_ eq "papersize" ) {
-	    $cfg->{pdf}->{papersize} = $song->{settings}->{papersize};
-	    next;
-	}
-	if ( $_ eq "titles" ) {
-	    $cfg->{settings}->{titles} = $song->{settings}->{titles};
-	    next;
-	}
-	if ( $_ eq "columns" ) {
-	    $cfg->{settings}->{columns} = $song->{settings}->{columns};
-	    next;
-	}
-	if ( $_ eq "diagrams" ) {
-	    $cfg->{diagrams}->{show} = $song->{settings}->{diagrams};
-	    next;
-	}
-	die("Cannot happen");
-    }
-    foreach ( @{$song->{body}} ) {
-	next if $_->{type} eq "diagrams"; # added by parser
-	next if $_->{type} eq "ignore"; # ignored
-	unless ( $_->{type} eq "control" ) {
-	    die("Cannot happen " . $_->{type} . " " . $_->{name});
-	}
-	my $name = $_->{name};
-	my $value = $_->{value};
-	unless ( $name =~ /^(text|chord|tab)-(font|size)$/ ) {
-	    die("Cannot happen");
-	}
-	$name = $1;
-	my $prop = $2;
-	if ( $prop eq "font" ) {
-	    if ( $value =~ /.+\.(?:ttf|otf)$/i ) {
-		$prop = "file";
-		$cfg->{pdf}->{fonts}->{$name}->{name} = undef;
-		$cfg->{pdf}->{fonts}->{$name}->{description} = undef;
-	    }
-	    else {
-		$cfg->{pdf}->{fonts}->{$name}->{name} = undef;
-		$cfg->{pdf}->{fonts}->{$name}->{file} = undef;
-		$prop = "description";
-	    }
-	}
-	$cfg->{pdf}->{fonts}->{$name}->{$prop} = $value;
-    }
-
-    return $cfg;
-}
-
 sub config_final {
+    my ( $delta ) = @_;
     $options->{'cfg-print'} = 1;
     my $cfg = configurator($options);
+
+    if ( $delta ) {
+	my $pp = JSON::PP->new->relaxed;
+	my $def = $pp->decode( default_config() );
+	$cfg->reduce($def);
+    }
+    $cfg->unlock;
     $cfg->{tuning} = delete $cfg->{_tuning};
+    delete($cfg->{tuning}) if $delta && !defined($cfg->{tuning});
     $cfg->{chords} = delete $cfg->{_chords};
     delete $cfg->{chords};
     delete $cfg->{_src};
+    $cfg->lock;
 
     if ( $ENV{CHORDPRO_CFGPROPS} ) {
 	cfg2props($cfg);
     }
     else {
 	my $pp = JSON::PP->new->canonical->indent(4)->pretty;
-	$pp->encode($cfg);
+	$pp->encode({%$cfg});
     }
 }
 
@@ -514,6 +470,276 @@ sub cfg2props {
     }
 
     return $ret;
+}
+
+# Locking/unlocking. Locking the hash is mainly for development, to
+# trap accidental modifications.
+
+sub lock: method {
+    my ( $self ) = @_;
+    return $self unless $] >= 5.018000;
+    require Hash::Util;
+    Hash::Util::lock_hash_recurse($self);
+}
+
+sub unlock : method {
+    my ( $self ) = @_;
+    return $self unless $] >= 5.018000;
+    require Hash::Util;
+    Hash::Util::unlock_hash_recurse($self);
+}
+
+sub is_locked : method {
+    return 0 unless $] >= 5.018000;
+    my ( $self ) = @_;
+    require Hash::Util;
+    Hash::Util::hashref_locked($self);
+}
+
+# Augment / Reduce.
+
+sub augment : method {
+    my ( $self, $hash ) = @_;
+
+    my $locked = $self->is_locked;
+    $self->unlock if $locked;
+
+    $self->_augment( $hash, "" );
+
+    $self->lock if $locked;
+
+    $self;
+}
+
+
+sub _augment {
+    my ( $self, $hash, $path ) = @_;
+
+    for my $key ( keys(%$hash) ) {
+
+	warn("Config error: unknown item $path$key\n")
+	  unless exists $self->{$key}
+	    || $path eq "pdf.fontconfig."
+	    || $key =~ /^_/;
+
+	# Hash -> Hash.
+	# Hash -> Array.
+	if ( ref($hash->{$key}) eq 'HASH' ) {
+	    if ( ref($self->{$key}) eq 'HASH' ) {
+
+		# Hashes. Recurse.
+		_augment( $self->{$key}, $hash->{$key}, "$path$key." );
+	    }
+	    elsif ( ref($self->{$key}) eq 'ARRAY' ) {
+
+		# Hash -> Array.
+		# Update single array element using a hash index.
+		foreach my $ix ( keys(%{$hash->{$key}}) ) {
+		    die unless $ix =~ /^\d+$/;
+		    $self->{$key}->[$ix] = $hash->{$key}->{$ix};
+		}
+	    }
+	    else {
+		# Overwrite.
+		$self->{$key} = $hash->{$key};
+	    }
+	}
+
+	# Array -> Array.
+	elsif ( ref($hash->{$key}) eq 'ARRAY'
+		and ref($self->{$key}) eq 'ARRAY' ) {
+
+	    # Arrays. Overwrite or append.
+	    if ( @{$hash->{$key}} ) {
+		my @v = @{ $hash->{$key} };
+		if ( $v[0] eq "append" ) {
+		    shift(@v);
+		    # Append the rest.
+		    push( @{ $self->{$key} }, @v );
+		}
+		elsif ( $v[0] eq "prepend" ) {
+		    shift(@v);
+		    # Prepend the rest.
+		    unshift( @{ $self->{$key} }, @v );
+		}
+		else {
+		    # Overwrite.
+		    $self->{$key} = $hash->{$key};
+		}
+	    }
+	    else {
+		# Overwrite.
+		$self->{$key} = $hash->{$key};
+	    }
+        }
+
+	else {
+	    # Overwrite.
+	    $self->{$key} = $hash->{$key};
+	}
+    }
+
+    $self;
+}
+
+use constant DEBUG => 0;
+
+sub reduce : method {
+    my ( $self, $hash ) = @_;
+
+    my $locked = $self->is_locked;
+
+    warn("O: ", qd($hash,1), "\n") if DEBUG;
+    warn("N: ", qd($self,1), "\n") if DEBUG;
+    my $state = _reduce( $self, $hash, "" );
+
+    $self->lock if $locked;
+
+    warn("== ", qd($self,1), "\n") if DEBUG;
+    return $self;
+}
+
+sub _ref {
+    reftype($_[0]) // ref($_[0]);
+}
+
+sub _reduce {
+
+    my ( $self, $orig, $path ) = @_;
+    my $state;
+
+    if ( _ref($self) eq 'HASH' && _ref($orig) eq 'HASH' ) {
+
+	warn("D: ", qd($self,1), "\n")  if DEBUG && !%$orig;
+	return 'D' unless %$orig;
+
+	my %hh = map { $_ => 1 } keys(%$self), keys(%$orig);
+	for my $key ( sort keys(%hh) ) {
+
+	    warn("Config error: unknown item $path$key\n")
+	      unless exists $self->{$key}
+		|| $key =~ /^_/;
+
+	    unless ( defined $orig->{$key} ) {
+		warn("D: $path$key\n") if DEBUG;
+		delete $self->{$key};
+		$state //= 'M';
+		next;
+	    }
+
+	    # Hash -> Hash.
+	    if (     _ref($orig->{$key}) eq 'HASH'
+		 and _ref($self->{$key}) eq 'HASH'
+		 or
+		     _ref($orig->{$key}) eq 'ARRAY'
+		 and _ref($self->{$key}) eq 'ARRAY' ) {
+		# Recurse.
+		my $m = _reduce( $self->{$key}, $orig->{$key}, "$path$key." );
+		delete $self->{$key} if $m eq 'D' || $m eq 'I';
+		$state //= 'M' if $m ne 'I';
+	    }
+
+	    elsif ( ($self->{$key}//'') eq ($orig->{$key}//'') ) {
+		warn("I: $path$key\n") if DEBUG;
+		delete $self->{$key};
+	    }
+	    elsif (     !defined($self->{$key})
+		    and _ref($orig->{$key}) eq 'ARRAY'
+		    and !@{$orig->{$key}}
+		    or
+		        !defined($orig->{$key})
+		    and _ref($self->{$key}) eq 'ARRAY'
+		    and !@{$self->{$key}} ) {
+		# Properties input [] yields undef.
+		warn("I: $path$key\n") if DEBUG;
+		delete $self->{$key};
+	    }
+	    else {
+		# Overwrite.
+		warn("M: $path$key => $self->{$key}\n") if DEBUG;
+		$state //= 'M';
+	    }
+	}
+	return $state // 'I';
+    }
+
+    if ( _ref($self) eq 'ARRAY' && _ref($orig) eq 'ARRAY' ) {
+
+	# Arrays.
+	if ( any { _ref($_) } @$self ) {
+	    # Complex arrays. Recurse.
+	    for ( my $key = 0; $key < @$self; $key++ ) {
+		my $m = _reduce( $self->[$key], $orig->[$key], "$path$key." );
+		#delete $self->{$key} if $m eq 'D'; # TODO
+		$state //= 'M' if $m ne 'I';
+	    }
+	    return $state // 'I';
+	}
+
+	# Simple arrays (only scalar values).
+	if ( my $dd = @$self - @$orig ) {
+	    $path =~ s/\.$//;
+	    if ( $dd > 0 ) {
+		# New is larger. Check for prepend/append.
+		# Deal with either one, not both. Maybe later.
+		my $t;
+		for ( my $ix = 0; $ix < @$orig; $ix++ ) {
+		    next if $orig->[$ix] eq $self->[$ix];
+		    $t++;
+		    last;
+		}
+		unless ( $t ) {
+		    warn("M: $path append @{$self}[-$dd..-1]\n") if DEBUG;
+		    splice( @$self, 0, $dd, "append" );
+		    return 'M';
+		}
+		undef $t;
+		for ( my $ix = $dd; $ix < @$self; $ix++ ) {
+		    next if $orig->[$ix-$dd] eq $self->[$ix];
+		    $t++;
+		    last;
+		}
+		unless ( $t ) {
+		    warn("M: $path prepend @{$self}[0..$dd-1]\n") if DEBUG;
+		    splice( @$self, $dd );
+		    unshift( @$self, "prepend" );
+		    return 'M';
+		}
+		warn("M: $path => @$self\n") if DEBUG;
+		$state = 'M';
+	    }
+	    else {
+		warn("M: $path => @$self\n") if DEBUG;
+		$state = 'M';
+	    }
+	    return $state // 'I';
+	}
+
+	# Equal length arrays with scalar values.
+	my $t;
+	for ( my $ix = 0; $ix < @$orig; $ix++ ) {
+	    next if $orig->[$ix] eq $self->[$ix];
+	    warn("M: $path$ix => $self->[$ix]\n") if DEBUG;
+	    $t++;
+	    last;
+	}
+	if ( $t ) {
+	    warn("M: $path\n") if DEBUG;
+	    return 'M';
+	}
+	warn("I: $path\[]\n") if DEBUG;
+	return 'I';
+    }
+
+    # Two scalar values.
+    $path =~ s/\.$//;
+    if ( $self eq $orig ) {
+	warn("I: $path\n") if DEBUG;
+	return 'I';
+    }
+
+    warn("M $path $self\n") if DEBUG;
+    return 'M';
 }
 
 sub hmerge($$;$) {
@@ -627,6 +853,54 @@ sub clone($) {
     return $copy;
 }
 
+## Data::Properties compatible API.
+#
+# Note: Lookup always takes the context into account.
+# Note: Always signals undefined values.
+
+my $prp_context = "";
+
+sub get_property : method {
+    my $p = shift;
+    for ( split( /\./,
+		 $prp_context eq ""
+		 ? $_[0]
+		 : "$prp_context.$_[0]" ) ) {
+	if ( /^\d+$/ ) {
+	    die("No config $_[0]\n") unless _ref($p) eq 'ARRAY';
+	    $p = $p->[$_];
+	}
+	else {
+	    die("No config $_[0]\n") unless _ref($p) eq 'HASH';
+	    $p = $p->{$_};
+	}
+    }
+    $p //= $_[1];
+    die("No config $_[0]\n") unless defined $p;
+    $p;
+}
+
+*gps = \&get_property;
+
+sub set_property : method {
+    die("...");			# 5.10 cannot handle ... yet
+}
+
+sub set_context : method {
+    $prp_context = $_[1] // "";
+}
+
+sub get_context : method {
+    $prp_context;
+}
+
+use base qw(Exporter);
+our @EXPORT = qw( _c );
+
+sub _c {
+    $::config->gps(@_);
+}
+
 # Get the raw contents of the builtin (default) config.
 sub default_config() {
     return <<'End_Of_Config';
@@ -642,8 +916,7 @@ sub default_config() {
     // "include" : [ "modern1", "lib/mycfg.json" ],
     "include" : [ "guitar" ],
 
-    // General settings, to be changed by legacy configs and
-    // command line.
+    // General settings, to be changed by configs and command line.
     "settings" : {
       // Add line info for backend diagnostics.
       "lineinfo" : true,
@@ -668,7 +941,7 @@ sub default_config() {
       // Chords under the lyrics.
       "chords-under" : false,
       // Transcoding.
-      "transcode" : null,
+      "transcode" : "",
       // Always decapoize.
       "decapo" : false,
       // Chords parsing strategy.
@@ -693,6 +966,10 @@ sub default_config() {
       "strict" : true,
       "separator" : "; ",
     },
+    // Globally defined (added) meta data,
+    // This is explicitly NOT intended for the metadata items above.
+    "meta" : {
+    },
 
     // Dates.
     "dates" : {
@@ -701,10 +978,20 @@ sub default_config() {
         }
     },
 
+    // User settings. These are usually set by a separate config file.
+    //
+    "user" : {
+        "name"     : "",
+        "fullname" : "",
+    },
+
     // Instrument settings. These are usually set by a separate
     // config file.
     //
-    "instrument" : null,
+    "instrument" : {
+        "type"     : "",
+        "description" : "",
+    },
 
     // Note (chord root) names.
     // Strings and tuning.
@@ -758,6 +1045,8 @@ sub default_config() {
     //         "all": all chords used.
     //         "user": only prints user defined chords.
     // "sorted": order the chords by key.
+    // Note: The type of diagram (string or keyboard) is determined
+    // by the value of "instrument.type".
     "diagrams" : {
 	"auto"     :  false,
 	"show"     :  "all",
@@ -774,18 +1063,21 @@ sub default_config() {
 	{ "fields"   : [ "songindex" ],
 	  "label"    : "Table of Contents",
 	  "line"     : "%{title}",
+          "pageno"   : "%{pageno}",
 	  "fold"     : false,
 	  "omit"     : false,
 	},
 	{ "fields"   : [ "sorttitle", "artist" ],
 	  "label"    : "Contents by Title",
 	  "line"     : "%{title}%{artist| - %{}}",
+          "pageno"   : "%{pageno}",
 	  "fold"     : false,
 	  "omit"     : false,
 	},
 	{ "fields"   : [ "artist", "sorttitle" ],
 	  "label"    : "Contents by Artist",
 	  "line"     : "%{artist|%{} - }%{title}",
+          "pageno"   : "%{pageno}",
 	  "fold"     : false,
 	  "omit"     : true,
 	},
@@ -822,6 +1114,11 @@ sub default_config() {
 
       // Papersize, 'a4' or [ 595, 842 ] etc.
       "papersize" : "a4",
+
+      "theme" : {
+          "foreground" : "black",
+          "background" : "none",
+      },
 
       // Space between columns, in pt.
       "columnspace"  :  20,
@@ -862,7 +1159,7 @@ sub default_config() {
 	  "bar" : {
 	      "offset" :  8,
 	      "width"  :  1,
-	      "color"  : "black",
+	      "color"  : "foreground",
 	  },
 	  "tag" : "Chorus",
 	  // Recall style: Print the tag using the type.
@@ -882,7 +1179,7 @@ sub default_config() {
 	  // Alignment for the labels. Default is left.
 	  "align" : "left",
 	  // Alternatively, render labels as comments.
-	  "comment" : null	// "comment", "comment_italic" or "comment_box",
+	  "comment" : ""	// "comment", "comment_italic" or "comment_box",
       },
 
       // Alternative songlines with chords in a side column.
@@ -909,12 +1206,33 @@ sub default_config() {
       // or "below" the last song line.
       "diagrams" : {
 	  "show"     :  "bottom",
-	  "width"    :  6,
-	  "height"   :  6,
-	  "hspace"   :  3.95,
-	  "vspace"   :  3,
-	  "vcells"   :  4,
-	  "linewidth" : 0.1,
+	  "width"    :  6,	// of a cell
+	  "height"   :  6,	// of a cell
+	  "vcells"   :  4,	// vertically
+	  "linewidth" : 0.1,	// of a cell width
+	  "hspace"   :  3.95,	// fraction of width
+	  "vspace"   :  3,	// fraction of height
+      },
+
+      // Keyboard diagrams.
+      // A keyboard diagram consists of a number of keys.
+      // Dimensions are specified by "width" (a key) and "height".
+      // The horizontal distance between diagrams is "hspace" * keys * width.
+      // The vertical distance is "vspace" * height.
+      // "linewidth" is the thickness of the lines as a fraction of "width".
+      // Diagrams for all chords of the song can be shown at the
+      // "top", "bottom" or "right" side of the first page,
+      // or "below" the last song line.
+      "kbdiagrams" : {
+	  "show"     :  "bottom",
+	  "width"    :   4,	// of a single key
+	  "height"   :  20,	// of the diagram
+	  "keys"     :  14,	// or 7, 10, 14, 17, 21
+          "base"     :  "C",	// or "F"
+	  "linewidth" : 0.1,	// fraction of a single key width
+          "pressed"  :  "grey",	// colour of a pressed key
+	  "hspace"   :  3.95,	// ??
+	  "vspace"   :  0.3,	// fraction of height
       },
 
       // Even/odd pages. A value of -1 denotes odd/even pages.
@@ -923,6 +1241,21 @@ sub default_config() {
       "pagealign-songs" : 1,
 
       // Formats.
+      // Pages have two title elements and one footer element.
+      // Topmost is "title". It uses the "title" font as defined further below.
+      // Second is "subtitle". It uses the "subtitle" font.
+      // The "footer" uses the "footer" font.
+      // All elements can have three fields, that are placed to the left side,
+      // centered, and right side of the page.
+      // The contents of all fields is defined below. You can use metadata
+      // items in the fields as shown. By default, the "title" element shows the
+      // value of metadata item "title", centered on the page. Likewise
+      // "subtitle".
+      // NOTE: The "title" and "subtitle" page elements have the same names
+      // as the default metadata values which may be confusing. To show
+      // metadata item, e.g. "artist", add its value to one of the
+      // title/subtitle fields. Don't try to add an artist page element.
+
       "formats" : {
 	  // Titles/Footers.
 
@@ -933,8 +1266,8 @@ sub default_config() {
 	  // By default, a page has:
 	  "default" : {
 	      // No title/subtitle.
-	      "title"     : null,
-	      "subtitle"  : null,
+	      "title"     : [ "", "", "" ],
+	      "subtitle"  : [ "", "", "" ],
 	      // Footer is title -- page number.
 	      "footer"    : [ "%{title}", "", "%{page}" ],
 	  },
@@ -950,7 +1283,7 @@ sub default_config() {
 	  "first" : {
 	      // It has title and subtitle, like normal 'first' pages.
 	      // But no footer.
-	      "footer"    : null,
+	      "footer"    : [ "", "", "" ],
 	  },
       },
 
@@ -971,7 +1304,7 @@ sub default_config() {
       // Relative filenames are looked up in the fontdir.
       // "fontdir" : [ "/usr/share/fonts/liberation", "/home/me/fonts" ],
 
-      "fontdir" : null,
+      "fontdir" : [],
       "fontconfig" : {
 	  // alternatives: regular r normal <empty>
 	  // alternatives: bold b strong
@@ -1069,7 +1402,7 @@ sub default_config() {
 
       // Bookmarks (PDF outlines).
       // fields:   primary and (optional) secondary fields.
-      // label:    outline label
+      // label:    outline label (omitted if there's only one outline)
       // line:     text of the outline element
       // collapse: initial display is collapsed
       // letter:   sublevel with first letters if more
@@ -1132,9 +1465,48 @@ sub default_config() {
 	"tabstop" : 8,
     },
 
+    // Settings for the parser/preprocessor.
+    // For selected lines, you can specify a series of 
+    // { "target" : "xxx", "replace" : "yyy" }
+    // Every occurrence of "xxx" will be replaced by "yyy".
+    // Use wisely.
+    "parser" : {
+	"preprocess" : {
+	    // All lines.
+	    "all" : [],
+	    // Song lines (lyrics) only.
+            "songline" : [],
+	},
+    },
+
+    // For (debugging (internal use only)).
+    "debug" : {
+        "song" : 0,
+    },
+
 }
 // End of config.
 End_Of_Config
+}
+
+# For debugging messages.
+sub qd {
+    my ( $val, $compact ) = @_;
+    use Data::Dumper qw();
+    local $Data::Dumper::Sortkeys  = 1;
+    local $Data::Dumper::Indent    = 1;
+    local $Data::Dumper::Quotekeys = 0;
+    local $Data::Dumper::Deparse   = 1;
+    local $Data::Dumper::Terse     = 1;
+    local $Data::Dumper::Trailingcomma = !$compact;
+    local $Data::Dumper::Useperl = 1;
+    local $Data::Dumper::Useqq     = 0; # I want unicode visible
+    my $x = Data::Dumper::Dumper($val);
+    if ( $compact ) {
+        $x =~ s/^bless\( (.*), '[\w:]+' \)$/$1/s;
+        $x =~ s/\s+/ /gs;
+    }
+    defined wantarray ? $x : warn($x,"\n");
 }
 
 unless ( caller ) {

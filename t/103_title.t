@@ -3,12 +3,12 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 4;
 
-use App::Music::ChordPro::Config;
+use App::Music::ChordPro::Testing;
 use App::Music::ChordPro::Songbook;
 
-our $config = App::Music::ChordPro::Config::configurator;
+plan tests => 4;
+
 # Prevent a dummy {body} for chord grids.
 $config->{diagrams}->{show} = 0;
 my $s = App::Music::ChordPro::Songbook->new;

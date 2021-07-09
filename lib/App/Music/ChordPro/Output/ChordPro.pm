@@ -44,6 +44,7 @@ sub generate_songbook {
 }
 
 my $lyrics_only = 0;
+my $variant = 'cho';
 
 sub generate_song {
     my ( $s ) = @_;
@@ -53,9 +54,9 @@ sub generate_song {
     my $rechorus = $::config->{chordpro}->{chorus}->{recall};
     my $structured = ( $options->{'backend-option'}->{structure} // '' ) eq 'structured';
     # $s->structurize if ++$structured;
-    my $variant = $options->{'backend-option'}->{variant} || 'cho';
-    my $seq     = $options->{'backend-option'}->{seq};
-    my $msp     = $variant eq "msp";
+    $variant = $options->{'backend-option'}->{variant} || 'cho';
+    my $seq  = $options->{'backend-option'}->{seq};
+    my $msp  = $variant eq "msp";
 
     my @s;
     my %imgs;
@@ -117,6 +118,9 @@ sub generate_song {
 	    $t .= " fingers " .
 	      join(" ", map { $_ < 0 ? "N" : $_ } @{$info->{fingers}})
 		if $info->{fingers};
+	    $t .= " keys " .
+	      join(" ", @{$info->{keys}})
+		if $info->{keys};
 	    push(@s, $t . "}");
 	}
 	push(@s, "") if $tidy;
@@ -388,7 +392,7 @@ sub songline {
 
     my $line = "";
     foreach ( 0..$#{$elt->{chords}} ) {
-	$line .= "[" . $elt->{chords}->[$_] . "]" . $elt->{phrases}->[$_];
+	$line .= "[" . chord($elt->{chords}->[$_]) . "]" . $elt->{phrases}->[$_];
     }
     $line =~ s/^\[\]//;
     $line;
@@ -414,7 +418,7 @@ sub gridline {
 	my $t = $elt->{comment};
 	if ( $t->{chords} ) {
 	    for ( 0..$#{ $t->{chords} } ) {
-		$res .= "[" . $t->{chords}->[$_] . "]" . $t->{phrases}->[$_];
+		$res .= "[" . chord($t->{chords}->[$_]) . "]" . $t->{phrases}->[$_];
 	    }
 	}
 	else {
@@ -425,6 +429,12 @@ sub gridline {
     }
 
     $line;
+}
+
+sub chord {
+    my ( $c ) = @_;
+    $c =~ s/^\*// if $variant eq 'msp' && length($c) > 1;
+    return $c;
 }
 
 1;

@@ -118,3 +118,34 @@ The following directives are legacy from the old `chord` program. The modern ref
 To facilitate using custom extensions for application specific purposes, any directive with a name starting with `x_` should be completely ignored by applications that do not handle this directive. In particular, no warning should be generated when an unsupported `x_`directive is encountered.
 
 It is advised to follow the `x_` prefix by a tag that identifies the application (namespace). For example, a directive  to control a specific pedal setting for the MobilsSheetsPro program could be named `x_mspro_pedal_setting`.
+
+# Conditional directives
+
+All directives can be conditionally selected by postfixing the
+directive with a dash (hyphen) and a _selector_.
+
+If a selector is used, ChordPro first tries to match it with the
+instrument type (as defined in the [config file]({{< relref "chordpro-configuration-generic#instrument-description" >}})).
+If this fails, it
+tries to match it with the user name (as defined in the [config file]({{< relref "chordpro-configuration-generic#user" >}})).
+
+For example, to
+define chords depending on the instrument used:
+
+````
+{define-guitar:  Am base-fret 1 frets 0 2 2 1 0 0}
+{define-ukulele: Am base-fret 1 frets 2 0 0 0}
+````
+An example of comments depending on voices:
+````
+{comment-alto:  Very softly!}
+{comment-tenor: Sing this with power}
+````
+When used with sections, selection applies to _everything_ in the
+section, up to and including the final section end directive:
+````
+{start_of_verse-soprano}
+...anything goes, including other directives...
+{end_of_verse}
+````
+Note that the section end must **not** include the selector.

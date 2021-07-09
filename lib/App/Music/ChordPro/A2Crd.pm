@@ -893,7 +893,6 @@ sub app_setup {
           'nosysconfig|no-sysconfig',
           'userconfig=s',
           'nouserconfig|no-userconfig',
-	  'nolegacyconfig|no-legacy-config',
 	  'nodefaultconfigs|no-default-configs|X',
 	  'define=s%',
 	  'print-default-config' => \$defcfg,
@@ -933,7 +932,7 @@ sub app_setup {
 
     # If the user specified a config, it must exist.
     # Otherwise, set to a default.
-    for my $config ( qw(sysconfig userconfig legacyconfig) ) {
+    for my $config ( qw(sysconfig userconfig) ) {
         for ( $clo->{$config} ) {
             if ( defined($_) ) {
                 die("$_: $!\n") unless -r $_;
@@ -966,7 +965,7 @@ sub app_setup {
         }
     }
     # If no config was specified, and no default is available, force no.
-    for my $config ( qw(sysconfig userconfig config legacyconfig) ) {
+    for my $config ( qw(sysconfig userconfig config) ) {
         $clo->{"no$config"} = 1 unless $clo->{$config};
     }
 

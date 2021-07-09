@@ -1,15 +1,16 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
-
+    "title": "ChordPro Configuration",
     "definitions": {
 	"colorspec": {
 	    "description": "Colour specification.",
 	    "type": "string",
+	    "format": "color",
 	    "pattern": "^(#[0-9A-Fa-f]{6}|[A-Za-z]+)$"
 	},
 	"fontspec": {
 	    "description": "Font specification.",
-	    "additionalProperties": { "not": {} },
+	    "additionalProperties": false,
 	    "properties": {
 		"name": {
 		    "type": "string"
@@ -41,43 +42,52 @@
 	},
 	"tptspec": {
 	    "description": "Three-part title format specification.",
-	    "type": [ "array", "null" ],
+	    "type": "array",
 	    "items": { "type": "string" },
 	    "minItems": 3,
 	    "maxItems": 3
 	}
     },
 
+    "additionalProperties": false,
+    
     "properties": {
 
     	"include": {
 	    "description": "List of configs to be processed before this one.",
-	    "type": [ "array", "null" ],
+	    "type": "array",
 	    "items": { "type": "string" }
 	},
 
 	"settings": {
 	    "description": "Global settings.",
+	    "additionalProperties": false,
 	    "properties": {
 
 		"chordnames": {
 		    "description": "Strictness of parsing chord names.",
 		    "type": "string",
+		    "format" : "checkbox",
 		    "default": "strict",
 		    "enum": [ "strict", "relaxed" ]
 		},
 
 		"chords-under": {
-		    "description": "Chords under the lyrics.",
+		    "description": "Normally, chords are placed above the lyrics. <br>Check this to place chords <b>under</b> the lyrics instead.",
+		    "title": "Chords under the lyrics.",
 		    "type": "boolean",
-		    "default": false
+		    "default": false,
+		    "options" : { "infoText" : "settings.chords-under\nNormally, chords are placed above the lyrics. <br>Check this to place chords <b>under</b> the lyrics instead.",
+		    "title": "Chords under the lyrics" }
 		},
 
 		"columns": {
 		    "description": "Number of columns.",
 		    "type": "integer",
 		    "default": 1,
-		    "minimum": 1
+		    "minimum": 1,
+		    "maximum": 3,
+		    "format" : "number"
 		},
 
 		"decapo": {
@@ -114,7 +124,7 @@
 		},
 
 		"notenames": {
-		    "description": "Allow parsing if note names.",
+		    "description": "Allow parsing of note names.",
 		    "type": "boolean",
 		    "default": false
 		},
@@ -144,15 +154,15 @@
 
 		"transcode": {
 		    "description": "Transcode chords.",
-		    "type": [ "string", "null" ],
-		    "default": null
+		    "type": "string",
+		    "default": ""
 		}
-	    },
-	    "additionalProperties": { "not": {} }
+	    }
 	},
 
 	"diagrams": {
 	    "description": "Chord diagrams at the end of songs.",
+	    "additionalProperties": false,
 	    "properties": {
 
 		"auto": {
@@ -173,18 +183,20 @@
 		    "description": "Sort the diagrams.",
 		    "type": "boolean"
 		}
-	    },
-	    "additionalProperties": { "not": {} }
+	    }
 	},
 
 	"chordpro": {
 	    "description": "Settings for ChordPro backend.",
+	    "additionalProperties": false,
 	    "properties": {
 		"chorus": {
 		    "description": "Appearance of chorus.",
+		    "additionalProperties": false,
 		    "properties": {
 			"recall": {
 			    "description": "Appearance of chorus recall.",
+			    "additionalProperties": false,
 			    "properties": {
 				"quote": {
 				    "description": "Quote the chorus.",
@@ -207,22 +219,21 @@
 				    ],
 				    "type": "string"
 				}
-			    },
-			    "additionalProperties": { "not": {} }
+			    }
 			},
 			"tag": {
 			    "description": "(Obsolete) Label for Chorus.",
 			    "type": "string",
 			    "default": "Chorus"
 			}
-		    },
-		    "additionalProperties": { "not": {} }
+		    }
 		}
 	    }
 	},
 
 	"a2crd": {
 	    "description": "Settings for A2Crd.",
+	    "additionalProperties": false,
 	    "properties": {
 		"infer-titles": {
 		    "description": "Treat leading lyrics lines as title/subtitle lines.",
@@ -239,14 +250,14 @@
 		    "type": "string",
 		    "default": "pct_chords"
 		}
-            },
-            "additionalProperties": { "not": {} }
+            }
 	},
 
 	"chords": {
 	    "description": "Additional chord definitions.",
-	    "type": [ "array", "null" ],
+	    "type": "array",
 	    "items": {
+		"additionalProperties": false,
 		"properties": {
 		    "name": {
 			"description": "The name of this chord.",
@@ -293,8 +304,7 @@
  		"anyOf" : [ 
   		    { "required": [ "name", "frets" ] },
   		    { "required": [ "name", "copy" ] }
- 		],
-		"additionalProperties": { "not": {} }
+ 		]
 	    }
 	},
 
@@ -302,6 +312,7 @@
 	    "description": "Tables of contents.",
 	    "type": "array",
 	    "items": {
+		"additionalProperties": false,
 		"properties": {
 		    "fields": {
 			"description": "The metadata for this toc.",
@@ -329,29 +340,35 @@
 			"description": "Omit this toc.",
 			"type": "boolean",
 			"default": false
+		    },
+		    "pageno": {
+			"description": "The format for the page numbers in the toc.",
+			"type": "string",
+			"default": "%{pageno}"
 		    }
-		},
-		"additionalProperties": { "not": {} }
+		}
 	    }
 	},
 
 	"diagnostics": {
 	    "description": "Settings for diagnostic messages.",
+	    "additionalProperties": false,
 	    "properties": {
 		"format": {
 		    "description": "Format for error messages.",
 		    "type": "string",
 		    "default": "\"%f\", line %n, %m\n\t%l"
 		}
-	    },
-	    "additionalProperties": { "not": {} }
+	    }
 	},
 
 	"html": {
 	    "description": "Settings for HTML output.",
+	    "additionalProperties": false,
 	    "properties": {
 		"styles": {
 		    "description": "Stylesheets.",
+		    "additionalProperties": false,
 		    "properties": {
 		        "display": {
 		            "description": "Stylesheet for screen.",
@@ -363,20 +380,38 @@
 			    "type": "string",
 			    "default": "chordpro_print.css"
 			}
-		    },
-		    "additionalProperties": { "not": {} }
+		    }
 		}
-            },
-            "additionalProperties": { "not": {} }
+            }
 	},
 
 	"instrument": {
 	    "description": "Description of the instrument.",
-	    "type": [ "string", "null" ]
+	    "additionalProperties": false,
+	    "properties" : {
+	        "description" : {
+		    "description" : "Descriptive instrument name",
+		    "type": "string",
+		    "default": ""
+		 },
+	        "type" : {
+		    "description" : "Instrument type",
+		    "type": "string",
+		    "default": ""
+		 }
+	    }
+	},
+
+	"meta": {
+	    "description": "User defined metadaya items.",
+            "additionalProperties": {
+	        "type" : "object"
+	    }
 	},
 
 	"metadata": {
 	    "description": "The list of metadata items.",
+            "additionalProperties": false,
 	    "properties": {
 		"keys": {
 		    "description": "Known metadata items.",
@@ -403,12 +438,12 @@
 		    "type": "boolean",
 		    "default": true
 		}
-	    },
-	    "additionalProperties": { "not": {} }
+	    }
 	},
 
 	"notes" : {
 	    "description" : "The note system used.",
+	    "additionalProperties": false,
 	    "properties" : {
 	        "system" : {
 		    "description" : "The note system used.",
@@ -425,7 +460,9 @@
 		     "type" : "array",
 		     "uniqueItems" : true,
 		     "items" : {
-		         "type" : [ "string", "array" ]
+		         "type" : [ "string", "array" ],
+			 "uniqueItems": true,
+			 "items": { "type": "string" }
 		      }
 		  },
 		 "flat" : {
@@ -433,14 +470,91 @@
 		     "type" : "array",
 		     "uniqueItems" : true,
 		     "items" : {
-		         "type" : [ "string", "array" ]
+		         "type" : [ "string", "array" ],
+			 "uniqueItems": true,
+			 "items": { "type": "string" }
 		      }
 		  }
 	     }
 	},
 
+	"dates": {
+	    "description": "Date formats.",
+	    "additionalProperties": false,
+	    "properties": {
+		"today": {
+		    "description": "Today's date.",
+		    "additionalProperties": false,
+		    "properties":{
+			"format": {
+			    "description": "Format",
+			    "type": "string",
+			    "default": "%A, %B %e, %Y"
+			}
+		    }
+	        }
+	    }
+	},
+
+	"delegates": {
+	    "description": "",
+	    "additionalProperties": false,
+	    "properties": {
+	        "abc": {
+		    "description": "",
+		    	"additionalProperties": false,
+			"properties": {
+			    "type": {
+			        "type": "string",
+				"default": "image"
+			    },
+			    "handler": {
+			        "type": "string",
+			        "default": "abc2image"
+			    }
+		       }
+		 },
+	        "ly": {
+		    "description": "",
+		    	"additionalProperties": false,
+			"properties": {
+			    "type": {
+			        "type": "string",
+				"default": "image"
+			    },
+			    "handler": {
+			        "type": "string",
+			        "default": "ly2image"
+			    }
+		       }
+		 }
+	    }
+	},
+
+	"parser": {
+	    "description": "",
+	    "additionalProperties": false,
+	    "properties": {
+		"preprocess": {
+		    "description": "",
+		    "additionalProperties": false,
+		    "properties": {
+			"all": {
+			    "description": "",
+			    "type": "array"
+			 },
+			"songline": {
+			    "description": "",
+			    "type": "array"
+			 }
+		    }
+		 }
+	    }
+	},
+
 	"pdf": {
 	    "description": "Settings for PDF output.",
+	    "additionalProperties": false,
 	    "properties": {
 
 		"capoheading": {
@@ -458,9 +572,11 @@
 
 		"chorus": {
 		    "description": "Appearance of chorus.",
+		    "additionalProperties": false,
 		    "properties": {
 			"bar": {
 			    "description": "Appearance of side bar.",
+			    "additionalProperties": false,
 			    "properties": {
 				"color": {
 				    "description": "Bar colour.",
@@ -481,8 +597,7 @@
 				    "minimum": 0,
 				    "type": "number"
 				}
-			    },
-			    "additionalProperties": { "not": {} }
+			    }
 			},
 			"indent": {
 			    "description": "Chorus indent.",
@@ -492,6 +607,7 @@
 			},
 			"recall": {
 			    "description": "Appearance of chorus recall.",
+			    "additionalProperties": false,
 			    "properties": {
 				"quote": {
 				    "description": "Quote the chorus.",
@@ -516,16 +632,14 @@
 				    ],
 				    "type": "string"
 				}
-			    },
-			    "additionalProperties": { "not": {} }
+			    }
 			},
 			"tag": {
 			    "description": "Label for Chorus.",
 			    "type": "string",
 			    "default": "Chorus"
 			}
-		    },
-		    "additionalProperties": { "not": {} }
+		    }
 		},
 
 		"columnspace": {
@@ -537,6 +651,7 @@
 
 		"diagrams": {
 		    "description": "Appearance of chord diagrams.",
+		    "additionalProperties": false,
 		    "properties": {
 		        "show": {
 			    "description": "Where to show the diagrams.",
@@ -580,8 +695,7 @@
 			    "minimum": 0,
 			    "type": "number"
 			}
-		    },
-		    "additionalProperties": { "not": {} }
+		    }
 		},
 
 		"diagramscolumn": {
@@ -600,7 +714,11 @@
 
 		"fontdir": {
 		    "description": "The location of font files.",
-		    "type": [ "array", "string", "null" ]
+		    "type": "array",
+		    "items" : {
+		        "type" : "string"
+		    },
+		    "minItems" : 0
 		},
 
  		"fontconfig": {
@@ -622,9 +740,8 @@
 				    "size": {
 					"default": 10,
 					"type": "number"
-				    },
-				    "additionalProperties": { "not": {} }
-				} } ]
+				    }
+				  } } ]
 			},
 			"chord": {
 			    "description": "Font for typesetting chord names.",
@@ -638,15 +755,14 @@
 				    "size": {
 					"default": 10,
 					"type": "number"
-				    },
-				    "additionalProperties": { "not": {} }
+				    }
 				} } ]
 			},
  			"chordfingers": {
  			    "description": "Font for numbered chord dots.",
  			    "allOf": [
  				{ "$ref": "#/definitions/fontspec" },
- 				{ "properties": {
+				{ "properties": {
  				    "name": {
  					"default": "ZapfDingpats",
  					"type": "string"
@@ -654,8 +770,7 @@
  				    "size": {
  					"default": 10,
  					"type": "number"
- 				    },
- 				    "additionalProperties": { "not": {} }
+ 				    }
  				} } ]
  			},
 			"comment": {
@@ -670,8 +785,7 @@
 				    "size": {
 					"default": 12,
 					"type": "number"
-				    },
-				    "additionalProperties": { "not": {} }
+				    }
 				} } ]
 			},
 			"tab": {
@@ -686,8 +800,7 @@
 				    "size": {
 					"default": 10,
 					"type": "number"
-				    },
-				    "additionalProperties": { "not": {} }
+				    }
 				} } ]
 			},
 			"text": {
@@ -702,8 +815,7 @@
 				    "size": {
 					"default": 12,
 					"type": "number"
-				    },
-				    "additionalProperties": { "not": {} }
+				    }
 				} } ]
 			},
 			"title": {
@@ -718,8 +830,7 @@
 				    "size": {
 					"default": 14,
 					"type": "number"
-				    },
-				    "additionalProperties": { "not": {} }
+				    }
 				} } ]
 			},
 			"toc": {
@@ -734,16 +845,14 @@
 				    "size": {
 					"default": 11,
 					"type": "number"
-				    },
-				    "additionalProperties": { "not": {} }
+				    }
 				} } ]
 			}
 		    },
 		    "patternProperties": {
 		      "^(grid|subtitle|comment_italic|comment_box|grid_margin|footer|empty|diagram|diagram_base)$":
 		        { "$ref": "#/definitions/fontspec" }
-		    },
-		    "additionalProperties": { "not": {} }
+		    }
 		},
 
 		"footspace": {
@@ -755,30 +864,32 @@
 
 		"formats": {
 		    "description": "Formats for page headers and footers.",
+		    "additionalProperties": false,
 		    "properties": {
 			"default": {
 			    "description": "Default properties for all pages.",
+			    "additionalProperties": false,
 			    "properties": {
 				"title": {
 				    "allOf": [
 					{ "$ref": "#/definitions/tptspec" },
-					{ "default": null }
+					{ "default": "" }
 				    ] },
 				"subtitle": {
 				    "allOf": [
 					{ "$ref": "#/definitions/tptspec" },
-					{ "default": null }
+					{ "default": "" }
 				    ] },
 				"footer": {
 				    "allOf": [
 					{ "$ref": "#/definitions/tptspec" },
 					{ "default": [ "%{title}", "", "%{page}" ] }
 				    ] }
-			    },
-			    "additionalProperties": { "not": {} }
+			    }
 			},
 			"title": {
 			    "description": "Properties for per-song title pages.",
+			    "additionalProperties": false,
 			    "properties": {
 				"title": {
 				    "allOf": [
@@ -795,11 +906,11 @@
 					{ "$ref": "#/definitions/tptspec" },
 					{ "default": [ "", "", "%{page}" ] }
 				    ] }
-			    },
-			    "additionalProperties": { "not": {} }
+			    }
 			},
 			"first": {
 			    "description": "Properties of the very first page.",
+			    "additionalProperties": false,
 			    "properties": {
 				"title": {
 				    "description": "Defaults to default.",
@@ -812,13 +923,11 @@
 				"footer": {
 				    "allOf": [
 					{ "$ref": "#/definitions/tptspec" },
-					{ "default": null }
+					{ "default": "" }
 				    ] }
-			    },
-			    "additionalProperties": { "not": {} }
+			    }
 			}
-		    },
-		    "additionalProperties": { "not": {} }
+		    }
 		},
 
 		"head-first-only": {
@@ -834,8 +943,72 @@
 		    "type": "number"
 		},
 
+		"kbdiagrams": {
+		    "description": "Appearance of keyboard diagrams.",
+		    "additionalProperties": false,
+		    "properties": {
+		        "show": {
+			    "description": "Where to show the diagrams.",
+			    "default": "bottom",
+			    "enum": [ "top", "right", "below", "bottom" ],
+			    "type": "string"
+			},
+			"height": {
+			    "description": "Height of the diagram.",
+			    "default": 20,
+			    "minimum": 0,
+			    "type": "number"
+			},
+			"width": {
+			    "description": "Width of a single (white) key.",
+			    "default": 4,
+			    "minimum": 0,
+			    "type": "number"
+			},
+			"hspace": {
+			    "description": "Horizontal space between diagrams.",
+			    "default": 3.95,
+			    "minimum": 0,
+			    "type": "number"
+			},
+			"keys": {
+			    "description": "The number of white keys shown.",
+			    "default": 14,
+			    "minimum": 7,
+			    "maximum": 21,
+			    "type": "number"
+			},
+			"base": {
+			    "description": "The leftmost white key.",
+			    "default": "C",
+			    "maximum": 21,
+			    "type": "string",
+			    "enum": [ "C", "F" ]
+			},
+			"linewidth": {
+			    "description": "Thickness of the diagram lines as a fraction of 'width'.",
+			    "default": 0.1,
+			    "minimum": 0,
+			    "type": "number"
+			},
+			"pressed": {
+			    "description": "Color of the 'pressed' keys.",
+			    "default": "grey",
+			    "type": "string",
+			    "format" : "color"
+			},
+			"vspace": {
+			    "description": "Vertical space between diagrams.",
+			    "default": 3,
+			    "minimum": 0,
+			    "type": "number"
+			}
+		    }
+		},
+
 		"labels": {
 		    "description": "Margin labels.",
+		    "additionalProperties": false,
 		    "properties": {
 		        "align": {
 			    "description": "Labels text alignment.",
@@ -850,17 +1023,17 @@
 			},
 			"comment": {
 			    "description": "Render labels as comments.",
-			    "default": null,
+			    "default": "",
 			    "enum": [
 				"comment",
 				"comment_italic",
 				"comment_box",
-				null
+				""
 			    ],
-			    "type": [ "string", "null" ]
+			    "type": "string",
+			    "default": ""
 		        }
-		    },
-		    "additionalProperties": { "not": {} }
+		    }
 		},
 
 		"marginbottom": {
@@ -895,6 +1068,7 @@
 		    "description": "PDF outlines (index).",
 		    "type": "array",
 		    "items": {
+			"additionalProperties": false,
 			"properties": {
 			    "collapse": {
 				"description": "Initial display is collapsed.",
@@ -933,8 +1107,7 @@
 				"type": "boolean",
 				"default": false
 			    }
-			},
-			"additionalProperties": { "not": {} }
+			}
 		    }
 		},
 
@@ -961,6 +1134,7 @@
 
 		"spacing": {
 		    "description": "Baseline distances as a factor of the font size.",
+		    "additionalProperties": false,
 		    "properties": {
 			"chords": {
 			    "description": "Spacing for chord names.",
@@ -997,8 +1171,7 @@
 			    "default": 1.4,
 			    "type": "number"
 			}
-		    },
-		    "additionalProperties": { "not": {} }
+		    }
 		},
 
  		"split-marker": {
@@ -1010,17 +1183,38 @@
  		    "maxItems": 3
  		},
  
+		"theme": {
+		    "description": "Theme",
+		    "additionalProperties": false,
+		    "properties": {
+			"background": {
+			    "description": "Background colour",
+			    "allOf": [
+				{ "$ref": "#/definitions/colorspec" },
+				{ "default": "none" }
+			    ]
+			},
+			"foreground": {
+			    "description": "Foreground colour",
+			    "allOf": [
+				{ "$ref": "#/definitions/colorspec" },
+				{ "default": "black" }
+			    ]
+			}
+		    }
+		},
+
 		"titles-directive-ignore": {
 		    "description": "Ignore titles directives in the songs.",
 		    "default": false,
 		    "type": "boolean"
 		}
-	    },
-	    "additionalProperties": { "not": {} }
+	    }
 	},
 
-	"toc": {
+        "toc": {
 	    "description": "(Obsolete) Table of Contents",
+	    "additionalProperties": false,
 	    "properties": {
 	        "line": {
 		    "description": "Format for toc lines",
@@ -1038,22 +1232,46 @@
 		    "default": "Table of Contents",
 		    "type": "string"
 		}
-	    },
-	    "additionalProperties": { "not": {} }
+	    }
 	},
 
 	"tuning": {
 	    "description": "Definition of the strings for chord grids.",
-	    "type": [ "array", "null" ],
+	    "type": "array",
 	    "items": {
 		"type": "string",
 		"pattern": "^[A-G][b#]?[1-9]$"
 	    }
 	},
-	"additionalProperties": { "not": {} }
-    },
-    
 
-    "additionalProperties": { "not": {} }
+        "user": {
+	    "description": "User data.",
+	    "additionalProperties": false,
+	    "properties" : {
+	        "fullname" : {
+		    "description" : "Full user name",
+		    "type": "string",
+		    "default": ""
+		 },
+	        "name" : {
+		    "description" : "Short user name.",
+		    "type": "string",
+		    "default": ""
+		 }
+	    }
+	},
+
+	"debug": {
+	    "description": "Miscellaneous debug settings.",
+	    "additionalProperties": false,
+	    "properties": {
+
+		"song": {
+		    "description": "Debug settig for song.",
+		    "type": "integer",
+		    "default": 0
+		}
+	    }
+	}
+    }
 }
-

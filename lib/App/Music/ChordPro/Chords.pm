@@ -120,6 +120,10 @@ sub list_chords {
 		   map { $_ < 0 ? "X" : $_ }
 		   @{ $info->{fingers} } )
 	  if $info->{fingers} && @{ $info->{fingers} };
+	$s .= join("", "    keys ",
+		   map { sprintf("%2d", $_) }
+		   @{ $info->{keys} } )
+	  if $info->{keys} && @{ $info->{keys} };
 	$s .= "}";
 	push( @s, $s );
     }
@@ -182,6 +186,11 @@ sub json_chords {
 	if ( $info->{fingers} && @{ $info->{fingers} } ) {
 	    $s .= qq{ "fingers" : [ } .
 	      join( ", ", map { sprintf("%2s", $_) } @{ $info->{fingers} } ) .
+		qq{ ],};
+	}
+	if ( $info->{keys} && @{ $info->{keys} } ) {
+	    $s .= qq{ "keys" : [ } .
+	      join( ", ", map { sprintf("%2d", $_) } @{ $info->{keys} } ) .
 		qq{ ],};
 	}
 	chop($s);
@@ -268,8 +277,10 @@ sub get_parser {
 ################ Section Config & User Chords ################
 
 sub _check_chord {
-    my ( $base, $frets, $fingers ) = @_;
-    if ( @$frets != strings() ) {
+    my ( $ii ) = @_;
+    my ( $name, $base, $frets, $fingers, $keys )
+      = @$ii{qw(name base frets fingers keys)};
+    if ( $frets && @$frets != strings() ) {
 	return scalar(@$frets) . " strings";
     }
     if ( $fingers && @$fingers && @$fingers != strings() ) {
@@ -277,6 +288,11 @@ sub _check_chord {
     }
     unless ( $base > 0 && $base < 24 ) {
 	return "base-fret $base out of range";
+    }
+    if ( $keys && @$keys ) {
+	for ( @$keys ) {
+	    return "invalid key \"$_\"" unless /^\d+$/ && $_ < 24;
+	}
     }
     return;
 }
@@ -309,9 +325,9 @@ sub add_config_chord {
 	$def = { %$res, %$def };
     }
 
-    my ( $base, $frets, $fingers ) =
-      ( $def->{base}||1, $def->{frets}, $def->{fingers} );
-    $res = _check_chord( $base, $frets, $fingers );
+    my ( $base, $frets, $fingers, $keys ) =
+      ( $def->{base}||1, $def->{frets}, $def->{fingers}, $def->{keys} );
+    $res = _check_chord($def);
     return $res if $res;
 
     for $name ( $name, @names ) {
@@ -322,8 +338,9 @@ sub add_config_chord {
 	    %$info,
 	    %$def,
 	    base    => $base,
-	    frets   => [ @$frets ],
-	    fingers => [ $fingers && @$fingers ? @$fingers : () ] };
+	    frets   => [ $frets && @$frets ? @$frets : () ],
+	    fingers => [ $fingers && @$fingers ? @$fingers : () ],
+	    keys    => [ $keys && @$keys ? @$keys : () ] };
 	push( @chordnames, $name );
 	# Also store the chord info under a neutral name so it can be
 	# found when other note name systems are used.
@@ -352,9 +369,11 @@ sub add_config_chord {
 # API: Add a user defined chord.
 # Used by: Songbook, Output::PDF.
 sub add_song_chord {
-    my ( $name, $base, $frets, $fingers ) = @_;
-    my $res = _check_chord( $base, $frets, $fingers );
+    my ( $ii ) = @_;
+    my $res = _check_chord($ii);
     return $res if $res;
+    my ( $name, $base, $frets, $fingers, $keys )
+      = @$ii{qw(name base frets fingers keys)};
 
     my $info = parse_chord($name) // { name => $name };
 
@@ -363,8 +382,10 @@ sub add_song_chord {
 	system  => $parser->{system},
 	%$info,
 	base    => $base,
-	frets   => [ @$frets ],
-	fingers => [ $fingers && @$fingers ? @$fingers : () ] };
+	frets   => [ $frets && @$frets ? @$frets : () ],
+	fingers => [ $fingers && @$fingers ? @$fingers : () ],
+	keys    => [ $keys && @$keys ? @$keys : () ],
+      };
     return;
 }
 
@@ -377,7 +398,8 @@ sub add_unknown_chord {
 	name    => $name,
 	base    => 0,
 	frets   => [],
-	fingers => [] };
+	fingers => [],
+        keys    => [] };
 }
 
 # API: Reset user defined songs. Should be done for each new song.
@@ -440,6 +462,7 @@ sub identify {
     }
     else {
 	$info->{$_} = $i->{$_} foreach keys %$i;
+	bless $info => ref($i);
     }
 
     return $ident_cache->{$name} = $info;
@@ -479,6 +502,7 @@ sub chord_info {
 		  base    => 0,
 		  frets   => [],
 		  fingers => [],
+		  keys    => [],
 		};
     }
 
@@ -489,6 +513,7 @@ sub chord_info {
 		 %$info,
 		 strings => [],
 		 fingers => [],
+		 keys    => [],
 		 base    => 1,
 		 system  => "",
 		 };

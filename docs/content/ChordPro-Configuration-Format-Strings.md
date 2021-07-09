@@ -49,6 +49,23 @@ The ChordPro reference implementation provides additional meta data:
  
  * `tuning`: The tuning of the instrument. Usually `"E2 A2 D3 G3 B3 E4"`.
  
- * `instrument`: The name of the instrument. Usually `"Guitar, 6
+ * `instrument.type`: The name of the instrument as set by instrument
+   configs. Usually `"guitar"`.
+
+ * `instrument`: Short for `instrument.type`.
+
+ * `instrument.description`: Set by instrument configs. Usually `"Guitar, 6
    strings, standard tuning"`.
    
+ * `user.name`: The (login) name of the user running ChordPro.
+   Initial value is derived from the environment.
+   
+ * `user`: Short for `user.name`.
+ 
+ * `user.fullname`: The full name of the user running ChordPro.
+   Initial value is derived from the environment, if possible.
+
+The value of `"instrument"` and `"user"` can be used for [directive
+selection]({{< relref "chordpro-directives#conditional-directives"
+>}})
+

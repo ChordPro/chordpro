@@ -50,9 +50,10 @@ The directives `{start_of_chorus}` and `{end_of_chorus}` indicate that the lines
 
 Finally, all lines that start with a `#` are ignored. These can be used to insert remarks into the ChordPro file that are only relevant for maintainers.
 
-In print, this song could look like this (click on the thumbnail to view the full PDF):
+In print, this song could look like this (click on the thumbnail to
+view a larger version):
 
-[![simple.png]({{< asset "images/simple.png" >}})]({{< asset "images/simple.pdf" >}})
+{{< showpage "simple" >}}
 
 ## Markup and annotations
 

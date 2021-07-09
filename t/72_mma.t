@@ -1,13 +1,12 @@
 #! perl
 
 use strict;
-use Test::More;
-use App::Packager qw( :name App::Music::ChordPro );
+use warnings;
+use utf8;
 
--d "t" && chdir "t";
-use_ok "App::Music::ChordPro";
-require_ok "./differ.pl";
-my $test = 2;
+use App::Music::ChordPro::Testing;
+
+my $test = 0;
 
 BAIL_OUT("Missing MMA test data") unless -d "mma";
 
@@ -37,6 +36,6 @@ foreach my $file ( sort @files ) {
     unlink($out) if $ok;
 }
 
-ok( $test++ == @files+2, "Tested @{[0+@files]} files" );
+ok( $test++ == @files, "Tested @{[0+@files]} files" );
 
 done_testing($test);

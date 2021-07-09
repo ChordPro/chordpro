@@ -8,6 +8,7 @@ use Encode;
 use PDF::API2;
 use Text::Layout;
 use IO::String;
+use Carp;
 
 use App::Music::ChordPro::Output::Common qw( fmt_subst prep_outlines demarkup );
 
@@ -22,6 +23,7 @@ my %fontcache;			# speeds up 2 seconds per song
 sub new {
     my ( $pkg, $ps, $pdfapi ) = @_;
     my $self = bless { ps => $ps }, $pkg;
+    $self->{pdfapi} = $pdfapi;
     $self->{pdf} = $pdfapi->new;
     $self->{pdf}->{forcecompress} = 0 if $regtest;
     $self->{pdf}->mediabox( $ps->{papersize}->[0],
@@ -65,6 +67,34 @@ sub wrap {
     return ( $text, $ex );
 }
 
+sub _fgcolor {
+    my ( $self, $col ) = @_;
+    if ( !defined($col) || $col eq "foreground" ) {
+	$col = $self->{ps}->{theme}->{foreground};
+    }
+    elsif ( $col eq "background" ) {
+	$col = $self->{ps}->{theme}->{background};
+    }
+    elsif ( !$col ) {
+	Carp::confess("Undefined fgcolor: $col");
+    }
+    $col;
+}
+
+sub _bgcolor {
+    my ( $self, $col ) = @_;
+    if ( !defined($col) || $col eq "background" ) {
+	$col = $self->{ps}->{theme}->{background};
+    }
+    elsif ( $col eq "foreground" ) {
+	$col = $self->{ps}->{theme}->{foreground};
+    }
+    elsif ( !$col ) {
+	Carp::confess("Undefined bgcolor: $col");
+    }
+    $col;
+}
+
 sub text {
     my ( $self, $text, $x, $y, $font, $size, $nomarkup ) = @_;
 #    print STDERR ("T: @_\n");
@@ -73,8 +103,12 @@ sub text {
 
     $self->{layout}->set_font_description($font->{fd});
     $self->{layout}->set_font_size($size);
-    if ( $font->{color} && $font->{color} ne "black" ) {
-	$text = "<span color='" . $font->{color} . "'>" . $text . "</span>";
+    my $col = $self->_fgcolor($font->{color});
+    if ( $col ne $self->{ps}->{theme}->{foreground} ) {
+	$text = "<span color='" . $col . "'>" . $text . "</span>";
+    }
+    else {
+	$self->{layout}->{_currentcolor} = $col;
     }
     if ( $nomarkup ) {
 	$self->{layout}->set_text($text);
@@ -97,7 +131,7 @@ sub text {
 	#printf("BB: %.2f %.2f %.2f %.2f\n", @{$e}{qw( x y width height ) } );
 	# Draw background and.or frame.
 	my $d = $debug ? 0 : 1;
-	$frame = $debug || $font->{color} || "black" if $frame;
+	$frame = $debug || $font->{color} || $self->{ps}->{theme}->{foreground} if $frame;
 	$self->rectxy( $x + $e->{x} - $d,
 		       $y + $e->{y} + $d,
 		       $x + $e->{x} + $e->{width} + $d,
@@ -119,8 +153,12 @@ sub text_nobl {
 
     $self->{layout}->set_font_description($font->{fd});
     $self->{layout}->set_font_size($size);
-    if ( $font->{color} && $font->{color} ne "black" ) {
-	$text = "<span color='" . $font->{color} . "'>" . $text . "</span>";
+    my $col = $self->_fgcolor($font->{color});
+    if ( $col ne $self->{ps}->{theme}->{foreground} ) {
+	$text = "<span color='" . $col . "'>" . $text . "</span>";
+    }
+    else {
+	$self->{layout}->{_currentcolor} = $col;
     }
     $self->{layout}->set_markup($text);
     $self->{layout}->show( $x, $y, $self->{pdftext} );
@@ -137,7 +175,7 @@ sub text_nobl {
 	#printf("BB: %.2f %.2f %.2f %.2f\n", @{$e}{qw( x y width height ) } );
 	# Draw background and.or frame.
 	my $d = $debug ? 0 : 1;
-	$frame = $debug || $font->{color} || "black" if $frame;
+	$frame = $debug || $font->{color} || $self->{ps}->{theme}->{foreground} if $frame;
 	$self->rectxy( $x + $e->{x} - $d,
 		       $y + $e->{y} + $d,
 		       $x + $e->{x} + $e->{width} + $d,
@@ -187,7 +225,7 @@ sub line {
     my ( $self, $x0, $y0, $x1, $y1, $lw, $color ) = @_;
     my $gfx = $self->{pdfgfx};
     $gfx->save;
-    $gfx->strokecolor($color ||= "black");
+    $gfx->strokecolor( $self->_fgcolor($color) );
     $gfx->linecap(1);
     $gfx->linewidth($lw||1);
     $gfx->move( $x0, $y0 );
@@ -200,7 +238,7 @@ sub hline {
     my ( $self, $x, $y, $w, $lw, $color ) = @_;
     my $gfx = $self->{pdfgfx};
     $gfx->save;
-    $gfx->strokecolor($color ||= "black");
+    $gfx->strokecolor( $self->_fgcolor($color) );
     $gfx->linecap(2);
     $gfx->linewidth($lw||1);
     $gfx->move( $x, $y );
@@ -213,7 +251,7 @@ sub vline {
     my ( $self, $x, $y, $h, $lw, $color ) = @_;
     my $gfx = $self->{pdfgfx};
     $gfx->save;
-    $gfx->strokecolor($color ||= "black");
+    $gfx->strokecolor( $self->_fgcolor($color) );
     $gfx->linecap(2);
     $gfx->linewidth($lw||1);
     $gfx->move( $x, $y );
@@ -226,11 +264,28 @@ sub rectxy {
     my ( $self, $x, $y, $x1, $y1, $lw, $fillcolor, $strokecolor ) = @_;
     my $gfx = $self->{pdfgfx};
     $gfx->save;
-    $gfx->strokecolor($strokecolor) if $strokecolor;
-    $gfx->fillcolor($fillcolor) if $fillcolor;
+    $gfx->strokecolor($self->_fgcolor($strokecolor)) if $strokecolor;
+    $gfx->fillcolor($self->_fgcolor($fillcolor)) if $fillcolor;
     $gfx->linecap(2);
     $gfx->linewidth($lw||1);
     $gfx->rectxy( $x, $y, $x1, $y1 );
+    $gfx->fill if $fillcolor && !$strokecolor;
+    $gfx->fillstroke if $fillcolor && $strokecolor;
+    $gfx->stroke if $strokecolor && !$fillcolor;
+    $gfx->restore;
+}
+
+sub poly {
+    my ( $self, $points, $lw, $fillcolor, $strokecolor ) = @_;
+    undef $strokecolor unless $lw;
+    my $gfx = $self->{pdfgfx};
+    $gfx->save;
+    $gfx->strokecolor($self->_fgcolor($strokecolor)) if $strokecolor;
+    $gfx->fillcolor($self->_fgcolor($fillcolor)) if $fillcolor;
+    $gfx->linecap(2);
+    $gfx->linewidth($lw);
+    $gfx->poly( @$points );
+    $gfx->close;
     $gfx->fill if $fillcolor && !$strokecolor;
     $gfx->fillstroke if $fillcolor && $strokecolor;
     $gfx->stroke if $strokecolor && !$fillcolor;
@@ -241,8 +296,8 @@ sub circle {
     my ( $self, $x, $y, $r, $lw, $fillcolor, $strokecolor ) = @_;
     my $gfx = $self->{pdfgfx};
     $gfx->save;
-    $gfx->strokecolor($strokecolor) if $strokecolor;
-    $gfx->fillcolor($fillcolor) if $fillcolor;
+    $gfx->strokecolor($self->_fgcolor($strokecolor)) if $strokecolor;
+    $gfx->fillcolor($self->_fgcolor($fillcolor)) if $fillcolor;
     $gfx->linewidth($lw||1);
     $gfx->circle( $x, $y, $r );
     $gfx->fill if $fillcolor;
@@ -254,7 +309,7 @@ sub cross {
     my ( $self, $x, $y, $r, $lw, $strokecolor ) = @_;
     my $gfx = $self->{pdfgfx};
     $gfx->save;
-    $gfx->strokecolor($strokecolor) if $strokecolor;
+    $gfx->strokecolor($self->_fgcolor($strokecolor)) if $strokecolor;
     $gfx->linewidth($lw||1);
     $r = 0.9 * $r;
     $gfx->move( $x-$r, $y-$r );
@@ -316,6 +371,17 @@ sub newpage {
 				$ps->{papersize}->[1] );
     $self->{pdfgfx}  = $self->{pdfpage}->gfx;
     $self->{pdftext} = $self->{pdfpage}->text;
+    unless ($ps->{theme}->{background} =~ /^white|none|#ffffff$/i ) {
+	for ( $self->{pdfgfx} ) {
+	    $_->save;
+	    $_->fillcolor( $ps->{theme}->{background} );
+	    $_->linewidth(0);
+	    $_->rectxy( 0, 0, $ps->{papersize}->[0],
+			$ps->{papersize}->[1] );
+	    $_->fill;
+	    $_->restore;
+	}
+    }
 }
 
 sub pagelabel {
@@ -342,9 +408,18 @@ sub make_outlines {
 	# Seems not to matter whether we re-use the root or create new.
 	$ol_root //= $pdf->outlines;
 
-	my $outline = $ol_root->outline;
-	$outline->title( $ctl->{label} );
-	$outline->closed if $ctl->{collapse};
+	my $outline;
+
+	# Skip level for a single outline.
+	if ( @{ $self->{ps}->{outlines} } == 1 ) {
+	    $outline = $ol_root;
+	    $outline->closed if $ctl->{collapse}; # TODO?
+	}
+	else {
+	    $outline = $ol_root->outline;
+	    $outline->title( $ctl->{label} );
+	    $outline->closed if $ctl->{collapse};
+	}
 
 	my %lh;			# letter hierarchy
 	for ( @$book ) {
@@ -406,8 +481,20 @@ sub init_fonts {
 
     my $fc = Text::Layout::FontConfig->new;
 
-    if ( $ps->{fontdir} ) {
-	$fc->add_fontdirs( @{ $ps->{fontdir} } );
+    # Add font dirs.
+    my @d = ( @{$ps->{fontdir}}, ::rsc_or_file("fonts/"), $ENV{FONTDIR} );
+    # Avoid rsc result if dummy.
+    splice( @d, -2, 1 ) if $d[-2] eq "fonts/";
+    for my $fontdir ( @d ) {
+	next unless $fontdir;
+	if ( -d $fontdir ) {
+	    $self->{pdfapi}->can("addFontDirs")->($fontdir);
+	    $fc->add_fontdirs($fontdir);
+	}
+	else {
+	    warn("PDF: Ignoring fontdir $fontdir [$!]\n");
+	    undef $fontdir;
+	}
     }
 
     foreach my $ff ( keys( %{ $ps->{fontconfig} } ) ) {
@@ -436,13 +523,13 @@ sub init_font {
     my ( $self, $ff ) = @_;
     my $ps = $self->{ps};
     my $fd;
-    if ( !$fd && $ps->{fonts}->{$ff}->{file} ) {
+    if ( $ps->{fonts}->{$ff}->{file} ) {
 	$fd = $self->init_filefont($ff);
     }
-    if ( !$fd && $ps->{fonts}->{$ff}->{description} ) {
+    elsif ( $ps->{fonts}->{$ff}->{description} ) {
 	$fd = $self->init_pangofont($ff);
     }
-    if ( !$fd && $ps->{fonts}->{$ff}->{name} ) {
+    elsif ( $ps->{fonts}->{$ff}->{name} ) {
 	$fd = $self->init_corefont($ff);
     }
     warn("No font found for \"$ff\"\n") unless $fd;
@@ -475,10 +562,11 @@ sub init_filefont {
 
     my $fc = Text::Layout::FontConfig->new;
     eval {
-	$font->{fd} = $fc->from_filename($font->{file});
-	$font->{fd}->get_font($self->{layout}); # force load
-	$font->{fd}->{font}->{Name}->{val} =~ s/~.*/~$faketime/ if $regtest;
-	$font->{_ff} = $ff;
+	my $t = $fc->from_filename($font->{file});
+	$t->get_font($self->{layout}); # force load
+	$t->{font}->{Name}->{val} =~ s/~.*/~$faketime/ if $regtest;
+	$t->{_ff} = $ff;
+	$font->{fd} = $t;
     };
     $font->{fd};
 }

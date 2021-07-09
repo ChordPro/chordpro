@@ -26,7 +26,7 @@ As the name implies, this is the default configuration. It accepts all ChordPro 
 {{< showpage "style_default" >}}
 
 ## Chordii
-This preset configuration makes the output look as closely as possible to the output of the _Chord_<sub>ii</sub> program.
+This preset configuration makes the output look as closely as possible to the output of the Chord<sub>ii</sub> program.
 
 {{< showpage "style_chordii" >}}
 
@@ -45,6 +45,13 @@ A style with chord diagrams in a right column on the first page instead of at th
 
 {{< showpage "style_modern3" >}}
 
+## Dark
+A dark 'theme'.
+
+{{< showpage "style_dark" >}}
+
+This style only sets colours, so it can be used in combination with other styles.
+
 ## Nashville
 A special style for songs that use Nashville numbering notation.
 
@@ -59,10 +66,18 @@ A special style for songs that use Roman numbering notation.
 
 This style only sets the font for the chords, so it can be used in combination with other styles.
 
+## Keyboard
+This preset sets the instrument to keyboard. It doesn't define
+chords since keyboard chords can be determined from their names.
+
+{{< showpage "style_keyboard" >}}
+
+This style only sets the instrument, so it can be used in combination with other styles.
+
 ## Ukulele
-This preset adds 4-chord tuning and ukulele chords.
+This preset adds ukulele tuning and chords.
 
 {{< showpage "style_ukulele" >}}
 
-This style only sets the number of strings to 4 and defines the ukulele chords, so it can be used in combination with other styles.
+This style only sets the instrument and defines the ukulele chords, so it can be used in combination with other styles.
 

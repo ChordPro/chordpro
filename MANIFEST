@@ -15,9 +15,11 @@ lib/App/Music/ChordPro/Output/Debug.pm
 lib/App/Music/ChordPro/Output/HTML.pm
 lib/App/Music/ChordPro/Output/PDF.pm
 lib/App/Music/ChordPro/Output/PDF/Writer.pm
+lib/App/Music/ChordPro/Output/PDF/KeyboardDiagrams.pm
 lib/App/Music/ChordPro/Output/PDF/StringDiagrams.pm
 lib/App/Music/ChordPro/Output/Text.pm
 lib/App/Music/ChordPro/Songbook.pm
+lib/App/Music/ChordPro/Testing.pm
 lib/App/Music/ChordPro/Utils.pm
 lib/App/Music/ChordPro/Version.pm
 lib/App/Music/ChordPro/Wx.pm
@@ -145,6 +147,8 @@ t/175_transpose.t
 t/177_transcode.t
 t/180_grids.t
 t/20_basic01_crd.t
+t/210_configs.t
+t/211_config.t
 t/21_basic02_crd.t
 t/30_basic01_cho.t
 t/31_basic02_cho.t
@@ -154,7 +158,6 @@ t/60_transpose.cho
 t/60_transpose.t
 t/basic01.cho
 t/basic02.cho
-t/differ.pl
 t/ref/20_crd_1.crd
 t/ref/20_crd_2.crd
 t/ref/20_crd_3.crd

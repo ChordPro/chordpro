@@ -3,18 +3,17 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 4;
 
-use App::Packager ( ':name', 'App::Music::ChordPro' );
-use App::Music::ChordPro::Config;
+use App::Music::ChordPro::Testing;
 use App::Music::ChordPro::Songbook;
 use App::Music::ChordPro::Output::Common;
+
+plan tests => 4;
 
 # For transcoding, both source and target notation systems must be
 # defined. The source system must be last, so it is current and used
 # to parse the the input data.
 
-our $config = App::Music::ChordPro::Config::configurator;
 ok( $config, "got config" );
 
 my $s = App::Music::ChordPro::Songbook->new;

@@ -4,15 +4,13 @@ use strict;
 use warnings;
 use utf8;
 
-use Test::More;
+use App::Music::ChordPro::Testing;
 my $tests = 0;
 
 use_ok( qw(App::Music::ChordPro::Output::Common) );
 $tests++;
 
 use App::Music::ChordPro::Config;
-
-our $config = App::Music::ChordPro::Config::configurator;
 
 $::config->{metadata}->{separator} = ":";
 our $options = { verbose => 0, debug => 0 };
@@ -25,6 +23,8 @@ my $s = { page => 24,
 		    h => ["Z"],
 		    multi => [ "Alpha", "Beta" ],
 		    head => ["yes"],
+		    true => 1,
+		    false => 0,
 		  },
 	};
 
@@ -60,6 +60,8 @@ ab%{head}def		abyesdef
 ab%{head}def%{head}xy	abyesdefyesxy
 %{head}def		yesdef
 %{h}def			Zdef
+%{true}			1
+%{false}		0
 
 # Subtitute the value
 X%{head}Y		XyesY
@@ -79,6 +81,8 @@ X%{}Y			X%{}Y
 # Subtitute the 'false' part
 X%{head=no|foo|bar}Y	XbarY
 X%{hexd|foo|bar}Y	XbarY
+X%{head|0|foo}Y		X0Y
+X%{hexd|foo|0}Y		X0Y
 X%{hexd=yes|foo|bar}Y	XbarY
 X%{hexd=no|foo|bar}Y	XbarY
 X%{hexd=|foo|bar}Y	XfooY
