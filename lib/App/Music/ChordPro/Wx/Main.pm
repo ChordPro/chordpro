@@ -121,8 +121,8 @@ sub init {
     }
 
     Wx::Log::SetTimestamp(' ');
-    if ( @ARGV && -s $ARGV[0] ) {
-	$self->openfile( shift(@ARGV) );
+    if ( @ARGV ) {
+	$self->openfile( shift(@ARGV) ) || return 0;
 	return 1;
     }
 
@@ -196,6 +196,17 @@ sub opendialog {
 
 sub openfile {
     my ( $self, $file ) = @_;
+
+    unless ( -f -r $file ) {
+	my $md = Wx::MessageDialog->new
+	  ( $self,
+	    "Error opening $file: $!",
+	    "File open error",
+	    wxOK | wxICON_ERROR );
+	my $ret = $md->ShowModal;
+	$md->Destroy;
+	return;
+    }
     unless ( $self->{t_source}->LoadFile($file) ) {
 	my $md = Wx::MessageDialog->new
 	  ( $self,
@@ -220,6 +231,7 @@ sub openfile {
 
     $self->{prefs_xpose} = 0;
     $self->{prefs_xposesharp} = 0;
+    return 1;
 }
 
 sub newfile {
