@@ -1396,7 +1396,7 @@ sub songline {
 		    $info = App::Music::ChordPro::Chords::chord_info($chord);
 		    warn("PDF: Lookup chord $chord... ",
 			 $info ? "found" : "fail",
-			 "\n");
+			 "\n") if $options->{debug};
 		}
 		if ( $info && $info->{system} eq "roman" ) {
 		    $xt0 = $pr->text( $pre.$info->{root},
