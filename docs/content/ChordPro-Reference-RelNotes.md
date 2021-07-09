@@ -1,5 +1,44 @@
 # Release info
 
+## 0.979
+
+Released: 2021-07-09
+
+
+### ChordPro syntax
+
+* {define ...} can take key definitions for keyboards.
+* All directives can be selected out by appending -XXX, where XXX is the type of instrument or a user name.
+
+### ChordPro functionality
+
+* (musejazz) Change font to MuseJazzText.otf as downloadable from GitHub.
+* Improve error messages for font files not found.
+* Default CHORDPRO_LIB to ~/.config/chordpro, if present.
+* Experimental: Allow delegates to specify image type.
+* Allow variable expansion on all input lines.
+* Experimental support for preprocessing.
+* Experimental support for song-specific configs.
+* Support for keyboard diagrams.
+* Experimental support for metadata in filelist.
+* Add --print-delta-config option.
+* Suppress outline title if there is only one outline.
+* Allow meta data definitions in config.
+* Remove support for legacy configs.
+* Suppress a directive if its argument is empty as result from %{} expansion.
+* Add directive suppression with instrument/user selectors.
+
+### BugFixes
+
+* Fix crash when abc section is the very first thing in a song.
+* Fix decapo setting from config file (issue #140).
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.
+
+[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.
+
 ## 0.978
 
 Released: 2021-03-05
@@ -23,12 +62,6 @@ Released: 2021-03-05
 * Fix chords transpose in comments with output ChordPro.
 * Fix detection of grid params in start_of_grid.
 * Fix problem with path name in start menu after windows install.
-
-### Social and support
-
-[User community](https://groups.io/g/ChordPro) for feedback and help.
-
-[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.
 
 ## 0.977
 

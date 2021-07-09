@@ -165,13 +165,6 @@
 	    "additionalProperties": false,
 	    "properties": {
 
-		"type": {
-		    "description": "Type of diagrams.",
-		    "default": "strings",
-		    "enum": [ "strings", "keyboard" ],
-		    "type": "string"
-		},
-
 		"auto": {
 		    "description": "Automatically add new chords.",
 		    "type": "boolean",
@@ -1190,6 +1183,27 @@
  		    "maxItems": 3
  		},
  
+		"theme": {
+		    "description": "Theme",
+		    "additionalProperties": false,
+		    "properties": {
+			"background": {
+			    "description": "Background colour",
+			    "allOf": [
+				{ "$ref": "#/definitions/colorspec" },
+				{ "default": "none" }
+			    ]
+			},
+			"foreground": {
+			    "description": "Foreground colour",
+			    "allOf": [
+				{ "$ref": "#/definitions/colorspec" },
+				{ "default": "black" }
+			    ]
+			}
+		    }
+		},
+
 		"titles-directive-ignore": {
 		    "description": "Ignore titles directives in the songs.",
 		    "default": false,
@@ -1198,7 +1212,7 @@
 	    }
 	},
 
-	"toc": {
+        "toc": {
 	    "description": "(Obsolete) Table of Contents",
 	    "additionalProperties": false,
 	    "properties": {
@@ -1244,6 +1258,19 @@
 		    "type": "string",
 		    "default": ""
 		 }
+	    }
+	},
+
+	"debug": {
+	    "description": "Miscellaneous debug settings.",
+	    "additionalProperties": false,
+	    "properties": {
+
+		"song": {
+		    "description": "Debug settig for song.",
+		    "type": "integer",
+		    "default": 0
+		}
 	    }
 	}
     }
