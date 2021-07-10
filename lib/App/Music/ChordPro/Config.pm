@@ -1237,7 +1237,7 @@ sub default_config() {
 
       // Even/odd pages. A value of -1 denotes odd/even pages.
       "even-odd-pages" : 1,
-      // Align songs to even/odd pages.
+      // Align songs to even/odd pages. When greater than 1, force alignment.
       "pagealign-songs" : 1,
 
       // Formats.

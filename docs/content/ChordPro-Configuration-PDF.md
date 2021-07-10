@@ -317,6 +317,9 @@ an even or odd page as well.
 
         "pagealign-songs" : 1,
 
+With a value greater than `1`, ChordPro will additionally force the
+resultant PDF to always have an even number of pages.
+
 ## Page headers and footers
 
 ChordPro distinguishes three types of output pages:

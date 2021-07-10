@@ -1,3 +1,9 @@
+0.000
+
+    - !ChordPro functionality
+    - Setting config value pdf.pagealign-songs to a value greater than
+      1 will force the resultant PDF to have an even number of pages.
+
 0.979 2021-07-09
 
     - !ChordPro syntax

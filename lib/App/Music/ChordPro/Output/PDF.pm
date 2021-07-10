@@ -80,6 +80,9 @@ sub generate_songbook {
 	$page += $song->{meta}->{pages} =
 	  generate_song( $song, { pr => $pr, startpage => $page } );
     }
+    # Align.
+    $pr->newpage($ps, $page+1), $page++
+      if $ps->{'pagealign-songs'} > 1 && !($page % 2);
     $book_back_matter_page = $page;
 
     #warn("F=$book_front_matter_page, T=$book_toc_page, S=$book_start_page, B=$book_back_matter_page\n");
