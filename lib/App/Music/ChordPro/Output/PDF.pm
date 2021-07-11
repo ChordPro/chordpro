@@ -45,7 +45,6 @@ sub generate_songbook {
 
     return [] unless $sb->{songs}->[0]->{body}; # no songs
     $verbose ||= $options->{verbose};
-    $debug_spacing ||= $options->{debug};
     my $ps = $config->{pdf};
     my $pr = (__PACKAGE__."::Writer")->new( $ps, $pdfapi );
     $pr->info( Title => $sb->{songs}->[0]->{meta}->{title}->[0],
@@ -242,6 +241,7 @@ sub generate_song {
     $suppress_empty_lyricsline = $::config->{settings}->{'suppress-empty-lyrics'};
     $inlinechords = $::config->{settings}->{'inline-chords'};
     $chordsunder  = $::config->{settings}->{'chords-under'};
+    $debug_spacing ||= $config->{debug}->{spacing} || $options->{debug};
     my $ps = $::config->clone->{pdf};
     my $pr = $opts->{pr};
     $ps->{pr} = $pr;

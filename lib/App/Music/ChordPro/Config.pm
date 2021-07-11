@@ -1481,6 +1481,7 @@ sub default_config() {
 
     // For (debugging (internal use only)).
     "debug" : {
+        "spacing" : 0,
         "song" : 0,
     },
 
