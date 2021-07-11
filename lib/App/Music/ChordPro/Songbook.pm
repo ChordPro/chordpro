@@ -157,7 +157,8 @@ sub parse_song {
 		}
 	    }
 	    if ( $options->{verbose} > 1 ) {
-		warn( "Processed ", scalar(@$chords), " chord entries\n");
+		warn( "Processed ", scalar(@$chords), " chord entries\n")
+		  if $chords;
 		warn( "Totals: ",
 		      App::Music::ChordPro::Chords::chord_stats(), "\n" );
 	    }
