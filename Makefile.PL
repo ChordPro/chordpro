@@ -32,10 +32,11 @@ WriteMakefile
 		    'PDF::API2'			  => 2.036,
 		    'Text::Layout'		  => 0.021,
 		    'JSON::PP'			  => 2.27203,
-		    'String::Interpolate::Named'  => 0.05,
+		    'String::Interpolate::Named'  => 1.01,
 		    'File::LoadLines'		  => 1.02,
 		    'Image::Info'		  => 1.41,
 		    'List::Util'		  => 1.33,
+		    'Storable'			  => 3.08,
 		   },
 
  CONFIGURE_REQUIRES => {
