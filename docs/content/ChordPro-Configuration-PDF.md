@@ -320,6 +320,10 @@ an even or odd page as well.
 With a value greater than `1`, ChordPro will additionally force the
 resultant PDF to always have an even number of pages.
 
+Note that with `pagealign-songs` = 1 empty (blank) pages are inserted
+(as conventional in book printing), while with `pagealign-songs` > 1
+the empty pages have headings and footers.
+
 ## Page headers and footers
 
 ChordPro distinguishes three types of output pages:

@@ -3,6 +3,9 @@
     - !ChordPro functionality
     - Setting config value pdf.pagealign-songs to a value greater than
       1 will force the resultant PDF to have an even number of pages.
+    - !BugFixes
+    - Fix crash when no chords.
+    - Fix issue #145.
 
 0.979 2021-07-09
 
