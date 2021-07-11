@@ -397,7 +397,12 @@ sub generate_song {
     my $col;
 
     my $col_adjust = sub {
-	return if $ps->{columns} <= 1;
+	if ( $ps->{columns} <= 1 ) {
+	    warn("L=", $ps->{__leftmargin},
+	     ", R=", $ps->{__rightmargin},
+	     "\n") if $debug_spacing;
+	    return;
+	}
 	$x = $ps->{_leftmargin} + $ps->{columnoffsets}->[$col];
 	$ps->{__leftmargin} = $x;
 	$ps->{__rightmargin} =
@@ -559,8 +564,10 @@ sub generate_song {
 	    my $hsp = $dd->hsp(undef,$ps);
 	    my $x = $x + $column - $ps->{_indent};
 	    $ps->{_rightmargin} = $ps->{papersize}->[0] - $x + $ps->{columnspace};
+	    $ps->{__rightmargin} = $x - $ps->{columnspace};
 	    set_columns( $ps,
 			 $s->{settings}->{columns} || $::config->{settings}->{columns} );
+	    $col_adjust->();
 	    my $y = $y;
 	    while ( @chords ) {
 
@@ -2221,11 +2228,13 @@ sub wrap {
     my @rchords;
     my @rphrases;
     my $m = $pr->{ps}->{__rightmargin};
+    #warn("WRAP x=$x rm=$m w=", $m - $x, "\n");
 
     while ( @chords ) {
 	my $chord  = shift(@chords);
 	my $phrase = shift(@phrases) // "";
 	my $ex = "";
+	#warn("wrap x=$x rm=$m w=", $m - $x, " ch=$chord, ph=$phrase\n");
 
 	if ( @rchords ) {
 	    # Does the chord fit?
@@ -2266,9 +2275,9 @@ sub wrap {
 	    }
 	    unshift( @chords, $chord );
 	    unshift( @phrases, $ex );
-	    $x = $_[2];
 	    push( @$res,
 		  { %$elt, chords => [@rchords], phrases => [@rphrases] } );
+	    $x = $_[2] + $pr->strwidth("x");
 	    $res->[-1]->{indent} = $pr->strwidth("x") if @$res > 1;
 	    @rchords = ();
 	    @rphrases = ();
