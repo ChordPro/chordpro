@@ -1978,6 +1978,7 @@ sub showlayout {
     my $pr = $ps->{pr};
     my $col = "red";
     my $lw = 0.5;
+    my $font = $ps->{fonts}->{grid};
 
     my $mr = $ps->{_rightmargin};
     my $ml = $ps->{_leftmargin};
@@ -1988,13 +1989,42 @@ sub showlayout {
 		 $ps->{papersize}->[1]-$ps->{margintop},
 		 $lw, undef, $col);
 
+    my $fsz = 7;
+    my $ptop = $ps->{papersize}->[1]-$ps->{margintop}+$fsz-3;
+    $pr->setfont($font,$fsz);
+    $pr->text( "<span color='red'>$ml</span>",
+	       $ml, $ptop, $font, $fsz );
+    my $t = $ps->{papersize}->[0]-$mr;
+    $pr->text( "<span color='red'>$t</span>",
+	       $ps->{papersize}->[0]-$mr-$pr->strwidth("$mr"),
+	       $ptop, $font, $fsz );
+    $t = $ps->{papersize}->[1]-$ps->{margintop};
+    $pr->text( "<span color='red'>$t  </span>",
+	       $ml-$pr->strwidth("$t  "),
+	       $ps->{papersize}->[1]-$ps->{margintop}-2,
+	       $font, $fsz );
+    $t = $ps->{marginbottom};
+    $pr->text( "<span color='red'>$t  </span>",
+	       $ml-$pr->strwidth("$t  "),
+	       $ps->{marginbottom}-2,
+	       $font, $fsz );
     my @a = ( $ml,
 	      $ps->{papersize}->[1]-$ps->{margintop}+$ps->{headspace},
 	      $ps->{papersize}->[0]-$ml-$mr,
 	      $lw, $col );
     $pr->hline(@a);
+    $t = $a[1];
+    $pr->text( "<span color='red'>$t  </span>",
+	       $ml-$pr->strwidth("$t  "),
+	       $a[1]-2,
+	       $font, $fsz );
     $a[1] = $ps->{marginbottom}-$ps->{footspace};
     $pr->hline(@a);
+    $t = $a[1];
+    $pr->text( "<span color='red'>$t  </span>",
+	       $ml-$pr->strwidth("$t  "),
+	       $a[1]-2,
+	       $font, $fsz );
 
     my @off = @{ $ps->{columnoffsets} };
     pop(@off);
@@ -2006,8 +2036,12 @@ sub showlayout {
     foreach my $i ( 0 .. @off-1 ) {
 	next unless $off[$i];
 	$a[0] = $ml + $off[$i];
+	$pr->text( "<span color='red'>$a[0]</span>",
+		   $a[0] - $pr->strwidth($a[0])/2, $ptop, $font, $fsz );
 	$pr->vline(@a);
 	$a[0] = $ml + $off[$i] - $ps->{columnspace};
+	$pr->text( "<span color='red'>$a[0]</span>",
+		   $a[0] - $pr->strwidth($a[0])/2, $ptop, $font, $fsz );
 	$pr->vline(@a);
 	if ( $ps->{_indent} ) {
 	    $a[0] = $ml + $off[$i] + $ps->{_indent};
