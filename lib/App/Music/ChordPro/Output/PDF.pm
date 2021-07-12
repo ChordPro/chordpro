@@ -1123,8 +1123,7 @@ sub generate_song {
     }
 
     my $pages = $thispage - $startpage + 1;
-    warn("PAGES: $pages, ALIGN = ", $ps->{'pagealign-songs'}, "\n");
-    $newpage->(), $pages++, warn("ALIGN $pages")
+    $newpage->(), $pages++,
       if $ps->{'pagealign-songs'} > 1 && $pages % 2;
 
     return $pages;
