@@ -141,6 +141,7 @@ sub draw {
 
     # Process the strings and fingers.
     $x -= $gw/2;
+    my $oflo;
     for my $sx ( 0 .. @{ $info->{frets} }-1 ) {
 	my $fret = $info->{frets}->[$sx];
 	my $fing;
@@ -153,6 +154,10 @@ sub draw {
 	}
 
 	if ( $fret > 0 ) {
+	    if ( $fret > $v && !$oflo++ ) {
+		warn("Diagram $info->{name}: ",
+		     "Fret position $fret exceeds diagram size $v\n");
+	    }
 	    if ( $fing && $fing > 0 ) {
 		# The dingbat glyphs are open, so we need a white
 		# background circle.
