@@ -157,7 +157,9 @@ sub draw {
 		# The dingbat glyphs are open, so we need a white
 		# background circle.
 		$pr->circle( $x+$gw/2, $y-$fret*$gh+$gh/2, $dot/2, 1,
-			     $ps->{theme}->{background}, $ps->{theme}->{foreground} );
+			     $ps->{theme}->{background} eq 'none'
+			     ? 'white' : $ps->{theme}->{background},
+			     $ps->{theme}->{foreground} );
 		my $dot = $dot/0.7;
 		my $glyph = pack( "C", 0xca + $fing - 1 );
 		$pr->setfont( $ps->{fonts}->{chordfingers}, $dot );

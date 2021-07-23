@@ -7,6 +7,7 @@
     - Fix crash when no chords.
     - Fix issue #145.
     - Allow {define} and {chord} to take multi-digit fret/finger positions.
+    - Fix background drawing for finger positions.
 
 0.979 2021-07-09
 
