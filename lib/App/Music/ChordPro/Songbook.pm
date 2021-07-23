@@ -1228,7 +1228,7 @@ sub directive {
 	    # frets N N ... N
 	    elsif ( $a eq "frets" ) {
 		my @f;
-		while ( @a && $a[0] =~ /^[0-9---xXN]$/ ) {
+		while ( @a && $a[0] =~ /^(?:[0-9]+|[-xXN])$/ ) {
 		    push( @f, shift(@a) );
 		}
 		if ( @f == $strings ) {
@@ -1246,7 +1246,7 @@ sub directive {
 	    elsif ( $a eq "fingers" ) {
 		my @f;
 		# It is tempting to limit the fingers to 1..5 ...
-		while ( @a && $a[0] =~ /^[0-9---xXN]$/ ) {
+		while ( @a && $a[0] =~ /^(?:[0-9]+|[-xXN])$/ ) {
 		    push( @f, shift(@a) );
 		}
 		if ( @f == $strings ) {
