@@ -5,6 +5,7 @@
       1 will force the resultant PDF to have an even number of pages.
     - Add warning when chord diagram exceeds the diagram size.
     - Do not complain about unknown meta data.
+    - Add numbercolor property for chordfingers chord.
     - !BugFixes
     - Fix crash when no chords.
     - Fix issue #145.
