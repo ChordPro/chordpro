@@ -31,12 +31,19 @@ sub fmt_subst {
 	        @{$m->{key}} ];
     }
     $m->{tuning} //= [ join(" ", App::Music::ChordPro::Chords::get_tuning) ];
-    $m->{instrument} = [ $config->{instrument}->{type} ];
-    $m->{"instrument.type"} = [ $config->{instrument}->{type} ];
-    $m->{"instrument.description"} = [ $config->{instrument}->{description} ];
-    $m->{user} = [ $config->{user}->{name} ];
-    $m->{"user.name"} = [ $config->{user}->{name} ];
-    $m->{"user.fullname"} = [ $config->{user}->{fullname} ];
+    # If config->{instrument} is missing, or null, the program abends with
+    # Modification of a read-only value attempted.
+    if ( $config->{instrument} ) {
+	$m->{instrument} = [ $config->{instrument}->{type} ];
+	$m->{"instrument.type"} = [ $config->{instrument}->{type} ];
+	$m->{"instrument.description"} = [ $config->{instrument}->{description} ];
+    }
+    # Same here.
+    if ( $config->{user} ) {
+	$m->{user} = [ $config->{user}->{name} ];
+	$m->{"user.name"} = [ $config->{user}->{name} ];
+	$m->{"user.fullname"} = [ $config->{user}->{fullname} ];
+    }
     setlocale( LC_TIME, "" );
     $m->{today} //= [ strftime( $config->{dates}->{today}->{format},
 				localtime(time) ) ];

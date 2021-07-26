@@ -9,6 +9,8 @@
     - Fix issue #145.
     - Allow {define} and {chord} to take multi-digit fret/finger positions.
     - Fix background drawing for finger positions.
+    - Fix "Modification of a read-only value attempted" crash when
+      instrument or user get nulled.
 
 0.979 2021-07-09
 
