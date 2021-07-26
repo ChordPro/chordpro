@@ -105,9 +105,16 @@ sub draw {
     my $xo = $self->grid_xo($ps);
     $pr->{pdfgfx}->formimage( $xo, $x, $y-$v*$gh, 1 );
 
+    # The numbercolor property of the chordfingers is used for the
+    # background of the underlying dot (the numbers are transparent).
+    my $fcf = $ps->{fonts}->{chordfingers};
+    my $fbg = $pr->_bgcolor($fcf->{numbercolor});
+    # However, if none we should really use white.
+    $fbg = "white" if $fbg eq "none";
+
     # Bar detection.
     my $bar;
-    if ( $info->{fingers} ) {
+    if ( $info->{fingers} && $fbg ne $ps->{theme}->{foreground} ) {
 	my %h;
 	my $str = 0;
 	my $got = 0;
@@ -141,7 +148,8 @@ sub draw {
 
     # Process the strings and fingers.
     $x -= $gw/2;
-    my $oflo;
+    my $oflo;			# to detect out of range frets
+
     for my $sx ( 0 .. @{ $info->{frets} }-1 ) {
 	my $fret = $info->{frets}->[$sx];
 	my $fing;
@@ -158,20 +166,18 @@ sub draw {
 		warn("Diagram $info->{name}: ",
 		     "Fret position $fret exceeds diagram size $v\n");
 	    }
-	    if ( $fing && $fing > 0 ) {
-		# The dingbat glyphs are open, so we need a white
+	    if ( $fing && $fing > 0 && $fbg ne $ps->{theme}->{foreground} ) {
+		# The dingbat glyphs are open, so we need am explicit
 		# background circle.
 		$pr->circle( $x+$gw/2, $y-$fret*$gh+$gh/2, $dot/2, 1,
-			     $ps->{theme}->{background} eq 'none'
-			     ? 'white' : $ps->{theme}->{background},
-			     $ps->{theme}->{foreground} );
+			     $fbg, $ps->{theme}->{foreground} );
 		my $dot = $dot/0.7;
 		my $glyph = pack( "C", 0xca + $fing - 1 );
-		$pr->setfont( $ps->{fonts}->{chordfingers}, $dot );
+		$pr->setfont( $fcf, $dot );
 		$pr->text( $glyph,
 			   $x+$gw/2-$pr->strwidth($glyph)/2,
 			   $y-$fret*$gh+$gh/2-$pr->strwidth($glyph)/2+$lw/2,
-			   $ps->{fonts}->{chordfingers}, $dot );
+			   $fcf, $dot );
 	    }
 	    else {
 		$pr->circle( $x+$gw/2, $y-$fret*$gh+$gh/2, $dot/2, 1,

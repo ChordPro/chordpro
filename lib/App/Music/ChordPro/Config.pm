@@ -1357,7 +1357,8 @@ sub default_config() {
 	  },
 	  "chordfingers" : {
 	      "name" : "ZapfDingbats",
-	      "size" : 10
+	      "size" : 10,
+	      "numbercolor" : "background",
 	  },
 	  "comment" : {
 	      "name" : "Helvetica",

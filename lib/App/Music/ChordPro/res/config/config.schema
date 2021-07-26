@@ -27,6 +27,9 @@
 		"color": {
 		    "$ref": "#/definitions/colorspec"
 		},
+		"numbercolor": {
+		    "$ref": "#/definitions/colorspec"
+		},
 		"background": {
 		    "$ref": "#/definitions/colorspec"
 		},

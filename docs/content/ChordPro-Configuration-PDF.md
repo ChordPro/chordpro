@@ -488,6 +488,14 @@ Default is the setting for `comment`.
 * `diagram_base`  
 The font for the base fret numbers in chord diagrams.  
 Default is the setting for `text` but at a small size.
+* `chordfingers`  
+The font used for drawing the fret positions that have fingering
+associated. This should **not** be modified unless you know what you
+are doing (and you probably don't).  
+This font has an additonal property `numbercolor` that can be set to
+control the colour of the finger number. By default this is the theme
+background colour. Setting this colour to the foreground colour
+effectively hides the finger numbers.
 
 ## Outlines
 
