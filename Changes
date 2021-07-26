@@ -4,6 +4,7 @@
     - Setting config value pdf.pagealign-songs to a value greater than
       1 will force the resultant PDF to have an even number of pages.
     - Add warning when chord diagram exceeds the diagram size.
+    - Do not complain about unknown meta data.
     - !BugFixes
     - Fix crash when no chords.
     - Fix issue #145.

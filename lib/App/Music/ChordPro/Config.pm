@@ -520,6 +520,7 @@ sub _augment {
 	warn("Config error: unknown item $path$key\n")
 	  unless exists $self->{$key}
 	    || $path eq "pdf.fontconfig."
+	    || $path =~ "^meta\."
 	    || $key =~ /^_/;
 
 	# Hash -> Hash.
@@ -757,6 +758,7 @@ sub hmerge($$;$) {
 	warn("Config error: unknown item $path$key\n")
 	  unless exists $res{$key}
 	    || $path eq "pdf.fontconfig."
+	    || $path =~ /^meta\./
 	    || $key =~ /^_/;
 
 	if ( ref($right->{$key}) eq 'HASH'
