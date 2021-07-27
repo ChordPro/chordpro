@@ -272,6 +272,12 @@
 			"minimum": 1,
 			"default": 1
 		    },
+		    "baselabeloffset": {
+			"description": "Displacement for the base fret label.",
+			"type": "integer",
+			"minimum": 0,
+			"default": 0
+		    },
  		    "copy": {
  			"description": "Copy another definition.",
  			"type": "string"

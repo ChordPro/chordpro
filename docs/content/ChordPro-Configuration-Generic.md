@@ -142,13 +142,18 @@ The configuration file can hold any number of predefined chords.
         {
             "name"  : "Bb(high)",
             "base"  : 6,
+            "baselabelofset"  : 1,
             "frets" : [ 1, 3, 3, 2, 1, 1 ],
             "fingers" : [ 1, 3, 4, 2, 1, 1 ],
 			"display" : "%{root}<sup>high</sup>",
         },
     ],
 
-`base` specifies the topmost position of the chord diagram. It must be 1 or higher. If `base` is greater than 1 its value is printed at the side the diagram, as can be seen in the illustration below.
+`base` specifies the topmost position of the chord diagram. It must be
+1 or higher. If `base` is greater than 1 its value is printed at the
+side the diagram, as can be seen in the illustration below. If
+`baselabelofset` has been defined and is greater than zero, the base value is
+printed `baselabelofset` frets higher.
 
 ![]({{< asset "images/ex_chords.png" >}})
 

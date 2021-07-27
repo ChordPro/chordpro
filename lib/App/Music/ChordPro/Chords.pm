@@ -338,6 +338,7 @@ sub add_config_chord {
 	    %$info,
 	    %$def,
 	    base    => $base,
+	    baselabeloffset => $def->{baselabeloffset}||0,
 	    frets   => [ $frets && @$frets ? @$frets : () ],
 	    fingers => [ $fingers && @$fingers ? @$fingers : () ],
 	    keys    => [ $keys && @$keys ? @$keys : () ] };

@@ -89,12 +89,12 @@ sub draw {
 	|| $::config->{diagrams}->{show} eq "user";
     $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y - font_bl($font) );
     $y -= $font->{size} * 1.2 + $dot/2 + $lw;
-
-    if ( $info->{base} > 1 ) {
+    if ( $info->{base} + $info->{baselabeloffset} > 1 ) {
 	# my $i = @Roman[$info->{base}] . "  ";
-	my $i = sprintf("%d  ", $info->{base});
+	my $i = sprintf("%d  ", $info->{base} + $info->{baselabeloffset});
 	$pr->setfont( $ps->{fonts}->{diagram_base}, $gh );
-	$pr->text( $i, $x-$pr->strwidth($i), $y-0.85*$gh,
+	$pr->text( $i, $x-$pr->strwidth($i),
+		   $y-($info->{baselabeloffset}*$gh)-0.85*$gh,
 		   $ps->{fonts}->{diagram_base}, 1.2*$gh );
     }
 
