@@ -353,7 +353,7 @@
 		    "pageno": {
 			"description": "The format for the page numbers in the toc.",
 			"type": "string",
-			"default": "%{pageno}"
+			"default": "%{page}"
 		    }
 		}
 	    }
