@@ -746,7 +746,7 @@ sub transpose {
     if ( $self->{bass} && $self->{bass} ne "" ) {
 	$info->{bass_ord} = ( $self->{bass_ord} + $xpose ) % $p->intervals;
 	$info->{bass_canon} = $info->{bass} =
-	  $p->root_canon($info->{bass_ord},$xpose > 0);
+	  $p->root_canon( $info->{bass_ord}, $xpose > 0 );
 	$info->{bass_mod} = $xpose <=> 0;
     }
     $info->{root_mod} = $xpose <=> 0;
@@ -773,7 +773,7 @@ sub transcode {
     }
     if ( $self->{bass} && $self->{bass} ne "" ) {
 	$info->{bass_canon} = $info->{bass} =
-	  $p->root_canon($info->{bass_ord},$info->{bass_mod});
+	  $p->root_canon( $info->{bass_ord}, $info->{bass_mod} >= 0 );
     }
     bless $info => $p->{target};
 }
