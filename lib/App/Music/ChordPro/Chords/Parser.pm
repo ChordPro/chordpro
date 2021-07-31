@@ -128,8 +128,10 @@ sub get_parser {
 	  App::Music::ChordPro::Chords::Parser::Roman->new;
     }
     elsif ( $system ) {
-	return $parsers->{$system} //=
-	  App::Music::ChordPro::Chords::Parser::Common->new;
+	return $parsers->{$system} if $parsers->{$system};
+	my $p = App::Music::ChordPro::Chords::Parser::Common->new;
+	$p->{system} = $system;
+	return $parsers->{$system} = $p;
     }
     elsif ( $nofallback ) {
 	return;
@@ -760,7 +762,7 @@ sub transcode {
     $info->{system} = $xcode;
     my $p = $self->{parser}->get_parser($xcode);
     $info->{parser} = $p;
-    die unless $p->{system} eq $xcode;
+    die("OOPS ", $p->{system}, " $xcode") unless $p->{system} eq $xcode;
     $info->{root_canon} = $info->{root} =
       $p->root_canon( $info->{root_ord},
 		      $info->{root_mod} >= 0,
