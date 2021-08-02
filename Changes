@@ -16,6 +16,7 @@
       instrument or user get nulled.
     - Fix %{pageno} vs. %{page} confusion.
     - Do not write K: to ABC (it has side-effects).
+    - Fix issue #148.
 
 0.979 2021-07-09
 

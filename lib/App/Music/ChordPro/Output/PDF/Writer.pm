@@ -103,13 +103,9 @@ sub text {
 
     $self->{layout}->set_font_description($font->{fd});
     $self->{layout}->set_font_size($size);
-    my $col = $self->_fgcolor($font->{color});
-    if ( $col ne $self->{ps}->{theme}->{foreground} ) {
-	$text = "<span color='" . $col . "'>" . $text . "</span>";
-    }
-    else {
-	$self->{layout}->{_currentcolor} = $col;
-    }
+    # We don't have set_color in the API.
+    $self->{layout}->{_currentcolor} = $self->_fgcolor($font->{color});
+    # Watch out for regression... May have to do this in the nomarkup case only.
     if ( $nomarkup ) {
 	$self->{layout}->set_text($text);
     }
@@ -153,13 +149,8 @@ sub text_nobl {
 
     $self->{layout}->set_font_description($font->{fd});
     $self->{layout}->set_font_size($size);
-    my $col = $self->_fgcolor($font->{color});
-    if ( $col ne $self->{ps}->{theme}->{foreground} ) {
-	$text = "<span color='" . $col . "'>" . $text . "</span>";
-    }
-    else {
-	$self->{layout}->{_currentcolor} = $col;
-    }
+    # We don't have set_color in the API.
+    $self->{layout}->{_currentcolor} = $self->_fgcolor($font->{color});
     $self->{layout}->set_markup($text);
     $self->{layout}->show( $x, $y, $self->{pdftext} );
 
