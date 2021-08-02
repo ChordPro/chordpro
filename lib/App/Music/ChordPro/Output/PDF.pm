@@ -2298,7 +2298,7 @@ sub wrapsimple {
     $pr->wrap( $text, $pr->{ps}->{__rightmargin} - $x );
 }
 
-use constant ABCDEBUG => 0;
+sub ABCDEBUG() { $config->{debug}->{abc} }
 
 use feature 'state';
 
@@ -2326,9 +2326,12 @@ sub abc2image {
 	warn('%%'.$_." ".$elt->{opts}->{$_}."\n") if ABCDEBUG;
     }
     print $fd "X:1\n";
-    if ( $s->{meta}->{key} ) {
-	print $fd "K:", $s->{meta}->{_orig_key}->[0], "\n";
-	warn("K:", $s->{meta}->{_orig_key}->[0], "\n") if ABCDEBUG;
+    warn("X:1\n") if ABCDEBUG;
+    # Do not add Key -- it has side-effects.
+    if ( 0 and my $k = $s->{meta}->{key}->[0] ) {
+	$k = $s->{meta}->{_orig_key}->[0] if $s->{meta}->{_orig_key}->[0];
+	print $fd "K:$k\n";
+	warn("K:$k\n") if ABCDEBUG;
     }
     if ( $s->{meta}->{time} ) {
 	print $fd "M:", $s->{meta}->{time}->[0], "\n";
@@ -2341,9 +2344,9 @@ sub abc2image {
     for ( @{$elt->{data}} ) {
 	# Ignore most information fields.
 	# We only need (accept) K (key), L (unit note lenght),
-	# P (parts), Q (tempo) and M (meter).
+	# P (parts), Q (tempo), V (verse), W (lyrics) and M (meter).
 	# From the directives, only pass %%transpose.
-	if ( /^[ABCDEFGHIJNORSTUVWXYZ+]:/i
+	if ( /^[ABCDEFGHIJNORSTUXYZ+]:/i
 	     || /^%%(?!transpose)/ ) {
 	    next;
 	}
@@ -2376,6 +2379,9 @@ sub abc2image {
 
     my $svg0 = File::Spec->catfile( $td, "tmp${imgcnt}.svg" );
     my $svg1 = File::Spec->catfile( $td, "tmp${imgcnt}001.svg" );
+    warn( join(" ", $abcm2ps, qw(-g -q -m0cm),
+	       "-w" . $pw . "pt",
+	       "-O", $svg0, $src, "\n" ) ) if ABCDEBUG;
     if ( sys( $abcm2ps, qw(-g -q -m0cm),
 	      "-w" . $pw . "pt",
 	      "-O", $svg0, $src ) ) {
@@ -2444,6 +2450,8 @@ sub abc2image {
 =cut
 
 }
+
+sub LYDEBUG() { $config->{debug}->{ly} }
 
 sub ly2image {
     my ( $s, $pr, $elt ) = @_;

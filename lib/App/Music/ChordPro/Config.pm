@@ -1486,6 +1486,8 @@ sub default_config() {
     "debug" : {
         "spacing" : 0,
         "song" : 0,
+  	"abc" : 0,
+  	"ly" : 0,
     },
 
 }

@@ -15,6 +15,7 @@
     - Fix "Modification of a read-only value attempted" crash when
       instrument or user get nulled.
     - Fix %{pageno} vs. %{page} confusion.
+    - Do not write K: to ABC (it has side-effects).
 
 0.979 2021-07-09
 
