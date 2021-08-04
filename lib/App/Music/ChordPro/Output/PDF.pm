@@ -14,6 +14,7 @@ use Encode qw( encode_utf8 );
 use App::Packager;
 use File::Temp ();
 use Storable qw(dclone);
+use List::Util qw(any);
 
 use App::Music::ChordPro::Output::Common
   qw( roman prep_outlines fmt_subst demarkup );
@@ -2325,31 +2326,15 @@ sub abc2image {
 	print $fd '%%'.$_." ".$elt->{opts}->{$_}."\n";
 	warn('%%'.$_." ".$elt->{opts}->{$_}."\n") if ABCDEBUG;
     }
-    print $fd "X:1\n";
-    warn("X:1\n") if ABCDEBUG;
-    # Do not add Key -- it has side-effects.
-    if ( 0 and my $k = $s->{meta}->{key}->[0] ) {
-	$k = $s->{meta}->{_orig_key}->[0] if $s->{meta}->{_orig_key}->[0];
-	print $fd "K:$k\n";
-	warn("K:$k\n") if ABCDEBUG;
+
+    # Add mandatory field.
+    unless ( any { /^X:/ } @{$elt->{data}} ) {
+	print $fd ("X:1\n");
+	warn("X:1\n") if ABCDEBUG;
     }
-    if ( $s->{meta}->{time} ) {
-	print $fd "M:", $s->{meta}->{time}->[0], "\n";
-	warn("M:", $s->{meta}->{time}->[0], "\n") if ABCDEBUG;
-    }
-    if ( $s->{meta}->{tempo} ) {
-	print $fd "Q:", $s->{meta}->{tempo}->[0], "\n";
-	warn("Q:", $s->{meta}->{tempo}->[0], "\n") if ABCDEBUG;
-    }
+
+    # Copy rest. We assume the user knows how to write ABC.
     for ( @{$elt->{data}} ) {
-	# Ignore most information fields.
-	# We only need (accept) K (key), L (unit note lenght),
-	# P (parts), Q (tempo), V (verse), W (lyrics) and M (meter).
-	# From the directives, only pass %%transpose.
-	if ( /^[ABCDEFGHIJNORSTUXYZ+]:/i
-	     || /^%%(?!transpose)/ ) {
-	    next;
-	}
 	print $fd $_, "\n";
 	warn($_, "\n") if ABCDEBUG;
     }

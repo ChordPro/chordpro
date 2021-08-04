@@ -31,6 +31,10 @@ convert the ABC source to an image, and then embeds the image (see
 [image directive]({{< relref "directives-image" >}})). Depending on
 the external tools support for embedded ABC may be limited, or absent.
 
+** Note** If you encounter problems with ABC content, first copy the ABC content
+into a separate file and run it through an ABC postprocessor (e.g.
+`abcm2ps` or `abc2svg`) to see if there are errors in the ABC content.
+
 This directive may include an optional label, to be printed in the
 left margin. For example:,
 
@@ -41,15 +45,6 @@ margin, see [labels]({{< relref "ChordPro-Configuration-PDF#labels" >}}).
 
 ## General rules for embedding ABC source
 
-* All information fields are ignored except for `K` (key), `L` (unit), `M`
-  (meter), `P` (part) and `Q` (tempo).
-
-* Default values will be supplied if possible for:
-
-  * `K`: the value set by a [`{key}`]({{< relref "directives-key" >}}) directive.
-  * `M`: the value set by a [`{time}`]({{< relref "directives-time" >}}) directive.
-  * `Q`: the value set by a [`{tempo}`]({{< relref "directives-tempo" >}}) directive.
-  
 * ChordPro transposition using `{transpose}` and/or `--transpose` will
   transpose the embedded ABC. Adding `%%transpose` to the ABC
   source will affect the ABC notes only.
