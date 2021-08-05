@@ -159,6 +159,12 @@
 		    "description": "Transcode chords.",
 		    "type": "string",
 		    "default": ""
+		},
+
+		"transpose": {
+		    "description": "Transpose chords.",
+		    "type": "integer",
+		    "default": 0
 		}
 	    }
 	},

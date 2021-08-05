@@ -34,6 +34,8 @@
       "inline-chords" : false,
       // Chords under the lyrics.
       "chords-under" : false,
+      // Transposing.
+      "transpose" : 0,
       // Transcoding.
       "transcode" : "",
       // Always decapoize.

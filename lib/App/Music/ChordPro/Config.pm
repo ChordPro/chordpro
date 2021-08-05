@@ -180,22 +180,6 @@ sub configurator {
     }
     $cfg = hmerge( $cfg, $ccfg );
 
-    if ( $cfg->{settings}->{transcode} ||= $options->{transcode} ) {
-	my $xc = $cfg->{settings}->{transcode};
-	# Load the appropriate notes config, but retain the current parser.
-	unless ( App::Music::ChordPro::Chords::Parser->have_parser($xc) ) {
-	    my $file = getresource("notes/$xc.json");
-	    my $new = hmerge( $cfg, get_config($file) );
-	    local $::config = $new;
-	    App::Music::ChordPro::Chords::Parser->new($new);
-	}
-	unless ( App::Music::ChordPro::Chords::Parser->have_parser($xc) ) {
-	    die("No transcoder for ", $xc, "\n");
-	}
-	warn("Got transcoder for $xc\n") if $::options->{vebose};
-	#warn("Parsers: ", ::dump(App::Music::ChordPro::Chords::Parser::parsers()));
-    }
-
     # Sanitize added extra entries.
     for ( qw(title subtitle footer) ) {
 	delete($cfg->{pdf}->{formats}->{first}->{$_})
@@ -258,18 +242,14 @@ sub configurator {
 	$cfg->{diagrams}->{show} =
 	  $options->{'chord-grids'} ? "all" : 0;
     }
+
+    for ( qw( transpose transcode decapo lyrics-only ) ) {
+	next unless defined $options->{$_};
+	$cfg->{settings}->{$_} = $options->{$_};
+    }
+
     if ( defined $options->{'chord-grids-sorted'} ) {
 	$cfg->{diagrams}->{sorted} = $options->{'chord-grids-sorted'};
-    }
-    if ( $options->{'lyrics-only'} ) {
-	$cfg->{settings}->{'lyrics-only'} = $options->{'lyrics-only'};
-    }
-    if ( $options->{transcode} ) {
-	# Already handled.
-	# $cfg->{settings}->{transcode} = $options->{transcode};
-    }
-    if ( $options->{decapo} ) {
-	$cfg->{settings}->{decapo} = $options->{decapo};
     }
 
     # For convenience...
@@ -942,6 +922,8 @@ sub default_config() {
       "inline-chords" : false,
       // Chords under the lyrics.
       "chords-under" : false,
+      // Transposing.
+      "transpose" : 0,
       // Transcoding.
       "transcode" : "",
       // Always decapoize.

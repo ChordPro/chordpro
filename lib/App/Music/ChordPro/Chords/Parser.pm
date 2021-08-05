@@ -758,11 +758,12 @@ sub transcode {
     my ( $self, $xcode ) = @_;
     return $self unless $xcode;
     return $self if $self->{system} eq $xcode;
-    my $info = $self->clone;
+    my $info = $self->dclone;
+#warn("_>_XCODE = $xcode, CHORD = $info->{name}");
     $info->{system} = $xcode;
     my $p = $self->{parser}->get_parser($xcode);
-    $info->{parser} = $p;
     die("OOPS ", $p->{system}, " $xcode") unless $p->{system} eq $xcode;
+    $info->{parser} = $p;
     $info->{root_canon} = $info->{root} =
       $p->root_canon( $info->{root_ord},
 		      $info->{root_mod} >= 0,
@@ -776,6 +777,9 @@ sub transcode {
 	  $p->root_canon( $info->{bass_ord}, $info->{bass_mod} >= 0 );
     }
     bless $info => $p->{target};
+#    ::dump($info);
+#warn("_<_XCODE = $xcode, CHORD = ", $info->show);
+    return $info;
 }
 
 ################ Chord objects: Nashville ################

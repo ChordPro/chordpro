@@ -27,6 +27,9 @@
 		"color": {
 		    "$ref": "#/definitions/colorspec"
 		},
+		"numbercolor": {
+		    "$ref": "#/definitions/colorspec"
+		},
 		"background": {
 		    "$ref": "#/definitions/colorspec"
 		},
@@ -269,6 +272,12 @@
 			"minimum": 1,
 			"default": 1
 		    },
+		    "baselabeloffset": {
+			"description": "Displacement for the base fret label.",
+			"type": "integer",
+			"minimum": 0,
+			"default": 0
+		    },
  		    "copy": {
  			"description": "Copy another definition.",
  			"type": "string"
@@ -344,7 +353,7 @@
 		    "pageno": {
 			"description": "The format for the page numbers in the toc.",
 			"type": "string",
-			"default": "%{pageno}"
+			"default": "%{page}"
 		    }
 		}
 	    }
@@ -1266,8 +1275,23 @@
 	    "additionalProperties": false,
 	    "properties": {
 
+		"abc": {
+		    "description": "Debug setting for ABC.",
+		    "type": "integer",
+		    "default": 0
+		},
+		"ly": {
+		    "description": "Debug setting for LilyPond.",
+		    "type": "integer",
+		    "default": 0
+		},
 		"song": {
-		    "description": "Debug settig for song.",
+		    "description": "Debug setting for songs.",
+		    "type": "integer",
+		    "default": 0
+		},
+		"spacing": {
+		    "description": "Debug setting for output spacing.",
 		    "type": "integer",
 		    "default": 0
 		}

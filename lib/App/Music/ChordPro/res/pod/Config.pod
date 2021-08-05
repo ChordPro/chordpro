@@ -61,6 +61,8 @@ extensive details and examples.
         "inline-chords" : false,
         // Chords under the lyrics.
         "chords-under" : false,
+        // Transposing.
+        "transpose" : 0,
         // Transcoding.
         "transcode" : "",
         // Always decapoize.
@@ -605,6 +607,8 @@ extensive details and examples.
       "debug" : {
           "spacing" : 0,
           "song" : 0,
+    	"abc" : 0,
+    	"ly" : 0,
       },
   
   }

@@ -7,6 +7,8 @@
     - Do not complain about unknown meta data.
     - Add numbercolor property for chordfingers chord.
     - Add baselabeloffset property for chords.
+    - Config settings that have corresponding command line options are
+      always overridden when the command line option is used.
     - !BugFixes
     - Fix crash when no chords.
     - Fix issue #145.
@@ -17,6 +19,7 @@
     - Fix %{pageno} vs. %{page} confusion.
     - Do not tamper with ABC content. E.g., adding K: has side-effects.
     - Fix issue #148.
+    - Fix issue #149.
 
 0.979 2021-07-09
 

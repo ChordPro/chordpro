@@ -240,19 +240,8 @@ sub chordpro {
 	}
     }
 
-    if ( my $xc = $::config->{settings}->{transcode} ) {
-	# Set target parser for the backend so it can find the transcoded
-	# chord definitions.
-	App::Music::ChordPro::Chords::set_parser($xc);
-	# Generate the songbook.
-	$res = $pkg->generate_songbook($s);
-	# Restore parser.
-	App::Music::ChordPro::Chords::set_parser($::config->{notes}->{system} );
-    }
-    else {
-	# Generate the songbook.
-	$res = $pkg->generate_songbook($s);
-    }
+    # Call backend to produce output.
+    $res = $pkg->generate_songbook($s);
 
   WRITE_OUTPUT:
     # Some backends write output themselves, others return an

@@ -89,10 +89,15 @@ sub parse_file {
     $lineinfo = $config->{settings}->{lineinfo};
 
     # Used by tests.
-    for ( "transpose", "no-substitute", "no-transpose" ) {
+    for ( "transpose", "transcode" ) {
+	next unless exists $opts->{$_};
+	$config->{settings}->{$_} = $opts->{$_};
+    }
+    for ( "no-substitute", "no-transpose" ) {
 	next unless exists $opts->{$_};
 	$options->{$_} = $opts->{$_};
     }
+    bless $config => App::Music::ChordPro::Config:: if ref $config eq 'HASH';
 
     my $linecnt = 0;
     while ( @$lines ) {
@@ -117,6 +122,13 @@ sub parse_song {
 
     # Load song-specific config, if any.
     if ( $diag->{file} ) {
+	if ( $options->{verbose} ) {
+	    my $this = App::Music::ChordPro::Chords->get_parser->{system};
+	    print STDERR ("Parsers at start of ", $diag->{file}, ":");
+	    print STDERR ( $this eq $_ ? " *" : " ", "$_")
+	      for keys %{ App::Music::ChordPro::Chords::Parser->parsers };
+	    print STDERR ("\n");
+	}
 	my $t = join("|",@{$config->{tuning}});
 	my $have;
 	if ( $meta && $meta->{__config} ) {
@@ -162,8 +174,22 @@ sub parse_song {
 		warn( "Totals: ",
 		      App::Music::ChordPro::Chords::chord_stats(), "\n" );
 	    }
+	    if ( 0 && $options->{verbose} ) {
+		my $this = App::Music::ChordPro::Chords->get_parser->{system};
+		print STDERR ("Parsers after local config:");
+		print STDERR ( $this eq $_ ? " *" : " ", "$_")
+		  for keys %{ App::Music::ChordPro::Chords::Parser->parsers };
+		print STDERR ("\n");
+	    }
 	}
     }
+
+    $config->unlock;
+    for ( qw( transpose transcode decapo lyrics-only ) ) {
+	next unless defined $options->{$_};
+	$config->{settings}->{$_} = $options->{$_};
+    }
+    $config->lock;
 
     for ( keys %{ $config->{meta} } ) {
 	$meta->{$_} //= [];
@@ -177,7 +203,7 @@ sub parse_song {
 
     $no_transpose = $options->{'no-transpose'};
     $no_substitute = $options->{'no-substitute'};
-    $decapo = $options->{decapo} || $config->{settings}->{decapo};
+    $decapo = $config->{settings}->{decapo};
     my $fragment = $options->{fragment};
 
     $song = App::Music::ChordPro::Song->new
@@ -336,9 +362,9 @@ sub parse_song {
 		# Else start new item.
 		else {
 		    my %opts;
-		    if ( $xpose || $options->{transpose} ) {
+		    if ( $xpose || $config->{settings}->{transpose} ) {
 			$opts{transpose} =
-			  $xpose + ($options->{transpose}//0 );
+			  $xpose + ($config->{settings}->{transpose}//0 );
 		    }
 		    $self->add( type => "delegate",
 				subtype => $config->{delegates}->{$in_context}->{type},
@@ -410,7 +436,27 @@ sub parse_song {
 	$diagrams = $config->{diagrams}->{show};
     }
 
-    my $target = $config->{settings}->{transcode} || $song->{system};
+    my $target = $config->{settings}->{transcode};
+    if ( $target ) {
+	unless ( App::Music::ChordPro::Chords::Parser->have_parser($target) ) {
+	    if ( my $file = ::getresource("notes/$target.json") ) {
+		for ( App::Music::ChordPro::Config::get_config($file) ) {
+		    my $new = $config->hmerge($_);
+		    local $config = $new;
+		    App::Music::ChordPro::Chords::Parser->new($new);
+		}
+	    }
+	}
+	unless ( App::Music::ChordPro::Chords::Parser->have_parser($target) ) {
+	    die("No transcoder for ", $target, "\n");
+	}
+	warn("Got transcoder for $target\n") if $::options->{verbose};
+	App::Music::ChordPro::Chords->set_parser($target);
+    }
+    else {
+	$target = $song->{system};
+    }
+
     if ( $diagrams =~ /^(user|all)$/
 	 && !App::Music::ChordPro::Chords::Parser->get_parser($target,1)->has_diagrams ) {
 	$diag->{orig} = "(End of Song)";
@@ -441,7 +487,7 @@ sub parse_song {
     }
     $song->{chordsinfo} = { %used_chords };
 
-    my $xp = $options->{transpose};
+    my $xp = $config->{settings}->{transpose};
     my $xc = $config->{settings}->{transcode};
     if ( $xc && App::Music::ChordPro::Chords::Parser->get_parser($xc,1)->movable ) {
 	if ( $song->{meta}->{key}
@@ -462,8 +508,10 @@ sub parse_song {
     ::dump( do {
 	my $a = dclone($song);
 	$a->{config} = ref(delete($a->{config}));
-	$a->{chordsinfo}{$_}{parser} = ref(delete($a->{chordsinfo}{$_}{parser}))
-	  for keys %{$a->{chordsinfo}};
+#	$a->{chordsinfo}{$_}{ns_canon} = $a->{chordsinfo}{$_}{parser}{ns_canon}
+#	  for keys %{$a->{chordsinfo}};
+#	$a->{chordsinfo}{$_}{parser} = ref(delete($a->{chordsinfo}{$_}{parser}))
+#	  for keys %{$a->{chordsinfo}};
 	$a;
 	} ) if eval { $config->{debug}->{song} };
 
@@ -961,7 +1009,7 @@ sub directive {
 		$val =~ s/[\[\]]//g;
 #		push( @{ $song->{meta}->{_orig_key} }, $val );
 		my $xp = $xpose;
-		$xp += $options->{transpose} if $options->{transpose};
+		$xp += $config->{settings}->{transpose} if $config->{settings}->{transpose};
 		$val = App::Music::ChordPro::Chords::transpose( $val, $xp )
 		  if $xp;
 	    }
@@ -971,7 +1019,7 @@ sub directive {
 		if ( $decapo ) {
 		    $xpose += $val;
 		    my $xp = $xpose;
-		    $xp += $options->{transpose} if $options->{transpose};
+		    $xp += $config->{settings}->{transpose} if $config->{settings}->{transpose};
 		    for ( qw( key key_actual key_from ) ) {
 			next unless exists $song->{meta}->{$_};
 			$song->{meta}->{$_}->[-1] =
@@ -1362,7 +1410,7 @@ sub duration {
 sub transpose {
     my ( $self, $xpose, $xcode ) = @_;
     return unless $xpose || $xcode;
-
+#warn("XPOSE = $xpose, XCODE = $xcode");
     foreach my $song ( @{ $self->{songs} } ) {
 	$song->transpose( $xpose, $xcode );
     }
@@ -1408,6 +1456,7 @@ sub new {
 
 sub transpose {
     my ( $self, $xpose, $xcode ) = @_;
+#warn("XPOSE = $xpose, XCODE = $xcode");
 
     $xpose ||= 0;
     my $xp = 0;
@@ -1428,6 +1477,7 @@ sub transpose {
     # Transpose song chords.
     if ( exists $self->{chords} ) {
 	foreach my $item ( $self->{chords} ) {
+#warn("_XPOSE = ", $xp+$xpose, " _XCODE = $xcode");
 	    $self->_transpose( $item, $xp+$xpose, $xcode );
 	}
     }
