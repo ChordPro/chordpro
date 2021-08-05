@@ -37,7 +37,6 @@ These settings control global behaviour of the ChordPro program and can be chang
         // Suppress blank lyrics lines.
         "suppress-empty-lyrics" : true,
         // Suppress chords.
-        // Overrides --lyrics-only command line option.
         "lyrics-only" : false,
         // Chords inline.
         // May be a string containing pretext %s posttext.
@@ -49,6 +48,8 @@ These settings control global behaviour of the ChordPro program and can be chang
         "memorize" : false,
         // Transcoding.
         "transcode" : "",
+        // Transpoing.
+        "transpose" : 0,
         // Always decapoize.
         "decapo" : false,
         // Chords parsing strategy.
@@ -57,6 +58,10 @@ These settings control global behaviour of the ChordPro program and can be chang
 		// Interpret lowcase root-only chords as note names.
 		"notenames": false,
     },
+
+Note that settings `decapo`, `lyrics-only`, `transcode` and
+`transpose` have corresponding command line options. The command line
+option, if used, overrides the config setting.
 
 ## Metadata
 

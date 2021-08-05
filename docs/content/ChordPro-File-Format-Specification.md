@@ -53,7 +53,7 @@ Finally, all lines that start with a `#` are ignored. These can be used to inser
 In print, this song could look like this (click on the thumbnail to
 view a larger version):
 
-{{< showpage "simple" >}}
+{{< showpage "style_default" >}}
 
 ## Markup and annotations
 

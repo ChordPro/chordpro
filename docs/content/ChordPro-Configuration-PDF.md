@@ -132,7 +132,7 @@ but only if labels are actually used.
 
 `align` will control how the labels are aligned in the margin.
 
-{{< showpage "labels" >}}
+{{< showpage "page_labels" >}}
 
 ## Chorus style
 
@@ -160,39 +160,6 @@ ChordPro can format a chorus in several different ways:
                  "quote" : false,
             },
         },
-
-## Section styles
-
-If you use `{start_of_`*section*`}` and `{end_of_`*section*`}`
-directives to mark specific parts of a song, you can specify that the
-*section* name must be printed as a comment line before the section
-itself.
-
-For example:
-
-    {start_of_bridge}
-    [F]The bridge starts with F.
-    {end_of_bridge}
-
-can produce output as if you wrote
-
-    {comment Bridge}
-    [F]The bridge starts with F.
-
-To obtain this, use the following configuration settings:
-
-        // Markup for sections.
-        // Define what to do with begin_of_XXX directives.
-        // Use fallback as fallback.
-        // Default is to ignore them.
-        "section" : {
-            "bridge" : "comment",
-        },
-
-Instead of `comment`, any of the fonts as described under [Fonts]({{< relref "#fonts" >}}) can be used.
-
-A special section name `fallback` can be used to handle all sections
-not otherwise specified.
 
 ## Chords in a side column
 
