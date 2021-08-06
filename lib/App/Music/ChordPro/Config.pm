@@ -1459,6 +1459,8 @@ sub default_config() {
 	"preprocess" : {
 	    // All lines.
 	    "all" : [],
+	    // Directives.
+	    "directive" : [],
 	    // Song lines (lyrics) only.
             "songline" : [],
 	},

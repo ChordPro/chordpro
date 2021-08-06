@@ -270,14 +270,26 @@ sub parse_song {
 	$re_chords = qr/(\[.*?\])/;
     }
 
+    my $skipcnt = 0;
     while ( @$lines ) {
-	$diag->{line} = ++$$linecnt;
+	if ( $skipcnt ) {
+	    $skipcnt--;
+	}
+	else {
+	    $diag->{line} = ++$$linecnt;
+	}
 	$diag->{orig} = $_ = shift(@$lines);
 
 	if ( $prep->{all} ) {
 	    # warn("PRE:  ", $_, "\n");
 	    $prep->{all}->($_);
 	    # warn("POST: ", $_, "\n");
+	    if ( /\n/ ) {
+		my @a = split( /\n/, $_ );
+		$_ = shift(@a);
+		unshift( @$lines, @a );
+		$skipcnt += @a;
+	    }
 	}
 
 	if ( $skip_context ) {
@@ -382,6 +394,11 @@ sub parse_song {
 
 	# For now, directives should go on their own lines.
 	if ( /^\s*\{(.*)\}\s*$/ ) {
+	    if ( $prep->{directive} ) {
+		# warn("PRE:  ", $_, "\n");
+		$prep->{directive}->($_);
+		# warn("POST: ", $_, "\n");
+	    }
 	    $self->add( type => "ignore",
 			text => $_ )
 	      unless $self->directive($1);

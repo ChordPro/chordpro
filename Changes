@@ -9,6 +9,8 @@
     - Add baselabeloffset property for chords.
     - Config settings that have corresponding command line options are
       always overridden when the command line option is used.
+    - Add preprocessing for directives.
+    - Preprocessing 'all' may result in multiple lines.
     - !BugFixes
     - Fix crash when no chords.
     - Fix issue #145.

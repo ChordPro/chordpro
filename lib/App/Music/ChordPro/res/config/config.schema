@@ -558,6 +558,10 @@
 			    "description": "",
 			    "type": "array"
 			 },
+			"directive": {
+			    "description": "",
+			    "type": "array"
+			 },
 			"songline": {
 			    "description": "",
 			    "type": "array"
