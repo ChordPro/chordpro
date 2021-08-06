@@ -11,6 +11,7 @@
       always overridden when the command line option is used.
     - Add preprocessing for directives.
     - Preprocessing 'all' may result in multiple lines.
+    - Experimental 'choruslike' property for pdf.chorus.recall.
     - !BugFixes
     - Fix crash when no chords.
     - Fix issue #145.

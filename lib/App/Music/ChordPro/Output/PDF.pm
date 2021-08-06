@@ -981,13 +981,19 @@ sub generate_song {
 				  type => "set",
 				  name => "label",
 				  value => $elt->{chorus}->[0]->{value},
-				 } );
+				} );
+		if ( $ps->{chorus}->{recall}->{choruslike} ) {
+		    $elts[0]->{context} = $elts[1]->{context} = "chorus";
+		}
 	    }
 	    elsif ( $t->{tag} && $t->{type} =~ /^comment(?:_(?:box|italic))?/ ) {
 		unshift( @elts, { %$elt,
 				  type => $t->{type},
 				  text => $t->{tag},
 				 } );
+		if ( $ps->{chorus}->{recall}->{choruslike} ) {
+		    $elts[0]->{context} = "chorus";
+		}
 	    }
 	    redo;
 	}

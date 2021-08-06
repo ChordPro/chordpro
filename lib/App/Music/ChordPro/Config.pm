@@ -1149,6 +1149,7 @@ sub default_config() {
 	  // Recall style: Print the tag using the type.
 	  // Alternatively quote the lines of the preceding chorus.
 	  "recall" : {
+	      "choruslike" : false,
 	      "tag"   : "Chorus",
 	      "type"  : "comment",
 	      "quote" : false,
