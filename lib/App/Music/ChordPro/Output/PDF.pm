@@ -140,7 +140,7 @@ sub generate_songbook {
 	    $page++;
 	}
 	$pr->newpage( $ps, 1+$matter->pages ), $page++
-	  if $ps->{'even-odd-pages'} && !($page % 2);
+	  if $ps->{'even-odd-pages'} && ($page % 2);
 	$book_toc_page         += $page - 1;
 	$book_start_page       += $page - 1;
 	$book_back_matter_page += $page - 1;
