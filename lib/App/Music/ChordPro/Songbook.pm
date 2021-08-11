@@ -75,9 +75,12 @@ sub parse_file {
     # Loadlines sets $opts->{_filesource}.
     my $lines = loadlines( $filename, $opts );
     # Sense crd input and convert if necessary.
-    if ( !$options->{fragment}
+    if ( !(defined($options->{a2crd}) && !$options->{a2crd}) and
+	 !$options->{fragment}
 	 and any { /\S/ } @$lines	# non-blank lines
 	 and $options->{crd} || !any { /^{\w+/ } @$lines ) {
+	warn("Converting $filename to ChordPro format\n")
+	  if $options->{verbose};
 	require App::Music::ChordPro::A2Crd;
 	$lines = App::Music::ChordPro::A2Crd::a2crd( { lines => $lines } );
     }
@@ -407,7 +410,9 @@ sub parse_song {
 
 	if ( /\S/ && !$fragment && !exists $song->{title} ) {
 	    do_warn("Missing {title} -- prepare for surprising results");
-	    $song->{title} = "Untitled";
+	    unshift( @$lines, "{title:$_}");
+	    $skipcnt++;
+	    next;
 	}
 
 	if ( $in_context eq "tab" ) {

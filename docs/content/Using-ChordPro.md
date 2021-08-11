@@ -47,9 +47,11 @@ the output. No further processing takes place.
 See also [Legacy ASCII input format]({{< relref
 "chordpro-getting-started#legacy-ascii-input-format" >}}).
 
-Note that `--a2crd` is slightly different from `--crd
---generate=ChordPro`. In the latter case the inpur data *is* processed
+Note that `--a2crd` is slightly different from `--generate=ChordPro`. In the latter case the inpur data *is* processed
 and then written out as a ChordPro file.
+
+See also [`--crd`]({{< relref "#crd" >}}),
+ [`--noa2crd`]({{< relref "#no-a2crd" >}}),
 
 ### about
 
@@ -177,6 +179,10 @@ require chords.
 Presets metadata item _KEY_ to have the value _VALUE_.
 
 This option may be specified multiple times.
+
+### no-a2crd
+
+Do not automatically convert non-ChordPro input to ChordPro format.
 
 ### no-csv
 

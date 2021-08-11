@@ -12,6 +12,7 @@
     - Add preprocessing for directives.
     - Preprocessing 'all' may result in multiple lines.
     - Experimental 'choruslike' property for pdf.chorus.recall.
+    - Add clo --noa2crd to suppress autoconversion.
     - !BugFixes
     - Fix crash when no chords.
     - Fix issue #145.
