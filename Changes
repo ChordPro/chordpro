@@ -15,6 +15,7 @@
     - Add clo --noa2crd to suppress autoconversion.
     - !BugFixes
     - Fix crash when no chords.
+    - Fix case insensitive matching of directive selectors.
     - Fix issue #145.
     - Allow {define} and {chord} to take multi-digit fret/finger positions.
     - Fix background drawing for finger positions.

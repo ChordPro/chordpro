@@ -787,9 +787,9 @@ sub parse_directive {
     if ( $dir =~ /^(.*)-(.+)$/ ) {
 	$dir = $abbrevs{$1} // $1;
 	my $sel = $2;
-	unless ( $sel eq $config->{instrument}->{type}
+	unless ( $sel eq lc($config->{instrument}->{type})
 		 or
-		 $sel eq $config->{user}->{name} ) {
+		 $sel eq lc($config->{user}->{name}) ) {
 	    if ( $dir =~ /^start_of_/ ) {
 		return { name => $dir, arg => $arg, omit => 2 };
 	    }
