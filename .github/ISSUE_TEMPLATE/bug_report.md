@@ -33,11 +33,18 @@ If PDF output can be generated re-run chordpro with --debug and
 include the resultant PDF in the bug report.
 -->
 
-## System information
- - OS: <!-- e.g. Ubuntu 18.08, Windows 8, Fedora 29 -->
- - Perl version: <!-- e.g. 5.28.1 (use `perl --version` on the command line) -->
- - ChordPro version: <!-- e.g. 0.975 (use `chordpro --version` on the command line) -->
- - Where did you get ChordPro from: <!--e.g. CPAN, SourceForge, GitHub -->
+### Sample files and screenshots
+<!-- Adding a small example ChordPro file that shows the problem often helps. If you use custom configuration include that as well.
+If applicable, add screenshots to help explain your problem.
+If PDF output can be generated re-run chordpro with --debug and
+include the resultant PDF in the bug report.
+-->
+
+## Please complete the following information
+ - OS: [e.g. Ubuntu 18.08, Windows 8, Fedora 29]
+ - Perl version [e.g. 5.28.1 (use `perl --version` on the command line)]
+ - ChordPro version [e.g. 0.975 (use `chordpro --version` on the command line)]
+ - Where did you get ChordPro from [e.g. CPAN, SourceForge, GitHub]
 
 ## Additional context
 <!-- Add any other context about the problem here. -->
