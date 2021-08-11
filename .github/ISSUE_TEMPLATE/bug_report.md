@@ -28,7 +28,10 @@ Steps to reproduce the behavior:
 
 ### Sample files and screenshots
 <!-- Adding a small example ChordPro file that shows the problem often helps. If you use custom configuration include that as well.
-If applicable, add screenshots to help explain your problem. -->
+If applicable, add screenshots to help explain your problem.
+If PDF output can be generated re-run chordpro with --debug and
+include the resultant PDF in the bug report.
+-->
 
 ## System information
  - OS: <!-- e.g. Ubuntu 18.08, Windows 8, Fedora 29 -->
