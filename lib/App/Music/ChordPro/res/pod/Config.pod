@@ -288,6 +288,7 @@ extensive details and examples.
   	  // Recall style: Print the tag using the type.
   	  // Alternatively quote the lines of the preceding chorus.
   	  "recall" : {
+  	      "choruslike" : false,
   	      "tag"   : "Chorus",
   	      "type"  : "comment",
   	      "quote" : false,
@@ -598,6 +599,8 @@ extensive details and examples.
   	"preprocess" : {
   	    // All lines.
   	    "all" : [],
+  	    // Directives.
+  	    "directive" : [],
   	    // Song lines (lyrics) only.
               "songline" : [],
   	},
