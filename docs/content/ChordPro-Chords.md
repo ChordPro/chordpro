@@ -20,14 +20,16 @@ and `[*Rit.]`.
 
 ChordPro can parse chord names in two modes: _strict_ and _relaxed_.
 
-In _strict_ mode, chord names are only recognized if they consist of
+In _strict_ mode, enabled by default, chord names are only recognized
+if they consist of
 * a root note, e.g. `C`, `F#` or `Bb`.
 * a _qualifier_, e.g. `m` (minor), `aug` (augmented), or empty.
 * an _extension_, which must be one of the extension names built-in.
 
 In _relaxed_ mode, the same rules apply for root note and qualifier,
 but the extension is not required to be known. You are free to make up
-your own. In relaxed mode, `[Coda]` would be a valid chord name.
+your own. In relaxed mode, `[Coda]` would be a valid chord name: root
+`C` plus extension `oda`.
 
 Many ChordPro implementations (formatters) provide chord diagrams at
 the end of a song, using a built-in list of known chords and
@@ -63,4 +65,102 @@ notes before the chords:
 
 ````
 {comment: Intro [f] [g] [a] [E] }
+````
+
+# ChordPro Implementation: Chord Extensions
+
+The following chord extensions are currently built-in.
+
+### Extensions for major chords
+
+Note that `^` is an alternative for `maj`.
+
+````
+   2
+   3
+   4
+   5
+   6
+   69
+   7
+   7-5
+   7#5 7#9 7#9#5 7#9b5 7#9#11
+   7b5 7b9 7b9#5 7b9#9 7b9#11 7b9b13 7b9b5 7b9sus 7b13 7b13sus
+   7-9 7-9#11 7-9#5 7-9#9 7-9-13 7-9-5 7-9sus
+   711
+   7#11
+   7-13 7-13sus
+   7sus 7susadd3
+   7+
+   7alt
+   9
+   9+
+   9#5
+   9b5
+   9-5
+   9sus
+   9add6
+   maj7 maj711 maj7#11 maj13 maj7#5 maj7sus2 maj7sus4
+   ^7 ^711 ^7#11 ^7#5 ^7sus2 ^7sus4
+   maj9 maj911
+   ^9 ^911
+   ^13
+   ^9#11
+   11
+   911
+   9#11
+   13
+   13#11
+   13#9
+   13b9
+   alt
+   add2 add4 add9
+   sus2 sus4 sus9
+   6sus2 6sus4
+   7sus2 7sus4
+   13sus2 13sus4
+````
+### Extensions for minor chords
+
+A minus sign `-` may be used instead of the `m` to denote a minor
+chord.
+````
+   m#5
+   -#5
+   m11
+   -11
+   m6
+   -6
+   m69
+   -69
+   m7b5
+   -7b5
+   m7-5
+   -7-5
+   mmaj7
+   -maj7
+   mmaj9
+   -maj9
+   m9maj7
+   -9maj7
+   m9^7
+   -9^7
+   madd9
+   -add9
+   mb6
+   -b6
+   m#7
+   -#7
+   msus4 msus9
+   -sus4 -sus9
+   m7sus4
+   -7sus4
+````
+### Other extensions
+````
+   aug +
+   dim 0
+   dim7
+   h h7
+   h9
 ````
