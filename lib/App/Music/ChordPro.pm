@@ -739,7 +739,7 @@ sub app_setup {
 
           ### Options ###
 
-	  "a2crd",			# perform ascii to cho
+	  "a2crd!",			# perform ascii to cho
 	  "crd",			# input is ascii, not cho
           "output|o=s",                 # Saves the output to FILE
           "generate=s",
@@ -1005,6 +1005,7 @@ Usage: $0 [ options ] [ file ... ]
 
 Options:
     --a2crd                       Perform text to ChordPro conversion only
+    --noa2crd                     Do not auto-sense text to ChordPro conversion
     --about  -A                   About ChordPro...
     --config=JSON  --cfg          Config definitions (multiple)
     --cover=FILE                  Add cover pages from PDF document
