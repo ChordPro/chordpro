@@ -57,13 +57,14 @@ sub generate_songbook {
 
     # The book consists of 4 parts:
     # 1. The front matter.
-    my $book_front_matter_page = 1;
     # 2. The table of contents.
-    my $book_toc_page = 1;
-    # 1. The songs.
-    my $book_start_page = 1;
-    # 1. The back matter.
-    my $book_back_matter_page = 1;
+    # 3. The songs.
+    # 4. The back matter.
+    my ( %start_of, %pages_of );
+    for ( qw( front toc songbook back ) ) {
+	$start_of{$_} = 1;
+	$pages_of{$_} = 0;
+    }
 
     # The songbook...
     my @book;
@@ -80,9 +81,8 @@ sub generate_songbook {
 	$page += $song->{meta}->{pages} =
 	  generate_song( $song, { pr => $pr, startpage => $page } );
     }
-    $book_back_matter_page = $page;
-
-    #warn("F=$book_front_matter_page, T=$book_toc_page, S=$book_start_page, B=$book_back_matter_page\n");
+    $pages_of{songbook} = $page - 1;
+    $start_of{back} = $page;
 
     $::config->{contents} //=
       [ { $::config->{toc}->{order} eq "alpha"
@@ -100,7 +100,7 @@ sub generate_songbook {
 	# Create a pseudo-song for the table of contents.
 	my $t = $ctl->{label};
 	my $l = $ctl->{line};
-	my $start = $book_start_page - 1;
+	my $start = $start_of{songbook} - 1;
 	my $pgtpl = $ctl->{pageno};
 	my $song =
 	  { title     => $t,
@@ -121,15 +121,14 @@ sub generate_songbook {
 			       { pr => $pr, prepend => 1, roman => 1,
 				 startpage => 1,
 			       } );
+	$pages_of{toc} += $page;
 
 	# Align.
 	$pr->newpage($ps, $page+1), $page++
 	  if $ps->{'even-odd-pages'} && $page % 2;
-	$book_start_page       += $page;
-	$book_back_matter_page += $page;
+	$start_of{songbook} += $page;
+	$start_of{back}     += $page;
     }
-
-    #warn("F=$book_front_matter_page, T=$book_toc_page, S=$book_start_page, B=$book_back_matter_page\n");
 
     if ( $options->{'front-matter'} ) {
 	$page = 1;
@@ -139,37 +138,45 @@ sub generate_songbook {
 	    $pr->{pdf}->importpage( $matter, $_, $_ );
 	    $page++;
 	}
-	$pr->newpage( $ps, 1+$matter->pages ), $page++
-	  if $ps->{'even-odd-pages'} && !($page % 2);
-	$book_toc_page         += $page - 1;
-	$book_start_page       += $page - 1;
-	$book_back_matter_page += $page - 1;
-    }
+	$pages_of{front} = $matter->pages;
 
-    #warn("F=$book_front_matter_page, T=$book_toc_page, S=$book_start_page, B=$book_back_matter_page\n");
+	# Align to ODD page. Frontmatter starts on a right page but
+	# songs on a left page.
+	$pr->newpage( $ps, 1+$matter->pages ), $page++
+	  if $ps->{'even-odd-pages'} && ($page % 2);
+
+	$start_of{toc}      += $page - 1;
+	$start_of{songbook} += $page - 1;
+	$start_of{back}     += $page - 1;
+    }
 
     if ( $options->{'back-matter'} ) {
 	my $matter = $pdfapi->open( $options->{'back-matter'} );
 	die("Missing back matter: ", $options->{'back-matter'}, "\n") unless $matter;
-	$page = $book_back_matter_page;
-	$pr->newpage($ps), $page++, $book_back_matter_page++
-	  if $ps->{'even-odd-pages'} && !($page % 2);
+	$page = $start_of{back};
+	$pr->newpage($ps), $page++, $start_of{back}++
+	  if $ps->{'even-odd-pages'} && ($page % 2);
 	for ( 1 .. $matter->pages ) {
 	    $pr->{pdf}->importpage( $matter, $_, $page );
 	    $page++;
 	}
+	$pages_of{back} = $matter->pages;
     }
-    #warn("F=$book_front_matter_page, T=$book_toc_page, S=$book_start_page, B=$book_back_matter_page\n");
-    $pr->pagelabel( $book_front_matter_page, 'arabic', 'front-' )
-      if $book_toc_page > $book_front_matter_page;
-    $pr->pagelabel( $book_toc_page,          'roman'            )
-      if $book_start_page > $book_toc_page;
-    $pr->pagelabel( $book_start_page,        'arabic'           );
-    $pr->pagelabel( $book_back_matter_page,  'arabic', 'back-'  )
-      if $page > $book_back_matter_page;
+    # warn ::dump(\%start_of) =~ s/\s+/ /gsr, "\n";
+    # warn ::dump(\%pages_of) =~ s/\s+/ /gsr, "\n";
+
+    # Note that the page indices run from zero.
+    $pr->pagelabel( $start_of{front}-1,    'arabic', 'front-' )
+      if $pages_of{front};
+    $pr->pagelabel( $start_of{toc}-1,      'roman'            )
+      if $pages_of{toc};
+    $pr->pagelabel( $start_of{songbook}-1, 'arabic'           )
+      if $pages_of{songbook};
+    $pr->pagelabel( $start_of{back}-1,     'arabic', 'back-'  )
+      if $pages_of{back};
 
     # Add the outlines.
-    $pr->make_outlines( [ map { $_->[1] } @book ], $book_start_page );
+    $pr->make_outlines( [ map { $_->[1] } @book ], $start_of{songbook} );
 
     $pr->finish( $options->{output} || "__new__.pdf" );
 
@@ -183,6 +190,16 @@ sub generate_songbook {
 	    $v =~ s/"/""/g;
 	    return '"' . $v . '"';
 	};
+	my $pages = sub {
+	    my ( $pages, $page ) = @_;
+	    if ( @_ == 1 ) {
+		$pages = $pages_of{$_[0]};
+		$page  = $start_of{$_[0]};
+	    }
+	    $pages > 1
+	      ? ( $page ."-". ($page+$pages-1) )
+	      : $page,
+	};
 
 	my @cols1 = qw( title pages );
 	my @cols2 = qw( sorttitle artist composer collection key year );
@@ -192,9 +209,25 @@ sub generate_songbook {
 	open( my $fd, '>:utf8', encode_utf8($csv) )
 	  or die( encode_utf8($csv), ": $!\n" );
 	print $fd ( join(";", @cols1, map{ $_."s" } @cols2), "\n" );
+
+	unless ( $pr->{csv}->{songsonly} ) {
+	    print $fd ( join(':','__front_matter__',
+			     $pages->("front"),
+			     'Front Matter',
+			     'ChordPro'),
+			";" x (@cols2-2), "\n" )
+	      if $pages_of{front};
+	    print $fd ( join(':','__table_of_contents__',
+			     $pages->("toc"),
+			     'Table of Contents',
+			     'ChordPro'),
+			";" x (@cols2-2), "\n" )
+	      if $pages_of{toc};
+	}
+
 	for ( my $p = 0; $p < @book-1; $p++ ) {
 	    my ( $title, $song ) = @{$book[$p]};
-	    my $page = $book_start_page + $song->{meta}->{tocpage} - 1;
+	    my $page = $start_of{songbook} + $song->{meta}->{tocpage} - 1;
 	    my $pages = $song->{meta}->{pages};
 	    print $fd ( join(';',
 			     $rfc4180->([$title]),
@@ -204,6 +237,15 @@ sub generate_songbook {
 			     map { $rfc4180->($song->{meta}->{$_}) } @cols2
 			    ),
 			"\n" );
+	}
+
+	unless ( $pr->{csv}->{songsonly} ) {
+	    print $fd ( join(':','__back_matter__',
+			     $pages->("back"),
+			     'Back Matter',
+			     'ChordPro'),
+			";" x (@cols2-2), "\n" )
+	      if $pages_of{back};
 	}
 	close($fd);
     }
