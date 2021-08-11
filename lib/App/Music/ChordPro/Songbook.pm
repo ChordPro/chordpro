@@ -103,16 +103,21 @@ sub parse_file {
     bless $config => App::Music::ChordPro::Config:: if ref $config eq 'HASH';
 
     my $linecnt = 0;
+    my $songs = 0;
     while ( @$lines ) {
 	my $song = $self->parse_song( $lines, \$linecnt, {%$meta} );
 #	if ( exists($self->{songs}->[-1]->{body}) ) {
 	    $song->{meta}->{songindex} = 1 + @{ $self->{songs} };
 	    push( @{ $self->{songs} }, $song );
+	    $songs++ if $song->{body};
 #	}
 #	else {
 #	    $self->{songs} = [ $song ];
 #	}
     }
+
+    warn("Warning: No songs found in ", $diag->{file}, "\n")
+      unless $songs || $::running_under_test;
     return 1;
 }
 

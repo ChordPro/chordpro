@@ -14,6 +14,7 @@
     - Experimental 'choruslike' property for pdf.chorus.recall.
     - Add clo --noa2crd to suppress autoconversion.
     - Improve page labeling and aligning.
+    - Add warning if no songs were found in the input.
     - !BugFixes
     - Fix crash when no chords.
     - Fix case insensitive matching of directive selectors.
