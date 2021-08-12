@@ -80,7 +80,7 @@ sub parse_file {
 	 and any { /\S/ } @$lines	# non-blank lines
 	 and $options->{crd} || !any { /^{\w+/ } @$lines ) {
 	warn("Converting $filename to ChordPro format\n")
-	  if $options->{verbose};
+	  if $options->{verbose} || !($options->{a2crd}||$options->{crd});
 	require App::Music::ChordPro::A2Crd;
 	$lines = App::Music::ChordPro::A2Crd::a2crd( { lines => $lines } );
     }
@@ -148,6 +148,7 @@ sub parse_song {
 	else {
 	    for ( "prp", "json" ) {
 		( my $cf = $diag->{file} ) =~ s/\.\w+$/.$_/;
+		$cf .= ".$_" if $cf eq $diag->{file};
 		next unless -s $cf;
 		warn("Config[song]: $cf\n") if $options->{verbose};
 		$have = App::Music::ChordPro::Config::get_config($cf);

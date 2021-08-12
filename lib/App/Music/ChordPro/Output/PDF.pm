@@ -224,13 +224,13 @@ sub generate_songbook {
 	print $fd ( join(";", @cols1, map{ $_."s" } @cols2), "\n" );
 
 	unless ( $ps->{csv}->{songsonly} ) {
-	    print $fd ( join(':','__front_matter__',
+	    print $fd ( join(';','__front_matter__',
 			     $pages->("front"),
 			     'Front Matter',
 			     'ChordPro'),
 			";" x (@cols2-2), "\n" )
 	      if $pages_of{front};
-	    print $fd ( join(':','__table_of_contents__',
+	    print $fd ( join(';','__table_of_contents__',
 			     $pages->("toc"),
 			     'Table of Contents',
 			     'ChordPro'),
