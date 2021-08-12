@@ -68,12 +68,22 @@ sub generate_songbook {
 
     # The songbook...
     my @book;
-    my $page = $options->{"start-page-number"} || 1;
+    my $page = $options->{"start-page-number"} ||= 1;
+
+    if ( $ps->{'even-odd-pages'} && !($page % 2) ) {
+	warn("Warning: Specifying an even start page when pdf.odd-even-pages is in effect may yield surprising results.\n");
+    }
+
+    my $first_song_aligned;
     foreach my $song ( @{$sb->{songs}} ) {
 
 	# Align.
-	$pr->newpage($ps, $page+1), $page++
-	  if $ps->{'pagealign-songs'} && !($page % 2);
+	if ( $ps->{'pagealign-songs'} && !($page % 2) ) {
+	    $pr->newpage($ps, $page+1);
+	    $page++;
+	    $first_song_aligned //= 1;
+	}
+	$first_song_aligned //= 0;
 
 	$song->{meta}->{tocpage} = $page;
 	push( @book, [ $song->{meta}->{title}->[0], $song ] );
@@ -100,7 +110,7 @@ sub generate_songbook {
 	# Create a pseudo-song for the table of contents.
 	my $t = $ctl->{label};
 	my $l = $ctl->{line};
-	my $start = $start_of{songbook} - ($options->{"start-page-number"} || 1);
+	my $start = $start_of{songbook} - $options->{"start-page-number"};
 	my $pgtpl = $ctl->{pageno};
 	my $song =
 	  { title     => $t,
@@ -122,10 +132,13 @@ sub generate_songbook {
 				 startpage => 1,
 			       } );
 	$pages_of{toc} += $page;
+	$pages_of{toc}++ if $first_song_aligned;
 
 	# Align.
-	$pr->newpage($ps, $page+1), $page++
-	  if $ps->{'even-odd-pages'} && $page % 2;
+	if ( $ps->{'even-odd-pages'} && $page % 2 && !$first_song_aligned ) {
+	    $pr->newpage($ps, $page+1);
+	    $page++;
+	}
 	$start_of{songbook} += $page;
 	$start_of{back}     += $page;
     }
@@ -227,7 +240,8 @@ sub generate_songbook {
 
 	for ( my $p = 0; $p < @book-1; $p++ ) {
 	    my ( $title, $song ) = @{$book[$p]};
-	    my $page = $start_of{songbook} + $song->{meta}->{tocpage} - 1;
+	    my $page = $start_of{songbook} + $song->{meta}->{tocpage}
+	      - ($options->{"start-page-number"} || 1);
 	    my $pages = $song->{meta}->{pages};
 	    print $fd ( join(';',
 			     $rfc4180->([$title]),
