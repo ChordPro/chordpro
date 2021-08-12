@@ -1413,6 +1413,12 @@ sub default_config() {
 
       // This will show the page layout if non-zero.
       "showlayout" : false,
+
+      // CSV generation.
+      "csv" : {
+	  // Restrict CSV to song pages only (do not include matter pages).
+	  "songsonly" : true
+      }
     },
 
     // Settings for ChordPro backend.

@@ -100,7 +100,7 @@ sub generate_songbook {
 	# Create a pseudo-song for the table of contents.
 	my $t = $ctl->{label};
 	my $l = $ctl->{line};
-	my $start = $start_of{songbook} - 1;
+	my $start = $start_of{songbook} - ($options->{"start-page-number"} || 1);
 	my $pgtpl = $ctl->{pageno};
 	my $song =
 	  { title     => $t,
@@ -210,7 +210,7 @@ sub generate_songbook {
 	  or die( encode_utf8($csv), ": $!\n" );
 	print $fd ( join(";", @cols1, map{ $_."s" } @cols2), "\n" );
 
-	unless ( $pr->{csv}->{songsonly} ) {
+	unless ( $ps->{csv}->{songsonly} ) {
 	    print $fd ( join(':','__front_matter__',
 			     $pages->("front"),
 			     'Front Matter',
@@ -239,7 +239,7 @@ sub generate_songbook {
 			"\n" );
 	}
 
-	unless ( $pr->{csv}->{songsonly} ) {
+	unless ( $ps->{csv}->{songsonly} ) {
 	    print $fd ( join(':','__back_matter__',
 			     $pages->("back"),
 			     'Back Matter',

@@ -457,6 +457,9 @@ pdf {
 
   # This will show the page layout if non-zero.
   showlayout = false
+
+  # Restrict CSV to song pages only (do not include matter pages).
+  csv.songsonly : true
 }
 
 # Settings for ChordPro backend.
