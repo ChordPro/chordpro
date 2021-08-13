@@ -29,6 +29,7 @@
     - Do not tamper with ABC content. E.g., adding K: has side-effects.
     - Fix issue #148.
     - Fix issue #149.
+    - Fix issue #158.
 
 0.979 2021-07-09
 

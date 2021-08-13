@@ -90,6 +90,8 @@ sub generate_songbook {
 
 	$page += $song->{meta}->{pages} =
 	  generate_song( $song, { pr => $pr, startpage => $page } );
+	# Easy access to toc page.
+	$song->{meta}->{page} = $song->{meta}->{tocpage};
     }
     $pages_of{songbook} = $page - 1;
     $start_of{back} = $page;
