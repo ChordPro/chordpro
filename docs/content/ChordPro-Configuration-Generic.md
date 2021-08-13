@@ -129,7 +129,7 @@ Setting the tuning to any value except `null` will discard all built-in chords!
 
 For keyboard, use
 
-    "tining" : [ 0 ],
+    "tuning" : [ 0 ],
 
 ## User defined chords (string instruments)
 
