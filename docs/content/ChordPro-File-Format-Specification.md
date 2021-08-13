@@ -11,6 +11,9 @@ In a hurry? See the [ChordPro 6 Release information]({{< relref "ChordPro-RelNot
 
 In 1992 Martin Leclerc and Mario Dorion developed a simple text file format to write _lead sheets_, songs with lyrics and chords, and a tool to create neatly printed lead sheets out of these text files. The tool was called `chord`, and the text files were called `chord` files. It soon became a popular way to write lead sheets and many users and tools adopted this format for similar purposes. For still unknown reasons people started calling the files `chordpro` files.
 
+Read more? See the [ChordPro history overview]({{< relref
+"Chordpro-History" >}}).
+
 As mentioned, the ChordPro file format is a simple text file format. Any text editor or word processor can be used to create and maintain them. The text files can have arbitrary names and arbitrary types (extensions). Common filename extensions for ChordPro files are `.cho`, `.crd`, `.chopro`, `.chord` and `.pro`. If you need to choose an extension for new ChordPro files, we advise to use `.cho`. Simple, short, easy to remember, and not heavily used by other applications.
 
 For example, this is the contents of a simple song:
