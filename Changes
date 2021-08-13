@@ -17,6 +17,8 @@
     - Config pdf.csv.songsonly controls whether matter pages are
       included in the CSV. 
     - Add warning if no songs were found in the input.
+    - Simplify README.md.
+    - Add ChordPro history doc.
     - !BugFixes
     - Fix crash when no chords.
     - Fix case insensitive matching of directive selectors.
