@@ -1,5 +1,49 @@
 # Release info
 
+## 5.980
+
+Released: 2021-08-14
+
+
+### ChordPro functionality
+
+* Bump version to 5.xxx moving towards 6.0.
+* Setting config value pdf.pagealign-songs to a value greater than 1 will force the resultant PDF to have an even number of pages.
+* Add warning when chord diagram exceeds the diagram size.
+* Do not complain about unknown meta data.
+* Add numbercolor property for chordfingers chord.
+* Add baselabeloffset property for chords.
+* Config settings that have corresponding command line options are always overridden when the command line option is used.
+* Add preprocessing for directives.
+* Preprocessing 'all' may result in multiple lines.
+* Experimental 'choruslike' property for pdf.chorus.recall.
+* Add clo --noa2crd to suppress autoconversion.
+* Improve page labeling and aligning.
+* Config pdf.csv.songsonly controls whether matter pages are included in the CSV. 
+* Add warning if no songs were found in the input.
+* Simplify README.md.
+* Add ChordPro history doc.
+
+### BugFixes
+
+* Fix crash when no chords.
+* Fix case insensitive matching of directive selectors.
+* Fix issue #145.
+* Allow {define} and {chord} to take multi-digit fret/finger positions.
+* Fix background drawing for finger positions.
+* Fix "Modification of a read-only value attempted" crash when instrument or user get nulled.
+* Fix %{pageno} vs. %{page} confusion.
+* Do not tamper with ABC content. E.g., adding K: has side-effects.
+* Fix issue #148.
+* Fix issue #149.
+* Fix issue #158.
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.
+
+[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.
+
 ## 0.979
 
 Released: 2021-07-09
@@ -33,12 +77,6 @@ Released: 2021-07-09
 * Fix crash when abc section is the very first thing in a song.
 * Fix decapo setting from config file (issue #140).
 
-### Social and support
-
-[User community](https://groups.io/g/ChordPro) for feedback and help.
-
-[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.
-
 ## 0.978
 
 Released: 2021-03-05
@@ -56,6 +94,7 @@ Released: 2021-03-05
 * Linux: Support building an AppImage.
 * Restore section label as comment (config: pdf.labels.comment).
 * Add experimental MMA backend.
+* Add metadata "today".
 
 ### Bugfixes
 
