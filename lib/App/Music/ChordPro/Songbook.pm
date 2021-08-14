@@ -198,6 +198,12 @@ sub parse_song {
 	next unless defined $options->{$_};
 	$config->{settings}->{$_} = $options->{$_};
     }
+    # Catch common error.
+    unless ( UNIVERSAL::isa( $config->{instrument}, 'HASH' ) ) {
+	$config->{instrument} =
+	  { type => $config->{instrument},
+	    description => $config->{instrument} };
+    }
     $config->lock;
 
     for ( keys %{ $config->{meta} } ) {
