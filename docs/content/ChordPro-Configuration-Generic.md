@@ -100,6 +100,7 @@ Defines the date format used by the metadata value `today`.
 
 The POSIX library function `strftime` is used to render the date, so
 the format string can use anything that `strftime` understands.
+See its documentation as specified by [The Open Group](https://pubs.opengroup.org/onlinepubs/007908799/xsh/strftime.html).
 
 ## Instrument description
 

@@ -72,6 +72,7 @@
     - Linux: Support building an AppImage.
     - Restore section label as comment (config: pdf.labels.comment).
     - Add experimental MMA backend.
+    - Add metadata "today".
     - !Bugfixes
     - Fix chords transpose in comments with output ChordPro.
     - Fix detection of grid params in start_of_grid.

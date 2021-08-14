@@ -955,7 +955,7 @@ sub default_config() {
     "meta" : {
     },
 
-    // Dates.
+    // Dates. Format is a strftime template.
     "dates" : {
         "today" : {
             "format" : "%A, %B %e, %Y"
