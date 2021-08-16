@@ -1,6 +1,7 @@
 0.000
 
     - !ChordPro functionality
+    - Document properties for the PDF can be supplied in the config file.
     - !BugFixes
       Fix issue #159.
 

@@ -48,12 +48,17 @@ sub generate_songbook {
     $verbose ||= $options->{verbose};
     my $ps = $config->{pdf};
     my $pr = (__PACKAGE__."::Writer")->new( $ps, $pdfapi );
-    $pr->info( Title => $sb->{songs}->[0]->{meta}->{title}->[0],
-	       Creator =>
-	       $regtest
-	       ? "$options->{_name} (regression testing)"
-	       : "$options->{_name} $options->{_version}",
-	     );
+
+    my %info = ( Title => $sb->{songs}->[0]->{meta}->{title}->[0],
+		 Creator =>
+		 $regtest
+		 ? "$options->{_name} (regression testing)"
+		 : "$options->{_name} $options->{_version}" );
+    while ( my ( $k, $v ) = each %{ $ps->{info} } ) {
+	next unless defined($v) && $v ne "";
+	$info{ucfirst($k)} = fmt_subst( $sb->{songs}->[0], $v );
+    }
+    $pr->info(%info);
 
     # The book consists of 4 parts:
     # 1. The front matter.

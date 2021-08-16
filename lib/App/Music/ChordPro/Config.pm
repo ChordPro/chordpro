@@ -1094,9 +1094,18 @@ sub default_config() {
         },
      },
 
-    // Layout definitions for PDF output.
+    // Definitions for PDF output.
 
     "pdf" : {
+
+      // PDF Properties.
+      // Note that the context for substitutions is the first song.
+      "info" : {
+          "title"    : "%{title}",
+	  "author"   : "",
+	  "subject"  : "",
+	  "keywords" : "",
+      },
 
       // Papersize, 'a4' or [ 595, 842 ] etc.
       "papersize" : "a4",
