@@ -5,7 +5,7 @@ description: "Pango markup language"
 
 # Pango markup language
 
-_This information is derived from the official [Pango documentation](https://developer.gnome.org/pygtk/stable/pango-markup-language.html)._
+_This information is derived from the official [Pango documentation](https://docs.gtk.org/Pango/pango_markup.html#pango-markup).
 
 The Pango markup language is a very simple SGML-like language that
 allows you specify attributes with the text they are applied to by
@@ -50,13 +50,11 @@ Note: Only `normal` and `bold` are supported.
 The font variant - either `normal` or `smallcaps`.  
 Note: Not (yet) supported.
 
-
 * `stretch`  
 The font width - one of `ultracondensed`, `extracondensed`,
 `condensed`, `semicondensed`, `normal`, `semiexpanded`, `expanded`,
 `extraexpanded`, `ultraexpanded`.  
 Note: Not (yet) supported.
-
 
 * `foreground`  
 An RGB color specification such as `#00FF00` or a color name such
@@ -67,10 +65,10 @@ An RGB color specification such as `#00FF00` or a color name such
 as `red`.  
 Note: Not (yet) supported.
 
-
 * `underline`  
 The underline style - one of `single`, `double`, `low`, or
-`none`.
+`none`.  
+Note: Not (yet) supported.
 
 * `rise`  
 The vertical displacement from the baseline, in ten thousandths of
@@ -79,7 +77,6 @@ an em. Can be negative for subscript, positive for superscript.
 * `strikethrough`  
 `true` or `false` whether to strike through the text.  
 Note: Not (yet) supported.
-
 
 * `fallback`  
 If True enable fallback to other fonts of characters are missing
@@ -90,11 +87,9 @@ text. Fallback is enabled by default. Most applications should not
 disable fallback.  
 Note: Not (yet) supported.
 
-
 * `lang`  
 A language code, indicating the text language.  
 Note: Not (yet) supported.
-
 
 There are a number of convenience tags that encapsulate specific span
 options:
@@ -111,7 +106,6 @@ Make the text italic.
 * `s`  
 Strikethrough the text.  
 Note: Not (yet) supported.
-
 
 * `sub`  
 Subscript the text.
