@@ -5,7 +5,7 @@ description: "Pango markup language"
 
 # Pango markup language
 
-_This information is derived from the official [Pango documentation](https://docs.gtk.org/Pango/pango_markup.html#pango-markup).
+_This information is derived from the official [Pango documentation](https://docs.gtk.org/Pango/pango_markup.html#pango-markup)._
 
 The Pango markup language is a very simple SGML-like language that
 allows you specify attributes with the text they are applied to by
