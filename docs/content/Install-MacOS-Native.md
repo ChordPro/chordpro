@@ -15,6 +15,13 @@ documents. For permanent install, drag the application from the DMG
 window into `/Applications` (may need an administrator
 password).
 
+If you try to open the app and get a dialog that the app
+cannot be opened because "the developer could not be verified", then
+click the small question mark button (bottom-left) to get a help
+screen. Scroll to the bottom, there is "Open an app by overriding
+security settings". Follow the instructions. You need to do that only
+once, then the app is unlocked and usable
+
 For the command line program it may be convenient to add the app
 location to the system path so you don't have to type the full path
 name.
