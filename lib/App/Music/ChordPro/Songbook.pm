@@ -1295,8 +1295,13 @@ sub directive {
 	while ( @a ) {
 	    my $a = shift(@a);
 
+	    # Copy existing definition.
+	    if ( $a eq "copy" ) {
+		$res->{copy} = shift(@a);
+	    }
+
 	    # base-fret N
-	    if ( $a eq "base-fret" ) {
+	    elsif ( $a eq "base-fret" ) {
 		if ( $a[0] =~ /^\d+$/ ) {
 		    $res->{base} = shift(@a);
 		}
@@ -1371,12 +1376,19 @@ sub directive {
 
 	return 1 if $fail;
 
-	if ( ( $res->{fingers} || $res->{base} ) && ! $res->{frets} ) {
+	if ( ( $res->{fingers} || $res->{base} )
+	     && ! ( $res->{copy} || $res->{frets} ) ) {
 	    do_warn("Missing fret positions: $res->{name}\n");
 	    return 1;
 	}
 
 	if ( $show) {
+	    if ( $res->{copy} ) {
+		my $r = App::Music::ChordPro::Chords::chord_info($res->{copy});
+		do_warn("Cannot copy $res->{copy}"), return 1
+		  unless $r;
+		$res = { %$r, name => $res->{name} };
+	    }
 	    my $ci;
 	    if ( $res->{frets} || $res->{base} || $res->{fingers} ) {
 		$ci = { name  => $res->{name},
@@ -1403,7 +1415,7 @@ sub directive {
 	    return 1;
 	}
 
-	if ( $res->{frets} || $res->{fingers} || $res->{keys} ) {
+	if ( $res->{copy} || $res->{frets} || $res->{fingers} || $res->{keys} ) {
 	    $res->{base} ||= 1;
 	    push( @{$song->{define}}, $res );
 	    my $ret =
