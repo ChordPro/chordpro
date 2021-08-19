@@ -976,6 +976,7 @@ sub ::runtimeinfo {
 	$p .= " Packager" unless $p =~ /packager/i;
 	$msg .= sprintf( $fmt, $p, App::Packager::Version() );
     }
+    $msg .= sprintf( $fmt, "Storable", $Storable::VERSION );
     $msg .= sprintf( $fmt, "Resource path",
 		     realpath( App::Packager::GetResourcePath() ) );
     eval { require Text::Layout;

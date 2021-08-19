@@ -48,9 +48,10 @@ WriteMakefile
 # },
 
  TEST_REQUIRES  => {
-		    'Test::More'  => 0,
-		    'JSON::PP'	  => 2.27203,
-		    'String::Interpolate::Named' => 0.05,
+		    'Test::More'                  => 0,
+		    'JSON::PP'	                  => 2.27203,
+		    'String::Interpolate::Named'  => 0.05,
+		    'Storable'			  => 3.08,
 		   },
 
  META_MERGE => {
