@@ -30,3 +30,9 @@ params:
 # Currently the goldmark parser misinterprets `[%`_name_`%]`.
 #markup:
 #  defaultMarkdownHandler: blackFriday
+
+markup:
+  goldmark:
+    parser:
+      attribute:
+        block: true

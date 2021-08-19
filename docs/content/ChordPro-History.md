@@ -15,7 +15,6 @@ still unknown reasons these files became known as `ChordPro` files.
 The content is written in a [Domain Specific Language](https://en.wikipedia.org/wiki/Domain-specific_language) called the
 ChordPro language, or short, ChordPro.
 
-{{<table "table table-striped table-bordered table-sm">}}
 | Chord Version | Release Date     | Remarks |
 |---------|----------|---|
 | 1.0 | 1992-05-20 | reconstructed from internet archives|
@@ -26,7 +25,7 @@ ChordPro language, or short, ChordPro.
 | 3.6.2 | 1995-03 | date from the manual|
 | 3.6.3 | | unofficial |
 | 3.6.4 | 2009-12-30 | GPL release |
-{{</table>}}
+{ .table .table-striped .table-bordered .table-sm }
 
 For convenience, the ChordPro language version supported by the latter
 programs is set to `3`, to reflect the major version number of the
@@ -70,7 +69,6 @@ existing unofficial 3.6.3 version. Following the `Chord` GPL release
 `Chord`<sub><i>ii</i></sub> was rebased on the 3.6.4 version, making
 it officially and legally GPL.
 
-{{<table "table table-striped table-bordered table-sm">}}
 | Chordii Version | Release Date     | Remarks |
 |---------|----------|---|
 | 4.0.0 | 2007-11-30 ||
@@ -84,7 +82,7 @@ it officially and legally GPL.
 | 4.5.3 | 2015-11-23 ||
 | 4.6.0 | 2017-11-09 ||
 | | 2020-02-02 | Post-EOL fix for legacy packages |
-{{</table>}}
+{ .table .table-striped .table-bordered .table-sm }
 
 `Chord`ii development was tracked in a public repository on
 [SourceForge](https://sourceforge.net/projects/chordii/).

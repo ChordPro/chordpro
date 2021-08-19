@@ -35,28 +35,27 @@ Lines that start with a hash `#` are ignored.
 
 Arguments to directives may be separated by a colon `:` and/or whitespace.
 
-{{<table "table table-striped table-bordered table-sm">}}
 | Directive                                                                | Short     | Purpose                                                                                            | Since |
 | ---                                                                      | ---       | ---                                                                                                | ---   |
 | [chord]({{< relref "Directives-chord" >}}) _name_ ...                    |           | Display diagram in-line.                                                                           | 5.0   |
-| ... `base-fret` _base_                                                   |           | Specify base-fret (1 or higher).                                                                   | 5.0   |
-| ... `fingers` _pos1_ _pos2_ _pos3_ ...                                   |           | Specify finger postions.                                                                           | 6.0   |
-| ... `frets` _pos1_ _pos2_ _pos3_ ...                                     |           | Specify fret postions.                                                                             | 5.0   |
-| ... `keys` _pos1_ _pos2_ _pos3_ ...                                      |           | Specify keyboard keys.                                                                             | 6.0   |
+| ... `base-fret` _base_                                                   |           | Specify base-fret (1 or higher).[^1]                                                               | 5.0   |
+| ... `fingers` _pos1_ _pos2_ _pos3_ ...                                   |           | Specify finger postions.[^1]                                                                       | 6.0   |
+| ... `frets` _pos1_ _pos2_ _pos3_ ...                                     |           | Specify fret postions.[^1]                                                                         | 5.0   |
+| ... `keys` _pos1_ _pos2_ _pos3_ ...                                      |           | Specify keyboard keys.[^1]                                                                         | 6.0   |
 | [chordcolour]({{< relref "Directives-props_chord_legacy" >}}) _colour_   |           | Chord colour.                                                                                      | 5.0   |
-| [chordfont]({{< relref "Directives-props_chord_legacy" >}}) _font_       | cf        | Chord font.                                                                                        | 1.0   |
-| [chordsize]({{< relref "Directives-props_chord_legacy" >}}) _size_       | cs        | Chord size.                                                                                        | 1.0   |
-| [chorus]({{< relref "Directives-env_chorus" >}})                         |           | Recall chorus. May have a [label]({{< relref "ChordPro-Configuration-PDF#labels" >}}).             | 5.0   |
+| [chordfont]({{< relref "Directives-props_chord_legacy" >}}) _font_       | cf[^3]    | Chord font.                                                                                        | 1.0   |
+| [chordsize]({{< relref "Directives-props_chord_legacy" >}}) _size_       | cs[^3]    | Chord size.                                                                                        | 1.0   |
+| [chorus]({{< relref "Directives-env_chorus" >}})                         |           | Recall chorus. May have a [label]({{< relref "ChordPro-Configuration-PDF#labels" >}}).[^2]         | 5.0   |
 | [column_break]({{< relref "Directives-column_break" >}})                 | cb        | New column or page.                                                                                | 3.6   |
 | [columns]({{< relref "Directives-columns" >}}) _cols_                    | col       | Number of columns.                                                                                 | 3.6   |
 | [comment]({{< relref "Directives-comment" >}})                           | c         | Comment.                                                                                           | 1.0   |
 | [comment_box]({{< relref "Directives-comment" >}})                       | cb        | Comment.                                                                                           | 3.6   |
 | [comment_italic]({{< relref "Directives-comment" >}})                    | ci        | Comment.                                                                                           | 3.6   |
 | [define]({{< relref "Directives-define" >}}) _name_ ...                  |           | Define chord.                                                                                      | 1.0   |
-| ... `base-fret` _base_                                                   |           | Specify base-fret (1 or higher).                                                                   | 1.0   |
-| ... `fingers` _pos1_ _pos2_ _pos3_ ...                                   |           | Specify finger postions.                                                                           | 6.0   |
-| ... `frets` _pos1_ _pos2_ _pos3_ ...                                     |           | Specify fret postions.                                                                             | 1.0   |
-| ... `keys` _pos1_ _pos2_ _pos3_ ...                                      |           | Specify keyboard keys.                                                                             | 6.0   |
+| ... `base-fret` _base_                                                   |           | Specify base-fret (1 or higher).[^1]                                                               | 1.0   |
+| ... `fingers` _pos1_ _pos2_ _pos3_ ...                                   |           | Specify finger postions.[^1]                                                                       | 6.0   |
+| ... `frets` _pos1_ _pos2_ _pos3_ ...                                     |           | Specify fret postions.[^1]                                                                         | 1.0   |
+| ... `keys` _pos1_ _pos2_ _pos3_ ...                                      |           | Specify keyboard keys.[^1]                                                                         | 6.0   |
 | [end_of_]({{< relref "Directives-env" >}})_section_                      |           | Ends a specific section.                                                                           | 6.0   |
 | [end_of_bridge]({{< relref "Directives-env_bridge" >}})                  | eob       | Ends bridge section.                                                                               | 6.0   |
 | [end_of_chorus]({{< relref "Directives-env_chorus" >}})                  | eoc       | Ends chorus section.                                                                               | 1.0   |
@@ -95,20 +94,20 @@ Arguments to directives may be separated by a colon `:` and/or whitespace.
 | [new_physical_page]({{< relref "Directives-new_page" >}})                | npp       | Starts new page.                                                                                   | 3.6   |
 | [new_song]({{< relref "Directives-new_song" >}})                         | ns        | Starts a new song.                                                                                 | 1.0   |
 | [no_grid]({{< relref "Directives-grid_legacy" >}})                       | ng        | Disable diagram printing.                                                                          | 3.6   |
-| [pagetype]({{< relref "Directives-pagetype_legacy" >}}) ...              |           | Set page (paper) size.                                                                             | 4.0   |
+| [pagetype]({{< relref "Directives-pagetype_legacy" >}}) ...[^4]          |           | Set page (paper) size.                                                                             | 4.0   |
 | [start_of_]({{< relref "Directives-env" >}})_section_                    |           | Starts a specific section. May have a [label]({{< relref "ChordPro-Configuration-PDF#labels" >}}). | 6.0   |
 | [start_of_bridge]({{< relref "Directives-env_bridge" >}})                | sob       | Starts bridge section. May have a [label]({{< relref "ChordPro-Configuration-PDF#labels" >}}).     | 6.0   |
-| [start_of_chorus]({{< relref "Directives-env_chorus" >}})                | soc       | Starts chorus section. May have a [label]({{< relref "ChordPro-Configuration-PDF#labels" >}}).     | 1.0   |
-| [start_of_grid]({{< relref "Directives-env_grid" >}})                    | sog       | Starts grid section. May have a [label]({{< relref "ChordPro-Configuration-PDF#labels" >}}).       | 5.0   |
-| [start_of_tab]({{< relref "Directives-env_tab" >}})                      | sot       | Starts tab section May have a [label]({{< relref "ChordPro-Configuration-PDF#labels" >}}).         | 3.6   |
+| [start_of_chorus]({{< relref "Directives-env_chorus" >}})                | soc       | Starts chorus section. May have a [label]({{< relref "ChordPro-Configuration-PDF#labels" >}}).[^2] | 1.0   |
+| [start_of_grid]({{< relref "Directives-env_grid" >}})                    | sog       | Starts grid section. May have a [label]({{< relref "ChordPro-Configuration-PDF#labels" >}}).[^2]   | 5.0   |
+| [start_of_tab]({{< relref "Directives-env_tab" >}})                      | sot       | Starts tab section May have a [label]({{< relref "ChordPro-Configuration-PDF#labels" >}}).[^2]     | 3.6   |
 | [start_of_verse]({{< relref "Directives-env_verse" >}})                  | sov       | Starts verse section. May have a [label]({{< relref "ChordPro-Configuration-PDF#labels" >}}).      | 6.0   |
 | [subtitle]({{< relref "Directives-subtitle" >}}) _text_                  | st        | Subtitle for song.                                                                                 | 1.0   |
 | [tabcolour]({{< relref "Directives-props_tab_legacy" >}}) _colour_       |           | Tabs colour.                                                                                       | 5.0   |
 | [tabfont]({{< relref "Directives-props_tab_legacy" >}}) _font_           |           | Tabs font.                                                                                         | 5.0   |
 | [tabsize]({{< relref "Directives-props_tab_legacy" >}}) _size_           |           | Tabs size.                                                                                         | 5.0   |
 | [textcolour]({{< relref "Directives-props_text_legacy" >}}) _colour_     |           | Text colour.                                                                                       | 5.0   |
-| [textfont]({{< relref "Directives-props_text_legacy" >}}) _font_         | tf        | Text font.                                                                                         | 1.0   |
-| [textsize]({{< relref "Directives-props_text_legacy" >}}) _size_         | ts        | Text size.                                                                                         | 1.0   |
+| [textfont]({{< relref "Directives-props_text_legacy" >}}) _font_         | tf[^3]    | Text font.                                                                                         | 1.0   |
+| [textsize]({{< relref "Directives-props_text_legacy" >}}) _size_         | ts[^3]    | Text size.                                                                                         | 1.0   |
 | [title]({{< relref "Directives-title" >}}) _text_                        | t         | Title for song.                                                                                    | 1.0   |
 | [titlesize]({{< relref "Directives-props_title_legacy" >}}) _size_       |           | Title size.                                                                                        | 5.0   |
 | [titlecolour]({{< relref "Directives-props_title_legacy" >}}) _colour_   |           | Title colour.                                                                                      | 5.0   |
@@ -117,28 +116,27 @@ Arguments to directives may be separated by a colon `:` and/or whitespace.
 | [tocsize]({{< relref "Directives-props_toc_legacy" >}}) _size_           |           | Table of contents font size.                                                                       | 5.0   |
 | [toccolour]({{< relref "Directives-props_toc_legacy" >}}) _colour_       |           | Table of contents colour.                                                                          | 5.0   |
 | [tocfont]({{< relref "Directives-props_toc_legacy" >}}) _font_           |           | Table of contents font.                                                                            | 5.0   |
-| [x_...]({{< relref "Directives-custom" >}})                              |           | Custom directive                                                                                   | 5.0   |
-{{</table>}}
-
+| [x_...]({{< relref "Directives-custom" >}})                              |           | Custom directive.                                                                                  | 5.0   |
+{ .table .table-striped .table-bordered .table-sm }
+ 
 ### Notes
 
 There are no archived releases between 1.2 and 3.6, so unless there
 are pre-1.2 proofs 3.6 is taken to be the initial release for a
 feature.
 
-As of [version 6.0]({{< relref "ChordPro6-RelNotes.md" >}}),
-all arguments to `chord` and `define` directives are optional.
-
-[Section labels]({{< relref "ChordPro-Configuration-PDF#labels" >}}) are a 6.0 feature.
-
 There has never been an official [5.0 release]({{< relref  "ChordPro5-RelNotes.md" >}}).
 5.0 was mostly a development target for 6.0.
 
-The short forms for [start/end of verse]({{< relref "Directives-env_verse" >}}) are a version 6.0 feature.
+[^1]: As of [version 6.0]({{< relref "ChordPro6-RelNotes.md" >}}),
+all arguments to `chord` and `define` directives are optional.
+[^2]: [Section labels]({{< relref "ChordPro-Configuration-PDF#labels" >}}) are a 6.0 feature.
+[^3]: The short forms were missing in version 5,0, and re-added in 6.0.
+[^4]: Actually, `pagetype` and `pagesize` were never implemented in version 5.0 and higher.
 
----
+<!---
 # Local Variables:
 # mode: text
 # eval: (auto-fill-mode -1)
 # End:
----
+--->

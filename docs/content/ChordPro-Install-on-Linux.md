@@ -21,7 +21,6 @@ available. On RPM-based systems (RedHat, Fedora, Suze) packages can be
 installed with `dnf` or `yum`. On Debian/Ubuntu-based systems use the
 `apt-get` tool.
 
-{{<table "table table-striped table-bordered">}}
 Module | RPM | Debian
 --|--|--
 `PDF::API2` | `perl-PDF-API2` | `libpdf-api2-perl`
@@ -30,7 +29,7 @@ Module | RPM | Debian
 `File::LoadLines` | `perl-File-LoadLines` | `libfile-loadlines-perl`
 `String::Interpolate::Named` | `perl-String-Interpolate-Named` | `libstring-interpolate-named-perl`
 `Image::Info` | `perl-Image-Info` | `libimage-info-perl`
-{{</table>}}
+{ .table .table-striped .table-bordered .table-sm }
 
 Do not worry if any of these packages are not available, the `cpan`
 install process will build them if necessary.
