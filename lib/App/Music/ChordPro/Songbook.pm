@@ -759,8 +759,10 @@ sub decompose_grid {
 my %abbrevs = (
    c	      => "comment",
    cb	      => "comment_box",
+   cf	      => "chordfont",
    ci	      => "comment_italic",
    colb	      => "column_break",
+   cs	      => "chordsize",
    eob	      => "end_of_bridge",
    eoc	      => "end_of_chorus",
    eot	      => "end_of_tab",
@@ -777,7 +779,9 @@ my %abbrevs = (
    sov	      => "start_of_verse",
    st	      => "subtitle",
    t	      => "title",
-);
+   tf         => "textfont",
+   ts         => "textsize",
+	      );
 
 
 sub parse_directive {
