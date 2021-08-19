@@ -1297,6 +1297,11 @@ sub directive {
 
 	    # Copy existing definition.
 	    if ( $a eq "copy" ) {
+		unless ( App::Music::ChordPro::Chords::_known_chord($a[0]) ) {
+		    do_warn("Unknown chord to copy: $a[0]\n");
+		    $fail++;
+		    last;
+		}
 		$res->{copy} = shift(@a);
 	    }
 
@@ -1376,9 +1381,8 @@ sub directive {
 
 	return 1 if $fail;
 
-	if ( ( $res->{fingers} || $res->{base} )
-	     && ! ( $res->{copy} || $res->{frets} ) ) {
-	    do_warn("Missing fret positions: $res->{name}\n");
+	unless ( $res->{copy} ||$res->{frets} || $res->{keys} ) {
+	    do_warn("Incomplete chord definition: $res->{name}\n");
 	    return 1;
 	}
 
@@ -1415,8 +1419,8 @@ sub directive {
 	    return 1;
 	}
 
-	if ( $res->{copy} || $res->{frets} || $res->{fingers} || $res->{keys} ) {
-	    $res->{base} ||= 1;
+	if ( $res->{frets} || $res->{fingers} || $res->{keys} ) {
+	    $res->{base} ||= 1 unless $res->{copy};
 	    push( @{$song->{define}}, $res );
 	    my $ret =
 	      App::Music::ChordPro::Chords::add_song_chord($res);
