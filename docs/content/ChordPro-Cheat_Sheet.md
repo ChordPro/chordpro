@@ -33,6 +33,8 @@ Lines that start with a hash `#` are ignored.
 
 ## Directives
 
+Directives can be [conditionally executed](/chordpro-directives/#conditional-directives) by appending a dash `-` and a _selector_ to the directive name.
+
 Arguments to directives may be separated by a colon `:` and/or whitespace.
 
 | Directive                                                                | Short     | Purpose                                                                                            | Since |
@@ -138,5 +140,6 @@ all arguments to `chord` and `define` directives are optional.
 # Local Variables:
 # mode: text
 # eval: (auto-fill-mode -1)
+# eval: (toggle-truncate-lines 1)
 # End:
 --->

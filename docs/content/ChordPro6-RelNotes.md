@@ -49,10 +49,11 @@ to know that annotations are _not_ chords. In particular:
 - No attempts will be made to transpose, transcode, or draw chord
   diagrams for annotations.
 
-## Directive selection
+## Conditional directives
 
 All directives can be equipped with a _selector_ by appending a
-selector name to the name of the directive, separated by a hyphen `-`.
+selector name to the name of the directive, separated by a dash (hyphen) `-`.
+If the selector fails, the directive is skipped.
 
 For example:
 
@@ -63,7 +64,7 @@ This will define the appropriate Dm chord for either ukulele or
 guitar.
 
 How selectors are defined depends on the ChordPro processing tool. The
-reference implementation uses the config values for `instrument.name`
+reference implementation uses the config values for `instrument.type`
 and `user.name`.
 
 ## Enhanced chord definitions

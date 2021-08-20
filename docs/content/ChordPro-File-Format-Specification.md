@@ -5,7 +5,11 @@ description: "ChordPro: The File Format Specification"
 
 # ChordPro: The File Format Specification
 
-In a hurry? See the [ChordPro 6 Release information]({{< relref "ChordPro-RelNotes" >}}).
+In a hurry? See the
+[ChordPro Cheat Sheet]({{< relref "ChordPro-Cheat_Sheet" >}}).
+
+Want to know what's new? See the
+[ChordPro 6 Release information]({{< relref "ChordPro-RelNotes" >}}).
 
 ## Overview
 
