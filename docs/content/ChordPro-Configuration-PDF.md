@@ -5,7 +5,7 @@ description: "Configuration for PDF output"
 
 # Configuration for PDF output
 
-Layout definitions for PDF output are stored in the configuration under the key `"pdf"`.
+Definitions for PDF output are stored in the configuration under the key `"pdf"`.
 
     {
        // ... generic part ...
@@ -16,6 +16,19 @@ Layout definitions for PDF output are stored in the configuration under the key 
 
 Topics in this document:
 {{< toc >}}
+
+## Document info
+
+PDF document properties.
+
+      "info" : {
+          "title"    : "%{title}",
+          "author"   : "",
+          "subject"  : "",
+          "keywords" : "",
+      },
+
+Note that the context for substitutions is the first song.
 
 ## Papersize
 

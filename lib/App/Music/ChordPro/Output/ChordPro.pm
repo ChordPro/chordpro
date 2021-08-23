@@ -111,6 +111,7 @@ sub generate_song {
     if ( $s->{define} ) {
 	foreach my $info ( @{ $s->{define} } ) {
 	    my $t = "{define: " . $info->{name};
+	    $t .= " copy " . $info->{copy} if $info->{copy};
 	    $t .= " base-fret " . $info->{base};
 	    $t .= " frets " .
 	      join(" ", map { $_ < 0 ? "N" : $_ } @{$info->{frets}})

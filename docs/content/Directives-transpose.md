@@ -5,9 +5,16 @@ description: "Directives transpose"
 
 # Directives transpose
 
-`{transpose:` _value_`}`
+`{transpose:` _value_ `}`
 
-This directive indicates that the remainder of the song should be transposed the number of semitones according to the given _value_, which is a positive or negative number. When used at the beginning of a song, the whole song will be transposed. When used somewhere in the song it can be used to achieve modulation.
+This directive indicates that the remainder of the song should be
+transposed the number of semitones according to the given _value_,
+which is a number in the range -12 to +12. When used at the beginning of
+a song, the whole song will be transposed. When used somewhere in the
+song it can be used to achieve modulation.
+
+If transposing results in accidentals, a positive value will use
+sharps, while a negative value will use flats.
 
 For example:
 
@@ -22,7 +29,10 @@ This will print:
     D      E         F#      G
     A song line with chords
 
-As can be seen above, when transposing with a positive value sharp signs will be used if necessary. Transposing with a negative value will use flat signs:
+As can be seen above, transposing `E` with the (positive) value 2
+results in `F#`.
+Transposing with the (negative) value -10 will result in the
+enharmonic equivalent chord `G♭`:
 
     [C]A song [D] line with [E]chords   [F]
     {transpose: -10}

@@ -50,6 +50,7 @@ See also [Using metadata in texts]({{< relref "ChordPro-Configuration-Format-Str
 ## Formatting directives
 
 * [comment]({{< relref "Directives-comment" >}}) (short: c)
+* [highlight]({{< relref "Directives-comment" >}})
 * [comment_italic]({{< relref "Directives-comment" >}}) (short: ci)
 * [comment_box]({{< relref "Directives-comment" >}}) (short: cb)
 * [image]({{< relref "Directives-image" >}})
@@ -90,21 +91,31 @@ output.
 
 These directives can be used to temporarily change the font, size and/or colour for lyrics and chords. To permanently change these the reference implementation uses much more powerful [configuration files]({{< relref "ChordPro-Configuration" >}}).
 
-* [textfont]({{< relref "Directives-props_text_legacy" >}})
-* [textsize]({{< relref "Directives-props_text_legacy" >}})
+* [textfont]({{< relref "Directives-props_text_legacy" >}}) (short: tf)
+* [textsize]({{< relref "Directives-props_text_legacy" >}}) (short: ts)
 * [textcolour]({{< relref "Directives-props_text_legacy" >}})
-* [chordfont]({{< relref "Directives-props_chord_legacy" >}})
-* [chordsize]({{< relref "Directives-props_chord_legacy" >}})
+* [titlefont]({{< relref "Directives-props_title_legacy" >}})
+* [titlesize]({{< relref "Directives-props_title_legacy" >}})
+* [titlecolour]({{< relref "Directives-props_title_legacy" >}})
+* [footerfont]({{< relref "Directives-props_footer_legacy" >}})
+* [footersize]({{< relref "Directives-props_footer_legacy" >}})
+* [footercolour]({{< relref "Directives-props_footer_legacy" >}})
+* [chordfont]({{< relref "Directives-props_chord_legacy" >}}) (short: cf)
+* [chordsize]({{< relref "Directives-props_chord_legacy" >}}) (short: cs)
 * [chordcolour]({{< relref "Directives-props_chord_legacy" >}})
 * [tabfont]({{< relref "Directives-props_tab_legacy" >}})
 * [tabsize]({{< relref "Directives-props_tab_legacy" >}})
 * [tabcolour]({{< relref "Directives-props_tab_legacy" >}})
+* [tocfont]({{< relref "Directives-props_toc_legacy" >}})
+* [tocsize]({{< relref "Directives-props_toc_legacy" >}})
+* [toccolour]({{< relref "Directives-props_toc_legacy" >}})
 
 ## Output related directives
 
 * [new_page]({{< relref "Directives-new_page" >}}) (short: np)
 * [new_physical_page]({{< relref "Directives-new_physical_page" >}}) (short: npp)
 * [column_break]({{< relref "Directives-column_break" >}}) (short: cb)
+* [pagetype]({{< relref "Directives-pagetype_legacy" >}})
 
 The following directives are legacy from the old `chord` program. The modern reference implementation uses much more powerful configuration files for this purpose.
 

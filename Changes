@@ -1,3 +1,14 @@
+0.000
+
+5.981 2021-08-23
+
+    - !ChordPro Syntax
+    - Add Cheat Sheet with ChordPro syntax and availability.
+    - !ChordPro functionality
+    - Document properties for the PDF can be supplied in the config file.
+    - !BugFixes
+    - Fix issue #159.
+
 5.980 2021-08-14
 
     - !ChordPro functionality

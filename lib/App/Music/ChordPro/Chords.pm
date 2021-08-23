@@ -276,6 +276,11 @@ sub get_parser {
 
 ################ Section Config & User Chords ################
 
+sub _known_chord {
+    my ( $name ) = @_;
+    $song_chords{$name} // $config_chords{$name};
+}
+
 sub _check_chord {
     my ( $ii ) = @_;
     my ( $name, $base, $frets, $fingers, $keys )
@@ -343,6 +348,8 @@ sub add_config_chord {
 	    fingers => [ $fingers && @$fingers ? @$fingers : () ],
 	    keys    => [ $keys && @$keys ? @$keys : () ] };
 	push( @chordnames, $name );
+	next if $def->{copy};
+
 	# Also store the chord info under a neutral name so it can be
 	# found when other note name systems are used.
 	my $i;
@@ -371,6 +378,13 @@ sub add_config_chord {
 # Used by: Songbook, Output::PDF.
 sub add_song_chord {
     my ( $ii ) = @_;
+
+    if ( $ii->{copy} ) {
+	my $res = $song_chords{$ii->{copy}} // $config_chords{$ii->{copy}};
+	return "Cannot copy $ii->{copy}"
+	  unless $res;
+	$ii = { %$res, %$ii };
+    }
     my $res = _check_chord($ii);
     return $res if $res;
     my ( $name, $base, $frets, $fingers, $keys )

@@ -453,24 +453,26 @@ sub cfg2props {
 }
 
 # Locking/unlocking. Locking the hash is mainly for development, to
-# trap accidental modifications.
+# trap accidental modifications and typos.
+# Note that even though Hash::Util::lock_hash_recurse is in the perl
+# core since 5.18, it seems to require 5.24 to work as expected.
 
 sub lock: method {
     my ( $self ) = @_;
-    return $self unless $] >= 5.018000;
+    return $self unless $] >= 5.024000;
     require Hash::Util;
     Hash::Util::lock_hash_recurse($self);
 }
 
 sub unlock : method {
     my ( $self ) = @_;
-    return $self unless $] >= 5.018000;
+    return $self unless $] >= 5.024000;
     require Hash::Util;
     Hash::Util::unlock_hash_recurse($self);
 }
 
 sub is_locked : method {
-    return 0 unless $] >= 5.018000;
+    return 0 unless $] >= 5.024000;
     my ( $self ) = @_;
     require Hash::Util;
     Hash::Util::hashref_locked($self);
@@ -1092,9 +1094,18 @@ sub default_config() {
         },
      },
 
-    // Layout definitions for PDF output.
+    // Definitions for PDF output.
 
     "pdf" : {
+
+      // PDF Properties.
+      // Note that the context for substitutions is the first song.
+      "info" : {
+          "title"    : "%{title}",
+	  "author"   : "",
+	  "subject"  : "",
+	  "keywords" : "",
+      },
 
       // Papersize, 'a4' or [ 595, 842 ] etc.
       "papersize" : "a4",

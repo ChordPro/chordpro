@@ -1,5 +1,28 @@
 # Release info
 
+## 5.981
+
+Released: 2021-08-23
+
+
+### ChordPro Syntax
+
+* Add Cheat Sheet with ChordPro syntax and availability.
+
+### ChordPro functionality
+
+* Document properties for the PDF can be supplied in the config file.
+
+### BugFixes
+
+* Fix issue #159.
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.
+
+[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.
+
 ## 5.980
 
 Released: 2021-08-14
@@ -37,12 +60,6 @@ Released: 2021-08-14
 * Fix issue #148.
 * Fix issue #149.
 * Fix issue #158.
-
-### Social and support
-
-[User community](https://groups.io/g/ChordPro) for feedback and help.
-
-[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.
 
 ## 0.979
 
@@ -768,4 +785,9 @@ Released: 2016-06-04
 Released: 2016-06-04
 
 * First alpha version released.
+
+## 0.000
+
+Under development
+
 
