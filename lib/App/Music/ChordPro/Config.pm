@@ -298,7 +298,7 @@ sub get_config {
     }
     elsif ( $file =~ /\.prp$/i ) {
 	if ( -e -f -r $file ) {
-	    require Data::Properties;
+	    require App::Music::ChordPro::Config::Properties;
 	    my $cfg = new Data::Properties;
 	    $cfg->parse_file($file);
 	    return $cfg->data;
@@ -499,10 +499,11 @@ sub _augment {
 
     for my $key ( keys(%$hash) ) {
 
-	warn("Config error: unknown item $path$key\n")
+	warn("Config augment error: unknown item $path$key\n")
 	  unless exists $self->{$key}
 	    || $path eq "pdf.fontconfig."
-	    || $path =~ "^meta\."
+	    || $path =~ /^pdf\.fonts\./
+	    || $path =~ /^meta\./
 	    || $key =~ /^_/;
 
 	# Hash -> Hash.
@@ -599,7 +600,7 @@ sub _reduce {
 	my %hh = map { $_ => 1 } keys(%$self), keys(%$orig);
 	for my $key ( sort keys(%hh) ) {
 
-	    warn("Config error: unknown item $path$key\n")
+	    warn("Config reduce error: unknown item $path$key\n")
 	      unless exists $self->{$key}
 		|| $key =~ /^_/;
 
@@ -740,6 +741,7 @@ sub hmerge($$;$) {
 	warn("Config error: unknown item $path$key\n")
 	  unless exists $res{$key}
 	    || $path eq "pdf.fontconfig."
+	    || $path =~ /^pdf\.fonts\./
 	    || $path =~ /^meta\./
 	    || $key =~ /^_/;
 
