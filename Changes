@@ -1,5 +1,10 @@
 0.000
 
+    - !ChordPro functionality
+    - !BugFixes
+    - Incorporate Data::Properties instead of using the CPAN version,
+      since this version is incompatible.
+
 5.981 2021-08-23
 
     - !ChordPro Syntax
