@@ -6,8 +6,8 @@
     <glob pattern="*.chordpro" weight="100"/>
     <glob pattern="*.chopro" weight="100"/>
     <glob pattern="*.crd" weight="50"/>
-    <comment>ChordPro document</comment>
-    <icon name="x-chordpro-doc"/>
+    <comment>ChordPro lead sheet document</comment>
+    <generic-icon name="x-chordpro-doc"/>
     <magic priority="80">
       <match value='{title' type='string' offset='0:200'/>
     </magic>

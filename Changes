@@ -1,6 +1,7 @@
 0.000
 
     - !ChordPro functionality
+    - Add/update misc. files for desktop systems.
     - !BugFixes
     - Incorporate Data::Properties instead of using the CPAN version,
       since this version is incompatible.
