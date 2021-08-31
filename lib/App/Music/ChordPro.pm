@@ -357,6 +357,15 @@ require chords.
 
 Suppresses generating the CSV file. See B<--toc>.
 
+=item B<--no-strict>
+
+Enables liberal interpretation of the input with regard to the
+ChordPro standard. Most notably, unknown directives will not
+not flagged as warnings but silently ignored.
+
+This makes it more convenient to process ChordPro files have custom
+directives.
+
 =item B<--no-toc>
 
 Suppresses the table of contents. See B<--toc>.
@@ -388,6 +397,12 @@ A functional equivalent version of the ChordPro input.
 =item B<--start-page-number=>I<N> (short: B<-p>)
 
 Sets the starting page number for the output.
+
+=item B<--strict>
+
+Requires the input to be strictly compliant to the ChordPro standard.
+
+This is enabled by default. See also B<--nostrict>.
 
 =item B<--toc> (short: B<-i>)
 
@@ -753,6 +768,7 @@ sub app_setup {
 	  "meta=s\%",			# Command line meta data
 	  "decapo",			# remove capo
 	  "fragment|F",			# partial (incomplete) song
+	  "strict!",			# strict conformance
 
           ### Standard Chordii Options ###
 
@@ -1018,6 +1034,7 @@ Options:
     --fragment -F                 Partial (incomplete) song
     --lyrics-only  -l             Only prints lyrics
     --output=FILE  -o             Saves the output to FILE
+    --[no]strict                  Strict conformance
     --start-page-number=N  -p     Starting page number [1]
     --toc --notoc -i              Generates/suppresses a table of contents
     --transcode=SYS  -xc          Transcodes to notation system

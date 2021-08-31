@@ -192,6 +192,19 @@ Suppresses the generation of a CSV file.
 
 See [`--csv`]({{< relref "#csv" >}}).
 
+### no-strict
+
+`--no-strict`
+
+Enables liberal interpretation of the input with regard to the
+ChordPro standard. Most notably, unknown directives will not
+not flagged as warnings but silently ignored.
+
+This makes it more convenient to process ChordPro files the have custom
+directives.
+
+See [`--strict`]({{< relref "#strict" >}}).
+
 ### no-toc
 
 `--no-toc`
@@ -255,6 +268,17 @@ with a `--generate` option:
 `--start-page-number=`*N* (short: `-p`)
 
 Sets the starting page number for the output.
+
+### strict
+
+`--strict`
+
+Enforces strict interpretation of the input with regard to the
+ChordPro standard.
+
+Enabled by default.
+
+See [`--no-strict`]({{< relref "#no-strict" >}}).
 
 ### toc
 

@@ -25,6 +25,8 @@ These settings control global behaviour of the ChordPro program and can be chang
 
     // General settings, to be changed by configs and command line.
     "settings" : {
+        // Strict behaviour.
+        "strict" : true,
         // Add line info for backend diagnostics.
         "lineinfo" : true,
         // Titles flush: default center.
@@ -59,7 +61,7 @@ These settings control global behaviour of the ChordPro program and can be chang
 		"notenames": false,
     },
 
-Note that settings `decapo`, `lyrics-only`, `transcode` and
+Note that settings `decapo`, `lyrics-only`, `strict`, `transcode` and
 `transpose` have corresponding command line options. The command line
 option, if used, overrides the config setting.
 

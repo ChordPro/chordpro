@@ -132,6 +132,12 @@
 		    "default": false
 		},
 
+		"strict": {
+		    "description": "Enforce strict interpretation of the input.",
+		    "type": "boolean",
+		    "default": true
+		},
+
 		"suppress-empty-chords": {
 		    "description": "Suppress empty chord lines.",
 		    "type": "boolean",
@@ -628,6 +634,11 @@
 			    "description": "Appearance of chorus recall.",
 			    "additionalProperties": false,
 			    "properties": {
+				"choruslike": {
+				    "description": "Quote the chorus like a chorus.",
+				    "default": false,
+				    "type": "boolean"
+				},
 				"quote": {
 				    "description": "Quote the chorus.",
 				    "default": false,
@@ -666,6 +677,18 @@
 		    "description": "Distance between columns in multi-column mode.",
 		    "minimum": 0,
 		    "type": "number"
+		},
+
+		"csv" : {
+		    "description": "CSV properties.",
+		    "additionalProperties": false,
+		    "properties": {
+		        "songsonly": {
+			    "description": "Include only songs in the CSV.",
+			    "default": true,
+			    "type": "boolean"
+			}
+		    }
 		},
 
 		"diagrams": {
@@ -960,6 +983,34 @@
 		    "default": 60,
 		    "minimum": 0,
 		    "type": "number"
+		},
+
+		"info" : {
+		    "description": "PDF info data.",
+		    "additionalProperties": false,
+		    "properties": {
+		        "author": {
+			    "description": "Name of the author.",
+			    "default": "",
+			    "type": "string"
+			},
+		        "keywords": {
+			    "description": "Document keywords.",
+			    "default": "",
+			    "type": "string"
+			},
+		        "subject": {
+			    "description": "Document subjecy.",
+			    "default": "",
+			    "type": "string"
+			},
+		        "title": {
+			    "description": "Document title.",
+			    "default": "%{title}",
+			    "type": "string"
+			}
+		   }
+		    
 		},
 
 		"kbdiagrams": {

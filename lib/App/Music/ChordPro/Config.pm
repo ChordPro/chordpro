@@ -243,7 +243,7 @@ sub configurator {
 	  $options->{'chord-grids'} ? "all" : 0;
     }
 
-    for ( qw( transpose transcode decapo lyrics-only ) ) {
+    for ( qw( transpose transcode decapo lyrics-only strict ) ) {
 	next unless defined $options->{$_};
 	$cfg->{settings}->{$_} = $options->{$_};
     }
@@ -904,6 +904,8 @@ sub default_config() {
 
     // General settings, to be changed by configs and command line.
     "settings" : {
+      // Strict behaviour.
+      "strict" : true,
       // Add line info for backend diagnostics.
       "lineinfo" : true,
       // Titles flush: default center.

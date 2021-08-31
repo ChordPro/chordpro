@@ -1074,14 +1074,16 @@ sub directive {
 	    if ( $config->{metadata}->{strict}
 		 && ! any { $_ eq $key } @{ $config->{metadata}->{keys} } ) {
 		# Unknown, and strict.
-		do_warn("Unknown metadata item: $key");
+		do_warn("Unknown metadata item: $key")
+		  if $config->{settings}->{strict};
 		return;
 	    }
 
 	    push( @{ $song->{meta}->{$key} }, $val ) if defined $val;
 	}
 	else {
-	    do_warn("Incomplete meta directive: $d\n");
+	    do_warn("Incomplete meta directive: $d\n")
+	      if $config->{settings}->{strict};
 	    return;
 	}
 	return 1;
@@ -1443,7 +1445,8 @@ sub directive {
     }
 
     # Warn about unknowns, unless they are x_... form.
-    do_warn("Unknown directive: $d\n") unless $d =~ /^x_/;
+    do_warn("Unknown directive: $d\n")
+      if $config->{settings}->{strict} && $d !~ /^x_/;
     return;
 }
 
