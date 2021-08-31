@@ -8,6 +8,8 @@ include = [ guitar ]
 
 # General settings, to be changed by configs and command line.
 settings {
+  # Strict behaviour.
+  strict = true
   # Add line info for backend diagnostics.
   lineinfo = true
   # Titles flush: default center.
@@ -68,7 +70,6 @@ diagrams {
     auto     =  false
     show     =  all
     sorted   =  false
-    type     =  strings
 }
 
 # Diagnostig messages.
@@ -509,7 +510,7 @@ parser {
         # All lines.
         all = []
 	# Directives.
-	directives = []
+	directive = []
 	# Song lines (lyrics) only.
 	songline = []
     }
@@ -538,11 +539,11 @@ delegates {
 }
 
 # For (debugging (internal use only)).
-debug = {
-    spacing : false
-    song    : false
-    abc     : false
-    ly      : false
+debug {
+    spacing = false
+    song    = false
+    abc     = false
+    ly      = false
 }
 
 # End of config.

@@ -62,5 +62,6 @@ fi
 update-desktop-database ${XDG_APP} 
 update-mime-database ${XDG_MIME}
 test -x /usr/bin/update-icon-caches && update-icon-caches ${XDG_ICONS} || true
+test -x /usr/bin/gtk-update-icon-cache && gtk-update-icon-cache ${XDG_ICONS} || true
 
 

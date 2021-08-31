@@ -10,6 +10,7 @@ use Text::Layout;
 use IO::String;
 use Carp;
 
+use App::Music::ChordPro::Utils qw( expand_tilde );
 use App::Music::ChordPro::Output::Common qw( fmt_subst prep_outlines demarkup );
 
 # For regression testing, run perl with PERL_HASH_SEED set to zero.
@@ -478,6 +479,7 @@ sub init_fonts {
     splice( @d, -2, 1 ) if $d[-2] eq "fonts/";
     for my $fontdir ( @d ) {
 	next unless $fontdir;
+	$fontdir = expand_tilde($fontdir);
 	if ( -d $fontdir ) {
 	    $self->{pdfapi}->can("addFontDirs")->($fontdir);
 	    $fc->add_fontdirs($fontdir);

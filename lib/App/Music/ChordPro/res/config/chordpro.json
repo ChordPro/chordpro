@@ -12,6 +12,8 @@
 
     // General settings, to be changed by configs and command line.
     "settings" : {
+      // Strict behaviour.
+      "strict" : true,
       // Add line info for backend diagnostics.
       "lineinfo" : true,
       // Titles flush: default center.

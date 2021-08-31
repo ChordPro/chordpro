@@ -1,10 +1,15 @@
 [Desktop Entry]
-Name=ChordPro
-Exec=wxchordpro
+Version=1.0
 Type=Application
+
+Name=ChordPro
+Comment=Format and print lead sheets
+Categories=Graphics;
+
+Exec=wxchordpro
 StartupNotify=true
 Icon=chordpro
 StartupWMClass=chordpro
-X-Desktop-File-Install-Version=0.24
+Terminal=false
+Keywords=music,typesetting,lead sheet
 MimeType=application/x-chordpro;
-Categories=Graphics;

@@ -49,11 +49,13 @@ Name: "{commondesktop}\{#APP}"; Filename: "{app}\wxchordpro.exe"; Tasks: desktop
 Name: "{userdesktop}\{#APP}"; Filename: "{app}\wxchordpro.exe"; Tasks: desktopicon\user; IconFilename: "{app}\chordpro.ico";
 
 [Registry]
-Root: HKCR; Subkey: ".cho"; ValueType: string; ValueName: ""; ValueData: "org.chordpro.chordpro"; Flags: uninsdeletevalue
-Root: HKCR; Subkey: ".crd"; ValueType: string; ValueName: ""; ValueData: "org.chordpro.chordpro"; Flags: uninsdeletevalue
-Root: HKCR; Subkey: "org.chordpro.chordpro"; ValueType: string; ValueName: ""; ValueData: "ChordPro File"; Flags: uninsdeletekey
-Root: HKCR; Subkey: "org.chordpro.chordpro\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\chordpro-doc.ico"
-Root: HKCR; Subkey: "org.chordpro.chordpro\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\wxchordpro.exe"" ""%1"""
+Root: HKA; Subkey: "Software\Classes\.cho\OpenWithProgids"; ValueType: string; ValueName: ""; ValueData: "org.chordpro.chordpro"; Flags: uninsdeletevalue
+Root: HKA; Subkey: "Software\Classes\.crd\OpenWithProgids"; ValueType: string; ValueName: ""; ValueData: "org.chordpro.chordpro"; Flags: uninsdeletevalue
+Root: HKA; Subkey: "Software\Classes\org.chordpro.chordpro"; ValueType: string; ValueName: ""; ValueData: "ChordPro File"; Flags: uninsdeletekey
+Root: HKA; Subkey: "Software\Classes\org.chordpro.chordpro\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: """{app}\chordpro-doc.ico"""
+Root: HKA; Subkey: "Software\Classes\org.chordpro.chordpro\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\wxchordpro.exe"" ""%1"""
+Root: HKA; Subkey: "Software\Classes\Applications\wxchordpro.exe\SupportedTypes"; ValueType: string; ValueName: ".cho"; ValueData: ""
+Root: HKA; Subkey: "Software\Classes\Applications\wxchordpro.exe\SupportedTypes"; ValueType: string; ValueName: ".crd"; ValueData: ""
 
 [Messages]
 BeveledLabel=Perl Powered Software by Squirrel Consultancy

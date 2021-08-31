@@ -1,5 +1,25 @@
 # Release info
 
+## 5.982
+
+Released: 2021-08-31
+
+
+### ChordPro functionality
+
+* Add --strict option to enforce conformance to ChordPro standard. Enabled by default, may be disabled with --no-strict.
+* Add/update misc. files for desktop systems.
+
+### BugFixes
+
+* Incorporate Data::Properties instead of using the CPAN version, since this version is incompatible.
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.
+
+[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.
+
 ## 5.981
 
 Released: 2021-08-23
@@ -16,12 +36,6 @@ Released: 2021-08-23
 ### BugFixes
 
 * Fix issue #159.
-
-### Social and support
-
-[User community](https://groups.io/g/ChordPro) for feedback and help.
-
-[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.
 
 ## 5.980
 
@@ -785,9 +799,4 @@ Released: 2016-06-04
 Released: 2016-06-04
 
 * First alpha version released.
-
-## 0.000
-
-Under development
-
 
