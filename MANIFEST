@@ -3,6 +3,7 @@ LICENSE
 MANIFEST
 Makefile.PL
 README.md
+README.ABC
 lib/App/Music/ChordPro.pm
 lib/App/Music/ChordPro/A2Crd.pm
 lib/App/Music/ChordPro/Bundle.pm
@@ -52,6 +53,7 @@ lib/App/Music/ChordPro/res/icons/chordpro-doc.icns
 lib/App/Music/ChordPro/res/icons/chordpro.png
 lib/App/Music/ChordPro/res/icons/chordpro-doc.png
 lib/App/Music/ChordPro/res/linux/chordpro.desktop
+lib/App/Music/ChordPro/res/linux/chordpro.metainfo.xml
 lib/App/Music/ChordPro/res/linux/chordpro.xml
 lib/App/Music/ChordPro/res/linux/setup_desktop.sh
 lib/App/Music/ChordPro/res/notes/common.json
