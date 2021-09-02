@@ -979,35 +979,49 @@ EndOfAbout
 use Cwd qw(realpath);
 
 sub ::runtimeinfo {
-    my $fmt = "%-22.22s %s\n";
+    my $wx = shift;
+    my $fmt = "  %-22.22s %s\n";
+    my $fmtv = defined($Wx::VERSION) ? "  %s version %s\n" : $fmt;
+    my $fmtvv = defined($Wx::VERSION) ? "  %s %s\n" : $fmt;
 
-    my $msg = sprintf( $fmt, "ChordPro version", $VERSION );
+    # Sometimes version numbers are localized...
+    my $dd = sub { my $v = $_[0]; $v =~ s/,/./g; $v };
+
+    my $msg = sprintf( $fmtv, "ChordPro core", $dd->($VERSION) );
     if ( $VERSION =~ /_/ ) {
 	$msg =~ s/\n$/ (Unsupported development snapshot)\n/;
     }
-    $msg .= sprintf( $fmt, "Perl version", $^V );
-    $msg .= sprintf( $fmt, "Perl program", $^X );
+    $msg .= sprintf( $fmtv, "Perl", $^V );
+    $msg =~ s/\n$/ ($^X)\n/;
     if ( $App::Packager::PACKAGED ) {
 	my $p = App::Packager::Packager();
 	$p .= " Packager" unless $p =~ /packager/i;
-	$msg .= sprintf( $fmt, $p, App::Packager::Version() );
+	$msg .= sprintf( $fmtv, $p, $dd->(App::Packager::Version()) );
     }
-    $msg .= sprintf( $fmt, "Storable", $Storable::VERSION );
-    $msg .= sprintf( $fmt, "Resource path",
+
+    $msg .= sprintf( $fmtvv, "Resource path",
 		     realpath( App::Packager::GetResourcePath() ) );
+    $msg .= "\nModules and libraries:\n";
+    if ( defined $Wx::VERSION ) {
+	no strict 'subs';
+	$msg .= sprintf( $fmtv, "wxPerl", $dd->($Wx::VERSION) );
+	$msg .= sprintf( $fmtv, "wxWidgets", $dd->(Wx::wxVERSION) );
+    }
+
+    $msg .= sprintf( $fmtv, "Storable", $dd->($Storable::VERSION) );
     eval { require Text::Layout;
-	$msg .= sprintf( $fmt, "Text::Layout", $Text::Layout::VERSION );
+	$msg .= sprintf( $fmtv, "Text::Layout", $dd->($Text::Layout::VERSION) );
     };
     eval { require HarfBuzz::Shaper;
-	$msg .= sprintf( $fmt, "HarfBuzz::Shaper", $HarfBuzz::Shaper::VERSION );
-	$msg .= sprintf( $fmt, "HarfBuzz library", HarfBuzz::Shaper::hb_version_string() );
+	$msg .= sprintf( $fmtv, "HarfBuzz::Shaper", $dd->($HarfBuzz::Shaper::VERSION) );
+	$msg .= sprintf( $fmtv, "HarfBuzz library", $dd->(HarfBuzz::Shaper::hb_version_string()) );
     };
-    $msg .= sprintf( $fmt, "File::LoadLines", $File::LoadLines::VERSION );
+    $msg .= sprintf( $fmtv, "File::LoadLines", $dd->($File::LoadLines::VERSION) );
     eval { require PDF::API2;
-	$msg .= sprintf( $fmt, "PDF::API2", $PDF::API2::VERSION );
+	$msg .= sprintf( $fmtv, "PDF::API2", $dd->($PDF::API2::VERSION) );
     };
     eval { require Font::TTF;
-	$msg .= sprintf( $fmt, "Font::TTF", $Font::TTF::VERSION );
+	$msg .= sprintf( $fmtv, "Font::TTF", $dd->($Font::TTF::VERSION) );
     };
 }
 
