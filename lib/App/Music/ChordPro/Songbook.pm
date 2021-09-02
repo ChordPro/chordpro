@@ -131,7 +131,7 @@ sub parse_song {
     # Load song-specific config, if any.
     if ( $diag->{file} ) {
 	if ( $options->{verbose} ) {
-	    my $this = App::Music::ChordPro::Chords->get_parser;
+	    my $this = App::Music::ChordPro::Chords::get_parser();
 	    $this = defined($this) ? $this->{system} : "";
 	    print STDERR ("Parsers at start of ", $diag->{file}, ":");
 	    print STDERR ( $this eq $_ ? " *" : " ", "$_")
@@ -164,8 +164,8 @@ sub parse_song {
 		  App::Music::ChordPro::Chords::set_tuning($config);
 		warn( "Invalid tuning in config: ", $res, "\n" ) if $res;
 	    }
-	    App::Music::ChordPro::Chords->reset_parser;
-	    App::Music::ChordPro::Chords::Parser->reset_parsers;
+	    App::Music::ChordPro::Chords::reset_parser();
+	    App::Music::ChordPro::Chords::Parse->reset_parsers;
 	    if ( $chords ) {
 		my $c = $chords;
 		if ( @$c && $c->[0] eq "append" ) {
@@ -185,7 +185,7 @@ sub parse_song {
 		      App::Music::ChordPro::Chords::chord_stats(), "\n" );
 	    }
 	    if ( 0 && $options->{verbose} ) {
-		my $this = App::Music::ChordPro::Chords->get_parser->{system};
+		my $this = App::Music::ChordPro::Chords::get_parser()->{system};
 		print STDERR ("Parsers after local config:");
 		print STDERR ( $this eq $_ ? " *" : " ", "$_")
 		  for keys %{ App::Music::ChordPro::Chords::Parser->parsers };
@@ -222,6 +222,7 @@ sub parse_song {
     $decapo = $config->{settings}->{decapo};
     my $fragment = $options->{fragment};
 
+    warn("Processing song...\n") if $options->{verbose};
     $song = App::Music::ChordPro::Song->new
       ( source => { file => $diag->{file}, line => 1 + $$linecnt },
 	system => $config->{notes}->{system},
@@ -458,6 +459,8 @@ sub parse_song {
     do_warn("Unterminated context in song: $in_context")
       if $in_context;
 
+    warn("Processed song...\n") if $options->{verbose};
+
     if ( @labels ) {
 	$song->{labels} = [ @labels ];
     }
@@ -486,7 +489,13 @@ sub parse_song {
 	    die("No transcoder for ", $target, "\n");
 	}
 	warn("Got transcoder for $target\n") if $::options->{verbose};
-	App::Music::ChordPro::Chords->set_parser($target);
+	App::Music::ChordPro::Chords::set_parser($target);
+	if ( $target ne App::Music::ChordPro::Chords::get_parser->{system} ) {
+	    ::dump(App::Music::ChordPro::Chords::Parser->parsers);
+	    warn("OOPS parser mixup, $target <> ",
+		App::Music::ChordPro::Chords::get_parser->{system})
+	}
+	App::Music::ChordPro::Chords::set_parser($song->{system});
     }
     else {
 	$target = $song->{system};

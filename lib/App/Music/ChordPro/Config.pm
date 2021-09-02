@@ -266,7 +266,7 @@ sub configurator {
     if ( $options->{verbose} > 1 ) {
 	my $cp = App::Music::ChordPro::Chords::get_parser() // "";
 	warn("Parsers:\n");
-	while ( my ($k, $v) = each %{App::Music::ChordPro::Chords::Parser::parsers()} ) {
+	while ( my ($k, $v) = each %{App::Music::ChordPro::Chords::Parser->parsers} ) {
 	    warn( "  $k",
 		  $v eq $cp ? " (active)": "",
 		  "\n");
@@ -355,7 +355,7 @@ sub process_config {
 	$cfg->{tuning} = [];
     }
 
-    App::Music::ChordPro::Chords->reset_parser;
+    App::Music::ChordPro::Chords::reset_parser;
     App::Music::ChordPro::Chords::Parser->reset_parsers;
     local $::config = hmerge( $::config, $cfg );
     if ( $cfg->{chords} ) {

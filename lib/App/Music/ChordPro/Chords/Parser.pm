@@ -5,9 +5,24 @@ use warnings;
 use utf8;
 use Carp;
 
+# package ParserWatch;
+#
+# require Tie::Hash;
+# our @ISA = qw( Tie::StdHash );
+#
+# sub STORE {
+#     if ( $_[1] !~ /^[[:alpha:]]+$/ ) {
+# 	Carp::cluck("STORE $_[1] " . $_[2]);
+# 	::dump($_[2]);
+#     }
+#     $_[0]->{$_[1]} = $_[2];
+# }
+
 use App::Music::ChordPro;
 
-my $parsers = {};
+my %parsers;
+
+# tie %parsers => 'ParserWatch';
 
 package App::Music::ChordPro::Chords::Parser;
 
@@ -72,9 +87,10 @@ sub new {
 # names.
 
 sub default {
+    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $pkg ) = @_;
 
-    return $parsers->{common} //=
+    return $parsers{common} //=
       App::Music::ChordPro::Chords::Parser::Common->new
 	( { %{$::config},
 	  "notes" =>
@@ -102,61 +118,81 @@ sub default {
 
 # Cached version of the individual parser's parse_chord.
 sub parse {
+    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self, $chord ) = @_;
     $self->{chord_cache}->{$chord} //= $self->parse_chord($chord);
 }
 
 # Virtual.
 sub parse_chord {
+    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     Carp::confess("Virtual method 'parse_chord' not defined");
 }
 
 # Fetch a parser for a known system, with fallback.
 # Default is a parser for the current config.
 sub get_parser {
+    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
+#    my ( $self, $system, $nofallback ) = @_;
+#    $system //= $::config->{notes}->{system};
+#    my $p = $self->_get_parser( $system, $nofallback );
+#    unless ( defined $p ) {
+#	warn("No parser for $system\n");
+#    }
+#    ::dump($p),die unless $p->{system} eq $system;
+#    return $p;
+#}
+#sub _get_parser {
     my ( $self, $system, $nofallback ) = @_;
 
     $system //= $::config->{notes}->{system};
-    return $parsers->{$system} if $parsers->{$system};
+    return $parsers{$system} if $parsers{$system};
 
     if ( $system eq "nashville" ) {
-	return $parsers->{$system} //=
+	return $parsers{$system} //=
 	  App::Music::ChordPro::Chords::Parser::Nashville->new;
     }
     elsif ( $system eq "roman" ) {
-	return $parsers->{$system} //=
+	return $parsers{$system} //=
 	  App::Music::ChordPro::Chords::Parser::Roman->new;
     }
     elsif ( $system ) {
-	return $parsers->{$system} if $parsers->{$system};
 	my $p = App::Music::ChordPro::Chords::Parser::Common->new;
 	$p->{system} = $system;
-	return $parsers->{$system} = $p;
+	return $parsers{$system} = $p;
     }
     elsif ( $nofallback ) {
 	return;
     };
 
     warn("No parser for $system, falling back to default\n");
-    return $parsers->{common} //= $self->default;
+    return $parsers{common} //= $self->default;
 }
 
 sub have_parser {
+    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self, $system ) = @_;
-    exists $parsers->{$system};
+    exists $parsers{$system};
 }
 
 # The list of instantiated parsers.
-sub parsers { $parsers }
+sub parsers {
+    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
+    \%parsers;
+}
 
 sub reset_parsers {
+    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self,  @which ) = @_;
-    @which = keys(%$parsers) unless @which;
-    delete $parsers->{$_} for @which;
+    @which = keys(%parsers) unless @which;
+    delete $parsers{$_} for @which;
 }
 
 # The number of intervals for this note system.
-sub intervals { $_[0]->{intervals} }
+sub intervals {
+    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
+    $_[0]->{intervals};
+}
 
 ################ Parsing Common notated chords ################
 
@@ -180,10 +216,11 @@ sub new {
 	 $cfg->{settings}->{chordnames} eq "relaxed"
 	 ? ", relaxed" : "",
 	 "\n") if $::options->{verbose} > 1;
-    return $parsers->{$self->{system}} = $self;
+    return $parsers{$self->{system}} = $self;
 }
 
 sub parse_chord {
+    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self, $chord ) = @_;
 
     my $bass;
@@ -398,6 +435,7 @@ my $additions_dim =
 # configuration.
 
 sub load_notes {
+    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self, $init ) = @_;
     my $cfg = { %{$::config//{}}, %{$init//{}} };
     my $n = $cfg->{notes};
@@ -474,15 +512,22 @@ sub load_notes {
 }
 
 sub root_canon {
+    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self, $root, $sharp ) = @_;
     ( $sharp ? $self->{ns_canon} : $self->{nf_canon} )->[$root];
 }
 
 # Has chord diagrams.
-sub has_diagrams { !$_[0]->{movable} }
+sub has_diagrams {
+    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
+    !$_[0]->{movable};
+}
 
 # Movable notes system.
-sub movable { $_[0]->{movable} }
+sub movable {
+    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
+    $_[0]->{movable};
+}
 
 ################ Parsing Nashville notated chords ################
 
@@ -499,7 +544,7 @@ sub new {
     $self->{target} = 'App::Music::ChordPro::Chord::Nashville';
     warn("Chords: Created parser for ", $self->{system}, "\n")
       if $::options->{verbose} && $::options->{verbose} > 1;
-    return $parsers->{$self->{system}} = $self;
+    return $parsers{$self->{system}} = $self;
 }
 
 my $n_pat = qr/(?<shift>[b#]?)(?<root>[1-7])/;
@@ -508,6 +553,7 @@ my %nmap = ( 1 => 0, 2 => 2, 3 => 4, 4 => 5, 5 => 7, 6 => 9, 7 => 11 );
 my @nmap = ( 1, 1, 2, 2, 3, 4, 4, 5, 5, 6, 6, 7, 1 );
 
 sub parse_chord {
+    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self, $chord ) = @_;
 
     $chord =~ tr/\x{266d}\x{266f}\x{0394}\x{f8}\x{b0}/b#^h0/;
@@ -575,6 +621,7 @@ sub parse_chord {
 sub load_notes { Carp::confess("OOPS") }
 
 sub root_canon {
+    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self, $root, $sharp ) = @_;
     no warnings 'qw';
     $sharp
@@ -583,10 +630,16 @@ sub root_canon {
 }
 
 # Has chord diagrams.
-sub has_diagrams { 0 }
+sub has_diagrams {
+    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
+    0;
+}
 
 # Movable notes system.
-sub movable { 1 }
+sub movable {
+    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
+    1;
+}
 
 ################ Parsing Roman notated chords ################
 
@@ -603,7 +656,7 @@ sub new {
     $self->{target} = 'App::Music::ChordPro::Chord::Roman';
     warn("Chords: Created parser for ", $self->{system}, "\n")
       if $::options->{verbose} && $::options->{verbose} > 1;
-    return $parsers->{$self->{system}} = $self;
+    return $parsers{$self->{system}} = $self;
 }
 
 my $r_pat = qr/(?<shift>[b#]?)(?<root>(?i)iii|ii|iv|i|viii|vii|vi|v)/;
@@ -611,6 +664,7 @@ my $r_pat = qr/(?<shift>[b#]?)(?<root>(?i)iii|ii|iv|i|viii|vii|vi|v)/;
 my %rmap = ( I => 0, II => 2, III => 4, IV => 5, V => 7, VI => 9, VII => 11 );
 
 sub parse_chord {
+    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self, $chord ) = @_;
 
     $chord =~ tr/\x{266d}\x{266f}\x{0394}\x{f8}\x{b0}/b#^h0/;
@@ -679,6 +733,7 @@ sub parse_chord {
 sub load_notes { Carp::confess("OOPS") }
 
 sub root_canon {
+    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self, $root, $sharp, $minor ) = @_;
     return lc( $self->root_canon( $root, $sharp ) ) if $minor;
     no warnings 'qw';
@@ -688,10 +743,16 @@ sub root_canon {
 }
 
 # Has chord diagrams.
-sub has_diagrams { 0 }
+sub has_diagrams {
+    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
+    0;
+}
 
 # Movable notes system.
-sub movable { 1 }
+sub movable {
+    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
+    1;
+}
 
 ################ Chord objects: Common ################
 
@@ -705,11 +766,13 @@ sub new {
 }
 
 sub clone {
+    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self ) = shift;
     dclone($self);
 }
 
 sub show {
+    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self ) = @_;
     my $res = $self->{parser}->root_canon( $self->{root_ord},
 					   $self->{root_mod} >= 0,
@@ -727,6 +790,7 @@ sub show {
 
 # Returns a representation indepent of notation system.
 sub agnostic {
+    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self ) = @_;
     return if $self->{isnote};
     join( " ", "",
@@ -735,6 +799,7 @@ sub agnostic {
 }
 
 sub transpose {
+    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self, $xpose ) = @_;
     return $self unless $xpose;
     my $info = $self->clone;
@@ -756,11 +821,12 @@ sub transpose {
 }
 
 sub transcode {
+    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self, $xcode ) = @_;
     return $self unless $xcode;
     return $self if $self->{system} eq $xcode;
     my $info = $self->dclone;
-#warn("_>_XCODE = $xcode, CHORD = $info->{name}");
+#warn("_>_XCODE = $xcode, _SELF = $self->{system}, CHORD = $info->{name}");
     $info->{system} = $xcode;
     my $p = $self->{parser}->get_parser($xcode);
     die("OOPS ", $p->{system}, " $xcode") unless $p->{system} eq $xcode;
