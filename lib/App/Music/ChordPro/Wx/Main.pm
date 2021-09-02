@@ -652,8 +652,6 @@ sub OnText {
 
 sub _aboutmsg {
     my ( $self ) = @_;
-    my $fmt = "  %s %s\n";
-    my $fmtv = "  %s version %s\n";
     my $firstyear = 2016;
     my $year = 1900 + (localtime(time))[5];
     if ( $year != $firstyear ) {
@@ -672,35 +670,8 @@ sub _aboutmsg {
 	"Copyright $year Johan Vromans <jvromans\@squirrel.nl>\n",
 	"\n",
 	"GUI wrapper ", $dd->($VERSION), " designed with wxGlade\n\n",
-	"Run-time information:\n" );
-
-    $msg .= sprintf( $fmtv, "Perl", $dd->(sprintf("%vd",$^V)) );
-    $msg .= sprintf( $fmt,  "Perl program", $^X );
-    $msg .= sprintf( $fmtv, "wxPerl", $dd->($Wx::VERSION) );
-    $msg .= sprintf( $fmtv, "wxWidgets", $dd->(Wx::wxVERSION) );
-
-    if ( $App::Packager::PACKAGED ) {
-	my $p = App::Packager::Packager();
-	$p .= " Packager" unless $p =~ /packager/i;
-	$msg .= sprintf( $fmtv, $p, App::Packager::Version() );
-    }
-    eval { require Text::Layout;
-	$msg .= sprintf( $fmtv, "Text::Layout", $Text::Layout::VERSION );
-    };
-    eval { require HarfBuzz::Shaper;
-	$msg .= sprintf( $fmtv, "HarfBuzz::Shaper", $HarfBuzz::Shaper::VERSION );
-	$msg .= sprintf( $fmtv, "HarfBuzz library", HarfBuzz::Shaper::hb_version_string() );
-    };
-    $msg .= sprintf( $fmtv, "File::LoadLines", $File::LoadLines::VERSION );
-    eval { require PDF::API2;
-	$msg .= sprintf( $fmtv, "PDF::API2", $PDF::API2::VERSION );
-    } or
-    eval { require PDF::Builder;
-	$msg .= sprintf( $fmtv, "PDF::Builder", $PDF::Builder::VERSION );
-    };
-    eval { require Font::TTF;
-	$msg .= sprintf( $fmtv, "Font::TTF", $Font::TTF::VERSION );
-    };
+	"Run-time information:\n",
+	::runtimeinfo() );
 
     return $msg;
 }
