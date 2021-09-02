@@ -131,7 +131,8 @@ sub parse_song {
     # Load song-specific config, if any.
     if ( $diag->{file} ) {
 	if ( $options->{verbose} ) {
-	    my $this = App::Music::ChordPro::Chords->get_parser->{system};
+	    my $this = App::Music::ChordPro::Chords->get_parser;
+	    $this = defined($this) ? $this->{system} : "";
 	    print STDERR ("Parsers at start of ", $diag->{file}, ":");
 	    print STDERR ( $this eq $_ ? " *" : " ", "$_")
 	      for keys %{ App::Music::ChordPro::Chords::Parser->parsers };
