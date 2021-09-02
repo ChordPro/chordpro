@@ -5,6 +5,9 @@ use warnings;
 use utf8;
 use Carp;
 
+binmode STDOUT => ':utf8';
+binmode STDERR => ':utf8';
+
 package App::Music::ChordPro::Testing;
 
 use base 'Exporter';
