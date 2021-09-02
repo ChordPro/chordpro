@@ -269,12 +269,12 @@ my ( $preview_cho, $preview_pdf );
 my ( $msgs, $fatal, $died );
 
 sub _warn {
-    Wx::LogWarning(@_);
+    Wx::LogWarning( "%s", join("",@_) );
     $msgs++;
 }
 
 sub _die {
-    Wx::LogError(@_);
+    Wx::LogError( "%s", join("", @_) );
     $msgs++;
     $fatal++;
     $died++;
