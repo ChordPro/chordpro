@@ -148,6 +148,7 @@ t/172_transpose.t
 t/173_transpose.t
 t/175_transpose.t
 t/177_transcode.t
+t/178_transcode.t
 t/180_grids.t
 t/20_basic01_crd.t
 t/210_configs.t
