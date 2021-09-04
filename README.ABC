@@ -1,0 +1,7 @@
+To render ABC, ChordPro makes use of external tools to convert the
+embedded ABC source to an image, and then embeds the image.
+
+For this, it requires:
+
+- abcm2ps : A program to typeset ABC tunes into Postscript
+- ImageMagick : An application for displaying and manipulating images

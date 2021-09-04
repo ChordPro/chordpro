@@ -1,0 +1,4 @@
+#!/bin/sh
+
+export APPIMAGE_PACKAGED=1.00
+exec wxchordpro ${1+"$@"}
