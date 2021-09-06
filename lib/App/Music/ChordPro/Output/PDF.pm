@@ -832,7 +832,7 @@ sub generate_song {
 	    }
 
 	    # Substitute metadata in comments.
-	    if ( $elt->{type} =~ /^comment/ ) {
+	    if ( $elt->{type} =~ /^comment/ && !$elt->{indent} ) {
 		$elt = { %$elt };
 		# Flatten chords/phrases.
 		if ( $elt->{chords} ) {
