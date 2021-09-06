@@ -78,7 +78,7 @@ sub parse_file {
     if ( !(defined($options->{a2crd}) && !$options->{a2crd}) and
 	 !$options->{fragment}
 	 and any { /\S/ } @$lines	# non-blank lines
-	 and $options->{crd} || !any { /^{\w+/ } @$lines ) {
+	 and $options->{crd} || !any { /^{\s*\w+/ } @$lines ) {
 	warn("Converting $filename to ChordPro format\n")
 	  if $options->{verbose} || !($options->{a2crd}||$options->{crd});
 	require App::Music::ChordPro::A2Crd;
