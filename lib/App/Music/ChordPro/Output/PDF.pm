@@ -1123,7 +1123,8 @@ sub generate_song {
 		}
 		else {
 		    # Restore default.
-		    delete( $ps->{fonts}->{$1}->{color} );
+		    $ps->{fonts}->{$1}->{color} =
+		      $::config->{pdf}->{fonts}->{$1}->{color};
 		}
 	    }
 	    next;
