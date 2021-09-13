@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Report a bug to help us improve
 title: ''
 labels: ''
 assignees: ''
@@ -18,35 +18,30 @@ https://groups.google.com/forum/#!forum/chordpro
 
 ### To Reproduce
 Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+1. <!-- Go to '...' -->
+2. <!-- Click on '....' -->
+3. <!-- Scroll down to '....' -->
+4. <!-- See error -->
 
 ### Expected behavior
 <!-- A clear and concise description of what you expected to happen. -->
 
-### Sample files and screenshots
-<!-- Adding a small example ChordPro file that shows the problem often helps. If you use custom configuration include that as well.
+### Attachments
+<!--
+Adding a small example ChordPro file that shows the problem often helps.
+If you use a custom configuration include that as well.
+
 If applicable, add screenshots to help explain your problem.
 If PDF output can be generated re-run chordpro with --debug and
 include the resultant PDF in the bug report.
 -->
 
-### Sample files and screenshots
-<!-- Adding a small example ChordPro file that shows the problem often helps. If you use custom configuration include that as well.
-If applicable, add screenshots to help explain your problem.
-If PDF output can be generated re-run chordpro with --debug and
-include the resultant PDF in the bug report.
--->
-
-## Please complete the following information
- - If possible, include the output of `chordpro --about` or a
-   screenshot of the `About` window.
- - OS: [e.g. Ubuntu 18.08, Windows 8, Fedora 29]
- - Perl version [e.g. 5.28.1 (use `perl --version` on the command line)]
- - ChordPro version [e.g. 0.975 (use `chordpro --version` on the command line)]
- - Where did you get ChordPro from [e.g. CPAN, SourceForge, GitHub]
+## System information
+ - OS: <!-- [e.g. Ubuntu 18.08, Windows 8, Fedora 29] -->
+ - Where did you get ChordPro from? <!-- [e.g. CPAN, SourceForge, GitHub] -->
+<!-- The versions below are best provided by `chordpro --about` or as screenshot of the `About` window. -->
+ - ChordPro version: <!-- [e.g. 0.975 (use `chordpro --version` on the command line)] -->
+ - Perl version: <!-- [e.g. 5.28.1 (use `perl --version` on the command line)] -->
 
 ## Additional context
 <!-- Add any other context about the problem here. -->
