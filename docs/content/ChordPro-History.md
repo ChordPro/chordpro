@@ -31,7 +31,7 @@ For convenience, the ChordPro language version supported by the latter
 programs is set to `3`, to reflect the major version number of the
 implementation.
 
-## From `Chord` to `Chord`ii
+## From `Chord` to `Chord`<sub><i>ii</i></sub>
 
 Johan Vromans adopted `Chord` in 1992 and for several
 years enhanced the program for his own personal needs,
@@ -51,8 +51,8 @@ used. Since this would cause confusion with the
 `Chord`<sub><i>ii</i></sub>, to be pronounced as
 chord-ee-ee.
 
-To avoid confusion, the first version of `Chord`ii was 4.0. The added
-improvements form the base of ChordPro language version `4`.
+To avoid confusion, the first version of `Chord`<sub><i>ii</i></sub> was 4.0.
+The added improvements formed the base of ChordPro language version `4`.
 
 The last known distribution of the original `Chord`
 program is 3.6.2 and dates from july 1995. It includes a statement
@@ -69,7 +69,7 @@ existing unofficial 3.6.3 version. Following the `Chord` GPL release
 `Chord`<sub><i>ii</i></sub> was rebased on the 3.6.4 version, making
 it officially and legally GPL.
 
-| Chordii Version | Release Date     | Remarks |
+| Chord<sub><i>ii</i></sub> Version | Release Date     | Remarks |
 |---------|----------|---|
 | 4.0.0 | 2007-11-30 ||
 | 4.1.0 | 2008-03-05 ||
@@ -84,35 +84,32 @@ it officially and legally GPL.
 | | 2020-02-02 | Post-EOL fix for legacy packages |
 { .table .table-striped .table-bordered .table-sm }
 
-`Chord`ii development was tracked in a public repository on
-[SourceForge](https://sourceforge.net/projects/chordii/).
+`Chord`<sub><i>ii</i></sub> development was tracked in a public repository on
+[SourceForge](https://sourceforge.net/projects/chordii).
 
 
-## From `Chord`ii to `ChordPro`
+## From `Chord`<sub><i>ii</i></sub> to `ChordPro`
 
-ChordPro language version `5` added a number of new features, and
-this was pushing the limits of the very old program. Unicode support
-would have been very hard to add, and the whole program centered
-around PostScript generation, while nowadays PDF would be a much
-better alternative.
+ChordPro language version `5` added a number of new features,
+pushing the limits of the very old program.
+Unicode support would have been very hard to add,
+and the whole program centered around PostScript generation,
+while nowadays PDF is much more predominant
 
-Johan Vromans decided to create a new program
-from the ground up. He choose the programming language Perl to write
-the new program in, because it is a very flexible programming language
-with good support for Unicode and other features that would be needed.
-And that is fun to program in.
+So Johan Vromans set out to create a new program from the ground up.
+He choose the programming language Perl because it is fun and flexible
+with good support for Unicode and other relevant features.
 
-The result is `ChordPro`, a program named after the file format. It
-supports almost all of the features of `Chord`ii, and a lot more, like
-native PDF generation, Unicode input and fully customizable layout,
-fonts and sizes. The first release of `ChordPro`, an alpha version,
-was on june 4, 2016. 
+The result is `ChordPro`, a program named after the file format.
+It supports almost all of the features of `Chord`<sub><i>ii</i></sub> and a lot more,
+such as native PDF generation, Unicode input and fully customizable layout, fonts and sizes.
+The first release of `ChordPro`, an alpha version, was on June 4, 2016. 
 
 `ChordPro` development is tracked in a public repository on
-[GitHub](https://github.com/chordpro/chordpro/).
-Its development follows the _Release Early, Release Often_
-approach; as of july 2021 there have been more than 67 releases.
+[GitHub](https://github.com/chordpro/chordpro).
+Its development follows the _Release Early, Release Often_ approach;
+as of July 2021 there have been more than 67 releases.
  
-Johan also established [ChordPro.ORG](https://www.chordpro.org) as
+Johan also established [ChordPro.org](https://www.chordpro.org) as
 a stable home for the ChordPro language standard and supporting
 implementation, and a user community on [Groups.io](https://groups.io/g/ChordPro).
