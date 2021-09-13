@@ -9,7 +9,7 @@
 ChordPro generates professional-looking sheet music from a text file
 containing the lyrics of one or many songs with chord information.
 Check <https://www.chordpro.org/chordpro/chordpro-installation> for installation instructions
-and execute `chordpro --help` for an overview about the avaalable options.
+and execute `chordpro --help` for an overview about the available options.
 
 ## Support
 For general discussion, please see [the user group](https://groups.io/g/ChordPro/topics).
