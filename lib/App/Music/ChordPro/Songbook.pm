@@ -165,7 +165,7 @@ sub parse_song {
 		warn( "Invalid tuning in config: ", $res, "\n" ) if $res;
 	    }
 	    App::Music::ChordPro::Chords::reset_parser();
-	    App::Music::ChordPro::Chords::Parse->reset_parsers;
+	    App::Music::ChordPro::Chords::Parser->reset_parsers;
 	    if ( $chords ) {
 		my $c = $chords;
 		if ( @$c && $c->[0] eq "append" ) {

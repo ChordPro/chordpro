@@ -6,6 +6,7 @@
     - !BugFixes
     - Fix issue #165.
     - Prevent wrapping loop with long comment with chords.
+    - Fix Can't locate object method "reset_parsers" (Songbook).
     - Fix issue #163.
     - Fix colour default with {xxxcolor}.
 
