@@ -6,9 +6,10 @@
 [![Built by musicians](https://img.shields.io/badge/built%20by-musicians%20𝄞-d15d27.svg?&labelColor=e36d25)](https://forthebadge.com)
 [![@ChordPro_Org on Twitter](https://img.shields.io/badge/twitter-@ChordPro%5FOrg-1DA1F2.svg)](https://twitter.com/ChordPro_Org)
 
-ChordPro generates professional-looking sheet music from a text file containing the lyrics of one or many songs with chord information.
+ChordPro generates professional-looking sheet music from a text file
+containing the lyrics of one or many songs with chord information.
 Check <https://www.chordpro.org/chordpro/chordpro-installation> for installation instructions
-and execute `chordpro --help` for an overview about the avalable options.
+and execute `chordpro --help` for an overview about the available options.
 
 ## Support
 For general discussion, please see [the user group](https://groups.io/g/ChordPro/topics).
@@ -21,7 +22,8 @@ It is the successor of [*Chord* and *Chord*<sub><i>ii</i></sub>](docs/content/Ch
 with additional features such as native PDF generation,
 Unicode input and fully customizable layout, fonts and sizes.
 
-Prominent features of ChordPro 6 are Pango style text markup, annotations,
+Prominent features of ChordPro 6 are
+Pango style text markup, annotations,
 and a more powerful way of assigning typefaces to layout items.
 
 For up-to-date information, see <https://www.chordpro.org/chordpro/chordpro-reference-implementation>.
