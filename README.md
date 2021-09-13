@@ -16,26 +16,15 @@ For general discussion, please see [the user group](https://groups.io/g/ChordPro
 Bugs and feature requests go to [the GitHub issue tracker](https://github.com/ChordPro/chordpro/issues).
 
 ## Development Status
-This program provides support for ChordPro version 6.
-It supports almost all features of Chordii, and a lot more,
-like native PDF generation, Unicode input and fully customizable layout, fonts and sizes.
+This program implements ChordPro language version 6.
+It is the successor of [*Chord* and *Chord*<sub><i>ii</i></sub>](docs/content/ChordPro-History.md)
+with additional features such as native PDF generation,
+Unicode input and fully customizable layout, fonts and sizes.
 
 Prominent features of ChordPro 6 are Pango style text markup, annotations,
 and a more powerful way of assigning typefaces to layout items.
 
-For up-to-date information, see <https://www.chordpro.org/chordpro/chordpro-reference-implementation>
-
-## Motivation
-ChordPro is a rewrite of Chordii.
-Why a rewrite?
-Chordii was the de facto reference implementation of the ChordPro file format standard version 4.
-
-ChordPro version 5 added a number of new features, pushing the limits of the very old program.
-Unicode support would have been very hard to add, and the whole program centered around PostScript generation, while nowadays PDF would be a much better alternative.
-
-So, we decided to create a new reference implementation from the ground up.
-We chose a programming language that is flexible and very good at handling Unicode data.
-And that is fun to program in.
+For up-to-date information, see <https://www.chordpro.org/chordpro/chordpro-reference-implementation>.
 
 ## License
 
