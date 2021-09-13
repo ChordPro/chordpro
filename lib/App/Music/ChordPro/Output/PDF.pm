@@ -2439,7 +2439,9 @@ sub abc2image {
 	       "-O", $svg0, $src, "\n" ) ) if ABCDEBUG;
     if ( sys( $abcm2ps, qw(-g -q -m0cm),
 	      "-w" . $pw . "pt",
-	      "-O", $svg0, $src ) ) {
+	      "-O", $svg0, $src )
+	 or
+	 ! -s $svg1 ) {
 	warn("Error in ABC embedding\n");
 	return;
     }
