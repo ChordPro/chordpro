@@ -2,7 +2,7 @@
 
     - !ChordPro Syntax
     - !ChordPro functionality
-    - (Songbook) Allow whitespace between curly and directive in a2crd detection.
+    - (Songbook) Allow whitespace between curly and directive in a2crd detection.   - (GUI) Add --maximize command line option.
     - !BugFixes
     - Fix issue #165.
     - Prevent wrapping loop with long comment with chords.

@@ -38,6 +38,18 @@ sub OnInit {
     $self->SetTopWindow($main);
     $main->Show(1);
 
+    if ( $options->{maximize} ) {
+	$main->Maximize(1);
+    }
+
+#    elsif ( $options->{geometry}
+#	    && $options->{geometry} =~ /^(?:(\d+)x(\d+))?(?:([+-]\d+)([+-]\d+))?$/ ) {
+#	$main->SetSize( $1, $2 )
+#	  if defined($1) && defined($2);
+#	$main->Move( $3+0, $4+0 )
+#	  if defined($3) && defined($4);
+#    }
+
     return 1;
 }
 
@@ -72,7 +84,9 @@ sub app_options {
     if ( !GetOptions( $options,
 		     'ident',
 		     'verbose|v+',
-		     'version|V',
+		      'version|V',
+		      'maximize',
+#		      'geometry=s',
 		     'quit',
 		     'trace',
 		     'help|?',
@@ -104,6 +118,7 @@ sub app_usage {
     app_ident();
     print STDERR <<EndOfUsage;
 Usage: $0 [options] [file ...]
+    --maximize          show full screen
     --help		this message
     --ident		show identification
     --version		show identification and exit

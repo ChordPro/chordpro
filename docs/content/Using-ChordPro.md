@@ -172,6 +172,13 @@ Only prints lyrics. All chords are suppressed.
 Useful to make prints for singers and other musicians that do not
 require chords.
 
+### maximize
+
+`--maximize`
+
+Starts with a maximized window.
+GUI version only.
+
 ### meta
 
 `--meta=`*KEY*`=`*VALUE*
