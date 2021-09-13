@@ -21,7 +21,7 @@ you can combine presets to form new styles. For example, `--config=modern1,nashv
 _Click on the page thumbnails to see the full size version._
 
 ## Default
-As the name implies, this is the default configuration. It accepts all ChordPro version 5 input.
+As the name implies, this is the default configuration.
 
 {{< showpage "style_default" >}}
 
@@ -80,4 +80,23 @@ This preset adds ukulele tuning and chords.
 {{< showpage "style_ukulele" >}}
 
 This style only sets the instrument and defines the ukulele chords, so it can be used in combination with other styles.
+
+# User library
+
+Presets are looked up in the folders where ChordPro is installed. It
+is possible to add a custom folder presets by using environment
+variable `CHORDPRO_LIB`.
+
+`CHORDPRO_LIB` should have the name of the custom folder, and a
+subfolder `config` where the custom configs can be placed. For
+example, assume `CONFIG_LIB` is `~/lib/ChordPro` and this folder
+contains `config/mspro.json`, then this config can be used as
+
+    --config mspro
+	
+Note that currently the name of the config file must be **all lowercase
+characters**. It may be referred in any case, e.g
+
+    --config Mspro
+    --config MSPro
 
