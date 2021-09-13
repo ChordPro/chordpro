@@ -41,6 +41,8 @@ include the resultant PDF in the bug report.
 -->
 
 ## Please complete the following information
+ - If possible, include the output of `chordpro --about` or a
+   screenshot of the `About` window.
  - OS: [e.g. Ubuntu 18.08, Windows 8, Fedora 29]
  - Perl version [e.g. 5.28.1 (use `perl --version` on the command line)]
  - ChordPro version [e.g. 0.975 (use `chordpro --version` on the command line)]
