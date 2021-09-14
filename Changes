@@ -1,6 +1,7 @@
 5.983
 
     - !ChordPro Syntax
+      (docs) Add transpose directive.
     - !ChordPro functionality
     - (Songbook) Allow whitespace between curly and directive in a2crd detection.   - (GUI) Add --maximize command line option.
     - !BugFixes
