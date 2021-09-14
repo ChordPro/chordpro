@@ -1,9 +1,9 @@
 ---
-title: "Directives transpose"
-description: "Directives transpose"
+title: "Directives: transpose"
+description: "Directives: transpose"
 ---
 
-# Directives transpose
+# Directives: transpose
 
 `{transpose:` _value_ `}`
 

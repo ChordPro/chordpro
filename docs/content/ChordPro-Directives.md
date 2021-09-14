@@ -87,6 +87,10 @@ output.
 * [define]({{< relref "Directives-define" >}})
 * [chord]({{< relref "Directives-chord" >}})
 
+## Transposition
+
+* [transpose]({{< relref "Directives-transpose" >}})
+
 ## Fonts, sizes and colours
 
 These directives can be used to temporarily change the font, size and/or colour for lyrics and chords. To permanently change these the reference implementation uses much more powerful [configuration files]({{< relref "ChordPro-Configuration" >}}).
