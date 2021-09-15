@@ -35,9 +35,8 @@ implementation.
 
 Johan Vromans adopted `Chord` in 1992 and for several
 years enhanced the program for his own personal needs,
-since Martin and Mario stopped development and
-maintenance and seemingly disappeared from the
-internet.
+since Martin and Mario stopped development and maintenance
+and seemingly disappeared from the internet.
 
 In 2007 Adam Monsen, also a grateful user of the tool, convinced
 Johan that `Chord` may not get lost for the public, and after failure
@@ -45,11 +44,10 @@ to contact the original authors they decided to take over the program,
 upgrade it to modern standards, and release it, again, to the
 public. 
 
-In its first reincarnation, the name `Chordie` was
-used. Since this would cause confusion with the
-[chordie.com](https://www.chordie.com) web site, the name was changed into
-`Chord`<sub><i>ii</i></sub>, to be pronounced as
-chord-ee-ee.
+In its first reincarnation, the name `Chordie` was used.
+Since this would cause confusion with the [chordie.com](https://www.chordie.com) website,
+the name was changed into `Chord`<sub><i>ii</i></sub>,
+to be pronounced as chord-ee-ee.
 
 To avoid confusion, the first version of `Chord`<sub><i>ii</i></sub> was 4.0.
 The added improvements formed the base of ChordPro language version `4`.
@@ -94,14 +92,14 @@ ChordPro language version `5` added a number of new features,
 pushing the limits of the very old program.
 Unicode support would have been very hard to add,
 and the whole program centered around PostScript generation,
-while nowadays PDF is much more predominant
+which has been superseded by PDF today.
 
 So Johan Vromans set out to create a new program from the ground up.
 He choose the programming language Perl because it is fun and flexible
 with good support for Unicode and other relevant features.
 
 The result is `ChordPro`, a program named after the file format.
-It supports almost all of the features of `Chord`<sub><i>ii</i></sub> and a lot more,
+It supports [almost all]({{< relref "chordpro-reference-implementation#what-is-missing" >}}) of the features of `Chord`<sub><i>ii</i></sub> and a lot more,
 such as native PDF generation, Unicode input and fully customizable layout, fonts and sizes.
 The first release of `ChordPro`, an alpha version, was on June 4, 2016. 
 
