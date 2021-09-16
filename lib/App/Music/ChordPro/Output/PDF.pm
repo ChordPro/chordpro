@@ -54,6 +54,7 @@ sub generate_songbook {
 		 $regtest
 		 ? "$options->{_name} (regression testing)"
 		 : "$options->{_name} $options->{_version}" );
+    $info{Creator} .= " reference mode" if $::options->{reference};
     while ( my ( $k, $v ) = each %{ $ps->{info} } ) {
 	next unless defined($v) && $v ne "";
 	$info{ucfirst($k)} = fmt_subst( $sb->{songs}->[0], $v );

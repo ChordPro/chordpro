@@ -548,6 +548,10 @@ Also, B<chordpro> will never create nor write configuration files.
 
 =over
 
+=item B<--nosongconfig>
+
+Don't use song specific config files, even if they exist.
+
 =item B<--sysconfig=>I<CFG>
 
 Designates a system specific config file.
@@ -749,7 +753,9 @@ sub app_setup {
     my $clo = {};
 
     # Sorry, layout is a bit ugly...
-    if ( !GetOptions
+    my $reference = 0;
+    my $ok =
+      GetOptions
          ($clo,
 
           ### Options ###
@@ -810,12 +816,14 @@ sub app_setup {
           'nosysconfig|no-sysconfig',
           'nolegacyconfig|no-legacyconfig',	# legacy
           'userconfig=s',
+          'nosongconfig|no-songconfig',
           'nouserconfig|no-userconfig',
 	  'nodefaultconfigs|no-default-configs|X',
 	  'define=s%',
 	  'print-default-config' => \$defcfg,
 	  'print-final-config'   => \$fincfg,
 	  'print-delta-config'   => \$deltacfg,
+	  'reference|R'		 => sub { $reference++; die("!FINISH!"); },
 
           ### Standard options ###
 
@@ -827,8 +835,41 @@ sub app_setup {
           'trace',
           'debug+',
 
-         ) )
-    {
+         );
+
+    if ( $reference ) {
+	@ARGV = @{ $options->{_argv} };
+	warn("Running in reference mode.\n");
+	$ok =
+	  GetOptions
+	  ($clo,
+
+	  ### Options for reference run ###
+
+	  "output|o=s",                 # Saves the output to FILE
+	  "strict!",			# strict conformance
+          "about|A" => \$about,         # About...
+          "version|V" => \$version,     # Prints version and exits
+	  'print-default-config' => \$defcfg,
+	  'reference|R',
+
+          ### Standard options ###
+
+          'ident'               => \$ident,
+          'help|h|?'            => \$help,
+          'help-config'         => sub { $manual = 2 },
+          'manual'              => \$manual,
+          'verbose|v+',
+          'trace',
+          'debug+',
+
+	  );
+	$clo->{nodefaultconfigs} = 1;
+	$clo->{nosongconfigs} = 1;
+	$::options->{reference} = 1;
+    }
+
+    unless ( $ok ) {
         # GNU convention: message to STDERR upon failure.
         app_usage(\*STDERR, 2);
     }
@@ -987,7 +1028,10 @@ sub ::runtimeinfo {
     # Sometimes version numbers are localized...
     my $dd = sub { my $v = $_[0]; $v =~ s/,/./g; $v };
 
-    my $msg = sprintf( $fmtv, "ChordPro core", $dd->($VERSION) );
+    my $msg =
+      $::options->{reference}
+      ? sprintf( $fmtv, "ChordPro reference", $dd->($VERSION) )
+      : sprintf( $fmtv, "ChordPro core", $dd->($VERSION) );
     if ( $VERSION =~ /_/ ) {
 	$msg =~ s/\n$/ (Unsupported development snapshot)\n/;
     }
@@ -1081,6 +1125,7 @@ Options marked with - are ignored.
 Configuration options:
     --config=CFG        Project specific config file ($cfg{config})
     --noconfig          Don't use a project specific config file
+    --nosongconfig      Don't use song specific configs
     --userconfig=CFG    User specific config file ($cfg{userconfig})
     --nouserconfig      Don't use a user specific config file
     --sysconfig=CFG     System specific config file ($cfg{sysconfig})

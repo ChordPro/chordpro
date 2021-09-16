@@ -587,6 +587,12 @@ Don't use the specific config file, even if it exists.
 
 Don't use a legacy config file, even if it exists.
 
+### nosongconfig
+
+`--nosongconfig`
+
+Don't use song specific config files, even if they exist.
+
 ### nosysconfig
 
 `--nosysconfig`

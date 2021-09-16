@@ -129,7 +129,7 @@ sub parse_song {
     local $config = dclone($config);
 
     # Load song-specific config, if any.
-    if ( $diag->{file} ) {
+    if ( !$options->{nosongconfigs} && $diag->{file} ) {
 	if ( $options->{verbose} ) {
 	    my $this = App::Music::ChordPro::Chords::get_parser();
 	    $this = defined($this) ? $this->{system} : "";
@@ -1180,7 +1180,7 @@ sub directive {
     }
 
     # More private hacks.
-    if ( $d =~ /^([-+])([-\w.]+)$/i ) {
+    if ( !$options->{reference} && $d =~ /^([-+])([-\w.]+)$/i ) {
 	if ( $2 eq "dumpmeta" ) {
 	    warn(::dump($song->{meta}));
 	}
@@ -1191,7 +1191,7 @@ sub directive {
 	return 1;
     }
 
-    if ( $dir =~ /^\+([-\w.]+(?:\.[<>])?)$/ ) {
+    if ( !$options->{reference} && $dir =~ /^\+([-\w.]+(?:\.[<>])?)$/ ) {
 	$self->add( type => "set",
 		    name => $1,
 		    value => $arg,
