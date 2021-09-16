@@ -1,12 +1,12 @@
 #!/usr/bin/perl
 
-# ChordPro -- perl version of Chord/Chordii
+# ChordPro -- Successor of Chord/Chordii
 
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
 # Last Modified By: Johan Vromans
-# Last Modified On: Wed Mar  3 22:11:36 2021
-# Update Count    : 262
+# Last Modified On: Thu Sep 16 19:29:26 2021
+# Update Count    : 263
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
