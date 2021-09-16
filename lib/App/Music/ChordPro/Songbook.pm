@@ -139,12 +139,13 @@ sub parse_song {
 	    print STDERR ("\n");
 	}
 	my $t = join("|",@{$config->{tuning}});
-	my $have;
+	my @configs;
 	if ( $meta && $meta->{__config} ) {
 	    my $cf = delete($meta->{__config})->[0];
 	    die("Missing config: $cf\n") unless -s $cf;
 	    warn("Config[song]: $cf\n") if $options->{verbose};
-	    $have = App::Music::ChordPro::Config::get_config($cf);
+	    my $have = App::Music::ChordPro::Config::get_config($cf);
+	    @configs = App::Music::ChordPro::Config::prep_configs( $have, $cf);
 	}
 	else {
 	    for ( "prp", "json" ) {
@@ -152,11 +153,13 @@ sub parse_song {
 		$cf .= ".$_" if $cf eq $diag->{file};
 		next unless -s $cf;
 		warn("Config[song]: $cf\n") if $options->{verbose};
-		$have = App::Music::ChordPro::Config::get_config($cf);
+		my $have = App::Music::ChordPro::Config::get_config($cf);
+		@configs = App::Music::ChordPro::Config::prep_configs( $have, $cf);
 		last;
 	    }
 	}
-	if ( $have ) {
+	foreach my $have ( @configs ) {
+	    warn("Config[song*]: ", $have->{_src}, "\n") if $options->{verbose};
 	    my $chords = $have->{chords};
 	    $config->augment($have);
 	    if ( $t ne join("|",@{$config->{tuning}}) ) {

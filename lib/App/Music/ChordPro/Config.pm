@@ -308,7 +308,7 @@ sub get_config {
 	}
     }
     else {
-	die("Unrecognized config type: $file\n");
+	Carp::confess("Unrecognized config type: $file\n");
     }
 }
 

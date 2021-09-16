@@ -1119,7 +1119,6 @@ sub ::rsc_or_file {
 	    $f = lc($c) . ".json";
 	}
     }
-
     my @libs = split( /[:;]/, $ENV{CHORDPRO_LIB} || "." );
     foreach my $lib ( @libs ) {
 	$lib = expand_tilde($lib);

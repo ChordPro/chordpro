@@ -4,6 +4,7 @@
       (docs) Add transpose directive.
     - !ChordPro functionality
     - (Songbook) Allow whitespace between curly and directive in a2crd detection.   - (GUI) Add --maximize command line option.
+    - Allow song-specific configs to have includes.
     - !BugFixes
     - Fix issue #165.
     - Prevent wrapping loop with long comment with chords.
