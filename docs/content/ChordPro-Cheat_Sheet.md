@@ -16,8 +16,8 @@ Annotations are placed between bracket-star `[*` and `]`.
 
 The input data may be encoded in ASCII, ISO 8859.1, UTF-8, UTF-16 or UTF-32.
 
-_Directives_ control processing and output. Directives are
-placed between braces `{` and `}` and must be on a single line.
+_Directives_ control processing and output.
+Directives are placed between braces `{` and `}` and must be on a single line.
 
 Example:
 
@@ -26,8 +26,8 @@ Example:
 [C]Twinkle, twinkle, [F]little [C]star
 ````
 
-Texts can use [Pango Markup]({{< relref "Pango_Markup" >}}) and [metadata]({{< relref
-"ChordPro-Configuration-Format-Strings" >}}).
+Texts can use [Pango Markup]({{< relref "Pango_Markup" >}})
+and [metadata]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
 
 Lines that start with a hash `#` are ignored.
 
@@ -118,6 +118,7 @@ Arguments to directives may be separated by a colon `:` and/or whitespace.
 | [tocsize]({{< relref "Directives-props_toc_legacy" >}}) _size_           |           | Table of contents font size.                                                                       | 5.0   |
 | [toccolour]({{< relref "Directives-props_toc_legacy" >}}) _colour_       |           | Table of contents colour.                                                                          | 5.0   |
 | [tocfont]({{< relref "Directives-props_toc_legacy" >}}) _font_           |           | Table of contents font.                                                                            | 5.0   |
+| [transpose]({{< relref "Directives-transpose" >}}) _semitones_           |           | Transpose by a number of semitones.                                                                | 5.0   |
 | [x_...]({{< relref "Directives-custom" >}})                              |           | Custom directive.                                                                                  | 5.0   |
 { .table .table-striped .table-bordered .table-sm }
  
@@ -128,7 +129,7 @@ are pre-1.2 proofs 3.6 is taken to be the initial release for a
 feature.
 
 There has never been an official [5.0 release]({{< relref  "ChordPro5-RelNotes.md" >}}).
-5.0 was mostly a development target for 6.0.
+5.0 was mostly an intermediate development target for 6.0.
 
 [^1]: As of [version 6.0]({{< relref "ChordPro6-RelNotes.md" >}}),
 all arguments to `chord` and `define` directives are optional.
