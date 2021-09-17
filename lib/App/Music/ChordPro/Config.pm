@@ -109,8 +109,14 @@ sub configurator {
     warn("Process: $cfg->{_src}\n") if $verbose > 1;
 
     # Presets.
-    $cfg->{user}->{name} = $ENV{USER} || $ENV{LOGNAME} || lc(getlogin());
-    $cfg->{user}->{fullname} = eval { (getpwuid($<))[6] } || "";
+    if ( $options->{reference} ) {
+	$cfg->{user}->{name} = "chordpro";
+	$cfg->{user}->{fullname} = ::runtimeinfo("short");
+    }
+    else {
+	$cfg->{user}->{name} = $ENV{USER} || $ENV{LOGNAME} || lc(getlogin());
+	$cfg->{user}->{fullname} = eval { (getpwuid($<))[6] } || "";
+    }
 
     # Add some extra entries to prevent warnings.
     for ( qw(title subtitle footer) ) {
