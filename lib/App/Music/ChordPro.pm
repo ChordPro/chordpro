@@ -752,8 +752,11 @@ sub app_setup {
     # later.
     my $clo = {};
 
-    # Sorry, layout is a bit ugly...
+    # When running in reference mode, we carefully defeat everything
+    # the user could change to the built-in default config.
     my $reference = 0;
+
+    # Sorry, layout is a bit ugly...
     my $ok =
       GetOptions
          ($clo,
@@ -823,6 +826,8 @@ sub app_setup {
 	  'print-default-config' => \$defcfg,
 	  'print-final-config'   => \$fincfg,
 	  'print-delta-config'   => \$deltacfg,
+
+	  # This aborts option scanning.
 	  'reference|R'		 => sub { $reference++; die("!FINISH!"); },
 
           ### Standard options ###
@@ -837,6 +842,8 @@ sub app_setup {
 
          );
 
+    # If --reference was encountered, retry with a very restricted set
+    # of options.
     if ( $reference ) {
 	@ARGV = @{ $options->{_argv} };
 	warn("Running in reference mode.\n");
@@ -850,15 +857,12 @@ sub app_setup {
 	  "strict!",			# strict conformance
           "about|A" => \$about,         # About...
           "version|V" => \$version,     # Prints version and exits
-	  'print-default-config' => \$defcfg,
 	  'reference|R',
 
           ### Standard options ###
 
           'ident'               => \$ident,
           'help|h|?'            => \$help,
-          'help-config'         => sub { $manual = 2 },
-          'manual'              => \$manual,
           'verbose|v+',
           'trace',
           'debug+',
@@ -987,11 +991,7 @@ sub app_setup {
 
 sub app_ident {
     my ($fh, $exit) = @_;
-    print {$fh} ("This is ",
-                 $my_package
-                 ? "$my_package [$my_name $my_version]"
-                 : "$my_name version $my_version",
-                 "\n");
+    print {$fh} ("This is ", ::runtimeinfo("short"), "\n");
     exit $exit if defined $exit;
 }
 
@@ -1020,21 +1020,28 @@ EndOfAbout
 use Cwd qw(realpath);
 
 sub ::runtimeinfo {
-    my $wx = shift;
-    my $fmt = "  %-22.22s %s\n";
-    my $fmtv = defined($Wx::VERSION) ? "  %s version %s\n" : $fmt;
+    my $short = shift;
+
+    my $fmt   = "  %-22.22s %s\n";
+    my $fmtv  = defined($Wx::VERSION) ? "  %s version %s\n" : $fmt;
     my $fmtvv = defined($Wx::VERSION) ? "  %s %s\n" : $fmt;
 
     # Sometimes version numbers are localized...
     my $dd = sub { my $v = $_[0]; $v =~ s/,/./g; $v };
 
-    my $msg =
-      $::options->{reference}
-      ? sprintf( $fmtv, "ChordPro reference", $dd->($VERSION) )
-      : sprintf( $fmtv, "ChordPro core", $dd->($VERSION) );
+    my $msg = sprintf( $fmtv, "ChordPro core", $dd->($VERSION) );
+    $msg =~ s/core/reference/ if $::options->{reference};
     if ( $VERSION =~ /_/ ) {
 	$msg =~ s/\n$/ (Unsupported development snapshot)\n/;
     }
+
+    if ( $short ) {
+	$msg =~ s/^\s+//;
+	$msg =~ s/\s+/ /g;
+	$msg =~ s/\s*\n//;
+	return $msg;
+    }
+
     $msg .= sprintf( $fmtv, "Perl", $^V );
     $msg =~ s/\n$/ ($^X)\n/;
     if ( $App::Packager::PACKAGED ) {

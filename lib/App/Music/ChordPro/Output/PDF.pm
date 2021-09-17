@@ -49,12 +49,10 @@ sub generate_songbook {
     my $ps = $config->{pdf};
     my $pr = (__PACKAGE__."::Writer")->new( $ps, $pdfapi );
 
+    my $name = ::runtimeinfo("short");
+    $name =~ s/version.*/regression testing/ if $regtest;
     my %info = ( Title => $sb->{songs}->[0]->{meta}->{title}->[0],
-		 Creator =>
-		 $regtest
-		 ? "$options->{_name} (regression testing)"
-		 : "$options->{_name} $options->{_version}" );
-    $info{Creator} .= " reference mode" if $::options->{reference};
+		 Creator => $name );
     while ( my ( $k, $v ) = each %{ $ps->{info} } ) {
 	next unless defined($v) && $v ne "";
 	$info{ucfirst($k)} = fmt_subst( $sb->{songs}->[0], $v );
