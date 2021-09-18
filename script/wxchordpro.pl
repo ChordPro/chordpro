@@ -111,6 +111,7 @@ sub app_options {
 
 sub app_ident {
     print STDERR ("This is $my_package [$my_name $my_version]\n");
+    print STDERR ( ::runtimeinfo("short"), "\n");
 }
 
 sub app_usage {
