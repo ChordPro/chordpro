@@ -15,6 +15,7 @@
     - Fix colour default with {xxxcolor}.
     - Prevent havoc when pdf.chorus.recall.type has illegal values.
     - Fix issue #178 (non-ascii filenames on Windows).
+    - (ChordPro/MSPro) Fix missing meta in substitutions 
 
 5.982 2021-08-31
 
