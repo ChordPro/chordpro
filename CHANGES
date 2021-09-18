@@ -2,6 +2,8 @@
 
 	Add --maximize command line option.
 	Streamline runtimeinfo.
+	Fix failure to open files with non-ascii names from the
+	Wx::FileDialog (Windows only).
 
 0.977
 

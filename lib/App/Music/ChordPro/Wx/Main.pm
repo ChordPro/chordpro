@@ -189,15 +189,16 @@ sub opendialog {
        wxDefaultPosition);
     my $ret = $fd->ShowModal;
     if ( $ret == wxID_OK ) {
-	$self->openfile( $fd->GetPath );
+	$self->openfile( $fd->GetPath, 1 );
     }
     $fd->Destroy;
 }
 
 sub openfile {
-    my ( $self, $file ) = @_;
+    my ( $self, $file, $checked ) = @_;
 
-    unless ( -f -r $file ) {
+    # File tests fail on Windows, so bypass when already checked.
+    unless ( $checked || -f -r $file ) {
 	my $md = Wx::MessageDialog->new
 	  ( $self,
 	    "Error opening $file: $!",
@@ -211,7 +212,7 @@ sub openfile {
 	my $md = Wx::MessageDialog->new
 	  ( $self,
 	    "Error opening $file: $!",
-	    "File open error",
+	    "File load error",
 	    wxOK | wxICON_ERROR );
 	$md->ShowModal;
 	$md->Destroy;
