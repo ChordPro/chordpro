@@ -62,11 +62,10 @@ sub configurator {
     }
     if ( keys(%$opts) ) {
 	$options = { %{$options//{}}, %$opts };
-	$options->{verbose} //= 0;
     }
 
     my @cfg;
-    my $verbose = $options->{verbose};
+    my $verbose = $options->{verbose} //= 0;
 
     # Load defaults.
     warn("Reading: <builtin>\n") if $verbose > 1;

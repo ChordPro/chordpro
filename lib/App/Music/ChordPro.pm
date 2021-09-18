@@ -873,6 +873,9 @@ sub app_setup {
 	$::options->{reference} = 1;
     }
 
+    $clo->{trace} ||= $clo->{debug};
+    $clo->{verbose} ||= $clo->{trace};
+
     unless ( $ok ) {
         # GNU convention: message to STDERR upon failure.
         app_usage(\*STDERR, 2);
@@ -888,7 +891,7 @@ sub app_setup {
     };
 
     # GNU convention: message to STDOUT upon request.
-    app_ident(\*STDOUT) if $ident || $help || $manual;
+    app_ident(\*STDOUT) if $ident || $clo->{verbose} || $help || $manual;
     if ( $manual or $help ) {
         app_usage(\*STDOUT, 0) if $help;
         $pod2usage->(VERBOSE => 2) if $manual;
