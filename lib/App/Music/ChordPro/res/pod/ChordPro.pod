@@ -311,6 +311,10 @@ Also, B<chordpro> will never create nor write configuration files.
 
 =over
 
+=item B<--nosongconfig>
+
+Don't use song specific config files, even if they exist.
+
 =item B<--sysconfig=>I<CFG>
 
 Designates a system specific config file.
