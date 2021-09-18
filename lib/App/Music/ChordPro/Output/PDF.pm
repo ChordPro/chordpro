@@ -1026,10 +1026,13 @@ sub generate_song {
 
 	if ( $elt->{type} eq "rechorus" ) {
 	    my $t = $ps->{chorus}->{recall};
+	    if ( $t->{type} !~ /^comment(?:_italic|_box)?$/ ) {
+		die("Config error: Invalid value for pdf.chorus.recall.type\n");
+	    }
+
 	    if ( $t->{quote} ) {
 		unshift( @elts, @{ $elt->{chorus} } ) if $elt->{chorus};
 	    }
-
 
 	    elsif ( $elt->{chorus}
 		    && $elt->{chorus}->[0]->{type} eq "set"
