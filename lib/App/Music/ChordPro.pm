@@ -1177,11 +1177,14 @@ sub ::rsc_or_file {
     my @libs = split( /[:;]/, $ENV{CHORDPRO_LIB} || "." );
     foreach my $lib ( @libs ) {
 	$lib = expand_tilde($lib);
+	warn("RSC1: $lib/$f\n") if $options->{debug};
 	return $lib . "/" . $f if -r $lib . "/" . $f;
 	next if $f =~ /\//;
+	warn("RSC2: $lib/config/$f\n") if $options->{debug};
 	return $lib . "/config/" . $f if -r $lib . "/config/" . $f;
     }
 
+    warn("RSC3: $f\n") if $options->{debug};
     my $t = getresource($f);
     $t = getresource( "config/$f" ) unless defined($t) || $f =~ /\//;
     return defined($t) ? $t : $c;
