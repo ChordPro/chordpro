@@ -11,13 +11,13 @@ use FindBin;
 use lib "$FindBin::Bin/../CPAN";
 use lib "$FindBin::Bin/../lib";
 use App::Packager qw( :name App::Music::ChordPro );
-use App::Music::ChordPro::Wx;
+use App::Music::ChordPro;
 
 # Package name.
 my $my_package = 'ChordPro';
 # Program name and version.
 my $my_name = 'WxChordPro';
-my $my_version = $App::Music::ChordPro::Wx::VERSION;
+my $my_version = $App::Music::ChordPro::VERSION;
 
 # We need Wx::App for the mainloop.
 # App::Music::ChordPro::Wx::Main is the main entry of the program.

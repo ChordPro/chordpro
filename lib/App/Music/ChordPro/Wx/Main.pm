@@ -15,14 +15,13 @@ use base qw( App::Music::ChordPro::Wx::Main_wxg );
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
 
-use App::Music::ChordPro::Wx;
 use App::Music::ChordPro;
 use App::Music::ChordPro::Output::Common;
 use App::Packager;
 use File::Temp qw( tempfile );
 use Encode qw(decode_utf8);
 
-our $VERSION = $App::Music::ChordPro::Wx::VERSION;
+our $VERSION = $App::Music::ChordPro::VERSION;
 
 sub new {
     my $self = bless $_[0]->SUPER::new(), __PACKAGE__;
@@ -670,7 +669,7 @@ sub _aboutmsg {
 	"https://www.chordpro.org\n",
 	"Copyright $year Johan Vromans <jvromans\@squirrel.nl>\n",
 	"\n",
-	"GUI wrapper ", $dd->($VERSION), " designed with wxGlade\n\n",
+	"GUI wrapper designed with wxGlade\n\n",
 	"Run-time information:\n",
 	::runtimeinfo() );
 
