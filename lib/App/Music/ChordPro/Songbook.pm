@@ -1400,7 +1400,7 @@ sub directive {
 
 	return 1 if $fail;
 
-	unless ( $res->{copy} ||$res->{frets} || $res->{keys} ) {
+	unless ( $show || $res->{copy} ||$res->{frets} || $res->{keys} ) {
 	    do_warn("Incomplete chord definition: $res->{name}\n");
 	    return 1;
 	}
