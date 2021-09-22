@@ -1053,8 +1053,23 @@ sub ::runtimeinfo {
 	$msg .= sprintf( $fmtv, $p, $dd->(App::Packager::Version()) );
     }
 
-    $msg .= sprintf( $fmtvv, "Resource path",
-		     realpath( App::Packager::GetResourcePath() ) );
+    # Determine resource path.
+    my @p;
+    if ( $ENV{CHORDPRO_LIB} ) {
+	if ( $^O =~ /Win/ ) {
+	    @p = split( /;/, $ENV{CHORDPRO_LIB} );
+	}
+	else {
+	    @p = split( /;/, $ENV{CHORDPRO_LIB} );
+	}
+    }
+    push( @p, realpath( App::Packager::GetResourcePath() ) );
+    my $tag = "Resource path";
+    for ( @p ) {
+	$msg .= sprintf( $fmtvv, $tag, $_ );
+	$tag = "";
+    }
+
     $msg .= "\nModules and libraries:\n";
     if ( defined $Wx::VERSION ) {
 	no strict 'subs';
