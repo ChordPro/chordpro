@@ -1,0 +1,15 @@
+{title: x34}
+{key: C}
+{time: 3/4}
+{tempo: 100}
+{duration: 16.4005}
+
+{comment: A}
+{start_of_grid 4x6}
+| C . . . . . | F . . . . . | G . . . . . | C . . . . . |
+| . . . . . . | F . . . . . | G . . . . . |
+{end_of_grid}
+{start_of_grid 4x5}
+| C . . . Am . |
+{end_of_grid}
+

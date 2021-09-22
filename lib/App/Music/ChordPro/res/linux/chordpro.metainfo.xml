@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+  <id>chordpro.desktop</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>Artistic 2.0</project_license>
+  <name>ChordPro</name>
+  <summary>Print songbooks (lyrics + chords)</summary>
+  <description>
+    <p>ChordPro will read a text file containing the lyrics of one or many
+songs plus chord information. ChordPro will then generate a
+photo-ready, professional looking, impress-your-friends sheet-music
+suitable for printing on your nearest printer.</p>
+    <p>ChordPro is a rewrite of the Chordii program.</p>
+    <p>For more information about ChordPro, see https://www.chordpro.org.</p>
+  </description>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://www.chordpro.org/appdata/screenshot2.png</image>
+    </screenshot>
+    <screenshot>
+      <image>https://www.chordpro.org/appdata/screenshot1.png</image>
+    </screenshot>
+  </screenshots>
+  <launchable type="desktop-id">chordpro.desktop</launchable>
+  <provides>
+    <mediatype>application/x-chordpro</mediatype>
+    <mediatype>text/x-chordpro</mediatype>
+  </provides>
+  <url type="homepage">https://www.chordpro.org/</url>
+  <update_contact>info_AT_chordpro.org</update_contact>
+</component>

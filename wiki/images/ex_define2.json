@@ -1,0 +1,13 @@
+{ "instrument" : {
+    "description" : "Keyboard, Piano, ...",
+    "type" : "keyboard"
+  },
+  "tuning" : [ 0 ],
+  "diagrams" : {
+      "type" : "keyboard"
+  },
+}
+
+
+  
+

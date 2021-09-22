@@ -1,0 +1,11 @@
+lib/App/Music/ChordPro/Wx.pm
+lib/App/Music/ChordPro/Wx/Main.pm
+lib/App/Music/ChordPro/Wx/Main_wxg.pm
+lib/App/Music/ChordPro/Wx/PreferencesDialog.pm
+lib/App/Music/ChordPro/Wx/PreferencesDialog.wxg
+lib/App/Music/ChordPro/Wx/PreferencesDialog_wxg.pm
+lib/App/Music/ChordPro/res/icons/chordpro.ico
+lib/App/Music/ChordPro/res/icons/chordpro.icns
+lib/App/Music/ChordPro/res/icons/chordpro-doc.icns
+lib/App/Music/ChordPro/res/icons/chordpro.svg
+script/wxchordpro.pl

@@ -1,0 +1,19 @@
+{{- $ctx := . -}}
+{{- $title := replace (lower .Destination) " " "-" -}}
+{{- $found := 0 -}}
+{{- range .Page.Site.AllPages -}}
+{{- $t := replace ( lower .Title ) " " "-" -}}
+{{- if eq $t $title -}}
+{{- $found = . -}}
+{{- end -}}
+{{- end -}}
+{{- if $found -}}
+<a href="{{ $found.RelPermalink }}"
+   {{- with $found.Title}} title="{{ . }}"{{ end }}>
+{{- .Text | safeHTML }}</a>
+{{- else -}}
+<a href="{{ .Destination | safeURL }}"
+   {{- with .Title}} title="{{ . }}"{{ end -}}
+   {{ if strings.HasPrefix .Destination "http" }} target="_blank" rel="noopener"{{ end }}>
+{{- .Text | safeHTML }}</a>
+{{- end -}}

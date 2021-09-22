@@ -1,0 +1,62 @@
+// Configuration for ChordPro.
+//
+// This is a relaxed JSON document, so comments are possible.
+
+{
+    // Layout definitions for PDF output.
+
+    "pdf" : {
+
+	// Style of chorus.
+	"chorus" : {
+	    "indent"     :  12,
+	    // Chorus side bar.
+	    "bar" : {
+		"width"  :  0.5,
+	    },
+	},
+
+	// Alternative songlines with chords in a side column.
+	// Value is the column position.
+	"chordscolumn" :  300,
+	"capoheading"  :  "%{capo|Capo: %{}}",
+
+	// A {titles: left} may conflict with customized formats.
+	// Set to non-zero to ignore the directive.
+	"titles-directive-ignore" : true,
+
+	// Formats.
+	"formats" : {
+	    // Titles/Footers.
+	    // The first page of a song has:
+	    "title" : {
+	        // Title and subtitle.
+	    	"title"     : [ "%{title}", "", "" ],
+	    	"subtitle"  : [ "%{subtitle|%{}|%{subtitle}}", "", "" ],
+	    },
+	},
+
+	// Fonts.
+
+	"fonts" : {
+	    "title" : {
+		"name" : "Helvetica-Bold",
+	    },
+	    "text" : {
+		"name" : "Helvetica",
+	    },
+	    "chord" : {
+		"name" : "Helvetica-Bold",
+		"size" : 12
+	    },
+	    "comment" : {
+		"name" : "Helvetica",
+		"size" : 12
+	    },
+	    "toc" : {
+		"name" : "Helvetica",
+	    },
+	},
+    },
+}
+// End of config.

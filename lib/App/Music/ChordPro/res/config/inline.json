@@ -1,0 +1,58 @@
+// Configuration for ChordPro.
+//
+// This is a relaxed JSON document, so comments are possible.
+//
+// This is an incremental config and can be used on top of other
+// configurations.
+
+{
+    // General settings.
+    "settings" : {
+      // Suppress empty chord lines.
+      "suppress-empty-chords" : true,
+      // Chords inline.
+      // May be a string containing pretext %s posttext.
+      // Defaults to "[%s]" if true.
+      "inline-chords" : true,
+    },
+
+    // Show chord diagrams.
+    "diagrams" : {
+	"show" : "all"
+    },
+    
+    // Layout definitions for PDF output.
+
+    "pdf" : {
+
+	// Slightly larger diagrams.
+	"diagrams" : {
+	    "show"     :  "right",
+	    "width"    :  8,
+  	    "height"   :  8,
+	    "hspace"   :  3.95,
+	    "vspace"   :  3,
+  	    "vcells"   :  4,
+	    "linewidth" : 0.1,
+	},
+
+	// Fonts.
+
+	"fonts" : {
+	    "title" : {
+		"name" : "Helvetica-Bold",
+		"size" : 14
+	    },
+	    "text" : {
+		"name" : "Helvetica",
+		"size" : 12
+	    },
+	    "chord" : {
+		"name" : "Helvetica",
+		"background" : "yellow",
+		"size" : 12
+	    },
+	},
+    },
+}
+// End of config.

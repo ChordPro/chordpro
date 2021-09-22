@@ -1,0 +1,15 @@
+{title: a68}
+{key: C}
+{time: 6/8}
+{tempo: 50}
+{duration: 30}
+
+{comment: A}
+{start_of_grid 4x6}
+| C . . . . . | F . . . . . | G . . . . . | C . . . . . |
+| . . . . . . | F . . . . . | G . . . . . |
+{end_of_grid}
+{start_of_grid 4x5}
+| C . . . Am . |
+{end_of_grid}
+

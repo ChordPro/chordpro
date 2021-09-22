@@ -1,0 +1,26 @@
+      <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+        <button class="btn btn-outline-primary" id="menu-toggle">Toggle Sidebar</button>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
+{{- if eq hugo.Environment "stable" }}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ .Site.Params.stable }}">ChordPro Home</span></a>
+            </li>
+{{- else }}
+            <li class="nav-item active">
+	      <a class="nav-link"
+		 style="color:#e83e8c;"
+		 href="{{ ref . "Home" }}">This is ChordPro Beta! <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ .Site.Params.stable }}">ChordPro Stable</span></a>
+            </li>
+{{- end }}
+          </ul>
+        </div>
+      </nav>

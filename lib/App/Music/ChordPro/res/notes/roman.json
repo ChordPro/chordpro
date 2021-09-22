@@ -1,0 +1,13 @@
+// Configuration for ChordPro.
+//
+// This is a relaxed JSON document, so comments are possible.
+//
+// Definitions of Notes.
+
+{
+    "notes" : {
+	"system" : "roman",
+	"movable" : true,
+    },
+}
+// End of config.

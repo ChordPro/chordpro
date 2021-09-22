@@ -1,0 +1,33 @@
+// Configuration for ChordPro.
+//
+// This is a relaxed JSON document, so comments are possible.
+
+{
+    // Layout definitions for PDF output.
+
+    "pdf" : {
+
+	// Style of chorus.
+	"chorus" : {
+	    "indent"     :  12,
+	    // Chorus side bar.
+	    "bar" : {
+		"width"  :  0.5,
+	    },
+	},
+
+	// Fonts.
+	"fonts" : {
+	    "title" : {
+		"name" : "Helvetica-Bold",
+	    },
+	    "text" : {
+		"name" : "Helvetica",
+	    },
+	    "toc" : {
+		"name" : "Helvetica",
+	    },
+	},
+    },
+}
+// End of config.

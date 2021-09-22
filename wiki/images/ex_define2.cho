@@ -1,0 +1,6 @@
+{title: }
+
+{define: D  keys 0 4 7}
+{define: D² keys 7 12 16}
+{chord: D  keys 0 4 7}
+{chord: D² keys 7 12 16}

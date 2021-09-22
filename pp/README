@@ -1,0 +1,43 @@
+Support for PPL packaging
+=========================
+
+Windows only. Requires PAR packaging.
+
+Support for PAR packaging
+=========================
+
+For consistency, Strawberry perl is used. Currently 5.30.
+
+linux
+-----
+
+  GNUmakefile : Makefile
+
+  Targets: chordpro (standalone binary)
+  	   wxchordpro (standalone binary)
+
+  wxchordpro.pp : pp options for wxchordpro
+		  (Linux, wxWidgets 3.0, all Wx libraries packaged)
+
+windows
+-------
+
+  Makefile : Makefile (gmake) for GNU make.
+
+  Targets: chordpro.exe (standalone binary)
+  	   wxchordpro.exe (standalone binary)
+	   ppl (portable loaders)
+	   iss (innosetup installer for portable loaders)
+
+  wxchordpro.pp : pp options for wxchordpro
+		  (MSWindows, all Wx libraries packaged)
+
+common
+------
+
+  chordpro.pp : pp options for chordpro (generic)
+
+  wxchordpro.pp : pp options for wxchordpro (generic)
+
+
+

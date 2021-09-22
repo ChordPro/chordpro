@@ -1,0 +1,36 @@
+// Definitions of Note names.
+//
+// The most widely used note naming systems in the western world are
+// Dutch and Neo-Latin. The English and Scandinavian systems may be
+// considered variants of Dutch.
+// In the Scandinavian system, note names are C, D, E, F, G, A, and H.
+// Half-tones have a sharp or flat, e.g. C# or Db.
+// H flat is Bb, not B (like in German), or Hb.
+
+{
+    // Note (chord root) names.
+    // In case of alternatives, the first one is used for output.
+    "notes" : {
+
+	"system" : "scandinavian",
+
+	"sharp" : [ "C", [ "C#", "C♯" ],
+		    "D", [ "D#", "D♯" ],
+		    "E",
+		    "F", [ "F#", "F♯" ],
+		    "G", [ "G#", "G♯" ],
+		    "A", [ "A#", "A♯" ],
+		    "H",
+		  ],
+
+	"flat" :  [                 "C",
+		    [ "Db", "D♭" ], "D",
+		    [ "Eb", "E♭" ], "E",
+		                    "F",
+		    [ "Gb", "G♭" ], "G",
+		    [ "Ab", "A♭" ], "A",
+                    [ "Bb", "B♭" ], "H",
+		  ],
+    },
+}
+// End of config.

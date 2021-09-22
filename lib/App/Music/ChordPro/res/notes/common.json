@@ -1,0 +1,37 @@
+// Definitions of Note names.
+//
+// The most widely used note naming systems in the western world are
+// Dutch and Neo-Latin. The English and German systems may be
+// considered variants of Dutch.
+// In the Dutch system, note names are A, B, C, D, E, F and G.
+// Half-tones have a sharp or flat, e.g. C# (Cis) or Db (Des). 
+// In English, Cis is called C sharp, and Des is called D flat.
+
+{
+    // Note (chord root) names.
+    // In case of alternatives, the first one is used for output.
+    "notes" : {
+
+	// System dutch is the same as common.
+	"system" : "common",
+
+	"sharp" : [ "C", [ "C#", "Cis", "C♯" ],
+		    "D", [ "D#", "Dis", "D♯" ],
+		    "E",
+		    "F", [ "F#", "Fis", "F♯" ],
+		    "G", [ "G#", "Gis", "G♯" ],
+		    "A", [ "A#", "Ais", "A♯" ],
+		    "B",
+		  ],
+
+	"flat" :  [ "C",
+		    [ "Db", "Des",        "D♭" ], "D",
+		    [ "Eb", "Es",  "Ees", "E♭" ], "E",
+		    "F",
+		    [ "Gb", "Ges",        "G♭" ], "G",
+		    [ "Ab", "As",  "Aes", "A♭" ], "A",
+		    [ "Bb", "Bes",        "B♭" ], "B",
+		  ],
+    },
+}
+// End of config.

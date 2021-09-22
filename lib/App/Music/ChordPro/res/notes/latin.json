@@ -1,0 +1,37 @@
+// Definitions of Note names.
+//
+// The most widely used note naming systems in the western world are
+// Dutch and Neo-Latin. The English and German systems may be
+// considered variants of Dutch.
+// In the Latin (or Neo-Latin) system, note names are Do, Re, Mi, Fa,
+// Sol, La, Si. Half-tones have a sharp or flat, e.g. Do# (Do diesis)
+// or Reb (Re bemolle).
+
+
+{
+    // Note (chord root) names.
+    // In case of alternatives, the first one is used for output.
+    "notes" : {
+
+	"system" : "latin",
+	
+	"sharp" : [ "Do",  [ "Do#",  "Do♯"  ],
+		    "Re",  [ "Re#",  "Re♯"  ],
+		    "Mi",
+		    "Fa",  [ "Fa#",  "Fa♯"  ],
+		    "Sol", [ "Sol#", "Sol♯" ],
+		    "La",  [ "La#",  "La♯"  ],
+		    "Si",
+		  ],
+
+	"flat" :  [ "Do",
+		    [ "Reb",  "Re♭"  ], "Re",
+		    [ "Mib",  "Mi♭"  ], "Mi",
+		    "Fa",
+		    [ "Solb", "Sol♭" ], "Sol",
+		    [ "Lab",  "La♭"  ], "La",
+		    [ "Sib",  "Si♭"  ], "Si",
+		  ],
+    },
+}
+// End of config.

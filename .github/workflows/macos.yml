@@ -1,0 +1,28 @@
+name: CI for MacOS
+
+on:
+  push:
+    branches:
+      - '*'
+    tags-ignore:
+      - '*'
+  pull_request:
+
+jobs:
+  perl:
+
+    runs-on: macOS-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Perl
+        run: brew install perl
+      - name: perl -V
+        run: perl -V
+      - name: Install Dependencies
+        run: |
+            curl -L https://cpanmin.us -o cpanm
+            chmod +x cpanm
+            ./cpanm --installdeps --notest .
+      - name: Run Tests
+        run: prove -l t

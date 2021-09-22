@@ -1,0 +1,8 @@
+{title: }
+{no_grid}
+{start_of_grid 32}
+|| Am . . . | C . . . | D  . . . | F  . . . |
+|  Am . . . | C . . . | E  . . . | E  . . . |
+|  Am . . . | C . . . | D  . . . | F  . . . |
+|  Am . . . | E . . . | Am . . . | Am . . . ||
+{end_of_grid}

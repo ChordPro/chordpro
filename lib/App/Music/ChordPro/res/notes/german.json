@@ -1,0 +1,36 @@
+// Definitions of Note names.
+//
+// The most widely used note naming systems in the western world are
+// Dutch and Neo-Latin. The English and German systems may be
+// considered variants of Dutch.
+// In the German system, note names are C, D, E, F, G, A, and H.
+// Half-tones have a is/es postfix, e.g. Cis or Db. 
+// B means Hb.
+
+{
+    // Note (chord root) names.
+    // In case of alternatives, the first one is used for output.
+    "notes" : {
+
+	"system" : "german",
+
+	"sharp" : [ "C", "Cis",
+		    "D", "Dis",
+		    "E",
+		    "F", "Fis",
+		    "G", "Gis",
+		    "A", "Ais",
+		    "H",
+		  ],
+
+	"flat" :  [ "C",
+		    "Des", "D",
+		    "Es",  "E",
+		    "F",
+		    "Ges", "G",
+		    "As",  "A",
+                    "B",   "H",
+		  ],
+    },
+}
+// End of config.

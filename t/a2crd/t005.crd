@@ -1,0 +1,19 @@
+This is a song for testing chord detection with the --a2crd funtion:
+
+Test supplied by nomike.
+
+A         C           D           E  F
+The first line of the song is pretty normal,
+G
+but as the second line has only one chord it's not detected as such.
+         Am
+However, if this single chord is not right at the beginning of the line, it works again.
+ Cm
+A single space is not enough though,
+  Dm
+there have to be at least two.
+Emsus4    Am  C
+Fooo      Bar Baz
+           C    F
+ A  Cm D F Even though this starts like some chords it isn't as there is text afterwards.
+
