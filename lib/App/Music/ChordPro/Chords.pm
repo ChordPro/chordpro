@@ -547,7 +547,7 @@ sub transpose {
     my ( $c, $xpose, $xcode ) = @_;
     return $c unless $xpose || $xcode;
     return $c if $c =~ /^\*/;
-#warn("__XPOSE = ", $xpose, " __XCODE = $xcode");
+#warn("__XPOSE = ", $xpose, " __XCODE = $xcode, chord = $c");
     my $info = parse_chord($c);
     unless ( $info ) {
 	assert_tuning();

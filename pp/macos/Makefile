@@ -10,6 +10,7 @@ ROOT   := ../..
 COMMON := ../common
 SCRIPT := ${ROOT}/script
 DEST   := build
+VERSION := $(shell perl ../../lib/App/Music/ChordPro/Version.pm)
 
 PP := pp -u
 
@@ -104,8 +105,10 @@ app1 :
 
 dmg : app dmg1
 
+DMG := Chordpro-Installer-${VERSION}.dmg
+
 dmg1 :
-	rm -f Chordpro-Installer.dmg
+	rm -f ${DMG}
 	bash ./create-dmg \
 		--volname "ChordPro Installer" \
 		--volicon "${APPDIR}/chordpro.icns" \
@@ -114,7 +117,7 @@ dmg1 :
 		--icon "${APPDIR}" 50 50 \
 		--add-file "READ ME FIRST.html" README.html 300 50 \
 		--hide-extension "READ ME FIRST.html" \
-		ChordPro-Installer.dmg "${APPDIR}"
+		${DMG} "${APPDIR}"
 
 clean ::
 	rm -fr ${APPDIR}

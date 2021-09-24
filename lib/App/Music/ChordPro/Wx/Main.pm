@@ -15,14 +15,13 @@ use base qw( App::Music::ChordPro::Wx::Main_wxg );
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
 
-use App::Music::ChordPro::Wx;
 use App::Music::ChordPro;
 use App::Music::ChordPro::Output::Common;
 use App::Packager;
 use File::Temp qw( tempfile );
 use Encode qw(decode_utf8);
 
-our $VERSION = $App::Music::ChordPro::Wx::VERSION;
+our $VERSION = $App::Music::ChordPro::VERSION;
 
 sub new {
     my $self = bless $_[0]->SUPER::new(), __PACKAGE__;
@@ -189,15 +188,16 @@ sub opendialog {
        wxDefaultPosition);
     my $ret = $fd->ShowModal;
     if ( $ret == wxID_OK ) {
-	$self->openfile( $fd->GetPath );
+	$self->openfile( $fd->GetPath, 1 );
     }
     $fd->Destroy;
 }
 
 sub openfile {
-    my ( $self, $file ) = @_;
+    my ( $self, $file, $checked ) = @_;
 
-    unless ( -f -r $file ) {
+    # File tests fail on Windows, so bypass when already checked.
+    unless ( $checked || -f -r $file ) {
 	my $md = Wx::MessageDialog->new
 	  ( $self,
 	    "Error opening $file: $!",
@@ -211,7 +211,7 @@ sub openfile {
 	my $md = Wx::MessageDialog->new
 	  ( $self,
 	    "Error opening $file: $!",
-	    "File open error",
+	    "File load error",
 	    wxOK | wxICON_ERROR );
 	$md->ShowModal;
 	$md->Destroy;
@@ -269,12 +269,12 @@ my ( $preview_cho, $preview_pdf );
 my ( $msgs, $fatal, $died );
 
 sub _warn {
-    Wx::LogWarning(@_);
+    Wx::LogWarning( "%s", join("",@_) );
     $msgs++;
 }
 
 sub _die {
-    Wx::LogError(@_);
+    Wx::LogError( "%s", join("", @_) );
     $msgs++;
     $fatal++;
     $died++;
@@ -652,8 +652,6 @@ sub OnText {
 
 sub _aboutmsg {
     my ( $self ) = @_;
-    my $fmt = "  %s %s\n";
-    my $fmtv = "  %s version %s\n";
     my $firstyear = 2016;
     my $year = 1900 + (localtime(time))[5];
     if ( $year != $firstyear ) {
@@ -671,36 +669,9 @@ sub _aboutmsg {
 	"https://www.chordpro.org\n",
 	"Copyright $year Johan Vromans <jvromans\@squirrel.nl>\n",
 	"\n",
-	"GUI wrapper ", $dd->($VERSION), " designed with wxGlade\n\n",
-	"Run-time information:\n" );
-
-    $msg .= sprintf( $fmtv, "Perl", $dd->(sprintf("%vd",$^V)) );
-    $msg .= sprintf( $fmt,  "Perl program", $^X );
-    $msg .= sprintf( $fmtv, "wxPerl", $dd->($Wx::VERSION) );
-    $msg .= sprintf( $fmtv, "wxWidgets", $dd->(Wx::wxVERSION) );
-
-    if ( $App::Packager::PACKAGED ) {
-	my $p = App::Packager::Packager();
-	$p .= " Packager" unless $p =~ /packager/i;
-	$msg .= sprintf( $fmtv, $p, App::Packager::Version() );
-    }
-    eval { require Text::Layout;
-	$msg .= sprintf( $fmtv, "Text::Layout", $Text::Layout::VERSION );
-    };
-    eval { require HarfBuzz::Shaper;
-	$msg .= sprintf( $fmtv, "HarfBuzz::Shaper", $HarfBuzz::Shaper::VERSION );
-	$msg .= sprintf( $fmtv, "HarfBuzz library", HarfBuzz::Shaper::hb_version_string() );
-    };
-    $msg .= sprintf( $fmtv, "File::LoadLines", $File::LoadLines::VERSION );
-    eval { require PDF::API2;
-	$msg .= sprintf( $fmtv, "PDF::API2", $PDF::API2::VERSION );
-    } or
-    eval { require PDF::Builder;
-	$msg .= sprintf( $fmtv, "PDF::Builder", $PDF::Builder::VERSION );
-    };
-    eval { require Font::TTF;
-	$msg .= sprintf( $fmtv, "Font::TTF", $Font::TTF::VERSION );
-    };
+	"GUI wrapper designed with wxGlade\n\n",
+	"Run-time information:\n",
+	::runtimeinfo() );
 
     return $msg;
 }

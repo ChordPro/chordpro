@@ -78,7 +78,7 @@ sub parse_file {
     if ( !(defined($options->{a2crd}) && !$options->{a2crd}) and
 	 !$options->{fragment}
 	 and any { /\S/ } @$lines	# non-blank lines
-	 and $options->{crd} || !any { /^{\w+/ } @$lines ) {
+	 and $options->{crd} || !any { /^{\s*\w+/ } @$lines ) {
 	warn("Converting $filename to ChordPro format\n")
 	  if $options->{verbose} || !($options->{a2crd}||$options->{crd});
 	require App::Music::ChordPro::A2Crd;
@@ -89,6 +89,8 @@ sub parse_file {
     $opts //= {};
     $diag->{format} = $opts->{diagformat} // $config->{diagnostics}->{format};
     $diag->{file}   = $opts->{_filesource};
+    $diag->{line}   = 0;
+    $diag->{orig}   = "(at start of song)";
     $lineinfo = $config->{settings}->{lineinfo};
 
     # Used by tests.
@@ -129,21 +131,23 @@ sub parse_song {
     local $config = dclone($config);
 
     # Load song-specific config, if any.
-    if ( $diag->{file} ) {
+    if ( !$options->{nosongconfigs} && $diag->{file} ) {
 	if ( $options->{verbose} ) {
-	    my $this = App::Music::ChordPro::Chords->get_parser->{system};
+	    my $this = App::Music::ChordPro::Chords::get_parser();
+	    $this = defined($this) ? $this->{system} : "";
 	    print STDERR ("Parsers at start of ", $diag->{file}, ":");
 	    print STDERR ( $this eq $_ ? " *" : " ", "$_")
 	      for keys %{ App::Music::ChordPro::Chords::Parser->parsers };
 	    print STDERR ("\n");
 	}
 	my $t = join("|",@{$config->{tuning}});
-	my $have;
+	my @configs;
 	if ( $meta && $meta->{__config} ) {
 	    my $cf = delete($meta->{__config})->[0];
 	    die("Missing config: $cf\n") unless -s $cf;
 	    warn("Config[song]: $cf\n") if $options->{verbose};
-	    $have = App::Music::ChordPro::Config::get_config($cf);
+	    my $have = App::Music::ChordPro::Config::get_config($cf);
+	    @configs = App::Music::ChordPro::Config::prep_configs( $have, $cf);
 	}
 	else {
 	    for ( "prp", "json" ) {
@@ -151,11 +155,13 @@ sub parse_song {
 		$cf .= ".$_" if $cf eq $diag->{file};
 		next unless -s $cf;
 		warn("Config[song]: $cf\n") if $options->{verbose};
-		$have = App::Music::ChordPro::Config::get_config($cf);
+		my $have = App::Music::ChordPro::Config::get_config($cf);
+		@configs = App::Music::ChordPro::Config::prep_configs( $have, $cf);
 		last;
 	    }
 	}
-	if ( $have ) {
+	foreach my $have ( @configs ) {
+	    warn("Config[song*]: ", $have->{_src}, "\n") if $options->{verbose};
 	    my $chords = $have->{chords};
 	    $config->augment($have);
 	    if ( $t ne join("|",@{$config->{tuning}}) ) {
@@ -163,7 +169,7 @@ sub parse_song {
 		  App::Music::ChordPro::Chords::set_tuning($config);
 		warn( "Invalid tuning in config: ", $res, "\n" ) if $res;
 	    }
-	    App::Music::ChordPro::Chords->reset_parser;
+	    App::Music::ChordPro::Chords::reset_parser();
 	    App::Music::ChordPro::Chords::Parser->reset_parsers;
 	    if ( $chords ) {
 		my $c = $chords;
@@ -184,7 +190,7 @@ sub parse_song {
 		      App::Music::ChordPro::Chords::chord_stats(), "\n" );
 	    }
 	    if ( 0 && $options->{verbose} ) {
-		my $this = App::Music::ChordPro::Chords->get_parser->{system};
+		my $this = App::Music::ChordPro::Chords::get_parser()->{system};
 		print STDERR ("Parsers after local config:");
 		print STDERR ( $this eq $_ ? " *" : " ", "$_")
 		  for keys %{ App::Music::ChordPro::Chords::Parser->parsers };
@@ -200,9 +206,12 @@ sub parse_song {
     }
     # Catch common error.
     unless ( UNIVERSAL::isa( $config->{instrument}, 'HASH' ) ) {
+	$config->{instrument} //= "guitar";
 	$config->{instrument} =
 	  { type => $config->{instrument},
-	    description => $config->{instrument} };
+	    description => ucfirst $config->{instrument} };
+	do_warn( "Missing or invalid instrument - set to ",
+		 $config->{instrument}->{type}, "\n" );
     }
     $config->lock;
 
@@ -221,6 +230,7 @@ sub parse_song {
     $decapo = $config->{settings}->{decapo};
     my $fragment = $options->{fragment};
 
+    warn("Processing song...\n") if $options->{verbose};
     $song = App::Music::ChordPro::Song->new
       ( source => { file => $diag->{file}, line => 1 + $$linecnt },
 	system => $config->{notes}->{system},
@@ -457,6 +467,8 @@ sub parse_song {
     do_warn("Unterminated context in song: $in_context")
       if $in_context;
 
+    warn("Processed song...\n") if $options->{verbose};
+
     if ( @labels ) {
 	$song->{labels} = [ @labels ];
     }
@@ -485,7 +497,13 @@ sub parse_song {
 	    die("No transcoder for ", $target, "\n");
 	}
 	warn("Got transcoder for $target\n") if $::options->{verbose};
-	App::Music::ChordPro::Chords->set_parser($target);
+	App::Music::ChordPro::Chords::set_parser($target);
+	if ( $target ne App::Music::ChordPro::Chords::get_parser->{system} ) {
+	    ::dump(App::Music::ChordPro::Chords::Parser->parsers);
+	    warn("OOPS parser mixup, $target <> ",
+		App::Music::ChordPro::Chords::get_parser->{system})
+	}
+	App::Music::ChordPro::Chords::set_parser($song->{system});
     }
     else {
 	$target = $song->{system};
@@ -1167,7 +1185,7 @@ sub directive {
     }
 
     # More private hacks.
-    if ( $d =~ /^([-+])([-\w.]+)$/i ) {
+    if ( !$options->{reference} && $d =~ /^([-+])([-\w.]+)$/i ) {
 	if ( $2 eq "dumpmeta" ) {
 	    warn(::dump($song->{meta}));
 	}
@@ -1178,7 +1196,7 @@ sub directive {
 	return 1;
     }
 
-    if ( $dir =~ /^\+([-\w.]+(?:\.[<>])?)$/ ) {
+    if ( !$options->{reference} && $dir =~ /^\+([-\w.]+(?:\.[<>])?)$/ ) {
 	$self->add( type => "set",
 		    name => $1,
 		    value => $arg,
@@ -1387,7 +1405,7 @@ sub directive {
 
 	return 1 if $fail;
 
-	unless ( $res->{copy} ||$res->{frets} || $res->{keys} ) {
+	unless ( $show || $res->{copy} ||$res->{frets} || $res->{keys} ) {
 	    do_warn("Incomplete chord definition: $res->{name}\n");
 	    return 1;
 	}

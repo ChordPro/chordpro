@@ -49,11 +49,10 @@ sub generate_songbook {
     my $ps = $config->{pdf};
     my $pr = (__PACKAGE__."::Writer")->new( $ps, $pdfapi );
 
+    my $name = ::runtimeinfo("short");
+    $name =~ s/version.*/regression testing/ if $regtest;
     my %info = ( Title => $sb->{songs}->[0]->{meta}->{title}->[0],
-		 Creator =>
-		 $regtest
-		 ? "$options->{_name} (regression testing)"
-		 : "$options->{_name} $options->{_version}" );
+		 Creator => $name );
     while ( my ( $k, $v ) = each %{ $ps->{info} } ) {
 	next unless defined($v) && $v ne "";
 	$info{ucfirst($k)} = fmt_subst( $sb->{songs}->[0], $v );
@@ -832,7 +831,7 @@ sub generate_song {
 	    }
 
 	    # Substitute metadata in comments.
-	    if ( $elt->{type} =~ /^comment/ ) {
+	    if ( $elt->{type} =~ /^comment/ && !$elt->{indent} ) {
 		$elt = { %$elt };
 		# Flatten chords/phrases.
 		if ( $elt->{chords} ) {
@@ -1027,10 +1026,13 @@ sub generate_song {
 
 	if ( $elt->{type} eq "rechorus" ) {
 	    my $t = $ps->{chorus}->{recall};
+	    if ( $t->{type} !~ /^comment(?:_italic|_box)?$/ ) {
+		die("Config error: Invalid value for pdf.chorus.recall.type\n");
+	    }
+
 	    if ( $t->{quote} ) {
 		unshift( @elts, @{ $elt->{chorus} } ) if $elt->{chorus};
 	    }
-
 
 	    elsif ( $elt->{chorus}
 		    && $elt->{chorus}->[0]->{type} eq "set"
@@ -1123,7 +1125,8 @@ sub generate_song {
 		}
 		else {
 		    # Restore default.
-		    delete( $ps->{fonts}->{$1}->{color} );
+		    $ps->{fonts}->{$1}->{color} =
+		      $::config->{pdf}->{fonts}->{$1}->{color};
 		}
 	    }
 	    next;
@@ -2438,7 +2441,9 @@ sub abc2image {
 	       "-O", $svg0, $src, "\n" ) ) if ABCDEBUG;
     if ( sys( $abcm2ps, qw(-g -q -m0cm),
 	      "-w" . $pw . "pt",
-	      "-O", $svg0, $src ) ) {
+	      "-O", $svg0, $src )
+	 or
+	 ! -s $svg1 ) {
 	warn("Error in ABC embedding\n");
 	return;
     }

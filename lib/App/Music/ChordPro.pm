@@ -548,6 +548,10 @@ Also, B<chordpro> will never create nor write configuration files.
 
 =over
 
+=item B<--nosongconfig>
+
+Don't use song specific config files, even if they exist.
+
 =item B<--sysconfig=>I<CFG>
 
 Designates a system specific config file.
@@ -748,8 +752,13 @@ sub app_setup {
     # later.
     my $clo = {};
 
+    # When running in reference mode, we carefully defeat everything
+    # the user could change to the built-in default config.
+    my $reference = 0;
+
     # Sorry, layout is a bit ugly...
-    if ( !GetOptions
+    my $ok =
+      GetOptions
          ($clo,
 
           ### Options ###
@@ -810,12 +819,16 @@ sub app_setup {
           'nosysconfig|no-sysconfig',
           'nolegacyconfig|no-legacyconfig',	# legacy
           'userconfig=s',
+          'nosongconfig|no-songconfig',
           'nouserconfig|no-userconfig',
 	  'nodefaultconfigs|no-default-configs|X',
 	  'define=s%',
 	  'print-default-config' => \$defcfg,
 	  'print-final-config'   => \$fincfg,
 	  'print-delta-config'   => \$deltacfg,
+
+	  # This aborts option scanning.
+	  'reference|R'		 => sub { $reference++; die("!FINISH!"); },
 
           ### Standard options ###
 
@@ -827,8 +840,43 @@ sub app_setup {
           'trace',
           'debug+',
 
-         ) )
-    {
+         );
+
+    # If --reference was encountered, retry with a very restricted set
+    # of options.
+    if ( $reference ) {
+	@ARGV = @{ $options->{_argv} };
+	warn("Running in reference mode.\n");
+	$ok =
+	  GetOptions
+	  ($clo,
+
+	  ### Options for reference run ###
+
+	  "output|o=s",                 # Saves the output to FILE
+	  "strict!",			# strict conformance
+          "about|A" => \$about,         # About...
+          "version|V" => \$version,     # Prints version and exits
+	  'reference|R',
+
+          ### Standard options ###
+
+          'ident'               => \$ident,
+          'help|h|?'            => \$help,
+          'verbose|v+',
+          'trace',
+          'debug+',
+
+	  );
+	$clo->{nodefaultconfigs} = 1;
+	$clo->{nosongconfigs} = 1;
+	$::options->{reference} = 1;
+    }
+
+    $clo->{trace} ||= $clo->{debug};
+    $clo->{verbose} ||= $clo->{trace};
+
+    unless ( $ok ) {
         # GNU convention: message to STDERR upon failure.
         app_usage(\*STDERR, 2);
     }
@@ -843,7 +891,7 @@ sub app_setup {
     };
 
     # GNU convention: message to STDOUT upon request.
-    app_ident(\*STDOUT) if $ident || $help || $manual;
+    app_ident(\*STDOUT) if $ident || $clo->{verbose} || $help || $manual;
     if ( $manual or $help ) {
         app_usage(\*STDOUT, 0) if $help;
         $pod2usage->(VERBOSE => 2) if $manual;
@@ -946,11 +994,7 @@ sub app_setup {
 
 sub app_ident {
     my ($fh, $exit) = @_;
-    print {$fh} ("This is ",
-                 $my_package
-                 ? "$my_package [$my_name $my_version]"
-                 : "$my_name version $my_version",
-                 "\n");
+    print {$fh} ("This is ", ::runtimeinfo("short"), "\n");
     exit $exit if defined $exit;
 }
 
@@ -979,35 +1023,74 @@ EndOfAbout
 use Cwd qw(realpath);
 
 sub ::runtimeinfo {
-    my $fmt = "%-22.22s %s\n";
+    my $short = shift;
 
-    my $msg = sprintf( $fmt, "ChordPro version", $VERSION );
+    my $fmt   = "  %-22.22s %s\n";
+    my $fmtv  = defined($Wx::VERSION) ? "  %s version %s\n" : $fmt;
+    my $fmtvv = defined($Wx::VERSION) ? "  %s %s\n" : $fmt;
+
+    # Sometimes version numbers are localized...
+    my $dd = sub { my $v = $_[0]; $v =~ s/,/./g; $v };
+
+    my $msg = sprintf( $fmtv, "ChordPro core", $dd->($VERSION) );
+    $msg =~ s/core/reference/ if $::options->{reference};
     if ( $VERSION =~ /_/ ) {
 	$msg =~ s/\n$/ (Unsupported development snapshot)\n/;
     }
-    $msg .= sprintf( $fmt, "Perl version", $^V );
-    $msg .= sprintf( $fmt, "Perl program", $^X );
+
+    if ( $short ) {
+	$msg =~ s/^\s+//;
+	$msg =~ s/\s+/ /g;
+	$msg =~ s/\s*\n//;
+	return $msg;
+    }
+
+    $msg .= sprintf( $fmtv, "Perl", $^V );
+    $msg =~ s/\n$/ ($^X)\n/;
     if ( $App::Packager::PACKAGED ) {
 	my $p = App::Packager::Packager();
 	$p .= " Packager" unless $p =~ /packager/i;
-	$msg .= sprintf( $fmt, $p, App::Packager::Version() );
+	$msg .= sprintf( $fmtv, $p, $dd->(App::Packager::Version()) );
     }
-    $msg .= sprintf( $fmt, "Storable", $Storable::VERSION );
-    $msg .= sprintf( $fmt, "Resource path",
-		     realpath( App::Packager::GetResourcePath() ) );
+
+    # Determine resource path.
+    my @p;
+    if ( $ENV{CHORDPRO_LIB} ) {
+	if ( $^O =~ /Win/ ) {
+	    @p = split( /;/, $ENV{CHORDPRO_LIB} );
+	}
+	else {
+	    @p = split( /;/, $ENV{CHORDPRO_LIB} );
+	}
+    }
+    push( @p, realpath( App::Packager::GetResourcePath() ) );
+    my $tag = "Resource path";
+    for ( @p ) {
+	$msg .= sprintf( $fmtvv, $tag, $_ );
+	$tag = "";
+    }
+
+    $msg .= "\nModules and libraries:\n";
+    if ( defined $Wx::VERSION ) {
+	no strict 'subs';
+	$msg .= sprintf( $fmtv, "wxPerl", $dd->($Wx::VERSION) );
+	$msg .= sprintf( $fmtv, "wxWidgets", $dd->(Wx::wxVERSION) );
+    }
+
+    $msg .= sprintf( $fmtv, "Storable", $dd->($Storable::VERSION) );
     eval { require Text::Layout;
-	$msg .= sprintf( $fmt, "Text::Layout", $Text::Layout::VERSION );
+	$msg .= sprintf( $fmtv, "Text::Layout", $dd->($Text::Layout::VERSION) );
     };
     eval { require HarfBuzz::Shaper;
-	$msg .= sprintf( $fmt, "HarfBuzz::Shaper", $HarfBuzz::Shaper::VERSION );
-	$msg .= sprintf( $fmt, "HarfBuzz library", HarfBuzz::Shaper::hb_version_string() );
+	$msg .= sprintf( $fmtv, "HarfBuzz::Shaper", $dd->($HarfBuzz::Shaper::VERSION) );
+	$msg .= sprintf( $fmtv, "HarfBuzz library", $dd->(HarfBuzz::Shaper::hb_version_string()) );
     };
-    $msg .= sprintf( $fmt, "File::LoadLines", $File::LoadLines::VERSION );
+    $msg .= sprintf( $fmtv, "File::LoadLines", $dd->($File::LoadLines::VERSION) );
     eval { require PDF::API2;
-	$msg .= sprintf( $fmt, "PDF::API2", $PDF::API2::VERSION );
+	$msg .= sprintf( $fmtv, "PDF::API2", $dd->($PDF::API2::VERSION) );
     };
     eval { require Font::TTF;
-	$msg .= sprintf( $fmt, "Font::TTF", $Font::TTF::VERSION );
+	$msg .= sprintf( $fmtv, "Font::TTF", $dd->($Font::TTF::VERSION) );
     };
 }
 
@@ -1067,6 +1150,7 @@ Options marked with - are ignored.
 Configuration options:
     --config=CFG        Project specific config file ($cfg{config})
     --noconfig          Don't use a project specific config file
+    --nosongconfig      Don't use song specific configs
     --userconfig=CFG    User specific config file ($cfg{userconfig})
     --nouserconfig      Don't use a user specific config file
     --sysconfig=CFG     System specific config file ($cfg{sysconfig})
@@ -1105,15 +1189,17 @@ sub ::rsc_or_file {
 	    $f = lc($c) . ".json";
 	}
     }
-
     my @libs = split( /[:;]/, $ENV{CHORDPRO_LIB} || "." );
     foreach my $lib ( @libs ) {
 	$lib = expand_tilde($lib);
+	warn("RSC1: $lib/$f\n") if $options->{debug};
 	return $lib . "/" . $f if -r $lib . "/" . $f;
 	next if $f =~ /\//;
+	warn("RSC2: $lib/config/$f\n") if $options->{debug};
 	return $lib . "/config/" . $f if -r $lib . "/config/" . $f;
     }
 
+    warn("RSC3: $f\n") if $options->{debug};
     my $t = getresource($f);
     $t = getresource( "config/$f" ) unless defined($t) || $f =~ /\//;
     return defined($t) ? $t : $c;

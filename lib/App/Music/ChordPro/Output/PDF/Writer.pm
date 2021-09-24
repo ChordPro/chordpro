@@ -587,6 +587,7 @@ sub show_vpos {
 use File::Temp;
 
 my $cname;
+my $rname;
 sub embed {
     my ( $self, $file ) = @_;
     return unless -f $file;
@@ -612,13 +613,21 @@ sub embed {
     $a->movie($cname, "ChordProConfig" );
     $a->open(0);
 
-    open( $cf, '>', $cname );
-    binmode( $cf, ':utf8' );
-    print $cf (::runtimeinfo());
-    close($cf);
+    my $rf;
+    if ( $rname ) {
+	open( $rf, '>', $rname );
+    }
+    else {
+	( $rf, $rname ) = File::Temp::tempfile( UNLINK => 0);
+    }
+    binmode( $rf, ':utf8' );
+    open( $rf, '>', $rname );
+    binmode( $rf, ':utf8' );
+    print $rf (::runtimeinfo());
+    close($rf);
 
     $a = $self->{pdfpage}->annotation();
-    $a->movie($cname, "ChordProRunTime" );
+    $a->movie($rname, "ChordProRunTime" );
     $a->open(0);
 }
 
@@ -626,6 +635,8 @@ END {
     return unless $cname;
     unlink($cname);
     undef $cname;
+    unlink($rname);
+    undef $rname;
 }
 
 1;

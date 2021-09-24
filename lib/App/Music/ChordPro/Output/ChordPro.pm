@@ -77,15 +77,17 @@ sub generate_song {
 	    $s->{meta}->{custom2} //= [ $seq ] if defined $seq;
 	}
 	# Known ones 'as is'.
+	my %used;
 	foreach my $k ( sort keys %{ $s->{meta} } ) {
 	    next if $k =~ /^(?:title|subtitle)$/;
 	    if ( $k =~ $re_meta ) {
 		push( @s, map { +"{$k: $_}" } @{ $s->{meta}->{$k} } );
-		delete $s->{meta}->{$k};
+		$used{$k}++;
 	    }
 	}
 	# Unknowns with meta prefix.
 	foreach my $k ( sort keys %{ $s->{meta} } ) {
+	    next if $used{$k};
 	    next if $k =~ /^(?:title|subtitle|songindex)$/;
 	    next if $k =~ /^_/;
 	    push( @s, map { +"{meta: $k $_}" } @{ $s->{meta}->{$k} } );

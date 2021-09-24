@@ -11,13 +11,13 @@ use FindBin;
 use lib "$FindBin::Bin/../CPAN";
 use lib "$FindBin::Bin/../lib";
 use App::Packager qw( :name App::Music::ChordPro );
-use App::Music::ChordPro::Wx;
+use App::Music::ChordPro;
 
 # Package name.
 my $my_package = 'ChordPro';
 # Program name and version.
 my $my_name = 'WxChordPro';
-my $my_version = $App::Music::ChordPro::Wx::VERSION;
+my $my_version = $App::Music::ChordPro::VERSION;
 
 # We need Wx::App for the mainloop.
 # App::Music::ChordPro::Wx::Main is the main entry of the program.
@@ -37,6 +37,18 @@ sub OnInit {
 
     $self->SetTopWindow($main);
     $main->Show(1);
+
+    if ( $options->{maximize} ) {
+	$main->Maximize(1);
+    }
+
+#    elsif ( $options->{geometry}
+#	    && $options->{geometry} =~ /^(?:(\d+)x(\d+))?(?:([+-]\d+)([+-]\d+))?$/ ) {
+#	$main->SetSize( $1, $2 )
+#	  if defined($1) && defined($2);
+#	$main->Move( $3+0, $4+0 )
+#	  if defined($3) && defined($4);
+#    }
 
     return 1;
 }
@@ -72,7 +84,9 @@ sub app_options {
     if ( !GetOptions( $options,
 		     'ident',
 		     'verbose|v+',
-		     'version|V',
+		      'version|V',
+		      'maximize',
+#		      'geometry=s',
 		     'quit',
 		     'trace',
 		     'help|?',
@@ -97,6 +111,7 @@ sub app_options {
 
 sub app_ident {
     print STDERR ("This is $my_package [$my_name $my_version]\n");
+    print STDERR ( ::runtimeinfo("short"), "\n");
 }
 
 sub app_usage {
@@ -104,6 +119,7 @@ sub app_usage {
     app_ident();
     print STDERR <<EndOfUsage;
 Usage: $0 [options] [file ...]
+    --maximize          show full screen
     --help		this message
     --ident		show identification
     --version		show identification and exit

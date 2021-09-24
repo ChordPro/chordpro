@@ -30,6 +30,7 @@ sub fmt_subst {
 	  [ map { App::Music::ChordPro::Chords::transpose( $_, $capo ) }
 	        @{$m->{key}} ];
     }
+    $m->{key_actual} //= $m->{key};
     $m->{tuning} //= [ join(" ", App::Music::ChordPro::Chords::get_tuning) ];
     # If config->{instrument} is missing, or null, the program abends with
     # Modification of a read-only value attempted.

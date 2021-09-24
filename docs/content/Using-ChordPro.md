@@ -172,6 +172,13 @@ Only prints lyrics. All chords are suppressed.
 Useful to make prints for singers and other musicians that do not
 require chords.
 
+### maximize
+
+`--maximize`
+
+Starts with a maximized window.
+GUI version only.
+
 ### meta
 
 `--meta=`*KEY*`=`*VALUE*
@@ -579,6 +586,12 @@ Don't use the specific config file, even if it exists.
 `--nolegacyconfig`
 
 Don't use a legacy config file, even if it exists.
+
+### nosongconfig
+
+`--nosongconfig`
+
+Don't use song specific config files, even if they exist.
 
 ### nosysconfig
 

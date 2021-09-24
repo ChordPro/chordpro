@@ -5,6 +5,8 @@ description: "Support"
 
 # Support
 
+See also [Trouble Shooting]({{< relref "Trouble-Shooting" >}}).
+
 ## Support for you
 
 * [User Forum]({{< relref "Support-User-Forum" >}})
