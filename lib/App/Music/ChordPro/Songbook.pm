@@ -89,6 +89,8 @@ sub parse_file {
     $opts //= {};
     $diag->{format} = $opts->{diagformat} // $config->{diagnostics}->{format};
     $diag->{file}   = $opts->{_filesource};
+    $diag->{line}   = 0;
+    $diag->{orig}   = "(at start of song)";
     $lineinfo = $config->{settings}->{lineinfo};
 
     # Used by tests.
@@ -204,9 +206,12 @@ sub parse_song {
     }
     # Catch common error.
     unless ( UNIVERSAL::isa( $config->{instrument}, 'HASH' ) ) {
+	$config->{instrument} //= "guitar";
 	$config->{instrument} =
 	  { type => $config->{instrument},
-	    description => $config->{instrument} };
+	    description => ucfirst $config->{instrument} };
+	do_warn( "Missing or invalid instrument - set to ",
+		 $config->{instrument}->{type}, "\n" );
     }
     $config->lock;
 
