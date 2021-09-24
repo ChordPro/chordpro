@@ -1,5 +1,41 @@
 # Release info
 
+## 5.983
+
+Released: 2021-09-24
+
+
+### ChordPro Syntax
+
+* (docs) Add transpose directive.
+
+### ChordPro functionality
+
+* (Songbook) Allow whitespace between curly and directive in a2crd detection
+* (GUI) Add --maximize command line option.
+* Allow song-specific configs to have includes.
+* Add --no-songconfig to ignore song specific configs.
+* Add --reference to defeat configs and other fun.
+
+### BugFixes
+
+* Fix issue #165.
+* Prevent wrapping loop with long comment with chords.
+* Fix Can't locate object method "reset_parsers" (Songbook).
+* Fix issue #163.
+* Fix colour default with {xxxcolor}.
+* Prevent havoc when pdf.chorus.recall.type has illegal values.
+* Fix issue #178 (non-ascii filenames on Windows).
+* (ChordPro/MSPro) Fix missing meta in substitutions. 
+* Fix incomplete chord warning for {chord x}.c
+* Fix issue #132.
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.
+
+[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.
+
 ## 5.982
 
 Released: 2021-08-31
@@ -13,12 +49,6 @@ Released: 2021-08-31
 ### BugFixes
 
 * Incorporate Data::Properties instead of using the CPAN version, since this version is incompatible.
-
-### Social and support
-
-[User community](https://groups.io/g/ChordPro) for feedback and help.
-
-[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.
 
 ## 5.981
 

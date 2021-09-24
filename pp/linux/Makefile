@@ -8,8 +8,11 @@ ROOT   := ../..
 COMMON := ../common
 SCRIPT := ${ROOT}/script
 DEST   := build
+VERSION := $(shell perl ../../lib/App/Music/ChordPro/Version.pm)
 
 PP := pp -u
+
+default : appimage
 
 # PAR Packer.
 
@@ -81,7 +84,7 @@ appimage : ppl
 	cp AppRun ${DEST}
 	cd ${DEST}; ln lib/App/Music/ChordPro/res/linux/chordpro.desktop .
 	cd ${DEST}; ln lib/App/Music/ChordPro/res/icons/chordpro.png .
-	${APPIMAGETOOL} -n ${DEST} ChordPro.AppImage
+	${APPIMAGETOOL} -n ${DEST} ChordPro-${VERSION}.AppImage
 
 # Truly dynamic version of loader. Rename to {wx}chordpro if you dare.
 

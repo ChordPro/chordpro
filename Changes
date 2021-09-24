@@ -1,9 +1,10 @@
-5.983
+5.983 2021-09-24
 
     - !ChordPro Syntax
-      (docs) Add transpose directive.
+    - (docs) Add transpose directive.
     - !ChordPro functionality
-    - (Songbook) Allow whitespace between curly and directive in a2crd detection.   - (GUI) Add --maximize command line option.
+    - (Songbook) Allow whitespace between curly and directive in a2crd detection
+    - (GUI) Add --maximize command line option.
     - Allow song-specific configs to have includes.
     - Add --no-songconfig to ignore song specific configs.
     - Add --reference to defeat configs and other fun.
