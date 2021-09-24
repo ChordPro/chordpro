@@ -700,16 +700,20 @@ sub app_setup {
     if ( $ENV{XDG_CONFIG_HOME} && -d $ENV{XDG_CONFIG_HOME} ) {
 	$configs{userconfig} =
 	  File::Spec->catfile( $ENV{XDG_CONFIG_HOME}, $app_lc, "$app_lc.json" );
+	$ENV{CHORDPRO_LIB} ||= File::Spec->catfile( $ENV{XDG_CONFIG_HOME}, $app_lc);
     }
     elsif ( $ENV{HOME} && -d $ENV{HOME} ) {
-        if ( -d File::Spec->catfile( $ENV{HOME}, ".config" ) ) {
+	my $dir = File::Spec->catfile( $ENV{HOME}, ".config" );
+        if ( -d $dir ) {
             $configs{userconfig} =
-              File::Spec->catfile( $ENV{HOME}, ".config", $app_lc, "$app_lc.json" );
-	    $ENV{CHORDPRO_LIB} ||= File::Spec->catfile( $ENV{HOME}, ".config", $app_lc);
+              File::Spec->catfile( $dir, $app_lc, "$app_lc.json" );
+	    $ENV{CHORDPRO_LIB} ||= File::Spec->catfile( $dir, $app_lc );
         }
         else {
+	    $dir = File::Spec->catfile( $ENV{HOME}, ".$app_lc" );
             $configs{userconfig} =
-              File::Spec->catfile( $ENV{HOME}, ".$app_lc", "$app_lc.json" );
+              File::Spec->catfile( $dir, "$app_lc.json" );
+	    $ENV{CHORDPRO_LIB} ||= $dir;
         }
     }
 
@@ -1056,6 +1060,7 @@ sub ::runtimeinfo {
     # Determine resource path.
     my @p;
     if ( $ENV{CHORDPRO_LIB} ) {
+	$msg .= sprintf( $fmtv, "CHORDPRO_LIB", $ENV{CHORDPRO_LIB} );
 	if ( $^O =~ /Win/ ) {
 	    @p = split( /;/, $ENV{CHORDPRO_LIB} );
 	}

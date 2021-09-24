@@ -15,6 +15,10 @@ In the examples below the symbol `~` denotes the user's home directory. Windows 
 
 2. A user specific configuration file is read from either:
 
+    `$XDG_CONFIG_HOME/chordpro/chordpro.json`
+	
+	or:
+	
     `~/.config/chordpro/chordpro.json`  
     `~/.chordpro/chordpro.json`  
   Note that if you have a `~/.config` directory ChordPro expects the configs to be there and the latter alternative will be ignored.
