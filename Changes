@@ -1,6 +1,7 @@
 5.984
 
     - !ChordPro functionality
+    - Change config preset lookup algorithm and document it.
     - (docs) First 'hints and tips' contributed by xeruf.
     - !BugFixes
     - Remove obsolete code from Makefile.PL and GNUmakefile.

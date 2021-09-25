@@ -329,7 +329,7 @@ sub prep_configs {
     foreach my $c ( @{ $cfg->{include} } ) {
 	# Check for resource names.
 	if ( $c !~ m;[/.]; ) {
-	    $c = ::rsc_or_file($c);
+	    $c = ::rsc_or_file( $c, "config" );
 	}
 	elsif ( $dir ne ""
 		&& !File::Spec->file_name_is_absolute($c) ) {

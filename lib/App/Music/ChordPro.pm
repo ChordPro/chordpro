@@ -924,7 +924,7 @@ sub app_setup {
                 foreach my $c ( @$_ ) {
 		    # Check for resource names.
 		    if ( ! -r $c && $c !~ m;[/.]; ) {
-			$c = ::rsc_or_file($c);
+			$c = ::rsc_or_file( $c, "config" );
 		    }
                     die("$c: $!\n") unless -r $c;
                 }
@@ -1061,12 +1061,7 @@ sub ::runtimeinfo {
     my @p;
     if ( $ENV{CHORDPRO_LIB} ) {
 	$msg .= sprintf( $fmtv, "CHORDPRO_LIB", $ENV{CHORDPRO_LIB} );
-	if ( $^O =~ /Win/ ) {
-	    @p = split( /;/, $ENV{CHORDPRO_LIB} );
-	}
-	else {
-	    @p = split( /;/, $ENV{CHORDPRO_LIB} );
-	}
+	@p = splitpath($ENV{CHORDPRO_LIB});
     }
     push( @p, realpath( App::Packager::GetResourcePath() ) );
     my $tag = "Resource path";
@@ -1097,6 +1092,15 @@ sub ::runtimeinfo {
     eval { require Font::TTF;
 	$msg .= sprintf( $fmtv, "Font::TTF", $dd->($Font::TTF::VERSION) );
     };
+}
+
+sub splitpath {
+    my ( $path ) = @_;
+    return () unless $path;
+    if ( $^O =~ /Win/ ) {
+	return split( /;/, $path );
+    }
+    return split( /;/, $path );
 }
 
 sub app_usage {
@@ -1182,31 +1186,30 @@ EndOfUsage
 use Encode qw(decode decode_utf8 encode_utf8);
 
 sub ::rsc_or_file {
-    my ( $c ) = @_;
+    my ( $c, $config ) = @_;
     my $f = $c;
+    $config .= "/" if $config;
 
     # Check for resource names.
     if ( $f !~ m;[/.]; ) {
 	if ( $c =~ /^(.+):(.*)/ ) {
-	    $f = lc($1) . "/" . lc($2) . ".json";
+	    $f = $config . lc($1) . "/" . lc($2) . ".json";
 	}
 	else {
-	    $f = lc($c) . ".json";
+	    $f = $config . lc($c) . ".json";
 	}
     }
-    my @libs = split( /[:;]/, $ENV{CHORDPRO_LIB} || "." );
-    foreach my $lib ( @libs ) {
-	$lib = expand_tilde($lib);
-	warn("RSC1: $lib/$f\n") if $options->{debug};
-	return $lib . "/" . $f if -r $lib . "/" . $f;
-	next if $f =~ /\//;
-	warn("RSC2: $lib/config/$f\n") if $options->{debug};
-	return $lib . "/config/" . $f if -r $lib . "/config/" . $f;
+    if ( $ENV{CHORDPRO_LIB} ) {
+	my @libs = splitpath($ENV{CHORDPRO_LIB});
+	foreach my $lib ( @libs ) {
+	    $lib = expand_tilde($lib);
+	    warn("RSC1: $lib/$f\n") if $options->{debug};
+	    return $lib . "/" . $f if -r $lib . "/" . $f;
+	}
     }
 
     warn("RSC3: $f\n") if $options->{debug};
     my $t = getresource($f);
-    $t = getresource( "config/$f" ) unless defined($t) || $f =~ /\//;
     return defined($t) ? $t : $c;
 }
 
