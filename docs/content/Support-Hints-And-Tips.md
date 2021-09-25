@@ -12,23 +12,23 @@ You need two modifications to achieve this.
 
 First off, set some config keys:
 
-```ini
+````
 pdf.chorus.indent=0
 pdf.chorus.bar.width=0
 pdf.chorus.recall.quote=1
 pdf.chorus.recall.choruslike=1
-```
+````
 
-Secondly, wrap the chorus in `textfont` tags:
+Secondly, wrap the chorus in `textfont` directives:
 
-```cho
+````
 {soc}
 {textfont Times-Bold}
 [E]Dreaming, [A]Dreaming, [B]Just go on
 [E]Dreaming, [A]Dreaming, [B]Just go on
 {textfont}
 {eoc}
-```
+````
 
 This might become easier in the future,
 see https://github.com/ChordPro/chordpro/issues/174.
@@ -38,7 +38,7 @@ see https://github.com/ChordPro/chordpro/issues/174.
 You can use the following preprocessor directive
 to suffix chords with an instrument name
 and thus generate versions of different difficulty or specificity.
-```json
+````
 {
   // Settings for the parser/preprocessor.
   // Replaces all instrument-specific chords with conditional directives
@@ -52,13 +52,13 @@ and thus generate versions of different difficulty or specificity.
     },
   },
 }
-```
+````
 
 An example of how to use it:
-```cho
+````
 {comment This is the %{instrument} variant}
 {begin_of_verse}
 [A]He[A7-piano]llo, [Bm]World![C-keyboard]
 [A]Swe[A7-piano]et [Bm]Home![C-keyboard]
 {end_of_verse}
-```
+````

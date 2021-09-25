@@ -1,3 +1,10 @@
+5.984
+
+    - !ChordPro functionality
+    - (docs) First 'hints and tips' contributed by xeruf.
+    - !BugFixes
+    - Fix issue #175.
+
 5.983 2021-09-24
 
     - !ChordPro Syntax
@@ -9,16 +16,16 @@
     - Add --no-songconfig to ignore song specific configs.
     - Add --reference to defeat configs and other fun.
     - !BugFixes
-    - Fix issue #165.
     - Prevent wrapping loop with long comment with chords.
     - Fix Can't locate object method "reset_parsers" (Songbook).
-    - Fix issue #163.
     - Fix colour default with {xxxcolor}.
     - Prevent havoc when pdf.chorus.recall.type has illegal values.
-    - Fix issue #178 (non-ascii filenames on Windows).
     - (ChordPro/MSPro) Fix missing meta in substitutions. 
-    - Fix incomplete chord warning for {chord x}.c
+    - Fix incomplete chord warning for {chord x}.
     - Fix issue #132.
+    - Fix issue #163.
+    - Fix issue #165.
+    - Fix issue #178 (non-ascii filenames on Windows).
 
 5.982 2021-08-31
 
