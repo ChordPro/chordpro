@@ -3,6 +3,7 @@
     - !ChordPro functionality
     - (docs) First 'hints and tips' contributed by xeruf.
     - !BugFixes
+    - Remove obsolete code from Makefile.PL and GNUmakefile.
     - Fix issue #175.
 
 5.983 2021-09-24

@@ -89,12 +89,3 @@ checkjson :
 	${JSONVALIDATOR} ${JSONOPTS} \
 	  ${CFGLIB}/config.schema .json/*.json
 	rm -fr .json
-
-xxcheckjson :
-	for i in ${CFGLIB}/*.json ; \
-	do \
-	  echo "Verifying $$i..."; \
-	  json_pp -json_opt relaxed < $$i | \
-	  jsonschema -i /dev/stdin ${CFGLIB}/config.schema; \
-	done
-
