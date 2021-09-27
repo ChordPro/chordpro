@@ -227,7 +227,7 @@ sub chordpro {
 	}
     }
 
-    warn(::dump($s), "\n") if $options->{debug};
+    warn(::dump($s), "\n") if $config->{debug}->{song};
 
     # Try interpolations.
     if ( $of ) {
@@ -923,7 +923,7 @@ sub app_setup {
             if ( defined($_) ) {
                 foreach my $c ( @$_ ) {
 		    # Check for resource names.
-		    if ( ! -r $c && $c !~ m;[/.]; ) {
+		    if ( $c !~ m;[/.]; ) {
 			$c = ::rsc_or_file( $c, "config" );
 		    }
                     die("$c: $!\n") unless -r $c;
@@ -934,7 +934,7 @@ sub app_setup {
 	    next if $clo->{nodefaultconfigs};
 	    next unless $configs{$config};
             $_ = [ $configs{$config} ];
-            undef($_) unless -r $_->[0];
+            undef($_) unless -r -f $_->[0];
         }
     }
     # If no config was specified, and no default is available, force no.
@@ -1186,17 +1186,17 @@ EndOfUsage
 use Encode qw(decode decode_utf8 encode_utf8);
 
 sub ::rsc_or_file {
-    my ( $c, $config ) = @_;
+    my ( $c, $cfg ) = @_;
     my $f = $c;
-    $config .= "/" if $config;
+    $cfg .= "/" if $cfg;
 
     # Check for resource names.
     if ( $f !~ m;[/.]; ) {
 	if ( $c =~ /^(.+):(.*)/ ) {
-	    $f = $config . lc($1) . "/" . lc($2) . ".json";
+	    $f = $cfg . lc($1) . "/" . lc($2) . ".json";
 	}
 	else {
-	    $f = $config . lc($c) . ".json";
+	    $f = $cfg . lc($c) . ".json";
 	}
     }
     if ( $ENV{CHORDPRO_LIB} ) {

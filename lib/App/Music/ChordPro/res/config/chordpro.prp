@@ -538,12 +538,18 @@ delegates {
     }
 }
 
-# For (debugging (internal use only)).
+# For debugging (internal use only).
 debug {
-    spacing = false
-    song    = false
-    abc     = false
-    ly      = false
+    abc		= false
+    config	= false
+    fonts	= false
+    images	= false
+    layout	= false
+    ly		= false
+    meta	= false
+    mma		= false
+    song	= false
+    spacing	= false
 }
 
 # End of config.
