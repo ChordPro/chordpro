@@ -27,7 +27,7 @@ dist : Makefile resources
 install : Makefile
 	$(MAKE) -f Makefile install
 
-Makefile : Makefile.PL lib/App/Music/ChordPro/Version.pm
+Makefile : Makefile.PL lib/App/Music/ChordPro/Version.pm resources
 	perl Makefile.PL
 
 ################ Extensions ################
