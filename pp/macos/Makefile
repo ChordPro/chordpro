@@ -105,7 +105,7 @@ app1 :
 
 dmg : app dmg1
 
-DMG := Chordpro-Installer-${VERSION}.dmg
+DMG := ChordPro-Installer-${VERSION}.dmg
 
 dmg1 :
 	rm -f ${DMG}
