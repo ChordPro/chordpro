@@ -227,7 +227,7 @@ sub chordpro {
 	}
     }
 
-    warn(::dump($s), "\n") if $options->{debug};
+    warn(::dump($s), "\n") if $config->{debug}->{song};
 
     # Try interpolations.
     if ( $of ) {
@@ -700,16 +700,20 @@ sub app_setup {
     if ( $ENV{XDG_CONFIG_HOME} && -d $ENV{XDG_CONFIG_HOME} ) {
 	$configs{userconfig} =
 	  File::Spec->catfile( $ENV{XDG_CONFIG_HOME}, $app_lc, "$app_lc.json" );
+	$ENV{CHORDPRO_LIB} ||= File::Spec->catfile( $ENV{XDG_CONFIG_HOME}, $app_lc);
     }
     elsif ( $ENV{HOME} && -d $ENV{HOME} ) {
-        if ( -d File::Spec->catfile( $ENV{HOME}, ".config" ) ) {
+	my $dir = File::Spec->catfile( $ENV{HOME}, ".config" );
+        if ( -d $dir ) {
             $configs{userconfig} =
-              File::Spec->catfile( $ENV{HOME}, ".config", $app_lc, "$app_lc.json" );
-	    $ENV{CHORDPRO_LIB} ||= File::Spec->catfile( $ENV{HOME}, ".config", $app_lc);
+              File::Spec->catfile( $dir, $app_lc, "$app_lc.json" );
+	    $ENV{CHORDPRO_LIB} ||= File::Spec->catfile( $dir, $app_lc );
         }
         else {
+	    $dir = File::Spec->catfile( $ENV{HOME}, ".$app_lc" );
             $configs{userconfig} =
-              File::Spec->catfile( $ENV{HOME}, ".$app_lc", "$app_lc.json" );
+              File::Spec->catfile( $dir, "$app_lc.json" );
+	    $ENV{CHORDPRO_LIB} ||= $dir;
         }
     }
 
@@ -919,8 +923,8 @@ sub app_setup {
             if ( defined($_) ) {
                 foreach my $c ( @$_ ) {
 		    # Check for resource names.
-		    if ( ! -r $c && $c !~ m;[/.]; ) {
-			$c = ::rsc_or_file($c);
+		    if ( $c !~ m;[/.]; ) {
+			$c = ::rsc_or_file( $c, "config" );
 		    }
                     die("$c: $!\n") unless -r $c;
                 }
@@ -930,7 +934,7 @@ sub app_setup {
 	    next if $clo->{nodefaultconfigs};
 	    next unless $configs{$config};
             $_ = [ $configs{$config} ];
-            undef($_) unless -r $_->[0];
+            undef($_) unless -r -f $_->[0];
         }
     }
     # If no config was specified, and no default is available, force no.
@@ -1056,12 +1060,8 @@ sub ::runtimeinfo {
     # Determine resource path.
     my @p;
     if ( $ENV{CHORDPRO_LIB} ) {
-	if ( $^O =~ /Win/ ) {
-	    @p = split( /;/, $ENV{CHORDPRO_LIB} );
-	}
-	else {
-	    @p = split( /;/, $ENV{CHORDPRO_LIB} );
-	}
+	$msg .= sprintf( $fmtv, "CHORDPRO_LIB", $ENV{CHORDPRO_LIB} );
+	@p = splitpath($ENV{CHORDPRO_LIB});
     }
     push( @p, realpath( App::Packager::GetResourcePath() ) );
     my $tag = "Resource path";
@@ -1092,6 +1092,15 @@ sub ::runtimeinfo {
     eval { require Font::TTF;
 	$msg .= sprintf( $fmtv, "Font::TTF", $dd->($Font::TTF::VERSION) );
     };
+}
+
+sub splitpath {
+    my ( $path ) = @_;
+    return () unless $path;
+    if ( $^O =~ /Win/ ) {
+	return split( /;/, $path );
+    }
+    return split( /;/, $path );
 }
 
 sub app_usage {
@@ -1177,31 +1186,30 @@ EndOfUsage
 use Encode qw(decode decode_utf8 encode_utf8);
 
 sub ::rsc_or_file {
-    my ( $c ) = @_;
+    my ( $c, $cfg ) = @_;
     my $f = $c;
+    $cfg .= "/" if $cfg;
 
     # Check for resource names.
     if ( $f !~ m;[/.]; ) {
 	if ( $c =~ /^(.+):(.*)/ ) {
-	    $f = lc($1) . "/" . lc($2) . ".json";
+	    $f = $cfg . lc($1) . "/" . lc($2) . ".json";
 	}
 	else {
-	    $f = lc($c) . ".json";
+	    $f = $cfg . lc($c) . ".json";
 	}
     }
-    my @libs = split( /[:;]/, $ENV{CHORDPRO_LIB} || "." );
-    foreach my $lib ( @libs ) {
-	$lib = expand_tilde($lib);
-	warn("RSC1: $lib/$f\n") if $options->{debug};
-	return $lib . "/" . $f if -r $lib . "/" . $f;
-	next if $f =~ /\//;
-	warn("RSC2: $lib/config/$f\n") if $options->{debug};
-	return $lib . "/config/" . $f if -r $lib . "/config/" . $f;
+    if ( $ENV{CHORDPRO_LIB} ) {
+	my @libs = splitpath($ENV{CHORDPRO_LIB});
+	foreach my $lib ( @libs ) {
+	    $lib = expand_tilde($lib);
+	    warn("RSC1: $lib/$f\n") if $options->{debug};
+	    return $lib . "/" . $f if -r $lib . "/" . $f;
+	}
     }
 
     warn("RSC3: $f\n") if $options->{debug};
     my $t = getresource($f);
-    $t = getresource( "config/$f" ) unless defined($t) || $f =~ /\//;
     return defined($t) ? $t : $c;
 }
 

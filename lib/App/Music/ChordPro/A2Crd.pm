@@ -951,7 +951,7 @@ sub app_setup {
                 foreach my $c ( @$_ ) {
 		    # Check for resource names.
 		    if ( ! -r $c && $c !~ m;[/.]; ) {
-			$c = ::rsc_or_file($c);
+			$c = ::rsc_or_file( $c, "config" );
 		    }
                     die("$c: $!\n") unless -r $c;
                 }

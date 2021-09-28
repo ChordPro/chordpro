@@ -1333,30 +1333,7 @@
 
 	"debug": {
 	    "description": "Miscellaneous debug settings.",
-	    "additionalProperties": false,
-	    "properties": {
-
-		"abc": {
-		    "description": "Debug setting for ABC.",
-		    "type": "integer",
-		    "default": 0
-		},
-		"ly": {
-		    "description": "Debug setting for LilyPond.",
-		    "type": "integer",
-		    "default": 0
-		},
-		"song": {
-		    "description": "Debug setting for songs.",
-		    "type": "integer",
-		    "default": 0
-		},
-		"spacing": {
-		    "description": "Debug setting for output spacing.",
-		    "type": "integer",
-		    "default": 0
-		}
-	    }
+	    "additionalProperties": true
 	}
     }
 }

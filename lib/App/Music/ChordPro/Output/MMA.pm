@@ -378,7 +378,7 @@ sub is_bar {
 sub reduce {
     my ( $a, $bpm, $line, $s ) = @_;
     my @a = @$a;
-    warn("R: ", join(' ',@a), "\n") if $options->{debug};
+    warn("R: ", join(' ',@a), "\n") if $config->{debug}->{mma};
     my @reduced;
     my $bar = 0;
     my $carry;

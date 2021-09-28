@@ -27,7 +27,7 @@ dist : Makefile resources
 install : Makefile
 	$(MAKE) -f Makefile install
 
-Makefile : Makefile.PL lib/App/Music/ChordPro/Version.pm
+Makefile : Makefile.PL lib/App/Music/ChordPro/Version.pm resources
 	perl Makefile.PL
 
 ################ Extensions ################
@@ -89,12 +89,3 @@ checkjson :
 	${JSONVALIDATOR} ${JSONOPTS} \
 	  ${CFGLIB}/config.schema .json/*.json
 	rm -fr .json
-
-xxcheckjson :
-	for i in ${CFGLIB}/*.json ; \
-	do \
-	  echo "Verifying $$i..."; \
-	  json_pp -json_opt relaxed < $$i | \
-	  jsonschema -i /dev/stdin ${CFGLIB}/config.schema; \
-	done
-

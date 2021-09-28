@@ -598,6 +598,12 @@
 
     // For (debugging (internal use only)).
     "debug" : {
+        "config" : 0,
+        "fonts" : 0,
+        "images" : 0,
+        "layout" : 0,
+        "meta" : 0,
+        "mma" : 0,
         "spacing" : 0,
         "song" : 0,
   	"abc" : 0,
