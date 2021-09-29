@@ -1827,7 +1827,7 @@ sub imageline {
     }
 
     warn("get_image ", $elt->{uri}, "\n") if $config->{debug}->{images};
-    my $img = eval { $pr->get_image($elt) };
+    my $img = eval { $pr->get_image( $elt->{uri} ) };
     unless ( $img ) {
 	warn($@);
 	return "Unhandled image type: " . $elt->{uri};
@@ -2425,9 +2425,7 @@ sub abc2image {
     else {
 	$pw = $ps->{__rightmargin} - $ps->{_leftmargin};
     }
-    if ( $elt->{width} ) {
-	$pw = $elt->{width} if $elt->{width} < $pw;
-    }
+
     state $abcm2ps = findexe("abcm2ps");
     unless ( $abcm2ps ) {
 	warn("Error in ABC embedding: missing 'abcm2ps' tool.\n");

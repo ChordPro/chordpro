@@ -364,31 +364,6 @@ sub parse_song {
 
 		next;
 	    }
-
-	    if ( /^##asset:\s+id=(\S+)\s+type=(\S+)/ ) {
-		my $id = $1;
-		my $type = $2;
-
-		# Read the data.
-		my @data;
-		while ( @$lines && $lines->[0] =~ /^# (.+)/ ) {
-		    push( @data, $1 );
-		    shift(@$lines);
-		}
-
-		# Store in assets.
-		$song->{assets} //= {};
-		$song->{assets}->{$id} =
-		  { data => \@data, type => $type,
-		    subtype => $config->{delegates}->{abc}->{type},
-		    handler => $config->{delegates}->{abc}->{handler},
-		  };
-		if ( $config->{debug}->{images} ) {
-		    warn("asset[$id] ", ::dump($song->{assets}->{$id}));
-		}
-		next;
-	    }
-
 	    # Collect pre-title stuff separately.
 	    if ( exists $song->{title} || $fragment ) {
 		$self->add( type => "ignore", text => $_ );

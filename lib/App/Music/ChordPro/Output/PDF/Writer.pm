@@ -314,25 +314,21 @@ sub cross {
 }
 
 sub get_image {
-    my ( $self, $elt ) = @_;
+    my ( $self, $uri ) = @_;
 
     my $img;
-    my $uri = $elt->{uri};
     if ( $uri =~ /^id=(.+)/ ) {
 	my $a = $App::Music::ChordPro::Output::PDF::assets->{$1};
-
-	if ( $a->{type} eq "abc" ) {
-	    my $res = App::Music::ChordPro::Output::PDF::abc2image( undef, $self, $a );
-	    return $self->get_image( { %$elt, uri => $res->{src} } );
-	}
-	elsif ( $a->{type} eq "jpg" ) {
-	    $img = $self->{pdf}->image_jpeg(IO::String->new($a->{data}));
+	my $d = $a->{data};
+	my $fh = IO::String->new($d);
+	if ( $a->{type} eq "jpg" ) {
+	    $img = $self->{pdf}->image_jpeg($fh);
 	}
 	elsif ( $a->{type} eq "png" ) {
-	    $img = $self->{pdf}->image_png(IO::String->new($a->{data}));
+	    $img = $self->{pdf}->image_png($fh);
 	}
 	elsif ( $a->{type} eq "gif" ) {
-	    $img = $self->{pdf}->image_gif(IO::String->new($a->{data}));
+	    $img = $self->{pdf}->image_gif($fh);
 	}
 	return $img;
     }
