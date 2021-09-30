@@ -1039,7 +1039,8 @@ sub generate_song {
 				  type => $t->{type} // "comment",
 				  font => $ps->{fonts}->{label},
 				  text => $ps->{chorus}->{recall}->{tag},
-				 } );
+				} )
+		  if $ps->{chorus}->{recall}->{tag} ne "";
 		unshift( @elts, { %$elt,
 				  type => "set",
 				  name => "label",
@@ -1827,7 +1828,7 @@ sub imageline {
     }
 
     warn("get_image ", $elt->{uri}, "\n") if $config->{debug}->{images};
-    my $img = eval { $pr->get_image( $elt->{uri} ) };
+    my $img = eval { $pr->get_image($elt) };
     unless ( $img ) {
 	warn($@);
 	return "Unhandled image type: " . $elt->{uri};
@@ -2425,7 +2426,9 @@ sub abc2image {
     else {
 	$pw = $ps->{__rightmargin} - $ps->{_leftmargin};
     }
-
+    if ( $elt->{width} ) {
+	$pw = $elt->{width} if $elt->{width} < $pw;
+    }
     state $abcm2ps = findexe("abcm2ps");
     unless ( $abcm2ps ) {
 	warn("Error in ABC embedding: missing 'abcm2ps' tool.\n");

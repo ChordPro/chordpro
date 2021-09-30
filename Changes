@@ -3,6 +3,7 @@
     - !ChordPro functionality
     - Change config preset lookup algorithm and document it.
     - (docs) First 'hints and tips' contributed by xeruf.
+    - (PDF) Suppress empty chorus recall tag.
     - !BugFixes
     - Remove obsolete code from Makefile.PL and GNUmakefile.
     - Fix issue #175.
