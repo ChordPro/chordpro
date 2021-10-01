@@ -283,6 +283,7 @@ and associating output elements to font families. The latter part is
         // No Liberation equivalent, use corefont.
         ""            : "ZapfDingbats",
     },
+},
 
 // "fonts" associates output elements to font families as defined in
 // "fontconfig" above.
