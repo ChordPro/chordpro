@@ -78,7 +78,11 @@ sub init {
     }
     else {
 	my $cb;
-	if ( -d "$ENV{HOME}/.config" ) {
+	if ( $ENV{XDG_CONFIG_HOME} && -d $ENV{XDG_CONFIG_HOME} ) {
+	    $cb =
+	      $ENV{XDG_CONFIG_HOME} . "/wxchordpro/wxchordpro";
+	}
+	elsif ( -d "$ENV{HOME}/.config" ) {
 	    $cb = "$ENV{HOME}/.config/wxchordpro/wxchordpro";
 	    mkdir("$ENV{HOME}/.config/wxchordpro");
 	}
