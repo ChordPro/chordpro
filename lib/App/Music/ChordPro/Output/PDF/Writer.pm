@@ -30,7 +30,10 @@ sub new {
     $self->{pdf}->mediabox( $ps->{papersize}->[0],
 			    $ps->{papersize}->[1] );
     $self->{layout} = Text::Layout->new( $self->{pdf} );
-    %fontcache = () if $::__EMBEDDED__;
+    $self->{tmplayout} = undef;
+
+    %fontcache = ();
+
     $self;
 }
 
@@ -189,28 +192,26 @@ sub setfont {
     $self->{pdftext}->font( $font->{fd}->{font}, $size );
 }
 
-my $tmplayout;
-
 sub strwidth {
     my ( $self, $text, $font, $size ) = @_;
     $font ||= $self->{font};
     $size ||= $self->{fontsize} || $font->{size};
-    $tmplayout //= Text::Layout->new( $self->{pdf} );
-    $tmplayout->set_font_description($font->{fd});
-    $tmplayout->set_font_size($size);
-    $tmplayout->set_markup($text);
-    $tmplayout->get_pixel_size->{width};
+    $self->{tmplayout} //= Text::Layout->new( $self->{pdf} );
+    $self->{tmplayout}->set_font_description($font->{fd});
+    $self->{tmplayout}->set_font_size($size);
+    $self->{tmplayout}->set_markup($text);
+    $self->{tmplayout}->get_pixel_size->{width};
 }
 
 sub strheight {
     my ( $self, $text, $font, $size ) = @_;
     $font ||= $self->{font};
     $size ||= $self->{fontsize} || $font->{size};
-    $tmplayout //= Text::Layout->new( $self->{pdf} );
-    $tmplayout->set_font_description($font->{fd});
-    $tmplayout->set_font_size($size);
-    $tmplayout->set_markup($text);
-    $tmplayout->get_pixel_size->{height};
+    $self->{tmplayout} //= Text::Layout->new( $self->{pdf} );
+    $self->{tmplayout}->set_font_description($font->{fd});
+    $self->{tmplayout}->set_font_size($size);
+    $self->{tmplayout}->set_markup($text);
+    $self->{tmplayout}->get_pixel_size->{height};
 }
 
 sub line {

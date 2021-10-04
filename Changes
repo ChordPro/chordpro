@@ -1,3 +1,10 @@
+5.986
+
+    - !ChordPro functionality
+    - !BugFixes
+    - Remove obsolete __EMBEDDING__.
+    - Fix issue #182.
+
 5.985 2021-09-28
 
     - !ChordPro functionality

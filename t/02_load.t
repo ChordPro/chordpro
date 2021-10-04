@@ -12,8 +12,6 @@ if ( -d "t" ) {
 
 use lib "../script";
 
-$::__EMBEDDED__ = 1;
-
 my $test;
 
 ++$test; use_ok("App::Music::ChordPro");

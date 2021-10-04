@@ -303,7 +303,6 @@ sub preview {
     #### ChordPro
 
     @ARGV = ();			# just to make sure
-    $::__EMBEDDED__ = 1;
 
     $msgs = $fatal = $died = 0;
     $SIG{__WARN__} = \&_warn;
