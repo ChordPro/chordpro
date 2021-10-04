@@ -258,7 +258,7 @@ sub configurator {
     }
 
     # For convenience...
-    bless( $cfg, __PACKAGE__ );;
+    bless( $cfg, __PACKAGE__ );
 
     return $cfg if $options->{'cfg-print'};
 
