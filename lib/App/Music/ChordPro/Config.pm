@@ -1097,6 +1097,7 @@ sub default_config() {
             "type" : "image",
             "module" : "ABC",
             "handler" : "abc2image",
+            "split" : 0,
         },
         "ly" : {
             "type" : "image",

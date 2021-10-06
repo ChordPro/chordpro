@@ -12,6 +12,8 @@ use warnings;
 use utf8;
 use File::Spec;
 use File::Temp ();
+use File::LoadLines;
+use IO::String;
 
 use App::Music::ChordPro::Utils;
 
@@ -58,7 +60,6 @@ sub abc2image {
     }
     my $kv = { %$elt };
     $kv = parse_kv( @pre );
-    ::dump($kv) if $kv;
     # Copy. We assume the user knows how to write ABC.
     for ( @data ) {
 	print $fd $_, "\n";
@@ -103,38 +104,132 @@ sub abc2image {
 	warn("Error in ABC embedding\n");
 	return;
     }
-
-    my @cmd;
-    if ( is_msw() ) {
-	state $magick = findexe("magick");
-	unless ( $magick ) {
-	    warn("Error in ABC embedding: missing 'imagemagick/convert' tool.\n");
-	    return;
-	}
-	@cmd = ( $magick, "convert" );
-    }
-    else {
-	state $convert = findexe("convert");
-	unless ( $convert ) {
-	    warn("Error in ABC embedding: missing 'imagemagick/convert' tool.\n");
-	    return;
-	}
-	@cmd = ( $convert );
-    }
-
-    if ( sys( @cmd, qw(-density 600 -background white -trim),
-	      $svg1, $img ) ) {
-	warn("Error in ABC embedding\n");
-	return;
-    }
     $kv->{scale} ||= 1;
 
-    return [
-	    { type => "image",
-	      uri  => $img,
-	      opts => { center => 0, scale => $kv->{scale} * 0.16 } },
-	   ];
+    my @res;
 
+    if ( defined($kv->{split}) ? $kv->{split} : $config->{delegates}->{abc}->{split} ) {
+	require Image::Magick;
+	my @lines = loadlines($svg1);
+
+	my $segment = 0;
+	my $init = 1;
+
+	my @preamble;
+
+	my $fd;
+	my $fn;
+
+	my $pp = sub {
+	    print $fd "</svg>\n";
+	    close($fd);
+
+	    my $image = Image::Magick->new( density => 600, background => 'white' );
+	    my $x = $image->Read($fn);
+	    warn $x if $x;
+	    $x = $image->Trim;
+	    warn $x if $x;
+	    $fn =~ s/\.svg$/.jpg/;
+	    $image->Set( magick => 'jpg' );
+	    my $data = $image->ImageToBlob;
+	    my $assetid = sprintf("ABCasset%03d", $imgcnt++);
+	    warn("Created asset $assetid (jpg, ", length($data), " bytes)\n")
+	      if $config->{debug}->{images};
+	    $App::Music::ChordPro::Output::PDF::assets->{$assetid} =
+	      { type => "jpg", data => $data };
+
+	    push( @res,{ type => "image",
+			 uri  => "id=$assetid",
+			 opts => { center => 0, scale => $kv->{scale} * 0.16 } },
+		);
+	};
+
+	while ( @lines ) {
+	    $_ = shift(@lines);
+	    if ( /^<(style|defs)\b/ ) {
+		$init = 0;
+		push( @preamble, $_ );
+		print $fd "$_\n" if $segment;
+		while ( @lines ) {
+		    push( @preamble, $lines[0] );
+		    print $fd "$lines[0]\n" if $segment;
+		    last if shift @lines eq "</$1>";
+		}
+		next;
+	    }
+	    if ( $init ) {
+		push( @preamble, $_ );
+		print $fd "$_\n" if $segment;
+		next;
+	    }
+	    if ( /<g stroke-width=".*?" style="font:.*">/
+		 && @lines > 8
+		 && $lines[0] =~ /<path class="stroke" stroke-width="/
+		 && $lines[2] =~ /<path class="stroke" stroke-width="/
+		 && $lines[4] =~ /<path class="stroke" stroke-width="/
+		 && $lines[6] =~ /<path class="stroke" stroke-width="/
+		 && $lines[8] =~ /<path class="stroke" stroke-width="/
+		 or !$segment
+	       ) {
+
+		$pp->() if $fd;
+		$fn = sprintf( "out%03d.svg", ++$segment );
+		warn("Writing: $fn ...\n") if $config->{debug}->{images};
+		undef $fd;
+		open( $fd, '>:utf8', $fn );
+		print $fd ( "$_\n" ) for @preamble;
+	    }
+
+	    last if /<\/svg>/;
+	    print $fd ("$_\n") if $fd;
+	}
+
+	$pp->() if $fd;
+    }
+    else {
+	my @cmd;
+	if ( is_msw() ) {
+	    state $magick = findexe("magick");
+	    unless ( $magick ) {
+		warn("Error in ABC embedding: missing 'imagemagick/convert' tool.\n");
+		return;
+	    }
+	    @cmd = ( $magick, "convert" );
+	}
+	else {
+	    state $convert = findexe("convert");
+	    unless ( $convert ) {
+		warn("Error in ABC embedding: missing 'imagemagick/convert' tool.\n");
+		return;
+	    }
+	    @cmd = ( $convert );
+	}
+
+	if ( sys( @cmd, qw(-density 600 -background white -trim),
+		  $svg1, $img ) ) {
+	    warn("Error in ABC embedding\n");
+	    return;
+	}
+
+	warn("Reading $img...\n") if $config->{debug}->{images};
+	open( my $im, '<:raw', $img );
+	my $data = do { local $/; <$im> };
+	close($im);
+
+	my $assetid = sprintf("ABCasset%03d", $imgcnt);
+	warn("Created asset $assetid (jpg, ", length($data), " bytes)\n")
+	  if $config->{debug}->{images};
+	$App::Music::ChordPro::Output::PDF::assets->{$assetid} =
+	  { type => "jpg", data => $data };
+
+	push( @res,{ type => "image",
+		     uri  => "id=$assetid",
+		     opts => { center => 0, scale => $kv->{scale} * 0.16 } },
+	    );
+    }
+
+
+    return \@res;
 }
 
 1;
