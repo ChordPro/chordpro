@@ -138,9 +138,11 @@ sub abc2image {
 	    $App::Music::ChordPro::Output::PDF::assets->{$assetid} =
 	      { type => "jpg", data => $data };
 
-	    push( @res,{ type => "image",
-			 uri  => "id=$assetid",
-			 opts => { center => 0, scale => $kv->{scale} * 0.16 } },
+	    push( @res,
+		  { type => "image",
+		    uri  => "id=$assetid",
+		    opts => { center => 0, scale => $kv->{scale} * 0.16 } },
+		  { type => "empty" },
 		);
 	};
 
@@ -167,8 +169,8 @@ sub abc2image {
 		 && $lines[0] =~ /<path class="stroke" stroke-width="/
 		 && $lines[2] =~ /<path class="stroke" stroke-width="/
 		 && $lines[4] =~ /<path class="stroke" stroke-width="/
-		 && $lines[6] =~ /<path class="stroke" stroke-width="/
-		 && $lines[8] =~ /<path class="stroke" stroke-width="/
+#		 && $lines[6] =~ /<path class="stroke" stroke-width="/
+#		 && $lines[8] =~ /<path class="stroke" stroke-width="/
 		 or !$segment
 	       ) {
 
@@ -185,6 +187,7 @@ sub abc2image {
 	}
 
 	$pp->() if $fd;
+	pop(@res);
     }
     else {
 	my @cmd;
