@@ -1,5 +1,9 @@
 #! perl
 
+package main;
+
+our $config;
+
 package App::Music::ChordPro::Output::PDF::Writer;
 
 use strict;
@@ -315,21 +319,26 @@ sub cross {
 }
 
 sub get_image {
-    my ( $self, $uri ) = @_;
+    my ( $self, $elt ) = @_;
 
     my $img;
+    my $uri = $elt->{uri};
+    warn("get_image($uri)\n") if $config->{debug}->{images};
     if ( $uri =~ /^id=(.+)/ ) {
 	my $a = $App::Music::ChordPro::Output::PDF::assets->{$1};
-	my $d = $a->{data};
-	my $fh = IO::String->new($d);
-	if ( $a->{type} eq "jpg" ) {
-	    $img = $self->{pdf}->image_jpeg($fh);
+
+	if ( $a->{type} eq "abc" ) {
+	    my $res = App::Music::ChordPro::Output::PDF::abc2image( undef, $self, $a );
+	    return $self->get_image( { %$elt, uri => $res->{src} } );
+	}
+	elsif ( $a->{type} eq "jpg" ) {
+	    $img = $self->{pdf}->image_jpeg(IO::String->new($a->{data}));
 	}
 	elsif ( $a->{type} eq "png" ) {
-	    $img = $self->{pdf}->image_png($fh);
+	    $img = $self->{pdf}->image_png(IO::String->new($a->{data}));
 	}
 	elsif ( $a->{type} eq "gif" ) {
-	    $img = $self->{pdf}->image_gif($fh);
+	    $img = $self->{pdf}->image_gif(IO::String->new($a->{data}));
 	}
 	return $img;
     }

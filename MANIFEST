@@ -11,6 +11,8 @@ lib/App/Music/ChordPro/Chords.pm
 lib/App/Music/ChordPro/Chords/Parser.pm
 lib/App/Music/ChordPro/Config.pm
 lib/App/Music/ChordPro/Config/Properties.pm
+lib/App/Music/ChordPro/Delegate/ABC.pm
+lib/App/Music/ChordPro/Delegate/Lilypond.pm
 lib/App/Music/ChordPro/Output/ChordPro.pm
 lib/App/Music/ChordPro/Output/Common.pm
 lib/App/Music/ChordPro/Output/Debug.pm

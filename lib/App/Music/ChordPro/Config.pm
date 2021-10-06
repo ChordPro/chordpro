@@ -1095,10 +1095,12 @@ sub default_config() {
     "delegates" : {
         "abc" : {
             "type" : "image",
+            "module" : "ABC",
             "handler" : "abc2image",
         },
         "ly" : {
             "type" : "image",
+            "module" : "Lilypond",
             "handler" : "ly2image",
         },
      },
