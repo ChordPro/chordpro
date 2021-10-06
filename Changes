@@ -3,6 +3,7 @@
     - !ChordPro functionality
     - !BugFixes
     - Remove obsolete __EMBEDDING__.
+    - Bump requirement Text::Layout to 0.022.
     - Fix issue #182.
 
 5.985 2021-09-28
