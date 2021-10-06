@@ -1,5 +1,9 @@
 #! perl
 
+package main;
+
+our $config;
+
 package App::Music::ChordPro::Output::PDF::Writer;
 
 use strict;
@@ -318,6 +322,7 @@ sub get_image {
 
     my $img;
     my $uri = $elt->{uri};
+    warn("get_image($uri)\n") if $config->{debug}->{images};
     if ( $uri =~ /^id=(.+)/ ) {
 	my $a = $App::Music::ChordPro::Output::PDF::assets->{$1};
 
