@@ -1045,7 +1045,10 @@ sub directive {
 	my $id;
 	my %opts;
 	while ( my($k,$v) = each(%$res) ) {
-	    if ( $k =~ /^(title|width|height|border|center)$/i && $v =~ /^(\d+)$/ ) {
+	    if ( $k =~ /^(title)$/i ) {
+		$opts{lc($k)} = $v;
+	    }
+	    elsif ( $k =~ /^(width|height|border|center)$/i && $v =~ /^(\d+)$/ ) {
 		$opts{lc($k)} = $v;
 	    }
 	    elsif ( $k =~ /^(scale)$/ && $v =~ /^(\d(?:\.\d+)?)$/ ) {

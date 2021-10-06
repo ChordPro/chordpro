@@ -198,10 +198,13 @@
     "delegates" : {
         "abc" : {
             "type" : "image",
+            "module" : "ABC",
             "handler" : "abc2image",
+            "split" : 0,
         },
         "ly" : {
             "type" : "image",
+            "module" : "Lilypond",
             "handler" : "ly2image",
         },
      },
