@@ -334,8 +334,21 @@ sub parse_song {
 	}
 
 	if ( /^#/ ) {
-	    if ( /^##image:\s+id=(\S+)/ ) {
-		my $id = $1;
+
+	    # Handle assets.
+	    my $kw = "";
+	    my $kv = {};
+	    if ( /^##(image|asset):\s+(.*)/i ) {
+		$kw = lc($1);
+		$kv = parse_kv($2);
+	    }
+
+	    if ( $kw eq "image" ) {
+		my $id = $kv->{id};
+		unless ( $id ) {
+		    do_warn("Missing id for image asset\n");
+		    next;
+		}
 
 		# In-line image asset.
 		require MIME::Base64;
@@ -362,12 +375,25 @@ sub parse_song {
 		    width => $info->{width}, height => $info->{height},
 		  };
 
+		if ( $config->{debug}->{images} ) {
+		    warn("asset[$id] ", length($data), " bytes, ",
+			 "width=$info->{width}, height=$info->{height}",
+			 "\n");
+		}
 		next;
 	    }
 
-	    if ( /^##asset:\s+id=(\S+)\s+type=(\S+)/ ) {
-		my $id = $1;
-		my $type = $2;
+	    if ( $kw eq "asset" ) {
+		my $id = $kv->{id};
+		my $type = $kv->{type};
+		unless ( $id ) {
+		    do_warn("Missing id for asset\n");
+		    next;
+		}
+		unless ( $type ) {
+		    do_warn("Missing type for asset\n");
+		    next;
+		}
 
 		# Read the data.
 		my @data;
@@ -380,8 +406,8 @@ sub parse_song {
 		$song->{assets} //= {};
 		$song->{assets}->{$id} =
 		  { data => \@data, type => $type,
-		    subtype => $config->{delegates}->{abc}->{type},
-		    handler => $config->{delegates}->{abc}->{handler},
+		    subtype => $config->{delegates}->{$type}->{type},
+		    handler => $config->{delegates}->{$type}->{handler},
 		  };
 		if ( $config->{debug}->{images} ) {
 		    warn("asset[$id] ", ::dump($song->{assets}->{$id}));
@@ -428,9 +454,11 @@ sub parse_song {
 			$opts{transpose} =
 			  $xpose + ($config->{settings}->{transpose}//0 );
 		    }
+		    my $d = $config->{delegates}->{$in_context};
 		    $self->add( type => "delegate",
-				subtype => $config->{delegates}->{$in_context}->{type},
-				handler => $config->{delegates}->{$in_context}->{handler},
+				delegate => $d->{module},
+				subtype => $d->{type},
+				handler => $d->{handler},
 				data => [ $_ ],
 				opts => \%opts,
 				open => 1 );
@@ -1012,36 +1040,33 @@ sub directive {
 
     # Images.
     if ( $dir eq "image" ) {
-	use Text::ParseWords qw(shellwords);
-	my @args = shellwords($arg);
+	my $res = parse_kv($arg);
 	my $uri;
 	my $id;
 	my %opts;
-	foreach ( @args ) {
-	    if ( /^(width|height|border|center)=(\d+)$/i ) {
-		$opts{lc($1)} = $2;
+	while ( my($k,$v) = each(%$res) ) {
+	    if ( $k =~ /^(title|width|height|border|center)$/i && $v =~ /^(\d+)$/ ) {
+		$opts{lc($k)} = $v;
 	    }
-	    elsif ( /^(scale)=(\d(?:\.\d+)?)$/i ) {
-		$opts{lc($1)} = $2;
+	    elsif ( $k =~ /^(scale)$/ && $v =~ /^(\d(?:\.\d+)?)$/ ) {
+		$opts{lc($k)} = $v;
 	    }
-	    elsif ( /^(center|border)$/i ) {
-		$opts{lc($_)} = 1;
+	    elsif ( $k =~ /^(center|border)$/i ) {
+		$opts{lc($k)} = $v;
 	    }
-	    elsif ( /^(src|uri)=(.+)$/i ) {
-		$uri = $2;
+	    elsif ( $k =~ /^(src|uri)$/i ) {
+		$uri = $v;
 	    }
-	    elsif ( /^(id)=(.+)$/i ) {
-		$id = $2;
+	    elsif ( $k =~ /^(id)$/i ) {
+		$id = $v;
 	    }
-	    elsif ( /^(title)=(.*)$/i ) {
-		$opts{title} = $2;
-	    }
-	    elsif ( /^(.+)=(.*)$/i ) {
+	    elsif ( $uri ) {
 		do_warn( "Unknown image attribute: $1\n" );
 		next;
 	    }
+	    # Assume just an image file uri.
 	    else {
-		$uri = $_;
+		$uri = $k;
 	    }
 	}
 	$uri = "id=$id" if $id;
