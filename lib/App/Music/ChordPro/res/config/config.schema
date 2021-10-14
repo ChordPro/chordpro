@@ -523,31 +523,43 @@
 	    "properties": {
 	        "abc": {
 		    "description": "",
-		    	"additionalProperties": false,
-			"properties": {
-			    "type": {
-			        "type": "string",
-				"default": "image"
-			    },
-			    "handler": {
-			        "type": "string",
-			        "default": "abc2image"
-			    }
-		       }
+		    "additionalProperties": false,
+		    "properties": {
+			"type": {
+			    "type": "string",
+			    "default": "image"
+			},
+			"handler": {
+			    "type": "string",
+			    "default": "abc2image"
+			},
+			"module": {
+			    "type": "string"
+			},
+			"split": {
+			    "type": "boolean",
+			    "default": false
+			}
+		   },
+		   "required" : [ "type", "handler", "module" ]
 		 },
 	        "ly": {
 		    "description": "",
-		    	"additionalProperties": false,
-			"properties": {
-			    "type": {
-			        "type": "string",
-				"default": "image"
-			    },
-			    "handler": {
-			        "type": "string",
-			        "default": "ly2image"
-			    }
-		       }
+		    "additionalProperties": false,
+		    "properties": {
+			"type": {
+			    "type": "string",
+			    "default": "image"
+			},
+			"handler": {
+			    "type": "string",
+			    "default": "ly2image"
+			},
+			"module": {
+			    "type": "string"
+			}
+		   },
+		   "required" : [ "type", "handler", "module" ]
 		 }
 	    }
 	},
@@ -683,6 +695,45 @@
 		    "description": "CSV properties.",
 		    "additionalProperties": false,
 		    "properties": {
+
+		    	"fields": {
+			    "description": "The fields for the CSV.",
+			    "type": "array",
+			    "items": {
+			        "type" : "object",
+				"additionalProperties": false,
+				"properties": {
+				    "name": {
+				        "type": "string"
+				    },
+				    "meta": {
+				        "type": "string"
+				    },
+				    "value": {
+				        "type": "string"
+				    },
+				    "omit": {
+				         "type": "boolean",
+					 "default": false
+				    }
+				},
+				"required": [ "name" ],
+				"anyOf": [
+				    { "required": [ "meta" ] },
+				    { "required": [ "value" ] }
+				]
+			    }
+			},
+			"separator": {
+			    "description": "Separator to join field values.",
+			    "type": "string",
+			    "default" : ";"
+			 },
+			"vseparator": {
+			    "description": "Separator to join meta values.",
+			    "type": "string",
+			    "default" : "|"
+			 },
 		        "songsonly": {
 			    "description": "Include only songs in the CSV.",
 			    "default": true,

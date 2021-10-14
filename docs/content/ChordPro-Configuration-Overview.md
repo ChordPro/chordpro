@@ -5,7 +5,55 @@ description: "Configuration: Overview"
 
 # Configuration: Overview
 
-The way the output is formatted and some behavioural aspects of the reference implementation are configurable via configuration files. These are [JSON](http://www.json.org/) files that can be created and modified using any convenient text editor. There are also several JSON editors available, often in the form of web services. For schema-based editors, the schema can be downloaded [here]({{< asset "pub/config60.schema" >}}).
+The way the output is formatted and some behavioural aspects of the
+reference implementation are configurable via configuration files.
+
+ChordPro understands two variants (formats) of configuration files:
+PRP and JSON. If both variants of the same config are available, the PRP
+variant takes precedence.
+
+[PRP](https://github.com/sciurius/perl-Data-Properties) files have
+filenames with extension `.prp` and are based on the [Java properties
+files](https://en.wikipedia.org/wiki/.properties), but with structure
+and many more extensions. They require much less typing and are much
+less prone to errors than JSON. 
+
+[JSON](http://www.json.org/) files have filenames with extension
+`.json` and can be created and modified using
+any convenient text editor. There are also several JSON editors
+available, often in the form of web services. For schema-based
+editors, the schema can be downloaded [here]({{< asset
+"pub/config60.schema" >}}).
+
+As an example, compare the variants of the following _identical_
+definitions:
+````
+// JSON
+"diagrams" : {
+    "auto"   :  false,
+    "show"   :  "all",
+    "sorted" :  false,
+},
+"tuning" : [ "E2", "A2", "D3", "G3", "B3", "E4" ],
+````
+````
+# Properties
+diagrams.auto   =  false
+diagrams.show   =  all
+diagrams.sorted =  false
+tuning = [ E2 A2 D3 G3 B3 E4 ]
+````
+````
+# Properties, structured
+diagrams {
+    auto   =  false
+    show   =  all
+    sorted =  false
+}
+tuning = [ E2 A2 D3 G3 B3 E4 ]
+````
+
+All forms of config definitions will be used in the documentation.
 
 ## Standard configuration files
 

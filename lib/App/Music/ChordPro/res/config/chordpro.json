@@ -200,7 +200,7 @@
             "type" : "image",
             "module" : "ABC",
             "handler" : "abc2image",
-            "split" : 0,
+            "split" : false,
         },
         "ly" : {
             "type" : "image",
