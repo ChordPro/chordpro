@@ -120,6 +120,7 @@ sub parse_file {
 
     warn("Warning: No songs found in ", $diag->{file}, "\n")
       unless $songs || $::running_under_test;
+
     return 1;
 }
 
@@ -230,7 +231,7 @@ sub parse_song {
     $decapo = $config->{settings}->{decapo};
     my $fragment = $options->{fragment};
 
-    warn("Processing song...\n") if $options->{verbose};
+    warn("Processing song ", $diag->{file}, "...\n") if $options->{verbose};
     $song = App::Music::ChordPro::Song->new
       ( source => { file => $diag->{file}, line => 1 + $$linecnt },
 	system => $config->{notes}->{system},
