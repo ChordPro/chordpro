@@ -47,6 +47,7 @@ sub generate_songbook {
     $verbose ||= $options->{verbose};
     my $ps = $config->{pdf};
     my $pr = (__PACKAGE__."::Writer")->new( $ps, $pdfapi );
+    warn("Generating PDF ", $options->{output} || "__new__.pdf", "...\n") if $options->{verbose};
 
     my $name = ::runtimeinfo("short");
     $name =~ s/version.*/regression testing/ if $regtest;
@@ -197,80 +198,112 @@ sub generate_songbook {
     $pr->make_outlines( [ map { $_->[1] } @book ], $start_of{songbook} );
 
     $pr->finish( $options->{output} || "__new__.pdf" );
+    warn("Generated PDF...\n") if $options->{verbose};
 
-    if ( $options->{csv} ) {
+    generate_csv( \@book, $page, \%pages_of, \%start_of )
+      if $options->{csv};
 
-	my $rfc4180 = sub {
-	    my ( $v ) = @_;
-	    return "" unless defined($v) && defined($v->[0]);
-	    $v = join("|", @$v);
-	    return $v unless $v =~ m/[;\s]/s;
-	    $v =~ s/"/""/g;
-	    return '"' . $v . '"';
-	};
-	my $pages = sub {
-	    my ( $pages, $page ) = @_;
-	    if ( @_ == 1 ) {
-		$pages = $pages_of{$_[0]};
-		$page  = $start_of{$_[0]};
-	    }
-	    $pages > 1
-	      ? ( $page ."-". ($page+$pages-1) )
-	      : $page,
-	};
-
-	my @cols1 = qw( title pages );
-	my @cols2 = qw( sorttitle artist composer collection key year );
-	# Create an MSPro compatible CSV for this PDF.
-	push( @book, [ "CSV", { meta => { tocpage => $page } } ] );
-	( my $csv = $options->{output} ) =~ s/\.pdf$/.csv/i;
-	open( my $fd, '>:utf8', encode_utf8($csv) )
-	  or die( encode_utf8($csv), ": $!\n" );
-	print $fd ( join(";", @cols1, map{ $_."s" } @cols2), "\n" );
-
-	unless ( $ps->{csv}->{songsonly} ) {
-	    print $fd ( join(';','__front_matter__',
-			     $pages->("front"),
-			     'Front Matter',
-			     'ChordPro'),
-			";" x (@cols2-2), "\n" )
-	      if $pages_of{front};
-	    print $fd ( join(';','__table_of_contents__',
-			     $pages->("toc"),
-			     'Table of Contents',
-			     'ChordPro'),
-			";" x (@cols2-2), "\n" )
-	      if $pages_of{toc};
-	}
-
-	for ( my $p = 0; $p < @book-1; $p++ ) {
-	    my ( $title, $song ) = @{$book[$p]};
-	    my $page = $start_of{songbook} + $song->{meta}->{tocpage}
-	      - ($options->{"start-page-number"} || 1);
-	    my $pages = $song->{meta}->{pages};
-	    print $fd ( join(';',
-			     $rfc4180->([$title]),
-			     $pages > 1
-			     ? ( $page ."-". ($page+$pages-1) )
-			     : $page,
-			     map { $rfc4180->($song->{meta}->{$_}) } @cols2
-			    ),
-			"\n" );
-	}
-
-	unless ( $ps->{csv}->{songsonly} ) {
-	    print $fd ( join(':','__back_matter__',
-			     $pages->("back"),
-			     'Back Matter',
-			     'ChordPro'),
-			";" x (@cols2-2), "\n" )
-	      if $pages_of{back};
-	}
-	close($fd);
-    }
     _dump($ps) if $verbose;
 
     []
+}
+
+sub generate_csv {
+    my ( $book, $page, $pages_of, $start_of ) = @_;
+
+    # Create an MSPro compatible CSV for this PDF.
+    push( @$book, [ "CSV", { meta => { tocpage => $page } } ] );
+    ( my $csv = $options->{output} ) =~ s/\.pdf$/.csv/i;
+    open( my $fd, '>:utf8', encode_utf8($csv) )
+      or die( encode_utf8($csv), ": $!\n" );
+
+    warn("Generating CSV ", encode_utf8($csv), "...\n")
+      if  $config->{debug}->{csv} || $options->{verbose};
+
+    my $ps = $config->{pdf};
+    my $ctl = $ps->{csv};
+    my $sep = $ctl->{separator} // ";";
+    my $vsep = $ctl->{vseparator} // "|";
+
+    my $rfc4180 = sub {
+	my ( $v ) = @_;
+	$v = [$v] unless ref($v) eq 'ARRAY';
+	return "" unless defined($v) && defined($v->[0]);
+	$v = join( $sep, @$v );
+	return $v unless $v =~ m/[$sep"\n\r]/s;
+	$v =~ s/"/""/g;
+	return '"' . $v . '"';
+    };
+
+    my $pagerange = sub {
+	my ( $pages, $page ) = @_;
+	if ( @_ == 1 ) {
+	    $pages = $pages_of->{$_[0]};
+	    $page  = $start_of->{$_[0]};
+	}
+	$pages > 1
+	  ? ( $page ."-". ($page+$pages-1) )
+	  : $page,
+      };
+
+    my $csvline = sub {
+	my ( $m ) = @_;
+	my @cols = ();
+	for ( @{ $ctl->{fields} } ) {
+	    next if $_->{omit};
+	    my $v = $_->{value} // '%{'.$_->{meta}.'}';
+	    local( $config->{metadata}->{separator} ) = $vsep;
+	    push( @cols, $rfc4180->( fmt_subst( { meta => $m }, $v ) ) );
+	}
+	print $fd ( join( $sep, @cols ), "\n" );
+	scalar(@cols);
+    };
+
+    my @cols;
+    my $ncols;
+    for ( @{ $ctl->{fields} } ) {
+	next if $_->{omit};
+	push( @cols, $rfc4180->($_->{name}) );
+    }
+    $ncols = @cols;
+    warn( "CSV: $ncols fields\n" );
+    print $fd ( join( $sep, @cols ), "\n" );
+
+    unless ( $ctl->{songsonly} ) {
+	$csvline->( { title     => '__front_matter__',
+		      pagerange => $pagerange->("front"),
+		      sorttitle => 'Front Matter',
+		      artist    => 'ChordPro' } )
+	  if $pages_of->{front};
+	$csvline->( { title     => '__table_of_contents__',
+		      pagerange => $pagerange->("front"),
+		      sorttitle => 'Table of Contents',
+		      artist    => 'ChordPro' } )
+	  if $pages_of->{toc};
+    }
+
+    warn( "CSV: ", scalar(@$book), " songs in book\n")
+      if $config->{debug}->{csv};
+    for ( my $p = 0; $p < @$book-1; $p++ ) {
+	my ( $title, $song ) = @{$book->[$p]};
+	my $page = $start_of->{songbook} + $song->{meta}->{tocpage}
+	  - ($options->{"start-page-number"} || 1);
+	my $pp = $song->{meta}->{pages};
+	my $m = { %{$song->{meta}},
+		  pagerange => [ $pagerange->($pp, $page) ] };
+	$csvline->($m);
+
+	unless ( $ctl->{songsonly} ) {
+	    $csvline->( { title     => '__back_matter__',
+			  pagerange => $pagerange->("back"),
+			  sorttitle => 'Back Matter',
+			  artist    => 'ChordPro'} )
+	      if $pages_of->{back};
+	}
+    }
+    close($fd);
+    warn("Generated CSV...\n")
+      if  $config->{debug}->{csv} || $options->{verbose};
 }
 
 my $source;			# song source

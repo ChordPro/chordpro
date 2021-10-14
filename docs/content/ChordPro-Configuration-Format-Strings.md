@@ -65,6 +65,14 @@ The ChordPro reference implementation provides additional meta data:
  
  * `page`: The starting page number of the song.
 
+ * `pages`: The number of pages of the song.  
+   _This is not yet supported._
+
+ * `pagerange`: The pages of the song, either a single page number or
+   a range like `3-7`.  
+   _`pagerange` is only available for CSV generation, see
+	[Configuration for CSV output]({{< relref "chordpro-configuration-csv" >}})._
+
  * `today`: The current date in the format defined in the config file.
    See [Dates and Times]({{< relref
    "ChordPro-Configuration-Generic#dates-and-times" >}}).
