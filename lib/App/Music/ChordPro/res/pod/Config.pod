@@ -567,11 +567,29 @@ extensive details and examples.
           // This will show the page layout if non-zero.
           "showlayout" : false,
     
-          // CSV generation.
+          // CSV generation for MobileSheetsPro. Adapt for other tools.
+          // Note that the resultant file will conform to RFC 4180.
           "csv" : {
-    	  // Restrict CSV to song pages only (do not include matter pages).
-    	  "songsonly" : true
-          }
+              "fields" : [
+                  { "name" : "title",        "meta" : "title"      },
+                  { "name" : "pages",        "meta" : "pagerange"  },
+                  { "name" : "sorttitles",   "meta" : "sorttitle"  },
+                  { "name" : "artists",      "meta" : "artist"     },
+                  { "name" : "composers",    "meta" : "composer"   },
+                  { "name" : "collections",  "meta" : "collection" },
+                  { "name" : "keys",         "meta" : "actual_key" },
+                  { "name" : "years",        "meta" : "year"       },
+                  // Add "omit" : true to omit a field.
+                  // To add fields with fixed values, use "value":
+                  { "name" : "my_field", "value" : "text", "omit" : true },
+              ],
+              // Field separator.
+              "separator" : ";",
+              // Values separator.
+              "vseparator" : "|",
+              // Restrict CSV to song pages only (do not include matter pages).
+              "songsonly" : true,
+          },
         },
     
         // Settings for ChordPro backend.
@@ -636,6 +654,7 @@ extensive details and examples.
             "mma" : 0,
             "spacing" : 0,
             "song" : 0,
+            "csv" : 0,
       	"abc" : 0,
       	"ly" : 0,
         },

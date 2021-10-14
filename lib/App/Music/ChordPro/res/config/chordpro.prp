@@ -200,7 +200,7 @@ pdf {
       bar {
 	  offset =  8
 	  width  =  1
-	  color  = black
+	  color  = foreground
       }
       tag = Chorus
       # Recall style: Print the tag using the type.
@@ -481,6 +481,52 @@ chordpro {
     }
 }
 
+# Settings for CSV (part of PDF).
+pdf.csv {
+    fields = [
+        {
+	  meta = title
+	  name = title
+        }
+	{
+	  meta = pagerange
+	  name = pages
+        }
+	{
+	  meta = sorttitle
+	  name = sorttitles
+        }
+	{
+	  meta = artist
+	  name = artists
+        }
+	{
+	  meta = composer
+	  name = composers
+        }
+	{
+	  meta = collection
+	  name = collections
+        }
+	{
+	  meta = actual_key
+	  name = keys
+        }
+	{
+	  meta = year
+	  name = years
+        }
+	{
+	  name = my_field
+	  omit = 1
+	  value = text
+	}
+    ]
+    separator = ;
+    songsonly = 1
+    vseparator = |
+}
+
 # Settings for HTML backend.
 html {
     # Stylesheet links.
@@ -542,6 +588,7 @@ delegates {
 debug {
     abc		= false
     config	= false
+    csv		= false
     fonts	= false
     images	= false
     layout	= false
