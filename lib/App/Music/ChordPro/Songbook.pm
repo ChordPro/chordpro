@@ -575,7 +575,7 @@ sub parse_song {
 	my %h;
 	@used_chords = map { $h{$_}++ ? () : $_ } @used_chords;
 
-	if ( $diagrams eq "user" && @{$song->{define}} ) {
+	if ( $diagrams eq "user" && $song->{define} && @{$song->{define}} ) {
 	    @used_chords =
 	    map { $_->{name} } @{$song->{define}};
 	}
