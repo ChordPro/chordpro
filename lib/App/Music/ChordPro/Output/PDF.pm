@@ -1187,6 +1187,13 @@ sub generate_song {
 		$cells += $grid_margin->[0] = $v[2] if $v[2];
 		$cells += $grid_margin->[1] = $v[3] if $v[3];
 		$grid_margin->[2] = $cells;
+		if ( $ps->{labels}->{comment} ) {
+		    unshift( @elts, { %$elt,
+				      type => $ps->{labels}->{comment},
+				      text => $v[4],
+				    } );
+		    redo;
+		}
 		$i_tag = $v[4];
 	    }
 	    elsif ( $elt->{name} eq "label" ) {
