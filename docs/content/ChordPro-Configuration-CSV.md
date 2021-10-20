@@ -21,7 +21,7 @@ key `"csv"` under the key `"pdf"`.
                  { "name" : "artists",      "meta" : "artist"     },
                  { "name" : "composers",    "meta" : "composer"   },
                  { "name" : "collections",  "meta" : "collection" },
-                 { "name" : "keys",         "meta" : "actual_key" },
+                 { "name" : "keys",         "meta" : "key_actual" },
                  { "name" : "years",        "meta" : "year"       },
                  // Add "omit" : true to omit a field.
                  // To add fields with fixed values, use "value":
