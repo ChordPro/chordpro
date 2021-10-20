@@ -200,7 +200,7 @@
             "type" : "image",
             "module" : "ABC",
             "handler" : "abc2image",
-            "split" : false,
+            "split" : 0,
         },
         "ly" : {
             "type" : "image",
@@ -550,7 +550,7 @@
               { "name" : "artists",      "meta" : "artist"     },
               { "name" : "composers",    "meta" : "composer"   },
               { "name" : "collections",  "meta" : "collection" },
-              { "name" : "keys",         "meta" : "actual_key" },
+              { "name" : "keys",         "meta" : "key_actual" },
               { "name" : "years",        "meta" : "year"       },
               // Add "omit" : true to omit a field.
               // To add fields with fixed values, use "value":
@@ -627,6 +627,7 @@
         "mma" : 0,
         "spacing" : 0,
         "song" : 0,
+        "songfull" : 0,
         "csv" : 0,
   	"abc" : 0,
   	"ly" : 0,

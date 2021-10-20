@@ -611,15 +611,24 @@ sub parse_song {
 
     # $song->structurize;
 
-    ::dump( do {
-	my $a = dclone($song);
-	$a->{config} = ref(delete($a->{config}));
-#	$a->{chordsinfo}{$_}{ns_canon} = $a->{chordsinfo}{$_}{parser}{ns_canon}
-#	  for keys %{$a->{chordsinfo}};
-#	$a->{chordsinfo}{$_}{parser} = ref(delete($a->{chordsinfo}{$_}{parser}))
-#	  for keys %{$a->{chordsinfo}};
-	$a;
-	} ) if eval { $config->{debug}->{song} };
+    if ( $config->{debug}->{songfull} ) {
+	::dump( do {
+	    my $a = dclone($song);
+	    $a->{config} = ref(delete($a->{config}));
+	    $a->{chordsinfo}{$_}{ns_canon} = $a->{chordsinfo}{$_}{parser}{ns_canon}
+	      for keys %{$a->{chordsinfo}};
+	    $a->{chordsinfo}{$_}{parser} = ref(delete($a->{chordsinfo}{$_}{parser}))
+	      for keys %{$a->{chordsinfo}};
+	    $a;
+	} );
+    }
+    elsif ( $config->{debug}->{song} ) {
+	::dump( do {
+	    my $a = dclone($song);
+	    $a->{config} = ref(delete($a->{config}));
+	    $a;
+	} );
+    }
 
     return $song;
 }

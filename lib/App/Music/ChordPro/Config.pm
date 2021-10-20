@@ -1524,6 +1524,7 @@ sub default_config() {
         "mma" : 0,
         "spacing" : 0,
         "song" : 0,
+        "songfull" : 0,
         "csv" : 0,
   	"abc" : 0,
   	"ly" : 0,
