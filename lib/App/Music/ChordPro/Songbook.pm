@@ -611,7 +611,7 @@ sub parse_song {
 
     # $song->structurize;
 
-    if ( $config->{debug}->{songfull} ) {
+    if ( $config->{debug}->{song} ) {
 	::dump( do {
 	    my $a = dclone($song);
 	    $a->{config} = ref(delete($a->{config}));
@@ -622,7 +622,7 @@ sub parse_song {
 	    $a;
 	} );
     }
-    elsif ( $config->{debug}->{song} ) {
+    elsif ( $config->{debug}->{songfull} ) {
 	::dump( do {
 	    my $a = dclone($song);
 	    $a->{config} = ref(delete($a->{config}));

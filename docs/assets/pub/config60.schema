@@ -6,7 +6,7 @@
 	    "description": "Colour specification.",
 	    "type": "string",
 	    "format": "color",
-	    "pattern": "^(#[0-9A-Fa-f]{6}|[A-Za-z]+)$"
+	    "pattern": "^(#[0-9A-Fa-f]{6}|[-A-Za-z0-9]+)$"
 	},
 	"fontspec": {
 	    "description": "Font specification.",
@@ -239,6 +239,7 @@
 				    "description": "Type for tag text.",
 				    "default": "comment",
 				    "enum": [
+					"",
 					"comment",
 					"comment_italic",
 					"comment_box"
@@ -566,10 +567,6 @@
 			"module": {
 			    "type": "string",
 			    "default": "ABC"
-			},
-			"split": {
-			    "type": "boolean",
-			    "default": false
 			}
 		   },
 		   "required" : [ "type", "handler", "module" ],
@@ -1066,6 +1063,28 @@
 		    }
 		},
 
+		"grids" : {
+		    "description": "Grid line properties.",
+		    "additionalProperties": false,
+		    "properties" : {
+		        "cellbar" : {
+			    "additionalProperties": false,
+			    "properties": {
+				"color": {
+				    "description": "Colour of the cell bar",
+				    "$ref": "#/definitions/colorspec",
+				    "default" : "foreground-light"
+				},
+			        "width": {
+				    "description": "Width of the cell bar.",
+				    "type": "integer",
+				    "default": 1
+				}
+			    }
+			}
+                    }
+		},
+
 		"head-first-only": {
 		    "description": "Headers and footers only on the very first page.",
 		    "default": false,
@@ -1157,7 +1176,7 @@
 			},
 			"pressed": {
 			    "description": "Color of the 'pressed' keys.",
-			    "default": "grey",
+			    "default": "foreground-medium",
 			    "type": "string",
 			    "format" : "color"
 			},
@@ -1364,6 +1383,20 @@
 				{ "$ref": "#/definitions/colorspec" },
 				{ "default": "black" }
 			    ]
+			},
+			"foreground-medium": {
+			    "description": "Light foreground colour",
+			    "allOf": [
+				{ "$ref": "#/definitions/colorspec" },
+				{ "default": "grey70" }
+			    ]
+			},
+			"foreground-light": {
+			    "description": "Very light foreground colour",
+			    "allOf": [
+				{ "$ref": "#/definitions/colorspec" },
+				{ "default": "grey90" }
+			    ]
 			}
 		    }
 		},
@@ -1471,6 +1504,10 @@
 		    "default": 0
 		},
 		"song": {
+		    "type": "integer",
+		    "default": 0
+		},
+		"songfull": {
 		    "type": "integer",
 		    "default": 0
 		},

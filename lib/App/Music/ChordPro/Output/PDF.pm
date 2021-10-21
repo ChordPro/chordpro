@@ -971,8 +971,9 @@ sub generate_song {
 				- ($cells)*$grid_barwidth
 			      ) / $cells;
 	    warn("L=", $ps->{__leftmargin},
+		 ", I=", $ps->{_indent},
 		 ", R=", $ps->{__rightmargin},
-		 ", C=$cells, W=", $grid_cellwidth,
+		 ", C=$cells, GBW=$grid_barwidth, W=", $grid_cellwidth,
 		 "\n") if $config->{debug}->{spacing};
 
 	    gridline( $elt, $x, $y,
@@ -1662,7 +1663,7 @@ sub gridline {
 	$firstbar //= $i;
     }
 
-    my $prevbar;
+    my $prevbar = -1;
     my @tokens = @{ $elt->{tokens} };
     my $t;
 
@@ -1681,21 +1682,13 @@ sub gridline {
 	$x += $margin->[0] * $cellwidth + $barwidth;
     }
 
+    my $ctl = $pr->{ps}->{grids}->{cellbar};
+    my $needcell = $ctl->{width};
     foreach my $i ( 0 .. $#tokens ) {
 	my $token = $tokens[$i];
-	if ( exists $token->{chord} ) {
-	    $pr->text( $token->{chord}, $x, $y, $fchord )
-	      unless $token eq ".";
-	    $x += $cellwidth;
-	}
-	elsif ( $token->{class} eq "slash" ) {
-	    $pr->text( "/", $x, $y, $fchord );
-	    $x += $cellwidth;
-	}
-	elsif ( $token->{class} eq "space" ) {
-	    $x += $cellwidth;
-	}
-	elsif ( $token->{class} eq "bar" ) {
+	my $sz = $fchord->{size};
+
+	if ( $token->{class} eq "bar" ) {
 	    $x -= $barwidth;
 	    $t = $token->{symbol};
 	    if ( 0 ) {
@@ -1712,8 +1705,6 @@ sub gridline {
 	    my $lcr = -1;	# left, center, right
 	    $lcr = 0 if $i > $firstbar;
 	    $lcr = 1 if $i == $lastbar;
-
-	    my $sz = $fchord->{size};
 
 	    if ( $t eq "|" ) {
 		pr_barline( $x, $y, $lcr, $sz, $pr );
@@ -1741,6 +1732,39 @@ sub gridline {
 	    }
 	    $x += $barwidth;
 	    $prevbar = $i;
+	    $needcell = 0;
+	    next;
+	}
+
+	if ( $token->{class} eq "repeat2" ) {
+	    # For repeat2Bars, change the next bar line to pseudo-bar.
+	    my $k = $prevbar + 1;
+	    while ( $k <= $#tokens
+		    && !is_bar($tokens[$k]) ) {
+		$k++;
+	    }
+	    $tokens[$k] = { symbol => " %", class => "bar" };
+	    $x += $cellwidth;
+	    $needcell = 0;
+	    next;
+	}
+
+	pr_cellline( $x-$barwidth, $y, 0, $sz, $ctl->{width},
+		     $pr->_fgcolor($ctl->{color}), $pr )
+	  if $needcell;
+	$needcell = $ctl->{width};
+
+	if ( exists $token->{chord} ) {
+	    $pr->text( $token->{chord}, $x, $y, $fchord )
+	      unless $token eq ".";
+	    $x += $cellwidth;
+	}
+	elsif ( $token->{class} eq "slash" ) {
+	    $pr->text( "/", $x, $y, $fchord );
+	    $x += $cellwidth;
+	}
+	elsif ( $token->{class} eq "space" ) {
+	    $x += $cellwidth;
 	}
 	elsif ( $token->{class} eq "repeat1" ) {
 	    $t = $token->{symbol};
@@ -1751,16 +1775,6 @@ sub gridline {
 	    }
 	    pr_repeat( $x + ($k - $prevbar - 1)*$cellwidth/2, $y,
 		       0, $fchord->{size}, $pr );
-	    $x += $cellwidth;
-	}
-	elsif ( $token->{class} eq "repeat2" ) {
-	    # For repeat2Bars, change the next bar line to pseudo-bar.
-	    my $k = $prevbar + 1;
-	    while ( $k <= $#tokens
-		    && !is_bar($tokens[$k]) ) {
-		$k++;
-	    }
-	    $tokens[$k] = { symbol => " %", class => "bar" };
 	    $x += $cellwidth;
 	}
 	if ( $x > $ps->{papersize}->[0] ) {
@@ -1780,6 +1794,12 @@ sub gridline {
 	}
 	$pr->text( " " . $t->{text}, $x, $y, $fonts->{comment} );
     }
+}
+
+sub pr_cellline {
+    my ( $x, $y, $lcr, $sz, $w, $col, $pr ) = @_;
+    $x -= $w / 2 * ($lcr + 1);
+    $pr->vline( $x, $y+0.9*$sz, $sz, $w, $col );
 }
 
 sub pr_barline {

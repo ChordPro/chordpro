@@ -1,9 +1,11 @@
 5.986
 
     - !ChordPro functionality
+    - (Config) Theme colors foreground-medium and foreground-light.
+    - Show cell bars in grid lines (Config: pdf.grids)
     - !BugFixes
     - Remove obsolete __EMBEDDING__.
-    - Bump requirement Text::Layout to 0.022.
+    - Bump requirement Text::Layout to 0.024.
     - Fix issue #182.
     - Fix warning if diagrams.show=user and no chords.
     - Fix labels for grid with pdf.labels.comment.

@@ -2,14 +2,12 @@
     "pdf" : {
         "theme" : {
             "foreground" : "white",
+            "foreground-light" : "#555555",
             "background" : "black",
         },
         "fonts" : {
             "chord" : {
                 "color" : "red",
-            },
-            "comment" : {
-                "background" : "#555555",
             },
         },
     },

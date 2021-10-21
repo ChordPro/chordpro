@@ -227,7 +227,9 @@ sub configurator {
 	    delete( $cfg->{pdf}->{fonts}->{$ff} );
 	    next;
 	}
-	for ( qw(name file description size color background) ) {
+	$cfg->{pdf}->{fonts}->{$ff}->{color}      //= "foreground";
+	$cfg->{pdf}->{fonts}->{$ff}->{background} //= "background";
+	for ( qw(name file description size) ) {
 	    delete( $cfg->{pdf}->{fonts}->{$ff}->{$_} )
 	      unless defined( $cfg->{pdf}->{fonts}->{$ff}->{$_} );
 	}
@@ -1097,7 +1099,6 @@ sub default_config() {
             "type" : "image",
             "module" : "ABC",
             "handler" : "abc2image",
-            "split" : 0,
         },
         "ly" : {
             "type" : "image",
@@ -1123,8 +1124,15 @@ sub default_config() {
       "papersize" : "a4",
 
       "theme" : {
-          "foreground" : "black",
-          "background" : "none",
+          // Forgeround color. Usually black.
+          "foreground"        : "black",
+          // Shades of grey.
+          // medium is used for pressed keys in keyboard diagrams.
+          "foreground-medium" : "grey70",
+          // light is used as background for comments, cell bars, ...
+          "foreground-light"  : "grey90",
+          // Background color. Usually none or white.
+          "background"        : "none",
       },
 
       // Space between columns, in pt.
@@ -1238,9 +1246,19 @@ sub default_config() {
 	  "keys"     :  14,	// or 7, 10, 14, 17, 21
           "base"     :  "C",	// or "F"
 	  "linewidth" : 0.1,	// fraction of a single key width
-          "pressed"  :  "grey",	// colour of a pressed key
+          "pressed"  :  "foreground-medium",	// colour of a pressed key
 	  "hspace"   :  3.95,	// ??
 	  "vspace"   :  0.3,	// fraction of height
+      },
+
+      // Grid section lines.
+      // The width and colour of the cell bar lines can be specified.
+      // Suppress the cell bar lines by setting width to 0.
+      "grids" : {
+          "cellbar" : {
+              "width" : 1,
+              "color" : "foreground-medium",
+          },
       },
 
       // Even/odd pages. A value of -1 denotes odd/even pages.
@@ -1369,7 +1387,7 @@ sub default_config() {
 	  "comment" : {
 	      "name" : "Helvetica",
 	      "size" : 12,
-	      "background" : "#E5E5E5"
+	      "background" : "foreground-light"
 	  },
 	  "comment_italic" : {
 	      "name" : "Helvetica-Oblique",

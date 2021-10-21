@@ -77,8 +77,8 @@ sub wrap {
 
 sub _fgcolor {
     my ( $self, $col ) = @_;
-    if ( !defined($col) || $col eq "foreground" ) {
-	$col = $self->{ps}->{theme}->{foreground};
+    if ( !defined($col) || $col =~ /^foreground(?:-medium|-light)?$/ ) {
+	$col = $self->{ps}->{theme}->{$col//"foreground"};
     }
     elsif ( $col eq "background" ) {
 	$col = $self->{ps}->{theme}->{background};
@@ -94,8 +94,8 @@ sub _bgcolor {
     if ( !defined($col) || $col eq "background" ) {
 	$col = $self->{ps}->{theme}->{background};
     }
-    elsif ( $col eq "foreground" ) {
-	$col = $self->{ps}->{theme}->{foreground};
+    elsif ( $col =~ /^foreground(?:-medium|-light)?$/ ) {
+	$col = $self->{ps}->{theme}->{$col};
     }
     elsif ( !$col ) {
 	Carp::confess("Undefined bgcolor: $col");
@@ -126,7 +126,7 @@ sub text {
     my $e = ($self->{layout}->get_pixel_extents)[1];
 
     # Handle decorations (background, box).
-    my $bgcol = $font->{background};
+    my $bgcol = $self->_bgcolor($font->{background});
     undef $bgcol if $bgcol && $bgcol =~ /^no(?:ne)?$/i;
     my $debug = $ENV{CHORDPRO_DEBUG_TEXT} ? "magenta" : undef;
     my $frame = $font->{frame} || $debug;
@@ -165,7 +165,7 @@ sub text_nobl {
     my $e = ($self->{layout}->get_pixel_extents)[1];
 
     # Handle decorations (background, box).
-    my $bgcol = $font->{background};
+    my $bgcol = $self->_bgcolor($font->{background});
     undef $bgcol if $bgcol && $bgcol =~ /^no(?:ne)?$/i;
     my $debug = "blue";
     my $frame = $font->{frame} || $debug;

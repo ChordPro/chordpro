@@ -51,8 +51,10 @@ These settings can be used to control the foreground and
 background colours of the PDF output.
 
         "theme" : {
-            "foreground" : "black",
-            "background" : "none",
+            "foreground"        : "black",
+            "foreground-light"  : "grey90",
+            "foreground-medium" : "grey70",
+            "background"        : "none",
         }
 
 Background `"none"` or `"white"` means there will be no background
@@ -66,22 +68,16 @@ these settings define a 'dark' theme that can be applied to any style.
 {
     "pdf" : {
         "theme" : {
-            "foreground" : "white",
-            "background" : "black",
-        },
-        "fonts" : {
-            "chord" : {
-                "color" : "red",
-            },
-            "comment" : {
-                "background" : "#555555",
-            },
+            "foreground"       : "white",
+            "foreground-light" : "#555555",
+            "background"       : "black",
         },
     },
 }
 ````
 
-Other configuration settings that use colours can use `foreground` and
+Other configuration settings that use colours can use `foreground`,
+`foreground-light`, `foreground-medium`, and
 `background` to refer to the colours defined in the theme.
 
 ## Inter-column space
@@ -274,7 +270,7 @@ colour, or a hex format `#RRGGBB`.
             "keys"     :  14,   // or 7, 10, 14, 17, 21
             "base"     :  "C",  // or "F"
             "linewidth" : 0.1,  // fraction of a single key width
-            "pressed"  :  "grey",   // colour of a pressed key
+            "pressed"  :  "foreground-medium",   // colour of a pressed key
             "hspace"   :  3.95, // ??
             "vspace"   :  0.3,  // fraction of height
         },
@@ -282,6 +278,21 @@ colour, or a hex format `#RRGGBB`.
 With the above settings, keyboard diagrams will look like:
 
 ![]({{< asset "images/ex_kbdiagram.png" >}})
+
+## Grid lines
+
+Properties for the lines of grid sections.
+
+      // Grid section lines.
+      // The width and colour of the cell bar lines can be specified.
+      // Suppress the cell bar lines by setting width to 0.
+      "grids" : {
+          "cellbar" : {
+              "width" : 1,
+              "color" : "foreground-medium",
+          },
+      },
+
 
 ## Even/odd page printing
 

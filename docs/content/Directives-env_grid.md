@@ -82,6 +82,8 @@ The result will be similar to:
 
 ![]({{< asset "images/ex_grid2.png" >}})
 
+See [PDF configuration - grid lines]({{< relref "chordpro-configuration-pdf/#grid-lines" >}}) for more configuration settings.
+
 This directive may include an optional label, to be printed in the
 left margin. For example:,
 

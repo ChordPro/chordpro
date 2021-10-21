@@ -29,6 +29,10 @@ STYLES := modern1 modern2 modern3 chordii default dark roman nashville ukulele k
 
 styles : $(foreach sty,${STYLES},style_${sty}.png)
 
+style_default.png : style_chordpro.png
+	cp style_chordpro.png style_default.png
+	cp style_chordpro-small.png style_default-small.png
+
 style_%.png : ${RES}/config/%.json
 	${CHORDPRO} --config=$< \
 	  ${RES}/examples/swinglow.cho --output=t.pdf
