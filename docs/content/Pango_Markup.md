@@ -91,7 +91,7 @@ an em. Can be negative for subscript, positive for superscript.
 * `strikethrough_color`  
 The color to be used for strikes.
 
-* `a` or `href` or `link`  
+* `href`  
 The URL for a hyperlink.  
 Note that this is a `Text:Layout` extension to the Pango Markup definition.
 
