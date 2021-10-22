@@ -1211,11 +1211,9 @@ sub directive {
 	    my $m = $song->{meta};
 	    if ( $m->{key} ) {
 		$m->{key_actual} =
-		  [ App::Music::ChordPro::Chords::transpose( $m->{key}->[-1],
-							     $xpose+$1 ) ];
+		  [ map { App::Music::ChordPro::Chords::transpose( $_, $xpose+$1 ) } @{ $m->{key} } ];
 		$m->{key_from} =
-		  [ App::Music::ChordPro::Chords::transpose( $m->{key}->[-1],
-							     $xpose ) ];
+		  [ map { App::Music::ChordPro::Chords::transpose( $_, $xpose ) } @{ $m->{key} } ];
 	    }
 	    $xpose += $1;
 	    $self->add( %a, value => $xpose ) if $no_transpose;
