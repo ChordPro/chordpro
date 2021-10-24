@@ -108,7 +108,7 @@ sub abc2image {
 
     my @res;
 
-    if ( defined($kv->{split}) ? $kv->{split} : $config->{delegates}->{abc}->{split} ) {
+    if ( $kv->{split} ) {
 	require Image::Magick;
 	my @lines = loadlines($svg1);
 
