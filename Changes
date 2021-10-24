@@ -3,6 +3,7 @@
     - !ChordPro functionality
     - (Config) Theme colors foreground-medium and foreground-light.
     - Show cell bars in grid lines (Config: pdf.grids)
+    - Suppress warnings for empty chords (i.e., [   ] spacers).
     - !BugFixes
     - Remove obsolete __EMBEDDING__.
     - Bump requirement Text::Layout to 0.024.

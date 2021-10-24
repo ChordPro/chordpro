@@ -546,7 +546,7 @@ sub chord_info {
 sub transpose {
     my ( $c, $xpose, $xcode ) = @_;
     return $c unless $xpose || $xcode;
-    return $c if $c =~ /^\*/;
+    return $c if $c =~ /^\*/ || $c =~ /^\s+$/;
 #warn("__XPOSE = ", $xpose, " __XCODE = $xcode, chord = $c");
     my $info = parse_chord($c);
     unless ( $info ) {

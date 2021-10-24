@@ -2059,6 +2059,7 @@ sub text_vsp {
 
 sub getchordinfo {
     my ( $name ) = @_;
+    return unless $name =~ /\S/;
     my $info;
     if ( eval{ $name->{name} } ) {
 	$info = $name;
