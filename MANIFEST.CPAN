@@ -191,10 +191,13 @@ CPAN/PDF/API2/Resource/XObject/Image/JPEG.pm
 CPAN/PDF/API2/Resource/XObject/Image.pm
 CPAN/PDF/API2/Resource/XObject/Image/PNG.pm
 CPAN/PDF/API2/Resource/XObject/Image/PNM.pm
+CPAN/PDF/API2/Resource/XObject/Image/TIFF/File.pm
 CPAN/PDF/API2/Resource/XObject/Image/TIFF.pm
 CPAN/PDF/API2/Resource/XObject.pm
 CPAN/PDF/API2/UniWrap.pm
 CPAN/PDF/API2/Util.pm
+CPAN/PDF/API2/ViewerPreferences.pm
+CPAN/PDF/API2/Win32.pm
 CPAN/String/Interpolate/Named.pm
 CPAN/Text/Layout.pm
 CPAN/Text/Layout/FontConfig.pm
