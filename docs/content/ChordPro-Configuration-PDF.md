@@ -285,10 +285,10 @@ Properties for the lines of grid sections.
 
       // Grid section lines.
       // The width and colour of the cell bar lines can be specified.
-      // Suppress the cell bar lines by setting width to 0.
+      // Enable by setting the width to the desired width.
       "grids" : {
           "cellbar" : {
-              "width" : 1,
+              "width" : 0,
               "color" : "foreground-medium",
           },
       },
