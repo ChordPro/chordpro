@@ -6,7 +6,6 @@ README.md
 README.ABC
 lib/App/Music/ChordPro.pm
 lib/App/Music/ChordPro/A2Crd.pm
-lib/App/Music/ChordPro/Bundle.pm
 lib/App/Music/ChordPro/Chords.pm
 lib/App/Music/ChordPro/Chords/Parser.pm
 lib/App/Music/ChordPro/Config.pm
@@ -70,6 +69,7 @@ lib/App/Music/ChordPro/res/pod/A2Crd.pod
 lib/App/Music/ChordPro/res/pod/ChordPro.pod
 lib/App/Music/ChordPro/res/pod/Config.pod
 pp/README
+pp/common/App_Music_ChordPro_Bundle.pm
 pp/common/PDF_API2_Bundle.pm
 pp/common/Text_Layout_Bundle.pm
 pp/common/chordpro.pp
