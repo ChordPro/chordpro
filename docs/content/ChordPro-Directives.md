@@ -61,17 +61,17 @@ Environment directives always come in pairs, one to start the
 environment and one to end it.
 
 * [Introduction to environments]({{< relref "Directives-env" >}})
-* [start_of_chorus]({{< relref "Directives-env_chorus" >}}) (short: soc)
-* [end_of_chorus]({{< relref "Directives-env_chorus" >}}) (short: eoc)
+* [start_of_chorus]({{< relref "Directives-env_chorus" >}}) (short: soc),
+   [end_of_chorus]({{< relref "Directives-env_chorus" >}}) (short: eoc)
 * [chorus]({{< relref "Directives-env_chorus" >}})
-* [start_of_verse]({{< relref "Directives-env_verse" >}}) (short: sov)
-* [end_of_verse]({{< relref "Directives-env_verse" >}}) (short: eov)
-* [start_of_bridge]({{< relref "Directives-env_bridge" >}}) (short: sob)
-* [end_of_bridge]({{< relref "Directives-env_bridge" >}}) (short: eob)
-* [start_of_tab]({{< relref "Directives-env_tab" >}}) (short: sot)
-* [end_of_tab]({{< relref "Directives-env_tab" >}}) (short: eot)
-* [start_of_grid]({{< relref "Directives-env_grid" >}}) (short: sog)
-* [end_of_grid]({{< relref "Directives-env_grid" >}}) (short: eog)
+* [start_of_verse]({{< relref "Directives-env_verse" >}}) (short: sov),
+   [end_of_verse]({{< relref "Directives-env_verse" >}}) (short: eov)
+* [start_of_bridge]({{< relref "Directives-env_bridge" >}}) (short: sob),
+   [end_of_bridge]({{< relref "Directives-env_bridge" >}}) (short: eob)
+* [start_of_tab]({{< relref "Directives-env_tab" >}}) (short: sot),
+   [end_of_tab]({{< relref "Directives-env_tab" >}}) (short: eot)
+* [start_of_grid]({{< relref "Directives-env_grid" >}}) (short: sog),
+   [end_of_grid]({{< relref "Directives-env_grid" >}}) (short: eog)
 
 ## Delegate environment directives
 
@@ -93,26 +93,32 @@ output.
 
 ## Fonts, sizes and colours
 
-These directives can be used to temporarily change the font, size and/or colour for lyrics and chords. To permanently change these the reference implementation uses much more powerful [configuration files]({{< relref "ChordPro-Configuration" >}}).
+These directives can be used to temporarily change the font, size
+and/or colour for lyrics, chords, and more.
+To permanently change these the reference implementation uses
+much more powerful [configuration files]({{< relref "ChordPro-Configuration" >}}).
 
-* [textfont]({{< relref "Directives-props_text_legacy" >}}) (short: tf)
-* [textsize]({{< relref "Directives-props_text_legacy" >}}) (short: ts)
-* [textcolour]({{< relref "Directives-props_text_legacy" >}})
-* [titlefont]({{< relref "Directives-props_title_legacy" >}})
-* [titlesize]({{< relref "Directives-props_title_legacy" >}})
-* [titlecolour]({{< relref "Directives-props_title_legacy" >}})
-* [footerfont]({{< relref "Directives-props_footer_legacy" >}})
-* [footersize]({{< relref "Directives-props_footer_legacy" >}})
-* [footercolour]({{< relref "Directives-props_footer_legacy" >}})
-* [chordfont]({{< relref "Directives-props_chord_legacy" >}}) (short: cf)
-* [chordsize]({{< relref "Directives-props_chord_legacy" >}}) (short: cs)
-* [chordcolour]({{< relref "Directives-props_chord_legacy" >}})
-* [tabfont]({{< relref "Directives-props_tab_legacy" >}})
-* [tabsize]({{< relref "Directives-props_tab_legacy" >}})
-* [tabcolour]({{< relref "Directives-props_tab_legacy" >}})
-* [tocfont]({{< relref "Directives-props_toc_legacy" >}})
-* [tocsize]({{< relref "Directives-props_toc_legacy" >}})
-* [toccolour]({{< relref "Directives-props_toc_legacy" >}})
+* [chordfont]({{< relref "Directives-props_chord_legacy" >}}) (short: cf),
+   [chordsize]({{< relref "Directives-props_chord_legacy" >}}) (short: cs),
+   [chordcolour]({{< relref "Directives-props_chord_legacy" >}})
+* [footerfont]({{< relref "Directives-props_footer_legacy" >}}),
+   [footersize]({{< relref "Directives-props_footer_legacy" >}}),
+   [footercolour]({{< relref "Directives-props_footer_legacy" >}})
+* [gridfont]({{< relref "Directives-props_grid_legacy" >}}),
+   [gridsize]({{< relref "Directives-props_grid_legacy" >}}),
+   [gridcolour]({{< relref "Directives-props_grid_legacy" >}})
+* [tabfont]({{< relref "Directives-props_tab_legacy" >}}),
+   [tabsize]({{< relref "Directives-props_tab_legacy" >}}),
+   [tabcolour]({{< relref "Directives-props_tab_legacy" >}})
+* [tocfont]({{< relref "Directives-props_toc_legacy" >}}),
+   [tocsize]({{< relref "Directives-props_toc_legacy" >}}),
+   [toccolour]({{< relref "Directives-props_toc_legacy" >}})
+* [textfont]({{< relref "Directives-props_text_legacy" >}}) (short: tf),
+   [textsize]({{< relref "Directives-props_text_legacy" >}}) (short: ts),
+   [textcolour]({{< relref "Directives-props_text_legacy" >}})
+* [titlefont]({{< relref "Directives-props_title_legacy" >}}),
+   [titlesize]({{< relref "Directives-props_title_legacy" >}}),
+   [titlecolour]({{< relref "Directives-props_title_legacy" >}})
 
 ## Output related directives
 
