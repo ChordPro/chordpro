@@ -224,14 +224,18 @@ extensive details and examples.
     
         "delegates" : {
             "abc" : {
-                "type" : "image",
-                "module" : "ABC",
-                "handler" : "abc2image",
+                "type"     : "image",
+                "module"   : "ABC",
+                "handler"  : "abc2image",
+                "config"   : "default", // or "none", or "myformat.fmt"
+                "preamble" : [],
             },
             "ly" : {
-                "type" : "image",
-                "module" : "Lilypond",
-                "handler" : "ly2image",
+                "type"     : "image",
+                "module"   : "Lilypond",
+                "handler"  : "ly2image",
+                "config"   : "default", // or "none", or ...
+                "preamble" : [],
             },
          },
     
@@ -381,10 +385,10 @@ extensive details and examples.
     
           // Grid section lines.
           // The width and colour of the cell bar lines can be specified.
-          // Suppress the cell bar lines by setting width to 0.
+          // Enable by setting the width to the desired width.
           "grids" : {
               "cellbar" : {
-                  "width" : 1,
+                  "width" : 0,
                   "color" : "foreground-medium",
               },
           },

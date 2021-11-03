@@ -8,6 +8,36 @@
 	    "format": "color",
 	    "pattern": "^(#[0-9A-Fa-f]{6}|[-A-Za-z0-9]+)$"
 	},
+	"delegatespec": {
+	    "description": "Delegates.",
+	    "additionalProperties": false,
+	    "properties": {
+		"type": {
+		    "type": "string",
+		    "default": "image"
+		},
+		"handler": {
+		    "type": "string",
+		    "default": "abc2image"
+		},
+		"config": {
+		    "type": "string",
+		    "default": "default"
+		},
+		"preamble": {
+		    "type": "array",
+		    "items" : {
+			"type": "string"
+		    }
+		},
+		"module": {
+		    "type": "string",
+		    "default": "ABC"
+		}
+	    },
+	    "required" : [ "type", "handler", "module" ],
+	    "defaultProperties" : [ "type", "handler", "module" ]
+	},
 	"fontspec": {
 	    "description": "Font specification.",
 	    "additionalProperties": false,
@@ -554,43 +584,35 @@
 	    "properties": {
 	        "abc": {
 		    "description": "Embedding ABC",
-		    "additionalProperties": false,
-		    "properties": {
-			"type": {
-			    "type": "string",
-			    "default": "image"
-			},
-			"handler": {
-			    "type": "string",
-			    "default": "abc2image"
-			},
-			"module": {
-			    "type": "string",
-			    "default": "ABC"
-			}
-		   },
-		   "required" : [ "type", "handler", "module" ],
-		   "defaultProperties" : [ "type", "handler", "module" ]
+		    "allOf": [
+			{ "$ref": "#/definitions/delegatespec" },
+			{ "properties": {
+			      "handler": {
+				  "type": "string",
+				  "default": "abc2image"
+			      },
+			      "module": {
+				  "type": "string",
+				  "default": "ABC"
+			      }
+			} }
+		    ]
 		 },
 	        "ly": {
 		    "description": "Embedding Lilypond",
-		    "additionalProperties": false,
-		    "properties": {
-			"type": {
-			    "type": "string",
-			    "default": "image"
-			},
-			"handler": {
-			    "type": "string",
-			    "default": "ly2image"
-			},
-			"module": {
-			    "type": "string",
-			    "default": "Lilypond"
-			}
-		   },
-		   "required" : [ "type", "handler", "module" ],
-		   "defaultProperties" : [ "type", "handler", "module" ]
+		    "allOf": [
+			{ "$ref": "#/definitions/delegatespec" },
+			{ "properties": {
+			      "handler": {
+			          "type": "string",
+			          "default": "ly2image"
+			      },
+			      "module": {
+			          "type": "string",
+			          "default": "Lilypond"
+			      }
+		        } }
+		     ]
 		 }
 	    }
 	},

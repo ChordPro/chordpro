@@ -16,6 +16,7 @@ use File::LoadLines;
 use IO::String;
 
 use App::Music::ChordPro::Utils;
+use Text::ParseWords qw(shellwords);
 
 sub ABCDEBUG() { $config->{debug}->{abc} }
 
@@ -43,6 +44,11 @@ sub abc2image {
     for ( keys(%{$elt->{opts}}) ) {
 	print $fd '%%'.$_." ".$elt->{opts}->{$_}."\n";
 	warn('%%'.$_." ".$elt->{opts}->{$_}."\n") if ABCDEBUG;
+    }
+
+    for ( @{ $config->{delegates}->{abc}->{preamble} } ) {
+	print $fd "$_\n";
+	warn( "$_\n") if ABCDEBUG;
     }
 
     # Add mandatory field.
@@ -85,6 +91,11 @@ sub abc2image {
     if ( $kv->{width} ) {
 	$pw = $kv->{width};
     }
+    { local $SIG{__WARN__} = sub {};
+      local $SIG{__DIE__} = sub {};
+      $kv->{split} = 0 unless eval { require Image::Magick };
+    }
+
     state $abcm2ps = findexe("abcm2ps");
     unless ( $abcm2ps ) {
 	warn("Error in ABC embedding: missing 'abcm2ps' tool.\n");
@@ -93,12 +104,16 @@ sub abc2image {
 
     my $svg0 = File::Spec->catfile( $td, "tmp${imgcnt}.svg" );
     my $svg1 = File::Spec->catfile( $td, "tmp${imgcnt}001.svg" );
-    warn( join(" ", $abcm2ps, qw(-g -q -m0cm),
-	       "-w" . $pw . "pt",
-	       "-O", $svg0, $src, "\n" ) ) if ABCDEBUG;
-    if ( sys( $abcm2ps, qw(-g -q -m0cm),
-	      "-w" . $pw . "pt",
-	      "-O", $svg0, $src )
+    my $fmt = $config->{delegates}->{abc}->{config};
+    my @cmd = ( $abcm2ps, qw(-g -q -m0cm), "-w" . $pw . "pt" );
+    if ( $fmt =~ s/^none,?// ) {
+	push( @cmd, "+F" );
+    }
+    push( @cmd, "-F", $fmt ) if $fmt && $fmt ne "default";
+    push( @cmd, "-A" ) if $kv->{split};
+    push( @cmd, "-O", $svg0, $src );
+    warn( "+ @cmd\n" ) if ABCDEBUG;
+    if ( sys( @cmd )
 	 or
 	 ! -s $svg1 ) {
 	warn("Error in ABC embedding\n");
@@ -107,10 +122,55 @@ sub abc2image {
     $kv->{scale} ||= 1;
 
     my @res;
+    my @lines;
+    if ( 1 ) {
+	# Sigh. ImageMagick uses librsvg, and this lib still does not
+	# support font styles. So replace them with their explicit forms.
+#	@lines = loadlines($svg1, { encoding => "ISO-8859-1" } );
+	@lines = loadlines($svg1);
+	for ( @lines ) {
+	    next unless /^(.*)\bstyle="font:(.*)"(.*)$/;
+	    my ( $pre, $style, $post ) = ( $1, $2, $3 );
+	    my $f = { family => "Serif" };
+	    for my $w ( shellwords($style) ) {
+		if ( $w =~ /^(bold|light)$/ ) {
+		    $f->{weight} = $1;
+		}
+		elsif ( $w =~ /^(italic|oblique)$/ ) {
+		    $f->{style} = $1;
+		}
+		elsif ( $w =~ /^(\d+(?:\.\d*)?)px$/ ) {
+		    $f->{size} = 0+$1;
+		}
+		else {
+		    $f->{family} = $w;
+		}
+	    }
+
+	    if ( $^O =~ /mswin/i ) {
+		$f->{family} = "Times New Roman" if $f->{family} eq "Times";
+		$f->{family} = "Arial" if $f->{family} eq "Helvetica";
+		$f->{family} = "Courier New" if $f->{family} eq "Courier";
+	    }
+
+	    $_ = $pre;
+	    $_ .= "font-family=\"" . $f->{family} . '" ';
+	    $_ .= "font-size=\""   . $f->{size} .   '" ' if $f->{size};
+	    $_ .= "font-weight=\"" . $f->{weight} . '" ' if $f->{weight};
+	    $_ .= $post;
+	    warn("\"${pre}style=\"font:$style\"$post\" => \"$_\"\n")
+	      if ABCDEBUG;
+	}
+	unless ( $kv->{split} ) {
+	    open( my $fd, '>:utf8', $svg1 )
+	      or die("Cannot rewrite $svg1: $!\n");
+	    print $fd ( "$_\n" ) for @lines;
+	    close($fd) or die("Error rewriting $svg1: $!\n");;
+	}
+    }
 
     if ( $kv->{split} ) {
 	require Image::Magick;
-	my @lines = loadlines($svg1);
 
 	my $segment = 0;
 	my $init = 1;
@@ -129,6 +189,10 @@ sub abc2image {
 	    warn $x if $x;
 	    $x = $image->Trim;
 	    warn $x if $x;
+	    warn("Trim: ", join("x", $image->Get('width', 'height')).
+		 " ", join("x", $image->Get('base-columns', 'base-rows')),
+		 "+", join("+", $image->Get('page.x', 'page.y')), "\n")
+	      if $config->{debug}->{images};
 	    $fn =~ s/\.svg$/.jpg/;
 	    $image->Set( magick => 'jpg' );
 	    my $data = $image->ImageToBlob;
@@ -164,13 +228,10 @@ sub abc2image {
 		print $fd "$_\n" if $segment;
 		next;
 	    }
-	    if ( /<g stroke-width=".*?" style="font:.*">/
+	    if ( /^<g stroke-width=".*?" font-.*/
 		 && @lines > 8
-		 && $lines[0] =~ /<path class="stroke" stroke-width="/
-		 && $lines[2] =~ /<path class="stroke" stroke-width="/
-		 && $lines[4] =~ /<path class="stroke" stroke-width="/
-#		 && $lines[6] =~ /<path class="stroke" stroke-width="/
-#		 && $lines[8] =~ /<path class="stroke" stroke-width="/
+		 && $lines[0] =~ /^<path class="stroke" stroke-width="/
+		 && $lines[2] =~ /^<abc type="B"/
 		 or !$segment
 	       ) {
 
@@ -207,9 +268,9 @@ sub abc2image {
 	    }
 	    @cmd = ( $convert );
 	}
-
-	if ( sys( @cmd, qw(-density 600 -background white -trim),
-		  $svg1, $img ) ) {
+	push( @cmd, qw(-density 600 -background white -trim), $svg1, $img );
+	warn( "+ @cmd\n" ) if ABCDEBUG;
+	if ( sys( @cmd ) ) {
 	    warn("Error in ABC embedding\n");
 	    return;
 	}

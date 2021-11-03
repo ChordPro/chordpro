@@ -1096,14 +1096,18 @@ sub default_config() {
 
     "delegates" : {
         "abc" : {
-            "type" : "image",
-            "module" : "ABC",
-            "handler" : "abc2image",
+            "type"     : "image",
+            "module"   : "ABC",
+            "handler"  : "abc2image",
+            "config"   : "default", // or "none", or "myformat.fmt"
+            "preamble" : [],
         },
         "ly" : {
-            "type" : "image",
-            "module" : "Lilypond",
-            "handler" : "ly2image",
+            "type"     : "image",
+            "module"   : "Lilypond",
+            "handler"  : "ly2image",
+            "config"   : "default", // or "none", or ...
+            "preamble" : [],
         },
      },
 
