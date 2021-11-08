@@ -873,7 +873,7 @@ sub app_setup {
 
 	  );
 	$clo->{nodefaultconfigs} = 1;
-	$clo->{nosongconfigs} = 1;
+	$clo->{nosongconfig} = 1;
 	$::options->{reference} = 1;
     }
 
@@ -938,7 +938,7 @@ sub app_setup {
         }
     }
     # If no config was specified, and no default is available, force no.
-    for my $config ( qw(sysconfig userconfig config) ) {
+    for my $config ( qw(sysconfig userconfig config songconfig) ) {
         $clo->{"no$config"} = 1 unless $clo->{$config};
     }
 

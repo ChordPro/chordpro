@@ -98,7 +98,7 @@ sub parse_file {
 	next unless exists $opts->{$_};
 	$config->{settings}->{$_} = $opts->{$_};
     }
-    for ( "no-substitute", "no-transpose" ) {
+    for ( "no-substitute", "no-transpose", "nosongconfig" ) {
 	next unless exists $opts->{$_};
 	$options->{$_} = $opts->{$_};
     }
@@ -132,7 +132,7 @@ sub parse_song {
     local $config = dclone($config);
 
     # Load song-specific config, if any.
-    if ( !$options->{nosongconfigs} && $diag->{file} ) {
+    if ( !$options->{nosongconfig} && $diag->{file} ) {
 	if ( $options->{verbose} ) {
 	    my $this = App::Music::ChordPro::Chords::get_parser();
 	    $this = defined($this) ? $this->{system} : "";
