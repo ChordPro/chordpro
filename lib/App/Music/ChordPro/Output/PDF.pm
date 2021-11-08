@@ -2215,6 +2215,8 @@ sub configurator {
 		$fonts->{$type}->{file} = $_;
 	    }
 	    else {
+		die("Config error: \"$_\" is not a built-in font\n")
+		  unless is_corefont($_);
 		$fonts->{$type}->{name} = $_;
 	    }
 	}
