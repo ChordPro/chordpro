@@ -91,9 +91,20 @@ sub abc2image {
     if ( $kv->{width} ) {
 	$pw = $kv->{width};
     }
-    { local $SIG{__WARN__} = sub {};
-      local $SIG{__DIE__} = sub {};
-      $kv->{split} = 0 unless eval { require Image::Magick };
+    my $have_magick = do {
+        local $SIG{__WARN__} = sub {};
+	local $SIG{__DIE__} = sub {};
+	eval { require Image::Magick;
+	       $Image::Magick::VERSION || "6.x?" };
+    };
+    if ( $have_magick ) {
+	warn("Using PerlMagick version ", $have_magick, "\n")
+	  if $config->{debug}->{images} || ABCDEBUG;
+    }
+    else {
+	warn("No PerlMagick, hope you have ImageMagick installed...\n")
+	  if $config->{debug}->{images} || ABCDEBUG;
+	$kv->{split} = 0;
     }
 
     state $abcm2ps = findexe("abcm2ps");
@@ -131,7 +142,8 @@ sub abc2image {
 	for ( @lines ) {
 	    next unless /^(.*)\bstyle="font:(.*)"(.*)$/;
 	    my ( $pre, $style, $post ) = ( $1, $2, $3 );
-	    my $f = { family => "Serif" };
+	    my $f = {};
+	    my @f;
 	    for my $w ( shellwords($style) ) {
 		if ( $w =~ /^(bold|light)$/ ) {
 		    $f->{weight} = $1;
@@ -143,14 +155,17 @@ sub abc2image {
 		    $f->{size} = 0+$1;
 		}
 		else {
-		    $f->{family} = $w;
+		    push( @f, $w );
 		}
 	    }
+	    $f->{family} = @f ? "@f" : "Serif";
 
-	    if ( $^O =~ /mswin/i ) {
+	    if ( 0 && is_msw() ) {
+		# Windows doesn't seem to find the right fonts.
+		# So lend a hand.
 		$f->{family} = "Times New Roman" if $f->{family} eq "Times";
-		$f->{family} = "Arial" if $f->{family} eq "Helvetica";
-		$f->{family} = "Courier New" if $f->{family} eq "Courier";
+		$f->{family} = "Arial"           if $f->{family} eq "Helvetica";
+		$f->{family} = "Courier New"     if $f->{family} eq "Courier";
 	    }
 
 	    $_ = $pre;
@@ -236,10 +251,10 @@ sub abc2image {
 	       ) {
 
 		$pp->() if $fd;
-		$fn = sprintf( "out%03d.svg", ++$segment );
+		$fn = File::Spec->catfile( $td, sprintf( "out%03d.svg", ++$segment ) );
 		warn("Writing: $fn ...\n") if $config->{debug}->{images};
 		undef $fd;
-		open( $fd, '>:utf8', $fn );
+		open( $fd, '>:utf8', $fn ) or die("$fn: $!\n");
 		print $fd ( "$_\n" ) for @preamble;
 	    }
 

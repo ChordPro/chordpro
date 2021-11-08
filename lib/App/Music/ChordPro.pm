@@ -1077,6 +1077,8 @@ sub ::runtimeinfo {
 	$msg .= sprintf( $fmtv, "wxWidgets", $dd->(Wx::wxVERSION) );
     }
 
+    local $SIG{__WARN__} = sub {};
+    local $SIG{__DIE__} = sub {};
     $msg .= sprintf( $fmtv, "Storable", $dd->($Storable::VERSION) );
     eval { require Text::Layout;
 	$msg .= sprintf( $fmtv, "Text::Layout", $dd->($Text::Layout::VERSION) );
@@ -1092,6 +1094,13 @@ sub ::runtimeinfo {
     eval { require Font::TTF;
 	$msg .= sprintf( $fmtv, "Font::TTF", $dd->($Font::TTF::VERSION) );
     };
+    eval { require Image::Magick;
+	$msg .= sprintf( $fmtv, "Image::Magick",
+			 $dd->( $Image::Magick::VERSION ||
+				$Image::Magick::Q16::VERSION ||
+				$Image::Magick::Q8::VERSION || "6.x?" ) );
+    };
+    return $msg;
 }
 
 sub splitpath {
