@@ -12,6 +12,7 @@
     - Fix warning if diagrams.show=user and no chords.
     - Fix labels for grid with pdf.labels.comment.
     - Fix key_actual and key_from to reflect all keys.
+    - Fix tilde expansion for font files.
 
 5.985 2021-09-28
 

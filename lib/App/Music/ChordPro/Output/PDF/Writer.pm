@@ -565,7 +565,7 @@ sub init_filefont {
 
     my $fc = Text::Layout::FontConfig->new;
     eval {
-	my $t = $fc->from_filename($font->{file});
+	my $t = $fc->from_filename(expand_tilde($font->{file}));
 	$t->get_font($self->{layout}); # force load
 	$t->{font}->{Name}->{val} =~ s/~.*/~$faketime/ if $regtest;
 	$t->{_ff} = $ff;
