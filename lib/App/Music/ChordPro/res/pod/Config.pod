@@ -123,6 +123,8 @@ extensive details and examples.
         "tuning" : [ "E2", "A2", "D3", "G3", "B3", "E4" ],
     
         // In case of alternatives, the first one is used for output.
+        // Note that it is tempting to use real sharps and flats for output,
+        // but most fonts don't have the glyphs :(.
         "notes" : {
     
           "system" : "common",
