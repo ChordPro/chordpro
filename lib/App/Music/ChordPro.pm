@@ -87,6 +87,7 @@ sub ::run {
 sub main {
     my ($opts) = @_;
     $options = { %$options, %$opts } if $opts;
+    warn("ChordPro invoked: @{$options->{_argv}}\n") if $options->{debug};
     chordpro();
 
 }
