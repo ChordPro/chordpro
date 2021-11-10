@@ -1122,7 +1122,7 @@
 
 		"info" : {
 		    "description": "PDF info data.",
-		    "additionalProperties": false,
+		    "additionalProperties": true,
 		    "properties": {
 		        "author": {
 			    "description": "Name of the author.",
