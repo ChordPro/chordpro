@@ -500,32 +500,30 @@ sub chord_info {
     if ( ! $info ) {
 	my $i;
 	if ( $i = parse_chord($chord) and defined($i->{root_ord}) ) {
-	    my $a = $i->agnostic;
+	    $i = $i->agnostic;
 	    for ( \%song_chords, \%config_chords ) {
-		last unless defined $a;
-		next unless exists($_->{$a});
-		$info = $_->{$a};
+		last unless defined $i;
+		next unless exists($_->{$i});
+		$info = $_->{$i};
 		$info->{name} = $chord;
 		last;
 	    }
-	    bless $info => ref($i);
 	}
     }
 
     if ( ! $info && $::config->{diagrams}->{auto} ) {
-	$info = bless {
-		  origin  => "user",
+	$info = { origin  => "user",
 		  name    => $chord,
 		  base    => 0,
 		  frets   => [],
 		  fingers => [],
 		  keys    => [],
-		} => 'App::Music::ChordPro::Chord::Common';####WRONG?;
+		};
     }
 
     return unless $info;
     if ( $info->{base} <= 0 ) {
-	return bless {
+	return +{
 		 name    => $chord,
 		 %$info,
 		 strings => [],
@@ -533,12 +531,12 @@ sub chord_info {
 		 keys    => [],
 		 base    => 1,
 		 system  => "",
-		 } => ref($info);
+		 };
     }
-    return bless {
+    return +{
 	     name    => $chord,
 	     %$info,
-    } => ref($info);
+    };
 }
 
 ################ Section Transposition ################

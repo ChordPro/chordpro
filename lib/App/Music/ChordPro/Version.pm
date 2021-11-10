@@ -1,4 +1,4 @@
 # This file is generated. Do not edit!
 package App::Music::ChordPro::Version;
-our $VERSION = "5.985_026";
+our $VERSION = "5.985_027";
 print "$VERSION\n" unless caller;

@@ -652,7 +652,7 @@ sub chord {
     return $c if $c =~ /^\*/;
     my $parens = $c =~ s/^\((.*)\)$/$1/;
 
-    my $info = App::Music::ChordPro::Chords::chord_info($c);
+    my $info = App::Music::ChordPro::Chords::identify($c);
     unless ( $info->{system} ) {
 	if ( $info->{error} && ! $warned_chords{$c}++ ) {
 	    do_warn( $info->{error} ) unless $c =~ /^n\.?c\.?$/i;
