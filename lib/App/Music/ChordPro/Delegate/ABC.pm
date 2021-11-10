@@ -42,6 +42,12 @@ sub abc2image {
     }
 
     for ( keys(%{$elt->{opts}}) ) {
+
+	# Suppress meaningless transpositions. ChordPro uses them to enforce
+	# certain chord renderings.
+	next if $_ eq "transpose"
+	  && !($elt->{opts}->{$_} % @{ $config->{notes}->{sharp} });
+
 	print $fd '%%'.$_." ".$elt->{opts}->{$_}."\n";
 	warn('%%'.$_." ".$elt->{opts}->{$_}."\n") if ABCDEBUG;
     }
