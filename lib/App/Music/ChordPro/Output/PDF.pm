@@ -980,7 +980,7 @@ sub generate_song {
 		      $grid_cellwidth,
 		      $grid_barwidth,
 		      $grid_margin,
-		      $ps );
+		      $ps, song => $s );
 
 	    $y -= $vsp;
 	    $pr->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
@@ -1633,7 +1633,7 @@ sub is_bar {
 }
 
 sub gridline {
-    my ( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps ) = @_;
+    my ( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) = @_;
 
     # Grid context.
 
@@ -1755,7 +1755,10 @@ sub gridline {
 	$needcell = $ctl->{width};
 
 	if ( exists $token->{chord} ) {
-	    $pr->text( $token->{chord}, $x, $y, $fchord )
+	    my $t = $token->{chord};
+	    my $i = $opts{song}->{chordsinfo}->{$t};
+	    $t = chord_display($i) if $i;
+	    $pr->text( $t, $x, $y, $fchord )
 	      unless $token eq ".";
 	    $x += $cellwidth;
 	}
@@ -2287,6 +2290,12 @@ sub configurator {
     $fonts->{comment_box}->{size}    ||= $fonts->{text}->{size};
     $fonts->{comment}->{size}        ||= $fonts->{text}->{size};
     $fonts->{annotation}->{size}     ||= $fonts->{chord}->{size};
+    $fonts->{toc}->{size}            ||= $fonts->{text}->{size};
+    $fonts->{empty}->{size}          ||= $fonts->{text}->{size};
+    $fonts->{grid}->{size}           ||= $fonts->{chord}->{size};
+    $fonts->{grid_margin}->{size}    ||= $fonts->{comment}->{size};
+    $fonts->{diagram}->{size}        ||= $fonts->{comment}->{size};
+    $fonts->{diagram_base}->{size}   ||= $fonts->{comment}->{size};
 
     # Default footer is small subtitle.
     unless ( $fonts->{footer} ) {
