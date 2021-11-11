@@ -46,12 +46,18 @@ sub info {
     unless ( $info{CreationDate} ) {
 	my @tm = gmtime( $regtest ? $faketime : time );
 	$info{CreationDate} =
-	  sprintf("D:%04d%02d%02d%02d%02d%02d+00'00'",
+	  sprintf("D:%04d%02d%02d%02d%02d%02d+01'00",
 		  1900+$tm[5], 1+$tm[4], @tm[3,2,1,0]);
     }
-    $self->{pdf}->info( %info );
+    if ( $self->{pdf}->can("info_metadata") ) {
+	for ( keys(%info) ) {
+	    $self->{pdf}->info_metadata( $_, $info{$_} );
+	}
+    }
+    else {
+	$self->{pdf}->info(%info);
+    }
 }
-
 
 sub wrap {
     my ( $self, $text, $m ) = @_;

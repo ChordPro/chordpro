@@ -5,6 +5,7 @@
     - Show cell bars in grid lines (Config: pdf.grids)
     - Suppress warnings for empty chords (i.e., [   ] spacers).
     - Add error message when font name is not a built-in.
+    - Allow custom PDF meta data. Requires PDF::API2 2.042.
     - !BugFixes
     - Remove obsolete __EMBEDDING__.
     - Bump requirement Text::Layout to 0.024.

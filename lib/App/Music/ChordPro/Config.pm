@@ -509,7 +509,7 @@ sub _augment {
 	warn("Config augment error: unknown item $path$key\n")
 	  unless exists $self->{$key}
 	    || $path eq "pdf.fontconfig."
-	    || $path =~ /^pdf\.fonts\./
+	    || $path =~ /^pdf\.(?:info|fonts)\./
 	    || $path =~ /^meta\./
 	    || $key =~ /^_/;
 
@@ -748,7 +748,7 @@ sub hmerge($$;$) {
 	warn("Config error: unknown item $path$key\n")
 	  unless exists $res{$key}
 	    || $path eq "pdf.fontconfig."
-	    || $path =~ /^pdf\.fonts\./
+	    || $path =~ /^pdf\.(?:info|fonts)\./
 	    || $path =~ /^meta\./
 	    || $key =~ /^_/;
 
@@ -1117,7 +1117,7 @@ sub default_config() {
 
     "pdf" : {
 
-      // PDF Properties.
+      // PDF Properties. Arbitrary key/values may be added.
       // Note that the context for substitutions is the first song.
       "info" : {
           "title"    : "%{title}",
