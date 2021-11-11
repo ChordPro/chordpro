@@ -121,6 +121,13 @@
 		    "title": "Chords under the lyrics" }
 		},
 
+		"chords-canonical": {
+		    "description": "",
+		    "title": "Use canonical representation for chords.",
+		    "type": "boolean",
+		    "default": false
+		},
+
 		"columns": {
 		    "description": "Number of columns.",
 		    "type": "integer",
@@ -1122,7 +1129,7 @@
 
 		"info" : {
 		    "description": "PDF info data.",
-		    "additionalProperties": false,
+		    "additionalProperties": true,
 		    "properties": {
 		        "author": {
 			    "description": "Name of the author.",

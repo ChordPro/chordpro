@@ -946,6 +946,8 @@ sub default_config() {
       "chordnames": "strict",
       // Allow note names in [].
       "notenames" : false,
+      // Always replace chords by their canonical form.
+      "chords-canonical" : false
     },
 
     // Metadata.

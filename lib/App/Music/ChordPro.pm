@@ -8,6 +8,7 @@ use App::Packager;
 
 use App::Music::ChordPro::Version;
 use App::Music::ChordPro::Utils;
+use App::Music::ChordPro::Chords;
 use App::Music::ChordPro::Output::Common;
 
 our $VERSION = $App::Music::ChordPro::Version::VERSION;
@@ -93,6 +94,9 @@ sub main {
 }
 
 sub chordpro {
+
+    # In case of re-entrancy.
+    App::Music::ChordPro::Chords::reset_cache();
 
     # Establish backend.
     my $of = $options->{output};
@@ -939,7 +943,7 @@ sub app_setup {
         }
     }
     # If no config was specified, and no default is available, force no.
-    for my $config ( qw(sysconfig userconfig config songconfig) ) {
+    for my $config ( qw(sysconfig userconfig config ) ) {
         $clo->{"no$config"} = 1 unless $clo->{$config};
     }
 

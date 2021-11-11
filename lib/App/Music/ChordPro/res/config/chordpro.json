@@ -47,6 +47,8 @@
       "chordnames": "strict",
       // Allow note names in [].
       "notenames" : false,
+      // Always replace chords by their canonical form.
+      "chords-canonical" : false
     },
 
     // Metadata.
@@ -218,7 +220,7 @@
 
     "pdf" : {
 
-      // PDF Properties.
+      // PDF Properties. Arbitrary key/values may be added.
       // Note that the context for substitutions is the first song.
       "info" : {
           "title"    : "%{title}",

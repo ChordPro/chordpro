@@ -98,7 +98,7 @@ sub parse_file {
 	next unless exists $opts->{$_};
 	$config->{settings}->{$_} = $opts->{$_};
     }
-    for ( "no-substitute", "no-transpose", "nosongconfig" ) {
+    for ( "no-substitute", "no-transpose" ) {
 	next unless exists $opts->{$_};
 	$options->{$_} = $opts->{$_};
     }
@@ -130,6 +130,8 @@ sub parse_song {
     my ( $self, $lines, $linecnt, $meta ) = @_;
     die("OOPS! Wrong meta") unless ref($meta) eq 'HASH';
     local $config = dclone($config);
+
+    warn("Processing song ", $diag->{file}, "...\n") if $options->{verbose};
 
     # Load song-specific config, if any.
     if ( !$options->{nosongconfig} && $diag->{file} ) {
@@ -215,7 +217,6 @@ sub parse_song {
 		 $config->{instrument}->{type}, "\n" );
     }
     $config->lock;
-
     for ( keys %{ $config->{meta} } ) {
 	$meta->{$_} //= [];
 	if ( UNIVERSAL::isa($config->{meta}->{$_}, 'ARRAY') ) {
@@ -231,7 +232,6 @@ sub parse_song {
     $decapo = $config->{settings}->{decapo};
     my $fragment = $options->{fragment};
 
-    warn("Processing song ", $diag->{file}, "...\n") if $options->{verbose};
     $song = App::Music::ChordPro::Song->new
       ( source => { file => $diag->{file}, line => 1 + $$linecnt },
 	system => $config->{notes}->{system},
@@ -666,8 +666,14 @@ sub chord {
 	    $c = $_;
     }
 
+    unless ( $info->{error} ) {
+	if ( $::config->{settings}->{'chords-canonical'} ) {
+	    my $t = $c;
+	    $c = $info->show;
+	}
+	$used_chords{$c} = $info;
+    }
     push( @used_chords, $c ) unless $info->{isnote};
-    $used_chords{$c} = $info unless $info->{error};
 
     return $parens ? "($c)" : $c;
 }

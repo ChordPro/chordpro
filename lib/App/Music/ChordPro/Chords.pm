@@ -483,6 +483,10 @@ sub identify {
     return $ident_cache->{$name} = $info;
 }
 
+sub reset_cache {
+    $ident_cache = {};
+}
+
 # API: Returns info about an individual chord.
 # This is basically the result of parse_chord, augmented with strings
 # and fingers, if any.

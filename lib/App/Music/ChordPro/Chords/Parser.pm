@@ -299,10 +299,17 @@ sub parse_chord {
 
     $ordmod->("root");
 
-    return $info unless $bass;
-    return unless $bass =~ /^$n_pat$/;
-    $info->{bass} = $bass;
-    $ordmod->("bass");
+    if ( $bass ) {
+	return unless $bass =~ /^$n_pat$/;
+	$info->{bass} = $bass;
+	$ordmod->("bass");
+    }
+
+    if ( $::config->{settings}->{'chords-canonical'} ) {
+	my $t = $info->{name};
+	$info->{name} = $info->show;
+    }
+
     return $info;
 }
 

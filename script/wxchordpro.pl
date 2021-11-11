@@ -4,8 +4,12 @@ use Wx 0.9912 qw[:allclasses];
 
 use strict;
 use warnings;
+use utf8;
 
 package main;
+
+binmode(STDERR, ':utf8');
+binmode(STDOUT, ':utf8');
 
 use FindBin;
 use lib "$FindBin::Bin/../CPAN";
