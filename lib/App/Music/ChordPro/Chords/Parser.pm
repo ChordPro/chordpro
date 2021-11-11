@@ -299,6 +299,9 @@ sub parse_chord {
 
     $ordmod->("root");
 
+    cluck("BLESS info for $chord into ", $self->{target}, "\n")
+      unless ref($info) =~ /App::Music::ChordPro::Chord::/;
+
     if ( $bass ) {
 	return unless $bass =~ /^$n_pat$/;
 	$info->{bass} = $bass;

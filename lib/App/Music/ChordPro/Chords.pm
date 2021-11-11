@@ -327,7 +327,7 @@ sub add_config_chord {
 	$res = $config_chords{$def->{copy}};
 	return "Cannot copy $def->{copy}"
 	  unless $res;
-	$def = { %$res, %$def };
+	$def = bless { %$res, %$def } => ref($res);
     }
 
     my ( $base, $frets, $fingers, $keys ) =
@@ -337,7 +337,7 @@ sub add_config_chord {
 
     for $name ( $name, @names ) {
 	my $info = parse_chord($name) // { name => $name };
-	$config_chords{$name} =
+	$config_chords{$name} = bless
 	  { origin  => "config",
 	    system  => $parser->{system},
 	    %$info,
@@ -346,7 +346,8 @@ sub add_config_chord {
 	    baselabeloffset => $def->{baselabeloffset}||0,
 	    frets   => [ $frets && @$frets ? @$frets : () ],
 	    fingers => [ $fingers && @$fingers ? @$fingers : () ],
-	    keys    => [ $keys && @$keys ? @$keys : () ] };
+	    keys    => [ $keys && @$keys ? @$keys : () ]
+	  } => $parser->{target};
 	push( @chordnames, $name );
 	next if $def->{copy};
 
@@ -439,7 +440,8 @@ sub parse_chord {
 	$parser //= App::Music::ChordPro::Chords::Parser->get_parser;
 	# warn("XXX ", $parser->{system}, " ", $parser->{n_pat}, "\n");
     }
-    return $parser->parse($chord);
+    my $res = $parser->parse($chord);
+    return $res;
 }
 
 ################ Section Chords Info ################
@@ -504,30 +506,38 @@ sub chord_info {
     if ( ! $info ) {
 	my $i;
 	if ( $i = parse_chord($chord) and defined($i->{root_ord}) ) {
-	    $i = $i->agnostic;
+	    $info = { %$i };
+	    my $a = $i->agnostic;
 	    for ( \%song_chords, \%config_chords ) {
-		last unless defined $i;
-		next unless exists($_->{$i});
-		$info = $_->{$i};
+		last unless defined $a;
+		next unless exists($_->{$a});
+		$info = $_->{$a};
 		$info->{name} = $chord;
 		last;
 	    }
+	    bless $info => ref($i);
+	    Carp::cluck("Chord_info BLESS info for $chord into ", ref($info), "\n")
+	      unless ref($info) =~ /App::Music::ChordPro::Chord::/;
+
 	}
     }
 
     if ( ! $info && $::config->{diagrams}->{auto} ) {
-	$info = { origin  => "user",
+	$info = bless {
+		  origin  => "user",
 		  name    => $chord,
 		  base    => 0,
 		  frets   => [],
 		  fingers => [],
 		  keys    => [],
-		};
+		} => 'App::Music::ChordPro::Chord::Common';####WRONG?;
     }
 
     return unless $info;
-    if ( $info->{base} <= 0 ) {
-	return +{
+    Carp::cluck("BLESS info for $chord into ", ref($info), "\n")
+	unless ref($info) =~ /App::Music::ChordPro::Chord::/;
+    if ( ($info->{base}//0) <= 0 ) {
+	return bless {
 		 name    => $chord,
 		 %$info,
 		 strings => [],
@@ -535,12 +545,12 @@ sub chord_info {
 		 keys    => [],
 		 base    => 1,
 		 system  => "",
-		 };
+		 } => ref($info);
     }
-    return +{
+    return bless {
 	     name    => $chord,
 	     %$info,
-    };
+    } => ref($info);
 }
 
 ################ Section Transposition ################

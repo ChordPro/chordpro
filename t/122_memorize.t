@@ -40,9 +40,9 @@ The ^quick ^brown ^ox jumps over the lazy ^dog
 {end_of_verse3}
 EOD
 
-my $warning;
+my $warning = "";
 {
-    local $SIG{__WARN__} = sub { $warning = "@_" };
+    local $SIG{__WARN__} = sub { $warning .= "@_" };
     eval { $s->parse_file(\$data) } or diag("$@");
 }
 

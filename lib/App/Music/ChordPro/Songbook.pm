@@ -592,7 +592,6 @@ sub parse_song {
 	  };
     }
     $song->{chordsinfo} = { %used_chords };
-
     my $xp = $config->{settings}->{transpose};
     my $xc = $config->{settings}->{transcode};
     if ( $xc && App::Music::ChordPro::Chords::Parser->get_parser($xc,1)->movable ) {
@@ -652,8 +651,10 @@ sub chord {
     return $c if $c =~ /^\*/;
     my $parens = $c =~ s/^\((.*)\)$/$1/;
 
-    my $info = App::Music::ChordPro::Chords::identify($c);
-    unless ( $info->{system} ) {
+    my $info = App::Music::ChordPro::Chords::chord_info($c);
+    Carp::cluck("BLESS info for $c into ", ref($info), "\n")
+	unless ref($info) =~ /App::Music::ChordPro::Chord::/;
+    unless ( keys(%$info) && $info->{system} ) {
 	if ( $info->{error} && ! $warned_chords{$c}++ ) {
 	    do_warn( $info->{error} ) unless $c =~ /^n\.?c\.?$/i;
 	}
@@ -1596,6 +1597,8 @@ sub new {
     bless { structure => "linear", settings => {}, %init }, $pkg;
 }
 
+use Scalar::Util qw(blessed);
+
 sub transpose {
     my ( $self, $xpose, $xcode ) = @_;
 #warn("XPOSE = $xpose, XCODE = $xcode");
@@ -1628,6 +1631,7 @@ sub transpose {
     if ( exists $self->{chordsinfo} ) {
 	my %new;
 	while ( my ($k,$v) = each( %{$self->{chordsinfo}} ) ) {
+	    warn("XX $k => $v\n"),next unless blessed($v);
 	    $v = $v->transpose( $xp+$xpose );
 	    my $name = $self->xpchord($v->{name}, $xpose, $xcode);
 	    $v->{name} = $name;
