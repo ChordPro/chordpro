@@ -232,8 +232,6 @@ sub chordpro {
 	}
     }
 
-    warn(::dump($s), "\n") if $config->{debug}->{song};
-
     # Try interpolations.
     if ( $of ) {
 	my $f = fmt_subst( $s->{songs}->[0], $of );

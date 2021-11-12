@@ -561,7 +561,6 @@ sub transpose {
     my ( $c, $xpose, $xcode ) = @_;
     return $c unless $xpose || $xcode;
     return $c if $c =~ /^\*/ || $c =~ /^\s+$/;
-#warn("__XPOSE = ", $xpose, " __XCODE = $xcode, chord = $c");
     my $info = parse_chord($c);
     unless ( $info ) {
 	assert_tuning();
@@ -577,7 +576,11 @@ sub transpose {
 	return;
     }
 
-    $info->transpose($xpose)->transcode($xcode)->show;
+    my $res = $info->transcode($xcode)->transpose($xpose)->show;
+
+#    Carp::cluck("__XPOSE = ", $xpose, " __XCODE = $xcode, chord $c => $res\n");
+
+    return $res;
 }
 
 1;

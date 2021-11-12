@@ -521,6 +521,8 @@ sub parse_song {
     do_warn("Unterminated context in song: $in_context")
       if $in_context;
 
+    $song->{chordsinfo} = { %used_chords };
+
     warn("Processed song...\n") if $options->{verbose};
 
     if ( @labels ) {
@@ -539,7 +541,7 @@ sub parse_song {
     my $target = $config->{settings}->{transcode};
     if ( $target ) {
 	unless ( App::Music::ChordPro::Chords::Parser->have_parser($target) ) {
-	    if ( my $file = ::getresource("notes/$target.json") ) {
+	    if ( my $file = ::rsc_or_file("config/notes/$target.json") ) {
 		for ( App::Music::ChordPro::Config::get_config($file) ) {
 		    my $new = $config->hmerge($_);
 		    local $config = $new;
@@ -591,7 +593,6 @@ sub parse_song {
 	    chords => [ @used_chords ],
 	  };
     }
-    $song->{chordsinfo} = { %used_chords };
     my $xp = $config->{settings}->{transpose};
     my $xc = $config->{settings}->{transcode};
     if ( $xc && App::Music::ChordPro::Chords::Parser->get_parser($xc,1)->movable ) {
@@ -610,24 +611,8 @@ sub parse_song {
 
     # $song->structurize;
 
-    if ( $config->{debug}->{song} ) {
-	::dump( do {
-	    my $a = dclone($song);
-	    $a->{config} = ref(delete($a->{config}));
-	    $a->{chordsinfo}{$_}{ns_canon} = $a->{chordsinfo}{$_}{parser}{ns_canon}
-	      for keys %{$a->{chordsinfo}};
-	    $a->{chordsinfo}{$_}{parser} = ref(delete($a->{chordsinfo}{$_}{parser}))
-	      for keys %{$a->{chordsinfo}};
-	    $a;
-	} );
-    }
-    elsif ( $config->{debug}->{songfull} ) {
-	::dump( do {
-	    my $a = dclone($song);
-	    $a->{config} = ref(delete($a->{config}));
-	    $a;
-	} );
-    }
+    $song->dump(0) if $config->{debug}->{song};
+    $song->dump(1) if $config->{debug}->{songfull};
 
     return $song;
 }
@@ -1592,12 +1577,13 @@ sub do_warn {
 
 package App::Music::ChordPro::Song;
 
+use Scalar::Util qw(blessed);
+use Storable qw(dclone);
+
 sub new {
     my ( $pkg, %init ) = @_;
     bless { structure => "linear", settings => {}, %init }, $pkg;
 }
-
-use Scalar::Util qw(blessed);
 
 sub transpose {
     my ( $self, $xpose, $xcode ) = @_;
@@ -1741,6 +1727,26 @@ sub structurize {
     }
     $self->{body} = [ @body ];
     $self->{structure} = "structured";
+}
+
+sub dump {
+    my ( $self, $full ) = @_;
+    my $a = dclone($self);
+    $a->{config} = ref(delete($a->{config}));
+    unless ( $full ) {
+	for my $ci ( keys %{$a->{chordsinfo}} ) {
+	    $a->{chordsinfo}{$ci}{ns_canon} =
+	      "[ " . join(" ", @{$a->{chordsinfo}{$ci}{parser}{ns_canon}}) . " ]";
+	    $a->{chordsinfo}{$ci}{parser} =
+	      ref(delete($a->{chordsinfo}{$ci}{parser}));
+	    for ( qw( frets fingers keys ) ) {
+		next unless @{$a->{chordsinfo}{$ci}{$_}};
+		$a->{chordsinfo}{$ci}{$_} =
+		  "[ " . join(" ", @{$a->{chordsinfo}{$ci}{$_}}) . " ]";
+	    }
+	}
+    }
+    ::dump($a);
 }
 
 1;
