@@ -105,6 +105,7 @@ sub init {
     $self->{_verbose} = $options->{verbose};
     $self->{_trace}   = $options->{trace};
     $self->{_debug}   = $options->{debug};
+    $self->{_log}     = $options->{log};
 
     $self->GetPreferences;
     my $font = $fonts[$self->{prefs_editfont}]->{font};
@@ -164,7 +165,7 @@ sub stylelist {
 my $notationlist;
 sub notationlist {
     return $notationlist if $notationlist && @$notationlist;
-    my $cfglib = getresource("notes");
+    my $cfglib = getresource("config/notes");
     $notationlist = [ undef ];
     if ( -d $cfglib ) {
 	opendir( my $dh, $cfglib );
@@ -305,11 +306,12 @@ sub preview {
     @ARGV = ();			# just to make sure
 
     $msgs = $fatal = $died = 0;
-    $SIG{__WARN__} = \&_warn;
+    $SIG{__WARN__} = \&_warn unless $self->{_log};
 #    $SIG{__DIE__}  = \&_die;
 
     my $haveconfig;
-    push( @ARGV, '--nosysconfig', '--nouserconfig', '--nolegacyconfig' )
+    push( @ARGV, '--nosysconfig', '--nouserconfig', '--nolegacyconfig',
+	         '--nosongconfig' )
       if $self->{prefs_skipstdcfg};
     if ( $self->{prefs_cfgpreset} ) {
 	$haveconfig++;

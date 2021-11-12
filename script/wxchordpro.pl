@@ -86,7 +86,8 @@ sub app_options {
     return unless @ARGV > 0;
 
     if ( !GetOptions( $options,
-		     'ident',
+		      'ident',
+		      'log',
 		     'verbose|v+',
 		      'version|V',
 		      'maximize',

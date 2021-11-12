@@ -13,7 +13,7 @@ our $config =
   eval {
       App::Music::ChordPro::Config::configurator
 	  ( { nosysconfig => 1, nolegacyconfig => 1, nouserconfig => 1,
-	      config => getresource("notes/common.json") } );
+	      config => getresource("config/notes/common.json") } );
   };
 
 =for generating
