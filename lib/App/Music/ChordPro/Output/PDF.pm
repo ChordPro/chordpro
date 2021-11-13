@@ -1491,7 +1491,7 @@ sub songline {
 	    my ( $pre, $word, $rest ) = $phrase =~ /^(\W+)?(\w+)(.+)?$/;
 	    my $ulstart = $x;
 	    $ulstart += $pr->strwidth($pre) if defined($pre);
-	    my $w = $pr->strwidth( $word, $ftext );
+	    my $w = $pr->strwidth( $word//" ", $ftext );
 	    # Avoid running together of syllables.
 	    $w *= 0.75 unless defined($rest);
 
