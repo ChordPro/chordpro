@@ -1505,7 +1505,7 @@ sub songline {
 
 	    # Collect chords to be printed in the side column.
 	    my $info = App::Music::ChordPro::Chords::chord_info($chord);
-	    push(@chords, $info ? chord_display($info) // $chord : $chord);
+	    push(@chords, $info ? $info->chord_display : $chord);
 	}
 	else {
 	    my $xt0;
@@ -1525,35 +1525,12 @@ sub songline {
 			 $info ? "found" : "fail",
 			 "\n") if $options->{debug};
 		}
-		if ( $info && $info->{system} eq "roman" ) {
-		    $xt0 = $pr->text( $pre.$info->{root},
-				      $x, $ychord, $fchord );
-		    $info->{qual} = 'ø' if $info->{qual} eq 'h';
-		    $xt0 = $pr->text( $info->{qual}.$info->{ext}, $xt0,
-				       $ychord + $fchord->{size} * 0.2,
-				       $fchord,
-				       $fchord->{size} * 0.8
-				     );
-		    $xt0 = $pr->text( $post, $xt0, $ychord, $fchord );
+		if ( $info ) {
+		    $chord = $info->chord_display;
 		}
-		elsif ( $info && $info->{system} eq "nashville" ) {
-		    $xt0 = $pr->text( $pre.$info->{root}.$info->{qual},
-				      $x, $ychord, $fchord );
-    #		if ( $info->{minor} ) {
-    #		    my $m = $info->{minor};
-    #		    # $m = "\x{0394}" if $m eq "^";
-    #		    $xt0 = $pr->text( $m, $xt0, $ychord, $fchord );
-    #		}
-		    $xt0 = $pr->text( $info->{ext}, $xt0,
-				       $ychord + $fchord->{size} * 0.2,
-				       $fchord,
-				       $fchord->{size} * 0.8,
-				     );
-		    $xt0 = $pr->text( $post, $xt0, $ychord, $fchord );
-		}
-		# Strip leading (but not sole) asterisk.
-		unless ( $chord =~ s/^\*(?=.)// ) {
-		    $chord = chord_display($info) // $chord;
+		else {
+		    # Strip leading (but not sole) asterisk.
+		    $chord =~ s/^\*(?=.)//;
 		}
 		$xt0 = $pr->text( $pre.$chord.$post, $x, $ychord, $fchord );
 	    }
@@ -1618,14 +1595,6 @@ sub songline {
       if @chords;
 
     return;
-}
-
-sub chord_display {
-    my ( $info ) = @_;
-#    ::dump( {%{$info // {} }, parser => {}} ) ;
-    return $info->{display}
-      ? interpolate( { args => $info }, $info->{display} )
-      : $info->{name};
 }
 
 sub is_bar {
@@ -1757,7 +1726,7 @@ sub gridline {
 	if ( exists $token->{chord} ) {
 	    my $t = $token->{chord};
 	    my $i = $opts{song}->{chordsinfo}->{$t};
-	    $t = chord_display($i) if $i;
+	    $t = $i->chord_display if $i;
 	    $pr->text( $t, $x, $y, $fchord )
 	      unless $token eq ".";
 	    $x += $cellwidth;

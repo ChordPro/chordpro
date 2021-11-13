@@ -497,7 +497,7 @@ sub load_notes {
       "(?<ext>" . join("|", keys(%$additions_min)) . ")|";
     $c_pat .= "(?<qual>\\+|aug)".
       "(?<ext>" . join("|", keys(%$additions_aug)) . ")|";
-    $c_pat .= "(?<qual>0|o|dim)".
+    $c_pat .= "(?<qual>0|o|dim|h)".
       "(?<ext>" . join("|", keys(%$additions_dim)) . ")|";
     $c_pat .= "(?<qual>)".
       "(?<ext>" . join("|", keys(%$additions_maj)) . ")";
@@ -853,10 +853,20 @@ sub transcode {
 	$info->{bass_canon} = $info->{bass} =
 	  $p->root_canon( $info->{bass_ord}, $info->{bass_mod} >= 0 );
     }
+    $info->{system} = $p->{system};
     bless $info => $p->{target};
 #    ::dump($info);
 #warn("_<_XCODE = $xcode, CHORD = ", $info->show);
     return $info;
+}
+
+sub chord_display {
+    my ( $self, $raw ) = @_;
+    return $self->{display}
+      ? $raw
+        ? $self->{display}
+        : interpolate( { args => $self }, $self->{display} )
+      : $self->show;
 }
 
 ################ Chord objects: Nashville ################
@@ -871,6 +881,34 @@ sub intervals { 12 }
 
 sub transpose { $_[0] }
 
+sub show {
+    my ( $self ) = @_;
+    my $res = $self->{root_canon} . $self->{qual} . $self->{ext};
+    if ( $self->{bass} && $self->{bass} ne "" ) {
+	$res .= "/" . lc($self->{bass});
+    }
+    return $res;
+}
+
+sub chord_display {
+    my ( $self, $raw ) = @_;
+    if ( $self->{display} ) {
+	if ( $raw ) {
+	    return $self->{display};
+	}
+	else {
+	    return interpolate( { args => $self }, $self->{display} );
+	}
+    }
+
+    my $res = $self->{root_canon} .
+      "<sup>" . $self->{qual} . $self->{ext} . "</sup>";
+    if ( $self->{bass} && $self->{bass} ne "" ) {
+	$res .= "<sub>/" . lc($self->{bass}) . "</sub>";
+    }
+    return $res;
+}
+
 ################ Chord objects: Roman ################
 
 package App::Music::ChordPro::Chord::Roman;
@@ -882,6 +920,34 @@ my @rmap = qw( I I II II III IV IV V V VI VI VII );
 sub intervals { 12 }
 
 sub transpose { $_[0] }
+
+sub show {
+    my ( $self ) = @_;
+    my $res = $self->{root_canon} . $self->{qual} . $self->{ext};
+    if ( $self->{bass} && $self->{bass} ne "" ) {
+	$res .= "/" . lc($self->{bass});
+    }
+    return $res;
+}
+
+sub chord_display {
+    my ( $self, $raw ) = @_;
+    if ( $self->{display} ) {
+	if ( $raw ) {
+	    return $self->{display};
+	}
+	else {
+	    return interpolate( { args => $self }, $self->{display} );
+	}
+    }
+
+    my $res = $self->{root_canon} .
+      "<sup>" . $self->{qual} . $self->{ext} . "</sup>";
+    if ( $self->{bass} && $self->{bass} ne "" ) {
+	$res .= "<sub>/" . lc($self->{bass}) . "</sub>";
+    }
+    return $res;
+}
 
 ################ Testing ################
 

@@ -1619,9 +1619,8 @@ sub transpose {
 	while ( my ($k,$v) = each( %{$self->{chordsinfo}} ) ) {
 	    warn("XX $k => $v\n"),next unless blessed($v);
 	    $v = $v->transpose( $xp+$xpose );
-	    my $name = $self->xpchord($v->{name}, $xpose, $xcode);
-	    $v->{name} = $name;
-	    $new{$name} = $v;
+	    $v = $v->transcode($xcode);
+	    $new{$v->show} = $v;
 	}
 	$self->{chordsinfo} = \%new;
     }

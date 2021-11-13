@@ -8,6 +8,7 @@
     - Allow custom PDF meta data. Requires PDF::API2 2.042.
     - Add settings.chords-canonical to use canonical representation for chords.
     - Rework chords lookup to always use chordsinfo.
+    - Use chord objects for show and display.
     - !BugFixes
     - Remove obsolete __EMBEDDING__.
     - Bump requirement Text::Layout to 0.024.
