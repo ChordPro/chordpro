@@ -393,7 +393,7 @@ sub add_song_chord {
 
     my $info = parse_chord($name) // { name => $name };
 
-    $song_chords{$name} =
+    $song_chords{$name} = bless
       { origin  => "user",
 	system  => $parser->{system},
 	%$info,
@@ -401,7 +401,7 @@ sub add_song_chord {
 	frets   => [ $frets && @$frets ? @$frets : () ],
 	fingers => [ $fingers && @$fingers ? @$fingers : () ],
 	keys    => [ $keys && @$keys ? @$keys : () ],
-      };
+      } => $parser->{target};
     return;
 }
 
@@ -409,13 +409,14 @@ sub add_song_chord {
 # Used by: Songbook.
 sub add_unknown_chord {
     my ( $name ) = @_;
-    $song_chords{$name} =
+    $song_chords{$name} = bless
       { origin  => "user",
 	name    => $name,
 	base    => 0,
 	frets   => [],
 	fingers => [],
-        keys    => [] };
+        keys    => []
+      } => $parser->{target};
 }
 
 # API: Reset user defined songs. Should be done for each new song.
