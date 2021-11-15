@@ -9,6 +9,7 @@
     - Add settings.chords-canonical to use canonical representation for chords.
     - Rework chords lookup to always use chordsinfo.
     - Use chord objects for show and display.
+    - (GUI) Allow selection of custom library.
     - !BugFixes
     - Remove obsolete __EMBEDDING__.
     - Bump requirement Text::Layout to 0.024.

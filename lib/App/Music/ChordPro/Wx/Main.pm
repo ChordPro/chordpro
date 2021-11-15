@@ -66,7 +66,10 @@ sub init {
        xcode	   => "",
        notation	   => "",
        skipstdcfg  => 1,
+       enable_configfile  => 0,
        configfile  => "",
+       enable_customlib   => 0,
+       customlib   => $ENV{CHORDPRO_LIB} // "",
        pdfviewer   => "",
        editfont	   => 0,
        editsize	   => FONTSIZE,
@@ -310,18 +313,27 @@ sub preview {
 #    $SIG{__DIE__}  = \&_die;
 
     my $haveconfig;
-    push( @ARGV, '--nosysconfig', '--nouserconfig', '--nolegacyconfig',
-	         '--nosongconfig' )
-      if $self->{prefs_skipstdcfg};
-    if ( $self->{prefs_cfgpreset} ) {
+    if ( $self->{prefs_skipstdcfg} ) {
+	push( @ARGV, '--nosysconfig', '--nouserconfig', '--nolegacyconfig',
+	      '--nosongconfig' )
+    }
+    elsif ( $self->{prefs_cfgpreset} ) {
 	$haveconfig++;
 	foreach ( @{ $self->{prefs_cfgpreset} } ) {
-	    if ( $_ eq "custom" ) {
-		push( @ARGV, '--config', $self->{prefs_configfile} );
-	    }
-	    else {
-		push( @ARGV, '--config', $_ );
-	    }
+	    push( @ARGV, '--config', $_ );
+	}
+    }
+    if ( $self->{prefs_enable_configfile} ) {
+	$haveconfig++;
+	foreach ( @{ $self->{prefs_configfile} } ) {
+	    next unless $_;
+	    push( @ARGV, '--config', $_ );
+	}
+    }
+    if ( $self->{prefs_enablecustomlib} ) {
+	foreach ( @{ $self->{prefs_customlib} } ) {
+	    next unless $_;
+	    $ENV{CHORDPRO_LIB} = $self->{prefs_customlib};
 	}
     }
     if ( $self->{prefs_xcode} ) {
