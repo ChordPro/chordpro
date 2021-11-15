@@ -79,7 +79,7 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "songline" ) {
-	    push(@s, songline($elt));
+	    push(@s, songline( $s, $elt ));
 	    next;
 	}
 
@@ -97,7 +97,7 @@ sub generate_song {
 		    next;
 		}
 		if ( $e->{type} eq "songline" ) {
-		    push(@s, songline($e));
+		    push(@s, songline( $s, $e ));
 		    next;
 		}
 	    }
@@ -125,7 +125,7 @@ sub generate_song {
 		    next;
 		}
 		if ( $e->{type} eq "songline" ) {
-		    push(@s, songline($e));
+		    push(@s, songline( $s, $e ));
 		    next;
 		}
 		if ( $e->{type} eq "comment" ) {
@@ -189,7 +189,7 @@ sub generate_song {
 }
 
 sub songline {
-    my ($elt) = @_;
+    my ( $song, $elt ) = @_;
 
     my $t_line = "";
 
@@ -211,7 +211,7 @@ sub songline {
 	$f .= '%s';
 	foreach ( 0..$#{$elt->{chords}} ) {
 	    $t_line .= sprintf( $f,
-				$elt->{chords}->[$_],
+				chord( $song, $elt->{chords}->[$_] ),
 				$elt->{phrases}->[$_] );
 	}
 	return ( $t_line );
@@ -219,7 +219,7 @@ sub songline {
 
     my $c_line = "";
     foreach ( 0..$#{$elt->{chords}} ) {
-	$c_line .= $elt->{chords}->[$_] . " ";
+	$c_line .= chord( $song, $elt->{chords}->[$_] ) . " ";
 	$t_line .= $elt->{phrases}->[$_];
 	my $d = length($c_line) - length($t_line);
 	$t_line .= "-" x $d if $d > 0;
@@ -229,6 +229,16 @@ sub songline {
     return $chords_under
       ? ( $t_line, $c_line )
       : ( $c_line, $t_line )
+}
+
+sub chord {
+    my ( $s, $c ) = @_;
+    return "" unless length($c);
+    my $ci = $s->{chordsinfo}->{$c};
+    return "<<$c>>" unless defined $ci;
+    my $t = $ci->show;
+    return "*$t" if ref($ci) eq 'App::Music::ChordPro::Chord::Annotation';
+    $t;
 }
 
 1;

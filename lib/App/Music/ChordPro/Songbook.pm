@@ -524,6 +524,7 @@ sub parse_song {
     $song->{chordsinfo} = { %used_chords };
 
     warn("Processed song...\n") if $options->{verbose};
+    $song->dump(0) if $config->{debug}->{song} > 1;
 
     if ( @labels ) {
 	$song->{labels} = [ @labels ];
@@ -630,10 +631,20 @@ sub add {
     }
 }
 
+my $ann_cnt = "an0000";
+
 sub chord {
     my ( $self, $c ) = @_;
     return $c unless length($c);
-    return $c if $c =~ /^\*/;
+
+    if ( $c =~ /^\*(.+)/ ) {
+	$ann_cnt++;
+	$used_chords{" $ann_cnt"} =
+	  App::Music::ChordPro::Chord::Annotation->new
+	    ( { name => " $ann_cnt", text => $1 } );
+	return " $ann_cnt";
+    }
+
     my $parens = $c =~ s/^\((.*)\)$/$1/;
 
     my $info = App::Music::ChordPro::Chords::chord_info($c);
@@ -647,18 +658,17 @@ sub chord {
 
     # Local transpose, if requested.
     if ( $xpose ) {
-	$_ = App::Music::ChordPro::Chords::transpose( $c, $xpose )
-	  and
-	    $c = $_;
+	$info = $info->transpose($xpose);
+	$c = $info->show;
     }
 
-    unless ( $info->{error} ) {
+    elsif ( !$info->{error} ) {
 	if ( $::config->{settings}->{'chords-canonical'} ) {
 	    my $t = $c;
 	    $c = $info->show;
 	}
-	$used_chords{$c} = $info;
     }
+    $used_chords{$c} = $info;
     push( @used_chords, $c ) unless $info->{isnote};
 
     return $parens ? "($c)" : $c;
@@ -1620,7 +1630,7 @@ sub transpose {
 	    warn("XX $k => $v\n"),next unless blessed($v);
 	    $v = $v->transpose( $xp+$xpose );
 	    $v = $v->transcode($xcode);
-	    $new{$v->show} = $v;
+	    $new{$v->name} = $v;
 	}
 	$self->{chordsinfo} = \%new;
     }
@@ -1734,15 +1744,17 @@ sub dump {
     $a->{config} = ref(delete($a->{config}));
     unless ( $full ) {
 	for my $ci ( keys %{$a->{chordsinfo}} ) {
-	    $a->{chordsinfo}{$ci}{ns_canon} =
-	      "[ " . join(" ", @{$a->{chordsinfo}{$ci}{parser}{ns_canon}}) . " ]";
-	    $a->{chordsinfo}{$ci}{parser} =
-	      ref(delete($a->{chordsinfo}{$ci}{parser}));
 	    for ( qw( frets fingers keys ) ) {
+		next unless exists $a->{chordsinfo}{$ci}{$_};
 		next unless @{$a->{chordsinfo}{$ci}{$_}};
 		$a->{chordsinfo}{$ci}{$_} =
 		  "[ " . join(" ", @{$a->{chordsinfo}{$ci}{$_}}) . " ]";
 	    }
+	    next unless $a->{chordsinfo}{$ci}{parser};
+	    $a->{chordsinfo}{$ci}{ns_canon} =
+	      "[ " . join(" ", @{$a->{chordsinfo}{$ci}{parser}{ns_canon}}) . " ]";
+	    $a->{chordsinfo}{$ci}{parser} =
+	      ref(delete($a->{chordsinfo}{$ci}{parser}));
 	}
     }
     ::dump($a);

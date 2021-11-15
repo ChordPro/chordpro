@@ -771,8 +771,9 @@ package App::Music::ChordPro::Chord::Common;
 use Storable qw(dclone);
 
 sub new {
-    my ( $pkg, %args ) = @_;
-    bless { %args } => $pkg;
+    my ( $pkg, $data ) = @_;
+    $pkg = ref($pkg) || $pkg;
+    bless { %$data } => $pkg;
 }
 
 sub clone {
@@ -781,13 +782,17 @@ sub clone {
     dclone($self);
 }
 
+sub name { $_[0]->show }
+
 sub show {
     Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self ) = @_;
-    my $res = $self->{parser}->root_canon( $self->{root_ord},
-					   $self->{root_mod} >= 0,
-					   $self->{qual} eq '-'
-					 ) . $self->{qual} . $self->{ext};
+    my $res = defined $self->{root_ord}
+      ? $self->{parser}->root_canon( $self->{root_ord},
+				     $self->{root_mod} >= 0,
+				     $self->{qual} eq '-'
+				   ) . $self->{qual} . $self->{ext}
+      : $self->{name};
     if ( $self->{isnote} ) {
 	return lcfirst($res);
     }
@@ -947,6 +952,37 @@ sub chord_display {
 	$res .= "<sub>/" . lc($self->{bass}) . "</sub>";
     }
     return $res;
+}
+
+################ Chord objects: Annotations ################
+
+package App::Music::ChordPro::Chord::Annotation;
+
+use String::Interpolate::Named;
+
+our @ISA = 'App::Music::ChordPro::Chord::Common';
+
+sub intervals { 1 }
+
+sub transpose { $_[0] }
+sub transcode { $_[0] }
+
+sub name { $_[0]->{name} }
+
+sub show {
+    my ( $self ) = @_;
+    my $res = $self->{text};
+    return $res;
+}
+
+sub chord_display {
+    my ( $self, $raw ) = @_;
+    if ( $raw ) {
+	return $self->{text};
+    }
+    else {
+	return interpolate( { args => $self }, $self->{text} );
+    }
 }
 
 ################ Testing ################

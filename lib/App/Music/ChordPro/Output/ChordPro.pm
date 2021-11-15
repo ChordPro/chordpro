@@ -197,7 +197,7 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "songline" ) {
-	    push(@s, songline($elt));
+	    push(@s, songline( $s, $elt ));
 	    next;
 	}
 
@@ -207,7 +207,7 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "gridline" ) {
-	    push(@s, gridline($elt));
+	    push(@s, gridline( $s, $elt ));
 	    next;
 	}
 
@@ -219,7 +219,7 @@ sub generate_song {
 		      if $structured;
 		}
 		if ( $e->{type} eq "song" ) {
-		    push(@s, songline($e));
+		    push(@s, songline( $s, $e ));
 		    next;
 		}
 	    }
@@ -236,7 +236,7 @@ sub generate_song {
 		    next;
 		}
 		if ( $e->{type} eq "songline" ) {
-		    push(@s, songline($e));
+		    push(@s, songline( $s, $e ));
 		    next;
 		}
 	    }
@@ -387,7 +387,7 @@ sub generate_song {
 }
 
 sub songline {
-    my ($elt) = @_;
+    my ( $song, $elt ) = @_;
 
     if ( $lyrics_only || !exists($elt->{chords}) ) {
 	return join( "", @{ $elt->{phrases} } );
@@ -395,14 +395,14 @@ sub songline {
 
     my $line = "";
     foreach ( 0..$#{$elt->{chords}} ) {
-	$line .= "[" . chord($elt->{chords}->[$_]) . "]" . $elt->{phrases}->[$_];
+	$line .= "[" . chord( $song, $elt->{chords}->[$_]) . "]" . $elt->{phrases}->[$_];
     }
     $line =~ s/^\[\]//;
     $line;
 }
 
 sub gridline {
-    my ($elt) = @_;
+    my ( $song, $elt ) = @_;
 
     my $line = "";
     for ( @{ $elt->{tokens} } ) {
@@ -421,7 +421,7 @@ sub gridline {
 	my $t = $elt->{comment};
 	if ( $t->{chords} ) {
 	    for ( 0..$#{ $t->{chords} } ) {
-		$res .= "[" . chord($t->{chords}->[$_]) . "]" . $t->{phrases}->[$_];
+		$res .= "[" . chord( $song, $t->{chords}->[$_]) . "]" . $t->{phrases}->[$_];
 	    }
 	}
 	else {
@@ -435,9 +435,16 @@ sub gridline {
 }
 
 sub chord {
-    my ( $c ) = @_;
-    $c =~ s/^\*// if $variant eq 'msp' && length($c) > 1;
-    return $c;
+    my ( $s, $c ) = @_;
+    return "" unless length($c);
+    #    $c =~ s/^\*// if $variant eq 'msp' && length($c) > 1;
+#    Carp::confess("XX \"$c\" ", ::dump($s->{chordsinfo})) unless defined $s->{chordsinfo}->{$c};
+    my $ci = $s->{chordsinfo}->{$c};
+    return "<<$c>>" unless defined $ci;
+    my $t = $ci->show;
+    return "*$t"
+      if $variant ne 'msp' && ref($ci) eq 'App::Music::ChordPro::Chord::Annotation';
+    $t;
 }
 
 1;

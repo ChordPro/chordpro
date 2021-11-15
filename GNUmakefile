@@ -44,6 +44,9 @@ to_tmp : resources
 to_tmp_cpan :
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.CPAN ./ ${TMP_DST}/
 
+to_c :
+	${MAKE} to_tmp to_tmp_cpan TMP_DST=/mnt/c/Users/Johan/ChordPro
+
 release :
 	${PERL} Makefile.PL
 	${MAKE} -f Makefile all test dist

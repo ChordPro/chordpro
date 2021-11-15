@@ -524,34 +524,34 @@ sub chord_info {
     }
 
     if ( ! $info && $::config->{diagrams}->{auto} ) {
-	$info = bless {
-		  origin  => "user",
-		  name    => $chord,
-		  base    => 0,
-		  frets   => [],
-		  fingers => [],
-		  keys    => [],
-		} => 'App::Music::ChordPro::Chord::Common';####WRONG?;
+	$info = App::Music::ChordPro::Chord::Common->new
+	  ( { origin  => "user",
+	      name    => $chord,
+	      base    => 0,
+	      frets   => [],
+	      fingers => [],
+	      keys    => [],
+	    } );
     }
 
     return unless $info;
     Carp::cluck("BLESS info for $chord into ", ref($info), "\n")
 	unless ref($info) =~ /App::Music::ChordPro::Chord::/;
     if ( ($info->{base}//0) <= 0 ) {
-	return bless {
-		 name    => $chord,
-		 %$info,
-		 strings => [],
-		 fingers => [],
-		 keys    => [],
-		 base    => 1,
-		 system  => "",
-		 } => ref($info);
+	return $info->new
+	  ( { name    => $chord,
+	      %$info,
+	      strings => [],
+	      fingers => [],
+	      keys    => [],
+	      base    => 1,
+	      system  => "",
+	    } );
     }
-    return bless {
-	     name    => $chord,
-	     %$info,
-    } => ref($info);
+    return $info->new
+      ( { name    => $chord,
+	  %$info,
+	} );
 }
 
 ################ Section Transposition ################
@@ -561,7 +561,7 @@ sub chord_info {
 sub transpose {
     my ( $c, $xpose, $xcode ) = @_;
     return $c unless $xpose || $xcode;
-    return $c if $c =~ /^\*/ || $c =~ /^\s+$/;
+    return $c if $c =~ /^ .+/;
     my $info = parse_chord($c);
     unless ( $info ) {
 	assert_tuning();
