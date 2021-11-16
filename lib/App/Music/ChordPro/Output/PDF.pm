@@ -1504,20 +1504,22 @@ sub songline {
 	    $x = $pr->text( $phrase, $x, $ytext, $ftext );
 
 	    # Collect chords to be printed in the side column.
-	    my $info = App::Music::ChordPro::Chords::chord_info($chord);
-	    push(@chords, $info ? $info->chord_display : $chord);
+	    my $info = $opts{song}->{chordsinfo}->{$chord};
+	    unless ( $info ) {
+		$info = App::Music::ChordPro::Chords::chord_info($chord);
+		warn("PDF: Lookup chord $chord... ",
+		     $info ? "found" : "fail",
+		     "\n") if $options->{debug};
+	    }
+	    if ( $info ) {
+		$chord = $info->chord_display;
+	    }
+	    push(@chords, $chord);
 	}
 	else {
-	    my $xt0;
-	    if ( $chord =~ /^\*(.*)/ ) {
-		my $ann = $1 ne "" ? $1 : "*";
-		my $fann = $fonts->{annotation};
-		$xt0 = $pr->text( $ann, $x, $ychord, $fann );
-	    }
-	    elsif ( $chord eq '' ) {
-		$xt0 = $x;
-	    }
-	    else {
+	    my $xt0 = $x;
+	    my $font = $fchord;
+	    if ( $chord ne '' ) {
 		my $info = $opts{song}->{chordsinfo}->{$chord};
 		unless ( $info ) {
 		    $info = App::Music::ChordPro::Chords::chord_info($chord);
@@ -1527,12 +1529,10 @@ sub songline {
 		}
 		if ( $info ) {
 		    $chord = $info->chord_display;
+		    $font = $fonts->{annotation}
+		      if ref($info) eq 'App::Music::ChordPro::Chord::Annotation';
 		}
-		else {
-		    # Strip leading (but not sole) asterisk.
-		    $chord =~ s/^\*(?=.)//;
-		}
-		$xt0 = $pr->text( $pre.$chord.$post, $x, $ychord, $fchord );
+		$xt0 = $pr->text( $pre.$chord.$post, $x, $ychord, $font );
 	    }
 
 	    # Do not indent chorus labels (issue #81).
@@ -2238,40 +2238,29 @@ sub configurator {
 	$pdf->{papersize} = $ps{lc $pdf->{papersize}}
     }
 
-    # Sanitize, if necessary.
-    my $comment = { %{ $fonts->{comment} } };
-    delete( $comment->{background} );
-    delete( $comment->{frame} );
-    $fonts->{subtitle}       ||= { %{ $fonts->{text}  } };
-    $fonts->{comment_italic} ||= { %{ $fonts->{chord} } };
-    $fonts->{comment_box}    ||= { %{ $fonts->{chord} } };
-    $fonts->{comment}        ||= { %{ $fonts->{text}  } };
-    $fonts->{annotation}     ||= { %{ $fonts->{chord}  } };
-    $fonts->{toc}	     ||= { %{ $fonts->{text}  } };
-    $fonts->{empty}	     ||= { %{ $fonts->{text}  } };
-    $fonts->{grid}           ||= { %{ $fonts->{chord} } };
-    $fonts->{grid_margin}    ||= { %{ $comment } };
-    $fonts->{diagram}        ||= { %{ $comment } };
-    $fonts->{diagram_base}   ||= { %{ $comment } };
-#    $fonts->{chordfingers}     = { name => 'ZapfDingbats' };
-    $fonts->{subtitle}->{size}       ||= $fonts->{text}->{size};
-    $fonts->{comment_italic}->{size} ||= $fonts->{text}->{size};
-    $fonts->{comment_box}->{size}    ||= $fonts->{text}->{size};
-    $fonts->{comment}->{size}        ||= $fonts->{text}->{size};
-    $fonts->{annotation}->{size}     ||= $fonts->{chord}->{size};
-    $fonts->{toc}->{size}            ||= $fonts->{text}->{size};
-    $fonts->{empty}->{size}          ||= $fonts->{text}->{size};
-    $fonts->{grid}->{size}           ||= $fonts->{chord}->{size};
-    $fonts->{grid_margin}->{size}    ||= $fonts->{comment}->{size};
-    $fonts->{diagram}->{size}        ||= $fonts->{comment}->{size};
-    $fonts->{diagram_base}->{size}   ||= $fonts->{comment}->{size};
+    # Merge properties for derived fonts.
+    my $fm = sub {
+	my ( $font, $def ) = @_;
+	for ( keys %{ $fonts->{$def} } ) {
+	    next if /^(?:background|frame)$/;
+	    $fonts->{$font}->{$_} //= $fonts->{$def}->{$_};
+	}
+    };
+    $fm->( qw( subtitle       text     ) );
+    $fm->( qw( comment_italic text     ) );
+    $fm->( qw( comment_box    text     ) );
+    $fm->( qw( comment        text     ) );
+    $fm->( qw( annotation     chord    ) );
+    $fm->( qw( toc            text     ) );
+    $fm->( qw( empty          text     ) );
+    $fm->( qw( grid           chord    ) );
+    $fm->( qw( grid_margin    comment  ) );
+    $fm->( qw( diagram        comment  ) );
+    $fm->( qw( diagram_base   comment  ) );
 
     # Default footer is small subtitle.
-    unless ( $fonts->{footer} ) {
-	$fonts->{footer} = { %{ $fonts->{subtitle} } };
-	$fonts->{footer}->{size}
-	  = 0.6 * $fonts->{subtitle}->{size};
-    }
+    $fonts->{footer}->{size} //= 0.6 * $fonts->{subtitle}->{size};
+    $fm->( qw( footer         subtitle ) );
 }
 
 # Get a format string for a given page class and type.

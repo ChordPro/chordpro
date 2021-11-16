@@ -944,6 +944,7 @@ sub app_setup {
     for my $config ( qw(sysconfig userconfig config ) ) {
         $clo->{"no$config"} = 1 unless $clo->{$config};
     }
+    $clo->{nosongconfig} ||= $clo->{nodefaultconfigs};
 
     # Decode command line strings.
     # File names are dealt with elsewhere.
