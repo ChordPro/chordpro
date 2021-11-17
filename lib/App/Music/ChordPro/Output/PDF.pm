@@ -454,10 +454,14 @@ sub generate_song {
 			warn("Oops -- pdf.formats.$class.$_ is not an array\n");
 			next;
 		    }
-		    ( $ps->{formats}->{$class}->{$_}->[$from],
-		      $ps->{formats}->{$class}->{$_}->[$to] ) =
-			( $ps->{formats}->{$class}->{$_}->[$to],
-			  $ps->{formats}->{$class}->{$_}->[$from] );
+		    unless ( ref($ps->{formats}->{$class}->{$_}->[0]) eq 'ARRAY' ) {
+			$ps->{formats}->{$class}->{$_} =
+			  [ $ps->{formats}->{$class}->{$_} ];
+		    }
+		    for my $l ( @{$ps->{formats}->{$class}->{$_}} ) {
+			( $l->[$from], $l->[$to] ) =
+			  ( $l->[$to], $l->[$from] );
+		    }
 		}
 	    }
 	};
@@ -577,9 +581,7 @@ sub generate_song {
 	      if $config->{debug}->{meta};
 	    $y = $ps->{_margintop} + $ps->{headspace};
 	    $y -= font_bl($fonts->{title});
-	    $tpt->("title");
-	    $y -= $pr->strheight( "X", $fonts->{title} )
-	      * $ps->{spacing}->{title};
+	    $y = $tpt->("title");
 	    $y = $tpt->("subtitle");
 	}
 
@@ -2281,49 +2283,56 @@ sub tpt {
     my ( $ps, $class, $type, $rightpage, $x, $y, $s ) = @_;
     my $fmt = get_format( $ps, $class, $type );
     return unless $fmt;
-
-    # @fmt = ( left-fmt, center-fmt, right-fmt )
-    unless ( @$fmt == 3 ) {
-	die("ASSERT: " . scalar(@$fmt)," part format $class $type");
+    if ( @$fmt == 3 && ref($fmt->[0]) ne 'ARRAY' ) {
+	$fmt = [ $fmt ];
     }
-    my @fmt = ( @$fmt );
-    @fmt = @fmt[2,1,0] unless $rightpage; # swap
-
+    # @fmt = ( left-fmt, center-fmt, right-fmt )
     my $pr = $ps->{pr};
     my $font = $ps->{fonts}->{$type};
 
     my $havefont;
     my $rm = $ps->{papersize}->[0] - $ps->{_rightmargin};
 
-    # Left part. Easiest.
-    if ( $fmt[0] ) {
-	my $t = fmt_subst( $s, $fmt[0] );
-	if ( $t ne "" ) {
-	    $pr->setfont($font) unless $havefont++;
-	    $pr->text( $t, $x, $y );
+    for my $fmt ( @$fmt ) {
+	if ( @$fmt % 3 ) {
+	    die("ASSERT: " . scalar(@$fmt)," part format $class $type");
 	}
-    }
 
-    # Center part.
-    if ( $fmt[1] ) {
-	my $t = fmt_subst( $s, $fmt[1] );
-	if ( $t ne "" ) {
-	    $pr->setfont($font) unless $havefont++;
-	    $pr->text( $t, ($rm+$x-$pr->strwidth($t))/2, $y );
-	}
-    }
+	my @fmt = @$fmt;
+	@fmt = @fmt[2,1,0] unless $rightpage; # swap
 
-    # Right part.
-    if ( $fmt[2] ) {
-	my $t = fmt_subst( $s, $fmt[2] );
-	if ( $t ne "" ) {
-	    $pr->setfont($font) unless $havefont++;
-	    $pr->text( $t, $rm-$pr->strwidth($t), $y );
+	# Left part. Easiest.
+	if ( $fmt[0] ) {
+	    my $t = fmt_subst( $s, $fmt[0] );
+	    if ( $t ne "" ) {
+		$pr->setfont($font) unless $havefont++;
+		$pr->text( $t, $x, $y );
+	    }
 	}
+
+	# Center part.
+	if ( $fmt[1] ) {
+	    my $t = fmt_subst( $s, $fmt[1] );
+	    if ( $t ne "" ) {
+		$pr->setfont($font) unless $havefont++;
+		$pr->text( $t, ($rm+$x-$pr->strwidth($t))/2, $y );
+	    }
+	}
+
+	# Right part.
+	if ( $fmt[2] ) {
+	    my $t = fmt_subst( $s, $fmt[2] );
+	    if ( $t ne "" ) {
+		$pr->setfont($font) unless $havefont++;
+		$pr->text( $t, $rm-$pr->strwidth($t), $y );
+	    }
+	}
+
+	$y -= $font->{size} * ($ps->{spacing}->{$type} || 1);
     }
 
     # Return updated baseline.
-    return $y - $font->{size} * ($ps->{spacing}->{$type} || 1);
+    return $y;
 }
 
 sub wrap {

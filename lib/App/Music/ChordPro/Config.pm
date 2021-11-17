@@ -194,9 +194,14 @@ sub configurator {
 	    next unless $t;
 	    die("Config error in pdf.formats.$class.$_: not an array\n")
 	      unless ref($t) eq 'ARRAY';
-	    die("Config error in pdf.formats.$class.$_: ",
-		 scalar(@$t), " fields instead of 3\n")
-	      unless @$t == 3;
+	    if ( ref($t->[0]) ne 'ARRAY' ) {
+		$t = [ $t ];
+	    }
+	    for ( @$t) {
+		die("Config error in pdf.formats.$class.$_: ",
+		    scalar(@$_), " fields instead of 3\n")
+		  unless @$_ == 3;
+	    }
 	}
     }
 

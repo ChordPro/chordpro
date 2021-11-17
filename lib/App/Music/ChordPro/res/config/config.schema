@@ -76,9 +76,20 @@
 	"tptspec": {
 	    "description": "Three-part title format specification, left, center, right.",
 	    "type": "array",
-	    "items": { "type": "string" },
-	    "minItems": 3,
-	    "maxItems": 3
+	    "oneOf" : [
+	    	{ "items": { "type": "string" },
+		  "minItems": 3,
+		  "maxItems": 3
+		},
+	    	{ "items": {
+		    "type": "array",
+		    "items": { "type": "string" },
+		    "minItems": 3,
+		    "maxItems": 3
+		  },
+		  "minItems": 1
+		}
+	    ]
 	}
     },
 

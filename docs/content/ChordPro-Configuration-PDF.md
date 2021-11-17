@@ -331,13 +331,24 @@ ChordPro distinguishes three types of output pages:
 * the first page of a song: `title`;
 * all other pages: `default`.
 
-Each of these page types can have settings for a page title, subtitle and footer. The settings inherit from `default` to `title` to `first`. So a `title` page has everything a `default` page has, and a `first` page has everything a `title` page has.
+Each of these page types can have settings for a page title, subtitle
+and footer. The settings inherit from `default` to `title` to `first`.
+So a `title` page has everything a `default` page has, and a `first`
+page has everything a `title` page has.
 
-Each title, subtitle and footer has three parts, which are printed to the left of the page, centered, and right. When even/odd page printing is selected, the left and right parts are swapped on even pages.
+Each title, subtitle and footer has three parts, which are printed to
+the left of the page, centered, and right. When even/odd page printing
+is selected, the left and right parts are swapped on even pages.
+
+The title, subtitle and footer may also be set to an *array* of three
+part strings, which will be printed on separate lines. 
 
 All heading strings may contain references to metadata in the form
 `%{`*name*`}`, for example `%{title}`. The current page number can be
-obtained with `%{page}`, and the song index in the songbook with `%{songindex}`. For a complete description on how to use metadata in heading strings, see [here]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
+obtained with `%{page}`, and the song index in the songbook with
+`%{songindex}`. For a complete description on how to use metadata in
+heading strings, see [here]({{< relref
+"ChordPro-Configuration-Format-Strings" >}}).
 
         "formats" : {
 

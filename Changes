@@ -10,6 +10,7 @@
     - Rework chords lookup to always use chordsinfo.
     - Use chord objects for show and display.
     - (GUI) Allow selection of custom library.
+    - (PDF) Allow multi-line headings and footers.
     - !BugFixes
     - Remove obsolete __EMBEDDING__.
     - Bump requirement Text::Layout to 0.024.
