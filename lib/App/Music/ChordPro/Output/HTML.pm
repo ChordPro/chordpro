@@ -43,6 +43,7 @@ sub generate_songbook {
 
 my $single_space = 0;		# suppress chords line when empty
 my $lyrics_only = 0;		# suppress all chords lines
+my $layout;
 
 sub generate_song {
     my ( $s ) = @_;
@@ -51,6 +52,7 @@ sub generate_song {
     $single_space = $::options->{'single-space'};
     $lyrics_only  = $::config->{settings}->{'lyrics-only'};
     $s->structurize;
+    $layout = Text::Layout::Text->new;
 
     my @s;
 
@@ -64,13 +66,13 @@ sub generate_song {
 	      '  }',
 	      '}',
 	      '</style>',
-	      '<div class="title">' . html($_) . '</div>',
+	      '<div class="title">' . nhtml($_) . '</div>',
 	    );
 
     }
     if ( defined $s->{subtitle} ) {
 	push( @s,
-	      map { '<div class="subtitle">' . html($_) . '</div>' }
+	      map { '<div class="subtitle">' . nhtml($_) . '</div>' }
 	      @{$s->{subtitle}} );
     }
 
@@ -94,13 +96,14 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "songline" ) {
-	    push(@s, songline($elt));
+	    push(@s, songline( $s, $elt ));
 	    next;
 	}
 
 	if ( $elt->{type} eq "tab" ) {
 	    my $p = '<div class="tab">';
 	    foreach ( @{ $elt->{body} } ) {
+		next if $_->{type} eq "set";
 		push( @s, $p . html($_->{text}) );
 		$p = "";
 	    }
@@ -117,13 +120,13 @@ sub generate_song {
 		    next;
 		}
 		if ( $e->{type} eq "songline" ) {
-		    push( @s, songline($e) );
+		    push( @s, songline( $s, $e ) );
 		    next;
 		}
 		if ( $e->{type} =~ /^comment(_\w+)?$/ ) {
 		    push( @s,
 			  '<div class="' . $e->{type} . '">' .
-			  html($e->{text}) . '</div>' );
+			  nhtml($e->{text}) . '</div>' );
 		    next;
 		}
 	    }
@@ -135,7 +138,7 @@ sub generate_song {
 	if ( $elt->{type} eq "comment" || $elt->{type} eq "comment_italic" ) {
 	    push( @s,
 		  '<div class="' . $elt->{type} . '">' .
-		  html($elt->{text}) . '</div>' );
+		  nhtml($elt->{text}) . '</div>' );
 	    push( @s, "" ) if $tidy;
 	    next;
 	}
@@ -169,51 +172,60 @@ sub generate_song {
 }
 
 sub songline {
-    my ($elt) = @_;
+    my ( $song, $elt ) = @_;
 
     my $t_line = "";
 
+    $elt->{chords} //= [ '' ];
+    my @c = map {
+	$_ eq "" ? "" : $song->{chordsinfo}->{$_}->show
+    } @{ $elt->{chords} };
+
     if ( $lyrics_only
 	 or
-	 $single_space && ! ( $elt->{chords} && join( "", @{ $elt->{chords} } ) =~ /\S/ )
+	 $single_space && ! ( $elt->{chords} && join( "", @c ) =~ /\S/ )
        ) {
 	$t_line = join( "", @{ $elt->{phrases} } );
 	$t_line =~ s/\s+$//;
 	return ( '<table class="songline">',
 		 '  <tr class="lyrics">',
-		 '    <td>' . html($t_line) . '</td>',
+		 '    <td>' . nhtml($t_line) . '</td>',
 		 '  </tr>',
 		 '</table>' );
     }
-
-    $elt->{chords} //= [ '' ];
 
     if ( $::config->{settings}->{'chords-under'} ) {
 	return ( '<table class="songline">',
 		 '  <tr class="lyrics">',
 		 '    ' . join( '',
-				map { ( $_ =~ s/^\s+// ? '<td class="indent">' : '<td>' ) . html($_) . '</td>' }
+				map { ( $_ =~ s/^\s+// ? '<td class="indent">' : '<td>' ) . nhtml($_) . '</td>' }
 				( @{ $elt->{phrases} } ) ),
 		 '  </tr>',
 		 '  <tr class="chords">',
 		 '    ' . join( '',
-				map { '<td>' . html($_) . ' </td>' }
-				( @{ $elt->{chords} } ) ),
+				map { '<td>' . nhtml($_) . ' </td>' }
+				( @c ) ),
 		 '  </tr>',
 		 '</table>' );
     }
     return ( '<table class="songline">',
 	     '  <tr class="chords">',
 	     '    ' . join( '',
-			    map { '<td>' . html($_) . ' </td>' }
-			    ( @{ $elt->{chords} } ) ),
+			    map { '<td>' . nhtml($_) . ' </td>' }
+			    ( @c ) ),
 	     '  </tr>',
 	     '  <tr class="lyrics">',
 	     '    ' . join( '',
-			    map { ( $_ =~ s/^\s+// ? '<td class="indent">' : '<td>' ) . html($_) . '</td>' }
+			    map { ( $_ =~ s/^\s+// ? '<td class="indent">' : '<td>' ) . nhtml($_) . '</td>' }
 			    ( @{ $elt->{phrases} } ) ),
 	     '  </tr>',
 	     '</table>' );
+}
+
+sub nhtml {
+    return unless defined $_[0];
+    $layout->set_markup(shift);
+    html($layout->render);
 }
 
 sub html {
@@ -222,6 +234,28 @@ sub html {
     $t =~ s/</&lt;/g;
     $t =~ s/>/&gt;/g;
     $t;
+}
+
+# Temporary. Eventually we'll have a decent HTML backend for Text::Layout.
+
+package Text::Layout::Text;
+
+use parent 'Text::Layout';
+
+sub new {
+    my ( $pkg, @data ) = @_;
+    my $self = $pkg->SUPER::new;
+    $self;
+}
+
+sub render {
+    my ( $self ) = @_;
+    my $res = "";
+    foreach my $fragment ( @{ $self->{_content} } ) {
+	next unless length($fragment->{text});
+	$res .= $fragment->{text};
+    }
+    $res;
 }
 
 1;

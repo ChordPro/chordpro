@@ -1530,7 +1530,7 @@ sub songline {
 		if ( $info ) {
 		    $chord = $info->chord_display;
 		    $font = $fonts->{annotation}
-		      if ref($info) eq 'App::Music::ChordPro::Chord::Annotation';
+		      if $info->is_annotation;
 		}
 		$xt0 = $pr->text( $pre.$chord.$post, $x, $ychord, $font );
 	    }

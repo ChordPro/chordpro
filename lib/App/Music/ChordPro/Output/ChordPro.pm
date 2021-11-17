@@ -442,8 +442,7 @@ sub chord {
     my $ci = $s->{chordsinfo}->{$c};
     return "<<$c>>" unless defined $ci;
     my $t = $ci->show;
-    return "*$t"
-      if $variant ne 'msp' && ref($ci) eq 'App::Music::ChordPro::Chord::Annotation';
+    return "*$t" if $variant ne 'msp' && $ci->is_annotation;
     $t;
 }
 

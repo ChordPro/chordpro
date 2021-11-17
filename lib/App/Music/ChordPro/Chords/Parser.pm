@@ -766,7 +766,7 @@ sub movable {
 
 ################ Chord objects: Common ################
 
-package App::Music::ChordPro::Chord::Common;
+package App::Music::ChordPro::Chord::Base;
 
 use Storable qw(dclone);
 
@@ -783,6 +783,13 @@ sub clone {
 }
 
 sub name { $_[0]->show }
+
+sub is_chord { 1 };
+sub is_annotation { 0 };
+
+package App::Music::ChordPro::Chord::Common;
+
+our @ISA = qw( App::Music::ChordPro::Chord::Base );
 
 sub show {
     Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
@@ -878,11 +885,7 @@ sub chord_display {
 
 package App::Music::ChordPro::Chord::Nashville;
 
-our @ISA = 'App::Music::ChordPro::Chord::Common';
-
-#my @nmap = ( 1, 1, 2, 2, 3, 4, 4, 5, 5, 6, 6, 7, 1 );
-
-sub intervals { 12 }
+our @ISA = 'App::Music::ChordPro::Chord::Base';
 
 sub transpose { $_[0] }
 
@@ -918,11 +921,7 @@ sub chord_display {
 
 package App::Music::ChordPro::Chord::Roman;
 
-our @ISA = 'App::Music::ChordPro::Chord::Common';
-
-my @rmap = qw( I I II II III IV IV V V VI VI VII );
-
-sub intervals { 12 }
+our @ISA = 'App::Music::ChordPro::Chord::Base';
 
 sub transpose { $_[0] }
 
@@ -960,9 +959,7 @@ package App::Music::ChordPro::Chord::Annotation;
 
 use String::Interpolate::Named;
 
-our @ISA = 'App::Music::ChordPro::Chord::Common';
-
-sub intervals { 1 }
+our @ISA = 'App::Music::ChordPro::Chord::Base';
 
 sub transpose { $_[0] }
 sub transcode { $_[0] }
@@ -984,6 +981,9 @@ sub chord_display {
 	return interpolate( { args => $self }, $self->{text} );
     }
 }
+
+sub is_chord { 0 };
+sub is_annotation { 1 };
 
 ################ Testing ################
 

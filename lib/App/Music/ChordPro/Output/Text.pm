@@ -31,6 +31,7 @@ sub generate_songbook {
 my $single_space = 0;		# suppress chords line when empty
 my $lyrics_only = 0;		# suppress all chords lines
 my $chords_under = 0;		# chords under lyrics
+my $layout = Text::Layout::Text->new;
 
 sub generate_song {
     my ( $s ) = @_;
@@ -192,18 +193,20 @@ sub songline {
     my ( $song, $elt ) = @_;
 
     my $t_line = "";
+    my @phrases = map { $layout->set_markup($_); $layout->render }
+      @{ $elt->{phrases} };
 
     if ( $lyrics_only
 	 or
 	 $single_space && ! ( $elt->{chords} && join( "", @{ $elt->{chords} } ) =~ /\S/ )
        ) {
-	$t_line = join( "", @{ $elt->{phrases} } );
+	$t_line = join( "", @phrases );
 	$t_line =~ s/\s+$//;
 	return $t_line;
     }
 
     unless ( $elt->{chords} ) {
-	return ( "", join( " ", @{ $elt->{phrases} } ) );
+	return ( "", join( " ", @phrases ) );
     }
 
     if ( my $f = $::config->{settings}->{'inline-chords'} ) {
@@ -212,7 +215,7 @@ sub songline {
 	foreach ( 0..$#{$elt->{chords}} ) {
 	    $t_line .= sprintf( $f,
 				chord( $song, $elt->{chords}->[$_] ),
-				$elt->{phrases}->[$_] );
+				$phrases[$_] );
 	}
 	return ( $t_line );
     }
@@ -220,7 +223,7 @@ sub songline {
     my $c_line = "";
     foreach ( 0..$#{$elt->{chords}} ) {
 	$c_line .= chord( $song, $elt->{chords}->[$_] ) . " ";
-	$t_line .= $elt->{phrases}->[$_];
+	$t_line .= $phrases[$_];
 	my $d = length($c_line) - length($t_line);
 	$t_line .= "-" x $d if $d > 0;
 	$c_line .= " " x -$d if $d < 0;
@@ -236,9 +239,32 @@ sub chord {
     return "" unless length($c);
     my $ci = $s->{chordsinfo}->{$c};
     return "<<$c>>" unless defined $ci;
-    my $t = $ci->show;
-    return "*$t" if ref($ci) eq 'App::Music::ChordPro::Chord::Annotation';
+    $layout->set_markup($ci->show);
+    my $t = $layout->render;
+    return "*$t" if $ci->is_annotation;
     $t;
+}
+
+# Temporary. Eventually we'll have a decent HTML backend for Text::Layout.
+
+package Text::Layout::Text;
+
+use parent 'Text::Layout';
+
+sub new {
+    my ( $pkg, @data ) = @_;
+    my $self = $pkg->SUPER::new;
+    $self;
+}
+
+sub render {
+    my ( $self ) = @_;
+    my $res = "";
+    foreach my $fragment ( @{ $self->{_content} } ) {
+	next unless length($fragment->{text});
+	$res .= $fragment->{text};
+    }
+    $res;
 }
 
 1;
