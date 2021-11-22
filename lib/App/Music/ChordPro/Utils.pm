@@ -106,10 +106,10 @@ push( @EXPORT, 'sys' );
 # Split (pseudo) command line into key/value pairs.
 
 sub parse_kv {
-    my ( $line ) = @_;
+    my ( @lines ) = @_;
 
     use Text::ParseWords qw(shellwords);
-    my @words = shellwords($line);
+    my @words = shellwords(@lines);
 
     my $res = {};
     foreach ( @words ) {

@@ -309,8 +309,13 @@ sub abc2image {
 
 	push( @res,{ type => "image",
 		     uri  => "id=$assetid",
-		     opts => { center => 0, scale => $kv->{scale} * 0.16 } },
+		     opts => { center => $kv->{center}, scale => $kv->{scale} * 0.16 } },
 	    );
+	warn("Asset $assetid options:",
+	     " scale=", $kv->{scale} * 0.16,
+	     " center=", $kv->{center}//0,
+	     "\n")
+	  if $config->{debug}->{images};
     }
 
 
