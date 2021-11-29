@@ -1092,6 +1092,10 @@ sub ::runtimeinfo {
 	$msg .= sprintf( $fmtv, "HarfBuzz library", $dd->(HarfBuzz::Shaper::hb_version_string()) );
     };
     $msg .= sprintf( $fmtv, "File::LoadLines", $dd->($File::LoadLines::VERSION) );
+    eval { require PDF::Builder;
+	$msg .= sprintf( $fmtv, "PDF::Builder", $dd->($PDF::Builder::VERSION) );
+    }
+    or
     eval { require PDF::API2;
 	$msg .= sprintf( $fmtv, "PDF::API2", $dd->($PDF::API2::VERSION) );
     };
