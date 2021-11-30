@@ -23,13 +23,6 @@ use App::Music::ChordPro::Output::PDF::Writer;
 use App::Music::ChordPro::Utils;
 
 my $pdfapi;
-BEGIN {
-    eval { require PDF::Builder; $pdfapi = "PDF::Builder"; }
-      or
-    eval { require PDF::API2; $pdfapi = "PDF::API2"; }
-      or
-    die("Missing PDF::API package\n");
-}
 use Text::Layout;
 use String::Interpolate::Named;
 
@@ -2175,6 +2168,25 @@ sub configurator {
 
     # From here, we're mainly dealing with the PDF settings.
     my $pdf   = $cfg->{pdf};
+
+    # Get PDF library.
+    unless ( $pdfapi ) {
+	if ( $pdf->{library} ) {
+	    unless ( eval( "require " . $pdf->{library} ) ) {
+		die("Missing ", $pdf->{library}, " library\n");
+	    }
+	    $pdfapi = $pdf->{library};
+	}
+	else {
+	    for ( qw( PDF::Builder PDF::API2 ) ) {
+		eval "require $_" or next;
+		$pdfapi = $_;
+		last;
+	    }
+	}
+	die("Missing PDF library\n") unless $pdfapi;
+    }
+
     my $fonts = $pdf->{fonts};
 
     # Apply Chordii command line compatibility.

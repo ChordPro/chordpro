@@ -1119,6 +1119,10 @@ sub default_config() {
 
     "pdf" : {
 
+      // Choose a PDF::API2 compatible library, or leave empty to
+      // have ChordPro choose one for you.
+      "library" : "",	// or "PDF::API2", or "PDF::Builder"
+
       // PDF Properties. Arbitrary key/values may be added.
       // Note that the context for substitutions is the first song.
       "info" : {
