@@ -1899,7 +1899,10 @@ sub imageline {
     warn("Image scale: $scale\n") if $config->{debug}->{images};
     $h *= $scale;
     $w *= $scale;
-    $x += ($pw - $w) / 2 if $opts->{center};
+    if ( $opts->{center} ) {
+	$x += ($pw - $w) / 2;
+	warn("Image center: $_[1] -> $x\n") if $config->{debug}->{images};
+    }
 
     my $y = $gety->($h);	# may have been changed by checkspace
     if ( defined ( my $tag = $i_tag // $opts->{label} ) ) {
