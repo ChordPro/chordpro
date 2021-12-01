@@ -11,6 +11,7 @@
     - Use chord objects for show and display.
     - (GUI) Allow selection of custom library.
     - (PDF) Allow multi-line headings and footers.
+    - (PDF) Configurable PDF library.
     - !BugFixes
     - Remove obsolete __EMBEDDING__.
     - Bump requirement Text::Layout to 0.024.
