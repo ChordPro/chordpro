@@ -102,6 +102,11 @@ sub generate_songbook {
 
     foreach my $ctl ( reverse( @{ $::config->{contents} } ) ) {
 	next unless $options->{toc} // @book > 1;
+
+	for ( qw( fields label line pageno ) ) {
+	    next if exists $ctl->{$_};
+	    die("Config error: \"contents\" is missing \"$_\"\n");
+	}
 	next if $ctl->{omit};
 
 	my $book = prep_outlines( [ map { $_->[1] } @book ], $ctl );
