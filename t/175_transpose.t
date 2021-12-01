@@ -83,7 +83,6 @@ my $song = {
 	},
       ],
       'context' => '',
-      'transpose' => 0,
       'type' => 'rechorus'
     },
     {
@@ -116,7 +115,6 @@ my $song = {
 	},
       ],
       'context' => '',
-      'transpose' => 0,
       'type' => 'rechorus'
     },
     {
@@ -139,7 +137,6 @@ my $song = {
 	},
       ],
       'context' => '',
-      'transpose' => 2,
       'type' => 'rechorus'
     }
   ],
@@ -158,6 +155,7 @@ my $song = {
     ]
   },
   settings => {},
+  chordsinfo => { map { $_ => $_ } qw( A G )  },
   source => { file => "__STRING__", line => 1 },
   structure => 'linear',
   system => 'common',

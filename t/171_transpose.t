@@ -59,6 +59,7 @@ my $song = {
 			 'type' => 'songline'
 		       }
 		      ],
+	    'chordsinfo' => { map { $_ => $_ } qw( Bb Ebm7 ) },
 	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear',
 	    'system' => 'common',

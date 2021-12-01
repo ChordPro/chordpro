@@ -50,6 +50,7 @@ my $song = {
 			 'type' => 'songline'
 		       }
 		      ],
+	    'chordsinfo' => { map { $_ => $_ } qw( D G ) },
 	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear',
 	    'system' => 'common',

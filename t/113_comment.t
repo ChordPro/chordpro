@@ -24,7 +24,7 @@ my $data = <<EOD;
 EOD
 
 eval { $s->parse_file( \$data,
-		      { transpose => 2, 'no-substitute' => 1 }
+		      { transpose => 2 }
 		    )
      } or diag("$@");
 
@@ -75,6 +75,8 @@ my $song = {
 			'type' => 'comment_box'
 		       }
 		      ],
+	    'chordsinfo' =>
+	        { 'D' => 'D' },
 	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear',
 	    'system' => 'common',

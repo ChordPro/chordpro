@@ -23,13 +23,7 @@ use App::Music::ChordPro::Output::PDF::Writer;
 use App::Music::ChordPro::Utils;
 
 my $pdfapi;
-BEGIN {
-    eval { require PDF::Builder; $pdfapi = "PDF::Builder"; }
-      or
-    eval { require PDF::API2; $pdfapi = "PDF::API2"; }
-      or
-    die("Missing PDF::API package\n");
-}
+
 use Text::Layout;
 use String::Interpolate::Named;
 
@@ -45,7 +39,9 @@ sub generate_songbook {
 
     return [] unless $sb->{songs}->[0]->{body}; # no songs
     $verbose ||= $options->{verbose};
+
     my $ps = $config->{pdf};
+
     my $pr = (__PACKAGE__."::Writer")->new( $ps, $pdfapi );
     warn("Generating PDF ", $options->{output} || "__new__.pdf", "...\n") if $options->{verbose};
 
@@ -109,6 +105,11 @@ sub generate_songbook {
 
     foreach my $ctl ( reverse( @{ $::config->{contents} } ) ) {
 	next unless $options->{toc} // @book > 1;
+
+	for ( qw( fields label line pageno ) ) {
+	    next if exists $ctl->{$_};
+	    die("Config error: \"contents\" is missing \"$_\"\n");
+	}
 	next if $ctl->{omit};
 
 	my $book = prep_outlines( [ map { $_->[1] } @book ], $ctl );
@@ -360,12 +361,12 @@ sub generate_song {
     my $sb = $s->{body};
 
     # Load song chords, if any.
-    App::Music::ChordPro::Chords::reset_song_chords();
-    if ( $s->{define} ) {
-	foreach ( @{ $s->{define} } ) {
-	    App::Music::ChordPro::Chords::add_song_chord($_);
-	}
-    }
+#    App::Music::ChordPro::Chords::reset_song_chords();
+#    if ( $s->{define} ) {
+#	foreach ( @{ $s->{define} } ) {
+#	    App::Music::ChordPro::Chords::add_song_chord($_);
+#	}
+#    }
 
     # set_columns needs these, set provisional values.
     $ps->{_leftmargin}  = $ps->{marginleft};
@@ -618,7 +619,7 @@ sub generate_song {
     };
 
     my $chorddiagrams = sub {
-	my ( $chords, $show ) = @_;
+	my ( $chords, $show, $ldisp ) = @_;
 	return unless $dctl->{show};
 	my @chords;
 	$chords = $s->{chords}->{chords}
@@ -626,7 +627,7 @@ sub generate_song {
 	$show //= $dctl->{show};
 	if ( $chords ) {
 	    foreach ( @$chords ) {
-		my $i = getchordinfo($_);
+		my $i = getchordinfo( $s, $_, $ldisp );
 		push( @chords, $i ) if $i;
 	    }
 	}
@@ -1114,7 +1115,7 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "diagrams" ) {
- 	    $chorddiagrams->( $elt->{chords}, "below" );
+ 	    $chorddiagrams->( $elt->{chords}, "below", $elt->{line} );
 	    next;
 	}
 
@@ -1507,15 +1508,8 @@ sub songline {
 
 	    # Collect chords to be printed in the side column.
 	    my $info = $opts{song}->{chordsinfo}->{$chord};
-	    unless ( $info ) {
-		$info = App::Music::ChordPro::Chords::chord_info($chord);
-		warn("PDF: Lookup chord $chord... ",
-		     $info ? "found" : "fail",
-		     "\n") if $options->{debug};
-	    }
-	    if ( $info ) {
-		$chord = $info->chord_display;
-	    }
+	    croak("Missing info for chord $chord") unless $info;
+	    $chord = $info->chord_display;
 	    push(@chords, $chord);
 	}
 	else {
@@ -1523,17 +1517,10 @@ sub songline {
 	    my $font = $fchord;
 	    if ( $chord ne '' ) {
 		my $info = $opts{song}->{chordsinfo}->{$chord};
-		unless ( $info ) {
-		    $info = App::Music::ChordPro::Chords::chord_info($chord);
-		    warn("PDF: Lookup chord $chord... ",
-			 $info ? "found" : "fail",
-			 "\n") if $options->{debug};
-		}
-		if ( $info ) {
-		    $chord = $info->chord_display;
-		    $font = $fonts->{annotation}
-		      if $info->is_annotation;
-		}
+		Carp::croak("Missing info for chord $chord") unless $info;
+		$chord = $info->chord_display;
+		$font = $fonts->{annotation}
+		  if $info->is_annotation;
 		$xt0 = $pr->text( $pre.$chord.$post, $x, $ychord, $font );
 	    }
 
@@ -1901,7 +1888,10 @@ sub imageline {
     warn("Image scale: $scale\n") if $config->{debug}->{images};
     $h *= $scale;
     $w *= $scale;
-    $x += ($pw - $w) / 2 if $opts->{center};
+    if ( $opts->{center} ) {
+	$x += ($pw - $w) / 2;
+	warn("Image center: $_[1] -> $x\n") if $config->{debug}->{images};
+    }
 
     my $y = $gety->($h);	# may have been changed by checkspace
     if ( defined ( my $tag = $i_tag // $opts->{label} ) ) {
@@ -1939,7 +1929,6 @@ sub tocline {
 	$y -= $vsp;
     }
     my $ann = $pr->{pdfpage}->annotation;
-    $ann->border(0,0,0);	# PDF spec says 0,0,1 is default
     $ann->link($elt->{page});
     $ann->rect( $ps->{_leftmargin}, $y0 - $ftoc->{size} * $ps->{spacing}->{toc},
 		$ps->{__rightmargin}, $y0 );
@@ -2033,7 +2022,8 @@ sub text_vsp {
 }
 
 sub getchordinfo {
-    my ( $name ) = @_;
+    my ( $song, $name, $ldisp ) = @_;
+    $ldisp ||= 0;
     return unless $name =~ /\S/;
     my $info;
     if ( eval{ $name->{name} } ) {
@@ -2042,7 +2032,7 @@ sub getchordinfo {
 	$name = $info->{name};
     }
     else {
-	$info = App::Music::ChordPro::Chords::chord_info($name);
+	$info = $song->{chordsinfo}->{$name};
     }
     if ( $info ) {
 	if ( $info->{frets} && @{ $info->{frets} } ) {
@@ -2061,11 +2051,16 @@ sub getchordinfo {
 	return $info if $info;
     }
 
-    warn("PDF: Unknown chord $name",
-	 $source ? ( " in song starting at line " .
-		     $source->{line} . " in " . $source->{file} ) : (),
-	 "\n"
-	);
+    my $msg = "PDF: Unknown chord $name";
+    if ( $ldisp ) {
+	$msg .= " in line $ldisp";
+    }
+    elsif ( $source) {
+	$msg .= " song starting at line " . $source->{line};
+    }
+    $msg .= " in " . $source->{file} if $source;
+    warn( $msg, "\n" );
+
     return;
 }
 
@@ -2178,6 +2173,25 @@ sub configurator {
 
     # From here, we're mainly dealing with the PDF settings.
     my $pdf   = $cfg->{pdf};
+
+    # Get PDF library.
+    unless ( $pdfapi ) {
+	if ( $pdf->{library} ) {
+	    unless ( eval( "require " . $pdf->{library} ) ) {
+		die("Missing ", $pdf->{library}, " library\n");
+	    }
+	    $pdfapi = $pdf->{library};
+	}
+	else {
+	    for ( qw( PDF::Builder PDF::API2 ) ) {
+		eval "require $_" or next;
+		$pdfapi = $_;
+		last;
+	    }
+	}
+	die("Missing PDF library\n") unless $pdfapi;
+    }
+
     my $fonts = $pdf->{fonts};
 
     # Apply Chordii command line compatibility.

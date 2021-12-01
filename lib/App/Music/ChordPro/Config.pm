@@ -371,6 +371,7 @@ sub process_config {
     App::Music::ChordPro::Chords::Parser->reset_parsers;
     local $::config = hmerge( $::config, $cfg );
     if ( $cfg->{chords} ) {
+	App::Music::ChordPro::Chords::push_parser($cfg->{notes}->{system});
 	my $c = $cfg->{chords};
 	if ( @$c && $c->[0] eq "append" ) {
 	    shift(@$c);
@@ -387,6 +388,7 @@ sub process_config {
 		  App::Music::ChordPro::Chords::chord_stats(), "\n" );
 	}
 	$cfg->{_chords} = delete $cfg->{chords};
+	App::Music::ChordPro::Chords::pop_parser();
     }
 }
 
@@ -1124,6 +1126,10 @@ sub default_config() {
 
     "pdf" : {
 
+      // Choose a PDF::API2 compatible library, or leave empty to
+      // have ChordPro choose one for you.
+      "library" : "",	// or "PDF::API2", or "PDF::Builder"
+
       // PDF Properties. Arbitrary key/values may be added.
       // Note that the context for substitutions is the first song.
       "info" : {
@@ -1547,6 +1553,7 @@ sub default_config() {
 
     // For (debugging (internal use only)).
     "debug" : {
+        "chords" : 0,
         "config" : 0,
         "fonts" : 0,
         "images" : 0,

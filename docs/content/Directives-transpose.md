@@ -8,8 +8,8 @@ description: "Directives: transpose"
 `{transpose:` _value_ `}`
 
 This directive indicates that the remainder of the song should be
-transposed the number of semitones according to the given _value_,
-which is a number in the range -12 to +12. When used at the beginning of
+transposed the number of semitones according to the given _value_.
+When used at the beginning of
 a song, the whole song will be transposed. When used somewhere in the
 song it can be used to achieve modulation.
 
@@ -45,10 +45,15 @@ This will print:
     D      E         Gb      G
     A song line with chords
 
-A `{transpose}` directive without a value will cancel the current transposition, possibly restoring a preceding transposition.
+A `{transpose}` directive without a value will cancel the current
+transposition, possibly restoring a preceding transposition.
 
 ## `transpose` and the `key` metadata
 
-The transpose directive is effective from where it appears in the ChordPro file. It will not affect a `key` directive that precedes it.
+The transpose directive is effective from where it appears in the
+ChordPro file. It will not affect a `key` directive that precedes it.
 
-If a song has a key, a metadata item `key_actual` is automatically added and contains the actual key including transpositions. If a transposition is in effect, there is also an item `key_from` that contains the actual key _before_ the transposition.
+If a song has a key, a metadata item `key_actual` is automatically
+added and contains the actual key including transpositions.
+If a transposition is in effect, there is also an item `key_from` that
+contains the actual key _before_ the transposition.

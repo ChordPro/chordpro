@@ -21,6 +21,7 @@ lib/App/Music/ChordPro/Output/PDF/Writer.pm
 lib/App/Music/ChordPro/Output/PDF/KeyboardDiagrams.pm
 lib/App/Music/ChordPro/Output/PDF/StringDiagrams.pm
 lib/App/Music/ChordPro/Output/Text.pm
+lib/App/Music/ChordPro/Song.pm
 lib/App/Music/ChordPro/Songbook.pm
 lib/App/Music/ChordPro/Testing.pm
 lib/App/Music/ChordPro/Utils.pm

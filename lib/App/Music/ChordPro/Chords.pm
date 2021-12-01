@@ -98,16 +98,16 @@ sub list_chords {
 	    $info = $chord;
 	}
 	elsif ( $origin eq "chord" ) {
-	    push( @s, sprintf( "{%s: %s}", "chord", $chord ) );
+	    push( @s, sprintf( "{%s:  %s}", "chord", $chord ) );
 	    next;
 	}
 	else {
 	    $info = chord_info($chord);
 	}
 	next unless $info;
-	my $s = sprintf( "{%s: %-15.15s base-fret %2d    ".
+	my $s = sprintf( "{%s %-15.15s base-fret %2d    ".
 			 "frets   %s",
-			 $origin eq "chord" ? "chord" : "define",
+			 $origin eq "chord" ? "chord: " : "define:",
 			 $info->{name}, $info->{base},
 			 @{ $info->{frets} }
 			 ? join("",
@@ -257,21 +257,41 @@ sub get_tuning {
 sub set_parser {
     my ( $p ) = @_;
 
-    $parser = App::Music::ChordPro::Chords::Parser->get_parser($p);
+    $p = App::Music::ChordPro::Chords::Parser->get_parser($p)
+      unless ref($p) && $p->isa('App::Music::ChordPro::Chords::Parser');
+    $parser = $p;
     warn( "Parser: ", $parser->{system}, "\n" )
       if $options->{verbose} > 1;
 
     return;
 }
 
+# Parser stack.
+
+my @parsers;
+
 # API: Reset current parser.
 # Used by: Config.
 sub reset_parser {
     undef $parser;
+    @parsers = ();
 }
 
 sub get_parser {
     $parser;
+}
+
+sub push_parser {
+    my ( $p ) = @_;
+    $p = App::Music::ChordPro::Chords::Parser->get_parser($p)
+      unless ref($p) && $p->isa('App::Music::ChordPro::Chords::Parser');
+    push( @parsers, $p );
+    $parser = $p;
+}
+
+sub pop_parser {
+    Carp::croak("Parser stack underflow") unless @parsers;
+    $parser = pop(@parsers);
 }
 
 ################ Section Config & User Chords ################
@@ -336,7 +356,21 @@ sub add_config_chord {
     return $res if $res;
 
     for $name ( $name, @names ) {
-	my $info = parse_chord($name) // { name => $name };
+	my $info = parse_chord($name) //
+	  App::Music::ChordPro::Chord::Common->new({ name => $name });
+
+	if ( $info->is_chord && $def->{copy} && $def->is_chord ) {
+	    for ( qw( root bass ext qual ) ) {
+		delete $def->{$_};
+		delete $def->{$_."_mod"};
+		delete $def->{$_."_canon"};
+	    }
+	    for ( qw( ext qual ) ) {
+		delete $def->{$_};
+		delete $def->{$_."_canon"};
+	    }
+	}
+	Carp::confess(::dump($parser)) unless $parser->{target};
 	$config_chords{$name} = bless
 	  { origin  => "config",
 	    system  => $parser->{system},
@@ -354,20 +388,20 @@ sub add_config_chord {
 	# Also store the chord info under a neutral name so it can be
 	# found when other note name systems are used.
 	my $i;
-	if ( defined $info->{root_ord} ) {
+	if ( $info->is_chord ) {
 	    $i = $info->agnostic;
 	}
 	else {
 	    # Retry with default parser.
 	    $i = App::Music::ChordPro::Chords::Parser->default->parse($name);
-	    if ( defined $i->{root_ord} ) {
+	    if ( $i && $i->is_chord ) {
 		$info->{root_ord} = $i->{root_ord};
 		$config_chords{$name}->{$_} = $i->{$_}
 		  for qw( root_ord ext_canon qual_canon );
 		$i = $i->agnostic;
 	    }
 	}
-	if ( defined $info->{root_ord} ) {
+	if ( $info->is_chord ) {
 	    $config_chords{$i} = $config_chords{$name};
 	    $config_chords{$i}->{origin} = "config";
 	}
@@ -390,12 +424,12 @@ sub add_song_chord {
     return $res if $res;
     my ( $name, $base, $frets, $fingers, $keys )
       = @$ii{qw(name base frets fingers keys)};
-
     my $info = parse_chord($name) // { name => $name };
 
     $song_chords{$name} = bless
       { origin  => "user",
 	system  => $parser->{system},
+	parser  => $parser,
 	%$info,
 	base    => $base,
 	frets   => [ $frets && @$frets ? @$frets : () ],
@@ -437,58 +471,17 @@ sub chord_stats {
 
 sub parse_chord {
     my ( $chord ) = @_;
+    my $res;
+
     unless ( $parser ) {
 	$parser //= App::Music::ChordPro::Chords::Parser->get_parser;
 	# warn("XXX ", $parser->{system}, " ", $parser->{n_pat}, "\n");
     }
-    my $res = $parser->parse($chord);
+    $res = $parser->parse($chord);
     return $res;
 }
 
 ################ Section Chords Info ################
-
-my $ident_cache = {};
-
-# API: Try to identify the argument as a valid chord.
-# Basically a wrapper around parse_chord, with error message.
-# Used by: Songbook, Output::PDF.
-sub identify {
-    my ( $name ) = @_;
-    return $ident_cache->{$name} if defined $ident_cache->{$name};
-
-    my $rem = $name;
-    my $info = { name => $name,
-		 qual => "",
-		 ext => "",
-		 system => $::config->{notes}->{system} || "" };
-
-    # Split off the duration, if present.
-    if ( $rem =~ m;^(.*):(\d\.*)?(?:x(\d+))?$; ) {
-	$rem = $1;
-	$info->{duration} = $2 // 1;
-	$info->{repeat} = $3;
-    }
-
-    my $i = parse_chord($rem);
-    unless ( $i ) {
-	if ( length($rem) ) {
-	    $info->{error} = "Cannot recognize chord \"$name\"";
-	}
-	else {
-	    $info->{root} = "";
-	}
-    }
-    else {
-	$info->{$_} = $i->{$_} foreach keys %$i;
-	bless $info => ref($i);
-    }
-
-    return $ident_cache->{$name} = $info;
-}
-
-sub reset_cache {
-    $ident_cache = {};
-}
 
 # API: Returns info about an individual chord.
 # This is basically the result of parse_chord, augmented with strings
@@ -496,25 +489,43 @@ sub reset_cache {
 # Used by: Songbook, Output/PDF.
 sub chord_info {
     my ( $chord ) = @_;
+    my $debug = $config->{debug}->{chords};
+    warn("chord_info($chord)...\n") if $debug;
     my $info;
     assert_tuning();
     for ( \%song_chords, \%config_chords ) {
 	next unless exists($_->{$chord});
+	warn("Found $chord in song/config chords\n") if $debug;
 	$info = $_->{$chord};
 	last;
     }
 
+    # This should only be needed for testing w/o chord configs.
+    if ( !$info && $chord =~ /^n\.?c\.?$/i ) {
+	return App::Music::ChordPro::Chord::Common->new
+	  ( { origin  => "user",
+	      name    => $chord,
+	      base    => 0,
+	      frets   => [ -1, -1, -1, -1, -1, -1 ],
+	      fingers => [],
+	      keys    => [],
+	    } );
+    }
+
     if ( ! $info ) {
 	my $i;
-	if ( $i = parse_chord($chord) and defined($i->{root_ord}) ) {
+	if ( $i = parse_chord($chord) and $i->is_chord ) {
 	    $info = { %$i };
-	    my $a = $i->agnostic;
-	    for ( \%song_chords, \%config_chords ) {
-		last unless defined $a;
-		next unless exists($_->{$a});
-		$info = $_->{$a};
-		$info->{name} = $chord;
-		last;
+	    if ( $i->can("agnostic") ) {
+		my $a = $i->agnostic;
+		for ( \%song_chords, \%config_chords ) {
+		    last unless defined $a;
+		    next unless exists($_->{$a});
+		    warn("Found '$a' for $chord in song/config chords\n") if $debug;
+		    $info = $_->{$a};
+		    $info->{name} = $chord;
+		    last;
+		}
 	    }
 	    bless $info => ref($i);
 	    Carp::cluck("Chord_info BLESS info for $chord into ", ref($info), "\n")
@@ -524,6 +535,7 @@ sub chord_info {
     }
 
     if ( ! $info && $::config->{diagrams}->{auto} ) {
+	warn("Adding new chord $chord\n") if $debug;
 	$info = App::Music::ChordPro::Chord::Common->new
 	  ( { origin  => "user",
 	      name    => $chord,
@@ -538,10 +550,11 @@ sub chord_info {
     Carp::cluck("BLESS info for $chord into ", ref($info), "\n")
 	unless ref($info) =~ /App::Music::ChordPro::Chord::/;
     if ( ($info->{base}//0) <= 0 ) {
+	warn("Partial $chord\n") if $debug;
 	return $info->new
 	  ( { name    => $chord,
 	      %$info,
-	      strings => [],
+	      frets   => [],
 	      fingers => [],
 	      keys    => [],
 	      base    => 1,

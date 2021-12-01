@@ -37,6 +37,7 @@ my $song = {
       structure => 'linear',
 	    'system' => 'common',
       title => 'Grids',
+      chordsinfo => { map { $_ => $_ } qw( B C D E ) },
       body => [
 	       { context => 'grid',
 		 name => 'gridparams',
@@ -141,34 +142,390 @@ my $song = {
 
 is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );
 
-$s = App::Music::ChordPro::Songbook->new;
-
 # Chord definitions.
 $data = <<EOD;
 {title Grids}
 {start_of_grid 1+4x3+2}
-| A . . | Bb . . | C . . | D . . |
+| B . . | C . . | D . . | E . . |
 {end_of_grid}
 {start_of_grid}
-| A . . | Bb . . | C . . | D . . |
+| B . . | C . . | D . . | E . . |
 {end_of_grid}
 {start_of_grid}
-| A . . | Bb . . | C . . | D . . |
+| B . . | C . . | D . . | E . . |
 {end_of_grid}
 {start_of_grid}
-| A . . | Bb . . | C . . | D . . |
+| B . . | C . . | D . . | E . . |
 {end_of_grid}
 EOD
 
 eval { $s->parse_file( \$data, { transpose => 2 } ) } or diag("$@");
 
-ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
-isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
+ok( scalar( @{ $s->{songs} } ) == 2, "One more song" );
+isa_ok( $s->{songs}->[1], 'App::Music::ChordPro::Song', "It's a song" );
 
-$song->{body}->[0]->{value} = [ 4, 3, 1, 2, '' ];
-splice( @{$song->{body}}, $_, 0,
-	{ context => 'grid', value => '', name => 'context', type => 'set' },
-	{ context => 'grid', name => 'gridparams',
-	  type => 'set', value => [ 4, 3, 1, 2 ] } )
-  for 2, 5, 8;
-is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );
+$song = {
+  body => [
+    {
+      context => 'grid',
+      name => 'gridparams',
+      type => 'set',
+      value => [ 4, 3, 1, 2, '' ],
+    },
+    {
+      context => 'grid',
+      tokens => [
+        {
+          class => 'bar',
+          symbol => '|',
+        },
+        {
+          chord => 'C#',
+          class => 'chord',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'bar',
+          symbol => '|',
+        },
+        {
+          chord => 'D',
+          class => 'chord',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'bar',
+          symbol => '|',
+        },
+        {
+          chord => 'E',
+          class => 'chord',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'bar',
+          symbol => '|',
+        },
+        {
+          chord => 'F#',
+          class => 'chord',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'bar',
+          symbol => '|',
+        },
+      ],
+      type => 'gridline',
+    },
+    {
+      context => 'grid',
+      name => 'context',
+      type => 'set',
+      value => '',
+    },
+    {
+      context => 'grid',
+      name => 'gridparams',
+      type => 'set',
+      value => [ 4, 3, 1, 2 ],
+    },
+    {
+      context => 'grid',
+      tokens => [
+        {
+          class => 'bar',
+          symbol => '|',
+        },
+        {
+          chord => 'C#',
+          class => 'chord',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'bar',
+          symbol => '|',
+        },
+        {
+          chord => 'D',
+          class => 'chord',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'bar',
+          symbol => '|',
+        },
+        {
+          chord => 'E',
+          class => 'chord',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'bar',
+          symbol => '|',
+        },
+        {
+          chord => 'F#',
+          class => 'chord',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'bar',
+          symbol => '|',
+        },
+      ],
+      type => 'gridline',
+    },
+    {
+      context => 'grid',
+      name => 'context',
+      type => 'set',
+      value => '',
+    },
+    {
+      context => 'grid',
+      name => 'gridparams',
+      type => 'set',
+      value => [ 4, 3, 1, 2 ],
+    },
+    {
+      context => 'grid',
+      tokens => [
+        {
+          class => 'bar',
+          symbol => '|',
+        },
+        {
+          chord => 'C#',
+          class => 'chord',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'bar',
+          symbol => '|',
+        },
+        {
+          chord => 'D',
+          class => 'chord',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'bar',
+          symbol => '|',
+        },
+        {
+          chord => 'E',
+          class => 'chord',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'bar',
+          symbol => '|',
+        },
+        {
+          chord => 'F#',
+          class => 'chord',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'bar',
+          symbol => '|',
+        },
+      ],
+      type => 'gridline',
+    },
+    {
+      context => 'grid',
+      name => 'context',
+      type => 'set',
+      value => '',
+    },
+    {
+      context => 'grid',
+      name => 'gridparams',
+      type => 'set',
+      value => [ 4, 3, 1, 2 ],
+    },
+    {
+      context => 'grid',
+      tokens => [
+        {
+          class => 'bar',
+          symbol => '|',
+        },
+        {
+          chord => 'C#',
+          class => 'chord',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'bar',
+          symbol => '|',
+        },
+        {
+          chord => 'D',
+          class => 'chord',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'bar',
+          symbol => '|',
+        },
+        {
+          chord => 'E',
+          class => 'chord',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'bar',
+          symbol => '|',
+        },
+        {
+          chord => 'F#',
+          class => 'chord',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'space',
+          symbol => '.',
+        },
+        {
+          class => 'bar',
+          symbol => '|',
+        },
+      ],
+      type => 'gridline',
+    },
+    {
+      context => 'grid',
+      name => 'context',
+      type => 'set',
+      value => '',
+    },
+  ],
+  meta => {
+    songindex => 2,
+    title => [
+      'Grids',
+    ],
+  },
+  settings => {},
+  source => {
+    file => '__STRING__',
+    line => 1,
+  },
+  structure => 'linear',
+  system => 'common',
+  title => 'Grids',
+  chordsinfo => { map { $_ => $_ } qw ( D E ), 'C#', 'F#' },
+};
+
+is_deeply( { %{ $s->{songs}->[1] } }, $song, "Song contents" );

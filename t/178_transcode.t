@@ -76,6 +76,7 @@ my $song = {
 			 'type' => 'songline'
 		       }
 		      ],
+	    chordsinfo => { map { $_ => $_ } qw( D Gm7 )  },
 	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear',
 	    'system' => 'latin',

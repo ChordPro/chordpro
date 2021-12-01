@@ -241,8 +241,7 @@ sub chord {
     return "<<$c>>" unless defined $ci;
     $layout->set_markup($ci->show);
     my $t = $layout->render;
-    return "*$t" if $ci->is_annotation;
-    $t;
+    return $ci->is_annotation ? "*$t" : $t;
 }
 
 # Temporary. Eventually we'll have a decent HTML backend for Text::Layout.
@@ -250,6 +249,9 @@ sub chord {
 package Text::Layout::Text;
 
 use parent 'Text::Layout';
+
+# Eliminate warning when HTML backend is loaded together with Text backend.
+no warnings 'redefine';
 
 sub new {
     my ( $pkg, @data ) = @_;

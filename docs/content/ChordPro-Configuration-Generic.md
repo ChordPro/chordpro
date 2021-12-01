@@ -75,6 +75,8 @@ For these keys you can use `{meta` _key_ ...`}` as well as `{`*key* ...`}`.
 Otherwise, only the keys named in the `keys` here are allowed.  
 `strict` is true by default.
 * `separator`: To concatenate multiple values when metadata are used in title fields.
+* `autosplit`: If enabled, metadata will be split on the separator to
+provide multiple values.
 
 Important: the keys `title` and `subtitle` must always be in this list.
 
@@ -86,9 +88,11 @@ Important: the keys `title` and `subtitle` must always be in this list.
                    "key", "time", "tempo", "capo", "duration" ],
         "strict" : true,
         "separator" : "; ",
+        "autosplit" : true,
     },
 
-See also [Using metadata in texts]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
+See also [Using metadata in texts]({{< relref
+"ChordPro-Configuration-Format-Strings" >}}).
 
 ## Dates and Times
 

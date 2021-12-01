@@ -52,6 +52,7 @@ my $song = {
 			'context' => ''
 		       },
 		      ],
+	    'chordsinfo' => { map { $_ => $_ } qw( D G ) },
 	    'chords' => {
 			'chords' => [ 'G', 'D' ],
 			'origin' => 'song',
@@ -125,6 +126,7 @@ $song = {
 				   'Swing Low Sweet Chariot'
 				  ]
 		      },
+	    'chordsinfo' => {},
 	    'chords' => {
 			'chords' => [],
 			'origin' => 'song',

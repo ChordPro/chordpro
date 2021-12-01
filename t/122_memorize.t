@@ -45,7 +45,6 @@ my $warning = "";
     local $SIG{__WARN__} = sub { $warning .= "@_" };
     eval { $s->parse_file(\$data) } or diag("$@");
 }
-
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 ok( $warning =~ /No chords memorized for verse3/, "You have been warned" );
 isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
@@ -259,6 +258,7 @@ my $song = {
 			 'line' => 1,
 			 'file' => '__STRING__'
 			},
+	    'chordsinfo' => { map { $_ => $_ } qw( A B C D E F G NC ) },
 	    'title' => 'Test Memorize',
 	    'system' => 'common',
 	    'structure' => 'linear',

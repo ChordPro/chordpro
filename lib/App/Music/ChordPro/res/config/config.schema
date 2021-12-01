@@ -1259,6 +1259,11 @@
 		    }
 		},
 
+		"library": {
+		    "description": "PDF handling library.",
+		    "type": "string"
+		},
+
 		"marginbottom": {
 		    "description": "Page bottom margin, excluding footspace.",
 		    "default": 40,
@@ -1508,6 +1513,10 @@
 	    "additionalProperties": false,
 	    "properties": {
 		"abc": {
+		    "type": "integer",
+		    "default": 0
+		},
+		"chords": {
 		    "type": "integer",
 		    "default": 0
 		},

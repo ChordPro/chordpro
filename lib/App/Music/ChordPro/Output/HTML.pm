@@ -242,6 +242,9 @@ package Text::Layout::Text;
 
 use parent 'Text::Layout';
 
+# Eliminate warning when HTML backend is loaded together with Text backend.
+no warnings 'redefine';
+
 sub new {
     my ( $pkg, @data ) = @_;
     my $self = $pkg->SUPER::new;
