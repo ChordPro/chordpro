@@ -1024,7 +1024,11 @@ sub directive {
     if ( $dir eq "meta" ) {
 	if ( $arg =~ /([^ :]+)[ :]+(.*)/ ) {
 	    my $key = lc $1;
-	    my $val = $2;
+	    my @vals = ( $2 );
+	    if ( $config->{metadata}->{autosplit} ) {
+		@vals = map { s/s\+$//; $_ }
+		  split( quotemeta($config->{metadata}->{separator}), $vals[0] );
+	    }
 
 	    # User and instrument cannot be set here.
 	    if ( $key eq "user" || $key eq "instrument" ) {
@@ -1032,40 +1036,42 @@ sub directive {
 		return 1;
 	    }
 
-	    if ( $key eq "key" ) {
-		$val =~ s/[\[\]]//g;
-		my ( $name, $info ) = $self->parse_chord($val);
-		$val = $name;
-	    }
-	    elsif ( $key eq "capo" ) {
-		do_warn("Multiple capo settings may yield surprising results.")
-		  if exists $self->{meta}->{capo};
-		if ( $decapo ) {
-		    $xpose += $val;
-		    my $xp = $xpose;
-		    $xp += $config->{settings}->{transpose} if $config->{settings}->{transpose};
-		    for ( qw( key key_actual key_from ) ) {
-			next unless exists $self->{meta}->{$_};
-			$self->{meta}->{$_}->[-1] =
-			  App::Music::ChordPro::Chords::transpose( $self->{meta}->{$_}->[-1], $xp )
-		    }
-		    return 1;
+	    for my $val ( @vals ) {
+		if ( $key eq "key" ) {
+		    $val =~ s/[\[\]]//g;
+		    my ( $name, $info ) = $self->parse_chord($val);
+		    $val = $name;
 		}
-		undef $val if $val == 0;
-	    }
-	    elsif ( $key eq "duration" && $val ) {
-		$val = duration($val);
-	    }
+		elsif ( $key eq "capo" ) {
+		    do_warn("Multiple capo settings may yield surprising results.")
+		      if exists $self->{meta}->{capo};
+		    if ( $decapo ) {
+			$xpose += $val;
+			my $xp = $xpose;
+			$xp += $config->{settings}->{transpose} if $config->{settings}->{transpose};
+			for ( qw( key key_actual key_from ) ) {
+			    next unless exists $self->{meta}->{$_};
+			    $self->{meta}->{$_}->[-1] =
+			      App::Music::ChordPro::Chords::transpose( $self->{meta}->{$_}->[-1], $xp )
+			    }
+			return 1;
+		    }
+		    undef $val if $val == 0;
+		}
+		elsif ( $key eq "duration" && $val ) {
+		    $val = duration($val);
+		}
 
-	    if ( $config->{metadata}->{strict}
-		 && ! any { $_ eq $key } @{ $config->{metadata}->{keys} } ) {
-		# Unknown, and strict.
-		do_warn("Unknown metadata item: $key")
-		  if $config->{settings}->{strict};
-		return;
-	    }
+		if ( $config->{metadata}->{strict}
+		     && ! any { $_ eq $key } @{ $config->{metadata}->{keys} } ) {
+		    # Unknown, and strict.
+		    do_warn("Unknown metadata item: $key")
+		      if $config->{settings}->{strict};
+		    return;
+		}
 
-	    push( @{ $self->{meta}->{$key} }, $val ) if defined $val;
+		push( @{ $self->{meta}->{$key} }, $val ) if defined $val;
+	    }
 	}
 	else {
 	    do_warn("Incomplete meta directive: $d\n")

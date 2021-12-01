@@ -509,6 +509,11 @@
 	    "type": "object",
             "additionalProperties": false,
 	    "properties": {
+		"autosplit": {
+		    "description": "Split data on separator.",
+		    "type": "boolean",
+		    "default": true
+		},
 		"keys": {
 		    "description": "Known metadata items.",
 		    "type": "array",

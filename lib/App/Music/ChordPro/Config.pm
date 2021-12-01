@@ -963,6 +963,8 @@ sub default_config() {
     // If strict is zero, {meta ...} will accept any key.
     // Important: "title" and "subtitle" must always be in this list.
     // The separator is used to concatenate multiple values.
+    // If autosplit is true, the separator is also used to split
+    // values upon input.
     "metadata" : {
       "keys" : [ "title", "subtitle",
 		 "artist", "composer", "lyricist", "arranger",
@@ -971,6 +973,7 @@ sub default_config() {
 		 "key", "time", "tempo", "capo", "duration" ],
       "strict" : true,
       "separator" : "; ",
+      "autosplit" : true,
     },
     // Globally defined (added) meta data,
     // This is explicitly NOT intended for the metadata items above.
