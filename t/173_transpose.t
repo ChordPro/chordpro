@@ -43,7 +43,7 @@ eval { $s->parse_file( \$data, { transpose => -10 } ) } or diag("$@");
 
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
-
+use DDumper; open( my $fd, '>', '173_transpose.out'); print $fd DDumper($s->{songs}->[0]); close($fd);
 my $song = {
   body => [
     {
@@ -118,7 +118,6 @@ my $song = {
 	},
       ],
       context => '',
-      transpose => 0,
       type => 'rechorus',
     },
     {
@@ -167,7 +166,6 @@ my $song = {
 	},
       ],
       context => '',
-      transpose => 2,
       type => 'rechorus',
     },
     {
@@ -216,7 +214,6 @@ my $song = {
 	},
       ],
       context => '',
-      transpose => 4,
       type => 'rechorus',
     },
     {
@@ -265,7 +262,6 @@ my $song = {
 	},
       ],
       context => '',
-      transpose => 2,
       type => 'rechorus',
     },
     {
@@ -314,7 +310,6 @@ my $song = {
 	},
       ],
       context => '',
-      transpose => 0,
       type => 'rechorus',
     },
   ],
@@ -324,17 +319,14 @@ my $song = {
       show => 'all',
       chords => [ 'E', 'A', 'Gb', 'B', 'Ab', 'Db' ]
   },
+  chordsinfo => { map { $_ => $_ } qw( E A B Gb Db Ab Bb ) },
   meta => {
     songindex => 1,
     key => [
       'E',
     ],
-    key_actual => [
-      'E',
-    ],
-    key_from => [
-      'F#',
-    ],
+#   key_actual => ['E'],
+#    key_from => ['F#'],
     title => [
       'Transpositions',
     ],

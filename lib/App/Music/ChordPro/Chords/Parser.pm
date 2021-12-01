@@ -120,7 +120,8 @@ sub default {
 sub parse {
     Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self, $chord ) = @_;
-    $self->{chord_cache}->{$chord} //= $self->parse_chord($chord);
+####    $self->{chord_cache}->{$chord} //=
+      $self->parse_chord($chord);
 }
 
 # Virtual.
@@ -156,6 +157,11 @@ sub get_parser {
 	return $parsers{$system} //=
 	  App::Music::ChordPro::Chords::Parser::Roman->new;
     }
+    elsif ( $system ne $::config->{notes}->{system} ) {
+	my $p = App::Music::ChordPro::Chords::Parser::Common->new
+	  ( { notes => $system } );
+	return $parsers{$system} = $p;
+    }
     elsif ( $system ) {
 	my $p = App::Music::ChordPro::Chords::Parser::Common->new;
 	$p->{system} = $system;
@@ -165,7 +171,7 @@ sub get_parser {
 	return;
     };
 
-    warn("No parser for $system, falling back to default\n");
+    Carp::confess("No parser for $system, falling back to default\n");
     return $parsers{common} //= $self->default;
 }
 
@@ -295,6 +301,7 @@ sub parse_chord {
 	    Carp::croak("CANT HAPPEN ($r)");
 	    return;
 	}
+####	$info->{isflat} = $info->{"${pfx}_mod"} < 0;
     };
 
     $ordmod->("root");
@@ -782,10 +789,23 @@ sub clone {
     dclone($self);
 }
 
-sub name { $_[0]->show }
+sub id {
+    my ( $self ) = @_;
+    Carp::confess("Chord missing ID") unless $self->{id};
+    $self->{id};
+}
 
-sub is_chord { 1 };
+sub name    { $_[0]->show }
+sub is_note { $_[0]->{isnote} };
+sub is_flat { $_[0]->{isflat} };
+
+# For convenience.
+sub is_chord      { defined $_[0]->{root_ord} };
 sub is_annotation { 0 };
+
+sub strings {
+    $_[0]->{parser}->{intervals};
+}
 
 package App::Music::ChordPro::Chord::Common;
 
@@ -793,11 +813,12 @@ our @ISA = qw( App::Music::ChordPro::Chord::Base );
 
 sub show {
     Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
-    my ( $self ) = @_;
-    my $res = defined $self->{root_ord}
+    my ( $self, $np ) = @_;
+    my $res = $self->is_chord
       ? $self->{parser}->root_canon( $self->{root_ord},
 				     $self->{root_mod} >= 0,
-				     $self->{qual} eq '-'
+				     $self->{qual} eq '-',
+				     !$self->is_flat
 				   ) . $self->{qual} . $self->{ext}
       : $self->{name};
     if ( $self->{isnote} ) {
@@ -807,7 +828,7 @@ sub show {
 	$res .= "/" .
 	  ($self->{system} eq "roman" ? lc($self->{bass}) : $self->{bass});
     }
-    return $res;
+    return $np ? $res : $self->{parens} ? "($res)" : $res;
 }
 
 # Returns a representation indepent of notation system.
@@ -824,6 +845,7 @@ sub transpose {
     Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self, $xpose ) = @_;
     return $self unless $xpose;
+    return $self unless $self->is_chord;
     my $info = $self->clone;
     my $p = $self->{parser};
     $info->{root_ord} = ( $self->{root_ord} + $xpose ) % $p->intervals;
@@ -838,7 +860,7 @@ sub transpose {
 	$info->{bass_mod} = $xpose <=> 0;
     }
     $info->{root_mod} = $xpose <=> 0;
-    delete $info->{$_} for qw( copy );
+    delete $info->{$_} for qw( copy base frets fingers keys );
     $info;
 }
 
@@ -846,6 +868,7 @@ sub transcode {
     Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self, $xcode ) = @_;
     return $self unless $xcode;
+    return $self unless $self->is_chord;
     return $self if $self->{system} eq $xcode;
     my $info = $self->dclone;
 #warn("_>_XCODE = $xcode, _SELF = $self->{system}, CHORD = $info->{name}");
@@ -853,6 +876,7 @@ sub transcode {
     my $p = $self->{parser}->get_parser($xcode);
     die("OOPS ", $p->{system}, " $xcode") unless $p->{system} eq $xcode;
     $info->{parser} = $p;
+#    $info->{$_} = $p->{$_} for qw( ns_tbl nf_tbl ns_canon nf_canon );
     $info->{root_canon} = $info->{root} =
       $p->root_canon( $info->{root_ord},
 		      $info->{root_mod} >= 0,
@@ -874,11 +898,12 @@ sub transcode {
 
 sub chord_display {
     my ( $self, $raw ) = @_;
-    return $self->{display}
+    my $res = $self->{display}
       ? $raw
-        ? $self->{display}
+      ? $self->{display}
         : interpolate( { args => $self }, $self->{display} )
-      : $self->show;
+	: $self->show("np");
+    return $self->{parens} ? "($res)" : $res;
 }
 
 ################ Chord objects: Nashville ################
@@ -890,12 +915,12 @@ our @ISA = 'App::Music::ChordPro::Chord::Base';
 sub transpose { $_[0] }
 
 sub show {
-    my ( $self ) = @_;
+    my ( $self, $np ) = @_;
     my $res = $self->{root_canon} . $self->{qual} . $self->{ext};
     if ( $self->{bass} && $self->{bass} ne "" ) {
 	$res .= "/" . lc($self->{bass});
     }
-    return $res;
+    return $np ? $res : $self->{parens} ? "($res)" : $res;
 }
 
 sub chord_display {
@@ -914,7 +939,7 @@ sub chord_display {
     if ( $self->{bass} && $self->{bass} ne "" ) {
 	$res .= "<sub>/" . lc($self->{bass}) . "</sub>";
     }
-    return $res;
+    return $self->{parens} ? "($res)" : $res;
 }
 
 ################ Chord objects: Roman ################
@@ -926,12 +951,12 @@ our @ISA = 'App::Music::ChordPro::Chord::Base';
 sub transpose { $_[0] }
 
 sub show {
-    my ( $self ) = @_;
+    my ( $self, $np ) = @_;
     my $res = $self->{root_canon} . $self->{qual} . $self->{ext};
     if ( $self->{bass} && $self->{bass} ne "" ) {
 	$res .= "/" . lc($self->{bass});
     }
-    return $res;
+    return $np ? $res : $self->{parens} ? "($res)" : $res;
 }
 
 sub chord_display {
@@ -950,7 +975,7 @@ sub chord_display {
     if ( $self->{bass} && $self->{bass} ne "" ) {
 	$res .= "<sub>/" . lc($self->{bass}) . "</sub>";
     }
-    return $res;
+    return $self->{parens} ? "($res)" : $res;
 }
 
 ################ Chord objects: Annotations ################
@@ -982,7 +1007,8 @@ sub chord_display {
     }
 }
 
-sub is_chord { 0 };
+# For convenience.
+sub is_chord      { 0 };
 sub is_annotation { 1 };
 
 ################ Testing ################

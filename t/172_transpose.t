@@ -118,7 +118,6 @@ my $song = {
 	},
       ],
       context => '',
-      transpose => 0,
       type => 'rechorus',
     },
     {
@@ -167,7 +166,6 @@ my $song = {
 	},
       ],
       context => '',
-      transpose => 2,
       type => 'rechorus',
     },
     {
@@ -216,7 +214,6 @@ my $song = {
 	},
       ],
       context => '',
-      transpose => 4,
       type => 'rechorus',
     },
     {
@@ -265,7 +262,6 @@ my $song = {
 	},
       ],
       context => '',
-      transpose => 2,
       type => 'rechorus',
     },
     {
@@ -314,10 +310,10 @@ my $song = {
 	},
       ],
       context => '',
-      transpose => 0,
       type => 'rechorus',
     },
   ],
+  chordsinfo => { map { $_ => $_ } qw( D G E A B), 'F#' },
   chords => {
     origin => 'song',
       type => 'diagrams',
@@ -326,15 +322,9 @@ my $song = {
   },
   meta => {
     songindex => 1,
-    key => [
-      'D',
-    ],
-    key_actual => [
-      'D',
-    ],
-    key_from => [
-      'E',
-    ],
+    key => ['D'],
+#    key_actual => ['D'],
+#    key_from => ['E'],
     title => [
       'Transpositions',
     ],

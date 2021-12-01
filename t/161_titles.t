@@ -65,6 +65,7 @@ $song = {
 	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear',
 	    'system' => 'common',
+	    'chordsinfo' => {},
 	    'meta' => {
 		       'songindex' => 1,
 		       'title' => [
@@ -97,6 +98,7 @@ $song = {
 	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear',
 	    'system' => 'common',
+	    'chordsinfo' => {},
 	    'meta' => {
 		       'songindex' => 1,
 		       'title' => [
@@ -129,6 +131,7 @@ $song = {
 	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear',
 	    'system' => 'common',
+	    'chordsinfo' => {},
 	    'meta' => {
 		       'songindex' => 1,
 		       'title' => [

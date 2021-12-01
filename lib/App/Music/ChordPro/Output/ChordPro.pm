@@ -56,6 +56,7 @@ sub generate_song {
     # $s->structurize if ++$structured;
     $variant = $options->{'backend-option'}->{variant} || 'cho';
     my $seq  = $options->{'backend-option'}->{seq};
+    my $expand = $options->{'backend-option'}->{expand};
     my $msp  = $variant eq "msp";
 
     my @s;
@@ -289,7 +290,7 @@ sub generate_song {
 		    $text .= $elt->{phrases}->[$_];
 		}
 	    }
-	    $text = fmt_subst( $s, $text ) if $msp;
+	    $text = fmt_subst( $s, $text ) if $msp || $expand;
 	    push(@s, "") if $tidy;
 	    push(@s, "{$type: $text}");
 	    push(@s, "") if $tidy;
@@ -318,7 +319,12 @@ sub generate_song {
 	    $dumphdr = 0 unless $elt->{origin} eq "__CLI__";
 	    push( @s,
 		  @{ App::Music::ChordPro::Chords::list_chords
-		      ( $elt->{chords}, $elt->{origin},
+		      ( [ map {
+			    $s->{chordsinfo}->{$_}->{origin} eq 'inline'
+			      ? $s->{chordsinfo}->{$_}
+			      : $s->{chordsinfo}->{$_}->{name}
+		          } @{$elt->{chords}} ],
+			$elt->{origin},
 			$dumphdr ) } );
 	    $dumphdr = 0;
 	    next;
@@ -443,7 +449,7 @@ sub chord {
     return "<<$c>>" unless defined $ci;
     my $t = $ci->show;
     return "*$t" if $variant ne 'msp' && $ci->is_annotation;
-    $t;
+    return $t;
 }
 
 1;

@@ -17,6 +17,7 @@ use Test::More ();
 
 use App::Packager ( ':name', 'App::Music::ChordPro' );
 use App::Music::ChordPro::Config;
+use App::Music::ChordPro::Chords;
 
 sub import {
     my $pkg = shift;
@@ -34,8 +35,18 @@ sub is_deeply {
     my ( $got, $expect, $tag ) = @_;
 
     if ( ref($got) eq 'HASH' && ref($expect) eq 'HASH' ) {
-	for ( qw( config chordsinfo ) ) {
+	for ( qw( config ) ) {
 	    delete $got->{$_} unless exists $expect->{$_};
+	}
+	if ( $got->{chordsinfo} ) {
+	    if ( !%{$got->{chordsinfo}} && !$expect->{chordsinfo} ) {
+		delete $got->{chordsinfo};
+	    }
+	    else {
+		foreach ( keys %{ $got->{chordsinfo} } ) {
+		    $got->{chordsinfo}{$_} = $got->{chordsinfo}{$_}->show;
+		}
+	    }
 	}
 	for ( qw( instrument user ) ) {
 	    delete $got->{meta}->{$_} unless exists $expect->{meta}->{$_};
@@ -55,6 +66,9 @@ sub testconfig {
 push( @EXPORT, 'testconfig' );
 
 our $config = testconfig();
+
+App::Music::ChordPro::Chords::add_config_chord
+  ( { name => "NC", base => 1, frets => [ (-1)x6 ], fingers => [] } );
 
 {
 no warnings 'redefine';

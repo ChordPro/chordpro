@@ -95,9 +95,6 @@ sub main {
 
 sub chordpro {
 
-    # In case of re-entrancy.
-    App::Music::ChordPro::Chords::reset_cache();
-
     # Establish backend.
     my $of = $options->{output};
 

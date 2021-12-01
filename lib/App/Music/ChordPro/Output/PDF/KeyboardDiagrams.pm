@@ -4,8 +4,6 @@ use strict;
 
 package App::Music::ChordPro::Output::PDF::KeyboardDiagrams;
 
-use App::Music::ChordPro::Chords;
-
 sub new {
     my ( $pkg, $ps ) = @_;
 
@@ -117,7 +115,7 @@ sub draw {
     # Draw font name.
     my $font = $ps->{fonts}->{diagram};
     $pr->setfont($font);
-    my $name = App::Music::ChordPro::Output::PDF::chord_display($info);
+    my $name = $info->chord_display;
     $name .= "*"
       unless $info->{origin} ne "user"
 	|| $ps->{kbdiagrams}->{show} eq "user";

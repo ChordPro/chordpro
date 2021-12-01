@@ -23,6 +23,7 @@ use App::Music::ChordPro::Output::PDF::Writer;
 use App::Music::ChordPro::Utils;
 
 my $pdfapi;
+
 use Text::Layout;
 use String::Interpolate::Named;
 
@@ -38,7 +39,9 @@ sub generate_songbook {
 
     return [] unless $sb->{songs}->[0]->{body}; # no songs
     $verbose ||= $options->{verbose};
+
     my $ps = $config->{pdf};
+
     my $pr = (__PACKAGE__."::Writer")->new( $ps, $pdfapi );
     warn("Generating PDF ", $options->{output} || "__new__.pdf", "...\n") if $options->{verbose};
 
@@ -358,12 +361,12 @@ sub generate_song {
     my $sb = $s->{body};
 
     # Load song chords, if any.
-    App::Music::ChordPro::Chords::reset_song_chords();
-    if ( $s->{define} ) {
-	foreach ( @{ $s->{define} } ) {
-	    App::Music::ChordPro::Chords::add_song_chord($_);
-	}
-    }
+#    App::Music::ChordPro::Chords::reset_song_chords();
+#    if ( $s->{define} ) {
+#	foreach ( @{ $s->{define} } ) {
+#	    App::Music::ChordPro::Chords::add_song_chord($_);
+#	}
+#    }
 
     # set_columns needs these, set provisional values.
     $ps->{_leftmargin}  = $ps->{marginleft};
@@ -624,7 +627,7 @@ sub generate_song {
 	$show //= $dctl->{show};
 	if ( $chords ) {
 	    foreach ( @$chords ) {
-		my $i = getchordinfo( $_, $ldisp );
+		my $i = getchordinfo( $s, $_, $ldisp );
 		push( @chords, $i ) if $i;
 	    }
 	}
@@ -1505,15 +1508,8 @@ sub songline {
 
 	    # Collect chords to be printed in the side column.
 	    my $info = $opts{song}->{chordsinfo}->{$chord};
-	    unless ( $info ) {
-		$info = App::Music::ChordPro::Chords::chord_info($chord);
-		warn("PDF: Lookup chord $chord... ",
-		     $info ? "found" : "fail",
-		     "\n") if $options->{debug};
-	    }
-	    if ( $info ) {
-		$chord = $info->chord_display;
-	    }
+	    croak("Missing info for chord $chord") unless $info;
+	    $chord = $info->chord_display;
 	    push(@chords, $chord);
 	}
 	else {
@@ -1521,17 +1517,10 @@ sub songline {
 	    my $font = $fchord;
 	    if ( $chord ne '' ) {
 		my $info = $opts{song}->{chordsinfo}->{$chord};
-		unless ( $info ) {
-		    $info = App::Music::ChordPro::Chords::chord_info($chord);
-		    warn("PDF: Lookup chord $chord... ",
-			 $info ? "found" : "fail",
-			 "\n") if $options->{debug};
-		}
-		if ( $info ) {
-		    $chord = $info->chord_display;
-		    $font = $fonts->{annotation}
-		      if $info->is_annotation;
-		}
+		Carp::croak("Missing info for chord $chord") unless $info;
+		$chord = $info->chord_display;
+		$font = $fonts->{annotation}
+		  if $info->is_annotation;
 		$xt0 = $pr->text( $pre.$chord.$post, $x, $ychord, $font );
 	    }
 
@@ -1940,7 +1929,6 @@ sub tocline {
 	$y -= $vsp;
     }
     my $ann = $pr->{pdfpage}->annotation;
-    $ann->border(0,0,0);	# PDF spec says 0,0,1 is default
     $ann->link($elt->{page});
     $ann->rect( $ps->{_leftmargin}, $y0 - $ftoc->{size} * $ps->{spacing}->{toc},
 		$ps->{__rightmargin}, $y0 );
@@ -2044,7 +2032,7 @@ sub getchordinfo {
 	$name = $info->{name};
     }
     else {
-	$info = App::Music::ChordPro::Chords::chord_info($name);
+	$info = $song->{chordsinfo}->{$name};
     }
     if ( $info ) {
 	if ( $info->{frets} && @{ $info->{frets} } ) {

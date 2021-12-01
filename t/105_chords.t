@@ -46,7 +46,7 @@ while ( <DATA> ) {
 plan tests => 0 + keys(%tbl);
 
 while ( my ( $c, $info ) = each %tbl ) {
-    my $res = App::Music::ChordPro::Chords::parse_chord($c);
+    my $res = App::Music::ChordPro::Chords::parse_chord($c,1);
     $res //= "FAIL";
     if ( UNIVERSAL::isa( $res, 'HASH' ) ) {
         $res = reformat($res);
