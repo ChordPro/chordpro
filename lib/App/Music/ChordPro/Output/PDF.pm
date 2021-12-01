@@ -1939,6 +1939,7 @@ sub tocline {
 	$y -= $vsp;
     }
     my $ann = $pr->{pdfpage}->annotation;
+    $ann->border(0,0,0);	# PDF spec says 0,0,1 is default
     $ann->link($elt->{page});
     $ann->rect( $ps->{_leftmargin}, $y0 - $ftoc->{size} * $ps->{spacing}->{toc},
 		$ps->{__rightmargin}, $y0 );

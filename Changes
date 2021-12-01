@@ -19,6 +19,7 @@
     - Fix labels for grid with pdf.labels.comment.
     - Fix key_actual and key_from to reflect all keys.
     - Fix tilde expansion for font files.
+    - (PDF) Suppress borders around ToC entries, just in case.
 
 5.985 2021-09-28
 
