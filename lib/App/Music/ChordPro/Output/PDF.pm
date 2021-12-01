@@ -616,7 +616,7 @@ sub generate_song {
     };
 
     my $chorddiagrams = sub {
-	my ( $chords, $show ) = @_;
+	my ( $chords, $show, $ldisp ) = @_;
 	return unless $dctl->{show};
 	my @chords;
 	$chords = $s->{chords}->{chords}
@@ -624,7 +624,7 @@ sub generate_song {
 	$show //= $dctl->{show};
 	if ( $chords ) {
 	    foreach ( @$chords ) {
-		my $i = getchordinfo($_);
+		my $i = getchordinfo( $_, $ldisp );
 		push( @chords, $i ) if $i;
 	    }
 	}
@@ -1112,7 +1112,7 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "diagrams" ) {
- 	    $chorddiagrams->( $elt->{chords}, "below" );
+ 	    $chorddiagrams->( $elt->{chords}, "below", $elt->{line} );
 	    next;
 	}
 
@@ -2034,7 +2034,8 @@ sub text_vsp {
 }
 
 sub getchordinfo {
-    my ( $name ) = @_;
+    my ( $song, $name, $ldisp ) = @_;
+    $ldisp ||= 0;
     return unless $name =~ /\S/;
     my $info;
     if ( eval{ $name->{name} } ) {
@@ -2062,11 +2063,16 @@ sub getchordinfo {
 	return $info if $info;
     }
 
-    warn("PDF: Unknown chord $name",
-	 $source ? ( " in song starting at line " .
-		     $source->{line} . " in " . $source->{file} ) : (),
-	 "\n"
-	);
+    my $msg = "PDF: Unknown chord $name";
+    if ( $ldisp ) {
+	$msg .= " in line $ldisp";
+    }
+    elsif ( $source) {
+	$msg .= " song starting at line " . $source->{line};
+    }
+    $msg .= " in " . $source->{file} if $source;
+    warn( $msg, "\n" );
+
     return;
 }
 
