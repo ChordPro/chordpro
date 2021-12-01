@@ -1516,6 +1516,10 @@
 		    "type": "integer",
 		    "default": 0
 		},
+		"chords": {
+		    "type": "integer",
+		    "default": 0
+		},
 		"config": {
 		    "type": "integer",
 		    "default": 0
