@@ -306,6 +306,55 @@
 	    }
 	},
 
+	"text": {
+	    "title": "Text (output)",
+	    "description": "Settings for Text backend.",
+	    "type": "object",
+	    "additionalProperties": false,
+	    "properties": {
+		"chorus": {
+		    "title": "Chorus",
+		    "description": "Appearance of chorus.",
+		    "format": "grid-strict",
+		    "additionalProperties": false,
+		    "properties": {
+			"recall": {
+			    "description": "Appearance of chorus recall.",
+			    "additionalProperties": false,
+			    "properties": {
+				"quote": {
+				    "description": "Quote the chorus.",
+				    "default": false,
+				    "type": "boolean"
+				},
+				"tag": {
+				    "description": "Label for recalled chorus.",
+				    "default": "Chorus",
+				    "type": "string"
+				},
+				"type": {
+				    "description": "Type for tag text.",
+				    "default": "comment",
+				    "enum": [
+					"",
+					"comment",
+					"comment_italic",
+					"comment_box"
+				    ],
+				    "type": "string"
+				}
+			    }
+			},
+			"tag": {
+			    "description": "(Obsolete) Label for Chorus.",
+			    "type": "string",
+			    "default": "Chorus"
+			}
+		    }
+		}
+	    }
+	},
+
 	"a2crd": {
 	    "title": "A2Crd (input)",
 	    "description": "Settings for A2Crd.",

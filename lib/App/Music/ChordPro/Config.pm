@@ -1528,6 +1528,23 @@ sub default_config() {
 	},
     },
 
+    // Settings for Text backend.
+    "text" : {
+	// Style of chorus.
+	"chorus" : {
+	    // Recall style: Print the tag using the type.
+	    // Alternatively quote the lines of the preceding chorus.
+	    // If no tag+type or quote: use {chorus}.
+	    // Note: Variant 'msp' always uses {chorus}.
+	    "recall" : {
+		 // "tag"   : "Chorus", "type"  : "comment",
+		 "tag"   : "", "type"  : "",
+		 // "quote" : false,
+		 "quote" : false,
+	    },
+	},
+    },
+
     // Settings for A2Crd.
     "a2crd" : {
 	// Treat leading lyrics lines as title/subtitle lines.
