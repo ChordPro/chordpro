@@ -32,14 +32,20 @@ my $single_space = 0;		# suppress chords line when empty
 my $lyrics_only = 0;		# suppress all chords lines
 my $chords_under = 0;		# chords under lyrics
 my $layout = Text::Layout::Text->new;
+my $rechorus;
+
+sub upd_config {
+    $lyrics_only  = $config->{settings}->{'lyrics-only'};
+    $chords_under = $config->{settings}->{'chords-under'};
+    $rechorus  = $config->{text}->{chorus}->{recall};
+}
 
 sub generate_song {
     my ( $s ) = @_;
 
     my $tidy      = $options->{'backend-option'}->{tidy};
     $single_space = $options->{'single-space'};
-    $lyrics_only  = $config->{settings}->{'lyrics-only'};
-    $chords_under = $config->{settings}->{'chords-under'};
+    upd_config();
 
     $s->structurize
       if ( $options->{'backend-option'}->{structure} // '' ) eq 'structured';
@@ -55,7 +61,9 @@ sub generate_song {
     push(@s, "") if $tidy;
 
     my $ctx = "";
-    foreach my $elt ( @{$s->{body}} ) {
+    my @elts = @{$s->{body}};
+    while ( @elts ) {
+	my $elt = shift(@elts);
 
 	if ( $elt->{context} ne $ctx ) {
 	    push(@s, "-- End of $ctx") if $ctx;
@@ -104,6 +112,19 @@ sub generate_song {
 	    }
 	    push(@s, "-- End of chorus*");
 	    push(@s, "") if $tidy;
+	    next;
+	}
+
+	if ( $elt->{type} eq "rechorus" ) {
+	    if ( $rechorus->{quote} ) {
+		unshift( @elts, @{ $elt->{chorus} } );
+	    }
+	    elsif ( $rechorus->{type} &&  $rechorus->{tag} ) {
+		push( @s, "{".$rechorus->{type}.": ".$rechorus->{tag}."}" );
+	    }
+	    else {
+		push( @s, "{chorus}" );
+	    }
 	    next;
 	}
 
@@ -177,6 +198,18 @@ sub generate_song {
 	    if ( $elt->{name} eq "lyrics-only" ) {
 		$lyrics_only = $elt->{value}
 		  unless $lyrics_only > 1;
+	    }
+	    # Arbitrary config values.
+	    elsif ( $elt->{name} =~ /^(text\..+)/ ) {
+		my @k = split( /[.]/, $1 );
+		my $cc = {};
+		my $c = \$cc;
+		foreach ( @k ) {
+		    $c = \($$c->{$_});
+		}
+		$$c = $elt->{value};
+		$config->augment($cc);
+		upd_config();
 	    }
 	    next;
 	}

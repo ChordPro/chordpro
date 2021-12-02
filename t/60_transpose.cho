@@ -1,6 +1,7 @@
+{+text.chorus.recall.quote 1}
 {title: Transpositions}
 {key: D}
-{c: Key: %{key}, actual: %{key_actual}%{key_from| from %{}}}
+{c: Key is %{key}%{key_actual|, actual %{}}%{key_from|, from %{}}}
 
 {start_of_chorus}
 Swing [D]low, sweet [G]chari[D]ot,
@@ -11,28 +12,28 @@ I [D]looked over Jordan, and [G]what did I [D]see,
 {chorus}
 
 {transpose +2}
-{c: Modulate to [D]%{key_actual| (%{key_from|from %{} }to %{key_actual})}}
+{c: Key is %{key}%{key_actual|, actual %{}}%{key_from|, from %{}}}
 
 I [D]looked over Jordan, and [G]what did I [D]see,
 
 {chorus}
 
 {transpose +2}
-{c: Modulate to [D]%{key_actual| (%{key_from|from %{} }to %{key_actual})}}
+{c: Key is %{key}%{key_actual|, actual %{}}%{key_from|, from %{}}}
 
 I [D]looked over Jordan, and [G]what did I [D]see,
 
 {chorus}
 
 {transpose}
-{c: Modulate to %{key}[D]%{key_actual| (%{key_from|from %{} }to %{key_actual})}}
+{c: Key is %{key}%{key_actual|, actual %{}}%{key_from|, from %{}}}
 
 I [D]looked over Jordan, and [G]what did I [D]see,
 
 {chorus}
 
 {transpose}
-{c: Modulate to [D]%{key_actual| (%{key_from|from %{} }to %{key_actual})}}
+{c: Key is %{key}%{key_actual|, actual %{}}%{key_from|, from %{}}}
 
 I [D]looked over Jordan, and [G]what did I [D]see,
 

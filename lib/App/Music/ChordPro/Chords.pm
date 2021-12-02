@@ -491,6 +491,7 @@ sub chord_info {
     my $debug = $config->{debug}->{chords};
     warn("chord_info($chord)...\n") if $debug;
     my $info;
+    my $parens = $chord =~ s/\((.+)\)$/$1/;
     assert_tuning();
     for ( \%song_chords, \%config_chords ) {
 	next unless exists($_->{$chord});

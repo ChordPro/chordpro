@@ -82,10 +82,10 @@ passed :
 	${PROVE} t/31_basic02_cho.t
 	${PROVE} t/40_basic01_html.t
 	${PROVE} t/50_encodings.t
+	${PROVE} t/60_transpose.t
 	${PROVE} t/70_a2crd.t
 	${PROVE} t/72_mma.t
+	${PROVE} t/71_cho.t
 
 todo :
 	- ${PROVE} t/173_transpose.t
-	- ${PROVE} t/60_transpose.t
-	- ${PROVE} t/71_cho.t

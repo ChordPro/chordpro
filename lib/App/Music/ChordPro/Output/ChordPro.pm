@@ -45,19 +45,24 @@ sub generate_songbook {
 
 my $lyrics_only = 0;
 my $variant = 'cho';
+my $rechorus;
+
+sub upd_config {
+    $rechorus = $::config->{chordpro}->{chorus}->{recall};
+    $lyrics_only = 2 * $::config->{settings}->{'lyrics-only'};
+}
 
 sub generate_song {
     my ( $s ) = @_;
 
     my $tidy = $options->{'backend-option'}->{tidy};
-    $lyrics_only = 2 * $::config->{settings}->{'lyrics-only'};
-    my $rechorus = $::config->{chordpro}->{chorus}->{recall};
     my $structured = ( $options->{'backend-option'}->{structure} // '' ) eq 'structured';
     # $s->structurize if ++$structured;
     $variant = $options->{'backend-option'}->{variant} || 'cho';
     my $seq  = $options->{'backend-option'}->{seq};
     my $expand = $options->{'backend-option'}->{expand};
     my $msp  = $variant eq "msp";
+    upd_config();
 
     my @s;
     my %imgs;
@@ -273,7 +278,7 @@ sub generate_song {
 
 	if ( $elt->{type} =~ /^comment(?:_italic|_box)?$/ ) {
 	    my $type = $elt->{type};
-	    my $text = $elt->{orig};
+	    my $text = $expand ? $elt->{text} : $elt->{orig};
 	    if ( $msp ) {
 		$type = $type eq 'comment'
 		  ? 'highlight'
@@ -290,7 +295,7 @@ sub generate_song {
 		    $text .= $elt->{phrases}->[$_];
 		}
 	    }
-	    $text = fmt_subst( $s, $text ) if $msp || $expand;
+	    $text = fmt_subst( $s, $text ) if $msp;
 	    push(@s, "") if $tidy;
 	    push(@s, "{$type: $text}");
 	    push(@s, "") if $tidy;
@@ -336,6 +341,18 @@ sub generate_song {
 		  unless $lyrics_only > 1;
 	    }
 	    elsif ( $elt->{name} eq "transpose" ) {
+	    }
+	    # Arbitrary config values.
+	    elsif ( $elt->{name} =~ /^(chordpro\..+)/ ) {
+		my @k = split( /[.]/, $1 );
+		my $cc = {};
+		my $c = \$cc;
+		foreach ( @k ) {
+		    $c = \($$c->{$_});
+		}
+		$$c = $elt->{value};
+		$config->augment($cc);
+		upd_config();
 	    }
 	    next;
 	}

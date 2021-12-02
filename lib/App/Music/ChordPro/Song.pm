@@ -572,7 +572,8 @@ sub chord {
     }
 
     my ( $name, $info ) = $self->parse_chord($c);
-    push( @used_chords, $name ) unless $info->{isnote};
+    ( my $n = $name ) =~ s/\((.+)\)$/$1/;
+    push( @used_chords, $n ) unless $info->{isnote};
     return $name;
 }
 
@@ -1051,6 +1052,7 @@ sub directive {
 			$xp += $config->{settings}->{transpose} if $config->{settings}->{transpose};
 			for ( qw( key key_actual key_from ) ) {
 			    next unless exists $self->{meta}->{$_};
+			    ####CHECK
 			    $self->{meta}->{$_}->[-1] =
 			      App::Music::ChordPro::Chords::transpose( $self->{meta}->{$_}->[-1], $xp )
 			    }
@@ -1121,6 +1123,7 @@ sub directive {
 		    );
 	    my $m = $self->{meta};
 	    if ( $m->{key} ) {
+		####CHECK
 		$m->{key_actual} =
 		  [ map { App::Music::ChordPro::Chords::transpose( $_, $xpose+$1 ) } @{ $m->{key} } ];
 		$m->{key_from} =
@@ -1136,6 +1139,7 @@ sub directive {
 		    );
 	    my $m = $self->{meta};
 	    if ( $m->{key} ) {
+		####CHECK
 		$m->{key_from} =
 		  [ App::Music::ChordPro::Chords::transpose( $m->{key}->[-1],
 							     $xpose ) ];
@@ -1150,6 +1154,7 @@ sub directive {
 		delete $m->{$_} for qw( key_actual key_from )
 	    }
 	    if ( $m->{key} && $xpose ) {
+		####CHECK
 		$m->{key_actual} =
 		  [ App::Music::ChordPro::Chords::transpose( $m->{key}->[-1],
 							     $xpose ) ];
