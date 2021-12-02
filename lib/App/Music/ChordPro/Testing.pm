@@ -102,21 +102,28 @@ sub cmp {
     }
 }
 
+use File::LoadLines qw( loadlines );
+
 sub differ {
     my ($file1, $file2) = @_;
     $file2 = "$file1" unless $file2;
     $file1 = "$file1";
-    my ($str1, $str2);
-    local($/);
-    open(my $fd1, "<:encoding(utf-8)", $file1) or die("$file1: $!\n");
-    $str1 = <$fd1>;
-    close($fd1);
-    open(my $fd2, "<:encoding(utf-8)", $file2) or die("$file2: $!\n");
-    $str2 = <$fd2>;
-    close($fd2);
-    $str1 =~ s/[\n\r]+/\n/;
-    $str2 =~ s/[\n\r]+/\n/;
-    return 0 if $str1 eq $str2;
+
+    my @lines1 = loadlines($file1);
+    my @lines2 = loadlines($file2);
+    my $linesm = @lines1 > @lines2 ? @lines1 : @lines2;
+    for ( my $line = 1; $line < $linesm; $line++ ) {
+	next if $lines1[$line] eq $lines2[$line];
+	Test::More::diag("Files $file1 and $file2 differ at line $line");
+	Test::More::diag("  <  $lines1[$line]");
+	Test::More::diag("  >  $lines2[$line]");
+	return 1;
+    }
+    return 0 if @lines1 == @lines2;
+    $linesm++;
+    Test::More::diag("Files $file1 and $file2 differ at line $linesm" );
+    Test::More::diag("  <  ", $lines1[$linesm] // "***missing***");
+    Test::More::diag("  >  ", $lines2[$linesm] // "***missing***");
     1;
 }
 
