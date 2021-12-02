@@ -26,6 +26,7 @@ sub fmt_subst {
     # Derived item(s).
     $m->{_key} = $m->{key} if exists $m->{key};
     if ( $m->{key} && $m->{capo} && (my $capo = $m->{capo}->[-1]) ) {
+	####CHECK
 	$m->{_key} =
 	  [ map { App::Music::ChordPro::Chords::transpose( $_, $capo ) }
 	        @{$m->{key}} ];

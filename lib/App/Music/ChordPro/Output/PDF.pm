@@ -626,10 +626,7 @@ sub generate_song {
 	  if !defined($chords) && $s->{chords};
 	$show //= $dctl->{show};
 	if ( $chords ) {
-	    foreach ( @$chords ) {
-		my $i = getchordinfo( $s, $_, $ldisp );
-		push( @chords, $i ) if $i;
-	    }
+	    @chords = map { $s->{chordsinfo}->{$_} } @$chords;
 	}
 	return unless @chords;
 
@@ -2019,49 +2016,6 @@ sub text_vsp {
     # Calculate the vertical span of this line.
 
     _vsp( "text", $ps, "lyrics" );
-}
-
-sub getchordinfo {
-    my ( $song, $name, $ldisp ) = @_;
-    $ldisp ||= 0;
-    return unless $name =~ /\S/;
-    my $info;
-    if ( eval{ $name->{name} } ) {
-	$info = $name;
-	$info->{user} = 0;
-	$name = $info->{name};
-    }
-    else {
-	$info = $song->{chordsinfo}->{$name};
-    }
-    if ( $info ) {
-	if ( $info->{frets} && @{ $info->{frets} } ) {
-	    # Suppress if NC.
-	    foreach ( @{ $info->{frets} } ) {
-		return $info if $_ >= 0;
-	    }
-	    return;
-	}
-	return $info;
-    }
-
-    # For keyboard, chords can easily be determined by name.
-    if ( $config->{instrument}->{type} eq "keyboard" ) {
-	$info = App::Music::ChordPro::Chords::parse_chord($name);
-	return $info if $info;
-    }
-
-    my $msg = "PDF: Unknown chord $name";
-    if ( $ldisp ) {
-	$msg .= " in line $ldisp";
-    }
-    elsif ( $source) {
-	$msg .= " song starting at line " . $source->{line};
-    }
-    $msg .= " in " . $source->{file} if $source;
-    warn( $msg, "\n" );
-
-    return;
 }
 
 sub set_columns {

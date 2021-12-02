@@ -201,6 +201,7 @@ sub chordpro {
 
 	my $prev = "";
 	foreach my $c ( @{ App::Music::ChordPro::Chords::chordnames() } ) {
+	    next if $c =~ /^n\.?c\.?$/i;
 	    if ( $c =~ /^(.[b#]?)/ and $1 ne $prev )  {
 		$prev = $1;
 		push( @body, { type => "diagrams",
@@ -211,6 +212,7 @@ sub chordpro {
 		@chords = ();
 	    }
 	    push( @chords, $c );
+	    $d->{chordsinfo}->{$c} = App::Music::ChordPro::Chords::_known_chord($c);
 	}
 
 	push( @body, { type => "diagrams",

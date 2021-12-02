@@ -56,8 +56,8 @@ sub chordcompare($$) {
     my ( $chorda, $chordb ) = @_;
     my ( $a0, $arest ) = $chorda =~ /^([A-G][b#]?)(.*)/;
     my ( $b0, $brest ) = $chordb =~ /^([A-G][b#]?)(.*)/;
-    $a0 = $chordorderkey{$a0}//return 0;
-    $b0 = $chordorderkey{$b0}//return 0;
+    $a0 = $chordorderkey{$a0//"\x{ff}"}//return 0;
+    $b0 = $chordorderkey{$b0//"\x{ff}"}//return 0;
     return $a0 <=> $b0 if $a0 != $b0;
     $a0++ if $arest =~ /^m(?:in)?(?!aj)/;
     $b0++ if $brest =~ /^m(?:in)?(?!aj)/;
@@ -483,10 +483,9 @@ sub parse_chord {
 
 ################ Section Chords Info ################
 
-# API: Returns info about an individual chord.
+# Returns info about an individual chord.
 # This is basically the result of parse_chord, augmented with strings
 # and fingers, if any.
-# Used by: Songbook, Output/PDF.
 sub chord_info {
     my ( $chord ) = @_;
     my $debug = $config->{debug}->{chords};
@@ -499,6 +498,9 @@ sub chord_info {
 	$info = $_->{$chord};
 	last;
     }
+
+    # This should not happen anymore...
+    Carp::cluck("Unknown chord: \"$chord\"") unless $info;
 
     # This should only be needed for testing w/o chord configs.
     if ( !$info && $chord =~ /^n\.?c\.?$/i ) {
