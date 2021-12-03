@@ -1,0 +1,13 @@
+{title: Tranpose}
+{define: D               base-fret  1    frets   X   X   0   2   3   2   }
+{define: G               base-fret  1    frets   3   2   0   0   0   3   }
+{define: F#              base-fret  1    frets   2   4   4   3   2   2   }
+{define: B               base-fret  1    frets   X   2   4   4   4   2   }
+{define: G#              base-fret  4    frets   1   3   3   2   1   1   }
+{define: C#              base-fret  1    frets   X   X   3   1   2   1   }
+
+I [D]looked over Jordan, and [G]what did I [D]see,
+I [F#]looked over Jordan, and [B]what did I [F#]see,
+I [G#]looked over Jordan, and [C#]what did I [G#]see,
+# Back to +4 or -2?
+I [F#]looked over Jordan, and [B]what did I [F#]see,
