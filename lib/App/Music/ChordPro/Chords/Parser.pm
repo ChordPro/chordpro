@@ -843,25 +843,30 @@ sub agnostic {
 
 sub transpose {
     Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
-    my ( $self, $xpose ) = @_;
+    my ( $self, $xpose, $dir ) = @_;
     return $self unless $xpose;
     return $self unless $self->is_chord;
+    $dir //= $xpose <=> 0;
+
     my $info = $self->clone;
     my $p = $self->{parser};
+
     $info->{root_ord} = ( $self->{root_ord} + $xpose ) % $p->intervals;
     $info->{root_canon} = $info->{root} =
       $p->root_canon( $info->{root_ord},
-		      $xpose > 0,
+		      $dir > 0,
 		      $info->{qual_canon} eq "-" );
     if ( $self->{bass} && $self->{bass} ne "" ) {
 	$info->{bass_ord} = ( $self->{bass_ord} + $xpose ) % $p->intervals;
 	$info->{bass_canon} = $info->{bass} =
 	  $p->root_canon( $info->{bass_ord}, $xpose > 0 );
-	$info->{bass_mod} = $xpose <=> 0;
+	$info->{bass_mod} = $dir;
     }
-    $info->{root_mod} = $xpose <=> 0;
+    $info->{root_mod} = $dir;
+
     delete $info->{$_} for qw( copy base frets fingers keys );
-    $info;
+
+    return $info;
 }
 
 sub transcode {

@@ -43,7 +43,7 @@ eval { $s->parse_file( \$data, { transpose => -10 } ) } or diag("$@");
 
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
-use DDumper; open( my $fd, '>', '173_transpose.out'); print $fd DDumper($s->{songs}->[0]); close($fd);
+
 my $song = {
   body => [
     {
@@ -67,10 +67,10 @@ my $song = {
       type => 'songline',
     },
     {
-     context => 'chorus',
-     type => 'set',
-     value => '',
-     name => 'context'
+      context => 'chorus',
+      type => 'set',
+      value => '',
+      name => 'context'
     },
     {
       context => '',
@@ -111,10 +111,10 @@ my $song = {
           type => 'songline',
         },
 	{
-	 context => 'chorus',
-	 type => 'set',
-	 value => '',
-	 name => 'context'
+	  context => 'chorus',
+	  type => 'set',
+	  value => '',
+	  name => 'context'
 	},
       ],
       context => '',
@@ -127,9 +127,9 @@ my $song = {
     {
       chords => [
         '',
-        'Gb',
+        'F#',
         'B',
-        'Gb',
+        'F#',
       ],
       context => '',
       phrases => [
@@ -145,9 +145,9 @@ my $song = {
         {
           chords => [
             '',
-            'Gb',
+            'F#',
             'B',
-            'Gb',
+            'F#',
           ],
           context => 'chorus',
           phrases => [
@@ -159,10 +159,10 @@ my $song = {
           type => 'songline',
         },
 	{
-	 context => 'chorus',
-	 type => 'set',
-	 value => '',
-	 name => 'context'
+	  context => 'chorus',
+	  type => 'set',
+	  value => '',
+	  name => 'context'
 	},
       ],
       context => '',
@@ -175,9 +175,9 @@ my $song = {
     {
       chords => [
         '',
-        'Ab',
-        'Db',
-        'Ab',
+        'G#',
+        'C#',
+        'G#',
       ],
       context => '',
       phrases => [
@@ -193,9 +193,9 @@ my $song = {
         {
           chords => [
             '',
-            'Ab',
-            'Db',
-            'Ab',
+            'G#',
+            'C#',
+            'G#',
           ],
           context => 'chorus',
           phrases => [
@@ -207,10 +207,10 @@ my $song = {
           type => 'songline',
         },
 	{
-	 context => 'chorus',
-	 type => 'set',
-	 value => '',
-	 name => 'context'
+	  context => 'chorus',
+	  type => 'set',
+	  value => '',
+	  name => 'context'
 	},
       ],
       context => '',
@@ -223,9 +223,9 @@ my $song = {
     {
       chords => [
         '',
-        'Gb',
+        'F#',
         'B',
-        'Gb',
+        'F#',
       ],
       context => '',
       phrases => [
@@ -241,9 +241,9 @@ my $song = {
         {
           chords => [
             '',
-            'Gb',
+            'F#',
             'B',
-            'Gb',
+            'F#',
           ],
           context => 'chorus',
           phrases => [
@@ -255,10 +255,10 @@ my $song = {
           type => 'songline',
         },
 	{
-	 context => 'chorus',
-	 type => 'set',
-	 value => '',
-	 name => 'context'
+	  context => 'chorus',
+	  type => 'set',
+	  value => '',
+	  name => 'context'
 	},
       ],
       context => '',
@@ -303,10 +303,10 @@ my $song = {
           type => 'songline',
         },
 	{
-	 context => 'chorus',
-	 type => 'set',
-	 value => '',
-	 name => 'context'
+	  context => 'chorus',
+	  type => 'set',
+	  value => '',
+	  name => 'context'
 	},
       ],
       context => '',
@@ -314,19 +314,17 @@ my $song = {
     },
   ],
   chords => {
+    chords => [ 'E', 'A', 'F#', 'B', 'G#', 'C#' ],
     origin => 'song',
-      type => 'diagrams',
-      show => 'all',
-      chords => [ 'E', 'A', 'Gb', 'B', 'Ab', 'Db' ]
+    show => 'all',
+    type => 'diagrams'
   },
-  chordsinfo => { map { $_ => $_ } qw( E A B Gb Db Ab Bb ) },
+  chordsinfo => { map { $_ => $_ } qw( E A B ), 'F#', 'C#', 'G#' },
   meta => {
     songindex => 1,
     key => [
       'E',
     ],
-#   key_actual => ['E'],
-#    key_from => ['F#'],
     title => [
       'Transpositions',
     ],
@@ -334,7 +332,7 @@ my $song = {
   settings => {},
   source => { file => "__STRING__", line => 1 },
   structure => 'linear',
-	    'system' => 'common',
+  system => 'common',
   title => 'Transpositions',
 };
 

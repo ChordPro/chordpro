@@ -51,6 +51,7 @@ passed :
 	${PROVE} t/170_transpose.t
 	${PROVE} t/171_transpose.t
 	${PROVE} t/172_transpose.t
+	${PROVE} t/173_transpose.t
 	${PROVE} t/175_transpose.t
 	${PROVE} t/177_transcode.t
 	${PROVE} t/178_transcode.t
@@ -88,4 +89,3 @@ passed :
 	${PROVE} t/71_cho.t
 
 todo :
-	- ${PROVE} t/173_transpose.t

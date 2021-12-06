@@ -31,6 +31,8 @@ my $grid_cells;
 
 # Local transposition.
 my $xpose = 0;
+my $xpose_dir;
+my $capo;
 
 # Used chords, in order of appearance.
 my @used_chords;
@@ -38,6 +40,7 @@ my @used_chords;
 # Chorus lines, if any.
 my @chorus;
 my $chorus_xpose = 0;
+my $chorus_xpose_dir = 0;
 
 # Memorized chords.
 my %memchords;			# all sections
@@ -49,7 +52,7 @@ my $memorizing;			# if memorizing (a.o.t. recalling)
 my %warned_chords;
 
 my $re_chords;			# for chords
-
+my $intervals;			# number of note intervals
 my @labels;			# labels used
 
 # Normally, transposition and subtitutions are handled by the parser.
@@ -74,7 +77,8 @@ sub new {
     App::Music::ChordPro::Chords::reset_song_chords();
     @labels = ();
     @chorus = ();
-    $lineinfo = $config->{settings}->{lineinfo};
+    $capo = undef;
+    upd_config();
 
     $diag->{format} = $config->{diagnostics}->{format};
     $diag->{file}   = $filesource;
@@ -85,6 +89,12 @@ sub new {
 	    meta       => {},
 	    structure  => "linear",
 	  } => $pkg;
+}
+
+sub upd_config {
+    $decapo    = $config->{settings}->{decapo};
+    $lineinfo  = $config->{settings}->{lineinfo};
+    $intervals = @{ $config->{notes}->{sharp} };
 }
 
 sub ::break() {}
@@ -192,9 +202,7 @@ sub parse_song {
 
     $no_transpose = $options->{'no-transpose'};
     $no_substitute = $options->{'no-substitute'};
-    $decapo = $config->{settings}->{decapo};
     my $fragment = $options->{fragment};
-
     my $target = $config->{settings}->{transcode};
     if ( $target ) {
 	unless ( App::Music::ChordPro::Chords::Parser->have_parser($target) ) {
@@ -222,6 +230,7 @@ sub parse_song {
 	$target = $self->{system};
     }
 
+    upd_config();
     $self->{source}     = { file => $diag->{file}, line => 1 + $$linecnt };
     $self->{system}     = $config->{notes}->{system};
     $self->{config}     = $config;
@@ -426,6 +435,7 @@ sub parse_song {
 		# Else start new item.
 		else {
 		    my %opts;
+		    ####TODO
 		    if ( $xpose || $config->{settings}->{transpose} ) {
 			$opts{transpose} =
 			  $xpose + ($config->{settings}->{transpose}//0 );
@@ -496,7 +506,11 @@ sub parse_song {
     do_warn("Unterminated context in song: $in_context")
       if $in_context;
 
+    # These don't make sense after processing.
+    delete $self->{meta}->{$_} for qw( key_actual key_from );
+
     warn("Processed song...\n") if $options->{verbose};
+
     $self->dump(0) if $config->{debug}->{song} > 1;
 
     if ( @labels ) {
@@ -557,6 +571,7 @@ sub add {
     if ( $in_context eq "chorus" ) {
 	push( @chorus, { context => $in_context, @_ } );
 	$chorus_xpose = $xpose;
+	$chorus_xpose_dir = $xpose_dir;
     }
 }
 
@@ -583,8 +598,6 @@ sub decompose {
     undef $orig if $orig eq $line;
     $line =~ s/\s+$//;
     my @a = split( $re_chords, $line, -1);
-
-#    die(msg("Illegal line")."\n") unless @a; #### TODO
 
     if ( @a <= 1 ) {
 	return ( phrases => [ $line ],
@@ -820,7 +833,8 @@ sub directive {
 	    # warn("Skipping context: $in_context\n");
 	    return 1;
 	}
-	@chorus = (), $chorus_xpose = 0 if $in_context eq "chorus";
+	@chorus = (), $chorus_xpose = $chorus_xpose_dir = 0
+	  if $in_context eq "chorus";
 	if ( $in_context eq "grid" ) {
 	    if ( $arg eq "" ) {
 		$self->add( type => "set",
@@ -908,6 +922,7 @@ sub directive {
 	     $config->{settings}->{transcode}
 	   ) {
 	    for ( @$chorus ) {
+		####TODO
 		my $xp = $xpose;
 		local $config->{settings}->{transpose} = 0;
 		$xpose -= $chorus_xpose;
@@ -1030,6 +1045,7 @@ sub directive {
 		@vals = map { s/s\+$//; $_ }
 		  split( quotemeta($config->{metadata}->{separator}), $vals[0] );
 	    }
+	    my $m = $self->{meta};
 
 	    # User and instrument cannot be set here.
 	    if ( $key eq "user" || $key eq "instrument" ) {
@@ -1038,28 +1054,51 @@ sub directive {
 	    }
 
 	    for my $val ( @vals ) {
+
 		if ( $key eq "key" ) {
 		    $val =~ s/[\[\]]//g;
 		    my ( $name, $info ) = $self->parse_chord($val);
-		    $val = $name;
-		}
-		elsif ( $key eq "capo" ) {
-		    do_warn("Multiple capo settings may yield surprising results.")
-		      if exists $self->{meta}->{capo};
-		    if ( $decapo ) {
-			$xpose += $val;
-			my $xp = $xpose;
-			$xp += $config->{settings}->{transpose} if $config->{settings}->{transpose};
-			for ( qw( key key_actual key_from ) ) {
-			    next unless exists $self->{meta}->{$_};
-			    ####CHECK
-			    $self->{meta}->{$_}->[-1] =
-			      App::Music::ChordPro::Chords::transpose( $self->{meta}->{$_}->[-1], $xp )
-			    }
-			return 1;
+		    my $act = $name;
+
+		    if ( $capo ) {
+			$act = $self->add_chord( $info->transpose($capo) );
+			$name = $act if $decapo;
 		    }
-		    undef $val if $val == 0;
+
+		    push( @{ $m->{key} }, $name );
+		    $m->{key_actual} = [ $act ];
+#		    warn("XX key=$name act=$act capo=",
+#			 $capo//"<undef>"," decapo=$decapo\n");
+		    return 1;
 		}
+
+
+		if ( $key eq "capo" ) {
+		    do_warn("Multiple capo settings may yield surprising results.")
+		      if exists $m->{capo};
+
+		    $capo = $val || undef;
+		    if ( $capo && $m->{key} ) {
+			if ( $decapo ) {
+			    my $key = $self->store_chord
+			      ($self->{chordsinfo}->{$m->{key}->[-1]}
+			       ->transpose($val));
+			    $m->{key}->[-1] = $key;
+			    $key = $self->store_chord
+			      ($self->{chordsinfo}->{$m->{key}->[-1]}
+			       ->transpose($xpose));
+			    $m->{key_actual} = [ $key ];
+			}
+			else {
+			    my $act = $m->{key_actual}->[-1];
+			    $m->{key_from} = [ $act ];
+			    my $key = $self->store_chord
+			      ($self->{chordsinfo}->{$act}->transpose($val));
+			    $m->{key_actual} = [ $key ];
+			}
+		    }
+		}
+
 		elsif ( $key eq "duration" && $val ) {
 		    $val = duration($val);
 		}
@@ -1116,50 +1155,55 @@ sub directive {
 	$propstack{transpose} //= [];
 
 	if ( $arg =~ /^([-+]?\d+)\s*$/ ) {
-	    push( @{ $propstack{transpose} }, $xpose );
+	    my $new = $1;
+	    push( @{ $propstack{transpose} }, [ $xpose, $xpose_dir ] );
 	    my %a = ( type => "control",
 		      name => "transpose",
-		      previous => $xpose,
+		      previous => [ $xpose, $xpose_dir ]
 		    );
+	    $xpose += $new;
+	    $xpose_dir = $new <=> 0;
 	    my $m = $self->{meta};
 	    if ( $m->{key} ) {
-		####CHECK
-		$m->{key_actual} =
-		  [ map { App::Music::ChordPro::Chords::transpose( $_, $xpose+$1 ) } @{ $m->{key} } ];
-		$m->{key_from} =
-		  [ map { App::Music::ChordPro::Chords::transpose( $_, $xpose ) } @{ $m->{key} } ];
+		my $key = $m->{key}->[-1];
+		my $xp = $xpose;
+		$xp += $capo if $capo;
+		my $xpk = $self->{chordsinfo}->{$key}->transpose($xp);
+		$self->{chordsinfo}->{$xpk->name} = $xpk;
+		$m->{key_from} = [ $m->{key_actual}->[0] ];
+		$m->{key_actual} = [ $xpk->name ];
 	    }
-	    $xpose += $1;
-	    $self->add( %a, value => $xpose ) if $no_transpose;
+	    $self->add( %a, value => $xpose, dir => $xpose_dir )
+	      if $no_transpose;
 	}
 	else {
 	    my %a = ( type => "control",
 		      name => "transpose",
-		      previous => $xpose,
+		      previous => [ $xpose, $xpose_dir ]
 		    );
 	    my $m = $self->{meta};
-	    if ( $m->{key} ) {
-		####CHECK
-		$m->{key_from} =
-		  [ App::Music::ChordPro::Chords::transpose( $m->{key}->[-1],
-							     $xpose ) ];
-	    }
+	    my ( $new, $dir );
 	    if ( @{ $propstack{transpose} } ) {
-		$xpose = pop( @{ $propstack{transpose} } );
+		( $new, $dir ) = @{ pop( @{ $propstack{transpose} } ) };
 	    }
 	    else {
-		$xpose = 0;
+		$new = 0;
+		$dir = $config->{settings}->{transpose} <=> 0;
+	    }
+	    $xpose = $new;
+	    $xpose_dir = $dir;
+	    if ( $m->{key} ) {
+		$m->{key_from} = [ $m->{key_actual}->[0] ];
+		my $xp = $xpose;
+		$xp += $capo if $capo && $decapo;
+		$m->{key_actual} =
+		  [ $self->{chordsinfo}->{$m->{key}->[-1]}->transpose($xp)->name ];
 	    }
 	    if ( !@{ $propstack{transpose} } ) {
-		delete $m->{$_} for qw( key_actual key_from )
+		delete $m->{$_} for qw( key_from );
 	    }
-	    if ( $m->{key} && $xpose ) {
-		####CHECK
-		$m->{key_actual} =
-		  [ App::Music::ChordPro::Chords::transpose( $m->{key}->[-1],
-							     $xpose ) ];
-	    }
-	    $self->add( %a, value => $xpose ) if $no_transpose;
+	    $self->add( %a, value => $xpose, dir => $dir )
+	      if $no_transpose;
 	}
 	return 1;
     }
@@ -1217,6 +1261,7 @@ sub directive {
 	    $$c->{$lk} = $arg;
 	}
 	$config->augment($ccfg);
+	upd_config();
 
 	return 1;
     }
@@ -1285,6 +1330,7 @@ sub directive {
 	my @orig = @a;
 	my $fail = 0;
 	my $name = $a[0];
+	my $strings = App::Music::ChordPro::Chords::strings();
 
 	# Result structure.
 	my $res = { name => $name };
@@ -1295,8 +1341,6 @@ sub directive {
 	    ( my $n, $info ) = $self->parse_chord( $name, "allow" );
 	    $name = $n if $info;
 	}
-
-	my $strings = App::Music::ChordPro::Chords::strings;
 
 	shift(@a);
 
@@ -1488,15 +1532,6 @@ sub duration {
     return $res;
 }
 
-sub transpose {
-    my ( $self, $xpose, $xcode ) = @_;
-    return unless $xpose || $xcode;
-#warn("XPOSE = $xpose, XCODE = $xcode");
-    foreach my $self ( @{ $self->{songs} } ) {
-	$self->transpose( $xpose, $xcode );
-    }
-}
-
 sub get_color {
     $_[0];
 }
@@ -1527,7 +1562,9 @@ sub parse_chord {
     my $parens = $chord =~ s/^\((.+)\)$/$1/;
     my $info;
     my $xp = $xpose + $config->{settings}->{transpose};
+    $xp += $capo if $capo && $decapo;
     my $xc = $config->{settings}->{transcode};
+    my $global_dir = $config->{settings}->{transpose} <=> 0;
 
     $info = App::Music::ChordPro::Chords::parse_chord($chord);
     unless ( $info || ( $allow && !( $xc || $xp ) ) ) {
@@ -1539,7 +1576,8 @@ sub parse_chord {
 
     if ( $xp && $info ) {
 	# For transpose/transcode, chord must be wellformed.
-	$info = $info->transpose($xp);
+	$info = $info->transpose( $xp,
+				  $xpose_dir // $global_dir);
 	warn( "Parsing chord: \"$chord\" transposed ",
 	      $xp > 0 ? "+$xp" : "$xp", " to ",
 	      $info->name, "\n" ) if $debug > 1;
@@ -1593,13 +1631,18 @@ sub parse_chord {
 	warn( "Parsing chord: \"$chord\" okay: \"",
 	      $info->name, "\"\n" ) if $debug > 1;
 	$info->{parens} = $parens if $parens;
-	$chord = $info->name;
-	$self->{chordsinfo}->{$chord} = $info unless $info->{isnote};
+	$chord = $self->store_chord($info);
 	return wantarray ? ( $chord, $info ) : $chord;
     }
 
     warn( "Parsing chord: \"$chord\" not found\n" ) if $debug;
     return;
+}
+
+sub store_chord {
+    my ( $self, $info ) = @_;
+    $self->{chordsinfo}->{$info->name} = $info unless $info->{isnote};
+    $info->name;
 }
 
 sub structurize {

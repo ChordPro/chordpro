@@ -5,6 +5,14 @@ I [D]looked over Jordan, and [G]what did I [D]see,
 I [D]looked over Jordan, and [G]what did I [D]see,
 {transpose +2}
 I [D]looked over Jordan, and [G]what did I [D]see,
+{transpose -2}
+I [D]looked over Jordan, and [G]what did I [D]see,
 {transpose}
-# Back to +4 or -2?
+# Back to +4 +2
+I [D]looked over Jordan, and [G]what did I [D]see,
+{transpose}
+# Back to +4
+I [D]looked over Jordan, and [G]what did I [D]see,
+{transpose}
+# Back to default
 I [D]looked over Jordan, and [G]what did I [D]see,
