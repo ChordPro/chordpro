@@ -1,0 +1,10 @@
+{ "instrument" : {
+    "description" : "Keyboard, Piano, ...",
+    "type" : "keyboard"
+  },
+  // Not used, but must be non-empty to force chords flush.
+  "tuning" : [ "A1" ],
+}
+
+
+  
