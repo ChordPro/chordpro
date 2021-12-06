@@ -244,6 +244,7 @@ sub chordpro {
 
     # Call backend to produce output.
     $res = $pkg->generate_songbook($s);
+    return $res if $options->{output} eq '*';
 
   WRITE_OUTPUT:
     # Some backends write output themselves, others return an
