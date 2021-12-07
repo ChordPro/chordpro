@@ -394,10 +394,25 @@ sub newpage {
 
 sub pagelabel {
     my ( $self, $page, $style, $prefix ) = @_;
-    my $opts = { -style => $style // 'arabic',
-		 defined $prefix ? ( -prefix => $prefix ) : (),
-		 -start => 1 };
-    $self->{pdf}->pageLabel( $page, $opts );
+    $style //= 'arabic';
+
+    # PDF::API2 2.042 has some incompatible changes...
+    my $c = $self->{pdf}->can("page_label");
+    if ( $c ) {			# 2.042+
+	my $opts = { style => $style eq 'Roman' ? 'R' :
+		              $style eq 'roman' ? 'r' :
+                              $style eq 'Alpha' ? 'A' :
+                              $style eq 'alpha' ? 'a' : 'D',
+		     defined $prefix ? ( prefix => $prefix ) : (),
+		     start => 1 };
+	$c->( $self->{pdf}, $page, $opts );
+    }
+    else {
+	my $opts = { -style => $style,
+		     defined $prefix ? ( -prefix => $prefix ) : (),
+		     -start => 1 };
+	$self->{pdf}->pageLabel( $page, $opts );
+    }
 }
 
 sub make_outlines {
@@ -463,7 +478,12 @@ sub make_outlines {
 		}
 		# Display info.
 		$ol->title( demarkup( fmt_subst( $song, $ctl->{line} ) ) );
-		$ol->dest($pdf->openpage( $song->{meta}->{tocpage} + $start ));
+		if ( my $c = $ol->can("destination") ) {
+		    $c->( $ol, $pdf->openpage( $song->{meta}->{tocpage} + $start ) );
+		}
+		else {
+		    $ol->dest($pdf->openpage( $song->{meta}->{tocpage} + $start ));
+		}
 	    }
 	}
     }
