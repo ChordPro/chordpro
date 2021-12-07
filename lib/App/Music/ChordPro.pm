@@ -735,7 +735,6 @@ sub app_setup {
        ### ADDITIONAL CLI OPTIONS ###
 
        'vertical-space' => 0,           # extra vertical space between lines
-       'lyrics-only'    => 0,           # suppress all chords
 
        ### NON-CLI OPTIONS ###
 
