@@ -1572,7 +1572,8 @@ sub parse_chord {
 	do_warn( "Cannot parse",
 		 $xp ? "/transpose" : "",
 		 $xc ? "/transcode" : "",
-		 " chord \"$chord\"\n" );
+		 " chord \"$chord\"\n" )
+	  if $xp || $xc || $config->{debug}->{chords};
     }
 
     if ( $xp && $info ) {
