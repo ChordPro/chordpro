@@ -267,7 +267,7 @@ sub generate_csv {
 	push( @cols, $rfc4180->($_->{name}) );
     }
     $ncols = @cols;
-    warn( "CSV: $ncols fields\n" );
+    #warn( "CSV: $ncols fields\n" );
     print $fd ( join( $sep, @cols ), "\n" );
 
     unless ( $ctl->{songsonly} ) {
