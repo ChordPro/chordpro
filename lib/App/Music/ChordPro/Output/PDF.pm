@@ -1934,7 +1934,14 @@ sub tocline {
 
 sub has_visible_chords {
     my ( $elt ) = @_;
-    $elt->{chords} && join( "", @{ $elt->{chords} } ) =~ /\S/;
+    if ( $elt->{chords} ) {
+	for ( @{ $elt->{chords} } ) {
+	    next if defined;
+	    warn("Undefined chord in chords: ", ::dump($elt) );
+	}
+	return join( "", @{ $elt->{chords} } ) =~ /\S/;
+    }
+    return;
 }
 
 sub has_visible_text {
