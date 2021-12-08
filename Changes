@@ -13,6 +13,7 @@
     - (GUI) Allow selection of custom library.
     - (PDF) Allow multi-line headings and footers.
     - (PDF) Configurable PDF library.
+    - (Wx) Overhaul preferences management.
     - !BugFixes
     - Remove obsolete __EMBEDDING__.
     - Bump requirement Text::Layout to 0.024.

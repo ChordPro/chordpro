@@ -62,18 +62,43 @@ sub init {
 
     $prefctl ||=
       {
-       cfgpreset   => lc(_T("Default")),
-       xcode	   => "",
-       notation	   => "",
+       # Skip default (system, user, song) configs.
        skipstdcfg  => 1,
-       enable_configfile  => 0,
-       configfile  => "",
-       enable_customlib   => 0,
-       customlib   => $ENV{CHORDPRO_LIB} // "",
-       pdfviewer   => "",
+
+       # Presets.
+       enable_presets => 1,
+       cfgpreset      => lc(_T("Default")),
+
+       # Custom config file.
+       enable_configfile => 0,
+       configfile        => "",
+
+       # Custom library.
+       enable_customlib => 0,
+       customlib        => $ENV{CHORDPRO_LIB} // "",
+
+       # New song template.
+       enable_tmplfile => 0,
+       tmplfile        => "",
+
+       # Editor.
        editfont	   => 0,
        editsize	   => FONTSIZE,
-       tmplfile    => "",
+
+       # Notation.
+       notation	   => "",
+
+       # Transpose.
+       xpose_from => 0,
+       xpose_to   => 0,
+       xpose_acc  => 0,
+
+       # Transcode.
+       xcode	   => "",
+
+       # PDF Viewer.
+       pdfviewer   => "",
+
       };
 
     if ( $^O =~ /^mswin/i ) {
@@ -160,7 +185,6 @@ sub stylelist {
 	    push( @$stylelist, $base );
 	}
     }
-    push( @$stylelist, "custom" );
     return $stylelist;
 }
 
@@ -314,8 +338,7 @@ sub preview {
 
     my $haveconfig;
     if ( $self->{prefs_skipstdcfg} ) {
-	push( @ARGV, '--nosysconfig', '--nouserconfig', '--nolegacyconfig',
-	      '--nosongconfig' )
+	push( @ARGV, '--nodefaultconfigs' );
     }
     elsif ( $self->{prefs_cfgpreset} ) {
 	$haveconfig++;
@@ -325,25 +348,23 @@ sub preview {
     }
     if ( $self->{prefs_enable_configfile} ) {
 	$haveconfig++;
-	foreach ( @{ $self->{prefs_configfile} } ) {
-	    next unless $_;
-	    push( @ARGV, '--config', $_ );
-	}
+	push( @ARGV, '--config', $self->{prefs_configfile} );
+
     }
     if ( $self->{prefs_enablecustomlib} ) {
-	foreach ( @{ $self->{prefs_customlib} } ) {
-	    next unless $_;
-	    $ENV{CHORDPRO_LIB} = $self->{prefs_customlib};
-	}
+	$ENV{CHORDPRO_LIB} = $self->{prefs_customlib};
     }
+
     if ( $self->{prefs_xcode} ) {
 	$haveconfig++;
 	push( @ARGV, '--transcode', $self->{prefs_xcode} );
     }
+
     if ( $self->{prefs_notation} ) {
 	$haveconfig++;
 	push( @ARGV, '--config', 'notes:' . $self->{prefs_notation} );
     }
+
     push( @ARGV, '--noconfig' ) unless $haveconfig;
 
     push( @ARGV, '--output', $preview_pdf );
@@ -686,7 +707,7 @@ sub _aboutmsg {
 	"https://www.chordpro.org\n",
 	"Copyright $year Johan Vromans <jvromans\@squirrel.nl>\n",
 	"\n",
-	"GUI wrapper designed with wxGlade\n\n",
+	"GUI designed with wxGlade\n\n",
 	"Run-time information:\n",
 	::runtimeinfo() );
 

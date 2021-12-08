@@ -41,31 +41,46 @@ sub get_configfile {
 # As of wxGlade 1.0 __set_properties and __do_layout are gone.
 sub new {
     my $self = shift->SUPER::new(@_);
+    $self->fetch_prefs();
+    $self;
+}
+
+sub _enablecustom {
+    my ( $self ) = @_;
+    my $n = $self->{cb_configfile}->IsChecked;
+    for ( $self->{t_configfiledialog}, $self->{b_configfiledialog} ) {
+	$_->Enable($n);
+    }
+    $n = $self->{cb_customlib}->IsChecked;
+    for ( $self->{t_customlibdialog}, $self->{b_customlibdialog} ) {
+	$_->Enable($n);
+    }
+    $n = $self->{cb_tmplfile}->IsChecked;
+    for ( $self->{t_tmplfiledialog}, $self->{b_tmplfiledialog} ) {
+	$_->Enable($n);
+    }
+}
+
+sub fetch_prefs {
+    my ( $self ) = @_;
+
+    # Fetch preferences from parent.
 
     my $parent = $self->GetParent;
-    $self->{t_configfiledialog}->SetValue($parent->{prefs_configfile})
-      if $parent->{prefs_configfile};
-    $self->{t_configlibdialog}->SetValue($parent->{prefs_configlib})
-      if $parent->{prefs_configlib};
-    $self->{t_tmpldialog}->SetValue($parent->{prefs_tmplfile})
-      if $parent->{prefs_tmplfile};
-    $self->{t_pdfviewer}->SetValue($parent->{prefs_pdfviewer})
-      if $parent->{prefs_pdfviewer};
-    $self->{cb_skipstdcfg}->SetValue($parent->{prefs_skipstdcfg});
-    $self->{cb_configfile}->SetValue($parent->{prefs_enable_configfile});
-    $self->{cb_customlib}->SetValue($parent->{prefs_enable_customlib});
 
-    my $ctl = $self->{ch_config};
+    # Skip default (system, user, song) configs.
+    $self->{cb_skipstdcfg}->SetValue($parent->{prefs_skipstdcfg});
+
+    # Presets.
+    $self->{cb_presets}->SetValue($parent->{prefs_enable_presets});
+    $self->{ch_presets}->Enable($parent->{prefs_enable_presets});
+    my $ctl = $self->{ch_presets};
     $ctl->Clear;
     for ( @{ $parent->stylelist } ) {
 	my $t = ucfirst(lc($_));
 	$t =~ s/_/ /g;
 	$t =~ s/ (.)/" ".uc($1)/eg;
 	$ctl->Append($t);
-    }
-
-    for ( qw( l_config ch_config ) ) {
-	$self->{$_}->Enable(!$self->{cb_skipstdcfg}->GetValue);
     }
 
     my $p = $parent->{prefs_cfgpreset};
@@ -82,13 +97,29 @@ sub new {
 	    $ctl->Check( $n, 1 );
 	}
     }
-    $self->_enablecustom;
 
+    # Custom config file.
+    $self->{cb_configfile}->SetValue($parent->{prefs_enable_configfile});
+    $self->{t_configfiledialog}->SetValue($parent->{prefs_configfile})
+      if $parent->{prefs_configfile};
+
+    # Custom library.
+    $self->{cb_customlib}->SetValue($parent->{prefs_enable_customlib});
+    $self->{t_customlibdialog}->SetValue($parent->{prefs_customlib})
+      if $parent->{prefs_customlib};
+
+    # New song template.
+    $self->{cb_tmplfile}->SetValue($parent->{prefs_enable_tmplfile});
+    $self->{t_tmplfiledialog}->SetValue($parent->{prefs_tmplfile})
+      if $parent->{prefs_tmplfile};
+
+    # Editor.
     $ctl = $self->{ch_editfont};
     $ctl->SetSelection( $parent->{prefs_editfont} );
     $ctl = $self->{sp_editfont};
     $ctl->SetValue( $parent->{prefs_editsize} );
 
+    # Notation.
     $ctl = $self->{ch_notation};
     $ctl->Clear;
     my $n = 0;
@@ -103,6 +134,9 @@ sub new {
     }
     $ctl->SetSelection($check);
 
+    # Transpose.
+
+    # Transcode.
     $ctl = $self->{ch_transcode};
     $ctl->Clear;
     $ctl->Append("-----");
@@ -117,44 +151,114 @@ sub new {
     }
     $ctl->SetSelection($check);
 
+    # PDF Viewer.
+    $self->{t_pdfviewer}->SetValue($parent->{prefs_pdfviewer})
+      if $parent->{prefs_pdfviewer};
+
+    $self->_enablecustom;
+
     if ( $is_macos ) {
 	# Cannot use chooser, allow editing.
-	$self->{t_configfiledialog} =
-	  Wx::TextCtrl->new($self, wxID_ANY, "", wxDefaultPosition,
-			    wxDefaultSize, 0);
-    }
-
-    if ( $is_macos ) {
-	$self->{sz_configfile}->Hide($self->{b_configfiledialog});
-	$self->{sz_configlib}->Hide($self->{b_configlibdialog});
-	$self->{sz_configfile}->Layout();
-	$self->{sz_configlib}->Layout();
+	for ( qw( configfile customlib tmplfile ) ) {
+	    $self->{"t_${_}dialog"} =
+	      Wx::TextCtrl->new( $self, wxID_ANY, "", wxDefaultPosition,
+				 wxDefaultSize, 0 );
+	    $self->{"sz_$_"}->Hide($self->{"b_${_}dialog"});
+	    $self->{"sz_$_"}->Layout;
+	}
 
     }
-    $self;
 }
 
-sub _enablecustom {
+#               C      D      E  F      G      A        B C
+my @xpmap = qw( 0 1  1 2 3  3 4  5 6  6 7 8  8 9 10 10 11 12 );
+my @sfmap = qw( 0 7 -5 2 9 -3 4 -1 6 -6 1 8 -4 3 10 -2  5 0  );
+
+sub store_prefs {
     my ( $self ) = @_;
-    my $n = $self->{cb_configfile}->IsChecked;
-    for ( $self->{t_configfiledialog}, $self->{b_configfiledialog} ) {
-	$_->Enable($n);
-    }
-    $n = $self->{cb_customlib}->IsChecked;
-    for ( $self->{t_customlibdialog}, $self->{b_customlibdialog} ) {
-	$_->Enable($n);
-    }
-}
 
-sub _enablexpose {
-    my ( $self, $n ) = @_;
-    for ( $self->{l_xpose},
-	  $self->{l_xpose_from}, $self->{ch_xpose_from},
-	  $self->{l_xpose_to}, $self->{ch_xpose_to},
-	  $self->{rb_xpose_sharp}, $self->{rb_xpose_flat},
-	) {
-	$_->Enable($n);
+    # Transfer all preferences to the parent.
+    my $parent = $self->GetParent;
+
+    # Skip default (system, user, song) configs.
+    $parent->{prefs_skipstdcfg}  = $self->{cb_skipstdcfg}->IsChecked;
+
+    # Presets.
+    $parent->{prefs_enable_presets} = $self->{cb_presets}->IsChecked;
+    my $ctl = $self->{ch_presets};
+    my $cnt = $ctl->GetCount;
+    my @p;
+    my $styles = $parent->stylelist;
+    for ( my $n = 0; $n < $cnt; $n++ ) {
+	next unless $ctl->IsChecked($n);
+	push( @p, $styles->[$n] );
+	if ( $n == $cnt - 1 ) {
+	    my $c = $self->{t_configfiledialog}->GetValue;
+	    if ( $is_macos && ! -r $c ) {
+		my $md = Wx::MessageDialog->new
+		  ( $self,
+		    "Custom config file $c can not be read.\n".
+		    "Please enter the name of an existing config file.",
+		    "Config file can not be read",
+		    0 | wxOK | wxICON_QUESTION );
+		my $ret = $md->ShowModal;
+		$md->Destroy;
+		return;
+	    }
+	    $parent->{_cfgpresetfile} =
+	      $parent->{prefs_configfile} = $c;
+	}
     }
+    $parent->{prefs_cfgpreset} = \@p;
+
+    # Custom config file.
+    $parent->{prefs_enable_configfile} = $self->{cb_configfile}->IsChecked;
+    $parent->{prefs_configfile}        = $self->{t_configfiledialog}->GetValue;
+
+    # Custom library.
+    $parent->{prefs_enable_customlib} = $self->{cb_customlib}->IsChecked;
+    $parent->{prefs_customlib}        = $ENV{CHORDPRO_LIB} // $self->{l_customlibdialog}->GetValue;
+
+    # New song template.
+    $parent->{prefs_enable_tmplfile} = $self->{cb_tmplfile}->IsChecked;
+    $parent->{prefs_tmplfile}        = $self->{t_tmplfiledialog}->GetValue;
+
+    # Editor.
+    $parent->{prefs_editfont}	   = $self->{ch_editfont}->GetSelection;
+    $parent->{prefs_editsize}	   = $self->{sp_editfont}->GetValue;
+
+    # Notation.
+    my $n = $self->{ch_notation}->GetSelection;
+    if ( $n > 0 ) {
+	$parent->{prefs_notation} =
+	  $self->{ch_notation}->GetClientData($n);
+    }
+    else {
+       	$parent->{prefs_notation} = "";
+    }
+
+    # Transpose.
+    $parent->{prefs_xpose_from} = $xpmap[$self->{ch_xpose_from}->GetSelection];
+    $parent->{prefs_xpose_to  } = $xpmap[$self->{ch_xpose_to  }->GetSelection];
+    $parent->{prefs_xpose_acc}  = $self->{ch_acc}->GetSelection;
+    $n = $parent->{prefs_xpose_to} - $parent->{prefs_xpose_from};
+    $n += 12 if $n < 0;
+    $n -= 12 if $parent->{prefs_xpose_acc} == 1;
+    $n += 12 if $parent->{prefs_xpose_acc} == 2;
+    $parent->{prefs_xpose} = $n;
+
+    # Transcode.
+    $n = $self->{ch_transcode}->GetSelection;
+    if ( $n > 0 ) {
+	$parent->{prefs_xcode} =
+	  $self->{ch_transcode}->GetClientData($n);
+    }
+    else {
+       	$parent->{prefs_xcode} = "";
+    }
+
+    # PDF Viewer.
+    $parent->{prefs_pdfviewer} = $self->{t_pdfviewer}->GetValue;
 }
 
 ################ Event handlers ################
@@ -163,7 +267,11 @@ sub _enablexpose {
 
 sub OnConfigFile {
     my ( $self, $event ) = @_;
-    $self->_enablecustom;
+    my $n = $self->{cb_configfile}->IsChecked;
+    for ( $self->{t_configfiledialog}, $self->{b_configfiledialog} ) {
+	$_->Enable($n);
+    }
+    $event->Skip;
 }
 
 sub OnConfigFileDialog {
@@ -212,7 +320,10 @@ sub OnConfigFileDialog {
 
 sub OnCustomLib {
     my ( $self, $event ) = @_;
-    $self->_enablecustom;
+    my $n = $self->{cb_customlib}->IsChecked;
+    for ( $self->{t_customlibdialog}, $self->{b_customlibdialog} ) {
+	$_->Enable($n);
+    }
 }
 
 sub OnCustomLibDialog {
@@ -230,6 +341,14 @@ sub OnCustomLibDialog {
     $fd->Destroy;
 }
 
+sub OnTmplFile {
+    my ( $self, $event ) = @_;
+    my $n = $self->{cb_tmplfile}->IsChecked;
+    for ( $self->{t_tmplfiledialog}, $self->{b_tmplfiledialog} ) {
+	$_->Enable($n);
+    }
+}
+
 sub OnTmplFileDialog {
     my ( $self, $event ) = @_;
     my $fd = Wx::FileDialog->new
@@ -241,78 +360,14 @@ sub OnTmplFileDialog {
     my $ret = $fd->ShowModal;
     if ( $ret == wxID_OK ) {
 	my $file = $fd->GetPath;
-	$self->{t_tmpldialog}->SetValue($file);
+	$self->{t_tmplfiledialog}->SetValue($file);
     }
     $fd->Destroy;
 }
 
-#               C      D      E  F      G      A        B C
-my @xpmap = qw( 0 1  1 2 3  3 4  5 6  6 7 8  8 9 10 10 11 12 );
-my @sfmap = qw( 0 7 -5 2 9 -3 4 -1 6 -6 1 8 -4 3 10 -2  5 0  );
-
 sub OnAccept {
     my ( $self, $event ) = @_;
-
-    my $ctl = $self->{ch_config};
-    my $cnt = $ctl->GetCount;
-    my @p;
-    my $styles = $self->GetParent->stylelist;
-    for ( my $n = 0; $n < $cnt; $n++ ) {
-	next unless $ctl->IsChecked($n);
-	push( @p, $styles->[$n] );
-	if ( $n == $cnt - 1 ) {
-	    my $c = $self->{t_configfiledialog}->GetValue;
-	    if ( $is_macos && ! -r $c ) {
-		my $md = Wx::MessageDialog->new
-		  ( $self,
-		    "Custom config file $c can not be read.\n".
-		    "Please enter the name of an existing config file.",
-		    "Config file can not be read",
-		    0 | wxOK | wxICON_QUESTION );
-		my $ret = $md->ShowModal;
-		$md->Destroy;
-		return;
-	    }
-	    $self->GetParent->{_cfgpresetfile} =
-	      $self->GetParent->{prefs_configfile} = $c;
-	}
-    }
-
-    $self->GetParent->{prefs_skipstdcfg} =
-      $self->{cb_skipstdcfg}->IsChecked ? 1 : 0;
-
-    $self->GetParent->{prefs_cfgpreset} = \@p;
-
-    $self->GetParent->{prefs_tmplfile} =
-	$self->{t_tmpldialog}->GetValue;
-
-    my $n = $self->{ch_notation}->GetSelection;
-    if ( $n > 0 ) {
-	$self->GetParent->{prefs_notation} =
-	  $self->{ch_notation}->GetClientData($n);
-    }
-    else {
-       	$self->GetParent->{prefs_notation} = "";
-    }
-
-    $self->GetParent->{prefs_pdfviewer} = $self->{t_pdfviewer}->GetValue;
-
-    $n = $xpmap[$self->{ch_xpose_to}->GetSelection]
-      - $xpmap[$self->{ch_xpose_from}->GetSelection];
-    $n += 12 if $n < 0;
-    $n -= 12 if $self->{rb_xpose_flat }->GetValue;
-    $n += 12 if $self->{rb_xpose_sharp }->GetValue;
-    $self->GetParent->{prefs_xpose} = $n;
-
-    $n = $self->{ch_transcode}->GetSelection;
-    if ( $n > 0 ) {
-	$self->GetParent->{prefs_xcode} =
-	  $self->{ch_transcode}->GetClientData($n);
-    }
-    else {
-       	$self->GetParent->{prefs_xcode} = "";
-    }
-
+    $self->store_prefs();
     $event->Skip;
 }
 
@@ -323,15 +378,18 @@ sub OnCancel {
 
 sub OnSkipStdCfg {
     my ( $self, $event ) = @_;
-    for ( qw( l_config ch_config ) ) {
-	$self->{$_}->Enable(!$self->{cb_skipstdcfg}->GetValue);
-    }
+    $event->Skip;
+}
+
+sub OnPresets {
+    my ( $self, $event ) = @_;
+    $self->{ch_presets}->Enable( $self->{cb_presets}->GetValue );
     $event->Skip;
 }
 
 sub OnXposeFrom {
     my ( $self, $event ) = @_;
-    $event->Skip;
+    $self->OnXposeTo($event);
 }
 
 sub OnXposeTo {
@@ -342,29 +400,14 @@ sub OnXposeTo {
 	$sf = $sel - $self->{ch_xpose_from}->GetSelection;
     }
     if ( $sf < 0 ) {
-	$self->{rb_xpose_flat }->SetValue(1);
-	$self->{rb_xpose_sharp}->SetValue(0);
+	$self->{ch_acc}->SetSelection(2);
     }
     elsif ( $sf > 0 ) {
-	$self->{rb_xpose_flat }->SetValue(0);
-	$self->{rb_xpose_sharp}->SetValue(1);
+	$self->{ch_acc}->SetSelection(1);
     }
     else {
-	$self->{rb_xpose_flat }->SetValue(0);
-	$self->{rb_xpose_sharp}->SetValue(0);
+	$self->{ch_acc}->SetSelection(0);
     }
-    $event->Skip;
-}
-
-sub OnXposeSharp {
-    my ( $self, $event ) = @_;
-    $self->{rb_xpose_flat }->SetValue(0);
-    $event->Skip;
-}
-
-sub onXposeFlat {
-    my ( $self, $event ) = @_;
-    $self->{rb_xpose_sharp}->SetValue(0);
     $event->Skip;
 }
 
