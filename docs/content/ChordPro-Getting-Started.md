@@ -59,6 +59,87 @@ From the menu bar, choose `File` > `Preview`. If all goes well, a preview window
 
 Note that you need to have a PDF file viewer application installed, and the system must be configured to use this viewer to open files with `.pdf` extension.
 
+# Preferences
+
+From the menu bar, choose `Edit` > `Preferences…`. This will show the
+preferences dialog.
+
+![]({{< asset "images/prf_cr_cfg_1.png" >}})
+
+## Ignore default configs
+
+This prevents ChordPro from processing system wide, user specific and
+song specific config files. Checking this will make sure that ChordPro
+only uses the configs set in the Preferences.
+
+## Presets
+
+If enabled, you can choose one or more preset configs to be used.
+
+## Custom config
+
+If enabled, use the `…` button to choose a custom config file. See
+[Creating a config (GUI)]({{< relref "Chordpro-Configuration-Create-GUI" >}}) how to get started
+with a custom config.
+
+## Custom library
+
+ChordPro has a built-in library with configs and other data. With
+`Custom library` you can add an additional location where to look for
+data.
+
+## Template for new songs
+
+Here you can select a ChordPro song to be used as a template for new
+songs. Its contents are inserted in the edit window when a new song is
+created (`File` > `New`).
+
+## Notation
+
+ChordPro supports several notation systems for songs. 
+
+Supported values include:
+
+* `common` (C, D, E, F, G, A, B)
+* `dutch` (same as `common`)
+* `german` (C, ... A, Ais/B, H)
+* `latin` (Do, Re, Mi, Fa, Sol, ...)
+* `scandinavian` (C, ... A, A#/Bb, H)
+* `solfège` (Do, Re, Mi, Fa, So, ...)
+* `nashville` (1, 2, 3, ...)
+* `roman` (I, II, III, ...)
+
+## Transpose
+
+Transpose the song from a given key to a new key.
+
+If transposed chords need accidentals, you can choose the desired
+behaviour:
+
+* `Auto` (transpose up uses sharps, transpose down uses flats)
+* `Sharps` (always use sharps).
+* `Flats` (always use flats).
+
+## Transcode
+
+Transcode the song to another notation system. See the list of
+supported notation systems above.
+
+## Editor font
+
+Choose a font and font size for the editor (main window).
+
+## PDF previewer
+
+System command to run an alternative PDF previewer.
+
+In the command, `%f` will be replaced by the file name of the
+(temporary) PDF document. `%u` will be replaced by the file URL.
+If no `%f` or `%u` is given, the file name is appended to the command.
+In other words, `atril` and `atril %f` are equivalent.
+
+Leave empty to use the system default viewer.
+
 # Legacy ASCII input format
 
 Before ChordPro it was common to write lead sheets with chords on
