@@ -587,7 +587,14 @@ sub chord {
     }
 
     my ( $name, $info ) = $self->parse_chord($c);
-    return unless defined $name;
+    unless ( defined $name ) {
+	# Warning was given.
+	# Make annotation.
+	$self->add_chord
+	  ( App::Music::ChordPro::Chord::Annotation->new
+	    ( { name => $c, text => $c } ) );
+	return $c;
+    }
     ( my $n = $name ) =~ s/\((.+)\)$/$1/;
     push( @used_chords, $n ) unless $info->{isnote};
     return $name;
