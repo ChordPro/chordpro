@@ -610,7 +610,7 @@ sub chord {
 	push( @used_chords, $n ) if !$info->{isnote};
     }
     else {
-	do_warn("Unknown chord: $n");
+	do_warn("Unknown chord: $n") unless $info->{isnote};
     }
     return $name;
 }
@@ -1687,7 +1687,7 @@ sub parse_chord {
 
 sub store_chord {
     my ( $self, $info ) = @_;
-    $self->{chordsinfo}->{$info->name} = $info unless $info->{isnote};
+    $self->{chordsinfo}->{$info->name} = $info;
     $info->name;
 }
 
