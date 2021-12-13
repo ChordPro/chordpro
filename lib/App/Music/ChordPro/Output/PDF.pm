@@ -2231,6 +2231,9 @@ sub configurator {
     # Default footer is small subtitle.
     $fonts->{footer}->{size} //= 0.6 * $fonts->{subtitle}->{size};
     $fm->( qw( footer         subtitle ) );
+
+    # This one is fixed.
+    $fonts->{chordfingers}->{title} = "ChordProSymbols.ttf";
 }
 
 # Get a format string for a given page class and type.

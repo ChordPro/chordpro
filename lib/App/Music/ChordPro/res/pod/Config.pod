@@ -523,8 +523,7 @@ extensive details and examples.
     	      "size" : 10
     	  },
     	  "chordfingers" : {
-    	      "name" : "ZapfDingbats",
-    	      "size" : 10,
+    	      "file" : "ChordProSymbols.ttf",	// do not change
     	      "numbercolor" : "background",
     	  },
     	  "comment" : {

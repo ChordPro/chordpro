@@ -1400,11 +1400,23 @@ sub directive {
 	    elsif ( $a eq "fingers" ) {
 		my @f;
 		# It is tempting to limit the fingers to 1..5 ...
-		while ( @a && $a[0] =~ /^(?:[0-9]+|[-xXN])$/ ) {
-		    push( @f, shift(@a) );
+		while ( @a ) {
+		    $_ = shift(@a);
+		    if ( /^[0-9]+$/ ) {
+			push( @f, 0 + $_ );
+		    }
+		    elsif ( /^[A-MO-WYZ]$/ ) {
+			push( @f, $_ );
+		    }
+		    elsif ( /^[-xNX]$/ ) {
+			push( @f, -1 );
+		    }
+		    else {
+			last;
+		    }
 		}
 		if ( @f == $strings ) {
-		    $res->{fingers} = [ map { $_ =~ /^\d+/ ? $_ : -1 } @f ];
+		    $res->{fingers} = \@f;
 		}
 		else {
 		    do_warn("Incorrect number of finger settings (" .

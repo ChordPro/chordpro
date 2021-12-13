@@ -176,7 +176,9 @@ The `frets` positions are the positions in the chord diagram as shown. The follo
 
 ![]({{< asset "images/ex_chords2.png" >}})
 
-As can be seen, the `"fingers"` part is optional.
+The `"fingers"` part is optional.
+You can use digits `0` .. `9` and letters `A` .. `Z` for finger
+symbols. A negative value denotes a string without finger information.
 
 The `display` part specifies the way the chord must be shown. Note the
 use of `%{root}` to show the root name.  
