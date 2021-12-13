@@ -1402,8 +1402,7 @@ sub default_config() {
 	      "size" : 10
 	  },
 	  "chordfingers" : {
-	      "name" : "ZapfDingbats",
-	      "size" : 10,
+	      "file" : "ChordProSymbols.ttf",	// do not change
 	      "numbercolor" : "background",
 	  },
 	  "comment" : {

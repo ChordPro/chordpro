@@ -13,6 +13,7 @@
     - (GUI) Allow selection of custom library.
     - (PDF) Allow multi-line headings and footers.
     - (PDF) Configurable PDF library.
+    - (PDF) Allow (uppercase) letters for chord fingers.
     - (Wx) Overhaul preferences management.
     - !BugFixes
     - Remove obsolete __EMBEDDING__.

@@ -154,10 +154,13 @@ sub draw {
     $x -= $gw/2;
     my $oflo;			# to detect out of range frets
 
+    my $g_none = "/";		# unnumbered
+    my $g_width = $pr->strwidth("1");
+
     for my $sx ( 0 .. @{ $info->{frets} }-1 ) {
 	my $fret = $info->{frets}->[$sx];
-	my $fing;
-	$fing = $info->{fingers}->[$sx] if $info->{fingers};
+	my $fing = -1;
+	$fing = $info->{fingers}->[$sx] // -1 if $info->{fingers};
 
 	# For bars, only the first and last finger.
 	if ( $fing && $bar && $bar->{$fing} ) {
@@ -170,23 +173,36 @@ sub draw {
 		warn("Diagram $info->{name}: ",
 		     "Fret position $fret exceeds diagram size $v\n");
 	    }
-	    if ( $fing && $fing > 0 && $fbg ne $ps->{theme}->{foreground} ) {
-		# The dingbat glyphs are open, so we need am explicit
-		# background circle.
-		$pr->circle( $x+$gw/2, $y-$fret*$gh+$gh/2, $dot/2, 1,
-			     $fbg, $ps->{theme}->{foreground} );
-		my $dot = $dot/0.7;
-		my $glyph = pack( "C", 0xca + $fing - 1 );
-		$pr->setfont( $fcf, $dot );
-		$pr->text( $glyph,
-			   $x+$gw/2-$pr->strwidth($glyph)/2,
-			   $y-$fret*$gh+$gh/2-$pr->strwidth($glyph)/2+$lw/2,
-			   $fcf, $dot );
+
+	    my $glyph;
+	    if ( $fbg eq $ps->{theme}->{foreground} ) {
+		$glyph = $g_none;
+	    }
+	    elsif ( $fing =~ /^[A-Z0-9]$/ ) {
+		# Leave it to the user to interpret sensibly.
+		$glyph = $fing;
+	    }
+	    elsif ( $fing =~ /-\d+$/ ) {
+		$glyph = $g_none;
 	    }
 	    else {
-		$pr->circle( $x+$gw/2, $y-$fret*$gh+$gh/2, $dot/2, 1,
-			     $ps->{theme}->{foreground}, $ps->{theme}->{foreground});
+		warn("Diagram $info->{name}: ",
+		     "Invalid finger position $fing, ignored\n");
+		$glyph = $g_none;
 	    }
+
+	    unless ( $fing eq $g_none ) {
+		# The glyphs are open, so we need am explicit
+		# background circle.
+		$pr->circle( $x+$gw/2, $y-$fret*$gh+$gh/2, $dot/2.2, 1,
+			     $fbg, "none");
+	    }
+
+	    $pr->setfont( $fcf, $dot );
+	    $pr->text( $glyph,
+		       $x + $gw/2 - $g_width/2.2,
+		       $y - $fret*$gh + $gh/2 - $g_width/2 + $lw*1.7,
+		       $fcf, $dot/0.8 );
 	}
 	elsif ( $fret < 0 ) {
 	    $pr->cross( $x+$gw/2, $y+$lw+$gh/3, $dot/3, $lw,
