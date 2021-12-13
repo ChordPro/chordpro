@@ -102,7 +102,7 @@ sub list_chords {
 	    next;
 	}
 	else {
-	    $info = chord_info($chord);
+	    $info = _known_chord($chord);
 	}
 	next unless $info;
 	my $s = sprintf( "{%s %-15.15s base-fret %2d    ".
@@ -170,7 +170,7 @@ sub json_chords {
 	    $info = $chord;
 	}
 	else {
-	    $info = chord_info($chord);
+	    $info = _known_chord($chord);
 	}
 	next unless $info;
 
@@ -479,94 +479,6 @@ sub parse_chord {
     }
     $res = $parser->parse($chord);
     return $res;
-}
-
-################ Section Chords Info ################
-
-# Returns info about an individual chord.
-# This is basically the result of parse_chord, augmented with strings
-# and fingers, if any.
-sub chord_info {
-    my ( $chord ) = @_;
-    my $debug = $config->{debug}->{chords};
-    warn("chord_info($chord)...\n") if $debug;
-    my $info;
-    my $parens = $chord =~ s/\((.+)\)$/$1/;
-    assert_tuning();
-    for ( \%song_chords, \%config_chords ) {
-	next unless exists($_->{$chord});
-	warn("Found $chord in song/config chords\n") if $debug;
-	$info = $_->{$chord};
-	last;
-    }
-
-    # This should not happen anymore...
-    Carp::cluck("Unknown chord: \"$chord\"") unless $info;
-
-    # This should only be needed for testing w/o chord configs.
-    if ( !$info && $chord =~ /^n\.?c\.?$/i ) {
-	return App::Music::ChordPro::Chord::Common->new
-	  ( { origin  => "user",
-	      name    => $chord,
-	      base    => 0,
-	      frets   => [ -1, -1, -1, -1, -1, -1 ],
-	      fingers => [],
-	      keys    => [],
-	    } );
-    }
-
-    if ( ! $info ) {
-	my $i;
-	if ( $i = parse_chord($chord) and $i->is_chord ) {
-	    $info = { %$i };
-	    if ( $i->can("agnostic") ) {
-		my $a = $i->agnostic;
-		for ( \%song_chords, \%config_chords ) {
-		    last unless defined $a;
-		    next unless exists($_->{$a});
-		    warn("Found '$a' for $chord in song/config chords\n") if $debug;
-		    $info = $_->{$a};
-		    $info->{name} = $chord;
-		    last;
-		}
-	    }
-	    bless $info => ref($i);
-	    Carp::cluck("Chord_info BLESS info for $chord into ", ref($info), "\n")
-	      unless ref($info) =~ /App::Music::ChordPro::Chord::/;
-
-	}
-    }
-
-    if ( ! $info && $::config->{diagrams}->{auto} ) {
-	warn("Adding new chord $chord\n") if $debug;
-	$info = App::Music::ChordPro::Chord::Common->new
-	  ( { origin  => "user",
-	      name    => $chord,
-	      base    => 0,
-	      frets   => [],
-	      fingers => [],
-	      keys    => [],
-	    } );
-    }
-
-    return unless $info;
-    Carp::cluck("BLESS info for $chord into ", ref($info), "\n")
-	unless ref($info) =~ /App::Music::ChordPro::Chord::/;
-    if ( ($info->{base}//0) <= 0 ) {
-	warn("Partial $chord\n") if $debug;
-	return $info->new
-	  ( { name    => $chord,
-	      frets   => [],
-	      fingers => [],
-	      keys    => [],
-	      base    => 1,
-	      system  => "",
-	    } );
-    }
-    return $info->new
-      ( { name    => $chord,
-	  %$info,
-	} );
 }
 
 ################ Section Transposition ################
