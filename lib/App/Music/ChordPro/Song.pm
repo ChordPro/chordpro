@@ -602,7 +602,11 @@ sub chord {
 	$self->add_chord($info);
     }
 
-    if ( $info->{origin} ) {
+    if ( $::running_under_test ) {
+	# Tests run without config and chords, so pretend.
+	push( @used_chords, $n ) if !$info->{isnote};
+    }
+    elsif ( $info->{origin} ) {
 	push( @used_chords, $n ) if !$info->{isnote};
     }
     else {
