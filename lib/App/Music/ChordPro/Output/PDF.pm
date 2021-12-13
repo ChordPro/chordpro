@@ -565,24 +565,7 @@ sub generate_song {
 	    $class = 1;		# first of a song
 	}
 
-	# Three-part title handlers.
-	my $tpt = sub { tpt( $ps, $class, $_[0], $rightpage, $x, $y, $s ) };
-
 	$x = $ps->{__leftmargin};
-	if ( $ps->{headspace} ) {
-	    warn("Metadata for pageheading: ", ::dump($s->{meta}), "\n")
-	      if $config->{debug}->{meta};
-	    $y = $ps->{_margintop} + $ps->{headspace};
-	    $y -= font_bl($fonts->{title});
-	    $y = $tpt->("title");
-	    $y = $tpt->("subtitle");
-	}
-
-	if ( $ps->{footspace} ) {
-	    $y = $ps->{marginbottom} - $ps->{footspace};
-	    $tpt->("footer");
-	}
-
 	$x += $ps->{_indent};
 	$y = $ps->{_margintop};
 	$y += $ps->{headspace} if $ps->{'head-first-only'} && $class == 2;
@@ -1233,6 +1216,84 @@ sub generate_song {
     my $pages = $thispage - $startpage + 1;
     $newpage->(), $pages++,
       if $ps->{'pagealign-songs'} > 1 && $pages % 2;
+
+    # Now for the page headings and footers.
+    $thispage = $startpage - 1;
+    $s->{meta}->{pages} = [ $pages ];
+
+    for my $p ( 1 .. $pages ) {
+
+	$pr->openpage($ps, $thispage+1 );
+
+	# Put titles and footer.
+
+	# If even/odd pages, leftpage signals whether the
+	# header/footer parts must be swapped.
+	my $rightpage = 1;
+	if ( $ps->{"even-odd-pages"} ) {
+	    # Even/odd printing...
+	    $rightpage = $thispage % 2 == 0;
+	    # Odd/even printing...
+	    $rightpage = !$rightpage if $ps->{'even-odd-pages'} < 0;
+	}
+
+	# margin* are offsets from the edges of the paper.
+	# _*margin are offsets taking even/odd pages into account.
+	# _margin* are physical coordinates, taking ...
+	if ( $rightpage ) {
+	    $ps->{_leftmargin}  = $ps->{marginleft};
+	    $ps->{_marginleft}  = $ps->{marginleft};
+	    $ps->{_rightmargin} = $ps->{marginright};
+	    $ps->{_marginright} = $ps->{papersize}->[0] - $ps->{marginright};
+	}
+	else {
+	    $ps->{_leftmargin}  = $ps->{marginright};
+	    $ps->{_marginleft}  = $ps->{marginright};
+	    $ps->{_rightmargin} = $ps->{marginleft};
+	    $ps->{_marginright} = $ps->{papersize}->[0] - $ps->{marginleft};
+	}
+	$ps->{_marginbottom}  = $ps->{marginbottom};
+	$ps->{_margintop}     = $ps->{papersize}->[1] - $ps->{margintop};
+	$ps->{_bottommargin}  = $ps->{marginbottom};
+
+	# Physical coordinates; will be adjusted to columns if needed.
+	$ps->{__leftmargin}   = $ps->{_marginleft};
+	$ps->{__rightmargin}  = $ps->{_marginright};
+	$ps->{__topmargin}    = $ps->{_margintop};
+	$ps->{__bottommargin} = $ps->{_marginbottom};
+
+	$thispage++;
+	$s->{meta}->{page} = [ $s->{page} = $opts->{roman}
+			       ? roman($thispage) : $thispage ];
+
+	# Determine page class.
+	my $class = 2;		# default
+	if ( $thispage == 1 ) {
+	    $class = 0;		# very first page
+	}
+	elsif ( $thispage == $startpage ) {
+	    $class = 1;		# first of a song
+	}
+
+	# Three-part title handlers.
+	my $tpt = sub { tpt( $ps, $class, $_[0], $rightpage, $x, $y, $s ) };
+
+	$x = $ps->{__leftmargin};
+	if ( $ps->{headspace} ) {
+	    warn("Metadata for pageheading: ", ::dump($s->{meta}), "\n")
+	      if $config->{debug}->{meta};
+	    $y = $ps->{_margintop} + $ps->{headspace};
+	    $y -= font_bl($fonts->{title});
+	    $y = $tpt->("title");
+	    $y = $tpt->("subtitle");
+	}
+
+	if ( $ps->{footspace} ) {
+	    $y = $ps->{marginbottom} - $ps->{footspace};
+	    $tpt->("footer");
+	}
+
+    }
 
     return $pages;
 }

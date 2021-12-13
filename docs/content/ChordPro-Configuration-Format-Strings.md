@@ -65,8 +65,7 @@ The ChordPro reference implementation provides additional meta data:
  
  * `page`: The starting page number of the song.
 
- * `pages`: The number of pages of the song.  
-   _This is not yet supported._
+ * `pages`: The number of pages of the current song.
 
  * `pagerange`: The pages of the song, either a single page number or
    a range like `3-7`.  

@@ -392,6 +392,13 @@ sub newpage {
     }
 }
 
+sub openpage {
+    my ( $self, $ps, $page ) = @_;
+    $self->{pdfpage} = $self->{pdf}->openpage($page);
+    $self->{pdfgfx}  = $self->{pdfpage}->gfx;
+    $self->{pdftext} = $self->{pdfpage}->text;
+}
+
 sub pagelabel {
     my ( $self, $page, $style, $prefix ) = @_;
     $style //= 'arabic';
