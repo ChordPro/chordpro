@@ -131,7 +131,7 @@ sub chordpro {
     elsif ( -t STDOUT ) {
 	# No output, and stdout is terminal.
 	# Derive output name from input name.
-	if ( @ARGV > 1 ) {
+	if ( @ARGV > 1 || ( $options->{'dump-chords'} && !@ARGV ) ) {
 	    # No default if more than one input document.
 	    die("Please use \"--output\" to specify the output file name\n");
 	}
