@@ -92,3 +92,16 @@ checkjson :
 	${JSONVALIDATOR} ${JSONOPTS} \
 	  ${CFGLIB}/config.schema .json/*.json
 	rm -fr .json
+
+# Experimental
+
+VM := Win10Pro
+WW := w10
+
+wkit :
+	VBoxManage startvm ${VM} --type headless
+	ssh ${WW} gmake -C Chordpro/pp/windows
+	scp ${WW}:Chordpro/pp/windows/ChordPro-Installer\*.exe ${HOME}/tmp/
+	VBoxManage controlvm ${VM} poweroff
+	VBoxManage snapshot ${VM} restorecurrent
+
