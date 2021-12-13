@@ -360,14 +360,6 @@ sub generate_song {
 
     my $sb = $s->{body};
 
-    # Load song chords, if any.
-#    App::Music::ChordPro::Chords::reset_song_chords();
-#    if ( $s->{define} ) {
-#	foreach ( @{ $s->{define} } ) {
-#	    App::Music::ChordPro::Chords::add_song_chord($_);
-#	}
-#    }
-
     # set_columns needs these, set provisional values.
     $ps->{_leftmargin}  = $ps->{marginleft};
     $ps->{_rightmargin} = $ps->{marginright};
@@ -2204,7 +2196,7 @@ sub configurator {
 	$pdf->{diagrams}->{width} =
 	  $pdf->{diagrams}->{height} =
 	    $options->{'chord-grid-size'} /
-	      App::Music::ChordPro::Chords::strings();
+	      @{ $config->{notes}->{sharps} };
     }
 
     # Map papersize name to [ width, height ].

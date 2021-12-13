@@ -2,6 +2,10 @@
 
 use strict;
 
+package main;
+
+our $config;
+
 package App::Music::ChordPro::Output::PDF::StringDiagrams;
 
 use App::Music::ChordPro::Chords;
@@ -43,7 +47,7 @@ sub vsp {
 # The horizontal space the diagram requires.
 sub hsp0 {
     my ( $self, $elt, $ps ) = @_;
-    (App::Music::ChordPro::Chords::strings() - 1) * $ps->{diagrams}->{width};
+    ($config->diagram_strings - 1) * $ps->{diagrams}->{width};
 }
 
 # The advance width.
@@ -77,7 +81,7 @@ sub draw {
     my $lw  = ($ps->{diagrams}->{linewidth} || 0.10) * $gw;
     my $pr = $ps->{pr};
 
-    my $strings = App::Music::ChordPro::Chords::strings();
+    my $strings = $config->diagram_strings;
     my $w = $gw * ($strings - 1);
 
     # Draw font name.
@@ -207,7 +211,7 @@ sub grid_xo {
     my $gh = $ps->{diagrams}->{height};
     my $lw  = ($ps->{diagrams}->{linewidth} || 0.10) * $gw;
     my $v = $ps->{diagrams}->{vcells};
-    my $strings = App::Music::ChordPro::Chords::strings();
+    my $strings = $config->diagram_strings;
 
     return $self->{grids}->{$gw,$gh,$lw,$v,$strings} //= do
       {

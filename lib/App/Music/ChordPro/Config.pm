@@ -1593,6 +1593,20 @@ sub default_config() {
 End_Of_Config
 }
 
+# For convenience.
+
+sub diagram_strings {
+    my $self = shift;
+    # tuning is usually removed from the config.
+    # scalar( @{ $self->{tuning} } );
+    App::Music::ChordPro::Chords::strings();
+}
+
+sub diagram_keys {
+    my $self = shift;
+    $self->{kbdiagrams}->{keys};
+}
+
 # For debugging messages.
 sub qd {
     my ( $val, $compact ) = @_;

@@ -1338,7 +1338,7 @@ sub directive {
 	my @orig = @a;
 	my $fail = 0;
 	my $name = $a[0];
-	my $strings = App::Music::ChordPro::Chords::strings();
+	my $strings = $config->diagram_strings;
 
 	# Result structure.
 	my $res = { name => $name };

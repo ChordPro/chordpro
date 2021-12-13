@@ -2,6 +2,10 @@
 
 use strict;
 
+package main;
+
+our $config;
+
 package App::Music::ChordPro::Output::PDF::KeyboardDiagrams;
 
 sub new {
