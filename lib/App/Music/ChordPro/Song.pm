@@ -596,7 +596,18 @@ sub chord {
 	return $c;
     }
     ( my $n = $name ) =~ s/\((.+)\)$/$1/;
-    push( @used_chords, $n ) unless $info->{isnote};
+
+    if ( ! $info->{origin} && $config->{diagrams}->{auto} ) {
+	$info = App::Music::ChordPro::Chords::add_unknown_chord($name);
+	$self->add_chord($info);
+    }
+
+    if ( $info->{origin} ) {
+	push( @used_chords, $n ) if !$info->{isnote};
+    }
+    else {
+	do_warn("Unknown chord: $n");
+    }
     return $name;
 }
 
@@ -1585,8 +1596,10 @@ sub parse_chord {
     $xp += $capo if $capo && $decapo;
     my $xc = $config->{settings}->{transcode};
     my $global_dir = $config->{settings}->{transpose} <=> 0;
+    my $unk;
 
     $info = App::Music::ChordPro::Chords::parse_chord($chord);
+    $unk = !defined $info;
     unless ( $info || ( $allow && !( $xc || $xp ) ) ) {
 	do_warn( "Cannot parse",
 		 $xp ? "/transpose" : "",
@@ -1611,6 +1624,11 @@ sub parse_chord {
 	    warn( "Parsing chord: \"$chord\" found ",
 		  $i->name, " for ", $info->name, " in song/config chords\n" ) if $debug > 1;
 	    $info = $i->new({ %$i, name => $info->name }) ;
+	    $unk = 0;
+	}
+	else {
+	    warn("Parsing chord: \"$chord\" not found in song/config chords\n" ) if $debug;
+	    $unk = 1;
 	}
     }
 
@@ -1623,6 +1641,7 @@ sub parse_chord {
 	if ( my $i = App::Music::ChordPro::Chords::_known_chord($info->name) ) {
 	    warn( "Parsing chord: \"$chord\" found ",
 		  $info->name, " in song/config chords\n" ) if $debug > 1;
+	    $unk = 0;
 	}
     }
     # else: warning has been given.
@@ -1650,7 +1669,9 @@ sub parse_chord {
 
     if ( $info ) {
 	warn( "Parsing chord: \"$chord\" okay: \"",
-	      $info->name, "\"\n" ) if $debug > 1;
+	      $info->name, "\"",
+	      $unk ? " but unknown" : "",
+	      "\n" ) if $debug > 1;
 	$info->{parens} = $parens if $parens;
 	$chord = $self->store_chord($info);
 	return wantarray ? ( $chord, $info ) : $chord;

@@ -556,7 +556,6 @@ sub chord_info {
 	warn("Partial $chord\n") if $debug;
 	return $info->new
 	  ( { name    => $chord,
-	      %$info,
 	      frets   => [],
 	      fingers => [],
 	      keys    => [],
