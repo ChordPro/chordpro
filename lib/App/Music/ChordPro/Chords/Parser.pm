@@ -810,6 +810,7 @@ sub strings {
 package App::Music::ChordPro::Chord::Common;
 
 our @ISA = qw( App::Music::ChordPro::Chord::Base );
+use String::Interpolate::Named;
 
 sub show {
     Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
@@ -916,6 +917,7 @@ sub chord_display {
 package App::Music::ChordPro::Chord::Nashville;
 
 our @ISA = 'App::Music::ChordPro::Chord::Base';
+use String::Interpolate::Named;
 
 sub transpose { $_[0] }
 
@@ -952,6 +954,7 @@ sub chord_display {
 package App::Music::ChordPro::Chord::Roman;
 
 our @ISA = 'App::Music::ChordPro::Chord::Base';
+use String::Interpolate::Named;
 
 sub transpose { $_[0] }
 
@@ -987,6 +990,7 @@ sub chord_display {
 
 package App::Music::ChordPro::Chord::Annotation;
 
+use String::Interpolate::Named;
 use String::Interpolate::Named;
 
 our @ISA = 'App::Music::ChordPro::Chord::Base';
