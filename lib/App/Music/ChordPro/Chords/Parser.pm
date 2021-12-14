@@ -991,7 +991,6 @@ sub chord_display {
 package App::Music::ChordPro::Chord::Annotation;
 
 use String::Interpolate::Named;
-use String::Interpolate::Named;
 
 our @ISA = 'App::Music::ChordPro::Chord::Base';
 

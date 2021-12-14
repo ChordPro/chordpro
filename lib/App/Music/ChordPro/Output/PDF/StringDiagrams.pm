@@ -191,12 +191,12 @@ sub draw {
 		$glyph = $g_none;
 	    }
 
-	    unless ( $fing eq $g_none ) {
-		# The glyphs are open, so we need am explicit
-		# background circle.
-		$pr->circle( $x+$gw/2, $y-$fret*$gh+$gh/2, $dot/2.2, 1,
-			     $fbg, "none");
-	    }
+	    # The glyphs are open, so we need am explicit
+	    # background circle to prevent the grid peeping through.
+	    # OTOH, for the unnumbered dot, we need a foreground circle.
+	    $pr->circle( $x+$gw/2, $y-$fret*$gh+$gh/2, $dot/2.2, 1,
+			 $glyph eq $g_none ? $ps->{theme}->{foreground} : $fbg,
+			 "none");
 
 	    $pr->setfont( $fcf, $dot );
 	    $pr->text( $glyph,
