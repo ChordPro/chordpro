@@ -349,6 +349,7 @@ sub add_config_chord {
 	  unless $res;
 	$def = bless { %$res, %$def } => ref($res);
     }
+    delete $def->{name};
 
     my ( $base, $frets, $fingers, $keys ) =
       ( $def->{base}||1, $def->{frets}, $def->{fingers}, $def->{keys} );
