@@ -7,6 +7,7 @@
     - Add error message when font name is not a built-in.
     - Allow custom PDF meta data. Requires PDF::API2 2.042.
     - Allow meta split on separator.
+    - Add settings.inline-annotations.
     - Add settings.chords-canonical to use canonical representation for chords.
     - Rework chords lookup to always use chordsinfo.
     - Use chord objects for show and display.

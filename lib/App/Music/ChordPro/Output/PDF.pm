@@ -313,6 +313,7 @@ my $suppress_empty_chordsline = 0;	# suppress chords line when empty
 my $suppress_empty_lyricsline = 0;	# suppress lyrics line when blank
 my $lyrics_only = 0;		# suppress all chord lines
 my $inlinechords = 0;		# chords inline
+my $inlineannots;		# format for inline annots
 my $chordsunder = 0;		# chords under the lyrics
 my $chordscol = 0;		# chords in a separate column
 my $chordscapo = 0;		# capo in a separate column
@@ -333,6 +334,7 @@ sub generate_song {
     $suppress_empty_chordsline = $::config->{settings}->{'suppress-empty-chords'};
     $suppress_empty_lyricsline = $::config->{settings}->{'suppress-empty-lyrics'};
     $inlinechords = $::config->{settings}->{'inline-chords'};
+    $inlineannots = $::config->{settings}->{'inline-annotations'};
     $chordsunder  = $::config->{settings}->{'chords-under'};
     my $ps = $::config->clone->{pdf};
     my $pr = $opts->{pr};
@@ -1511,12 +1513,8 @@ sub songline {
     $x += $opts{indent} if $opts{indent};
 
     # How to embed the chords.
-    my ( $pre, $post ) = ( "", " " );
     if ( $inlinechords ) {
-	$pre = "[";
-	$post = "]";
-	( $pre, $post ) = ( $1, $2 )
-	  if $inlinechords =~ /^(.*?)\%[cs](.*)/;
+	$inlinechords = '[%s]' unless $inlinechords =~ /%[cs]/;
 	$ychord = $ytext;
     }
 
@@ -1569,9 +1567,16 @@ sub songline {
 		my $info = $opts{song}->{chordsinfo}->{$chord};
 		Carp::croak("Missing info for chord $chord") unless $info;
 		$chord = $info->chord_display;
-		$font = $fonts->{annotation}
-		  if $info->is_annotation;
-		$xt0 = $pr->text( $pre.$chord.$post, $x, $ychord, $font );
+		my $dp = $chord;
+		if ( $info->is_annotation ) {
+		    $font = $fonts->{annotation};
+		    ( $dp = $inlineannots ) =~ s/%[cs]/$chord/
+		      if $inlinechords;
+		}
+		elsif ( $inlinechords ) {
+		    ( $dp = $inlinechords ) =~ s/%[cs]/$chord/;
+		}
+		$xt0 = $pr->text( $dp, $x, $ychord, $font );
 	    }
 
 	    # Do not indent chorus labels (issue #81).

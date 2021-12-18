@@ -940,6 +940,10 @@ sub default_config() {
       // May be a string containing pretext %s posttext.
       // Defaults to "[%s]" if true.
       "inline-chords" : false,
+      // Same, for annotations. Ignored unless inline-chords is set.
+      // Must be a string containing pretext %s posttext.
+      // Default is "%s".
+      "inline-annotations" : "%s",
       // Chords under the lyrics.
       "chords-under" : false,
       // Transposing.
