@@ -1575,12 +1575,12 @@ sub msg {
     my $m = join("", @_);
     $m =~ s/\n+$//;
     my $t = $diag->{format};
+    $t =~ s/\\n/\n/g;
+    $t =~ s/\\t/\t/g;
     $t =~ s/\%f/$diag->{file}/g;
     $t =~ s/\%n/$diag->{line}/g;
     $t =~ s/\%l/$diag->{orig}/g;
     $t =~ s/\%m/$m/g;
-    $t =~ s/\\n/\n/g;
-    $t =~ s/\\t/\t/g;
     $t;
 }
 
