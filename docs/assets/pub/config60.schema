@@ -154,6 +154,12 @@
 		    "default": false
 		},
 
+		"inline-annotations": {
+		    "description": "Format for inline annotations. Requires inline-chords..",
+		    "type": "string",
+		    "default": "%s"
+		},
+
 		"inline-chords": {
 		    "description": "Chords inline.",
 		    "default": false,

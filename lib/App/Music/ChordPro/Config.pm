@@ -1486,7 +1486,7 @@ sub default_config() {
           "fields" : [
               { "name" : "title",        "meta" : "title"      },
               { "name" : "pages",        "meta" : "pagerange"  },
-              { "name" : "sorttitles",   "meta" : "sorttitle"  },
+              { "name" : "sort title",   "meta" : "sorttitle"  },
               { "name" : "artists",      "meta" : "artist"     },
               { "name" : "composers",    "meta" : "composer"   },
               { "name" : "collections",  "meta" : "collection" },
