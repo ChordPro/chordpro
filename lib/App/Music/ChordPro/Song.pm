@@ -940,22 +940,19 @@ sub directive {
 	    push( @labels, $arg );
 	}
 
-	if ( $xpose + $config->{settings}->{transpose}
-	     or
-	     $config->{settings}->{transcode}
-	   ) {
+	if ( $chorus_xpose != ( my $xp = $xpose ) ) {
+	    $xp -= $chorus_xpose;
 	    for ( @$chorus ) {
-		####TODO
-		my $xp = $xpose;
-		local $config->{settings}->{transpose} = 0;
-		$xpose -= $chorus_xpose;
 		if ( $_->{type} eq "songline" ) {
 		    for ( @{ $_->{chords} } ) {
 			next if $_ eq '';
-			$_ = $self->parse_chord($_);
+			my $info = $self->{chordsinfo}->{$_};
+			next if $info->is_annotation;
+			$info = $info->transpose($xp, $xpose <=> 0) if $xp;
+			$info = $info->new($info);
+			$_ = $self->add_chord($info);
 		    }
 		}
-		$xpose = $xp;
 	    }
 	}
 
@@ -1547,8 +1544,7 @@ sub add_chord {
     else {
 	$new_id = $info->name;
     }
-    $self->{chordsinfo}->{$new_id} =
-      $info->new( { %$info, parser => ref($info->{parser}) } );
+    $self->{chordsinfo}->{$new_id} = $info->new($info);
 
     return $new_id;
 }

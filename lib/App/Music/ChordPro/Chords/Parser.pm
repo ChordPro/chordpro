@@ -807,6 +807,20 @@ sub strings {
     $_[0]->{parser}->{intervals};
 }
 
+sub dump {
+    my ( $self ) = @_;
+    my $c = dclone($self);
+    for ( qw( frets fingers keys ) ) {
+	$c->{$_} = "[ " . join(" ", @{$c->{$_}}) . " ]";
+    }
+    if ( ref($c->{parser}) ) {
+	$c->{ns_canon} = "[ " . join(" ", @{$c->{parser}{ns_canon}}) . " ]"
+	  if $c->{parser}{ns_canon};
+	$c->{parser} = ref(delete($c->{parser}));
+    }
+    ::dump($c);
+}
+
 package App::Music::ChordPro::Chord::Common;
 
 our @ISA = qw( App::Music::ChordPro::Chord::Base );

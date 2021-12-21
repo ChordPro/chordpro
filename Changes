@@ -27,6 +27,7 @@
     - Fix tilde expansion for font files.
     - (PDF) Suppress borders around ToC entries, just in case.
     - Fix sorttitles field name in CSV export.
+    - Fix issue #194.
     - Fix issue #195.
 
 5.985 2021-09-28
