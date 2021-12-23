@@ -29,6 +29,7 @@
     - Fix sorttitles field name in CSV export.
     - Fix issue #194.
     - Fix issue #195.
+    - Add workaround for incompatible pagel labels change in PDF::API 2.042.
 
 5.985 2021-09-28
 

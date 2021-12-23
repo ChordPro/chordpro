@@ -404,7 +404,7 @@ sub pagelabel {
     $style //= 'arabic';
 
     # PDF::API2 2.042 has some incompatible changes...
-    my $c = $self->{pdf}->can("page_label");
+    my $c = $self->{pdf}->can("page_labels");
     if ( $c ) {			# 2.042+
 	my $opts = { style => $style eq 'Roman' ? 'R' :
 		              $style eq 'roman' ? 'r' :
