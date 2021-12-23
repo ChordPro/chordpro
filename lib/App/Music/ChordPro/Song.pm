@@ -506,8 +506,8 @@ sub parse_song {
     do_warn("Unterminated context in song: $in_context")
       if $in_context;
 
-    # These don't make sense after processing.
-    delete $self->{meta}->{$_} for qw( key_actual key_from );
+    # These don't make sense after processing. Or do they?
+    # delete $self->{meta}->{$_} for qw( key_actual key_from );
 
     warn("Processed song...\n") if $options->{verbose};
 

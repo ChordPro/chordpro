@@ -48,7 +48,7 @@ sub is_deeply {
 		}
 	    }
 	}
-	for ( qw( instrument user ) ) {
+	for ( qw( instrument user key_from key_actual ) ) {
 	    delete $got->{meta}->{$_} unless exists $expect->{meta}->{$_};
 	}
     }

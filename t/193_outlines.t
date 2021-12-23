@@ -67,6 +67,9 @@ my $xp = [
         key => [
           'A',
         ],
+        key_actual => [
+          'Am',
+        ],
         songindex => 1,
         sorttitle => [
           'Fietspomp, De',
@@ -85,6 +88,9 @@ my $xp = [
           'September',
         ],
         key => [
+          'Am',
+        ],
+        key_actual => [
           'Am',
         ],
         songindex => 1,
@@ -108,6 +114,9 @@ my $xp = [
         key => [
           'C',
         ],
+        key_actual => [
+          'C',
+        ],
         songindex => 3,
         sorttitle => [
            'Fietsenhok, Het',
@@ -129,6 +138,9 @@ my $xp = [
           'December',
         ],
         key => [
+          'D',
+        ],
+        key_actual => [
           'D',
         ],
         songindex => 2,
