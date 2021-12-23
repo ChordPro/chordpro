@@ -129,7 +129,8 @@ sub text {
     $y -= $self->{layout}->get_baseline;
     $self->{layout}->show( $x, $y, $self->{pdftext} );
 
-    my $e = ($self->{layout}->get_pixel_extents)[1];
+    my $e = $self->{layout}->get_pixel_extents;
+    $e = $e->[1] if ref($e) eq 'ARRAY'; # Text::Layout <= 0.026
 
     # Handle decorations (background, box).
     my $bgcol = $self->_bgcolor($font->{background});
@@ -168,7 +169,8 @@ sub text_nobl {
     $self->{layout}->set_markup($text);
     $self->{layout}->show( $x, $y, $self->{pdftext} );
 
-    my $e = ($self->{layout}->get_pixel_extents)[1];
+    my $e = $self->{layout}->get_pixel_extents;
+    $e = $e->[1] if ref($e) eq 'ARRAY'; # Text::Layout <= 0.026
 
     # Handle decorations (background, box).
     my $bgcol = $self->_bgcolor($font->{background});
