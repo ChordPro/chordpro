@@ -1371,6 +1371,9 @@ sub directive {
 	    if ( $a eq "copy" ) {
 		if ( my $i = App::Music::ChordPro::Chords::_known_chord($a[0]) ) {
 		    $info = $i;
+		    shift(@a);
+		    $res->{$_} = $info->{$_}
+		      for qw( base frets fingers keys );
 		}
 		else {
 		    do_warn("Unknown chord to copy: $a[0]\n");
