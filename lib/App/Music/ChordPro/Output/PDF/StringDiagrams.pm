@@ -62,7 +62,7 @@ sub hsp {
     $self->hsp0( $elt, $ps ) + $self->hsp1( $elt, $ps );
 }
 
-my @Roman = qw( I II III IV V VI VI VII VIII IX X XI XII );
+# my @Roman = qw( I II III IV V VI VI VII VIII IX X XI XII );
 
 sub font_bl {
     goto &App::Music::ChordPro::Output::PDF::font_bl;
@@ -100,6 +100,7 @@ sub draw {
 	$pr->text( $i, $x-$pr->strwidth($i),
 		   $y-($info->{baselabeloffset}*$gh)-0.85*$gh,
 		   $ps->{fonts}->{diagram_base}, 1.2*$gh );
+	$pr->setfont($font);
     }
 
     my $v = $ps->{diagrams}->{vcells};
@@ -107,6 +108,23 @@ sub draw {
 
     # Draw the grid.
     my $xo = $self->grid_xo($ps);
+
+    my $crosshairs = sub {
+	my ( $x, $y, $col ) = @_;
+	for ( $pr->{pdfgfx}  ) {
+	    $_->save;
+	    $_->linewidth(0.1);
+	    $_->strokecolor($col//"black");
+	    $_->move($x-10,$y);
+	    $_->hline($x+20);
+	    $_->stroke;
+	    $_->move($x,$y+10);
+	    $_->vline($y-20);
+	    $_->stroke;
+	    $_->restore;
+	}
+    };
+
     $pr->{pdfgfx}->formimage( $xo, $x, $y-$v*$gh, 1 );
 
     # The numbercolor property of the chordfingers is used for the
@@ -142,10 +160,10 @@ sub draw {
 		    delete $bar->{$_};
 		    next;
 		}
-		# Print the bar line.
+		# Print the bar line. Need linecap 0.
 		$pr->hline( $x+$bi[2]*$gw, $y-$bi[1]*$gh+$gh/2,
 			    ($bi[3]-$bi[2])*$gw,
-			    6*$lw, $ps->{theme}->{foreground} );
+			    $dot, $ps->{theme}->{foreground}, 0 );
 	    }
 	}
     }
@@ -155,7 +173,17 @@ sub draw {
     my $oflo;			# to detect out of range frets
 
     my $g_none = "/";		# unnumbered
+
+    # All symbols from the chordfingers font are equal size: a circle
+    # of 824 (1000-2*88) centered horizontally in the box, with a
+    # decender of 55.
+    # To get it vertically centered we must lower it by 455 (1000/2-55).
+    $pr->setfont($fcf,$dot);
     my $g_width = $pr->strwidth("1");
+    my $g_lower = -0.455*$g_width;
+#    warn("GW dot=$dot, width=$g_width, lower=$g_lower\n");
+#    my $e = $fcf->{fd}->{font}->extents("1",10);
+#    use DDumper; DDumper($e);
 
     for my $sx ( 0 .. @{ $info->{frets} }-1 ) {
 	my $fret = $info->{frets}->[$sx];
@@ -200,9 +228,9 @@ sub draw {
 
 	    $pr->setfont( $fcf, $dot );
 	    $pr->text( $glyph,
-		       $x + $gw/2 - $g_width/2.2,
-		       $y - $fret*$gh + $gh/2 - $g_width/2 + $lw*1.7,
-		       $fcf, $dot/0.8 );
+			$x,
+			$y - $fret*$gh + $gh/2 + $g_lower,
+			$fcf, $dot/0.8 );
 	}
 	elsif ( $fret < 0 ) {
 	    $pr->cross( $x+$gw/2, $y+$lw+$gh/3, $dot/3, $lw,
