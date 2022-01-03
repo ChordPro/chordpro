@@ -240,11 +240,12 @@ sub line {
 }
 
 sub hline {
-    my ( $self, $x, $y, $w, $lw, $color ) = @_;
+    my ( $self, $x, $y, $w, $lw, $color, $cap ) = @_;
+    $cap //= 2;
     my $gfx = $self->{pdfgfx};
     $gfx->save;
     $gfx->strokecolor( $self->_fgcolor($color) );
-    $gfx->linecap(2);
+    $gfx->linecap($cap);
     $gfx->linewidth($lw||1);
     $gfx->move( $x, $y );
     $gfx->hline( $x + $w );
@@ -253,11 +254,12 @@ sub hline {
 }
 
 sub vline {
-    my ( $self, $x, $y, $h, $lw, $color ) = @_;
+    my ( $self, $x, $y, $h, $lw, $color, $cap ) = @_;
+    $cap //= 2;
     my $gfx = $self->{pdfgfx};
     $gfx->save;
     $gfx->strokecolor( $self->_fgcolor($color) );
-    $gfx->linecap(2);
+    $gfx->linecap($cap);
     $gfx->linewidth($lw||1);
     $gfx->move( $x, $y );
     $gfx->vline( $y - $h );
