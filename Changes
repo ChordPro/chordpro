@@ -31,6 +31,7 @@
     - Fix issue #195.
     - Add workaround for incompatible pagel labels change in PDF::API 2.042.
     - Fix placement of finger dots.
+    - Fix handling of NC chords.
 
 5.985 2021-09-28
 

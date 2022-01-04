@@ -603,7 +603,10 @@ sub generate_song {
 	  if !defined($chords) && $s->{chords};
 	$show //= $dctl->{show};
 	if ( $chords ) {
-	    @chords = map { $s->{chordsinfo}->{$_} } @$chords;
+	    for ( @$chords ) {
+		my $i = $s->{chordsinfo}->{$_};
+		push( @chords, $i ) unless $i->is_nc;
+	    }
 	}
 	return unless @chords;
 

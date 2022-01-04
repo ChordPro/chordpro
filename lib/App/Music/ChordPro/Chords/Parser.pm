@@ -486,14 +486,16 @@ sub load_notes {
 
     # Pattern to match note names.
     my $n_pat = '(?:' ;
-    foreach ( sort keys %ns_tbl ) {
-	$n_pat .= "$_|";
+    my @n;
+    foreach ( keys %ns_tbl ) {
+	push( @n, $_ );
     }
     foreach ( sort keys %nf_tbl ) {
 	next if $ns_tbl{$_};
-	$n_pat .= "$_|";
+	push( @n, $_ );
     }
-    substr( $n_pat, -1, 1, ")" );
+
+    $n_pat = '(?:' . join( '|', sort { length($b) <=> length($a) } @n ) . ')';
 
     # Pattern to match chord names.
     my $c_pat;
@@ -799,6 +801,15 @@ sub name    { $_[0]->show }
 sub is_note { $_[0]->{isnote} };
 sub is_flat { $_[0]->{isflat} };
 
+sub is_nc {
+    my ( $self ) = @_;
+    return unless $self->{frets} && @{ $self->{frets} };
+    for ( @{ $self->{frets} } ) {
+	return unless $_ < 0;
+    }
+    return 1;			# all -1 => N.C.
+}
+
 # For convenience.
 sub is_chord      { defined $_[0]->{root_ord} };
 sub is_annotation { 0 };
@@ -836,7 +847,7 @@ sub show {
 				     !$self->is_flat
 				   ) . $self->{qual} . $self->{ext}
       : $self->{name};
-    if ( $self->{isnote} ) {
+    if ( $self->is_note ) {
 	return lcfirst($res);
     }
     if ( $self->{bass} && $self->{bass} ne "" ) {
@@ -850,7 +861,7 @@ sub show {
 sub agnostic {
     Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self ) = @_;
-    return if $self->{isnote};
+    return if $self->is_note;
     join( " ", "",
 	  $self->{root_ord}, $self->{qual_canon},
 	  $self->{ext_canon}, $self->{bass_ord} // () );

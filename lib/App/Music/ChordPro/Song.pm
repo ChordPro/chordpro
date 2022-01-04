@@ -602,15 +602,14 @@ sub chord {
 	$self->add_chord($info);
     }
 
-    if ( $::running_under_test ) {
-	# Tests run without config and chords, so pretend.
-	push( @used_chords, $n ) if !$info->{isnote};
-    }
-    elsif ( $info->{origin} ) {
-	push( @used_chords, $n ) if !$info->{isnote};
-    }
-    else {
-	do_warn("Unknown chord: $n") unless $info->{isnote};
+    unless ( $info->is_note ) {
+	if ( $info->{origin} || $::running_under_test ) {
+	    # Tests run without config and chords, so pretend.
+	    push( @used_chords, $n );
+	}
+	else {
+	    do_warn("Unknown chord: $n");
+	}
     }
     return $name;
 }
@@ -1601,7 +1600,23 @@ sub parse_chord {
     my $global_dir = $config->{settings}->{transpose} <=> 0;
     my $unk;
 
-    $info = App::Music::ChordPro::Chords::parse_chord($chord);
+    $info = App::Music::ChordPro::Chords::_known_chord($chord);
+    if ( $info ) {
+	warn( "Parsing chord: \"$chord\" found ",
+	      $chord, " in song/config chords\n" ) if $debug > 1;
+    }
+    else {
+	$info = App::Music::ChordPro::Chords::parse_chord($chord);
+	warn( "Parsing chord: \"$chord\" parsed ok\n" ) if $info && $debug > 1;
+    }
+#    if ( $info && ( my $i = App::Music::ChordPro::Chords::_known_chord($info->name) || App::Music::ChordPro::Chords::_known_chord($chord) ) ) {
+#	require DDumper; DDumper::DDumper($i) if $chord =~ /N/;
+#	warn("AAA", join(",",@{$i->{frets}}), " ", join(",",(-1)x($config->diagram_strings)) );
+#	if ( $i->{frets} && join(",",@{$i->{frets}}) eq join(",",(-1)x($config->diagram_strings)) ) {
+#	    warn("BBB");
+#	    $xp = 0; $xc = '';
+#	}
+#    }
     $unk = !defined $info;
     unless ( $info || ( $allow && !( $xc || $xp ) ) ) {
 	do_warn( "Cannot parse",
