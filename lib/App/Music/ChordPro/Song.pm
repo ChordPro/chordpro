@@ -602,7 +602,7 @@ sub chord {
 	$self->add_chord($info);
     }
 
-    unless ( $info->is_note ) {
+    unless ( $info->is_note || !$info->{frets} ) {
 	if ( $info->{origin} || $::running_under_test ) {
 	    # Tests run without config and chords, so pretend.
 	    push( @used_chords, $n );
@@ -1602,8 +1602,8 @@ sub parse_chord {
 
     $info = App::Music::ChordPro::Chords::_known_chord($chord);
     if ( $info ) {
-	warn( "Parsing chord: \"$chord\" found ",
-	      $chord, " in song/config chords\n" ) if $debug > 1;
+	warn( "Parsing chord: \"$chord\" found \"",
+	      $chord, "\" in song/config chords\n" ) if $debug > 1;
     }
     else {
 	$info = App::Music::ChordPro::Chords::parse_chord($chord);
@@ -1631,8 +1631,8 @@ sub parse_chord {
 	$info = $info->transpose( $xp,
 				  $xpose_dir // $global_dir);
 	warn( "Parsing chord: \"$chord\" transposed ",
-	      $xp > 0 ? "+$xp" : "$xp", " to ",
-	      $info->name, "\n" ) if $debug > 1;
+	      $xp > 0 ? "+$xp" : "$xp", " to \"",
+	      $info->name, "\"\n" ) if $debug > 1;
     }
     # else: warning has been given.
 
@@ -1645,7 +1645,8 @@ sub parse_chord {
 	    $unk = 0;
 	}
 	else {
-	    warn("Parsing chord: \"$chord\" not found in song/config chords\n" ) if $debug;
+	    warn( "Parsing chord: \"$chord\" \"", $info->name,
+		  "\" not found in song/config chords\n" ) if $debug;
 	    $unk = 1;
 	}
     }
@@ -1657,8 +1658,8 @@ sub parse_chord {
 	      " (", $info->{system}, ")",
 	      "\n" ) if $debug > 1;
 	if ( my $i = App::Music::ChordPro::Chords::_known_chord($info->name) ) {
-	    warn( "Parsing chord: \"$chord\" found ",
-		  $info->name, " in song/config chords\n" ) if $debug > 1;
+	    warn( "Parsing chord: \"$chord\" found \"",
+		  $info->name, "\" in song/config chords\n" ) if $debug > 1;
 	    $unk = 0;
 	}
     }
@@ -1667,8 +1668,13 @@ sub parse_chord {
     if ( ! $info ) {
 	if ( my $i = App::Music::ChordPro::Chords::_known_chord($chord) ) {
 	    $info = $i;
-	    warn( "Parsing chord: \"$chord\" found ",
-		  $chord, " in song/config chords\n" ) if $debug > 1;
+	    warn( "Parsing chord: \"$chord\" found \"",
+		  $chord, "\" in song/config chords\n" ) if $debug > 1;
+	    $unk = 0;
+	}
+	elsif ( $config->{diagrams}->{auto} ) {
+	    my $i = App::Music::ChordPro::Chords::add_unknown_chord($chord);
+	    $info = bless { %$i, %$info } => ref($info);
 	}
     }
 
