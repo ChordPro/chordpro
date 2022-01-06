@@ -235,26 +235,25 @@ sub parse_chord {
 	$bass = $2;
     }
 
-    # Pattern to match chords.
-    my $c_pat = $self->{c_pat};
-
-    # Use relaxed pattern if requested.
-    $c_pat = $self->{c_rpat}
-      if $self->{c_rpat} && $::config->{settings}->{chordnames} eq "relaxed";
-
-    # Pattern to match notes.
-    my $n_pat = $self->{n_pat};
-
     my $info = { system => $self->{system},
 		 parser => $self,
 		 name => $_[1] };
 
-    if ( $chord =~ /^$c_pat$/ ) {
-	return unless $info->{root} = $+{root};
+    # Match chord.
+    my %plus;
+    if ( $chord =~ /^$self->{c_pat}$/ ) {
+	%plus = %+;
+	$info->{root} = $plus{root};
+    }
+    # Retry with relaxed pattern if requested.
+    elsif ( $self->{c_rpat} && $::config->{settings}->{chordnames} eq "relaxed" ) {
+	$chord =~ /^$self->{c_rpat}$/;
+	%plus = %+;		# keep it outer
+	return unless $info->{root} = $plus{root};
     }
     # Not a chord. Try note name.
     elsif ( $::config->{settings}->{notenames}
-	    && ucfirst($chord) =~ /^$n_pat$/ ) {
+	    && ucfirst($chord) =~ /^$self->{n_pat}$/ ) {
 	$info->{root} = $chord;
 	$info->{isnote} = 1;
     }
@@ -265,7 +264,7 @@ sub parse_chord {
 
     bless $info => $self->{target};
 
-    my $q = $+{qual} // "";
+    my $q = $plus{qual} // "";
     $info->{qual} = $q;
     $q = "-" if $q eq "m" || $q eq "min";
     $q = "+" if $q eq "aug";
@@ -273,7 +272,7 @@ sub parse_chord {
     $q = "0" if $q eq "o";
     $info->{qual_canon} = $q;
 
-    my $x = $+{ext} // "";
+    my $x = $plus{ext} // "";
     if ( !$info->{qual} ) {
 	if ( $x eq "maj" ) {
 	    $x = "";
@@ -310,7 +309,7 @@ sub parse_chord {
       unless ref($info) =~ /App::Music::ChordPro::Chord::/;
 
     if ( $bass ) {
-	return unless $bass =~ /^$n_pat$/;
+	return unless $bass =~ /^$self->{n_pat}$/;
 	$info->{bass} = $bass;
 	$ordmod->("bass");
     }
@@ -318,6 +317,8 @@ sub parse_chord {
     if ( $::config->{settings}->{'chords-canonical'} ) {
 	my $t = $info->{name};
 	$info->{name} = $info->show;
+	warn("Parsing chord: \"$chord\" canon \"", $info->show, "\"\n" )
+	  if $info->{name} ne $t and $::config->{debug}->{chords};
     }
 
     return $info;
