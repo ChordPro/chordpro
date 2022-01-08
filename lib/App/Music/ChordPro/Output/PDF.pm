@@ -1192,15 +1192,14 @@ sub generate_song {
 	    }
 	    # Arbitrary config values.
 	    elsif ( $elt->{name} =~ /^pdf\.(.+)/ ) {
+		# $ps is inuse, modify in place.
 		my @k = split( /[.]/, $1 );
-		my $cc = {};
+		my $cc = $ps;
 		my $c = \$cc;
 		foreach ( @k ) {
 		    $c = \($$c->{$_});
 		}
 		$$c = $elt->{value};
-		$ps = App::Music::ChordPro::Config::hmerge( $ps, $cc, "" );
-# 	    warn("YYY ", $dctl->{show} );
 	    }
 	    next;
 	}
