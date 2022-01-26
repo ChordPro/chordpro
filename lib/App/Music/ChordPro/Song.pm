@@ -610,7 +610,7 @@ sub chord {
 	    # Tests run without config and chords, so pretend.
 	    push( @used_chords, $n );
 	}
-	else {
+	elsif ( $config->{debug}->{chords} ) {
 	    do_warn("Unknown chord: $n");
 	}
     }
@@ -1682,7 +1682,7 @@ sub parse_chord {
     }
 
     unless ( $info || $allow ) {
-	if ( ! $warned_chords{$chord}++ ) {
+	if ( $config->{debug}->{chords} || ! $warned_chords{$chord}++ ) {
 	    warn("Parsing chord: \"$chord\" unknown\n") if $debug;
 	    do_warn( "Unknown chord: \"$chord\"\n" )
 	      unless $chord =~ /^n\.?c\.?$/i;
