@@ -510,6 +510,7 @@ sub parse_song {
     # delete $self->{meta}->{$_} for qw( key_actual key_from );
 
     warn("Processed song...\n") if $options->{verbose};
+    $diag->{format} = "\"%f\": %m";
 
     $self->dump(0) if $config->{debug}->{song} > 1;
 
@@ -528,7 +529,6 @@ sub parse_song {
 
     if ( $diagrams =~ /^(user|all)$/
 	 && !App::Music::ChordPro::Chords::Parser->get_parser($target,1)->has_diagrams ) {
-	$diag->{orig} = "(End of Song)";
 	do_warn( "Chord diagrams suppressed for " .
 		 ucfirst($target) . " chords" ) unless $options->{silent};
 	$diagrams = "none";
@@ -553,6 +553,19 @@ sub parse_song {
 	    show   => $diagrams,
 	    chords => [ @used_chords ],
 	  };
+
+	if ( %warned_chords ) {
+	    my @a = sort App::Music::ChordPro::Chords::chordcompare keys(%warned_chords);
+	    my $l;
+	    if ( @a > 1 ) {
+		my $a = pop(@a);
+		$l = '"' . join('", "', @a) . '" and "' . $a . '"';
+	    }
+	    else {
+		$l = '"' . $a[0] . '"';
+	    }
+	    do_warn( "No chord diagram defined for $l (skipped)\n" );
+	}
     }
 
     $self->dump(0) if $config->{debug}->{song};
@@ -610,8 +623,9 @@ sub chord {
 	    # Tests run without config and chords, so pretend.
 	    push( @used_chords, $n );
 	}
-	elsif ( $config->{debug}->{chords} ) {
-	    do_warn("Unknown chord: $n");
+	else {
+	    do_warn("Unknown chord: $n") if $config->{debug}->{chords};
+	    $warned_chords{$n}++;
 	}
     }
     return $name;
