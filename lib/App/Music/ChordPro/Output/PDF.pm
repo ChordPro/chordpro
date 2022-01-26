@@ -1569,14 +1569,14 @@ sub songline {
 		my $info = $opts{song}->{chordsinfo}->{$chord};
 		Carp::croak("Missing info for chord $chord") unless $info;
 		$chord = $info->chord_display;
-		my $dp = $chord;
+		my $dp = $chord . " ";
 		if ( $info->is_annotation ) {
 		    $font = $fonts->{annotation};
-		    ( $dp = $inlineannots ) =~ s/%[cs]/$chord/
+		    ( $dp = $inlineannots ) =~ s/%[cs]/$chord/g
 		      if $inlinechords;
 		}
 		elsif ( $inlinechords ) {
-		    ( $dp = $inlinechords ) =~ s/%[cs]/$chord/;
+		    ( $dp = $inlinechords ) =~ s/%[cs]/$chord/g;
 		}
 		$xt0 = $pr->text( $dp, $x, $ychord, $font );
 	    }
@@ -1588,7 +1588,14 @@ sub songline {
 		$x = $pr->text( $phrase, $xt0, $ytext, $ftext );
 	    }
 	    else {
-		my $xt1 = $pr->text( $phrase, $x, $ytext, $ftext );
+		my $xt1;
+		if ( $phrase =~ /^\s+$/ ) {
+		    $xt1 = $xt0 + length($phrase) * $pr->strwidth(" ",$ftext);
+#		    $xt1 = $pr->text( "n" x length($phrase), $xt0, $ytext, $ftext );
+		}
+		else {
+		    $xt1 = $pr->text( $phrase, $x, $ytext, $ftext );
+		}
 		if ( $xt0 > $xt1 ) { # chord is wider
 		    # Do we need to insert a split marker?
 		    if ( $i < $n
