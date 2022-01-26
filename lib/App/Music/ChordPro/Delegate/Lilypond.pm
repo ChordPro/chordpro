@@ -12,16 +12,21 @@ use warnings;
 use utf8;
 use File::Spec;
 use File::Temp ();
+use File::LoadLines;
 use feature 'state';
 
 use App::Music::ChordPro::Utils;
+use Text::ParseWords qw(shellwords);
 
-sub LYDEBUG() { $config->{debug}->{ly} }
+sub DEBUG() { $config->{debug}->{ly} }
 
 sub ly2image {
     my ( $s, $pr, $elt ) = @_;
+
     state $imgcnt = 0;
     state $td = File::Temp::tempdir( CLEANUP => !$config->{debug}->{ly} );
+
+    $imgcnt++;
     my $src  = File::Spec->catfile( $td, "tmp${imgcnt}.ly" );
     my $img  = File::Spec->catfile( $td, "tmp${imgcnt}.png" );
 
@@ -31,13 +36,53 @@ sub ly2image {
 	return;
     }
 
-    print $fd "\\version \"2.21.0\"\n";
-    print $fd "\\header { tagline = ##f }\n";
+    my $need_version = 1;
+    my @pre;
     for ( keys(%{$elt->{opts}}) ) {
-	print $fd '%%'.$_." ".$elt->{opts}->{$_}."\n";
+
+	if ( $_ eq "version" ) {
+	    push( @pre, "\\version \"", $elt->{opts}->{$_}, "\"" );
+	    warn ( "\\version \"", $elt->{opts}->{$_}, "\"\n" ) if DEBUG;
+	    $need_version = 0;
+	}
+	else {
+	    push( @pre, '%%'.$_." ".$elt->{opts}->{$_} );
+	    warn('%%'.$_." ".$elt->{opts}->{$_}."\n") if DEBUG;
+	}
     }
-    for ( @{$elt->{data}} ) {
+
+    for ( @{ $config->{delegates}->{ly}->{preamble} } ) {
+	push( @pre, $_ );
+	warn( "$_\n") if DEBUG;
+	$need_version = 0 if /^\\version\s+/;
+    }
+
+    if ( $need_version ) {
+	my $v = "2.21.0";
+	unshift( @pre, "\\version \"$v\"",
+		 "\\header { tagline = ##f }" );
+	warn("ly: no \\version seen, assuming \"$v\"\n");
+    }
+    printf $fd "$_\n" for @pre;
+
+    @pre = ();
+    my @data = @{$elt->{data}};
+    while ( @data ) {
+	$_ = shift(@data);
+	unshift( @data, $_ ), last if /^[%\\]/; # LP data
+	push( @pre, $_ );
+    }
+    if ( @pre && !@data ) {	# no LP found
+	@data = @pre;
+	@pre = ();
+    }
+
+    my $kv = { %$elt };
+    $kv = parse_kv( @pre ) if @pre;
+    # Copy. We assume the user knows how to write LilyPond.
+    for ( @data ) {
 	print $fd $_, "\n";
+	warn($_, "\n") if DEBUG;
     }
 
     unless ( close($fd) ) {
@@ -56,6 +101,9 @@ sub ly2image {
     else {
 	$pw = $ps->{__rightmargin} - $ps->{_leftmargin};
     }
+    if ( $kv->{width} ) {
+	$pw = $kv->{width};
+    }
 
     state $lilypond = findexe("lilypond");
     unless ( $lilypond ) {
@@ -63,8 +111,29 @@ sub ly2image {
 	return;
     }
 
-    my @cmd;
-    if ( is_msw() ) {
+    my @cmd = ( $lilypond, qw( --png -dresolution=820) );
+    push( @cmd, "--silent" ) unless DEBUG;
+    ( my $im1 = $img ) =~ s/\.\w+$//;
+    push( @cmd, "-o", $im1, $src );
+    if ( sys( @cmd )
+	 or
+	 ! -s $img ) {
+	warn("Error in Lilypond embedding\n");
+	return;
+    }
+    $kv->{scale} ||= 1;
+
+    my $have_magick = do {
+        local $SIG{__WARN__} = sub {};
+	local $SIG{__DIE__} = sub {};
+	eval { require Image::Magicxk;
+	       $Image::Magick::VERSION || "6.x?" };
+    };
+    if ( $have_magick ) {
+	warn("Using PerlMagick version ", $have_magick, "\n")
+	  if $config->{debug}->{images} || DEBUG;
+    }
+    elsif ( is_msw() ) {
 	state $magick = findexe("magick");
 	unless ( $magick ) {
 	    warn("Error in Lilypond embedding: missing 'imagemagick/convert' tool.\n");
@@ -81,22 +150,68 @@ sub ly2image {
 	@cmd = ( $convert );
     }
 
-    my $png = File::Spec->catfile( $td, "tmp${imgcnt}" );
-    if ( sys( qw(lilypond -s --png -dresolution=820),
-	      "-o", $png, $src ) ) {
-	warn("Error in Lilypond embedding\n");
-	return;
+    my @res;
+    if ( $have_magick ) {
+	require Image::Magick;
+	my $image = Image::Magick->new( density => 600, background => 'white' );
+	my $x = $image->Read($img);
+	warn $x if $x;
+	$x = $image->Trim;
+	warn $x if $x;
+	warn("Trim: ", join("x", $image->Get('width', 'height')).
+	     " ", join("x", $image->Get('base-columns', 'base-rows')),
+	     "+", join("+", $image->Get('page.x', 'page.y')), "\n")
+	  if $config->{debug}->{images};
+
+	$image->Set( magick => 'jpg' );
+	my $data = $image->ImageToBlob;
+	my $assetid = sprintf("LYasset%03d", $imgcnt++);
+	warn("Created asset $assetid (jpg, ", length($data), " bytes)\n")
+	  if $config->{debug}->{images};
+	$App::Music::ChordPro::Output::PDF::assets->{$assetid} =
+	  { type => "jpg", data => $data };
+
+	push( @res,
+	      { type => "image",
+		uri  => "id=$assetid",
+		opts => { center => $kv->{center}, scale => $kv->{scale} * 0.16 } },
+	      { type => "empty" },
+	    );
+	warn("Asset $assetid options:",
+	     " scale=", $kv->{scale} * 0.16,
+	     " center=", $kv->{center}//0,
+	     "\n")
+	  if $config->{debug}->{images};
     }
-    if ( sys( @cmd, qw(-background white -trim), $img, $img ) ) {
-	warn("Error in Lilypond embedding\n");
-	return;
+    else {
+	if ( sys( @cmd, qw(-background white -trim), $img, $img ) ) {
+	    warn("Error in Lilypond embedding\n");
+	    return;
+	}
+
+	warn("Reading $img...\n") if $config->{debug}->{images};
+	open( my $im, '<:raw', $img );
+	my $data = do { local $/; <$im> };
+	close($im);
+
+	my $assetid = sprintf("LYasset%03d", $imgcnt);
+	warn("Created asset $assetid (png, ", length($data), " bytes)\n")
+	  if $config->{debug}->{images};
+	$App::Music::ChordPro::Output::PDF::assets->{$assetid} =
+	  { type => "png", data => $data };
+
+	push( @res,{ type => "image",
+		     uri  => "id=$assetid",
+		     opts => { center => $kv->{center}, scale => $kv->{scale} * 0.16 } },
+	    );
+	warn("Asset $assetid options:",
+	     " scale=", $kv->{scale} * 0.16,
+	     " center=", $kv->{center}//0,
+	     "\n")
+	  if $config->{debug}->{images};
     }
 
-    return [
-	    { type => "image",
-	      uri  => $img,
-	      opts => { center => 0, scale => 0.1 } },
-	   ];
+    return \@res;
 
 }
 

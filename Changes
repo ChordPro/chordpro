@@ -17,6 +17,7 @@
     - (PDF) Provide meta %{pages} for headings.
     - Allow (uppercase) letters for chord fingers.
     - (Wx) Overhaul preferences management.
+    - Support center and scale for lilypond.
     - !BugFixes
     - Remove obsolete __EMBEDDING__.
     - Bump requirement Text::Layout to 0.024.

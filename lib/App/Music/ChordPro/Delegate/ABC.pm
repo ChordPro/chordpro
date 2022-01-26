@@ -13,14 +13,12 @@ use utf8;
 use File::Spec;
 use File::Temp ();
 use File::LoadLines;
-use IO::String;
+use feature 'state';
 
 use App::Music::ChordPro::Utils;
 use Text::ParseWords qw(shellwords);
 
-sub ABCDEBUG() { $config->{debug}->{abc} }
-
-use feature 'state';
+sub DEBUG() { $config->{debug}->{abc} }
 
 sub abc2image {
     my ( $s, $pr, $elt ) = @_;
@@ -49,12 +47,12 @@ sub abc2image {
 	  && !($elt->{opts}->{$_} % @{ $config->{notes}->{sharp} });
 
 	print $fd '%%'.$_." ".$elt->{opts}->{$_}."\n";
-	warn('%%'.$_." ".$elt->{opts}->{$_}."\n") if ABCDEBUG;
+	warn('%%'.$_." ".$elt->{opts}->{$_}."\n") if DEBUG;
     }
 
     for ( @{ $config->{delegates}->{abc}->{preamble} } ) {
 	print $fd "$_\n";
-	warn( "$_\n") if ABCDEBUG;
+	warn( "$_\n") if DEBUG;
     }
 
     # Add mandatory field.
@@ -66,16 +64,16 @@ sub abc2image {
 	push( @pre, $_ );
     }
     if ( @pre && !@data ) {	# no X: found
-	warn("X:1 (added)\n") if ABCDEBUG;
+	warn("X:1 (added)\n") if DEBUG;
 	@data = ( "X:1", @pre );
 	@pre = ();
     }
     my $kv = { %$elt };
-    $kv = parse_kv( @pre );
+    $kv = parse_kv( @pre ) if @pre;
     # Copy. We assume the user knows how to write ABC.
     for ( @data ) {
 	print $fd $_, "\n";
-	warn($_, "\n") if ABCDEBUG;
+	warn($_, "\n") if DEBUG;
     }
 
     unless ( close($fd) ) {
@@ -105,11 +103,11 @@ sub abc2image {
     };
     if ( $have_magick ) {
 	warn("Using PerlMagick version ", $have_magick, "\n")
-	  if $config->{debug}->{images} || ABCDEBUG;
+	  if $config->{debug}->{images} || DEBUG;
     }
     else {
 	warn("No PerlMagick, hope you have ImageMagick installed...\n")
-	  if $config->{debug}->{images} || ABCDEBUG;
+	  if $config->{debug}->{images} || DEBUG;
 	$kv->{split} = 0;
     }
 
@@ -129,7 +127,7 @@ sub abc2image {
     push( @cmd, "-F", $fmt ) if $fmt && $fmt ne "default";
     push( @cmd, "-A" ) if $kv->{split};
     push( @cmd, "-O", $svg0, $src );
-    warn( "+ @cmd\n" ) if ABCDEBUG;
+    warn( "+ @cmd\n" ) if DEBUG;
     if ( sys( @cmd )
 	 or
 	 ! -s $svg1 ) {
@@ -180,7 +178,7 @@ sub abc2image {
 	    $_ .= "font-weight=\"" . $f->{weight} . '" ' if $f->{weight};
 	    $_ .= $post;
 	    warn("\"${pre}style=\"font:$style\"$post\" => \"$_\"\n")
-	      if ABCDEBUG;
+	      if DEBUG;
 	}
 	unless ( $kv->{split} ) {
 	    open( my $fd, '>:utf8', $svg1 )
@@ -226,7 +224,7 @@ sub abc2image {
 	    push( @res,
 		  { type => "image",
 		    uri  => "id=$assetid",
-		    opts => { center => 0, scale => $kv->{scale} * 0.16 } },
+		    opts => { center => $kv->{center}, scale => $kv->{scale} * 0.16 } },
 		  { type => "empty" },
 		);
 	};
@@ -290,7 +288,7 @@ sub abc2image {
 	    @cmd = ( $convert );
 	}
 	push( @cmd, qw(-density 600 -background white -trim), $svg1, $img );
-	warn( "+ @cmd\n" ) if ABCDEBUG;
+	warn( "+ @cmd\n" ) if DEBUG;
 	if ( sys( @cmd ) ) {
 	    warn("Error in ABC embedding\n");
 	    return;
