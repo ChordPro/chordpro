@@ -18,6 +18,7 @@
     - Allow (uppercase) letters for chord fingers.
     - (Wx) Overhaul preferences management.
     - Support center and scale for lilypond.
+    - Add config settings.choruslabels for MSPro convenience.
     - !BugFixes
     - Remove obsolete __EMBEDDING__.
     - Bump requirement Text::Layout to 0.024.

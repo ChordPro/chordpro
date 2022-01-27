@@ -839,6 +839,7 @@ sub generate_song {
 				$style->{bar}->{color} );
 		}
 		$curctx = "chorus";
+		$i_tag = "" unless $config->{settings}->{choruslabels};
 	    }
 
 	    # Substitute metadata in comments.
@@ -1052,17 +1053,28 @@ sub generate_song {
 	    elsif ( $elt->{chorus}
 		    && $elt->{chorus}->[0]->{type} eq "set"
 		    && $elt->{chorus}->[0]->{name} eq "label" ) {
-		unshift( @elts, { %$elt,
-				  type => $t->{type} // "comment",
-				  font => $ps->{fonts}->{label},
-				  text => $ps->{chorus}->{recall}->{tag},
-				} )
-		  if $ps->{chorus}->{recall}->{tag} ne "";
-		unshift( @elts, { %$elt,
-				  type => "set",
-				  name => "label",
-				  value => $elt->{chorus}->[0]->{value},
-				} );
+		if ( $config->{settings}->{choruslabels} ) {
+		    # Use as margin label.
+		    unshift( @elts, { %$elt,
+				      type => $t->{type} // "comment",
+				      font => $ps->{fonts}->{label},
+				      text => $ps->{chorus}->{recall}->{tag},
+				    } )
+		      if $ps->{chorus}->{recall}->{tag} ne "";
+		    unshift( @elts, { %$elt,
+				      type => "set",
+				      name => "label",
+				      value => $elt->{chorus}->[0]->{value},
+				    } );
+		}
+		else {
+		    # Use as tag.
+		    unshift( @elts, { %$elt,
+				      type => $t->{type} // "comment",
+				      font => $ps->{fonts}->{label},
+				      text => $elt->{chorus}->[0]->{value},
+				    } )
+		}
 		if ( $ps->{chorus}->{recall}->{choruslike} ) {
 		    $elts[0]->{context} = $elts[1]->{context} = "chorus";
 		}

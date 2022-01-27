@@ -906,7 +906,8 @@ sub directive {
 	    $self->add( type  => "set",
 			name  => "label",
 			value => $arg );
-	    push( @labels, $arg );
+	    push( @labels, $arg )
+	      unless $in_context eq "chorus" && !$config->{settings}->{choruslabels};
 	}
 	else {
 	    do_warn("Garbage in start_of_$1: $arg (ignored)\n")
@@ -953,7 +954,8 @@ sub directive {
 			   context => "chorus",
 			 } );
 	    }
-	    push( @labels, $arg );
+	    push( @labels, $arg )
+	      if $config->{settings}->{choruslabels};
 	}
 
 	if ( $chorus_xpose != ( my $xp = $xpose ) ) {

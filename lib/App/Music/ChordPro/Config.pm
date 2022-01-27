@@ -958,7 +958,9 @@ sub default_config() {
       // Allow note names in [].
       "notenames" : false,
       // Always replace chords by their canonical form.
-      "chords-canonical" : false
+      "chords-canonical" : false,
+      // If false, chorus labels are used as tags.
+      "choruslabels" : false,
     },
 
     // Metadata.

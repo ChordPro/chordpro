@@ -12,7 +12,11 @@ Examples:
     {chorus}
     {chorus: Final}
 
-In the second form, the argument is used as a label for the chorus. 
+In the second form, if config setting `settings.choruslabels` is true (default)
+the argument is used as a label for the chorus. 
+
+If `settings.choruslabels` is false, the argument is used _instead_ of
+the normal `Chorus` tag.
 
 See also: [start_of_chorus]({{< relref "Directives-env_chorus" >}}),
 	[Chorus style]({{< relref "ChordPro-Configuration-PDF#chorus-style" >}}).

@@ -59,6 +59,10 @@ These settings control global behaviour of the ChordPro program and can be chang
         "chordnames": "strict",
 		// Interpret lowcase root-only chords as note names.
 		"notenames": false,
+		// Always replace chords by their canonical form.
+		"chords-canonical" : false,
+		// If false, chorus labels are used as tags.
+		"choruslabels" : false,
     },
 
 Note that settings `decapo`, `lyrics-only`, `strict`, `transcode` and
