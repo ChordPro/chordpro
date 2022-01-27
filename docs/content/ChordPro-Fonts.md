@@ -140,9 +140,9 @@ Built-in fonts are specified with `"name"`. The ChordPro Reference
 Implementation supports the following built-in font names:
 
 * Courier, Courier-Bold, Courier-BoldOblique, Courier-Oblique
-* Georgia, Georgia-Bold, Georgia-BoldItalic, Georgia-Italic
+* Georgia, Georgia,Bold, Georgia,BoldItalic, Georgia,Italic
 * Helvetica, Helvetica-Bold, Helvetica-BoldOblique, Helvetica-Oblique
-* Verdana, Verdana-Bold, Verdana-BoldItalic, Verdana-Italic
+* Verdana, Verdana,Bold, Verdana,BoldItalic, Verdana,Italic
 * Times-Roman, Times-Bold, Times-BoldItalic, Times-Italic 
 * Symbol, Webdings, Wingdings, ZapfDingbats
 
