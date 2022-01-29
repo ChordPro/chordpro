@@ -62,7 +62,7 @@ These settings control global behaviour of the ChordPro program and can be chang
 		// Always replace chords by their canonical form.
 		"chords-canonical" : false,
 		// If false, chorus labels are used as tags.
-		"choruslabels" : false,
+		"choruslabels" : true,
     },
 
 Note that settings `decapo`, `lyrics-only`, `strict`, `transcode` and

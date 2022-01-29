@@ -960,7 +960,7 @@ sub default_config() {
       // Always replace chords by their canonical form.
       "chords-canonical" : false,
       // If false, chorus labels are used as tags.
-      "choruslabels" : false,
+      "choruslabels" : true,
     },
 
     // Metadata.
