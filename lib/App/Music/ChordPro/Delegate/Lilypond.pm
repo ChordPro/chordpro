@@ -121,7 +121,6 @@ sub ly2image {
 	warn("Error in Lilypond embedding\n");
 	return;
     }
-    $kv->{scale} ||= 1;
 
     my $have_magick = do {
         local $SIG{__WARN__} = sub {};
@@ -174,11 +173,13 @@ sub ly2image {
 	push( @res,
 	      { type => "image",
 		uri  => "id=$assetid",
-		opts => { center => $kv->{center}, scale => $kv->{scale} * 0.16 } },
+		opts => { center => $kv->{center},
+			  $kv->{scale} ? ( scale => $kv->{scale} * 0.16 ) : (),
+			} },
 	      { type => "empty" },
 	    );
 	warn("Asset $assetid options:",
-	     " scale=", $kv->{scale} * 0.16,
+	     $kv->{scale} ? ( " scale=", $kv->{scale} * 0.16 ) : (),
 	     " center=", $kv->{center}//0,
 	     "\n")
 	  if $config->{debug}->{images};
@@ -202,10 +203,12 @@ sub ly2image {
 
 	push( @res,{ type => "image",
 		     uri  => "id=$assetid",
-		     opts => { center => $kv->{center}, scale => $kv->{scale} * 0.16 } },
+		opts => { center => $kv->{center},
+			  $kv->{scale} ? ( scale => $kv->{scale} * 0.16 ) : (),
+			} },
 	    );
 	warn("Asset $assetid options:",
-	     " scale=", $kv->{scale} * 0.16,
+	     $kv->{scale} ? ( " scale=", $kv->{scale} * 0.16 ) : (),
 	     " center=", $kv->{center}//0,
 	     "\n")
 	  if $config->{debug}->{images};
