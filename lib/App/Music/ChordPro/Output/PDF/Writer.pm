@@ -110,7 +110,7 @@ sub _bgcolor {
 }
 
 sub _yflip {
-    warn("Text::Layout = $Text::Layout::VERSION\n" );
+    #warn("Text::Layout = $Text::Layout::VERSION\n" );
     $Text::Layout::VERSION gt "0.027";
 }
 
