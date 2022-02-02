@@ -7,7 +7,7 @@ use utf8;
 use App::Music::ChordPro::Testing;
 use App::Music::ChordPro::Songbook;
 
-plan tests => 10;
+plan tests => 16;
 
 # Prevent a dummy {body} for chord grids.
 $config->{diagrams}->{show} = 0;
@@ -46,13 +46,14 @@ my $song = {
 		       'time' => [ '3/4' ],
 		       'capo' => [ '2' ],
 		      },
+	    'chordsinfo' => { map { $_ => $_ } qw( F G ) },
 	    'title' => 'Swing Low Sweet Chariot',
 	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear',
 	    'system' => 'common',
 	   };
 
-is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );
+is_deeply( { %{ $s->{songs}->[0] } }, $song, "[meta meta] Song contents" );
 
 #### meta as directives.
 
@@ -75,7 +76,7 @@ ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
 #use Data::Dumper; warn(Dumper($s));
 
-is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );
+is_deeply( { %{ $s->{songs}->[0] } }, $song, "[meta as dir] Song contents" );
 
 #### combinations.
 
@@ -126,6 +127,7 @@ $song = {
 		       'tempo' => [ '320', '220' ],
 		       'time' => [ '3/4', '4/4' ],
 		      },
+	    'chordsinfo' => { map { $_ => $_ } qw( F G A C ) },
 	    'title' => 'Swing Low Sweet Chariot',
 	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear',
@@ -139,4 +141,108 @@ $song = {
 		    ],
 	   };
 
-is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );
+is_deeply( { %{ $s->{songs}->[0] } }, $song, "[combi's] Song contents" );
+
+#### autosplit (default, on).
+
+$s = App::Music::ChordPro::Songbook->new;
+
+$data = <<EOD;
+{title: Swing Low Sweet Chariot}
+{artist Another Artist}
+{composer Another Composer}
+{album Another Album}
+{key G}
+{capo: 2}
+{time 4/4}
+{tempo 220; 260}
+{c: %%}
+EOD
+
+$s->parse_file(\$data);
+ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
+isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
+#use Data::Dumper; warn(Dumper($s));
+$song = {
+	    'settings' => {},
+	    'meta' => {
+		       'songindex' => 1,
+		       'title' => [
+				   'Swing Low Sweet Chariot'
+				  ],
+		       'artist' => [ 'Another Artist' ],
+		       'composer' => [ 'Another Composer' ],
+		       'album' => [ 'Another Album' ],
+		       'capo' => [ '2' ],
+		       'key' => [ 'G' ],
+		       'tempo' => [ '220', '260' ],
+		       'time' => [ '4/4' ],
+		      },
+	    'chordsinfo' => { map { $_ => $_ } qw( G A ) },
+	    'title' => 'Swing Low Sweet Chariot',
+	    'source' => { file => "__STRING__", line => 1 },
+	    'structure' => 'linear',
+	    'system' => 'common',
+	    'body' => [
+		       { context => '',
+			 orig => '%%',
+			 text => '%%',
+			 type => 'comment',
+		       },
+		    ],
+	   };
+
+is_deeply( { %{ $s->{songs}->[0] } }, $song, "[autosplit] Song contents" );
+
+#### No autosplit
+
+$::config->{metadata}->{autosplit} = 0;
+
+$s = App::Music::ChordPro::Songbook->new;
+
+$data = <<EOD;
+{title: Swing Low Sweet Chariot}
+{artist Another Artist}
+{composer Another Composer}
+{album Another Album}
+{key G}
+{capo: 2}
+{time 4/4}
+{tempo 220; 260}
+{c: %%}
+EOD
+
+$s->parse_file(\$data);
+ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
+isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
+#use Data::Dumper; warn(Dumper($s));
+$song = {
+	    'settings' => {},
+	    'meta' => {
+		       'songindex' => 1,
+		       'title' => [
+				   'Swing Low Sweet Chariot'
+				  ],
+		       'artist' => [ 'Another Artist' ],
+		       'composer' => [ 'Another Composer' ],
+		       'album' => [ 'Another Album' ],
+		       'capo' => [ '2' ],
+		       'key' => [ 'G' ],
+		       'tempo' => [ '220; 260' ],
+		       'time' => [ '4/4' ],
+		      },
+	    'chordsinfo' => { map { $_ => $_ } qw( G A ) },
+	    'title' => 'Swing Low Sweet Chariot',
+	    'source' => { file => "__STRING__", line => 1 },
+	    'structure' => 'linear',
+	    'system' => 'common',
+	    'body' => [
+		       { context => '',
+			 orig => '%%',
+			 text => '%%',
+			 type => 'comment',
+		       },
+		    ],
+	   };
+
+is_deeply( { %{ $s->{songs}->[0] } }, $song, "[no autosplit] Song contents" );

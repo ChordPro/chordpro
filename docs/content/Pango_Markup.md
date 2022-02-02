@@ -14,8 +14,10 @@ markup is:
 
     <span foreground="blue" size="100">Blue text</span> is <i>cool</i>!
 
-The ChordPro reference implementation provides almost complete support
-for the Pango markup language.
+The ChordPro reference implementation uses the perl module
+`Text::Layout` that provides almost complete support
+for the Pango markup language. For details, see the [module
+documentation](https://metacpan.org/pod/Text::Layout) on GitHub.
 
 The most general markup tag is `<span>`. The `<span>` tag has the
 following attributes:
@@ -68,7 +70,16 @@ Note: Not (yet) supported.
 * `underline`  
 The underline style - one of `single`, `double`, `low`, or
 `none`.  
-Note: Not (yet) supported.
+
+* `underline_color`  
+The color to be used for underlines.
+
+* `overline`  
+The overline style - one of `single`, `double`, `low`, or
+`none`.  
+
+* `overline_color`  
+The color to be used for overlines.
 
 * `rise`  
 The vertical displacement from the baseline, in ten thousandths of
@@ -76,7 +87,13 @@ an em. Can be negative for subscript, positive for superscript.
 
 * `strikethrough`  
 `true` or `false` whether to strike through the text.  
-Note: Not (yet) supported.
+
+* `strikethrough_color`  
+The color to be used for strikes.
+
+* `href`  
+The URL for a hyperlink.  
+Note that this is a `Text:Layout` extension to the Pango Markup definition.
 
 * `fallback`  
 If True enable fallback to other fonts of characters are missing
@@ -104,8 +121,7 @@ Makes font relatively larger, equivalent to `<span size="larger">`.
 Make the text italic.
 
 * `s`  
-Strikethrough the text.  
-Note: Not (yet) supported.
+Strikethrough the text.
 
 * `sub`  
 Subscript the text.
@@ -120,5 +136,4 @@ Makes font relatively smaller, equivalent to `<span size="smaller">`.
 Use a monospace font.
 
 * `u`  
-Underline the text.  
-Note: Not (yet) supported.
+Underline the text.

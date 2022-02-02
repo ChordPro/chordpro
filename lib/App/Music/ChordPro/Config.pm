@@ -194,9 +194,14 @@ sub configurator {
 	    next unless $t;
 	    die("Config error in pdf.formats.$class.$_: not an array\n")
 	      unless ref($t) eq 'ARRAY';
-	    die("Config error in pdf.formats.$class.$_: ",
-		 scalar(@$t), " fields instead of 3\n")
-	      unless @$t == 3;
+	    if ( ref($t->[0]) ne 'ARRAY' ) {
+		$t = [ $t ];
+	    }
+	    for ( @$t) {
+		die("Config error in pdf.formats.$class.$_: ",
+		    scalar(@$_), " fields instead of 3\n")
+		  unless @$_ == 3;
+	    }
 	}
     }
 
@@ -227,7 +232,9 @@ sub configurator {
 	    delete( $cfg->{pdf}->{fonts}->{$ff} );
 	    next;
 	}
-	for ( qw(name file description size color background) ) {
+	$cfg->{pdf}->{fonts}->{$ff}->{color}      //= "foreground";
+	$cfg->{pdf}->{fonts}->{$ff}->{background} //= "background";
+	for ( qw(name file description size) ) {
 	    delete( $cfg->{pdf}->{fonts}->{$ff}->{$_} )
 	      unless defined( $cfg->{pdf}->{fonts}->{$ff}->{$_} );
 	}
@@ -258,7 +265,7 @@ sub configurator {
     }
 
     # For convenience...
-    bless( $cfg, __PACKAGE__ );;
+    bless( $cfg, __PACKAGE__ );
 
     return $cfg if $options->{'cfg-print'};
 
@@ -364,6 +371,7 @@ sub process_config {
     App::Music::ChordPro::Chords::Parser->reset_parsers;
     local $::config = hmerge( $::config, $cfg );
     if ( $cfg->{chords} ) {
+	App::Music::ChordPro::Chords::push_parser($cfg->{notes}->{system});
 	my $c = $cfg->{chords};
 	if ( @$c && $c->[0] eq "append" ) {
 	    shift(@$c);
@@ -380,6 +388,7 @@ sub process_config {
 		  App::Music::ChordPro::Chords::chord_stats(), "\n" );
 	}
 	$cfg->{_chords} = delete $cfg->{chords};
+	App::Music::ChordPro::Chords::pop_parser();
     }
 }
 
@@ -507,7 +516,7 @@ sub _augment {
 	warn("Config augment error: unknown item $path$key\n")
 	  unless exists $self->{$key}
 	    || $path eq "pdf.fontconfig."
-	    || $path =~ /^pdf\.fonts\./
+	    || $path =~ /^pdf\.(?:info|fonts)\./
 	    || $path =~ /^meta\./
 	    || $key =~ /^_/;
 
@@ -746,7 +755,7 @@ sub hmerge($$;$) {
 	warn("Config error: unknown item $path$key\n")
 	  unless exists $res{$key}
 	    || $path eq "pdf.fontconfig."
-	    || $path =~ /^pdf\.fonts\./
+	    || $path =~ /^pdf\.(?:info|fonts)\./
 	    || $path =~ /^meta\./
 	    || $key =~ /^_/;
 
@@ -931,6 +940,10 @@ sub default_config() {
       // May be a string containing pretext %s posttext.
       // Defaults to "[%s]" if true.
       "inline-chords" : false,
+      // Same, for annotations. Ignored unless inline-chords is set.
+      // Must be a string containing pretext %s posttext.
+      // Default is "%s".
+      "inline-annotations" : "%s",
       // Chords under the lyrics.
       "chords-under" : false,
       // Transposing.
@@ -944,6 +957,10 @@ sub default_config() {
       "chordnames": "strict",
       // Allow note names in [].
       "notenames" : false,
+      // Always replace chords by their canonical form.
+      "chords-canonical" : false,
+      // If false, chorus labels are used as tags.
+      "choruslabels" : true,
     },
 
     // Metadata.
@@ -952,6 +969,8 @@ sub default_config() {
     // If strict is zero, {meta ...} will accept any key.
     // Important: "title" and "subtitle" must always be in this list.
     // The separator is used to concatenate multiple values.
+    // If autosplit is true, the separator is also used to split
+    // values upon input.
     "metadata" : {
       "keys" : [ "title", "subtitle",
 		 "artist", "composer", "lyricist", "arranger",
@@ -960,6 +979,7 @@ sub default_config() {
 		 "key", "time", "tempo", "capo", "duration" ],
       "strict" : true,
       "separator" : "; ",
+      "autosplit" : true,
     },
     // Globally defined (added) meta data,
     // This is explicitly NOT intended for the metadata items above.
@@ -993,6 +1013,8 @@ sub default_config() {
     "tuning" : [ "E2", "A2", "D3", "G3", "B3", "E4" ],
 
     // In case of alternatives, the first one is used for output.
+    // Note that it is tempting to use real sharps and flats for output,
+    // but most fonts don't have the glyphs :(.
     "notes" : {
 
       "system" : "common",
@@ -1094,12 +1116,18 @@ sub default_config() {
 
     "delegates" : {
         "abc" : {
-            "type" : "image",
-            "handler" : "abc2image",
+            "type"     : "image",
+            "module"   : "ABC",
+            "handler"  : "abc2image",
+            "config"   : "default", // or "none", or "myformat.fmt"
+            "preamble" : [],
         },
         "ly" : {
-            "type" : "image",
-            "handler" : "ly2image",
+            "type"     : "image",
+            "module"   : "Lilypond",
+            "handler"  : "ly2image",
+            "config"   : "default", // or "none", or ...
+            "preamble" : [],
         },
      },
 
@@ -1107,7 +1135,11 @@ sub default_config() {
 
     "pdf" : {
 
-      // PDF Properties.
+      // Choose a PDF::API2 compatible library, or leave empty to
+      // have ChordPro choose one for you.
+      "library" : "",	// or "PDF::API2", or "PDF::Builder"
+
+      // PDF Properties. Arbitrary key/values may be added.
       // Note that the context for substitutions is the first song.
       "info" : {
           "title"    : "%{title}",
@@ -1120,8 +1152,15 @@ sub default_config() {
       "papersize" : "a4",
 
       "theme" : {
-          "foreground" : "black",
-          "background" : "none",
+          // Forgeround color. Usually black.
+          "foreground"        : "black",
+          // Shades of grey.
+          // medium is used for pressed keys in keyboard diagrams.
+          "foreground-medium" : "grey70",
+          // light is used as background for comments, cell bars, ...
+          "foreground-light"  : "grey90",
+          // Background color. Usually none or white.
+          "background"        : "none",
       },
 
       // Space between columns, in pt.
@@ -1235,9 +1274,19 @@ sub default_config() {
 	  "keys"     :  14,	// or 7, 10, 14, 17, 21
           "base"     :  "C",	// or "F"
 	  "linewidth" : 0.1,	// fraction of a single key width
-          "pressed"  :  "grey",	// colour of a pressed key
+          "pressed"  :  "foreground-medium",	// colour of a pressed key
 	  "hspace"   :  3.95,	// ??
 	  "vspace"   :  0.3,	// fraction of height
+      },
+
+      // Grid section lines.
+      // The width and colour of the cell bar lines can be specified.
+      // Enable by setting the width to the desired width.
+      "grids" : {
+          "cellbar" : {
+              "width" : 0,
+              "color" : "foreground-medium",
+          },
       },
 
       // Even/odd pages. A value of -1 denotes odd/even pages.
@@ -1359,14 +1408,13 @@ sub default_config() {
 	      "size" : 10
 	  },
 	  "chordfingers" : {
-	      "name" : "ZapfDingbats",
-	      "size" : 10,
+	      "file" : "ChordProSymbols.ttf",	// do not change
 	      "numbercolor" : "background",
 	  },
 	  "comment" : {
 	      "name" : "Helvetica",
 	      "size" : 12,
-	      "background" : "#E5E5E5"
+	      "background" : "foreground-light"
 	  },
 	  "comment_italic" : {
 	      "name" : "Helvetica-Oblique",
@@ -1434,11 +1482,29 @@ sub default_config() {
       // This will show the page layout if non-zero.
       "showlayout" : false,
 
-      // CSV generation.
+      // CSV generation for MobileSheetsPro. Adapt for other tools.
+      // Note that the resultant file will conform to RFC 4180.
       "csv" : {
-	  // Restrict CSV to song pages only (do not include matter pages).
-	  "songsonly" : true
-      }
+          "fields" : [
+              { "name" : "title",        "meta" : "title"      },
+              { "name" : "pages",        "meta" : "pagerange"  },
+              { "name" : "sort title",   "meta" : "sorttitle"  },
+              { "name" : "artists",      "meta" : "artist"     },
+              { "name" : "composers",    "meta" : "composer"   },
+              { "name" : "collections",  "meta" : "collection" },
+              { "name" : "keys",         "meta" : "key_actual" },
+              { "name" : "years",        "meta" : "year"       },
+              // Add "omit" : true to omit a field.
+              // To add fields with fixed values, use "value":
+              { "name" : "my_field", "value" : "text", "omit" : true },
+          ],
+          // Field separator.
+          "separator" : ";",
+          // Values separator.
+          "vseparator" : "|",
+          // Restrict CSV to song pages only (do not include matter pages).
+          "songsonly" : true,
+      },
     },
 
     // Settings for ChordPro backend.
@@ -1464,6 +1530,23 @@ sub default_config() {
 	"styles" : {
 	    "display" : "chordpro.css",
 	    "print"   : "chordpro_print.css",
+	},
+    },
+
+    // Settings for Text backend.
+    "text" : {
+	// Style of chorus.
+	"chorus" : {
+	    // Recall style: Print the tag using the type.
+	    // Alternatively quote the lines of the preceding chorus.
+	    // If no tag+type or quote: use {chorus}.
+	    // Note: Variant 'msp' always uses {chorus}.
+	    "recall" : {
+		 // "tag"   : "Chorus", "type"  : "comment",
+		 "tag"   : "", "type"  : "",
+		 // "quote" : false,
+		 "quote" : false,
+	    },
 	},
     },
 
@@ -1495,6 +1578,7 @@ sub default_config() {
 
     // For (debugging (internal use only)).
     "debug" : {
+        "chords" : 0,
         "config" : 0,
         "fonts" : 0,
         "images" : 0,
@@ -1503,6 +1587,8 @@ sub default_config() {
         "mma" : 0,
         "spacing" : 0,
         "song" : 0,
+        "songfull" : 0,
+        "csv" : 0,
   	"abc" : 0,
   	"ly" : 0,
     },
@@ -1510,6 +1596,20 @@ sub default_config() {
 }
 // End of config.
 End_Of_Config
+}
+
+# For convenience.
+
+sub diagram_strings {
+    my $self = shift;
+    # tuning is usually removed from the config.
+    # scalar( @{ $self->{tuning} } );
+    App::Music::ChordPro::Chords::strings();
+}
+
+sub diagram_keys {
+    my $self = shift;
+    $self->{kbdiagrams}->{keys};
 }
 
 # For debugging messages.

@@ -72,11 +72,13 @@ Root notes are defined in the configuration files:
 `"sharp"` and `"flat"` are two lists of note names, the first list has
 diatonic notes and raised notes, the second has diatonic notes and
 lowered notes. Where there are multiple alternative forms for a note
-they are in a sublist. Note that the first of a sublist of
-alternatives is the preferred way to show a note in diagrams and other
-places. The choice for the non-unicode variant is deliberate since
-many fonts do not yet have the appropriate symbols to show `♯` and
-`♭`.
+they are in a sublist.
+
+ChordPro will attempt to reproduce the chord name the way it was
+input, but in case of transposition or transcoding it uses the first
+of the sublist of alternatives, if any. Note that the choice for the
+non-unicode variant is deliberate since many fonts do not yet have the
+appropriate symbols to show `♯` and `♭`.
 
 By default ChordPro uses the Common (a.k.a. Dutch) note naming system
 according to the definition shown above. Some other note naming

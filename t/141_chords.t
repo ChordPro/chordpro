@@ -71,18 +71,7 @@ my $song = {
 			'origin' => 'chord',
 			'type' => 'diagrams',
 			'show' => 'user',
-			'chords' => [
-			 {
-			  'name' => 'Fus',
-			  'base' => '2',
-			  'frets' => [ -1, '0', '3', '2', '1', '0' ],
-			 },
-			 {
-			  'name' => 'Fos',
-			  'base' => '2',
-			  'frets' => [ -1, '0', '3', '2', '1', '0' ],
-			 },
-				     ],
+			'chords' => [ ' ch001', ' ch002' ],
 		       },
 		       {
 			'type' => 'empty',
@@ -95,7 +84,8 @@ my $song = {
 				      'Hi there.'
 				     ]
 		       }
-		      ]
+		      ],
+	      'chordsinfo' => { ' ch001' => 'Fus', ' ch002' => 'Fos', },
 	   };
 
 is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );
@@ -143,7 +133,7 @@ $song = {
 			  'base' => '1',
 			  'frets' => [ -1, '0', '3', '2', '1', '0' ],
 			 }
-			]
+			],
 	   };
 
 is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );

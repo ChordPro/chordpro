@@ -1,0 +1,8 @@
+{title: https://groups.io/g/ChordPro/message/1092}
+{define: Bb6             base-fret  1    frets   X   X   3   3   3   3   }
+{define: Bb7             base-fret  3    frets   X   X   1   1   1   2   }
+{define: Bb              base-fret  1    frets   X   1   3   3   3   1   }
+
+[Bb6] comes out as Bb6
+[Bb7] comes out as A#7
+[Bb] comes out as  A#

@@ -30,7 +30,7 @@ WriteMakefile
  PREREQ_PM      => {
 		    'App::Packager'		  => 1.430,
 		    'PDF::API2'			  => 2.036,
-		    'Text::Layout'		  => 0.021,
+		    'Text::Layout'		  => 0.022,
 		    'JSON::PP'			  => 2.27203,
 		    'String::Interpolate::Named'  => 1.01,
 		    'File::LoadLines'		  => 1.02,

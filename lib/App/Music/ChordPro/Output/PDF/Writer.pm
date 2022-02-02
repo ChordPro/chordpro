@@ -1,5 +1,9 @@
 #! perl
 
+package main;
+
+our $config;
+
 package App::Music::ChordPro::Output::PDF::Writer;
 
 use strict;
@@ -30,7 +34,10 @@ sub new {
     $self->{pdf}->mediabox( $ps->{papersize}->[0],
 			    $ps->{papersize}->[1] );
     $self->{layout} = Text::Layout->new( $self->{pdf} );
-    %fontcache = () if $::__EMBEDDED__;
+    $self->{tmplayout} = undef;
+
+    %fontcache = ();
+
     $self;
 }
 
@@ -39,12 +46,18 @@ sub info {
     unless ( $info{CreationDate} ) {
 	my @tm = gmtime( $regtest ? $faketime : time );
 	$info{CreationDate} =
-	  sprintf("D:%04d%02d%02d%02d%02d%02d+00'00'",
+	  sprintf("D:%04d%02d%02d%02d%02d%02d+01'00",
 		  1900+$tm[5], 1+$tm[4], @tm[3,2,1,0]);
     }
-    $self->{pdf}->info( %info );
+    if ( $self->{pdf}->can("info_metadata") ) {
+	for ( keys(%info) ) {
+	    $self->{pdf}->info_metadata( $_, $info{$_} );
+	}
+    }
+    else {
+	$self->{pdf}->info(%info);
+    }
 }
-
 
 sub wrap {
     my ( $self, $text, $m ) = @_;
@@ -70,8 +83,8 @@ sub wrap {
 
 sub _fgcolor {
     my ( $self, $col ) = @_;
-    if ( !defined($col) || $col eq "foreground" ) {
-	$col = $self->{ps}->{theme}->{foreground};
+    if ( !defined($col) || $col =~ /^foreground(?:-medium|-light)?$/ ) {
+	$col = $self->{ps}->{theme}->{$col//"foreground"};
     }
     elsif ( $col eq "background" ) {
 	$col = $self->{ps}->{theme}->{background};
@@ -87,14 +100,21 @@ sub _bgcolor {
     if ( !defined($col) || $col eq "background" ) {
 	$col = $self->{ps}->{theme}->{background};
     }
-    elsif ( $col eq "foreground" ) {
-	$col = $self->{ps}->{theme}->{foreground};
+    elsif ( $col =~ /^foreground(?:-medium|-light)?$/ ) {
+	$col = $self->{ps}->{theme}->{$col};
     }
     elsif ( !$col ) {
 	Carp::confess("Undefined bgcolor: $col");
     }
     $col;
 }
+
+sub _yflip {
+    #warn("Text::Layout = $Text::Layout::VERSION\n" );
+    $Text::Layout::VERSION gt "0.027";
+}
+
+my $yflip;
 
 sub text {
     my ( $self, $text, $x, $y, $font, $size, $nomarkup ) = @_;
@@ -116,62 +136,31 @@ sub text {
     $y -= $self->{layout}->get_baseline;
     $self->{layout}->show( $x, $y, $self->{pdftext} );
 
-    my $e = ($self->{layout}->get_pixel_extents)[1];
+    my $e = $self->{layout}->get_pixel_extents;
+    if ( ref($e) eq 'ARRAY' ) { # Text::Layout <= 0.026
+	$e = $e->[1];
+    }
+    elsif ( $yflip //= _yflip() ) {
+	$e->{y} += $e->{height};
+    }
 
     # Handle decorations (background, box).
-    my $bgcol = $font->{background};
+    my $bgcol = $self->_bgcolor($font->{background});
     undef $bgcol if $bgcol && $bgcol =~ /^no(?:ne)?$/i;
     my $debug = $ENV{CHORDPRO_DEBUG_TEXT} ? "magenta" : undef;
     my $frame = $font->{frame} || $debug;
     undef $frame if $frame && $frame =~ /^no(?:ne)?$/i;
     if ( $bgcol || $frame ) {
-	#printf("BB: %.2f %.2f %.2f %.2f\n", @{$e}{qw( x y width height ) } );
+	printf("BB: %.2f %.2f %.2f %.2f\n", @{$e}{qw( x y width height ) } )
+	  if $debug;
 	# Draw background and.or frame.
 	my $d = $debug ? 0 : 1;
 	$frame = $debug || $font->{color} || $self->{ps}->{theme}->{foreground} if $frame;
+	# $self->crosshair( $x, $y, 20, 0.2, "magenta" );
 	$self->rectxy( $x + $e->{x} - $d,
 		       $y + $e->{y} + $d,
 		       $x + $e->{x} + $e->{width} + $d,
-		       $y - $e->{height} - $d,
-		       0.5, $bgcol, $frame);
-    }
-
-    $x += $e->{width};
-#    print STDERR ("TX: $x\n");
-    return $x;
-}
-
-# Identical copy of text, but without baseline correction.
-sub text_nobl {
-    my ( $self, $text, $x, $y, $font, $size ) = @_;
-#    print STDERR ("T: @_\n");
-    $font ||= $self->{font};
-    $size ||= $font->{size};
-
-    $self->{layout}->set_font_description($font->{fd});
-    $self->{layout}->set_font_size($size);
-    # We don't have set_color in the API.
-    $self->{layout}->{_currentcolor} = $self->_fgcolor($font->{color});
-    $self->{layout}->set_markup($text);
-    $self->{layout}->show( $x, $y, $self->{pdftext} );
-
-    my $e = ($self->{layout}->get_pixel_extents)[1];
-
-    # Handle decorations (background, box).
-    my $bgcol = $font->{background};
-    undef $bgcol if $bgcol && $bgcol =~ /^no(?:ne)?$/i;
-    my $debug = "blue";
-    my $frame = $font->{frame} || $debug;
-    undef $frame if $frame && $frame =~ /^no(?:ne)?$/i;
-    if ( $bgcol || $frame ) {
-	#printf("BB: %.2f %.2f %.2f %.2f\n", @{$e}{qw( x y width height ) } );
-	# Draw background and.or frame.
-	my $d = $debug ? 0 : 1;
-	$frame = $debug || $font->{color} || $self->{ps}->{theme}->{foreground} if $frame;
-	$self->rectxy( $x + $e->{x} - $d,
-		       $y + $e->{y} + $d,
-		       $x + $e->{x} + $e->{width} + $d,
-		       $y - $e->{height} - $d,
+		       $y + $e->{y} - $e->{height} - $d,
 		       0.5, $bgcol, $frame);
     }
 
@@ -189,28 +178,26 @@ sub setfont {
     $self->{pdftext}->font( $font->{fd}->{font}, $size );
 }
 
-my $tmplayout;
-
 sub strwidth {
     my ( $self, $text, $font, $size ) = @_;
     $font ||= $self->{font};
     $size ||= $self->{fontsize} || $font->{size};
-    $tmplayout //= Text::Layout->new( $self->{pdf} );
-    $tmplayout->set_font_description($font->{fd});
-    $tmplayout->set_font_size($size);
-    $tmplayout->set_markup($text);
-    $tmplayout->get_pixel_size->{width};
+    $self->{tmplayout} //= Text::Layout->new( $self->{pdf} );
+    $self->{tmplayout}->set_font_description($font->{fd});
+    $self->{tmplayout}->set_font_size($size);
+    $self->{tmplayout}->set_markup($text);
+    $self->{tmplayout}->get_pixel_size->{width};
 }
 
 sub strheight {
     my ( $self, $text, $font, $size ) = @_;
     $font ||= $self->{font};
     $size ||= $self->{fontsize} || $font->{size};
-    $tmplayout //= Text::Layout->new( $self->{pdf} );
-    $tmplayout->set_font_description($font->{fd});
-    $tmplayout->set_font_size($size);
-    $tmplayout->set_markup($text);
-    $tmplayout->get_pixel_size->{height};
+    $self->{tmplayout} //= Text::Layout->new( $self->{pdf} );
+    $self->{tmplayout}->set_font_description($font->{fd});
+    $self->{tmplayout}->set_font_size($size);
+    $self->{tmplayout}->set_markup($text);
+    $self->{tmplayout}->get_pixel_size->{height};
 }
 
 sub line {
@@ -227,11 +214,12 @@ sub line {
 }
 
 sub hline {
-    my ( $self, $x, $y, $w, $lw, $color ) = @_;
+    my ( $self, $x, $y, $w, $lw, $color, $cap ) = @_;
+    $cap //= 2;
     my $gfx = $self->{pdfgfx};
     $gfx->save;
     $gfx->strokecolor( $self->_fgcolor($color) );
-    $gfx->linecap(2);
+    $gfx->linecap($cap);
     $gfx->linewidth($lw||1);
     $gfx->move( $x, $y );
     $gfx->hline( $x + $w );
@@ -240,11 +228,12 @@ sub hline {
 }
 
 sub vline {
-    my ( $self, $x, $y, $h, $lw, $color ) = @_;
+    my ( $self, $x, $y, $h, $lw, $color, $cap ) = @_;
+    $cap //= 2;
     my $gfx = $self->{pdfgfx};
     $gfx->save;
     $gfx->strokecolor( $self->_fgcolor($color) );
-    $gfx->linecap(2);
+    $gfx->linecap($cap);
     $gfx->linewidth($lw||1);
     $gfx->move( $x, $y );
     $gfx->vline( $y - $h );
@@ -313,22 +302,42 @@ sub cross {
     $gfx->restore;
 }
 
+sub crosshair {			# for debugging
+    my ( $self, $x, $y, $r, $lw, $strokecolor ) = @_;
+    my $gfx = $self->{pdfgfx};
+    $gfx->save;
+    $gfx->strokecolor($self->_fgcolor($strokecolor)) if $strokecolor;
+    $gfx->linewidth($lw||1);
+    $gfx->move( $x, $y - $r );
+    $gfx->line( $x, $y + $r );
+    $gfx->stroke if $strokecolor;
+    $gfx->move( $x - $r, $y );
+    $gfx->line( $x + $r, $y );
+    $gfx->stroke if $strokecolor;
+    $gfx->restore;
+}
+
 sub get_image {
-    my ( $self, $uri ) = @_;
+    my ( $self, $elt ) = @_;
 
     my $img;
+    my $uri = $elt->{uri};
+    warn("get_image($uri)\n") if $config->{debug}->{images};
     if ( $uri =~ /^id=(.+)/ ) {
 	my $a = $App::Music::ChordPro::Output::PDF::assets->{$1};
-	my $d = $a->{data};
-	my $fh = IO::String->new($d);
-	if ( $a->{type} eq "jpg" ) {
-	    $img = $self->{pdf}->image_jpeg($fh);
+
+	if ( $a->{type} eq "abc" ) {
+	    my $res = App::Music::ChordPro::Output::PDF::abc2image( undef, $self, $a );
+	    return $self->get_image( { %$elt, uri => $res->{src} } );
+	}
+	elsif ( $a->{type} eq "jpg" ) {
+	    $img = $self->{pdf}->image_jpeg(IO::String->new($a->{data}));
 	}
 	elsif ( $a->{type} eq "png" ) {
-	    $img = $self->{pdf}->image_png($fh);
+	    $img = $self->{pdf}->image_png(IO::String->new($a->{data}));
 	}
 	elsif ( $a->{type} eq "gif" ) {
-	    $img = $self->{pdf}->image_gif($fh);
+	    $img = $self->{pdf}->image_gif(IO::String->new($a->{data}));
 	}
 	return $img;
     }
@@ -376,12 +385,34 @@ sub newpage {
     }
 }
 
+sub openpage {
+    my ( $self, $ps, $page ) = @_;
+    $self->{pdfpage} = $self->{pdf}->openpage($page);
+    $self->{pdfgfx}  = $self->{pdfpage}->gfx;
+    $self->{pdftext} = $self->{pdfpage}->text;
+}
+
 sub pagelabel {
     my ( $self, $page, $style, $prefix ) = @_;
-    my $opts = { -style => $style // 'arabic',
-		 defined $prefix ? ( -prefix => $prefix ) : (),
-		 -start => 1 };
-    $self->{pdf}->pageLabel( $page, $opts );
+    $style //= 'arabic';
+
+    # PDF::API2 2.042 has some incompatible changes...
+    my $c = $self->{pdf}->can("page_labels");
+    if ( $c ) {			# 2.042+
+	my $opts = { style => $style eq 'Roman' ? 'R' :
+		              $style eq 'roman' ? 'r' :
+                              $style eq 'Alpha' ? 'A' :
+                              $style eq 'alpha' ? 'a' : 'D',
+		     defined $prefix ? ( prefix => $prefix ) : (),
+		     start => 1 };
+	$c->( $self->{pdf}, $page, $opts );
+    }
+    else {
+	my $opts = { -style => $style,
+		     defined $prefix ? ( -prefix => $prefix ) : (),
+		     -start => 1 };
+	$self->{pdf}->pageLabel( $page, $opts );
+    }
 }
 
 sub make_outlines {
@@ -447,7 +478,12 @@ sub make_outlines {
 		}
 		# Display info.
 		$ol->title( demarkup( fmt_subst( $song, $ctl->{line} ) ) );
-		$ol->dest($pdf->openpage( $song->{meta}->{tocpage} + $start ));
+		if ( my $c = $ol->can("destination") ) {
+		    $c->( $ol, $pdf->openpage( $song->{meta}->{tocpage} + $start ) );
+		}
+		else {
+		    $ol->dest($pdf->openpage( $song->{meta}->{tocpage} + $start ));
+		}
 	    }
 	}
     }
@@ -555,7 +591,7 @@ sub init_filefont {
 
     my $fc = Text::Layout::FontConfig->new;
     eval {
-	my $t = $fc->from_filename($font->{file});
+	my $t = $fc->from_filename(expand_tilde($font->{file}));
 	$t->get_font($self->{layout}); # force load
 	$t->{font}->{Name}->{val} =~ s/~.*/~$faketime/ if $regtest;
 	$t->{_ff} = $ff;
@@ -569,7 +605,8 @@ sub init_corefont {
 
     my $ps = $self->{ps};
     my $font = $ps->{fonts}->{$ff};
-
+    die("Config error: \"$font->{name}\" is not a built-in font\n")
+      unless App::Music::ChordPro::Output::PDF::is_corefont($font->{name});
     my $fc = Text::Layout::FontConfig->new;
     eval {
 	$font->{fd} = $fc->from_filename($font->{name});

@@ -62,15 +62,43 @@ sub init {
 
     $prefctl ||=
       {
-       cfgpreset   => lc(_T("Default")),
-       xcode	   => "",
-       notation	   => "",
+       # Skip default (system, user, song) configs.
        skipstdcfg  => 1,
-       configfile  => "",
-       pdfviewer   => "",
+
+       # Presets.
+       enable_presets => 1,
+       cfgpreset      => lc(_T("Default")),
+
+       # Custom config file.
+       enable_configfile => 0,
+       configfile        => "",
+
+       # Custom library.
+       enable_customlib => 0,
+       customlib        => $ENV{CHORDPRO_LIB} // "",
+
+       # New song template.
+       enable_tmplfile => 0,
+       tmplfile        => "",
+
+       # Editor.
        editfont	   => 0,
        editsize	   => FONTSIZE,
-       tmplfile    => "",
+
+       # Notation.
+       notation	   => "",
+
+       # Transpose.
+       xpose_from => 0,
+       xpose_to   => 0,
+       xpose_acc  => 0,
+
+       # Transcode.
+       xcode	   => "",
+
+       # PDF Viewer.
+       pdfviewer   => "",
+
       };
 
     if ( $^O =~ /^mswin/i ) {
@@ -78,7 +106,11 @@ sub init {
     }
     else {
 	my $cb;
-	if ( -d "$ENV{HOME}/.config" ) {
+	if ( $ENV{XDG_CONFIG_HOME} && -d $ENV{XDG_CONFIG_HOME} ) {
+	    $cb =
+	      $ENV{XDG_CONFIG_HOME} . "/wxchordpro/wxchordpro";
+	}
+	elsif ( -d "$ENV{HOME}/.config" ) {
 	    $cb = "$ENV{HOME}/.config/wxchordpro/wxchordpro";
 	    mkdir("$ENV{HOME}/.config/wxchordpro");
 	}
@@ -101,6 +133,7 @@ sub init {
     $self->{_verbose} = $options->{verbose};
     $self->{_trace}   = $options->{trace};
     $self->{_debug}   = $options->{debug};
+    $self->{_log}     = $options->{log};
 
     $self->GetPreferences;
     my $font = $fonts[$self->{prefs_editfont}]->{font};
@@ -152,7 +185,6 @@ sub stylelist {
 	    push( @$stylelist, $base );
 	}
     }
-    push( @$stylelist, "custom" );
     return $stylelist;
 }
 
@@ -160,7 +192,7 @@ sub stylelist {
 my $notationlist;
 sub notationlist {
     return $notationlist if $notationlist && @$notationlist;
-    my $cfglib = getresource("notes");
+    my $cfglib = getresource("config/notes");
     $notationlist = [ undef ];
     if ( -d $cfglib ) {
 	opendir( my $dh, $cfglib );
@@ -299,34 +331,40 @@ sub preview {
     #### ChordPro
 
     @ARGV = ();			# just to make sure
-    $::__EMBEDDED__ = 1;
 
     $msgs = $fatal = $died = 0;
-    $SIG{__WARN__} = \&_warn;
+    $SIG{__WARN__} = \&_warn unless $self->{_log};
 #    $SIG{__DIE__}  = \&_die;
 
     my $haveconfig;
-    push( @ARGV, '--nosysconfig', '--nouserconfig', '--nolegacyconfig' )
-      if $self->{prefs_skipstdcfg};
-    if ( $self->{prefs_cfgpreset} ) {
+    if ( $self->{prefs_skipstdcfg} ) {
+	push( @ARGV, '--nodefaultconfigs' );
+    }
+    elsif ( $self->{prefs_cfgpreset} ) {
 	$haveconfig++;
 	foreach ( @{ $self->{prefs_cfgpreset} } ) {
-	    if ( $_ eq "custom" ) {
-		push( @ARGV, '--config', $self->{prefs_configfile} );
-	    }
-	    else {
-		push( @ARGV, '--config', $_ );
-	    }
+	    push( @ARGV, '--config', $_ );
 	}
     }
+    if ( $self->{prefs_enable_configfile} ) {
+	$haveconfig++;
+	push( @ARGV, '--config', $self->{prefs_configfile} );
+
+    }
+    if ( $self->{prefs_enablecustomlib} ) {
+	$ENV{CHORDPRO_LIB} = $self->{prefs_customlib};
+    }
+
     if ( $self->{prefs_xcode} ) {
 	$haveconfig++;
 	push( @ARGV, '--transcode', $self->{prefs_xcode} );
     }
+
     if ( $self->{prefs_notation} ) {
 	$haveconfig++;
 	push( @ARGV, '--config', 'notes:' . $self->{prefs_notation} );
     }
+
     push( @ARGV, '--noconfig' ) unless $haveconfig;
 
     push( @ARGV, '--output', $preview_pdf );
@@ -669,7 +707,7 @@ sub _aboutmsg {
 	"https://www.chordpro.org\n",
 	"Copyright $year Johan Vromans <jvromans\@squirrel.nl>\n",
 	"\n",
-	"GUI wrapper designed with wxGlade\n\n",
+	"GUI designed with wxGlade\n\n",
 	"Run-time information:\n",
 	::runtimeinfo() );
 

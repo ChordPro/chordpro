@@ -1,0 +1,18 @@
+{title: t1}
+{artist: Foo}
+{artist: Bar}
+{key: D}
+{define: D               base-fret  1    frets   X   X   0   2   3   2   }
+{define: E               base-fret  1    frets   0   2   2   1   0   0   }
+{define: NC              base-fret  1    frets   X   X   X   X   X   X   }
+
+{comment: Key: D}
+[D]Hello[*Bis]
+{chord:  B               base-fret  1    frets   1   2   3   4   5   6   }
+Air [(E)]Hello[E]
+{chord:  B}
+S[NC]ure
+
+#{start_of_grid 1+4x4+2}
+#A | D . . . | E . . . | (D) . . . | E . . . |
+#{end_of_grid}

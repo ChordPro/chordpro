@@ -9,11 +9,19 @@ use parent qw(Exporter);
 
 our @EXPORT;
 
+################ Platforms ################
+
+use constant MSWIN => $^O =~ /MSWin|Windows_NT/i ? 1 : 0;
+
+sub is_msw   { MSWIN }
+sub is_macos { $^O =~ /darwin/ }
+
+push( @EXPORT, 'is_msw', 'is_macos' );
+
 ################ Filenames ################
 
 use File::Glob ( $] >= 5.016 ? ":bsd_glob" : ":glob" );
 use File::Spec;
-use constant MSWIN => $^O =~ /MSWin|Windows_NT/i ? 1 : 0;
 
 # Derived from Path::ExpandTilde.
 
@@ -57,11 +65,6 @@ sub expand_tilde {
 
 push( @EXPORT, 'expand_tilde' );
 
-sub is_msw   { MSWIN }
-sub is_macos { $^O =~ /darwin/ }
-
-push( @EXPORT, 'is_msw', 'is_macos' );
-
 sub findexe {
     my ( $prog ) = @_;
     my @path;
@@ -97,5 +100,33 @@ sub sys {
 }
 
 push( @EXPORT, 'sys' );
+
+################ Utilities ################
+
+# Split (pseudo) command line into key/value pairs.
+
+sub parse_kv {
+    my ( @lines ) = @_;
+
+    use Text::ParseWords qw(shellwords);
+    my @words = shellwords(@lines);
+
+    my $res = {};
+    foreach ( @words ) {
+	if ( /^(.*?)=(.+)/ ) {
+	    $res->{$1} = $2;
+	}
+	elsif ( /^no[-_]?(.+)/ ) {
+	    $res->{$1} = 0;
+	}
+	else {
+	    $res->{$_}++;
+	}
+    }
+
+    return $res;
+}
+
+push( @EXPORT, 'parse_kv' );
 
 1;

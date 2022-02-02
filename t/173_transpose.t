@@ -67,10 +67,10 @@ my $song = {
       type => 'songline',
     },
     {
-     context => 'chorus',
-     type => 'set',
-     value => '',
-     name => 'context'
+      context => 'chorus',
+      type => 'set',
+      value => '',
+      name => 'context'
     },
     {
       context => '',
@@ -111,14 +111,13 @@ my $song = {
           type => 'songline',
         },
 	{
-	 context => 'chorus',
-	 type => 'set',
-	 value => '',
-	 name => 'context'
+	  context => 'chorus',
+	  type => 'set',
+	  value => '',
+	  name => 'context'
 	},
       ],
       context => '',
-      transpose => 0,
       type => 'rechorus',
     },
     {
@@ -128,9 +127,9 @@ my $song = {
     {
       chords => [
         '',
-        'Gb',
+        'F#',
         'B',
-        'Gb',
+        'F#',
       ],
       context => '',
       phrases => [
@@ -146,9 +145,9 @@ my $song = {
         {
           chords => [
             '',
-            'Gb',
+            'F#',
             'B',
-            'Gb',
+            'F#',
           ],
           context => 'chorus',
           phrases => [
@@ -160,14 +159,13 @@ my $song = {
           type => 'songline',
         },
 	{
-	 context => 'chorus',
-	 type => 'set',
-	 value => '',
-	 name => 'context'
+	  context => 'chorus',
+	  type => 'set',
+	  value => '',
+	  name => 'context'
 	},
       ],
       context => '',
-      transpose => 2,
       type => 'rechorus',
     },
     {
@@ -177,9 +175,9 @@ my $song = {
     {
       chords => [
         '',
-        'Ab',
-        'Db',
-        'Ab',
+        'G#',
+        'C#',
+        'G#',
       ],
       context => '',
       phrases => [
@@ -195,9 +193,9 @@ my $song = {
         {
           chords => [
             '',
-            'Ab',
-            'Db',
-            'Ab',
+            'G#',
+            'C#',
+            'G#',
           ],
           context => 'chorus',
           phrases => [
@@ -209,14 +207,13 @@ my $song = {
           type => 'songline',
         },
 	{
-	 context => 'chorus',
-	 type => 'set',
-	 value => '',
-	 name => 'context'
+	  context => 'chorus',
+	  type => 'set',
+	  value => '',
+	  name => 'context'
 	},
       ],
       context => '',
-      transpose => 4,
       type => 'rechorus',
     },
     {
@@ -226,9 +223,9 @@ my $song = {
     {
       chords => [
         '',
-        'Gb',
+        'F#',
         'B',
-        'Gb',
+        'F#',
       ],
       context => '',
       phrases => [
@@ -244,9 +241,9 @@ my $song = {
         {
           chords => [
             '',
-            'Gb',
+            'F#',
             'B',
-            'Gb',
+            'F#',
           ],
           context => 'chorus',
           phrases => [
@@ -258,14 +255,13 @@ my $song = {
           type => 'songline',
         },
 	{
-	 context => 'chorus',
-	 type => 'set',
-	 value => '',
-	 name => 'context'
+	  context => 'chorus',
+	  type => 'set',
+	  value => '',
+	  name => 'context'
 	},
       ],
       context => '',
-      transpose => 2,
       type => 'rechorus',
     },
     {
@@ -307,33 +303,27 @@ my $song = {
           type => 'songline',
         },
 	{
-	 context => 'chorus',
-	 type => 'set',
-	 value => '',
-	 name => 'context'
+	  context => 'chorus',
+	  type => 'set',
+	  value => '',
+	  name => 'context'
 	},
       ],
       context => '',
-      transpose => 0,
       type => 'rechorus',
     },
   ],
   chords => {
+    chords => [ 'E', 'A', 'F#', 'B', 'G#', 'C#' ],
     origin => 'song',
-      type => 'diagrams',
-      show => 'all',
-      chords => [ 'E', 'A', 'Gb', 'B', 'Ab', 'Db' ]
+    show => 'all',
+    type => 'diagrams'
   },
+  chordsinfo => { map { $_ => $_ } qw( E A B ), 'F#', 'C#', 'G#' },
   meta => {
     songindex => 1,
     key => [
       'E',
-    ],
-    key_actual => [
-      'E',
-    ],
-    key_from => [
-      'F#',
     ],
     title => [
       'Transpositions',
@@ -342,7 +332,7 @@ my $song = {
   settings => {},
   source => { file => "__STRING__", line => 1 },
   structure => 'linear',
-	    'system' => 'common',
+  system => 'common',
   title => 'Transpositions',
 };
 

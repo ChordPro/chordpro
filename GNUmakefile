@@ -36,6 +36,7 @@ PERL := perl
 PROJECT := ChordPro
 TMP_DST := ${HOME}/tmp/${PROJECT}
 RSYNC_ARGS := -rptgoDvHL
+W10DIR := /Users/Johan/${PROJECT}
 
 to_tmp : resources
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST    ./ ${TMP_DST}/
@@ -43,6 +44,9 @@ to_tmp : resources
 
 to_tmp_cpan :
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.CPAN ./ ${TMP_DST}/
+
+to_c :
+	${MAKE} to_tmp to_tmp_cpan TMP_DST=/mnt/c${W10DIR}
 
 release :
 	${PERL} Makefile.PL
@@ -89,3 +93,18 @@ checkjson :
 	${JSONVALIDATOR} ${JSONOPTS} \
 	  ${CFGLIB}/config.schema .json/*.json
 	rm -fr .json
+
+# Experimental
+
+VM := Win10Pro
+WW := w10
+
+wkit :
+	-VBoxManage startvm ${VM} --type headless
+	test -d /mnt/c/Users || mount /mnt/c
+	${MAKE} to_c
+	ssh ${WW} gmake -C Chordpro/pp/windows
+	scp ${WW}:Chordpro/pp/windows/ChordPro-Installer\*.exe ${HOME}/tmp/
+	VBoxManage controlvm ${VM} poweroff
+	VBoxManage snapshot ${VM} restorecurrent
+

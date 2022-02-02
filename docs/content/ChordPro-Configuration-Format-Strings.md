@@ -18,7 +18,10 @@ It is possible to test for specific values using the `=` (equality) operator:
 
 `%{`*name*`=`*value*`|`*true-text*`|`*false-text*`}`
 
-For even more power, _true-text_ and _false-text_ may contain other metadata subtitutions. The special `%{}` can be used to substitute the value of the controling item.
+For even more power, _true-text_ and _false-text_ may contain other
+metadata subtitutions. The special `%{}` can be used to substitute the
+value of the controling item. See. however, [nested substitutions]({{<
+relref "#nested-substitutions" >}}) below.
 
 For example, if metadata item `album` has the value "Yes", `%{album|Album: %{}}` expands to "Album: Yes". If `album` did not have a value, the expansion would be empty.
 
@@ -33,6 +36,27 @@ Metadata values passed on the command line [(`--meta`)]({{< relref "Using-ChordP
 
 If necessary, the special meaning of the characters `\`, `{`, `}`, and `|` can be escaped by preceding it a `\`. Note that in the configuration files the strings are JSON strings and each `\` must be doubled: `"\\{"` is an escaped `{`. `"\\\\"` is an escaped backslash.
 
+## Nested substitutions
+
+Care must be taken if substituted values contain special characters.
+For example:
+
+    {year: 1939|1967}
+
+When used in a substitution `%{year}` this will yield, as expected,
+`1939|1967`.
+
+However, when used in `%{anything|%{year}}` first `%{year}` is
+expanded, resulting in `%{anything|1939|1967}}`.
+This accidentaly introduces an 'else' part.
+Then `anything` is examined.
+It is empty so it expands to the 'else' part... `1967`.
+
+This can be considered a bug or a feature, depending on how you look at it.
+
+A better way to supply multiple values is by using multiple directives
+as shown above.
+
 ## Standard meta data
 
 The ChordPro reference implementation provides additional meta data:
@@ -41,8 +65,13 @@ The ChordPro reference implementation provides additional meta data:
  
  * `page`: The starting page number of the song.
 
- * `pages`: The number of pages of the song.
- 
+ * `pages`: The number of pages of the current song.
+
+ * `pagerange`: The pages of the song, either a single page number or
+   a range like `3-7`.  
+   _`pagerange` is only available for CSV generation, see
+	[Configuration for CSV output]({{< relref "chordpro-configuration-csv" >}})._
+
  * `today`: The current date in the format defined in the config file.
    See [Dates and Times]({{< relref
    "ChordPro-Configuration-Generic#dates-and-times" >}}).

@@ -10,5 +10,7 @@ use App::Music::ChordPro::Output::Debug;
 use App::Music::ChordPro::Output::ChordPro;
 use App::Music::ChordPro::Output::Text;
 use App::Music::ChordPro::Output::HTML;
+use App::Music::ChordPro::Delegate::ABC;
+use App::Music::ChordPro::Delegate::Lilypond;
 
 1;

@@ -86,7 +86,8 @@ $song = {
 			'uri' => 'red.jpg',
 			'context' => ''
 		       }
-		      ]
+		      ],
+	      'chordsinfo' => {},
 	   };
 
 is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );

@@ -2,6 +2,10 @@
 
 use strict;
 
+package main;
+
+our $config;
+
 package App::Music::ChordPro::Output::PDF::StringDiagrams;
 
 use App::Music::ChordPro::Chords;
@@ -43,7 +47,7 @@ sub vsp {
 # The horizontal space the diagram requires.
 sub hsp0 {
     my ( $self, $elt, $ps ) = @_;
-    (App::Music::ChordPro::Chords::strings() - 1) * $ps->{diagrams}->{width};
+    ($config->diagram_strings - 1) * $ps->{diagrams}->{width};
 }
 
 # The advance width.
@@ -58,7 +62,7 @@ sub hsp {
     $self->hsp0( $elt, $ps ) + $self->hsp1( $elt, $ps );
 }
 
-my @Roman = qw( I II III IV V VI VI VII VIII IX X XI XII );
+# my @Roman = qw( I II III IV V VI VI VII VIII IX X XI XII );
 
 sub font_bl {
     goto &App::Music::ChordPro::Output::PDF::font_bl;
@@ -77,13 +81,13 @@ sub draw {
     my $lw  = ($ps->{diagrams}->{linewidth} || 0.10) * $gw;
     my $pr = $ps->{pr};
 
-    my $strings = App::Music::ChordPro::Chords::strings();
+    my $strings = $config->diagram_strings;
     my $w = $gw * ($strings - 1);
 
     # Draw font name.
     my $font = $ps->{fonts}->{diagram};
     $pr->setfont($font);
-    my $name = App::Music::ChordPro::Output::PDF::chord_display($info);
+    my $name = $info->chord_display;
     $name .= "*"
       unless $info->{origin} ne "user"
 	|| $::config->{diagrams}->{show} eq "user";
@@ -96,6 +100,7 @@ sub draw {
 	$pr->text( $i, $x-$pr->strwidth($i),
 		   $y-($info->{baselabeloffset}*$gh)-0.85*$gh,
 		   $ps->{fonts}->{diagram_base}, 1.2*$gh );
+	$pr->setfont($font);
     }
 
     my $v = $ps->{diagrams}->{vcells};
@@ -103,6 +108,23 @@ sub draw {
 
     # Draw the grid.
     my $xo = $self->grid_xo($ps);
+
+    my $crosshairs = sub {
+	my ( $x, $y, $col ) = @_;
+	for ( $pr->{pdfgfx}  ) {
+	    $_->save;
+	    $_->linewidth(0.1);
+	    $_->strokecolor($col//"black");
+	    $_->move($x-10,$y);
+	    $_->hline($x+20);
+	    $_->stroke;
+	    $_->move($x,$y+10);
+	    $_->vline($y-20);
+	    $_->stroke;
+	    $_->restore;
+	}
+    };
+
     $pr->{pdfgfx}->formimage( $xo, $x, $y-$v*$gh, 1 );
 
     # The numbercolor property of the chordfingers is used for the
@@ -138,10 +160,10 @@ sub draw {
 		    delete $bar->{$_};
 		    next;
 		}
-		# Print the bar line.
+		# Print the bar line. Need linecap 0.
 		$pr->hline( $x+$bi[2]*$gw, $y-$bi[1]*$gh+$gh/2,
 			    ($bi[3]-$bi[2])*$gw,
-			    6*$lw, $ps->{theme}->{foreground} );
+			    $dot, $ps->{theme}->{foreground}, 0 );
 	    }
 	}
     }
@@ -150,10 +172,23 @@ sub draw {
     $x -= $gw/2;
     my $oflo;			# to detect out of range frets
 
+    my $g_none = "/";		# unnumbered
+
+    # All symbols from the chordfingers font are equal size: a circle
+    # of 824 (1000-2*88) centered horizontally in the box, with a
+    # decender of 55.
+    # To get it vertically centered we must lower it by 455 (1000/2-55).
+    $pr->setfont($fcf,$dot);
+    my $g_width = $pr->strwidth("1");
+    my $g_lower = -0.455*$g_width;
+#    warn("GW dot=$dot, width=$g_width, lower=$g_lower\n");
+#    my $e = $fcf->{fd}->{font}->extents("1",10);
+#    use DDumper; DDumper($e);
+
     for my $sx ( 0 .. @{ $info->{frets} }-1 ) {
 	my $fret = $info->{frets}->[$sx];
-	my $fing;
-	$fing = $info->{fingers}->[$sx] if $info->{fingers};
+	my $fing = -1;
+	$fing = $info->{fingers}->[$sx] // -1 if $info->{fingers};
 
 	# For bars, only the first and last finger.
 	if ( $fing && $bar && $bar->{$fing} ) {
@@ -166,23 +201,36 @@ sub draw {
 		warn("Diagram $info->{name}: ",
 		     "Fret position $fret exceeds diagram size $v\n");
 	    }
-	    if ( $fing && $fing > 0 && $fbg ne $ps->{theme}->{foreground} ) {
-		# The dingbat glyphs are open, so we need am explicit
-		# background circle.
-		$pr->circle( $x+$gw/2, $y-$fret*$gh+$gh/2, $dot/2, 1,
-			     $fbg, $ps->{theme}->{foreground} );
-		my $dot = $dot/0.7;
-		my $glyph = pack( "C", 0xca + $fing - 1 );
-		$pr->setfont( $fcf, $dot );
-		$pr->text( $glyph,
-			   $x+$gw/2-$pr->strwidth($glyph)/2,
-			   $y-$fret*$gh+$gh/2-$pr->strwidth($glyph)/2+$lw/2,
-			   $fcf, $dot );
+
+	    my $glyph;
+	    if ( $fbg eq $ps->{theme}->{foreground} ) {
+		$glyph = $g_none;
+	    }
+	    elsif ( $fing =~ /^[A-Z0-9]$/ ) {
+		# Leave it to the user to interpret sensibly.
+		$glyph = $fing;
+	    }
+	    elsif ( $fing =~ /-\d+$/ ) {
+		$glyph = $g_none;
 	    }
 	    else {
-		$pr->circle( $x+$gw/2, $y-$fret*$gh+$gh/2, $dot/2, 1,
-			     $ps->{theme}->{foreground}, $ps->{theme}->{foreground});
+		warn("Diagram $info->{name}: ",
+		     "Invalid finger position $fing, ignored\n");
+		$glyph = $g_none;
 	    }
+
+	    # The glyphs are open, so we need am explicit
+	    # background circle to prevent the grid peeping through.
+	    # OTOH, for the unnumbered dot, we need a foreground circle.
+	    $pr->circle( $x+$gw/2, $y-$fret*$gh+$gh/2, $dot/2.2, 1,
+			 $glyph eq $g_none ? $ps->{theme}->{foreground} : $fbg,
+			 "none");
+
+	    $pr->setfont( $fcf, $dot );
+	    $pr->text( $glyph,
+			$x,
+			$y - $fret*$gh + $gh/2 + $g_lower,
+			$fcf, $dot/0.8 );
 	}
 	elsif ( $fret < 0 ) {
 	    $pr->cross( $x+$gw/2, $y+$lw+$gh/3, $dot/3, $lw,
@@ -207,7 +255,7 @@ sub grid_xo {
     my $gh = $ps->{diagrams}->{height};
     my $lw  = ($ps->{diagrams}->{linewidth} || 0.10) * $gw;
     my $v = $ps->{diagrams}->{vcells};
-    my $strings = App::Music::ChordPro::Chords::strings();
+    my $strings = $config->diagram_strings;
 
     return $self->{grids}->{$gw,$gh,$lw,$v,$strings} //= do
       {

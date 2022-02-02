@@ -59,6 +59,10 @@ These settings control global behaviour of the ChordPro program and can be chang
         "chordnames": "strict",
 		// Interpret lowcase root-only chords as note names.
 		"notenames": false,
+		// Always replace chords by their canonical form.
+		"chords-canonical" : false,
+		// If false, chorus labels are used as tags.
+		"choruslabels" : true,
     },
 
 Note that settings `decapo`, `lyrics-only`, `strict`, `transcode` and
@@ -75,6 +79,8 @@ For these keys you can use `{meta` _key_ ...`}` as well as `{`*key* ...`}`.
 Otherwise, only the keys named in the `keys` here are allowed.  
 `strict` is true by default.
 * `separator`: To concatenate multiple values when metadata are used in title fields.
+* `autosplit`: If enabled, metadata will be split on the separator to
+provide multiple values.
 
 Important: the keys `title` and `subtitle` must always be in this list.
 
@@ -86,9 +92,11 @@ Important: the keys `title` and `subtitle` must always be in this list.
                    "key", "time", "tempo", "capo", "duration" ],
         "strict" : true,
         "separator" : "; ",
+        "autosplit" : true,
     },
 
-See also [Using metadata in texts]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
+See also [Using metadata in texts]({{< relref
+"ChordPro-Configuration-Format-Strings" >}}).
 
 ## Dates and Times
 
@@ -172,7 +180,9 @@ The `frets` positions are the positions in the chord diagram as shown. The follo
 
 ![]({{< asset "images/ex_chords2.png" >}})
 
-As can be seen, the `"fingers"` part is optional.
+The `"fingers"` part is optional.
+You can use digits `0` .. `9` and letters `A` .. `Z` for finger
+symbols. A negative value denotes a string without finger information.
 
 The `display` part specifies the way the chord must be shown. Note the
 use of `%{root}` to show the root name.  

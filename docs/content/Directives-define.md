@@ -75,7 +75,10 @@ The `define` directive details:
   For the `frets` and the `fingers` positions, there must be exactly
   as many positions as there are strings, which is 6 by default. For
   the `fingers` positions, values corresponding to open or damped
-  strings are ignored.
+  strings are ignored.  
+  Finger settings may be numeric (`0` .. `9`) or uppercase letters
+  (`A` .. `Z`). Note that the values `-`, `x`, `X`, and `N` are used
+  to designate a string without finger setting.
 
 Example:
 

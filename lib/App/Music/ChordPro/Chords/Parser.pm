@@ -120,7 +120,8 @@ sub default {
 sub parse {
     Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self, $chord ) = @_;
-    $self->{chord_cache}->{$chord} //= $self->parse_chord($chord);
+####    $self->{chord_cache}->{$chord} //=
+      $self->parse_chord($chord);
 }
 
 # Virtual.
@@ -156,6 +157,11 @@ sub get_parser {
 	return $parsers{$system} //=
 	  App::Music::ChordPro::Chords::Parser::Roman->new;
     }
+    elsif ( $system ne $::config->{notes}->{system} ) {
+	my $p = App::Music::ChordPro::Chords::Parser::Common->new
+	  ( { notes => $system } );
+	return $parsers{$system} = $p;
+    }
     elsif ( $system ) {
 	my $p = App::Music::ChordPro::Chords::Parser::Common->new;
 	$p->{system} = $system;
@@ -165,7 +171,7 @@ sub get_parser {
 	return;
     };
 
-    warn("No parser for $system, falling back to default\n");
+    Carp::confess("No parser for $system, falling back to default\n");
     return $parsers{common} //= $self->default;
 }
 
@@ -229,26 +235,25 @@ sub parse_chord {
 	$bass = $2;
     }
 
-    # Pattern to match chords.
-    my $c_pat = $self->{c_pat};
-
-    # Use relaxed pattern if requested.
-    $c_pat = $self->{c_rpat}
-      if $self->{c_rpat} && $::config->{settings}->{chordnames} eq "relaxed";
-
-    # Pattern to match notes.
-    my $n_pat = $self->{n_pat};
-
     my $info = { system => $self->{system},
 		 parser => $self,
 		 name => $_[1] };
 
-    if ( $chord =~ /^$c_pat$/ ) {
-	return unless $info->{root} = $+{root};
+    # Match chord.
+    my %plus;
+    if ( $chord =~ /^$self->{c_pat}$/ ) {
+	%plus = %+;
+	$info->{root} = $plus{root};
+    }
+    # Retry with relaxed pattern if requested.
+    elsif ( $self->{c_rpat} && $::config->{settings}->{chordnames} eq "relaxed" ) {
+	$chord =~ /^$self->{c_rpat}$/;
+	%plus = %+;		# keep it outer
+	return unless $info->{root} = $plus{root};
     }
     # Not a chord. Try note name.
     elsif ( $::config->{settings}->{notenames}
-	    && ucfirst($chord) =~ /^$n_pat$/ ) {
+	    && ucfirst($chord) =~ /^$self->{n_pat}$/ ) {
 	$info->{root} = $chord;
 	$info->{isnote} = 1;
     }
@@ -259,7 +264,7 @@ sub parse_chord {
 
     bless $info => $self->{target};
 
-    my $q = $+{qual} // "";
+    my $q = $plus{qual} // "";
     $info->{qual} = $q;
     $q = "-" if $q eq "m" || $q eq "min";
     $q = "+" if $q eq "aug";
@@ -267,7 +272,7 @@ sub parse_chord {
     $q = "0" if $q eq "o";
     $info->{qual_canon} = $q;
 
-    my $x = $+{ext} // "";
+    my $x = $plus{ext} // "";
     if ( !$info->{qual} ) {
 	if ( $x eq "maj" ) {
 	    $x = "";
@@ -295,14 +300,27 @@ sub parse_chord {
 	    Carp::croak("CANT HAPPEN ($r)");
 	    return;
 	}
+####	$info->{isflat} = $info->{"${pfx}_mod"} < 0;
     };
 
     $ordmod->("root");
 
-    return $info unless $bass;
-    return unless $bass =~ /^$n_pat$/;
-    $info->{bass} = $bass;
-    $ordmod->("bass");
+    cluck("BLESS info for $chord into ", $self->{target}, "\n")
+      unless ref($info) =~ /App::Music::ChordPro::Chord::/;
+
+    if ( $bass ) {
+	return unless $bass =~ /^$self->{n_pat}$/;
+	$info->{bass} = $bass;
+	$ordmod->("bass");
+    }
+
+    if ( $::config->{settings}->{'chords-canonical'} ) {
+	my $t = $info->{name};
+	$info->{name} = $info->show;
+	warn("Parsing chord: \"$chord\" canon \"", $info->show, "\"\n" )
+	  if $info->{name} ne $t and $::config->{debug}->{chords};
+    }
+
     return $info;
 }
 
@@ -469,14 +487,16 @@ sub load_notes {
 
     # Pattern to match note names.
     my $n_pat = '(?:' ;
-    foreach ( sort keys %ns_tbl ) {
-	$n_pat .= "$_|";
+    my @n;
+    foreach ( keys %ns_tbl ) {
+	push( @n, $_ );
     }
     foreach ( sort keys %nf_tbl ) {
 	next if $ns_tbl{$_};
-	$n_pat .= "$_|";
+	push( @n, $_ );
     }
-    substr( $n_pat, -1, 1, ")" );
+
+    $n_pat = '(?:' . join( '|', sort { length($b) <=> length($a) } @n ) . ')';
 
     # Pattern to match chord names.
     my $c_pat;
@@ -487,7 +507,7 @@ sub load_notes {
       "(?<ext>" . join("|", keys(%$additions_min)) . ")|";
     $c_pat .= "(?<qual>\\+|aug)".
       "(?<ext>" . join("|", keys(%$additions_aug)) . ")|";
-    $c_pat .= "(?<qual>0|o|dim)".
+    $c_pat .= "(?<qual>0|o|dim|h)".
       "(?<ext>" . join("|", keys(%$additions_dim)) . ")|";
     $c_pat .= "(?<qual>)".
       "(?<ext>" . join("|", keys(%$additions_maj)) . ")";
@@ -756,13 +776,14 @@ sub movable {
 
 ################ Chord objects: Common ################
 
-package App::Music::ChordPro::Chord::Common;
+package App::Music::ChordPro::Chord::Base;
 
 use Storable qw(dclone);
 
 sub new {
-    my ( $pkg, %args ) = @_;
-    bless { %args } => $pkg;
+    my ( $pkg, $data ) = @_;
+    $pkg = ref($pkg) || $pkg;
+    bless { %$data } => $pkg;
 }
 
 sub clone {
@@ -771,28 +792,77 @@ sub clone {
     dclone($self);
 }
 
+sub id {
+    my ( $self ) = @_;
+    Carp::confess("Chord missing ID") unless $self->{id};
+    $self->{id};
+}
+
+sub name    { $_[0]->show }
+sub is_note { $_[0]->{isnote} };
+sub is_flat { $_[0]->{isflat} };
+
+sub is_nc {
+    my ( $self ) = @_;
+    return unless $self->{frets} && @{ $self->{frets} };
+    for ( @{ $self->{frets} } ) {
+	return unless $_ < 0;
+    }
+    return 1;			# all -1 => N.C.
+}
+
+# For convenience.
+sub is_chord      { defined $_[0]->{root_ord} };
+sub is_annotation { 0 };
+
+sub strings {
+    $_[0]->{parser}->{intervals};
+}
+
+sub dump {
+    my ( $self ) = @_;
+    my $c = dclone($self);
+    for ( qw( frets fingers keys ) ) {
+	$c->{$_} = "[ " . join(" ", @{$c->{$_}}) . " ]";
+    }
+    if ( ref($c->{parser}) ) {
+	$c->{ns_canon} = "[ " . join(" ", @{$c->{parser}{ns_canon}}) . " ]"
+	  if $c->{parser}{ns_canon};
+	$c->{parser} = ref(delete($c->{parser}));
+    }
+    ::dump($c);
+}
+
+package App::Music::ChordPro::Chord::Common;
+
+our @ISA = qw( App::Music::ChordPro::Chord::Base );
+use String::Interpolate::Named;
+
 sub show {
     Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
-    my ( $self ) = @_;
-    my $res = $self->{parser}->root_canon( $self->{root_ord},
-					   $self->{root_mod} >= 0,
-					   $self->{qual} eq '-'
-					 ) . $self->{qual} . $self->{ext};
-    if ( $self->{isnote} ) {
+    my ( $self, $np ) = @_;
+    my $res = $self->is_chord
+      ? $self->{parser}->root_canon( $self->{root_ord},
+				     $self->{root_mod} >= 0,
+				     $self->{qual} eq '-',
+				     !$self->is_flat
+				   ) . $self->{qual} . $self->{ext}
+      : $self->{name};
+    if ( $self->is_note ) {
 	return lcfirst($res);
     }
     if ( $self->{bass} && $self->{bass} ne "" ) {
 	$res .= "/" .
 	  ($self->{system} eq "roman" ? lc($self->{bass}) : $self->{bass});
     }
-    return $res;
+    return $np ? $res : $self->{parens} ? "($res)" : $res;
 }
 
 # Returns a representation indepent of notation system.
 sub agnostic {
     Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self ) = @_;
-    return if $self->{isnote};
+    return if $self->is_note;
     join( " ", "",
 	  $self->{root_ord}, $self->{qual_canon},
 	  $self->{ext_canon}, $self->{bass_ord} // () );
@@ -800,30 +870,37 @@ sub agnostic {
 
 sub transpose {
     Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
-    my ( $self, $xpose ) = @_;
+    my ( $self, $xpose, $dir ) = @_;
     return $self unless $xpose;
+    return $self unless $self->is_chord;
+    $dir //= $xpose <=> 0;
+
     my $info = $self->clone;
     my $p = $self->{parser};
+
     $info->{root_ord} = ( $self->{root_ord} + $xpose ) % $p->intervals;
     $info->{root_canon} = $info->{root} =
       $p->root_canon( $info->{root_ord},
-		      $xpose > 0,
+		      $dir > 0,
 		      $info->{qual_canon} eq "-" );
     if ( $self->{bass} && $self->{bass} ne "" ) {
 	$info->{bass_ord} = ( $self->{bass_ord} + $xpose ) % $p->intervals;
 	$info->{bass_canon} = $info->{bass} =
 	  $p->root_canon( $info->{bass_ord}, $xpose > 0 );
-	$info->{bass_mod} = $xpose <=> 0;
+	$info->{bass_mod} = $dir;
     }
-    $info->{root_mod} = $xpose <=> 0;
-    delete $info->{$_} for qw( copy );
-    $info;
+    $info->{root_mod} = $dir;
+
+    delete $info->{$_} for qw( copy base frets fingers keys );
+
+    return $info;
 }
 
 sub transcode {
     Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self, $xcode ) = @_;
     return $self unless $xcode;
+    return $self unless $self->is_chord;
     return $self if $self->{system} eq $xcode;
     my $info = $self->dclone;
 #warn("_>_XCODE = $xcode, _SELF = $self->{system}, CHORD = $info->{name}");
@@ -831,6 +908,7 @@ sub transcode {
     my $p = $self->{parser}->get_parser($xcode);
     die("OOPS ", $p->{system}, " $xcode") unless $p->{system} eq $xcode;
     $info->{parser} = $p;
+#    $info->{$_} = $p->{$_} for qw( ns_tbl nf_tbl ns_canon nf_canon );
     $info->{root_canon} = $info->{root} =
       $p->root_canon( $info->{root_ord},
 		      $info->{root_mod} >= 0,
@@ -843,35 +921,129 @@ sub transcode {
 	$info->{bass_canon} = $info->{bass} =
 	  $p->root_canon( $info->{bass_ord}, $info->{bass_mod} >= 0 );
     }
+    $info->{system} = $p->{system};
     bless $info => $p->{target};
 #    ::dump($info);
 #warn("_<_XCODE = $xcode, CHORD = ", $info->show);
     return $info;
 }
 
+sub chord_display {
+    my ( $self, $raw ) = @_;
+    my $res = $self->{display}
+      ? $raw
+      ? $self->{display}
+        : interpolate( { args => $self }, $self->{display} )
+	: $self->show("np");
+    return $self->{parens} ? "($res)" : $res;
+}
+
 ################ Chord objects: Nashville ################
 
 package App::Music::ChordPro::Chord::Nashville;
 
-our @ISA = 'App::Music::ChordPro::Chord::Common';
-
-#my @nmap = ( 1, 1, 2, 2, 3, 4, 4, 5, 5, 6, 6, 7, 1 );
-
-sub intervals { 12 }
+our @ISA = 'App::Music::ChordPro::Chord::Base';
+use String::Interpolate::Named;
 
 sub transpose { $_[0] }
+
+sub show {
+    my ( $self, $np ) = @_;
+    my $res = $self->{root_canon} . $self->{qual} . $self->{ext};
+    if ( $self->{bass} && $self->{bass} ne "" ) {
+	$res .= "/" . lc($self->{bass});
+    }
+    return $np ? $res : $self->{parens} ? "($res)" : $res;
+}
+
+sub chord_display {
+    my ( $self, $raw ) = @_;
+    if ( $self->{display} ) {
+	if ( $raw ) {
+	    return $self->{display};
+	}
+	else {
+	    return interpolate( { args => $self }, $self->{display} );
+	}
+    }
+
+    my $res = $self->{root_canon} .
+      "<sup>" . $self->{qual} . $self->{ext} . "</sup>";
+    if ( $self->{bass} && $self->{bass} ne "" ) {
+	$res .= "<sub>/" . lc($self->{bass}) . "</sub>";
+    }
+    return $self->{parens} ? "($res)" : $res;
+}
 
 ################ Chord objects: Roman ################
 
 package App::Music::ChordPro::Chord::Roman;
 
-our @ISA = 'App::Music::ChordPro::Chord::Common';
-
-my @rmap = qw( I I II II III IV IV V V VI VI VII );
-
-sub intervals { 12 }
+our @ISA = 'App::Music::ChordPro::Chord::Base';
+use String::Interpolate::Named;
 
 sub transpose { $_[0] }
+
+sub show {
+    my ( $self, $np ) = @_;
+    my $res = $self->{root_canon} . $self->{qual} . $self->{ext};
+    if ( $self->{bass} && $self->{bass} ne "" ) {
+	$res .= "/" . lc($self->{bass});
+    }
+    return $np ? $res : $self->{parens} ? "($res)" : $res;
+}
+
+sub chord_display {
+    my ( $self, $raw ) = @_;
+    if ( $self->{display} ) {
+	if ( $raw ) {
+	    return $self->{display};
+	}
+	else {
+	    return interpolate( { args => $self }, $self->{display} );
+	}
+    }
+
+    my $res = $self->{root_canon} .
+      "<sup>" . $self->{qual} . $self->{ext} . "</sup>";
+    if ( $self->{bass} && $self->{bass} ne "" ) {
+	$res .= "<sub>/" . lc($self->{bass}) . "</sub>";
+    }
+    return $self->{parens} ? "($res)" : $res;
+}
+
+################ Chord objects: Annotations ################
+
+package App::Music::ChordPro::Chord::Annotation;
+
+use String::Interpolate::Named;
+
+our @ISA = 'App::Music::ChordPro::Chord::Base';
+
+sub transpose { $_[0] }
+sub transcode { $_[0] }
+
+sub name { $_[0]->{name} }
+
+sub show {
+    my ( $self ) = @_;
+    my $res = $self->{text};
+    return $res;
+}
+
+sub chord_display {
+    my ( $self, $raw ) = @_;
+    if ( $raw ) {
+	return $self->{text};
+    }
+    else {
+	return interpolate( { args => $self }, $self->{text} );
+    }
+}
+
+# For convenience.
+sub is_chord      { 0 };
+sub is_annotation { 1 };
 
 ################ Testing ################
 

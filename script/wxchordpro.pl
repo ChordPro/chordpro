@@ -4,8 +4,12 @@ use Wx 0.9912 qw[:allclasses];
 
 use strict;
 use warnings;
+use utf8;
 
 package main;
+
+binmode(STDERR, ':utf8');
+binmode(STDOUT, ':utf8');
 
 use FindBin;
 use lib "$FindBin::Bin/../CPAN";
@@ -22,6 +26,25 @@ my $my_version = $App::Music::ChordPro::VERSION;
 # We need Wx::App for the mainloop.
 # App::Music::ChordPro::Wx::Main is the main entry of the program.
 use base qw(Wx::App App::Music::ChordPro::Wx::Main);
+
+use File::HomeDir;
+
+$ENV{HOME} //= File::HomeDir->my_home;
+
+my $app_lc = "chordpro";
+if ( $ENV{XDG_CONFIG_HOME} && -d $ENV{XDG_CONFIG_HOME} ) {
+    $ENV{CHORDPRO_LIB} ||= File::Spec->catfile( $ENV{XDG_CONFIG_HOME}, $app_lc);
+}
+elsif ( $ENV{HOME} && -d $ENV{HOME} ) {
+    my $dir = File::Spec->catfile( $ENV{HOME}, ".config" );
+    if ( -d $dir ) {
+	$ENV{CHORDPRO_LIB} ||= File::Spec->catfile( $dir, $app_lc );
+    }
+    else {
+	$dir = File::Spec->catfile( $ENV{HOME}, ".$app_lc" );
+	$ENV{CHORDPRO_LIB} ||= $dir;
+    }
+}
 
 my $options = app_options();
 
@@ -82,7 +105,8 @@ sub app_options {
     return unless @ARGV > 0;
 
     if ( !GetOptions( $options,
-		     'ident',
+		      'ident',
+		      'log',
 		     'verbose|v+',
 		      'version|V',
 		      'maximize',

@@ -30,6 +30,14 @@ PDF document properties.
 
 Note that the context for substitutions is the first song.
 
+## CSV
+
+With the PDF, ChordPro can optionally generate a CSV document that
+describes the content of the PDF outout. This can be used with some
+third-party tools when importing or viewing the PDF document.
+
+For details, see [Configuration for CSV output]({{< relref "chordpro-configuration-csv" >}}).
+
 ## Papersize
 
 The size of the paper for which output must be formatted. The size can be specified either as the name of a known page size, e.g. `"a4"`, or as a 2-element list containing the width and height of the page in _PDF units_ (_DTP points_, _pt_, 1/72 inch).
@@ -43,8 +51,10 @@ These settings can be used to control the foreground and
 background colours of the PDF output.
 
         "theme" : {
-            "foreground" : "black",
-            "background" : "none",
+            "foreground"        : "black",
+            "foreground-light"  : "grey90",
+            "foreground-medium" : "grey70",
+            "background"        : "none",
         }
 
 Background `"none"` or `"white"` means there will be no background
@@ -58,22 +68,16 @@ these settings define a 'dark' theme that can be applied to any style.
 {
     "pdf" : {
         "theme" : {
-            "foreground" : "white",
-            "background" : "black",
-        },
-        "fonts" : {
-            "chord" : {
-                "color" : "red",
-            },
-            "comment" : {
-                "background" : "#555555",
-            },
+            "foreground"       : "white",
+            "foreground-light" : "#555555",
+            "background"       : "black",
         },
     },
 }
 ````
 
-Other configuration settings that use colours can use `foreground` and
+Other configuration settings that use colours can use `foreground`,
+`foreground-light`, `foreground-medium`, and
 `background` to refer to the colours defined in the theme.
 
 ## Inter-column space
@@ -266,7 +270,7 @@ colour, or a hex format `#RRGGBB`.
             "keys"     :  14,   // or 7, 10, 14, 17, 21
             "base"     :  "C",  // or "F"
             "linewidth" : 0.1,  // fraction of a single key width
-            "pressed"  :  "grey",   // colour of a pressed key
+            "pressed"  :  "foreground-medium",   // colour of a pressed key
             "hspace"   :  3.95, // ??
             "vspace"   :  0.3,  // fraction of height
         },
@@ -274,6 +278,21 @@ colour, or a hex format `#RRGGBB`.
 With the above settings, keyboard diagrams will look like:
 
 ![]({{< asset "images/ex_kbdiagram.png" >}})
+
+## Grid lines
+
+Properties for the lines of grid sections.
+
+      // Grid section lines.
+      // The width and colour of the cell bar lines can be specified.
+      // Enable by setting the width to the desired width.
+      "grids" : {
+          "cellbar" : {
+              "width" : 0,
+              "color" : "foreground-medium",
+          },
+      },
+
 
 ## Even/odd page printing
 
@@ -312,13 +331,24 @@ ChordPro distinguishes three types of output pages:
 * the first page of a song: `title`;
 * all other pages: `default`.
 
-Each of these page types can have settings for a page title, subtitle and footer. The settings inherit from `default` to `title` to `first`. So a `title` page has everything a `default` page has, and a `first` page has everything a `title` page has.
+Each of these page types can have settings for a page title, subtitle
+and footer. The settings inherit from `default` to `title` to `first`.
+So a `title` page has everything a `default` page has, and a `first`
+page has everything a `title` page has.
 
-Each title, subtitle and footer has three parts, which are printed to the left of the page, centered, and right. When even/odd page printing is selected, the left and right parts are swapped on even pages.
+Each title, subtitle and footer has three parts, which are printed to
+the left of the page, centered, and right. When even/odd page printing
+is selected, the left and right parts are swapped on even pages.
+
+The title, subtitle and footer may also be set to an *array* of three
+part strings, which will be printed on separate lines. 
 
 All heading strings may contain references to metadata in the form
 `%{`*name*`}`, for example `%{title}`. The current page number can be
-obtained with `%{page}`, and the song index in the songbook with `%{songindex}`. For a complete description on how to use metadata in heading strings, see [here]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
+obtained with `%{page}`, and the song index in the songbook with
+`%{songindex}`. For a complete description on how to use metadata in
+heading strings, see [here]({{< relref
+"ChordPro-Configuration-Format-Strings" >}}).
 
         "formats" : {
 

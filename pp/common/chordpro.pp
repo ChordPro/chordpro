@@ -7,7 +7,7 @@
 --cachedeps=chordpro.pp.deps
 
 # Since not all modules are statically required, enumerate.
---module=App::Music::ChordPro::Bundle
+--module=App_Music_ChordPro_Bundle
 
 # Same for PDF::API2 and Font::TTF.
 # By explicitly including the main module we are pretty sure the

@@ -54,7 +54,7 @@ my $song = {
 			  'base' => '2',
 			  'frets' => [ -1, '0', '3', '2', '1', '0' ],
 			 }
-			]
+			],
 	   };
 
 is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );
@@ -102,7 +102,8 @@ $song = {
 			  'base' => '1',
 			  'frets' => [ -1, '0', '3', '2', '1', '0' ],
 			 }
-			]
+			],
+	    'chordsinfo' => {},
 	   };
 
 is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );

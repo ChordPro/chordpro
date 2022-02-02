@@ -45,18 +45,24 @@ sub generate_songbook {
 
 my $lyrics_only = 0;
 my $variant = 'cho';
+my $rechorus;
+
+sub upd_config {
+    $rechorus = $::config->{chordpro}->{chorus}->{recall};
+    $lyrics_only = 2 * $::config->{settings}->{'lyrics-only'};
+}
 
 sub generate_song {
     my ( $s ) = @_;
 
     my $tidy = $options->{'backend-option'}->{tidy};
-    $lyrics_only = 2 * $::config->{settings}->{'lyrics-only'};
-    my $rechorus = $::config->{chordpro}->{chorus}->{recall};
     my $structured = ( $options->{'backend-option'}->{structure} // '' ) eq 'structured';
     # $s->structurize if ++$structured;
     $variant = $options->{'backend-option'}->{variant} || 'cho';
     my $seq  = $options->{'backend-option'}->{seq};
+    my $expand = $options->{'backend-option'}->{expand};
     my $msp  = $variant eq "msp";
+    upd_config();
 
     my @s;
     my %imgs;
@@ -88,7 +94,7 @@ sub generate_song {
 	# Unknowns with meta prefix.
 	foreach my $k ( sort keys %{ $s->{meta} } ) {
 	    next if $used{$k};
-	    next if $k =~ /^(?:title|subtitle|songindex)$/;
+	    next if $k =~ /^(?:title|subtitle|songindex|key_.*)$/;
 	    next if $k =~ /^_/;
 	    push( @s, map { +"{meta: $k $_}" } @{ $s->{meta}->{$k} } );
 	}
@@ -197,7 +203,7 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "songline" ) {
-	    push(@s, songline($elt));
+	    push(@s, songline( $s, $elt ));
 	    next;
 	}
 
@@ -207,7 +213,7 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "gridline" ) {
-	    push(@s, gridline($elt));
+	    push(@s, gridline( $s, $elt ));
 	    next;
 	}
 
@@ -219,7 +225,7 @@ sub generate_song {
 		      if $structured;
 		}
 		if ( $e->{type} eq "song" ) {
-		    push(@s, songline($e));
+		    push(@s, songline( $s, $e ));
 		    next;
 		}
 	    }
@@ -236,7 +242,7 @@ sub generate_song {
 		    next;
 		}
 		if ( $e->{type} eq "songline" ) {
-		    push(@s, songline($e));
+		    push(@s, songline( $s, $e ));
 		    next;
 		}
 	    }
@@ -272,7 +278,7 @@ sub generate_song {
 
 	if ( $elt->{type} =~ /^comment(?:_italic|_box)?$/ ) {
 	    my $type = $elt->{type};
-	    my $text = $elt->{orig};
+	    my $text = $expand ? $elt->{text} : $elt->{orig};
 	    if ( $msp ) {
 		$type = $type eq 'comment'
 		  ? 'highlight'
@@ -318,7 +324,12 @@ sub generate_song {
 	    $dumphdr = 0 unless $elt->{origin} eq "__CLI__";
 	    push( @s,
 		  @{ App::Music::ChordPro::Chords::list_chords
-		      ( $elt->{chords}, $elt->{origin},
+		      ( [ map {
+			    $s->{chordsinfo}->{$_}->{origin} eq 'inline'
+			      ? $s->{chordsinfo}->{$_}
+			      : $s->{chordsinfo}->{$_}->{name}
+		          } @{$elt->{chords}} ],
+			$elt->{origin},
 			$dumphdr ) } );
 	    $dumphdr = 0;
 	    next;
@@ -330,6 +341,18 @@ sub generate_song {
 		  unless $lyrics_only > 1;
 	    }
 	    elsif ( $elt->{name} eq "transpose" ) {
+	    }
+	    # Arbitrary config values.
+	    elsif ( $elt->{name} =~ /^(chordpro\..+)/ ) {
+		my @k = split( /[.]/, $1 );
+		my $cc = {};
+		my $c = \$cc;
+		foreach ( @k ) {
+		    $c = \($$c->{$_});
+		}
+		$$c = $elt->{value};
+		$config->augment($cc);
+		upd_config();
 	    }
 	    next;
 	}
@@ -387,7 +410,7 @@ sub generate_song {
 }
 
 sub songline {
-    my ($elt) = @_;
+    my ( $song, $elt ) = @_;
 
     if ( $lyrics_only || !exists($elt->{chords}) ) {
 	return join( "", @{ $elt->{phrases} } );
@@ -395,14 +418,14 @@ sub songline {
 
     my $line = "";
     foreach ( 0..$#{$elt->{chords}} ) {
-	$line .= "[" . chord($elt->{chords}->[$_]) . "]" . $elt->{phrases}->[$_];
+	$line .= "[" . chord( $song, $elt->{chords}->[$_]) . "]" . $elt->{phrases}->[$_];
     }
     $line =~ s/^\[\]//;
     $line;
 }
 
 sub gridline {
-    my ($elt) = @_;
+    my ( $song, $elt ) = @_;
 
     my $line = "";
     for ( @{ $elt->{tokens} } ) {
@@ -421,7 +444,7 @@ sub gridline {
 	my $t = $elt->{comment};
 	if ( $t->{chords} ) {
 	    for ( 0..$#{ $t->{chords} } ) {
-		$res .= "[" . chord($t->{chords}->[$_]) . "]" . $t->{phrases}->[$_];
+		$res .= "[" . chord( $song, $t->{chords}->[$_]) . "]" . $t->{phrases}->[$_];
 	    }
 	}
 	else {
@@ -435,9 +458,15 @@ sub gridline {
 }
 
 sub chord {
-    my ( $c ) = @_;
-    $c =~ s/^\*// if $variant eq 'msp' && length($c) > 1;
-    return $c;
+    my ( $s, $c ) = @_;
+    return "" unless length($c);
+    #    $c =~ s/^\*// if $variant eq 'msp' && length($c) > 1;
+#    Carp::confess("XX \"$c\" ", ::dump($s->{chordsinfo})) unless defined $s->{chordsinfo}->{$c};
+    my $ci = $s->{chordsinfo}->{$c};
+    return "<<$c>>" unless defined $ci;
+    my $t = $ci->show;
+    return "*$t" if $variant ne 'msp' && $ci->is_annotation;
+    return $t;
 }
 
 1;

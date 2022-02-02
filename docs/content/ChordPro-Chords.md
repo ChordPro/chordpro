@@ -67,6 +67,33 @@ notes before the chords:
 {comment: Intro [f] [g] [a] [E] }
 ````
 
+# ChordPro Implementation: Understandable versus known
+
+An often made mistake is to confuse _understandable_ with _known_.
+
+For example, in the default configuration for guitar, the chord `Bbm`
+is understood to be the root key `B♭` and qualifier `m` for minor.
+Likewise, `Besm` and `B♭m` are understood to mean the same chord, and
+so are `Aism` and `A#m` and `A♯m`.
+When it comes to transposing and transcoding, ChordPro knows how to handle
+these.
+
+Root key names and equivalents are defined in the 
+[`notes` section]({{< relref "chordpro-configuration-instrument" >}})
+of the config files.
+
+However, when a chord diagram must be drawn, the chord must be _known_
+by name.
+In the default configuration a chord with name `Bbm` is defined, so it is
+known and has the information to draw the chord diagram. The chord
+named `Besm` is **not** defined, hence it is not known, and ChordPro can not
+draw a diagram for it.
+
+Chords are defined in the 
+[`chords` section]({{< relref "chordpro-configuration-generic/#user-defined-chords-string-instruments" >}})
+of the config files, usually in an instrument specific config file,
+e.g. `guitar` or `ukulele`.
+
 # ChordPro Implementation: Chord Extensions
 
 The following chord extensions are currently built-in.

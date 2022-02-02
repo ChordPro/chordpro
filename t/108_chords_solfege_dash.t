@@ -12,7 +12,7 @@ my %tbl;
 our $config =
       App::Music::ChordPro::Config::configurator
 	  ( { nosysconfig => 1, nolegacyconfig => 1, nouserconfig => 1,
-	      config => getresource("notes/solfege.json") } );
+	      config => getresource("config/notes/solfege.json") } );
 
 =begin regenerate
 

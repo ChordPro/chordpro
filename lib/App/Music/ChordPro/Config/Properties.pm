@@ -8,8 +8,8 @@ use warnings;
 # Author          : Johan Vromans
 # Created On      : Mon Mar  4 11:51:54 2002
 # Last Modified By: Johan Vromans
-# Last Modified On: Wed Aug 25 14:16:41 2021
-# Update Count    : 552
+# Last Modified On: Mon Dec  6 10:53:33 2021
+# Update Count    : 557
 # Status          : Unknown, Use with caution!
 
 =head1 NAME
@@ -286,7 +286,8 @@ sub _parse_file_internal {
 	$cfg = $path . $file unless $file =~ m:^/:;
 	next unless -e $cfg;
 
-	my $lines = loadlines($cfg);
+	my $opt = { strip => qr/[ \t]*\\(?:\r\n|\n|\r)[ \t]*/ };
+	my $lines = loadlines( $cfg, $opt );
 	$self->parse_lines( $lines, $cfg, $context );
 	$did++;
 

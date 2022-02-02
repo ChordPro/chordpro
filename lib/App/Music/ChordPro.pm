@@ -8,6 +8,7 @@ use App::Packager;
 
 use App::Music::ChordPro::Version;
 use App::Music::ChordPro::Utils;
+use App::Music::ChordPro::Chords;
 use App::Music::ChordPro::Output::Common;
 
 our $VERSION = $App::Music::ChordPro::Version::VERSION;
@@ -87,6 +88,7 @@ sub ::run {
 sub main {
     my ($opts) = @_;
     $options = { %$options, %$opts } if $opts;
+    warn("ChordPro invoked: @{$options->{_argv}}\n") if $options->{debug};
     chordpro();
 
 }
@@ -129,7 +131,7 @@ sub chordpro {
     elsif ( -t STDOUT ) {
 	# No output, and stdout is terminal.
 	# Derive output name from input name.
-	if ( @ARGV > 1 ) {
+	if ( @ARGV > 1 || ( $options->{'dump-chords'} && !@ARGV ) ) {
 	    # No default if more than one input document.
 	    die("Please use \"--output\" to specify the output file name\n");
 	}
@@ -199,6 +201,7 @@ sub chordpro {
 
 	my $prev = "";
 	foreach my $c ( @{ App::Music::ChordPro::Chords::chordnames() } ) {
+	    next if $c =~ /^n\.?c\.?$/i;
 	    if ( $c =~ /^(.[b#]?)/ and $1 ne $prev )  {
 		$prev = $1;
 		push( @body, { type => "diagrams",
@@ -209,6 +212,7 @@ sub chordpro {
 		@chords = ();
 	    }
 	    push( @chords, $c );
+	    $d->{chordsinfo}->{$c} = App::Music::ChordPro::Chords::_known_chord($c);
 	}
 
 	push( @body, { type => "diagrams",
@@ -227,8 +231,6 @@ sub chordpro {
 	}
     }
 
-    warn(::dump($s), "\n") if $config->{debug}->{song};
-
     # Try interpolations.
     if ( $of ) {
 	my $f = fmt_subst( $s->{songs}->[0], $of );
@@ -242,6 +244,7 @@ sub chordpro {
 
     # Call backend to produce output.
     $res = $pkg->generate_songbook($s);
+    return $res if $options->{output} eq '*';
 
   WRITE_OUTPUT:
     # Some backends write output themselves, others return an
@@ -732,7 +735,6 @@ sub app_setup {
        ### ADDITIONAL CLI OPTIONS ###
 
        'vertical-space' => 0,           # extra vertical space between lines
-       'lyrics-only'    => 0,           # suppress all chords
 
        ### NON-CLI OPTIONS ###
 
@@ -873,7 +875,7 @@ sub app_setup {
 
 	  );
 	$clo->{nodefaultconfigs} = 1;
-	$clo->{nosongconfigs} = 1;
+	$clo->{nosongconfig} = 1;
 	$::options->{reference} = 1;
     }
 
@@ -938,9 +940,10 @@ sub app_setup {
         }
     }
     # If no config was specified, and no default is available, force no.
-    for my $config ( qw(sysconfig userconfig config) ) {
+    for my $config ( qw(sysconfig userconfig config ) ) {
         $clo->{"no$config"} = 1 unless $clo->{$config};
     }
+    $clo->{nosongconfig} ||= $clo->{nodefaultconfigs};
 
     # Decode command line strings.
     # File names are dealt with elsewhere.
@@ -1077,6 +1080,8 @@ sub ::runtimeinfo {
 	$msg .= sprintf( $fmtv, "wxWidgets", $dd->(Wx::wxVERSION) );
     }
 
+    local $SIG{__WARN__} = sub {};
+    local $SIG{__DIE__} = sub {};
     $msg .= sprintf( $fmtv, "Storable", $dd->($Storable::VERSION) );
     eval { require Text::Layout;
 	$msg .= sprintf( $fmtv, "Text::Layout", $dd->($Text::Layout::VERSION) );
@@ -1086,12 +1091,23 @@ sub ::runtimeinfo {
 	$msg .= sprintf( $fmtv, "HarfBuzz library", $dd->(HarfBuzz::Shaper::hb_version_string()) );
     };
     $msg .= sprintf( $fmtv, "File::LoadLines", $dd->($File::LoadLines::VERSION) );
+    eval { require PDF::Builder;
+	$msg .= sprintf( $fmtv, "PDF::Builder", $dd->($PDF::Builder::VERSION) );
+    }
+    or
     eval { require PDF::API2;
 	$msg .= sprintf( $fmtv, "PDF::API2", $dd->($PDF::API2::VERSION) );
     };
     eval { require Font::TTF;
 	$msg .= sprintf( $fmtv, "Font::TTF", $dd->($Font::TTF::VERSION) );
     };
+    eval { require Image::Magick;
+	$msg .= sprintf( $fmtv, "Image::Magick",
+			 $dd->( $Image::Magick::VERSION ||
+				$Image::Magick::Q16::VERSION ||
+				$Image::Magick::Q8::VERSION || "6.x?" ) );
+    };
+    return $msg;
 }
 
 sub splitpath {

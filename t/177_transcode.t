@@ -18,8 +18,8 @@ our $config =
   eval {
       App::Music::ChordPro::Config::configurator
 	  ( { nosysconfig => 1, nolegacyconfig => 1, nouserconfig => 1,
-	      config => [ getresource("notes/latin.json"),
-			  getresource("notes/common.json") ],
+	      config => [ getresource("config/notes/latin.json"),
+			  getresource("config/notes/common.json") ],
 	      transcode => "latin"
 	    } );
   };
@@ -75,6 +75,7 @@ my $song = {
 			 'type' => 'songline'
 		       }
 		      ],
+	    chordsinfo => { map { $_ => $_ } qw( Re Solm7 )  },
 	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear',
 	    'system' => 'common',
