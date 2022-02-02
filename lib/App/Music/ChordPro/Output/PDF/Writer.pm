@@ -109,6 +109,13 @@ sub _bgcolor {
     $col;
 }
 
+sub _yflip {
+    warn("Text::Layout = $Text::Layout::VERSION\n" );
+    $Text::Layout::VERSION gt "0.027";
+}
+
+my $yflip;
+
 sub text {
     my ( $self, $text, $x, $y, $font, $size, $nomarkup ) = @_;
 #    print STDERR ("T: @_\n");
@@ -130,7 +137,12 @@ sub text {
     $self->{layout}->show( $x, $y, $self->{pdftext} );
 
     my $e = $self->{layout}->get_pixel_extents;
-    $e = $e->[1] if ref($e) eq 'ARRAY'; # Text::Layout <= 0.026
+    if ( ref($e) eq 'ARRAY' ) { # Text::Layout <= 0.026
+	$e = $e->[1];
+    }
+    elsif ( $yflip //= _yflip() ) {
+	$e->{y} += $e->{height};
+    }
 
     # Handle decorations (background, box).
     my $bgcol = $self->_bgcolor($font->{background});
@@ -139,54 +151,16 @@ sub text {
     my $frame = $font->{frame} || $debug;
     undef $frame if $frame && $frame =~ /^no(?:ne)?$/i;
     if ( $bgcol || $frame ) {
-	#printf("BB: %.2f %.2f %.2f %.2f\n", @{$e}{qw( x y width height ) } );
+	printf("BB: %.2f %.2f %.2f %.2f\n", @{$e}{qw( x y width height ) } )
+	  if $debug;
 	# Draw background and.or frame.
 	my $d = $debug ? 0 : 1;
 	$frame = $debug || $font->{color} || $self->{ps}->{theme}->{foreground} if $frame;
+	# $self->crosshair( $x, $y, 20, 0.2, "magenta" );
 	$self->rectxy( $x + $e->{x} - $d,
 		       $y + $e->{y} + $d,
 		       $x + $e->{x} + $e->{width} + $d,
-		       $y - $e->{height} - $d,
-		       0.5, $bgcol, $frame);
-    }
-
-    $x += $e->{width};
-#    print STDERR ("TX: $x\n");
-    return $x;
-}
-
-# Identical copy of text, but without baseline correction.
-sub text_nobl {
-    my ( $self, $text, $x, $y, $font, $size ) = @_;
-#    print STDERR ("T: @_\n");
-    $font ||= $self->{font};
-    $size ||= $font->{size};
-
-    $self->{layout}->set_font_description($font->{fd});
-    $self->{layout}->set_font_size($size);
-    # We don't have set_color in the API.
-    $self->{layout}->{_currentcolor} = $self->_fgcolor($font->{color});
-    $self->{layout}->set_markup($text);
-    $self->{layout}->show( $x, $y, $self->{pdftext} );
-
-    my $e = $self->{layout}->get_pixel_extents;
-    $e = $e->[1] if ref($e) eq 'ARRAY'; # Text::Layout <= 0.026
-
-    # Handle decorations (background, box).
-    my $bgcol = $self->_bgcolor($font->{background});
-    undef $bgcol if $bgcol && $bgcol =~ /^no(?:ne)?$/i;
-    my $debug = "blue";
-    my $frame = $font->{frame} || $debug;
-    undef $frame if $frame && $frame =~ /^no(?:ne)?$/i;
-    if ( $bgcol || $frame ) {
-	#printf("BB: %.2f %.2f %.2f %.2f\n", @{$e}{qw( x y width height ) } );
-	# Draw background and.or frame.
-	my $d = $debug ? 0 : 1;
-	$frame = $debug || $font->{color} || $self->{ps}->{theme}->{foreground} if $frame;
-	$self->rectxy( $x + $e->{x} - $d,
-		       $y + $e->{y} + $d,
-		       $x + $e->{x} + $e->{width} + $d,
-		       $y - $e->{height} - $d,
+		       $y + $e->{y} - $e->{height} - $d,
 		       0.5, $bgcol, $frame);
     }
 
@@ -324,6 +298,21 @@ sub cross {
     $gfx->stroke if $strokecolor;
     $gfx->move( $x-$r, $y+$r );
     $gfx->line( $x+$r, $y-$r );
+    $gfx->stroke if $strokecolor;
+    $gfx->restore;
+}
+
+sub crosshair {			# for debugging
+    my ( $self, $x, $y, $r, $lw, $strokecolor ) = @_;
+    my $gfx = $self->{pdfgfx};
+    $gfx->save;
+    $gfx->strokecolor($self->_fgcolor($strokecolor)) if $strokecolor;
+    $gfx->linewidth($lw||1);
+    $gfx->move( $x, $y - $r );
+    $gfx->line( $x, $y + $r );
+    $gfx->stroke if $strokecolor;
+    $gfx->move( $x - $r, $y );
+    $gfx->line( $x + $r, $y );
     $gfx->stroke if $strokecolor;
     $gfx->restore;
 }
