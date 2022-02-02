@@ -1,5 +1,55 @@
 # Release info
 
+## 5.986
+
+Released: 2022-02-02
+
+
+### ChordPro functionality
+
+* (Config) Theme colors foreground-medium and foreground-light.
+* Show cell bars in grid lines (Config: pdf.grids)
+* Suppress warnings for empty chords (i.e., [   ] spacers).
+* Add error message when font name is not a built-in.
+* Allow custom PDF meta data. Requires PDF::API2 2.042.
+* Allow meta split on separator.
+* Add settings.inline-annotations.
+* Add settings.chords-canonical to use canonical representation for chords.
+* Rework chords lookup to always use chordsinfo.
+* Use chord objects for show and display.
+* (GUI) Allow selection of custom library.
+* (PDF) Allow multi-line headings and footers.
+* (PDF) Configurable PDF library.
+* (PDF) Provide meta %{pages} for headings.
+* Allow (uppercase) letters for chord fingers.
+* (Wx) Overhaul preferences management.
+* Support center and scale for lilypond.
+* Add config settings.choruslabels for MSPro convenience.
+
+### BugFixes
+
+* Remove obsolete __EMBEDDING__.
+* Bump requirement Text::Layout to 0.024.
+* Fix issue #182.
+* Fix warning if diagrams.show=user and no chords.
+* Fix labels for grid with pdf.labels.comment.
+* Fix key_actual and key_from to reflect all keys.
+* Fix tilde expansion for font files.
+* (PDF) Suppress borders around ToC entries, just in case.
+* Fix sorttitles field name in CSV export.
+* Fix issue #194.
+* Fix issue #195.
+* Add workaround for incompatible pagel labels change in PDF::API 2.042.
+* Fix placement of finger dots.
+* Fix handling of NC chords.
+* Fix config loss problem with '{+pdf...}'. 
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.
+
+[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.
+
 ## 5.985
 
 Released: 2021-09-28
@@ -9,17 +59,12 @@ Released: 2021-09-28
 
 * Change config preset lookup algorithm and document it.
 * (docs) First 'hints and tips' contributed by xeruf.
+* (PDF) Suppress empty chorus recall tag.
 
 ### BugFixes
 
 * Remove obsolete code from Makefile.PL and GNUmakefile.
 * Fix issue #175.
-
-### Social and support
-
-[User community](https://groups.io/g/ChordPro) for feedback and help.
-
-[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.
 
 ## 5.983
 
