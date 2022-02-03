@@ -34,6 +34,7 @@ WriteMakefile
 		    'JSON::PP'			  => 2.27203,
 		    'String::Interpolate::Named'  => 1.01,
 		    'File::LoadLines'		  => 1.02,
+		    'File::HomeDir'		  => 1.004,,
 		    'Image::Info'		  => 1.41,
 		    'List::Util'		  => 1.33,
 		    'Storable'			  => 3.08,
