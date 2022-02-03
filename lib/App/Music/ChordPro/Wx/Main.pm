@@ -340,10 +340,10 @@ sub preview {
     if ( $self->{prefs_skipstdcfg} ) {
 	push( @ARGV, '--nodefaultconfigs' );
     }
-    elsif ( $self->{prefs_cfgpreset} ) {
-	$haveconfig++;
+    if ( $self->{prefs_cfgpreset} ) {
 	foreach ( @{ $self->{prefs_cfgpreset} } ) {
 	    push( @ARGV, '--config', $_ );
+	    $haveconfig++;
 	}
     }
     if ( $self->{prefs_enable_configfile} ) {
