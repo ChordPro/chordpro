@@ -4,6 +4,7 @@
     - (Wx)(MacOS) Improve prefences dialog.
     - !BugFixes
     - Add File::HomeDir to dependencies.
+    - Fix issue #204.
 
 5.986 2022-02-02
 
