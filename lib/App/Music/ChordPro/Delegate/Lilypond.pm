@@ -125,7 +125,7 @@ sub ly2image {
     my $have_magick = do {
         local $SIG{__WARN__} = sub {};
 	local $SIG{__DIE__} = sub {};
-	eval { require Image::Magicxk;
+	eval { require Image::Magick;
 	       $Image::Magick::VERSION || "6.x?" };
     };
     if ( $have_magick ) {
