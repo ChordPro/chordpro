@@ -160,19 +160,13 @@ sub fetch_prefs {
     $self->_enablecustom;
 
     if ( $is_macos ) {
-	# Cannot use chooser, allow editing and hide button.
+	# Cannot use chooser, hide button and change tooltip.
 	for ( qw( configfile customlib tmplfile ) ) {
 	    $self->{"sz_$_"}->Hide($self->{"b_${_}dialog"});
 	    $self->{"sz_$_"}->Layout;
 	    my $t = $self->{"t_${_}dialog"}->GetToolTip->GetTip;
-	    $t =~ s/ by pressing .* button// and
-	      $self->{"t_${_}dialog"}->SetToolTipString($t);
-	}
-    }
-    else {
-	# Use chooser, disallow editing.
-	for ( qw( configfile customlib tmplfile ) ) {
-	    $self->{"t_${_}dialog"}->SetEditable(0);
+	    $t =~ s/ by pressing .* button//;
+	    $self->{"t_${_}dialog"}->SetToolTipString($t);
 	}
     }
 }
