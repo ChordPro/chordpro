@@ -64,6 +64,11 @@ The ABC data may be preceded by formatting instructions:
 * center  
   Center the image on the page.
 
+* split  
+  ChordPro will attempt to split the generated image into individual
+  systems so longer scores can be put into multiple pages.  
+  Note that there is no guarantee this will work for your score.
+
 # Directives: end_of_abc
 
 This directive indicates the end of the abc section.
