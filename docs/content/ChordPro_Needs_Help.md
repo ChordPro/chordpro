@@ -43,6 +43,9 @@ Currently we only have an official package in the Fedora repository.
 We also have a ChordPro [AppImage](https://www.appimge.org) but it
 needs work to suit more platforms.
 
+Some users ask for [flatpak](https://flatpak.org/) or
+[docker](https://www.docker.com/). Can you help?
+
 ### Microsoft Windows
 
 Currently we provide an installer package for 64-bit Windows 10.
