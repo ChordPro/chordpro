@@ -4,6 +4,7 @@ MANIFEST
 Makefile.PL
 README.md
 README.ABC
+README.LilyPond
 lib/App/Music/ChordPro.pm
 lib/App/Music/ChordPro/A2Crd.pm
 lib/App/Music/ChordPro/Chords.pm
