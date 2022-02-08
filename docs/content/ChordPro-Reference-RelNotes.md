@@ -1,5 +1,25 @@
 # Release info
 
+## 5.987
+
+Released: 2022-02-08
+
+
+### ChordPro functionality
+
+* (Wx)(MacOS) Improve prefences dialog.
+
+### BugFixes
+
+* Add File::HomeDir to dependencies.
+* Fix issue #204.
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.
+
+[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.
+
 ## 5.986
 
 Released: 2022-02-02
@@ -43,12 +63,6 @@ Released: 2022-02-02
 * Fix placement of finger dots.
 * Fix handling of NC chords.
 * Fix config loss problem with '{+pdf...}'. 
-
-### Social and support
-
-[User community](https://groups.io/g/ChordPro) for feedback and help.
-
-[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.
 
 ## 5.985
 

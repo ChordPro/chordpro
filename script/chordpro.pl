@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
 # Last Modified By: Johan Vromans
-# Last Modified On: Thu Sep 16 19:29:26 2021
-# Update Count    : 263
+# Last Modified On: Sat Feb  5 20:35:50 2022
+# Update Count    : 264
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -40,7 +40,10 @@ use lib "$FindBin::Bin/../lib";
 use App::Packager qw( :name App::Music::ChordPro );
 use App::Music::ChordPro;
 use App::Music::ChordPro::Utils qw(is_msw);
-$ENV{PATH} = "$FindBin::Bin/.." . (is_msw() ? ";" : ":" ) . $ENV{PATH};
+
+$ENV{PATH} = join( is_msw() ? ";" : ":",
+		   "$FindBin::Bin", "$FindBin::Bin/..",
+		   $ENV{PATH} );
 
 run();
 

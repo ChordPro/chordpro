@@ -1,3 +1,11 @@
+5.987 2022-02-08
+
+    - !ChordPro functionality
+    - (Wx)(MacOS) Improve prefences dialog.
+    - !BugFixes
+    - Add File::HomeDir to dependencies.
+    - Fix issue #204.
+
 5.986 2022-02-02
 
     - !ChordPro functionality

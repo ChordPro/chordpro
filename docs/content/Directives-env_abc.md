@@ -39,8 +39,10 @@ margin, see [labels]({{< relref "ChordPro-Configuration-PDF#labels" >}}).
 ## General rules for embedding ABC source
 
 * Always start ABC content with `X:1` as first line and insert an
-  empty line before the `{end_of_abc}` directive. See [Remarks]({{<
-  relref "#remarks" >}}) below.
+  empty line before the `{end_of_abc}` directive. 
+  Anything before this
+  line will be considered formatting instructions (see below).
+  See also [Remarks]({{< relref "#remarks" >}}).
 
 * ChordPro transposition using `{transpose}` and/or `--transpose` will
   transpose the embedded ABC. Adding `%%transpose` to the ABC
@@ -51,6 +53,21 @@ margin, see [labels]({{< relref "ChordPro-Configuration-PDF#labels" >}}).
 
 Since the actual rendering is handled by external tools, ChordPro has
 no control over what and how the output will look like.
+
+## Formatting instructioms
+
+The ABC data may be preceded by formatting instructions:
+
+* scale=_n_  
+  Scale the image with the given factor.
+
+* center  
+  Center the image on the page.
+
+* split  
+  ChordPro will attempt to split the generated image into individual
+  systems so longer scores can be put into multiple pages.  
+  Note that there is no guarantee this will work for your score.
 
 # Directives: end_of_abc
 

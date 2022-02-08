@@ -17,6 +17,12 @@ use lib "$FindBin::Bin/../lib";
 use App::Packager qw( :name App::Music::ChordPro );
 use App::Music::ChordPro;
 
+use App::Music::ChordPro::Utils qw(is_msw);
+
+$ENV{PATH} = join( is_msw() ? ";" : ":",
+		   "$FindBin::Bin", "$FindBin::Bin/..",
+		   $ENV{PATH} );
+
 # Package name.
 my $my_package = 'ChordPro';
 # Program name and version.

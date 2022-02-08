@@ -51,8 +51,22 @@ margin, see [labels]({{< relref "ChordPro-Configuration-PDF#labels" >}}).
 * The Lilypond data is converted and included as a single image.
   No vertical splitting between staves.
 
+* The LilyPond data must start with a line that
+  starts with a percent `%` sign or backslash `\`. Anything before this
+  line will be considered formatting instructions (see below).
+
 Since the actual rendering is handled by external tools, ChordPro has
 no control over what and how the output will look like.
+
+## Formatting instructioms
+
+The Lilypond data may be preceded by formatting instructions:
+
+* scale=_n_  
+  Scale the image with the given factor.
+
+* center  
+  Center the image on the page.
 
 # Directives: end_of_ly
 
