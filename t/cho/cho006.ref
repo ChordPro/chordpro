@@ -1,0 +1,15 @@
+{title: Conditional directives}
+{no_grid}
+
+{comment: This is for guitar}
+{comment: This is not for guitarx}
+
+{start_of_whatever}
+[A]This is for [B]Guitar
+{end_of_whatever}
+
+
+
+{start_of_whatever}
+[A]This is not for [B]Guitarx
+{end_of_whatever}

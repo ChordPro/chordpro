@@ -103,6 +103,8 @@ sub generate_song {
     if ( $s->{settings} ) {
 	foreach ( sort keys %{ $s->{settings} } ) {
 	    push(@s, "{$_: " . $s->{settings}->{$_} . "}");
+	    $s[-1] = "{no_grid}"
+	      if $s[-1] eq "{diagrams: 0}";
 	}
     }
 

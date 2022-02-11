@@ -1,6 +1,7 @@
 5.987 2022-02-08
 
     - !ChordPro functionality
+    - Conditional directives can be negated with a trailing !
     - (Wx)(MacOS) Improve prefences dialog.
     - !BugFixes
     - Add File::HomeDir to dependencies.

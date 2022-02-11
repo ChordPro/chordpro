@@ -1,0 +1,23 @@
+{title: Conditional directives}
+{no_grid}
+
+{c-guitar: This is for guitar}
+{c-guitar!: This is not for guitar}
+{c-guitarx: This is for guitarx}
+{c-guitarx!: This is not for guitarx}
+
+{start_of_whatever-guitar}
+[A]This is for [B]Guitar
+{end_of_whatever}
+
+{start_of_whatever-guitar!}
+[A]This is not for [B]Guitar
+{end_of_whatever}
+
+{start_of_whatever-guitarx}
+[A]This is for [B]Guitarx
+{end_of_whatever}
+
+{start_of_whatever-guitarx!}
+[A]This is not for [B]Guitarx
+{end_of_whatever}
