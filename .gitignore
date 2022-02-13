@@ -1,12 +1,16 @@
 .??*
 !.github/
+!.vscode/
+!.devcontainer/
 *~
+App/
 \#.*#
 CPAN
 Makefile
 blib/
 *.cho
 *.pdf
+test.*
 x.*
 Misc
 Released
@@ -25,3 +29,4 @@ pm_to_blib
 pd_*.json
 files*.lst
 res/pod
+.vscode/perl-lang/**

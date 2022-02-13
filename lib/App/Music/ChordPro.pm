@@ -124,6 +124,9 @@ sub chordpro {
         elsif ( $of =~ /\.mma?$/i ) {
             $options->{generate} ||= "MMA";
         }
+        elsif ( $of =~ /\.(md|markdown)$/i ) {
+            $options->{generate} ||= "Markdown";
+        }
         elsif ( $of =~ /\.(debug)$/i ) {
             $options->{generate} ||= "Debug";
         }
