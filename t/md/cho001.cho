@@ -1,0 +1,15 @@
+{title: t1}
+{artist: Foo}
+{artist: Bar}
+{key: D}
+
+{c: Key: %{key}}
+[D]Hello[*Bis]
+{chord B frets 1 2 3 4 5 6}
+Air [(E)]Hello[E]
+{chord B}
+S[NC]ure
+
+#{start_of_grid 1+4x4+2}
+#A | D . . . | E . . . | (D) . . . | E . . . |
+#{end_of_grid}
