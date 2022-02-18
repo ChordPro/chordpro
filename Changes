@@ -1,3 +1,10 @@
+0.000
+
+    - !ChordPro functionality
+    - Markdown export (EXPERIMENTAL). Thanks to Johannes Rumpf.
+    - (Wx)(MacOS) Improve prefences dialog.
+    - !BugFixes
+
 5.987 2022-02-08
 
     - !ChordPro functionality
