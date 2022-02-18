@@ -8,6 +8,7 @@ our $config;
 package App::Music::ChordPro::Output::Markdown;
 
 use App::Music::ChordPro::Output::Common;
+use Text::Layout::Markdown;
 
 use strict;
 use warnings;
@@ -345,29 +346,6 @@ sub chord {
     $layout->set_markup($ci->show);
     my $t = $layout->render;
     return $ci->is_annotation ? "*$t" : $t;
-}
-
-package Text::Layout::Markdown;
-
-use parent 'Text::Layout';
-
-# Eliminate warning when HTML backend is loaded together with Text backend.
-no warnings 'redefine';
-
-sub new {
-    my ( $pkg, @data ) = @_;
-    my $self = $pkg->SUPER::new;
-    $self;
-}
-
-sub render {
-    my ( $self ) = @_;
-    my $res = "";
-    foreach my $fragment ( @{ $self->{_content} } ) {
-	next unless length($fragment->{text});
-	$res .= $fragment->{text};
-    }
-    $res;
 }
 
 1;
