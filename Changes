@@ -4,6 +4,7 @@
     - Markdown export (EXPERIMENTAL). Thanks to Johannes Rumpf.
     - (Wx)(MacOS) Improve prefences dialog.
     - !BugFixes
+    - Fix issue #208.
 
 5.987 2022-02-08
 
