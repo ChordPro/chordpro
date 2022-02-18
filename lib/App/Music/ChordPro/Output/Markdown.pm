@@ -12,7 +12,6 @@ use Text::Layout::Markdown;
 
 use strict;
 use warnings;
-use JSON;
 use Data::Dumper;
 
 sub generate_songbook {
