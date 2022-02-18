@@ -1,0 +1,11 @@
+{title: Keys and Capo}
+{key: D}
+{capo: 2}
+{c: Key: %{key}, Actual: %{key_actual}, From: %{key_from}}
+[D]Hi
+{transpose 3}
+{c: Key: %{key}, Actual: %{key_actual}, From: %{key_from}}
+[D]Hi
+{transpose}
+{c: Key: %{key}, Actual: %{key_actual}, From: %{key_from}}
+[D]Hi
