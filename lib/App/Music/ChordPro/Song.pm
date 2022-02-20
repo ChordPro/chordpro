@@ -238,32 +238,7 @@ sub parse_song {
     $self->{chordsinfo} = {};
 
     # Preprocessor.
-    my $prep;
-    if ( $config->{parser} ) {
-	foreach my $linetype ( keys %{ $config->{parser}->{preprocess} } ) {
-	    my @targets;
-	    my $code;
-	    foreach ( @{ $config->{parser}->{preprocess}->{$linetype} } ) {
-		if ( $_->{pattern} ) {
-		    push( @targets, $_->{pattern} );
-		    # Subsequent targets override.
-		    $code->{$_->{pattern}} = $_->{replace};
-		}
-		else {
-		    push( @targets, quotemeta($_->{target}) );
-		    # Subsequent targets override.
-		    $code->{quotemeta($_->{target})} = quotemeta($_->{replace});
-		}
-	    }
-	    if ( @targets ) {
-		my $t = "sub { for (\$_[0]) {\n";
-		$t .= "s\0" . $_ . "\0" . $code->{$_} . "\0g;\n" for @targets;
-		$t .= "}}";
-		$prep->{$linetype} = eval $t;
-		die( "CODE : $t\n$@" ) if $@;
-	    }
-	}
-    }
+    my $prep = make_preprocessor( $config->{parser}->{preprocess} );
 
     # Pre-fill meta data, if any. TODO? ALREADY DONE?
     if ( $options->{meta} ) {
@@ -1715,7 +1690,8 @@ sub parse_chord {
 
     if ( $info ) {
 	warn( "Parsing chord: \"$chord\" okay: \"",
-	      $info->name, "\"",
+	      $info->name, "\" \"",
+	      $info->chord_display, "\"",
 	      $unk ? " but unknown" : "",
 	      "\n" ) if $debug > 1;
 	$info->{parens} = $parens if $parens;
