@@ -2,9 +2,12 @@
 
     - !ChordPro functionality
     - Markdown export (EXPERIMENTAL). Thanks to Johannes Rumpf.
+    - Add settings.truesf to obtain unicode sharps/flats in chord names.
     - (Wx)(MacOS) Improve prefences dialog.
+    - Several ABC fixes/improvements.
     - !BugFixes
     - Fix issue #208.
+    - (Wx) Fix sharps/flats mixup in PreferencesDialog.
 
 5.987 2022-02-08
 

@@ -25,6 +25,9 @@ sub abc2image {
 
     state $imgcnt = 0;
     state $td = File::Temp::tempdir( CLEANUP => !$config->{debug}->{abc} );
+    my $cfg = $config->{delegates}->{abc};
+
+    my $prep = make_preprocessor( $cfg->{preprocess} );
 
     $imgcnt++;
     my $src  = File::Spec->catfile( $td, "tmp${imgcnt}.abc" );
@@ -43,14 +46,13 @@ sub abc2image {
 
 	# Suppress meaningless transpositions. ChordPro uses them to enforce
 	# certain chord renderings.
-	next if $_ eq "transpose"
-	  && !($elt->{opts}->{$_} % @{ $config->{notes}->{sharp} });
-
-	print $fd '%%'.$_." ".$elt->{opts}->{$_}."\n";
-	warn('%%'.$_." ".$elt->{opts}->{$_}."\n") if DEBUG;
+	next if $_ ne "transpose";
+	my $x = $elt->{opts}->{$_} % @{ $config->{notes}->{sharp} };
+	print $fd '%%transpose'." $x\n";
+	warn('%%transpose'." $x\n") if DEBUG;
     }
 
-    for ( @{ $config->{delegates}->{abc}->{preamble} } ) {
+    for ( @{ $cfg->{preamble} } ) {
 	print $fd "$_\n";
 	warn( "$_\n") if DEBUG;
     }
@@ -72,6 +74,7 @@ sub abc2image {
     $kv = parse_kv( @pre ) if @pre;
     # Copy. We assume the user knows how to write ABC.
     for ( @data ) {
+	$prep->{abc}->($_) if $prep->{abc};
 	print $fd $_, "\n";
 	warn($_, "\n") if DEBUG;
     }
@@ -119,7 +122,7 @@ sub abc2image {
 
     my $svg0 = File::Spec->catfile( $td, "tmp${imgcnt}.svg" );
     my $svg1 = File::Spec->catfile( $td, "tmp${imgcnt}001.svg" );
-    my $fmt = $config->{delegates}->{abc}->{config};
+    my $fmt = $cfg->{config};
     my @cmd = ( $abcm2ps, qw(-g -q -m0cm), "-w" . $pw . "pt" );
     if ( $fmt =~ s/^none,?// ) {
 	push( @cmd, "+F" );
@@ -144,7 +147,10 @@ sub abc2image {
 #	@lines = loadlines($svg1, { encoding => "ISO-8859-1" } );
 	@lines = loadlines($svg1);
 	for ( @lines ) {
+
+	    $prep->{svg}->($_) if $prep->{svg};
 	    next unless /^(.*)\bstyle="font:(.*)"(.*)$/;
+
 	    my ( $pre, $style, $post ) = ( $1, $2, $3 );
 	    my $f = {};
 	    my @f;

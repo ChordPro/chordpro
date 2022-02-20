@@ -930,11 +930,17 @@ sub transcode {
 
 sub chord_display {
     my ( $self, $raw ) = @_;
-    my $res = $self->{display}
+    my $res =
+      $self->{display}
       ? $raw
-      ? $self->{display}
+        ? $self->{display}
         : interpolate( { args => $self }, $self->{display} )
-	: $self->show("np");
+      : $self->show("np");
+    if ( $::config->{settings}->{truesf} ) {
+	$res =~ s/#/♯/g;
+	pos($res) = 1;
+	$res =~ s/b/♭/g;
+    }
     return $self->{parens} ? "($res)" : $res;
 }
 

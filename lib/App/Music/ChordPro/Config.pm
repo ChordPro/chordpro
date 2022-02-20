@@ -961,6 +961,8 @@ sub default_config() {
       "chords-canonical" : false,
       // If false, chorus labels are used as tags.
       "choruslabels" : true,
+      // Substitute Unicode sharp/flats in chord names.
+      "truesf" : false,
     },
 
     // Metadata.
@@ -1121,6 +1123,7 @@ sub default_config() {
             "handler"  : "abc2image",
             "config"   : "default", // or "none", or "myformat.fmt"
             "preamble" : [],
+            "preprocess" : { "abc" : [], "svg" : [] },
         },
         "ly" : {
             "type"     : "image",
