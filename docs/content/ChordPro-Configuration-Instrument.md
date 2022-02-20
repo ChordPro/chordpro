@@ -89,13 +89,13 @@ This is a variant of Dutch where `H` is used instead of `B`, and `B`
 is used instead of `B♭`. Flats and sharps are denoted by `is` and `es`
 suffixes, not symbols.  
 This definition is contained in the preset configuration
-`notes_german`.
+`notes:german`.
 
 * Scandinavian  
 This is a variant of German where `H` means `B`, and `B♭`
 means B flat. Flats and sharps are denoted by the appropriate symbols.  
 This definition is contained in the preset configuration
-`notes_scandinavian`.
+`notes:scandinavian`.
 
 * Latin  
 This system consists of the diatonic note names `Do`, `Re`, `Mi`,
@@ -103,7 +103,7 @@ This system consists of the diatonic note names `Do`, `Re`, `Mi`,
 appropriate symbols. It is often used in Italian, French,
 Spanish and Portuguese speaking countries.  
 This definition is contained in the preset configuration
-`notes_latin`.
+`notes:latin`.
 
 For more information, see [Key signature names and translations](https://en.wikipedia.org/wiki/Key_signature_names_and_translations) on Wikipedia.
 
