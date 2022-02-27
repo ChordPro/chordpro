@@ -21,7 +21,7 @@ use Text::ParseWords qw(shellwords);
 sub DEBUG() { $config->{debug}->{ly} }
 
 sub ly2image {
-    my ( $s, $pr, $elt ) = @_;
+    my ( $s, $pw, $elt ) = @_;
 
     state $imgcnt = 0;
     state $td = File::Temp::tempdir( CLEANUP => !$config->{debug}->{ly} );
@@ -90,17 +90,6 @@ sub ly2image {
 	return;
     }
 
-    # Available width and height.
-    my $pw;
-    my $ps = $pr->{ps};
-    if ( $ps->{columns} > 1 ) {
-	$pw = $ps->{columnoffsets}->[1]
-	  - $ps->{columnoffsets}->[0]
-	  - $ps->{columnspace};
-    }
-    else {
-	$pw = $ps->{__rightmargin} - $ps->{_leftmargin};
-    }
     if ( $kv->{width} ) {
 	$pw = $kv->{width};
     }

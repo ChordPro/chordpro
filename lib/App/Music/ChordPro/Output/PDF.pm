@@ -1003,7 +1003,16 @@ sub generate_song {
 		eval "require $pkg" || die($@);
 		my $hd = $pkg->can($elt->{handler}) //
 		  die("PDF: Missing delegate handler ${pkg}::$elt->{handler}\n");
-		my $res = $hd->( $s, $pr, $elt );
+		my $pw;			# available width
+		if ( $ps->{columns} > 1 ) {
+		    $pw = $ps->{columnoffsets}->[1]
+		      - $ps->{columnoffsets}->[0]
+		      - $ps->{columnspace};
+		}
+		else {
+		    $pw = $ps->{__rightmargin} - $ps->{_leftmargin};
+		}
+		my $res = $hd->( $s, $pw, $elt );
 		next unless $res; # assume errors have been given
 		unshift( @elts, @$res );
 		next;
