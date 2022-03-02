@@ -15,7 +15,7 @@ use Text::Layout::Markdown;
 my $single_space = 0;		# suppress chords line when empty
 my $lyrics_only = 0;		# suppress all chords lines
 my $chords_under = 0;		# chords under lyrics
-my $text_layout = Text::Layout::Text->new; 
+my $text_layout = Text::Layout::Markdown->new;; # Text::Layout::Text->new; 
 my %line_routines = ();
 my $tidy;
 my $rechorus; # not implemented @todo
@@ -336,28 +336,28 @@ sub elt_handler {
 
 #################
 
-package Text::Layout::Text;
+# package Text::Layout::Text;
 
-use parent 'Text::Layout';
+# use parent 'Text::Layout';
 
-# Eliminate warning when HTML backend is loaded together with Text backend.
-no warnings 'redefine';
+# # Eliminate warning when HTML backend is loaded together with Text backend.
+# no warnings 'redefine';
 
-sub new {
-    my ( $pkg, @data ) = @_;
-    my $self = $pkg->SUPER::new;
-    $self;
-}
+# sub new {
+#     my ( $pkg, @data ) = @_;
+#     my $self = $pkg->SUPER::new;
+#     $self;
+# }
 
-sub render {
-    my ( $self ) = @_;
-    my $res = "";
-    foreach my $fragment ( @{ $self->{_content} } ) {
-	next unless length($fragment->{text});
-	$res .= $fragment->{text};
-    }
-    $res;
-}
+# sub render {
+#     my ( $self ) = @_;
+#     my $res = "";
+#     foreach my $fragment ( @{ $self->{_content} } ) {
+# 	next unless length($fragment->{text});
+# 	$res .= $fragment->{text};
+#     }
+#     $res;
+# }
 
 
 1;

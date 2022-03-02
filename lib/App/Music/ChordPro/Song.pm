@@ -1722,9 +1722,9 @@ sub structurize {
 	    $context = $def_context;
 	    next;
 	}
-	if ( $item->{type} eq "songline" &&  $item->{context} eq '' ){ # A songline should have a context - non means verse
-		$item->{context} = 'verse';
-	}
+	# if ( $item->{type} eq "songline" &&  $item->{context} eq '' ){
+	# 	$item->{context} = 'verse';
+	# }
 	if ( $context ne $item->{context} ) {
 	    push( @body, { type => $context = $item->{context}, body => [] } );
 	}
