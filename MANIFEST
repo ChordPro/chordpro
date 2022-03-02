@@ -21,6 +21,7 @@ lib/App/Music/ChordPro/Output/PDF.pm
 lib/App/Music/ChordPro/Output/PDF/Writer.pm
 lib/App/Music/ChordPro/Output/PDF/KeyboardDiagrams.pm
 lib/App/Music/ChordPro/Output/PDF/StringDiagrams.pm
+lib/App/Music/ChordPro/Output/PDF/SVG.pm
 lib/App/Music/ChordPro/Output/Text.pm
 lib/App/Music/ChordPro/Song.pm
 lib/App/Music/ChordPro/Songbook.pm
@@ -58,6 +59,7 @@ lib/App/Music/ChordPro/res/config/ukulele-ly.json
 lib/App/Music/ChordPro/res/config/ukulele.json
 lib/App/Music/ChordPro/res/examples/swinglow.cho
 lib/App/Music/ChordPro/res/fonts/ChordProSymbols.ttf
+lib/App/Music/ChordPro/res/fonts/abc2avg.ttf
 lib/App/Music/ChordPro/res/icons/chordpro.ico
 lib/App/Music/ChordPro/res/icons/chordpro-doc.ico
 lib/App/Music/ChordPro/res/icons/chordpro.icns

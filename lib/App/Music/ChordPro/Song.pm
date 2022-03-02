@@ -1027,7 +1027,7 @@ sub directive {
 	    do_warn( "Missing image source\n" );
 	    return;
 	}
-	$self->add( type => "image",
+	$self->add( type => $uri =~ /\.svg$/ ? "svg" : "image",
 		    uri  => $uri,
 		    opts => \%opts );
 	return 1;
