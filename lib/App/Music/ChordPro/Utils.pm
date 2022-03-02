@@ -69,7 +69,7 @@ sub findexe {
     my ( $prog ) = @_;
     my @path;
     if ( MSWIN ) {
-	$prog .= ".exe";
+	$prog .= ".exe" unless $prog =~ /\.\w+$/;
 	@path = split( ';', $ENV{PATH} );
 	unshift( @path, '.' );
     }
