@@ -791,3 +791,125 @@ sub xabc2image {
 #     }
 #
 # =cut
+
+# ABC processing using abc2svg and custom SVG processor.
+# FOR EXPERIMENTAL PURPOSES ONLY!
+
+sub abc2svg {
+    my ( $s, $pw, $elt ) = @_;
+
+    state $imgcnt = 0;
+    state $td = File::Temp::tempdir( CLEANUP => !$config->{debug}->{abc} );
+    my $cfg = $config->{delegates}->{abc};
+
+    state $abc2svg = findexe("abc2svg");
+    unless ( $abc2svg ) {
+	my $x;
+	if ( $x = findexe("npx")
+	     or is_msw() and $x = findexe("npx.cmd") ) {
+	    $abc2svg = [ $x, "abc2svg" ];
+	}
+    }
+
+    unless ( $abc2svg ) {
+	warn("Error in ABC embedding: need 'abc2svg' tool.\n");
+	return;
+    }
+
+    my $prep = make_preprocessor( $cfg->{preprocess} );
+
+    $imgcnt++;
+    my $src  = File::Spec->catfile( $td, "tmp${imgcnt}.abc" );
+    my $svg  = File::Spec->catfile( $td, "tmp${imgcnt}.xhtml" );
+
+    my $fd;
+    unless ( open( $fd, '>:utf8', $src ) ) {
+	warn("Error in ABC embedding: $src: $!\n");
+	return;
+    }
+
+    if ( $abc2svg ) {
+	my $f = ::rsc_or_file( "fonts/abc2svg.ttf" );
+	# Currently we have a dup id when using fullsvg.
+	for ( "%%musicfont abc2svg" ) {
+	    print $fd "$_\n";
+	    warn( "$_\n") if DEBUG;
+	}
+    }
+
+    my @preamble = @{ $cfg->{preamble} };
+
+    for ( keys(%{$elt->{opts}}) ) {
+
+	# Suppress meaningless transpositions. ChordPro uses them to enforce
+	# certain chord renderings.
+	next if $_ ne "transpose";
+	my $x = $elt->{opts}->{$_} % @{ $config->{notes}->{sharp} };
+	unshift( @preamble, '%%transpose'." $x" );
+    }
+
+    # Add mandatory field.
+    my @pre;
+    my @data = @{$elt->{data}};
+    while ( @data ) {
+	$_ = shift(@data);
+	unshift( @data, $_ ), last if /^X:/;
+	push( @pre, $_ );
+    }
+    if ( @pre && !@data ) {	# no X: found
+	warn("X:1 (added)\n") if DEBUG;
+	@data = ( "X:1", @pre );
+	@pre = ();
+    }
+    my $kv = { %$elt };
+    $kv = parse_kv( @pre ) if @pre;
+    $kv->{split} = 1 if $abc2svg;
+    $kv->{scale} ||= 1;
+    if ( $kv->{width} ) {
+	$pw = $kv->{width};
+    }
+
+    unshift( @preamble,
+	     "%%pagewidth " . $pw . "px",
+	     "%%leftmargin 0cm",
+	     "%%rightmargin 0cm",
+	   );
+
+    # Copy. We assume the user knows how to write ABC.
+    for ( @preamble ) {
+	print $fd $_, "\n";
+	warn($_, "\n") if DEBUG;
+    }
+    for ( @data ) {
+	$prep->{abc}->($_) if $prep->{abc};
+	print $fd $_, "\n";
+	warn($_, "\n") if DEBUG;
+    }
+
+    unless ( close($fd) ) {
+	warn("Error in ABC embedding: $src: $!\n");
+	return;
+    }
+
+    my @cmd = ref($abc2svg) ? ( @$abc2svg ) : ( $abc2svg );
+    open( my $STDOLD, '>&', STDOUT );
+    open( STDOUT, '>:utf8', $svg );
+    push( @cmd, "toxhtml.js", $src );
+    warn( "+ @cmd\n" ) if DEBUG;
+    my $ret = sys( @cmd );
+    open( STDOUT, '>&', $STDOLD );
+    if ( $ret or ! -s $svg ) {
+	warn("Error in ABC embedding\n");
+	return;
+    }
+
+    my @res;
+    push( @res,
+	  { type => "svg",
+	    uri  => $svg,
+	    opts => { center => $kv->{center}, scale => $kv->{scale} } } );
+
+    return \@res;
+}
+
+1;
