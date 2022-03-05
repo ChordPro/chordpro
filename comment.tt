@@ -1,0 +1,7 @@
+\begin{tcolorbox}[colback=gray!30,%gray background
+                  colframe=black,% black frame colour
+                  width=\textwidth-2cm,% Use 5cm total width,
+                  arc=3mm, auto outer arc,
+                  size=small]
+                \chordsoff [% comment %] 
+\end{tcolorbox}
