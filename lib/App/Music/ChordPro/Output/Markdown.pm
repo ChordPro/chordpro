@@ -15,7 +15,7 @@ use Text::Layout::Markdown;
 my $single_space = 0;		# suppress chords line when empty
 my $lyrics_only = 0;		# suppress all chords lines
 my $chords_under = 0;		# chords under lyrics
-my $text_layout = Text::Layout::Markdown->new;; # Text::Layout::Text->new; 
+my $text_layout = Text::Layout::Markdown->new; # Text::Layout::Text->new; 
 my %line_routines = ();
 my $tidy;
 my $rechorus; # not implemented @todo
@@ -38,7 +38,7 @@ sub generate_songbook {
 			push(@book, "") if $options->{'backend-option'}->{tidy};
 		}
 		push(@book, @{generate_song($song)});
-		push(@book, "---  \n"); #Horizontal line between each song
+		push(@book, "---------------  \n"); #Horizontal line between each song
 	}
 
     push( @book, "");
@@ -182,7 +182,7 @@ sub line_songline {
 $line_routines{line_songline} = \&line_songline;
 
 sub line_newpage {
-    return "---  \n";
+    return "---------------  \n";
 }
 $line_routines{line_newpage} = \&line_newpage;
 
@@ -248,7 +248,7 @@ sub line_chorus {
 	push(@s, "");
 	push(@s, elt_handler($lineobject->{body}));
 	# push(@s, "\x{00A0}  "); # nbsp
-	push(@s, "---  ");
+	push(@s, "---------------  \n");
    return @s;
 }
 $line_routines{line_chorus} = \&line_chorus;
