@@ -1068,9 +1068,6 @@ sub generate_song {
 	    for my $xo ( @$o ) {
 		state $imgcnt = 0;
 		my $assetid = sprintf("XFOasset%03d", $imgcnt++);
-		warn("Created asset $assetid (xform, ",
-		     $xo->{width}, "x", $xo->{height}, ")\n")
-		  if $config->{debug}->{images};
 		$assets->{$assetid} = { type => "xform", data => $xo };
 
 		push( @res,
@@ -1079,9 +1076,10 @@ sub generate_song {
 			height => $xo->{height},
 			id  => $assetid,
 			opts => { center => $elt->{opts}->{center},
-				  scale => $elt->{ops}->{scale} || 1 } },
+				  scale => $elt->{opts}->{scale} || 1 } },
 		    );
-		warn("Asset $assetid options:",
+		warn("Created asset $assetid (xform, ",
+		     $xo->{width}, "x", $xo->{height}, ")",
 		     " scale=", $elt->{opts}->{scale} || 1,
 		     " center=", $elt->{opts}->{center}//0,
 		     "\n")
