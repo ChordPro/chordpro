@@ -1,0 +1,6 @@
+<h{{ .Level }} id="{{ .Anchor | safeURL }}">
+  {{- if not ( eq hugo.Environment "stable" ) -}}
+  <a class="heading-anchor" href="#{{ .Anchor | safeURL }}"># </a>
+  {{- end -}}
+  {{ .Text | safeHTML }}
+</h{{ .Level }}>
