@@ -32,7 +32,8 @@ sub generate_songbook {
     $gcfg = $::config->{LaTeX};
 
     $gtemplate = Template->new({
-        INCLUDE_PATH => $gcfg->{template_include_path},
+        INCLUDE_PATH => [ $gcfg->{template_include_path},
+                         ::rsc_or_file("res/templates/"), ],
         INTERPOLATE  => 1,
     }) || die "$Template::ERROR\n";
 
@@ -56,6 +57,19 @@ sub line_default {
     return "";
 }
 $line_routines{line_default} = \&line_default;
+
+sub get_firstphrase{
+   my ( $elts ) = @_; # reference to array
+   my $line = "";
+   foreach my $elt (@{ $elts }) {
+       if($elt->{type} eq 'songline'){
+          foreach my $phrase (@{$elt->{phrases}}){
+                $line .=  $phrase;
+            }
+        return my_latex_encode($line);
+       }
+   }
+}
 
 sub line_songline {
     my ( $lineobject ) = @_;
@@ -247,7 +261,13 @@ sub my_latex_encode{
 
 sub generate_song {
     my ( $s ) = @_;
+    %gtemplatatevar = ();
 
+    if ( defined $s->{meta} ) {
+		$gtemplatatevar{meta} = my_latex_encode($s->{meta});
+    }
+    $gtemplatatevar{meta}->{index} = get_firstphrase($s->{body}); # needs unstructured data - .. redesign?
+    
   # asume songline a verse when no context is applied. # check https://github.com/ChordPro/chordpro/pull/211
   # Songbook needs to have a verse otherwise the chords-makro is not in the right context
 	foreach my $item ( @{ $s->{body} } ) {
@@ -256,7 +276,7 @@ sub generate_song {
 	}} # end of pull -- 
     $s->structurize; # removes empty lines 
 
-    %gtemplatatevar = ();
+
     for ( $s->{title} // "Untitled" ) {
 		$gtemplatatevar{title} = my_latex_encode($s->{title});
     }
@@ -264,9 +284,6 @@ sub generate_song {
 		$gtemplatatevar{subtitle} = my_latex_encode($s->{subtitle});
     }
 
-    if ( defined $s->{meta} ) {
-		$gtemplatatevar{meta} = my_latex_encode($s->{meta});
-    }
 
     if ( defined $s->{chords}->{chords} ) {
        my @chords;

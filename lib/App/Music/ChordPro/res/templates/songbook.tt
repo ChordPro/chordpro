@@ -47,7 +47,7 @@
 
 \begin{document}
 \frontmatter
-%\showindex{Index}{titleidx}
+\showindex{Index}{titleidx}
 
 \mainmatter
 \begin{songs}{titleidx,authidx,scripidx}
