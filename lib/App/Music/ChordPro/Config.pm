@@ -1166,6 +1166,10 @@ sub default_config() {
           "background"        : "none",
       },
 
+      // Background page (for logo's and such).
+      // Specify a single-page PDF with compatible page size.
+      "background" : "",
+
       // Space between columns, in pt.
       "columnspace"  :  20,
 

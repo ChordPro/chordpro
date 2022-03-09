@@ -370,6 +370,18 @@ sub newpage {
     $self->{pdfpage} = $self->{pdf}->page($page||0);
     $self->{pdfpage}->mediabox( $ps->{papersize}->[0],
 				$ps->{papersize}->[1] );
+
+    if ( $ps->{background} ) {
+	if ( -s -r $ps->{background} ) {
+	    my $bg = PDF::API2->open( $ps->{background} );
+	    $self->{pdf}->import_page($bg, 1, $self->{pdfpage} );
+	}
+	else {
+	    warn( "PDF: Missing or empty background document: ",
+		  $ps->{background}, "\n" );
+	}
+    }
+
     $self->{pdfgfx}  = $self->{pdfpage}->gfx;
     $self->{pdftext} = $self->{pdfpage}->text;
     unless ($ps->{theme}->{background} =~ /^white|none|#ffffff$/i ) {

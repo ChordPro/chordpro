@@ -45,6 +45,16 @@ The size of the paper for which output must be formatted. The size can be specif
         "papersize" : "a4",
         // Same as: "papersize" : [ 595, 842 ]
 
+## Background
+
+You can specify the name of an existing PDF document and have its
+first page inserted in every output page as a background. Useful for
+logo's, watermarks, and so on.
+
+      // Background page (for logo's and such).
+      // Specify a single-page PDF with compatible page size.
+      "background" : "",
+
 ## Theme
 
 These settings can be used to control the foreground and
