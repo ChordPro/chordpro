@@ -371,17 +371,6 @@ sub newpage {
     $self->{pdfpage}->mediabox( $ps->{papersize}->[0],
 				$ps->{papersize}->[1] );
 
-    if ( $ps->{background} ) {
-	if ( -s -r $ps->{background} ) {
-	    my $bg = PDF::API2->open( $ps->{background} );
-	    $self->{pdf}->import_page($bg, 1, $self->{pdfpage} );
-	}
-	else {
-	    warn( "PDF: Missing or empty background document: ",
-		  $ps->{background}, "\n" );
-	}
-    }
-
     $self->{pdfgfx}  = $self->{pdfpage}->gfx;
     $self->{pdftext} = $self->{pdfpage}->text;
     unless ($ps->{theme}->{background} =~ /^white|none|#ffffff$/i ) {
@@ -400,6 +389,17 @@ sub newpage {
 sub openpage {
     my ( $self, $ps, $page ) = @_;
     $self->{pdfpage} = $self->{pdf}->openpage($page);
+    $self->{pdfgfx}  = $self->{pdfpage}->gfx;
+    $self->{pdftext} = $self->{pdfpage}->text;
+}
+
+sub importpage {
+    my ( $self, $fn, $pg ) = @_;
+    my $bg = $self->{pdfapi}->open($fn);
+    return unless $bg;		# should have been checked
+    $pg = $bg->pages if $pg > $bg->pages;
+    $self->{pdf}->import_page( $bg, $pg, $self->{pdfpage} );
+    # Make sure the contents get on top of it.
     $self->{pdfgfx}  = $self->{pdfpage}->gfx;
     $self->{pdftext} = $self->{pdfpage}->text;
 }

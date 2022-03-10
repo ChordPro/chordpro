@@ -559,13 +559,34 @@ sub generate_song {
 	$s->{meta}->{page} = [ $s->{page} = $opts->{roman}
 			       ? roman($thispage) : $thispage ];
 
-	# Determine page class.
+	# Determine page class and background.
 	my $class = 2;		# default
+	my $bgpdf = $ps->{formats}->{default}->{background};
 	if ( $thispage == 1 ) {
 	    $class = 0;		# very first page
+	    $bgpdf = $ps->{formats}->{first}->{background}
+	      || $ps->{formats}->{title}->{background}
+	      || $bgpdf;
 	}
 	elsif ( $thispage == $startpage ) {
 	    $class = 1;		# first of a song
+	    $bgpdf = $ps->{formats}->{title}->{background}
+	      || $bgpdf;
+	}
+	if ( $bgpdf ) {
+	    my ( $fn, $pg ) = ( $bgpdf, 1 );
+	    if ( $bgpdf =~ /^(.+):(\d+)$/ ) {
+		( $bgpdf, $pg ) = ( $1, $2 );
+	    }
+	    $fn = ::rsc_or_file($bgpdf);
+	    if ( -s -r $fn ) {
+		$pg++ if $ps->{"even-odd-pages"} && !$rightpage;
+		$pr->importpage( $fn, $pg );
+	    }
+	    else {
+		warn( "PDF: Missing or empty background document: ",
+		      $bgpdf, "\n" );
+	    }
 	}
 
 	$x = $ps->{__leftmargin};
@@ -738,7 +759,7 @@ sub generate_song {
     $newpage->();
 
     # Embed source and config for debugging;
-    $pr->embed($source->{file}) if $options->{debug};
+    $pr->embed($source->{file}) if $source->{file} && $options->{debug};
 
     my @elts = @{$sb};
     my $elt;			# current element

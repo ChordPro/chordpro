@@ -1302,7 +1302,8 @@ sub default_config() {
       "pagealign-songs" : 1,
 
       // Formats.
-      // Pages have two title elements and one footer element.
+      // Pages have two title elements and one footer element. They also
+      // can have a page of an existing PDF file as underlay (background).
       // Topmost is "title". It uses the "title" font as defined further below.
       // Second is "subtitle". It uses the "subtitle" font.
       // The "footer" uses the "footer" font.
@@ -1318,10 +1319,12 @@ sub default_config() {
       // title/subtitle fields. Don't try to add an artist page element.
 
       "formats" : {
-	  // Titles/Footers.
+  	  // Titles/Footers.
 
-	  // Titles/footers have 3 parts, which are printed left,
+  	  // Titles/footers have 3 parts, which are printed left,
 	  // centered and right.
+	  // For odd/even printing, the 1st background page is used
+	  // for left pages and the next page (if it exists) for right pages.
 	  // For even/odd printing, the order is reversed.
 
 	  // By default, a page has:
@@ -1331,6 +1334,8 @@ sub default_config() {
 	      "subtitle"  : [ "", "", "" ],
 	      // Footer is title -- page number.
 	      "footer"    : [ "%{title}", "", "%{page}" ],
+	      // Background page.
+	      "background" : "",
 	  },
 	  // The first page of a song has:
 	  "title" : {
@@ -1339,12 +1344,16 @@ sub default_config() {
 	      "subtitle"  : [ "", "%{subtitle}", "" ],
 	      // Footer with page number.
 	      "footer"    : [ "", "", "%{page}" ],
+	      // Background page.
+	      "background" : "",
 	  },
 	  // The very first output page is slightly different:
 	  "first" : {
 	      // It has title and subtitle, like normal 'first' pages.
 	      // But no footer.
 	      "footer"    : [ "", "", "" ],
+	      // Background page.
+	      "background" : "",
 	  },
       },
 

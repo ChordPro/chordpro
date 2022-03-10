@@ -45,16 +45,6 @@ The size of the paper for which output must be formatted. The size can be specif
         "papersize" : "a4",
         // Same as: "papersize" : [ 595, 842 ]
 
-## Background
-
-You can specify the name of an existing PDF document and have its
-first page inserted in every output page as a background. Useful for
-logo's, watermarks, and so on.
-
-      // Background page (for logo's and such).
-      // Specify a single-page PDF with compatible page size.
-      "background" : "",
-
 ## Theme
 
 These settings can be used to control the foreground and
@@ -341,8 +331,9 @@ ChordPro distinguishes three types of output pages:
 * the first page of a song: `title`;
 * all other pages: `default`.
 
-Each of these page types can have settings for a page title, subtitle
-and footer. The settings inherit from `default` to `title` to `first`.
+Each of these page types can have settings for a page title, subtitle,
+footer, and background.
+The settings inherit from `default` to `title` to `first`.
 So a `title` page has everything a `default` page has, and a `first`
 page has everything a `title` page has.
 
@@ -360,6 +351,12 @@ obtained with `%{page}`, and the song index in the songbook with
 heading strings, see [here]({{< relref
 "ChordPro-Configuration-Format-Strings" >}}).
 
+`background` can be used to designate an existing PDF document to be
+used as background. It has the form _filename_ or _filename:page_.
+Page numbers count from one. If odd/even printing is in effect, the
+designated page number is used for left pages, and the next page (if
+it exists) for right pages.
+
         "formats" : {
 
             // By default, a page has:
@@ -369,6 +366,8 @@ heading strings, see [here]({{< relref
                 "subtitle"  : null,
                 // Footer is title -- page number.
                 "footer"    : [ "%{title}", "", "%{page}" ],
+                // Background pages: 5 and 6 from bgdemo.
+               "background" : "examples/bgdemo.pdf:5",
             },
 
             // The first page of a song has:
@@ -378,6 +377,8 @@ heading strings, see [here]({{< relref
                 "subtitle"  : [ "", "%{subtitle}", "" ],
                 // Footer with page number.
                 "footer"    : [ "", "", "%{page}" ],
+                // Background pages: 3 and 4 from bgdemo.
+               "background" : "examples/bgdemo.pdf:3",
             },
 
             // The very first output page is slightly different:
@@ -385,23 +386,27 @@ heading strings, see [here]({{< relref
                 // It has title and subtitle, like normal 'first' pages.
                 // But no footer.
                 "footer"    : null,
+                // Background pages: 1 and 2 from bgdemo.
+               "background" : "examples/bgdemo.pdf:1",
             },
         },
 
-The effect of the default settings can be seen in the following
+The effect of the above settings can be seen in the following
 picture.
 
 ![]({{< asset "images/pageformats.png" >}})
 
-Pages 2 and 4 are normal (`default`) pages. They have no heading and
-have the page number and song title in the footer.
-
-Page 3 is the first page of a song (`title`). It has the song title
-and subtitle in the heading, and only the page number in the footer.
-
-Page 1 is the very first output page (`first`). It is like a `title`
+Page 1 is the very first output page (type `first`). It is like a `title`
 page but, according to typesetting conventions, doesn't have the page
 number in the footer.
+
+Page 4 is the first page of a song, but not the very first (type `title`).
+It has the song title and subtitle in the heading, and only the page
+number in the footer.
+
+The other pages are normal pages (type `default`). They have no heading and
+have the page number and song title in the footer. Pages inserted for
+alignment are completely blank.
 
 Note that by default ChordPro produces different odd and even pages.
 Therefore the page number on (odd) page 3 is at the left side, while it is at
