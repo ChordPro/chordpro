@@ -28,7 +28,6 @@ my $gcfg;
 sub generate_songbook {
     my ( $self, $sb ) = @_;
     my @songs;
-print($ENV{'PWD'});
     $gcfg = $::config->{LaTeX};
     $gtemplate = Template->new({
         INCLUDE_PATH => [@{$gcfg->{template_include_path}}, ::rsc_or_file("res/templates/")],
