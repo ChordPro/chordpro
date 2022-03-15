@@ -153,7 +153,7 @@ sub ly2image {
 
 	$image->Set( magick => 'jpg' );
 	my $data = $image->ImageToBlob;
-	my $assetid = sprintf("LYasset%03d", $imgcnt++);
+	my $assetid = $kv->{asset} || sprintf("LYasset%03d", $imgcnt++);
 	warn("Created asset $assetid (jpg, ", length($data), " bytes)\n")
 	  if $config->{debug}->{images};
 	$App::Music::ChordPro::Output::PDF::assets->{$assetid} =
@@ -166,7 +166,7 @@ sub ly2image {
 			  $kv->{scale} ? ( scale => $kv->{scale} * 0.16 ) : (),
 			} },
 	      { type => "empty" },
-	    );
+	    ) unless $kv->{asset};
 	warn("Asset $assetid options:",
 	     $kv->{scale} ? ( " scale=", $kv->{scale} * 0.16 ) : (),
 	     " center=", $kv->{center}//0,
@@ -184,7 +184,7 @@ sub ly2image {
 	my $data = do { local $/; <$im> };
 	close($im);
 
-	my $assetid = sprintf("LYasset%03d", $imgcnt);
+	my $assetid = $kv->{asset} || sprintf("LYasset%03d", $imgcnt);
 	warn("Created asset $assetid (png, ", length($data), " bytes)\n")
 	  if $config->{debug}->{images};
 	$App::Music::ChordPro::Output::PDF::assets->{$assetid} =
@@ -195,7 +195,7 @@ sub ly2image {
 		opts => { center => $kv->{center},
 			  $kv->{scale} ? ( scale => $kv->{scale} * 0.16 ) : (),
 			} },
-	    );
+	    ) unless $kv->{asset};
 	warn("Asset $assetid options:",
 	     $kv->{scale} ? ( " scale=", $kv->{scale} * 0.16 ) : (),
 	     " center=", $kv->{center}//0,

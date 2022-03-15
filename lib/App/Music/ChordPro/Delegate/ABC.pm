@@ -212,7 +212,7 @@ sub abc2image {
 	    $fn =~ s/\.svg$/.jpg/;
 	    $image->Set( magick => 'jpg' );
 	    my $data = $image->ImageToBlob;
-	    my $assetid = sprintf("ABCasset%03d", $imgcnt++);
+	    my $assetid = $kv->{asset} || sprintf("ABCasset%03d", $imgcnt++);
 	    warn("Created asset $assetid (jpg, ", length($data), " bytes)\n")
 	      if $config->{debug}->{images};
 	    $App::Music::ChordPro::Output::PDF::assets->{$assetid} =
@@ -223,7 +223,7 @@ sub abc2image {
 		    uri  => "id=$assetid",
 		    opts => { center => $kv->{center}, scale => $kv->{scale} * 0.16 } },
 		  { type => "empty" },
-		);
+		) unless $kv->{asset};
 	};
 
 	while ( @lines ) {
@@ -296,7 +296,7 @@ sub abc2image {
 	my $data = do { local $/; <$im> };
 	close($im);
 
-	my $assetid = sprintf("ABCasset%03d", $imgcnt);
+	my $assetid = $kv->{asset} || sprintf("ABCasset%03d", $imgcnt);
 	warn("Created asset $assetid (jpg, ", length($data), " bytes)\n")
 	  if $config->{debug}->{images};
 	$App::Music::ChordPro::Output::PDF::assets->{$assetid} =
@@ -305,7 +305,7 @@ sub abc2image {
 	push( @res,{ type => "image",
 		     uri  => "id=$assetid",
 		     opts => { center => $kv->{center}, scale => $kv->{scale} * 0.16 } },
-	    );
+	    ) unless $kv->{asset};
 	warn("Asset $assetid options:",
 	     " scale=", $kv->{scale} * 0.16,
 	     " center=", $kv->{center}//0,
@@ -612,7 +612,7 @@ sub xabc2image {
 	    $fn =~ s/\.svg$/.jpg/;
 	    $image->Set( magick => 'jpg' );
 	    my $data = $image->ImageToBlob;
-	    my $assetid = sprintf("ABCasset%03d", $imgcnt++);
+	    my $assetid = $kv->{asset} || sprintf("ABCasset%03d", $imgcnt++);
 	    warn("Created asset $assetid (jpg, ", length($data), " bytes)\n")
 	      if $config->{debug}->{images};
 	    $App::Music::ChordPro::Output::PDF::assets->{$assetid} =
@@ -623,7 +623,7 @@ sub xabc2image {
 		    uri  => "id=$assetid",
 		    opts => { center => $kv->{center}, scale => $kv->{scale} * 0.16 } },
 		  { type => "empty" },
-		);
+		) unless $kv->{asset};
 	};
 
 	my $skip = $abc2svg;
@@ -720,7 +720,7 @@ sub xabc2image {
 	my $data = do { local $/; <$im> };
 	close($im);
 
-	my $assetid = sprintf("ABCasset%03d", $imgcnt);
+	my $assetid = $kv->{asset} || sprintf("ABCasset%03d", $imgcnt);
 	warn("Created asset $assetid (jpg, ", length($data), " bytes)\n")
 	  if $config->{debug}->{images};
 	$App::Music::ChordPro::Output::PDF::assets->{$assetid} =
@@ -729,7 +729,7 @@ sub xabc2image {
 	push( @res,{ type => "image",
 		     uri  => "id=$assetid",
 		     opts => { center => $kv->{center}, scale => $kv->{scale} * 0.16 } },
-	    );
+	    ) unless $kv->{asset};
 	warn("Asset $assetid options:",
 	     " scale=", $kv->{scale} * 0.16,
 	     " center=", $kv->{center}//0,
