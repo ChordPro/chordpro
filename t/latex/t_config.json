@@ -1,0 +1,25 @@
+{
+    "LaTeX" : { // please be aware that LaTeX Song Package require Verse
+        "template_include_path" : ["./latex/"],
+        "template_songbook" : "t_songbook.tt",
+        "template_comment" : "t_comment.tt",
+        "template_song" : "t_song.tt",
+        "template_image" : "t_image.tt",
+        "newpage_tag" : "newpage",
+        "emptyline_tag" : "emptyline", 
+        "columnbreak_tag" : "colbreak",
+        "beginchorus_tag" : "beginchorus",
+        "endchorus_tag" : "endchorus",
+        "beginverse_tag" : "beginverse",
+        "endverse_tag" : "endverse",
+         "begingrid_tag" : "begingrid",
+        "endgrid_tag" : "endgrid",
+         "begintab_tag" : "begintab",
+        "endtab_tag" : "endtab",
+        "gchordstart_tag" : "[", 
+        "gchordend_tag"  : "]", 
+        "chorded_line" : "wc ",
+        "unchorded_line" : "", 
+        "start_spaces_songline" : "   ", 
+    }
+}

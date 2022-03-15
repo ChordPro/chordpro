@@ -1,0 +1,51 @@
+{title: Swing Low Sweet Chariot}
+{subtitle: Traditional}
+{lyricist: mylyricist}
+{composer: mycomposer}
+
+{define: D               base-fret  1    frets   X   X   0   2   3   2   }
+{define: G               base-fret  1    frets   3   2   0   0   0   3   }
+{define: A7              base-fret  1    frets   X   0   2   0   2   0   }
+{define: D7              base-fret  1    frets   X   X   0   2   1   2   }
+
+{start_of_tab}
+e|---R-----R-R--------|
+B|-----M-------M---M--|
+G|-------Z-------Z----|
+D|---D-----D-D--------|
+A|--------------------|
+E|--------------------|
+{eot}
+
+{start_of_chorus}
+Swing [D]low, sweet [G]chari[D]ot,
+Comin’ for to carry me [A7]home.
+Swing [D7]low, sweet [G]chari[D]ot,
+Comin’ for to [A7]carry me [D]home.
+{end_of_chorus}
+
+
+I [D]looked over Jordan, and [G]what did I [D]see,
+     “Comin’ for to carry me [A7]home.”
+A [D7]band of angels [G]comin’ after [D]me,
+     Comin’ for to [A7]carry me [D]home.     [G]     [D]     [G]
+
+{new_page}
+{comment: Chorus}
+
+If you get there before I do,
+     Comin’ for to carry me home.
+Just tell my friends that I’m a comin’ too.
+     Comin’ for to carry me home.
+
+{column_break}
+{comment: Chorus}
+
+# Note the ' here will be changed into a decent apostrophe.
+I’m sometimes up and sometimes down,
+     Comin’ for to carry me home.
+But still my soul feels heavenly bound.
+     Comin’ for to carry me home.
+
+{comment: Chorus}
+{comment_italic: And a final chorus}

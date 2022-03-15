@@ -1,0 +1,12 @@
+[% title %]
+[%  FOREACH st IN subtitle %][% st %]
+[%  END %]
+[% meta.composer.0 %]
+[% meta.lyricist.0 %]
+[% meta.copyright.0 %]
+[% IF meta.capo.0 %]Capo [% meta.capo.0 %]
+[% END %]
+[%  FOREACH chord IN chords %][% chord.chord %] [% chord.frets %]
+[% END %]
+
+[% songlines %]

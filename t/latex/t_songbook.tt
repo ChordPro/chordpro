@@ -1,0 +1,2 @@
+[%  FOREACH song IN songs %][% song %]
+[%  END %]
