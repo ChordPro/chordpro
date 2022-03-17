@@ -3,6 +3,7 @@
     - !ChordPro functionality
     - Markdown export (EXPERIMENTAL). Thanks to Johannes Rumpf.
     - Add settings.truesf to obtain unicode sharps/flats in chord names.
+    - Allow settings.* to be used in %{} substitutions.
     - (Wx)(MacOS) Improve prefences dialog.
     - Several ABC fixes/improvements.
     - Experimental support for SVG images.
