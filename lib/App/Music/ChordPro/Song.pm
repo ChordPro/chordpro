@@ -583,7 +583,7 @@ sub chord {
 	    ( { name => $c, text => $c } ) );
 	return $c;
     }
-    ( my $n = $name ) =~ s/\((.+)\)$/$1/;
+    ( my $n = $name ) =~ s/^\((.+)\)$/$1/;
 
     if ( ! $info->{origin} && $config->{diagrams}->{auto} ) {
 	$info = App::Music::ChordPro::Chords::add_unknown_chord($name);
