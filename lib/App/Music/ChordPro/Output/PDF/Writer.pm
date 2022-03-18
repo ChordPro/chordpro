@@ -538,6 +538,10 @@ sub init_fonts {
 	}
     }
 
+    # Make sure we have this one.
+    $fc->register_font( "ChordProSymbols.ttf", "chordprosymbols", "", {} );
+
+    # Process the fontconfig.
     foreach my $ff ( keys( %{ $ps->{fontconfig} } ) ) {
 	my @fam = split( /\s*,\s*/, $ff );
 	foreach my $s ( keys( %{ $ps->{fontconfig}->{$ff} } ) ) {

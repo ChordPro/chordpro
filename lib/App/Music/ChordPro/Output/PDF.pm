@@ -1659,7 +1659,7 @@ sub songline {
 	    # Collect chords to be printed in the side column.
 	    my $info = $opts{song}->{chordsinfo}->{$chord};
 	    croak("Missing info for chord $chord") unless $info;
-	    $chord = $info->chord_display;
+	    $chord = $info->chord_display( has_musicsyms($fchord) );
 	    push(@chords, $chord);
 	}
 	else {
@@ -1668,7 +1668,7 @@ sub songline {
 	    if ( $chord ne '' ) {
 		my $info = $opts{song}->{chordsinfo}->{$chord};
 		Carp::croak("Missing info for chord $chord") unless $info;
-		$chord = $info->chord_display;
+		$chord = $info->chord_display( has_musicsyms($font) );
 		my $dp = $chord . " ";
 		if ( $info->is_annotation ) {
 		    $font = $fonts->{annotation};
@@ -1748,6 +1748,19 @@ sub songline {
       if @chords;
 
     return;
+}
+
+sub has_musicsyms {
+    my ( $font ) = @_;
+    my $sf = 0;
+    $sf |= 0x01
+      if $font->{has_sharp}  //=
+        $font->{fd}->{font}->glyphByUni(ord("♯")) ne ".notdef";
+    $sf |= 0x02
+      if $font->{has_flat} //=
+        $font->{fd}->{font}->glyphByUni(ord("♭")) ne ".notdef";
+    warn("SF: $sf\n");
+    return $sf;
 }
 
 sub is_bar {
@@ -1879,7 +1892,7 @@ sub gridline {
 	if ( exists $token->{chord} ) {
 	    my $t = $token->{chord};
 	    my $i = $opts{song}->{chordsinfo}->{$t};
-	    $t = $i->chord_display if $i;
+	    $t = $i->chord_display( has_musicsyms($fchord) ) if $i;
 	    $pr->text( $t, $x, $y, $fchord )
 	      unless $token eq ".";
 	    $x += $cellwidth;
@@ -2400,7 +2413,7 @@ sub configurator {
     $fm->( qw( empty          text     ) );
     $fm->( qw( grid           chord    ) );
     $fm->( qw( grid_margin    comment  ) );
-    $fm->( qw( diagram        comment  ) );
+    $fm->( qw( diagram        chord    ) );
     $fm->( qw( diagram_base   comment  ) );
 
     # Default footer is small subtitle.

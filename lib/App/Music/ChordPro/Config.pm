@@ -962,7 +962,8 @@ sub default_config() {
       // If false, chorus labels are used as tags.
       "choruslabels" : true,
       // Substitute Unicode sharp/flats in chord names.
-      "truesf" : false,
+      // Will be disabled if the font doesn't have the glyphs.
+      "truesf" : true,
     },
 
     // Metadata.
@@ -1165,10 +1166,6 @@ sub default_config() {
           // Background color. Usually none or white.
           "background"        : "none",
       },
-
-      // Background page (for logo's and such).
-      // Specify a single-page PDF with compatible page size.
-      "background" : "",
 
       // Space between columns, in pt.
       "columnspace"  :  20,
