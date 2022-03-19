@@ -1759,7 +1759,6 @@ sub has_musicsyms {
     $sf |= 0x02
       if $font->{has_flat} //=
         $font->{fd}->{font}->glyphByUni(ord("♭")) ne ".notdef";
-    warn("SF: $sf\n");
     return $sf;
 }
 
