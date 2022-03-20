@@ -8,6 +8,7 @@
     - The diagram font, used for chord names in diagrams, now defaults
       to the chord font.
     - Allow settings.* to be used in %{} substitutions.
+    - Allow meta values for directive selectors.
     - (Wx)(MacOS) Improve prefences dialog.
     - Several ABC fixes/improvements.
     - (PDF) Add support for background document.

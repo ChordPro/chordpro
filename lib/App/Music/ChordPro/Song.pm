@@ -806,7 +806,10 @@ sub parse_directive {
 	my $negate = $sel =~ s/\!$//;
 	$sel = ( $sel eq lc($config->{instrument}->{type}) )
 	       ||
-	       ( $sel eq lc($config->{user}->{name}) );
+	       ( $sel eq lc($config->{user}->{name})
+	       ||
+	       ( $self->{meta}->{lc $sel} && is_true($self->{meta}->{lc $sel}->[0]) )
+	       );
 	$sel = !$sel if $negate;
 	unless ( $sel ) {
 	    if ( $dir =~ /^start_of_/ ) {
