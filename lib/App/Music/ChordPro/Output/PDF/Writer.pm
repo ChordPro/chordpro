@@ -621,11 +621,12 @@ sub init_corefont {
 
     my $ps = $self->{ps};
     my $font = $ps->{fonts}->{$ff};
+    my $cf = App::Music::ChordPro::Output::PDF::is_corefont($font->{name});
     die("Config error: \"$font->{name}\" is not a built-in font\n")
-      unless App::Music::ChordPro::Output::PDF::is_corefont($font->{name});
+      unless $cf;
     my $fc = Text::Layout::FontConfig->new;
     eval {
-	$font->{fd} = $fc->from_filename($font->{name});
+	$font->{fd} = $fc->from_filename($cf);
 	$font->{fd}->get_font($self->{layout}); # force load
 	$font->{_ff} = $ff;
     };

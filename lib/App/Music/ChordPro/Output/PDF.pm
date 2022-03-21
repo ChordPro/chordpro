@@ -384,7 +384,7 @@ sub generate_song {
 		$fonts->{$item}->{file} = $_;
 	    }
 	    elsif ( is_corefont($_) ) {
-		$fonts->{$item}->{name} = $_;
+		$fonts->{$item}->{name} = is_corefont($_);
 	    }
 	    else {
 		$fonts->{$item}->{description} = $_;
@@ -1220,7 +1220,7 @@ sub generate_song {
 		    elsif ( is_corefont( $elt->{value} ) ) {
 			delete $ps->{fonts}->{$f}->{description};
 			delete $ps->{fonts}->{$f}->{file};
-			$ps->{fonts}->{$f}->{name} = $elt->{value};
+			$ps->{fonts}->{$f}->{name} = is_corefont( $elt->{value} );
 		    }
 		    else {
 			delete $ps->{fonts}->{$f}->{file};
@@ -2346,7 +2346,7 @@ sub configurator {
 	    else {
 		die("Config error: \"$_\" is not a built-in font\n")
 		  unless is_corefont($_);
-		$fonts->{$type}->{name} = $_;
+		$fonts->{$type}->{name} = is_corefont($_);
 	    }
 	}
 	for ( $options->{"$type-size"} ) {
@@ -2570,30 +2570,40 @@ sub wrapsimple {
     $pr->wrap( $text, $pr->{ps}->{__rightmargin} - $x );
 }
 
-my %corefonts = map { $_ => 1 }
-  ( "times-roman",
-    "times-bold",
-    "times-italic",
-    "times-bolditalic",
-    "helvetica",
-    "helvetica-bold",
-    "helvetica-oblique",
-    "helvetica-boldoblique",
-    "courier",
-    "courier-bold",
-    "courier-oblique",
-    "courier-boldoblique",
-    "zapfdingbats",
-    "georgia",
-    "georgia,bold",
-    "georgia,italic",
-    "georgia,bolditalic",
-    "verdana",
-    "verdana,bold",
-    "verdana,italic",
-    "verdana,bolditalic",
-    "webdings",
-    "wingdings" );
+my %corefonts =
+  (
+   ( map { lc($_) => $_ }
+     "Times-Roman",
+     "Times-Bold",
+     "Times-Italic",
+     "Times-BoldItalic",
+     "Helvetica",
+     "Helvetica-Bold",
+     "Helvetica-Oblique",
+     "Helvetica-BoldOblique",
+     "Courier",
+     "Courier-Bold",
+     "Courier-Oblique",
+     "Courier-BoldOblique",
+     "ZapfDingbats",
+     "Georgia",
+     "Georgia,Bold",
+     "Georgia,Italic",
+     "Georgia,BoldItalic",
+     "Verdana",
+     "Verdana,Bold",
+     "Verdana,Italic",
+     "Verdana,BoldItalic",
+     "Webdings",
+     "Wingdings" ),
+   # For convenience.
+   "georgia-bold"	 => "Georgia,Bold",
+   "georgia-italic"	 => "Georgia,Italic",
+   "georgia-bolditalic"	 => "Georgia,BoldItalic",
+   "verdana-bold"	 => "Verdana,Bold",
+   "verdana-italic"	 => "Verdana,Italic",
+   "verdana-bolditalic"	 => "Verdana,BoldItalic",
+);
 
 sub is_corefont {
     $corefonts{lc $_[0]};
