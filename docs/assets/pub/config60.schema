@@ -142,6 +142,13 @@
 		    "default": false
 		},
 
+		"choruslabels": {
+		    "description": "",
+		    "title": "If false, chorus labels are used as tags.",
+		    "type": "boolean",
+		    "default": true
+		},
+
 		"columns": {
 		    "description": "Number of columns.",
 		    "type": "integer",
@@ -234,6 +241,12 @@
 		    "minimum" : -12,
 		    "maximum" : 12,
 		    "format" : "number"
+		},
+
+		"truesf": {
+		    "description": "Substitute Unicode sharp/flats in chord names.",
+		    "type": "boolean",
+		    "default": true
 		}
 	    }
 	},
