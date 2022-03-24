@@ -25,7 +25,7 @@ page_%.png : page_%.cho
 
 #### Styles.
 
-STYLES := modern1 modern2 modern3 chordii default dark roman nashville ukulele keyboard
+STYLES := modern1 modern2 modern3 chordii dark roman nashville ukulele keyboard
 
 styles : $(foreach sty,${STYLES},style_${sty}.png)
 
