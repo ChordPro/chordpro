@@ -370,6 +370,7 @@ sub newpage {
     $self->{pdfpage} = $self->{pdf}->page($page||0);
     $self->{pdfpage}->mediabox( $ps->{papersize}->[0],
 				$ps->{papersize}->[1] );
+
     $self->{pdfgfx}  = $self->{pdfpage}->gfx;
     $self->{pdftext} = $self->{pdfpage}->text;
     unless ($ps->{theme}->{background} =~ /^white|none|#ffffff$/i ) {
@@ -388,6 +389,17 @@ sub newpage {
 sub openpage {
     my ( $self, $ps, $page ) = @_;
     $self->{pdfpage} = $self->{pdf}->openpage($page);
+    $self->{pdfgfx}  = $self->{pdfpage}->gfx;
+    $self->{pdftext} = $self->{pdfpage}->text;
+}
+
+sub importpage {
+    my ( $self, $fn, $pg ) = @_;
+    my $bg = $self->{pdfapi}->open($fn);
+    return unless $bg;		# should have been checked
+    $pg = $bg->pages if $pg > $bg->pages;
+    $self->{pdf}->import_page( $bg, $pg, $self->{pdfpage} );
+    # Make sure the contents get on top of it.
     $self->{pdfgfx}  = $self->{pdfpage}->gfx;
     $self->{pdftext} = $self->{pdfpage}->text;
 }
@@ -526,6 +538,10 @@ sub init_fonts {
 	}
     }
 
+    # Make sure we have this one.
+    $fc->register_font( "ChordProSymbols.ttf", "chordprosymbols", "", {} );
+
+    # Process the fontconfig.
     foreach my $ff ( keys( %{ $ps->{fontconfig} } ) ) {
 	my @fam = split( /\s*,\s*/, $ff );
 	foreach my $s ( keys( %{ $ps->{fontconfig}->{$ff} } ) ) {
@@ -605,11 +621,12 @@ sub init_corefont {
 
     my $ps = $self->{ps};
     my $font = $ps->{fonts}->{$ff};
+    my $cf = App::Music::ChordPro::Output::PDF::is_corefont($font->{name});
     die("Config error: \"$font->{name}\" is not a built-in font\n")
-      unless App::Music::ChordPro::Output::PDF::is_corefont($font->{name});
+      unless $cf;
     my $fc = Text::Layout::FontConfig->new;
     eval {
-	$font->{fd} = $fc->from_filename($font->{name});
+	$font->{fd} = $fc->from_filename($cf);
 	$font->{fd}->get_font($self->{layout}); # force load
 	$font->{_ff} = $ff;
     };

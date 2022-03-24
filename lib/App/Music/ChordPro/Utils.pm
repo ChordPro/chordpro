@@ -164,4 +164,15 @@ sub parse_kv {
 
 push( @EXPORT, 'parse_kv' );
 
+# Map true/false etc to true / false.
+
+sub is_true {
+    my ( $arg ) = @_;
+    return if !defined($arg);
+    return if $arg =~ /^(false|null|0+)$/i;
+    return !!$arg;
+}
+
+push( @EXPORT, 'is_true' );
+
 1;

@@ -1,11 +1,19 @@
 0.000
 
     - !ChordPro functionality
-    - Markdown export (EXPERIMENTAL). Thanks to Johannes Rumpf.
-    - Add settings.truesf to obtain unicode sharps/flats in chord names.
+    - Automatically use real sharps and flats in chord names.
+      Fallback to the ChordProSymbols font if the font doesn't have the
+      appropriate symbols.
+    - Add settings.truesf (default: true) to enable/disable this.
+    - The diagram font, used for chord names in diagrams, now defaults
+      to the chord font.
+    - Allow settings.* to be used in %{} substitutions.
+    - Allow meta values for directive selectors.
     - (Wx)(MacOS) Improve prefences dialog.
     - Several ABC fixes/improvements.
+    - (PDF) Add support for background document.
     - Experimental support for SVG images.
+    - Markdown export (EXPERIMENTAL). Thanks to Johannes Rumpf.
     - !BugFixes
     - Fix issue #208.
     - (Wx) Fix sharps/flats mixup in PreferencesDialog.

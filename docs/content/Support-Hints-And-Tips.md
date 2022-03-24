@@ -30,10 +30,28 @@ Secondly, wrap the chorus in `textfont` directives:
 {eoc}
 ````
 
-This might become easier in the future,
-see https://github.com/ChordPro/chordpro/issues/174.
+## Chords too close to the lyrics
 
-## [Conditional chords](https://github.com/ChordPro/chordpro/issues/176)
+The distance between the chords and the lyrics is determined by the
+properties of the font used for the chords. Some fonts use the size of
+the font as distance, which results in chords being placed too close,
+and other fonts use the distance to the next line, resulting in chords
+being higher above the lyrics.
+
+You can adjust the chord spacing in the PDF config:
+
+````
+{ "pdf" :
+  { "spacing" :
+    { "chords" : 1.2,
+	...
+````
+
+The value specified is a factor, it is multiplied by the font size to
+obtain the distance between baseline of the chords and the baseline of
+the lyrics.
+
+## Conditional chords
 
 You can use the following preprocessor directive
 to suffix chords with an instrument name

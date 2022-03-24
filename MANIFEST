@@ -59,9 +59,10 @@ lib/App/Music/ChordPro/res/config/notes/solfege.json
 lib/App/Music/ChordPro/res/config/roman.json
 lib/App/Music/ChordPro/res/config/ukulele-ly.json
 lib/App/Music/ChordPro/res/config/ukulele.json
+lib/App/Music/ChordPro/res/examples/bgdemo.pdf
 lib/App/Music/ChordPro/res/examples/swinglow.cho
 lib/App/Music/ChordPro/res/fonts/ChordProSymbols.ttf
-lib/App/Music/ChordPro/res/fonts/abc2avg.ttf
+lib/App/Music/ChordPro/res/fonts/abc2svg.ttf
 lib/App/Music/ChordPro/res/icons/chordpro.ico
 lib/App/Music/ChordPro/res/icons/chordpro-doc.ico
 lib/App/Music/ChordPro/res/icons/chordpro.icns

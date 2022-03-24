@@ -583,7 +583,7 @@ sub chord {
 	    ( { name => $c, text => $c } ) );
 	return $c;
     }
-    ( my $n = $name ) =~ s/\((.+)\)$/$1/;
+    ( my $n = $name ) =~ s/^\((.+)\)$/$1/;
 
     if ( ! $info->{origin} && $config->{diagrams}->{auto} ) {
 	$info = App::Music::ChordPro::Chords::add_unknown_chord($name);
@@ -644,7 +644,7 @@ sub decompose {
 	}
 
 	# Recall memorized chords.
-	elsif ( $memchords ) {
+	elsif ( $memchords && $in_context ) {
 	    if ( $memcrdinx == 0 && @$memchords == 0 ) {
 		do_warn("No chords memorized for $in_context");
 		push( @chords, $chord );
@@ -806,7 +806,10 @@ sub parse_directive {
 	my $negate = $sel =~ s/\!$//;
 	$sel = ( $sel eq lc($config->{instrument}->{type}) )
 	       ||
-	       ( $sel eq lc($config->{user}->{name}) );
+	       ( $sel eq lc($config->{user}->{name})
+	       ||
+	       ( $self->{meta}->{lc $sel} && is_true($self->{meta}->{lc $sel}->[0]) )
+	       );
 	$sel = !$sel if $negate;
 	unless ( $sel ) {
 	    if ( $dir =~ /^start_of_/ ) {
@@ -1694,7 +1697,10 @@ sub parse_chord {
 	      $info->chord_display, "\"",
 	      $unk ? " but unknown" : "",
 	      "\n" ) if $debug > 1;
-	$info->{parens} = $parens if $parens;
+	if ( $parens ) {
+	    $self->store_chord( $info->clone );
+	    $info->{parens} = $parens;
+	}
 	$chord = $self->store_chord($info);
 	return wantarray ? ( $chord, $info ) : $chord;
     }
@@ -1721,6 +1727,9 @@ sub structurize {
 	if ( $item->{type} eq "empty" && $item->{context} eq $def_context ) {
 	    $context = $def_context;
 	    next;
+	}
+	if ( $item->{type} eq "songline" &&  $item->{context} eq '' ){ # A songline should have a context - non means verse
+		$item->{context} = 'verse';
 	}
 	if ( $context ne $item->{context} ) {
 	    push( @body, { type => $context = $item->{context}, body => [] } );
