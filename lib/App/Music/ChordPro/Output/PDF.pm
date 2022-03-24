@@ -626,8 +626,12 @@ sub generate_song {
 	$show //= $dctl->{show};
 	if ( $chords ) {
 	    for ( @$chords ) {
-		my $i = $s->{chordsinfo}->{$_};
-		push( @chords, $i ) unless $i->is_nc;
+		if ( my $i = $s->{chordsinfo}->{$_} ) {
+		    push( @chords, $i ) unless $i->is_nc;
+		}
+		else {
+		    warn("PDF: Missing chord info for \"$_\"\n");
+		}
 	    }
 	}
 	return unless @chords;

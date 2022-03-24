@@ -644,7 +644,7 @@ sub decompose {
 	}
 
 	# Recall memorized chords.
-	elsif ( $memchords ) {
+	elsif ( $memchords && $in_context ) {
 	    if ( $memcrdinx == 0 && @$memchords == 0 ) {
 		do_warn("No chords memorized for $in_context");
 		push( @chords, $chord );
@@ -1697,7 +1697,10 @@ sub parse_chord {
 	      $info->chord_display, "\"",
 	      $unk ? " but unknown" : "",
 	      "\n" ) if $debug > 1;
-	$info->{parens} = $parens if $parens;
+	if ( $parens ) {
+	    $self->store_chord( $info->clone );
+	    $info->{parens} = $parens;
+	}
 	$chord = $self->store_chord($info);
 	return wantarray ? ( $chord, $info ) : $chord;
     }
