@@ -113,7 +113,8 @@ sub configurator {
 	$cfg->{user}->{fullname} = ::runtimeinfo("short");
     }
     else {
-	$cfg->{user}->{name} = $ENV{USER} || $ENV{LOGNAME} || lc(getlogin());
+	$cfg->{user}->{name} = $ENV{USER} || $ENV{LOGNAME}
+	  || lc(getlogin()) || getpwuid($<) || "chordpro";
 	$cfg->{user}->{fullname} = eval { (getpwuid($<))[6] } || "";
     }
 
