@@ -1520,7 +1520,7 @@ sub default_config() {
       },
     },
 	"LaTeX" : {  // please check for LaTeX Songbook/Guitar packages and have a look into config-examples
-          "template_include_path" : ["."],
+          "template_include_path" : [ ],
           "template_songbook" : "songbook.tt",
           "template_comment" : "comment.tt",
           "template_song" : "song.tt",
