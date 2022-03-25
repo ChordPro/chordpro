@@ -5,6 +5,7 @@
         "template_comment" : "t_comment.tt",
         "template_song" : "t_song.tt",
         "template_image" : "t_image.tt",
+        "eol" : "\n",
         "newpage_tag" : "newpage",
         "emptyline_tag" : "emptyline", 
         "columnbreak_tag" : "colbreak",

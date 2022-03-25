@@ -1,0 +1,21 @@
+
+% https://ftp.rrze.uni-erlangen.de/ctan/macros/latex/contrib/guitar/guitar.pdf
+\documentclass[a4paper]{article}
+
+\usepackage{guitar}
+\usepackage[most]{tcolorbox}
+\usepackage[TS1,T1]{fontenc}
+\usepackage[bookmarks]{hyperref}
+
+\begin{document}
+\title{my Songbook}
+\author{The Author}
+\date{\today}
+\maketitle
+
+\section{Songbook-chapter} 
+
+[%  FOREACH song IN songs %][% song %]
+[%  END %]
+
+\end{document}

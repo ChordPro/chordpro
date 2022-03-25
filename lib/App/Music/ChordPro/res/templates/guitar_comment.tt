@@ -1,0 +1,7 @@
+\begin{tcolorbox}[colback=gray!30,
+                  colframe=black,
+                  width=\textwidth-2cm,
+                  arc=3mm, auto outer arc,
+                  size=small]
+                [% comment %] 
+\end{tcolorbox}

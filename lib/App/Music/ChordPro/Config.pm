@@ -1519,12 +1519,13 @@ sub default_config() {
           "songsonly" : true,
       },
     },
-	"LaTeX" : { // please be aware that LaTeX Song Package require Verse
+	"LaTeX" : {  // please check for LaTeX Songbook/Guitar packages and have a look into config-examples
           "template_include_path" : ["."],
           "template_songbook" : "songbook.tt",
           "template_comment" : "comment.tt",
           "template_song" : "song.tt",
           "template_image" : "image.tt",
+		  "eol" : "\n", // end of line - needs to be handled sometime by \\ or \newline
           "newpage_tag" : "\\newpage",
           "emptyline_tag" : "\\brk", 
           "columnbreak_tag" : "\\columnbreak",
@@ -1532,14 +1533,18 @@ sub default_config() {
           "endchorus_tag" : "\\endchorus",
           "beginverse_tag" : "\\beginverse",
           "endverse_tag" : "\\endverse",
-		   "begingrid_tag" : "\\begin{verbatim}",
+          "beginabc_tag" : "\\begin{abc}",
+          "endabc_tag" : "\\end{abc}",		  
+          "beginlilypond_tag" : "\\begin{lilypond}",
+          "endlilypond_tag" : "\\end{lilypond}",		  
+		  "begingrid_tag" : "\\begin{verbatim}",
           "endgrid_tag" : "\\end{verbatim}",
-		   "begintab_tag" : "\\begin{verbatim}",
+		  "begintab_tag" : "\\begin{verbatim}",
           "endtab_tag" : "\\end{verbatim}",
-		  "gchordstart_tag" : "\\[", // for Guitar this would be fe. "\\guitarChord{"
-		  "gchordend_tag"  : "]", // for Guitar this would be "}"
-		  "chorded_line" : "\\chordson ", // Songs-package require this to know when to switch 
-		  "unchorded_line" : "\\chordsoff ", // chordlines off - it will be printed ahead of a song line
+		  "gchordstart_tag" : "\\[", 
+		  "gchordend_tag"  : "]", 
+		  "chorded_line" : "\\chordson ", // Songs-package require this to know when to switch Lines with or without Chord
+		  "unchorded_line" : "\\chordsoff ", // chordlines off - it will be printed ahead of a song line without chords
 		  "start_spaces_songline" : "\\hspace{0,5cm}", // if a songline starts with spaces it will be replaced by start_spaces_songline
       },
     // Settings for ChordPro backend.

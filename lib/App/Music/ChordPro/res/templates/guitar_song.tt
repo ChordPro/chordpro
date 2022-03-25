@@ -1,0 +1,7 @@
+\newpage
+\subsection{[% title %]}
+[%  FOREACH st IN subtitle %] [% st %] \\[%  END %]
+[% IF meta.composer.0 %] Composer [% meta.composer.0 %] \\[% END %]
+[% IF meta.lyricist.0 %]lyricist [% meta.lyricist.0 %] \\[% END %]
+[% IF meta.copyright.0 %](c) [% meta.copyright.0 %] \\[% END %]
+[% songlines %]

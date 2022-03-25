@@ -96,7 +96,7 @@ sub line_songline {
     }
     $line = $textline;
     if ($has_chord) { $line = $gcfg->{chorded_line} . $line; } else { $line = $gcfg->{unchorded_line} . $line; }
-    return $line."\n";
+    return $line.$gcfg->{eol};
 }
 $line_routines{line_songline} = \&line_songline;
 
@@ -172,7 +172,7 @@ $line_routines{line_set} = \&line_set;
 
 sub line_tabline {
     my ( $lineobject ) = @_;
-    return $lineobject->{text}."\n";
+    return $lineobject->{text}.$gcfg->{eol};
 }
 $line_routines{line_tabline} = \&line_tabline;
 
@@ -212,7 +212,7 @@ sub line_gridline {
     if(defined $lineobject->{comment}){
         $line .= $lineobject->{comment}->{text};
     }
-    return $line. "\n";
+    return $line. $gcfg->{eol};
 }
 $line_routines{line_gridline} = \&line_gridline;
 
