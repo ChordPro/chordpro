@@ -963,8 +963,8 @@ sub default_config() {
       // If false, chorus labels are used as tags.
       "choruslabels" : true,
       // Substitute Unicode sharp/flats in chord names.
-      // Will be disabled if the font doesn't have the glyphs.
-      "truesf" : true,
+      // Will fallback to ChordProSymbols the font doesn't have the glyphs.
+      "truesf" : false,
     },
 
     // Metadata.

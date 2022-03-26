@@ -246,7 +246,7 @@
 		"truesf": {
 		    "description": "Substitute Unicode sharp/flats in chord names.",
 		    "type": "boolean",
-		    "default": true
+		    "default": false
 		}
 	    }
 	},

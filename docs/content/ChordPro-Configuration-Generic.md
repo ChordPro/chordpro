@@ -63,6 +63,9 @@ These settings control global behaviour of the ChordPro program and can be chang
 		"chords-canonical" : false,
 		// If false, chorus labels are used as tags.
 		"choruslabels" : true,
+        // Substitute Unicode sharp/flats in chord names.
+        // Will fallback to ChordProSymbols the font doesn't have the glyphs.
+        "truesf" : false,
     },
 
 Note that settings `decapo`, `lyrics-only`, `strict`, `transcode` and
