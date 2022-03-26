@@ -62,7 +62,7 @@ sub generate_songbook {
     my $songbook = '';
     my %vars = ();
     $vars{songs} = [@songs] ;
-    $gtemplate->process($gcfg->{template_songbook}, \%vars, $::options->{output} )
+    $gtemplate->process($gcfg->{templates}->{songbook}, \%vars, $::options->{output} )
         || die $gtemplate->error();
  # i like it more to handle output through template module - but its possible to result it as array.
  #   return split(/\n/, $songbook); 
@@ -140,7 +140,7 @@ sub line_comment {
         comment => latex_encode($lineobject->{text})
     };
     my $comment = '';
-    $gtemplate->process($gcfg->{template_comment}, $vars, \$comment) || die $gtemplate->error();
+    $gtemplate->process($gcfg->{templates}->{comment}, $vars, \$comment) || die $gtemplate->error();
     return $comment ;
 }
 $line_routines{line_comment} = \&line_comment;
@@ -151,7 +151,7 @@ sub line_comment_italic {
         comment => "\\textit{". latex_encode($lineobject->{text}) ."}"
     };
     my $comment = '';
-    $gtemplate->process($gcfg->{template_comment}, $vars, \$comment) || die $gtemplate->error();
+    $gtemplate->process($gcfg->{templates}->{comment}, $vars, \$comment) || die $gtemplate->error();
     return $comment;
 }
 $line_routines{line_comment_italic} = \&line_comment_italic;
@@ -159,7 +159,7 @@ $line_routines{line_comment_italic} = \&line_comment_italic;
 sub line_image {
     my ( $lineobject ) = @_;
     my $image = '';
-    $gtemplate->process($gcfg->{template_image}, $lineobject, \$image)|| die $gtemplate->error();
+    $gtemplate->process($gcfg->{templates}->{image}, $lineobject, \$image)|| die $gtemplate->error();
     return $image;
 }
 $line_routines{line_image} = \&line_image;

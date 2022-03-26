@@ -1520,10 +1520,12 @@ sub default_config() {
       },
     },
 	"LaTeX" : {  // please check for LaTeX Songbook/Guitar packages and have a look into config-examples
-          "template_include_path" : [ ],
-          "template_songbook" : "songbook.tt",
-          "template_comment" : "comment.tt",
-          "template_image" : "image.tt",
+         "template_include_path" : [ "$CHORDPRO_LIBRARY" ],
+		 "templates" :  {
+			"songbook" : "songbook.tt",
+			"comment" : "comment.tt",
+			"image" : "image.tt"
+		  }
       },
     // Settings for ChordPro backend.
     "chordpro" : {
