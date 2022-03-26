@@ -2416,7 +2416,7 @@ sub configurator {
     $fm->( qw( empty          text     ) );
     $fm->( qw( grid           chord    ) );
     $fm->( qw( grid_margin    comment  ) );
-    $fm->( qw( diagram        chord    ) );
+    $fm->( qw( diagram        comment  ) );
     $fm->( qw( diagram_base   comment  ) );
 
     # Default footer is small subtitle.

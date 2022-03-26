@@ -5,8 +5,6 @@
       Fallback to the ChordProSymbols font if the font doesn't have the
       appropriate symbols.
     - Add settings.truesf (default: true) to enable/disable this.
-    - The diagram font, used for chord names in diagrams, now defaults
-      to the chord font.
     - Allow settings.* to be used in %{} substitutions.
     - Allow meta values for directive selectors.
     - (Wx)(MacOS) Improve prefences dialog.
