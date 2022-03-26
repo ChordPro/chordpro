@@ -1,30 +1,10 @@
 {
     "include" : [ "guitar" ],
 	"LaTeX" : { 
-          "template_include_path" : ["."],
+          "template_include_path" : [],
           "template_songbook" : "songbook.tt",
           "template_comment" : "comment.tt",
           "template_song" : "song.tt",
-          "template_image" : "image.tt",
-          "newpage_tag" : "\\newpage",
-          "emptyline_tag" : "\\brk", 
-          "columnbreak_tag" : "\\columnbreak",
-          "beginchorus_tag" : "\\beginchorus",
-          "endchorus_tag" : "\\endchorus",
-          "beginverse_tag" : "\\beginverse",
-          "endverse_tag" : "\\endverse",
-          "beginabc_tag" : "\\begin{abc}",
-          "endabc_tag" : "\\end{abc}",		  
-          "beginlilypond_tag" : "\\begin{lilypond}",
-          "endlilypond_tag" : "\\end{lilypond}",
-		  "begingrid_tag" : "\\begin{singlespace*}\n\\begin{verbatim}",
-          "endgrid_tag" : "\\end{verbatim}\n\\end{singlespace*}",
-		  "begintab_tag" : "\\begin{singlespace*}\n\\begin{verbatim}",
-          "endtab_tag" : "\\end{verbatim}\n\\end{singlespace*}",
-		  "gchordstart_tag" : "\\[", 
-		  "gchordend_tag"  : "]", 
-		  "chorded_line" : "\\chordson ", // Songs-package require this to know when to switch 
-		  "unchorded_line" : "\\chordsoff ", // chordlines off - it will be printed ahead of a song line
-		  "start_spaces_songline" : "\\hspace{0,5cm}" // if a songline starts with spaces it will be replaced by start_spaces_songline
-      }
+          "template_image" : "image.tt"
+   }
 }

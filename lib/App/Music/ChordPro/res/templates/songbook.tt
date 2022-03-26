@@ -1,4 +1,26 @@
-
+[% # these variables are obligatory to set 
+ newpage_tag = "\\newpage\n" 
+ emptyline_tag = "\\newpage\n" 
+ columnbreak_tag = "\\columnbreak\n" 
+ beginchorus_tag = "\\beginchorus" 
+ endchorus_tag = "\\endchorus" 
+ beginverse_tag = "\\beginverse" 
+ endverse_tag = "\\endverse" 
+ beginabc_tag = "\\begin{abc}" 
+ endabc_tag = "\\end{abc}" 
+ beginlilypond_tag = "\\begin{lilypond}" 
+ endlilypond_tag = "\\end{lilypond}" 
+ begingrid_tag = "\\begin{singlespace*}\n\\begin{verbatim}" 
+ endgrid_tag = "\\end{verbatim}\n\\end{singlespace*}" 
+ begintab_tag = "\\begin{singlespace*}\n\\begin{verbatim}" 
+ endtab_tag = "\\end{verbatim}\n\\end{singlespace*}" 
+ gchordstart_tag = "\\[" 
+ gchordend_tag = "]"  
+ chorded_line = "\\chordson " # Songs-package require this to know when to switch  
+ unchorded_line = "\\chordsoff " # chordlines off - it will be printed ahead of a song line 
+ start_spaces_songline = "\\hspace{0,5cm}" #if a songline starts with spaces it will be replaced by start_spaces_songline  
+ eol = "\n" #sometimes this need to be to \\ or \newline 
+%] 
 % http://songs.sourceforge.net/songsdoc/songs.html
 \documentclass[a5paper]{book}
 \usepackage{graphicx}
@@ -51,7 +73,21 @@
 
 \mainmatter
 \begin{songs}{titleidx,authidx,scripidx}
-[%  FOREACH song IN songs %][% song %]
+[%  FOREACH song IN songs %]
+\newpage
+\beginsong{[% song.title %][%  FOREACH st IN song.subtitle %] \\ [% st %][%  END %]}
+[
+  by={[% song.meta.composer.0 %]},
+  sr={[% song.meta.lyricist.0 %]},
+  cr={[% song.meta.copyright.0 %]},
+  index={[% song.meta.index %]}] 
+[% IF song.meta.capo.0 %]\capo{[% song.meta.capo.0 %]}[% END %]
+[% IF song.chords.0 %]\begin{tcolorbox}[colback=white,colframe=black,width=0.75\textwidth,arc=3mm, auto outer arc]
+[%  FOREACH chord IN song.chords %]\gtab{[% chord.chord %]}{[% chord.frets %]}[% elements = loop.count % 5 %][% IF ((elements == 0) and (not loop.last)) %]\newline[% END %][% END %]\end{tcolorbox}[% END %]
+
+[% song.songlines | eval %]
+\endsong
+
 [%  END %]
 \end{songs}
 

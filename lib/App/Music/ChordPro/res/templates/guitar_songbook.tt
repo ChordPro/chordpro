@@ -1,4 +1,26 @@
-
+[% # these variables are obligatory to set 
+ newpage_tag = "\\newpage\n" 
+ emptyline_tag = "\\newline\n" 
+ columnbreak_tag = "\\par\n" 
+ beginchorus_tag =  "\\begin{tcolorbox}[boxrule=0pt,frame hidden,sharp corners,enhanced,borderline west={1pt}{0pt}{black},colback=white]" 
+ endchorus_tag = "\\end{tcolorbox}" 
+ beginverse_tag = "" 
+ endverse_tag = "\\\\" 
+ beginabc_tag = "\\begin{abc}" 
+ endabc_tag = "\\end{abc}" 
+ beginlilypond_tag = "\\begin{lilypond}" 
+ endlilypond_tag = "\\end{lilypond}" 
+ begingrid_tag = "\\begin{singlespace*}\n\\begin{verbatim}" 
+ endgrid_tag = "\\end{verbatim}\n\\end{singlespace*}" 
+ begintab_tag = "\\begin{singlespace*}\n\\begin{verbatim}" 
+ endtab_tag = "\\end{verbatim}\n\\end{singlespace*}" 
+ gchordstart_tag = "\\guitarChord{" 
+ gchordend_tag = "}"  
+ chorded_line = "" # \\guitarAccord when using \begin{guitar}  
+ unchorded_line = "" # \\guitarNoChord
+ start_spaces_songline = "\\hspace{0,5cm}" #if a songline starts with spaces it will be replaced by start_spaces_songline  
+ eol = "\\\\ \n" #sometimes this need to be to \\ or \newline 
+%]
 % https://ftp.rrze.uni-erlangen.de/ctan/macros/latex/contrib/guitar/guitar.pdf
 \documentclass[a4paper]{article}
 
@@ -15,7 +37,12 @@
 
 \section{Songbook-chapter} 
 
-[%  FOREACH song IN songs %][% song %]
+[%  FOREACH song IN songs %]
+\newpage
+\subsection{[% song.title %]}
+[%  FOREACH st IN song.subtitle %] [% st %] \\[%  END %]
+[% IF song.meta.composer.0 %] Composer [% song.meta.composer.0 %] \\[% END %][% IF song.meta.lyricist.0 %]lyricist [% song.meta.lyricist.0 %] \\[% END %][% IF song.meta.copyright.0 %](c) [% song.meta.copyright.0 %] \\[% END %]
+[% song.songlines | eval #eval is obligatory to eval the variables set above %]
 [%  END %]
 
 \end{document}

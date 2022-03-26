@@ -25,6 +25,28 @@ my %line_routines = ();
 my $gtemplate;
 my $gcfg;
 
+my $newpage_tag = "[% newpage_tag %]" ;
+my $emptyline_tag = "[% emptyline_tag %]";
+my $columnbreak_tag = "[% columnbreak_tag %]";
+my $beginchorus_tag = "[% beginchorus_tag %]";
+my $endchorus_tag = "[% endchorus_tag %]";
+my $beginverse_tag = "[% beginverse_tag %]";
+my $endverse_tag = "[% endverse_tag %]";
+my $beginabc_tag = "[% beginabc_tag %]";
+my $endabc_tag = "[% endabc_tag %]";
+my $beginlilypond_tag = "[% beginlilypond_tag %]";
+my $endlilypond_tag = "[% endlilypond_tag %]";
+my $begingrid_tag = "[% begingrid_tag %]";
+my $endgrid_tag = "[% endgrid_tag %]";
+my $begintab_tag = "[% begintab_tag %]";
+my $endtab_tag = "[% endtab_tag %]";
+my $gchordstart_tag = "[% gchordstart_tag %]";
+my $gchordend_tag = "[% gchordend_tag %]"; 
+my $chorded_line = "[% chorded_line %]";
+my $unchorded_line = "[% unchorded_line %]";
+my $start_spaces_songline = "[% start_spaces_songline %]";
+my $eol = "[% eol %]";
+
 sub generate_songbook {
     my ( $self, $sb ) = @_;
     my @songs;
@@ -77,7 +99,7 @@ sub line_songline {
     foreach my $phrase (@{$lineobject->{phrases}}){
         if(defined $lineobject->{chords}){
             if (@{$lineobject->{chords}}[$index] ne '' ){
-                $chord = $gcfg->{gchordstart_tag}.@{$lineobject->{chords}}[$index] .$gcfg->{gchordend_tag}; #songbook format \\[chord]
+                $chord = $gchordstart_tag.@{$lineobject->{chords}}[$index] .$gchordend_tag; #songbook format \\[chord]
                 $has_chord = 1;
         }}
         $line .=  $chord . latex_encode($phrase);
@@ -87,7 +109,7 @@ sub line_songline {
 
 	my $empty = $line;
     my $textline = $line;
-    my $nbsp = $gcfg->{start_spaces_songline}; #unicode for nbsp sign # start_spaces_songline
+    my $nbsp = $start_spaces_songline; #unicode for nbsp sign # start_spaces_songline
     if($empty =~ /^\s+/){ # starts with spaces
 	    $empty =~ s/^(\s+).*$/$1/; # not the elegant solution - but working - replace all spaces in the beginning of a line
         my $replaces = $empty;  #with a nbsp symbol as the intend tend to be intentional
@@ -95,20 +117,20 @@ sub line_songline {
         $textline =~ s/$empty/$replaces/;
     }
     $line = $textline;
-    if ($has_chord) { $line = $gcfg->{chorded_line} . $line; } else { $line = $gcfg->{unchorded_line} . $line; }
-    return $line.$gcfg->{eol};
+    if ($has_chord) { $line = $chorded_line . $line; } else { $line = $unchorded_line . $line; }
+    return $line.$eol;
 }
 $line_routines{line_songline} = \&line_songline;
 
 sub line_newpage {
     my ( $lineobject ) = @_;
-    return $gcfg->{newpage_tag} . "\n";
+    return $newpage_tag;
 }
 $line_routines{line_newpage} = \&line_newpage;
 
 sub line_empty {
     my ( $lineobject ) = @_;
-    return $gcfg->{emptyline_tag} . "\n";
+    return $emptyline_tag;
 }
 $line_routines{line_empty} = \&line_empty;
 
@@ -144,23 +166,23 @@ $line_routines{line_image} = \&line_image;
 
 sub line_colb {
     my ( $lineobject ) = @_; # Template for comment?
-    return $gcfg->{columnbreak_tag} . "\n";
+    return $columnbreak_tag;
 }
 $line_routines{line_colb} = \&line_colb;
 
 sub line_chorus {
     my ( $lineobject ) = @_; #
-   return $gcfg->{beginchorus_tag} ."\n". 
+   return $beginchorus_tag ."\n". 
           elt_handler($lineobject->{body}) . 
-          $gcfg->{endchorus_tag} . "\n";
+          $endchorus_tag . "\n";
 }
 $line_routines{line_chorus} = \&line_chorus;
 
 sub line_verse {
     my ( $lineobject ) = @_; #
-   return $gcfg->{beginverse_tag} ."\n". 
+   return $beginverse_tag ."\n". 
         elt_handler($lineobject->{body}) 
-        .$gcfg->{endverse_tag} ."\n";
+        .$endverse_tag ."\n";
 }
 $line_routines{line_verse} = \&line_verse;
 
@@ -172,23 +194,23 @@ $line_routines{line_set} = \&line_set;
 
 sub line_tabline {
     my ( $lineobject ) = @_;
-    return $lineobject->{text}.$gcfg->{eol};
+    return $lineobject->{text}.$eol;
 }
 $line_routines{line_tabline} = \&line_tabline;
 
 sub line_tab {
     my ( $lineobject ) = @_;
-    return $gcfg->{begintab_tag}."\n". 
+    return $begintab_tag."\n". 
            elt_handler($lineobject->{body}) .
-           $gcfg->{endtab_tag} ."\n";
+           $endtab_tag ."\n";
 }
 $line_routines{line_tab} = \&line_tab;
 
 sub line_grid {
     my ( $lineobject ) = @_;
-    return $gcfg->{begingrid_tag}."\n".
+    return $begingrid_tag."\n".
            elt_handler($lineobject->{body}) 
-           .$gcfg->{endgrid_tag} ."\n";
+           .$endgrid_tag ."\n";
 }
 $line_routines{line_grid} = \&line_grid;
 
@@ -212,7 +234,7 @@ sub line_gridline {
     if(defined $lineobject->{comment}){
         $line .= $lineobject->{comment}->{text};
     }
-    return $line. $gcfg->{eol};
+    return $line. $eol;
 }
 $line_routines{line_gridline} = \&line_gridline;
 
@@ -299,10 +321,11 @@ sub generate_song {
 
     $gtemplatatevar{songlines} = elt_handler($s->{body});
     
-    my $song = '';
-    $gtemplate->process($gcfg->{template_song}, \%gtemplatatevar, \$song) || die $gtemplate->error();
+   # my $song = '';
+   # $gtemplate->process($gcfg->{template_song}, \%gtemplatatevar, \$song) || die $gtemplate->error();
     
-    return $song;
+    return \%gtemplatatevar;
+    #$song;
 }
 
 1;
