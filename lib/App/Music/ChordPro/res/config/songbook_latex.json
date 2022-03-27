@@ -1,6 +1,5 @@
 {
    "LaTeX" : {  // please check for LaTeX Songbook/Guitar packages and have a look into config-examples
-    "template_include_path" : [ "$CHORDPRO_LIBRARY" ],
     "templates" :  {
        "songbook" : "songbook.tt",
        "comment" : "comment.tt",

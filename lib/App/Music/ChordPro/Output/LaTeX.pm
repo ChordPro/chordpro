@@ -18,6 +18,8 @@ use App::Music::ChordPro::Output::Common;
 use Template;
 use LaTeX::Encode;
 
+our $CHORDPRO_LIBRARY;
+
 my $single_space = 0;		# suppress chords line when empty
 my $lyrics_only = 0;		# suppress all chords lines
 my %gtemplatatevar = ();
@@ -52,7 +54,7 @@ sub generate_songbook {
     my @songs;
     $gcfg = $::config->{LaTeX};
     $gtemplate = Template->new({
-        INCLUDE_PATH => [@{$gcfg->{template_include_path}}, ::rsc_or_file("res/templates/")],
+        INCLUDE_PATH => [@{$gcfg->{template_include_path}}, ::rsc_or_file("res/templates/"), $CHORDPRO_LIBRARY],
         INTERPOLATE  => 1,
     }) || die "$Template::ERROR\n";
 
