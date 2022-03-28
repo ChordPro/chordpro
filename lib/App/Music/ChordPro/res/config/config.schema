@@ -33,6 +33,9 @@
 		"module": {
 		    "type": "string",
 		    "default": "ABC"
+		},
+		"preprocess": {
+		    "type": "object"
 		}
 	    },
 	    "required" : [ "type", "handler", "module" ],
@@ -139,6 +142,13 @@
 		    "default": false
 		},
 
+		"choruslabels": {
+		    "description": "",
+		    "title": "If false, chorus labels are used as tags.",
+		    "type": "boolean",
+		    "default": true
+		},
+
 		"columns": {
 		    "description": "Number of columns.",
 		    "type": "integer",
@@ -231,6 +241,12 @@
 		    "minimum" : -12,
 		    "maximum" : 12,
 		    "format" : "number"
+		},
+
+		"truesf": {
+		    "description": "Substitute Unicode sharp/flats in chord names.",
+		    "type": "boolean",
+		    "default": false
 		}
 	    }
 	},
@@ -1103,6 +1119,10 @@
 			    "description": "Default properties for all pages.",
 			    "additionalProperties": false,
 			    "properties": {
+			        "background": {
+				    "description": "Background page.",
+				    "type": "string"
+				},
 				"title": {
 				    "allOf": [
 					{ "$ref": "#/definitions/tptspec" },
@@ -1124,6 +1144,10 @@
 			    "description": "Properties for per-song title pages.",
 			    "additionalProperties": false,
 			    "properties": {
+			        "background": {
+				    "description": "Background page.",
+				    "type": "string"
+				},
 				"title": {
 				    "allOf": [
 					{ "$ref": "#/definitions/tptspec" },
@@ -1145,6 +1169,10 @@
 			    "description": "Properties of the very first page.",
 			    "additionalProperties": false,
 			    "properties": {
+			        "background": {
+				    "description": "Background page.",
+				    "type": "string"
+				},
 				"title": {
 				    "description": "Defaults to default.",
 				    "$ref": "#/definitions/tptspec"
