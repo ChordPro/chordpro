@@ -73,7 +73,7 @@
 
 \mainmatter
 \begin{songs}{titleidx,authidx,scripidx}
-[%  FOREACH song IN songs %]
+[% FOREACH song IN songs %]
 \newpage
 \beginsong{[% song.title %][%  FOREACH st IN song.subtitle %] \\ [% st %][%  END %]}
 [
@@ -88,7 +88,7 @@
 [% song.songlines | eval %]
 \endsong
 
-[%  END %]
+[% END %]
 \end{songs}
 
 \pagenumbering{Alph}

@@ -22,7 +22,6 @@ our $CHORDPRO_LIBRARY;
 
 my $single_space = 0;		# suppress chords line when empty
 my $lyrics_only = 0;		# suppress all chords lines
-my %gtemplatatevar = ();
 my %line_routines = ();
 my $gtemplate;
 my $gcfg;
@@ -282,7 +281,7 @@ sub my_latex_encode{
 
 sub generate_song {
     my ( $s ) = @_;
-    %gtemplatatevar = ();
+    my %gtemplatatevar = ();
 
     if ( defined $s->{meta} ) {
 		$gtemplatatevar{meta} = my_latex_encode($s->{meta});
