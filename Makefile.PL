@@ -38,6 +38,8 @@ WriteMakefile
 		    'Image::Info'		  => 1.41,
 		    'List::Util'		  => 1.33,
 		    'Storable'			  => 3.08,
+			'Template'			  => 3.010,
+			'LaTeX::Encode'		  => 0.092.0
 		   },
 
  CONFIGURE_REQUIRES => {
