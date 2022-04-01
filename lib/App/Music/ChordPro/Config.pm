@@ -1520,14 +1520,7 @@ sub default_config() {
           "songsonly" : true,
       },
     },
-	"LaTeX" : {  // please check for LaTeX Songbook/Guitar packages and have a look into config-examples
-         "template_include_path" : [ ],
-		 "templates" :  {
-			"songbook" : "songbook.tt",
-			"comment" : "comment.tt",
-			"image" : "image.tt"
-		  }
-      },
+
     // Settings for ChordPro backend.
     "chordpro" : {
 	// Style of chorus.
@@ -1552,6 +1545,16 @@ sub default_config() {
 	    "display" : "chordpro.css",
 	    "print"   : "chordpro_print.css",
 	},
+    },
+
+    // Settings for LaTeX backend.
+    "latex" : {
+        "template_include_path" : [ ],
+	"templates" :  {
+	    "songbook" : "songbook.tt",
+	    "comment" : "comment.tt",
+	    "image"   : "image.tt"
+	}
     },
 
     // Settings for Text backend.

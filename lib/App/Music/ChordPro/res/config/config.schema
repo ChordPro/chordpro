@@ -711,6 +711,41 @@
 	    }
 	},
 
+	"latex": {
+	    "title": "LaTeX backend",
+	    "description": "",
+	    "type": "object",
+	    "additionalProperties": false,
+	    "properties": {
+		"template_include_path": {
+		    "description": "Include paths for templates.",
+		    "additionalProperties": false,
+		    "type" : "array"
+		},
+		"templates" : {
+		    "description": "Templates for LaTeX generation.",
+		    "additionalProperties": false,
+		    "properties": {
+			"comment": {
+			    "description": "Helper template to render comments.",
+			    "type": "string",
+			    "default" : "comment.tt"
+			},
+			"image": {
+			    "description": "Helper template to render images.",
+			    "type": "string",
+			    "default" : "image.tt"
+			},
+			"songbook": {
+			    "description": "Master template to render the songbook.",
+			    "type": "string",
+			    "default" : "songbook.tt"
+			}
+		    }
+		}
+	    }
+	},
+
 	"parser": {
 	    "title": "Preprocessing",
 	    "description": "Preprocessing the input.",

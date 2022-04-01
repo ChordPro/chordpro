@@ -1,5 +1,5 @@
 {
-    "LaTeX" : { // please be aware that LaTeX Song Package require Verse
+    "latex" : { // please be aware that LaTeX Song Package require Verse
         "template_include_path" : ["./latex/"],
         "templates" :  {
             "songbook" : "t_songbook.tt",

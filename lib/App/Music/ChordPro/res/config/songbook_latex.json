@@ -1,5 +1,5 @@
 {
-   "LaTeX" : {  // please check for LaTeX Songbook/Guitar packages and have a look into config-examples
+   "latex" : {  // please check for LaTeX Songbook/Guitar packages and have a look into config-examples
     "templates" :  {
        "songbook" : "songbook.tt",
        "comment" : "comment.tt",

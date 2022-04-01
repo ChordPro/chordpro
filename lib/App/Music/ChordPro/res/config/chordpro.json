@@ -640,6 +640,16 @@
 	},
     },
 
+    // Settings for LaTeX backend.
+    "latex" : {
+        "template_include_path" : [ ],
+	    "templates" :  {
+	    "songbook" : "songbook.tt",
+	    "comment" : "comment.tt",
+	    "image"   : "image.tt"
+	}
+    },
+
     // Settings for Text backend.
     "text" : {
 	// Style of chorus.

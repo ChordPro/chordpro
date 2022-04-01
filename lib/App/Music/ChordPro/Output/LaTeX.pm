@@ -51,7 +51,7 @@ my $eol = "[% eol %]";
 sub generate_songbook {
     my ( $self, $sb ) = @_;
     my @songs;
-    $gcfg = $::config->{LaTeX};
+    $gcfg = $::config->{latex};
     $gtemplate = Template->new({
         INCLUDE_PATH => [@{$gcfg->{template_include_path}}, ::rsc_or_file("res/templates/"), $CHORDPRO_LIBRARY],
         INTERPOLATE  => 1,
