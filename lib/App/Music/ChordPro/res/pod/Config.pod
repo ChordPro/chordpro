@@ -668,9 +668,9 @@ extensive details and examples.
         },
     
         // Settings for LaTeX backend.
-        "LaTeX" : {
+        "latex" : {
             "template_include_path" : [ ],
-    	"templates" :  {
+    	    "templates" :  {
     	    "songbook" : "songbook.tt",
     	    "comment" : "comment.tt",
     	    "image"   : "image.tt"

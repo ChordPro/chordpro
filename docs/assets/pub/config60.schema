@@ -711,7 +711,7 @@
 	    }
 	},
 
-	"LaTeX": {
+	"latex": {
 	    "title": "LaTeX backend",
 	    "description": "",
 	    "type": "object",
