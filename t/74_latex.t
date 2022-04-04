@@ -24,10 +24,8 @@ foreach my $file ( sort @files ) {
     #diag("Testing: $file");
     ( my $out = $file ) =~ s/\.cho/.tmp/;
     ( my $ref = $file ) =~ s/\.cho/.tex/;
-    @ARGV = ( "--config", "./latex/t_config.json",
+    @ARGV = ( "--no-default-configs", "--config", "./latex/t_config.json",
 	      "--generate", "LaTeX",
-	       $decoda ? ( "--backend-option", "decoda=1" ) : (),
-	      "--backend-option", "groove=testing",
 	      "--output", $out,
 	      $file );
     ::run();

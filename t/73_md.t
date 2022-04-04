@@ -26,8 +26,6 @@ foreach my $file ( sort @files ) {
     ( my $ref = $file ) =~ s/\.cho/.md/;
     @ARGV = ( "--no-default-configs",
 	      "--generate", "Markdown",
-	      $decoda ? ( "--backend-option", "decoda=1" ) : (),
-	      "--backend-option", "groove=testing",
 	      "--output", $out,
 	      $file );
     ::run();
