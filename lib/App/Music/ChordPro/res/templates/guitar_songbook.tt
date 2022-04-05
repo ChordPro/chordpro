@@ -28,8 +28,10 @@
 \usepackage[most]{tcolorbox}
 \usepackage[TS1,T1]{fontenc}
 \usepackage[bookmarks]{hyperref}
-
+\usepackage{gchords}
 \begin{document}
+\smallchords
+
 \title{my Songbook}
 \author{The Author}
 \date{\today}
@@ -40,6 +42,18 @@
 [%  FOREACH song IN songs %]
 \newpage
 \subsection{[% song.title %]}
+[% IF song.chords.0 %]\begin{tcolorbox}[colback=white,colframe=black,width=0.75\textwidth,arc=3mm, auto outer arc]
+ \chords{
+[%  FOREACH chord IN song.chords %]\chord{t}{[% FOREACH fret IN chord.frets.split(''); 
+IF fret != 'X'; 
+  IF fret != '0';
+  'p'; fret; END; 
+ELSE; 'x'; 
+END;  
+IF not loop.last; ','; END;
+END; -%]}{[% chord.chord %]} [% elements = loop.count % 5 %][% IF ((elements == 0) and (not loop.last)) %]\newline[% END %][% END %]
+ }\end{tcolorbox}[% END %]
+
 [%  FOREACH st IN song.subtitle %] [% st %] \\[%  END %]
 [% IF song.meta.composer.0 %] Composer [% song.meta.composer.0 %] \\[% END %][% IF song.meta.lyricist.0 %]lyricist [% song.meta.lyricist.0 %] \\[% END %][% IF song.meta.copyright.0 %](c) [% song.meta.copyright.0 %] \\[% END %]
 [% song.songlines | eval #eval is obligatory to eval the variables set above %]
