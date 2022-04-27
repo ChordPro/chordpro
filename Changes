@@ -12,6 +12,7 @@
     - (PDF) Add support for background document.
     - Experimental support for SVG images.
     - Markdown export (EXPERIMENTAL). Thanks to Johannes Rumpf.
+    - LaTeX export (EXPERIMENTAL). Thanks to Johannes Rumpf.
     - !BugFixes
     - Fix issue #208.
     - (Wx) Fix sharps/flats mixup in PreferencesDialog.
