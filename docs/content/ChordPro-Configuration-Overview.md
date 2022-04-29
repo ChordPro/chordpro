@@ -126,7 +126,7 @@ The config files are processed in order, and their contents are merged. In gener
 
 ### Merging instrument definitions
 
-Instrument definitions, in particular the settings `"tuning"`, `"notes"` and `"chords"`, are handled differently. These are processed immedeately after parsing a configuration file and then the setting is removed from the configuration.
+Instrument definitions, in particular the settings `"tuning"`, `"notes"` and `"chords"`, are handled differently. These are processed immediately after parsing a configuration file and then the setting is removed from the configuration.
 
 For example, assume `"chords_italian.json"` defines a number of chords using italian (latin) note names and `"chords_german.json"` defines some chords using german note names. Then the following sequence of configuration files will work as expected:
 
