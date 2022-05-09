@@ -7,6 +7,7 @@
     - Add settings.truesf (default: false) to enable/disable this.
     - Allow settings.* to be used in %{} substitutions.
     - Allow meta values for directive selectors.
+    - Re-enable agnostic chord lookup.
     - (Wx)(MacOS) Improve prefences dialog.
     - Several ABC fixes/improvements.
     - (PDF) Add support for background document.

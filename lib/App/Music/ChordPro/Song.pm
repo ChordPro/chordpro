@@ -1638,7 +1638,7 @@ sub parse_chord {
 
     if ( $info ) {
 	# Look it up now, the name may change by transcode.
-	if ( my $i = App::Music::ChordPro::Chords::_known_chord($info->name) ) {
+	if ( my $i = App::Music::ChordPro::Chords::_known_chord($info) ) {
 	    warn( "Parsing chord: \"$chord\" found ",
 		  $i->name, " for ", $info->name, " in song/config chords\n" ) if $debug > 1;
 	    $info = $i->new({ %$i, name => $info->name }) ;
@@ -1657,7 +1657,7 @@ sub parse_chord {
 	      $info->name,
 	      " (", $info->{system}, ")",
 	      "\n" ) if $debug > 1;
-	if ( my $i = App::Music::ChordPro::Chords::_known_chord($info->name) ) {
+	if ( my $i = App::Music::ChordPro::Chords::_known_chord($info) ) {
 	    warn( "Parsing chord: \"$chord\" found \"",
 		  $info->name, "\" in song/config chords\n" ) if $debug > 1;
 	    $unk = 0;

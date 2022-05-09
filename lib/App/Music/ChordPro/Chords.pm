@@ -298,7 +298,28 @@ sub pop_parser {
 
 sub _known_chord {
     my ( $name ) = @_;
-    $song_chords{$name} // $config_chords{$name};
+    my $info;
+    if ( ref($name) =~ /^App::Music::ChordPro::Chord::/ ) {
+	$info = $name;
+	$name = $info->name;
+    }
+    my $ret = $song_chords{$name} // $config_chords{$name};
+    return $ret if $ret || !$info;
+
+    # Retry agnostic.
+    $name = $info->agnostic;
+    $ret = $song_chords{$name} // $config_chords{$name};
+    if ( $ret ) {
+	$ret = $info->new($ret);
+	for ( qw( name display
+		  root root_canon
+		  bass bass_canon
+		  system parser ) ) {
+	    next unless defined $info->{$_};
+	    $ret->{$_} = $info->{$_};
+	}
+    }
+    $ret;
 }
 
 sub _check_chord {
