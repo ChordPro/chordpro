@@ -2515,8 +2515,14 @@ sub wrap {
 
 	if ( @rchords ) {
 	    # Does the chord fit?
-	    my $font = $pr->{ps}->{fonts}->{chord};
-	    $pr->setfont($font);
+	    my $c = $chord;
+	    if ( $chord =~ /^\*(.+)/ ) {
+		$c = $1;
+		$pr->setfont( $pr->{ps}->{fonts}->{annotation} );
+	    }
+	    else {
+		$pr->setfont( $pr->{ps}->{fonts}->{chord} );
+	    }
 	    my $w = $pr->strwidth($chord);
 	    if ( $w > $m - $x ) {
 		# Nope. Move to overflow.
