@@ -1190,6 +1190,7 @@ sub default_config() {
 	  "title"  : 1.2,
 	  "lyrics" : 1.2,
 	  "chords" : 1.2,
+	  "diagramchords" : 1.2,
 	  "grid"   : 1.2,
 	  "tab"    : 1.0,
 	  "toc"    : 1.4,

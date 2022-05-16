@@ -113,13 +113,23 @@ This controls the distance between lines as a factor of the font size.
             "title"  : 1.2,
             "lyrics" : 1.2,
             "chords" : 1.2,
+            "diagramchords" : 1.2,
             "grid"   : 1.2,
             "tab"    : 1.0,
             "toc"    : 1.4,
             "empty"  : 1.0,
         },
 
-Note: By setting the spacing for `empty` to a small value, you get fine-grained control over the spacing between the various parts of the song.
+`lyrics` controls the spacing between songlines (chords + lyrics).
+
+`chords` controls the spacing between chords and lyrics in songlines.
+
+`diagramchords` controls the spacing between the chordname and the
+diagram in chord diagrams.
+
+By setting the spacing for `empty` to a small value, you get
+fine-grained control over the spacing between the various parts of the
+song.
 
 ## Labels
 

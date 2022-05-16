@@ -27,7 +27,7 @@ sub new {
 # The vertical space the diagram requires.
 sub vsp0 {
     my ( $self, $elt, $ps ) = @_;
-    $ps->{fonts}->{diagram}->{size} * 1.2
+    $ps->{fonts}->{diagram}->{size} * $ps->{spacing}->{diagramchords}
       + 0.40 * $ps->{diagrams}->{width}
 	+ $ps->{diagrams}->{vcells} * $ps->{diagrams}->{height};
 }
@@ -93,14 +93,14 @@ sub draw {
       unless $info->{origin} ne "user"
 	|| $::config->{diagrams}->{show} eq "user";
     $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y - font_bl($font) );
-    $y -= $font->{size} * 1.2 + $dot/2 + $lw;
+    $y -= $font->{size} * $ps->{spacing}->{diagramchords} + $dot/2 + $lw;
     if ( $info->{base} + $info->{baselabeloffset} > 1 ) {
 	# my $i = @Roman[$info->{base}] . "  ";
 	my $i = sprintf("%d  ", $info->{base} + $info->{baselabeloffset});
 	$pr->setfont( $ps->{fonts}->{diagram_base}, $gh );
 	$pr->text( $i, $x-$pr->strwidth($i),
 		   $y-($info->{baselabeloffset}*$gh)-0.85*$gh,
-		   $ps->{fonts}->{diagram_base}, 1.2*$gh );
+		   $ps->{fonts}->{diagram_base}, $ps->{spacing}->{diagramchords}*$gh );
 	$pr->setfont($font);
     }
 
