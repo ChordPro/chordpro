@@ -6,12 +6,12 @@
       appropriate symbols.
     - Add settings.truesf (default: false) to enable/disable this.
     - Allow settings.* to be used in %{} substitutions.
+    - Add meta chords and numchords (list/number of chords used).
     - Allow meta values for directive selectors.
     - Re-enable agnostic chord lookup.
     - (Wx)(MacOS) Improve prefences dialog.
     - Several ABC fixes/improvements.
     - (PDF) Add support for background document.
-    - Experimental support for SVG images.
     - Markdown export (EXPERIMENTAL). Thanks to Johannes Rumpf.
     - LaTeX export (EXPERIMENTAL). Thanks to Johannes Rumpf.
     - !BugFixes

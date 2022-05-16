@@ -509,19 +509,23 @@ sub parse_song {
 	$diagrams = "none";
     }
 
+    { my %h; @used_chords = map { $h{$_}++ ? () : $_ } @used_chords; }
+
+    if ( $diagrams eq "user" && $self->{define} && @{$self->{define}} ) {
+	@used_chords =
+	  map { $_->{name} } @{$self->{define}};
+    }
+
+    if ( $config->{diagrams}->{sorted} ) {
+	@used_chords =
+	  sort App::Music::ChordPro::Chords::chordcompare @used_chords;
+    }
+
+    # For headings, footers, table of contents, ...
+    $self->{meta}->{chords} //= [ @used_chords ];
+    $self->{meta}->{numchords} = [ scalar(@{$self->{meta}->{chords}}) ];
+
     if ( $diagrams =~ /^(user|all)$/ ) {
-	my %h;
-	@used_chords = map { $h{$_}++ ? () : $_ } @used_chords;
-
-	if ( $diagrams eq "user" && $self->{define} && @{$self->{define}} ) {
-	    @used_chords =
-	    map { $_->{name} } @{$self->{define}};
-	}
-
-	if ( $config->{diagrams}->{sorted} ) {
-	    @used_chords =
-	      sort App::Music::ChordPro::Chords::chordcompare @used_chords;
-	}
 	$self->{chords} =
 	  { type   => "diagrams",
 	    origin => "song",
