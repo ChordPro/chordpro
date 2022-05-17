@@ -929,12 +929,32 @@ sub transcode {
 }
 
 sub chord_display {
-    my ( $self, $raw ) = @_;
-    my $res = $self->{display}
-      ? $raw
-      ? $self->{display}
-        : interpolate( { args => $self }, $self->{display} )
-	: $self->show("np");
+    my ( $self, $sf ) = @_;
+
+    my $res =
+      $self->{display}
+      ? interpolate( { args => $self }, $self->{display} )
+      : $self->show("np");
+
+    # Substitute musical symbols if wanted and possible.
+    if ( $::config->{settings}->{truesf} ) {
+	$sf ||= 0;
+	if ( $sf & 0x02 ) {	# has flat
+	    pos($res) = 1;
+	    $res =~ s/b/♭/g;
+	}
+	else {			# fallback
+	    pos($res) = 1;
+	    $res =~ s;b;<span font="chordprosymbols">!</span>;g;
+	}
+	if ( $sf & 0x01 ) {	# has sharp
+	    $res =~ s/#/♯/g;
+	}
+	else {			# fallback
+	    $res =~ s;#;<span font="chordprosymbols">#</span>;g;
+	}
+    }
+
     return $self->{parens} ? "($res)" : $res;
 }
 

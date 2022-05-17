@@ -148,7 +148,12 @@ directive with a dash (hyphen) and a _selector_.
 If a selector is used, ChordPro first tries to match it with the
 instrument type (as defined in the [config file]({{< relref "chordpro-configuration-generic#instrument-description" >}})).
 If this fails, it
-tries to match it with the user name (as defined in the [config file]({{< relref "chordpro-configuration-generic#user" >}})).
+tries to match it with the user name (as defined in the [config
+file]({{< relref "chordpro-configuration-generic#user" >}})).
+Finally, it will try it as a meta item, selection will succeed if this
+item exists and has a 'true' value (i.e., not empty, zero, `false` or
+`null`).
+Selection can be reversed by appending a `!` to the selector.
 
 For example, to
 define chords depending on the instrument used:

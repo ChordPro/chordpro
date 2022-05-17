@@ -129,6 +129,13 @@ sub generate_song {
 			  nhtml($e->{text}) . '</div>' );
 		    next;
 		}
+		if ( $e->{type} eq "set" && $e->{name} eq "label" ) {
+		    push( @s,
+			  '<div class="label">' . nhtml($e->{value}) . '</div>'
+			);
+		    next;
+		}
+
 	    }
 	    push( @s, '</div>' );
 	    push( @s, "" ) if $tidy;

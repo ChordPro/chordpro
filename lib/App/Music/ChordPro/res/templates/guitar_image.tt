@@ -1,0 +1,3 @@
+\begin{center} [% # image parameters are at opts. f.e. opts.width, opts.scale, opts.height ... %]
+ \includegraphics[width=[% IF opts.scale %][% opts.scale %][% ELSE %]0.75[% END %]\textwidth,keepaspectratio]{[% uri %]}  \\
+\end{center}

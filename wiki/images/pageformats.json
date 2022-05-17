@@ -1,183 +1,13 @@
 // Configuration for ChordPro.
-//
-// This is a relaxed JSON document, so comments are possible.
 
 {
-    // General settings, to be changed by legacy configs and
-    // command line.
-    "settings" : {
-	// Titles flush: default center.
-	"titles" : "center",
-	// Columns, default one.
-	"columns" : 1,
-	// Suppress empty chord lines.
-	// Overrides the -a (--single-space) command line options.
-	"suppress-empty-chords" : true,
-	// Suppress chords.
-	// Overrides --lyrics-only command line option.
-	"lyrics-only" : false,
-	// Chords inline.
-	// May be a string containing pretext %s posttext.
-	// Defaults to "[%s]" if true.
-	"inline-chords" : false,
-    },
-
-    // Metadata.
-    // For these keys you can use {meta key ...} as well as {key ...}.
-    // If strict is nonzero, only the keys named here are allowed.
-    // If strict is zero, {meta ...} will accept any key.
-    // Important: "title" and "subtitle" must always be in this list.
-    // The separator is used to concatenate multiple values.
-    "metadata" : {
-      "keys" : [ "title", "subtitle",
-                 "artist", "composer", "lyricist", "arranger",
-                 "album", "copyright", "year",
-                 "key", "time", "tempo", "capo", "duration" ],
-      "strict" : true,
-      "separator" : "; ",
-    },
-
-    // Strings and tuning.
-    // Note that using this will discard all built-in chords!
-    // "tuning" : [ "E2", "A2", "D3", "G3", "B3", "E4" ],
-    "tuning" : null,
-
-    // User defined chords.
-    // "base" defaults to 1.
-    // "easy" is ignored.
-    // Use 0 for an empty string, and -1 for a muted string.
-    "chords" : [
-      //  {
-	//    "name"  : "Bb",
-	//    "base"  : 1,
-	//    "frets" : [ 1, 1, 3, 3, 3, 1 ],
-	//    "fingers" : [ 1, 1, 2, 3, 4, 1 ],
-	//    "easy"  : true,
-	//  },
-    ],
-
-    // Printing chord diagrams.
-    // "auto": automatically add unknown chords as empty diagrams.
-    // "show": prints the chords used in the song.
-    //         "all": all chords used.
-    //         "user": only prints user defined chords.
-    // "sorted": order the chords by key.
-    "diagrams" : {
-        "auto"     :  false,
-        "show"     :  "all",
-        "sorted"   :  false,
-    },
-
-    // Diagnostig messages.
-    "diagnostics" : {
-	  "format" : "\"%f\", line %n, %m\n\t%l",
-    },
-
-    // Table of contents.
-    "toc" : {
-	  // Title for ToC.
-	  "title" : "Table of Contents",
-	  // Sorting order.
-	  // Currently only sorting by page number and alpha is implemented.
-	  "order" : "page",
-    },
 
     // Layout definitions for PDF output.
 
     "pdf" : {
 
-	// Papersize, 'a4' or [ 595, 842 ] etc.
-	"papersize" : "a4",
-
-	// Space between columns, in pt.
-	"columnspace"  :  20,
-
-	// Page margins.
-	// Note that top/bottom exclude the head/footspace.
 	"margintop"    : 100,
-	"marginbottom" :  40,
-	"marginleft"   :  40,
-	"marginright"  :  40,
 	"headspace"    :  80,
-	"footspace"    :  20,
-
-	// Special: head on first page only, add the headspace to
-	// the other pages so they become larger.
-	"head-first-only" : false,
-
-	// Spacings.
-	// Baseline distances as a factor of the font size.
-	"spacing" : {
-	    "title"  : 1.2,
-	    "lyrics" : 1.2,
-	    "chords" : 1.2,
-	    "grid"   : 1.2,
-	    "tab"    : 1.0,
-	    "toc"    : 1.4,
-	    "empty"  : 1.0,
-	},
-	// Note: By setting the font size and spacing for empty lines to
-	// smaller values, you get a fine(r)-grained control over the
-	// spacing between the various parts of the song.
-
-	// Style of chorus.
-	"chorus" : {
-	    "indent"     :  0,
-	    // Chorus side bar.
-	    // Suppress by setting offset and/or width to zero.
-	    "bar" : {
-		"offset" :  8,
-		"width"  :  1,
-		"color"  : "black",
-	    },
-	    "tag" : "Chorus",
-          // Recall style: Print the tag using the type.
-          // Optionally quote the lines of the preceding chorus.
-          "recall" : {
-               "tag"   : "Chorus",
-               "type"  : "comment",
-               "quote" : false,
-          },
-	},
-
-	// Indent for lyrics.
-	// "indent" : 70,
-	"indent" :  0,
-
-	// Alternative songlines with chords in a side column.
-	// Value is the column position.
-	// "chordscolumn" : 400,
-	"chordscolumn" :  0,
-
-	// A {titles: left} may conflict with customized formats.
-	// Set to non-zero to ignore the directive.
-	"titles-directive-ignore" : false,
-
-  	// Chord diagrams.
-	// A chord diagram consists of a number of cells.
-	// Cell dimensions are specified by "width" and "height".
-	// The horizontal number of cells depends on the number of strings.
-	// The vertical number of cells is "vcells", which should
-	// be 4 or larger to accomodate most chords.
-	// The horizontal distance between diagrams is "hspace" cells.
-	// The vertical distance is "vspace" cells.
-	// "linewidth" is the thickness of the lines as a fraction of "width".
-	// Diagrams for all chords of the song can be shown at the
-	// "top" of the first page, the "bottom" of the last page
-	// (default), "left" on the first page and "right" on the first
-	// page. "left" is not implemented.
-	"diagrams" : {
-	    "show"     :  "bottom",
-	    "width"    :  15,
-	    "height"   :  15,
-	    "hspace"   :  10,
-	    "vspace"   :  3,
-	    "vcells"   :  4,
-	    "linewidth" : 0.1,
-	},
-
-	// Even/odd pages. A value of -1 denotes odd/even pages.
-	"even-odd-pages" : 1,
 
 	// Formats.
 	"formats" : {
@@ -194,6 +24,8 @@
 	    	"subtitle"  : null,
 		// Footer is title -- page number.
 	    	"footer"    : [ "%{title}", "", "%{page}" ],
+                // Background pages: 5 and 6 from bgdemo.
+               "background" : "examples/bgdemo.pdf:5",
 	    },
 	    // The first page of a song has:
 	    "title" : {
@@ -202,81 +34,44 @@
 	    	"subtitle"  : [ "", "%{subtitle}", "" ],
 		// Footer with page number.
 	    	"footer"    : [ "", "", "%{page}" ],
-	    },
+                // Background pages: 3 and 4 from bgdemo.
+                "background" : "examples/bgdemo.pdf:3",
+  	    },
 	    // The very first output page is slightly different:
 	    "first" : {
 	    	// It has title and subtitle, like normal 'first' pages.
 		// But no footer.
 	    	"footer"    : null,
+                // Background pages: 1 and 2 from bgdemo.
+                "background" : "examples/bgdemo.pdf:1",
 	    },
+	},
+
+	// Diagrams.
+	"diagrams" : {
+            "height" : "15",
+            "hspace" : "10",
+            "width" : "15"
 	},
 
 	// Fonts.
-	// Fonts can be specified by name (for the corefonts)
-	// or a filename (for TrueType/OpenType fonts).
-	// Relative filenames are looked up in the fontdir.
-	// "fontdir" : [ "/usr/share/fonts/liberation", "/home/me/fonts" ],
-	"fontdir" : null,
-
-	// Fonts for chords and comments can have a background
-	// colour associated.
-	// Colours are "#RRGGBB" or predefined names like "black", "white",
-	// and lots of others.
-
 	"fonts" : {
 	    "title" : {
-		"name" : "Times-Bold",
 		"size" : 30
 	    },
 	    "subtitle" : {
-		"name" : "Times",
 		"size" : 24
 	    },
 	    "footer" : {
-		"name" : "Times",
 		"size" : 24
 	    },
 	    "text" : {
-		"name" : "Times-Roman",
 		"size" : 20
 	    },
 	    "chord" : {
-		"name" : "Helvetica-Oblique",
 		"size" : 20
 	    },
-	    "comment" : {
-		"name" : "Helvetica",
-		"size" : 12
-	    },
-	    "tab" : {
-		"name" : "Courier",
-		"size" : 10
-	    },
-	    "toc" : {
-		"name" : "Times-Roman",
-		"size" : 11
-	    },
-	    "grid" : {
-		"name" : "Helvetica",
-		"size" : 10
-	    },
 	},
-
-	// Fonts that can be specified, but need not.
-	// subtitle       --> text
-	// comment        --> text
-	// comment_italic --> chord
-	// comment_box    --> chord
-	// toc            --> text
-	// grid           --> chord
-	// grid_margin	  --> comment
-	// footer         --> subtitle @ 60%
-	// empty          --> text
-	// diagram	  --> comment
-	// diagram_base	  --> text (but at a small size)
-
-	// This will show the page layout if non-zero.
-	"showlayout" : false,
     },
 }
 // End of config.

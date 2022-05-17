@@ -1,5 +1,36 @@
 # Release info
 
+## 5.988
+
+Released: 2022-05-17
+
+
+### ChordPro functionality
+
+* Automatically use real sharps and flats in chord names. Fallback to the ChordProSymbols font if the font doesn't have the appropriate symbols.
+* Add settings.truesf (default: false) to enable/disable this.
+* Allow settings.* to be used in %{} substitutions.
+* Add meta chords and numchords (list/number of chords used).
+* Add config pdf.spacing.diagramchords.
+* Allow meta values for directive selectors.
+* Re-enable agnostic chord lookup.
+* (Wx)(MacOS) Improve prefences dialog.
+* Several ABC fixes/improvements.
+* (PDF) Add support for background document.
+* Markdown export (EXPERIMENTAL). Thanks to Johannes Rumpf.
+* LaTeX export (EXPERIMENTAL). Thanks to Johannes Rumpf.
+
+### BugFixes
+
+* Fix issue #208.
+* (Wx) Fix sharps/flats mixup in PreferencesDialog.
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.
+
+[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.
+
 ## 5.987
 
 Released: 2022-02-08
@@ -7,18 +38,13 @@ Released: 2022-02-08
 
 ### ChordPro functionality
 
+* Conditional directives can be negated with a trailing !
 * (Wx)(MacOS) Improve prefences dialog.
 
 ### BugFixes
 
 * Add File::HomeDir to dependencies.
 * Fix issue #204.
-
-### Social and support
-
-[User community](https://groups.io/g/ChordPro) for feedback and help.
-
-[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.
 
 ## 5.986
 

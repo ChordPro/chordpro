@@ -65,6 +65,11 @@ my $xp = [
         artist => [
           'December',
         ],
+	chords => [
+	],
+        numchords => [
+          0,
+        ],
         key => [
           'D',
         ],
@@ -91,6 +96,11 @@ my $xp = [
       meta => {
         artist => [
           'September',
+        ],
+	chords => [
+	],
+        numchords => [
+          0,
         ],
         key => [
           'D',
@@ -119,6 +129,11 @@ my $xp = [
         artist => [
           'December',
         ],
+	chords => [
+	],
+        numchords => [
+          0,
+        ],
         key => [
           'C',
         ],
@@ -146,6 +161,11 @@ my $xp = [
         artist => [
           'September',
         ],
+	chords => [
+	],
+        numchords => [
+          0,
+        ],
         key => [
           'C',
         ],
@@ -172,6 +192,11 @@ my $xp = [
       meta => {
         artist => [
           'September',
+        ],
+	chords => [
+	],
+        numchords => [
+          0,
         ],
         key => [
           'A',
@@ -201,6 +226,11 @@ my $xp = [
         artist => [
           'December',
         ],
+	chords => [
+	],
+        numchords => [
+          0,
+        ],
         key => [
           'C',
         ],
@@ -227,6 +257,11 @@ my $xp = [
       meta => {
         artist => [
           'September',
+        ],
+	chords => [
+	],
+        numchords => [
+          0,
         ],
         key => [
           'C',

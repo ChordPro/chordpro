@@ -64,6 +64,11 @@ my $xp = [
         artist => [
           'September',
         ],
+	chords => [
+	],
+        numchords => [
+          0,
+        ],
         key => [
           'A',
         ],
@@ -87,11 +92,16 @@ my $xp = [
         artist => [
           'September',
         ],
+	chords => [
+	],
         key => [
           'Am',
         ],
         key_actual => [
           'Am',
+        ],
+        numchords => [
+          0,
         ],
         songindex => 1,
         sorttitle => [
@@ -111,11 +121,16 @@ my $xp = [
           'September',
           'December',
         ],
+	chords => [
+	],
         key => [
           'C',
         ],
         key_actual => [
           'C',
+        ],
+        numchords => [
+          0,
         ],
         songindex => 3,
         sorttitle => [
@@ -137,11 +152,16 @@ my $xp = [
           'September',
           'December',
         ],
+	chords => [
+	],
         key => [
           'D',
         ],
         key_actual => [
           'D',
+        ],
+        numchords => [
+          0,
         ],
         songindex => 2,
         sorttitle => [

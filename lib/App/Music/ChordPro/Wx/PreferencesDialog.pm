@@ -244,8 +244,8 @@ sub store_prefs {
     $parent->{prefs_xpose_acc}  = $self->{ch_acc}->GetSelection;
     $n = $parent->{prefs_xpose_to} - $parent->{prefs_xpose_from};
     $n += 12 if $n < 0;
-    $n -= 12 if $parent->{prefs_xpose_acc} == 1;
-    $n += 12 if $parent->{prefs_xpose_acc} == 2;
+    $n += 12 if $parent->{prefs_xpose_acc} == 1; # sharps
+    $n -= 12 if $parent->{prefs_xpose_acc} == 2; # flats
     $parent->{prefs_xpose} = $n;
 
     # Transcode.

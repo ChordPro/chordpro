@@ -1,0 +1,9 @@
+{
+    "latex" : {  // please check for LaTeX Songbook/Guitar packages and have a look into config-examples
+        "templates" :  {
+           "songbook" : "guitar_songbook.tt",
+           "comment" : "guitar_comment.tt",
+           "image" : "guitar_image.tt"
+         }
+     }
+}

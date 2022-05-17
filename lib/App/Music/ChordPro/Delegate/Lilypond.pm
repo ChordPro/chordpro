@@ -21,7 +21,7 @@ use Text::ParseWords qw(shellwords);
 sub DEBUG() { $config->{debug}->{ly} }
 
 sub ly2image {
-    my ( $s, $pr, $elt ) = @_;
+    my ( $s, $pw, $elt ) = @_;
 
     state $imgcnt = 0;
     state $td = File::Temp::tempdir( CLEANUP => !$config->{debug}->{ly} );
@@ -90,17 +90,6 @@ sub ly2image {
 	return;
     }
 
-    # Available width and height.
-    my $pw;
-    my $ps = $pr->{ps};
-    if ( $ps->{columns} > 1 ) {
-	$pw = $ps->{columnoffsets}->[1]
-	  - $ps->{columnoffsets}->[0]
-	  - $ps->{columnspace};
-    }
-    else {
-	$pw = $ps->{__rightmargin} - $ps->{_leftmargin};
-    }
     if ( $kv->{width} ) {
 	$pw = $kv->{width};
     }
@@ -164,7 +153,7 @@ sub ly2image {
 
 	$image->Set( magick => 'jpg' );
 	my $data = $image->ImageToBlob;
-	my $assetid = sprintf("LYasset%03d", $imgcnt++);
+	my $assetid = $kv->{asset} || sprintf("LYasset%03d", $imgcnt++);
 	warn("Created asset $assetid (jpg, ", length($data), " bytes)\n")
 	  if $config->{debug}->{images};
 	$App::Music::ChordPro::Output::PDF::assets->{$assetid} =
@@ -177,7 +166,7 @@ sub ly2image {
 			  $kv->{scale} ? ( scale => $kv->{scale} * 0.16 ) : (),
 			} },
 	      { type => "empty" },
-	    );
+	    ) unless $kv->{asset};
 	warn("Asset $assetid options:",
 	     $kv->{scale} ? ( " scale=", $kv->{scale} * 0.16 ) : (),
 	     " center=", $kv->{center}//0,
@@ -195,7 +184,7 @@ sub ly2image {
 	my $data = do { local $/; <$im> };
 	close($im);
 
-	my $assetid = sprintf("LYasset%03d", $imgcnt);
+	my $assetid = $kv->{asset} || sprintf("LYasset%03d", $imgcnt);
 	warn("Created asset $assetid (png, ", length($data), " bytes)\n")
 	  if $config->{debug}->{images};
 	$App::Music::ChordPro::Output::PDF::assets->{$assetid} =
@@ -206,7 +195,7 @@ sub ly2image {
 		opts => { center => $kv->{center},
 			  $kv->{scale} ? ( scale => $kv->{scale} * 0.16 ) : (),
 			} },
-	    );
+	    ) unless $kv->{asset};
 	warn("Asset $assetid options:",
 	     $kv->{scale} ? ( " scale=", $kv->{scale} * 0.16 ) : (),
 	     " center=", $kv->{center}//0,

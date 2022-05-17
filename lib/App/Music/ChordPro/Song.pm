@@ -238,32 +238,7 @@ sub parse_song {
     $self->{chordsinfo} = {};
 
     # Preprocessor.
-    my $prep;
-    if ( $config->{parser} ) {
-	foreach my $linetype ( keys %{ $config->{parser}->{preprocess} } ) {
-	    my @targets;
-	    my $code;
-	    foreach ( @{ $config->{parser}->{preprocess}->{$linetype} } ) {
-		if ( $_->{pattern} ) {
-		    push( @targets, $_->{pattern} );
-		    # Subsequent targets override.
-		    $code->{$_->{pattern}} = $_->{replace};
-		}
-		else {
-		    push( @targets, quotemeta($_->{target}) );
-		    # Subsequent targets override.
-		    $code->{quotemeta($_->{target})} = quotemeta($_->{replace});
-		}
-	    }
-	    if ( @targets ) {
-		my $t = "sub { for (\$_[0]) {\n";
-		$t .= "s\0" . $_ . "\0" . $code->{$_} . "\0g;\n" for @targets;
-		$t .= "}}";
-		$prep->{$linetype} = eval $t;
-		die( "CODE : $t\n$@" ) if $@;
-	    }
-	}
-    }
+    my $prep = make_preprocessor( $config->{parser}->{preprocess} );
 
     # Pre-fill meta data, if any. TODO? ALREADY DONE?
     if ( $options->{meta} ) {
@@ -534,19 +509,23 @@ sub parse_song {
 	$diagrams = "none";
     }
 
+    { my %h; @used_chords = map { $h{$_}++ ? () : $_ } @used_chords; }
+
+    if ( $diagrams eq "user" && $self->{define} && @{$self->{define}} ) {
+	@used_chords =
+	  map { $_->{name} } @{$self->{define}};
+    }
+
+    if ( $config->{diagrams}->{sorted} ) {
+	@used_chords =
+	  sort App::Music::ChordPro::Chords::chordcompare @used_chords;
+    }
+
+    # For headings, footers, table of contents, ...
+    $self->{meta}->{chords} //= [ @used_chords ];
+    $self->{meta}->{numchords} = [ scalar(@{$self->{meta}->{chords}}) ];
+
     if ( $diagrams =~ /^(user|all)$/ ) {
-	my %h;
-	@used_chords = map { $h{$_}++ ? () : $_ } @used_chords;
-
-	if ( $diagrams eq "user" && $self->{define} && @{$self->{define}} ) {
-	    @used_chords =
-	    map { $_->{name} } @{$self->{define}};
-	}
-
-	if ( $config->{diagrams}->{sorted} ) {
-	    @used_chords =
-	      sort App::Music::ChordPro::Chords::chordcompare @used_chords;
-	}
 	$self->{chords} =
 	  { type   => "diagrams",
 	    origin => "song",
@@ -608,7 +587,7 @@ sub chord {
 	    ( { name => $c, text => $c } ) );
 	return $c;
     }
-    ( my $n = $name ) =~ s/\((.+)\)$/$1/;
+    ( my $n = $name ) =~ s/^\((.+)\)$/$1/;
 
     if ( ! $info->{origin} && $config->{diagrams}->{auto} ) {
 	$info = App::Music::ChordPro::Chords::add_unknown_chord($name);
@@ -669,7 +648,7 @@ sub decompose {
 	}
 
 	# Recall memorized chords.
-	elsif ( $memchords ) {
+	elsif ( $memchords && $in_context ) {
 	    if ( $memcrdinx == 0 && @$memchords == 0 ) {
 		do_warn("No chords memorized for $in_context");
 		push( @chords, $chord );
@@ -828,9 +807,15 @@ sub parse_directive {
     if ( $dir =~ /^(.*)-(.+)$/ ) {
 	$dir = $abbrevs{$1} // $1;
 	my $sel = $2;
-	unless ( $sel eq lc($config->{instrument}->{type})
-		 or
-		 $sel eq lc($config->{user}->{name}) ) {
+	my $negate = $sel =~ s/\!$//;
+	$sel = ( $sel eq lc($config->{instrument}->{type}) )
+	       ||
+	       ( $sel eq lc($config->{user}->{name})
+	       ||
+	       ( $self->{meta}->{lc $sel} && is_true($self->{meta}->{lc $sel}->[0]) )
+	       );
+	$sel = !$sel if $negate;
+	unless ( $sel ) {
 	    if ( $dir =~ /^start_of_/ ) {
 		return { name => $dir, arg => $arg, omit => 2 };
 	    }
@@ -1049,7 +1034,7 @@ sub directive {
 	    do_warn( "Missing image source\n" );
 	    return;
 	}
-	$self->add( type => "image",
+	$self->add( type => $uri =~ /\.svg$/ ? "svg" : "image",
 		    uri  => $uri,
 		    opts => \%opts );
 	return 1;
@@ -1657,7 +1642,7 @@ sub parse_chord {
 
     if ( $info ) {
 	# Look it up now, the name may change by transcode.
-	if ( my $i = App::Music::ChordPro::Chords::_known_chord($info->name) ) {
+	if ( my $i = App::Music::ChordPro::Chords::_known_chord($info) ) {
 	    warn( "Parsing chord: \"$chord\" found ",
 		  $i->name, " for ", $info->name, " in song/config chords\n" ) if $debug > 1;
 	    $info = $i->new({ %$i, name => $info->name }) ;
@@ -1676,7 +1661,7 @@ sub parse_chord {
 	      $info->name,
 	      " (", $info->{system}, ")",
 	      "\n" ) if $debug > 1;
-	if ( my $i = App::Music::ChordPro::Chords::_known_chord($info->name) ) {
+	if ( my $i = App::Music::ChordPro::Chords::_known_chord($info) ) {
 	    warn( "Parsing chord: \"$chord\" found \"",
 		  $info->name, "\" in song/config chords\n" ) if $debug > 1;
 	    $unk = 0;
@@ -1712,10 +1697,14 @@ sub parse_chord {
 
     if ( $info ) {
 	warn( "Parsing chord: \"$chord\" okay: \"",
-	      $info->name, "\"",
+	      $info->name, "\" \"",
+	      $info->chord_display, "\"",
 	      $unk ? " but unknown" : "",
 	      "\n" ) if $debug > 1;
-	$info->{parens} = $parens if $parens;
+	if ( $parens ) {
+	    $self->store_chord( $info->clone );
+	    $info->{parens} = $parens;
+	}
 	$chord = $self->store_chord($info);
 	return wantarray ? ( $chord, $info ) : $chord;
     }
@@ -1742,6 +1731,9 @@ sub structurize {
 	if ( $item->{type} eq "empty" && $item->{context} eq $def_context ) {
 	    $context = $def_context;
 	    next;
+	}
+	if ( $item->{type} eq "songline" &&  $item->{context} eq '' ){ # A songline should have a context - non means verse
+		$item->{context} = 'verse';
 	}
 	if ( $context ne $item->{context} ) {
 	    push( @body, { type => $context = $item->{context}, body => [] } );

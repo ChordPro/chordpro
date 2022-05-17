@@ -116,6 +116,8 @@ For example:
 This will define the appropriate Dm chord for either ukulele or
 guitar.
 
+Selection can be reversed by appending a `!` to the selector.
+
 How selectors are defined depends on the ChordPro processing tool. The
 reference implementation uses the config values for `instrument.type`
 and `user.name`.

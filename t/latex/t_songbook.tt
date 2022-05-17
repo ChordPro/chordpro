@@ -1,0 +1,42 @@
+[% # these variables are obligatory to set
+
+newpage_tag		= "newpage\n";
+emptyline_tag		= "emptyline\n";
+columnbreak_tag		= "colbreak\n";
+beginchorus_tag		=  "beginchorus\n";
+endchorus_tag		= "endchorus\n";
+beginverse_tag		= "beginverse\n";
+endverse_tag		= "endverse\n";
+begingrid_tag		= "begingrid\n";
+endgrid_tag		= "endgrid\n";
+begintab_tag		= "begintab\n";
+endtab_tag		= "endtab\n";
+gchordstart_tag		= "[";
+gchordend_tag		= "]";
+chorded_line		= "wc ";
+unchorded_line		= "";
+start_spaces_songline	= "   ";
+eol			= "\n";
+beginabc_tag		= "begin_abc\n";
+endabc_tag		= "end_abc\n";
+beginlilypond_tag	= "begin_lilypond\n";
+endlilypond_tag		= "end_lilypond\n";
+
+FOREACH song IN songs;
+  title; "\n";
+  FOREACH st IN song.subtitle;
+    st; "\n";
+  END;
+  song.meta.composer.0;  "\n";
+  song.meta.lyricist.0;  "\n";
+  song.meta.copyright.0; "\n";
+  IF song.meta.capo.0;
+    "Capo "; song.meta.capo.0; "\n";
+  END;
+  FOREACH chord IN song.chords;
+    chord.chord; " "; chord.frets; "\n";
+  END;
+  song.songlines | eval;
+END;
+
+-%]

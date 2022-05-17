@@ -15,6 +15,7 @@ use App::Packager;
 use File::Temp ();
 use Storable qw(dclone);
 use List::Util qw(any);
+use feature 'state';
 
 use App::Music::ChordPro::Output::Common
   qw( roman prep_outlines fmt_subst demarkup );
@@ -383,7 +384,7 @@ sub generate_song {
 		$fonts->{$item}->{file} = $_;
 	    }
 	    elsif ( is_corefont($_) ) {
-		$fonts->{$item}->{name} = $_;
+		$fonts->{$item}->{name} = is_corefont($_);
 	    }
 	    else {
 		$fonts->{$item}->{description} = $_;
@@ -558,13 +559,34 @@ sub generate_song {
 	$s->{meta}->{page} = [ $s->{page} = $opts->{roman}
 			       ? roman($thispage) : $thispage ];
 
-	# Determine page class.
+	# Determine page class and background.
 	my $class = 2;		# default
+	my $bgpdf = $ps->{formats}->{default}->{background};
 	if ( $thispage == 1 ) {
 	    $class = 0;		# very first page
+	    $bgpdf = $ps->{formats}->{first}->{background}
+	      || $ps->{formats}->{title}->{background}
+	      || $bgpdf;
 	}
 	elsif ( $thispage == $startpage ) {
 	    $class = 1;		# first of a song
+	    $bgpdf = $ps->{formats}->{title}->{background}
+	      || $bgpdf;
+	}
+	if ( $bgpdf ) {
+	    my ( $fn, $pg ) = ( $bgpdf, 1 );
+	    if ( $bgpdf =~ /^(.+):(\d+)$/ ) {
+		( $bgpdf, $pg ) = ( $1, $2 );
+	    }
+	    $fn = ::rsc_or_file($bgpdf);
+	    if ( -s -r $fn ) {
+		$pg++ if $ps->{"even-odd-pages"} && !$rightpage;
+		$pr->importpage( $fn, $pg );
+	    }
+	    else {
+		warn( "PDF: Missing or empty background document: ",
+		      $bgpdf, "\n" );
+	    }
 	}
 
 	$x = $ps->{__leftmargin};
@@ -604,8 +626,12 @@ sub generate_song {
 	$show //= $dctl->{show};
 	if ( $chords ) {
 	    for ( @$chords ) {
-		my $i = $s->{chordsinfo}->{$_};
-		push( @chords, $i ) unless $i->is_nc;
+		if ( my $i = $s->{chordsinfo}->{$_} ) {
+		    push( @chords, $i ) unless $i->is_nc;
+		}
+		else {
+		    warn("PDF: Missing chord info for \"$_\"\n");
+		}
 	    }
 	}
 	return unless @chords;
@@ -737,7 +763,7 @@ sub generate_song {
     $newpage->();
 
     # Embed source and config for debugging;
-    $pr->embed($source->{file}) if $options->{debug};
+    $pr->embed($source->{file}) if $source->{file} && $options->{debug};
 
     my @elts = @{$sb};
     my $elt;			# current element
@@ -1003,7 +1029,16 @@ sub generate_song {
 		eval "require $pkg" || die($@);
 		my $hd = $pkg->can($elt->{handler}) //
 		  die("PDF: Missing delegate handler ${pkg}::$elt->{handler}\n");
-		my $res = $hd->( $s, $pr, $elt );
+		my $pw;			# available width
+		if ( $ps->{columns} > 1 ) {
+		    $pw = $ps->{columnoffsets}->[1]
+		      - $ps->{columnoffsets}->[0]
+		      - $ps->{columnspace};
+		}
+		else {
+		    $pw = $ps->{__rightmargin} - $ps->{_leftmargin};
+		}
+		my $res = $hd->( $s, $pw, $elt );
 		next unless $res; # assume errors have been given
 		unshift( @elts, @$res );
 		next;
@@ -1033,6 +1068,63 @@ sub generate_song {
 				} );
 		redo;
 	    }
+
+	    $y -= $vsp;
+	    $pr->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
+
+	    next;
+	}
+
+	if ( $elt->{type} eq "svg" ) {
+	    # We turn SVG into one (or more) XForm objects.
+
+	    require App::Music::ChordPro::Output::PDF::SVG;
+	    my $p = App::Music::ChordPro::Output::PDF::SVG->new
+	      ( $ps, debug => $config->{debug}->{images} > 1 );
+	    my $o = $p->process_file( $elt->{uri} );
+	    warn("PDF: SVG objects: ", 0+@$o, "\n")
+	      if $config->{debug}->{images} || !@$o;
+	    if ( ! @$o ) {
+		warn("Error in SVG embedding\n");
+		next;
+	    }
+
+	    my @res;
+	    for my $xo ( @$o ) {
+		state $imgcnt = 0;
+		my $assetid = sprintf("XFOasset%03d", $imgcnt++);
+		$assets->{$assetid} = { type => "xform", data => $xo };
+
+		push( @res,
+		      { type => "xform",
+			width => $xo->{width},
+			height => $xo->{height},
+			id  => $assetid,
+			opts => { center => $elt->{opts}->{center},
+				  scale => $elt->{opts}->{scale} || 1 } },
+		    );
+		warn("Created asset $assetid (xform, ",
+		     $xo->{width}, "x", $xo->{height}, ")",
+		     " scale=", $elt->{opts}->{scale} || 1,
+		     " center=", $elt->{opts}->{center}//0,
+		     "\n")
+		  if $config->{debug}->{images};
+	    }
+
+	    unshift( @elts, @res );
+	    next;
+	}
+
+	if ( $elt->{type} eq "xform" ) {
+	    my $h = $elt->{height};
+	    my $w = $elt->{width};
+	    my $scale = $elt->{opts}->{scale};
+	    my $vsp = $h * $scale;
+	    $checkspace->($vsp);
+	    $ps->{pr}->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
+
+	    my $xo = $assets->{ $elt->{id} };
+	    $pr->{pdfgfx}->object( $xo->{data}->{xo}, $x, $y-$vsp, $scale );
 
 	    $y -= $vsp;
 	    $pr->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
@@ -1132,7 +1224,7 @@ sub generate_song {
 		    elsif ( is_corefont( $elt->{value} ) ) {
 			delete $ps->{fonts}->{$f}->{description};
 			delete $ps->{fonts}->{$f}->{file};
-			$ps->{fonts}->{$f}->{name} = $elt->{value};
+			$ps->{fonts}->{$f}->{name} = is_corefont( $elt->{value} );
 		    }
 		    else {
 			delete $ps->{fonts}->{$f}->{file};
@@ -1571,7 +1663,7 @@ sub songline {
 	    # Collect chords to be printed in the side column.
 	    my $info = $opts{song}->{chordsinfo}->{$chord};
 	    croak("Missing info for chord $chord") unless $info;
-	    $chord = $info->chord_display;
+	    $chord = $info->chord_display( has_musicsyms($fchord) );
 	    push(@chords, $chord);
 	}
 	else {
@@ -1580,7 +1672,7 @@ sub songline {
 	    if ( $chord ne '' ) {
 		my $info = $opts{song}->{chordsinfo}->{$chord};
 		Carp::croak("Missing info for chord $chord") unless $info;
-		$chord = $info->chord_display;
+		$chord = $info->chord_display( has_musicsyms($font) );
 		my $dp = $chord . " ";
 		if ( $info->is_annotation ) {
 		    $font = $fonts->{annotation};
@@ -1660,6 +1752,18 @@ sub songline {
       if @chords;
 
     return;
+}
+
+sub has_musicsyms {
+    my ( $font ) = @_;
+    my $sf = 0;
+    $sf |= 0x01
+      if $font->{has_sharp}  //=
+        $font->{fd}->{font}->glyphByUni(ord("♯")) ne ".notdef";
+    $sf |= 0x02
+      if $font->{has_flat} //=
+        $font->{fd}->{font}->glyphByUni(ord("♭")) ne ".notdef";
+    return $sf;
 }
 
 sub is_bar {
@@ -1791,7 +1895,7 @@ sub gridline {
 	if ( exists $token->{chord} ) {
 	    my $t = $token->{chord};
 	    my $i = $opts{song}->{chordsinfo}->{$t};
-	    $t = $i->chord_display if $i;
+	    $t = $i->chord_display( has_musicsyms($fchord) ) if $i;
 	    $pr->text( $t, $x, $y, $fchord )
 	      unless $token eq ".";
 	    $x += $cellwidth;
@@ -2246,7 +2350,7 @@ sub configurator {
 	    else {
 		die("Config error: \"$_\" is not a built-in font\n")
 		  unless is_corefont($_);
-		$fonts->{$type}->{name} = $_;
+		$fonts->{$type}->{name} = is_corefont($_);
 	    }
 	}
 	for ( $options->{"$type-size"} ) {
@@ -2411,8 +2515,14 @@ sub wrap {
 
 	if ( @rchords ) {
 	    # Does the chord fit?
-	    my $font = $pr->{ps}->{fonts}->{chord};
-	    $pr->setfont($font);
+	    my $c = $chord;
+	    if ( $chord =~ /^\*(.+)/ ) {
+		$c = $1;
+		$pr->setfont( $pr->{ps}->{fonts}->{annotation} );
+	    }
+	    else {
+		$pr->setfont( $pr->{ps}->{fonts}->{chord} );
+	    }
 	    my $w = $pr->strwidth($chord);
 	    if ( $w > $m - $x ) {
 		# Nope. Move to overflow.
@@ -2470,30 +2580,40 @@ sub wrapsimple {
     $pr->wrap( $text, $pr->{ps}->{__rightmargin} - $x );
 }
 
-my %corefonts = map { $_ => 1 }
-  ( "times-roman",
-    "times-bold",
-    "times-italic",
-    "times-bolditalic",
-    "helvetica",
-    "helvetica-bold",
-    "helvetica-oblique",
-    "helvetica-boldoblique",
-    "courier",
-    "courier-bold",
-    "courier-oblique",
-    "courier-boldoblique",
-    "zapfdingbats",
-    "georgia",
-    "georgia,bold",
-    "georgia,italic",
-    "georgia,bolditalic",
-    "verdana",
-    "verdana,bold",
-    "verdana,italic",
-    "verdana,bolditalic",
-    "webdings",
-    "wingdings" );
+my %corefonts =
+  (
+   ( map { lc($_) => $_ }
+     "Times-Roman",
+     "Times-Bold",
+     "Times-Italic",
+     "Times-BoldItalic",
+     "Helvetica",
+     "Helvetica-Bold",
+     "Helvetica-Oblique",
+     "Helvetica-BoldOblique",
+     "Courier",
+     "Courier-Bold",
+     "Courier-Oblique",
+     "Courier-BoldOblique",
+     "ZapfDingbats",
+     "Georgia",
+     "Georgia,Bold",
+     "Georgia,Italic",
+     "Georgia,BoldItalic",
+     "Verdana",
+     "Verdana,Bold",
+     "Verdana,Italic",
+     "Verdana,BoldItalic",
+     "Webdings",
+     "Wingdings" ),
+   # For convenience.
+   "georgia-bold"	 => "Georgia,Bold",
+   "georgia-italic"	 => "Georgia,Italic",
+   "georgia-bolditalic"	 => "Georgia,BoldItalic",
+   "verdana-bold"	 => "Verdana,Bold",
+   "verdana-italic"	 => "Verdana,Italic",
+   "verdana-bolditalic"	 => "Verdana,BoldItalic",
+);
 
 sub is_corefont {
     $corefonts{lc $_[0]};

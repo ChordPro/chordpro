@@ -69,7 +69,7 @@ sub findexe {
     my ( $prog ) = @_;
     my @path;
     if ( MSWIN ) {
-	$prog .= ".exe";
+	$prog .= ".exe" unless $prog =~ /\.\w+$/;
 	@path = split( ';', $ENV{PATH} );
 	unshift( @path, '.' );
     }
@@ -101,6 +101,41 @@ sub sys {
 
 push( @EXPORT, 'sys' );
 
+################ (Pre)Processing ################
+
+sub make_preprocessor {
+    my ( $prp ) = @_;
+    return unless $prp;
+
+    my $prep;
+    foreach my $linetype ( keys %{ $prp } ) {
+	my @targets;
+	my $code;
+	foreach ( @{ $prp->{$linetype} } ) {
+	    if ( $_->{pattern} ) {
+		push( @targets, $_->{pattern} );
+		# Subsequent targets override.
+		$code->{$_->{pattern}} = $_->{replace};
+	    }
+	    else {
+		push( @targets, quotemeta($_->{target}) );
+		# Subsequent targets override.
+		$code->{quotemeta($_->{target})} = quotemeta($_->{replace});
+	    }
+	}
+	if ( @targets ) {
+	    my $t = "sub { for (\$_[0]) {\n";
+	    $t .= "s\0" . $_ . "\0" . $code->{$_} . "\0g;\n" for @targets;
+	    $t .= "}}";
+	    $prep->{$linetype} = eval $t;
+	    die( "CODE : $t\n$@" ) if $@;
+	}
+    }
+    $prep;
+}
+
+push( @EXPORT, 'make_preprocessor' );
+
 ################ Utilities ################
 
 # Split (pseudo) command line into key/value pairs.
@@ -128,5 +163,16 @@ sub parse_kv {
 }
 
 push( @EXPORT, 'parse_kv' );
+
+# Map true/false etc to true / false.
+
+sub is_true {
+    my ( $arg ) = @_;
+    return if !defined($arg);
+    return if $arg =~ /^(false|null|0+)$/i;
+    return !!$arg;
+}
+
+push( @EXPORT, 'is_true' );
 
 1;

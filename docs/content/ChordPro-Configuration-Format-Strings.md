@@ -61,40 +61,48 @@ as shown above.
 
 The ChordPro reference implementation provides additional meta data:
 
- * `songindex`: The index (serial number) of the song in the songbook.
- 
+ * `chords`: A comma-separated list of chords used in this song.
+
+ * `instrument`: Short for `instrument.type`.
+
+ * `instrument.description`: Set by instrument configs.
+   For the default guitar config this is `"Guitar, 6
+   strings, standard tuning"`.
+   
+ * `instrument.type`: The name of the instrument as set by instrument
+   configs. Default `"guitar"`.
+
+ * `numchords`: The number of chords used in this song.
+
  * `page`: The starting page number of the song.
 
  * `pages`: The number of pages of the current song.
 
- * `pagerange`: The pages of the song, either a single page number or
-   a range like `3-7`.  
-   _`pagerange` is only available for CSV generation, see
-	[Configuration for CSV output]({{< relref "chordpro-configuration-csv" >}})._
-
+ * `songindex`: The index (serial number) of the song in the songbook.
+ 
  * `today`: The current date in the format defined in the config file.
    See [Dates and Times]({{< relref
    "ChordPro-Configuration-Generic#dates-and-times" >}}).
  
- * `tuning`: The tuning of the instrument. Usually `"E2 A2 D3 G3 B3 E4"`.
+ * `tuning`: The tuning of the instrument.
+   For the default guitar config this is `"E2 A2 D3 G3 B3 E4"`.
  
- * `instrument.type`: The name of the instrument as set by instrument
-   configs. Usually `"guitar"`.
-
- * `instrument`: Short for `instrument.type`.
-
- * `instrument.description`: Set by instrument configs. Usually `"Guitar, 6
-   strings, standard tuning"`.
-   
- * `user.name`: The (login) name of the user running ChordPro.
-   Initial value is derived from the environment.
-   
  * `user`: Short for `user.name`.
  
  * `user.fullname`: The full name of the user running ChordPro.
    Initial value is derived from the environment, if possible.
 
-The value of `"instrument"` and `"user"` can be used for [directive
+ * `user.name`: The (login) name of the user running ChordPro.
+   Initial value is derived from the environment.
+   
+The values of `"instrument"` and `"user"` can be used for [directive
 selection]({{< relref "chordpro-directives#conditional-directives"
 >}})
 
+
+## Additional meta data for CSV generation
+
+See [Configuration for CSV output]({{< relref "chordpro-configuration-csv" >}}).
+
+ * `pagerange`: The pages of the song, either a single page number or
+   a range like `3-7`.

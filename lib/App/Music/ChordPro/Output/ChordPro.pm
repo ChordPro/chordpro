@@ -94,7 +94,7 @@ sub generate_song {
 	# Unknowns with meta prefix.
 	foreach my $k ( sort keys %{ $s->{meta} } ) {
 	    next if $used{$k};
-	    next if $k =~ /^(?:title|subtitle|songindex|key_.*)$/;
+	    next if $k =~ /^(?:title|subtitle|songindex|key_.*|chords|numchords)$/;
 	    next if $k =~ /^_/;
 	    push( @s, map { +"{meta: $k $_}" } @{ $s->{meta}->{$k} } );
 	}
@@ -103,6 +103,8 @@ sub generate_song {
     if ( $s->{settings} ) {
 	foreach ( sort keys %{ $s->{settings} } ) {
 	    push(@s, "{$_: " . $s->{settings}->{$_} . "}");
+	    $s[-1] = "{no_grid}"
+	      if $s[-1] eq "{diagrams: 0}";
 	}
     }
 

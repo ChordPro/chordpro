@@ -31,18 +31,20 @@ dst.fontname = "ChordProSymbols"
 dst.familyname = "MusicalSymbolsForChordPro"
 dst.fullname = "Musical Symbols For ChordPro"
 dst.copyright = "Open Font License"
-dst.version = "000.100"
-dst.em = 1000;
+dst.version = "000.200"
+dst.em = 2048;
 
 # Next slot for glyphs.
 ind = 33;
 
 # Copy glyphs from Symbols font.
-src = fontforge.open("NotoSansSymbols-Regular.ttf")
+src = fontforge.open("Cadman.ttf")
 gcopy( "Flat",    0x266d )
 gcopy( "Natural", 0x266e )
 gcopy( "Sharp",   0x266f )
 
+src = fontforge.open("NotoSansSymbols-Regular.ttf")
+src.em = dst.em
 ind = 47
 # We're missing a fullly filled circle for unfingered strings.
 # Use one of the others and draw it on a black circle.

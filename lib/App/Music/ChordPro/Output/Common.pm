@@ -49,6 +49,13 @@ sub fmt_subst {
     setlocale( LC_TIME, "" );
     $m->{today} //= [ strftime( $config->{dates}->{today}->{format},
 				localtime(time) ) ];
+
+    for ( keys %{ $config->{settings} } ) {
+	my $v = $config->{settings}->{$_};
+	$v = '' if $v =~ /^(0|false|off)$/i;
+	$v = 1  if $v=~ /^(true|on)$/i;
+	$m->{"settings.$_"} = $v;
+    }
     interpolate( { %$s, args => $m,
 		   separator => $config->{metadata}->{separator} },
 		 $t );

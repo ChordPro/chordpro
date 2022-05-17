@@ -53,3 +53,20 @@ When running from the GUI, check Help > Enable debug info in PDF and
 try again. _You will get a "Problems Found" dialog with diagnostic
 information, this can be ignored._. Save the PDF document and add it
 to be bug report.
+
+## ChordPro output looks okay, but ABC parts are missing or wrong
+
+To process ABC data, ChordPro relies on a couple of external tools:
+`abcm2ps` and `convert`. These tools should be easily added to your
+system if not already there.
+
+For `abcm2ps` version 8.12.14 or later is advised, although earlier
+versions usually work okay in most cases.
+
+`convert` is part of ImageMagick. Version 7 is advised, but 6.9.12 or
+later will also work okay in most cases. For `convert` it is
+imperative that it can handle SVG image files. Some system vendors
+find it necessary to build ImageMagick without SVG support in which
+case you'll get crippled or no output.
+
+See also https://github.com/ChordPro/chordpro/issues/217 .

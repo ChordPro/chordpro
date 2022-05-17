@@ -30,7 +30,7 @@ WriteMakefile
  PREREQ_PM      => {
 		    'App::Packager'		  => 1.430,
 		    'PDF::API2'			  => 2.036,
-		    'Text::Layout'		  => 0.022,
+		    'Text::Layout'		  => 0.028,
 		    'JSON::PP'			  => 2.27203,
 		    'String::Interpolate::Named'  => 1.01,
 		    'File::LoadLines'		  => 1.02,
@@ -38,6 +38,9 @@ WriteMakefile
 		    'Image::Info'		  => 1.41,
 		    'List::Util'		  => 1.33,
 		    'Storable'			  => 3.08,
+		   # These are only used by the LaTeX backend
+		   # 'Template'			  => 3.010,
+		   # 'LaTeX::Encode'		  => 0.092.0,
 		   },
 
  CONFIGURE_REQUIRES => {

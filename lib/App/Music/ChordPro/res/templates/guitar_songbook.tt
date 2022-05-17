@@ -1,0 +1,62 @@
+[% # these variables are obligatory to set 
+ newpage_tag = '\newpage' _ "\n"  # _ is concatenate
+ emptyline_tag = '\newline'_"\n" 
+ columnbreak_tag = "\\par\n" 
+ beginchorus_tag =  "\\begin{tcolorbox}[boxrule=0pt,frame hidden,sharp corners,enhanced,borderline west={1pt}{0pt}{black},colback=white]" 
+ endchorus_tag = "\\end{tcolorbox}" 
+ beginverse_tag = "" 
+ endverse_tag = '\newline' 
+ beginabc_tag = "\\begin{abc}" 
+ endabc_tag = "\\end{abc}" 
+ beginlilypond_tag = "\\begin{lilypond}" 
+ endlilypond_tag = "\\end{lilypond}" 
+ begingrid_tag = "\\begin{singlespace*}\n\\begin{verbatim}" 
+ endgrid_tag = "\\end{verbatim}\n\\end{singlespace*}" 
+ begintab_tag = "\\begin{singlespace*}\n\\begin{verbatim}" 
+ endtab_tag = "\\end{verbatim}\n\\end{singlespace*}" 
+ gchordstart_tag = "\\guitarChord{" 
+ gchordend_tag = "}"  
+ chorded_line = "" # \\guitarAccord when using \begin{guitar}  
+ unchorded_line = "" # \\guitarNoChord
+ start_spaces_songline = "\\hspace{0,5cm}" #if a songline starts with spaces it will be replaced by start_spaces_songline  
+ eol = '\\\\' _ "\n" #sometimes this need to be to \\ or \newline 
+%]
+% https://ftp.rrze.uni-erlangen.de/ctan/macros/latex/contrib/guitar/guitar.pdf
+\documentclass[a4paper]{article}
+
+\usepackage{guitar}
+\usepackage[most]{tcolorbox}
+\usepackage[TS1,T1]{fontenc}
+\usepackage[bookmarks]{hyperref}
+\usepackage{gchords}
+\begin{document}
+\smallchords
+
+\title{my Songbook}
+\author{The Author}
+\date{\today}
+\maketitle
+
+\section{Songbook-chapter} 
+
+[%  FOREACH song IN songs %]
+\newpage
+\subsection{[% song.title %]}
+[% IF song.chords.0 %]\begin{tcolorbox}[colback=white,colframe=black,width=0.75\textwidth,arc=3mm, auto outer arc]
+ \chords{
+[%  FOREACH chord IN song.chords %]\chord{t}{[% FOREACH fret IN chord.frets.split(''); 
+IF fret != 'X'; 
+  IF fret != '0';
+  'p'; fret; END; 
+ELSE; 'x'; 
+END;  
+IF not loop.last; ','; END;
+END; -%]}{[% chord.chord %]} [% elements = loop.count % 5 %][% IF ((elements == 0) and (not loop.last)) %]\newline[% END %][% END %]
+ }\end{tcolorbox}[% END %]
+
+[%  FOREACH st IN song.subtitle %] [% st %] \\[%  END %]
+[% IF song.meta.composer.0 %] Composer [% song.meta.composer.0 %] \\[% END %][% IF song.meta.lyricist.0 %]lyricist [% song.meta.lyricist.0 %] \\[% END %][% IF song.meta.copyright.0 %](c) [% song.meta.copyright.0 %] \\[% END %]
+[% song.songlines | eval #eval is obligatory to eval the variables set above %]
+[%  END %]
+
+\end{document}
