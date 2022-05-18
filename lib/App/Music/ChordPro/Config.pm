@@ -302,6 +302,7 @@ sub get_config {
 	if ( open( my $fd, "<:raw", $file ) ) {
 	    my $pp = JSON::PP->new->relaxed;
 	    my $new = $pp->decode( loadlines( $fd, { split => 0 } ) );
+	    precheck( $new, $file );
 	    close($fd);
 	    return $new;
 	}
@@ -853,6 +854,36 @@ sub clone($) {
     bless( $copy, $class ) if $class;
     return $copy;
 }
+
+sub precheck {
+    my ( $cfg, $file ) = @_;
+    my $verbose = $options->{verbose};
+    warn("Verify config \"$file\"\n") if $verbose > 1;
+    my $p;
+    $p = sub {
+	my ( $o, $path ) = @_;
+	$path //= "";
+	if ( !defined $o ) {
+	    warn("$file: Undefined config \"$path\" (using 'false')\n");
+	    $_[0] = '';
+	}
+	elsif ( UNIVERSAL::isa( $o, 'HASH' ) ) {
+	    $path .= "." unless $path eq "";
+	    for ( sort keys %$o ) {
+		$p->( $o->{$_}, $path . $_  );
+	    }
+	}
+	elsif ( UNIVERSAL::isa( $o, 'ARRAY' ) ) {
+	    $path .= "." unless $path eq "";
+	    for ( my $i = 0; $i < @$o; $i++ ) {
+		$p->( $o->[$i], $path . "$i" );
+	    }
+	}
+    };
+
+    $p->($cfg);
+}
+
 
 ## Data::Properties compatible API.
 #
