@@ -2,6 +2,7 @@
 
     - !ChordPro functionality
     - Verify configs (and fix if possible).
+    - Enhance ToC sorting, unlimited keys, numeric and reverse sorting.
     - !BugFixes
     - Fix problem that toc columns overlapped lefter columns.
 

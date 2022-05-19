@@ -272,8 +272,9 @@ to the meta data specified in `"fields"`. The format of the content lines
 is specified in `"line"`.
 
 * `fields`  
-The ordering of the table. You can specify one or two metadata
-items.  
+The ordering of the table.  
+Prefix the sort key with `+` to force numeric sorting. Likewise, a
+`-` prefix reverses sort order.  
 When you specify a metadata item that has multiple values they are
 split out in the table.  
 `songindex` is a built-in meta data item that yields the sequence
