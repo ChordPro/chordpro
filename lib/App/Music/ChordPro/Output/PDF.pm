@@ -2110,9 +2110,8 @@ sub tocline {
     }
     my $ann = $pr->{pdfpage}->annotation;
     $ann->link($elt->{page});
-    $ann->rect( $ps->{_leftmargin}, $y0 - $ftoc->{size} * $ps->{spacing}->{toc},
+    $ann->rect( $ps->{__leftmargin}, $y0 - $ftoc->{size} * $ps->{spacing}->{toc},
 		$ps->{__rightmargin}, $y0 );
-    ####CHECK MARGIN RIGHT
 }
 
 sub has_visible_chords {

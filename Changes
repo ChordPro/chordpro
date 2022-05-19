@@ -2,6 +2,8 @@
 
     - !ChordPro functionality
     - Verify configs (and fix if possible).
+    - !BugFixes
+    - Fix problem that toc columns overlapped lefter columns.
 
 5.988 2022-05-17
 
