@@ -68,7 +68,7 @@ sub abc2image {
 	push( @pre, $_ );
     }
     if ( @pre && !@data ) {	# no X: found
-	warn("X:1 (added)\n") if DEBUG;
+	warn("Field X: is missing in the ABC content.\n");
 	@data = ( "X:1", @pre );
 	@pre = ();
     }
