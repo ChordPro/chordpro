@@ -1005,13 +1005,13 @@ sub directive {
 	    if ( $k =~ /^(title)$/i ) {
 		$opts{lc($k)} = $v;
 	    }
-	    elsif ( $k =~ /^(width|height|border|center)$/i && $v =~ /^(\d+)$/ ) {
+	    elsif ( $k =~ /^(width|height|border|spread|center)$/i && $v =~ /^(\d+)$/ ) {
 		$opts{lc($k)} = $v;
 	    }
 	    elsif ( $k =~ /^(scale)$/ && $v =~ /^(\d(?:\.\d+)?)$/ ) {
 		$opts{lc($k)} = $v;
 	    }
-	    elsif ( $k =~ /^(center|border)$/i ) {
+	    elsif ( $k =~ /^(center|border|spread)$/i ) {
 		$opts{lc($k)} = $v;
 	    }
 	    elsif ( $k =~ /^(src|uri)$/i ) {

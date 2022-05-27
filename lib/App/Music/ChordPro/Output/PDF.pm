@@ -511,6 +511,7 @@ sub generate_song {
     my $vsp_ignorefirst;
     my $startpage = $opts->{startpage} || 1;
     my $thispage = $startpage - 1;
+    my $spreadimage;
 
     # Physical newpage handler.
     my $newpage = sub {
@@ -593,6 +594,11 @@ sub generate_song {
 	$x += $ps->{_indent};
 	$y = $ps->{_margintop};
 	$y += $ps->{headspace} if $ps->{'head-first-only'} && $class == 2;
+
+	if ( $spreadimage ) {
+	    $y -= imagespread( $spreadimage, $x, $y, $ps );
+	    undef $spreadimage;
+	}
 	$ps->{_top} = $y;
 	$col = 0;
 	$vsp_ignorefirst = 1;
@@ -759,14 +765,54 @@ sub generate_song {
 	}
     };
 
+    my @elts;
+    my $elt;			# current element
+    my @sb = @{$sb};
+    my $redo = [];
+    while ( @sb ) {
+	$elt = @$redo ? shift(@$redo) : shift(@sb);
+	if ( $elt->{type} eq "image"
+	     && $elt->{opts}->{spread} ) {
+	    if ( $spreadimage ) {
+		warn("Ignoring superfluous spread image\n");
+	    }
+	    else {
+		warn("Got spread image\n") if $config->{debug}->{images};
+		$spreadimage //= $elt;
+		next;
+	    }
+	}
+	elsif ( $elt->{type} eq "delegate"
+		&& $elt->{subtype} eq "image"
+		&& $elt->{data}->[0] =~ /\bspread=\d+\b$/
+	      ) {
+	    if ( $spreadimage ) {
+		warn("Ignoring superfluous spread delegate\n");
+	    }
+	    else {
+		warn("Got spread delegate\n") if $config->{debug}->{images};
+		my $delegate = $elt->{delegate};
+		my $pkg = __PACKAGE__;
+		$pkg =~ s/::Output::\w+$/::Delegate::$delegate/;
+		eval "require $pkg" || die($@);
+		my $hd = $pkg->can($elt->{handler}) //
+		  die("PDF: Missing delegate handler ${pkg}::$elt->{handler}\n");
+
+		my $pw = $ps->{papersize}->[0]
+		  - $ps->{marginleft}
+		  - $ps->{marginright};
+		$redo = $hd->( $s, $pw, $elt );
+		next;
+	    }
+	}
+	push( @elts, $elt );
+    }
+
     # Get going.
     $newpage->();
 
     # Embed source and config for debugging;
     $pr->embed($source->{file}) if $source->{file} && $options->{debug};
-
-    my @elts = @{$sb};
-    my $elt;			# current element
 
     my $prev;			# previous element
 
@@ -2086,6 +2132,67 @@ sub imageline {
     warn("done\n") if $config->{debug}->{images};
 
     return $h;			# vertical size
+}
+
+sub imagespread {
+    my ( $elt, $x, $y, $ps ) = @_;
+
+    my $opts = $elt->{opts};
+    my $pr = $ps->{pr};
+
+    if ( $elt->{uri} =~ /^id=(.+)/ ) {
+	return "Unknown asset: id=$1"
+	  unless exists( $assets->{$1} );
+    }
+    elsif ( ! -s $elt->{uri} ) {
+	return "$!: " . $elt->{uri};
+    }
+
+    warn("get_image ", $elt->{uri}, "\n") if $config->{debug}->{images};
+    my $img = eval { $pr->get_image($elt) };
+    unless ( $img ) {
+	warn($@);
+	return "Unhandled image type: " . $elt->{uri};
+    }
+
+    # Available width and height.
+    my $pw = $ps->{__rightmargin} - $ps->{_leftmargin};
+    my $ph = $ps->{_margintop} - $ps->{_marginbottom};
+
+    my $scale = 1;
+    my ( $w, $h ) = ( $opts->{width}  || $img->width,
+		      $opts->{height} || $img->height );
+    if ( defined $opts->{scale} ) {
+	$scale = $opts->{scale} || 1;
+    }
+    else {
+	if ( $w > $pw ) {
+	    $scale = $pw / $w;
+	}
+	if ( $h*$scale > $ph ) {
+	    $scale = $ph / $h;
+	}
+    }
+    warn("Image scale: $scale\n") if $config->{debug}->{images};
+    $h *= $scale;
+    $w *= $scale;
+    if ( $opts->{center} ) {
+	$x += ($pw - $w) / 2;
+	warn("Image center: $_[1] -> $x\n") if $config->{debug}->{images};
+    }
+
+    if ( defined ( my $tag = $i_tag // $opts->{label} ) ) {
+	$i_tag = undef;
+    	my $ftext = $ps->{fonts}->{comment};
+	my $ytext  = $y - font_bl($ftext);
+	prlabel( $ps, $tag, $x, $ytext );
+    }
+
+    warn("add_image\n") if $config->{debug}->{images};
+    $pr->add_image( $img, $x, $y, $w, $h, $opts->{border} || 0 );
+    warn("done\n") if $config->{debug}->{images};
+
+    return $h + $elt->{opts}->{spread};			# vertical size
 }
 
 sub tocline {
