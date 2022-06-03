@@ -308,6 +308,7 @@ sub _known_chord {
 
     # Retry agnostic.
     $name = $info->agnostic;
+    return unless $name;
     $ret = $song_chords{$name} // $config_chords{$name};
     if ( $ret ) {
 	$ret = $info->new($ret);
