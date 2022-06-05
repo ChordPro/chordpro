@@ -198,8 +198,9 @@ sub configurator {
 	    if ( ref($t->[0]) ne 'ARRAY' ) {
 		$t = [ $t ];
 	    }
+	    my $tt = $_;
 	    for ( @$t) {
-		die("Config error in pdf.formats.$class.$_: ",
+		die("Config error in pdf.formats.$class.$tt: ",
 		    scalar(@$_), " fields instead of 3\n")
 		  unless @$_ == 3;
 	    }
