@@ -760,6 +760,59 @@ sub decompose_grid {
 
 ################ Parsing directives ################
 
+my @directives = qw(
+    chord
+    chordcolour
+    chordfont
+    chordsize
+    chorus
+    column_break
+    columns
+    comment
+    comment_box
+    comment_italic
+    define
+    end_of_bridge
+    end_of_chorus
+    end_of_grid
+    end_of_tab
+    end_of_verse
+    footersize
+    footercolour
+    footerfont
+    grid
+    highlight
+    image
+    meta
+    new_page
+    new_physical_page
+    new_song
+    no_grid
+    pagetype
+    start_of_bridge
+    start_of_chorus
+    start_of_grid
+    start_of_tab
+    start_of_verse
+    subtitle
+    tabcolour
+    tabfont
+    tabsize
+    textcolour
+    textfont
+    textsize
+    title
+    titlesize
+    titlecolour
+    titlefont
+    titles
+    tocsize
+    toccolour
+    tocfont
+    transpose
+   );
+# NOTE: Flex: start_of_... end_of_... x_...
+
 my %abbrevs = (
    c	      => "comment",
    cb	      => "comment_box",
@@ -787,6 +840,13 @@ my %abbrevs = (
    ts         => "textsize",
 	      );
 
+my $dirpat =
+  '(?:' .
+  join( '|', @directives, keys(%abbrevs),
+	     '(?:start|end)_of_\w+' ) .
+  ')';
+
+$dirpat = qr/$dirpat/;
 
 sub parse_directive {
     my ( $self, $d ) = @_;
@@ -804,7 +864,7 @@ sub parse_directive {
     # $arg is the rest, if any.
 
     # Check for xxx-yyy selectors.
-    if ( $dir =~ /^(.*)-(.+)$/ ) {
+    if ( $dir =~ /^($dirpat)-(.+)$/ ) {
 	$dir = $abbrevs{$1} // $1;
 	my $sel = $2;
 	my $negate = $sel =~ s/\!$//;

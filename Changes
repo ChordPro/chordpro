@@ -6,6 +6,7 @@
     - Warn if X: is missing in ABC content.
     - !BugFixes
     - Fix problem that toc columns overlapped lefter columns.
+    - Fix issue 222.
     - Fix issue 223.
 
 5.988 2022-05-17
