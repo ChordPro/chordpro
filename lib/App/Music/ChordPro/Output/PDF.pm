@@ -1184,8 +1184,8 @@ sub generate_song {
 		die("Config error: Invalid value for pdf.chorus.recall.type\n");
 	    }
 
-	    if ( $t->{quote} ) {
-		unshift( @elts, @{ $elt->{chorus} } ) if $elt->{chorus};
+	    if ( $t->{quote} && $elt->{chorus} ) {
+		unshift( @elts, @{ $elt->{chorus} } );
 	    }
 
 	    elsif ( $elt->{chorus}

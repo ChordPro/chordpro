@@ -6,6 +6,7 @@
     - Warn if X: is missing in ABC content.
     - !BugFixes
     - Fix problem that toc columns overlapped lefter columns.
+    - (PDF) Print chorus tag if there's no chorus to rechorus.
     - Fix issue 222.
     - Fix issue 223.
     - Fix issue 224.
