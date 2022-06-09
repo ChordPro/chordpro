@@ -380,7 +380,7 @@ sub generate_song {
 	# Slurp the image.
 	my $fd;
 	unless ( open( $fd, '<:raw', $url ) ) {
-	    do_warn("$url: $!\n");
+	    warn("$url: $!\n");
 	    next;
 	}
 	my $data = do { local $/; <$fd> };
