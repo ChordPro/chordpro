@@ -825,7 +825,7 @@ my %abbrevs = (
    eot	      => "end_of_tab",
    eov	      => "end_of_verse",
    g	      => "grid",
-   highlight  => "comment",
+   highlight  => "comment",	# not really an abbrev
    ng	      => "no_grid",
    np	      => "new_page",
    npp	      => "new_physical_page",
@@ -840,16 +840,22 @@ my %abbrevs = (
    ts         => "textsize",
 	      );
 
-my $dirpat =
-  '(?:' .
-  join( '|', @directives, keys(%abbrevs),
-	     '(?:start|end)_of_\w+' ) .
-  ')';
-
-$dirpat = qr/$dirpat/;
+my $dirpat;
 
 sub parse_directive {
     my ( $self, $d ) = @_;
+
+    # Pattern for all recognized directives.
+    unless ( $dirpat ) {
+	$dirpat =
+	  '(?:' .
+	  join( '|', @directives,
+		     @{$config->{metadata}->{keys}},
+		     keys(%abbrevs),
+		'(?:start|end)_of_\w+' ) .
+		  ')';
+	$dirpat = qr/$dirpat/;
+    }
 
     # $d is the complete directive line, without leading/trailing { }.
     $d =~ s/^[: ]+//;
