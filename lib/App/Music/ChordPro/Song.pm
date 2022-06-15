@@ -719,6 +719,10 @@ sub decompose_grid {
 	if ( $_ eq "|:" || $_ eq "{" ) {
 	    $_ = { symbol => $_, class => "bar" };
 	}
+	elsif ( /^\|(\d+)(>?)$/ ) {
+	    $_ = { symbol => '|', volta => $1, class => "bar" };
+	    $_->{align} = 1 if $2;
+	}
 	elsif ( $_ eq ":|" || $_ eq "}" ) {
 	    $_ = { symbol => $_, class => "bar" };
 	}

@@ -790,8 +790,8 @@ sub generate_song {
 		warn("Ignoring superfluous spread delegate\n");
 	    }
 	    else {
-		warn("Got spread delegate\n") if $config->{debug}->{images};
 		my $delegate = $elt->{delegate};
+		warn("Got spread delegate $delegate\n") if $config->{debug}->{images};
 		my $pkg = __PACKAGE__;
 		$pkg =~ s/::Output::\w+$/::Delegate::$delegate/;
 		eval "require $pkg" || die($@);
@@ -1867,13 +1867,29 @@ sub gridline {
     }
 
     my $ctl = $pr->{ps}->{grids}->{cellbar};
+    my $col = $pr->{ps}->{grids}->{symbols}->{color};
     my $needcell = $ctl->{width};
+
+    state $prevvoltastart;
+    my $align;
+    if ( $prevvoltastart && @tokens
+	 && $tokens[0]->{class} eq "bar" && $tokens[0]->{align} ) {
+	$align = $prevvoltastart;
+    }
+    $prevvoltastart = 0;
+
+    my $voltastart;
     foreach my $i ( 0 .. $#tokens ) {
 	my $token = $tokens[$i];
 	my $sz = $fchord->{size};
 
 	if ( $token->{class} eq "bar" ) {
 	    $x -= $barwidth;
+	    if ( $voltastart ) {
+		pr_voltafinish( $voltastart, $y, $x - $voltastart, $sz, $col, $pr );
+		$voltastart = 0;
+	    }
+
 	    $t = $token->{symbol};
 	    if ( 0 ) {
 		$t = "{" if $t eq "|:";
@@ -1891,25 +1907,36 @@ sub gridline {
 	    $lcr = 1 if $i == $lastbar;
 
 	    if ( $t eq "|" ) {
-		pr_barline( $x, $y, $lcr, $sz, $pr );
+		if ( $token->{volta} ) {
+		    if ( $align ) {
+			$x = $align;
+			$lcr = 0;
+		    }
+		    $voltastart =
+		    pr_rptvolta( $x, $y, $lcr, $sz, $col, $pr, $token );
+		    $prevvoltastart ||= $x;
+		}
+		else {
+		    pr_barline( $x, $y, $lcr, $sz, $col, $pr );
+		}
 	    }
 	    elsif ( $t eq "||" ) {
-		pr_dbarline( $x, $y, $lcr, $sz, $pr );
+		pr_dbarline( $x, $y, $lcr, $sz, $col, $pr );
 	    }
 	    elsif ( $t eq "|:" ) {
-		pr_rptstart( $x, $y, $lcr, $sz, $pr );
+		pr_rptstart( $x, $y, $lcr, $sz, $col, $pr );
 	    }
 	    elsif ( $t eq ":|" ) {
-		pr_rptend( $x, $y, $lcr, $sz, $pr );
+		pr_rptend( $x, $y, $lcr, $sz, $col, $pr );
 	    }
 	    elsif ( $t eq ":|:" ) {
-		pr_rptendstart( $x, $y, $lcr, $sz, $pr );
+		pr_rptendstart( $x, $y, $lcr, $sz, $col, $pr );
 	    }
 	    elsif ( $t eq "|." ) {
-		pr_endline( $x, $y, $lcr, $sz, $pr );
+		pr_endline( $x, $y, $lcr, $sz, $col, $pr );
 	    }
 	    elsif ( $t eq " %" ) { # repeat2Bars
-		pr_repeat( $x+$sz/2, $y, 0, $sz, $pr );
+		pr_repeat( $x+$sz/2, $y, 0, $sz, $col, $pr );
 	    }
 	    else {
 		die($t);	# can't happen
@@ -1961,7 +1988,7 @@ sub gridline {
 		$k++;
 	    }
 	    pr_repeat( $x + ($k - $prevbar - 1)*$cellwidth/2, $y,
-		       0, $fchord->{size}, $pr );
+		       0, $fchord->{size}, $col, $pr );
 	    $x += $cellwidth;
 	}
 	if ( $x > $ps->{papersize}->[0] ) {
@@ -1990,59 +2017,80 @@ sub pr_cellline {
 }
 
 sub pr_barline {
-    my ( $x, $y, $lcr, $sz, $pr ) = @_;
+    my ( $x, $y, $lcr, $sz, $col, $pr ) = @_;
     my $w = $sz / 10;		# glyph width = $w
     $x -= $w / 2 * ($lcr + 1);
-    $pr->vline( $x, $y+0.9*$sz, $sz, $w );
+    $pr->vline( $x, $y+0.9*$sz, $sz, $w, $col );
 }
 
 sub pr_dbarline {
-    my ( $x, $y, $lcr, $sz, $pr ) = @_;
+    my ( $x, $y, $lcr, $sz, $col, $pr ) = @_;
     my $w = $sz / 10;		# glyph width = 3 * $w
     $x -= 1.5 * $w * ($lcr + 1);
-    $pr->vline( $x, $y+0.9*$sz, $sz, $w );
+    $pr->vline( $x, $y+0.9*$sz, $sz, $w, $col );
     $x += 2 * $w;
-    $pr->vline( $x, $y+0.9*$sz, $sz, $w );
+    $pr->vline( $x, $y+0.9*$sz, $sz, $w, $col );
 }
 
 sub pr_rptstart {
-    my ( $x, $y, $lcr, $sz, $pr ) = @_;
+    my ( $x, $y, $lcr, $sz, $col, $pr ) = @_;
     my $w = $sz / 10;		# glyph width = 3 * $w
     $x -= 1.5 * $w * ($lcr + 1);
-    $pr->vline( $x, $y+0.9*$sz, $sz, $w  );
+    $pr->vline( $x, $y+0.9*$sz, $sz, $w, $col );
     $x += 2 * $w;
     $y += 0.55 * $sz;
-    $pr->line( $x, $y, $x, $y+$w, $w );
+    $pr->line( $x, $y, $x, $y+$w, $w, $col );
     $y -= 0.4 * $sz;
-    $pr->line( $x, $y, $x, $y+$w, $w );
+    $pr->line( $x, $y, $x, $y+$w, $w, $col );
+}
+
+sub pr_rptvolta {
+    my ( $x, $y, $lcr, $sz, $symcol, $pr, $token ) = @_;
+    my $w = $sz / 10;		# glyph width = 3 * $w
+    my $col = $pr->{ps}->{grids}->{volta}->{color};
+    my $ret = $x -= 1.5 * $w * ($lcr + 1);
+    $pr->vline( $x, $y+0.9*$sz, $sz, $w, $col );
+    $x += 2 * $w;
+    my $font = $pr->{ps}->{fonts}->{grid};
+    $pr->setfont($font);
+    $pr->text( "<span color='$col'><sup>" . $token->{volta} . "</sup></span>",
+	       $x-$w/2, $y, $font );
+    $ret;
+}
+
+sub pr_voltafinish {
+    my ( $x, $y, $width, $sz, $symcol, $pr ) = @_;
+    my $w = $sz / 10;		# glyph width = 3 * $w
+    my ( $col, $span ) = @{$pr->{ps}->{grids}->{volta}}{qw(color span)};
+    $pr->hline( $x, $y+0.9*$sz+$w/4, $width*$span, $w/2, $col  );
 }
 
 sub pr_rptend {
-    my ( $x, $y, $lcr, $sz, $pr ) = @_;
+    my ( $x, $y, $lcr, $sz, $col, $pr ) = @_;
     my $w = $sz / 10;		# glyph width = 3 * $w
     $x -= 1.5 * $w * ($lcr + 1);
-    $pr->vline( $x + 2*$w, $y+0.9*$sz, $sz, $w );
+    $pr->vline( $x + 2*$w, $y+0.9*$sz, $sz, $w, $col );
     $y += 0.55 * $sz;
-    $pr->line( $x, $y, $x, $y+$w, $w );
+    $pr->line( $x, $y, $x, $y+$w, $w, $col );
     $y -= 0.4 * $sz;
-    $pr->line( $x, $y, $x, $y+$w, $w );
+    $pr->line( $x, $y, $x, $y+$w, $w, $col );
 }
 
 sub pr_rptendstart {
-    my ( $x, $y, $lcr, $sz, $pr ) = @_;
+    my ( $x, $y, $lcr, $sz, $col, $pr ) = @_;
     my $w = $sz / 10;		# glyph width = 5 * $w
     $x -= 2.5 * $w * ($lcr + 1);
-    $pr->vline( $x + 2*$w, $y+0.9*$sz, $sz, $w );
+    $pr->vline( $x + 2*$w, $y+0.9*$sz, $sz, $col, , $w );
     $y += 0.55 * $sz;
-    $pr->line( $x,      $y, $x     , $y+$w, $w );
-    $pr->line( $x+4*$w, $y, $x+4*$w, $y+$w, $w );
+    $pr->line( $x,      $y, $x     , $y+$w, $col, , $w );
+    $pr->line( $x+4*$w, $y, $x+4*$w, $y+$w, $col, , $w );
     $y -= 0.4 * $sz;
-    $pr->line( $x,      $y, $x,      $y+$w, $w );
-    $pr->line( $x+4*$w, $y, $x+4*$w, $y+$w, $w );
+    $pr->line( $x,      $y, $x,      $y+$w, $col, , $w );
+    $pr->line( $x+4*$w, $y, $x+4*$w, $y+$w, $col, , $w );
 }
 
 sub pr_repeat {
-    my ( $x, $y, $lcr, $sz, $pr ) = @_;
+    my ( $x, $y, $lcr, $sz, $col, $pr ) = @_;
     my $w = $sz / 3;		# glyph width = 3 * $w
     $x -= 1.5 * $w * ($lcr + 1);
     my $lw = $sz / 10;
@@ -2054,7 +2102,7 @@ sub pr_repeat {
 }
 
 sub pr_endline {
-    my ( $x, $y, $lcr, $sz, $pr ) = @_;
+    my ( $x, $y, $lcr, $sz, $col, $pr ) = @_;
     my $w = $sz / 10;		# glyph width = 2 * $w
     $x -= 0.75 * $w * ($lcr + 1);
     $pr->vline( $x, $y+0.85*$sz, 0.9*$sz, 2*$w );
@@ -2530,7 +2578,7 @@ sub configurator {
     $fm->( qw( footer         subtitle ) );
 
     # This one is fixed.
-    $fonts->{chordfingers}->{title} = "ChordProSymbols.ttf";
+    $fonts->{chordfingers}->{file} = "ChordProSymbols.ttf";
 }
 
 # Get a format string for a given page class and type.

@@ -1327,6 +1327,13 @@ sub default_config() {
               "width" : 0,
               "color" : "foreground-medium",
           },
+          "symbols" : {
+              "color" : "blue",
+          },
+          "volta" : {
+              "span" : 0.7,
+              "color" : "blue",
+          },
       },
 
       // Even/odd pages. A value of -1 denotes odd/even pages.

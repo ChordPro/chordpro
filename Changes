@@ -4,6 +4,7 @@
     - Verify configs (and fix if possible).
     - Enhance ToC sorting, unlimited keys, numeric and reverse sorting.
     - Warn if X: is missing in ABC content.
+    - Add volta for grid.
     - !BugFixes
     - Fix problem that toc columns overlapped lefter columns.
     - (PDF) Print chorus tag if there's no chorus to rechorus.
