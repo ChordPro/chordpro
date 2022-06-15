@@ -760,6 +760,8 @@ sub hmerge($$;$) {
 	    || $path eq "pdf.fontconfig."
 	    || $path =~ /^pdf\.(?:info|fonts)\./
 	    || $path =~ /^meta\./
+	    || $path =~ /^delegates\./
+	    || $path =~ /^debug\./
 	    || $key =~ /^_/;
 
 	if ( ref($right->{$key}) eq 'HASH'
