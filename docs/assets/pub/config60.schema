@@ -1244,6 +1244,31 @@
 				    "default": 1
 				}
 			    }
+			},
+		        "symbols" : {
+			    "additionalProperties": false,
+			    "properties": {
+				"color": {
+				    "description": "Colour of the cell bar",
+				    "$ref": "#/definitions/colorspec",
+				    "default" : "foreground-light"
+				}
+			    }
+			},
+		        "volta" : {
+			    "additionalProperties": false,
+			    "properties": {
+				"color": {
+				    "description": "Colour of the cell bar",
+				    "$ref": "#/definitions/colorspec",
+				    "default" : "foreground-light"
+				},
+				"span" : {
+				     "description": "Volta span (fraction of measure).",
+				     "type": "float",
+				     "default": 0.7
+				}
+			    }
 			}
                     }
 		},
