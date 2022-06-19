@@ -122,16 +122,21 @@ sub generate_song {
 	foreach my $info ( @{ $s->{define} } ) {
 	    my $t = "{define: " . $info->{name};
 	    $t .= " copy " . $info->{copy} if $info->{copy};
+	    if ( my $x = $info->{display} ) {
+		$x =~ s/"/\\"/g;
+		$x = '"'.$x.'"' if $x =~ /[\s"]/;
+		$t .= " display $x";
+	    }
 	    $t .= " base-fret " . $info->{base};
 	    $t .= " frets " .
 	      join(" ", map { $_ < 0 ? "N" : $_ } @{$info->{frets}})
 		if $info->{frets};
 	    $t .= " fingers " .
 	      join(" ", map { $_ < 0 ? "N" : $_ } @{$info->{fingers}})
-		if $info->{fingers};
+		if $info->{fingers} && @{$info->{fingers}};
 	    $t .= " keys " .
 	      join(" ", @{$info->{keys}})
-		if $info->{keys};
+		if $info->{keys} && @{$info->{keys}};
 	    push(@s, $t . "}");
 	}
 	push(@s, "") if $tidy;

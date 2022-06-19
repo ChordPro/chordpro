@@ -445,8 +445,8 @@ sub add_song_chord {
     }
     my $res = _check_chord($ii);
     return $res if $res;
-    my ( $name, $base, $frets, $fingers, $keys )
-      = @$ii{qw(name base frets fingers keys)};
+    my ( $name, $display, $base, $frets, $fingers, $keys )
+      = @$ii{qw(name display base frets fingers keys)};
     my $info = parse_chord($name) // { name => $name };
 
     $song_chords{$name} = bless
@@ -455,6 +455,7 @@ sub add_song_chord {
 	parser  => $parser,
 	%$info,
 	base    => $base,
+	$display ? ( display => $display ) : (),
 	frets   => [ $frets && @$frets ? @$frets : () ],
 	fingers => [ $fingers && @$fingers ? @$fingers : () ],
 	keys    => [ $keys && @$keys ? @$keys : () ],

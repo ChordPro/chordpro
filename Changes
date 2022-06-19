@@ -5,6 +5,7 @@
     - Enhance ToC sorting, unlimited keys, numeric and reverse sorting.
     - Warn if X: is missing in ABC content.
     - Add volta for grid.
+    - Add display for {define}.
     - !BugFixes
     - Fix problem that toc columns overlapped lefter columns.
     - (PDF) Print chorus tag if there's no chorus to rechorus.

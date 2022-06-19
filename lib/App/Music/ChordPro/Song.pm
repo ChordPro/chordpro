@@ -21,6 +21,7 @@ use List::Util qw(any);
 use File::LoadLines;
 use Storable qw(dclone);
 use feature 'state';
+use Text::ParseWords qw(quotewords);
 
 # Parser context.
 my $def_context = "";
@@ -1420,6 +1421,7 @@ sub directive {
 
 	# Split the arguments and keep a copy for error messages.
 	my @a = split( /[: ]+/, $arg );
+	@a = quotewords( '[: ]+', 0, $arg );
 	my @orig = @a;
 	my $fail = 0;
 	my $name = $a[0];
@@ -1455,6 +1457,11 @@ sub directive {
 		}
 	    }
 
+	    # display
+	    elsif ( $a eq "display" ) {
+		$res->{display} = shift(@a);
+	    }
+
 	    # base-fret N
 	    elsif ( $a eq "base-fret" ) {
 		if ( $a[0] =~ /^\d+$/ ) {
@@ -1466,7 +1473,6 @@ sub directive {
 		    last;
 		}
 	    }
-
 	    # frets N N ... N
 	    elsif ( $a eq "frets" ) {
 		my @f;
