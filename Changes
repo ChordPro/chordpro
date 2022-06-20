@@ -8,6 +8,7 @@
     - Add display for {define}.
     - !BugFixes
     - Fix problem that toc columns overlapped lefter columns.
+    - Fix some problems with {define}.
     - (PDF) Print chorus tag if there's no chorus to rechorus.
     - Fix issue 222.
     - Fix issue 223.

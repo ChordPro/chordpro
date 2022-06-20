@@ -1448,7 +1448,7 @@ sub directive {
 		    $info = $i;
 		    shift(@a);
 		    $res->{$_} = $info->{$_}
-		      for qw( base frets fingers keys );
+		      for qw( base display frets fingers keys );
 		}
 		else {
 		    do_warn("Unknown chord to copy: $a[0]\n");
@@ -1476,7 +1476,7 @@ sub directive {
 	    # frets N N ... N
 	    elsif ( $a eq "frets" ) {
 		my @f;
-		while ( @a && $a[0] =~ /^(?:[0-9]+|[-xXN])$/ ) {
+		while ( @a && $a[0] =~ /^(?:[0-9]+|[-xXN])$/ && @f < $strings ) {
 		    push( @f, shift(@a) );
 		}
 		if ( @f == $strings ) {
@@ -1506,6 +1506,7 @@ sub directive {
 			push( @f, -1 );
 		    }
 		    else {
+			unshift( @a, $a );
 			last;
 		    }
 		}
