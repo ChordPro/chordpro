@@ -936,7 +936,7 @@ sub chord_display {
       $self->{display}
       ? interpolate( { args => $self }, $self->{display} )
       : $self->show("np");
-    warn("XXX \"", $self->{display}, "\" => \"", $res, "\"\n");
+
     # Substitute musical symbols if wanted and possible.
     if ( $::config->{settings}->{truesf} ) {
 	$sf ||= 0;
