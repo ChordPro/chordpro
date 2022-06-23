@@ -246,8 +246,9 @@ sub parse_chord {
 	$info->{root} = $plus{root};
     }
     # Retry with relaxed pattern if requested.
-    elsif ( $self->{c_rpat} && $::config->{settings}->{chordnames} eq "relaxed" ) {
-	$chord =~ /^$self->{c_rpat}$/;
+    elsif ( $self->{c_rpat}
+	    && $::config->{settings}->{chordnames} eq "relaxed"
+	    && $chord =~ /^$self->{c_rpat}$/ ) {
 	%plus = %+;		# keep it outer
 	return unless $info->{root} = $plus{root};
     }
@@ -891,7 +892,7 @@ sub transpose {
     }
     $info->{root_mod} = $dir;
 
-    delete $info->{$_} for qw( copy base frets fingers keys );
+    delete $info->{$_} for qw( copy base frets fingers keys display );
 
     return $info;
 }
@@ -935,7 +936,7 @@ sub chord_display {
       $self->{display}
       ? interpolate( { args => $self }, $self->{display} )
       : $self->show("np");
-
+    warn("XXX \"", $self->{display}, "\" => \"", $res, "\"\n");
     # Substitute musical symbols if wanted and possible.
     if ( $::config->{settings}->{truesf} ) {
 	$sf ||= 0;
