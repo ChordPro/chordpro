@@ -9,10 +9,12 @@
     - !BugFixes
     - Fix problem that toc columns overlapped lefter columns.
     - Fix some problems with {define}.
+    - Only print user chords when diagrams.show=user.
     - (PDF) Print chorus tag if there's no chorus to rechorus.
     - Fix issue 222.
     - Fix issue 223.
     - Fix issue 224.
+    - Fix issue 226.
 
 5.988 2022-05-17
 

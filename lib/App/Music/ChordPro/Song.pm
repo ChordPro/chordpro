@@ -510,11 +510,20 @@ sub parse_song {
 	$diagrams = "none";
     }
 
-    { my %h; @used_chords = map { $h{$_}++ ? () : $_ } @used_chords; }
+    if ( $diagrams eq "user" ) {
 
-    if ( $diagrams eq "user" && $self->{define} && @{$self->{define}} ) {
-	@used_chords =
-	  map { $_->{name} } @{$self->{define}};
+	if ( $self->{define} && @{$self->{define}} ) {
+	    my %h = map { $_ => 1 } @used_chords;
+	    @used_chords =
+	      map { $h{$_->{name}} ? $_->{name} : () } @{$self->{define}};
+	}
+	else {
+	    @used_chords = ();
+	}
+    }
+    else {
+	my %h;
+	@used_chords = map { $h{$_}++ ? () : $_ } @used_chords;
     }
 
     if ( $config->{diagrams}->{sorted} ) {
