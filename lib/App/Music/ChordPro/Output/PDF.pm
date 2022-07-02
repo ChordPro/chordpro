@@ -277,7 +277,7 @@ sub generate_csv {
 		      artist    => 'ChordPro' } )
 	  if $pages_of->{front};
 	$csvline->( { title     => '__table_of_contents__',
-		      pagerange => $pagerange->("front"),
+		      pagerange => $pagerange->("toc"),
 		      sorttitle => 'Table of Contents',
 		      artist    => 'ChordPro' } )
 	  if $pages_of->{toc};
