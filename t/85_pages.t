@@ -23,23 +23,25 @@ my $csv = $base . "csv";
 my $front = $base . "front.pdf";
 my $back  = $base . "back.pdf";
 
-use PDF::API2;
+use PDF::API2 2.036;
 
-my $p = PDF::API2->new;
+my $p = PDF::API2->new( file => $front );
 my $page = $p->page;
+$page->size("A4");
 my $text = $page->text;
 $text->font( $p->corefont("Times-Roman"), 20 );
-$text->transform( { translate => [ 100, 100 ] } );
+$text->translate( 600, 100 );
 $text->text( "Hello, World!" );
-$p->saveas($front);
+$p->save;
 
-$p = PDF::API2->new;
+$p = PDF::API2->new( file => $back );
 $page = $p->page;
+$page->size("A4");
 $text = $page->text;
-$text->font( $p->corefont("Times-Roman"), 20 );
-$text->transform( { translate => [ 100, 100 ] } );
+$text->font( $p->font("Times-Roman"), 20 );
+$text->translate( 400, 100 );
 $text->text( "Hello, World!" );
-$p->saveas($back);
+$p->save;
 
 our $options;
 

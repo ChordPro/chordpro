@@ -294,14 +294,14 @@ sub generate_csv {
 	my $m = { %{$song->{meta}},
 		  pagerange => [ $pagerange->($pp, $page) ] };
 	$csvline->($m);
+    }
 
-	unless ( $ctl->{songsonly} ) {
-	    $csvline->( { title     => '__back_matter__',
-			  pagerange => $pagerange->("back"),
-			  sorttitle => 'Back Matter',
-			  artist    => 'ChordPro'} )
-	      if $pages_of->{back};
-	}
+    unless ( $ctl->{songsonly} ) {
+	$csvline->( { title     => '__back_matter__',
+		      pagerange => $pagerange->("back"),
+		      sorttitle => 'Back Matter',
+		      artist    => 'ChordPro'} )
+	  if $pages_of->{back};
     }
     close($fd);
     warn("Generated CSV...\n")
