@@ -1135,15 +1135,19 @@ Options:
     --a2crd                       Perform text to ChordPro conversion only
     --noa2crd                     Do not auto-sense text to ChordPro conversion
     --about  -A                   About ChordPro...
+    --back-matter=FILE            Add back matter pages from PDF document
     --config=JSON  --cfg          Config definitions (multiple)
     --cover=FILE                  Add cover pages from PDF document
     --crd                         Input is text, not ChordPro
+    --csv                         (with PDF) Also generate CSV
     --decapo                      Eliminate capo settings
     --diagrams=WHICH		  Prints chord diagrams
     --encoding=ENC                Encoding for input files (UTF-8)
     --filelist=FILE               Reads song file names from FILE
     --fragment -F                 Partial (incomplete) song
+    --front-matter=FILE           Add cover pages from PDF document
     --lyrics-only  -l             Only prints lyrics
+    --meta KEY=VALUE              Add meta data
     --output=FILE  -o             Saves the output to FILE
     --[no]strict                  Strict conformance
     --start-page-number=N  -p     Starting page number [1]
@@ -1177,25 +1181,26 @@ Options marked with - are ignored.
 
 Configuration options:
     --config=CFG        Project specific config file ($cfg{config})
-    --noconfig          Don't use a project specific config file
-    --nosongconfig      Don't use song specific configs
-    --userconfig=CFG    User specific config file ($cfg{userconfig})
-    --nouserconfig      Don't use a user specific config file
-    --sysconfig=CFG     System specific config file ($cfg{sysconfig})
-    --nosysconfig       Don't use a system specific config file
-    --nodefaultconfigs  -X  Don't use any default config files
     --define=XXX=YYY	Sets config item XXX to value YYY
+    --noconfig          Don't use a project specific config file
+    --nodefaultconfigs  -X  Don't use any default config files
+    --nosongconfig      Don't use song specific configs
+    --nosysconfig       Don't use a system specific config file
+    --nouserconfig      Don't use a user specific config file
     --print-default-config   Prints the default config and exits
-    --print-final-config   Prints the resultant config and exits
     --print-delta-config   Prints the diffs for the resultant config and exits
+    --print-final-config   Prints the resultant config and exits
+    --reference  -R     Reference mode (no configs etc.)
+    --sysconfig=CFG     System specific config file ($cfg{sysconfig})
+    --userconfig=CFG    User specific config file ($cfg{userconfig})
 Missing default configuration files are silently ignored.
 
 Miscellaneous options:
     --help  -h          This message
     --help-config       Help for ChordPro configuration
-    --manual            The full manual.
     --ident             Show identification
-    --verbose           Verbose information
+    --manual            The full manual.
+    --verbose           Verbose information. Repeat for more.
 EndOfUsage
     exit $exit if defined $exit;
 }
