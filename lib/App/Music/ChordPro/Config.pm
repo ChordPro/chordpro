@@ -1109,7 +1109,7 @@ sub default_config() {
 	"sorted"   :  false,
     },
 
-    // Diagnostig messages.
+    // Diagnostic messages.
     "diagnostics" : {
 	"format" : "\"%f\", line %n, %m\n\t%l",
     },
