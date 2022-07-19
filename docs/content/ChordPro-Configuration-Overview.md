@@ -95,6 +95,9 @@ In the examples below the symbol `~` denotes the user's home directory. Windows 
    steps 1 through 3, and then its song specific configuration file if
    it exists.
 
+   **Important** A song specific configuration file may **not**
+   contain an `"include"` or `"tuning"` item.
+
 ## Configuration resources (presets)
 
 Preset configurations can be specified by their names, without path
