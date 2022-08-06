@@ -802,6 +802,7 @@ sub id {
 sub name    { $_[0]->show }
 sub is_note { $_[0]->{isnote} };
 sub is_flat { $_[0]->{isflat} };
+sub is_keyboard { $_[0]->{iskeyboard} };
 
 sub is_nc {
     my ( $self ) = @_;

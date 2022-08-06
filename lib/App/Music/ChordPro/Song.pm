@@ -605,7 +605,10 @@ sub chord {
     }
 
     unless ( $info->is_note ) {
-	if ( $info->{origin} ) {
+	if ( $info->is_keyboard ) {
+	    push( @used_chords, $n );
+	}
+	elsif ( $info->{origin} ) {
 	    push( @used_chords, $n ) if $info->{frets};
 	}
 	elsif ( $::running_under_test ) {
@@ -1732,6 +1735,13 @@ sub parse_chord {
 	    warn( "Parsing chord: \"$chord\" found ",
 		  $i->name, " for ", $info->name, " in song/config chords\n" ) if $debug > 1;
 	    $info = $i->new({ %$i, name => $info->name }) ;
+	    $unk = 0;
+	}
+	elsif ( $config->{instrument}->{type} eq 'keyboard'
+		&& App::Music::ChordPro::Chords::_get_keys($info) ) {
+	    warn( "Parsing chord: \"$chord\" \"", $info->name, "\" not found ",
+		  "but we know what to do\n" ) if $debug > 1;
+	    $info = $info->new({ %$info, iskeyboard => 1 }) ;
 	    $unk = 0;
 	}
 	else {

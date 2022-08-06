@@ -131,7 +131,7 @@ sub draw {
     $pr->{pdfgfx}->formimage( $xo, $x, $y-$v, 1 );
 
     # Get (or infer) keys.
-    my @keys = @{getkeys($info)};
+    my @keys = @{App::Music::ChordPro::Chords::_get_keys($info)};
 
     my $kk = ( $keys % 7 == 0 )
       ? 12 * int( $keys / 7 )
@@ -258,50 +258,6 @@ sub grid_xo {
 
 	$form;
       };
-}
-
-my %keys =
-  ( ""       => [ 0, 4, 7 ],	 # major
-    "7"      => [ 0, 4, 7, 10 ], # dominant seventh
-    "maj7"   => [ 0, 4, 7, 11 ], # major seventh
-    "-"      => [ 0, 3, 7 ],	 # minor
-    "-7"     => [ 0, 3, 7, 10 ], # minor seventh
-    "+"      => [ 0, 4, 8 ],	 # augmented
-    "0"      => [ 0, 3, 6 ],	 # diminished
-    "sus4"   => [ 0, 5, 7 ],	 # suspended 4th
-    "h"      => [ 0, 3, 6, 10 ], # half-diminished seventh
-
-    #### TODO: MORE
-  );
-
-sub getkeys {
-    my ( $info ) = @_;
-#    ::dump( { %$info, parser => ref($info->{parser}) });
-    # Has keys defined.
-    return $info->{keys} if $info->{keys} && @{$info->{keys}};
-
-    # Known chords.
-    return $keys{$info->{qual_canon}.$info->{ext_canon}}
-      if defined $info->{qual_canon}
-      && defined $info->{ext_canon}
-      && defined $keys{$info->{qual_canon}.$info->{ext_canon}};
-
-    # Try to derive from guitar chords.
-    return [] unless $info->{frets} && @{$info->{frets}};
-    my @tuning = ( 4, 9, 2, 7, 11, 4 );
-    my %keys;
-    my $i = -1;
-    my $base = $info->{base} - 1;
-    $base = 0 if $base < 0;
-    for ( @{ $info->{frets} } ) {
-	$i++;
-	next if $_ < 0;
-	my $c = $tuning[$i] + $_ + $base;
-	$c += 12 if $c < $info->{root_ord};
-	$c -= $info->{root_ord};
-	$keys{ $c % 12 }++;
-    }
-    return [ keys %keys ];
 }
 
 1;
