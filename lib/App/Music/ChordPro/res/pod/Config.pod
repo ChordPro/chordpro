@@ -194,7 +194,7 @@ extensive details and examples.
     	"sorted"   :  false,
         },
     
-        // Diagnostig messages.
+        // Diagnostic messages.
         "diagnostics" : {
     	"format" : "\"%f\", line %n, %m\n\t%l",
         },
