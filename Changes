@@ -10,6 +10,7 @@
     - Fix problem that toc columns overlapped lefter columns.
     - Fix some problems with {define}.
     - Only print user chords when diagrams.show=user.
+    - Make base optional in json chords (part of fix 234).
     - (PDF) Print chorus tag if there's no chorus to rechorus.
     - Fix issue 222.
     - Fix issue 223.

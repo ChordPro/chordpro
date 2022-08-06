@@ -372,9 +372,10 @@ sub add_config_chord {
 	$def = bless { %$res, %$def } => ref($res);
     }
     delete $def->{name};
+    $def->{base} ||= 1;
 
     my ( $base, $frets, $fingers, $keys ) =
-      ( $def->{base}||1, $def->{frets}, $def->{fingers}, $def->{keys} );
+      ( $def->{base}, $def->{frets}, $def->{fingers}, $def->{keys} );
     $res = _check_chord($def);
     return $res if $res;
 
