@@ -611,9 +611,9 @@ sub chord {
 	elsif ( $info->{origin} ) {
 	    # Include if we have diagram info.
 	    push( @used_chords, $n )
-	      if $config->{instrument}->{type} eq 'keyboard'
-	         ? $info->{keys} && @{$info->{keys}}
-		 : $info->{frets} && @{$info->{frets}};
+	      if $info->{frets} && @{$info->{frets}}
+	         || $config->{instrument}->{type} eq 'keyboard'
+	            && $info->{keys} && @{$info->{keys}};
 	}
 	elsif ( $::running_under_test ) {
 	    # Tests run without config and chords, so pretend.

@@ -327,7 +327,7 @@ sub _check_chord {
     my ( $ii ) = @_;
     my ( $name, $base, $frets, $fingers, $keys )
       = @$ii{qw(name base frets fingers keys)};
-    if ( $frets && @$frets != strings() ) {
+    if ( $frets && @$frets && @$frets != strings() ) {
 	return scalar(@$frets) . " strings";
     }
     if ( $fingers && @$fingers && @$fingers != strings() ) {
