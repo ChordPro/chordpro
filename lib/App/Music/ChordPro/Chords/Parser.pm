@@ -806,6 +806,8 @@ sub is_keyboard { $_[0]->{iskeyboard} };
 
 sub is_nc {
     my ( $self ) = @_;
+    return 1 if $self->is_keyboard &&
+      $self->{keys} && !@{ $self->{keys} };
     return unless $self->{frets} && @{ $self->{frets} };
     for ( @{ $self->{frets} } ) {
 	return unless $_ < 0;

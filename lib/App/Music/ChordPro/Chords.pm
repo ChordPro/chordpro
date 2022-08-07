@@ -510,12 +510,17 @@ sub parse_chord {
 
 my %keys =
   ( ""       => [ 0, 4, 7 ],	 # major
+    "6"      => [ 0, 4, 7,  9 ], # major sixth
     "7"      => [ 0, 4, 7, 10 ], # dominant seventh
+    "9"      => [ 0, 4, 7, 10, 14 ], # dominant nineth
+    "add9"   => [ 0, 4, 7, 14 ], # added nineth
     "maj7"   => [ 0, 4, 7, 11 ], # major seventh
     "-"      => [ 0, 3, 7 ],	 # minor
+    "-6"     => [ 0, 3, 7,  9 ], # minor major sixth
     "-7"     => [ 0, 3, 7, 10 ], # minor seventh
     "+"      => [ 0, 4, 8 ],	 # augmented
     "0"      => [ 0, 3, 6 ],	 # diminished
+    "sus2"   => [ 0, 2, 7 ],	 # suspended 2th
     "sus4"   => [ 0, 5, 7 ],	 # suspended 4th
     "h"      => [ 0, 3, 6, 10 ], # half-diminished seventh
 

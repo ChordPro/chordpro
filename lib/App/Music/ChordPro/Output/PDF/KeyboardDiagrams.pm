@@ -106,6 +106,12 @@ sub draw {
     return unless $info;
     my $x0 = $x;
 
+    # Get (or infer) keys.
+    my @keys = @{App::Music::ChordPro::Chords::_get_keys($info)};
+    unless ( @keys ) {
+	warn("PDF: No diagram for chord \"", $info->name, "\"\n");
+    }
+
     my $ctl = $ps->{kbdiagrams};
     my $kw = $ctl->{width};
     my $kh = $ctl->{height};
@@ -120,6 +126,7 @@ sub draw {
     my $font = $ps->{fonts}->{diagram};
     $pr->setfont($font);
     my $name = $info->chord_display;
+    $name .= "?" unless @keys;
     $name .= "*"
       unless $info->{origin} ne "user"
 	|| $ps->{kbdiagrams}->{show} eq "user";
@@ -129,9 +136,6 @@ sub draw {
     # Draw the grid.
     my $xo = $self->grid_xo( $ps, $lw );
     $pr->{pdfgfx}->formimage( $xo, $x, $y-$v, 1 );
-
-    # Get (or infer) keys.
-    my @keys = @{App::Music::ChordPro::Chords::_get_keys($info)};
 
     my $kk = ( $keys % 7 == 0 )
       ? 12 * int( $keys / 7 )

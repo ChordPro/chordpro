@@ -606,17 +606,17 @@ sub chord {
 
     unless ( $info->is_note ) {
 	if ( $info->is_keyboard ) {
-	    push( @used_chords, $n );
+	    push( @used_chords, $n ) unless $info->is_nc;
 	}
 	elsif ( $info->{origin} ) {
-	    push( @used_chords, $n ) if $info->{frets};
+	    push( @used_chords, $n ) if $info->{frets} && @{$info->{frets}};
 	}
 	elsif ( $::running_under_test ) {
 	    # Tests run without config and chords, so pretend.
 	    push( @used_chords, $n );
 	}
-	else {
-	    do_warn("Unknown chord: $n") if $config->{debug}->{chords};
+	elsif ( $config->{debug}->{chords} ) {
+	    do_warn("Unknown chord: $n");
 	    $warned_chords{$n}++;
 	}
     }
