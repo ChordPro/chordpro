@@ -609,7 +609,11 @@ sub chord {
 	    push( @used_chords, $n ) unless $info->is_nc;
 	}
 	elsif ( $info->{origin} ) {
-	    push( @used_chords, $n ) if $info->{frets} && @{$info->{frets}};
+	    # Include if we have diagram info.
+	    push( @used_chords, $n )
+	      if $config->{instrument}->{type} eq 'keyboard'
+	         ? $info->{keys} && @{$info->{keys}}
+		 : $info->{frets} && @{$info->{frets}};
 	}
 	elsif ( $::running_under_test ) {
 	    # Tests run without config and chords, so pretend.
