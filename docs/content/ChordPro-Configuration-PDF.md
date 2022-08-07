@@ -213,7 +213,7 @@ Traditionally, the `{titles}` directive was used to control titles flush. ChordP
 Chord diagrams are added to the song to show the chords used in the
 song. By default the diagrams are at the end of the song but it is
 also possible to have them at the bottom, or in a side column on the first page of the
-song. See [Chords diagrams in a side column]({{< relref "#chords-diagrams-in-a-side-column" >}}) below.
+song. See [Chords diagrams in a side column]({{< relref "#chords-in-a-side-column" >}}) below.
 
 A chord diagram consists of a number of cells. Cell dimensions are specified by `width` and `height`.  
 The horizontal number of cells depends on the number of strings.  
