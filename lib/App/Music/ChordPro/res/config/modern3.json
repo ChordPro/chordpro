@@ -27,6 +27,11 @@
 	    "linewidth" : 0.1,
 	},
 
+	// Beyboard diagrams, shown at the right side.
+	"kbdiagrams" : {
+	    "show"     :  "right",
+	},
+
 	// A {titles: left} may conflict with customized formats.
 	// Set to non-zero to ignore the directive.
 	"titles-directive-ignore" : true,
