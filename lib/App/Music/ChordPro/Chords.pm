@@ -509,22 +509,43 @@ sub parse_chord {
 ################ Section Keyboard keys ################
 
 my %keys =
-  ( ""       => [ 0, 4, 7 ],	 # major
-    "6"      => [ 0, 4, 7,  9 ], # major sixth
-    "7"      => [ 0, 4, 7, 10 ], # dominant seventh
-    "9"      => [ 0, 4, 7, 10, 14 ], # dominant nineth
-    "add9"   => [ 0, 4, 7, 14 ], # added nineth
-    "maj7"   => [ 0, 4, 7, 11 ], # major seventh
-    "-"      => [ 0, 3, 7 ],	 # minor
-    "-6"     => [ 0, 3, 7,  9 ], # minor major sixth
-    "-7"     => [ 0, 3, 7, 10 ], # minor seventh
-    "+"      => [ 0, 4, 8 ],	 # augmented
-    "0"      => [ 0, 3, 6 ],	 # diminished
-    "sus2"   => [ 0, 2, 7 ],	 # suspended 2th
-    "sus4"   => [ 0, 5, 7 ],	 # suspended 4th
-    "h"      => [ 0, 3, 6, 10 ], # half-diminished seventh
-
-    #### TODO: MORE
+  ( ""       => [ 0, 4, 7 ],	             # major
+	"-"      => [ 0, 3, 7 ],	             # minor
+	"7"      => [ 0, 4, 7, 10 ],             # dominant 7th
+	"-7"     => [ 0, 3, 7, 10 ],             # minor seventh
+	"maj7"   => [ 0, 4, 7, 11 ],             # major 7th
+	"-maj7"  => [ 0, 3, 7, 11 ],             # minor major 7th
+	"6"      => [ 0, 4, 7, 9 ],              # 6th
+	"-6"     => [ 0, 3, 7, 9 ],              # minor 6th
+	"6add9"  => [ 0, 4, 7, 9, 14],           # 6/9
+	"5"      => [ 0, 7 ],                    # 6th
+	"9"      => [ 0, 4, 7, 10, 14 ],         # 9th
+	"-9"     => [ 0, 3, 7, 10, 14 ],         # minor 9th
+	"maj9"   => [ 0, 4, 7, 11, 14 ],         # major 9th
+	"11"     => [ 0, 4, 7, 10, 14, 17 ],     # 11th
+	"-11"    => [ 0, 3, 7, 10, 14, 17 ],     # minor 11th
+	"13"     => [ 0, 4, 7, 10, 14, 17, 21 ], # 13th
+	"-13"    => [ 0, 3, 7, 10, 14, 17, 21 ], # minor 13th
+	"maj13"  => [ 0, 4, 7, 11, 14, 21 ],     # major 13th
+	"add2"   => [ 0, 2, 4, 7 ],              # add 2
+	"add9"   => [ 0, 4, 7, 14 ],             # add 9
+	"-add2"  => [ 0, 2, 3, 7 ],              # minor add 2
+	"-add9"  => [ 0, 2, 3, 7, 11 ],          # minor add 9
+	"-add11" => [ 0, 3, 5, 7, 11 ],          # minor add 11
+	"7-5"    => [ 0, 4, 6, 10 ],             # 7 flat 5 altered chord
+	"7+5"    => [ 0, 4, 8, 10 ],             # 7 sharp 5 altered chord
+	"sus4"   => [ 0, 5, 7 ],                 # sus 4
+	"sus2"   => [ 0, 2, 7 ],                 # sus 2
+	"7sus2"  => [ 0, 2, 7, 10 ],             # 7 sus 2
+	"7sus4"  => [ 0, 5, 7, 10 ],             # 7 sus 4
+	"-7sus2" => [ 0, 2, 3, 7, 10 ],          # minor 7 sus 2
+	"-7sus4" => [ 0, 3, 5, 7, 10 ],          # minor 7 sus 4
+	"0"      => [ 0, 3, 6 ],	             # diminished
+	"07"     => [ 0, 3, 6, 9 ],              # diminished 7
+	"-7b5"   => [ 0, 3, 6, 10 ],             # minor 7 flat 5
+	"+"      => [ 0, 4, 8 ],	             # augmented
+	"+7"     => [ 0, 4, 8, 10 ],             # augmented 7
+	"h"      => [ 0, 3, 6, 10 ],             # half-diminished seventh
   );
 
 sub _get_keys {

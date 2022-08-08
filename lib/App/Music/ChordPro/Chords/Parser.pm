@@ -344,6 +344,7 @@ my $additions_maj =
    "5",
    "6",
    "69",
+   "6add9",
    "7",
    "711",
    "7add11",
@@ -367,6 +368,7 @@ my $additions_maj =
    "7-13",
    "7-13sus",
    "7-5",
+   "7\\+5",
    "7-9",
    "7-9#11",
    "7-9#5",
@@ -417,6 +419,7 @@ my $additions_min =
    "",
    "#5",
    "11",
+   "13",
    "6",
    "69",
    "7b5",
@@ -439,6 +442,7 @@ my $additions_aug =
   {
    map { $_ => $_ }
    "",
+   "7",
   };
 
 # The following additions are recognized for diminished chords.
