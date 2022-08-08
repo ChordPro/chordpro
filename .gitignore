@@ -31,3 +31,4 @@ xtest*
 *.aux
 *.log
 *.out
+MYMETA.*
