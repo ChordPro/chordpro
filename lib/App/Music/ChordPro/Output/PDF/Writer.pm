@@ -519,7 +519,7 @@ sub init_fonts {
     my $ps = $self->{ps};
     my $fail;
 
-    my $fc = Text::Layout::FontConfig->new;
+    my $fc = Text::Layout::FontConfig->new( debug => $config->{debug}->{fonts} > 1 );
 
     # Add font dirs.
     my @d = ( @{$ps->{fontdir}}, ::rsc_or_file("fonts/"), $ENV{FONTDIR} );
@@ -587,7 +587,7 @@ sub init_pangofont {
     my $ps = $self->{ps};
     my $font = $ps->{fonts}->{$ff};
 
-    my $fc = Text::Layout::FontConfig->new;
+    my $fc = Text::Layout::FontConfig->new( debug => $config->{debug}->{fonts} > 1 );
     eval {
 	$font->{fd} = $fc->from_string($font->{description});
 	$font->{fd}->get_font($self->{layout}); # force load
@@ -605,7 +605,7 @@ sub init_filefont {
     my $ps = $self->{ps};
     my $font = $ps->{fonts}->{$ff};
 
-    my $fc = Text::Layout::FontConfig->new;
+    my $fc = Text::Layout::FontConfig->new( debug => $config->{debug}->{fonts} > 1 );
     eval {
 	my $t = $fc->from_filename(expand_tilde($font->{file}));
 	$t->get_font($self->{layout}); # force load
@@ -624,7 +624,7 @@ sub init_corefont {
     my $cf = App::Music::ChordPro::Output::PDF::is_corefont($font->{name});
     die("Config error: \"$font->{name}\" is not a built-in font\n")
       unless $cf;
-    my $fc = Text::Layout::FontConfig->new;
+    my $fc = Text::Layout::FontConfig->new( debug => $config->{debug}->{fonts} > 1 );
     eval {
 	$font->{fd} = $fc->from_filename($cf);
 	$font->{fd}->get_font($self->{layout}); # force load
