@@ -934,6 +934,8 @@ sub default_config() {
       // Suppress chords.
       // Overrides --lyrics-only command line option.
       "lyrics-only" : false,
+	  // Suppresses printing of chord diagrams for certain chords
+	  "suppressed-chord-diagrams" : [""],
       // Memorize chords in sections, to be recalled by [^].
       "memorize" : false,
       // Chords inline.
