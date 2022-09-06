@@ -38,3 +38,8 @@ markup:
         block: true
     renderer:
       unsafe: true
+
+
+module:
+  imports:
+    path: "github.com/kaushalmodi/hugo-search-fuse-js"
