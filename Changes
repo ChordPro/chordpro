@@ -9,6 +9,7 @@
     - !BugFixes
     - Fix problem that toc columns overlapped lefter columns.
     - Fix some problems with {define}.
+    - Fix crash when auto-adding an unknown chord.
     - Only print user chords when diagrams.show=user.
     - Make base optional in json chords (part of fix 234).
     - Modern3 style now has keyboard diagrams at the right. See issue 236.

@@ -1778,7 +1778,7 @@ sub parse_chord {
 	}
 	elsif ( $config->{diagrams}->{auto} ) {
 	    my $i = App::Music::ChordPro::Chords::add_unknown_chord($chord);
-	    $info = bless { %$i, %$info } => ref($info);
+	    $info = $i;
 	}
     }
 
