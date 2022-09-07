@@ -311,7 +311,6 @@ my $source;			# song source
 my $structured = 0;		# structured data
 my $suppress_empty_chordsline = 0;	# suppress chords line when empty
 my $suppress_empty_lyricsline = 0;	# suppress lyrics line when blank
-my @suppressed_chord_diagrams = [ "" ]; #List of chords that should not print a diagram
 my $lyrics_only = 0;		# suppress all chord lines
 my $inlinechords = 0;		# chords inline
 my $inlineannots;		# format for inline annots
@@ -334,7 +333,6 @@ sub generate_song {
 
     $suppress_empty_chordsline = $::config->{settings}->{'suppress-empty-chords'};
     $suppress_empty_lyricsline = $::config->{settings}->{'suppress-empty-lyrics'};
-    @suppressed_chord_diagrams = @{$::config->{settings}->{'suppressed-chord-diagrams'}};
     $inlinechords = $::config->{settings}->{'inline-chords'};
     $inlineannots = $::config->{settings}->{'inline-annotations'};
     $chordsunder  = $::config->{settings}->{'chords-under'};
@@ -604,11 +602,10 @@ sub generate_song {
 	$chords = $s->{chords}->{chords}
 	  if !defined($chords) && $s->{chords};
 	$show //= $dctl->{show};
-	my %supchords = map {$_ => 1} @suppressed_chord_diagrams;
 	if ( $chords ) {
 	    for ( @$chords ) {
-		  my $i = $s->{chordsinfo}->{$_};
-		  push( @chords, $i ) unless $i->is_nc || exists $supchords{$i->name};
+		my $i = $s->{chordsinfo}->{$_};
+		push( @chords, $i ) unless $i->is_nc;
 	    }
 	}
 	return unless @chords;
@@ -643,7 +640,6 @@ sub generate_song {
 			 $s->{settings}->{columns} || $::config->{settings}->{columns} );
 	    $col_adjust->();
 	    my $y = $y;
-
 	    while ( @chords ) {
 
 		for ( 0..$c-1 ) {

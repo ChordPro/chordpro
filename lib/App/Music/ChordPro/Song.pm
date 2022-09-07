@@ -538,6 +538,9 @@ sub parse_song {
 	my %h;
 	@used_chords = map { $h{$_}++ ? () : $_ } @used_chords;
 
+	my %suppressed_chord_diagrams = map {$_ => 1} @{$::config->{settings}->{'suppressed-chord-diagrams'}};
+	@used_chords = map {$suppressed_chord_diagrams{$_} ? $_ : ()} @used_chords;
+	
 	if ( $diagrams eq "user" && $self->{define} && @{$self->{define}} ) {
 	    @used_chords =
 	    map { $_->{name} } @{$self->{define}};
