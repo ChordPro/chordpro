@@ -6,6 +6,7 @@
     - Warn if X: is missing in ABC content.
     - Add volta for grid.
     - Add display for {define}.
+    - Remove some GUI restrictions for MacOS and wxGTK3.
     - !BugFixes
     - Fix problem that toc columns overlapped lefter columns.
     - Fix some problems with {define}.
