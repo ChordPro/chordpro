@@ -56,7 +56,7 @@ my @fonts =
 my $prefctl;
 
 # Old GTK2 version is limited due to sandboxing. GTK3 behaves normal.
-my $is_macos_crippled = is_macos() && $Wx::wxVERSION < 3;
+my $is_macos_crippled = is_macos();
 
 # Explicit (re)initialisation of this class.
 sub init {

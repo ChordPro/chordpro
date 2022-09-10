@@ -3,11 +3,14 @@
 use strict;
 use warnings;
 use utf8;
+use Alien::wxWidgets;
 
 my $verbose = 1;
 
-my $prefix = $ENV{HOME} . "/lib/citrusperl";
-
+my $prefix = Alien::wxWidgets->prefix;
+my @libs = Alien::wxWidgets->shared_libraries("core");
+die("Cannot find libs version\n") unless $libs[0] =~ /-([0-9._]+)\.dylib/;
+my $lv = $1;
 my $srcpat = qr;($prefix.*?)/([-\w.]+\.(?:dylib|bundle));;
 my $dst = '@executable_path';
 
@@ -38,7 +41,7 @@ sub relocate {
 	    system("install_name_tool", "-id", "$dst/$name", $lib);
 	}
 	else {
-	    $name =~ s/3\.0\.0\.2\.0/3.0/;
+	    $name =~ s/-[.0-9_]+\.dylib/-$lv.dylib/;
 	    warn("+ install_name_tool -change \"$orig/$oname\" \"$dst/$name\" \"$lib\"\n")
 	      if $verbose;
 	    system("install_name_tool", "-change", "$orig/$oname", "$dst/$name", $lib);

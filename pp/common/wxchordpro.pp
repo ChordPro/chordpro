@@ -20,4 +20,3 @@
 --module=Wx::Ribbon
 --module=Wx::RichText
 --module=Wx::Socket
---module=Wx::WebView

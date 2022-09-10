@@ -88,7 +88,7 @@ pp/linux/chordpro.pp
 pp/linux/wxchordpro.pp
 pp/macos/Makefile
 pp/macos/chordpro.pp
-pp/macos/wxchordpro.pp
+pp/macos/wxchordpro_pp.pl
 pp/macos/ppl.c
 pp/macos/dndhandler.cpp
 pp/macos/Info.plist

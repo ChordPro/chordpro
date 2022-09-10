@@ -31,7 +31,7 @@ my $notdesc =
     "roman"	   => "I, II, III, ...",
   };
 
-my $is_macos_crippled = is_macos() && $Wx::wxVERSION < 3;
+my $is_macos_crippled = is_macos();
 
 sub get_configfile {
     my ( $self ) = @_;
