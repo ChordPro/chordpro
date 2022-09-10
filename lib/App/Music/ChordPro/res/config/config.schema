@@ -211,6 +211,18 @@
 		    "default": true
 		},
 
+		"suppressed-chord-diagrams": {
+			"title": "Suppressed Chord Diagrams",
+			"description": "Suppress diagrams for listed chords.",
+			"type": "array",
+			"items": {
+				"type": "string",
+			"title": "String",
+			"headerTemplate": "String {{ i1 }}",
+			"pattern": "^[A-G][b#]?[1-9]$"
+			}
+		},
+
 		"titles": {
 		    "description": "Titles flush.",
 		    "type": "string",

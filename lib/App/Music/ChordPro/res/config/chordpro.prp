@@ -24,6 +24,8 @@ settings {
   # Suppress chords.
   # Overrides --lyrics-only command line option.
   lyrics-only = false
+  # List of chords that should never print diagrams (aka easy chords in chordii)
+  suppressed-chord-diagrams = [""]
   # Memorize chords in sections, to be recalled by [^].
   memorize = false
   # Chords inline.

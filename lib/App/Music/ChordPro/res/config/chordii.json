@@ -9,7 +9,9 @@
       "suppress-empty-chords" : false,
       // Suppress blank lyrics lines.
       "suppress-empty-lyrics" : false,
-    },
+ 	  // Suppresses printing of chord diagrams for certain chords
+	  "suppressed-chord-diagrams" : ["A", "Am", "Bb", "B", "Bm", "C", "D", "D7", "Dm", "Dmin", "E", "Em", "Emin", "F", "Fm", "Fmin",   "F#", "F#m", "F#min", "G", "G7", "Gm", "Gmin" ],
+	  },
 
     // Printing chord diagrams.
     // "auto": automatically add unknown chords as empty diagrams.
