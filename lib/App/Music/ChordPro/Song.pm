@@ -265,6 +265,8 @@ sub parse_song {
 	    $diag->{line} = ++$$linecnt;
 	}
 	$diag->{orig} = $_ = shift(@$lines);
+	# Get rid of TABs.
+	s/\t/ /g;
 
 	if ( $prep->{all} ) {
 	    # warn("PRE:  ", $_, "\n");

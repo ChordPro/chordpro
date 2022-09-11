@@ -6,6 +6,7 @@
     - Warn if X: is missing in ABC content.
     - Add volta for grid.
     - Add display for {define}.
+    - Replace TAB characters by a single space on input.
     - Support building installer with MacOS homebrew perl.
     - !Miscellaneous
     - Luke Pinner contributed a nice search feature for our doc pages.
