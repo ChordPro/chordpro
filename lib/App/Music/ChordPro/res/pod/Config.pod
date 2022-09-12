@@ -186,12 +186,15 @@ extensive details and examples.
         //         "all": all chords used.
         //         "user": only prints user defined chords.
         // "sorted": order the chords by key.
+        // "suppress": a series of chord (names) thet will not generate
+        //         diagrams, e.g. if they are considered trivial.
         // Note: The type of diagram (string or keyboard) is determined
         // by the value of "instrument.type".
         "diagrams" : {
     	"auto"     :  false,
     	"show"     :  "all",
     	"sorted"   :  false,
+            "suppress" :  [],
         },
     
         // Diagnostic messages.

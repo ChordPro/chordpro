@@ -275,6 +275,15 @@
 		    "default": false,
 		    "description": "Sort the diagrams.",
 		    "type": "boolean"
+		},
+
+		"suppress": {
+		    "default": [],
+		    "description": "Chords (names) that will not generate diagrams, e.g. if they are considered trivial.",
+		    "type": "array",
+		    "items" : {
+		        "type": "string"
+		    }
 		}
 	    }
 	},

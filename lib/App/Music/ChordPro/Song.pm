@@ -493,6 +493,23 @@ sub parse_song {
 	$self->{labels} = [ @labels ];
     }
 
+    # Suppress chords that the user considers 'easy'.
+    if (  @{ $config->{diagrams}->{suppress} // [] } ) {
+	my %suppress;
+	my $xc = $config->{settings}->{transcode};
+	for (  @{ $config->{diagrams}->{suppress} } ) {
+	    my $info = App::Music::ChordPro::Chords::_known_chord($_);
+	    warn("Unknown chord \"$_\" in suppress list\n"), next
+	      unless $info;
+	    # Note we do transcode, but we do not transpose.
+	    if ( $xc ) {
+		$info = $info->transcode($xc);
+	    }
+	    $suppress{$info->name} = 1;
+	}
+	@used_chords = map { $suppress{$_} ? () : $_ } @used_chords;
+    }
+
     my $diagrams;
     if ( exists($self->{settings}->{diagrams} ) ) {
 	$diagrams = $self->{settings}->{diagrams};
