@@ -297,6 +297,7 @@ sub render {
     my $res = "";
     foreach my $fragment ( @{ $self->{_content} } ) {
 	next unless length($fragment->{text});
+	$fragment->{text} =~ s/'/\x{2019}/g;	# friendly quote
 	$res .= $fragment->{text};
     }
     $res;

@@ -128,10 +128,14 @@ sub text {
     $self->{layout}->{_currentcolor} = $self->_fgcolor($font->{color});
     # Watch out for regression... May have to do this in the nomarkup case only.
     if ( $nomarkup ) {
+	$text =~ s/'/\x{2019}/g;		# friendly quote
 	$self->{layout}->set_text($text);
     }
     else {
 	$self->{layout}->set_markup($text);
+	for ( @{ $self->{layout}->{_content} } ) {
+	    $_->{text} =~ s/\'/\x{2019}/g;	# friendly quote
+	}
     }
     $y -= $self->{layout}->get_baseline;
     $self->{layout}->show( $x, $y, $self->{pdftext} );

@@ -13,6 +13,7 @@
     - !BugFixes
     - Fix problem that toc columns overlapped lefter columns.
     - Fix some problems with {define}.
+    - Fix automatic replacement of apostroph (prime) by friendly quote.
     - Fix crash when auto-adding an unknown chord.
     - Only print user chords when diagrams.show=user.
     - Make base optional in json chords (part of fix 234).

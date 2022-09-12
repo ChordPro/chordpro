@@ -431,8 +431,8 @@ sub parse_song {
 	    }
 	}
 
-	# For practical reasons: a prime should always be an apostroph.
-	s/'/\x{2019}/g;
+	# For practical reasons: a prime should always be friendly quote
+	s/'/\x{2019}/g;		# friendly quote
 
 	# For now, directives should go on their own lines.
 	if ( /^\s*\{(.*)\}\s*$/ ) {
