@@ -10,6 +10,7 @@ package App::Music::ChordPro::Output::HTML;
 use strict;
 use warnings;
 use App::Music::ChordPro::Output::Common;
+use App::Music::ChordPro::Utils qw();
 
 sub generate_songbook {
     my ( $self, $sb ) = @_;
@@ -263,7 +264,7 @@ sub render {
     my $res = "";
     foreach my $fragment ( @{ $self->{_content} } ) {
 	next unless length($fragment->{text});
-	$res .= $fragment->{text};
+	$res .= App::Music::ChordPro::Utils::fq($fragment->{text});
     }
     $res;
 }

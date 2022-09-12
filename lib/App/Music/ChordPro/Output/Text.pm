@@ -8,6 +8,7 @@ our $config;
 package App::Music::ChordPro::Output::Text;
 
 use App::Music::ChordPro::Output::Common;
+use App::Music::ChordPro::Utils qw();
 
 use strict;
 use warnings;
@@ -297,8 +298,7 @@ sub render {
     my $res = "";
     foreach my $fragment ( @{ $self->{_content} } ) {
 	next unless length($fragment->{text});
-	$fragment->{text} =~ s/'/\x{2019}/g;	# friendly quote
-	$res .= $fragment->{text};
+	$res .= App::Music::ChordPro::Utils::fq($fragment->{text});
     }
     $res;
 }

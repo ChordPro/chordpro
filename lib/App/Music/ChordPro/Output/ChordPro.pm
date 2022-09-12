@@ -11,6 +11,7 @@ use strict;
 use warnings;
 
 use App::Music::ChordPro::Output::Common;
+use App::Music::ChordPro::Utils qw(fq);
 
 my $re_meta;
 
@@ -71,10 +72,10 @@ sub generate_song {
 	@s = @{ $s->{preamble} };
     }
 
-    push(@s, "{title: " . $s->{meta}->{title}->[0] . "}")
+    push(@s, "{title: " . fq($s->{meta}->{title}->[0]) . "}")
       if defined $s->{meta}->{title};
     if ( defined $s->{subtitle} ) {
-	push(@s, map { +"{subtitle: $_}" } @{$s->{subtitle}});
+	push(@s, map { +"{subtitle: ".fq($_)."}" } @{$s->{subtitle}});
     }
 
     if ( $s->{meta} ) {
@@ -87,7 +88,7 @@ sub generate_song {
 	foreach my $k ( sort keys %{ $s->{meta} } ) {
 	    next if $k =~ /^(?:title|subtitle)$/;
 	    if ( $k =~ $re_meta ) {
-		push( @s, map { +"{$k: $_}" } @{ $s->{meta}->{$k} } );
+		push( @s, map { +"{$k: ".fq($_)."}" } @{ $s->{meta}->{$k} } );
 		$used{$k}++;
 	    }
 	}
@@ -96,7 +97,7 @@ sub generate_song {
 	    next if $used{$k};
 	    next if $k =~ /^(?:title|subtitle|songindex|key_.*|chords|numchords)$/;
 	    next if $k =~ /^_/;
-	    push( @s, map { +"{meta: $k $_}" } @{ $s->{meta}->{$k} } );
+	    push( @s, map { +"{meta: $k ".fq($_)."}" } @{ $s->{meta}->{$k} } );
 	}
     }
 
@@ -304,7 +305,7 @@ sub generate_song {
 	    }
 	    $text = fmt_subst( $s, $text ) if $msp;
 	    push(@s, "") if $tidy;
-	    push(@s, "{$type: $text}");
+	    push(@s, "{$type: ".fq($text)."}");
 	    push(@s, "") if $tidy;
 	    next;
 	}
@@ -420,12 +421,12 @@ sub songline {
     my ( $song, $elt ) = @_;
 
     if ( $lyrics_only || !exists($elt->{chords}) ) {
-	return join( "", @{ $elt->{phrases} } );
+	return fq(join( "", @{ $elt->{phrases} } ));
     }
 
     my $line = "";
     foreach ( 0..$#{$elt->{chords}} ) {
-	$line .= "[" . chord( $song, $elt->{chords}->[$_]) . "]" . $elt->{phrases}->[$_];
+	$line .= "[" . fq(chord( $song, $elt->{chords}->[$_])) . "]" . fq($elt->{phrases}->[$_]);
     }
     $line =~ s/^\[\]//;
     $line;
@@ -451,11 +452,11 @@ sub gridline {
 	my $t = $elt->{comment};
 	if ( $t->{chords} ) {
 	    for ( 0..$#{ $t->{chords} } ) {
-		$res .= "[" . chord( $song, $t->{chords}->[$_]) . "]" . $t->{phrases}->[$_];
+		$res .= "[" . fq(chord( $song, $t->{chords}->[$_])) . "]" . fq($t->{phrases}->[$_]);
 	    }
 	}
 	else {
-	    $res .= $t->{text};
+	    $res .= fq($t->{text});
 	}
 	$res =~ s/^\[\]//;
 	$line .= $res;
