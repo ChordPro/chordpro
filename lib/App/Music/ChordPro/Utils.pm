@@ -175,4 +175,14 @@ sub is_true {
 
 push( @EXPORT, 'is_true' );
 
+# Fix apos -> quote.
+
+sub fq {
+    my ( $arg ) = @_;
+    $arg =~ s/'/\x{2019}/g;
+    $arg;
+}
+
+push( @EXPORT, 'fq' );
+
 1;
