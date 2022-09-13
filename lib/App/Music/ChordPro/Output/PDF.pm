@@ -360,7 +360,8 @@ sub generate_song {
 	$dd = App::Music::ChordPro::Output::PDF::StringDiagrams->new($ps);
 	$dctl = $ps->{diagrams};
     }
-
+    $dctl->{show}=$s->{settings}->{diagrampos} if (defined $s->{settings}->{diagrampos});
+	
     my $sb = $s->{body};
 
     # set_columns needs these, set provisional values.
