@@ -124,7 +124,7 @@ much more powerful [configuration files]({{< relref "ChordPro-Configuration" >}}
 
 * [new_page]({{< relref "Directives-new_page" >}}) (short: np)
 * [new_physical_page]({{< relref "Directives-new_physical_page" >}}) (short: npp)
-* [column_break]({{< relref "Directives-column_break" >}}) (short: cb)
+* [column_break]({{< relref "Directives-column_break" >}}) (short: colb)
 * [pagetype]({{< relref "Directives-pagetype_legacy" >}})
 
 The following directives are legacy from the old `chord` program. The modern reference implementation uses much more powerful configuration files for this purpose.
