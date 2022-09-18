@@ -19,7 +19,6 @@ my $s = App::Music::ChordPro::Songbook->new;
 my $data = <<EOD;
 {title: De Fietspomp}
 {meta: sorttitle Fietspomp, De}
-{meta: artist September}
 {key: A}
 {key: Am}
 
@@ -187,11 +186,11 @@ my $xp = [
   ],
   [
     'de fietspomp',
-    'september',
+    '',
     {
       meta => {
         artist => [
-          'September',
+          '',
         ],
 	chords => [
 	],
@@ -207,7 +206,7 @@ my $xp = [
         ],
         songindex => 1,
         sortartist => [
-          'September',
+          '',
         ],
         sorttitle => [
           'Fietspomp, De',
