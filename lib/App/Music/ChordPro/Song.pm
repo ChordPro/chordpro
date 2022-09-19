@@ -1623,7 +1623,9 @@ sub directive {
 	    return 1;
 	}
 	elsif ( ! ( $res->{copy} ||$res->{frets} || $res->{keys} ) ) {
-	    do_warn("Incomplete chord definition: $res->{name}\n");
+	    App::Music::ChordPro::Chords::add_unknown_chord( $res->{name} );
+	    do_warn("Incomplete chord definition: $res->{name}\n")
+	      if $config->{debug}->{chords};
 	    return 1;
 	}
 

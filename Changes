@@ -8,6 +8,7 @@
     - Add display for {define}.
     - Replace TAB characters by a single space on input.
     - Support building installer with MacOS homebrew perl.
+    - Allow empty chord defines (just the name) to make the chord known.
     - !Miscellaneous
     - Luke Pinner contributed a nice search feature for our doc pages.
     - !BugFixes
