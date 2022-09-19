@@ -160,7 +160,7 @@ sub prep_outlines {
 
 	foreach my $item ( @fields ) {
 	    ( my $coreitem = $item ) =~ s/^sort//;
-	    push( @split, [] ), next unless $meta->{$coreitem};
+	    push( @split, [ $coreitem, [""] ] ), next unless $meta->{$coreitem};
 
 	    my @s = map { [ $_ ] }
 	      @{ UNIVERSAL::isa( $meta->{$coreitem}, 'ARRAY' )
