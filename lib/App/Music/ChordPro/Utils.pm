@@ -185,4 +185,39 @@ sub fq {
 
 push( @EXPORT, 'fq' );
 
+# Turn foo.bar.blech=blah into { foo => { bar => { blech ==> "blah" } } }.
+
+sub prp2cfg {
+    my ( $defs, $cfg ) = @_;
+    my $ccfg = {};
+    $cfg //= {};
+    while ( my ($k, $v) = each(%$defs) ) {
+	my @k = split( /[:.]/, $k );
+	my $c = \$ccfg;		# new
+	my $o = $cfg;		# current
+	my $lk = pop(@k);	# last key
+
+	# Step through the keys.
+	foreach ( @k ) {
+	    $c = \($$c->{$_});
+	    $o = $o->{$_};
+	}
+
+	# Final key. Merge array if so.
+	if ( $lk =~ /^\d+$/ && ref($o) eq 'ARRAY' ) {
+	    unless ( ref($$c) eq 'ARRAY' ) {
+		# Only copy orig values the first time.
+		$$c->[$_] = $o->[$_] for 0..scalar(@{$o})-1;
+	    }
+	    $$c->[$lk] = $v;
+	}
+	else {
+	    $$c->{$lk} = $v;
+	}
+    }
+    return $ccfg;
+}
+
+push( @EXPORT, 'prp2cfg' );
+
 1;

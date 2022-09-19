@@ -160,32 +160,7 @@ sub configurator {
     }
 
     # Handle defines from the command line.
-    my $ccfg = {};
-    while ( my ($k, $v) = each( %{ $options->{define} } ) ) {
-	my @k = split( /[:.]/, $k );
-	my $c = \$ccfg;		# new
-	my $o = $cfg;		# current
-	my $lk = pop(@k);	# last key
-
-	# Step through the keys.
-	foreach ( @k ) {
-	    $c = \($$c->{$_});
-	    $o = $o->{$_};
-	}
-
-	# Final key. Merge array if so.
-	if ( $lk =~ /^\d+$/ && ref($o) eq 'ARRAY' ) {
-	    unless ( ref($$c) eq 'ARRAY' ) {
-		# Only copy orig values the first time.
-		$$c->[$_] = $o->[$_] for 0..scalar(@{$o})-1;
-	    }
-	    $$c->[$lk] = $v;
-	}
-	else {
-	    $$c->{$lk} = $v;
-	}
-    }
-    $cfg = hmerge( $cfg, $ccfg );
+    $cfg = hmerge( $cfg, prp2cfg( $options->{define}, $cfg ) );
 
     # Sanitize added extra entries.
     for ( qw(title subtitle footer) ) {

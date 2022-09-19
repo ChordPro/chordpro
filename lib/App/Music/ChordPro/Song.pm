@@ -101,7 +101,7 @@ sub upd_config {
 sub ::break() {}
 
 sub parse_song {
-    my ( $self, $lines, $linecnt, $meta ) = @_;
+    my ( $self, $lines, $linecnt, $meta, $defs ) = @_;
     die("OOPS! Wrong meta") unless ref($meta) eq 'HASH';
     local $config = dclone($config);
 
@@ -177,6 +177,13 @@ sub parse_song {
     }
 
     $config->unlock;
+
+    if ( %$defs ) {
+	my $c = $config->hmerge( prp2cfg( $defs, $config ) );
+	bless $c => ref($config);
+	$config = $c;
+    }
+
     for ( qw( transpose transcode decapo lyrics-only ) ) {
 	next unless defined $options->{$_};
 	$config->{settings}->{$_} = $options->{$_};
@@ -635,9 +642,9 @@ sub chord {
 	    # Tests run without config and chords, so pretend.
 	    push( @used_chords, $n );
 	}
-	elsif ( $config->{debug}->{chords} ) {
-	    do_warn("Unknown chord: $n");
-	    $warned_chords{$n}++;
+	else {
+	    do_warn("Unknown chord: $n")
+	      unless $warned_chords{$n}++;
 	}
     }
     return $name;

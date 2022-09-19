@@ -27,6 +27,7 @@ sub parse_file {
     my ( $self, $filename, $opts ) = @_;
     $opts //= {};
     my $meta = { %{$config->{meta}}, %{delete $opts->{meta}//{}} };
+    my $defs = { %{delete $opts->{defs}//{}} };
 
     # Loadlines sets $opts->{_filesource}.
     my $lines = loadlines( $filename, $opts );
@@ -41,7 +42,6 @@ sub parse_file {
 	$lines = App::Music::ChordPro::A2Crd::a2crd( { lines => $lines } );
     }
 
-    # Note: $opts are used by the tests only.
     $opts //= {};
 
     # Used by tests.
@@ -60,7 +60,7 @@ sub parse_file {
     while ( @$lines ) {
 	my $song = App::Music::ChordPro::Song
 	  ->new( $opts->{_filesource} )
-	  ->parse_song( $lines, \$linecnt, {%$meta} );
+	  ->parse_song( $lines, \$linecnt, {%$meta}, {%$defs} );
 	$song->{meta}->{songindex} = 1 + @{ $self->{songs} };
 	push( @{ $self->{songs} }, $song );
 	$songs++ if $song->{body};

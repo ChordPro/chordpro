@@ -2,6 +2,7 @@
  *
  * Based on ppl.c by Oliver Betz, inspired by "runperl.c" used to
  * compile the original perl.exe
+ * https://oliverbetz.de/pages/Artikel/Portable-Perl-Applications
  */
 
 #define CASSERT(pred) switch(0){case 0:case (pred):;} // compile time assert
