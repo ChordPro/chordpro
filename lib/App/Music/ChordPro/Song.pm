@@ -642,9 +642,9 @@ sub chord {
 	    # Tests run without config and chords, so pretend.
 	    push( @used_chords, $n );
 	}
-	elsif ( $config->{debug}->{chords} ) {
-	    do_warn("Unknown chord: $n");
-	    $warned_chords{$n}++;
+	else {
+	    do_warn("Unknown chord: $n")
+	      unless $warned_chords{$n}++;
 	}
     }
     return $name;
