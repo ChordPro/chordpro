@@ -448,10 +448,7 @@ sub add_song_chord {
     return $res if $res;
     my ( $name, $display, $base, $frets, $fingers, $keys )
       = @$ii{qw(name display base frets fingers keys)};
-
-    # Parsing the chord pulls in other, probably unwanted, info
-    #    my $info = parse_chord($name) // { name => $name };
-    my $info = { name => $name };
+    my $info = parse_chord($name) // { name => $name };
 
     $song_chords{$name} = bless
       { origin  => "user",
