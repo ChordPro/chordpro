@@ -446,21 +446,26 @@ sub add_song_chord {
     }
     my $res = _check_chord($ii);
     return $res if $res;
-    my ( $name, $display, $base, $frets, $fingers, $keys )
-      = @$ii{qw(name display base frets fingers keys)};
-    my $info = parse_chord($name) // { name => $name };
 
-    $song_chords{$name} = bless
-      { origin  => "user",
-	system  => $parser->{system},
+    # Need a parser anyway.
+    $parser //= App::Music::ChordPro::Chords::Parser->get_parser;
+
+    my $c =
+      { system  => $parser->{system},
 	parser  => $parser,
-	%$info,
-	base    => $base,
-	$display ? ( display => $display ) : (),
-	frets   => [ $frets && @$frets ? @$frets : () ],
-	fingers => [ $fingers && @$fingers ? @$fingers : () ],
-	keys    => [ $keys && @$keys ? @$keys : () ],
-      } => $parser->{target};
+	%$ii,
+	origin  => "user",
+      };
+
+    # Cleanup.
+    for ( qw( display ) ) {
+	delete $c->{$_} unless defined $c->{$_};
+    }
+    for ( qw( frets fingers keys ) ) {
+	delete $c->{$_} unless $c->{$_} && @{ $c->{$_} };
+    }
+
+    $song_chords{$c->{name}} = bless $c => $parser->{target};
     return;
 }
 
@@ -496,14 +501,9 @@ sub chord_stats {
 
 sub parse_chord {
     my ( $chord ) = @_;
-    my $res;
 
-    unless ( $parser ) {
-	$parser //= App::Music::ChordPro::Chords::Parser->get_parser;
-	# warn("XXX ", $parser->{system}, " ", $parser->{n_pat}, "\n");
-    }
-    $res = $parser->parse($chord);
-    return $res;
+    $parser //= App::Music::ChordPro::Chords::Parser->get_parser;
+    return $parser->parse($chord);
 }
 
 ################ Section Keyboard keys ################

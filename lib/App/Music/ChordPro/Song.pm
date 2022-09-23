@@ -1731,16 +1731,9 @@ sub parse_chord {
 	$info = App::Music::ChordPro::Chords::parse_chord($chord);
 	warn( "Parsing chord: \"$chord\" parsed ok\n" ) if $info && $debug > 1;
     }
-#    if ( $info && ( my $i = App::Music::ChordPro::Chords::_known_chord($info->name) || App::Music::ChordPro::Chords::_known_chord($chord) ) ) {
-#	require DDumper; DDumper::DDumper($i) if $chord =~ /N/;
-#	warn("AAA", join(",",@{$i->{frets}}), " ", join(",",(-1)x($config->diagram_strings)) );
-#	if ( $i->{frets} && join(",",@{$i->{frets}}) eq join(",",(-1)x($config->diagram_strings)) ) {
-#	    warn("BBB");
-#	    $xp = 0; $xc = '';
-#	}
-#    }
     $unk = !defined $info;
-    unless ( $info || ( $allow && !( $xc || $xp ) ) ) {
+
+    unless ( ($info && defined($info->{root})) || ( $allow && !( $xc || $xp ) ) ) {
 	do_warn( "Cannot parse",
 		 $xp ? "/transpose" : "",
 		 $xc ? "/transcode" : "",
