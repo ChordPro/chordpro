@@ -14,11 +14,14 @@ my $s = App::Music::ChordPro::Songbook->new;
 my $data = <<EOD;
 {title: Swing Low Sweet Chariot}
 {key: D}
-I [D]looked over Jordan, and [G/B]what did I [D]see,
+I [D]looked over Jordan, [NC]and [G/B]what did I [D]see,
 {transpose: 2}
-I [D]looked over Jordan, and [G/B]what did I [D]see, %{key_actual}
+I [D]looked over Jordan, [NC]and [G/B]what did I [D]see, %{key_actual}
 {transpose}
 EOD
+
+App::Music::ChordPro::Chords::add_config_chord
+  ( { name => [ "NC", "N.C." ], frets => [ -1, -1, -1, -1, -1, -1 ] } );
 
 eval { $s->parse_file( \$data, { transpose => 0 } ) } or diag("$@");
 
@@ -53,13 +56,15 @@ my $song = {
 			 'context' => '',
 			 'phrases' => [
 					'I ',
-					'looked over Jordan, and ',
+				        'looked over Jordan, ',
+				        'and ',
 					'what did I ',
 					'see,'
 				      ],
 			 'chords' => [
 				       '',
 				       'D',
+				       'NC',
 				       'G/B',
 				       'D'
 				     ],
@@ -69,21 +74,23 @@ my $song = {
 			 'context' => '',
 			 'phrases' => [
 					'I ',
-					'looked over Jordan, and ',
+				        'looked over Jordan, ',
+				        'and ',
 					'what did I ',
 					'see, E'
 				      ],
 			 'chords' => [
 				       '',
 				       'E',
+				       'NC',
 				       'A/C#',
 				       'E'
 				     ],
-			 'orig' => 'I [D]looked over Jordan, and [G/B]what did I [D]see, %{key_actual}',
+			 'orig' => 'I [D]looked over Jordan, [NC]and [G/B]what did I [D]see, %{key_actual}',
 			 'type' => 'songline'
 		       }
 		      ],
-	    'chordsinfo' => { map { $_ => $_ } qw( D G/B E ), 'A/C#' },
+	    'chordsinfo' => { map { $_ => $_ } qw( D G/B E ), 'A/C#', 'NC' },
 	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear',
 	    'system' => 'common',
@@ -94,7 +101,7 @@ is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );
 $data = <<EOD;
 {title: Swing Low Sweet Chariot}
 {key: D}
-I [D]looked over Jordan, and [G/B]what did I [D]see,
+I [D]looked over Jordan, [N.C.]and [G/B]what did I [D]see,
 EOD
 
 eval { $s->parse_file( \$data, { transpose => 3 } ) } or diag("$@");
@@ -126,20 +133,22 @@ $song = {
 			 'context' => '',
 			 'phrases' => [
 					'I ',
-					'looked over Jordan, and ',
+				        'looked over Jordan, ',
+				        'and ',
 					'what did I ',
 					'see,'
 				      ],
 			 'chords' => [
 				       '',
 				       'F',
+				       'N.C.',
 				       'A#/D',
 				       'F'
 				     ],
 			 'type' => 'songline'
 		       }
 		      ],
-	    'chordsinfo' => { map { $_ => $_ } qw( F ), 'A#/D'  },
+	    'chordsinfo' => { map { $_ => $_ } qw( F ), 'A#/D', 'N.C.' },
 	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear',
 	    'system' => 'common',

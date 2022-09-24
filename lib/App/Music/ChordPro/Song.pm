@@ -634,7 +634,7 @@ sub chord {
 	elsif ( $info->{origin} ) {
 	    # Include if we have diagram info.
 	    push( @used_chords, $n )
-	      if $info->{frets} && @{$info->{frets}}
+	      if @{$info->{frets}//[]} && !$info->is_nc
 	         || $config->{instrument}->{type} eq 'keyboard'
 	            && $info->{keys} && @{$info->{keys}};
 	}
@@ -1733,7 +1733,9 @@ sub parse_chord {
     }
     $unk = !defined $info;
 
-    unless ( ($info && defined($info->{root})) || ( $allow && !( $xc || $xp ) ) ) {
+    unless ( ($info
+	      && ( defined($info->{root}) || $info->is_nc))
+	     || ( $allow && !( $xc || $xp ) ) ) {
 	do_warn( "Cannot parse",
 		 $xp ? "/transpose" : "",
 		 $xc ? "/transcode" : "",
