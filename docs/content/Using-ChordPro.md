@@ -59,6 +59,13 @@ See also [`--crd`]({{< relref "#crd" >}}),
 
 Prints version information about the ChordPro program. No other processing will be done.
 
+### back-matter
+
+`--back-matter=`*FILE*
+
+Appends the contents of the named PDF document to the output. This can
+be used to produce documents with cover and back pages.
+
 ### cover
 
 `--cover=`*FILE*
@@ -162,6 +169,10 @@ Important notice: Filelist lines that have `--meta` and/or `--config`
 ````
 "My New Song.cho" --meta voice=soprano
 ````
+
+### front-matter
+
+Same as [`--cover`]({{< relref "#cover" >}}).
 
 ### lyrics-only
 

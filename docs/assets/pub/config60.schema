@@ -789,6 +789,12 @@
 	    "additionalProperties": false,
 	    "properties": {
 
+		"back-matter": {
+		    "default": "",
+		    "description": "Back page(s) filename.",
+		    "type": "string"
+		},
+
 		"capoheading": {
 		    "description": "Value for Capo heading when using chordscolumn.",
 		    "type": "string",
@@ -1233,6 +1239,12 @@
 			    }
 			}
 		    }
+		},
+
+		"front-matter": {
+		    "default": "",
+		    "description": "Cover page(s) filename.",
+		    "type": "string"
 		},
 
 		"grids" : {

@@ -238,6 +238,11 @@ sub configurator {
 	$cfg->{settings}->{$_} = $options->{$_};
     }
 
+    for ( "front-matter", "back-matter" ) {
+	next unless defined $options->{$_};
+	$cfg->{pdf}->{$_} = $options->{$_};
+    }
+
     if ( defined $options->{'chord-grids-sorted'} ) {
 	$cfg->{diagrams}->{sorted} = $options->{'chord-grids-sorted'};
     }
@@ -1319,6 +1324,10 @@ sub default_config() {
       "even-odd-pages" : 1,
       // Align songs to even/odd pages. When greater than 1, force alignment.
       "pagealign-songs" : 1,
+      // PDF file to add as front matter.
+      "front-matter" : "",
+      // PDF file to add as back matter.
+      "back-matter" : "",
 
       // Formats.
       // Pages have two title elements and one footer element. They also

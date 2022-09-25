@@ -422,6 +422,22 @@ Note that by default ChordPro produces different odd and even pages.
 Therefore the page number on (odd) page 3 is at the left side, while it is at
 the right side on (even) pages 2 and 4.
 
+## Front and Back Matter
+
+Front matter and back matter can be specified in the config file.
+
+      // PDF file to add as front matter.
+      "front-matter" : "",
+      // PDF file to add as back matter.
+      "back-matter" : "",
+
+The value should be the name of a file that contains a PDF document.
+This document is prepended (for back matter, appended) to the
+songbook.
+
+Front matter and back matter can be overriden with command line
+options.
+
 ## Font libraries
 
 You can either designate a built-in font by its name, or give the filename of a TrueType (ttf) or OpenType font (otf).  

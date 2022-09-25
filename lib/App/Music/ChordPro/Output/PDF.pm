@@ -140,6 +140,7 @@ sub generate_songbook {
 				 startpage => 1,
 			       } );
 	$pages_of{toc} += $page;
+	#### TODO: This is not correct if there are more TOCs.
 	$pages_of{toc}++ if $first_song_aligned;
 
 	# Align.
@@ -151,10 +152,10 @@ sub generate_songbook {
 	$start_of{back}     += $page;
     }
 
-    if ( $options->{'front-matter'} ) {
+    if ( $ps->{'front-matter'} ) {
 	$page = 1;
-	my $matter = $pdfapi->open( $options->{'front-matter'} );
-	die("Missing front matter: ", $options->{'front-matter'}, "\n") unless $matter;
+	my $matter = $pdfapi->open( expand_tilde($ps->{'front-matter'}) );
+	die("Missing front matter: ", $ps->{'front-matter'}, "\n") unless $matter;
 	for ( 1 .. $matter->pages ) {
 	    $pr->{pdf}->importpage( $matter, $_, $_ );
 	    $page++;
@@ -171,9 +172,9 @@ sub generate_songbook {
 	$start_of{back}     += $page - 1;
     }
 
-    if ( $options->{'back-matter'} ) {
-	my $matter = $pdfapi->open( $options->{'back-matter'} );
-	die("Missing back matter: ", $options->{'back-matter'}, "\n") unless $matter;
+    if ( $ps->{'back-matter'} ) {
+	my $matter = $pdfapi->open( expand_tilde($ps->{'back-matter'}) );
+	die("Missing back matter: ", $ps->{'back-matter'}, "\n") unless $matter;
 	$page = $start_of{back};
 	$pr->newpage($ps), $page++, $start_of{back}++
 	  if $ps->{'even-odd-pages'} && ($page % 2);
