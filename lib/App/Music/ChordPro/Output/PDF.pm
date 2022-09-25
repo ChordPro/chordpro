@@ -165,7 +165,7 @@ sub generate_songbook {
 	# Align to ODD page. Frontmatter starts on a right page but
 	# songs on a left page.
 	$pr->newpage( $ps, 1+$matter->pages ), $page++
-	  if $ps->{'even-odd-pages'} && ($page % 2);
+	  if $ps->{'even-odd-pages'} && !($page % 2);
 
 	$start_of{toc}      += $page - 1;
 	$start_of{songbook} += $page - 1;
