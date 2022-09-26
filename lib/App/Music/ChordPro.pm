@@ -994,7 +994,17 @@ sub app_setup {
 		push( @files, encode_utf8($_) );
 	    }
 	}
-	unshift( @ARGV, @files );
+	if ( @files ) {
+	    if ( $files[0] =~ /\.pdf$/i ) {
+		$options->{'front-matter'} //= $files[0];
+		shift(@files);
+	    }
+	    if ( $files[-1] =~ /\.pdf$/i ) {
+		$options->{'back-matter'} //= $files[-1];
+		pop(@files);
+	    }
+	}
+	unshift( @ARGV, @files ) if @files;
     }
 
     # At this point, there should be filename argument(s)

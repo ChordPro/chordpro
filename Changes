@@ -9,7 +9,7 @@
     - Replace TAB characters by a single space on input.
     - Support building installer with MacOS homebrew perl.
     - Allow empty chord defines (just the name) to make the chord known.
-    - Allow front-matter and back-matter in the config.
+    - Allow front-matter and back-matter in the config and filelist.
     - !Miscellaneous
     - Luke Pinner contributed a nice search feature for our doc pages.
     - !BugFixes
