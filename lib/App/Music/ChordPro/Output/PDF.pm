@@ -333,7 +333,14 @@ sub generate_song {
 	return unless $s->{source}->{embedding};
 	return unless $s->{source}->{embedding} eq "pdf";
 	my $p = $pr->importfile($s->{source}->{file});
-	$s->{meta}->{pages} = $p;
+	$s->{meta}->{pages} = $p->{pages};
+
+	# Copy the title of the embedded document, provided there
+	# was no override.
+	if ( $s->{meta}->{title}->[0] eq $s->{source}->{file}
+	     and $p->{Title} ) {
+	    $s->{meta}->{title} = [ $s->{title} = $p->{Title} ];
+	}
 	return $s->{meta}->{pages};
     }
 

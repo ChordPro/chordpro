@@ -415,7 +415,7 @@ sub importfile {
     for ( my $page = 1; $page <= $pdf->pages; $page++ ) {
 	$self->{pdf}->import_page( $pdf, $page );
     }
-    return $pdf->pages;
+    return { pages => $pdf->pages, $pdf->info_metadata };
 }
 
 sub pagelabel {
