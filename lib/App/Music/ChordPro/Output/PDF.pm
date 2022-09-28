@@ -327,7 +327,16 @@ use constant SIZE_ITEMS => [ qw (chord text tab grid diagram toc title footer) ]
 sub generate_song {
     my ( $s, $opts ) = @_;
 
-    return 0 unless $s->{body};	# empty song
+    my $pr = $opts->{pr};
+
+    unless ( $s->{body} ) {	# empty song, or embedded
+	return unless $s->{source}->{embedding};
+	return unless $s->{source}->{embedding} eq "pdf";
+	my $p = $pr->importfile($s->{source}->{file});
+	$s->{meta}->{pages} = $p;
+	return $s->{meta}->{pages};
+    }
+
     local $config = dclone( $s->{config} // $config );
 
     $source = $s->{source};
@@ -339,7 +348,6 @@ sub generate_song {
     $inlineannots = $::config->{settings}->{'inline-annotations'};
     $chordsunder  = $::config->{settings}->{'chords-under'};
     my $ps = $::config->clone->{pdf};
-    my $pr = $opts->{pr};
     $ps->{pr} = $pr;
     $pr->{ps} = $ps;
     $pr->init_fonts();

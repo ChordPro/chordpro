@@ -10,6 +10,7 @@
     - Support building installer with MacOS homebrew perl.
     - Allow empty chord defines (just the name) to make the chord known.
     - Allow front-matter and back-matter in the config and filelist.
+    - (Experimental) Allow PDF filenames in the filelist.
     - !Miscellaneous
     - Luke Pinner contributed a nice search feature for our doc pages.
     - !BugFixes

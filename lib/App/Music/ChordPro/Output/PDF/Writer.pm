@@ -408,6 +408,16 @@ sub importpage {
     $self->{pdftext} = $self->{pdfpage}->text;
 }
 
+sub importfile {
+    my ( $self, $filename ) = @_;
+    my $pdf = $self->{pdfapi}->open($filename);
+    return unless $pdf;		# should have been checked
+    for ( my $page = 1; $page <= $pdf->pages; $page++ ) {
+	$self->{pdf}->import_page( $pdf, $page );
+    }
+    return $pdf->pages;
+}
+
 sub pagelabel {
     my ( $self, $page, $style, $prefix ) = @_;
     $style //= 'arabic';

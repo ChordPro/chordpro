@@ -29,6 +29,11 @@ sub parse_file {
     my $meta = { %{$config->{meta}}, %{delete $opts->{meta}//{}} };
     my $defs = { %{delete $opts->{defs}//{}} };
 
+    # Check for PDF embedding.
+    if ( $filename =~ /\.pdf$/i ) {
+	return $self->embed_file( $filename, $meta, $defs );
+    }
+
     # Loadlines sets $opts->{_filesource}.
     my $lines = loadlines( $filename, $opts );
     # Sense crd input and convert if necessary.
@@ -69,6 +74,30 @@ sub parse_file {
     warn("Warning: No songs found in ", $opts->{_filesource}, "\n")
       unless $songs || $::running_under_test;
 
+    return 1;
+}
+
+sub embed_file {
+    my ( $self, $filename, $meta, $defs ) = @_;
+
+    unless ( -s -r $filename ) {
+	warn("$filename: $! (skipped)\n");
+	return;
+    }
+    my $type = "pdf";
+
+    my $song = App::Music::ChordPro::Song->new( $filename );
+    $song->{meta}->{songindex} = 1 + @{ $self->{songs} };
+    $song->{source} =
+      { file      => $filename,
+	line      => 1,
+	embedding => $type,
+      };
+    my $title = $defs->{title} // $filename;
+    $song->{title} = $title;
+    $song->{meta}->{title} = [ $title ];
+    push( @{ $self->{songs} }, $song );
+    $song->dump(0) if $config->{debug}->{song};
     return 1;
 }
 
