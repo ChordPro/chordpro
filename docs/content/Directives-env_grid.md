@@ -48,8 +48,11 @@ The grid input lines consist of space-separated tokens, which are either valid c
 
 Chords are put into the cells. If a cell does not need to contain a
 chord, the placeholder `.` (period) can be used to designate an empty
-cell. Alternatively, a slash `/` can be used to designate that a
+cell.
+Alternatively, a slash `/` can be used to designate that a
 chord must be played here.
+Multiple chords can be put in a single cell by separating the chord
+names with a `~` (tilde).
 
 Between the cells bar lines can be placed. In the above example, each line contains 16 cells and the bar lines divide the cells into 4 groups (measures) of 4 cells (beats). 
 

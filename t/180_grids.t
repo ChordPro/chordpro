@@ -15,7 +15,7 @@ my $s = App::Music::ChordPro::Songbook->new;
 my $data = <<EOD;
 {title Grids}
 {start_of_grid 4x3}
-| B . . | C . . | D . . | E . . |
+| B . . | C . . | D~C . . | E . . |
 | B . . | C . . | D . . | E . . |
 | B . . | C . . | D . . | E . . |
 | B . . | C . . | D . . | E . . |
@@ -55,7 +55,7 @@ my $song = {
 			   { class => 'space', symbol => '.' },
 			   { class => 'space', symbol => '.' },
 			   { class => 'bar', symbol => '|' },
-			   { chord => 'D', class => 'chord' },
+			   { chords => ['D','C'], class => 'chords' },
 			   { class => 'space', symbol => '.' },
 			   { class => 'space', symbol => '.' },
 			   { class => 'bar', symbol => '|' },
