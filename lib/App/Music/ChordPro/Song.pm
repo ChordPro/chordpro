@@ -792,7 +792,20 @@ sub decompose_grid {
 	    $nbt++;
 	}
 	else {
-	    $_ = { chord => $self->chord($_), class => "chord" };
+	    # Multiple chords in a cell?
+	    my @a = split( /~/, $_, -1 );
+	    if ( @a == 1) {
+		# Normal case, single chord.
+		$_ = { chord => $self->chord($_), class => "chord" };
+	    }
+	    else {
+		# Multiple chords.
+		$_ = { chords =>
+		       [ map { ( $_ eq '.' || $_ eq '' )
+				 ? ''
+				 : $self->chord($_) } @a ],
+		       class => "chords" };
+	    }
 	    $nbt++;
 	}
     }

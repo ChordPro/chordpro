@@ -11,6 +11,7 @@
     - Allow empty chord defines (just the name) to make the chord known.
     - Allow front-matter and back-matter in the config and filelist.
     - (Experimental) Allow PDF filenames in the filelist.
+    - (Experimental) Allow multiple chords in a grid cell.
     - !Miscellaneous
     - Luke Pinner contributed a nice search feature for our doc pages.
     - !BugFixes

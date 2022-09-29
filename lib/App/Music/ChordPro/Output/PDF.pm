@@ -1981,7 +1981,21 @@ sub gridline {
 	  if $needcell;
 	$needcell = $ctl->{width};
 
-	if ( exists $token->{chord} ) {
+	if ( $token->{class} eq "chord" || $token->{class} eq "chords" ) {
+	    my $tok = $token->{chords} // [ $token->{chord} ];
+	    my $cellwidth = $cellwidth / @$tok;
+	    for my $t ( @$tok ) {
+		$x += $cellwidth, next if $t eq '';
+		my $i = $opts{song}->{chordsinfo}->{$t};
+		$t = $i->chord_display( has_musicsyms($fchord) ) if $i;
+		$pr->text( $t, $x, $y, $fchord );
+		$x += $cellwidth;
+	    }
+	}
+	elsif ( exists $token->{chord} ) {
+	    # I'm not sure why not testing for class = chord...
+	    warn("Chord token without class\n")
+	      unless $token->{class} eq "chord";
 	    my $t = $token->{chord};
 	    my $i = $opts{song}->{chordsinfo}->{$t};
 	    $t = $i->chord_display( has_musicsyms($fchord) ) if $i;
