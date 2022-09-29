@@ -803,7 +803,9 @@ sub decompose_grid {
 		$_ = { chords =>
 		       [ map { ( $_ eq '.' || $_ eq '' )
 				 ? ''
-				 : $self->chord($_) } @a ],
+				 : $_ eq "/"
+				   ? "/"
+				   : $self->chord($_) } @a ],
 		       class => "chords" };
 	    }
 	    $nbt++;
