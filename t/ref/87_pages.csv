@@ -1,0 +1,7 @@
+title;pages;sort title;artists;composers;collections;keys;years
+__front_matter__;1;Front Matter;ChordPro;;;;
+__table_of_contents__;3-4;Table of Contents;ChordPro;;;;
+Song1;7-8;;Artist1;Composer1;;A;
+Song2;9-10;;Artist2;Composer2;;B;
+Song3;11;;Artist3;Composer3;;C;
+__back_matter__;12;Back Matter;ChordPro;;;;

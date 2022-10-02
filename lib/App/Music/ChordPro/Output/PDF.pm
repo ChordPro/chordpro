@@ -76,7 +76,9 @@ sub generate_songbook {
     }
 
     my $first_song_aligned;
+    my $songindex;
     foreach my $song ( @{$sb->{songs}} ) {
+	$songindex++;
 
 	# Align.
 	if ( $ps->{'pagealign-songs'} && !($page % 2) ) {
@@ -90,7 +92,11 @@ sub generate_songbook {
 	push( @book, [ $song->{meta}->{title}->[0], $song ] );
 
 	$page += $song->{meta}->{pages} =
-	  generate_song( $song, { pr => $pr, startpage => $page } );
+	  generate_song( $song, { pr        => $pr,
+				  startpage => $page,
+				  songindex => $songindex,
+				  numsongs  => scalar(@{$sb->{songs}}),
+				} );
 	# Easy access to toc page.
 	$song->{meta}->{page} = $song->{meta}->{tocpage};
     }
@@ -138,6 +144,7 @@ sub generate_songbook {
 	$page = generate_song( $song,
 			       { pr => $pr, prepend => 1, roman => 1,
 				 startpage => 1,
+				 songindex => 1, numsongs => 1,
 			       } );
 	$pages_of{toc} += $page;
 	#### TODO: This is not correct if there are more TOCs.
@@ -1385,7 +1392,8 @@ sub generate_song {
 
     my $pages = $thispage - $startpage + 1;
     $newpage->(), $pages++,
-      if $ps->{'pagealign-songs'} > 1 && $pages % 2;
+      if $ps->{'pagealign-songs'} > 1 && $pages % 2
+         && $opts->{songindex} < $opts->{numsongs};
 
     # Now for the page headings and footers.
     $thispage = $startpage - 1;
