@@ -1474,8 +1474,11 @@ sub directive {
     if ( $dir eq "define" or my $show = $dir eq "chord" ) {
 
 	# Split the arguments and keep a copy for error messages.
-	my @a = split( /[: ]+/, $arg );
-	@a = quotewords( '[: ]+', 0, $arg );
+	# Note that quotewords retunrs an epty result if it gets confused,
+	# so fall back to the ancient split method if so.
+	my @a = quotewords( '[: ]+', 0, $arg );
+	@a = split( /[: ]+/, $arg ) unless @a;
+
 	my @orig = @a;
 	my $fail = 0;
 	my $name = $a[0];
@@ -1638,8 +1641,9 @@ sub directive {
 	    return 1;
 	}
 	elsif ( ! ( $res->{copy} ||$res->{frets} || $res->{keys} ) ) {
+	    use DDumper; DDumper($res);
 	    App::Music::ChordPro::Chords::add_unknown_chord( $res->{name} )
-		if $res->{name};
+;#		if $res->{name};
 	    do_warn("Incomplete chord definition: $res->{name}\n")
 	      if $config->{debug}->{chords};
 	    return 1;
