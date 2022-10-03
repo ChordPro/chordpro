@@ -1751,9 +1751,18 @@ sub parse_chord {
     }
     $unk = !defined $info;
 
+    if ( ( $xp || $xc )
+	 && ! ($info
+	       && ( defined($info->{root}) || $info->is_nc)) ) {
+	# Desparately trying to get something to transcode/pose.
+	local $::config->{settings}->{chordnames} = "relaxed";
+	$info = App::Music::ChordPro::Chords::parse_chord($chord);
+    }
+
     unless ( ($info
 	      && ( defined($info->{root}) || $info->is_nc))
-	     || ( $allow && !( $xc || $xp ) ) ) {
+	     ||
+	     ( $allow && !( $xc || $xp ) ) ) {
 	do_warn( "Cannot parse",
 		 $xp ? "/transpose" : "",
 		 $xc ? "/transcode" : "",
