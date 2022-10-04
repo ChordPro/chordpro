@@ -1551,7 +1551,7 @@ sub directive {
 	    elsif ( $a eq "fingers" ) {
 		my @f;
 		# It is tempting to limit the fingers to 1..5 ...
-		while ( @a ) {
+		while ( @a && @f < $strings ) {
 		    $_ = shift(@a);
 		    if ( /^[0-9]+$/ ) {
 			push( @f, 0 + $_ );
@@ -1563,7 +1563,7 @@ sub directive {
 			push( @f, -1 );
 		    }
 		    else {
-			unshift( @a, $a );
+			unshift( @a, $_ );
 			last;
 		    }
 		}
