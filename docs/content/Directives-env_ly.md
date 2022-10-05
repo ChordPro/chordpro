@@ -35,8 +35,9 @@ margin, see [labels]({{< relref "ChordPro-Configuration-PDF#labels" >}}).
 
 ## General rules for embedding Lilypond source
 
-* A suitable `\version` directive will be prepended, although it is
-  always better to include your own.
+* A default `\version` directive will be prepended, although it is
+  always better to provide your own. See `"preamble"` in the Lilypond
+  section of `"delegates"` in the config.
 
 * To prevent large (full-page) images, printing the Lilypond tag line is
   suppressed by prepending

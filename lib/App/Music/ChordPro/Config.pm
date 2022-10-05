@@ -1150,7 +1150,12 @@ sub default_config() {
             "module"   : "Lilypond",
             "handler"  : "ly2image",
             "config"   : "default", // or "none", or ...
-            "preamble" : [],
+            // The preamble is a list of lines inserted before the lilipond data.
+            // This is a good place to set the version and global customizations.
+            "preamble" : [
+		"\\version \"2.21.0\"",
+		"\\header { tagline = ##f }",
+            ],
         },
      },
 
