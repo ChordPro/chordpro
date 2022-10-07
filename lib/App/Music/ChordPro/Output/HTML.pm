@@ -127,7 +127,7 @@ sub generate_song {
 		if ( $e->{type} =~ /^comment(_\w+)?$/ ) {
 		    push( @s,
 			  '<div class="' . $e->{type} . '">' .
-			  nhtml($e->{text}) . '</div>' );
+			  '<span>' . nhtml($e->{text}) . '</span></div>' );
 		    next;
 		}
 		if ( $e->{type} eq "set" && $e->{name} eq "label" ) {
@@ -146,7 +146,7 @@ sub generate_song {
 	if ( $elt->{type} eq "comment" || $elt->{type} eq "comment_italic" ) {
 	    push( @s,
 		  '<div class="' . $elt->{type} . '">' .
-		  nhtml($elt->{text}) . '</div>' );
+		  '<span>' . nhtml($elt->{text}) . '</span></div>' );
 	    push( @s, "" ) if $tidy;
 	    next;
 	}
