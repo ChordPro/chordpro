@@ -260,12 +260,12 @@ sub chordpro {
         if ( $of && $of ne "-" ) {
             open( my $fd, '>', $of );
 	    binmode( $fd, ":utf8" );
-	    print { $fd } ( join( "\n", @$res ) );
+	    print { $fd } ( join( "\n", @$res ), "\n" );
 	    close($fd);
         }
 	else {
 	    binmode( STDOUT, ":utf8" );
-	    print( join( "\n", @$res ) );
+	    print( join( "\n", @$res ), "\n" );
 	}
 	# Don't close STDOUT!
     }
