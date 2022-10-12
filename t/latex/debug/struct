@@ -1,0 +1,16 @@
+[%
+
+WRAPPER table/row;
+    INCLUDE table/head content=key;
+    WRAPPER table/cell;
+	IF val.keys;
+	    INCLUDE debug/hash hash=val;
+	ELSIF val.0 != "";
+	    INCLUDE debug/array array=val;
+	ELSE;
+	    val;
+	END;
+    END;
+END;
+
+-%]

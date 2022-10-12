@@ -1,0 +1,3 @@
+<tr valign="top">
+  [% content %]
+</tr>
