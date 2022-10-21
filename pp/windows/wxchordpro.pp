@@ -4,6 +4,7 @@
 
 @../common/wxchordpro.pp
 --gui
+--module=Wx::WebView
 
 # Explicitly link the wxmsw libraries.
 --link=C:/Strawberry/perl/site/lib/Alien/wxWidgets/msw_3_0_2_uni_gcc_3_4/lib/wxbase30u_gcc_custom.dll
