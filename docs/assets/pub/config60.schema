@@ -275,6 +275,15 @@
 		    "default": false,
 		    "description": "Sort the diagrams.",
 		    "type": "boolean"
+		},
+
+		"suppress": {
+		    "default": [],
+		    "description": "Chords (names) that will not generate diagrams, e.g. if they are considered trivial.",
+		    "type": "array",
+		    "items" : {
+		        "type": "string"
+		    }
 		}
 	    }
 	},
@@ -780,6 +789,12 @@
 	    "additionalProperties": false,
 	    "properties": {
 
+		"back-matter": {
+		    "default": "",
+		    "description": "Back page(s) filename.",
+		    "type": "string"
+		},
+
 		"capoheading": {
 		    "description": "Value for Capo heading when using chordscolumn.",
 		    "type": "string",
@@ -1226,6 +1241,12 @@
 		    }
 		},
 
+		"front-matter": {
+		    "default": "",
+		    "description": "Cover page(s) filename.",
+		    "type": "string"
+		},
+
 		"grids" : {
 		    "description": "Grid line properties.",
 		    "additionalProperties": false,
@@ -1242,6 +1263,31 @@
 				    "description": "Width of the cell bar.",
 				    "type": "integer",
 				    "default": 1
+				}
+			    }
+			},
+		        "symbols" : {
+			    "additionalProperties": false,
+			    "properties": {
+				"color": {
+				    "description": "Colour of the cell bar",
+				    "$ref": "#/definitions/colorspec",
+				    "default" : "foreground-light"
+				}
+			    }
+			},
+		        "volta" : {
+			    "additionalProperties": false,
+			    "properties": {
+				"color": {
+				    "description": "Colour of the cell bar",
+				    "$ref": "#/definitions/colorspec",
+				    "default" : "foreground-light"
+				},
+				"span" : {
+				     "description": "Volta span (fraction of measure).",
+				     "type": "number",
+				     "default": 0.7
 				}
 			    }
 			}
@@ -1492,6 +1538,11 @@
 			    "default": 1.2,
 			    "type": "number"
 			},
+			"diagramchords": {
+			    "description": "Spacing for diagram chords.",
+			    "default": 1.2,
+			    "type": "number"
+			},
 			"empty": {
 			    "description": "Spacing for empty (blank) lines.",
 			    "default": 1,
@@ -1633,7 +1684,7 @@
 	"debug": {
 	    "description": "Miscellaneous debug settings.",
 	    "format": "grid",
-	    "additionalProperties": false,
+	    "additionalProperties": true,
 	    "properties": {
 		"abc": {
 		    "type": "integer",

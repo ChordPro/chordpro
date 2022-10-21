@@ -1,0 +1,11 @@
+<table border="0" cellspacing="1" cellpadding="0"
+       bgcolor="[% site.col.table.edge %]">
+  <tr>
+    <td>
+      <table border="0" bgcolor="[% site.col.table.back %]"
+             cellspacing="2" cellpadding="4">
+        [%- content -%]
+      </table>
+    </td>
+  </tr>
+</table>

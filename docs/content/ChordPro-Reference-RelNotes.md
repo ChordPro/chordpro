@@ -1,5 +1,58 @@
 # Release info
 
+## 5.989
+
+Released: 2022-10-21
+
+
+### ChordPro functionality
+
+* Verify configs (and fix if possible).
+* Enhance ToC sorting, unlimited keys, numeric and reverse sorting.
+* Warn if X: is missing in ABC content.
+* Add volta for grid.
+* Add display for {define}.
+* Replace TAB characters by a single space on input.
+* Support building installer with MacOS homebrew perl.
+* Allow empty chord defines (just the name) to make the chord known.
+* Allow front-matter and back-matter in the config and filelist.
+* (Experimental) Allow PDF filenames in the filelist.
+* (Experimental) Allow multiple chords in a grid cell.
+
+### Miscellaneous
+
+* Luke Pinner contributed a nice search feature for our doc pages.
+
+### BugFixes
+
+* Fix problem that toc columns overlapped lefter columns.
+* Fix some problems with {define}.
+* Fix some more problems with {define}.
+* Fix automatic replacement of apostroph (prime) by friendly quote.
+* Fix crash when auto-adding an unknown chord.
+* Only print user chords when diagrams.show=user.
+* Make base optional in json chords (part of fix 234).
+* Modern3 style now has keyboard diagrams at the right. See issue 236.
+* (PDF) Print chorus tag if there's no chorus to rechorus.
+* Fix regression with pagealign = 2.
+* Fix issue 222.
+* Fix issue 223.
+* Fix issue 224.
+* Fix issue 226.
+* Fix issue 234.
+* Fix issue 237.
+* Fix issue 239.
+* Fix issue 250.
+* Fix issue 251.
+* Fix issue 253.
+* Fix issue 255.
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.
+
+[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.
+
 ## 5.988
 
 Released: 2022-05-17
@@ -24,12 +77,6 @@ Released: 2022-05-17
 
 * Fix issue #208.
 * (Wx) Fix sharps/flats mixup in PreferencesDialog.
-
-### Social and support
-
-[User community](https://groups.io/g/ChordPro) for feedback and help.
-
-[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.
 
 ## 5.987
 

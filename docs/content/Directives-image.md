@@ -35,6 +35,15 @@ Draws a border around the image. Without an explicit width, the border is one ty
 `title=`*text*  
 Provides a title for the image.
 
+`spread`=*space*  
+Places the image at the top of the page, across the full page width.
+The rest of the content will be shifted down by the height of the
+image plus *space*.
+
+Note that the top of the page is the top of the paper minus the
+top margin, and that the width of the page is the width of the paper
+minus the left and right margins.
+
 Example:
 
     Swing [D]low, sweet [G]chari[D]ot

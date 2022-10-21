@@ -1,0 +1,11 @@
+[%
+
+WRAPPER table/edge;
+
+    FOREACH key = hash.keys.sort;
+	INCLUDE debug/struct key=key val=hash.$key;
+    END;
+
+END;
+
+-%]

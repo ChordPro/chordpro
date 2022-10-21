@@ -68,12 +68,13 @@ sub abc2image {
 	push( @pre, $_ );
     }
     if ( @pre && !@data ) {	# no X: found
-	warn("X:1 (added)\n") if DEBUG;
+	warn("Field X: is missing in the ABC content.\n");
 	@data = ( "X:1", @pre );
 	@pre = ();
     }
     my $kv = { %$elt };
     $kv = parse_kv( @pre ) if @pre;
+    delete $kv->{split} if $kv->{spread};
     # Copy. We assume the user knows how to write ABC.
     for ( @data ) {
 	$prep->{abc}->($_) if $prep->{abc};
@@ -221,7 +222,9 @@ sub abc2image {
 	    push( @res,
 		  { type => "image",
 		    uri  => "id=$assetid",
-		    opts => { center => $kv->{center}, scale => $kv->{scale} * 0.16 } },
+		    opts => { center => $kv->{center},
+			      scale => $kv->{scale} * 0.16,
+			    } },
 		  { type => "empty" },
 		) unless $kv->{asset};
 	};
@@ -304,11 +307,16 @@ sub abc2image {
 
 	push( @res,{ type => "image",
 		     uri  => "id=$assetid",
-		     opts => { center => $kv->{center}, scale => $kv->{scale} * 0.16 } },
+		     opts => { center => $kv->{center},
+			       scale => $kv->{scale} * 0.16,
+			       $kv->{spread} ? ( spread => $kv->{spread} ) : (),
+			     }
+		     },
 	    ) unless $kv->{asset};
 	warn("Asset $assetid options:",
 	     " scale=", $kv->{scale} * 0.16,
 	     " center=", $kv->{center}//0,
+	     $kv->{spread} ? ( " spread=", $kv->{spread} ) : (),
 	     "\n")
 	  if $config->{debug}->{images};
     }
@@ -402,6 +410,7 @@ sub xabc2image {
     my $kv = { %$elt };
     $kv = parse_kv( @pre ) if @pre;
     $kv->{split} = 1 if $abc2svg;
+    delete $kv->{split} if $kv->{spread}; # C-x C-t?
 
     if ( $kv->{width} ) {
 	$pw = $kv->{width};

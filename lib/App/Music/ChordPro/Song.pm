@@ -21,6 +21,7 @@ use List::Util qw(any);
 use File::LoadLines;
 use Storable qw(dclone);
 use feature 'state';
+use Text::ParseWords qw(quotewords);
 
 # Parser context.
 my $def_context = "";
@@ -100,7 +101,7 @@ sub upd_config {
 sub ::break() {}
 
 sub parse_song {
-    my ( $self, $lines, $linecnt, $meta ) = @_;
+    my ( $self, $lines, $linecnt, $meta, $defs ) = @_;
     die("OOPS! Wrong meta") unless ref($meta) eq 'HASH';
     local $config = dclone($config);
 
@@ -176,6 +177,13 @@ sub parse_song {
     }
 
     $config->unlock;
+
+    if ( %$defs ) {
+	my $c = $config->hmerge( prp2cfg( $defs, $config ) );
+	bless $c => ref($config);
+	$config = $c;
+    }
+
     for ( qw( transpose transcode decapo lyrics-only ) ) {
 	next unless defined $options->{$_};
 	$config->{settings}->{$_} = $options->{$_};
@@ -264,6 +272,8 @@ sub parse_song {
 	    $diag->{line} = ++$$linecnt;
 	}
 	$diag->{orig} = $_ = shift(@$lines);
+	# Get rid of TABs.
+	s/\t/ /g;
 
 	if ( $prep->{all} ) {
 	    # warn("PRE:  ", $_, "\n");
@@ -428,9 +438,6 @@ sub parse_song {
 	    }
 	}
 
-	# For practical reasons: a prime should always be an apostroph.
-	s/'/\x{2019}/g;
-
 	# For now, directives should go on their own lines.
 	if ( /^\s*\{(.*)\}\s*$/ ) {
 	    if ( $prep->{directive} ) {
@@ -493,6 +500,23 @@ sub parse_song {
 	$self->{labels} = [ @labels ];
     }
 
+    # Suppress chords that the user considers 'easy'.
+    if (  @{ $config->{diagrams}->{suppress} // [] } ) {
+	my %suppress;
+	my $xc = $config->{settings}->{transcode};
+	for (  @{ $config->{diagrams}->{suppress} } ) {
+	    my $info = App::Music::ChordPro::Chords::_known_chord($_);
+	    warn("Unknown chord \"$_\" in suppress list\n"), next
+	      unless $info;
+	    # Note we do transcode, but we do not transpose.
+	    if ( $xc ) {
+		$info = $info->transcode($xc);
+	    }
+	    $suppress{$info->name} = 1;
+	}
+	@used_chords = map { $suppress{$_} ? () : $_ } @used_chords;
+    }
+
     my $diagrams;
     if ( exists($self->{settings}->{diagrams} ) ) {
 	$diagrams = $self->{settings}->{diagrams};
@@ -509,11 +533,20 @@ sub parse_song {
 	$diagrams = "none";
     }
 
-    { my %h; @used_chords = map { $h{$_}++ ? () : $_ } @used_chords; }
+    if ( $diagrams eq "user" ) {
 
-    if ( $diagrams eq "user" && $self->{define} && @{$self->{define}} ) {
-	@used_chords =
-	  map { $_->{name} } @{$self->{define}};
+	if ( $self->{define} && @{$self->{define}} ) {
+	    my %h = map { $_ => 1 } @used_chords;
+	    @used_chords =
+	      map { $h{$_->{name}} ? $_->{name} : () } @{$self->{define}};
+	}
+	else {
+	    @used_chords = ();
+	}
+    }
+    else {
+	my %h;
+	@used_chords = map { $h{$_}++ ? () : $_ } @used_chords;
     }
 
     if ( $config->{diagrams}->{sorted} ) {
@@ -595,16 +628,23 @@ sub chord {
     }
 
     unless ( $info->is_note ) {
-	if ( $info->{origin} ) {
-	    push( @used_chords, $n ) if $info->{frets};
+	if ( $info->is_keyboard ) {
+	    push( @used_chords, $n ) unless $info->is_nc;
+	}
+	elsif ( $info->{origin} ) {
+	    # Include if we have diagram info.
+	    push( @used_chords, $n )
+	      if @{$info->{frets}//[]} && !$info->is_nc
+	         || $config->{instrument}->{type} eq 'keyboard'
+	            && $info->{keys} && @{$info->{keys}};
 	}
 	elsif ( $::running_under_test ) {
 	    # Tests run without config and chords, so pretend.
 	    push( @used_chords, $n );
 	}
 	else {
-	    do_warn("Unknown chord: $n") if $config->{debug}->{chords};
-	    $warned_chords{$n}++;
+	    do_warn("Unknown chord: $n")
+	      unless $warned_chords{$n}++;
 	}
     }
     return $name;
@@ -719,6 +759,10 @@ sub decompose_grid {
 	if ( $_ eq "|:" || $_ eq "{" ) {
 	    $_ = { symbol => $_, class => "bar" };
 	}
+	elsif ( /^\|(\d+)(>?)$/ ) {
+	    $_ = { symbol => '|', volta => $1, class => "bar" };
+	    $_->{align} = 1 if $2;
+	}
 	elsif ( $_ eq ":|" || $_ eq "}" ) {
 	    $_ = { symbol => $_, class => "bar" };
 	}
@@ -748,7 +792,22 @@ sub decompose_grid {
 	    $nbt++;
 	}
 	else {
-	    $_ = { chord => $self->chord($_), class => "chord" };
+	    # Multiple chords in a cell?
+	    my @a = split( /~/, $_, -1 );
+	    if ( @a == 1) {
+		# Normal case, single chord.
+		$_ = { chord => $self->chord($_), class => "chord" };
+	    }
+	    else {
+		# Multiple chords.
+		$_ = { chords =>
+		       [ map { ( $_ eq '.' || $_ eq '' )
+				 ? ''
+				 : $_ eq "/"
+				   ? "/"
+				   : $self->chord($_) } @a ],
+		       class => "chords" };
+	    }
 	    $nbt++;
 	}
     }
@@ -759,6 +818,59 @@ sub decompose_grid {
 }
 
 ################ Parsing directives ################
+
+my @directives = qw(
+    chord
+    chordcolour
+    chordfont
+    chordsize
+    chorus
+    column_break
+    columns
+    comment
+    comment_box
+    comment_italic
+    define
+    end_of_bridge
+    end_of_chorus
+    end_of_grid
+    end_of_tab
+    end_of_verse
+    footersize
+    footercolour
+    footerfont
+    grid
+    highlight
+    image
+    meta
+    new_page
+    new_physical_page
+    new_song
+    no_grid
+    pagetype
+    start_of_bridge
+    start_of_chorus
+    start_of_grid
+    start_of_tab
+    start_of_verse
+    subtitle
+    tabcolour
+    tabfont
+    tabsize
+    textcolour
+    textfont
+    textsize
+    title
+    titlesize
+    titlecolour
+    titlefont
+    titles
+    tocsize
+    toccolour
+    tocfont
+    transpose
+   );
+# NOTE: Flex: start_of_... end_of_... x_...
 
 my %abbrevs = (
    c	      => "comment",
@@ -772,7 +884,7 @@ my %abbrevs = (
    eot	      => "end_of_tab",
    eov	      => "end_of_verse",
    g	      => "grid",
-   highlight  => "comment",
+   highlight  => "comment",	# not really an abbrev
    ng	      => "no_grid",
    np	      => "new_page",
    npp	      => "new_physical_page",
@@ -787,9 +899,22 @@ my %abbrevs = (
    ts         => "textsize",
 	      );
 
+my $dirpat;
 
 sub parse_directive {
     my ( $self, $d ) = @_;
+
+    # Pattern for all recognized directives.
+    unless ( $dirpat ) {
+	$dirpat =
+	  '(?:' .
+	  join( '|', @directives,
+		     @{$config->{metadata}->{keys}},
+		     keys(%abbrevs),
+		'(?:start|end)_of_\w+' ) .
+		  ')';
+	$dirpat = qr/$dirpat/;
+    }
 
     # $d is the complete directive line, without leading/trailing { }.
     $d =~ s/^[: ]+//;
@@ -804,7 +929,7 @@ sub parse_directive {
     # $arg is the rest, if any.
 
     # Check for xxx-yyy selectors.
-    if ( $dir =~ /^(.*)-(.+)$/ ) {
+    if ( $dir =~ /^($dirpat)-(.+)$/ ) {
 	$dir = $abbrevs{$1} // $1;
 	my $sel = $2;
 	my $negate = $sel =~ s/\!$//;
@@ -1005,13 +1130,13 @@ sub directive {
 	    if ( $k =~ /^(title)$/i ) {
 		$opts{lc($k)} = $v;
 	    }
-	    elsif ( $k =~ /^(width|height|border|center)$/i && $v =~ /^(\d+)$/ ) {
+	    elsif ( $k =~ /^(width|height|border|spread|center)$/i && $v =~ /^(\d+)$/ ) {
 		$opts{lc($k)} = $v;
 	    }
 	    elsif ( $k =~ /^(scale)$/ && $v =~ /^(\d(?:\.\d+)?)$/ ) {
 		$opts{lc($k)} = $v;
 	    }
-	    elsif ( $k =~ /^(center|border)$/i ) {
+	    elsif ( $k =~ /^(center|border|spread)$/i ) {
 		$opts{lc($k)} = $v;
 	    }
 	    elsif ( $k =~ /^(src|uri)$/i ) {
@@ -1349,7 +1474,11 @@ sub directive {
     if ( $dir eq "define" or my $show = $dir eq "chord" ) {
 
 	# Split the arguments and keep a copy for error messages.
-	my @a = split( /[: ]+/, $arg );
+	# Note that quotewords retunrs an epty result if it gets confused,
+	# so fall back to the ancient split method if so.
+	my @a = quotewords( '[: ]+', 0, $arg );
+	@a = split( /[: ]+/, $arg ) unless @a;
+
 	my @orig = @a;
 	my $fail = 0;
 	my $name = $a[0];
@@ -1376,13 +1505,18 @@ sub directive {
 		    $info = $i;
 		    shift(@a);
 		    $res->{$_} = $info->{$_}
-		      for qw( base frets fingers keys );
+		      for qw( base display frets fingers keys );
 		}
 		else {
 		    do_warn("Unknown chord to copy: $a[0]\n");
 		    $fail++;
 		    last;
 		}
+	    }
+
+	    # display
+	    elsif ( $a eq "display" ) {
+		$res->{display} = shift(@a);
 	    }
 
 	    # base-fret N
@@ -1396,11 +1530,10 @@ sub directive {
 		    last;
 		}
 	    }
-
 	    # frets N N ... N
 	    elsif ( $a eq "frets" ) {
 		my @f;
-		while ( @a && $a[0] =~ /^(?:[0-9]+|[-xXN])$/ ) {
+		while ( @a && $a[0] =~ /^(?:[0-9]+|[-xXN])$/ && @f < $strings ) {
 		    push( @f, shift(@a) );
 		}
 		if ( @f == $strings ) {
@@ -1418,7 +1551,7 @@ sub directive {
 	    elsif ( $a eq "fingers" ) {
 		my @f;
 		# It is tempting to limit the fingers to 1..5 ...
-		while ( @a ) {
+		while ( @a && @f < $strings ) {
 		    $_ = shift(@a);
 		    if ( /^[0-9]+$/ ) {
 			push( @f, 0 + $_ );
@@ -1430,6 +1563,7 @@ sub directive {
 			push( @f, -1 );
 		    }
 		    else {
+			unshift( @a, $_ );
 			last;
 		    }
 		}
@@ -1507,7 +1641,9 @@ sub directive {
 	    return 1;
 	}
 	elsif ( ! ( $res->{copy} ||$res->{frets} || $res->{keys} ) ) {
-	    do_warn("Incomplete chord definition: $res->{name}\n");
+	    App::Music::ChordPro::Chords::add_unknown_chord( $res->{name} );
+	    do_warn("Incomplete chord definition: $res->{name}\n")
+	      if $config->{debug}->{chords};
 	    return 1;
 	}
 
@@ -1613,16 +1749,20 @@ sub parse_chord {
 	$info = App::Music::ChordPro::Chords::parse_chord($chord);
 	warn( "Parsing chord: \"$chord\" parsed ok\n" ) if $info && $debug > 1;
     }
-#    if ( $info && ( my $i = App::Music::ChordPro::Chords::_known_chord($info->name) || App::Music::ChordPro::Chords::_known_chord($chord) ) ) {
-#	require DDumper; DDumper::DDumper($i) if $chord =~ /N/;
-#	warn("AAA", join(",",@{$i->{frets}}), " ", join(",",(-1)x($config->diagram_strings)) );
-#	if ( $i->{frets} && join(",",@{$i->{frets}}) eq join(",",(-1)x($config->diagram_strings)) ) {
-#	    warn("BBB");
-#	    $xp = 0; $xc = '';
-#	}
-#    }
     $unk = !defined $info;
-    unless ( $info || ( $allow && !( $xc || $xp ) ) ) {
+
+    if ( ( $xp || $xc )
+	 && ! ($info
+	       && ( defined($info->{root}) || $info->is_nc)) ) {
+	# Desparately trying to get something to transcode/pose.
+	local $::config->{settings}->{chordnames} = "relaxed";
+	$info = App::Music::ChordPro::Chords::parse_chord($chord);
+    }
+
+    unless ( ($info
+	      && ( defined($info->{root}) || $info->is_nc))
+	     ||
+	     ( $allow && !( $xc || $xp ) ) ) {
 	do_warn( "Cannot parse",
 		 $xp ? "/transpose" : "",
 		 $xc ? "/transcode" : "",
@@ -1646,6 +1786,13 @@ sub parse_chord {
 	    warn( "Parsing chord: \"$chord\" found ",
 		  $i->name, " for ", $info->name, " in song/config chords\n" ) if $debug > 1;
 	    $info = $i->new({ %$i, name => $info->name }) ;
+	    $unk = 0;
+	}
+	elsif ( $config->{instrument}->{type} eq 'keyboard'
+		&& App::Music::ChordPro::Chords::_get_keys($info) ) {
+	    warn( "Parsing chord: \"$chord\" \"", $info->name, "\" not found ",
+		  "but we know what to do\n" ) if $debug > 1;
+	    $info = $info->new({ %$info, iskeyboard => 1 }) ;
 	    $unk = 0;
 	}
 	else {
@@ -1678,7 +1825,7 @@ sub parse_chord {
 	}
 	elsif ( $config->{diagrams}->{auto} ) {
 	    my $i = App::Music::ChordPro::Chords::add_unknown_chord($chord);
-	    $info = bless { %$i, %$info } => ref($info);
+	    $info = $i;
 	}
     }
 

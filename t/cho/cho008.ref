@@ -1,0 +1,37 @@
+{title: Chord suffix testing 2}
+{define: D base-fret 5 frets 1 1 3 3 3 1}
+{define: D' base-fret 5 frets 1 1 3 3 3 1}
+{define: Dosa base-fret 5 frets 1 1 3 3 3 1}
+{define: D† display D<sup>†</sup> base-fret 5 frets 1 1 3 3 3 1}
+{define: C base-fret 3 frets 1 1 3 3 3 1}
+{define: C' base-fret 3 frets 1 1 3 3 3 1}
+{define: C† display C<sup>†</sup> base-fret 3 frets 1 1 3 3 3 1}
+{define: Cosa base-fret 5 frets 1 1 3 3 3 1}
+{define: D               base-fret  5    frets   1   1   3   3   3   1   }
+{define: D'              base-fret  5    frets   1   1   3   3   3   1   }
+{define: D†              base-fret  5    frets   1   1   3   3   3   1   }
+{define: Dosa            base-fret  5    frets   1   1   3   3   3   1   }
+{define: A               base-fret  1    frets   X   0   2   2   2   0   }
+{define: C               base-fret  3    frets   1   1   3   3   3   1   }
+{define: C'              base-fret  3    frets   1   1   3   3   3   1   }
+{define: C†              base-fret  3    frets   1   1   3   3   3   1   }
+{define: Cosa            base-fret  5    frets   1   1   3   3   3   1   }
+{define: G               base-fret  1    frets   3   2   0   0   0   3   }
+
+This is a song with a [D] D chord, transposed down 2 semitones
+This is with alternative [D’]  D’ chord or [D†] D†
+Arbitrary unknown (but understood) chord [Dosa](Dosa)
+
+{start_of_grid: 4x4+4}
+| D . . . | D' . . . |
+| A . . . | D† . . D ||
+{end_of_grid}
+
+This is a song with a [C] D chord, transposed down 2 semitones
+This is with alternative [C’]  D’ chord or [C†] D†
+Arbitrary unknown (but understood) chord [Cosa](Dosa)
+
+{start_of_grid: 4x4+4}
+| C . . . | C' . . . |
+| G . . . | C† . . C ||
+{end_of_grid}

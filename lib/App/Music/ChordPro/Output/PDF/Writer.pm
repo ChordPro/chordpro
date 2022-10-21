@@ -128,10 +128,14 @@ sub text {
     $self->{layout}->{_currentcolor} = $self->_fgcolor($font->{color});
     # Watch out for regression... May have to do this in the nomarkup case only.
     if ( $nomarkup ) {
+	$text =~ s/'/\x{2019}/g;		# friendly quote
 	$self->{layout}->set_text($text);
     }
     else {
 	$self->{layout}->set_markup($text);
+	for ( @{ $self->{layout}->{_content} } ) {
+	    $_->{text} =~ s/\'/\x{2019}/g;	# friendly quote
+	}
     }
     $y -= $self->{layout}->get_baseline;
     $self->{layout}->show( $x, $y, $self->{pdftext} );
@@ -404,6 +408,16 @@ sub importpage {
     $self->{pdftext} = $self->{pdfpage}->text;
 }
 
+sub importfile {
+    my ( $self, $filename ) = @_;
+    my $pdf = $self->{pdfapi}->open($filename);
+    return unless $pdf;		# should have been checked
+    for ( my $page = 1; $page <= $pdf->pages; $page++ ) {
+	$self->{pdf}->import_page( $pdf, $page );
+    }
+    return { pages => $pdf->pages, $pdf->info_metadata };
+}
+
 sub pagelabel {
     my ( $self, $page, $style, $prefix ) = @_;
     $style //= 'arabic';
@@ -519,7 +533,7 @@ sub init_fonts {
     my $ps = $self->{ps};
     my $fail;
 
-    my $fc = Text::Layout::FontConfig->new;
+    my $fc = Text::Layout::FontConfig->new( debug => $config->{debug}->{fonts} > 1 );
 
     # Add font dirs.
     my @d = ( @{$ps->{fontdir}}, ::rsc_or_file("fonts/"), $ENV{FONTDIR} );
@@ -587,7 +601,7 @@ sub init_pangofont {
     my $ps = $self->{ps};
     my $font = $ps->{fonts}->{$ff};
 
-    my $fc = Text::Layout::FontConfig->new;
+    my $fc = Text::Layout::FontConfig->new( debug => $config->{debug}->{fonts} > 1 );
     eval {
 	$font->{fd} = $fc->from_string($font->{description});
 	$font->{fd}->get_font($self->{layout}); # force load
@@ -605,7 +619,7 @@ sub init_filefont {
     my $ps = $self->{ps};
     my $font = $ps->{fonts}->{$ff};
 
-    my $fc = Text::Layout::FontConfig->new;
+    my $fc = Text::Layout::FontConfig->new( debug => $config->{debug}->{fonts} > 1 );
     eval {
 	my $t = $fc->from_filename(expand_tilde($font->{file}));
 	$t->get_font($self->{layout}); # force load
@@ -624,7 +638,7 @@ sub init_corefont {
     my $cf = App::Music::ChordPro::Output::PDF::is_corefont($font->{name});
     die("Config error: \"$font->{name}\" is not a built-in font\n")
       unless $cf;
-    my $fc = Text::Layout::FontConfig->new;
+    my $fc = Text::Layout::FontConfig->new( debug => $config->{debug}->{fonts} > 1 );
     eval {
 	$font->{fd} = $fc->from_filename($cf);
 	$font->{fd}->get_font($self->{layout}); # force load

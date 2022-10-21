@@ -4,7 +4,6 @@
 {key: D}
 {define: D               base-fret  1    frets   X   X   0   2   3   2   }
 {define: E               base-fret  1    frets   0   2   2   1   0   0   }
-{define: NC              base-fret  1    frets   X   X   X   X   X   X   }
 
 {comment: Key: D}
 [D]Hello[*Bis]

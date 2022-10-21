@@ -80,3 +80,30 @@ An example of how to use it:
 [A]Swe[A7-piano]et [Bm]Home![C-keyboard]
 {end_of_verse}
 ````
+
+## MacOS _Quick Action_ to create PDFs from within the Finder
+
+_Contributed by Daniel Saunders_
+
+1. Create a new Quick Action in Automator.
+2. Make the top line read: 'Workflow receives current Files or Folders
+   in Finder
+3. The only 'action' is to Run Shell Script.
+4. Select /bin/bash as the Scripting language.
+5. Then enter the following script
+
+````
+export PATH=/usr/local/bin:$PATH
+for f in "$@"
+do
+	name=$(echo "$f" | cut -f 1 -d '.')
+	chordpro "$f" -o="$name".pdf
+done
+````
+
+![]({{< asset "images/macos-quick-action.png" >}})
+
+The result is a Quick Action in the 'right click' menu. When you run
+the action on a ChordPro text file, the script will run ChordPro and
+output a PDF in the same directory, with the same name, but with .pdf
+as the extension.

@@ -113,8 +113,9 @@ sub configurator {
 	$cfg->{user}->{fullname} = ::runtimeinfo("short");
     }
     else {
-	$cfg->{user}->{name} = $ENV{USER} || $ENV{LOGNAME}
-	  || lc(getlogin()) || getpwuid($<) || "chordpro";
+	$cfg->{user}->{name} =
+	  lc( $ENV{USER} || $ENV{LOGNAME}
+	      || getlogin() || getpwuid($<) || "chordpro" );
 	$cfg->{user}->{fullname} = eval { (getpwuid($<))[6] } || "";
     }
 
@@ -159,32 +160,7 @@ sub configurator {
     }
 
     # Handle defines from the command line.
-    my $ccfg = {};
-    while ( my ($k, $v) = each( %{ $options->{define} } ) ) {
-	my @k = split( /[:.]/, $k );
-	my $c = \$ccfg;		# new
-	my $o = $cfg;		# current
-	my $lk = pop(@k);	# last key
-
-	# Step through the keys.
-	foreach ( @k ) {
-	    $c = \($$c->{$_});
-	    $o = $o->{$_};
-	}
-
-	# Final key. Merge array if so.
-	if ( $lk =~ /^\d+$/ && ref($o) eq 'ARRAY' ) {
-	    unless ( ref($$c) eq 'ARRAY' ) {
-		# Only copy orig values the first time.
-		$$c->[$_] = $o->[$_] for 0..scalar(@{$o})-1;
-	    }
-	    $$c->[$lk] = $v;
-	}
-	else {
-	    $$c->{$lk} = $v;
-	}
-    }
-    $cfg = hmerge( $cfg, $ccfg );
+    $cfg = hmerge( $cfg, prp2cfg( $options->{define}, $cfg ) );
 
     # Sanitize added extra entries.
     for ( qw(title subtitle footer) ) {
@@ -198,8 +174,9 @@ sub configurator {
 	    if ( ref($t->[0]) ne 'ARRAY' ) {
 		$t = [ $t ];
 	    }
+	    my $tt = $_;
 	    for ( @$t) {
-		die("Config error in pdf.formats.$class.$_: ",
+		die("Config error in pdf.formats.$class.$tt: ",
 		    scalar(@$_), " fields instead of 3\n")
 		  unless @$_ == 3;
 	    }
@@ -261,6 +238,11 @@ sub configurator {
 	$cfg->{settings}->{$_} = $options->{$_};
     }
 
+    for ( "front-matter", "back-matter" ) {
+	next unless defined $options->{$_};
+	$cfg->{pdf}->{$_} = $options->{$_};
+    }
+
     if ( defined $options->{'chord-grids-sorted'} ) {
 	$cfg->{diagrams}->{sorted} = $options->{'chord-grids-sorted'};
     }
@@ -302,6 +284,7 @@ sub get_config {
 	if ( open( my $fd, "<:raw", $file ) ) {
 	    my $pp = JSON::PP->new->relaxed;
 	    my $new = $pp->decode( loadlines( $fd, { split => 0 } ) );
+	    precheck( $new, $file );
 	    close($fd);
 	    return $new;
 	}
@@ -758,6 +741,8 @@ sub hmerge($$;$) {
 	    || $path eq "pdf.fontconfig."
 	    || $path =~ /^pdf\.(?:info|fonts)\./
 	    || $path =~ /^meta\./
+	    || $path =~ /^delegates\./
+	    || $path =~ /^debug\./
 	    || $key =~ /^_/;
 
 	if ( ref($right->{$key}) eq 'HASH'
@@ -853,6 +838,36 @@ sub clone($) {
     bless( $copy, $class ) if $class;
     return $copy;
 }
+
+sub precheck {
+    my ( $cfg, $file ) = @_;
+    my $verbose = $options->{verbose};
+    warn("Verify config \"$file\"\n") if $verbose > 1;
+    my $p;
+    $p = sub {
+	my ( $o, $path ) = @_;
+	$path //= "";
+	if ( !defined $o ) {
+	    warn("$file: Undefined config \"$path\" (using 'false')\n");
+	    $_[0] = '';
+	}
+	elsif ( UNIVERSAL::isa( $o, 'HASH' ) ) {
+	    $path .= "." unless $path eq "";
+	    for ( sort keys %$o ) {
+		$p->( $o->{$_}, $path . $_  );
+	    }
+	}
+	elsif ( UNIVERSAL::isa( $o, 'ARRAY' ) ) {
+	    $path .= "." unless $path eq "";
+	    for ( my $i = 0; $i < @$o; $i++ ) {
+		$p->( $o->[$i], $path . "$i" );
+	    }
+	}
+    };
+
+    $p->($cfg);
+}
+
 
 ## Data::Properties compatible API.
 #
@@ -1066,15 +1081,18 @@ sub default_config() {
     //         "all": all chords used.
     //         "user": only prints user defined chords.
     // "sorted": order the chords by key.
+    // "suppress": a series of chord (names) thet will not generate
+    //         diagrams, e.g. if they are considered trivial.
     // Note: The type of diagram (string or keyboard) is determined
     // by the value of "instrument.type".
     "diagrams" : {
 	"auto"     :  false,
 	"show"     :  "all",
 	"sorted"   :  false,
+        "suppress" :  [],
     },
 
-    // Diagnostig messages.
+    // Diagnostic messages.
     "diagnostics" : {
 	"format" : "\"%f\", line %n, %m\n\t%l",
     },
@@ -1132,7 +1150,12 @@ sub default_config() {
             "module"   : "Lilypond",
             "handler"  : "ly2image",
             "config"   : "default", // or "none", or ...
-            "preamble" : [],
+            // The preamble is a list of lines inserted before the lilipond data.
+            // This is a good place to set the version and global customizations.
+            "preamble" : [
+		"\\version \"2.21.0\"",
+		"\\header { tagline = ##f }",
+            ],
         },
      },
 
@@ -1293,12 +1316,23 @@ sub default_config() {
               "width" : 0,
               "color" : "foreground-medium",
           },
+          "symbols" : {
+              "color" : "blue",
+          },
+          "volta" : {
+              "span" : 0.7,
+              "color" : "blue",
+          },
       },
 
       // Even/odd pages. A value of -1 denotes odd/even pages.
       "even-odd-pages" : 1,
       // Align songs to even/odd pages. When greater than 1, force alignment.
       "pagealign-songs" : 1,
+      // PDF file to add as front matter.
+      "front-matter" : "",
+      // PDF file to add as back matter.
+      "back-matter" : "",
 
       // Formats.
       // Pages have two title elements and one footer element. They also
@@ -1616,6 +1650,10 @@ sub default_config() {
         "csv" : 0,
   	"abc" : 0,
   	"ly" : 0,
+	// For temporary use.
+	"x1" : 0,
+	"x2" : 0,
+	"x3" : 0,
     },
 
 }

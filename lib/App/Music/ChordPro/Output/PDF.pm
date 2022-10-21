@@ -76,7 +76,9 @@ sub generate_songbook {
     }
 
     my $first_song_aligned;
+    my $songindex;
     foreach my $song ( @{$sb->{songs}} ) {
+	$songindex++;
 
 	# Align.
 	if ( $ps->{'pagealign-songs'} && !($page % 2) ) {
@@ -90,7 +92,11 @@ sub generate_songbook {
 	push( @book, [ $song->{meta}->{title}->[0], $song ] );
 
 	$page += $song->{meta}->{pages} =
-	  generate_song( $song, { pr => $pr, startpage => $page } );
+	  generate_song( $song, { pr        => $pr,
+				  startpage => $page,
+				  songindex => $songindex,
+				  numsongs  => scalar(@{$sb->{songs}}),
+				} );
 	# Easy access to toc page.
 	$song->{meta}->{page} = $song->{meta}->{tocpage};
     }
@@ -138,8 +144,10 @@ sub generate_songbook {
 	$page = generate_song( $song,
 			       { pr => $pr, prepend => 1, roman => 1,
 				 startpage => 1,
+				 songindex => 1, numsongs => 1,
 			       } );
 	$pages_of{toc} += $page;
+	#### TODO: This is not correct if there are more TOCs.
 	$pages_of{toc}++ if $first_song_aligned;
 
 	# Align.
@@ -151,10 +159,10 @@ sub generate_songbook {
 	$start_of{back}     += $page;
     }
 
-    if ( $options->{'front-matter'} ) {
+    if ( $ps->{'front-matter'} ) {
 	$page = 1;
-	my $matter = $pdfapi->open( $options->{'front-matter'} );
-	die("Missing front matter: ", $options->{'front-matter'}, "\n") unless $matter;
+	my $matter = $pdfapi->open( expand_tilde($ps->{'front-matter'}) );
+	die("Missing front matter: ", $ps->{'front-matter'}, "\n") unless $matter;
 	for ( 1 .. $matter->pages ) {
 	    $pr->{pdf}->importpage( $matter, $_, $_ );
 	    $page++;
@@ -164,16 +172,16 @@ sub generate_songbook {
 	# Align to ODD page. Frontmatter starts on a right page but
 	# songs on a left page.
 	$pr->newpage( $ps, 1+$matter->pages ), $page++
-	  if $ps->{'even-odd-pages'} && ($page % 2);
+	  if $ps->{'even-odd-pages'} && !($page % 2);
 
 	$start_of{toc}      += $page - 1;
 	$start_of{songbook} += $page - 1;
 	$start_of{back}     += $page - 1;
     }
 
-    if ( $options->{'back-matter'} ) {
-	my $matter = $pdfapi->open( $options->{'back-matter'} );
-	die("Missing back matter: ", $options->{'back-matter'}, "\n") unless $matter;
+    if ( $ps->{'back-matter'} ) {
+	my $matter = $pdfapi->open( expand_tilde($ps->{'back-matter'}) );
+	die("Missing back matter: ", $ps->{'back-matter'}, "\n") unless $matter;
 	$page = $start_of{back};
 	$pr->newpage($ps), $page++, $start_of{back}++
 	  if $ps->{'even-odd-pages'} && ($page % 2);
@@ -278,7 +286,7 @@ sub generate_csv {
 		      artist    => 'ChordPro' } )
 	  if $pages_of->{front};
 	$csvline->( { title     => '__table_of_contents__',
-		      pagerange => $pagerange->("front"),
+		      pagerange => $pagerange->("toc"),
 		      sorttitle => 'Table of Contents',
 		      artist    => 'ChordPro' } )
 	  if $pages_of->{toc};
@@ -294,14 +302,14 @@ sub generate_csv {
 	my $m = { %{$song->{meta}},
 		  pagerange => [ $pagerange->($pp, $page) ] };
 	$csvline->($m);
+    }
 
-	unless ( $ctl->{songsonly} ) {
-	    $csvline->( { title     => '__back_matter__',
-			  pagerange => $pagerange->("back"),
-			  sorttitle => 'Back Matter',
-			  artist    => 'ChordPro'} )
-	      if $pages_of->{back};
-	}
+    unless ( $ctl->{songsonly} ) {
+	$csvline->( { title     => '__back_matter__',
+		      pagerange => $pagerange->("back"),
+		      sorttitle => 'Back Matter',
+		      artist    => 'ChordPro'} )
+	  if $pages_of->{back};
     }
     close($fd);
     warn("Generated CSV...\n")
@@ -326,7 +334,23 @@ use constant SIZE_ITEMS => [ qw (chord text tab grid diagram toc title footer) ]
 sub generate_song {
     my ( $s, $opts ) = @_;
 
-    return 0 unless $s->{body};	# empty song
+    my $pr = $opts->{pr};
+
+    unless ( $s->{body} ) {	# empty song, or embedded
+	return unless $s->{source}->{embedding};
+	return unless $s->{source}->{embedding} eq "pdf";
+	my $p = $pr->importfile($s->{source}->{file});
+	$s->{meta}->{pages} = $p->{pages};
+
+	# Copy the title of the embedded document, provided there
+	# was no override.
+	if ( $s->{meta}->{title}->[0] eq $s->{source}->{file}
+	     and $p->{Title} ) {
+	    $s->{meta}->{title} = [ $s->{title} = $p->{Title} ];
+	}
+	return $s->{meta}->{pages};
+    }
+
     local $config = dclone( $s->{config} // $config );
 
     $source = $s->{source};
@@ -338,7 +362,6 @@ sub generate_song {
     $inlineannots = $::config->{settings}->{'inline-annotations'};
     $chordsunder  = $::config->{settings}->{'chords-under'};
     my $ps = $::config->clone->{pdf};
-    my $pr = $opts->{pr};
     $ps->{pr} = $pr;
     $pr->{ps} = $ps;
     $pr->init_fonts();
@@ -511,6 +534,7 @@ sub generate_song {
     my $vsp_ignorefirst;
     my $startpage = $opts->{startpage} || 1;
     my $thispage = $startpage - 1;
+    my $spreadimage;
 
     # Physical newpage handler.
     my $newpage = sub {
@@ -593,6 +617,11 @@ sub generate_song {
 	$x += $ps->{_indent};
 	$y = $ps->{_margintop};
 	$y += $ps->{headspace} if $ps->{'head-first-only'} && $class == 2;
+
+	if ( $spreadimage ) {
+	    $y -= imagespread( $spreadimage, $x, $y, $ps );
+	    undef $spreadimage;
+	}
 	$ps->{_top} = $y;
 	$col = 0;
 	$vsp_ignorefirst = 1;
@@ -759,14 +788,54 @@ sub generate_song {
 	}
     };
 
+    my @elts;
+    my $elt;			# current element
+    my @sb = @{$sb};
+    my $redo = [];
+    while ( @sb ) {
+	$elt = @$redo ? shift(@$redo) : shift(@sb);
+	if ( $elt->{type} eq "image"
+	     && $elt->{opts}->{spread} ) {
+	    if ( $spreadimage ) {
+		warn("Ignoring superfluous spread image\n");
+	    }
+	    else {
+		warn("Got spread image\n") if $config->{debug}->{images};
+		$spreadimage //= $elt;
+		next;
+	    }
+	}
+	elsif ( $elt->{type} eq "delegate"
+		&& $elt->{subtype} eq "image"
+		&& $elt->{data}->[0] =~ /\bspread=\d+\b$/
+	      ) {
+	    if ( $spreadimage ) {
+		warn("Ignoring superfluous spread delegate\n");
+	    }
+	    else {
+		my $delegate = $elt->{delegate};
+		warn("Got spread delegate $delegate\n") if $config->{debug}->{images};
+		my $pkg = __PACKAGE__;
+		$pkg =~ s/::Output::\w+$/::Delegate::$delegate/;
+		eval "require $pkg" || die($@);
+		my $hd = $pkg->can($elt->{handler}) //
+		  die("PDF: Missing delegate handler ${pkg}::$elt->{handler}\n");
+
+		my $pw = $ps->{papersize}->[0]
+		  - $ps->{marginleft}
+		  - $ps->{marginright};
+		$redo = $hd->( $s, $pw, $elt );
+		next;
+	    }
+	}
+	push( @elts, $elt );
+    }
+
     # Get going.
     $newpage->();
 
     # Embed source and config for debugging;
     $pr->embed($source->{file}) if $source->{file} && $options->{debug};
-
-    my @elts = @{$sb};
-    my $elt;			# current element
 
     my $prev;			# previous element
 
@@ -1138,8 +1207,8 @@ sub generate_song {
 		die("Config error: Invalid value for pdf.chorus.recall.type\n");
 	    }
 
-	    if ( $t->{quote} ) {
-		unshift( @elts, @{ $elt->{chorus} } ) if $elt->{chorus};
+	    if ( $t->{quote} && $elt->{chorus} ) {
+		unshift( @elts, @{ $elt->{chorus} } );
 	    }
 
 	    elsif ( $elt->{chorus}
@@ -1272,7 +1341,7 @@ sub generate_song {
 		$cells += $grid_margin->[0] = $v[2] if $v[2];
 		$cells += $grid_margin->[1] = $v[3] if $v[3];
 		$grid_margin->[2] = $cells;
-		if ( $ps->{labels}->{comment} ) {
+		if ( $ps->{labels}->{comment} && $v[4] ne "" ) {
 		    unshift( @elts, { %$elt,
 				      type => $ps->{labels}->{comment},
 				      text => $v[4],
@@ -1282,7 +1351,7 @@ sub generate_song {
 		$i_tag = $v[4];
 	    }
 	    elsif ( $elt->{name} eq "label" ) {
-		if ( $ps->{labels}->{comment} ) {
+		if ( $ps->{labels}->{comment} && $elt->{value} ne ""  ) {
 		    unshift( @elts, { %$elt,
 				      type => $ps->{labels}->{comment},
 				      text => $elt->{value},
@@ -1323,7 +1392,8 @@ sub generate_song {
 
     my $pages = $thispage - $startpage + 1;
     $newpage->(), $pages++,
-      if $ps->{'pagealign-songs'} > 1 && $pages % 2;
+      if $ps->{'pagealign-songs'} > 1 && $pages % 2
+         && $opts->{songindex} < $opts->{numsongs};
 
     # Now for the page headings and footers.
     $thispage = $startpage - 1;
@@ -1821,13 +1891,29 @@ sub gridline {
     }
 
     my $ctl = $pr->{ps}->{grids}->{cellbar};
+    my $col = $pr->{ps}->{grids}->{symbols}->{color};
     my $needcell = $ctl->{width};
+
+    state $prevvoltastart;
+    my $align;
+    if ( $prevvoltastart && @tokens
+	 && $tokens[0]->{class} eq "bar" && $tokens[0]->{align} ) {
+	$align = $prevvoltastart;
+    }
+    $prevvoltastart = 0;
+
+    my $voltastart;
     foreach my $i ( 0 .. $#tokens ) {
 	my $token = $tokens[$i];
 	my $sz = $fchord->{size};
 
 	if ( $token->{class} eq "bar" ) {
 	    $x -= $barwidth;
+	    if ( $voltastart ) {
+		pr_voltafinish( $voltastart, $y, $x - $voltastart, $sz, $col, $pr );
+		$voltastart = 0;
+	    }
+
 	    $t = $token->{symbol};
 	    if ( 0 ) {
 		$t = "{" if $t eq "|:";
@@ -1845,25 +1931,36 @@ sub gridline {
 	    $lcr = 1 if $i == $lastbar;
 
 	    if ( $t eq "|" ) {
-		pr_barline( $x, $y, $lcr, $sz, $pr );
+		if ( $token->{volta} ) {
+		    if ( $align ) {
+			$x = $align;
+			$lcr = 0;
+		    }
+		    $voltastart =
+		    pr_rptvolta( $x, $y, $lcr, $sz, $col, $pr, $token );
+		    $prevvoltastart ||= $x;
+		}
+		else {
+		    pr_barline( $x, $y, $lcr, $sz, $col, $pr );
+		}
 	    }
 	    elsif ( $t eq "||" ) {
-		pr_dbarline( $x, $y, $lcr, $sz, $pr );
+		pr_dbarline( $x, $y, $lcr, $sz, $col, $pr );
 	    }
 	    elsif ( $t eq "|:" ) {
-		pr_rptstart( $x, $y, $lcr, $sz, $pr );
+		pr_rptstart( $x, $y, $lcr, $sz, $col, $pr );
 	    }
 	    elsif ( $t eq ":|" ) {
-		pr_rptend( $x, $y, $lcr, $sz, $pr );
+		pr_rptend( $x, $y, $lcr, $sz, $col, $pr );
 	    }
 	    elsif ( $t eq ":|:" ) {
-		pr_rptendstart( $x, $y, $lcr, $sz, $pr );
+		pr_rptendstart( $x, $y, $lcr, $sz, $col, $pr );
 	    }
 	    elsif ( $t eq "|." ) {
-		pr_endline( $x, $y, $lcr, $sz, $pr );
+		pr_endline( $x, $y, $lcr, $sz, $col, $pr );
 	    }
 	    elsif ( $t eq " %" ) { # repeat2Bars
-		pr_repeat( $x+$sz/2, $y, 0, $sz, $pr );
+		pr_repeat( $x+$sz/2, $y, 0, $sz, $col, $pr );
 	    }
 	    else {
 		die($t);	# can't happen
@@ -1892,7 +1989,21 @@ sub gridline {
 	  if $needcell;
 	$needcell = $ctl->{width};
 
-	if ( exists $token->{chord} ) {
+	if ( $token->{class} eq "chord" || $token->{class} eq "chords" ) {
+	    my $tok = $token->{chords} // [ $token->{chord} ];
+	    my $cellwidth = $cellwidth / @$tok;
+	    for my $t ( @$tok ) {
+		$x += $cellwidth, next if $t eq '';
+		my $i = $opts{song}->{chordsinfo}->{$t};
+		$t = $i->chord_display( has_musicsyms($fchord) ) if $i;
+		$pr->text( $t, $x, $y, $fchord );
+		$x += $cellwidth;
+	    }
+	}
+	elsif ( exists $token->{chord} ) {
+	    # I'm not sure why not testing for class = chord...
+	    warn("Chord token without class\n")
+	      unless $token->{class} eq "chord";
 	    my $t = $token->{chord};
 	    my $i = $opts{song}->{chordsinfo}->{$t};
 	    $t = $i->chord_display( has_musicsyms($fchord) ) if $i;
@@ -1915,7 +2026,7 @@ sub gridline {
 		$k++;
 	    }
 	    pr_repeat( $x + ($k - $prevbar - 1)*$cellwidth/2, $y,
-		       0, $fchord->{size}, $pr );
+		       0, $fchord->{size}, $col, $pr );
 	    $x += $cellwidth;
 	}
 	if ( $x > $ps->{papersize}->[0] ) {
@@ -1944,59 +2055,80 @@ sub pr_cellline {
 }
 
 sub pr_barline {
-    my ( $x, $y, $lcr, $sz, $pr ) = @_;
+    my ( $x, $y, $lcr, $sz, $col, $pr ) = @_;
     my $w = $sz / 10;		# glyph width = $w
     $x -= $w / 2 * ($lcr + 1);
-    $pr->vline( $x, $y+0.9*$sz, $sz, $w );
+    $pr->vline( $x, $y+0.9*$sz, $sz, $w, $col );
 }
 
 sub pr_dbarline {
-    my ( $x, $y, $lcr, $sz, $pr ) = @_;
+    my ( $x, $y, $lcr, $sz, $col, $pr ) = @_;
     my $w = $sz / 10;		# glyph width = 3 * $w
     $x -= 1.5 * $w * ($lcr + 1);
-    $pr->vline( $x, $y+0.9*$sz, $sz, $w );
+    $pr->vline( $x, $y+0.9*$sz, $sz, $w, $col );
     $x += 2 * $w;
-    $pr->vline( $x, $y+0.9*$sz, $sz, $w );
+    $pr->vline( $x, $y+0.9*$sz, $sz, $w, $col );
 }
 
 sub pr_rptstart {
-    my ( $x, $y, $lcr, $sz, $pr ) = @_;
+    my ( $x, $y, $lcr, $sz, $col, $pr ) = @_;
     my $w = $sz / 10;		# glyph width = 3 * $w
     $x -= 1.5 * $w * ($lcr + 1);
-    $pr->vline( $x, $y+0.9*$sz, $sz, $w  );
+    $pr->vline( $x, $y+0.9*$sz, $sz, $w, $col );
     $x += 2 * $w;
     $y += 0.55 * $sz;
-    $pr->line( $x, $y, $x, $y+$w, $w );
+    $pr->line( $x, $y, $x, $y+$w, $w, $col );
     $y -= 0.4 * $sz;
-    $pr->line( $x, $y, $x, $y+$w, $w );
+    $pr->line( $x, $y, $x, $y+$w, $w, $col );
+}
+
+sub pr_rptvolta {
+    my ( $x, $y, $lcr, $sz, $symcol, $pr, $token ) = @_;
+    my $w = $sz / 10;		# glyph width = 3 * $w
+    my $col = $pr->{ps}->{grids}->{volta}->{color};
+    my $ret = $x -= 1.5 * $w * ($lcr + 1);
+    $pr->vline( $x, $y+0.9*$sz, $sz, $w, $col );
+    $x += 2 * $w;
+    my $font = $pr->{ps}->{fonts}->{grid};
+    $pr->setfont($font);
+    $pr->text( "<span color='$col'><sup>" . $token->{volta} . "</sup></span>",
+	       $x-$w/2, $y, $font );
+    $ret;
+}
+
+sub pr_voltafinish {
+    my ( $x, $y, $width, $sz, $symcol, $pr ) = @_;
+    my $w = $sz / 10;		# glyph width = 3 * $w
+    my ( $col, $span ) = @{$pr->{ps}->{grids}->{volta}}{qw(color span)};
+    $pr->hline( $x, $y+0.9*$sz+$w/4, $width*$span, $w/2, $col  );
 }
 
 sub pr_rptend {
-    my ( $x, $y, $lcr, $sz, $pr ) = @_;
+    my ( $x, $y, $lcr, $sz, $col, $pr ) = @_;
     my $w = $sz / 10;		# glyph width = 3 * $w
     $x -= 1.5 * $w * ($lcr + 1);
-    $pr->vline( $x + 2*$w, $y+0.9*$sz, $sz, $w );
+    $pr->vline( $x + 2*$w, $y+0.9*$sz, $sz, $w, $col );
     $y += 0.55 * $sz;
-    $pr->line( $x, $y, $x, $y+$w, $w );
+    $pr->line( $x, $y, $x, $y+$w, $w, $col );
     $y -= 0.4 * $sz;
-    $pr->line( $x, $y, $x, $y+$w, $w );
+    $pr->line( $x, $y, $x, $y+$w, $w, $col );
 }
 
 sub pr_rptendstart {
-    my ( $x, $y, $lcr, $sz, $pr ) = @_;
+    my ( $x, $y, $lcr, $sz, $col, $pr ) = @_;
     my $w = $sz / 10;		# glyph width = 5 * $w
     $x -= 2.5 * $w * ($lcr + 1);
-    $pr->vline( $x + 2*$w, $y+0.9*$sz, $sz, $w );
+    $pr->vline( $x + 2*$w, $y+0.9*$sz, $sz, $col, , $w );
     $y += 0.55 * $sz;
-    $pr->line( $x,      $y, $x     , $y+$w, $w );
-    $pr->line( $x+4*$w, $y, $x+4*$w, $y+$w, $w );
+    $pr->line( $x,      $y, $x     , $y+$w, $col, , $w );
+    $pr->line( $x+4*$w, $y, $x+4*$w, $y+$w, $col, , $w );
     $y -= 0.4 * $sz;
-    $pr->line( $x,      $y, $x,      $y+$w, $w );
-    $pr->line( $x+4*$w, $y, $x+4*$w, $y+$w, $w );
+    $pr->line( $x,      $y, $x,      $y+$w, $col, , $w );
+    $pr->line( $x+4*$w, $y, $x+4*$w, $y+$w, $col, , $w );
 }
 
 sub pr_repeat {
-    my ( $x, $y, $lcr, $sz, $pr ) = @_;
+    my ( $x, $y, $lcr, $sz, $col, $pr ) = @_;
     my $w = $sz / 3;		# glyph width = 3 * $w
     $x -= 1.5 * $w * ($lcr + 1);
     my $lw = $sz / 10;
@@ -2008,7 +2140,7 @@ sub pr_repeat {
 }
 
 sub pr_endline {
-    my ( $x, $y, $lcr, $sz, $pr ) = @_;
+    my ( $x, $y, $lcr, $sz, $col, $pr ) = @_;
     my $w = $sz / 10;		# glyph width = 2 * $w
     $x -= 0.75 * $w * ($lcr + 1);
     $pr->vline( $x, $y+0.85*$sz, 0.9*$sz, 2*$w );
@@ -2088,6 +2220,67 @@ sub imageline {
     return $h;			# vertical size
 }
 
+sub imagespread {
+    my ( $elt, $x, $y, $ps ) = @_;
+
+    my $opts = $elt->{opts};
+    my $pr = $ps->{pr};
+
+    if ( $elt->{uri} =~ /^id=(.+)/ ) {
+	return "Unknown asset: id=$1"
+	  unless exists( $assets->{$1} );
+    }
+    elsif ( ! -s $elt->{uri} ) {
+	return "$!: " . $elt->{uri};
+    }
+
+    warn("get_image ", $elt->{uri}, "\n") if $config->{debug}->{images};
+    my $img = eval { $pr->get_image($elt) };
+    unless ( $img ) {
+	warn($@);
+	return "Unhandled image type: " . $elt->{uri};
+    }
+
+    # Available width and height.
+    my $pw = $ps->{__rightmargin} - $ps->{_leftmargin};
+    my $ph = $ps->{_margintop} - $ps->{_marginbottom};
+
+    my $scale = 1;
+    my ( $w, $h ) = ( $opts->{width}  || $img->width,
+		      $opts->{height} || $img->height );
+    if ( defined $opts->{scale} ) {
+	$scale = $opts->{scale} || 1;
+    }
+    else {
+	if ( $w > $pw ) {
+	    $scale = $pw / $w;
+	}
+	if ( $h*$scale > $ph ) {
+	    $scale = $ph / $h;
+	}
+    }
+    warn("Image scale: $scale\n") if $config->{debug}->{images};
+    $h *= $scale;
+    $w *= $scale;
+    if ( $opts->{center} ) {
+	$x += ($pw - $w) / 2;
+	warn("Image center: $_[1] -> $x\n") if $config->{debug}->{images};
+    }
+
+    if ( defined ( my $tag = $i_tag // $opts->{label} ) ) {
+	$i_tag = undef;
+    	my $ftext = $ps->{fonts}->{comment};
+	my $ytext  = $y - font_bl($ftext);
+	prlabel( $ps, $tag, $x, $ytext );
+    }
+
+    warn("add_image\n") if $config->{debug}->{images};
+    $pr->add_image( $img, $x, $y, $w, $h, $opts->{border} || 0 );
+    warn("done\n") if $config->{debug}->{images};
+
+    return $h + $elt->{opts}->{spread};			# vertical size
+}
+
 sub tocline {
     my ( $elt, $x, $y, $ps ) = @_;
 
@@ -2110,9 +2303,8 @@ sub tocline {
     }
     my $ann = $pr->{pdfpage}->annotation;
     $ann->link($elt->{page});
-    $ann->rect( $ps->{_leftmargin}, $y0 - $ftoc->{size} * $ps->{spacing}->{toc},
+    $ann->rect( $ps->{__leftmargin}, $y0 - $ftoc->{size} * $ps->{spacing}->{toc},
 		$ps->{__rightmargin}, $y0 );
-    ####CHECK MARGIN RIGHT
 }
 
 sub has_visible_chords {
@@ -2424,7 +2616,7 @@ sub configurator {
     $fm->( qw( footer         subtitle ) );
 
     # This one is fixed.
-    $fonts->{chordfingers}->{title} = "ChordProSymbols.ttf";
+    $fonts->{chordfingers}->{file} = "ChordProSymbols.ttf";
 }
 
 # Get a format string for a given page class and type.

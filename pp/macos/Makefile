@@ -12,7 +12,7 @@ SCRIPT := ${ROOT}/script
 DEST   := build
 VERSION := $(shell perl ../../lib/App/Music/ChordPro/Version.pm)
 
-PP := pp -u
+PP := pp
 
 # PAR Packer.
 
@@ -20,6 +20,7 @@ chordpro : chordpro.pp ${COMMON}/chordpro.pp
 	${PP} --output=chordpro @chordpro.pp ${SCRIPT}/chordpro.pl
 
 wxchordpro : chordpro.pp ${COMMON}/chordpro.pp ${COMMON}/wxchordpro.pp
+	perl wxchordpro_pp.pl > wxchordpro.pp
 	${PP} --output=wxchordpro @wxchordpro.pp ${SCRIPT}/wxchordpro.pl
 
 clean ::
@@ -47,14 +48,14 @@ unpack :
 # Copy core DLLs.
 # We assume that the target system has the primary ddls like -ldl, -lc, ...
 copy_coredll :
-	cp -pL ${PERLLIB}/../citrus/dll/libperl.dylib ${DEST}/${PERLSO}
+	cp -pL ${PERLLIB}/CORE/libperl.dylib ${DEST}/${PERLSO}
 	install_name_tool -id  @executable_path/${PERLSO} ${DEST}/${PERLSO}
 
 PREFIX := '"script/"'
 CCOPTS := $(shell perl -MExtUtils::Embed -e ccopts) -DSCRIPTPREFIX=${PREFIX}
 LDOPTS := ${DEST}/${PERLSO} -lpthread
-WXCLIB := ${HOME}/lib/citrusperl/vendor/lib/Alien/wxWidgets/osx_cocoa_3_0_2_uni
-WXCNFG := ${WXCLIB}/bin/wx-config
+WXCLIB := $(shell perl -MAlien::wxWidgets -E 'say Alien::wxWidgets->prefix')
+WXCNFG := $(shell test -s ${WXCLIB}/bin/wx-config-3.0 && echo ${WXCLIB}/bin/wx-config-3.0 || echo ${WXCLIB}/bin/wx-config)
 
 .PHONY :: loaders
 loaders : "${DEST}/wxchordpro" "${DEST}/chordpro"

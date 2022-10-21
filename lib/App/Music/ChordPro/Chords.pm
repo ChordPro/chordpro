@@ -306,8 +306,9 @@ sub _known_chord {
     my $ret = $song_chords{$name} // $config_chords{$name};
     return $ret if $ret || !$info;
 
-    # Retry agnostic.
-    $name = $info->agnostic;
+    # Retry agnostic. Not all can do that.
+    $name = eval { $info->agnostic };
+    return unless $name;
     $ret = $song_chords{$name} // $config_chords{$name};
     if ( $ret ) {
 	$ret = $info->new($ret);
@@ -326,7 +327,7 @@ sub _check_chord {
     my ( $ii ) = @_;
     my ( $name, $base, $frets, $fingers, $keys )
       = @$ii{qw(name base frets fingers keys)};
-    if ( $frets && @$frets != strings() ) {
+    if ( $frets && @$frets && @$frets != strings() ) {
 	return scalar(@$frets) . " strings";
     }
     if ( $fingers && @$fingers && @$fingers != strings() ) {
@@ -371,9 +372,10 @@ sub add_config_chord {
 	$def = bless { %$res, %$def } => ref($res);
     }
     delete $def->{name};
+    $def->{base} ||= 1;
 
     my ( $base, $frets, $fingers, $keys ) =
-      ( $def->{base}||1, $def->{frets}, $def->{fingers}, $def->{keys} );
+      ( $def->{base}, $def->{frets}, $def->{fingers}, $def->{keys} );
     $res = _check_chord($def);
     return $res if $res;
 
@@ -444,20 +446,26 @@ sub add_song_chord {
     }
     my $res = _check_chord($ii);
     return $res if $res;
-    my ( $name, $base, $frets, $fingers, $keys )
-      = @$ii{qw(name base frets fingers keys)};
-    my $info = parse_chord($name) // { name => $name };
 
-    $song_chords{$name} = bless
-      { origin  => "user",
-	system  => $parser->{system},
+    # Need a parser anyway.
+    $parser //= App::Music::ChordPro::Chords::Parser->get_parser;
+
+    my $c =
+      { system  => $parser->{system},
 	parser  => $parser,
-	%$info,
-	base    => $base,
-	frets   => [ $frets && @$frets ? @$frets : () ],
-	fingers => [ $fingers && @$fingers ? @$fingers : () ],
-	keys    => [ $keys && @$keys ? @$keys : () ],
-      } => $parser->{target};
+	%$ii,
+	origin  => "user",
+      };
+
+    # Cleanup.
+    for ( qw( display ) ) {
+	delete $c->{$_} unless defined $c->{$_};
+    }
+    for ( qw( frets fingers keys ) ) {
+	delete $c->{$_} unless $c->{$_} && @{ $c->{$_} };
+    }
+
+    $song_chords{$c->{name}} = bless $c => $parser->{target};
     return;
 }
 
@@ -493,14 +501,81 @@ sub chord_stats {
 
 sub parse_chord {
     my ( $chord ) = @_;
-    my $res;
 
-    unless ( $parser ) {
-	$parser //= App::Music::ChordPro::Chords::Parser->get_parser;
-	# warn("XXX ", $parser->{system}, " ", $parser->{n_pat}, "\n");
+    $parser //= App::Music::ChordPro::Chords::Parser->get_parser;
+    return $parser->parse($chord);
+}
+
+################ Section Keyboard keys ################
+
+my %keys =
+  ( ""       => [ 0, 4, 7 ],	             # major
+	"-"      => [ 0, 3, 7 ],	             # minor
+	"7"      => [ 0, 4, 7, 10 ],             # dominant 7th
+	"-7"     => [ 0, 3, 7, 10 ],             # minor seventh
+	"maj7"   => [ 0, 4, 7, 11 ],             # major 7th
+	"-maj7"  => [ 0, 3, 7, 11 ],             # minor major 7th
+	"6"      => [ 0, 4, 7, 9 ],              # 6th
+	"-6"     => [ 0, 3, 7, 9 ],              # minor 6th
+	"6add9"  => [ 0, 4, 7, 9, 14],           # 6/9
+	"5"      => [ 0, 7 ],                    # 6th
+	"9"      => [ 0, 4, 7, 10, 14 ],         # 9th
+	"-9"     => [ 0, 3, 7, 10, 14 ],         # minor 9th
+	"maj9"   => [ 0, 4, 7, 11, 14 ],         # major 9th
+	"11"     => [ 0, 4, 7, 10, 14, 17 ],     # 11th
+	"-11"    => [ 0, 3, 7, 10, 14, 17 ],     # minor 11th
+	"13"     => [ 0, 4, 7, 10, 14, 17, 21 ], # 13th
+	"-13"    => [ 0, 3, 7, 10, 14, 17, 21 ], # minor 13th
+	"maj13"  => [ 0, 4, 7, 11, 14, 21 ],     # major 13th
+	"add2"   => [ 0, 2, 4, 7 ],              # add 2
+	"add9"   => [ 0, 4, 7, 14 ],             # add 9
+	"-add2"  => [ 0, 2, 3, 7 ],              # minor add 2
+	"-add9"  => [ 0, 2, 3, 7, 11 ],          # minor add 9
+	"-add11" => [ 0, 3, 5, 7, 11 ],          # minor add 11
+	"7-5"    => [ 0, 4, 6, 10 ],             # 7 flat 5 altered chord
+	"7+5"    => [ 0, 4, 8, 10 ],             # 7 sharp 5 altered chord
+	"sus4"   => [ 0, 5, 7 ],                 # sus 4
+	"sus2"   => [ 0, 2, 7 ],                 # sus 2
+	"7sus2"  => [ 0, 2, 7, 10 ],             # 7 sus 2
+	"7sus4"  => [ 0, 5, 7, 10 ],             # 7 sus 4
+	"-7sus2" => [ 0, 2, 3, 7, 10 ],          # minor 7 sus 2
+	"-7sus4" => [ 0, 3, 5, 7, 10 ],          # minor 7 sus 4
+	"0"      => [ 0, 3, 6 ],	             # diminished
+	"07"     => [ 0, 3, 6, 9 ],              # diminished 7
+	"-7b5"   => [ 0, 3, 6, 10 ],             # minor 7 flat 5
+	"+"      => [ 0, 4, 8 ],	             # augmented
+	"+7"     => [ 0, 4, 8, 10 ],             # augmented 7
+	"h"      => [ 0, 3, 6, 10 ],             # half-diminished seventh
+  );
+
+sub _get_keys {
+    my ( $info ) = @_;
+#    ::dump( { %$info, parser => ref($info->{parser}) });
+    # Has keys defined.
+    return $info->{keys} if $info->{keys} && @{$info->{keys}};
+
+    # Known chords.
+    return $keys{$info->{qual_canon}.$info->{ext_canon}}
+      if defined $info->{qual_canon}
+      && defined $info->{ext_canon}
+      && defined $keys{$info->{qual_canon}.$info->{ext_canon}};
+
+    # Try to derive from guitar chords.
+    return [] unless $info->{frets} && @{$info->{frets}};
+    my @tuning = ( 4, 9, 2, 7, 11, 4 );
+    my %keys;
+    my $i = -1;
+    my $base = $info->{base} - 1;
+    $base = 0 if $base < 0;
+    for ( @{ $info->{frets} } ) {
+	$i++;
+	next if $_ < 0;
+	my $c = $tuning[$i] + $_ + $base;
+	$c += 12 if $c < $info->{root_ord};
+	$c -= $info->{root_ord};
+	$keys{ $c % 12 }++;
     }
-    $res = $parser->parse($chord);
-    return $res;
+    return [ keys %keys ];
 }
 
 ################ Section Transposition ################

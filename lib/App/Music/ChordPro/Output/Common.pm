@@ -135,16 +135,18 @@ push( @EXPORT_OK, 'roman' );
 # Returns a book array where each element consists of the sort items,
 # and the song.
 
+#sub PODBG() { $config->{debug}->{x1} }
+sub PODBG() { 0 }
+
 sub prep_outlines {
     my ( $book, $ctl ) = @_;
     return [] unless $book && @$book; # unlikely
     return [] if $ctl->{omit};
 
-    my @fields = @{$ctl->{fields}};
-    if ( @fields > 2 ) {
-	croak("Too many fields for outline (max 2)");
-    }
-    elsif ( @fields == 1 && $fields[0] eq "songindex" ) {
+    warn("FLD: ", join(" ", @{$ctl->{fields}}), "\n") if PODBG;
+
+    my @fields = map { /^[-+]*(.*)/ ? $1 : $_ } @{$ctl->{fields}};
+    if ( @fields == 1 && $fields[0] eq "songindex" ) {
 	# Return in book order.
 	return [ map { [ $_->{meta}->{songindex}, $_ ] } @$book ];
     }
@@ -158,7 +160,7 @@ sub prep_outlines {
 
 	foreach my $item ( @fields ) {
 	    ( my $coreitem = $item ) =~ s/^sort//;
-	    push( @split, [] ), next unless $meta->{$coreitem};
+	    push( @split, [ $coreitem, [""] ] ), next unless $meta->{$coreitem};
 
 	    my @s = map { [ $_ ] }
 	      @{ UNIVERSAL::isa( $meta->{$coreitem}, 'ARRAY' )
@@ -187,68 +189,96 @@ sub prep_outlines {
 	if ( @split == 0 ) {
 	    push( @book, $song );
 	}
-	elsif ( @split == 1 ) {
-	    my $f1 = shift(@{$split[0]});
-	    my $addsort1 = $f1 =~ /^(title|artist)$/;
-	    for my $s1 ( @{$split[0]} ) {
-		push( @book,
-		      { %$song,
-			meta =>
-			{ %$meta,
-			  $f1       => [ $s1->[0] ],
-			  $addsort1
-			  ? ( "sort$f1" => [ $s1->[1] // $s1->[0] ] )
-			  : (),
-			}
-		      }
-		    );
-	    }
-	}
+	# elsif ( @split == 1 ) {
+	#     my $f1 = shift(@{$split[0]});
+	#     my $addsort1 = $f1 =~ /^(title|artist)$/;
+	#     for my $s1 ( @{$split[0]} ) {
+	# 	push( @book,
+	# 	      { %$song,
+	# 		meta =>
+	# 		{ %$meta,
+	# 		  $f1       => [ $s1->[0] ],
+	# 		  $addsort1
+	# 		  ? ( "sort$f1" => [ $s1->[1] // $s1->[0] ] )
+	# 		  : (),
+	# 		}
+	# 	      }
+	# 	    );
+	#     }
+	# }
+	# elsif ( @split == 200 ) {
+	#     my $f1 = shift(@{$split[0]}) // "";
+	#     my $f2 = shift(@{$split[1]}) // "";
+	#     my $addsort1 = $f1 =~ /^(title|artist)$/;
+	#     my $addsort2 = $f2 =~ /^(title|artist)$/;
+	#     for my $s1 ( @{$split[0]} ) {
+	# 	for my $s2 ( @{$split[1]} ) {
+	# 	    push( @book,
+	# 		  { %$song,
+	# 		   meta =>
+	# 		   { %$meta,
+	# 		     $f1       => [ $s1->[0] ],
+	# 		     $addsort1
+	# 		     ? ( "sort$f1" => [ $s1->[1] // $s1->[0] ] )
+	# 		     : (),
+	# 		     $f2       => [ $s2->[0] ],
+	# 		     $addsort2
+	# 		     ? ( "sort$f2" => [ $s2->[1] // $s2->[0] ] )
+	# 		     : (),
+	# 		   }
+	# 		  }
+	# 		);
+	# 	}
+	#     }
+	# }
 	else {
-	    my $f1 = shift(@{$split[0]}) // "";
-	    my $f2 = shift(@{$split[1]}) // "";
-	    my $addsort1 = $f1 =~ /^(title|artist)$/;
-	    my $addsort2 = $f2 =~ /^(title|artist)$/;
-	    for my $s1 ( @{$split[0]} ) {
-		for my $s2 ( @{$split[1]} ) {
-		    push( @book,
-			  { %$song,
-			   meta =>
-			   { %$meta,
-			     $f1       => [ $s1->[0] ],
-			     $addsort1
-			     ? ( "sort$f1" => [ $s1->[1] // $s1->[0] ] )
-			     : (),
-			     $f2       => [ $s2->[0] ],
-			     $addsort2
-			     ? ( "sort$f2" => [ $s2->[1] // $s2->[0] ] )
-			     : (),
-			   }
-			  }
-			);
+	    my @mm;
+	    for my $split ( @split ) {
+		my $f = shift(@$split) // "";
+		warn("F: $f\n") if PODBG;
+		my $addsort = $f =~ /^(title|artist)$/;
+		my @x;
+		for my $s ( @{$split} ) {
+		    warn("V: $s->[0]\n") if PODBG;
+		    my %x = ( $f => [ $s->[0] ] );
+		    $x{"sort$f"} = [ $s->[1] // $s->[0] ] if $addsort;
+		    if ( @mm ) {
+			push( @x, { %x, %$_ } ) for @mm;
+		    }
+		    else {
+			push( @x, \%x );
+		    }
+		    warn("X: ", scalar(@x), " items\n") if PODBG;
 		}
+		@mm = @x;
 	    }
+	    push( @book, { %$song, meta => { %$meta, %$_ } } ) for @mm;
 	}
     }
 
     # Sort.
-    if ( @{$ctl->{fields}} == 1 ) {
-	@book =
-	  sort { $a->[0] cmp $b->[0] }
-	  map { [ demarkup(lc($_->{meta}->{$ctl->{fields}->[0]}->[0])), $_ ] }
+    my $i = -1;
+    my $srt =
+      "sub { " .
+      join( " or ",
+	    map { $i++;
+		  my ( $rev, $f ) = /^([-+]*)(.*)/;
+		  my $num = $rev =~ s/\+//g;
+		  warn("F: $f, N: $num, R: $rev\n") if PODBG;
+		  "\$" . ( $rev =~ /-/ ? "b" : "a" ) . "->[$i] " .
+		  ($num ? '<=>' : 'cmp') .
+		  " \$" . ( $rev =~ /-/  ? "a" : "b" ) . "->[$i]" }
+		@{$ctl->{fields}} ) .
+      " }";
+    warn("SRT; $srt\n") if PODBG;
+    $srt = eval $srt or die($@);
+    @book =
+      sort $srt
+      map { my $t = $_;
+	    [ ( map { demarkup(lc($t->{meta}->{$_}->[0] // "")) }
+		    @fields ),
+	      $_ ] }
 	  @book;
-    }
-    elsif ( @{$ctl->{fields}} == 2 ) {
-	@book =
-	  sort { $a->[0] cmp $b->[0] || $a->[1] cmp $b->[1] }
-	  map { [ demarkup(lc($_->{meta}->{$ctl->{fields}->[0]}->[0])),
-		  demarkup(lc($_->{meta}->{$ctl->{fields}->[1]}->[0])),
-		  $_ ] }
-	  @book;
-    }
-    else {
-	# Already asserted.
-    }
 
     return \@book;
 }

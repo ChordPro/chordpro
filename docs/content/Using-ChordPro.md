@@ -59,12 +59,16 @@ See also [`--crd`]({{< relref "#crd" >}}),
 
 Prints version information about the ChordPro program. No other processing will be done.
 
+### back-matter
+
+`--back-matter=`*FILE*
+
+Appends the contents of the named PDF document to the output. This can
+be used to produce documents with cover and back pages.
+
 ### cover
 
-`--cover=`*FILE*
-
-Prepends the contents of the named PDF document to the output. This can
-be used to produce documents with cover pages.
+Same as [`--front-matter`]({{< relref "#front-matter" >}}).
 
 ### crd
 
@@ -139,10 +143,17 @@ exception of empty lines and lines that start with a `#` which are ignored.
 
 This option may be specified multiple times.
 
-Song file names listed on the command line are processed _after_ the
+If the first file from the final filelist is a PDF document (the name
+ends with `.pdf`) it is used as [front matter]({{<relref "#front-matter">}}).
+Likewise, if the last file from the final filelist is a PDF document
+it is used as [back matter]({{<relref "#back-matter">}}).
+
+Song file names listed on the command line are processed _after_ any
 files from the filelist arguments.
 
-You can add metadata in the filelist with `--meta` (see [below]({{< relref "#meta" >}})). This is useful to create song variants:
+You can add metadata in the filelist with `--meta`
+(see [below]({{< relref "#meta" >}})).
+This is useful to create song variants:
 ````
 MySong.cho
 MySong.cho  --meta voice=bass
@@ -162,6 +173,14 @@ Important notice: Filelist lines that have `--meta` and/or `--config`
 ````
 "My New Song.cho" --meta voice=soprano
 ````
+
+### front-matter
+
+`--front-matter=`*FILE*
+`--cover=`*FILE*
+
+Prepends the contents of the named PDF document to the output. This can
+be used to produce documents with cover pages.
 
 ### lyrics-only
 

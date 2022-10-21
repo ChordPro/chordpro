@@ -41,6 +41,7 @@ Arguments to directives may be separated by a colon `:` and/or whitespace.
 | ---                                                                      | ---       | ---                                                                                                | ---   |
 | [chord]({{< relref "Directives-chord" >}}) _name_ ...                    |           | Display diagram in-line.                                                                           | 5.0   |
 | ... `base-fret` _base_                                                   |           | Specify base-fret (1 or higher).[^1]                                                               | 5.0   |
+| ... `display` _display_                                                  |           | Specify display string.[^1]                                                                        | 6.0   |
 | ... `fingers` _pos1_ _pos2_ _pos3_ ...                                   |           | Specify finger postions.[^1]                                                                       | 6.0   |
 | ... `frets` _pos1_ _pos2_ _pos3_ ...                                     |           | Specify fret postions.[^1]                                                                         | 5.0   |
 | ... `keys` _pos1_ _pos2_ _pos3_ ...                                      |           | Specify keyboard keys.[^1]                                                                         | 6.0   |

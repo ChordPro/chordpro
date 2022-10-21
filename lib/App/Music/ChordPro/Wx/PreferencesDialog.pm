@@ -16,6 +16,7 @@ use base qw( App::Music::ChordPro::Wx::PreferencesDialog_wxg );
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
 use App::Packager;
+use App::Music::ChordPro::Utils qw(is_macos);
 
 # BUilt-in descriptions for some notation systems.
 my $notdesc =
@@ -30,7 +31,7 @@ my $notdesc =
     "roman"	   => "I, II, III, ...",
   };
 
-my $is_macos = $^O =~ /darwin/;
+my $is_macos_crippled = is_macos();
 
 sub get_configfile {
     my ( $self ) = @_;
@@ -159,7 +160,7 @@ sub fetch_prefs {
 
     $self->_enablecustom;
 
-    if ( $is_macos ) {
+    if ( $is_macos_crippled ) {
 	# Cannot use chooser, hide button and change tooltip.
 	for ( qw( configfile customlib tmplfile ) ) {
 	    $self->{"sz_$_"}->Hide($self->{"b_${_}dialog"});
@@ -195,7 +196,7 @@ sub store_prefs {
 	push( @p, $styles->[$n] );
 	if ( $n == $cnt - 1 ) {
 	    my $c = $self->{t_configfiledialog}->GetValue;
-	    if ( $is_macos && ! -r $c ) {
+	    if ( $is_macos_crippled && ! -r $c ) {
 		my $md = Wx::MessageDialog->new
 		  ( $self,
 		    "Custom config file $c can not be read.\n".

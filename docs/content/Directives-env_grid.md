@@ -48,8 +48,11 @@ The grid input lines consist of space-separated tokens, which are either valid c
 
 Chords are put into the cells. If a cell does not need to contain a
 chord, the placeholder `.` (period) can be used to designate an empty
-cell. Alternatively, a slash `/` can be used to designate that a
+cell.
+Alternatively, a slash `/` can be used to designate that a
 chord must be played here.
+Multiple chords can be put in a single cell by separating the chord
+names with a `~` (tilde).
 
 Between the cells bar lines can be placed. In the above example, each line contains 16 cells and the bar lines divide the cells into 4 groups (measures) of 4 cells (beats). 
 
@@ -61,8 +64,14 @@ The following bar line symbols are valid:
 * `|:` start repeat bar line
 * `:|` stop repeat bar line
 * `:|:` combined stop/start repeat bar line
+* `|1`, `|2`, etc, start of a volta
+* `|2>` start of a volta, align under the first volta of the previous line
 
-Each line should contain at least one bar line symbol. Everything before the first bar line will be put in the left margin, and everything following the last bar symbol will be put in the right margin. If the line doesn't contain a bar symbol it is printed completely in the left margin.
+Each line should contain at least one bar line symbol. Everything
+before the first bar line will be put in the left margin, and
+everything following the last bar symbol will be put in the right
+margin. If the line doesn't contain a bar symbol it is printed
+completely in the left margin.
 
 Other symbols that can be used:
 

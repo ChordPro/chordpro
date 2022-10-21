@@ -1,0 +1,13 @@
+[%
+
+WRAPPER table/edge;
+
+    i = 0;
+    FOREACH val IN array;
+	INCLUDE debug/struct key=i val=val;
+	i = i + 1;
+    END;
+
+END;
+
+-%]

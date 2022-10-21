@@ -10,6 +10,7 @@ package App::Music::ChordPro::Output::HTML;
 use strict;
 use warnings;
 use App::Music::ChordPro::Output::Common;
+use App::Music::ChordPro::Utils qw();
 
 sub generate_songbook {
     my ( $self, $sb ) = @_;
@@ -126,7 +127,7 @@ sub generate_song {
 		if ( $e->{type} =~ /^comment(_\w+)?$/ ) {
 		    push( @s,
 			  '<div class="' . $e->{type} . '">' .
-			  nhtml($e->{text}) . '</div>' );
+			  '<span>' . nhtml($e->{text}) . '</span></div>' );
 		    next;
 		}
 		if ( $e->{type} eq "set" && $e->{name} eq "label" ) {
@@ -145,7 +146,7 @@ sub generate_song {
 	if ( $elt->{type} eq "comment" || $elt->{type} eq "comment_italic" ) {
 	    push( @s,
 		  '<div class="' . $elt->{type} . '">' .
-		  nhtml($elt->{text}) . '</div>' );
+		  '<span>' . nhtml($elt->{text}) . '</span></div>' );
 	    push( @s, "" ) if $tidy;
 	    next;
 	}
@@ -263,7 +264,7 @@ sub render {
     my $res = "";
     foreach my $fragment ( @{ $self->{_content} } ) {
 	next unless length($fragment->{text});
-	$res .= $fragment->{text};
+	$res .= App::Music::ChordPro::Utils::fq($fragment->{text});
     }
     $res;
 }

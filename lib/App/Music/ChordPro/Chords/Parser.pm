@@ -246,8 +246,9 @@ sub parse_chord {
 	$info->{root} = $plus{root};
     }
     # Retry with relaxed pattern if requested.
-    elsif ( $self->{c_rpat} && $::config->{settings}->{chordnames} eq "relaxed" ) {
-	$chord =~ /^$self->{c_rpat}$/;
+    elsif ( $self->{c_rpat}
+	    && $::config->{settings}->{chordnames} eq "relaxed"
+	    && $chord =~ /^$self->{c_rpat}$/ ) {
 	%plus = %+;		# keep it outer
 	return unless $info->{root} = $plus{root};
     }
@@ -343,6 +344,7 @@ my $additions_maj =
    "5",
    "6",
    "69",
+   "6add9",
    "7",
    "711",
    "7add11",
@@ -366,6 +368,7 @@ my $additions_maj =
    "7-13",
    "7-13sus",
    "7-5",
+   "7\\+5",
    "7-9",
    "7-9#11",
    "7-9#5",
@@ -416,6 +419,7 @@ my $additions_min =
    "",
    "#5",
    "11",
+   "13",
    "6",
    "69",
    "7b5",
@@ -438,6 +442,7 @@ my $additions_aug =
   {
    map { $_ => $_ }
    "",
+   "7",
   };
 
 # The following additions are recognized for diminished chords.
@@ -801,9 +806,12 @@ sub id {
 sub name    { $_[0]->show }
 sub is_note { $_[0]->{isnote} };
 sub is_flat { $_[0]->{isflat} };
+sub is_keyboard { $_[0]->{iskeyboard} };
 
 sub is_nc {
     my ( $self ) = @_;
+    return 1 if $self->is_keyboard &&
+      $self->{keys} && !@{ $self->{keys} };
     return unless $self->{frets} && @{ $self->{frets} };
     for ( @{ $self->{frets} } ) {
 	return unless $_ < 0;
@@ -891,7 +899,7 @@ sub transpose {
     }
     $info->{root_mod} = $dir;
 
-    delete $info->{$_} for qw( copy base frets fingers keys );
+    delete $info->{$_} for qw( copy base frets fingers keys display );
 
     return $info;
 }

@@ -17,6 +17,7 @@ use Wx::Locale gettext => '_T';
 
 use App::Music::ChordPro;
 use App::Music::ChordPro::Output::Common;
+use App::Music::ChordPro::Utils qw(is_macos);
 use App::Packager;
 use File::Temp qw( tempfile );
 use Encode qw(decode_utf8);
@@ -54,7 +55,8 @@ my @fonts =
 
 my $prefctl;
 
-my $is_macos = $^O =~ /darwin/;
+# Old GTK2 version is limited due to sandboxing. GTK3 behaves normal.
+my $is_macos_crippled = is_macos();
 
 # Explicit (re)initialisation of this class.
 sub init {
@@ -148,7 +150,7 @@ sub init {
 
     # On MacOS, we cannot open arbitrary files due to sandboxing
     # constraints.
-    if ( $is_macos ) {
+    if ( $is_macos_crippled ) {
 	$self->{main_menubar}->FindItem(wxID_OPEN) ->Enable(0);
     }
 
@@ -159,7 +161,7 @@ sub init {
     }
 
     # Skip initial open dialog for MacOS. Use Finder calls.
-    unless ( $is_macos ) {
+    unless ( $is_macos_crippled ) {
 	$self->opendialog;
     }
     $self->newfile unless $self->{_currentfile};
@@ -292,7 +294,7 @@ sub newfile {
     $self->{prefs_xposesharp} = 0;
     # On MacOS, we cannot save arbitrary files due to sandboxing
     # constraints.
-    if ( $is_macos ) {
+    if ( $is_macos_crippled ) {
 	$self->{main_menubar}->FindItem(wxID_SAVE) ->Enable(0);
     }
 }
@@ -464,7 +466,7 @@ sub checksaved {
 	    $self->saveas( $self->{_currentfile} );
 	}
     }
-    elsif ( $is_macos ) {
+    elsif ( $is_macos_crippled ) {
 	my $md = Wx::MessageDialog->new
 	  ( $self,
 	    "Sorry, cannot save your changes due to MacOS constraints.",
@@ -664,7 +666,7 @@ sub OnHelp_Example {
 
     # On MacOS, we cannot save arbitrary files due to sandboxing
     # constraints.
-    if ( $is_macos ) {
+    if ( $is_macos_crippled ) {
 	$self->{main_menubar}->FindItem(wxID_SAVE) ->Enable(0);
     }
 }
