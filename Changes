@@ -1,3 +1,8 @@
+0.000
+
+    - !BugFixes
+    - Fix erroneous error message when pdf.formats.default.title (cs) is [].  
+
 5.989 2022-10-21
 
     - !ChordPro functionality
