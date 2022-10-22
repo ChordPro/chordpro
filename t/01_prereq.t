@@ -9,7 +9,7 @@ my $pdfapi = "PDF::API2";
 my $pdfapiv = "2.036";
 
 # PDF::API2 2.036 is ok, 2.042 is better, 2.043 is best.
-for ( qw( xPango@1.227 PDF::API2@2.036 PDF::Builder@3.016 ) ) {
+for ( qw( PDF::Builder@3.016 PDF::API2@2.036 ) ) {
     ( $pdfapi, $pdfapiv ) = split( '@', $_ );
     eval "require $pdfapi" or next;
     eval '$pdfapiv = $pdfapi->VERSION($pdfapiv)' or next;
