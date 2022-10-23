@@ -9,7 +9,6 @@ package App::Music::ChordPro::Output::PDF::Writer;
 use strict;
 use warnings;
 use Encode;
-use PDF::API2;
 use Text::Layout;
 use IO::String;
 use Carp;

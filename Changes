@@ -1,7 +1,8 @@
 0.000
 
     - !BugFixes
-    - Fix erroneous error message when pdf.formats.default.title (cs) is [].  
+    - Fix erroneous error message when pdf.formats.default.title (cs) is [].
+    - Fix compatibility problems with PDF::Builder.
 
 5.989 2022-10-21
 

@@ -164,7 +164,7 @@ sub generate_songbook {
 	my $matter = $pdfapi->open( expand_tilde($ps->{'front-matter'}) );
 	die("Missing front matter: ", $ps->{'front-matter'}, "\n") unless $matter;
 	for ( 1 .. $matter->pages ) {
-	    $pr->{pdf}->importpage( $matter, $_, $_ );
+	    $pr->{pdf}->import_page( $matter, $_, $_ );
 	    $page++;
 	}
 	$pages_of{front} = $matter->pages;
@@ -186,7 +186,7 @@ sub generate_songbook {
 	$pr->newpage($ps), $page++, $start_of{back}++
 	  if $ps->{'even-odd-pages'} && ($page % 2);
 	for ( 1 .. $matter->pages ) {
-	    $pr->{pdf}->importpage( $matter, $_, $page );
+	    $pr->{pdf}->import_page( $matter, $_, $page );
 	    $page++;
 	}
 	$pages_of{back} = $matter->pages;
@@ -2504,6 +2504,36 @@ sub showlayout {
     }
 }
 
+sub config_pdfapi {
+    my ( $lib, $verbose ) = @_;
+    my $pdfapi;
+    $verbose++;
+
+    my $t = "config";
+    # Get PDF library.
+    if ( $ENV{CHORDPRO_PDF_API} ) {
+	$t = "CHORDPRO_PDF_API";
+	$lib = $ENV{CHORDPRO_PDF_API};
+    }
+    if ( $lib ) {
+	unless ( eval( "require $lib" ) ) {
+	    die("Missing PDF library $lib ($t)\n");
+	}
+	$pdfapi = $lib;
+	warn("Using PDF library $lib ($t)\n") if $verbose;
+    }
+    else {
+	for ( qw( PDF::API2 PDF::Builder ) ) {
+	    eval "require $_" or next;
+	    $pdfapi = $_;
+	    warn("Using PDF library $_ (detected)\n") if $verbose;
+	    last;
+	}
+    }
+    die("Missing PDF library\n") unless $pdfapi;
+    return $pdfapi;
+}
+
 sub configurator {
     my ( $cfg ) = @_;
 
@@ -2511,22 +2541,7 @@ sub configurator {
     my $pdf   = $cfg->{pdf};
 
     # Get PDF library.
-    unless ( $pdfapi ) {
-	if ( $pdf->{library} ) {
-	    unless ( eval( "require " . $pdf->{library} ) ) {
-		die("Missing ", $pdf->{library}, " library\n");
-	    }
-	    $pdfapi = $pdf->{library};
-	}
-	else {
-	    for ( qw( PDF::Builder PDF::API2 ) ) {
-		eval "require $_" or next;
-		$pdfapi = $_;
-		last;
-	    }
-	}
-	die("Missing PDF library\n") unless $pdfapi;
-    }
+    $pdfapi //= config_pdfapi( $pdf->{library} );
 
     my $fonts = $pdf->{fonts};
 
