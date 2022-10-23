@@ -12,6 +12,18 @@ $master =~ s;/Version;;;
 
 my @bins = qw( chordpro wxchordpro );
 
+my @pdfapi = ( 'PDF::API2' => 2.036 ); # default
+if ( my $a = $ENV{CHORDPRO_PDF_API} ) {
+    if ( $a =~ /PDF::Builder/ ) {
+	@pdfapi = ( 'PDF::Builder' => 3.023 );
+    }
+    elsif ( $a =~ /PDF::API2/ ) {
+    }
+    else {
+	@pdfapi = ( $a => 0 );
+    }
+}
+
 WriteMakefile
 (
  NAME		=> 'App::Music::ChordPro',
@@ -19,17 +31,17 @@ WriteMakefile
  VERSION	=> $version,
  AUTHOR	        => 'Johan Vromans <jvromans@squirrel.nl>',
  LICENSE	=> "perl",
- MIN_PERL_VERSION => 5.010000,
+ MIN_PERL_VERSION => 5.010001,
  INSTALLDIRS	=> 'site',
  EXE_FILES	=> [ map { "script/$_" } @bins ],
  PL_FILES	=> {
 		    'script/ppchordpro.PL' => [ map { "script/$_" } @bins ]
 		   },
 
- # Always require PDF::API2 and Text::Layout.
+ # Always require PDF::API2 or PDF::Builder and Text::Layout.
  PREREQ_PM      => {
 		    'App::Packager'		  => 1.430,
-		    'PDF::API2'			  => 2.036,
+		    @pdfapi,
 		    'Text::Layout'		  => 0.028,
 		    'JSON::PP'			  => 2.27203,
 		    'String::Interpolate::Named'  => 1.01,
@@ -55,6 +67,7 @@ WriteMakefile
 		    'JSON::PP'	                  => 2.27203,
 		    'String::Interpolate::Named'  => 1.01,
 		    'Storable'			  => 3.08,
+		    @pdfapi,
 		   },
 
  META_MERGE => {

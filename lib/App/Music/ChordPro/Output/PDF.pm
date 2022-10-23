@@ -2507,7 +2507,6 @@ sub showlayout {
 sub config_pdfapi {
     my ( $lib, $verbose ) = @_;
     my $pdfapi;
-    $verbose++;
 
     my $t = "config";
     # Get PDF library.
