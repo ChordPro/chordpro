@@ -82,7 +82,7 @@ sub generate_songbook {
 
 	# Align.
 	if ( $ps->{'pagealign-songs'} && !($page % 2) ) {
-	    $pr->newpage($ps, $page+1);
+	    $pr->newpage($ps, $page);
 	    $page++;
 	    $first_song_aligned //= 1;
 	}

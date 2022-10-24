@@ -3,6 +3,7 @@
     - !BugFixes
     - Fix erroneous error message when pdf.formats.default.title (cs) is [].
     - Fix compatibility problems with PDF::Builder.
+    - Eliminate potential splice warning with pagealign-songs.
 
 5.989 2022-10-21
 
