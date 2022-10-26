@@ -12,10 +12,10 @@ $master =~ s;/Version;;;
 
 my @bins = qw( chordpro wxchordpro );
 
-my @pdfapi = ( 'PDF::API2' => 2.036 ); # default
+my @pdfapi = ( 'PDF::API2' => 2.043 ); # default
 if ( my $a = $ENV{CHORDPRO_PDF_API} ) {
     if ( $a =~ /PDF::Builder/ ) {
-	@pdfapi = ( 'PDF::Builder' => 3.023 );
+	@pdfapi = ( 'PDF::Builder' => 3.025 );
     }
     elsif ( $a =~ /PDF::API2/ ) {
     }
@@ -42,11 +42,11 @@ WriteMakefile
  PREREQ_PM      => {
 		    'App::Packager'		  => 1.430,
 		    @pdfapi,
-		    'Text::Layout'		  => 0.028,
+		    'Text::Layout'		  => 0.030,
 		    'JSON::PP'			  => 2.27203,
-		    'String::Interpolate::Named'  => 1.01,
-		    'File::LoadLines'		  => 1.02,
-		    'File::HomeDir'		  => 1.004,,
+		    'String::Interpolate::Named'  => 1.030,
+		    'File::LoadLines'		  => 1.021,
+		    'File::HomeDir'		  => 1.004,
 		    'Image::Info'		  => 1.41,
 		    'List::Util'		  => 1.33,
 		    'Storable'			  => 3.08,
