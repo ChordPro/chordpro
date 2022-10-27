@@ -304,7 +304,8 @@ sub _known_chord {
 	$name = $info->name;
     }
     my $ret = $song_chords{$name} // $config_chords{$name};
-    return $ret if $ret || !$info;
+    $ret->{_via} = $ret->{origin} . " chords", return $ret if $ret;
+    return unless $info;
 
     # Retry agnostic. Not all can do that.
     $name = eval { $info->agnostic };
@@ -313,12 +314,13 @@ sub _known_chord {
     if ( $ret ) {
 	$ret = $info->new($ret);
 	for ( qw( name display
-		  root root_canon
+		  root root_canon root_mod
 		  bass bass_canon
 		  system parser ) ) {
 	    next unless defined $info->{$_};
 	    $ret->{$_} = $info->{$_};
 	}
+	$ret->{_via} = "agnostic" . " " . $ret->{origin} . " chords";
     }
     $ret;
 }
@@ -407,7 +409,6 @@ sub add_config_chord {
 	    keys    => [ $keys && @$keys ? @$keys : () ]
 	  } => $parser->{target};
 	push( @chordnames, $name );
-	next if $def->{copy};
 
 	# Also store the chord info under a neutral name so it can be
 	# found when other note name systems are used.
@@ -421,7 +422,7 @@ sub add_config_chord {
 	    if ( $i && $i->is_chord ) {
 		$info->{root_ord} = $i->{root_ord};
 		$config_chords{$name}->{$_} = $i->{$_}
-		  for qw( root_ord ext_canon qual_canon );
+		  for qw( root_ord root_mod ext_canon qual_canon );
 		$i = $i->agnostic;
 	    }
 	}

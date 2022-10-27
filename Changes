@@ -5,6 +5,8 @@
     - Fix compatibility problems with PDF::Builder.
     - Fix page labels for PDF::API2 >= 2.041.
     - Eliminate potential splice warning with pagealign-songs.
+    - Fix resize preferences window.
+    - Fix problem with copied chords not being registered as agnostic.
 
 5.989 2022-10-21
 

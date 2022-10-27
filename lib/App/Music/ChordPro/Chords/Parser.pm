@@ -872,8 +872,11 @@ sub agnostic {
     my ( $self ) = @_;
     return if $self->is_note;
     join( " ", "",
-	  $self->{root_ord}, $self->{qual_canon},
-	  $self->{ext_canon}, $self->{bass_ord} // () );
+	  $self->{root_ord},
+	  $self->{root_mod},
+	  $self->{qual_canon},
+	  $self->{ext_canon},
+	  $self->{bass_ord} // () );
 }
 
 sub transpose {

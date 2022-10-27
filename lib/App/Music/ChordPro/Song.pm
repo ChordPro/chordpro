@@ -1743,7 +1743,7 @@ sub parse_chord {
     $info = App::Music::ChordPro::Chords::_known_chord($chord);
     if ( $info ) {
 	warn( "Parsing chord: \"$chord\" found \"",
-	      $chord, "\" in song/config chords\n" ) if $debug > 1;
+	      $chord, "\" in ", $info->{_via}, "\n" ) if $debug > 1;
     }
     else {
 	$info = App::Music::ChordPro::Chords::parse_chord($chord);
@@ -1782,9 +1782,10 @@ sub parse_chord {
 
     if ( $info ) {
 	# Look it up now, the name may change by transcode.
-	if ( my $i = App::Music::ChordPro::Chords::_known_chord($info) ) {
+	if ( my $i = App::Music::ChordPro::Chords::_known_chord($info,1) ) {
 	    warn( "Parsing chord: \"$chord\" found ",
-		  $i->name, " for ", $info->name, " in song/config chords\n" ) if $debug > 1;
+		  $i->name, " for ", $info->name,
+		  " in ", $i->{_via}, "\n" ) if $debug > 1;
 	    $info = $i->new({ %$i, name => $info->name }) ;
 	    $unk = 0;
 	}
@@ -1798,6 +1799,7 @@ sub parse_chord {
 	else {
 	    warn( "Parsing chord: \"$chord\" \"", $info->name,
 		  "\" not found in song/config chords\n" ) if $debug;
+#	    warn("XX \'", $info->agnostic, "\'\n");
 	    $unk = 1;
 	}
     }
@@ -1820,7 +1822,8 @@ sub parse_chord {
 	if ( my $i = App::Music::ChordPro::Chords::_known_chord($chord) ) {
 	    $info = $i;
 	    warn( "Parsing chord: \"$chord\" found \"",
-		  $chord, "\" in song/config chords\n" ) if $debug > 1;
+		  $chord, "\" in ",
+		  $i->{_via}, "\n" ) if $debug > 1;
 	    $unk = 0;
 	}
 	elsif ( $config->{diagrams}->{auto} ) {

@@ -32,6 +32,7 @@ foreach my $file ( sort @files ) {
     my $ok = !differ( $out, $ref );
     ok( $ok, $file );
     unlink($out) if $ok;
+    system( $ENV{CHORDPRO_DIFF}, $out, $ref) if $ENV{CHORDPRO_DIFF};
 }
 
 ok( $test++ == @files, "Tested @{[0+@files]} files" );
