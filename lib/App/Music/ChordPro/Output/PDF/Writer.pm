@@ -9,7 +9,6 @@ package App::Music::ChordPro::Output::PDF::Writer;
 use strict;
 use warnings;
 use Encode;
-use PDF::API2;
 use Text::Layout;
 use IO::String;
 use Carp;
@@ -371,7 +370,13 @@ sub add_image {
 sub newpage {
     my ( $self, $ps, $page ) = @_;
     #$self->{pdftext}->textend if $self->{pdftext};
-    $self->{pdfpage} = $self->{pdf}->page($page||0);
+    $page ||= 0;
+
+    # PDF::API2 says $page must refer to an existing page.
+    # Set to 0 to append.
+    $page = 0 if $page == $self->{pdf}->pages + 1;
+
+    $self->{pdfpage} = $self->{pdf}->page($page);
     $self->{pdfpage}->mediabox( $ps->{papersize}->[0],
 				$ps->{papersize}->[1] );
 
@@ -431,7 +436,7 @@ sub pagelabel {
                               $style eq 'alpha' ? 'a' : 'D',
 		     defined $prefix ? ( prefix => $prefix ) : (),
 		     start => 1 };
-	$c->( $self->{pdf}, $page, $opts );
+	$c->( $self->{pdf}, $page, %$opts );
     }
     else {
 	my $opts = { -style => $style,

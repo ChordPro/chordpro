@@ -45,6 +45,7 @@ SKIP: {
 	my $ok = !differ( $out, $ref );
 	ok( $ok, $file );
 	unlink($out) if $ok;
+	system( $ENV{CHORDPRO_DIFF}, $out, $ref) if $ENV{CHORDPRO_DIFF};
     }
 
     ok( $test++ == $numtests, "Tested $numtests files" );

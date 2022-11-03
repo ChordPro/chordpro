@@ -178,7 +178,7 @@ sub configurator {
 	    for ( @$t) {
 		die("Config error in pdf.formats.$class.$tt: ",
 		    scalar(@$_), " fields instead of 3\n")
-		  unless @$_ == 3;
+		  if @$_ && @$_ != 3;
 	    }
 	}
     }
