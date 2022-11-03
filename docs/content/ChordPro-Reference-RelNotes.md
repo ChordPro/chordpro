@@ -1,5 +1,23 @@
 # Release info
 
+## 5.990
+
+Released: 2022-11-03
+
+
+### BugFixes
+
+* Fix erroneous error message when pdf.formats.default.title (cs) is [].
+* Fix compatibility problems with PDF::Builder.
+* Fix page labels for PDF::API2 >= 2.041.
+* Eliminate potential splice warning with pagealign-songs.
+* Fix resize preferences window.
+* Fix problem with copied chords not being registered as agnostic.
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.
+
 ## 5.989
 
 Released: 2022-10-21
@@ -46,12 +64,6 @@ Released: 2022-10-21
 * Fix issue 251.
 * Fix issue 253.
 * Fix issue 255.
-
-### Social and support
-
-[User community](https://groups.io/g/ChordPro) for feedback and help.
-
-[Follow us on Twitter](https://twitter.com/ChordPro_Org) to stay informed about new releases and updates.
 
 ## 5.988
 
