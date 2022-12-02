@@ -42,7 +42,7 @@ These settings control global behaviour of the ChordPro program and can be chang
         "lyrics-only" : false,
         // Chords inline.
         // May be a string containing pretext %s posttext.
-        // Defaults to "[%s]" if true.
+        // Defaults to "[%s]" if set to a value that doesn't contain "%s".
         "inline-chords" : false,
         // Chords under the lyrics.
         "chords-under" : false,

@@ -954,7 +954,7 @@ sub default_config() {
       "memorize" : false,
       // Chords inline.
       // May be a string containing pretext %s posttext.
-      // Defaults to "[%s]" if true.
+      // Defaults to "[%s]" if set to a value that doesn't contain "%s".
       "inline-chords" : false,
       // Same, for annotations. Ignored unless inline-chords is set.
       // Must be a string containing pretext %s posttext.
