@@ -440,14 +440,15 @@ sub parse_song {
 
 	# For now, directives should go on their own lines.
 	if ( /^\s*\{(.*)\}\s*$/ ) {
+	    my $dir = $1;
 	    if ( $prep->{directive} ) {
 		# warn("PRE:  ", $_, "\n");
-		$prep->{directive}->($_);
+		$prep->{directive}->($dir);
 		# warn("POST: ", $_, "\n");
 	    }
 	    $self->add( type => "ignore",
 			text => $_ )
-	      unless $self->directive($1);
+	      unless $self->directive($dir);
 	    next;
 	}
 
