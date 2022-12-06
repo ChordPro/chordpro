@@ -59,7 +59,7 @@ extensive details and examples.
           "memorize" : false,
           // Chords inline.
           // May be a string containing pretext %s posttext.
-          // Defaults to "[%s]" if true.
+          // Defaults to "[%s]" if set to a value that doesn't contain "%s".
           "inline-chords" : false,
           // Same, for annotations. Ignored unless inline-chords is set.
           // Must be a string containing pretext %s posttext.
@@ -390,6 +390,7 @@ extensive details and examples.
     	  "linewidth" : 0.1,	// of a cell width
     	  "hspace"   :  3.95,	// fraction of width
     	  "vspace"   :  3,	// fraction of height
+              "fingers"  :  true,   // show fingering if available
           },
     
           // Keyboard diagrams.

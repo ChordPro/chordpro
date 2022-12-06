@@ -1285,6 +1285,7 @@ sub default_config() {
 	  "linewidth" : 0.1,	// of a cell width
 	  "hspace"   :  3.95,	// fraction of width
 	  "vspace"   :  3,	// fraction of height
+          "fingers"  :  true,   // show fingering if available
       },
 
       // Keyboard diagrams.

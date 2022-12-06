@@ -948,6 +948,11 @@
 		    "description": "Appearance of chord diagrams.",
 		    "additionalProperties": false,
 		    "properties": {
+		        "fingers": {
+			    "description": "Show finger settings, if available.",
+			    "default": "true",
+			    "type": "boolean"
+			},
 		        "show": {
 			    "description": "Where to show the diagrams.",
 			    "default": "bottom",

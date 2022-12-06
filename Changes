@@ -1,3 +1,9 @@
+0.000
+
+    - !ChordPro functionality
+    - Chord finger settings can be suppressed with pdf.diagrams.fingers.
+    - (Experimental) Add line selection to preprocessor.
+
 5.990 2022-11-03
 
     - !BugFixes
