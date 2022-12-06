@@ -127,8 +127,6 @@ sub make_preprocessor {
 	    my $t = "sub { for (\$_[0]) {\n" . $code . "}}";
 	    $prep->{$linetype} = eval $t;
 	    die( "CODE : $t\n$@" ) if $@;
-	    $t =~ s/\0/♯/g;
-	    warn("CODE: $t\n");
 	}
     }
     $prep;
