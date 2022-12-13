@@ -5,7 +5,8 @@
     - (Experimental) Add line selection to preprocessor.
     - !BugFixes
     - Fix issue 259.
-
+    - Fix issue 260 (chords not being handled correctly in comments).
+    
 5.990 2022-11-03
 
     - !BugFixes

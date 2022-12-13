@@ -15,6 +15,7 @@ use App::Packager;
 use File::Temp ();
 use Storable qw(dclone);
 use List::Util qw(any);
+use Carp;
 use feature 'state';
 
 use App::Music::ChordPro::Output::Common
@@ -1627,9 +1628,26 @@ sub songline {
 	$x += $opts{indent} if $opts{indent};
 	$x += $elt->{indent} if $elt->{indent};
 	prlabel( $ps, $tag, $x, $ytext );
-	my ( $text, $ex ) = wrapsimple( $pr, $elt->{text}, $x, $ftext );
+	my $t = $elt->{text};
+	if ( $elt->{chords} ) {
+	    $t = "";
+	    my @ph = @{ $elt->{phrases} };
+	    for my $chord ( @{ $elt->{chords} }) {
+		if ( $chord eq '' ) {
+		}
+		else {
+		    my $info = $opts{song}->{chordsinfo}->{$chord};
+		    croak("Missing info for chord $chord") unless $info;
+		    $chord = $info->chord_display( has_musicsyms($ftext) );
+		}
+		$t .= $chord . shift(@ph);
+	    }
+	}
+	my ( $text, $ex ) = wrapsimple( $pr, $t, $x, $ftext );
 	$pr->text( $text, $x, $ytext, $ftext );
-	return $ex ne "" ? { %$elt, indent => $pr->strwidth("x"), text => $ex } : undef;
+	return $ex ne ""
+	  ? { %$elt, indent => $pr->strwidth("x"), text => $ex, chords => undef  }
+	  : undef;
     }
     if ( $type eq "tabline" ) {
 	$ftext = $fonts->{tab};
