@@ -1271,6 +1271,11 @@
 				}
 			    }
 			},
+		        "show" : {
+			    "description": "Show grid context in output.",
+			    "type": "boolean",
+			    "default" : true
+			},
 		        "symbols" : {
 			    "additionalProperties": false,
 			    "properties": {

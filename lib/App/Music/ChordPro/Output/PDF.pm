@@ -649,7 +649,7 @@ sub generate_song {
 
     my $chorddiagrams = sub {
 	my ( $chords, $show, $ldisp ) = @_;
-	return unless $dctl->{show};
+	return if $lyrics_only || !$dctl->{show};
 	my @chords;
 	$chords = $s->{chords}->{chords}
 	  if !defined($chords) && $s->{chords};
@@ -1036,6 +1036,8 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "gridline" ) {
+
+	    next if $lyrics_only || !$ps->{grids}->{show};
 
 	    my $vsp = grid_vsp( $elt, $ps );
 	    $checkspace->($vsp);

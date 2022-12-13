@@ -248,6 +248,9 @@ the song.
 
 {{< showpage "style_modern3" >}}
 
+Note that command line option `--lyricsonly` implies `"show":false`
+for diagrams.
+
 ## Keyboard diagrams
 
 Keyboard diagrams are added to the song to show the chords used in the
@@ -293,11 +296,15 @@ With the above settings, keyboard diagrams will look like:
 
 ![]({{< asset "images/ex_kbdiagram.png" >}})
 
+Note that command line option `--lyricsonly` implies `"show":false`
+for diagrams.
+
 ## Grid lines
 
 Properties for the lines of grid sections.
 
       // Grid section lines.
+      // Suppress when "show" is false, e.g. for singers.
       // The width and colour of the cell bar lines can be specified.
       // Enable by setting the width to the desired width.
       "grids" : {
@@ -305,8 +312,18 @@ Properties for the lines of grid sections.
               "width" : 0,
               "color" : "foreground-medium",
           },
+          "show": true,
+          "symbols" : {
+              "color" : "blue",
+          },
+          "volta" : {
+              "span" : 0.7,
+              "color" : "blue",
+          },
       },
 
+Note that command line option `--lyricsonly` implies `"show":false`
+for grids.
 
 ## Even/odd page printing
 

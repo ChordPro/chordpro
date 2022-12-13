@@ -1310,6 +1310,7 @@ sub default_config() {
       },
 
       // Grid section lines.
+      // Suppress when "show" is false, e.g. for singers.
       // The width and colour of the cell bar lines can be specified.
       // Enable by setting the width to the desired width.
       "grids" : {
@@ -1317,6 +1318,7 @@ sub default_config() {
               "width" : 0,
               "color" : "foreground-medium",
           },
+          "show": true,
           "symbols" : {
               "color" : "blue",
           },

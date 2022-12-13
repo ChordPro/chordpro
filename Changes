@@ -6,6 +6,7 @@
     - !BugFixes
     - Fix issue 259.
     - Fix issue 260 (chords not being handled correctly in comments).
+    - Fix issue 260 (suppress diagrams and grids when lyrics-only).
     
 5.990 2022-11-03
 
