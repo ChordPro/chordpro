@@ -55,7 +55,7 @@ selector pattern:
     "parser" : {
         "preprocess" : {
 			"directives" : [
-				{ "select" : "^c(omment(_(italic|box))?|i|b)?[:\\s]",
+				{ "select" : "^c(omment(_(italic|box))?|i|b)?(-\\w+!?)?[:\\s]",
 				  "target" : ":)",
 				  "replace" : ":smiley:" }
 			]

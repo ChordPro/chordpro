@@ -950,18 +950,17 @@ sub chord_display {
     # Substitute musical symbols if wanted and possible.
     if ( $::config->{settings}->{truesf} ) {
 	$sf ||= 0;
-	pos($res) = 1;
 	if ( $sf & 0x02 ) {	# has flat
-	    $res =~ s/\Gb/♭/g;
+	    $res =~ s/(?<=.)b/♭/g;
 	}
 	else {			# fallback
-	    $res =~ s;\Gb;<span font="chordprosymbols">!</span>;g;
+	    $res =~ s;(?<=.)b;<span font="chordprosymbols">!</span>;g;
 	}
 	if ( $sf & 0x01 ) {	# has sharp
-	    $res =~ s/\G#/♯/g;
+	    $res =~ s/(?<=.)#/♯/g;
 	}
 	else {			# fallback
-	    $res =~ s;\G#;<span font="chordprosymbols">#</span>;g;
+	    $res =~ s;(?<=.)#;<span font="chordprosymbols">#</span>;g;
 	}
     }
 
