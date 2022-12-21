@@ -954,13 +954,13 @@ sub chord_display {
 	    $res =~ s/(?<=.)b/♭/g;
 	}
 	else {			# fallback
-	    $res =~ s;(?<=.)b;<span font="chordprosymbols">!</span>;g;
+	    $res =~ s;(?<=.)[b♭];<span font="chordprosymbols">!</span>;g;
 	}
 	if ( $sf & 0x01 ) {	# has sharp
 	    $res =~ s/(?<=.)#/♯/g;
 	}
 	else {			# fallback
-	    $res =~ s;(?<=.)#;<span font="chordprosymbols">#</span>;g;
+	    $res =~ s;(?<=.)[#♯];<span font="chordprosymbols">#</span>;g;
 	}
     }
 
