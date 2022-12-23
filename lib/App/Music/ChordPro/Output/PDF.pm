@@ -365,6 +365,7 @@ sub generate_song {
     my $ps = $::config->clone->{pdf};
     $ps->{pr} = $pr;
     $pr->{ps} = $ps;
+    $pr->{_df} = {};
 #    warn("X1: ", $ps->{fonts}->{$_}->{size}, "\n") for "text";
     $pr->init_fonts();
     my $fonts = $ps->{fonts};
