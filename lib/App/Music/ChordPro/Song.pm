@@ -1463,6 +1463,16 @@ sub directive {
 		    name  => $name,
 		    value => $value );
 	push( @{ $propstack{$name} }, $value );
+
+	# A trailing number after a font directive is an implisit size
+	# directive.
+	if ( $prop eq 'font' && $value =~ /\s(\d+(?:\.\d+)?)$/ ) {
+	    $self->add( type  => "control",
+			name  => "$item-size",
+			value => $1 );
+	    push( @{ $propstack{"$item-size"} }, $1 );
+	}
+
 	return 1;
     }
 

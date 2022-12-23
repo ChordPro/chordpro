@@ -365,8 +365,11 @@ sub generate_song {
     my $ps = $::config->clone->{pdf};
     $ps->{pr} = $pr;
     $pr->{ps} = $ps;
+#    warn("X1: ", $ps->{fonts}->{$_}->{size}, "\n") for "text";
     $pr->init_fonts();
     my $fonts = $ps->{fonts};
+    $pr->{_df}->{$_} = { %{$fonts->{$_}} } for qw( text chord grid toc tab );
+#    warn("X2: ", $pr->{_df}->{$_}->{size}, "\n") for "text";
 
     $structured = ( $options->{'backend-option'}->{structure} // '' ) eq 'structured';
     $s->structurize if $structured;
@@ -1280,23 +1283,27 @@ sub generate_song {
 		else {
 		    # Restore default.
 		    $ps->{fonts}->{$1}->{size} =
-		      $::config->{pdf}->{fonts}->{$1}->{size};
+		      $pr->{_df}->{$1}->{size};
 		}
 	    }
 	    elsif ( $elt->{name} =~ /^(text|chord|grid|toc|tab)-font$/ ) {
 		my $f = $1;
 		if ( defined $elt->{value} ) {
-		    if ( $elt->{value} =~ m;/;
+		    my ( $fn, $sz ) = $elt->{value} =~ /^(.*) (\d+(?:\.\d+)?)$/;
+		    $fn //= $elt->{value};
+		    if ( $fn =~ m;/;
 			 ||
-			 $elt->{value} =~ m;\.(ttf|otf)$;i ) {
+			 $fn =~ m;\.(ttf|otf)$;i ) {
 			delete $ps->{fonts}->{$f}->{description};
 			delete $ps->{fonts}->{$f}->{name};
 			$ps->{fonts}->{$f}->{file} = $elt->{value};
+			# Discard $sz. There will be an {xxxsize} following.
 		    }
-		    elsif ( is_corefont( $elt->{value} ) ) {
+		    elsif ( is_corefont( $fn ) ) {
 			delete $ps->{fonts}->{$f}->{description};
 			delete $ps->{fonts}->{$f}->{file};
-			$ps->{fonts}->{$f}->{name} = is_corefont( $elt->{value} );
+			$ps->{fonts}->{$f}->{name} = is_corefont($fn);
+			# Discard $sz. There will be an {xxxsize} following.
 		    }
 		    else {
 			delete $ps->{fonts}->{$f}->{file};
@@ -1307,7 +1314,7 @@ sub generate_song {
 		else {
 		    # Restore default.
 		    $ps->{fonts}->{$f} =
-		      { %{ $::config->{pdf}->{fonts}->{$f} } };
+		      { %{ $pr->{_df}->{$f} } };
 		}
 		$pr->init_font($f);
 	    }
@@ -1318,7 +1325,7 @@ sub generate_song {
 		else {
 		    # Restore default.
 		    $ps->{fonts}->{$1}->{color} =
-		      $::config->{pdf}->{fonts}->{$1}->{color};
+		      $pr->{_df}->{$1}->{color};
 		}
 	    }
 	    next;
