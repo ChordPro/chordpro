@@ -61,6 +61,9 @@ my $decapo;
 my $no_transpose;		# NYI
 my $no_substitute;
 
+# Stack for properties like textsize.
+my %propstack;
+
 my $diag;			# for diagnostics
 my $lineinfo;			# keep lineinfo
 
@@ -75,6 +78,7 @@ sub new {
     @used_chords = ();
     %warned_chords = ();
     %memchords = ();
+    %propstack = ();
     App::Music::ChordPro::Chords::reset_song_chords();
     @labels = ();
     @chorus = ();
@@ -956,8 +960,6 @@ sub parse_directive {
 
     return { name => $dir, arg => $arg, omit => 0 }
 }
-
-my %propstack;
 
 sub directive {
     my ( $self, $d ) = @_;
