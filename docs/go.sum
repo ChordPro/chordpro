@@ -1,4 +1,8 @@
 github.com/julmot/mark.js v0.0.0-20210820195258-8b57fccf976b/go.mod h1:aAyDyl2EhNPiZbFqqURsAmxYwwTHslrIxZErXMO3pJQ=
+github.com/julmot/mark.js v0.0.0-20221116182818-7f7e9820514e h1:EZl5226VdgA6DxtbGRgEODgmvT845TKZ1Sl7uZOFT/U=
+github.com/julmot/mark.js v0.0.0-20221116182818-7f7e9820514e/go.mod h1:aAyDyl2EhNPiZbFqqURsAmxYwwTHslrIxZErXMO3pJQ=
 github.com/kaushalmodi/hugo-search-fuse-js v0.4.4 h1:zEnFYi9DYMoHLsMOf5QqXcQJnfEYGaNanqjnTjlJjto=
 github.com/kaushalmodi/hugo-search-fuse-js v0.4.4/go.mod h1:Wr6gbPat+KW6wReh/hDBykKIWn296FsEkuhojJvHHxw=
 github.com/krisk/Fuse v3.2.1+incompatible/go.mod h1:3moWv8rDjwoKic9nwiPLgZjldkbdTAbtzJHCu/Vsj4A=
+github.com/krisk/Fuse v6.6.2+incompatible h1:laigOpZFs/xUi9zGjVu5t19bcvzRVufoXCnPSgQZmYI=
+github.com/krisk/Fuse v6.6.2+incompatible/go.mod h1:3moWv8rDjwoKic9nwiPLgZjldkbdTAbtzJHCu/Vsj4A=
