@@ -1,9 +1,9 @@
 ---
-title: "ChordPro: The File Format Specification"
+title: "ChordPro: Introduction"
 description: "ChordPro: The File Format Specification"
 ---
 
-# ChordPro: The File Format Specification
+# Introduction to ChordPro
 
 In a hurry? See the
 [ChordPro Cheat Sheet]({{< relref "ChordPro-Cheat_Sheet" >}}).
@@ -20,7 +20,9 @@ See the [ChordPro history overview]({{< relref "Chordpro-History" >}}).
 
 As mentioned, the ChordPro file format is a simple text file format. Any text editor or word processor can be used to create and maintain them. The text files can have arbitrary names and arbitrary types (extensions). Common filename extensions for ChordPro files are `.cho`, `.crd`, `.chopro`, `.chord` and `.pro`. If you need to choose an extension for new ChordPro files, we advise to use `.cho`. Simple, short, easy to remember, and not heavily used by other applications.
 
-For example, this is the contents of a simple song:
+## The basics
+
+This is an example of a simple song:
 
     # A simple ChordPro song.
 
@@ -57,10 +59,10 @@ The directives `{start_of_chorus}` and `{end_of_chorus}` indicate that the lines
 
 Finally, all lines that start with a `#` are ignored. These can be used to insert remarks into the ChordPro file that are only relevant for maintainers.
 
-In print, this song could look like this (click on the thumbnail to
+In print, this song could look like one of these (click on the thumbnail to
 view a larger version):
 
-{{< showpage "style_default" >}}
+{{< showpage "style_default" "style_modern3" "style_modern2" >}}
 
 ## Markup and annotations
 

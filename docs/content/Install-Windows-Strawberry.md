@@ -7,7 +7,7 @@ description: "Strawberry Perl on Microsoft Windows"
 
 _This information may be sub-optimal and/or incomplete. Please help improving it._
 
-Download Strawberry Perl from <http://strawberryperl.com/releases.html>.
+Download Strawberry Perl from <https://strawberryperl.com/releases.html>.
 Install according to the directions on the site.
 
 Open a command prompt window and type:

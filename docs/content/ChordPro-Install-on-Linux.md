@@ -88,7 +88,7 @@ This will also associate files with extension `.cho`, `.chordpro`,
 To check for successful install, run `chordpro --version`. That should
 return a result similar to
 
-    This is ChordPro version 0.977
+    This is ChordPro version 6.000
 
 (The version number may be different.)
 

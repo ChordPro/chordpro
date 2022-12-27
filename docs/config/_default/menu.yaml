@@ -23,7 +23,7 @@ sidebar:
   weight: 130
   title: ChordPro Chords
 
-- title: The Implementation
+- title: The Program
   identifier: impl
   weight: 200
 
