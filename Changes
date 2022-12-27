@@ -3,6 +3,7 @@
     - !ChordPro functionality
     - Chord finger settings can be suppressed with pdf.diagrams.fingers.
     - (Experimental) Add line selection to preprocessor.
+    - Remove * for user defined chords.
     - !BugFixes
     - Fix issue 259.
     - Fix issue 260 (chords not being handled correctly in comments).

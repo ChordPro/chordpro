@@ -89,9 +89,9 @@ sub draw {
     $pr->setfont($font);
     my $name = $info->chord_display
       ( App::Music::ChordPro::Output::PDF::has_musicsyms($font) );
-    $name .= "*"
-      unless $info->{origin} ne "user"
-	|| $::config->{diagrams}->{show} eq "user";
+    # $name .= "*"
+    #   unless $info->{origin} ne "user"
+    #     || $::config->{diagrams}->{show} eq "user";
     $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y - font_bl($font) );
     $y -= $font->{size} * $ps->{spacing}->{diagramchords} + $dot/2 + $lw;
     if ( $info->{base} + $info->{baselabeloffset} > 1 ) {

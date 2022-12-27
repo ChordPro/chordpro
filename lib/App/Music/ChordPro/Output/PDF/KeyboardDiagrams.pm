@@ -127,9 +127,9 @@ sub draw {
     $pr->setfont($font);
     my $name = $info->chord_display;
     $name .= "?" unless @keys;
-    $name .= "*"
-      unless $info->{origin} ne "user"
-	|| $ps->{kbdiagrams}->{show} eq "user";
+    # $name .= "*"
+    #   unless $info->{origin} ne "user"
+    #     || $ps->{kbdiagrams}->{show} eq "user";
     $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y - font_bl($font) );
     $y -= $font->{size} * 1.2 + $lw;
 
