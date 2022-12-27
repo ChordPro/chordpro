@@ -8,7 +8,7 @@ description: "Welcome to ChordPro!"
 ![]({{< asset "images/love-me-tender-small.png" >}})
 
 ## ChordPro: The File Format Specification
-* [Overview]({{< relref "ChordPro-File-Format-Specification" >}})
+* [Overview]({{< relref "ChordPro-Introduction" >}})
 * [ChordPro Directives]({{< relref "ChordPro-Directives" >}})
 * [ChordPro Chords]({{< relref "ChordPro-Chords" >}})
 
