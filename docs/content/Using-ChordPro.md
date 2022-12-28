@@ -186,7 +186,8 @@ be used to produce documents with cover pages.
 
 `--lyrics-only` (short: `-l`)
 
-Only prints lyrics. All chords are suppressed.
+Only prints lyrics. All chords are suppressed in lyrics.
+Chord diagrams and grids are also suppressed.
 
 Useful to make prints for singers and other musicians that do not
 require chords.

@@ -5,14 +5,20 @@ description: "Welcome to ChordPro!"
 
 # Welcome to ChordPro!
 
+{{< yell "ChordPro 6 is out!" >}}
+[Read all about it]({{< relref "ChordPro6-Relnotes.html" >}})
+
+[Join the community](<https://groups.io/g/ChordPro>)
+
+
 ![]({{< asset "images/love-me-tender-small.png" >}})
 
-## ChordPro: The File Format Specification
-* [Overview]({{< relref "ChordPro-File-Format-Specification" >}})
+## ChordPro 6: The File Format Specification
+* [Overview]({{< relref "ChordPro-Introduction" >}})
 * [ChordPro Directives]({{< relref "ChordPro-Directives" >}})
 * [ChordPro Chords]({{< relref "ChordPro-Chords" >}})
 
-## ChordPro: The Reference Implementation
+## ChordPro 6: The Program
 * [Overview]({{< relref "ChordPro-Reference-Implementation" >}})
 * [Installation]({{< relref "ChordPro-Installation" >}})
 * [Configuration]({{< relref "ChordPro-Configuration" >}})

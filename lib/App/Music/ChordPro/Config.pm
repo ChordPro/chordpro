@@ -954,7 +954,7 @@ sub default_config() {
       "memorize" : false,
       // Chords inline.
       // May be a string containing pretext %s posttext.
-      // Defaults to "[%s]" if true.
+      // Defaults to "[%s]" if set to a value that doesn't contain "%s".
       "inline-chords" : false,
       // Same, for annotations. Ignored unless inline-chords is set.
       // Must be a string containing pretext %s posttext.
@@ -1285,6 +1285,7 @@ sub default_config() {
 	  "linewidth" : 0.1,	// of a cell width
 	  "hspace"   :  3.95,	// fraction of width
 	  "vspace"   :  3,	// fraction of height
+          "fingers"  :  true,   // show fingering if available
       },
 
       // Keyboard diagrams.
@@ -1309,6 +1310,7 @@ sub default_config() {
       },
 
       // Grid section lines.
+      // Suppress when "show" is false, e.g. for singers.
       // The width and colour of the cell bar lines can be specified.
       // Enable by setting the width to the desired width.
       "grids" : {
@@ -1316,6 +1318,7 @@ sub default_config() {
               "width" : 0,
               "color" : "foreground-medium",
           },
+          "show": true,
           "symbols" : {
               "color" : "blue",
           },

@@ -61,6 +61,9 @@ my $decapo;
 my $no_transpose;		# NYI
 my $no_substitute;
 
+# Stack for properties like textsize.
+my %propstack;
+
 my $diag;			# for diagnostics
 my $lineinfo;			# keep lineinfo
 
@@ -75,6 +78,7 @@ sub new {
     @used_chords = ();
     %warned_chords = ();
     %memchords = ();
+    %propstack = ();
     App::Music::ChordPro::Chords::reset_song_chords();
     @labels = ();
     @chorus = ();
@@ -440,14 +444,15 @@ sub parse_song {
 
 	# For now, directives should go on their own lines.
 	if ( /^\s*\{(.*)\}\s*$/ ) {
+	    my $dir = $1;
 	    if ( $prep->{directive} ) {
 		# warn("PRE:  ", $_, "\n");
-		$prep->{directive}->($_);
+		$prep->{directive}->($dir);
 		# warn("POST: ", $_, "\n");
 	    }
 	    $self->add( type => "ignore",
 			text => $_ )
-	      unless $self->directive($1);
+	      unless $self->directive($dir);
 	    next;
 	}
 
@@ -956,8 +961,6 @@ sub parse_directive {
     return { name => $dir, arg => $arg, omit => 0 }
 }
 
-my %propstack;
-
 sub directive {
     my ( $self, $d ) = @_;
 
@@ -1462,6 +1465,16 @@ sub directive {
 		    name  => $name,
 		    value => $value );
 	push( @{ $propstack{$name} }, $value );
+
+	# A trailing number after a font directive is an implisit size
+	# directive.
+	if ( $prop eq 'font' && $value =~ /\s(\d+(?:\.\d+)?)$/ ) {
+	    $self->add( type  => "control",
+			name  => "$item-size",
+			value => $1 );
+	    push( @{ $propstack{"$item-size"} }, $1 );
+	}
+
 	return 1;
     }
 

@@ -5,7 +5,8 @@ description: "User Forum"
 
 # User Forum
 
-A new user forum is available on groups.io. Feel free to subscribe and contribute.
+An active and responsive user forum is available on groups.io.
+Feel free to subscribe and contribute.
 
 <https://groups.io/g/ChordPro>
 

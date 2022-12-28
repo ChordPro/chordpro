@@ -7,7 +7,7 @@ description: "ChordPro 6 Release Information"
 
 Release information for the ChordPro __file format__.
 
-For release information for the ChordPro __reference implementation__, see
+For release information for the ChordPro __program__, see
 [here]({{< relref "ChordPro-Reference-RelNotes.html" >}}).
 
 Since ChordPro 5 never had an official release, its release notes have
@@ -27,7 +27,7 @@ For example:
 
     [C]Roses are <span color="red">red</span>, [G]<b>don't forget!</b>
 	
-The reference implementation will produce something similar to:
+The ChordPro program will produce something similar to:
 
 ![Example markup]({{< asset "images/ex_markup.png" >}})
 
@@ -40,7 +40,7 @@ For example:
 
     [Em]This is the [*Rit.]end my [Am]friend.
 
-The reference implementation will produce something similar to:
+The ChordPro program will produce something similar to:
 
 ![Example annotation]({{< asset "images/ex_annot.png" >}})
 
@@ -52,10 +52,42 @@ to know that annotations are _not_ chords. In particular:
 - No attempts will be made to transpose, transcode, or draw chord
   diagrams for annotations.
 
-## Metadata (v5)
+## Images
+
+Images can be inserted in the song using the [`image`
+directive]({{< relref "Directives-image.html" >}}). Useful for logo's
+and score fragments.
+
+![Example image]({{< asset "images/ex_image.png" >}})
+
+## Delegates
+
+Delegation is a means to pass arbitrary data to an external program
+that will generate an image. The image is then inserted as with the
+`{image}` directive.
+
+A popular delegate is [ABC[(https://abcnotation.com/).
+The above example image could have been
+acquired via delegation:
+
+````
+{start_of_abc}
+X:1
+K:F
+M:4/4
+[AE]2 | [FC]6 [AC]2 | [FD]3 [FD] [(D(B,] [C)A,)]3 |
+
+{end_of_abc}
+````
+
+## Metadata
 
 Metadata can be used to maintain information about the song.
 See also [Using metadata in texts]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
+
+All metadata can be specified with a directive named after the
+metadatum, or with an explicit [`meta` directive]({{< relref
+"Directives-meta.html" >}}).
 
 The following metadata are supported:
 
@@ -70,6 +102,9 @@ Multiple arrangers can be specified using multiple directives.
 artist
 : Specifies the artist.
 Multiple artists can be specified using multiple directives.
+
+capo
+: The position of the capo, if any.
 
 composer
 : Specifies the composer of the song.
@@ -90,6 +125,9 @@ lyricist
 : Specifies the writer of the lyrics of the song.
 Multiple lyricists can be specified using multiple directives.
 If no lyricist is specified, it is assumed that the composer did all the work.
+
+sorttitle
+: Specifies the title to be used for sorting, e.g. in the table of contents.
 
 tempo
 : Specifies the tempo in number of beats per minute for the song, e.g 80.
@@ -118,8 +156,8 @@ guitar.
 
 Selection can be reversed by appending a `!` to the selector.
 
-How selectors are defined depends on the ChordPro processing tool. The
-reference implementation uses the config values for `instrument.type`
+How selectors are defined depends on the ChordPro processing tool.
+The ChordPro program uses the config values for `instrument.type`
 and `user.name`.
 
 ## Enhanced chord definitions
@@ -139,9 +177,29 @@ For a keyboard:
 Note that the keys are _relative_. `0` is the root, `3` the minor
 third, `7` the fifth and so on.
 
+To modify an existing chord, use `copy`:
+
+    {define Bstar copy B frets x 2 4 4 x}
+
+To change the name as shown, use `display`:
+
+    {define Bstar display B*}
+
+All parts are optional.
+It is even possible to define a chord without additional information.
+
+    {define Bstar}
+	
 For more details, see [Define Directive]({{< relref "directives-define" >}}).
 
-## New section directives
+## Chord grids
+
+Not to be confused with chord _diagrams_, chord grids form an easy way
+to denote the rhythmic structure of a song part.
+
+![]({{< asset "images/ex_grid2.png" >}})
+
+## New lyrics section directives
 
 The following directives are added:
 
@@ -158,7 +216,7 @@ In addition to these directives it is possible to add your own section
 directives, for example `{start_of_lead}` or `{start_of_coda}`. All
 sections must be closed with the corresponding `{end_of_`*section*`}`.
 
-The reference implementation treats all sections (except `chorus`,
+The ChordPro program treats all sections (except `chorus`,
 `tab`, `grid`, `abc` and `ly`) as lyrics.
 
 ## Modified section directives
@@ -183,24 +241,33 @@ to tag individual sections. For example:
 {end_of_verse}
 ````
 
-The reference implementation will add a left margin to the output and
+The ChordPro program will add a left margin to the output and
 place the label text in this margin.
 
 ![Example labels]({{< asset "images/ex_labels.png" >}})
 
-## New directives for fonts and sizes (v5)
+## New directives for fonts, sizes and colours (v5)
 
-You can set fonts and font sizes for `title, `footer`, `toc`
-(table of contents), and `tab`.
+You can set fonts, sizes and colours for `text` (lyrics), `chord`,
+`title`, `footer`, `toc` (table of contents), and `tab`.
 
-For example: `{footersize:10}`.
+For example:
 
-## New directives for colours (v5)
+````
+{titlecolour:blue}
+{footersize:10}
+````
 
-You can set colours for `title`, `footer`, `toc`
-(table of contents), `tab`, `text` and `chords`.
+Without argument a setting will revert to its previous value, e.g.
 
-For example: `{titlecolour:blue}`.
+````
+{textsize:14}
+[A]Lyrics size 14
+{textsize:20}
+[B]Lyrics size 20
+{textsize}
+[C]Lyrics size 14
+````
 
 ## New directive: `highlight` (v5)
 

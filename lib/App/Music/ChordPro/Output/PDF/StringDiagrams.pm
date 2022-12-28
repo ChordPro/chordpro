@@ -89,9 +89,9 @@ sub draw {
     $pr->setfont($font);
     my $name = $info->chord_display
       ( App::Music::ChordPro::Output::PDF::has_musicsyms($font) );
-    $name .= "*"
-      unless $info->{origin} ne "user"
-	|| $::config->{diagrams}->{show} eq "user";
+    # $name .= "*"
+    #   unless $info->{origin} ne "user"
+    #     || $::config->{diagrams}->{show} eq "user";
     $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y - font_bl($font) );
     $y -= $font->{size} * $ps->{spacing}->{diagramchords} + $dot/2 + $lw;
     if ( $info->{base} + $info->{baselabeloffset} > 1 ) {
@@ -135,13 +135,16 @@ sub draw {
     # However, if none we should really use white.
     $fbg = "white" if $fbg eq "none";
 
+    my $fingers;
+    $fingers = $info->{fingers} if $ps->{diagrams}->{fingers};
+
     # Bar detection.
     my $bar;
-    if ( $info->{fingers} && $fbg ne $ps->{theme}->{foreground} ) {
+    if ( $fingers && $fbg ne $ps->{theme}->{foreground} ) {
 	my %h;
 	my $str = 0;
 	my $got = 0;
-	foreach ( @{ $info->{fingers} } ) {
+	foreach ( @{ $fingers } ) {
 	    $str++, next unless $info->{frets}->[$str] > 0;
 	    if ( $bar->{$_} ) {
 		# Same finger on multiple strings -> bar.
@@ -189,7 +192,7 @@ sub draw {
     for my $sx ( 0 .. @{ $info->{frets} }-1 ) {
 	my $fret = $info->{frets}->[$sx];
 	my $fing = -1;
-	$fing = $info->{fingers}->[$sx] // -1 if $info->{fingers};
+	$fing = $fingers->[$sx] // -1 if $fingers;
 
 	# For bars, only the first and last finger.
 	if ( $fing && $bar && $bar->{$fing} ) {

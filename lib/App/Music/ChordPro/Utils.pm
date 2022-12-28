@@ -110,23 +110,21 @@ sub make_preprocessor {
     my $prep;
     foreach my $linetype ( keys %{ $prp } ) {
 	my @targets;
-	my $code;
+	my $code = "";
 	foreach ( @{ $prp->{$linetype} } ) {
+	    $code .= "m\0" . $_->{select} . "\0 && "
+	      if $_->{select};
 	    if ( $_->{pattern} ) {
-		push( @targets, $_->{pattern} );
-		# Subsequent targets override.
-		$code->{$_->{pattern}} = $_->{replace};
+		$code .= "s\0" . $_->{pattern} . "\0"
+		  . $_->{replace} . "\0g;\n";
 	    }
 	    else {
-		push( @targets, quotemeta($_->{target}) );
-		# Subsequent targets override.
-		$code->{quotemeta($_->{target})} = quotemeta($_->{replace});
+		$code .= "s\0" . quotemeta($_->{target}) . "\0"
+		  . quotemeta($_->{replace}) . "\0g;\n";
 	    }
 	}
-	if ( @targets ) {
-	    my $t = "sub { for (\$_[0]) {\n";
-	    $t .= "s\0" . $_ . "\0" . $code->{$_} . "\0g;\n" for @targets;
-	    $t .= "}}";
+	if ( $code ) {
+	    my $t = "sub { for (\$_[0]) {\n" . $code . "}}";
 	    $prep->{$linetype} = eval $t;
 	    die( "CODE : $t\n$@" ) if $@;
 	}

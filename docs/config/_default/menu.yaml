@@ -9,7 +9,7 @@ sidebar:
   weight: 100
 
 - title: Overview
-  identifier: ChordPro-File-Format-Specification
+  identifier: ChordPro-Introduction
   parent: spec
   weight: 110
 
@@ -23,7 +23,7 @@ sidebar:
   weight: 130
   title: ChordPro Chords
 
-- title: The Implementation
+- title: The Program
   identifier: impl
   weight: 200
 

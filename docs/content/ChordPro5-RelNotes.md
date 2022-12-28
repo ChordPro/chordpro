@@ -7,7 +7,7 @@ description: "ChordPro 5 Release Information"
 
 Release information for the ChordPro __file format__.
 
-For release information for the ChordPro __reference implementation__, see
+For release information for the ChordPro __program__, see
 [here]({{< relref "ChordPro-Reference-RelNotes.html" >}}).
 
 {{< toc >}}
@@ -62,19 +62,17 @@ Multiple specifications are possible, each specification applies from where it a
 year
 : The year this song was first published, as a four-digit number.
 
-## New directives for fonts and sizes
+## New directives for fonts, sizes and colours (v5)
 
-You can set fonts and font sizes for `title, `footer`, `toc`
-(table of contents), and `tab`.
+You can set fonts, sizes and colours for `text` (lyrics), `chord`,
+`title`, `footer`, `toc` (table of contents), and `tab`.
 
-For example: `{footersize:10}`.
+For example:
 
-## New directives for colours
-
-You can set colours for `title`, `footer`, `toc`
-(table of contents), `tab`, `text` and `chords`.
-
-For example: `{titlecolour:blue}`.
+````
+{titlecolour:blue}
+{footersize:10}
+````
 
 ## New directive: `highlight`
 

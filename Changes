@@ -1,3 +1,15 @@
+6.000 2022-12-28
+
+    - !ChordPro functionality
+    - Chord finger settings can be suppressed with pdf.diagrams.fingers.
+    - (Experimental) Add line selection to preprocessor.
+    - Remove * for user defined chords.
+    - !BugFixes
+    - Fix issue 259.
+    - Fix issue 260 (chords not being handled correctly in comments).
+    - Fix issue 260 (suppress diagrams and grids when lyrics-only).
+    - Fix issue 261 (truesf not functional beyond chord root).
+    
 5.990 2022-11-03
 
     - !BugFixes

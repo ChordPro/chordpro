@@ -572,8 +572,10 @@ sub _get_keys {
 	$i++;
 	next if $_ < 0;
 	my $c = $tuning[$i] + $_ + $base;
-	$c += 12 if $c < $info->{root_ord};
-	$c -= $info->{root_ord};
+	if ( $info->{root_ord} ) {
+	    $c += 12 if $c < $info->{root_ord};
+	    $c -= $info->{root_ord};
+	}
 	$keys{ $c % 12 }++;
     }
     return [ keys %keys ];

@@ -44,6 +44,7 @@ lib/App/Music/ChordPro/res/config/guitar-ly.json
 lib/App/Music/ChordPro/res/config/guitar.json
 lib/App/Music/ChordPro/res/config/guitar_latex.json
 lib/App/Music/ChordPro/res/config/inline.json
+lib/App/Music/ChordPro/res/config/keyboard.json
 lib/App/Music/ChordPro/res/config/mandolin-ly.json
 lib/App/Music/ChordPro/res/config/modern1.json
 lib/App/Music/ChordPro/res/config/modern2.json

@@ -224,7 +224,11 @@ The vertical distance between lines of diagrams is `vspace` times the cell heigh
 
 `linewidth` is the thickness of the diagram lines as a fraction of the cell width.
 
+If the chord definition has info for finger settings, these will be
+shown if `fingers` is true.
+
         "diagrams" : {
+            "fingers"  : "true"
             "show"     :  "bottom",   // or "top", or "right", or "below"
             "width"    :  6,
             "height"   :  6,
@@ -243,6 +247,9 @@ separate column at the right of the lyrics instead of at the end of
 the song.
 
 {{< showpage "style_modern3" >}}
+
+Note that command line option `--lyricsonly` implies `"show":false`
+for diagrams.
 
 ## Keyboard diagrams
 
@@ -289,11 +296,15 @@ With the above settings, keyboard diagrams will look like:
 
 ![]({{< asset "images/ex_kbdiagram.png" >}})
 
+Note that command line option `--lyricsonly` implies `"show":false`
+for diagrams.
+
 ## Grid lines
 
 Properties for the lines of grid sections.
 
       // Grid section lines.
+      // Suppress when "show" is false, e.g. for singers.
       // The width and colour of the cell bar lines can be specified.
       // Enable by setting the width to the desired width.
       "grids" : {
@@ -301,8 +312,18 @@ Properties for the lines of grid sections.
               "width" : 0,
               "color" : "foreground-medium",
           },
+          "show": true,
+          "symbols" : {
+              "color" : "blue",
+          },
+          "volta" : {
+              "span" : 0.7,
+              "color" : "blue",
+          },
       },
 
+Note that command line option `--lyricsonly` implies `"show":false`
+for grids.
 
 ## Even/odd page printing
 
