@@ -12,11 +12,9 @@
     },
 
     // Printing chord diagrams.
-    // "auto": automatically add unknown chords as empty diagrams.
     // "show": prints the chords used in the song.
     // "sorted": order the chords by key.
     "diagrams" : {
-	"auto"     :  true,
 	"show"     :  "all",
 	"sorted"   :  false,
     },

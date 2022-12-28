@@ -225,7 +225,6 @@ defintions are necessary, ChordPro can derive the notes from the chord type.
 By default, ChordPro will include diagrams for all known chords that
 have been used in a song.
 
-    // "auto": automatically add unknown chords as empty diagrams.
     // "show": prints the chords used in the song.
     //         "all": all chords used.
     //         "user": only prints user defined chords.
@@ -236,7 +235,6 @@ have been used in a song.
     // Note: The type of diagram (string or keyboard) is determined
     // by the value of "instrument.type".
     "diagrams" : {
-        "auto"     :  false,
         "show"     :  "all",
         "sorted"   :  false,
         "suppress" :  [],
@@ -244,11 +242,6 @@ have been used in a song.
 
 The `suppress` list can be used to filter chords from showing
 diagrams, for example for chords that you consider trivial.
-
-If `auto` is set to true, unknown chords will be printed as empty
-diagrams. This makes it easy to manually put the finger positions on
-paper. Of course, adding a [chord definition]({{< relref
-"directives-define" >}}) is usually a better alternative.
 
 ## Table of Contents
 

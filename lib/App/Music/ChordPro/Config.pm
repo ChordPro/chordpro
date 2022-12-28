@@ -1076,7 +1076,6 @@ sub default_config() {
     ],
 
     // Printing chord diagrams.
-    // "auto": automatically add unknown chords as empty diagrams.
     // "show": prints the chords used in the song.
     //         "all": all chords used.
     //         "user": only prints user defined chords.
@@ -1086,7 +1085,6 @@ sub default_config() {
     // Note: The type of diagram (string or keyboard) is determined
     // by the value of "instrument.type".
     "diagrams" : {
-	"auto"     :  false,
 	"show"     :  "all",
 	"sorted"   :  false,
         "suppress" :  [],

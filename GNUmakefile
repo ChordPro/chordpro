@@ -73,7 +73,7 @@ ${RES}/pod/Config.pod : ${LIB}/Config.pm
 ${RES}/pod/A2Crd.pod : ${LIB}/A2Crd.pm
 	${PODSELECT} $< > $@
 
-docs/assets/pub/config60.schema : ${RES}/config/config.schema
+docs/assets/pub/config61.schema : ${RES}/config/config.schema
 	cp -p $< $@
 
 # Verify JSON data
