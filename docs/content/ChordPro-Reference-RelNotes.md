@@ -1,5 +1,27 @@
 # Release info
 
+## 6.000
+
+Released: 2022-12-28
+
+
+### ChordPro functionality
+
+* Chord finger settings can be suppressed with pdf.diagrams.fingers.
+* (Experimental) Add line selection to preprocessor.
+* Remove * for user defined chords.
+
+### BugFixes
+
+* Fix issue 259.
+* Fix issue 260 (chords not being handled correctly in comments).
+* Fix issue 260 (suppress diagrams and grids when lyrics-only).
+* Fix issue 261 (truesf not functional beyond chord root).
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.
+
 ## 5.990
 
 Released: 2022-11-03
@@ -13,10 +35,6 @@ Released: 2022-11-03
 * Eliminate potential splice warning with pagealign-songs.
 * Fix resize preferences window.
 * Fix problem with copied chords not being registered as agnostic.
-
-### Social and support
-
-[User community](https://groups.io/g/ChordPro) for feedback and help.
 
 ## 5.989
 
