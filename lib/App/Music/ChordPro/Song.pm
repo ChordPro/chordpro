@@ -627,11 +627,6 @@ sub chord {
     }
     ( my $n = $name ) =~ s/^\((.+)\)$/$1/;
 
-    if ( ! $info->{origin} && $config->{diagrams}->{auto} ) {
-	$info = App::Music::ChordPro::Chords::add_unknown_chord($name);
-	$self->add_chord($info);
-    }
-
     unless ( $info->is_note ) {
 	if ( $info->is_keyboard ) {
 	    push( @used_chords, $n ) unless $info->is_nc;
@@ -1839,10 +1834,6 @@ sub parse_chord {
 		  $i->{_via}, "\n" ) if $debug > 1;
 	    $unk = 0;
 	}
-	elsif ( $config->{diagrams}->{auto} ) {
-	    my $i = App::Music::ChordPro::Chords::add_unknown_chord($chord);
-	    $info = $i;
-	}
     }
 
     unless ( $info || $allow ) {
@@ -1850,11 +1841,6 @@ sub parse_chord {
 	    warn("Parsing chord: \"$chord\" unknown\n") if $debug;
 	    do_warn( "Unknown chord: \"$chord\"\n" )
 	      unless $chord =~ /^n\.?c\.?$/i;
-	}
-	if ( $config->{diagrams}->{auto} ) {
-	    $info = App::Music::ChordPro::Chords::add_unknown_chord($chord);
-	    warn( "Parsing chord: \"$chord\" added ",
-		  $info->name, " to song chords\n" ) if $debug > 1;
 	}
     }
 
