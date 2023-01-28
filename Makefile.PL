@@ -50,6 +50,8 @@ WriteMakefile
 		    'Image::Info'		  => 1.41,
 		    'List::Util'		  => 1.33,
 		    'Storable'			  => 3.08,
+		   # Some distro's have these removed from the core.
+		    'Pod::Usage'		  => 2.03,
 		   # These are only used by the LaTeX backend
 		   # 'Template'			  => 3.010,
 		   # 'LaTeX::Encode'		  => 0.092.0,

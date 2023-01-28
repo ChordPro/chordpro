@@ -3,7 +3,8 @@
     - !ChordPro functionality
     - Remove diagrams.auto from config.
     - !BugFixes
-
+    - Add Pod::Usage to required modules. Some distros have removed it from the core.
+    
 6.000 2022-12-28
 
     - !ChordPro functionality
