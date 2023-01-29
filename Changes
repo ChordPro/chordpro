@@ -4,6 +4,7 @@
     - Remove diagrams.auto from config.
     - !BugFixes
     - Add Pod::Usage to required modules. Some distros have removed it from the core.
+    - Add jpeg library to MacOS kit.
     
 6.000 2022-12-28
 
