@@ -572,7 +572,8 @@ sub parse_song {
 	  };
 
 	if ( %warned_chords ) {
-	    my @a = sort App::Music::ChordPro::Chords::chordcompare keys(%warned_chords);
+	    my @a = sort App::Music::ChordPro::Chords::chordcompare
+	      keys(%warned_chords);
 	    my $l;
 	    if ( @a > 1 ) {
 		my $a = pop(@a);
@@ -642,7 +643,7 @@ sub chord {
 	    # Tests run without config and chords, so pretend.
 	    push( @used_chords, $n );
 	}
-	else {
+	elsif ( ! $info->is_rootless ) {
 	    do_warn("Unknown chord: $n")
 	      unless $warned_chords{$n}++;
 	}
@@ -1768,7 +1769,7 @@ sub parse_chord {
     }
 
     unless ( ($info
-	      && ( defined($info->{root}) || $info->is_nc))
+	      && ( defined($info->{root}) || defined($info->{bass}) || $info->is_nc))
 	     ||
 	     ( $allow && !( $xc || $xp ) ) ) {
 	do_warn( "Cannot parse",

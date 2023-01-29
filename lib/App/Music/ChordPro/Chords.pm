@@ -435,7 +435,7 @@ sub add_config_chord {
 }
 
 # API: Add a user defined chord.
-# Used by: Songbook, Output::PDF.
+# Used by: Song.
 sub add_song_chord {
     my ( $ii ) = @_;
 
@@ -471,7 +471,7 @@ sub add_song_chord {
 }
 
 # API: Add an unknown chord.
-# Used by: Songbook.
+# Used by: Song.
 sub add_unknown_chord {
     my ( $name ) = @_;
     $song_chords{$name} = bless

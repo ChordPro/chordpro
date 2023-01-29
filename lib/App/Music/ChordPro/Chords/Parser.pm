@@ -239,9 +239,13 @@ sub parse_chord {
 		 parser => $self,
 		 name => $_[1] };
 
-    # Match chord.
     my %plus;
-    if ( $chord =~ /^$self->{c_pat}$/ ) {
+
+    # Match chord.
+    if ( $chord eq "" && $bass ne "" ) {
+	$info->{rootless} = 1;
+    }
+    elsif ( $chord =~ /^$self->{c_pat}$/ ) {
 	%plus = %+;
 	$info->{root} = $plus{root};
     }
@@ -304,7 +308,7 @@ sub parse_chord {
 ####	$info->{isflat} = $info->{"${pfx}_mod"} < 0;
     };
 
-    $ordmod->("root");
+    $ordmod->("root") unless $info->is_rootless;
 
     cluck("BLESS info for $chord into ", $self->{target}, "\n")
       unless ref($info) =~ /App::Music::ChordPro::Chord::/;
@@ -313,6 +317,11 @@ sub parse_chord {
 	return unless $bass =~ /^$self->{n_pat}$/;
 	$info->{bass} = $bass;
 	$ordmod->("bass");
+	if ( $info->is_rootless ) {
+	    for ( qw( ord mod canon ) ) {
+		$info->{"root_$_"} = $info->{"bass_$_"};
+	    }
+	}
     }
 
     if ( $::config->{settings}->{'chords-canonical'} ) {
@@ -821,6 +830,7 @@ sub is_nc {
 
 # For convenience.
 sub is_chord      { defined $_[0]->{root_ord} };
+sub is_rootless   { $_[0]->{rootless} };
 sub is_annotation { 0 };
 
 sub strings {
@@ -849,13 +859,16 @@ use String::Interpolate::Named;
 sub show {
     Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self, $np ) = @_;
-    my $res = $self->is_chord
-      ? $self->{parser}->root_canon( $self->{root_ord},
-				     $self->{root_mod} >= 0,
-				     $self->{qual} eq '-',
-				     !$self->is_flat
-				   ) . $self->{qual} . $self->{ext}
-      : $self->{name};
+    my $res =
+      $self->is_rootless
+      ? ""
+      : $self->is_chord
+        ? $self->{parser}->root_canon( $self->{root_ord},
+				       $self->{root_mod} >= 0,
+				       $self->{qual} eq '-',
+				       !$self->is_flat
+				     ) . $self->{qual} . $self->{ext}
+        : $self->{name};
     if ( $self->is_note ) {
 	return lcfirst($res);
     }
@@ -870,7 +883,7 @@ sub show {
 sub agnostic {
     Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self ) = @_;
-    return if $self->is_note;
+    return if $self->is_rootless || $self->is_note;
     join( " ", "",
 	  $self->{root_ord},
 	  $self->{root_mod},
@@ -889,11 +902,13 @@ sub transpose {
     my $info = $self->clone;
     my $p = $self->{parser};
 
-    $info->{root_ord} = ( $self->{root_ord} + $xpose ) % $p->intervals;
-    $info->{root_canon} = $info->{root} =
-      $p->root_canon( $info->{root_ord},
-		      $dir > 0,
-		      $info->{qual_canon} eq "-" );
+    unless ( $self->{rootless} ) {
+	$info->{root_ord} = ( $self->{root_ord} + $xpose ) % $p->intervals;
+	$info->{root_canon} = $info->{root} =
+	  $p->root_canon( $info->{root_ord},
+			  $dir > 0,
+			  $info->{qual_canon} eq "-" );
+    }
     if ( $self->{bass} && $self->{bass} ne "" ) {
 	$info->{bass_ord} = ( $self->{bass_ord} + $xpose ) % $p->intervals;
 	$info->{bass_canon} = $info->{bass} =

@@ -3,6 +3,7 @@
     - !ChordPro functionality
     - Remove diagrams.auto from config.
     - Allow define chord "|" in config.
+    - Allow graceful handling of rootless chords.
     - !BugFixes
     - Add Pod::Usage to required modules. Some distros have removed it from the core.
     - Add jpeg library to MacOS kit.
