@@ -355,7 +355,7 @@ sub add_config_chord {
 
     # Handle alternatives.
     my @names;
-    if ( $def->{name} =~ /\|/ ) {
+    if ( $def->{name} =~ /.\|./ ) {
 	$def->{name} = [ split( /\|/, $def->{name} ) ];
     }
     if ( UNIVERSAL::isa( $def->{name}, 'ARRAY' ) ) {
