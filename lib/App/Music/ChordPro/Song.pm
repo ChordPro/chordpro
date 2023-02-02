@@ -1144,6 +1144,9 @@ sub directive {
 	    elsif ( $k =~ /^(id)$/i ) {
 		$id = $v;
 	    }
+	    elsif ( $k =~ /^(x|y)$/i ) {
+		$opts{lc($k)} = $v;
+	    }
 	    elsif ( $uri ) {
 		do_warn( "Unknown image attribute: $1\n" );
 		next;

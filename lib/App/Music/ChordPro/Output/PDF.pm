@@ -2241,11 +2241,14 @@ sub imageline {
 	prlabel( $ps, $tag, $x, $ytext );
     }
 
-    warn("add_image\n") if $config->{debug}->{images};
+    $x = $ps->{__leftmargin} + $opts->{x} if defined $opts->{x};
+    $y = $ps->{__topmargin}  - $opts->{y} if defined $opts->{y};
+    warn( sprintf("add_image %.1f %.1f %.1f %.1f\n",
+		  $x, $y, $w, $h )) if $config->{debug}->{images};
     $pr->add_image( $img, $x, $y, $w, $h, $opts->{border} || 0 );
     warn("done\n") if $config->{debug}->{images};
 
-    return $h;			# vertical size
+    return defined($opts->{x}) || defined($opts->{y}) ? 0 : $h;			# vertical size
 }
 
 sub imagespread {
