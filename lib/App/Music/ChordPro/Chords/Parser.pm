@@ -924,7 +924,7 @@ sub transpose {
 
 sub transcode {
     Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
-    my ( $self, $xcode ) = @_;
+    my ( $self, $xcode, $key_ord ) = @_;
     return $self unless $xcode;
     return $self unless $self->is_chord;
     return $self if $self->{system} eq $xcode;
@@ -934,6 +934,7 @@ sub transcode {
     my $p = $self->{parser}->get_parser($xcode);
     die("OOPS ", $p->{system}, " $xcode") unless $p->{system} eq $xcode;
     $info->{parser} = $p;
+    $info->{root_ord} -= $key_ord if $key_ord && $p->movable;
 #    $info->{$_} = $p->{$_} for qw( ns_tbl nf_tbl ns_canon nf_canon );
     $info->{root_canon} = $info->{root} =
       $p->root_canon( $info->{root_ord},
@@ -944,6 +945,7 @@ sub transcode {
 	$info->{qual_canon} = $info->{qual} = "";
     }
     if ( $self->{bass} && $self->{bass} ne "" ) {
+	$info->{bass_ord} -= $key_ord if $key_ord && $p->movable;
 	$info->{bass_canon} = $info->{bass} =
 	  $p->root_canon( $info->{bass_ord}, $info->{bass_mod} >= 0 );
     }

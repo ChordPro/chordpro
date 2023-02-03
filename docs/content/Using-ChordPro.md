@@ -328,10 +328,14 @@ are:
 * `german` (C, ... A, Ais/B, H)
 * `latin` (Do, Re, Mi, Fa, Sol, ...)
 * `scandinavian` (C, ... A, A#/Bb, H)
-* `solfège` (Do, Re, Mi, Fa, So, ...)
-* `solfege` (same as `solfège`)
-* `nashville` (1, 2, 3, ...)
-* `roman` (I, II, III, ...)
+* `solfège` (Do, Re, Mi, Fa, So, ...)*
+* `solfege` (same as `solfège`)*
+* `nashville` (1, 2, 3, ...)*
+* `roman` (I, II, III, ...)*
+
+The systems marked with * are key-relative. For example, when a song
+is in the key of `D` and transcoded to `nashville`, `D` becomes `1`,
+`G` becomes `4` and so on.
 
 ### transpose
 

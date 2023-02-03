@@ -1817,7 +1817,10 @@ sub parse_chord {
     }
 
     if ( $xc && $info ) {
-	$info = $info->transcode($xc);
+	my $key_ord;
+	$key_ord = $self->{chordsinfo}->{$self->{meta}->{key}->[-1]}->{root_ord}
+	  if $self->{meta}->{key};
+	$info = $info->transcode( $xc, $key_ord );
 	warn( "Parsing chord: \"$chord\" transcoded to ",
 	      $info->name,
 	      " (", $info->{system}, ")",

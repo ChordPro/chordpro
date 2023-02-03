@@ -8,6 +8,7 @@
     - !BugFixes
     - Add Pod::Usage to required modules. Some distros have removed it from the core.
     - Add jpeg library to MacOS kit.
+    - Fix root relocation when transcoding to a movable system.
     
 6.000 2022-12-28
 

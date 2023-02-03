@@ -1,0 +1,57 @@
+{new_song}
+{+settings.transcode:nashville}
+{title: Nashville C}
+{key: C}
+
+[C]Hello, [G]World!
+
+{new_song}
+{+settings.transcode:nashville}
+{title: Nashville D}
+{key: D}
+
+[D]Hello, [G]World!
+
+{new_song}
+{+settings.transcode:roman}
+{title: Roman C}
+{key: C}
+
+[C]Hello, [G]World!
+
+{new_song}
+{+settings.transcode:roman}
+{title: Roman D}
+{key: D}
+
+[D]Hello, [G]World!
+
+# Cannot yet test these -- solfege and latin cannot be fooled with {+settings}.
+#
+# {new_song}
+# {+settings.transcode:solfege}
+# {title: Solfege C}
+# {key: C}
+#
+# [C]Hello, [G]World!
+#
+# {new_song}
+# {+settings.transcode:solfege}
+# {title: Solfege D}
+# {key: D}
+#
+# [D]Hello, [G]World!
+#
+# {new_song}
+# {+settings.transcode:latin}
+# {title: Latin C}
+# {key: C}
+#
+# [C]Hello, [G]World!
+#
+# {new_song}
+# {+settings.transcode:latin}
+# {title: Latin D}
+# {key: D}
+#
+# [D]Hello, [G]World!
