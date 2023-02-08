@@ -59,6 +59,7 @@ my @labels;			# labels used
 # Normally, transposition and subtitutions are handled by the parser.
 my $decapo;
 my $no_transpose;		# NYI
+my $xcmov;			# transcode to movable system
 my $no_substitute;
 
 # Stack for properties like textsize.
@@ -83,6 +84,7 @@ sub new {
     @labels = ();
     @chorus = ();
     $capo = undef;
+    $xcmov = undef;
     upd_config();
 
     $diag->{format} = $config->{diagnostics}->{format};
@@ -231,7 +233,9 @@ sub parse_song {
 	}
 	warn("Got transcoder for $target\n") if $::options->{verbose};
 	App::Music::ChordPro::Chords::set_parser($target);
-	if ( $target ne App::Music::ChordPro::Chords::get_parser->{system} ) {
+	my $p = App::Music::ChordPro::Chords::get_parser;
+	$xcmov = $p->movable;
+	if ( $target ne $p->{system} ) {
 	    ::dump(App::Music::ChordPro::Chords::Parser->parsers);
 	    warn("OOPS parser mixup, $target <> ",
 		App::Music::ChordPro::Chords::get_parser->{system})
@@ -1820,6 +1824,10 @@ sub parse_chord {
 	my $key_ord;
 	$key_ord = $self->{chordsinfo}->{$self->{meta}->{key}->[-1]}->{root_ord}
 	  if $self->{meta}->{key};
+	if ( $xcmov && !defined $key_ord ) {
+	    do_warn("Warning: Transcoding to $xc without key may yield unexpected results\n");
+	    undef $xcmov;
+	}
 	$info = $info->transcode( $xc, $key_ord );
 	warn( "Parsing chord: \"$chord\" transcoded to ",
 	      $info->name,
