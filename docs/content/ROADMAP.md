@@ -1,11 +1,11 @@
 # ROADMAP for ChordPro
 
-This roadmap contains changes and enhacements that are likely to take
+This roadmap contains changes and enhancements that are likely to take
 place in the future.
 
 Feel free to feedback on the [community forum](https://groups.io/g/ChordPro).
 
-## Planned for 6.x
+## Planned for ChrdPro 6.x
 
 ### Placement of images
 
@@ -49,6 +49,8 @@ recall the section at arbitrary places.
 
 Useful to change parts order for different voices or instruments.
 
+[Discussion](https://groups.io/g/ChordPro/topic/addition_of_a_flow/92490757).
+
 ### HTML support
 
 HTML support is currently limited. With the power of modern CSS HTML
@@ -60,7 +62,7 @@ output should be as perfect as the PDF.
 
 A new wrapper program that provides real MacOS GUI.
 
-Requires a MacOS developer.
+![]({{< asset "images/helpwanted50.png" >}}) Requires a MacOS developer.
 
 ### Libraries
 
@@ -71,8 +73,8 @@ least in the GUI) to work with libraries.
 
 Designate style or properties for selected sections.
 
-Issue #174.
+[Issue #174](https://github.com/ChordPro/chordpro/issues/174).
 
 ### Strumming patterns
 
-Issue #85.
+[Issue #85](https://github.com/ChordPro/chordpro/issues/85).
