@@ -687,6 +687,9 @@ sub decompose {
 		}
 		if ( $memorizing ) {
 		    push( @$memchords, $chords[-1] );
+		    warn("Chord memorized for $in_context\[$memcrdinx]: ",
+			 $chords[-1], "\n")
+		      if $config->{debug}->{chords};
 		}
 		$memcrdinx++;
 	    }
@@ -704,14 +707,16 @@ sub decompose {
 		push( @chords, $chord );
 	    }
 	    else {
-		push( @chords, $memchords->[$memcrdinx]);
+		push( @chords, $self->chord($memchords->[$memcrdinx]));
+		warn("Chord recall $in_context\[$memcrdinx]: ", $chords[-1], "\n")
+		  if $config->{debug}->{chords};
 	    }
 	    $memcrdinx++;
 	}
 
 	# Not memorizing.
 	else {
-	    #do_warn("No chords memorized for $in_context");
+	    # do_warn("No chords memorized for $in_context");
 	    push( @chords, $chord );
 	}
 	$dummy = 0;

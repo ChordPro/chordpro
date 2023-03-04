@@ -1,0 +1,17 @@
+{+settings.memorize:1}
+{title: Transpose test}
+{artist:}
+{key: D}
+{tempo: 80}
+{define D/F# frets x x 4 2 3 2}
+{define E/G# frets 4 2 2 1 0 0}
+
+{start_of_verse verse 1}
+ [G]This is a [Bm]funky verse in [A]D    [D/F#]
+{end_of_verse}
+
+{transpose: 2}
+
+{start_of_verse verse 2}
+ [^]Now it's a [^]funky verse in [^]E    [^]
+{end_of_verse}

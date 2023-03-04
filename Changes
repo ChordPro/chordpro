@@ -9,7 +9,8 @@
     - Add Pod::Usage to required modules. Some distros have removed it from the core.
     - Add jpeg library to MacOS kit.
     - Fix root relocation when transcoding to a movable system.
-    
+    - Fix chord recall with trans{code,pose} (Forum 1693).
+
 6.000 2022-12-28
 
     - !ChordPro functionality

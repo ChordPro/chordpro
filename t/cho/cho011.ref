@@ -1,0 +1,21 @@
+{title: Transpose test}
+{key: D}
+{tempo: 80}
+{define: D/F# base-fret 1 frets N N 4 2 3 2}
+{define: E/G# base-fret 1 frets 4 2 2 1 0 0}
+{define: G               base-fret  1    frets   3   2   0   0   0   3   }
+{define: Bm              base-fret  1    frets   X   2   4   4   3   2   }
+{define: A               base-fret  1    frets   X   0   2   2   2   0   }
+{define: D/F#            base-fret  1    frets   X   X   4   2   3   2   }
+{define: C#m             base-fret  1    frets   X   X   2   1   2   0   }
+{define: B               base-fret  1    frets   X   2   4   4   4   2   }
+{define: E/G#            base-fret  1    frets   4   2   2   1   0   0   }
+
+{start_of_verse: verse 1}
+ [G]This is a [Bm]funky verse in [A]D    [D/F#]
+{end_of_verse}
+
+
+{start_of_verse: verse 2}
+ [A]Now it’s a [C#m]funky verse in [B]E    [E/G#]
+{end_of_verse}
