@@ -436,7 +436,7 @@ sub pagelabel {
                               $style eq 'alpha' ? 'a' : 'D',
 		     defined $prefix ? ( prefix => $prefix ) : (),
 		     start => 1 };
-	$c->( $self->{pdf}, $page, %$opts );
+	$c->( $self->{pdf}, $page+1, %$opts );
     }
     else {
 	my $opts = { -style => $style,
