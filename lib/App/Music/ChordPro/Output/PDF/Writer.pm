@@ -476,24 +476,25 @@ sub make_outlines {
 	}
 
 	my %lh;			# letter hierarchy
-	for ( @$book ) {
-	    # Group on first letter.
-	    # That's why we left the sort fields in...
-	    my $cur = uc(substr( $_->[0], 0, 1 ));
-	    $lh{$cur} //= [];
-	    # Last item is the song.
-	    push( @{$lh{$cur}}, $_->[-1] );
+	my $needlh = 0;
+	if ( $ctl->{letter} > 0 ) {
+	    for ( @$book ) {
+		# Group on first letter.
+		# That's why we left the sort fields in...
+		my $cur = uc(substr( $_->[0], 0, 1 ));
+		$lh{$cur} //= [];
+		# Last item is the song.
+		push( @{$lh{$cur}}, $_->[-1] );
+	    }
+	    # Need letter hierarchy?
+	    $needlh = keys(%lh) >= $ctl->{letter};
 	}
 
-	# Need letter hierarchy?
-	my $needlh = keys(%lh) >= $ctl->{letter};
-	my $cur_ol;
-	my $cur_let = "";
-
-	foreach my $let ( sort keys %lh ) {
-	    foreach my $song ( @{$lh{$let}} ) {
-		my $ol;
-		if ( $needlh ) {
+	if ( $needlh ) {
+	    my $cur_ol;
+	    my $cur_let = "";
+	    foreach my $let ( sort keys %lh ) {
+		foreach my $song ( @{$lh{$let}} ) {
 		    unless ( defined $cur_ol && $cur_let eq $let ) {
 			# Intermediate level autoline.
 			$cur_ol = $outline->outline;
@@ -501,12 +502,23 @@ sub make_outlines {
 			$cur_let = $let;
 		    }
 		    # Leaf outline.
-		    $ol = $cur_ol->outline;
+		    my $ol = $cur_ol->outline;
+		    # Display info.
+		    $ol->title( demarkup( fmt_subst( $song, $ctl->{line} ) ) );
+		    if ( my $c = $ol->can("destination") ) {
+			$c->( $ol, $pdf->openpage( $song->{meta}->{tocpage} + $start ) );
+		    }
+		    else {
+			$ol->dest($pdf->openpage( $song->{meta}->{tocpage} + $start ));
+		    }
 		}
-		else {
-		    # Leaf outline.
-		    $ol = $outline->outline;
-		}
+	    }
+	}
+	else {
+	    foreach my $b ( @$book ) {
+		my $song = $b->[-1];
+		# Leaf outline.
+		my $ol = $outline->outline;
 		# Display info.
 		$ol->title( demarkup( fmt_subst( $song, $ctl->{line} ) ) );
 		if ( my $c = $ol->can("destination") ) {
