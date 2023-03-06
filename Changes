@@ -9,6 +9,7 @@
     - Add Pod::Usage to required modules. Some distros have removed it from the core.
     - Add jpeg library to MacOS kit.
     - Fix root relocation when transcoding to a movable system.
+    - Fix missing parser in {define XX} without frets etc.
     - Fix forum 1696 (chord recall with trans{code,pose}).
     - Fix issue #269 (problem with page labels).
     - Fix issue #270 (PDF outlines issues, 'letter' setting).

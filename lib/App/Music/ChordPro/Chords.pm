@@ -474,6 +474,7 @@ sub add_song_chord {
 # Used by: Song.
 sub add_unknown_chord {
     my ( $name ) = @_;
+    $parser //= App::Music::ChordPro::Chords::Parser->get_parser;
     $song_chords{$name} = bless
       { origin  => "user",
 	name    => $name,
