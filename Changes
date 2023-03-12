@@ -8,6 +8,7 @@
     - !BugFixes
     - Add Pod::Usage to required modules. Some distros have removed it from the core.
     - Add jpeg library to MacOS kit.
+    - Add some missing files for docs building.
     - Fix root relocation when transcoding to a movable system.
     - Fix missing parser in {define XX} without frets etc.
     - Fix forum 1696 (chord recall with trans{code,pose}).
