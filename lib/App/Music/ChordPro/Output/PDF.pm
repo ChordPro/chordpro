@@ -2433,6 +2433,11 @@ sub text_vsp {
 
 sub set_columns {
     my ( $ps, $cols ) = @_;
+    my @cols;
+    if ( ref($cols) eq 'ARRAY' ) {
+	@cols = @$cols;
+	$cols = @$cols;
+    }
     unless ( $cols ) {
 	$cols = $ps->{columns} ||= 1;
     }
@@ -2442,9 +2447,38 @@ sub set_columns {
 
     my $w = $ps->{papersize}->[0]
       - $ps->{_leftmargin} - $ps->{_rightmargin};
-
     $ps->{columnoffsets} = [ 0 ];
-     push( @{ $ps->{columnoffsets} }, $w ), return unless $cols > 1;
+
+    if ( @cols ) {		# columns with explicit widths
+	my $stars;
+	my $wx = $w;		# available
+	for ( @cols ) {
+	    if ( !$_ || $_ eq '*' ) {
+		$stars++;
+	    }
+	    elsif ( /^(\d+)%$/ ) {
+		$_ = $1 * $w / 100; # patch
+	    }
+	    else {
+		$wx -= $_;	# subtract from avail width
+	    }
+	}
+	my $sw = $wx / $stars if $stars;
+	my $l = 0;
+	for ( @cols ) {
+	    if ( !$_ || $_ eq '*' ) {
+		$l += $sw;
+	    }
+	    else {
+		$l += $_;
+	    }
+	    push( @{ $ps->{columnoffsets} }, $l );
+	}
+	warn("COL: @{ $ps->{columnoffsets} }\n");
+	return;
+    }
+
+    push( @{ $ps->{columnoffsets} }, $w ), return unless $cols > 1;
 
     my $d = ( $w - ( $cols - 1 ) * $ps->{columnspace} ) / $cols;
     $d += $ps->{columnspace};
@@ -2452,6 +2486,7 @@ sub set_columns {
 	push( @{ $ps->{columnoffsets} }, $_ * $d );
     }
     push( @{ $ps->{columnoffsets} }, $w );
+    warn("COL: @{ $ps->{columnoffsets} }\n");
 }
 
 sub showlayout {

@@ -1292,7 +1292,13 @@ sub directive {
 
     if ( $dir eq "columns"
 	 && $arg =~ /^(\d+)$/ ) {
-	$self->{settings}->{columns} = $arg;
+	# If there a column specifications in the config, retain them
+	# if the number of columns match.
+	unless( ref($config->{settings}->{columns}) eq 'ARRAY'
+	     && $arg == @{$config->{settings}->{columns}}
+	   ) {
+	    $self->{settings}->{columns} = $arg;
+	}
 	return 1;
     }
 
