@@ -42,12 +42,12 @@ sub new {
 
 sub info {
     my ( $self, %info ) = @_;
-    unless ( $info{CreationDate} ) {
-	my @tm = gmtime( $regtest ? $faketime : time );
-	$info{CreationDate} =
-	  sprintf("D:%04d%02d%02d%02d%02d%02d+01'00",
-		  1900+$tm[5], 1+$tm[4], @tm[3,2,1,0]);
-    }
+
+    $info{CreationDate} //= pdf_date();
+
+    # PDF::API2 2.42+ does not accept the final apostrophe.
+    local *PDF::API2::_is_date = sub { 1 };
+
     if ( $self->{pdf}->can("info_metadata") ) {
 	for ( keys(%info) ) {
 	    $self->{pdf}->info_metadata( $_, $info{$_} );
@@ -56,6 +56,18 @@ sub info {
     else {
 	$self->{pdf}->info(%info);
     }
+}
+
+# Return a PDF compliant date/time string.
+sub pdf_date {
+    my ( $t ) = @_;
+    $t ||= $regtest ? $faketime : time;
+    my @lt = localtime($t);
+    my @gt = gmtime($t);
+    my $tzoff = ( $lt[2] - $gt[2] ) * 60 + ( $lt[1] - $gt[1] );
+    sprintf("D:%04d%02d%02d%02d%02d%02d%+03d'%02d'",
+	    1900+$lt[5], 1+$lt[4], @lt[3,2,1,0],
+	    int($tzoff / 60), $tzoff % 60 );
 }
 
 sub wrap {

@@ -14,6 +14,7 @@
     - Fix forum 1696 (chord recall with trans{code,pose}).
     - Fix issue #269 (problem with page labels).
     - Fix issue #270 (PDF outlines issues, 'letter' setting).
+    - Fix issue #273 (PDF CreationDate string is not conformant, but PDF::API2 2.042+ rejects conformant strings).
 
 6.000 2022-12-28
 
