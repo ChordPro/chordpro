@@ -62,12 +62,12 @@ sub info {
 sub pdf_date {
     my ( $t ) = @_;
     $t ||= $regtest ? $faketime : time;
-    my @lt = localtime($t);
-    my @gt = gmtime($t);
-    my $tzoff = ( $lt[2] - $gt[2] ) * 60 + ( $lt[1] - $gt[1] );
-    sprintf("D:%04d%02d%02d%02d%02d%02d%+03d'%02d'",
-	    1900+$lt[5], 1+$lt[4], @lt[3,2,1,0],
-	    int($tzoff / 60), $tzoff % 60 );
+
+    use POSIX qw( strftime );
+    my $r = strftime( "%Y%m%d%H%M%S%z", localtime($t) );
+    # Don't use s///r to keep PERL_MIN_VERSION low.
+    $r =~ s/(..)$/'$1'/;	# +0100 -> +01'00'
+    $r;
 }
 
 sub wrap {
