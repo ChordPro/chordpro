@@ -75,6 +75,11 @@ Designate style or properties for selected sections.
 
 [Issue #174](https://github.com/ChordPro/chordpro/issues/174).
 
+### User-defined comments
+
+`comment_user1`, `comment_user2`, etc. for more flexibility in
+selecting styles.
+
 ### Strumming patterns
 
 [Issue #85](https://github.com/ChordPro/chordpro/issues/85).
