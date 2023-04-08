@@ -7,7 +7,7 @@
 [![Built by
 musicians](https://img.shields.io/badge/built%20by-musicians%20𝄞-d15d27.svg?&labelColor=e36d25)](https://forthebadge.com)
 ![Language Perl](https://img.shields.io/badge/Language-Perl-blue)
-[![@ChordPro_Org on Twitter](https://img.shields.io/badge/twitter-@ChordPro%5FOrg-1DA1F2.svg)](https://twitter.com/ChordPro_Org)
+[![User Forum](https://img.shields.io/badge/forum-groups.io%2Fg%2FChordPro-8fff00)](https://groups.io/g/ChordPro)
 
 ChordPro generates professional-looking sheet music from a text file
 containing the lyrics of one or many songs with chord information.
