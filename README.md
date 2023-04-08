@@ -1,9 +1,12 @@
 # [ChordPro](https://www.chordpro.org)
 *A lyrics and chords formatting program*
 
+![Version](https://img.shields.io/github/v/release/ChordPro/chordpro)
 ![GitHub issues](https://img.shields.io/github/issues/chordpro/chordpro)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
-[![Built by musicians](https://img.shields.io/badge/built%20by-musicians%20𝄞-d15d27.svg?&labelColor=e36d25)](https://forthebadge.com)
+[![Built by
+musicians](https://img.shields.io/badge/built%20by-musicians%20𝄞-d15d27.svg?&labelColor=e36d25)](https://forthebadge.com)
+![Language Perl](https://img.shields.io/badge/Language-Perl-blue)
 [![@ChordPro_Org on Twitter](https://img.shields.io/badge/twitter-@ChordPro%5FOrg-1DA1F2.svg)](https://twitter.com/ChordPro_Org)
 
 ChordPro generates professional-looking sheet music from a text file
