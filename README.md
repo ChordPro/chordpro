@@ -21,7 +21,7 @@ Bugs and feature requests go to [the GitHub issue tracker](https://github.com/Ch
 
 ## Development Status
 This program implements ChordPro language version 6.
-It is the successor of [*Chord* and *Chord*<sub><i>ii</i></sub>](docs/content/ChordPro-History.md)
+It is the successor of [*Chord* and *Chord*<sub><i>ii</i></sub>](https://chordpro.org/chordpro/ChordPro-History.md)
 with additional features such as native PDF generation,
 Unicode input and fully customizable layout, fonts and sizes.
 
