@@ -11,7 +11,7 @@ musicians](https://img.shields.io/badge/built%20by-musicians%20𝄞-d15d27.svg?&
 
 ChordPro generates professional-looking sheet music from a text file
 containing the lyrics of one or many songs with chord information.
-Check <https://www.chordpro.org/chordpro/chordpro-installation> for installation instructions
+Check <https://chordpro.org/chordpro/ChordPro-Installation.html> for installation instructions
 and execute `chordpro --help` for an overview about the available options.
 
 ## Support
@@ -29,10 +29,10 @@ Prominent features of ChordPro 6 are
 Pango style text markup, annotations,
 and a more powerful way of assigning typefaces to layout items.
 
-For up-to-date information, see <https://www.chordpro.org/chordpro/chordpro-reference-implementation>.
+For up-to-date information, see [The ChordPro implementation](https://chordpro.org/chordpro/ChordPro-Reference-Implementation.html).
 
 ## License
 
-Copyright © 2010,2018 The ChordPro Team
+Copyright © 2010,2018,2023 The ChordPro Team
 
 This program is free software. You can redistribute it and/or modify it under the terms of the Artistic License 2.0.
