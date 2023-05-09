@@ -375,7 +375,7 @@ Released: 2020-08-13
 
 ### ChordPro syntax
 
-* Support Pango Markup language.
+* Support Markup language.
 * Add basic support for annotations.
 * Add directives start/end_of_verse/bridge and short forms.
 

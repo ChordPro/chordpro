@@ -67,8 +67,8 @@ aliases are `"sans"` and `"mono"`.
 
 ### Why is using font descriptions important?
 
-Because ChordPro allows you to use [Pango style markup]({{< relref
-"Pango_Markup.html" >}}) in all your lyrics, titles and so on. For
+Because ChordPro allows you to use [markup]({{< relref
+"ChordPro_Markup.html" >}}) in all your lyrics, titles and so on. For
 example:
 
     [C]winkle, twinkle <bold>little</bold> [G]star

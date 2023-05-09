@@ -26,7 +26,7 @@ Example:
 [C]Twinkle, twinkle, [F]little [C]star
 ````
 
-Texts can use [Pango Markup]({{< relref "Pango_Markup" >}})
+Texts can use [ChordPro Markup]({{< relref "ChordPro_Markup" >}})
 and [metadata]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
 
 Lines that start with a hash `#` are ignored.

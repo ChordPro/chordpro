@@ -67,8 +67,10 @@ view a larger version):
 ## Markup and annotations
 
 It is possible to use _markup_ in lyrics and other texts to change the
-way how these will be typeset. The markup confirms to the [Pango
-Markup Language]({{< relref "Pango_Markup" >}})
+way how these will be typeset.
+The [markup instructions]({{< relref "ChordPro_Markup" >}}) resemble the
+[Pango Markup Language](https://docs.gtk.org/Pango/pango_markup.html)
+as defined by the [Gnome organisation](https://www.gnome.org/)
 and can be used to change text size, color, typeface (font) and more.
 
 _Annotations_ are textual remarks placed above the lyrics, just like

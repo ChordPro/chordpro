@@ -1,6 +1,6 @@
 ---
-title: "ChordPro markup language"
-description: "ChordPro markup language"
+title: "ChordPro markup"
+description: "ChordPro markup"
 ---
 
 # ChordPro markup language
