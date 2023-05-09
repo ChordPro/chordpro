@@ -1141,8 +1141,8 @@ sub directive {
 	    elsif ( $k =~ /^(width|height|border|spread|center)$/i && $v =~ /^(\d+)$/ ) {
 		$opts{lc($k)} = $v;
 	    }
-	    elsif ( $k =~ /^(scale)$/ && $v =~ /^(\d(?:\.\d+)?)$/ ) {
-		$opts{lc($k)} = $v;
+	    elsif ( $k =~ /^(scale)$/ && $v =~ /^(\d+(?:\.\d+)?)(%)?$/ ) {
+		$opts{lc($k)} = $2 ? $1/100 : $1;
 	    }
 	    elsif ( $k =~ /^(center|border|spread)$/i ) {
 		$opts{lc($k)} = $v;

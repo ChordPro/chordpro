@@ -22,7 +22,8 @@ Specifies the desired width of the image in typographic points (1/72 inch or 0.3
 Specifies the desired height of the image. If necessary the original image is scaled to fit.	
 
 `scale=`*factor*  
-Scales the image with the factor.	
+Scales the image with the factor.
+This may be a floating point number, e.g. `0.2`, or a percentage, e.g. `20%`.
 
 `center=`*tf*  
 `center`  
