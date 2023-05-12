@@ -640,7 +640,6 @@ sub chord {
 	my $m = $markup;
 	if ( $markup =~ s/\>\Q$c\E\</>%{name}</ ) {
 	    $info = $info->clone;
-	    warn("CHORD \"$c\" display \"$markup\"\n");
 	    $info->{display} = $markup;
 	    $name = $self->add_chord( $info, $m );
 	}
@@ -1768,7 +1767,7 @@ sub add_chord {
     my ( $self, $info, $new_id ) = @_;
 
     if ( $new_id ) {
-	if ( $new_id == 1 ) {
+	if ( $new_id eq "1" ) {
 	    state $id = "ch0000";
 	    $new_id = " $id";
 	    $id++;
