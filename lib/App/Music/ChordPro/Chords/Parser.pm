@@ -968,10 +968,10 @@ sub chord_display {
     if ( $::config->{settings}->{truesf} ) {
 	$sf ||= 0;
 	if ( $sf & 0x02 ) {	# has flat
-	    $res =~ s/(?<=.)b/♭/g;
+	    $res =~ s/(?<=[[:alpha:]])b/♭/g;
 	}
 	else {			# fallback
-	    $res =~ s;(?<=.)[b♭];<span font="chordprosymbols">!</span>;g;
+	    $res =~ s;(?<=[[:alpha:]])[b♭];<span font="chordprosymbols">!</span>;g;
 	}
 	if ( $sf & 0x01 ) {	# has sharp
 	    $res =~ s/(?<=.)#/♯/g;
