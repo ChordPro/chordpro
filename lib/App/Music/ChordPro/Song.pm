@@ -1135,10 +1135,16 @@ sub directive {
 	my $id;
 	my %opts;
 	while ( my($k,$v) = each(%$res) ) {
-	    if ( $k =~ /^(title)$/i ) {
+	    if ( $k =~ /^(title)$/i && $v ne "" ) {
 		$opts{lc($k)} = $v;
 	    }
-	    elsif ( $k =~ /^(width|height|border|spread|center)$/i && $v =~ /^(\d+)$/ ) {
+	    elsif ( $k =~ /^(border|spread|center)$/i && $v =~ /^(\d+)$/ ) {
+		$opts{lc($k)} = $v;
+	    }
+	    elsif ( $k =~ /^(width|height)$/i && $v =~ /^(\d+(?:\.\d+)?\%?)$/ ) {
+		$opts{lc($k)} = $v;
+	    }
+	    elsif ( $k =~ /^(x|y)$/i && $v =~ /^([-+]?\d+(?:\.\d+)?\%?)$/ ) {
 		$opts{lc($k)} = $v;
 	    }
 	    elsif ( $k =~ /^(scale)$/ && $v =~ /^(\d+(?:\.\d+)?)(%)?$/ ) {
@@ -1147,17 +1153,18 @@ sub directive {
 	    elsif ( $k =~ /^(center|border|spread)$/i ) {
 		$opts{lc($k)} = $v;
 	    }
-	    elsif ( $k =~ /^(src|uri)$/i ) {
+	    elsif ( $k =~ /^(src|uri)$/i && $v ne "" ) {
 		$uri = $v;
 	    }
-	    elsif ( $k =~ /^(id)$/i ) {
+	    elsif ( $k =~ /^(id)$/i && $v ne "" ) {
 		$id = $v;
 	    }
-	    elsif ( $k =~ /^(x|y)$/i ) {
-		$opts{lc($k)} = $v;
+	    elsif ( $k =~ /^(anchor)$/i
+		    && $v =~ /^(paper|page|column|line)$/ ) {
+		$opts{lc($k)} = lc($v);
 	    }
 	    elsif ( $uri ) {
-		do_warn( "Unknown image attribute: $1\n" );
+		do_warn( "Unknown image attribute: $k\n" );
 		next;
 	    }
 	    # Assume just an image file uri.
@@ -1165,6 +1172,43 @@ sub directive {
 		$uri = $k;
 	    }
 	}
+
+	# uri + id -> define asset
+	if ( $uri && $id ) {
+	    # Define a new asset.
+	    if ( %opts ) {
+		do_warn("Asset definition \"$id\" does not take attributes");
+		return;
+	    }
+	    use Image::Info;
+	    open( my $fd, '<:raw', $uri );
+	    unless ( $fd ) {
+		do_warn("$uri: $!");
+		return;
+	    }
+	    my $data = do { local $/; <$fd> };
+	    # Get info.
+	    my $info = Image::Info::image_info(\$data);
+	    if ( $info->{error} ) {
+		do_warn($info->{error});
+		return;
+	    }
+
+	    # Store in assets.
+	    $self->{assets} //= {};
+	    $self->{assets}->{$id} =
+	      { data => $data, type => $info->{file_ext},
+		width => $info->{width}, height => $info->{height},
+	      };
+
+	    if ( $config->{debug}->{images} ) {
+		warn("asset[$id] ", length($data), " bytes, ",
+		     "width=$info->{width}, height=$info->{height}",
+		     "\n");
+	    }
+	    return 1;
+	}
+
 	$uri = "id=$id" if $id;
 	unless ( $uri ) {
 	    do_warn( "Missing image source\n" );

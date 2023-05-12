@@ -1005,6 +1005,9 @@ sub default_config() {
     "meta" : {
     },
 
+    // Assets.
+    "assets" : {},
+
     // Dates. Format is a strftime template.
     "dates" : {
         "today" : {

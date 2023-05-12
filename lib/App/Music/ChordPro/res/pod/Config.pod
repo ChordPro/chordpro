@@ -110,6 +110,9 @@ extensive details and examples.
         "meta" : {
         },
     
+        // Assets.
+        "assets" : {},
+    
         // Dates. Format is a strftime template.
         "dates" : {
             "today" : {
