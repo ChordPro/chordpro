@@ -13,8 +13,8 @@ use Text::Layout;
 use IO::String;
 use Carp;
 
-use App::Music::ChordPro::Utils qw( expand_tilde );
-use App::Music::ChordPro::Output::Common qw( fmt_subst prep_outlines demarkup );
+use App::Music::ChordPro::Utils qw( expand_tilde demarkup );
+use App::Music::ChordPro::Output::Common qw( fmt_subst prep_outlines );
 
 # For regression testing, run perl with PERL_HASH_SEED set to zero.
 # This eliminates the arbitrary order of font definitions and triggers

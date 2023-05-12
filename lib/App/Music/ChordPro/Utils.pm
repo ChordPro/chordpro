@@ -218,4 +218,12 @@ sub prp2cfg {
 
 push( @EXPORT, 'prp2cfg' );
 
+# Remove markup.
+sub demarkup {
+    my ( $t ) = @_;
+    $t =~ s;</?([-\w]+|span\s.*?)>;;g;
+    return $t;
+}
+push( @EXPORT, 'demarkup' );
+
 1;

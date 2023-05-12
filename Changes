@@ -4,6 +4,7 @@
     - Remove diagrams.auto from config.
     - Allow define chord "|" in config.
     - Allow graceful handling of rootless chords.
+    - Allow simple markup in chords.
     - Allow image scale as a percentage.
     - Experimental: Absolute placement for images.
     - !BugFixes

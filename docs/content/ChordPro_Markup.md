@@ -146,6 +146,22 @@ Use a monospace font.
 * `u`  
 Underline the text.
 
+## Using markup in chords
+
+Markup in chords is supported, provided the chord name is not split by
+markup.
+
+For example, this is valid:
+
+    [<span color="red">Daug</span>]
+	
+This is not valid:
+
+    [<span color="red">D<sup>aug</sup></span>]
+
+Marked up chords appear as individual entries in the chord diagrams.
+This may be considered a feature.
+
 ## Credits
 
 Parts of this information is derived from the official [Pango documentation](https://docs.gtk.org/Pango/pango_markup.html#pango-markup).

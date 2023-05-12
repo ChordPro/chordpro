@@ -545,7 +545,7 @@ sub parse_song {
     if ( $diagrams eq "user" ) {
 
 	if ( $self->{define} && @{$self->{define}} ) {
-	    my %h = map { $_ => 1 } @used_chords;
+	    my %h = map { demarkup($_) => 1 } @used_chords;
 	    @used_chords =
 	      map { $h{$_->{name}} ? $_->{name} : () } @{$self->{define}};
 	}
@@ -555,7 +555,8 @@ sub parse_song {
     }
     else {
 	my %h;
-	@used_chords = map { $h{$_}++ ? () : $_ } @used_chords;
+	@used_chords = map { $h{$_}++ ? () : $_ }
+	  map { demarkup($_) } @used_chords;
     }
 
     if ( $config->{diagrams}->{sorted} ) {
@@ -621,6 +622,10 @@ sub chord {
 	return $c;
     }
 
+    my $markup = $c;
+    $c = demarkup($markup);
+    undef $markup if $markup eq $c;
+
     my ( $name, $info ) = $self->parse_chord($c);
     unless ( defined $name ) {
 	# Warning was given.
@@ -629,6 +634,19 @@ sub chord {
 	  ( App::Music::ChordPro::Chord::Annotation->new
 	    ( { name => $c, text => $c } ) );
 	return $c;
+    }
+
+    if ( $markup ) {
+	my $m = $markup;
+	if ( $markup =~ s/\>\Q$c\E\</>%{name}</ ) {
+	    $info = $info->clone;
+	    warn("CHORD \"$c\" display \"$markup\"\n");
+	    $info->{display} = $markup;
+	    $name = $self->add_chord( $info, $m );
+	}
+	else {
+	    do_warn("Invalid markup in chord: \"$markup\"");
+	}
     }
     ( my $n = $name ) =~ s/^\((.+)\)$/$1/;
 
@@ -1750,9 +1768,11 @@ sub add_chord {
     my ( $self, $info, $new_id ) = @_;
 
     if ( $new_id ) {
-	state $id = "ch0000";
-	$new_id = " $id";
-	$id++;
+	if ( $new_id == 1 ) {
+	    state $id = "ch0000";
+	    $new_id = " $id";
+	    $id++;
+	}
     }
     else {
 	$new_id = $info->name;
