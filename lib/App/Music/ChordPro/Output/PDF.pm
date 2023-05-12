@@ -19,7 +19,7 @@ use Carp;
 use feature 'state';
 
 use App::Music::ChordPro::Output::Common
-  qw( roman prep_outlines fmt_subst demarkup );
+  qw( roman prep_outlines fmt_subst );
 
 use App::Music::ChordPro::Output::PDF::Writer;
 use App::Music::ChordPro::Utils;
@@ -2178,20 +2178,6 @@ sub pr_endline {
 sub imageline_vsp {
 }
 
-package placeholder {
-    sub new {
-	my $class = shift;
-	my $self = {};
-	$self->{name} = shift;
-	$self->{w} = shift;
-	$self->{h} = shift;
-	bless $self => $class;
-    }
-    sub name   { $_[0]->{name} }
-    sub width  { $_[0]->{w} }
-    sub height { $_[0]->{h} }
-}
-
 sub imageline {
     my ( $elt, $x, $ps, $gety ) = @_;
 
@@ -2317,19 +2303,8 @@ sub imageline {
 	if ( $_oy =~ /^([-+]?[\d.]+)\%$/ ) {
 	    $oy = $_oy = $1/100 * ($t - $b) - ( $1/100 ) * $h;
 	}
-#	if ( $_ox eq "-0" || $_ox < 0 ) {
-#	    $x = $r - $w;
-#	}
-#	else {
-	    $x = $l;
-#	}
-#	if ( $_oy eq "-0" || $_oy < 0 ) {
-#	    $y = $h + $b;
-#	    $oy = -$oy;
-#	}
-#	else {
-	    $y = $t;
-#	}
+	$x = $l;
+	$y = $t;
     };
 
     if ( $anchor eq "column" ) {
@@ -3036,6 +3011,19 @@ sub _dump {
 		      );
     }
 }
+
+package placeholder;
+sub new {
+    my $class = shift;
+    my $self = {};
+    $self->{name} = shift;
+    $self->{w} = shift;
+    $self->{h} = shift;
+    bless $self => $class;
+}
+sub name   { $_[0]->{name} }
+sub width  { $_[0]->{w} }
+sub height { $_[0]->{h} }
 
 1;
 
