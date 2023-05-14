@@ -949,6 +949,7 @@ sub transcode {
 	$info->{bass_canon} = $info->{bass} =
 	  $p->root_canon( $info->{bass_ord}, $info->{bass_mod} >= 0 );
     }
+    $info->{name} = $info->name;
     $info->{system} = $p->{system};
     bless $info => $p->{target};
 #    ::dump($info);
