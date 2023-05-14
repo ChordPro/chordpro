@@ -19,6 +19,10 @@ markup is:
 ChordPro implements a variant of a subset of the Pango markup
 language, more suitable for the needs of musicians.
 
+Markup can be applied to all texts and chords, but note that in a
+lyrics line the markup of chords is independent from the markup of the
+lyrics.
+
 ## `<span>` tags
 
 The most general markup tag is `<span>`, shown above. The `<span>` tag

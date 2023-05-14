@@ -279,7 +279,16 @@ sub parse_song {
 	else {
 	    $diag->{line} = ++$$linecnt;
 	}
-	$diag->{orig} = $_ = shift(@$lines);
+
+	$_ = shift(@$lines);
+	while ( /\\\Z/ && @$lines ) {
+	    chop;
+	    my $cont = shift(@$lines);
+	    $$linecnt++;
+	    $cont =~ s/^\s+//;
+	    $_ .= $cont;
+	}
+	$diag->{orig} = $_;
 	# Get rid of TABs.
 	s/\t/ /g;
 

@@ -26,10 +26,14 @@ Example:
 [C]Twinkle, twinkle, [F]little [C]star
 ````
 
-Texts can use [ChordPro Markup]({{< relref "ChordPro_Markup" >}})
+Texts and chords can use [ChordPro Markup]({{< relref "ChordPro_Markup" >}})
 and [metadata]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
 
 Lines that start with a hash `#` are ignored.
+
+Lines that end with a backslash `\` will get the next line appended,
+where the backslash and leading whitespace of the next line are
+discarded.
 
 ## Directives
 
