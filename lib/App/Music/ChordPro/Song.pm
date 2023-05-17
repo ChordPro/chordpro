@@ -789,7 +789,22 @@ sub decompose_grid {
 	}
     }
 
-    my @tokens = split( ' ', $line );
+    my @tokens;
+    my @t = split( ' ', $line );
+
+    # Unfortunately, <span xxx> gets split too.
+    while ( @t ) {
+	$_ = shift(@t);
+	push( @tokens, $_ );
+	if ( /\<span$/ ) {
+	    while ( @t ) {
+		$_ = shift(@t);
+		$tokens[-1] .= " " . $_;
+		last if /\<\/span>/;
+	    }
+	}
+    }
+
     my $nbt = 0;		# non-bar tokens
     foreach ( @tokens ) {
 	if ( $_ eq "|:" || $_ eq "{" ) {

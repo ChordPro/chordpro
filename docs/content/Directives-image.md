@@ -103,7 +103,7 @@ will place the image in the top left corner of the paper.
 
 When the offset is a percentage, it is adjusted for the image size.
 For example, with `x="0%"` the left side of the image is at the left
-edge of the paper. With `x="100%"` the rights side of the image is at
+edge of the paper. With `x="100%"` the right side of the image is at
 the right edge of the paper. With `x="50%"` the center of the image is
 at the center of the paper.
 
