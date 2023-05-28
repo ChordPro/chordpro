@@ -960,6 +960,8 @@ sub transcode {
 sub chord_display {
     my ( $self, $sf ) = @_;
 
+    use App::Music::ChordPro::Utils qw( demarkup );
+
     my $res =
       $self->{display}
       ? interpolate( { args => $self }, $self->{display} )
@@ -967,6 +969,12 @@ sub chord_display {
 
     # Substitute musical symbols if wanted and possible.
     if ( $::config->{settings}->{truesf} ) {
+	my $c0 = demarkup($res);
+	my ( $pre, $post );
+	if ( $c0 ne $res ) {	# has markup
+	    ( $pre, $post ) = $res =~ /^(.*\>)\Q$c0\E(\<.+)$/;
+	    $res = $c0;
+	}
 	$sf ||= 0;
 	if ( $sf & 0x02 ) {	# has flat
 	    $res =~ s/(?<=[[:alpha:]])b/♭/g;
@@ -980,6 +988,8 @@ sub chord_display {
 	else {			# fallback
 	    $res =~ s;(?<=.)[#♯];<span font="chordprosymbols">#</span>;g;
 	}
+	$res = $pre . $res . $post
+	  if defined $pre;
     }
 
     return $self->{parens} ? "($res)" : $res;
