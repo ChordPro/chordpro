@@ -5,6 +5,31 @@ description: "Hints and Tips"
 
 # Hints and Tips
 
+## Unicode escape characters in input
+
+You can use the following preprocessor directive
+to replace `\u`_XXXX_ and `\u{`_XXXX_`}` in the input by the actual
+unicode characters with codepoint _XXXX_ (a hexadecinal number).
+Note that `\u`_XXXX_ requires **exactly** 4 hexadecimal characters, while
+`\u{`_XXXX_`}` takes an arbitrary number of hex characters.
+
+````
+{ "parser" : {
+    "preprocess" : {
+      "all" : [
+        { "pattern" : "\\\\u([0-9a-f]{4})",
+          "replace" : "chr(hex(\"0x$1\"))",
+          "flags"   : "gie"
+        },
+        { "pattern" : "\\\\u\\{([0-9a-f]+)\\}",
+          "replace" : "chr(hex(\"0x$1\"))",
+          "flags"   : "gie"
+        }
+      ]
+} } }
+````
+
+
 ## Bold chorus
 
 A common style nowadays puts the chorus in bold.

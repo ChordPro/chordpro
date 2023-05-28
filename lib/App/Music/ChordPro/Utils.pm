@@ -112,15 +112,16 @@ sub make_preprocessor {
 	my @targets;
 	my $code = "";
 	foreach ( @{ $prp->{$linetype} } ) {
+	    my $flags = $_->{flags} // "g";
 	    $code .= "m\0" . $_->{select} . "\0 && "
 	      if $_->{select};
 	    if ( $_->{pattern} ) {
 		$code .= "s\0" . $_->{pattern} . "\0"
-		  . $_->{replace} . "\0g;\n";
+		  . $_->{replace} . "\0$flags;\n";
 	    }
 	    else {
 		$code .= "s\0" . quotemeta($_->{target}) . "\0"
-		  . quotemeta($_->{replace}) . "\0g;\n";
+		  . quotemeta($_->{replace}) . "\0$flags;\n";
 	    }
 	}
 	if ( $code ) {
