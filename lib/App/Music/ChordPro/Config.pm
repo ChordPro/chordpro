@@ -499,8 +499,7 @@ sub _augment {
 
 	warn("Config augment error: unknown item $path$key\n")
 	  unless exists $self->{$key}
-	    || $path eq "pdf.fontconfig."
-	    || $path =~ /^pdf\.(?:info|fonts)\./
+	    || $path =~ /^pdf\.(?:info|fonts|fontconfig)\./
 	    || $path =~ /^meta\./
 	    || $key =~ /^_/;
 
