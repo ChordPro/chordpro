@@ -1518,6 +1518,12 @@
 		    "type": [ "boolean", "integer" ]
 		},
 
+		"sort-pages": {
+		    "default": "",
+		    "description": "Sorting options for pages.",
+		    "type": "string"
+		},
+
 		"papersize": {
 		    "description": "Output page size, e.g. \"a4\" or [595,842].",
 		    "default": "a4",

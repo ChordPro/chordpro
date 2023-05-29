@@ -411,6 +411,16 @@
       "even-odd-pages" : 1,
       // Align songs to even/odd pages. When greater than 1, force alignment.
       "pagealign-songs" : 1,
+	  // Sort pages by "title", "author", "2page", "compact", "desc" 
+	  // Comma separated list of the options above
+	  // title  : sort pages alphabetically by title (t:}
+	  // author : sort pages alphabetically by subtitle {st:} - if this is used together with title, only title is used
+	  // 2page  : make sure songs with 2 pages are placed on even pages, so the full song is visible in a normal book without needing to turn a page.
+	  //          a blankpage is added to align. Note: this option requires extra precessing time (whole songbook takes about 2x to generate)
+	  // compact: modifier for 2page - instead of adding a blank page, another song is moved in front of this song to achieve even page alignment for 2-page songs
+	  // desc   : modifier for title or author to achive a descending order (Z->A instead of A->Z)
+	  "sort-pages" : "",
+	  // Can be overriden by command line option
       // PDF file to add as front matter.
       "front-matter" : "",
       // PDF file to add as back matter.

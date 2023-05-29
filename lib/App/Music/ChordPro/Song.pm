@@ -1397,6 +1397,7 @@ sub directive {
 
     if ( $dir eq "grid" ) {
 	$self->{settings}->{diagrams} = 1;
+	$self->{settings}->{diagrampos} = lc($arg) if ($arg =~ /^(right|bottom|top|below)$/i);
 	return 1;
     }
     if ( $dir eq "no_grid" ) {

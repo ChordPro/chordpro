@@ -44,6 +44,88 @@ sub generate_songbook {
 
     my $ps = $config->{pdf};
 
+#Initial Writer for counting (will be discarded)
+    my $pri = ( __PACKAGE__."::Writer" )->new( $ps, $pdfapi );
+
+#Count pages to properly align multi-page songs without needing to turn page	
+    print "Counting pages:\n" if $options->{verbose};
+    my $page = $options->{"start-page-number"} ||= 1;
+	
+	my $sorting = $ps->{'sort-pages'};
+	
+	if ( $sorting =~ /2page/ ) {
+		warn "Mixing pagealign-songs with 2page sorting will create unexpected results" if ($ps->{'pagealign-songs'} > 0);
+
+		foreach my $song ( @{$sb->{songs}} ) {
+			$song->{meta}->{pages} =
+		generate_song( $song, { pr => $pri, startpage => 1 } );
+		if ( $options->{verbose} ) { print $song->{meta}->{pages}." "; STDOUT->flush(); } 
+		}
+		print "\n" if $options->{verbose};
+	}
+
+	my @songlist = @{$sb->{songs}};
+	
+	if ( $sorting =~ /title/ ) {
+		if ($sorting =~ /desc/ ) {
+			@songlist=sort {"$b->{meta}->{title}[0]" cmp "$a->{meta}->{title}[0]"} @songlist;
+		}
+		else {
+			@songlist=sort {"$a->{meta}->{title}[0]" cmp "$b->{meta}->{title}[0]"} @songlist;
+		}
+	}
+	elsif ( $sorting =~ /author/ ) {
+		if ($sorting =~ /desc/ ) {
+			@songlist=sort {"$b->{meta}->{subtitle}[0]" cmp "$a->{meta}->{subtitle}[0]"} @songlist;
+		}
+		else {
+			@songlist=sort {"$a->{meta}->{subtitle}[0]" cmp "$b->{meta}->{subtitle}[0]"} @songlist;
+		}
+	}
+
+	if ( $sorting =~ /compact/ ) {
+		my $pagecount = $page;
+		my $songs = @songlist;
+		my $i = 0;
+		while ( $i<$songs ) {
+			if ( defined($songlist[$i]->{meta}->{order}) ) {
+				#skip already processed entries
+				$i++; 
+				next;
+			}
+			my $pages = $songlist[$i]->{meta}->{pages};
+			$songlist[$i]->{meta}->{order}=$pagecount;
+			if ( ($pagecount % 2) && $pages == 2 ) {
+				my $j = $i+1;
+				#Find next song with != 2 pages
+				while ( $j < $songs ) {
+					last if ( !defined($songlist[$j]->{meta}->{order}) && $songlist[$j]->{meta}->{pages} != 2 );
+					$j++;
+				}
+				if ( $j == $songs ) {
+					$i++;
+				} 
+				else {
+					#Swapped page gets current ID
+					$songlist[$j]->{meta}->{order}=$pagecount;
+					#Pushed page gets ID plus swapped page
+					$songlist[$i]->{meta}->{order}=$pagecount+$songlist[$j]->{meta}->{pages};
+					#Add the swapped page to pagecount as it will be skipped later
+					$pages+=$songlist[$j]->{meta}->{pages};
+				}
+			} 
+			else {
+				$i++
+			}
+			$pagecount += $pages;
+		}
+		#By Pagelist
+		@songlist=sort { $a->{meta}->{order} <=> $b->{meta}->{order} } @songlist;
+	}
+
+	$sb->{songs} = [@songlist];
+	
+	#Reset Writer
     my $pr = (__PACKAGE__."::Writer")->new( $ps, $pdfapi );
     warn("Generating PDF ", $options->{output} || "__new__.pdf", "...\n") if $options->{verbose};
 
@@ -82,15 +164,21 @@ sub generate_songbook {
 	$songindex++;
 
 	# Align.
-	if ( $ps->{'pagealign-songs'} && !($page % 2) ) {
-	    $pr->newpage($ps, $page);
+	if ( $ps->{'pagealign-songs'} == 1 && !($page % 2) ) {
+	    $pr->newpage($ps, $page+1);
 	    $page++;
 	    $first_song_aligned //= 1;
 	}
 	$first_song_aligned //= 0;
 
+	if ( $ps->{'pagealign-songs'} == 2 && ($page % 2) && $song->{meta}->{pages} == 2 ) {
+	    $pr->newpage($ps, $page+1);
+	    $page++;
+	}
+
 	$song->{meta}->{tocpage} = $page;
 	push( @book, [ $song->{meta}->{title}->[0], $song ] );
+	if ($options->{verbose}) {print "."; STDOUT->flush();} 
 
 	$page += $song->{meta}->{pages} =
 	  generate_song( $song, { pr        => $pr,
@@ -103,6 +191,7 @@ sub generate_songbook {
     }
     $pages_of{songbook} = $page - 1;
     $start_of{back} = $page;
+	print "\n" if $options->{verbose};
 
     $::config->{contents} //=
       [ { $::config->{toc}->{order} eq "alpha"
@@ -390,6 +479,8 @@ sub generate_song {
 	$dctl = $ps->{diagrams};
     }
     $ps->{dd} = $dd;
+    $dctl->{show}=$s->{settings}->{diagrampos} if (defined $s->{settings}->{diagrampos});
+
     my $sb = $s->{body};
 
     # set_columns needs these, set provisional values.
@@ -2579,7 +2670,7 @@ sub set_columns {
 	    }
 	    push( @{ $ps->{columnoffsets} }, $l );
 	}
-	warn("COL: @{ $ps->{columnoffsets} }\n");
+	#warn("COL: @{ $ps->{columnoffsets} }\n");
 	return;
     }
 
@@ -2591,7 +2682,7 @@ sub set_columns {
 	push( @{ $ps->{columnoffsets} }, $_ * $d );
     }
     push( @{ $ps->{columnoffsets} }, $w );
-    warn("COL: @{ $ps->{columnoffsets} }\n");
+    #warn("COL: @{ $ps->{columnoffsets} }\n");
 }
 
 sub showlayout {
