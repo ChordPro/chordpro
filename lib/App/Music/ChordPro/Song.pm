@@ -288,9 +288,12 @@ sub parse_song {
 	    $cont =~ s/^\s+//;
 	    $_ .= $cont;
 	}
-	# Uncomment these to allow \uXXXX and \u{XX...}.
-	# s/\\u([0-9a-f]{4})/chr(hex("0x$1"))/ige;
+
+	# Uncomment this to allow \uXXXX escapes.
+	s/\\u([0-9a-f]{4})/chr(hex("0x$1"))/ige;
+	# Uncomment this to allow \u{XX...} escapes.
 	# s/\\u\{([0-9a-f]+)\}/chr(hex("0x$1"))/ige;
+
 	$diag->{orig} = $_;
 	# Get rid of TABs.
 	s/\t/ /g;
