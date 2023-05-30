@@ -1,14 +1,14 @@
-0.000
+6.010
 
     - !ChordPro functionality
     - Allow line continuation for input lines using a backslash.
-    - Remove diagrams.auto from config.
     - Allow define chord "|" in config.
     - Allow graceful handling of rootless chords.
     - Allow simple markup in chords. Yes, this includes grid chords.
     - Add flags for preprocessor pattern replacements.
     - Allow image scale as a percentage.
     - Experimental: Absolute placement for images.
+    - Remove diagrams.auto from config.
     - !BugFixes
     - Add Pod::Usage to required modules. Some distros seem to have
       removed it from the core.
