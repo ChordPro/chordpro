@@ -25,7 +25,7 @@ opening of files, make changes, and preview (optionally print) the
 formatted result.
 
 For more information about the ChordPro file format, see
-L<http://www.chordpro.org>.
+L<https://www.chordpro.org>.
 
 For more information about ChordPro program, see L<App::Music::ChordPro>.
 
