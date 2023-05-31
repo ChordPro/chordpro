@@ -1496,6 +1496,13 @@ sub directive {
 	    $o = $o->{$_};
 	}
 
+	# Turn hash.array into hash.array.> (append).
+	if ( ref($o) eq 'HASH' && ref($o->{$lk}) eq 'ARRAY' ) {
+	    $c = \($$c->{$lk});
+	    $o = $o->{$lk};
+	    $lk = '>';
+	}
+
 	# Final key. Merge array if so.
 	if ( ( $lk =~ /^\d+$/ || $lk eq '>' || $lk eq '<' )
 	       && ref($o) eq 'ARRAY' ) {
@@ -1516,6 +1523,7 @@ sub directive {
 	else {
 	    $$c->{$lk} = $arg;
 	}
+
 	$config->augment($ccfg);
 	upd_config();
 
