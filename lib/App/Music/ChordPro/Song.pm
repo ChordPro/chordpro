@@ -252,6 +252,7 @@ sub parse_song {
     $self->{config}     = $config;
     $self->{meta}       = $meta if $meta;
     $self->{chordsinfo} = {};
+    $target //= $self->{system};
 
     # Preprocessor.
     my $prep = make_preprocessor( $config->{parser}->{preprocess} );
@@ -679,7 +680,7 @@ sub chord {
 	    # Tests run without config and chords, so pretend.
 	    push( @used_chords, $n );
 	}
-	elsif ( ! $info->is_rootless ) {
+	elsif ( ! $info->is_rootless && ! $info->has_diagrams ) {
 	    do_warn("Unknown chord: $n")
 	      unless $warned_chords{$n}++;
 	}
@@ -1875,7 +1876,9 @@ sub parse_chord {
     }
     else {
 	$info = App::Music::ChordPro::Chords::parse_chord($chord);
-	warn( "Parsing chord: \"$chord\" parsed ok\n" ) if $info && $debug > 1;
+	warn( "Parsing chord: \"$chord\" parsed ok [",
+	      $info->{system},
+	      "]\n" ) if $info && $debug > 1;
     }
     $unk = !defined $info;
 
@@ -1908,7 +1911,7 @@ sub parse_chord {
     }
     # else: warning has been given.
 
-    if ( $info ) {
+    if ( $info && $info->{system} eq "common" ) {
 	# Look it up now, the name may change by transcode.
 	if ( my $i = App::Music::ChordPro::Chords::_known_chord($info,1) ) {
 	    warn( "Parsing chord: \"$chord\" found ",

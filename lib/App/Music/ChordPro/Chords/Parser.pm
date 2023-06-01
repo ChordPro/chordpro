@@ -710,14 +710,14 @@ sub parse_chord {
     }
 
     return unless $chord =~ /^$r_pat(?<qual>\+|0|o|aug|dim|h)?(?<ext>.*)$/;
+    my $r = $+{shift}.$+{root};
 
     my $info = { system => "roman",
 		 parser => $self,
 		 name   => $_[1],
-		 root   => $+{root} };
+		 root   => $r };
     bless $info => $self->{target};
 
-    my $r = $+{root};
     my $q = $+{qual} // "";
     $info->{qual} = $q;
     $q = "-" if $r eq lc($r);
@@ -829,9 +829,11 @@ sub is_nc {
 }
 
 # For convenience.
-sub is_chord      { defined $_[0]->{root_ord} };
-sub is_rootless   { $_[0]->{rootless} };
-sub is_annotation { 0 };
+sub is_chord      { defined $_[0]->{root_ord} }
+sub is_rootless   { $_[0]->{rootless} }
+sub is_annotation { 0 }
+sub has_diagrams  { !$_[0]->{movable} }
+sub is_movable    { $_[0]->{movable} }
 
 sub strings {
     $_[0]->{parser}->{intervals};
@@ -1072,8 +1074,9 @@ sub chord_display {
 	}
     }
 
-    my $res = $self->{root_canon} .
-      "<sup>" . $self->{qual} . $self->{ext} . "</sup>";
+    my $res = $self->{root_canon};
+    $res .= "<sup>" . $self->{qual} . $self->{ext} . "</sup>"
+      if $self->{qual};
     if ( $self->{bass} && $self->{bass} ne "" ) {
 	$res .= "<sub>/" . lc($self->{bass}) . "</sub>";
     }
