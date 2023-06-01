@@ -973,7 +973,7 @@ sub chord_display {
 	$sf ||= 0;
 	$res = '';
 	push( @c, '' ) if @c % 2;
-	my $did = $self->{system} ne "common";;
+	my $did = $self->{system} ne "common";
 	while ( @c ) {
 	    $_ = shift(@c);
 	    if ( $sf & 0x02 ) {	# has flat
