@@ -222,9 +222,16 @@ push( @EXPORT, 'prp2cfg' );
 # Remove markup.
 sub demarkup {
     my ( $t ) = @_;
-    $t =~ s;</?([-\w]+|span\s.*?)>;;g;
-    return $t;
+    return join( '', grep { ! /^\</ } splitmarkup($t) );
 }
 push( @EXPORT, 'demarkup' );
+
+# Split into markup/nonmarkup segments.
+sub splitmarkup {
+    my ( $t ) = @_;
+    my @t = split( qr;(</?(?:[-\w]+|span\s.*?)>);, $t );
+    return @t;
+}
+push( @EXPORT, 'splitmarkup' );
 
 1;

@@ -960,7 +960,7 @@ sub transcode {
 sub chord_display {
     my ( $self, $sf ) = @_;
 
-    use App::Music::ChordPro::Utils qw( demarkup );
+    use App::Music::ChordPro::Utils qw( splitmarkup );
 
     my $res =
       $self->{display}
@@ -969,27 +969,38 @@ sub chord_display {
 
     # Substitute musical symbols if wanted and possible.
     if ( $::config->{settings}->{truesf} ) {
-	my $c0 = demarkup($res);
-	my ( $pre, $post );
-	if ( $c0 ne $res ) {	# has markup
-	    ( $pre, $post ) = $res =~ /^(.*\>)\Q$c0\E(\<.+)$/;
-	    $res = $c0;
-	}
+	my @c = splitmarkup($res);
 	$sf ||= 0;
-	if ( $sf & 0x02 ) {	# has flat
-	    $res =~ s/(?<=[[:alpha:]])b/♭/g;
+	$res = '';
+	push( @c, '' ) if @c % 2;
+	my $did = $self->{system} ne "common";;
+	while ( @c ) {
+	    $_ = shift(@c);
+	    if ( $sf & 0x02 ) {	# has flat
+		if ( $did ) {
+		    s/b/♭/g;
+		}
+		else {
+		    s/(?<=[[:alnum:]])b/♭/g;
+		    $did++;
+		}
+	    }
+	    else {			# fallback
+		if ( $did ) {
+		    s;[b♭];<span font="chordprosymbols">!</span>;g;}
+		else {
+		    s;(?<=[[:alnum:]])[b♭];<span font="chordprosymbols">!</span>;g;
+		    $did++;
+		}
+	    }
+	    if ( $sf & 0x01 ) {	# has sharp
+		s/#/♯/g;
+	    }
+	    else {			# fallback
+		s;[#♯];<span font="chordprosymbols">#</span>;g;
+	    }
+	    $res .= $_ . shift(@c);
 	}
-	else {			# fallback
-	    $res =~ s;(?<=[[:alpha:]])[b♭];<span font="chordprosymbols">!</span>;g;
-	}
-	if ( $sf & 0x01 ) {	# has sharp
-	    $res =~ s/(?<=.)#/♯/g;
-	}
-	else {			# fallback
-	    $res =~ s;(?<=.)[#♯];<span font="chordprosymbols">#</span>;g;
-	}
-	$res = $pre . $res . $post
-	  if defined $pre;
     }
 
     return $self->{parens} ? "($res)" : $res;
