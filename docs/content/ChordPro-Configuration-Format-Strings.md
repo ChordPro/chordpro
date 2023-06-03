@@ -106,3 +106,18 @@ See [Configuration for CSV output]({{< relref "chordpro-configuration-csv" >}}).
 
  * `pagerange`: The pages of the song, either a single page number or
    a range like `3-7`.
+
+## Chord display strings
+
+[Chord display strings]({{< relref
+"Directives-define#chord-display-strings" >}}) support a limited set of substitutions.
+
+ * `root`: The root of the chord.
+ 
+ * `qual`: The quality of the chord. Qualities are `m`, `min`, `-`
+   (minor), `maj` (major), `aug`, `+` (augmented) and `dim`, `o`, `0`
+   (diminished).
+   
+ * `ext`: The rest, e.g. `7sus4`.
+
+In all cases, `%{root}%{qual}%{ext}` yields the full chord name.
