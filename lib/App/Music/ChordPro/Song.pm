@@ -1633,6 +1633,8 @@ sub directive {
 		    shift(@a);
 		    $res->{$_} = $info->{$_}
 		      for qw( base display frets fingers keys );
+		    $res->{$_} = $info->{$_}
+		      for qw( root qual ext );
 		}
 		else {
 		    do_warn("Unknown chord to copy: $a[0]\n");
