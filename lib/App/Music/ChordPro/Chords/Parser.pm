@@ -841,14 +841,19 @@ sub strings {
 
 sub dump {
     my ( $self ) = @_;
-    my $c = dclone($self);
+    my $c = {};
     for ( qw( frets fingers keys ) ) {
-	$c->{$_} = "[ " . join(" ", @{$c->{$_}}) . " ]";
+	next unless $self->{$_};
+	$c->{$_} = "[ " . join(" ", @{$self->{$_}}) . " ]";
     }
-    if ( ref($c->{parser}) ) {
-	$c->{ns_canon} = "[ " . join(" ", @{$c->{parser}{ns_canon}}) . " ]"
-	  if $c->{parser}{ns_canon};
-	$c->{parser} = ref(delete($c->{parser}));
+    if ( ref($self->{parser}) ) {
+	$c->{ns_canon} = "[ " . join(" ", @{$self->{parser}{ns_canon}}) . " ]"
+	  if $self->{parser}{ns_canon};
+	$c->{parser} = ref($self->{parser});
+    }
+    for ( keys %$self ) {
+	next unless defined $self->{$_};
+	$c->{$_} //= $self->{$_};
     }
     ::dump($c);
 }
