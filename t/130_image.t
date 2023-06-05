@@ -16,7 +16,7 @@ my $s = App::Music::ChordPro::Songbook->new;
 # Image (minimal).
 my $data = <<EOD;
 {title: Swing Low Sweet Chariot}
-{image red.jpg}
+{image 130_image.jpg}
 EOD
 
 eval { $s->parse_file(\$data) } or diag("$@");
@@ -36,7 +36,7 @@ my $song = {
 	    'body' => [
 		       {
 			'context' => '',
-			'uri' => './red.jpg',
+			'uri' => './130_image.jpg',
 			'type' => 'image',
 			'opts' => {}
 		       }
@@ -52,7 +52,7 @@ is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );
 $s = App::Music::ChordPro::Songbook->new;
 $data = <<EOD;
 {title: Swing Low Sweet Chariot}
-{image red.jpg width=200 height=150 border=2 center scale=4 title="A red image"}
+{image 130_image.jpg width=200 height=150 border=2 center scale=4 title="A red image"}
 EOD
 
 eval { $s->parse_file(\$data) } or diag("$@");
@@ -83,7 +83,7 @@ $song = {
 				   'center' => 1,
 				   'width' => '200'
 				  },
-			'uri' => './red.jpg',
+			'uri' => './130_image.jpg',
 			'context' => ''
 		       }
 		      ],

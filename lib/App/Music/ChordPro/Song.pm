@@ -300,6 +300,11 @@ sub parse_song {
 	# Get rid of TABs.
 	s/\t/ /g;
 
+	if ( $config->{debug}->{x1} ) {
+	    warn(sprintf("==%3d => %s\n", $diag->{line}, $diag->{orig} ) );
+	}
+
+	
 	if ( $prep->{all} ) {
 	    # warn("PRE:  ", $_, "\n");
 	    $prep->{all}->($_);
@@ -1818,6 +1823,7 @@ sub directive {
 	    App::Music::ChordPro::Chords::add_unknown_chord( $res->{name} );
 	}
 
+	$info->dump;
 	# $used_chords{$res->{name}} = $info if $info;
 
 	return 1;
