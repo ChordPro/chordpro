@@ -1601,7 +1601,7 @@ sub directive {
     if ( $dir eq "define" or my $show = $dir eq "chord" ) {
 
 	# Split the arguments and keep a copy for error messages.
-	# Note that quotewords retunrs an epty result if it gets confused,
+	# Note that quotewords returns an empty result if it gets confused,
 	# so fall back to the ancient split method if so.
 	my @a = quotewords( '[: ]+', 0, $arg );
 	@a = split( /[: ]+/, $arg ) unless @a;
@@ -1633,8 +1633,9 @@ sub directive {
 		    shift(@a);
 		    $res->{$_} = $info->{$_}
 		      for qw( base display frets fingers keys );
+		    # Note: Values of the chord copied from!
 		    $res->{$_} = $info->{$_}
-		      for qw( root qual ext );
+		      for qw( root qual ext root_ord root_mod bass bass_ord qual_canon );
 		}
 		else {
 		    do_warn("Unknown chord to copy: $a[0]\n");
@@ -1644,7 +1645,7 @@ sub directive {
 	    }
 
 	    # display
-	    elsif ( $a eq "display" ) {
+	    elsif ( $a eq "display" && @a ) {
 		$res->{display} = shift(@a);
 	    }
 
@@ -1723,6 +1724,10 @@ sub directive {
 		}
 	    }
 
+	    elsif ( $a eq "diagram" && @a > 0 ) {
+		$res->{diagram} = shift(@a);
+	    }
+
 	    # Wrong...
 	    else {
 		# Insert a marker to show how far we got.
@@ -1735,6 +1740,10 @@ sub directive {
 	}
 
 	return 1 if $fail;
+
+	if ( defined($res->{diagram}) && !is_true($res->{diagram}) ) {
+	    push( @{ $config->{diagrams}->{suppress} }, $res->{name} );
+	}
 
 	if ( $show) {
 	    my $ci;
@@ -1874,7 +1883,8 @@ sub parse_chord {
     $info = App::Music::ChordPro::Chords::_known_chord($chord);
     if ( $info ) {
 	warn( "Parsing chord: \"$chord\" found \"",
-	      $chord, "\" in ", $info->{_via}, "\n" ) if $debug > 1;
+	      $info->name, "\" in ", $info->{_via}, "\n" ) if $debug > 1;
+	$info->dump if $debug > 1;
     }
     else {
 	$info = App::Music::ChordPro::Chords::parse_chord($chord);

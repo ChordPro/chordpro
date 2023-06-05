@@ -8,6 +8,7 @@
     - Add flags for preprocessor pattern replacements.
     - Allow image scale as a percentage.
     - Experimental: Absolute placement for images.
+    - Experimental: Diagram control in {define}.
     - Remove diagrams.auto from config.
     - !BugFixes
     - Add Pod::Usage to required modules. Some distros seem to have
