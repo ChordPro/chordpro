@@ -10,6 +10,7 @@ package App::Music::ChordPro::Output::Common;
 use strict;
 use warnings;
 use App::Music::ChordPro::Chords;
+use App::Music::ChordPro::Utils qw( demarkup );
 use String::Interpolate::Named;
 use utf8;
 use POSIX qw(setlocale LC_TIME strftime);
@@ -283,13 +284,5 @@ sub prep_outlines {
     return \@book;
 }
 push( @EXPORT_OK, 'prep_outlines' );
-
-# Remove markup.
-sub demarkup {
-    my ( $t ) = @_;
-    $t =~ s;</?([-\w]+|span\s.*?)>;;g;
-    return $t;
-}
-push( @EXPORT, 'demarkup' );
 
 1;

@@ -610,6 +610,9 @@ is specified in `"line"`.
 * `fields`  
 The ordering of the outline. You can specify one or two metadata
 items.  
+When the field name is prefixed with a minus sign, the sort order is
+reversed. With a plus prefix the field is sorted numerically. Both
+prefixes may be supplied for reverse numeric sort order.  
 When you specify a metadata item that has multiple values they are
 split out in the outline.
 * `label`  
@@ -619,7 +622,7 @@ The format of the outline.
 * `collapse`  
 If true, the outline is initially collapsed.
 * `letter`  
-If there are more outline items with differing first letters than the
+If there are at least as many outline items with differing first letters than the
 amount specified here, an extra level of outlines (letter index) is
 created for easy navigation.  
 A value of zero disables this.

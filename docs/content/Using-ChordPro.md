@@ -205,11 +205,12 @@ GUI version only.
 
 Presets metadata item _KEY_ to have the value _VALUE_.
 
-This option may be specified multiple times.
+This option may be specified multiple times. Additional values for the
+same _KEY_ will overwrite the previous value.
 
 ### no-a2crd
 
-Do not automatically convert non-ChordPro input to ChordPro format.
+Do not automatically attempt to convert non-ChordPro input to ChordPro format.
 
 ### no-csv
 
@@ -328,10 +329,14 @@ are:
 * `german` (C, ... A, Ais/B, H)
 * `latin` (Do, Re, Mi, Fa, Sol, ...)
 * `scandinavian` (C, ... A, A#/Bb, H)
-* `solfège` (Do, Re, Mi, Fa, So, ...)
-* `solfege` (same as `solfège`)
-* `nashville` (1, 2, 3, ...)
-* `roman` (I, II, III, ...)
+* `solfège` (Do, Re, Mi, Fa, So, ...)*
+* `solfege` (same as `solfège`)*
+* `nashville` (1, 2, 3, ...)*
+* `roman` (I, II, III, ...)*
+
+The systems marked with * are key-relative. For example, when a song
+is in the key of `D` and transcoded to `nashville`, `D` becomes `1`,
+`G` becomes `4` and so on.
 
 ### transpose
 

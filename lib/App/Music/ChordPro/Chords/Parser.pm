@@ -239,9 +239,13 @@ sub parse_chord {
 		 parser => $self,
 		 name => $_[1] };
 
-    # Match chord.
     my %plus;
-    if ( $chord =~ /^$self->{c_pat}$/ ) {
+
+    # Match chord.
+    if ( $chord eq "" && $bass ne "" ) {
+	$info->{rootless} = 1;
+    }
+    elsif ( $chord =~ /^$self->{c_pat}$/ ) {
 	%plus = %+;
 	$info->{root} = $plus{root};
     }
@@ -304,7 +308,7 @@ sub parse_chord {
 ####	$info->{isflat} = $info->{"${pfx}_mod"} < 0;
     };
 
-    $ordmod->("root");
+    $ordmod->("root") unless $info->is_rootless;
 
     cluck("BLESS info for $chord into ", $self->{target}, "\n")
       unless ref($info) =~ /App::Music::ChordPro::Chord::/;
@@ -313,6 +317,11 @@ sub parse_chord {
 	return unless $bass =~ /^$self->{n_pat}$/;
 	$info->{bass} = $bass;
 	$ordmod->("bass");
+	if ( $info->is_rootless ) {
+	    for ( qw( ord mod canon ) ) {
+		$info->{"root_$_"} = $info->{"bass_$_"};
+	    }
+	}
     }
 
     if ( $::config->{settings}->{'chords-canonical'} ) {
@@ -701,14 +710,14 @@ sub parse_chord {
     }
 
     return unless $chord =~ /^$r_pat(?<qual>\+|0|o|aug|dim|h)?(?<ext>.*)$/;
+    my $r = $+{shift}.$+{root};
 
     my $info = { system => "roman",
 		 parser => $self,
 		 name   => $_[1],
-		 root   => $+{root} };
+		 root   => $r };
     bless $info => $self->{target};
 
-    my $r = $+{root};
     my $q = $+{qual} // "";
     $info->{qual} = $q;
     $q = "-" if $r eq lc($r);
@@ -820,8 +829,11 @@ sub is_nc {
 }
 
 # For convenience.
-sub is_chord      { defined $_[0]->{root_ord} };
-sub is_annotation { 0 };
+sub is_chord      { defined $_[0]->{root_ord} }
+sub is_rootless   { $_[0]->{rootless} }
+sub is_annotation { 0 }
+sub has_diagrams  { !$_[0]->{movable} }
+sub is_movable    { $_[0]->{movable} }
 
 sub strings {
     $_[0]->{parser}->{intervals};
@@ -829,14 +841,19 @@ sub strings {
 
 sub dump {
     my ( $self ) = @_;
-    my $c = dclone($self);
+    my $c = {};
     for ( qw( frets fingers keys ) ) {
-	$c->{$_} = "[ " . join(" ", @{$c->{$_}}) . " ]";
+	next unless $self->{$_};
+	$c->{$_} = "[ " . join(" ", @{$self->{$_}}) . " ]";
     }
-    if ( ref($c->{parser}) ) {
-	$c->{ns_canon} = "[ " . join(" ", @{$c->{parser}{ns_canon}}) . " ]"
-	  if $c->{parser}{ns_canon};
-	$c->{parser} = ref(delete($c->{parser}));
+    if ( ref($self->{parser}) ) {
+	$c->{ns_canon} = "[ " . join(" ", @{$self->{parser}{ns_canon}}) . " ]"
+	  if $self->{parser}{ns_canon};
+	$c->{parser} = ref($self->{parser});
+    }
+    for ( keys %$self ) {
+	next unless defined $self->{$_};
+	$c->{$_} //= $self->{$_};
     }
     ::dump($c);
 }
@@ -849,13 +866,16 @@ use String::Interpolate::Named;
 sub show {
     Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self, $np ) = @_;
-    my $res = $self->is_chord
-      ? $self->{parser}->root_canon( $self->{root_ord},
-				     $self->{root_mod} >= 0,
-				     $self->{qual} eq '-',
-				     !$self->is_flat
-				   ) . $self->{qual} . $self->{ext}
-      : $self->{name};
+    my $res =
+      $self->is_rootless
+      ? ""
+      : $self->is_chord
+        ? $self->{parser}->root_canon( $self->{root_ord},
+				       $self->{root_mod} >= 0,
+				       $self->{qual} eq '-',
+				       !$self->is_flat
+				     ) . $self->{qual} . $self->{ext}
+        : $self->{name};
     if ( $self->is_note ) {
 	return lcfirst($res);
     }
@@ -870,7 +890,7 @@ sub show {
 sub agnostic {
     Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self ) = @_;
-    return if $self->is_note;
+    return if $self->is_rootless || $self->is_note;
     join( " ", "",
 	  $self->{root_ord},
 	  $self->{root_mod},
@@ -889,11 +909,13 @@ sub transpose {
     my $info = $self->clone;
     my $p = $self->{parser};
 
-    $info->{root_ord} = ( $self->{root_ord} + $xpose ) % $p->intervals;
-    $info->{root_canon} = $info->{root} =
-      $p->root_canon( $info->{root_ord},
-		      $dir > 0,
-		      $info->{qual_canon} eq "-" );
+    unless ( $self->{rootless} ) {
+	$info->{root_ord} = ( $self->{root_ord} + $xpose ) % $p->intervals;
+	$info->{root_canon} = $info->{root} =
+	  $p->root_canon( $info->{root_ord},
+			  $dir > 0,
+			  $info->{qual_canon} eq "-" );
+    }
     if ( $self->{bass} && $self->{bass} ne "" ) {
 	$info->{bass_ord} = ( $self->{bass_ord} + $xpose ) % $p->intervals;
 	$info->{bass_canon} = $info->{bass} =
@@ -909,7 +931,7 @@ sub transpose {
 
 sub transcode {
     Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
-    my ( $self, $xcode ) = @_;
+    my ( $self, $xcode, $key_ord ) = @_;
     return $self unless $xcode;
     return $self unless $self->is_chord;
     return $self if $self->{system} eq $xcode;
@@ -919,6 +941,7 @@ sub transcode {
     my $p = $self->{parser}->get_parser($xcode);
     die("OOPS ", $p->{system}, " $xcode") unless $p->{system} eq $xcode;
     $info->{parser} = $p;
+    $info->{root_ord} -= $key_ord if $key_ord && $p->movable;
 #    $info->{$_} = $p->{$_} for qw( ns_tbl nf_tbl ns_canon nf_canon );
     $info->{root_canon} = $info->{root} =
       $p->root_canon( $info->{root_ord},
@@ -929,9 +952,11 @@ sub transcode {
 	$info->{qual_canon} = $info->{qual} = "";
     }
     if ( $self->{bass} && $self->{bass} ne "" ) {
+	$info->{bass_ord} -= $key_ord if $key_ord && $p->movable;
 	$info->{bass_canon} = $info->{bass} =
 	  $p->root_canon( $info->{bass_ord}, $info->{bass_mod} >= 0 );
     }
+    $info->{name} = $info->name;
     $info->{system} = $p->{system};
     bless $info => $p->{target};
 #    ::dump($info);
@@ -942,6 +967,8 @@ sub transcode {
 sub chord_display {
     my ( $self, $sf ) = @_;
 
+    use App::Music::ChordPro::Utils qw( splitmarkup );
+
     my $res =
       $self->{display}
       ? interpolate( { args => $self }, $self->{display} )
@@ -949,18 +976,37 @@ sub chord_display {
 
     # Substitute musical symbols if wanted and possible.
     if ( $::config->{settings}->{truesf} ) {
+	my @c = splitmarkup($res);
 	$sf ||= 0;
-	if ( $sf & 0x02 ) {	# has flat
-	    $res =~ s/(?<=.)b/♭/g;
-	}
-	else {			# fallback
-	    $res =~ s;(?<=.)[b♭];<span font="chordprosymbols">!</span>;g;
-	}
-	if ( $sf & 0x01 ) {	# has sharp
-	    $res =~ s/(?<=.)#/♯/g;
-	}
-	else {			# fallback
-	    $res =~ s;(?<=.)[#♯];<span font="chordprosymbols">#</span>;g;
+	$res = '';
+	push( @c, '' ) if @c % 2;
+	my $did = 0;		# TODO: not for roman
+	while ( @c ) {
+	    $_ = shift(@c);
+	    if ( $sf & 0x02 ) {	# has flat
+		if ( $did ) {
+		    s/b/♭/g;
+		}
+		else {
+		    s/(?<=[[:alnum:]])b/♭/g;
+		    $did++;
+		}
+	    }
+	    else {			# fallback
+		if ( $did ) {
+		    s;[b♭];<span font="chordprosymbols">!</span>;g;}
+		else {
+		    s;(?<=[[:alnum:]])[b♭];<span font="chordprosymbols">!</span>;g;
+		    $did++;
+		}
+	    }
+	    if ( $sf & 0x01 ) {	# has sharp
+		s/#/♯/g;
+	    }
+	    else {			# fallback
+		s;[#♯];<span font="chordprosymbols">#</span>;g;
+	    }
+	    $res .= $_ . shift(@c);
 	}
     }
 
@@ -1033,8 +1079,9 @@ sub chord_display {
 	}
     }
 
-    my $res = $self->{root_canon} .
-      "<sup>" . $self->{qual} . $self->{ext} . "</sup>";
+    my $res = $self->{root_canon};
+    $res .= "<sup>" . $self->{qual} . $self->{ext} . "</sup>"
+      if $self->{qual};
     if ( $self->{bass} && $self->{bass} ne "" ) {
 	$res .= "<sub>/" . lc($self->{bass}) . "</sub>";
     }

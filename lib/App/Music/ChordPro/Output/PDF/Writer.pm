@@ -13,8 +13,8 @@ use Text::Layout;
 use IO::String;
 use Carp;
 
-use App::Music::ChordPro::Utils qw( expand_tilde );
-use App::Music::ChordPro::Output::Common qw( fmt_subst prep_outlines demarkup );
+use App::Music::ChordPro::Utils qw( expand_tilde demarkup );
+use App::Music::ChordPro::Output::Common qw( fmt_subst prep_outlines );
 
 # For regression testing, run perl with PERL_HASH_SEED set to zero.
 # This eliminates the arbitrary order of font definitions and triggers
@@ -42,12 +42,13 @@ sub new {
 
 sub info {
     my ( $self, %info ) = @_;
-    unless ( $info{CreationDate} ) {
-	my @tm = gmtime( $regtest ? $faketime : time );
-	$info{CreationDate} =
-	  sprintf("D:%04d%02d%02d%02d%02d%02d+01'00",
-		  1900+$tm[5], 1+$tm[4], @tm[3,2,1,0]);
-    }
+
+    $info{CreationDate} //= pdf_date();
+
+    # PDF::API2 2.42+ does not accept the final apostrophe.
+    no warnings 'redefine';
+    local *PDF::API2::_is_date = sub { 1 };
+
     if ( $self->{pdf}->can("info_metadata") ) {
 	for ( keys(%info) ) {
 	    $self->{pdf}->info_metadata( $_, $info{$_} );
@@ -56,6 +57,18 @@ sub info {
     else {
 	$self->{pdf}->info(%info);
     }
+}
+
+# Return a PDF compliant date/time string.
+sub pdf_date {
+    my ( $t ) = @_;
+    $t ||= $regtest ? $faketime : time;
+
+    use POSIX qw( strftime );
+    my $r = strftime( "%Y%m%d%H%M%S%z", localtime($t) );
+    # Don't use s///r to keep PERL_MIN_VERSION low.
+    $r =~ s/(..)$/'$1'/;	# +0100 -> +01'00'
+    $r;
 }
 
 sub wrap {
@@ -436,7 +449,7 @@ sub pagelabel {
                               $style eq 'alpha' ? 'a' : 'D',
 		     defined $prefix ? ( prefix => $prefix ) : (),
 		     start => 1 };
-	$c->( $self->{pdf}, $page, %$opts );
+	$c->( $self->{pdf}, $page+1, %$opts );
     }
     else {
 	my $opts = { -style => $style,
@@ -476,24 +489,25 @@ sub make_outlines {
 	}
 
 	my %lh;			# letter hierarchy
-	for ( @$book ) {
-	    # Group on first letter.
-	    # That's why we left the sort fields in...
-	    my $cur = uc(substr( $_->[0], 0, 1 ));
-	    $lh{$cur} //= [];
-	    # Last item is the song.
-	    push( @{$lh{$cur}}, $_->[-1] );
+	my $needlh = 0;
+	if ( $ctl->{letter} > 0 ) {
+	    for ( @$book ) {
+		# Group on first letter.
+		# That's why we left the sort fields in...
+		my $cur = uc(substr( $_->[0], 0, 1 ));
+		$lh{$cur} //= [];
+		# Last item is the song.
+		push( @{$lh{$cur}}, $_->[-1] );
+	    }
+	    # Need letter hierarchy?
+	    $needlh = keys(%lh) >= $ctl->{letter};
 	}
 
-	# Need letter hierarchy?
-	my $needlh = keys(%lh) >= $ctl->{letter};
-	my $cur_ol;
-	my $cur_let = "";
-
-	foreach my $let ( sort keys %lh ) {
-	    foreach my $song ( @{$lh{$let}} ) {
-		my $ol;
-		if ( $needlh ) {
+	if ( $needlh ) {
+	    my $cur_ol;
+	    my $cur_let = "";
+	    foreach my $let ( sort keys %lh ) {
+		foreach my $song ( @{$lh{$let}} ) {
 		    unless ( defined $cur_ol && $cur_let eq $let ) {
 			# Intermediate level autoline.
 			$cur_ol = $outline->outline;
@@ -501,12 +515,23 @@ sub make_outlines {
 			$cur_let = $let;
 		    }
 		    # Leaf outline.
-		    $ol = $cur_ol->outline;
+		    my $ol = $cur_ol->outline;
+		    # Display info.
+		    $ol->title( demarkup( fmt_subst( $song, $ctl->{line} ) ) );
+		    if ( my $c = $ol->can("destination") ) {
+			$c->( $ol, $pdf->openpage( $song->{meta}->{tocpage} + $start ) );
+		    }
+		    else {
+			$ol->dest($pdf->openpage( $song->{meta}->{tocpage} + $start ));
+		    }
 		}
-		else {
-		    # Leaf outline.
-		    $ol = $outline->outline;
-		}
+	    }
+	}
+	else {
+	    foreach my $b ( @$book ) {
+		my $song = $b->[-1];
+		# Leaf outline.
+		my $ol = $outline->outline;
 		# Display info.
 		$ol->title( demarkup( fmt_subst( $song, $ctl->{line} ) ) );
 		if ( my $c = $ol->can("destination") ) {

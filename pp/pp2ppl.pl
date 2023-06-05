@@ -4,9 +4,9 @@
 
 # Author          : Johan Vromans
 # Created On      : Mon Apr 27 15:13:18 2020
-# Last Modified By: Johan Vromans
-# Last Modified On: Fri Jan 29 08:29:23 2021
-# Update Count    : 42
+# Last Modified By: 
+# Last Modified On: Tue May 30 09:56:53 2023
+# Update Count    : 43
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -216,13 +216,14 @@ __END__
 
 =head1 NAME
 
-sample - skeleton for GetOpt::Long and Pod::Usage
+pp2ppl - Create portable tree out of PP package.
 
 =head1 SYNOPSIS
 
-sample [options] [file ...]
+sample [options] package
 
  Options:
+   --dest=XXX           destination folder
    --ident		shows identification
    --help		shows a brief help message and exits
    --man                shows full documentation and exits
@@ -232,6 +233,10 @@ sample [options] [file ...]
 =head1 OPTIONS
 
 =over 8
+
+=item B<--dest=>I<XXX>
+
+The folder where the tree will be unpacked.
 
 =item B<--help>
 
@@ -254,15 +259,37 @@ This option may be repeated to increase verbosity.
 
 Suppresses all non-essential information.
 
-=item I<file>
+=item I<package>
 
-The input file(s) to process, if any.
+The package to process. This must be an archive file  created by L<PAR>.
 
 =back
 
 =head1 DESCRIPTION
 
-B<This program> will read the given input file(s) and do someting
-useful with the contents thereof.
+B<This program> will read the archive file and unpack it into the
+destination directory.
+
+First the embedded files are extracted to $dest/lib.
+
+Then the remainder of the PAR is processed as a ZIP archive:
+
+=over 4
+
+=item *
+
+C<lib/> files are extracted to $dest/lib;
+
+=item *
+
+C<shlib/> files are extracted to $dest;
+
+=item *
+
+The rest is extracted I<as is>.
+
+=back
+
+The resultant file tree is suitable to build a ppl (Portable Perl Loader) kit.
 
 =cut

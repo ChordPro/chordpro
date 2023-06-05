@@ -18,6 +18,9 @@ print <<EOD;
 @../common/wxchordpro.pp
 --gui
 
+# Explicit libraries.
+--link=/usr/local/lib/libjpeg.8.dylib
+
 # Explicitly link the wx libraries.
 EOD
 

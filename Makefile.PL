@@ -42,7 +42,7 @@ WriteMakefile
  PREREQ_PM      => {
 		    'App::Packager'		  => 1.430,
 		    @pdfapi,
-		    'Text::Layout'		  => 0.030,
+		    'Text::Layout'		  => 0.031,
 		    'JSON::PP'			  => 2.27203,
 		    'String::Interpolate::Named'  => 1.030,
 		    'File::LoadLines'		  => 1.021,
@@ -50,6 +50,8 @@ WriteMakefile
 		    'Image::Info'		  => 1.41,
 		    'List::Util'		  => 1.33,
 		    'Storable'			  => 3.08,
+		   # Some distro's have removed this from the core.
+		    'Pod::Usage'		  => 2.03,
 		   # These are only used by the LaTeX backend
 		   # 'Template'			  => 3.010,
 		   # 'LaTeX::Encode'		  => 0.092.0,

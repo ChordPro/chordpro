@@ -355,7 +355,7 @@ sub add_config_chord {
 
     # Handle alternatives.
     my @names;
-    if ( $def->{name} =~ /\|/ ) {
+    if ( $def->{name} =~ /.\|./ ) {
 	$def->{name} = [ split( /\|/, $def->{name} ) ];
     }
     if ( UNIVERSAL::isa( $def->{name}, 'ARRAY' ) ) {
@@ -435,7 +435,7 @@ sub add_config_chord {
 }
 
 # API: Add a user defined chord.
-# Used by: Songbook, Output::PDF.
+# Used by: Song.
 sub add_song_chord {
     my ( $ii ) = @_;
 
@@ -471,9 +471,10 @@ sub add_song_chord {
 }
 
 # API: Add an unknown chord.
-# Used by: Songbook.
+# Used by: Song.
 sub add_unknown_chord {
     my ( $name ) = @_;
+    $parser //= App::Music::ChordPro::Chords::Parser->get_parser;
     $song_chords{$name} = bless
       { origin  => "user",
 	name    => $name,

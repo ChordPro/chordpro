@@ -22,6 +22,7 @@ use File::LoadLines;
 use Storable qw(dclone);
 use feature 'state';
 use Text::ParseWords qw(quotewords);
+use File::Basename qw(basename);
 
 # Parser context.
 my $def_context = "";
@@ -59,6 +60,7 @@ my @labels;			# labels used
 # Normally, transposition and subtitutions are handled by the parser.
 my $decapo;
 my $no_transpose;		# NYI
+my $xcmov;			# transcode to movable system
 my $no_substitute;
 
 # Stack for properties like textsize.
@@ -83,6 +85,7 @@ sub new {
     @labels = ();
     @chorus = ();
     $capo = undef;
+    $xcmov = undef;
     upd_config();
 
     $diag->{format} = $config->{diagnostics}->{format};
@@ -231,7 +234,9 @@ sub parse_song {
 	}
 	warn("Got transcoder for $target\n") if $::options->{verbose};
 	App::Music::ChordPro::Chords::set_parser($target);
-	if ( $target ne App::Music::ChordPro::Chords::get_parser->{system} ) {
+	my $p = App::Music::ChordPro::Chords::get_parser;
+	$xcmov = $p->movable;
+	if ( $target ne $p->{system} ) {
 	    ::dump(App::Music::ChordPro::Chords::Parser->parsers);
 	    warn("OOPS parser mixup, $target <> ",
 		App::Music::ChordPro::Chords::get_parser->{system})
@@ -248,6 +253,7 @@ sub parse_song {
     $self->{config}     = $config;
     $self->{meta}       = $meta if $meta;
     $self->{chordsinfo} = {};
+    $target //= $self->{system};
 
     # Preprocessor.
     my $prep = make_preprocessor( $config->{parser}->{preprocess} );
@@ -275,7 +281,22 @@ sub parse_song {
 	else {
 	    $diag->{line} = ++$$linecnt;
 	}
-	$diag->{orig} = $_ = shift(@$lines);
+
+	$_ = shift(@$lines);
+	while ( /\\\Z/ && @$lines ) {
+	    chop;
+	    my $cont = shift(@$lines);
+	    $$linecnt++;
+	    $cont =~ s/^\s+//;
+	    $_ .= $cont;
+	}
+
+	# Uncomment this to allow \uXXXX escapes.
+	s/\\u([0-9a-f]{4})/chr(hex("0x$1"))/ige;
+	# Uncomment this to allow \u{XX...} escapes.
+	# s/\\u\{([0-9a-f]+)\}/chr(hex("0x$1"))/ige;
+
+	$diag->{orig} = $_;
 	# Get rid of TABs.
 	s/\t/ /g;
 
@@ -541,7 +562,7 @@ sub parse_song {
     if ( $diagrams eq "user" ) {
 
 	if ( $self->{define} && @{$self->{define}} ) {
-	    my %h = map { $_ => 1 } @used_chords;
+	    my %h = map { demarkup($_) => 1 } @used_chords;
 	    @used_chords =
 	      map { $h{$_->{name}} ? $_->{name} : () } @{$self->{define}};
 	}
@@ -551,7 +572,8 @@ sub parse_song {
     }
     else {
 	my %h;
-	@used_chords = map { $h{$_}++ ? () : $_ } @used_chords;
+	@used_chords = map { $h{$_}++ ? () : $_ }
+	  map { demarkup($_) } @used_chords;
     }
 
     if ( $config->{diagrams}->{sorted} ) {
@@ -572,7 +594,8 @@ sub parse_song {
 	  };
 
 	if ( %warned_chords ) {
-	    my @a = sort App::Music::ChordPro::Chords::chordcompare keys(%warned_chords);
+	    my @a = sort App::Music::ChordPro::Chords::chordcompare
+	      keys(%warned_chords);
 	    my $l;
 	    if ( @a > 1 ) {
 		my $a = pop(@a);
@@ -616,6 +639,10 @@ sub chord {
 	return $c;
     }
 
+    my $markup = $c;
+    $c = demarkup($markup);
+    undef $markup if $markup eq $c;
+
     my ( $name, $info ) = $self->parse_chord($c);
     unless ( defined $name ) {
 	# Warning was given.
@@ -625,12 +652,19 @@ sub chord {
 	    ( { name => $c, text => $c } ) );
 	return $c;
     }
-    ( my $n = $name ) =~ s/^\((.+)\)$/$1/;
 
-    if ( ! $info->{origin} && $config->{diagrams}->{auto} ) {
-	$info = App::Music::ChordPro::Chords::add_unknown_chord($name);
-	$self->add_chord($info);
+    if ( $markup ) {
+	my $m = $markup;
+	if ( $markup =~ s/\>\Q$c\E\</>%{name}</ ) {
+	    $info = $info->clone;
+	    $info->{display} = $markup;
+	    $name = $self->add_chord( $info, $m );
+	}
+	else {
+	    do_warn("Invalid markup in chord: \"$markup\"");
+	}
     }
+    ( my $n = $name ) =~ s/^\((.+)\)$/$1/;
 
     unless ( $info->is_note ) {
 	if ( $info->is_keyboard ) {
@@ -647,7 +681,7 @@ sub chord {
 	    # Tests run without config and chords, so pretend.
 	    push( @used_chords, $n );
 	}
-	else {
+	elsif ( ! $info->is_rootless && ! $info->has_diagrams ) {
 	    do_warn("Unknown chord: $n")
 	      unless $warned_chords{$n}++;
 	}
@@ -687,6 +721,9 @@ sub decompose {
 		}
 		if ( $memorizing ) {
 		    push( @$memchords, $chords[-1] );
+		    warn("Chord memorized for $in_context\[$memcrdinx]: ",
+			 $chords[-1], "\n")
+		      if $config->{debug}->{chords};
 		}
 		$memcrdinx++;
 	    }
@@ -704,14 +741,16 @@ sub decompose {
 		push( @chords, $chord );
 	    }
 	    else {
-		push( @chords, $memchords->[$memcrdinx]);
+		push( @chords, $self->chord($memchords->[$memcrdinx]));
+		warn("Chord recall $in_context\[$memcrdinx]: ", $chords[-1], "\n")
+		  if $config->{debug}->{chords};
 	    }
 	    $memcrdinx++;
 	}
 
 	# Not memorizing.
 	else {
-	    #do_warn("No chords memorized for $in_context");
+	    # do_warn("No chords memorized for $in_context");
 	    push( @chords, $chord );
 	}
 	$dummy = 0;
@@ -758,7 +797,22 @@ sub decompose_grid {
 	}
     }
 
-    my @tokens = split( ' ', $line );
+    my @tokens;
+    my @t = split( ' ', $line );
+
+    # Unfortunately, <span xxx> gets split too.
+    while ( @t ) {
+	$_ = shift(@t);
+	push( @tokens, $_ );
+	if ( /\<span$/ ) {
+	    while ( @t ) {
+		$_ = shift(@t);
+		$tokens[-1] .= " " . $_;
+		last if /\<\/span>/;
+	    }
+	}
+    }
+
     my $nbt = 0;		# non-bar tokens
     foreach ( @tokens ) {
 	if ( $_ eq "|:" || $_ eq "{" ) {
@@ -1130,26 +1184,36 @@ sub directive {
 	my $id;
 	my %opts;
 	while ( my($k,$v) = each(%$res) ) {
-	    if ( $k =~ /^(title)$/i ) {
+	    if ( $k =~ /^(title)$/i && $v ne "" ) {
 		$opts{lc($k)} = $v;
 	    }
-	    elsif ( $k =~ /^(width|height|border|spread|center)$/i && $v =~ /^(\d+)$/ ) {
+	    elsif ( $k =~ /^(border|spread|center)$/i && $v =~ /^(\d+)$/ ) {
 		$opts{lc($k)} = $v;
 	    }
-	    elsif ( $k =~ /^(scale)$/ && $v =~ /^(\d(?:\.\d+)?)$/ ) {
+	    elsif ( $k =~ /^(width|height)$/i && $v =~ /^(\d+(?:\.\d+)?\%?)$/ ) {
 		$opts{lc($k)} = $v;
+	    }
+	    elsif ( $k =~ /^(x|y)$/i && $v =~ /^([-+]?\d+(?:\.\d+)?\%?)$/ ) {
+		$opts{lc($k)} = $v;
+	    }
+	    elsif ( $k =~ /^(scale)$/ && $v =~ /^(\d+(?:\.\d+)?)(%)?$/ ) {
+		$opts{lc($k)} = $2 ? $1/100 : $1;
 	    }
 	    elsif ( $k =~ /^(center|border|spread)$/i ) {
 		$opts{lc($k)} = $v;
 	    }
-	    elsif ( $k =~ /^(src|uri)$/i ) {
+	    elsif ( $k =~ /^(src|uri)$/i && $v ne "" ) {
 		$uri = $v;
 	    }
-	    elsif ( $k =~ /^(id)$/i ) {
+	    elsif ( $k =~ /^(id)$/i && $v ne "" ) {
 		$id = $v;
 	    }
+	    elsif ( $k =~ /^(anchor)$/i
+		    && $v =~ /^(paper|page|column|line)$/ ) {
+		$opts{lc($k)} = lc($v);
+	    }
 	    elsif ( $uri ) {
-		do_warn( "Unknown image attribute: $1\n" );
+		do_warn( "Unknown image attribute: $k\n" );
 		next;
 	    }
 	    # Assume just an image file uri.
@@ -1157,6 +1221,48 @@ sub directive {
 		$uri = $k;
 	    }
 	}
+
+	if ( $uri && $uri !~ m;/\\; ) { # basename
+	    use File::Basename qw(dirname);
+	    $uri = dirname($diag->{file}) . "/" . $uri;
+	}
+
+	# uri + id -> define asset
+	if ( $uri && $id ) {
+	    # Define a new asset.
+	    if ( %opts ) {
+		do_warn("Asset definition \"$id\" does not take attributes");
+		return;
+	    }
+	    use Image::Info;
+	    open( my $fd, '<:raw', $uri );
+	    unless ( $fd ) {
+		do_warn("$uri: $!");
+		return;
+	    }
+	    my $data = do { local $/; <$fd> };
+	    # Get info.
+	    my $info = Image::Info::image_info(\$data);
+	    if ( $info->{error} ) {
+		do_warn($info->{error});
+		return;
+	    }
+
+	    # Store in assets.
+	    $self->{assets} //= {};
+	    $self->{assets}->{$id} =
+	      { data => $data, type => $info->{file_ext},
+		width => $info->{width}, height => $info->{height},
+	      };
+
+	    if ( $config->{debug}->{images} ) {
+		warn("asset[$id] ", length($data), " bytes, ",
+		     "width=$info->{width}, height=$info->{height}",
+		     "\n");
+	    }
+	    return 1;
+	}
+
 	$uri = "id=$id" if $id;
 	unless ( $uri ) {
 	    do_warn( "Missing image source\n" );
@@ -1284,7 +1390,13 @@ sub directive {
 
     if ( $dir eq "columns"
 	 && $arg =~ /^(\d+)$/ ) {
-	$self->{settings}->{columns} = $arg;
+	# If there a column specifications in the config, retain them
+	# if the number of columns match.
+	unless( ref($config->{settings}->{columns}) eq 'ARRAY'
+	     && $arg == @{$config->{settings}->{columns}}
+	   ) {
+	    $self->{settings}->{columns} = $arg;
+	}
 	return 1;
     }
 
@@ -1391,6 +1503,13 @@ sub directive {
 	    $o = $o->{$_};
 	}
 
+	# Turn hash.array into hash.array.> (append).
+	if ( ref($o) eq 'HASH' && ref($o->{$lk}) eq 'ARRAY' ) {
+	    $c = \($$c->{$lk});
+	    $o = $o->{$lk};
+	    $lk = '>';
+	}
+
 	# Final key. Merge array if so.
 	if ( ( $lk =~ /^\d+$/ || $lk eq '>' || $lk eq '<' )
 	       && ref($o) eq 'ARRAY' ) {
@@ -1411,6 +1530,7 @@ sub directive {
 	else {
 	    $$c->{$lk} = $arg;
 	}
+
 	$config->augment($ccfg);
 	upd_config();
 
@@ -1487,7 +1607,7 @@ sub directive {
     if ( $dir eq "define" or my $show = $dir eq "chord" ) {
 
 	# Split the arguments and keep a copy for error messages.
-	# Note that quotewords retunrs an epty result if it gets confused,
+	# Note that quotewords returns an empty result if it gets confused,
 	# so fall back to the ancient split method if so.
 	my @a = quotewords( '[: ]+', 0, $arg );
 	@a = split( /[: ]+/, $arg ) unless @a;
@@ -1519,6 +1639,9 @@ sub directive {
 		    shift(@a);
 		    $res->{$_} = $info->{$_}
 		      for qw( base display frets fingers keys );
+		    # Note: Values of the chord copied from!
+		    $res->{$_} = $info->{$_}
+		      for qw( root qual ext root_ord root_mod bass bass_ord qual_canon );
 		}
 		else {
 		    do_warn("Unknown chord to copy: $a[0]\n");
@@ -1528,7 +1651,7 @@ sub directive {
 	    }
 
 	    # display
-	    elsif ( $a eq "display" ) {
+	    elsif ( $a eq "display" && @a ) {
 		$res->{display} = shift(@a);
 	    }
 
@@ -1607,6 +1730,10 @@ sub directive {
 		}
 	    }
 
+	    elsif ( $a eq "diagram" && @a > 0 ) {
+		$res->{diagram} = shift(@a);
+	    }
+
 	    # Wrong...
 	    else {
 		# Insert a marker to show how far we got.
@@ -1619,6 +1746,10 @@ sub directive {
 	}
 
 	return 1 if $fail;
+
+	if ( defined($res->{diagram}) && !is_true($res->{diagram}) ) {
+	    push( @{ $config->{diagrams}->{suppress} }, $res->{name} );
+	}
 
 	if ( $show) {
 	    my $ci;
@@ -1692,9 +1823,11 @@ sub add_chord {
     my ( $self, $info, $new_id ) = @_;
 
     if ( $new_id ) {
-	state $id = "ch0000";
-	$new_id = " $id";
-	$id++;
+	if ( $new_id eq "1" ) {
+	    state $id = "ch0000";
+	    $new_id = " $id";
+	    $id++;
+	}
     }
     else {
 	$new_id = $info->name;
@@ -1756,11 +1889,14 @@ sub parse_chord {
     $info = App::Music::ChordPro::Chords::_known_chord($chord);
     if ( $info ) {
 	warn( "Parsing chord: \"$chord\" found \"",
-	      $chord, "\" in ", $info->{_via}, "\n" ) if $debug > 1;
+	      $info->name, "\" in ", $info->{_via}, "\n" ) if $debug > 1;
+	$info->dump if $debug > 1;
     }
     else {
 	$info = App::Music::ChordPro::Chords::parse_chord($chord);
-	warn( "Parsing chord: \"$chord\" parsed ok\n" ) if $info && $debug > 1;
+	warn( "Parsing chord: \"$chord\" parsed ok [",
+	      $info->{system},
+	      "]\n" ) if $info && $debug > 1;
     }
     $unk = !defined $info;
 
@@ -1773,7 +1909,7 @@ sub parse_chord {
     }
 
     unless ( ($info
-	      && ( defined($info->{root}) || $info->is_nc))
+	      && ( defined($info->{root}) || defined($info->{bass}) || $info->is_nc))
 	     ||
 	     ( $allow && !( $xc || $xp ) ) ) {
 	do_warn( "Cannot parse",
@@ -1793,7 +1929,7 @@ sub parse_chord {
     }
     # else: warning has been given.
 
-    if ( $info ) {
+    if ( $info && $info->{system} eq "common" ) {
 	# Look it up now, the name may change by transcode.
 	if ( my $i = App::Music::ChordPro::Chords::_known_chord($info,1) ) {
 	    warn( "Parsing chord: \"$chord\" found ",
@@ -1818,7 +1954,14 @@ sub parse_chord {
     }
 
     if ( $xc && $info ) {
-	$info = $info->transcode($xc);
+	my $key_ord;
+	$key_ord = $self->{chordsinfo}->{$self->{meta}->{key}->[-1]}->{root_ord}
+	  if $self->{meta}->{key};
+	if ( $xcmov && !defined $key_ord ) {
+	    do_warn("Warning: Transcoding to $xc without key may yield unexpected results\n");
+	    undef $xcmov;
+	}
+	$info = $info->transcode( $xc, $key_ord );
 	warn( "Parsing chord: \"$chord\" transcoded to ",
 	      $info->name,
 	      " (", $info->{system}, ")",
@@ -1839,10 +1982,6 @@ sub parse_chord {
 		  $i->{_via}, "\n" ) if $debug > 1;
 	    $unk = 0;
 	}
-	elsif ( $config->{diagrams}->{auto} ) {
-	    my $i = App::Music::ChordPro::Chords::add_unknown_chord($chord);
-	    $info = $i;
-	}
     }
 
     unless ( $info || $allow ) {
@@ -1850,11 +1989,6 @@ sub parse_chord {
 	    warn("Parsing chord: \"$chord\" unknown\n") if $debug;
 	    do_warn( "Unknown chord: \"$chord\"\n" )
 	      unless $chord =~ /^n\.?c\.?$/i;
-	}
-	if ( $config->{diagrams}->{auto} ) {
-	    $info = App::Music::ChordPro::Chords::add_unknown_chord($chord);
-	    warn( "Parsing chord: \"$chord\" added ",
-		  $info->name, " to song chords\n" ) if $debug > 1;
 	}
     }
 

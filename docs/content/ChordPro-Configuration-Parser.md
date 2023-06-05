@@ -30,6 +30,9 @@ Each preprocessor is a list of items each having the following keys:
 
 * `target`: a string that may occur in the line;
 * `replace`: each target string is replaced by this value.
+* `flags`: replacement flags. Default is `g` (global - replace all
+  occurrences). An other useful
+  value is `gi` (global, case insensitive).
 
 For example, this will replace every occurrence of the string `[Bes]`
 by `[Bb]`:
@@ -66,3 +69,7 @@ This will replace the string `:)` by `:smiley:` on comment directives
 only.
 
 Note that the selector is always a pattern.
+
+See also [Unicode escape characters in input]({{<relref
+"Support-Hints-And-Tips#unicode-escape-characters-in-input">}}) in the 
+[Hints and Tips]({{< relref "Support-Hints-And-Tips" >}}).

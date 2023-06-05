@@ -17,7 +17,7 @@ use Wx::Locale gettext => '_T';
 
 use App::Music::ChordPro;
 use App::Music::ChordPro::Output::Common;
-use App::Music::ChordPro::Utils qw(is_macos);
+use App::Music::ChordPro::Utils qw( demarkup is_macos );
 use App::Packager;
 use File::Temp qw( tempfile );
 use Encode qw(decode_utf8);

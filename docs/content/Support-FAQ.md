@@ -21,3 +21,5 @@ questions and answers here sometime soon.
 * [ChordPro supports UNICODE. Then why can't I see my russian (vietnamese, greek, ...) characters?]({{< relref "FAQ-Unicode-characters" >}})
 
 * [D♯ transposes to D♭ but I want C♯]({{< relref "FAQ-Transpose" >}})
+
+* ["Unknown chord" for slash chords]({{< relref "FAQ-SlashChords" >}})

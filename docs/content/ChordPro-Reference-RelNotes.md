@@ -1,5 +1,38 @@
 # Release info
 
+## 6.010
+
+Released: 2023-06-05
+
+
+### ChordPro functionality
+
+* Allow line continuation for input lines using a backslash.
+* Allow define chord "|" in config.
+* Allow graceful handling of rootless chords.
+* Allow simple markup in chords. Yes, this includes grid chords.
+* Add flags for preprocessor pattern replacements.
+* Allow image scale as a percentage.
+* Experimental: Absolute placement for images.
+* Experimental: Diagram control in {define}.
+* Remove diagrams.auto from config.
+
+### BugFixes
+
+* Add Pod::Usage to required modules. Some distros seem to have removed it from the core.
+* Add jpeg library to MacOS kit.
+* Add some missing files for docs building.
+* Fix root relocation when transcoding to a movable system.
+* Fix missing parser in {define XX} without frets etc.
+* Fix forum 1696 (chord recall with trans{code,pose}).
+* Fix issue #269 (problem with page labels).
+* Fix issue #270 (PDF outlines issues, 'letter' setting).
+* Fix issue #273 (PDF CreationDate string is not conformant, but PDF::API2 2.042+ rejects conformant strings).
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.
+
 ## 6.000
 
 Released: 2022-12-28
@@ -17,10 +50,6 @@ Released: 2022-12-28
 * Fix issue 260 (chords not being handled correctly in comments).
 * Fix issue 260 (suppress diagrams and grids when lyrics-only).
 * Fix issue 261 (truesf not functional beyond chord root).
-
-### Social and support
-
-[User community](https://groups.io/g/ChordPro) for feedback and help.
 
 ## 5.990
 
@@ -375,7 +404,7 @@ Released: 2020-08-13
 
 ### ChordPro syntax
 
-* Support Pango Markup language.
+* Support Pango style markup language.
 * Add basic support for annotations.
 * Add directives start/end_of_verse/bridge and short forms.
 
@@ -413,7 +442,7 @@ Released: 2020-08-13
 
 ### Miscellaneous
 
-* Use Text::Layout to support Pango Markup language.
+* Use Text::Layout to support Pango style markup language.
 * Use File::LoadLines.
 * Upgrade requirement for PDF::API2 to 2.035, Font::TTF to 1.05, Text::Layout to 0.014.
 * Packaged version no longer loads default config from chordpro.json. It is now really built-in.

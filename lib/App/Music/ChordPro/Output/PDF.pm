@@ -19,7 +19,7 @@ use Carp;
 use feature 'state';
 
 use App::Music::ChordPro::Output::Common
-  qw( roman prep_outlines fmt_subst demarkup );
+  qw( roman prep_outlines fmt_subst );
 
 use App::Music::ChordPro::Output::PDF::Writer;
 use App::Music::ChordPro::Utils;
@@ -365,6 +365,7 @@ sub generate_song {
     my $ps = $::config->clone->{pdf};
     $ps->{pr} = $pr;
     $pr->{ps} = $ps;
+    $ps->{_s} = $s;
     $pr->{_df} = {};
 #    warn("X1: ", $ps->{fonts}->{$_}->{size}, "\n") for "text";
     $pr->init_fonts();
@@ -388,7 +389,7 @@ sub generate_song {
 	$dd = App::Music::ChordPro::Output::PDF::StringDiagrams->new($ps);
 	$dctl = $ps->{diagrams};
     }
-
+    $ps->{dd} = $dd;
     my $sb = $s->{body};
 
     # set_columns needs these, set provisional values.
@@ -2183,16 +2184,56 @@ sub imageline {
     my $opts = $elt->{opts};
     my $pr = $ps->{pr};
 
+    my $img;
     if ( $elt->{uri} =~ /^id=(.+)/ ) {
-	return "Unknown asset: id=$1"
-	  unless exists( $assets->{$1} );
+	my $id = $1;
+	unless ( exists( $assets->{$id} ) ) {
+	    unless ( exists( $config->{assets}->{$id} ) ) {
+		return "Unknown asset: id=$id";
+	    }
+	    my $a = $config->{assets}->{$id};
+	    if ( $a->{src} && !$a->{data} ) {
+		use Image::Info;
+		open( my $fd, '<:raw', $a->{src} );
+		unless ( $fd ) {
+		    return $a->{src} . ": $!";
+		}
+		my $data = do { local $/; <$fd> };
+		# Get info.
+		my $info = Image::Info::image_info(\$data);
+		if ( $info->{error} ) {
+		    return $info->{error};
+		}
+
+		# Store in assets.
+		$assets //= {};
+		$assets->{$id} =
+		  { data => $data, type => $info->{file_ext},
+		    width => $info->{width}, height => $info->{height},
+		  };
+
+		if ( $config->{debug}->{images} ) {
+		    warn("asset[$id] ", length($data), " bytes, ",
+			 "width=$info->{width}, height=$info->{height}",
+			 "\n");
+		}
+	    }
+	}
+	unless ( $assets->{$id}->{data} ) {
+	    return "Unhandled asset: id=$id";
+	}
+    }
+    elsif ( $elt->{uri} =~ /^chord:(.*)/) {
+	$img = placeholder->new( $1,
+				 $ps->{dd}->hsp0( undef, $ps ),
+				 $ps->{dd}->vsp0( undef, $ps ) );
     }
     elsif ( ! -s $elt->{uri} ) {
 	return "$!: " . $elt->{uri};
     }
 
     warn("get_image ", $elt->{uri}, "\n") if $config->{debug}->{images};
-    my $img = eval { $pr->get_image($elt) };
+    $img //= eval { $pr->get_image($elt) };
     unless ( $img ) {
 	warn($@);
 	return "Unhandled image type: " . $elt->{uri};
@@ -2208,8 +2249,14 @@ sub imageline {
     else {
 	$pw = $ps->{__rightmargin} - $ps->{_leftmargin};
     }
-
     my $ph = $ps->{_margintop} - $ps->{_marginbottom};
+
+    if ( $opts->{width} && $opts->{width} =~ /^(\d+(?:\.\d+)?)\%$/ ) {
+	$opts->{width} = $1/100 * $pw;
+    }
+    if ( $opts->{height} && $opts->{height} =~ /^(\d+(?:\.\d+)?)\%$/ ) {
+	$opts->{height} = $1/100 * $ph;
+    }
 
     my $scale = 1;
     my ( $w, $h ) = ( $opts->{width}  || $img->width,
@@ -2241,11 +2288,72 @@ sub imageline {
 	prlabel( $ps, $tag, $x, $ytext );
     }
 
-    warn("add_image\n") if $config->{debug}->{images};
-    $pr->add_image( $img, $x, $y, $w, $h, $opts->{border} || 0 );
+    my $anchor = $opts->{anchor} //= "float";
+    my $ox = $opts->{x};
+    my $oy = $opts->{y};
+
+    my $calc = sub {
+	my ( $l, $r, $t, $b ) = @_;
+	my $_ox = $ox // 0;
+	my $_oy = $oy // 0;
+
+	if ( $_ox =~ /^([-+]?[\d.]+)\%$/ ) {
+	    $ox = $_ox = $1/100 * ($r - $l) - ( $1/100 ) * $w;
+	}
+	if ( $_oy =~ /^([-+]?[\d.]+)\%$/ ) {
+	    $oy = $_oy = $1/100 * ($t - $b) - ( $1/100 ) * $h;
+	}
+	$x = $l;
+	$y = $t;
+    };
+
+    if ( $anchor eq "column" ) {
+	# Relative to the column.
+	$calc->( @{$ps}{qw( __leftmargin __rightmargin
+			    __topmargin __bottommargin )} );
+    }
+    elsif ( $anchor eq "page" ) {
+	# Relative to the page.
+	$calc->( @{$ps}{qw( _marginleft _marginright
+			    __topmargin __bottommargin )} );
+    }
+    elsif ( $anchor eq "paper" ) {
+	# Relative to the paper.
+	$calc->( 0, $ps->{papersize}->[0], $ps->{papersize}->[1], 0 );
+    }
+    else {
+	# image is line oriented.
+	$calc->( $x, $ps->{__rightmargin},
+		 $y, $ps->{__bottommargin} );
+    }
+
+    $x += $ox if defined $ox;
+    $y -= $oy if defined $oy;
+    if ( ref($img) eq "placeholder" ) {
+	warn( sprintf("add_chord %s %.1f %.1f %.1f %.1f (%s x%+.1f y%+.1f)\n",
+		      $img->name, $x, $y, $w, $h,
+		      $anchor,
+		      $ox//0, $oy//0
+		     )) if $config->{debug}->{images};
+	local $ps->{diagrams}->{width} = $ps->{diagrams}->{width} * $scale;
+	local $ps->{diagrams}->{height} = $ps->{diagrams}->{height} * $scale;
+	$ps->{dd}->draw( $ps->{_s}->{chordsinfo}->{$img->name}, $x, $y, $ps );
+    }
+    else {
+	warn( sprintf("add_image %.1f %.1f %.1f %.1f (%s x%+.1f y%+.1f)\n",
+		      $x, $y, $w, $h,
+		      $anchor,
+		      $ox//0, $oy//0
+		     )) if $config->{debug}->{images};
+
+	$pr->add_image( $img, $x, $y, $w, $h, $opts->{border} || 0 );
+    }
     warn("done\n") if $config->{debug}->{images};
 
-    return $h;			# vertical size
+    if ( $anchor eq "float" ) {
+	return $h + ($oy//0);
+    }
+    return 0;			# vertical size
 }
 
 sub imagespread {
@@ -2430,6 +2538,11 @@ sub text_vsp {
 
 sub set_columns {
     my ( $ps, $cols ) = @_;
+    my @cols;
+    if ( ref($cols) eq 'ARRAY' ) {
+	@cols = @$cols;
+	$cols = @$cols;
+    }
     unless ( $cols ) {
 	$cols = $ps->{columns} ||= 1;
     }
@@ -2439,9 +2552,38 @@ sub set_columns {
 
     my $w = $ps->{papersize}->[0]
       - $ps->{_leftmargin} - $ps->{_rightmargin};
-
     $ps->{columnoffsets} = [ 0 ];
-     push( @{ $ps->{columnoffsets} }, $w ), return unless $cols > 1;
+
+    if ( @cols ) {		# columns with explicit widths
+	my $stars;
+	my $wx = $w;		# available
+	for ( @cols ) {
+	    if ( !$_ || $_ eq '*' ) {
+		$stars++;
+	    }
+	    elsif ( /^(\d+)%$/ ) {
+		$_ = $1 * $w / 100; # patch
+	    }
+	    else {
+		$wx -= $_;	# subtract from avail width
+	    }
+	}
+	my $sw = $wx / $stars if $stars;
+	my $l = 0;
+	for ( @cols ) {
+	    if ( !$_ || $_ eq '*' ) {
+		$l += $sw;
+	    }
+	    else {
+		$l += $_;
+	    }
+	    push( @{ $ps->{columnoffsets} }, $l );
+	}
+	warn("COL: @{ $ps->{columnoffsets} }\n");
+	return;
+    }
+
+    push( @{ $ps->{columnoffsets} }, $w ), return unless $cols > 1;
 
     my $d = ( $w - ( $cols - 1 ) * $ps->{columnspace} ) / $cols;
     $d += $ps->{columnspace};
@@ -2449,6 +2591,7 @@ sub set_columns {
 	push( @{ $ps->{columnoffsets} }, $_ * $d );
     }
     push( @{ $ps->{columnoffsets} }, $w );
+    warn("COL: @{ $ps->{columnoffsets} }\n");
 }
 
 sub showlayout {
@@ -2868,6 +3011,19 @@ sub _dump {
 		      );
     }
 }
+
+package placeholder;
+sub new {
+    my $class = shift;
+    my $self = {};
+    $self->{name} = shift;
+    $self->{w} = shift;
+    $self->{h} = shift;
+    bless $self => $class;
+}
+sub name   { $_[0]->{name} }
+sub width  { $_[0]->{w} }
+sub height { $_[0]->{h} }
 
 1;
 

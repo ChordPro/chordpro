@@ -5,6 +5,27 @@ description: "Hints and Tips"
 
 # Hints and Tips
 
+## Unicode escape characters in input
+
+ChordPro allows using Unicode escape sequence in the form `\u`_XXXX_.
+In case you need more (or less) hexadecimal digits, 
+you can use the following preprocessor directive
+to replace `\u{`_XXXX_`}` (with an arbitrary number of hex digits)
+by the corresponding unicode character.
+
+````
+{ "parser" : {
+    "preprocess" : {
+      "all" : [
+        { "pattern" : "\\\\u\\{([0-9a-f]+)\\}",
+          "replace" : "chr(hex(\"0x$1\"))",
+          "flags"   : "gie"
+        }
+      ]
+} } }
+````
+
+
 ## Bold chorus
 
 A common style nowadays puts the chorus in bold.
