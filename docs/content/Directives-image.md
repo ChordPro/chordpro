@@ -21,7 +21,7 @@ Supported file types may depend on the platforms and
 tools used, but PNG, JPG and GIF should always be valid.
 The syntax of file names also depends on the platforms and
 tools used. A simple file name like `"myimage.png"` should always
-be acceptable. 	
+be acceptable. The image must then reside in the same directory as the song.
 
 Example:
 

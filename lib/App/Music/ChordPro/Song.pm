@@ -22,6 +22,7 @@ use File::LoadLines;
 use Storable qw(dclone);
 use feature 'state';
 use Text::ParseWords qw(quotewords);
+use File::Basename qw(basename);
 
 # Parser context.
 my $def_context = "";
@@ -1219,6 +1220,11 @@ sub directive {
 	    else {
 		$uri = $k;
 	    }
+	}
+
+	if ( $uri && $uri !~ m;/\\; ) { # basename
+	    use File::Basename qw(dirname);
+	    $uri = dirname($diag->{file}) . "/" . $uri;
 	}
 
 	# uri + id -> define asset
