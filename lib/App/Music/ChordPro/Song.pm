@@ -1222,9 +1222,19 @@ sub directive {
 	    }
 	}
 
+	# If the image name does not have a directory, look it up
+	# next to the song, and then in the images folder of the
+	# CHORDPRO_LIB.
 	if ( $uri && $uri !~ m;/\\; ) { # basename
 	    use File::Basename qw(dirname);
-	    $uri = dirname($diag->{file}) . "/" . $uri;
+	    L: for ( dirname($diag->{file}) ) {
+		$uri = "$_/$uri", last if -s "$_/$uri";
+		for ( ::rsc_or_file("images/$uri") ) {
+		    last unless $_;
+		    $uri = $_, last L if -s $_;
+		}
+		do_warn("Missing image for \"$uri\"");
+	    }
 	}
 
 	# uri + id -> define asset
