@@ -1642,6 +1642,7 @@ sub default_config() {
     "debug" : {
         "chords" : 0,
         "config" : 0,
+        "echo" : 0,
         "fonts" : 0,
         "images" : 0,
         "layout" : 0,
