@@ -1654,8 +1654,8 @@ sub directive {
 		    $res->{$_} = $info->{$_}
 		      for qw( base display frets fingers keys );
 		    # Note: Values of the chord copied from!
-		    $res->{$_} = $info->{$_}
-		      for qw( root qual ext root_ord root_mod bass bass_ord qual_canon );
+#		    $res->{$_} = $info->{$_}
+#		      for qw( root qual ext root_ord root_mod bass bass_ord qual_canon );
 		}
 		else {
 		    do_warn("Unknown chord to copy: $a[0]\n");
@@ -1761,8 +1761,16 @@ sub directive {
 
 	return 1 if $fail;
 
-	if ( defined($res->{diagram}) && !is_true($res->{diagram}) ) {
-	    push( @{ $config->{diagrams}->{suppress} }, $res->{name} );
+	if ( defined($res->{diagram}) ) {
+	    if ( is_true($res->{diagram}) ) {
+		# Diagram can be a colour, remove trivial 'true' values.
+		if ( $res->{diagram} =~ /^(true|1)$/i ) {
+		    delete $res->{diagram};
+		}
+	    }
+	    else {
+		push( @{ $config->{diagrams}->{suppress} }, $res->{name} );
+	    }
 	}
 
 	if ( $show) {
@@ -1822,6 +1830,7 @@ sub directive {
 	    App::Music::ChordPro::Chords::add_unknown_chord( $res->{name} );
 	}
 
+	$info->dump if $config->{debug}->{x1};
 	# $used_chords{$res->{name}} = $info if $info;
 
 	return 1;
@@ -1918,6 +1927,11 @@ sub parse_chord {
 	 && ! ($info
 	       && ( defined($info->{root}) || $info->is_nc)) ) {
 	# Desparately trying to get something to transcode/pose.
+	local $::config->{settings}->{chordnames} = "relaxed";
+	$info = App::Music::ChordPro::Chords::parse_chord($chord);
+    }
+    if ( $allow
+	 && ! ( $info && ( defined($info->{root}) || $info->is_nc ) ) ) {
 	local $::config->{settings}->{chordnames} = "relaxed";
 	$info = App::Music::ChordPro::Chords::parse_chord($chord);
     }
