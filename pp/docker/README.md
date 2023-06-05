@@ -32,3 +32,16 @@ ChordProSymbols.ttf.
 
 Volume spec `$HOME:$HOME` is needed to access files on your disk. To restrict
 access to the current directory only, use `--volume $PWD:$PWD`.
+
+
+## Hint from waterkip to use perl::slim
+
+````
+FROM perl:latest as build
+
+RUN ...
+
+FROM perl:slim as prod
+COPY --from=build /usr/local/lib/perl5/ /usr/local/lib/perl5
+COPY --from=build /usr/local/bin /usr/local/bin
+````
