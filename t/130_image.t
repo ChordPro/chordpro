@@ -36,7 +36,7 @@ my $song = {
 	    'body' => [
 		       {
 			'context' => '',
-			'uri' => 'red.jpg',
+			'uri' => './red.jpg',
 			'type' => 'image',
 			'opts' => {}
 		       }
@@ -83,7 +83,7 @@ $song = {
 				   'center' => 1,
 				   'width' => '200'
 				  },
-			'uri' => 'red.jpg',
+			'uri' => './red.jpg',
 			'context' => ''
 		       }
 		      ],
