@@ -2,7 +2,7 @@
 
 ## 6.010
 
-Under development
+Released: 2023-06-05
 
 
 ### ChordPro functionality
@@ -14,6 +14,7 @@ Under development
 * Add flags for preprocessor pattern replacements.
 * Allow image scale as a percentage.
 * Experimental: Absolute placement for images.
+* Experimental: Diagram control in {define}.
 * Remove diagrams.auto from config.
 
 ### BugFixes
@@ -403,7 +404,7 @@ Released: 2020-08-13
 
 ### ChordPro syntax
 
-* Support Pango Markup language.
+* Support Pango style markup language.
 * Add basic support for annotations.
 * Add directives start/end_of_verse/bridge and short forms.
 
@@ -441,7 +442,7 @@ Released: 2020-08-13
 
 ### Miscellaneous
 
-* Use Text::Layout to support Pango Markup language.
+* Use Text::Layout to support Pango style markup language.
 * Use File::LoadLines.
 * Upgrade requirement for PDF::API2 to 2.035, Font::TTF to 1.05, Text::Layout to 0.014.
 * Packaged version no longer loads default config from chordpro.json. It is now really built-in.
