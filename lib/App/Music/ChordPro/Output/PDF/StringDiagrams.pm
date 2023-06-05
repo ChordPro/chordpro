@@ -81,6 +81,7 @@ sub draw {
     my $lw  = ($ps->{diagrams}->{linewidth} || 0.10) * $gw;
     my $pr = $ps->{pr};
 
+    my $fg = $info->{diagram} // $config->{pdf}->{theme}->{foreground};
     my $strings = $config->diagram_strings;
     my $w = $gw * ($strings - 1);
 
@@ -92,6 +93,8 @@ sub draw {
     # $name .= "*"
     #   unless $info->{origin} ne "user"
     #     || $::config->{diagrams}->{show} eq "user";
+    $name = "<span color='$fg'>$name</span>"
+      if $info->{diagram};
     $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y - font_bl($font) );
     $y -= $font->{size} * $ps->{spacing}->{diagramchords} + $dot/2 + $lw;
     if ( $info->{base} + $info->{baselabeloffset} > 1 ) {
@@ -108,7 +111,7 @@ sub draw {
     my $h = $strings;
 
     # Draw the grid.
-    my $xo = $self->grid_xo($ps);
+    my $xo = $self->grid_xo( $ps, $fg );
 
     my $crosshairs = sub {
 	my ( $x, $y, $col ) = @_;
@@ -140,7 +143,7 @@ sub draw {
 
     # Bar detection.
     my $bar;
-    if ( $fingers && $fbg ne $ps->{theme}->{foreground} ) {
+    if ( $fingers && $fbg ne $fg ) {
 	my %h;
 	my $str = 0;
 	my $got = 0;
@@ -167,7 +170,7 @@ sub draw {
 		# Print the bar line. Need linecap 0.
 		$pr->hline( $x+$bi[2]*$gw, $y-$bi[1]*$gh+$gh/2,
 			    ($bi[3]-$bi[2])*$gw,
-			    $dot, $ps->{theme}->{foreground}, 0 );
+			    $dot, $fg, 0 );
 	    }
 	}
     }
@@ -207,7 +210,7 @@ sub draw {
 	    }
 
 	    my $glyph;
-	    if ( $fbg eq $ps->{theme}->{foreground} ) {
+	    if ( $fbg eq $fg ) {
 		$glyph = $g_none;
 	    }
 	    elsif ( $fing =~ /^[A-Z0-9]$/ ) {
@@ -227,10 +230,12 @@ sub draw {
 	    # background circle to prevent the grid peeping through.
 	    # OTOH, for the unnumbered dot, we need a foreground circle.
 	    $pr->circle( $x+$gw/2, $y-$fret*$gh+$gh/2, $dot/2.2, 1,
-			 $glyph eq $g_none ? $ps->{theme}->{foreground} : $fbg,
+			 $glyph eq $g_none ? $fg : $fbg,
 			 "none");
 
 	    $pr->setfont( $fcf, $dot );
+	    $glyph = "<span color='$fg'>$glyph</span>"
+	      if $info->{diagram};
 	    $pr->text( $glyph,
 			$x,
 			$y - $fret*$gh + $gh/2 + $g_lower,
@@ -238,11 +243,11 @@ sub draw {
 	}
 	elsif ( $fret < 0 ) {
 	    $pr->cross( $x+$gw/2, $y+$lw+$gh/3, $dot/3, $lw,
-			$ps->{theme}->{foreground} );
+			$fg );
 	}
 	elsif ( $info->{base} > 0 ) {
 	    $pr->circle( $x+$gw/2, $y+$lw+$gh/3, $dot/3, $lw,
-			 undef, $ps->{theme}->{foreground} );
+			 undef, $fg );
 	}
     }
     continue {
@@ -253,7 +258,7 @@ sub draw {
 }
 
 sub grid_xo {
-    my ( $self, $ps ) = @_;
+    my ( $self, $ps, $fg ) = @_;
 
     my $gw = $ps->{diagrams}->{width};
     my $gh = $ps->{diagrams}->{height};
@@ -261,7 +266,7 @@ sub grid_xo {
     my $v = $ps->{diagrams}->{vcells};
     my $strings = $config->diagram_strings;
 
-    return $self->{grids}->{$gw,$gh,$lw,$v,$strings} //= do
+    return $self->{grids}->{$gw,$gh,$lw,$v,$strings,$fg} //= do
       {
 	my $w = $gw * ($strings - 1);
 	my $h = $strings;
@@ -278,7 +283,7 @@ sub grid_xo {
 
 	# Draw the grid.
 	$dc->rectxy( @bb, 0, 'red' ) if 0;
-	my $color = $ps->{theme}->{foreground};
+	my $color = $fg;
 	$dc->hline( 0, ($v-$_)*$gh, $w, $lw, $color ) for 0..$v;
 	$dc->vline( $_*$gw, $v*$gh, $gh*$v, $lw, $color) for 0..$h-1;
 
