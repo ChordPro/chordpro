@@ -5,14 +5,19 @@ description: "Using metadata in texts"
 
 # Using metadata in texts
 
-Metadata can be used in header/footer texts and comments. The general format of a metadata value in a text is `%{`*name*`}`, where _name_ is the name of the metadata item.
+Metadata can be used in header/footer texts and comments. The general
+format of a metadata value in a text is `%{`*name*`}`, where _name_ is
+the name of the metadata item.
 
-It is also possible to conditionally substitute texts depending on the value of metadata items.
+It is also possible to conditionally substitute texts depending on the
+value of metadata items.
 
 `%{`*name*`|`*true-text*`|`*false-text*`}`  
 `%{`*name*`|`*true-text*`}`
 
-If metadata item _name_, the controling item, has a value, the _true-text_ is substituted. If metadata item _name_ has no value, the _false-text_ is substituted. Both alternatives may be left out.
+If metadata item _name_, the controling item, has a value, the
+_true-text_ is substituted. If metadata item _name_ has no value, the
+_false-text_ is substituted. Both alternatives may be left out.
 
 It is possible to test for specific values using the `=` (equality) operator:
 
@@ -23,18 +28,31 @@ metadata subtitutions. The special `%{}` can be used to substitute the
 value of the controling item. See. however, [nested substitutions]({{<
 relref "#nested-substitutions" >}}) below.
 
-For example, if metadata item `album` has the value "Yes", `%{album|Album: %{}}` expands to "Album: Yes". If `album` did not have a value, the expansion would be empty.
+For example, if metadata item `album` has the value "Yes",
+`%{album|Album: %{}}` expands to "Album: Yes". If `album` did not have
+a value, the expansion would be empty.
 
-All metadata items can have multiple values. To get multiple values, just issue multiple directives. For example:
+All metadata items can have multiple values. To get multiple values,
+just issue multiple directives. For example:
 
     {album: Cover Stories}
     {album: Greatest Hits}
 
-Now `album` has two values. When substituted, the values are concatenated using the configuration setting [`metadata.separator`]({{< relref "ChordPro-Configuration-Generic#metadata" >}}). To access the individual values, use `album.1` for the first value, `album.2` for the second value, and so on. Negative numbers count from the end, e.g. `album.-1` will give the last value.
+Now `album` has two values. When substituted, the values are
+concatenated using the configuration setting
+[`metadata.separator`]({{< relref
+"ChordPro-Configuration-Generic#metadata" >}}). To access the
+individual values, use `album.1` for the first value, `album.2` for
+the second value, and so on. Negative numbers count from the end, e.g.
+`album.-1` will give the last value.
 
-Metadata values passed on the command line [(`--meta`)]({{< relref "Using-ChordPro#meta" >}}) are always inserted first.
+Metadata values passed on the command line [(`--meta`)]({{< relref
+"Using-ChordPro#meta" >}}) are always inserted first.
 
-If necessary, the special meaning of the characters `\`, `{`, `}`, and `|` can be escaped by preceding it a `\`. Note that in the configuration files the strings are JSON strings and each `\` must be doubled: `"\\{"` is an escaped `{`. `"\\\\"` is an escaped backslash.
+If necessary, the special meaning of the characters `\`, `{`, `}`, and
+`|` can be escaped by preceding it a `\`. Note that in the
+configuration files the strings are JSON strings and each `\` must be
+doubled: `"\\{"` is an escaped `{`. `"\\\\"` is an escaped backslash.
 
 ## Nested substitutions
 
@@ -57,9 +75,12 @@ This can be considered a bug or a feature, depending on how you look at it.
 A better way to supply multiple values is by using multiple directives
 as shown above.
 
-## Standard meta data
+## Standard metadata
 
-The ChordPro reference implementation provides additional meta data:
+See [meta directive]({{< relref "Directives-meta" >}}) for the standard
+metadata items.
+
+The ChordPro reference implementation provides additional metadata:
 
  * `chords`: A comma-separated list of chords used in this song.
 
@@ -77,6 +98,7 @@ The ChordPro reference implementation provides additional meta data:
  * `page`: The starting page number of the song.
 
  * `pages`: The number of pages of the current song.
+   Only meaningful in headings and footers.
 
  * `songindex`: The index (serial number) of the song in the songbook.
  
@@ -95,12 +117,30 @@ The ChordPro reference implementation provides additional meta data:
  * `user.name`: The (login) name of the user running ChordPro.
    Initial value is derived from the environment.
    
-The values of `"instrument"` and `"user"` can be used for [directive
+The values of `instrument` and `user` can be used for [directive
 selection]({{< relref "chordpro-directives#conditional-directives"
 >}})
 
+## Command line metadata
 
-## Additional meta data for CSV generation
+Additional metadata can be provided on the [command line]({{< relref
+"Using-ChordPro#meta" >}}).
+
+## Song key
+
+As can be expected, `%{key}` yields the song key as specified with the
+[key]({{< relref "Directives-key" >}}) directive.
+
+ChordPro provides two additonal metadata for substitution:
+
+ * `key_actual`: The actual key, which is initially identical to `key`
+   but will change when [transpositions]({{< relref
+   "Directives-transpose" >}}) are in effect.
+ 
+ * `key_from`: If a transposition is in effect, the key _before_ the
+   transposition.
+
+## Additional metadata for CSV generation
 
 See [Configuration for CSV output]({{< relref "chordpro-configuration-csv" >}}).
 
@@ -109,8 +149,12 @@ See [Configuration for CSV output]({{< relref "chordpro-configuration-csv" >}}).
 
 ## Chord display strings
 
+_Note: This is not applicable to chords in Nasville, Roman and Solfege
+notations._
+
 [Chord display strings]({{< relref
-"Directives-define#chord-display-strings" >}}) support a limited set of substitutions.
+"Directives-define#chord-display-strings" >}}) support a limited set
+of metadata for substitutions.
 
  * `root`: The root of the chord.
  
@@ -119,5 +163,8 @@ See [Configuration for CSV output]({{< relref "chordpro-configuration-csv" >}}).
    (diminished).
    
  * `ext`: The rest, e.g. `7sus4`.
+ 
+ * `bass`: The bass part, if the chord has a bass note separated by a
+   slash `/`.
 
-In all cases, `%{root}%{qual}%{ext}` yields the full chord name.
+In all cases, `%{root}%{qual}%{ext}%{bass|/%{}}` yields the full chord name.

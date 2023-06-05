@@ -205,11 +205,12 @@ GUI version only.
 
 Presets metadata item _KEY_ to have the value _VALUE_.
 
-This option may be specified multiple times.
+This option may be specified multiple times. Additional values for the
+same _KEY_ will overwrite the previous value.
 
 ### no-a2crd
 
-Do not automatically convert non-ChordPro input to ChordPro format.
+Do not automatically attempt to convert non-ChordPro input to ChordPro format.
 
 ### no-csv
 
