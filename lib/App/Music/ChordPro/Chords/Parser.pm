@@ -200,7 +200,7 @@ sub intervals {
     $_[0]->{intervals};
 }
 
-sub as_string {
+sub simplify {
     my ( $self ) = @_;
     ref($self);
 }
@@ -845,14 +845,14 @@ sub strings {
     $_[0]->{parser}->{intervals};
 }
 
-sub as_string {
+sub simplify {
     my ( $self ) = @_;
     my $c = {};
     for ( keys %$self ) {
 	next unless defined $self->{$_};
 	next if defined $c->{$_};
-	if ( UNIVERSAL::can( $self->{$_}, "as_string" ) ) {
-	    $c->{$_} = $self->{$_}->as_string;
+	if ( UNIVERSAL::can( $self->{$_}, "simplify" ) ) {
+	    $c->{$_} = $self->{$_}->simplify;
 	}
 	elsif ( ref($self->{$_}) eq 'ARRAY' && @{$self->{$_}} ) {
 	    $c->{$_} = "[ " . join(" ", @{$self->{$_}}) . " ]";
@@ -866,7 +866,7 @@ sub as_string {
 
 sub dump {
     my ( $self ) = @_;
-    ::dump($self->as_string);
+    ::dump($self->simplify);
 }
 
 package App::Music::ChordPro::Chord::Common;

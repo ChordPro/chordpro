@@ -2091,7 +2091,7 @@ sub dump {
     $a->{config} = ref(delete($a->{config}));
     unless ( $full ) {
 	for my $ci ( keys %{$a->{chordsinfo}} ) {
-	    $a->{chordsinfo}{$ci} = $a->{chordsinfo}{$ci}->as_string;
+	    $a->{chordsinfo}{$ci} = $a->{chordsinfo}{$ci}->simplify;
 	}
     }
     ::dump($a);
