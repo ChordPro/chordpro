@@ -200,6 +200,11 @@ sub intervals {
     $_[0]->{intervals};
 }
 
+sub as_string {
+    my ( $self ) = @_;
+    ref($self);
+}
+
 ################ Parsing Common notated chords ################
 
 package App::Music::ChordPro::Chords::Parser::Common;
@@ -314,12 +319,13 @@ sub parse_chord {
       unless ref($info) =~ /App::Music::ChordPro::Chord::/;
 
     if ( $bass ) {
-	return unless $bass =~ /^$self->{n_pat}$/;
 	$info->{bass} = $bass;
-	$ordmod->("bass");
-	if ( $info->is_rootless ) {
-	    for ( qw( ord mod canon ) ) {
-		$info->{"root_$_"} = $info->{"bass_$_"};
+	if ( $bass =~ /^$self->{n_pat}$/ ) {
+	    $ordmod->("bass");
+	    if ( $info->is_rootless ) {
+		for ( qw( ord mod canon ) ) {
+		    $info->{"root_$_"} = $info->{"bass_$_"};
+		}
 	    }
 	}
     }
@@ -839,23 +845,28 @@ sub strings {
     $_[0]->{parser}->{intervals};
 }
 
-sub dump {
+sub as_string {
     my ( $self ) = @_;
     my $c = {};
-    for ( qw( frets fingers keys ) ) {
-	next unless $self->{$_};
-	$c->{$_} = "[ " . join(" ", @{$self->{$_}}) . " ]";
-    }
-    if ( ref($self->{parser}) ) {
-	$c->{ns_canon} = "[ " . join(" ", @{$self->{parser}{ns_canon}}) . " ]"
-	  if $self->{parser}{ns_canon};
-	$c->{parser} = ref($self->{parser});
-    }
     for ( keys %$self ) {
 	next unless defined $self->{$_};
-	$c->{$_} //= $self->{$_};
+	next if defined $c->{$_};
+	if ( UNIVERSAL::can( $self->{$_}, "as_string" ) ) {
+	    $c->{$_} = $self->{$_}->as_string;
+	}
+	elsif ( ref($self->{$_}) eq 'ARRAY' && @{$self->{$_}} ) {
+	    $c->{$_} = "[ " . join(" ", @{$self->{$_}}) . " ]";
+	}
+	else {
+	    $c->{$_} = $self->{$_};
+	}
     }
-    ::dump($c);
+    $c;
+}
+
+sub dump {
+    my ( $self ) = @_;
+    ::dump($self->as_string);
 }
 
 package App::Music::ChordPro::Chord::Common;
@@ -866,16 +877,27 @@ use String::Interpolate::Named;
 sub show {
     Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self, $np ) = @_;
-    my $res =
+    my $res;
+
+    # For {define} and {chord} chords, use whatever the user called it.
+    if ( $self->{origin} && $self->{origin} =~ /^(song|inline)$/
+	 && !$::config->{settings}->{'chords-canonical'} ) {
+	$res = $self->{name};
+	return lcfirst($res) if $self->is_note;
+	return $np ? $res : $self->{parens} ? "($res)" : $res;
+    }
+
+    $res =
       $self->is_rootless
       ? ""
-      : $self->is_chord
-        ? $self->{parser}->root_canon( $self->{root_ord},
-				       $self->{root_mod} >= 0,
-				       $self->{qual} eq '-',
-				       !$self->is_flat
-				     ) . $self->{qual} . $self->{ext}
-        : $self->{name};
+	: $self->is_chord
+	  ? $self->{parser}->root_canon( $self->{root_ord},
+					 $self->{root_mod} >= 0,
+					 $self->{qual} eq '-',
+					 !$self->is_flat
+				       ) . $self->{qual} . $self->{ext}
+	  : $self->{name};
+
     if ( $self->is_note ) {
 	return lcfirst($res);
     }
@@ -916,7 +938,7 @@ sub transpose {
 			  $dir > 0,
 			  $info->{qual_canon} eq "-" );
     }
-    if ( $self->{bass} && $self->{bass} ne "" ) {
+    if ( $self->{bass} && $self->{bass} ne "" && $self->{bass} !~ /^\d+$/ ) {
 	$info->{bass_ord} = ( $self->{bass_ord} + $xpose ) % $p->intervals;
 	$info->{bass_canon} = $info->{bass} =
 	  $p->root_canon( $info->{bass_ord}, $xpose > 0 );
@@ -964,15 +986,34 @@ sub transcode {
     return $info;
 }
 
+sub _flat_copy {
+    my ( $ret, $o, $pfx ) = @_;
+    $pfx //= "";
+    while ( my ( $k, $v ) = each %$o ) {
+	if ( $k eq "orig" ) {
+	    _flat_copy( $ret, $v, "$k.$pfx");
+	}
+	else {
+	    $ret->{"$pfx$k"} = $v;
+	}
+    }
+    $ret;
+}
+
 sub chord_display {
     my ( $self, $sf ) = @_;
 
     use App::Music::ChordPro::Utils qw( splitmarkup );
 
-    my $res =
-      $self->{display}
-      ? interpolate( { args => $self }, $self->{display} )
-      : $self->show("np");
+    my $res;
+    if ( $self->{display} ) {
+	my $args = {};
+	_flat_copy( $args, $self );
+	$res = interpolate( { args => $args }, $self->{display} );
+    }
+    else {
+	$res = $self->show("np");
+    }
 
     # Substitute musical symbols if wanted and possible.
     if ( $::config->{settings}->{truesf} ) {

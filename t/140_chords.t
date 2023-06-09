@@ -55,6 +55,7 @@ my $song = {
 			  'frets' => [ -1, '0', '3', '2', '1', '0' ],
 			 }
 			],
+	    'chordsinfo' => { map { $_ => $_ } qw( Fus Fos Fas ) },
 	   };
 
 is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );
@@ -103,7 +104,7 @@ $song = {
 			  'frets' => [ -1, '0', '3', '2', '1', '0' ],
 			 }
 			],
-	    'chordsinfo' => {},
+	    'chordsinfo' => { map { $_ => $_ } qw( Fus Fos Fas ) },
 	   };
 
 is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );

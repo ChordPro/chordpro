@@ -1,0 +1,6 @@
+{title: Custom chord diagram display}
+{define: Am/C copy Am diagram false}
+{define: C6 copy Am diagram true}
+Main chord [Am]
+Slash chord [Am/C]
+Alternate chord [C6]

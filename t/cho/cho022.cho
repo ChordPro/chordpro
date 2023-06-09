@@ -1,0 +1,5 @@
+{title: Multiple define and diagram for %{instrument.type}}
+{+instrument.type guitar}
+{define-keyboard!: G/B copy G diagram false}
+{define-guitar: G/B copy G frets x 2 0 0 0 3 display "G/B" diagram true}
+The chord [G/B]

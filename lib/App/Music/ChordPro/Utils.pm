@@ -234,4 +234,15 @@ sub splitmarkup {
 }
 push( @EXPORT, 'splitmarkup' );
 
+# For conditional filling of hashes.
+sub maybe($$@) {
+    if (defined $_[0] and defined $_[1]) {
+	@_;
+    }
+    else {
+	( scalar @_ > 1 ) ? @_[2 .. $#_] : ();
+    }
+}
+push( @EXPORT, "maybe" );
+
 1;

@@ -531,21 +531,23 @@ sub parse_song {
     }
 
     # Suppress chords that the user considers 'easy'.
-    if (  @{ $config->{diagrams}->{suppress} // [] } ) {
-	my %suppress;
-	my $xc = $config->{settings}->{transcode};
-	for (  @{ $config->{diagrams}->{suppress} } ) {
-	    my $info = App::Music::ChordPro::Chords::_known_chord($_);
-	    warn("Unknown chord \"$_\" in suppress list\n"), next
-	      unless $info;
-	    # Note we do transcode, but we do not transpose.
-	    if ( $xc ) {
-		$info = $info->transcode($xc);
-	    }
-	    $suppress{$info->name} = 1;
+    my %suppress;
+    my $xc = $config->{settings}->{transcode};
+    for (  @{ $config->{diagrams}->{suppress} } ) {
+	my $info = App::Music::ChordPro::Chords::_known_chord($_);
+	warn("Unknown chord \"$_\" in suppress list\n"), next
+	  unless $info;
+	# Note we do transcode, but we do not transpose.
+	if ( $xc ) {
+	    $info = $info->transcode($xc);
 	}
-	@used_chords = map { $suppress{$_} ? () : $_ } @used_chords;
+	$suppress{$info->name} = 1;
     }
+    # Suppress chords that the user don't want.
+    while ( my ($k,$v) = each %{ $self->{chordsinfo} } ) {
+	$suppress{$k} = 1 if !is_true($v->{diagram}//1);
+    }
+    @used_chords = map { $suppress{$_} ? () : $_ } @used_chords;
 
     my $diagrams;
     if ( exists($self->{settings}->{diagrams} ) ) {
@@ -1627,35 +1629,42 @@ sub directive {
 	@a = split( /[: ]+/, $arg ) unless @a;
 
 	my @orig = @a;
+	my $is_chord;
+	my $has_diagram;
 	my $fail = 0;
-	my $name = $a[0];
+	my $name = shift(@a);
 	my $strings = $config->diagram_strings;
 
 	# Result structure.
 	my $res = { name => $name };
-
-	# Defaults.
-	my $info;
-	if ( $show ) {
-	    ( my $n, $info ) = $self->parse_chord( $name, "allow" );
-	    $name = $n if $info;
+	( undef, my $info ) = $self->parse_chord( $name, "def" );
+	if ( $info ) {
+	    # Copy the chord info.
+	    $res->{$_} //= $info->{$_} // ''
+	      for qw( root qual ext bass
+		      root_canon qual_canon ext_canon bass_canon
+		      root_ord root_mod bass_ord bass_mod
+		   );
+	    $is_chord = defined( $res->{root} );
+	    if ( $show ) {
+		$res->{$_} //= $info->{$_}
+		  for qw( base frets fingers keys );
+	    }
+	}
+	else {
+	    $res->{parser} = App::Music::ChordPro::Chords::get_parser();
 	}
 
-	shift(@a);
-
+	# Process the options.
 	while ( @a ) {
 	    my $a = shift(@a);
 
 	    # Copy existing definition.
 	    if ( $a eq "copy" ) {
 		if ( my $i = App::Music::ChordPro::Chords::_known_chord($a[0]) ) {
-		    $info = $i;
+		    $res->{copy} = $a[0];
+		    $res->{orig} = $i;
 		    shift(@a);
-		    $res->{$_} = $info->{$_}
-		      for qw( base display frets fingers keys );
-		    # Note: Values of the chord copied from!
-#		    $res->{$_} = $info->{$_}
-#		      for qw( root qual ext root_ord root_mod bass bass_ord qual_canon );
 		}
 		else {
 		    do_warn("Unknown chord to copy: $a[0]\n");
@@ -1671,6 +1680,7 @@ sub directive {
 
 	    # base-fret N
 	    elsif ( $a eq "base-fret" ) {
+		$has_diagram++;
 		if ( $a[0] =~ /^\d+$/ ) {
 		    $res->{base} = shift(@a);
 		}
@@ -1682,6 +1692,7 @@ sub directive {
 	    }
 	    # frets N N ... N
 	    elsif ( $a eq "frets" ) {
+		$has_diagram++;
 		my @f;
 		while ( @a && $a[0] =~ /^(?:[0-9]+|[-xXN])$/ && @f < $strings ) {
 		    push( @f, shift(@a) );
@@ -1699,6 +1710,7 @@ sub directive {
 
 	    # fingers N N ... N
 	    elsif ( $a eq "fingers" ) {
+		$has_diagram++;
 		my @f;
 		# It is tempting to limit the fingers to 1..5 ...
 		while ( @a && @f < $strings ) {
@@ -1730,6 +1742,7 @@ sub directive {
 
 	    # keys N N ... N
 	    elsif ( $a eq "keys" ) {
+		$has_diagram++;
 		my @f;
 		while ( @a && $a[0] =~ /^[0-9]+$/ ) {
 		    push( @f, shift(@a) );
@@ -1745,6 +1758,10 @@ sub directive {
 	    }
 
 	    elsif ( $a eq "diagram" && @a > 0 ) {
+		if ( $show && !is_true($a[0]) ) {
+		    do_warn("Useless diagram suppression");
+		    next;
+		}
 		$res->{diagram} = shift(@a);
 	    }
 
@@ -1761,6 +1778,7 @@ sub directive {
 
 	return 1 if $fail;
 
+	# If we've got diagram visibility, remove it if true.
 	if ( defined($res->{diagram}) ) {
 	    if ( is_true($res->{diagram}) ) {
 		# Diagram can be a colour, remove trivial 'true' values.
@@ -1768,27 +1786,21 @@ sub directive {
 		    delete $res->{diagram};
 		}
 	    }
-	    else {
-		push( @{ $config->{diagrams}->{suppress} }, $res->{name} );
-	    }
 	}
 
-	if ( $show) {
-	    my $ci;
-	    if ( $res->{frets} || $res->{base} || $res->{fingers} ) {
-		$ci = App::Music::ChordPro::Chord::Common->new
-		  ( { name   => $res->{name},
-		      origin => "inline",
-		      base   => $res->{base} ? $res->{base} : 1,
-		      frets  => $res->{frets},
-		      $res->{fingers} ? ( fingers => $res->{fingers} ) : (),
-		    } );
-	    }
-	    else {
-		# Info is already in $info.
-		$ci = $info->clone;
-	    }
+	# At this time, $res is still just a hash. Time to make a chord.
+	if ( $res->{orig} && !$has_diagram ) {
+	    $res->{$_} = $res->{orig}->{$_}
+	      for qw( base frets fingers keys );
+	    $has_diagram++;
+	}
+	$res->{base} ||= 1;
+	$res = App::Music::ChordPro::Chord::Common->new
+	  ( { %$res, origin => $show ? "inline" : "song" } );
+	$res->{parser} //= App::Music::ChordPro::Chords::get_parser();
 
+	if ( $show) {
+	    my $ci = $res->clone;
 	    state $chidx = "ch000";
 	    $chidx++;
 	    # Combine consecutive entries.
@@ -1798,25 +1810,22 @@ sub directive {
 		      " $chidx" );
 	    }
 	    else {
-		$self->add( type => "diagrams",
-			    show => "user",
+		$self->add( type   => "diagrams",
+			    show   => "user",
 			    origin => "chord",
 			    chords => [ " $chidx" ] );
 	    }
 	    $self->{chordsinfo}->{" $chidx"} = $ci;
 	    return 1;
 	}
-	elsif ( ! ( $res->{copy} ||$res->{frets} || $res->{keys} ) ) {
-	    App::Music::ChordPro::Chords::add_unknown_chord( $res->{name} );
-	    do_warn("Incomplete chord definition: $res->{name}\n")
-	      if $config->{debug}->{chords};
-	    return 1;
-	}
 
-
-	if ( $res->{frets} || $res->{fingers} || $res->{keys} ) {
-	    $res->{base} ||= 1 unless $res->{copy};
-	    push( @{$self->{define}}, $res );
+	if ( $has_diagram ) {
+	    my $def = {};
+	    for ( qw( name base frets fingers keys display diagram ) ) {
+		next unless defined $res->{$_};
+		$def->{$_} = $res->{$_};
+	    }
+	    push( @{$self->{define}}, $def );
 	    my $ret =
 	      App::Music::ChordPro::Chords::add_song_chord($res);
 	    if ( $ret ) {
@@ -1827,11 +1836,12 @@ sub directive {
 	    croak("We just entered it?? ", $res->{name}) unless $info;
 	}
 	else {
+	    # Just to silence warnings.
 	    App::Music::ChordPro::Chords::add_unknown_chord( $res->{name} );
+	    return 1;
 	}
 
 	$info->dump if $config->{debug}->{x1};
-	# $used_chords{$res->{name}} = $info if $info;
 
 	return 1;
     }
@@ -1896,7 +1906,7 @@ sub do_warn {
 }
 
 sub parse_chord {
-    my ( $self, $chord, $allow ) = @_;
+    my ( $self, $chord, $def ) = @_;
 
     my $debug = $config->{debug}->{chords};
 
@@ -1908,6 +1918,9 @@ sub parse_chord {
     my $xc = $config->{settings}->{transcode};
     my $global_dir = $config->{settings}->{transpose} <=> 0;
     my $unk;
+
+    # When called from {define} ignore xc/xp.
+    $xc = $xp = '' if $def;
 
     $info = App::Music::ChordPro::Chords::_known_chord($chord);
     if ( $info ) {
@@ -1923,15 +1936,8 @@ sub parse_chord {
     }
     $unk = !defined $info;
 
-    if ( ( $xp || $xc )
-	 && ! ($info
-	       && ( defined($info->{root}) || $info->is_nc)) ) {
-	# Desparately trying to get something to transcode/pose.
-	local $::config->{settings}->{chordnames} = "relaxed";
-	$info = App::Music::ChordPro::Chords::parse_chord($chord);
-    }
-    if ( $allow
-	 && ! ( $info && ( defined($info->{root}) || $info->is_nc ) ) ) {
+    if ( ( $def || $xp || $xc )
+	 && ! ($info && ( defined($info->{root}) || $info->is_nc ) ) ) {
 	local $::config->{settings}->{chordnames} = "relaxed";
 	$info = App::Music::ChordPro::Chords::parse_chord($chord);
     }
@@ -1939,7 +1945,7 @@ sub parse_chord {
     unless ( ($info
 	      && ( defined($info->{root}) || defined($info->{bass}) || $info->is_nc))
 	     ||
-	     ( $allow && !( $xc || $xp ) ) ) {
+	     ( $def && !( $xc || $xp ) ) ) {
 	do_warn( "Cannot parse",
 		 $xp ? "/transpose" : "",
 		 $xc ? "/transcode" : "",
@@ -1951,13 +1957,16 @@ sub parse_chord {
 	# For transpose/transcode, chord must be wellformed.
 	$info = $info->transpose( $xp,
 				  $xpose_dir // $global_dir);
+	$info->{transposed} = sprintf("%+d", $xp);
+	$info->{origin} .= $info->{transposed}
+	  if $info->{origin};
 	warn( "Parsing chord: \"$chord\" transposed ",
-	      $xp > 0 ? "+$xp" : "$xp", " to \"",
+	      $info->{transposed}, " to \"",
 	      $info->name, "\"\n" ) if $debug > 1;
     }
     # else: warning has been given.
 
-    if ( $info && $info->{system} eq "common" ) {
+    if ( $info ) { # TODO roman?
 	# Look it up now, the name may change by transcode.
 	if ( my $i = App::Music::ChordPro::Chords::_known_chord($info,1) ) {
 	    warn( "Parsing chord: \"$chord\" found ",
@@ -1990,6 +1999,8 @@ sub parse_chord {
 	    undef $xcmov;
 	}
 	$info = $info->transcode( $xc, $key_ord );
+	$info->{origin} .= "-" . ($info->{transcoded} = $info->{system})
+	  if $info->{origin};
 	warn( "Parsing chord: \"$chord\" transcoded to ",
 	      $info->name,
 	      " (", $info->{system}, ")",
@@ -2012,7 +2023,7 @@ sub parse_chord {
 	}
     }
 
-    unless ( $info || $allow ) {
+    unless ( $info || $def ) {
 	if ( $config->{debug}->{chords} || ! $warned_chords{$chord}++ ) {
 	    warn("Parsing chord: \"$chord\" unknown\n") if $debug;
 	    do_warn( "Unknown chord: \"$chord\"\n" )
@@ -2080,18 +2091,7 @@ sub dump {
     $a->{config} = ref(delete($a->{config}));
     unless ( $full ) {
 	for my $ci ( keys %{$a->{chordsinfo}} ) {
-	    for ( qw( frets fingers keys ) ) {
-		next unless exists $a->{chordsinfo}{$ci}{$_};
-		next unless @{$a->{chordsinfo}{$ci}{$_}};
-		$a->{chordsinfo}{$ci}{$_} =
-		  "[ " . join(" ", @{$a->{chordsinfo}{$ci}{$_}}) . " ]";
-	    }
-	    next unless $a->{chordsinfo}{$ci}{parser};
-	    $a->{chordsinfo}{$ci}{ns_canon} =
-	      "[ " . join(" ", @{$a->{chordsinfo}{$ci}{parser}{ns_canon}}) . " ]"
-	      if $a->{chordsinfo}{$ci}{parser}{ns_canon};
-	    $a->{chordsinfo}{$ci}{parser} =
-	      ref(delete($a->{chordsinfo}{$ci}{parser}));
+	    $a->{chordsinfo}{$ci} = $a->{chordsinfo}{$ci}->as_string;
 	}
     }
     ::dump($a);

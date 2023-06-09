@@ -9,7 +9,7 @@
 [D]Hello[*Bis]
 {chord:  B               base-fret  1    frets   1   2   3   4   5   6   }
 Air [(E)]Hello[E]
-{chord:  B}
+{chord:  B               base-fret  1    frets   X   2   4   4   4   2   }
 S[NC]ure
 
 #{start_of_grid 1+4x4+2}
