@@ -1789,8 +1789,9 @@ sub directive {
 	}
 
 	# At this time, $res is still just a hash. Time to make a chord.
-	if ( $res->{orig} && !$has_diagram ) {
-	    $res->{$_} = $res->{orig}->{$_}
+#	if ( $res->{orig} && !$has_diagram ) {
+	if ( $res->{orig} ) {
+	    $res->{$_} //= $res->{orig}->{$_}
 	      for qw( base frets fingers keys );
 	    $has_diagram++;
 	}
