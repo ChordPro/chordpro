@@ -357,12 +357,13 @@ sub process_config {
     if ( $cfg->{chords} ) {
 	App::Music::ChordPro::Chords::push_parser($cfg->{notes}->{system});
 	my $c = $cfg->{chords};
+	my $defs = {};
 	if ( @$c && $c->[0] eq "append" ) {
 	    shift(@$c);
 	}
 	foreach ( @$c ) {
 	    my $res =
-	      App::Music::ChordPro::Chords::add_config_chord($_);
+	      App::Music::ChordPro::Chords::add_config_chord($_, $defs);
 	    warn( "Invalid chord in config: ",
 		  $_->{name}, ": ", $res, "\n" ) if $res;
 	}
@@ -1075,6 +1076,8 @@ sub default_config() {
       //    "fingers" : [ 1, 1, 2, 3, 4, 1 ],
       //    "display" : "B<sup>\u266d</sup>",
       //  },
+      // If the name of the first entry is "defaults" its properties may
+      // be used as defaults for the rest of the chords.
     ],
 
     // Printing chord diagrams.

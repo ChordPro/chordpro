@@ -349,9 +349,14 @@ sub _check_chord {
 # API: Add a config defined chord.
 # Used by: Config.
 sub add_config_chord {
-    my ( $def ) = @_;
+    my ( $def, $defaults ) = @_;
     my $res;
     my $name;
+
+    if ( $def->{name} eq "defaults" ) {
+	$defaults->{$_} = $def->{$_} for qw( display );
+	return;
+    }
 
     # Handle alternatives.
     my @names;
@@ -375,6 +380,9 @@ sub add_config_chord {
     }
     delete $def->{name};
     $def->{base} ||= 1;
+
+    # Defaults.
+    $def->{$_} //= $defaults->{$_} for qw( display );
 
     my ( $base, $frets, $fingers, $keys ) =
       ( $def->{base}, $def->{frets}, $def->{fingers}, $def->{keys} );

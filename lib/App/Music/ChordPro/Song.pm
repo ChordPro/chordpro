@@ -157,12 +157,13 @@ sub parse_song {
 	    App::Music::ChordPro::Chords::Parser->reset_parsers;
 	    if ( $chords ) {
 		my $c = $chords;
+		my $defs = {};
 		if ( @$c && $c->[0] eq "append" ) {
 		    shift(@$c);
 		}
 		foreach ( @$c ) {
 		    my $res =
-		      App::Music::ChordPro::Chords::add_config_chord($_);
+		      App::Music::ChordPro::Chords::add_config_chord($_, $defs);
 		    warn( "Invalid chord in config: ",
 			  $_->{name}, ": ", $res, "\n" ) if $res;
 		}
