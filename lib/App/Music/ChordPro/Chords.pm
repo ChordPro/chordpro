@@ -10,6 +10,7 @@ package App::Music::ChordPro::Chords;
 use strict;
 use warnings;
 use utf8;
+use feature 'state';
 
 use App::Music::ChordPro::Chords::Parser;
 
@@ -350,11 +351,13 @@ sub _check_chord {
 # Used by: Config.
 sub add_config_chord {
     my ( $def, $defaults ) = @_;
+
     my $res;
     my $name;
 
+    state @defprops = qw( display );
     if ( $def->{name} eq "defaults" ) {
-	$defaults->{$_} = $def->{$_} for qw( display );
+	$defaults->{$_} = $def->{$_} for @defprops;
 	return;
     }
 
@@ -382,7 +385,7 @@ sub add_config_chord {
     $def->{base} ||= 1;
 
     # Defaults.
-    $def->{$_} //= $defaults->{$_} for qw( display );
+    $def->{$_} //= $defaults->{$_} for @defprops;
 
     my ( $base, $frets, $fingers, $keys ) =
       ( $def->{base}, $def->{frets}, $def->{fingers}, $def->{keys} );
