@@ -1,6 +1,8 @@
 0.000
 
     - !ChordPro functionality
+    - New directive diagrams obsoletes grid/no_grid with more possibilities,
+      Based on a suggestion and concept implementation from Jörg Bublath.
     - Images without directory can be looked up in CHORDPO_LIB.
 
 6.010 2023-06-05

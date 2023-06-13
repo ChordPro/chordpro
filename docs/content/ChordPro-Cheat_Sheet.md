@@ -4,7 +4,7 @@ title: "ChordPro Cheat Sheet"
 description: "ChordPro Cheat Sheet"
 ---
 
-# ChordPro 6.01Cheat Sheet
+# ChordPro 6.01 Cheat Sheet
 
 ## General
 
@@ -65,6 +65,7 @@ Arguments to directives may be separated by a colon `:` and/or whitespace. They 
 | ... `fingers` _pos1_ _pos2_ _pos3_ ...                                   |           | Specify finger postions.[^1]                                                                       | 6.0   |
 | ... `frets` _pos1_ _pos2_ _pos3_ ...                                     |           | Specify fret postions.[^1]                                                                         | 1.0   |
 | ... `keys` _pos1_ _pos2_ _pos3_ ...                                      |           | Specify keyboard keys.[^1]                                                                         | 6.0   |
+| [diagrams]({{< relref "Directives-diagrams" >}})                         |           | Control diagrams printing                                                                          | 6.02  |
 | [end_of_]({{< relref "Directives-env" >}})_section_                      |           | Ends a specific section.                                                                           | 6.0   |
 | [end_of_bridge]({{< relref "Directives-env_bridge" >}})                  | eob       | Ends bridge section.                                                                               | 6.0   |
 | [end_of_chorus]({{< relref "Directives-env_chorus" >}})                  | eoc       | Ends chorus section.                                                                               | 1.0   |
@@ -74,7 +75,7 @@ Arguments to directives may be separated by a colon `:` and/or whitespace. They 
 | [footersize]({{< relref "Directives-props_footer_legacy" >}}) _size_     |           | Footer size.                                                                                       | 5.0   |
 | [footercolour]({{< relref "Directives-props_footer_legacy" >}}) _colour_ |           | Footer colour.                                                                                     | 5.0   |
 | [footerfont]({{< relref "Directives-props_footer_legacy" >}}) _font_     |           | Footer font.                                                                                       | 5.0   |
-| [grid]({{< relref "Directives-grid_legacy" >}})                          | g         | Print diagrams at end.                                                                             | 3.6   |
+| [grid]({{< relref "Directives-grid_legacy" >}})                          | g         | Obsolete. See [{diagrams}]({{< relref "Directives-diagrams" >}}).                                  | 3.6   |
 | [highlight]({{< relref "Directives-comment" >}})                         |           | Same as comment.                                                                                   | 5.0   |
 | [image]({{< relref "Directives-image" >}}) ...                           |           | Include image.                                                                                     | 5.0   |
 | ... `anchor=` _anchor_                                                   |           | Anchor for [static image]({{< relref "Directives-image/#static-stationary-images" >}}).            | 6.01  |
@@ -107,7 +108,7 @@ Arguments to directives may be separated by a colon `:` and/or whitespace. They 
 | [new_page]({{< relref "Directives-new_page" >}})                         | np        | Starts new page.                                                                                   | 3.6   |
 | [new_physical_page]({{< relref "Directives-new_page" >}})                | npp       | Starts new page.                                                                                   | 3.6   |
 | [new_song]({{< relref "Directives-new_song" >}})                         | ns        | Starts a new song.                                                                                 | 1.0   |
-| [no_grid]({{< relref "Directives-grid_legacy" >}})                       | ng        | Disable diagram printing.                                                                          | 3.6   |
+| [no_grid]({{< relref "Directives-grid_legacy" >}})                       | ng        | Obsolete. See [{diagrams:off}]({{< relref "Directives-diagrams" >}}).                              | 3.6   |
 | [pagetype]({{< relref "Directives-pagetype_legacy" >}}) ...[^4]          |           | Set page (paper) size.                                                                             | 4.0   |
 | [start_of_]({{< relref "Directives-env" >}})_section_                    |           | Starts a specific section. May have a [label]({{< relref "ChordPro-Configuration-PDF#labels" >}}). | 6.0   |
 | [start_of_bridge]({{< relref "Directives-env_bridge" >}})                | sob       | Starts bridge section. May have a [label]({{< relref "ChordPro-Configuration-PDF#labels" >}}).     | 6.0   |

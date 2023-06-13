@@ -945,11 +945,12 @@ my %abbrevs = (
    ci	      => "comment_italic",
    colb	      => "column_break",
    cs	      => "chordsize",
+   grid       => "diagrams",	# not really an abbrev
    eob	      => "end_of_bridge",
    eoc	      => "end_of_chorus",
    eot	      => "end_of_tab",
    eov	      => "end_of_verse",
-   g	      => "grid",
+   g	      => "diagrams",
    highlight  => "comment",	# not really an abbrev
    ng	      => "no_grid",
    np	      => "new_page",
@@ -1422,8 +1423,15 @@ sub directive {
 	return 1;
     }
 
-    if ( $dir eq "grid" ) {
-	$self->{settings}->{diagrams} = 1;
+    if ( $dir eq "diagrams" ) {	# AKA grid
+	if ( $arg ne "" ) {
+	    $self->{settings}->{diagrams} = !!is_true($arg);
+	    $self->{settings}->{diagrampos} = lc($arg)
+	      if $arg =~ /^(right|bottom|top|below)$/i;
+	}
+	else {
+	    $self->{settings}->{diagrams} = 1;
+	}
 	return 1;
     }
     if ( $dir eq "no_grid" ) {

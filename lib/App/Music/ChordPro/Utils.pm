@@ -168,7 +168,7 @@ push( @EXPORT, 'parse_kv' );
 sub is_true {
     my ( $arg ) = @_;
     return if !defined($arg);
-    return if $arg =~ /^(false|null|0+)$/i;
+    return if $arg =~ /^(false|null|no|none|off|0+)$/i;
     return !!$arg;
 }
 

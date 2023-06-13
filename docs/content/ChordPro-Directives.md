@@ -129,6 +129,7 @@ much more powerful [configuration files]({{< relref "ChordPro-Configuration" >}}
 
 The following directives are legacy from the old `chord` program. The modern reference implementation uses much more powerful configuration files for this purpose.
 
+* [diagrams]({{< relref "Directives-diagrams" >}})
 * [grid]({{< relref "Directives-grid_legacy" >}}) (short: g)
 * [no_grid]({{< relref "Directives-grid_legacy" >}}) (short: ng)
 * [titles]({{< relref "Directives-titles_legacy" >}})

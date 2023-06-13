@@ -389,6 +389,8 @@ sub generate_song {
 	$dd = App::Music::ChordPro::Output::PDF::StringDiagrams->new($ps);
 	$dctl = $ps->{diagrams};
     }
+    $dctl->{show} = $s->{settings}->{diagrampos}
+      if defined $s->{settings}->{diagrampos};
     $ps->{dd} = $dd;
     my $sb = $s->{body};
 
