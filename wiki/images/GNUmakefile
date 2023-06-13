@@ -2,7 +2,7 @@
 
 LIB := ../../lib
 RES := ${LIB}/App/Music/ChordPro/res
-CHORDPRO := perl ${LIB}/../script/chordpro -X --def settings.truesf=1
+CHORDPRO := perl ${LIB}/../script/chordpro --nosysconfig --nouserconfig --noconfig --def settings.truesf=1
 CONVERT := convert -define profile:skip=ICC
 GS := gs -q -dNOPAUSE -dBATCH
 GSPNG := ${GS} -sDEVICE=png16m -dGraphicsAlphaBits=4 -dTextAlphaBits=4 -r144

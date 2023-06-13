@@ -21,7 +21,7 @@ Supported file types may depend on the platforms and
 tools used, but PNG, JPG and GIF should always be valid.
 The syntax of file names also depends on the platforms and
 tools used. A simple file name like `"myimage.png"` should always
-be acceptable. 	
+be acceptable. The image must then reside in the same directory as the song.
 
 Example:
 
@@ -66,8 +66,6 @@ Provides a title for the image.
 
 ## Advanced features
 
-**TO BE DISCUSSED**
-
 ##### `spread`=*space*  
 Places the image at the top of the page, across the full page width.
 The rest of the content will be shifted down by the height of the
@@ -76,6 +74,8 @@ image plus *space*.
 Note that the top of the page is the top of the paper minus the
 top margin, and that the width of the page is the width of the paper
 minus the left and right margins.
+
+## Static (stationary) images
 
 ##### `x=`*offset*
 ##### `y=`*offset*

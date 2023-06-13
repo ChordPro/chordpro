@@ -710,14 +710,14 @@ sub parse_chord {
     }
 
     return unless $chord =~ /^$r_pat(?<qual>\+|0|o|aug|dim|h)?(?<ext>.*)$/;
+    my $r = $+{shift}.$+{root};
 
     my $info = { system => "roman",
 		 parser => $self,
 		 name   => $_[1],
-		 root   => $+{root} };
+		 root   => $r };
     bless $info => $self->{target};
 
-    my $r = $+{root};
     my $q = $+{qual} // "";
     $info->{qual} = $q;
     $q = "-" if $r eq lc($r);
@@ -829,9 +829,11 @@ sub is_nc {
 }
 
 # For convenience.
-sub is_chord      { defined $_[0]->{root_ord} };
-sub is_rootless   { $_[0]->{rootless} };
-sub is_annotation { 0 };
+sub is_chord      { defined $_[0]->{root_ord} }
+sub is_rootless   { $_[0]->{rootless} }
+sub is_annotation { 0 }
+sub has_diagrams  { !$_[0]->{movable} }
+sub is_movable    { $_[0]->{movable} }
 
 sub strings {
     $_[0]->{parser}->{intervals};
@@ -839,14 +841,19 @@ sub strings {
 
 sub dump {
     my ( $self ) = @_;
-    my $c = dclone($self);
+    my $c = {};
     for ( qw( frets fingers keys ) ) {
-	$c->{$_} = "[ " . join(" ", @{$c->{$_}}) . " ]";
+	next unless $self->{$_};
+	$c->{$_} = "[ " . join(" ", @{$self->{$_}}) . " ]";
     }
-    if ( ref($c->{parser}) ) {
-	$c->{ns_canon} = "[ " . join(" ", @{$c->{parser}{ns_canon}}) . " ]"
-	  if $c->{parser}{ns_canon};
-	$c->{parser} = ref(delete($c->{parser}));
+    if ( ref($self->{parser}) ) {
+	$c->{ns_canon} = "[ " . join(" ", @{$self->{parser}{ns_canon}}) . " ]"
+	  if $self->{parser}{ns_canon};
+	$c->{parser} = ref($self->{parser});
+    }
+    for ( keys %$self ) {
+	next unless defined $self->{$_};
+	$c->{$_} //= $self->{$_};
     }
     ::dump($c);
 }
@@ -960,7 +967,7 @@ sub transcode {
 sub chord_display {
     my ( $self, $sf ) = @_;
 
-    use App::Music::ChordPro::Utils qw( demarkup );
+    use App::Music::ChordPro::Utils qw( splitmarkup );
 
     my $res =
       $self->{display}
@@ -969,27 +976,38 @@ sub chord_display {
 
     # Substitute musical symbols if wanted and possible.
     if ( $::config->{settings}->{truesf} ) {
-	my $c0 = demarkup($res);
-	my ( $pre, $post );
-	if ( $c0 ne $res ) {	# has markup
-	    ( $pre, $post ) = $res =~ /^(.*\>)\Q$c0\E(\<.+)$/;
-	    $res = $c0;
-	}
+	my @c = splitmarkup($res);
 	$sf ||= 0;
-	if ( $sf & 0x02 ) {	# has flat
-	    $res =~ s/(?<=[[:alpha:]])b/♭/g;
+	$res = '';
+	push( @c, '' ) if @c % 2;
+	my $did = 0;		# TODO: not for roman
+	while ( @c ) {
+	    $_ = shift(@c);
+	    if ( $sf & 0x02 ) {	# has flat
+		if ( $did ) {
+		    s/b/♭/g;
+		}
+		else {
+		    s/(?<=[[:alnum:]])b/♭/g;
+		    $did++;
+		}
+	    }
+	    else {			# fallback
+		if ( $did ) {
+		    s;[b♭];<span font="chordprosymbols">!</span>;g;}
+		else {
+		    s;(?<=[[:alnum:]])[b♭];<span font="chordprosymbols">!</span>;g;
+		    $did++;
+		}
+	    }
+	    if ( $sf & 0x01 ) {	# has sharp
+		s/#/♯/g;
+	    }
+	    else {			# fallback
+		s;[#♯];<span font="chordprosymbols">#</span>;g;
+	    }
+	    $res .= $_ . shift(@c);
 	}
-	else {			# fallback
-	    $res =~ s;(?<=[[:alpha:]])[b♭];<span font="chordprosymbols">!</span>;g;
-	}
-	if ( $sf & 0x01 ) {	# has sharp
-	    $res =~ s/(?<=.)#/♯/g;
-	}
-	else {			# fallback
-	    $res =~ s;(?<=.)[#♯];<span font="chordprosymbols">#</span>;g;
-	}
-	$res = $pre . $res . $post
-	  if defined $pre;
     }
 
     return $self->{parens} ? "($res)" : $res;
@@ -1061,8 +1079,9 @@ sub chord_display {
 	}
     }
 
-    my $res = $self->{root_canon} .
-      "<sup>" . $self->{qual} . $self->{ext} . "</sup>";
+    my $res = $self->{root_canon};
+    $res .= "<sup>" . $self->{qual} . $self->{ext} . "</sup>"
+      if $self->{qual};
     if ( $self->{bass} && $self->{bass} ne "" ) {
 	$res .= "<sub>/" . lc($self->{bass}) . "</sub>";
     }

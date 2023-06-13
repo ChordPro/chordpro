@@ -89,9 +89,6 @@ The resultant chord diagrams are:
 
 ![]({{< asset "images/ex_define.png" >}})
 
-The asterisk after the chord names indiciates that the chords have
-been defined in the song, possibly overriding built-in definitions.
-
 ## Defining chords for keyboard instruments
 
 For keyboard chords, only the chord notes relative to the root note
@@ -120,3 +117,27 @@ The resultant chord diagrams are:
 ![]({{< asset "images/ex_define2.png" >}})
 
 Note that keys that would exceed the diagram are silently wrapped.
+
+## Reusing existing chord definitions
+
+To modify an existing chord definition just define the chord as shown
+above and the already existing definition will be overwritten.
+
+Alternatively, you can _copy_ (pull in) the definition of an existing
+chord and only modify selected parts of the definition. E.g. to use an
+alternative finger setting for the `D` chord:
+
+    {define: D copy D fingers 0 0 0 2 4 3}
+	
+## Chord display strings
+
+The chord display string controls how the chord name will be shown.
+This is particularly useful if chordnames are to be shown using
+[markup]({{< relref "Chordpro_Markup" >}}).
+
+Chord display strings are specified with `display`. For example the
+following directive changes how the `Am7` chord will be shown, but
+leaves everything else unmodified:
+
+    {define: Am7 copy Am7 display "Am<sup>7</sup>"}
+	

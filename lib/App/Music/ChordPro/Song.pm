@@ -22,6 +22,7 @@ use File::LoadLines;
 use Storable qw(dclone);
 use feature 'state';
 use Text::ParseWords qw(quotewords);
+use File::Basename qw(basename);
 
 # Parser context.
 my $def_context = "";
@@ -252,6 +253,7 @@ sub parse_song {
     $self->{config}     = $config;
     $self->{meta}       = $meta if $meta;
     $self->{chordsinfo} = {};
+    $target //= $self->{system};
 
     # Preprocessor.
     my $prep = make_preprocessor( $config->{parser}->{preprocess} );
@@ -288,9 +290,12 @@ sub parse_song {
 	    $cont =~ s/^\s+//;
 	    $_ .= $cont;
 	}
-	# Uncomment these to allow \uXXXX and \u{XX...}.
-	# s/\\u([0-9a-f]{4})/chr(hex("0x$1"))/ige;
+
+	# Uncomment this to allow \uXXXX escapes.
+	s/\\u([0-9a-f]{4})/chr(hex("0x$1"))/ige;
+	# Uncomment this to allow \u{XX...} escapes.
 	# s/\\u\{([0-9a-f]+)\}/chr(hex("0x$1"))/ige;
+
 	$diag->{orig} = $_;
 	# Get rid of TABs.
 	s/\t/ /g;
@@ -676,7 +681,7 @@ sub chord {
 	    # Tests run without config and chords, so pretend.
 	    push( @used_chords, $n );
 	}
-	elsif ( ! $info->is_rootless ) {
+	elsif ( ! $info->is_rootless && ! $info->has_diagrams ) {
 	    do_warn("Unknown chord: $n")
 	      unless $warned_chords{$n}++;
 	}
@@ -1217,6 +1222,11 @@ sub directive {
 	    }
 	}
 
+	if ( $uri && $uri !~ m;/\\; ) { # basename
+	    use File::Basename qw(dirname);
+	    $uri = dirname($diag->{file}) . "/" . $uri;
+	}
+
 	# uri + id -> define asset
 	if ( $uri && $id ) {
 	    # Define a new asset.
@@ -1494,6 +1504,13 @@ sub directive {
 	    $o = $o->{$_};
 	}
 
+	# Turn hash.array into hash.array.> (append).
+	if ( ref($o) eq 'HASH' && ref($o->{$lk}) eq 'ARRAY' ) {
+	    $c = \($$c->{$lk});
+	    $o = $o->{$lk};
+	    $lk = '>';
+	}
+
 	# Final key. Merge array if so.
 	if ( ( $lk =~ /^\d+$/ || $lk eq '>' || $lk eq '<' )
 	       && ref($o) eq 'ARRAY' ) {
@@ -1514,6 +1531,7 @@ sub directive {
 	else {
 	    $$c->{$lk} = $arg;
 	}
+
 	$config->augment($ccfg);
 	upd_config();
 
@@ -1590,7 +1608,7 @@ sub directive {
     if ( $dir eq "define" or my $show = $dir eq "chord" ) {
 
 	# Split the arguments and keep a copy for error messages.
-	# Note that quotewords retunrs an epty result if it gets confused,
+	# Note that quotewords returns an empty result if it gets confused,
 	# so fall back to the ancient split method if so.
 	my @a = quotewords( '[: ]+', 0, $arg );
 	@a = split( /[: ]+/, $arg ) unless @a;
@@ -1622,6 +1640,9 @@ sub directive {
 		    shift(@a);
 		    $res->{$_} = $info->{$_}
 		      for qw( base display frets fingers keys );
+		    # Note: Values of the chord copied from!
+		    $res->{$_} = $info->{$_}
+		      for qw( root qual ext root_ord root_mod bass bass_ord qual_canon );
 		}
 		else {
 		    do_warn("Unknown chord to copy: $a[0]\n");
@@ -1631,7 +1652,7 @@ sub directive {
 	    }
 
 	    # display
-	    elsif ( $a eq "display" ) {
+	    elsif ( $a eq "display" && @a ) {
 		$res->{display} = shift(@a);
 	    }
 
@@ -1710,6 +1731,10 @@ sub directive {
 		}
 	    }
 
+	    elsif ( $a eq "diagram" && @a > 0 ) {
+		$res->{diagram} = shift(@a);
+	    }
+
 	    # Wrong...
 	    else {
 		# Insert a marker to show how far we got.
@@ -1722,6 +1747,10 @@ sub directive {
 	}
 
 	return 1 if $fail;
+
+	if ( defined($res->{diagram}) && !is_true($res->{diagram}) ) {
+	    push( @{ $config->{diagrams}->{suppress} }, $res->{name} );
+	}
 
 	if ( $show) {
 	    my $ci;
@@ -1861,11 +1890,14 @@ sub parse_chord {
     $info = App::Music::ChordPro::Chords::_known_chord($chord);
     if ( $info ) {
 	warn( "Parsing chord: \"$chord\" found \"",
-	      $chord, "\" in ", $info->{_via}, "\n" ) if $debug > 1;
+	      $info->name, "\" in ", $info->{_via}, "\n" ) if $debug > 1;
+	$info->dump if $debug > 1;
     }
     else {
 	$info = App::Music::ChordPro::Chords::parse_chord($chord);
-	warn( "Parsing chord: \"$chord\" parsed ok\n" ) if $info && $debug > 1;
+	warn( "Parsing chord: \"$chord\" parsed ok [",
+	      $info->{system},
+	      "]\n" ) if $info && $debug > 1;
     }
     $unk = !defined $info;
 
@@ -1898,7 +1930,7 @@ sub parse_chord {
     }
     # else: warning has been given.
 
-    if ( $info ) {
+    if ( $info && $info->{system} eq "common" ) {
 	# Look it up now, the name may change by transcode.
 	if ( my $i = App::Music::ChordPro::Chords::_known_chord($info,1) ) {
 	    warn( "Parsing chord: \"$chord\" found ",

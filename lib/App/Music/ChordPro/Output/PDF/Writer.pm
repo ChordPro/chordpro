@@ -46,6 +46,7 @@ sub info {
     $info{CreationDate} //= pdf_date();
 
     # PDF::API2 2.42+ does not accept the final apostrophe.
+    no warnings 'redefine';
     local *PDF::API2::_is_date = sub { 1 };
 
     if ( $self->{pdf}->can("info_metadata") ) {

@@ -1,14 +1,15 @@
-0.000
+6.010 2023-06-05
 
     - !ChordPro functionality
     - Allow line continuation for input lines using a backslash.
-    - Remove diagrams.auto from config.
     - Allow define chord "|" in config.
     - Allow graceful handling of rootless chords.
     - Allow simple markup in chords. Yes, this includes grid chords.
     - Add flags for preprocessor pattern replacements.
     - Allow image scale as a percentage.
     - Experimental: Absolute placement for images.
+    - Experimental: Diagram control in {define}.
+    - Remove diagrams.auto from config.
     - !BugFixes
     - Add Pod::Usage to required modules. Some distros seem to have
       removed it from the core.
@@ -304,7 +305,7 @@
 0.975	2020-08-13
 
     - !ChordPro syntax
-    - Support Pango Markup language.
+    - Support Pango style markup language.
     - Add basic support for annotations.
     - Add directives start/end_of_verse/bridge and short forms.
     - !ChordPro functionality
@@ -337,7 +338,7 @@
     - Fix problem where the tag of a grid was ignored.
     - Do not indent chorus labels when chorus indenting (issue #81).
     - !Miscellaneous
-    - Use Text::Layout to support Pango Markup language.
+    - Use Text::Layout to support Pango style markup language.
     - Use File::LoadLines.
     - Upgrade requirement for PDF::API2 to 2.035, Font::TTF to 1.05,
       Text::Layout to 0.014.

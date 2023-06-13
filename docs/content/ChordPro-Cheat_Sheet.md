@@ -4,7 +4,7 @@ title: "ChordPro Cheat Sheet"
 description: "ChordPro Cheat Sheet"
 ---
 
-# ChordPro Cheat Sheet
+# ChordPro 6.01Cheat Sheet
 
 ## General
 
@@ -15,6 +15,8 @@ Chords are placed between brackets `[` and `]`.
 Annotations are placed between bracket-star `[*` and `]`.
 
 The input data may be encoded in ASCII, ISO 8859.1, UTF-8, UTF-16 or UTF-32.
+Lines may be continued on the next line by putting a backslash `\` at the end.
+Unicode escape sequences (`\u` followed by 4 hexadecimal digits) are replaced by the corresponding unicode character.[^5]
 
 _Directives_ control processing and output.
 Directives are placed between braces `{` and `}` and must be on a single line.
@@ -39,7 +41,7 @@ discarded.
 
 Directives can be [conditionally executed](/chordpro-directives/#conditional-directives) by appending a dash `-` and a _selector_ to the directive name.
 
-Arguments to directives may be separated by a colon `:` and/or whitespace.
+Arguments to directives may be separated by a colon `:` and/or whitespace. They may be quoted with `""` or `''`.
 
 | Directive                                                                | Short     | Purpose                                                                                            | Since |
 | ---                                                                      | ---       | ---                                                                                                | ---   |
@@ -75,15 +77,20 @@ Arguments to directives may be separated by a colon `:` and/or whitespace.
 | [grid]({{< relref "Directives-grid_legacy" >}})                          | g         | Print diagrams at end.                                                                             | 3.6   |
 | [highlight]({{< relref "Directives-comment" >}})                         |           | Same as comment.                                                                                   | 5.0   |
 | [image]({{< relref "Directives-image" >}}) ...                           |           | Include image.                                                                                     | 5.0   |
+| ... `anchor=` _anchor_                                                   |           | Anchor for [static image]({{< relref "Directives-image/#static-stationary-images" >}}).            | 6.01  |
 | ... `border`                                                             |           | Draws a 1 point border around the image.                                                           | 5.0   |
 | ... `border=` _width_                                                    |           | Draws a border around the image (points).                                                          | 5.0   |
 | ... `center`                                                             |           | Center image.                                                                                      | 5.0   |
 | ... `center=` _arg_                                                      |           | Center image if _arg_ .                                                                            | 5.0   |
 | ... `height=` _height_                                                   |           | Height (points).                                                                                   | 5.0   |
+| ... `id=` _id_                                                           |           | [Asset id](Directives-image#assets).                                                               | 6.01  |
 | ... `scale=` _scale_                                                     |           | Scale factor (number).                                                                             | 5.0   |
+| ... `spread=` _advance_                                                  |           | Places the image at the top of the page, across the full page width                                | 6.0   |
 | ... `src=` _filename_                                                    |           | Image file name                                                                                    | 5.0   |
 | ... `title=` _text_                                                      |           | Provides a title (caption) for the image.                                                          | 5.0   |
 | ... `width=` _width_                                                     |           | Width (points).                                                                                    | 5.0   |
+| ... `x=` _offset_                                                        |           | Horizontal offset (points) for [static image]({{< relref "Directives-image/#static-stationary-images" >}}).  | 6.01  |
+| ... `y=` _offset_                                                        |           | Vertical offset (points) for [static image]({{< relref "Directives-image/#static-stationary-images" >}}). | 6.01  |
 | [meta]({{< relref "Directives-meta" >}}) _item_                          |           | Metadata.                                                                                          | 5.0   |
 | [meta album]({{< relref "Directives-album" >}}) _name_                   | album     | Album name.                                                                                        | 5.0   |
 | [meta artist]({{< relref "Directives-artist" >}}) _name_                 | artist    | Artist name.                                                                                       | 5.0   |
@@ -141,6 +148,7 @@ all arguments to `chord` and `define` directives are optional.
 [^2]: [Section labels]({{< relref "ChordPro-Configuration-PDF#labels" >}}) are a 6.0 feature.
 [^3]: The short forms were missing in version 5,0, and re-added in 6.0.
 [^4]: Actually, `pagetype` and `pagesize` were never implemented in version 5.0 and higher.
+[^5]: Continuation lines and unicode escapes were introduced in 6.01.
 
 <!---
 # Local Variables:

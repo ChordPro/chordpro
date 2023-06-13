@@ -11,9 +11,10 @@ This directive is similar to [define]({{< relref "Directives-define" >}}) but it
 `{chord:` _name_ `base-fret` _offset_ `frets` _pos_ _pos_ … _pos_`}`  
 `{chord:` _name_ `base-fret` _offset_ `frets` _pos_ _pos_ … _pos_ `fingers` _pos_ _pos_ … _pos_`}`
 
-* _name_ is the name to be used for this chord. If the directive is used to show a known chord the rest of the arguments may be omitted.
+_name_ is the name to be used for this chord. If the directive is
+used to show a known chord the rest of the arguments may be omitted.
 
-* `base-fret`, `frets` and `fingers` are identical to the [define]({{< relref "Directives-define" >}}) directive.
+See [define]({{< relref "Directives-define" >}}) for all possible arguments.
 
 Example:
 
