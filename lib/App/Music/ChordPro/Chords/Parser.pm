@@ -1006,10 +1006,11 @@ sub chord_display {
     use App::Music::ChordPro::Utils qw( splitmarkup );
 
     my $res;
-    if ( $self->{display} ) {
+    my $fmt = $self->{format} || $::config->{settings}->{"chord-format"};
+    if ( $fmt ) {
 	my $args = {};
 	_flat_copy( $args, $self );
-	$res = interpolate( { args => $args }, $self->{display} );
+	$res = interpolate( { args => $args }, $fmt );
     }
     else {
 	$res = $self->show("np");
@@ -1074,12 +1075,18 @@ sub show {
 
 sub chord_display {
     my ( $self, $raw ) = @_;
-    if ( $self->{display} ) {
+    if ( $self->{format} ) {
 	if ( $raw ) {
-	    return $self->{display};
+	    return $self->{format};
 	}
 	else {
-	    return interpolate( { args => $self }, $self->{display} );
+	    my $fmt = $self->{format} || $::config->{settings}->{"chord-format"};
+	    if ( $fmt ) {
+		my $args = {};
+		_flat_copy( $args, $self );
+		return interpolate( { args => $args }, $fmt );
+	    }
+	    return $self->show;
 	}
     }
 
@@ -1111,12 +1118,18 @@ sub show {
 
 sub chord_display {
     my ( $self, $raw ) = @_;
-    if ( $self->{display} ) {
+    if ( $self->{format} ) {
 	if ( $raw ) {
-	    return $self->{display};
+	    return $self->{format};
 	}
 	else {
-	    return interpolate( { args => $self }, $self->{display} );
+	    my $fmt = $self->{format} || $::config->{settings}->{"chord-format"};
+	    if ( $fmt ) {
+		my $args = {};
+		_flat_copy( $args, $self );
+		return interpolate( { args => $args }, $fmt );
+	    }
+	    return $self->show;
 	}
     }
 

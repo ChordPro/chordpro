@@ -115,7 +115,7 @@ sub parse_song {
     warn("Processing song ", $diag->{file}, "...\n") if $options->{verbose};
     ::break();
     my @configs;
-    # Experimental: embedded config.
+    #
     if ( $lines->[0] =~ /^##config:\s*json/ ) {
 	my $cf = "";
 	shift(@$lines);
@@ -686,7 +686,7 @@ sub chord {
 	my $m = $markup;
 	if ( $markup =~ s/\>\Q$c\E\</>%{name}</ ) {
 	    $info = $info->clone;
-	    $info->{display} = $markup;
+	    $info->{format} = $markup;
 	    $name = $self->add_chord( $info, $m );
 	}
 	else {
@@ -1687,11 +1687,12 @@ sub directive {
 	}
 
 	# Process the options.
+	my $copyall;
 	while ( @a ) {
 	    my $a = shift(@a);
 
 	    # Copy existing definition.
-	    if ( $a eq "copy" ) {
+	    if ( $a eq "copy" || ( $copyall = $a eq "copyall" ) ) {
 		if ( my $i = App::Music::ChordPro::Chords::_known_chord($a[0]) ) {
 		    $res->{copy} = $a[0];
 		    $res->{orig} = $i;
@@ -1707,6 +1708,11 @@ sub directive {
 	    # display
 	    elsif ( $a eq "display" && @a ) {
 		$res->{display} = shift(@a);
+	    }
+
+	    # format
+	    elsif ( $a eq "format" && @a ) {
+		$res->{format} = shift(@a);
 	    }
 
 	    # base-fret N
@@ -1854,27 +1860,20 @@ sub directive {
 	    return 1;
 	}
 
-	if ( $has_diagram ) {
-	    my $def = {};
-	    for ( qw( name base frets fingers keys display diagram ) ) {
-		next unless defined $res->{$_};
-		$def->{$_} = $res->{$_};
-	    }
-	    push( @{$self->{define}}, $def );
-	    my $ret =
-	      App::Music::ChordPro::Chords::add_song_chord($res);
-	    if ( $ret ) {
-		do_warn("Invalid chord: ", $res->{name}, ": ", $ret, "\n");
-		return 1;
-	    }
-	    $info = App::Music::ChordPro::Chords::_known_chord($res->{name});
-	    croak("We just entered it?? ", $res->{name}) unless $info;
+	my $def = {};
+	for ( qw( name base frets fingers keys display format diagram ) ) {
+	    next unless defined $res->{$_};
+	    $def->{$_} = $res->{$_};
 	}
-	else {
-	    # Just to silence warnings.
-	    App::Music::ChordPro::Chords::add_unknown_chord( $res->{name} );
+	push( @{$self->{define}}, $def );
+	my $ret =
+	  App::Music::ChordPro::Chords::add_song_chord($res);
+	if ( $ret ) {
+	    do_warn("Invalid chord: ", $res->{name}, ": ", $ret, "\n");
 	    return 1;
 	}
+	$info = App::Music::ChordPro::Chords::_known_chord($res->{name});
+	croak("We just entered it?? ", $res->{name}) unless $info;
 
 	$info->dump if $config->{debug}->{x1};
 

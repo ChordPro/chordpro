@@ -184,6 +184,20 @@ sub fq {
 
 push( @EXPORT, 'fq' );
 
+# Quote a string.
+
+sub qquote {
+    my ( $arg, $force ) = @_;
+    for ( $arg ) {
+	s/([\\\"])/\\$1/g;
+	s/([[:^print:]])/sprintf("\\u%04x", ord($1))/ge;
+	return $_ unless /[\\\s]/;
+	return qq("$_");
+    }
+}
+
+push( @EXPORT, 'qquote' );
+
 # Turn foo.bar.blech=blah into { foo => { bar => { blech ==> "blah" } } }.
 
 sub prp2cfg {

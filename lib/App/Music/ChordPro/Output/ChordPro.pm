@@ -11,7 +11,7 @@ use strict;
 use warnings;
 
 use App::Music::ChordPro::Output::Common;
-use App::Music::ChordPro::Utils qw(fq);
+use App::Music::ChordPro::Utils qw( fq qquote );
 
 my $re_meta;
 
@@ -122,11 +122,15 @@ sub generate_song {
     if ( $s->{define} ) {
 	foreach my $info ( @{ $s->{define} } ) {
 	    my $t = "{define: " . $info->{name};
-	    $t .= " copy " . $info->{copy} if $info->{copy};
-	    if ( my $x = $info->{display} ) {
-		$x =~ s/"/\\"/g;
-		$x = '"'.$x.'"' if $x =~ /[\s"]/;
-		$t .= " display $x";
+	    if ( $info->{copyall} ) {
+		$t .= " copyall " . $info->{copyall};
+	    }
+	    elsif ( $info->{copy} ) {
+		$t .= " copy " . $info->{copy};
+	    }
+	    for ( qw( display format ) ) {
+		next unless defined $info->{$_};
+		$t .= " $_ " . qquote($info->{$_} );
 	    }
 	    $t .= " base-fret " . $info->{base};
 	    $t .= " frets " .

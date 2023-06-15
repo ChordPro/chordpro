@@ -357,13 +357,12 @@ sub process_config {
     if ( $cfg->{chords} ) {
 	App::Music::ChordPro::Chords::push_parser($cfg->{notes}->{system});
 	my $c = $cfg->{chords};
-	my $defs = {};
 	if ( @$c && $c->[0] eq "append" ) {
 	    shift(@$c);
 	}
 	foreach ( @$c ) {
 	    my $res =
-	      App::Music::ChordPro::Chords::add_config_chord($_, $defs);
+	      App::Music::ChordPro::Chords::add_config_chord($_);
 	    warn( "Invalid chord in config: ",
 		  $_->{name}, ": ", $res, "\n" ) if $res;
 	}
@@ -932,7 +931,7 @@ sub default_config() {
     // "include" : [ "modern1", "lib/mycfg.json" ],
     "include" : [ "guitar" ],
 
-    // General settings, to be changed by configs and command line.
+    // General settings, often changed by configs and command line.
     "settings" : {
       // Strict behaviour.
       "strict" : true,
@@ -952,6 +951,9 @@ sub default_config() {
       "lyrics-only" : false,
       // Memorize chords in sections, to be recalled by [^].
       "memorize" : false,
+      // Format to show chord names. May contain markup.
+      // "chord-format" : "%{root}%{qual|%{}}%{ext|<sup>%{}</sup>}%{bass|/%{}}",
+      "chord-format" : "%{root}%{qual|%{}}%{ext|%{}}%{bass|/%{}}",
       // Chords inline.
       // May be a string containing pretext %s posttext.
       // Defaults to "[%s]" if set to a value that doesn't contain "%s".

@@ -2581,7 +2581,7 @@ sub set_columns {
 	    }
 	    push( @{ $ps->{columnoffsets} }, $l );
 	}
-	warn("COL: @{ $ps->{columnoffsets} }\n");
+	#warn("COL: @{ $ps->{columnoffsets} }\n");
 	return;
     }
 
@@ -2593,7 +2593,7 @@ sub set_columns {
 	push( @{ $ps->{columnoffsets} }, $_ * $d );
     }
     push( @{ $ps->{columnoffsets} }, $w );
-    warn("COL: @{ $ps->{columnoffsets} }\n");
+    #warn("COL: @{ $ps->{columnoffsets} }\n");
 }
 
 sub showlayout {

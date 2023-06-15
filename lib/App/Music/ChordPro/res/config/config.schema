@@ -142,6 +142,11 @@
 		    "default": false
 		},
 
+		"chord-format": {
+		    "description": "Format string for rendering chord names.",
+		    "type": "string"
+		},
+
 		"choruslabels": {
 		    "description": "",
 		    "title": "If false, chorus labels are used as tags.",
@@ -379,6 +384,13 @@
 		}
 	    }
 	},
+
+	"assets": {
+	    "title": "Assets",
+	    "description": "Assets (placeholder).",
+	    "type": "object",
+	    "additionalProperties": true
+        },
 
 	"a2crd": {
 	    "title": "A2Crd (input)",

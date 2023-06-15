@@ -349,16 +349,12 @@ sub _check_chord {
 # API: Add a config defined chord.
 # Used by: Config.
 sub add_config_chord {
-    my ( $def, $defaults ) = @_;
+    my ( $def ) = @_;
 
     my $res;
     my $name;
 
-    my @defprops = qw( display );
-    if ( $def->{name} eq "defaults" ) {
-	$defaults->{$_} = $def->{$_} for @defprops;
-	return;
-    }
+    my @extprops = qw( display format );
 
     # Handle alternatives.
     my @names;
@@ -374,26 +370,39 @@ sub add_config_chord {
     }
 
     # For derived chords.
-    if ( $def->{copy} ) {
-	$res = $config_chords{$def->{copy}};
-	return "Cannot copy $def->{copy}"
-	  unless $res;
+    if ( $def->{copy} || $def->{"copyall"} ) {
+	my $src = $def->{copy};
+	if ( $def->{copyall} ) {
+	    return "Cannot copy and copyall at the same time"
+	      if $src;
+	    $src = $def->{copyall};
+	}
+	$res = $config_chords{$src};
+	return "Cannot copy $src" unless $res;
 	$def = bless { %$res, %$def } => ref($res);
+	if ( $def->{copy} ) {
+	    delete $def->{$_} for @extprops;
+	}
+	else {
+	    $def->{copy} = $def->{copyall};
+	}
     }
     delete $def->{name};
     $def->{base} ||= 1;
-
-    # Defaults.
-    $def->{$_} //= $defaults->{$_} for @defprops;
 
     my ( $base, $frets, $fingers, $keys ) =
       ( $def->{base}, $def->{frets}, $def->{fingers}, $def->{keys} );
     $res = _check_chord($def);
     return $res if $res;
 
+    my $dpinfo;
+    if ( $def->{display} ) {
+	$dpinfo = parse_chord($def->{display});
+    }
     for $name ( $name, @names ) {
-	my $info = parse_chord($name) //
-	  App::Music::ChordPro::Chord::Common->new({ name => $name });
+	my $info = $dpinfo
+	  // parse_chord($name)
+	  // App::Music::ChordPro::Chord::Common->new({ name => $name });
 
 	if ( $info->is_chord && $def->{copy} && $def->is_chord ) {
 	    for ( qw( root bass ext qual ) ) {
