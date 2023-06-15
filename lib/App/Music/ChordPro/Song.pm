@@ -114,6 +114,30 @@ sub parse_song {
 
     warn("Processing song ", $diag->{file}, "...\n") if $options->{verbose};
     ::break();
+    my @configs;
+    # Experimental: embedded config.
+    if ( $lines->[0] =~ /^##config:\s*json/ ) {
+	my $cf = "";
+	shift(@$lines);
+	$$linecnt++;
+	while ( @$lines ) {
+	    if ( $lines->[0] =~ /^# (.*)/ ) {
+		$cf .= $1 . "\n";
+		shift(@$lines);
+		$$linecnt++;
+	    }
+	    else {
+		last;
+	    }
+	}
+	if ( $cf ) {
+	    my $pp = JSON::PP->new->relaxed;
+	    my $precfg = $pp->decode($cf);
+	    my $prename = "__PRECFG__";
+	    App::Music::ChordPro::Config::precheck( $precfg, $prename );
+	    push( @configs, App::Music::ChordPro::Config::prep_configs( $precfg, $prename) );
+	}
+    }
     # Load song-specific config, if any.
     if ( !$options->{nosongconfig} && $diag->{file} ) {
 	if ( $options->{verbose} ) {
@@ -124,14 +148,12 @@ sub parse_song {
 	      for keys %{ App::Music::ChordPro::Chords::Parser->parsers };
 	    print STDERR ("\n");
 	}
-	my $t = join("|",@{$config->{tuning}});
-	my @configs;
 	if ( $meta && $meta->{__config} ) {
 	    my $cf = delete($meta->{__config})->[0];
 	    die("Missing config: $cf\n") unless -s $cf;
 	    warn("Config[song]: $cf\n") if $options->{verbose};
 	    my $have = App::Music::ChordPro::Config::get_config($cf);
-	    @configs = App::Music::ChordPro::Config::prep_configs( $have, $cf);
+	    push( @configs, App::Music::ChordPro::Config::prep_configs( $have, $cf) );
 	}
 	else {
 	    for ( "prp", "json" ) {
@@ -140,47 +162,47 @@ sub parse_song {
 		next unless -s $cf;
 		warn("Config[song]: $cf\n") if $options->{verbose};
 		my $have = App::Music::ChordPro::Config::get_config($cf);
-		@configs = App::Music::ChordPro::Config::prep_configs( $have, $cf);
+		push( @configs, App::Music::ChordPro::Config::prep_configs( $have, $cf) );
 		last;
 	    }
 	}
-	foreach my $have ( @configs ) {
-	    warn("Config[song*]: ", $have->{_src}, "\n") if $options->{verbose};
-	    my $chords = $have->{chords};
-	    $config->augment($have);
-	    if ( $t ne join("|",@{$config->{tuning}}) ) {
+    }
+    my $tuncheck = join("|",@{$config->{tuning}});
+    foreach my $have ( @configs ) {
+	warn("Config[song*]: ", $have->{_src}, "\n") if $options->{verbose};
+	my $chords = $have->{chords};
+	$config->augment($have);
+	if ( $tuncheck ne join("|",@{$config->{tuning}}) ) {
+	    my $res =
+	      App::Music::ChordPro::Chords::set_tuning($config);
+	    warn( "Invalid tuning in config: ", $res, "\n" ) if $res;
+	}
+	App::Music::ChordPro::Chords::reset_parser();
+	App::Music::ChordPro::Chords::Parser->reset_parsers;
+	if ( $chords ) {
+	    my $c = $chords;
+	    if ( @$c && $c->[0] eq "append" ) {
+		shift(@$c);
+	    }
+	    foreach ( @$c ) {
 		my $res =
-		  App::Music::ChordPro::Chords::set_tuning($config);
-		warn( "Invalid tuning in config: ", $res, "\n" ) if $res;
+		  App::Music::ChordPro::Chords::add_config_chord($_);
+		warn( "Invalid chord in config: ",
+		      $_->{name}, ": ", $res, "\n" ) if $res;
 	    }
-	    App::Music::ChordPro::Chords::reset_parser();
-	    App::Music::ChordPro::Chords::Parser->reset_parsers;
-	    if ( $chords ) {
-		my $c = $chords;
-		my $defs = {};
-		if ( @$c && $c->[0] eq "append" ) {
-		    shift(@$c);
-		}
-		foreach ( @$c ) {
-		    my $res =
-		      App::Music::ChordPro::Chords::add_config_chord($_, $defs);
-		    warn( "Invalid chord in config: ",
-			  $_->{name}, ": ", $res, "\n" ) if $res;
-		}
-	    }
-	    if ( $options->{verbose} > 1 ) {
-		warn( "Processed ", scalar(@$chords), " chord entries\n")
-		  if $chords;
-		warn( "Totals: ",
-		      App::Music::ChordPro::Chords::chord_stats(), "\n" );
-	    }
-	    if ( 0 && $options->{verbose} ) {
-		my $this = App::Music::ChordPro::Chords::get_parser()->{system};
-		print STDERR ("Parsers after local config:");
-		print STDERR ( $this eq $_ ? " *" : " ", "$_")
-		  for keys %{ App::Music::ChordPro::Chords::Parser->parsers };
-		print STDERR ("\n");
-	    }
+	}
+	if ( $options->{verbose} > 1 ) {
+	    warn( "Processed ", scalar(@$chords), " chord entries\n")
+	      if $chords;
+	    warn( "Totals: ",
+		  App::Music::ChordPro::Chords::chord_stats(), "\n" );
+	}
+	if ( 0 && $options->{verbose} ) {
+	    my $this = App::Music::ChordPro::Chords::get_parser()->{system};
+	    print STDERR ("Parsers after local config:");
+	    print STDERR ( $this eq $_ ? " *" : " ", "$_")
+	      for keys %{ App::Music::ChordPro::Chords::Parser->parsers };
+	    print STDERR ("\n");
 	}
     }
 
@@ -1798,10 +1820,13 @@ sub directive {
 	}
 
 	# At this time, $res is still just a hash. Time to make a chord.
-#	if ( $res->{orig} && !$has_diagram ) {
 	if ( $res->{orig} ) {
 	    $res->{$_} //= $res->{orig}->{$_}
 	      for qw( base frets fingers keys );
+	    if ( $copyall ) {
+		$res->{$_} //= $res->{orig}->{$_}
+		  for qw( display format );
+	    }
 	    $has_diagram++;
 	}
 	$res->{base} ||= 1;
