@@ -46,6 +46,7 @@ sub generate_songbook {
     $verbose ||= $options->{verbose};
 
     $ps = $config->{pdf};
+
 	sort_songbook($sb);
 
     my $pr = (__PACKAGE__."::Writer")->new( $ps, $pdfapi );
@@ -93,9 +94,10 @@ sub generate_songbook {
 	}
 	$first_song_aligned //= 0;
 	
-	if ( ($page % 2) && $song->{meta}->{pages} == 2 ) {
+	if ( ($page % 2) && exists $song->{meta}->{pages} && $song->{meta}->{pages} == 2 ) {
 	    $pr->newpage($ps, $page+1);
 	    $page++;
+		print " " if $options->{verbose};
 	}
 
 	$song->{meta}->{tocpage} = $page;
@@ -3183,16 +3185,16 @@ sub sort_songbook {
  my $pri = ( __PACKAGE__."::Writer" )->new( $ps, $pdfapi );
 
 #Count pages to properly align multi-page songs without needing to turn page	
-    print "Counting pages:\n" if $options->{verbose};
     my $page = $options->{"start-page-number"} ||= 1;
 
 	my $sorting = $ps->{'sort-pages'};
 
-	if ( $sorting =~ /2page/ ) {
+	if ( $sorting =~ /2page/ ||  $sorting =~ /compact/) {
+		print "Counting pages:\n" if $options->{verbose};
 
 		foreach my $song ( @{$sb->{songs}} ) {
 			$song->{meta}->{pages} =
-		generate_song( $song, { pr => $pri, startpage => 1 } );
+				generate_song( $song, { pr => $pri, startpage => 1 } );
 		if ( $options->{verbose} ) { print $song->{meta}->{pages}." "; STDOUT->flush(); } 
 		}
 		print "\n" if $options->{verbose};
