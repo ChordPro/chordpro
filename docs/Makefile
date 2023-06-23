@@ -15,7 +15,7 @@ site :: assets
 	cp public/home/index.html public/
 
 publish ::
-	rsync -acvHi --delete public/ chordpro-site:www/${TARGET}/
+	rsync -rlpgocHi --delete public/ chordpro-site:www/${TARGET}/
 
 clean ::
 	rm -fr public resources

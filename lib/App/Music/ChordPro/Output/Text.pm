@@ -171,7 +171,7 @@ sub generate_song {
 	    if ( $elt->{chords} ) {
 		$text = "";
 		for ( 0..$#{ $elt->{chords} } ) {
-		    $text .= "[" . $elt->{chords}->[$_] . "]"
+		    $text .= "[" . $elt->{chords}->[$_]->key . "]"
 		      if $elt->{chords}->[$_] ne "";
 		    $text .= $elt->{phrases}->[$_];
 		}
@@ -232,7 +232,7 @@ sub songline {
 
     if ( $lyrics_only
 	 or
-	 $single_space && ! ( $elt->{chords} && join( "", @{ $elt->{chords} } ) =~ /\S/ )
+	 $single_space && ! ( $elt->{chords} && join( "", map { $_?$_->key:"" } @{ $elt->{chords} } ) =~ /\S/ )
        ) {
 	$t_line = join( "", @phrases );
 	$t_line =~ s/\s+$//;
@@ -248,7 +248,7 @@ sub songline {
 	$f .= '%s';
 	foreach ( 0..$#{$elt->{chords}} ) {
 	    $t_line .= sprintf( $f,
-				chord( $song, $elt->{chords}->[$_] ),
+				$elt->{chords}->[$_] ? chord( $song, $elt->{chords}->[$_]->key ) : "",
 				$phrases[$_] );
 	}
 	return ( $t_line );
@@ -256,7 +256,8 @@ sub songline {
 
     my $c_line = "";
     foreach ( 0..$#{$elt->{chords}} ) {
-	$c_line .= chord( $song, $elt->{chords}->[$_] ) . " ";
+	$c_line .= chord( $song, $elt->{chords}->[$_]->key ) . " "
+	  if ref $elt->{chords}->[$_];
 	$t_line .= $phrases[$_];
 	my $d = length($c_line) - length($t_line);
 	$t_line .= "-" x $d if $d > 0;
@@ -273,7 +274,7 @@ sub chord {
     return "" unless length($c);
     my $ci = $s->{chordsinfo}->{$c};
     return "<<$c>>" unless defined $ci;
-    $layout->set_markup($ci->show);
+    $layout->set_markup($ci->name);
     my $t = $layout->render;
     return $ci->is_annotation ? "*$t" : $t;
 }

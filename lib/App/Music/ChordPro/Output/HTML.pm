@@ -186,7 +186,7 @@ sub songline {
 
     $elt->{chords} //= [ '' ];
     my @c = map {
-	$_ eq "" ? "" : $song->{chordsinfo}->{$_}->show
+	$_ eq "" ? "" : $song->{chordsinfo}->{$_->key }->name
     } @{ $elt->{chords} };
 
     if ( $lyrics_only

@@ -192,7 +192,7 @@ sub draw {
 #    my $e = $fcf->{fd}->{font}->extents("1",10);
 #    use DDumper; DDumper($e);
 
-    for my $sx ( 0 .. @{ $info->{frets} }-1 ) {
+    for my $sx ( 0 .. @{ $info->{frets} // [] }-1 ) {
 	my $fret = $info->{frets}->[$sx];
 	my $fing = -1;
 	$fing = $fingers->[$sx] // -1 if $fingers;

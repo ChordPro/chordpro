@@ -102,14 +102,14 @@ sub list_chords {
 	    next;
 	}
 	else {
-	    $info = _known_chord($chord);
+	    $info = known_chord($chord);
 	}
 	next unless $info;
 	my $s = sprintf( "{%s %-15.15s base-fret %2d    ".
 			 "frets   %s",
 			 $origin eq "chord" ? "chord: " : "define:",
 			 $info->{name}, $info->{base},
-			 @{ $info->{frets} }
+			 @{ $info->{frets} // [] }
 			 ? join("",
 				map { sprintf("%-4s", $_) }
 				map { $_ < 0 ? "X" : $_ }
@@ -170,7 +170,7 @@ sub json_chords {
 	    $info = $chord;
 	}
 	else {
-	    $info = _known_chord($chord);
+	    $info = known_chord($chord);
 	}
 	next unless $info;
 
@@ -296,7 +296,7 @@ sub pop_parser {
 
 ################ Section Config & User Chords ################
 
-sub _known_chord {
+sub known_chord {
     my ( $name ) = @_;
     my $info;
     if ( ref($name) =~ /^App::Music::ChordPro::Chord::/ ) {
@@ -325,7 +325,7 @@ sub _known_chord {
     $ret;
 }
 
-sub _check_chord {
+sub check_chord {
     my ( $ii ) = @_;
     my ( $name, $base, $frets, $fingers, $keys )
       = @$ii{qw(name base frets fingers keys)};
@@ -392,7 +392,7 @@ sub add_config_chord {
 
     my ( $base, $frets, $fingers, $keys ) =
       ( $def->{base}, $def->{frets}, $def->{fingers}, $def->{keys} );
-    $res = _check_chord($def);
+    $res = check_chord($def);
     return $res if $res;
 
     my $dpinfo;
@@ -458,7 +458,7 @@ sub add_config_chord {
 sub add_song_chord {
     my ( $ii ) = @_;
 
-    my $res = _check_chord($ii);
+    my $res = check_chord($ii);
     return $res if $res;
 
     # Need a parser anyway.
@@ -563,7 +563,7 @@ my %keys =
 	"h"      => [ 0, 3, 6, 10 ],             # half-diminished seventh
   );
 
-sub _get_keys {
+sub get_keys {
     my ( $info ) = @_;
 #    ::dump( { %$info, parser => ref($info->{parser}) });
     # Has keys defined.
@@ -618,7 +618,7 @@ sub transpose {
 	return;
     }
 
-    my $res = $info->transcode($xcode)->transpose($xpose)->show;
+    my $res = $info->transcode($xcode)->transpose($xpose)->canonical;
 
 #    Carp::cluck("__XPOSE = ", $xpose, " __XCODE = $xcode, chord $c => $res\n");
 

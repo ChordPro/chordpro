@@ -1,7 +1,7 @@
 {title: Custom chord diagram display name}
-{define: Am/C copy Am display "Am (Am/C)"  diagram false}
-{define: C6 copy Am display "Am (C6)"  diagram true}
-{define: Am copy Am display "Am (orig)" }
+{define: Am/C copy Am format "Am (Am/C)"  diagram false}
+{define: C6 copy Am format "Am (C6)"  diagram true}
+{define: Am copy Am format "Am (orig)" }
 Main chord [Am]
 Slash chord [Am/C]
 Alternate chord [C6]

@@ -12,6 +12,7 @@ use warnings;
 
 use App::Music::ChordPro;
 use App::Music::ChordPro::Chords;
+use App::Music::ChordPro::Chords::Appearance;
 use App::Music::ChordPro::Chords::Parser;
 use App::Music::ChordPro::Output::Common;
 use App::Music::ChordPro::Utils;
@@ -557,7 +558,7 @@ sub parse_song {
     my %suppress;
     my $xc = $config->{settings}->{transcode};
     for (  @{ $config->{diagrams}->{suppress} } ) {
-	my $info = App::Music::ChordPro::Chords::_known_chord($_);
+	my $info = App::Music::ChordPro::Chords::known_chord($_);
 	warn("Unknown chord \"$_\" in suppress list\n"), next
 	  unless $info;
 	# Note we do transcode, but we do not transpose.
@@ -657,65 +658,88 @@ sub add {
     }
 }
 
+# Parses a chord and adds it to the song.
+# It understands markup, parenthesized chords and annotations.
+# Returns the chord Appearance.
 sub chord {
-    my ( $self, $c ) = @_;
-    return $c unless length($c);
+    my ( $self, $orig ) = @_;
+    Carp::confess unless length($orig);
+    my $ap = App::Music::ChordPro::Chords::Appearance->new;
 
-    if ( $c =~ /^\*(.+)/ ) {
-	$self->add_chord
-	  ( App::Music::ChordPro::Chord::Annotation->new
-	    ( { name => $c, text => $1 } ) );
-	return $c;
+    # Intercept annotations.
+    if ( $orig =~ /^\*(.+)/ ) {
+	return
+	  App::Music::ChordPro::Chords::Appearance->new
+	    ( key => $self->add_chord
+	      ( App::Music::ChordPro::Chord::Annotation->new
+		( { name => $orig, text => $1 } ) ) );
     }
 
-    my $markup = $c;
-    $c = demarkup($markup);
-    undef $markup if $markup eq $c;
+    # Check for markup.
+    my $markup = $orig;
+    my $c = demarkup($orig);
+    if ( $markup eq $c ) { 	# no markup
+	undef $markup;
+    }
 
-    my ( $name, $info ) = $self->parse_chord($c);
-    unless ( defined $name ) {
+    # Special treatment for parenthesized chords.
+    $c =~ s/^\((.*)\)$/$1/;
+    do_warn("Double parens in chord: \"$orig\"")
+      if $c =~ s/^\((.*)\)$/$1/;
+
+    # We have a 'bare' chord now. Parse it.
+    my $info = $self->parse_chord($c);
+    unless ( defined $info ) {
 	# Warning was given.
 	# Make annotation.
-	$self->add_chord
-	  ( App::Music::ChordPro::Chord::Annotation->new
-	    ( { name => $c, text => $c } ) );
-	return $c;
+	return
+	  App::Music::ChordPro::Chords::Appearance->new
+	    ( key => $self->add_chord
+	      ( App::Music::ChordPro::Chord::Annotation->new
+		( { name => $orig, text => $orig } ) ) );
     }
 
+    # Handle markup, if any.
     if ( $markup ) {
-	my $m = $markup;
-	if ( $markup =~ s/\>\Q$c\E\</>%{name}</ ) {
-	    $info = $info->clone;
-	    $info->{format} = $markup;
-	    $name = $self->add_chord( $info, $m );
+	if ( $markup =~ s/\>\Q$c\E\</>%{formatted}</
+	     ||
+	     $markup =~ s/\>\(\Q$c\E\)\</>(%{formatted})</ ) {
 	}
 	else {
-	    do_warn("Invalid markup in chord: \"$markup\"");
+	    do_warn("Invalid markup in chord: \"$markup\"\n");
 	}
+	$ap->format = $markup;
     }
-    ( my $n = $name ) =~ s/^\((.+)\)$/$1/;
+    elsif ( (my $m = $orig) =~ s/\Q$c\E/%{formatted}/ ) {
+	$ap->format = $m unless $m eq "%{formatted}";
+    }
 
-    unless ( $info->is_note ) {
+    # After parsing, the chord can be changed by transpose/code.
+    # info->name is the new key.
+    $ap->key = $self->add_chord( $info, $c = $info->name );
+
+    unless ( $info->is_nc || $info->is_note ) {
 	if ( $info->is_keyboard ) {
-	    push( @used_chords, $n ) unless $info->is_nc;
+	    push( @used_chords, $c );
 	}
 	elsif ( $info->{origin} ) {
 	    # Include if we have diagram info.
-	    push( @used_chords, $n )
-	      if @{$info->{frets}//[]} && !$info->is_nc
-	         || $config->{instrument}->{type} eq 'keyboard'
-	            && $info->{keys} && @{$info->{keys}};
+	    push( @used_chords, $c ) if $info->has_diagram;
 	}
 	elsif ( $::running_under_test ) {
 	    # Tests run without config and chords, so pretend.
-	    push( @used_chords, $n );
+	    push( @used_chords, $c );
 	}
-	elsif ( ! $info->is_rootless && ! $info->has_diagrams ) {
-	    do_warn("Unknown chord: $n")
-	      unless $warned_chords{$n}++;
+	elsif ( ! ( $info->is_rootless
+		    || $info->has_diagram
+		    || !$info->parser->has_diagrams
+		  ) ) {
+	    do_warn("Unknown chord: $c")
+	      unless $warned_chords{$c}++;
 	}
     }
-    return $name;
+
+    return $ap;
 }
 
 sub decompose {
@@ -743,7 +767,7 @@ sub decompose {
 
 	# Normal chords.
 	if ( $chord =~ s/^\[(.*)\]$/$1/ && $chord ne "^" ) {
-	    push(@chords, $self->chord($chord));
+	    push(@chords, $chord eq "" ? "" : $self->chord($chord));
 	    if ( $memchords && !$dummy ) {
 		if ( $memcrdinx == 0 ) {
 		    $memorizing++;
@@ -770,7 +794,7 @@ sub decompose {
 		push( @chords, $chord );
 	    }
 	    else {
-		push( @chords, $self->chord($memchords->[$memcrdinx]));
+		push( @chords, $self->chord($memchords->[$memcrdinx]->chord_display($self->{chordsinfo}, 0)));
 		warn("Chord recall $in_context\[$memcrdinx]: ", $chords[-1], "\n")
 		  if $config->{debug}->{chords};
 	    }
@@ -1161,11 +1185,14 @@ sub directive {
 		if ( $_->{type} eq "songline" ) {
 		    for ( @{ $_->{chords} } ) {
 			next if $_ eq '';
-			my $info = $self->{chordsinfo}->{$_};
+			my $info = $self->{chordsinfo}->{$_->key};
 			next if $info->is_annotation;
 			$info = $info->transpose($xp, $xpose <=> 0) if $xp;
 			$info = $info->new($info);
-			$_ = $self->add_chord($info);
+			$_ = App::Music::ChordPro::Chords::Appearance->new
+			  ( key => $self->add_chord($info),
+			    maybe format => $_->format
+			  );
 		    }
 		}
 	    }
@@ -1354,7 +1381,8 @@ sub directive {
 
 		if ( $key eq "key" ) {
 		    $val =~ s/[\[\]]//g;
-		    my ( $name, $info ) = $self->parse_chord($val);
+		    my $info = $self->parse_chord($val);
+		    my $name = $info->name;
 		    my $act = $name;
 
 		    if ( $capo ) {
@@ -1651,233 +1679,9 @@ sub directive {
     # optional: N N N N N N (for unknown chords)
     # optional: fingers N N N N N N
 
-    if ( $dir eq "define" or my $show = $dir eq "chord" ) {
+    if ( $dir eq "define" or $dir eq "chord" ) {
 
-	# Split the arguments and keep a copy for error messages.
-	# Note that quotewords returns an empty result if it gets confused,
-	# so fall back to the ancient split method if so.
-	my @a = quotewords( '[: ]+', 0, $arg );
-	@a = split( /[: ]+/, $arg ) unless @a;
-
-	my @orig = @a;
-	my $is_chord;
-	my $has_diagram;
-	my $fail = 0;
-	my $name = shift(@a);
-	my $strings = $config->diagram_strings;
-
-	# Result structure.
-	my $res = { name => $name };
-	( undef, my $info ) = $self->parse_chord( $name, "def" );
-	if ( $info ) {
-	    # Copy the chord info.
-	    $res->{$_} //= $info->{$_} // ''
-	      for qw( root qual ext bass
-		      root_canon qual_canon ext_canon bass_canon
-		      root_ord root_mod bass_ord bass_mod
-		   );
-	    $is_chord = defined( $res->{root} );
-	    if ( $show ) {
-		$res->{$_} //= $info->{$_}
-		  for qw( base frets fingers keys );
-	    }
-	}
-	else {
-	    $res->{parser} = App::Music::ChordPro::Chords::get_parser();
-	}
-
-	# Process the options.
-	my $copyall;
-	while ( @a ) {
-	    my $a = shift(@a);
-
-	    # Copy existing definition.
-	    if ( $a eq "copy" || ( $copyall = $a eq "copyall" ) ) {
-		if ( my $i = App::Music::ChordPro::Chords::_known_chord($a[0]) ) {
-		    $res->{copy} = $a[0];
-		    $res->{orig} = $i;
-		    shift(@a);
-		}
-		else {
-		    do_warn("Unknown chord to copy: $a[0]\n");
-		    $fail++;
-		    last;
-		}
-	    }
-
-	    # display
-	    elsif ( $a eq "display" && @a ) {
-		$res->{display} = shift(@a);
-	    }
-
-	    # format
-	    elsif ( $a eq "format" && @a ) {
-		$res->{format} = shift(@a);
-	    }
-
-	    # base-fret N
-	    elsif ( $a eq "base-fret" ) {
-		$has_diagram++;
-		if ( $a[0] =~ /^\d+$/ ) {
-		    $res->{base} = shift(@a);
-		}
-		else {
-		    do_warn("Invalid base-fret value: $a[0]\n");
-		    $fail++;
-		    last;
-		}
-	    }
-	    # frets N N ... N
-	    elsif ( $a eq "frets" ) {
-		$has_diagram++;
-		my @f;
-		while ( @a && $a[0] =~ /^(?:[0-9]+|[-xXN])$/ && @f < $strings ) {
-		    push( @f, shift(@a) );
-		}
-		if ( @f == $strings ) {
-		    $res->{frets} = [ map { $_ =~ /^\d+/ ? $_ : -1 } @f ];
-		}
-		else {
-		    do_warn("Incorrect number of fret positions (" .
-			    scalar(@f) . ", should be $strings)\n");
-		    $fail++;
-		    last;
-		}
-	    }
-
-	    # fingers N N ... N
-	    elsif ( $a eq "fingers" ) {
-		$has_diagram++;
-		my @f;
-		# It is tempting to limit the fingers to 1..5 ...
-		while ( @a && @f < $strings ) {
-		    $_ = shift(@a);
-		    if ( /^[0-9]+$/ ) {
-			push( @f, 0 + $_ );
-		    }
-		    elsif ( /^[A-MO-WYZ]$/ ) {
-			push( @f, $_ );
-		    }
-		    elsif ( /^[-xNX]$/ ) {
-			push( @f, -1 );
-		    }
-		    else {
-			unshift( @a, $_ );
-			last;
-		    }
-		}
-		if ( @f == $strings ) {
-		    $res->{fingers} = \@f;
-		}
-		else {
-		    do_warn("Incorrect number of finger settings (" .
-			    scalar(@f) . ", should be $strings)\n");
-		    $fail++;
-		    last;
-		}
-	    }
-
-	    # keys N N ... N
-	    elsif ( $a eq "keys" ) {
-		$has_diagram++;
-		my @f;
-		while ( @a && $a[0] =~ /^[0-9]+$/ ) {
-		    push( @f, shift(@a) );
-		}
-		if ( @f ) {
-		    $res->{keys} = \@f;
-		}
-		else {
-		    do_warn("Invalid or missing keys\n");
-		    $fail++;
-		    last;
-		}
-	    }
-
-	    elsif ( $a eq "diagram" && @a > 0 ) {
-		if ( $show && !is_true($a[0]) ) {
-		    do_warn("Useless diagram suppression");
-		    next;
-		}
-		$res->{diagram} = shift(@a);
-	    }
-
-	    # Wrong...
-	    else {
-		# Insert a marker to show how far we got.
-		splice( @orig, @orig-@a, 0, "<<<" );
-		splice( @orig, @orig-@a-2, 0, ">>>" );
-		do_warn("Invalid chord definition: @orig\n");
-		$fail++;
-		last;
-	    }
-	}
-
-	return 1 if $fail;
-
-	# If we've got diagram visibility, remove it if true.
-	if ( defined($res->{diagram}) ) {
-	    if ( is_true($res->{diagram}) ) {
-		# Diagram can be a colour, remove trivial 'true' values.
-		if ( $res->{diagram} =~ /^(true|1)$/i ) {
-		    delete $res->{diagram};
-		}
-	    }
-	}
-
-	# At this time, $res is still just a hash. Time to make a chord.
-	if ( $res->{orig} ) {
-	    $res->{$_} //= $res->{orig}->{$_}
-	      for qw( base frets fingers keys );
-	    if ( $copyall ) {
-		$res->{$_} //= $res->{orig}->{$_}
-		  for qw( display format );
-	    }
-	    $has_diagram++;
-	}
-	$res->{base} ||= 1;
-	$res = App::Music::ChordPro::Chord::Common->new
-	  ( { %$res, origin => $show ? "inline" : "song" } );
-	$res->{parser} //= App::Music::ChordPro::Chords::get_parser();
-
-	if ( $show) {
-	    my $ci = $res->clone;
-	    state $chidx = "ch000";
-	    $chidx++;
-	    # Combine consecutive entries.
-	    if ( defined($self->{body})
-		 && $self->{body}->[-1]->{type} eq "diagrams" ) {
-		push( @{ $self->{body}->[-1]->{chords} },
-		      " $chidx" );
-	    }
-	    else {
-		$self->add( type   => "diagrams",
-			    show   => "user",
-			    origin => "chord",
-			    chords => [ " $chidx" ] );
-	    }
-	    $self->{chordsinfo}->{" $chidx"} = $ci;
-	    return 1;
-	}
-
-	my $def = {};
-	for ( qw( name base frets fingers keys display format diagram ) ) {
-	    next unless defined $res->{$_};
-	    $def->{$_} = $res->{$_};
-	}
-	push( @{$self->{define}}, $def );
-	my $ret =
-	  App::Music::ChordPro::Chords::add_song_chord($res);
-	if ( $ret ) {
-	    do_warn("Invalid chord: ", $res->{name}, ": ", $ret, "\n");
-	    return 1;
-	}
-	$info = App::Music::ChordPro::Chords::_known_chord($res->{name});
-	croak("We just entered it?? ", $res->{name}) unless $info;
-
-	$info->dump if $config->{debug}->{x1};
-
-	return 1;
+	return $self->define_chord( $dir, $arg );
     }
 
     # Warn about unknowns, unless they are x_... form.
@@ -1904,6 +1708,251 @@ sub add_chord {
     return $new_id;
 }
 
+sub define_chord {
+    my ( $self, $dir, $args ) = @_;
+
+    # Split the arguments and keep a copy for error messages.
+    # Note that quotewords returns an empty result if it gets confused,
+    # so fall back to the ancient split method if so.
+    $args =~ s/^\s+//;
+    $args =~ s/\s+$//;
+    my @a = quotewords( '[: ]+', 0, $args );
+    @a = split( /[: ]+/, $args ) unless @a;
+
+    my @orig = @a;
+    my $show = $dir eq "chord";
+    my $fail = 0;
+    my $name = shift(@a);
+    my $strings = $config->diagram_strings;
+
+    # Process the options.
+    my %kv = ( name => $name );
+    while ( @a ) {
+	my $a = shift(@a);
+
+	# Copy existing definition.
+	if ( $a eq "copy" || $a eq "copyall" ) {
+	    if ( my $i = App::Music::ChordPro::Chords::known_chord($a[0]) ) {
+		$kv{$a} = $a[0];
+		$kv{orig} = $i;
+		shift(@a);
+	    }
+	    else {
+		do_warn("Unknown chord to copy: $a[0]\n");
+		$fail++;
+		last;
+	    }
+	}
+
+	# display
+	elsif ( $a eq "display" && @a ) {
+	    $kv{display} = demarkup($a[0]);
+	    do_warn( "\"display\" should not contain markup, use \"format\"" )
+	      unless $kv{display} eq shift(@a);
+	}
+
+	# format
+	elsif ( $a eq "format" && @a ) {
+	    $kv{format} = shift(@a);
+	}
+
+	# base-fret N
+	elsif ( $a eq "base-fret" ) {
+	    if ( $a[0] =~ /^\d+$/ ) {
+		$kv{base} = shift(@a);
+	    }
+	    else {
+		do_warn("Invalid base-fret value: $a[0]\n");
+		$fail++;
+		last;
+	    }
+	}
+	# frets N N ... N
+	elsif ( $a eq "frets" ) {
+	    my @f;
+	    while ( @a && $a[0] =~ /^(?:[0-9]+|[-xXN])$/ && @f < $strings ) {
+		push( @f, shift(@a) );
+	    }
+	    if ( @f == $strings ) {
+		$kv{frets} = [ map { $_ =~ /^\d+/ ? $_ : -1 } @f ];
+	    }
+	    else {
+		do_warn("Incorrect number of fret positions (" .
+			scalar(@f) . ", should be $strings)\n");
+		$fail++;
+		last;
+	    }
+	}
+
+	# fingers N N ... N
+	elsif ( $a eq "fingers" ) {
+	    my @f;
+	    # It is tempting to limit the fingers to 1..5 ...
+	    while ( @a && @f < $strings ) {
+		local $_ = shift(@a);
+		if ( /^[0-9]+$/ ) {
+		    push( @f, 0 + $_ );
+		}
+		elsif ( /^[A-MO-WYZ]$/ ) {
+		    push( @f, $_ );
+		}
+		elsif ( /^[-xNX]$/ ) {
+		    push( @f, -1 );
+		}
+		else {
+		    unshift( @a, $_ );
+		    last;
+		}
+	    }
+	    if ( @f == $strings ) {
+		$kv{fingers} = \@f;
+	    }
+	    else {
+		do_warn("Incorrect number of finger settings (" .
+			scalar(@f) . ", should be $strings)\n");
+		$fail++;
+		last;
+	    }
+	}
+
+	# keys N N ... N
+	elsif ( $a eq "keys" ) {
+	    my @f;
+	    while ( @a && $a[0] =~ /^[0-9]+$/ ) {
+		push( @f, shift(@a) );
+	    }
+	    if ( @f ) {
+		$kv{keys} = \@f;
+	    }
+	    else {
+		do_warn("Invalid or missing keys\n");
+		$fail++;
+		last;
+	    }
+	}
+
+	elsif ( $a eq "diagram" && @a > 0 ) {
+	    if ( $show && !is_true($a[0]) ) {
+		do_warn("Useless diagram suppression");
+		next;
+	    }
+	    $kv{diagram} = shift(@a);
+	}
+
+	# Wrong...
+	else {
+	    # Insert a marker to show how far we got.
+	    splice( @orig, @orig-@a, 0, "<<<" );
+	    splice( @orig, @orig-@a-2, 0, ">>>" );
+	    do_warn("Invalid chord definition: @orig\n");
+	    $fail++;
+	    last;
+	}
+    }
+
+    return 1 if $fail;
+    # All options are verified and stored in %kv;
+
+    # Result structure.
+    my $res = { name => $name };
+
+    # Try to find info.
+    my $info = $self->parse_chord( $kv{display} // $name, "def" );
+    if ( $info ) {
+	# Copy the chord info.
+	$res->{$_} //= $info->{$_} // ''
+	  for qw( root qual ext bass
+		  root_canon qual_canon ext_canon bass_canon
+		  root_ord root_mod bass_ord bass_mod
+	       );
+	if ( $show ) {
+	    $res->{$_} //= $info->{$_}
+	      for qw( base frets fingers keys );
+	}
+    }
+    else {
+	$res->{parser} = App::Music::ChordPro::Chords::get_parser();
+    }
+
+    # Copy existing definition.
+    for ( $kv{copyall} // $kv{copy} ) {
+	next unless defined;
+	$res->{copy} = $_;
+	my $orig = $res->{orig} = $kv{orig};
+	$res->{$_} //= $orig->{$_}
+	  for qw( base frets fingers keys );
+	if ( $kv{copyall} ) {
+	    $res->{$_} //= $orig->{$_}
+	      for qw( display format );
+	}
+    }
+    for ( qw( display format ) ) {
+	$res->{$_} = $kv{$_} if defined $kv{$_};
+    }
+
+    # If we've got diagram visibility, remove it if true.
+    if ( defined $kv{diagram} ) {
+	for ( my $v = $kv{diagram} ) {
+	    if ( is_true($v) ) {
+		if ( is_ttrue($v) ) {
+		    next;
+		}
+	    }
+	    else {
+		$v = 0;
+	    }
+	    $res->{diagram} = $v;
+	}
+    }
+
+    # Copy rest of options.
+    for ( qw( base frets fingers keys display format ) ) {
+	next unless defined $kv{$_};
+	$res->{$_} = $kv{$_};
+    }
+
+    # At this time, $res is still just a hash. Time to make a chord.
+    $res->{base} ||= 1;
+    $res = App::Music::ChordPro::Chord::Common->new
+      ( { %$res, origin => $show ? "inline" : "song" } );
+    $res->{parser} //= App::Music::ChordPro::Chords::get_parser();
+
+    if ( $show) {
+	my $ci = $res->clone;
+	my $chidx = $self->add_chord( $ci, 1 );
+	# Combine consecutive entries.
+	if ( defined($self->{body})
+	     && $self->{body}->[-1]->{type} eq "diagrams" ) {
+	    push( @{ $self->{body}->[-1]->{chords} }, $chidx );
+	}
+	else {
+	    $self->add( type   => "diagrams",
+			show   => "user",
+			origin => "chord",
+			chords => [ $chidx ] );
+	}
+	return 1;
+    }
+
+    my $def = {};
+    for ( qw( name base frets fingers keys display format diagram ) ) {
+	next unless defined $res->{$_};
+	$def->{$_} = $res->{$_};
+    }
+    push( @{$self->{define}}, $def );
+    my $ret = App::Music::ChordPro::Chords::add_song_chord($res);
+    if ( $ret ) {
+	do_warn("Invalid chord: ", $res->{name}, ": ", $ret, "\n");
+	return 1;
+    }
+    $info = App::Music::ChordPro::Chords::known_chord($res->{name});
+    croak("We just entered it?? ", $res->{name}) unless $info;
+
+    $info->dump if $config->{debug}->{x1};
+
+    return 1;
+}
+
 sub duration {
     my ( $dur ) = @_;
 
@@ -1920,6 +1969,11 @@ sub duration {
 
 sub get_color {
     $_[0];
+}
+
+sub _diag {
+    my ( $self, %d ) = @_;
+    $diag->{$_} = $d{$_} for keys(%d);
 }
 
 sub msg {
@@ -1939,13 +1993,16 @@ sub do_warn {
     warn(msg(@_)."\n");
 }
 
+# Parse a chord.
+# Handles transpose/transcode.
+# Returns the chord object.
+# No parens or annotations, please.
 sub parse_chord {
     my ( $self, $chord, $def ) = @_;
 
     my $debug = $config->{debug}->{chords};
 
     warn("Parsing chord: \"$chord\"\n") if $debug;
-    my $parens = $chord =~ s/^\((.+)\)$/$1/;
     my $info;
     my $xp = $xpose + $config->{settings}->{transpose};
     $xp += $capo if $capo && $decapo;
@@ -1956,7 +2013,7 @@ sub parse_chord {
     # When called from {define} ignore xc/xp.
     $xc = $xp = '' if $def;
 
-    $info = App::Music::ChordPro::Chords::_known_chord($chord);
+    $info = App::Music::ChordPro::Chords::known_chord($chord);
     if ( $info ) {
 	warn( "Parsing chord: \"$chord\" found \"",
 	      $info->name, "\" in ", $info->{_via}, "\n" ) if $debug > 1;
@@ -1971,13 +2028,13 @@ sub parse_chord {
     $unk = !defined $info;
 
     if ( ( $def || $xp || $xc )
-	 && ! ($info && ( defined($info->{root}) || $info->is_nc ) ) ) {
+	 &&
+	 ! ($info && $info->is_xpxc ) ) {
 	local $::config->{settings}->{chordnames} = "relaxed";
 	$info = App::Music::ChordPro::Chords::parse_chord($chord);
     }
 
-    unless ( ($info
-	      && ( defined($info->{root}) || defined($info->{bass}) || $info->is_nc))
+    unless ( ( $info && $info->is_xpxc )
 	     ||
 	     ( $def && !( $xc || $xp ) ) ) {
 	do_warn( "Cannot parse",
@@ -1991,9 +2048,6 @@ sub parse_chord {
 	# For transpose/transcode, chord must be wellformed.
 	$info = $info->transpose( $xp,
 				  $xpose_dir // $global_dir);
-	$info->{transposed} = sprintf("%+d", $xp);
-	$info->{origin} .= $info->{transposed}
-	  if $info->{origin};
 	warn( "Parsing chord: \"$chord\" transposed ",
 	      $info->{transposed}, " to \"",
 	      $info->name, "\"\n" ) if $debug > 1;
@@ -2002,7 +2056,7 @@ sub parse_chord {
 
     if ( $info ) { # TODO roman?
 	# Look it up now, the name may change by transcode.
-	if ( my $i = App::Music::ChordPro::Chords::_known_chord($info,1) ) {
+	if ( my $i = App::Music::ChordPro::Chords::known_chord($info,1) ) {
 	    warn( "Parsing chord: \"$chord\" found ",
 		  $i->name, " for ", $info->name,
 		  " in ", $i->{_via}, "\n" ) if $debug > 1;
@@ -2010,7 +2064,7 @@ sub parse_chord {
 	    $unk = 0;
 	}
 	elsif ( $config->{instrument}->{type} eq 'keyboard'
-		&& App::Music::ChordPro::Chords::_get_keys($info) ) {
+		&& App::Music::ChordPro::Chords::get_keys($info) ) {
 	    warn( "Parsing chord: \"$chord\" \"", $info->name, "\" not found ",
 		  "but we know what to do\n" ) if $debug > 1;
 	    $info = $info->new({ %$info, iskeyboard => 1 }) ;
@@ -2033,13 +2087,11 @@ sub parse_chord {
 	    undef $xcmov;
 	}
 	$info = $info->transcode( $xc, $key_ord );
-	$info->{origin} .= "-" . ($info->{transcoded} = $info->{system})
-	  if $info->{origin};
 	warn( "Parsing chord: \"$chord\" transcoded to ",
 	      $info->name,
 	      " (", $info->{system}, ")",
 	      "\n" ) if $debug > 1;
-	if ( my $i = App::Music::ChordPro::Chords::_known_chord($info) ) {
+	if ( my $i = App::Music::ChordPro::Chords::known_chord($info) ) {
 	    warn( "Parsing chord: \"$chord\" found \"",
 		  $info->name, "\" in song/config chords\n" ) if $debug > 1;
 	    $unk = 0;
@@ -2048,7 +2100,7 @@ sub parse_chord {
     # else: warning has been given.
 
     if ( ! $info ) {
-	if ( my $i = App::Music::ChordPro::Chords::_known_chord($chord) ) {
+	if ( my $i = App::Music::ChordPro::Chords::known_chord($chord) ) {
 	    $info = $i;
 	    warn( "Parsing chord: \"$chord\" found \"",
 		  $chord, "\" in ",
@@ -2071,12 +2123,8 @@ sub parse_chord {
 	      $info->chord_display, "\"",
 	      $unk ? " but unknown" : "",
 	      "\n" ) if $debug > 1;
-	if ( $parens ) {
-	    $self->store_chord( $info->clone );
-	    $info->{parens} = $parens;
-	}
-	$chord = $self->store_chord($info);
-	return wantarray ? ( $chord, $info ) : $chord;
+	$self->store_chord($info);
+	return $info;
     }
 
     warn( "Parsing chord: \"$chord\" not found\n" ) if $debug;

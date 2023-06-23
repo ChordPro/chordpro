@@ -25,47 +25,55 @@ These settings control global behaviour of the ChordPro program and can be chang
 
     // General settings, to be changed by configs and command line.
     "settings" : {
-        // Strict behaviour.
-        "strict" : true,
-        // Add line info for backend diagnostics.
-        "lineinfo" : true,
-        // Titles flush: default center.
-        "titles" : "center",
-        // Columns, default one.
-        "columns" : 1,
-        // Suppress empty chord lines.
-        // Overrides the -a (--single-space) command line options.
-        "suppress-empty-chords" : true,
-        // Suppress blank lyrics lines.
-        "suppress-empty-lyrics" : true,
-        // Suppress chords.
-        "lyrics-only" : false,
-        // Chords inline.
-        // May be a string containing pretext %s posttext.
-        // Defaults to "[%s]" if set to a value that doesn't contain "%s".
-        "inline-chords" : false,
-        // Chords under the lyrics.
-        "chords-under" : false,
-        // Memorize chords.
-        "memorize" : false,
-        // Transcoding.
-        "transcode" : "",
-        // Transpoing.
-        "transpose" : 0,
-        // Always decapoize.
-        "decapo" : false,
-        // Chords parsing strategy.
-        // Strict (only known) or relaxed (anything that looks sane).
-        "chordnames": "strict",
-		// Interpret lowcase root-only chords as note names.
-		"notenames": false,
-		// Always replace chords by their canonical form.
-		"chords-canonical" : false,
-		// If false, chorus labels are used as tags.
-		"choruslabels" : true,
-        // Substitute Unicode sharp/flats in chord names.
-        // Will fallback to ChordProSymbols the font doesn't have the glyphs.
-        "truesf" : false,
+      // Strict behaviour.
+      "strict" : true,
+      // Add line info for backend diagnostics.
+      "lineinfo" : true,
+      // Titles flush: default center.
+      "titles" : "center",
+      // Columns, default one.
+      "columns" : 1,
+      // Suppress empty chord lines.
+      // Overrides the -a (--single-space) command line options.
+      "suppress-empty-chords" : true,
+      // Suppress blank lyrics lines.
+      "suppress-empty-lyrics" : true,
+      // Suppress chords.
+      // Overrides --lyrics-only command line option.
+      "lyrics-only" : false,
+      // Memorize chords in sections, to be recalled by [^].
+      "memorize" : false,
+      // Format to show chord names. May contain markup.
+      // "chord-format" : "%{root}%{qual|%{}}%{ext|<sup>%{}</sup>}%{bass|/%{}}",
+      "chord-format" : "%{root}%{qual|%{}}%{ext|%{}}%{bass|/%{}}",
+      // Chords inline.
+      // May be a string containing pretext %s posttext.
+      // Defaults to "[%s]" if set to a value that doesn't contain "%s".
+      "inline-chords" : false,
+      // Same, for annotations. Ignored unless inline-chords is set.
+      // Must be a string containing pretext %s posttext.
+      // Default is "%s".
+      "inline-annotations" : "%s",
+      // Chords under the lyrics.
+      "chords-under" : false,
+      // Transposing.
+      "transpose" : 0,
+      // Transcoding.
+      "transcode" : "",
+      // Always decapoize.
+      "decapo" : false,
+      // Chords parsing strategy.
+      // Strict (only known) or relaxed (anything that looks sane).
+      "chordnames": "strict",
+      // Allow note names in [].
+      "notenames" : false,
+      // Always replace chords by their canonical form.
+      "chords-canonical" : false,
+      // If false, chorus labels are used as tags.
+      "choruslabels" : true,
+      // Substitute Unicode sharp/flats in chord names.
+      // Will fallback to ChordProSymbols the font doesn't have the glyphs.
+      "truesf" : false,
     },
 
 Note that settings `decapo`, `lyrics-only`, `strict`, `transcode` and

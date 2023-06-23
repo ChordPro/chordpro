@@ -128,9 +128,9 @@ sub reformat {
 }
 
 __DATA__
-Do#7(-5)	{ ext => '7-5', ext_canon => '7-5', name => 'Do#7-5', qual => '', qual_canon => '', root => 'Do#', root_canon => 'Do#', root_mod => 1, root_ord => 1, system => 'latin' }
-Mi7(-5)	{ ext => '7-5', ext_canon => '7-5', name => 'Mi7-5', qual => '', qual_canon => '', root => 'Mi', root_canon => 'Mi', root_mod => 0, root_ord => 4, system => 'latin' }
-Mi7-9	{ ext => '7-9', ext_canon => '7-9', name => 'Mi7-9', qual => '', qual_canon => '', root => 'Mi', root_canon => 'Mi', root_mod => 0, root_ord => 4, system => 'latin' }
-Fa#m7-5	{ ext => '7-5', ext_canon => '7-5', name => 'Fa#m7-5', qual => 'm', qual_canon => '-', root => 'Fa#', root_canon => 'Fa#', root_mod => 1, root_ord => 6, system => 'latin' }
-Sol7-9	{ ext => '7-9', ext_canon => '7-9', name => 'Sol7-9', qual => '', qual_canon => '', root => 'Sol', root_canon => 'Sol', root_mod => 0, root_ord => 7, system => 'latin' }
-Sim7-5	{ ext => '7-5', ext_canon => '7-5', name => 'Sim7-5', qual => 'm', qual_canon => '-', root => 'Si', root_canon => 'Si', root_mod => 0, root_ord => 11, system => 'latin' }
+Do#7(-5)	{ bass => '', ext => '7-5', ext_canon => '7-5', name => 'Do#7-5', qual => '', qual_canon => '', root => 'Do#', root_canon => 'Do#', root_mod => 1, root_ord => 1, system => 'latin' }
+Mi7(-5)	{ bass => '', ext => '7-5', ext_canon => '7-5', name => 'Mi7-5', qual => '', qual_canon => '', root => 'Mi', root_canon => 'Mi', root_mod => 0, root_ord => 4, system => 'latin' }
+Mi7-9	{ bass => '', ext => '7-9', ext_canon => '7-9', name => 'Mi7-9', qual => '', qual_canon => '', root => 'Mi', root_canon => 'Mi', root_mod => 0, root_ord => 4, system => 'latin' }
+Fa#m7-5	{ bass => '', ext => '7-5', ext_canon => '7-5', name => 'Fa#m7-5', qual => 'm', qual_canon => '-', root => 'Fa#', root_canon => 'Fa#', root_mod => 1, root_ord => 6, system => 'latin' }
+Sol7-9	{ bass => '', ext => '7-9', ext_canon => '7-9', name => 'Sol7-9', qual => '', qual_canon => '', root => 'Sol', root_canon => 'Sol', root_mod => 0, root_ord => 7, system => 'latin' }
+Sim7-5	{ bass => '', ext => '7-5', ext_canon => '7-5', name => 'Sim7-5', qual => 'm', qual_canon => '-', root => 'Si', root_canon => 'Si', root_mod => 0, root_ord => 11, system => 'latin' }

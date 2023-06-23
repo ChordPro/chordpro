@@ -953,7 +953,7 @@ sub default_config() {
       "memorize" : false,
       // Format to show chord names. May contain markup.
       // "chord-format" : "%{root}%{qual|%{}}%{ext|<sup>%{}</sup>}%{bass|/%{}}",
-      "chord-format" : "%{root}%{qual|%{}}%{ext|%{}}%{bass|/%{}}",
+      "chord-format" : "%{root|%{}%{qual|%{}}%{ext|%{}}%{bass|/%{}}|%{name}}",
       // Chords inline.
       // May be a string containing pretext %s posttext.
       // Defaults to "[%s]" if set to a value that doesn't contain "%s".

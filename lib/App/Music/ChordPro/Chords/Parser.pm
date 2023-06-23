@@ -234,7 +234,7 @@ sub parse_chord {
     Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self, $chord ) = @_;
 
-    my $bass;
+    my $bass = "";
     if ( $chord =~ m;^(.*)/(.*); ) {
 	$chord = $1;
 	$bass = $2;
@@ -318,8 +318,7 @@ sub parse_chord {
     cluck("BLESS info for $chord into ", $self->{target}, "\n")
       unless ref($info) =~ /App::Music::ChordPro::Chord::/;
 
-    if ( $bass ) {
-	$info->{bass} = $bass;
+    if ( $info->{bass} = $bass ) {
 	if ( $bass =~ /^$self->{n_pat}$/ ) {
 	    $ordmod->("bass");
 	    if ( $info->is_rootless ) {
@@ -332,9 +331,9 @@ sub parse_chord {
 
     if ( $::config->{settings}->{'chords-canonical'} ) {
 	my $t = $info->{name};
-	$info->{name} = $info->show;
-	warn("Parsing chord: \"$chord\" canon \"", $info->show, "\"\n" )
-	  if $info->{name} ne $t and $::config->{debug}->{chords};
+	$info->{name_canon} = $info->canonical;
+	warn("Parsing chord: \"$chord\" canon \"", $info->canonical, "\"\n" )
+	  if $info->{name_canon} ne $t and $::config->{debug}->{chords};
     }
 
     return $info;
@@ -598,7 +597,7 @@ sub parse_chord {
 
     $chord =~ tr/\x{266d}\x{266f}\x{0394}\x{f8}\x{b0}/b#^h0/;
 
-    my $bass;
+    my $bass = "";
     if ( $chord =~ m;^(.*)/(.*); ) {
 	$chord = $1;
 	$bass = $2;
@@ -650,9 +649,9 @@ sub parse_chord {
 
     $ordmod->("root");
 
+    $info->{bass} = $bass;
     return $info unless $bass;
     return unless $bass =~ /^$n_pat$/;
-    $info->{bass} = $bass;
     $ordmod->("bass");
 
     return $info;
@@ -709,7 +708,7 @@ sub parse_chord {
 
     $chord =~ tr/\x{266d}\x{266f}\x{0394}\x{f8}\x{b0}/b#^h0/;
 
-    my $bass;
+    my $bass = "";
     if ( $chord =~ m;^(.*)/(.*); ) {
 	$chord = $1;
 	$bass = $2;
@@ -762,9 +761,9 @@ sub parse_chord {
 
     $ordmod->("root");
 
+    $info->{bass} = uc $bass;
     return $info unless $bass;
     return unless $bass =~ /^$r_pat$/;
-    $info->{bass} = uc $bass;
     $ordmod->("bass");
 
     return $info;
@@ -812,34 +811,61 @@ sub clone {
     dclone($self);
 }
 
-sub id {
-    my ( $self ) = @_;
-    Carp::confess("Chord missing ID") unless $self->{id};
-    $self->{id};
-}
-
-sub name    { $_[0]->show }
 sub is_note { $_[0]->{isnote} };
 sub is_flat { $_[0]->{isflat} };
 sub is_keyboard { $_[0]->{iskeyboard} };
 
 sub is_nc {
     my ( $self ) = @_;
-    return 1 if $self->is_keyboard &&
-      $self->{keys} && !@{ $self->{keys} };
-    return unless $self->{frets} && @{ $self->{frets} };
-    for ( @{ $self->{frets} } ) {
+    # Keyboard...
+    return 1 if $self->is_keyboard && !@{ $self->kbkeys // [1] };
+    # Strings...
+    return unless @{ $self->frets // [] };
+    for ( @{ $self->frets } ) {
 	return unless $_ < 0;
     }
     return 1;			# all -1 => N.C.
+}
+
+# Can be transposed/transcoded.
+sub is_xpxc {
+    defined($_[0]->{root}) || defined($_[0]->{bass}) || $_[0]->is_nc;
+}
+
+sub has_diagram {
+    my ( $self ) = @_;
+    $self->is_keyboard
+      ? @{ $self->kbkeys // [] }
+      : @{ $self->frets  // [] };
 }
 
 # For convenience.
 sub is_chord      { defined $_[0]->{root_ord} }
 sub is_rootless   { $_[0]->{rootless} }
 sub is_annotation { 0 }
-sub has_diagrams  { !$_[0]->{movable} }
 sub is_movable    { $_[0]->{movable} }
+
+# Common accessors.
+sub name          {
+    my ( $self, $np ) = @_;
+    Carp::confess("Double parens")
+	if $self->{parens} && $self->{name} =~ /^\(.*\)$/;
+    return $self->{name} if $np || !$self->{parens};
+    "(" . $self->{name} . ")";
+}
+
+sub canon         { $_[0]->{name_canon} }
+sub root          { $_[0]->{root} }
+sub qual          { $_[0]->{qual} }
+sub ext           { $_[0]->{ext} }
+sub bass          { $_[0]->{bass} }
+sub base          { $_[0]->{base} }
+sub frets         { $_[0]->{frets} }
+sub fingers       { $_[0]->{fingers} }
+sub kbkeys        { $_[0]->{keys} }
+sub display       { $_[0]->{display} }
+sub format        { $_[0]->{format} }
+sub diagram       { $_[0]->{diagram} }
 
 sub strings {
     $_[0]->{parser}->{intervals};
@@ -874,18 +900,17 @@ package App::Music::ChordPro::Chord::Common;
 our @ISA = qw( App::Music::ChordPro::Chord::Base );
 use String::Interpolate::Named;
 
+# Show reconstructs the chord from its constituents.
+# Result is canonical.
 sub show {
+    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
+    Carp::croak("call canonical instead of show");
+}
+
+sub canonical {
     Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     my ( $self, $np ) = @_;
     my $res;
-
-    # For {define} and {chord} chords, use whatever the user called it.
-    if ( $self->{origin} && $self->{origin} =~ /^(song|inline)$/
-	 && !$::config->{settings}->{'chords-canonical'} ) {
-	$res = $self->{name};
-	return lcfirst($res) if $self->is_note;
-	return $np ? $res : $self->{parens} ? "($res)" : $res;
-    }
 
     $res =
       $self->is_rootless
@@ -945,6 +970,7 @@ sub transpose {
 	$info->{bass_mod} = $dir;
     }
     $info->{root_mod} = $dir;
+    $info->{name} = $info->{name_canon} = $info->canonical;
 
     delete $info->{$_} for qw( copy base frets fingers keys display );
 
@@ -978,11 +1004,11 @@ sub transcode {
 	$info->{bass_canon} = $info->{bass} =
 	  $p->root_canon( $info->{bass_ord}, $info->{bass_mod} >= 0 );
     }
-    $info->{name} = $info->name;
+    $info->{name} = $info->{name_canon} = $info->canonical;
     $info->{system} = $p->{system};
     bless $info => $p->{target};
 #    ::dump($info);
-#warn("_<_XCODE = $xcode, CHORD = ", $info->show);
+#warn("_<_XCODE = $xcode, CHORD = ", $info->canonical);
     return $info;
 }
 
@@ -1004,17 +1030,27 @@ sub chord_display {
     my ( $self, $sf ) = @_;
 
     use App::Music::ChordPro::Utils qw( splitmarkup );
-
+    # $self->dump;
     my $res;
+    my $args = {};
     my $fmt = $self->{format} || $::config->{settings}->{"chord-format"};
     if ( $fmt ) {
-	my $args = {};
 	_flat_copy( $args, $self );
 	$res = interpolate( { args => $args }, $fmt );
+	# warn( "fmt1 |$fmt|$res|\n");
     }
     else {
-	$res = $self->show("np");
+	$res = $self->name("np");
     }
+    # warn("RES1 $res\n");
+    $fmt = $self->{chordformat};
+    if ( $fmt ) {
+	_flat_copy( $args, $self ) unless %$args;
+	$args->{formatted} = $res;
+	$res = interpolate( { args => $args }, $fmt );
+	# warn( "fmt2 |$fmt|$res|\n");
+    }
+    # warn("RES2 $res\n");
 
     # Substitute musical symbols if wanted and possible.
     if ( $::config->{settings}->{truesf} ) {
@@ -1052,6 +1088,7 @@ sub chord_display {
 	}
     }
 
+    return $res;
     return $self->{parens} ? "($res)" : $res;
 }
 
@@ -1065,6 +1102,10 @@ use String::Interpolate::Named;
 sub transpose { $_[0] }
 
 sub show {
+    Carp::croak("call canonical instead of show");
+}
+
+sub canonical {
     my ( $self, $np ) = @_;
     my $res = $self->{root_canon} . $self->{qual} . $self->{ext};
     if ( $self->{bass} && $self->{bass} ne "" ) {
@@ -1086,7 +1127,7 @@ sub chord_display {
 		_flat_copy( $args, $self );
 		return interpolate( { args => $args }, $fmt );
 	    }
-	    return $self->show;
+	    return $self->canonical;
 	}
     }
 
@@ -1108,6 +1149,10 @@ use String::Interpolate::Named;
 sub transpose { $_[0] }
 
 sub show {
+    Carp::croak("call canonical instead of show");
+}
+
+sub canonical {
     my ( $self, $np ) = @_;
     my $res = $self->{root_canon} . $self->{qual} . $self->{ext};
     if ( $self->{bass} && $self->{bass} ne "" ) {
@@ -1129,7 +1174,7 @@ sub chord_display {
 		_flat_copy( $args, $self );
 		return interpolate( { args => $args }, $fmt );
 	    }
-	    return $self->show;
+	    return $self->canonical;
 	}
     }
 
@@ -1153,9 +1198,7 @@ our @ISA = 'App::Music::ChordPro::Chord::Base';
 sub transpose { $_[0] }
 sub transcode { $_[0] }
 
-sub name { $_[0]->{name} }
-
-sub show {
+sub canonical {
     my ( $self ) = @_;
     my $res = $self->{text};
     return $res;
@@ -1200,11 +1243,11 @@ unless ( caller ) {
 	$info = $p3->parse($_) if !$info && $p3;
 	print( "$_ => OOPS\n" ), next unless $info;
 	print( "$_ ($info->{system}) =>" );
-	print( " ", $info->transcode($_)->show, " ($_)" )
+	print( " ", $info->transcode($_)->canonical, " ($_)" )
 	  for qw( common nashville roman );
 	print( " '", $info->agnostic, "' (agnostic)\n" );
 	print( "$_ =>" );
-	print( " ", $info->transpose($_)->show, " ($_)" ) for -2..2;
+	print( " ", $info->transpose($_)->canonical, " ($_)" ) for -2..2;
 	print( "\n" );
 #	my $clone = $info->clone;
 #	delete($clone->{parser});

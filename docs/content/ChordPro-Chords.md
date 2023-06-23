@@ -18,7 +18,7 @@ treat everything else as a text that will be printed just like the
 chord names. This can be used to add small annotations, e.g. `[*Coda]`
 and `[*Rit.]`.
 
-## Parsing chords
+## Parsing chords — the chord properties
 
 ChordPro can parse chord names in two modes: _strict_ and _relaxed_.
 
@@ -34,23 +34,23 @@ constituents is registered with the chord as properties `root`,
 `qual`, `ext` and `bass`.
 It's name is registered as property `name`. These properties are
 referred to as the *chord properties* of the chord.
+
 Some examples:
 
-| name   | root | qual | ext | bass |
-|--------|------|------|-----|------|
-| `C`    | `C`  |      |     |      |
-| `F#`   | `F#` |      |     |      |
-| `Besm` | `Bb` | `m`  |     |      |
-| `Am7`  | `A`  | `m`  | `7` |      |
-| `C/B`  | `C`  |      |     | `B`  |
+| name   | root  | qual | ext | bass |
+|--------|-------|------|-----|------|
+| `C`    | `C`   |      |     |      |
+| `F#`   | `F#`  |      |     |      |
+| `Besm` | `Bes` | `m`  |     |      |
+| `Am7`  | `A`   | `m`  | `7` |      |
+| `C/B`  | `C`   |      |     | `B`  |
 { .table .table-striped .table-bordered .table-sm }
 
 Note: What is recognized as a root note and what is stored in the
 `root` property is controlled by the 
 [`notes` section]({{< relref "chordpro-configuration-instrument" >}})
-of the config files.
-In the default config files `Bb` is the root name, but `Bes` and `B♭`
-are also understood.
+of the config files. For example, in the common notation `B♭`, `Bb`
+and `Bes` all designate a B-flat note.
 
 In _relaxed_ mode, the same rules apply for root note and qualifier,
 but the extension is not required to be known. You are free to make up
@@ -66,17 +66,24 @@ your own. In relaxed mode, `[Coda]` would be a valid chord name: root
 Chord properties can be used as [metadata for substitutions]({{<
 relref "Chordpro-Configuration-Format-Strings/#chord-display-strings" >}}).
 
-## Chord diagrams
+## Chord diagrams — the diagram properties
 
 Many ChordPro implementations (formatters) provide chord diagrams at
 the end of a song, using a built-in list of known chords and
 fingerings. Clearly, this can only work when the chords in the
 ChordPro file can be recognized, either in strict mode, or in relaxed
-mode.
-If a chord is known, there are some additional properties that are
-used internally to produce chord diagrams.
-This set of properties is
-referred to as the *diagram properties* of the chord.
+mode. If a chord is known there may be some additional
+properties that are used internally to produce chord diagrams. This
+set of properties is referred to as the *diagram properties* of the
+chord.
+
+Some examples:
+
+| name  | base | frets       | fingers     | keys     |
+|-------|------|-------------|-------------|----------|
+| `Am7` | 1    | x 0 2 0 1 3 | x x 2 3 1 x | 0 3 7 10 |
+| `B`   | 2    | 1 1 3 3 3 1 | 1 1 2 3 4 1 | 0 4 7    |
+{ .table .table-striped .table-bordered .table-sm }
 
 The list of known chords is read from the config files and can be
 extended by defining chords using the [define directive]({{< relref

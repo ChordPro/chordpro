@@ -11,7 +11,7 @@ use strict;
 use warnings;
 
 use App::Music::ChordPro::Output::Common;
-use App::Music::ChordPro::Utils qw( fq qquote );
+use App::Music::ChordPro::Utils qw( fq qquote demarkup is_true is_ttrue );
 
 my $re_meta;
 
@@ -103,9 +103,26 @@ sub generate_song {
 
     if ( $s->{settings} ) {
 	foreach ( sort keys %{ $s->{settings} } ) {
-	    push(@s, "{$_: " . $s->{settings}->{$_} . "}");
-	    $s[-1] = "{no_grid}"
-	      if $s[-1] eq "{diagrams: 0}";
+	    if ( $_ eq "diagrams" ) {
+		next if $s->{settings}->{diagrampos};
+		my $v = $s->{settings}->{$_};
+		if ( is_ttrue($v) ) {
+		    $v = "on";
+		}
+		elsif ( is_true($v) ) {
+		}
+		else {
+		    $v = "off";
+		}
+		push(@s, "{diagrams: $v}");
+	    }
+	    elsif ( $_ eq "diagrampos" ) {
+		my $v = $s->{settings}->{$_};
+		push(@s, "{diagrams: $v}");
+	    }
+	    else {
+		push(@s, "{$_: " . $s->{settings}->{$_} . "}");
+	    }
 	}
     }
 
@@ -142,6 +159,19 @@ sub generate_song {
 	    $t .= " keys " .
 	      join(" ", @{$info->{keys}})
 		if $info->{keys} && @{$info->{keys}};
+	    for ( qw( diagram ) ) {
+		next unless defined $info->{$_};
+		my $v = $info->{$_};
+		if ( is_true($v) ) {
+		    if ( is_ttrue($v) ) {
+			next;
+		    }
+		}
+		else {
+		    $v = "off";
+		}
+		$t .= " $_ $v";
+	    }
 	    push(@s, $t . "}");
 	}
 	push(@s, "") if $tidy;
@@ -443,7 +473,7 @@ sub gridline {
     for ( @{ $elt->{tokens} } ) {
 	$line .= " " if $line;
 	if ( $_->{class} eq "chord" ) {
-	    $line .= $_->{chord};
+	    $line .= chord( $song, $_->{chord} );
 	}
 	else {
 	    $line .= $_->{symbol};
@@ -474,10 +504,18 @@ sub chord {
     return "" unless length($c);
     #    $c =~ s/^\*// if $variant eq 'msp' && length($c) > 1;
 #    Carp::confess("XX \"$c\" ", ::dump($s->{chordsinfo})) unless defined $s->{chordsinfo}->{$c};
-    my $ci = $s->{chordsinfo}->{$c};
+    my $ci = $s->{chordsinfo}->{$c->key};
     return "<<$c>>" unless defined $ci;
-    my $t = $ci->show;
-    return "*$t" if $variant ne 'msp' && $ci->is_annotation;
+    my $t = $ci->name;
+    if ( $c->format && $c->format eq "(%{formatted})" ) {
+	$t = "($t)";
+    }
+    if ( $variant eq 'msp' ) {
+    }
+    else {
+	$t = demarkup($t);
+#	return "*$t" if $ci->is_annotation;
+    }
     return $t;
 }
 

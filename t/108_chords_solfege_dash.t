@@ -124,10 +124,10 @@ sub reformat {
 }
 
 __DATA__
-Tim7-5	{ ext => '7-5', ext_canon => '7-5', name => 'Tim7-5', qual => 'm', qual_canon => '-', root => 'Ti', root_canon => 'Ti', root_mod => 0, root_ord => 11, system => 'solfege' }
-Di7(-5)	{ ext => '7-5', ext_canon => '7-5', name => 'Di7-5', qual => '', qual_canon => '', root => 'Di', root_canon => 'Di', root_mod => 1, root_ord => 1, system => 'solfege' }
-Mi7(-5)	{ ext => '7-5', ext_canon => '7-5', name => 'Mi7-5', qual => '', qual_canon => '', root => 'Mi', root_canon => 'Mi', root_mod => 0, root_ord => 4, system => 'solfege' }
-Mi7-9	{ ext => '7-9', ext_canon => '7-9', name => 'Mi7-9', qual => '', qual_canon => '', root => 'Mi', root_canon => 'Mi', root_mod => 0, root_ord => 4, system => 'solfege' }
-Fim7-5	{ ext => '7-5', ext_canon => '7-5', name => 'Fim7-5', qual => 'm', qual_canon => '-', root => 'Fi', root_canon => 'Fi', root_mod => 1, root_ord => 6, system => 'solfege' }
-So7-9	{ ext => '7-9', ext_canon => '7-9', name => 'So7-9', qual => '', qual_canon => '', root => 'So', root_canon => 'So', root_mod => 0, root_ord => 7, system => 'solfege' }
-Tim7-5	{ ext => '7-5', ext_canon => '7-5', name => 'Tim7-5', qual => 'm', qual_canon => '-', root => 'Ti', root_canon => 'Ti', root_mod => 0, root_ord => 11, system => 'solfege' }
+Tim7-5	{ bass => '', ext => '7-5', ext_canon => '7-5', name => 'Tim7-5', qual => 'm', qual_canon => '-', root => 'Ti', root_canon => 'Ti', root_mod => 0, root_ord => 11, system => 'solfege' }
+Di7(-5)	{ bass => '', ext => '7-5', ext_canon => '7-5', name => 'Di7-5', qual => '', qual_canon => '', root => 'Di', root_canon => 'Di', root_mod => 1, root_ord => 1, system => 'solfege' }
+Mi7(-5)	{ bass => '', ext => '7-5', ext_canon => '7-5', name => 'Mi7-5', qual => '', qual_canon => '', root => 'Mi', root_canon => 'Mi', root_mod => 0, root_ord => 4, system => 'solfege' }
+Mi7-9	{ bass => '', ext => '7-9', ext_canon => '7-9', name => 'Mi7-9', qual => '', qual_canon => '', root => 'Mi', root_canon => 'Mi', root_mod => 0, root_ord => 4, system => 'solfege' }
+Fim7-5	{ bass => '', ext => '7-5', ext_canon => '7-5', name => 'Fim7-5', qual => 'm', qual_canon => '-', root => 'Fi', root_canon => 'Fi', root_mod => 1, root_ord => 6, system => 'solfege' }
+So7-9	{ bass => '', ext => '7-9', ext_canon => '7-9', name => 'So7-9', qual => '', qual_canon => '', root => 'So', root_canon => 'So', root_mod => 0, root_ord => 7, system => 'solfege' }
+Tim7-5	{ bass => '', ext => '7-5', ext_canon => '7-5', name => 'Tim7-5', qual => 'm', qual_canon => '-', root => 'Ti', root_canon => 'Ti', root_mod => 0, root_ord => 11, system => 'solfege' }

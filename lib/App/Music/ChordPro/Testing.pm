@@ -35,6 +35,8 @@ sub is_deeply {
     my ( $got, $expect, $tag ) = @_;
 
     if ( ref($got) eq 'HASH' && ref($expect) eq 'HASH' ) {
+	fixchords($got) if $got->{body};
+
 	for ( qw( config ) ) {
 	    delete $got->{$_} unless exists $expect->{$_};
 	}
@@ -44,7 +46,7 @@ sub is_deeply {
 	    }
 	    else {
 		foreach ( keys %{ $got->{chordsinfo} } ) {
-		    $got->{chordsinfo}{$_} = $got->{chordsinfo}{$_}->show;
+		    $got->{chordsinfo}{$_} = $got->{chordsinfo}{$_}->name;
 		}
 	    }
 	}
@@ -128,5 +130,33 @@ sub differ {
 }
 
 push( @EXPORT, 'differ' );
+
+sub fixchords {
+    my ( $s ) = @_;
+    for ( @{ $s->{body} // [] } ) {
+	for ( @{ $_->{chords} // [] } ) {
+	    $_ = $_->key if UNIVERSAL::can( $_, "key" );
+	}
+	for ( @{ $_->{chorus} // [] } ) {
+	    for ( @{ $_->{chords} // [] } ) {
+		$_ = $_->key if UNIVERSAL::can( $_, "key" );
+	    }
+	}
+	for ( @{ $_->{tokens} // [] } ) {
+	    if ( $_->{class} eq "chord" ) {
+		for ( $_->{chord} ) {
+		    $_ = $_->key;
+		}
+	    }
+	    elsif ( $_->{class} eq "chords" ) {
+		for ( @{ $_->{chords} } ) {
+		    $_ = $_->key;
+		}
+	    }
+	}
+    }
+}
+
+push( @EXPORT, 'fixchords' );
 
 1;

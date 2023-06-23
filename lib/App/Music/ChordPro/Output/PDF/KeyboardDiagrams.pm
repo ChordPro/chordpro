@@ -107,7 +107,7 @@ sub draw {
     my $x0 = $x;
 
     # Get (or infer) keys.
-    my @keys = @{App::Music::ChordPro::Chords::_get_keys($info)};
+    my @keys = @{App::Music::ChordPro::Chords::get_keys($info)};
     unless ( @keys ) {
 	warn("PDF: No diagram for chord \"", $info->name, "\"\n");
     }

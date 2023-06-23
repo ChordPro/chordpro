@@ -9,56 +9,79 @@ use App::Music::ChordPro::Testing;
 use App::Music::ChordPro::Song;
 use App::Music::ChordPro::Chords;
 
-my @tbl;
-
+my @tbl1;
+my @tbl2;
+my $tbl = \@tbl1;
+my $line = 0;
 while ( <DATA> ) {
     chomp;
+    $line++;
+    last if /^#END/;
     next if /^#/;
     next unless /\S/;
+    $tbl = \@tbl2, next if /^--/;
     my ( $chord, $disp, $info ) = split( /\t/, $_ );
     my $c = $chord;
-    $c =~ s/[()]//g;
-    push( @tbl, [ $c, $disp, $info ] );
+    push( @$tbl, [ $line, $c, $disp, $info ] );
 }
 
-plan tests => 1 + @tbl;
+plan tests => 1 + @tbl1 + @tbl2;
 
 my $s = App::Music::ChordPro::Song->new;
 ok( $s, "Got song");
+$s->_diag( format => '<DATA>, line %n, %m' );
 
 App::Music::ChordPro::Chords::set_parser("common");
 $::config->{settings}->{truesf} = 1;
 $::config->{settings}->{chordnames} = "relaxed";
 $::config->{settings}->{notenames} = 1;
 
-foreach ( @tbl ) {
-    my ( $c, $fmt, $info ) = @$_;
-    my $res = $s->chord($c);
-    $res = $s->{chordsinfo}->{$res} // "FAIL";
-    if ( UNIVERSAL::isa( $res, 'HASH' ) ) {
-	$res->{format} = $fmt if $fmt ne '-';
-	$res = $res->chord_display(0x3);
+foreach ( @tbl1 ) {
+    doit($_);
+}
+
+$::config->{settings}->{"chord-format"} = "%{root}%{qual|%{}}%{ext|<sup>%{}</sup>}%{bass|/%{}}";
+foreach ( @tbl2 ) {
+    doit($_);
+}
+
+sub doit {
+    my ( $line, $c, $info ) = @{$_[0]};
+    $s->_diag( line => $line );
+    my $ap = $s->chord($c);
+    my $key = $ap->key;
+    my $res = $s->{chordsinfo}->{$key};
+    unless ( $res ) {
+	warn( "XXX |", join("|",keys %{$s->{chordsinfo}}), "|\n");
+	$res = "FAIL";
     }
-    is( $res, $info, "parsing chord $c" . ( $fmt ne '-' ? " and show with $fmt" : "") );
+    if ( UNIVERSAL::isa( $res, 'HASH' ) ) {
+	$res = $ap->chord_display( $s->{chordsinfo}, 0x3 );
+    }
+    is( $res, $info, "parsing chord $c" );
 }
 
 __DATA__
-Bm7	-	Bm7
-Bbm7	-	B♭m7
-Bbm7b5	-	B♭m7♭5
-C#m7	-	C♯m7
-C#m7#5	-	C♯m7♯5
-B	-	B
-b	-	b
-Bb	-	B♭
-bb	-	b♭
-<span color="blue">Bm7</span>	-	<span color="blue">Bm7</span>
-<span color="blue">Bbm7</span>	-	<span color="blue">B♭m7</span>
-Bm7	<span color="blue">Bm</span><sup>7</sup>	<span color="blue">Bm</span><sup>7</sup>
-Bm7	<span color="blue">Bm<sup>7</sup></span>	<span color="blue">Bm<sup>7</sup></span>
-Bm7	<span color="blue">Bbm7</span>	<span color="blue">B♭m7</span>
-Bm7	<span color="blueberry">Bbm7</span>	<span color="blueberry">B♭m7</span>
-Bm7	<span color="blueberry">Bm</span><sup>7</sup>	<span color="blueberry">Bm</span><sup>7</sup>
-Bm7b5	-	Bm7♭5
-Bbm7b5	-	B♭m7♭5
-Bbm7b5	Bbm7<sup>b5<sup>	B♭m7<sup>♭5<sup>
+Bm7	Bm7
+(Bm7)	(Bm7)
+(Besm7)	(Besm7)
+Bbm7	B♭m7
+Bbm7b5	B♭m7♭5
+C#m7	C♯m7
+C#m7#5	C♯m7♯5
+B	B
+b	b
+Bb	B♭
+bb	b♭
+<span color="blue">Bm7</span>	<span color="blue">Bm7</span>
+<span color="blue">Bbm7</span>	<span color="blue">B♭m7</span>
+Bm7b5	Bm7♭5
+Bbm7b5	B♭m7♭5
+Bbm7<sup>b5<sup>	B♭m7<sup>♭5<sup>
+<b>(Bes)</b>	<b>(Bes)</b>
+(<b>Bes</b>)	(<b>Bes</b>)
+--
+Bbm7b5	B♭m<sup>7♭5</sup>
+<b>Bbm7b5</b>	<b>B♭m<sup>7♭5</sup></b>
+(Bbm7b5)	(B♭m<sup>7♭5</sup>)
+<b>(Bbm7b5)</b>	<b>(B♭m<sup>7♭5</sup>)</b>

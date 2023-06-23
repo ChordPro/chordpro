@@ -167,12 +167,21 @@ push( @EXPORT, 'parse_kv' );
 
 sub is_true {
     my ( $arg ) = @_;
-    return if !defined($arg);
-    return if $arg =~ /^(false|null|no|none|off|0+)$/i;
+    return if !defined($arg) || $arg eq '';
+    return if $arg =~ /^(false|null|no|none|off|\s+|0)$/i;
     return !!$arg;
 }
 
 push( @EXPORT, 'is_true' );
+
+# Stricter form of true.
+sub is_ttrue {
+    my ( $arg ) = @_;
+    return if !defined($arg);
+    $arg =~ /^(on|true|1)$/i;
+}
+
+push( @EXPORT, 'is_ttrue' );
 
 # Fix apos -> quote.
 

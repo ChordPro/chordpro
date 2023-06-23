@@ -114,3 +114,7 @@ _wkit2 :
 	VBoxManage controlvm ${VM} poweroff
 	VBoxManage snapshot ${VM} restorecurrent
 
+.PHONY: TAGS
+
+TAGS:
+	etags.emacs `grep '\.p[lm]' MANIFEST`

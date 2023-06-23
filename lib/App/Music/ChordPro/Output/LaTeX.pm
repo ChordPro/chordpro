@@ -100,7 +100,7 @@ sub line_songline {
     foreach my $phrase (@{$lineobject->{phrases}}){
         if(defined $lineobject->{chords}){
             if (@{$lineobject->{chords}}[$index] ne '' ){
-                $chord = $gchordstart_tag.@{$lineobject->{chords}}[$index] .$gchordend_tag; #songbook format \\[chord]
+                $chord = $gchordstart_tag.@{$lineobject->{chords}}[$index]->key .$gchordend_tag; #songbook format \\[chord]
                 $has_chord = 1;
         }}
         $line .=  $chord . latex_encode($phrase);
@@ -226,7 +226,7 @@ sub line_gridline {
     }
     foreach my $token (@{ $lineobject->{tokens} }){
         if ($token->{class} eq 'chord'){
-            $line .= $token->{chord};
+            $line .= $token->{chord}->key;
         }
         else {
            $line .= $token->{symbol};

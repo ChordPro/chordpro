@@ -47,8 +47,9 @@ Arguments to directives may be separated by a colon `:` and/or whitespace. They 
 | ---                                                                      | ---       | ---                                                                                                | ---   |
 | [chord]({{< relref "Directives-chord" >}}) _name_ ...                    |           | Display diagram in-line.                                                                           | 5.0   |
 | ... `base-fret` _base_                                                   |           | Specify base-fret (1 or higher).[^1]                                                               | 5.0   |
-| ... `display` _display_                                                  |           | Specify display string.[^1]                                                                        | 6.0   |
+| ... `display` _display_                                                  |           | Override chord properties.[^1]                                                                     | 6.02  |
 | ... `fingers` _pos1_ _pos2_ _pos3_ ...                                   |           | Specify finger postions.[^1]                                                                       | 6.0   |
+| ... `format` _format_                                                    |           | Format string for display purposes.[^1]                                                            | 6.02  |
 | ... `frets` _pos1_ _pos2_ _pos3_ ...                                     |           | Specify fret postions.[^1]                                                                         | 5.0   |
 | ... `keys` _pos1_ _pos2_ _pos3_ ...                                      |           | Specify keyboard keys.[^1]                                                                         | 6.0   |
 | [chordcolour]({{< relref "Directives-props_chord_legacy" >}}) _colour_   |           | Chord colour.                                                                                      | 5.0   |

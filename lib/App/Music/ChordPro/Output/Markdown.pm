@@ -105,11 +105,11 @@ $line_routines{line_default} = \&line_default;
 sub chord {
     my ( $c ) = @_;
     return "" unless length($c);
-    my $ci = $act_song->{chordsinfo}->{$c};
+    my $ci = $act_song->{chordsinfo}->{$c->key};
     return "<<$c>>" unless defined $ci;
-    $text_layout->set_markup($ci->show);
-    my $t = $text_layout->render;
-    return $ci->is_annotation ? "*$t" : $t;
+    return $c->key if $ci->is_annotation;
+    $text_layout->set_markup($c->chord_display( $act_song->{chordsinfo} ));
+    return $text_layout->render;
 }
 
 sub md_textline{
@@ -134,7 +134,7 @@ sub line_songline {
       @{ $elt->{phrases} };
 
     if ( $lyrics_only or
-	   $single_space && ! ( $elt->{chords} && join( "", @{ $elt->{chords} } ) =~ /\S/ )
+	   $single_space && ! ( $elt->{chords} && join( "", map { $_->raw } @{ $elt->{chords} } ) =~ /\S/ )
        ) {
 	$t_line = join( "", @phrases );
 	return md_textline($cp.$t_line);
@@ -149,7 +149,7 @@ sub line_songline {
 	$f .= '%s';
 	foreach ( 0..$#{$elt->{chords}} ) {
 	    $t_line .= sprintf( $f,
-				chord( $elt->{chords}->[$_] ),
+				chord( $elt->{chords}->[$_]->raw ),
 				$phrases[$_] );
 	}
 	return ( md_textline($cp.$t_line) );
@@ -198,7 +198,7 @@ sub line_comment {
 	if ( $elt->{chords} ) {
 		$text = "";
 		for ( 0..$#{ $elt->{chords} } ) {
-		    $text .= "[" . $elt->{chords}->[$_] . "]"
+		    $text .= "[" . $elt->{chords}->[$_]->raw . "]"
 		      if $elt->{chords}->[$_] ne "";
 		    $text .= $elt->{phrases}->[$_];
 	}}
@@ -318,7 +318,7 @@ sub line_gridline {
     my ( $elt ) = @_;
 	my @a = @{ $elt->{tokens} };
 	@a = map { $_->{class} eq 'chord'
-			 ? $_->{chord}
+			 ? $_->{chord}->raw
 			 : $_->{symbol} } @a;
     return "\t".join("", @a);
 }

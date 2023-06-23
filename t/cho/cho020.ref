@@ -1,5 +1,6 @@
 {title: Custom chord diagram display}
-{define: Am/C base-fret 1 frets N 0 2 2 1 0}
+{diagrams: below}
+{define: Am/C base-fret 1 frets N 0 2 2 1 0 diagram off}
 {define: C6 base-fret 1 frets N 0 2 2 1 0}
 {define: Am              base-fret  1    frets   X   0   2   2   1   0   }
 {define: C6              base-fret  1    frets   X   0   2   2   1   0   }

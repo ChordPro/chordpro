@@ -1,4 +1,5 @@
 {title: Custom chord diagram display}
+{diagrams: below}
 {define: Am/C copy Am diagram false}
 {define: C6 copy Am diagram true}
 Main chord [Am]

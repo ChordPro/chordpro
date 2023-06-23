@@ -71,7 +71,7 @@ my $song = {
 			'origin' => 'chord',
 			'type' => 'diagrams',
 			'show' => 'user',
-			'chords' => [ ' ch001', ' ch002' ],
+			'chords' => [ ' ch0000', ' ch0001' ],
 		       },
 		       {
 			'type' => 'empty',
@@ -85,7 +85,7 @@ my $song = {
 				     ]
 		       }
 		      ],
-	      'chordsinfo' => { 'Fus' => 'Fus', 'Fos' => 'Fos', ' ch001' => 'Fus', ' ch002' => 'Fos', Fas => 'Fas' },
+	      'chordsinfo' => { 'Fus' => 'Fus', 'Fos' => 'Fos', ' ch0000' => 'Fus', ' ch0001' => 'Fos', Fas => 'Fas' },
 	   };
 
 is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );

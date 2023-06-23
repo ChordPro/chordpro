@@ -132,7 +132,7 @@ sub generate_song {
 	    my @a = @{ $elt->{tokens} };
 	    # Reduce the elements (objects) to simple chords or symbols.
 	    @a = map { $_->{class} eq 'chord'
-			 ? $_->{chord}
+			 ? $_->{chord}->key
 			 : $_->{symbol} } @a;
 
 	    push( @s, "// $line @a" );
@@ -344,7 +344,7 @@ sub songline {
 	$f .= '%s';
 	foreach ( 0..$#{$elt->{chords}} ) {
 	    $t_line .= sprintf( $f,
-				$elt->{chords}->[$_],
+				$elt->{chords}->[$_]->key,
 				$elt->{phrases}->[$_] );
 	}
 	return ( $t_line );
@@ -352,7 +352,7 @@ sub songline {
 
     my $c_line = "";
     foreach ( 0..$#{$elt->{chords}} ) {
-	$c_line .= $elt->{chords}->[$_] . " ";
+	$c_line .= $elt->{chords}->[$_]->key . " ";
 	$t_line .= $elt->{phrases}->[$_];
 	my $d = length($c_line) - length($t_line);
 	$t_line .= "-" x $d if $d > 0;

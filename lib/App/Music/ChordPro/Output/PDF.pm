@@ -1650,7 +1650,7 @@ sub songline {
 		}
 		else {
 		    my $info = $opts{song}->{chordsinfo}->{$chord};
-		    croak("Missing info for chord $chord") unless $info;
+		    confess("Missing info for chord $chord") unless $info;
 		    $chord = $info->chord_display( has_musicsyms($ftext) );
 		}
 		$t .= $chord . shift(@ph);
@@ -1762,18 +1762,18 @@ sub songline {
 	    $x = $pr->text( $phrase, $x, $ytext, $ftext );
 
 	    # Collect chords to be printed in the side column.
-	    my $info = $opts{song}->{chordsinfo}->{$chord};
-	    croak("Missing info for chord $chord") unless $info;
-	    $chord = $info->chord_display( has_musicsyms($fchord) );
+	    my $info = $opts{song}->{chordsinfo}->{$chord->key};
+	    confess("Missing info for chord $chord") unless $info;
+	    $chord = $chord->chord_display( $opts{song}, has_musicsyms($fchord) );
 	    push(@chords, $chord);
 	}
 	else {
 	    my $xt0 = $x;
 	    my $font = $fchord;
 	    if ( $chord ne '' ) {
-		my $info = $opts{song}->{chordsinfo}->{$chord};
-		Carp::croak("Missing info for chord $chord") unless $info;
-		$chord = $info->chord_display( has_musicsyms($font) );
+		my $info = $opts{song}->{chordsinfo}->{$chord->key};
+		confess("Missing info for chord $chord") unless $info;
+		$chord = $chord->chord_display( $opts{song}->{chordsinfo}, has_musicsyms($font) );
 		my $dp = $chord . " ";
 		if ( $info->is_annotation ) {
 		    $font = $fonts->{annotation};
@@ -1913,7 +1913,7 @@ sub gridline {
 	    if ( $t->{chords} ) {
 		$t->{text} = "";
 		for ( 0..$#{ $t->{chords} } ) {
-		    $t->{text} .= $t->{chords}->[$_] . $t->{phrases}->[$_];
+		    $t->{text} .= $t->{chords}->[$_]->chord_display($opts{song}->{chordsinfo}) . $t->{phrases}->[$_];
 		}
 	    }
 	    $pr->text( $t->{text}, $x, $y, $fonts->{comment} );
@@ -2025,8 +2025,8 @@ sub gridline {
 	    my $cellwidth = $cellwidth / @$tok;
 	    for my $t ( @$tok ) {
 		$x += $cellwidth, next if $t eq '';
-		my $i = $opts{song}->{chordsinfo}->{$t};
-		$t = $i->chord_display( has_musicsyms($fchord) ) if $i;
+		my $i = $opts{song}->{chordsinfo}->{$t->key};
+		$t = $t->chord_display( $opts{song}->{chordsinfo}, has_musicsyms($fchord) );
 		$pr->text( $t, $x, $y, $fchord );
 		$x += $cellwidth;
 	    }
@@ -2036,8 +2036,8 @@ sub gridline {
 	    warn("Chord token without class\n")
 	      unless $token->{class} eq "chord";
 	    my $t = $token->{chord};
-	    my $i = $opts{song}->{chordsinfo}->{$t};
-	    $t = $i->chord_display( has_musicsyms($fchord) ) if $i;
+	    my $i = $opts{song}->{chordsinfo}->{$t->key};
+	    $t = $t->chord_display( $opts{song}->{chordsinfo}, has_musicsyms($fchord) );
 	    $pr->text( $t, $x, $y, $fchord )
 	      unless $token eq ".";
 	    $x += $cellwidth;

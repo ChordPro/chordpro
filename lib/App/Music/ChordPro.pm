@@ -219,7 +219,7 @@ sub chordpro {
 		@chords = ();
 	    }
 	    push( @chords, $c );
-	    $d->{chordsinfo}->{$c} = App::Music::ChordPro::Chords::_known_chord($c);
+	    $d->{chordsinfo}->{$c} = App::Music::ChordPro::Chords::known_chord($c);
 	}
 
 	push( @body, { type => "diagrams",
