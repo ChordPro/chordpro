@@ -935,7 +935,7 @@ sub default_config() {
     "settings" : {
       // Strict behaviour.
       "strict" : true,
-      // Add line info for backend diagnostics.
+      // Obsolete -- lineinfo is always included.
       "lineinfo" : true,
       // Titles flush: default center.
       "titles" : "center",

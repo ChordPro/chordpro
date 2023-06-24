@@ -913,7 +913,7 @@ sub generate_song {
 	    # Get vertical space the songline will occupy.
 	    my $vsp = songline_vsp( $elt, $ps );
 	    if ( $elt->{type} eq "songline" && !$elt->{indent} ) {
-		my $e = wrap( $pr, $elt, $x );
+		my $e = wrap( $pr, $elt, $x, $s );
 		if ( @$e > 1 ) {
 		    $checkspace->($vsp * scalar( @$e ));
 		    $elt = shift( @$e );
@@ -1649,14 +1649,14 @@ sub songline {
 		if ( $chord eq '' ) {
 		}
 		else {
-		    my $info = $opts{song}->{chordsinfo}->{$chord};
+		    my $info = $song->{chordsinfo}->{$chord->key};
 		    confess("Missing info for chord $chord") unless $info;
-		    $chord = $info->chord_display( has_musicsyms($ftext) );
+		    $chord = $chord->chord_display( $info, has_musicsyms($ftext) );
 		}
 		$t .= $chord . shift(@ph);
 	    }
 	}
-	my ( $text, $ex ) = wrapsimple( $pr, $t, $x, $ftext );
+	my ( $text, $ex ) = wrapsimple( $pr, $t, $x, $ftext, $song );
 	$pr->text( $text, $x, $ytext, $ftext );
 	return $ex ne ""
 	  ? { %$elt, indent => $pr->strwidth("x"), text => $ex, chords => undef  }
@@ -1688,7 +1688,7 @@ sub songline {
 	$x += $elt->{indent} if $elt->{indent};
 	prlabel( $ps, $tag, $x, $ytext );
 	my ( $text, $ex ) = wrapsimple( $pr, join( "", @phrases ),
-					$x, $ftext );
+					$x, $ftext, \%opts );
 	$pr->text( $text, $x, $ytext, $ftext );
 	return $ex ne "" ? { %$elt, indent => $pr->strwidth("x"), phrases => [$ex] } : undef;
     }
@@ -1764,7 +1764,7 @@ sub songline {
 	    # Collect chords to be printed in the side column.
 	    my $info = $opts{song}->{chordsinfo}->{$chord->key};
 	    confess("Missing info for chord $chord") unless $info;
-	    $chord = $chord->chord_display( $opts{song}, has_musicsyms($fchord) );
+	    $chord = $chord->chord_display( $info, has_musicsyms($fchord) );
 	    push(@chords, $chord);
 	}
 	else {
@@ -1773,7 +1773,7 @@ sub songline {
 	    if ( $chord ne '' ) {
 		my $info = $opts{song}->{chordsinfo}->{$chord->key};
 		confess("Missing info for chord $chord") unless $info;
-		$chord = $chord->chord_display( $opts{song}->{chordsinfo}, has_musicsyms($font) );
+		$chord = $chord->chord_display( $info, has_musicsyms($font) );
 		my $dp = $chord . " ";
 		if ( $info->is_annotation ) {
 		    $font = $fonts->{annotation};
@@ -2026,7 +2026,7 @@ sub gridline {
 	    for my $t ( @$tok ) {
 		$x += $cellwidth, next if $t eq '';
 		my $i = $opts{song}->{chordsinfo}->{$t->key};
-		$t = $t->chord_display( $opts{song}->{chordsinfo}, has_musicsyms($fchord) );
+		$t = $t->chord_display( $i, has_musicsyms($fchord) );
 		$pr->text( $t, $x, $y, $fchord );
 		$x += $cellwidth;
 	    }
@@ -2037,7 +2037,7 @@ sub gridline {
 	      unless $token->{class} eq "chord";
 	    my $t = $token->{chord};
 	    my $i = $opts{song}->{chordsinfo}->{$t->key};
-	    $t = $t->chord_display( $opts{song}->{chordsinfo}, has_musicsyms($fchord) );
+	    $t = $t->chord_display( $i, has_musicsyms($fchord) );
 	    $pr->text( $t, $x, $y, $fchord )
 	      unless $token eq ".";
 	    $x += $cellwidth;
@@ -2877,7 +2877,7 @@ sub tpt {
 }
 
 sub wrap {
-    my ( $pr, $elt, $x ) = @_;
+    my ( $pr, $elt, $x, $song ) = @_;
     my $res = [];
     my @chords  = @{ $elt->{chords} // [] };
     my @phrases = @{ defrag( $elt->{phrases} // [] ) };
@@ -2894,15 +2894,18 @@ sub wrap {
 
 	if ( @rchords ) {
 	    # Does the chord fit?
-	    my $c = $chord;
-	    if ( $chord =~ /^\*(.+)/ ) {
-		$c = $1;
+	    my $info = $song->{chordsinfo}->{$chord->key};
+	    Carp::confess("Missing info for " . $chord->key) unless $info;
+	    my $c = $chord->chord_display($info);
+	    my $w;
+	    if ( $c =~ /^\*(.+)/ ) {
 		$pr->setfont( $pr->{ps}->{fonts}->{annotation} );
+		$c = $1;
 	    }
 	    else {
 		$pr->setfont( $pr->{ps}->{fonts}->{chord} );
 	    }
-	    my $w = $pr->strwidth($chord);
+	    $w = $pr->strwidth($c);
 	    if ( $w > $m - $x ) {
 		# Nope. Move to overflow.
 		$ex = $phrase;
@@ -2951,12 +2954,12 @@ sub wrap {
 }
 
 sub wrapsimple {
-    my ( $pr, $text, $x, $font ) = @_;
+    my ( $pr, $text, $x, $font, $s ) = @_;
     return ( "", "" ) unless length($text);
 
     $font ||= $pr->{font};
     $pr->setfont($font);
-    $pr->wrap( $text, $pr->{ps}->{__rightmargin} - $x );
+    $pr->wrap( $text, $pr->{ps}->{__rightmargin} - $x, $s );
 }
 
 my %corefonts =

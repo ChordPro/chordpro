@@ -108,7 +108,7 @@ sub chord {
     my $ci = $act_song->{chordsinfo}->{$c->key};
     return "<<$c>>" unless defined $ci;
     return $c->key if $ci->is_annotation;
-    $text_layout->set_markup($c->chord_display( $act_song->{chordsinfo} ));
+    $text_layout->set_markup($c->chord_display($ci));
     return $text_layout->render;
 }
 

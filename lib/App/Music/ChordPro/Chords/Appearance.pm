@@ -27,7 +27,14 @@ sub format :lvalue {
 # For convenience.
 sub chord_display {
     my ( $self, $ci, $cap ) = @_;
-    my $info = $ci->{$self->key};
+    my $info =
+      ref($ci) eq 'HASH'
+      ? $ci->{$self->key}
+      : $ci;
+    Carp::confess("Missing info for " . $self->key . " from " . ref($ci) )
+	unless $info
+	&& UNIVERSAL::isa( $info, 'App::Music::ChordPro::Chord::Base' );
+
     local $info->{chordformat} = $info->{display} // $self->format;
     $info->chord_display($cap);
 }
