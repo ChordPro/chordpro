@@ -866,6 +866,7 @@ sub kbkeys        { $_[0]->{keys} }
 sub display       { $_[0]->{display} }
 sub format        { $_[0]->{format} }
 sub diagram       { $_[0]->{diagram} }
+sub parser        { $_[0]->{parser} }
 
 sub strings {
     $_[0]->{parser}->{intervals};
