@@ -274,7 +274,7 @@ sub chord {
     return "" unless length($c);
     my $ci = $s->{chordsinfo}->{$c->key};
     return "<<$c>>" unless defined $ci;
-    $layout->set_markup($c->chord_display($ci));
+    $layout->set_markup($c->chord_display);
     my $t = $layout->render;
     return $ci->is_annotation ? "*$t" : $t;
 }

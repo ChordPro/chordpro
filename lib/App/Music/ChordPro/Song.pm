@@ -717,6 +717,7 @@ sub chord {
     # After parsing, the chord can be changed by transpose/code.
     # info->name is the new key.
     $ap->key = $self->add_chord( $info, $c = $info->name );
+    $ap->info = $info;
 
     unless ( $info->is_nc || $info->is_note ) {
 	if ( $info->is_keyboard ) {
@@ -794,7 +795,7 @@ sub decompose {
 		push( @chords, $chord );
 	    }
 	    else {
-		push( @chords, $self->chord($memchords->[$memcrdinx]->chord_display($self->{chordsinfo}, 0)));
+		push( @chords, $self->chord($memchords->[$memcrdinx]->chord_display(0)));
 		warn("Chord recall $in_context\[$memcrdinx]: ", $chords[-1], "\n")
 		  if $config->{debug}->{chords};
 	    }
@@ -1191,6 +1192,7 @@ sub directive {
 			$info = $info->new($info);
 			$_ = App::Music::ChordPro::Chords::Appearance->new
 			  ( key => $self->add_chord($info),
+			    info => $info,
 			    maybe format => $_->format
 			  );
 		    }

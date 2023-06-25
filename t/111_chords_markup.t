@@ -55,7 +55,7 @@ sub doit {
 	warn( "XXX |", join("|",keys %{$s->{chordsinfo}}), "|\n");
 	$res = "FAIL";
     }
-    $res = $ap->chord_display( $res, 0x3 );
+    $res = $ap->chord_display(0x3);
     is( $res, $info, "parsing chord $c" );
 }
 

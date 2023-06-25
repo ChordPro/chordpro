@@ -22,16 +22,18 @@ sub format :lvalue {
     $self->{format};
 }
 
+sub info :lvalue {
+    my ( $self ) = @_;
+    $self->{info};
+}
+
 # use overload '""' => sub { %_[0]->key }, fallback => 1;
 
 # For convenience.
 sub chord_display {
-    my ( $self, $ci, $cap ) = @_;
-    my $info =
-      ref($ci) eq 'HASH'
-      ? $ci->{$self->key}
-      : $ci;
-    Carp::confess("Missing info for " . $self->key . " from " . ref($ci) )
+    my ( $self, $cap ) = @_;
+    my $info = $self->info;
+    Carp::confess("Missing info for " . $self->key)
 	unless $info
 	&& UNIVERSAL::isa( $info, 'App::Music::ChordPro::Chord::Base' );
 
