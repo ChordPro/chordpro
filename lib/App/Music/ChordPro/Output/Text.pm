@@ -248,7 +248,7 @@ sub songline {
 	$f .= '%s';
 	foreach ( 0..$#{$elt->{chords}} ) {
 	    $t_line .= sprintf( $f,
-				$elt->{chords}->[$_] ? chord( $song, $elt->{chords}->[$_]->key ) : "",
+				$elt->{chords}->[$_] ? chord( $song, $elt->{chords}->[$_] ) : "",
 				$phrases[$_] );
 	}
 	return ( $t_line );
@@ -256,7 +256,7 @@ sub songline {
 
     my $c_line = "";
     foreach ( 0..$#{$elt->{chords}} ) {
-	$c_line .= chord( $song, $elt->{chords}->[$_]->key ) . " "
+	$c_line .= chord( $song, $elt->{chords}->[$_] ) . " "
 	  if ref $elt->{chords}->[$_];
 	$t_line .= $phrases[$_];
 	my $d = length($c_line) - length($t_line);
@@ -272,9 +272,9 @@ sub songline {
 sub chord {
     my ( $s, $c ) = @_;
     return "" unless length($c);
-    my $ci = $s->{chordsinfo}->{$c};
+    my $ci = $s->{chordsinfo}->{$c->key};
     return "<<$c>>" unless defined $ci;
-    $layout->set_markup($ci->name);
+    $layout->set_markup($c->chord_display($ci));
     my $t = $layout->render;
     return $ci->is_annotation ? "*$t" : $t;
 }
