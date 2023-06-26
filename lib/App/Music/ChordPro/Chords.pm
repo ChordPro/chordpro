@@ -398,6 +398,7 @@ sub add_config_chord {
     my $dpinfo;
     if ( $def->{display} ) {
 	$dpinfo = parse_chord($def->{display});
+	delete $def->{display};
     }
     for $name ( $name, @names ) {
 	my $info = $dpinfo

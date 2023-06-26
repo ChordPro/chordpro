@@ -1649,8 +1649,6 @@ sub songline {
 		if ( $chord eq '' ) {
 		}
 		else {
-		    my $info = $song->{chordsinfo}->{$chord->key};
-		    confess("Missing info for chord $chord") unless $info;
 		    $chord = $chord->chord_display(has_musicsyms($ftext) );
 		}
 		$t .= $chord . shift(@ph);
@@ -1762,26 +1760,22 @@ sub songline {
 	    $x = $pr->text( $phrase, $x, $ytext, $ftext );
 
 	    # Collect chords to be printed in the side column.
-	    my $info = $opts{song}->{chordsinfo}->{$chord->key};
-	    confess("Missing info for chord $chord") unless $info;
 	    $chord = $chord->chord_display(has_musicsyms($fchord) );
-	    push(@chords, $chord);
+	    push( @chords, $chord );
 	}
 	else {
 	    my $xt0 = $x;
 	    my $font = $fchord;
 	    if ( $chord ne '' ) {
-		my $info = $opts{song}->{chordsinfo}->{$chord->key};
-		confess("Missing info for chord $chord") unless $info;
-		$chord = $chord->chord_display(has_musicsyms($font) );
-		my $dp = $chord . " ";
-		if ( $info->is_annotation ) {
+		my $ch = $chord->chord_display(has_musicsyms($font) );
+		my $dp = $ch . " ";
+		if ( $chord->info->is_annotation ) {
 		    $font = $fonts->{annotation};
-		    ( $dp = $inlineannots ) =~ s/%[cs]/$chord/g
+		    ( $dp = $inlineannots ) =~ s/%[cs]/$ch/g
 		      if $inlinechords;
 		}
 		elsif ( $inlinechords ) {
-		    ( $dp = $inlinechords ) =~ s/%[cs]/$chord/g;
+		    ( $dp = $inlinechords ) =~ s/%[cs]/$ch/g;
 		}
 		$xt0 = $pr->text( $dp, $x, $ychord, $font );
 	    }
@@ -2025,7 +2019,6 @@ sub gridline {
 	    my $cellwidth = $cellwidth / @$tok;
 	    for my $t ( @$tok ) {
 		$x += $cellwidth, next if $t eq '';
-		my $i = $opts{song}->{chordsinfo}->{$t->key};
 		$t = $t->chord_display( has_musicsyms($fchord) );
 		$pr->text( $t, $x, $y, $fchord );
 		$x += $cellwidth;
@@ -2036,7 +2029,6 @@ sub gridline {
 	    warn("Chord token without class\n")
 	      unless $token->{class} eq "chord";
 	    my $t = $token->{chord};
-	    my $i = $opts{song}->{chordsinfo}->{$t->key};
 	    $t = $t->chord_display( has_musicsyms($fchord) );
 	    $pr->text( $t, $x, $y, $fchord )
 	      unless $token eq ".";

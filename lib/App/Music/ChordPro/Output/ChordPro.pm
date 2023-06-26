@@ -502,20 +502,15 @@ sub gridline {
 sub chord {
     my ( $s, $c ) = @_;
     return "" unless length($c);
-    #    $c =~ s/^\*// if $variant eq 'msp' && length($c) > 1;
-#    Carp::confess("XX \"$c\" ", ::dump($s->{chordsinfo})) unless defined $s->{chordsinfo}->{$c};
-    my $ci = $s->{chordsinfo}->{$c->key};
-    return "<<$c>>" unless defined $ci;
-    my $t = $ci->name;
+#    my $t = $c->chord_display;
+    my $t = $c->info->name;
     if ( $c->format && $c->format eq "(%{formatted})" ) {
 	$t = "($t)";
     }
-    if ( $variant eq 'msp' ) {
-    }
-    else {
+    if ( $variant ne 'msp' ) {
 	$t = demarkup($t);
-#	return "*$t" if $ci->is_annotation;
     }
+#    return "*$t" if $c->info->is_annotation;
     return $t;
 }
 

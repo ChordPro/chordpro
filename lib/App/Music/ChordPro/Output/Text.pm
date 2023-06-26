@@ -8,7 +8,6 @@ our $config;
 package App::Music::ChordPro::Output::Text;
 
 use App::Music::ChordPro::Output::Common;
-use App::Music::ChordPro::Utils qw();
 
 use strict;
 use warnings;
@@ -272,11 +271,9 @@ sub songline {
 sub chord {
     my ( $s, $c ) = @_;
     return "" unless length($c);
-    my $ci = $s->{chordsinfo}->{$c->key};
-    return "<<$c>>" unless defined $ci;
     $layout->set_markup($c->chord_display);
     my $t = $layout->render;
-    return $ci->is_annotation ? "*$t" : $t;
+    return $c->info->is_annotation ? "*$t" : $t;
 }
 
 # Temporary. Eventually we'll have a decent HTML backend for Text::Layout.
@@ -284,6 +281,7 @@ sub chord {
 package Text::Layout::Text;
 
 use parent 'Text::Layout';
+use App::Music::ChordPro::Utils qw( fq );
 
 # Eliminate warning when HTML backend is loaded together with Text backend.
 no warnings 'redefine';
@@ -299,7 +297,7 @@ sub render {
     my $res = "";
     foreach my $fragment ( @{ $self->{_content} } ) {
 	next unless length($fragment->{text});
-	$res .= App::Music::ChordPro::Utils::fq($fragment->{text});
+	$res .= fq($fragment->{text});
     }
     $res;
 }

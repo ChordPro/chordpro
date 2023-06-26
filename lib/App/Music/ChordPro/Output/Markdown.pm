@@ -105,9 +105,7 @@ $line_routines{line_default} = \&line_default;
 sub chord {
     my ( $c ) = @_;
     return "" unless length($c);
-    my $ci = $act_song->{chordsinfo}->{$c->key};
-    return "<<$c>>" unless defined $ci;
-    return $c->key if $ci->is_annotation;
+    return $c->key if $c->info->is_annotation;
     $text_layout->set_markup($c->chord_display);
     return $text_layout->render;
 }

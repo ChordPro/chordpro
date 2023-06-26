@@ -664,15 +664,14 @@ sub add {
 sub chord {
     my ( $self, $orig ) = @_;
     Carp::confess unless length($orig);
-    my $ap = App::Music::ChordPro::Chords::Appearance->new;
 
     # Intercept annotations.
     if ( $orig =~ /^\*(.+)/ ) {
+	my $i = App::Music::ChordPro::Chord::Annotation->new
+	  ( { name => $orig, text => $1 } );
 	return
 	  App::Music::ChordPro::Chords::Appearance->new
-	    ( key => $self->add_chord
-	      ( App::Music::ChordPro::Chord::Annotation->new
-		( { name => $orig, text => $1 } ) ) );
+	    ( key => $self->add_chord($i), info => $i, orig => $orig );
     }
 
     # Check for markup.
@@ -692,12 +691,14 @@ sub chord {
     unless ( defined $info ) {
 	# Warning was given.
 	# Make annotation.
+	my $i = App::Music::ChordPro::Chord::Annotation->new
+	  ( { name => $orig, text => $orig } );
 	return
 	  App::Music::ChordPro::Chords::Appearance->new
-	    ( key => $self->add_chord
-	      ( App::Music::ChordPro::Chord::Annotation->new
-		( { name => $orig, text => $orig } ) ) );
+	    ( key => $self->add_chord($i), info => $i, orig => $orig );
     }
+
+    my $ap = App::Music::ChordPro::Chords::Appearance->new( orig => $orig );
 
     # Handle markup, if any.
     if ( $markup ) {
