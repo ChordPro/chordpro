@@ -803,7 +803,6 @@ sub clone($) {
     my ( $source ) = @_;
 
     return if not defined($source);
-
     my $ref_type = ref($source);
 
     # Non-reference values are copied as is.
@@ -814,17 +813,22 @@ sub clone($) {
     if ( "$source" =~ /^\Q$ref_type\E\=(\w+)\(0x[0-9a-f]+\)$/ ) {
 	$class = $ref_type;
 	$ref_type = $1;
-	return unless $class eq __PACKAGE__;
+	return unless $class eq __PACKAGE__
+	  || $source->can('is_chord') # chord info object
+	  || $source->can('have_parser') # parser object
+	  ;
     }
 
     my $copy;
     if ( $ref_type eq 'HASH' ) {
 	$copy = {};
-	%$copy = map { !ref($_) ? $_ : clone($_) } %$source;
+	my @a = map { ref($_) ? clone($_) : $_ } %$source;
+	::dump(\@a) if @a % 2 == 1;
+	%$copy = @a;
     }
     elsif ( $ref_type eq 'ARRAY' ) {
 	$copy = [];
-	@$copy = map { !ref($_) ? $_ : clone($_) } @$source;
+	@$copy = map { ref($_) ? clone($_) : $_ } @$source;
     }
     elsif ( $ref_type eq 'REF' or $ref_type eq 'SCALAR' ) {
 	$copy = \( my $var = "" );
