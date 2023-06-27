@@ -405,11 +405,15 @@ sub add_config_chord {
     my $dpinfo;
     if ( $def->{display} ) {
 	$dpinfo = parse_chord($def->{display});
-	delete $def->{display};
+	if ( $dpinfo ) {
+	    $def->{display} = $dpinfo;
+	}
+	else {
+	    delete $def->{display};
+	}
     }
     for $name ( $name, @names ) {
-	my $info = $dpinfo
-	  // parse_chord($name)
+	my $info = parse_chord($name)
 	  // App::Music::ChordPro::Chord::Common->new({ name => $name });
 
 	if ( $info->is_chord && $def->{copy} && $def->is_chord ) {

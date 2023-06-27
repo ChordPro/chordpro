@@ -1752,6 +1752,8 @@ sub define_chord {
 	    $kv{display} = demarkup($a[0]);
 	    do_warn( "\"display\" should not contain markup, use \"format\"" )
 	      unless $kv{display} eq shift(@a);
+	    $kv{display} = $self->parse_chord($kv{display});
+	    delete $kv{display} unless defined $kv{display};
 	}
 
 	# format
@@ -1860,7 +1862,7 @@ sub define_chord {
     my $res = { name => $name };
 
     # Try to find info.
-    my $info = $self->parse_chord( $kv{display} // $name, "def" );
+    my $info = $self->parse_chord( $name, "def" );
     if ( $info ) {
 	# Copy the chord info.
 	$res->{$_} //= $info->{$_} // ''

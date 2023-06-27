@@ -145,7 +145,11 @@ sub generate_song {
 	    elsif ( $info->{copy} ) {
 		$t .= " copy " . $info->{copy};
 	    }
-	    for ( qw( display format ) ) {
+	    for ( qw( display ) ) {
+		next unless defined $info->{$_};
+		$t .= " $_ " . qquote($info->{$_}->name );
+	    }
+	    for ( qw( format ) ) {
 		next unless defined $info->{$_};
 		$t .= " $_ " . qquote($info->{$_} );
 	    }

@@ -1,5 +1,5 @@
 {title: Using metadata for %{instrument.type}}
 {+instrument.type guitar}
-{define-keyboard!: C7sus4/G copy C7 display "\%{root}"}
+{define-keyboard!: C7sus4/G copy C7 display C}
 #{define-guitar: C7sus4 copy Gm}
 The chord [C7sus4/G]
