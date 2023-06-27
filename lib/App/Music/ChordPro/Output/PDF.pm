@@ -664,7 +664,7 @@ sub generate_song {
 	if ( $chords ) {
 	    for ( @$chords ) {
 		if ( my $i = $s->{chordsinfo}->{$_} ) {
-		    push( @chords, $i ) unless $i->is_nc;
+		    push( @chords, $i ) if $i->has_diagram;
 		}
 		else {
 		    warn("PDF: Missing chord info for \"$_\"\n");

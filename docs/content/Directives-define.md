@@ -129,8 +129,10 @@ Note that keys that would exceed the diagram are silently wrapped.
 `    {define: A frets 0 0 2 2 2 0 base_fret 1}`
 
 This is the most common use of the define directive. It defines a
-chord with name `A` and its fret positions. The chord properties
-(`root`, `qual`, `ext` and `bass`) are derived from the given name.
+chord with name `A` and its fret positions.
+If `A` is a known chord its chord properties
+(`root`, `qual`, `ext` and `bass`) are used, otherwise these
+properties are derived from the given name.
 
 You can include the chord in a song by using its name:
 
@@ -164,6 +166,16 @@ colour.
 This sets the displayed chord name (in song body and diagram) to _C_,
 and also derives the chord properties from _C_. Note that to include
 the chord in your song you still have to use the given name _A_.
+
+**Warning:** Changing the chord name with `display` can be extremely
+confusing. For example,
+
+````
+{define: A display C}
+{define: A frets 0 0 2 2 2 0}
+````
+
+When you use chord `[A]` in a song, it will display `C`.
 
 ### Adjust the appearance of the chord name
 

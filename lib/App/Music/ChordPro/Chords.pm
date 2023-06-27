@@ -296,21 +296,28 @@ sub pop_parser {
 
 ################ Section Config & User Chords ################
 
+#use feature 'signatures';
+#sub known_chord ( $name, $onlyconfig = 0 ) {
+
 sub known_chord {
-    my ( $name ) = @_;
+    my ( $name, $onlyconfig ) = @_;
     my $info;
     if ( ref($name) =~ /^App::Music::ChordPro::Chord::/ ) {
 	$info = $name;
 	$name = $info->name;
     }
-    my $ret = $song_chords{$name} // $config_chords{$name};
+    my $ret = $onlyconfig
+      ? $config_chords{$name}
+      : $song_chords{$name} // $config_chords{$name};
     $ret->{_via} = $ret->{origin} . " chords", return $ret if $ret;
     return unless $info;
 
     # Retry agnostic. Not all can do that.
     $name = eval { $info->agnostic };
     return unless $name;
-    $ret = $song_chords{$name} // $config_chords{$name};
+    $ret = $onlyconfig
+      ? $config_chords{$name}
+      : $song_chords{$name} // $config_chords{$name};
     if ( $ret ) {
 	$ret = $info->new($ret);
 	for ( qw( name display

@@ -2016,7 +2016,7 @@ sub parse_chord {
     # When called from {define} ignore xc/xp.
     $xc = $xp = '' if $def;
 
-    $info = App::Music::ChordPro::Chords::known_chord($chord);
+    $info = App::Music::ChordPro::Chords::known_chord( $chord, $def );
     if ( $info ) {
 	warn( "Parsing chord: \"$chord\" found \"",
 	      $info->name, "\" in ", $info->{_via}, "\n" ) if $debug > 1;
@@ -2059,7 +2059,7 @@ sub parse_chord {
 
     if ( $info ) { # TODO roman?
 	# Look it up now, the name may change by transcode.
-	if ( my $i = App::Music::ChordPro::Chords::known_chord($info,1) ) {
+	if ( my $i = App::Music::ChordPro::Chords::known_chord($info, $def) ) {
 	    warn( "Parsing chord: \"$chord\" found ",
 		  $i->name, " for ", $info->name,
 		  " in ", $i->{_via}, "\n" ) if $debug > 1;
@@ -2103,7 +2103,7 @@ sub parse_chord {
     # else: warning has been given.
 
     if ( ! $info ) {
-	if ( my $i = App::Music::ChordPro::Chords::known_chord($chord) ) {
+	if ( my $i = App::Music::ChordPro::Chords::known_chord($chord, $def) ) {
 	    $info = $i;
 	    warn( "Parsing chord: \"$chord\" found \"",
 		  $chord, "\" in ",
