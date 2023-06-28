@@ -1753,7 +1753,7 @@ sub define_chord {
 	    $kv{display} = demarkup($a[0]);
 	    do_warn( "\"display\" should not contain markup, use \"format\"" )
 	      unless $kv{display} eq shift(@a);
-	    $kv{display} = $self->parse_chord($kv{display});
+	    $kv{display} = $self->parse_chord($kv{display},1);
 	    delete $kv{display} unless defined $kv{display};
 	}
 
@@ -2055,7 +2055,7 @@ sub parse_chord {
 	$info = $info->transpose( $xp,
 				  $xpose_dir // $global_dir);
 	warn( "Parsing chord: \"$chord\" transposed ",
-	      $info->{transposed}, " to \"",
+	      sprintf("%+d", $xp), " to \"",
 	      $info->name, "\"\n" ) if $debug > 1;
     }
     # else: warning has been given.
@@ -2182,6 +2182,14 @@ sub dump {
 	    $a->{chordsinfo}{$ci} = $a->{chordsinfo}{$ci}->simplify;
 	}
     }
+#    require Data::Dump::Filtered;
+#    warn Data::Dump::Filtered::dump_filtered($a, sub {
+#						 my ( $ctx, $o ) = @_;
+#						 my $h = { hide_keys => [ 'parser' ] };
+#						 $h->{bless} = ""
+#						   if $ctx->class;
+#						 $h;
+#				      });
     ::dump($a);
 }
 
