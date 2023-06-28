@@ -1041,6 +1041,7 @@ sub chord_display {
     my $fmt = $self->{format} || $::config->{settings}->{"chord-format"};
     if ( $fmt ) {
 	_flat_copy( $args, $self->{display} // $self );
+	$args->{root} = lc($args->{root}) if $self->is_note;
 	$res = interpolate( { args => $args }, $fmt );
 	# warn( "fmt1 |$fmt|$res|\n");
     }
@@ -1051,6 +1052,7 @@ sub chord_display {
     $fmt = $self->{chordformat};
     if ( $fmt ) {
 	_flat_copy( $args, $self->{display} // $self ) unless %$args;
+	$args->{root} = lc($args->{root}) if $self->is_note;
 	$args->{formatted} = $res;
 	$res = interpolate( { args => $args }, $fmt );
 	# warn( "fmt2 |$fmt|$res|\n");

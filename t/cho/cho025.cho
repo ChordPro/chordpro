@@ -1,0 +1,4 @@
+{+settings.notenames:1}
+{title: Transpose notenames}
+{transpose -10}
+[*riff:  ] [c]–[f]–[f#]–[g]
