@@ -834,9 +834,9 @@ sub is_xpxc {
 
 sub has_diagram {
     my ( $self ) = @_;
-    $self->is_keyboard
-      ? @{ $self->kbkeys // [] }
-      : @{ $self->frets  // [] };
+    ( $::config->{instrument}->{type} eq "keyboard" )
+      ? @{ $self->kbkeys // []}
+      : @{ $self->frets  // []};
 }
 
 # For convenience.
@@ -862,7 +862,6 @@ sub bass          { $_[0]->{bass} }
 sub base          { $_[0]->{base} }
 sub frets         { $_[0]->{frets} }
 sub fingers       { $_[0]->{fingers} }
-sub kbkeys        { $_[0]->{keys} }
 sub display       { $_[0]->{display} }
 sub format        { $_[0]->{format} }
 sub diagram       { $_[0]->{diagram} }
@@ -870,6 +869,11 @@ sub parser        { $_[0]->{parser} }
 
 sub strings {
     $_[0]->{parser}->{intervals};
+}
+
+sub kbkeys {
+    return $_[0]->{keys} if $_[0]->{keys} && @{$_[0]->{keys}};
+    $_[0]->{keys} = App::Music::ChordPro::Chords::get_keys($_[0]);
 }
 
 sub simplify {

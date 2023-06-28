@@ -163,19 +163,10 @@ colour.
 
 `    {define:` _A_ ... `display` _C_ ... `}`
 
-This sets the displayed chord name (in song body and diagram) to _C_,
-and also derives the chord properties from _C_. Note that to include
+This sets the displayed chord name (in song body and diagram) to _C_.
+To show the chord the chord properties from _C_ will be used.
+Note that to include
 the chord in your song you still have to use the given name _A_.
-
-**Warning:** Changing the chord name with `display` can be extremely
-confusing. For example,
-
-````
-{define: A display C}
-{define: A frets 0 0 2 2 2 0}
-````
-
-When you use chord `[A]` in a song, it will display `C`.
 
 ### Adjust the appearance of the chord name
 
@@ -292,9 +283,17 @@ item `settings.chord-format`, and its default value is:
 If property `root` is not empty this indicates that the chord was
 successfully parsed. The format will then use the chord properties
 `root`, `qual`, `ext` and `bass`. Otherwise it uses the `name`
-property.
+property. 
 
-**Important:** When using a format string in a define directive, you
+**Important 1:** Do not leave out the alternative to show the `name`
+property otherwise unparsable chords, including `NC`, will not show in
+the output.
+
+**Important 2:** When using a format string in a define directive, you
 **must** put a backslash `\` before each occurrence of `%{` to prevent
 the substitution to happen 'too early', i.e. when the directive itself
 is processed.
+The default format string, when used in a define directive, looks
+like:
+
+    {define ... format "\%{root|\%{}\%{qual}\%{ext}\%{bass|/\%{}}|\%{name}}"}
