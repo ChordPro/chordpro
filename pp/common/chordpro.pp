@@ -28,6 +28,11 @@
 # Same for File::LoadLines
 --module=File::LoadLines
 
+# Same for Object::Pad
+--module=Object::Pad
+--module=XS::Parse::Keyword
+--module=XS::Parse::Sublike
+
 # Resources.
 --addfile=../../lib/App/Music/ChordPro/res;res
 

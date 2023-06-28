@@ -1,7 +1,7 @@
 #! perl
 
 # Ease the life of the CPAN testers.
-exit 0 if $ENV{AUTOMATED_TESTING} && $] < 5.010000;
+exit 0 if $ENV{AUTOMATED_TESTING} && $] < 5.026000;
 
 # EU::MM 6.5503 is the first version to understand *_REQUIRES.
 use ExtUtils::MakeMaker 6.5503;
@@ -31,7 +31,7 @@ WriteMakefile
  VERSION	=> $version,
  AUTHOR	        => 'Johan Vromans <jvromans@squirrel.nl>',
  LICENSE	=> "perl",
- MIN_PERL_VERSION => 5.010001,
+ MIN_PERL_VERSION => 5.026000,
  INSTALLDIRS	=> 'site',
  EXE_FILES	=> [ map { "script/$_" } @bins ],
  PL_FILES	=> {
@@ -50,6 +50,7 @@ WriteMakefile
 		    'Image::Info'		  => 1.41,
 		    'List::Util'		  => 1.33,
 		    'Storable'			  => 3.08,
+		    'Object::Pad'                 => 0.78,
 		   # Some distro's have removed this from the core.
 		    'Pod::Usage'		  => 2.03,
 		   # These are only used by the LaTeX backend
