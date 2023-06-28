@@ -12,6 +12,7 @@ use Encode;
 use Text::Layout;
 use IO::String;
 use Carp;
+use utf8;
 
 use App::Music::ChordPro::Utils qw( expand_tilde demarkup );
 use App::Music::ChordPro::Output::Common qw( fmt_subst prep_outlines );
@@ -131,16 +132,18 @@ my $yflip;
 sub fix_musicsyms {
     my ( $text, $font ) = @_;
 
-    if ( $text =~ /♯/ ) {
-	unless ( $font->{has_sharp} //=
-		 $font->{fd}->{font}->glyphByUni(ord("♯")) ne ".notdef" ) {
-	    s;♯;<span font="chordprosymbols">#</span>;g;
+    for ( $text ) {
+	if ( /♯/ ) {
+	    unless ( $font->{has_sharp} //=
+		     $font->{fd}->{font}->glyphByUni(ord("♯")) ne ".notdef" ) {
+		s;♯;<span font="chordprosymbols">#</span>;g;
+	    }
 	}
-    }
-    if ( $text =~ /♭/ ) {
-	unless ( $font->{has_flat} //=
-		 $font->{fd}->{font}->glyphByUni(ord("♭")) ne ".notdef" ) {
-	    s;♭;<span font="chordprosymbols">!</span>;g;
+	if ( /♭/ ) {
+	    unless ( $font->{has_flat} //=
+		     $font->{fd}->{font}->glyphByUni(ord("♭")) ne ".notdef" ) {
+		s;♭;<span font="chordprosymbols">!</span>;g;
+	    }
 	}
     }
     return $text;
