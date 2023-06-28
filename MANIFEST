@@ -291,6 +291,8 @@ t/cho/cho023.cho
 t/cho/cho023.ref
 t/cho/cho024.cho
 t/cho/cho024.ref
+t/cho/cho025.cho
+t/cho/cho025.ref
 t/latex/30_cho_1.cho
 t/latex/30_cho_1.tex
 t/latex/30_cho_2.cho

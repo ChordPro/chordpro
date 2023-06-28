@@ -37,6 +37,7 @@ PROJECT := ChordPro
 TMP_DST := ${HOME}/tmp/${PROJECT}
 RSYNC_ARGS := -rptgoDvHL
 W10DIR := /Users/Johan/${PROJECT}
+MACDST := macky:ChordPro
 
 to_tmp : resources
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST    ./ ${TMP_DST}/
@@ -47,6 +48,11 @@ to_tmp_cpan :
 
 to_c :
 	${MAKE} to_tmp to_tmp_cpan TMP_DST=/mnt/c${W10DIR}
+
+to_mac : resources
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST    ./ ${MACDST}/
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST.WX ./ ${MACDST}/
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST.CPAN ./ ${MACDST}/
 
 release :
 	${PERL} Makefile.PL
