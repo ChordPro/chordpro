@@ -88,8 +88,7 @@ sub draw {
     # Draw font name.
     my $font = $ps->{fonts}->{diagram};
     $pr->setfont($font);
-    my $name = $info->chord_display
-      ( App::Music::ChordPro::Output::PDF::has_musicsyms($font) );
+    my $name = $info->chord_display;
     # $name .= "*"
     #   unless $info->{origin} ne "user"
     #     || $::config->{diagrams}->{show} eq "user";

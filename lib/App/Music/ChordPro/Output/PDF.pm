@@ -1649,7 +1649,7 @@ sub songline {
 		if ( $chord eq '' ) {
 		}
 		else {
-		    $chord = $chord->chord_display(has_musicsyms($ftext) );
+		    $chord = $chord->chord_display;
 		}
 		$t .= $chord . shift(@ph);
 	    }
@@ -1760,14 +1760,14 @@ sub songline {
 	    $x = $pr->text( $phrase, $x, $ytext, $ftext );
 
 	    # Collect chords to be printed in the side column.
-	    $chord = $chord->chord_display(has_musicsyms($fchord) );
+	    $chord = $chord->chord_display;
 	    push( @chords, $chord );
 	}
 	else {
 	    my $xt0 = $x;
 	    my $font = $fchord;
 	    if ( $chord ne '' ) {
-		my $ch = $chord->chord_display(has_musicsyms($font) );
+		my $ch = $chord->chord_display;
 		my $dp = $ch . " ";
 		if ( $chord->info->is_annotation ) {
 		    $font = $fonts->{annotation};
@@ -1847,18 +1847,6 @@ sub songline {
       if @chords;
 
     return;
-}
-
-sub has_musicsyms {
-    my ( $font ) = @_;
-    my $sf = 0;
-    $sf |= 0x01
-      if $font->{has_sharp}  //=
-        $font->{fd}->{font}->glyphByUni(ord("♯")) ne ".notdef";
-    $sf |= 0x02
-      if $font->{has_flat} //=
-        $font->{fd}->{font}->glyphByUni(ord("♭")) ne ".notdef";
-    return $sf;
 }
 
 sub is_bar {
@@ -2019,7 +2007,7 @@ sub gridline {
 	    my $cellwidth = $cellwidth / @$tok;
 	    for my $t ( @$tok ) {
 		$x += $cellwidth, next if $t eq '';
-		$t = $t->chord_display( has_musicsyms($fchord) );
+		$t = $t->chord_display;
 		$pr->text( $t, $x, $y, $fchord );
 		$x += $cellwidth;
 	    }
@@ -2029,7 +2017,7 @@ sub gridline {
 	    warn("Chord token without class\n")
 	      unless $token->{class} eq "chord";
 	    my $t = $token->{chord};
-	    $t = $t->chord_display( has_musicsyms($fchord) );
+	    $t = $t->chord_display;
 	    $pr->text( $t, $x, $y, $fchord )
 	      unless $token eq ".";
 	    $x += $cellwidth;

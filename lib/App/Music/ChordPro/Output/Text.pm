@@ -254,10 +254,10 @@ sub songline {
     }
 
     my $c_line = "";
-    foreach ( 0..$#{$elt->{chords}} ) {
-	$c_line .= chord( $song, $elt->{chords}->[$_] ) . " "
-	  if ref $elt->{chords}->[$_];
-	$t_line .= $phrases[$_];
+    foreach my $c ( 0..$#{$elt->{chords}} ) {
+	$c_line .= chord( $song, $elt->{chords}->[$c] ) . " "
+	  if ref $elt->{chords}->[$c];
+	$t_line .= $phrases[$c];
 	my $d = length($c_line) - length($t_line);
 	$t_line .= "-" x $d if $d > 0;
 	$c_line .= " " x -$d if $d < 0;

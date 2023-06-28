@@ -1032,7 +1032,7 @@ sub _flat_copy {
 }
 
 sub chord_display {
-    my ( $self, $sf ) = @_;
+    my ( $self ) = @_;
 
     use App::Music::ChordPro::Utils qw( splitmarkup );
     # $self->dump;
@@ -1057,44 +1057,27 @@ sub chord_display {
     }
     # warn("RES2 $res\n");
 
-    # Substitute musical symbols if wanted and possible.
+    # Substitute musical symbols if wanted.
     if ( $::config->{settings}->{truesf} ) {
 	my @c = splitmarkup($res);
-	$sf ||= 0;
 	$res = '';
 	push( @c, '' ) if @c % 2;
 	my $did = 0;		# TODO: not for roman
 	while ( @c ) {
 	    $_ = shift(@c);
-	    if ( $sf & 0x02 ) {	# has flat
-		if ( $did ) {
-		    s/b/♭/g;
-		}
-		else {
-		    s/(?<=[[:alnum:]])b/♭/g;
-		    $did++;
-		}
+	    if ( $did ) {
+		s/b/♭/g;
 	    }
-	    else {			# fallback
-		if ( $did ) {
-		    s;[b♭];<span font="chordprosymbols">!</span>;g;}
-		else {
-		    s;(?<=[[:alnum:]])[b♭];<span font="chordprosymbols">!</span>;g;
-		    $did++;
-		}
+	    else {
+		s/(?<=[[:alnum:]])b/♭/g;
+		$did++;
 	    }
-	    if ( $sf & 0x01 ) {	# has sharp
-		s/#/♯/g;
-	    }
-	    else {			# fallback
-		s;[#♯];<span font="chordprosymbols">#</span>;g;
-	    }
+	    s/#/♯/g;
 	    $res .= $_ . shift(@c);
 	}
     }
 
     return $res;
-    return $self->{parens} ? "($res)" : $res;
 }
 
 ################ Chord objects: Nashville ################

@@ -128,10 +128,29 @@ sub _yflip {
 
 my $yflip;
 
+sub fix_musicsyms {
+    my ( $text, $font ) = @_;
+
+    if ( $text =~ /♯/ ) {
+	unless ( $font->{has_sharp} //=
+		 $font->{fd}->{font}->glyphByUni(ord("♯")) ne ".notdef" ) {
+	    s;♯;<span font="chordprosymbols">#</span>;g;
+	}
+    }
+    if ( $text =~ /♭/ ) {
+	unless ( $font->{has_flat} //=
+		 $font->{fd}->{font}->glyphByUni(ord("♭")) ne ".notdef" ) {
+	    s;♭;<span font="chordprosymbols">!</span>;g;
+	}
+    }
+    return $text;
+}
+
 sub text {
     my ( $self, $text, $x, $y, $font, $size, $nomarkup ) = @_;
 #    print STDERR ("T: @_\n");
     $font ||= $self->{font};
+    $text = fix_musicsyms( $text, $font );
     $size ||= $font->{size};
 
     $self->{layout}->set_font_description($font->{fd});
@@ -197,6 +216,7 @@ sub setfont {
 sub strwidth {
     my ( $self, $text, $font, $size ) = @_;
     $font ||= $self->{font};
+    $text = fix_musicsyms( $text, $font );
     $size ||= $self->{fontsize} || $font->{size};
     $self->{tmplayout} //= Text::Layout->new( $self->{pdf} );
     $self->{tmplayout}->set_font_description($font->{fd});
@@ -208,6 +228,7 @@ sub strwidth {
 sub strheight {
     my ( $self, $text, $font, $size ) = @_;
     $font ||= $self->{font};
+    $text = fix_musicsyms( $text, $font );
     $size ||= $self->{fontsize} || $font->{size};
     $self->{tmplayout} //= Text::Layout->new( $self->{pdf} );
     $self->{tmplayout}->set_font_description($font->{fd});

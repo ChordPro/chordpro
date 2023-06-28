@@ -1,11 +1,11 @@
 #! perl
 
-use strict;
-use warnings;
+use v5.26;
+use Object::Pad;
 use utf8;
 use Carp;
 
-package App::Music::ChordPro::Chords::Appearance;
+class App::Music::ChordPro::Chords::Appearance :strict(params);
 
 =for md
 
@@ -28,32 +28,13 @@ raw      ????
 
 =cut
 
-sub new {
-    my ( $pkg, %args ) = @_;
-    bless { %args } => $pkg;
-}
-
-sub key :lvalue {
-    my ( $self ) = @_;
-    $self->{key};
-}
-
-sub format :lvalue {
-    my ( $self ) = @_;
-    $self->{format};
-}
-
-sub info :lvalue {
-    my ( $self ) = @_;
-    $self->{info};
-}
-
-# use overload '""' => sub { %_[0]->key }, fallback => 1;
+field $key             :mutator :param = undef;
+field $format          :mutator :param = undef;
+field $info            :mutator :param = undef;
+field $orig            :mutator :param = undef;
 
 # For convenience.
-sub chord_display {
-    my ( $self, $cap ) = @_;
-    my $info = $self->info;
+method chord_display {
 
     unless ( $info
 	     && UNIVERSAL::isa( $info, 'App::Music::ChordPro::Chord::Base' ) ) {
@@ -65,25 +46,23 @@ sub chord_display {
 	my $m = Carp::longmess();
 	$m =~ s/App::Music::ChordPro::([^(]+)/$1/g;
 	$m =~ s;( at )(?:.*?)(App/Music/ChordPro);$1$2;g;
-	die("Missing info for " . $self->key . "$m");
+	die("Missing info for $key$m");
     }
 
-    local $info->{chordformat} = $self->format;
-    $info->chord_display($cap);
+    local $info->{chordformat} = $format;
+    $info->chord_display;
 }
 
-sub raw {
-    my ( $self ) = @_;
-    return $self->key unless defined $self->format;
-    if ( $self->format eq '(%{formatted})' ) {
-	return '(' . $self->key . ')';
+method raw {
+    return $key unless defined $format;
+    if ( $format eq '(%{formatted})' ) {
+	return '(' . $key . ')';
     }
-    $self->key;
+    $key;
 }
 
-sub CARP_TRACE {
-    my ( $self ) = @_;
-    "<<Appearance(\"" . $self->key . "\")>>";
+method CARP_TRACE {
+    "<<Appearance(\"" . $key . "\")>>";
 }
 
 1;

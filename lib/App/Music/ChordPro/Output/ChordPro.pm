@@ -463,8 +463,8 @@ sub songline {
     }
 
     my $line = "";
-    foreach ( 0..$#{$elt->{chords}} ) {
-	$line .= "[" . fq(chord( $song, $elt->{chords}->[$_])) . "]" . fq($elt->{phrases}->[$_]);
+    foreach my $c ( 0..$#{$elt->{chords}} ) {
+	$line .= "[" . fq(chord( $song, $elt->{chords}->[$c])) . "]" . fq($elt->{phrases}->[$c]);
     }
     $line =~ s/^\[\]//;
     $line;
@@ -506,15 +506,13 @@ sub gridline {
 sub chord {
     my ( $s, $c ) = @_;
     return "" unless length($c);
-#    my $t = $c->chord_display;
-    my $t = $c->info->name;
-    if ( $c->format && $c->format eq "(%{formatted})" ) {
-	$t = "($t)";
-    }
+    local $c->info->{display} = undef;
+    local $c->info->{format} = undef;
+    my $t = $c->chord_display;
     if ( $variant ne 'msp' ) {
 	$t = demarkup($t);
     }
-#    return "*$t" if $c->info->is_annotation;
+    return "*$t" if $c->info->is_annotation;
     return $t;
 }
 
