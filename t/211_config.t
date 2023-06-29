@@ -4,8 +4,8 @@ use strict;
 use warnings;
 use utf8;
 
-use App::Music::ChordPro::Testing;
-use App::Music::ChordPro::Config;
+use ChordPro::Testing;
+use ChordPro::Config;
 
 plan tests => 12;
 
@@ -23,7 +23,7 @@ our $config = bless
 		blech => 'a',
 	      }
 	    },
-  } => 'App::Music::ChordPro::Config';
+  } => 'ChordPro::Config';
 
 is( _c("outer.foo"), "1" );
 is( _c("outer.bar.1"), "noot" );

@@ -4,12 +4,12 @@ use strict;
 use warnings;
 use utf8;
 
-use App::Music::ChordPro::Testing;
-use App::Music::ChordPro::Songbook;
+use ChordPro::Testing;
+use ChordPro::Songbook;
 
 plan tests => 6;
 
-my $s = App::Music::ChordPro::Songbook->new;
+my $s = ChordPro::Songbook->new;
 
 my $data = <<EOD;
 {title: Swing Low Sweet Chariot}
@@ -20,13 +20,13 @@ I [D]looked over Jordan, [NC]and [G/B]what did I [D]see, %{key_actual}
 {transpose}
 EOD
 
-App::Music::ChordPro::Chords::add_config_chord
+ChordPro::Chords::add_config_chord
   ( { name => [ "NC", "N.C." ], frets => [ -1, -1, -1, -1, -1, -1 ] } );
 
 eval { $s->parse_file( \$data, { transpose => 0 } ) } or diag("$@");
 
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
-isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
+isa_ok( $s->{songs}->[0], 'ChordPro::Song', "It's a song" );
 
 my $song = {
 	    'settings' => {},
@@ -107,7 +107,7 @@ EOD
 eval { $s->parse_file( \$data, { transpose => 3 } ) } or diag("$@");
 
 ok( scalar( @{ $s->{songs} } ) == 2, "One more song" );
-isa_ok( $s->{songs}->[1], 'App::Music::ChordPro::Song', "It's a song" );
+isa_ok( $s->{songs}->[1], 'ChordPro::Song', "It's a song" );
 
 $song = {
 	    'settings' => {},

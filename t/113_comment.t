@@ -4,14 +4,14 @@ use strict;
 use warnings;
 use utf8;
 
-use App::Music::ChordPro::Testing;
-use App::Music::ChordPro::Songbook;
+use ChordPro::Testing;
+use ChordPro::Songbook;
 
 plan tests => 6;
 
 # Prevent a dummy {body} for chord grids.
 $config->{diagrams}->{show} = 0;
-my $s = App::Music::ChordPro::Songbook->new;
+my $s = ChordPro::Songbook->new;
 
 # Transposition happens at compile time, %{...} is handled by the backends.
 my $data = <<EOD;
@@ -29,7 +29,7 @@ eval { $s->parse_file( \$data,
      } or diag("$@");
 
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
-isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
+isa_ok( $s->{songs}->[0], 'ChordPro::Song', "It's a song" );
 
 my $song = {
 	    'settings' => {},
@@ -85,7 +85,7 @@ my $song = {
 is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );
 
 # Same, with substitutions.
-$s = App::Music::ChordPro::Songbook->new;
+$s = ChordPro::Songbook->new;
 eval { $s->parse_file( \$data,
 		      { 'no-substitute' => 0, transpose => 2 }
 		    )
@@ -93,7 +93,7 @@ eval { $s->parse_file( \$data,
 
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 
-isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
+isa_ok( $s->{songs}->[0], 'ChordPro::Song', "It's a song" );
 
 $song->{body}->[1]->{phrases}->[0] =~ s/\%\{title\}/$song->{title}/e;
 is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );

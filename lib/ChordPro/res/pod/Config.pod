@@ -1,0 +1,27 @@
+=head1 NAME
+
+ChordPro::Config - Configurator.
+
+=head1 DESCRIPTION
+
+This module first establishes a well-defined (builtin) configuration.
+
+Then it processes the config files specified by the environment and
+adds the information to the global $config hash.
+
+The configurations files are 'relaxed' JSON files. This means that
+they may contain comments and trailing comma's.
+
+This module can be run standalone and will print the default config.
+
+=encoding utf8
+
+=head1 DEFAULT CONFIGURATION
+
+The default configuration as built in. User and system
+configs go on top of this one.
+
+See L<https://www.chordpro.org/chordpro/chordpro-configuration/> for
+extensive details and examples.
+
+

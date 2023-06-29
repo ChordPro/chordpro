@@ -4,17 +4,17 @@ use strict;
 use warnings;
 use utf8;
 
-use App::Music::ChordPro::Testing;
-use App::Music::ChordPro::Songbook;
-use App::Music::ChordPro::Song;
+use ChordPro::Testing;
+use ChordPro::Songbook;
+use ChordPro::Song;
 
 $config->{debug}->{chords} = 0;
 $config->{debug}->{x1} = 0;
-bless $config => App::Music::ChordPro::Config::;
+bless $config => ChordPro::Config::;
 my $tests = 0;
 
-my $sb = App::Music::ChordPro::Songbook->new;
-my $s = App::Music::ChordPro::Song->new;
+my $sb = ChordPro::Songbook->new;
+my $s = ChordPro::Song->new;
 
 my $info = $s->parse_chord("Am7");
 my $chord = $info->name;

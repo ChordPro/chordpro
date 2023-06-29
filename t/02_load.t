@@ -14,16 +14,16 @@ use lib "../script";
 
 my $test;
 
-++$test; use_ok("App::Music::ChordPro");
-++$test; use_ok("App::Music::ChordPro::Config");
-++$test; use_ok("App::Music::ChordPro::Testing");
-++$test; use_ok("App::Music::ChordPro::Songbook");
-++$test; use_ok("App::Music::ChordPro::Output::Debug");
-++$test; use_ok("App::Music::ChordPro::Output::Text");
-++$test; use_ok("App::Music::ChordPro::Output::ChordPro");
-++$test; use_ok("App::Music::ChordPro::Output::HTML");
-++$test; use_ok("App::Music::ChordPro::Output::PDF");
+++$test; use_ok("ChordPro");
+++$test; use_ok("ChordPro::Config");
+++$test; use_ok("ChordPro::Testing");
+++$test; use_ok("ChordPro::Songbook");
+++$test; use_ok("ChordPro::Output::Debug");
+++$test; use_ok("ChordPro::Output::Text");
+++$test; use_ok("ChordPro::Output::ChordPro");
+++$test; use_ok("ChordPro::Output::HTML");
+++$test; use_ok("ChordPro::Output::PDF");
 
-diag( "Testing App::Music::ChordPro $App::Music::ChordPro::VERSION, Perl $], $^X" );
+diag( "Testing ChordPro $ChordPro::VERSION, Perl $], $^X" );
 
 done_testing($test);

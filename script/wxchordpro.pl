@@ -14,10 +14,10 @@ binmode(STDOUT, ':utf8');
 use FindBin;
 use lib "$FindBin::Bin/../CPAN";
 use lib "$FindBin::Bin/../lib";
-use App::Packager qw( :name App::Music::ChordPro );
-use App::Music::ChordPro;
+use App::Packager qw( :name ChordPro );
+use ChordPro;
 
-use App::Music::ChordPro::Utils qw(is_msw);
+use ChordPro::Utils qw(is_msw);
 
 $ENV{PATH} = join( is_msw() ? ";" : ":",
 		   "$FindBin::Bin", "$FindBin::Bin/..",
@@ -27,11 +27,11 @@ $ENV{PATH} = join( is_msw() ? ";" : ":",
 my $my_package = 'ChordPro';
 # Program name and version.
 my $my_name = 'WxChordPro';
-my $my_version = $App::Music::ChordPro::VERSION;
+my $my_version = $ChordPro::VERSION;
 
 # We need Wx::App for the mainloop.
-# App::Music::ChordPro::Wx::Main is the main entry of the program.
-use base qw(Wx::App App::Music::ChordPro::Wx::Main);
+# ChordPro::Wx::Main is the main entry of the program.
+use base qw(Wx::App ChordPro::Wx::Main);
 
 use File::HomeDir;
 
@@ -61,7 +61,7 @@ sub OnInit {
     $self->SetVendorName("ChordPro.ORG");
     Wx::InitAllImageHandlers();
 
-    my $main = App::Music::ChordPro::Wx::Main->new();
+    my $main = ChordPro::Wx::Main->new();
     exit unless $main->init($options);
 
     $self->SetTopWindow($main);
@@ -176,7 +176,7 @@ formatted result.
 For more information about the ChordPro file format, see
 L<https://www.chordpro.org>.
 
-For more information about ChordPro program, see L<App::Music::ChordPro>.
+For more information about ChordPro program, see L<ChordPro>.
 
 =head1 LICENSE
 

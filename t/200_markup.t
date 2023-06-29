@@ -6,12 +6,12 @@ use strict;
 use warnings;
 use utf8;
 
-use App::Music::ChordPro::Testing;
-use App::Music::ChordPro::Output::PDF;
+use ChordPro::Testing;
+use ChordPro::Output::PDF;
 
 plan tests => 2;
 
-*defrag = \&App::Music::ChordPro::Output::PDF::defrag;
+*defrag = \&ChordPro::Output::PDF::defrag;
 
 my $res;
 

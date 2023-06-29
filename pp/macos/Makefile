@@ -10,7 +10,7 @@ ROOT   := ../..
 COMMON := ../common
 SCRIPT := ${ROOT}/script
 DEST   := build
-VERSION := $(shell perl ../../lib/App/Music/ChordPro/Version.pm)
+VERSION := $(shell perl ../../lib/ChordPro/Version.pm)
 
 PP := pp
 
@@ -39,10 +39,10 @@ ppl :: clean wxchordpro unpack copy_coredll loaders
 unpack :
 	perl ../pp2ppl.pl --dest=${DEST} wxchordpro --quiet
 	cp -p "${ROOT}/script/chordpro.pl" "${DEST}/script/chordpro.pl" 
-	cp -p "${ROOT}/lib/App/Music/ChordPro/Config.pm" "${DEST}/lib/App/Music/ChordPro/Config.pm" 
+	cp -p "${ROOT}/lib/ChordPro/Config.pm" "${DEST}/lib/ChordPro/Config.pm" 
 	cp "${DEST}/res/icons/chordpro.icns" ${DEST}
 	cp "${DEST}/res/icons/chordpro-doc.icns" ${DEST}
-	mv "${DEST}/res" "${DEST}/lib/App/Music/ChordPro/"
+	mv "${DEST}/res" "${DEST}/lib/ChordPro/"
 	rm -f "${DEST}/script/main.pl"
 
 # Copy core DLLs.

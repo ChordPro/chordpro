@@ -3,8 +3,8 @@
 use strict;
 use warnings;
 use utf8;
-use App::Music::ChordPro::Testing;
-use App::Music::ChordPro::Chords;
+use ChordPro::Testing;
+use ChordPro::Chords;
 
 my %tbl;
 
@@ -18,7 +18,7 @@ while ( <DATA> ) {
 
 plan tests => 0 + keys(%tbl);
 
-App::Music::ChordPro::Chords::set_parser("nashville");
+ChordPro::Chords::set_parser("nashville");
 
 =for generating
 
@@ -27,7 +27,7 @@ for my $r ( '1', '#1', 'b2', '2', '#2', 'b3', '3', '4',
     for my $q ( '', '-', '0', '+' ) {
 	for my $e ( '', '7', '^', 'h', 'h7', '^7' ) {
 	    my $chord = "$r$q$e";
-	    my $res = App::Music::ChordPro::Chords::parse_chord($chord);
+	    my $res = ChordPro::Chords::parse_chord($chord);
 	    unless ( $res ) {
 		print( "$chord\tFAIL\n");
 		next;
@@ -42,7 +42,7 @@ exit;
 =cut
 
 while ( my ( $c, $info ) = each %tbl ) {
-    my $res = App::Music::ChordPro::Chords::parse_chord($c);
+    my $res = ChordPro::Chords::parse_chord($c);
     $res //= "FAIL";
     if ( UNIVERSAL::isa( $res, 'HASH' ) ) {
 	$res = reformat($res);

@@ -4,15 +4,15 @@ use strict;
 use warnings;
 use utf8;
 
-use App::Music::ChordPro::Testing;
-use App::Music::ChordPro::Songbook;
+use ChordPro::Testing;
+use ChordPro::Songbook;
 
 plan tests => 1;
 
 # Prevent a dummy {body} for chord grids.
 $config->{diagrams}->{show} = 0;
 
-my $s = App::Music::ChordPro::Songbook->new;
+my $s = ChordPro::Songbook->new;
 
 my $data = <<EOD;
 EOD
@@ -20,7 +20,7 @@ EOD
 eval { $s->parse_file(\$data); 1 } or diag("$@");
 #use DDumper; DDumper( $s->{songs} );
 ok( scalar( @{ $s->{songs} } ) == 0, "No song" );
-#isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
+#isa_ok( $s->{songs}->[0], 'ChordPro::Song', "It's a song" );
 #
 #my $song = {
 #	    'settings' => {},

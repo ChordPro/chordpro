@@ -27,7 +27,7 @@ dist : Makefile resources
 install : Makefile
 	$(MAKE) -f Makefile install
 
-Makefile : Makefile.PL lib/App/Music/ChordPro/Version.pm resources
+Makefile : Makefile.PL lib/ChordPro/Version.pm resources
 	perl Makefile.PL
 
 ################ Extensions ################
@@ -60,7 +60,7 @@ release :
 
 # Actualize resources.
 
-LIB := lib/App/Music/ChordPro
+LIB := lib/ChordPro
 RES := ${LIB}/res
 PODSELECT := podselect
 

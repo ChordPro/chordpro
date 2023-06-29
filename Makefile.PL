@@ -6,7 +6,7 @@ exit 0 if $ENV{AUTOMATED_TESTING} && $] < 5.026000;
 # EU::MM 6.5503 is the first version to understand *_REQUIRES.
 use ExtUtils::MakeMaker 6.5503;
 
-my $master = 'lib/App/Music/ChordPro/Version.pm';
+my $master = 'lib/ChordPro/Version.pm';
 my $version = MM->parse_version($master);
 $master =~ s;/Version;;;
 
@@ -70,6 +70,7 @@ WriteMakefile
 		    'JSON::PP'	                  => 2.27203,
 		    'String::Interpolate::Named'  => 1.01,
 		    'Storable'			  => 3.08,
+		    'Object::Pad'		  => 0.78,
 		    @pdfapi,
 		   },
 
@@ -84,19 +85,19 @@ WriteMakefile
 	 chordpro => { file => "script/chordpro",
 		       version => $version },
 	 "App::Music::ChordPro"
-		  => { file => "lib/App/Music/ChordPro.pm",
+		  => { file => "lib/ChordPro.pm",
 		       version => $version },
      },
      no_index => {
          file => [
-	    "lib/App/Music/ChordPro/Songbook.pm",
-	    "lib/App/Music/ChordPro/Chords.pm",
-	    "lib/App/Music/ChordPro/Version.pm",
-	    "lib/App/Music/ChordPro/Wx.pm",
+	    "lib/ChordPro/Songbook.pm",
+	    "lib/ChordPro/Chords.pm",
+	    "lib/ChordPro/Version.pm",
+	    "lib/ChordPro/Wx.pm",
 	 ],
          directory => [
-	    "lib/App/Music/ChordPro/Output",
-	    "lib/App/Music/ChordPro/Wx",
+	    "lib/ChordPro/Output",
+	    "lib/ChordPro/Wx",
 	 ],
      },
  },

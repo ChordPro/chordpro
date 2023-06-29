@@ -4,14 +4,14 @@ use strict;
 use warnings;
 use utf8;
 
-use App::Music::ChordPro::Testing;
-use App::Music::ChordPro::Songbook;
+use ChordPro::Testing;
+use ChordPro::Songbook;
 
 use Encode qw( encode from_to );
 
 # Prevent a dummy {body} for chord grids.
 $config->{diagrams}->{show} = 0;
-my $s = App::Music::ChordPro::Songbook->new;
+my $s = ChordPro::Songbook->new;
 
 my $data = <<EOD;
 {title: Swing Low Sweet Chariot}
@@ -21,7 +21,7 @@ EOD
 eval { $s->parse_file(\$data) } or diag("$@");
 
 ok( scalar( @{ $s->{songs} } ) == 1, "__STRING__: One song" );
-isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
+isa_ok( $s->{songs}->[0], 'ChordPro::Song', "It's a song" );
 
 my $song = {
 	    'settings' => {},
@@ -75,10 +75,10 @@ sub enctest {
 
     $enc .= " (no BOM)" if $nobom;
 
-    my $s = App::Music::ChordPro::Songbook->new;
+    my $s = ChordPro::Songbook->new;
     eval { $s->parse_file($fn) } or diag("$@");
     ok( scalar( @{ $s->{songs} } ) == 1, "$enc: One song" );
-    isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
+    isa_ok( $s->{songs}->[0], 'ChordPro::Song', "It's a song" );
     $song->{source}->{file} = $fn;
     is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );
 

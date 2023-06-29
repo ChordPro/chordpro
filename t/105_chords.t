@@ -4,14 +4,14 @@ use strict;
 use warnings;
 use utf8;
 
-use App::Music::ChordPro::Testing;
-use App::Music::ChordPro::Chords;
+use ChordPro::Testing;
+use ChordPro::Chords;
 
 my %tbl;
 
 our $config =
   eval {
-      App::Music::ChordPro::Config::configurator
+      ChordPro::Config::configurator
 	  ( { nosysconfig => 1, nolegacyconfig => 1, nouserconfig => 1,
 	      config => getresource("config/notes/common.json") } );
   };
@@ -23,7 +23,7 @@ while ( <DATA> ) {
     my ( $chord, $info ) = split( /\t/, $_ );
     my $c = $chord;
     $c =~ s/[()]//g;
-    my $res = App::Music::ChordPro::Chords::parse_chord($c);
+    my $res = ChordPro::Chords::parse_chord($c);
     unless ( $res ) {
 	print( "$_\tFAIL\n");
 	next;
@@ -46,7 +46,7 @@ while ( <DATA> ) {
 plan tests => 0 + keys(%tbl);
 
 while ( my ( $c, $info ) = each %tbl ) {
-    my $res = App::Music::ChordPro::Chords::parse_chord($c,1);
+    my $res = ChordPro::Chords::parse_chord($c,1);
     $res //= "FAIL";
     if ( UNIVERSAL::isa( $res, 'HASH' ) ) {
         $res = reformat($res);

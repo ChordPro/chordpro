@@ -4,15 +4,15 @@ use strict;
 use warnings;
 use utf8;
 
-use App::Music::ChordPro::Testing;
-use App::Music::ChordPro::Config;
-use App::Music::ChordPro::Songbook;
+use ChordPro::Testing;
+use ChordPro::Config;
+use ChordPro::Songbook;
 
 plan tests => 2;
 
 !$config && diag("$@");
 ok($config, "Configuration set up");
 
-my $s = App::Music::ChordPro::Songbook->new;
+my $s = ChordPro::Songbook->new;
 ok($s, "Song set up");
 

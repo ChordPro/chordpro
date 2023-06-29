@@ -4,8 +4,8 @@ use strict;
 use warnings;
 use utf8;
 
-use App::Music::ChordPro::Testing;
-use App::Music::ChordPro::Utils;
+use ChordPro::Testing;
+use ChordPro::Utils;
 
 plan tests => 2;
 

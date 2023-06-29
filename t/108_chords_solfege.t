@@ -4,14 +4,14 @@ use strict;
 use warnings;
 use utf8;
 
-use App::Music::ChordPro::Testing;
-use App::Music::ChordPro::Chords;
-use App::Music::ChordPro::Chords::Parser;
+use ChordPro::Testing;
+use ChordPro::Chords;
+use ChordPro::Chords::Parser;
 
 my %tbl;
 
 our $config =
-      App::Music::ChordPro::Config::configurator
+      ChordPro::Config::configurator
 	  ( { nosysconfig => 1, nolegacyconfig => 1, nouserconfig => 1,
 	      config => getresource("config/notes/solfege.json") } );
 
@@ -19,7 +19,7 @@ our $config =
 
 # Enable this section to generate new reference data.
 
-my $p = App::Music::ChordPro::Chords::Parser->get_parser("solfege");
+my $p = ChordPro::Chords::Parser->get_parser("solfege");
 
 open( my $fd, '<', "t/105_chords.t" );
 my $skip = 1;
@@ -96,7 +96,7 @@ while ( <DATA> ) {
 plan tests => 0 + keys(%tbl);
 
 while ( my ( $c, $info ) = each %tbl ) {
-    my $res = App::Music::ChordPro::Chords::parse_chord($c);
+    my $res = ChordPro::Chords::parse_chord($c);
     $res //= "FAIL";
     if ( UNIVERSAL::isa( $res, 'HASH' ) ) {
 	$res = reformat($res);

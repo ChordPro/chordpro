@@ -1,7 +1,7 @@
 #! perl
 
 use Test::More tests => 2;
-use App::Music::ChordPro::Config::Properties;
+use ChordPro::Config::Properties;
 
 my $cfg = Data::Properties->new;
 $cfg->parse_lines( [ split( /[\r\n]+/, <<'EOD' ) ] );

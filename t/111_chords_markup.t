@@ -5,9 +5,9 @@
 use strict;
 use warnings;
 use utf8;
-use App::Music::ChordPro::Testing;
-use App::Music::ChordPro::Song;
-use App::Music::ChordPro::Chords;
+use ChordPro::Testing;
+use ChordPro::Song;
+use ChordPro::Chords;
 
 my @tbl1;
 my @tbl2;
@@ -27,11 +27,11 @@ while ( <DATA> ) {
 
 plan tests => 1 + @tbl1 + @tbl2;
 
-my $s = App::Music::ChordPro::Song->new;
+my $s = ChordPro::Song->new;
 ok( $s, "Got song");
 $s->_diag( format => '<DATA>, line %n, %m' );
 
-App::Music::ChordPro::Chords::set_parser("common");
+ChordPro::Chords::set_parser("common");
 $::config->{settings}->{truesf} = 1;
 $::config->{settings}->{chordnames} = "relaxed";
 $::config->{settings}->{notenames} = 1;
