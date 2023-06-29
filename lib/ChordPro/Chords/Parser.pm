@@ -127,19 +127,7 @@ sub parse_chord ( $self, $chord ) {
 
 # Fetch a parser for a known system, with fallback.
 # Default is a parser for the current config.
-sub get_parser {
-    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
-#    my ( $self, $system, $nofallback ) = @_;
-#    $system //= $::config->{notes}->{system};
-#    my $p = $self->_get_parser( $system, $nofallback );
-#    unless ( defined $p ) {
-#	warn("No parser for $system\n");
-#    }
-#    ::dump($p),die unless $p->{system} eq $system;
-#    return $p;
-#}
-#sub _get_parser {
-    my ( $self, $system, $nofallback ) = @_;
+sub get_parser ( $self, $system = undef, $nofallback = undef ) {
 
     $system //= $::config->{notes}->{system};
     return $parsers{$system} if $parsers{$system};

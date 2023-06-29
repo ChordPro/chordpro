@@ -7,10 +7,11 @@ our $config;
 
 package ChordPro::Config;
 
-use feature ':5.10';		# for state
-use strict;
-use warnings;
+use v5.26;
 use utf8;
+use Carp;
+use feature qw( signatures );
+no warnings "experimental::signatures";
 
 use App::Packager;
 use ChordPro;
@@ -20,6 +21,7 @@ use File::Spec;
 use JSON::PP ();
 use Scalar::Util qw(reftype);
 use List::Util qw(any);
+use Hash::Util;
 
 =head1 NAME
 
@@ -41,13 +43,11 @@ This module can be run standalone and will print the default config.
 
 =cut
 
-sub hmerge($$;$);
-sub clone($);
+#sub hmerge($$;$);
+#sub clone($);
+#sub default_config();
 
-sub default_config();
-
-sub configurator {
-    my ( $opts ) = @_;
+sub configurator ( $opts = undef ) {
     my $pp = JSON::PP->new->relaxed;
 
     # Test programs call configurator without options.
@@ -272,9 +272,7 @@ sub configurator {
 }
 
 # Get the decoded contents of a single config file.
-sub get_config {
-    my ( $file ) = @_;
-    Carp::confess("FATAL: Insufficient config") unless @_ == 1;
+sub get_config ( $file ) {
     Carp::confess("FATAL: Undefined config") unless defined $file;
     my $verbose = $options->{verbose};
     warn("Reading: $file\n") if $verbose > 1;
@@ -309,8 +307,7 @@ sub get_config {
 }
 
 # Check config for includes, and prepend them.
-sub prep_configs {
-    my ( $cfg, $src ) = @_;
+sub prep_configs ( $cfg, $src ) {
     $cfg->{_src} = $src;
 
     my @res;
@@ -337,8 +334,7 @@ sub prep_configs {
     return @res;
 }
 
-sub process_config {
-    my ( $cfg, $file ) = @_;
+sub process_config ( $cfg, $file ) {
     my $verbose = $options->{verbose};
 
     warn("Process: $file\n") if $verbose > 1;
@@ -376,8 +372,7 @@ sub process_config {
     }
 }
 
-sub config_final {
-    my ( $delta ) = @_;
+sub config_final ( $delta ) {
     $options->{'cfg-print'} = 1;
     my $cfg = configurator($options);
 
@@ -403,7 +398,7 @@ sub config_final {
     }
 }
 
-sub config_default {
+sub config_default () {
     if ( $ENV{CHORDPRO_CFGPROPS} ) {
 	my $pp = JSON::PP->new->relaxed;
 	my $cfg = $pp->decode( default_config() );
@@ -416,8 +411,7 @@ sub config_default {
 
 # Config in properties format.
 
-sub cfg2props {
-    my ( $o, $path ) = @_;
+sub cfg2props ( $o, $path ) {
     $path //= "";
     my $ret = "";
     if ( !defined $o ) {
@@ -452,34 +446,22 @@ sub cfg2props {
 
 # Locking/unlocking. Locking the hash is mainly for development, to
 # trap accidental modifications and typos.
-# Note that even though Hash::Util::lock_hash_recurse is in the perl
-# core since 5.18, it seems to require 5.24 to work as expected.
 
-sub lock: method {
-    my ( $self ) = @_;
-    return $self unless $] >= 5.024000;
-    require Hash::Util;
-    Hash::Util::lock_hash_recurse($self);
+sub lock ( $self ) {
+    Hash::Util::lock_hashref_recurse($self);
 }
 
-sub unlock : method {
-    my ( $self ) = @_;
-    return $self unless $] >= 5.024000;
-    require Hash::Util;
-    Hash::Util::unlock_hash_recurse($self);
+sub unlock ( $self ) {
+    Hash::Util::unlock_hashref_recurse($self);
 }
 
-sub is_locked : method {
-    return 0 unless $] >= 5.024000;
-    my ( $self ) = @_;
-    require Hash::Util;
+sub is_locked ( $self ) {
     Hash::Util::hashref_locked($self);
 }
 
 # Augment / Reduce.
 
-sub augment : method {
-    my ( $self, $hash ) = @_;
+sub augment ( $self, $hash ) {
 
     my $locked = $self->is_locked;
     $self->unlock if $locked;
@@ -492,8 +474,7 @@ sub augment : method {
 }
 
 
-sub _augment {
-    my ( $self, $hash, $path ) = @_;
+sub _augment ( $self, $hash, $path ) {
 
     for my $key ( keys(%$hash) ) {
 
@@ -565,8 +546,7 @@ sub _augment {
 
 use constant DEBUG => 0;
 
-sub reduce : method {
-    my ( $self, $hash ) = @_;
+sub reduce ( $self, $hash ) {
 
     my $locked = $self->is_locked;
 
@@ -580,13 +560,12 @@ sub reduce : method {
     return $self;
 }
 
-sub _ref {
-    reftype($_[0]) // ref($_[0]);
+sub _ref ( $self ) {
+    reftype($self) // ref($self);
 }
 
-sub _reduce {
+sub _reduce ( $self, $orig, $path ) {
 
-    my ( $self, $orig, $path ) = @_;
     my $state;
 
     if ( _ref($self) eq 'HASH' && _ref($orig) eq 'HASH' ) {
@@ -723,13 +702,10 @@ sub _reduce {
     return 'M';
 }
 
-sub hmerge($$;$) {
+sub hmerge( $left, $right, $path = "" ) {
 
     # Merge hashes. Right takes precedence.
     # Based on Hash::Merge::Simple by Robert Krimen.
-
-    my ( $left, $right, $path ) = @_;
-    $path ||= "";
 
     my %res = %$left;
 
@@ -799,8 +775,7 @@ sub hmerge($$;$) {
     return \%res;
 }
 
-sub clone($) {
-    my ( $source ) = @_;
+sub clone ( $source ) {
 
     return if not defined($source);
     my $ref_type = ref($source);
@@ -842,8 +817,8 @@ sub clone($) {
     return $copy;
 }
 
-sub precheck {
-    my ( $cfg, $file ) = @_;
+sub precheck ( $cfg, $file ) {
+
     my $verbose = $options->{verbose};
     warn("Verify config \"$file\"\n") if $verbose > 1;
     my $p;
@@ -879,49 +854,46 @@ sub precheck {
 
 my $prp_context = "";
 
-sub get_property : method {
-    my $p = shift;
+sub get_property ( $p, $prp, $def = undef ) {
     for ( split( /\./,
 		 $prp_context eq ""
-		 ? $_[0]
-		 : "$prp_context.$_[0]" ) ) {
+		 ? $prp
+		 : "$prp_context.$prp" ) ) {
 	if ( /^\d+$/ ) {
-	    die("No config $_[0]\n") unless _ref($p) eq 'ARRAY';
+	    die("No config $prp\n") unless _ref($p) eq 'ARRAY';
 	    $p = $p->[$_];
 	}
 	else {
-	    die("No config $_[0]\n") unless _ref($p) eq 'HASH';
+	    die("No config $prp\n") unless _ref($p) eq 'HASH';
 	    $p = $p->{$_};
 	}
     }
-    $p //= $_[1];
-    die("No config $_[0]\n") unless defined $p;
+    $p //= $def;
+    die("No config $prp\n") unless defined $p;
     $p;
 }
 
 *gps = \&get_property;
 
-sub set_property : method {
-    die("...");			# 5.10 cannot handle ... yet
+sub set_property  {
+    ...;
 }
 
-sub set_context : method {
-    $prp_context = $_[1] // "";
+sub set_context ( $self, $ctx = "" ) {
+    $prp_context = $ctx;
 }
 
-sub get_context : method {
+sub get_context () {
     $prp_context;
 }
 
+# For testing
 use base qw(Exporter);
 our @EXPORT = qw( _c );
-
-sub _c {
-    $::config->gps(@_);
-}
+sub _c ( @args ) { $::config->gps(@args) }
 
 # Get the raw contents of the builtin (default) config.
-sub default_config() {
+sub default_config () {
     return <<'End_Of_Config';
 // Configuration for ChordPro.
 //
@@ -1676,21 +1648,18 @@ End_Of_Config
 
 # For convenience.
 
-sub diagram_strings {
-    my $self = shift;
+sub diagram_strings ( $self ) {
     # tuning is usually removed from the config.
     # scalar( @{ $self->{tuning} } );
     ChordPro::Chords::strings();
 }
 
-sub diagram_keys {
-    my $self = shift;
+sub diagram_keys ( $self ) {
     $self->{kbdiagrams}->{keys};
 }
 
 # For debugging messages.
-sub qd {
-    my ( $val, $compact ) = @_;
+sub qd ( $val, $compact = 0 ) {
     use Data::Dumper qw();
     local $Data::Dumper::Sortkeys  = 1;
     local $Data::Dumper::Indent    = 1;
