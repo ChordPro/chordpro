@@ -4,7 +4,11 @@
     - New directive diagrams obsoletes grid/no_grid with more possibilities,
       Based on a suggestion and concept implementation from Jörg Bublath.
     - Images without directory can be looked up in CHORDPO_LIB.
+    - !Internal
     - Bump minimal perl version to 5.26 and added Object::Pad to dependencies.
+    - Change namespace App::Music::ChordPro to ChordPro.
+    - Upgrade ChordPro::Chords::Appearance to class.
+    - Enhance Parser to use sub signatures to catch call errors.
 
 6.010 2023-06-05
 

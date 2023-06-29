@@ -1,9 +1,10 @@
 #! perl
 
-use strict;
-use warnings;
+use v5.26;
 use utf8;
 use Carp;
+use feature qw( signatures );
+no warnings "experimental::signatures";
 
 # package ParserWatch;
 #
@@ -61,8 +62,7 @@ package ChordPro::Chords::Parser;
 # Note that the appropriate way is to call
 # ChordPro::Chords::Parser->get_parser.
 
-sub new {
-    my ( $pkg, $init ) = @_;
+sub new ( $pkg, $init ) {
 
     Carp::confess("Missing config?") unless $::config;
     # Use current config, optionally augmented by $init.
@@ -86,9 +86,7 @@ sub new {
 # The default parser has built-in support for common (dutch) note
 # names.
 
-sub default {
-    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
-    my ( $pkg ) = @_;
+sub default ( $pkg ) {
 
     return $parsers{common} //=
       ChordPro::Chords::Parser::Common->new
@@ -117,16 +115,13 @@ sub default {
 }
 
 # Cached version of the individual parser's parse_chord.
-sub parse {
-    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
-    my ( $self, $chord ) = @_;
+sub parse ( $self, $chord ) {
 ####    $self->{chord_cache}->{$chord} //=
       $self->parse_chord($chord);
 }
 
 # Virtual.
-sub parse_chord {
-    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
+sub parse_chord ( $self, $chord ) {
     Carp::confess("Virtual method 'parse_chord' not defined");
 }
 
@@ -175,33 +170,26 @@ sub get_parser {
     return $parsers{common} //= $self->default;
 }
 
-sub have_parser {
-    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
-    my ( $self, $system ) = @_;
+sub have_parser ( $self, $system ) {
     exists $parsers{$system};
 }
 
 # The list of instantiated parsers.
-sub parsers {
-    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
+sub parsers ( $self ) {
     \%parsers;
 }
 
-sub reset_parsers {
-    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
-    my ( $self,  @which ) = @_;
+sub reset_parsers ( $self,  @which ) {
     @which = keys(%parsers) unless @which;
     delete $parsers{$_} for @which;
 }
 
 # The number of intervals for this note system.
-sub intervals {
-    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
-    $_[0]->{intervals};
+sub intervals ( $self ) {
+    $self->{intervals};
 }
 
-sub simplify {
-    my ( $self ) = @_;
+sub simplify ( $self ) {
     ref($self);
 }
 
@@ -213,9 +201,7 @@ our @ISA = qw( ChordPro::Chords::Parser );
 
 use Storable qw(dclone);
 
-sub new {
-    my ( $pkg, $cfg ) = @_;
-    $cfg //= $::config;
+sub new ( $pkg, $cfg = $::config ) {
     my $self = bless { chord_cache => {} } => $pkg;
     bless $self => 'ChordPro::Chords::Parser::Common';
     my $notes = $cfg->{notes};
@@ -230,19 +216,17 @@ sub new {
     return $parsers{$self->{system}} = $self;
 }
 
-sub parse_chord {
-    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
-    my ( $self, $chord ) = @_;
+sub parse_chord ( $self, $chord ) {
+
+    my $info = { system => $self->{system},
+		 parser => $self,
+		 name   => $chord };
 
     my $bass = "";
     if ( $chord =~ m;^(.*)/(.*); ) {
 	$chord = $1;
 	$bass = $2;
     }
-
-    my $info = { system => $self->{system},
-		 parser => $self,
-		 name => $_[1] };
 
     my %plus;
 
@@ -471,9 +455,7 @@ my $additions_dim =
 # Build tables and patterns from the "notes" element from the
 # configuration.
 
-sub load_notes {
-    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
-    my ( $self, $init ) = @_;
+sub load_notes ( $self, $init ) {
     my $cfg = { %{$::config//{}}, %{$init//{}} };
     my $n = $cfg->{notes};
     Carp::confess("No notes?") unless $n->{system};
@@ -550,23 +532,15 @@ sub load_notes {
     $self->{intervals} = @ns_canon;
 }
 
-sub root_canon {
-    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
-    my ( $self, $root, $sharp ) = @_;
+sub root_canon ( $self, $root, $sharp = 0, $minor = 0 ) {
     ( $sharp ? $self->{ns_canon} : $self->{nf_canon} )->[$root];
 }
 
 # Has chord diagrams.
-sub has_diagrams {
-    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
-    !$_[0]->{movable};
-}
+sub has_diagrams ( $self ) { !$self->{movable} }
 
 # Movable notes system.
-sub movable {
-    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
-    $_[0]->{movable};
-}
+sub movable ( $self ) { $self->{movable} }
 
 ################ Parsing Nashville notated chords ################
 
@@ -876,8 +850,44 @@ sub kbkeys {
     $_[0]->{keys} = ChordPro::Chords::get_keys($_[0]);
 }
 
-sub simplify {
-    my ( $self ) = @_;
+sub flat_copy ( $self, $ret, $o, $pfx = "" ) {
+    while ( my ( $k, $v ) = each %$o ) {
+	if ( $k eq "orig" ) {
+	    $self->flat_copy( $ret, $v, "$k.$pfx");
+	}
+	else {
+	    $ret->{"$pfx$k"} = $v;
+	}
+    }
+    $ret;
+}
+
+sub fix_musicsyms ( $self, $str ) {
+
+    use ChordPro::Utils qw( splitmarkup );
+
+    return $str unless $::config->{settings}->{truesf};
+
+    my @c = splitmarkup($str);
+    my $res = '';
+    push( @c, '' ) if @c % 2;
+    my $did = 0;		# TODO: not for roman
+    while ( @c ) {
+	$_ = shift(@c);
+	if ( $did ) {
+	    s/b/♭/g;
+	}
+	else {
+	    s/(?<=[[:alnum:]])b/♭/g;
+	    $did++;
+	}
+	s/#/♯/g;
+	$res .= $_ . shift(@c);
+    }
+    $res;
+}
+
+sub simplify ( $self ) {
     my $c = {};
     for ( keys %$self ) {
 	next unless defined $self->{$_};
@@ -895,26 +905,23 @@ sub simplify {
     $c;
 }
 
-sub dump {
-    my ( $self ) = @_;
+sub dump ( $self ) {
     ::dump($self->simplify);
 }
 
 package ChordPro::Chord::Common;
 
 our @ISA = qw( ChordPro::Chord::Base );
+
 use String::Interpolate::Named;
 
 # Show reconstructs the chord from its constituents.
 # Result is canonical.
 sub show {
-    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
     Carp::croak("call canonical instead of show");
 }
 
-sub canonical {
-    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
-    my ( $self, $np ) = @_;
+sub canonical ( $self ) {
     my $res;
 
     $res =
@@ -924,7 +931,7 @@ sub canonical {
 	  ? $self->{parser}->root_canon( $self->{root_ord},
 					 $self->{root_mod} >= 0,
 					 $self->{qual} eq '-',
-					 !$self->is_flat
+					 # !$self->is_flat ???
 				       ) . $self->{qual} . $self->{ext}
 	  : $self->{name};
 
@@ -935,13 +942,11 @@ sub canonical {
 	$res .= "/" .
 	  ($self->{system} eq "roman" ? lc($self->{bass}) : $self->{bass});
     }
-    return $np ? $res : $self->{parens} ? "($res)" : $res;
+    return $res;
 }
 
 # Returns a representation indepent of notation system.
-sub agnostic {
-    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
-    my ( $self ) = @_;
+sub agnostic ( $self ) {
     return if $self->is_rootless || $self->is_note;
     join( " ", "",
 	  $self->{root_ord},
@@ -951,9 +956,7 @@ sub agnostic {
 	  $self->{bass_ord} // () );
 }
 
-sub transpose {
-    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
-    my ( $self, $xpose, $dir ) = @_;
+sub transpose ( $self, $xpose, $dir = 0 ) {
     return $self unless $xpose;
     return $self unless $self->is_chord;
     $dir //= $xpose <=> 0;
@@ -982,9 +985,7 @@ sub transpose {
     return $info;
 }
 
-sub transcode {
-    Carp::confess("NMC") unless UNIVERSAL::isa($_[0],__PACKAGE__);
-    my ( $self, $xcode, $key_ord ) = @_;
+sub transcode ( $self, $xcode, $key_ord = 0 ) {
     return $self unless $xcode;
     return $self unless $self->is_chord;
     return $self if $self->{system} eq $xcode;
@@ -1017,69 +1018,25 @@ sub transcode {
     return $info;
 }
 
-sub _flat_copy {
-    my ( $ret, $o, $pfx ) = @_;
-    $pfx //= "";
-    while ( my ( $k, $v ) = each %$o ) {
-	if ( $k eq "orig" ) {
-	    _flat_copy( $ret, $v, "$k.$pfx");
-	}
-	else {
-	    $ret->{"$pfx$k"} = $v;
-	}
-    }
-    $ret;
-}
+sub chord_display ( $self ) {
 
-sub chord_display {
-    my ( $self ) = @_;
-
-    use ChordPro::Utils qw( splitmarkup );
     # $self->dump;
-    my $res;
+
+    my $res = $self->name;
     my $args = {};
-    my $fmt = $self->{format} || $::config->{settings}->{"chord-format"};
-    if ( $fmt ) {
-	_flat_copy( $args, $self->{display} // $self );
-	$args->{root} = lc($args->{root}) if $self->is_note;
-	$res = interpolate( { args => $args }, $fmt );
-	# warn( "fmt1 |$fmt|$res|\n");
-    }
-    else {
-	$res = $self->name("np");
-    }
-    # warn("RES1 $res\n");
-    $fmt = $self->{chordformat};
-    if ( $fmt ) {
-	_flat_copy( $args, $self->{display} // $self ) unless %$args;
+    $self->flat_copy( $args, $self->{display} // $self );
+
+    for my $fmt ( $::config->{settings}->{"chord-format"},
+		  $self->{format},
+		  $self->{chordformat} ) {
+	next unless $fmt;
 	$args->{root} = lc($args->{root}) if $self->is_note;
 	$args->{formatted} = $res;
 	$res = interpolate( { args => $args }, $fmt );
-	# warn( "fmt2 |$fmt|$res|\n");
     }
-    # warn("RES2 $res\n");
 
     # Substitute musical symbols if wanted.
-    if ( $::config->{settings}->{truesf} ) {
-	my @c = splitmarkup($res);
-	$res = '';
-	push( @c, '' ) if @c % 2;
-	my $did = 0;		# TODO: not for roman
-	while ( @c ) {
-	    $_ = shift(@c);
-	    if ( $did ) {
-		s/b/♭/g;
-	    }
-	    else {
-		s/(?<=[[:alnum:]])b/♭/g;
-		$did++;
-	    }
-	    s/#/♯/g;
-	    $res .= $_ . shift(@c);
-	}
-    }
-
-    return $res;
+    return $::config->{settings}->{truesf} ? $self->fix_musicsyms($res) : $res;
 }
 
 ################ Chord objects: Nashville ################
@@ -1087,37 +1044,31 @@ sub chord_display {
 package ChordPro::Chord::Nashville;
 
 our @ISA = 'ChordPro::Chord::Base';
+
 use String::Interpolate::Named;
 
-sub transpose { $_[0] }
+sub transpose ( $self ) { $self }
 
 sub show {
     Carp::croak("call canonical instead of show");
 }
 
-sub canonical {
-    my ( $self, $np ) = @_;
+sub canonical ( $self ) {
     my $res = $self->{root_canon} . $self->{qual} . $self->{ext};
     if ( $self->{bass} && $self->{bass} ne "" ) {
 	$res .= "/" . lc($self->{bass});
     }
-    return $np ? $res : $self->{parens} ? "($res)" : $res;
+    return $res;
 }
 
-sub chord_display {
-    my ( $self, $raw ) = @_;
+sub chord_display ( $self ) {
     if ( $self->{format} ) {
-	if ( $raw ) {
-	    return $self->{format};
-	}
-	else {
-	    my $fmt = $self->{format} || $::config->{settings}->{"chord-format"};
-	    if ( $fmt ) {
-		my $args = {};
-		_flat_copy( $args, $self );
-		return interpolate( { args => $args }, $fmt );
-	    }
-	    return $self->canonical;
+	####TODO
+	my $fmt = $self->{format} || $::config->{settings}->{"chord-format"};
+	if ( $fmt ) {
+	    my $args = {};
+	    $self->flat_copy( $args, $self );
+	    return interpolate( { args => $args }, $fmt );
 	}
     }
 
@@ -1126,7 +1077,7 @@ sub chord_display {
     if ( $self->{bass} && $self->{bass} ne "" ) {
 	$res .= "<sub>/" . lc($self->{bass}) . "</sub>";
     }
-    return $self->{parens} ? "($res)" : $res;
+    return $res;
 }
 
 ################ Chord objects: Roman ################
@@ -1134,38 +1085,33 @@ sub chord_display {
 package ChordPro::Chord::Roman;
 
 our @ISA = 'ChordPro::Chord::Base';
+
 use String::Interpolate::Named;
 
-sub transpose { $_[0] }
+sub transpose ( $self ) { $self }
 
 sub show {
     Carp::croak("call canonical instead of show");
 }
 
-sub canonical {
-    my ( $self, $np ) = @_;
+sub canonical ( $self ) {
     my $res = $self->{root_canon} . $self->{qual} . $self->{ext};
     if ( $self->{bass} && $self->{bass} ne "" ) {
 	$res .= "/" . lc($self->{bass});
     }
-    return $np ? $res : $self->{parens} ? "($res)" : $res;
+    return $res;
 }
 
-sub chord_display {
-    my ( $self, $raw ) = @_;
+sub chord_display ( $self ) {
     if ( $self->{format} ) {
-	if ( $raw ) {
-	    return $self->{format};
+	####TODO
+	my $fmt = $self->{format} || $::config->{settings}->{"chord-format"};
+	if ( $fmt ) {
+	    my $args = {};
+	    $self->flat_copy( $args, $self );
+	    return interpolate( { args => $args }, $fmt );
 	}
-	else {
-	    my $fmt = $self->{format} || $::config->{settings}->{"chord-format"};
-	    if ( $fmt ) {
-		my $args = {};
-		_flat_copy( $args, $self );
-		return interpolate( { args => $args }, $fmt );
-	    }
-	    return $self->canonical;
-	}
+	return $self->canonical;
     }
 
     my $res = $self->{root_canon};
@@ -1174,7 +1120,7 @@ sub chord_display {
     if ( $self->{bass} && $self->{bass} ne "" ) {
 	$res .= "<sub>/" . lc($self->{bass}) . "</sub>";
     }
-    return $self->{parens} ? "($res)" : $res;
+    return $res;
 }
 
 ################ Chord objects: Annotations ################
@@ -1185,28 +1131,21 @@ use String::Interpolate::Named;
 
 our @ISA = 'ChordPro::Chord::Base';
 
-sub transpose { $_[0] }
-sub transcode { $_[0] }
+sub transpose ( $self ) { $self }
+sub transcode ( $self ) { $self }
 
-sub canonical {
-    my ( $self ) = @_;
+sub canonical ( $self ) {
     my $res = $self->{text};
     return $res;
 }
 
-sub chord_display {
-    my ( $self, $raw ) = @_;
-    if ( $raw ) {
-	return $self->{text};
-    }
-    else {
-	return interpolate( { args => $self }, $self->{text} );
-    }
+sub chord_display ( $self ) {
+    return interpolate( { args => $self }, $self->{text} );
 }
 
 # For convenience.
-sub is_chord      { 0 };
-sub is_annotation { 1 };
+sub is_chord      ( $self ) { 0 };
+sub is_annotation ( $self ) { 1 };
 
 ################ Testing ################
 
