@@ -7,9 +7,11 @@ our $options;
 
 package ChordPro::Chords;
 
-use strict;
-use warnings;
+use v5.26;
 use utf8;
+use Carp;
+use feature qw( signatures );
+no warnings "experimental::signatures";
 
 use ChordPro::Chords::Parser;
 
@@ -26,17 +28,15 @@ my %song_chords;
 my @tuning;
 
 # Assert that an instrument is loaded.
-sub assert_tuning {
+sub assert_tuning () {
     Carp::croak("FATAL: No instrument?") unless @tuning;
 }
 
 ################ Section Dumping Chords ################
 
-sub chordcompare($$);
-
 # API: Returns a list of all chord names in a nice order.
 # Used by: ChordPro, Output/ChordPro.
-sub chordnames {
+sub chordnames () {
     assert_tuning();
     [ sort chordcompare @chordnames ];
 }
@@ -52,8 +52,7 @@ my %chordorderkey; {
 
 # Compare routine for chord names.
 # API: Used by: Songbook.
-sub chordcompare($$) {
-    my ( $chorda, $chordb ) = @_;
+sub chordcompare ( $chorda, $chordb ) {
     my ( $a0, $arest ) = $chorda =~ /^([A-G][b#]?)(.*)/;
     my ( $b0, $brest ) = $chordb =~ /^([A-G][b#]?)(.*)/;
     $a0 = $chordorderkey{$a0//"\x{ff}"}//return 0;
@@ -72,8 +71,7 @@ sub chordcompare($$) {
 # Dump a textual list of chord definitions.
 # Should be handled by the ChordPro backend?
 
-sub list_chords {
-    my ( $chords, $origin, $hdr ) = @_;
+sub list_chords ( $chords, $origin, $hdr ) {
     assert_tuning();
     my @s;
     if ( $hdr ) {
@@ -130,8 +128,7 @@ sub list_chords {
     \@s;
 }
 
-sub dump_chords {
-    my ( $mode ) = @_;
+sub dump_chords ( $mode ) {
     assert_tuning();
     print( join( "\n",
 		 $mode && $mode == 2
@@ -139,8 +136,7 @@ sub dump_chords {
 		 : @{ list_chords(\@chordnames, "__CLI__", 1) } ), "\n" );
 }
 
-sub json_chords {
-    my ( $chords ) = @_;
+sub json_chords ( $chords ) {
     assert_tuning();
     my @s;
 
@@ -212,7 +208,7 @@ sub json_chords {
 
 # API: Return the number of strings supported.
 # Used by: Songbook, Output::PDF.
-sub strings {
+sub strings () {
     scalar(@tuning);
 }
 
@@ -220,8 +216,7 @@ my $parser;# = ChordPro::Chords::Parser->default;
 
 # API: Set tuning, discarding chords.
 # Used by: Config.
-sub set_tuning {
-    my ( $cfg ) = @_;
+sub set_tuning ( $cfg ) {
     my $t = $cfg->{tuning} // [];
     return "Invalid tuning (not array)" unless ref($t) eq "ARRAY";
     $options //= { verbose => 0 };
@@ -248,14 +243,13 @@ sub set_tuning {
 
 # API: Get tuning.
 # Used by: String substitution.
-sub get_tuning {
+sub get_tuning () {
     @{[@tuning]};
 }
 
 # API: Set target parser.
 # Used by: ChordPro.
-sub set_parser {
-    my ( $p ) = @_;
+sub set_parser ( $p ) {
 
     $p = ChordPro::Chords::Parser->get_parser($p)
       unless ref($p) && $p->isa('ChordPro::Chords::Parser');
@@ -272,52 +266,43 @@ my @parsers;
 
 # API: Reset current parser.
 # Used by: Config.
-sub reset_parser {
+sub reset_parser () {
     undef $parser;
     @parsers = ();
 }
 
-sub get_parser {
+sub get_parser () {
     $parser;
 }
 
-sub push_parser {
-    my ( $p ) = @_;
+sub push_parser ( $p ) {
     $p = ChordPro::Chords::Parser->get_parser($p)
       unless ref($p) && $p->isa('ChordPro::Chords::Parser');
     push( @parsers, $p );
     $parser = $p;
 }
 
-sub pop_parser {
+sub pop_parser () {
     Carp::croak("Parser stack underflow") unless @parsers;
     $parser = pop(@parsers);
 }
 
 ################ Section Config & User Chords ################
 
-#use feature 'signatures';
-#sub known_chord ( $name, $onlyconfig = 0 ) {
-
-sub known_chord {
-    my ( $name, $onlyconfig ) = @_;
+sub known_chord ( $name ) {
     my $info;
     if ( ref($name) =~ /^ChordPro::Chord::/ ) {
 	$info = $name;
 	$name = $info->name;
     }
-    my $ret = $onlyconfig
-      ? $config_chords{$name}
-      : $song_chords{$name} // $config_chords{$name};
+    my $ret = $song_chords{$name} // $config_chords{$name};
     $ret->{_via} = $ret->{origin} . " chords", return $ret if $ret;
     return unless $info;
 
     # Retry agnostic. Not all can do that.
     $name = eval { $info->agnostic };
     return unless $name;
-    $ret = $onlyconfig
-      ? $config_chords{$name}
-      : $song_chords{$name} // $config_chords{$name};
+    $ret = $song_chords{$name} // $config_chords{$name};
     if ( $ret ) {
 	$ret = $info->new($ret);
 	for ( qw( name display
@@ -332,8 +317,7 @@ sub known_chord {
     $ret;
 }
 
-sub check_chord {
-    my ( $ii ) = @_;
+sub check_chord ( $ii ) {
     my ( $name, $base, $frets, $fingers, $keys )
       = @$ii{qw(name base frets fingers keys)};
     if ( $frets && @$frets && @$frets != strings() ) {
@@ -355,8 +339,7 @@ sub check_chord {
 
 # API: Add a config defined chord.
 # Used by: Config.
-sub add_config_chord {
-    my ( $def ) = @_;
+sub add_config_chord ( $def ) {
 
     my $res;
     my $name;
@@ -467,8 +450,7 @@ sub add_config_chord {
 
 # API: Add a user defined chord.
 # Used by: Song.
-sub add_song_chord {
-    my ( $ii ) = @_;
+sub add_song_chord ( $ii ) {
 
     my $res = check_chord($ii);
     return $res if $res;
@@ -497,8 +479,7 @@ sub add_song_chord {
 
 # API: Add an unknown chord.
 # Used by: Song.
-sub add_unknown_chord {
-    my ( $name ) = @_;
+sub add_unknown_chord ( $name ) {
     $parser //= ChordPro::Chords::Parser->get_parser;
     $song_chords{$name} = bless
       { origin  => "user",
@@ -512,12 +493,12 @@ sub add_unknown_chord {
 
 # API: Reset user defined songs. Should be done for each new song.
 # Used by: Songbook, Output::PDF.
-sub reset_song_chords {
+sub reset_song_chords () {
     %song_chords = ();
 }
 
 # API: Return some chord statistics.
-sub chord_stats {
+sub chord_stats () {
     my $res = sprintf( "%d config chords", scalar(keys(%config_chords)) );
     $res .= sprintf( ", %d song chords", scalar(keys(%song_chords)) )
       if %song_chords;
@@ -526,8 +507,7 @@ sub chord_stats {
 
 ################ Section Chords Parser ################
 
-sub parse_chord {
-    my ( $chord ) = @_;
+sub parse_chord ( $chord ) {
 
     $parser //= ChordPro::Chords::Parser->get_parser;
     return $parser->parse($chord);
@@ -575,8 +555,7 @@ my %keys =
 	"h"      => [ 0, 3, 6, 10 ],             # half-diminished seventh
   );
 
-sub get_keys {
-    my ( $info ) = @_;
+sub get_keys ( $info ) {
 #    ::dump( { %$info, parser => ref($info->{parser}) });
     # Has keys defined.
     return $info->{keys} if $info->{keys} && @{$info->{keys}};
@@ -611,8 +590,7 @@ sub get_keys {
 
 # API: Transpose a chord.
 # Used by: Songbook.
-sub transpose {
-    my ( $c, $xpose, $xcode ) = @_;
+sub transpose ( $c, $xpose, $xcode = "" ) {
     return $c unless $xpose || $xcode;
     return $c if $c =~ /^ .+/;
     my $info = parse_chord($c);

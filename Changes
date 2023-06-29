@@ -8,7 +8,9 @@
     - Bump minimal perl version to 5.26 and added Object::Pad to dependencies.
     - Change namespace App::Music::ChordPro to ChordPro.
     - Upgrade ChordPro::Chords::Appearance to class.
-    - Enhance Parser to use sub signatures to catch call errors.
+    - Enhance Parser to use signatures to catch call errors.
+    - Enhance Config to use signatures to catch call errors.
+    - Enhance Chords to use signatures to catch call errors.
 
 6.010 2023-06-05
 
