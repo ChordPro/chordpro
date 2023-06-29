@@ -36,6 +36,7 @@ $::config->{settings}->{truesf} = 1;
 $::config->{settings}->{chordnames} = "relaxed";
 $::config->{settings}->{notenames} = 1;
 
+diag( qq{Expect: <DATA>, line 16, Invalid markup in chord: "Bbm7<sup>b5<sup>"} );
 foreach ( @tbl1 ) {
     doit($_);
 }
