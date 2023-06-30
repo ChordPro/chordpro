@@ -778,43 +778,12 @@ sub hmerge( $left, $right, $path = "" ) {
 sub clone ( $source ) {
 
     return if not defined($source);
-    my $ref_type = ref($source);
 
-    # Non-reference values are copied as is.
-    return $source unless $ref_type;
+    use Storable;
+    my $clone = Storable::dclone($source);
+    $clone->unlock;
+    return $clone;
 
-    # Ignore blessed objects unless it's me.
-    my $class;
-    if ( "$source" =~ /^\Q$ref_type\E\=(\w+)\(0x[0-9a-f]+\)$/ ) {
-	$class = $ref_type;
-	$ref_type = $1;
-	return unless $class eq __PACKAGE__
-	  || $source->can('is_chord') # chord info object
-	  || $source->can('have_parser') # parser object
-	  ;
-    }
-
-    my $copy;
-    if ( $ref_type eq 'HASH' ) {
-	$copy = {};
-	my @a = map { ref($_) ? clone($_) : $_ } %$source;
-	::dump(\@a) if @a % 2 == 1;
-	%$copy = @a;
-    }
-    elsif ( $ref_type eq 'ARRAY' ) {
-	$copy = [];
-	@$copy = map { ref($_) ? clone($_) : $_ } @$source;
-    }
-    elsif ( $ref_type eq 'REF' or $ref_type eq 'SCALAR' ) {
-	$copy = \( my $var = "" );
-	$$copy = clone($$source);
-    }
-    else {
-	# Plain copy anything else.
-	$copy = $source;
-    }
-    bless( $copy, $class ) if $class;
-    return $copy;
 }
 
 sub precheck ( $cfg, $file ) {
