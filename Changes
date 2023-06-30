@@ -11,6 +11,7 @@
     - Enhance Parser to use signatures to catch call errors.
     - Enhance Config to use signatures to catch call errors.
     - Enhance Chords to use signatures to catch call errors.
+    - Enhance Utils to use signatures to catch call errors.
 
 6.010 2023-06-05
 

@@ -2,9 +2,11 @@
 
 package ChordPro::Utils;
 
-use strict;
-use warnings;
+use v5.26;
 use utf8;
+use Carp;
+use feature qw( signatures );
+no warnings "experimental::signatures";
 use parent qw(Exporter);
 
 our @EXPORT;
@@ -13,14 +15,14 @@ our @EXPORT;
 
 use constant MSWIN => $^O =~ /MSWin|Windows_NT/i ? 1 : 0;
 
-sub is_msw   { MSWIN }
-sub is_macos { $^O =~ /darwin/ }
+sub is_msw ()   { MSWIN }
+sub is_macos () { $^O =~ /darwin/ }
 
 push( @EXPORT, 'is_msw', 'is_macos' );
 
 ################ Filenames ################
 
-use File::Glob ( $] >= 5.016 ? ":bsd_glob" : ":glob" );
+use File::Glob ( ":bsd_glob" );
 use File::Spec;
 
 # Derived from Path::ExpandTilde.
@@ -32,8 +34,7 @@ use constant BSD_GLOB_FLAGS => GLOB_NOCHECK | GLOB_QUOTE | GLOB_TILDE | GLOB_ERR
 # File::Glob did not try %USERPROFILE% (set in Windows NT derivatives) for ~ before 5.16
 use constant WINDOWS_USERPROFILE => MSWIN && $] < 5.016;
 
-sub expand_tilde {
-    my ( $dir ) = @_;
+sub expand_tilde ( $dir ) {
 
     return undef unless defined $dir;
     return File::Spec->canonpath($dir) unless $dir =~ m/^~/;
@@ -65,8 +66,7 @@ sub expand_tilde {
 
 push( @EXPORT, 'expand_tilde' );
 
-sub findexe {
-    my ( $prog ) = @_;
+sub findexe ( $prog ) {
     my @path;
     if ( MSWIN ) {
 	$prog .= ".exe" unless $prog =~ /\.\w+$/;
@@ -90,8 +90,7 @@ sub findexe {
 
 push( @EXPORT, 'findexe' );
 
-sub sys {
-    my ( @cmd ) = @_;
+sub sys ( @cmd ) {
     warn("+ @cmd\n") if $::options->{trace};
     # Use outer defined subroutine, depends on Wx or not.
     my $res = ::sys(@cmd);
@@ -103,8 +102,7 @@ push( @EXPORT, 'sys' );
 
 ################ (Pre)Processing ################
 
-sub make_preprocessor {
-    my ( $prp ) = @_;
+sub make_preprocessor ( $prp ) {
     return unless $prp;
 
     my $prep;
@@ -139,8 +137,7 @@ push( @EXPORT, 'make_preprocessor' );
 
 # Split (pseudo) command line into key/value pairs.
 
-sub parse_kv {
-    my ( @lines ) = @_;
+sub parse_kv ( @lines ) {
 
     use Text::ParseWords qw(shellwords);
     my @words = shellwords(@lines);
@@ -165,8 +162,7 @@ push( @EXPORT, 'parse_kv' );
 
 # Map true/false etc to true / false.
 
-sub is_true {
-    my ( $arg ) = @_;
+sub is_true ( $arg ) {
     return if !defined($arg) || $arg eq '';
     return if $arg =~ /^(false|null|no|none|off|\s+|0)$/i;
     return !!$arg;
@@ -175,8 +171,7 @@ sub is_true {
 push( @EXPORT, 'is_true' );
 
 # Stricter form of true.
-sub is_ttrue {
-    my ( $arg ) = @_;
+sub is_ttrue ( $arg ) {
     return if !defined($arg);
     $arg =~ /^(on|true|1)$/i;
 }
@@ -185,18 +180,16 @@ push( @EXPORT, 'is_ttrue' );
 
 # Fix apos -> quote.
 
-sub fq {
-    my ( $arg ) = @_;
+sub fq ( $arg ) {
     $arg =~ s/'/\x{2019}/g;
     $arg;
 }
 
 push( @EXPORT, 'fq' );
 
-# Quote a string.
+# Quote a string if needed unless forced.
 
-sub qquote {
-    my ( $arg, $force ) = @_;
+sub qquote ( $arg, $force = 0 ) {
     for ( $arg ) {
 	s/([\\\"])/\\$1/g;
 	s/([[:^print:]])/sprintf("\\u%04x", ord($1))/ge;
@@ -209,8 +202,7 @@ push( @EXPORT, 'qquote' );
 
 # Turn foo.bar.blech=blah into { foo => { bar => { blech ==> "blah" } } }.
 
-sub prp2cfg {
-    my ( $defs, $cfg ) = @_;
+sub prp2cfg ( $defs, $cfg ) {
     my $ccfg = {};
     $cfg //= {};
     while ( my ($k, $v) = each(%$defs) ) {
@@ -243,27 +235,25 @@ sub prp2cfg {
 push( @EXPORT, 'prp2cfg' );
 
 # Remove markup.
-sub demarkup {
-    my ( $t ) = @_;
+sub demarkup ( $t ) {
     return join( '', grep { ! /^\</ } splitmarkup($t) );
 }
 push( @EXPORT, 'demarkup' );
 
 # Split into markup/nonmarkup segments.
-sub splitmarkup {
-    my ( $t ) = @_;
+sub splitmarkup ( $t ) {
     my @t = split( qr;(</?(?:[-\w]+|span\s.*?)>);, $t );
     return @t;
 }
 push( @EXPORT, 'splitmarkup' );
 
 # For conditional filling of hashes.
-sub maybe($$@) {
-    if (defined $_[0] and defined $_[1]) {
-	@_;
+sub maybe ( $key, $value, @rest ) {
+    if (defined $key and defined $value) {
+	return ( $key, $value, @rest );
     }
     else {
-	( scalar @_ > 1 ) ? @_[2 .. $#_] : ();
+	( defined($key) || @rest ) ? @rest : ();
     }
 }
 push( @EXPORT, "maybe" );
