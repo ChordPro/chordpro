@@ -3,8 +3,7 @@
 # Ease the life of the CPAN testers.
 exit 0 if $ENV{AUTOMATED_TESTING} && $] < 5.026000;
 
-# EU::MM 6.5503 is the first version to understand *_REQUIRES.
-use ExtUtils::MakeMaker 6.5503;
+use ExtUtils::MakeMaker 7.24;	# comes with 5.26
 
 my $master = 'lib/ChordPro/Version.pm';
 my $version = MM->parse_version($master);
@@ -26,17 +25,17 @@ if ( my $a = $ENV{CHORDPRO_PDF_API} ) {
 
 WriteMakefile
 (
- NAME		=> 'App::Music::ChordPro',
- ABSTRACT_FROM  => $master,
- VERSION	=> $version,
- AUTHOR	        => 'Johan Vromans <jvromans@squirrel.nl>',
- LICENSE	=> "perl",
+ NAME		  => 'App::Music::ChordPro',
+ ABSTRACT         => "A lyrics and chords formatting program",
+ VERSION	  => $version,
+ AUTHOR	          => 'Johan Vromans <jvromans@squirrel.nl>',
+ LICENSE	  => "perl",
  MIN_PERL_VERSION => 5.026000,
- INSTALLDIRS	=> 'site',
- EXE_FILES	=> [ map { "script/$_" } @bins ],
- PL_FILES	=> {
-		    'script/ppchordpro.PL' => [ map { "script/$_" } @bins ]
-		   },
+ INSTALLDIRS	  => 'site',
+ EXE_FILES	  => [ map { "script/$_" } @bins ],
+ PL_FILES	  => {
+		       'script/ppchordpro.PL' => [ map { "script/$_" } @bins ]
+		     },
 
  # Always require PDF::API2 or PDF::Builder and Text::Layout.
  PREREQ_PM      => {
@@ -48,7 +47,7 @@ WriteMakefile
 		    'File::LoadLines'		  => 1.021,
 		    'File::HomeDir'		  => 1.004,
 		    'Image::Info'		  => 1.41,
-		    'List::Util'		  => 1.33,
+		    'List::Util'		  => 1.46,
 		    'Storable'			  => 3.08,
 		    'Object::Pad'                 => 0.78,
 		   # Some distro's have removed this from the core.
@@ -59,8 +58,8 @@ WriteMakefile
 		   },
 
  CONFIGURE_REQUIRES => {
-    "ExtUtils::MakeMaker" => 6.5503,
- },
+		    'ExtUtils::MakeMaker'	  => 7.24,
+		    },
 
 # BUILD_REQUIRES => {
 # },
@@ -76,8 +75,8 @@ WriteMakefile
 
  META_MERGE => {
      resources => {
-	 license    => "http://dev.perl.org/licenses/",
-	 homepage   => "http://www.chordpro.org",
+	 license    => "https://dev.perl.org/licenses/",
+	 homepage   => "https://www.chordpro.org",
 	 repository => "https://github.com/sciurius/chordpro",
 	 bugtracker => "https://github.com/sciurius/chordpro/issues",
      },
@@ -92,12 +91,19 @@ WriteMakefile
          file => [
 	    "lib/ChordPro/Songbook.pm",
 	    "lib/ChordPro/Chords.pm",
+	    "lib/ChordPro/Testing.pm",
+	    "lib/ChordPro/Utils.pm",
 	    "lib/ChordPro/Version.pm",
 	    "lib/ChordPro/Wx.pm",
 	 ],
          directory => [
+	    "lib/ChordPro/Chords",
+	    "lib/ChordPro/Config",
+	    "lib/ChordPro/Delegate",
 	    "lib/ChordPro/Output",
 	    "lib/ChordPro/Wx",
+	    "lib/ChordPro/res",
+	    "pp",
 	 ],
      },
  },
