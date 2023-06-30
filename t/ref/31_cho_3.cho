@@ -2,10 +2,6 @@
 {subtitle: Traditional}
 {columns: 2}
 {titles: center}
-{define: D               base-fret  1    frets   X   X   0   2   3   2   }
-{define: G               base-fret  1    frets   3   2   0   0   0   3   }
-{define: A7              base-fret  1    frets   X   0   2   0   2   0   }
-{define: D7              base-fret  1    frets   X   X   0   2   1   2   }
 
 {start_of_chorus}
 Swing low, sweet chariot,
@@ -33,3 +29,8 @@ I'm sometimes up and sometimes down,
 But still my soul feels heavenly bound.
      Comin' for to carry me home.
 {end_of_tab}
+
+#{chord: D base-fret 1 frets N N 0 2 3 2}
+#{chord: G base-fret 1 frets 3 2 0 0 0 3}
+#{chord: A7 base-fret 1 frets N 0 2 0 2 0}
+#{chord: D7 base-fret 1 frets N N 0 2 1 2}

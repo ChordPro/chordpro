@@ -1,7 +1,5 @@
 {title: Keys}
 {key: D}
-{define: D               base-fret  1    frets   X   X   0   2   3   2   }
-{define: E               base-fret  1    frets   0   2   2   1   0   0   }
 {comment: Key: , Actual: , From: }
 {comment: Key: D, Actual: D, From: }
 [D]Hi
@@ -9,3 +7,6 @@
 [E]Hi
 {comment: Key: D, Actual: D, From: }
 [D]Hi
+
+#{chord: D base-fret 1 frets N N 0 2 3 2}
+#{chord: E base-fret 1 frets 0 2 2 1 0 0}

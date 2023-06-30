@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#! perl
 
 package main;
 
@@ -7,16 +7,18 @@ our $config;
 
 package ChordPro::Output::ChordPro;
 
-use strict;
-use warnings;
+use v5.26;
+use utf8;
+use Carp;
+use feature qw( signatures );
+no warnings "experimental::signatures";
 
 use ChordPro::Output::Common;
 use ChordPro::Utils qw( fq qquote demarkup is_true is_ttrue );
 
 my $re_meta;
 
-sub generate_songbook {
-    my ( $self, $sb ) = @_;
+sub generate_songbook ( $self, $sb ) {
 
     # Skip empty songbooks.
     return [] unless eval { $sb->{songs}->[0]->{body} };
@@ -48,13 +50,12 @@ my $lyrics_only = 0;
 my $variant = 'cho';
 my $rechorus;
 
-sub upd_config {
+sub upd_config () {
     $rechorus = $::config->{chordpro}->{chorus}->{recall};
     $lyrics_only = 2 * $::config->{settings}->{'lyrics-only'};
 }
 
-sub generate_song {
-    my ( $s ) = @_;
+sub generate_song ( $s ) {
 
     my $tidy = $options->{'backend-option'}->{tidy};
     my $structured = ( $options->{'backend-option'}->{structure} // '' ) eq 'structured';
@@ -138,61 +139,12 @@ sub generate_song {
 
     if ( $s->{define} ) {
 	foreach my $info ( @{ $s->{define} } ) {
-	    my $t = "{define: " . $info->{name};
-	    if ( $info->{copyall} ) {
-		$t .= " copyall " . $info->{copyall};
-	    }
-	    elsif ( $info->{copy} ) {
-		$t .= " copy " . $info->{copy};
-	    }
-	    for ( qw( display ) ) {
-		next unless defined $info->{$_};
-		$t .= " $_ " . qquote($info->{$_}->name );
-	    }
-	    for ( qw( format ) ) {
-		next unless defined $info->{$_};
-		$t .= " $_ " . qquote($info->{$_} );
-	    }
-	    $t .= " base-fret " . $info->{base};
-	    $t .= " frets " .
-	      join(" ", map { $_ < 0 ? "N" : $_ } @{$info->{frets}})
-		if $info->{frets};
-	    $t .= " fingers " .
-	      join(" ", map { $_ < 0 ? "N" : $_ } @{$info->{fingers}})
-		if $info->{fingers} && @{$info->{fingers}};
-	    $t .= " keys " .
-	      join(" ", @{$info->{keys}})
-		if $info->{keys} && @{$info->{keys}};
-	    for ( qw( diagram ) ) {
-		next unless defined $info->{$_};
-		my $v = $info->{$_};
-		if ( is_true($v) ) {
-		    if ( is_ttrue($v) ) {
-			next;
-		    }
-		}
-		else {
-		    $v = "off";
-		}
-		$t .= " $_ $v";
-	    }
-	    push(@s, $t . "}");
+	    push( @s, define($info) );
 	}
 	push(@s, "") if $tidy;
     }
 
     my $ctx = "";
-    my $dumphdr = 1;
-
-    if ( $s->{chords} && $variant ne 'msp' ) {
-	$dumphdr = 0 unless $s->{chords}->{origin} eq "__CLI__";
-	push( @s,
-	      @{ ChordPro::Chords::list_chords
-		  ( $s->{chords}->{chords},
-		    $s->{chords}->{origin},
-		    $dumphdr ) } );
-	$dumphdr = 0;
-    }
 
     my @elts = @{$s->{body}};
     while ( @elts ) {
@@ -367,18 +319,9 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "diagrams" ) {
-	    $dumphdr = 0 unless $elt->{origin} eq "__CLI__";
-	    push( @s,
-		  @{ ChordPro::Chords::list_chords
-		      ( [ map {
-			    $s->{chordsinfo}->{$_}->{origin} eq 'inline'
-			      ? $s->{chordsinfo}->{$_}
-			      : $s->{chordsinfo}->{$_}->{name}
-		          } @{$elt->{chords}} ],
-			$elt->{origin},
-			$dumphdr ) } );
-	    $dumphdr = 0;
-	    next;
+	    for ( @{$elt->{chords}} ) {
+		push( @s, define( $s->{chordsinfo}->{$_}, 1 ) );
+	    }
 	}
 
 	if ( $elt->{type} eq "set" ) {
@@ -411,6 +354,15 @@ sub generate_song {
     }
 
     push(@s, "{end_of_$ctx}") if $ctx;
+
+    my $did = 0;
+    if ( $s->{chords} && @{ $s->{chords}->{chords} } && $variant ne 'msp' ) {
+	for ( @{ $s->{chords}->{chords} } ) {
+	    last unless $s->{chordsinfo}->{$_}->parser->has_diagrams;
+	    push( @s, "" ) unless $did++;
+	    push( @s, define( $s->{chordsinfo}->{$_}, 1 ) );
+	}
+    }
 
     # Process image assets.
     foreach ( sort { $imgs{$a} <=> $imgs{$b} } keys %imgs ) {
@@ -455,8 +407,7 @@ sub generate_song {
     \@s;
 }
 
-sub songline {
-    my ( $song, $elt ) = @_;
+sub songline ( $song, $elt ) {
 
     if ( $lyrics_only || !exists($elt->{chords}) ) {
 	return fq(join( "", @{ $elt->{phrases} } ));
@@ -470,8 +421,7 @@ sub songline {
     $line;
 }
 
-sub gridline {
-    my ( $song, $elt ) = @_;
+sub gridline ( $song, $elt ) {
 
     my $line = "";
     for ( @{ $elt->{tokens} } ) {
@@ -503,8 +453,7 @@ sub gridline {
     $line;
 }
 
-sub chord {
-    my ( $s, $c ) = @_;
+sub chord ( $s, $c ) {
     return "" unless length($c);
     local $c->info->{display} = undef;
     local $c->info->{format} = undef;
@@ -514,6 +463,62 @@ sub chord {
     }
     return "*$t" if $c->info->is_annotation;
     return $t;
+}
+
+sub define ( $info, $is_diag = 0 ) {
+
+    my $t = $is_diag ? "#{chord: " : "{define: ";
+    $t .= $info->{name};
+    unless ( $is_diag ) {
+	if ( $info->{copyall} ) {
+	    $t .= " copyall " . qquote($info->{copyall});
+	}
+	elsif ( $info->{copy} ) {
+	    $t .= " copy " . qquote($info->{copy});
+	}
+	for ( qw( display ) ) {
+	    next unless defined $info->{$_};
+	    $t .= " $_ " . qquote($info->{$_}->name );
+	}
+	for ( qw( format ) ) {
+	    next unless defined $info->{$_};
+	    my $x = qquote($info->{$_}, 1 );
+	    $x =~ s/\%\{/\\%{/g;
+	    $t .= " $_ $x";
+	}
+    }
+
+    if ( $::config->{instrument}->{type} eq "keyboard" ) {
+	$t .= " keys " .
+	  join(" ", @{$info->{keys}})
+	  if $info->{keys} && @{$info->{keys}};
+    }
+    else {
+	$t .= " base-fret " . $info->{base};
+	$t .= " frets " .
+	  join(" ", map { $_ < 0 ? "N" : $_ } @{$info->{frets}})
+	  if $info->{frets};
+	$t .= " fingers " .
+	  join(" ", map { $_ < 0 ? "N" : $_ } @{$info->{fingers}})
+	  if $info->{fingers} && @{$info->{fingers}};
+    }
+    unless ( $is_diag ) {
+	for ( qw( diagram ) ) {
+	    next unless defined $info->{$_};
+	    my $v = $info->{$_};
+	    if ( is_true($v) ) {
+		if ( is_ttrue($v) ) {
+		    next;
+		}
+	    }
+	    else {
+		$v = "off";
+	    }
+	    $t .= " $_ $v";
+	}
+    }
+
+    return $t . "}";
 }
 
 1;

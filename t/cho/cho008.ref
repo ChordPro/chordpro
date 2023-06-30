@@ -2,21 +2,11 @@
 {define: D base-fret 5 frets 1 1 3 3 3 1}
 {define: D' base-fret 5 frets 1 1 3 3 3 1}
 {define: Dosa base-fret 5 frets 1 1 3 3 3 1}
-{define: D† format D<sup>†</sup> base-fret 5 frets 1 1 3 3 3 1}
+{define: D† format "D<sup>†</sup>" base-fret 5 frets 1 1 3 3 3 1}
 {define: C base-fret 3 frets 1 1 3 3 3 1}
 {define: C' base-fret 3 frets 1 1 3 3 3 1}
-{define: C† format C<sup>†</sup> base-fret 3 frets 1 1 3 3 3 1}
+{define: C† format "C<sup>†</sup>" base-fret 3 frets 1 1 3 3 3 1}
 {define: Cosa base-fret 5 frets 1 1 3 3 3 1}
-{define: D               base-fret  5    frets   1   1   3   3   3   1   }
-{define: D'              base-fret  5    frets   1   1   3   3   3   1   }
-{define: D†              base-fret  5    frets   1   1   3   3   3   1   }
-{define: Dosa            base-fret  5    frets   1   1   3   3   3   1   }
-{define: A               base-fret  1    frets   X   0   2   2   2   0   }
-{define: C               base-fret  3    frets   1   1   3   3   3   1   }
-{define: C'              base-fret  3    frets   1   1   3   3   3   1   }
-{define: C†              base-fret  3    frets   1   1   3   3   3   1   }
-{define: Cosa            base-fret  5    frets   1   1   3   3   3   1   }
-{define: G               base-fret  1    frets   3   2   0   0   0   3   }
 
 This is a song with a [D] D chord, transposed down 2 semitones
 This is with alternative [D’]  D’ chord or [D†] D†
@@ -35,3 +25,14 @@ Arbitrary unknown (but understood) chord [Cosa](Dosa)
 | C . . . | C' . . . |
 | G . . . | C† . . C ||
 {end_of_grid}
+
+#{chord: D base-fret 5 frets 1 1 3 3 3 1}
+#{chord: D' base-fret 5 frets 1 1 3 3 3 1}
+#{chord: D† base-fret 5 frets 1 1 3 3 3 1}
+#{chord: Dosa base-fret 5 frets 1 1 3 3 3 1}
+#{chord: A base-fret 1 frets N 0 2 2 2 0}
+#{chord: C base-fret 3 frets 1 1 3 3 3 1}
+#{chord: C' base-fret 3 frets 1 1 3 3 3 1}
+#{chord: C† base-fret 3 frets 1 1 3 3 3 1}
+#{chord: Cosa base-fret 5 frets 1 1 3 3 3 1}
+#{chord: G base-fret 1 frets 3 2 0 0 0 3}

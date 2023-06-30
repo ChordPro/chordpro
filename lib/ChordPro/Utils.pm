@@ -200,7 +200,7 @@ sub qquote {
     for ( $arg ) {
 	s/([\\\"])/\\$1/g;
 	s/([[:^print:]])/sprintf("\\u%04x", ord($1))/ge;
-	return $_ unless /[\\\s]/;
+	return $_ unless /[\\\s]/ || $force;
 	return qq("$_");
     }
 }

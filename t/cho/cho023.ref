@@ -1,5 +1,6 @@
 {title: Using metadata for guitar}
 {define: C7sus4/G display C base-fret 1 frets 0 3 2 3 1 0}
-{define: C7sus4/G        base-fret  1    frets   0   3   2   3   1   0   }
 #{define-guitar: C7sus4 copy Gm}
 The chord [C7sus4/G]
+
+#{chord: C7sus4/G base-fret 1 frets 0 3 2 3 1 0}

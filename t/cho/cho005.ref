@@ -1,11 +1,12 @@
 {title: Keys and Capo}
 {capo: 2}
 {key: D}
-{define: D               base-fret  1    frets   X   X   0   2   3   2   }
-{define: F               base-fret  1    frets   1   3   3   2   1   1   }
 {comment: Key: D, Actual: E, From: D}
 [D]Hi
 {comment: Key: D, Actual: G, From: E}
 [F]Hi
 {comment: Key: D, Actual: D, From: }
 [D]Hi
+
+#{chord: D base-fret 1 frets N N 0 2 3 2}
+#{chord: F base-fret 1 frets 1 3 3 2 1 1}
