@@ -1082,7 +1082,7 @@ sub ::runtimeinfo {
     # Determine resource path.
     my @p;
     if ( $ENV{CHORDPRO_LIB} ) {
-	$msg .= sprintf( $fmtv, "CHORDPRO_LIB", $ENV{CHORDPRO_LIB} );
+	$msg .= sprintf( $fmtvv, "CHORDPRO_LIB", $ENV{CHORDPRO_LIB} );
 	@p = splitpath($ENV{CHORDPRO_LIB});
     }
     push( @p, realpath( App::Packager::GetResourcePath() ) );
