@@ -666,7 +666,7 @@ sub chord {
     Carp::confess unless length($orig);
 
     # Intercept annotations.
-    if ( $orig =~ /^\*(.+)/ ) {
+    if ( $orig =~ /^\*(.+)/ || $orig =~ /^(\||\s+)$/ ) {
 	my $i = ChordPro::Chord::Annotation->new
 	  ( { name => $orig, text => $1 } );
 	return

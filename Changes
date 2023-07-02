@@ -4,6 +4,7 @@
     - New directive diagrams obsoletes grid/no_grid with more possibilities,
       Based on a suggestion and concept implementation from Jörg Bublath.
     - Images without directory can be looked up in CHORDPO_LIB.
+    - Turn pseudo-chords like | and spaces into annotations.
     - !Internal
     - Bump minimal perl version to 5.26 and added Object::Pad to dependencies.
     - Change namespace App::Music::ChordPro to ChordPro.

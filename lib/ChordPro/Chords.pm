@@ -396,6 +396,7 @@ sub add_config_chord ( $def ) {
 	}
     }
     for $name ( $name, @names ) {
+	next if $name =~ /^(\||\s*)$/;
 	my $info = parse_chord($name)
 	  // ChordPro::Chord::Common->new({ name => $name });
 
@@ -451,6 +452,8 @@ sub add_config_chord ( $def ) {
 # API: Add a user defined chord.
 # Used by: Song.
 sub add_song_chord ( $ii ) {
+
+    return if $ii->name =~ /^(\||\s*)$/;
 
     my $res = check_chord($ii);
     return $res if $res;
