@@ -3,6 +3,8 @@
 use Test::More tests => 2;
 use ChordPro::Config::Properties;
 
+delete $ENV{version};		# yes, some systems seem to set this
+
 my $cfg = Data::Properties->new;
 $cfg->parse_lines( [ split( /[\r\n]+/, <<'EOD' ) ] );
 version = 1

@@ -3,6 +3,8 @@
 use Test::More tests => 3;
 use ChordPro::Config::Properties;
 
+delete $ENV{version};		# yes, some systems seem to set this
+
 my $cfg = Data::Properties->new;
 
 $cfg->set_property( "version", 1 );

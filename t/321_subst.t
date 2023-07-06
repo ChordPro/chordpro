@@ -5,6 +5,7 @@ use ChordPro::Config::Properties;
 
 my $cfg = Data::Properties->new;
 
+delete $ENV{version};		# yes, some systems seem to set this
 delete $ENV{XXDATAPROPERTIESXX};
 delete $ENV{xxdatapropertiesxx};
 $ENV{XXDATAPROPERTIESXX} = "env";
