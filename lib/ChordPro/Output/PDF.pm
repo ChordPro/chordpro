@@ -1157,8 +1157,8 @@ sub generate_song {
 	if ( $elt->{type} eq "svg" ) {
 	    # We turn SVG into one (or more) XForm objects.
 
-	    require ChordPro::Output::PDF::SVG;
-	    my $p = ChordPro::Output::PDF::SVG->new
+	    require PDF::SVG;
+	    my $p = PDF::SVG->new
 	      ( $ps, debug => $config->{debug}->{images} > 1 );
 	    my $o = $p->process_file( $elt->{uri} );
 	    warn("PDF: SVG objects: ", 0+@$o, "\n")
