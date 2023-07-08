@@ -211,7 +211,7 @@ sub parse_chord ( $self, $chord ) {
 		 name   => $chord };
 
     my $bass = "";
-    if ( $chord =~ m;^(.*)/(.*); ) {
+    if ( $chord =~ m;^(.*)/($self->{n_pat})$; ) {
 	$chord = $1;
 	$bass = $2;
     }
