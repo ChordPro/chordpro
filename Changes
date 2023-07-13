@@ -10,6 +10,7 @@
     - !Internal
     - Bump minimal perl version to 5.26 and added Object::Pad to dependencies.
     - Change namespace App::Music::ChordPro to ChordPro.
+    - Put VERSION on single line for stupid tools.
     - Upgrade ChordPro::Chords::Appearance to class.
     - Enhance Parser to use signatures to catch call errors.
     - Enhance Config to use signatures to catch call errors.

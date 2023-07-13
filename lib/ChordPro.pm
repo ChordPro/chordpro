@@ -6,12 +6,12 @@ package ChordPro;
 
 use App::Packager;
 
-use ChordPro::Version;
 use ChordPro::Utils;
 use ChordPro::Chords;
 use ChordPro::Output::Common;
 
-our $VERSION = $ChordPro::Version::VERSION;
+# Single line for stupid tools.
+use ChordPro::Version; our $VERSION = $ChordPro::Version::VERSION;
 
 =head1 NAME
 
