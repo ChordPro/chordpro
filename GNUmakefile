@@ -45,14 +45,16 @@ to_tmp : resources
 
 to_tmp_cpan :
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.CPAN ./ ${TMP_DST}/
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST.SVG  ./ ${TMP_DST}/
 
 to_c :
 	${MAKE} to_tmp to_tmp_cpan TMP_DST=/mnt/c${W10DIR}
 
 to_mac : resources
-	rsync ${RSYNC_ARGS} --files-from=MANIFEST    ./ ${MACDST}/
-	rsync ${RSYNC_ARGS} --files-from=MANIFEST.WX ./ ${MACDST}/
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST      ./ ${MACDST}/
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST.WX   ./ ${MACDST}/
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.CPAN ./ ${MACDST}/
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST.SVG  ./ ${MACDST}/
 
 release :
 	${PERL} Makefile.PL

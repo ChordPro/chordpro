@@ -1159,8 +1159,9 @@ sub generate_song {
 
 	    require PDF::SVG;
 	    my $p = PDF::SVG->new
-	      ( $ps, debug => $config->{debug}->{images} > 1 );
-	    my $o = $p->process_file( $elt->{uri} );
+	      ( ps => $ps, atts => { debug => $config->{debug}->{images} > 1 } );
+	    $p->process_file( $elt->{uri} );
+	    my $o = $p->xoforms;
 	    warn("PDF: SVG objects: ", 0+@$o, "\n")
 	      if $config->{debug}->{images} || !@$o;
 	    if ( ! @$o ) {
