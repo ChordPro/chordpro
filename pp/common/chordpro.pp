@@ -7,7 +7,7 @@
 --cachedeps=chordpro.pp.deps
 
 # Since not all modules are statically required, enumerate.
---module=App_Music_ChordPro_Bundle
+--module=ChordPro_Bundle
 
 # Same for PDF::API2 and Font::TTF.
 # By explicitly including the main module we are pretty sure the
@@ -28,8 +28,13 @@
 # Same for File::LoadLines
 --module=File::LoadLines
 
+# Same for Object::Pad
+--module=Object::Pad
+--module=XS::Parse::Keyword
+--module=XS::Parse::Sublike
+
 # Resources.
---addfile=../../lib/App/Music/ChordPro/res;res
+--addfile=../../lib/ChordPro/res;res
 
 # Filtering
 #--modfilter=Null=Config\.pm$

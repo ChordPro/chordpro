@@ -3,8 +3,8 @@
 use strict;
 use warnings;
 use lib "../../lib";
-use App::Music::ChordPro::Version;
-my $vv = $App::Music::ChordPro::Version::VERSION;
+use ChordPro::Version;
+my $vv = $ChordPro::Version::VERSION;
 
 my ( $maj, $min, $aux ) = $vv =~ /^(\d+)\.(\d+)(?:_(\d+))?/;
 

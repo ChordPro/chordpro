@@ -6,7 +6,7 @@
 ROOT   := ../..
 COMMON := ../common
 SCRIPT := ${ROOT}/script
-RES    := ..\..\lib\App\Music\ChordPro\res
+RES    := ..\..\lib\ChordPro\res
 PP := pp -u
 
 all : ppl iss
@@ -56,11 +56,11 @@ ppl : clean wxchordpro.exe unpack copy_coredll loaders
 unpack :
 	perl ..\pp2ppl.pl --quiet --dest="${DEST}" wxchordpro.exe
 	copy "${ROOT}\script\chordpro.pl" "${DEST}\script\chordpro.pl" 
-	copy "${ROOT}\lib\App\Music\ChordPro\Config.pm" "${DEST}\lib\App\Music\ChordPro\Config.pm" 
+	copy "${ROOT}\lib\ChordPro\Config.pm" "${DEST}\lib\ChordPro\Config.pm" 
 	copy "abcm2ps.exe" "${DEST}" 
 	copy "${DEST}\res\icons\chordpro.ico" "${DEST}"
 	copy "${DEST}\res\icons\chordpro-doc.ico" "${DEST}"
-	move "${DEST}\res" "${DEST}\lib\App\Music\ChordPro"
+	move "${DEST}\res" "${DEST}\lib\ChordPro"
 
 # The core DLLs needed for Strawberry perl. The Wx libs have been unpacked already.
 copy_coredll :

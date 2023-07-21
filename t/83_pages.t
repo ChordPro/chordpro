@@ -5,9 +5,9 @@ use warnings;
 use utf8;
 use Test::More tests => 5;
 
-use App::Music::ChordPro::Testing;
+use ChordPro::Testing;
 
-use_ok "App::Music::ChordPro";
+use_ok "ChordPro";
 
 my $test = 1;
 

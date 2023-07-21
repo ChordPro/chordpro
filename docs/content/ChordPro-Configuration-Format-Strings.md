@@ -147,15 +147,17 @@ See [Configuration for CSV output]({{< relref "chordpro-configuration-csv" >}}).
  * `pagerange`: The pages of the song, either a single page number or
    a range like `3-7`.
 
-## Chord display strings
+## Chord format string
 
 _Note: This is not applicable to chords in Nasville, Roman and Solfege
 notations._
 
-[Chord display strings]({{< relref
-"Directives-define#chord-display-strings" >}}) support a limited set
+[Chord format strings]({{< relref
+"Directives-define#chord-format-strings" >}}) support a limited set
 of metadata for substitutions.
 
+ * `name`: The given name of the chord.
+ 
  * `root`: The root of the chord.
  
  * `qual`: The quality of the chord. Qualities are `m`, `min`, `-`
@@ -168,3 +170,13 @@ of metadata for substitutions.
    slash `/`.
 
 In all cases, `%{root}%{qual}%{ext}%{bass|/%{}}` yields the full chord name.
+
+The default chord format string is the value of config
+item `settings.chord-format`, and its default value is slightly more
+complicated:
+
+    %{root|%{}%{qual}%{ext}%{bass|/%{}}|%{name}}
+	
+If property `root` is known this means that the chord was successfully
+parsed. The format will use the chord properties `root`,
+`qual`, `ext` and `bass`. Otherwise it uses the `name` property.

@@ -1,7 +1,7 @@
 #! perl
 
 use Test::More tests => 1;
-use App::Music::ChordPro::Config::Properties;
+use ChordPro::Config::Properties;
 use File::LoadLines;
 
 # Take a big properties file, convert to data and dump.

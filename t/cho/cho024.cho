@@ -1,0 +1,8 @@
+{title: Define copy with modified fingers and frets}
+{define: A7 copy A7 fingers 0 0 2 0 4 0 }
+{define: B7 copy B7 frets x 2 4 4 0 x }
+{define: C7 copy C7}
+This is [A7]
+This is [B7]
+This is [C7]
+

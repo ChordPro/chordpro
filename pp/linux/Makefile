@@ -8,7 +8,7 @@ ROOT   := ../..
 COMMON := ../common
 SCRIPT := ${ROOT}/script
 DEST   := build
-VERSION := $(shell perl ../../lib/App/Music/ChordPro/Version.pm)
+VERSION := $(shell perl ../../lib/ChordPro/Version.pm)
 
 PP := pp -u
 
@@ -38,9 +38,9 @@ ppl :: clean wxchordpro unpack copy_coredll loaders
 unpack :
 	perl ../pp2ppl.pl --dest=${DEST} wxchordpro --quiet
 	cp -p "${ROOT}/script/chordpro.pl" "${DEST}/script/chordpro.pl" 
-	cp -p "${ROOT}/lib/App/Music/ChordPro/Config.pm" "${DEST}/lib/App/Music/ChordPro/Config.pm" 
+	cp -p "${ROOT}/lib/ChordPro/Config.pm" "${DEST}/lib/ChordPro/Config.pm" 
 	cp "${DEST}/res/icons/chordpro.ico" ${DEST}
-	mv "${DEST}/res" "${DEST}/lib/App/Music/ChordPro/"
+	mv "${DEST}/res" "${DEST}/lib/ChordPro/"
 
 # Copy code DLLs.
 # We assume that the target system has:
@@ -82,8 +82,8 @@ APPIMAGETOOL := appimagetool
 
 appimage : ppl
 	cp AppRun ${DEST}
-	cd ${DEST}; ln lib/App/Music/ChordPro/res/linux/chordpro.desktop .
-	cd ${DEST}; ln lib/App/Music/ChordPro/res/icons/chordpro.png .
+	cd ${DEST}; ln lib/ChordPro/res/linux/chordpro.desktop .
+	cd ${DEST}; ln lib/ChordPro/res/icons/chordpro.png .
 	${APPIMAGETOOL} -n ${DEST} ChordPro-${VERSION}.AppImage
 
 # Truly dynamic version of loader. Rename to {wx}chordpro if you dare.

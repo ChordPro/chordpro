@@ -5,9 +5,9 @@ use warnings;
 use utf8;
 use Test::More tests => 7;
 
-use App::Music::ChordPro::Testing;
+use ChordPro::Testing;
 
-use_ok "App::Music::ChordPro";
+use_ok "ChordPro";
 
 my $test = 1;
 
@@ -23,8 +23,8 @@ my $csv = $base . "csv";
 my $front = $base . "front.pdf";
 my $back  = $base . "back.pdf";
 
-use App::Music::ChordPro::Output::PDF;
-my $api = App::Music::ChordPro::Output::PDF::config_pdfapi;
+use ChordPro::Output::PDF;
+my $api = ChordPro::Output::PDF::config_pdfapi;
 
 my $p = $api->new( file => $front );
 my $page = $p->page;

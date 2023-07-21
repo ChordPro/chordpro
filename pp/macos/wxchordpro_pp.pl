@@ -20,6 +20,7 @@ print <<EOD;
 
 # Explicit libraries.
 --link=/usr/local/lib/libjpeg.8.dylib
+--link=/usr/local/lib/libtiff.5.dylib
 
 # Explicitly link the wx libraries.
 EOD

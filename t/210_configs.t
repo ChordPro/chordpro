@@ -4,14 +4,14 @@ use strict;
 use warnings;
 use utf8;
 
-use App::Music::ChordPro::Testing;
-use App::Music::ChordPro::Config;
+use ChordPro::Testing;
+use ChordPro::Config;
 
 plan tests => 3;
 
 sub Config::new {
     my ( $pkg, $init ) = @_;
-    bless { %$init } => 'App::Music::ChordPro::Config';
+    bless { %$init } => 'ChordPro::Config';
 }
 
 # Original content.

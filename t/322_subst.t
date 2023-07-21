@@ -1,7 +1,9 @@
 #! perl
 
 use Test::More tests => 3;
-use App::Music::ChordPro::Config::Properties;
+use ChordPro::Config::Properties;
+
+delete $ENV{version};		# yes, some systems seem to set this
 
 my $cfg = Data::Properties->new;
 

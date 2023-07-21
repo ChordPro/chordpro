@@ -18,29 +18,88 @@ treat everything else as a text that will be printed just like the
 chord names. This can be used to add small annotations, e.g. `[*Coda]`
 and `[*Rit.]`.
 
+## Parsing chords — the chord properties
+
 ChordPro can parse chord names in two modes: _strict_ and _relaxed_.
 
 In _strict_ mode, enabled by default, chord names are only recognized
 if they consist of
 * a root note, e.g. `C`, `F#` or `Bb`.
-* a _qualifier_, e.g. `m` (minor), `aug` (augmented), or empty.
-* an _extension_, which must be one of the extension names built-in.
+* an optional _qualifier_, e.g. `m` (minor), `aug` (augmented).
+* an optional _extension_, which must be one of the extension names built-in.
+* an optional _bass_, a slash `/` followed by another root note.
+
+When a chord name is successfully parsed, each of the above
+constituents is registered with the chord as properties `root`,
+`qual`, `ext` and `bass`.
+It's name is registered as property `name`. These properties are
+referred to as the *chord properties* of the chord.
+
+Some examples:
+
+| name   | root  | qual | ext | bass |
+|--------|-------|------|-----|------|
+| `C`    | `C`   |      |     |      |
+| `F#`   | `F#`  |      |     |      |
+| `Besm` | `Bes` | `m`  |     |      |
+| `Am7`  | `A`   | `m`  | `7` |      |
+| `C/B`  | `C`   |      |     | `B`  |
+{ .table .table-striped .table-bordered .table-sm }
+
+Note: What is recognized as a root note and what is stored in the
+`root` property is controlled by the 
+[`notes` section]({{< relref "chordpro-configuration-instrument" >}})
+of the config files. For example, in the common notation `B♭`, `Bb`
+and `Bes` all designate a B-flat note.
 
 In _relaxed_ mode, the same rules apply for root note and qualifier,
 but the extension is not required to be known. You are free to make up
 your own. In relaxed mode, `[Coda]` would be a valid chord name: root
 `C` plus extension `oda`.
 
+| name   | root | qual | ext   | bass |
+|--------|------|------|-------|------|
+| `Coda` | `C`  |      | `oda` |      |
+| `Gm*`  | `G`  | `m`  | `*`   |      |
+{ .table .table-striped .table-bordered .table-sm }
+
+Chord properties can be used as [metadata for substitutions]({{<
+relref "Chordpro-Configuration-Format-Strings/#chord-display-strings" >}}).
+
+## Chord diagrams — the diagram properties
+
 Many ChordPro implementations (formatters) provide chord diagrams at
 the end of a song, using a built-in list of known chords and
 fingerings. Clearly, this can only work when the chords in the
 ChordPro file can be recognized, either in strict mode, or in relaxed
-mode.
+mode. If a chord is known there may be some additional
+properties that are used internally to produce chord diagrams. This
+set of properties is referred to as the *diagram properties* of the
+chord.
 
-For transposition it is slightly easier. For example, when you're
+Some examples:
+
+| name  | base | frets       | fingers     | keys     |
+|-------|------|-------------|-------------|----------|
+| `Am7` | 1    | x 0 2 0 1 3 | x x 2 3 1 x | 0 3 7 10 |
+| `B`   | 2    | 1 1 3 3 3 1 | 1 1 2 3 4 1 | 0 4 7    |
+{ .table .table-striped .table-bordered .table-sm }
+
+The list of known chords is read from the config files and can be
+extended by defining chords using the [define directive]({{< relref
+"Directives-define" >}}).
+
+## Transposition and transcoding
+
+For transposition and transcoding the chord **must** have at least a
+`root` property. This controls what and how can be transposed or
+transcoded. 
+For example, when you're
 transposing from A to C, you can replace everything chord-like that
-starts with ‘A’ by ‘C’ and whatever follows the ‘A’. ‘Am7’ becomes
-‘Cm7’ and ‘Alpha’ would become ‘Clpha’, who cares?
+starts with `A` by `C` and whatever follows the `A`. `Am7` becomes
+`Cm7` and `Alpha` would become `Clpha`, who cares?
+
+## Valid chord names
 
 Although the ChordPro File Format Specification deliberately doesn't
 say anything about valid chords, it is advised to stick to commonly
@@ -67,34 +126,7 @@ notes before the chords:
 {comment: Intro [f] [g] [a] [E] }
 ````
 
-# ChordPro Implementation: Understandable versus known
-
-An often made mistake is to confuse _understandable_ with _known_.
-
-For example, in the default configuration for guitar, the chord `Bbm`
-is understood to be the root key `B♭` and qualifier `m` for minor.
-Likewise, `Besm` and `B♭m` are understood to mean the same chord, and
-so are `Aism` and `A#m` and `A♯m`.
-When it comes to transposing and transcoding, ChordPro knows how to handle
-these.
-
-Root key names and equivalents are defined in the 
-[`notes` section]({{< relref "chordpro-configuration-instrument" >}})
-of the config files.
-
-However, when a chord diagram must be drawn, the chord must be _known_
-by name.
-In the default configuration a chord with name `Bbm` is defined, so it is
-known and has the information to draw the chord diagram. The chord
-named `Besm` is **not** defined, hence it is not known, and ChordPro can not
-draw a diagram for it.
-
-Chords are defined in the 
-[`chords` section]({{< relref "chordpro-configuration-generic/#user-defined-chords-string-instruments" >}})
-of the config files, usually in an instrument specific config file,
-e.g. `guitar` or `ukulele`.
-
-# ChordPro Implementation: Chord Extensions
+# Appendix: List of known chord extensions
 
 The following chord extensions are currently built-in.
 

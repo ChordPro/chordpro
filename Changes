@@ -1,3 +1,23 @@
+6.020 2023-07-21
+
+    - !ChordPro functionality
+    - New directive diagrams obsoletes grid/no_grid with more possibilities,
+      Based on a suggestion and concept implementation from Jörg Bublath.
+    - Images without directory can be looked up in CHORDPO_LIB.
+    - Turn pseudo-chords like | and spaces into annotations.
+    - !BugFixes
+    - Fix a number of problems with define/copy/copyall.
+    - Fix issue #293.
+    - !Internal
+    - Bump minimal perl version to 5.26 and add Object::Pad to dependencies.
+    - Change namespace App::Music::ChordPro to ChordPro.
+    - Put VERSION on single line for stupid tools.
+    - Upgrade ChordPro::Chords::Appearance to class.
+    - Enhance Parser to use signatures to catch call errors.
+    - Enhance Config to use signatures to catch call errors.
+    - Enhance Chords to use signatures to catch call errors.
+    - Enhance Utils to use signatures to catch call errors.
+
 6.010 2023-06-05
 
     - !ChordPro functionality

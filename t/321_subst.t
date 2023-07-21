@@ -1,10 +1,11 @@
 #! perl
 
 use Test::More tests => 1;
-use App::Music::ChordPro::Config::Properties;
+use ChordPro::Config::Properties;
 
 my $cfg = Data::Properties->new;
 
+delete $ENV{version};		# yes, some systems seem to set this
 delete $ENV{XXDATAPROPERTIESXX};
 delete $ENV{xxdatapropertiesxx};
 $ENV{XXDATAPROPERTIESXX} = "env";

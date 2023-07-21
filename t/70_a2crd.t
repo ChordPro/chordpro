@@ -4,9 +4,9 @@ use strict;
 use warnings;
 use utf8;
 
-use App::Music::ChordPro::Testing;
+use ChordPro::Testing;
 
-use_ok "App::Music::ChordPro::A2Crd";
+use_ok "ChordPro::A2Crd";
 
 my $test = 1;
 

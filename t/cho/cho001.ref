@@ -2,16 +2,17 @@
 {artist: Foo}
 {artist: Bar}
 {key: D}
-{define: D               base-fret  1    frets   X   X   0   2   3   2   }
-{define: E               base-fret  1    frets   0   2   2   1   0   0   }
 
 {comment: Key: D}
 [D]Hello[*Bis]
-{chord:  B               base-fret  1    frets   1   2   3   4   5   6   }
+#{chord: B base-fret 1 frets 1 2 3 4 5 6}
 Air [(E)]Hello[E]
-{chord:  B}
+#{chord: B base-fret 1 frets N 2 4 4 4 2}
 S[NC]ure
 
 #{start_of_grid 1+4x4+2}
 #A | D . . . | E . . . | (D) . . . | E . . . |
 #{end_of_grid}
+
+#{chord: D base-fret 1 frets N N 0 2 3 2}
+#{chord: E base-fret 1 frets 0 2 2 1 0 0}

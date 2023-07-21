@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use utf8;
 
-use App::Music::ChordPro::Testing;
+use ChordPro::Testing;
 
 mkdir("out") unless -d "out";
 

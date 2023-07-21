@@ -1,8 +1,9 @@
 {title: Issue with define}
-{define: Fadd2 display F<sup>add2</sup> base-fret 1 frets N 3 3 2 1 3 fingers 0 3 3 2 1 4}
-{define: Gadd2 display G<sup>add2</sup> base-fret 3 frets N 3 3 2 1 3 fingers 0 3 3 2 1 4}
-{define: Aadd2 display G<sup>add2</sup> base-fret 3 frets N 3 3 2 1 3 fingers 0 3 3 2 1 4}
-{define: Badd2 display G<sup>add2</sup> base-fret 3 frets N 3 3 2 1 3 fingers 0 3 3 2 1 4}
+{define: Fadd2 format "F<sup>add2</sup>" base-fret 1 frets N 3 3 2 1 3 fingers 0 3 3 2 1 4}
+{define: Gadd2 format "G<sup>add2</sup>" base-fret 3 frets N 3 3 2 1 3 fingers 0 3 3 2 1 4}
+{define: Aadd2 format "G<sup>add2</sup>" base-fret 3 frets N 3 3 2 1 3 fingers 0 3 3 2 1 4}
+{define: Badd2 format "G<sup>add2</sup>" base-fret 3 frets N 3 3 2 1 3 fingers 0 3 3 2 1 4}
 {define: A base-fret 1 frets N 0 2 2 2 0}
-{define: A               base-fret  1    frets   X   0   2   2   2   0   }
 [A]Hello
+
+#{chord: A base-fret 1 frets N 0 2 2 2 0}

@@ -27,7 +27,7 @@ dist : Makefile resources
 install : Makefile
 	$(MAKE) -f Makefile install
 
-Makefile : Makefile.PL lib/App/Music/ChordPro/Version.pm resources
+Makefile : Makefile.PL lib/ChordPro/Version.pm resources
 	perl Makefile.PL
 
 ################ Extensions ################
@@ -37,6 +37,7 @@ PROJECT := ChordPro
 TMP_DST := ${HOME}/tmp/${PROJECT}
 RSYNC_ARGS := -rptgoDvHL
 W10DIR := /Users/Johan/${PROJECT}
+MACDST := macky:ChordPro
 
 to_tmp : resources
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST    ./ ${TMP_DST}/
@@ -44,9 +45,16 @@ to_tmp : resources
 
 to_tmp_cpan :
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.CPAN ./ ${TMP_DST}/
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST.SVG  ./ ${TMP_DST}/
 
 to_c :
 	${MAKE} to_tmp to_tmp_cpan TMP_DST=/mnt/c${W10DIR}
+
+to_mac : resources
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST      ./ ${MACDST}/
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST.WX   ./ ${MACDST}/
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST.CPAN ./ ${MACDST}/
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST.SVG  ./ ${MACDST}/
 
 release :
 	${PERL} Makefile.PL
@@ -54,7 +62,7 @@ release :
 
 # Actualize resources.
 
-LIB := lib/App/Music/ChordPro
+LIB := lib/ChordPro
 RES := ${LIB}/res
 PODSELECT := podselect
 
@@ -114,3 +122,7 @@ _wkit2 :
 	VBoxManage controlvm ${VM} poweroff
 	VBoxManage snapshot ${VM} restorecurrent
 
+.PHONY: TAGS
+
+TAGS:
+	etags.emacs `grep '\.p[lm]' MANIFEST`

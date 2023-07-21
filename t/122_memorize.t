@@ -4,15 +4,15 @@ use strict;
 use warnings;
 use utf8;
 
-use App::Music::ChordPro::Testing;
-use App::Music::ChordPro::Songbook;
+use ChordPro::Testing;
+use ChordPro::Songbook;
 
 plan tests => 4;
 
 $config->{settings}->{memorize} = 1;
 # Prevent a dummy {body} for chord grids.
 $config->{diagrams}->{show} = 0;
-my $s = App::Music::ChordPro::Songbook->new;
+my $s = ChordPro::Songbook->new;
 
 #### meta as meta.
 
@@ -47,7 +47,7 @@ my $warning = "";
 }
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 ok( $warning =~ /No chords memorized for verse3/, "You have been warned" );
-isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
+isa_ok( $s->{songs}->[0], 'ChordPro::Song', "It's a song" );
 #use Data::Dumper; warn(Dumper($s));
 my $song = {
 	    'meta' => {

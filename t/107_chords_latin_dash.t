@@ -3,26 +3,26 @@
 use strict;
 use warnings;
 use utf8;
-use App::Music::ChordPro::Testing;
-use App::Music::ChordPro::Chords;
-use App::Music::ChordPro::Chords::Parser;
+use ChordPro::Testing;
+use ChordPro::Chords;
+use ChordPro::Chords::Parser;
 
 my %tbl;
 
 our $options = { verbose => 0 };
 our $config =
   eval {
-      App::Music::ChordPro::Config::configurator
+      ChordPro::Config::configurator
 	  ( { nosysconfig => 1, nolegacyconfig => 1, nouserconfig => 1,
 	      config => getresource("config/notes/latin.json") } );
   };
-die unless App::Music::ChordPro::Chords::Parser->get_parser($::config->{notes}->{system},1);
+die unless ChordPro::Chords::Parser->get_parser($::config->{notes}->{system},1);
 
 =begin regenerate
 
 # Enable this section to generate new reference data.
 
-my $p = App::Music::ChordPro::Chords::Parser->get_parser("latin");
+my $p = ChordPro::Chords::Parser->get_parser("latin");
 
 open( my $fd, '<', "t/105_chords.t" );
 my $skip = 1;
@@ -99,7 +99,7 @@ while ( <DATA> ) {
 plan tests => 0 + keys(%tbl);
 
 while ( my ( $c, $info ) = each %tbl ) {
-    my $res = App::Music::ChordPro::Chords::parse_chord($c);
+    my $res = ChordPro::Chords::parse_chord($c);
     $res //= "FAIL";
     if ( UNIVERSAL::isa( $res, 'HASH' ) ) {
 	$res = reformat($res);
@@ -128,9 +128,9 @@ sub reformat {
 }
 
 __DATA__
-Do#7(-5)	{ ext => '7-5', ext_canon => '7-5', name => 'Do#7-5', qual => '', qual_canon => '', root => 'Do#', root_canon => 'Do#', root_mod => 1, root_ord => 1, system => 'latin' }
-Mi7(-5)	{ ext => '7-5', ext_canon => '7-5', name => 'Mi7-5', qual => '', qual_canon => '', root => 'Mi', root_canon => 'Mi', root_mod => 0, root_ord => 4, system => 'latin' }
-Mi7-9	{ ext => '7-9', ext_canon => '7-9', name => 'Mi7-9', qual => '', qual_canon => '', root => 'Mi', root_canon => 'Mi', root_mod => 0, root_ord => 4, system => 'latin' }
-Fa#m7-5	{ ext => '7-5', ext_canon => '7-5', name => 'Fa#m7-5', qual => 'm', qual_canon => '-', root => 'Fa#', root_canon => 'Fa#', root_mod => 1, root_ord => 6, system => 'latin' }
-Sol7-9	{ ext => '7-9', ext_canon => '7-9', name => 'Sol7-9', qual => '', qual_canon => '', root => 'Sol', root_canon => 'Sol', root_mod => 0, root_ord => 7, system => 'latin' }
-Sim7-5	{ ext => '7-5', ext_canon => '7-5', name => 'Sim7-5', qual => 'm', qual_canon => '-', root => 'Si', root_canon => 'Si', root_mod => 0, root_ord => 11, system => 'latin' }
+Do#7(-5)	{ bass => '', ext => '7-5', ext_canon => '7-5', name => 'Do#7-5', qual => '', qual_canon => '', root => 'Do#', root_canon => 'Do#', root_mod => 1, root_ord => 1, system => 'latin' }
+Mi7(-5)	{ bass => '', ext => '7-5', ext_canon => '7-5', name => 'Mi7-5', qual => '', qual_canon => '', root => 'Mi', root_canon => 'Mi', root_mod => 0, root_ord => 4, system => 'latin' }
+Mi7-9	{ bass => '', ext => '7-9', ext_canon => '7-9', name => 'Mi7-9', qual => '', qual_canon => '', root => 'Mi', root_canon => 'Mi', root_mod => 0, root_ord => 4, system => 'latin' }
+Fa#m7-5	{ bass => '', ext => '7-5', ext_canon => '7-5', name => 'Fa#m7-5', qual => 'm', qual_canon => '-', root => 'Fa#', root_canon => 'Fa#', root_mod => 1, root_ord => 6, system => 'latin' }
+Sol7-9	{ bass => '', ext => '7-9', ext_canon => '7-9', name => 'Sol7-9', qual => '', qual_canon => '', root => 'Sol', root_canon => 'Sol', root_mod => 0, root_ord => 7, system => 'latin' }
+Sim7-5	{ bass => '', ext => '7-5', ext_canon => '7-5', name => 'Sim7-5', qual => 'm', qual_canon => '-', root => 'Si', root_canon => 'Si', root_mod => 0, root_ord => 11, system => 'latin' }

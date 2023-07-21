@@ -2,10 +2,10 @@
 {define: D base-fret 5 frets 1 1 3 3 3 1}
 {define: D' base-fret 5 frets 1 1 3 3 3 1}
 {define: Dosa base-fret 5 frets 1 1 3 3 3 1}
-{define: D† base-fret 5 frets 1 1 3 3 3 1 display D<sup>†</sup>}  
+{define: D† base-fret 5 frets 1 1 3 3 3 1 format D<sup>†</sup>}  
 {define: C base-fret 3 frets 1 1 3 3 3 1}
 {define: C' base-fret 3 frets 1 1 3 3 3 1}
-{define: C† base-fret 3 frets 1 1 3 3 3 1 display C<sup>†</sup>}
+{define: C† base-fret 3 frets 1 1 3 3 3 1 format C<sup>†</sup>}
 {define: Cosa base-fret 5 frets 1 1 3 3 3 1}
 
 This is a song with a [D] D chord, transposed down 2 semitones

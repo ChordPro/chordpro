@@ -4,13 +4,13 @@ use strict;
 use warnings;
 use utf8;
 
-use App::Music::ChordPro::Testing;
+use ChordPro::Testing;
 my $tests = 0;
 
-use_ok( qw(App::Music::ChordPro::Output::Common) );
+use_ok( qw(ChordPro::Output::Common) );
 $tests++;
 
-use App::Music::ChordPro::Config;
+use ChordPro::Config;
 
 $::config->{metadata}->{separator} = ":";
 our $options = { verbose => 0, debug => 0 };
@@ -34,7 +34,7 @@ while ( <DATA> ) {
     chomp;
 
     my ( $tpl, $exp ) = split( /\t+/, $_ );
-    my $res = App::Music::ChordPro::Output::Common::fmt_subst( $s, $tpl );
+    my $res = ChordPro::Output::Common::fmt_subst( $s, $tpl );
     is( $res, $exp, "$tpl -> $exp" );
 
     $tests++;

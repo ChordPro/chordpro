@@ -17,7 +17,7 @@ for ( qw( PDF::Builder@3.023 PDF::API2@2.036 ) ) {
 }
 
 my $test;
-++$test; ok( $] >= 5.010001,
+++$test; ok( $] >= 5.026000,
 	     "Perl version $] is newer than 5.010.001" );
 
 if ( $pdfapi =~ /^pdf/i ) {
@@ -31,7 +31,7 @@ else {
     ++$test; use_ok( $pdfapi,  $pdfapiv );
     diag("Using $pdfapi $pdfapiv for PDF generation");
 }
-++$test; use_ok( "Text::Layout",   0.028 );
+++$test; use_ok( "Text::Layout",   0.031 );
 #diag("Using Text::Layout $Text::Layout::VERSION");
 eval {
     require HarfBuzz::Shaper;
@@ -41,11 +41,12 @@ eval {
 } || diag( "Shaping disabled (HarfBuzz::Shaper not found)" );
 ++$test; use_ok( "App::Packager",   1.430 );
 ++$test; use_ok( "JSON::PP",   2.27203 );
-++$test; use_ok( "String::Interpolate::Named", 1.01 );
+++$test; use_ok( "String::Interpolate::Named", 1.030 );
 ++$test; use_ok( "File::HomeDir", 1.004 );
-++$test; use_ok( "File::LoadLines", 1.02 );
+++$test; use_ok( "File::LoadLines", 1.021 );
 ++$test; use_ok( "Image::Info", 1.41 );
 ++$test; use_ok( "List::Util", 1.33 );
 ++$test; use_ok( "Storable", 3.08 );
+++$test; use_ok( "Object::Pad", 0.78 );
 
 done_testing($test);

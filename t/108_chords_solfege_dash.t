@@ -3,14 +3,14 @@
 use strict;
 use warnings;
 use utf8;
-use App::Music::ChordPro::Testing;
-use App::Music::ChordPro::Chords;
-use App::Music::ChordPro::Chords::Parser;
+use ChordPro::Testing;
+use ChordPro::Chords;
+use ChordPro::Chords::Parser;
 
 my %tbl;
 
 our $config =
-      App::Music::ChordPro::Config::configurator
+      ChordPro::Config::configurator
 	  ( { nosysconfig => 1, nolegacyconfig => 1, nouserconfig => 1,
 	      config => getresource("config/notes/solfege.json") } );
 
@@ -18,7 +18,7 @@ our $config =
 
 # Enable this section to generate new reference data.
 
-my $p = App::Music::ChordPro::Chords::Parser->get_parser("solfege");
+my $p = ChordPro::Chords::Parser->get_parser("solfege");
 
 open( my $fd, '<', "t/105_chords.t" );
 my $skip = 1;
@@ -95,7 +95,7 @@ while ( <DATA> ) {
 plan tests => 0 + keys(%tbl);
 
 while ( my ( $c, $info ) = each %tbl ) {
-    my $res = App::Music::ChordPro::Chords::parse_chord($c);
+    my $res = ChordPro::Chords::parse_chord($c);
     $res //= "FAIL";
     if ( UNIVERSAL::isa( $res, 'HASH' ) ) {
 	$res = reformat($res);
@@ -124,10 +124,10 @@ sub reformat {
 }
 
 __DATA__
-Tim7-5	{ ext => '7-5', ext_canon => '7-5', name => 'Tim7-5', qual => 'm', qual_canon => '-', root => 'Ti', root_canon => 'Ti', root_mod => 0, root_ord => 11, system => 'solfege' }
-Di7(-5)	{ ext => '7-5', ext_canon => '7-5', name => 'Di7-5', qual => '', qual_canon => '', root => 'Di', root_canon => 'Di', root_mod => 1, root_ord => 1, system => 'solfege' }
-Mi7(-5)	{ ext => '7-5', ext_canon => '7-5', name => 'Mi7-5', qual => '', qual_canon => '', root => 'Mi', root_canon => 'Mi', root_mod => 0, root_ord => 4, system => 'solfege' }
-Mi7-9	{ ext => '7-9', ext_canon => '7-9', name => 'Mi7-9', qual => '', qual_canon => '', root => 'Mi', root_canon => 'Mi', root_mod => 0, root_ord => 4, system => 'solfege' }
-Fim7-5	{ ext => '7-5', ext_canon => '7-5', name => 'Fim7-5', qual => 'm', qual_canon => '-', root => 'Fi', root_canon => 'Fi', root_mod => 1, root_ord => 6, system => 'solfege' }
-So7-9	{ ext => '7-9', ext_canon => '7-9', name => 'So7-9', qual => '', qual_canon => '', root => 'So', root_canon => 'So', root_mod => 0, root_ord => 7, system => 'solfege' }
-Tim7-5	{ ext => '7-5', ext_canon => '7-5', name => 'Tim7-5', qual => 'm', qual_canon => '-', root => 'Ti', root_canon => 'Ti', root_mod => 0, root_ord => 11, system => 'solfege' }
+Tim7-5	{ bass => '', ext => '7-5', ext_canon => '7-5', name => 'Tim7-5', qual => 'm', qual_canon => '-', root => 'Ti', root_canon => 'Ti', root_mod => 0, root_ord => 11, system => 'solfege' }
+Di7(-5)	{ bass => '', ext => '7-5', ext_canon => '7-5', name => 'Di7-5', qual => '', qual_canon => '', root => 'Di', root_canon => 'Di', root_mod => 1, root_ord => 1, system => 'solfege' }
+Mi7(-5)	{ bass => '', ext => '7-5', ext_canon => '7-5', name => 'Mi7-5', qual => '', qual_canon => '', root => 'Mi', root_canon => 'Mi', root_mod => 0, root_ord => 4, system => 'solfege' }
+Mi7-9	{ bass => '', ext => '7-9', ext_canon => '7-9', name => 'Mi7-9', qual => '', qual_canon => '', root => 'Mi', root_canon => 'Mi', root_mod => 0, root_ord => 4, system => 'solfege' }
+Fim7-5	{ bass => '', ext => '7-5', ext_canon => '7-5', name => 'Fim7-5', qual => 'm', qual_canon => '-', root => 'Fi', root_canon => 'Fi', root_mod => 1, root_ord => 6, system => 'solfege' }
+So7-9	{ bass => '', ext => '7-9', ext_canon => '7-9', name => 'So7-9', qual => '', qual_canon => '', root => 'So', root_canon => 'So', root_mod => 0, root_ord => 7, system => 'solfege' }
+Tim7-5	{ bass => '', ext => '7-5', ext_canon => '7-5', name => 'Tim7-5', qual => 'm', qual_canon => '-', root => 'Ti', root_canon => 'Ti', root_mod => 0, root_ord => 11, system => 'solfege' }

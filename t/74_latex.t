@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use utf8;
 
-use App::Music::ChordPro::Testing;
+use ChordPro::Testing;
 
 BAIL_OUT("Missing md test data") unless -d "md";
 

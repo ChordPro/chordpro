@@ -4,9 +4,9 @@ use strict;
 use warnings;
 use utf8;
 
-use App::Music::ChordPro::Testing;
-use App::Music::ChordPro::Songbook;
-use App::Music::ChordPro::Output::Common;
+use ChordPro::Testing;
+use ChordPro::Songbook;
+use ChordPro::Output::Common;
 
 plan tests => 3;
 
@@ -14,7 +14,7 @@ plan tests => 3;
 # defined. The source system must be last, so it is current and used
 # to parse the the input data.
 
-my $s = App::Music::ChordPro::Songbook->new;
+my $s = ChordPro::Songbook->new;
 
 my $data = <<EOD;
 {title: De Fietspomp}
@@ -49,12 +49,12 @@ EOD
 eval { $s->parse_file( \$data ) } or diag("$@");
 
 ok( scalar( @{ $s->{songs} } ) == 3, "three songs" );
-isa_ok( $s->{songs}->[0], 'App::Music::ChordPro::Song', "It's a song" );
+isa_ok( $s->{songs}->[0], 'ChordPro::Song', "It's a song" );
 
 my $book = [ map { { meta => $_->{meta} } } @{$s->{songs}} ];
 
 my $ctl = { fields => [ qw( key ) ] };
-my $res = App::Music::ChordPro::Output::Common::prep_outlines( $book, $ctl );
+my $res = ChordPro::Output::Common::prep_outlines( $book, $ctl );
 
 my $xp = [
   [

@@ -1,0 +1,6 @@
+{title: Multiple define and diagram for guitar}
+{define: G/B base-fret 1 frets 3 2 0 0 0 3 diagram off}
+{define: G/B display G/B base-fret 1 frets N 2 0 0 0 3}
+The chord [G/B]
+
+#{chord: G/B base-fret 1 frets N 2 0 0 0 3}
