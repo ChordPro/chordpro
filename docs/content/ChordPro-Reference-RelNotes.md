@@ -1,5 +1,36 @@
 # Release info
 
+## 6.020
+
+Released: 2023-07-21
+
+
+### ChordPro functionality
+
+* New directive diagrams obsoletes grid/no_grid with more possibilities, Based on a suggestion and concept implementation from Jörg Bublath.
+* Images without directory can be looked up in CHORDPO_LIB.
+* Turn pseudo-chords like | and spaces into annotations.
+
+### BugFixes
+
+* Fix a number of problems with define/copy/copyall.
+* Fix issue #293.
+
+### Internal
+
+* Bump minimal perl version to 5.26 and added Object::Pad to dependencies.
+* Change namespace App::Music::ChordPro to ChordPro.
+* Put VERSION on single line for stupid tools.
+* Upgrade ChordPro::Chords::Appearance to class.
+* Enhance Parser to use signatures to catch call errors.
+* Enhance Config to use signatures to catch call errors.
+* Enhance Chords to use signatures to catch call errors.
+* Enhance Utils to use signatures to catch call errors.
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.
+
 ## 6.010
 
 Released: 2023-06-05
@@ -28,10 +59,6 @@ Released: 2023-06-05
 * Fix issue #269 (problem with page labels).
 * Fix issue #270 (PDF outlines issues, 'letter' setting).
 * Fix issue #273 (PDF CreationDate string is not conformant, but PDF::API2 2.042+ rejects conformant strings).
-
-### Social and support
-
-[User community](https://groups.io/g/ChordPro) for feedback and help.
 
 ## 6.000
 
