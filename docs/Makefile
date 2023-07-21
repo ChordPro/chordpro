@@ -26,4 +26,4 @@ server :: assets
 	${HUGO} server --disableFastRender --navigateToChanged --bind ${HOSTNAME} --baseURL http://${HOSTNAME}:1313
 
 assets ::
-	cp ../lib/App/Music/ChordPro/res/config/chordpro.json assets/pub/chordpro_json.txt
+	cp ../lib/ChordPro/res/config/chordpro.json assets/pub/chordpro_json.txt
