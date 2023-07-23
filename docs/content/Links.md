@@ -30,8 +30,8 @@ description: "ChordPro related links"
 * [OnSong](https://onsongapp.com/)  
   OnSong is a MobileSheetsPro like app for Apple iOS.
 
-* [Emacs ChordPro mode](https://github.com/hading/chordpro-mode/)  
-  Emacs major mode for editing ChordPro files.
+* [Emacs ChordPro mode](https://git.sr.ht/~breatheoutbreathein/chordpro-mode.el/)  
+  Emacs major mode for editing ChordPro files. Available on [MELPA](https://melpa.org/#/chordpro-mode).
 
 * [ChordTransposer](https://extensions.libreoffice.org/extensions/chordtransposer/)  
   ChordTransposer is an extension for LibreOffice and OpenOffice. It
