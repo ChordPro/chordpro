@@ -156,8 +156,11 @@ sub draw {
     # Don't use theme colour, use black & white.
     my $fgcol = "black"; # $ps->{theme}->{foreground};
 
+    # Shift down if would start in 2nd octave.
+    my $kd = -int(($keys[0] + $info->{root_ord}) / 12) * 12;
+
     for my $key ( @keys ) {
-	$key += $info->{root_ord};
+	$key += $kd + $info->{root_ord};
 	$key += 12 if $key < 0;
 	$key -= 12 while $key >= $kk;
 	# Get octave and reduce.
