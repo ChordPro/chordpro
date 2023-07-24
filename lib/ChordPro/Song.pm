@@ -1510,7 +1510,7 @@ sub directive {
 		my $key = $m->{key}->[-1];
 		my $xp = $xpose;
 		$xp += $capo if $capo;
-		my $xpk = $self->{chordsinfo}->{$key}->transpose($xp);
+		my $xpk = $self->{chordsinfo}->{$key}->transpose($xp, $xp <=> 0);
 		$self->{chordsinfo}->{$xpk->name} = $xpk;
 		$m->{key_from} = [ $m->{key_actual}->[0] ];
 		$m->{key_actual} = [ $xpk->name ];
