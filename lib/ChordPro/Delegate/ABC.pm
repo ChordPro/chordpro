@@ -837,14 +837,6 @@ sub abc2svg {
 	return;
     }
 
-    if ( $abc2svg ) {
-	my $f = ::rsc_or_file( "fonts/abc2svg.ttf" );
-	# Currently we have a dup id when using fullsvg.
-	for ( "%%musicfont abc2svg" ) {
-	    print $fd "$_\n";
-	    warn( "$_\n") if DEBUG;
-	}
-    }
 
     my @preamble = @{ $cfg->{preamble} };
 
@@ -872,13 +864,14 @@ sub abc2svg {
     }
     my $kv = { %$elt };
     $kv = parse_kv( @pre ) if @pre;
-    $kv->{split} = 1 if $abc2svg;
+    $kv->{split} = 1;
     $kv->{scale} ||= 1;
     if ( $kv->{width} ) {
 	$pw = $kv->{width};
     }
 
     unshift( @preamble,
+	     grep { /^%%/ } @pre,
 	     "%%pagewidth " . $pw . "px",
 	     "%%leftmargin 0cm",
 	     "%%rightmargin 0cm",
@@ -911,12 +904,17 @@ sub abc2svg {
 	warn("Error in ABC embedding\n");
 	return;
     }
+    # Note: abc2svg misses the closing </body> tag but the SVG
+    # processor knows how to handle this.
 
     my @res;
     push( @res,
 	  { type => "svg",
 	    uri  => $svg,
-	    opts => { center => $kv->{center}, scale => $kv->{scale} } } );
+	    opts => { center => $kv->{center},
+		      scale  => $kv->{scale},
+		      split  => $kv->{split},
+		    } } );
 
     return \@res;
 }

@@ -1159,12 +1159,14 @@ sub generate_song {
 
 	    require PDF::SVG;
 	    my $p = PDF::SVG->new
-	      ( pdf => $ps->{pr}->{pdf}, atts => { debug => $config->{debug}->{images} > 1 } );
+	      ( pdf  => $ps->{pr}->{pdf},
+		fc   => \&svg_fontmanager,
+		atts => { debug => $config->{debug}->{svg} > 1 } );
 	    my $o = $p->process( $elt->{uri} );
 	    warn("PDF: SVG objects: ", 0+@$o, "\n")
-	      if $config->{debug}->{images} || !@$o;
+	      if $config->{debug}->{svg} || !@$o;
 	    if ( ! @$o ) {
-		warn("Error in SVG embedding\n");
+		warn("Error in SVG embedding (no SVG objects found)\n");
 		next;
 	    }
 
@@ -2977,6 +2979,44 @@ my %corefonts =
 
 sub is_corefont {
     $corefonts{lc $_[0]};
+}
+
+# Font manager for SVG embedding.
+sub svg_fontmanager {
+    my ( $pdf, $gfx, $style ) = @_;
+
+    my $family = $style->{'font-family'};
+    my $stl    = $style->{'font-style'}   // "normal";
+    my $weight = $style->{'font-weight'}  // "normal";
+    my $size   = $style->{'font-size'}    || 12;
+    my $key    = join( "|", $family, $weight, $stl );
+    state $fc  = {};
+
+    local *Text::Layout::FontConfig::_fallback = sub { 0 };
+
+    my $font = $fc->{$key} //= do {
+
+	my $t;
+	my $try =
+	  eval {
+	      $t = Text::Layout::FontConfig->find_font( $family, $stl, $weight );
+	      $t->get_font(Text::Layout->new($pdf));
+	  };
+	if ( $try ) {
+	    warn("SVG: Font $key found in font config: ",
+		 $t->{loader_data},
+		 "\n")
+	      if $config->{debug}->{svg};
+	    $try;
+	}
+	else {
+	    return 0;
+	}
+    };
+
+    $gfx->font( $font, $size );
+
+    return 1;
 }
 
 sub _dump {
