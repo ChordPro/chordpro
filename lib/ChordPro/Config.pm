@@ -1604,6 +1604,7 @@ sub default_config () {
         "csv" : 0,
   	"abc" : 0,
   	"ly" : 0,
+  	"svg" : 0,
 	// For temporary use.
 	"x1" : 0,
 	"x2" : 0,
