@@ -307,6 +307,7 @@ sub known_chord ( $name ) {
 	$ret = $info->new($ret);
 	for ( qw( name display
 		  root root_canon root_mod
+		  qual qual_canon ext ext_canon
 		  bass bass_canon
 		  system parser ) ) {
 	    next unless defined $info->{$_};
