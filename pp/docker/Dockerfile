@@ -9,7 +9,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 # Install perl and runtime packages.
 # We have a libpdf-api2-perl but that's not recent enough.
-RUN apt-get update \
+RUN apt-get update && apt-get upgrade \
     && apt-get install -y \
 	  build-essential \
           perl \
@@ -22,6 +22,8 @@ RUN apt-get install --no-install-recommends -y \
     libxml-perl \
     libfile-homedir-perl \
     libfont-ttf-perl \
+    libpdf-api2-perl \
+    libobject-pad-perl \
     libimage-info-perl \
     abcm2ps \
     imagemagick \
@@ -32,18 +34,12 @@ RUN apt-get install --no-install-recommends -y \
 
 # Perl modules from CPAN.
 RUN cpanm \
-    PDF::API2 \
     File::LoadLines \
     String::Interpolate::Named \
     HarfBuzz::Shaper \
     Text::Layout
 
 FROM base
-
-# Augmented version of App::Packeger.
-RUN cpanm App::Packager
-COPY CPAN/App/Packager.pm Packager.pm
-RUN perl -MConfig -e 'print "mv Packager.pm $Config{sitelib}/App/Packager.pm\n"' | bash -x
 
 # Add ChordPro
 RUN cpanm chordpro
