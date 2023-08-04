@@ -1,5 +1,7 @@
 0.000
 
+    - !ChordPro functionality
+    - Experimental: Docker based web app.
     - !BugFixes
     - Fix issue #297.
     - Fix issue #298.
