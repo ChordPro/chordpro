@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=[% settings.charset %]" />
+<title>[% settings.appname | html; IF template.title; " - "; template.title|html; END %]</title>
+<link rel="stylesheet"
+      href="[% uri_base %]css/style.css" />
+[% IF userstyle %]<link rel="stylesheet"
+      href="[% userstyle %]" />
+[% END %]
+</head>
+<body>
+[% content %]
+</body>
+</html>

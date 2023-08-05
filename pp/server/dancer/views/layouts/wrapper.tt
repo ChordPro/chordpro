@@ -1,0 +1,11 @@
+[%
+
+SWITCH template.type;
+    CASE "html";
+	content;
+
+    CASE;
+	content WRAPPER layouts/main.tt;
+END;
+
+-%]

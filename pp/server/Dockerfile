@@ -9,6 +9,7 @@ RUN cpanm \
     PDF::API2 \
     Image::Info \
     Object::Pad \
+    Capture::Tiny \
     Dancer2
 
 # Add dependencies from CPAN for newest versions.
@@ -19,19 +20,23 @@ RUN cpanm \
     HarfBuzz::Shaper \
     Text::Layout
 
-# Add chordpro and clean up.
-RUN cpanm chordpro
+# Add abc2svg.
+COPY abc2svg/abc2svg.tar.gz .
+RUN tar zxvf abc2svg.tar.gz -C /usr/local/ && \
+    rm abc2svg.tar.gz && \
+    ln -s ../lib/abc2svg/abcqjs /usr/local/bin/abc2svg
 
-# Not needed, we're going to copy into a perl:slim image.
-# RUN apt-get remove --purge -y curl make gcc && \
-#     apt-get autoremove -y && \
-#     apt-get clean && \
-#     apt-get autoclean && \
-#     echo -n > /var/lib/apt/extended_states && \
-#     rm -rf /var/lib/apt/lists/* && \
-#     rm -rf /usr/share/man/?? && \
-#     rm -rf /usr/share/man/??_* && \
-#     rm -rf ~/.cpanm/* ~/.cpanminus/*
+# Add chordpro, pdfsvg and clean up.
+COPY chordpro.tar.gz pdfsvg.tar.gz /tmp/
+RUN cd /tmp && \
+    mkdir chordpro && cd chordpro && \
+    tar xf ../chordpro.tar.gz && \
+    perl Makefile.PL && make && make install && \
+    cd .. && rm -fr chordpro.tar.gz chordpro && \
+    mkdir pdfsvg && cd pdfsvg && \
+    tar xf ../pdfsvg.tar.gz && \
+    perl Makefile.PL && make && make install && \
+    cd .. && rm -fr pdfsvg.tar.gz pdfsvg 
 
 # Copy into a slim image for reduced size.
 FROM perl:slim AS prod
@@ -41,9 +46,9 @@ COPY --from=base /usr/local/bin /usr/local/bin
 # Setup for run-time.
 ENV DOCKER_PACKAGED=1.00
 RUN chordpro --about
-COPY scripts/chordpro-server.pl .
+COPY dancer dancer
 
 # Default listen to all, port 5000.
 EXPOSE 5000
-ENTRYPOINT plackup chordpro-server.pl
+ENTRYPOINT plackup dancer/chordpro-server.pl
 

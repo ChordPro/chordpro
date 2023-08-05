@@ -14,6 +14,7 @@ use utf8;
 use App::Packager qw( :name ChordPro );
 use ChordPro;
 use Dancer2;
+use Capture::Tiny qw( capture_stderr );
 use File::Temp qw( tempdir tempfile );
 
 # Common entry point, display form.
@@ -60,7 +61,7 @@ form {
       <input type="submit" name="type" value="ChordPro">
       &nbsp;
       <input type="submit" name="type" value="PDF">
-      &nbsp;or
+      &nbsp;or&nbsp;
       <input type="reset"> form</td>
     </tr>
   </table>
@@ -142,17 +143,17 @@ sub _convert {
 	push( @ARGV, "--output", \$out );
 	push( @ARGV, "--generate=$t" );
 	push( @ARGV, \$song );
-	::run();
+	my $stderr = capture_stderr { ::run() };
 
 	if ( $out ) {
 	    $out = Encode::decode_utf8($out);
 	    if ( $type eq "html" && $css ) {
 		$out =~ s;</head>;<style>\n$css</style>\n</head>;;
 	    }
-	    if ( $type eq "chordpro" ) {
-		$out = "<pre>" . $out . "</pre>\n";
-	    }
-	    return $out;
+	    return template "show_".lc($type).".tt",
+	      { output => $out,
+		message => $stderr,
+	      };
 	}
     }
 
@@ -165,8 +166,8 @@ sub _convert {
 	my $out = path( $dir, $of );
 	push( @ARGV, "--output", $out );
 	push( @ARGV, "--generate=$t" );
-	push( @ARGV, $path );
-	::run();
+	push( @ARGV, \$song );
+	my $stderr = capture_stderr { ::run() };
 
 	if ( -s $out ) {
 	    send_file( $out, system_path => 1,

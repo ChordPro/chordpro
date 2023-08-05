@@ -8,7 +8,7 @@ plackup :
 
 # With -ti you can kill the bastard with ^C.
 run :
-	docker run --rm --publish -ti chordpro-server
+	docker run --rm -p 5000:5000 -ti chordpro-server
 
 compose :
 	docker-compose up --no-start

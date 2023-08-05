@@ -1,0 +1,25 @@
+body {
+    margin: 10;
+    background-color: #ffffff;
+    padding: 0;
+    font-family: Verdana, Arial, Sans-serif;
+    font-size: 12pt;
+}
+
+p {
+    text-align: left;
+    margin: 0pt;
+}
+
+div.cpout {
+    margin-top: 0px;
+    white-space: pre;
+    margin-bottom: 10px;
+}
+
+div.error {
+    white-space: pre;
+    border: 1px solid;
+    background: #e0e0e0;
+    padding: 10px;
+}
