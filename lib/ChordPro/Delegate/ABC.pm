@@ -13,6 +13,7 @@ use utf8;
 use File::Spec;
 use File::Temp ();
 use File::LoadLines;
+use Capture::Tiny qw(capture);
 use feature 'state';
 
 use ChordPro::Utils;
@@ -829,7 +830,7 @@ sub abc2svg {
 
     $imgcnt++;
     my $src  = File::Spec->catfile( $td, "tmp${imgcnt}.abc" );
-    my $svg  = File::Spec->catfile( $td, "tmp${imgcnt}.xhtml" );
+    my $svg  = File::Spec->catfile( $td, "tmp${imgcnt}.svg" );
 
     my $fd;
     unless ( open( $fd, '>:utf8', $src ) ) {
@@ -872,7 +873,7 @@ sub abc2svg {
 
     unshift( @preamble,
 	     grep { /^%%/ } @pre,
-	     "%%pagewidth " . $pw . "px",
+	     $pw ? ( "%%pagewidth " . $pw . "px" ) : (),
 	     "%%leftmargin 0cm",
 	     "%%rightmargin 0cm",
 	   );
@@ -894,18 +895,29 @@ sub abc2svg {
     }
 
     my @cmd = ref($abc2svg) ? ( @$abc2svg ) : ( $abc2svg );
-    open( my $STDOLD, '>&', STDOUT );
-    open( STDOUT, '>:utf8', $svg );
+
     push( @cmd, "toxhtml.js", $src );
     warn( "+ @cmd\n" ) if DEBUG;
-    my $ret = sys( @cmd );
-    open( STDOUT, '>&', $STDOLD );
-    if ( $ret or ! -s $svg ) {
+    my ( $out, $err, $ret ) = capture {
+	sys( @cmd );
+    };
+    if ( $ret or !$out ) {
 	warn("Error in ABC embedding\n");
 	return;
     }
-    # Note: abc2svg misses the closing </body> tag but the SVG
-    # processor knows how to handle this.
+
+    open( $fd, '>:utf8', $svg );
+    my $copy = 0;
+    my @lines = loadlines(\$out);
+    while ( @lines ) {
+	$_ = shift(@lines);
+	if ( /^<svg/ ) {
+	    $copy++;
+	}
+	print $fd $_, "\n" if $copy;
+	last if /^<\/svg/ && @lines && $lines[0] =~ /^<\/div/;
+    }
+    close($fd);
 
     my @res;
     push( @res,
