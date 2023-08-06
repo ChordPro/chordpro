@@ -79,7 +79,10 @@ sub generate_song {
 
     push(@s, "") if $tidy;
 
-    foreach my $elt ( @{$s->{body}} ) {
+    my @elts = @{$s->{body}};
+    while ( @elts ) {
+	my $elt = shift(@elts);
+	warn("XXX ", $elt->{type}, "\n");;
 
 	if ( $elt->{type} eq "empty" ) {
 	    push(@s, "***SHOULD NOT HAPPEN***");
@@ -115,7 +118,10 @@ sub generate_song {
 
 	if ( exists $elt->{body} ) {
 	    push( @s, '<div class="' . $elt->{type} . '">' );
-	    foreach my $e ( @{$elt->{body}} ) {
+	    my @elts = @{$elt->{body}};
+	    while ( @elts ) {
+		my $e = shift(@elts);
+		warn("YYY ", $e->{type}, "\n");;
 		if ( $e->{type} eq "empty" ) {
 		    push( @s, "<!-- ***SHOULD NOT HAPPEN*** -->" );
 		    next;
@@ -136,6 +142,27 @@ sub generate_song {
 			);
 		    next;
 		}
+		if ( $e->{type} eq "delegate"
+		     && $e->{subtype} =~ /^image(?:-(\w+))?$/ ) {
+		    my $delegate = $1 // $e->{delegate};
+		    my $pkg = __PACKAGE__;
+		    $pkg =~ s/::Output::\w+$/::Delegate::$delegate/;
+		    eval "require $pkg" || die($@);
+		    my $hd = $pkg->can($e->{handler}) //
+		      die("HTML: Missing delegate handler ${pkg}::$e->{handler}\n");
+		    my $res = $hd->( $s, 0, $e );
+		    next unless $res; # assume errors have been given
+		    unshift( @elts, @$res );
+		    next;
+		}
+		if ( $e->{type} eq "svg" ) {
+		    push( @s, '<div class="' . $e->{type} . '">' );
+		    push( @s, File::LoadLines::loadlines( $e->{uri} ) );
+		    push( @s, "</div>" );
+		    push( @s, "" ) if $tidy;
+		    next;
+		}
+
 
 	    }
 	    push( @s, '</div>' );
@@ -164,7 +191,7 @@ sub generate_song {
 		  "@args" . "/>" .
 		  '</div>' );
 	    push( @s, "" ) if $tidy;
-
+	    next;
 	}
 
 	if ( $elt->{type} eq "control" ) {
