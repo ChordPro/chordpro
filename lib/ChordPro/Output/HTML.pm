@@ -82,7 +82,6 @@ sub generate_song {
     my @elts = @{$s->{body}};
     while ( @elts ) {
 	my $elt = shift(@elts);
-	warn("XXX ", $elt->{type}, "\n");;
 
 	if ( $elt->{type} eq "empty" ) {
 	    push(@s, "***SHOULD NOT HAPPEN***");
@@ -121,7 +120,6 @@ sub generate_song {
 	    my @elts = @{$elt->{body}};
 	    while ( @elts ) {
 		my $e = shift(@elts);
-		warn("YYY ", $e->{type}, "\n");;
 		if ( $e->{type} eq "empty" ) {
 		    push( @s, "<!-- ***SHOULD NOT HAPPEN*** -->" );
 		    next;
