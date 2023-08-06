@@ -4,7 +4,7 @@ build :
 	docker build -t chordpro-server .
 
 plackup :
-	env PERL5LIB=../../CPAN:../../lib plackup -r scripts/chordpro-server.pl
+	env PERL5LIB=../../CPAN:../../lib plackup -r dancer/chordpro-server.pl
 
 # With -ti you can kill the bastard with ^C.
 run :
