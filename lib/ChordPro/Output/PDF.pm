@@ -2874,7 +2874,7 @@ sub wrap {
 	my $ex = "";
 	#warn("wrap x=$x rm=$m w=", $m - $x, " ch=$chord, ph=$phrase\n");
 
-	if ( @rchords ) {
+	if ( @rchords && $chord ) {
 	    # Does the chord fit?
 	    my $c = $chord->chord_display;
 	    my $w;
