@@ -255,6 +255,68 @@ sub songline {
 	     '</table>' );
 }
 
+=for later
+
+sub gridline {
+}
+
+<style>
+div.grid_2_4x4_1 {
+    display: grid;
+    grid-template-columns: 5.263% 5.263% 5.263% 5.263% 5.263% 5.263% 5.263% 5.263% 5.263% 5.263% 5.263% 5.263% 5.263% 5.263% 5.263% 5.263% 5.263% 5.263% 5.263%;
+}
+div.grid_2_4x4_1 div   { padding: 4px }
+div.grid_2_4x4_1 div.A { grid-column: span 2 }
+div.grid_2_4x4_1 div.L { border-left: 1px solid black   }
+div.grid_2_4x4_1 div.M { border-left: 1px solid #e0e0e0 }
+div.grid_2_4x4_1 div.R { border-right: 1px solid black  }
+div.grid_2_4x4_1 div.Z { grid-column: span 1 }
+</style>
+
+<div class="grid_2_4x4_1">
+
+  <div class="A">intro</div>
+  <div class="L">a1</div>
+  <div class="M">a2</div>
+  <div class="M">a3</div>
+  <div class="M">a4</div>
+  <div class="L">b1</div>
+  <div class="M">b2</div>
+  <div class="M">b3</div>
+  <div class="M">b4</div>
+  <div class="L">c1</div>
+  <div class="M">c2</div>
+  <div class="M">c3</div>
+  <div class="M">c4</div>
+  <div class="L">d1</div>
+  <div class="M">d2</div>
+  <div class="M">d3</div>
+  <div class="M R">d4 d4</div>
+  <div class="Z"></div>
+
+  <div class="A"></div>
+  <div class="L">a1</div>
+  <div class="M">a2</div>
+  <div class="M">a3</div>
+  <div class="M">a4</div>
+  <div class="L">b1</div>
+  <div class="M">b2</div>
+  <div class="M">b3</div>
+  <div class="M">b4</div>
+  <div class="L">c1</div>
+  <div class="M">c2</div>
+  <div class="M">c3</div>
+  <div class="M">c4</div>
+  <div class="L">d1</div>
+  <div class="M">d2</div>
+  <div class="M">d3</div>
+  <div class="M R">d4</div>
+  <div class="Z">2x</div>
+
+</div>
+
+=cut
+
 sub nhtml {
     return unless defined $_[0];
     $layout->set_markup(shift);
