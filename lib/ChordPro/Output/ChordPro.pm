@@ -288,7 +288,7 @@ sub generate_song ( $s ) {
 	    if ( $elt->{chords} ) {
 		$text = "";
 		for ( 0..$#{ $elt->{chords} } ) {
-		    $text .= "[" . $elt->{chords}->[$_] . "]"
+		    $text .= "[" . fq(chord( $s, $elt->{chords}->[$_])) . "]"
 		      if $elt->{chords}->[$_] ne "";
 		    $text .= $elt->{phrases}->[$_];
 		}
