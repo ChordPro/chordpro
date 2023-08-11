@@ -838,10 +838,32 @@ sub kbkeys {
     $_[0]->{keys} = ChordPro::Chords::get_keys($_[0]);
 }
 
+sub chord_display ( $self, $default ) {
+
+    use String::Interpolate::Named;
+
+    my $res = $self->name;
+    my $args = {};
+    $self->flat_copy( $args, $self->{display} // $self );
+
+    for my $fmt ( $default,
+		  $self->{format},
+		  $self->{chordformat} ) {
+	next unless $fmt;
+	$args->{root} = lc($args->{root}) if $self->is_note;
+	$args->{formatted} = $res;
+	$res = interpolate( { args => $args }, $fmt );
+    }
+
+    # Substitute musical symbols if wanted.
+    return $::config->{settings}->{truesf} ? $self->fix_musicsyms($res) : $res;
+}
+
 sub flat_copy ( $self, $ret, $o, $pfx = "" ) {
     while ( my ( $k, $v ) = each %$o ) {
-	if ( $k eq "orig" ) {
+	if ( $k eq "orig" || $k eq "xc" || $k eq "xp" ) {
 	    $self->flat_copy( $ret, $v, "$k.$pfx");
+	    $ret->{"$k.${pfx}formatted"} = $v->chord_display;
 	}
 	else {
 	    $ret->{"$pfx$k"} = $v;
@@ -900,8 +922,6 @@ sub dump ( $self ) {
 package ChordPro::Chord::Common;
 
 our @ISA = qw( ChordPro::Chord::Base );
-
-use String::Interpolate::Named;
 
 # Show reconstructs the chord from its constituents.
 # Result is canonical.
@@ -1008,23 +1028,10 @@ sub transcode ( $self, $xcode, $key_ord = 0 ) {
 
 sub chord_display ( $self ) {
 
-    # $self->dump;
-
-    my $res = $self->name;
-    my $args = {};
-    $self->flat_copy( $args, $self->{display} // $self );
-
-    for my $fmt ( $::config->{settings}->{"chord-format"},
-		  $self->{format},
-		  $self->{chordformat} ) {
-	next unless $fmt;
-	$args->{root} = lc($args->{root}) if $self->is_note;
-	$args->{formatted} = $res;
-	$res = interpolate( { args => $args }, $fmt );
-    }
-
-    # Substitute musical symbols if wanted.
-    return $::config->{settings}->{truesf} ? $self->fix_musicsyms($res) : $res;
+    $self->SUPER::chord_display
+      ( $::config->{"chord-formats"}->{common}
+	// $::config->{settings}->{"chord-format"}
+	// "%{name}" );
 }
 
 ################ Chord objects: Nashville ################
@@ -1033,8 +1040,6 @@ package ChordPro::Chord::Nashville;
 
 our @ISA = 'ChordPro::Chord::Base';
 
-use String::Interpolate::Named;
-
 sub transpose ( $self ) { $self }
 
 sub show {
@@ -1050,22 +1055,10 @@ sub canonical ( $self ) {
 }
 
 sub chord_display ( $self ) {
-    if ( $self->{format} ) {
-	####TODO
-	my $fmt = $self->{format} || $::config->{settings}->{"chord-format"};
-	if ( $fmt ) {
-	    my $args = {};
-	    $self->flat_copy( $args, $self );
-	    return interpolate( { args => $args }, $fmt );
-	}
-    }
 
-    my $res = $self->{root_canon} .
-      "<sup>" . $self->{qual} . $self->{ext} . "</sup>";
-    if ( $self->{bass} && $self->{bass} ne "" ) {
-	$res .= "<sub>/" . lc($self->{bass}) . "</sub>";
-    }
-    return $res;
+    $self->SUPER::chord_display
+      ( $::config->{"chord-formats"}->{nashville}
+	// "%{name}" );
 }
 
 ################ Chord objects: Roman ################
@@ -1074,9 +1067,7 @@ package ChordPro::Chord::Roman;
 
 our @ISA = 'ChordPro::Chord::Base';
 
-use String::Interpolate::Named;
-
-sub transpose ( $self ) { $self }
+sub transpose ( $self, $dummy1, $dummy2 ) { $self }
 
 sub show {
     Carp::croak("call canonical instead of show");
@@ -1091,24 +1082,10 @@ sub canonical ( $self ) {
 }
 
 sub chord_display ( $self ) {
-    if ( $self->{format} ) {
-	####TODO
-	my $fmt = $self->{format} || $::config->{settings}->{"chord-format"};
-	if ( $fmt ) {
-	    my $args = {};
-	    $self->flat_copy( $args, $self );
-	    return interpolate( { args => $args }, $fmt );
-	}
-	return $self->canonical;
-    }
 
-    my $res = $self->{root_canon};
-    $res .= "<sup>" . $self->{qual} . $self->{ext} . "</sup>"
-      if $self->{qual};
-    if ( $self->{bass} && $self->{bass} ne "" ) {
-	$res .= "<sub>/" . lc($self->{bass}) . "</sub>";
-    }
-    return $res;
+    $self->SUPER::chord_display
+      ( $::config->{"chord-formats"}->{roman}
+	// "%{name}" );
 }
 
 ################ Chord objects: Annotations ################

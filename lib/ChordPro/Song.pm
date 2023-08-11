@@ -2052,8 +2052,10 @@ sub parse_chord {
 
     if ( $xp && $info ) {
 	# For transpose/transcode, chord must be wellformed.
-	$info = $info->transpose( $xp,
+	my $i = $info->transpose( $xp,
 				  $xpose_dir // $global_dir);
+	$i->{xp} = $info;
+	$info = $i;
 	warn( "Parsing chord: \"$chord\" transposed ",
 	      sprintf("%+d", $xp), " to \"",
 	      $info->name, "\"\n" ) if $debug > 1;
@@ -2066,7 +2068,10 @@ sub parse_chord {
 	    warn( "Parsing chord: \"$chord\" found ",
 		  $i->name, " for ", $info->name,
 		  " in ", $i->{_via}, "\n" ) if $debug > 1;
-	    $info = $i->new({ %$i, name => $info->name }) ;
+	    $info = $i->new({ %$i, name => $info->name,
+			      $info->{xp} ? ( xp => $info->{xp} ) : (),
+			      $info->{xc} ? ( xc => $info->{xc} ) : (),
+			    }) ;
 	    $unk = 0;
 	}
 	elsif ( $config->{instrument}->{type} eq 'keyboard'
@@ -2092,7 +2097,9 @@ sub parse_chord {
 	    do_warn("Warning: Transcoding to $xc without key may yield unexpected results\n");
 	    undef $xcmov;
 	}
-	$info = $info->transcode( $xc, $key_ord );
+	my $i = $info->transcode( $xc, $key_ord );
+	$i->{xc} = $info;
+	$info = $i;
 	warn( "Parsing chord: \"$chord\" transcoded to ",
 	      $info->name,
 	      " (", $info->{system}, ")",

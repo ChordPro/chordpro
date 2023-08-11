@@ -142,11 +142,6 @@
 		    "default": false
 		},
 
-		"chord-format": {
-		    "description": "Format string for rendering chord names.",
-		    "type": "string"
-		},
-
 		"choruslabels": {
 		    "description": "",
 		    "title": "If false, chorus labels are used as tags.",
@@ -252,6 +247,29 @@
 		    "description": "Substitute Unicode sharp/flats in chord names.",
 		    "type": "boolean",
 		    "default": false
+		}
+	    }
+	},
+
+        "chord-formats": {
+	    "title": "Chord display formats",
+	    "description": "Format string for rendering chord names.",
+	    "additionalProperties": false,
+	    "properties": {
+	        "common": {
+		    "description": "Format string for rendering common chord names.",
+	    	    "type": "string",
+		    "default": "%{root|%{}%{qual|%{}}%{ext|%{}}%{bass|/%{}}|%{name}}"
+		},
+	        "roman": {
+		    "description": "Format string for rendering roman chord names.",
+	    	    "type": "string",
+		    "default": "%{root|%{}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}"
+		},
+	        "nashville": {
+		    "description": "Format string for rendering nashville chord names.",
+	    	    "type": "string",
+		    "default": "%{root|%{}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}"
 		}
 	    }
 	},

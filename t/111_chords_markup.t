@@ -41,7 +41,7 @@ foreach ( @tbl1 ) {
     doit($_);
 }
 
-$::config->{settings}->{"chord-format"} = "%{root}%{qual|%{}}%{ext|<sup>%{}</sup>}%{bass|/%{}}";
+$::config->{"chord-formats"}->{common} = "%{root}%{qual|%{}}%{ext|<sup>%{}</sup>}%{bass|/%{}}";
 foreach ( @tbl2 ) {
     doit($_);
 }

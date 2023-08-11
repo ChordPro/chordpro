@@ -896,9 +896,6 @@ sub default_config () {
       "lyrics-only" : false,
       // Memorize chords in sections, to be recalled by [^].
       "memorize" : false,
-      // Format to show chord names. May contain markup.
-      // "chord-format" : "%{root}%{qual|%{}}%{ext|<sup>%{}</sup>}%{bass|/%{}}",
-      "chord-format" : "%{root|%{}%{qual|%{}}%{ext|%{}}%{bass|/%{}}|%{name}}",
       // Chords inline.
       // May be a string containing pretext %s posttext.
       // Defaults to "[%s]" if set to a value that doesn't contain "%s".
@@ -1026,6 +1023,14 @@ sub default_config () {
       // If the name of the first entry is "defaults" its properties may
       // be used as defaults for the rest of the chords.
     ],
+
+      // Format to show chord names. May contain markup.
+      // "chord-format" : "%{root}%{qual|%{}}%{ext|<sup>%{}</sup>}%{bass|/%{}}",
+    "chord-formats" : {
+        "common" :    "%{root|%{}%{qual|%{}}%{ext|%{}}%{bass|/%{}}|%{name}}",
+        "roman" :     "%{root|%{}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}",
+        "nashville" : "%{root|%{}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}",
+    },
 
     // Printing chord diagrams.
     // "show": prints the chords used in the song.

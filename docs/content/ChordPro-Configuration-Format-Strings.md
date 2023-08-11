@@ -149,9 +149,6 @@ See [Configuration for CSV output]({{< relref "chordpro-configuration-csv" >}}).
 
 ## Chord format string
 
-_Note: This is not applicable to chords in Nasville, Roman and Solfege
-notations._
-
 [Chord format strings]({{< relref
 "Directives-define#chord-format-strings" >}}) support a limited set
 of metadata for substitutions.
@@ -172,11 +169,41 @@ of metadata for substitutions.
 In all cases, `%{root}%{qual}%{ext}%{bass|/%{}}` yields the full chord name.
 
 The default chord format string is the value of config
-item `settings.chord-format`, and its default value is slightly more
-complicated:
+item `chord-formats` with a format string for each of the supported chord
+formats.
 
-    %{root|%{}%{qual}%{ext}%{bass|/%{}}|%{name}}
+    "chord-formats" : {
+        "common" :    "%{root|%{}%{qual|%{}}%{ext|%{}}%{bass|/%{}}|%{name}}",
+        "roman" :     "%{root|%{}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}",
+        "nashville" : "%{root|%{}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}",
+    },
 	
 If property `root` is known this means that the chord was successfully
 parsed. The format will use the chord properties `root`,
 `qual`, `ext` and `bass`. Otherwise it uses the `name` property.
+
+**Experimental:** If a chord has been transposed and/or transcoded
+there will be additional metadata:
+
+ * `xp`: The metadata for the chord _before_ transposing.
+ 
+ * `xc`: The metadata for the chord _before_ transcoding.
+ 
+These have all the metadata for chords (i.e. `root`, `qual` etc.), and
+in additon:
+ 
+ * `formatted`: The formatted chord name.
+
+For example, when you transcode a song to Roman and want to show the
+roman notation alongside the original (common) notation, you can use
+the following value for `chord-formats.roman`:
+
+    %{root|%{}%{qual|<sup>%{}%{ext|%{}}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}%{xc.root| (%{xc.formatted})}
+
+The first part is the normal format for Roman notation. To this, the
+following is appended:
+
+    %{xc.root| (%{xc.formatted})}
+
+When the chord was transcoded there is an `xc.root` and the formatted
+chord name `xc.formatted` is appended between parentheses.
