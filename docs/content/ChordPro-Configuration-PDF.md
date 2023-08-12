@@ -228,14 +228,17 @@ If the chord definition has info for finger settings, these will be
 shown if `fingers` is true.
 
         "diagrams" : {
-            "fingers"  : "true"
-            "show"     :  "bottom",   // or "top", or "right", or "below"
-            "width"    :  6,
-            "height"   :  6,
-            "hspace"   :  3.95,
-            "vspace"   :  3,
-            "vcells"   :  4,
-            "linewidth" : 0.1,
+          "show"     :  "bottom",
+          "width"    :  6,      // of a cell
+          "height"   :  6,      // of a cell
+          "vcells"   :  4,      // vertically
+          "linewidth" : 0.1,    // of a cell width
+          "nutwidth" :  5,      // linewidth
+          "hspace"   :  3.95,   // fraction of width
+          "vspace"   :  3,      // fraction of height
+          "dotsize"  :  0.8,    // of a cell
+          "barwidth" :  0.8,    // of a dot
+          "fingers"  :  true,   // show fingering if available (or "below")
         },
 
 With the above settings, chord diagrams will look like:

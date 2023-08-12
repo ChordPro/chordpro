@@ -975,7 +975,7 @@
 		        "fingers": {
 			    "description": "Show finger settings, if available.",
 			    "default": "true",
-			    "type": "boolean"
+			    "type": [ "boolean", "string" ]
 			},
 		        "show": {
 			    "description": "Where to show the diagrams.",
@@ -986,6 +986,18 @@
 			"height": {
 			    "description": "Distance between frets.",
 			    "default": 6,
+			    "minimum": 0,
+			    "type": "number"
+			},
+			"dotsize": {
+			    "description": "Size of the fret dot, fraction of cell width.",
+			    "default": 0.8,
+			    "minimum": 0,
+			    "type": "number"
+			},
+			"barwidth": {
+			    "description": "Thickness of bars, fraction of dot width.",
+			    "default": 0.8,
 			    "minimum": 0,
 			    "type": "number"
 			},
@@ -1004,6 +1016,12 @@
 			"linewidth": {
 			    "description": "Thickness of the diagram lines as a fraction of 'width'.",
 			    "default": 0.1,
+			    "minimum": 0,
+			    "type": "number"
+			},
+			"nutwidth": {
+			    "description": "Thickness of the top nut, in 'linewidth'.",
+			    "default": 5,
 			    "minimum": 0,
 			    "type": "number"
 			},

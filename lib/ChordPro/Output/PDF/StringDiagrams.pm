@@ -28,9 +28,11 @@ sub new {
 sub vsp0 {
     my ( $self, $elt, $ps ) = @_;
     $ps->{fonts}->{diagram}->{size} * $ps->{spacing}->{diagramchords}
-      + ( 5 * ($ps->{diagrams}->{linewidth} || 0.10) + 0.40 )
+      + ( $ps->{diagrams}->{nutwidth} * ($ps->{diagrams}->{linewidth} || 0.10) + 0.40 )
        * $ps->{diagrams}->{width}
-	+ $ps->{diagrams}->{vcells} * $ps->{diagrams}->{height};
+       + $ps->{diagrams}->{vcells} * $ps->{diagrams}->{height}
+       + ( $ps->{diagrams}->{fingers} eq "below" ? $ps->{fonts}->{diagram}->{size} : 0 )
+       ;
 }
 
 # The advance height.
@@ -63,8 +65,6 @@ sub hsp {
     $self->hsp0( $elt, $ps ) + $self->hsp1( $elt, $ps );
 }
 
-# my @Roman = qw( I II III IV V VI VI VII VIII IX X XI XII );
-
 sub font_bl {
     goto &ChordPro::Output::PDF::font_bl;
 }
@@ -75,13 +75,17 @@ sub draw {
     return unless $info;
 
     my $x0 = $x;
+    my $y0 = $y;
 
-    my $gw = $ps->{diagrams}->{width};
-    my $gh = $ps->{diagrams}->{height};
-    my $dot = 0.80 * $gw;
-    my $lw  = ($ps->{diagrams}->{linewidth} || 0.10) * $gw;
-    my $bflw = 5*$lw;
-    my $bfy = $bflw/3;
+    my $gw   = $ps->{diagrams}->{width};
+    my $gh   = $ps->{diagrams}->{height};
+    my $dot  = $ps->{diagrams}->{dotsize} * $gw;
+    my $bsz  = $ps->{diagrams}->{barwidth} * $dot;
+    my $lw   = ($ps->{diagrams}->{linewidth} || 0.10) * $gw;
+    my $bflw = $ps->{diagrams}->{nutwidth} * $lw;
+    my $fsh  = $ps->{diagrams}->{fingers}; # t / f / below
+    my $bfy  = $bflw/3;
+
     my $pr = $ps->{pr};
 
     my $fg = $info->{diagram} // $config->{pdf}->{theme}->{foreground};
@@ -90,6 +94,7 @@ sub draw {
 
     # Draw font name.
     my $font = $ps->{fonts}->{diagram};
+    my $fasc = $font->{fd}->{font}->ascender/1000;
     $pr->setfont($font);
     my $name = $info->chord_display;
     # $name .= "*"
@@ -100,7 +105,6 @@ sub draw {
     $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y - font_bl($font) );
     $y -= $font->{size} * $ps->{spacing}->{diagramchords} + $dot/2 + $lw;
     if ( $info->{base} + $info->{baselabeloffset} > 1 ) {
-	# my $i = @Roman[$info->{base}] . "  ";
 	my $i = sprintf("%d  ", $info->{base} + $info->{baselabeloffset});
 	$pr->setfont( $ps->{fonts}->{diagram_base}, $gh );
 	$pr->text( $i, $x-$pr->strwidth($i),
@@ -142,7 +146,7 @@ sub draw {
     $fbg = "white" if $fbg eq "none";
 
     my $fingers;
-    $fingers = $info->{fingers} if $ps->{diagrams}->{fingers};
+    $fingers = $info->{fingers} if $fsh;
 
     # Bar detection.
     my $bar;
@@ -173,13 +177,13 @@ sub draw {
 		# Print the bar line. Need linecap 0.
 		$pr->hline( $x+$bi[2]*$gw, $y-$bfy -$bflw/2 -$bi[1]*$gh+$gh/2,
 			    ($bi[3]-$bi[2])*$gw,
-			    $dot, $fg, 0 );
+			    $bsz, $fg, 0 );
 	    }
 	}
     }
 
     # Process the strings and fingers.
-    $x -= $gw/2;
+#    $x -= $gw/2;
     my $oflo;			# to detect out of range frets
 
     my $g_none = "/";		# unnumbered
@@ -190,6 +194,7 @@ sub draw {
     # To get it vertically centered we must lower it by 455 (1000/2-55).
     $pr->setfont($fcf,$dot);
     my $g_width = $pr->strwidth("1");
+    $x -= 0.65 * $g_width;
     my $g_lower = -0.455*$g_width;
 #    warn("GW dot=$dot, width=$g_width, lower=$g_lower\n");
 #    my $e = $fcf->{fd}->{font}->extents("1",10);
@@ -202,8 +207,17 @@ sub draw {
 
 	# For bars, only the first and last finger.
 	if ( $fing && $bar && $bar->{$fing} ) {
-	    next unless $sx == $bar->{$fing}->[2]
-	      || $sx == $bar->{$fing}->[3];
+	    unless ( $sx == $bar->{$fing}->[2] || $sx == $bar->{$fing}->[3] ) {
+		if ( $fsh eq "below" && $fing =~ /^[A-Z0-9]$/ ){
+		    $pr->setfont( $font, $dot );
+		    my $w = $pr->strwidth($fing);
+		    $pr->text( $fing,
+			       $x + 0.65*$g_width -$w/2,
+			       $y - $bfy - $bflw/2-($v+0.3)*$gh - $dot*1.4*$fasc,
+			       $font, $dot*1.4 );
+		}
+		next;
+	    }
 	}
 
 	if ( $fret > 0 ) {
@@ -213,7 +227,7 @@ sub draw {
 	    }
 
 	    my $glyph;
-	    if ( $fbg eq $fg ) {
+	    if ( $fbg eq $fg || $fsh eq "below" ) {
 		$glyph = $g_none;
 	    }
 	    elsif ( $fing =~ /^[A-Z0-9]$/ ) {
@@ -238,9 +252,19 @@ sub draw {
 	    $glyph = "<span color='$fg'>$glyph</span>"
 	      if $info->{diagram};
 	    $pr->text( $glyph,
-			$x,
-			$y - $bfy - $bflw/2-$fret*$gh + $gh/2 + $g_lower,
-			$fcf, $dot/0.8 );
+		       $x,
+		       $y - $bfy - $bflw/2-$fret*$gh + $gh/2 + $g_lower,
+		       $fcf, $dot/0.8 );
+
+	    if ( $fsh eq "below" && $fing =~ /^[A-Z0-9]$/ ){
+		$pr->setfont( $font, $dot*1.4 );
+		my $w = $pr->strwidth($fing);
+		$pr->text( $fing,
+			   $x + 0.65*$g_width -$w/2,
+			   $y - $bfy - $bflw/2-($v+0.3)*$gh - $dot*1.4*$fasc,
+			   $font, $dot*1.4 );
+	    }
+
 	}
 	elsif ( $fret < 0 ) {
 	    $pr->cross( $x+$gw/2, $y+$lw+$gh/3, $dot/3, $lw, $fg );
@@ -262,7 +286,7 @@ sub grid_xo {
     my $gw = $ps->{diagrams}->{width};
     my $gh = $ps->{diagrams}->{height};
     my $lw  = ($ps->{diagrams}->{linewidth} || 0.10) * $gw;
-    my $bflw = 5 * $lw;
+    my $bflw = $ps->{diagrams}->{nutwidth} * $lw;
     my $bfno = $basefretno;
     my $v = $ps->{diagrams}->{vcells};
     my $strings = $config->diagram_strings;

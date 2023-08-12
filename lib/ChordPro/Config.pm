@@ -1234,13 +1234,16 @@ sub default_config () {
       // or "below" the last song line.
       "diagrams" : {
 	  "show"     :  "bottom",
-	  "width"    :  6,	// of a cell
-	  "height"   :  6,	// of a cell
-	  "vcells"   :  4,	// vertically
-	  "linewidth" : 0.1,	// of a cell width
+	  "width"    :  6,	// width of a cell
+	  "height"   :  6,	// height of a cell
+	  "vcells"   :  4,	// vertical cells
+	  "linewidth" : 0.1,	// fraction of cell width
+	  "nutwidth" :  5,	// width (in linewidth) of the top nut
 	  "hspace"   :  3.95,	// fraction of width
 	  "vspace"   :  3,	// fraction of height
-          "fingers"  :  true,   // show fingering if available
+          "dotsize"  :  0.8,    // fraction of a cell
+          "barwidth" :  0.8,    // fraction of a dot
+          "fingers"  :  true,   // show fingering if available (or "below")
       },
 
       // Keyboard diagrams.

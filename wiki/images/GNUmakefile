@@ -1,8 +1,8 @@
 #! make
 
 LIB := ../../lib
-RES := ${LIB}/App/Music/ChordPro/res
-CHORDPRO := perl ${LIB}/../script/chordpro --nosysconfig --nouserconfig --noconfig --def settings.truesf=1
+RES := ${LIB}/ChordPro/res
+CHORDPRO := perl ${LIB}/../script/chordpro --nosysconfig --nouserconfig --cfg im.json
 CONVERT := convert -define profile:skip=ICC
 GS := gs -q -dNOPAUSE -dBATCH
 GSPNG := ${GS} -sDEVICE=png16m -dGraphicsAlphaBits=4 -dTextAlphaBits=4 -r144
@@ -44,7 +44,7 @@ style_%.png : ${RES}/config/%.json
 examples : $(subst .cho,.png,$(wildcard ex_*.cho)) ex_clean
 
 ex_%.png : ex_%.cho
-	${CHORDPRO} $< --output=t.pdf
+	${CHORDPRO} --cfg ex.json $< --output=t.pdf
 	${GSPNG} -r115 -sOutputFile=- t.pdf \
 	| ${CONVERT} -trim -alpha remove ${CVT_WBORDER} png:- png:- \
 	| ${CONVERT} ${CVT_BORDER} png:- $@
