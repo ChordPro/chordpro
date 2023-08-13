@@ -2054,7 +2054,8 @@ sub parse_chord {
 	# For transpose/transcode, chord must be wellformed.
 	my $i = $info->transpose( $xp,
 				  $xpose_dir // $global_dir);
-	$i->{xp} = $info;
+	# Prevent self-references.
+	$i->{xp} = $info unless $i eq $info;
 	$info = $i;
 	warn( "Parsing chord: \"$chord\" transposed ",
 	      sprintf("%+d", $xp), " to \"",
@@ -2098,7 +2099,8 @@ sub parse_chord {
 	    undef $xcmov;
 	}
 	my $i = $info->transcode( $xc, $key_ord );
-	$i->{xc} = $info;
+	# Prevent self-references.
+	$i->{xc} = $info unless $i eq $info;
 	$info = $i;
 	warn( "Parsing chord: \"$chord\" transcoded to ",
 	      $info->name,
