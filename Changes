@@ -1,6 +1,7 @@
 0.000
 
     - !ChordPro functionality
+    - (Wx) Tasks menu for previews including custom extensions.
     - Experimental: Docker based web app.
     - !BugFixes
     - Fix issue #297.

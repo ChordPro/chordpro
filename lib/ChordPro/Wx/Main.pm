@@ -142,6 +142,8 @@ sub init {
     $font->SetPointSize($self->{prefs_editsize});
     $self->{t_source}->SetFont($font);
 
+    $self->setup_tasks();
+
     # Disable menu items if we cannot.
     $self->{main_menubar}->FindItem(wxID_UNDO)
       ->Enable($self->{t_source}->CanUndo);
@@ -208,6 +210,52 @@ sub notationlist {
 	}
     }
     return $notationlist;
+}
+
+sub setup_tasks {
+    my ( $self ) = @_;
+    my $dir = $self->{prefs_customlib};
+    return unless $dir && -d $dir;
+    $dir .= "/tasks";
+    return unless $dir && -d $dir;
+
+    use File::Glob 'bsd_glob';
+    use File::Basename;
+
+    my @files = glob( "$dir/*.{json,prp}" );
+    return unless @files;
+
+    my $menu = $self->{main_menubar}->FindMenu("Tasks");
+    $menu = $self->{main_menubar}->GetMenu($menu);
+
+    my $did;
+    foreach my $file ( @files ) {
+	next unless -s $file;
+
+	# Tentative title (description).
+	( my $desc = basename( $file, ".json", ".prp" ) ) =~ s/_/ /g;
+
+	# Peek in the first line.
+	my $line;
+	my $fd;
+	open( $fd, '<:utf8', $file ) and
+	  $line = <$fd> and
+	  close($fd);
+	if ( $line =~ m;(?://|\#)\s*(?:chordpro\s*)?task:\s*(.*);i ) {
+	    $desc = $1;
+	}
+
+	# Append to the menu, first a separator if needed.
+	$menu->AppendSeparator unless $did++;
+	my $id = Wx::NewId();
+	$menu->Append( $id, $desc, _T("User task: ").$desc );
+	Wx::Event::EVT_MENU
+	    ( $self, $id,
+	      sub {
+		  my ( $self, $event ) = @_;
+		  $self->preview( "--config", $file );
+	      } );
+    }
 }
 
 sub fonts { \@fonts }
@@ -315,7 +363,7 @@ sub _die {
 }
 
 sub preview {
-    my ( $self ) = @_;
+    my ( $self, @opts ) = @_;
 
     # We can not unlink temps because we do not know when the viewer
     # is ready. So the best we can do is reuse the files.
@@ -375,6 +423,7 @@ sub preview {
     push( @ARGV, '--transpose', $self->{prefs_xpose} )
       if $self->{prefs_xpose};
 
+    push( @ARGV, @opts ) if @opts;
     push( @ARGV, $preview_cho );
 
     if ( $self->{_trace} || $self->{_debug}
@@ -597,7 +646,17 @@ sub OnSave {
 
 sub OnPreview {
     my ( $self, $event ) = @_;
-    $self->preview;
+    $self->preview();
+}
+
+sub OnPreviewNoChords {
+    my ( $self, $event ) = @_;
+    $self->preview("--no-chord-grids");
+}
+
+sub OnPreviewLyricsOnly {
+    my ( $self, $event ) = @_;
+    $self->preview("--lyrics-only");
 }
 
 sub OnClose {
