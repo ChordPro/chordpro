@@ -248,7 +248,7 @@ sub setup_tasks {
 	# Append to the menu, first a separator if needed.
 	$menu->AppendSeparator unless $did++;
 	my $id = Wx::NewId();
-	$menu->Append( $id, $desc, _T("User task: ").$desc );
+	$menu->Append( $id, $desc, _T("Custom task: ").$desc );
 	Wx::Event::EVT_MENU
 	    ( $self, $id,
 	      sub {
