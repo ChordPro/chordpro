@@ -1099,6 +1099,7 @@ sub default_config () {
             "config"   : "default", // or "none", or "myformat.fmt"
             "preamble" : [],
             "preprocess" : { "abc" : [], "svg" : [] },
+            "omit"     : false,
         },
         "ly" : {
             "type"     : "image",
@@ -1111,6 +1112,7 @@ sub default_config () {
 		"\\version \"2.21.0\"",
 		"\\header { tagline = ##f }",
             ],
+            "omit"     : false,
         },
      },
 

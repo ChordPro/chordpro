@@ -1,8 +1,9 @@
 0.000
 
     - !ChordPro functionality
-    - (Wx) Tasks menu for previews including custom extensions.
+    - (Wx) Tasks menu for previews, including custom extensions.
     - Experimental: Docker based web app.
+    - Add 'omit' to delegates config.
     - !BugFixes
     - Fix issue #297.
     - Fix issue #298.

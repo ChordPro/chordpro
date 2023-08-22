@@ -456,11 +456,17 @@ sub parse_song {
 	}
 
 	if ( exists $config->{delegates}->{$in_context} ) {
-
 	    # 'open' indicates open.
 	    if ( /^\s*\{(?:end_of_\Q$in_context\E)\}\s*$/ ) {
-		delete $self->{body}->[-1]->{open};
-		# A subsequent {start_of_XXX} will reopen a new item
+		if ( $config->{delegates}->{$in_context}->{omit} ) {
+		}
+		else {
+		    delete $self->{body}->[-1]->{open};
+		    # A subsequent {start_of_XXX} will reopen a new item
+		}
+	    }
+	    elsif ( $config->{delegates}->{$in_context}->{omit} ) {
+		next;
 	    }
 	    else {
 		# Add to an open item.
