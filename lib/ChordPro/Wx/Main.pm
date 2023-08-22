@@ -212,6 +212,8 @@ sub notationlist {
     return $notationlist;
 }
 
+my @tasks;
+
 sub setup_tasks {
     my ( $self ) = @_;
     my $dir = $self->{prefs_customlib};
@@ -255,9 +257,11 @@ sub setup_tasks {
 		  my ( $self, $event ) = @_;
 		  $self->preview( "--config", $file );
 	      } );
+	push( @tasks, [ $desc, $file ] );
     }
 }
 
+sub tasks { \@tasks }
 sub fonts { \@fonts }
 
 sub opendialog {
@@ -656,7 +660,9 @@ sub OnPreviewNoChords {
 
 sub OnPreviewLyricsOnly {
     my ( $self, $event ) = @_;
-    $self->preview("--lyrics-only");
+    $self->preview( "--lyrics-only",
+		    "--define=delegates.abc.omit=1",
+		    "--define=delegates.ly.omit=1" );
 }
 
 sub OnClose {
@@ -742,6 +748,53 @@ sub OnPreferences {
     $self->{d_prefs} ||= ChordPro::Wx::PreferencesDialog->new($self, -1, "Preferences");
     my $ret = $self->{d_prefs}->ShowModal;
     $self->SavePreferences if $ret == wxID_OK;
+}
+
+#               C      D      E  F      G      A        B C
+my @xpmap = qw( 0 1  1 2 3  3 4  5 6  6 7 8  8 9 10 10 11 12 );
+my @sfmap = qw( 0 7 -5 2 9 -3 4 -1 6 -6 1 8 -4 3 10 -2  5 0  );
+
+sub OnPreviewMore {
+    my ($self, $event) = @_;
+
+    use ChordPro::Wx::RenderDialog;
+    my $d = $self->{d_render} ||= ChordPro::Wx::RenderDialog->new($self, -1, "Tasks");
+    my $ret = $d->ShowModal;
+    return unless $ret == wxID_OK;
+    my @args;
+    if ( $d->{cb_task_no_diagrams}->IsChecked ) {
+	push( @args, "--no-chord-grids" );
+    }
+    if ( $d->{cb_task_lyrics_only}->IsChecked ) {
+	push( @args, "--lyrics-only",
+	      "--define=delegates.abc.omit=1",
+	      "--define=delegates.ly.omit=1" );
+    }
+    if ( $d->{cb_task_decapo}->IsChecked ) {
+	push( @args, "--decapo" );
+    }
+
+    # Transpose.
+    my $xpose_from = $xpmap[$d->{ch_xpose_from}->GetSelection];
+    my $xpose_to   = $xpmap[$d->{ch_xpose_to  }->GetSelection];
+    my $xpose_acc  = $d->{ch_acc}->GetSelection;
+    my $n = $xpose_to - $xpose_from;
+    $n += 12 if $n < 0;
+    $n += 12 if $xpose_acc == 1; # sharps
+    $n -= 12 if $xpose_acc == 2; # flats
+
+    push( @args, "--transpose=$n" );
+
+
+
+    my $i = 0;
+    for ( @tasks ) {
+	if ( $d->{"cb_customtask_$i"}->IsChecked ) {
+	    push( @args, "--config", $_->[1] );
+	}
+	$i++;
+    }
+    $self->preview( @args );
 }
 
 sub OnText {
