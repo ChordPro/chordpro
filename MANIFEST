@@ -36,6 +36,8 @@ lib/ChordPro/Wx/Main.pm
 lib/ChordPro/Wx/Main_wxg.pm
 lib/ChordPro/Wx/PreferencesDialog.pm
 lib/ChordPro/Wx/PreferencesDialog_wxg.pm
+lib/ChordPro/Wx/RenderDialog.pm
+lib/ChordPro/Wx/RenderDialog_wxg.pm
 lib/ChordPro/res/config/brandtroemer.json
 lib/ChordPro/res/config/chordii.json
 lib/ChordPro/res/config/chordpro.json

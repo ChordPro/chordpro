@@ -1,5 +1,6 @@
 pp/windows/abcm2ps.exe
 CPAN/App/Packager.pm
+CPAN/Capture/Tiny.pm
 CPAN/Data/Properties.pm
 CPAN/File/HomeDir.pm
 CPAN/File/HomeDir/Darwin.pm
