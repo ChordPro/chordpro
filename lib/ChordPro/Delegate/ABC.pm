@@ -13,8 +13,8 @@ use utf8;
 use File::Spec;
 use File::Temp ();
 use File::LoadLines;
-use Capture::Tiny qw(capture);
 use feature 'state';
+use Encode 'decode_utf8';
 
 use ChordPro::Utils;
 use Text::ParseWords qw(shellwords);
@@ -805,14 +805,37 @@ sub xabc2image {
 # ABC processing using abc2svg and custom SVG processor.
 # FOR EXPERIMENTAL PURPOSES ONLY!
 
+my $abc2svg;
+
+sub abc2svg_qjs {
+    my ( $s, $pw, $elt ) = @_;
+
+    # Try (embedded) QuickJS.
+
+    my $dir = ::rsc_or_file("abc2svg/");
+    my $x;
+    if ( -x "$dir/qjs" ) {
+	$x = "$dir/qjs";
+    }
+    elsif ( is_msw() and -s "$dir/qjs.exe" ) {
+	$x = "$dir/qjs.exe";
+    }
+    if ( $x ) {
+	$abc2svg = [ $x, "--std", "$dir/abc2svg.js", $dir ];
+    }
+
+    return _abc2svg( $abc2svg, $s, $pw, $elt );
+}
+
 sub abc2svg {
     my ( $s, $pw, $elt ) = @_;
 
-    state $imgcnt = 0;
-    state $td = File::Temp::tempdir( CLEANUP => !$config->{debug}->{abc} );
-    my $cfg = $config->{delegates}->{abc};
+    # Native.
+    unless ( $abc2svg ) {
+	$abc2svg = findexe("abc2svg");
+    }
 
-    state $abc2svg = findexe("abc2svg");
+    # Try node.
     unless ( $abc2svg ) {
 	my $x;
 	if ( $x = findexe("npx")
@@ -820,6 +843,31 @@ sub abc2svg {
 	    $abc2svg = [ $x, "abc2svg" ];
 	}
     }
+
+    # Try (embedded) QuickJS.
+    unless ( $abc2svg ) {
+	my $dir = ::rsc_or_file("abc2svg/");warn("XXX $dir\n");
+	my $x;
+	if ( -x "$dir/qjs" ) {
+	    $x = "$dir/qjs";
+	}
+	elsif ( is_msw() and -s "$dir/qjs.exe" ) {
+	    $x = "$dir/qjs.exe";
+	}
+	if ( $x ) {
+	    $abc2svg = [ $x, "--std", "$dir/abc2svg.js", $dir ];
+	}
+    }
+
+    return _abc2svg( $abc2svg, $s, $pw, $elt );
+}
+
+sub _abc2svg {
+    my ( $abc2svg, $s, $pw, $elt ) = @_;
+
+    state $imgcnt = 0;
+    state $td = File::Temp::tempdir( CLEANUP => !$config->{debug}->{abc} );
+    my $cfg = $config->{delegates}->{abc};
 
     unless ( $abc2svg ) {
 	warn("Error in ABC embedding: need 'abc2svg' tool.\n");
@@ -831,6 +879,8 @@ sub abc2svg {
     $imgcnt++;
     my $src  = File::Spec->catfile( $td, "tmp${imgcnt}.abc" );
     my $svg  = File::Spec->catfile( $td, "tmp${imgcnt}.svg" );
+    my $out  = File::Spec->catfile( $td, "tmp${imgcnt}.err" );
+    my $err  = File::Spec->catfile( $td, "tmp${imgcnt}.out" );
 
     my $fd;
     unless ( open( $fd, '>:utf8', $src ) ) {
@@ -898,27 +948,85 @@ sub abc2svg {
 
     push( @cmd, "toxhtml.js", $src );
     warn( "+ @cmd\n" ) if DEBUG;
-    my ( $out, $err, $ret ) = capture {
-	sys( @cmd );
-    };
-    if ( $ret or !$out ) {
-	warn("Error in ABC embedding\n");
+
+    my @lines;
+    my $ret;
+    unless ( main->can("OnInit") ) {
+	my ( $oldout, $olderr );
+	open( $oldout, ">&STDOUT" )
+	  or die "Can't dup STDOUT: $!";
+	open( $olderr,     ">&", \*STDERR )
+	  or die "Can't dup STDERR: $!";
+
+	open(STDOUT, '>:utf8', $out)
+	  or die "Can't redirect STDOUT: $!";
+	open(STDERR, ">:utf8", $err)
+	  or die "Can't dup STDERR: $!";
+
+	select STDERR; $| = 1;  # make unbuffered
+	select STDOUT; $| = 1;  # make unbuffered
+
+	$ret = eval { sys(@cmd) };
+
+	open(STDOUT, ">&", $oldout)
+	  or die "Can't dup OLDOUT: $!";
+	open(STDERR, ">&", $olderr)
+	  or die "Can't dup OLDERR: $!";
+	select STDERR; $| = 1;  # make unbuffered
+
+	if ( -s $err ) {
+	    open( $fd, '<:utf8', $err );
+	    while ( <$fd> ) {
+		warn("ABC: $_");
+	    }
+	    close($fd);
+	}
+	@lines = loadlines($out);
+    }
+    elsif ( 1 ) {
+	system("@cmd > x.svg");
+	@lines = loadlines("x.svg");
+    }
+    else {
+	( $ret, $out, $err ) = Wx::ExecuteStdout( "@cmd", 32 );
+#	open( my $fd, '>:raw', "out.out" );
+	for ( @$err ) {
+	    warn("ABC: $_");
+	}
+	for ( @$out) {
+	    push( @lines, $_ );
+#	    print( $fd Encode::decode_utf8($_), "\n" );
+	}
+#	close($fd);
+    }
+
+    if ( $ret ) {
+	warn( sprintf( "Error in ABC embedding (ret = 0x%x)\n", $ret ) );
 	return;
     }
+    if ( ! @lines ) {
+	warn("Error in ABC embedding (no output?)\n");
+	return;
+    }
+    warn("SVG: ", scalar(@lines), " lines (raw)\n") if DEBUG();
 
     open( $fd, '>:utf8', $svg );
     my $copy = 0;
-    my @lines = loadlines(\$out);
+    print $fd ("<div>\n");
+    my $lines = 1;
     while ( @lines ) {
 	$_ = shift(@lines);
 	if ( /^<svg/ ) {
 	    $copy++;
 	}
-	print $fd $_, "\n" if $copy;
-	last if /^<\/svg/ && @lines && $lines[0] =~ /^<\/div/;
+	print( $fd $_, "\n"), $lines++ if $copy;
+	if ( /^<\/svg/ && @lines && $lines[0] =~ /^<\/div/ ) {
+	    last;
+	}
     }
+    print $fd ("</div>\n");
     close($fd);
-
+    warn("SVG: ", 1+$lines, " lines (", -s $svg, " bytes)\n") if DEBUG();
     my @res;
     push( @res,
 	  { type => "svg",

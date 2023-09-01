@@ -2,6 +2,7 @@ CPAN/SVGPDF.pm
 CPAN/SVGPDF/CSS.pm
 CPAN/SVGPDF/Circle.pm
 CPAN/SVGPDF/Contrib/Bogen.pm
+CPAN/SVGPDF/Contrib/PathExtract.pm
 CPAN/SVGPDF/Defs.pm
 CPAN/SVGPDF/Element.pm
 CPAN/SVGPDF/Ellipse.pm

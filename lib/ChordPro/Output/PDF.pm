@@ -123,12 +123,12 @@ sub generate_songbook {
 	my $book = prep_outlines( [ map { $_->[1] } @book ], $ctl );
 
 	# Create a pseudo-song for the table of contents.
-	my $t = $ctl->{label};
+	my $t = fmt_subst( $book[0][-1], $ctl->{label} );
 	my $l = $ctl->{line};
 	my $start = $start_of{songbook} - $options->{"start-page-number"};
 	my $pgtpl = $ctl->{pageno};
 	my $song =
-	  { title     => $t,
+	  { title     =>  $t,
 	    meta => { title => [ $t ] },
 	    structure => "linear",
 	    body      => [
@@ -1157,11 +1157,13 @@ sub generate_song {
 	if ( $elt->{type} eq "svg" ) {
 	    # We turn SVG into one (or more) XForm objects.
 
-	    require PDF::SVG;
-	    my $p = PDF::SVG->new
+	    require SVGPDF;
+	    my $p = SVGPDF->new
 	      ( pdf  => $ps->{pr}->{pdf},
 		fc   => \&svg_fontmanager,
-		atts => { debug => $config->{debug}->{svg} > 1 } );
+		atts => { debug => $config->{debug}->{svg} > 1,
+			  verbose => $config->{debug}->{svg},
+			} );
 	    my $o = $p->process( $elt->{uri} );
 	    warn("PDF: SVG objects: ", 0+@$o, "\n")
 	      if $config->{debug}->{svg} || !@$o;
@@ -1180,12 +1182,14 @@ sub generate_song {
 		      { type => "xform",
 			width => $xo->{width},
 			height => $xo->{height},
+			vwidth => $xo->{vwidth},
+			vheight => $xo->{vheight},
 			id  => $assetid,
 			opts => { center => $elt->{opts}->{center},
 				  scale => $elt->{opts}->{scale} || 1 } },
 		    );
 		warn("Created asset $assetid (xform, ",
-		     $xo->{width}, "x", $xo->{height}, ")",
+		     $xo->{vwidth}, "x", $xo->{vheight}, ")",
 		     " scale=", $elt->{opts}->{scale} || 1,
 		     " center=", $elt->{opts}->{center}//0,
 		     "\n")
@@ -1199,13 +1203,16 @@ sub generate_song {
 	if ( $elt->{type} eq "xform" ) {
 	    my $h = $elt->{height};
 	    my $w = $elt->{width};
+	    my $vh = $elt->{vheight};
+	    my $vw = $elt->{vwidth};
 	    my $scale = $elt->{opts}->{scale};
+
 	    my $vsp = $h * $scale;
 	    $checkspace->($vsp);
 	    $ps->{pr}->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
 
 	    my $xo = $assets->{ $elt->{id} };
-	    $pr->{pdfgfx}->object( $xo->{data}->{xo}, $x, $y-$vsp, $scale );
+	    $pr->{pdfgfx}->object( $xo->{data}->{xo}, $x, $y, $scale );
 
 	    $y -= $vsp;
 	    $pr->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
@@ -2983,13 +2990,13 @@ sub is_corefont {
 
 # Font manager for SVG embedding.
 sub svg_fontmanager {
-    my ( $pdf, $gfx, $style ) = @_;
+    my ( $self, $pdf, $style ) = @_;
 
     my $family = $style->{'font-family'};
     my $stl    = $style->{'font-style'}   // "normal";
     my $weight = $style->{'font-weight'}  // "normal";
     my $size   = $style->{'font-size'}    || 12;
-    my $key    = join( "|", $family, $weight, $stl );
+    my $key    = join( "|", $family, $stl, $weight );
     state $fc  = {};
 
     local *Text::Layout::FontConfig::_fallback = sub { 0 };
@@ -3010,13 +3017,11 @@ sub svg_fontmanager {
 	    $try;
 	}
 	else {
-	    return 0;
+	    return;
 	}
     };
 
-    $gfx->font( $font, $size );
-
-    return 1;
+    return $font;
 }
 
 sub _dump {

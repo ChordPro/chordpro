@@ -49,6 +49,7 @@ to_tmp_cpan :
 
 to_c :
 	${MAKE} to_tmp to_tmp_cpan TMP_DST=/mnt/c${W10DIR}
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST.ABC  ./ /mnt/c${W10DIR}/
 
 to_mac : resources
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST      ./ ${MACDST}/

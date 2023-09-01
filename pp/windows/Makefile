@@ -57,10 +57,10 @@ unpack :
 	perl ..\pp2ppl.pl --quiet --dest="${DEST}" wxchordpro.exe
 	copy "${ROOT}\script\chordpro.pl" "${DEST}\script\chordpro.pl" 
 	copy "${ROOT}\lib\ChordPro\Config.pm" "${DEST}\lib\ChordPro\Config.pm" 
-	copy "abcm2ps.exe" "${DEST}" 
 	copy "${DEST}\res\icons\chordpro.ico" "${DEST}"
 	copy "${DEST}\res\icons\chordpro-doc.ico" "${DEST}"
 	move "${DEST}\res" "${DEST}\lib\ChordPro"
+	tar xf abc2svg_qjs.tar.gz -C "${DEST}"
 
 # The core DLLs needed for Strawberry perl. The Wx libs have been unpacked already.
 copy_coredll :
