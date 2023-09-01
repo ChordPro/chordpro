@@ -728,7 +728,7 @@ sub embed {
 	( $cf, $cname ) = File::Temp::tempfile( UNLINK => 0);
     }
     binmode( $cf, ':utf8' );
-    print $cf ChordPro::Config::config_final();
+    print $cf ChordPro::Config::config_final(0);
     close($cf);
 
     $a = $self->{pdfpage}->annotation();
