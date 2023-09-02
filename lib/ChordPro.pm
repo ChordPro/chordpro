@@ -1118,6 +1118,9 @@ sub ::runtimeinfo {
     eval { require PDF::API2;
 	$msg .= sprintf( $fmtv, "PDF::API2", $dd->($PDF::API2::VERSION) );
     };
+    eval { require SVGPDF;
+	$msg .= sprintf( $fmtv, "SVGPDF", $dd->($SVGPDF::VERSION) );
+    };
     eval { require Font::TTF;
 	$msg .= sprintf( $fmtv, "Font::TTF", $dd->($Font::TTF::VERSION) );
     };
