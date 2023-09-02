@@ -66,7 +66,7 @@ sub expand_tilde ( $dir ) {
 
 push( @EXPORT, 'expand_tilde' );
 
-sub findexe ( $prog ) {
+sub findexe ( $prog, $silent ) {
     my @path;
     if ( MSWIN ) {
 	$prog .= ".exe" unless $prog =~ /\.\w+$/;
@@ -84,7 +84,7 @@ sub findexe ( $prog ) {
 	}
     }
     warn("Could not find $prog in ",
-	 join(" ", map { qq{"$_"} } @path), "\n");
+	 join(" ", map { qq{"$_"} } @path), "\n") unless $silent;
     return;
 }
 
