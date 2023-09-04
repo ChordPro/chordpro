@@ -1095,7 +1095,7 @@ sub default_config () {
         "abc" : {
             "type"     : "image",
             "module"   : "ABC",
-            "handler"  : "abc2image",
+            "handler"  : "abc2svg",
             "config"   : "default", // or "none", or "myformat.fmt"
             "preamble" : [],
             "preprocess" : { "abc" : [], "svg" : [] },

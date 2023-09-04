@@ -123,6 +123,13 @@ _wkit2 :
 	VBoxManage controlvm ${VM} poweroff
 	VBoxManage snapshot ${VM} restorecurrent
 
+abckit ::
+	npm update --silent abc2svg
+	tar zcvf pp/windows/abc2svg_qjs.tar \
+	    -C ${HOME}/node_modules \
+	    --exclude "**/Scc1t?/*" \
+	    abc2svg
+
 .PHONY: TAGS
 
 TAGS:
