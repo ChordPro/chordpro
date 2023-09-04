@@ -1104,7 +1104,7 @@ sub default_config () {
         "ly" : {
             "type"     : "image",
             "module"   : "Lilypond",
-            "handler"  : "ly2image",
+            "handler"  : "ly2svg",
             "config"   : "default", // or "none", or ...
             // The preamble is a list of lines inserted before the lilipond data.
             // This is a good place to set the version and global customizations.

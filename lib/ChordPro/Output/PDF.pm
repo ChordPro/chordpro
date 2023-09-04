@@ -1179,12 +1179,12 @@ sub generate_song {
 		$assets->{$assetid} = { type => "xform", data => $xo };
 
 		push( @res,
-		      { type => "xform",
-			width => $xo->{width},
-			height => $xo->{height},
-			vwidth => $xo->{vwidth},
-			vheight => $xo->{vheight},
-			id  => $assetid,
+		      { type     => "xform",
+			width    => $xo->{width},
+			height   => $xo->{height},
+			vwidth   => $xo->{vwidth},
+			vheight  => $xo->{vheight},
+			id       => $assetid,
 			opts => { center => $elt->{opts}->{center},
 				  scale => $elt->{opts}->{scale} || 1 } },
 		    );
@@ -1195,7 +1195,6 @@ sub generate_song {
 		     "\n")
 		  if $config->{debug}->{images};
 	    }
-
 	    unshift( @elts, @res );
 	    next;
 	}
@@ -1206,13 +1205,26 @@ sub generate_song {
 	    my $vh = $elt->{vheight};
 	    my $vw = $elt->{vwidth};
 	    my $scale = $elt->{opts}->{scale};
+	    my $xo = $assets->{ $elt->{id} };
+
+	    my $xscale = $vw / $xo->{data}->{vbox}->[2];
+	    my $yscale = $vh / $xo->{data}->{vbox}->[3];
+	    $scale *= $xscale;
+	    warn("XForm asset ", $elt->{id}, " (",
+		 $vw, "x", $vh, ")",
+		 " [$x,$y]",
+		 " scale=", $scale,
+		 " center=", $elt->{opts}->{center}//0,
+		 "\n")
+	      if $config->{debug}->{images};
 
 	    my $vsp = $h * $scale;
 	    $checkspace->($vsp);
 	    $ps->{pr}->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
 
-	    my $xo = $assets->{ $elt->{id} };
-	    $pr->{pdfgfx}->object( $xo->{data}->{xo}, $x, $y, $scale );
+	    $pr->{pdfgfx}->object( $xo->{data}->{xo},
+				   $x-$xo->{data}->{vbox}->[0]*$xscale,
+				   $y, $scale );
 
 	    $y -= $vsp;
 	    $pr->show_vpos( $y, 1 ) if $config->{debug}->{spacing};

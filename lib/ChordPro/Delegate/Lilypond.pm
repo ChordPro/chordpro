@@ -59,12 +59,12 @@ sub ly2svg {
 
     if ( $need_version ) {
 	my $v = "2.21.0";
-	unshift( @pre, "\\version \"$v\"",
-		 "#(ly:set-option 'crop #t)",
-		 "\\header { tagline = ##f }" );
+	unshift( @pre, "\\version \"$v\"" );
 	warn("ly: no \\version seen, assuming \"$v\"\n");
     }
-    printf $fd "$_\n" for @pre;
+    printf $fd "$_\n" for @pre,
+      "#(ly:set-option 'crop #t)",
+      "\\header { tagline = ##f }";
 
     @pre = ();
     my @data = @{$elt->{data}};
@@ -95,7 +95,7 @@ sub ly2svg {
 	$pw = $kv->{width};
     }
 
-    state $lilypond = findexe("lilypond");
+    state $lilypond = findexe( "lilypond", "silent" );
     unless ( $lilypond ) {
 	warn("Error in Lilypond embedding: missing 'lilypond' tool.\n");
 	return;
@@ -105,10 +105,14 @@ sub ly2svg {
     push( @cmd, "--silent" ) unless DEBUG;
     ( my $im1 = $svg ) =~ s/\.\w+$//;
     push( @cmd, "-o", $im1, $src );
-    if ( sys( @cmd )
-	 or
-	 ! -s "$im1.cropped.svg" ) {
-	warn("Error in Lilypond embedding\n");
+    my $ret = sys( @cmd );
+
+    if ( $ret ) {
+	warn( sprintf( "Error in Lilypond embedding (ret = 0x%x)\n", $ret ) );
+	return;
+    }
+    if ( ! -s "$im1.cropped.svg" ) {
+	warn("Error in Lilypond embedding (no output?)\n");
 	return;
     }
 
@@ -128,6 +132,8 @@ sub ly2svg {
 
 sub ly2image {
     my ( $s, $pw, $elt ) = @_;
+
+    croak("Lilypond: Please adjust your delegate config to use handler \"ly2svg\" instead of \"ly2image\"");
 
     state $imgcnt = 0;
     state $td = File::Temp::tempdir( CLEANUP => !$config->{debug}->{ly} );
@@ -200,7 +206,7 @@ sub ly2image {
 	$pw = $kv->{width};
     }
 
-    state $lilypond = findexe("lilypond");
+    state $lilypond = findexe( "lilypond", "silent" );
     unless ( $lilypond ) {
 	warn("Error in Lilypond embedding: missing 'lilypond' tool.\n");
 	return;
@@ -228,7 +234,7 @@ sub ly2image {
 	  if $config->{debug}->{images} || DEBUG;
     }
     elsif ( is_msw() ) {
-	state $magick = findexe("magick");
+	state $magick = findexe( "magick", "silent" );
 	unless ( $magick ) {
 	    warn("Error in Lilypond embedding: missing 'imagemagick/convert' tool.\n");
 	    return;
@@ -236,7 +242,7 @@ sub ly2image {
 	@cmd = ( $magick, "convert" );
     }
     else {
-	state $convert = findexe("convert");
+	state $convert = findexe( "convert", "silent" );
 	unless ( $convert ) {
 	    warn("Error in Lilypond embedding: missing 'imagemagick/convert' tool.\n");
 	    return;
