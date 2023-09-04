@@ -66,7 +66,7 @@ sub expand_tilde ( $dir ) {
 
 push( @EXPORT, 'expand_tilde' );
 
-sub findexe ( $prog, $silent ) {
+sub findexe ( $prog, $silent = 0 ) {
     my @path;
     if ( MSWIN ) {
 	$prog .= ".exe" unless $prog =~ /\.\w+$/;
