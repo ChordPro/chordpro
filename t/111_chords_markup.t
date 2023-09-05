@@ -25,7 +25,7 @@ while ( <DATA> ) {
     push( @$tbl, [ $line, $c, $disp, $info ] );
 }
 
-plan tests => 1 + @tbl1 + @tbl2;
+plan tests => 2 + @tbl1 + @tbl2;
 
 my $s = ChordPro::Song->new;
 ok( $s, "Got song");
@@ -36,10 +36,14 @@ $::config->{settings}->{truesf} = 1;
 $::config->{settings}->{chordnames} = "relaxed";
 $::config->{settings}->{notenames} = 1;
 
-diag( qq{Expect: <DATA>, line 16, Invalid markup in chord: "Bbm7<sup>b5<sup>"} );
+my $msg = "";
 foreach ( @tbl1 ) {
+    local $SIG{__WARN__} = sub { $msg .= "@_" };
     doit($_);
 }
+ok( $msg =~ /<DATA>, line (\d+), Invalid markup in chord: "Bbm7<sup>b5<sup>"/
+    && $1 == 16,
+    "Warning given at line $1" );
 
 $::config->{"chord-formats"}->{common} = "%{root}%{qual|%{}}%{ext|<sup>%{}</sup>}%{bass|/%{}}";
 foreach ( @tbl2 ) {
