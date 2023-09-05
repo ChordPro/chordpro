@@ -7,6 +7,7 @@
     - Handle Lilypond via SVG image.
     - Experimental: Docker based web app.
     - Add 'omit' to delegates config.
+    - Infer chord inversions for keyboard.
     - !BugFixes
     - Fix issue #297.
     - Fix issue #298.

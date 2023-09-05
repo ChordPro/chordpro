@@ -25,7 +25,9 @@ my @chordnames;
 my %song_chords;
 
 # Current tuning.
-my @tuning;
+my @tuning;			# names, e.g. E2
+my @t_ord;			# ordinals, e.g. 4
+my $t_oct;			# octave, usually 12
 
 # Assert that an instrument is loaded.
 sub assert_tuning () {
@@ -235,7 +237,19 @@ sub set_tuning ( $cfg ) {
 	@chordnames = ();
 	%config_chords = ();
     }
-    @tuning = @$t;		# need more checks
+    @tuning = @$t;
+
+    # Get ordinals for tuning.
+    my $p = ChordPro::Chords::Parser->get_parser("common");
+    $t_oct = keys %{ $p->{ns_tbl} };
+    for ( @tuning ) {
+	return "Invalid tuning (should be note + octave): $_"
+	  unless /(^.*?)(\d+)$/;	# split off octave
+	my $n = $p->{ns_tbl}->{$1} // $p->{nf_tbl}->{$1};
+	return "Invalid tuning (unknown note): $1" unless defined $n;
+	push( @t_ord, $2 * $t_oct + $n );
+    }
+
     assert_tuning();
     return;
 
@@ -560,34 +574,55 @@ my %keys =
   );
 
 sub get_keys ( $info ) {
-#    ::dump( { %$info, parser => ref($info->{parser}) });
+
     # Has keys defined.
     return $info->{keys} if $info->{keys} && @{$info->{keys}};
 
-    # Known chords.
-    return $keys{$info->{qual_canon}.$info->{ext_canon}}
-      if defined $info->{qual_canon}
-      && defined $info->{ext_canon}
-      && defined $keys{$info->{qual_canon}.$info->{ext_canon}};
+    my @keys;
 
-    # Try to derive from guitar chords.
-    return [] unless $info->{frets} && @{$info->{frets}};
-    my @tuning = ( 4, 9, 2, 7, 11, 4 );
-    my %keys;
-    my $i = -1;
-    my $base = $info->{base} - 1;
-    $base = 0 if $base < 0;
-    for ( @{ $info->{frets} } ) {
-	$i++;
-	next if $_ < 0;
-	my $c = $tuning[$i] + $_ + $base;
-	if ( $info->{root_ord} ) {
-	    $c += 12 if $c < $info->{root_ord};
-	    $c -= $info->{root_ord};
-	}
-	$keys{ $c % 12 }++;
+    if ( defined $info->{qual_canon}
+	 && defined $info->{ext_canon}
+	 && defined $keys{$info->{qual_canon}.$info->{ext_canon}} ) {
+	# Known chord extension.
+	@keys = @{ $keys{$info->{qual_canon}.$info->{ext_canon}} };
     }
-    return [ keys %keys ];
+    else {
+	# Try to derive from guitar chord.
+	return [] unless $info->{frets} && @{$info->{frets}};
+
+	# Get ordinals for tuning.
+	my @t_ord = map { $_ % $t_oct } @t_ord;
+
+	my %keys;
+	my $i = -1;
+	my $base = $info->{base} - 1;
+	$base = 0 if $base < 0;
+	for ( @{ $info->{frets} } ) {
+	    $i++;
+	    next if $_ < 0;
+	    my $c = $t_ord[$i] + $_ + $base;
+	    if ( $info->{root_ord} ) {
+		$c += $t_oct if $c < $info->{root_ord};
+		$c -= $info->{root_ord};
+	    }
+	    $keys{ $c % $t_oct }++;
+	}
+	@keys = sort keys %keys;
+    }
+
+    if ( defined $info->{bass} ) {
+	# Handle inversions.
+	my @k;
+	my $bass = $info->{bass_ord};
+	my $oct = 12;		# yes
+	for ( @keys ) {
+	    push( @k, $_ < $bass ? $_+$oct : $_ );
+	}
+	unshift( @k, $bass ) unless $k[0] == $bass;
+	@keys = @k;
+    }
+
+    \@keys;
 }
 
 ################ Section Transposition ################
