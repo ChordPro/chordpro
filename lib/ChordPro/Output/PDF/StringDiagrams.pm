@@ -291,7 +291,7 @@ sub grid_xo {
     my $v = $ps->{diagrams}->{vcells};
     my $strings = $config->diagram_strings;
 
-    return $self->{grids}->{$gw,$gh,$lw, $bflw, $bfno, $v,$strings} //= do
+    return $self->{grids}->{$gw,$gh,$lw, $bflw, $bfno, $fg, $v,$strings} //= do
       {
 	my $w = $gw * ($strings - 1);
 	my $h = $strings;
