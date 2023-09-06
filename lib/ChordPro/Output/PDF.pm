@@ -1204,12 +1204,30 @@ sub generate_song {
 	    my $w = $elt->{width};
 	    my $vh = $elt->{vheight};
 	    my $vw = $elt->{vwidth};
-	    my $scale = $elt->{opts}->{scale};
 	    my $xo = $assets->{ $elt->{id} };
 
-	    my $xscale = $vw / $xo->{data}->{vbox}->[2];
-	    my $yscale = $vh / $xo->{data}->{vbox}->[3];
-	    $scale *= $xscale;
+	    my $scale = min( $vw / $w, $vh / $h );
+	    warn("vw=$vw, w=$w, vbw=", $xo->{data}->{vbox}->[2],
+		 ", scale=$scale\n");
+
+	    # Available width and height.
+	    my $pw;
+	    if ( $ps->{columns} > 1 ) {
+		$pw = $ps->{columnoffsets}->[1]
+		  - $ps->{columnoffsets}->[0]
+		  - $ps->{columnspace};
+	    }
+	    else {
+		$pw = $ps->{__rightmargin} - $ps->{_leftmargin};
+	    }
+	    my $ph = $ps->{_margintop} - $ps->{_marginbottom};
+
+	    if ( $w * $scale > $pw ) {
+		$scale = $pw / $w;
+	    }
+	    if ( $h * $scale > $ph ) {
+		$scale = $ph / $h;
+	    }
 	    warn("XForm asset ", $elt->{id}, " (",
 		 $vw, "x", $vh, ")",
 		 " [$x,$y]",
@@ -1218,12 +1236,13 @@ sub generate_song {
 		 "\n")
 	      if $config->{debug}->{images};
 
+	    $scale *= $elt->{opts}->{scale};
 	    my $vsp = $h * $scale;
 	    $checkspace->($vsp);
 	    $ps->{pr}->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
 
 	    $pr->{pdfgfx}->object( $xo->{data}->{xo},
-				   $x-$xo->{data}->{vbox}->[0]*$xscale,
+				   $x-$xo->{data}->{vbox}->[0]*$scale,
 				   $y, $scale );
 
 	    $y -= $vsp;
