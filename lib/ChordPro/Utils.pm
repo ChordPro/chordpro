@@ -258,4 +258,10 @@ sub maybe ( $key, $value, @rest ) {
 }
 push( @EXPORT, "maybe" );
 
+# Min/Max.
+sub min { $_[0] < $_[1] ? $_[0] : $_[1] }
+sub max { $_[0] > $_[1] ? $_[0] : $_[1] }
+
+push( @EXPORT, "min", "max" );
+
 1;
