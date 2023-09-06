@@ -1158,9 +1158,11 @@ sub generate_song {
 	    # We turn SVG into one (or more) XForm objects.
 
 	    require SVGPDF;
+
+	    # Note we need a special fonthandler.
 	    my $p = SVGPDF->new
 	      ( pdf  => $ps->{pr}->{pdf},
-		fc   => \&svg_fontmanager,
+		fc   => sub { svg_fonthandler( $_[0], $ps, $_[2] ) },
 		atts => { debug => $config->{debug}->{svg} > 1,
 			  verbose => $config->{debug}->{svg},
 			} );
@@ -1207,8 +1209,6 @@ sub generate_song {
 	    my $xo = $assets->{ $elt->{id} };
 
 	    my $scale = min( $vw / $w, $vh / $h );
-	    warn("vw=$vw, w=$w, vbw=", $xo->{data}->{vbox}->[2],
-		 ", scale=$scale\n");
 
 	    # Available width and height.
 	    my $pw;
@@ -2283,6 +2283,10 @@ sub imageline {
     my $scale = 1;
     my ( $w, $h ) = ( $opts->{width}  || $img->width,
 		      $opts->{height} || $img->height );
+
+  if ( 1 ) {
+
+    # Current approach: user scale overrides.
     if ( defined $opts->{scale} ) {
 	$scale = $opts->{scale} || 1;
     }
@@ -2294,6 +2298,23 @@ sub imageline {
 	    $scale = $ph / $h;
 	}
     }
+  }
+  else {
+
+    # Better, but may break things.
+    if ( $w > $pw ) {
+	$scale = $pw / $w;
+    }
+    if ( $h*$scale > $ph ) {
+	$scale = $ph / $h;
+    }
+    if ( $opts->{scale} ) {
+	$scale *= $opts->{scale};
+    }
+
+
+  }
+
     warn("Image scale: $scale\n") if $config->{debug}->{images};
     $h *= $scale;
     $w *= $scale;
@@ -3019,16 +3040,32 @@ sub is_corefont {
     $corefonts{lc $_[0]};
 }
 
-# Font manager for SVG embedding.
-sub svg_fontmanager {
-    my ( $self, $pdf, $style ) = @_;
+# Font handler for SVG embedding.
+sub svg_fonthandler {
+    my ( $self, $ps, $style ) = @_;
 
+    my $pdf    = $ps->{pr}->{pdf};
     my $family = $style->{'font-family'};
     my $stl    = $style->{'font-style'}   // "normal";
     my $weight = $style->{'font-weight'}  // "normal";
     my $size   = $style->{'font-size'}    || 12;
     my $key    = join( "|", $family, $stl, $weight );
     state $fc  = {};
+
+    # As a special case we handle fonts with 'names' like
+    # pdf.font.foo and map these to the corresponding font
+    # in the pdf.fonts structure.
+    if ( $family =~ /^pdf\.fonts\.(.*)/ ) {
+	my $try = $ps->{fonts}->{$1};
+	if ( $try ) {
+	    warn("SVG: Font $family found in config: ",
+		 $try->{_ff}, "\n")
+	      if $config->{debug}->{svg};
+	    # The font may change during the run, so we do not
+	    # cache it.
+	    return $try->{fd}->{font};
+	}
+    }
 
     local *Text::Layout::FontConfig::_fallback = sub { 0 };
 

@@ -8,6 +8,7 @@
     - Experimental: Docker based web app.
     - Add 'omit' to delegates config.
     - Infer chord inversions for keyboard.
+    - Allow 'pdf.fonts.XXX' as fonts in SVG.
     - !BugFixes
     - Fix issue #297.
     - Fix issue #298.
