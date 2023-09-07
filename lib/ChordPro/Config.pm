@@ -53,15 +53,15 @@ sub configurator ( $opts = undef ) {
     # Test programs call configurator without options.
     # Prepare a minimal config.
     unless ( $opts ) {
-	my $cfg = $pp->decode( default_config() );
-	$config = $cfg;
-	$options = { verbose => 0 };
-	process_config( $cfg, "<builtin>" );
-	$cfg->{settings}->{lineinfo} = 0;
-	return $cfg;
+        my $cfg = $pp->decode( default_config() );
+        $config = $cfg;
+        $options = { verbose => 0 };
+        process_config( $cfg, "<builtin>" );
+        $cfg->{settings}->{lineinfo} = 0;
+        return $cfg;
     }
     if ( keys(%$opts) ) {
-	$options = { %{$options//{}}, %$opts };
+        $options = { %{$options//{}}, %$opts };
     }
 
     my @cfg;
@@ -78,30 +78,30 @@ sub configurator ( $opts = undef ) {
 
     # Collect other config files.
     my $add_config = sub {
-	my $fn = shift;
-	$cfg = get_config( $fn );
-	push( @cfg, prep_configs( $cfg, $fn ) );
+        my $fn = shift;
+        $cfg = get_config( $fn );
+        push( @cfg, prep_configs( $cfg, $fn ) );
     };
 
     foreach my $c ( qw( sysconfig userconfig config ) ) {
-	next if $options->{"no$c"};
-	if ( ref($options->{$c}) eq 'ARRAY' ) {
-	    $add_config->($_) foreach @{ $options->{$c} };
-	}
-	else {
-	    warn("Adding config for $c\n") if $verbose;
-	    $add_config->( $options->{$c} );
-	}
+        next if $options->{"no$c"};
+        if ( ref($options->{$c}) eq 'ARRAY' ) {
+            $add_config->($_) foreach @{ $options->{$c} };
+        }
+        else {
+            warn("Adding config for $c\n") if $verbose;
+            $add_config->( $options->{$c} );
+        }
     }
 
     # Now we have a list of all config files. Weed out dups.
     for ( my $a = 0; $a < @cfg; $a++ ) {
-	if ( $a && $cfg[$a]->{_src} eq $cfg[$a-1]->{_src} ) {
-	    splice( @cfg, $a, 1 );
-	    redo;
-	}
-	print STDERR ("Config[$a]: ", $cfg[$a]->{_src}, "\n" )
-	  if $verbose;
+        if ( $a && $cfg[$a]->{_src} eq $cfg[$a-1]->{_src} ) {
+            splice( @cfg, $a, 1 );
+            redo;
+        }
+        print STDERR ("Config[$a]: ", $cfg[$a]->{_src}, "\n" )
+          if $verbose;
     }
 
     $cfg = shift(@cfg);
@@ -109,29 +109,29 @@ sub configurator ( $opts = undef ) {
 
     # Presets.
     if ( $options->{reference} ) {
-	$cfg->{user}->{name} = "chordpro";
-	$cfg->{user}->{fullname} = ::runtimeinfo("short");
+        $cfg->{user}->{name} = "chordpro";
+        $cfg->{user}->{fullname} = ::runtimeinfo("short");
     }
     else {
-	$cfg->{user}->{name} =
-	  lc( $ENV{USER} || $ENV{LOGNAME}
-	      || getlogin() || getpwuid($<) || "chordpro" );
-	$cfg->{user}->{fullname} = eval { (getpwuid($<))[6] } || "";
+        $cfg->{user}->{name} =
+          lc( $ENV{USER} || $ENV{LOGNAME}
+              || getlogin() || getpwuid($<) || "chordpro" );
+        $cfg->{user}->{fullname} = eval { (getpwuid($<))[6] } || "";
     }
 
     # Add some extra entries to prevent warnings.
     for ( qw(title subtitle footer) ) {
-	next if exists($cfg->{pdf}->{formats}->{first}->{$_});
-	$cfg->{pdf}->{formats}->{first}->{$_} = "";
+        next if exists($cfg->{pdf}->{formats}->{first}->{$_});
+        $cfg->{pdf}->{formats}->{first}->{$_} = "";
     }
     for my $ff ( qw(chord
-		    diagram diagram_base chordfingers
-		    comment comment_box comment_italic
-		    tab text toc annotation label
-		    empty footer grid grid_margin subtitle title) ) {
-	for ( qw(name file description size color background) ) {
-	    $cfg->{pdf}->{fonts}->{$ff}->{$_} //= undef;
-	}
+                    diagram diagram_base chordfingers
+                    comment comment_box comment_italic
+                    tab text toc annotation label
+                    empty footer grid grid_margin subtitle title) ) {
+        for ( qw(name file description size color background) ) {
+            $cfg->{pdf}->{fonts}->{$ff}->{$_} //= undef;
+        }
     }
 
     my $backend_configurator =
@@ -139,24 +139,24 @@ sub configurator ( $opts = undef ) {
 
     # Apply config files
     foreach my $new ( @cfg ) {
-	my $file = $new->{_src}; # for diagnostics
-	# Handle obsolete keys.
-	if ( exists $new->{pdf}->{diagramscolumn} ) {
-	    $new->{pdf}->{diagrams}->{show} //= "right";
-	    delete $new->{pdf}->{diagramscolumn};
-	    warn("$file: pdf.diagramscolumn is obsolete, use pdf.diagrams.show instead\n");
-	}
-	if ( exists $new->{pdf}->{formats}->{default}->{'toc-title'} ) {
-	    $new->{toc}->{title} //= $new->{pdf}->{formats}->{default}->{'toc-title'};
-	    delete $new->{pdf}->{formats}->{default}->{'toc-title'};
-	    warn("$file: pdf.formats.default.toc-title is obsolete, use toc.title instead\n");
-	}
+        my $file = $new->{_src}; # for diagnostics
+        # Handle obsolete keys.
+        if ( exists $new->{pdf}->{diagramscolumn} ) {
+            $new->{pdf}->{diagrams}->{show} //= "right";
+            delete $new->{pdf}->{diagramscolumn};
+            warn("$file: pdf.diagramscolumn is obsolete, use pdf.diagrams.show instead\n");
+        }
+        if ( exists $new->{pdf}->{formats}->{default}->{'toc-title'} ) {
+            $new->{toc}->{title} //= $new->{pdf}->{formats}->{default}->{'toc-title'};
+            delete $new->{pdf}->{formats}->{default}->{'toc-title'};
+            warn("$file: pdf.formats.default.toc-title is obsolete, use toc.title instead\n");
+        }
 
-	# Process.
-	local $::config = $cfg;
-	process_config( $new, $file );
-	# Merge final.
-	$cfg = hmerge( $cfg, $new );
+        # Process.
+        local $::config = $cfg;
+        process_config( $new, $file );
+        # Merge final.
+        $cfg = hmerge( $cfg, $new );
     }
 
     # Handle defines from the command line.
@@ -164,87 +164,87 @@ sub configurator ( $opts = undef ) {
 
     # Sanitize added extra entries.
     for ( qw(title subtitle footer) ) {
-	delete($cfg->{pdf}->{formats}->{first}->{$_})
-	  if ($cfg->{pdf}->{formats}->{first}->{$_} // 1) eq "";
-	for my $class ( qw(title first default) ) {
-	    my $t = $cfg->{pdf}->{formats}->{$class}->{$_};
-	    next unless $t;
-	    die("Config error in pdf.formats.$class.$_: not an array\n")
-	      unless ref($t) eq 'ARRAY';
-	    if ( ref($t->[0]) ne 'ARRAY' ) {
-		$t = [ $t ];
-	    }
-	    my $tt = $_;
-	    for ( @$t) {
-		die("Config error in pdf.formats.$class.$tt: ",
-		    scalar(@$_), " fields instead of 3\n")
-		  if @$_ && @$_ != 3;
-	    }
-	}
+        delete($cfg->{pdf}->{formats}->{first}->{$_})
+          if ($cfg->{pdf}->{formats}->{first}->{$_} // 1) eq "";
+        for my $class ( qw(title first default) ) {
+            my $t = $cfg->{pdf}->{formats}->{$class}->{$_};
+            next unless $t;
+            die("Config error in pdf.formats.$class.$_: not an array\n")
+              unless ref($t) eq 'ARRAY';
+            if ( ref($t->[0]) ne 'ARRAY' ) {
+                $t = [ $t ];
+            }
+            my $tt = $_;
+            for ( @$t) {
+                die("Config error in pdf.formats.$class.$tt: ",
+                    scalar(@$_), " fields instead of 3\n")
+                  if @$_ && @$_ != 3;
+            }
+        }
     }
 
     if ( $cfg->{pdf}->{fontdir} ) {
-	my @a;
-	if ( ref($cfg->{pdf}->{fontdir}) eq 'ARRAY' ) {
-	    @a = @{ $cfg->{pdf}->{fontdir} };
-	}
-	else {
-	    @a = ( $cfg->{pdf}->{fontdir} );
-	}
-	$cfg->{pdf}->{fontdir} = [];
-	my $split = $^O =~ /^MS*/ ? qr(;) : qr(:);
-	foreach ( @a ) {
-	    push( @{ $cfg->{pdf}->{fontdir} },
-		  map { expand_tilde($_) } split( $split, $_ ) );
-	}
+        my @a;
+        if ( ref($cfg->{pdf}->{fontdir}) eq 'ARRAY' ) {
+            @a = @{ $cfg->{pdf}->{fontdir} };
+        }
+        else {
+            @a = ( $cfg->{pdf}->{fontdir} );
+        }
+        $cfg->{pdf}->{fontdir} = [];
+        my $split = $^O =~ /^MS*/ ? qr(;) : qr(:);
+        foreach ( @a ) {
+            push( @{ $cfg->{pdf}->{fontdir} },
+                  map { expand_tilde($_) } split( $split, $_ ) );
+        }
     }
     else {
-	$cfg->{pdf}->{fontdir} = [];
+        $cfg->{pdf}->{fontdir} = [];
     }
 
     my @allfonts = keys(%{$cfg->{pdf}->{fonts}});
     for my $ff ( @allfonts ) {
-	unless ( $cfg->{pdf}->{fonts}->{$ff}->{name}
-		 || $cfg->{pdf}->{fonts}->{$ff}->{description}
-		 || $cfg->{pdf}->{fonts}->{$ff}->{file} ) {
-	    delete( $cfg->{pdf}->{fonts}->{$ff} );
-	    next;
-	}
-	$cfg->{pdf}->{fonts}->{$ff}->{color}      //= "foreground";
-	$cfg->{pdf}->{fonts}->{$ff}->{background} //= "background";
-	for ( qw(name file description size) ) {
-	    delete( $cfg->{pdf}->{fonts}->{$ff}->{$_} )
-	      unless defined( $cfg->{pdf}->{fonts}->{$ff}->{$_} );
-	}
+        unless ( $cfg->{pdf}->{fonts}->{$ff}->{name}
+                 || $cfg->{pdf}->{fonts}->{$ff}->{description}
+                 || $cfg->{pdf}->{fonts}->{$ff}->{file} ) {
+            delete( $cfg->{pdf}->{fonts}->{$ff} );
+            next;
+        }
+        $cfg->{pdf}->{fonts}->{$ff}->{color}      //= "foreground";
+        $cfg->{pdf}->{fonts}->{$ff}->{background} //= "background";
+        for ( qw(name file description size) ) {
+            delete( $cfg->{pdf}->{fonts}->{$ff}->{$_} )
+              unless defined( $cfg->{pdf}->{fonts}->{$ff}->{$_} );
+        }
     }
 
     if ( defined $options->{diagrams} ) {
-	warn( "Invalid value for diagrams: ",
-	      $options->{diagrams}, "\n" )
-	  unless $options->{diagrams} =~ /^(all|none|user)$/i;
-	$cfg->{diagrams}->{show} = lc $options->{'diagrams'};
+        warn( "Invalid value for diagrams: ",
+              $options->{diagrams}, "\n" )
+          unless $options->{diagrams} =~ /^(all|none|user)$/i;
+        $cfg->{diagrams}->{show} = lc $options->{'diagrams'};
     }
     elsif ( defined $options->{'user-chord-grids'} ) {
-	$cfg->{diagrams}->{show} =
-	  $options->{'user-chord-grids'} ? "user" : 0;
+        $cfg->{diagrams}->{show} =
+          $options->{'user-chord-grids'} ? "user" : 0;
     }
     elsif ( defined $options->{'chord-grids'} ) {
-	$cfg->{diagrams}->{show} =
-	  $options->{'chord-grids'} ? "all" : 0;
+        $cfg->{diagrams}->{show} =
+          $options->{'chord-grids'} ? "all" : 0;
     }
 
     for ( qw( transpose transcode decapo lyrics-only strict ) ) {
-	next unless defined $options->{$_};
-	$cfg->{settings}->{$_} = $options->{$_};
+        next unless defined $options->{$_};
+        $cfg->{settings}->{$_} = $options->{$_};
     }
 
     for ( "front-matter", "back-matter" ) {
-	next unless defined $options->{$_};
-	$cfg->{pdf}->{$_} = $options->{$_};
+        next unless defined $options->{$_};
+        $cfg->{pdf}->{$_} = $options->{$_};
     }
 
     if ( defined $options->{'chord-grids-sorted'} ) {
-	$cfg->{diagrams}->{sorted} = $options->{'chord-grids-sorted'};
+        $cfg->{diagrams}->{sorted} = $options->{'chord-grids-sorted'};
     }
 
     # For convenience...
@@ -259,13 +259,13 @@ sub configurator ( $opts = undef ) {
     $cfg->lock;
 
     if ( $options->{verbose} > 1 ) {
-	my $cp = ChordPro::Chords::get_parser() // "";
-	warn("Parsers:\n");
-	while ( my ($k, $v) = each %{ChordPro::Chords::Parser->parsers} ) {
-	    warn( "  $k",
-		  $v eq $cp ? " (active)": "",
-		  "\n");
-	}
+        my $cp = ChordPro::Chords::get_parser() // "";
+        warn("Parsers:\n");
+        while ( my ($k, $v) = each %{ChordPro::Chords::Parser->parsers} ) {
+            warn( "  $k",
+                  $v eq $cp ? " (active)": "",
+                  "\n");
+        }
     }
 
     return $cfg;
@@ -279,30 +279,30 @@ sub get_config ( $file ) {
     $file = expand_tilde($file);
 
     if ( $file =~ /\.json$/i ) {
-	if ( open( my $fd, "<:raw", $file ) ) {
-	    my $pp = JSON::PP->new->relaxed;
-	    my $new = $pp->decode( loadlines( $fd, { split => 0 } ) );
-	    precheck( $new, $file );
-	    close($fd);
-	    return $new;
-	}
-	else {
-	    die("Cannot open config $file [$!]\n");
-	}
+        if ( open( my $fd, "<:raw", $file ) ) {
+            my $pp = JSON::PP->new->relaxed;
+            my $new = $pp->decode( loadlines( $fd, { split => 0 } ) );
+            precheck( $new, $file );
+            close($fd);
+            return $new;
+        }
+        else {
+            die("Cannot open config $file [$!]\n");
+        }
     }
     elsif ( $file =~ /\.prp$/i ) {
-	if ( -e -f -r $file ) {
-	    require ChordPro::Config::Properties;
-	    my $cfg = new Data::Properties;
-	    $cfg->parse_file($file);
-	    return $cfg->data;
-	}
-	else {
-	    die("Cannot open config $file [$!]\n");
-	}
+        if ( -e -f -r $file ) {
+            require ChordPro::Config::Properties;
+            my $cfg = new Data::Properties;
+            $cfg->parse_file($file);
+            return $cfg->data;
+        }
+        else {
+            die("Cannot open config $file [$!]\n");
+        }
     }
     else {
-	Carp::confess("Unrecognized config type: $file\n");
+        Carp::confess("Unrecognized config type: $file\n");
     }
 }
 
@@ -315,18 +315,18 @@ sub prep_configs ( $cfg, $src ) {
     # If there are includes, add them first.
     my ( $vol, $dir, undef ) = File::Spec->splitpath($cfg->{_src});
     foreach my $c ( @{ $cfg->{include} } ) {
-	# Check for resource names.
-	if ( $c !~ m;[/.]; ) {
-	    $c = ::rsc_or_file( $c, "config" );
-	}
-	elsif ( $dir ne ""
-		&& !File::Spec->file_name_is_absolute($c) ) {
-	    # Prepend dir of the caller, if needed.
-	    $c = File::Spec->catpath( $vol, $dir, $c );
-	}
-	my $cfg = get_config($c);
-	# Recurse.
-	push( @res, prep_configs( $cfg, $c ) );
+        # Check for resource names.
+        if ( $c !~ m;[/.]; ) {
+            $c = ::rsc_or_file( $c, "config" );
+        }
+        elsif ( $dir ne ""
+                && !File::Spec->file_name_is_absolute($c) ) {
+            # Prepend dir of the caller, if needed.
+            $c = File::Spec->catpath( $vol, $dir, $c );
+        }
+        my $cfg = get_config($c);
+        # Recurse.
+        push( @res, prep_configs( $cfg, $c ) );
     }
 
     # Push this and return.
@@ -340,35 +340,35 @@ sub process_config ( $cfg, $file ) {
     warn("Process: $file\n") if $verbose > 1;
 
     if ( $cfg->{tuning} ) {
-	my $res =
-	  ChordPro::Chords::set_tuning( $cfg );
-	warn( "Invalid tuning in config: ", $res, "\n" ) if $res;
-	$cfg->{_tuning} = $cfg->{tuning};
-	$cfg->{tuning} = [];
+        my $res =
+          ChordPro::Chords::set_tuning( $cfg );
+        warn( "Invalid tuning in config: ", $res, "\n" ) if $res;
+        $cfg->{_tuning} = $cfg->{tuning};
+        $cfg->{tuning} = [];
     }
 
     ChordPro::Chords::reset_parser;
     ChordPro::Chords::Parser->reset_parsers;
     local $::config = hmerge( $::config, $cfg );
     if ( $cfg->{chords} ) {
-	ChordPro::Chords::push_parser($cfg->{notes}->{system});
-	my $c = $cfg->{chords};
-	if ( @$c && $c->[0] eq "append" ) {
-	    shift(@$c);
-	}
-	foreach ( @$c ) {
-	    my $res =
-	      ChordPro::Chords::add_config_chord($_);
-	    warn( "Invalid chord in config: ",
-		  $_->{name}, ": ", $res, "\n" ) if $res;
-	}
-	if ( $verbose > 1 ) {
-	    warn( "Processed ", scalar(@$c), " chord entries\n");
-	    warn( "Totals: ",
-		  ChordPro::Chords::chord_stats(), "\n" );
-	}
-	$cfg->{_chords} = delete $cfg->{chords};
-	ChordPro::Chords::pop_parser();
+        ChordPro::Chords::push_parser($cfg->{notes}->{system});
+        my $c = $cfg->{chords};
+        if ( @$c && $c->[0] eq "append" ) {
+            shift(@$c);
+        }
+        foreach ( @$c ) {
+            my $res =
+              ChordPro::Chords::add_config_chord($_);
+            warn( "Invalid chord in config: ",
+                  $_->{name}, ": ", $res, "\n" ) if $res;
+        }
+        if ( $verbose > 1 ) {
+            warn( "Processed ", scalar(@$c), " chord entries\n");
+            warn( "Totals: ",
+                  ChordPro::Chords::chord_stats(), "\n" );
+        }
+        $cfg->{_chords} = delete $cfg->{chords};
+        ChordPro::Chords::pop_parser();
     }
 }
 
@@ -377,9 +377,9 @@ sub config_final ( $delta ) {
     my $cfg = configurator($options);
 
     if ( $delta ) {
-	my $pp = JSON::PP->new->relaxed;
-	my $def = $pp->decode( default_config() );
-	$cfg->reduce($def);
+        my $pp = JSON::PP->new->relaxed;
+        my $def = $pp->decode( default_config() );
+        $cfg->reduce($def);
     }
     $cfg->unlock;
     $cfg->{tuning} = delete $cfg->{_tuning};
@@ -390,22 +390,22 @@ sub config_final ( $delta ) {
     $cfg->lock;
 
     if ( $ENV{CHORDPRO_CFGPROPS} ) {
-	cfg2props($cfg);
+        cfg2props($cfg);
     }
     else {
-	my $pp = JSON::PP->new->canonical->indent(4)->pretty;
-	$pp->encode({%$cfg});
+        my $pp = JSON::PP->new->canonical->indent(4)->pretty;
+        $pp->encode({%$cfg});
     }
 }
 
 sub config_default () {
     if ( $ENV{CHORDPRO_CFGPROPS} ) {
-	my $pp = JSON::PP->new->relaxed;
-	my $cfg = $pp->decode( default_config() );
-	cfg2props($cfg);
+        my $pp = JSON::PP->new->relaxed;
+        my $cfg = $pp->decode( default_config() );
+        cfg2props($cfg);
     }
     else {
-	default_config();
+        default_config();
     }
 }
 
@@ -415,30 +415,30 @@ sub cfg2props ( $o, $path ) {
     $path //= "";
     my $ret = "";
     if ( !defined $o ) {
-	$ret .= "$path: undef\n";
+        $ret .= "$path: undef\n";
     }
     elsif ( UNIVERSAL::isa( $o, 'HASH' ) ) {
-	$path .= "." unless $path eq "";
-	for ( sort keys %$o ) {
-	    $ret .= cfg2props( $o->{$_}, $path . $_  );
-	}
+        $path .= "." unless $path eq "";
+        for ( sort keys %$o ) {
+            $ret .= cfg2props( $o->{$_}, $path . $_  );
+        }
     }
     elsif ( UNIVERSAL::isa( $o, 'ARRAY' ) ) {
-	$path .= "." unless $path eq "";
-	for ( my $i = 0; $i < @$o; $i++ ) {
-	    $ret .= cfg2props( $o->[$i], $path . "$i" );
-	}
+        $path .= "." unless $path eq "";
+        for ( my $i = 0; $i < @$o; $i++ ) {
+            $ret .= cfg2props( $o->[$i], $path . "$i" );
+        }
     }
     elsif ( $o =~ /^\d+$/ ) {
-	$ret .= "$path: $o\n";
+        $ret .= "$path: $o\n";
     }
     else {
-	$o =~ s/\\/\\\\/g;
-	$o =~ s/"/\\"/g;
-	$o =~ s/\n/\\n/;
-	$o =~ s/\t/\\t/;
-	$o =~ s/([^\x00-\xff])/sprintf("\\x{%x}", ord($1))/ge;
-	$ret .= "$path: \"$o\"\n";
+        $o =~ s/\\/\\\\/g;
+        $o =~ s/"/\\"/g;
+        $o =~ s/\n/\\n/;
+        $o =~ s/\t/\\t/;
+        $o =~ s/([^\x00-\xff])/sprintf("\\x{%x}", ord($1))/ge;
+        $ret .= "$path: \"$o\"\n";
     }
 
     return $ret;
@@ -478,67 +478,67 @@ sub _augment ( $self, $hash, $path ) {
 
     for my $key ( keys(%$hash) ) {
 
-	warn("Config augment error: unknown item $path$key\n")
-	  unless exists $self->{$key}
-	    || $path =~ /^pdf\.(?:info|fonts|fontconfig)\./
-	    || $path =~ /^meta\./
-	    || $key =~ /^_/;
+        warn("Config augment error: unknown item $path$key\n")
+          unless exists $self->{$key}
+            || $path =~ /^pdf\.(?:info|fonts|fontconfig)\./
+            || $path =~ /^meta\./
+            || $key =~ /^_/;
 
-	# Hash -> Hash.
-	# Hash -> Array.
-	if ( ref($hash->{$key}) eq 'HASH' ) {
-	    if ( ref($self->{$key}) eq 'HASH' ) {
+        # Hash -> Hash.
+        # Hash -> Array.
+        if ( ref($hash->{$key}) eq 'HASH' ) {
+            if ( ref($self->{$key}) eq 'HASH' ) {
 
-		# Hashes. Recurse.
-		_augment( $self->{$key}, $hash->{$key}, "$path$key." );
-	    }
-	    elsif ( ref($self->{$key}) eq 'ARRAY' ) {
+                # Hashes. Recurse.
+                _augment( $self->{$key}, $hash->{$key}, "$path$key." );
+            }
+            elsif ( ref($self->{$key}) eq 'ARRAY' ) {
 
-		# Hash -> Array.
-		# Update single array element using a hash index.
-		foreach my $ix ( keys(%{$hash->{$key}}) ) {
-		    die unless $ix =~ /^\d+$/;
-		    $self->{$key}->[$ix] = $hash->{$key}->{$ix};
-		}
-	    }
-	    else {
-		# Overwrite.
-		$self->{$key} = $hash->{$key};
-	    }
-	}
-
-	# Array -> Array.
-	elsif ( ref($hash->{$key}) eq 'ARRAY'
-		and ref($self->{$key}) eq 'ARRAY' ) {
-
-	    # Arrays. Overwrite or append.
-	    if ( @{$hash->{$key}} ) {
-		my @v = @{ $hash->{$key} };
-		if ( $v[0] eq "append" ) {
-		    shift(@v);
-		    # Append the rest.
-		    push( @{ $self->{$key} }, @v );
-		}
-		elsif ( $v[0] eq "prepend" ) {
-		    shift(@v);
-		    # Prepend the rest.
-		    unshift( @{ $self->{$key} }, @v );
-		}
-		else {
-		    # Overwrite.
-		    $self->{$key} = $hash->{$key};
-		}
-	    }
-	    else {
-		# Overwrite.
-		$self->{$key} = $hash->{$key};
-	    }
+                # Hash -> Array.
+                # Update single array element using a hash index.
+                foreach my $ix ( keys(%{$hash->{$key}}) ) {
+                    die unless $ix =~ /^\d+$/;
+                    $self->{$key}->[$ix] = $hash->{$key}->{$ix};
+                }
+            }
+            else {
+                # Overwrite.
+                $self->{$key} = $hash->{$key};
+            }
         }
 
-	else {
-	    # Overwrite.
-	    $self->{$key} = $hash->{$key};
-	}
+        # Array -> Array.
+        elsif ( ref($hash->{$key}) eq 'ARRAY'
+                and ref($self->{$key}) eq 'ARRAY' ) {
+
+            # Arrays. Overwrite or append.
+            if ( @{$hash->{$key}} ) {
+                my @v = @{ $hash->{$key} };
+                if ( $v[0] eq "append" ) {
+                    shift(@v);
+                    # Append the rest.
+                    push( @{ $self->{$key} }, @v );
+                }
+                elsif ( $v[0] eq "prepend" ) {
+                    shift(@v);
+                    # Prepend the rest.
+                    unshift( @{ $self->{$key} }, @v );
+                }
+                else {
+                    # Overwrite.
+                    $self->{$key} = $hash->{$key};
+                }
+            }
+            else {
+                # Overwrite.
+                $self->{$key} = $hash->{$key};
+            }
+        }
+
+        else {
+            # Overwrite.
+            $self->{$key} = $hash->{$key};
+        }
     }
 
     $self;
@@ -570,132 +570,132 @@ sub _reduce ( $self, $orig, $path ) {
 
     if ( _ref($self) eq 'HASH' && _ref($orig) eq 'HASH' ) {
 
-	warn("D: ", qd($self,1), "\n")  if DEBUG && !%$orig;
-	return 'D' unless %$orig;
+        warn("D: ", qd($self,1), "\n")  if DEBUG && !%$orig;
+        return 'D' unless %$orig;
 
-	my %hh = map { $_ => 1 } keys(%$self), keys(%$orig);
-	for my $key ( sort keys(%hh) ) {
+        my %hh = map { $_ => 1 } keys(%$self), keys(%$orig);
+        for my $key ( sort keys(%hh) ) {
 
-	    warn("Config reduce error: unknown item $path$key\n")
-	      unless exists $self->{$key}
-		|| $key =~ /^_/;
+            warn("Config reduce error: unknown item $path$key\n")
+              unless exists $self->{$key}
+                || $key =~ /^_/;
 
-	    unless ( defined $orig->{$key} ) {
-		warn("D: $path$key\n") if DEBUG;
-		delete $self->{$key};
-		$state //= 'M';
-		next;
-	    }
+            unless ( defined $orig->{$key} ) {
+                warn("D: $path$key\n") if DEBUG;
+                delete $self->{$key};
+                $state //= 'M';
+                next;
+            }
 
-	    # Hash -> Hash.
-	    if (     _ref($orig->{$key}) eq 'HASH'
-		 and _ref($self->{$key}) eq 'HASH'
-		 or
-		     _ref($orig->{$key}) eq 'ARRAY'
-		 and _ref($self->{$key}) eq 'ARRAY' ) {
-		# Recurse.
-		my $m = _reduce( $self->{$key}, $orig->{$key}, "$path$key." );
-		delete $self->{$key} if $m eq 'D' || $m eq 'I';
-		$state //= 'M' if $m ne 'I';
-	    }
+            # Hash -> Hash.
+            if (     _ref($orig->{$key}) eq 'HASH'
+                 and _ref($self->{$key}) eq 'HASH'
+                 or
+                     _ref($orig->{$key}) eq 'ARRAY'
+                 and _ref($self->{$key}) eq 'ARRAY' ) {
+                # Recurse.
+                my $m = _reduce( $self->{$key}, $orig->{$key}, "$path$key." );
+                delete $self->{$key} if $m eq 'D' || $m eq 'I';
+                $state //= 'M' if $m ne 'I';
+            }
 
-	    elsif ( ($self->{$key}//'') eq ($orig->{$key}//'') ) {
-		warn("I: $path$key\n") if DEBUG;
-		delete $self->{$key};
-	    }
-	    elsif (     !defined($self->{$key})
-		    and _ref($orig->{$key}) eq 'ARRAY'
-		    and !@{$orig->{$key}}
-		    or
-		        !defined($orig->{$key})
-		    and _ref($self->{$key}) eq 'ARRAY'
-		    and !@{$self->{$key}} ) {
-		# Properties input [] yields undef.
-		warn("I: $path$key\n") if DEBUG;
-		delete $self->{$key};
-	    }
-	    else {
-		# Overwrite.
-		warn("M: $path$key => $self->{$key}\n") if DEBUG;
-		$state //= 'M';
-	    }
-	}
-	return $state // 'I';
+            elsif ( ($self->{$key}//'') eq ($orig->{$key}//'') ) {
+                warn("I: $path$key\n") if DEBUG;
+                delete $self->{$key};
+            }
+            elsif (     !defined($self->{$key})
+                    and _ref($orig->{$key}) eq 'ARRAY'
+                    and !@{$orig->{$key}}
+                    or
+                        !defined($orig->{$key})
+                    and _ref($self->{$key}) eq 'ARRAY'
+                    and !@{$self->{$key}} ) {
+                # Properties input [] yields undef.
+                warn("I: $path$key\n") if DEBUG;
+                delete $self->{$key};
+            }
+            else {
+                # Overwrite.
+                warn("M: $path$key => $self->{$key}\n") if DEBUG;
+                $state //= 'M';
+            }
+        }
+        return $state // 'I';
     }
 
     if ( _ref($self) eq 'ARRAY' && _ref($orig) eq 'ARRAY' ) {
 
-	# Arrays.
-	if ( any { _ref($_) } @$self ) {
-	    # Complex arrays. Recurse.
-	    for ( my $key = 0; $key < @$self; $key++ ) {
-		my $m = _reduce( $self->[$key], $orig->[$key], "$path$key." );
-		#delete $self->{$key} if $m eq 'D'; # TODO
-		$state //= 'M' if $m ne 'I';
-	    }
-	    return $state // 'I';
-	}
+        # Arrays.
+        if ( any { _ref($_) } @$self ) {
+            # Complex arrays. Recurse.
+            for ( my $key = 0; $key < @$self; $key++ ) {
+                my $m = _reduce( $self->[$key], $orig->[$key], "$path$key." );
+                #delete $self->{$key} if $m eq 'D'; # TODO
+                $state //= 'M' if $m ne 'I';
+            }
+            return $state // 'I';
+        }
 
-	# Simple arrays (only scalar values).
-	if ( my $dd = @$self - @$orig ) {
-	    $path =~ s/\.$//;
-	    if ( $dd > 0 ) {
-		# New is larger. Check for prepend/append.
-		# Deal with either one, not both. Maybe later.
-		my $t;
-		for ( my $ix = 0; $ix < @$orig; $ix++ ) {
-		    next if $orig->[$ix] eq $self->[$ix];
-		    $t++;
-		    last;
-		}
-		unless ( $t ) {
-		    warn("M: $path append @{$self}[-$dd..-1]\n") if DEBUG;
-		    splice( @$self, 0, $dd, "append" );
-		    return 'M';
-		}
-		undef $t;
-		for ( my $ix = $dd; $ix < @$self; $ix++ ) {
-		    next if $orig->[$ix-$dd] eq $self->[$ix];
-		    $t++;
-		    last;
-		}
-		unless ( $t ) {
-		    warn("M: $path prepend @{$self}[0..$dd-1]\n") if DEBUG;
-		    splice( @$self, $dd );
-		    unshift( @$self, "prepend" );
-		    return 'M';
-		}
-		warn("M: $path => @$self\n") if DEBUG;
-		$state = 'M';
-	    }
-	    else {
-		warn("M: $path => @$self\n") if DEBUG;
-		$state = 'M';
-	    }
-	    return $state // 'I';
-	}
+        # Simple arrays (only scalar values).
+        if ( my $dd = @$self - @$orig ) {
+            $path =~ s/\.$//;
+            if ( $dd > 0 ) {
+                # New is larger. Check for prepend/append.
+                # Deal with either one, not both. Maybe later.
+                my $t;
+                for ( my $ix = 0; $ix < @$orig; $ix++ ) {
+                    next if $orig->[$ix] eq $self->[$ix];
+                    $t++;
+                    last;
+                }
+                unless ( $t ) {
+                    warn("M: $path append @{$self}[-$dd..-1]\n") if DEBUG;
+                    splice( @$self, 0, $dd, "append" );
+                    return 'M';
+                }
+                undef $t;
+                for ( my $ix = $dd; $ix < @$self; $ix++ ) {
+                    next if $orig->[$ix-$dd] eq $self->[$ix];
+                    $t++;
+                    last;
+                }
+                unless ( $t ) {
+                    warn("M: $path prepend @{$self}[0..$dd-1]\n") if DEBUG;
+                    splice( @$self, $dd );
+                    unshift( @$self, "prepend" );
+                    return 'M';
+                }
+                warn("M: $path => @$self\n") if DEBUG;
+                $state = 'M';
+            }
+            else {
+                warn("M: $path => @$self\n") if DEBUG;
+                $state = 'M';
+            }
+            return $state // 'I';
+        }
 
-	# Equal length arrays with scalar values.
-	my $t;
-	for ( my $ix = 0; $ix < @$orig; $ix++ ) {
-	    next if $orig->[$ix] eq $self->[$ix];
-	    warn("M: $path$ix => $self->[$ix]\n") if DEBUG;
-	    $t++;
-	    last;
-	}
-	if ( $t ) {
-	    warn("M: $path\n") if DEBUG;
-	    return 'M';
-	}
-	warn("I: $path\[]\n") if DEBUG;
-	return 'I';
+        # Equal length arrays with scalar values.
+        my $t;
+        for ( my $ix = 0; $ix < @$orig; $ix++ ) {
+            next if $orig->[$ix] eq $self->[$ix];
+            warn("M: $path$ix => $self->[$ix]\n") if DEBUG;
+            $t++;
+            last;
+        }
+        if ( $t ) {
+            warn("M: $path\n") if DEBUG;
+            return 'M';
+        }
+        warn("I: $path\[]\n") if DEBUG;
+        return 'I';
     }
 
     # Two scalar values.
     $path =~ s/\.$//;
     if ( $self eq $orig ) {
-	warn("I: $path\n") if DEBUG;
-	return 'I';
+        warn("I: $path\n") if DEBUG;
+        return 'I';
     }
 
     warn("M $path $self\n") if DEBUG;
@@ -711,65 +711,65 @@ sub hmerge( $left, $right, $path = "" ) {
 
     for my $key ( keys(%$right) ) {
 
-	warn("Config error: unknown item $path$key\n")
-	  unless exists $res{$key}
-	    || $path eq "pdf.fontconfig."
-	    || $path =~ /^pdf\.(?:info|fonts)\./
-	    || $path =~ /^meta\./
-	    || $path =~ /^delegates\./
-	    || $path =~ /^debug\./
-	    || $key =~ /^_/;
+        warn("Config error: unknown item $path$key\n")
+          unless exists $res{$key}
+            || $path eq "pdf.fontconfig."
+            || $path =~ /^pdf\.(?:info|fonts)\./
+            || $path =~ /^meta\./
+            || $path =~ /^delegates\./
+            || $path =~ /^debug\./
+            || $key =~ /^_/;
 
-	if ( ref($right->{$key}) eq 'HASH'
-	     and
-	     ref($res{$key}) eq 'HASH' ) {
+        if ( ref($right->{$key}) eq 'HASH'
+             and
+             ref($res{$key}) eq 'HASH' ) {
 
-	    # Hashes. Recurse.
+            # Hashes. Recurse.
             $res{$key} = hmerge( $res{$key}, $right->{$key}, "$path$key." );
         }
-	elsif ( ref($right->{$key}) eq 'ARRAY'
-		and
-		ref($res{$key}) eq 'ARRAY' ) {
-	    warn("AMERGE $key: ",
-		 join(" ", map { qq{"$_"} } @{ $res{$key} }),
-		 " + ",
-		 join(" ", map { qq{"$_"} } @{ $right->{$key} }),
-		 " \n") if 0;
-	    # Arrays. Overwrite or append.
-	    if ( @{$right->{$key}} ) {
-		my @v = @{ $right->{$key} };
-		if ( $v[0] eq "append" ) {
-		    shift(@v);
-		    # Append the rest.
-		    warn("PRE: ",
-			 join(" ", map { qq{"$_"} } @{ $res{$key} }),
-			 " + ",
-			 join(" ", map { qq{"$_"} } @v),
-			 "\n") if 0;
-		    push( @{ $res{$key} }, @v );
-		    warn("POST: ",
-			 join(" ", map { qq{"$_"} } @{ $res{$key} }),
-			 "\n") if 0;
-		}
-		elsif ( $v[0] eq "prepend" ) {
-		    shift(@v);
-		    # Prepend the rest.
-		    unshift( @{ $res{$key} }, @v );
-		}
-		else {
-		    # Overwrite.
-		    $res{$key} = $right->{$key};
-		}
-	    }
-	    else {
-		# Overwrite.
-		$res{$key} = $right->{$key};
-	    }
+        elsif ( ref($right->{$key}) eq 'ARRAY'
+                and
+                ref($res{$key}) eq 'ARRAY' ) {
+            warn("AMERGE $key: ",
+                 join(" ", map { qq{"$_"} } @{ $res{$key} }),
+                 " + ",
+                 join(" ", map { qq{"$_"} } @{ $right->{$key} }),
+                 " \n") if 0;
+            # Arrays. Overwrite or append.
+            if ( @{$right->{$key}} ) {
+                my @v = @{ $right->{$key} };
+                if ( $v[0] eq "append" ) {
+                    shift(@v);
+                    # Append the rest.
+                    warn("PRE: ",
+                         join(" ", map { qq{"$_"} } @{ $res{$key} }),
+                         " + ",
+                         join(" ", map { qq{"$_"} } @v),
+                         "\n") if 0;
+                    push( @{ $res{$key} }, @v );
+                    warn("POST: ",
+                         join(" ", map { qq{"$_"} } @{ $res{$key} }),
+                         "\n") if 0;
+                }
+                elsif ( $v[0] eq "prepend" ) {
+                    shift(@v);
+                    # Prepend the rest.
+                    unshift( @{ $res{$key} }, @v );
+                }
+                else {
+                    # Overwrite.
+                    $res{$key} = $right->{$key};
+                }
+            }
+            else {
+                # Overwrite.
+                $res{$key} = $right->{$key};
+            }
         }
-	else {
-	    # Overwrite.
-	    $res{$key} = $right->{$key};
-	}
+        else {
+            # Overwrite.
+            $res{$key} = $right->{$key};
+        }
     }
 
     return \%res;
@@ -792,24 +792,24 @@ sub precheck ( $cfg, $file ) {
     warn("Verify config \"$file\"\n") if $verbose > 1;
     my $p;
     $p = sub {
-	my ( $o, $path ) = @_;
-	$path //= "";
-	if ( !defined $o ) {
-	    warn("$file: Undefined config \"$path\" (using 'false')\n");
-	    $_[0] = '';
-	}
-	elsif ( UNIVERSAL::isa( $o, 'HASH' ) ) {
-	    $path .= "." unless $path eq "";
-	    for ( sort keys %$o ) {
-		$p->( $o->{$_}, $path . $_  );
-	    }
-	}
-	elsif ( UNIVERSAL::isa( $o, 'ARRAY' ) ) {
-	    $path .= "." unless $path eq "";
-	    for ( my $i = 0; $i < @$o; $i++ ) {
-		$p->( $o->[$i], $path . "$i" );
-	    }
-	}
+        my ( $o, $path ) = @_;
+        $path //= "";
+        if ( !defined $o ) {
+            warn("$file: Undefined config \"$path\" (using 'false')\n");
+            $_[0] = '';
+        }
+        elsif ( UNIVERSAL::isa( $o, 'HASH' ) ) {
+            $path .= "." unless $path eq "";
+            for ( sort keys %$o ) {
+                $p->( $o->{$_}, $path . $_  );
+            }
+        }
+        elsif ( UNIVERSAL::isa( $o, 'ARRAY' ) ) {
+            $path .= "." unless $path eq "";
+            for ( my $i = 0; $i < @$o; $i++ ) {
+                $p->( $o->[$i], $path . "$i" );
+            }
+        }
     };
 
     $p->($cfg);
@@ -825,17 +825,17 @@ my $prp_context = "";
 
 sub get_property ( $p, $prp, $def = undef ) {
     for ( split( /\./,
-		 $prp_context eq ""
-		 ? $prp
-		 : "$prp_context.$prp" ) ) {
-	if ( /^\d+$/ ) {
-	    die("No config $prp\n") unless _ref($p) eq 'ARRAY';
-	    $p = $p->[$_];
-	}
-	else {
-	    die("No config $prp\n") unless _ref($p) eq 'HASH';
-	    $p = $p->{$_};
-	}
+                 $prp_context eq ""
+                 ? $prp
+                 : "$prp_context.$prp" ) ) {
+        if ( /^\d+$/ ) {
+            die("No config $prp\n") unless _ref($p) eq 'ARRAY';
+            $p = $p->[$_];
+        }
+        else {
+            die("No config $prp\n") unless _ref($p) eq 'HASH';
+            $p = $p->{$_};
+        }
     }
     $p //= $def;
     die("No config $prp\n") unless defined $p;
@@ -936,10 +936,10 @@ sub default_config () {
     // values upon input.
     "metadata" : {
       "keys" : [ "title", "subtitle",
-		 "artist", "composer", "lyricist", "arranger",
-		 "album", "copyright", "year",
-		 "sorttitle",
-		 "key", "time", "tempo", "capo", "duration" ],
+                 "artist", "composer", "lyricist", "arranger",
+                 "album", "copyright", "year",
+                 "sorttitle",
+                 "key", "time", "tempo", "capo", "duration" ],
       "strict" : true,
       "separator" : "; ",
       "autosplit" : true,
@@ -986,22 +986,22 @@ sub default_config () {
       "system" : "common",
 
       "sharp" : [ "C", [ "C#", "Cis", "C♯" ],
-		  "D", [ "D#", "Dis", "D♯" ],
-		  "E",
-		  "F", [ "F#", "Fis", "F♯" ],
-		  "G", [ "G#", "Gis", "G♯" ],
-		  "A", [ "A#", "Ais", "A♯" ],
-		  "B",
-		],
+                  "D", [ "D#", "Dis", "D♯" ],
+                  "E",
+                  "F", [ "F#", "Fis", "F♯" ],
+                  "G", [ "G#", "Gis", "G♯" ],
+                  "A", [ "A#", "Ais", "A♯" ],
+                  "B",
+                ],
 
       "flat" :  [ "C",
-		  [ "Db", "Des",        "D♭" ], "D",
-		  [ "Eb", "Es",  "Ees", "E♭" ], "E",
-		  "F",
-		  [ "Gb", "Ges",        "G♭" ], "G",
-		  [ "Ab", "As",  "Aes", "A♭" ], "A",
-		  [ "Bb", "Bes",        "B♭" ], "B",
-		],
+                  [ "Db", "Des",        "D♭" ], "D",
+                  [ "Eb", "Es",  "Ees", "E♭" ], "E",
+                  "F",
+                  [ "Gb", "Ges",        "G♭" ], "G",
+                  [ "Ab", "As",  "Aes", "A♭" ], "A",
+                  [ "Bb", "Bes",        "B♭" ], "B",
+                ],
 
        // Movable means position independent (e.g. nashville).
        "movable" : false,
@@ -1042,54 +1042,54 @@ sub default_config () {
     // Note: The type of diagram (string or keyboard) is determined
     // by the value of "instrument.type".
     "diagrams" : {
-	"show"     :  "all",
-	"sorted"   :  false,
+        "show"     :  "all",
+        "sorted"   :  false,
         "suppress" :  [],
     },
 
     // Diagnostic messages.
     "diagnostics" : {
-	"format" : "\"%f\", line %n, %m\n\t%l",
+        "format" : "\"%f\", line %n, %m\n\t%l",
     },
 
     // Table of contents.
     "contents" : [
-	{ "fields"   : [ "songindex" ],
-	  "label"    : "Table of Contents",
-	  "line"     : "%{title}",
+        { "fields"   : [ "songindex" ],
+          "label"    : "Table of Contents",
+          "line"     : "%{title}",
           "pageno"   : "%{page}",
-	  "fold"     : false,
-	  "omit"     : false,
-	},
-	{ "fields"   : [ "sorttitle", "artist" ],
-	  "label"    : "Contents by Title",
-	  "line"     : "%{title}%{artist| - %{}}",
+          "fold"     : false,
+          "omit"     : false,
+        },
+        { "fields"   : [ "sorttitle", "artist" ],
+          "label"    : "Contents by Title",
+          "line"     : "%{title}%{artist| - %{}}",
           "pageno"   : "%{page}",
-	  "fold"     : false,
-	  "omit"     : false,
-	},
-	{ "fields"   : [ "artist", "sorttitle" ],
-	  "label"    : "Contents by Artist",
-	  "line"     : "%{artist|%{} - }%{title}",
+          "fold"     : false,
+          "omit"     : false,
+        },
+        { "fields"   : [ "artist", "sorttitle" ],
+          "label"    : "Contents by Artist",
+          "line"     : "%{artist|%{} - }%{title}",
           "pageno"   : "%{page}",
-	  "fold"     : false,
-	  "omit"     : true,
-	},
+          "fold"     : false,
+          "omit"     : true,
+        },
     ],
     // Table of contents, old style.
     // This will be ignored when new style contents is present.
     "toc" : {
-	// Title for ToC.
-	"title" : "Table of Contents",
-	"line" : "%{title}",
-	// Sorting order.
-	// Currently only sorting by page number and alpha is implemented.
-	"order" : "page",
+        // Title for ToC.
+        "title" : "Table of Contents",
+        "line" : "%{title}",
+        // Sorting order.
+        // Currently only sorting by page number and alpha is implemented.
+        "order" : "page",
     },
 
     // Delegates.
     // Basically a delegate is a section {start_of_XXX} which content is
-    // collected and handled later by the backend.
+    // collected and handled later by the delegate module.
 
     "delegates" : {
         "abc" : {
@@ -1097,7 +1097,23 @@ sub default_config () {
             "module"   : "ABC",
             "handler"  : "abc2svg",
             "config"   : "default", // or "none", or "myformat.fmt"
-            "preamble" : [],
+            // The preamble is a list of lines inserted before the ABC data.
+            // DO NOT MODIFY unless you know what you are doing!
+            "preamble" : [
+               // Get rid of as much space as possible.
+               "%%topspace 0",
+               "%%titlespace 0",
+               "%%musicspace 0",
+               "%%composerspace 0",
+               "%%infospace 0",
+               "%%textspace 0",
+               "%%leftmargin 0cm",
+               "%%rightmargin 0cm",
+               "%%staffsep 0",
+               // Use ChordPro fonts for lyrics and chords.
+               "%%textfont pdf.fonts.text",
+               "%%gchordfont pdf.fonts.chord",
+            ],
             "preprocess" : { "abc" : [], "svg" : [] },
             "omit"     : false,
         },
@@ -1109,8 +1125,8 @@ sub default_config () {
             // The preamble is a list of lines inserted before the lilipond data.
             // This is a good place to set the version and global customizations.
             "preamble" : [
-		"\\version \"2.21.0\"",
-		"\\header { tagline = ##f }",
+                "\\version \"2.21.0\"",
+                "\\header { tagline = ##f }",
             ],
             "omit"     : false,
         },
@@ -1122,15 +1138,15 @@ sub default_config () {
 
       // Choose a PDF::API2 compatible library, or leave empty to
       // have ChordPro choose one for you.
-      "library" : "",	// or "PDF::API2", or "PDF::Builder"
+      "library" : "",   // or "PDF::API2", or "PDF::Builder"
 
       // PDF Properties. Arbitrary key/values may be added.
       // Note that the context for substitutions is the first song.
       "info" : {
           "title"    : "%{title}",
-	  "author"   : "",
-	  "subject"  : "",
-	  "keywords" : "",
+          "author"   : "",
+          "subject"  : "",
+          "keywords" : "",
       },
 
       // Papersize, 'a4' or [ 595, 842 ] etc.
@@ -1167,14 +1183,14 @@ sub default_config () {
       // Spacings.
       // Baseline distances as a factor of the font size.
       "spacing" : {
-	  "title"  : 1.2,
-	  "lyrics" : 1.2,
-	  "chords" : 1.2,
-	  "diagramchords" : 1.2,
-	  "grid"   : 1.2,
-	  "tab"    : 1.0,
-	  "toc"    : 1.4,
-	  "empty"  : 1.0,
+          "title"  : 1.2,
+          "lyrics" : 1.2,
+          "chords" : 1.2,
+          "diagramchords" : 1.2,
+          "grid"   : 1.2,
+          "tab"    : 1.0,
+          "toc"    : 1.4,
+          "empty"  : 1.0,
       },
       // Note: By setting the font size and spacing for empty lines to
       // smaller values, you get a fine(r)-grained control over the
@@ -1182,34 +1198,34 @@ sub default_config () {
 
       // Style of chorus.
       "chorus" : {
-	  "indent"     :  0,
-	  // Chorus side bar.
-	  // Suppress by setting offset and/or width to zero.
-	  "bar" : {
-	      "offset" :  8,
-	      "width"  :  1,
-	      "color"  : "foreground",
-	  },
-	  "tag" : "Chorus",
-	  // Recall style: Print the tag using the type.
-	  // Alternatively quote the lines of the preceding chorus.
-	  "recall" : {
-	      "choruslike" : false,
-	      "tag"   : "Chorus",
-	      "type"  : "comment",
-	      "quote" : false,
-	  },
+          "indent"     :  0,
+          // Chorus side bar.
+          // Suppress by setting offset and/or width to zero.
+          "bar" : {
+              "offset" :  8,
+              "width"  :  1,
+              "color"  : "foreground",
+          },
+          "tag" : "Chorus",
+          // Recall style: Print the tag using the type.
+          // Alternatively quote the lines of the preceding chorus.
+          "recall" : {
+              "choruslike" : false,
+              "tag"   : "Chorus",
+              "type"  : "comment",
+              "quote" : false,
+          },
       },
 
       // This opens a margin for margin labels.
       "labels" : {
-	  // Margin width. Default is 0 (no margin labels).
-	  // "auto" will automatically reserve a margin if labels are used.
-	  "width" : "auto",
-	  // Alignment for the labels. Default is left.
-	  "align" : "left",
-	  // Alternatively, render labels as comments.
-	  "comment" : ""	// "comment", "comment_italic" or "comment_box",
+          // Margin width. Default is 0 (no margin labels).
+          // "auto" will automatically reserve a margin if labels are used.
+          "width" : "auto",
+          // Alignment for the labels. Default is left.
+          "align" : "left",
+          // Alternatively, render labels as comments.
+          "comment" : ""        // "comment", "comment_italic" or "comment_box",
       },
 
       // Alternative songlines with chords in a side column.
@@ -1235,14 +1251,14 @@ sub default_config () {
       // "top", "bottom" or "right" side of the first page,
       // or "below" the last song line.
       "diagrams" : {
-	  "show"     :  "bottom",
-	  "width"    :  6,	// width of a cell
-	  "height"   :  6,	// height of a cell
-	  "vcells"   :  4,	// vertical cells
-	  "linewidth" : 0.1,	// fraction of cell width
-	  "nutwidth" :  5,	// width (in linewidth) of the top nut
-	  "hspace"   :  3.95,	// fraction of width
-	  "vspace"   :  3,	// fraction of height
+          "show"     :  "bottom",
+          "width"    :  6,      // width of a cell
+          "height"   :  6,      // height of a cell
+          "vcells"   :  4,      // vertical cells
+          "linewidth" : 0.1,    // fraction of cell width
+          "nutwidth" :  5,      // width (in linewidth) of the top nut
+          "hspace"   :  3.95,   // fraction of width
+          "vspace"   :  3,      // fraction of height
           "dotsize"  :  0.8,    // fraction of a cell
           "barwidth" :  0.8,    // fraction of a dot
           "fingers"  :  true,   // show fingering if available (or "below")
@@ -1258,15 +1274,15 @@ sub default_config () {
       // "top", "bottom" or "right" side of the first page,
       // or "below" the last song line.
       "kbdiagrams" : {
-	  "show"     :  "bottom",
-	  "width"    :   4,	// of a single key
-	  "height"   :  20,	// of the diagram
-	  "keys"     :  14,	// or 7, 10, 14, 17, 21
-          "base"     :  "C",	// or "F"
-	  "linewidth" : 0.1,	// fraction of a single key width
-          "pressed"  :  "foreground-medium",	// colour of a pressed key
-	  "hspace"   :  3.95,	// ??
-	  "vspace"   :  0.3,	// fraction of height
+          "show"     :  "bottom",
+          "width"    :   4,     // of a single key
+          "height"   :  20,     // of the diagram
+          "keys"     :  14,     // or 7, 10, 14, 17, 21
+          "base"     :  "C",    // or "F"
+          "linewidth" : 0.1,    // fraction of a single key width
+          "pressed"  :  "foreground-medium",    // colour of a pressed key
+          "hspace"   :  3.95,   // ??
+          "vspace"   :  0.3,    // fraction of height
       },
 
       // Grid section lines.
@@ -1315,42 +1331,42 @@ sub default_config () {
       // title/subtitle fields. Don't try to add an artist page element.
 
       "formats" : {
-  	  // Titles/Footers.
+          // Titles/Footers.
 
-  	  // Titles/footers have 3 parts, which are printed left,
-	  // centered and right.
-	  // For odd/even printing, the 1st background page is used
-	  // for left pages and the next page (if it exists) for right pages.
-	  // For even/odd printing, the order is reversed.
+          // Titles/footers have 3 parts, which are printed left,
+          // centered and right.
+          // For odd/even printing, the 1st background page is used
+          // for left pages and the next page (if it exists) for right pages.
+          // For even/odd printing, the order is reversed.
 
-	  // By default, a page has:
-	  "default" : {
-	      // No title/subtitle.
-	      "title"     : [ "", "", "" ],
-	      "subtitle"  : [ "", "", "" ],
-	      // Footer is title -- page number.
-	      "footer"    : [ "%{title}", "", "%{page}" ],
-	      // Background page.
-	      "background" : "",
-	  },
-	  // The first page of a song has:
-	  "title" : {
-	      // Title and subtitle.
-	      "title"     : [ "", "%{title}", "" ],
-	      "subtitle"  : [ "", "%{subtitle}", "" ],
-	      // Footer with page number.
-	      "footer"    : [ "", "", "%{page}" ],
-	      // Background page.
-	      "background" : "",
-	  },
-	  // The very first output page is slightly different:
-	  "first" : {
-	      // It has title and subtitle, like normal 'first' pages.
-	      // But no footer.
-	      "footer"    : [ "", "", "" ],
-	      // Background page.
-	      "background" : "",
-	  },
+          // By default, a page has:
+          "default" : {
+              // No title/subtitle.
+              "title"     : [ "", "", "" ],
+              "subtitle"  : [ "", "", "" ],
+              // Footer is title -- page number.
+              "footer"    : [ "%{title}", "", "%{page}" ],
+              // Background page.
+              "background" : "",
+          },
+          // The first page of a song has:
+          "title" : {
+              // Title and subtitle.
+              "title"     : [ "", "%{title}", "" ],
+              "subtitle"  : [ "", "%{subtitle}", "" ],
+              // Footer with page number.
+              "footer"    : [ "", "", "%{page}" ],
+              // Background page.
+              "background" : "",
+          },
+          // The very first output page is slightly different:
+          "first" : {
+              // It has title and subtitle, like normal 'first' pages.
+              // But no footer.
+              "footer"    : [ "", "", "" ],
+              // Background page.
+              "background" : "",
+          },
       },
 
       // Split marker for syllables that are smaller than chord width.
@@ -1372,31 +1388,31 @@ sub default_config () {
 
       "fontdir" : [],
       "fontconfig" : {
-	  // alternatives: regular r normal <empty>
-	  // alternatives: bold b strong
-	  // alternatives: italic i oblique o emphasis
-	  // alternatives: bolditalic bi italicbold ib boldoblique bo obliquebold ob
-	  "times" : {
-	      ""            : "Times-Roman",
-	      "bold"        : "Times-Bold",
-	      "italic"      : "Times-Italic",
-	      "bolditalic"  : "Times-BoldItalic",
-	  },
-	  "helvetica" : {
-	      ""            : "Helvetica",
-	      "bold"        : "Helvetica-Bold",
-	      "oblique"     : "Helvetica-Oblique",
-	      "boldoblique" : "Helvetica-BoldOblique",
-	  },
-	  "courier" : {
-	      ""            : "Courier",
-	      "bold"        : "Courier-Bold",
-	      "italic"      : "Courier-Italic",
-	      "bolditalic"  : "Courier-BoldItalic",
-	  },
-	  "dingbats" : {
-	      ""            : "ZapfDingbats",
-	  },
+          // alternatives: regular r normal <empty>
+          // alternatives: bold b strong
+          // alternatives: italic i oblique o emphasis
+          // alternatives: bolditalic bi italicbold ib boldoblique bo obliquebold ob
+          "times" : {
+              ""            : "Times-Roman",
+              "bold"        : "Times-Bold",
+              "italic"      : "Times-Italic",
+              "bolditalic"  : "Times-BoldItalic",
+          },
+          "helvetica" : {
+              ""            : "Helvetica",
+              "bold"        : "Helvetica-Bold",
+              "oblique"     : "Helvetica-Oblique",
+              "boldoblique" : "Helvetica-BoldOblique",
+          },
+          "courier" : {
+              ""            : "Courier",
+              "bold"        : "Courier-Bold",
+              "italic"      : "Courier-Italic",
+              "bolditalic"  : "Courier-BoldItalic",
+          },
+          "dingbats" : {
+              ""            : "ZapfDingbats",
+          },
       },
 
       // "fonts" maps output elements to fonts as defined in "fontconfig".
@@ -1407,48 +1423,48 @@ sub default_config () {
       // be overruled with user settings.
 
       "fonts" : {
-	  "title" : {
-	      "name" : "Times-Bold",
-	      "size" : 14
-	  },
-	  "text" : {
-	      "name" : "Times-Roman",
-	      "size" : 12
-	  },
-	  "chord" : {
-	      "name" : "Helvetica-Oblique",
-	      "size" : 10
-	  },
-	  "chordfingers" : {
-	      "file" : "ChordProSymbols.ttf",	// do not change
-	      "numbercolor" : "background",
-	  },
-	  "comment" : {
-	      "name" : "Helvetica",
-	      "size" : 12,
-	      "background" : "foreground-light"
-	  },
-	  "comment_italic" : {
-	      "name" : "Helvetica-Oblique",
-	      "size" : 12,
-	  },
-	  "comment_box" : {
-	      "name" : "Helvetica",
-	      "size" : 12,
-	      "frame" : 1
-	  },
-	  "tab" : {
-	      "name" : "Courier",
-	      "size" : 10
-	  },
-	  "toc" : {
-	      "name" : "Times-Roman",
-	      "size" : 11
-	  },
-	  "grid" : {
-	      "name" : "Helvetica",
-	      "size" : 10
-	  },
+          "title" : {
+              "name" : "Times-Bold",
+              "size" : 14
+          },
+          "text" : {
+              "name" : "Times-Roman",
+              "size" : 12
+          },
+          "chord" : {
+              "name" : "Helvetica-Oblique",
+              "size" : 10
+          },
+          "chordfingers" : {
+              "file" : "ChordProSymbols.ttf",   // do not change
+              "numbercolor" : "background",
+          },
+          "comment" : {
+              "name" : "Helvetica",
+              "size" : 12,
+              "background" : "foreground-light"
+          },
+          "comment_italic" : {
+              "name" : "Helvetica-Oblique",
+              "size" : 12,
+          },
+          "comment_box" : {
+              "name" : "Helvetica",
+              "size" : 12,
+              "frame" : 1
+          },
+          "tab" : {
+              "name" : "Courier",
+              "size" : 10
+          },
+          "toc" : {
+              "name" : "Times-Roman",
+              "size" : 11
+          },
+          "grid" : {
+              "name" : "Helvetica",
+              "size" : 10
+          },
       },
 
       // Element mappings that can be specified, but need not since
@@ -1475,20 +1491,20 @@ sub default_config () {
       // fold:     group by primary (NYI)
       // omit:     ignore this
       "outlines" : [
-	  { "fields"   : [ "sorttitle", "artist" ],
-	    "label"    : "By Title",
-	    "line"     : "%{title}%{artist| - %{}}",
-	    "collapse" : false,
-	    "letter"   : 5,
-	    "fold"     : false,
-	  },
-	  { "fields"   : [ "artist", "sorttitle" ],
-	    "label"    : "By Artist",
-	    "line"     : "%{artist|%{} - }%{title}",
-	    "collapse" : false,
-	    "letter"   : 5,
-	    "fold"     : false,
-	  },
+          { "fields"   : [ "sorttitle", "artist" ],
+            "label"    : "By Title",
+            "line"     : "%{title}%{artist| - %{}}",
+            "collapse" : false,
+            "letter"   : 5,
+            "fold"     : false,
+          },
+          { "fields"   : [ "artist", "sorttitle" ],
+            "label"    : "By Artist",
+            "line"     : "%{artist|%{} - }%{title}",
+            "collapse" : false,
+            "letter"   : 5,
+            "fold"     : false,
+          },
       ],
 
       // This will show the page layout if non-zero.
@@ -1521,65 +1537,65 @@ sub default_config () {
 
     // Settings for ChordPro backend.
     "chordpro" : {
-	// Style of chorus.
-	"chorus" : {
-	    // Recall style: Print the tag using the type.
-	    // Alternatively quote the lines of the preceding chorus.
-	    // If no tag+type or quote: use {chorus}.
-	    // Note: Variant 'msp' always uses {chorus}.
-	    "recall" : {
-		 // "tag"   : "Chorus", "type"  : "comment",
-		 "tag"   : "", "type"  : "",
-		 // "quote" : false,
-		 "quote" : false,
-	    },
-	},
+        // Style of chorus.
+        "chorus" : {
+            // Recall style: Print the tag using the type.
+            // Alternatively quote the lines of the preceding chorus.
+            // If no tag+type or quote: use {chorus}.
+            // Note: Variant 'msp' always uses {chorus}.
+            "recall" : {
+                 // "tag"   : "Chorus", "type"  : "comment",
+                 "tag"   : "", "type"  : "",
+                 // "quote" : false,
+                 "quote" : false,
+            },
+        },
     },
 
     // Settings for HTML backend.
     "html" : {
-	// Stylesheet links.
-	"styles" : {
-	    "display" : "chordpro.css",
-	    "print"   : "chordpro_print.css",
-	},
+        // Stylesheet links.
+        "styles" : {
+            "display" : "chordpro.css",
+            "print"   : "chordpro_print.css",
+        },
     },
 
     // Settings for LaTeX backend.
     "latex" : {
         "template_include_path" : [ ],
-	"templates" :  {
-	    "songbook" : "songbook.tt",
-	    "comment" : "comment.tt",
-	    "image"   : "image.tt"
-	}
+        "templates" :  {
+            "songbook" : "songbook.tt",
+            "comment" : "comment.tt",
+            "image"   : "image.tt"
+        }
     },
 
     // Settings for Text backend.
     "text" : {
-	// Style of chorus.
-	"chorus" : {
-	    // Recall style: Print the tag using the type.
-	    // Alternatively quote the lines of the preceding chorus.
-	    // If no tag+type or quote: use {chorus}.
-	    // Note: Variant 'msp' always uses {chorus}.
-	    "recall" : {
-		 // "tag"   : "Chorus", "type"  : "comment",
-		 "tag"   : "", "type"  : "",
-		 // "quote" : false,
-		 "quote" : false,
-	    },
-	},
+        // Style of chorus.
+        "chorus" : {
+            // Recall style: Print the tag using the type.
+            // Alternatively quote the lines of the preceding chorus.
+            // If no tag+type or quote: use {chorus}.
+            // Note: Variant 'msp' always uses {chorus}.
+            "recall" : {
+                 // "tag"   : "Chorus", "type"  : "comment",
+                 "tag"   : "", "type"  : "",
+                 // "quote" : false,
+                 "quote" : false,
+            },
+        },
     },
 
     // Settings for A2Crd.
     "a2crd" : {
-	// Treat leading lyrics lines as title/subtitle lines.
-	"infer-titles" : true,
-	// Classification algorithm.
-	"classifier" : "pct_chords",
-	// Tab stop width for tab expansion. Set to zero to disable.
-	"tabstop" : 8,
+        // Treat leading lyrics lines as title/subtitle lines.
+        "infer-titles" : true,
+        // Classification algorithm.
+        "classifier" : "pct_chords",
+        // Tab stop width for tab expansion. Set to zero to disable.
+        "tabstop" : 8,
     },
 
     // Settings for the parser/preprocessor.
@@ -1588,14 +1604,14 @@ sub default_config () {
     // Every occurrence of "xxx" will be replaced by "yyy".
     // Use wisely.
     "parser" : {
-	"preprocess" : {
-	    // All lines.
-	    "all" : [],
-	    // Directives.
-	    "directive" : [],
-	    // Song lines (lyrics) only.
+        "preprocess" : {
+            // All lines.
+            "all" : [],
+            // Directives.
+            "directive" : [],
+            // Song lines (lyrics) only.
             "songline" : [],
-	},
+        },
     },
 
     // For (debugging (internal use only)).
@@ -1612,13 +1628,13 @@ sub default_config () {
         "song" : 0,
         "songfull" : 0,
         "csv" : 0,
-  	"abc" : 0,
-  	"ly" : 0,
-  	"svg" : 0,
-	// For temporary use.
-	"x1" : 0,
-	"x2" : 0,
-	"x3" : 0,
+        "abc" : 0,
+        "ly" : 0,
+        "svg" : 0,
+        // For temporary use.
+        "x1" : 0,
+        "x2" : 0,
+        "x3" : 0,
     },
 
 }

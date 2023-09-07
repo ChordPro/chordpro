@@ -262,6 +262,7 @@ sub _abc2svg {
 	    opts => { center => $kv->{center},
 		      scale  => $kv->{scale},
 		      split  => $kv->{split},
+		      sep    => $kv->{staffsep},
 		    } } );
 
     return \@res;

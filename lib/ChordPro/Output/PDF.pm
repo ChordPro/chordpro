@@ -1175,10 +1175,13 @@ sub generate_song {
 	    }
 
 	    my @res;
+	    my $i = 0;
 	    for my $xo ( @$o ) {
 		state $imgcnt = 0;
+		$i++;
 		my $assetid = sprintf("XFOasset%03d", $imgcnt++);
 		$assets->{$assetid} = { type => "xform", data => $xo };
+		my $sep = $i == @$o ? -10 : $elt->{opts}->{sep} || 0;
 
 		push( @res,
 		      { type     => "xform",
@@ -1188,12 +1191,15 @@ sub generate_song {
 			vheight  => $xo->{vheight},
 			id       => $assetid,
 			opts => { center => $elt->{opts}->{center},
-				  scale => $elt->{opts}->{scale} || 1 } },
+				  scale  => $elt->{opts}->{scale} || 1,
+				  sep    => $sep },
+		      }
 		    );
 		warn("Created asset $assetid (xform, ",
 		     $xo->{vwidth}, "x", $xo->{vheight}, ")",
 		     " scale=", $elt->{opts}->{scale} || 1,
 		     " center=", $elt->{opts}->{center}//0,
+		     " sep=", $sep,
 		     "\n")
 		  if $config->{debug}->{images};
 	    }
@@ -1202,13 +1208,14 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "xform" ) {
-	    my $h = $elt->{height};
+	    my $h = $elt->{height};# + ($elt->{opts}->{sep}||0);
 	    my $w = $elt->{width};
 	    my $vh = $elt->{vheight};
 	    my $vw = $elt->{vwidth};
 	    my $xo = $assets->{ $elt->{id} };
 
 	    my $scale = min( $vw / $w, $vh / $h );
+	    my $sep = $elt->{opts}->{sep} || 0;
 
 	    # Available width and height.
 	    my $pw;
@@ -1233,6 +1240,7 @@ sub generate_song {
 		 " [$x,$y]",
 		 " scale=", $scale,
 		 " center=", $elt->{opts}->{center}//0,
+		 " sep=", $sep,
 		 "\n")
 	      if $config->{debug}->{images};
 
@@ -1245,7 +1253,7 @@ sub generate_song {
 				   $x-$xo->{data}->{vbox}->[0]*$scale,
 				   $y, $scale );
 
-	    $y -= $vsp;
+	    $y -= $vsp + $sep;
 	    $pr->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
 
 	    next;

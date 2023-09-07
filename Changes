@@ -9,6 +9,7 @@
     - Add 'omit' to delegates config.
     - Infer chord inversions for keyboard.
     - Allow 'pdf.fonts.XXX' as fonts in SVG.
+    - Trim space from ABC generated SVG; add 'staffsep' option.
     - !BugFixes
     - Fix issue #297.
     - Fix issue #298.
