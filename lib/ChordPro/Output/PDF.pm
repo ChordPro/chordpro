@@ -1158,11 +1158,13 @@ sub generate_song {
 	    # We turn SVG into one (or more) XForm objects.
 
 	    require SVGPDF;
+	    SVGPDF->VERSION(0.070);
 
-	    # Note we need a special fonthandler.
+	    # Note we need special font and text handlers.
 	    my $p = SVGPDF->new
 	      ( pdf  => $ps->{pr}->{pdf},
-		fc   => sub { svg_fonthandler( $_[0], $ps, $_[2] ) },
+		fc   => sub { svg_fonthandler( $ps, @_ ) },
+		tc   => sub { svg_texthandler( $ps, @_ ) },
 		atts => { debug => $config->{debug}->{svg} > 1,
 			  verbose => $config->{debug}->{svg},
 			} );
@@ -1181,7 +1183,7 @@ sub generate_song {
 		$i++;
 		my $assetid = sprintf("XFOasset%03d", $imgcnt++);
 		$assets->{$assetid} = { type => "xform", data => $xo };
-		my $sep = $i == @$o ? -10 : $elt->{opts}->{sep} || 0;
+		my $sep = $i == @$o ? 0 : $elt->{opts}->{sep} || 0;
 
 		push( @res,
 		      { type     => "xform",
@@ -3050,9 +3052,8 @@ sub is_corefont {
 
 # Font handler for SVG embedding.
 sub svg_fonthandler {
-    my ( $self, $ps, $style ) = @_;
+    my ( $ps, $el, $pdf, $style ) = @_;
 
-    my $pdf    = $ps->{pr}->{pdf};
     my $family = $style->{'font-family'};
     my $stl    = $style->{'font-style'}   // "normal";
     my $weight = $style->{'font-weight'}  // "normal";
@@ -3098,6 +3099,44 @@ sub svg_fonthandler {
     };
 
     return $font;
+}
+
+# Text handler for SVG embedding.
+sub svg_texthandler {
+    my ( $ps, $el, $xo, $pdf, $style, $text, %opts ) = @_;
+    my @t = split( /([♯♭])/, $text );
+    if ( @t == 1 ) {
+	# Nothing special.
+	$el->set_font( $xo, $style );
+	return $xo->text( $text, %opts );
+    }
+
+    my ( $font, $sz ) = $el->root->fontmanager->find_font($style);
+    my $has_sharp = $font->glyphByUni(ord("♯")) ne ".notdef";
+    my $has_flat  = $font->glyphByUni(ord("♭")) ne ".notdef";
+    # For convenience we assume that either both are available, or missing.
+
+    if ( $has_sharp && $has_flat ) {
+	# Nothing special.
+	$xo->font( $font, $sz );
+	return $xo->text( $text, %opts );
+    }
+
+    # Replace the sharp and flat glyphs by glyps from the chordfingers font.
+    my $d = 0;
+    my $this = 0;
+    while ( @t ) {
+	my $text = shift(@t);
+	my $fs   = shift(@t);
+	$xo->font( $font, $sz ) unless $this eq $font;
+	$d += $xo->text($text);
+	$this = $font;
+	next unless $fs;
+	$xo->font( $ps->{fonts}->{chordfingers}->{fd}->{font}, $sz );
+	$this = 0;
+	$d += $xo->text( $fs eq '♭' ? '!' : '#' );
+    }
+    return $d;
 }
 
 sub _dump {

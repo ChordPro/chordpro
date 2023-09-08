@@ -10,6 +10,8 @@
     - Infer chord inversions for keyboard.
     - Allow 'pdf.fonts.XXX' as fonts in SVG.
     - Trim space from ABC generated SVG; add 'staffsep' option.
+    - Add 'staffsep' option for ABC embedding.
+    - Use SVGPDF text callback to substitute missing flat/sharp glyphs.
     - !BugFixes
     - Fix issue #297.
     - Fix issue #298.
