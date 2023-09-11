@@ -615,6 +615,7 @@ sub get_keys ( $info ) {
 	my @k;
 	my $bass = $info->{bass_ord} - $info->{root_ord};
 	my $oct = 12;		# yes
+	$bass += $oct if $bass < 0;
 	for ( @keys ) {
 	    next if $_ == $bass;
 	    push( @k, $_ < $bass ? $_+$oct : $_ );
