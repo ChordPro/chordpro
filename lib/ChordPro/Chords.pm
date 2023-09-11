@@ -610,18 +610,18 @@ sub get_keys ( $info ) {
 	@keys = sort keys %keys;
     }
 
-    if ( defined $info->{bass} ) {
+    if ( defined $info->{bass} && $info->{bass} ne '' ) {
 	# Handle inversions.
 	my @k;
-	my $bass = $info->{bass_ord};
+	my $bass = $info->{bass_ord} - $info->{root_ord};
 	my $oct = 12;		# yes
 	for ( @keys ) {
+	    next if $_ == $bass;
 	    push( @k, $_ < $bass ? $_+$oct : $_ );
 	}
-	unshift( @k, $bass ) unless $k[0] == $bass;
+	unshift( @k, $bass );
 	@keys = @k;
     }
-
     \@keys;
 }
 
