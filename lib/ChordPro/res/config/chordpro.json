@@ -604,6 +604,7 @@
       // Element mappings that can be specified, but need not since
       // they default to other elements.
       // subtitle       --> text
+      // chorus         --> text
       // comment        --> text
       // comment_italic --> chord
       // comment_box    --> chord

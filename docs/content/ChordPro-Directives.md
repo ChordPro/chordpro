@@ -101,6 +101,9 @@ much more powerful [configuration files]({{< relref "ChordPro-Configuration" >}}
 * [chordfont]({{< relref "Directives-props_chord_legacy" >}}) (short: cf),
    [chordsize]({{< relref "Directives-props_chord_legacy" >}}) (short: cs),
    [chordcolour]({{< relref "Directives-props_chord_legacy" >}})
+* [chorusfont]({{< relref "Directives-props_chorus_legacy" >}}),
+   [chorussize]({{< relref "Directives-props_chorus_legacy" >}}),
+   [choruscolour]({{< relref "Directives-props_chorus_legacy" >}})
 * [footerfont]({{< relref "Directives-props_footer_legacy" >}}),
    [footersize]({{< relref "Directives-props_footer_legacy" >}}),
    [footercolour]({{< relref "Directives-props_footer_legacy" >}})

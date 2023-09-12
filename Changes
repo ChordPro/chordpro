@@ -1,6 +1,7 @@
 0.000
 
     - !ChordPro functionality
+    - Directives and config to change the chorus appearance.
     - (Wx) Tasks menu for previews, including custom extensions.
     - Add support for SVG images.
     - Handle ABC via SVG image.

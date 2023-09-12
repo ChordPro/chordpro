@@ -124,15 +124,6 @@ sub configurator ( $opts = undef ) {
         next if exists($cfg->{pdf}->{formats}->{first}->{$_});
         $cfg->{pdf}->{formats}->{first}->{$_} = "";
     }
-    for my $ff ( qw(chord
-                    diagram diagram_base chordfingers
-                    comment comment_box comment_italic
-                    tab text toc annotation label
-                    empty footer grid grid_margin subtitle title) ) {
-        for ( qw(name file description size color background) ) {
-            $cfg->{pdf}->{fonts}->{$ff}->{$_} //= undef;
-        }
-    }
 
     my $backend_configurator =
       UNIVERSAL::can( $options->{backend}, "configurator" );
@@ -1470,6 +1461,7 @@ sub default_config () {
       // Element mappings that can be specified, but need not since
       // they default to other elements.
       // subtitle       --> text
+      // chorus         --> text
       // comment        --> text
       // comment_italic --> chord
       // comment_box    --> chord

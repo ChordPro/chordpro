@@ -523,6 +523,9 @@ Default is the setting for `subtitle` at 60% size.
 * `text`  
 The font used for lyrics texts.  
 Default is "Times-Roman" at size 12.
+* `chorus`  
+The font used for chorus texts.  
+Default is the setting for `text`.
 * `chord`  
 The font used for chords above the lyrics.  
 Default is "Helvetica-Oblique" at size 10.

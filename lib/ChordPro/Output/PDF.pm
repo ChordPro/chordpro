@@ -330,7 +330,8 @@ my $chordscapo = 0;		# capo in a separate column
 my $i_tag;
 our $assets;
 
-use constant SIZE_ITEMS => [ qw (chord text tab grid diagram toc title footer) ];
+use constant SIZE_ITEMS => [ qw( chord text chorus tab grid diagram
+				 toc title footer ) ];
 
 sub generate_song {
     my ( $s, $opts ) = @_;
@@ -901,7 +902,7 @@ sub generate_song {
 
 	    my $ftext;
 	    if ( $type eq "songline" ) {
-		$ftext = $fonts->{text};
+		$ftext = $curctx eq "chorus" ? $fonts->{chorus} : $fonts->{text};
 	    }
 	    elsif ( $type =~ /^comment/ ) {
 		$ftext = $fonts->{$type} || $fonts->{comment};
@@ -1330,7 +1331,7 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "control" ) {
-	    if ( $elt->{name} =~ /^(text|chord|grid|toc|tab)-size$/ ) {
+	    if ( $elt->{name} =~ /^(text|chord|chorus|grid|toc|tab)-size$/ ) {
 		if ( defined $elt->{value} ) {
 		    $do_size->( $1, $elt->{value} );
 		}
@@ -1340,7 +1341,7 @@ sub generate_song {
 		      $pr->{_df}->{$1}->{size};
 		}
 	    }
-	    elsif ( $elt->{name} =~ /^(text|chord|grid|toc|tab)-font$/ ) {
+	    elsif ( $elt->{name} =~ /^(text|chord|chorus|grid|toc|tab)-font$/ ) {
 		my $f = $1;
 		if ( defined $elt->{value} ) {
 		    my ( $fn, $sz ) = $elt->{value} =~ /^(.*) (\d+(?:\.\d+)?)$/;
@@ -1372,7 +1373,7 @@ sub generate_song {
 		}
 		$pr->init_font($f);
 	    }
-	    elsif ( $elt->{name} =~ /^(text|chord|grid|toc|tab)-color$/ ) {
+	    elsif ( $elt->{name} =~ /^(text|chord|chorus|grid|toc|tab)-color$/ ) {
 		if ( defined $elt->{value} ) {
 		    $ps->{fonts}->{$1}->{color} = $elt->{value};
 		}
@@ -1720,7 +1721,7 @@ sub songline {
     }
 
     # assert $type eq "songline";
-    $ftext = $fonts->{text};
+    $ftext = $fonts->{ $elt->{context} eq "chorus" ? "chorus" : "text" };
     $ytext  = $ytop - font_bl($ftext); # unless lyrics AND chords
 
     my $fchord = $fonts->{chord};
@@ -2577,16 +2578,18 @@ sub toc_vsp   {
 sub text_vsp {
     my ( $elt, $ps ) = @_;
 
+    my $ftext = $ps->{fonts}->{ $elt->{context} eq "chorus"
+				? "chorus" : "text" };
     my $layout = Text::Layout->new( $ps->{pr}->{pdf} );
-    $layout->set_font_description( $ps->{fonts}->{text}->{fd} );
-    $layout->set_font_size( $ps->{fonts}->{text}->{size} );
+    $layout->set_font_description( $ftext->{fd} );
+    $layout->set_font_size( $ftext->{size} );
     #warn("vsp: ".join( "", @{$elt->{phrases}} )."\n");
     $layout->set_markup( join( "", @{$elt->{phrases}} ) );
     my $vsp = $layout->get_size->{height} * $ps->{spacing}->{lyrics};
     #warn("vsp $vsp \"", $layout->get_text, "\"\n");
     # Calculate the vertical span of this line.
 
-    _vsp( "text", $ps, "lyrics" );
+    _vsp( $elt->{context} eq "chorus" ? "chorus" : "text", $ps, "lyrics" );
 }
 
 sub set_columns {
@@ -2838,6 +2841,7 @@ sub configurator {
 	}
     };
     $fm->( qw( subtitle       text     ) );
+    $fm->( qw( chorus         text     ) );
     $fm->( qw( comment_italic text     ) );
     $fm->( qw( comment_box    text     ) );
     $fm->( qw( comment        text     ) );
@@ -2855,6 +2859,7 @@ sub configurator {
 
     # This one is fixed.
     $fonts->{chordfingers}->{file} = "ChordProSymbols.ttf";
+    $fonts->{chordprosymbols} = $fonts->{chordfingers};
 }
 
 # Get a format string for a given page class and type.

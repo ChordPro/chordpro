@@ -1623,7 +1623,7 @@ sub directive {
     }
 
     # Formatting.
-    if ( $dir =~ /^(text|chord|tab|grid|diagrams|title|footer|toc)(font|size|colou?r)$/ ) {
+    if ( $dir =~ /^(text|chord|chorus|tab|grid|diagrams|title|footer|toc)(font|size|colou?r)$/ ) {
 	my $item = $1;
 	my $prop = $2;
 	my $value = $arg;

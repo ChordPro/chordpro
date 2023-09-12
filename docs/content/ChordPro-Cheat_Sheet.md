@@ -4,7 +4,7 @@ title: "ChordPro Cheat Sheet"
 description: "ChordPro Cheat Sheet"
 ---
 
-# ChordPro 6.01 Cheat Sheet
+# ChordPro 6.03 Cheat Sheet
 
 ## General
 
@@ -56,6 +56,9 @@ Arguments to directives may be separated by a colon `:` and/or whitespace. They 
 | [chordfont]({{< relref "Directives-props_chord_legacy" >}}) _font_       | cf[^3]    | Chord font.                                                                                        | 1.0   |
 | [chordsize]({{< relref "Directives-props_chord_legacy" >}}) _size_       | cs[^3]    | Chord size.                                                                                        | 1.0   |
 | [chorus]({{< relref "Directives-env_chorus" >}})                         |           | Recall chorus. May have a [label]({{< relref "ChordPro-Configuration-PDF#labels" >}}).[^2]         | 5.0   |
+| [choruscolour]({{< relref "Directives-props_chorus_legacy" >}}) _colour_ |           | Chorus colour.                                                                                     | 6.03  |
+| [chorusfont]({{< relref "Directives-props_chorus_legacy" >}}) _font_     |           | Chorus font.                                                                                       | 6.03  |
+| [chorussize]({{< relref "Directives-props_chorus_legacy" >}}) _size_     |           | Chorus size.                                                                                       | 6.03  |
 | [column_break]({{< relref "Directives-column_break" >}})                 | cb        | New column or page.                                                                                | 3.6   |
 | [columns]({{< relref "Directives-columns" >}}) _cols_                    | col       | Number of columns.                                                                                 | 3.6   |
 | [comment]({{< relref "Directives-comment" >}})                           | c         | Comment.                                                                                           | 1.0   |
