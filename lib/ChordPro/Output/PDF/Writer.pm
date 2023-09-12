@@ -122,13 +122,6 @@ sub _bgcolor {
     $col;
 }
 
-sub _yflip {
-    #warn("Text::Layout = $Text::Layout::VERSION\n" );
-    $Text::Layout::VERSION gt "0.027";
-}
-
-my $yflip;
-
 sub fix_musicsyms {
     my ( $text, $font ) = @_;
 
@@ -175,12 +168,7 @@ sub text {
     $self->{layout}->show( $x, $y, $self->{pdftext} );
 
     my $e = $self->{layout}->get_pixel_extents;
-    if ( ref($e) eq 'ARRAY' ) { # Text::Layout <= 0.026
-	$e = $e->[1];
-    }
-    elsif ( $yflip //= _yflip() ) {
-	$e->{y} += $e->{height};
-    }
+    $e->{y} += $e->{height};
 
     # Handle decorations (background, box).
     my $bgcol = $self->_bgcolor($font->{background});
