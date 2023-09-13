@@ -46,6 +46,12 @@ my $song = {
 			'context' => ''
 		       },
 		       {
+			'type' => 'control',
+			'name' => 'chorus-font',
+			'value' => 'Times-Italic',
+			'context' => ''
+		       },
+		       {
 			'context' => '',
 			'type' => 'control',
 			'value' => '80%',
@@ -54,8 +60,20 @@ my $song = {
 		       {
 			'context' => '',
 			'type' => 'control',
+			'value' => '80%',
+			'name' => 'chorus-size'
+		       },
+		       {
+			'context' => '',
+			'type' => 'control',
 			'value' => 'yellow',
 			'name' => 'text-color'
+		       },
+		       {
+			'context' => '',
+			'type' => 'control',
+			'value' => 'yellow',
+			'name' => 'chorus-color'
 		       }
 		      ]
  	   };
