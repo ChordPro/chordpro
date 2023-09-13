@@ -445,6 +445,8 @@ sub preview {
     $options->{trace} = $self->{_trace} || 0;
     $options->{debug} = $self->{_debug} || $self->{_debuginfo};
     $options->{diagformat} = 'Line %n, %m';
+    # Actual file name.
+    $options->{filesource} = $self->{_currentfile};
     $options->{silent} = 1;
 
     eval {

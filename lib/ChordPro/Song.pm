@@ -1292,7 +1292,7 @@ sub directive {
 	# If the image name does not have a directory, look it up
 	# next to the song, and then in the images folder of the
 	# CHORDPRO_LIB.
-	if ( $uri && $uri !~ m;/\\; ) { # basename
+	if ( $uri && $uri !~ m;^([a-z]:)?[/\\];i ) { # not abs
 	    use File::Basename qw(dirname);
 	    L: for ( dirname($diag->{file}) ) {
 		$uri = "$_/$uri", last if -s "$_/$uri";
