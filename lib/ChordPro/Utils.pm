@@ -100,6 +100,12 @@ sub sys ( @cmd ) {
 
 push( @EXPORT, 'sys' );
 
+sub splitpath( $path ) {
+    split( MSWIN ? ";" : ":", $path );
+}
+
+push( @EXPORT, 'splitpath' );
+
 ################ (Pre)Processing ################
 
 sub make_preprocessor ( $prp ) {
