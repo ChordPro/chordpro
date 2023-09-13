@@ -1622,63 +1622,18 @@ sub directive {
 	return 1;
     }
 
-    # Formatting.
-    if ( $dir =~ /^(text|chord|chorus|tab|grid|diagrams|title|footer|toc)(font|size|colou?r)$/ ) {
+    # Formatting. {chordsize XX} and such.
+    if ( $dir =~ m/ ^( text | chord | chorus | tab | grid | diagrams
+		       | title | footer | toc )
+		     ( font | size | colou?r )
+		     $/x ) {
 	my $item = $1;
 	my $prop = $2;
-	my $value = $arg;
 
-	$prop = "color" if $prop eq "colour";
-	my $name = "$item-$prop";
-	$propstack{$name} //= [];
+	$self->propset( $item, $prop, $arg );
 
-	if ( $value eq "" ) {
-	    # Pop current value from stack.
-	    if ( @{ $propstack{$name} } ) {
-		pop( @{ $propstack{$name} } );
-	    }
-	    # Use new current value, if any.
-	    if ( @{ $propstack{$name} } ) {
-		$value = $propstack{$name}->[-1]
-	    }
-	    else {
-		# do_warn("No saved value for property $item$prop\n" );
-		$value = undef;
-	    }
-	    $self->add( type  => "control",
-			name  => $name,
-			value => $value );
-	    return 1;
-	}
-
-	if ( $prop eq "size" ) {
-	    unless ( $value =~ /^\d+(?:\.\d+)?\%?$/ ) {
-		do_warn("Illegal value \"$value\" for $item$prop\n");
-		return 1;
-	    }
-	}
-	if ( $prop =~ /^colou?r$/  ) {
-	    my $v;
-	    unless ( $v = get_color($value) ) {
-		do_warn("Illegal value \"$value\" for $item$prop\n");
-		return 1;
-	    }
-	    $value = $v;
-	}
-	$value = $prop eq 'font' ? $value : lc($value);
-	$self->add( type  => "control",
-		    name  => $name,
-		    value => $value );
-	push( @{ $propstack{$name} }, $value );
-
-	# A trailing number after a font directive is an implisit size
-	# directive.
-	if ( $prop eq 'font' && $value =~ /\s(\d+(?:\.\d+)?)$/ ) {
-	    $self->add( type  => "control",
-			name  => "$item-size",
-			value => $1 );
-	    push( @{ $propstack{"$item-size"} }, $1 );
-	}
+	# Derived props.
+	$self->propset( "chorus", $prop, $arg ) if $item eq "text";
 
 	return 1;
     }
@@ -1698,6 +1653,61 @@ sub directive {
     do_warn("Unknown directive: $d\n")
       if $config->{settings}->{strict} && $d !~ /^x_/;
     return;
+}
+
+sub propset {
+    my ( $self, $item, $prop, $value ) = @_;
+    $prop = "color" if $prop eq "colour";
+    my $name = "$item-$prop";
+    $propstack{$name} //= [];
+
+    if ( $value eq "" ) {
+	# Pop current value from stack.
+	if ( @{ $propstack{$name} } ) {
+	    pop( @{ $propstack{$name} } );
+	}
+	# Use new current value, if any.
+	if ( @{ $propstack{$name} } ) {
+	    $value = $propstack{$name}->[-1]
+	}
+	else {
+	    # do_warn("No saved value for property $item$prop\n" );
+	    $value = undef;
+	}
+	$self->add( type  => "control",
+		    name  => $name,
+		    value => $value );
+	return 1;
+    }
+
+    if ( $prop eq "size" ) {
+	unless ( $value =~ /^\d+(?:\.\d+)?\%?$/ ) {
+	    do_warn("Illegal value \"$value\" for $item$prop\n");
+	    return 1;
+	}
+    }
+    if ( $prop eq "color" ) {
+	my $v;
+	unless ( $v = get_color($value) ) {
+	    do_warn("Illegal value \"$value\" for $item$prop\n");
+	    return 1;
+	}
+	$value = $v;
+    }
+    $value = $prop eq "font" ? $value : lc($value);
+    $self->add( type  => "control",
+		name  => $name,
+		value => $value );
+    push( @{ $propstack{$name} }, $value );
+
+    # A trailing number after a font directive is an implicit size
+    # directive.
+    if ( $prop eq 'font' && $value =~ /\s(\d+(?:\.\d+)?)$/ ) {
+	$self->add( type  => "control",
+		    name  => "$item-size",
+		    value => $1 );
+	push( @{ $propstack{"$item-size"} }, $1 );
+    }
 }
 
 sub add_chord {
