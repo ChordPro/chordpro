@@ -1635,6 +1635,7 @@ sub directive {
 	# Derived props.
 	$self->propset( "chorus", $prop, $arg ) if $item eq "text";
 
+	#::dump( { %propstack, line => $diag->{line} } );
 	return 1;
     }
 
@@ -1664,14 +1665,21 @@ sub propset {
     if ( $value eq "" ) {
 	# Pop current value from stack.
 	if ( @{ $propstack{$name} } ) {
-	    pop( @{ $propstack{$name} } );
+	    my $old = pop( @{ $propstack{$name} } );
+	    # A trailing number after a font directive means there
+	    # was also a size saved. Pop it.
+	    if ( $prop eq "font" && $old =~ /\s(\d+(?:\.\d+)?)$/ ) {
+		pop( @{ $propstack{"$item-size"} } );
+	    }
+	}
+	else {
+	    do_warn("No saved value for property $item$prop\n" )
 	}
 	# Use new current value, if any.
 	if ( @{ $propstack{$name} } ) {
 	    $value = $propstack{$name}->[-1]
 	}
 	else {
-	    # do_warn("No saved value for property $item$prop\n" );
 	    $value = undef;
 	}
 	$self->add( type  => "control",

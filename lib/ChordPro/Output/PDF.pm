@@ -371,7 +371,7 @@ sub generate_song {
 #    warn("X1: ", $ps->{fonts}->{$_}->{size}, "\n") for "text";
     $pr->init_fonts();
     my $fonts = $ps->{fonts};
-    $pr->{_df}->{$_} = { %{$fonts->{$_}} } for qw( text chord grid toc tab );
+    $pr->{_df}->{$_} = { %{$fonts->{$_}} } for qw( text chorus chord grid toc tab );
 #    warn("X2: ", $pr->{_df}->{$_}->{size}, "\n") for "text";
 
     $structured = ( $options->{'backend-option'}->{structure} // '' ) eq 'structured';
@@ -1339,6 +1339,8 @@ sub generate_song {
 		    # Restore default.
 		    $ps->{fonts}->{$1}->{size} =
 		      $pr->{_df}->{$1}->{size};
+		    warn("No size to restore for font $1\n")
+		      unless $ps->{fonts}->{$1}->{size};
 		}
 	    }
 	    elsif ( $elt->{name} =~ /^(text|chord|chorus|grid|toc|tab)-font$/ ) {
@@ -2558,6 +2560,7 @@ sub _vsp {
     # Calculate the vertical span of this element.
 
     my $font = $ps->{fonts}->{$eltype};
+    confess("Font $eltype has no size!") unless $font->{size};
     $font->{size} * $ps->{spacing}->{$sptype};
 }
 
