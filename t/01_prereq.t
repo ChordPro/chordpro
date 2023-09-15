@@ -18,7 +18,9 @@ for ( qw( PDF::Builder@3.023 PDF::API2@2.036 ) ) {
 
 my $test;
 ++$test; ok( $] >= 5.026000,
-	     "Perl version $] is newer than 5.010.001" );
+	     "Perl version $] is 5.026 or newer" );
+
+++$test; use_ok( "ChordPro::Testing", 6.000 );
 
 if ( $pdfapi =~ /^pdf/i ) {
     ++$test; use_ok( "IO::String", 1.08  ); # for Font::TTF
@@ -32,7 +34,6 @@ else {
     diag("Using $pdfapi $pdfapiv for PDF generation");
 }
 ++$test; use_ok( "Text::Layout",   0.031 );
-#diag("Using Text::Layout $Text::Layout::VERSION");
 eval {
     require HarfBuzz::Shaper;
     HarfBuzz::Shaper->VERSION(0.026);
@@ -44,6 +45,7 @@ eval {
 ++$test; use_ok( "String::Interpolate::Named", 1.030 );
 ++$test; use_ok( "File::HomeDir", 1.004 );
 ++$test; use_ok( "File::LoadLines", 1.021 );
+++$test; use_ok( "SVGPDF", 0.070 );
 ++$test; use_ok( "Image::Info", 1.41 );
 ++$test; use_ok( "List::Util", 1.33 );
 ++$test; use_ok( "Storable", 3.08 );

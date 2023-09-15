@@ -372,4 +372,27 @@ t/ref/84_pages.csv
 t/ref/85_pages.csv
 t/ref/86_pages.csv
 t/ref/87_pages.csv
+lib/ChordPro/lib/SVGPDF.pm
+lib/ChordPro/lib/SVGPDF/CSS.pm
+lib/ChordPro/lib/SVGPDF/Circle.pm
+lib/ChordPro/lib/SVGPDF/Contrib/Bogen.pm
+lib/ChordPro/lib/SVGPDF/Contrib/PathExtract.pm
+lib/ChordPro/lib/SVGPDF/Defs.pm
+lib/ChordPro/lib/SVGPDF/Element.pm
+lib/ChordPro/lib/SVGPDF/Ellipse.pm
+lib/ChordPro/lib/SVGPDF/FontManager.pm
+lib/ChordPro/lib/SVGPDF/G.pm
+lib/ChordPro/lib/SVGPDF/Image.pm
+lib/ChordPro/lib/SVGPDF/Line.pm
+lib/ChordPro/lib/SVGPDF/PAST.pm
+lib/ChordPro/lib/SVGPDF/Parser.pm
+lib/ChordPro/lib/SVGPDF/Path.pm
+lib/ChordPro/lib/SVGPDF/Polygon.pm
+lib/ChordPro/lib/SVGPDF/Polyline.pm
+lib/ChordPro/lib/SVGPDF/Rect.pm
+lib/ChordPro/lib/SVGPDF/Style.pm
+lib/ChordPro/lib/SVGPDF/Svg.pm
+lib/ChordPro/lib/SVGPDF/Text.pm
+lib/ChordPro/lib/SVGPDF/Tspan.pm
+lib/ChordPro/lib/SVGPDF/Use.pm
 

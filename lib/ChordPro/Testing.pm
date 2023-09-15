@@ -5,10 +5,16 @@ use warnings;
 use utf8;
 use Carp;
 
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+use lib "$FindBin::Bin/../lib/ChordPro/lib";
+
 binmode STDOUT => ':utf8';
 binmode STDERR => ':utf8';
 
 package ChordPro::Testing;
+
+our $VERSION = "6.000";
 
 use base 'Exporter';
 our @EXPORT = qw( $config );

@@ -102,6 +102,7 @@ WriteMakefile
 	    "lib/ChordPro/Delegate",
 	    "lib/ChordPro/Output",
 	    "lib/ChordPro/Wx",
+	    "lib/ChordPro/lib",
 	    "lib/ChordPro/res",
 	    "pp",
 	 ],
