@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
 # Last Modified By: 
-# Last Modified On: Thu Jun 29 09:19:42 2023
-# Update Count    : 269
+# Last Modified On: Fri Sep 15 09:39:40 2023
+# Update Count    : 271
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -35,8 +35,8 @@ use strict;
 use warnings;
 
 use FindBin;
-use lib "$FindBin::Bin/../CPAN";
 use lib "$FindBin::Bin/../lib";
+use lib "$FindBin::Bin/../lib/ChordPro/lib";
 use App::Packager qw( :name ChordPro );
 use ChordPro;
 use ChordPro::Utils qw(is_msw);
