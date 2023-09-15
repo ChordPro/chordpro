@@ -798,7 +798,7 @@ sub app_setup {
 
           ### Standard Chordii Options ###
 
-          "about|A" => \$about,         # About...
+          "about|A+" => \$about,        # About...
           "chord-font|C=s",             # Sets chord font
           "chord-grid-size|s=f",        # Sets chord diagram size [30]
           "chord-grids-sorted|S!",      # Prints chord diagrams ordered
@@ -914,7 +914,7 @@ sub app_setup {
         $pod2usage->(VERBOSE => 2) if $manual;
     }
     app_ident(\*STDOUT, 0) if $version;
-    app_about(\*STDOUT, 0) if $about;
+    app_about(\*STDOUT, $about, 0) if $about;
 
     # If the user specified a config, it must exist.
     # Otherwise, set to a default.
@@ -1027,8 +1027,8 @@ sub app_ident {
 }
 
 sub app_about {
-    my ($fh, $exit) = @_;
-    print ${fh} <<EndOfAbout;
+    my ($fh, $level, $exit) = @_;
+    print ${fh} <<EndOfAbout,
 
 ChordPro: A lyrics and chords formatting program.
 
@@ -1043,19 +1043,20 @@ To learn more about ChordPro, look for the man page or do
 For more information, see https://www.chordpro.org .
 
 Run-time information:
-@{[::runtimeinfo()]}
 EndOfAbout
+      ::runtimeinfo( $level > 1 ? "extensive" : "normal" );
+
     exit $exit if defined $exit;
 }
 
 use Cwd qw(realpath);
 
 sub ::runtimeinfo {
-    my $short = shift;
+    my $level = shift // "normal";
 
-    my $fmt   = "  %-22.22s %s\n";
-    my $fmtv  = defined($Wx::VERSION) ? "  %s version %s\n" : $fmt;
-    my $fmtvv = defined($Wx::VERSION) ? "  %s %s\n" : $fmt;
+    my $fmt   = "  %-22.22s %-10s\n";
+    my $fmtv  = defined($Wx::VERSION) ? "  %s version %-10s\n" : $fmt;
+    my $fmtvv = defined($Wx::VERSION) ? "  %s %-10s\n" : $fmt;
 
     # Sometimes version numbers are localized...
     my $dd = sub { my $v = $_[0]; $v =~ s/,/./g; $v };
@@ -1066,7 +1067,7 @@ sub ::runtimeinfo {
 	$msg =~ s/\n$/ (Unsupported development snapshot)\n/;
     }
 
-    if ( $short ) {
+    if ( $level eq "short" ) {
 	$msg =~ s/^\s+//;
 	$msg =~ s/\s+/ /g;
 	$msg =~ s/\s*\n//;
@@ -1094,6 +1095,25 @@ sub ::runtimeinfo {
 	$tag = "";
     }
 
+    my $vv = sub {
+	my ( $mod ) = @_;
+	no strict 'refs';
+	$msg .= sprintf( $fmtv, $mod, $dd->(${${"${mod}::"}{VERSION}}) );
+	return unless $level eq "extensive";
+	chomp($msg);
+	my $pm = $mod =~ s;::;/;gr . ".pm";
+	my $loc = $INC{$pm};
+	if ( 0 ) {
+	    $msg .= "(site)" if $loc =~ /site_perl/;
+	    $msg .= "(vendor)" if $loc =~ /vendor_perl/;
+	    $msg .= "(ChordPro)" if $loc =~ /ChordPro\/lib/;
+	    $msg .= "(private)" if $loc =~ /$ENV{HOME}\/lib\/perl5/;
+	}
+	else {
+	    $msg .= "($1)" if $loc =~ /^(.*)\/\Q$pm\E$/;
+	}
+	$msg .= "\n";
+    };
     $msg .= "\nModules and libraries:\n";
     if ( defined $Wx::VERSION ) {
 	no strict 'subs';
@@ -1103,34 +1123,27 @@ sub ::runtimeinfo {
 
     local $SIG{__WARN__} = sub {};
     local $SIG{__DIE__} = sub {};
-    $msg .= sprintf( $fmtv, "Storable", $dd->($Storable::VERSION) );
-    $msg .= sprintf( $fmtv, "Object::Pad", $dd->($Object::Pad::VERSION) );
+    $vv->("Storable");
+    $vv->("Object::Pad");
     eval { require Text::Layout;
-	$msg .= sprintf( $fmtv, "Text::Layout", $dd->($Text::Layout::VERSION) );
+	$vv->("Text::Layout");
     };
     eval { require HarfBuzz::Shaper;
-	$msg .= sprintf( $fmtv, "HarfBuzz::Shaper", $dd->($HarfBuzz::Shaper::VERSION) );
+	$vv->("HarfBuzz::Shaper");
 	$msg .= sprintf( $fmtv, "HarfBuzz library", $dd->(HarfBuzz::Shaper::hb_version_string()) );
     };
-    $msg .= sprintf( $fmtv, "File::LoadLines", $dd->($File::LoadLines::VERSION) );
+    $vv->("File::LoadLines");
     eval { require PDF::Builder;
-	$msg .= sprintf( $fmtv, "PDF::Builder", $dd->($PDF::Builder::VERSION) );
-    }
-    or
+	$vv->("PDF::Builder");
+    };
     eval { require PDF::API2;
-	$msg .= sprintf( $fmtv, "PDF::API2", $dd->($PDF::API2::VERSION) );
+	$vv->("PDF::API2");
     };
     eval { require SVGPDF;
-	$msg .= sprintf( $fmtv, "SVGPDF", $dd->($SVGPDF::VERSION) );
+	$vv->("SVGPDF");
     };
     eval { require Font::TTF;
-	$msg .= sprintf( $fmtv, "Font::TTF", $dd->($Font::TTF::VERSION) );
-    };
-    eval { require Image::Magick;
-	$msg .= sprintf( $fmtv, "Image::Magick",
-			 $dd->( $Image::Magick::VERSION ||
-				$Image::Magick::Q16::VERSION ||
-				$Image::Magick::Q8::VERSION || "6.x?" ) );
+	$vv->("Font::TTF");
     };
     return $msg;
 }
