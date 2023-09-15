@@ -132,3 +132,10 @@ abckit ::
 
 TAGS:
 	etags.emacs `grep '\.p[lm]' MANIFEST`
+
+.PHONY: svg
+
+svg :
+	cp -p ${HOME}/src/SVGPDF/lib/SVGPDF.pm lib/ChordPro/lib
+	cp -p ${HOME}/src/SVGPDF/lib/SVGPDF/*.pm lib/ChordPro/lib/SVGPDF/
+	cp -p ${HOME}/src/SVGPDF/lib/SVGPDF/Contrib/*.pm lib/ChordPro/lib/SVGPDF/Contrib/
