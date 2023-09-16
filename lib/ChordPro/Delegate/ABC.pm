@@ -25,6 +25,7 @@ sub DEBUG() { $config->{debug}->{abc} }
 # ABC processing using abc2svg and custom SVG processor.
 
 my $abc2svg;
+my $embedded;
 
 sub abc2svg_qjs {
     my ( $s, $pw, $elt ) = @_;
@@ -42,8 +43,8 @@ sub abc2svg_qjs {
     if ( $x ) {
 	$abc2svg = [ $x, "--std", "$dir/chordproabc.js", "$dir/abc2svg/" ];
     }
-
-    return _abc2svg( $abc2svg, 1, $s, $pw, $elt );
+    $embedded = 1;
+    return _abc2svg( $abc2svg, $s, $pw, $elt );
 }
 
 sub abc2svg {
@@ -51,6 +52,7 @@ sub abc2svg {
 
     # Native.
     unless ( $abc2svg ) {
+	$embedded = 0;
 	$abc2svg = findexe( "abc2svg", "silent" );
     }
 
@@ -65,7 +67,7 @@ sub abc2svg {
     }
 
     if ( $abc2svg ) {
-	return _abc2svg( $abc2svg, 0, $s, $pw, $elt );
+	return _abc2svg( $abc2svg, $s, $pw, $elt );
     }
 
     # Try (embedded) QuickJS.
@@ -73,7 +75,7 @@ sub abc2svg {
 }
 
 sub _abc2svg {
-    my ( $abc2svg, $embedded, $s, $pw, $elt ) = @_;
+    my ( $abc2svg, $s, $pw, $elt ) = @_;
 
     state $imgcnt = 0;
     state $td = File::Temp::tempdir( CLEANUP => !$config->{debug}->{abc} );
