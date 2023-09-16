@@ -2,6 +2,7 @@
 
 --lib=../../CPAN
 --lib=../../lib
+--lib=../../lib/ChordPro/lib
 --lib=../common
 
 --cachedeps=chordpro.pp.deps
@@ -16,6 +17,7 @@
 --module=PDF::API2
 --module=Font::TTF
 --module=PDF_API2_Bundle
+--module=SVGPDF
 
 # Same for Text::Layout
 --module=Text::Layout
