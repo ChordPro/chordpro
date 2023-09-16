@@ -100,7 +100,11 @@ In other words,
 
     anchor="paper" x="0" y="0"
 
-will place the image in the top left corner of the paper.
+will place the image in the top left corner of the paper, while
+
+    anchor="paper" x="-0" y="-0"
+
+will place the image in the bottom right corner of the paper.
 
 When the offset is a percentage, it is adjusted for the image size.
 For example, with `x="0%"` the left side of the image is at the left
@@ -108,7 +112,7 @@ edge of the paper. With `x="100%"` the right side of the image is at
 the right edge of the paper. With `x="50%"` the center of the image is
 at the center of the paper.
 
-So this is the way to get an image in the bottom right corner of
+So this is another way to get an image in the bottom right corner of
 the paper: 
 
     anchor="paper" x="100%" y="100%"
@@ -116,6 +120,15 @@ the paper:
 `page`
 : Placement is relative to the page boundaries, i.e. the paper
 boundaries minus top, bottom, left and right margins.
+
+Negative values will move beyond the left and top margins.
+
+When the offset is a percentage, it is adjusted for the image size.
+
+This is the way to get an image in the bottom right corner of
+the page: 
+
+    anchor="page" x="100%" y="100%"
 
 `column`
 : Same as page boundaries, but taking column layout into account.
@@ -148,22 +161,3 @@ This loads the image an assigns it asset id `im01`.
 The second occurrence places an image but instead of specifying the
 source of the image, it uses the asset with the given id.
 
-### Annotation with assets
-
-**TDB**
-
-````
-[A]Swing low, Sweet <img id="im01" scale="10%">Chariot.
-````
-
-Asset with the given id is placed in the line, top aligned. "Chariot"
-is shifted to the right.
-
-````
-[A]Swing low, Sweet <img id="im01" y=12 scale="10%">Chariot.
-````
-
-Asset with the given id is placed in the line, shifted 12pt up from
-top aligned. "Chariot" is **not** shifted to the right.
-
-**TBD** Align bottom of image with the baseline instead?

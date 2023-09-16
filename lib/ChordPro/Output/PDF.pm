@@ -92,6 +92,14 @@ sub generate_songbook {
 	$song->{meta}->{tocpage} = $page;
 	push( @book, [ $song->{meta}->{title}->[0], $song ] );
 
+	# Copy persistent assets into each of the songs.
+	if ( $sb->{assets} ) {
+	    $song->{assets} //= {};
+	    while ( my ($k,$v) = each %{$sb->{assets}} ) {
+		$song->{assets}->{$k} = $v;
+	    }
+	}
+
 	$page += $song->{meta}->{pages} =
 	  generate_song( $song, { pr        => $pr,
 				  startpage => $page,
@@ -2297,7 +2305,7 @@ sub imageline {
     my ( $w, $h ) = ( $opts->{width}  || $img->width,
 		      $opts->{height} || $img->height );
 
-  if ( 1 ) {
+  if ( $config->{debug}->{x1} ) {
 
     # Current approach: user scale overrides.
     if ( defined $opts->{scale} ) {
@@ -2325,7 +2333,6 @@ sub imageline {
 	$scale *= $opts->{scale};
     }
 
-
   }
 
     warn("Image scale: $scale\n") if $config->{debug}->{images};
@@ -2349,9 +2356,11 @@ sub imageline {
     my $oy = $opts->{y};
 
     my $calc = sub {
-	my ( $l, $r, $t, $b ) = @_;
+	my ( $l, $r, $t, $b, $mirror ) = @_;
 	my $_ox = $ox // 0;
 	my $_oy = $oy // 0;
+	$x = $l;
+	$y = $t;
 
 	if ( $_ox =~ /^([-+]?[\d.]+)\%$/ ) {
 	    $ox = $_ox = $1/100 * ($r - $l) - ( $1/100 ) * $w;
@@ -2359,28 +2368,29 @@ sub imageline {
 	if ( $_oy =~ /^([-+]?[\d.]+)\%$/ ) {
 	    $oy = $_oy = $1/100 * ($t - $b) - ( $1/100 ) * $h;
 	}
-	$x = $l;
-	$y = $t;
+	if ( $mirror ) {
+	    $x = $r - $w if $_ox =~ /^-/;
+	    $y = $b + $h if $_oy =~ /^-/;
+	}
     };
 
     if ( $anchor eq "column" ) {
 	# Relative to the column.
 	$calc->( @{$ps}{qw( __leftmargin __rightmargin
-			    __topmargin __bottommargin )} );
+			    __topmargin __bottommargin )}, 0 );
     }
     elsif ( $anchor eq "page" ) {
 	# Relative to the page.
 	$calc->( @{$ps}{qw( _marginleft _marginright
-			    __topmargin __bottommargin )} );
+			    __topmargin __bottommargin )}, 0 );
     }
     elsif ( $anchor eq "paper" ) {
 	# Relative to the paper.
-	$calc->( 0, $ps->{papersize}->[0], $ps->{papersize}->[1], 0 );
+	$calc->( 0, $ps->{papersize}->[0], $ps->{papersize}->[1], 0, 1 );
     }
     else {
 	# image is line oriented.
-	$calc->( $x, $ps->{__rightmargin},
-		 $y, $ps->{__bottommargin} );
+	$calc->( $x, $ps->{__rightmargin}, $y, $ps->{__bottommargin}, 0 );
     }
 
     $x += $ox if defined $ox;

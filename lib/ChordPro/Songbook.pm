@@ -69,6 +69,16 @@ sub parse_file {
 	  ->parse_song( $lines, \$linecnt, {%$meta}, {%$defs} );
 	$song->{meta}->{songindex} = 1 + @{ $self->{songs} };
 	push( @{ $self->{songs} }, $song );
+
+	# Copy persistent assets to the songbook.
+	if ( $song->{assets} ) {
+	    $self->{assets} //= {};
+	    while ( my ($k,$v) = each %{$song->{assets}} ) {
+		next unless $v->{persist};
+		$self->{assets}->{$k} = $v;
+	    }
+	}
+
 	$songs++ if $song->{body};
     }
 

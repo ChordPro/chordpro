@@ -14,6 +14,7 @@
     - Add 'staffsep' option for ABC embedding.
     - Use SVGPDF text callback to substitute missing flat/sharp glyphs.
     - Trap missing font sizes (should not happen).
+    - Breaking: Change image scale strategy.
     - !BugFixes
     - Fix issue #297.
     - Fix issue #298.

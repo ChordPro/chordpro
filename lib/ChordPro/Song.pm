@@ -396,11 +396,13 @@ sub parse_song {
 		$self->{assets}->{$id} =
 		  { data => $data, type => $info->{file_ext},
 		    width => $info->{width}, height => $info->{height},
+		    $kv->{persist} ? ( persist => 1 ) : (),
 		  };
 
 		if ( $config->{debug}->{images} ) {
 		    warn("asset[$id] ", length($data), " bytes, ",
 			 "width=$info->{width}, height=$info->{height}",
+			 $kv->{persist} ? ", persist" : "",
 			 "\n");
 		}
 		next;
@@ -1276,7 +1278,7 @@ sub directive {
 		$id = $v;
 	    }
 	    elsif ( $k =~ /^(anchor)$/i
-		    && $v =~ /^(paper|page|column|line)$/ ) {
+		    && $v =~ /^(paper|page|column|float|line)$/ ) {
 		$opts{lc($k)} = lc($v);
 	    }
 	    elsif ( $uri ) {
