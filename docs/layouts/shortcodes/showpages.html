@@ -1,0 +1,12 @@
+{{- $tag := .Get 0 -}}
+{{/* - $img := resources.Get (printf "images/%s.png" $tag) - */}}
+{{/* - $large := $img.Resize "1200x1698 jpg #ffffff" - */}}
+{{/* - $small := $img.Resize "240x340 jpg #f4f4f4" - */}}
+<div style="margin-bottom:15px">
+{{ range .Params }}
+{{- $large := resources.Get (printf "images/%s.png" .) -}}
+{{- $small := resources.Get (printf "images/%s-small.png" .) -}}
+  <a data-fancybox="gallery" href="{{ $large.RelPermalink }}">
+  <img src="{{ $small.RelPermalink }}"></a>
+{{ end }}
+</div>
