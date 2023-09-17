@@ -139,6 +139,11 @@ push( @EXPORT, 'make_preprocessor' );
 
 sub parse_kv ( @lines ) {
 
+    if ( is_macos() ) {
+	# MacOS has the nasty habit to smartify quotes.
+	@lines = map { s/“/"/g; s/”/"/g; s/‘/'/g; s/’/'/gr;} @lines;
+    }
+
     use Text::ParseWords qw(shellwords);
     my @words = shellwords(@lines);
 

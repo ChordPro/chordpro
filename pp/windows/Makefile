@@ -60,7 +60,7 @@ unpack :
 	copy "${DEST}\res\icons\chordpro.ico" "${DEST}"
 	copy "${DEST}\res\icons\chordpro-doc.ico" "${DEST}"
 	move "${DEST}\res" "${DEST}\lib\ChordPro"
-	tar xf abc2svg_qjs.tar.gz -C "${DEST}\lib\ChordPro\res\abc"
+	tar xf ..\common\abc2svg_qjs.tar.gz -C "${DEST}\lib\ChordPro\res\abc"
 	copy qjs.exe "${DEST}\lib\ChordPro\res\abc"
 
 # The core DLLs needed for Strawberry perl. The Wx libs have been unpacked already.

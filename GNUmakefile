@@ -49,11 +49,14 @@ to_tmp_cpan :
 to_c :
 	${MAKE} to_tmp to_tmp_cpan TMP_DST=/mnt/c${W10DIR}
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.ABC  ./ /mnt/c${W10DIR}/
+	rm -fr /mnt/c${W10DIR}/pp/macos
 
 to_mac : resources
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST      ./ ${MACDST}/
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.WX   ./ ${MACDST}/
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.CPAN ./ ${MACDST}/
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST.ABC  ./ ${MACDST}/
+	ssh macky rm -fr ${MACDST}/pp/windows
 
 release :
 	${PERL} Makefile.PL
