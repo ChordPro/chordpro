@@ -1,5 +1,49 @@
 # Release info
 
+## 6.030
+
+Released: 2023-09-18
+
+
+### Highlights
+
+* [ABC](https://www.chordpro.org/chordpro/directives-env_abc/) and [Lilypond](https://www.chordpro.org/chordpro/directives-env_ly/) embedding now use SVG (vector graphics) instead of pixmap images. This is very crisp at all sizes, and greatly reduces the size of the resultant PDF document.  
+  No additional tools are required for embedding, except the `abc2svg` and `lilypond` tools. The installer kits for MS Windows and MacOS already include the `abc2svg` tool.
+* The ChordPro GUI (`wxchordpro`) has been extended with a Tasks menu that can be used to quickly select presets for a specific task. For example, to produce a PDF with only lyrics, or with keyboard diagrams instead of string diagrams. User presets can be added by placing small config files in a `tasks` folder under the `CHORDPRO_LIB`.
+
+### ChordPro functionality
+
+* Directives and config to change the [chorus appearance](https://www.chordpro.org/chordpro/directives-props_chorus_legacy/).
+* Add support for SVG images. Allow `pdf.fonts.XXX` as fonts in SVG.
+* Handle ABC and Lilypond embedding via SVG images. No more need for ImageMagick. Add 'staffsep' option for ABC embedding.
+* Add 'omit' to delegates config.
+* Infer chord inversions for keyboard.
+* Use SVGPDF text callback to substitute missing flat/sharp glyphs.
+* Trap missing font sizes (should not happen).
+
+### Breaking changes
+
+* The image scale strategy was changed to be more intuitive. See [this forum message](https://groups.io/g/ChordPro/message/1846) for details.
+
+### Experimental
+
+* A primitive but effective docker based web app.
+
+### BugFixes
+
+* Fix issue #297.
+* Fix issue #298.
+* Fix issue message/1780.
+* Fix issue #300.
+* Fix issue #301.
+* Fix issue #309.
+* Fix issue #311.
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.  
+Please use the [issue tracker](https://github.com/ChordPro/chordpro/issues) for bugs reports.
+
 ## 6.020
 
 Released: 2023-07-21
@@ -18,7 +62,7 @@ Released: 2023-07-21
 
 ### Internal
 
-* Bump minimal perl version to 5.26 and added Object::Pad to dependencies.
+* Bump minimal perl version to 5.26 and add Object::Pad to dependencies.
 * Change namespace App::Music::ChordPro to ChordPro.
 * Put VERSION on single line for stupid tools.
 * Upgrade ChordPro::Chords::Appearance to class.
@@ -26,10 +70,6 @@ Released: 2023-07-21
 * Enhance Config to use signatures to catch call errors.
 * Enhance Chords to use signatures to catch call errors.
 * Enhance Utils to use signatures to catch call errors.
-
-### Social and support
-
-[User community](https://groups.io/g/ChordPro) for feedback and help.
 
 ## 6.010
 
@@ -441,7 +481,8 @@ Released: 2020-08-13
 * Revamp table of contens (finally).
 * Remove section handling (we now have labels).
 * Allow ~ expansion in file names.
-* Allow relaxed parsing of chords (root name + arbitrary).
+* Allow relaxed parsing of chords (root name  
+  arbitrary).
 * Allow parsing of notes (chords with only a lc root name).
 * (Wx) Show filename in window title.
 * (Wx) Show asterisk if file is modified.

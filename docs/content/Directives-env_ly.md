@@ -20,10 +20,10 @@ The result could look like:
 
 ![]({{< asset "images/ex_ly1.png" >}})
 
-**Important** To render Lilypond, ChordPro makes use of external tools to
-convert the Lilypond source to an image, and then embeds the image (see
-[image directive]({{< relref "directives-image" >}})). Depending on
-the external tools support for embedded Lilypond may be limited, or absent.
+**Important** To render Lilypond, ChordPro makes use of external tools
+to convert the Lilypond source to an SVG image, and then embeds the
+image. Depending on the external tools support for embedded Lilypond
+may be limited, or absent.
 
 This directive may include an optional label, to be printed in the
 left margin. For example:,
@@ -44,13 +44,13 @@ margin, see [labels]({{< relref "ChordPro-Configuration-PDF#labels" >}}).
 
       \header { tagline = ##f }
 
-* ChordPro transposition using `{transpose}` and/or `--transpose` will
+* ChordPro transposition using `{transpose}` or `--transpose` will
   **not transpose** the embedded Lilypond. This is hopefully a
   temporary restriction. Adding `\transpose` to the Lilypond
   source will work as usual, affecting the Lilypond notes only.
 
 * The Lilypond data is converted and included as a single image.
-  No vertical splitting between staves.
+  No vertical splitting between systems.
 
 * The LilyPond data must start with a line that
   starts with a percent `%` sign or backslash `\`. Anything before this
