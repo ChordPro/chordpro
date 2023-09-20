@@ -41,7 +41,8 @@ sub relocate {
 	    system("install_name_tool", "-id", "$dst/$name", $lib);
 	}
 	else {
-	    $name =~ s/-[.0-9_]+\.dylib/-$lv.dylib/;
+	    $name =~ s/-[.0-9_]+\.dylib/-$lv.dylib/
+	      unless $name =~ m;libpcre2;;
 	    warn("+ install_name_tool -change \"$orig/$oname\" \"$dst/$name\" \"$lib\"\n")
 	      if $verbose;
 	    system("install_name_tool", "-change", "$orig/$oname", "$dst/$name", $lib);

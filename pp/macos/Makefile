@@ -57,7 +57,7 @@ PREFIX := '"script/"'
 CCOPTS := $(shell perl -MExtUtils::Embed -e ccopts) -DSCRIPTPREFIX=${PREFIX}
 LDOPTS := ${DEST}/${PERLSO} -lpthread
 WXCLIB := $(shell perl -MAlien::wxWidgets -E 'say Alien::wxWidgets->prefix')
-WXCNFG := $(shell test -s ${WXCLIB}/bin/wx-config-3.0 && echo ${WXCLIB}/bin/wx-config-3.0 || echo ${WXCLIB}/bin/wx-config)
+WXCNFG := ${WXCLIB}/bin/wx-config
 
 .PHONY :: loaders
 loaders : "${DEST}/wxchordpro" "${DEST}/chordpro"
@@ -104,6 +104,7 @@ app1 :
 	cd "${APPDIR}"; rm -f MANIFEST META.yml
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libjpeg.*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libtiff.*.dylib
+	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libpcre2-32.*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libwx*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*.bundle
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*/*.bundle
