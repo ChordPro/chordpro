@@ -30,6 +30,11 @@ sub new {
     Wx::Event::EVT_IDLE($self, $self->can('OnIdle'));
     Wx::Event::EVT_CLOSE($self, $self->can('OnClose'));
 
+    # By default the TextCtrl on MacOS substitutes smart quotes and dashes.
+    # Note that OSXDisableAllSmartSubstitutions requires an augmented
+    # version of wxPerl.
+    $self->{t_source}->OSXDisableAllSmartSubstitutions
+      if $self->{t_source}->can("OSXDisableAllSmartSubstitutions");
     $self;
 }
 
