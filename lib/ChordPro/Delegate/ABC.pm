@@ -2,8 +2,6 @@
 
 use v5.26;
 use utf8;
-use feature qw( signatures );
-no warnings "experimental::signatures";
 
 package main;
 
@@ -14,6 +12,8 @@ package ChordPro::Delegate::ABC;
 
 use strict;
 use warnings;
+use feature qw( signatures );
+no warnings "experimental::signatures";
 use utf8;
 use Carp;
 use File::Spec;
