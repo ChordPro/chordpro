@@ -1,3 +1,8 @@
+0.000
+
+    - !ChordPro functionality
+    - ABC embedding no longer uses nodeJS.
+
 6.030 2023-09-18
 
     - !Highlights
