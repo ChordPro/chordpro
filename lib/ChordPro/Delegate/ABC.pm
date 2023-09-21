@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use v5.36;
+use v5.26;
 use utf8;
 use feature qw( signatures );
 no warnings "experimental::signatures";
