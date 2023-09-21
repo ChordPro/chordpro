@@ -75,6 +75,15 @@ our $config;
 
 package ChordPro;
 
+sub import {
+    # Add private library.
+    my $lib = substr( $INC{"ChordPro.pm"}, 0, -3 ) . "/lib";
+    for ( @INC ) {
+	return if $_ eq $lib;
+    }
+    unshift( @INC, $lib );
+}
+
 sub ::run {
     binmode(STDERR, ':utf8');
     binmode(STDOUT, ':utf8');

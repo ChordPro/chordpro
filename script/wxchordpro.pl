@@ -13,7 +13,6 @@ binmode(STDOUT, ':utf8');
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";
-use lib "$FindBin::Bin/../lib/ChordPro/lib";
 use App::Packager qw( :name ChordPro );
 use ChordPro;
 
