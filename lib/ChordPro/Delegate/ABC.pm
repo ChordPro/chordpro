@@ -90,7 +90,7 @@ sub packaged_qjs() {
     # If so, check for packaged abc files.
     if ( $qjs
 	 && -s "${dir}chordproabc.js"
-	 && -s "${dir}abc2svg/toxhtml.js" ) {
+	 && -s "${dir}abc2svg/tohtml.js" ) {
 	return [ $qjs, "--std", "${dir}chordproabc.js", "${dir}abc2svg" ];
     }
     return 0;

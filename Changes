@@ -2,6 +2,7 @@
 
     - !ChordPro functionality
     - (ABC) ABC embedding no longer uses nodeJS.
+    - (ABC) ABC embedding use tohtml instead of toxhtml.
     - Improve runtime info.
     - (PDF) Image scale strategy change for spread images.
     - (PDF/Writer) Add generalized add_object for objects and images.
