@@ -2450,6 +2450,10 @@ sub imagespread {
     my $scale = 1;
     my ( $w, $h ) = ( $opts->{width}  || $img->width,
 		      $opts->{height} || $img->height );
+
+  if ( $config->{debug}->{x1} ) {
+
+    # Current approach: user scale overrides.
     if ( defined $opts->{scale} ) {
 	$scale = $opts->{scale} || 1;
     }
@@ -2461,6 +2465,22 @@ sub imagespread {
 	    $scale = $ph / $h;
 	}
     }
+  }
+  else {
+
+    # Better, but may break things.
+    if ( $w > $pw ) {
+	$scale = $pw / $w;
+    }
+    if ( $h*$scale > $ph ) {
+	$scale = $ph / $h;
+    }
+    if ( $opts->{scale} ) {
+	$scale *= $opts->{scale};
+    }
+
+  }
+
     warn("Image scale: $scale\n") if $config->{debug}->{images};
     $h *= $scale;
     $w *= $scale;

@@ -1,8 +1,9 @@
 0.000
 
     - !ChordPro functionality
-    - ABC embedding no longer uses nodeJS.
+    - (ABC) ABC embedding no longer uses nodeJS.
     - Improve runtime info.
+    - (PDF) Image scale strategy change for spread images.
 
 6.030 2023-09-18
 
