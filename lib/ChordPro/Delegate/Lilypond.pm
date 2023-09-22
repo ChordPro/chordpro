@@ -116,7 +116,7 @@ sub ly2svg {
 	return;
     }
 
-    warn("SVG: ", -s $svg, " bytes\n");
+    warn("SVG: ", -s $svg, " bytes\n") if $config->{debug}->{ly};
     my @res;
     push( @res,
 	  { type => "svg",
