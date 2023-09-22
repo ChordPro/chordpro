@@ -5,6 +5,7 @@
     - Improve runtime info.
     - (PDF) Image scale strategy change for spread images.
     - (PDF/Writer) Add generalized add_object for objects and images.
+    - (PDF) Prevent case problems when looking up fonts for SVG.
 
 6.030 2023-09-18
 
