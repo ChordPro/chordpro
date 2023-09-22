@@ -207,6 +207,7 @@ sub _abc2svg( $s, $pw, $elt ) {
     # Not packaged. Check for Wx on Windows since we cannot redirect STD***.
     elsif ( !is_wx() && !is_msw() ) {
 
+	push( @cmd, $src );
 	warn( "+ @cmd\n" ) if DEBUG;
 
 	# Setup redirection for STDOUT/ERR.
