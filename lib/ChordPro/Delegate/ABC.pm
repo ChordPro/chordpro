@@ -42,6 +42,15 @@ sub abc2svg( $s, $pw, $elt ) {
 		       : ( $abc2svg) // "<undef>" ) );
     }
 
+    state $cfg_checked;
+    unless ( $cfg_checked++ ) {
+	if ( ($config->{delegates}{abc}{config} // "default") ne "default" ) {
+	    warn("ABC: delegates.abc.config is no longer used.\n");
+	    warn("ABC: Config \"default.abc\" will be loaded instead.\n")
+	      if -s "default.abc";
+	}
+    }
+
     # Try to find a way to run the abv2svg javascript code.
     # We support two strategies, in order:
     # 1. A program 'abc2svg' in PATH, that writes the SVG to standard out
@@ -117,6 +126,7 @@ sub _abc2svg( $s, $pw, $elt ) {
     state $td = File::Temp::tempdir( CLEANUP => !$config->{debug}->{abc} );
     my $cfg = $config->{delegates}->{abc};
 
+    warn("ABC: Using config \"default.abc\".\n") if -s "default.abc";
     my $prep = make_preprocessor( $cfg->{preprocess} );
 
     # Prepare names for temporary files.

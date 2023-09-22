@@ -1087,6 +1087,7 @@ sub default_config () {
             "type"     : "image",
             "module"   : "ABC",
             "handler"  : "abc2svg",
+            // No longer used -- ./default.abc will always be used if present
             "config"   : "default", // or "none", or "myformat.fmt"
             // The preamble is a list of lines inserted before the ABC data.
             // DO NOT MODIFY unless you know what you are doing!
@@ -1105,7 +1106,7 @@ sub default_config () {
                "%%textfont pdf.fonts.text",
                "%%gchordfont pdf.fonts.chord",
             ],
-            "preprocess" : { "abc" : [], "svg" : [] },
+            "preprocess" : { "abc" : [] },
             "omit"     : false,
         },
         "ly" : {
