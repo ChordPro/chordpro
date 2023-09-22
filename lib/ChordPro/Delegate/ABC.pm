@@ -69,29 +69,36 @@ sub abc2svg( $s, $pw, $elt ) {
 
 # Alternative entry point that always uses QuickJS only.
 
+sub packaged_qjs() {
+
+    my $dir = ::rsc_or_file("abc/");
+    my $qjs;
+
+    # First, try packaged qjs.
+    if ( -x "${dir}qjs" ) {
+	$qjs = "${dir}qjs";
+    }
+    elsif ( is_msw() and -s "${dir}qjs.exe" ) {
+	$qjs = "${dir}qjs.exe";
+    }
+
+    # Else try to find an installed qjs.
+    else {
+	$qjs = findexe("qjs");
+    }
+
+    # If so, check for packaged abc files.
+    if ( $qjs
+	 && -s "${dir}chordproabc.js"
+	 && -s "${dir}abc2svg/toxhtml.js" ) {
+	return [ $qjs, "--std", "${dir}chordproabc.js", "${dir}abc2svg" ];
+    }
+    return 0;
+}
+
 sub abc2svg_qjs( $s, $pw, $elt ) {
 
-    unless ( $abc2svg ) {
-	my $dir = ::rsc_or_file("abc/");
-	my $qjs;
-
-	# First, try packaged qjs.
-	if ( -x "${dir}qjs" ) {
-	    $qjs = "${dir}qjs";
-	}
-	elsif ( is_msw() and -s "${dir}qjs.exe" ) {
-	    $qjs = "${dir}qjs.exe";
-	}
-
-	# Else try to find an installed qjs.
-	else {
-	    $qjs = findexe("qjs");
-	}
-
-	if ( $qjs ) {
-	    $abc2svg = [ $qjs, "--std", "${dir}chordproabc.js", "${dir}abc2svg" ];
-	}
-    }
+    $abc2svg //= packaged_qjs();
 
     # This will bail out if we didn't find a suitable program.
     return _abc2svg( $s, $pw, $elt );

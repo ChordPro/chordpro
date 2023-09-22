@@ -2,6 +2,7 @@
 
     - !ChordPro functionality
     - ABC embedding no longer uses nodeJS.
+    - Improve runtime info.
 
 6.030 2023-09-18
 

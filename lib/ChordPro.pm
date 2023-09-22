@@ -1091,18 +1091,30 @@ sub ::runtimeinfo {
 	$msg .= sprintf( $fmtv, $p, $dd->(App::Packager::Version()) );
     }
 
+    my $pp = sub { realpath($_[0]) =~ s;^$ENV{HOME}/;~/;r; };
+
     # Determine resource path.
     my @p;
     if ( $ENV{CHORDPRO_LIB} ) {
-	$msg .= sprintf( $fmtvv, "CHORDPRO_LIB", $ENV{CHORDPRO_LIB} );
+	$msg .= sprintf( $fmtvv, "CHORDPRO_LIB", $pp->($ENV{CHORDPRO_LIB}) );
 	@p = splitpath($ENV{CHORDPRO_LIB});
     }
     push( @p, realpath( App::Packager::GetResourcePath() ) );
     my $tag = "Resource path";
     for ( @p ) {
-	$msg .= sprintf( $fmtvv, $tag, $_ );
+	$msg .= sprintf( $fmtvv, $tag, $pp->($_) );
 	$tag = "";
     }
+    eval { require ChordPro::Delegate::ABC;
+	   my $x;
+	   if ( $x = findexe( "abc2svg", "silent" ) ) {
+	       $msg .= sprintf( $fmt, "ABC support", $pp->($x) );
+	   }
+	   elsif ( $x = ChordPro::Delegate::ABC::packaged_qjs() ) {
+	       $msg .= sprintf( $fmt, "ABC support",
+				$pp->($x->[0]) . " (" . $pp->($x->[-1]) . ")" );
+	   }
+    };
 
     my $vv = sub {
 	my ( $mod ) = @_;
