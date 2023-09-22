@@ -377,19 +377,79 @@ sub get_image {
     return $img;
 }
 
-sub add_image {
-    my ( $self, $img, $x, $y, $w, $h, $border ) = @_;
+sub add_object {
+    my ( $self, $o, $x, $y, %options ) = @_;
+
+    my $scale_x = $options{"xscale"} || $options{"scale"} || 1;
+    my $scale_y = $options{"yscale"} || $options{"scale"} || $scale_x;
+
+    my $va = $options{valign} // "bottom";
+    my $ha = $options{align}  // "left";
 
     my $gfx = $self->{pdfgfx};
+    my $w = $o->width  * $scale_x;
+    my $h = $o->height * $scale_y;
+
+    if ( $va eq "top" ) {
+	$y -= $h;
+    }
+    elsif ( $va eq "middle" ) {
+	$y -= $h/2;
+    }
+    if ( $ha eq "right" ) {
+	$x -= $w;
+    }
+    elsif ( $ha eq "center" ) {
+	$x -= $w/2;
+    }
 
     $gfx->save;
-    $gfx->image( $img, $x, $y-$h, $w, $h );
-    if ( $border ) {
-	$gfx->rect( $x, $y-$h, $w, $h )
-	  ->linewidth($border)
+
+    if ( ref($o) =~ /::Resource::XObject::Image::/ ) {
+	$gfx->object( $o, $x, $y, $w, $h );
+    }
+    else {
+	# Assume XO_Form.
+	$gfx->object( $o, $x, $y, $scale_x, $scale_y );
+    }
+    if ( $options{border} ) {
+	my $bc = $options{"bordercolor"} || $options{"color"};
+	$gfx->stroke_color($bc) if $bc;
+	$gfx->rectangle( $x, $y, $x+$w, $y+$h )
+	  ->line_width( $options{border} )
 	    ->stroke;
     }
+
     $gfx->restore;
+}
+
+# For convenience.
+sub crosshairs {
+    my ( $gfx, $x, $y, %options ) = @_;
+    my $col = $options{colour} || $options{color} || "black";
+    my $lw  = $options{linewidth} || 0.1;
+    my $w  = ( $options{width} || 40 ) / 2;
+    my $h  = ( $options{width} || $options{height} || 40 ) / 2;
+    for ( $gfx  ) {
+	$_->save;
+	$_->line_width($lw);
+	$_->stroke_color($col);
+	$_->move($x-$w,$y);
+	$_->hline($x+$w);
+	$_->move($x,$y+$h);
+	$_->vline($y-$h);
+	$_->stroke;
+	$_->restore;
+    }
+}
+
+sub add_image {
+    my ( $self, $img, $x, $y, $w, $h, $border ) = @_;
+    $self->add_object( $img, $x, $y,
+		       xscale => $w/$img->width,
+		       yscale => $h/$img->height,
+		       valign => "top",
+		       $border ? ( border => $border ) : () );
 }
 
 sub newpage {
