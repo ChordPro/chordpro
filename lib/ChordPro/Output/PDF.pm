@@ -3092,9 +3092,9 @@ sub is_corefont {
 sub svg_fonthandler {
     my ( $ps, $el, $pdf, $style ) = @_;
 
-    my $family = lc $style->{'font-family'};
-    my $stl    = lc $style->{'font-style'}   // "normal";
-    my $weight = lc $style->{'font-weight'}  // "normal";
+    my $family = lc( $style->{'font-family'} );
+    my $stl    = lc( $style->{'font-style'}  // "normal" );
+    my $weight = lc( $style->{'font-weight'} // "normal" );
     my $size   = $style->{'font-size'}       || 12;
     my $key    = join( "|", $family, $stl, $weight );
     state $fc  = {};
