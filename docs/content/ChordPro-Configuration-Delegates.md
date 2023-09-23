@@ -5,10 +5,56 @@ description: "Configuration file contents - Delegates"
 
 # Configuration file contents - Delegates
 
+{{< toc >}}
+
+Delegates are interfaces to external tools to turn non-ChordPro
+content into something that ChordPro can handle. The non-ChordPro
+content is included in the song between `{start_of_...}` and
+`{end_of_...}` directives.
+
+ChordPro currently provides two delegates:
+
+* abc, the popular [ABC music notation](https://www.abcnotation.com), and
+
+* ly, the [Lilypond](https://lilypond.org) music typesetter.
+
+Configuration settings for these delegates can be set the config file
+under `"delegates"`:
+
     "delegates" : {
+        "abc" : { ... },
+        "ly"  : { ... },
      },
 
 ## ABC
+
+The ABC delegate collects the ABC music data and prepares it for the
+ABC tool to turn it into an SVG image. 
+
+### Selecting the ABC tool
+
+The ABC delegate supports two tools:
+
+* `abc2svg`, a program that comes with some ABC tools.
+
+* QuickJS, a JavaScript interpreter. 
+
+ChordPro will first try to find an `abc2svg` program in the executable
+path. If this is found it will be used to process the ABC data. The
+program will be executed with a single argument, the name of a file
+that contains the prepared ABC data, and it should produce the SVG
+image on standard output.
+
+Alternatively, if the QuickJS program `qjs` can be found in the
+executable path, ChordPro will use this internally to produce the SVG
+image.
+
+In the ABC configuration the setting `handler` can be use to modify
+the tool selection. If set to `"abc2svg"` selection proceeds as
+described above. If set to `"abc2svg_qjs"` ChordPro will always use the
+QuickJS interpreter.
+
+### ABC configuration
 
         "abc" : {
             "module"   : "ABC",
@@ -41,8 +87,7 @@ description: "Configuration file contents - Delegates"
   This must be `"ABC"`.
 
 * `handler`: The module function that handles this delegation.  
-  Valid values are `"abc2svg"` and `"abc2svg_qjs"`.  
-  See [Tools, below](#selecting-the-abc-tool).
+  Valid values are `"abc2svg"` and `"abc2svg_qjs"`.
 
 * `type`: The result produced by the delegate handler.  
   This must be `"image"`, this delegate
@@ -60,14 +105,39 @@ description: "Configuration file contents - Delegates"
   the contents of `{start_of_abc}` ... `{end_of_abc}` is silently
   ignored.
 
-### Selecting the ABC tool
+### ABC using ChordPro fonts
 
+ABC directives can refer to ChordPro fonts with a `pdf.fonts.` prefix.
+See the preamble in the ABC config above for some examples.
 
-### Connecting ABC and ChordPro fonts
+### ABC using arbitrary fonts
 
-TBD
-  
+When arbitrary fonts are used in the ABC data it is important that
+ChordPro knows these fonts as well. For each of these fonts an entry
+must be made in the font registry.
+
+For example, in the ABC the music font `Bravura` is used. The
+corresponding ChordPro font registry would be:
+
+    "pdf" : {
+        "fontconfig" : {
+            ...
+            "bravura" : {
+                "" : { "file" : "Bravura.otf" }
+            },
+            ...
+        }
+    }
+
+See also [ChordPro Implementation: Fonts]({{<
+relref "chordpro-fonts" >}}).
+
 ## Lilypond
+
+The Lilypond delegate collects the Lilypond music data and prepares it
+for the Lilypond program `lilypond` to turn it into an SVG image.
+
+### Lilypond configuration
 
         "ly" : {
             "module"   : "Lilypond",
@@ -102,7 +172,9 @@ TBD
   interpretated as a single backslash without special meaning.
 
 * `omit`: If `true`, no delegation will be handled. In other words,
-  the contents of `{start_of_ly}` ... `{end_of_ly}` is silently
+  the content of `{start_of_ly}` ... `{end_of_ly}` is silently
   ignored.
 
-# The Lilypond tool
+### Connecting Lilypond and ChordPro fonts
+
+This is similar to [ABC using arbitrary fonts](#abc-using-arbitrary-fonts).
