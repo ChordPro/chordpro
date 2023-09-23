@@ -42,6 +42,8 @@ margin, see [labels]({{< relref "ChordPro-Configuration-PDF#labels" >}}).
   line will be considered formatting instructions (see below).
   See also [Remarks]({{< relref "#remarks" >}}).
 
+* The song **must** have a key (`K:`).
+
 * ChordPro transposition using `{transpose}` or `--transpose` will
   transpose the embedded ABC. Adding `%%transpose` to the ABC
   source will affect the ABC notes only.
