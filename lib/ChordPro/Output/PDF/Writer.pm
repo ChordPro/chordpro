@@ -352,13 +352,9 @@ sub get_image {
     my $uri = $elt->{uri};
     warn("get_image($uri)\n") if $config->{debug}->{images};
     if ( $uri =~ /^id=(.+)/ ) {
-	my $a = $ChordPro::Output::PDF::assets->{$1};
+	my $a = ChordPro::Output::PDF::assets($1);
 
-	if ( $a->{type} eq "abc" ) {
-	    my $res = ChordPro::Output::PDF::abc2image( undef, $self, $a );
-	    return $self->get_image( { %$elt, uri => $res->{src} } );
-	}
-	elsif ( $a->{type} eq "jpg" ) {
+	if ( $a->{type} eq "jpg" ) {
 	    $img = $self->{pdf}->image_jpeg(IO::String->new($a->{data}));
 	}
 	elsif ( $a->{type} eq "png" ) {
@@ -366,6 +362,9 @@ sub get_image {
 	}
 	elsif ( $a->{type} eq "gif" ) {
 	    $img = $self->{pdf}->image_gif(IO::String->new($a->{data}));
+	}
+	else {
+	    warn( "PDF: Unhandled asset type: ", $a->{type}, " (skipped)\n");
 	}
 	return $img;
     }
@@ -406,12 +405,14 @@ sub add_object {
     $gfx->save;
 
     if ( ref($o) =~ /::Resource::XObject::Image::/ ) {
+	# Image wants width and height.
 	$gfx->object( $o, $x, $y, $w, $h );
     }
     else {
-	# Assume XO_Form.
+	# XO_Form wants xscale and yscale.
 	$gfx->object( $o, $x, $y, $scale_x, $scale_y );
     }
+
     if ( $options{border} ) {
 	my $bc = $options{"bordercolor"} || $options{"color"};
 	$gfx->stroke_color($bc) if $bc;

@@ -7,6 +7,8 @@
     - (PDF) Image scale strategy change for spread images.
     - (PDF/Writer) Add generalized add_object for objects and images.
     - (PDF) Prevent case problems when looking up fonts for SVG.
+    - !Internal
+    - (PDF) Enhance assets (wip), labels; move grid to separate module.
 
 6.030 2023-09-18
 
