@@ -1191,7 +1191,8 @@ sub generate_song {
 		atts => { debug => $config->{debug}->{svg} > 1,
 			  verbose => $config->{debug}->{svg},
 			} );
-	    my $o = $p->process( $elt->{uri} );
+	    my $data = $elt->{data};
+	    my $o = $p->process( $data ? \join( "\n", @$data ) : $elt->{uri} );
 	    warn("PDF: SVG objects: ", 0+@$o, "\n")
 	      if $config->{debug}->{svg} || !@$o;
 	    if ( ! @$o ) {
@@ -1201,12 +1202,53 @@ sub generate_song {
 
 	    my @res;
 	    my $i = 0;
+	    my $sep = $elt->{opts}->{sep} || 0;
+
+	    # If we have multiple objects, and not splitting,
+	    # combine into a new object.
+	    if ( !$elt->{opts}->{split} && @$o > 1 ) {
+		my $nx = $ps->{pr}->{pdf}->xo_form;
+		my ( $xmin, $ymin, $xmax, $ymax );
+		my $y = 0;
+		my $x = 0;
+		for my $xo ( @$o ) {
+		    my $w = $xo->{vwidth};
+		    my $h = $xo->{vheight};
+		    $xo = $xo->{xo};
+		    warn( "O: $x, $y ( w=$w h=$h )\n");
+		    $nx->object( $xo, $x, $y );
+		    $y -= $h;
+
+		    if ( defined $xmax ) {
+			$xmax = $w if $w > $xmax;
+		    }
+		    else {
+			$xmax = $w;
+		    }
+		    $ymax = $y;
+		    $y -= $sep;
+		}
+		$nx->bbox(  0, $ymax, $xmax, 0 );
+		$o = [ { type => "xform",
+			 width   => $xmax,
+			 height  => -$ymax,
+			 vwidth  => $xmax,
+			 vheight => -$ymax,
+			 bbox    => [ 0, $ymax, $xmax, 0 ],
+			 vbox    => [ 0, -$ymax, $xmax, $ymax ],
+			 xo      => $nx,
+			 opts    => $elt->{opts},
+			 }
+		     ];
+		warn( "F: ( ", join(" ",@{$o->[0]->{bbox}}), " )\n");
+	    }
+ 
 	    for my $xo ( @$o ) {
 		state $imgcnt = 0;
 		$i++;
 		my $assetid = sprintf("XFOasset%03d", $imgcnt++);
 		$assets->{$assetid} = { type => "xform", data => $xo };
-		my $sep = $i == @$o ? 0 : $elt->{opts}->{sep} || 0;
+		$sep = 0 if $i == @$o;
 
 		push( @res,
 		      { type     => "xform",

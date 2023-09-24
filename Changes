@@ -2,12 +2,13 @@
 
     - !ChordPro functionality
     - (ABC) ABC embedding no longer uses nodeJS.
-    - (ABC) ABC embedding use tohtml instead of toxhtml.
+    - (ABC) Make split work (and enable by default).
     - Improve runtime info.
     - (PDF) Image scale strategy change for spread images.
     - (PDF/Writer) Add generalized add_object for objects and images.
     - (PDF) Prevent case problems when looking up fonts for SVG.
     - !Internal
+    - (ABC) ABC embedding use tohtml instead of toxhtml.
     - (PDF) Enhance assets (wip), labels; move grid to separate module.
 
 6.030 2023-09-18

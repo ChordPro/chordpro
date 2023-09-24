@@ -164,7 +164,7 @@ sub _abc2svg( $s, $pw, $elt ) {
     my $kv = { %$elt };
     $kv = parse_kv( @pre ) if @pre;
     $kv->{id} = 1;
-    $kv->{split} = 1;
+    $kv->{split} //= 1;		# less overhead. really.
     $kv->{scale} ||= 1;
     if ( $kv->{width} ) {
 	$pw = $kv->{width};
@@ -172,7 +172,8 @@ sub _abc2svg( $s, $pw, $elt ) {
 
     unshift( @preamble,
 	     grep { /^%%/ } @pre,
-	     $pw ? ( "%%pagewidth " . $pw . "px" ) : (),
+#	     $pw ? sprintf("%%%%pagewidth %.3fcm", $pw/96*2.54) : (),
+	     $pw ? sprintf("%%%%pagewidth %dpx", $pw) : (),
 	     "%%leftmargin 0cm",
 	     "%%rightmargin 0cm",
 	   );
@@ -286,32 +287,40 @@ sub _abc2svg( $s, $pw, $elt ) {
     warn("SVG: ", scalar(@lines), " lines (raw)\n") if DEBUG > 1;
 
     # Postprocess the SVG data.
-    open( $fd, '>:utf8', $svg );
     my $copy = 0;
-    print $fd ("<div>\n");
+    @data = ();
     my $lines = 1;
     while ( @lines ) {
 	$_ = shift(@lines);
 	if ( /^<svg/ ) {
 	    $copy++;
 	}
-	print( $fd $_, "\n"), $lines++ if $copy;
+	push( @data, $_ ), $lines++ if $copy;
 	if ( /^<\/svg/ && @lines && $lines[0] =~ /^<\/div/ ) {
 	    last;
 	}
     }
-    print $fd ("</div>\n");
-    close($fd);
-    warn("SVG: ", 1+$lines, " lines (", -s $svg, " bytes)\n") if DEBUG > 1;
+    if ( @data ) {
+	unshift( @data, "<div>" );
+	push( @data, "</div>" );
+    }
+
+    if ( DEBUG ) {
+	open( $fd, '>:utf8', $svg );
+	print( $fd $_, "\n" ) for @data;
+	close($fd);
+	warn("SVG: ", 1+$lines, " lines (", -s $svg, " bytes)\n") if DEBUG > 1;
+    }
 
     my @res;
     push( @res,
 	  { type => "svg",
-	    uri  => $svg,
+	    data => \@data,
 	    opts => { id     => $kv->{id},
 		      center => $kv->{center},
 		      scale  => $kv->{scale},
 		      split  => $kv->{split},
+		      spread => $kv->{spread},
 		      sep    => $kv->{staffsep},
 		    } } );
 
