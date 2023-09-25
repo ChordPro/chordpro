@@ -79,7 +79,8 @@ The ABC data may be preceded by formatting instructions:
 * split  
   If set, ChordPro will attempt to split the generated image into individual
   systems so longer scores can be put onto multiple pages.  
-  As of 6.030 this is enabled by default.
+  As of 6.030 this is enabled by default. Use `split=0` to keep the
+  score in one piece.
 
 * staffsep=_n_  
   Add extra vertical space between the systems.
