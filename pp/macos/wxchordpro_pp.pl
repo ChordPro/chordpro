@@ -19,6 +19,7 @@ print <<EOD;
 --gui
 
 # Explicit libraries.
+--link=/usr/local/lib/libpng16.16.dylib
 --link=/usr/local/lib/libjpeg.8.dylib
 --link=/usr/local/lib/libtiff.6.dylib
 --link=/usr/local/opt/pcre2/lib/libpcre2-32.0.dylib
