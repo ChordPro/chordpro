@@ -102,8 +102,10 @@ app1 :
 	cd "${APPDIR}"; mv script lib Contents/MacOS
 	cd "${APPDIR}"; mv lib*.dylib Contents/MacOS
 	cd "${APPDIR}"; rm -f MANIFEST META.yml
+	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libpng16.*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libjpeg.*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libtiff.*.dylib
+	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libz.*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libpcre2-32.*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libwx*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*.bundle
