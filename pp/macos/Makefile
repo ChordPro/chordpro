@@ -105,7 +105,7 @@ app1 :
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libpng16.*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libjpeg.*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libtiff.*.dylib
-	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libz.*.dylib
+	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libz*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libpcre2-32.*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libwx*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*.bundle
