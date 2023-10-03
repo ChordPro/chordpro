@@ -25,6 +25,12 @@ ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 isa_ok( $s->{songs}->[0], 'ChordPro::Song', "It's a song" );
 #use Data::Dumper; warn(Dumper($s));
 my $song = {
+	    assets     => {
+			   _Image001 => {
+					 type => 'image',
+					 uri  => './130_image.jpg'
+					}
+			  },
 	    'settings' => {},
 	    'meta' => {
 		       'songindex' => 1,
@@ -36,7 +42,7 @@ my $song = {
 	    'body' => [
 		       {
 			'context' => '',
-			'uri' => './130_image.jpg',
+			'id' => '_Image001',
 			'type' => 'image',
 			'opts' => {}
 		       }
@@ -71,6 +77,12 @@ $song = {
 				   'Swing Low Sweet Chariot'
 				  ]
 		      },
+	    assets     => {
+			   _Image002 => {
+					 type => 'image',
+					 uri  => './130_image.jpg'
+					}
+			  },
 	    'settings' => {},
 	    'body' => [
 		       {
@@ -83,7 +95,7 @@ $song = {
 				   'center' => 1,
 				   'width' => '200'
 				  },
-			'uri' => './130_image.jpg',
+			'id' => '_Image002',
 			'context' => ''
 		       }
 		      ],

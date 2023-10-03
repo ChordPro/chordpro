@@ -17,9 +17,10 @@ use Storable qw(dclone);
 use List::Util qw(any);
 use Carp;
 use feature 'state';
-
+use File::LoadLines qw(loadlines);
 use ChordPro::Output::Common
   qw( roman prep_outlines fmt_subst );
+use feature 'signatures';
 
 use ChordPro::Output::PDF::Writer;
 use ChordPro::Utils;
@@ -345,7 +346,7 @@ sub pr_label_maybe {
 }
 
 my $assets;
-sub asset {
+sub assets {
     my ( $id ) = @_;
     $assets->{$id};
 }
@@ -376,7 +377,6 @@ sub generate_song {
     local $config = dclone( $s->{config} // $config );
 
     $source = $s->{source};
-    $assets = $s->{assets} || {};
 
     $suppress_empty_chordsline = $::config->{settings}->{'suppress-empty-chords'};
     $suppress_empty_lyricsline = $::config->{settings}->{'suppress-empty-lyrics'};
@@ -817,49 +817,179 @@ sub generate_song {
 	}
     };
 
-    my @elts;
+    #### CODE STARTS HERE ####
+
+    my %sa = %{$s->{assets}//{}};	# song assets
     my $elt;			# current element
-    my @sb = @{$sb};
-    my $redo = [];
-    while ( @sb ) {
-	$elt = @$redo ? shift(@$redo) : shift(@sb);
-	if ( $elt->{type} eq "image"
-	     && $elt->{opts}->{spread} ) {
+    my @elts = @$sb;		# song elements
+
+    # All elements generate zero or one display items, except for SVG images
+    # than can result in a series of display items.
+    # So we first scan the list for SVG and delegate items and turn these
+    # into simple display items.
+
+    my $pw = $ps->{papersize}->[0] - $ps->{marginleft} - $ps->{marginright};
+    my $cw = ( $pw - ( $ps->{columns} - 1 ) * $ps->{columnspace} ) /$ps->{columns};
+    warn("PDF: Preparing ", scalar(keys %sa), " image",
+	 keys(%sa) == 1 ? "" : "s", ", pw=$pw, cw=$cw\n")
+      if $config->{debug}->{images} || $config->{debug}->{assets};
+    for my $id ( sort keys %sa ) {
+	my $elt = $sa{$id};
+
+	$elt->{subtype} //= "image" if $elt->{uri};
+
+	if ( $elt->{type} eq "image" && $elt->{subtype} eq "delegate" ) {
+	    my $delegate = $elt->{delegate};
+	    warn("PDF: Preparing delegate $delegate, handler ",
+		 $elt->{handler}, "\n") if $config->{debug}->{images};
+
+	    my $pkg = __PACKAGE__;
+	    $pkg =~ s/::Output::[:\w]+$/::Delegate::$delegate/;
+	    eval "require $pkg" || die($@);
+	    my $hd = $pkg->can($elt->{handler}) //
+	      die("PDF: Missing delegate handler ${pkg}::$elt->{handler}\n");
+	    unless ( $elt->{data} ) {
+		$elt->{data} = [ loadlines($elt->{uri}) ];
+	    }
+
+	    # Determine actual width.
+	    my $w = defined($elt->{opts}->{spread}) ? $pw : $cw;
+	    $w = $elt->{opts}->{width}
+	      if $elt->{opts}->{width} && $elt->{opts}->{width} < $w;
+
+	    my $res = $hd->( $s, $w, $elt );
+	    if ( $res ) {
+		warn( "PDF: Preparing delegate $delegate, handler ",
+		      $elt->{handler}, " => ",
+		      $res->{type}, "/", $res->{subtype}, "\n" )
+		  if $config->{debug}->{images};
+		$res->{opts} = { %{ $res->{opts}   // {} },
+				 %{ $elt->{opts} // {} } };
+		$s->{assets}->{$id} = $res;
+	    }
+
+	    # If the delegate produced an SVG, continue processing.
+	    if ( $res && $res->{type} eq "image" && $res->{subtype} eq "svg" ) {
+		$elt = $res;
+	    }
+	    else {
+		# Proceed to next asset.
+		next;
+	    }
+	}
+
+	if ( $elt->{type} eq "image" && $elt->{subtype} eq "svg" ) {
+	    warn("PDF: Preparing SVG image\n") if $config->{debug}->{images};
+	    require SVGPDF;
+	    SVGPDF->VERSION(0.080);
+
+	    # One or more?
+	    my $combine = ( !($elt->{opts}->{split}//1)
+			    || $elt->{id}
+			    || defined($elt->{opts}->{spread}) )
+	      ? "stacked" : "none";
+	    my $sep = $elt->{opts}->{staffsep} || 0;
+
+	    # Note we need special font and text handlers.
+	    my $p = SVGPDF->new
+	      ( pdf  => $ps->{pr}->{pdf},
+		fc   => sub { svg_fonthandler( $ps, @_ ) },
+		tc   => sub { svg_texthandler( $ps, @_ ) },
+		atts => { debug   => $config->{debug}->{svg} > 1,
+			  verbose => $config->{debug}->{svg},
+			} );
+	    my $data = $elt->{data};
+	    my $o = $p->process( $data ? \join( "\n", @$data ) : $elt->{uri},
+				 combine => $combine,
+				 sep     => $sep,
+			       );
+	    warn( "PDF: Preparing SVG image => ", 0+@$o, " element",
+		  @$o == 1 ? "" : "s", ", combine=$combine\n")
+	      if $config->{debug}->{images};
+	    if ( ! @$o ) {
+		warn("Error in SVG embedding (no SVG objects found)\n");
+		next;
+	    }
+
+	    my $res =
+	    $s->{assets}->{$id} = {
+			type     => "image",
+			subtype  => "xform",
+			width    => $o->[0]->{width},
+			height   => $o->[0]->{height},
+			vwidth   => $o->[0]->{vwidth},
+			vheight  => $o->[0]->{vheight},
+			data     => $o->[0]->{xo},
+			opts     => { %{ $o->[0]->{opts}  // {} },
+				      %{ $s->{assets}->{$id}->{opts} // {} },
+				    },
+			sep      => $sep,
+		      };
+	    if ( @$o > 1 ) {
+		$res->{multi} = $o;
+	    }
+
+	    warn("Created asset $id (xform, ",
+		 $o->[0]->{vwidth}, "x", $o->[0]->{vheight}, ")",
+		 " scale=", $res->{opts}->{scale} || 1,
+		 " center=", $res->{opts}->{center}//0,
+		 " sep=", $sep,
+		 "\n")
+	      if $config->{debug}->{images};
+	    next;
+	}
+
+	if ( $elt->{type} eq "image" ) {
+	    warn("PDF: Preparing $elt->{subtype} image\n") if $config->{debug}->{images};
+	    my $data = $elt->{data} ? IO::String->new($elt->{data}) : $elt->{uri};
+	    my $img = $pr->{pdf}->image($data);
+	    my $subtype = lc(ref($img) =~ s/^.*://r);
+	    $subtype = "jpg" if $subtype eq "jpeg";
+	    my $res =
+	    $s->{assets}->{$id} = {
+			type     => "image",
+			subtype  => $subtype,
+			width    => $img->width,
+			height   => $img->height,
+			data     => $img,
+			maybe opts => $s->{assets}->{$id}->{opts},
+		      };
+	    warn("Created asset $id ($elt->{subtype}, ",
+		 $res->{width}, "x", $res->{height}, ")",
+		 map { " $_=" . $res->{opts}->{$_} } keys( %{$res->{opts}//{}} ),
+		 "\n")
+	      if $config->{debug}->{images};
+	}
+
+	next;
+
+	if ( $elt->{type} eq "image" && $elt->{opts}->{spread} ) {
 	    if ( $spreadimage ) {
 		warn("Ignoring superfluous spread image\n");
 	    }
 	    else {
-		warn("Got spread image\n") if $config->{debug}->{images};
-		$spreadimage //= $elt;
-		next;
+		$spreadimage = $elt;
+		warn("PDF: Preparing images, got spread image\n")
+		  if $config->{debug}->{images};
+		next;		# do not copy back
 	    }
 	}
-	elsif ( $elt->{type} eq "delegate"
-		&& $elt->{subtype} eq "image"
-		&& $elt->{data}->[0] =~ /\bspread=\d+\b$/
-	      ) {
-	    if ( $spreadimage ) {
-		warn("Ignoring superfluous spread delegate\n");
-	    }
-	    else {
-		my $delegate = $elt->{delegate};
-		warn("Got spread delegate $delegate\n") if $config->{debug}->{images};
-		my $pkg = __PACKAGE__;
-		$pkg =~ s/::Output::\w+$/::Delegate::$delegate/;
-		eval "require $pkg" || die($@);
-		my $hd = $pkg->can($elt->{handler}) //
-		  die("PDF: Missing delegate handler ${pkg}::$elt->{handler}\n");
 
-		my $pw = $ps->{papersize}->[0]
-		  - $ps->{marginleft}
-		  - $ps->{marginright};
-		$redo = $hd->( $s, $pw, $elt );
-		next;
-	    }
-	}
-	push( @elts, $elt );
     }
+    warn("PDF: Preparing images, done\n")
+      if $config->{debug}->{images} || $config->{debug}->{assets};
+    $assets = $s->{assets} || {};
+    ::dump( $assets, as => "Assets, Pass 2" )
+      if $config->{debug}->{assets} & 0x02;
 
+    if ( $s->{spreadimage} ) {
+	$spreadimage =
+	  { type => "image",
+	    id => $s->{spreadimage}->{id},
+	    opts => { spread => $s->{spreadimage}->{space} }
+	  };
+    }
+    
     # Get going.
     $newpage->();
 
@@ -877,6 +1007,18 @@ sub generate_song {
     while ( @elts ) {
 	$elt = shift(@elts);
 
+	if ( $config->{debug}->{ops} ) {
+	    my $msg = sprintf("OP L:%2d %s (", $elt->{line}, $elt->{type} );
+	    $msg .= " " . $elt->{subtype} if $elt->{subtype};
+	    $msg .= " U:" . $elt->{uri} if $elt->{uri};
+	    $msg .= " O:" . $elt->{orig} if $elt->{orig};
+	    $msg .= " D:" . $elt->{delegate} if $elt->{delegate};
+	    $msg .= " H:" . $elt->{handler} if $elt->{handler};
+	    $msg .= " )";
+	    $msg =~ s/\s+\(\s+\)//;
+	    warn( $msg, "\n" );
+	}
+	
 	if ( $elt->{type} eq "newpage" ) {
 	    $newpage->();
 	    next;
@@ -1123,31 +1265,6 @@ sub generate_song {
 	    next;
 	}
 
-	if ( $elt->{type} eq "delegate" ) {
-	    if ( $elt->{subtype} =~ /^image(?:-(\w+))?$/ ) {
-		my $delegate = $1 // $elt->{delegate};
-		my $pkg = __PACKAGE__;
-		$pkg =~ s/::Output::\w+$/::Delegate::$delegate/;
-		eval "require $pkg" || die($@);
-		my $hd = $pkg->can($elt->{handler}) //
-		  die("PDF: Missing delegate handler ${pkg}::$elt->{handler}\n");
-		my $pw;			# available width
-		if ( $ps->{columns} > 1 ) {
-		    $pw = $ps->{columnoffsets}->[1]
-		      - $ps->{columnoffsets}->[0]
-		      - $ps->{columnspace};
-		}
-		else {
-		    $pw = $ps->{__rightmargin} - $ps->{_leftmargin};
-		}
-		my $res = $hd->( $s, $pw, $elt );
-		next unless $res; # assume errors have been given
-		unshift( @elts, @$res );
-		next;
-	    }
-	    die("PDF: Unsupported delegation $elt->{subtype}\n");
-	}
-
 	if ( $elt->{type} eq "image" ) {
 	    # Images are slightly more complex.
 	    # Only after establishing the desired height we can issue
@@ -1174,155 +1291,13 @@ sub generate_song {
 	    $y -= $vsp;
 	    $pr->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
 
-	    next;
-	}
-
-	if ( $elt->{type} eq "svg" ) {
-	    # We turn SVG into one (or more) XForm objects.
-
-	    require SVGPDF;
-	    SVGPDF->VERSION(0.070);
-
-	    # Note we need special font and text handlers.
-	    my $p = SVGPDF->new
-	      ( pdf  => $ps->{pr}->{pdf},
-		fc   => sub { svg_fonthandler( $ps, @_ ) },
-		tc   => sub { svg_texthandler( $ps, @_ ) },
-		atts => { debug => $config->{debug}->{svg} > 1,
-			  verbose => $config->{debug}->{svg},
-			} );
-	    my $data = $elt->{data};
-	    my $o = $p->process( $data ? \join( "\n", @$data ) : $elt->{uri} );
-	    warn("PDF: SVG objects: ", 0+@$o, "\n")
-	      if $config->{debug}->{svg} || !@$o;
-	    if ( ! @$o ) {
-		warn("Error in SVG embedding (no SVG objects found)\n");
-		next;
-	    }
-
-	    my @res;
-	    my $i = 0;
-	    my $sep = $elt->{opts}->{sep} || 0;
-
-	    # If we have multiple objects, and not splitting,
-	    # combine into a new object.
-	    if ( !$elt->{opts}->{split} && @$o > 1 ) {
-		my $nx = $ps->{pr}->{pdf}->xo_form;
-		my ( $xmin, $ymin, $xmax, $ymax );
-		my $y = 0;
-		my $x = 0;
-		for my $xo ( @$o ) {
-		    my $w = $xo->{vwidth};
-		    my $h = $xo->{vheight};
-		    $xo = $xo->{xo};
-		    warn( "O: $x, $y ( w=$w h=$h )\n");
-		    $nx->object( $xo, $x, $y );
-		    $y -= $h;
-
-		    if ( defined $xmax ) {
-			$xmax = $w if $w > $xmax;
-		    }
-		    else {
-			$xmax = $w;
-		    }
-		    $ymax = $y;
-		    $y -= $sep;
+	    if ( $elt->{multi} && !$elt->{msel} ) {
+		my $i = @{ $elt->{multi} } - 1;
+		while ( $i > 0 ) {
+		    unshift( @elts, { %$elt, msel => $i } );
+		    $i--;
 		}
-		$nx->bbox(  0, $ymax, $xmax, 0 );
-		$o = [ { type => "xform",
-			 width   => $xmax,
-			 height  => -$ymax,
-			 vwidth  => $xmax,
-			 vheight => -$ymax,
-			 bbox    => [ 0, $ymax, $xmax, 0 ],
-			 vbox    => [ 0, -$ymax, $xmax, $ymax ],
-			 xo      => $nx,
-			 opts    => $elt->{opts},
-			 }
-		     ];
-		warn( "F: ( ", join(" ",@{$o->[0]->{bbox}}), " )\n");
 	    }
- 
-	    for my $xo ( @$o ) {
-		state $imgcnt = 0;
-		$i++;
-		my $assetid = sprintf("XFOasset%03d", $imgcnt++);
-		$assets->{$assetid} = { type => "xform", data => $xo };
-		$sep = 0 if $i == @$o;
-
-		push( @res,
-		      { type     => "xform",
-			width    => $xo->{width},
-			height   => $xo->{height},
-			vwidth   => $xo->{vwidth},
-			vheight  => $xo->{vheight},
-			id       => $assetid,
-			opts => { center => $elt->{opts}->{center},
-				  scale  => $elt->{opts}->{scale} || 1,
-				  sep    => $sep },
-		      }
-		    );
-		warn("Created asset $assetid (xform, ",
-		     $xo->{vwidth}, "x", $xo->{vheight}, ")",
-		     " scale=", $elt->{opts}->{scale} || 1,
-		     " center=", $elt->{opts}->{center}//0,
-		     " sep=", $sep,
-		     "\n")
-		  if $config->{debug}->{images};
-	    }
-	    unshift( @elts, @res );
-	    next;
-	}
-
-	if ( $elt->{type} eq "xform" ) {
-	    my $h = $elt->{height};# + ($elt->{opts}->{sep}||0);
-	    my $w = $elt->{width};
-	    my $vh = $elt->{vheight};
-	    my $vw = $elt->{vwidth};
-	    my $xo = $assets->{ $elt->{id} };
-
-	    my $scale = min( $vw / $w, $vh / $h );
-	    my $sep = $elt->{opts}->{sep} || 0;
-
-	    # Available width and height.
-	    my $pw;
-	    if ( $ps->{columns} > 1 ) {
-		$pw = $ps->{columnoffsets}->[1]
-		  - $ps->{columnoffsets}->[0]
-		  - $ps->{columnspace};
-	    }
-	    else {
-		$pw = $ps->{__rightmargin} - $ps->{_leftmargin};
-	    }
-	    my $ph = $ps->{_margintop} - $ps->{_marginbottom};
-
-	    if ( $w * $scale > $pw ) {
-		$scale = $pw / $w;
-	    }
-	    if ( $h * $scale > $ph ) {
-		$scale = $ph / $h;
-	    }
-	    warn("XForm asset ", $elt->{id}, " (",
-		 $vw, "x", $vh, ")",
-		 " [$x,$y]",
-		 " scale=", $scale,
-		 " center=", $elt->{opts}->{center}//0,
-		 " sep=", $sep,
-		 "\n")
-	      if $config->{debug}->{images};
-
-	    $scale *= $elt->{opts}->{scale};
-	    my $vsp = $h * $scale;
-	    $checkspace->($vsp);
-	    $ps->{pr}->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
-
-	    $pr->{pdfgfx}->object( $xo->{data}->{xo},
-				   $x-$xo->{data}->{vbox}->[0]*$scale,
-				   $y, $scale );
-
-	    $y -= $vsp + $sep;
-	    $pr->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
-
 	    next;
 	}
 
@@ -1969,60 +1944,16 @@ sub imageline {
 
     my $opts = $elt->{opts};
     my $pr = $ps->{pr};
-
-    my $img;
-    if ( $elt->{uri} =~ /^id=(.+)/ ) {
-	my $id = $1;
-	unless ( exists( $assets->{$id} ) ) {
-	    unless ( exists( $config->{assets}->{$id} ) ) {
-		return "Unknown asset: id=$id";
-	    }
-	    my $a = $config->{assets}->{$id};
-	    if ( $a->{src} && !$a->{data} ) {
-		use Image::Info;
-		open( my $fd, '<:raw', $a->{src} );
-		unless ( $fd ) {
-		    return $a->{src} . ": $!";
-		}
-		my $data = do { local $/; <$fd> };
-		# Get info.
-		my $info = Image::Info::image_info(\$data);
-		if ( $info->{error} ) {
-		    return $info->{error};
-		}
-
-		# Store in assets.
-		$assets //= {};
-		$assets->{$id} =
-		  { data => $data, type => $info->{file_ext},
-		    width => $info->{width}, height => $info->{height},
-		  };
-
-		if ( $config->{debug}->{images} ) {
-		    warn("asset[$id] ", length($data), " bytes, ",
-			 "width=$info->{width}, height=$info->{height}",
-			 "\n");
-		}
-	    }
-	}
-	unless ( $assets->{$id}->{data} ) {
-	    return "Unhandled asset: id=$id";
-	}
-    }
-    elsif ( $elt->{uri} =~ /^chord:(.*)/) {
-	$img = placeholder->new( $1,
-				 $ps->{dd}->hsp0( undef, $ps ),
-				 $ps->{dd}->vsp0( undef, $ps ) );
-    }
-    elsif ( ! -s $elt->{uri} ) {
-	return "$!: " . $elt->{uri};
-    }
-
-    warn("get_image ", $elt->{uri}, "\n") if $config->{debug}->{images};
-    $img //= eval { $pr->get_image($elt) };
+    my $id = $elt->{id};
+    my $img = $assets->{$id}->{data};
     unless ( $img ) {
-	warn($@);
-	return "Unhandled image type: " . $elt->{uri};
+	return "Unhandled image type: asset=$id";
+    }
+    if ( $assets->{$id}->{multi} ) {
+	$elt->{multi} = $assets->{$id}->{multi};
+    }
+    if ( $elt->{msel} ) {
+	$img = $assets->{$id}->{multi}->[$elt->{msel}]->{xo};
     }
 
     # Available width and height.
@@ -2081,7 +2012,12 @@ sub imageline {
     warn("Image scale: $scale\n") if $config->{debug}->{images};
     $h *= $scale;
     $w *= $scale;
-    if ( $opts->{center} ) {
+
+    my $anchor = $opts->{anchor} //= "float";
+    my $ox = $opts->{x};
+    my $oy = $opts->{y};
+
+    if ( $anchor eq "float" && $opts->{center} // 1 ) {
 	$x += ($pw - $w) / 2;
 	warn("Image center: $_[1] -> $x\n") if $config->{debug}->{images};
     }
@@ -2093,10 +2029,6 @@ sub imageline {
 	my $ytext  = $y - font_bl($ftext);
 	pr_label_maybe( $ps, $x, $ytext );
     }
-
-    my $anchor = $opts->{anchor} //= "float";
-    my $ox = $opts->{x};
-    my $oy = $opts->{y};
 
     my $calc = sub {
 	my ( $l, $r, $t, $b, $mirror ) = @_;
@@ -2149,13 +2081,19 @@ sub imageline {
 	$ps->{dd}->draw( $ps->{_s}->{chordsinfo}->{$img->name}, $x, $y, $ps );
     }
     else {
-	warn( sprintf("add_image %.1f %.1f %.1f %.1f (%s x%+.1f y%+.1f)\n",
+	warn( sprintf("add_image x=%.1f y=%.1f w=%.1f h=%.1f (%s x%+.1f y%+.1f)\n",
 		      $x, $y, $w, $h,
 		      $anchor,
 		      $ox//0, $oy//0
 		     )) if $config->{debug}->{images};
 
-	$pr->add_image( $img, $x, $y, $w, $h, $opts->{border} || 0 );
+#	$pr->add_image( $img, $x, $y, $w, $h, $opts->{border} || 0 );
+	$pr->add_object( $img, $x, $y,
+			 xscale => $w/$img->width,
+			 yscale => $h/$img->height,
+			 border => $opts->{border} || 0,
+			 valign => "top",
+		       );
     }
     warn("done\n") if $config->{debug}->{images};
 
@@ -2171,20 +2109,12 @@ sub imagespread {
     my $opts = $elt->{opts};
     my $pr = $ps->{pr};
 
-    if ( $elt->{uri} =~ /^id=(.+)/ ) {
-	return "Unknown asset: id=$1"
-	  unless exists( $assets->{$1} );
-    }
-    elsif ( ! -s $elt->{uri} ) {
-	return "$!: " . $elt->{uri};
-    }
-
-    warn("get_image ", $elt->{uri}, "\n") if $config->{debug}->{images};
-    my $img = eval { $pr->get_image($elt) };
-    unless ( $img ) {
-	warn($@);
-	return "Unhandled image type: " . $elt->{uri};
-    }
+    my $tag = "id=" . $elt->{id};
+    return "Unknown asset: $tag"
+      unless exists( $assets->{$elt->{id}} );
+    my $img = $assets->{$elt->{id}}->{data};
+    return "Unhandled asset: $tag"
+      unless $img;
 
     # Available width and height.
     my $pw = $ps->{__rightmargin} - $ps->{_leftmargin};
@@ -2232,16 +2162,14 @@ sub imagespread {
 	warn("Image center: $_[1] -> $x\n") if $config->{debug}->{images};
     }
 
-    if ( defined ( my $tag = $i_tag // $opts->{label} ) ) {
-	$i_tag = $tag;
-    	my $ftext = $ps->{fonts}->{comment};
-	my $ytext  = $y - font_bl($ftext);
-	pr_label_maybe( $ps, $x, $ytext );
-    }
-
     warn("add_image\n") if $config->{debug}->{images};
-    $pr->add_image( $img, $x, $y, $w, $h, $opts->{border} || 0 );
-    warn("done\n") if $config->{debug}->{images};
+    # $pr->add_image( $img, $x, $y, $w, $h, $opts->{border} || 0 );
+    $pr->add_object( $img, $x, $y,
+		     xscale => $w/$img->width,
+		     yscale => $h/$img->height,
+		     border => $opts->{border} || 0,
+		     valign => "top",
+		   );
 
     return $h + $elt->{opts}->{spread};			# vertical size
 }

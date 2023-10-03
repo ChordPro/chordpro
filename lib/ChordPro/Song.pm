@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+use utf8;
+
 package main;
 
 our $options;
@@ -69,6 +71,7 @@ my %propstack;
 
 my $diag;			# for diagnostics
 my $lineinfo;			# keep lineinfo
+my $assetid = "001";		# for assets
 
 # Constructor.
 
@@ -394,16 +397,20 @@ sub parse_song {
 		# Store in assets.
 		$self->{assets} //= {};
 		$self->{assets}->{$id} =
-		  { data => $data, type => $info->{file_ext},
-		    width => $info->{width}, height => $info->{height},
+		  { type     => "image",
+		    data     => $data,
+		    subtype  => $info->{file_ext},
+		    width    => $info->{width},
+		    height   => $info->{height},
 		    $kv->{persist} ? ( persist => 1 ) : (),
 		  };
 
 		if ( $config->{debug}->{images} ) {
-		    warn("asset[$id] ", length($data), " bytes, ",
-			 "width=$info->{width}, height=$info->{height}",
-			 $kv->{persist} ? ", persist" : "",
-			 "\n");
+		    warn( "asset[$id] type=image/$info->{file_ext} ",
+			  length($data), " bytes, ",
+			  "width=$info->{width}, height=$info->{height}",
+			  $kv->{persist} ? ", persist" : "",
+			  "\n");
 		}
 		next;
 	    }
@@ -419,6 +426,10 @@ sub parse_song {
 		    do_warn("Missing type for asset\n");
 		    next;
 		}
+		unless ( exists $config->{delegates}->{$type} ) {
+		    do_warn("Unhandled type for asset: $type\n");
+		    next;
+		}
 
 		# Read the data.
 		my @data;
@@ -430,12 +441,18 @@ sub parse_song {
 		# Store in assets.
 		$self->{assets} //= {};
 		$self->{assets}->{$id} =
-		  { data => \@data, type => $type,
-		    subtype => $config->{delegates}->{$type}->{type},
+		  { data => \@data,
+		    type    => "image",
+		    subtype => $type,
+		    module  => $config->{delegates}->{$type}->{module},
 		    handler => $config->{delegates}->{$type}->{handler},
+		    $kv->{persist} ? ( persist => 1 ) : (),
 		  };
 		if ( $config->{debug}->{images} ) {
-		    warn("asset[$id] ", ::dump($self->{assets}->{$id}));
+		    warn("asset[$id] type=image/$type ",
+			 scalar(@data), " lines",
+			 $kv->{persist} ? ", persist" : "",
+			 "\n");
 		}
 		next;
 	    }
@@ -465,6 +482,45 @@ sub parse_song {
 		else {
 		    delete $self->{body}->[-1]->{open};
 		    # A subsequent {start_of_XXX} will reopen a new item
+
+		    my $d = $config->{delegates}->{$in_context};
+		    if ( $d->{type} eq "image" ) {
+			local $_;
+			my $a = pop( @{ $self->{body} } );
+			delete( $a->{context} );
+			my $id;
+			my $opts = {};
+			my $pkg = 'ChordPro::Delegate::' . $a->{delegate};
+			eval "require $pkg" || warn($@);
+			if ( my $c = $pkg->can("options") ) {
+			    $opts = $c->($a->{data});
+			    $id = delete $opts->{id};
+			}
+			$a->{opts} = { %{$a->{opts}}, %$opts };
+
+
+			my $def = !!$id;
+			$id //= "_Image".$assetid++;
+
+			if ( defined $opts->{spread} ) {
+			    $def++;
+			    if ( exists $self->{spreadimage} ) {
+				do_warn("Skipping superfluous spread image");
+			    }
+			    else {
+				$self->{spreadimage} =
+				  { id => $id, space => $opts->{spread} };
+				warn("Got spread image $id with space=$opts->{spread}\n")
+				  if $config->{debug}->{images};
+			    }
+			}
+
+			# Move to assets.
+			$self->{assets}->{$id} = $a;
+			$self->add( type => "image",
+				    opts => $opts,
+				    id => $id ) unless $def;
+		    }
 		}
 	    }
 	    elsif ( $config->{delegates}->{$in_context}->{omit} ) {
@@ -487,13 +543,13 @@ sub parse_song {
 			  $xpose + ($config->{settings}->{transpose}//0 );
 		    }
 		    my $d = $config->{delegates}->{$in_context};
-		    $self->add( type => "delegate",
+		    $self->add( type     => "image",
+				subtype  => "delegate",
 				delegate => $d->{module},
-				subtype => $d->{type},
-				handler => $d->{handler},
-				data => [ $_ ],
-				opts => \%opts,
-				open => 1 );
+				handler  => $d->{handler},
+				data     => [ $_ ],
+				opts     => \%opts,
+				open     => 1 );
 		}
 		next;
 	    }
@@ -556,6 +612,8 @@ sub parse_song {
     warn("Processed song...\n") if $options->{verbose};
     $diag->{format} = "\"%f\": %m";
 
+    ::dump($self->{assets}, as => "Assets, Pass 1")
+      if $config->{debug}->{assets} & 1;
     $self->dump(0) if $config->{debug}->{song} > 1;
 
     if ( @labels ) {
@@ -646,7 +704,8 @@ sub parse_song {
 	}
     }
 
-    $self->dump(0) if $config->{debug}->{song};
+    $self->dump(0) if $config->{debug}->{song} > 0;
+    $self->dump(2) if $config->{debug}->{song} < 0;
     $self->dump(1) if $config->{debug}->{songfull};
 
     return $self;
@@ -1251,24 +1310,29 @@ sub directive {
 	my $res = parse_kv($arg);
 	my $uri;
 	my $id;
+	my $type;
 	my %opts;
 	while ( my($k,$v) = each(%$res) ) {
 	    if ( $k =~ /^(title)$/i && $v ne "" ) {
 		$opts{lc($k)} = $v;
 	    }
-	    elsif ( $k =~ /^(border|spread|center)$/i && $v =~ /^(\d+)$/ ) {
+	    elsif ( $k =~ /^(border|spread|center|persist)$/i
+		    && $v =~ /^(\d+)$/ ) {
 		$opts{lc($k)} = $v;
 	    }
-	    elsif ( $k =~ /^(width|height)$/i && $v =~ /^(\d+(?:\.\d+)?\%?)$/ ) {
+	    elsif ( $k =~ /^(width|height)$/i
+		    && $v =~ /^(\d+(?:\.\d+)?\%?)$/ ) {
 		$opts{lc($k)} = $v;
 	    }
-	    elsif ( $k =~ /^(x|y)$/i && $v =~ /^([-+]?\d+(?:\.\d+)?\%?)$/ ) {
+	    elsif ( $k =~ /^(x|y)$/i
+		    && $v =~ /^([-+]?\d+(?:\.\d+)?\%?)$/ ) {
 		$opts{lc($k)} = $v;
 	    }
-	    elsif ( $k =~ /^(scale)$/ && $v =~ /^(\d+(?:\.\d+)?)(%)?$/ ) {
+	    elsif ( $k =~ /^(scale)$/
+		    && $v =~ /^(\d+(?:\.\d+)?)(%)?$/ ) {
 		$opts{lc($k)} = $2 ? $1/100 : $1;
 	    }
-	    elsif ( $k =~ /^(center|border|spread)$/i ) {
+	    elsif ( $k =~ /^(center|border|spread|persist)$/i ) {
 		$opts{lc($k)} = $v;
 	    }
 	    elsif ( $k =~ /^(src|uri)$/i && $v ne "" ) {
@@ -1276,6 +1340,9 @@ sub directive {
 	    }
 	    elsif ( $k =~ /^(id)$/i && $v ne "" ) {
 		$id = $v;
+	    }
+	    elsif ( $k =~ /^(type)$/i && $v ne "" ) {
+		$type = $v;
 	    }
 	    elsif ( $k =~ /^(anchor)$/i
 		    && $v =~ /^(paper|page|column|float|line)$/ ) {
@@ -1291,7 +1358,12 @@ sub directive {
 	    }
 	}
 
-	# If the image name does not have a directory, look it up
+	unless ( $uri || $id ) {
+	    do_warn( "Missing image source\n" );
+	    return;
+	}
+
+	# If the image uri does not have a directory, look it up
 	# next to the song, and then in the images folder of the
 	# CHORDPRO_LIB.
 	if ( $uri && $uri !~ m;^([a-z]:)?[/\\];i ) { # not abs
@@ -1303,53 +1375,67 @@ sub directive {
 		    $uri = $_, last L if -s $_;
 		}
 		do_warn("Missing image for \"$uri\"");
+		return;
 	    }
 	}
 
-	# uri + id -> define asset
-	if ( $uri && $id ) {
-	    # Define a new asset.
-	    if ( %opts ) {
+	my $aid = $id || "_Image".$assetid++;
+
+	if ( defined $opts{spread} ) {
+	    if ( exists $self->{spreadimage} ) {
+		do_warn("Skipping superfluous spread image");
+	    }
+	    else {
+		$self->{spreadimage} =
+		  { id => $aid, space => $opts{spread} };
+		warn("Got spread image $aid with $opts{spread} space\n");
+	    }
+	}
+
+	# Store as asset.
+	if ( $uri ) {
+	    my $opts;
+	    $opts->{subtype} = $opts{type}    if $opts{type};
+	    $opts->{persist} = $opts{persist} if $opts{persist};
+	    delete $opts{$_} for qw( type persist );
+
+	    if ( $id && %opts ) {
 		do_warn("Asset definition \"$id\" does not take attributes");
 		return;
 	    }
-	    use Image::Info;
-	    open( my $fd, '<:raw', $uri );
-	    unless ( $fd ) {
-		do_warn("$uri: $!");
-		return;
-	    }
-	    my $data = do { local $/; <$fd> };
-	    # Get info.
-	    my $info = Image::Info::image_info(\$data);
-	    if ( $info->{error} ) {
-		do_warn($info->{error});
-		return;
-	    }
 
-	    # Store in assets.
 	    $self->{assets} //= {};
-	    $self->{assets}->{$id} =
-	      { data => $data, type => $info->{file_ext},
-		width => $info->{width}, height => $info->{height},
-	      };
+	    my $a;
+	    if ( $uri =~ /\.(\w+)$/ && exists $config->{delegates}->{$1} ) {
+		my $d = $config->{delegates}->{$1};
+		$a = { type      => "image",
+		       subtype   => "delegate",
+		       delegate  => $d->{module},
+		       handler   => $d->{handler},
+		       uri       => $uri,
+		     };
+	    }
+	    else {
+		$a = { type      => "image",
+		       uri       => $uri,
+		     };
+	    }
+	    $a->{opts} = $opts if $opts;
+	    $self->{assets}->{$aid} = $a;
 
 	    if ( $config->{debug}->{images} ) {
-		warn("asset[$id] ", length($data), " bytes, ",
-		     "width=$info->{width}, height=$info->{height}",
+		warn("asset[$aid] type=image uri=$uri",
+		     $a->{subtype} ? " subtype=$a->{subtype}" : (),
+		     $a->{delegate} ? " delegate=$a->{delegate}" : (),
+		     $opts->{persist} ? " persist" : (),
 		     "\n");
 	    }
-	    return 1;
+	    return if $id || defined $opts{spread};	# defining only
 	}
 
-	$uri = "id=$id" if $id;
-	unless ( $uri ) {
-	    do_warn( "Missing image source\n" );
-	    return;
-	}
-	$self->add( type => $uri =~ /\.svg$/ ? "svg" : "image",
-		    uri  => $uri,
-		    opts => \%opts );
+	$self->add( type      => "image",
+		    id        => $aid,
+		    opts      => \%opts );
 	return 1;
     }
 
@@ -2210,6 +2296,11 @@ sub structurize {
 
 sub dump {
     my ( $self, $full ) = @_;
+    $full ||= 0;
+
+    if ( $full == 2 ) {
+	return ::dump($self->{body});
+    }
     my $a = dclone($self);
     $a->{config} = ref(delete($a->{config}));
     unless ( $full ) {
@@ -2217,14 +2308,6 @@ sub dump {
 	    $a->{chordsinfo}{$ci} = $a->{chordsinfo}{$ci}->simplify;
 	}
     }
-#    require Data::Dump::Filtered;
-#    warn Data::Dump::Filtered::dump_filtered($a, sub {
-#						 my ( $ctx, $o ) = @_;
-#						 my $h = { hide_keys => [ 'parser' ] };
-#						 $h->{bless} = ""
-#						   if $ctx->class;
-#						 $h;
-#				      });
     ::dump($a);
 }
 

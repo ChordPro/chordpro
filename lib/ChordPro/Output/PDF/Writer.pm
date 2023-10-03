@@ -16,6 +16,7 @@ use utf8;
 
 use ChordPro::Utils qw( expand_tilde demarkup );
 use ChordPro::Output::Common qw( fmt_subst prep_outlines );
+use File::LoadLines qw(loadlines);
 
 # For regression testing, run perl with PERL_HASH_SEED set to zero.
 # This eliminates the arbitrary order of font definitions and triggers
@@ -182,7 +183,6 @@ sub text {
 	# Draw background and.or frame.
 	my $d = $debug ? 0 : 1;
 	$frame = $debug || $font->{color} || $self->{ps}->{theme}->{foreground} if $frame;
-	# $self->crosshair( $x, $y, 20, 0.2, "magenta" );
 	$self->rectxy( $x + $e->{x} - $d,
 		       $y + $e->{y} + $d,
 		       $x + $e->{x} + $e->{width} + $d,
@@ -330,50 +330,63 @@ sub cross {
     $gfx->restore;
 }
 
-sub crosshair {			# for debugging
-    my ( $self, $x, $y, $r, $lw, $strokecolor ) = @_;
-    my $gfx = $self->{pdfgfx};
-    $gfx->save;
-    $gfx->strokecolor($self->_fgcolor($strokecolor)) if $strokecolor;
-    $gfx->linewidth($lw||1);
-    $gfx->move( $x, $y - $r );
-    $gfx->line( $x, $y + $r );
-    $gfx->stroke if $strokecolor;
-    $gfx->move( $x - $r, $y );
-    $gfx->line( $x + $r, $y );
-    $gfx->stroke if $strokecolor;
-    $gfx->restore;
-}
-
 sub get_image {
     my ( $self, $elt ) = @_;
 
     my $img;
-    my $uri = $elt->{uri};
-    warn("get_image($uri)\n") if $config->{debug}->{images};
-    if ( $uri =~ /^id=(.+)/ ) {
-	my $a = ChordPro::Output::PDF::assets($1);
+    my $subtype = $elt->{subtype};
 
-	if ( $a->{type} eq "jpg" ) {
-	    $img = $self->{pdf}->image_jpeg(IO::String->new($a->{data}));
-	}
-	elsif ( $a->{type} eq "png" ) {
-	    $img = $self->{pdf}->image_png(IO::String->new($a->{data}));
-	}
-	elsif ( $a->{type} eq "gif" ) {
-	    $img = $self->{pdf}->image_gif(IO::String->new($a->{data}));
-	}
-	else {
-	    warn( "PDF: Unhandled asset type: ", $a->{type}, " (skipped)\n");
-	}
-	return $img;
+    if ( $subtype && $subtype eq "delegate" ) {
+	croak("delegated image in get_image()");
     }
-    for ( $uri ) {
-	$img = $self->{pdf}->image_png($_)  if /\.png$/i;
-	$img = $self->{pdf}->image_jpeg($_) if /\.jpe?g$/i;
-	$img = $self->{pdf}->image_gif($_)  if /\.gif$/i;
+
+    my $uri = $elt->{uri};
+    my $data = $uri;
+    if ( $elt->{data} ) {
+	$data = $elt->{data};
+	warn("get_image($subtype): data ", length($data), " bytes\n")
+	  if $config->{debug}->{images};
+	return $data;
+    }
+    if ( $elt->{id} ) {
+	my $a = ChordPro::Output::PDF::assets($elt->{id});
+	$subtype = $a->{type};
+	$data = $subtype eq "xform" ? $data : IO::String->new($a->{data});
+	warn("get_image(id=", $elt->{id}, "): subtype $subtype\n")
+	  if $config->{debug}->{images};
+	$elt = $a;
+    }
+
+    if ( $subtype =~ /^(jpg|png|gif)$/ ) {
+	$img = $self->{pdf}->image($data);
+	warn("get_image($subtype, $uri): img ", length($img), " bytes\n")
+	  if $config->{debug}->{images};
+    }
+    elsif ( $subtype =~ /^(xform)$/ ) {
+	$img = $data;
+	warn("get_image($subtype): xobject (",
+#	     join(" ", $img->bbox),
+	     join(" ", @{$data->{bbox}}),
+	     ")\n")
+	  if $config->{debug}->{images};
+    }
+    else {
+	croak("Unhandled image type: $subtype\n");
     }
     return $img;
+}
+
+package PDF::API2::Resource::XObject::Form {
+  sub width {
+    my ( $self ) = @_;
+    my @bb = $self->bbox;
+    return $bb[2]-$bb[0];
+  }
+  sub height {
+    my ( $self ) = @_;
+    my @bb = $self->bbox;
+    return $bb[3]-$bb[1];
+  }
 }
 
 sub add_object {
@@ -389,6 +402,11 @@ sub add_object {
     my $w = $o->width  * $scale_x;
     my $h = $o->height * $scale_y;
 
+    warn( sprintf("add_object x=%.1f y=%.1f w=%.1f h=%.1f scale=%.1f,%.1f)\n",
+		  $x, $y, $w, $h, $scale_x, $scale_y
+		 ) ) if $config->{debug}->{images};
+    
+    $self->crosshairs( $x, $y, color => "lime" );
     if ( $va eq "top" ) {
 	$y -= $h;
     }
@@ -402,15 +420,16 @@ sub add_object {
 	$x -= $w/2;
     }
 
+    $self->crosshairs( $x, $y, color => "red" );
     $gfx->save;
-
     if ( ref($o) =~ /::Resource::XObject::Image::/ ) {
 	# Image wants width and height.
 	$gfx->object( $o, $x, $y, $w, $h );
     }
     else {
 	# XO_Form wants xscale and yscale.
-	$gfx->object( $o, $x, $y, $scale_x, $scale_y );
+	my @bb = $o->bbox;
+	$gfx->object( $o, $x-$bb[0]*$scale_x, $y-$bb[1]*$scale_y, $scale_x, $scale_y );
     }
 
     if ( $options{border} ) {
@@ -426,7 +445,8 @@ sub add_object {
 
 # For convenience.
 sub crosshairs {
-    my ( $gfx, $x, $y, %options ) = @_;
+    my ( $self, $x, $y, %options ) = @_;
+    my $gfx = $self->{pdfgfx};
     my $col = $options{colour} || $options{color} || "black";
     my $lw  = $options{linewidth} || 0.1;
     my $w  = ( $options{width} || 40 ) / 2;
@@ -449,7 +469,7 @@ sub add_image {
     $self->add_object( $img, $x, $y,
 		       xscale => $w/$img->width,
 		       yscale => $h/$img->height,
-		       valign => "top",
+		       valign => "bottom",
 		       $border ? ( border => $border ) : () );
 }
 
@@ -484,6 +504,7 @@ sub newpage {
 sub openpage {
     my ( $self, $ps, $page ) = @_;
     $self->{pdfpage} = $self->{pdf}->openpage($page);
+    confess("Fatal: Page $page not found.") unless $self->{pdfpage};
     $self->{pdfgfx}  = $self->{pdfpage}->gfx;
     $self->{pdftext} = $self->{pdfpage}->text;
 }

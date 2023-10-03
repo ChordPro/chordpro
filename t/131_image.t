@@ -43,14 +43,15 @@ my $song = {
 	    'body' => [
 		       {
 			'context' => '',
-			'uri' => 'id=white',
+			'id' => 'white',
 			'type' => 'image',
 			'opts' => {}
 		       }
 		      ],
 	    'assets' => {
 			 white => {
-				   type => 'jpg',
+				   type => 'image',
+				   subtype => 'jpg',
 				   width => 1,
 				   height => 1,
 				},
