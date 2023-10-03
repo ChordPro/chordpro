@@ -137,7 +137,25 @@ sub _abc2svg( $s, $pw, $elt ) {
     my $out  = File::Spec->catfile( $td, "tmp${imgcnt}.out" );
     my $err  = File::Spec->catfile( $td, "tmp${imgcnt}.err" );
 
-    my @preamble = @{ $cfg->{preamble} };
+    # Get rid of as much space as possible.
+    # Jean-François Moine:
+    # If you have both "%%stretchstaff 1" and "%%trimsvg 1", and
+    # "%%stretchlast 0", only the final line is shorter.
+    # Otherwise, you can have "%%trimsvg 1" as the last line of the tune.
+    my @preamble =
+      ( "%%topspace 0",
+	"%%titlespace 0",
+	"%%musicspace 0",
+	"%%composerspace 0",
+	"%%infospace 0",
+	"%%textspace 0",
+	"%%leftmargin 0cm",
+	"%%rightmargin 0cm",
+	"%%stretchstaff 1",
+	"%%stretchlast 0",
+	"%%trimsvg 1",
+	"%%staffsep 0",
+	@{ $cfg->{preamble} } );
 
     for ( keys(%{$elt->{opts}}) ) {
 
@@ -163,7 +181,6 @@ sub _abc2svg( $s, $pw, $elt ) {
     }
     my $kv = { %$elt };
     $kv = parse_kv( @pre ) if @pre;
-    $kv->{id} = 1;
     $kv->{split} //= 1;		# less overhead. really.
     $kv->{scale} ||= 1;
     if ( $kv->{width} ) {
@@ -172,10 +189,7 @@ sub _abc2svg( $s, $pw, $elt ) {
 
     unshift( @preamble,
 	     grep { /^%%/ } @pre,
-#	     $pw ? sprintf("%%%%pagewidth %.3fcm", $pw/96*2.54) : (),
 	     $pw ? sprintf("%%%%pagewidth %dpx", $pw) : (),
-	     "%%leftmargin 0cm",
-	     "%%rightmargin 0cm",
 	   );
 
     # Create the temp file for the ABC source.
@@ -312,25 +326,40 @@ sub _abc2svg( $s, $pw, $elt ) {
 	warn("SVG: ", 1+$lines, " lines (", -s $svg, " bytes)\n") if DEBUG > 1;
     }
 
-    my @res;
-    push( @res,
-	  { type => "svg",
+    return
+	  { type => "image",
+	    line => $elt->{line},
+	    subtype => "svg",
 	    data => \@data,
-	    opts => { id     => $kv->{id},
-		      center => $kv->{center},
-		      scale  => $kv->{scale},
-		      split  => $kv->{split},
-		      spread => $kv->{spread},
-		      sep    => $kv->{staffsep},
-		    } } );
-
-    return \@res;
+	    opts => { maybe id     => $kv->{id},
+		      maybe center => $kv->{center},
+		      maybe scale  => $kv->{scale},
+		      maybe split  => $kv->{split},
+		      maybe spread => $kv->{spread},
+		      maybe sep    => $kv->{staffsep},
+		    } };
 }
 
 sub abc2image( $s, $pw, $elt ) {
 
     croak("ABC: Please remove handler \"abc2image\" from your ABC delegates config");
 
+}
+
+# Pre-scan.
+sub options( $data ) {
+
+    my @pre;
+    while ( @$data ) {
+	$_ = shift(@$data);
+	unshift( @$data, $_ ), last if /^X:/;
+	push( @pre, $_ );
+    }
+    if ( @pre && !@$data ) {	# no X: found
+	return;
+    }
+    my $kv = parse_kv( @pre ) if @pre;
+    $kv;
 }
 
 1;
