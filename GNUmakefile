@@ -125,11 +125,9 @@ _wkit2 :
 	VBoxManage snapshot ${VM} restorecurrent
 
 abckit ::
-	npm update --silent abc2svg
-	tar zcvf pp/windows/abc2svg_qjs.tar \
-	    -C ${HOME}/node_modules \
-	    --exclude "**/Scc1t?/*" \
-	    abc2svg
+	: npm update --silent abc2svg
+	tar zcvf pp/common/abc2svg_qjs.tar \
+	    -C ${HOME}/node_modules -T lib/ChordPro/res/abc/.manifest
 
 .PHONY: TAGS
 
