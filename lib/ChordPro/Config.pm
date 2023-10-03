@@ -1089,19 +1089,10 @@ sub default_config () {
             "handler"  : "abc2svg",
             // No longer used -- ./default.abc will always be used if present
             "config"   : "default", // or "none", or "myformat.fmt"
-            // The preamble is a list of lines inserted before the ABC data.
+            // The preamble is a list of lines inserted before the ABC data,
+            // and after the delegate supplied preamble.
             // DO NOT MODIFY unless you know what you are doing!
             "preamble" : [
-               // Get rid of as much space as possible.
-               "%%topspace 0",
-               "%%titlespace 0",
-               "%%musicspace 0",
-               "%%composerspace 0",
-               "%%infospace 0",
-               "%%textspace 0",
-               "%%leftmargin 0cm",
-               "%%rightmargin 0cm",
-               "%%staffsep 0",
                // Use ChordPro fonts for lyrics and chords.
                "%%textfont pdf.fonts.text",
                "%%gchordfont pdf.fonts.chord",
@@ -1120,6 +1111,12 @@ sub default_config () {
                 "\\version \"2.21.0\"",
                 "\\header { tagline = ##f }",
             ],
+            "omit"     : false,
+        },
+        "svg" : {
+            "type"     : "image",
+            "module"   : "SVG",
+            "handler"  : "svg2svg",
             "omit"     : false,
         },
      },
@@ -1609,6 +1606,7 @@ sub default_config () {
 
     // For (debugging (internal use only)).
     "debug" : {
+        "assets" : 0,
         "chords" : 0,
         "config" : 0,
         "echo" : 0,
@@ -1620,6 +1618,7 @@ sub default_config () {
         "spacing" : 0,
         "song" : 0,
         "songfull" : 0,
+        "ops" : 0,
         "csv" : 0,
         "abc" : 0,
         "ly" : 0,

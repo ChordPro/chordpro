@@ -18,7 +18,7 @@
 		},
 		"handler": {
 		    "type": "string",
-		    "default": "abc2image"
+		    "default": "abc2svg"
 		},
 		"config": {
 		    "type": "string",
@@ -720,7 +720,7 @@
 			{ "properties": {
 			      "handler": {
 				  "type": "string",
-				  "default": "abc2image"
+				  "default": "abc2svg"
 			      },
 			      "module": {
 				  "type": "string",
@@ -736,11 +736,27 @@
 			{ "properties": {
 			      "handler": {
 			          "type": "string",
-			          "default": "ly2image"
+			          "default": "ly2svg"
 			      },
 			      "module": {
 			          "type": "string",
 			          "default": "Lilypond"
+			      }
+		        } }
+		     ]
+		 },
+	        "svg": {
+		    "description": "Embedding SVG",
+		    "allOf": [
+			{ "$ref": "#/definitions/delegatespec" },
+			{ "properties": {
+			      "handler": {
+			          "type": "string",
+			          "default": "svg2svg"
+			      },
+			      "module": {
+			          "type": "string",
+			          "default": "SVG"
 			      }
 		        } }
 		     ]
