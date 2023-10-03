@@ -48,6 +48,7 @@ WriteMakefile
 		    'File::HomeDir'		  => 1.004,
 		    'Image::Info'		  => 1.41,
 		    'List::Util'		  => 1.46,
+		    'Data::Printer'		  => 1.001001,
 		    'Storable'			  => 3.08,
 		    'Object::Pad'                 => 0.78,
 		   # Some distro's have removed this from the core.

@@ -285,19 +285,8 @@ sub chordpro {
 }
 
 sub ::dump {
-    use Data::Dumper qw();
-    local $Data::Dumper::Sortkeys  = 1;
-    local $Data::Dumper::Indent    = 1;
-    local $Data::Dumper::Quotekeys = 0;
-    local $Data::Dumper::Deparse   = 1;
-    local $Data::Dumper::Terse     = 1;
-    local $Data::Dumper::Trailingcomma = 1;
-    local $Data::Dumper::Useperl = 1;
-    local $Data::Dumper::Useqq     = 0; # I want unicode visible
-
-    my $s = Data::Dumper::Dumper @_;
-    defined wantarray or warn $s;
-    return $s;
+    use ChordPro::Dumper;
+    ddp(@_);
 }
 
 ################ Options and Configuration ################
