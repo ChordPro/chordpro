@@ -1,4 +1,3 @@
-
 Changes
 LICENSE
 MANIFEST
@@ -15,6 +14,8 @@ lib/ChordPro/Config.pm
 lib/ChordPro/Config/Properties.pm
 lib/ChordPro/Delegate/ABC.pm
 lib/ChordPro/Delegate/Lilypond.pm
+lib/ChordPro/Delegate/SVG.pm
+lib/ChordPro/Dumper.pm
 lib/ChordPro/Output/ChordPro.pm
 lib/ChordPro/Output/Common.pm
 lib/ChordPro/Output/Debug.pm
@@ -182,6 +183,7 @@ t/122_memorize.t
 t/130_image.jpg
 t/130_image.t
 t/131_image.t
+t/132_image.t
 t/140_chords.t
 t/141_chords.t
 t/142_chords.t
