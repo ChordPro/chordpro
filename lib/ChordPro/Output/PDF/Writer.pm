@@ -162,6 +162,7 @@ sub text {
     else {
 	$self->{layout}->set_markup($text);
 	for ( @{ $self->{layout}->{_content} } ) {
+	    next unless $_->{type} eq "text";
 	    $_->{text} =~ s/\'/\x{2019}/g;	# friendly quote
 	}
     }
@@ -405,7 +406,7 @@ sub add_object {
     warn( sprintf("add_object x=%.1f y=%.1f w=%.1f h=%.1f scale=%.1f,%.1f)\n",
 		  $x, $y, $w, $h, $scale_x, $scale_y
 		 ) ) if $config->{debug}->{images};
-    
+
     $self->crosshairs( $x, $y, color => "lime" );
     if ( $va eq "top" ) {
 	$y -= $h;

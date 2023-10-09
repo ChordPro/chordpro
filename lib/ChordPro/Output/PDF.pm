@@ -358,6 +358,8 @@ sub generate_song {
     my ( $s, $opts ) = @_;
 
     my $pr = $opts->{pr};
+    $pr->{layout}->register_element
+      ( TextLayoutImageElement->new( pdf => $pr->{pdf} ), "img" );
 
     unless ( $s->{body} ) {	# empty song, or embedded
 	return unless $s->{source}->{embedding};
@@ -1658,7 +1660,9 @@ sub defrag {
 	    }
 	    elsif ( $a =~ m;^<\s*(\w+)(.*)>$; ) {
 		my $k = $1;
-		push( @stack, "<$k$2>" );
+		my $v = $2;
+		# Do not push if self-closed.
+		push( @stack, "<$k$v>" ) unless $v =~ m;/\s*$;;
 	    }
 	    push( @r, $a );
 	}
@@ -1976,8 +1980,8 @@ sub imageline {
     }
 
     my $scale = 1;
-    my ( $w, $h ) = ( $opts->{width}  || $img->width,
-		      $opts->{height} || $img->height );
+    my ( $w, $h ) = ( $opts->{width}  || $assets->{$id}->{vwidth}  || $img->width,
+		      $opts->{height} || $assets->{$id}->{vheight} || $img->height );
 
   if ( $config->{debug}->{x1} ) {
 
@@ -2876,6 +2880,60 @@ sub new {
 sub name   { $_[0]->{name} }
 sub width  { $_[0]->{w} }
 sub height { $_[0]->{h} }
+
+use Object::Pad;
+
+class TextLayoutImageElement :isa(Text::Layout::PDFAPI2::ImageElement);
+
+use constant TYPE => "img";
+use Carp;
+
+use Text::ParseWords qw( shellwords );
+
+method parse( $ctx, $k, $v ) {
+
+    my %ctl = ( type => TYPE );
+
+    # Split the attributes.
+    foreach my $k ( shellwords($v) ) {
+
+	# key=value
+	if ( $k =~ /^([-\w]+)=(.+)$/ ) {
+	    my ( $k, $v ) = ( $1, $2 );
+
+	    # Ignore case unless required.
+	    $v = lc $v unless $k =~ /^(id)$/;
+
+	    if ( $k =~ /^(id|bbox)$/ ) {
+		$ctl{$k} = $v;
+	    }
+	    elsif ( $k =~ /^(width|height|dx|dy|w|h)$/ ) {
+		$v = $1 * $ctx->{size}     if $v =~ /^([\d.]+)em$/;
+		$v = $1 * $ctx->{size} / 2 if $v =~ /^([\d.]+)ex$/;
+		$ctl{$k} = $v;
+	    }
+	    elsif ( $k =~ /^(scale)$/ ) {
+		$v = $1 / 100 if $v =~ /^([\d.]+)\%$/;
+		$ctl{$k} = $v;
+	    }
+	    else {
+		carp("Invalid " . TYPE . " attribute: \"$k\"\n");
+	    }
+	}
+
+	# Currently do not have value-less attributes.
+	else {
+	    carp("Invalid " . TYPE . " attribute: \"$k\"\n");
+	}
+    }
+
+    return \%ctl;
+}
+
+method getimage ($fragment) {
+    $fragment->{_img} //=
+      ChordPro::Output::PDF::assets($fragment->{id})->{data};
+}
 
 1;
 

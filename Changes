@@ -1,6 +1,7 @@
 0.000
 
     - !ChordPro functionality
+    - Inline images.
     - (ABC) ABC embedding no longer uses nodeJS.
     - (ABC) Make split work (and enable by default).
     - Improve runtime info.

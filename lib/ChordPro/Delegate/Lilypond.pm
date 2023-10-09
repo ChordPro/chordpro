@@ -9,6 +9,8 @@ package ChordPro::Delegate::Lilypond;
 
 use strict;
 use warnings;
+use feature qw( signatures );
+no warnings "experimental::signatures";
 use utf8;
 use File::Spec;
 use File::Temp ();
@@ -20,8 +22,7 @@ use Text::ParseWords qw(shellwords);
 
 sub DEBUG() { $config->{debug}->{ly} }
 
-sub ly2svg {
-    my ( $s, $pw, $elt ) = @_;
+sub ly2svg( $s, $pw, $elt ) {
 
     state $imgcnt = 0;
     state $td = File::Temp::tempdir( CLEANUP => !$config->{debug}->{ly} );
@@ -118,15 +119,18 @@ sub ly2svg {
 
     warn("SVG: ", -s $svg, " bytes\n") if $config->{debug}->{ly};
     return
-	  { type => "svg",
+	  { type => "image",
+	    line => $elt->{line},
+	    subtype => "svg",
 	    uri  => "$im1.cropped.svg",
-	    opts => { center => $kv->{center},
-		      scale  => $kv->{scale},
-		      split  => $kv->{split},
+	    opts => { maybe id     => $kv->{id},
+		      maybe center => $kv->{center},
+		      maybe scale  => $kv->{scale},
+		      maybe spread => $kv->{spread},
 		    } };
 }
 
-sub ly2image {
+sub ly2image( $s, $pw, $elt ) {
     croak("Lilypond: Please adjust your delegate config to use handler \"ly2svg\" instead of \"ly2image\"");
 }
 
