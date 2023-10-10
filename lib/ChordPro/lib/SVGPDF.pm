@@ -291,8 +291,8 @@ method process ( $data, %options ) {
     # Restore.
     $fontsize = $save_fontsize;
 
-    my $combine = $options{combine};
-    if ( $combine ne "none" ) {
+    my $combine = $options{combine} // "none";
+    if ( $combine ne "none" && @$xoforms > 1 ) {
 	my $sep = $options{sep} || 0;
 	$xoforms = $self->combine_svg( $xoforms,
 				       type => $combine, sep => $sep );
