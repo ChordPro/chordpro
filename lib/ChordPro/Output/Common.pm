@@ -127,7 +127,7 @@ sub Roman($) {
 push( @EXPORT_OK, 'Roman' );
 
 sub roman($) {
-    lc Roman shift;
+    lc( Roman(shift) );
 }
 push( @EXPORT_OK, 'roman' );
 
