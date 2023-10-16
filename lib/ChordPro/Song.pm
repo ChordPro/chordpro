@@ -494,7 +494,7 @@ sub parse_song {
 			eval "require $pkg" || warn($@);
 			if ( my $c = $pkg->can("options") ) {
 			    $opts = $c->($a->{data});
-			    $id = delete $opts->{id};
+			    $id = $opts->{id};
 			}
 			$a->{opts} = { %{$a->{opts}}, %$opts };
 
@@ -531,7 +531,8 @@ sub parse_song {
 		if ( $self->{body} && @{ $self->{body} }
 		     && $self->{body}->[-1]->{context} eq $in_context
 		     && $self->{body}->[-1]->{open} ) {
-		    push( @{$self->{body}->[-1]->{data}}, $_ );
+		    push( @{$self->{body}->[-1]->{data}},
+			  fmt_subst( $self, $_ ) );
 		}
 
 		# Else start new item.
