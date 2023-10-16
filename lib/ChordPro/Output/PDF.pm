@@ -6,6 +6,8 @@ use utf8;
 our $config;
 our $options;
 
+our $ps;
+
 package ChordPro::Output::PDF;
 
 use strict;
@@ -43,7 +45,7 @@ sub generate_songbook {
     return [] unless $sb->{songs}->[0]->{body}; # no songs
     $verbose ||= $options->{verbose};
 
-    my $ps = $config->{pdf};
+    $ps = $config->{pdf};
 
     my $pr = (__PACKAGE__."::Writer")->new( $ps, $pdfapi );
     warn("Generating PDF ", $options->{output} || "__new__.pdf", "...\n") if $options->{verbose};
@@ -240,7 +242,7 @@ sub generate_csv {
     warn("Generating CSV ", encode_utf8($csv), "...\n")
       if  $config->{debug}->{csv} || $options->{verbose};
 
-    my $ps = $config->{pdf};
+    $ps = $config->{pdf};
     my $ctl = $ps->{csv};
     my $sep = $ctl->{separator} // ";";
     my $vsep = $ctl->{vseparator} // "|";
@@ -385,7 +387,7 @@ sub generate_song {
     $inlinechords = $::config->{settings}->{'inline-chords'};
     $inlineannots = $::config->{settings}->{'inline-annotations'};
     $chordsunder  = $::config->{settings}->{'chords-under'};
-    my $ps = $::config->clone->{pdf};
+    $ps = $::config->clone->{pdf};
     $ps->{pr} = $pr;
     $pr->{ps} = $ps;
     $ps->{_s} = $s;
@@ -403,13 +405,13 @@ sub generate_song {
     my $dd;
     my $dctl;
     if ( $::config->{instrument}->{type} eq "keyboard" ) {
-	require ChordPro::Output::PDF::KeyboardDiagrams;
-	$dd = ChordPro::Output::PDF::KeyboardDiagrams->new($ps);
+	require ChordPro::Output::PDF::KeyboardDiagram;
+	$dd = ChordPro::Output::PDF::KeyboardDiagram->new( ps => $ps );
 	$dctl = $ps->{kbdiagrams};
     }
     else {
-	require ChordPro::Output::PDF::StringDiagrams;
-	$dd = ChordPro::Output::PDF::StringDiagrams->new($ps);
+	require ChordPro::Output::PDF::StringDiagram;
+	$dd = ChordPro::Output::PDF::StringDiagram->new( ps => $ps );
 	$dctl = $ps->{diagrams};
     }
     $dctl->{show} = $s->{settings}->{diagrampos}
@@ -887,7 +889,7 @@ sub generate_song {
 
 	    # One or more?
 	    my $combine = ( !($elt->{opts}->{split}//1)
-			    || $elt->{id}
+			    || $elt->{opts}->{id}
 			    || defined($elt->{opts}->{spread}) )
 	      ? "stacked" : "none";
 	    my $sep = $elt->{opts}->{staffsep} || 0;
@@ -2892,20 +2894,26 @@ use Text::ParseWords qw( shellwords );
 
 method parse( $ctx, $k, $v ) {
 
-    my %ctl = ( type => TYPE );
+    my %ctl = ( type => TYPE, size => $ctx->{size} );
 
     # Split the attributes.
-    foreach my $k ( shellwords($v) ) {
+    foreach my $kk ( shellwords($v) ) {
 
 	# key=value
-	if ( $k =~ /^([-\w]+)=(.+)$/ ) {
+	if ( $kk =~ /^([-\w]+)=(.+)$/ ) {
 	    my ( $k, $v ) = ( $1, $2 );
 
 	    # Ignore case unless required.
-	    $v = lc $v unless $k =~ /^(id)$/;
+	    $v = lc $v unless $k =~ /^(id|chord)$/;
 
-	    if ( $k =~ /^(id|bbox)$/ ) {
+	    if ( $k =~ /^(id|bbox|chord|src)$/ ) {
 		$ctl{$k} = $v;
+	    }
+	    elsif ( $k eq "align" && $v =~ /^(left|right|center)$/ ) {
+		$ctl{$k} = $v;
+	    }
+	    elsif ( $k eq "type" && $v =~ /^(strings?|keyboard)$/ ) {
+		$ctl{instrument} = $v;
 	    }
 	    elsif ( $k =~ /^(width|height|dx|dy|w|h)$/ ) {
 		$v = $1 * $ctx->{size}     if $v =~ /^([\d.]+)em$/;
@@ -2917,13 +2925,13 @@ method parse( $ctx, $k, $v ) {
 		$ctl{$k} = $v;
 	    }
 	    else {
-		carp("Invalid " . TYPE . " attribute: \"$k\"\n");
+		carp("Invalid " . TYPE . " attribute: \"$k\" ($kk)\n");
 	    }
 	}
 
-	# Currently do not have value-less attributes.
+	# Currently we do not have value-less attributes.
 	else {
-	    carp("Invalid " . TYPE . " attribute: \"$k\"\n");
+	    carp("Invalid " . TYPE . " attribute: \"$kk\"\n");
 	}
     }
 
@@ -2931,8 +2939,48 @@ method parse( $ctx, $k, $v ) {
 }
 
 method getimage ($fragment) {
-    $fragment->{_img} //=
-      ChordPro::Output::PDF::assets($fragment->{id})->{data};
+    $fragment->{_img} //= do {
+	my $xo;
+	if ( $fragment->{id} ) {
+	    $xo = ChordPro::Output::PDF::assets($fragment->{id})->{data};
+	    unless ( $xo ) {
+		warn("Unknown image ID in <img>: $fragment->{id}\n");
+	    }
+	}
+	elsif ( $fragment->{chord} ) {
+	    my $info = ChordPro::Chords::known_chord($fragment->{chord});
+	    unless ( $info ) {
+		warn("Unknown chord in <img>: $fragment->{chord}\n");
+	    }
+	    else {
+		my $p;
+		if ( ($fragment->{instrument} // $config->{instrument}->{type}) eq "keyboard" ) {
+		    require ChordPro::Output::PDF::KeyboardDiagram;
+		    $p = ChordPro::Output::PDF::KeyboardDiagram->new( ps => $ps );
+		}
+		else {
+		    require ChordPro::Output::PDF::StringDiagram;
+		    $p = ChordPro::Output::PDF::StringDiagram->new( ps => $ps );
+		}
+		$xo = $p->diagram_xo($info);
+	    }
+	}
+	$xo // $self->SUPER::getimage($fragment) // alert( $fragment->{size} );
+    };
+}
+
+sub alert ($size) {
+    my $scale = $size/20;
+    my $xo = $ps->{pr}->{pdf}->xo_form;
+    $xo->bbox( 0, -18*$scale, 20*$scale, 0 );
+    $xo->matrix( $scale, 0, 0, -$scale, 0, 0 );
+    $xo->line_width(2)->line_join(1);
+    $xo->stroke_color("red");
+    $xo->fill_color("red");
+    $xo->move( 1, 17 )->polyline( 19, 17, 10, 1 )->close->stroke;
+    $xo->rectangle( 9, 13, 11, 15 );
+    $xo->move( 9, 12 )->polyline( 8.5, 7, 11.5, 7, 11, 12 )->close->fill;
+    return $xo;
 }
 
 1;
