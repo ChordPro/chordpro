@@ -407,7 +407,7 @@ sub add_object {
 		  $x, $y, $w, $h, $scale_x, $scale_y
 		 ) ) if $config->{debug}->{images};
 
-    $self->crosshairs( $x, $y, color => "lime" );
+    $self->crosshairs( $x, $y, color => "lime" ) if $config->{debug}->{images};
     if ( $va eq "top" ) {
 	$y -= $h;
     }
@@ -421,7 +421,7 @@ sub add_object {
 	$x -= $w/2;
     }
 
-    $self->crosshairs( $x, $y, color => "red" );
+    $self->crosshairs( $x, $y, color => "red" ) if $config->{debug}->{images};
     $gfx->save;
     if ( ref($o) =~ /::Resource::XObject::Image::/ ) {
 	# Image wants width and height.
