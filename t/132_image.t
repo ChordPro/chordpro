@@ -90,6 +90,7 @@ my $song = {
 						'</svg>'
 					       ],
 				     'opts' => {
+						'id' => 'green',
 						'center' => '0'
 					       },
 				     'type' => 'image',

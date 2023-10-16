@@ -25,8 +25,8 @@ lib/ChordPro/Output/MMA.pm
 lib/ChordPro/Output/Markdown.pm
 lib/ChordPro/Output/PDF.pm
 lib/ChordPro/Output/PDF/Grid.pm
-lib/ChordPro/Output/PDF/KeyboardDiagrams.pm
-lib/ChordPro/Output/PDF/StringDiagrams.pm
+lib/ChordPro/Output/PDF/KeyboardDiagram.pm
+lib/ChordPro/Output/PDF/StringDiagram.pm
 lib/ChordPro/Output/PDF/Writer.pm
 lib/ChordPro/Output/Text.pm
 lib/ChordPro/Song.pm
