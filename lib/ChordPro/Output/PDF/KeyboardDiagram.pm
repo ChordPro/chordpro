@@ -116,7 +116,7 @@ method draw ( $info, $x, $y, $dummy = 0 ) {
 
     my $xo = $self->diagram_xo($info);
     my @bb = $xo->bbox;
-    warn("BB [ @bb ] $x $y\n");
+    warn("BB [ @bb ] $x $y\n") if DIAG_DEBUG;
     $pr->{pdfgfx}->object( $xo, $x,
 			   $y - ($font->{size} * 1.2 + $lw) );
 
@@ -203,7 +203,6 @@ method diagram_xo ($info) {
 
 	# Draw the keys.
 	if ( $type eq "L" ) {
-	    warn("X${pos}L ", $pkw + $l, " Y ", $b, "\n");
 	    $xo->move( $pkw + $l,  $b );
 	    $xo->polyline( $pkw + $l,  $t,
 			   $pkw + $mr, $t,
@@ -212,7 +211,6 @@ method diagram_xo ($info) {
 			   $pkw + $r,  $b )->close->fillstroke;
 	}
 	elsif ( $type eq "R" ) {
-	    warn("X${pos}R ", $pkw + $l, " Y ", $b, "\n");
 	    $xo->move( $pkw + $l,  $b );
 	    $xo->polyline( $pkw + $l,  $m,
 			   $pkw + $ml, $m,
@@ -221,7 +219,6 @@ method diagram_xo ($info) {
 			   $pkw + $r,  $b )->close->fillstroke;
 	}
 	elsif ( $type eq "M" ) {
-	    warn("X${pos}M ", $pkw + $l, " Y ", $b, "\n");
 	    $xo->move( $pkw + $l,  $b );
 	    $xo->polyline( $pkw + $l,  $m,
 			   $pkw + $ml, $m,
@@ -232,7 +229,6 @@ method diagram_xo ($info) {
 			   $pkw + $r,  $b )->close->fillstroke;
 	}
 	else {
-	    warn("X${pos}  ", $pkw + $mr, " Y ", $m, "\n");
 	    $xo->rectangle( $pkw + $mr,  $m,
 			    $pkw + $xr,  $t )->fillstroke;
 	}
