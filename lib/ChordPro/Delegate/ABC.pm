@@ -220,7 +220,7 @@ sub _abc2svg( $s, $pw, $elt ) {
     my @lines;
     my $ret;
 
-    if ( $cmd[0] =~ /qjs(?:\.w+)?$/ ) {
+    if ( $cmd[0] =~ /qjs(?:\.\w+)?$/ ) {
 
 	# Packaged.
 	push( @cmd, $out, $src );

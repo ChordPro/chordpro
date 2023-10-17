@@ -126,7 +126,7 @@ _wkit2 :
 
 abckit ::
 	: npm update --silent abc2svg
-	tar zcvf pp/common/abc2svg_qjs.tar \
+	tar zcvf pp/common/abc2svg_qjs.tar.gz \
 	    -C ${HOME}/node_modules -T lib/ChordPro/res/abc/.manifest
 
 .PHONY: TAGS
