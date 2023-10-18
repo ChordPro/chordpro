@@ -272,6 +272,7 @@ sub _abc2svg( $s, $pw, $elt ) {
     }
 
     else {
+	push( @cmd, $src );
 	if ( 0 ) {
 	    # This seemed a good idea but unfortunately Wx has problems
 	    # returning the UTF8 data correctly. Non-ASCII characters are
