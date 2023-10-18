@@ -5,6 +5,7 @@ use Object::Pad;
 use utf8;
 
 my $dcache;			# cache core grids
+my $pdf = "";			# for cache flush
 
 class ChordPro::Output::PDF::KeyboardDiagram;
 
@@ -33,6 +34,8 @@ ADJUST {
     $base	  = $ctl->{base};
     $show	  = $ctl->{show};
     $pressed	  = $ctl->{pressed};
+    $dcache = {} if $pr->{pdf} ne $pdf;
+    $pdf          = $pr->{pdf};
 
     unless ( $keys =~ /^(?:7|10|14|17|21)$/ ) {
 	die("pdf.kbdiagrams.keys is $keys, must be one of 7, 10, 14, 17, or 21\n");
@@ -49,7 +52,7 @@ ADJUST {
     }
 }
 
-use constant DIAG_DEBUG => 1;
+use constant DIAG_DEBUG => 0;
 
 # The vertical space the diagram requires.
 method vsp0 ( $elt, $dummy = 0 ) {
@@ -148,7 +151,7 @@ method diagram_xo ($info) {
 	warn("PDF: No diagram for chord \"", $info->name, "\"\n");
     }
 
-    my $xo = $pr->{pdf}->xo_form;
+    my $xo = $pdf->xo_form;
 
     # Draw the core grid.
     $xo->line_width($lw);
@@ -246,7 +249,7 @@ method grid_xo {
 	my $w = $kw * $keys;	# total width, excl linewidth
 	my $h = $kh;		# total height, excl linewidth
 
-	my $xo = $pr->{pdf}->xo_form;
+	my $xo = $pdf->xo_form;
 
 	# Bounding box must take linewidth into account.
 	# Origin is top left, so y runs negative.

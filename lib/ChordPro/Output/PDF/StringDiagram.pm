@@ -5,6 +5,7 @@ use Object::Pad;
 use utf8;
 
 my $dcache;			# cache core grids
+my $pdf = "";			# for cache flush
 
 class ChordPro::Output::PDF::StringDiagram;
 
@@ -41,6 +42,8 @@ ADJUST {
     $dot	  = $ctl->{dotsize} * ( $gh < $gw ? $gh : $gw );
     $bsz	  = $ctl->{barwidth} * $dot;
     $fsh	  = $ctl->{fingers} || 0;
+    $dcache = {} if $pr->{pdf} ne $pdf;
+    $pdf          = $pr->{pdf};
 }
 
 use constant DIAG_DEBUG => 0;
@@ -128,7 +131,7 @@ method diagram_xo( $info ) {
     my $xg = $self->grid_xo;
     my @xgbb = $xg->bbox;
 
-    my $xo = $pr->{pdf}->xo_form;
+    my $xo = $pdf->xo_form;
     my @bb = ( 0,
 	       0.77 * $dot + 2*$lw,
 	       $w + $dot/2,
@@ -332,7 +335,7 @@ method grid_xo {
 	my $w = $gw * ($hc - 1);
 	my $h = $gh * $vc;
 
-	my $xo = $pr->{pdf}->xo_form;
+	my $xo = $pdf->xo_form;
 
 	# Bounding box must take linewidth into account.
 	# Origin is top left, so y runs negative.
