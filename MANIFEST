@@ -157,6 +157,7 @@ t/01_prereq.t
 t/02_load.t
 t/100_basic.t
 t/101_empty.t
+t/101_directives.t
 t/102_new_song.t
 t/103_title.t
 t/104_subtitles.t
