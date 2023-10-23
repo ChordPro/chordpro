@@ -70,6 +70,7 @@ my $no_substitute;
 my %propstack;
 
 my $diag;			# for diagnostics
+my @diag;			# keep track of includes
 my $lineinfo;			# keep lineinfo
 my $assetid = "001";		# for assets
 
@@ -364,9 +365,10 @@ sub parse_song {
 	    # Handle assets.
 	    my $kw = "";
 	    my $kv = {};
-	    if ( /^##(image|asset):\s+(.*)/i ) {
+	    if ( /^##(image|asset|include)(?:-(.+))?:\s+(.*)/i
+		 && $self->selected($2) ) {
 		$kw = lc($1);
-		$kv = parse_kv($2);
+		$kv = parse_kv($3);
 	    }
 
 	    if ( $kw eq "image" ) {
@@ -457,6 +459,34 @@ sub parse_song {
 		next;
 	    }
 
+	    if ( $kw eq "include" ) {
+		if ( $kv->{end} ) {
+		    $diag = pop( @diag );
+		    $$linecnt = $diag->{line};
+		}
+		else {
+		    use Cwd qw(realpath);
+		    use File::Basename qw(dirname);
+		    my $uri = expand_tilde($kv->{uri} || $kv->{src});
+		    unless ( $uri =~ m;^(?:[a-z]:)?[/\\];i ) {
+			$uri = dirname(realpath($diag->{file})) . "/" . $uri;
+		    }
+		    unless ( $uri && -s $uri ) {
+			do_warn("Missing include \"$uri\"");
+			$uri = undef;
+			next;
+		    }
+		    if ( $uri ) {
+			unshift( @$lines, loadlines($uri), "##include: end=1" );
+			push( @diag, { %$diag } );
+			$diag->{file} = $uri;
+			$diag->{line} = $$linecnt = 0;
+			$diag->{orig}   = "(including $uri)";
+		    }
+		}
+		next;
+	    }
+
 	    # Collect pre-title stuff separately.
 	    if ( exists $self->{title} || $fragment ) {
 		$self->add( type => "ignore", text => $_ );
@@ -467,6 +497,7 @@ sub parse_song {
 	    next;
 	}
 
+	# Tab content goes literally.
 	if ( $in_context eq "tab" ) {
 	    unless ( /^\s*\{(?:end_of_tab|eot)\}\s*$/ ) {
 		$self->add( type => "tabline", text => $_ );
@@ -488,16 +519,17 @@ sub parse_song {
 			local $_;
 			my $a = pop( @{ $self->{body} } );
 			delete( $a->{context} );
-			my $id;
+			my $id = $a->{id};
 			my $opts = {};
-			my $pkg = 'ChordPro::Delegate::' . $a->{delegate};
-			eval "require $pkg" || warn($@);
-			if ( my $c = $pkg->can("options") ) {
-			    $opts = $c->($a->{data});
-			    $id = $opts->{id};
+			unless ( $id ) {
+			    my $pkg = 'ChordPro::Delegate::' . $a->{delegate};
+			    eval "require $pkg" || warn($@);
+			    if ( my $c = $pkg->can("options") ) {
+				$opts = $c->($a->{data});
+				$id = $opts->{id};
+			    }
 			}
-			$a->{opts} = { %{$a->{opts}}, %$opts };
-
+			$opts = $a->{opts} = { %{$a->{opts}}, %$opts };
 
 			my $def = !!$id;
 			$id //= "_Image".$assetid++;
@@ -517,9 +549,19 @@ sub parse_song {
 
 			# Move to assets.
 			$self->{assets}->{$id} = $a;
-			$self->add( type => "image",
-				    opts => $opts,
-				    id => $id ) unless $def;
+			if ( $def ) {
+			    if ( @{$self->{body}}
+				 && $self->{body}->[-1]->{type} eq 'set'
+				 && $self->{body}->[-1]->{name} eq 'label' ) {
+				my $a = pop( @{$self->{body}} );
+				do_warn("Label \"$a->{value}\" ignored on non-displaying $a->{context} section\n");
+			    }
+			}
+			else {
+			    $self->add( type => "image",
+					opts => $opts,
+					id => $id );
+			}
 		    }
 		}
 	    }
@@ -1002,56 +1044,40 @@ sub decompose_grid {
 
 ################ Parsing directives ################
 
-my @directives = qw(
-    chord
-    chordcolour
-    chordfont
-    chordsize
-    chorus
-    column_break
-    columns
-    comment
-    comment_box
-    comment_italic
-    define
-    end_of_bridge
-    end_of_chorus
-    end_of_grid
-    end_of_tab
-    end_of_verse
-    footersize
-    footercolour
-    footerfont
-    grid
-    highlight
-    image
-    meta
-    new_page
-    new_physical_page
-    new_song
-    no_grid
-    pagetype
-    start_of_bridge
-    start_of_chorus
-    start_of_grid
-    start_of_tab
-    start_of_verse
-    subtitle
-    tabcolour
-    tabfont
-    tabsize
-    textcolour
-    textfont
-    textsize
-    title
-    titlesize
-    titlecolour
-    titlefont
-    titles
-    tocsize
-    toccolour
-    tocfont
-    transpose
+my %directives = (
+		  chord		     => \&define_chord,
+		  chorus	     => \&dir_chorus,
+		  column_break	     => \&dir_column_break,
+		  columns	     => \&dir_columns,
+		  comment	     => \&dir_comment,
+		  comment_box	     => \&dir_comment,
+		  comment_italic     => \&dir_comment,
+		  define	     => \&define_chord,
+		  diagrams	     => \&dir_diagrams,
+		  end_of_bridge	     => undef,
+		  end_of_chorus	     => undef,
+		  end_of_grid	     => undef,
+		  end_of_tab	     => undef,
+		  end_of_verse	     => undef,
+		  grid		     => \&dir_grid,
+		  highlight	     => \&dir_comment,
+		  image		     => \&dir_image,
+		  meta		     => \&dir_meta,
+		  new_page	     => \&dir_new_page,
+		  new_physical_page  => \&dir_new_page,
+		  new_song	     => \&dir_new_song,
+		  no_grid	     => \&dir_no_grid,
+		  pagesize	     => \&dir_papersize,
+		  pagetype	     => \&dir_papersize,
+		  start_of_bridge    => undef,
+		  start_of_chorus    => undef,
+		  start_of_grid	     => undef,
+		  start_of_tab	     => undef,
+		  start_of_verse     => undef,
+		  subtitle	     => \&dir_subtitle,
+		  title		     => \&dir_title,
+		  titles	     => \&dir_titles,
+		  transpose	     => \&dir_transpose,
    );
 # NOTE: Flex: start_of_... end_of_... x_...
 
@@ -1062,13 +1088,11 @@ my %abbrevs = (
    ci	      => "comment_italic",
    colb	      => "column_break",
    cs	      => "chordsize",
-   grid       => "diagrams",	# not really an abbrev
    eob	      => "end_of_bridge",
    eoc	      => "end_of_chorus",
    eot	      => "end_of_tab",
    eov	      => "end_of_verse",
    g	      => "diagrams",
-   highlight  => "comment",	# not really an abbrev
    ng	      => "no_grid",
    np	      => "new_page",
    npp	      => "new_physical_page",
@@ -1092,11 +1116,13 @@ sub parse_directive {
     unless ( $dirpat ) {
 	$dirpat =
 	  '(?:' .
-	  join( '|', @directives,
+	  join( '|', keys(%directives),
 		     @{$config->{metadata}->{keys}},
 		     keys(%abbrevs),
-		'(?:start|end)_of_\w+' ) .
-		  ')';
+		     '(?:start|end)_of_\w+',
+		     '(?:(?:text|chord|chorus|tab|grid|diagrams|title|footer|toc)'.
+		     '(?:font|size|colou?r))',
+		) . ')';
 	$dirpat = qr/$dirpat/;
     }
 
@@ -1115,16 +1141,7 @@ sub parse_directive {
     # Check for xxx-yyy selectors.
     if ( $dir =~ /^($dirpat)-(.+)$/ ) {
 	$dir = $abbrevs{$1} // $1;
-	my $sel = $2;
-	my $negate = $sel =~ s/\!$//;
-	$sel = ( $sel eq lc($config->{instrument}->{type}) )
-	       ||
-	       ( $sel eq lc($config->{user}->{name})
-	       ||
-	       ( $self->{meta}->{lc $sel} && is_true($self->{meta}->{lc $sel}->[0]) )
-	       );
-	$sel = !$sel if $negate;
-	unless ( $sel ) {
+	unless ( $self->selected($2) ) {
 	    if ( $dir =~ /^start_of_/ ) {
 		return { name => $dir, arg => $arg, omit => 2 };
 	    }
@@ -1140,6 +1157,21 @@ sub parse_directive {
     return { name => $dir, arg => $arg, omit => 0 }
 }
 
+# Process a selector.
+sub selected {
+    my ( $self, $sel ) = @_;
+    return 1 unless defined $sel;
+    my $negate = $sel =~ s/\!$//;
+    $sel = ( $sel eq lc($config->{instrument}->{type}) )
+      ||
+      ( $sel eq lc($config->{user}->{name})
+	||
+	( $self->{meta}->{lc $sel} && is_true($self->{meta}->{lc $sel}->[0]) )
+      );
+    $sel = !$sel if $negate;
+    return $sel;
+}
+
 sub directive {
     my ( $self, $d ) = @_;
 
@@ -1152,6 +1184,10 @@ sub directive {
 	return 1 if $arg !~ /\S/;
     }
     my $dir = $dd->{name};
+
+    if ( $directives{$dir} ) {
+	return $directives{$dir}->( $self, $dir, $arg, $dd->{arg} );
+    }
 
     # Context flags.
 
@@ -1195,11 +1231,25 @@ sub directive {
 			    $grid_arg->[2],  $grid_arg->[3] ];
 	}
 	elsif ( $arg && $arg ne "" ) {
-	    $self->add( type  => "set",
-			name  => "label",
-			value => $arg );
-	    push( @labels, $arg )
-	      unless $in_context eq "chorus" && !$config->{settings}->{choruslabels};
+	    if ( $arg =~ /\b(id|label)=(.+)/ ) {
+		my $kv = parse_kv($arg);
+		my $d = $config->{delegates}->{$in_context};
+		$self->add( type     => "image",
+			    subtype  => "delegate",
+			    delegate => $d->{module},
+			    handler  => $d->{handler},
+			    data     => [ ],
+			    opts     => $kv,
+			    id       => $kv->{id},
+			    open     => 1 );
+	    }
+	    else {
+		$self->add( type  => "set",
+			    name  => "label",
+			    value => $arg );
+		push( @labels, $arg )
+		  unless $in_context eq "chorus" && !$config->{settings}->{choruslabels};
+	    }
 	}
 	else {
 	    do_warn("Garbage in start_of_$1: $arg (ignored)\n")
@@ -1215,6 +1265,7 @@ sub directive {
 	}
 	return 1;
     }
+
     if ( $dir =~ /^end_of_(\w+)$/ ) {
 	do_warn("Not in " . ucfirst($1) . " context\n")
 	  unless $in_context eq $1;
@@ -1225,426 +1276,29 @@ sub directive {
 	undef $memchords;
 	return 1;
     }
-    if ( $dir =~ /^chorus$/i ) {
-	if ( $in_context ) {
-	    do_warn("{chorus} encountered while in $in_context context -- ignored\n");
-	    return 1;
-	}
-
-	# Clone the chorus so we can modify the label, if required.
-	my $chorus = @chorus ? dclone(\@chorus) : [];
-
-	if ( @$chorus && $arg && $arg ne "" ) {
-	    if ( $chorus->[0]->{type} eq "set" && $chorus->[0]->{name} eq "label" ) {
-		$chorus->[0]->{value} = $arg;
-	    }
-	    else {
-		unshift( @$chorus,
-			 { type => "set",
-			   name => "label",
-			   value => $arg,
-			   context => "chorus",
-			 } );
-	    }
-	    push( @labels, $arg )
-	      if $config->{settings}->{choruslabels};
-	}
-
-	if ( $chorus_xpose != ( my $xp = $xpose ) ) {
-	    $xp -= $chorus_xpose;
-	    for ( @$chorus ) {
-		if ( $_->{type} eq "songline" ) {
-		    for ( @{ $_->{chords} } ) {
-			next if $_ eq '';
-			my $info = $self->{chordsinfo}->{$_->key};
-			next if $info->is_annotation;
-			$info = $info->transpose($xp, $xpose <=> 0) if $xp;
-			$info = $info->new($info);
-			$_ = ChordPro::Chords::Appearance->new
-			  ( key => $self->add_chord($info),
-			    info => $info,
-			    maybe format => $_->format
-			  );
-		    }
-		}
-	    }
-	}
-
-	$self->add( type => "rechorus",
-		    @$chorus
-		    ? ( "chorus" => $chorus )
-		    : (),
-		  );
-	return 1;
-    }
-
-    # Song settings.
-
-    # Breaks.
-
-    if ( $dir eq "column_break" ) {
-	$self->add( type => "colb" );
-	return 1;
-    }
-
-    if ( $dir eq "new_page" || $dir eq "new_physical_page" ) {
-	$self->add( type => "newpage" );
-	return 1;
-    }
-
-    if ( $dir eq "new_song" ) {
-	die("FATAL - cannot start a new song now\n");
-    }
-
-    # Comments. Strictly speaking they do not belong here.
-
-    if ( $dir =~ /^comment(_italic|_box)?$/ ) {
-	my %res = $self->cdecompose($arg);
-	$res{orig} = $dd->{arg};
-	$self->add( type => $dir, %res )
-	  unless exists($res{text}) && $res{text} =~ /^[ \t]*$/;
-	return 1;
-    }
-
-    # Images.
-    if ( $dir eq "image" ) {
-	my $res = parse_kv($arg);
-	my $uri;
-	my $id;
-	my $type;
-	my %opts;
-	while ( my($k,$v) = each(%$res) ) {
-	    if ( $k =~ /^(title)$/i && $v ne "" ) {
-		$opts{lc($k)} = $v;
-	    }
-	    elsif ( $k =~ /^(border|spread|center|persist)$/i
-		    && $v =~ /^(\d+)$/ ) {
-		$opts{lc($k)} = $v;
-	    }
-	    elsif ( $k =~ /^(width|height)$/i
-		    && $v =~ /^(\d+(?:\.\d+)?\%?)$/ ) {
-		$opts{lc($k)} = $v;
-	    }
-	    elsif ( $k =~ /^(x|y)$/i
-		    && $v =~ /^([-+]?\d+(?:\.\d+)?\%?)$/ ) {
-		$opts{lc($k)} = $v;
-	    }
-	    elsif ( $k =~ /^(scale)$/
-		    && $v =~ /^(\d+(?:\.\d+)?)(%)?$/ ) {
-		$opts{lc($k)} = $2 ? $1/100 : $1;
-	    }
-	    elsif ( $k =~ /^(center|border|spread|persist)$/i ) {
-		$opts{lc($k)} = $v;
-	    }
-	    elsif ( $k =~ /^(src|uri)$/i && $v ne "" ) {
-		$uri = $v;
-	    }
-	    elsif ( $k =~ /^(id)$/i && $v ne "" ) {
-		$id = $v;
-	    }
-	    elsif ( $k =~ /^(type)$/i && $v ne "" ) {
-		$type = $v;
-	    }
-	    elsif ( $k =~ /^(anchor)$/i
-		    && $v =~ /^(paper|page|column|float|line)$/ ) {
-		$opts{lc($k)} = lc($v);
-	    }
-	    elsif ( $uri ) {
-		do_warn( "Unknown image attribute: $k\n" );
-		next;
-	    }
-	    # Assume just an image file uri.
-	    else {
-		$uri = $k;
-	    }
-	}
-
-	unless ( $uri || $id ) {
-	    do_warn( "Missing image source\n" );
-	    return;
-	}
-
-	# If the image uri does not have a directory, look it up
-	# next to the song, and then in the images folder of the
-	# CHORDPRO_LIB.
-	if ( $uri && $uri !~ m;^([a-z]:)?[/\\];i ) { # not abs
-	    use File::Basename qw(dirname);
-	    L: for ( dirname($diag->{file}) ) {
-		$uri = "$_/$uri", last if -s "$_/$uri";
-		for ( ::rsc_or_file("images/$uri") ) {
-		    last unless $_;
-		    $uri = $_, last L if -s $_;
-		}
-		do_warn("Missing image for \"$uri\"");
-		return;
-	    }
-	}
-
-	my $aid = $id || "_Image".$assetid++;
-
-	if ( defined $opts{spread} ) {
-	    if ( exists $self->{spreadimage} ) {
-		do_warn("Skipping superfluous spread image");
-	    }
-	    else {
-		$self->{spreadimage} =
-		  { id => $aid, space => $opts{spread} };
-		warn("Got spread image $aid with $opts{spread} space\n");
-	    }
-	}
-
-	# Store as asset.
-	if ( $uri ) {
-	    my $opts;
-	    $opts->{subtype} = $opts{type}    if $opts{type};
-	    $opts->{persist} = $opts{persist} if $opts{persist};
-	    delete $opts{$_} for qw( type persist );
-
-	    if ( $id && %opts ) {
-		do_warn("Asset definition \"$id\" does not take attributes");
-		return;
-	    }
-
-	    $self->{assets} //= {};
-	    my $a;
-	    if ( $uri =~ /\.(\w+)$/ && exists $config->{delegates}->{$1} ) {
-		my $d = $config->{delegates}->{$1};
-		$a = { type      => "image",
-		       subtype   => "delegate",
-		       delegate  => $d->{module},
-		       handler   => $d->{handler},
-		       uri       => $uri,
-		     };
-	    }
-	    else {
-		$a = { type      => "image",
-		       uri       => $uri,
-		     };
-	    }
-	    $a->{opts} = $opts if $opts;
-	    $self->{assets}->{$aid} = $a;
-
-	    if ( $config->{debug}->{images} ) {
-		warn("asset[$aid] type=image uri=$uri",
-		     $a->{subtype} ? " subtype=$a->{subtype}" : (),
-		     $a->{delegate} ? " delegate=$a->{delegate}" : (),
-		     $opts->{persist} ? " persist" : (),
-		     "\n");
-	    }
-	    return if $id || defined $opts{spread};	# defining only
-	}
-
-	$self->add( type      => "image",
-		    id        => $aid,
-		    opts      => \%opts );
-	return 1;
-    }
-
-    if ( $dir eq "title" ) {
-	$self->{title} = $arg;
-	push( @{ $self->{meta}->{title} }, $arg );
-	return 1;
-    }
-
-    if ( $dir eq "subtitle" ) {
-	push( @{ $self->{subtitle} }, $arg );
-	push( @{ $self->{meta}->{subtitle} }, $arg );
-	return 1;
-    }
 
     # Metadata extensions (legacy). Should use meta instead.
     # Only accept the list from config.
     if ( any { $_ eq $dir } @{ $config->{metadata}->{keys} } ) {
-	$arg = "$dir $arg";
-	$dir = "meta";
+	return $self->dir_meta( "meta", "$dir $arg" );
     }
 
-    # Metadata.
-    if ( $dir eq "meta" ) {
-	if ( $arg =~ /([^ :]+)[ :]+(.*)/ ) {
-	    my $key = lc $1;
-	    my @vals = ( $2 );
-	    if ( $config->{metadata}->{autosplit} ) {
-		@vals = map { s/s\+$//; $_ }
-		  split( quotemeta($config->{metadata}->{separator}), $vals[0] );
-	    }
-	    my $m = $self->{meta};
+    # Formatting. {chordsize XX} and such.
+    if ( $dir =~ m/ ^( text | chord | chorus | tab | grid | diagrams
+		       | title | footer | toc )
+		     ( font | size | colou?r )
+		     $/x ) {
+	my $item = $1;
+	my $prop = $2;
 
-	    # User and instrument cannot be set here.
-	    if ( $key eq "user" || $key eq "instrument" ) {
-		do_warn("\"$key\" can be set from config only.\n");
-		return 1;
-	    }
+	$self->propset( $item, $prop, $arg );
 
-	    for my $val ( @vals ) {
+	# Derived props.
+	$self->propset( "chorus", $prop, $arg ) if $item eq "text";
 
-		if ( $key eq "key" ) {
-		    $val =~ s/[\[\]]//g;
-		    my $info = $self->parse_chord($val);
-		    my $name = $info->name;
-		    my $act = $name;
-
-		    if ( $capo ) {
-			$act = $self->add_chord( $info->transpose($capo) );
-			$name = $act if $decapo;
-		    }
-
-		    push( @{ $m->{key} }, $name );
-		    $m->{key_actual} = [ $act ];
-#		    warn("XX key=$name act=$act capo=",
-#			 $capo//"<undef>"," decapo=$decapo\n");
-		    return 1;
-		}
-
-
-		if ( $key eq "capo" ) {
-		    do_warn("Multiple capo settings may yield surprising results.")
-		      if exists $m->{capo};
-
-		    $capo = $val || undef;
-		    if ( $capo && $m->{key} ) {
-			if ( $decapo ) {
-			    my $key = $self->store_chord
-			      ($self->{chordsinfo}->{$m->{key}->[-1]}
-			       ->transpose($val));
-			    $m->{key}->[-1] = $key;
-			    $key = $self->store_chord
-			      ($self->{chordsinfo}->{$m->{key}->[-1]}
-			       ->transpose($xpose));
-			    $m->{key_actual} = [ $key ];
-			}
-			else {
-			    my $act = $m->{key_actual}->[-1];
-			    $m->{key_from} = [ $act ];
-			    my $key = $self->store_chord
-			      ($self->{chordsinfo}->{$act}->transpose($val));
-			    $m->{key_actual} = [ $key ];
-			}
-		    }
-		}
-
-		elsif ( $key eq "duration" && $val ) {
-		    $val = duration($val);
-		}
-
-		if ( $config->{metadata}->{strict}
-		     && ! any { $_ eq $key } @{ $config->{metadata}->{keys} } ) {
-		    # Unknown, and strict.
-		    do_warn("Unknown metadata item: $key")
-		      if $config->{settings}->{strict};
-		    return;
-		}
-
-		push( @{ $self->{meta}->{$key} }, $val ) if defined $val;
-	    }
-	}
-	else {
-	    do_warn("Incomplete meta directive: $d\n")
-	      if $config->{settings}->{strict};
-	    return;
-	}
+	#::dump( { %propstack, line => $diag->{line} } );
 	return 1;
     }
-
-    # Song / Global settings.
-
-    if ( $dir eq "titles"
-	 && $arg =~ /^(left|right|center|centre)$/i ) {
-	$self->{settings}->{titles} =
-	  lc($1) eq "centre" ? "center" : lc($1);
-	return 1;
-    }
-
-    if ( $dir eq "columns"
-	 && $arg =~ /^(\d+)$/ ) {
-	# If there a column specifications in the config, retain them
-	# if the number of columns match.
-	unless( ref($config->{settings}->{columns}) eq 'ARRAY'
-	     && $arg == @{$config->{settings}->{columns}}
-	   ) {
-	    $self->{settings}->{columns} = $arg;
-	}
-	return 1;
-    }
-
-    if ( $dir eq "pagetype" || $dir eq "pagesize" ) {
-	$self->{settings}->{papersize} = $arg;
-	return 1;
-    }
-
-    if ( $dir eq "diagrams" ) {	# AKA grid
-	if ( $arg ne "" ) {
-	    $self->{settings}->{diagrams} = !!is_true($arg);
-	    $self->{settings}->{diagrampos} = lc($arg)
-	      if $arg =~ /^(right|bottom|top|below)$/i;
-	}
-	else {
-	    $self->{settings}->{diagrams} = 1;
-	}
-	return 1;
-    }
-    if ( $dir eq "no_grid" ) {
-	$self->{settings}->{diagrams} = 0;
-	return 1;
-    }
-
-    if ( $dir eq "transpose" ) {
-	$propstack{transpose} //= [];
-
-	if ( $arg =~ /^([-+]?\d+)\s*$/ ) {
-	    my $new = $1;
-	    push( @{ $propstack{transpose} }, [ $xpose, $xpose_dir ] );
-	    my %a = ( type => "control",
-		      name => "transpose",
-		      previous => [ $xpose, $xpose_dir ]
-		    );
-	    $xpose += $new;
-	    $xpose_dir = $new <=> 0;
-	    my $m = $self->{meta};
-	    if ( $m->{key} ) {
-		my $key = $m->{key}->[-1];
-		my $xp = $xpose;
-		$xp += $capo if $capo;
-		my $xpk = $self->{chordsinfo}->{$key}->transpose($xp, $xp <=> 0);
-		$self->{chordsinfo}->{$xpk->name} = $xpk;
-		$m->{key_from} = [ $m->{key_actual}->[0] ];
-		$m->{key_actual} = [ $xpk->name ];
-	    }
-	    $self->add( %a, value => $xpose, dir => $xpose_dir )
-	      if $no_transpose;
-	}
-	else {
-	    my %a = ( type => "control",
-		      name => "transpose",
-		      previous => [ $xpose, $xpose_dir ]
-		    );
-	    my $m = $self->{meta};
-	    my ( $new, $dir );
-	    if ( @{ $propstack{transpose} } ) {
-		( $new, $dir ) = @{ pop( @{ $propstack{transpose} } ) };
-	    }
-	    else {
-		$new = 0;
-		$dir = $config->{settings}->{transpose} <=> 0;
-	    }
-	    $xpose = $new;
-	    $xpose_dir = $dir;
-	    if ( $m->{key} ) {
-		$m->{key_from} = [ $m->{key_actual}->[0] ];
-		my $xp = $xpose;
-		$xp += $capo if $capo && $decapo;
-		$m->{key_actual} =
-		  [ $self->{chordsinfo}->{$m->{key}->[-1]}->transpose($xp)->name ];
-	    }
-	    if ( !@{ $propstack{transpose} } ) {
-		delete $m->{$_} for qw( key_from );
-	    }
-	    $self->add( %a, value => $xpose, dir => $dir )
-	      if $no_transpose;
-	}
-	return 1;
-    }
-
     # More private hacks.
     if ( !$options->{reference} && $d =~ /^([-+])([-\w.]+)$/i ) {
 	if ( $2 eq "dumpmeta" ) {
@@ -1711,39 +1365,493 @@ sub directive {
 	return 1;
     }
 
-    # Formatting. {chordsize XX} and such.
-    if ( $dir =~ m/ ^( text | chord | chorus | tab | grid | diagrams
-		       | title | footer | toc )
-		     ( font | size | colou?r )
-		     $/x ) {
-	my $item = $1;
-	my $prop = $2;
-
-	$self->propset( $item, $prop, $arg );
-
-	# Derived props.
-	$self->propset( "chorus", $prop, $arg ) if $item eq "text";
-
-	#::dump( { %propstack, line => $diag->{line} } );
-	return 1;
-    }
-
-    # define A: base-fret N frets N N N N N N fingers N N N N N N
-    # define: A base-fret N frets N N N N N N fingers N N N N N N
-    # optional: base-fret N (defaults to 1)
-    # optional: N N N N N N (for unknown chords)
-    # optional: fingers N N N N N N
-
-    if ( $dir eq "define" or $dir eq "chord" ) {
-
-	return $self->define_chord( $dir, $arg );
-    }
-
     # Warn about unknowns, unless they are x_... form.
     do_warn("Unknown directive: $d\n")
       if $config->{settings}->{strict} && $d !~ /^x_/;
     return;
 }
+
+sub dir_chorus {
+    my ( $self, $dir, $arg ) = @_;
+
+    if ( $in_context ) {
+	do_warn("{chorus} encountered while in $in_context context -- ignored\n");
+	return 1;
+    }
+
+    # Clone the chorus so we can modify the label, if required.
+    my $chorus = @chorus ? dclone(\@chorus) : [];
+
+    if ( @$chorus && $arg && $arg ne "" ) {
+	if ( $chorus->[0]->{type} eq "set" && $chorus->[0]->{name} eq "label" ) {
+	    $chorus->[0]->{value} = $arg;
+	}
+	else {
+	    unshift( @$chorus,
+		     { type => "set",
+		       name => "label",
+		       value => $arg,
+		       context => "chorus",
+		     } );
+	}
+	push( @labels, $arg )
+	  if $config->{settings}->{choruslabels};
+    }
+
+    if ( $chorus_xpose != ( my $xp = $xpose ) ) {
+	$xp -= $chorus_xpose;
+	for ( @$chorus ) {
+	    if ( $_->{type} eq "songline" ) {
+		for ( @{ $_->{chords} } ) {
+		    next if $_ eq '';
+		    my $info = $self->{chordsinfo}->{$_->key};
+		    next if $info->is_annotation;
+		    $info = $info->transpose($xp, $xpose <=> 0) if $xp;
+		    $info = $info->new($info);
+		    $_ = ChordPro::Chords::Appearance->new
+		      ( key => $self->add_chord($info),
+			info => $info,
+			maybe format => $_->format
+		      );
+		}
+	    }
+	}
+    }
+
+    $self->add( type => "rechorus",
+		@$chorus
+		? ( "chorus" => $chorus )
+		: (),
+	      );
+    return 1;
+}
+
+#### Directive handlers ####
+
+# Song settings.
+
+# Breaks.
+
+sub dir_column_break {
+    my ( $self, $dir, $arg ) = @_;
+    $self->add( type => "colb" );
+    return 1;
+}
+
+sub dir_new_page {
+    my ( $self, $dir, $arg ) = @_;
+    $self->add( type => "newpage" );
+    return 1;
+}
+
+sub dir_new_song {
+    my ( $self, $dir, $arg ) = @_;
+    die("FATAL - cannot start a new song now\n");
+}
+
+# Comments. Strictly speaking they do not belong here.
+
+sub dir_comment {
+    my ( $self, $dir, $arg, $orig ) = @_;
+    $dir = "comment" if $dir eq "highlight";
+    my %res = $self->cdecompose($arg);
+    $res{orig} = $orig;
+    $self->add( type => $dir, %res )
+      unless exists($res{text}) && $res{text} =~ /^[ \t]*$/;
+    return 1;
+}
+
+sub dir_image {
+    my ( $self, $dir, $arg ) = @_;
+    return 1 if $::running_under_test && !$arg;
+    my $res = parse_kv($arg);
+    my $uri;
+    my $id;
+    my $chord;
+    my $type;
+    my %opts;
+    while ( my($k,$v) = each(%$res) ) {
+	if ( $k =~ /^(title)$/i && $v ne "" ) {
+	    $opts{lc($k)} = $v;
+	}
+	elsif ( $k =~ /^(border|spread|center|persist)$/i
+		&& $v =~ /^(\d+)$/ ) {
+	    if ( $k eq "center" && $v ) {
+		$opts{align} = $k;
+	    }
+	    else {
+		$opts{lc($k)} = $v;
+	    }
+	}
+	elsif ( $k =~ /^(width|height)$/i
+		&& $v =~ /^(\d+(?:\.\d+)?\%?)$/ ) {
+	    $opts{lc($k)} = $v;
+	}
+	elsif ( $k =~ /^(x|y)$/i
+		&& $v =~ /^([-+]?\d+(?:\.\d+)?\%?)$/ ) {
+	    $opts{lc($k)} = $v;
+	}
+	elsif ( $k =~ /^(scale)$/
+		&& $v =~ /^(\d+(?:\.\d+)?)(%)?$/ ) {
+	    $opts{lc($k)} = $2 ? $1/100 : $1;
+	}
+	elsif ( $k =~ /^(center|border|spread|persist)$/i ) {
+	    if ( $k eq "center" ) {
+		$opts{align} = $k;
+	    }
+	    else {
+		$opts{lc($k)} = $v;
+	    }
+	}
+	elsif ( $k =~ /^(src|uri)$/i && $v ne "" ) {
+	    $uri = $v;
+	}
+	elsif ( $k =~ /^(id)$/i && $v ne "" ) {
+	    $id = $v;
+	}
+	elsif ( $k =~ /^(chord)$/i && $v ne "" ) {
+	    $chord = $v;
+	}
+	elsif ( $k =~ /^(type)$/i && $v ne "" ) {
+	    $opts{type} = $v;
+	}
+	elsif ( $k =~ /^(label)$/i && $v ne "" ) {
+	    $opts{lc($k)} = $v;
+	}
+	elsif ( $k =~ /^(anchor)$/i
+		&& $v =~ /^(paper|page|column|float|line)$/ ) {
+	    $opts{lc($k)} = lc($v);
+	}
+	elsif ( $k =~ /^(align)$/i
+		&& $v =~ /^(center|left|right)$/ ) {
+	    $opts{lc($k)} = lc($v);
+	}
+	elsif ( $uri ) {
+	    do_warn( "Unknown image attribute: $k\n" );
+	    next;
+	}
+	# Assume just an image file uri.
+	else {
+	    $uri = $k;
+	}
+    }
+
+    unless ( $uri || $id || $chord ) {
+	do_warn( "Missing image source\n" );
+	return;
+    }
+
+    # If the image uri does not have a directory, look it up
+    # next to the song, and then in the images folder of the
+    # CHORDPRO_LIB.
+    if ( $uri && $uri !~ m;^([a-z]:)?[/\\];i ) { # not abs
+	use File::Basename qw(dirname);
+	L: for ( dirname($diag->{file}) ) {
+	    $uri = "$_/$uri", last if -s "$_/$uri";
+	    for ( ::rsc_or_file("images/$uri") ) {
+		last unless $_;
+		$uri = $_, last L if -s $_;
+	    }
+	    do_warn("Missing image for \"$uri\"");
+	    return;
+	}
+    }
+    $uri = "chord:$chord" if $chord;
+
+    my $aid = $id || "_Image".$assetid++;
+
+    if ( defined $opts{spread} ) {
+	if ( exists $self->{spreadimage} ) {
+	    do_warn("Skipping superfluous spread image");
+	}
+	else {
+	    $self->{spreadimage} =
+	      { id => $aid, space => $opts{spread} };
+	    warn("Got spread image $aid with $opts{spread} space\n");
+	}
+    }
+
+    # Store as asset.
+    if ( $uri ) {
+	my $opts;
+	$opts->{type} = $opts{type}    if $opts{type};
+	$opts->{persist} = $opts{persist} if $opts{persist};
+	delete $opts{$_} for qw( type persist );
+
+	if ( $id && %opts ) {
+	    do_warn("Asset definition \"$id\" does not take attributes");
+	    return;
+	}
+
+	$self->{assets} //= {};
+	my $a;
+	if ( $uri =~ /\.(\w+)$/ && exists $config->{delegates}->{$1} ) {
+	    my $d = $config->{delegates}->{$1};
+	    $a = { type      => "image",
+		   subtype   => "delegate",
+		   delegate  => $d->{module},
+		   handler   => $d->{handler},
+		   uri       => $uri,
+		 };
+	}
+	else {
+	    $a = { type      => "image",
+		   uri       => $uri,
+		 };
+	}
+	$a->{opts} = $opts if $opts;
+	$self->{assets}->{$aid} = $a;
+
+	if ( $config->{debug}->{images} ) {
+	    warn("asset[$aid] type=image uri=$uri",
+		 $a->{subtype} ? " subtype=$a->{subtype}" : (),
+		 $a->{delegate} ? " delegate=$a->{delegate}" : (),
+		 $opts->{persist} ? " persist" : (),
+		 "\n");
+	}
+	return if $id || defined $opts{spread};	# defining only
+    }
+
+    if ( $opts{label} ) {
+	$self->add( type      => "set",
+		    name      => "label",
+		    value     => $opts{label},
+		    context   => "image" );
+	push( @labels, $opts{label} );
+    }
+
+    $self->add( type      => "image",
+		id        => $aid,
+		opts      => \%opts );
+    return 1;
+}
+
+sub dir_title {
+    my ( $self, $dir, $arg ) = @_;
+    $self->{title} = $arg;
+    push( @{ $self->{meta}->{title} }, $arg );
+    return 1;
+}
+
+sub dir_subtitle {
+    my ( $self, $dir, $arg ) = @_;
+    push( @{ $self->{subtitle} }, $arg );
+    push( @{ $self->{meta}->{subtitle} }, $arg );
+    return 1;
+}
+
+# Metadata.
+
+sub dir_meta {
+    my ( $self, $dir, $arg ) = @_;
+
+    if ( $arg =~ /([^ :]+)[ :]+(.*)/ ) {
+	my $key = lc $1;
+	my @vals = ( $2 );
+	if ( $config->{metadata}->{autosplit} ) {
+	    @vals = map { s/s\+$//; $_ }
+	      split( quotemeta($config->{metadata}->{separator}), $vals[0] );
+	}
+	my $m = $self->{meta};
+
+	# User and instrument cannot be set here.
+	if ( $key eq "user" || $key eq "instrument" ) {
+	    do_warn("\"$key\" can be set from config only.\n");
+	    return 1;
+	}
+
+	for my $val ( @vals ) {
+
+	    if ( $key eq "key" ) {
+		$val =~ s/[\[\]]//g;
+		my $info = $self->parse_chord($val);
+		my $name = $info->name;
+		my $act = $name;
+
+		if ( $capo ) {
+		    $act = $self->add_chord( $info->transpose($capo) );
+		    $name = $act if $decapo;
+		}
+
+		push( @{ $m->{key} }, $name );
+		$m->{key_actual} = [ $act ];
+#		    warn("XX key=$name act=$act capo=",
+#			 $capo//"<undef>"," decapo=$decapo\n");
+		return 1;
+	    }
+
+
+	    if ( $key eq "capo" ) {
+		do_warn("Multiple capo settings may yield surprising results.")
+		  if exists $m->{capo};
+
+		$capo = $val || undef;
+		if ( $capo && $m->{key} ) {
+		    if ( $decapo ) {
+			my $key = $self->store_chord
+			  ($self->{chordsinfo}->{$m->{key}->[-1]}
+			   ->transpose($val));
+			$m->{key}->[-1] = $key;
+			$key = $self->store_chord
+			  ($self->{chordsinfo}->{$m->{key}->[-1]}
+			   ->transpose($xpose));
+			$m->{key_actual} = [ $key ];
+		    }
+		    else {
+			my $act = $m->{key_actual}->[-1];
+			$m->{key_from} = [ $act ];
+			my $key = $self->store_chord
+			  ($self->{chordsinfo}->{$act}->transpose($val));
+			$m->{key_actual} = [ $key ];
+		    }
+		}
+	    }
+
+	    elsif ( $key eq "duration" && $val ) {
+		$val = duration($val);
+	    }
+
+	    if ( $config->{metadata}->{strict}
+		 && ! any { $_ eq $key } @{ $config->{metadata}->{keys} } ) {
+		# Unknown, and strict.
+		do_warn("Unknown metadata item: $key")
+		  if $config->{settings}->{strict};
+		return;
+	    }
+
+	    push( @{ $self->{meta}->{$key} }, $val ) if defined $val;
+	}
+    }
+    else {
+	do_warn("Incomplete meta directive: $dir $arg\n")
+	  if $config->{settings}->{strict};
+	return;
+    }
+    return 1;
+}
+
+# Song / Global settings.
+
+sub dir_titles {
+    my ( $self, $dir, $arg ) = @_;
+
+    unless ( $arg =~ /^(left|right|center|centre)$/i ) {
+	do_warn("Invalid argument for titles directive: $arg\n");
+	return 1;
+    }
+    $self->{settings}->{titles} = lc($1) eq "centre" ? "center" : lc($1);
+    return 1;
+}
+
+sub dir_columns {
+    my ( $self, $dir, $arg ) = @_;
+
+    unless ( $arg =~ /^(\d+)$/ ) {
+	do_warn("Invalid argument for columns directive: $arg (should be a number)\n");
+	return 1;
+    }
+    # If there a column specifications in the config, retain them
+    # if the number of columns match.
+    unless( ref($config->{settings}->{columns}) eq 'ARRAY'
+	    && $arg == @{$config->{settings}->{columns}}
+	  ) {
+	$self->{settings}->{columns} = $arg;
+    }
+    return 1;
+}
+
+sub dir_papersize {
+    my ( $self, $dir, $arg ) = @_;
+    $self->{settings}->{papersize} = $arg;
+    return 1;
+}
+
+sub dir_diagrams {	# AKA grid
+    my ( $self, $dir, $arg ) = @_;
+
+    if ( $arg ne "" ) {
+	$self->{settings}->{diagrams} = !!is_true($arg);
+	$self->{settings}->{diagrampos} = lc($arg)
+	  if $arg =~ /^(right|bottom|top|below)$/i;
+    }
+    else {
+	$self->{settings}->{diagrams} = 1;
+    }
+    return 1;
+}
+
+sub dir_grid {
+    my ( $self, $dir, $arg ) = @_;
+    $self->{settings}->{diagrams} = 1;
+    return 1;
+}
+
+sub dir_no_grid {
+    my ( $self, $dir, $arg ) = @_;
+    $self->{settings}->{diagrams} = 0;
+    return 1;
+}
+
+sub dir_transpose {
+    my ( $self, $dir, $arg ) = @_;
+
+    $propstack{transpose} //= [];
+
+    if ( $arg =~ /^([-+]?\d+)\s*$/ ) {
+	my $new = $1;
+	push( @{ $propstack{transpose} }, [ $xpose, $xpose_dir ] );
+	my %a = ( type => "control",
+		  name => "transpose",
+		  previous => [ $xpose, $xpose_dir ]
+		);
+	$xpose += $new;
+	$xpose_dir = $new <=> 0;
+	my $m = $self->{meta};
+	if ( $m->{key} ) {
+	    my $key = $m->{key}->[-1];
+	    my $xp = $xpose;
+	    $xp += $capo if $capo;
+	    my $xpk = $self->{chordsinfo}->{$key}->transpose($xp, $xp <=> 0);
+	    $self->{chordsinfo}->{$xpk->name} = $xpk;
+	    $m->{key_from} = [ $m->{key_actual}->[0] ];
+	    $m->{key_actual} = [ $xpk->name ];
+	}
+	$self->add( %a, value => $xpose, dir => $xpose_dir )
+	  if $no_transpose;
+    }
+    else {
+	my %a = ( type => "control",
+		  name => "transpose",
+		  previous => [ $xpose, $xpose_dir ]
+		);
+	my $m = $self->{meta};
+	my ( $new, $dir );
+	if ( @{ $propstack{transpose} } ) {
+	    ( $new, $dir ) = @{ pop( @{ $propstack{transpose} } ) };
+	}
+	else {
+	    $new = 0;
+	    $dir = $config->{settings}->{transpose} <=> 0;
+	}
+	$xpose = $new;
+	$xpose_dir = $dir;
+	if ( $m->{key} ) {
+	    $m->{key_from} = [ $m->{key_actual}->[0] ];
+	    my $xp = $xpose;
+	    $xp += $capo if $capo && $decapo;
+	    $m->{key_actual} =
+	      [ $self->{chordsinfo}->{$m->{key}->[-1]}->transpose($xp)->name ];
+	}
+	if ( !@{ $propstack{transpose} } ) {
+	    delete $m->{$_} for qw( key_from );
+	}
+	$self->add( %a, value => $xpose, dir => $dir )
+	  if $no_transpose;
+    }
+    return 1;
+}
+
+#### End of directive handlers ####
 
 sub propset {
     my ( $self, $item, $prop, $value ) = @_;
