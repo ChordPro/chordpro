@@ -2,6 +2,7 @@
 
     - !ChordPro functionality
     - Inline images.
+    - {image} can have label and align properties.
     - (ABC) ABC embedding no longer uses nodeJS.
     - (ABC) Make split work (and enable by default).
     - Improve runtime info.
