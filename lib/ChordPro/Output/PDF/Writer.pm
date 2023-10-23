@@ -14,7 +14,7 @@ use IO::String;
 use Carp;
 use utf8;
 
-use ChordPro::Utils qw( expand_tilde demarkup );
+use ChordPro::Utils qw( expand_tilde demarkup min );
 use ChordPro::Output::Common qw( fmt_subst prep_outlines );
 use File::LoadLines qw(loadlines);
 
@@ -37,6 +37,15 @@ sub new {
     $self->{layout} = Text::Layout->new( $self->{pdf} );
     $self->{tmplayout} = undef;
 
+    # Patches and enhancements to PDF library.
+    no strict 'refs';
+    *{$pdfapi . '::Resource::XObject::Form::width' } = \&_xo_width;
+    *{$pdfapi . '::Resource::XObject::Form::height'} = \&_xo_height;
+    if ( $pdfapi eq 'PDF::API2' ) {
+	no warnings 'redefine';
+	*{$pdfapi . '::_is_date'} = sub { 1 };
+    }
+
     %fontcache = ();
 
     $self;
@@ -46,10 +55,6 @@ sub info {
     my ( $self, %info ) = @_;
 
     $info{CreationDate} //= pdf_date();
-
-    # PDF::API2 2.42+ does not accept the final apostrophe.
-    no warnings 'redefine';
-    local *PDF::API2::_is_date = sub { 1 };
 
     if ( $self->{pdf}->can("info_metadata") ) {
 	for ( keys(%info) ) {
@@ -310,8 +315,9 @@ sub circle {
     $gfx->fillcolor($self->_fgcolor($fillcolor)) if $fillcolor;
     $gfx->linewidth($lw||1);
     $gfx->circle( $x, $y, $r );
-    $gfx->fill if $fillcolor;
-    $gfx->stroke if $strokecolor;
+    $gfx->fill if $fillcolor && !$strokecolor;
+    $gfx->fillstroke if $fillcolor && $strokecolor;
+    $gfx->stroke if $strokecolor && !$fillcolor;
     $gfx->restore;
 }
 
@@ -331,35 +337,34 @@ sub cross {
     $gfx->restore;
 }
 
+# Fetch an image or xform object.
+# Source is $elt->{uri} (for files), $elt->{chord} (for chords).
+# Result is delivered, and stored in $elt->{data};
 sub get_image {
     my ( $self, $elt ) = @_;
 
     my $img;
     my $subtype = $elt->{subtype};
+    my $data;
 
-    if ( $subtype && $subtype eq "delegate" ) {
+    if ( $subtype eq "delegate" ) {
 	croak("delegated image in get_image()");
     }
 
-    my $uri = $elt->{uri};
-    my $data = $uri;
-    if ( $elt->{data} ) {
+    if ( $elt->{data} ) {	# have data
 	$data = $elt->{data};
-	warn("get_image($subtype): data ", length($data), " bytes\n")
+	warn("get_image($elt->{subtype}): data ", length($data), " bytes\n")
 	  if $config->{debug}->{images};
 	return $data;
     }
-    if ( $elt->{id} ) {
-	my $a = ChordPro::Output::PDF::assets($elt->{id});
-	$subtype = $a->{type};
-	$data = $subtype eq "xform" ? $data : IO::String->new($a->{data});
-	warn("get_image(id=", $elt->{id}, "): subtype $subtype\n")
-	  if $config->{debug}->{images};
-	$elt = $a;
+
+    my $uri = $elt->{uri};
+    if ( !$subtype && $uri =~ /\.(\w+)$/ ) {
+	$subtype //= $1;
     }
 
     if ( $subtype =~ /^(jpg|png|gif)$/ ) {
-	$img = $self->{pdf}->image($data);
+	$img = $self->{pdf}->image($uri);
 	warn("get_image($subtype, $uri): img ", length($img), " bytes\n")
 	  if $config->{debug}->{images};
     }
@@ -377,17 +382,15 @@ sub get_image {
     return $img;
 }
 
-package PDF::API2::Resource::XObject::Form {
-  sub width {
+sub _xo_width {
     my ( $self ) = @_;
     my @bb = $self->bbox;
-    return $bb[2]-$bb[0];
-  }
-  sub height {
+    return abs($bb[2]-$bb[0]);
+}
+sub _xo_height {
     my ( $self ) = @_;
     my @bb = $self->bbox;
-    return $bb[3]-$bb[1];
-  }
+    return abs($bb[3]-$bb[1]);
 }
 
 sub add_object {
@@ -403,8 +406,8 @@ sub add_object {
     my $w = $o->width  * $scale_x;
     my $h = $o->height * $scale_y;
 
-    warn( sprintf("add_object x=%.1f y=%.1f w=%.1f h=%.1f scale=%.1f,%.1f)\n",
-		  $x, $y, $w, $h, $scale_x, $scale_y
+    warn( sprintf("add_object x=%.1f y=%.1f w=%.1f h=%.1f scale=%.1f,%.1f) %s\n",
+		  $x, $y, $w, $h, $scale_x, $scale_y, $ha,
 		 ) ) if $config->{debug}->{images};
 
     $self->crosshairs( $x, $y, color => "lime" ) if $config->{debug}->{images};
@@ -430,7 +433,8 @@ sub add_object {
     else {
 	# XO_Form wants xscale and yscale.
 	my @bb = $o->bbox;
-	$gfx->object( $o, $x-$bb[0]*$scale_x, $y-$bb[1]*$scale_y, $scale_x, $scale_y );
+	$gfx->object( $o, $x-min($bb[0],$bb[2])*$scale_x,
+		      $y-min($bb[1],$bb[3])*$scale_y, $scale_x, $scale_y );
     }
 
     if ( $options{border} ) {
