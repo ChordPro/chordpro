@@ -7,7 +7,7 @@ description: "Directives: image"
 
 `{image:` `src=`*filename* _options_ `}`
 
-Includes a bitmap image.
+Includes an image.
 
 ## Simple use
 
@@ -19,6 +19,7 @@ Includes a bitmap image.
 Specifies the name of the file containing the image.
 Supported file types may depend on the platforms and
 tools used, but PNG, JPG and GIF should always be valid.
+Most likely, ABC and SVG will also be acceptable.
 The syntax of file names also depends on the platforms and
 tools used. A simple file name like `"myimage.png"` should always
 be acceptable. The image must then reside in the same directory as the
@@ -160,4 +161,75 @@ This loads the image an assigns it asset id `im01`.
 
 The second occurrence places an image but instead of specifying the
 source of the image, it uses the asset with the given id.
+
+## Assets from delegates
+
+Delegates, e.g. ABC, can produce assets.
+Simply prepend the contents with a line `id=`_XXX_ to supply the id.
+Note that you need an `{image}` directive to show it.
+
+# Inline images
+
+Images can also be placed inside texts using a special markup element
+`<img>`.
+
+The img element takes several attributes.
+
+First, and most important, is the source of the image. This can be the
+name of a file containing an image, e.g.
+
+    src="image.jpg"
+	
+Alternatively, an asset id can be used:
+
+    id="im01"
+	
+Finally, chord diagrams are images too:
+
+    chord="Am7"
+	
+Other attributes are:
+
+`width=`_NNN_
+: The desired width for the image.
+The value can be a size (in points, `em` or `ex`) or a percentage.
+The image is scaled if necessary.
+
+`height=`_NNN_
+: The desired height for the image.
+
+`dx=`_NNN_
+: A horizontal offset for the image, wrt. the current location in the text.
+The value can be a size (in points, `em` or `ex`) or a percentage.
+
+`dy=`_NNN_
+: Same, but vertical. Positive amounts move up.
+
+Note the direction is opposite to the markup `<rise>`.
+
+`scale=`_NNN_
+: A scaling factor, to be applied _after_ width/height scaling.
+The value may be expressed as a percentage.
+
+`align="left"`  `align="right"`  `align="center"`
+: Align the image in the width given by the `w` attribute.
+
+`bbox=1`   `bbox=0`
+: If true, the actual bounding box of an object is used for placement.
+
+By default the bounding box is only used to obtain the width and height.
+
+This attribute has no effect on image objects.
+
+`w=`_NNN_
+: The advance width of the image.
+This is the **actual** space occupied by the image.
+If the image is wider it will overlap the text it is embedded in.
+
+Default advance is the image width plus horizontal offset.
+This overrides the advance and may be zero.
+
+`h=`_NNN_
+: The advance height of the image.
+Similar to `w` but vertically.
 
