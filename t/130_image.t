@@ -65,7 +65,7 @@ eval { $s->parse_file(\$data) } or diag("$@");
 
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 isa_ok( $s->{songs}->[0], 'ChordPro::Song', "It's a song" );
-#use Data::Dumper; warn(Dumper($s));
+#use DDP; p($s->{songs}[0]);
 $song = {
 	    'title' => 'Swing Low Sweet Chariot',
 	    'source' => { file => "__STRING__", line => 1 },
@@ -92,7 +92,7 @@ $song = {
 				   'height' => '150',
 				   'border' => '2',
 				   'scale' => '4',
-				   'center' => 1,
+				   'align' => 'center',
 				   'width' => '200'
 				  },
 			'id' => '_Image002',
