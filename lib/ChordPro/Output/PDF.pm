@@ -1854,7 +1854,7 @@ sub imageline {
 	$scale = $ph / $h;
     }
     if ( $opts->{scale} ) {
-	$scale *= $opts->{scale};
+	$scale *= $opts->{scale} =~ /^(\d+(?:\.\d+)?)\%$/ ? $1/100 : $opts->{scale};
     }
 
   }
@@ -2926,7 +2926,16 @@ sub _dump {
 
 use Object::Pad;
 
-class Text::Layout::PDFAPI2::ImageElement;
+### Stub
+#role Text::Layout::ElementRole;
+#method parse( $ctx, $el, $atts );
+#method render( $hash, $gfx, $x, $y );
+#method bbox( $hash );
+#class Text::Layout::PDFAPI2::ImageElement :does(Text::Layout::ElementRole);
+#method parse( $ctx, $el, $atts ) {}
+#method render( $hash, $gfx, $x, $y ) {}
+#method bbox( $hash ) {}
+#### End stub
 
 # Stub until upstream packages are up level.
 
