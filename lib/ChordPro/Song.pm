@@ -1231,7 +1231,7 @@ sub directive {
 			    $grid_arg->[2],  $grid_arg->[3] ];
 	}
 	elsif ( $arg && $arg ne "" ) {
-	    if ( $arg =~ /\b(id|label)=(.+)/ ) {
+	    if ( $arg =~ /\b(id|label|scale|align|center)=(.+)/ ) {
 		my $kv = parse_kv($arg);
 		my $d = $config->{delegates}->{$in_context};
 		$self->add( type     => "image",
