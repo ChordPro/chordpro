@@ -9,6 +9,9 @@
     - (PDF) Image scale strategy change for spread images.
     - (PDF/Writer) Add generalized add_object for objects and images.
     - (PDF) Prevent case problems when looking up fonts for SVG.
+    - (Windows) ChordPro now installs as a 64-bit application in
+      \Program Files instead of \Program Files (x86).
+      You are adsvised to remove the old 32bits install first.
     - !Internal
     - (ABC) ABC embedding use tohtml instead of toxhtml.
     - (PDF) Enhance assets (wip), labels; move grid to separate module.

@@ -33,7 +33,7 @@ else {
     ++$test; use_ok( $pdfapi,  $pdfapiv );
     diag("Using $pdfapi $pdfapiv for PDF generation");
 }
-++$test; use_ok( "Text::Layout",   0.031 );
+++$test; use_ok( "Text::Layout",   0.031_007 );
 eval {
     require HarfBuzz::Shaper;
     HarfBuzz::Shaper->VERSION(0.026);

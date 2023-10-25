@@ -2926,19 +2926,6 @@ sub _dump {
 
 use Object::Pad;
 
-### Stub
-#role Text::Layout::ElementRole;
-#method parse( $ctx, $el, $atts );
-#method render( $hash, $gfx, $x, $y );
-#method bbox( $hash );
-#class Text::Layout::PDFAPI2::ImageElement :does(Text::Layout::ElementRole);
-#method parse( $ctx, $el, $atts ) {}
-#method render( $hash, $gfx, $x, $y ) {}
-#method bbox( $hash ) {}
-#### End stub
-
-# Stub until upstream packages are up level.
-
 class TextLayoutImageElement :isa(Text::Layout::PDFAPI2::ImageElement);
 
 use constant TYPE => "img";
