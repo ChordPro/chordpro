@@ -196,7 +196,7 @@ sub stylelist {
     }
 
     my $dir = $self->{prefs_customlib};
-    if ( $dir && -d $dir && -d ( $cfglib = "$dir/config" ) ) {
+    if ( $dir && -d ( $cfglib = "$dir/config" ) ) {
 	opendir( my $dh, $cfglib );
 	foreach ( readdir($dh) ) {
 	    $_ = decode_utf8($_);
