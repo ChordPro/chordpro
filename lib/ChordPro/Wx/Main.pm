@@ -180,21 +180,43 @@ sub init {
 # List of available config presets (styles).
 my $stylelist;
 sub stylelist {
+    my ( $self ) = @_;
     return $stylelist if $stylelist && @$stylelist;
     my $cfglib = getresource("config");
-    $stylelist = [];
+    my @stylelist;
+    my %stylelist;
     if ( -d $cfglib ) {
 	opendir( my $dh, $cfglib );
-	foreach ( sort readdir($dh) ) {
+	foreach ( readdir($dh) ) {
 	    $_ = decode_utf8($_);
 	    next unless /^(.*)\.json$/;
 	    my $base = $1;
-	    unshift( @$stylelist, $base ), next
-	      if $base eq "chordpro"; # default
-	    push( @$stylelist, $base );
+	    $stylelist{$base} = $_;
 	}
     }
-    return $stylelist;
+
+    my $dir = $self->{prefs_customlib};
+    if ( $dir && -d $dir && -d ( $cfglib = "$dir/config" ) ) {
+	opendir( my $dh, $cfglib );
+	foreach ( readdir($dh) ) {
+	    $_ = decode_utf8($_);
+	    next unless /^(.*)\.json$/;
+	    my $base = $1;
+	    $stylelist{$base} = " $_";
+	}
+    }
+
+    push( @stylelist, "chordpro" ) if delete $stylelist{chordpro};
+    foreach ( sort keys %stylelist ) {
+	if ( $stylelist{$_} =~ /^\s+(.*)/ ) {
+	    push( @stylelist, "$_ (User)" );
+	}
+	else {
+	    push( @stylelist, "$_" );
+	}
+    }
+
+    return $stylelist = \@stylelist;
 }
 
 # List of available notation systems.
@@ -401,7 +423,7 @@ sub preview {
     }
     if ( $self->{prefs_cfgpreset} ) {
 	foreach ( @{ $self->{prefs_cfgpreset} } ) {
-	    push( @ARGV, '--config', $_ );
+	    push( @ARGV, '--config', $_ =~ s/ \(User\)//ir );
 	    $haveconfig++;
 	}
     }
@@ -572,8 +594,8 @@ sub GetPreferences {
 	$self->{_cfgpresetfile} = $self->{prefs_configfile};
     }
     my @presets;
-    foreach ( @{stylelist()} ) {
-	if ( ",$p" =~ quotemeta( "," . $_ ) ) {
+    foreach ( @{$self->stylelist()} ) {
+	if ( ",$p" =~ quotemeta( "," . lc($_) ) ) {
 	    push( @presets, $_ );
 	}
     }
