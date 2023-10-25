@@ -58,7 +58,7 @@ sub info {
 
     if ( $self->{pdf}->can("info_metadata") ) {
 	for ( keys(%info) ) {
-	    $self->{pdf}->info_metadata( $_, $info{$_} );
+	    $self->{pdf}->info_metadata( $_, demarkup($info{$_}) );
 	}
     }
     else {
