@@ -339,6 +339,7 @@ sub OnCustomLibDialog {
     if ( $ret == wxID_OK ) {
 	my $file = $fd->GetPath;
 	$self->{t_customlibdialog}->SetValue($file);
+	$ENV{CHORDPRO_LIB} = $file;
     }
     $fd->Destroy;
 }
