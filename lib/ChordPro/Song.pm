@@ -1664,7 +1664,13 @@ sub dir_meta {
 
 	    if ( $key eq "key" ) {
 		$val =~ s/[\[\]]//g;
-		my $info = $self->parse_chord($val);
+		my $info = do {
+		    # When transcoding to nash/roman, parse_chord will
+		    # complain about a missing key. Fake one.
+		    local( $self->{meta}->{key} ) = [ '_dummy_' ];
+		    local( $self->{chordsinfo}->{_dummy_} ) = { root_ord => 0 };
+		    $self->parse_chord($val);
+		};
 		my $name = $info->name;
 		my $act = $name;
 
