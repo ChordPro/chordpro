@@ -1053,13 +1053,11 @@ sub ::runtimeinfo {
     my $level = shift // "normal";
 
     my $fmt   = "  %-22.22s %-10s\n";
-    my $fmtv  = defined($Wx::VERSION) ? "  %s version %-10s\n" : $fmt;
-    my $fmtvv = defined($Wx::VERSION) ? "  %s %-10s\n" : $fmt;
 
     # Sometimes version numbers are localized...
     my $dd = sub { my $v = $_[0]; $v =~ s/,/./g; $v };
 
-    my $msg = sprintf( $fmtv, "ChordPro core", $dd->($VERSION) );
+    my $msg = sprintf( $fmt, "ChordPro core", $dd->($VERSION) );
     $msg =~ s/core/reference/ if $::options->{reference};
     if ( $VERSION =~ /_/ ) {
 	$msg =~ s/\n$/ (Unsupported development snapshot)\n/;
@@ -1072,12 +1070,12 @@ sub ::runtimeinfo {
 	return $msg;
     }
 
-    $msg .= sprintf( $fmtv, "Perl", $^V );
+    $msg .= sprintf( $fmt, "Perl", $^V );
     $msg =~ s/\n$/ ($^X)\n/;
     if ( $App::Packager::PACKAGED ) {
 	my $p = App::Packager::Packager();
 	$p .= " Packager" unless $p =~ /packager/i;
-	$msg .= sprintf( $fmtv, $p, $dd->(App::Packager::Version()) );
+	$msg .= sprintf( $fmt, $p, $dd->(App::Packager::Version()) );
     }
 
     my $pp = sub { realpath($_[0]) =~ s;^$ENV{HOME}/;~/;r; };
@@ -1085,13 +1083,13 @@ sub ::runtimeinfo {
     # Determine resource path.
     my @p;
     if ( $ENV{CHORDPRO_LIB} ) {
-	$msg .= sprintf( $fmtvv, "CHORDPRO_LIB", $pp->($ENV{CHORDPRO_LIB}) );
+	$msg .= sprintf( $fmt, "CHORDPRO_LIB", $pp->($ENV{CHORDPRO_LIB}) );
 	@p = splitpath($ENV{CHORDPRO_LIB});
     }
     push( @p, realpath( App::Packager::GetResourcePath() ) );
     my $tag = "Resource path";
     for ( @p ) {
-	$msg .= sprintf( $fmtvv, $tag, $pp->($_) );
+	$msg .= sprintf( $fmt, $tag, $pp->($_) );
 	$tag = "";
     }
     eval { require ChordPro::Delegate::ABC;
@@ -1108,7 +1106,7 @@ sub ::runtimeinfo {
     my $vv = sub {
 	my ( $mod ) = @_;
 	no strict 'refs';
-	$msg .= sprintf( $fmtv, $mod, $dd->(${${"${mod}::"}{VERSION}}) );
+	$msg .= sprintf( $fmt, $mod, $dd->(${${"${mod}::"}{VERSION}}) );
 	return unless $level eq "extensive";
 	chomp($msg);
 	my $pm = $mod =~ s;::;/;gr . ".pm";
@@ -1127,8 +1125,8 @@ sub ::runtimeinfo {
     $msg .= "\nModules and libraries:\n";
     if ( defined $Wx::VERSION ) {
 	no strict 'subs';
-	$msg .= sprintf( $fmtv, "wxPerl", $dd->($Wx::VERSION) );
-	$msg .= sprintf( $fmtv, "wxWidgets", $dd->(Wx::wxVERSION) );
+	$msg .= sprintf( $fmt, "wxPerl", $dd->($Wx::VERSION) );
+	$msg .= sprintf( $fmt, "wxWidgets", $dd->(Wx::wxVERSION) );
     }
 
     local $SIG{__WARN__} = sub {};
@@ -1140,7 +1138,7 @@ sub ::runtimeinfo {
     };
     eval { require HarfBuzz::Shaper;
 	$vv->("HarfBuzz::Shaper");
-	$msg .= sprintf( $fmtv, "HarfBuzz library", $dd->(HarfBuzz::Shaper::hb_version_string()) );
+	$msg .= sprintf( $fmt, "HarfBuzz library", $dd->(HarfBuzz::Shaper::hb_version_string()) );
     };
     $vv->("File::LoadLines");
     eval { require PDF::Builder;

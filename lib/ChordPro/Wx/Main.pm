@@ -857,7 +857,7 @@ sub _aboutmsg {
     return $msg;
 }
 
-sub OnAbout {
+sub xOnAbout {
     my ($self, $event) = @_;
 
     my $md = Wx::MessageDialog->new
@@ -865,6 +865,21 @@ sub OnAbout {
 	"About ChordPro",
 	wxOK|wxICON_INFORMATION,
 	wxDefaultPosition);
+    $md->ShowModal;
+    $md->Destroy;
+}
+
+sub OnAbout {
+    my ($self, $event) = @_;
+
+    # Need a custom dialog since the mesage doesn't look well in
+    # a non-proportional font.
+    my $md = AboutDialog->new
+      ( $self, -1, "About ChordPro",
+	wxDefaultPosition, wxDefaultSize, undef,
+	"About",
+	_aboutmsg()
+      );
     $md->ShowModal;
     $md->Destroy;
 }
@@ -877,5 +892,66 @@ sub OnIdle {
 }
 
 ################ End of Event handlers ################
+
+package AboutDialog;
+
+use Wx qw[:everything];
+use base qw(Wx::Dialog);
+use strict;
+
+sub new {
+    my( $self, $parent, $id, $title, $pos, $size, $style, $name, $text ) = @_;
+    $parent = undef              unless defined $parent;
+    $id     = -1                 unless defined $id;
+    $title  = ""                 unless defined $title;
+    $pos    = wxDefaultPosition  unless defined $pos;
+    $size   = wxDefaultSize      unless defined $size;
+    $name   = ""                 unless defined $name;
+
+    # begin wxGlade: MyDialog::new
+    $style = wxDEFAULT_DIALOG_STYLE
+        unless defined $style;
+
+    $self = $self->SUPER::new( $parent, $id, $title, $pos, $size, $style, $name );
+
+    # Infer size from text.
+    my ( $lc, $ll ) = ( 0, 0 );
+    for ( split( /[\r\n]+/, $text ) ) {
+	$lc++;
+	$ll = length($_) if length($_) > $ll;
+    }
+    $self->SetSize(Wx::Size->new(10*$ll, 24*$lc));
+
+    $self->SetTitle("About ChordPro");
+    $self->SetFont(Wx::Font->new(11, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, 0, ""));
+
+    $self->{sizer_1} = Wx::BoxSizer->new(wxVERTICAL);
+
+    $text =~ s/[\r\n]+$//;
+    $self->{text} = Wx::TextCtrl->new($self, wxID_ANY, $text, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY);
+    $self->{text}->SetFont(Wx::Font->new(11, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, 0, ""));
+    $self->{text}->SetInsertionPoint(0);
+    $self->{sizer_1}->Add($self->{text}, 1, wxEXPAND|wxLEFT|wxRIGHT|wxTOP, 5);
+
+    $self->{sizer_2} = Wx::BoxSizer->new(wxHORIZONTAL);
+    $self->{sizer_1}->Add($self->{sizer_2}, 0, wxALIGN_RIGHT|wxALL, 4);
+
+    $self->{sizer_2}->Add(1, 1, 0, wxEXPAND, 0);
+
+    $self->{button_OK} = Wx::Button->new($self, wxID_OK, "");
+    $self->{button_OK}->SetDefault();
+    $self->{sizer_2}->Add($self->{button_OK}, 0, 0, 0);
+
+    $self->SetSizer($self->{sizer_1});
+
+    $self->SetAffirmativeId($self->{button_OK}->GetId());
+
+    $self->Layout();
+    # end wxGlade
+    return $self;
+
+}
+
+# end of class AboutDialog
 
 1;
