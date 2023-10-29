@@ -53,8 +53,14 @@ image is scaled to fit.
 Scales the image with the factor.
 This may be a floating point number, e.g. `0.2`, or a percentage, e.g. `20%`.
 
+##### `align=`*aa*  
+Aligns the image on the page. The argument may be `"left"`,
+`"center"` or `"right"`.
+Default alignment is `"center"`.
+
 ##### `center=`*tf*  
 ##### `center`  
+(Deprecated)
 The image is horizontally centered on the page or column.
 If _tf_ equals `0`, the image is flushed left.
 

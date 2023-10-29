@@ -31,6 +31,10 @@ left margin. For example:,
 
     {start_of_abc: Intro}
 
+or (preferred):
+
+    {start_of_abc: label="Intro"}
+
 The ChordPro reference implementation prints the label in the left
 margin, see [labels]({{< relref "ChordPro-Configuration-PDF#labels" >}}).
 
@@ -43,6 +47,7 @@ margin, see [labels]({{< relref "ChordPro-Configuration-PDF#labels" >}}).
   See also [Remarks]({{< relref "#remarks" >}}).
 
 * The song **must** have a key (`K:`).
+  **No output will be generated if there is no key.**
 
 * ChordPro transposition using `{transpose}` or `--transpose` will
   transpose the embedded ABC. Adding `%%transpose` to the ABC
@@ -66,7 +71,29 @@ margin, see [labels]({{< relref "ChordPro-Configuration-PDF#labels" >}}).
 Since the actual rendering is handled by external tools, ChordPro has
 no control over what and how the output will look like.
 
-## Formatting instructions
+## Attributes
+
+The ABC directive may contain the same formatting attributes as the
+image directive, for example:
+
+    {start_of_abc label="Alert" align="left"}
+
+See [Directives: Image]({{< relref "Directives-Image" >}}) for all
+possible attributes.
+
+Additionally, the following attributes may be used:
+
+* split="_n_"  
+  If set, ChordPro will attempt to split the generated image into individual
+  systems so longer scores can be put onto multiple pages.  
+  As of 6.030 this is enabled by default. Use `split="0"` to keep the
+  score as a singlee image.
+
+* staffsep="_n_"  
+  Add extra vertical space between the systems.
+  Only relevant when not splitting.
+
+## Formatting instructions (deprecated)
 
 The ABC data may be preceded by formatting instructions:
 
@@ -80,10 +107,11 @@ The ABC data may be preceded by formatting instructions:
   If set, ChordPro will attempt to split the generated image into individual
   systems so longer scores can be put onto multiple pages.  
   As of 6.030 this is enabled by default. Use `split=0` to keep the
-  score in one piece.
+  score as a single image.
 
 * staffsep=_n_  
   Add extra vertical space between the systems.
+  Only relevant when not splitting.
 
 # Directives: end_of_abc
 
