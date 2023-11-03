@@ -4,9 +4,8 @@ use v5.26;
 
 package ChordPro::A2Crd;
 
-use App::Packager;
-
 use ChordPro::Version;
+use ChordPro::Paths;
 use ChordPro::Chords;
 
 our $VERSION = $ChordPro::Version::VERSION;
@@ -92,6 +91,7 @@ use ChordPro::Config;
 
 use File::LoadLines;
 use Encode qw(decode decode_utf8 encode_utf8);
+my $local_debug;
 
 # API: Main entry point.
 sub a2crd {
@@ -100,6 +100,7 @@ sub a2crd {
 
     # One configurator to bind them all.
     $config = ChordPro::Config::configurator({});
+    $local_debug = $config->{debug}->{a2crd};
 
     # Process input.
     my $lines = $opts->{lines}
@@ -400,7 +401,6 @@ sub decode_fingering
 sub classify_pct_chords {
     my ( $line ) = @_;
     my $lc_line = lc($line) ;
-    my $local_debug=0 ;
 
     return 'C' if $line =~ /^\s*\[.+?\]/;	# comment
     return 'C' if $line =~ /^\s*\#.+?/;	# comment
@@ -540,7 +540,6 @@ my $infer_titles;
 sub maplines {
     my ( $map, $lines ) = @_;
     my @out;
-    my $local_debug=0 ;
     $infer_titles //= $::config->{a2crd}->{'infer-titles'};
 
     # Preamble.
@@ -610,7 +609,7 @@ sub maplines {
 		while(1) {
 		    $line = shift @$lines ;
 		    die "Malformed input, {sot} has no matching {eot}" if ! $line ;
-		    $map = s/.// ;
+		    $map =~ s/.// ;
 		    push( @out, $line);
 		    last if $line =~ /{eot}/ ;
 		}
@@ -830,34 +829,9 @@ sub app_setup {
     }
 
     # Config files.
+    %configs = %{ CP->configs };
+
     my $app_lc = lc("ChordPro"); # common config
-    if ( -d "/etc" ) {          # some *ux
-        $configs{sysconfig} =
-          File::Spec->catfile( "/", "etc", "$app_lc.json" );
-    }
-
-    my $e = $ENV{CHORDIIRC} || $ENV{CHORDRC};
-    if ( $ENV{HOME} && -d $ENV{HOME} ) {
-        if ( -d File::Spec->catfile( $ENV{HOME}, ".config" ) ) {
-            $configs{userconfig} =
-              File::Spec->catfile( $ENV{HOME}, ".config", $app_lc, "$app_lc.json" );
-        }
-        else {
-            $configs{userconfig} =
-              File::Spec->catfile( $ENV{HOME}, ".$app_lc", "$app_lc.json" );
-        }
-	$e ||= File::Spec->catfile( $ENV{HOME}, ".chordrc" );
-    }
-    $e ||= "/chordrc";		# Windows, most likely
-    $configs{legacyconfig} = $e if -s $e && -r _;
-
-    if ( -s ".$app_lc.json" ) {
-        $configs{config} = ".$app_lc.json";
-    }
-    else {
-        $configs{config} = "$app_lc.json";
-    }
-
     my $options =
       {
        verbose          => 0,           # verbose processing
@@ -918,7 +892,7 @@ sub app_setup {
         require Pod::Usage;
         Pod::Usage->import;
 	my $f = "pod/A2Crd.pod";
-        unshift( @_, -input => getresource($f) );
+        unshift( @_, -input => CP->findres($f) );
         &pod2usage;
     };
 
@@ -949,11 +923,12 @@ sub app_setup {
         for ( $clo->{$config} ) {
             if ( defined($_) ) {
                 foreach my $c ( @$_ ) {
+		    my $try = $c;
 		    # Check for resource names.
-		    if ( ! -r $c && $c !~ m;[/.]; ) {
-			$c = ::rsc_or_file( $c, "config" );
+		    if ( ! -r $try ) {
+			$try = CP->findcfg($c);
 		    }
-                    die("$c: $!\n") unless -r $c;
+                    die("$c: $!\n") unless -r $try;
                 }
                 next;
             }

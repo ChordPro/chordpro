@@ -13,14 +13,9 @@ binmode(STDOUT, ':utf8');
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";
-use App::Packager qw( :name ChordPro );
 use ChordPro;
-
-use ChordPro::Utils qw(is_msw);
-
-$ENV{PATH} = join( is_msw() ? ";" : ":",
-		   "$FindBin::Bin", "$FindBin::Bin/..",
-		   $ENV{PATH} );
+use ChordPro::Paths;
+CP->pathprepend( "$FindBin::Bin", "$FindBin::Bin/.." );
 
 # Package name.
 my $my_package = 'ChordPro';
@@ -31,25 +26,6 @@ my $my_version = $ChordPro::VERSION;
 # We need Wx::App for the mainloop.
 # ChordPro::Wx::Main is the main entry of the program.
 use base qw(Wx::App ChordPro::Wx::Main);
-
-use File::HomeDir;
-
-$ENV{HOME} //= File::HomeDir->my_home;
-
-my $app_lc = "chordpro";
-if ( $ENV{XDG_CONFIG_HOME} && -d $ENV{XDG_CONFIG_HOME} ) {
-    $ENV{CHORDPRO_LIB} ||= File::Spec->catfile( $ENV{XDG_CONFIG_HOME}, $app_lc);
-}
-elsif ( $ENV{HOME} && -d $ENV{HOME} ) {
-    my $dir = File::Spec->catfile( $ENV{HOME}, ".config" );
-    if ( -d $dir ) {
-	$ENV{CHORDPRO_LIB} ||= File::Spec->catfile( $dir, $app_lc );
-    }
-    else {
-	$dir = File::Spec->catfile( $ENV{HOME}, ".$app_lc" );
-	$ENV{CHORDPRO_LIB} ||= $dir;
-    }
-}
 
 my $options = app_options();
 

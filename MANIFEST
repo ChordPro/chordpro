@@ -29,6 +29,7 @@ lib/ChordPro/Output/PDF/KeyboardDiagram.pm
 lib/ChordPro/Output/PDF/StringDiagram.pm
 lib/ChordPro/Output/PDF/Writer.pm
 lib/ChordPro/Output/Text.pm
+lib/ChordPro/Paths.pm
 lib/ChordPro/Song.pm
 lib/ChordPro/Songbook.pm
 lib/ChordPro/Testing.pm

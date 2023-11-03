@@ -4,8 +4,6 @@ use v5.26;
 
 package ChordPro;
 
-use App::Packager;
-
 use ChordPro::Utils;
 use ChordPro::Chords;
 use ChordPro::Output::Common;
@@ -75,9 +73,12 @@ our $config;
 
 package ChordPro;
 
+use ChordPro::Paths;
+use Encode qw(decode decode_utf8 encode_utf8);
+
 sub import {
     # Add private library.
-    my $lib = substr( $INC{"ChordPro.pm"}, 0, -3 ) . "/lib";
+    my $lib = CP->privlib;
     for ( @INC ) {
 	return if $_ eq $lib;
     }
@@ -147,9 +148,7 @@ sub chordpro {
 	    # No default if more than one input document.
 	    die("Please use \"--output\" to specify the output file name\n");
 	}
-	my $f = $ARGV[0];
-	$f =~ s/\.\w+$/.pdf/;
-	$f .= ".pdf" if $f eq $ARGV[0];
+	my $f = CP->sibling( $ARGV[0], ext => ".pdf" );
 	$options->{output} = $f;
 	warn("Writing output to $f\n") if $options->{verbose};
     }
@@ -704,37 +703,7 @@ sub app_setup {
     }
 
     # Config files.
-    if ( -d "/etc" ) {          # some *ux
-        $configs{sysconfig} =
-          File::Spec->catfile( "/", "etc", "$app_lc.json" );
-    }
-
-    if ( $ENV{XDG_CONFIG_HOME} && -d $ENV{XDG_CONFIG_HOME} ) {
-	$configs{userconfig} =
-	  File::Spec->catfile( $ENV{XDG_CONFIG_HOME}, $app_lc, "$app_lc.json" );
-	$ENV{CHORDPRO_LIB} ||= File::Spec->catfile( $ENV{XDG_CONFIG_HOME}, $app_lc);
-    }
-    elsif ( $ENV{HOME} && -d $ENV{HOME} ) {
-	my $dir = File::Spec->catfile( $ENV{HOME}, ".config" );
-        if ( -d $dir ) {
-            $configs{userconfig} =
-              File::Spec->catfile( $dir, $app_lc, "$app_lc.json" );
-	    $ENV{CHORDPRO_LIB} ||= File::Spec->catfile( $dir, $app_lc );
-        }
-        else {
-	    $dir = File::Spec->catfile( $ENV{HOME}, ".$app_lc" );
-            $configs{userconfig} =
-              File::Spec->catfile( $dir, "$app_lc.json" );
-	    $ENV{CHORDPRO_LIB} ||= $dir;
-        }
-    }
-
-    if ( -s ".$app_lc.json" ) {
-        $configs{config} = ".$app_lc.json";
-    }
-    else {
-        $configs{config} = "$app_lc.json";
-    }
+    %configs = %{ CP->configs };
 
     my $options =
       {
@@ -900,8 +869,8 @@ sub app_setup {
         # Load Pod::Usage only if needed.
         require Pod::Usage;
         Pod::Usage->import;
-	my $f = $manual == 2 ? "pod/Config.pod" : "pod/ChordPro.pod";
-        unshift( @_, -input => getresource($f) );
+	my $f = $manual == 2 ? "Config.pod" : "ChordPro.pod";
+        unshift( @_, -input => CP->findres( $f, class => "pod" ) );
         &pod2usage;
     };
 
@@ -933,9 +902,10 @@ sub app_setup {
         for ( $clo->{$config} ) {
             if ( defined($_) ) {
                 foreach my $c ( @$_ ) {
+		    my $try = $c;
 		    # Check for resource names.
-		    if ( $c !~ m;[/.]; ) {
-			$c = ::rsc_or_file( $c, "config" );
+		    if ( ! -r $try ) {
+			$try = CP->findcfg($c);
 		    }
                     die("$c: $!\n") unless -r $c;
                 }
@@ -1047,11 +1017,11 @@ EndOfAbout
     exit $exit if defined $exit;
 }
 
-use Cwd qw(realpath);
+use List::Util qw(uniq);
 
 sub ::runtimeinfo {
     my $level = shift // "normal";
-
+    my $cp = ChordPro::Paths->get;
     my $fmt   = "  %-22.22s %-10s\n";
 
     # Sometimes version numbers are localized...
@@ -1071,35 +1041,32 @@ sub ::runtimeinfo {
     }
 
     $msg .= sprintf( $fmt, "Perl", $^V );
-    $msg =~ s/\n$/ ($^X)\n/;
-    if ( $App::Packager::PACKAGED ) {
-	my $p = App::Packager::Packager();
-	$p .= " Packager" unless $p =~ /packager/i;
-	$msg .= sprintf( $fmt, $p, $dd->(App::Packager::Version()) );
-    }
-
-    my $pp = sub { realpath($_[0]) =~ s;^$ENV{HOME}/;~/;r; };
+    $msg =~ s/\n$/sprintf(" (%s)\n", $cp->display($^X))/e;
 
     # Determine resource path.
     my @p;
-    if ( $ENV{CHORDPRO_LIB} ) {
-	$msg .= sprintf( $fmt, "CHORDPRO_LIB", $pp->($ENV{CHORDPRO_LIB}) );
-	@p = splitpath($ENV{CHORDPRO_LIB});
+    my $tag = "CHORDPRO_LIB";
+    if ( defined $ENV{CHORDPRO_LIB} ) {
+	for ( $cp->path($ENV{CHORDPRO_LIB}) ) {
+	    $msg .= sprintf( $fmt, $tag, $cp->display($_) );
+	    $tag = "";
+	    push( @p, $cp->display($_) );
+	}
     }
-    push( @p, realpath( App::Packager::GetResourcePath() ) );
-    my $tag = "Resource path";
-    for ( @p ) {
-	$msg .= sprintf( $fmt, $tag, $pp->($_) );
+    push( @p,  map { $cp->display($_) } @{ $cp->resdirs } );
+    $tag = "Resource path";
+    for ( uniq(@p) ) {
+	$msg .= sprintf( $fmt, $tag, $_ );
 	$tag = "";
     }
     eval { require ChordPro::Delegate::ABC;
 	   my $x;
 	   if ( $x = findexe( "abc2svg", "silent" ) ) {
-	       $msg .= sprintf( $fmt, "ABC support", $pp->($x) );
+	       $msg .= sprintf( $fmt, "ABC support", $cp->display($x) );
 	   }
 	   elsif ( $x = ChordPro::Delegate::ABC::packaged_qjs() ) {
 	       $msg .= sprintf( $fmt, "ABC support",
-				$pp->($x->[0]) . " (" . $pp->($x->[-1]) . ")" );
+				$cp->display($x->[0]) . " (" . $cp->display($x->[-1]) . ")" );
 	   }
     };
 
@@ -1247,40 +1214,6 @@ Miscellaneous options:
 EndOfUsage
     exit $exit if defined $exit;
 }
-
-################ Resources ################
-
-use Encode qw(decode decode_utf8 encode_utf8);
-
-sub ::rsc_or_file {
-    my ( $c, $cfg ) = @_;
-    my $f = $c;
-    $cfg .= "/" if $cfg;
-
-    # Check for resource names.
-    if ( $f !~ m;[/.]; ) {
-	if ( $c =~ /^(.+):(.*)/ ) {
-	    $f = $cfg . lc($1) . "/" . lc($2) . ".json";
-	}
-	else {
-	    $f = $cfg . lc($c) . ".json";
-	}
-    }
-    if ( $ENV{CHORDPRO_LIB} ) {
-	my @libs = splitpath($ENV{CHORDPRO_LIB});
-	foreach my $lib ( @libs ) {
-	    $lib = expand_tilde($lib);
-	    warn("RSC1: $lib/$f\n") if $options->{debug};
-	    return $lib . "/" . $f if -r $lib . "/" . $f;
-	}
-    }
-
-    warn("RSC3: $f\n") if $options->{debug};
-    my $t = getresource($f);
-    return defined($t) ? $t : $c;
-}
-
-use lib ( grep { defined } getresource("CPAN") );
 
 =head1 FONTS
 

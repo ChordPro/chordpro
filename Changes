@@ -1,6 +1,8 @@
 0.000
 
     - !ChordPro functionality
+    - Rework paths handling for consistent resource handling;
+      eliminate App::Packager.
     - Inline images.
     - {image} can have label and align properties.
     - (ABC) ABC embedding no longer uses nodeJS.

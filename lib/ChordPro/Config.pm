@@ -13,8 +13,8 @@ use Carp;
 use feature qw( signatures );
 no warnings "experimental::signatures";
 
-use App::Packager;
 use ChordPro;
+use ChordPro::Paths;
 use ChordPro::Utils;
 use File::LoadLines;
 use File::Spec;
@@ -308,7 +308,7 @@ sub prep_configs ( $cfg, $src ) {
     foreach my $c ( @{ $cfg->{include} } ) {
         # Check for resource names.
         if ( $c !~ m;[/.]; ) {
-            $c = ::rsc_or_file( $c, "config" );
+            $c = CP->findcfg($c);
         }
         elsif ( $dir ne ""
                 && !File::Spec->file_name_is_absolute($c) ) {
@@ -1606,27 +1606,29 @@ sub default_config () {
 
     // For (debugging (internal use only)).
     "debug" : {
-        "assets" : 0,
-        "chords" : 0,
-        "config" : 0,
-        "echo" : 0,
-        "fonts" : 0,
-        "images" : 0,
-        "layout" : 0,
-        "meta" : 0,
-        "mma" : 0,
-        "spacing" : 0,
-        "song" : 0,
-        "songfull" : 0,
-        "ops" : 0,
-        "csv" : 0,
-        "abc" : 0,
-        "ly" : 0,
-        "svg" : 0,
+        "a2crd"     : 0,
+        "assets"    : 0,
+        "chords"    : 0,
+        "config"    : 0,
+        "echo"	    : 0,
+        "fonts"	    : 0,
+        "images"    : 0,
+        "layout"    : 0,
+        "meta"	    : 0,
+        "mma"	    : 0,
+        "paths"	    : 0,
+        "spacing"   : 0,
+        "song"	    : 0,
+        "songfull"  : 0,
+        "ops"	    : 0,
+        "csv"	    : 0,
+        "abc"	    : 0,
+        "ly"	    : 0,
+        "svg"	    : 0,
         // For temporary use.
-        "x1" : 0,
-        "x2" : 0,
-        "x3" : 0,
+        "x1"	    : 0,
+        "x2"	    : 0,
+        "x3"	    : 0,
     },
 
 }

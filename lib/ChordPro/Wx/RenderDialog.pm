@@ -15,7 +15,6 @@ use base qw( ChordPro::Wx::RenderDialog_wxg );
 
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
-use App::Packager;
 
 # BUilt-in descriptions for some notation systems.
 my $notdesc =

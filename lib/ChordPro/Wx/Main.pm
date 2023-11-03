@@ -16,9 +16,9 @@ use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
 
 use ChordPro;
+use ChordPro::Paths;
 use ChordPro::Output::Common;
 use ChordPro::Utils qw( demarkup is_macos );
-use App::Packager;
 use File::Temp qw( tempfile );
 use Encode qw(decode_utf8);
 
@@ -182,10 +182,11 @@ my $stylelist;
 sub stylelist {
     my ( $self ) = @_;
     return $stylelist if $stylelist && @$stylelist;
-    my $cfglib = getresource("config");
+    my $cfglib = CP->configdir;
     my @stylelist;
     my %stylelist;
-    if ( -d $cfglib ) {
+    for my $cfglib ( @{ CP->findresdirs("config") } ) {
+	next unless $cfglib && -d $cfglib;
 	opendir( my $dh, $cfglib );
 	foreach ( readdir($dh) ) {
 	    $_ = decode_utf8($_);
@@ -223,9 +224,9 @@ sub stylelist {
 my $notationlist;
 sub notationlist {
     return $notationlist if $notationlist && @$notationlist;
-    my $cfglib = getresource("config/notes");
     $notationlist = [ undef ];
-    if ( -d $cfglib ) {
+    for my $cfglib ( @{ CP->findresdirs( "notes", class => "config" ) } ) {
+	next unless $cfglib && -d $cfglib;
 	opendir( my $dh, $cfglib );
 	foreach ( sort readdir($dh) ) {
 	    $_ = decode_utf8($_);
@@ -243,48 +244,50 @@ my @tasks;
 
 sub setup_tasks {
     my ( $self ) = @_;
-    my $dir = $self->{prefs_customlib};
-    return unless $dir && -d $dir;
-    $dir .= "/tasks";
-    return unless $dir && -d $dir;
-
-    use File::Glob 'bsd_glob';
-    use File::Basename;
-
-    my @files = glob( "$dir/*.{json,prp}" );
-    return unless @files;
 
     my $menu = $self->{main_menubar}->FindMenu("Tasks");
     $menu = $self->{main_menubar}->GetMenu($menu);
 
+    my @libs = @{ CP->findresdirs("tasks") };
+    my $dir = $self->{prefs_customlib};
+    push( @libs, "$dir/tasks" ) if $dir && -d "$dir/tasks";
     my $did;
-    foreach my $file ( @files ) {
-	next unless -s $file;
+    my %dups;
+    for my $cfglib ( @libs ) {
+	next unless $cfglib && -d $cfglib;
+	opendir( my $dh, $cfglib );
+	foreach ( readdir($dh) ) {
+	    $_ = decode_utf8($_);
+	    next unless /^(.*)\.(?:json|prp)$/;
+	    my $base = $1;
+	    my $file = File::Spec->catfile( $cfglib, $_ );
 
-	# Tentative title (description).
-	( my $desc = basename( $file, ".json", ".prp" ) ) =~ s/_/ /g;
+	    # Tentative title (description).
+	    ( my $desc = $base ) =~ s/_/ /g;
 
-	# Peek in the first line.
-	my $line;
-	my $fd;
-	open( $fd, '<:utf8', $file ) and
-	  $line = <$fd> and
-	  close($fd);
-	if ( $line =~ m;(?://|\#)\s*(?:chordpro\s*)?task:\s*(.*);i ) {
-	    $desc = $1;
+	    # Peek in the first line.
+	    my $line;
+	    my $fd;
+	    open( $fd, '<:utf8', $file ) and
+	      $line = <$fd> and
+	      close($fd);
+	    if ( $line =~ m;(?://|\#)\s*(?:chordpro\s*)?task:\s*(.*);i ) {
+		$desc = $1;
+	    }
+	    next unless $dups{$desc}++;
+
+	    # Append to the menu, first a separator if needed.
+	    $menu->AppendSeparator unless $did++;
+	    my $id = Wx::NewId();
+	    $menu->Append( $id, $desc, _T("Custom task: ").$desc );
+	    Wx::Event::EVT_MENU
+		( $self, $id,
+		  sub {
+		      my ( $self, $event ) = @_;
+		      $self->preview( "--config", $file );
+		  } );
+	    push( @tasks, [ $desc, $file ] );
 	}
-
-	# Append to the menu, first a separator if needed.
-	$menu->AppendSeparator unless $did++;
-	my $id = Wx::NewId();
-	$menu->Append( $id, $desc, _T("Custom task: ").$desc );
-	Wx::Event::EVT_MENU
-	    ( $self, $id,
-	      sub {
-		  my ( $self, $event ) = @_;
-		  $self->preview( "--config", $file );
-	      } );
-	push( @tasks, [ $desc, $file ] );
     }
 }
 
@@ -417,7 +420,7 @@ sub preview {
     $SIG{__WARN__} = \&_warn unless $self->{_log};
 #    $SIG{__DIE__}  = \&_die;
 
-    my $haveconfig;
+    my $haveconfig = List::Util::any { $_ eq "--config" } @opts;
     if ( $self->{prefs_skipstdcfg} ) {
 	push( @ARGV, '--nodefaultconfigs' );
     }
@@ -754,7 +757,7 @@ sub OnHelp_Config {
 sub OnHelp_Example {
     my ($self, $event) = @_;
     return unless $self->checksaved;
-    $self->openfile( getresource( "examples/swinglow.cho" ) );
+    $self->openfile( CP->findres( "swinglow.cho", class => "examples" ) );
     undef $self->{_currentfile};
     $self->{t_source}->SetModified(0);
 

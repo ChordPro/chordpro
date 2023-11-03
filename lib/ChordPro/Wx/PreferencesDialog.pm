@@ -15,7 +15,6 @@ use base qw( ChordPro::Wx::PreferencesDialog_wxg );
 
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
-use App::Packager;
 use ChordPro::Utils qw(is_macos);
 
 # BUilt-in descriptions for some notation systems.

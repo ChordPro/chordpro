@@ -14,6 +14,7 @@ package ChordPro::Output::LaTeX;
 
 use strict;
 use warnings;
+use ChordPro::Paths;
 use ChordPro::Output::Common;
 use Template;
 use LaTeX::Encode;
@@ -52,8 +53,9 @@ sub generate_songbook {
     my ( $self, $sb ) = @_;
     my @songs;
     $gcfg = $::config->{latex};
-    $gtemplate = Template->new({
-        INCLUDE_PATH => [@{$gcfg->{template_include_path}}, ::rsc_or_file("res/templates/"), $CHORDPRO_LIBRARY],
+    $gtemplate = Template->new
+      ({ INCLUDE_PATH => [@{$gcfg->{template_include_path}},
+			  CP->findres("templates"), $CHORDPRO_LIBRARY],
         INTERPOLATE  => 1,
     }) || die "$Template::ERROR\n";
 

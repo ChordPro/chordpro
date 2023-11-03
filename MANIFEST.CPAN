@@ -1,4 +1,3 @@
-CPAN/App/Packager.pm
 CPAN/File/HomeDir.pm
 CPAN/File/HomeDir/Darwin.pm
 CPAN/File/HomeDir/Darwin/Carbon.pm

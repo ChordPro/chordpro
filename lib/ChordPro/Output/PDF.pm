@@ -13,7 +13,6 @@ package ChordPro::Output::PDF;
 use strict;
 use warnings;
 use Encode qw( encode_utf8 );
-use App::Packager;
 use File::Temp ();
 use Storable qw(dclone);
 use List::Util qw(any);
@@ -25,6 +24,7 @@ use ChordPro::Output::Common
 use feature 'signatures';
 
 use ChordPro::Output::PDF::Writer;
+use ChordPro::Paths;
 use ChordPro::Utils;
 
 my $pdfapi;
@@ -235,7 +235,7 @@ sub generate_csv {
 
     # Create an MSPro compatible CSV for this PDF.
     push( @$book, [ "CSV", { meta => { tocpage => $page } } ] );
-    ( my $csv = $options->{output} ) =~ s/\.pdf$/.csv/i;
+    my $csv = CP->sibling( $options->{output}, ext => ".csv" );
     open( my $fd, '>:utf8', encode_utf8($csv) )
       or die( encode_utf8($csv), ": $!\n" );
 
@@ -637,7 +637,7 @@ sub generate_song {
 	    if ( $bgpdf =~ /^(.+):(\d+)$/ ) {
 		( $bgpdf, $pg ) = ( $1, $2 );
 	    }
-	    $fn = ::rsc_or_file($bgpdf);
+	    $fn = CP->findres($bgpdf);
 	    if ( -s -r $fn ) {
 		$pg++ if $ps->{"even-odd-pages"} && !$rightpage;
 		$pr->importpage( $fn, $pg );

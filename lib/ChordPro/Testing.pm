@@ -21,8 +21,8 @@ our @EXPORT = qw( $config );
 
 use Test::More ();
 
-use App::Packager ( ':name', 'ChordPro' );
 use ChordPro::Config;
+use ChordPro::Paths;
 use ChordPro::Chords;
 
 sub import {
@@ -32,7 +32,6 @@ sub import {
     -d "t" && chdir "t";
 
     $::running_under_test = 1;
-    App::Packager->export_to_level(1);
     Test::More->export_to_level(1);
     $pkg->export_to_level( 1, undef, @EXPORT );
 }
@@ -82,7 +81,7 @@ ChordPro::Chords::add_config_chord
 no warnings 'redefine';
 
 sub getresource {
-    App::Packager::U_GetResource(@_);
+    CP->findres($_[0]);
 }
 }
 

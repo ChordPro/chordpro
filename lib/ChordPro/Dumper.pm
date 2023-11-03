@@ -18,7 +18,6 @@ use Data::Printer
   scalar_quotes	  => "'",
   caller_message_newline => 0,
   string_max      => 120,
-  theme		  => "Zellner",
   class => { parents    => 0,
 	     linear_isa => 0,
 	     show_methods    => "none",

@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
 # Last Modified By: 
-# Last Modified On: Thu Sep 21 21:00:03 2023
-# Update Count    : 276
+# Last Modified On: Fri Nov  3 22:37:19 2023
+# Update Count    : 279
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -36,13 +36,9 @@ use warnings;
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";
-use App::Packager qw( :name ChordPro );
 use ChordPro;
-use ChordPro::Utils qw(is_msw);
-
-$ENV{PATH} = join( is_msw() ? ";" : ":",
-		   "$FindBin::Bin", "$FindBin::Bin/..",
-		   $ENV{PATH} );
+use ChordPro::Paths;
+CP->pathprepend( "$FindBin::Bin", "$FindBin::Bin/.." );
 
 run();
 

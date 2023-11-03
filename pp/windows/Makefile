@@ -33,7 +33,6 @@ clean ::
 	del *.pp.deps
 
 #### NOTE: THIS MAY NEED ADJUSTMENT FOR YOUR SYSTEM
-ISC := 	"C:\Program Files (x86)\Inno Setup 6\Compil32.exe"
 ISCC := "C:\Program Files (x86)\Inno Setup 6\iscc.exe"
 
 .PHONY :: iss_par
@@ -41,7 +40,7 @@ iss_par :: chordpro.exe wxchordpro.exe innosetup_par.iss chordproinst.bmp
 	copy ${RES}\icons\chordpro.ico .
 	copy ${RES}\icons\chordpro-doc.ico .
 	perl vfix.pl innosetup_par.iss
-	${ISC} /cc innosetup_par.iss
+	${ISCC} innosetup_par.iss
 
 PLIBS := C:\Strawberry\perl\bin
 CLIBS := C:\Strawberry\c\bin
@@ -93,7 +92,7 @@ loaders : "${DEST}\wxchordpro.exe" "${DEST}\chordpro.exe"
 .PHONY :: iss
 iss : "${DEST}\wxchordpro.exe" innosetup.iss
 	perl vfix.pl
-	${ISCC} innosetup.iss
+	${ISCC} /q innosetup.iss
 
 clean ::
 	-rmdir /q/s "${DEST}"

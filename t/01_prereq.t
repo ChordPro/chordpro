@@ -40,7 +40,6 @@ eval {
     diag( "Shaping enabled (HarfBuzz::Shaper $HarfBuzz::Shaper::VERSION)" );
     1;
 } || diag( "Shaping disabled (HarfBuzz::Shaper not found)" );
-++$test; use_ok( "App::Packager",   1.430 );
 ++$test; use_ok( "JSON::PP",   2.27203 );
 ++$test; use_ok( "String::Interpolate::Named", 1.030 );
 ++$test; use_ok( "File::HomeDir", 1.004 );

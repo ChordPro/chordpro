@@ -28,7 +28,7 @@ my $song = {
 	    assets     => {
 			   _Image001 => {
 					 type => 'image',
-					 uri  => './130_image.jpg'
+					 uri  => '130_image.jpg'
 					}
 			  },
 	    'settings' => {},
@@ -80,7 +80,7 @@ $song = {
 	    assets     => {
 			   _Image002 => {
 					 type => 'image',
-					 uri  => './130_image.jpg'
+					 uri  => '130_image.jpg'
 					}
 			  },
 	    'settings' => {},

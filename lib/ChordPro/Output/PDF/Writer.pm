@@ -14,6 +14,7 @@ use IO::String;
 use Carp;
 use utf8;
 
+use ChordPro::Paths;
 use ChordPro::Utils qw( expand_tilde demarkup min );
 use ChordPro::Output::Common qw( fmt_subst prep_outlines );
 use File::LoadLines qw(loadlines);
@@ -665,7 +666,7 @@ sub init_fonts {
     my $fc = Text::Layout::FontConfig->new( debug => $config->{debug}->{fonts} > 1 );
 
     # Add font dirs.
-    my @d = ( @{$ps->{fontdir}}, ::rsc_or_file("fonts/"), $ENV{FONTDIR} );
+    my @d = ( @{$ps->{fontdir}}, @{ CP->findresdirs("fonts") }, $ENV{FONTDIR} );
     # Avoid rsc result if dummy.
     splice( @d, -2, 1 ) if $d[-2] eq "fonts/";
     for my $fontdir ( @d ) {

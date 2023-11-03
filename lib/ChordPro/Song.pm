@@ -13,6 +13,7 @@ use strict;
 use warnings;
 
 use ChordPro;
+use ChordPro::Paths;
 use ChordPro::Chords;
 use ChordPro::Chords::Appearance;
 use ChordPro::Chords::Parser;
@@ -25,7 +26,6 @@ use File::LoadLines;
 use Storable qw(dclone);
 use feature 'state';
 use Text::ParseWords qw(quotewords);
-use File::Basename qw(basename);
 
 # Parser context.
 my $def_context = "";
@@ -249,7 +249,7 @@ sub parse_song {
     my $target = $config->{settings}->{transcode};
     if ( $target ) {
 	unless ( ChordPro::Chords::Parser->have_parser($target) ) {
-	    if ( my $file = ::rsc_or_file("config/notes/$target.json") ) {
+	    if ( my $file = CP->findres("config/notes/$target.json") ) {
 		for ( ChordPro::Config::get_config($file) ) {
 		    my $new = $config->hmerge($_);
 		    local $config = $new;
@@ -465,16 +465,16 @@ sub parse_song {
 		    $$linecnt = $diag->{line};
 		}
 		else {
-		    use Cwd qw(realpath);
-		    use File::Basename qw(dirname);
-		    my $uri = expand_tilde($kv->{uri} || $kv->{src});
-		    unless ( $uri =~ m;^(?:[a-z]:)?[/\\];i ) {
-			$uri = dirname(realpath($diag->{file})) . "/" . $uri;
-		    }
-		    unless ( $uri && -s $uri ) {
-			do_warn("Missing include \"$uri\"");
-			$uri = undef;
-			next;
+		    my $uri = $kv->{src};
+		    if ( $uri && CP->is_here($uri) ) {
+			my $found = CP->siblingres( $diag->{file}, $uri, class => "include" );
+			if ( $found ) {
+			    $uri = $found;
+			}
+			else {
+			    do_warn("Missing include for \"$uri\"");
+			    $uri = undef;
+			}
 		    }
 		    if ( $uri ) {
 			unshift( @$lines, loadlines($uri), "##include: end=1" );
@@ -1543,15 +1543,13 @@ sub dir_image {
 
     # If the image uri does not have a directory, look it up
     # next to the song, and then in the images folder of the
-    # CHORDPRO_LIB.
-    if ( $uri && $uri !~ m;^([a-z]:)?[/\\];i ) { # not abs
-	use File::Basename qw(dirname);
-	L: for ( dirname($diag->{file}) ) {
-	    $uri = "$_/$uri", last if -s "$_/$uri";
-	    for ( ::rsc_or_file("images/$uri") ) {
-		last unless $_;
-		$uri = $_, last L if -s $_;
-	    }
+    # resources.
+    if ( $uri && CP->is_here($uri) ) {
+	my $found = CP->siblingres( $diag->{file}, $uri, class => "images" );
+	if ( $found ) {
+	    $uri = $found;
+	}
+	else {
 	    do_warn("Missing image for \"$uri\"");
 	    return;
 	}
