@@ -21,9 +21,18 @@ Supported file types may depend on the platforms and
 tools used, but PNG, JPG and GIF should always be valid.
 Most likely, ABC and SVG will also be acceptable.
 The syntax of file names also depends on the platforms and
-tools used. A simple file name like `"myimage.png"` should always
+tools used.
+
+In general, a simple file name like `"myimage.png"` should always
 be acceptable. The image must then reside in the same directory as the
-song, or in an `images` subdirectory of `CHORDPRO_LIB`.
+song, or in an `images` subdirectory of one of the ChordPro resource
+paths.
+
+A full (absolute) filename like `"/home/me/images/myimage.png"` or
+`"C:\Users\Me\Documents\myimage.png"` is acceptable but not portable.
+
+Avoid relative filenames like `"images/myimage.png"`. They may or may not work,
+do not count on it.
 
 Example:
 
