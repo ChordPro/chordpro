@@ -2957,8 +2957,9 @@ method parse( $ctx, $k, $v ) {
 		$ctl{instrument} = $v;
 	    }
 	    elsif ( $k =~ /^(width|height|dx|dy|w|h)$/ ) {
-		$v = $1 * $ctx->{size}     if $v =~ /^([\d.]+)em$/;
-		$v = $1 * $ctx->{size} / 2 if $v =~ /^([\d.]+)ex$/;
+		$v = $1 * $ctx->{size}       if $v =~ /^(-?[\d.]+)em$/;
+		$v = $1 * $ctx->{size} / 2   if $v =~ /^(-?[\d.]+)ex$/;
+		$v = $1 * $ctx->{size} / 100 if $v =~ /^(-?[\d.]+)\%$/;
 		$ctl{$k} = $v;
 	    }
 	    elsif ( $k =~ /^(scale)$/ ) {
