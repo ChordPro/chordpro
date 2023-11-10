@@ -628,6 +628,10 @@ sub make_outlines {
 	    }
 	}
 	else {
+	    ####TODO: Why?
+	    if ( @$book == 1 && ref($book->[0]) eq 'ChordPro::Song' ) {
+		$book = [[ $book->[0] ]];
+	    }
 	    foreach my $b ( @$book ) {
 		my $song = $b->[-1];
 		# Leaf outline.
