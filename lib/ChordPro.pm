@@ -907,7 +907,7 @@ sub app_setup {
 		    if ( ! -r $try ) {
 			$try = CP->findcfg($c);
 		    }
-                    die("$c: $!\n") unless -r $try;
+                    die("$c: $!\n") unless $try && -r $try;
 		    $c = $try;
                 }
                 next;
