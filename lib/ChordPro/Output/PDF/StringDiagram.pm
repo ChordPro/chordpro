@@ -51,7 +51,7 @@ use constant DIAG_DEBUG => 0;
 # The vertical space the diagram requires.
 method vsp0( $elt, $dummy = 0 ) {
     $ps->{fonts}->{diagram}->{size} * $ps->{spacing}->{diagramchords}
-      + ( $nw + $lw + 0.40 ) * $gw
+      + $nutwidth * $lw + 0.40 * $gw
       + $vc * $gh
       + ( $fsh eq "below" ? $ps->{fonts}->{diagram}->{size} : 0 )
       ;
