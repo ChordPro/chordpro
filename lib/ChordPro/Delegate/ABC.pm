@@ -22,6 +22,7 @@ use File::LoadLines;
 use feature 'state';
 use Encode 'decode_utf8';
 
+use ChordPro::Paths;
 use ChordPro::Utils;
 use Text::ParseWords qw(shellwords);
 
@@ -80,27 +81,27 @@ sub abc2svg( $s, $pw, $elt ) {
 
 sub packaged_qjs() {
 
-    my $dir = ::rsc_or_file("abc/");
+    my $dir = CP->findresdirs("abc")->[0];
     my $qjs;
 
     # First, try packaged qjs.
-    if ( -x "${dir}qjs" ) {
-	$qjs = "${dir}qjs";
+    if ( -x "${dir}/qjs" ) {
+	$qjs = "${dir}/qjs";
     }
-    elsif ( is_msw() and -s "${dir}qjs.exe" ) {
-	$qjs = "${dir}qjs.exe";
+    elsif ( is_msw() and -s "${dir}/qjs.exe" ) {
+	$qjs = "${dir}/qjs.exe";
     }
 
     # Else try to find an installed qjs.
     else {
-	$qjs = findexe("qjs");
+	$qjs = CP->findexe("qjs");
     }
 
     # If so, check for packaged abc files.
     if ( $qjs
-	 && -s "${dir}chordproabc.js"
-	 && -s "${dir}abc2svg/tohtml.js" ) {
-	return [ $qjs, "--std", "${dir}chordproabc.js", "${dir}abc2svg" ];
+	 && -s "${dir}/chordproabc.js"
+	 && -s "${dir}/abc2svg/tohtml.js" ) {
+	return [ $qjs, "--std", "${dir}/chordproabc.js", "${dir}/abc2svg" ];
     }
     return 0;
 }
