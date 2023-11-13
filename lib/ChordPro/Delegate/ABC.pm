@@ -81,7 +81,8 @@ sub abc2svg( $s, $pw, $elt ) {
 
 sub packaged_qjs() {
 
-    my $dir = CP->findresdirs("abc")->[0];
+    # Only use ours.
+    my $dir = CP->findresdirs("abc")->[-1];
     my $qjs;
 
     # First, try packaged qjs.
