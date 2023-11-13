@@ -112,7 +112,6 @@ WW := w10
 wkit : _wkit1 _wkit _wkit2
 
 _wkit :
-	test -d /mnt/c/Users || mount /mnt/c
 	${MAKE} to_c
 	ssh ${WW} gmake -C Chordpro/pp/windows
 	scp ${WW}:Chordpro/pp/windows/ChordPro-Installer\*.exe ${HOME}/tmp/
@@ -121,6 +120,7 @@ _wkit1 :
 	-VBoxManage startvm ${VM} --type headless
 
 _wkit2 :
+	sudo umount /misc/c
 	VBoxManage controlvm ${VM} poweroff
 	VBoxManage snapshot ${VM} restorecurrent
 
