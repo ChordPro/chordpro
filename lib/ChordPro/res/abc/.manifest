@@ -1,13 +1,9 @@
 abc2svg/abc2svg-1.js
 abc2svg/abc2svg.ttf
 abc2svg/abcdoc-1.js
-abc2svg/abcemb1-1.js
-abc2svg/abcemb-1.js
-abc2svg/abcemb2-1.js
 abc2svg/ambitus-1.js
 abc2svg/break-1.js
 abc2svg/capo-1.js
-abc2svg/chord-1.js
 abc2svg/chordnames-1.js
 abc2svg/clair-1.js
 abc2svg/clip-1.js
@@ -23,7 +19,6 @@ abc2svg/grid2-1.js
 abc2svg/grid3-1.js
 abc2svg/jazzchord-1.js
 abc2svg/jianpu-1.js
-abc2svg/json-1.js
 abc2svg/mdnn-1.js
 abc2svg/MIDI-1.js
 abc2svg/nns-1.js
