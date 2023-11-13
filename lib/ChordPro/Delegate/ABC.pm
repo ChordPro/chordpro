@@ -353,12 +353,13 @@ sub abc2image( $s, $pw, $elt ) {
 sub options( $data ) {
 
     my @pre;
-    while ( @$data ) {
-	$_ = shift(@$data);
-	unshift( @$data, $_ ), last if /^X:/;
+    my @data = @$data;
+    while ( @data ) {
+	$_ = shift(@data);
+	unshift( @data, $_ ), last if /^X:/;
 	push( @pre, $_ );
     }
-    if ( @pre && !@$data ) {	# no X: found
+    if ( @pre && !@data ) {	# no X: found
 	return;
     }
     my $kv = parse_kv( @pre ) if @pre;
