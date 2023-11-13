@@ -1796,6 +1796,8 @@ sub imageline {
     my $pr = $ps->{pr};
     my $id = $elt->{id};
     my $img = $assets->{$id}->{data};
+    my $avwidth  = $assets->{$id}->{vwidth};
+    my $avheight = $assets->{$id}->{vheight};
     unless ( $img ) {
 	return "Unhandled image type: asset=$id";
     }
@@ -1803,7 +1805,12 @@ sub imageline {
 	$elt->{multi} = $assets->{$id}->{multi};
     }
     if ( $elt->{msel} ) {
-	$img = $assets->{$id}->{multi}->[$elt->{msel}]->{xo};
+	for ( $assets->{$id}->{multi}->[$elt->{msel}] ) {
+	    $img = $_->{xo};
+	    # Take vwidth/vheight from subimage.
+	    $avwidth  = $_->{vwidth};
+	    $avheight = $_->{vheight};
+	}
     }
 
     # Available width and height.
@@ -1826,8 +1833,8 @@ sub imageline {
     }
 
     my $scale = 1;
-    my ( $w, $h ) = ( $opts->{width}  || $assets->{$id}->{vwidth}  || $img->width,
-		      $opts->{height} || $assets->{$id}->{vheight} || $img->height );
+    my ( $w, $h ) = ( $opts->{width}  || $avwidth  || $img->width,
+		      $opts->{height} || $avheight || $img->height );
 
   if ( $config->{debug}->{x1} ) {
 
