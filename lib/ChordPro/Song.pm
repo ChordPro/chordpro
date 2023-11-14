@@ -1225,7 +1225,8 @@ sub directive {
 	    $grid_cells = [ $grid_arg->[0] * $grid_arg->[1],
 			    $grid_arg->[2],  $grid_arg->[3] ];
 	}
-	elsif ( my $d = $config->{delegates}->{$in_context} ) {
+	elsif ( exists $config->{delegates}->{$in_context} ) {
+	    my $d = $config->{delegates}->{$in_context};
 	    my $label = $arg;
 	    my $kv;
 	    if ( $arg =~ /\b(id|label|scale|align|center)=(.+)/ ) {

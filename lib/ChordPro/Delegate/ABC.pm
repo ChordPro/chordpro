@@ -181,10 +181,12 @@ sub _abc2svg( $s, $pw, $elt ) {
 	@data = ( "X:1", @pre );
 	@pre = ();
     }
-    my $kv = { %$elt };
+    my $kv = {};
     $kv = parse_kv( @pre ) if @pre;
+    $kv = { %$kv, %{$elt->{opts}} };
     $kv->{split} //= 1;		# less overhead. really.
     $kv->{scale} ||= 1;
+    $kv->{align} //= ($kv->{center}//0) ? "center" : "left";
     if ( $kv->{width} ) {
 	$pw = $kv->{width};
     }
@@ -335,7 +337,7 @@ sub _abc2svg( $s, $pw, $elt ) {
 	    subtype => "svg",
 	    data => \@data,
 	    opts => { maybe id     => $kv->{id},
-		      maybe center => $kv->{center},
+		      maybe align  => $kv->{align},
 		      maybe scale  => $kv->{scale},
 		      maybe split  => $kv->{split},
 		      maybe spread => $kv->{spread},
@@ -355,14 +357,13 @@ sub options( $data ) {
     my @pre;
     my @data = @$data;
     while ( @data ) {
-	$_ = shift(@data);
-	unshift( @data, $_ ), last if /^X:/;
-	push( @pre, $_ );
+	last if $data[0] =~ /^([A-Z]:|\%)/;
+	push( @pre, shift(@data) );
     }
-    if ( @pre && !@data ) {	# no X: found
-	return;
-    }
-    my $kv = parse_kv( @pre ) if @pre;
+    @pre = () if @pre && !@data;	# no data found
+    my $kv = {};
+    $kv = parse_kv( @pre ) if @pre;
+    $kv->{align} //= ($kv->{center}//0) ? "center" : "left";
     $kv;
 }
 

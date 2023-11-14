@@ -81,6 +81,9 @@ sub ly2svg( $s, $pw, $elt ) {
 
     my $kv = { %$elt };
     $kv = parse_kv( @pre ) if @pre;
+    $kv->{scale} ||= 1;
+    $kv->{align} //= ($kv->{center}//0) ? "center" : "left";
+
     # Copy. We assume the user knows how to write LilyPond.
     for ( @data ) {
 	print $fd $_, "\n";
@@ -124,7 +127,7 @@ sub ly2svg( $s, $pw, $elt ) {
 	    subtype => "svg",
 	    uri  => "$im1.cropped.svg",
 	    opts => { maybe id     => $kv->{id},
-		      maybe center => $kv->{center},
+		      maybe align  => $kv->{align},
 		      maybe scale  => $kv->{scale},
 		      maybe spread => $kv->{spread},
 		    } };
@@ -138,16 +141,15 @@ sub ly2image( $s, $pw, $elt ) {
 sub options( $data ) {
 
     my @pre;
+    my @data = @$data;
     while ( @$data ) {
-	$_ = shift(@$data);
-	unshift( @$data, $_ ), last if /^[%\\]/; # LP data
-	push( @pre, $_ );
+	last if $data[0] =~ /^[%\\]/; # LP data
+	push( @pre, shift(@data) );
     }
-    if ( @pre && !@$data ) {	# no LP found
-	return;
-    }
-
-    my $kv = parse_kv( @pre ) if @pre;
+    @pre = () if @pre && !@$data; 	# no LP found
+    my $kv = {};
+    $kv = parse_kv( @pre ) if @pre;
+    $kv->{align} //= ($kv->{center}//0) ? "center" : "left";
     $kv;
 }
 

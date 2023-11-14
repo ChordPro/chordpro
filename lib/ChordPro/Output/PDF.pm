@@ -1796,6 +1796,9 @@ sub imageline {
     my $pr = $ps->{pr};
     my $id = $elt->{id};
     my $img = $assets->{$id}->{data};
+    my $label = $opts->{label};
+    my $width = $opts->{width};
+    my $height = $opts->{height};
     my $avwidth  = $assets->{$id}->{vwidth};
     my $avheight = $assets->{$id}->{vheight};
     unless ( $img ) {
@@ -1811,6 +1814,8 @@ sub imageline {
 	    $avwidth  = $_->{vwidth};
 	    $avheight = $_->{vheight};
 	}
+	$width = $height = 0;
+	$label = "";
     }
 
     # Available width and height.
@@ -1823,18 +1828,28 @@ sub imageline {
     else {
 	$pw = $ps->{__rightmargin} - $ps->{_leftmargin};
     }
+    $pw -= $ps->{_indent};
     my $ph = $ps->{_margintop} - $ps->{_marginbottom};
 
-    if ( $opts->{width} && $opts->{width} =~ /^(\d+(?:\.\d+)?)\%$/ ) {
-	$opts->{width} = $1/100 * $pw;
+    if ( $width && $width =~ /^(\d+(?:\.\d+)?)\%$/ ) {
+	$width  = $1/100 * $pw;
     }
-    if ( $opts->{height} && $opts->{height} =~ /^(\d+(?:\.\d+)?)\%$/ ) {
-	$opts->{height} = $1/100 * $ph;
+    if ( $height && $height =~ /^(\d+(?:\.\d+)?)\%$/ ) {
+	$height = $1/100 * $ph;
     }
 
     my $scale = 1;
-    my ( $w, $h ) = ( $opts->{width}  || $avwidth  || $img->width,
-		      $opts->{height} || $avheight || $img->height );
+    my ( $w, $h ) = ( $width  || $avwidth  || $img->width,
+		      $height || $avheight || $img->height );
+
+    # Scale proportionally if width xor height was explicitly requested.
+    if ( $width && !$height ) {
+	$h = $width / ($avwidth || $img->width) * ($avheight || $img->height);
+    }
+    elsif ( !$width && $height ) {
+	$w = $height / ($avheight || $img->height) * ($avwidth || $img->width);
+    }
+
 
   if ( $config->{debug}->{x1} ) {
 
@@ -1890,7 +1905,7 @@ sub imageline {
     $align //= "left";
 
     my $y = $gety->($h);	# may have been changed by checkspace
-    if ( defined ( my $tag = $i_tag // $opts->{label} ) ) {
+    if ( defined ( my $tag = $i_tag // $label ) ) {
 	$i_tag = $tag;
     	my $ftext = $ps->{fonts}->{comment};
 	my $ytext  = $y - font_bl($ftext);
@@ -1944,7 +1959,7 @@ sub imageline {
 		 )) if $config->{debug}->{images};
 
 #	$pr->add_image( $img, $x, $y, $w, $h, $opts->{border} || 0 );
-    $pr->add_object( $img, $x, $y,
+    $pr->add_object( $img, $x-2, $y,
 		     xscale => $w/$img->width,
 		     yscale => $h/$img->height,
 		     border => $opts->{border} || 0,
@@ -2593,7 +2608,8 @@ sub prepare_assets {
     # So we first scan the list for SVG and delegate items and turn these
     # into simple display items.
 
-    my $pw = $ps->{papersize}->[0] - $ps->{marginleft} - $ps->{marginright};
+    my $pw = $ps->{papersize}->[0] - $ps->{marginleft} - $ps->{marginright}
+      - $ps->{_indent};
     my $cw = ( $pw - ( $ps->{columns} - 1 ) * $ps->{columnspace} ) /$ps->{columns};
     warn("PDF: Preparing ", scalar(keys %sa), " image",
 	 keys(%sa) == 1 ? "" : "s", ", pw=$pw, cw=$cw\n")
@@ -2698,7 +2714,7 @@ sub prepare_assets {
 	    warn("Created asset $id (xform, ",
 		 $o->[0]->{vwidth}, "x", $o->[0]->{vheight}, ")",
 		 " scale=", $res->{opts}->{scale} || 1,
-		 " center=", $res->{opts}->{center}//0,
+		 " align=", $res->{opts}->{align}//"default",
 		 " sep=", $sep,
 		 "\n")
 	      if $config->{debug}->{images};
