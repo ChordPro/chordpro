@@ -209,7 +209,6 @@ method diagram_xo ($info) {
 	$pos += 7, $o-- while $pos < 0;
 	$pos %= 7;
 	$pos += 7 * $o if $o >= 1;
-	print( STDERR "[$pos,$type]\n" );
 
 	# Actual displacement.
 	my $pkw = $pos * $kw;
