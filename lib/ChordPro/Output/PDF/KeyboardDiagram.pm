@@ -20,6 +20,7 @@ field $lw;
 field $fg;
 field $keys;
 field $base;
+field $base_k;
 field $show;
 field $pressed;
 
@@ -44,7 +45,13 @@ ADJUST {
     unless ( $base =~ /^(?:C|F)$/i ) {
 	die("pdf.kbdiagrams.base is \"$base\", must be \"C\" or \"F\"\n");
     }
-    $base = uc($base) eq "F" ? 3 : 0;
+    if ( uc($base) eq 'C' ) {
+	$base = $base_k = 0;
+    }
+    else {			# must be 'F'
+	$base_k = 3;
+	$base = 5;
+    }
 
     unless ( $show =~ /^(?:top|bottom|right|below)$/i ) {
 	die("pdf.kbdiagrams.show is \"$show\", must be one of ".
@@ -181,6 +188,8 @@ method diagram_xo ($info) {
 
     # Shift down if would start in 2nd octave.
     my $kd = -int(($keys[0] + $info->{root_ord}) / 12) * 12;
+    # Adjust for diagram start.
+    $kd+=12 if ($keys[0] + $info->{root_ord}) < $base;
 
     for my $key ( @keys ) {
 	$key += $kd + $info->{root_ord};
@@ -194,12 +203,13 @@ method diagram_xo ($info) {
 	my ($pos,$type) = @{$keytypes{$key}};
 
 	# Adjust for diagram start.
-	$pos -= $base;
+	$pos -= $base_k;
 
 	# Reduce to single octave and scale.
 	$pos += 7, $o-- while $pos < 0;
 	$pos %= 7;
 	$pos += 7 * $o if $o >= 1;
+	print( STDERR "[$pos,$type]\n" );
 
 	# Actual displacement.
 	my $pkw = $pos * $kw;
@@ -276,9 +286,9 @@ method grid_xo {
 	$xo->stroke;
 	for my $i (  1,  2,  4,  5,  6,  8,  9, 11,
 		    12, 13, 15, 16, 18, 19, 20, 22, 23 ) {
-	    next if $i < $base;
-	    last if $i > $keys + $base;
-	    my $x = ($i-$base-1)*$kw+2*$kw/3;
+	    next if $i < $base_k;
+	    last if $i > $keys + $base_k;
+	    my $x = ($i-$base_k-1)*$kw+2*$kw/3;
 	    $xo->rectangle( $x, -$kh/2, $x + 2*$kw/3, 0 )->fillstroke;
 	}
 

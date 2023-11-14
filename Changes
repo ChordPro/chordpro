@@ -16,6 +16,7 @@
       You are adsvised to remove the old 32bits install first.
     - !Bug fixes
     - Prevent warning when parsing {key} and trancode to nashville/roman.
+    - Fix chord inversion (issue 321).
     - !Internal
     - (ABC) ABC embedding use tohtml instead of toxhtml.
     - (PDF) Enhance assets (wip), labels; move grid to separate module.
