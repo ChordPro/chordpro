@@ -512,7 +512,7 @@ sub parse_song {
 		}
 		else {
 		    delete $self->{body}->[-1]->{open};
-		    # A subsequent {start_of_XXX} will reopen a new item
+		    # A subsequent {start_of_XXX} will open a new item
 
 		    my $d = $config->{delegates}->{$in_context};
 		    if ( $d->{type} eq "image" ) {
@@ -529,7 +529,7 @@ sub parse_song {
 				$id = $opts->{id};
 			    }
 			}
-			$opts = $a->{opts} = { %{$a->{opts}}, %$opts };
+			$opts = $a->{opts} = { %$opts, %{$a->{opts}} };
 
 			my $def = !!$id;
 			$id //= "_Image".$assetid++;
@@ -550,17 +550,25 @@ sub parse_song {
 			# Move to assets.
 			$self->{assets}->{$id} = $a;
 			if ( $def ) {
+			    my $label = $opts->{label};
 			    if ( @{$self->{body}}
 				 && $self->{body}->[-1]->{type} eq 'set'
 				 && $self->{body}->[-1]->{name} eq 'label' ) {
 				my $a = pop( @{$self->{body}} );
-				do_warn("Label \"$a->{value}\" ignored on non-displaying $a->{context} section\n");
+				$label = $a->{value};
 			    }
+			    do_warn("Label \"$label\" ignored on non-displaying $in_context section\n")
+			      if $label;
 			}
 			else {
 			    $self->add( type => "image",
 					opts => $opts,
 					id => $id );
+			    if ( $opts->{label} ) {
+				push( @labels, $opts->{label} )
+				  unless $in_context eq "chorus"
+				  && !$config->{settings}->{choruslabels};
+			    }
 			}
 		    }
 		}
@@ -579,20 +587,7 @@ sub parse_song {
 
 		# Else start new item.
 		else {
-		    my %opts;
-		    ####TODO
-		    if ( $xpose || $config->{settings}->{transpose} ) {
-			$opts{transpose} =
-			  $xpose + ($config->{settings}->{transpose}//0 );
-		    }
-		    my $d = $config->{delegates}->{$in_context};
-		    $self->add( type     => "image",
-				subtype  => "delegate",
-				delegate => $d->{module},
-				handler  => $d->{handler},
-				data     => [ $_ ],
-				opts     => \%opts,
-				open     => 1 );
+		    croak("Reopening delegate");
 		}
 		next;
 	    }
@@ -1230,26 +1225,31 @@ sub directive {
 	    $grid_cells = [ $grid_arg->[0] * $grid_arg->[1],
 			    $grid_arg->[2],  $grid_arg->[3] ];
 	}
-	elsif ( $arg && $arg ne "" ) {
+	elsif ( my $d = $config->{delegates}->{$in_context} ) {
+	    my $label = $arg;
+	    my $kv;
 	    if ( $arg =~ /\b(id|label|scale|align|center)=(.+)/ ) {
-		my $kv = parse_kv($arg);
-		my $d = $config->{delegates}->{$in_context};
-		$self->add( type     => "image",
-			    subtype  => "delegate",
-			    delegate => $d->{module},
-			    handler  => $d->{handler},
-			    data     => [ ],
-			    opts     => $kv,
-			    id       => $kv->{id},
-			    open     => 1 );
+		$kv = parse_kv($arg);
 	    }
 	    else {
-		$self->add( type  => "set",
-			    name  => "label",
-			    value => $arg );
-		push( @labels, $arg )
-		  unless $in_context eq "chorus" && !$config->{settings}->{choruslabels};
+		$kv->{label} = $arg if $arg ne "";
 	    }
+	    $self->add( type     => "image",
+			subtype  => "delegate",
+			delegate => $d->{module},
+			handler  => $d->{handler},
+			data     => [ ],
+			opts     => $kv,
+			exists($kv->{id}) ? ( id => $kv->{id} ) : (),
+			open     => 1 );
+	}
+	elsif ( $arg ne "" ) {
+	    $self->add( type  => "set",
+			name  => "label",
+			value => $arg );
+	    push( @labels, $arg )
+	      unless $in_context eq "chorus"
+	      && !$config->{settings}->{choruslabels};
 	}
 	else {
 	    do_warn("Garbage in start_of_$1: $arg (ignored)\n")
