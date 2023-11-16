@@ -1,5 +1,23 @@
 0.000
 
+    - !Highlights
+
+    - Images can be [placed everywhere](https://chordpro.org/chordpro/directives-image/).
+      They can be placed relative to the paper, the page, the column,
+      and the lyrics.
+
+    - Images can be [embedded[(https://chordpro.org/chordpro/directives-image/#inline-images) in text (lyrics) lines, either as part of
+      the text similar to a glyph, or somewhere else on the page
+      relative to a particular place in the text. The latter is most
+      interesting for annotations.
+
+    - Delegates are images, too. Annotate your lyrics with SVG images,
+      or with musical notes using ABC or Lilypond.
+
+    - Resources like configs, tasks and images are now more logically
+      searched using [resource
+      libraries](https://chordpro.org/chordpro/resources/).
+
     - !ChordPro functionality
     - Rework paths handling for consistent resource handling;
       eliminate App::Packager.

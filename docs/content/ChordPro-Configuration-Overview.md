@@ -98,31 +98,6 @@ In the examples below the symbol `~` denotes the user's home directory. Windows 
    **Important** A song specific configuration file may **not**
    contain an `"include"` or `"tuning"` item.
 
-## Configuration resources (presets)
-
-Preset configurations can be specified by their names, without path
-and extension. For example, `--config=modern1` refers to the preset
-`modern1`.
-
-When a preset config is used, ChordPro will try to find the
-corresponding config file in the following locations (using `modern1`
-as example):
-
-* File `config/modern1.json` or `config/modern1.prp` in one of the
-  paths from the `CHORDPRO_LIB` search path, provided this
-  environment variable has been set.
-  
-* File `config/modern1.json` in a built-in location that comes with
-  the ChordPro install.
-  
-If environment variable `CHORDPRO_LIB` is not explicitly set, 
-ChordPro will use the first valid directory of:
-
-`$XDG_CONFIG_HOME/chordpro` (provided variable `XDG_CONFIG_HOME` is set)  
-`$HOME/.config/chordpro`  
-`$HOME/.chordpro`  
-`$HOME/chordpro`
-
 ## How config files are combined
 
 The config files are processed in order, and their contents are merged. In general, a config setting from a later file replaces the value from previous files. There are a few exceptions: instrument definitions, hashes and arrays.
