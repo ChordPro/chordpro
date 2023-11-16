@@ -76,11 +76,11 @@ BUILD {
 	my $path = $self->normalize($_);
 	warn("Paths: configdir try $_ => $path\n") if $self->debug > 1;
 	next unless $path && -d $path;
+	$configdir = $path;
 	for ( $self->normalize( catfile( $path, "$app_lc.prp" ) ),
 	      $self->normalize( catfile( $path, "$app_lc.json" ) ) ) {
 	    next unless $_ && -f $_;
 	    $configs->{userconfig} = $_;
-	    $configdir = $path;
 	    last;
 	}
 	last if $configdir;
