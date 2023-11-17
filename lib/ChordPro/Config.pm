@@ -1030,7 +1030,7 @@ sub default_config () {
     //         "all": all chords used.
     //         "user": only prints user defined chords.
     // "sorted": order the chords by key.
-    // "suppress": a series of chord (names) thet will not generate
+    // "suppress": a series of chord (names) that will not generate
     //         diagrams, e.g. if they are considered trivial.
     // Note: The type of diagram (string or keyboard) is determined
     // by the value of "instrument.type".
@@ -1542,6 +1542,8 @@ sub default_config () {
                  "quote" : false,
             },
         },
+        // Retain # comments -- we'll output them.
+        "comments" : "retain",
     },
 
     // Settings for HTML backend.

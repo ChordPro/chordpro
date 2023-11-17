@@ -99,7 +99,7 @@ checkjson :
 	do \
 	  json_pp -json_opt relaxed < $$i > .json/`basename $$i`; \
 	done
-	rm -f .json/pd_colour.json
+	cd .json; rm keyboard.json dark.json resetchords.json
 	${JSONVALIDATOR} ${JSONOPTS} \
 	  ${CFGLIB}/config.schema .json/*.json
 	rm -fr .json

@@ -493,7 +493,9 @@ sub parse_song {
 	    # Currently the ChordPro backend is the only one that
 	    # cares about comment lines.
 	    # Collect pre-title stuff separately.
-	    next unless $self->{generate} eq 'ChordPro';
+	    next unless exists $config->{lc $self->{generate}}
+	      && exists $config->{lc $self->{generate}}->{comments}
+	      && $config->{lc $self->{generate}}->{comments} eq "retain";
 
 	    if ( exists $self->{title} || $fragment ) {
 		$self->add( type => "ignore", text => $_ );
