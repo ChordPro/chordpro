@@ -85,6 +85,8 @@ extensive details and examples.
           // Substitute Unicode sharp/flats in chord names.
           // Will fallback to ChordProSymbols the font doesn't have the glyphs.
           "truesf" : false,
+          // Amount of indent for wrapped lines. Actual indent is the stringwidth.
+          "wrapindent" : "x",
         },
     
         // Metadata.

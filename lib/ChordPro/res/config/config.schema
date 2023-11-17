@@ -251,6 +251,12 @@
 		    "description": "Substitute Unicode sharp/flats in chord names.",
 		    "type": "boolean",
 		    "default": false
+		},
+
+		"wrapindent": {
+		    "description": "Indent for wrapped lyrics.",
+		    "type": "string",
+		    "default": "x"
 		}
 	    }
 	},

@@ -1594,8 +1594,11 @@ sub songline {
 	}
 	my ( $text, $ex ) = wrapsimple( $pr, $t, $x, $ftext );
 	$pr->text( $text, $x, $ytext, $ftext );
+	my $wi = $pr->strwidth( $config->{settings}->{wrapindent}//"x" );
 	return $ex ne ""
-	  ? { %$elt, indent => $pr->strwidth("x"), text => $ex, chords => undef  }
+	  ? { %$elt,
+	      indent => $wi,
+	      text => $ex, chords => undef  }
 	  : undef;
     }
     if ( $type eq "tabline" ) {
@@ -1626,7 +1629,12 @@ sub songline {
 	my ( $text, $ex ) = wrapsimple( $pr, join( "", @phrases ),
 					$x, $ftext );
 	$pr->text( $text, $x, $ytext, $ftext );
-	return $ex ne "" ? { %$elt, indent => $pr->strwidth("x"), phrases => [$ex] } : undef;
+	my $wi = $pr->strwidth( $config->{settings}->{wrapindent}//"x" );
+	return $ex ne ""
+	  ? { %$elt,
+	      indent => $wi,
+	      phrases => [$ex] }
+	  : undef;
     }
 
     if ( $chordscol || $inlinechords ) {
@@ -2522,6 +2530,8 @@ sub wrap {
     my @rchords;
     my @rphrases;
     my $m = $pr->{ps}->{__rightmargin};
+    my $wi = $pr->strwidth( $config->{settings}->{wrapindent}//"x",
+			    $pr->{ps}->{fonts}->{text} );
     #warn("WRAP x=$x rm=$m w=", $m - $x, "\n");
 
     while ( @chords ) {
@@ -2578,14 +2588,14 @@ sub wrap {
 	    unshift( @phrases, $ex );
 	    push( @$res,
 		  { %$elt, chords => [@rchords], phrases => [@rphrases] } );
-	    $x = $_[2] + $pr->strwidth("x");
-	    $res->[-1]->{indent} = $pr->strwidth("x") if @$res > 1;
+	    $x = $_[2] + $wi;;
+	    $res->[-1]->{indent} = $wi if @$res > 1;
 	    @rchords = ();
 	    @rphrases = ();
 	}
     }
     push( @$res, { %$elt, chords => \@rchords, phrases => \@rphrases } );
-    $res->[-1]->{indent} = $pr->strwidth("x") if @$res > 1;
+    $res->[-1]->{indent} = $wi if @$res > 1;
     return $res;
 }
 
