@@ -42,7 +42,7 @@ sub is_deeply {
     if ( ref($got) eq 'HASH' && ref($expect) eq 'HASH' ) {
 	fixchords($got) if $got->{body};
 
-	for ( qw( config ) ) {
+	for ( qw( config generate ) ) {
 	    delete $got->{$_} unless exists $expect->{$_};
 	}
 	if ( $got->{chordsinfo} ) {

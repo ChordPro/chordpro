@@ -204,6 +204,7 @@ sub chordpro {
 		$opts->{meta}->{__config} = \@cfg;
 	    }
 	}
+	$opts->{generate} = $options->{generate};
 	# Wx runs on temp files, so pass real filename in.
 	$opts->{filesource} = $options->{filesource};
 	$s->parse_file( $file, $opts );

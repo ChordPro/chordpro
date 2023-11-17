@@ -63,9 +63,7 @@ sub parse_file {
     my $linecnt = 0;
     my $songs = 0;
     while ( @$lines ) {
-	my $song = ChordPro::Song
-	  # WxChordPro uses temp file _filesource. Add real filename as well.
-	  ->new( $opts->{filesource} || $opts->{_filesource} )
+	my $song = ChordPro::Song->new($opts)
 	  ->parse_song( $lines, \$linecnt, {%$meta}, {%$defs} );
 	$song->{meta}->{songindex} = 1 + @{ $self->{songs} };
 	push( @{ $self->{songs} }, $song );

@@ -77,7 +77,9 @@ my $assetid = "001";		# for assets
 # Constructor.
 
 sub new {
-    my ( $pkg, $filesource ) = @_;
+    my ( $pkg, $opts ) = @_;
+
+    my $filesource = $opts->{filesource} || $opts->{_filesource};
 
     $xpose = 0;
     $grid_arg = [ 4, 4, 1, 1 ];	# 1+4x4+1
@@ -100,6 +102,7 @@ sub new {
 
     bless { chordsinfo => {},
 	    meta       => {},
+	    generate   => $opts->{generate},
 	    structure  => "linear",
 	  } => $pkg;
 }
@@ -487,7 +490,11 @@ sub parse_song {
 		next;
 	    }
 
+	    # Currently the ChordPro backend is the only one that
+	    # cares about comment lines.
 	    # Collect pre-title stuff separately.
+	    next unless $self->{generate} eq 'ChordPro';
+
 	    if ( exists $self->{title} || $fragment ) {
 		$self->add( type => "ignore", text => $_ );
 	    }
