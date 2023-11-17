@@ -2,17 +2,20 @@
 
     - !Highlights
 
-    - Images can be [placed everywhere](https://chordpro.org/chordpro/directives-image/).
+    - Images can be [placed everywhere](https://chordpro.org/beta/directives-image/).
       They can be placed relative to the paper, the page, the column,
       and the lyrics.
 
-    - Images can be [embedded[(https://chordpro.org/chordpro/directives-image/#inline-images) in text (lyrics) lines, either as part of
+    - Images can be [embedded[(https://chordpro.org/beta/directives-image/#inline-images) in text (lyrics) lines, either as part of
       the text similar to a glyph, or somewhere else on the page
       relative to a particular place in the text. The latter is most
       interesting for annotations.
 
-    - Delegates are images, too. Annotate your lyrics with SVG images,
+    - Delegates are images too. Annotate your lyrics with SVG images,
       or with musical notes using ABC or Lilypond.
+
+    - Chord and keyboard diagrams are images too. And you can use
+      string and keyboard diagrams simultaneously.
 
     - Resources like configs, tasks and images are now more logically
       searched using [resource
@@ -25,6 +28,8 @@
     - {image} can have label and align properties.
     - (ABC) ABC embedding no longer uses nodeJS.
     - (ABC) Make split work (and enable by default).
+    - (ABC) Images are left aligned by default.
+    - (Lilypond) Images are left aligned by default.
     - Improve runtime info.
     - (PDF) Image scale strategy change for spread images.
     - (PDF/Writer) Add generalized add_object for objects and images.
