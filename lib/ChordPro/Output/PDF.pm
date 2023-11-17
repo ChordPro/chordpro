@@ -1800,9 +1800,9 @@ sub imageline {
     my ( $elt, $x, $ps, $gety ) = @_;
 
     my $x0 = $x;
-    my $opts = $elt->{opts};
     my $pr = $ps->{pr};
     my $id = $elt->{id};
+    my $opts = { %{$assets->{$id}->{opts}//{}}, %{$elt->{opts}//{}} };
     my $img = $assets->{$id}->{data};
     my $label = $opts->{label};
     my $width = $opts->{width};
