@@ -22,6 +22,10 @@ description: "ChordPro related links"
   Mac OS X (Java-based native .app), and any platform that
   supports Java 1.5 (.jar file).
 
+* [SongPress](https://www.skeed.it/songpress)  
+  A simple but often effective editor with WYSIWYG capabilities. Runs
+  on Windows and Linux.
+
 * [MobileSheetsPro](http://www.zubersoft.com/mobilesheets/)  
   MobileSheetsPro is a music viewer for Android and Windows (and soon iOS). It
   is aimed at musicians to replace the music papers and books. It

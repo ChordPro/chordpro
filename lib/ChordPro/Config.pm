@@ -917,6 +917,8 @@ sub default_config () {
       "truesf" : false,
       // Amount of indent for wrapped lines. Actual indent is the stringwidth.
       "wrapindent" : "x",
+      // Flow text. Do not use.
+      "flowtext" : 0,
     },
 
     // Metadata.

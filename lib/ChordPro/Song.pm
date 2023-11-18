@@ -640,7 +640,22 @@ sub parse_song {
 		$prep->{songline}->($_);
 		# warn("POST: ", $_, "\n");
 	    }
-	    $self->add( type => "songline", $self->decompose($_) );
+	    if ( $config->{settings}->{flowtext}
+		 && @{ $self->{body}//[] } ) {
+		my $prev = $self->{body}->[-1];
+		my $this = { $self->decompose($_) };
+		if ( $prev->{type} eq "songline"
+		     && !$prev->{chords}
+		     && !$this->{chords} ) {
+		    $prev->{phrases}->[0] .= " " . $this->{phrases}->[0];
+		}
+		else {
+		    $self->add( type => "songline", %$this );
+		}
+	    }
+	    else {
+		$self->add( type => "songline", $self->decompose($_) );
+	    }
 	}
 	elsif ( exists $self->{title} || $fragment ) {
 	    $self->add( type => "empty" );
