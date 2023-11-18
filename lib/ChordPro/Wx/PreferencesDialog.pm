@@ -218,7 +218,7 @@ sub store_prefs {
 
     # Custom library.
     $parent->{prefs_enable_customlib} = $self->{cb_customlib}->IsChecked;
-    $parent->{prefs_customlib}        = $ENV{CHORDPRO_LIB} // $self->{l_customlibdialog}->GetValue;
+    $parent->{prefs_customlib}        = $ENV{CHORDPRO_LIB} // $self->{t_customlibdialog}->GetValue;
 
     # New song template.
     $parent->{prefs_enable_tmplfile} = $self->{cb_tmplfile}->IsChecked;

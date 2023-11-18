@@ -41,6 +41,7 @@
     - Prevent warning when parsing {key} and trancode to nashville/roman.
     - Fix chord inversion (issue 321).
     - Fix comment lines disturbing a consecutive series of {chord}s.
+    - Fix typo in Wx Preferencesdialog, causing it to crash.
     - !Internal
     - (ABC) ABC embedding use tohtml instead of toxhtml.
     - (PDF) Enhance assets (wip), labels; move grid to separate module.
