@@ -11,6 +11,10 @@ all :	Makefile cleanup
 test : Makefile
 	env PERL5LIB=$(shell pwd)/CPAN $(MAKE) -f Makefile test
 
+.PHONY : tests
+tests : test
+	prove -b xt
+
 .PHONY : clean
 clean : cleanup
 	rm -f *~
