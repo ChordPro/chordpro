@@ -402,7 +402,7 @@ sub config_default () {
 
 # Config in properties format.
 
-sub cfg2props ( $o, $path ) {
+sub cfg2props ( $o, $path = "" ) {
     $path //= "";
     my $ret = "";
     if ( !defined $o ) {
@@ -848,7 +848,7 @@ sub get_context () {
 }
 
 # For testing
-use base qw(Exporter);
+use Exporter 'import';
 our @EXPORT = qw( _c );
 sub _c ( @args ) { $::config->gps(@args) }
 
@@ -918,7 +918,7 @@ sub default_config () {
       // Amount of indent for wrapped lines. Actual indent is the stringwidth.
       "wrapindent" : "x",
       // Flow text. Do not use.
-      "flowtext" : 0,
+      "flowtext" : false,
     },
 
     // Metadata.
@@ -945,7 +945,8 @@ sub default_config () {
     },
 
     // Assets.
-    "assets" : {},
+    "assets" : {
+    },
 
     // Dates. Format is a strftime template.
     "dates" : {

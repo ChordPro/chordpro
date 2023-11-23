@@ -7,9 +7,8 @@ use utf8;
 
 package ChordPro::Dumper;
 
-use parent qw(Exporter);
-our @EXPORT;
-BEGIN { @EXPORT = qw( ddp ) };
+use Exporter qw(import);
+our @EXPORT = qw(ddp);
 
 use Data::Printer
   hash_separator  => " => ",

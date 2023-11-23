@@ -7,8 +7,8 @@ use utf8;
 use Carp;
 use feature qw( signatures );
 no warnings "experimental::signatures";
-use parent qw(Exporter);
 
+use Exporter 'import';
 our @EXPORT;
 
 ################ Platforms ################

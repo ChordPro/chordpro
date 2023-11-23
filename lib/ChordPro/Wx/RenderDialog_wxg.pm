@@ -15,7 +15,7 @@ use strict;
 package ChordPro::Wx::RenderDialog_wxg;
 
 use Wx qw[:everything];
-use base qw(Wx::Dialog);
+use parent -norequire, qw(Wx::Dialog);
 use strict;
 
 use Wx::Locale gettext => '_T';

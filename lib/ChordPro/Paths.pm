@@ -318,7 +318,7 @@ method siblingres ( $orig, $name, %opts ) {
 
 # For convenience.
 
-use base 'Exporter';
+use Exporter 'import';
 our @EXPORT;
 
 sub CP() { __PACKAGE__->get }

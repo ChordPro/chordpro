@@ -15,7 +15,7 @@ use String::Interpolate::Named;
 use utf8;
 use POSIX qw(setlocale LC_TIME strftime);
 
-use parent qw(Exporter);
+use Exporter 'import';
 our @EXPORT;
 our @EXPORT_OK;
 

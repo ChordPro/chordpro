@@ -14,9 +14,7 @@ binmode STDERR => ':utf8';
 
 package ChordPro::Testing;
 
-our $VERSION = "6.000";
-
-use base 'Exporter';
+use parent 'Exporter';
 our @EXPORT = qw( $config );
 
 use Test::More ();
