@@ -14,25 +14,29 @@ Environments start with a `start_of` directive, e.g.
 e.g. `{end_of_chorus}`. As with every ChordPro directive, these
 directives should be alone on a line.
 
-You are free to choose names for sections as long as the names only
-consists of letters, digits and underscores. All environments are
-considered to be part of the song lyrics, except for `chorus`, `tab`,
-and `grid`. These environments get a predefined special treatment.
+You can choose arbitrary names for sections as long as the names only
+consists of letters, digits and underscores. Environments `chorus`,
+`tab`, and `grid` get a predefined special treatment.
 
-All environment directives may include an optional label to identify
-the section. For example:,
+Implementations are free to add special treatment to specific
+environments, but unknown (unhandled) environments should always be
+treated as part of the song lyrics.
+
+All environment directives may include an optional [label]({{< relref
+"ChordPro-Configuration-PDF#labels" >}}) to identify the section. For
+example:,
+
+    {start_of_verse: label="Verse 1"}
+
+For backward compatibility, this also works:
 
     {start_of_verse: Verse 1}
-
-The ChordPro reference implementation prints the label in the left
-margin, see [labels]({{< relref "ChordPro-Configuration-PDF#labels" >}}).
 
 For legacy reasons, the following environments have a short directive
 to start and end them:
 
 * [start_of_chorus]({{< relref "Directives-env_chorus" >}}) (short: soc)
 * [end_of_chorus]({{< relref "Directives-env_chorus" >}}) (short: eoc)
-* [chorus]({{< relref "Directives-env_chorus" >}})
 * [start_of_verse]({{< relref "Directives-env_verse" >}}) (short: sov)
 * [end_of_verse]({{< relref "Directives-env_verse" >}}) (short: eov)
 * [start_of_bridge]({{< relref "Directives-env_bridge" >}}) (short: sob)
