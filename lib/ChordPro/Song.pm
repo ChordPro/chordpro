@@ -1252,7 +1252,12 @@ sub directive {
 	elsif ( exists $config->{delegates}->{$in_context} ) {
 	    my $d = $config->{delegates}->{$in_context};
 	    my $label = $arg;
-	    my $kv;
+	    my %opts;
+	    if ( $xpose || $config->{settings}->{transpose} ) {
+		$opts{transpose} =
+		  $xpose + ($config->{settings}->{transpose}//0 );
+	    }
+	    my $kv = {};
 	    if ( $arg =~ /\b(id|label|scale|align|center)=(.+)/ ) {
 		$kv = parse_kv($arg);
 	    }
@@ -1264,7 +1269,7 @@ sub directive {
 			delegate => $d->{module},
 			handler  => $d->{handler},
 			data     => [ ],
-			opts     => $kv,
+			opts     => { %opts, %$kv },
 			exists($kv->{id}) ? ( id => $kv->{id} ) : (),
 			open     => 1 );
 	}
