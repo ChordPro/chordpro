@@ -1045,6 +1045,10 @@ sub ::runtimeinfo {
     $msg .= sprintf( $fmt, "Perl", $^V );
     $msg =~ s/\n$/sprintf(" (%s)\n", $cp->display($^X))/e;
 
+    if ( CP->packager ) {
+	$msg .= sprintf( $fmt, CP->packager." Packager", CP->packager_version );
+    }
+ 
     # Determine resource path.
     my @p;
     my $tag = "CHORDPRO_LIB";

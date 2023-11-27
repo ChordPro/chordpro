@@ -25,6 +25,8 @@ field $resdirs   :reader;	# [ dir, ... ]
 field $configs   :reader;	# { config => dir, ... }
 field $pathsep   :reader;	# : or ;
 
+field $packager  :reader;
+
 # Cwd::realpath always returns forward slashes.
 # On Windows, Cwd::realpath always returns a volume.
 
@@ -127,6 +129,14 @@ BUILD {
 
     unless ( @$resdirs ) {
 	warn("Paths: Cannot find resources, prepare for disaster\n");
+    }
+
+    # Check for packaged image.
+    for ( qw( Docker AppImage PPL ) ) {
+	next unless exists $ENV{uc($_)."_PACKAGED"}
+	  && $ENV{uc($_)."_PACKAGED"};
+	$packager = $_;
+	last;
     }
 
 };
@@ -312,6 +322,11 @@ method siblingres ( $orig, $name, %opts ) {
       ? $try
       : $self->findres( $name, class => $opts{class} );
     return $found;
+}
+
+method packager_version {
+    return unless $packager;
+    $ENV{uc($packager)."_PACKAGED"};
 }
 
 ################ Export ################
