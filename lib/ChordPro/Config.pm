@@ -942,6 +942,8 @@ sub default_config () {
     // Globally defined (added) meta data,
     // This is explicitly NOT intended for the metadata items above.
     "meta" : {
+        // Do not remove or change this one.
+        "_configversion" : [ "6.031" ],
     },
 
     // Assets.

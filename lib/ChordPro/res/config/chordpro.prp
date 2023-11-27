@@ -1,5 +1,8 @@
 # Configuration for ChordPro.
 
+# Do not remove or change this one.
+meta._configversion = 6.031
+
 # Includes. These are processed first, before the rest of
 # the config file.
 #

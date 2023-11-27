@@ -175,4 +175,7 @@ my $xp = [
   ],
 ];
 
+foreach ( @$res ) {
+    delete $_->[1]->{meta}->{_configversion};
+}
 is_deeply( $res, $xp, "outlined");

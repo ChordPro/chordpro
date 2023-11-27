@@ -270,6 +270,12 @@
           "description" : "Indent for wrapped lyrics.",
           "type" : "string",
           "default" : "x"
+        },
+
+        "flowtext" : {
+          "description" : "Considerr text flowed.",
+          "type" : "boolean",
+          "default" : false
         }
       }
     },
@@ -629,6 +635,16 @@
       "description" : "User defined metadata items.",
       "additionalProperties" : {
         "type" : "object"
+      },
+      "properties" : {
+        "_configversion" : {
+          "description" : "Config file version.",
+          "type" : "array",
+	  "uniqueItems" : true,
+	  "items" : {
+	    "type" : "string"
+	  }
+        }
       }
     },
 
