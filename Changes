@@ -26,7 +26,7 @@
       eliminate App::Packager.
     - Inline images.
     - {image} can have label and align properties.
-    - (ABC) ABC embedding no longer uses nodeJS.
+    - (ABC) ABC embedding no longer uses nodeJS (npx).
     - (ABC) Make split work (and enable by default).
     - (ABC) Images are left aligned by default.
     - (Lilypond) Images are left aligned by default.

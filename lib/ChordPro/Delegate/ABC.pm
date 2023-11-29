@@ -55,6 +55,7 @@ sub abc2svg( $s, $pw, $elt ) {
     # Try to find a way to run the abv2svg javascript code.
     # We support two strategies, in order:
     # 1. A program 'abc2svg' in PATH, that writes the SVG to standard out
+    #    (In newer installs it is called 'abcnode' so we try that as well.)
     # 2. The QuickJS program, either in PATH or in our 'abc' resource
     #    directory. In this case, packaged abc2svg is used.
     # The actual command is stored in $abc2svg and retained across calls.
@@ -62,15 +63,23 @@ sub abc2svg( $s, $pw, $elt ) {
     # Note we do not use 'node' since it is hard to instruct it not to use
     # global data.
 
-    # First, try native program.
-    unless ( $abc2svg ) {
-	$abc2svg = findexe( "abc2svg", "silent" );
-	$abc2svg = [ $abc2svg ] if $abc2svg;
-    }
+    # If packaged, do not use external tools.
+    unless ( CP->packager ) {
 
-    # We know what to do.
-    if ( $abc2svg ) {
-	return _abc2svg( $s, $pw, $elt );
+	# First, try native program.
+	unless ( $abc2svg ) {
+	    $abc2svg = findexe( "abc2svg", "silent" );
+	    $abc2svg = [ $abc2svg ] if $abc2svg;
+	}
+	unless ( $abc2svg ) {
+	    $abc2svg = findexe( "abcnode", "silent" );
+	    $abc2svg = [ $abc2svg ] if $abc2svg;
+	}
+
+	# We know what to do.
+	if ( $abc2svg ) {
+	    return _abc2svg( $s, $pw, $elt );
+	}
     }
 
     # Try (optionally packaged) QuickJS with packaged abc2svg.
