@@ -42,6 +42,7 @@
     - Fix chord inversion (issue 321).
     - Fix comment lines disturbing a consecutive series of {chord}s.
     - Fix typo in Wx Preferencesdialog, causing it to crash.
+    - Fix problem with PDF/SVG caching fonts.
     - (Wx) Filter configs on prp ans json.
     - !Internal
     - (ABC) ABC embedding use tohtml instead of toxhtml.

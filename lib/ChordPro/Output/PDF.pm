@@ -2860,8 +2860,17 @@ sub svg_fonthandler {
     my $stl    = lc( $style->{'font-style'}  // "normal" );
     my $weight = lc( $style->{'font-weight'} // "normal" );
     my $size   = $style->{'font-size'}       || 12;
-    my $key    = join( "|", $family, $stl, $weight );
+
+    # Font cache.
     state $fc  = {};
+    my $key    = join( "|", $family, $stl, $weight );
+
+    # Clear cache when the PDF changes.
+    state $cf  = "";
+    if ( $cf ne $ps->{pr}->{pdf} ) {
+	$cf = $ps->{pr}->{pdf};
+	$fc = {};
+    }
 
     # As a special case we handle fonts with 'names' like
     # pdf.font.foo and map these to the corresponding font
