@@ -181,13 +181,13 @@ and associating output elements to font families. The latter part is
         "italic"      : "Times-Italic",
         "bolditalic"  : "Times-BoldItalic",
     },
-    "sans" : {
+    "sans, sans-serif" : {
         ""            : "Helvetica",
         "bold"        : "Helvetica-Bold",
         "oblique"     : "Helvetica-Oblique",
         "boldoblique" : "Helvetica-BoldOblique",
     },
-    "monospace" : {
+    "mono, monospace" : {
         ""            : "Courier",
         "bold"        : "Courier-Bold",
         "italic"      : "Courier-Italic",
@@ -267,13 +267,13 @@ and associating output elements to font families. The latter part is
         "italic"      : "LiberationSerif-Italic.ttf",
         "bolditalic"  : "LiberationSerif-BoldItalic.ttf",
     },
-    "sans" : {
+    "sans, sans-serif" : {
         ""            : "LiberationSans-Regular.ttf",
         "bold"        : "LiberationSans-Bold.ttf",
         "oblique"     : "LiberationSans-Italic.ttf",
         "boldoblique" : "LiberationSans-BoldItalic.ttf",
     },
-    "monospace" : {
+    "mono, monospace" : {
         ""            : "LiberationMono-Regular.ttf",
         "bold"        : "LiberationMono-Bold.ttf",
         "italic"      : "LiberationMono-Italic.ttf",
@@ -349,13 +349,13 @@ and associating output elements to font families. The latter part is
         "italic"      : "georgiai.ttf",
         "bolditalic"  : "georgiaz.ttf",
     },
-    "sans" : {
+    "sans, sans-serif" : {
         ""            : "arial.ttf",
         "bold"        : "arialbd.ttf",
         "oblique"     : "ariali.ttf",
         "boldoblique" : "arialbi.ttf",
     },
-    "monospace" : {
+    "mono, monospace" : {
         ""            : "cour.ttf",
         "bold"        : "courbd.ttf",
         "italic"      : "couri.ttf",

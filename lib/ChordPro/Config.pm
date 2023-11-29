@@ -1388,19 +1388,19 @@ sub default_config () {
           // alternatives: bold b strong
           // alternatives: italic i oblique o emphasis
           // alternatives: bolditalic bi italicbold ib boldoblique bo obliquebold ob
-          "times" : {
+          "times, serif" : {
               ""            : "Times-Roman",
               "bold"        : "Times-Bold",
               "italic"      : "Times-Italic",
               "bolditalic"  : "Times-BoldItalic",
           },
-          "helvetica" : {
+          "helvetica, sans, sans-serif" : {
               ""            : "Helvetica",
               "bold"        : "Helvetica-Bold",
               "oblique"     : "Helvetica-Oblique",
               "boldoblique" : "Helvetica-BoldOblique",
           },
-          "courier" : {
+          "courier, mono, monospace" : {
               ""            : "Courier",
               "bold"        : "Courier-Bold",
               "italic"      : "Courier-Italic",
