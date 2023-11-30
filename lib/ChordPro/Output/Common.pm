@@ -10,7 +10,7 @@ package ChordPro::Output::Common;
 use strict;
 use warnings;
 use ChordPro::Chords;
-use ChordPro::Utils qw( demarkup );
+use ChordPro::Utils qw( demarkup is_true );
 use String::Interpolate::Named;
 use utf8;
 use POSIX qw(setlocale LC_TIME strftime);
@@ -139,6 +139,16 @@ push( @EXPORT_OK, 'roman' );
 #sub PODBG() { $config->{debug}->{x1} }
 sub PODBG() { 0 }
 
+# Suppress toc entry.
+sub _suppresstoc {
+    my ( $meta ) = @_;
+    return !is_true($meta->{_TOC}->[0]) if exists($meta->{_TOC});
+    # return unless exists($meta->{sorttitle});
+    # my $st = $meta->{sorttitle};
+    # defined($st) && ( $st->[0] eq "" || $st->[0] eq '""' );
+    return;
+}
+
 sub prep_outlines {
     my ( $book, $ctl ) = @_;
     return [] unless $book && @$book; # unlikely
@@ -149,13 +159,15 @@ sub prep_outlines {
     my @fields = map { /^[-+]*(.*)/ ? $1 : $_ } @{$ctl->{fields}};
     if ( @fields == 1 && $fields[0] eq "songindex" ) {
 	# Return in book order.
-	return [ map { [ $_->{meta}->{songindex}, $_ ] } @$book ];
+	return [ map { [ $_->{meta}->{songindex}, $_ ] }
+		 grep { !_suppresstoc($_->{meta}) } @$book ];
     }
     return $book unless @fields; # ?
 
     my @book;
     foreach my $song ( @$book ) {
 	my $meta = $song->{meta};
+	next if _suppresstoc($meta);
 
 	my @split;
 

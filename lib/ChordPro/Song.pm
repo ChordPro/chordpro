@@ -358,8 +358,17 @@ sub parse_song {
 	    next;
 	}
 
-	if ( /^\s*\{(new_song|ns)\}\s*$/ ) {
-	    last if $self->{body};
+	if ( /^\s*\{((?:new_song|ns)\b.*)\}\s*$/ ) {
+	    if ( $self->{body} ) {
+		unshift( @$lines, $_ );
+		$$linecnt--;
+		last;
+	    }
+	    my $dir = $self->parse_directive($1);
+	    my $kv = parse_kv($dir->{arg}//"");
+	    if ( $kv && $kv->{toc} ) {
+		$self->{meta}->{_TOC} = [ $kv->{toc} ];
+	    }
 	    next;
 	}
 
