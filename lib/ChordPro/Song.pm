@@ -693,7 +693,7 @@ sub parse_song {
 	if ( $xc ) {
 	    $info = $info->transcode($xc);
 	}
-	$suppress{$info->name} = 1;
+	$suppress{$info->name} = $info->{origin} ne "song";
     }
     # Suppress chords that the user don't want.
     while ( my ($k,$v) = each %{ $self->{chordsinfo} } ) {
