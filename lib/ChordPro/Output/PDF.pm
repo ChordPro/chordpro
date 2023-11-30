@@ -18,7 +18,7 @@ use Storable qw(dclone);
 use List::Util qw(any);
 use Carp;
 use feature 'state';
-use File::LoadLines qw(loadlines);
+use File::LoadLines qw(loadlines loadblob);
 use ChordPro::Output::Common
   qw( roman prep_outlines fmt_subst );
 use feature 'signatures';
@@ -2769,6 +2769,9 @@ sub prepare_assets {
 		  if $config->{debug}->{images};
 	    }
 	    else {
+		if ( $elt->{uri} && !$elt->{data} ) {
+		    $elt->{data} = loadblob($elt->{uri});
+		}
 		my $data = $elt->{data} ? IO::String->new($elt->{data}) : $elt->{uri};
 		my $img = $pr->{pdf}->image($data);
 		my $subtype = lc(ref($img) =~ s/^.*://r);
