@@ -4,7 +4,7 @@ title: "ChordPro Cheat Sheet"
 description: "ChordPro Cheat Sheet"
 ---
 
-# ChordPro 6.03 Cheat Sheet
+# ChordPro 6.04 Cheat Sheet
 
 ## General
 
@@ -115,7 +115,8 @@ Arguments to directives may be separated by a colon `:` and/or whitespace. They 
 | [meta year]({{< relref "Directives-year" >}}) _text_                     | year      | Release date.                                                                                               | 5.0   |
 | [new_page]({{< relref "Directives-new_page" >}})                         | np        | Starts new page.                                                                                            | 3.6   |
 | [new_physical_page]({{< relref "Directives-new_page" >}})                | npp       | Starts new page.                                                                                            | 3.6   |
-| [new_song]({{< relref "Directives-new_song" >}})                         | ns        | Starts a new song.                                                                                          | 1.0   |
+| [new_song]({{< relref "Directives-new_song" >}}) ...                     | ns        | Starts a new song.                                                                                          | 1.0   |
+| ... `toc=` _arg_                                                         |           | Enter the title in the table of contents if _arg_ (default)                                                 | 6.04  |
 | [no_grid]({{< relref "Directives-grid_legacy" >}})                       | ng        | Obsolete. See [{diagrams:off}]({{< relref "Directives-diagrams" >}}).                                       | 3.6   |
 | [pagetype]({{< relref "Directives-pagetype_legacy" >}}) ...[^4]          |           | Set page (paper) size.                                                                                      | 4.0   |
 | [start_of_]({{< relref "Directives-env" >}})_section_                    |           | Starts a specific section. May have a [label]({{< relref "ChordPro-Configuration-PDF#labels" >}}).          | 6.0   |

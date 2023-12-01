@@ -13,3 +13,11 @@ Examples:
 
     {new_song}
     {ns}
+
+Attributes may be added using [key/value pairs]({{< relref
+"Key_Value_Pairs" >}}).
+
+* `toc=` _arg_  
+Add the song title to the table of contents if _arg_. This is the
+default case. Use `toc=no` to suppress this song from appearing
+the in the table of contents.
