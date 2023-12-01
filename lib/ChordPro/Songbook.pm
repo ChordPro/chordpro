@@ -17,6 +17,7 @@ use ChordPro::Song;
 use Carp;
 use List::Util qw(any);
 use File::LoadLines;
+use Storable qw(dclone);
 
 sub new {
     my ($pkg) = @_;
@@ -64,7 +65,7 @@ sub parse_file {
     my $songs = 0;
     while ( @$lines ) {
 	my $song = ChordPro::Song->new($opts)
-	  ->parse_song( $lines, \$linecnt, {%$meta}, {%$defs} );
+	  ->parse_song( $lines, \$linecnt, {%{dclone($meta)}}, {%$defs} );
 
 	if ( $song->{body}
 	     && any { $_->{type} ne "ignore" } @{$song->{body}}
