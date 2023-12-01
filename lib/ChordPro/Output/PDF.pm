@@ -96,7 +96,7 @@ sub generate_songbook {
 	push( @book, [ $song->{meta}->{title}->[0], $song ] );
 
 	# Copy persistent assets into each of the songs.
-	if ( $sb->{assets} ) {
+	if ( $sb->{assets} && %{$sb->{assets}} ) {
 	    $song->{assets} //= {};
 	    while ( my ($k,$v) = each %{$sb->{assets}} ) {
 		$song->{assets}->{$k} = $v;

@@ -65,19 +65,23 @@ sub parse_file {
     while ( @$lines ) {
 	my $song = ChordPro::Song->new($opts)
 	  ->parse_song( $lines, \$linecnt, {%$meta}, {%$defs} );
-	$song->{meta}->{songindex} = 1 + @{ $self->{songs} };
-	push( @{ $self->{songs} }, $song );
+
+	if ( $song->{body}
+	     && any { $_->{type} ne "ignore" } @{$song->{body}}
+	   ) {
+	    $song->{meta}->{songindex} = 1 + @{ $self->{songs} };
+	    push( @{ $self->{songs} }, $song );
+	    $songs++;
+	}
 
 	# Copy persistent assets to the songbook.
 	if ( $song->{assets} ) {
 	    $self->{assets} //= {};
 	    while ( my ($k,$v) = each %{$song->{assets}} ) {
-		next unless $v->{persist};
+		next unless $v->{opts} && $v->{opts}->{persist};
 		$self->{assets}->{$k} = $v;
 	    }
 	}
-
-	$songs++ if $song->{body};
     }
 
     warn("Warning: No songs found in ", $opts->{_filesource}, "\n")

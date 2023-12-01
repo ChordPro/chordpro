@@ -33,6 +33,7 @@
     - (ABC) Images are left aligned by default.
     - (Lilypond) Images are left aligned by default.
     - Improve runtime info.
+    - Suppress songs that do not have content.
     - Suppress table of content entry for a song w/ {ns toc=no}.
     - (PDF) Image scale strategy change for spread images.
     - (PDF/Writer) Add generalized add_object for objects and images.
