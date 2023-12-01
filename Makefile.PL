@@ -50,6 +50,7 @@ WriteMakefile
 		    'Data::Printer'		  => 1.001001,
 		    'Storable'			  => 3.08,
 		    'Object::Pad'                 => 0.78,
+		    'JavaScript::QuickJS'         => 1.18,
 		   # Some distro's have removed this from the core.
 		    'Pod::Usage'		  => 2.03,
 		   # These are only used by the LaTeX backend

@@ -53,15 +53,18 @@ sub abc2svg( $s, $pw, $elt ) {
     }
 
     # Try to find a way to run the abv2svg javascript code.
-    # We support two strategies, in order:
-    # 1. A program 'abc2svg' in PATH, that writes the SVG to standard out
+    # We support the following strategies, in order:
+    # 1. Embedded JavaScript::QuickJS module.
+    # 2. A program 'abc2svg' in PATH, that writes the SVG to standard out
     #    (In newer installs it is called 'abcnode' so we try that as well.)
-    # 2. The QuickJS program, either in PATH or in our 'abc' resource
+    # 3. The QuickJS program, either in PATH or in our 'abc' resource
     #    directory. In this case, packaged abc2svg is used.
     # The actual command is stored in $abc2svg and retained across calls.
     #
     # Note we do not use 'node' since it is hard to instruct it not to use
     # global data.
+
+    return abc2svg_qjs( $s, $pw, $elt ) if have_xs();
 
     # If packaged, do not use external tools.
     unless ( CP->packager ) {
@@ -92,6 +95,9 @@ sub packaged_qjs() {
 
     # Only use ours.
     my $dir = CP->findresdirs("abc")->[-1];
+
+    return [ "QuickJS_XS", $dir ] if have_xs();
+
     my $qjs;
 
     # First, try packaged qjs.
@@ -233,7 +239,62 @@ sub _abc2svg( $s, $pw, $elt ) {
     my @lines;
     my $ret;
 
-    if ( $cmd[0] =~ /qjs(?:\.\w+)?$/ ) {
+    if ( $cmd[0] eq "QuickJS_XS" ) {
+	my $js = JavaScript::QuickJS->new;
+	my $base = $cmd[-1] . "/abc2svg";
+	$js->set_module_base($base);
+
+	my $abc2svg =
+	  {
+	   print     => sub { push( @lines, split(/\n/, $_) ) for @_ },
+	   printErr  => sub { print STDERR @_ },
+	   quit      => sub { exit 66 },
+	   readFile  => sub { slurp($_[0]) },
+	   get_mtime => sub {
+	       my @stat = stat($_[0]);
+	       return @stat ? 1000*$stat[9] : undef;
+	   },
+	   loadjs    => sub {
+	       my ( $fn, $relay, $onerror ) = @_;
+	       if ( -s -r "$base/$fn" ) {
+		   $js->eval(slurp("$base/$_[0]"));
+	       }
+	       elsif ( $onerror ) {
+		   $onerror->();
+	       }
+	       else {
+		   warn( qq{loadjs("$fn"): $!\n} );
+	       }
+	   },
+	  };
+
+	$js->set_globals
+	  ( args    => [ $src ],
+	    load    => sub { $js->eval(slurp("$base/$_[0]")) },
+	    abc2svg => $abc2svg,
+	    abc => '',			# global for 'toxxx.js'
+	  );
+
+	warn( "+ QuickJS[", CP->display($base), "] $src\n") if DEBUG;
+	eval {
+	    $js->eval( slurp("$base/abc2svg-1.js") );
+	    if ( -r "$base/../cmd.js" ) {
+		warn(" QuickJS using ", CP->display("$base/../cmd.js"), "\n" )
+		  if DEBUG;
+		$js->eval( slurp("$base/../cmd.js") );
+	    }
+	    else {
+		$js->eval( slurp("$base/cmdline.js") );
+	    }
+	    $js->eval( slurp("$base/tohtml.js") );
+	    $js->eval( qq{abc_cmd("ChordPro", args, "QuickJS (embedded)")} );
+	};
+	warn($@) if $@;
+	undef $js;
+
+    }
+
+    elsif ( $cmd[0] =~ /qjs(?:\.\w+)?$/ ) {
 
 	# Packaged.
 	push( @cmd, $out, $src );
@@ -352,6 +413,21 @@ sub _abc2svg( $s, $pw, $elt ) {
 		      maybe spread => $kv->{spread},
 		      maybe sep    => $kv->{staffsep},
 		    } };
+}
+
+sub have_xs {
+    local $SIG{__WARN__} = sub {};
+    state $ok;
+    $ok //= eval { require JavaScript::QuickJS };
+}
+
+sub slurp {
+    my ( $fn ) = @_;
+    my $opts = { split => 0, fail => "soft" };
+    my $data = loadlines( $fn, $opts );
+    warn("LOAD($fn): ", $opts->{error}, "\n")
+      unless defined $data || $fn eq "default.abc";
+    $data;
 }
 
 sub abc2image( $s, $pw, $elt ) {

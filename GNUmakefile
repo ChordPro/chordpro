@@ -53,13 +53,11 @@ to_tmp_cpan :
 to_c :
 	test -d /mnt/c/Users || mount /mnt/c
 	${MAKE} to_tmp to_tmp_cpan TMP_DST=/mnt/c${W10DIR}
-	rsync ${RSYNC_ARGS} --files-from=MANIFEST.ABC  ./ /mnt/c${W10DIR}/
 
 to_mac : resources
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST      ./ ${MACDST}/
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.WX   ./ ${MACDST}/
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.CPAN ./ ${MACDST}/
-	rsync ${RSYNC_ARGS} --files-from=MANIFEST.ABC  ./ ${MACDST}/
 	ssh macky rm -fr ${MACDST}/pp/windows
 
 release :
@@ -127,11 +125,6 @@ _wkit2 :
 	sudo umount /misc/c
 	VBoxManage controlvm ${VM} poweroff
 	VBoxManage snapshot ${VM} restorecurrent
-
-abckit ::
-	: npm update --silent abc2svg
-	tar zcvf pp/common/abc2svg_qjs.tar.gz \
-	    -C ${HOME}/node_modules -T lib/ChordPro/res/abc/.manifest
 
 .PHONY: TAGS
 

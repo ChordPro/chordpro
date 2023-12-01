@@ -35,6 +35,12 @@
 --module=XS::Parse::Keyword
 --module=XS::Parse::Sublike
 
+# Same for JavaScript::QuickJS
+--module=JavaScript::QuickJS
+--module=JavaScript::QuickJS::Function
+--module=JavaScript::QuickJS::Date
+--module=JavaScript::QuickJS::RegExp
+
 # Resources.
 --addfile=../../lib/ChordPro/res;res
 

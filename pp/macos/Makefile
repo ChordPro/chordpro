@@ -43,8 +43,6 @@ unpack :
 	cp "${DEST}/res/icons/chordpro.icns" ${DEST}
 	cp "${DEST}/res/icons/chordpro-doc.icns" ${DEST}
 	mv "${DEST}/res" "${DEST}/lib/ChordPro/"
-	tar xf ../common/abc2svg_qjs.tar.gz -C "${DEST}/lib/ChordPro/res/abc"
-	cp -p qjs "${DEST}/lib/ChordPro/res/abc"
 	rm -f "${DEST}/script/main.pl"
 
 # Copy core DLLs.

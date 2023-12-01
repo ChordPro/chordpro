@@ -1067,7 +1067,13 @@ sub ::runtimeinfo {
     }
     eval { require ChordPro::Delegate::ABC;
 	   my $x;
-	   if ( $x = findexe( "abc2svg", "silent" ) ) {
+	   if ( ChordPro::Delegate::ABC::have_xs() ) {
+	       $x = ChordPro::Delegate::ABC::packaged_qjs();
+	       $msg .= sprintf( $fmt, "ABC support",
+				$x->[0] . " (" . $cp->display($x->[-1]) . ")" );
+	   }
+	   elsif ( $x = findexe( "abc2svg", "silent" )
+		        || findexe( "abcnode", "silent" ) ) {
 	       $msg .= sprintf( $fmt, "ABC support", $cp->display($x) );
 	   }
 	   elsif ( $x = ChordPro::Delegate::ABC::packaged_qjs() ) {
@@ -1125,6 +1131,9 @@ sub ::runtimeinfo {
     };
     eval { require Font::TTF;
 	$vv->("Font::TTF");
+    };
+    eval { require JavaScript::QuickJS;
+	$vv->("JavaScript::QuickJS");
     };
     return $msg;
 }

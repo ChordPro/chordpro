@@ -28,10 +28,9 @@ RUN apt-get install --no-install-recommends -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-COPY qjs /usr/local/bin/qjs
-
 # Perl modules from CPAN.
 RUN cpanm \
+    JavaScript::QuickJS \
     File::LoadLines \
     String::Interpolate::Named \
     HarfBuzz::Shaper \
@@ -54,10 +53,7 @@ RUN mkdir ChordPro \
   && tar xf chordpro-dev.tar.gz -C ChordPro \
   && cd ChordPro \
   && perl Makefile.PL \
-  && make && make install \
-  && cd .. \
-  && eval `perl -V:sitelib` \
-  && tar xf abc2svg_qjs.tar.gz -C ${sitelib}/ChordPro/res/abc
+  && make && make install
 
 # Cleanup.
 RUN rm -fr .cpanminus

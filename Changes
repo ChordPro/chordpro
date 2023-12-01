@@ -27,6 +27,7 @@
     - Inline images.
     - {image} can have label and align properties.
     - {define}d chords overrules suppress list.
+    - (ABC) Use QuickJS XS (JavaScript::QuickJS) as preferred.
     - (ABC) ABC embedding no longer uses nodeJS (npx).
     - (ABC) Make split work (and enable by default).
     - (ABC) Images are left aligned by default.
