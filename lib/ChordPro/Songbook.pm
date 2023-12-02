@@ -67,13 +67,9 @@ sub parse_file {
 	my $song = ChordPro::Song->new($opts)
 	  ->parse_song( $lines, \$linecnt, {%{dclone($meta)}}, {%$defs} );
 
-	if ( $song->{body}
-	     && any { $_->{type} ne "ignore" } @{$song->{body}}
-	   ) {
-	    $song->{meta}->{songindex} = 1 + @{ $self->{songs} };
-	    push( @{ $self->{songs} }, $song );
-	    $songs++;
-	}
+	$song->{meta}->{songindex} = 1 + @{ $self->{songs} };
+	push( @{ $self->{songs} }, $song );
+	$songs++;
 
 	# Copy persistent assets to the songbook.
 	if ( $song->{assets} ) {
@@ -82,6 +78,15 @@ sub parse_file {
 		next unless $v->{opts} && $v->{opts}->{persist};
 		$self->{assets}->{$k} = $v;
 	    }
+	}
+    }
+
+    if ( @{$self->{songs}} > 1 ) {
+	my $song = $self->{songs}->[-1];
+	unless ( $song->{body}
+		 && any { $_->{type} ne "ignore" } @{$song->{body}} ) {
+	    pop( @{ $self->{songs} } );
+	    $songs--;
 	}
     }
 
