@@ -55,6 +55,7 @@ sub configurator ( $opts = undef ) {
     unless ( $opts ) {
         my $cfg = $pp->decode( default_config() );
         $config = $cfg;
+	config_split_fc_aliases($cfg);
         $options = { verbose => 0 };
         process_config( $cfg, "<builtin>" );
         $cfg->{settings}->{lineinfo} = 0;
@@ -70,6 +71,9 @@ sub configurator ( $opts = undef ) {
     # Load defaults.
     warn("Reading: <builtin>\n") if $verbose > 1;
     my $cfg = $pp->decode( default_config() );
+
+    # This is easier than splitting out manually :)
+    config_split_fc_aliases($cfg);
 
     # Default first.
     @cfg = prep_configs( $cfg, "<builtin>" );
@@ -360,6 +364,27 @@ sub process_config ( $cfg, $file ) {
         }
         $cfg->{_chords} = delete $cfg->{chords};
         ChordPro::Chords::pop_parser();
+    }
+    config_split_fc_aliases($cfg);
+}
+
+sub config_split_fc_aliases ( $cfg ) {
+    # Split fontconfig aliases into individual entries.
+    if ( $cfg->{pdf}->{fontconfig} ) {
+	# Orig.
+	my $fc = $cfg->{pdf}->{fontconfig};
+	# Since we're going to delete/insert keys, we need a copy.
+	my %fc = %$fc;
+	while ( my($k,$v) = each(%fc) ) {
+	    # Split on comma.
+	    my @k = split( /\s*,\s*/, $k );
+	    if ( @k > 1 ) {
+		# We have aliases. Delete the original.
+		delete( $fc->{$k} );
+		# And insert individual entries.
+		$fc->{$_} = $v for @k;
+	    }
+	}
     }
 }
 
