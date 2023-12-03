@@ -1409,21 +1409,24 @@ sub default_config () {
 
       "fontdir" : [],
       "fontconfig" : {
-          // alternatives: regular r normal <empty>
-          // alternatives: bold b strong
-          // alternatives: italic i oblique o emphasis
-          // alternatives: bolditalic bi italicbold ib boldoblique bo obliquebold ob
           "times, serif" : {
               ""            : "Times-Roman",
               "bold"        : "Times-Bold",
               "italic"      : "Times-Italic",
               "bolditalic"  : "Times-BoldItalic",
           },
-          "helvetica, sans, sans-serif" : {
+          "helvetica" : {
               ""            : "Helvetica",
               "bold"        : "Helvetica-Bold",
+              // Only helvetica uses oblique, use italic for all other fonts
               "oblique"     : "Helvetica-Oblique",
               "boldoblique" : "Helvetica-BoldOblique",
+          },
+          "sans, sans-serif" : {
+              ""            : "Helvetica",
+              "bold"        : "Helvetica-Bold",
+              "italic"      : "Helvetica-Oblique",
+              "bolditalic"  : "Helvetica-BoldOblique",
           },
           "courier, mono, monospace" : {
               ""            : "Courier",
