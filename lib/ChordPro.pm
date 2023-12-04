@@ -1125,6 +1125,9 @@ sub ::runtimeinfo {
     };
     eval { require PDF::API2;
 	$vv->("PDF::API2");
+	eval { require PDF::API2::XS;
+	       $vv->("PDF::API2::XS");
+	};
     };
     eval { require SVGPDF;
 	$vv->("SVGPDF");
