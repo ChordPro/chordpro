@@ -2734,7 +2734,15 @@ sub prepare_assets {
 	if ( $elt->{type} eq "image" ) {
 	    warn("PDF: Preparing $elt->{subtype} image\n") if $config->{debug}->{images};
 	    if ( ($elt->{uri}//"") =~ /^chord:(.+)/ ) {
-		my $info = ChordPro::Chords::known_chord($1);
+		my $chord = $1;
+		# Look it up.
+		my $info = $s->{chordsinfo}->{$chord}
+		  // ChordPro::Chords::known_chord($chord);
+		# If it is defined locally, merge.
+		for my $def ( @{ $s->{define} // [] } ) {
+		    next unless $def->{name} eq $chord;
+		    $info->{$_} = $def->{$_} for keys(%$def);
+		}
 		my $xo;
 		unless ( $info ) {
 		    warn("Unknown chord in asset: $1\n");
