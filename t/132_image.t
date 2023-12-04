@@ -57,7 +57,7 @@ eval { $s->parse_file(\$data) } or diag("$@");
 
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 isa_ok( $s->{songs}->[0], 'ChordPro::Song', "It's a song" );
-#use Data::Dumper; warn(Dumper($s));
+#use DDP; p $s->{songs}->[0];
 delete( $s->{songs}->[0]->{assets}->{yellow}->{data} )
   if $s->{songs}->[0]->{assets}->{yellow}->{data} =~ /^\xff\xd8\xff\xe0/;
 
@@ -68,7 +68,8 @@ my $song = {
 				      'width' => 50,
 				      'type' => 'image',
 				      'subtype' => 'jpg',
-				      'persist' => 1
+				      opts => { id => 'yellow',
+						'persist' => 1 }
 				     },
 			 'red' => {
 				   'data' => [
@@ -79,7 +80,9 @@ my $song = {
 				   'handler' => 'svg2svg',
 				   'type' => 'image',
 				   'subtype' => 'svg',
-				   'persist' => 1,
+				   opts => { id => 'red',
+					     type => 'svg',
+					     'persist' => 1 },
 				   'module' => 'SVG'
 				  },
 			 'green' => {

@@ -27,7 +27,7 @@ eval { $s->parse_file(\$data) } or diag("$@");
 
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 isa_ok( $s->{songs}->[0], 'ChordPro::Song', "It's a song" );
-#use Data::Dumper; warn(Dumper($s));
+#use DDP; p $s->{songs}->[0];
 delete( $s->{songs}->[0]->{assets}->{white}->{data} )
   if $s->{songs}->[0]->{assets}->{white}->{data} =~ /^\xff\xd8\xff\xe0/;
 
@@ -54,6 +54,13 @@ my $song = {
 				   subtype => 'jpg',
 				   width => 1,
 				   height => 1,
+				   opts => {
+					    enc    => 'base64',
+					    height => 1,
+					    id     => 'white',
+					    type   => 'jpg',
+					    width  => 1
+					   },
 				},
 			},
 	    'source' => { file => "__STRING__", line => 1 },

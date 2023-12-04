@@ -416,7 +416,7 @@ sub parse_song {
 		    subtype  => $info->{file_ext},
 		    width    => $info->{width},
 		    height   => $info->{height},
-		    $kv->{persist} ? ( persist => 1 ) : (),
+		    opts     => $kv,
 		  };
 
 		if ( $config->{debug}->{images} ) {
@@ -460,7 +460,7 @@ sub parse_song {
 		    subtype => $type,
 		    module  => $config->{delegates}->{$type}->{module},
 		    handler => $config->{delegates}->{$type}->{handler},
-		    $kv->{persist} ? ( persist => 1 ) : (),
+		    opts    => $kv,
 		  };
 		if ( $config->{debug}->{images} ) {
 		    warn("asset[$id] type=image/$type ",
