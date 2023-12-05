@@ -1267,7 +1267,7 @@ sub directive {
 		  $xpose + ($config->{settings}->{transpose}//0 );
 	    }
 	    my $kv = {};
-	    if ( $arg =~ /\b(id|label|scale|align|center)=(.+)/ ) {
+	    if ( $arg =~ /\b(id|label|scale|split|align|center)=(.+)/ ) {
 		$kv = parse_kv($arg);
 	    }
 	    else {
