@@ -143,7 +143,8 @@ sub _abc2svg( $s, $pw, $elt ) {
     state $td = File::Temp::tempdir( CLEANUP => !$config->{debug}->{abc} );
     my $cfg = $config->{delegates}->{abc};
 
-    warn("ABC: Using config \"default.abc\".\n") if -s "default.abc";
+    warn("ABC: Using config \"default.abc\".\n")
+      if !have_xs() && -s "default.abc";
     my $prep = make_preprocessor( $cfg->{preprocess} );
 
     # Prepare names for temporary files.
