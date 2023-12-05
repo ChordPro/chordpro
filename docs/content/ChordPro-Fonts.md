@@ -101,7 +101,7 @@ In the config file in section `"pdf"` there is a section `"fontconfig"` that can
       },
     },
 
-For each family name you should specify four members: a regular font (with an empty key), a bold font (key `"bold"` or `"b"`), an italic font (key `"italic"` or `"i"` or `"oblique"` or `"o"`), and a bold-italic font.
+For each family name you should specify four members: a regular font (with an empty key), a bold font (key `"bold"`), an italic font (key `"italic"`), and a bold-italic font.
 
 This is the short story. The longer story is that instead of a file name you can specify another set of key/value pairs, for example:
 
@@ -171,10 +171,6 @@ and associating output elements to font families. The latter part is
 // "fontconfig" maps members of font families to built-in fonts.
 
 "fontconfig" : {
-    // alternatives: regular r normal <empty>
-    // alternatives: bold b strong
-    // alternatives: italic i oblique o emphasis
-    // alternatives: bolditalic bi italicbold ib boldoblique bo obliquebold ob
     "serif" : {
         ""            : "Times-Roman",
         "bold"        : "Times-Bold",
@@ -184,8 +180,8 @@ and associating output elements to font families. The latter part is
     "sans, sans-serif" : {
         ""            : "Helvetica",
         "bold"        : "Helvetica-Bold",
-        "oblique"     : "Helvetica-Oblique",
-        "boldoblique" : "Helvetica-BoldOblique",
+        "italic"      : "Helvetica-Oblique",
+        "bolditalic"  : "Helvetica-BoldOblique",
     },
     "mono, monospace" : {
         ""            : "Courier",
@@ -257,10 +253,6 @@ and associating output elements to font families. The latter part is
 // "fontconfig" maps members of font families to font files.
 
 "fontconfig" : {
-    // alternatives: regular r normal <empty>
-    // alternatives: bold b strong
-    // alternatives: italic i oblique o emphasis
-    // alternatives: bolditalic bi italicbold ib boldoblique bo obliquebold ob
     "serif" : {
         ""            : "LiberationSerif-Regular.ttf",
         "bold"        : "LiberationSerif-Bold.ttf",
@@ -270,8 +262,8 @@ and associating output elements to font families. The latter part is
     "sans, sans-serif" : {
         ""            : "LiberationSans-Regular.ttf",
         "bold"        : "LiberationSans-Bold.ttf",
-        "oblique"     : "LiberationSans-Italic.ttf",
-        "boldoblique" : "LiberationSans-BoldItalic.ttf",
+        "italic"      : "LiberationSans-Italic.ttf",
+        "bolditalic"  : "LiberationSans-BoldItalic.ttf",
     },
     "mono, monospace" : {
         ""            : "LiberationMono-Regular.ttf",
@@ -339,10 +331,6 @@ and associating output elements to font families. The latter part is
 // "fontconfig" maps members of font families to physical fonts.
 
 "fontconfig" : {
-    // alternatives: regular r normal <empty>
-    // alternatives: bold b strong
-    // alternatives: italic i oblique o emphasis
-    // alternatives: bolditalic bi italicbold ib boldoblique bo obliquebold ob
     "serif" : {
         ""            : "georgia.ttf",
         "bold"        : "georgiab.ttf",
@@ -352,8 +340,8 @@ and associating output elements to font families. The latter part is
     "sans, sans-serif" : {
         ""            : "arial.ttf",
         "bold"        : "arialbd.ttf",
-        "oblique"     : "ariali.ttf",
-        "boldoblique" : "arialbi.ttf",
+        "italic"      : "ariali.ttf",
+        "bolditalic"  : "arialbi.ttf",
     },
     "mono, monospace" : {
         ""            : "cour.ttf",
