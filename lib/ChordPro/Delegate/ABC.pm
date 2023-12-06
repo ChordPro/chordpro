@@ -96,7 +96,14 @@ sub packaged_qjs() {
     # Only use ours.
     my $dir = CP->findresdirs("abc")->[-1];
 
-    return [ "QuickJS_XS", $dir ] if have_xs();
+    if ( have_xs() ) {
+	my $js = "$dir/abc2svg/abc2svg-1.js";
+	my @js = loadlines( $js, { split => 0 } );
+	if ( $js[-1] =~ /abc2svg.version="(.*?)";abc2svg.vdate="(.*?)"/ ) {
+	    return [ "QuickJS_XS", "ABC2SVG version $1 of $2", $dir ];
+	}
+	return [ "QuickJS_XS", $dir ];
+    }
 
     my $qjs;
 

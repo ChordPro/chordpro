@@ -1070,7 +1070,7 @@ sub ::runtimeinfo {
 	   if ( ChordPro::Delegate::ABC::have_xs() ) {
 	       $x = ChordPro::Delegate::ABC::packaged_qjs();
 	       $msg .= sprintf( $fmt, "ABC support",
-				$x->[0] . " (" . $cp->display($x->[-1]) . ")" );
+				$x->[0] . " (" . $x->[1] . ")" );
 	   }
 	   elsif ( $x = findexe( "abc2svg", "silent" )
 		        || findexe( "abcnode", "silent" ) ) {
