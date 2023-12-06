@@ -825,7 +825,7 @@ sub generate_song {
 
     #### CODE STARTS HERE ####
 
-    prepare_assets( $s, $pr );
+#    prepare_assets( $s, $pr );
 
     if ( $s->{spreadimage} ) {
 	$spreadimage = $assets->{$s->{spreadimage}->{id}};
@@ -865,7 +865,7 @@ sub generate_song {
 	    $msg =~ s/\s+\(\s+\)//;
 	    warn( $msg, "\n" );
 	}
-	
+
 	if ( $elt->{type} eq "newpage" ) {
 	    $newpage->();
 	    next;
@@ -879,6 +879,8 @@ sub generate_song {
 	if ( $elt->{type} ne "set" && !$did++ ) {
 	    # Insert top/left/right/bottom chord diagrams.
  	    $chorddiagrams->() unless $dctl->{show} eq "below";
+	    # Prepare the assets now we know the page width.
+	    prepare_assets( $s, $pr );
 	    showlayout($ps) if $ps->{showlayout} || $config->{debug}->{spacing};
 	}
 
@@ -2618,7 +2620,7 @@ sub prepare_assets {
     # So we first scan the list for SVG and delegate items and turn these
     # into simple display items.
 
-    my $pw = $ps->{papersize}->[0] - $ps->{marginleft} - $ps->{marginright}
+    my $pw = $ps->{__rightmargin} - $ps->{__leftmargin}
       - $ps->{_indent};
     my $cw = ( $pw - ( $ps->{columns} - 1 ) * $ps->{columnspace} ) /$ps->{columns};
     warn("PDF: Preparing ", scalar(keys %sa), " image",
