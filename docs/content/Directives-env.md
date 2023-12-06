@@ -32,6 +32,11 @@ For backward compatibility, this also works:
 
     {start_of_verse: Verse 1}
 
+The label text may contain `\n` sequences to produce multi--line
+labels:
+
+    {start_of_verse: label="Verse 1\nAll"}
+
 For legacy reasons, the following environments have a short directive
 to start and end them:
 
