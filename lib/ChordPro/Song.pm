@@ -568,17 +568,16 @@ sub parse_song {
 			# Move to assets.
 			$self->{assets}->{$id} = $a;
 			if ( $def ) {
-			    my $label = $opts->{label};
-			    if ( @{$self->{body}}
-				 && $self->{body}->[-1]->{type} eq 'set'
-				 && $self->{body}->[-1]->{name} eq 'label' ) {
-				my $a = pop( @{$self->{body}} );
-				$label = $a->{value};
-			    }
+			    my $label = delete $a->{label};
 			    do_warn("Label \"$label\" ignored on non-displaying $in_context section\n")
 			      if $label;
 			}
 			else {
+			    my $label = delete $opts->{label};
+			    $self->add( type => "set",
+					name => "label",
+					value => $label )
+			      if $label && $label ne "";
 			    $self->add( type => "image",
 					opts => $opts,
 					id => $id );

@@ -48,6 +48,7 @@
     - Fix comment lines disturbing a consecutive series of {chord}s.
     - Fix typo in Wx Preferencesdialog, causing it to crash.
     - Fix problem with PDF/SVG caching fonts.
+    - Fix comment labels for delegates (issue 329.3).
     - (Wx) Filter configs on prp ans json.
     - !Internal
     - (ABC) ABC embedding use tohtml instead of toxhtml.

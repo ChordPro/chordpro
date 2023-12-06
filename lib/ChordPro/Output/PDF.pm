@@ -1441,10 +1441,10 @@ sub font_ul {
 }
 
 sub prlabel {
-    my ( $ps, $label, $x, $y, $font) = @_;
+    my ( $ps, $label, $x, $y ) = @_;
     return if $label eq "" || $ps->{_indent} == 0;
     my $align = $ps->{labels}->{align};
-    $font ||= $ps->{fonts}->{label} || $ps->{fonts}->{text};
+    my $font= $ps->{fonts}->{label} || $ps->{fonts}->{text};
     $font->{size} ||= $font->{fd}->{size};
     $ps->{pr}->setfont($font);	# for strwidth.
     for ( split( /\\n/, $label ) ) {
