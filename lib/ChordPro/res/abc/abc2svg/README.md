@@ -17,4 +17,6 @@ cd into the unpack directory and
 
 ./build
 
+change version (last line of abc2svg-1.js)
+
 mv *-1/js to here
