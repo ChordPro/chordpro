@@ -184,7 +184,6 @@ pp/windows/chordpro.pp
 pp/windows/chordpro.rc
 pp/windows/chordproinst.bmp
 pp/windows/infoafter.txt
-pp/windows/infoafter.txt
 pp/windows/innosetup.iss
 pp/windows/innosetup_par.iss
 pp/windows/ppl.c
