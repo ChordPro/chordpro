@@ -43,7 +43,7 @@ WriteMakefile
 		    'Text::Layout'		  => 0.032,
 		    'JSON::PP'			  => 2.27203,
 		    'String::Interpolate::Named'  => 1.030,
-		    'File::LoadLines'		  => 1.040,
+		    'File::LoadLines'		  => 1.042,
 		    'File::HomeDir'		  => 1.004,
 		    'Image::Info'		  => 1.41,
 		    'List::Util'		  => 1.46,

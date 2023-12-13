@@ -43,7 +43,7 @@ eval {
 ++$test; use_ok( "JSON::PP",   2.27203 );
 ++$test; use_ok( "String::Interpolate::Named", 1.030 );
 ++$test; use_ok( "File::HomeDir", 1.004 );
-++$test; use_ok( "File::LoadLines", 1.021 );
+++$test; use_ok( "File::LoadLines", 1.042 );
 ++$test; use_ok( "SVGPDF", 0.080 );
 ++$test; use_ok( "Image::Info", 1.41 );
 ++$test; use_ok( "List::Util", 1.33 );
