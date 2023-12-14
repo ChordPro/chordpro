@@ -888,7 +888,12 @@ sub generate_song {
 	    my $y0 = $y;
 	    warn("***SHOULD NOT HAPPEN1***")
 	      if $s->{structure} eq "structured";
-	    $vsp_ignorefirst = 0, next if $vsp_ignorefirst;
+	    if ( $vsp_ignorefirst ) {
+		if ( @elts && $elts[0]->{type} !~ /empty|ignore/ ) {
+		    $vsp_ignorefirst = 0;
+		}
+		next;
+	    }
 	    $pr->show_vpos( $y, 0 ) if $config->{debug}->{spacing};
 	    my $vsp = empty_vsp( $elt, $ps );
 	    $y -= $vsp;
