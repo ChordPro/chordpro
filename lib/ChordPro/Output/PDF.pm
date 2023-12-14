@@ -823,6 +823,38 @@ sub generate_song {
 	}
     };
 
+    my @elts;
+    my $dbgop = sub {
+	my ( $elts, $pb ) = @_;
+	$elts //= $elts[-1];
+	$elts = [ $elts ] unless ref($elts) eq 'ARRAY';
+	for my $elt ( @$elts ) {
+	    my $msg = sprintf("OP L:%2d %s (", $elt->{line},
+			      $pb ? "pushback($elt->{type})" : $elt->{type} );
+	    $msg .= " " . $elt->{subtype} if $elt->{subtype};
+	    $msg .= " U:" . $elt->{uri} if $elt->{uri};
+	    $msg .= " O:" . $elt->{orig} if $elt->{orig};
+	    $msg .= " D:" . $elt->{delegate} if $elt->{delegate};
+	    $msg .= " H:" . $elt->{handler} if $elt->{handler};
+	    $msg .= " )";
+	    $msg =~ s/\s+\(\s+\)//;
+	    if ( $config->{debug}->{ops} > 1 ) {
+		require ChordPro::Dumper;
+		local *ChordPro::Chords::Appearance::_data_printer = sub {
+		    my ( $self, $ddp ) = @_;
+		    "ChordPro::Chords::Appearance('" . $self->key . "'" .
+		      ($self->format ? (", '" . $self->format . "'") : "") .
+		      ")";
+		};
+
+		ChordPro::Dumper::ddp( $elt, as => $msg );
+	    }
+	    else {
+		warn( $msg, "\n" );
+	    }
+	}
+    };
+
     #### CODE STARTS HERE ####
 
 #    prepare_assets( $s, $pr );
@@ -850,20 +882,12 @@ sub generate_song {
     my $curctx = "";
 
     my $elt;			# current element
-    my @elts = @$sb;		# song elements
+    @elts = @$sb;		# song elements
     while ( @elts ) {
 	$elt = shift(@elts);
 
 	if ( $config->{debug}->{ops} ) {
-	    my $msg = sprintf("OP L:%2d %s (", $elt->{line}, $elt->{type} );
-	    $msg .= " " . $elt->{subtype} if $elt->{subtype};
-	    $msg .= " U:" . $elt->{uri} if $elt->{uri};
-	    $msg .= " O:" . $elt->{orig} if $elt->{orig};
-	    $msg .= " D:" . $elt->{delegate} if $elt->{delegate};
-	    $msg .= " H:" . $elt->{handler} if $elt->{handler};
-	    $msg .= " )";
-	    $msg =~ s/\s+\(\s+\)//;
-	    warn( $msg, "\n" );
+	    $dbgop->($elt);
 	}
 
 	if ( $elt->{type} eq "newpage" ) {
