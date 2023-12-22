@@ -128,6 +128,8 @@ notes before the chords:
 
 # Appendix: List of known chord extensions
 
+Note that _extensions_ here include the _qualifier_.
+
 The following chord extensions are currently built-in.
 
 ### Extensions for major chords
