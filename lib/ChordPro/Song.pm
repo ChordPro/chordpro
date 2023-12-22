@@ -913,9 +913,9 @@ sub decompose {
 		    $memorizing++;
 		}
 		if ( $memorizing ) {
-		    push( @$memchords, $chords[-1] );
+		    push( @$memchords, $chord eq "" ? "" : $chord );
 		    warn("Chord memorized for $in_context\[$memcrdinx]: ",
-			 $chords[-1], "\n")
+			 $memchords->[-1], "\n")
 		      if $config->{debug}->{chords};
 		}
 		$memcrdinx++;
@@ -934,7 +934,7 @@ sub decompose {
 		push( @chords, $chord );
 	    }
 	    else {
-		push( @chords, $self->chord($memchords->[$memcrdinx]->chord_display));
+		push( @chords, $self->chord($memchords->[$memcrdinx]) );
 		warn("Chord recall $in_context\[$memcrdinx]: ", $chords[-1], "\n")
 		  if $config->{debug}->{chords};
 	    }

@@ -222,6 +222,8 @@ t/118_tab.t
 t/119_verse.t
 t/120_meta.t
 t/122_memorize.t
+t/123_memtrans.t
+t/124_memtrans.t
 t/130_image.jpg
 t/130_image.t
 t/131_image.t
