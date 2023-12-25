@@ -1287,8 +1287,10 @@ sub generate_song {
 		}
 		else {
 		    # Restore default.
+		    my $sz = $ps->{fonts}->{$1}->{size};
 		    $ps->{fonts}->{$f} =
 		      { %{ $pr->{_df}->{$f} } };
+#		    $ps->{fonts}->{$1}->{size} = $sz;
 		}
 		$pr->init_font($f);
 	    }

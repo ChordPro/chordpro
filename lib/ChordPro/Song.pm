@@ -1909,6 +1909,12 @@ sub propset {
 	    # was also a size saved. Pop it.
 	    if ( $prop eq "font" && $old =~ /\s(\d+(?:\.\d+)?)$/ ) {
 		pop( @{ $propstack{"$item-size"} } );
+		$self->add( type  => "control",
+			    name  => "$item-size",
+			    value =>
+			    @{ $propstack{"$item-size"} }
+			    ? $propstack{"$item-size"}->[-1]
+			    : undef )
 	    }
 	}
 	else {

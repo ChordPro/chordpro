@@ -107,6 +107,29 @@ method set_transform ( $tf ) {
     }
 }
 
+# <g matrix = m1>
+#   <g matrix = m2>
+#     <g matrix = m3>
+# result = multiply_matrices( $m1, $m2, $m3 );
+
+method multiply_matrices :common (@m) {
+    my $i = @m;
+    my $m2 = pop(@m);
+    die("Matrix$i must have 6 elements\n") unless @$m2 == 6;
+
+    while ( --$i > 0 ) {
+	my $m1 = pop(@m);
+	die("Matrix$i must have 6 elements\n") unless @$m1 == 6;
+	$m2 = [ $m1->[0] * $m2->[0] + $m1->[2] * $m2->[1],
+		$m1->[1] * $m2->[0] + $m1->[3] * $m2->[1],
+		$m1->[0] * $m2->[2] + $m1->[2] * $m2->[3],
+		$m1->[1] * $m2->[2] + $m1->[3] * $m2->[3],
+		$m1->[0] * $m2->[4] + $m1->[2] * $m2->[5] + $m1->[4],
+		$m1->[1] * $m2->[4] + $m1->[3] * $m2->[5] + $m1->[5] ];
+    }
+    $m2;
+}
+
 method set_graphics () {
 
     my $msg = $name;
@@ -244,7 +267,10 @@ method _paintsub () {
 	};
     }
     else {
-	return sub {};
+	return sub {
+	    $self->_dbg("xo end");
+	    $xo->end;
+	}
     }
 }
 
