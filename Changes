@@ -52,6 +52,7 @@
     - Fix comment labels for delegates (issue 329.3).
     - (Wx) Filter configs on prp ans json.
     - Fix memorize/recall/transpose issue 333.
+    - Fix issue 334.
     - !Internal
     - (ABC) ABC embedding use tohtml instead of toxhtml.
     - (PDF) Enhance assets (wip), labels; move grid to separate module.
