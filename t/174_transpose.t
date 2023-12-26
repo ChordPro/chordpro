@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use utf8;
 
-use App::Packager qw( :name ChordPro );
 use ChordPro;
 use Test::More;
 

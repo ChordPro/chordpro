@@ -1,5 +1,8 @@
 #!/usr/bin/perl
 
+use v5.26;
+use utf8;
+
 package main;
 
 our $config;
@@ -9,6 +12,8 @@ package ChordPro::Delegate::ABC;
 
 use strict;
 use warnings;
+use feature qw( signatures );
+no warnings "experimental::signatures";
 use utf8;
 use Carp;
 use File::Spec;
@@ -17,6 +22,7 @@ use File::LoadLines;
 use feature 'state';
 use Encode 'decode_utf8';
 
+use ChordPro::Paths;
 use ChordPro::Utils;
 use Text::ParseWords qw(shellwords);
 
@@ -25,83 +31,156 @@ sub DEBUG() { $config->{debug}->{abc} }
 # ABC processing using abc2svg and custom SVG processor.
 
 my $abc2svg;
-my $embedded;
 
-sub abc2svg_qjs {
-    my ( $s, $pw, $elt ) = @_;
+# Default entry point.
 
-    # Embedded QuickJS.
+sub abc2svg( $s, $pw, $elt ) {
 
-    my $dir = ::rsc_or_file("abc/");
-    my $x;
-    if ( -x "$dir/qjs" ) {
-	$x = "$dir/qjs";
-    }
-    elsif ( is_msw() and -s "$dir/qjs.exe" ) {
-	$x = "$dir/qjs.exe";
-    }
-    if ( $x ) {
-	$abc2svg = [ $x, "--std", "$dir/chordproabc.js", "$dir/abc2svg/" ];
-    }
-    $embedded = 1;
-    return _abc2svg( $abc2svg, $s, $pw, $elt );
-}
-
-sub abc2svg {
-    my ( $s, $pw, $elt ) = @_;
-
-    # Native.
-    unless ( $abc2svg ) {
-	$embedded = 0;
-	$abc2svg = findexe( "abc2svg", "silent" );
+    if ( DEBUG() ) {
+	warn( sprintf( "ABC: abc2svg (tool = %s)\n",
+		       ref($abc2svg)
+		       ? $abc2svg->[0]
+		       : ( $abc2svg) // "<undef>" ) );
     }
 
-    # Try node.
-    unless ( $abc2svg ) {
-	my $x;
-	if ( $x = findexe( "npx", "silent" )
-	     or is_msw() and $x = findexe( "npx.cmd", "silent" ) ) {
-	    my $dir = ::rsc_or_file("abc2svg/");;
-	    $abc2svg = [ $x, "$dir/abc2svg" ];
+    state $cfg_checked;
+    unless ( $cfg_checked++ ) {
+	if ( ($config->{delegates}{abc}{config} // "default") ne "default" ) {
+	    warn("ABC: delegates.abc.config is no longer used.\n");
+	    warn("ABC: Config \"default.abc\" will be loaded instead.\n")
+	      if -s "default.abc";
 	}
     }
 
-    if ( $abc2svg ) {
-	return _abc2svg( $abc2svg, $s, $pw, $elt );
+    # Try to find a way to run the abv2svg javascript code.
+    # We support the following strategies, in order:
+    # 1. Embedded JavaScript::QuickJS module.
+    # 2. A program 'abc2svg' in PATH, that writes the SVG to standard out
+    #    (In newer installs it is called 'abcnode' so we try that as well.)
+    # 3. The QuickJS program, either in PATH or in our 'abc' resource
+    #    directory. In this case, packaged abc2svg is used.
+    # The actual command is stored in $abc2svg and retained across calls.
+    #
+    # Note we do not use 'node' since it is hard to instruct it not to use
+    # global data.
+
+    return abc2svg_qjs( $s, $pw, $elt ) if have_xs();
+
+    # If packaged, do not use external tools.
+    unless ( CP->packager ) {
+
+	# First, try native program.
+	unless ( $abc2svg ) {
+	    $abc2svg = findexe( "abc2svg", "silent" );
+	    $abc2svg = [ $abc2svg ] if $abc2svg;
+	}
+	unless ( $abc2svg ) {
+	    $abc2svg = findexe( "abcnode", "silent" );
+	    $abc2svg = [ $abc2svg ] if $abc2svg;
+	}
+
+	# We know what to do.
+	if ( $abc2svg ) {
+	    return _abc2svg( $s, $pw, $elt );
+	}
     }
 
-    # Try (embedded) QuickJS.
+    # Try (optionally packaged) QuickJS with packaged abc2svg.
     return abc2svg_qjs( $s, $pw, $elt );
 }
 
-sub _abc2svg {
-    my ( $abc2svg, $s, $pw, $elt ) = @_;
+# Alternative entry point that always uses QuickJS only.
 
-    state $imgcnt = 0;
-    state $td = File::Temp::tempdir( CLEANUP => !$config->{debug}->{abc} );
-    my $cfg = $config->{delegates}->{abc};
+sub packaged_qjs() {
 
+    # Only use ours.
+    my $dir = CP->findresdirs("abc")->[-1];
+
+    if ( have_xs() ) {
+	my $js = "$dir/abc2svg/abc2svg-1.js";
+	my @js = loadlines( $js, { split => 0 } );
+	if ( $js[-1] =~ /abc2svg.version="(.*?)";abc2svg.vdate="(.*?)"/ ) {
+	    return [ "QuickJS_XS", "ABC2SVG version $1 of $2", $dir ];
+	}
+	return [ "QuickJS_XS", $dir ];
+    }
+
+    my $qjs;
+
+    # First, try packaged qjs.
+    if ( -x "${dir}/qjs" ) {
+	$qjs = "${dir}/qjs";
+    }
+    elsif ( is_msw() and -s "${dir}/qjs.exe" ) {
+	$qjs = "${dir}/qjs.exe";
+    }
+
+    # Else try to find an installed qjs.
+    else {
+	$qjs = CP->findexe("qjs");
+    }
+
+    # If so, check for packaged abc files.
+    if ( $qjs
+	 && -s "${dir}/chordproabc.js"
+	 && -s "${dir}/abc2svg/tohtml.js" ) {
+	return [ $qjs, "--std", "${dir}/chordproabc.js", "${dir}/abc2svg" ];
+    }
+    return 0;
+}
+
+sub abc2svg_qjs( $s, $pw, $elt ) {
+
+    $abc2svg //= packaged_qjs();
+
+    # This will bail out if we didn't find a suitable program.
+    return _abc2svg( $s, $pw, $elt );
+}
+
+# Internal handler.
+
+sub _abc2svg( $s, $pw, $elt ) {
+
+    # Bail out if we don't have a suitable program.
     unless ( $abc2svg ) {
-	warn("Error in ABC embedding: need 'abc2svg' tool.\n");
+	warn("Error in ABC embedding: no 'abc2svg' or 'qjs' program found.\n");
 	return;
     }
 
+    state $td = File::Temp::tempdir( CLEANUP => !$config->{debug}->{abc} );
+    my $cfg = $config->{delegates}->{abc};
+
+    warn("ABC: Using config \"default.abc\".\n")
+      if !have_xs() && -s "default.abc";
     my $prep = make_preprocessor( $cfg->{preprocess} );
 
+    # Prepare names for temporary files.
+    state $imgcnt = 0;
     $imgcnt++;
     my $src  = File::Spec->catfile( $td, "tmp${imgcnt}.abc" );
     my $svg  = File::Spec->catfile( $td, "tmp${imgcnt}.svg" );
     my $out  = File::Spec->catfile( $td, "tmp${imgcnt}.out" );
     my $err  = File::Spec->catfile( $td, "tmp${imgcnt}.err" );
 
-    my $fd;
-    unless ( open( $fd, '>:utf8', $src ) ) {
-	warn("Error in ABC embedding: $src: $!\n");
-	return;
-    }
-
-
-    my @preamble = @{ $cfg->{preamble} };
+    # Get rid of as much space as possible.
+    # Jean-François Moine:
+    # If you have both "%%stretchstaff 1" and "%%trimsvg 1", and
+    # "%%stretchlast 0", only the final line is shorter.
+    # Otherwise, you can have "%%trimsvg 1" as the last line of the tune.
+    my @preamble =
+      ( "%%topspace 0",
+	"%%titlespace 0",
+	"%%musicspace 0",
+	"%%composerspace 0",
+	"%%infospace 0",
+	"%%textspace 0",
+	"%%leftmargin 0cm",
+	"%%rightmargin 0cm",
+	"%%stretchstaff 1",
+	"%%stretchlast 0",
+	"%%trimsvg 1",
+	"%%staffsep 0",
+	@{ $cfg->{preamble} } );
 
     for ( keys(%{$elt->{opts}}) ) {
 
@@ -125,30 +204,37 @@ sub _abc2svg {
 	@data = ( "X:1", @pre );
 	@pre = ();
     }
-    my $kv = { %$elt };
+    my $kv = {};
     $kv = parse_kv( @pre ) if @pre;
-    $kv->{split} = 1;
+    $kv = { %$kv, %{$elt->{opts}} };
+    $kv->{split} //= 1;		# less overhead. really.
     $kv->{scale} ||= 1;
+    $kv->{align} //= ($kv->{center}//0) ? "center" : "left";
     if ( $kv->{width} ) {
 	$pw = $kv->{width};
     }
 
     unshift( @preamble,
 	     grep { /^%%/ } @pre,
-	     $pw ? ( "%%pagewidth " . $pw . "px" ) : (),
-	     "%%leftmargin 0cm",
-	     "%%rightmargin 0cm",
+	     $pw ? sprintf("%%%%pagewidth %dpx", $pw) : (),
 	   );
+
+    # Create the temp file for the ABC source.
+    my $fd;
+    unless ( open( $fd, '>:utf8', $src ) ) {
+	warn("Error in ABC embedding: $src: $!\n");
+	return;
+    }
 
     # Copy. We assume the user knows how to write ABC.
     for ( @preamble ) {
 	print $fd $_, "\n";
-	warn($_, "\n") if DEBUG;
+	warn($_, "\n") if DEBUG > 1;
     }
     for ( @data ) {
 	$prep->{abc}->($_) if $prep->{abc};
 	print $fd $_, "\n";
-	warn($_, "\n") if DEBUG;
+	warn($_, "\n") if DEBUG > 1;
     }
 
     unless ( close($fd) ) {
@@ -156,27 +242,89 @@ sub _abc2svg {
 	return;
     }
 
-    my @cmd = ref($abc2svg) ? ( @$abc2svg ) : ( $abc2svg );
+    my @cmd = @$abc2svg;
 
     my @lines;
     my $ret;
 
-    push( @cmd, "toxhtml.js", $src );
-    if ( $embedded  ) {
-	splice( @cmd, 3, 0, $out ); # insert output name.
+    if ( $cmd[0] eq "QuickJS_XS" ) {
+	my $js = JavaScript::QuickJS->new;
+	my $base = $cmd[-1] . "/abc2svg";
+	$js->set_module_base($base);
+
+	my $abc2svg =
+	  {
+	   print     => sub { push( @lines, split(/\n/, $_) ) for @_ },
+	   printErr  => sub { print STDERR @_ },
+	   quit      => sub { exit 66 },
+	   readFile  => sub { slurp($_[0]) },
+	   get_mtime => sub {
+	       my @stat = stat($_[0]);
+	       return @stat ? 1000*$stat[9] : undef;
+	   },
+	   loadjs    => sub {
+	       my ( $fn, $relay, $onerror ) = @_;
+	       if ( -s -r "$base/$fn" ) {
+		   $js->eval(slurp("$base/$_[0]"));
+	       }
+	       elsif ( $onerror ) {
+		   $onerror->();
+	       }
+	       else {
+		   warn( qq{loadjs("$fn"): $!\n} );
+	       }
+	   },
+	  };
+
+	$js->set_globals
+	  ( args    => [ $src ],
+	    load    => sub { $js->eval(slurp("$base/$_[0]")) },
+	    abc2svg => $abc2svg,
+	    abc => '',			# global for 'toxxx.js'
+	  );
+
+	warn( "+ QuickJS[", CP->display($base), "] $src\n") if DEBUG;
+	eval {
+	    $js->eval( slurp("$base/abc2svg-1.js") );
+	    if ( -r "$base/../cmd.js" ) {
+		warn(" QuickJS using ", CP->display("$base/../cmd.js"), "\n" )
+		  if DEBUG;
+		$js->eval( slurp("$base/../cmd.js") );
+	    }
+	    else {
+		$js->eval( slurp("$base/cmdline.js") );
+	    }
+	    $js->eval( slurp("$base/tohtml.js") );
+	    $js->eval( qq{abc_cmd("ChordPro", args, "QuickJS (embedded)")} );
+	};
+	warn($@) if $@;
+	undef $js;
+
+    }
+
+    elsif ( $cmd[0] =~ /qjs(?:\.\w+)?$/ ) {
+
+	# Packaged.
+	push( @cmd, $out, $src );
 	if ( DEBUG ) {
 	    warn( "+ @cmd\n" );
 	    $ENV{CHORDPRO_ABC_DEBUG} = 1;
 	}
+
+	# Run the command.
 	$ret = eval { sys( @cmd ) };
+
+	# Load data.
 	@lines = loadlines($out)
     }
 
-    elsif ( ! main->can("OnInit") ) {
+    # Not packaged. Check for Wx on Windows since we cannot redirect STD***.
+    elsif ( !is_wx() && !is_msw() ) {
 
+	push( @cmd, $src );
 	warn( "+ @cmd\n" ) if DEBUG;
 
-	# Command line use. Redirect stdout/err.
+	# Setup redirection for STDOUT/ERR.
 	my ( $oldout, $olderr );
 	open( $oldout, ">&STDOUT" )
 	  or die "Can't dup STDOUT: $!";
@@ -191,27 +339,22 @@ sub _abc2svg {
 	select STDERR; $| = 1;  # make unbuffered
 	select STDOUT; $| = 1;  # make unbuffered
 
+	# Run the command.
 	$ret = eval { sys(@cmd) };
 
+	# Reconnect STDOUT/ERR.
 	open(STDOUT, ">&", $oldout)
 	  or die "Can't dup OLDOUT: $!";
 	open(STDERR, ">&", $olderr)
 	  or die "Can't dup OLDERR: $!";
 	select STDERR; $| = 1;  # make unbuffered
 
-	if ( -s $err ) {
-	    open( $fd, '<:utf8', $err );
-	    while ( <$fd> ) {
-		warn("ABC: $_");
-	    }
-	    close($fd);
-	}
-
 	# Load data.
 	@lines = loadlines($out);
     }
 
     else {
+	push( @cmd, $src );
 	if ( 0 ) {
 	    # This seemed a good idea but unfortunately Wx has problems
 	    # returning the UTF8 data correctly. Non-ASCII characters are
@@ -238,42 +381,83 @@ sub _abc2svg {
 	warn("Error in ABC embedding (no output?)\n");
 	return;
     }
-    warn("SVG: ", scalar(@lines), " lines (raw)\n") if DEBUG();
+    warn("SVG: ", scalar(@lines), " lines (raw)\n") if DEBUG > 1;
 
-    open( $fd, '>:utf8', $svg );
+    # Postprocess the SVG data.
     my $copy = 0;
-    print $fd ("<div>\n");
+    @data = ();
     my $lines = 1;
     while ( @lines ) {
 	$_ = shift(@lines);
 	if ( /^<svg/ ) {
 	    $copy++;
 	}
-	print( $fd $_, "\n"), $lines++ if $copy;
+	push( @data, $_ ), $lines++ if $copy;
 	if ( /^<\/svg/ && @lines && $lines[0] =~ /^<\/div/ ) {
 	    last;
 	}
     }
-    print $fd ("</div>\n");
-    close($fd);
-    warn("SVG: ", 1+$lines, " lines (", -s $svg, " bytes)\n") if DEBUG();
-    my @res;
-    push( @res,
-	  { type => "svg",
-	    uri  => $svg,
-	    opts => { center => $kv->{center},
-		      scale  => $kv->{scale},
-		      split  => $kv->{split},
-		      sep    => $kv->{staffsep},
-		    } } );
+    if ( @data ) {
+	unshift( @data, "<div>" );
+	push( @data, "</div>" );
+    }
 
-    return \@res;
+    if ( DEBUG ) {
+	open( $fd, '>:utf8', $svg );
+	print( $fd $_, "\n" ) for @data;
+	close($fd);
+	warn("SVG: ", 1+$lines, " lines (", -s $svg, " bytes)\n") if DEBUG > 1;
+    }
+
+    return
+	  { type => "image",
+	    line => $elt->{line},
+	    subtype => "svg",
+	    data => \@data,
+	    opts => { maybe id     => $kv->{id},
+		      maybe align  => $kv->{align},
+		      maybe scale  => $kv->{scale},
+		      maybe split  => $kv->{split},
+		      maybe spread => $kv->{spread},
+		      maybe sep    => $kv->{staffsep},
+		    } };
 }
 
-sub abc2image {
+sub have_xs {
+    local $SIG{__WARN__} = sub {};
+    state $ok;
+    $ok //= eval { require JavaScript::QuickJS };
+}
 
-    croak("ABC: Please adjust your config to use ABC handler \"abc2svg\" instead of \"abc2image\"");
+sub slurp {
+    my ( $fn ) = @_;
+    my $opts = { split => 0, fail => "soft" };
+    my $data = loadlines( $fn, $opts );
+    warn("LOAD($fn): ", $opts->{error}, "\n")
+      unless defined $data || $fn eq "default.abc";
+    $data;
+}
 
+sub abc2image( $s, $pw, $elt ) {
+
+    croak("ABC: Please remove handler \"abc2image\" from your ABC delegates config");
+
+}
+
+# Pre-scan.
+sub options( $data ) {
+
+    my @pre;
+    my @data = @$data;
+    while ( @data ) {
+	last if $data[0] =~ /^([A-Z]:|\%)/;
+	push( @pre, shift(@data) );
+    }
+    @pre = () if @pre && !@data;	# no data found
+    my $kv = {};
+    $kv = parse_kv( @pre ) if @pre;
+    $kv->{align} //= ($kv->{center}//0) ? "center" : "left";
+    $kv;
 }
 
 1;

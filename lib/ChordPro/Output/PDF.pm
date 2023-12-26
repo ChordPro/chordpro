@@ -6,22 +6,25 @@ use utf8;
 our $config;
 our $options;
 
+our $ps;
+
 package ChordPro::Output::PDF;
 
 use strict;
 use warnings;
 use Encode qw( encode_utf8 );
-use App::Packager;
 use File::Temp ();
 use Storable qw(dclone);
 use List::Util qw(any);
 use Carp;
 use feature 'state';
-
+use File::LoadLines qw(loadlines loadblob);
 use ChordPro::Output::Common
   qw( roman prep_outlines fmt_subst );
+use feature 'signatures';
 
 use ChordPro::Output::PDF::Writer;
+use ChordPro::Paths;
 use ChordPro::Utils;
 
 my $pdfapi;
@@ -42,7 +45,7 @@ sub generate_songbook {
     return [] unless $sb->{songs}->[0]->{body}; # no songs
     $verbose ||= $options->{verbose};
 
-    my $ps = $config->{pdf};
+    $ps = $config->{pdf};
 
     my $pr = (__PACKAGE__."::Writer")->new( $ps, $pdfapi );
     warn("Generating PDF ", $options->{output} || "__new__.pdf", "...\n") if $options->{verbose};
@@ -93,7 +96,7 @@ sub generate_songbook {
 	push( @book, [ $song->{meta}->{title}->[0], $song ] );
 
 	# Copy persistent assets into each of the songs.
-	if ( $sb->{assets} ) {
+	if ( $sb->{assets} && %{$sb->{assets}} ) {
 	    $song->{assets} //= {};
 	    while ( my ($k,$v) = each %{$sb->{assets}} ) {
 		$song->{assets}->{$k} = $v;
@@ -232,14 +235,14 @@ sub generate_csv {
 
     # Create an MSPro compatible CSV for this PDF.
     push( @$book, [ "CSV", { meta => { tocpage => $page } } ] );
-    ( my $csv = $options->{output} ) =~ s/\.pdf$/.csv/i;
+    my $csv = CP->sibling( $options->{output}, ext => ".csv" );
     open( my $fd, '>:utf8', encode_utf8($csv) )
       or die( encode_utf8($csv), ": $!\n" );
 
     warn("Generating CSV ", encode_utf8($csv), "...\n")
       if  $config->{debug}->{csv} || $options->{verbose};
 
-    my $ps = $config->{pdf};
+    $ps = $config->{pdf};
     my $ctl = $ps->{csv};
     my $sep = $ctl->{separator} // ";";
     my $vsep = $ctl->{vseparator} // "|";
@@ -335,8 +338,20 @@ my $inlineannots;		# format for inline annots
 my $chordsunder = 0;		# chords under the lyrics
 my $chordscol = 0;		# chords in a separate column
 my $chordscapo = 0;		# capo in a separate column
+
 my $i_tag;
-our $assets;
+sub pr_label_maybe {
+    my ( $ps, $x, $y ) = @_;
+    my $tag = $i_tag // "";
+    $i_tag = undef;
+    prlabel( $ps, $tag, $x, $y ) if $tag ne "";
+}
+
+my $assets;
+sub assets {
+    my ( $id ) = @_;
+    $assets->{$id};
+}
 
 use constant SIZE_ITEMS => [ qw( chord text chorus tab grid diagram
 				 toc title footer ) ];
@@ -345,6 +360,10 @@ sub generate_song {
     my ( $s, $opts ) = @_;
 
     my $pr = $opts->{pr};
+    if ( $pr->{layout}->can("register_element") ) {
+	$pr->{layout}->register_element
+	  ( TextLayoutImageElement->new( pdf => $pr->{pdf} ), "img" );
+    }
 
     unless ( $s->{body} ) {	# empty song, or embedded
 	return unless $s->{source}->{embedding};
@@ -364,14 +383,13 @@ sub generate_song {
     local $config = dclone( $s->{config} // $config );
 
     $source = $s->{source};
-    $assets = $s->{assets} || {};
 
     $suppress_empty_chordsline = $::config->{settings}->{'suppress-empty-chords'};
     $suppress_empty_lyricsline = $::config->{settings}->{'suppress-empty-lyrics'};
     $inlinechords = $::config->{settings}->{'inline-chords'};
     $inlineannots = $::config->{settings}->{'inline-annotations'};
     $chordsunder  = $::config->{settings}->{'chords-under'};
-    my $ps = $::config->clone->{pdf};
+    $ps = $::config->clone->{pdf};
     $ps->{pr} = $pr;
     $pr->{ps} = $ps;
     $ps->{_s} = $s;
@@ -389,13 +407,13 @@ sub generate_song {
     my $dd;
     my $dctl;
     if ( $::config->{instrument}->{type} eq "keyboard" ) {
-	require ChordPro::Output::PDF::KeyboardDiagrams;
-	$dd = ChordPro::Output::PDF::KeyboardDiagrams->new($ps);
+	require ChordPro::Output::PDF::KeyboardDiagram;
+	$dd = ChordPro::Output::PDF::KeyboardDiagram->new( ps => $ps );
 	$dctl = $ps->{kbdiagrams};
     }
     else {
-	require ChordPro::Output::PDF::StringDiagrams;
-	$dd = ChordPro::Output::PDF::StringDiagrams->new($ps);
+	require ChordPro::Output::PDF::StringDiagram;
+	$dd = ChordPro::Output::PDF::StringDiagram->new( ps => $ps );
 	$dctl = $ps->{diagrams};
     }
     $dctl->{show} = $s->{settings}->{diagrampos}
@@ -619,7 +637,7 @@ sub generate_song {
 	    if ( $bgpdf =~ /^(.+):(\d+)$/ ) {
 		( $bgpdf, $pg ) = ( $1, $2 );
 	    }
-	    $fn = ::rsc_or_file($bgpdf);
+	    $fn = CP->findres($bgpdf);
 	    if ( -s -r $fn ) {
 		$pg++ if $ps->{"even-odd-pages"} && !$rightpage;
 		$pr->importpage( $fn, $pg );
@@ -631,7 +649,6 @@ sub generate_song {
 	}
 
 	$x = $ps->{__leftmargin};
-	$x += $ps->{_indent};
 	$y = $ps->{_margintop};
 	$y += $ps->{headspace} if $ps->{'head-first-only'} && $class == 2;
 
@@ -639,6 +656,7 @@ sub generate_song {
 	    $y -= imagespread( $spreadimage, $x, $y, $ps );
 	    undef $spreadimage;
 	}
+	$x += $ps->{_indent};
 	$ps->{_top} = $y;
 	$col = 0;
 	$vsp_ignorefirst = 1;
@@ -806,46 +824,47 @@ sub generate_song {
     };
 
     my @elts;
-    my $elt;			# current element
-    my @sb = @{$sb};
-    my $redo = [];
-    while ( @sb ) {
-	$elt = @$redo ? shift(@$redo) : shift(@sb);
-	if ( $elt->{type} eq "image"
-	     && $elt->{opts}->{spread} ) {
-	    if ( $spreadimage ) {
-		warn("Ignoring superfluous spread image\n");
-	    }
-	    else {
-		warn("Got spread image\n") if $config->{debug}->{images};
-		$spreadimage //= $elt;
-		next;
-	    }
-	}
-	elsif ( $elt->{type} eq "delegate"
-		&& $elt->{subtype} eq "image"
-		&& $elt->{data}->[0] =~ /\bspread=\d+\b$/
-	      ) {
-	    if ( $spreadimage ) {
-		warn("Ignoring superfluous spread delegate\n");
-	    }
-	    else {
-		my $delegate = $elt->{delegate};
-		warn("Got spread delegate $delegate\n") if $config->{debug}->{images};
-		my $pkg = __PACKAGE__;
-		$pkg =~ s/::Output::\w+$/::Delegate::$delegate/;
-		eval "require $pkg" || die($@);
-		my $hd = $pkg->can($elt->{handler}) //
-		  die("PDF: Missing delegate handler ${pkg}::$elt->{handler}\n");
+    my $dbgop = sub {
+	my ( $elts, $pb ) = @_;
+	$elts //= $elts[-1];
+	$elts = [ $elts ] unless ref($elts) eq 'ARRAY';
+	for my $elt ( @$elts ) {
+	    my $msg = sprintf("OP L:%2d %s (", $elt->{line},
+			      $pb ? "pushback($elt->{type})" : $elt->{type} );
+	    $msg .= " " . $elt->{subtype} if $elt->{subtype};
+	    $msg .= " U:" . $elt->{uri} if $elt->{uri};
+	    $msg .= " O:" . $elt->{orig} if $elt->{orig};
+	    $msg .= " D:" . $elt->{delegate} if $elt->{delegate};
+	    $msg .= " H:" . $elt->{handler} if $elt->{handler};
+	    $msg .= " )";
+	    $msg =~ s/\s+\(\s+\)//;
+	    if ( $config->{debug}->{ops} > 1 ) {
+		require ChordPro::Dumper;
+		local *ChordPro::Chords::Appearance::_data_printer = sub {
+		    my ( $self, $ddp ) = @_;
+		    "ChordPro::Chords::Appearance('" . $self->key . "'" .
+		      ($self->format ? (", '" . $self->format . "'") : "") .
+		      ")";
+		};
 
-		my $pw = $ps->{papersize}->[0]
-		  - $ps->{marginleft}
-		  - $ps->{marginright};
-		$redo = $hd->( $s, $pw, $elt );
-		next;
+		ChordPro::Dumper::ddp( $elt, as => $msg );
+	    }
+	    else {
+		warn( $msg, "\n" );
 	    }
 	}
-	push( @elts, $elt );
+    };
+
+    #### CODE STARTS HERE ####
+
+#    prepare_assets( $s, $pr );
+
+    if ( $s->{spreadimage} ) {
+	$spreadimage = $assets->{$s->{spreadimage}->{id}};
+#	  { type => "image",
+#	    id => $s->{spreadimage}->{id},
+#	    opts => { spread => $s->{spreadimage}->{space} }
+#	  };
     }
 
     # Get going.
@@ -862,8 +881,14 @@ sub generate_song {
     my $did = 0;
     my $curctx = "";
 
+    my $elt;			# current element
+    @elts = @$sb;		# song elements
     while ( @elts ) {
 	$elt = shift(@elts);
+
+	if ( $config->{debug}->{ops} ) {
+	    $dbgop->($elt);
+	}
 
 	if ( $elt->{type} eq "newpage" ) {
 	    $newpage->();
@@ -878,6 +903,8 @@ sub generate_song {
 	if ( $elt->{type} ne "set" && !$did++ ) {
 	    # Insert top/left/right/bottom chord diagrams.
  	    $chorddiagrams->() unless $dctl->{show} eq "below";
+	    # Prepare the assets now we know the page width.
+	    prepare_assets( $s, $pr );
 	    showlayout($ps) if $ps->{showlayout} || $config->{debug}->{spacing};
 	}
 
@@ -885,7 +912,12 @@ sub generate_song {
 	    my $y0 = $y;
 	    warn("***SHOULD NOT HAPPEN1***")
 	      if $s->{structure} eq "structured";
-	    $vsp_ignorefirst = 0, next if $vsp_ignorefirst;
+	    if ( $vsp_ignorefirst ) {
+		if ( @elts && $elts[0]->{type} !~ /empty|ignore/ ) {
+		    $vsp_ignorefirst = 0;
+		}
+		next;
+	    }
 	    $pr->show_vpos( $y, 0 ) if $config->{debug}->{spacing};
 	    my $vsp = empty_vsp( $elt, $ps );
 	    $y -= $vsp;
@@ -1071,11 +1103,13 @@ sub generate_song {
 		 ", C=$cells, GBW=$grid_barwidth, W=", $grid_cellwidth,
 		 "\n") if $config->{debug}->{spacing};
 
-	    gridline( $elt, $x, $y,
-		      $grid_cellwidth,
-		      $grid_barwidth,
-		      $grid_margin,
-		      $ps, song => $s );
+	    require ChordPro::Output::PDF::Grid;
+	    ChordPro::Output::PDF::Grid::gridline
+		( $elt, $x, $y,
+		  $grid_cellwidth,
+		  $grid_barwidth,
+		  $grid_margin,
+		  $ps, song => $s );
 
 	    $y -= $vsp;
 	    $pr->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
@@ -1109,31 +1143,6 @@ sub generate_song {
 	    next;
 	}
 
-	if ( $elt->{type} eq "delegate" ) {
-	    if ( $elt->{subtype} =~ /^image(?:-(\w+))?$/ ) {
-		my $delegate = $1 // $elt->{delegate};
-		my $pkg = __PACKAGE__;
-		$pkg =~ s/::Output::\w+$/::Delegate::$delegate/;
-		eval "require $pkg" || die($@);
-		my $hd = $pkg->can($elt->{handler}) //
-		  die("PDF: Missing delegate handler ${pkg}::$elt->{handler}\n");
-		my $pw;			# available width
-		if ( $ps->{columns} > 1 ) {
-		    $pw = $ps->{columnoffsets}->[1]
-		      - $ps->{columnoffsets}->[0]
-		      - $ps->{columnspace};
-		}
-		else {
-		    $pw = $ps->{__rightmargin} - $ps->{_leftmargin};
-		}
-		my $res = $hd->( $s, $pw, $elt );
-		next unless $res; # assume errors have been given
-		unshift( @elts, @$res );
-		next;
-	    }
-	    die("PDF: Unsupported delegation $elt->{subtype}\n");
-	}
-
 	if ( $elt->{type} eq "image" ) {
 	    # Images are slightly more complex.
 	    # Only after establishing the desired height we can issue
@@ -1160,113 +1169,13 @@ sub generate_song {
 	    $y -= $vsp;
 	    $pr->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
 
-	    next;
-	}
-
-	if ( $elt->{type} eq "svg" ) {
-	    # We turn SVG into one (or more) XForm objects.
-
-	    require SVGPDF;
-	    SVGPDF->VERSION(0.070);
-
-	    # Note we need special font and text handlers.
-	    my $p = SVGPDF->new
-	      ( pdf  => $ps->{pr}->{pdf},
-		fc   => sub { svg_fonthandler( $ps, @_ ) },
-		tc   => sub { svg_texthandler( $ps, @_ ) },
-		atts => { debug => $config->{debug}->{svg} > 1,
-			  verbose => $config->{debug}->{svg},
-			} );
-	    my $o = $p->process( $elt->{uri} );
-	    warn("PDF: SVG objects: ", 0+@$o, "\n")
-	      if $config->{debug}->{svg} || !@$o;
-	    if ( ! @$o ) {
-		warn("Error in SVG embedding (no SVG objects found)\n");
-		next;
+	    if ( $elt->{multi} && !$elt->{msel} ) {
+		my $i = @{ $elt->{multi} } - 1;
+		while ( $i > 0 ) {
+		    unshift( @elts, { %$elt, msel => $i } );
+		    $i--;
+		}
 	    }
-
-	    my @res;
-	    my $i = 0;
-	    for my $xo ( @$o ) {
-		state $imgcnt = 0;
-		$i++;
-		my $assetid = sprintf("XFOasset%03d", $imgcnt++);
-		$assets->{$assetid} = { type => "xform", data => $xo };
-		my $sep = $i == @$o ? 0 : $elt->{opts}->{sep} || 0;
-
-		push( @res,
-		      { type     => "xform",
-			width    => $xo->{width},
-			height   => $xo->{height},
-			vwidth   => $xo->{vwidth},
-			vheight  => $xo->{vheight},
-			id       => $assetid,
-			opts => { center => $elt->{opts}->{center},
-				  scale  => $elt->{opts}->{scale} || 1,
-				  sep    => $sep },
-		      }
-		    );
-		warn("Created asset $assetid (xform, ",
-		     $xo->{vwidth}, "x", $xo->{vheight}, ")",
-		     " scale=", $elt->{opts}->{scale} || 1,
-		     " center=", $elt->{opts}->{center}//0,
-		     " sep=", $sep,
-		     "\n")
-		  if $config->{debug}->{images};
-	    }
-	    unshift( @elts, @res );
-	    next;
-	}
-
-	if ( $elt->{type} eq "xform" ) {
-	    my $h = $elt->{height};# + ($elt->{opts}->{sep}||0);
-	    my $w = $elt->{width};
-	    my $vh = $elt->{vheight};
-	    my $vw = $elt->{vwidth};
-	    my $xo = $assets->{ $elt->{id} };
-
-	    my $scale = min( $vw / $w, $vh / $h );
-	    my $sep = $elt->{opts}->{sep} || 0;
-
-	    # Available width and height.
-	    my $pw;
-	    if ( $ps->{columns} > 1 ) {
-		$pw = $ps->{columnoffsets}->[1]
-		  - $ps->{columnoffsets}->[0]
-		  - $ps->{columnspace};
-	    }
-	    else {
-		$pw = $ps->{__rightmargin} - $ps->{_leftmargin};
-	    }
-	    my $ph = $ps->{_margintop} - $ps->{_marginbottom};
-
-	    if ( $w * $scale > $pw ) {
-		$scale = $pw / $w;
-	    }
-	    if ( $h * $scale > $ph ) {
-		$scale = $ph / $h;
-	    }
-	    warn("XForm asset ", $elt->{id}, " (",
-		 $vw, "x", $vh, ")",
-		 " [$x,$y]",
-		 " scale=", $scale,
-		 " center=", $elt->{opts}->{center}//0,
-		 " sep=", $sep,
-		 "\n")
-	      if $config->{debug}->{images};
-
-	    $scale *= $elt->{opts}->{scale};
-	    my $vsp = $h * $scale;
-	    $checkspace->($vsp);
-	    $ps->{pr}->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
-
-	    $pr->{pdfgfx}->object( $xo->{data}->{xo},
-				   $x-$xo->{data}->{vbox}->[0]*$scale,
-				   $y, $scale );
-
-	    $y -= $vsp + $sep;
-	    $pr->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
-
 	    next;
 	}
 
@@ -1378,8 +1287,10 @@ sub generate_song {
 		}
 		else {
 		    # Restore default.
+		    my $sz = $ps->{fonts}->{$1}->{size};
 		    $ps->{fonts}->{$f} =
 		      { %{ $pr->{_df}->{$f} } };
+#		    $ps->{fonts}->{$1}->{size} = $sz;
 		}
 		$pr->init_font($f);
 	    }
@@ -1563,10 +1474,10 @@ sub font_ul {
 }
 
 sub prlabel {
-    my ( $ps, $label, $x, $y, $font) = @_;
+    my ( $ps, $label, $x, $y ) = @_;
     return if $label eq "" || $ps->{_indent} == 0;
     my $align = $ps->{labels}->{align};
-    $font ||= $ps->{fonts}->{label} || $ps->{fonts}->{text};
+    my $font= $ps->{fonts}->{label} || $ps->{fonts}->{text};
     $font->{size} ||= $font->{fd}->{size};
     $ps->{pr}->setfont($font);	# for strwidth.
     for ( split( /\\n/, $label ) ) {
@@ -1627,7 +1538,9 @@ sub defrag {
 	    }
 	    elsif ( $a =~ m;^<\s*(\w+)(.*)>$; ) {
 		my $k = $1;
-		push( @stack, "<$k$2>" );
+		my $v = $2;
+		# Do not push if self-closed.
+		push( @stack, "<$k$v>" ) unless $v =~ m;/\s*$;;
 	    }
 	    push( @r, $a );
 	}
@@ -1690,9 +1603,6 @@ sub songline {
 
     my $ftext;
     my $ytext;
-    my $tag = $i_tag // "";
-    $i_tag = undef;
-
     my @phrases = @{ defrag( $elt->{phrases} ) };
 
     if ( $type =~ /^comment/ ) {
@@ -1701,7 +1611,7 @@ sub songline {
 	my $song   = $opts{song};
 	$x += $opts{indent} if $opts{indent};
 	$x += $elt->{indent} if $elt->{indent};
-	prlabel( $ps, $tag, $x, $ytext );
+	pr_label_maybe( $ps, $x, $ytext );
 	my $t = $elt->{text};
 	if ( $elt->{chords} ) {
 	    $t = "";
@@ -1717,15 +1627,18 @@ sub songline {
 	}
 	my ( $text, $ex ) = wrapsimple( $pr, $t, $x, $ftext );
 	$pr->text( $text, $x, $ytext, $ftext );
+	my $wi = $pr->strwidth( $config->{settings}->{wrapindent}//"x" );
 	return $ex ne ""
-	  ? { %$elt, indent => $pr->strwidth("x"), text => $ex, chords => undef  }
+	  ? { %$elt,
+	      indent => $wi,
+	      text => $ex, chords => undef  }
 	  : undef;
     }
     if ( $type eq "tabline" ) {
 	$ftext = $fonts->{tab};
 	$ytext  = $ytop - font_bl($ftext);
 	$x += $opts{indent} if $opts{indent};
-	prlabel( $ps, $tag, $x, $ytext );
+	pr_label_maybe( $ps, $x, $ytext );
 	$pr->text( $elt->{text}, $x, $ytext, $ftext, undef, "no markup" );
 	return;
     }
@@ -1745,11 +1658,16 @@ sub songline {
 	my $x = $x;
 	$x += $opts{indent} if $opts{indent};
 	$x += $elt->{indent} if $elt->{indent};
-	prlabel( $ps, $tag, $x, $ytext );
+	pr_label_maybe( $ps, $x, $ytext );
 	my ( $text, $ex ) = wrapsimple( $pr, join( "", @phrases ),
 					$x, $ftext );
 	$pr->text( $text, $x, $ytext, $ftext );
-	return $ex ne "" ? { %$elt, indent => $pr->strwidth("x"), phrases => [$ex] } : undef;
+	my $wi = $pr->strwidth( $config->{settings}->{wrapindent}//"x" );
+	return $ex ne ""
+	  ? { %$elt,
+	      indent => $wi,
+	      phrases => [$ex] }
+	  : undef;
     }
 
     if ( $chordscol || $inlinechords ) {
@@ -1816,8 +1734,7 @@ sub songline {
 			0.25, $ps->{theme}->{foreground} );
 
 	    # Print the text.
-	    prlabel( $ps, $tag, $x, $ytext );
-	    $tag = "";
+	    pr_label_maybe( $ps, $x, $ytext );
 	    $x = $pr->text( $phrase, $x, $ytext, $ftext );
 
 	    # Collect chords to be printed in the side column.
@@ -1842,8 +1759,7 @@ sub songline {
 	    }
 
 	    # Do not indent chorus labels (issue #81).
-	    prlabel( $ps, $tag, $x-$opts{indent}, $ytext );
-	    $tag = "";
+	    pr_label_maybe( $ps, $x-$opts{indent}, $ytext );
 	    if ( $inlinechords ) {
 		$x = $pr->text( $phrase, $xt0, $ytext, $ftext );
 	    }
@@ -1910,376 +1826,37 @@ sub songline {
     return;
 }
 
-sub is_bar {
-    exists( $_[0]->{class} ) && $_[0]->{class} eq "bar";
-}
-
-sub gridline {
-    my ( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) = @_;
-
-    # Grid context.
-
-    my $pr = $ps->{pr};
-    my $fonts = $ps->{fonts};
-
-    my $tag = $i_tag // "";
-    $i_tag = undef;
-
-    # Use the chords font for the chords, and for the symbols size.
-    my $fchord = { %{ $fonts->{grid} || $fonts->{chord} } };
-    delete($fchord->{background});
-    $y -= font_bl($fchord);
-
-    prlabel( $ps, $tag, $x, $y );
-
-    $x += $barwidth;
-    $cellwidth += $barwidth;
-
-    $elt->{tokens} //= [ {} ];
-
-    my $firstbar;
-    my $lastbar;
-    foreach my $i ( 0 .. $#{ $elt->{tokens} } ) {
-	next unless is_bar( $elt->{tokens}->[$i] );
-	$lastbar = $i;
-	$firstbar //= $i;
-    }
-
-    my $prevbar = -1;
-    my @tokens = @{ $elt->{tokens} };
-    my $t;
-
-    if ( $margin->[0] ) {
-	$x -= $barwidth;
-	if ( $elt->{margin} ) {
-	    my $t = $elt->{margin};
-	    if ( $t->{chords} ) {
-		$t->{text} = "";
-		for ( 0..$#{ $t->{chords} } ) {
-		    $t->{text} .= $t->{chords}->[$_]->chord_display . $t->{phrases}->[$_];
-		}
-	    }
-	    $pr->text( $t->{text}, $x, $y, $fonts->{comment} );
-	}
-	$x += $margin->[0] * $cellwidth + $barwidth;
-    }
-
-    my $ctl = $pr->{ps}->{grids}->{cellbar};
-    my $col = $pr->{ps}->{grids}->{symbols}->{color};
-    my $needcell = $ctl->{width};
-
-    state $prevvoltastart;
-    my $align;
-    if ( $prevvoltastart && @tokens
-	 && $tokens[0]->{class} eq "bar" && $tokens[0]->{align} ) {
-	$align = $prevvoltastart;
-    }
-    $prevvoltastart = 0;
-
-    my $voltastart;
-    foreach my $i ( 0 .. $#tokens ) {
-	my $token = $tokens[$i];
-	my $sz = $fchord->{size};
-
-	if ( $token->{class} eq "bar" ) {
-	    $x -= $barwidth;
-	    if ( $voltastart ) {
-		pr_voltafinish( $voltastart, $y, $x - $voltastart, $sz, $col, $pr );
-		$voltastart = 0;
-	    }
-
-	    $t = $token->{symbol};
-	    if ( 0 ) {
-		$t = "{" if $t eq "|:";
-		$t = "}" if $t eq ":|";
-		$t = "}{" if $t eq ":|:";
-	    }
-	    else {
-		$t = "|:" if $t eq "{";
-		$t = ":|" if $t eq "}";
-		$t = ":|:" if $t eq "}{";
-	    }
-
-	    my $lcr = -1;	# left, center, right
-	    $lcr = 0 if $i > $firstbar;
-	    $lcr = 1 if $i == $lastbar;
-
-	    if ( $t eq "|" ) {
-		if ( $token->{volta} ) {
-		    if ( $align ) {
-			$x = $align;
-			$lcr = 0;
-		    }
-		    $voltastart =
-		    pr_rptvolta( $x, $y, $lcr, $sz, $col, $pr, $token );
-		    $prevvoltastart ||= $x;
-		}
-		else {
-		    pr_barline( $x, $y, $lcr, $sz, $col, $pr );
-		}
-	    }
-	    elsif ( $t eq "||" ) {
-		pr_dbarline( $x, $y, $lcr, $sz, $col, $pr );
-	    }
-	    elsif ( $t eq "|:" ) {
-		pr_rptstart( $x, $y, $lcr, $sz, $col, $pr );
-	    }
-	    elsif ( $t eq ":|" ) {
-		pr_rptend( $x, $y, $lcr, $sz, $col, $pr );
-	    }
-	    elsif ( $t eq ":|:" ) {
-		pr_rptendstart( $x, $y, $lcr, $sz, $col, $pr );
-	    }
-	    elsif ( $t eq "|." ) {
-		pr_endline( $x, $y, $lcr, $sz, $col, $pr );
-	    }
-	    elsif ( $t eq " %" ) { # repeat2Bars
-		pr_repeat( $x+$sz/2, $y, 0, $sz, $col, $pr );
-	    }
-	    else {
-		die($t);	# can't happen
-	    }
-	    $x += $barwidth;
-	    $prevbar = $i;
-	    $needcell = 0;
-	    next;
-	}
-
-	if ( $token->{class} eq "repeat2" ) {
-	    # For repeat2Bars, change the next bar line to pseudo-bar.
-	    my $k = $prevbar + 1;
-	    while ( $k <= $#tokens
-		    && !is_bar($tokens[$k]) ) {
-		$k++;
-	    }
-	    $tokens[$k] = { symbol => " %", class => "bar" };
-	    $x += $cellwidth;
-	    $needcell = 0;
-	    next;
-	}
-
-	pr_cellline( $x-$barwidth, $y, 0, $sz, $ctl->{width},
-		     $pr->_fgcolor($ctl->{color}), $pr )
-	  if $needcell;
-	$needcell = $ctl->{width};
-
-	if ( $token->{class} eq "chord" || $token->{class} eq "chords" ) {
-	    my $tok = $token->{chords} // [ $token->{chord} ];
-	    my $cellwidth = $cellwidth / @$tok;
-	    for my $t ( @$tok ) {
-		$x += $cellwidth, next if $t eq '';
-		$t = $t->chord_display;
-		$pr->text( $t, $x, $y, $fchord );
-		$x += $cellwidth;
-	    }
-	}
-	elsif ( exists $token->{chord} ) {
-	    # I'm not sure why not testing for class = chord...
-	    warn("Chord token without class\n")
-	      unless $token->{class} eq "chord";
-	    my $t = $token->{chord};
-	    $t = $t->chord_display;
-	    $pr->text( $t, $x, $y, $fchord )
-	      unless $token eq ".";
-	    $x += $cellwidth;
-	}
-	elsif ( $token->{class} eq "slash" ) {
-	    $pr->text( "/", $x, $y, $fchord );
-	    $x += $cellwidth;
-	}
-	elsif ( $token->{class} eq "space" ) {
-	    $x += $cellwidth;
-	}
-	elsif ( $token->{class} eq "repeat1" ) {
-	    $t = $token->{symbol};
-	    my $k = $prevbar + 1;
-	    while ( $k <= $#tokens
-		    && !is_bar($tokens[$k]) ) {
-		$k++;
-	    }
-	    pr_repeat( $x + ($k - $prevbar - 1)*$cellwidth/2, $y,
-		       0, $fchord->{size}, $col, $pr );
-	    $x += $cellwidth;
-	}
-	if ( $x > $ps->{papersize}->[0] ) {
-	    # This should be signalled by the parser.
-	    # warn("PDF: Too few cells for content\n");
-	    last;
-	}
-    }
-
-    if ( $margin->[1] && $elt->{comment} ) {
-	my $t = $elt->{comment};
-	if ( $t->{chords} ) {
-	    $t->{text} = "";
-	    for ( 0..$#{ $t->{chords} } ) {
-		$t->{text} .= $t->{chords}->[$_] . $t->{phrases}->[$_];
-	    }
-	}
-	$pr->text( " " . $t->{text}, $x, $y, $fonts->{comment} );
-    }
-}
-
-sub pr_cellline {
-    my ( $x, $y, $lcr, $sz, $w, $col, $pr ) = @_;
-    $x -= $w / 2 * ($lcr + 1);
-    $pr->vline( $x, $y+0.9*$sz, $sz, $w, $col );
-}
-
-sub pr_barline {
-    my ( $x, $y, $lcr, $sz, $col, $pr ) = @_;
-    my $w = $sz / 10;		# glyph width = $w
-    $x -= $w / 2 * ($lcr + 1);
-    $pr->vline( $x, $y+0.9*$sz, $sz, $w, $col );
-}
-
-sub pr_dbarline {
-    my ( $x, $y, $lcr, $sz, $col, $pr ) = @_;
-    my $w = $sz / 10;		# glyph width = 3 * $w
-    $x -= 1.5 * $w * ($lcr + 1);
-    $pr->vline( $x, $y+0.9*$sz, $sz, $w, $col );
-    $x += 2 * $w;
-    $pr->vline( $x, $y+0.9*$sz, $sz, $w, $col );
-}
-
-sub pr_rptstart {
-    my ( $x, $y, $lcr, $sz, $col, $pr ) = @_;
-    my $w = $sz / 10;		# glyph width = 3 * $w
-    $x -= 1.5 * $w * ($lcr + 1);
-    $pr->vline( $x, $y+0.9*$sz, $sz, $w, $col );
-    $x += 2 * $w;
-    $y += 0.55 * $sz;
-    $pr->line( $x, $y, $x, $y+$w, $w, $col );
-    $y -= 0.4 * $sz;
-    $pr->line( $x, $y, $x, $y+$w, $w, $col );
-}
-
-sub pr_rptvolta {
-    my ( $x, $y, $lcr, $sz, $symcol, $pr, $token ) = @_;
-    my $w = $sz / 10;		# glyph width = 3 * $w
-    my $col = $pr->{ps}->{grids}->{volta}->{color};
-    my $ret = $x -= 1.5 * $w * ($lcr + 1);
-    $pr->vline( $x, $y+0.9*$sz, $sz, $w, $col );
-    $x += 2 * $w;
-    my $font = $pr->{ps}->{fonts}->{grid};
-    $pr->setfont($font);
-    $pr->text( "<span color='$col'><sup>" . $token->{volta} . "</sup></span>",
-	       $x-$w/2, $y, $font );
-    $ret;
-}
-
-sub pr_voltafinish {
-    my ( $x, $y, $width, $sz, $symcol, $pr ) = @_;
-    my $w = $sz / 10;		# glyph width = 3 * $w
-    my ( $col, $span ) = @{$pr->{ps}->{grids}->{volta}}{qw(color span)};
-    $pr->hline( $x, $y+0.9*$sz+$w/4, $width*$span, $w/2, $col  );
-}
-
-sub pr_rptend {
-    my ( $x, $y, $lcr, $sz, $col, $pr ) = @_;
-    my $w = $sz / 10;		# glyph width = 3 * $w
-    $x -= 1.5 * $w * ($lcr + 1);
-    $pr->vline( $x + 2*$w, $y+0.9*$sz, $sz, $w, $col );
-    $y += 0.55 * $sz;
-    $pr->line( $x, $y, $x, $y+$w, $w, $col );
-    $y -= 0.4 * $sz;
-    $pr->line( $x, $y, $x, $y+$w, $w, $col );
-}
-
-sub pr_rptendstart {
-    my ( $x, $y, $lcr, $sz, $col, $pr ) = @_;
-    my $w = $sz / 10;		# glyph width = 5 * $w
-    $x -= 2.5 * $w * ($lcr + 1);
-    $pr->vline( $x + 2*$w, $y+0.9*$sz, $sz, $col, , $w );
-    $y += 0.55 * $sz;
-    $pr->line( $x,      $y, $x     , $y+$w, $col, , $w );
-    $pr->line( $x+4*$w, $y, $x+4*$w, $y+$w, $col, , $w );
-    $y -= 0.4 * $sz;
-    $pr->line( $x,      $y, $x,      $y+$w, $col, , $w );
-    $pr->line( $x+4*$w, $y, $x+4*$w, $y+$w, $col, , $w );
-}
-
-sub pr_repeat {
-    my ( $x, $y, $lcr, $sz, $col, $pr ) = @_;
-    my $w = $sz / 3;		# glyph width = 3 * $w
-    $x -= 1.5 * $w * ($lcr + 1);
-    my $lw = $sz / 10;
-    $x -= $w / 2;
-    $pr->line( $x, $y+0.2*$sz, $x + $w, $y+0.7*$sz, $lw );
-    $pr->line( $x, $y+0.6*$sz, $x + 0.07*$sz , $y+0.7*$sz, $lw );
-    $x += $w;
-    $pr->line( $x - 0.05*$sz, $y+0.2*$sz, $x + 0.02*$sz, $y+0.3*$sz, $lw );
-}
-
-sub pr_endline {
-    my ( $x, $y, $lcr, $sz, $col, $pr ) = @_;
-    my $w = $sz / 10;		# glyph width = 2 * $w
-    $x -= 0.75 * $w * ($lcr + 1);
-    $pr->vline( $x, $y+0.85*$sz, 0.9*$sz, 2*$w );
-}
-
 sub imageline_vsp {
 }
 
 sub imageline {
     my ( $elt, $x, $ps, $gety ) = @_;
 
-    my $opts = $elt->{opts};
+    my $x0 = $x;
     my $pr = $ps->{pr};
-
-    my $img;
-    if ( $elt->{uri} =~ /^id=(.+)/ ) {
-	my $id = $1;
-	unless ( exists( $assets->{$id} ) ) {
-	    unless ( exists( $config->{assets}->{$id} ) ) {
-		return "Unknown asset: id=$id";
-	    }
-	    my $a = $config->{assets}->{$id};
-	    if ( $a->{src} && !$a->{data} ) {
-		use Image::Info;
-		open( my $fd, '<:raw', $a->{src} );
-		unless ( $fd ) {
-		    return $a->{src} . ": $!";
-		}
-		my $data = do { local $/; <$fd> };
-		# Get info.
-		my $info = Image::Info::image_info(\$data);
-		if ( $info->{error} ) {
-		    return $info->{error};
-		}
-
-		# Store in assets.
-		$assets //= {};
-		$assets->{$id} =
-		  { data => $data, type => $info->{file_ext},
-		    width => $info->{width}, height => $info->{height},
-		  };
-
-		if ( $config->{debug}->{images} ) {
-		    warn("asset[$id] ", length($data), " bytes, ",
-			 "width=$info->{width}, height=$info->{height}",
-			 "\n");
-		}
-	    }
-	}
-	unless ( $assets->{$id}->{data} ) {
-	    return "Unhandled asset: id=$id";
-	}
-    }
-    elsif ( $elt->{uri} =~ /^chord:(.*)/) {
-	$img = placeholder->new( $1,
-				 $ps->{dd}->hsp0( undef, $ps ),
-				 $ps->{dd}->vsp0( undef, $ps ) );
-    }
-    elsif ( ! -s $elt->{uri} ) {
-	return "$!: " . $elt->{uri};
-    }
-
-    warn("get_image ", $elt->{uri}, "\n") if $config->{debug}->{images};
-    $img //= eval { $pr->get_image($elt) };
+    my $id = $elt->{id};
+    my $opts = { %{$assets->{$id}->{opts}//{}}, %{$elt->{opts}//{}} };
+    my $img = $assets->{$id}->{data};
+    my $label = $opts->{label};
+    my $width = $opts->{width};
+    my $height = $opts->{height};
+    my $avwidth  = $assets->{$id}->{vwidth};
+    my $avheight = $assets->{$id}->{vheight};
     unless ( $img ) {
-	warn($@);
-	return "Unhandled image type: " . $elt->{uri};
+	return "Unhandled image type: asset=$id";
+    }
+    if ( $assets->{$id}->{multi} ) {
+	$elt->{multi} = $assets->{$id}->{multi};
+    }
+    if ( $elt->{msel} ) {
+	for ( $assets->{$id}->{multi}->[$elt->{msel}] ) {
+	    $img = $_->{xo};
+	    # Take vwidth/vheight from subimage.
+	    $avwidth  = $_->{vwidth};
+	    $avheight = $_->{vheight};
+	}
+	$width = $height = 0;
+	$label = "";
     }
 
     # Available width and height.
@@ -2292,18 +1869,28 @@ sub imageline {
     else {
 	$pw = $ps->{__rightmargin} - $ps->{_leftmargin};
     }
+    $pw -= $ps->{_indent};
     my $ph = $ps->{_margintop} - $ps->{_marginbottom};
 
-    if ( $opts->{width} && $opts->{width} =~ /^(\d+(?:\.\d+)?)\%$/ ) {
-	$opts->{width} = $1/100 * $pw;
+    if ( $width && $width =~ /^(\d+(?:\.\d+)?)\%$/ ) {
+	$width  = $1/100 * $pw;
     }
-    if ( $opts->{height} && $opts->{height} =~ /^(\d+(?:\.\d+)?)\%$/ ) {
-	$opts->{height} = $1/100 * $ph;
+    if ( $height && $height =~ /^(\d+(?:\.\d+)?)\%$/ ) {
+	$height = $1/100 * $ph;
     }
 
     my $scale = 1;
-    my ( $w, $h ) = ( $opts->{width}  || $img->width,
-		      $opts->{height} || $img->height );
+    my ( $w, $h ) = ( $width  || $avwidth  || $img->width,
+		      $height || $avheight || $img->height );
+
+    # Scale proportionally if width xor height was explicitly requested.
+    if ( $width && !$height ) {
+	$h = $width / ($avwidth || $img->width) * ($avheight || $img->height);
+    }
+    elsif ( !$width && $height ) {
+	$w = $height / ($avheight || $img->height) * ($avwidth || $img->width);
+    }
+
 
   if ( $config->{debug}->{x1} ) {
 
@@ -2330,7 +1917,7 @@ sub imageline {
 	$scale = $ph / $h;
     }
     if ( $opts->{scale} ) {
-	$scale *= $opts->{scale};
+	$scale *= $opts->{scale} =~ /^(\d+(?:\.\d+)?)\%$/ ? $1/100 : $opts->{scale};
     }
 
   }
@@ -2338,22 +1925,33 @@ sub imageline {
     warn("Image scale: $scale\n") if $config->{debug}->{images};
     $h *= $scale;
     $w *= $scale;
-    if ( $opts->{center} ) {
-	$x += ($pw - $w) / 2;
-	warn("Image center: $_[1] -> $x\n") if $config->{debug}->{images};
-    }
-
-    my $y = $gety->($h);	# may have been changed by checkspace
-    if ( defined ( my $tag = $i_tag // $opts->{label} ) ) {
-	$i_tag = undef;
-    	my $ftext = $ps->{fonts}->{comment};
-	my $ytext  = $y - font_bl($ftext);
-	prlabel( $ps, $tag, $x, $ytext );
-    }
 
     my $anchor = $opts->{anchor} //= "float";
     my $ox = $opts->{x};
     my $oy = $opts->{y};
+
+    my $align;
+    if ( $anchor eq "float" ) {
+	$align = $opts->{align};
+	$align //= ( $opts->{center} // 1 ) ? "center" : "left";
+	# Note that image is placed aligned on $x.
+	if ( $align eq "center" ) {
+	    $x += ($pw - $ps->{_indent}) / 2;
+	}
+	elsif ( $align eq "right" ) {
+	    $x += $pw - $ps->{_indent};
+	}
+	warn("Image $align: $_[1] -> $x\n") if $config->{debug}->{images};
+    }
+    $align //= "left";
+
+    my $y = $gety->($h);	# may have been changed by checkspace
+    if ( defined ( my $tag = $i_tag // $label ) ) {
+	$i_tag = $tag;
+    	my $ftext = $ps->{fonts}->{comment};
+	my $ytext  = $y - font_bl($ftext);
+	pr_label_maybe( $ps, $x0, $ytext );
+    }
 
     my $calc = sub {
 	my ( $l, $r, $t, $b, $mirror ) = @_;
@@ -2395,26 +1993,20 @@ sub imageline {
 
     $x += $ox if defined $ox;
     $y -= $oy if defined $oy;
-    if ( ref($img) eq "placeholder" ) {
-	warn( sprintf("add_chord %s %.1f %.1f %.1f %.1f (%s x%+.1f y%+.1f)\n",
-		      $img->name, $x, $y, $w, $h,
-		      $anchor,
-		      $ox//0, $oy//0
-		     )) if $config->{debug}->{images};
-	local $ps->{diagrams}->{width} = $ps->{diagrams}->{width} * $scale;
-	local $ps->{diagrams}->{height} = $ps->{diagrams}->{height} * $scale;
-	$ps->{dd}->draw( $ps->{_s}->{chordsinfo}->{$img->name}, $x, $y, $ps );
-    }
-    else {
-	warn( sprintf("add_image %.1f %.1f %.1f %.1f (%s x%+.1f y%+.1f)\n",
-		      $x, $y, $w, $h,
-		      $anchor,
-		      $ox//0, $oy//0
-		     )) if $config->{debug}->{images};
+    warn( sprintf("add_image x=%.1f y=%.1f w=%.1f h=%.1f (%s x%+.1f y%+.1f) %s\n",
+		  $x, $y, $w, $h,
+		  $anchor,
+		  $ox//0, $oy//0, $align,
+		 )) if $config->{debug}->{images};
 
-	$pr->add_image( $img, $x, $y, $w, $h, $opts->{border} || 0 );
-    }
-    warn("done\n") if $config->{debug}->{images};
+#	$pr->add_image( $img, $x, $y, $w, $h, $opts->{border} || 0 );
+    $pr->add_object( $img, $x-2, $y,
+		     xscale => $w/$img->width,
+		     yscale => $h/$img->height,
+		     border => $opts->{border} || 0,
+		     valign => "top",
+		     align  => $align,
+		   );
 
     if ( $anchor eq "float" ) {
 	return $h + ($oy//0);
@@ -2424,24 +2016,16 @@ sub imageline {
 
 sub imagespread {
     my ( $elt, $x, $y, $ps ) = @_;
-
+    ::dump($elt);
     my $opts = $elt->{opts};
     my $pr = $ps->{pr};
 
-    if ( $elt->{uri} =~ /^id=(.+)/ ) {
-	return "Unknown asset: id=$1"
-	  unless exists( $assets->{$1} );
-    }
-    elsif ( ! -s $elt->{uri} ) {
-	return "$!: " . $elt->{uri};
-    }
-
-    warn("get_image ", $elt->{uri}, "\n") if $config->{debug}->{images};
-    my $img = eval { $pr->get_image($elt) };
-    unless ( $img ) {
-	warn($@);
-	return "Unhandled image type: " . $elt->{uri};
-    }
+    my $tag = "id=" . $elt->{opts}->{id};
+    return "Unknown asset: $tag"
+      unless exists( $assets->{$elt->{opts}->{id}} );
+    my $img = $assets->{$elt->{opts}->{id}}->{data};
+    return "Unhandled asset: $tag"
+      unless $img;
 
     # Available width and height.
     my $pw = $ps->{__rightmargin} - $ps->{_leftmargin};
@@ -2450,6 +2034,10 @@ sub imagespread {
     my $scale = 1;
     my ( $w, $h ) = ( $opts->{width}  || $img->width,
 		      $opts->{height} || $img->height );
+
+  if ( $config->{debug}->{x1} ) {
+
+    # Current approach: user scale overrides.
     if ( defined $opts->{scale} ) {
 	$scale = $opts->{scale} || 1;
     }
@@ -2461,24 +2049,46 @@ sub imagespread {
 	    $scale = $ph / $h;
 	}
     }
+  }
+  else {
+
+    # Better, but may break things.
+    if ( $w > $pw ) {
+	$scale = $pw / $w;
+    }
+    if ( $h*$scale > $ph ) {
+	$scale = $ph / $h;
+    }
+    if ( $opts->{scale} ) {
+	$scale *= $opts->{scale};
+    }
+
+  }
+
     warn("Image scale: $scale\n") if $config->{debug}->{images};
     $h *= $scale;
     $w *= $scale;
-    if ( $opts->{center} ) {
-	$x += ($pw - $w) / 2;
-	warn("Image center: $_[1] -> $x\n") if $config->{debug}->{images};
-    }
 
-    if ( defined ( my $tag = $i_tag // $opts->{label} ) ) {
-	$i_tag = undef;
-    	my $ftext = $ps->{fonts}->{comment};
-	my $ytext  = $y - font_bl($ftext);
-	prlabel( $ps, $tag, $x, $ytext );
+    my $align = $opts->{align};
+    $align //= ( $opts->{center} // 1 ) ? "center" : "left";
+    # Note that image is placed aligned on $x.
+    if ( $align eq "center" ) {
+	$x += $pw / 2;
     }
+    elsif ( $align eq "right" ) {
+	$x += $pw;
+    }
+    warn("Image $align: $_[1] -> $x\n") if $config->{debug}->{images};
 
     warn("add_image\n") if $config->{debug}->{images};
-    $pr->add_image( $img, $x, $y, $w, $h, $opts->{border} || 0 );
-    warn("done\n") if $config->{debug}->{images};
+    # $pr->add_image( $img, $x, $y, $w, $h, $opts->{border} || 0 );
+    $pr->add_object( $img, $x, $y,
+		     xscale => $w/$img->width,
+		     yscale => $h/$img->height,
+		     border => $opts->{border} || 0,
+		     valign => "top",
+		     align  => $align,
+		   );
 
     return $h + $elt->{opts}->{spread};			# vertical size
 }
@@ -2953,6 +2563,8 @@ sub wrap {
     my @rchords;
     my @rphrases;
     my $m = $pr->{ps}->{__rightmargin};
+    my $wi = $pr->strwidth( $config->{settings}->{wrapindent}//"x",
+			    $pr->{ps}->{fonts}->{text} );
     #warn("WRAP x=$x rm=$m w=", $m - $x, "\n");
 
     while ( @chords ) {
@@ -3009,14 +2621,14 @@ sub wrap {
 	    unshift( @phrases, $ex );
 	    push( @$res,
 		  { %$elt, chords => [@rchords], phrases => [@rphrases] } );
-	    $x = $_[2] + $pr->strwidth("x");
-	    $res->[-1]->{indent} = $pr->strwidth("x") if @$res > 1;
+	    $x = $_[2] + $wi;;
+	    $res->[-1]->{indent} = $wi if @$res > 1;
 	    @rchords = ();
 	    @rphrases = ();
 	}
     }
     push( @$res, { %$elt, chords => \@rchords, phrases => \@rphrases } );
-    $res->[-1]->{indent} = $pr->strwidth("x") if @$res > 1;
+    $res->[-1]->{indent} = $wi if @$res > 1;
     return $res;
 }
 
@@ -3028,6 +2640,222 @@ sub wrapsimple {
     $pr->setfont($font);
     $pr->wrap( $text, $pr->{ps}->{__rightmargin} - $x );
 }
+
+sub prepare_assets {
+    my ( $s, $pr ) = @_;
+
+    my %sa = %{$s->{assets}//{}};	# song assets
+
+    # All elements generate zero or one display items, except for SVG images
+    # than can result in a series of display items.
+    # So we first scan the list for SVG and delegate items and turn these
+    # into simple display items.
+
+    my $pw = $ps->{__rightmargin} - $ps->{__leftmargin}
+      - $ps->{_indent};
+    my $cw = ( $pw - ( $ps->{columns} - 1 ) * $ps->{columnspace} ) /$ps->{columns};
+    warn("PDF: Preparing ", scalar(keys %sa), " image",
+	 keys(%sa) == 1 ? "" : "s", ", pw=$pw, cw=$cw\n")
+      if $config->{debug}->{images} || $config->{debug}->{assets};
+    for my $id ( sort keys %sa ) {
+	my $elt = $sa{$id};
+
+	$elt->{subtype} //= "image" if $elt->{uri};
+
+	if ( $elt->{type} eq "image" && $elt->{subtype} eq "delegate" ) {
+	    my $delegate = $elt->{delegate};
+	    warn("PDF: Preparing delegate $delegate, handler ",
+		 $elt->{handler}, "\n") if $config->{debug}->{images};
+
+	    my $pkg = __PACKAGE__;
+	    $pkg =~ s/::Output::[:\w]+$/::Delegate::$delegate/;
+	    eval "require $pkg" || die($@);
+	    my $hd = $pkg->can($elt->{handler}) //
+	      die("PDF: Missing delegate handler ${pkg}::$elt->{handler}\n");
+	    unless ( $elt->{data} ) {
+		$elt->{data} = [ loadlines($elt->{uri}) ];
+	    }
+
+	    # Determine actual width.
+	    my $w = defined($elt->{opts}->{spread}) ? $pw : $cw;
+#	    $w -= $ps->{_indent};
+	    $w = $elt->{opts}->{width}
+	      if $elt->{opts}->{width} && $elt->{opts}->{width} < $w;
+
+	    my $res = $hd->( $s, $w, $elt );
+	    if ( $res ) {
+		warn( "PDF: Preparing delegate $delegate, handler ",
+		      $elt->{handler}, " => ",
+		      $res->{type}, "/", $res->{subtype}, "\n" )
+		  if $config->{debug}->{images};
+		$res->{opts} = { %{ $res->{opts}   // {} },
+				 %{ $elt->{opts} // {} } };
+		$s->{assets}->{$id} = $res;
+	    }
+
+	    # If the delegate produced an SVG, continue processing.
+	    if ( $res && $res->{type} eq "image" && $res->{subtype} eq "svg" ) {
+		$elt = $res;
+	    }
+	    else {
+		# Proceed to next asset.
+		next;
+	    }
+	}
+
+	if ( $elt->{type} eq "image" && $elt->{subtype} eq "svg" ) {
+	    warn("PDF: Preparing SVG image\n") if $config->{debug}->{images};
+	    require SVGPDF;
+	    SVGPDF->VERSION(0.080);
+
+	    # One or more?
+	    my $combine = ( !($elt->{opts}->{split}//1)
+			    || $elt->{opts}->{id}
+			    || defined($elt->{opts}->{spread}) )
+	      ? "stacked" : "none";
+	    my $sep = $elt->{opts}->{staffsep} || 0;
+
+	    # Note we need special font and text handlers.
+	    my $p = SVGPDF->new
+	      ( pdf  => $ps->{pr}->{pdf},
+		fc   => sub { svg_fonthandler( $ps, @_ ) },
+		tc   => sub { svg_texthandler( $ps, @_ ) },
+		atts => { debug   => $config->{debug}->{svg} > 1,
+			  verbose => $config->{debug}->{svg},
+			} );
+	    my $data = $elt->{data};
+	    my $o = $p->process( $data ? \join( "\n", @$data ) : $elt->{uri},
+				 combine => $combine,
+				 sep     => $sep,
+			       );
+	    warn( "PDF: Preparing SVG image => ", 0+@$o, " element",
+		  @$o == 1 ? "" : "s", ", combine=$combine\n")
+	      if $config->{debug}->{images};
+	    if ( ! @$o ) {
+		warn("Error in SVG embedding (no SVG objects found)\n");
+		next;
+	    }
+
+	    my $res =
+	    $s->{assets}->{$id} = {
+			type     => "image",
+			subtype  => "xform",
+			width    => $o->[0]->{width},
+			height   => $o->[0]->{height},
+			vwidth   => $o->[0]->{vwidth},
+			vheight  => $o->[0]->{vheight},
+			data     => $o->[0]->{xo},
+			opts     => { %{ $o->[0]->{opts}  // {} },
+				      %{ $s->{assets}->{$id}->{opts} // {} },
+				    },
+			sep      => $sep,
+		      };
+	    if ( @$o > 1 ) {
+		$res->{multi} = $o;
+	    }
+
+	    warn("Created asset $id (xform, ",
+		 $o->[0]->{vwidth}, "x", $o->[0]->{vheight}, ")",
+		 " scale=", $res->{opts}->{scale} || 1,
+		 " align=", $res->{opts}->{align}//"default",
+		 " sep=", $sep,
+		 "\n")
+	      if $config->{debug}->{images};
+	    next;
+	}
+
+	if ( $elt->{type} eq "image" ) {
+	    warn("PDF: Preparing $elt->{subtype} image\n") if $config->{debug}->{images};
+	    if ( ($elt->{uri}//"") =~ /^chord:(.+)/ ) {
+		my $chord = $1;
+		# Look it up.
+		my $info = $s->{chordsinfo}->{$chord}
+		  // ChordPro::Chords::known_chord($chord);
+		# If it is defined locally, merge.
+		for my $def ( @{ $s->{define} // [] } ) {
+		    next unless $def->{name} eq $chord;
+		    $info->{$_} = $def->{$_} for keys(%$def);
+		}
+		my $xo;
+		unless ( $info ) {
+		    warn("Unknown chord in asset: $1\n");
+		    $xo = TextLayoutImageElement::alert(20);
+		}
+		else {
+		    my $type = $elt->{opts}->{type} || $config->{instrument}->{type};
+		    my $p;
+		    if ( $type eq "keyboard" ) {
+			require ChordPro::Output::PDF::KeyboardDiagram;
+			$p = ChordPro::Output::PDF::KeyboardDiagram->new( ps => $ps );
+		    }
+		    else {
+			require ChordPro::Output::PDF::StringDiagram;
+			$p = ChordPro::Output::PDF::StringDiagram->new( ps => $ps );
+		    }
+		    $xo = $p->diagram_xo($info);
+		}
+		my $res =
+		  $s->{assets}->{$id} = {
+					 type     => "image",
+					 subtype  => "xform",
+					 width    => $xo->width,
+					 height   => $xo->height,
+					 data     => $xo,
+					 maybe opts => $s->{assets}->{$id}->{opts},
+					};
+		warn("Created asset $id ($elt->{subtype}, ",
+		     $res->{width}, "x", $res->{height}, ")",
+		     map { " $_=" . $res->{opts}->{$_} } keys( %{$res->{opts}//{}} ),
+		     "\n")
+		  if $config->{debug}->{images};
+	    }
+	    else {
+		if ( $elt->{uri} && !$elt->{data} ) {
+		    $elt->{data} = loadblob($elt->{uri});
+		}
+		my $data = $elt->{data} ? IO::String->new($elt->{data}) : $elt->{uri};
+		my $img = $pr->{pdf}->image($data);
+		my $subtype = lc(ref($img) =~ s/^.*://r);
+		$subtype = "jpg" if $subtype eq "jpeg";
+		my $res =
+		  $s->{assets}->{$id} = {
+					 type     => "image",
+					 subtype  => $subtype,
+					 width    => $img->width,
+					 height   => $img->height,
+					 data     => $img,
+					 maybe opts => $s->{assets}->{$id}->{opts},
+					};
+		warn("Created asset $id ($elt->{subtype}, ",
+		     $res->{width}, "x", $res->{height}, ")",
+		     map { " $_=" . $res->{opts}->{$_} } keys( %{$res->{opts}//{}} ),
+		     "\n")
+		  if $config->{debug}->{images};
+	    }
+	}
+
+	next;
+
+	if ( $elt->{type} eq "image" && $elt->{opts}->{spread} ) {
+	    if ( $s->{spreadimage} ) {
+		warn("Ignoring superfluous spread image\n");
+	    }
+	    else {
+		$s->{spreadimage} = $elt;
+		warn("PDF: Preparing images, got spread image\n")
+		  if $config->{debug}->{images};
+		next;		# do not copy back
+	    }
+	}
+
+    }
+    warn("PDF: Preparing images, done\n")
+      if $config->{debug}->{images} || $config->{debug}->{assets};
+    $assets = $s->{assets} || {};
+    ::dump( $assets, as => "Assets, Pass 2" )
+      if $config->{debug}->{assets} & 0x02;
+}
+
 
 my %corefonts =
   (
@@ -3072,12 +2900,21 @@ sub is_corefont {
 sub svg_fonthandler {
     my ( $ps, $el, $pdf, $style ) = @_;
 
-    my $family = $style->{'font-family'};
-    my $stl    = $style->{'font-style'}   // "normal";
-    my $weight = $style->{'font-weight'}  // "normal";
-    my $size   = $style->{'font-size'}    || 12;
-    my $key    = join( "|", $family, $stl, $weight );
+    my $family = lc( $style->{'font-family'} );
+    my $stl    = lc( $style->{'font-style'}  // "normal" );
+    my $weight = lc( $style->{'font-weight'} // "normal" );
+    my $size   = $style->{'font-size'}       || 12;
+
+    # Font cache.
     state $fc  = {};
+    my $key    = join( "|", $family, $stl, $weight );
+
+    # Clear cache when the PDF changes.
+    state $cf  = "";
+    if ( $cf ne $ps->{pr}->{pdf} ) {
+	$cf = $ps->{pr}->{pdf};
+	$fc = {};
+    }
 
     # As a special case we handle fonts with 'names' like
     # pdf.font.foo and map these to the corresponding font
@@ -3173,18 +3010,106 @@ sub _dump {
     }
 }
 
-package placeholder;
-sub new {
-    my $class = shift;
-    my $self = {};
-    $self->{name} = shift;
-    $self->{w} = shift;
-    $self->{h} = shift;
-    bless $self => $class;
+use Object::Pad;
+
+class TextLayoutImageElement :isa(Text::Layout::PDFAPI2::ImageElement);
+
+use constant TYPE => "img";
+use Carp;
+
+use Text::ParseWords qw( shellwords );
+
+method parse( $ctx, $k, $v ) {
+
+    my %ctl = ( type => TYPE, size => $ctx->{size} );
+
+    # Split the attributes.
+    foreach my $kk ( shellwords($v) ) {
+
+	# key=value
+	if ( $kk =~ /^([-\w]+)=(.+)$/ ) {
+	    my ( $k, $v ) = ( $1, $2 );
+
+	    # Ignore case unless required.
+	    $v = lc $v unless $k =~ /^(id|chord)$/;
+
+	    if ( $k =~ /^(id|bbox|chord|src)$/ ) {
+		$ctl{$k} = $v;
+	    }
+	    elsif ( $k eq "align" && $v =~ /^(left|right|center)$/ ) {
+		$ctl{$k} = $v;
+	    }
+	    elsif ( $k eq "type" && $v =~ /^(strings?|keyboard)$/ ) {
+		$ctl{instrument} = $v;
+	    }
+	    elsif ( $k =~ /^(width|height|dx|dy|w|h)$/ ) {
+		$v = $1 * $ctx->{size}       if $v =~ /^(-?[\d.]+)em$/;
+		$v = $1 * $ctx->{size} / 2   if $v =~ /^(-?[\d.]+)ex$/;
+		$v = $1 * $ctx->{size} / 100 if $v =~ /^(-?[\d.]+)\%$/;
+		$ctl{$k} = $v;
+	    }
+	    elsif ( $k =~ /^(scale)$/ ) {
+		$v = $1 / 100 if $v =~ /^([\d.]+)\%$/;
+		$ctl{$k} = $v;
+	    }
+	    else {
+		carp("Invalid " . TYPE . " attribute: \"$k\" ($kk)\n");
+	    }
+	}
+
+	# Currently we do not have value-less attributes.
+	else {
+	    carp("Invalid " . TYPE . " attribute: \"$kk\"\n");
+	}
+    }
+
+    return \%ctl;
 }
-sub name   { $_[0]->{name} }
-sub width  { $_[0]->{w} }
-sub height { $_[0]->{h} }
+
+method getimage ($fragment) {
+    $fragment->{_img} //= do {
+	my $xo;
+	if ( $fragment->{id} ) {
+	    $xo = ChordPro::Output::PDF::assets($fragment->{id})->{data};
+	    unless ( $xo ) {
+		warn("Unknown image ID in <img>: $fragment->{id}\n");
+	    }
+	}
+	elsif ( $fragment->{chord} ) {
+	    my $info = ChordPro::Chords::known_chord($fragment->{chord});
+	    unless ( $info ) {
+		warn("Unknown chord in <img>: $fragment->{chord}\n");
+	    }
+	    else {
+		my $p;
+		if ( ($fragment->{instrument} // $config->{instrument}->{type}) eq "keyboard" ) {
+		    require ChordPro::Output::PDF::KeyboardDiagram;
+		    $p = ChordPro::Output::PDF::KeyboardDiagram->new( ps => $ps );
+		}
+		else {
+		    require ChordPro::Output::PDF::StringDiagram;
+		    $p = ChordPro::Output::PDF::StringDiagram->new( ps => $ps );
+		}
+		$xo = $p->diagram_xo($info);
+	    }
+	}
+	$xo // $self->SUPER::getimage($fragment) // alert( $fragment->{size} );
+    };
+}
+
+sub alert ($size) {
+    my $scale = $size/20;
+    my $xo = $ps->{pr}->{pdf}->xo_form;
+    $xo->bbox( 0, -18*$scale, 20*$scale, 0 );
+    $xo->matrix( $scale, 0, 0, -$scale, 0, 0 );
+    $xo->line_width(2)->line_join(1);
+    $xo->stroke_color("red");
+    $xo->fill_color("red");
+    $xo->move( 1, 17 )->polyline( 19, 17, 10, 1 )->close->stroke;
+    $xo->rectangle( 9, 13, 11, 15 );
+    $xo->move( 9, 12 )->polyline( 8.5, 7, 11.5, 7, 11, 12 )->close->fill;
+    return $xo;
+}
 
 1;
 

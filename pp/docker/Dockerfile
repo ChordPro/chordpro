@@ -25,24 +25,35 @@ RUN apt-get install --no-install-recommends -y \
     libpdf-api2-perl \
     libobject-pad-perl \
     libimage-info-perl \
-    abcm2ps \
-    imagemagick \
-    librsvg2-bin \
-    libimage-magick-perl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Perl modules from CPAN.
 RUN cpanm \
+    JavaScript::QuickJS \
     File::LoadLines \
     String::Interpolate::Named \
     HarfBuzz::Shaper \
-    Text::Layout
+    Text::Layout \
+    Data::Printer
 
-FROM base
-
-# Add ChordPro
+FROM base AS chordpro-prod
 RUN cpanm chordpro
+
+# Cleanup.
+RUN rm -fr .cpanminus
+
+# Setup for run-time
+ENV DOCKER_PACKAGED=1.00
+RUN chordpro --about
+
+FROM base AS chordpro-dev
+COPY chordpro-dev.tar.gz abc2svg_qjs.tar.gz ./
+RUN mkdir ChordPro \
+  && tar xf chordpro-dev.tar.gz -C ChordPro \
+  && cd ChordPro \
+  && perl Makefile.PL \
+  && make && make install
 
 # Cleanup.
 RUN rm -fr .cpanminus

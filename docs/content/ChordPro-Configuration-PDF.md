@@ -159,6 +159,10 @@ but only if labels are actually used.
 
 `align` will control how the labels are aligned in the margin.
 
+The appearance of the label text can be set in the [fonts]( {{< relref
+"#fonts" >}}).
+It defaults to the text (lyrics) font and size.
+
 {{< showpage "page_labels" >}}
 
 ## Chorus style

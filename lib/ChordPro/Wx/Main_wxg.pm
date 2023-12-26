@@ -15,7 +15,7 @@ use Wx::Locale gettext => '_T';
 package ChordPro::Wx::Main_wxg;
 
 use Wx qw[:everything];
-use base qw(Wx::Frame);
+use parent -norequire, qw(Wx::Frame);
 use strict;
 
 # begin wxGlade: dependencies

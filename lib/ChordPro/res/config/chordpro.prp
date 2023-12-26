@@ -1,16 +1,20 @@
 # Configuration for ChordPro.
 
+# Do not remove or change this one.
+meta._configversion = [ 6.031 ]
+
 # Includes. These are processed first, before the rest of
 # the config file.
 #
-# "include" takes a list of either filenames or preset names.
+# Takes a list of either filenames or preset names.
+# E.g. include = [ modern1 lib/mycfg.json ]
 include = [ guitar ]
 
-# General settings, to be changed by configs and command line.
+# General settings, often changed by configs and command line.
 settings {
   # Strict behaviour.
   strict = true
-  # Add line info for backend diagnostics.
+  # Obsolete -- lineinfo is always included.
   lineinfo = true
   # Titles flush: default center.
   titles = center
@@ -28,14 +32,18 @@ settings {
   memorize = false
   # Chords inline.
   # May be a string containing pretext %s posttext.
-  # Defaults to "[%s]" if true.
+  # Defaults to "[%s]" if set to a value that doesn't contain "%s".
   inline-chords = false
+  # Same, for annotations. Ignored unless inline-chords is set.
+  # Must be a string containing pretext %s posttext.
+  # Default is "%s".
+  inline-annotations = %s
   # Chords under the lyrics.
   chords-under = false
-  # Transcoding.
-  transcode = ""
   # Transposing.
   transpose = 0
+  # Transcoding.
+  transcode = ""
   # Always decapoize.
   decapo = false
   # Chords parsing strategy.
@@ -43,6 +51,17 @@ settings {
   chordnames = strict
   # Allow note names in [].
   notenames = false
+  # Always replace chords by their canonical form.
+  chords-canonical = false
+  # If false, chorus labels are used as tags.
+  choruslabels = true
+  # Substitute Unicode sharp/flats in chord names.
+  # Will fallback to ChordProSymbols the font doesn't have the glyphs.
+  truesf = false
+  # Amount of indent for wrapped lines. Actual indent is the stringwidth.
+  wrapindent = x
+  # Flow text. Do not use.
+  flowtext = false
 }
 
 # Metadata.
@@ -51,21 +70,120 @@ settings {
 # If strict is zero, {meta ...} will accept any key.
 # Important: "title" and "subtitle" must always be in this list.
 # The separator is used to concatenate multiple values.
+# If autosplit is true, the separator is also used to split
+# values upon input.
 metadata {
-  keys = [ title subtitle artist composer lyricist arranger
-         album copyright year sorttitle key
-	 time tempo capo duration
+  keys = [ title subtitle
+           artist composer lyricist arranger
+           album copyright year
+           sorttitle
+           key time tempo capo duration
   ]
   strict = true
   separator = "; "
+  autosplit = true
+}
+# Globally defined (added) meta data.
+# This is explicitly NOT intended for the metadata items above.
+meta {
+}
+
+# Assets.
+assets {
+}
+
+# Dates. Format is a strftime template.
+dates {
+    today {
+        format = "%A, %B %e, %Y"
+    }
+}
+
+# User settings. These are usually set by a separate config file.
+#
+user {
+    name = ""
+    fullname = ""
+}
+
+# Instrument settings. These are usually set by a separate
+# config file.
+#
+instrument {
+    type = ""
+    description = ""
+}
+
+# Note (chord root) names.
+# Strings and tuning.
+tuning = [ E2 A2 D3 G3 B3 E4 ]
+
+# In case of alternatives, the first one is used for output.
+# Note that it is tempting to use real sharps and flats for output,
+# but most fonts don't have the glyphs :(.
+notes {
+  flat = [
+         C
+         [ Db Des D♭ ]
+         D
+         [ Eb Es Ees E♭ ]
+         E
+         F
+         [ Gb Ges G♭ ]
+         G
+         [ Ab As Aes A♭ ]
+         A
+         [ Bb Bes B♭ ]
+         B
+  ]
+  sharp = [
+         C
+         [ C# Cis C♯ ]
+         D
+         [ D# Dis D♯ ]
+         E
+         F
+         [ F# Fis F♯ ]
+         G
+         [ G# Gis G♯ ]
+         A
+         [ A# Ais A♯ ]
+         B
+  ]
+  system = common
+  movable = false
+}
+
+# User defined chords.
+# "base" defaults to 1.
+# Use 0 for an empty string, and -1 for a muted string.
+# "fingers" is optional.
+# "display" (optional) can be used to change the way the chord is displayed. 
+chords = [ 
+  #  {
+  #    name  = Bb
+  #    base  = 1
+  #    frets = [ 1 1 3 3 3 1 ]
+  #    fingers = [ 1 1 2 3 4 1 ]
+  #    display = "B<sup>\x{266d}</sup>"
+  #  }
+  # If the name of the first entry is "defaults" its properties may
+  # be used as defaults for the rest of the chords.
+]
+
+# Format to show chord names. May contain markup.
+chord-formats {
+    common    = %{root|%{}%{qual|%{}}%{ext|%{}}%{bass|/%{}}|%{name}}
+    roman     = %{root|%{}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}
+    nashville = %{root|%{}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}
 }
 
 # Printing chord diagrams.
-# show= prints the chords used in the song.
-#         all= all chords used.
-#         user= only prints user defined chords.
-# sorted= order the chords by key.
-# suppress= a series of chord (names) that will not generate
+# show: prints the chords used in the song.
+#       all -- all chords used.
+#       user -- only prints user defined chords.
+# sorted: order the chords by key.
+# suppress: a series of chord (names) that will not generate
 #           diagrams, e.g. if they are considered trivial.
 diagrams {
     show     =  all
@@ -73,7 +191,7 @@ diagrams {
     suppress =  []
 }
 
-# Diagnostig messages.
+# Diagnostic messages.
 diagnostics {
     format = "\"%f\", line %n, %m\n\t%l"
 }
@@ -113,67 +231,87 @@ toc {
     title = Table of Contents
     line = %{title}
     # Sorting order.
+    # Currently only sorting by page number and alpha is implemented.
     order = page
 }
 
-# Intrument definitions.
+# Delegates.
+# Basically a delegate is a section {start_of_XXX} which content is
+# collected and handled later by the delegate module.
 
-instrument = ""
-tuning = [ E2 A2 D3 G3 B3 E4 ]
-notes {
-  flat = [
-         C
-         [ Db Des D♭ ]
-         D
-         [ Eb Es Ees E♭ ]
-         E
-         F
-         [ Gb Ges G♭ ]
-         G
-         [ Ab As Aes A♭ ]
-         A
-         [ Bb Bes B♭ ]
-         B
-  ]
-  sharp = [
-         C
-         [ C# Cis C♯ ]
-         D
-         [ D# Dis D♯ ]
-         E
-         F
-         [ F# Fis F♯ ]
-         G
-         [ G# Gis G♯ ]
-         A
-         [ A# Ais A♯ ]
-         B
-  ]
-  system = common
-  movable = false
+delegates {
+    abc {
+        type = image
+        module = ABC
+        handler = abc2svg
+        # No longer used -- ./default.abc will always be used if present
+        config = "default"
+        # The preamble is a list of lines inserted before the ABC data,
+        # and after the delegate supplied preamble.
+        # DO NOT MODIFY unless you know what you are doing!
+        preamble = [ 
+           # Use ChordPro fonts for lyrics and chords.
+           "%%textfont pdf.fonts.text"
+           "%%gchordfont pdf.fonts.chord"
+        ]
+        preprocess {
+	    abc = []
+	}
+        omit = false
+    }
+    ly {
+        type = image
+        module = Lilypond
+        handler = ly2svg
+        config = "default"
+        # The preamble is a list of lines inserted before the lilipond data.
+        # This is a good place to set the version and global customizations.
+        preamble = [ 
+            "\version "2.21.0""
+            "\header { tagline = ##f }"
+        ]
+        omit = false
+    }
+    svg {
+        type = image
+        module = SVG
+        handler = svg2svg
+        omit = false
+    }
 }
 
-chords = []
-
-# Layout definitions for PDF output.
+# Definitions for PDF output.
 
 pdf {
+
+  # Choose a PDF::API2 compatible library, or leave empty to
+  # have ChordPro choose one for you.
+  # Currently supported are "PDF::API2" and "PDF::Builder".
+  library = ""
+
+  # PDF Properties. Arbitrary key/values may be added.
+  # Note that the context for substitutions is the first song.
+  info {
+      title = %{title}
+      author = ""
+      subject = ""
+      keywords = ""
+    }
 
   # Papersize, 'a4' or [ 595, 842 ] etc.
   papersize = a4
 
   theme {
       # Forgeround color. Usually black.
-      foreground        : black
-      # Shades of grey
+      foreground = black
+      # Shades of grey.
       # medium is used for pressed keys in keyboard diagrams.
-      foreground-medium : grey70
+      foreground-medium = grey70
       # light is used as background for comments, cell bars, ...
-      foreground-light  : grey90
+      foreground-light = grey90
       # Background color. Usually none or white.
-      background        : none
+      background = none
   }
-
 
   # Space between columns, in pt.
   columnspace  =  20
@@ -197,6 +335,7 @@ pdf {
       title  = 1.2
       lyrics = 1.2
       chords = 1.2
+      diagramchords = 1.2
       grid   = 1.2
       tab    = 1
       toc    = 1.4
@@ -212,18 +351,18 @@ pdf {
       # Chorus side bar.
       # Suppress by setting offset and/or width to zero.
       bar {
-	  offset =  8
-	  width  =  1
-	  color  = foreground
+          offset =  8
+          width  =  1
+          color  = foreground
       }
       tag = Chorus
       # Recall style: Print the tag using the type.
       # Alternatively quote the lines of the preceding chorus.
       recall {
           choruslike = false
-	  tag        = Chorus
-	  type       = comment
-	  quote      = false
+          tag        = Chorus
+          type       = comment
+          quote      = false
       }
   }
 
@@ -235,7 +374,7 @@ pdf {
       # Alignment for the labels. Default is left.
       align = left
       # Alternatively, render labels as comments.
-      # "comment", "comment_italic" or "comment_box",
+      # Values are "comment", "comment_italic" or "comment_box".
       comment = ""
   }
 
@@ -269,6 +408,10 @@ pdf {
       vspace   =  3
       vcells   =  4
       linewidth = 0.1
+      barwidth  = 0.8
+      nutwidth  = 5
+      dotsize   = 0.8
+      fingers   = 1
   }
 
   # Keyboard diagrams.
@@ -287,7 +430,7 @@ pdf {
       keys     =  14
       base     =  C
       linewidth = 0.1
-      pressed  =  grey
+      pressed  =  foreground-medium
       hspace   =  3.95
       vspace   =  0.3
   }
@@ -297,15 +440,28 @@ pdf {
       # The width and colour of the cell bar lines can be specified.
       # Suppress the cell bar lines by setting width to 0.
       cellbar {
-          width = 1
+          width = 0
           color = foreground-medium
-       }
+      }
+      show = 1
+      symbols {
+          color = 'blue'
+      }
+      volta {
+          color = 'blue'
+          span  = 0.7
+      }
   }
 
   # Even/odd pages. A value of -1 denotes odd/even pages.
   even-odd-pages = 1
   # Align songs to even/odd pages. When greater than 1, force alignment.
   pagealign-songs = 1
+
+  # PDF file to add as front matter.
+  front-matter = ""
+  # PDF file to add as back matter.
+  back-matter = ""
 
   # Formats.
   formats {
@@ -317,25 +473,28 @@ pdf {
 
       # By default, a page has:
       default {
-	  # No title/subtitle.
-	  title     = [ "" "" "" ]
-	  subtitle  = [ "" "" "" ]
-	  # Footer is title -- page number.
-	  footer    = [ %{title} "" %{page} ]
+          # No title/subtitle.
+          title     = [ "" "" "" ]
+          subtitle  = [ "" "" "" ]
+          # Footer is title -- page number.
+          footer    = [ %{title} "" %{page} ]
+	  background = ""
       }
       # The first page of a song has:
       title {
-	  # Title and subtitle.
-	  title     = [ "" %{title} "" ]
-	  subtitle  = [ "" %{subtitle} "" ]
-	  # Footer with page number.
-	  footer    = [ "" "" %{page} ]
+          # Title and subtitle.
+          title     = [ "" %{title} "" ]
+          subtitle  = [ "" %{subtitle} "" ]
+          # Footer with page number.
+          footer    = [ "" "" %{page} ]
+	  background = ""
       }
       # The very first output page is slightly different:
       first {
-	  # It has title and subtitle, like normal 'first' pages.
-	  # But no footer.
-	  footer    = [ "" "" "" ]
+          # It has title and subtitle, like normal 'first' pages.
+          # But no footer.
+          footer    = [ "" "" "" ]
+	  background = ""
       }
   }
 
@@ -362,26 +521,26 @@ pdf {
       # alternatives: bold b strong
       # alternatives: italic i oblique o emphasis
       # alternatives: bolditalic bi italicbold ib boldoblique bo obliquebold ob
-      times {
-	  ''	      = Times-Roman
-	  bold        = Times-Bold
-	  italic      = Times-Italic
-	  bolditalic  = Times-BoldItalic
+      "times, serif" {
+          ''          = Times-Roman
+          bold        = Times-Bold
+          italic      = Times-Italic
+          bolditalic  = Times-BoldItalic
       }
-      helvetica {
-	  ''	      = Helvetica
-	  bold        = Helvetica-Bold
-	  oblique     = Helvetica-Oblique
-	  boldoblique = Helvetica-BoldOblique
+      "helvetica, sans, sans-serif" {
+          ''          = Helvetica
+          bold        = Helvetica-Bold
+          oblique     = Helvetica-Oblique
+          boldoblique = Helvetica-BoldOblique
       }
-      courier {
-	  ''	      = Courier
-	  bold        = Courier-Bold
-	  italic      = Courier-Italic
-	  bolditalic  = Courier-BoldItalic
+      "courier, mono, monospace" {
+          ''          = Courier
+          bold        = Courier-Bold
+          italic      = Courier-Italic
+          bolditalic  = Courier-BoldItalic
       }
       dingbats {
-	  ""	      = ZapfDingbats
+          ""          = ZapfDingbats
       }
   }
 
@@ -394,47 +553,46 @@ pdf {
 
   fonts {
       title {
-	  name = Times-Bold
-	  size = 14
+          name = Times-Bold
+          size = 14
       }
       text {
-	  name = Times-Roman
-	  size = 12
+          name = Times-Roman
+          size = 12
       }
       chord {
-	  name = Helvetica-Oblique
-	  size = 10
+          name = Helvetica-Oblique
+          size = 10
       }
       chordfingers {
-	  name = ZapfDingbats
-	  size = 10
-	  numbercolor = background
+          file = ChordProSymbols.ttf
+          numbercolor = background
       }
       comment {
-	  name = Helvetica
-	  size = 12
-	  background = foreground-light
+          name = Helvetica
+          size = 12
+          background = foreground-light
       }
       comment_italic {
-	  name = Helvetica-Oblique
-	  size = 12
+          name = Helvetica-Oblique
+          size = 12
       }
       comment_box {
-	  name = Helvetica
-	  size = 12
-	  frame = 1
+          name = Helvetica
+          size = 12
+          frame = 1
       }
       tab {
-	  name = Courier
-	  size = 10
+          name = Courier
+          size = 10
       }
       toc {
-	  name = Times-Roman
-	  size = 11
+          name = Times-Roman
+          size = 11
       }
       grid {
-	  name = Helvetica
-	  size = 10
+          name = Helvetica
+          size = 10
       }
   }
 
@@ -485,8 +643,92 @@ pdf {
 
 }
 
+# Settings for CSV (part of PDF).
+pdf.csv {
+    fields = [
+        {
+          meta = title
+          name = title
+        }
+        {
+          meta = pagerange
+          name = pages
+        }
+        {
+          meta = sorttitle
+          name = sort title
+        }
+        {
+          meta = artist
+          name = artists
+        }
+        {
+          meta = composer
+          name = composers
+        }
+        {
+          meta = collection
+          name = collections
+        }
+        {
+          meta = key_actual
+          name = keys
+        }
+        {
+          meta = year
+          name = years
+        }
+        {
+          name = my_field
+          omit = 1
+          value = text
+        }
+    ]
+    separator = ;
+    songsonly = 1
+    vseparator = |
+}
+
 # Settings for ChordPro backend.
 chordpro {
+    # Style of chorus.
+    chorus {
+        # Recall style: Print the tag using the type.
+        # Alternatively quote the lines of the preceding chorus.
+        # If no tag+type or quote: use {chorus}.
+        # Note: Variant 'msp' always uses {chorus}.
+        recall {
+             # tag   = Chorus
+             tag   = ""
+             # type  = comment
+             type  = ""
+             quote = false
+        }
+    }
+    comments = retain
+}
+
+# Settings for HTML backend.
+html {
+    # Stylesheet links.
+    styles {
+        display = chordpro.css
+        print   = chordpro_print.css
+    }
+}
+
+# Settings for LaTeX backend.
+latex {
+    template_include_path = []
+    templates {
+        comment  = comment.tt
+        image    = image.tt
+        songbook = songbook.tt
+    }
+}
+
+# Settings for Text backend.
+text {
     # Style of chorus.
     chorus {
 	# Recall style: Print the tag using the type.
@@ -494,67 +736,11 @@ chordpro {
 	# If no tag+type or quote: use {chorus}.
 	# Note: Variant 'msp' always uses {chorus}.
 	recall {
-	     # tag   = Chorus
-	     tag   = ""
-	     # type  = comment
-	     type  = ""
-	     quote = false
+	    # tag = Chorus / type = comment
+	    tag = ""
+	    type = ""
+	    quote = false
 	}
-    }
-}
-
-# Settings for CSV (part of PDF).
-pdf.csv {
-    fields = [
-        {
-	  meta = title
-	  name = title
-        }
-	{
-	  meta = pagerange
-	  name = pages
-        }
-	{
-	  meta = sorttitle
-	  name = sorttitles
-        }
-	{
-	  meta = artist
-	  name = artists
-        }
-	{
-	  meta = composer
-	  name = composers
-        }
-	{
-	  meta = collection
-	  name = collections
-        }
-	{
-	  meta = actual_key
-	  name = keys
-        }
-	{
-	  meta = year
-	  name = years
-        }
-	{
-	  name = my_field
-	  omit = 1
-	  value = text
-	}
-    ]
-    separator = ;
-    songsonly = 1
-    vseparator = |
-}
-
-# Settings for HTML backend.
-html {
-    # Stylesheet links.
-    styles {
-	display = chordpro.css
-	print   = chordpro_print.css
     }
 }
 
@@ -577,49 +763,39 @@ parser {
     preprocess {
         # All lines.
         all = []
-	# Directives.
-	directive = []
-	# Song lines (lyrics) only.
-	songline = []
+        # Directives.
+        directive = []
+        # Song lines (lyrics) only.
+        songline = []
     }
 }
 
-# Dates.
-dates {
-    today {
-        format = %A, %B %e, %Y
-    }
-}
-
-# Delegates.
-# Basically a delegate is a section {start_of_XXX} which content is
-# collected and handled later by the backend.
-
-delegates {
-    abc {
-	type    = image
-	handler = abc2image
-    }
-    ly {
-	type    = image
-	handler = ly2image
-    }
-}
 
 # For debugging (internal use only).
 debug {
-    abc		= false
-    config	= false
-    csv		= false
-    fonts	= false
-    images	= false
-    layout	= false
-    ly		= false
-    meta	= false
-    mma		= false
-    song	= false
-    songfull	= false
-    spacing	= false
+  a2crd        = 0
+  abc          = 0
+  assets       = 0
+  chords       = 0
+  config       = 0
+  csv          = 0
+  echo         = 0
+  fonts        = 0
+  images       = 0
+  layout       = 0
+  ly           = 0
+  meta         = 0
+  mma          = 0
+  ops          = 0
+  paths        = 0
+  song         = 0
+  songfull     = 0
+  spacing      = 0
+  svg          = 0
+  # For temporary use.
+  x1           = 0
+  x2           = 0
+  x3           = 0
 }
 
 # End of config.

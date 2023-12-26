@@ -39,17 +39,18 @@ WriteMakefile
 
  # Always require PDF::API2 or PDF::Builder and Text::Layout.
  PREREQ_PM      => {
-		    'App::Packager'		  => 1.430,
 		    @pdfapi,
-		    'Text::Layout'		  => 0.031,
+		    'Text::Layout'		  => 0.032,
 		    'JSON::PP'			  => 2.27203,
 		    'String::Interpolate::Named'  => 1.030,
-		    'File::LoadLines'		  => 1.021,
+		    'File::LoadLines'		  => 1.042,
 		    'File::HomeDir'		  => 1.004,
 		    'Image::Info'		  => 1.41,
 		    'List::Util'		  => 1.46,
+		    'Data::Printer'		  => 1.001001,
 		    'Storable'			  => 3.08,
 		    'Object::Pad'                 => 0.78,
+		    'JavaScript::QuickJS'         => 0.18,
 		   # Some distro's have removed this from the core.
 		    'Pod::Usage'		  => 2.03,
 		   # These are only used by the LaTeX backend

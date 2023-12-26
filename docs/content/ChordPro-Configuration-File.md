@@ -31,7 +31,7 @@ Layout doesn't matter, this document might as well have been written as:
 
     {"diagrams":{"show":"none"}}
 
-The ChordPro configuration file consists of two parts, all optional.
+The ChordPro configuration file consists of the following parts, all optional.
 
 * [The Generic Part]({{< relref "ChordPro-Configuration-Generic" >}})  
 Settings for the song parser and output backends.
@@ -44,6 +44,9 @@ Specific settings for HTML output.
 
 * [ChordPro Output]({{< relref "ChordPro-Configuration-ChordPro" >}})  
 Specific settings for ChordPro output.
+
+* [Delegate Configuration]({{< relref "ChordPro-Configuration-Delegates" >}})  
+Settings for _delegates_, e.g. ABC and Lilypond.
 
 * [ASCII text to ChordPro converter]({{< relref "ChordPro-Configuration-A2Crd" >}})  
 Settings for the ASCII text to ChordPro converter.

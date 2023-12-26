@@ -20,7 +20,7 @@ my $test;
 ++$test; ok( $] >= 5.026000,
 	     "Perl version $] is 5.026 or newer" );
 
-++$test; use_ok( "ChordPro::Testing", 6.000 );
+++$test; use_ok( "ChordPro::Testing" );
 
 if ( $pdfapi =~ /^pdf/i ) {
     ++$test; use_ok( "IO::String", 1.08  ); # for Font::TTF
@@ -33,19 +33,18 @@ else {
     ++$test; use_ok( $pdfapi,  $pdfapiv );
     diag("Using $pdfapi $pdfapiv for PDF generation");
 }
-++$test; use_ok( "Text::Layout",   0.031 );
+++$test; use_ok( "Text::Layout",   0.032 );
 eval {
     require HarfBuzz::Shaper;
     HarfBuzz::Shaper->VERSION(0.026);
     diag( "Shaping enabled (HarfBuzz::Shaper $HarfBuzz::Shaper::VERSION)" );
     1;
 } || diag( "Shaping disabled (HarfBuzz::Shaper not found)" );
-++$test; use_ok( "App::Packager",   1.430 );
 ++$test; use_ok( "JSON::PP",   2.27203 );
 ++$test; use_ok( "String::Interpolate::Named", 1.030 );
 ++$test; use_ok( "File::HomeDir", 1.004 );
-++$test; use_ok( "File::LoadLines", 1.021 );
-++$test; use_ok( "SVGPDF", 0.070 );
+++$test; use_ok( "File::LoadLines", 1.042 );
+++$test; use_ok( "SVGPDF", 0.080 );
 ++$test; use_ok( "Image::Info", 1.41 );
 ++$test; use_ok( "List::Util", 1.33 );
 ++$test; use_ok( "Storable", 3.08 );

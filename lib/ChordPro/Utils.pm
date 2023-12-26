@@ -7,8 +7,8 @@ use utf8;
 use Carp;
 use feature qw( signatures );
 no warnings "experimental::signatures";
-use parent qw(Exporter);
 
+use Exporter 'import';
 our @EXPORT;
 
 ################ Platforms ################
@@ -17,8 +17,9 @@ use constant MSWIN => $^O =~ /MSWin|Windows_NT/i ? 1 : 0;
 
 sub is_msw ()   { MSWIN }
 sub is_macos () { $^O =~ /darwin/ }
+sub is_wx ()    { main->can("OnInit") }
 
-push( @EXPORT, 'is_msw', 'is_macos' );
+push( @EXPORT, qw( is_msw is_macos is_wx ) );
 
 ################ Filenames ################
 

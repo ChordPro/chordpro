@@ -14,15 +14,13 @@ binmode STDERR => ':utf8';
 
 package ChordPro::Testing;
 
-our $VERSION = "6.000";
-
-use base 'Exporter';
+use parent 'Exporter';
 our @EXPORT = qw( $config );
 
 use Test::More ();
 
-use App::Packager ( ':name', 'ChordPro' );
 use ChordPro::Config;
+use ChordPro::Paths;
 use ChordPro::Chords;
 
 sub import {
@@ -32,7 +30,6 @@ sub import {
     -d "t" && chdir "t";
 
     $::running_under_test = 1;
-    App::Packager->export_to_level(1);
     Test::More->export_to_level(1);
     $pkg->export_to_level( 1, undef, @EXPORT );
 }
@@ -43,7 +40,7 @@ sub is_deeply {
     if ( ref($got) eq 'HASH' && ref($expect) eq 'HASH' ) {
 	fixchords($got) if $got->{body};
 
-	for ( qw( config ) ) {
+	for ( qw( config generate ) ) {
 	    delete $got->{$_} unless exists $expect->{$_};
 	}
 	if ( $got->{chordsinfo} ) {
@@ -56,7 +53,8 @@ sub is_deeply {
 		}
 	    }
 	}
-	for ( qw( instrument user key_from key_actual chords numchords ) ) {
+	for ( qw( instrument user key_from key_actual chords numchords
+		  _configversion ) ) {
 	    delete $got->{meta}->{$_} unless exists $expect->{meta}->{$_};
 	}
     }
@@ -82,7 +80,7 @@ ChordPro::Chords::add_config_chord
 no warnings 'redefine';
 
 sub getresource {
-    App::Packager::U_GetResource(@_);
+    CP->findres($_[0]);
 }
 }
 

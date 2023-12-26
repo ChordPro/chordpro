@@ -12,7 +12,7 @@ there is no ready to use kit, see
 https://abcplus.sourceforge.net/#abc2svg.
 
 ChordPro will try to run a script `abc2svg` with parameters
-`toxhtml.js` and the name of a temporary file containing the ABC data.
+`tohtml.js` and the name of a temporary file containing the ABC data.
 The standard output of the script will be scanned for SVG images to
 insert in the PDF socument.
 

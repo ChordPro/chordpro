@@ -543,6 +543,7 @@ sub new {
     my $self = bless { chord_cache => {} } => $pkg;
     $self->{system} = "nashville";
     $self->{target} = 'ChordPro::Chord::Nashville';
+    $self->{intervals} = 12;
     warn("Chords: Created parser for ", $self->{system}, "\n")
       if $::options->{verbose} && $::options->{verbose} > 1;
     return $parsers{$self->{system}} = $self;
@@ -655,6 +656,7 @@ sub new {
     my $self = bless { chord_cache => {} } => $pkg;
     $self->{system} = "roman";
     $self->{target} = 'ChordPro::Chord::Roman';
+    $self->{intervals} = 12;
     warn("Chords: Created parser for ", $self->{system}, "\n")
       if $::options->{verbose} && $::options->{verbose} > 1;
     return $parsers{$self->{system}} = $self;
@@ -1003,7 +1005,9 @@ sub transcode ( $self, $xcode, $key_ord = 0 ) {
     my $p = $self->{parser}->get_parser($xcode);
     die("OOPS ", $p->{system}, " $xcode") unless $p->{system} eq $xcode;
     $info->{parser} = $p;
-    $info->{root_ord} -= $key_ord if $key_ord && $p->movable;
+    if ( $key_ord && $p->movable ) {
+	$info->{root_ord} -= $key_ord % $p->intervals;
+    }
 #    $info->{$_} = $p->{$_} for qw( ns_tbl nf_tbl ns_canon nf_canon );
     $info->{root_canon} = $info->{root} =
       $p->root_canon( $info->{root_ord},
@@ -1014,7 +1018,9 @@ sub transcode ( $self, $xcode, $key_ord = 0 ) {
 	$info->{qual_canon} = $info->{qual} = "";
     }
     if ( $self->{bass} && $self->{bass} ne "" ) {
-	$info->{bass_ord} -= $key_ord if $key_ord && $p->movable;
+	if ( $key_ord && $p->movable ) {
+	    $info->{bass_ord} -= $key_ord % $p->intervals;
+	}
 	$info->{bass_canon} = $info->{bass} =
 	  $p->root_canon( $info->{bass_ord}, $info->{bass_mod} >= 0 );
     }

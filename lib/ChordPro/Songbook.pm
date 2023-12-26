@@ -17,6 +17,7 @@ use ChordPro::Song;
 use Carp;
 use List::Util qw(any);
 use File::LoadLines;
+use Storable qw(dclone);
 
 sub new {
     my ($pkg) = @_;
@@ -63,23 +64,30 @@ sub parse_file {
     my $linecnt = 0;
     my $songs = 0;
     while ( @$lines ) {
-	my $song = ChordPro::Song
-	  # WxChordPro uses temp file _filesource. Add real filename as well.
-	  ->new( $opts->{filesource} || $opts->{_filesource} )
-	  ->parse_song( $lines, \$linecnt, {%$meta}, {%$defs} );
+	my $song = ChordPro::Song->new($opts)
+	  ->parse_song( $lines, \$linecnt, {%{dclone($meta)}}, {%$defs} );
+
 	$song->{meta}->{songindex} = 1 + @{ $self->{songs} };
 	push( @{ $self->{songs} }, $song );
+	$songs++;
 
 	# Copy persistent assets to the songbook.
 	if ( $song->{assets} ) {
 	    $self->{assets} //= {};
 	    while ( my ($k,$v) = each %{$song->{assets}} ) {
-		next unless $v->{persist};
+		next unless $v->{opts} && $v->{opts}->{persist};
 		$self->{assets}->{$k} = $v;
 	    }
 	}
+    }
 
-	$songs++ if $song->{body};
+    if ( @{$self->{songs}} > 1 ) {
+	my $song = $self->{songs}->[-1];
+	unless ( $song->{body}
+		 && any { $_->{type} ne "ignore" } @{$song->{body}} ) {
+	    pop( @{ $self->{songs} } );
+	    $songs--;
+	}
     }
 
     warn("Warning: No songs found in ", $opts->{_filesource}, "\n")

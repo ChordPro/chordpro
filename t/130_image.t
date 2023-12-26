@@ -25,6 +25,12 @@ ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 isa_ok( $s->{songs}->[0], 'ChordPro::Song', "It's a song" );
 #use Data::Dumper; warn(Dumper($s));
 my $song = {
+	    assets     => {
+			   _Image001 => {
+					 type => 'image',
+					 uri  => '130_image.jpg'
+					}
+			  },
 	    'settings' => {},
 	    'meta' => {
 		       'songindex' => 1,
@@ -36,7 +42,7 @@ my $song = {
 	    'body' => [
 		       {
 			'context' => '',
-			'uri' => './130_image.jpg',
+			'id' => '_Image001',
 			'type' => 'image',
 			'opts' => {}
 		       }
@@ -59,7 +65,7 @@ eval { $s->parse_file(\$data) } or diag("$@");
 
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 isa_ok( $s->{songs}->[0], 'ChordPro::Song', "It's a song" );
-#use Data::Dumper; warn(Dumper($s));
+#use DDP; p($s->{songs}[0]);
 $song = {
 	    'title' => 'Swing Low Sweet Chariot',
 	    'source' => { file => "__STRING__", line => 1 },
@@ -71,6 +77,12 @@ $song = {
 				   'Swing Low Sweet Chariot'
 				  ]
 		      },
+	    assets     => {
+			   _Image002 => {
+					 type => 'image',
+					 uri  => '130_image.jpg'
+					}
+			  },
 	    'settings' => {},
 	    'body' => [
 		       {
@@ -80,10 +92,10 @@ $song = {
 				   'height' => '150',
 				   'border' => '2',
 				   'scale' => '4',
-				   'center' => 1,
+				   'align' => 'center',
 				   'width' => '200'
 				  },
-			'uri' => './130_image.jpg',
+			'id' => '_Image002',
 			'context' => ''
 		       }
 		      ],

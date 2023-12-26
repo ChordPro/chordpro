@@ -14,8 +14,10 @@ use IO::String;
 use Carp;
 use utf8;
 
-use ChordPro::Utils qw( expand_tilde demarkup );
+use ChordPro::Paths;
+use ChordPro::Utils qw( expand_tilde demarkup min );
 use ChordPro::Output::Common qw( fmt_subst prep_outlines );
+use File::LoadLines qw(loadlines);
 
 # For regression testing, run perl with PERL_HASH_SEED set to zero.
 # This eliminates the arbitrary order of font definitions and triggers
@@ -36,6 +38,15 @@ sub new {
     $self->{layout} = Text::Layout->new( $self->{pdf} );
     $self->{tmplayout} = undef;
 
+    # Patches and enhancements to PDF library.
+    no strict 'refs';
+    *{$pdfapi . '::Resource::XObject::Form::width' } = \&_xo_width;
+    *{$pdfapi . '::Resource::XObject::Form::height'} = \&_xo_height;
+    if ( $pdfapi eq 'PDF::API2' ) {
+	no warnings 'redefine';
+	*{$pdfapi . '::_is_date'} = sub { 1 };
+    }
+
     %fontcache = ();
 
     $self;
@@ -46,13 +57,9 @@ sub info {
 
     $info{CreationDate} //= pdf_date();
 
-    # PDF::API2 2.42+ does not accept the final apostrophe.
-    no warnings 'redefine';
-    local *PDF::API2::_is_date = sub { 1 };
-
     if ( $self->{pdf}->can("info_metadata") ) {
 	for ( keys(%info) ) {
-	    $self->{pdf}->info_metadata( $_, $info{$_} );
+	    $self->{pdf}->info_metadata( $_, demarkup($info{$_}) );
 	}
     }
     else {
@@ -161,6 +168,7 @@ sub text {
     else {
 	$self->{layout}->set_markup($text);
 	for ( @{ $self->{layout}->{_content} } ) {
+	    next unless $_->{type} eq "text";
 	    $_->{text} =~ s/\'/\x{2019}/g;	# friendly quote
 	}
     }
@@ -182,7 +190,6 @@ sub text {
 	# Draw background and.or frame.
 	my $d = $debug ? 0 : 1;
 	$frame = $debug || $font->{color} || $self->{ps}->{theme}->{foreground} if $frame;
-	# $self->crosshair( $x, $y, 20, 0.2, "magenta" );
 	$self->rectxy( $x + $e->{x} - $d,
 		       $y + $e->{y} + $d,
 		       $x + $e->{x} + $e->{width} + $d,
@@ -309,8 +316,9 @@ sub circle {
     $gfx->fillcolor($self->_fgcolor($fillcolor)) if $fillcolor;
     $gfx->linewidth($lw||1);
     $gfx->circle( $x, $y, $r );
-    $gfx->fill if $fillcolor;
-    $gfx->stroke if $strokecolor;
+    $gfx->fill if $fillcolor && !$strokecolor;
+    $gfx->fillstroke if $fillcolor && $strokecolor;
+    $gfx->stroke if $strokecolor && !$fillcolor;
     $gfx->restore;
 }
 
@@ -330,66 +338,145 @@ sub cross {
     $gfx->restore;
 }
 
-sub crosshair {			# for debugging
-    my ( $self, $x, $y, $r, $lw, $strokecolor ) = @_;
-    my $gfx = $self->{pdfgfx};
-    $gfx->save;
-    $gfx->strokecolor($self->_fgcolor($strokecolor)) if $strokecolor;
-    $gfx->linewidth($lw||1);
-    $gfx->move( $x, $y - $r );
-    $gfx->line( $x, $y + $r );
-    $gfx->stroke if $strokecolor;
-    $gfx->move( $x - $r, $y );
-    $gfx->line( $x + $r, $y );
-    $gfx->stroke if $strokecolor;
-    $gfx->restore;
-}
-
+# Fetch an image or xform object.
+# Source is $elt->{uri} (for files), $elt->{chord} (for chords).
+# Result is delivered, and stored in $elt->{data};
 sub get_image {
     my ( $self, $elt ) = @_;
 
     my $img;
-    my $uri = $elt->{uri};
-    warn("get_image($uri)\n") if $config->{debug}->{images};
-    if ( $uri =~ /^id=(.+)/ ) {
-	my $a = $ChordPro::Output::PDF::assets->{$1};
+    my $subtype = $elt->{subtype};
+    my $data;
 
-	if ( $a->{type} eq "abc" ) {
-	    my $res = ChordPro::Output::PDF::abc2image( undef, $self, $a );
-	    return $self->get_image( { %$elt, uri => $res->{src} } );
-	}
-	elsif ( $a->{type} eq "jpg" ) {
-	    $img = $self->{pdf}->image_jpeg(IO::String->new($a->{data}));
-	}
-	elsif ( $a->{type} eq "png" ) {
-	    $img = $self->{pdf}->image_png(IO::String->new($a->{data}));
-	}
-	elsif ( $a->{type} eq "gif" ) {
-	    $img = $self->{pdf}->image_gif(IO::String->new($a->{data}));
-	}
-	return $img;
+    if ( $subtype eq "delegate" ) {
+	croak("delegated image in get_image()");
     }
-    for ( $uri ) {
-	$img = $self->{pdf}->image_png($_)  if /\.png$/i;
-	$img = $self->{pdf}->image_jpeg($_) if /\.jpe?g$/i;
-	$img = $self->{pdf}->image_gif($_)  if /\.gif$/i;
+
+    if ( $elt->{data} ) {	# have data
+	$data = $elt->{data};
+	warn("get_image($elt->{subtype}): data ", length($data), " bytes\n")
+	  if $config->{debug}->{images};
+	return $data;
+    }
+
+    my $uri = $elt->{uri};
+    if ( !$subtype && $uri =~ /\.(\w+)$/ ) {
+	$subtype //= $1;
+    }
+
+    if ( $subtype =~ /^(jpg|png|gif)$/ ) {
+	$img = $self->{pdf}->image($uri);
+	warn("get_image($subtype, $uri): img ", length($img), " bytes\n")
+	  if $config->{debug}->{images};
+    }
+    elsif ( $subtype =~ /^(xform)$/ ) {
+	$img = $data;
+	warn("get_image($subtype): xobject (",
+#	     join(" ", $img->bbox),
+	     join(" ", @{$data->{bbox}}),
+	     ")\n")
+	  if $config->{debug}->{images};
+    }
+    else {
+	croak("Unhandled image type: $subtype\n");
     }
     return $img;
 }
 
-sub add_image {
-    my ( $self, $img, $x, $y, $w, $h, $border ) = @_;
+sub _xo_width {
+    my ( $self ) = @_;
+    my @bb = $self->bbox;
+    return abs($bb[2]-$bb[0]);
+}
+sub _xo_height {
+    my ( $self ) = @_;
+    my @bb = $self->bbox;
+    return abs($bb[3]-$bb[1]);
+}
+
+sub add_object {
+    my ( $self, $o, $x, $y, %options ) = @_;
+
+    my $scale_x = $options{"xscale"} || $options{"scale"} || 1;
+    my $scale_y = $options{"yscale"} || $options{"scale"} || $scale_x;
+
+    my $va = $options{valign} // "bottom";
+    my $ha = $options{align}  // "left";
 
     my $gfx = $self->{pdfgfx};
+    my $w = $o->width  * $scale_x;
+    my $h = $o->height * $scale_y;
 
+    warn( sprintf("add_object x=%.1f y=%.1f w=%.1f h=%.1f scale=%.1f,%.1f) %s\n",
+		  $x, $y, $w, $h, $scale_x, $scale_y, $ha,
+		 ) ) if $config->{debug}->{images};
+
+    $self->crosshairs( $x, $y, color => "lime" ) if $config->{debug}->{images};
+    if ( $va eq "top" ) {
+	$y -= $h;
+    }
+    elsif ( $va eq "middle" ) {
+	$y -= $h/2;
+    }
+    if ( $ha eq "right" ) {
+	$x -= $w;
+    }
+    elsif ( $ha eq "center" ) {
+	$x -= $w/2;
+    }
+
+    $self->crosshairs( $x, $y, color => "red" ) if $config->{debug}->{images};
     $gfx->save;
-    $gfx->image( $img, $x, $y-$h, $w, $h );
-    if ( $border ) {
-	$gfx->rect( $x, $y-$h, $w, $h )
-	  ->linewidth($border)
+    if ( ref($o) =~ /::Resource::XObject::Image::/ ) {
+	# Image wants width and height.
+	$gfx->object( $o, $x, $y, $w, $h );
+    }
+    else {
+	# XO_Form wants xscale and yscale.
+	my @bb = $o->bbox;
+	$gfx->object( $o, $x-min($bb[0],$bb[2])*$scale_x,
+		      $y-min($bb[1],$bb[3])*$scale_y, $scale_x, $scale_y );
+    }
+
+    if ( $options{border} ) {
+	my $bc = $options{"bordercolor"} || $options{"color"};
+	$gfx->stroke_color($bc) if $bc;
+	$gfx->rectangle( $x, $y, $x+$w, $y+$h )
+	  ->line_width( $options{border} )
 	    ->stroke;
     }
+
     $gfx->restore;
+}
+
+# For convenience.
+sub crosshairs {
+    my ( $self, $x, $y, %options ) = @_;
+    my $gfx = $self->{pdfgfx};
+    my $col = $options{colour} || $options{color} || "black";
+    my $lw  = $options{linewidth} || 0.1;
+    my $w  = ( $options{width} || 40 ) / 2;
+    my $h  = ( $options{width} || $options{height} || 40 ) / 2;
+    for ( $gfx  ) {
+	$_->save;
+	$_->line_width($lw);
+	$_->stroke_color($col);
+	$_->move($x-$w,$y);
+	$_->hline($x+$w);
+	$_->move($x,$y+$h);
+	$_->vline($y-$h);
+	$_->stroke;
+	$_->restore;
+    }
+}
+
+sub add_image {
+    my ( $self, $img, $x, $y, $w, $h, $border ) = @_;
+    $self->add_object( $img, $x, $y,
+		       xscale => $w/$img->width,
+		       yscale => $h/$img->height,
+		       valign => "bottom",
+		       $border ? ( border => $border ) : () );
 }
 
 sub newpage {
@@ -423,6 +510,7 @@ sub newpage {
 sub openpage {
     my ( $self, $ps, $page ) = @_;
     $self->{pdfpage} = $self->{pdf}->openpage($page);
+    confess("Fatal: Page $page not found.") unless $self->{pdfpage};
     $self->{pdfgfx}  = $self->{pdfpage}->gfx;
     $self->{pdftext} = $self->{pdfpage}->text;
 }
@@ -540,6 +628,10 @@ sub make_outlines {
 	    }
 	}
 	else {
+	    ####TODO: Why?
+	    if ( @$book == 1 && ref($book->[0]) eq 'ChordPro::Song' ) {
+		$book = [[ $book->[0] ]];
+	    }
 	    foreach my $b ( @$book ) {
 		my $song = $b->[-1];
 		# Leaf outline.
@@ -578,7 +670,7 @@ sub init_fonts {
     my $fc = Text::Layout::FontConfig->new( debug => $config->{debug}->{fonts} > 1 );
 
     # Add font dirs.
-    my @d = ( @{$ps->{fontdir}}, ::rsc_or_file("fonts/"), $ENV{FONTDIR} );
+    my @d = ( @{$ps->{fontdir}}, @{ CP->findresdirs("fonts") }, $ENV{FONTDIR} );
     # Avoid rsc result if dummy.
     splice( @d, -2, 1 ) if $d[-2] eq "fonts/";
     for my $fontdir ( @d ) {

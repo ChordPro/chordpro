@@ -13,8 +13,8 @@ use Carp;
 use feature qw( signatures );
 no warnings "experimental::signatures";
 
-use App::Packager;
 use ChordPro;
+use ChordPro::Paths;
 use ChordPro::Utils;
 use File::LoadLines;
 use File::Spec;
@@ -55,6 +55,7 @@ sub configurator ( $opts = undef ) {
     unless ( $opts ) {
         my $cfg = $pp->decode( default_config() );
         $config = $cfg;
+	config_split_fc_aliases($cfg);
         $options = { verbose => 0 };
         process_config( $cfg, "<builtin>" );
         $cfg->{settings}->{lineinfo} = 0;
@@ -70,6 +71,9 @@ sub configurator ( $opts = undef ) {
     # Load defaults.
     warn("Reading: <builtin>\n") if $verbose > 1;
     my $cfg = $pp->decode( default_config() );
+
+    # This is easier than splitting out manually :)
+    config_split_fc_aliases($cfg);
 
     # Default first.
     @cfg = prep_configs( $cfg, "<builtin>" );
@@ -308,7 +312,7 @@ sub prep_configs ( $cfg, $src ) {
     foreach my $c ( @{ $cfg->{include} } ) {
         # Check for resource names.
         if ( $c !~ m;[/.]; ) {
-            $c = ::rsc_or_file( $c, "config" );
+            $c = CP->findcfg($c);
         }
         elsif ( $dir ne ""
                 && !File::Spec->file_name_is_absolute($c) ) {
@@ -361,6 +365,27 @@ sub process_config ( $cfg, $file ) {
         $cfg->{_chords} = delete $cfg->{chords};
         ChordPro::Chords::pop_parser();
     }
+    config_split_fc_aliases($cfg);
+}
+
+sub config_split_fc_aliases ( $cfg ) {
+    # Split fontconfig aliases into individual entries.
+    if ( $cfg->{pdf}->{fontconfig} ) {
+	# Orig.
+	my $fc = $cfg->{pdf}->{fontconfig};
+	# Since we're going to delete/insert keys, we need a copy.
+	my %fc = %$fc;
+	while ( my($k,$v) = each(%fc) ) {
+	    # Split on comma.
+	    my @k = split( /\s*,\s*/, $k );
+	    if ( @k > 1 ) {
+		# We have aliases. Delete the original.
+		delete( $fc->{$k} );
+		# And insert individual entries.
+		$fc->{$_} = $v for @k;
+	    }
+	}
+    }
 }
 
 sub config_final ( $delta ) {
@@ -402,7 +427,7 @@ sub config_default () {
 
 # Config in properties format.
 
-sub cfg2props ( $o, $path ) {
+sub cfg2props ( $o, $path = "" ) {
     $path //= "";
     my $ret = "";
     if ( !defined $o ) {
@@ -848,7 +873,7 @@ sub get_context () {
 }
 
 # For testing
-use base qw(Exporter);
+use Exporter 'import';
 our @EXPORT = qw( _c );
 sub _c ( @args ) { $::config->gps(@args) }
 
@@ -915,6 +940,10 @@ sub default_config () {
       // Substitute Unicode sharp/flats in chord names.
       // Will fallback to ChordProSymbols the font doesn't have the glyphs.
       "truesf" : false,
+      // Amount of indent for wrapped lines. Actual indent is the stringwidth.
+      "wrapindent" : "x",
+      // Flow text. Do not use.
+      "flowtext" : false,
     },
 
     // Metadata.
@@ -938,10 +967,13 @@ sub default_config () {
     // Globally defined (added) meta data,
     // This is explicitly NOT intended for the metadata items above.
     "meta" : {
+        // Do not remove or change this one.
+        "_configversion" : [ "6.031" ],
     },
 
     // Assets.
-    "assets" : {},
+    "assets" : {
+    },
 
     // Dates. Format is a strftime template.
     "dates" : {
@@ -1028,7 +1060,7 @@ sub default_config () {
     //         "all": all chords used.
     //         "user": only prints user defined chords.
     // "sorted": order the chords by key.
-    // "suppress": a series of chord (names) thet will not generate
+    // "suppress": a series of chord (names) that will not generate
     //         diagrams, e.g. if they are considered trivial.
     // Note: The type of diagram (string or keyboard) is determined
     // by the value of "instrument.type".
@@ -1087,25 +1119,17 @@ sub default_config () {
             "type"     : "image",
             "module"   : "ABC",
             "handler"  : "abc2svg",
+            // No longer used -- ./default.abc will always be used if present
             "config"   : "default", // or "none", or "myformat.fmt"
-            // The preamble is a list of lines inserted before the ABC data.
+            // The preamble is a list of lines inserted before the ABC data,
+            // and after the delegate supplied preamble.
             // DO NOT MODIFY unless you know what you are doing!
             "preamble" : [
-               // Get rid of as much space as possible.
-               "%%topspace 0",
-               "%%titlespace 0",
-               "%%musicspace 0",
-               "%%composerspace 0",
-               "%%infospace 0",
-               "%%textspace 0",
-               "%%leftmargin 0cm",
-               "%%rightmargin 0cm",
-               "%%staffsep 0",
                // Use ChordPro fonts for lyrics and chords.
                "%%textfont pdf.fonts.text",
                "%%gchordfont pdf.fonts.chord",
             ],
-            "preprocess" : { "abc" : [], "svg" : [] },
+            "preprocess" : { "abc" : [] },
             "omit"     : false,
         },
         "ly" : {
@@ -1119,6 +1143,12 @@ sub default_config () {
                 "\\version \"2.21.0\"",
                 "\\header { tagline = ##f }",
             ],
+            "omit"     : false,
+        },
+        "svg" : {
+            "type"     : "image",
+            "module"   : "SVG",
+            "handler"  : "svg2svg",
             "omit"     : false,
         },
      },
@@ -1379,11 +1409,7 @@ sub default_config () {
 
       "fontdir" : [],
       "fontconfig" : {
-          // alternatives: regular r normal <empty>
-          // alternatives: bold b strong
-          // alternatives: italic i oblique o emphasis
-          // alternatives: bolditalic bi italicbold ib boldoblique bo obliquebold ob
-          "times" : {
+          "times, serif" : {
               ""            : "Times-Roman",
               "bold"        : "Times-Bold",
               "italic"      : "Times-Italic",
@@ -1392,10 +1418,17 @@ sub default_config () {
           "helvetica" : {
               ""            : "Helvetica",
               "bold"        : "Helvetica-Bold",
+              // Only helvetica uses oblique, use italic for all other fonts
               "oblique"     : "Helvetica-Oblique",
               "boldoblique" : "Helvetica-BoldOblique",
           },
-          "courier" : {
+          "sans, sans-serif" : {
+              ""            : "Helvetica",
+              "bold"        : "Helvetica-Bold",
+              "italic"      : "Helvetica-Oblique",
+              "bolditalic"  : "Helvetica-BoldOblique",
+          },
+          "courier, mono, monospace" : {
               ""            : "Courier",
               "bold"        : "Courier-Bold",
               "italic"      : "Courier-Italic",
@@ -1542,6 +1575,8 @@ sub default_config () {
                  "quote" : false,
             },
         },
+        // Retain # comments -- we'll output them.
+        "comments" : "retain",
     },
 
     // Settings for HTML backend.
@@ -1608,25 +1643,29 @@ sub default_config () {
 
     // For (debugging (internal use only)).
     "debug" : {
-        "chords" : 0,
-        "config" : 0,
-        "echo" : 0,
-        "fonts" : 0,
-        "images" : 0,
-        "layout" : 0,
-        "meta" : 0,
-        "mma" : 0,
-        "spacing" : 0,
-        "song" : 0,
-        "songfull" : 0,
-        "csv" : 0,
-        "abc" : 0,
-        "ly" : 0,
-        "svg" : 0,
+        "a2crd"     : 0,
+        "assets"    : 0,
+        "chords"    : 0,
+        "config"    : 0,
+        "echo"	    : 0,
+        "fonts"	    : 0,
+        "images"    : 0,
+        "layout"    : 0,
+        "meta"	    : 0,
+        "mma"	    : 0,
+        "paths"	    : 0,
+        "spacing"   : 0,
+        "song"	    : 0,
+        "songfull"  : 0,
+        "ops"	    : 0,
+        "csv"	    : 0,
+        "abc"	    : 0,
+        "ly"	    : 0,
+        "svg"	    : 0,
         // For temporary use.
-        "x1" : 0,
-        "x2" : 0,
-        "x3" : 0,
+        "x1"	    : 0,
+        "x2"	    : 0,
+        "x3"	    : 0,
     },
 
 }

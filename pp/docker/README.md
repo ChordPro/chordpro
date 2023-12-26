@@ -1,17 +1,24 @@
 # Docker
 
-docker build -t chordpro .
+## Build
 
-## Normal chordpro
+    docker build -t chordpro/chordpro:v6.030.0 .
+    docker tag chordpro/chordpro:v6.030.0 chordpro/chordpro:latest
+
+## Push to repo
+
+    docker push chordpro/chordpro:latest
+
+## Running chordpro
 
 	docker run -ti --rm \
 	  --env HOME=${HOME} \
 	  --env USER=$USER \
 	  --workdir `pwd` \
 	  --volume ${HOME}:${HOME} \
-	  chordpro chordpro
+	  chordpro/chordpro:latest chordpro
 
-## WxChordPro
+## Running wxchordpro
 
 	docker run --rm \
 	  --env DISPLAY=${DISPLAY} \
@@ -21,7 +28,7 @@ docker build -t chordpro .
 	  --env USER=${USER} \
 	  --workdir `pwd` \
 	  --volume ${HOME}:${HOME}:rw \
-	  chordpro wxchordpro
+	  chordpro/chordpro:latest wxchordpro
 
 ## Notes
 

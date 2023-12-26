@@ -57,11 +57,25 @@ my %enc2bom = map { $_ => encode($_, "\x{feff}") } @BOMs;
 enctest( $_, 1 ) for @noBOMs;
 enctest($_) for @BOMs;
 
-done_testing( 3 * ( 1 + @noBOMs + @BOMs ) );
+done_testing( 3 * ( 1 + 4*(@noBOMs + @BOMs) ) );
 
 sub enctest {
     my ( $enc, $nobom ) = @_;
     my $encoded = $data;
+    _enctest( $encoded, $enc, $nobom );
+    $encoded = $data;
+    $encoded =~ s/\n/\x0a/g;
+    _enctest( $encoded, $enc, $nobom, "LF" );
+    $encoded = $data;
+    $encoded =~ s/\n/\x0d/g;
+    _enctest( $encoded, $enc, $nobom, "CR" );
+    $encoded = $data;
+    $encoded =~ s/\n/\x0d\x0a/g;
+    _enctest( $encoded, $enc, $nobom, "CRLF" );
+}
+
+sub _enctest {
+    my ( $encoded, $enc, $nobom, $crlf ) = @_;
     from_to( $encoded, "UTF-8", $enc );
     unless ( $nobom ) {
 	BAIL_OUT("Unknown encoding: $enc") unless $enc2bom{$enc};
@@ -69,11 +83,11 @@ sub enctest {
     }
 
     my $fn = "out/$enc.cho";
-    open( my $fh, ">", $fn ) or die("$fn: $!\n");
+    open( my $fh, ">:raw", $fn ) or die("$fn: $!\n");
     print $fh $encoded;
     close($fh);
-
     $enc .= " (no BOM)" if $nobom;
+    $enc .= " ($crlf)" if $crlf;
 
     my $s = ChordPro::Songbook->new;
     eval { $s->parse_file($fn) } or diag("$@");

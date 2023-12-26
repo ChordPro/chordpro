@@ -1,3 +1,63 @@
+6.040 2023-12-26
+
+    - !Highlights
+
+    - Images can be [placed everywhere](https://chordpro.org/chordpro/directives-image/).
+      They can be placed relative to the paper, the page, the column,
+      and the lyrics.
+
+    - Images can be [embedded[(https://chordpro.org/chordpro/directives-image/#inline-images) in text (lyrics) lines, either as part of
+      the text similar to a glyph, or somewhere else on the page
+      relative to a particular place in the text. The latter is most
+      interesting for annotations.
+
+    - Delegates are images too. Annotate your lyrics with SVG images,
+      or with musical notes using ABC or Lilypond.
+
+    - Chord and keyboard diagrams are images too. And you can use
+      string and keyboard diagrams simultaneously.
+
+    - Resources like configs, tasks and images are now more logically
+      searched using [resource
+      libraries](https://chordpro.org/chordpro/resources/).
+
+    - !ChordPro functionality
+    - Rework paths handling for consistent resource handling;
+      eliminate App::Packager.
+    - Inline images.
+    - {image} can have label and align properties.
+    - {define}d chords overrules suppress list.
+    - (ABC) Use QuickJS XS (JavaScript::QuickJS) as preferred.
+    - (ABC) ABC embedding no longer uses nodeJS (npx).
+    - (ABC) Make split work (and enable by default).
+    - (ABC) Images are left aligned by default.
+    - (Lilypond) Images are left aligned by default.
+    - Improve runtime info.
+    - Suppress songs that do not have content.
+    - Suppress table of content entry for a song w/ {ns toc=no}.
+    - (PDF) Image scale strategy change for spread images.
+    - (PDF/Writer) Add generalized add_object for objects and images.
+    - (PDF) Prevent case problems when looking up fonts for SVG.
+    - (PDF) Add aliases for web standard fonts like serif, sans, ...
+    - (PDF) Ignore leading empty and ignores (was: leading empty only).
+    - (Windows) ChordPro now installs as a 64-bit application in
+      \Program Files instead of \Program Files (x86).
+      You are adsvised to remove the old 32bits install first.
+    - !Bug fixes
+    - Prevent warning when parsing {key} and trancode to nashville/roman.
+    - Fix chord inversion (issue 321).
+    - Fix comment lines disturbing a consecutive series of {chord}s.
+    - Fix typo in Wx Preferencesdialog, causing it to crash.
+    - Fix problem with PDF/SVG caching fonts.
+    - Fix comment labels for delegates (issue 329.3).
+    - (Wx) Filter configs on prp ans json.
+    - Fix memorize/recall/transpose issue 333.
+    - Fix issue 334.
+    - !Internal
+    - (ABC) ABC embedding use tohtml instead of toxhtml.
+    - (PDF) Enhance assets (wip), labels; move grid to separate module.
+    - Experimental ##include facility.
+
 6.030 2023-09-18
 
     - !Highlights

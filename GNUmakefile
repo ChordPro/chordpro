@@ -11,6 +11,10 @@ all :	Makefile cleanup
 test : Makefile
 	env PERL5LIB=$(shell pwd)/CPAN $(MAKE) -f Makefile test
 
+.PHONY : tests
+tests : test
+	prove -b xt
+
 .PHONY : clean
 clean : cleanup
 	rm -f *~
@@ -47,15 +51,13 @@ to_tmp_cpan :
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.CPAN ./ ${TMP_DST}/
 
 to_c :
+	test -d /mnt/c/Users || mount /mnt/c
 	${MAKE} to_tmp to_tmp_cpan TMP_DST=/mnt/c${W10DIR}
-	rsync ${RSYNC_ARGS} --files-from=MANIFEST.ABC  ./ /mnt/c${W10DIR}/
-	rm -fr /mnt/c${W10DIR}/pp/macos
 
 to_mac : resources
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST      ./ ${MACDST}/
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.WX   ./ ${MACDST}/
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.CPAN ./ ${MACDST}/
-	rsync ${RSYNC_ARGS} --files-from=MANIFEST.ABC  ./ ${MACDST}/
 	ssh macky rm -fr ${MACDST}/pp/windows
 
 release :
@@ -99,7 +101,7 @@ checkjson :
 	do \
 	  json_pp -json_opt relaxed < $$i > .json/`basename $$i`; \
 	done
-	rm -f .json/pd_colour.json
+	cd .json; rm keyboard.json dark.json resetchords.json
 	${JSONVALIDATOR} ${JSONOPTS} \
 	  ${CFGLIB}/config.schema .json/*.json
 	rm -fr .json
@@ -112,7 +114,6 @@ WW := w10
 wkit : _wkit1 _wkit _wkit2
 
 _wkit :
-	test -d /mnt/c/Users || mount /mnt/c
 	${MAKE} to_c
 	ssh ${WW} gmake -C Chordpro/pp/windows
 	scp ${WW}:Chordpro/pp/windows/ChordPro-Installer\*.exe ${HOME}/tmp/
@@ -121,15 +122,9 @@ _wkit1 :
 	-VBoxManage startvm ${VM} --type headless
 
 _wkit2 :
+	sudo umount /misc/c
 	VBoxManage controlvm ${VM} poweroff
 	VBoxManage snapshot ${VM} restorecurrent
-
-abckit ::
-	npm update --silent abc2svg
-	tar zcvf pp/windows/abc2svg_qjs.tar \
-	    -C ${HOME}/node_modules \
-	    --exclude "**/Scc1t?/*" \
-	    abc2svg
 
 .PHONY: TAGS
 
