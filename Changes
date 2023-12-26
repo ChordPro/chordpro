@@ -1,12 +1,12 @@
-0.000
+6.040 2023-12-26
 
     - !Highlights
 
-    - Images can be [placed everywhere](https://chordpro.org/beta/directives-image/).
+    - Images can be [placed everywhere](https://chordpro.org/chordpro/directives-image/).
       They can be placed relative to the paper, the page, the column,
       and the lyrics.
 
-    - Images can be [embedded[(https://chordpro.org/beta/directives-image/#inline-images) in text (lyrics) lines, either as part of
+    - Images can be [embedded[(https://chordpro.org/chordpro/directives-image/#inline-images) in text (lyrics) lines, either as part of
       the text similar to a glyph, or somewhere else on the page
       relative to a particular place in the text. The latter is most
       interesting for annotations.
