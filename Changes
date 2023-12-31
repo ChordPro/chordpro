@@ -1,3 +1,7 @@
+0.000
+
+    - Post-release typo fixes.
+
 6.040 2023-12-26
 
     - !Highlights
@@ -6,13 +10,13 @@
       They can be placed relative to the paper, the page, the column,
       and the lyrics.
 
-    - Images can be [embedded[(https://chordpro.org/chordpro/directives-image/#inline-images) in text (lyrics) lines, either as part of
+    - Images can be [embedded](https://chordpro.org/chordpro/directives-image/#inline-images) in text (lyrics) lines, either as part of
       the text similar to a glyph, or somewhere else on the page
       relative to a particular place in the text. The latter is most
       interesting for annotations.
 
-    - Delegates are images too. Annotate your lyrics with SVG images,
-      or with musical notes using ABC or Lilypond.
+    - Delegates are images too. Annotate your lyrics with SVG images
+      and musical notes using ABC or Lilypond.
 
     - Chord and keyboard diagrams are images too. And you can use
       string and keyboard diagrams simultaneously.
