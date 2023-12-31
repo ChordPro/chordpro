@@ -139,7 +139,7 @@ method diagram_xo( $info ) {
 
     if ( $basefretno > 1 ) {
 	$basefont = $ps->{fonts}->{diagram_base}->{fd}->{font};
-	$basesize = $ps->{spacing}->{diagramchords}*$gh;
+	$basesize = $gh;
 	$bb[0] -= $basefont->width("$basefretno ") * $basesize;
     }
     else {
