@@ -1,5 +1,7 @@
 0.000
 
+    - !Functionality
+    - Report XDG_CONFIG_HOME in runtime info.
     - !Bug fixes
     - Post-release typo fixes.
     - (Stringdiagram) Fix font size of base fret numeral (issue 337).

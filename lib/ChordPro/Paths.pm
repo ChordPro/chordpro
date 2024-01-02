@@ -60,7 +60,7 @@ BUILD {
     # -d ~/.$app_lc
     # -d my_dist_config
     my @try;
-    if ( defined( $ENV{XDG_CONFIG_HOME} ) ) {
+    if ( defined( $ENV{XDG_CONFIG_HOME} ) && $ENV{XDG_CONFIG_HOME} ne "" ) {
 	push( @try,
 	      catdir( $ENV{XDG_CONFIG_HOME}, ".config", $app_lc ),
 	      catdir( $ENV{XDG_CONFIG_HOME}, ".config" ),
