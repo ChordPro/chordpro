@@ -62,9 +62,11 @@ BUILD {
     my @try;
     if ( defined( $ENV{XDG_CONFIG_HOME} ) && $ENV{XDG_CONFIG_HOME} ne "" ) {
 	push( @try,
-	      catdir( $ENV{XDG_CONFIG_HOME}, ".config", $app_lc ),
-	      catdir( $ENV{XDG_CONFIG_HOME}, ".config" ),
-	      catdir( $ENV{XDG_CONFIG_HOME}, ".$app_lc" ) );
+	      # See https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
+	      # catdir( $ENV{XDG_CONFIG_HOME}, ".config", $app_lc ),
+	      # catdir( $ENV{XDG_CONFIG_HOME}, ".config" ),
+	      # catdir( $ENV{XDG_CONFIG_HOME}, ".$app_lc" ) );
+	      catdir( $ENV{XDG_CONFIG_HOME}, "$app_lc" ) );
     }
     else {
 	push( @try,
