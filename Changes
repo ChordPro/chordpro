@@ -1,7 +1,15 @@
 0.000
 
+    - !Highlights
+
+    - To trace problems, the ChordPro 'about' information is included
+      in the PDF. This should not reveal sensitive information, but in
+      case this bothers you, you can disable this by setting
+      debug.runtimeinfo to 0 in the config.
+    
     - !Functionality
     - Report XDG_CONFIG_HOME in runtime info.
+    - Include 'about' info as PDF metadata.
     - !Bug fixes
     - Post-release typo fixes.
     - (Stringdiagram) Fix font size of base fret numeral (issue 337).

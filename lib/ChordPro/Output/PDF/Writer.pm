@@ -61,6 +61,9 @@ sub info {
 	for ( keys(%info) ) {
 	    $self->{pdf}->info_metadata( $_, demarkup($info{$_}) );
 	}
+	if ( $config->{debug}->{runtimeinfo} ) {
+	    $self->{pdf}->info_metadata( "RuntimeInfo", ::runtimeinfo() );
+	}
     }
     else {
 	$self->{pdf}->info(%info);

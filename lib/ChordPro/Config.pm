@@ -1643,6 +1643,7 @@ sub default_config () {
 
     // For (debugging (internal use only)).
     "debug" : {
+        "runtimeinfo" : 1,
         "a2crd"     : 0,
         "assets"    : 0,
         "chords"    : 0,
