@@ -2828,7 +2828,8 @@ sub prepare_assets {
 					};
 		warn("Created asset $id ($elt->{subtype}, ",
 		     $res->{width}, "x", $res->{height}, ")",
-		     map { " $_=" . $res->{opts}->{$_} } keys( %{$res->{opts}//{}} ),
+		     ( map { " $_=" . $res->{opts}->{$_} }
+		           keys( %{$res->{opts}//{}} ) ),
 		     "\n")
 		  if $config->{debug}->{images};
 	    }
