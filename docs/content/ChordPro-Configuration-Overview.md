@@ -108,9 +108,9 @@ Instrument definitions, in particular the settings `"tuning"`, `"notes"` and `"c
 
 For example, assume `"chords_italian.json"` defines a number of chords using italian (latin) note names and `"chords_german.json"` defines some chords using german note names. Then the following sequence of configuration files will work as expected:
 
-    notes::latin          (built-in, enable latin note names)
+    notes:latin           (built-in, enable latin note names)
     chords_italian.json   (defines chords with latin note names)
-    notes::german         (built-in, enable german note names)
+    notes:german          (built-in, enable german note names)
     chords_german.json    (defines chords with german note names)
 
 ### Merging hash valued items

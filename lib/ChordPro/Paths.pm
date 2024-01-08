@@ -232,6 +232,7 @@ method findcfg ( $p ) {
 	@p = ( $p );
     }
     else {
+	$p =~ s/:+/\//g;
 	@p = ( "$p.prp", "$p.json" );
     }
     unless ( $found ) {
