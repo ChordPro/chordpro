@@ -1127,6 +1127,7 @@ sub default_config () {
             "preamble" : [
                // Use ChordPro fonts for lyrics and chords.
                "%%textfont pdf.fonts.text",
+               "%%vocalfont pdf.fonts.text",
                "%%gchordfont pdf.fonts.chord",
             ],
             "preprocess" : { "abc" : [] },
