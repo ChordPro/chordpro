@@ -544,11 +544,14 @@ sub generate_song {
     };
 
     my $col;
+    my $spreadimage;
 
     my $col_adjust = sub {
 	if ( $ps->{columns} <= 1 ) {
 	    warn("L=", $ps->{__leftmargin},
 	     ", R=", $ps->{__rightmargin},
+	     ", T=", $ps->{_top},
+	     ", S=", $spreadimage//"<undef>",
 	     "\n") if $config->{debug}->{spacing};
 	    return;
 	}
@@ -559,17 +562,19 @@ sub generate_song {
 	    + $ps->{columnoffsets}->[$col+1];
 	$ps->{__rightmargin} -= $ps->{columnspace}
 	  if $col < $ps->{columns}-1;
+	$y = $ps->{_top};
 	warn("C=$col, L=", $ps->{__leftmargin},
 	     ", R=", $ps->{__rightmargin},
+	     ", T=", $ps->{_top},
+	     ", S=", $spreadimage//"<undef>",
 	     "\n") if $config->{debug}->{spacing};
-	$y = $ps->{_top};
 	$x += $ps->{_indent};
+	$y -= $spreadimage if defined($spreadimage) && !ref($spreadimage);
     };
 
     my $vsp_ignorefirst;
     my $startpage = $opts->{startpage} || 1;
     my $thispage = $startpage - 1;
-    my $spreadimage;
 
     # Physical newpage handler.
     my $newpage = sub {
@@ -651,12 +656,8 @@ sub generate_song {
 	$x = $ps->{__leftmargin};
 	$y = $ps->{_margintop};
 	$y += $ps->{headspace} if $ps->{'head-first-only'} && $class == 2;
-
-	if ( $spreadimage ) {
-	    $y -= imagespread( $spreadimage, $x, $y, $ps );
-	    undef $spreadimage;
-	}
 	$x += $ps->{_indent};
+	undef $spreadimage unless ref($spreadimage);
 	$ps->{_top} = $y;
 	$col = 0;
 	$vsp_ignorefirst = 1;
@@ -859,13 +860,7 @@ sub generate_song {
 
 #    prepare_assets( $s, $pr );
 
-    if ( $s->{spreadimage} ) {
-	$spreadimage = $assets->{$s->{spreadimage}->{id}};
-#	  { type => "image",
-#	    id => $s->{spreadimage}->{id},
-#	    opts => { spread => $s->{spreadimage}->{space} }
-#	  };
-    }
+    $spreadimage = $s->{spreadimage};
 
     # Get going.
     $newpage->();
@@ -905,6 +900,13 @@ sub generate_song {
  	    $chorddiagrams->() unless $dctl->{show} eq "below";
 	    # Prepare the assets now we know the page width.
 	    prepare_assets( $s, $pr );
+
+	    if ( $spreadimage ) {
+		if (ref($spreadimage) eq 'HASH' ) {
+		    $spreadimage = imagespread( $spreadimage, $x, $y, $ps );
+		}
+		$y -= $spreadimage;
+	    }
 	    showlayout($ps) if $ps->{showlayout} || $config->{debug}->{spacing};
 	}
 
@@ -1403,21 +1405,22 @@ sub generate_song {
 
 	# margin* are offsets from the edges of the paper.
 	# _*margin are offsets taking even/odd pages into account.
-	# _margin* are physical coordinates, taking ...
 	if ( $rightpage ) {
 	    $ps->{_leftmargin}  = $ps->{marginleft};
-	    $ps->{_marginleft}  = $ps->{marginleft};
 	    $ps->{_rightmargin} = $ps->{marginright};
-	    $ps->{_marginright} = $ps->{papersize}->[0] - $ps->{marginright};
 	}
 	else {
 	    $ps->{_leftmargin}  = $ps->{marginright};
-	    $ps->{_marginleft}  = $ps->{marginright};
 	    $ps->{_rightmargin} = $ps->{marginleft};
-	    $ps->{_marginright} = $ps->{papersize}->[0] - $ps->{marginleft};
 	}
+
+	# _margin* are physical coordinates, taking even/odd pages into account.
+	$ps->{_marginleft}    = $ps->{_leftmargin};
+	$ps->{_marginright}   = $ps->{papersize}->[0] - $ps->{_rightmargin};
 	$ps->{_marginbottom}  = $ps->{marginbottom};
 	$ps->{_margintop}     = $ps->{papersize}->[1] - $ps->{margintop};
+
+	# Bottom margin, taking bottom chords into account.
 	$ps->{_bottommargin}  = $ps->{marginbottom};
 
 	# Physical coordinates; will be adjusted to columns if needed.
@@ -2015,20 +2018,19 @@ sub imageline {
 }
 
 sub imagespread {
-    my ( $elt, $x, $y, $ps ) = @_;
-    ::dump($elt);
-    my $opts = $elt->{opts};
+    my ( $si, $x, $y, $ps ) = @_;
     my $pr = $ps->{pr};
 
-    my $tag = "id=" . $elt->{opts}->{id};
+    my $tag = "id=" . $si->{id};
     return "Unknown asset: $tag"
-      unless exists( $assets->{$elt->{opts}->{id}} );
-    my $img = $assets->{$elt->{opts}->{id}}->{data};
+      unless exists( $assets->{$si->{id}} );
+    my $img = $assets->{$si->{id}}->{data};
     return "Unhandled asset: $tag"
       unless $img;
+    my $opts = {};
 
     # Available width and height.
-    my $pw = $ps->{__rightmargin} - $ps->{_leftmargin};
+    my $pw = $ps->{_marginright} - $ps->{_marginleft};
     my $ph = $ps->{_margintop} - $ps->{_marginbottom};
 
     my $scale = 1;
@@ -2090,7 +2092,7 @@ sub imagespread {
 		     align  => $align,
 		   );
 
-    return $h + $elt->{opts}->{spread};			# vertical size
+    return $h + $si->{space};			# vertical size
 }
 
 sub tocline {
@@ -2651,9 +2653,9 @@ sub prepare_assets {
     # So we first scan the list for SVG and delegate items and turn these
     # into simple display items.
 
-    my $pw = $ps->{__rightmargin} - $ps->{__leftmargin}
+    my $pw = $ps->{_marginright} - $ps->{_marginleft};
+    my $cw = ( $pw - ( $ps->{columns} - 1 ) * $ps->{columnspace} ) /$ps->{columns}
       - $ps->{_indent};
-    my $cw = ( $pw - ( $ps->{columns} - 1 ) * $ps->{columnspace} ) /$ps->{columns};
     warn("PDF: Preparing ", scalar(keys %sa), " image",
 	 keys(%sa) == 1 ? "" : "s", ", pw=$pw, cw=$cw\n")
       if $config->{debug}->{images} || $config->{debug}->{assets};
@@ -2665,7 +2667,9 @@ sub prepare_assets {
 	if ( $elt->{type} eq "image" && $elt->{subtype} eq "delegate" ) {
 	    my $delegate = $elt->{delegate};
 	    warn("PDF: Preparing delegate $delegate, handler ",
-		 $elt->{handler}, "\n") if $config->{debug}->{images};
+		 $elt->{handler},
+		 ( map { " $_=" . $elt->{opts}->{$_} } keys(%{$elt->{opts}//{}})),
+		 "\n") if $config->{debug}->{images};
 
 	    my $pkg = __PACKAGE__;
 	    $pkg =~ s/::Output::[:\w]+$/::Delegate::$delegate/;
@@ -2678,18 +2682,20 @@ sub prepare_assets {
 
 	    # Determine actual width.
 	    my $w = defined($elt->{opts}->{spread}) ? $pw : $cw;
-#	    $w -= $ps->{_indent};
 	    $w = $elt->{opts}->{width}
 	      if $elt->{opts}->{width} && $elt->{opts}->{width} < $w;
 
 	    my $res = $hd->( $s, $w, $elt );
 	    if ( $res ) {
+		$res->{opts} = { %{ $res->{opts} // {} },
+				 %{ $elt->{opts} // {} } };
 		warn( "PDF: Preparing delegate $delegate, handler ",
 		      $elt->{handler}, " => ",
-		      $res->{type}, "/", $res->{subtype}, "\n" )
+		      $res->{type}, "/", $res->{subtype},
+		      ( map { " $_=" . $res->{opts}->{$_} } keys(%{$res->{opts}//{}})),
+		      " w=$w",
+		      "\n" )
 		  if $config->{debug}->{images};
-		$res->{opts} = { %{ $res->{opts}   // {} },
-				 %{ $elt->{opts} // {} } };
 		$s->{assets}->{$id} = $res;
 	    }
 

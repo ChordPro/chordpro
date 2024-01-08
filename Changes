@@ -15,6 +15,7 @@
     - (Stringdiagram) Fix font size of base fret numeral (issue 337).
     - (Stringdiagram) Fix fret number colours.
     - Fix handling of XDG_CONFIG_HOME.
+    - Fix 'spread' images.
     - (MMA) Fix test fail with perl >= 5.39.6.
 
 6.040 2023-12-26
