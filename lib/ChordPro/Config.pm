@@ -733,6 +733,7 @@ sub hmerge( $left, $right, $path = "" ) {
             || $path =~ /^pdf\.(?:info|fonts)\./
             || $path =~ /^meta\./
             || $path =~ /^delegates\./
+            || $path =~ /^parser\.preprocess\./
             || $path =~ /^debug\./
             || $key =~ /^_/;
 

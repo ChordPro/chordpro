@@ -335,15 +335,17 @@ sub parse_song {
 	    warn(sprintf("==[%3d]=> %s\n", $diag->{line}, $diag->{orig} ) );
 	}
 
-	if ( $prep->{all} ) {
-	    # warn("PRE:  ", $_, "\n");
-	    $prep->{all}->($_);
-	    # warn("POST: ", $_, "\n");
-	    if ( /\n/ ) {
-		my @a = split( /\n/, $_ );
-		$_ = shift(@a);
-		unshift( @$lines, @a );
-		$skipcnt += @a;
+	for my $pp ( "all", "env-$in_context" ) {
+	    if ( $prep->{$pp} ) {
+		# warn("PRE:  ", $_, "\n");
+		$prep->{$pp}->($_);
+		# warn("POST: ", $_, "\n");
+		if ( /\n/ ) {
+		    my @a = split( /\n/, $_ );
+		    $_ = shift(@a);
+		    unshift( @$lines, @a );
+		    $skipcnt += @a;
+		}
 	    }
 	}
 
