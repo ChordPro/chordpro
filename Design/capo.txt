@@ -1,0 +1,23 @@
+                Key     Capo      Chord     Display
+Mod Down         D       -          D         D
+Mod Up           D       -          D         D
+Ignore           D       -          D         D
+
+Key = Concert key
+
+                Key     Capo      Chord     Display
+Mod Down         D       2          D         C
+Mod Up           D       2          D         E
+Ignore           D       2          D         D
+
+Key = Relative
+
+                Key     Capo      Chord     Display
+Mod Down         C       2          D         C
+Mod Up           E       2          D         E
+Ignore           D       2          D         D
+
+Note: MuseScore would display D(C) (sounding D, play C).
+
+While other will prefer D(E).
+

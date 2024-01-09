@@ -139,10 +139,12 @@ method diagram_xo( $info ) {
 
     if ( $basefretno > 1 ) {
 	$basefont = $ps->{fonts}->{diagram_base}->{fd}->{font};
-	$basesize = $ps->{spacing}->{diagramchords}*$gh;
-	$bb[0] -= $basefont->width("$basefretno ") * $basesize;
+	$basesize = $gh/0.85;
+	$basefretno = sprintf( "%2d", $basefretno );
+	$bb[0] -= $basefont->width("xx$basefretno") * $basesize;
     }
     else {
+	$basefretno = "";
 	$bb[0] -= $dot/2;
     }
     if ( $fsh eq "below" && $info->{fingers} ) {
@@ -180,12 +182,12 @@ method diagram_xo( $info ) {
     }
 
     # Draw first fret number, if > 1.
-    if ( $basefretno > 1 ) {
-	my $i = sprintf("%2d ", $basefretno );
+    if ( $basefretno ) {
 	$xo->textstart;
 	$xo->font( $basefont, $basesize );
-	$xo->translate( 0, -$nw - ($baselabeloffset+0.85)*$gh );
-	$xo->text( "$basefretno ", align => "right" );
+	$xo->translate( -$basefont->width("x") * 0.85 * $basesize,
+			-$nw - ($baselabeloffset+0.85)*$gh );
+	$xo->text( $basefretno, align => "right" );
 	$xo->textend;
     }
 
@@ -231,6 +233,19 @@ method diagram_xo( $info ) {
 
     my $oflo;			# to detect out of range frets
 
+    # Color of the dots and numbers.
+    my $fbg = "";		# numbers
+    my $ffg = "";		# dots
+    unless ( $fsh eq "below" ) {
+	# The numbercolor property of the chordfingers is used for the
+	# color of the dot numbers.
+	my $fcf = $ps->{fonts}->{chordfingers};
+	$fbg = $pr->_bgcolor($fcf->{numbercolor});
+	$ffg = $pr->_bgcolor($fcf->{color});
+	# However, if none we should really use white.
+	$fbg = "white" if $fbg eq "none";
+    }
+
     $x = -$gw;
     for my $sx ( 0 .. $strings-1 ) {
 	$x += $gw;
@@ -249,6 +264,7 @@ method diagram_xo( $info ) {
 		     "Fret position $fret exceeds diagram size $vc\n");
 		next;
 	    }
+	    $xo->fill_color($ffg);
 	    $xo->circle( $x, -$nw - ($fret-0.5)*$gh, $dot/2 )->fill;
 
 	}
@@ -269,17 +285,6 @@ method diagram_xo( $info ) {
 	my $font = $ps->{fonts}->{diagram}->{fd}->{font};
 	my $size = $dot;
 	my $asc;		# space if "below"
-
-	# Color of the numbers.
-	my $fbg = "";
-	unless ( $fsh eq "below" ) {
-	    # The numbercolor property of the chordfingers is used for the
-	    # color of the dot numbers.
-	    my $fcf = $ps->{fonts}->{chordfingers};
-	    $fbg = $pr->_bgcolor($fcf->{numbercolor});
-	    # However, if none we should really use white.
-	    $fbg = "white" if $fbg eq "none";
-	}
 
 	$x = -$gw;
 	my $did = 0;

@@ -335,15 +335,17 @@ sub parse_song {
 	    warn(sprintf("==[%3d]=> %s\n", $diag->{line}, $diag->{orig} ) );
 	}
 
-	if ( $prep->{all} ) {
-	    # warn("PRE:  ", $_, "\n");
-	    $prep->{all}->($_);
-	    # warn("POST: ", $_, "\n");
-	    if ( /\n/ ) {
-		my @a = split( /\n/, $_ );
-		$_ = shift(@a);
-		unshift( @$lines, @a );
-		$skipcnt += @a;
+	for my $pp ( "all", "env-$in_context" ) {
+	    if ( $prep->{$pp} ) {
+		# warn("PRE:  ", $_, "\n");
+		$prep->{$pp}->($_);
+		# warn("POST: ", $_, "\n");
+		if ( /\n/ ) {
+		    my @a = split( /\n/, $_ );
+		    $_ = shift(@a);
+		    unshift( @$lines, @a );
+		    $skipcnt += @a;
+		}
 	    }
 	}
 
@@ -1266,7 +1268,7 @@ sub directive {
 		  $xpose + ($config->{settings}->{transpose}//0 );
 	    }
 	    my $kv = {};
-	    if ( $arg =~ /\b(id|label|scale|split|align|center)=(.+)/ ) {
+	    if ( $arg =~ /\b(id|label|scale|split|spread|width|align|center)=(.+)/ ) {
 		$kv = parse_kv($arg);
 	    }
 	    else {

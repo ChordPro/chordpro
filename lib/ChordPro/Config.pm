@@ -733,6 +733,7 @@ sub hmerge( $left, $right, $path = "" ) {
             || $path =~ /^pdf\.(?:info|fonts)\./
             || $path =~ /^meta\./
             || $path =~ /^delegates\./
+            || $path =~ /^parser\.preprocess\./
             || $path =~ /^debug\./
             || $key =~ /^_/;
 
@@ -1127,6 +1128,7 @@ sub default_config () {
             "preamble" : [
                // Use ChordPro fonts for lyrics and chords.
                "%%textfont pdf.fonts.text",
+               "%%vocalfont pdf.fonts.text",
                "%%gchordfont pdf.fonts.chord",
             ],
             "preprocess" : { "abc" : [] },
@@ -1643,6 +1645,7 @@ sub default_config () {
 
     // For (debugging (internal use only)).
     "debug" : {
+        "runtimeinfo" : 1,
         "a2crd"     : 0,
         "assets"    : 0,
         "chords"    : 0,

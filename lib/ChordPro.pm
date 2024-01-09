@@ -1059,6 +1059,11 @@ sub ::runtimeinfo {
 	    push( @p, $cp->display($_) );
 	}
     }
+    for ( qw( XDG_CONFIG_HOME ) ) {
+	if ( defined($ENV{$_}) && $ENV{$_} ne "" ) {
+	    $msg .= sprintf( $fmt, $_, $cp->display($ENV{$_}) );
+	}
+    }
     push( @p,  map { $cp->display($_) } @{ $cp->resdirs } );
     $tag = "Resource path";
     for ( uniq(@p) ) {

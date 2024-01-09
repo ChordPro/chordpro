@@ -37,7 +37,7 @@ my $chords_under = 0;		# chords under lyrics
 
 sub safemeta {
     my ( $s, $meta, $default ) = @_;
-    return $default undef unless defined $meta && defined $s->{meta}->{$meta};
+    return $default unless defined $meta && defined $s->{meta}->{$meta};
     return $s->{meta}->{$meta}->[0];
 }
 

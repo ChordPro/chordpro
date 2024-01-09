@@ -1,0 +1,23 @@
+songbook ::= song+
+
+song ::= directive-or-part+
+
+directive-or-part ::= directive | part
+
+directive ::= '{' keyword [ ':' value ] '}'
+
+part ::= verse | chorus | tab
+
+verse ::= one or more consequetive songlines
+
+chorus ::= start-of-chorus verse+ end-of-chorus
+
+start-of-chorus ::= '{' 'start-of-chorus' | 'soc' '}'
+
+end-of-chorus ::= '{' 'end-of-chorus' | 'eoc' '}'
+
+tab ::= start-of-tab lines+ end-of-tab
+
+start-of-tab ::= '{' 'start-of-tab' | 'sot' '}'
+
+end-of-tab ::= '{' 'end-of-tab' | 'eot' '}'

@@ -1,5 +1,37 @@
 # Release info
 
+## 6.042
+
+Released: 2024-01-09
+
+
+### This is a bugfix release.
+
+
+### Important
+
+* To trace problems, the ChordPro 'about' information is included in the PDF. This should not reveal sensitive information, but in case this bothers you, you can disable this by setting debug.runtimeinfo to 0 in the config.
+
+### Functionality
+
+* Report XDG_CONFIG_HOME in runtime info.
+* Include 'about' info as PDF metadata.
+
+### Bug fixes
+
+* Post-release typo fixes.
+* (Stringdiagram) Fix font size of base fret numeral (issue 337).
+* (Stringdiagram) Fix fret number colours.
+* Fix handling of XDG_CONFIG_HOME.
+* Fix 'spread' images.
+* Fix problem finding notes:german et al.
+* (MMA) Fix test fail with perl >= 5.39.6.
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.  
+Please use the [issue tracker](https://github.com/ChordPro/chordpro/issues) for bugs reports.
+
 ## 6.040
 
 Released: 2023-12-26
@@ -8,8 +40,8 @@ Released: 2023-12-26
 ### Highlights
 
 * Images can be [placed everywhere](https://chordpro.org/chordpro/directives-image/). They can be placed relative to the paper, the page, the column, and the lyrics.
-* Images can be [embedded[(https://chordpro.org/chordpro/directives-image/#inline-images) in text (lyrics) lines, either as part of the text similar to a glyph, or somewhere else on the page relative to a particular place in the text. The latter is most interesting for annotations.
-* Delegates are images too. Annotate your lyrics with SVG images, or with musical notes using ABC or Lilypond.
+* Images can be [embedded](https://chordpro.org/chordpro/directives-image/#inline-images) in text (lyrics) lines, either as part of the text similar to a glyph, or somewhere else on the page relative to a particular place in the text. The latter is most interesting for annotations.
+* Delegates are images too. Annotate your lyrics with SVG images and musical notes using ABC or Lilypond.
 * Chord and keyboard diagrams are images too. And you can use string and keyboard diagrams simultaneously.
 * Resources like configs, tasks and images are now more logically searched using [resource libraries](https://chordpro.org/chordpro/resources/).
 
@@ -51,11 +83,6 @@ Released: 2023-12-26
 * (ABC) ABC embedding use tohtml instead of toxhtml.
 * (PDF) Enhance assets (wip), labels; move grid to separate module.
 * Experimental ##include facility.
-
-### Social and support
-
-[User community](https://groups.io/g/ChordPro) for feedback and help.  
-Please use the [issue tracker](https://github.com/ChordPro/chordpro/issues) for bugs reports.
 
 ## 6.030
 

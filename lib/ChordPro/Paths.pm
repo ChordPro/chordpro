@@ -60,11 +60,13 @@ BUILD {
     # -d ~/.$app_lc
     # -d my_dist_config
     my @try;
-    if ( defined( $ENV{XDG_CONFIG_HOME} ) ) {
+    if ( defined( $ENV{XDG_CONFIG_HOME} ) && $ENV{XDG_CONFIG_HOME} ne "" ) {
 	push( @try,
-	      catdir( $ENV{XDG_CONFIG_HOME}, ".config", $app_lc ),
-	      catdir( $ENV{XDG_CONFIG_HOME}, ".config" ),
-	      catdir( $ENV{XDG_CONFIG_HOME}, ".$app_lc" ) );
+	      # See https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
+	      # catdir( $ENV{XDG_CONFIG_HOME}, ".config", $app_lc ),
+	      # catdir( $ENV{XDG_CONFIG_HOME}, ".config" ),
+	      # catdir( $ENV{XDG_CONFIG_HOME}, ".$app_lc" ) );
+	      catdir( $ENV{XDG_CONFIG_HOME}, "$app_lc" ) );
     }
     else {
 	push( @try,
@@ -230,6 +232,7 @@ method findcfg ( $p ) {
 	@p = ( $p );
     }
     else {
+	$p =~ s/:+/\//g;
 	@p = ( "$p.prp", "$p.json" );
     }
     unless ( $found ) {
