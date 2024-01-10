@@ -337,9 +337,9 @@ sub parse_song {
 
 	for my $pp ( "all", "env-$in_context" ) {
 	    if ( $prep->{$pp} ) {
-		# warn("PRE:  ", $_, "\n");
+		 warn("PRE:  ", $_, "\n");
 		$prep->{$pp}->($_);
-		# warn("POST: ", $_, "\n");
+		  warn("POST: ", $_, "\n");
 		if ( /\n/ ) {
 		    my @a = split( /\n/, $_ );
 		    $_ = shift(@a);
@@ -1003,11 +1003,12 @@ sub decompose_grid {
 	    while ( @t ) {
 		$_ = shift(@t);
 		$tokens[-1] .= " " . $_;
-		last if /\<\/span>/;
+		last if /\<\/span>/
+		  && ! /\<\/span>.*?\<span/;
 	    }
 	}
     }
-
+    ::dump(\@tokens);
     my $nbt = 0;		# non-bar tokens
     foreach ( @tokens ) {
 	if ( $_ eq "|:" || $_ eq "{" ) {
