@@ -337,9 +337,9 @@ sub parse_song {
 
 	for my $pp ( "all", "env-$in_context" ) {
 	    if ( $prep->{$pp} ) {
-		 warn("PRE:  ", $_, "\n");
+		0&&warn("PRE:  ", $_, "\n");
 		$prep->{$pp}->($_);
-		  warn("POST: ", $_, "\n");
+		0&&warn("POST: ", $_, "\n");
 		if ( /\n/ ) {
 		    my @a = split( /\n/, $_ );
 		    $_ = shift(@a);
