@@ -158,9 +158,9 @@ sub parse_song {
 	}
 	if ( $meta && $meta->{__config} ) {
 	    my $cf = delete($meta->{__config})->[0];
-	    die("Missing config: $cf\n") unless -s $cf;
 	    warn("Config[song]: $cf\n") if $options->{verbose};
-	    my $have = ChordPro::Config::get_config($cf);
+	    my $have = ChordPro::Config::get_config( CP->findcfg($cf) );
+	    die("Missing config: $cf\n") unless $have;
 	    push( @configs, ChordPro::Config::prep_configs( $have, $cf) );
 	}
 	else {
@@ -1008,7 +1008,6 @@ sub decompose_grid {
 	    }
 	}
     }
-    ::dump(\@tokens);
     my $nbt = 0;		# non-bar tokens
     foreach ( @tokens ) {
 	if ( $_ eq "|:" || $_ eq "{" ) {
