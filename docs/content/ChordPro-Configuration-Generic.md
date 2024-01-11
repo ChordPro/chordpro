@@ -80,6 +80,25 @@ Note that settings `decapo`, `lyrics-only`, `strict`, `transcode` and
 `transpose` have corresponding command line options. The command line
 option, if used, overrides the config setting.
 
+## Columns
+
+`columns` in `settings` can also be set to an array with column widths.
+Column widths can be a number (PDF points),
+a percentage of the total width,
+or `0` (or `*`) to distribute the available width.
+
+These are the same:
+
+````
+"columns": 2
+"columns": [ "50%", "50%" ]
+"columns": [ 0, 0 ]
+"columns": [ "50%", "*" ]
+````
+
+Note that the final columns always uses the remaining width. Its value
+is therefore bogus unless you have columns with `0` (or `*`).
+
 ## Metadata
 
 The `metadata` setting contains three items:
