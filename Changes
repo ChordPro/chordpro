@@ -1,7 +1,11 @@
 0.000
 
+    - !Functionality
+    - (Experimental) Add environment textblock.
+    - (PDF) Allow strwidth and strheight to return both values at once.
     - !Bug fixes
     - Fix issue #265.
+    - Fix spread indent with labels.
 
 6.042 2024-01-09
 

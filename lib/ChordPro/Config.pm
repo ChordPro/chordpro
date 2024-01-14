@@ -1153,6 +1153,12 @@ sub default_config () {
             "handler"  : "svg2svg",
             "omit"     : false,
         },
+        "textblock" : {
+            "type"     : "image",
+            "module"   : "TextBlock",
+            "handler"  : "txt2xform",
+            "omit"     : false,
+        },
      },
 
     // Definitions for PDF output.
@@ -1665,6 +1671,7 @@ sub default_config () {
         "abc"	    : 0,
         "ly"	    : 0,
         "svg"	    : 0,
+        "txtblk"    : 0,
         // For temporary use.
         "x1"	    : 0,
         "x2"	    : 0,

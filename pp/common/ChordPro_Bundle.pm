@@ -14,5 +14,6 @@ use ChordPro::Output::HTML;
 use ChordPro::Delegate::ABC;
 use ChordPro::Delegate::Lilypond;
 use ChordPro::Delegate::SVG;
+use ChordPro::Delegate::TextBlock;
 
 1;

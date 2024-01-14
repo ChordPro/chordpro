@@ -903,7 +903,8 @@ sub generate_song {
 
 	    if ( $spreadimage ) {
 		if (ref($spreadimage) eq 'HASH' ) {
-		    $spreadimage = imagespread( $spreadimage, $x, $y, $ps );
+		    # Spread image doesn't indent.
+		    $spreadimage = imagespread( $spreadimage, $x-$ps->{_indent}, $y, $ps );
 		}
 		$y -= $spreadimage;
 	    }
@@ -1872,7 +1873,6 @@ sub imageline {
     else {
 	$pw = $ps->{__rightmargin} - $ps->{_leftmargin};
     }
-    $pw -= $ps->{_indent};
     my $ph = $ps->{_margintop} - $ps->{_marginbottom};
 
     if ( $width && $width =~ /^(\d+(?:\.\d+)?)\%$/ ) {
@@ -2002,8 +2002,7 @@ sub imageline {
 		  $ox//0, $oy//0, $align,
 		 )) if $config->{debug}->{images};
 
-#	$pr->add_image( $img, $x, $y, $w, $h, $opts->{border} || 0 );
-    $pr->add_object( $img, $x-2, $y,
+    $pr->add_object( $img, $x, $y,
 		     xscale => $w/$img->width,
 		     yscale => $h/$img->height,
 		     border => $opts->{border} || 0,
@@ -2647,6 +2646,7 @@ sub prepare_assets {
     my ( $s, $pr ) = @_;
 
     my %sa = %{$s->{assets}//{}};	# song assets
+    $s->{_ps} = $pr->{ps};		# for handlers TODO
 
     # All elements generate zero or one display items, except for SVG images
     # than can result in a series of display items.
