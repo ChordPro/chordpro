@@ -2128,7 +2128,14 @@ sub tocline {
     my $tpl = $elt->{title};
     my $vsp;
     for ( split( /\\n/, $tpl ) ) {
-	$ps->{pr}->text( $_, $x, $y );
+	# Truncate if too long... Lousy, but better than nothing.
+	my $rm = $ps->{__rightmargin} - $pr->strwidth($elt->{pageno}."xxx") - $x;
+	my $text = $_;
+	while ( $pr->strwidth($text) > $rm ) {
+	    chop($text);
+	}
+	$text .= "…" if $text ne $_;
+	$pr->text( $text, $x, $y );
 	unless ($vsp) {
 	    my $p = $elt->{pageno};
 	    $ps->{pr}->text( $p, $ps->{__rightmargin} - $pr->strwidth($p), $y );
