@@ -141,6 +141,7 @@ sub generate_songbook {
 
 	# If we have a preamble, process it as a song and prepend.
 	my $pre;
+	my $st;
 	if ( @{$ctl->{preamble}//[]} ) {
 	    $pre = ChordPro::Song->new( { generate => 'PDF' } );
 	    my $l = 0;
@@ -148,11 +149,15 @@ sub generate_songbook {
 	    $pre->parse_song( $lines, \$l, {}, {} );
 	    $t = fmt_subst( $book[0][-1], $pre->{title} )
 	      if $pre->{title};
+	    $st = fmt_subst( $book[0][-1], $pre->{meta}->{subtitle}->[0] )
+	      if $pre->{meta}->{subtitle} && $pre->{meta}->{subtitle}->[0];
 	}
 
 	my $song =
 	  { title     =>  $t,
-	    meta => { title => [ $t ] },
+	    meta => { title => [ $t ],
+		      subtitle => [ $st ],
+		    },
 	    structure => "linear",
 	    body      => [ ($pre && $pre->{body}) ? ( @{$pre->{body}} ) : (),
 		     map { +{ type    => "tocline",
