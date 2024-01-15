@@ -138,11 +138,23 @@ sub generate_songbook {
 	my $l = $ctl->{line};
 	my $start = $start_of{songbook} - $options->{"start-page-number"};
 	my $pgtpl = $ctl->{pageno};
+
+	# If we have a preamble, process it as a song and prepend.
+	my $pre;
+	if ( @{$ctl->{preamble}//[]} ) {
+	    $pre = ChordPro::Song->new( { generate => 'PDF' } );
+	    my $l = 0;
+	    my $lines = $ctl->{preamble};
+	    $pre->parse_song( $lines, \$l, {}, {} );
+	    $t = fmt_subst( $book[0][-1], $pre->{title} )
+	      if $pre->{title};
+	}
+
 	my $song =
 	  { title     =>  $t,
 	    meta => { title => [ $t ] },
 	    structure => "linear",
-	    body      => [
+	    body      => [ ($pre && $pre->{body}) ? ( @{$pre->{body}} ) : (),
 		     map { +{ type    => "tocline",
 			      context => "toc",
 			      title   => fmt_subst( $_->[-1], $l ),
@@ -150,6 +162,9 @@ sub generate_songbook {
 			      pageno  => fmt_subst( $_->[-1], $pgtpl ),
 			    } } @$book,
 	    ],
+	    maybe settings    => $pre->{settings},
+	    maybe assets      => $pre->{assets},
+	    maybe spreadimage => $pre->{spreadimage},
 	  };
 
 	# Prepend the toc.

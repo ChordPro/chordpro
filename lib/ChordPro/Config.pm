@@ -1084,6 +1084,7 @@ sub default_config () {
           "pageno"   : "%{page}",
           "fold"     : false,
           "omit"     : false,
+          "preamble" : [],
         },
         { "fields"   : [ "sorttitle", "artist" ],
           "label"    : "Contents by Title",
