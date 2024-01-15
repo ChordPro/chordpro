@@ -9,6 +9,32 @@ use utf8;
 
 package ChordPro::Delegate::TextBlock;
 
+# Combine one or more text lines into a single xforms object.
+#
+# Attributes:
+#
+#  width:      Width of the resultant object.
+#              Defaults to the actual width (tight fit) of the texts.
+#  height:     Height of the resultant object.
+#              Defaults to the actual height of the text, including
+#              the advance of the last line (non-tight fit).
+#              When height or padding is set, a tight fit is used.
+#  padding:    Provide padding between the object and the inner text.
+#              When height or padding is set, a tight fit is used.
+#  flush:      Horizontal text flush (left, center, right).
+#  vflush:     Vertical text flush (top, middle, bottom).
+#  textstyle:  Style (font) to be used. Must be one of "text", "chords",
+#              "comment" etc.
+#  textsize:   Initial value for the text size.
+#  textcolor:  Initial color for the text.
+#  background: Background color of the object.
+#
+# Common attributes:
+#
+#  id:         Make asset instead of image.
+#  align:      Image alignment (left, center, right)
+#  border:     Draw border around the image.
+
 use ChordPro::Utils;
 
 sub DEBUG() { $::config->{debug}->{txtblk} }
@@ -17,73 +43,118 @@ sub txt2xform( $s, $pw, $elt ) {
 
     my $ps = $s->{_ps};
     my $pr = $ps->{pr};
+    my $opts = { %{$elt->{opts}} };
 
-    my $flush = $elt->{opts}->{flush} // "left";
-    my $font  = $elt->{opts}->{textfont} // "text";
-    $font = $ps->{fonts}->{$font};
-    my $size = $elt->{opts}->{textsize} || $font->{size};
-    my $color = $elt->{opts}->{textcolor};
+    # Text style must be one of the known styles (text, chord, comment, ...).
+    my $style = delete($opts->{textstyle}) // "text";
+    unless ( defined($ps->{fonts}->{$style} ) ) {
+	warn("TextBlock: Unknown font style \"$style\", using \"text\"\n");
+	$style = "text";
+    }
+    my $font  = $ps->{fonts}->{$style};
+
+    my $size   = delete($opts->{textsize}) || $font->{size};
+    my $color  = delete($opts->{textcolor});
+    my $flush  = delete($opts->{flush})  // "left";
+    my $vflush = delete($opts->{vflush}) // "top";
 
     my $data = $elt->{data};
     if ( $color ) {
 	$data = [ map { "<span color='$color'>$_</span>" } @$data ];
     }
-    my $height = 0;
-    my $width = 0;
-    my $x = 0;
-    my $y = 0;
+    my $padding  = delete($opts->{padding});
+
     # New xo, and put it in text mode.
     my $xo = $pr->{pdf}->xo_form;
     $xo->textstart;
 
-    if ( $flush eq "right" ) {
-	for ( @$data ) {
-	    my $w = $pr->strwidth( $_, $font, $size );
-	    $width = $w if $w > $width;
+    # Pre-pass to establish the actual width/height.
+    my ( $awidth, $aheight ) = ( 0, 0 );
+    my ( $w, $h );
+    for ( @$data ) {
+	( $w, $h ) = $pr->strwidth( $_, $font, $size );
+	$awidth = $w if $w > $awidth;
+	$aheight += $h * $ps->{spacing}->{lyrics};
+    }
+
+    # Desired width (includes padding).
+    my ( $width, $height );
+    if ( $width = delete($opts->{width}) ) {
+	$width -= 2*($padding||0);
+    }
+    else {
+	$width = $awidth;
+    }
+
+    # Correction for tight y-fit.
+    my $ycorr = $h * ($ps->{spacing}->{lyrics} - 1);
+
+    # Desired height (includes padding).
+    if ( $height = delete($opts->{height}) ) {
+	$height -= 2*($padding||0);
+    }
+    else {
+	$height = $aheight;
+	$ycorr = 0 unless defined($padding);;
+    }
+    # Width and height are now the 'inner' box (w/o padding).
+
+    # With padding, we cancel the leading after the last line.
+    if ( defined $padding ) {
+	$ycorr = 0;
+    }
+    else {
+	$padding = 0;
+    }
+    # Note that the padding will be dealt with in the bbox.
+
+    # Draw background.
+    $xo->bbox( -$padding, -$padding, $width+$padding, $height+$padding );
+    if ( my $bg = delete($opts->{background}) ) {
+	$xo->rectangle( $xo->bbox );
+	$xo->fill_color($bg);
+	$xo->fill;
+    }
+
+    my $y = $height - $ycorr;
+
+    if ( $flush eq "right" || $flush eq "center"
+	 || $vflush eq "middle" || $vflush eq "bottom" ) {
+
+	if ( $vflush eq "middle" ) {
+	    $y += ($aheight-$height)/2;
 	}
-	for ( reverse @$data ) {
-	    my ( $w, $h ) = $pr->strwidth( $_, $font, $size );
-	    $height += $h * $ps->{spacing}->{lyrics};
-	    # We know that after a call to strwidth there is a tmplayout...
-	    $pr->{tmplayout}->show( $x + $width-$w, $height, $xo );
+	elsif ( $vflush eq "bottom" ) {
+	    $y += $aheight - $height;
+	}
+
+	for ( @$data ) {
+	    my $w = $pr->strheight( $_, $font, $size );
+	    $pr->{tmplayout}->set_width($width);
+	    $pr->{tmplayout}->set_alignment($flush);
+	    $pr->{tmplayout}->show( 0, $y, $xo );
+	    $y -= $h * $ps->{spacing}->{lyrics};
 	}
     }
-    elsif ( $flush eq "center" ) {
+    else {			# assume top/left
 	for ( @$data ) {
-	    my $w = $pr->strwidth( $_, $font, $size );
-	    $width = $w if $w > $width;
-	}
-	for ( reverse @$data ) {
-	    my ( $w, $h ) = $pr->strwidth( $_, $font, $size );
-	    $height += $h * $ps->{spacing}->{lyrics};
-	    # We know that after a call to strwidth there is a tmplayout...
-	    $pr->{tmplayout}->show( $x + ($width-$w)/2, $height, $xo );
-	}
-    }
-    else {			# assume left
-	for ( reverse @$data ) {
-	    my ( $w, $h ) = $pr->strwidth( $_, $font, $size );
-	    $width = $w if $w > $width;
-	    $height += $h * $ps->{spacing}->{lyrics};
-	    # We know that after a call to strwidth there is a tmplayout...
-	    $pr->{tmplayout}->show( $x, $height, $xo );
+	    my $h = $pr->strheight( $_, $font, $size );
+	    $pr->{tmplayout}->show( 0, $y, $xo );
+	    $y -= $h * $ps->{spacing}->{lyrics};
 	}
     }
 
     # Finish.
     $xo->textend;
-    $xo->bbox( 0, 0, $width, $height );
 
     return
       { type      => "image",
 	subtype   => "xoform",
 	line      => $elt->{line},
 	data      => $xo,
-	width     => $width,
-	height    => $height,
-	opts      => {
-		      align => "left"
-		     },
+	width     => $width  + 2*$padding,
+	height    => $height + 2*$padding,
+	opts      => { align => "left", %$opts },
       };
 }
 
