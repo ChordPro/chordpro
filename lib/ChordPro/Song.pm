@@ -1605,7 +1605,8 @@ sub dir_image {
 	else {
 	    $self->{spreadimage} =
 	      { id => $aid, space => $opts{spread} };
-	    warn("Got spread image $aid with $opts{spread} space\n");
+	    warn("Got spread image $aid with $opts{spread} space\n")
+	      if $config->{debug}->{images};
 	}
     }
 
