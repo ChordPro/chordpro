@@ -147,6 +147,7 @@ sub generate_songbook {
 					   generate => 'PDF' } );
 	    my $l = 0;
 	    my $lines = $ctl->{preamble};
+	    $lines = [ $lines ] unless ref($lines) eq 'ARRAY';
 	    $song->parse_song( $lines, \$l, {}, {} );
 	    $t = fmt_subst( $book[0][-1], $song->{title} )
 	      if $song->{title};
@@ -159,6 +160,13 @@ sub generate_songbook {
 	$song->{title} //= $t;
 	$song->{meta}->{title} //= [ $t ];
 	$song->{meta}->{subtitle} //= [ $st ];
+	$song->{settings}->{columns} //= $ctl->{columns} // 1;
+	if ( $ctl->{columnspace} ) {
+	    $song->{config}->unlock;
+	    $song->{config}->{pdf}->{columnspace} = $ctl->{columnspace};
+	    $::config->unlock;
+	    $::config->{pdf}->{columnspace} = $ctl->{columnspace};
+	}
 	$song->{body} //= [];
 	push( @{ $song->{body} },
 	      map { +{ type    => "tocline",
@@ -1254,7 +1262,7 @@ sub generate_song {
 	    $checkspace->($vsp);
 	    $pr->show_vpos( $y, 0 ) if $config->{debug}->{spacing};
 
-	    $y = tocline( $elt, $x, $y, $ps );
+	    $y -= $vsp * tocline( $elt, $x, $y, $ps );
 	    $pr->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
 	    next;
 	}
@@ -2119,11 +2127,13 @@ sub tocline {
     $pr->setfont($ftoc);
     my $tpl = $elt->{title};
     my $vsp;
+    my $lines = 0;
 
     my $p = $elt->{pageno};
     my $pw = $pr->strwidth($p);
     my $ww = $ps->{__rightmargin} - $x - $pr->strwidth("xxx$p");
     for my $text ( split( /\\n/, $tpl ) ) {
+	$lines++;
 	# Suppress unclosed markup warnings.
 	local $SIG{__WARN__} = sub{
 	    CORE::warn(@_) unless "@_" =~ /Unclosed markup/;
@@ -2146,7 +2156,7 @@ sub tocline {
     my $ann = $pr->{pdfpage}->annotation;
     $ann->link($elt->{page});
     $ann->rect( $ps->{__leftmargin}, $y, $ps->{__rightmargin}, $y0 );
-    return $y;
+    return $lines;
 }
 
 sub has_visible_chords {
@@ -2265,7 +2275,7 @@ sub set_columns {
 
     if ( @cols ) {		# columns with explicit widths
 	my $stars;
-	my $wx = $w;		# available
+	my $wx = $w + $ps->{columnspace}; # available
 	for ( @cols ) {
 	    if ( !$_ || $_ eq '*' ) {
 		$stars++;
