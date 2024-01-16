@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#! perl
 
 package main;
 
@@ -140,39 +140,33 @@ sub generate_songbook {
 	my $pgtpl = $ctl->{pageno};
 
 	# If we have a preamble, process it as a song and prepend.
-	my $pre;
-	my $m = {};
-	my $st;
+	my $st = "";
+	my $song;
 	if ( @{$ctl->{preamble}//[]} ) {
-	    $pre = ChordPro::Song->new( { generate => 'PDF' } );
+	    $song = ChordPro::Song->new( { _filesource => "__TOC__",
+					   generate => 'PDF' } );
 	    my $l = 0;
 	    my $lines = $ctl->{preamble};
-	    $pre->parse_song( $lines, \$l, {}, {} );
-	    $t = fmt_subst( $book[0][-1], $pre->{title} )
-	      if $pre->{title};
-	    $st = fmt_subst( $book[0][-1], $pre->{meta}->{subtitle}->[0] )
-	      if $pre->{meta}->{subtitle} && $pre->{meta}->{subtitle}->[0];
-	    $m = $pre->{meta};
+	    $song->parse_song( $lines, \$l, {}, {} );
+	    $t = fmt_subst( $book[0][-1], $song->{title} )
+	      if $song->{title};
+	    $st = fmt_subst( $book[0][-1], $song->{meta}->{subtitle}->[0] )
+	      if $song->{meta}->{subtitle} && $song->{meta}->{subtitle}->[0];
 	}
-
-	$m->{title} //= [ $t ];
-	$m->{subtitle} //= [ $st ];
-	my $song =
-	  { title     =>  $t,
-	    meta      => $m,
-	    structure => "linear",
-	    body      => [ ($pre && $pre->{body}) ? ( @{$pre->{body}} ) : (),
-		     map { +{ type    => "tocline",
-			      context => "toc",
-			      title   => fmt_subst( $_->[-1], $l ),
-			      page    => $pr->{pdf}->openpage($_->[-1]->{meta}->{tocpage}+$start),
-			      pageno  => fmt_subst( $_->[-1], $pgtpl ),
-			    } } @$book,
-	    ],
-	    maybe settings    => $pre->{settings},
-	    maybe assets      => $pre->{assets},
-	    maybe spreadimage => $pre->{spreadimage},
-	  };
+	else {
+	    $song = { meta => {} };
+	}
+	$song->{title} //= $t;
+	$song->{meta}->{title} //= [ $t ];
+	$song->{meta}->{subtitle} //= [ $st ];
+	$song->{body} //= [];
+	push( @{ $song->{body} },
+	      map { +{ type    => "tocline",
+		       context => "toc",
+		       title   => fmt_subst( $_->[-1], $l ),
+		       page    => $pr->{pdf}->openpage($_->[-1]->{meta}->{tocpage}+$start),
+		       pageno  => fmt_subst( $_->[-1], $pgtpl ),
+		     } } @$book );
 
 	# Prepend the toc.
 	$page = generate_song( $song,
@@ -2127,18 +2121,25 @@ sub tocline {
     $pr->setfont($ftoc);
     my $tpl = $elt->{title};
     my $vsp;
+
+    my $p = $elt->{pageno};
+    my $pw = $pr->strwidth($p);
+    my $ww = $ps->{__rightmargin} - $x - $pr->strwidth("xxx$p");
+
     for ( split( /\\n/, $tpl ) ) {
-	# Truncate if too long... Lousy, but better than nothing.
-	my $rm = $ps->{__rightmargin} - $pr->strwidth($elt->{pageno}."xxx") - $x;
-	my $text = $_;
-	while ( $pr->strwidth($text) > $rm ) {
-	    chop($text);
+	# Suppress unclosed markup warnings.
+	local $SIG{__WARN__} = sub{
+	    CORE::warn(@_) unless "@_" =~ /Unclosed markup/;
+	};
+	# Get the part that fits (hopefully, all) and print.
+	my ( $text, $ex ) = $pr->wrap( $_, $ww );
+	$x = $pr->text( $text, $x, $y );
+	if ( $ex ne "" ) {
+	    # Show ellipses.
+	    $pr->text( "…", $x, $y );
 	}
-	$text .= "…" if $text ne $_;
-	$pr->text( $text, $x, $y );
 	unless ($vsp) {
-	    my $p = $elt->{pageno};
-	    $ps->{pr}->text( $p, $ps->{__rightmargin} - $pr->strwidth($p), $y );
+	    $ps->{pr}->text( $p, $ps->{__rightmargin} - $pw, $y );
 	    $vsp = _vsp("toc", $ps);
 	}
 	$y -= $vsp;
