@@ -3,6 +3,7 @@
     - !Functionality
     - (Experimental) Add environment textblock.
     - (Experimental) Add ToC preamble.
+    - Wrap toc lines.
     - (PDF) Allow strwidth and strheight to return both values at once.
     - !Bug fixes
     - Fix issue #265.

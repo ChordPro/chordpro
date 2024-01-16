@@ -1254,9 +1254,7 @@ sub generate_song {
 	    $checkspace->($vsp);
 	    $pr->show_vpos( $y, 0 ) if $config->{debug}->{spacing};
 
-	    tocline( $elt, $x, $y, $ps );
-
-	    $y -= $vsp;
+	    $y = tocline( $elt, $x, $y, $ps );
 	    $pr->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
 	    next;
 	}
@@ -2125,29 +2123,30 @@ sub tocline {
     my $p = $elt->{pageno};
     my $pw = $pr->strwidth($p);
     my $ww = $ps->{__rightmargin} - $x - $pr->strwidth("xxx$p");
-
-    for ( split( /\\n/, $tpl ) ) {
+    for my $text ( split( /\\n/, $tpl ) ) {
 	# Suppress unclosed markup warnings.
 	local $SIG{__WARN__} = sub{
 	    CORE::warn(@_) unless "@_" =~ /Unclosed markup/;
 	};
 	# Get the part that fits (hopefully, all) and print.
-	my ( $text, $ex ) = $pr->wrap( $_, $ww );
-	$x = $pr->text( $text, $x, $y );
-	if ( $ex ne "" ) {
-	    # Show ellipses.
-	    $pr->text( "…", $x, $y );
-	}
+	( $text, my $ex ) = @{ defrag( [ $pr->wrap( $text, $ww ) ] ) };
+	$pr->text( $text, $x, $y );
 	unless ($vsp) {
 	    $ps->{pr}->text( $p, $ps->{__rightmargin} - $pw, $y );
 	    $vsp = _vsp("toc", $ps);
+	    $x += $pr->strwidth( $config->{settings}->{wrapindent} )
+	      if $ex ne "";
 	}
 	$y -= $vsp;
+	if ( $ex ne "" ) {
+	    $text = $ex;
+	    redo;
+	}
     }
     my $ann = $pr->{pdfpage}->annotation;
     $ann->link($elt->{page});
-    $ann->rect( $ps->{__leftmargin}, $y0 - $ftoc->{size} * $ps->{spacing}->{toc},
-		$ps->{__rightmargin}, $y0 );
+    $ann->rect( $ps->{__leftmargin}, $y, $ps->{__rightmargin}, $y0 );
+    return $y;
 }
 
 sub has_visible_chords {
