@@ -141,6 +141,7 @@ sub abc2svg_qjs( $s, $pw, $elt ) {
 
 sub _abc2svg( $s, $pw, $elt ) {
 
+    return { type => "ignore" } unless @{ $elt->{data} };
     # Bail out if we don't have a suitable program.
     unless ( $abc2svg ) {
 	warn("Error in ABC embedding: no 'abc2svg' or 'qjs' program found.\n");
