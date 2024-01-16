@@ -2313,6 +2313,12 @@ sub showlayout {
     my $mr = $ps->{_rightmargin};
     my $ml = $ps->{_leftmargin};
 
+    my $f = sub {
+	my $t = sprintf( "%.1f", shift );
+	$t =~ s/\.0$//;
+	return $t;
+    };
+
     $pr->rectxy( $ml,
 		 $ps->{marginbottom},
 		 $ps->{papersize}->[0]-$mr,
@@ -2324,16 +2330,16 @@ sub showlayout {
     $pr->setfont($font,$fsz);
     $pr->text( "<span color='red'>$ml</span>",
 	       $ml, $ptop, $font, $fsz );
-    my $t = $ps->{papersize}->[0]-$mr;
+    my $t = $f->($ps->{papersize}->[0]-$mr);
     $pr->text( "<span color='red'>$t</span>",
 	       $ps->{papersize}->[0]-$mr-$pr->strwidth("$mr"),
 	       $ptop, $font, $fsz );
-    $t = $ps->{papersize}->[1]-$ps->{margintop};
+    $t = $f->($ps->{papersize}->[1]-$ps->{margintop});
     $pr->text( "<span color='red'>$t  </span>",
 	       $ml-$pr->strwidth("$t  "),
 	       $ps->{papersize}->[1]-$ps->{margintop}-2,
 	       $font, $fsz );
-    $t = $ps->{marginbottom};
+    $t = $f->($ps->{marginbottom});
     $pr->text( "<span color='red'>$t  </span>",
 	       $ml-$pr->strwidth("$t  "),
 	       $ps->{marginbottom}-2,
@@ -2343,14 +2349,14 @@ sub showlayout {
 	      $ps->{papersize}->[0]-$ml-$mr,
 	      $lw, $col );
     $pr->hline(@a);
-    $t = $a[1];
+    $t = $f->($a[1]);
     $pr->text( "<span color='red'>$t  </span>",
 	       $ml-$pr->strwidth("$t  "),
 	       $a[1]-2,
 	       $font, $fsz );
     $a[1] = $ps->{marginbottom}-$ps->{footspace};
     $pr->hline(@a);
-    $t = $a[1];
+    $t = $f->($a[1]);
     $pr->text( "<span color='red'>$t  </span>",
 	       $ml-$pr->strwidth("$t  "),
 	       $a[1]-2,
@@ -2365,11 +2371,11 @@ sub showlayout {
 	   $lw, $col );
     foreach my $i ( 0 .. @off-1 ) {
 	next unless $off[$i];
-	$a[0] = $ml + $off[$i];
+	$a[0] = $f->($ml + $off[$i]);
 	$pr->text( "<span color='red'>$a[0]</span>",
 		   $a[0] - $pr->strwidth($a[0])/2, $ptop, $font, $fsz );
 	$pr->vline(@a);
-	$a[0] = $ml + $off[$i] - $ps->{columnspace};
+	$a[0] = $f->($ml + $off[$i] - $ps->{columnspace});
 	$pr->text( "<span color='red'>$a[0]</span>",
 		   $a[0] - $pr->strwidth($a[0])/2, $ptop, $font, $fsz );
 	$pr->vline(@a);
