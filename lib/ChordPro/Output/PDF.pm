@@ -140,35 +140,27 @@ sub generate_songbook {
 	my $pgtpl = $ctl->{pageno};
 
 	# If we have a preamble, process it as a song and prepend.
-	my $st = "";
 	my $song;
-	if ( @{$ctl->{preamble}//[]} ) {
-	    $song = ChordPro::Song->new( { _filesource => "__TOC__",
+	if ( $ctl->{template} ) {
+	    my $opts = {};
+	    my $cf = CP->siblingres( $book[0][-1]->{source}->{file},
+				     $ctl->{template}, class => "templates" );
+	    my $lines = loadlines( $cf, $opts );
+	    $song = ChordPro::Song->new( { %$opts,
 					   generate => 'PDF' } );
 	    my $l = 0;
-	    my $lines = $ctl->{preamble};
-	    $lines = [ $lines ] unless ref($lines) eq 'ARRAY';
 	    $song->parse_song( $lines, \$l, {}, {} );
 	    $t = fmt_subst( $book[0][-1], $song->{title} )
 	      if $song->{title};
-	    $st = fmt_subst( $book[0][-1], $song->{meta}->{subtitle}->[0] )
+	    my $st = fmt_subst( $book[0][-1], $song->{meta}->{subtitle}->[0] )
 	      if $song->{meta}->{subtitle} && $song->{meta}->{subtitle}->[0];
 	}
 	else {
 	    $song = { meta => {} };
+	    $song->{title} //= $t;
+	    $song->{meta}->{title} //= [ $t ];
 	}
-	$song->{title} //= $t;
-	$song->{meta}->{title} //= [ $t ];
-	$song->{meta}->{subtitle} //= [ $st ];
-	$song->{settings}->{columns} //= $ctl->{columns} // 1;
-	if ( $ctl->{columnspace} ) {
-	    $song->{config}->unlock;
-	    $song->{config}->{pdf}->{columnspace} = $ctl->{columnspace};
-	    $::config->unlock;
-	    $::config->{pdf}->{columnspace} = $ctl->{columnspace};
-	}
-	$song->{body} //= [];
-	push( @{ $song->{body} },
+	push( @{ $song->{body} //= [] },
 	      map { +{ type    => "tocline",
 		       context => "toc",
 		       title   => fmt_subst( $_->[-1], $l ),
