@@ -2155,7 +2155,7 @@ sub tocline {
     }
     my $ann = $pr->{pdfpage}->annotation;
     $ann->link($elt->{page});
-    $ann->rect( $ps->{__leftmargin}, $y, $ps->{__rightmargin}, $y0 );
+    $ann->rect( $ps->{__leftmargin}, $y0-$lines*$vsp, $ps->{__rightmargin}, $y0 );
     return $lines;
 }
 
