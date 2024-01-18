@@ -22,4 +22,4 @@ questions and answers here sometime soon.
 
 * [D♯ transposes to D♭ but I want C♯]({{< relref "FAQ-Transpose" >}})
 
-* ["Unknown chord" for slash chords]({{< relref "FAQ-SlashChords" >}})
+* ["Unknown chord" for valid chords]({{< relref "FAQ-SlashChords" >}})

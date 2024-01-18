@@ -11,7 +11,7 @@ See also [Trouble Shooting]({{< relref "Trouble-Shooting" >}}).
 
 * [User Forum]({{< relref "Support-User-Forum" >}})
 * [Hints and Tips]({{< relref "Support-Hints-And-Tips" >}})
-* [FAQ]({{< relref "Support-FAQ" >}})
+* [Frequently Asked Questions]({{< relref "Support-FAQ" >}})
 
 ## Support for us
 
@@ -26,8 +26,8 @@ like ChordPro, please consider a small donation.
 
 [Buy a coffee](https://ko-fi.com/chordpro)
 
-Bitcoin: `3GBzu3xC9DzVHfYHt9rRgA6qmjNkRfbr9o`
-
 [Donate with Paypal](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=WDKWDE6R3KR98&lc=GB&item_name=ChordPro&currency_code=EUR&bn=PP-DonationsBF%3Abtn_donate_LG.gif%3ANonHosted)
+
+Bitcoin: `3GBzu3xC9DzVHfYHt9rRgA6qmjNkRfbr9o`
 
 ### Thanks!
