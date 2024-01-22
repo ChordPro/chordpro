@@ -81,7 +81,7 @@ output.
 
 * [start_of_abc]({{< relref "Directives-env_abc" >}}) / [end_of_abc]({{< relref "Directives-env_abc" >}})
 * [start_of_ly]({{< relref "Directives-env_ly" >}}) / [end_of_ly]({{< relref "Directives-env_ly" >}})
-* [start_of_svg]({{< relref "Directives-env_svg" >}}) / [end_of_ly]({{< relref "Directives-env_svg" >}})
+* [start_of_svg]({{< relref "Directives-env_svg" >}}) / [end_of_svg]({{< relref "Directives-env_svg" >}})
 
 ## Chord diagrams
 
