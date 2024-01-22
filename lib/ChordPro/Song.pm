@@ -2139,7 +2139,7 @@ sub define_chord {
     if ( $info ) {
 	# Copy the chord info.
 	$res->{$_} //= $info->{$_} // ''
-	  for qw( root qual ext bass
+	  for qw( parser root qual ext bass
 		  root_canon qual_canon ext_canon bass_canon
 		  root_ord root_mod bass_ord bass_mod
 	       );
