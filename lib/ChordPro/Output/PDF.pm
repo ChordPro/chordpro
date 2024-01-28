@@ -139,12 +139,26 @@ sub generate_songbook {
 	my $start = $start_of{songbook} - $options->{"start-page-number"};
 	my $pgtpl = $ctl->{pageno};
 
-	# If we have a preamble, process it as a song and prepend.
+	# If we have a template, process it as a song and prepend.
 	my $song;
+	    my $cf;
 	if ( $ctl->{template} ) {
+	    my $tpl = $ctl->{template};
+	    if ( $tpl =~ /\.\w+/ ) { # file
+		$cf = CP->siblingres( $book[0][-1]->{source}->{file},
+				      $tpl, class => "templates" );
+		warn("ToC template not found: $tpl\n") unless $cf;
+	    }
+	    else {
+		$cf = CP->findres( $tpl.".cho", class => "templates" );
+		if ( $verbose ) {
+		    warn("ToC template",
+			 $cf ? " found: $cf" : " not found: $tpl.cho\n")
+		}
+	    }
+	}
+	if ( $cf ) {
 	    my $opts = {};
-	    my $cf = CP->siblingres( $book[0][-1]->{source}->{file},
-				     $ctl->{template}, class => "templates" );
 	    my $lines = loadlines( $cf, $opts );
 	    $song = ChordPro::Song->new( { %$opts,
 					   generate => 'PDF' } );

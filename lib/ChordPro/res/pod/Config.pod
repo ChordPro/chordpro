@@ -228,6 +228,7 @@ extensive details and examples.
               "pageno"   : "%{page}",
               "fold"     : false,
               "omit"     : false,
+              "template" : "stdtoc",
             },
             { "fields"   : [ "sorttitle", "artist" ],
               "label"    : "Contents by Title",
@@ -235,6 +236,7 @@ extensive details and examples.
               "pageno"   : "%{page}",
               "fold"     : false,
               "omit"     : false,
+              "template" : "stdtoc",
             },
             { "fields"   : [ "artist", "sorttitle" ],
               "label"    : "Contents by Artist",
@@ -242,6 +244,7 @@ extensive details and examples.
               "pageno"   : "%{page}",
               "fold"     : false,
               "omit"     : true,
+              "template" : "stdtoc",
             },
         ],
         // Table of contents, old style.

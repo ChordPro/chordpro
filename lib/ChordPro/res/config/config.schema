@@ -565,6 +565,11 @@
             "description" : "The format for the page numbers in the toc.",
             "type" : "string",
             "default" : "%{page}"
+          },
+          "template" : {
+            "description" : "Template song for the toc.",
+            "type" : "string",
+            "default" : "stdtoc"
           }
         }
       }

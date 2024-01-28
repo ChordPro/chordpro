@@ -1084,6 +1084,7 @@ sub default_config () {
           "pageno"   : "%{page}",
           "fold"     : false,
           "omit"     : false,
+          "template" : "stdtoc",
         },
         { "fields"   : [ "sorttitle", "artist" ],
           "label"    : "Contents by Title",
@@ -1091,6 +1092,7 @@ sub default_config () {
           "pageno"   : "%{page}",
           "fold"     : false,
           "omit"     : false,
+          "template" : "stdtoc",
         },
         { "fields"   : [ "artist", "sorttitle" ],
           "label"    : "Contents by Artist",
@@ -1098,6 +1100,7 @@ sub default_config () {
           "pageno"   : "%{page}",
           "fold"     : false,
           "omit"     : true,
+          "template" : "stdtoc",
         },
     ],
     // Table of contents, old style.

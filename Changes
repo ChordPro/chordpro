@@ -1,8 +1,18 @@
 0.000
 
+    - !Highlights
+
+    - It is possible to customize the tables of content by providing a
+      template. The template is processed as a song before the tables
+      and can be used to set title, subtitle, columns, maybe even an
+      introduction text. Since the template it iself a song, it can be
+      associated with its own config file for unlimited customization.
+
+      See [the docs](https://chordpro.org/beta/chordpro-configuration-generic/#customizing-the-table-of-contents) for more information.
+
     - !Functionality
     - (Experimental) Add environment textblock.
-    - (Experimental) Add ToC preamble.
+    - (Experimental) Add ToC templates.
     - Wrap toc lines.
     - (PDF) Allow strwidth and strheight to return both values at once.
     - !Bug fixes

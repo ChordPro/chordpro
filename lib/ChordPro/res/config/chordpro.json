@@ -201,6 +201,7 @@
           "pageno"   : "%{page}",
           "fold"     : false,
           "omit"     : false,
+          "template" : "stdtoc",
         },
         { "fields"   : [ "sorttitle", "artist" ],
           "label"    : "Contents by Title",
@@ -208,6 +209,7 @@
           "pageno"   : "%{page}",
           "fold"     : false,
           "omit"     : false,
+          "template" : "stdtoc",
         },
         { "fields"   : [ "artist", "sorttitle" ],
           "label"    : "Contents by Artist",
@@ -215,6 +217,7 @@
           "pageno"   : "%{page}",
           "fold"     : false,
           "omit"     : true,
+          "template" : "stdtoc",
         },
     ],
     // Table of contents, old style.
