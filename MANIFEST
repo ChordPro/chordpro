@@ -15,6 +15,7 @@ lib/ChordPro/Config/Properties.pm
 lib/ChordPro/Delegate/ABC.pm
 lib/ChordPro/Delegate/Lilypond.pm
 lib/ChordPro/Delegate/SVG.pm
+lib/ChordPro/Delegate/TextBlock.pm
 lib/ChordPro/Dumper.pm
 lib/ChordPro/Output/ChordPro.pm
 lib/ChordPro/Output/Common.pm
@@ -141,9 +142,11 @@ lib/ChordPro/res/fonts/ChordProSymbols.ttf
 lib/ChordPro/res/icons/chordpro-doc.icns
 lib/ChordPro/res/icons/chordpro-doc.ico
 lib/ChordPro/res/icons/chordpro-doc.png
+lib/ChordPro/res/icons/chordpro-doc.svg
 lib/ChordPro/res/icons/chordpro.icns
 lib/ChordPro/res/icons/chordpro.ico
 lib/ChordPro/res/icons/chordpro.png
+lib/ChordPro/res/icons/chordpro.svg
 lib/ChordPro/res/linux/chordpro.desktop
 lib/ChordPro/res/linux/chordpro.metainfo.xml
 lib/ChordPro/res/linux/chordpro.xml

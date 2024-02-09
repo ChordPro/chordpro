@@ -72,11 +72,13 @@ sub abc2svg( $s, $pw, $elt ) {
 	# First, try native program.
 	unless ( $abc2svg ) {
 	    $abc2svg = findexe( "abc2svg", "silent" );
-	    $abc2svg = [ $abc2svg ] if $abc2svg;
+	    $abc2svg = { desc => "abc2svg",
+			 cmd => [ $abc2svg ] } if $abc2svg;
 	}
 	unless ( $abc2svg ) {
 	    $abc2svg = findexe( "abcnode", "silent" );
-	    $abc2svg = [ $abc2svg ] if $abc2svg;
+	    $abc2svg = { desc => "abcnode",
+			 cmd => [ $abc2svg ] } if $abc2svg;
 	}
 
 	# We know what to do.
@@ -98,11 +100,14 @@ sub packaged_qjs() {
 
     if ( have_xs() ) {
 	my $js = "$dir/abc2svg/abc2svg-1.js";
-	my @js = loadlines( $js, { split => 0 } );
+	my @js = loadlines($js);
 	if ( $js[-1] =~ /abc2svg.version="(.*?)";abc2svg.vdate="(.*?)"/ ) {
-	    return [ "QuickJS_XS", "ABC2SVG version $1 of $2", $dir ];
+	    return { desc => "QuickJS_XS",
+		     version => "ABC2SVG version $1 of $2",
+		     lib => $dir };
 	}
-	return [ "QuickJS_XS", $dir ];
+	return { desc => "QuickJS_XS",
+		 lib => $dir };
     }
 
     my $qjs;
@@ -124,7 +129,17 @@ sub packaged_qjs() {
     if ( $qjs
 	 && -s "${dir}/chordproabc.js"
 	 && -s "${dir}/abc2svg/tohtml.js" ) {
-	return [ $qjs, "--std", "${dir}/chordproabc.js", "${dir}/abc2svg" ];
+	my $js = "$dir/abc2svg/abc2svg-1.js";
+	my @js = loadlines($js);
+	if ( $js[-1] =~ /abc2svg.version="(.*?)";abc2svg.vdate="(.*?)"/ ) {
+	    return { desc => $qjs,
+		     version => "ABC2SVG version $1 of $2",
+		     cmd => [ $qjs, "--std", "${dir}/chordproabc.js",
+			      "${dir}/abc2svg" ] };
+	}
+	return { desc => $qjs,
+		 cmd => [ $qjs, "--std", "${dir}/chordproabc.js",
+			  "${dir}/abc2svg" ] };
     }
     return 0;
 }
@@ -141,6 +156,7 @@ sub abc2svg_qjs( $s, $pw, $elt ) {
 
 sub _abc2svg( $s, $pw, $elt ) {
 
+    return { type => "ignore" } unless @{ $elt->{data} };
     # Bail out if we don't have a suitable program.
     unless ( $abc2svg ) {
 	warn("Error in ABC embedding: no 'abc2svg' or 'qjs' program found.\n");
@@ -242,14 +258,12 @@ sub _abc2svg( $s, $pw, $elt ) {
 	return;
     }
 
-    my @cmd = @$abc2svg;
-
     my @lines;
     my $ret;
 
-    if ( $cmd[0] eq "QuickJS_XS" ) {
+    if ( $abc2svg->{desc} eq "QuickJS_XS" ) {
 	my $js = JavaScript::QuickJS->new;
-	my $base = $cmd[-1] . "/abc2svg";
+	my $base = $abc2svg->{lib} . "/abc2svg";
 	$js->set_module_base($base);
 
 	my $abc2svg =
@@ -295,14 +309,16 @@ sub _abc2svg( $s, $pw, $elt ) {
 		$js->eval( slurp("$base/cmdline.js") );
 	    }
 	    $js->eval( slurp("$base/tohtml.js") );
-	    $js->eval( qq{abc_cmd("ChordPro", args, "QuickJS (embedded)")} );
+	    $js->eval( qq{abc_cmd("ChordPro", args, "QuickJS_XS")} );
 	};
 	warn($@) if $@;
 	undef $js;
 
     }
 
-    elsif ( $cmd[0] =~ /qjs(?:\.\w+)?$/ ) {
+    elsif ( $abc2svg->{desc} =~ /qjs(?:\.\w+)?$/ ) {
+
+	my @cmd = @{ $abc2svg->{cmd} };
 
 	# Packaged.
 	push( @cmd, $out, $src );
@@ -320,6 +336,8 @@ sub _abc2svg( $s, $pw, $elt ) {
 
     # Not packaged. Check for Wx on Windows since we cannot redirect STD***.
     elsif ( !is_wx() && !is_msw() ) {
+
+	my @cmd = @{ $abc2svg->{cmd} };
 
 	push( @cmd, $src );
 	warn( "+ @cmd\n" ) if DEBUG;
@@ -354,6 +372,7 @@ sub _abc2svg( $s, $pw, $elt ) {
     }
 
     else {
+	my @cmd = @{ $abc2svg->{cmd} };
 	push( @cmd, $src );
 	if ( 0 ) {
 	    # This seemed a good idea but unfortunately Wx has problems

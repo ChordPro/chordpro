@@ -1075,7 +1075,7 @@ sub ::runtimeinfo {
 	   if ( ChordPro::Delegate::ABC::have_xs() ) {
 	       $x = ChordPro::Delegate::ABC::packaged_qjs();
 	       $msg .= sprintf( $fmt, "ABC support",
-				$x->[0] . " (" . $x->[1] . ")" );
+				$x->{desc} . " (" . $x->{version} . ")" );
 	   }
 	   elsif ( $x = findexe( "abc2svg", "silent" )
 		        || findexe( "abcnode", "silent" ) ) {
@@ -1083,7 +1083,7 @@ sub ::runtimeinfo {
 	   }
 	   elsif ( $x = ChordPro::Delegate::ABC::packaged_qjs() ) {
 	       $msg .= sprintf( $fmt, "ABC support",
-				$cp->display($x->[0]) . " (" . $cp->display($x->[-1]) . ")" );
+				$cp->display($x->{desc}) . " (" . $x->{version} . ")" );
 	   }
     };
 

@@ -223,7 +223,8 @@ sub strwidth {
     $self->{tmplayout}->set_font_description($font->{fd});
     $self->{tmplayout}->set_font_size($size);
     $self->{tmplayout}->set_markup($text);
-    $self->{tmplayout}->get_pixel_size->{width};
+    wantarray ? $self->{tmplayout}->get_pixel_size
+      : $self->{tmplayout}->get_pixel_size->{width};
 }
 
 sub strheight {
@@ -235,7 +236,8 @@ sub strheight {
     $self->{tmplayout}->set_font_description($font->{fd});
     $self->{tmplayout}->set_font_size($size);
     $self->{tmplayout}->set_markup($text);
-    $self->{tmplayout}->get_pixel_size->{height};
+    wantarray ? $self->{tmplayout}->get_pixel_size
+      : $self->{tmplayout}->get_pixel_size->{height};
 }
 
 sub line {

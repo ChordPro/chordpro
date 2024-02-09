@@ -17,3 +17,5 @@ Example:
     {col: 2}
 
 See also: [column_break]({{< relref "Directives-column_break" >}}).
+
+See also: [settings.columns]({{< relref "ChordPro-Configuration-Generic#columns" >}}).

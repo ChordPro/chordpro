@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#! perl
 
 package main;
 
@@ -138,19 +138,49 @@ sub generate_songbook {
 	my $l = $ctl->{line};
 	my $start = $start_of{songbook} - $options->{"start-page-number"};
 	my $pgtpl = $ctl->{pageno};
-	my $song =
-	  { title     =>  $t,
-	    meta => { title => [ $t ] },
-	    structure => "linear",
-	    body      => [
-		     map { +{ type    => "tocline",
-			      context => "toc",
-			      title   => fmt_subst( $_->[-1], $l ),
-			      page    => $pr->{pdf}->openpage($_->[-1]->{meta}->{tocpage}+$start),
-			      pageno  => fmt_subst( $_->[-1], $pgtpl ),
-			    } } @$book,
-	    ],
-	  };
+
+	# If we have a template, process it as a song and prepend.
+	my $song;
+	    my $cf;
+	if ( $ctl->{template} ) {
+	    my $tpl = $ctl->{template};
+	    if ( $tpl =~ /\.\w+/ ) { # file
+		$cf = CP->siblingres( $book[0][-1]->{source}->{file},
+				      $tpl, class => "templates" );
+		warn("ToC template not found: $tpl\n") unless $cf;
+	    }
+	    else {
+		$cf = CP->findres( $tpl.".cho", class => "templates" );
+		if ( $verbose ) {
+		    warn("ToC template",
+			 $cf ? " found: $cf" : " not found: $tpl.cho\n")
+		}
+	    }
+	}
+	if ( $cf ) {
+	    my $opts = {};
+	    my $lines = loadlines( $cf, $opts );
+	    $song = ChordPro::Song->new( { %$opts,
+					   generate => 'PDF' } );
+	    my $l = 0;
+	    $song->parse_song( $lines, \$l, {}, {} );
+	    $t = fmt_subst( $book[0][-1], $song->{title} )
+	      if $song->{title};
+	    my $st = fmt_subst( $book[0][-1], $song->{meta}->{subtitle}->[0] )
+	      if $song->{meta}->{subtitle} && $song->{meta}->{subtitle}->[0];
+	}
+	else {
+	    $song = { meta => {} };
+	    $song->{title} //= $t;
+	    $song->{meta}->{title} //= [ $t ];
+	}
+	push( @{ $song->{body} //= [] },
+	      map { +{ type    => "tocline",
+		       context => "toc",
+		       title   => fmt_subst( $_->[-1], $l ),
+		       page    => $pr->{pdf}->openpage($_->[-1]->{meta}->{tocpage}+$start),
+		       pageno  => fmt_subst( $_->[-1], $pgtpl ),
+		     } } @$book );
 
 	# Prepend the toc.
 	$page = generate_song( $song,
@@ -903,7 +933,8 @@ sub generate_song {
 
 	    if ( $spreadimage ) {
 		if (ref($spreadimage) eq 'HASH' ) {
-		    $spreadimage = imagespread( $spreadimage, $x, $y, $ps );
+		    # Spread image doesn't indent.
+		    $spreadimage = imagespread( $spreadimage, $x-$ps->{_indent}, $y, $ps );
 		}
 		$y -= $spreadimage;
 	    }
@@ -1237,9 +1268,7 @@ sub generate_song {
 	    $checkspace->($vsp);
 	    $pr->show_vpos( $y, 0 ) if $config->{debug}->{spacing};
 
-	    tocline( $elt, $x, $y, $ps );
-
-	    $y -= $vsp;
+	    $y -= $vsp * tocline( $elt, $x, $y, $ps );
 	    $pr->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
 	    next;
 	}
@@ -1872,7 +1901,6 @@ sub imageline {
     else {
 	$pw = $ps->{__rightmargin} - $ps->{_leftmargin};
     }
-    $pw -= $ps->{_indent};
     my $ph = $ps->{_margintop} - $ps->{_marginbottom};
 
     if ( $width && $width =~ /^(\d+(?:\.\d+)?)\%$/ ) {
@@ -2002,8 +2030,7 @@ sub imageline {
 		  $ox//0, $oy//0, $align,
 		 )) if $config->{debug}->{images};
 
-#	$pr->add_image( $img, $x, $y, $w, $h, $opts->{border} || 0 );
-    $pr->add_object( $img, $x-2, $y,
+    $pr->add_object( $img, $x, $y,
 		     xscale => $w/$img->width,
 		     yscale => $h/$img->height,
 		     border => $opts->{border} || 0,
@@ -2106,19 +2133,36 @@ sub tocline {
     $pr->setfont($ftoc);
     my $tpl = $elt->{title};
     my $vsp;
-    for ( split( /\\n/, $tpl ) ) {
-	$ps->{pr}->text( $_, $x, $y );
+    my $lines = 0;
+
+    my $p = $elt->{pageno};
+    my $pw = $pr->strwidth($p);
+    my $ww = $ps->{__rightmargin} - $x - $pr->strwidth("xxx$p");
+    for my $text ( split( /\\n/, $tpl ) ) {
+	$lines++;
+	# Suppress unclosed markup warnings.
+	local $SIG{__WARN__} = sub{
+	    CORE::warn(@_) unless "@_" =~ /Unclosed markup/;
+	};
+	# Get the part that fits (hopefully, all) and print.
+	( $text, my $ex ) = @{ defrag( [ $pr->wrap( $text, $ww ) ] ) };
+	$pr->text( $text, $x, $y );
 	unless ($vsp) {
-	    my $p = $elt->{pageno};
-	    $ps->{pr}->text( $p, $ps->{__rightmargin} - $pr->strwidth($p), $y );
+	    $ps->{pr}->text( $p, $ps->{__rightmargin} - $pw, $y );
 	    $vsp = _vsp("toc", $ps);
+	    $x += $pr->strwidth( $config->{settings}->{wrapindent} )
+	      if $ex ne "";
 	}
 	$y -= $vsp;
+	if ( $ex ne "" ) {
+	    $text = $ex;
+	    redo;
+	}
     }
     my $ann = $pr->{pdfpage}->annotation;
     $ann->link($elt->{page});
-    $ann->rect( $ps->{__leftmargin}, $y0 - $ftoc->{size} * $ps->{spacing}->{toc},
-		$ps->{__rightmargin}, $y0 );
+    $ann->rect( $ps->{__leftmargin}, $y0-$lines*$vsp, $ps->{__rightmargin}, $y0 );
+    return $lines;
 }
 
 sub has_visible_chords {
@@ -2237,7 +2281,7 @@ sub set_columns {
 
     if ( @cols ) {		# columns with explicit widths
 	my $stars;
-	my $wx = $w;		# available
+	my $wx = $w + $ps->{columnspace}; # available
 	for ( @cols ) {
 	    if ( !$_ || $_ eq '*' ) {
 		$stars++;
@@ -2285,6 +2329,12 @@ sub showlayout {
     my $mr = $ps->{_rightmargin};
     my $ml = $ps->{_leftmargin};
 
+    my $f = sub {
+	my $t = sprintf( "%.1f", shift );
+	$t =~ s/\.0$//;
+	return $t;
+    };
+
     $pr->rectxy( $ml,
 		 $ps->{marginbottom},
 		 $ps->{papersize}->[0]-$mr,
@@ -2296,16 +2346,16 @@ sub showlayout {
     $pr->setfont($font,$fsz);
     $pr->text( "<span color='red'>$ml</span>",
 	       $ml, $ptop, $font, $fsz );
-    my $t = $ps->{papersize}->[0]-$mr;
+    my $t = $f->($ps->{papersize}->[0]-$mr);
     $pr->text( "<span color='red'>$t</span>",
 	       $ps->{papersize}->[0]-$mr-$pr->strwidth("$mr"),
 	       $ptop, $font, $fsz );
-    $t = $ps->{papersize}->[1]-$ps->{margintop};
+    $t = $f->($ps->{papersize}->[1]-$ps->{margintop});
     $pr->text( "<span color='red'>$t  </span>",
 	       $ml-$pr->strwidth("$t  "),
 	       $ps->{papersize}->[1]-$ps->{margintop}-2,
 	       $font, $fsz );
-    $t = $ps->{marginbottom};
+    $t = $f->($ps->{marginbottom});
     $pr->text( "<span color='red'>$t  </span>",
 	       $ml-$pr->strwidth("$t  "),
 	       $ps->{marginbottom}-2,
@@ -2315,14 +2365,14 @@ sub showlayout {
 	      $ps->{papersize}->[0]-$ml-$mr,
 	      $lw, $col );
     $pr->hline(@a);
-    $t = $a[1];
+    $t = $f->($a[1]);
     $pr->text( "<span color='red'>$t  </span>",
 	       $ml-$pr->strwidth("$t  "),
 	       $a[1]-2,
 	       $font, $fsz );
     $a[1] = $ps->{marginbottom}-$ps->{footspace};
     $pr->hline(@a);
-    $t = $a[1];
+    $t = $f->($a[1]);
     $pr->text( "<span color='red'>$t  </span>",
 	       $ml-$pr->strwidth("$t  "),
 	       $a[1]-2,
@@ -2337,11 +2387,11 @@ sub showlayout {
 	   $lw, $col );
     foreach my $i ( 0 .. @off-1 ) {
 	next unless $off[$i];
-	$a[0] = $ml + $off[$i];
+	$a[0] = $f->($ml + $off[$i]);
 	$pr->text( "<span color='red'>$a[0]</span>",
 		   $a[0] - $pr->strwidth($a[0])/2, $ptop, $font, $fsz );
 	$pr->vline(@a);
-	$a[0] = $ml + $off[$i] - $ps->{columnspace};
+	$a[0] = $f->($ml + $off[$i] - $ps->{columnspace});
 	$pr->text( "<span color='red'>$a[0]</span>",
 		   $a[0] - $pr->strwidth($a[0])/2, $ptop, $font, $fsz );
 	$pr->vline(@a);
@@ -2647,6 +2697,7 @@ sub prepare_assets {
     my ( $s, $pr ) = @_;
 
     my %sa = %{$s->{assets}//{}};	# song assets
+    $s->{_ps} = $pr->{ps};		# for handlers TODO
 
     # All elements generate zero or one display items, except for SVG images
     # than can result in a series of display items.

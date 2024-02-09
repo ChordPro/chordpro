@@ -182,7 +182,7 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "image" ) {
-	    my @args = ( "image:", $elt->{uri} );
+	    my @args = ( "image:", $elt->{uri} // "<none>" );
 	    while ( my($k,$v) = each( %{ $elt->{opts} } ) ) {
 		push( @args, "$k=$v" );
 	    }

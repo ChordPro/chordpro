@@ -1084,6 +1084,7 @@ sub default_config () {
           "pageno"   : "%{page}",
           "fold"     : false,
           "omit"     : false,
+          "template" : "stdtoc",
         },
         { "fields"   : [ "sorttitle", "artist" ],
           "label"    : "Contents by Title",
@@ -1091,6 +1092,7 @@ sub default_config () {
           "pageno"   : "%{page}",
           "fold"     : false,
           "omit"     : false,
+          "template" : "stdtoc",
         },
         { "fields"   : [ "artist", "sorttitle" ],
           "label"    : "Contents by Artist",
@@ -1098,6 +1100,7 @@ sub default_config () {
           "pageno"   : "%{page}",
           "fold"     : false,
           "omit"     : true,
+          "template" : "stdtoc",
         },
     ],
     // Table of contents, old style.
@@ -1114,6 +1117,8 @@ sub default_config () {
     // Delegates.
     // Basically a delegate is a section {start_of_XXX} which content is
     // collected and handled later by the delegate module.
+    // Note: type = "none" treats the section as a generic section,
+    // type = "omit" ignores the section.
 
     "delegates" : {
         "abc" : {
@@ -1132,7 +1137,6 @@ sub default_config () {
                "%%gchordfont pdf.fonts.chord",
             ],
             "preprocess" : { "abc" : [] },
-            "omit"     : false,
         },
         "ly" : {
             "type"     : "image",
@@ -1145,13 +1149,16 @@ sub default_config () {
                 "\\version \"2.21.0\"",
                 "\\header { tagline = ##f }",
             ],
-            "omit"     : false,
         },
         "svg" : {
             "type"     : "image",
             "module"   : "SVG",
             "handler"  : "svg2svg",
-            "omit"     : false,
+        },
+        "textblock" : {
+            "type"     : "image",
+            "module"   : "TextBlock",
+            "handler"  : "txt2xform",
         },
      },
 
@@ -1665,6 +1672,7 @@ sub default_config () {
         "abc"	    : 0,
         "ly"	    : 0,
         "svg"	    : 0,
+        "txtblk"    : 0,
         // For temporary use.
         "x1"	    : 0,
         "x2"	    : 0,

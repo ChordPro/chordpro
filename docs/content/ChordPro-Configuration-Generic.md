@@ -80,6 +80,25 @@ Note that settings `decapo`, `lyrics-only`, `strict`, `transcode` and
 `transpose` have corresponding command line options. The command line
 option, if used, overrides the config setting.
 
+## Columns
+
+`columns` in `settings` can also be set to an array with column widths.
+Column widths can be a number (PDF points),
+a percentage of the total width,
+or `0` (or `*`) to distribute the available width.
+
+These are the same:
+
+````
+"columns": 2
+"columns": [ "50%", "50%" ]
+"columns": [ 0, 0 ]
+"columns": [ "50%", "*" ]
+````
+
+Note that the final columns always uses the remaining width. Its value
+is therefore bogus unless you have columns with `0` (or `*`).
+
 ## Metadata
 
 The `metadata` setting contains three items:
@@ -263,24 +282,31 @@ the config file.
             "line"     : "%{title}",
             "pageno"   : "%{page},
             "omit"     : false,
+            "template" : "stdtoc",
           },
           { "fields"   : [ "sorttitle", "artist" ],
             "label"    : "Contents by Title",
             "line"     : "%{title}%{artist| - %{}}",
             "pageno"   : "%{page},
             "omit"     : false,
+            "template" : "stdtoc",
           },
           { "fields"   : [ "artist", "sorttitle" ],
             "label"    : "Contents by Artist",
             "line"     : "%{artist|%{} - }%{title}",
             "pageno"   : "%{page},
             "omit"     : true,
+            "template" : "stdtoc",
           },
       ],
 
-The default configuration generates two tables, one labelled `Table of Contents` and one labelled `Contents by Artist`. Each table is ordered according
-to the meta data specified in `"fields"`. The format of the content lines
-is specified in `"line"`.
+The default configuration generates two tables, one labelled `Table of
+Contents` and one labelled `Contents by Title`.
+The table with title `Contents by Artist` will be omitted (see `omit`) below.
+
+Each table is ordered according to the meta data specified in
+`"fields"`.
+The format of the content lines is specified in `"line"`.
 
 * `fields`  
 The ordering of the table.  
@@ -292,7 +318,7 @@ split out in the table.
 number of the song in the songbook. Sorting on `songindex` will
 produce the songs in songbook order.
 * `label`  
-The label for this table.
+The label (title) for this table.
 * `line`  
 The format of the table lines.  
 You can use all song metadata, see [here]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
@@ -301,6 +327,25 @@ The format for the page number.
 You can use all song metadata, see [here]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
 * `omit`  
 If true, this table is omitted.
+* `template`  
+The template for this table.
+
+### Customizing the table of contents
+
+It is possible to customize the tables of content by providing a
+template.
+The template is processed as a song before the table
+and can be used to set title, subtitle, columns, maybe even an
+introduction text.
+Since the template iself a song, it can be
+associated with its own config file for unlimited customization.
+
+A template can be specified with a name, e.g. `"stdtoc"` or with a file
+name, e.g. `"mytoc.cho"`. Default is `"stdtoc"`.
+
+Named templates are lookedp up with extension `.cho` in the `template`
+directories of the ChordPro library. 
+Template files are looked up relative to the _first_ song of the songbook.
 
 Note that the first table in the default configuration is equivalent to
 the legacy table of contents.
