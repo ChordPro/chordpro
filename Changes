@@ -10,11 +10,15 @@
 
       See [the docs](https://chordpro.org/beta/chordpro-configuration-generic/#customizing-the-table-of-contents) for more information.
 
+    - Delegate type may now also be 'omit' to omit the content of the
+      section, and 'none' to treat the section a generic.
+
     - !Functionality
     - (Experimental) Add environment textblock.
     - (Experimental) Add ToC templates.
     - Wrap toc lines.
     - (PDF) Allow strwidth and strheight to return both values at once.
+    - (Config) allow delegate types 'none' and 'omit'; remove 'omit' attribute.
     - !Bug fixes
     - Fix issue #265.
     - Fix spread indent with labels.

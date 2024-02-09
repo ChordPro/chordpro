@@ -235,7 +235,16 @@ sub parse_song {
 	do_warn( "Missing or invalid instrument - set to ",
 		 $config->{instrument}->{type}, "\n" );
     }
+
+    # Remove inactive delegates.
+    while ( my ($k,$v) = each %{ $config->{delegates} } ) {
+	delete( $config->{delegates}->{$k} )
+	  if $v->{type} eq 'none';
+    }
+
+    # And lock the config.
     $config->lock;
+
     for ( keys %{ $config->{meta} } ) {
 	$meta->{$_} //= [];
 	if ( UNIVERSAL::isa($config->{meta}->{$_}, 'ARRAY') ) {
@@ -528,72 +537,65 @@ sub parse_song {
 	if ( exists $config->{delegates}->{$in_context} ) {
 	    # 'open' indicates open.
 	    if ( /^\s*\{(?:end_of_\Q$in_context\E)\}\s*$/ ) {
-		if ( $config->{delegates}->{$in_context}->{omit} ) {
-		}
-		else {
-		    delete $self->{body}->[-1]->{open};
-		    # A subsequent {start_of_XXX} will open a new item
+		delete $self->{body}->[-1]->{open};
+		# A subsequent {start_of_XXX} will open a new item
 
-		    my $d = $config->{delegates}->{$in_context};
-		    if ( $d->{type} eq "image" ) {
-			local $_;
-			my $a = pop( @{ $self->{body} } );
-			delete( $a->{context} );
-			my $id = $a->{id};
-			my $opts = {};
-			unless ( $id ) {
-			    my $pkg = 'ChordPro::Delegate::' . $a->{delegate};
-			    eval "require $pkg" || warn($@);
-			    if ( my $c = $pkg->can("options") ) {
-				$opts = $c->($a->{data});
-				$id = $opts->{id};
-			    }
+		my $d = $config->{delegates}->{$in_context};
+		if ( $d->{type} eq "image" ) {
+		    local $_;
+		    my $a = pop( @{ $self->{body} } );
+		    delete( $a->{context} );
+		    my $id = $a->{id};
+		    my $opts = {};
+		    unless ( $id ) {
+			my $pkg = 'ChordPro::Delegate::' . $a->{delegate};
+			eval "require $pkg" || warn($@);
+			if ( my $c = $pkg->can("options") ) {
+			    $opts = $c->($a->{data});
+			    $id = $opts->{id};
 			}
-			$opts = $a->{opts} = { %$opts, %{$a->{opts}} };
+		    }
+		    $opts = $a->{opts} = { %$opts, %{$a->{opts}} };
 
-			my $def = !!$id;
-			$id //= "_Image".$assetid++;
+		    my $def = !!$id;
+		    $id //= "_Image".$assetid++;
 
-			if ( defined $opts->{spread} ) {
-			    $def++;
-			    if ( exists $self->{spreadimage} ) {
-				do_warn("Skipping superfluous spread image");
-			    }
-			    else {
-				$self->{spreadimage} =
-				  { id => $id, space => $opts->{spread} };
-				warn("Got spread image $id with space=$opts->{spread}\n")
-				  if $config->{debug}->{images};
-			    }
-			}
-
-			# Move to assets.
-			$self->{assets}->{$id} = $a;
-			if ( $def ) {
-			    my $label = delete $a->{label};
-			    do_warn("Label \"$label\" ignored on non-displaying $in_context section\n")
-			      if $label;
+		    if ( defined $opts->{spread} ) {
+			$def++;
+			if ( exists $self->{spreadimage} ) {
+			    do_warn("Skipping superfluous spread image");
 			}
 			else {
-			    my $label = delete $opts->{label};
-			    $self->add( type => "set",
-					name => "label",
-					value => $label )
-			      if $label && $label ne "";
-			    $self->add( type => "image",
-					opts => $opts,
-					id => $id );
-			    if ( $opts->{label} ) {
-				push( @labels, $opts->{label} )
-				  unless $in_context eq "chorus"
-				  && !$config->{settings}->{choruslabels};
-			    }
+			    $self->{spreadimage} =
+			      { id => $id, space => $opts->{spread} };
+			    warn("Got spread image $id with space=$opts->{spread}\n")
+			      if $config->{debug}->{images};
+			}
+		    }
+
+		    # Move to assets.
+		    $self->{assets}->{$id} = $a;
+		    if ( $def ) {
+			my $label = delete $a->{label};
+			do_warn("Label \"$label\" ignored on non-displaying $in_context section\n")
+			  if $label;
+		    }
+		    else {
+			my $label = delete $opts->{label};
+			$self->add( type => "set",
+				    name => "label",
+				    value => $label )
+			  if $label && $label ne "";
+			$self->add( type => "image",
+				    opts => $opts,
+				    id => $id );
+			if ( $opts->{label} ) {
+			    push( @labels, $opts->{label} )
+			      unless $in_context eq "chorus"
+			      && !$config->{settings}->{choruslabels};
 			}
 		    }
 		}
-	    }
-	    elsif ( $config->{delegates}->{$in_context}->{omit} ) {
-		next;
 	    }
 	    else {
 		# Add to an open item.
@@ -1183,6 +1185,12 @@ sub parse_directive {
 	$dir = $abbrevs{$dir} // $dir;
     }
 
+    if ( $dir =~ /^start_of_(.*)/
+	 && exists $config->{delegates}->{$1}
+	 && $config->{delegates}->{$1}->{type} eq 'omit' ) {
+	return { name => $dir, arg => $arg, omit => 2 };
+    }
+
     return { name => $dir, arg => $arg, omit => 0 }
 }
 
@@ -1282,18 +1290,26 @@ sub directive {
 			opts     => { %opts, %$kv },
 			exists($kv->{id}) ? ( id => $kv->{id} ) : (),
 			open     => 1 );
+	    push( @labels, $kv->{label} ) if $kv->{label}//"" ne "";
 	}
 	elsif ( $arg ne "" ) {
-	    $self->add( type  => "set",
-			name  => "label",
-			value => $arg );
-	    push( @labels, $arg )
-	      unless $in_context eq "chorus"
-	      && !$config->{settings}->{choruslabels};
-	}
-	else {
-	    do_warn("Garbage in start_of_$1: $arg (ignored)\n")
-	      if $arg;
+	    # Prefer explicit label.
+	    if ( $arg =~ /^label=/ ) {
+		$arg = parse_kv($arg)->{label};
+	    }
+	    elsif ( $arg =~ /\b(id|scale|split|spread|width|align|center)=(.+)/ ) {
+		# Doesn't look like a label. Assume a mistake.
+		do_warn("Garbage in start_of_$in_context: $arg (ignored)\n");
+		$arg = "";
+	    }
+	    if ( $arg ne "" ) {
+		$self->add( type  => "set",
+			    name  => "label",
+			    value => $arg );
+		push( @labels, $arg )
+		  unless $in_context eq "chorus"
+		  && !$config->{settings}->{choruslabels};
+	    }
 	}
 
 	# Enabling this always would allow [^] to recall anyway.

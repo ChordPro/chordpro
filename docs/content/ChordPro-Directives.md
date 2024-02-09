@@ -73,15 +73,17 @@ environment and one to end it.
 * [start_of_grid]({{< relref "Directives-env_grid" >}}) (short: sog),
    [end_of_grid]({{< relref "Directives-env_grid" >}}) (short: eog)
 
-## Delegate environment directives
+## Delegated environment directives
 
-These environment directives are experimental: they turn their content into
+These environment directives turn their content into
 something else, usually an image, and embed the result in the ChordPro
 output.
 
+* [Introduction to delegated environments]({{< relref "Directives-delegates" >}})
 * [start_of_abc]({{< relref "Directives-env_abc" >}}) / [end_of_abc]({{< relref "Directives-env_abc" >}})
 * [start_of_ly]({{< relref "Directives-env_ly" >}}) / [end_of_ly]({{< relref "Directives-env_ly" >}})
 * [start_of_svg]({{< relref "Directives-env_svg" >}}) / [end_of_svg]({{< relref "Directives-env_svg" >}})
+* [start_of_textblock]({{< relref "Directives-env_textblock" >}}) / [end_of_textblock]({{< relref "Directives-env_textblock" >}})
 
 ## Chord diagrams
 

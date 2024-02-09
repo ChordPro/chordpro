@@ -27,11 +27,12 @@
       "properties" : {
         "type" : {
           "type" : "string",
+	  "enum" : [ "image", "ignore", "omit" ],
           "default" : "image"
         },
         "handler" : {
           "type" : "string",
-          "default" : "abc2svg"
+          "default" : "default"
         },
         "config" : {
           "type" : "string",
@@ -46,10 +47,6 @@
         "module" : {
           "type" : "string",
           "default" : "ABC"
-        },
-        "omit" : {
-          "type" : "boolean",
-          "default" : false
         },
         "preprocess" : {
           "type" : "object"
@@ -800,6 +797,22 @@
               "module" : {
                 "type" : "string",
                 "default" : "SVG"
+              }
+            } }
+          ]
+        },
+        "textblock" : {
+          "description" : "Embedding text block",
+          "allOf" : [
+            { "$ref" : "#/definitions/delegatespec" },
+            { "properties" : {
+              "handler" : {
+                "type" : "string",
+                "default" : "txt2xform"
+              },
+              "module" : {
+                "type" : "string",
+                "default" : "TextBlock"
               }
             } }
           ]
