@@ -1,5 +1,35 @@
 # Release info
 
+## 6.050
+
+Released: 2024-02-09
+
+
+### Highlights
+
+* Customize the tables of content by providing a template. The template is processed as a song before the tables and can be used to set title, subtitle, columns, maybe even an introduction text. Since the template it iself a song, it can be associated with its own config file for unlimited customization. [Read more...](https://chordpro.org/chordpro/chordpro-configuration-generic/#customizing-the-table-of-contents)
+* New delegated environment: textblock. The text between start_of_textblock and end_of_textblock is formatted normally, but the result is an image that can be placed anywhere. Several attributes are available to control the appearance of the text, e.g. centered and flush right. [Read more...](https://chordpro.org/chordpro/directives-env_textblock/)
+* Delegate type may now also be 'omit' to omit the content of the section, and 'none' to treat the section a generic. [Read more...](https://chordpro.org/chordpro/directives-delegates/)
+
+### Functionality
+
+* (Experimental) Add environment textblock.
+* (Experimental) Add ToC templates.
+* Wrap toc lines.
+* (PDF) Allow strwidth and strheight to return both values at once.
+* (Config) allow delegate types 'none' and 'omit'; remove 'omit' attribute.
+
+### Bug fixes
+
+* Fix issue #265.
+* Fix spread indent with labels.
+* Fix issue #343.
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.  
+Please use the [issue tracker](https://github.com/ChordPro/chordpro/issues) for bugs reports.
+
 ## 6.042
 
 Released: 2024-01-09
@@ -26,11 +56,6 @@ Released: 2024-01-09
 * Fix 'spread' images.
 * Fix problem finding notes:german et al.
 * (MMA) Fix test fail with perl >= 5.39.6.
-
-### Social and support
-
-[User community](https://groups.io/g/ChordPro) for feedback and help.  
-Please use the [issue tracker](https://github.com/ChordPro/chordpro/issues) for bugs reports.
 
 ## 6.040
 
