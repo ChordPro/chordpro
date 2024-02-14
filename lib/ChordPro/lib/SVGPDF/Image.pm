@@ -26,33 +26,65 @@ method process () {
     $self->_dbg( $self->name, " x=$x y=$y w=$w h=$h" );
 
     my $img;
-    if ( $link =~ m!^data:image/(png|jpe?g);(base64),(.*)$!s ) {
+    if ( $link =~ /^data:/ ) {
 	# In-line image asset.
-	require MIME::Base64;
-	require Image::Info;
-	require IO::String;
-	my $type = $1;
-	my $enc = $2;
-	my $data = MIME::Base64::decode($3);
-	unless ( $enc eq "base64" ) {
-	    warn("SVG: Unhandled encoding in image: $enc\n");
+	my $info = $self->data_inline($link);
+	if ( $info->{error} ) {
+	    warn( "SVG: ", $info->{error}, "\n" );
 	    $self->css_pop, return;
 	}
 
+	my $mimetype = $info->{mimetype};
+	my $subtype  = $info->{subtype};
+
+	unless ( $mimetype eq "image" ) {
+	    warn("SVG: Unhandled mime type \"mimetype/$subtype\" in inline image\n");
+	    $self->css_pop, return;
+	}
+	my $data = $info->{data};
+
 	# Get info.
-	my $info = Image::Info::image_info(\$data);
+	require Image::Info;
+	$info = Image::Info::image_info(\$data);
 	if ( $info->{error} ) {
 	    warn($info->{error});
 	    $self->css_pop, return;
 	}
 
-	# Make the image. Silence missing Image::PNG::Libpng warnings.
-	$img = $self->root->pdf->image( IO::String->new($data),
-					silent => 1 );
+	my $format = $info->{file_ext};
+	$format = "jpeg" if $format eq "jpg";
+	$format = "pnm"  if $format =~ /^p[bgp]m$/;
+	$format = "pnm"  if $format =~ /^x[bp]m$/; # bonus
+	$format = "tiff" if $format eq "tif";
+
+	# Make the image. Silence missing library warnings.
+	my $fh;
+	# Also, do not use the fast IPL module, it cannot read from scalar.
+	if ( $format eq "tiff" ) {
+	    # TIFF can't read from scalar file handle.
+	    use File::Temp;
+	    ( my $fd, $fh ) = File::Temp::tempfile( UNLINK => 1 );
+	    binmode $fd => ':raw';
+	    print $fd $data;
+	    close($fd);
+	    # Yes, trickery... $fh is now a file name, not a handle.
+	}
+	else {
+	    open( $fh, '<:raw', \$data );
+	}
+	$img = $self->root->pdf->image( $fh, format => $format,
+					silent => 1, nouseIPL => 1 );
     }
-    elsif ( $link =~ m!^.+\.(png|jpe?g)$! && -s $link ) {
-	# Make the image. Silence missing Image::PNG::Libpng warnings.
-	$img = $self->root->pdf->image($link, silent => 1 );
+    elsif ( $link =~ m!^.+\.(png|jpe?g|gif)$!i && -s $link ) {
+	# Autodetected. Make the image.
+	$img = $self->root->pdf->image( $link, silent => 1 );
+    }
+    elsif ( $link =~ m!^.+\.(tiff?|p[bgp]m|x[bp]m)$!i && -s $link ) {
+	# Not autodetected, need format.
+	# Note that xbm and xpm are bonus.
+	my $format = $1 =~ /tif/i ? "tiff" : "pnm";
+	# Make the image.
+	$img = $self->root->pdf->image( $link, format => $format, silent => 1 );
     }
     else {
 	warn("SVG: Unhandled or missing image link: ",
