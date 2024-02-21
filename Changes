@@ -1,8 +1,14 @@
-0.000
+6.050.2 2024-02-21
+
+    - !Functionality
+    - Repackaged ABC files.
+
+6.050.1 2024-02-19
 
     - !Functionality
     - Upgrade to SVGPDF 0.086.
     - New sample song: Molly Malone.
+    - Repackaged ABC files.
 
 6.050 2024-02-09
 

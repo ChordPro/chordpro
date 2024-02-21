@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Sun Feb 18 16:15:19 2024
 # Last Modified By: 
-# Last Modified On: Sun Feb 18 17:45:33 2024
-# Update Count    : 21
+# Last Modified On: Wed Feb 21 07:30:20 2024
+# Update Count    : 22
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -157,7 +157,7 @@ for my $mod ( qw( modules/ambitus.js
       or die( "$target: $!\n" );
 }
 
-for my $mod ( qw( COPYING README.md tohtml.js ) ) {
+for my $mod ( qw( COPYING.LESSER README.md tohtml.js ) ) {
 
     my $target = "$dest/$mod";
 
