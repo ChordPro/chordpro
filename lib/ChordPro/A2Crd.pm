@@ -18,7 +18,7 @@ ChordPro::A2Crd - convert lyrics and chords to ChordPro
 
   perl -MA2Crd -e run -- [ options ] [ file ... ]
 
-(But noone does that.)
+(But no one does that.)
 
 When the associated B<chordpro> program has been installed correctly:
 

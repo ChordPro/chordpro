@@ -6,7 +6,7 @@ Name=ChordPro
 Comment=Format and print lead sheets
 Categories=Graphics;
 
-Exec=wxchordpro
+Exec=wxchordpro %f
 StartupNotify=true
 Icon=chordpro
 StartupWMClass=chordpro

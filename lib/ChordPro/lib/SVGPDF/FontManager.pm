@@ -7,12 +7,20 @@ use utf8;
 class SVGPDF::FontManager;
 
 use Carp;
-use List::Util qw( any uniq );
+use List::Util qw( any none uniq );
 use Text::ParseWords qw( quotewords );
 
 field $svg	:mutator :param;
 field $fc       :mutator;
 field $td       :accessor;
+
+# The 14 corefonts.
+my @corefonts =
+  qw( Courier Courier-Bold Courier-BoldOblique Courier-Oblique
+      Helvetica Helvetica-Bold Helvetica-BoldOblique Helvetica-Oblique
+      Symbol
+      Times-Bold Times-BoldItalic Times-Italic Times-Roman
+      ZapfDingbats );
 
 # Set a font according to the style.
 #
@@ -186,22 +194,26 @@ method find_font ( $style ) {
     for ( ffsplit($fn) ) {
 	$fn = lc($_);
 
+	# helvetica sans sans-serif text,sans-serif
 	if ( $fn =~ /^(sans|helvetica|(?:text,)?sans-serif)$/ ) {
 	    $fn = $bd
 	      ? $em ? "Helvetica-BoldOblique" : "Helvetica-Bold"
 	      : $em ? "Helvetica-Oblique" : "Helvetica";
 	}
-	elsif ( $fn eq "text" || $fn =~ /^mono(?:-?space)?$/ ) {
+	# courier mono monospace mono-space text
+	elsif ( $fn =~ /^(text|courier|mono(?:-?space)?)$/ ) {
 	    $fn = $bd
 	      ? $em ? "Courier-BoldOblique" : "Courier-Bold"
 	      : $em ? "Courier-Oblique" : "Courier";
 	}
+	# times serif text,serif
 	elsif ( $fn =~ /^(serif|times|(?:text,)?serif)$/ ) {
 	    $fn = $bd
 	      ? $em ? "Times-BoldItalic" : "Times-Bold"
 	      : $em ? "Times-Italic" : "Times-Roman";
 	}
-	else {
+	# Any of the corefonts, case insensitive.
+	elsif ( none { $fn eq lc($_) } @corefonts ) {
 	    undef $fn;
 	}
 	last if $fn;

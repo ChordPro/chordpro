@@ -7,7 +7,7 @@ use utf8;
 
 class  SVGPDF;
 
-our $VERSION = '0.086';
+our $VERSION = '0.086.2';
 
 =head1 NAME
 
@@ -741,7 +741,7 @@ An SVG document on disk, specified as the name of the document.
 
 =item *
 
-A file handle, openened on a SVG document, specified as a glob
+A file handle, opened on a SVG document, specified as a glob
 reference. You can use C<\*DATA> to append the SVG data after a
 C<__DATA__> separator at the end of the program.
 
@@ -858,7 +858,7 @@ ignored.
         return $font;
     }
 
-If no callback function is set, SVGPDF will recognize the standard
+If no callback function is set, SVGPDF will recognize the 14 standard
 PDF corefonts, and aliases C<serif>, C<sans> and C<mono>.
 
 B<IMPORTANT: With the standard corefonts only characters of the

@@ -46,7 +46,12 @@ WriteMakefile
  PL_FILES	  => {
 		       'script/ppchordpro.PL' => [ map { "script/$_" } @bins ]
 		     },
-
+ MAN3PODS	  => {
+    'lib/ChordPro.pm'        => 'blib/man3/ChordPro.3pm',
+    'lib/ChordPro/A2Crd.pm'  => 'blib/man3/ChordPro::A2Crd.3pm',
+    'lib/ChordPro/Config.pm' => 'blib/man3/ChordPro::Config.3pm',
+    'lib/ChordPro/Wx.pm'     => 'blib/man3/ChordPro::Wx.3pm',
+		     },
  # Always require PDF::API2 or PDF::Builder and Text::Layout.
  PREREQ_PM      => {
 		    @pdfapi,
@@ -91,7 +96,7 @@ WriteMakefile
        homepage   => 'https://chordpro.org',
        repository => {
 	 url => 'git://github.com/ChordPro/chordpro.git',
-	 web => 'https://github.com/ChordPro/chordpro %]',
+	 web => 'https://github.com/ChordPro/chordpro',
 	 type => 'git',
        },
        bugtracker => {
