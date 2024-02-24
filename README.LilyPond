@@ -1,7 +1,6 @@
 To embed LilyPond, ChordPro makes use of the lilypond tool to convert
 the embedded source to an image, and then embeds the image.
 
-For this, it requires:
+For this, it requires the LilyPond typesetter to be installed.
 
-- lilypond : The LilyPond typesetter
-- ImageMagick : An application for displaying and manipulating images
+You can install LilyPond using the package manager for your system.

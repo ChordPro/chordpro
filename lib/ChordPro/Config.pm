@@ -1273,7 +1273,7 @@ sub default_config () {
       // Cell dimensions are specified by "width" and "height".
       // The horizontal number of cells depends on the number of strings.
       // The vertical number of cells is "vcells", which should
-      // be 4 or larger to accomodate most chords.
+      // be 4 or larger to accommodate most chords.
       // The horizontal distance between diagrams is "hspace" cells.
       // The vertical distance is "vspace" cells.
       // "linewidth" is the thickness of the lines as a fraction of "width".

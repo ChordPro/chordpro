@@ -2967,7 +2967,8 @@ sub is_corefont {
 
 # Font handler for SVG embedding.
 sub svg_fonthandler {
-    my ( $ps, $el, $pdf, $style ) = @_;
+    my ( $ps, $svg, %args ) = @_;
+    my ( $pdf, $style ) = @args{qw(pdf style)};
 
     my $family = lc( $style->{'font-family'} );
     my $stl    = lc( $style->{'font-style'}  // "normal" );
@@ -3027,15 +3028,21 @@ sub svg_fonthandler {
 
 # Text handler for SVG embedding.
 sub svg_texthandler {
-    my ( $ps, $el, $xo, $pdf, $style, $text, %opts ) = @_;
+    my ( $ps, $svg, %args ) = @_;
+    my $xo    = delete($args{xo});
+    my $pdf   = delete($args{pdf});
+    my $style = delete($args{style});
+    my $text  = delete($args{text});
+    my %opts  = %args;
+
     my @t = split( /([♯♭])/, $text );
     if ( @t == 1 ) {
 	# Nothing special.
-	$el->set_font( $xo, $style );
+	$svg->set_font( $xo, $style );
 	return $xo->text( $text, %opts );
     }
 
-    my ( $font, $sz ) = $el->root->fontmanager->find_font($style);
+    my ( $font, $sz ) = $svg->root->fontmanager->find_font($style);
     my $has_sharp = $font->glyphByUni(ord("♯")) ne ".notdef";
     my $has_flat  = $font->glyphByUni(ord("♭")) ne ".notdef";
     # For convenience we assume that either both are available, or missing.

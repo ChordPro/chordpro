@@ -18,7 +18,7 @@ ChordPro::A2Crd - convert lyrics and chords to ChordPro
 
   perl -MA2Crd -e run -- [ options ] [ file ... ]
 
-(But noone does that.)
+(But no one does that.)
 
 When the associated B<chordpro> program has been installed correctly:
 
@@ -38,20 +38,20 @@ Typical a2crd input:
 	  D          G    D
     Swing low, sweet chariot,
 			   A7
-    Comin’ for to carry me home.
+    Comin' for to carry me home.
 	  D7         G    D
     Swing low, sweet chariot,
 		  A7       D
-    Comin’ for to carry me home.
+    Comin' for to carry me home.
 
       D                       G          D
     I looked over Jordan, and what did I see,
 			   A7
-    Comin’ for to carry me home.
+    Comin' for to carry me home.
       D              G            D
-    A band of angels comin’ after me,
+    A band of angels comin' after me,
 		  A7       D
-    Comin’ for to carry me home.
+    Comin' for to carry me home.
 
 Note that the output from the conversion will generally need some
 additional editing to be useful as input to ChordPro.
