@@ -140,8 +140,8 @@ method process () {
 
 		$xo->textstart;
 		if ( $tc ) {
-		    $x += $tc->( $self, $xo, $self->root->pdf,
-				 $style, $c->content, %o );
+		    $x += $tc->( $self, xo => $xo, pdf => $self->root->pdf,
+				 style => $style, text => $c->content, %o );
 		}
 		else {
 		    $self->set_font( $xo, $style );

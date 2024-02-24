@@ -1,20 +1,7 @@
-To render ABC, ChordPro makes use of external tools to convert the
-embedded ABC source to an image, and then embeds the image.
+To render ABC, ChordPro makes use of QuickJS embedding. You can
+install this easily with
 
-For this, it requires:
+    cpan JavaScript::QuickJS
 
-- abc2svg : A program to typeset ABC tunes into SVG
-
-See https://chiselapp.com/user/moinejf/repository/abc2svg/doc/trunk/README.md
-
-For Linux, check your distro for an installable `abc2svg` kit. If
-there is no ready to use kit, see
-https://abcplus.sourceforge.net/#abc2svg.
-
-ChordPro will try to run a script `abc2svg` with parameters
-`tohtml.js` and the name of a temporary file containing the ABC data.
-The standard output of the script will be scanned for SVG images to
-insert in the PDF socument.
-
-The Windows installer for ChordPro includes all tools to provide ABC
-embedding.
+The Windows and MacOS installers for ChordPro include all tools to
+provide ABC embedding.
