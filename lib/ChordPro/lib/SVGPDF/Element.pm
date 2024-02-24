@@ -138,14 +138,18 @@ method set_graphics () {
 	my $w = $self->u( $lw,
 			  fontsize => $style->{'font-size'},
 			  width => $self->root->xoforms->[-1]->{diag});
-	$msg .= " stroke-width=$w";
+	$msg .= sprintf(" stroke-width=%.2f", $w);
 	if ( $lw =~ /e[mx]/ ) {
-	    $msg .= "($lw@" .
-	      ( $style->{'font-size'}|| $self->root->fontsize) . ")";
+	    $msg .= sprintf("(%s\@%.2f)", $lw,
+			    $self->u( $style->{'font-size'}|| $self->root->fontsize,
+				      fontsize => $style->{'font-size'},
+				      width => $self->root->xoforms->[-1]->{diag}));
 	}
 	if ( $lw =~ /\%/ ) {
-	    $msg .= "($lw@" .
-	      ( $self->root->xoforms->[-1]->{diag}) . ")";
+	    $msg .= sprintf("(%s\@%.2f)", $lw,
+			    $self->u( $self->root->xoforms->[-1]->{diag},
+				      fontsize => $style->{'font-size'},
+				      width => $self->root->xoforms->[-1]->{diag}));
 	}
 	$xo->line_width($w);
     }
@@ -490,6 +494,35 @@ method set_font ( $xo, $style ) {
 #     return $bb;
 # }
 #
+
+################ Utility ################
+
+method data_inline($src) {
+
+    my %info;
+
+    unless ( $src =~ m! ^ data:
+			(?<mimetype> [^/]+ ) /
+			(?<subtype>  [^;]+ ) ;
+			(?<encoding> [^,]+ ) ,
+			(?<data>     .   + ) $
+		      !sx ) {
+	return { error => "Malformed inline data" };
+    }
+
+    if ( $+{encoding} eq "base64" ) {
+	require MIME::Base64;
+	$info{data} = MIME::Base64::decode($+{data});
+    }
+    else {
+	return { error => "Unhandled encoding \"$+{encoding}\" in inline data" };
+    }
+
+    $info{mimetype} = $+{mimetype};
+    $info{subtype}  = $+{subtype};
+
+    return \%info;
+}
 
 ################ TextElement ################
 

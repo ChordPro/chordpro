@@ -1,5 +1,14 @@
 #!/usr/bin/perl
 
+# WxChordPro -- Successor of Chord/Chordii
+
+# Author          : Johan Vromans
+# Created On      : Fri Jul  9 14:32:34 2010
+# Last Modified On: Mon Feb 12 22:12:02 2024
+# Update Count    : 283
+# Status          : Unknown, Use with caution!
+
+################ Common stuff ################
 use Wx 0.9912 qw[:allclasses];
 
 use strict;
@@ -148,21 +157,7 @@ B<wxchordpro> is a GUI wrapper for the ChordPro program. It allows
 opening of files, make changes, and preview (optionally print) the
 formatted result.
 
-For more information about the ChordPro file format, see
-L<https://www.chordpro.org>.
-
-For more information about ChordPro program, see L<ChordPro>.
-
-=head1 LICENSE
-
-Copyright (C) 2010,2018 Johan Vromans,
-
-This module is free software. You can redistribute it and/or
-modify it under the terms of the Artistic License 2.0.
-
-This program is distributed in the hope that it will be useful,
-but without any warranty; without even the implied warranty of
-merchantability or fitness for a particular purpose.
+Visit the web site L<https://chordpro.org> for complete documentation.
 
 =cut
 

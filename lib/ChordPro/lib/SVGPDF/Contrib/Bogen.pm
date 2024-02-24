@@ -484,6 +484,8 @@ C<[$x1,$y1]> to C<[$x2,$y2]>. If it is too small, the radius will be set to
 half the distance between the points (resulting in an arc that is a
 semicircle). This is a silent error.
 
+=back
+
 =cut
 
 sub bogen {
