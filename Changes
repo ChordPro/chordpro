@@ -1,7 +1,8 @@
-6.050.6
+6.050.6 2024-02-25
 
     - !Internal
     - Remove ABC kit from kit. It is not license clean.
+    - Add cmdline.js for external QuickJS.
 
 6.050.5 2024-02-23
 

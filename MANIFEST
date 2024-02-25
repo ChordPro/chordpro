@@ -414,6 +414,7 @@ lib/ChordPro/res/abc/abc2svg/capo-1.js
 lib/ChordPro/res/abc/abc2svg/chordnames-1.js
 lib/ChordPro/res/abc/abc2svg/clair-1.js
 lib/ChordPro/res/abc/abc2svg/clip-1.js
+lib/ChordPro/res/abc/abc2svg/cmdline.js
 lib/ChordPro/res/abc/abc2svg/combine-1.js
 lib/ChordPro/res/abc/abc2svg/COPYING.LESSER
 lib/ChordPro/res/abc/abc2svg/diag-1.js
