@@ -78,9 +78,6 @@ If _tf_ equals `0`, the image is flushed left.
 Draws a border around the image.
 Without an explicit width, the border is one typographic point.
 
-##### `title=`*text*  
-Provides a title for the image.
-
 ## Advanced features
 
 ##### `spread`=*space*  
