@@ -407,8 +407,6 @@ t/ref/84_pages.csv
 t/ref/85_pages.csv
 t/ref/86_pages.csv
 t/ref/87_pages.csv
-ABC/build.pl
-ABC/abc2svg-1f1e9ecb65.tar.gz
 lib/ChordPro/res/abc/abc2svg/abc2svg-1.js
 lib/ChordPro/res/abc/abc2svg/ambitus-1.js
 lib/ChordPro/res/abc/abc2svg/break-1.js
