@@ -1117,6 +1117,7 @@ my %abbrevs = (
    cb	      => "comment_box",
    cf	      => "chordfont",
    ci	      => "comment_italic",
+   col	      => "colums",
    colb	      => "column_break",
    cs	      => "chordsize",
    eob	      => "end_of_bridge",
