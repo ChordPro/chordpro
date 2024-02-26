@@ -2749,6 +2749,15 @@ sub prepare_assets {
 		  if $config->{debug}->{images};
 		$s->{assets}->{$id} = $res;
 	    }
+	    else {
+		# Substitute alert image.
+		$s->{assets}->{$id} = $res =
+		  { type => "image",
+		    line => $elt->{line},
+		    subtype => "xform",
+		    data => TextLayoutImageElement::alert(60),
+		    opts => { %{$elt->{opts}//{}} } };
+	    }
 
 	    # If the delegate produced an SVG, continue processing.
 	    if ( $res && $res->{type} eq "image" && $res->{subtype} eq "svg" ) {
