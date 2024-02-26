@@ -22,7 +22,8 @@ use Text::ParseWords qw(shellwords);
 
 sub DEBUG() { $config->{debug}->{ly} }
 
-sub ly2svg( $s, $pw, $elt ) {
+sub ly2svg( $self, %args ) {
+    my ( $elt, $pw ) = @args{qw(elt pagewidth)};
 
     state $imgcnt = 0;
     state $td = File::Temp::tempdir( CLEANUP => !$config->{debug}->{ly} );

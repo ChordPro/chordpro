@@ -2736,7 +2736,7 @@ sub prepare_assets {
 	    $w = $elt->{opts}->{width}
 	      if $elt->{opts}->{width} && $elt->{opts}->{width} < $w;
 
-	    my $res = $hd->( $s, $w, $elt );
+	    my $res = $hd->( $s, elt => $elt, pagewidth => $w );
 	    if ( $res ) {
 		$res->{opts} = { %{ $res->{opts} // {} },
 				 %{ $elt->{opts} // {} } };

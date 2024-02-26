@@ -39,9 +39,10 @@ use ChordPro::Utils;
 
 sub DEBUG() { $::config->{debug}->{txtblk} }
 
-sub txt2xform( $s, $pw, $elt ) {
+sub txt2xform( $self, %args ) {
+    my $elt = $args{elt};
 
-    my $ps = $s->{_ps};
+    my $ps = $self->{_ps};
     my $pr = $ps->{pr};
     my $opts = { %{$elt->{opts}} };
 

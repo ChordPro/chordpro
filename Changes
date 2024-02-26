@@ -2,6 +2,7 @@
 
     - (Song) Add col alias for columns.
     - Substitute alert image for failed delegates.
+    - Modify delegate API.
 
 6.050.6 2024-02-25
 

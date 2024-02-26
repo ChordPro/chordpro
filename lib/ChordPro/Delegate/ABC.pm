@@ -34,7 +34,7 @@ my $abc2svg;
 
 # Default entry point.
 
-sub abc2svg( $s, $pw, $elt ) {
+sub abc2svg( $song, %args ) {
 
     if ( DEBUG() ) {
 	warn( sprintf( "ABC: abc2svg (tool = %s)\n",
@@ -64,7 +64,7 @@ sub abc2svg( $s, $pw, $elt ) {
     # Note we do not use 'node' since it is hard to instruct it not to use
     # global data.
 
-    return abc2svg_qjs( $s, $pw, $elt ) if have_xs();
+    return abc2svg_qjs( $song, %args ) if have_xs();
 
     # If packaged, do not use external tools.
     unless ( CP->packager ) {
@@ -83,12 +83,12 @@ sub abc2svg( $s, $pw, $elt ) {
 
 	# We know what to do.
 	if ( $abc2svg ) {
-	    return _abc2svg( $s, $pw, $elt );
+	    return _abc2svg( $song, %args );
 	}
     }
 
     # Try (optionally packaged) QuickJS with packaged abc2svg.
-    return abc2svg_qjs( $s, $pw, $elt );
+    return abc2svg_qjs( $song, %args);
 }
 
 # Alternative entry point that always uses QuickJS only.
@@ -144,17 +144,17 @@ sub packaged_qjs() {
     return 0;
 }
 
-sub abc2svg_qjs( $s, $pw, $elt ) {
-
+sub abc2svg_qjs( $song, %args ) {
     $abc2svg //= packaged_qjs();
 
     # This will bail out if we didn't find a suitable program.
-    return _abc2svg( $s, $pw, $elt );
+    return _abc2svg( $song, %args );
 }
 
 # Internal handler.
 
-sub _abc2svg( $s, $pw, $elt ) {
+sub _abc2svg( $song, %args ) {
+    my ( $elt, $pw ) = @args{qw(elt pagewidth)};
 
     return { type => "ignore" } unless @{ $elt->{data} };
     # Bail out if we don't have a suitable program.

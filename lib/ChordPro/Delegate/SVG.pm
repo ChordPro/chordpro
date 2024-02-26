@@ -13,7 +13,8 @@ use ChordPro::Utils;
 
 sub DEBUG() { $::config->{debug}->{svg} }
 
-sub svg2svg( $s, $pw, $elt ) {
+sub svg2svg( $self, %args ) {
+    my $elt = $args{elt};
 
     my @data = @{ $elt->{data} };
     my @pre;
