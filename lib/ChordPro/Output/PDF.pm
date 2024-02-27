@@ -2724,7 +2724,7 @@ sub prepare_assets {
     for my $id ( sort keys %sa ) {
 	my $elt = $sa{$id};
 	
-	next if defined $elt->{data};
+	#next if defined $elt->{data};
 
 	$elt->{subtype} //= "image" if $elt->{uri};
 
@@ -2831,6 +2831,16 @@ sub prepare_assets {
 		 " sep=", $sep,
 		 "\n")
 	      if $config->{debug}->{images};
+	    next;
+	}
+
+	if ( $elt->{type} eq "image" && $elt->{subtype} eq "xform" ) {
+	    # Ready to go.
+	    next;
+	}
+
+	if ( $elt->{type} eq "image" && $elt->{data} ) {
+	    # Ready to go.
 	    next;
 	}
 
