@@ -46,12 +46,6 @@ sub generate_songbook {
     $verbose ||= $options->{verbose};
 
     $ps = $config->{pdf};
-my $pri = ( __PACKAGE__."::Writer" )->new( $ps, $pdfapi );
-foreach my $song ( @{$sb->{songs}} ) {
-		$song->{meta}->{pages} =
-			generate_song( $song, { pr => $pri, startpage => 1 } );
-	if ( $options->{verbose} ) { print $song->{meta}->{pages}." "; STDOUT->flush(); } 
-	}
 
     my $pr = (__PACKAGE__."::Writer")->new( $ps, $pdfapi );
     warn("Generating PDF ", $options->{output} || "__new__.pdf", "...\n") if $options->{verbose};
