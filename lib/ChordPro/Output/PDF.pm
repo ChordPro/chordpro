@@ -111,8 +111,8 @@ sub generate_songbook {
 	    }
 	}
 
-	if ($options->{verbose}) {print "."; STDOUT->flush();} 
-	
+	if ($options->{verbose}) {print "$page "; STDOUT->flush();} 
+
 	$page += $song->{meta}->{pages} =
 	  generate_song( $song, { pr        => $pr,
 				  startpage => $page,
@@ -2723,6 +2723,8 @@ sub prepare_assets {
       if $config->{debug}->{images} || $config->{debug}->{assets};
     for my $id ( sort keys %sa ) {
 	my $elt = $sa{$id};
+	
+	next if defined $elt->{data};
 
 	$elt->{subtype} //= "image" if $elt->{uri};
 
@@ -3086,6 +3088,97 @@ sub _dump {
     }
 }
 
+sub sort_songbook {
+ my ( $sb ) = @_;
+ my $ps = $config->{pdf};
+ my $pri = ( __PACKAGE__."::Writer" )->new( $ps, $pdfapi );
+
+#Count pages to properly align multi-page songs without needing to turn page	
+    my $page = $options->{"start-page-number"} ||= 1;
+
+	my $sorting = $ps->{'sort-pages'};
+
+	if ( $sorting =~ /2page/ ||  $sorting =~ /compact/) {
+		print "Counting pages:\n" if $options->{verbose};
+
+		foreach my $song ( @{$sb->{songs}} ) {
+			#Make a deep copy of the structure to avoid issues when doing this twice
+			#my $tmpasset;
+			#$tmpasset=dclone $song->{assets} if defined $song->{assets};
+			$song->{meta}->{pages} =
+				generate_song( $song, { pr => $pri, startpage => 1 } );
+			#Restore the original value
+			#$song->{assets}=$tmpasset;
+		if ( $options->{verbose} ) { print $song->{meta}->{pages}." "; STDOUT->flush(); } 
+		}
+		print "\n" if $options->{verbose};
+	}
+
+	my @songlist = @{$sb->{songs}};
+
+	if ( $sorting =~ /title/ ) {
+		if ($sorting =~ /desc/ ) {
+			@songlist=sort {"$b->{meta}->{title}[0]" cmp "$a->{meta}->{title}[0]"} @songlist;
+		}
+		else {
+			@songlist=sort {"$a->{meta}->{title}[0]" cmp "$b->{meta}->{title}[0]"} @songlist;
+		}
+	}
+	elsif ( $sorting =~ /author/ ) {
+		if ($sorting =~ /desc/ ) {
+			@songlist=sort {"$b->{meta}->{subtitle}[0]" cmp "$a->{meta}->{subtitle}[0]"} @songlist;
+		}
+		else {
+			@songlist=sort {"$a->{meta}->{subtitle}[0]" cmp "$b->{meta}->{subtitle}[0]"} @songlist;
+		}
+	}
+
+	if ( $sorting =~ /compact/ ) {
+		my $pagecount = $page;
+		my $songs = @songlist;
+		my $i = 0;
+		while ( $i<$songs ) {
+			if ( defined($songlist[$i]->{meta}->{order}) ) {
+				#skip already processed entries
+				$i++; 
+				next;
+			}
+			my $pages = $songlist[$i]->{meta}->{pages};
+			$songlist[$i]->{meta}->{order}=$pagecount;
+			if ( ($pagecount % 2) && $pages == 2 ) {
+				my $j = $i+1;
+				#Find next song with != 2 pages
+				while ( $j < $songs ) {
+					last if ( !defined($songlist[$j]->{meta}->{order}) && $songlist[$j]->{meta}->{pages} != 2 );
+					$j++;
+				}
+				if ( $j == $songs ) {
+					$i++;
+				} 
+				else {
+					#Swapped page gets current ID
+					$songlist[$j]->{meta}->{order}=$pagecount;
+					#Pushed page gets ID plus swapped page
+					$songlist[$i]->{meta}->{order}=$pagecount+$songlist[$j]->{meta}->{pages};
+					#Add the swapped page to pagecount as it will be skipped later
+					$pages+=$songlist[$j]->{meta}->{pages};
+					print "!$j " if $options->{verbose};
+				}
+			} 
+			else {
+				$i++
+			}
+			$pagecount += $pages;
+		}
+		#By Pagelist
+		@songlist=sort { $a->{meta}->{order} <=> $b->{meta}->{order} } @songlist;
+	}
+
+	$sb->{songs} = [@songlist];
+	print "\n" if $options->{verbose};
+}
+
+
 use Object::Pad;
 
 class TextLayoutImageElement :isa(Text::Layout::PDFAPI2::ImageElement);
@@ -3185,90 +3278,6 @@ sub alert ($size) {
     $xo->rectangle( 9, 13, 11, 15 );
     $xo->move( 9, 12 )->polyline( 8.5, 7, 11.5, 7, 11, 12 )->close->fill;
     return $xo;
-
-sub sort_songbook {
- my ( $sb ) = @_;
- my $ps = $config->{pdf};
- my $pri = ( __PACKAGE__."::Writer" )->new( $ps, $pdfapi );
-
-#Count pages to properly align multi-page songs without needing to turn page	
-    my $page = $options->{"start-page-number"} ||= 1;
-
-	my $sorting = $ps->{'sort-pages'};
-
-	if ( $sorting =~ /2page/ ||  $sorting =~ /compact/) {
-		print "Counting pages:\n" if $options->{verbose};
-
-		foreach my $song ( @{$sb->{songs}} ) {
-			$song->{meta}->{pages} =
-				generate_song( $song, { pr => $pri, startpage => 1 } );
-		if ( $options->{verbose} ) { print $song->{meta}->{pages}." "; STDOUT->flush(); } 
-		}
-		print "\n" if $options->{verbose};
-	}
-
-	my @songlist = @{$sb->{songs}};
-
-	if ( $sorting =~ /title/ ) {
-		if ($sorting =~ /desc/ ) {
-			@songlist=sort {"$b->{meta}->{title}[0]" cmp "$a->{meta}->{title}[0]"} @songlist;
-		}
-		else {
-			@songlist=sort {"$a->{meta}->{title}[0]" cmp "$b->{meta}->{title}[0]"} @songlist;
-		}
-	}
-	elsif ( $sorting =~ /author/ ) {
-		if ($sorting =~ /desc/ ) {
-			@songlist=sort {"$b->{meta}->{subtitle}[0]" cmp "$a->{meta}->{subtitle}[0]"} @songlist;
-		}
-		else {
-			@songlist=sort {"$a->{meta}->{subtitle}[0]" cmp "$b->{meta}->{subtitle}[0]"} @songlist;
-		}
-	}
-
-	if ( $sorting =~ /compact/ ) {
-		my $pagecount = $page;
-		my $songs = @songlist;
-		my $i = 0;
-		while ( $i<$songs ) {
-			if ( defined($songlist[$i]->{meta}->{order}) ) {
-				#skip already processed entries
-				$i++; 
-				next;
-			}
-			my $pages = $songlist[$i]->{meta}->{pages};
-			$songlist[$i]->{meta}->{order}=$pagecount;
-			if ( ($pagecount % 2) && $pages == 2 ) {
-				my $j = $i+1;
-				#Find next song with != 2 pages
-				while ( $j < $songs ) {
-					last if ( !defined($songlist[$j]->{meta}->{order}) && $songlist[$j]->{meta}->{pages} != 2 );
-					$j++;
-				}
-				if ( $j == $songs ) {
-					$i++;
-				} 
-				else {
-					#Swapped page gets current ID
-					$songlist[$j]->{meta}->{order}=$pagecount;
-					#Pushed page gets ID plus swapped page
-					$songlist[$i]->{meta}->{order}=$pagecount+$songlist[$j]->{meta}->{pages};
-					#Add the swapped page to pagecount as it will be skipped later
-					$pages+=$songlist[$j]->{meta}->{pages};
-					print "!$j " if $options->{verbose};
-				}
-			} 
-			else {
-				$i++
-			}
-			$pagecount += $pages;
-		}
-		#By Pagelist
-		@songlist=sort { $a->{meta}->{order} <=> $b->{meta}->{order} } @songlist;
-	}
-
-	$sb->{songs} = [@songlist];
-	print "\n" if $options->{verbose};
 }
 
 1;
