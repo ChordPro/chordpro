@@ -2723,8 +2723,6 @@ sub prepare_assets {
       if $config->{debug}->{images} || $config->{debug}->{assets};
     for my $id ( sort keys %sa ) {
 	my $elt = $sa{$id};
-	
-	#next if defined $elt->{data};
 
 	$elt->{subtype} //= "image" if $elt->{uri};
 
