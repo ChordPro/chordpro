@@ -8,6 +8,7 @@
 
     !Bugfixes
     - (Song) Add col alias for columns.
+    - Fix issue #349.
 
     !Internal
     - Modify delegate API.

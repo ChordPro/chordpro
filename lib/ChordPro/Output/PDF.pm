@@ -46,6 +46,12 @@ sub generate_songbook {
     $verbose ||= $options->{verbose};
 
     $ps = $config->{pdf};
+my $pri = ( __PACKAGE__."::Writer" )->new( $ps, $pdfapi );
+foreach my $song ( @{$sb->{songs}} ) {
+		$song->{meta}->{pages} =
+			generate_song( $song, { pr => $pri, startpage => 1 } );
+	if ( $options->{verbose} ) { print $song->{meta}->{pages}." "; STDOUT->flush(); } 
+	}
 
     my $pr = (__PACKAGE__."::Writer")->new( $ps, $pdfapi );
     warn("Generating PDF ", $options->{output} || "__new__.pdf", "...\n") if $options->{verbose};
@@ -2830,6 +2836,16 @@ sub prepare_assets {
 	    next;
 	}
 
+	if ( $elt->{type} eq "image" && $elt->{subtype} eq "xform" ) {
+	    # Ready to go.
+	    next;
+	}
+
+	if ( $elt->{type} eq "image" && $elt->{data} ) {
+	    # Ready to go.
+	    next;
+	}
+
 	if ( $elt->{type} eq "image" ) {
 	    warn("PDF: Preparing $elt->{subtype} image\n") if $config->{debug}->{images};
 	    if ( ($elt->{uri}//"") =~ /^chord:(.+)/ ) {
@@ -2921,6 +2937,7 @@ sub prepare_assets {
     $assets = $s->{assets} || {};
     ::dump( $assets, as => "Assets, Pass 2" )
       if $config->{debug}->{assets} & 0x02;
+
 }
 
 
