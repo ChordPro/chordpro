@@ -44,6 +44,10 @@
             "type" : "string"
           }
         },
+        "program" : {
+          "type" : "string",
+          "default" : ""
+        },
         "module" : {
           "type" : "string",
           "default" : "ABC"

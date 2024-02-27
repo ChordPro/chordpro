@@ -1124,8 +1124,16 @@ sub default_config () {
         "abc" : {
             "type"     : "image",
             "module"   : "ABC",
+
+            // Default handler "abc2svg" uses program (if set),
+            // otherwise embedded QuickJS or external QuickJS.
+            // Handler "quickjs_xs" uses embedded QuickJS only.
+            // Handler "quickjs_qjs" uses external QuickJS only.
+            // Handler "quickjs" uses internal or external QuickJS.
             "handler"  : "abc2svg",
-            // No longer used -- ./default.abc will always be used if present
+            "program"  : "",		// specify program tool
+
+            // No longer used -- ./default.abc will be used if program tool
             "config"   : "default", // or "none", or "myformat.fmt"
             // The preamble is a list of lines inserted before the ABC data,
             // and after the delegate supplied preamble.

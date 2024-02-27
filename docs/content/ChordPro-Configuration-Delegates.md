@@ -33,11 +33,11 @@ ABC tool to turn it into an SVG image.
 
 ### Selecting the ABC tool
 
-The ABC delegate supports two tools:
-
-* `abc2svg`, a program that comes with some ABC tools.
+The ABC delegate supports two methods:
 
 * QuickJS, a JavaScript interpreter. 
+
+* A program similar to `abcnode` that comes with some ABC tools.
 
 ChordPro will first try to find an `abc2svg` program in the executable
 path. If this is found it will be used to process the ABC data. The
@@ -58,7 +58,17 @@ QuickJS interpreter.
 
         "abc" : {
             "module"   : "ABC",
+
+            // Default handler "abc2svg" uses program (if set),
+            // otherwise embedded QuickJS or external QuickJS.
+            // Handler "quickjs_xs" uses embedded QuickJS only.
+            // Handler "quickjs_qjs" uses external QuickJS only.
+            // Handler "quickjs" uses internal or external QuickJS.
+            // Please stick to the default unless you know what you
+            // are doing.
             "handler"  : "abc2svg",
+            "program"  : "",		// specify program tool
+
             "type"     : "image",
 
             // The preamble is a list of lines inserted before the ABC data.
@@ -87,7 +97,13 @@ QuickJS interpreter.
   This must be `"ABC"`.
 
 * `handler`: The module function that handles this delegation.  
-  Valid values are `"abc2svg"` and `"abc2svg_qjs"`.
+  Default value is `"abc2svg"` to let ChordPro decide.  
+  Unless `program` is set, ChordPro will use QuickJS, either built-in
+  or via an external QuickJS interpreter.
+
+* `program`: The program to use if the handler is `"abc2svg"`.  
+  This program should take one argument, the ABC file, and write the
+  SVG data to its standard output.
 
 * `type`: The result produced by the delegate handler.  
   This must be `"image"`, this delegate

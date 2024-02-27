@@ -882,7 +882,6 @@ sub app_setup {
         $pod2usage->(VERBOSE => 2) if $manual;
     }
     app_ident(\*STDOUT, 0) if $version;
-    app_about(\*STDOUT, $about, 0) if $about;
 
     # If the user specified a config, it must exist.
     # Otherwise, set to a default.
@@ -948,6 +947,11 @@ sub app_setup {
 	print ChordPro::Config::config_final($deltacfg)
 	  if $fincfg || $deltacfg;
 	exit 0;
+    }
+
+    if ( $about ) {
+	$::config = ChordPro::Config::configurator({});
+	app_about( \*STDOUT, $about, 0 );
     }
 
     if ( $dump_chords ) {
@@ -1070,22 +1074,12 @@ sub ::runtimeinfo {
 	$msg .= sprintf( $fmt, $tag, $_ );
 	$tag = "";
     }
-    eval { require ChordPro::Delegate::ABC;
-	   my $x;
-	   if ( ChordPro::Delegate::ABC::have_xs() ) {
-	       $x = ChordPro::Delegate::ABC::packaged_qjs();
-	       $msg .= sprintf( $fmt, "ABC support",
-				$x->{desc} . " (" . $x->{version} . ")" );
-	   }
-	   elsif ( $x = findexe( "abc2svg", "silent" )
-		        || findexe( "abcnode", "silent" ) ) {
-	       $msg .= sprintf( $fmt, "ABC support", $cp->display($x) );
-	   }
-	   elsif ( $x = ChordPro::Delegate::ABC::packaged_qjs() ) {
-	       $msg .= sprintf( $fmt, "ABC support",
-				$cp->display($x->{desc}) . " (" . $x->{version} . ")" );
-	   }
-    };
+    eval {
+	require ChordPro::Delegate::ABC;
+	my $x = ChordPro::Delegate::ABC->info();
+	$msg .= sprintf( $fmt, "ABC support", $x->{info} ) if $x->{info};
+	1;
+    } or $@ =~ /Can't locate/ or warn($@);
 
     my $vv = sub {
 	my ( $mod ) = @_;

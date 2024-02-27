@@ -1,7 +1,15 @@
 0.000
 
-    - (Song) Add col alias for columns.
+    !Functionality
+    - ABC support will default to QuickJS, either embedded via
+      JavaScript::QuickJS or via an external interpreter.
+      To use another tool, set delegates.abc.program in the config.    
     - Substitute alert image for failed delegates.
+
+    !Bugfixes
+    - (Song) Add col alias for columns.
+
+    !Internal
     - Modify delegate API.
 
 6.050.6 2024-02-25
