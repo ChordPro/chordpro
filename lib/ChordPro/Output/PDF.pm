@@ -87,7 +87,7 @@ sub generate_songbook {
 	$songindex++;
 
 	# Align.
-	if ( $ps->{'pagealign-songs'} && !($page % 2) ) {
+	if ( $ps->{'pagealign-songs'} && !($page % 2) && !$ps->{'sort-pages'}=~ /2page|compact/) {
 	    $pr->newpage($ps, $page);
 	    $page++;
 	    $first_song_aligned //= 1;
@@ -3110,13 +3110,8 @@ sub sort_songbook {
 		print "Counting pages:\n" if $options->{verbose};
 
 		foreach my $song ( @{$sb->{songs}} ) {
-			#Make a deep copy of the structure to avoid issues when doing this twice
-			#my $tmpasset;
-			#$tmpasset=dclone $song->{assets} if defined $song->{assets};
 			$song->{meta}->{pages} =
 				generate_song( $song, { pr => $pri, startpage => 1 } );
-			#Restore the original value
-			#$song->{assets}=$tmpasset;
 		if ( $options->{verbose} ) { print $song->{meta}->{pages}." "; STDOUT->flush(); } 
 		}
 		print "\n" if $options->{verbose};
@@ -3170,7 +3165,6 @@ sub sort_songbook {
 					$songlist[$i]->{meta}->{order}=$pagecount+$songlist[$j]->{meta}->{pages};
 					#Add the swapped page to pagecount as it will be skipped later
 					$pages+=$songlist[$j]->{meta}->{pages};
-					print "!$j " if $options->{verbose};
 				}
 			} 
 			else {
@@ -3183,7 +3177,6 @@ sub sort_songbook {
 	}
 
 	$sb->{songs} = [@songlist];
-	print "\n" if $options->{verbose};
 }
 
 
