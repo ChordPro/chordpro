@@ -87,7 +87,7 @@ sub generate_songbook {
 	$songindex++;
 
 	# Align.
-	if ( $ps->{'pagealign-songs'} && !($page % 2) && !$ps->{'sort-pages'}=~ /2page|compact/) {
+	if ( $ps->{'pagealign-songs'} && !($page % 2) && !($ps->{'sort-pages'}=~ /2page|compact/ ) )  {
 	    $pr->newpage($ps, $page);
 	    $page++;
 	    $first_song_aligned //= 1;
