@@ -1,5 +1,7 @@
 0.000
 
+6.050.7 2024-02-27
+
     !Functionality
     - ABC support will default to QuickJS, either embedded via
       JavaScript::QuickJS or via an external interpreter.
