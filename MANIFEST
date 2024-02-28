@@ -258,6 +258,7 @@ t/84_pages.t
 t/85_pages.t
 t/86_pages.t
 t/87_pages.t
+t/90_pages.t
 t/a2crd/t001.cho
 t/a2crd/t001.crd
 t/a2crd/t002.cho

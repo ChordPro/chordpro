@@ -361,6 +361,36 @@ Note that with `pagealign-songs` = 1 empty (blank) pages are inserted
 (as conventional in book printing), while with `pagealign-songs` > 1
 the empty pages have headings and footers.
 
+## Page reordering
+
+Pages can be reordered based on the song title or subtitle.
+Also possible is to align songs with two pages on an even page, so
+that you can view it without having to turn a page.
+
+        "sort-pages" : ""
+
+`sort-pages` can be set to a comma separated list of `title`, `author`,
+`2page`, `compact`, and `desc`.
+
+* `title`: sort pages alphabetically by title.
+
+* `author`: sort pages alphabetically by subtitle. If this is
+  used together with title, only title is used.
+
+* `2page`:  make sure songs with even pages are placed on even
+  pages, so most. if not all, of the song is visible
+  in a normal book without needing to turn a page.
+  A blank page is added to align.
+
+* `compact`: modifier for 2page - instead of adding a blank page,
+  an odd-paged song is moved in front of this song to achieve
+  even page alignment.  
+  Note: this option requires extra processing time since
+  the songbook has to be processed twice.
+
+* `desc`: modifier for title or author to sort descending.
+
+
 ## Page headers and footers
 
 ChordPro distinguishes three types of output pages:

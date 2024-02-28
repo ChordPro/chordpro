@@ -1723,6 +1723,12 @@
 	      }
 	    },
 
+	    "sort-pages" : {
+	        "description" : "How to reorder pages.",
+		"default" : "",
+		"type" : "string"
+	    },
+
 	    "split-marker" : {
 	      "description" : "Marker when syllables are too small for chord.",
 	      "default" : [ "", "", "" ],
