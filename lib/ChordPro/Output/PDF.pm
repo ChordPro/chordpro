@@ -100,7 +100,7 @@ sub generate_songbook {
 	if ( ($page % 2) && $song->{meta}->{pages} && $song->{meta}->{pages} == 2 ) {
 	    $pr->newpage($ps, $page+1);
 	    $page++;
-	    print " " if $options->{verbose};
+	    print STDERR " " if $options->{verbose}; # Progress indicator
 	}
 
 	$song->{meta}->{tocpage} = $page;
@@ -115,9 +115,8 @@ sub generate_songbook {
 	}
 
 	if ( $options->{verbose} ) {
-	    print "$page ";
-	    STDOUT->flush();
-	} 
+	    print STDERR "$page "; # Progress indicator
+	}
 
 	$page += $song->{meta}->{pages} =
 	  generate_song( $song, { pr        => $pr,
@@ -130,7 +129,7 @@ sub generate_songbook {
     }
     $pages_of{songbook} = $page - 1;
     $start_of{back} = $page;
-    print "\n" if $options->{verbose};
+    print STDERR "\n" if $options->{verbose}; # Progress indicator
 
     $::config->{contents} //=
       [ { $::config->{toc}->{order} eq "alpha"
@@ -3124,17 +3123,18 @@ sub sort_songbook {
     my $sorting = $ps->{'sort-pages'};
 
     if ( $sorting =~ /2page/ ||  $sorting =~ /compact/) {
-	print "Counting pages:\n" if $options->{verbose};
+	# Progress indicator
+	print STDERR "Counting pages:\n" if $options->{verbose};
 
 	foreach my $song ( @{$sb->{songs}} ) {
 	    $song->{meta}->{pages} =
 	      generate_song( $song, { pr => $pri, startpage => 1 } );
 	    if ( $options->{verbose} ) {
-		print $song->{meta}->{pages}." ";
-		STDOUT->flush();
+		# Progress indicator
+		print STDERR $song->{meta}->{pages}." ";
 	    }
 	}
-	print "\n" if $options->{verbose};
+	print STDERR "\n" if $options->{verbose}; # Progress indicator
     }
 
     my @songlist = @{$sb->{songs}};
