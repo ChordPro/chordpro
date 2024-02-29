@@ -3122,7 +3122,7 @@ sub sort_songbook {
 
     my $sorting = $ps->{'sort-pages'};
 
-    if ( $sorting =~ /2page/ ||  $sorting =~ /compact/) {
+    if ( $sorting =~ /2page|compact/ ) {
 	# Progress indicator
 	print STDERR "Counting pages:\n" if $options->{verbose};
 
@@ -3147,7 +3147,7 @@ sub sort_songbook {
 	    @songlist = sort { $a->{meta}->{title}[0] cmp $b->{meta}->{title}[0]} @songlist;
 	}
     }
-    elsif ( $sorting =~ /author/ ) {
+    elsif ( $sorting =~ /subtitle/ ) {
 	if ($sorting =~ /desc/ ) {
 	    @songlist = sort { $b->{meta}->{subtitle}[0] cmp $a->{meta}->{subtitle}[0] } @songlist;
 	}

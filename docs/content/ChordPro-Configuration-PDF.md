@@ -369,12 +369,12 @@ that you can view it without having to turn a page.
 
         "sort-pages" : ""
 
-`sort-pages` can be set to a comma separated list of `title`, `author`,
+`sort-pages` can be set to a comma separated list of `title`, `subtitle`,
 `2page`, `compact`, and `desc`.
 
 * `title`: sort pages alphabetically by title.
 
-* `author`: sort pages alphabetically by subtitle. If this is
+* `subtitle`: sort pages alphabetically by subtitle. If this is
   used together with title, only title is used.
 
 * `2page`:  make sure songs with even pages are placed on even
@@ -382,7 +382,7 @@ that you can view it without having to turn a page.
   in a normal book without needing to turn a page.
   A blank page is added to align.
 
-* `compact`: modifier for 2page - instead of adding a blank page,
+* `compact`: implies `2page` - instead of adding a blank page,
   an odd-paged song is moved in front of this song to achieve
   even page alignment.  
   Note: this option requires extra processing time since

@@ -1347,21 +1347,21 @@ sub default_config () {
       // Align songs to even/odd pages. When greater than 1, force alignment.
       "pagealign-songs" : 1,
 
-      // Sort pages by "title", "author", "2page", "compact", "desc".
+      // Sort pages by "title", "subtitle", "2page", "compact", "desc".
       // "sort-pages" is a Comma separated list of the options above.
       // title  : sort pages alphabetically by title.
-      // author : sort pages alphabetically by subtitle. If this is
+      // subtitle : sort pages alphabetically by subtitle. If this is
       //          used together with title, only title is used.
       // 2page :  make sure songs with even pages are placed on even
       //          pages, so most. if not all, of the song is visible
       //          in a normal book without needing to turn a page.
       //          A blank page is added to align.
-      // compact: modifier for 2page - instead of adding a blank page,
+      // compact: implies 2page - instead of adding a blank page,
       //          an odd-paged song is moved in front of this song to achieve
       //          even page alignment.
       //          Note: this option requires extra processing time since
       //          the songbook has to be processed twice.
-      // desc :   modifier for title or author to sort descending.
+      // desc :   modifier to sort descending.
 
       "sort-pages" : "",
       // PDF file to add as front matter.
