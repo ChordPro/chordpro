@@ -37,12 +37,14 @@ Additionally, the following attributes may be used:
 
 * `width="`_n_`"`  
    The width of the resultant object.  
-   Defaults to the actual width (tight fit) of the texts.
+   Defaults to the actual width (tight fit) of the texts.  
+   Note that the object can only be made wider, not smaller.
 
 * `height="`_n_`"`  
    The height of the resultant object.  
    Defaults to the actual height of the text, including
    the advance of the last line (non-tight fit).  
+   Note that the object can only be made higher, not smaller.  
    When `height` or `padding` is set, a tight fit is used.
 
 * `padding="`_n_`"`  

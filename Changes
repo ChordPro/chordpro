@@ -2,7 +2,8 @@
 
     !Functionality
     - Use bublath donated a page reordering feature. See
-    https://chordpro.org/beta/chordpro-configuration-pdf/#page-reordering
+      https://chordpro.org/beta/chordpro-configuration-pdf/#page-reordering
+    - Improve error message for open failures.
 
 6.050.7 2024-02-27
 
