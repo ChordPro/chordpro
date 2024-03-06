@@ -36,7 +36,9 @@ sub parse_file {
     }
 
     # Loadlines sets $opts->{_filesource}.
+    $opts->{fail} = "soft";
     my $lines = loadlines( $filename, $opts );
+    die( $filename, ": ", $opts->{error}, "\n" ) if $opts->{error};
     # Sense crd input and convert if necessary.
     if ( !(defined($options->{a2crd}) && !$options->{a2crd}) and
 	 !$options->{fragment}
