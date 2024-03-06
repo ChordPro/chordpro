@@ -110,6 +110,7 @@ sub ly2svg( $self, %args ) {
     push( @cmd, "--silent" ) unless DEBUG;
     ( my $im1 = $svg ) =~ s/\.\w+$//;
     push( @cmd, "-o", $im1, $src );
+    warn( "+ @cmd\n" ) if DEBUG;
     my $ret = sys( @cmd );
 
     if ( $ret ) {
