@@ -34,8 +34,9 @@ field $info            :mutator :param = undef;
 field $orig            :mutator :param = undef;
 
 # For convenience.
-method chord_display {
+method chord_display() {
 
+    use String::Interpolate::Named;
     unless ( $info
 	     && UNIVERSAL::isa( $info, 'ChordPro::Chord::Base' ) ) {
 	$Carp::Internal{ (__PACKAGE__) }++;
@@ -47,11 +48,14 @@ method chord_display {
 	die("Missing info for $key$m");
     }
 
-    local $info->{chordformat} = $format;
-    $info->chord_display;
+    my $res = $info->chord_display;
+    return $res unless $format;
+    $res = interpolate( { args => { formatted => $res } }, $format );
+    return $::config->{settings}->{truesf} ? $info->fix_musicsyms($res) : $res;
+
 }
 
-method raw {
+method raw() {
     return $key unless defined $format;
     my ( $std, $prn ) = @{$::config->{'chord-formats'}}{qw(stdfmt prnfmt)};
     $format =~ s/\%\{formatted\}/$key/gr;
