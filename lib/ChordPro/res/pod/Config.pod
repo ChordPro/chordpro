@@ -50,6 +50,8 @@ extensive details and examples.
           // Suppress empty chord lines.
           // Overrides the -a (--single-space) command line options.
           "suppress-empty-chords" : true,
+          // Suppress parenthesised chords.
+          "suppress-paren-chords" : false,
           // Suppress blank lyrics lines.
           "suppress-empty-lyrics" : true,
           // Suppress chords.
@@ -113,7 +115,7 @@ extensive details and examples.
         // This is explicitly NOT intended for the metadata items above.
         "meta" : {
             // Do not remove or change this one.
-            "_configversion" : [ "6.031" ],
+            "_configversion" : [ "6.051" ],
         },
     
         // Assets.
@@ -198,6 +200,8 @@ extensive details and examples.
             "common" :    "%{root|%{}%{qual|%{}}%{ext|%{}}%{bass|/%{}}|%{name}}",
             "roman" :     "%{root|%{}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}",
             "nashville" : "%{root|%{}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}",
+            "stdfmt" : "%{formatted}",
+            "prnfmt" : "(%{formatted})",
         },
     
         // Printing chord diagrams.

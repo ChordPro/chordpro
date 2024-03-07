@@ -823,7 +823,7 @@ sub chord {
     }
 
     # Special treatment for parenthesized chords.
-    $c =~ s/^\((.*)\)$/$1/;
+    my $parens = $c =~ s/^\((.*)\)$/$1/;
     do_warn("Double parens in chord: \"$orig\"")
       if $c =~ s/^\((.*)\)$/$1/;
 
@@ -842,19 +842,23 @@ sub chord {
     my $ap = ChordPro::Chords::Appearance->new( orig => $orig );
 
     # Handle markup, if any.
+    my ( $std, $prn ) = @{$config->{'chord-formats'}}{qw(stdfmt prnfmt)};
     if ( $markup ) {
-	if ( $markup =~ s/\>\Q$c\E\</>%{formatted}</
+	if ( $markup =~ s/\>\Q$c\E\</>$std</
 	     ||
-	     $markup =~ s/\>\(\Q$c\E\)\</>(%{formatted})</ ) {
+	     $markup =~ s/\>\(\Q$c\E\)\</>$prn</ ) {
 	}
 	else {
 	    do_warn("Invalid markup in chord: \"$markup\"\n");
 	}
 	$ap->format = $markup;
     }
-    elsif ( (my $m = $orig) =~ s/\Q$c\E/%{formatted}/ ) {
-	$ap->format = $m unless $m eq "%{formatted}";
+    elsif ( (my $m = $orig) =~ s/\Q$c\E/$std/ ) {
+	$m =~ s/\(\Q$std\E\)/$prn/ if $parens;
+	$ap->format = $m unless $m eq $std;
     }
+
+    return "" if $parens && $config->{settings}->{'suppress-paren-chords'};
 
     # After parsing, the chord can be changed by transpose/code.
     # info->name is the new key.
