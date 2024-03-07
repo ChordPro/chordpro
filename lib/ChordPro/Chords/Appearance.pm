@@ -53,14 +53,19 @@ method chord_display {
 
 method raw {
     return $key unless defined $format;
-    if ( $format eq '(%{formatted})' ) {
-	return '(' . $key . ')';
-    }
-    $key;
+    my ( $std, $prn ) = @{$::config->{'chord-formats'}}{qw(stdfmt prnfmt)};
+    $format =~ s/\%\{formatted\}/$key/gr;
 }
 
 method CARP_TRACE {
     "<<Appearance(\"$key\")>>";
+}
+
+method _data_printer($ddp) {
+    my $ret = "'$orig'";
+    $ret .= " ← '$key'" if $key ne $orig;
+    $ret .=" @ '$format'" if $format;
+    return $ret;
 }
 
 1;

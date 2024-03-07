@@ -815,7 +815,8 @@ sub name          {
     Carp::confess("Double parens")
 	if $self->{parens} && $self->{name} =~ /^\(.*\)$/;
     return $self->{name} if $np || !$self->{parens};
-    "(" . $self->{name} . ")";
+
+    $::config->{'chord-formats'}->{prnfmt} =~ s/\%\{formatted\}/$self->{name}/gr;
 }
 
 sub canon         { $_[0]->{name_canon} }
