@@ -455,8 +455,8 @@ sub gridline ( $song, $elt ) {
 
 sub chord ( $s, $c ) {
     return "" unless length($c);
-    local $c->info->{display} = undef;
-    local $c->info->{format} = undef;
+   # local $c->info->{display} = undef;
+   # local $c->info->{format} = undef;
     my $t = $c->chord_display;
     if ( $variant ne 'msp' ) {
 	$t = demarkup($t);
