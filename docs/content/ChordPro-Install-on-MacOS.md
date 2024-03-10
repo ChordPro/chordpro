@@ -5,13 +5,20 @@ description: "Installation on MacOS"
 
 # Installation on MacOS
 
+There are currently no reports that ChordPro can be successfully built 
+using the pre-installed version of Perl that comes with MacOS.
 
-Modern versions of MacOS come with a pre-installed version of Perl
-that is capable of running the command line version of ChordPro. 
-It is currently not possible (well, not easy) to run the GUI version.
-To run the GUI version please use the [binary install]({{< relref
-"Install-MacOS-Native" >}}). Note that the binary install includes
-both the GUI and the command line version of ChordPro.
+The command line version of ChordPro can be built with HomeBrew Perl.
+It is currently not possible (well, not easy) to build the GUI version.
+
+Unless you are a seasoned MacOS Perl developer, please use the [binary
+install kit]({{< relref
+"Install-MacOS-Native" >}}).
+This kit includes both the GUI and the command line version of ChordPro.
+
+## Using HomeBrew
+
+Still here?
 
 To install the command line version of ChordPro, open a command
 terminal window and type
@@ -20,29 +27,6 @@ terminal window and type
 
 You need to do this only once. This may give a final error that the
 install failed, this can be ignored.
-
-## Using system perl
-
-Type:
-
-    sudo cpan chordpro
-
-Make sure you are running the system version of the `cpan` tool. If in doubt, type this instead:
-
-    sudo /usr/bin/cpan chordpro
-
-ChordPro should now be built and installed, by default in
-`/usr/local/bin`.
-
-Try it by typing `chordpro --version`. The result should be similar to
-
-````
-This is ChordPro version 0.977
-````
-
-(The version number may be different.)
-
-## Using HomeBrew
 
 First, install `homebrew` if it is not yet installed. Directions can
 be found [here](https://brew.sh/).
@@ -55,18 +39,14 @@ Note that this will install perl in a subdirectory of
 `/usr/local/Cellar`, e.g. `/usr/local/Cellar/perl/5.32.0/bin`. It is
 advised to add this to the front of your `PATH`.
 
-If you want to use the ChordPro GUI, install wxWidgets and wxPerl.
-
-    brew install wxmac
-    /usr/local/Cellar/perl/5.32.0/bin/cpan Wx
-
-The last command may take a while, but should complete without errors.
-
 Finally, install ChordPro:
 
     /usr/local/Cellar/perl/5.32.0/bin/cpan chordpro
 	
-This will give you both the `chordpro` and `wxchordpro` commands.
+This will give you the `chordpro` command.
+
+    % chordpro --version
+    This is ChordPro core 6.050
 
 ## Personal configuration
 
