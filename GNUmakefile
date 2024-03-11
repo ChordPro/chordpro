@@ -99,7 +99,7 @@ checkjson :
 	mkdir .json
 	for i in ${CFGLIB}/*.json ; \
 	do \
-	  json_pp -json_opt relaxed < $$i > .json/`basename $$i`; \
+	  perl script/rrjson.pl --json $$i > .json/`basename $$i`; \
 	done
 	cd .json; rm keyboard.json dark.json resetchords.json
 	${JSONVALIDATOR} ${JSONOPTS} \

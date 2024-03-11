@@ -10,7 +10,7 @@ package ChordPro::Config;
 use v5.26;
 use utf8;
 use Carp;
-use feature qw( signatures );
+use feature qw( signatures state );
 no warnings "experimental::signatures";
 
 use ChordPro;
@@ -18,7 +18,6 @@ use ChordPro::Paths;
 use ChordPro::Utils;
 use File::LoadLines;
 use File::Spec;
-use JSON::PP ();
 use Scalar::Util qw(reftype);
 use List::Util qw(any);
 use Hash::Util;
@@ -47,13 +46,27 @@ This module can be run standalone and will print the default config.
 #sub clone($);
 #sub default_config();
 
+sub json_load( $json, $source = "<builtin>" ) {
+    use JSON::Relaxed;
+    state $pp = JSON::Relaxed::Parser->new;
+    #$json =~ s/\\[\r\n]+\s*//sg;
+    $json =~ s/(['"])\s*\\[\r\n]+\s*\1//sg;
+    my $data = $pp->parse($json);
+    return $data unless $JSON::Relaxed::err_id;
+    $source .= ": " if $source;
+    die("${source}JSON error: $JSON::Relaxed::err_msg\n");
+#    use JSON::PP;
+#    state $pp = JSON::PP->new->relaxed;
+#    $pp->decode($json);
+}
+
 sub configurator ( $opts = undef ) {
     my $pp = JSON::PP->new->relaxed;
 
     # Test programs call configurator without options.
     # Prepare a minimal config.
     unless ( $opts ) {
-        my $cfg = $pp->decode( default_config() );
+        my $cfg = json_load( default_config() );
         $config = $cfg;
 	config_split_fc_aliases($cfg);
         $options = { verbose => 0 };
@@ -70,7 +83,7 @@ sub configurator ( $opts = undef ) {
 
     # Load defaults.
     warn("Reading: <builtin>\n") if $verbose > 1;
-    my $cfg = $pp->decode( default_config() );
+    my $cfg = json_load( default_config() );
 
     # This is easier than splitting out manually :)
     config_split_fc_aliases($cfg);
@@ -275,8 +288,7 @@ sub get_config ( $file ) {
 
     if ( $file =~ /\.json$/i ) {
         if ( open( my $fd, "<:raw", $file ) ) {
-            my $pp = JSON::PP->new->relaxed;
-            my $new = $pp->decode( loadlines( $fd, { split => 0 } ) );
+            my $new = json_load( loadlines( $fd, { split => 0 } ), $file );
             precheck( $new, $file );
             close($fd);
             return $new;
@@ -393,8 +405,7 @@ sub config_final ( $delta ) {
     my $cfg = configurator($options);
 
     if ( $delta ) {
-        my $pp = JSON::PP->new->relaxed;
-        my $def = $pp->decode( default_config() );
+        my $def = json_load( default_config() );
         $cfg->reduce($def);
     }
     $cfg->unlock;
@@ -409,6 +420,7 @@ sub config_final ( $delta ) {
         cfg2props($cfg);
     }
     else {
+	use JSON::PP;
         my $pp = JSON::PP->new->canonical->indent(4)->pretty;
         $pp->encode({%$cfg});
     }
@@ -416,8 +428,7 @@ sub config_final ( $delta ) {
 
 sub config_default () {
     if ( $ENV{CHORDPRO_CFGPROPS} ) {
-        my $pp = JSON::PP->new->relaxed;
-        my $cfg = $pp->decode( default_config() );
+        my $cfg = json_load( default_config() );
         cfg2props($cfg);
     }
     else {
@@ -1035,7 +1046,7 @@ sub default_config () {
     // "base" defaults to 1.
     // Use 0 for an empty string, and -1 for a muted string.
     // "fingers" is optional.
-    // "display" (optional) can be used to change the way the chord is displayed. 
+    // "display" (optional) can be used to change the way the chord is displayed.
     "chords" : [
       //  {
       //    "name"  : "Bb",
