@@ -812,11 +812,8 @@ sub is_movable    { $_[0]->{movable} }
 # Common accessors.
 sub name          {
     my ( $self, $np ) = @_;
-    Carp::confess("Double parens")
-	if $self->{parens} && $self->{name} =~ /^\(.*\)$/;
-    return $self->{name} if $np || !$self->{parens};
-
-    $::config->{'chord-formats'}->{prnfmt} =~ s/\%\{formatted\}/$self->{name}/gr;
+    croak("NP") if $np;
+    return $self->{name};
 }
 
 sub canon         { $_[0]->{name_canon} }
@@ -841,7 +838,12 @@ sub kbkeys {
     $_[0]->{keys} = ChordPro::Chords::get_keys($_[0]);
 }
 
-sub chord_display ( $self, $default ) {
+sub chord_display ( $self, $default = undef ) {
+    Carp::carp("chord_display called on chord object");
+    $self->_chord_display( $default );
+}
+
+sub _chord_display ( $self, $default = undef ) {
 
     use String::Interpolate::Named;
 

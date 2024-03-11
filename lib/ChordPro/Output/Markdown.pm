@@ -103,10 +103,9 @@ sub line_default {
 $line_routines{line_default} = \&line_default;
 
 sub chord {
-    my ( $c ) = @_;
+    my ( $c, $format ) = @_;
     return "" unless length($c);
-    return $c->key if $c->info->is_annotation;
-    $text_layout->set_markup($c->chord_display);
+    $text_layout->set_markup($c->chord_display($format));
     return $text_layout->render;
 }
 
@@ -128,6 +127,7 @@ sub md_textline{
 sub line_songline {
     my ( $elt ) = @_;
     my $t_line = "";
+    my $format = $::config->{chordpro}->{'chord-formats'}->{default};
     my @phrases = map { $text_layout->set_markup($_); $text_layout->render }
       @{ $elt->{phrases} };
 
@@ -147,7 +147,7 @@ sub line_songline {
 	$f .= '%s';
 	foreach ( 0..$#{$elt->{chords}} ) {
 	    $t_line .= sprintf( $f,
-				chord( $elt->{chords}->[$_]->raw ),
+				chord( $elt->{chords}->[$_]->raw, $format ),
 				$phrases[$_] );
 	}
 	return ( md_textline($cp.$t_line) );
@@ -155,7 +155,7 @@ sub line_songline {
 
     my $c_line = "";
     foreach ( 0..$#{$elt->{chords}} ) {
-		$c_line .= chord( $elt->{chords}->[$_] ) . " ";
+		$c_line .= chord( $elt->{chords}->[$_], $format ) . " ";
 		$t_line .= $phrases[$_];
 		my $d = length($c_line) - length($t_line);
 		$t_line .= "-" x $d if $d > 0;
@@ -313,10 +313,11 @@ sub line_grid {
 $line_routines{line_grid} = \&line_grid;
 
 sub line_gridline {
+    my $format = $::config->{chordpro}->{'chord-formats'}->{grid};
     my ( $elt ) = @_;
 	my @a = @{ $elt->{tokens} };
 	@a = map { $_->{class} eq 'chord'
-			 ? $_->{chord}->raw
+			 ? $_->{chord}->chord_display($format)
 			 : $_->{symbol} } @a;
     return "\t".join("", @a);
 }

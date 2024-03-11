@@ -414,8 +414,9 @@ sub songline ( $song, $elt ) {
     }
 
     my $line = "";
+    my $format = $::config->{chordpro}->{'chord-formats'}->{default};
     foreach my $c ( 0..$#{$elt->{chords}} ) {
-	$line .= "[" . fq(chord( $song, $elt->{chords}->[$c])) . "]" . fq($elt->{phrases}->[$c]);
+	$line .= "[" . fq(chord( $song, $elt->{chords}->[$c], $format )) . "]" . fq($elt->{phrases}->[$c]);
     }
     $line =~ s/^\[\]//;
     $line;
@@ -424,10 +425,11 @@ sub songline ( $song, $elt ) {
 sub gridline ( $song, $elt ) {
 
     my $line = "";
+    my $format = $::config->{chordpro}->{'chord-formats'}->{grid};
     for ( @{ $elt->{tokens} } ) {
 	$line .= " " if $line;
 	if ( $_->{class} eq "chord" ) {
-	    $line .= chord( $song, $_->{chord} );
+	    $line .= chord( $song, $_->{chord}, $format );
 	}
 	else {
 	    $line .= $_->{symbol};
@@ -440,7 +442,7 @@ sub gridline ( $song, $elt ) {
 	my $t = $elt->{comment};
 	if ( $t->{chords} ) {
 	    for ( 0..$#{ $t->{chords} } ) {
-		$res .= "[" . fq(chord( $song, $t->{chords}->[$_])) . "]" . fq($t->{phrases}->[$_]);
+		$res .= "[" . fq(chord( $song, $t->{chords}->[$_], $format )) . "]" . fq($t->{phrases}->[$_]);
 	    }
 	}
 	else {
@@ -453,15 +455,12 @@ sub gridline ( $song, $elt ) {
     $line;
 }
 
-sub chord ( $s, $c ) {
+sub chord ( $s, $c, $format = undef ) {
     return "" unless length($c);
-   # local $c->info->{display} = undef;
-   # local $c->info->{format} = undef;
-    my $t = $c->chord_display;
+    my $t = $c->chord_display($format);
     if ( $variant ne 'msp' ) {
 	$t = demarkup($t);
     }
-    return "*$t" if $c->info->is_annotation;
     return $t;
 }
 

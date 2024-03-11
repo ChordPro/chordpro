@@ -51,7 +51,7 @@ extensive details and examples.
           // Overrides the -a (--single-space) command line options.
           "suppress-empty-chords" : true,
           // Suppress parenthesised chords.
-          "suppress-paren-chords" : false,
+          "suppress-parenthesised-chords" : false,
           // Suppress blank lyrics lines.
           "suppress-empty-lyrics" : true,
           // Suppress chords.
@@ -197,11 +197,12 @@ extensive details and examples.
           // Format to show chord names. May contain markup.
           // "chord-format" : "%{root}%{qual|%{}}%{ext|<sup>%{}</sup>}%{bass|/%{}}",
         "chord-formats" : {
-            "common" :    "%{root|%{}%{qual|%{}}%{ext|%{}}%{bass|/%{}}|%{name}}",
-            "roman" :     "%{root|%{}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}",
-            "nashville" : "%{root|%{}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}",
-            "stdfmt" : "%{formatted}",
-            "prnfmt" : "(%{formatted})",
+    
+            // Basic. Depend on notation system.
+            "common" :    "%{parenthesised|(}%{root|%{}%{qual|%{}}%{ext|%{}}%{bass|/%{}}|%{name}}%{parenthesised|)}",
+            "roman" :     "%{parenthesised|(}%{root|%{}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}%{parenthesised|)}",
+            "nashville" : "%{parenthesised|(}%{root|%{}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}%{parenthesised|)}",
+    
         },
     
         // Printing chord diagrams.
@@ -252,7 +253,7 @@ extensive details and examples.
             },
         ],
         // Table of contents, old style.
-        // This will be ignored when new style contents is present. 
+        // This will be ignored when new style contents is present.
         "toc" : {
             // Title for ToC.
             "title" : "Table of Contents",
@@ -423,6 +424,14 @@ extensive details and examples.
           // A {titles: left} may conflict with customized formats.
           // Set to non-zero to ignore the directive.
           "titles-directive-ignore" : false,
+    
+          // Chord presentation formats.
+          'chord-formats' : {
+            "default" : "%{formatted}",
+            "grid"    : "%{formatted}",
+            "inline"  : "[%{formatted}]",
+            "inline-annotation" : "[%{formatted}]",
+          },
     
           // Chord diagrams.
           // A chord diagram consists of a number of cells.
@@ -745,6 +754,13 @@ extensive details and examples.
     
         // Settings for ChordPro backend.
         "chordpro" : {
+    	// Chord presentation formats.
+    	'chord-formats' : {
+    	  "default" : "%{formatted}",
+    	  "grid"    : "%{formatted}",
+    	  "inline"  : "[%{formatted}]",
+    	  "inline-annotation" : "[%{formatted}]",
+    	},
             // Style of chorus.
             "chorus" : {
                 // Recall style: Print the tag using the type.
@@ -764,6 +780,13 @@ extensive details and examples.
     
         // Settings for HTML backend.
         "html" : {
+    	// Chord presentation formats.
+    	'chord-formats' : {
+    	  "default" : "%{formatted}",
+    	  "grid"    : "%{formatted}",
+    	  "inline"  : "[%{formatted}]",
+    	  "inline-annotation" : "[%{formatted}]",
+    	},
             // Stylesheet links.
             "styles" : {
                 "display" : "chordpro.css",
@@ -773,6 +796,13 @@ extensive details and examples.
     
         // Settings for LaTeX backend.
         "latex" : {
+    	// Chord presentation formats.
+    	'chord-formats' : {
+    	  "default" : "%{formatted}",
+    	  "grid"    : "%{formatted}",
+    	  "inline"  : "[%{formatted}]",
+    	  "inline-annotation" : "[%{formatted}]",
+    	},
             "template_include_path" : [ ],
             "templates" :  {
                 "songbook" : "songbook.tt",
@@ -783,6 +813,13 @@ extensive details and examples.
     
         // Settings for Text backend.
         "text" : {
+    	// Chord presentation formats.
+    	'chord-formats' : {
+    	  "default" : "%{formatted}",
+    	  "grid"    : "%{formatted}",
+    	  "inline"  : "[%{formatted}]",
+    	  "inline-annotation" : "[%{formatted}]",
+    	},
             // Style of chorus.
             "chorus" : {
                 // Recall style: Print the tag using the type.
@@ -808,12 +845,35 @@ extensive details and examples.
             "tabstop" : 8,
         },
     
-        // Settings for the parser/preprocessor.
-        // For selected lines, you can specify a series of 
-        // { "target" : "xxx", "replace" : "yyy" }
-        // Every occurrence of "xxx" will be replaced by "yyy".
-        // Use wisely.
+        // Settings for the parser.
         "parser" : {
+    
+            // Parsing chord presentations.
+            "chords" : {
+                // The default entry is optional.
+                "default" : {
+                    "pattern" : "(.*)",
+                    "priority" : 0,	// lowest
+                },
+                "parenthesised" : {
+                    "pattern" : "\\((.+)\\)",
+                    "priority" : 10,
+                },
+                "passing" : {
+                    "pattern" : "(.+)\\*",
+                    "priority" : 10,
+                },
+                "annotation" : {
+                    "pattern" : "\\*(.*)",
+                    "priority" : 20,	// higher than passing
+                },
+            },
+    
+            // Settings for the preprocessor.
+            // For selected lines, you can specify a series of 
+            // { "target" : "xxx", "replace" : "yyy" }
+            // Every occurrence of "xxx" will be replaced by "yyy".
+            // Use wisely.
             "preprocess" : {
                 // All lines.
                 "all" : [],
@@ -828,6 +888,7 @@ extensive details and examples.
         "debug" : {
             "runtimeinfo" : 1,
             "a2crd"     : 0,
+            "appearance": 0,
             "assets"    : 0,
             "chords"    : 0,
             "config"    : 0,

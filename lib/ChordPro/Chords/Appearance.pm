@@ -23,8 +23,8 @@ format   The format for the chord, e.g. "%{root}%{qual}<sup>%{ext}</sup>",
          %{formatted} will be replaced by the result of applying the
          global config.chord-format.
 
-raw      ????
-         Key with parens if (%{formatted}).
+presentation
+         The presentation as defined in config->parser->chords.
 
 =cut
 
@@ -32,9 +32,10 @@ field $key             :mutator :param = undef;
 field $format          :mutator :param = undef;
 field $info            :mutator :param = undef;
 field $orig            :mutator :param = undef;
+field $presentation    :mutator :param = "";
 
 # For convenience.
-method chord_display() {
+method chord_display( $finalformat = undef ) {
 
     use String::Interpolate::Named;
     unless ( $info
@@ -48,17 +49,37 @@ method chord_display() {
 	die("Missing info for $key$m");
     }
 
-    my $res = $info->chord_display;
-    return $res unless $format;
-    $res = interpolate( { args => { formatted => $res } }, $format );
-    return $::config->{settings}->{truesf} ? $info->fix_musicsyms($res) : $res;
+    my $args = {};
+    $info->flat_copy( $args, $info->{display} // $info );
+    $args->{$presentation} = 1 if $presentation;
+    my $res = $info->name;
+    my $i = 0;		# debug
+    warn("[$i] ", ::dump($args), "\n") if $::config->{debug}->{appearance};
+    for my $fmt ( $::config->{'chord-formats'}->{common}, # $default,
+		  $info->{format},
+		  $info->{chordformat},
+		  $format,
+		  $finalformat
+		) {
+	$i++;
+	next unless $fmt;
+	$args->{root} = lc($args->{root}) if $info->is_note;
+	$args->{formatted} = $res;
+	$res = interpolate( { args => $args }, $fmt );
+	warn("[$i] \"$res\" ← \"$fmt\" ← \"$args->{formatted}\"\n")
+	   if $::config->{debug}->{appearance};
+    }
 
+    # Substitute musical symbols if wanted.
+    return $::config->{settings}->{truesf} ? $info->fix_musicsyms($res) : $res;
 }
 
-method raw() {
-    return $key unless defined $format;
-    my ( $std, $prn ) = @{$::config->{'chord-formats'}}{qw(stdfmt prnfmt)};
-    $format =~ s/\%\{formatted\}/$key/gr;
+method is_annotation {
+    $presentation eq "annotation";
+}
+
+method is_parenthesised {
+    $presentation eq "parenthesised";
 }
 
 method CARP_TRACE {
@@ -69,6 +90,7 @@ method _data_printer($ddp) {
     my $ret = "'$orig'";
     $ret .= " ← '$key'" if $key ne $orig;
     $ret .=" @ '$format'" if $format;
+    $ret .=" ($presentation)" if $presentation;
     return $ret;
 }
 
