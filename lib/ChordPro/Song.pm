@@ -11,6 +11,8 @@ package ChordPro::Song;
 
 use strict;
 use warnings;
+use feature 'signatures';
+no warnings 'experimental::signatures';
 
 use ChordPro;
 use ChordPro::Paths;
@@ -76,8 +78,7 @@ my $assetid = "001";		# for assets
 
 # Constructor.
 
-sub new {
-    my ( $pkg, $opts ) = @_;
+sub new( $pkg, $opts = {} ) {
 
     my $filesource = $opts->{filesource} || $opts->{_filesource};
 
@@ -107,7 +108,7 @@ sub new {
 	  } => $pkg;
 }
 
-sub upd_config {
+sub upd_config() {
     $decapo    = $config->{settings}->{decapo};
     $lineinfo  = $config->{settings}->{lineinfo};
     $intervals = @{ $config->{notes}->{sharp} };
@@ -115,8 +116,7 @@ sub upd_config {
 
 sub ::break() {}
 
-sub parse_song {
-    my ( $self, $lines, $linecnt, $meta, $defs ) = @_;
+sub parse_song( $self, $lines, $linecnt, $meta, $defs ) {
     die("OOPS! Wrong meta") unless ref($meta) eq 'HASH';
     local $config = dclone($config);
 
@@ -294,6 +294,9 @@ sub parse_song {
     $self->{meta}       = $meta if $meta;
     $self->{chordsinfo} = {};
     $target //= $self->{system};
+
+    # Chords parser.
+    $self->make_chord_parser();
 
     # Preprocessor.
     my $prep = make_preprocessor( $config->{parser}->{preprocess} );
@@ -785,36 +788,74 @@ sub parse_song {
     return $self;
 }
 
-sub add {
-    my $self = shift;
+sub add( $self, @rest ) {
     return if $skip_context;
     push( @{$self->{body}},
 	  { context => $in_context,
 	    $lineinfo ? ( line => $diag->{line} ) : (),
-	    @_ } );
+	    @rest } );
     if ( $in_context eq "chorus" ) {
-	push( @chorus, { context => $in_context, @_ } );
+	push( @chorus, { context => $in_context, @rest } );
 	$chorus_xpose = $xpose;
 	$chorus_xpose_dir = $xpose_dir;
     }
 }
 
+my $chord_parser_pattern;
+
+sub make_chord_parser( $self ) {
+    my $cp = $config->{parser}->{chords};
+    $cp->{default} //= { pattern => "(.*)", priority => 0 };
+
+    my $pat = "";
+
+    for ( sort { $b->{priority} <=> $a->{priority} }
+	  map { { %{$cp->{$_}}, key => $_ } }
+	  keys %$cp ) {
+
+	# Each pattern must have (.*) or (.+)
+	die( "Config error: invalid chord parser pattern for %_->{key}\n" )
+	  unless $_->{pattern} =~ /^(.*)\((\.[+*])\)(.*)$/;
+	$pat .= "|" if $pat;
+	$pat .= "^$1(?<$_->{key}>$2)$3\$"
+    }
+    $chord_parser_pattern = qr/$pat/o;
+}
+
+sub chord_parser( $self, $arg ) {
+    $self->make_chord_parser unless $chord_parser_pattern;
+    $arg =~ /$chord_parser_pattern/ or die("Chord parser: can't happen\n");
+    my $ap = ChordPro::Chords::Appearance->new( orig => $arg );
+
+    # The patterns are mutual exclusive, so there's one key.
+    for ( keys %+ ) {
+	next unless defined $+{$_};
+	$ap->key = $+{$_};
+	$ap->presentation = $_ unless $_ eq "default";
+	last;
+    }
+    ::dump($ap) if $config->{debug}->{chords} > 1;
+    $ap;
+}
+
 # Parses a chord and adds it to the song.
 # It understands markup, parenthesized chords and annotations.
 # Returns the chord Appearance.
-sub chord {
-    my ( $self, $orig ) = @_;
+sub chord( $self, $orig ) {
     Carp::confess unless length($orig);
 
+    my $ap = $self->chord_parser($orig);
+
     # Intercept annotations.
-    if ( $orig =~ /^\*(.+)/ || $orig =~ /^(\||\s+)$/ ) {
+    if ( $ap->is_annotation ) {
 	my $i = ChordPro::Chord::Annotation->new
 	  ( { name => $orig, text => $1 } );
-	return
-	  ChordPro::Chords::Appearance->new
-	    ( key => $self->add_chord($i), info => $i, orig => $orig );
+	$ap->key = $self->add_chord($i);
+	$ap->info = $i;
+	return $ap;
     }
 
+    $orig = $ap->key;
     # Check for markup.
     my $markup = $orig;
     my $c = demarkup($orig);
@@ -822,10 +863,10 @@ sub chord {
 	undef $markup;
     }
 
-    # Special treatment for parenthesized chords.
-    my $parens = $c =~ s/^\((.*)\)$/$1/;
-    do_warn("Double parens in chord: \"$orig\"")
-      if $c =~ s/^\((.*)\)$/$1/;
+#    # Special treatment for parenthesized chords.
+#    my $parens = $c =~ s/^\((.*)\)$/$1/;
+#    do_warn("Double parens in chord: \"$orig\"")
+#      if $c =~ s/^\((.*)\)$/$1/;
 
     # We have a 'bare' chord now. Parse it.
     my $info = $self->parse_chord($c);
@@ -834,19 +875,19 @@ sub chord {
 	# Make annotation.
 	my $i = ChordPro::Chord::Annotation->new
 	  ( { name => $orig, text => $orig } );
-	return
-	  ChordPro::Chords::Appearance->new
-	    ( key => $self->add_chord($i), info => $i, orig => $orig );
+	$ap->key = $self->add_chord($i);
+	$ap->info = $i;
+	$ap->presentation = "annotation";
+	return $ap;
     }
 
-    my $ap = ChordPro::Chords::Appearance->new( orig => $orig );
-
     # Handle markup, if any.
-    my ( $std, $prn ) = @{$config->{'chord-formats'}}{qw(stdfmt prnfmt)};
+    #### TODO
+    my $std = '%{formatted}';
     if ( $markup ) {
 	if ( $markup =~ s/\>\Q$c\E\</>$std</
 	     ||
-	     $markup =~ s/\>\(\Q$c\E\)\</>$prn</ ) {
+	     $markup =~ s/\>\(\Q$c\E\)\</>$std</ ) {
 	}
 	else {
 	    do_warn("Invalid markup in chord: \"$markup\"\n");
@@ -854,11 +895,13 @@ sub chord {
 	$ap->format = $markup;
     }
     elsif ( (my $m = $orig) =~ s/\Q$c\E/$std/ ) {
-	$m =~ s/\(\Q$std\E\)/$prn/ if $parens;
+#	$m =~ s/\(\Q$std\E\)/$prn/ if $parens;
 	$ap->format = $m unless $m eq $std;
     }
 
-    return "" if $parens && $config->{settings}->{'suppress-paren-chords'};
+    return ""
+      if $ap->is_parenthesised
+         && $config->{settings}->{'suppress-parenthesised-chords'};
 
     # After parsing, the chord can be changed by transpose/code.
     # info->name is the new key.
@@ -890,8 +933,7 @@ sub chord {
     return $ap;
 }
 
-sub decompose {
-    my ($self, $orig) = @_;
+sub decompose($self, $orig) {
     my $line = fmt_subst( $self, $orig );
     undef $orig if $orig eq $line;
     $line =~ s/\s+$//;
@@ -963,16 +1005,14 @@ sub decompose {
 	   );
 }
 
-sub cdecompose {
-    my ( $self, $line ) = @_;
+sub cdecompose( $self, $line ) {
     $line = fmt_subst( $self, $line ) unless $no_substitute;
     my %res = $self->decompose($line);
     return ( text => $line ) unless $res{chords};
     return %res;
 }
 
-sub decompose_grid {
-    my ($self, $line) = @_;
+sub decompose_grid($self, $line) {
     $line =~ s/^\s+//;
     $line =~ s/\s+$//;
     return ( tokens => [] ) if $line eq "";
@@ -1145,8 +1185,7 @@ my %abbrevs = (
 
 my $dirpat;
 
-sub parse_directive {
-    my ( $self, $d ) = @_;
+sub parse_directive( $self, $d ) {
 
     # Pattern for all recognized directives.
     unless ( $dirpat ) {
@@ -1200,8 +1239,7 @@ sub parse_directive {
 }
 
 # Process a selector.
-sub selected {
-    my ( $self, $sel ) = @_;
+sub selected( $self, $sel ) {
     return 1 unless defined $sel;
     my $negate = $sel =~ s/\!$//;
     $sel = ( $sel eq lc($config->{instrument}->{type}) )
@@ -1214,8 +1252,7 @@ sub selected {
     return $sel;
 }
 
-sub directive {
-    my ( $self, $d ) = @_;
+sub directive( $self, $d ) {
 
     my $dd = $self->parse_directive($d);
     return 1 if $dd->{omit} == 1;
@@ -1341,7 +1378,7 @@ sub directive {
     # Metadata extensions (legacy). Should use meta instead.
     # Only accept the list from config.
     if ( any { $_ eq $dir } @{ $config->{metadata}->{keys} } ) {
-	return $self->dir_meta( "meta", "$dir $arg" );
+	return $self->dir_meta( "meta", "$dir $arg", "$dir $arg" );
     }
 
     # Formatting. {chordsize XX} and such.
@@ -1432,8 +1469,7 @@ sub directive {
     return;
 }
 
-sub dir_chorus {
-    my ( $self, $dir, $arg ) = @_;
+sub dir_chorus( $self, $dir, $arg, $orig ) {
 
     if ( $in_context ) {
 	do_warn("{chorus} encountered while in $in_context context -- ignored\n");
@@ -1493,27 +1529,23 @@ sub dir_chorus {
 
 # Breaks.
 
-sub dir_column_break {
-    my ( $self, $dir, $arg ) = @_;
+sub dir_column_break( $self, $dir, $arg, $orig ) {
     $self->add( type => "colb" );
     return 1;
 }
 
-sub dir_new_page {
-    my ( $self, $dir, $arg ) = @_;
+sub dir_new_page( $self, $dir, $arg, $orig ) {
     $self->add( type => "newpage" );
     return 1;
 }
 
-sub dir_new_song {
-    my ( $self, $dir, $arg ) = @_;
+sub dir_new_song( $self, $dir, $arg, $orig ) {
     die("FATAL - cannot start a new song now\n");
 }
 
 # Comments. Strictly speaking they do not belong here.
 
-sub dir_comment {
-    my ( $self, $dir, $arg, $orig ) = @_;
+sub dir_comment( $self, $dir, $arg, $orig ) {
     $dir = "comment" if $dir eq "highlight";
     my %res = $self->cdecompose($arg);
     $res{orig} = $orig;
@@ -1522,8 +1554,7 @@ sub dir_comment {
     return 1;
 }
 
-sub dir_image {
-    my ( $self, $dir, $arg ) = @_;
+sub dir_image( $self, $dir, $arg, $orig ) {
     return 1 if $::running_under_test && !$arg;
     my $res = parse_kv($arg);
     my $uri;
@@ -1686,15 +1717,13 @@ sub dir_image {
     return 1;
 }
 
-sub dir_title {
-    my ( $self, $dir, $arg ) = @_;
+sub dir_title( $self, $dir, $arg, $orig ) {
     $self->{title} = $arg;
     push( @{ $self->{meta}->{title} }, $arg );
     return 1;
 }
 
-sub dir_subtitle {
-    my ( $self, $dir, $arg ) = @_;
+sub dir_subtitle( $self, $dir, $arg, $orig ) {
     push( @{ $self->{subtitle} }, $arg );
     push( @{ $self->{meta}->{subtitle} }, $arg );
     return 1;
@@ -1702,8 +1731,7 @@ sub dir_subtitle {
 
 # Metadata.
 
-sub dir_meta {
-    my ( $self, $dir, $arg ) = @_;
+sub dir_meta( $self, $dir, $arg, $orig ) {
 
     if ( $arg =~ /([^ :]+)[ :]+(.*)/ ) {
 	my $key = lc $1;
@@ -1798,8 +1826,7 @@ sub dir_meta {
 
 # Song / Global settings.
 
-sub dir_titles {
-    my ( $self, $dir, $arg ) = @_;
+sub dir_titles( $self, $dir, $arg, $orig ) {
 
     unless ( $arg =~ /^(left|right|center|centre)$/i ) {
 	do_warn("Invalid argument for titles directive: $arg\n");
@@ -1809,8 +1836,7 @@ sub dir_titles {
     return 1;
 }
 
-sub dir_columns {
-    my ( $self, $dir, $arg ) = @_;
+sub dir_columns( $self, $dir, $arg, $orig ) {
 
     unless ( $arg =~ /^(\d+)$/ ) {
 	do_warn("Invalid argument for columns directive: $arg (should be a number)\n");
@@ -1826,14 +1852,12 @@ sub dir_columns {
     return 1;
 }
 
-sub dir_papersize {
-    my ( $self, $dir, $arg ) = @_;
+sub dir_papersize( $self, $dir, $arg, $orig ) {
     $self->{settings}->{papersize} = $arg;
     return 1;
 }
 
-sub dir_diagrams {	# AKA grid
-    my ( $self, $dir, $arg ) = @_;
+sub dir_diagrams( $self, $dir, $arg, $orig ) {	# AKA grid
 
     if ( $arg ne "" ) {
 	$self->{settings}->{diagrams} = !!is_true($arg);
@@ -1846,20 +1870,17 @@ sub dir_diagrams {	# AKA grid
     return 1;
 }
 
-sub dir_grid {
-    my ( $self, $dir, $arg ) = @_;
+sub dir_grid( $self, $dir, $arg, $orig ) {
     $self->{settings}->{diagrams} = 1;
     return 1;
 }
 
-sub dir_no_grid {
-    my ( $self, $dir, $arg ) = @_;
+sub dir_no_grid( $self, $dir, $arg, $orig ) {
     $self->{settings}->{diagrams} = 0;
     return 1;
 }
 
-sub dir_transpose {
-    my ( $self, $dir, $arg ) = @_;
+sub dir_transpose( $self, $dir, $arg, $orig ) {
 
     $propstack{transpose} //= [];
 
@@ -1919,8 +1940,7 @@ sub dir_transpose {
 
 #### End of directive handlers ####
 
-sub propset {
-    my ( $self, $item, $prop, $value ) = @_;
+sub propset( $self, $item, $prop, $value ) {
     $prop = "color" if $prop eq "colour";
     my $name = "$item-$prop";
     $propstack{$name} //= [];
@@ -1987,8 +2007,7 @@ sub propset {
     }
 }
 
-sub add_chord {
-    my ( $self, $info, $new_id ) = @_;
+sub add_chord( $self, $info, $new_id = undef ) {
 
     if ( $new_id ) {
 	if ( $new_id eq "1" ) {
@@ -2005,8 +2024,7 @@ sub add_chord {
     return $new_id;
 }
 
-sub define_chord {
-    my ( $self, $dir, $args ) = @_;
+sub define_chord( $self, $dir, $args, $orig = undef ) {
 
     # Split the arguments and keep a copy for error messages.
     # Note that quotewords returns an empty result if it gets confused,
@@ -2252,8 +2270,7 @@ sub define_chord {
     return 1;
 }
 
-sub duration {
-    my ( $dur ) = @_;
+sub duration( $dur ) {
 
     if ( $dur =~ /(?:(?:(\d+):)?(\d+):)?(\d+)/ ) {
 	$dur = $3 + ( $2 ? 60 * $2 :0 ) + ( $1 ? 3600 * $1 : 0 );
@@ -2266,17 +2283,16 @@ sub duration {
     return $res;
 }
 
-sub get_color {
-    $_[0];
+sub get_color( $col ) {
+    $col;
 }
 
-sub _diag {
-    my ( $self, %d ) = @_;
+sub _diag( $self, %d ) {
     $diag->{$_} = $d{$_} for keys(%d);
 }
 
-sub msg {
-    my $m = join("", @_);
+sub msg( @m ) {
+    my $m = join("", @m);
     $m =~ s/\n+$//;
     my $t = $diag->{format};
     $t =~ s/\\n/\n/g;
@@ -2288,16 +2304,15 @@ sub msg {
     $t;
 }
 
-sub do_warn {
-    warn(msg(@_)."\n");
+sub do_warn( @m ) {
+    warn(msg(@m)."\n");
 }
 
 # Parse a chord.
 # Handles transpose/transcode.
 # Returns the chord object.
 # No parens or annotations, please.
-sub parse_chord {
-    my ( $self, $chord, $def ) = @_;
+sub parse_chord( $self, $chord, $def = undef ) {
 
     my $debug = $config->{debug}->{chords};
 
@@ -2439,14 +2454,12 @@ sub parse_chord {
     return;
 }
 
-sub store_chord {
-    my ( $self, $info ) = @_;
+sub store_chord( $self, $info ) {
     $self->{chordsinfo}->{$info->name} = $info;
     $info->name;
 }
 
-sub structurize {
-    my ( $self ) = @_;
+sub structurize( $self ) {
 
     return if $self->{structure} eq "structured";
 
@@ -2475,8 +2488,7 @@ sub structurize {
     $self->{structure} = "structured";
 }
 
-sub dump {
-    my ( $self, $full ) = @_;
+sub dump( $self, $full ) {
     $full ||= 0;
 
     if ( $full == 2 ) {
@@ -2491,6 +2503,8 @@ sub dump {
     }
     ::dump($a);
 }
+
+################ Testing ################
 
 unless ( caller ) {
     require DDumper;

@@ -15,7 +15,7 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 
     my $pr = $ps->{pr};
     my $fonts = $ps->{fonts};
-
+    my $format = $ps->{'chord-formats'}->{grid};
     # Use the chords font for the chords, and for the symbols size.
     my $fchord = { %{ $fonts->{grid} || $fonts->{chord} } };
     delete($fchord->{background});
@@ -47,7 +47,7 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 	    if ( $t->{chords} ) {
 		$t->{text} = "";
 		for ( 0..$#{ $t->{chords} } ) {
-		    $t->{text} .= $t->{chords}->[$_]->chord_display . $t->{phrases}->[$_];
+		    $t->{text} .= $t->{chords}->[$_]->chord_display($format) . $t->{phrases}->[$_];
 		}
 	    }
 	    $pr->text( $t->{text}, $x, $y, $fonts->{comment} );
@@ -159,7 +159,7 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 	    my $cellwidth = $cellwidth / @$tok;
 	    for my $t ( @$tok ) {
 		$x += $cellwidth, next if $t eq '';
-		$t = $t->chord_display;
+		$t = $t->chord_display($format);
 		$pr->text( $t, $x, $y, $fchord );
 		$x += $cellwidth;
 	    }
@@ -169,7 +169,7 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 	    warn("Chord token without class\n")
 	      unless $token->{class} eq "chord";
 	    my $t = $token->{chord};
-	    $t = $t->chord_display;
+	    $t = $t->chord_display($format);
 	    $pr->text( $t, $x, $y, $fchord )
 	      unless $token eq ".";
 	    $x += $cellwidth;

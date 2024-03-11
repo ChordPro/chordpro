@@ -132,7 +132,7 @@ method draw ( $info, $x, $y, $dummy = 0 ) {
 
     # Draw font name.
     $pr->setfont($font);
-    my $name = $info->chord_display;
+    my $name = ChordPro::Chords::Appearance->new( info => $info )->chord_display;
     $name .= "?" unless @keys;
     $name = "<span color='$fg'>$name</span>"
       if $info->{diagram};

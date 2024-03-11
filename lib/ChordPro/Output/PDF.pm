@@ -19,6 +19,7 @@ use List::Util qw(any);
 use Carp;
 use feature 'state';
 use File::LoadLines qw(loadlines loadblob);
+use String::Interpolate::Named;
 use ChordPro::Output::Common
   qw( roman prep_outlines fmt_subst );
 use feature 'signatures';
@@ -433,7 +434,19 @@ sub generate_song {
     $suppress_empty_chordsline = $::config->{settings}->{'suppress-empty-chords'};
     $suppress_empty_lyricsline = $::config->{settings}->{'suppress-empty-lyrics'};
     $inlinechords = $::config->{settings}->{'inline-chords'};
+    if ( $inlinechords && $ps->{'chord-formats'}->{inline} ) {
+	$inlinechords = $ps->{'chord-formats'}->{inline};
+    }
+    else {
+	$inlinechords =~ s/\%[cs]/$ps->{'chord-formats'}->{default}/g;
+    }
     $inlineannots = $::config->{settings}->{'inline-annotations'};
+    if ( $inlineannots && $ps->{'chord-formats'}->{'inline-annotation'} ) {
+	$inlineannots = $ps->{'chord-formats'}->{'inline-annotation'};
+    }
+    else {
+	$inlineannots =~ s/\%[cs]/$ps->{'chord-formats'}->{default}/g;
+    }
     $chordsunder  = $::config->{settings}->{'chords-under'};
     $ps = $::config->clone->{pdf};
     $ps->{pr} = $pr;
@@ -1746,7 +1759,7 @@ sub songline {
 
     # How to embed the chords.
     if ( $inlinechords ) {
-	$inlinechords = '[%s]' unless $inlinechords =~ /%[cs]/;
+####	$inlinechords = '[%s]' unless $inlinechords =~ /%[cs]/;
 	$ychord = $ytext;
     }
 
@@ -1793,15 +1806,17 @@ sub songline {
 	    my $xt0 = $x;
 	    my $font = $fchord;
 	    if ( $chord ne '' ) {
-		my $ch = $chord->chord_display;
-		my $dp = $ch . " ";
-		if ( $chord->info->is_annotation ) {
-		    $font = $fonts->{annotation};
-		    ( $dp = $inlineannots ) =~ s/%[cs]/$ch/g
-		      if $inlinechords;
+		my $dp;
+		if ( $inlinechords ) {
+		    if ( $chord->info->is_annotation ) {
+			$dp = $chord->chord_display($inlineannots);
+		    }
+		    else {
+			$dp = $chord->chord_display($inlinechords);
+		    }
 		}
-		elsif ( $inlinechords ) {
-		    ( $dp = $inlinechords ) =~ s/%[cs]/$ch/g;
+		else {
+		    $dp = $chord->chord_display;
 		}
 		$xt0 = $pr->text( $dp, $x, $ychord, $font );
 	    }

@@ -15,10 +15,17 @@
         }
       }
     },
+    "boolspec" : {
+      "description" : "Boolean values.",
+      "anyOf" : [
+         { "type" : "boolean" },
+	 { "enum" : [ "true", "false", "on", "off", "no", "yes" ] },
+         { "$ref" : "#/definitions/numspec" }
+       ]
+    },
     "colorspec" : {
       "description" : "Colour specification.",
       "type" : "string",
-      "format" : "color",
       "pattern" : "^(#[0-9A-Fa-f]{6}|[-A-Za-z0-9]+)$"
     },
     "delegatespec" : {
@@ -73,7 +80,7 @@
           "type" : "string"
         },
         "size" : {
-          "type" : "number"
+          "$ref" : "#/definitions/numspec"
         },
         "color" : {
           "$ref" : "#/definitions/colorspec"
@@ -85,7 +92,7 @@
           "$ref" : "#/definitions/colorspec"
         },
         "frame" : {
-          "type" : [ "boolean", "integer" ]
+          "$ref" : "#/definitions/boolspec"
         }
       },
       "anyOf" : [
@@ -93,6 +100,26 @@
         { "required" : [ "name" ] },
         { "required" : [ "file" ] }
       ]
+    },
+    "intspec" : {
+      "description" : "Integer values.",
+      "anyOf" : [
+         { "type" : "integer"
+	 },
+         { "type" : "string",
+	   "pattern" : "^[-+]?([0-9]+)$"
+	 }
+       ]
+    },
+    "numspec" : {
+      "description" : "Numeric values.",
+      "anyOf" : [
+         { "type" : "number"
+	 },
+         { "type" : "string",
+	   "pattern" : "^[-+]?([0-9.]+)$"
+	 }
+       ]
     },
     "tptspec" : {
       "description" : "Three-part title format specification, left, center, right.",
@@ -147,7 +174,7 @@
         "chords-under" : {
           "description" : "",
           "title" : "Chords under the lyrics.",
-          "type" : "boolean",
+          "$ref" : "#/definitions/boolspec",
           "default" : false,
           "options" : { "infoText" : "settings.chords-under\nNormally, chords are placed above the lyrics. <br>Check this to place chords <b>under</b> the lyrics instead.",
           "title" : "Chords under the lyrics" }
@@ -156,20 +183,20 @@
         "chords-canonical" : {
           "description" : "",
           "title" : "Use canonical representation for chords.",
-          "type" : "boolean",
+          "$ref" : "#/definitions/boolspec",
           "default" : false
         },
 
         "choruslabels" : {
           "description" : "",
           "title" : "If false, chorus labels are used as tags.",
-          "type" : "boolean",
+          "$ref" : "#/definitions/boolspec",
           "default" : true
         },
 
         "columns" : {
           "description" : "Number of columns.",
-          "type" : "integer",
+          "$ref" : "#/definitions/intspec",
           "default" : 1,
           "minimum" : 1,
           "maximum" : 3,
@@ -178,7 +205,7 @@
 
         "decapo" : {
           "description" : "Eliminate capo by transposing chords.",
-          "type" : "boolean",
+          "$ref" : "#/definitions/boolspec",
           "default" : false
         },
 
@@ -193,49 +220,55 @@
           "default" : false,
           "anyOf" : [
             { "type" : "string" },
-            { "type" : "boolean" }
+            { "$ref" : "#/definitions/boolspec" }
           ]
         },
 
         "lineinfo" : {
           "description" : "Retain line info for backend diagnostics.",
           "default" : true,
-          "type" : "boolean"
+          "$ref" : "#/definitions/boolspec"
         },
 
         "lyrics-only" : {
           "description" : "Suppress chords.",
-          "type" : "boolean",
+          "$ref" : "#/definitions/boolspec",
           "default" : false
         },
 
         "memorize" : {
           "description" : "Memorize the chords from sections.",
-          "type" : "boolean",
+          "$ref" : "#/definitions/boolspec",
           "default" : false
         },
 
         "notenames" : {
           "description" : "Allow parsing of note names.",
-          "type" : "boolean",
+          "$ref" : "#/definitions/boolspec",
           "default" : false
         },
 
         "strict" : {
           "description" : "Enforce strict interpretation of the input.",
-          "type" : "boolean",
+          "$ref" : "#/definitions/boolspec",
           "default" : true
         },
 
         "suppress-empty-chords" : {
           "description" : "Suppress empty chord lines.",
-          "type" : "boolean",
+          "$ref" : "#/definitions/boolspec",
           "default" : true
         },
 
         "suppress-empty-lyrics" : {
           "description" : "Suppress blank lyrics lines.",
-          "type" : "boolean",
+          "$ref" : "#/definitions/boolspec",
+          "default" : true
+        },
+
+        "suppress-parenthesised-chords" : {
+          "description" : "Suppress parenthesised chords.",
+          "$ref" : "#/definitions/boolspec",
           "default" : true
         },
 
@@ -254,7 +287,7 @@
 
         "transpose" : {
           "description" : "Transpose chords.",
-          "type" : "integer",
+          "$ref" : "#/definitions/intspec",
           "default" : 0,
           "minimum" : -12,
           "maximum" : 12,
@@ -263,7 +296,7 @@
 
         "truesf" : {
           "description" : "Substitute Unicode sharp/flats in chord names.",
-          "type" : "boolean",
+          "$ref" : "#/definitions/boolspec",
           "default" : false
         },
 
@@ -275,7 +308,7 @@
 
         "flowtext" : {
           "description" : "Considerr text flowed.",
-          "type" : "boolean",
+          "$ref" : "#/definitions/boolspec",
           "default" : false
         }
       }
@@ -300,7 +333,27 @@
           "description" : "Format string for rendering nashville chord names.",
           "type" : "string",
           "default" : "%{root|%{}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}"
-        }
+        },
+	"default" : {
+	  "description" : "Format string for plain chords.",
+	  "type" : "string",
+	  "default" : "%{formatted}"
+	},
+	"inline" : {
+	  "description" : "Format string for inline chords.",
+	  "type" : "string",
+	  "default" : "[%{formatted}]"
+	},
+	"grid" : {
+	  "description" : "Format string for gridq chords.",
+	  "type" : "string",
+	  "default" : "[%{formatted}]"
+	},
+	"inlinea" : {
+	  "description" : "Format string for inline annotations.",
+	  "type" : "string",
+	  "default" : "[%{formatted}]"
+	}
       }
     },
 
@@ -321,7 +374,7 @@
         "sorted" : {
           "default" : false,
           "description" : "Sort the diagrams.",
-          "type" : "boolean"
+          "$ref" : "#/definitions/boolspec"
         },
 
         "suppress" : {
@@ -354,7 +407,7 @@
                     "quote" : {
                       "description" : "Quote the chorus.",
                       "default" : false,
-                      "type" : "boolean"
+                      "$ref" : "#/definitions/boolspec"
                     },
                     "tag" : {
                       "description" : "Label for recalled chorus.",
@@ -404,7 +457,7 @@
 		    "quote" : {
 		      "description" : "Quote the chorus.",
 		      "default" : false,
-		      "type" : "boolean"
+		      "$ref" : "#/definitions/boolspec"
 		    },
 		    "tag" : {
 		      "description" : "Label for recalled chorus.",
@@ -451,12 +504,12 @@
       "properties" : {
         "infer-titles" : {
           "description" : "Treat leading lyrics lines as title/subtitle lines.",
-          "type" : "boolean",
+          "$ref" : "#/definitions/boolspec",
           "default" : true
         },
         "tabstop" : {
           "description" : "Tab width.",
-          "type" : "integer",
+          "$ref" : "#/definitions/intspec",
           "default" : 8
         },
         "classifier" : {
@@ -480,13 +533,13 @@
           },
           "base" : {
             "description" : "The base fret, usually 1.",
-            "type" : "integer",
+            "$ref" : "#/definitions/intspec",
             "minimum" : 1,
             "default" : 1
           },
           "baselabeloffset" : {
             "description" : "Displacement for the base fret label.",
-            "type" : "integer",
+            "$ref" : "#/definitions/intspec",
             "minimum" : 0,
             "default" : 0
           },
@@ -502,7 +555,7 @@
             "description" : "Finger positions from low string to hight string.",
             "type" : "array",
             "items" : {
-              "type" : "integer",
+              "$ref" : "#/definitions/intspec",
               "minimum" : -1,
               "default" : 0
             }
@@ -511,14 +564,14 @@
             "description" : "Fingers from low string to hight string.",
             "type" : "array",
             "items" : {
-              "type" : "integer",
+              "$ref" : "#/definitions/intspec",
               "minimum" : -1,
               "default" : 0
             }
           },
           "easy" : {
             "description" : "Deprecated.",
-            "type" : "boolean",
+            "$ref" : "#/definitions/boolspec",
             "default" : true
           }
         },
@@ -545,7 +598,7 @@
           },
           "fold" : {
             "description" : "For future use.",
-            "type" : "boolean",
+            "$ref" : "#/definitions/boolspec",
             "default" : false
           },
           "label" : {
@@ -559,7 +612,7 @@
           },
           "omit" : {
             "description" : "Omit this toc.",
-            "type" : "boolean",
+            "$ref" : "#/definitions/boolspec",
             "default" : false
           },
           "pageno" : {
@@ -663,7 +716,7 @@
       "properties" : {
         "autosplit" : {
           "description" : "Split data on separator.",
-          "type" : "boolean",
+          "$ref" : "#/definitions/boolspec",
           "default" : true
         },
         "keys" : {
@@ -688,7 +741,7 @@
         },
         "strict" : {
           "description" : "Disallow extending the list of metadata items.",
-          "type" : "boolean",
+          "$ref" : "#/definitions/boolspec",
           "default" : true
         }
       }
@@ -706,7 +759,7 @@
         },
         "movable" : {
           "description" : "Movable note system.",
-          "type" : "boolean",
+          "$ref" : "#/definitions/boolspec",
           "default" : false
         },
         "sharp" : {
@@ -866,6 +919,19 @@
       "type" : "object",
       "additionalProperties" : false,
       "properties" : {
+        "chords" : {
+          "description" : "",
+          "additionalProperties" : true,
+          "properties" : {
+            "default" : {
+	      "additionalProperties" : false,
+	      "properties" : {
+	        "pattern" : { "type" : "string" },
+	        "priority" : { "$ref" : "#/definitions/numspec" }
+	      }
+	    }
+	  }
+	},
         "preprocess" : {
           "description" : "",
           "additionalProperties" : false,
@@ -910,7 +976,7 @@
 	      "description" : "Chords position in alternative formatting, if greater than 0.",
 	      "default" : 0,
 	      "minimum" : 0,
-	      "type" : "number"
+	      "$ref" : "#/definitions/numspec"
 	    },
 
 	    "chorus" : {
@@ -933,13 +999,13 @@
 		      "description" : "Bar offset. Suppress when zero",
 		      "default" : 8,
 		      "minimum" : 0,
-		      "type" : "number"
+		      "$ref" : "#/definitions/numspec"
 		    },
 		    "width" : {
 		      "description" : "Bar width. Suppress when zero.",
 		      "default" : 1,
 		      "minimum" : 0,
-		      "type" : "number"
+		      "$ref" : "#/definitions/numspec"
 		    }
 		  }
 		},
@@ -947,7 +1013,7 @@
 		  "description" : "Chorus indent.",
 		  "default" : 0,
 		  "minimum" : 0,
-		  "type" : "number"
+		  "$ref" : "#/definitions/numspec"
 		},
 		"recall" : {
 		  "description" : "Appearance of chorus recall.",
@@ -956,12 +1022,12 @@
 		    "choruslike" : {
 		      "description" : "Quote the chorus like a chorus.",
 		      "default" : false,
-		      "type" : "boolean"
+		      "$ref" : "#/definitions/boolspec"
 		    },
 		    "quote" : {
 		      "description" : "Quote the chorus.",
 		      "default" : false,
-		      "type" : "boolean"
+		      "$ref" : "#/definitions/boolspec"
 		    },
 		    "tag" : {
 		      "description" : "Label for recalled chorus.",
@@ -995,7 +1061,7 @@
 	      "default" : 20,
 	      "description" : "Distance between columns in multi-column mode.",
 	      "minimum" : 0,
-	      "type" : "number"
+	      "$ref" : "#/definitions/numspec"
 	    },
 
 	    "csv" : {
@@ -1020,7 +1086,7 @@
 			"type" : "string"
 		      },
 		      "omit" : {
-			"type" : "boolean",
+			"$ref" : "#/definitions/boolspec",
 			"default" : false
 		      }
 		    },
@@ -1044,7 +1110,7 @@
 		"songsonly" : {
 		  "description" : "Include only songs in the CSV.",
 		  "default" : true,
-		  "type" : "boolean"
+		  "$ref" : "#/definitions/boolspec"
 		}
 	      }
 	    },
@@ -1056,7 +1122,7 @@
 		"fingers" : {
 		  "description" : "Show finger settings, if available.",
 		  "default" : "true",
-		  "type" : [ "boolean", "string" ]
+		  "$ref" : "#/definitions/boolspec"
 		},
 		"show" : {
 		  "description" : "Where to show the diagrams.",
@@ -1068,55 +1134,55 @@
 		  "description" : "Distance between frets.",
 		  "default" : 6,
 		  "minimum" : 0,
-		  "type" : "number"
+		  "$ref" : "#/definitions/numspec"
 		},
 		"dotsize" : {
 		  "description" : "Size of the fret dot, fraction of cell width.",
 		  "default" : 0.8,
 		  "minimum" : 0,
-		  "type" : "number"
+		  "$ref" : "#/definitions/numspec"
 		},
 		"barwidth" : {
 		  "description" : "Thickness of bars, fraction of dot width.",
 		  "default" : 0.8,
 		  "minimum" : 0,
-		  "type" : "number"
+		  "$ref" : "#/definitions/numspec"
 		},
 		"width" : {
 		  "description" : "Distance between strings.",
 		  "default" : 6,
 		  "minimum" : 0,
-		  "type" : "number"
+		  "$ref" : "#/definitions/numspec"
 		},
 		"hspace" : {
 		  "description" : "Horizontal space between diagrams.",
 		  "default" : 3.95,
 		  "minimum" : 0,
-		  "type" : "number"
+		  "$ref" : "#/definitions/numspec"
 		},
 		"linewidth" : {
 		  "description" : "Thickness of the diagram lines as a fraction of 'width'.",
 		  "default" : 0.1,
 		  "minimum" : 0,
-		  "type" : "number"
+		  "$ref" : "#/definitions/numspec"
 		},
 		"nutwidth" : {
 		  "description" : "Thickness of the top nut, in 'linewidth'.",
 		  "default" : 5,
 		  "minimum" : 0,
-		  "type" : "number"
+		  "$ref" : "#/definitions/numspec"
 		},
 		"vcells" : {
 		  "description" : "The number of frets shown.",
 		  "default" : 4,
 		  "minimum" : 3,
-		  "type" : "number"
+		  "$ref" : "#/definitions/numspec"
 		},
 		"vspace" : {
 		  "description" : "Vertical space between diagrams.",
 		  "default" : 3,
 		  "minimum" : 0,
-		  "type" : "number"
+		  "$ref" : "#/definitions/numspec"
 		}
 	      }
 	    },
@@ -1125,7 +1191,7 @@
 	      "description" : "Chords diagrams are printed in a right column. Value is the column offset.",
 	      "default" : 0,
 	      "minimum" : 0,
-	      "type" : "number"
+	      "$ref" : "#/definitions/numspec"
 	    },
 
 	    "even-odd-pages" : {
@@ -1135,7 +1201,7 @@
 	      "options" : {
 		"enum_titles" : [ "Even/Odd", "Odd/Even", "Odd" ]
 	      },
-	      "type" : "integer"
+	      "$ref" : "#/definitions/intspec"
 	    },
 
 	    "fontdir" : {
@@ -1166,7 +1232,7 @@
 		      },
 		      "size" : {
 			"default" : 10,
-			"type" : "number"
+			"$ref" : "#/definitions/numspec"
 		      }
 		    } }
 		  ]
@@ -1182,7 +1248,7 @@
 		      },
 		      "size" : {
 			"default" : 10,
-			"type" : "number"
+			"$ref" : "#/definitions/numspec"
 		      }
 		    } }
 		  ]
@@ -1198,7 +1264,7 @@
 		      },
 		      "size" : {
 			"default" : 10,
-			"type" : "number"
+			"$ref" : "#/definitions/numspec"
 		      }
 		    } }
 		  ]
@@ -1214,7 +1280,7 @@
 		      },
 		      "size" : {
 			"default" : 12,
-			"type" : "number"
+			"$ref" : "#/definitions/numspec"
 		      }
 		    } }
 		  ]
@@ -1230,7 +1296,7 @@
 		      },
 		      "size" : {
 			"default" : 10,
-			"type" : "number"
+			"$ref" : "#/definitions/numspec"
 		      }
 		    } }
 		  ]
@@ -1246,7 +1312,7 @@
 		      },
 		      "size" : {
 			"default" : 12,
-			"type" : "number"
+			"$ref" : "#/definitions/numspec"
 		      }
 		    } }
 		  ]
@@ -1262,7 +1328,7 @@
 		      },
 		      "size" : {
 			"default" : 14,
-			"type" : "number"
+			"$ref" : "#/definitions/numspec"
 		      }
 		    } }
 		  ]
@@ -1278,7 +1344,7 @@
 		      },
 		      "size" : {
 			"default" : 11,
-			"type" : "number"
+			"$ref" : "#/definitions/numspec"
 		      }
 		    } }
 		  ]
@@ -1294,7 +1360,7 @@
 	      "description" : "Space for page footers.",
 	      "default" : 20,
 	      "minimum" : 0,
-	      "type" : "number"
+	      "$ref" : "#/definitions/numspec"
 	    },
 
 	    "formats" : {
@@ -1404,14 +1470,14 @@
 		    },
 		    "width" : {
 		      "description" : "Width of the cell bar.",
-		      "type" : "integer",
+		      "$ref" : "#/definitions/intspec",
 		      "default" : 1
 		    }
 		  }
 		},
 		"show" : {
 		  "description" : "Show grid context in output.",
-		  "type" : "boolean",
+		  "$ref" : "#/definitions/boolspec",
 		  "default" : true
 		},
 		"symbols" : {
@@ -1434,7 +1500,7 @@
 		    },
 		    "span" : {
 		      "description" : "Volta span (fraction of measure).",
-		      "type" : "number",
+		      "$ref" : "#/definitions/numspec",
 		      "default" : 0.7
 		    }
 		  }
@@ -1445,14 +1511,14 @@
 	    "head-first-only" : {
 	      "description" : "Headers and footers only on the very first page.",
 	      "default" : false,
-	      "type" : "boolean"
+	      "$ref" : "#/definitions/boolspec"
 	    },
 
 	    "headspace" : {
 	      "description" : "Space for page titles.",
 	      "default" : 60,
 	      "minimum" : 0,
-	      "type" : "number"
+	      "$ref" : "#/definitions/numspec"
 	    },
 
 	    "info" : {
@@ -1496,26 +1562,26 @@
 		  "description" : "Height of the diagram.",
 		  "default" : 20,
 		  "minimum" : 0,
-		  "type" : "number"
+		  "$ref" : "#/definitions/numspec"
 		},
 		"width" : {
 		  "description" : "Width of a single (white) key.",
 		  "default" : 4,
 		  "minimum" : 0,
-		  "type" : "number"
+		  "$ref" : "#/definitions/numspec"
 		},
 		"hspace" : {
 		  "description" : "Horizontal space between diagrams.",
 		  "default" : 3.95,
 		  "minimum" : 0,
-		  "type" : "number"
+		  "$ref" : "#/definitions/numspec"
 		},
 		"keys" : {
 		  "description" : "The number of white keys shown.",
 		  "default" : 14,
 		  "minimum" : 7,
 		  "maximum" : 21,
-		  "type" : "number"
+		  "$ref" : "#/definitions/numspec"
 		},
 		"base" : {
 		  "description" : "The leftmost white key.",
@@ -1528,7 +1594,7 @@
 		  "description" : "Thickness of the diagram lines as a fraction of 'width'.",
 		  "default" : 0.1,
 		  "minimum" : 0,
-		  "type" : "number"
+		  "$ref" : "#/definitions/numspec"
 		},
 		"pressed" : {
 		  "description" : "Color of the 'pressed' keys.",
@@ -1540,7 +1606,7 @@
 		  "description" : "Vertical space between diagrams.",
 		  "default" : 3,
 		  "minimum" : 0,
-		  "type" : "number"
+		  "$ref" : "#/definitions/numspec"
 		}
 	      }
 	    },
@@ -1584,28 +1650,28 @@
 	      "description" : "Page bottom margin, excluding footspace.",
 	      "default" : 40,
 	      "minimum" : 0,
-	      "type" : "number"
+	      "$ref" : "#/definitions/numspec"
 	    },
 
 	    "marginleft" : {
 	      "description" : "Page left margin.",
 	      "default" : 40,
 	      "minimum" : 0,
-	      "type" : "number"
+	      "$ref" : "#/definitions/numspec"
 	    },
 
 	    "marginright" : {
 	      "description" : "Page right margin.",
 	      "default" : 40,
 	      "minimum" : 0,
-	      "type" : "number"
+	      "$ref" : "#/definitions/numspec"
 	    },
 
 	    "margintop" : {
 	      "description" : "Page top marging, excluding headspace.",
 	      "default" : 80,
 	      "minimum" : 0,
-	      "type" : "number"
+	      "$ref" : "#/definitions/numspec"
 	    },
 
 	    "outlines" : {
@@ -1616,7 +1682,7 @@
 		"properties" : {
 		  "collapse" : {
 		    "description" : "Initial display is collapsed.",
-		    "type" : "boolean",
+		    "$ref" : "#/definitions/boolspec",
 		    "default" : false
 		  },
 		  "fields" : {
@@ -1629,7 +1695,7 @@
 		  },
 		  "fold" : {
 		    "description" : "For future use.",
-		    "type" : "boolean",
+		    "$ref" : "#/definitions/boolspec",
 		    "default" : false
 		  },
 		  "label" : {
@@ -1639,7 +1705,7 @@
 		  },
 		  "letter" : {
 		    "description" : "Make letter level if more entries than this value.",
-		    "type" : "integer",
+		    "$ref" : "#/definitions/intspec",
 		    "default" : 5
 		  },
 		  "line" : {
@@ -1648,7 +1714,7 @@
 		  },
 		  "omit" : {
 		    "description" : "Omit this outline.",
-		    "type" : "boolean",
+		    "$ref" : "#/definitions/boolspec",
 		    "default" : false
 		  }
 		}
@@ -1658,14 +1724,14 @@
 	    "pagealign-songs" : {
 	      "default" : true,
 	      "description" : "Page alignment for songs.",
-	      "type" : [ "boolean", "integer" ]
+	      "$ref" : "#/definitions/boolspec"
 	    },
 
 	    "papersize" : {
 	      "description" : "Output page size, e.g. \"a4\" or [595,842].",
 	      "default" : "a4",
 	      "type" : [ "string", "array" ],
-	      "items" : { "type" : "number" },
+	      "items" : { "$ref" : "#/definitions/numspec" },
 	      "minItems" : 2,
 	      "maxItems" : 2
 	    },
@@ -1673,7 +1739,7 @@
 	    "showlayout" : {
 	      "description" : "Show the page layout structure.",
 	      "default" : false,
-	      "type" : "boolean"
+	      "$ref" : "#/definitions/boolspec"
 	    },
 
 	    "spacing" : {
@@ -1683,42 +1749,42 @@
 		"chords" : {
 		  "description" : "Spacing for chord names.",
 		  "default" : 1.2,
-		  "type" : "number"
+		  "$ref" : "#/definitions/numspec"
 		},
 		"diagramchords" : {
 		  "description" : "Spacing for diagram chords.",
 		  "default" : 1.2,
-		  "type" : "number"
+		  "$ref" : "#/definitions/numspec"
 		},
 		"empty" : {
 		  "description" : "Spacing for empty (blank) lines.",
 		  "default" : 1,
-		  "type" : "number"
+		  "$ref" : "#/definitions/numspec"
 		},
 		"grid" : {
 		  "description" : "Spacing for grid lines.",
 		  "default" : 1.2,
-		  "type" : "number"
+		  "$ref" : "#/definitions/numspec"
 		},
 		"lyrics" : {
 		  "description" : "SPacing for lyrics.",
 		  "default" : 1.2,
-		  "type" : "number"
+		  "$ref" : "#/definitions/numspec"
 		},
 		"tab" : {
 		  "description" : "Spacing for tab lines.",
 		  "default" : 1,
-		  "type" : "number"
+		  "$ref" : "#/definitions/numspec"
 		},
 		"title" : {
 		  "description" : "Spacing for page titles.",
 		  "default" : 1.2,
-		  "type" : "number"
+		  "$ref" : "#/definitions/numspec"
 		},
 		"toc" : {
 		  "description" : "Spacing for table of contens lines.",
 		  "default" : 1.4,
-		  "type" : "number"
+		  "$ref" : "#/definitions/numspec"
 		}
 	      }
 	    },
@@ -1776,7 +1842,7 @@
 	    "titles-directive-ignore" : {
 	      "description" : "Ignore titles directives in the songs.",
 	      "default" : false,
-	      "type" : "boolean"
+	      "$ref" : "#/definitions/boolspec"
 	    }
 	} }
       ]
@@ -1841,55 +1907,55 @@
       "additionalProperties" : true,
       "properties" : {
         "abc" : {
-          "type" : "integer",
+          "$ref" : "#/definitions/intspec",
           "default" : 0
         },
         "chords" : {
-          "type" : "integer",
+          "$ref" : "#/definitions/intspec",
           "default" : 0
         },
         "config" : {
-          "type" : "integer",
+          "$ref" : "#/definitions/intspec",
           "default" : 0
         },
         "csv" : {
-          "type" : "integer",
+          "$ref" : "#/definitions/intspec",
           "default" : 0
         },
         "fonts" : {
-          "type" : "integer",
+          "$ref" : "#/definitions/intspec",
           "default" : 0
         },
         "images" : {
-          "type" : "integer",
+          "$ref" : "#/definitions/intspec",
           "default" : 0
         },
         "layout" : {
-          "type" : "integer",
+          "$ref" : "#/definitions/intspec",
           "default" : 0
         },
         "ly" : {
-          "type" : "integer",
+          "$ref" : "#/definitions/intspec",
           "default" : 0
         },
         "meta" : {
-          "type" : "integer",
+          "$ref" : "#/definitions/intspec",
           "default" : 0
         },
         "mma" : {
-          "type" : "integer",
+          "$ref" : "#/definitions/intspec",
           "default" : 0
         },
         "song" : {
-          "type" : "integer",
+          "$ref" : "#/definitions/intspec",
           "default" : 0
         },
         "songfull" : {
-          "type" : "integer",
+          "$ref" : "#/definitions/intspec",
           "default" : 0
         },
         "spacing" : {
-          "type" : "integer",
+          "$ref" : "#/definitions/intspec",
           "default" : 0
         }
       }

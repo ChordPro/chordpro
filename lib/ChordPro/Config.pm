@@ -506,6 +506,7 @@ sub _augment ( $self, $hash, $path ) {
         warn("Config augment error: unknown item $path$key\n")
           unless exists $self->{$key}
             || $path =~ /^pdf\.(?:info|fonts|fontconfig)\./
+            || $path =~ /^parser\.(?:chords)\./
             || $path =~ /^meta\./
             || $key =~ /^_/;
 
@@ -742,7 +743,7 @@ sub hmerge( $left, $right, $path = "" ) {
             || $path =~ /^pdf\.(?:info|fonts)\./
             || $path =~ /^meta\./
             || $path =~ /^delegates\./
-            || $path =~ /^parser\.preprocess\./
+            || $path =~ /^parser\.(?:chords|preprocess)\./
             || $path =~ /^debug\./
             || $key =~ /^_/;
 
@@ -916,7 +917,7 @@ sub default_config () {
       // Overrides the -a (--single-space) command line options.
       "suppress-empty-chords" : true,
       // Suppress parenthesised chords.
-      "suppress-paren-chords" : false,
+      "suppress-parenthesised-chords" : false,
       // Suppress blank lyrics lines.
       "suppress-empty-lyrics" : true,
       // Suppress chords.
@@ -1062,11 +1063,12 @@ sub default_config () {
       // Format to show chord names. May contain markup.
       // "chord-format" : "%{root}%{qual|%{}}%{ext|<sup>%{}</sup>}%{bass|/%{}}",
     "chord-formats" : {
-        "common" :    "%{root|%{}%{qual|%{}}%{ext|%{}}%{bass|/%{}}|%{name}}",
-        "roman" :     "%{root|%{}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}",
-        "nashville" : "%{root|%{}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}",
-        "stdfmt" : "%{formatted}",
-        "prnfmt" : "(%{formatted})",
+
+        // Basic. Depend on notation system.
+        "common" :    "%{parenthesised|(}%{root|%{}%{qual|%{}}%{ext|%{}}%{bass|/%{}}|%{name}}%{parenthesised|)}",
+        "roman" :     "%{parenthesised|(}%{root|%{}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}%{parenthesised|)}",
+        "nashville" : "%{parenthesised|(}%{root|%{}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}%{parenthesised|)}",
+
     },
 
     // Printing chord diagrams.
@@ -1288,6 +1290,14 @@ sub default_config () {
       // A {titles: left} may conflict with customized formats.
       // Set to non-zero to ignore the directive.
       "titles-directive-ignore" : false,
+
+      // Chord presentation formats.
+      'chord-formats' : {
+        "default" : "%{formatted}",
+        "grid"    : "%{formatted}",
+        "inline"  : "[%{formatted}]",
+        "inline-annotation" : "[%{formatted}]",
+      },
 
       // Chord diagrams.
       // A chord diagram consists of a number of cells.
@@ -1610,6 +1620,13 @@ sub default_config () {
 
     // Settings for ChordPro backend.
     "chordpro" : {
+	// Chord presentation formats.
+	'chord-formats' : {
+	  "default" : "%{formatted}",
+	  "grid"    : "%{formatted}",
+	  "inline"  : "[%{formatted}]",
+	  "inline-annotation" : "[%{formatted}]",
+	},
         // Style of chorus.
         "chorus" : {
             // Recall style: Print the tag using the type.
@@ -1629,6 +1646,13 @@ sub default_config () {
 
     // Settings for HTML backend.
     "html" : {
+	// Chord presentation formats.
+	'chord-formats' : {
+	  "default" : "%{formatted}",
+	  "grid"    : "%{formatted}",
+	  "inline"  : "[%{formatted}]",
+	  "inline-annotation" : "[%{formatted}]",
+	},
         // Stylesheet links.
         "styles" : {
             "display" : "chordpro.css",
@@ -1638,6 +1662,13 @@ sub default_config () {
 
     // Settings for LaTeX backend.
     "latex" : {
+	// Chord presentation formats.
+	'chord-formats' : {
+	  "default" : "%{formatted}",
+	  "grid"    : "%{formatted}",
+	  "inline"  : "[%{formatted}]",
+	  "inline-annotation" : "[%{formatted}]",
+	},
         "template_include_path" : [ ],
         "templates" :  {
             "songbook" : "songbook.tt",
@@ -1648,6 +1679,13 @@ sub default_config () {
 
     // Settings for Text backend.
     "text" : {
+	// Chord presentation formats.
+	'chord-formats' : {
+	  "default" : "%{formatted}",
+	  "grid"    : "%{formatted}",
+	  "inline"  : "[%{formatted}]",
+	  "inline-annotation" : "[%{formatted}]",
+	},
         // Style of chorus.
         "chorus" : {
             // Recall style: Print the tag using the type.
@@ -1673,12 +1711,35 @@ sub default_config () {
         "tabstop" : 8,
     },
 
-    // Settings for the parser/preprocessor.
-    // For selected lines, you can specify a series of 
-    // { "target" : "xxx", "replace" : "yyy" }
-    // Every occurrence of "xxx" will be replaced by "yyy".
-    // Use wisely.
+    // Settings for the parser.
     "parser" : {
+
+        // Parsing chord presentations.
+        "chords" : {
+            // The default entry is optional.
+            "default" : {
+                "pattern" : "(.*)",
+                "priority" : 0,	// lowest
+            },
+            "parenthesised" : {
+                "pattern" : "\\((.+)\\)",
+                "priority" : 10,
+            },
+            "passing" : {
+                "pattern" : "(.+)\\*",
+                "priority" : 10,
+            },
+            "annotation" : {
+                "pattern" : "\\*(.*)",
+                "priority" : 20,	// higher than passing
+            },
+        },
+
+        // Settings for the preprocessor.
+        // For selected lines, you can specify a series of 
+        // { "target" : "xxx", "replace" : "yyy" }
+        // Every occurrence of "xxx" will be replaced by "yyy".
+        // Use wisely.
         "preprocess" : {
             // All lines.
             "all" : [],
@@ -1693,6 +1754,7 @@ sub default_config () {
     "debug" : {
         "runtimeinfo" : 1,
         "a2crd"     : 0,
+        "appearance": 0,
         "assets"    : 0,
         "chords"    : 0,
         "config"    : 0,
