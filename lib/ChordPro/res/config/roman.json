@@ -20,7 +20,7 @@
 	    // flat and sharp.
 	    "chord" : {
 		"name" : "Times-Roman",
-#		"file" : "/usr/share/fonts/gnu-free/FreeSerif.ttf",
+//		"file" : "/usr/share/fonts/gnu-free/FreeSerif.ttf",
 		"size" : 10,
 	    },
 	},
