@@ -8,6 +8,7 @@ use utf8;
 use ChordPro::Testing;
 use ChordPro::Song;
 use ChordPro::Chords;
+#use DDP;
 
 my @tbl1;
 my @tbl2;
@@ -45,7 +46,10 @@ ok( $msg =~ /<DATA>, line (\d+), Invalid markup in chord: "Bbm7<sup>b5<sup>"/
     && $1 == 16,
     "Warning given at line $1" );
 
-$::config->{"chord-formats"}->{common} = "%{root}%{qual|%{}}%{ext|<sup>%{}</sup>}%{bass|/%{}}";
+$::config->{"chord-formats"}->{common} =
+  "%{parens|(}".
+  "%{root}%{qual|%{}}%{ext|<sup>%{}</sup>}%{bass|/%{}}".
+  "%{parens|)}";
 foreach ( @tbl2 ) {
     doit($_);
 }
@@ -54,6 +58,7 @@ sub doit {
     my ( $line, $c, $info ) = @{$_[0]};
     $s->_diag( line => $line );
     my $ap = $s->chord($c);
+    #note(np($ap));
     my $key = $ap->key;
     my $res = $s->{chordsinfo}->{$key};
     unless ( $res ) {
@@ -82,6 +87,7 @@ Bm7b5	Bm7♭5
 Bbm7b5	B♭m7♭5
 Bbm7<sup>b5<sup>	B♭m7<sup>♭5<sup>
 <b>(Bes)</b>	<b>(Bes)</b>
+# parenthesised may not contain markup
 (<b>Bes</b>)	(<b>Bes</b>)
 --
 Bbm7b5	B♭m<sup>7♭5</sup>
