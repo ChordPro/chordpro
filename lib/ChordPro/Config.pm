@@ -42,10 +42,6 @@ This module can be run standalone and will print the default config.
 
 =cut
 
-#sub hmerge($$;$);
-#sub clone($);
-#sub default_config();
-
 sub json_load( $json, $source = "<builtin>" ) {
     use JSON::Relaxed;
     state $pp = JSON::Relaxed::Parser->new;
@@ -66,7 +62,7 @@ sub configurator ( $opts = undef ) {
     # Test programs call configurator without options.
     # Prepare a minimal config.
     unless ( $opts ) {
-        my $cfg = json_load( default_config() );
+        my $cfg = default_config();
         $config = $cfg;
 	config_split_fc_aliases($cfg);
         $options = { verbose => 0 };
@@ -83,7 +79,7 @@ sub configurator ( $opts = undef ) {
 
     # Load defaults.
     warn("Reading: <builtin>\n") if $verbose > 1;
-    my $cfg = json_load( default_config() );
+    my $cfg = default_config();
 
     # This is easier than splitting out manually :)
     config_split_fc_aliases($cfg);
@@ -405,7 +401,7 @@ sub config_final ( $delta ) {
     my $cfg = configurator($options);
 
     if ( $delta ) {
-        my $def = json_load( default_config() );
+        my $def = default_config();
         $cfg->reduce($def);
     }
     $cfg->unlock;
@@ -428,11 +424,11 @@ sub config_final ( $delta ) {
 
 sub config_default () {
     if ( $ENV{CHORDPRO_CFGPROPS} ) {
-        my $cfg = json_load( default_config() );
+        my $cfg = default_config();
         cfg2props($cfg);
     }
     else {
-        default_config();
+        default_json_config();
     }
 }
 
@@ -891,7 +887,7 @@ our @EXPORT = qw( _c );
 sub _c ( @args ) { $::config->gps(@args) }
 
 # Get the raw contents of the builtin (default) config.
-sub default_config () {
+sub default_json_config () {
     return <<'End_Of_Config';
 // Configuration for ChordPro.
 //
@@ -919,7 +915,7 @@ sub default_config () {
       // Overrides the -a (--single-space) command line options.
       "suppress-empty-chords" : true,
       // Suppress parenthesised chords.
-      "suppress-parenthesised-chords" : false,
+      "suppress-parens-chords" : false,
       // Suppress blank lyrics lines.
       "suppress-empty-lyrics" : true,
       // Suppress chords.
@@ -1067,10 +1063,18 @@ sub default_config () {
     "chord-formats" : {
 
         // Basic. Depend on notation system.
-        "common" :    "%{parenthesised|(}%{root|%{}%{qual|%{}}%{ext|%{}}%{bass|/%{}}|%{name}}%{parenthesised|)}",
-        "roman" :     "%{parenthesised|(}%{root|%{}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}%{parenthesised|)}",
-        "nashville" : "%{parenthesised|(}%{root|%{}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}%{parenthesised|)}",
-
+        "common" :
+            "%{parens|(}" \
+            "%{root|%{}%{qual|%{}}%{ext|%{}}%{bass|/%{}}|%{name}}" \
+            "%{parens|)}%{passing|*}",
+        "roman" :
+            "%{parens|(}" \
+            "%{root|%{}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}" \
+            "%{parens|)}",
+        "nashville" :
+            "%{parens|(}" \
+            "%{root|%{}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}" \
+            "%{parens|)}",
     },
 
     // Printing chord diagrams.
@@ -1723,7 +1727,7 @@ sub default_config () {
                 "pattern" : "(.*)",
                 "priority" : 0,	// lowest
             },
-            "parenthesised" : {
+            "parens" : {
                 "pattern" : "\\((.+)\\)",
                 "priority" : 10,
             },
@@ -1785,6 +1789,10 @@ sub default_config () {
 }
 // End of config.
 End_Of_Config
+}
+
+sub default_config() {
+    json_load( default_json_config() );
 }
 
 # For convenience.

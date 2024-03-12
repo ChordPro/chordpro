@@ -54,7 +54,7 @@ method chord_display( $finalformat = undef ) {
     $args->{$presentation} = 1 if $presentation;
     my $res = $info->name;
     my $i = 0;		# debug
-    warn("[$i] ", ::dump($args), "\n") if $::config->{debug}->{appearance};
+    warn("[$i] ", ::dump({%$args, parser => ref($args->{parser})}), "\n") if $::config->{debug}->{appearance};
     for my $fmt ( $::config->{'chord-formats'}->{common}, # $default,
 		  $info->{format},
 		  $info->{chordformat},
@@ -74,12 +74,16 @@ method chord_display( $finalformat = undef ) {
     return $::config->{settings}->{truesf} ? $info->fix_musicsyms($res) : $res;
 }
 
+method set_annotation( $mode = 1 ) {
+    $presentation = $mode ? "annotation" : "";
+}
 method is_annotation {
     $presentation eq "annotation";
 }
 
+# Used by Song, to skip parenthesised chords.
 method is_parenthesised {
-    $presentation eq "parenthesised";
+    $presentation eq "parens";
 }
 
 method CARP_TRACE {

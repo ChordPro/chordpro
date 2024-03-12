@@ -801,7 +801,14 @@ sub add( $self, @rest ) {
     }
 }
 
+################ Parsing Chords ################
+
+# chord("<b>(A)</b>") ->
+#   chord_parser("(A)") -> ap
+#   parse_chord(ap->key) -> info
+
 my $chord_parser_pattern;
+my $cpdbg;
 
 sub make_chord_parser( $self ) {
     my $cp = $config->{parser}->{chords};
@@ -820,9 +827,11 @@ sub make_chord_parser( $self ) {
 	$pat .= "^$1(?<$_->{key}>$2)$3\$"
     }
     $chord_parser_pattern = qr/$pat/o;
+    $cpdbg = $::config->{debug}->{x2};
 }
 
 sub chord_parser( $self, $arg ) {
+    warn("chord_parser: $arg\n") if $cpdbg;
     $self->make_chord_parser unless $chord_parser_pattern;
     $arg =~ /$chord_parser_pattern/ or die("Chord parser: can't happen\n");
     my $ap = ChordPro::Chords::Appearance->new( orig => $arg );
@@ -834,7 +843,7 @@ sub chord_parser( $self, $arg ) {
 	$ap->presentation = $_ unless $_ eq "default";
 	last;
     }
-    ::dump($ap) if $config->{debug}->{chords} > 1;
+    ::dump($ap) if $cpdbg || $config->{debug}->{chords} > 1;
     $ap;
 }
 
@@ -842,31 +851,37 @@ sub chord_parser( $self, $arg ) {
 # It understands markup, parenthesized chords and annotations.
 # Returns the chord Appearance.
 sub chord( $self, $orig ) {
+    warn("chord: $orig\n") if $cpdbg;
     Carp::confess unless length($orig);
 
-    my $ap = $self->chord_parser($orig);
+    my $ap;
 
-    # Intercept annotations.
-    if ( $ap->is_annotation ) {
-	my $i = ChordPro::Chord::Annotation->new
-	  ( { name => $orig, text => $1 } );
-	$ap->key = $self->add_chord($i);
-	$ap->info = $i;
-	return $ap;
-    }
-
-    $orig = $ap->key;
     # Check for markup.
     my $markup = $orig;
     my $c = demarkup($orig);
     if ( $markup eq $c ) { 	# no markup
 	undef $markup;
+	$ap = $self->chord_parser($c);
+    }
+    else {
+	$ap = $self->chord_parser($c);
+	warn("demarkup: $c -> ", $ap->orig, "\n") if $cpdbg;
+	if ( index( $markup, $ap->orig ) < 0 ) {
+	    $ap->set_annotation;
+	    warn("$c: \"", $ap->orig, "\" ? \"$markup\" -> annotation\n") if $cpdbg;
+	}
     }
 
-#    # Special treatment for parenthesized chords.
-#    my $parens = $c =~ s/^\((.*)\)$/$1/;
-#    do_warn("Double parens in chord: \"$orig\"")
-#      if $c =~ s/^\((.*)\)$/$1/;
+    # Intercept annotations.
+    if ( $ap->is_annotation ) {
+	my $i = ChordPro::Chord::Annotation->new
+	  ( { name => $orig, text => $ap->key } );
+	$ap->key = $self->add_chord($i);
+	$ap->info = $i;
+	warn("ap ", ::dump($ap),"\n") if $cpdbg;
+	return $ap;
+    }
+    $c = $ap->key;
 
     # We have a 'bare' chord now. Parse it.
     my $info = $self->parse_chord($c);
@@ -877,31 +892,40 @@ sub chord( $self, $orig ) {
 	  ( { name => $orig, text => $orig } );
 	$ap->key = $self->add_chord($i);
 	$ap->info = $i;
-	$ap->presentation = "annotation";
+	$ap->set_annotation;
 	return $ap;
     }
 
     # Handle markup, if any.
-    #### TODO
     my $std = '%{formatted}';
     if ( $markup ) {
+	if ( $ap->is_parenthesised
+	     && ! ( $markup =~ $::config->{parser}->{chords}->{parens}->{pattern}
+		    && $1 eq $c ) ) {
+	    warn("deparen: $markup '$1'\n") if $cpdbg;
+	    $ap->presentation = '';
+
+	}
+	$c = $ap->orig;
 	if ( $markup =~ s/\>\Q$c\E\</>$std</
-	     ||
-	     $markup =~ s/\>\(\Q$c\E\)\</>$std</ ) {
+#	     || $markup =~ s/\>\(\Q$c\E\)\</>$std</
+	   ) {
 	}
 	else {
 	    do_warn("Invalid markup in chord: \"$markup\"\n");
 	}
 	$ap->format = $markup;
     }
-    elsif ( (my $m = $orig) =~ s/\Q$c\E/$std/ ) {
-#	$m =~ s/\(\Q$std\E\)/$prn/ if $parens;
-	$ap->format = $m unless $m eq $std;
+    else {
+	$c = $ap->orig;
+	if ( (my $m = $orig) =~ s/\Q$c\E/$std/ ) {
+	    $ap->format = $m unless $m eq $std;
+	}
     }
 
     return ""
       if $ap->is_parenthesised
-         && $config->{settings}->{'suppress-parenthesised-chords'};
+         && $config->{settings}->{'suppress-parens-chords'};
 
     # After parsing, the chord can be changed by transpose/code.
     # info->name is the new key.
@@ -930,8 +954,159 @@ sub chord( $self, $orig ) {
 	}
     }
 
+    warn("ap ", ::dump($ap),"\n") if $cpdbg;
+    warn("result: ", $ap->chord_display, "\n") if $cpdbg;
     return $ap;
 }
+
+# Parse a chord.
+# Handles transpose/transcode.
+# Returns the chord object.
+# No parens or annotations, please.
+sub parse_chord( $self, $chord, $def = undef ) {
+    warn("parse_chord: $chord\n") if $cpdbg;
+
+    my $debug = $config->{debug}->{chords};
+
+    warn("Parsing chord: \"$chord\"\n") if $debug;
+    my $info;
+    my $xp = $xpose + $config->{settings}->{transpose};
+    $xp += $capo if $capo && $decapo;
+    my $xc = $config->{settings}->{transcode};
+    my $global_dir = $config->{settings}->{transpose} <=> 0;
+    my $unk;
+
+    # When called from {define} ignore xc/xp.
+    $xc = $xp = '' if $def;
+
+    $info = ChordPro::Chords::known_chord($chord);
+    if ( $info ) {
+	warn( "Parsing chord: \"$chord\" found \"",
+	      $info->name, "\" in ", $info->{_via}, "\n" ) if $debug > 1;
+	$info->dump if $debug > 1;
+    }
+    else {
+	$info = ChordPro::Chords::parse_chord($chord);
+	warn( "Parsing chord: \"$chord\" parsed ok [",
+	      $info->{system},
+	      "]\n" ) if $info && $debug > 1;
+    }
+    $unk = !defined $info;
+
+    if ( ( $def || $xp || $xc )
+	 &&
+	 ! ($info && $info->is_xpxc ) ) {
+	local $::config->{settings}->{chordnames} = "relaxed";
+	$info = ChordPro::Chords::parse_chord($chord);
+    }
+
+    unless ( ( $info && $info->is_xpxc )
+	     ||
+	     ( $def && !( $xc || $xp ) ) ) {
+	do_warn( "Cannot parse",
+		 $xp ? "/transpose" : "",
+		 $xc ? "/transcode" : "",
+		 " chord \"$chord\"\n" )
+	  if $xp || $xc || $config->{debug}->{chords};
+    }
+
+    if ( $xp && $info ) {
+	# For transpose/transcode, chord must be wellformed.
+	my $i = $info->transpose( $xp,
+				  $xpose_dir // $global_dir);
+	# Prevent self-references.
+	$i->{xp} = $info unless $i eq $info;
+	$info = $i;
+	warn( "Parsing chord: \"$chord\" transposed ",
+	      sprintf("%+d", $xp), " to \"",
+	      $info->name, "\"\n" ) if $debug > 1;
+    }
+    # else: warning has been given.
+
+    if ( $info ) { # TODO roman?
+	# Look it up now, the name may change by transcode.
+	if ( my $i = ChordPro::Chords::known_chord($info) ) {
+	    warn( "Parsing chord: \"$chord\" found ",
+		  $i->name, " for ", $info->name,
+		  " in ", $i->{_via}, "\n" ) if $debug > 1;
+	    $info = $i->new({ %$i, name => $info->name,
+			      $info->{xp} ? ( xp => $info->{xp} ) : (),
+			      $info->{xc} ? ( xc => $info->{xc} ) : (),
+			    }) ;
+	    $unk = 0;
+	}
+	elsif ( $config->{instrument}->{type} eq 'keyboard'
+		&& ( my $k = ChordPro::Chords::get_keys($info) ) ) {
+	    warn( "Parsing chord: \"$chord\" \"", $info->name, "\" not found ",
+		  "but we know what to do\n" ) if $debug > 1;
+	    $info = $info->new({ %$info, keys => $k }) ;
+	    $unk = 0;
+	}
+	else {
+	    warn( "Parsing chord: \"$chord\" \"", $info->name,
+		  "\" not found in song/config chords\n" ) if $debug;
+#	    warn("XX \'", $info->agnostic, "\'\n");
+	    $unk = 1;
+	}
+    }
+
+    if ( $xc && $info ) {
+	my $key_ord;
+	$key_ord = $self->{chordsinfo}->{$self->{meta}->{key}->[-1]}->{root_ord}
+	  if $self->{meta}->{key};
+	if ( $xcmov && !defined $key_ord ) {
+	    do_warn("Warning: Transcoding to $xc without key may yield unexpected results\n");
+	    undef $xcmov;
+	}
+	my $i = $info->transcode( $xc, $key_ord );
+	# Prevent self-references.
+	$i->{xc} = $info unless $i eq $info;
+	$info = $i;
+	warn( "Parsing chord: \"$chord\" transcoded to ",
+	      $info->name,
+	      " (", $info->{system}, ")",
+	      "\n" ) if $debug > 1;
+	if ( my $i = ChordPro::Chords::known_chord($info) ) {
+	    warn( "Parsing chord: \"$chord\" found \"",
+		  $info->name, "\" in song/config chords\n" ) if $debug > 1;
+	    $unk = 0;
+	}
+    }
+    # else: warning has been given.
+
+    if ( ! $info ) {
+	if ( my $i = ChordPro::Chords::known_chord($chord) ) {
+	    $info = $i;
+	    warn( "Parsing chord: \"$chord\" found \"",
+		  $chord, "\" in ",
+		  $i->{_via}, "\n" ) if $debug > 1;
+	    $unk = 0;
+	}
+    }
+
+    unless ( $info || $def ) {
+	if ( $config->{debug}->{chords} || ! $warned_chords{$chord}++ ) {
+	    warn("Parsing chord: \"$chord\" unknown\n") if $debug;
+	    do_warn( "Unknown chord: \"$chord\"\n" )
+	      unless $chord =~ /^n\.?c\.?$/i;
+	}
+    }
+
+    if ( $info ) {
+	warn( "Parsing chord: \"$chord\" okay: \"",
+	      $info->name, "\" \"",
+	      $info->chord_display, "\"",
+	      $unk ? " but unknown" : "",
+	      "\n" ) if $debug > 1;
+	$self->store_chord($info);
+	return $info;
+    }
+
+    warn( "Parsing chord: \"$chord\" not found\n" ) if $debug;
+    return;
+}
+
+################ ################
 
 sub decompose($self, $orig) {
     my $line = fmt_subst( $self, $orig );
@@ -2306,152 +2481,6 @@ sub msg( @m ) {
 
 sub do_warn( @m ) {
     warn(msg(@m)."\n");
-}
-
-# Parse a chord.
-# Handles transpose/transcode.
-# Returns the chord object.
-# No parens or annotations, please.
-sub parse_chord( $self, $chord, $def = undef ) {
-
-    my $debug = $config->{debug}->{chords};
-
-    warn("Parsing chord: \"$chord\"\n") if $debug;
-    my $info;
-    my $xp = $xpose + $config->{settings}->{transpose};
-    $xp += $capo if $capo && $decapo;
-    my $xc = $config->{settings}->{transcode};
-    my $global_dir = $config->{settings}->{transpose} <=> 0;
-    my $unk;
-
-    # When called from {define} ignore xc/xp.
-    $xc = $xp = '' if $def;
-
-    $info = ChordPro::Chords::known_chord($chord);
-    if ( $info ) {
-	warn( "Parsing chord: \"$chord\" found \"",
-	      $info->name, "\" in ", $info->{_via}, "\n" ) if $debug > 1;
-	$info->dump if $debug > 1;
-    }
-    else {
-	$info = ChordPro::Chords::parse_chord($chord);
-	warn( "Parsing chord: \"$chord\" parsed ok [",
-	      $info->{system},
-	      "]\n" ) if $info && $debug > 1;
-    }
-    $unk = !defined $info;
-
-    if ( ( $def || $xp || $xc )
-	 &&
-	 ! ($info && $info->is_xpxc ) ) {
-	local $::config->{settings}->{chordnames} = "relaxed";
-	$info = ChordPro::Chords::parse_chord($chord);
-    }
-
-    unless ( ( $info && $info->is_xpxc )
-	     ||
-	     ( $def && !( $xc || $xp ) ) ) {
-	do_warn( "Cannot parse",
-		 $xp ? "/transpose" : "",
-		 $xc ? "/transcode" : "",
-		 " chord \"$chord\"\n" )
-	  if $xp || $xc || $config->{debug}->{chords};
-    }
-
-    if ( $xp && $info ) {
-	# For transpose/transcode, chord must be wellformed.
-	my $i = $info->transpose( $xp,
-				  $xpose_dir // $global_dir);
-	# Prevent self-references.
-	$i->{xp} = $info unless $i eq $info;
-	$info = $i;
-	warn( "Parsing chord: \"$chord\" transposed ",
-	      sprintf("%+d", $xp), " to \"",
-	      $info->name, "\"\n" ) if $debug > 1;
-    }
-    # else: warning has been given.
-
-    if ( $info ) { # TODO roman?
-	# Look it up now, the name may change by transcode.
-	if ( my $i = ChordPro::Chords::known_chord($info) ) {
-	    warn( "Parsing chord: \"$chord\" found ",
-		  $i->name, " for ", $info->name,
-		  " in ", $i->{_via}, "\n" ) if $debug > 1;
-	    $info = $i->new({ %$i, name => $info->name,
-			      $info->{xp} ? ( xp => $info->{xp} ) : (),
-			      $info->{xc} ? ( xc => $info->{xc} ) : (),
-			    }) ;
-	    $unk = 0;
-	}
-	elsif ( $config->{instrument}->{type} eq 'keyboard'
-		&& ( my $k = ChordPro::Chords::get_keys($info) ) ) {
-	    warn( "Parsing chord: \"$chord\" \"", $info->name, "\" not found ",
-		  "but we know what to do\n" ) if $debug > 1;
-	    $info = $info->new({ %$info, keys => $k }) ;
-	    $unk = 0;
-	}
-	else {
-	    warn( "Parsing chord: \"$chord\" \"", $info->name,
-		  "\" not found in song/config chords\n" ) if $debug;
-#	    warn("XX \'", $info->agnostic, "\'\n");
-	    $unk = 1;
-	}
-    }
-
-    if ( $xc && $info ) {
-	my $key_ord;
-	$key_ord = $self->{chordsinfo}->{$self->{meta}->{key}->[-1]}->{root_ord}
-	  if $self->{meta}->{key};
-	if ( $xcmov && !defined $key_ord ) {
-	    do_warn("Warning: Transcoding to $xc without key may yield unexpected results\n");
-	    undef $xcmov;
-	}
-	my $i = $info->transcode( $xc, $key_ord );
-	# Prevent self-references.
-	$i->{xc} = $info unless $i eq $info;
-	$info = $i;
-	warn( "Parsing chord: \"$chord\" transcoded to ",
-	      $info->name,
-	      " (", $info->{system}, ")",
-	      "\n" ) if $debug > 1;
-	if ( my $i = ChordPro::Chords::known_chord($info) ) {
-	    warn( "Parsing chord: \"$chord\" found \"",
-		  $info->name, "\" in song/config chords\n" ) if $debug > 1;
-	    $unk = 0;
-	}
-    }
-    # else: warning has been given.
-
-    if ( ! $info ) {
-	if ( my $i = ChordPro::Chords::known_chord($chord) ) {
-	    $info = $i;
-	    warn( "Parsing chord: \"$chord\" found \"",
-		  $chord, "\" in ",
-		  $i->{_via}, "\n" ) if $debug > 1;
-	    $unk = 0;
-	}
-    }
-
-    unless ( $info || $def ) {
-	if ( $config->{debug}->{chords} || ! $warned_chords{$chord}++ ) {
-	    warn("Parsing chord: \"$chord\" unknown\n") if $debug;
-	    do_warn( "Unknown chord: \"$chord\"\n" )
-	      unless $chord =~ /^n\.?c\.?$/i;
-	}
-    }
-
-    if ( $info ) {
-	warn( "Parsing chord: \"$chord\" okay: \"",
-	      $info->name, "\" \"",
-	      $info->chord_display, "\"",
-	      $unk ? " but unknown" : "",
-	      "\n" ) if $debug > 1;
-	$self->store_chord($info);
-	return $info;
-    }
-
-    warn( "Parsing chord: \"$chord\" not found\n" ) if $debug;
-    return;
 }
 
 sub store_chord( $self, $info ) {
