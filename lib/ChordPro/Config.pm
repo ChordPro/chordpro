@@ -1826,7 +1826,7 @@ sub qd ( $val, $compact = 0 ) {
 
 unless ( caller ) {
     binmode STDOUT => ':utf8';
-    print( default_config() );
+    print( default_json_config() );
     exit;
 }
 
