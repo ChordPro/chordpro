@@ -47,6 +47,8 @@ sub json_load( $json, $source = "<builtin>" ) {
     state $pp = JSON::Relaxed::Parser->new;
     #$json =~ s/\\[\r\n]+\s*//sg;
     $json =~ s/(['"])\s*\\[\r\n]+\s*\1//sg;
+    # Relaxed does not interpret \uXXXX....? Hack attack
+    $json =~ s/\\u([0-9a-f]{4})/sprintf("%c",hex($1))/ige; # TODO
     my $data = $pp->parse($json);
     return $data unless $JSON::Relaxed::err_id;
     $source .= ": " if $source;
@@ -1828,7 +1830,7 @@ sub qd ( $val, $compact = 0 ) {
 
 unless ( caller ) {
     binmode STDOUT => ':utf8';
-    print( default_config() );
+    print( default_json_config() );
     exit;
 }
 
