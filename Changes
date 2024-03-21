@@ -6,6 +6,7 @@
     - Improve error message for open failures.
     - Allow very relaxed JSON format for config files.
     - Improve ppl packaging; add support for debian (static).
+    - Upgrade ABC2SVG kit to 1.22.14.
 
 6.050.7 2024-02-27
 

@@ -156,16 +156,12 @@ svg :
 	cp -p ${HOME}/src/SVGPDF/lib/SVGPDF/Contrib/*.pm lib/ChordPro/lib/SVGPDF/Contrib/
 
 ABCDEST    = ${RES}/abc/abc2svg
-ABCKIT     = abc2svg-1f1e9ecb65
-ABCVERSION = 1.22.13
-ABCVDATE   = 2024-01-30
+ABCKIT     = abc2svg-be8faee2b4
 
 abc :
-	mv ${ABCDEST}/README.FIRST ABC/
 	rm -f ${ABCDEST}/*
-	perl ABC/build.pl --dest=${ABCDEST} \
-	  ABC/${ABCKIT}.tar.gz --version=${ABCVERSION} --vdate=${ABCVDATE}
-	mv ABC/README.FIRST ${ABCDEST}/
+	perl ABC/build.pl --dest=${ABCDEST} ABC/${ABCKIT}.tar.gz 
+	cp -p ABC/README.FIRST ABC/cmdline.js ${ABCDEST}/
 	grep -v ${ABCDEST} MANIFEST > x
 	find ${ABCDEST} -type f -printf "%p\n" \
 	  | sort -u >> x

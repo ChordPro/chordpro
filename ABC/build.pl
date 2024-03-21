@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Sun Feb 18 16:15:19 2024
 # Last Modified By: 
-# Last Modified On: Wed Feb 21 07:30:20 2024
-# Update Count    : 22
+# Last Modified On: Thu Mar 21 19:38:21 2024
+# Update Count    : 24
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -25,8 +25,6 @@ use Getopt::Long 2.13;
 
 # Command line options.
 my $abcroot;
-my $version;
-my $vdate;
 my $dest;
 my $verbose = 1;		# verbose processing
 
@@ -66,16 +64,14 @@ for $target ( "$dest/abc2svg-$major.js" ) {
 		      font.js core/format.js core/front.js core/music.js
 		      core/parse.js core/subs.js core/svg.js core/tune.js
 		      core/lyrics.js core/gchord.js core/tail.js
-		      core/modules.js ) ) {
+		      core/modules.js
+		      version.txt ) ) {
 	my $data = $tar->get_content("$abcroot/$mod");
 	die( "$abcroot/$mod: $!\n" ) unless $data;
 	warn("  adding $mod (", length($data), " bytes)...\n") if $verbose > 1;
 	$data .= "\n" unless $data =~ /\n$/;
 	print $fd $data;
     }
-    warn("  fixing version...\n") if $verbose > 1;
-    printf $fd ( 'abc2svg.version="%s";abc2svg.vdate="%s"'."\n",
-		 $version, $vdate );
     $fd->close
       or die( "$target: $!\n" );
 }
@@ -194,8 +190,6 @@ sub app_options {
     # Process options.
     if ( @ARGV > 0 ) {
 	GetOptions( 'abcroot=s' => \$abcroot,
-		    'version=s' => \$version,
-		    'vdate=s'   => \$vdate,
 		    'dest=s'	=> \$dest,
 		    'ident'	=> \$ident,
 		    'verbose+'	=> \$verbose,
@@ -210,9 +204,6 @@ sub app_options {
     }
     if ( $man or $help ) {
 	$pod2usage->( -exitval => 0, -verbose => 0 );
-    }
-    unless ( @ARGV == 1 && $version && $vdate && $dest ) {
-	$pod2usage->( -exitval => 2, -verbose => 0 );
     }
 }
 
@@ -229,8 +220,6 @@ build - tool to prepare ABC files for ChrdPro
 build [options] abckit
 
  Mandatory arguments:
-   --version=XXX	ABC version
-   --vdate=XXX		ABC version date
    --dest=XXX		destination for the abc files in the ChordPro kit
 
  Options:

@@ -158,10 +158,10 @@ Without this style, the music is in-lined as in [this other example][5].
 [5]: http://moinejf.free.fr/abcm2ps-doc/dansou-i.html "Tune index example"
 
 Global ABC parameters may be added as `parameter=value` in the query string
-of the URL of the page. The [following example][16] calls the same
+of the URL of the page. The [following example][9] calls the same
 "J'ai du bon tabac" with `pagescale=1.2` (giving `%%pagescale 1.2`).
 
-[16]: http://moinejf.free.fr/abcm2ps-doc/tabac.html?pagescale=1.2 "J'ai du bon tabac"
+[9]: http://moinejf.free.fr/abcm2ps-doc/tabac.html?pagescale=1.2 "J'ai du bon tabac"
 
 In the above examples, all the ABC music is generated (displayed
 and ready to be played) by means of the script **abcweb-1.js**.  

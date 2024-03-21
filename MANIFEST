@@ -122,6 +122,10 @@ lib/ChordPro/res/templates/guitar_songbook.tt
 lib/ChordPro/res/templates/image.tt
 lib/ChordPro/res/templates/songbook.tt
 pp/README
+pp/debian/chordpro.pp
+pp/debian/wxchordpro.pp
+pp/debian/Makefile
+pp/debian/README
 pp/common/ChordPro_Bundle.pm
 pp/common/PAR/Filter/Null.pm
 pp/common/PDF_API2_Bundle.pm
@@ -444,8 +448,3 @@ lib/ChordPro/res/abc/abc2svg/strtab-1.js
 lib/ChordPro/res/abc/abc2svg/temper-1.js
 lib/ChordPro/res/abc/abc2svg/tohtml.js
 lib/ChordPro/res/abc/abc2svg/tropt-1.js
-pp/debian/chordpro.pp
-pp/debian/wxchordpro.pp
-pp/debian/Makefile
-pp/debian/Makefile~
-pp/debian/README
