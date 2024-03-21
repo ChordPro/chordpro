@@ -1,18 +1,20 @@
 #! /bin/make -f
 
-# GNUmakefile for MacOS, Citrus Perl
-
-default : dmg
+# GNUmakefile for MacOS, Wx 3.2
 
 .PHONY :: chordpro wxchordpro
 
 ROOT   := ../..
 COMMON := ../common
+BASE   := ../linux
 SCRIPT := ${ROOT}/script
 DEST   := build
 VERSION := $(shell perl ../../lib/ChordPro/Version.pm)
+TARGET := wxchordpro
 
 PP := pp
+
+default : dmg
 
 # PAR Packer.
 
@@ -29,15 +31,14 @@ clean ::
 # Portable Perl Launcher
 
 PERLLIB := $(shell perl -MConfig -E 'say $$Config{archlib}')
-PERLINC := ${PERLLIB}/perl5/CORE
 PERLSO  := $(shell perl -MConfig -E 'say $$Config{libperl}')
 
 .PHONY :: ppl
-ppl :: clean wxchordpro unpack copy_coredll loaders
+ppl :: clean ${TARGET} unpack copy_coredll loaders
 
 .PHONY :: unpack
 unpack :
-	perl ../pp2ppl.pl --dest=${DEST} wxchordpro --quiet
+	perl ../pp2ppl.pl --dest=${DEST} ${TARGET} --quiet
 	cp -p "${ROOT}/script/chordpro.pl" "${DEST}/script/chordpro.pl" 
 	cp -p "${ROOT}/lib/ChordPro/Config.pm" "${DEST}/lib/ChordPro/Config.pm" 
 	cp "${DEST}/res/icons/chordpro.icns" ${DEST}
@@ -58,29 +59,24 @@ WXCLIB := $(shell perl -MAlien::wxWidgets -E 'say Alien::wxWidgets->prefix')
 WXCNFG := ${WXCLIB}/bin/wx-config
 
 .PHONY :: loaders
-loaders : "${DEST}/wxchordpro" "${DEST}/chordpro"
+loaders : "${DEST}/${TARGET}" "${DEST}/chordpro"
 
 # For testing...
 .PHONY :: _loaders
 _loaders : "${DEST}/chordpro"
 	cp "${DEST}/chordpro" "${DEST}/perl"
 
-"${DEST}/wxchordpro" : ppl.c dndhandler.cpp
-	${CC} ${CCOPTS} -o "${DEST}/wxchordpro" -L${DEST} ${LDOPTS} ppl.c
+"${DEST}/wxchordpro" : ${BASE}/ppl.c dndhandler.cpp
+	${CC} ${CCOPTS} -o "${DEST}/wxchordpro" -L${DEST} ${LDOPTS} ${BASE}/ppl.c
 	${CXX} -o "${DEST}/dndhandler" \
 		dndhandler.cpp `${WXCNFG} --cxxflags --libs`
 	perl ./reloc.pl "${DEST}/dndhandler"
 
-"${DEST}/chordpro" : ppl.c
-	${CC} ${CCOPTS} -o "${DEST}/chordpro" -L${DEST} ${LDOPTS} ppl.c
+"${DEST}/chordpro" : ${BASE}/ppl.c
+	${CC} ${CCOPTS} -o "${DEST}/chordpro" -L${DEST} ${LDOPTS} ${BASE}/ppl.c
 
 clean ::
 	rm -fr ${DEST}
-
-# Truly dynamic version of loader. Rename to {wx}chordpro if you dare.
-
-"${DEST}/poc" : poc.c
-	${CC} ${CCOPTS} -o "${DEST}/poc" poc.c -ldl
 
 APPDIR := ChordPro.app
 

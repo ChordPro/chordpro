@@ -2,6 +2,14 @@
 
 SELF=$(readlink -f "$0")
 HERE=${SELF%/*}
-
+TARGET=wxchordpro
 export APPIMAGE_PACKAGED=1.00
-exec ${HERE}/wxchordpro ${1+"$@"}
+
+if [ ! -z $APPIMAGE ] ; then
+  BINARY_NAME=$(basename "$ARGV0")
+  if [ -e "$HERE/$BINARY_NAME" ] ; then
+    exec "$HERE/$BINARY_NAME" "$@"
+  fi
+fi
+
+exec ${HERE}/$TARGET ${1+"$@"}

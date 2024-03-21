@@ -6,12 +6,13 @@
 
 ROOT   := ../..
 COMMON := ../common
+BASE   := ../linux
 SCRIPT := ${ROOT}/script
 DEST   := build
 VERSION := $(shell perl ../../lib/ChordPro/Version.pm)
 TARGET := wxchordpro
 
-PP := pp -u
+PP := pp
 
 default : appimage
 
@@ -20,7 +21,7 @@ default : appimage
 chordpro : chordpro.pp ${COMMON}/chordpro.pp
 	${PP} --output=chordpro @chordpro.pp ${SCRIPT}/chordpro.pl
 
-wxchordpro : chordpro.pp ${COMMON}/chordpro.pp ${COMMON}/wxchordpro.pp
+wxchordpro : wxchordpro.pp ${COMMON}/chordpro.pp ${COMMON}/wxchordpro.pp
 	${PP} --output=wxchordpro @wxchordpro.pp ${SCRIPT}/wxchordpro.pl
 
 clean ::
@@ -28,7 +29,7 @@ clean ::
 
 # Portable Perl Launcher
 
-SYSLIB := /usr/lib64
+SYSLIB := /usr/lib/x86_64-linux-gnu
 PERL_SO  := $(shell ldd `which perl`|perl -ne 's/^.* => (.*libperl.so.*) \(.*\)/$$1/ && print')
 PERLSO  := $(shell perl -wle 'printf("libperl.so.%d.%d\n",$$1,$$2) if $$] =~ /^(\d+)\.(\d\d\d)/')
 
@@ -54,15 +55,14 @@ unpack :
 #        /lib64/ld-linux-x86-64.so.2
 
 copy_coredll :
-	cp -pL ${SYSLIB} ${DEST}/${PERLSO}
+	cp -pL ${SYSLIB}/libperl.so ${DEST}/${PERLSO}
 	patchelf --set-soname ${PERLSO} ${DEST}/${PERLSO}
-	cp -pL ${PERLLIB}/libpthread.so.0 ${DEST}/
 	find . -type f -name '*.so' -exec patchelf --set-rpath '$$ORIGIN' {} \;
 	find . -type f -name '*.so.*' -exec patchelf --set-rpath '$$ORIGIN' {} \;
 
 PREFIX := '"script/"'
 CCOPTS := $(shell perl -MExtUtils::Embed -e ccopts) -DSCRIPTPREFIX=${PREFIX}
-LDOPTS := -Wl,--rpath='$$ORIGIN' ${DEST}/${PERLSO} -lpthread
+LDOPTS := $(shell perl -MExtUtils::Embed -e ldopts)
 
 .PHONY :: loaders
 loaders : "${DEST}/${TARGET}" "${DEST}/chordpro"
@@ -72,11 +72,13 @@ loaders : "${DEST}/${TARGET}" "${DEST}/chordpro"
 _loaders : "${DEST}/chordpro"
 	cp "${DEST}/chordpro" "${DEST}/perl"
 
-"${DEST}/wxchordpro" : ppl.c
-	${CC} ${CCOPTS} -o "${DEST}/wxchordpro" -L${DEST} ${LDOPTS} ppl.c
+"${DEST}/wxchordpro" : ${BASE}/ppl.c
+	${CC} ${CCOPTS} -o "${DEST}/wxchordpro" -L${DEST} ${LDOPTS} \
+	    ${BASE}/ppl.c ${SYSLIB}/libperl.a -lm -lcrypt
 
-"${DEST}/chordpro" : ppl.c
-	${CC} ${CCOPTS} -o "${DEST}/chordpro" -L${DEST} ${LDOPTS} ppl.c
+"${DEST}/chordpro" : ${BASE}/ppl.c
+	${CC} ${CCOPTS} -o "${DEST}/chordpro" -L${DEST} ${LDOPTS} \
+	    ${BASE}/ppl.c ${SYSLIB}/libperl.a -lm -lcrypt
 
 clean ::
 	rm -fr build
@@ -87,13 +89,9 @@ APPIMAGETOOL := appimagetool
 appimage : ppl _appimage
 
 _appimage : 
-	sed -e "s/TARGET=.*/TARGET=${TARGET}/" AppRun > ${DEST}/AppRun
+	sed -e "s/TARGET=.*/TARGET=${TARGET}/" ${BASE}/AppRun > ${DEST}/AppRun
 	chmod 0755 ${DEST}/AppRun
 	cd ${DEST}; ln -f lib/ChordPro/res/linux/chordpro.desktop .
 	cd ${DEST}; ln -f lib/ChordPro/res/icons/chordpro.png .
 	${APPIMAGETOOL} -n ${DEST} ChordPro-${VERSION}.AppImage
 
-# Truly dynamic version of loader. Rename to {wx}chordpro if you dare.
-
-"${DEST}/poc" : poc.c
-	${CC} ${CCOPTS} -o "${DEST}/poc" poc.c -ldl

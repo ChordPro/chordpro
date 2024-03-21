@@ -5,6 +5,7 @@
       https://chordpro.org/beta/chordpro-configuration-pdf/#page-reordering
     - Improve error message for open failures.
     - Allow very relaxed JSON format for config files.
+    - Improve ppl packaging; add support for debian (static).
 
 6.050.7 2024-02-27
 

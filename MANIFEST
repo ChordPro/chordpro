@@ -444,3 +444,8 @@ lib/ChordPro/res/abc/abc2svg/strtab-1.js
 lib/ChordPro/res/abc/abc2svg/temper-1.js
 lib/ChordPro/res/abc/abc2svg/tohtml.js
 lib/ChordPro/res/abc/abc2svg/tropt-1.js
+pp/debian/chordpro.pp
+pp/debian/wxchordpro.pp
+pp/debian/Makefile
+pp/debian/Makefile~
+pp/debian/README
