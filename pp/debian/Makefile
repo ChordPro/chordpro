@@ -74,11 +74,11 @@ _loaders : "${DEST}/chordpro"
 
 "${DEST}/wxchordpro" : ${BASE}/ppl.c
 	${CC} ${CCOPTS} -o "${DEST}/wxchordpro" -L${DEST} ${LDOPTS} \
-	    ${BASE}/ppl.c ${SYSLIB}/libperl.a -lm -lcrypt
+	    ${BASE}/ppl.c ${SYSLIB}/libperl.a ${SYSLIB}/libcrypt.a -lm
 
 "${DEST}/chordpro" : ${BASE}/ppl.c
 	${CC} ${CCOPTS} -o "${DEST}/chordpro" -L${DEST} ${LDOPTS} \
-	    ${BASE}/ppl.c ${SYSLIB}/libperl.a -lm -lcrypt
+	    ${BASE}/ppl.c ${SYSLIB}/libperl.a ${SYSLIB}/libcrypt.a -lm
 
 clean ::
 	rm -fr build
