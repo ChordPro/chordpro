@@ -108,23 +108,40 @@ checkjson :
 
 # Experimental
 
-VM := Win10Pro
-WW := w10
+WIN := w10
+WINVM := Win10Pro
 
 wkit : _wkit1 _wkit _wkit2
 
 _wkit :
 	${MAKE} to_c
-	ssh ${WW} gmake -C Chordpro/pp/windows
-	scp ${WW}:Chordpro/pp/windows/ChordPro-Installer\*.exe ${HOME}/tmp/
+	ssh ${WIN} gmake -C ChordPro/pp/windows
+	scp ${WIN}:ChordPro/pp/windows/ChordPro-Installer\*.exe ${HOME}/tmp/
 
 _wkit1 :
-	-VBoxManage startvm ${VM} --type headless
+	-VBoxManage startvm ${WINVM} --type headless
 
 _wkit2 :
 	sudo umount /misc/c
-	VBoxManage controlvm ${VM} poweroff
-	VBoxManage snapshot ${VM} restorecurrent
+	VBoxManage controlvm ${WINVM} poweroff
+	VBoxManage snapshot ${WINVM} restorecurrent
+
+DEB := debby
+DEBVM := Debian
+
+appimage : _akit1 _akit _akit2
+
+_akit :
+	rsync -avHi ./ ${DEB}:ChordPro/ --exclude .git --exclude build --exclude docs
+	ssh ${DEB} make -C ChordPro/pp/debian
+	scp ${DEB}:ChordPro/pp/debian/ChordPro-\*.AppImage ${HOME}/tmp/
+
+_akit1 :
+	-VBoxManage startvm ${DEBVM} --type headless
+
+_akit2 :
+	VBoxManage controlvm ${DEBVM} poweroff
+	VBoxManage snapshot ${DEBVM} restorecurrent
 
 .PHONY: TAGS
 
