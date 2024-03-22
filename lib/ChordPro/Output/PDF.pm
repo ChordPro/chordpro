@@ -1807,8 +1807,9 @@ sub songline {
 	    my $font = $fchord;
 	    if ( $chord ne '' ) {
 		my $dp;
+		$font = $fonts->{annotation} if $chord->is_annotation;
 		if ( $inlinechords ) {
-		    if ( $chord->info->is_annotation ) {
+		    if ( $chord->is_annotation ) {
 			$dp = $chord->chord_display($inlineannots);
 		    }
 		    else {
@@ -1816,7 +1817,12 @@ sub songline {
 		    }
 		}
 		else {
-		    $dp = $chord->chord_display;
+		    if ( $chord->is_annotation ) {
+			$dp = $chord->chord_display;
+		    }
+		    else {
+			$dp = $chord->chord_display;
+		    }
 		}
 		$xt0 = $pr->text( $dp, $x, $ychord, $font );
 	    }
@@ -2660,9 +2666,9 @@ sub wrap {
 	    # Does the chord fit?
 	    my $c = $chord->chord_display;
 	    my $w;
-	    if ( $c =~ /^\*(.+)/ ) {
+	    if ( $chord->is_annotation ) {
 		$pr->setfont( $pr->{ps}->{fonts}->{annotation} );
-		$c = $1;
+		$c = $chord->text;
 	    }
 	    else {
 		$pr->setfont( $pr->{ps}->{fonts}->{chord} );

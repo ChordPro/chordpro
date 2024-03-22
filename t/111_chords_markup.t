@@ -43,7 +43,7 @@ foreach ( @tbl1 ) {
     doit($_);
 }
 ok( $msg =~ /<DATA>, line (\d+), Invalid markup in chord: "Bbm7<sup>b5<sup>"/
-    && $1 == 16,
+    && $1 == 17,
     "Warning given at line $1" );
 
 $::config->{"chord-formats"}->{common} =
@@ -85,7 +85,8 @@ bb	b♭
 <span color="blue">Bbm7</span>	<span color="blue">B♭m7</span>
 Bm7b5	Bm7♭5
 Bbm7b5	B♭m7♭5
-Bbm7<sup>b5<sup>	B♭m7<sup>♭5<sup>
+# no embedded markup -> annotation (and no syms)
+Bbm7<sup>b5<sup>	Bbm7<sup>b5<sup>
 <b>(Bes)</b>	<b>(Bes)</b>
 # parenthesised may not contain markup
 (<b>Bes</b>)	(<b>Bes</b>)

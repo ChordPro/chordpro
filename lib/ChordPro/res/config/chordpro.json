@@ -846,7 +846,7 @@
             },
             "annotation" : {
                 "pattern" : "\\*(.*)",
-                "priority" : 20,	// higher than passing
+                "priority" : 100,	// irrelevant, always processed first
             },
         },
 

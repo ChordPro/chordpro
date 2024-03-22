@@ -807,14 +807,16 @@ sub add( $self, @rest ) {
 #   chord_parser("(A)") -> ap
 #   parse_chord(ap->key) -> info
 
-my $chord_parser_pattern;
+my $chord_pattern;
+my $annotation_pattern;
 my $cpdbg;
 
 sub make_chord_parser( $self ) {
     my $cp = $config->{parser}->{chords};
     $cp->{default} //= { pattern => "(.*)", priority => 0 };
 
-    my $pat = "";
+    $chord_pattern      = "";
+    $annotation_pattern = "";
 
     for ( sort { $b->{priority} <=> $a->{priority} }
 	  map { { %{$cp->{$_}}, key => $_ } }
@@ -823,18 +825,44 @@ sub make_chord_parser( $self ) {
 	# Each pattern must have (.*) or (.+)
 	die( "Config error: invalid chord parser pattern for %_->{key}\n" )
 	  unless $_->{pattern} =~ /^(.*)\((\.[+*])\)(.*)$/;
-	$pat .= "|" if $pat;
-	$pat .= "^$1(?<$_->{key}>$2)$3\$"
+
+	if ( $_->{key} eq "annotation" ) {
+	    $annotation_pattern .= "^$1(?<$_->{key}>$2)$3\$"
+	}
+	else {
+	    $chord_pattern .= "|" if $chord_pattern;
+	    $chord_pattern .= "^$1(?<$_->{key}>$2)$3\$"
+	}
     }
-    $chord_parser_pattern = qr/$pat/o;
+    $chord_pattern     = qr/$chord_pattern/o;
+    $annotation_pattern = qr/$annotation_pattern/o;
     $cpdbg = $::config->{debug}->{x2};
+}
+
+sub annotation_parser( $self, $arg ) {
+    warn("annotation_parser: $arg =~ $annotation_pattern\n") if $cpdbg;
+    my $ap = ChordPro::Chords::Appearance->new( orig => $arg,
+						key => $arg,
+						presentation => "annotation" );
+
+    return unless $arg =~ /$annotation_pattern/;
+
+    for ( keys %+ ) {
+	next unless defined $+{$_};
+	$ap->text = $+{$_};
+	last;
+    }
+    ::dump($ap) if $cpdbg || $config->{debug}->{chords} > 1;
+    $ap;
 }
 
 sub chord_parser( $self, $arg ) {
     warn("chord_parser: $arg\n") if $cpdbg;
-    $self->make_chord_parser unless $chord_parser_pattern;
-    $arg =~ /$chord_parser_pattern/ or die("Chord parser: can't happen\n");
     my $ap = ChordPro::Chords::Appearance->new( orig => $arg );
+
+    if ( $arg !~ /$chord_pattern/ ) {
+	die("Chord parser: can't happen\n");
+    }
 
     # The patterns are mutual exclusive, so there's one key.
     for ( keys %+ ) {
@@ -853,12 +881,19 @@ sub chord_parser( $self, $arg ) {
 sub chord( $self, $orig ) {
     warn("chord: $orig\n") if $cpdbg;
     Carp::confess unless length($orig);
+    $self->make_chord_parser unless $chord_pattern;
+    my $markup = $orig;
+    my $c = $orig;
 
-    my $ap;
+    # Try annotation first.
+    my $ap = $self->annotation_parser($c);
+    if ( $ap ) {		# annotation
+	warn("$c: \"", $ap->orig, "\" -> annotation\n") if $cpdbg;
+	return $ap;
+    }
 
     # Check for markup.
-    my $markup = $orig;
-    my $c = demarkup($orig);
+    $c = demarkup($orig);
     if ( $markup eq $c ) { 	# no markup
 	undef $markup;
 	$ap = $self->chord_parser($c);
@@ -867,20 +902,14 @@ sub chord( $self, $orig ) {
 	$ap = $self->chord_parser($c);
 	warn("demarkup: $c -> ", $ap->orig, "\n") if $cpdbg;
 	if ( index( $markup, $ap->orig ) < 0 ) {
+	    $ap->key = $ap->text = $orig;
 	    $ap->set_annotation;
+	    do_warn("Invalid markup in chord: \"$markup\"\n");
 	    warn("$c: \"", $ap->orig, "\" ? \"$markup\" -> annotation\n") if $cpdbg;
+	    return $ap;
 	}
     }
 
-    # Intercept annotations.
-    if ( $ap->is_annotation ) {
-	my $i = ChordPro::Chord::Annotation->new
-	  ( { name => $orig, text => $ap->key } );
-	$ap->key = $self->add_chord($i);
-	$ap->info = $i;
-	warn("ap ", ::dump($ap),"\n") if $cpdbg;
-	return $ap;
-    }
     $c = $ap->key;
 
     # We have a 'bare' chord now. Parse it.
@@ -888,11 +917,9 @@ sub chord( $self, $orig ) {
     unless ( defined $info ) {
 	# Warning was given.
 	# Make annotation.
-	my $i = ChordPro::Chord::Annotation->new
-	  ( { name => $orig, text => $orig } );
-	$ap->key = $self->add_chord($i);
-	$ap->info = $i;
+	$ap->key = $ap->text = $orig;
 	$ap->set_annotation;
+	warn("ap2 ", ::dump($ap),"\n") if $cpdbg;
 	return $ap;
     }
 

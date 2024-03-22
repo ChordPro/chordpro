@@ -839,29 +839,34 @@ sub kbkeys {
 }
 
 sub chord_display ( $self, $default = undef ) {
+    local $Carp::CarpLevel = 2;
     Carp::carp("chord_display called on chord object");
-    $self->_chord_display( $default );
+    $self->_chord_display( finalformat => $default );
 }
 
-sub _chord_display ( $self, $default = undef ) {
+sub _chord_display ( $self, %args ) {
 
     use String::Interpolate::Named;
 
-    my $res = $self->name;
-    my $args = {};
-    $self->flat_copy( $args, $self->{display} // $self );
-
-    for my $fmt ( $default,
-		  $self->{format},
-		  $self->{chordformat} ) {
+    my $args = { %args };
+    $self->flat_copy( $args, $self->{display} // $self ) if $self;
+    my $res = $args->{name};
+    my $i = 0;		# debug
+    warn("[$i] ", ::dump({%$args, parser => ref($args->{parser})}), "\n") if $::config->{debug}->{appearance};
+    for my $fmt ( $::config->{'chord-formats'}->{common}, # $default,
+		  $self ? $self->{format} : undef,
+		  $args{format},
+		  $args{finalformat}
+		) {
+	$i++;
 	next unless $fmt;
-	$args->{root} = lc($args->{root}) if $self->is_note;
+	$args->{root} = lc($args->{root}) if $self && $self->is_note;
 	$args->{formatted} = $res;
 	$res = interpolate( { args => $args }, $fmt );
+	warn("[$i] \"$res\" ← \"$fmt\" ← \"$args->{formatted}\"\n")
+	  if $::config->{debug}->{appearance};
     }
-
-    # Substitute musical symbols if wanted.
-    return $::config->{settings}->{truesf} ? $self->fix_musicsyms($res) : $res;
+    $res;
 }
 
 sub flat_copy ( $self, $ret, $o, $pfx = "" ) {
@@ -1113,8 +1118,14 @@ sub canonical ( $self ) {
     return $res;
 }
 
-sub chord_display ( $self ) {
-    return interpolate( { args => $self }, $self->{text} );
+sub chord_display ( $self, $default = undef ) {
+    Carp::cluck("chord_display called on annotation object");
+    "<annotation>"
+}
+
+sub chord_display ( $self, $default = undef ) {
+    Carp::cluck("_chord_display called on annotation object");
+    "<annotation>"
 }
 
 # For convenience.
