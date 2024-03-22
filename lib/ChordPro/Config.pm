@@ -1453,7 +1453,13 @@ sub default_config () {
 
       "fontdir" : [],
       "fontconfig" : {
-          "times, serif" : {
+          "serif" : {
+              ""            : "Times-Roman",
+              "bold"        : "Times-Bold",
+              "italic"      : "Times-Italic",
+              "bolditalic"  : "Times-BoldItalic",
+          },
+          "times" : {
               ""            : "Times-Roman",
               "bold"        : "Times-Bold",
               "italic"      : "Times-Italic",
@@ -1472,7 +1478,13 @@ sub default_config () {
               "italic"      : "Helvetica-Oblique",
               "bolditalic"  : "Helvetica-BoldOblique",
           },
-          "courier, mono, monospace" : {
+          "courier" : {
+              ""            : "Courier",
+              "bold"        : "Courier-Bold",
+              "italic"      : "Courier-Italic",
+              "bolditalic"  : "Courier-BoldItalic",
+          },
+          "mono, monospace" : {
               ""            : "Courier",
               "bold"        : "Courier-Bold",
               "italic"      : "Courier-Italic",

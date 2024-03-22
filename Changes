@@ -7,7 +7,9 @@
     - Allow very relaxed JSON format for config files.
     - Improve ppl packaging; add support for debian (static).
     - Upgrade ABC2SVG kit to 1.22.14.
-
+    - Make times/serif and helvetica/sans soft aliases so they can
+      be redefined individually.
+    
 6.050.7 2024-02-27
 
     !Functionality
