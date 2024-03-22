@@ -1,7 +1,9 @@
 #! perl
 
 # Ease the life of the CPAN testers.
-exit 0 if $ENV{AUTOMATED_TESTING} && $] < 5.026000;
+BEGIN { exit 0 if $ENV{AUTOMATED_TESTING} && $] < 5.026000 }
+
+use v5.26;
 
 use ExtUtils::MakeMaker 7.24;	# comes with 5.26
 
@@ -91,7 +93,7 @@ WriteMakefile
        },
        bugtracker => {
 	 web => "https://github.com/ChordPro/chordpro/issues",
-	 mailto => "info@chordpro.org",
+	 mailto => 'info@chordpro.org',
        },
     },
      provides => {
