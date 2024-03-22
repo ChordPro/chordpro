@@ -49,8 +49,6 @@ This module can be run standalone and will print the default config.
 sub json_load( $json, $source = "<builtin>" ) {
     use JSON::Relaxed;
     state $pp = JSON::Relaxed::Parser->new;
-    #$json =~ s/\\[\r\n]+\s*//sg;
-    $json =~ s/(['"])\s*\\[\r\n]+\s*\1//sg;
     my $data = $pp->parse($json);
     return $data unless $JSON::Relaxed::err_id;
     $source .= ": " if $source;
