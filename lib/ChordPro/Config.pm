@@ -43,7 +43,7 @@ This module can be run standalone and will print the default config.
 =cut
 
 sub json_load( $json, $source = "<builtin>" ) {
-    use JSON::Relaxed;
+    use JSON::Relaxed 0.061;
     state $pp = JSON::Relaxed::Parser->new;
     my $data = $pp->parse($json);
     return $data unless $JSON::Relaxed::err_id;
@@ -1735,7 +1735,7 @@ sub default_json_config () {
             },
             "annotation" : {
                 "pattern" : "\\*(.*)",
-                "priority" : 20,	// higher than passing
+                "priority" : 100,	// irrelevant, always processed first
             },
         },
 
