@@ -155,8 +155,16 @@ svg :
 	cp -p ${HOME}/src/SVGPDF/lib/SVGPDF/*.pm lib/ChordPro/lib/SVGPDF/
 	cp -p ${HOME}/src/SVGPDF/lib/SVGPDF/Contrib/*.pm lib/ChordPro/lib/SVGPDF/Contrib/
 
+.PHONY: svg
+
+rrjson :
+	mkdir -p lib/ChordPro/lib/JSON/
+	cp -p ${HOME}/src/JSON-Relaxed/lib/JSON/Relaxed.pm lib/ChordPro/lib/JSON/
+
 ABCDEST    = ${RES}/abc/abc2svg
 ABCKIT     = abc2svg-be8faee2b4
+
+.PHONY: abc
 
 abc :
 	rm -f ${ABCDEST}/*
