@@ -3129,9 +3129,6 @@ sub sort_songbook {
 	foreach my $song ( @{$sb->{songs}} ) {
 	    $song->{meta}->{pages} =
 	      generate_song( $song, { pr => $pri, startpage => 1 } );
-	      if (!defined($song->{meta}->{sorttitle})) {
-	         $song->{meta}->{sorttitle}=$song->{meta}->{title};
-	      }
 	    if ( $options->{verbose} ) {
 		# Progress indicator
 		print STDERR $song->{meta}->{pages}." ";
@@ -3139,7 +3136,13 @@ sub sort_songbook {
 	}
 	print STDERR "\n" if $options->{verbose}; # Progress indicator
     }
-
+	
+	foreach my $song ( @{$sb->{songs}} ) {
+	  if (!defined($song->{meta}->{sorttitle})) {
+	    $song->{meta}->{sorttitle}=$song->{meta}->{title};
+	  }
+	}
+	
     my @songlist = @{$sb->{songs}};
 
     if ( $sorting =~ /title/ ) {
