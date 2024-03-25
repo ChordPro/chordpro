@@ -1,0 +1,32 @@
+{
+    "pdf" : {
+	// Style of chorus.
+	"chorus" : {
+	    "indent"     :  20,
+	    // Chorus side bar.
+	    "bar" : {
+		"width"  :  0,
+	    },
+	},
+	"spacing" : {
+	    "lyrics" : 1.5,
+	    "chords" : 0.9,
+	},
+	"fonts" : {
+	    "title" : {
+		"description" : "serif bold",
+	    },
+	    "text" : {
+		"description" : "serif",
+	    },
+	    "chorus" : {
+		"description" : "serif",
+		"color" : "green",
+	    },
+	    "comment" : {
+		"description" : "serif",
+		"color" : "green",
+	    },
+	},
+    },
+}

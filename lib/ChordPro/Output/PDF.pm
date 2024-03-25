@@ -689,7 +689,7 @@ sub generate_song {
 		( $bgpdf, $pg ) = ( $1, $2 );
 	    }
 	    $fn = CP->findres($bgpdf);
-	    if ( -s -r $fn ) {
+	    if ( $fn && -s -r $fn ) {
 		$pg++ if $ps->{"even-odd-pages"} && !$rightpage;
 		$pr->importpage( $fn, $pg );
 	    }

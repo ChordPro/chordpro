@@ -1,0 +1,71 @@
+{
+    "pdf" : {
+	
+	// Setup to use the full unicode FreeXXX fonts.
+
+	"fontdir" : [ "/usr/share/fonts/gnu-free" ],
+	"fontconfig" : {
+            "serif" : {
+		""            : "FreeSerif.ttf",
+		"bold"        : "FreeSerifBold.ttf",
+		"italic"      : "FreeSerifItalic.ttf",
+		"bolditalic"  : "FreeSerifBoldItalic.ttf",
+            },
+            "sans" : {
+		""            : "FreeSans.ttf",
+		"bold"        : "FreeSansBold.ttf",
+		"italic"      : "FreeSansOblique.ttf",
+		"bolditalic"  : "FreeSansBoldOblique.ttf",
+            },
+            "mono" : {
+		""            : "FreeMono.ttf",
+		"bold"        : "FreeMonoBold.ttf",
+		"italic"      : "FreeMonoOblique.ttf",
+		"bolditalic"  : "FreeMonoBoldOblique.ttf",
+            },
+	},
+	
+	"fonts" : {
+	    "title" : {
+		"description" : "Serif Bold",
+	    },
+	    "text" : {
+		"description" : "Serif",
+	    },
+	    "chord" : {
+		"description" : "Sans Italic",
+	    },
+	    "annotation" : {
+		"description" : "Sans Italic",
+	    },
+	    "comment" : {
+		"description" : "Helvetica",
+	    },
+	    "comment_italic" : {
+		"description" : "Sans Italic",
+	    },
+	    "comment_box" : {
+		"description" : "Sans",
+	    },
+	    "tab" : {
+		"description" : "Mono",
+	    },
+	    "toc" : {
+		"description" : "Serif",
+	    },
+	    "diagram" : {
+		"description" : "Sans",
+	    },
+	    "grid" : {
+		"description" : "Sans",
+	    },
+	},
+    },
+    "metadata" : {
+	"strict" : 0
+    },
+    "meta" : {
+	// Invisible character that is not detected as being whitespace.
+	"invis" : [ "\u2063" ],
+    }
+}
