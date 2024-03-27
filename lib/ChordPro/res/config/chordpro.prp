@@ -188,7 +188,7 @@ chord-formats {
 diagrams {
     show     =  all
     sorted   =  false
-    suppress =  []
+#    suppress =  []
 }
 
 # Diagnostic messages.
@@ -519,21 +519,39 @@ pdf {
   fontconfig {
       # alternatives: regular r normal <empty>
       # alternatives: bold b strong
-      # alternatives: italic i oblique o emphasis
-      # alternatives: bolditalic bi italicbold ib boldoblique bo obliquebold ob
-      "times, serif" {
+      # alternatives: italic i emphasis
+      # alternatives: bolditalic bi italicbold ib
+      serif {
           ''          = Times-Roman
           bold        = Times-Bold
           italic      = Times-Italic
           bolditalic  = Times-BoldItalic
       }
-      "helvetica, sans, sans-serif" {
+      times {
+          ''          = Times-Roman
+          bold        = Times-Bold
+          italic      = Times-Italic
+          bolditalic  = Times-BoldItalic
+      }
+      "sans, sans-serif" {
+          ''          = Helvetica
+          bold        = Helvetica-Bold
+          italic      = Helvetica-Italic
+          bolditalic  = Helvetica-BoldItalic
+      }
+      helvetica {
           ''          = Helvetica
           bold        = Helvetica-Bold
           oblique     = Helvetica-Oblique
           boldoblique = Helvetica-BoldOblique
       }
-      "courier, mono, monospace" {
+      "mono, monospace" {
+          ''          = Courier
+          bold        = Courier-Bold
+          italic      = Courier-Italic
+          bolditalic  = Courier-BoldItalic
+      }
+      courier {
           ''          = Courier
           bold        = Courier-Bold
           italic      = Courier-Italic
@@ -759,16 +777,16 @@ a2crd {
 # { "target" : "xxx", "replace" : "yyy" }
 # Every occurrence of "xxx" will be replaced by "yyy".
 # Use wisely.
-parser {
-    preprocess {
-        # All lines.
-        all = []
-        # Directives.
-        directive = []
-        # Song lines (lyrics) only.
-        songline = []
-    }
-}
+#parser {
+#    preprocess {
+#        # All lines.
+#        all = []
+#        # Directives.
+#        directive = []
+#        # Song lines (lyrics) only.
+#        songline = []
+#    }
+#}
 
 
 # For debugging (internal use only).

@@ -3,6 +3,11 @@
 // This is a relaxed JSON document, so comments are possible.
 
 {
+
+    "settings" : {
+	"columns" : 1
+    },
+
     // Layout definitions for PDF output.
 
     "pdf" : {
