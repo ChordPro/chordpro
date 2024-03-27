@@ -54,15 +54,15 @@ unpack :
 #        /lib64/ld-linux-x86-64.so.2
 
 copy_coredll :
-	cp -pL ${SYSLIB} ${DEST}/${PERLSO}
+	cp -pL ${SYSLIB}/${PERLSO} ${DEST}/${PERLSO}
 	patchelf --set-soname ${PERLSO} ${DEST}/${PERLSO}
-	cp -pL ${PERLLIB}/libpthread.so.0 ${DEST}/
+	cp -pL ${SYSLIB}/libpthread.so.0 ${DEST}/
 	find . -type f -name '*.so' -exec patchelf --set-rpath '$$ORIGIN' {} \;
 	find . -type f -name '*.so.*' -exec patchelf --set-rpath '$$ORIGIN' {} \;
 
 PREFIX := '"script/"'
 CCOPTS := $(shell perl -MExtUtils::Embed -e ccopts) -DSCRIPTPREFIX=${PREFIX}
-LDOPTS := -Wl,--rpath='$$ORIGIN' ${DEST}/${PERLSO} -lpthread
+LDOPTS := -Wl,--rpath='$$ORIGIN' ${DEST}/${PERLSO} # -lpthread
 
 .PHONY :: loaders
 loaders : "${DEST}/${TARGET}" "${DEST}/chordpro"
