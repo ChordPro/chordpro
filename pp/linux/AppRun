@@ -5,6 +5,11 @@ HERE=${SELF%/*}
 TARGET=wxchordpro
 export APPIMAGE_PACKAGED=1.00
 
+if [ "$1" = "chordpro" ]; then
+    TARGET=chordpro
+    shift  # remove "chordpro" arg
+fi
+
 if [ ! -z $APPIMAGE ] ; then
   BINARY_NAME=$(basename "$ARGV0")
   if [ -e "$HERE/$BINARY_NAME" ] ; then
