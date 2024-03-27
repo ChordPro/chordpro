@@ -9,7 +9,8 @@
     - Upgrade ABC2SVG kit to 1.22.14.
     - Make times/serif and helvetica/sans soft aliases so they can
       be redefined individually.
-    
+    - Remove Verdana and Georgia from the list of core fonts. They're not.
+
 6.050.7 2024-02-27
 
     !Functionality

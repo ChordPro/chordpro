@@ -1244,9 +1244,7 @@ dir, and the contents of environment variable C<FONTDIR>. In any case,
 the filename should point to a valid TrueType (C<.ttf>) or OpenType
 (C<.otf>) font.
 
-If it is not a filename, it must be the name one of the built-in fonts.
-
-Built-in 'Adobe Core Fonts':
+If it is not a filename, it must be the name one of the built-in PDF core fonts:
 
   Courier                             Symbol
   Courier-Bold                        Times-Bold
@@ -1256,17 +1254,6 @@ Built-in 'Adobe Core Fonts':
   Helvetica-Bold                      ZapfDingbats
   Helvetica-BoldOblique
   Helvetica-Oblique
-
-Built-in 'Windows Fonts':
-
-  Georgia                             Webdings
-  Georgia,Bold                        Wingdings
-  Georgia,BoldItalic
-  Georgia,Italic
-  Verdana
-  Verdana,Bold
-  Verdana,BoldItalic
-  Verdana,Italic
 
 =head1 MOTIVATION
 

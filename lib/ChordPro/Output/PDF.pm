@@ -2966,24 +2966,8 @@ my %corefonts =
      "Courier-Bold",
      "Courier-Oblique",
      "Courier-BoldOblique",
-     "ZapfDingbats",
-     "Georgia",
-     "Georgia,Bold",
-     "Georgia,Italic",
-     "Georgia,BoldItalic",
-     "Verdana",
-     "Verdana,Bold",
-     "Verdana,Italic",
-     "Verdana,BoldItalic",
-     "Webdings",
-     "Wingdings" ),
-   # For convenience.
-   "georgia-bold"	 => "Georgia,Bold",
-   "georgia-italic"	 => "Georgia,Italic",
-   "georgia-bolditalic"	 => "Georgia,BoldItalic",
-   "verdana-bold"	 => "Verdana,Bold",
-   "verdana-italic"	 => "Verdana,Italic",
-   "verdana-bolditalic"	 => "Verdana,BoldItalic",
+     "Symbol",
+     "ZapfDingbats" ),
 );
 
 sub is_corefont {
