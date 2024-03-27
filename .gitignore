@@ -33,3 +33,7 @@ xtest*
 *.out
 MYMETA.*
 MANIFEST.SKIP
+appimagetool
+*.AppImage
+pp/*/build
+pp/debian/wxchordpro
