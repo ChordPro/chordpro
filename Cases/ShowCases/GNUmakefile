@@ -7,33 +7,72 @@ DOCS     := ${ROOT}/docs/assets/images
 
 DEST     := ${HOME}/src/ChordPro-Frontpage/src/img/chordpro
 
-CHORDPRO := CHORDPRO_LIB=. chordpro --nouserconfig
+CHORDPRO := CHORDPRO_LIB=. chordpro --noa2crd --nouserconfig
 
 CONVERT  := convert -density 192 -quality 100 -alpha remove
 
 default :
 	@echo No default
 
-EX := mollymalone background armenian nepali
+################ Examples ################
 
-examples : $(addsuffix .png,${EX})
+EXAMPLES := mollymalone background twelvedays armenian nepali \
+	    biscuit1 biscuit2
+
+examples : $(addprefix example-,$(addsuffix .png,${EXAMPLES}))
+
+example-biscuit1.pdf : prefab-biscuit1.pdf
+	cp -p $< $@
+
+example-biscuit2.pdf : prefab-biscuit2.pdf
+	cp -p $< $@
+
+clean_examples ::
+	rm -f example-*.pdf example-*.png
+
+################ Styles ################
+
+STYLES   := chordpro chordii modern1 modern2 modern3 ukulele keyboard dark
+
+styles   : $(addprefix style-,$(addsuffix .png,${STYLES}))
+
+style-chordpro.pdf : basic2.cho
+	${CHORDPRO} -X --cfg chordpro -o $@ $<
+
+# Chordii default is US Letter format.
+style-chordii.pdf : basic2.cho
+	${CHORDPRO} -X --cfg chordii --def pdf.papersize=a4 -o $@ $<
+
+style-modern1.pdf : basic2.cho
+	${CHORDPRO} -X --cfg modern1 -o $@ $<
+
+style-modern2.pdf : basic1.cho
+	${CHORDPRO} -X --cfg modern2 -o $@ $<
+
+style-modern3.pdf : basic1.cho
+	${CHORDPRO} -X --cfg modern3 -o $@ $<
+
+style-ukulele.pdf : basic2.cho
+	${CHORDPRO} -X --cfg ukulele -o $@ $<
+
+style-keyboard.pdf : basic2.cho
+	${CHORDPRO} -X --cfg keyboard -o $@ $<
+
+style-dark.pdf : basic2.cho
+	${CHORDPRO} -X --cfg dark -o $@ $<
+
+clean_styles ::
+	rm -f style-*.pdf style-*.png
+
+################ Generic  ################
 
 %.png : %.pdf
 	${CONVERT} $< $@
-	cp -p $@ ${DEST}/examples-$@
+	cp -p $@ ${DEST}/$@
 
 %.pdf : %.cho
 	${CHORDPRO} -o $@ $<
 
+clean :: clean_examples clean_styles
+	rm -f *~
 
-xx:
-	${CONVERT} ${RES}/examples/mollymalone.pdf ${DEST}/examples-mollymalone.png
-	${CONVERT} ${DOCS}/style_chordii.png ${DEST}/examples-chordii.png
-	${CONVERT} ${DOCS}/style_dark.png ${DEST}/examples-dark.png
-	${CONVERT} ${DOCS}/style_default.png ${DEST}/examples-default.png
-	${CONVERT} ${DOCS}/style_keyboard.png ${DEST}/examples-keyboard.png
-	${CONVERT} ${DOCS}/style_modern1.png ${DEST}/examples-modern1.png
-	${CONVERT} ${DOCS}/style_modern2.png ${DEST}/examples-modern2.png
-	${CONVERT} ${DOCS}/style_modern3.png ${DEST}/examples-modern3.png
-	${CONVERT} ${DOCS}/style_ukulele.png ${DEST}/examples-ukulele.png
-	${CONVERT} Cases/Devanagari/Come_To_Christ_Friend.pdf ${DEST}/examples-nepali.png

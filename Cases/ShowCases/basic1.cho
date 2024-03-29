@@ -1,17 +1,10 @@
 {title: St. James Infirmary Blues}
 {subtitle: Traditional}
-{columns:2}
 
-{textsize: 110%}
-{chordsize: 110%}
 I went [Em]down to the [Am]St James In[Em]firmary
 I found my [Am]baby [B7]there
 She was [Em]stretched out on a [Am]long white [Em]table
 So [C]white, so [B7]cold, so [Em]fair
-{textsize}
-{chordsize}
-
-
 
 It was down in old Joe's barroom
 On the corner by the square
@@ -29,24 +22,11 @@ She was stretched out on a long cold table
 So pale so cold and so fair
 
 {soc}
-{chorusfont: %{style|%{}|Serif} italic}
-Let her go let her go God bless her
-Wherever she may be
-You can search the wide world over
-Not find another sweet man like me
+Let her [Em]go let her [Am]go God [Em]bless her
+Wherever [Am]she may [B7]be
+You can [Em]search the [Am]wide world [Em]over
+Not [C]find another [B7]sweet man like [Em]me
 {eoc}
-
-{colb}
-# Trick to align 2nd column.
-{textsize: 110%}
-{chordsize: 110%}
-[*%{invis.1}]%{invis.1}
-[*%{invis.1}]%{invis.1}
-[*%{invis.1}]%{invis.1}
-[*%{invis.1}]%{invis.1}
-{textsize}
-
-
 
 When I die I want you to bury me
 In a John B Stetson hat

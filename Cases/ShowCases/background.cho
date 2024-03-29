@@ -1,4 +1,0 @@
-{ns}
-{meta: style sans}
-##include: src="example.cho"
-{titles:left}
