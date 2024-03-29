@@ -144,7 +144,6 @@ pp/macos/README.html
 pp/macos/chordpro.pp
 pp/macos/create-dmg
 pp/macos/dndhandler.cpp
-pp/macos/ppl.c
 pp/macos/reloc.pl
 pp/macos/wxchordpro_pp.pl
 pp/pp2ppl.pl
