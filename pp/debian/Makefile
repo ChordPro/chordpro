@@ -73,12 +73,12 @@ _loaders : "${DEST}/chordpro"
 	cp "${DEST}/chordpro" "${DEST}/perl"
 
 "${DEST}/wxchordpro" : ${BASE}/ppl.c
-	${CC} ${CCOPTS} -o "${DEST}/wxchordpro" -L${DEST} ${LDOPTS} \
-	    ${BASE}/ppl.c ${SYSLIB}/libperl.a ${SYSLIB}/libcrypt.a -lm
+	${CC} ${CCOPTS} -o "${DEST}/wxchordpro" -L${DEST} \
+	    ${BASE}/ppl.c ${SYSLIB}/libperl.a ${SYSLIB}/libcrypt.a -lm ${LDOPTS}
 
 "${DEST}/chordpro" : ${BASE}/ppl.c
-	${CC} ${CCOPTS} -o "${DEST}/chordpro" -L${DEST} ${LDOPTS} \
-	    ${BASE}/ppl.c ${SYSLIB}/libperl.a ${SYSLIB}/libcrypt.a -lm
+	${CC} ${CCOPTS} -o "${DEST}/chordpro" -L${DEST} \
+	    ${BASE}/ppl.c ${SYSLIB}/libperl.a ${SYSLIB}/libcrypt.a -lm ${LDOPTS}
 
 clean ::
 	rm -fr build
@@ -94,4 +94,3 @@ _appimage :
 	cd ${DEST}; ln -f lib/ChordPro/res/linux/chordpro.desktop .
 	cd ${DEST}; ln -f lib/ChordPro/res/icons/chordpro.png .
 	${APPIMAGETOOL} -n ${DEST} ChordPro-${VERSION}.AppImage
-
