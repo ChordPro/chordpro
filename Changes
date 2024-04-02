@@ -5,11 +5,13 @@
       https://chordpro.org/beta/chordpro-configuration-pdf/#page-reordering
     - Improve error message for open failures.
     - Allow very relaxed JSON format for config files.
+    - Run with CHORDPRO_JSON_RELAXED=1 in case of emergency.
     - Improve ppl packaging; add support for debian (static).
     - Upgrade ABC2SVG kit to 1.22.14.
     - Make times/serif and helvetica/sans soft aliases so they can
       be redefined individually.
     - Remove Verdana and Georgia from the list of core fonts. They're not.
+    - Fix problem with image aligning (see forum 2179).
 
 6.050.7 2024-02-27
 

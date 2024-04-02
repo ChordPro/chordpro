@@ -1977,9 +1977,8 @@ sub imageline {
     my $ox = $opts->{x};
     my $oy = $opts->{y};
 
-    my $align;
+    my 	$align = $opts->{align};
     if ( $anchor eq "float" ) {
-	$align = $opts->{align};
 	$align //= ( $opts->{center} // 1 ) ? "center" : "left";
 	# Note that image is placed aligned on $x.
 	if ( $align eq "center" ) {
@@ -2050,7 +2049,7 @@ sub imageline {
 		     xscale => $w/$img->width,
 		     yscale => $h/$img->height,
 		     border => $opts->{border} || 0,
-		     valign => "top",
+		     valign => $opts->{valign} // "top",
 		     align  => $align,
 		   );
 
