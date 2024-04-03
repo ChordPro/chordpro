@@ -47,9 +47,8 @@ This module can be run standalone and will print the default config.
 #sub default_config();
 
 sub json_load( $json, $source = "<builtin>" ) {
-    my $relax = $ENV{CHORDPRO_JSON_RELAXED} // 1;
-    if ( $relax > 1 ) {
-	require JSON::Relaxed;
+    my $info = json_parser();
+    if ( $info->{parser} eq "JSON::Relaxed" ) {
 	state $pp = JSON::Relaxed::Parser->new;
 	my $data = $pp->parse($json);
 	return $data unless $JSON::Relaxed::err_id;
@@ -57,10 +56,25 @@ sub json_load( $json, $source = "<builtin>" ) {
 	die("${source}JSON error: $JSON::Relaxed::err_msg\n");
     }
     else {
-	require JSON::PP;
 	state $pp = JSON::PP->new;
-	$pp->relaxed if $relax;
+	$pp->relaxed if $info->{relaxed};
 	$pp->decode($json);
+    }
+}
+
+# JSON parser, what and how (also used by runtimeinfo().
+sub json_parser() {
+    my $relax = $ENV{CHORDPRO_JSON_RELAXED} // 2;
+    if ( $relax > 1 ) {
+	require JSON::Relaxed;
+	return { parser  => "JSON::Relaxed",
+		 version => $JSON::Relaxed::VERSION }
+    }
+    else {
+	require JSON::PP;
+	return { parser  => "JSON::PP",
+		 relaxed => $relax,
+		 version => $JSON::PP::VERSION }
     }
 }
 

@@ -6,7 +6,7 @@ use strict;
 # use Debug::ShowStuff::ShowVar;
 
 # version
-our $VERSION = '0.061';
+our $VERSION = '0.062';
 
 # global error messages
 our $err_id;
@@ -534,9 +534,12 @@ our %quotes = (
 
 =item * End of line characters
 
+End of line characters are used to detect the end of // comments.
 The C<%newlines> hash defines the three ways a line can end in a RJSON
 document. Lines in Windows text files end with carriage-return newline
-("\r\n").  Lines in Unixish text files end with newline ("\n"). Lines in some
+("\r\n").  Lines in Unixish text files end with newline ("\n").
+Note that an escaped newline also terminates a comment.
+Lines in some
 operating systems end with just carriage returns ("\n"). C<%newlines> is
 defined as follows.
 
@@ -544,6 +547,7 @@ defined as follows.
         "\r\n" => 1,
         "\r" => 1,
         "\n" => 1,
+        "\\\n" => 1,
     );
 
 =cut
@@ -553,6 +557,7 @@ our %newlines = (
     "\r\n" => 1,
     "\r" => 1,
     "\n" => 1,
+    "\\\n" => 1,
 );
 
 =item * Boolean
@@ -759,10 +764,7 @@ sub is_error {
     my ($parser) = @_;
 
     # return true if there is an error, false otherwise
-    if ($JSON::Relaxed::err_id)
-	{ return 1 }
-    else
-	{ return 0 }
+    return !!$JSON::Relaxed::err_id;
 }
 #
 # is_error

@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Sun Mar 10 18:02:02 2024
 # Last Modified By: 
-# Last Modified On: Mon Mar 11 10:04:31 2024
-# Update Count    : 27
+# Last Modified On: Tue Apr  2 22:46:16 2024
+# Update Count    : 35
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -21,7 +21,7 @@ no warnings 'experimental::signatures';
 # Package name.
 my $my_package = 'ChordPro';
 # Program name and version.
-my ($my_name, $my_version) = qw( rrjson 0.01 );
+my ($my_name, $my_version) = qw( rrjson 0.02 );
 
 ################ Command line parameters ################
 
@@ -50,6 +50,7 @@ my $TMPDIR = $ENV{TMPDIR} || $ENV{TEMP} || '/usr/tmp';
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";
+use lib "$FindBin::Bin/../lib/ChordPro/lib";
 use JSON::Relaxed;
 use File::LoadLines;
 binmode STDOUT => ':utf8';
@@ -59,7 +60,6 @@ for my $file ( @ARGV ) {
     my $opts = { split => 0, fail => "soft" };
     my $json = loadlines( $file, $opts );
     die( "$file: $opts->{error}\n") if $opts->{error};
-    $json =~ s/(['"])\s*\\[\r\n]+\s*\1//sg;
     my $data = JSON::Relaxed::Parser->new->parse($json);
     if ( $JSON::Relaxed::err_id ) {
 	die("$file: JSON error: $JSON::Relaxed::err_msg\n");
@@ -126,6 +126,7 @@ sub app_options() {
 
 sub app_ident() {
     print STDERR ("This is $my_package [$my_name $my_version]\n");
+    print STDERR ("JSON::Relaxed version $JSON::Relaxed::VERSION\n");
 }
 
 sub app_usage( $exit ) {
