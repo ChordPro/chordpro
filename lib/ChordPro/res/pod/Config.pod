@@ -248,7 +248,7 @@ extensive details and examples.
             },
         ],
         // Table of contents, old style.
-        // This will be ignored when new style contents is present. 
+        // This will be ignored when new style contents is present.
         "toc" : {
             // Title for ToC.
             "title" : "Table of Contents",
@@ -588,7 +588,13 @@ extensive details and examples.
     
           "fontdir" : [],
           "fontconfig" : {
-              "times, serif" : {
+              "serif" : {
+                  ""            : "Times-Roman",
+                  "bold"        : "Times-Bold",
+                  "italic"      : "Times-Italic",
+                  "bolditalic"  : "Times-BoldItalic",
+              },
+              "times" : {
                   ""            : "Times-Roman",
                   "bold"        : "Times-Bold",
                   "italic"      : "Times-Italic",
@@ -607,7 +613,13 @@ extensive details and examples.
                   "italic"      : "Helvetica-Oblique",
                   "bolditalic"  : "Helvetica-BoldOblique",
               },
-              "courier, mono, monospace" : {
+              "courier" : {
+                  ""            : "Courier",
+                  "bold"        : "Courier-Bold",
+                  "italic"      : "Courier-Italic",
+                  "bolditalic"  : "Courier-BoldItalic",
+              },
+              "mono, monospace" : {
                   ""            : "Courier",
                   "bold"        : "Courier-Bold",
                   "italic"      : "Courier-Italic",
