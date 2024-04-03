@@ -39,8 +39,8 @@ ppl :: clean ${TARGET} unpack copy_coredll loaders
 .PHONY :: unpack
 unpack :
 	perl ../pp2ppl.pl --dest=${DEST} ${TARGET} --quiet
-	cp -p "${ROOT}/script/chordpro.pl" "${DEST}/script/chordpro.pl" 
-	cp -p "${ROOT}/lib/ChordPro/Config.pm" "${DEST}/lib/ChordPro/Config.pm" 
+	cp -p "${ROOT}/script/chordpro.pl" "${DEST}/script/chordpro.pl"
+	cp -p "${ROOT}/lib/ChordPro/Config.pm" "${DEST}/lib/ChordPro/Config.pm"
 	cp "${DEST}/res/icons/chordpro.ico" ${DEST}
 	mv "${DEST}/res" "${DEST}/lib/ChordPro/"
 
@@ -73,12 +73,12 @@ _loaders : "${DEST}/chordpro"
 	cp "${DEST}/chordpro" "${DEST}/perl"
 
 "${DEST}/wxchordpro" : ${BASE}/ppl.c
-	${CC} ${CCOPTS} -o "${DEST}/wxchordpro" -L${DEST} ${LDOPTS} \
-	    ${BASE}/ppl.c ${SYSLIB}/libperl.a ${SYSLIB}/libcrypt.a -lm
+	${CC} ${CCOPTS} -o "${DEST}/wxchordpro" -L${DEST} \
+	    ${BASE}/ppl.c ${SYSLIB}/libperl.a ${SYSLIB}/libcrypt.a -lm ${LDOPTS}
 
 "${DEST}/chordpro" : ${BASE}/ppl.c
-	${CC} ${CCOPTS} -o "${DEST}/chordpro" -L${DEST} ${LDOPTS} \
-	    ${BASE}/ppl.c ${SYSLIB}/libperl.a ${SYSLIB}/libcrypt.a -lm
+	${CC} ${CCOPTS} -o "${DEST}/chordpro" -L${DEST} \
+	    ${BASE}/ppl.c ${SYSLIB}/libperl.a ${SYSLIB}/libcrypt.a -lm ${LDOPTS}
 
 clean ::
 	rm -fr build
@@ -88,10 +88,9 @@ APPIMAGETOOL := appimagetool
 
 appimage : ppl _appimage
 
-_appimage : 
-	sed -e "s/TARGET=.*/TARGET=${TARGET}/" ${BASE}/AppRun > ${DEST}/AppRun
+_appimage :
+	cp ${BASE}/AppRun ${DEST}/AppRun
 	chmod 0755 ${DEST}/AppRun
 	cd ${DEST}; ln -f lib/ChordPro/res/linux/chordpro.desktop .
 	cd ${DEST}; ln -f lib/ChordPro/res/icons/chordpro.png .
 	${APPIMAGETOOL} -n ${DEST} ChordPro-${VERSION}.AppImage
-
