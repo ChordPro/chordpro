@@ -11,10 +11,10 @@ jobs:
         uses: actions/checkout@v4
       - name: Set Env Vars
         run: |
-          PERL5LIB=${{ runner.temp }}/build-cpan/lib/perl5 
-          CHORDPRO_VERSION=$(perl lib/ChordPro/Version.pm) 
+          PERL5LIB=${{ runner.temp }}/build-cpan/lib/perl5
+          CHORDPRO_VERSION=$(perl lib/ChordPro/Version.pm)
           echo "${{ runner.temp }}" >> "$GITHUB_PATH"
-          echo "PERL5LIB=$PERL5LIB" >> "$GITHUB_ENV" 
+          echo "PERL5LIB=$PERL5LIB" >> "$GITHUB_ENV"
           echo "CHORDPRO_VERSION=$CHORDPRO_VERSION" >> "$GITHUB_ENV"
       - name: Install dependencies
         run: |
@@ -26,9 +26,8 @@ jobs:
         run: |
           cd pp/debian
           make
-          mv "ChordPro-$CHORDPRO_VERSION.AppImage" chordpro
-          chmod +x chordpro
-          zip -m "${{ runner.temp }}/ChordPro-$CHORDPRO_VERSION-Linux_x86_64-AppImage.zip" chordpro
+          chmod +x ChordPro-$CHORDPRO_VERSION.AppImage
+          zip -m "${{ runner.temp }}/ChordPro-$CHORDPRO_VERSION-Linux_x86_64-AppImage.zip" ChordPro-$CHORDPRO_VERSION.AppImage
           ls -l "${{ runner.temp }}"
       - name: Upload the artifact
         uses: shogo82148/actions-upload-release-asset@v1
