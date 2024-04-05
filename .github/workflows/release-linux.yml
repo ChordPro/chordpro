@@ -26,9 +26,8 @@ jobs:
         run: |
           cd pp/debian
           make
-          mv "ChordPro-$CHORDPRO_VERSION.AppImage" chordpro.AppImage
-          chmod +x chordpro.AppImage
-          zip -m "${{ runner.temp }}/ChordPro-$CHORDPRO_VERSION-Linux_x86_64-AppImage.zip" chordpro.AppImage
+          chmod +x ChordPro-$CHORDPRO_VERSION.AppImage
+          zip -m "${{ runner.temp }}/ChordPro-$CHORDPRO_VERSION-Linux_x86_64-AppImage.zip" ChordPro-$CHORDPRO_VERSION.AppImage
           ls -l "${{ runner.temp }}"
       - name: Upload the artifact
         uses: shogo82148/actions-upload-release-asset@v1
