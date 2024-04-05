@@ -2802,7 +2802,7 @@ sub prepare_assets {
 		fc   => sub { svg_fonthandler( $ps, @_ ) },
 		tc   => sub { svg_texthandler( $ps, @_ ) },
 		atts => { debug   => $config->{debug}->{svg} > 1,
-			  verbose => $config->{debug}->{svg},
+			  verbose => $config->{debug}->{svg} // 0,
 			} );
 	    my $data = $elt->{data};
 	    my $o = $p->process( $data ? \join( "\n", @$data ) : $elt->{uri},

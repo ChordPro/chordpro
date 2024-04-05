@@ -7,7 +7,7 @@ use utf8;
 
 class  SVGPDF;
 
-our $VERSION = '0.086.2';
+our $VERSION = '0.087';
 
 =head1 NAME
 
@@ -205,8 +205,8 @@ sub BUILDARGS ( @args ) {
 }
 
 BUILD {
-    $verbose      = $atts->{verbose}      // 1;
     $debug        = $atts->{debug}        || 0;
+    $verbose      = $atts->{verbose}      // $debug;
     $grid         = $atts->{grid}         || 0;
     $prog         = $atts->{prog}         || 0;
     $debug_styles = $atts->{debug_styles} || $debug > 1;

@@ -12,6 +12,7 @@
       be redefined individually.
     - Remove Verdana and Georgia from the list of core fonts. They're not.
     - Fix problem with image aligning (see forum 2179).
+    - Prevent some SVG diagnostics.
 
 6.050.7 2024-02-27
 
