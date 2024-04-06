@@ -3119,15 +3119,21 @@ sub sort_songbook {
 	}
 	print STDERR "\n" if $options->{verbose}; # Progress indicator
     }
-
+	
+	foreach my $song ( @{$sb->{songs}} ) {
+	  if (!defined($song->{meta}->{sorttitle})) {
+	    $song->{meta}->{sorttitle}=$song->{meta}->{title};
+	  }
+	}
+	
     my @songlist = @{$sb->{songs}};
 
     if ( $sorting =~ /title/ ) {
 	if ($sorting =~ /desc/ ) {
-	    @songlist = sort { $b->{meta}->{title}[0] cmp $a->{meta}->{title}[0]} @songlist;
+	    @songlist = sort { $b->{meta}->{sorttitle}[0] cmp $a->{meta}->{sorttitle}[0]} @songlist;
 	}
 	else {
-	    @songlist = sort { $a->{meta}->{title}[0] cmp $b->{meta}->{title}[0]} @songlist;
+	    @songlist = sort { $a->{meta}->{sorttitle}[0] cmp $b->{meta}->{sorttitle}[0]} @songlist;
 	}
     }
     elsif ( $sorting =~ /subtitle/ ) {

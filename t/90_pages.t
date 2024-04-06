@@ -34,6 +34,7 @@ Hi
 Ho
 {ns}
 {title AAAAA}
+{sorttitle AAAAB}
 Hi
 {np}
 Ho
@@ -73,7 +74,7 @@ EOD
     print $fd <<EOD;
 title;pages;sort title;artists;composers;collections;keys;years
 BBBBB;1-2;;;;;;
-AAAAA;3-4;;;;;;
+AAAAA;3-4;AAAAB;;;;;
 AAAAA;5-6;;;;;;
 ZZZZ;7-8;;;;;;
 EEEE;9;;;;;;
@@ -100,13 +101,13 @@ EOD
     ok( open( $fd, '>', $ref ), "Create $ref" );
     print $fd <<EOD;
 title;pages;sort title;artists;composers;collections;keys;years
-AAAAA;1-2;;;;;;
-AAAAA;3-4;;;;;;
-BBBBB;5-6;;;;;;
-EEEE;7;;;;;;
-FFFF;9;;;;;;
-POPPP;11-12;;;;;;
-ZZZZ;13-14;;;;;;
+AAAAA;1-2;AAAAA;;;;;
+AAAAA;3-4;AAAAB;;;;;
+BBBBB;5-6;BBBBB;;;;;
+EEEE;7;EEEE;;;;;
+FFFF;9;FFFF;;;;;
+POPPP;11-12;POPPP;;;;;
+ZZZZ;13-14;ZZZZ;;;;;
 EOD
     close($fd);
 
@@ -128,13 +129,13 @@ EOD
     ok( open( $fd, '>', $ref ), "Create $ref" );
     print $fd <<EOD;
 title;pages;sort title;artists;composers;collections;keys;years
-AAAAA;2-3;;;;;;
-AAAAA;4-5;;;;;;
-BBBBB;6-7;;;;;;
-EEEE;8;;;;;;
-FFFF;9;;;;;;
-POPPP;10-11;;;;;;
-ZZZZ;12-13;;;;;;
+AAAAA;2-3;AAAAA;;;;;
+AAAAA;4-5;AAAAB;;;;;
+BBBBB;6-7;BBBBB;;;;;
+EEEE;8;EEEE;;;;;
+FFFF;9;FFFF;;;;;
+POPPP;10-11;POPPP;;;;;
+ZZZZ;12-13;ZZZZ;;;;;
 EOD
     close($fd);
 
@@ -156,13 +157,13 @@ EOD
     ok( open( $fd, '>', $ref ), "Create $ref" );
     print $fd <<EOD;
 title;pages;sort title;artists;composers;collections;keys;years
-EEEE;1;;;;;;
-AAAAA;2-3;;;;;;
-AAAAA;4-5;;;;;;
-BBBBB;6-7;;;;;;
-FFFF;8;;;;;;
-POPPP;10-11;;;;;;
-ZZZZ;12-13;;;;;;
+EEEE;1;EEEE;;;;;
+AAAAA;2-3;AAAAA;;;;;
+AAAAA;4-5;AAAAB;;;;;
+BBBBB;6-7;BBBBB;;;;;
+FFFF;8;FFFF;;;;;
+POPPP;10-11;POPPP;;;;;
+ZZZZ;12-13;ZZZZ;;;;;
 EOD
     close($fd);
 
