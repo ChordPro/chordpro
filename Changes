@@ -1,5 +1,10 @@
 0.000
 
+    - (PDF, page sort) Use sorttitle for page sorting.
+    - Fix/update docker build.
+
+6.050.10 2024-04-06
+
     - Upgrade PDF::API2 to 2.045.
 
 6.050.9 2024-04-05

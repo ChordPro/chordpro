@@ -30,6 +30,7 @@ RUN apt-get install --no-install-recommends -y \
 
 # Perl modules from CPAN.
 RUN cpanm \
+    Pod::Usage \
     JavaScript::QuickJS \
     File::LoadLines \
     String::Interpolate::Named \
@@ -48,7 +49,7 @@ ENV DOCKER_PACKAGED=1.00
 RUN chordpro --about
 
 FROM base AS chordpro-dev
-COPY chordpro-dev.tar.gz abc2svg_qjs.tar.gz ./
+COPY chordpro-dev.tar.gz ./
 RUN mkdir ChordPro \
   && tar xf chordpro-dev.tar.gz -C ChordPro \
   && cd ChordPro \
