@@ -2,6 +2,7 @@
 
     - (PDF, page sort) Use sorttitle for page sorting.
     - Fix/update docker build.
+    - Fix issue #367.
 
 6.050.10 2024-04-06
 

@@ -2536,6 +2536,7 @@ sub configurator {
     $fm->( qw( comment_box    text     ) );
     $fm->( qw( comment        text     ) );
     $fm->( qw( annotation     chord    ) );
+    $fm->( qw( label          text     ) );
     $fm->( qw( toc            text     ) );
     $fm->( qw( empty          text     ) );
     $fm->( qw( grid           chord    ) );

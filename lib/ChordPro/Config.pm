@@ -230,7 +230,9 @@ sub configurator ( $opts = undef ) {
 
     my @allfonts = keys(%{$cfg->{pdf}->{fonts}});
     for my $ff ( @allfonts ) {
-        unless ( $cfg->{pdf}->{fonts}->{$ff}->{name}
+	# Derived chords can have size or color only. Disable
+	# this test for now.
+        unless ( 1 || $cfg->{pdf}->{fonts}->{$ff}->{name}
                  || $cfg->{pdf}->{fonts}->{$ff}->{description}
                  || $cfg->{pdf}->{fonts}->{$ff}->{file} ) {
             delete( $cfg->{pdf}->{fonts}->{$ff} );
