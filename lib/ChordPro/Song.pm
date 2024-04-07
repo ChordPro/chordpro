@@ -556,6 +556,10 @@ sub parse_song {
 			}
 		    }
 		    $opts = $a->{opts} = { %$opts, %{$a->{opts}} };
+		    if ( $opts->{align} && $opts->{x} && $opts->{x} =~ /\%$/ ) {
+			do_warn( "Useless combination of x percentage with align (align ignored)" );
+			delete $opts->{align};
+    }
 
 		    my $def = !!$id;
 		    $id //= "_Image".$assetid++;
@@ -1596,6 +1600,10 @@ sub dir_image {
     unless ( $uri || $id || $chord ) {
 	do_warn( "Missing image source\n" );
 	return;
+    }
+    if ( $opts{align} && $opts{x} && $opts{x} =~ /\%$/ ) {
+	do_warn( "Useless combination of x percentage with align (align ignored)" );
+	delete $opts{align};
     }
 
     # If the image uri does not have a directory, look it up
