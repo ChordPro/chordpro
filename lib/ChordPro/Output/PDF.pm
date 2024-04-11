@@ -1771,15 +1771,15 @@ sub songline {
 	    # Underline the first word of the phrase, to indicate
 	    # the actual chord position. Skip leading non-letters.
 	    $phrase = " " if $phrase eq "";
-	    my ( $pre, $word, $rest ) = $phrase =~ /^(\W+)?(\w+)(.+)?$/;
-	    my $ulstart = $x;
-	    $ulstart += $pr->strwidth($pre) if defined($pre);
-	    my $w = $pr->strwidth( $word//" ", $ftext );
-	    # Avoid running together of syllables.
-	    $w *= 0.75 unless defined($rest);
 
-	    $pr->hline( $ulstart, $ytext + font_ul($ftext), $w,
-			0.25, $ps->{theme}->{foreground} );
+	    # This may screw up in some markup situations.
+	    my ( $pre, $word, $rest ) =
+	      $phrase =~ /^((?:\<[^>]*?\>|\W)+)?(\w+)(.+)?$/;
+	    # This should take case of most cases...
+	    unless ( $i == $n || defined($rest) && $rest !~ /^\</ ) {
+		$rest = chop($word) . ($rest//"");
+	    }
+	    $phrase = ($pre//"") . "<u>" . $word . "</u>" . ($rest//"");
 
 	    # Print the text.
 	    pr_label_maybe( $ps, $x, $ytext );
