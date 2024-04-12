@@ -193,6 +193,7 @@ sub abc2svg( $song, %args ) {
 	       my ( $fn, $relay, $onerror ) = @_;
 	       if ( -s -r "$base/$fn" ) {
 		   $js->eval(slurp("$base/$_[0]"));
+		   $relay->() if $relay;
 	       }
 	       elsif ( $onerror ) {
 		   $onerror->();
@@ -207,19 +208,25 @@ sub abc2svg( $song, %args ) {
 	  ( args    => [ $src ],
 	    load    => sub { $js->eval(slurp("$base/$_[0]")) },
 	    abc2svg => $qjsdata,
-	    abc => '',			# global for 'toxxx.js'
+	    abc     => {},	# for backends
 	  );
 
 	warn( "+ QuickJS_XS[", CP->display($base), "] $src\n") if DEBUG;
+	my $hooks = "$base/../hooks.js";
+	undef $hooks unless -s $hooks;
+
 	eval {
 	    $js->eval( slurp("$base/abc2svg-1.js") );
+	    $js->eval( slurp($hooks) ) if $hooks;
 	    if ( -r "$base/../cmd.js" ) {
-		warn(" QuickJS_XS using ", CP->display("$base/../cmd.js"), "\n" )
+		warn(" QuickJS_XS using ", CP->display("$base/../cmd.js"),
+		     $hooks ? "+hooks" : "", "\n" )
 		  if DEBUG;
 		$js->eval( slurp("$base/../cmd.js") );
 	    }
 	    else {
-		warn(" QuickJS_XS using ", CP->display("$base/cmdline.js"), "\n" )
+		warn(" QuickJS_XS using ", CP->display("$base/cmdline.js"),
+		     $hooks ? "+hooks" : "", "\n" )
 		  if DEBUG;
 		$js->eval( slurp("$base/cmdline.js") );
 	    }
@@ -319,11 +326,17 @@ sub abc2svg( $song, %args ) {
     warn("SVG: ", scalar(@lines), " lines (raw)\n") if DEBUG > 1;
 
     # Postprocess the SVG data.
+    my $staffbase;
     my $copy = 0;
     @data = ();
     my $lines = 1;
     while ( @lines ) {
 	$_ = shift(@lines);
+	if ( /\<!-- staffbase:(.*) --\>/ ) {
+	    $staffbase = $1;
+	    warn("ABC: staffbase = $staffbase\n") if DEBUG;
+	    next;
+	}
 	if ( /^<svg/ ) {
 	    $copy++;
 	}
@@ -355,6 +368,7 @@ sub abc2svg( $song, %args ) {
 		      maybe split  => $kv->{split},
 		      maybe spread => $kv->{spread},
 		      maybe sep    => $kv->{staffsep},
+		      maybe base   => $staffbase,
 		    } };
 }
 

@@ -1977,6 +1977,13 @@ sub imageline {
     my $ox = $opts->{x};
     my $oy = $opts->{y};
 
+    # Not sure I like this...
+    if ( defined $oy && $oy =~ /base([-+].*)/ ) {
+	$oy = -$1;
+	$oy += $opts->{base}*$scale if $opts->{base};
+	warn("Y: ", $opts->{y}, " BASE: ", $opts->{base}, " -> $oy\n");
+    }
+
     my 	$align = $opts->{align};
     if ( $anchor eq "float" ) {
 	$align //= ( $opts->{center} // 1 ) ? "center" : "left";
@@ -2835,12 +2842,12 @@ sub prepare_assets {
 	    if ( @$o > 1 ) {
 		$res->{multi} = $o;
 	    }
-
 	    warn("Created asset $id (xform, ",
 		 $o->[0]->{vwidth}, "x", $o->[0]->{vheight}, ")",
 		 " scale=", $res->{opts}->{scale} || 1,
 		 " align=", $res->{opts}->{align}//"default",
 		 " sep=", $sep,
+		 " base=", $res->{opts}->{base}//"",
 		 "\n")
 	      if $config->{debug}->{images};
 	    next;
@@ -3239,6 +3246,13 @@ method parse( $ctx, $k, $v ) {
 	# Currently we do not have value-less attributes.
 	else {
 	    carp("Invalid " . TYPE . " attribute: \"$kk\"\n");
+	}
+    }
+
+    if ( $ctl{id} ) {
+	my $a = ChordPro::Output::PDF::assets($ctl{id});
+	if ( $a && $a->{opts}->{base} ) {
+	    $ctl{base} = $a->{opts}->{base};
 	}
     }
 
