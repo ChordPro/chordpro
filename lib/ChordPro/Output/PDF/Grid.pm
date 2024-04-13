@@ -50,7 +50,7 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 		    $t->{text} .= $t->{chords}->[$_]->chord_display . $t->{phrases}->[$_];
 		}
 	    }
-	    $pr->text( $t->{text}, $x, $y, $fonts->{comment} );
+	    $pr->text( $t->{text}, $x, $y, $fonts->{grid_margin} );
 	}
 	$x += $margin->[0] * $cellwidth + $barwidth;
     }
@@ -199,7 +199,7 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 	}
     }
 
-    if ( $margin->[1] && $elt->{comment} ) {
+    if ( $margin->[1] && $elt->{comment} ) { # Should it change here as well?
 	my $t = $elt->{comment};
 	if ( $t->{chords} ) {
 	    $t->{text} = "";
@@ -207,7 +207,7 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 		$t->{text} .= $t->{chords}->[$_]->chord_display . $t->{phrases}->[$_];
 	    }
 	}
-	$pr->text( " " . $t->{text}, $x, $y, $fonts->{comment} );
+	$pr->text( " " . $t->{text}, $x, $y, $fonts->{grid_margin} );
     }
 }
 
