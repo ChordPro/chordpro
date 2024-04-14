@@ -199,7 +199,7 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 	}
     }
 
-    if ( $margin->[1] && $elt->{comment} ) { # Should it change here as well?
+    if ( $margin->[1] && $elt->{comment} ) {
 	my $t = $elt->{comment};
 	if ( $t->{chords} ) {
 	    $t->{text} = "";
