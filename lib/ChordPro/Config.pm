@@ -57,6 +57,10 @@ sub json_load( $json, $source = "<builtin>" ) {
     }
     else {
 	state $pp = JSON::PP->new;
+
+	# Glue lines, so we have at lease some relaxation.
+	$json =~ s/"\s*\\\n\s*"//g;
+
 	$pp->relaxed if $info->{relaxed};
 	$pp->decode($json);
     }
