@@ -6,7 +6,7 @@ use strict;
 # use Debug::ShowStuff::ShowVar;
 
 # version
-our $VERSION = '0.062';
+our $VERSION = '0.063';
 
 # global error messages
 our $err_id;
@@ -1825,10 +1825,14 @@ sub new {
 	    # TODO: This probably only works with newline, not CR or CRLF...
 	    if ( @$chars > 2 ) {
 		my $i = 0;
-		$i++ if $chars->[$i] !~ /\S/;
+		while ( $i < @$chars && $chars->[$i] =~ /^\s$/ ) {
+		    $i++;
+		}
 		if ( $chars->[$i] eq "\\\n" ) {
 		    $i++;
-		    $i++ if $chars->[$i] !~ /\S/;
+		    while ( $i < @$chars && $chars->[$i] =~ /^\s$/ ) {
+			$i++;
+		    }
 		    # if ( $chars->[$i] eq $str->{quote} ) {
 		    if ( $chars->[$i] =~ /['"]/ ) {
 			$str->{quote} = $chars->[$i];
