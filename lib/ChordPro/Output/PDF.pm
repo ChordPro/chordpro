@@ -1886,10 +1886,12 @@ sub imageline {
     my $opts = { %{$assets->{$id}->{opts}//{}}, %{$elt->{opts}//{}} };
     my $img = $assets->{$id}->{data};
     my $label = $opts->{label};
+    my $anchor = $opts->{anchor} //= "float";
     my $width = $opts->{width};
     my $height = $opts->{height};
     my $avwidth  = $assets->{$id}->{vwidth};
     my $avheight = $assets->{$id}->{vheight};
+
     unless ( $img ) {
 	return "Unhandled image type: asset=$id";
     }
@@ -1908,16 +1910,21 @@ sub imageline {
     }
 
     # Available width and height.
-    my $pw;
-    if ( $ps->{columns} > 1 ) {
-	$pw = $ps->{columnoffsets}->[1]
-	  - $ps->{columnoffsets}->[0]
-	    - $ps->{columnspace};
+    my ( $pw, $ph );
+    if ( $anchor eq "paper" ) {
+	( $pw, $ph ) = @{$ps->{papersize}};
     }
     else {
-	$pw = $ps->{__rightmargin} - $ps->{_leftmargin};
+	if ( $ps->{columns} > 1 ) {
+	    $pw = $ps->{columnoffsets}->[1]
+	      - $ps->{columnoffsets}->[0]
+	      - $ps->{columnspace};
+	}
+	else {
+	    $pw = $ps->{__rightmargin} - $ps->{_leftmargin};
+	}
+	$ph = $ps->{_margintop} - $ps->{_marginbottom};
     }
-    my $ph = $ps->{_margintop} - $ps->{_marginbottom};
 
     if ( $width && $width =~ /^(\d+(?:\.\d+)?)\%$/ ) {
 	$width  = $1/100 * $pw;
@@ -1973,7 +1980,6 @@ sub imageline {
     $h *= $scale;
     $w *= $scale;
 
-    my $anchor = $opts->{anchor} //= "float";
     my $ox = $opts->{x};
     my $oy = $opts->{y};
 
@@ -1998,7 +2004,7 @@ sub imageline {
     }
     $align //= "left";
 
-    my $y = $gety->($h);	# may have been changed by checkspace
+    my $y = $gety->($anchor eq "float" ? $h : 0);	# may have been changed by checkspace
     if ( defined ( my $tag = $i_tag // $label ) ) {
 	$i_tag = $tag;
     	my $ftext = $ps->{fonts}->{comment};
