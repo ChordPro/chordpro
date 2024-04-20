@@ -42,7 +42,8 @@ my $regtest = defined($ENV{PERL_HASH_SEED}) && $ENV{PERL_HASH_SEED} == 0;
 sub generate_songbook {
     my ( $self, $sb ) = @_;
 
-    return [] unless $sb->{songs}->[0]->{body}; # no songs
+    return [] unless $sb->{songs}->[0]->{body}
+                  || $sb->{songs}->[0]->{source}->{embedding};
     $verbose ||= $options->{verbose};
 
     $ps = $config->{pdf};

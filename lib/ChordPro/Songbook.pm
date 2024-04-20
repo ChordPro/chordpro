@@ -107,7 +107,7 @@ sub embed_file {
     }
     my $type = "pdf";
 
-    my $song = ChordPro::Song->new( $filename );
+    my $song = ChordPro::Song->new( { filesource => $filename } );
     $song->{meta}->{songindex} = 1 + @{ $self->{songs} };
     $song->{source} =
       { file      => $filename,
