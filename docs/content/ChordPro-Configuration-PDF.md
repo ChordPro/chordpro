@@ -468,17 +468,18 @@ Page 1 is the very first output page (type `first`). It is like a `title`
 page but, according to typesetting conventions, doesn't have the page
 number in the footer.
 
-Page 4 is the first page of a song, but not the very first (type `title`).
+Page 5 is the first page of a song, but not the very first (type `title`).
 It has the song title and subtitle in the heading, and only the page
-number in the footer.
+number in the footer. By default ChordPro starts each song on an odd
+page and therefore inserts an alignment page (page 4).
 
 The other pages are normal pages (type `default`). They have no heading and
 have the page number and song title in the footer. Pages inserted for
 alignment are completely blank.
 
 Note that by default ChordPro produces different odd and even pages.
-Therefore the page number on (odd) page 3 is at the left side, while it is at
-the right side on (even) pages 2 and 4.
+Therefore the page numbers on (odd) pages 3 and 7 are at the right
+side, while they are at the left side on (even) pages 2 and 6.
 
 ## Front and Back Matter
 

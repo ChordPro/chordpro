@@ -57,6 +57,7 @@ pageformats.png : pageformats.cho pageformats.json
 	rm -f x-*.png
 	${CONVERT} -alpha remove -resize 300x300 ${CVT_BORDER} x.pdf x.png
 	${CONVERT} +append x-*.png $@
+	montage null: x-?.png -tile 2x -geometry 214x302+2+2! $@
 	rm -f x.pdf x-*.png
 
 #### Publish.
