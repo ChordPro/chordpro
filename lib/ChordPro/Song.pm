@@ -1281,7 +1281,7 @@ sub directive {
 		  $xpose + ($config->{settings}->{transpose}//0 );
 	    }
 	    my $kv = {};
-	    if ( $arg =~ /\b(id|label|scale|split|spread|width|align|center)=(.+)/ ) {
+	    if ( $arg =~ /\w+=["'](.+)/ ) {
 		$kv = parse_kv($arg);
 	    }
 	    else {
@@ -1302,7 +1302,7 @@ sub directive {
 	    if ( $arg =~ /^label=/ ) {
 		$arg = parse_kv($arg)->{label};
 	    }
-	    elsif ( $arg =~ /\b(id|scale|split|spread|width|align|center)=(.+)/ ) {
+	    elsif ( $arg =~ /\w+=["'](.+)/ ) {
 		# Doesn't look like a label. Assume a mistake.
 		do_warn("Garbage in start_of_$in_context: $arg (ignored)\n");
 		$arg = "";
