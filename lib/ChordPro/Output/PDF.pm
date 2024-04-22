@@ -512,7 +512,8 @@ sub generate_song {
 	    my $ftext = $fonts->{label} || $fonts->{text};
 	    my $w = $pr->strwidth("    ", $ftext);
 	    for ( @{ $s->{labels} } ) {
-		for ( split( /\\n/, $_ ) ) {
+		# Split on real newlines and \n.
+		for ( split( /\\n|\n/, $_ ) ) {
 		    my $t = $pr->strwidth( $_, $ftext ) + $w;
 		    $longest = $t if $t > $longest;
 		}
@@ -1529,7 +1530,10 @@ sub prlabel {
     my $font= $ps->{fonts}->{label} || $ps->{fonts}->{text};
     $font->{size} ||= $font->{fd}->{size};
     $ps->{pr}->setfont($font);	# for strwidth.
-    for ( split( /\\n/, $label ) ) {
+
+    # Now we have quoted strings we can have real newlines.
+    # Split on real and unescaped (old style) newlines.
+    for ( split( /\\n|\n/, $label ) ) {
 	my $label = $_;
 	if ( $align eq "right" ) {
 	    my $avg_space_width = $ps->{pr}->strwidth("m");

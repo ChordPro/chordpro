@@ -138,6 +138,10 @@ push( @EXPORT, 'make_preprocessor' );
 
 # Split (pseudo) command line into key/value pairs.
 
+# Escapes for string expansion. Most make no sense, newline is special.
+my %dqesc = ( n => "\n" );
+my %sqesc = ( n => "\n" );
+
 sub parse_kv ( @lines ) {
 
     if ( is_macos() ) {
@@ -145,12 +149,20 @@ sub parse_kv ( @lines ) {
 	@lines = map { s/“/"/g; s/”/"/g; s/‘/'/g; s/’/'/gr;} @lines;
     }
 
-    use Text::ParseWords qw(shellwords);
-    my @words = shellwords(@lines);
+    use Text::ParseWords qw(quotewords);
+    my @words = quotewords( '\s+', 1, @lines );
 
     my $res = {};
     foreach ( @words ) {
-	if ( /^(.*?)=(.+)/ ) {
+	if ( /^(.*?)="(.*)"$/ ) {
+	    my ( $k, $v ) = ( $1, $2 );
+	    $res->{$k} = $v =~ s;\\(.);$dqesc{$1}//$1;segr;
+	}
+	elsif ( /^(.*?)='(.*)'$/ ) {
+	    my ( $k, $v ) = ( $1, $2 );
+	    $res->{$k} = $v =~ s;\\(.);$sqesc{$1}//$1;segr;
+	}
+	elsif ( /^(.*?)=(.+)$/ ) {
 	    $res->{$1} = $2;
 	}
 	elsif ( /^no[-_]?(.+)/ ) {
