@@ -47,7 +47,7 @@ WriteMakefile
  # Always require PDF::API2 or PDF::Builder and Text::Layout.
  PREREQ_PM      => {
 		    @pdfapi,
-		    'Text::Layout'		  => 0.032,
+		    'Text::Layout'		  => 0.036,
 		    'JSON::PP'			  => 2.27203,
 		    'String::Interpolate::Named'  => 1.030,
 		    'File::LoadLines'		  => 1.044,
