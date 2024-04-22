@@ -75,7 +75,7 @@ sub txt2xform( $self, %args ) {
     for ( @$data ) {
 	( $w, $h ) = $pr->strwidth( $_, $font, $size );
 	$awidth = $w if $w > $awidth;
-	$aheight += $h * $ps->{spacing}->{lyrics};
+	$aheight += ($h||$size) * $ps->{spacing}->{lyrics};
     }
 
     # Desired width (includes padding).
@@ -130,7 +130,7 @@ sub txt2xform( $self, %args ) {
 	}
 
 	for ( @$data ) {
-	    my $w = $pr->strheight( $_, $font, $size );
+	    my $h = $pr->strheight( $_, $font, $size ) || $size;
 	    $pr->{tmplayout}->set_width($width);
 	    $pr->{tmplayout}->set_alignment($flush);
 	    $pr->{tmplayout}->show( 0, $y, $xo );
@@ -139,7 +139,7 @@ sub txt2xform( $self, %args ) {
     }
     else {			# assume top/left
 	for ( @$data ) {
-	    my $h = $pr->strheight( $_, $font, $size );
+	    my $h = $pr->strheight( $_, $font, $size ) || $size;
 	    $pr->{tmplayout}->show( 0, $y, $xo );
 	    $y -= $h * $ps->{spacing}->{lyrics};
 	}
