@@ -346,9 +346,9 @@ sub parse_song {
 
 	for my $pp ( "all", "env-$in_context" ) {
 	    if ( $prep->{$pp} ) {
-		0&&warn("PRE:  ", $_, "\n");
+		$config->{debug}->{pp} && warn("PRE:  ", $_, "\n");
 		$prep->{$pp}->($_);
-		0&&warn("POST: ", $_, "\n");
+		$config->{debug}->{pp} && warn("POST: ", $_, "\n");
 		if ( /\n/ ) {
 		    my @a = split( /\n/, $_ );
 		    $_ = shift(@a);
@@ -622,9 +622,9 @@ sub parse_song {
 	if ( /^\s*\{(.*)\}\s*$/ ) {
 	    my $dir = $1;
 	    if ( $prep->{directive} ) {
-		# warn("PRE:  ", $_, "\n");
+		$config->{debug}->{pp} && warn("PRE:  ", $_, "\n");
 		$prep->{directive}->($dir);
-		# warn("POST: ", $_, "\n");
+		$config->{debug}->{pp} && warn("POST: ", $_, "\n");
 	    }
 	    $self->add( type => "ignore",
 			text => $_ )
@@ -652,9 +652,9 @@ sub parse_song {
 
 	if ( /\S/ ) {
 	    if ( $prep->{songline} ) {
-		# warn("PRE:  ", $_, "\n");
+		$config->{debug}->{pp} && warn("PRE:  ", $_, "\n");
 		$prep->{songline}->($_);
-		# warn("POST: ", $_, "\n");
+		$config->{debug}->{pp} && warn("POST: ", $_, "\n");
 	    }
 	    if ( $config->{settings}->{flowtext}
 		 && @{ $self->{body}//[] } ) {

@@ -1737,6 +1737,7 @@ sub default_config () {
         "meta"	    : 0,
         "mma"	    : 0,
         "paths"	    : 0,
+        "pp"	    : 0,
         "spacing"   : 0,
         "song"	    : 0,
         "songfull"  : 0,
