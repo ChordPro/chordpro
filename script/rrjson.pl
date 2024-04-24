@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Sun Mar 10 18:02:02 2024
 # Last Modified By: 
-# Last Modified On: Tue Apr  2 22:46:16 2024
-# Update Count    : 35
+# Last Modified On: Wed Apr 24 12:37:48 2024
+# Update Count    : 37
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -88,11 +88,11 @@ for my $file ( @ARGV ) {
     }
     elsif ( $mode eq "json_xs" ) {
 	require JSON::XS;
-	print ( JSON::XS->new->canonical->utf8->pretty->encode($data), "\n" );
+	print ( JSON::XS->new->canonical->utf8(0)->pretty->encode($data), "\n" );
     }
     else {			# default JSON
 	require JSON::PP;
-	print ( JSON::PP->new->canonical->utf8->pretty->encode($data), "\n" );
+	print ( JSON::PP->new->canonical->utf8(0)->pretty->encode($data), "\n" );
     }
 }
 
