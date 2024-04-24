@@ -331,6 +331,11 @@ sub parse_song {
 	    $_ .= $cont;
 	}
 
+	# Uncomment this to allow \uDXXX\uDYYY (surrogate) escapes.
+	s/ \\u(d[89ab][[:xdigit:]]{2})\\u(d[cdef][[:xdigit:]]{2})
+	 / pack('U*', 0x10000 + (hex($1) - 0xD800) * 0x400 + (hex($2) - 0xDC00) )
+	   /igex;
+
 	# Uncomment this to allow \uXXXX escapes.
 	s/\\u([0-9a-f]{4})/chr(hex("0x$1"))/ige;
 	# Uncomment this to allow \u{XX...} escapes.
