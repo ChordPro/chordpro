@@ -6,7 +6,7 @@ use strict;
 # use Debug::ShowStuff::ShowVar;
 
 # version
-our $VERSION = '0.063';
+our $VERSION = '0.063_02';
 
 # global error messages
 our $err_id;
@@ -89,14 +89,15 @@ RJSON supports JavaScript-like comments:
 
 =item * trailing commas
 
-Like Perl, RJSON allows treats commas as separators.  If nothing is before,
+Like Perl, RJSON allows treats commas as separators.  If nothing is
 after, or between commas, those commas are just ignored:
 
     [
-        , // nothing before this comma
         "data",
         , // nothing after this comma
     ]
+
+Note that the specification disallows loose commas at the beginning of a list.
 
 =item * single quotes, double quotes, no quotes
 
@@ -168,6 +169,14 @@ C<b> is assigned 2, and C<c> is assigned undef:
 	a: 1,
 	b: 2,
 	c
+    }
+
+=item * commas are optional between objects pairs and array items
+
+    {
+      buy: [ milk eggs butter 'dog bones' ]
+      tasks: [ { name:exercise completed:false }
+               { name:eat completed:true } ]
     }
 
 =back
@@ -515,13 +524,15 @@ our %structural = (
 
 =item * Quotes
 
-The C<%quotes> hash defines the two types of quotes recognized by RJSON: single
-and double quotes. JSON only allows the use of double quotes to define strings.
-Relaxed also allows single quotes.  C<%quotes> is defined as follows.
+The C<%quotes> hash defines the types of quotes recognized by RJSON: single
+and double quotes, and backticks.
+JSON only allows the use of double quotes to define strings.
+C<%quotes> is defined as follows.
 
     our %quotes = (
         '"' => 1,
         "'" => 1,
+        "`" => 1,
     );
 
 =cut
@@ -530,6 +541,7 @@ Relaxed also allows single quotes.  C<%quotes> is defined as follows.
 our %quotes = (
     '"' => 1,
     "'" => 1,
+    "`" => 1,
 );
 
 =item * End of line characters
@@ -1186,7 +1198,7 @@ sub tokenize {
 	}
 
 	# structural characters
-	elsif ($JSON::Relaxed::structural{$char}) {
+	elsif ( $JSON::Relaxed::structural{$char}) {
 	    push @tokens, $char;
 	}
 
@@ -1598,8 +1610,9 @@ sub build {
 	    push @$rv, $object;
 	}
 
-	# comma: if we get to a comma at this point, do nothing with it
-	elsif ($next eq ',') {
+	# Comma: if we get to a comma at this point, and we have
+	# content, do nothing with it
+	elsif ( $next eq ',' && @$rv ) {
 	}
 
 	# if string, add it to the array
@@ -1607,14 +1620,19 @@ sub build {
 	    # add the string to the array
 	    push @$rv, $next->as_perl();
 
-	    # check following token, which must be either a comma or
-	    # the closing brace
-	    if (@$tokens) {
+	    # Check following token.
+	    if ( @$tokens ) {
 		my $n2 = $tokens->[0] || '';
 
-		# the next element must be a comma or the closing brace,
-		# anything else is an error
-		unless  ( ($n2 eq ',') || ($n2 eq ']') ) {
+		# Spec say: Commas are optional between objects pairs
+		# and array items.
+		# The next element must be a comma or the closing brace,
+		# or a string or list.
+		# Anything else is an error.
+		unless ( $n2 eq ','
+			 || $n2 eq ']'
+			 || $parser->is_string($n2)
+			 || $parser->is_list_opener($n2) ) {
 		    return missing_comma($parser, $n2);
 		}
 	    }
@@ -1666,7 +1684,7 @@ sub missing_comma {
 # invalid_array_token
 #
 
-=item invalid_array_token)
+=item invalid_array_token
 
 This static method build the C<unknown-array-token> error message.
 
@@ -1683,7 +1701,7 @@ sub invalid_array_token {
     );
 }
 #
-# invalid_array_token
+# invalid_array_token()
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -1717,14 +1735,111 @@ use strict;
 
 =head2 JSON::Relaxed::Parser::Token::String
 
-Base class . Nothing actually happens in this package, it's just a base class
-for JSON::Relaxed::Parser::Token::String::Quoted and
+Base class JSON::Relaxed::Parser::Token::String::Quoted and
 JSON::Relaxed::Parser::Token::String::Unquoted.
+
+=over 4
 
 =cut
 
 #
 # POD
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+# decode_uescape()
+#
+
+=item * decode_uescape()
+
+Decodes unicode escapes like \u201D.
+Handles surrogates.
+
+Extension: Also handles \u{1d10e} escapes.
+
+=cut
+
+sub decode_uescape {
+    my ( $self, $chars ) = @_;
+    my $next = $chars->[0];
+
+    return unless $next eq '\u' && @$chars >= 5;
+
+    if ( $chars->[1] eq '{' ) { # extended
+	my $i = 2;
+	my $u = "";
+	while ( $i < @$chars ) {
+	    if ( $chars->[$i] =~ /[[:xdigit:]]/ ) {
+		$u .= $chars->[$i];
+		$i++;
+		next;
+	    }
+	    if ( $chars->[$i] eq '}' ) {
+		splice( @$chars, 0, $i );
+		return chr(hex($u));
+	    }
+	    last;
+	}
+	return;
+    }
+
+    # Let's not be too relaxed -- require exactly 4 hexits.
+    my $u = join('',@$chars[1..4]);
+    if ( $u =~ /^[[:xdigit:]]+$/ ) {
+	splice( @$chars, 0, 4 );
+	if ( $u =~ /^d[89ab][[:xdigit:]]{2}/i # utf-16 HI
+	     && @$chars >= 6 && $chars->[1] eq '\u' ) {
+	    my $utf16hi = $u;
+	    $u = join('',@$chars[2..5]);
+	    if ( $u =~ /^d[c-f][[:xdigit:]]{2}/i ) { # utf-16 LO
+		splice( @$chars, 0, 5 );
+		return $self->assemble_surrogate( $utf16hi, $u );
+	    }
+	    else {
+		return chr(hex($u));
+	    }
+	}
+	else {
+	    return chr(hex($u));
+	}
+    }
+
+    return;
+}
+
+#
+# decode_uescape
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+# assemble_surrogate
+#
+
+=item * assemble_surrogate()
+
+Assembles a Unicode character out of a high and low surrogate.
+
+=cut
+
+sub assemble_surrogate {
+    my ( $self, $hi, $lo ) = @_;
+    pack('U*', 0x10000 + (hex($hi) - 0xD800) * 0x400 + (hex($lo) - 0xDC00) );
+}
+
+#
+# assemble_surrogate
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+# closing POD
+#
+
+=back
+
+=cut
+
+#
+# closing POD
 #------------------------------------------------------------------------------
 
 #
@@ -1833,8 +1948,7 @@ sub new {
 		    while ( $i < @$chars && $chars->[$i] =~ /^\s$/ ) {
 			$i++;
 		    }
-		    # if ( $chars->[$i] eq $str->{quote} ) {
-		    if ( $chars->[$i] =~ /['"]/ ) {
+		    if ( $quotes{$chars->[$i]} ) {
 			$str->{quote} = $chars->[$i];
 			splice( @$chars, 0, $i+1 );
 			next;
@@ -1850,13 +1964,10 @@ sub new {
 		$next = $JSON::Relaxed::esc{$next};
 	    }
 	    # \uXXXX escapes.
-	    elsif ( $next eq 'u' && @$chars >= 4 ) {
-		# Let's not be too relaxed -- require exactly 4 hexits.
-		my $u = join('',@$chars[0..3]);
-		if ( $u =~ /^[[:xdigit:]]+$/ ) {
-		    splice( @$chars, 0, 4 );
-		    $next = chr(hex($u));
-		}
+	    elsif ( $next eq 'u' ) {
+		unshift( @$chars, '\u' );
+		$next = $str->decode_uescape($chars) // 'u';
+		shift(@$chars);
 	    }
 	}
 
@@ -1970,25 +2081,32 @@ sub new {
     # println subname(); ##i
 
     # initialize hash
-    $str->{'raw'} = $char;
+    $str->{'raw'} = "";
+    unshift( @$chars, $char );
 
     # loop while not space or structural characters
     TOKEN_LOOP:
     while (@$chars) {
+	my $next = $chars->[0];
 	# if structural character, we're done
-	if ($JSON::Relaxed::structural{$chars->[0]})
+	if ($JSON::Relaxed::structural{$next})
 	    { last TOKEN_LOOP }
 
 	# if space character, we're done
-	if ($chars->[0] =~ m|\s+|s)
+	if ($next =~ m|\s+|s)
 	    { last TOKEN_LOOP }
 
 	# if opening of a comment, we're done
-	if ($parser->is_comment_opener($chars->[0]))
+	if ($parser->is_comment_opener($next))
 	    { last TOKEN_LOOP }
 
+	if ( $next eq '\u' ) {
+	    $next = $str->decode_uescape($chars) // 'u';
+	}
+
 	# add to raw string
-	$str->{'raw'} .= shift(@$chars);
+	$str->{'raw'} .= $next;
+	shift(@$chars);
     }
 
     # return
