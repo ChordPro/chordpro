@@ -339,7 +339,7 @@ sub parse_song {
 	# Uncomment this to allow \uXXXX escapes.
 	s/\\u([0-9a-f]{4})/chr(hex("0x$1"))/ige;
 	# Uncomment this to allow \u{XX...} escapes.
-	# s/\\u\{([0-9a-f]+)\}/chr(hex("0x$1"))/ige;
+	s/\\u\{([0-9a-f]+)\}/chr(hex("0x$1"))/ige;
 
 	$diag->{orig} = $_;
 	# Get rid of TABs.
