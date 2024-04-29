@@ -14,6 +14,7 @@
     - Upgrade JSON::Relaxed to 0.063_02.
     - Handle \u escapes for surrogates and extended chars (\u{...}).
     - Fix issue #371.
+    - Fix problem that text in a TextBlock did not reset to flush left.
 
 6.050.10 2024-04-06
 

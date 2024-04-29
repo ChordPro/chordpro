@@ -140,6 +140,7 @@ sub txt2xform( $self, %args ) {
     else {			# assume top/left
 	for ( @$data ) {
 	    my $h = $pr->strheight( $_, $font, $size ) || $size;
+	    $pr->{tmplayout}->set_alignment($flush);
 	    $pr->{tmplayout}->show( 0, $y, $xo );
 	    $y -= $h * $ps->{spacing}->{lyrics};
 	}
