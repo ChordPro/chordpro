@@ -158,8 +158,12 @@ svg :
 .PHONY: svg
 
 rrjson :
-	mkdir -p lib/ChordPro/lib/JSON/
-	cp -p ${HOME}/src/JSON-Relaxed/lib/JSON/Relaxed.pm lib/ChordPro/lib/JSON/
+	mkdir -p lib/ChordPro/lib/JSON/Relaxed
+	cp -p ${HOME}/src/JSON-Relaxed/lib/JSON/Relaxed.pm \
+	  lib/ChordPro/lib/JSON/
+	cp -p ${HOME}/src/JSON-Relaxed/lib/JSON/Relaxed/Parser.pm \
+	  ${HOME}/src/JSON-Relaxed/lib/JSON/Relaxed/ErrorCodes.pm \
+	  lib/ChordPro/lib/JSON/Relaxed/
 
 ABCDEST    = ${RES}/abc/abc2svg
 ABCKIT     = abc2svg-be8faee2b4
