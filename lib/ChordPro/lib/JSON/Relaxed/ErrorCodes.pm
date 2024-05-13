@@ -152,7 +152,7 @@ my %msg =
     'multiple-structures' =>
     'the string being parsed contains more than one structure',
     'unknown-token-after-key' =>
-    'expected comma or closing brace after a hash key',
+    'expected colon, comma or closing brace after a hash key',
     'unknown-token-for-hash-key' =>
     'expected string, comma, or closing brace in a hash key',
     'unclosed-hash-brace' =>
@@ -173,11 +173,21 @@ sub message {
     my ( $self, $id, $aux ) = @_;
     my $msg = $msg{$id} // ($id =~ s/-/ /gr);
     if ( $aux ) {
-	$msg .= sprintf( ", at character offset %d (before %s)",
-			 $aux->offset, $aux->as_string );
+	# Calculate line/col from offset.
+	my @a = split( /\r\n?|\n/, $aux->parent->data );
+	if ( @a > 1 ) {
+	    @a = split( /\r\n?|\n/, substr( $aux->parent->data, 0, $aux->offset ) );
+	    $msg .= sprintf( " (line %d, col %d, before %s)",
+			     0+@a, length($a[-1]), $aux->as_string );
+	}
+	else {
+	    # Single line, assume string.
+	    $msg .= sprintf( " (offset %d, before %s)",
+			     $aux->offset, $aux->as_string );
+	}
     }
     else {
-	$msg .= ", at end of string";
+	$msg .= " (at end of string)";
     }
     $msg;
 }
