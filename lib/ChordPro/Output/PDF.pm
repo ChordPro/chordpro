@@ -1247,7 +1247,7 @@ sub generate_song {
 		    # Use as margin label.
 		    unshift( @elts, { %$elt,
 				      type => $t->{type} // "comment",
-				      font => $ps->{fonts}->{label},
+				      font => $ps->{fonts}->{$t->{type} // "label"},
 				      text => $ps->{chorus}->{recall}->{tag},
 				    } )
 		      if $ps->{chorus}->{recall}->{tag} ne "";
@@ -1261,7 +1261,7 @@ sub generate_song {
 		    # Use as tag.
 		    unshift( @elts, { %$elt,
 				      type => $t->{type} // "comment",
-				      font => $ps->{fonts}->{label},
+				      font => $ps->{fonts}->{$t->{type} // "label"},
 				      text => $elt->{chorus}->[0]->{value},
 				    } )
 		}

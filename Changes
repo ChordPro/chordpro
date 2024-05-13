@@ -13,7 +13,7 @@
     - Upgrade Text::Layout to 0.036.
     - Upgrade JSON::Relaxed to 0.090.
     - Handle \u escapes for surrogates and extended chars (\u{...}).
-    - Fix issue #371.
+    - Fix issue #371, #372.
     - Fix problem that text in a TextBlock did not reset to flush left.
 
 6.050.10 2024-04-06
