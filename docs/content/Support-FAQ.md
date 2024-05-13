@@ -23,3 +23,6 @@ questions and answers here sometime soon.
 * [D♯ transposes to D♭ but I want C♯]({{< relref "FAQ-Transpose" >}})
 
 * ["Unknown chord" for valid chords]({{< relref "FAQ-SlashChords" >}})
+
+* [I’ve added a Copyright (Artist, ...) directive but I do not see it in the output]({{< relref "FAQ-PageTitles" >}})
+
