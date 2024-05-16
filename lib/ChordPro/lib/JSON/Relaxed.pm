@@ -362,7 +362,9 @@ For a full list, see L<JSON::Relaxed::ErrorCodes>.
 
 =head2 prp
 
-=head2 pretty (see "encode").
+=head2 pretty (see "encode")
+
+=head2 booleans (see L<"Boolean values">)
 
 Sets/resets options.
 
@@ -394,6 +396,80 @@ BEGIN {
     our %EXPORT_TAGS = ( all => [ @EXPORT_OK ] );
 }
 
+=head1 MAPPING
+
+=head2 RRJSON to Perl
+
+=over 4
+
+=item *
+
+Numbers are unquoted strings. They will be mapped to numbers if the
+repesentation is identical to the source.
+For example, the unquoted string C<1> and the quoted string C<"1">
+will both yield the number C<1>
+The unquoted string C<1.0> will also yield the number C<1>,
+but C<"1.0"> will yield the string C<"1.0">.
+
+=item *
+
+Unquoted C<null> will become C<undef>.
+
+=item *
+
+Unquoted C<true> and C<false> will yield JSON::Boolean objects that
+test as boolean (true resp. false) and stringify as C<"true"> resp.
+C<"false">. See L</"Boolean values"> how to change this behaviour.
+
+=item *
+
+Other unquoted strings will be treated as quoted strings.
+
+=back
+
+=head2 Perl to RRJSON
+
+=over 4
+
+=item *
+
+Numbers will be output as numbers.
+
+=item *
+
+Strings will be output as unquoted strings if possible, quoted strings
+otherwise. Non-latin characters will be output as C<\u> escapes.
+When some of the quotes C<" ' `> are embedded the others will be tried
+for the string, e.g. C<"a\"b"> will yield C<'a"b'>.
+
+=item *
+
+Boolean objects will be output as unquoted C<true> and C<false>.
+
+=item *
+
+Undefined values will be output as C<null>.
+
+=back
+
+=head2 Boolean values
+
+By default JSON::Boolean objects will be used for unquoted C<true> and
+C<false>. The C<booleans> method can be used to change this.
+
+    $parser->booleans = [ false-value, true-value ]
+
+This sets the values to be used for C<true> and C<false>.
+Default is
+
+    $parser->booleans = [ $JSON::Boolean::false, $JSON::Boolean::true  ]
+
+A non-array true value establishes the default.
+
+Setting to a false value is the same as
+
+    $parser->booleans = [ 0, 1 ]
+
 =head1 ERROR HANDLING
 
 If the document cannot be parsed, JSON::Relaxed will throw an
@@ -404,7 +480,7 @@ value and sets error indicators in $JSON::Relaxed::err_id and
 $JSON::Relaxed::err_msg.
 
 If parser property C<croak_on_error> is set to a false
-value, it will always behave as if in legacy mode.
+value, it will behave as if in legacy mode.
 
 For a full list of error codes, see L<JSON::Relaxed::ErrorCodes>.
 

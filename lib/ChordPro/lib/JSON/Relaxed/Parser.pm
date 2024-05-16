@@ -17,6 +17,7 @@ field @tokens;			# string as tokens
 
 # Instance properties.
 field $extra_tokens_ok	   :mutator :param = undef;
+field $booleans		   :mutator :param = 1;
 
 # Signal error with exceptions.
 field $croak_on_error	   :mutator :param = 1;
@@ -64,8 +65,9 @@ method _decode( $str ) {
     $err_pos = -1;
     undef $err_msg;
 
-    $self->parse_chars;
+    $self->pretokenize;
     return if $self->is_error;
+
     $self->tokenize;
     return $self->error('empty-input') unless @tokens;
 
@@ -107,9 +109,7 @@ method is_quote ($c) {
 # Numbers. A special case of unquoted strings.
 my $p_number = q{[+-]?\d*\.?\d+(?:[Ee][+-]?\d+)?};
 
-method parse_chars( $source = undef ) {
-
-    $data = $source if $source;	# for debugging
+method pretokenize {
 
     # \u escape (4 hexits)
     my @p = ( qq<\\\\u[[:xdigit:]]{4}> );
@@ -156,11 +156,19 @@ method parse_chars( $source = undef ) {
 # Accessor for @pretoks.
 method pretoks() { \@pretoks }
 
-method tokenize( $pretoks = undef ) {
+method tokenize {
 
     @tokens = ();
     my $offset = 0;		# token offset in input
-    @pretoks = @$pretoks if $pretoks;	# for debugging;
+
+    if ( $booleans ) {
+	if ( ref($booleans) ne 'ARRAY' ) {
+	    $booleans = [ $JSON::Boolean::false, $JSON::Boolean::true ];
+	}
+    }
+    else {
+	$booleans = [ 0, 1 ];
+    }
 
     my $glue = 0;		# can glue strings
     my $uq_open = 0;		# collecting pretokens for unquoted string
@@ -187,12 +195,10 @@ method tokenize( $pretoks = undef ) {
 	if ( $pretok =~ /^(["'`])(.*?)\1$/s ) {
 	    my ( $quote, $content ) = ( $1, $2 );
 	    if ( $glue > 1 ) {
-		$tokens[-1]->token->append($content);
+		$tokens[-1]->append($content);
 	    }
 	    else {
-		$self->addtok( JSON::Relaxed::Parser::String::Quoted->new
-			       ( quote => $quote, content => $content),
-			       'Q', $offset );
+		$self->addtok( $content, 'Q', $offset, $quote );
 		$glue = 1 unless $strict;
 	    }
 	    $offset += length($pretok);
@@ -228,8 +234,7 @@ method tokenize( $pretoks = undef ) {
 
 	# Numbers.
 	elsif ( $pretok =~ /^$p_number$/ ) {
-	    $self->addtok( JSON::Relaxed::Parser::String::Unquoted->new
-			   ( content => 0+$pretok ), 'N', $offset );
+	    $self->addtok( 0+$pretok, 'N', $offset );
 	    $offset += length($pretok);
 	    $uq_open = 0;
 	}
@@ -245,11 +250,10 @@ method tokenize( $pretoks = undef ) {
 	# Else it's an unquoted string.
 	else {
 	    if ( $uq_open ) {
-		$tokens[-1]->token->append($pretok);
+		$tokens[-1]->append($pretok);
 	    }
 	    else {
-		$self->addtok( JSON::Relaxed::Parser::String::Unquoted->new
-			       ( content => $pretok ), 'U', $offset );
+		$self->addtok( $pretok, 'U', $offset );
 		$uq_open++;
 	    }
 	    $offset += length($pretok);
@@ -262,13 +266,26 @@ method tokenize( $pretoks = undef ) {
 method tokens() { \@tokens }
 
 # Add a new token to @tokens.
-method addtok( $tok, $typ, $off ) {
+method addtok( $tok, $typ, $off, $quote=undef ) {
 
     push( @tokens,
-	  JSON::Relaxed::Parser::Token->new( parent => $self,
-					     token  => $tok,
-					     type   => $typ,
-					     offset => $off ) );
+	  $typ eq 'U' || $typ eq 'N'
+	  ? JSON::Relaxed::String::Unquoted->new( token  => $tok,
+						  content => $tok,
+						  type   => $typ,
+						  parent => $self,
+						  offset => $off )
+	  : $typ eq 'Q'
+	    ? JSON::Relaxed::String::Quoted->new( token  => $tok,
+						  type   => $typ,
+						  content => $tok,
+						  quote  => $quote,
+						  parent => $self,
+						  offset => $off )
+	    : JSON::Relaxed::Token->new( token  => $tok,
+					 parent => $self,
+					 type   => $typ,
+					 offset => $off ) );
 }
 
 # Build the result structure out of the tokens.
@@ -527,7 +544,7 @@ method is_comment_opener( $pretok ) {
 
 method encode(%opts) {
     my $level   = $opts{level}              // 0;
-    my $rv      = $opts{data}               // "Missing data";
+    my $rv      = $opts{data};			# allow undef
     my $indent  = $opts{indent}             // 2;
     my $impoh   = $opts{implied_outer_hash} // $implied_outer_hash;
     my $ckeys   = $opts{combined_keys}      // $combined_keys;
@@ -537,13 +554,25 @@ method encode(%opts) {
     my $s = "";
     my $i = 0;
 
-    my $pr_string = sub ( $rv, $level=0, $always_string=1 ) {
+    my $pr_string = sub ( $rv, $level=0 ) {
+	my $always_string;
+
+	# Reserved strings.
 	if ( !defined($rv) ) {
 	    $s .= "null";
 	    return;
 	}
+	if ( UNIVERSAL::isa( $rv, 'JSON::Boolean' ) ) {
+	    $s .= '"' if $always_string;
+	    $s .= $rv;
+	    $s .= '"' if $always_string;
+	    return;
+	}
 
-	my $v = $rv =~ s/\\/\\\\/gr;
+	my $v = $rv;
+	$always_string ||= $v =~ /^$p_number$/ && 0+$v ne $v;
+
+	$v =~ s/\\/\\\\/g;
 	$v =~ s/\n/\\n/g;
 	$v =~ s/\r/\\r/g;
 	$v =~ s/\f/\\f/g;
@@ -551,11 +580,11 @@ method encode(%opts) {
 	$v =~ s/\010/\\b/g;
 	$v =~ s/\t/\\t/g;
 	$v =~ s/([^ -ÿ])/sprintf( ord($1) < 0xffff ? "\\u%04x" : "\\u{%x}", ord($1))/ge;
-	if ( $v ne $rv ) {
-	    $s .= '"' . ($v =~ s/(["'`])/\\$1/r) . '"';
+	if ( $always_string || $v ne $rv ) {
+	    $s .= '"' . ($v =~ s/(["'`])/\\$1/rg) . '"';
 	}
 	elsif ( $v =~ $p_reserved || $v =~ $p_quotes || $v =~ /\s/
-	     || ( $always_string && $v =~ /^(true|false|null)$/i ) ) {
+	     || ( $always_string && $v =~ /^(true|false)$/ ) ) {
 	    if ( $v !~ /\"/ ) {
 		$s .= '"' . $v . '"';
 	    }
@@ -566,7 +595,7 @@ method encode(%opts) {
 		$s .= "`" . $v . "`";
 	    }
 	    else {
-		$s .= '"' . ($v =~ s/(["'`])/\\$1/r) . '"';
+		$s .= '"' . ($v =~ s/(["'`])/\\$1/rg) . '"';
 	    }
 	}
 	else {
@@ -595,7 +624,7 @@ method encode(%opts) {
 
     my $pr_hash; $pr_hash = sub ( $rv, $level=0 ) {
 	unless ( keys(%$rv) ) {
-	    $s .= $pretty ? ": {}" : ":{}";
+	    $s .= "{}";
 	    return;
 	}
 	if ( $level || !$impoh ) {
@@ -629,9 +658,11 @@ method encode(%opts) {
 	    else {
 		$s .= $pretty ? " : " : ":";
 		$pr_string->( $v, $level+1 );
+		$s .= "," unless $pretty;
 	    }
 	    $s .= "\n" if $pretty;
 	}
+	$s =~ s/,$// unless $pretty;
 	if ( $level || !$impoh ) {
 	    $i -= $indent;
 	    $s .= (" " x $i) if $pretty;
@@ -657,7 +688,7 @@ method encode(%opts) {
 
 ################ Tokens ################
 
-class JSON::Relaxed::Parser::Token :isa(JSON::Relaxed::Parser);
+class JSON::Relaxed::Token;
 
 field $parent :accessor :param;
 field $token  :accessor :param;
@@ -673,15 +704,15 @@ method is_list_opener() {
 }
 
 method as_perl( %options ) {	# for values
-
-    return $token->as_perl(%options) if $token->can("as_perl");
-    ...;			# reached?
-    $token;
+    $token->as_perl(%options);
 }
 
 method _data_printer( $ddp ) {	# for DDP
     my $res = "Token(";
-    if ( $self->is_string ) {
+    if ( !defined $token ) {
+	$res .= "null";
+    }
+    elsif ( $self->is_string ) {
 	$res .= $token->_data_printer($ddp);
     }
     else {
@@ -694,7 +725,7 @@ method _data_printer( $ddp ) {	# for DDP
 method as_string {		# for messages
     my $res = "";
     if ( $self->is_string ) {
-	$res = '"' . ($token->content =~ s/"/\\"/gr) . '"';
+	$res = '"' . ($self->content =~ s/"/\\"/gr) . '"';
     }
     else {
 	$res .= "\"$token\"";
@@ -704,7 +735,7 @@ method as_string {		# for messages
 
 =begin heavily_optimized_alternative
 
-package JSON::Relaxed::Parser::XXToken;
+package JSON::Relaxed::XXToken;
 our @ISA = qw(JSON::Relaxed::Parser);
 
 sub new {
@@ -754,9 +785,9 @@ sub as_string {		# for messages
 
 ################ Strings ################
 
-class JSON::Relaxed::Parser::String :isa(JSON::Relaxed::Parser);
+class JSON::Relaxed::String :isa(JSON::Relaxed::Token);
 
-field $content		  :param;
+field $content	:param = undef;
 field $quote	:accessor :param = undef;
 
 # Quoted strings are assembled from complete substrings, so escape
@@ -833,41 +864,75 @@ method unescape ($str) {
 
 ################ Quoted Strings ################
 
-class JSON::Relaxed::Parser::String::Quoted
-  :isa(JSON::Relaxed::Parser::String);
+class JSON::Relaxed::String::Quoted :isa(JSON::Relaxed::String);
 
 method as_perl( %options ) {
     $self->content;
 }
 
 method _data_printer( $ddp ) {
-    $self->quote . $self->content . $self->quote;
+    "Token(" . $self->quote . $self->content . $self->quote . ", " .
+      $self->type . ", " . $self->offset . ")";
 }
 
 ################ Unquoted Strings ################
 
-class JSON::Relaxed::Parser::String::Unquoted
-  :isa(JSON::Relaxed::Parser::String);
-
-# Values for reserved strings.
-my %boolean = (
-    null  => undef,
-    true  => 1,
-    false => 0,
-);
+class JSON::Relaxed::String::Unquoted :isa(JSON::Relaxed::String);
 
 # If the option always_string is set, bypass the reserved strings.
 # This is used for hash keys.
 method as_perl( %options ) {
     my $content = $self->content;
-    return $content if $options{always_string};
-    exists( $boolean{lc $content} ) ? $boolean{lc $content} : $content;
 
+    # If used as a key, always return a string.
+    return $content if $options{always_string};
+
+    # Return boolean specials if appropriate.
+    if ( $content =~ /^(?:true|false)$/ ) {
+	return $self->parent->booleans->[ $content eq 'true' ? 1 : 0 ];
+    }
+
+    # null -> undef
+    elsif ( $content eq "null" ) {
+	return;
+    }
+
+    # Return as string.
+    $content;
 }
 
 method _data_printer( $ddp ) {
-    "<" . $self->content . ">";
+    "Token(«" . $self->content . "», " .
+      $self->type . ", " . $self->offset . ")";
 }
+
+################ Booleans ################
+
+# This class distinguises booleans true and false from numeric 1 and 0.
+
+class JSON::Boolean;
+
+field $value		:param = undef;
+field $from		:param;
+
+ADJUST {
+    $value = $from eq "true" ? 1 : 0;
+};
+
+method as_perl( %options ) { $self }
+
+method _data_printer( $ddp ) { "Bool($from)" }
+
+use overload '""'     => method { $from },
+	     "bool"   => method { $value },
+	     fallback => 1;
+
+# For JSON::PP export.
+method TO_JSON { $value ? $JSON::PP::true : $JSON::PP::false }
+
+# Boolean values.
+our $true  = JSON::Boolean->new( from => 'true'  );
+our $false = JSON::Boolean->new( from => 'false' );
 
 ################
 
