@@ -282,4 +282,46 @@ sub max { $_[0] > $_[1] ? $_[0] : $_[1] }
 
 push( @EXPORT, "min", "max" );
 
+# Dimensions.
+# Fontsize allows typical font units, and defaults to ref 12.
+sub fontsize( $size, $ref=12 ) {
+    if ( $size && $size =~ /^([.\d]+)(%|e[mx]|p[tx])$/ ) {
+	return $ref/100 * $1 if $2 eq '%';
+	return $ref     * $1 if $2 eq 'em';
+	return $ref/2   * $1 if $2 eq 'ex';
+	return $1            if $2 eq 'pt';
+	return $1 * 0.75     if $2 eq 'px';
+    }
+    $size || $ref;
+}
+
+push( @EXPORT, "fontsize" );
+
+# Dimension allows arbitrary units, and defaults to ref 12.
+sub dimension( $size, %sz ) {
+    return unless defined $size;
+    my $ref;
+    if ( ( $ref = $sz{fsize} )
+	 && $size =~ /^([.\d]+)(%|e[mx])$/ ) {
+	return $ref/100 * $1  if $2 eq '%';
+	return $ref     * $1  if $2 eq 'em';
+	return $ref/2   * $1  if $2 eq 'ex';
+    }
+    if ( ( $ref = $sz{width} )
+	 && $size =~ /^([.\d]+)(%)$/ ) {
+	return $ref/100 * $1  if $2 eq '%';
+    }
+    if ( $size =~ /^([.\d]+)(p[tx]|[cm]m|in|)$/ ) {
+	return $1             if $2 eq 'pt';
+	return $1 * 0.75      if $2 eq 'px';
+	return $1 * 72 / 2.54 if $2 eq 'cm';
+	return $1 * 72 / 25.4 if $2 eq 'mm';
+	return $1 * 72        if $2 eq 'in';
+	return $1             if $2 eq '';
+    }
+    $size;			# let someone else croak
+}
+
+push( @EXPORT, "dimension" );
+
 1;
