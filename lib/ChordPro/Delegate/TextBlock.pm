@@ -56,7 +56,7 @@ sub txt2xform( $self, %args ) {
     my $bgcol = $pr->_bgcolor($font->{background});
     $bgcol = "" if $bgcol eq "none";
 
-    my $size   = delete($opts->{textsize}) || $font->{size};
+    my $size   = fontsize( delete($opts->{textsize}), $font->{size} );
     my $color  = delete($opts->{textcolor});
     my $flush  = delete($opts->{flush})  // "left";
     my $vflush = delete($opts->{vflush}) // "top";
@@ -86,7 +86,8 @@ sub txt2xform( $self, %args ) {
     # Desired width (includes padding).
     my ( $width, $height );
     if ( $width = delete($opts->{width}) ) {
-	$width -= 2*($padding||0);
+	# Note that using dimension is not yet operational.
+	$width = dimension( $width, width => $size ) - 2*($padding||0);
     }
     else {
 	$width = $awidth;
@@ -97,7 +98,8 @@ sub txt2xform( $self, %args ) {
 
     # Desired height (includes padding).
     if ( $height = delete($opts->{height}) ) {
-	$height -= 2*($padding||0);
+	# Note that using dimension is not yet operational.
+	$height = dimension( $height, width => $size ) - 2*($padding||0);
     }
     else {
 	$height = $aheight;
