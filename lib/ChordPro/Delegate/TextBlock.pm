@@ -53,10 +53,8 @@ sub txt2xform( $self, %args ) {
 	$style = "text";
     }
     my $font  = $ps->{fonts}->{$style};
-    my $background = $font->{background};
-    if ( $background && exists( $ps->{theme}->{$background} ) ) {
-	$background = $ps->{theme}->{$background};
-    }
+    my $bgcol = $pr->_bgcolor($font->{background});
+    $bgcol = "" if $bgcol eq "none";
 
     my $size   = delete($opts->{textsize}) || $font->{size};
     my $color  = delete($opts->{textcolor});
@@ -64,10 +62,10 @@ sub txt2xform( $self, %args ) {
     my $vflush = delete($opts->{vflush}) // "top";
 
     my $data = $elt->{data};
-    if ( $color || $background ) {
+    if ( $color || $bgcol ) {
 	my $span = "";
 	$span .= " color='$color'" if $color;
-	$span .= " background='$background'" if $background;
+	$span .= " background='$bgcol'" if $bgcol;
 	$data = [ map { "<span$span>$_</span>" } @$data ];
     }
     my $padding  = delete($opts->{padding});
