@@ -65,6 +65,8 @@ Additionally, the following attributes may be used:
    
 * `textsize="`_n_`"`  
    Initial value for the text size.
+   This may be relative to the size specified in the config using `%`, `em`,
+   and `ex`.
 
 * `textcolor="`_colour_`"`  
    Initial value for the text colour.
