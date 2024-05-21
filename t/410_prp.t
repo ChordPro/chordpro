@@ -6,7 +6,7 @@ no warnings 'experimental::signatures';
 use utf8;
 
 use ChordPro::Testing;
-use ChordPro::Utils qw(prp2cfg prpadd2cfg);
+use ChordPro::Utils qw(prpadd2cfg);
 use ChordPro::Config;
 
 plan tests => 29;
