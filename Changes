@@ -16,6 +16,7 @@
     - Fix issue #371, #372.
     - Fix problem that text in a TextBlock did not reset to flush left.
     - Fix problem TextBlock textstyle did not copy the background colour.
+    - New function to deal with property settings for the config.
 
 6.050.10 2024-04-06
 

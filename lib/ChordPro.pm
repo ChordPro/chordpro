@@ -1137,7 +1137,7 @@ sub ::runtimeinfo {
     eval { require JavaScript::QuickJS;
 	$vv->("JavaScript::QuickJS");
     };
-    my $i = ChordPro::Config::json_parser();
+    my $i = json_parser();
     $vv->( $i->{parser} );
     $msg =~ s/\n$/(relaxed)\n/ if $i->{relaxed};
     return $msg;

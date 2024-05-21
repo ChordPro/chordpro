@@ -247,6 +247,7 @@ t/322_subst.t
 t/323_null.t
 t/380_roundtrip.t
 t/400_kv.t
+t/410_prp.t
 t/40_basic01_html.t
 t/50_encodings.t
 t/60_transpose.cho

@@ -125,6 +125,7 @@ sub txt2xform( $self, %args ) {
     }
 
     my $y = $height - $ycorr;
+    my $sp = $ps->{spacing}->{$style} || $ps->{spacing}->{lyrics};
 
     if ( $flush eq "right" || $flush eq "center"
 	 || $vflush eq "middle" || $vflush eq "bottom" ) {
@@ -141,7 +142,7 @@ sub txt2xform( $self, %args ) {
 	    $pr->{tmplayout}->set_width($width);
 	    $pr->{tmplayout}->set_alignment($flush);
 	    $pr->{tmplayout}->show( 0, $y, $xo );
-	    $y -= $h * $ps->{spacing}->{lyrics};
+	    $y -= $h * $sp;
 	}
     }
     else {			# assume top/left
@@ -149,7 +150,7 @@ sub txt2xform( $self, %args ) {
 	    my $h = $pr->strheight( $_, $font, $size ) || $size;
 	    $pr->{tmplayout}->set_alignment($flush);
 	    $pr->{tmplayout}->show( 0, $y, $xo );
-	    $y -= $h * $ps->{spacing}->{lyrics};
+	    $y -= $h * $sp;
 	}
     }
 

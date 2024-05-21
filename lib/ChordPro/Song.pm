@@ -217,9 +217,7 @@ sub parse_song {
     $config->unlock;
 
     if ( %$defs ) {
-	my $c = $config->hmerge( prp2cfg( $defs, $config ) );
-	bless $c => ref($config);
-	$config = $c;
+	prpadd2cfg( $config, %$defs );
     }
 
     for ( qw( transpose transcode decapo lyrics-only ) ) {
@@ -1383,49 +1381,10 @@ sub directive {
 		    value => $arg,
 		  );
 
-	# THIS IS BASICALLY A COPY OF THE CODE IN Config.pm.
-	# TODO: GENERALIZE.
-	my $ccfg = {};
-	my @k = split( /[:.]/, $1 );
-	my $c = \$ccfg;		# new
-	my $o = $config;	# current
-	my $lk = pop(@k);	# last key
+	$config->unlock;
+	prpadd2cfg( $config, $1 => $arg );
+	$config->lock;
 
-	# Step through the keys.
-	foreach ( @k ) {
-	    $c = \($$c->{$_});
-	    $o = $o->{$_};
-	}
-
-	# Turn hash.array into hash.array.> (append).
-	if ( ref($o) eq 'HASH' && ref($o->{$lk}) eq 'ARRAY' ) {
-	    $c = \($$c->{$lk});
-	    $o = $o->{$lk};
-	    $lk = '>';
-	}
-
-	# Final key. Merge array if so.
-	if ( ( $lk =~ /^\d+$/ || $lk eq '>' || $lk eq '<' )
-	       && ref($o) eq 'ARRAY' ) {
-	    unless ( ref($$c) eq 'ARRAY' ) {
-		# Only copy orig values the first time.
-		$$c->[$_] = $o->[$_] for 0..scalar(@{$o})-1;
-	    }
-	    if ( $lk eq '>' ) {
-		push( @{$$c}, $arg );
-	    }
-	    elsif ( $lk eq '<' ) {
-		unshift( @{$$c}, $arg );
-	    }
-	    else {
-		$$c->[$lk] = $arg;
-	    }
-	}
-	else {
-	    $$c->{$lk} = $arg;
-	}
-
-	$config->augment($ccfg);
 	upd_config();
 
 	return 1;

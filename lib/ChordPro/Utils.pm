@@ -218,39 +218,152 @@ sub qquote ( $arg, $force = 0 ) {
 
 push( @EXPORT, 'qquote' );
 
-# Turn foo.bar.blech=blah into { foo => { bar => { blech ==> "blah" } } }.
+# Processing JSON.
 
-sub prp2cfg ( $defs, $cfg ) {
-    my $ccfg = {};
-    $cfg //= {};
-    while ( my ($k, $v) = each(%$defs) ) {
-	my @k = split( /[:.]/, $k );
-	my $c = \$ccfg;		# new
-	my $o = $cfg;		# current
-	my $lk = pop(@k);	# last key
-
-	# Step through the keys.
-	foreach ( @k ) {
-	    $c = \($$c->{$_});
-	    $o = $o->{$_};
-	}
-
-	# Final key. Merge array if so.
-	if ( $lk =~ /^\d+$/ && ref($o) eq 'ARRAY' ) {
-	    unless ( ref($$c) eq 'ARRAY' ) {
-		# Only copy orig values the first time.
-		$$c->[$_] = $o->[$_] for 0..scalar(@{$o})-1;
-	    }
-	    $$c->[$lk] = $v;
-	}
-	else {
-	    $$c->{$lk} = $v;
-	}
+sub json_load( $json, $source = "<builtin>" ) {
+    my $info = json_parser();
+    if ( $info->{parser} eq "JSON::Relaxed" ) {
+	state $pp = JSON::Relaxed::Parser->new( croak_on_error => 0,
+						strict => 0,
+						booleans => [ 0, 1 ],
+						prp => 1 );
+	my $data = $pp->decode($json);
+	return $data unless $pp->is_error;
+	$source .= ": " if $source;
+	die("${source}JSON error: " . $pp->err_msg . "\n");
     }
-    return $ccfg;
+    else {
+	state $pp = JSON::PP->new;
+
+	# Glue lines, so we have at lease some relaxation.
+	$json =~ s/"\s*\\\n\s*"//g;
+
+	$pp->relaxed if $info->{relaxed};
+	$pp->decode($json);
+    }
 }
 
-push( @EXPORT, 'prp2cfg' );
+# JSON parser, what and how (also used by runtimeinfo().
+sub json_parser() {
+    my $relax = $ENV{CHORDPRO_JSON_RELAXED} // 2;
+    if ( $relax > 1 ) {
+	require JSON::Relaxed::Parser;
+	return { parser  => "JSON::Relaxed",
+		 version => $JSON::Relaxed::VERSION }
+    }
+    else {
+	require JSON::PP;
+	return { parser  => "JSON::PP",
+		 relaxed => $relax,
+		 version => $JSON::PP::VERSION }
+    }
+}
+
+push( @EXPORT, qw(json_parser json_load) );
+
+# Like prp2cfg, but updates.
+# Also allows array pre/append and JSON data.
+# Useful error messages are signalled with exceptions.
+
+push( @EXPORT, 'prpadd2cfg' );
+
+sub prpadd2cfg ( $cfg, @defs ) {
+    $cfg //= {};
+    state $specials = { false => 0, true => 1, null => undef };
+
+    while ( @defs ) {
+	my $key   = shift(@defs);
+	my $value = shift(@defs);
+	# warn("K:$key V:$value\n");
+
+	# Check and process the value, if needed.
+	if ( exists $specials->{$value} ) {
+	    $value = $specials->{$value};
+	    # warn("Value => $value\n");
+	}
+	elsif ( !( ref($value)
+		   || $value =~ /^(?:[-+]?\d+(?:\.\d+)?|[\w, -]*)$/ ) ) {
+	    # Not simple, assume JSON struct.
+	    $value = json_load( $value, $value );
+	    # use DDP; p($value, as => "Value ->");
+	}
+
+	# Note that ':' is not oficailly supported by RRJson.
+	my @keys = split( /[:.]/, $key );
+	my $lastkey = pop(@keys);
+
+	my $cur = \$cfg;		# current pointer in struct
+
+	# Step through the keys.
+	my $errkey = "";		# error trail
+	foreach ( @keys ) {
+	    if ( UNIVERSAL::isa( $$cur, 'ARRAY' ) ) {
+		die("Array ", substr($errkey,0,-1),
+		    " requires integer index (got \"$_\")\n")
+		  unless /^[<>]?[-+]?\d+$/;
+		$cur = \($$cur->[$_]);
+	    }
+	    elsif ( UNIVERSAL::isa( $$cur, 'HASH' ) ) {
+		$cur = \($$cur->{$_});
+	    }
+	    else {
+		die("Key ", substr($errkey,0,-1),
+		    " ", ref($$cur),
+		    " does not refer to an array or hash\n");
+	    }
+	    $errkey .= "$_."
+
+	}
+
+	# Final key.
+	if ( UNIVERSAL::isa( $$cur, 'ARRAY' ) ) {
+	    if ( $lastkey =~ />([-+]?\d+)?$/ ) {	# append
+		if ( defined $1 ) {
+		    splice( @{$$cur},
+			    $1 >= 0 ? 1+$1 : 1+@{$$cur}+$1, 0, $value );
+		}
+		else {
+		    push( @{$$cur}, $value );
+		}
+	    }
+	    elsif ( $lastkey =~ /<([-+]?\d+)?$/ ) {	# prepend
+		if ( defined $1 ) {
+		    splice( @{$$cur}, $1, 0, $value );
+		}
+		else {
+		    unshift( @{$$cur}, $value );
+		}
+	    }
+	    elsif ( $lastkey =~ /\/([-+]?\d+)?$/ ) {	# remove
+		if ( defined $1 ) {
+		    splice( @{$$cur}, $1, 1 );
+		}
+		else {
+		    pop( @{$$cur} );
+		}
+	    }
+	    else {					# replace
+		die("Array $errkey requires integer index (got \"$lastkey\")\n")
+		  unless $lastkey =~ /^[-+]?\d+$/;
+		$$cur->[$lastkey] = $value;
+	    }
+	}
+	elsif ( UNIVERSAL::isa( $$cur, 'HASH' ) ) {
+	    $$cur->{$lastkey} = $value;
+	}
+	else {
+	    die("Key ", substr($errkey,0,-1),
+		" is scalar, not ",
+		$lastkey =~ /^(?:[-+]?\d+|[<>])$/ ? "array" : "hash",
+		"\n");
+	}
+    }
+
+    # The structure has been modified, but also return for covenience.
+    return $cfg;
+}
+
+push( @EXPORT, 'prpadd2cfg' );
 
 # Remove markup.
 sub demarkup ( $t ) {

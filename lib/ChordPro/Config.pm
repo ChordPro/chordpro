@@ -46,47 +46,7 @@ This module can be run standalone and will print the default config.
 #sub clone($);
 #sub default_config();
 
-sub json_load( $json, $source = "<builtin>" ) {
-    my $info = json_parser();
-    if ( $info->{parser} eq "JSON::Relaxed" ) {
-	state $pp = JSON::Relaxed::Parser->new( croak_on_error => 0,
-						strict => 0,
-						booleans => [ 0, 1 ],
-						prp => 1 );
-	my $data = $pp->decode($json);
-	return $data unless $pp->is_error;
-	$source .= ": " if $source;
-	die("${source}JSON error: " . $pp->err_msg . "\n");
-    }
-    else {
-	state $pp = JSON::PP->new;
-
-	# Glue lines, so we have at lease some relaxation.
-	$json =~ s/"\s*\\\n\s*"//g;
-
-	$pp->relaxed if $info->{relaxed};
-	$pp->decode($json);
-    }
-}
-
-# JSON parser, what and how (also used by runtimeinfo().
-sub json_parser() {
-    my $relax = $ENV{CHORDPRO_JSON_RELAXED} // 2;
-    if ( $relax > 1 ) {
-	require JSON::Relaxed::Parser;
-	return { parser  => "JSON::Relaxed",
-		 version => $JSON::Relaxed::VERSION }
-    }
-    else {
-	require JSON::PP;
-	return { parser  => "JSON::PP",
-		 relaxed => $relax,
-		 version => $JSON::PP::VERSION }
-    }
-}
-
 sub configurator ( $opts = undef ) {
-    my $pp = JSON::PP->new->relaxed;
 
     # Test programs call configurator without options.
     # Prepare a minimal config.
@@ -193,7 +153,8 @@ sub configurator ( $opts = undef ) {
     }
 
     # Handle defines from the command line.
-    $cfg = hmerge( $cfg, prp2cfg( $options->{define}, $cfg ) );
+    # $cfg = hmerge( $cfg, prp2cfg( $options->{define}, $cfg ) );
+    prpadd2cfg( $cfg, %{$options->{define}} );
 
     # Sanitize added extra entries.
     for ( qw(title subtitle footer) ) {
