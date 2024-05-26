@@ -399,6 +399,73 @@ and associating output elements to font families. The latter part is
 },
 ````
 
+## Example setup using DejaVu fonts (Mac OS X)
+
+````
+// We have installed the DejaVu fonts in the ~/Library/Fonts
+// directory. See https://dejavu-fonts.github.io/
+"fontdir" : [ "~/Library/Fonts" ],
+// "fontconfig" maps members of font families to font files.
+"fontconfig" : {
+   "serif" : {
+       ""            : "DejaVuSerif.ttf",
+       "bold"        : "DejaVuSerif-Bold.ttf",
+       "bolditalic"  : "DejaVuSerif-BoldItalic.ttf",
+       "italic"      : "DejaVuSerif-Italic.ttf",
+   },
+   "sans, sans-serif" : {
+       ""            : "DejaVuSans.ttf",
+       "bold"        : "DejaVuSans-Bold.ttf",
+       "bolditalic"  : "DejaVuSans-BoldOblique.ttf",
+       "italic"      : "DejaVuSans-Oblique.ttf",
+   },
+   "mono, monospace" : {
+       ""            : "DejaVuSansMono.ttf",
+       "bold"        : "DejaVuSansMono-Bold.ttf",
+       "bolditalic"  : "DejaVuSansMono-BoldOblique.ttf",
+       "italic"      : "DejaVuSansMono-Oblique.ttf",
+   },
+},
+// "fonts" associates output elements to font families as defined in
+// "fontconfig" above.
+// Not all elements need to be associated since they default to other
+// settings.
+"fonts" : {
+    "title" : {
+        "description" : "serif bold 14",
+    },
+    "subtitle" : {
+        "description" : "serif 11",
+    },
+    "text" : {
+        "description" : "serif 12",
+    },
+    "chord" : {
+        "description" : "sans italic 10",
+    },
+    "comment" : {
+        "description" : "sans 12",
+        "background" : "#E5E5E5"
+    },
+    "comment_italic" : {
+        "description" : "sans italic 12",
+    },
+    "comment_box" : {
+        "description" : "sans 12",
+        "frame" : 1
+    },
+    "tab" : {
+        "description" : "monospace 10",
+    },
+    "toc" : {
+        "description" : "serif 11",
+    },
+    "grid" : {
+        "description" : "sans 10",
+    },
+},
+````
+
 ## Example font config using system fonts
 
 While this will always generate good results, the results may, and
