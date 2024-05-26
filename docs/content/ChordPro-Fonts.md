@@ -403,7 +403,9 @@ and associating output elements to font families. The latter part is
 
 ````
 // We have installed the DejaVu fonts in the ~/Library/Fonts
-// directory. See https://dejavu-fonts.github.io/
+// directory. See https://dejavu-fonts.github.io/ for downloading
+// the fonts. To install, unzip the fonts bundle and double-click on
+// each of the .ttf files.
 "fontdir" : [ "~/Library/Fonts" ],
 // "fontconfig" maps members of font families to font files.
 "fontconfig" : {
