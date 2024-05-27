@@ -225,7 +225,6 @@ sub json_load( $json, $source = "<builtin>" ) {
     if ( $info->{parser} eq "JSON::Relaxed" ) {
 	state $pp = JSON::Relaxed::Parser->new( croak_on_error => 0,
 						strict => 0,
-						booleans => [ 0, 1 ],
 						prp => 1 );
 	my $data = $pp->decode($json);
 	return $data unless $pp->is_error;
