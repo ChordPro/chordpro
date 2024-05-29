@@ -112,7 +112,11 @@ endif
 
 dmg : app dmg1
 
+ifeq (${TARGET},wxchordpro)
 DMG := ChordPro-Installer-${VERSION}.dmg
+else
+DMG := ChordPro-CLI-${VERSION}.dmg
+endif
 
 dmg1 :
 	rm -f ${DMG}
