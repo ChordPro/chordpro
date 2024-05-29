@@ -92,10 +92,11 @@ app1 :
 	cp PkgInfo Info.plist "${APPDIR}/Contents"
 	cp "${DEST}/chordpro.icns" "${APPDIR}/Contents/Resources"
 	cp "${DEST}/chordpro-doc.icns" "${APPDIR}/Contents/Resources"
-	cd "${APPDIR}"; mv chordpro wxchordpro dndhandler Contents/MacOS
 	cd "${APPDIR}"; mv script lib Contents/MacOS
 	cd "${APPDIR}"; mv lib*.dylib Contents/MacOS
 	cd "${APPDIR}"; rm -f MANIFEST META.yml
+ifeq (${TARGET},wxchordpro)
+	cd "${APPDIR}"; mv chordpro wxchordpro dndhandler Contents/MacOS
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libpng16.*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libjpeg.*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libtiff.*.dylib
@@ -104,6 +105,10 @@ app1 :
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libwx*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*.bundle
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*/*.bundle
+else
+	cd "${APPDIR}"; cp chordpro dndhandler
+	cd "${APPDIR}"; mv chordpro dndhandler Contents/MacOS
+endif
 
 dmg : app dmg1
 
