@@ -99,7 +99,7 @@ checkjson :
 	mkdir .json
 	for i in ${CFGLIB}/*.json ; \
 	do \
-	  perl script/rrjson.pl --json $$i > .json/`basename $$i`; \
+	  perl -Ilib/ChordPro/lib script/rrjson.pl --json $$i > .json/`basename $$i`; \
 	done
 	cd .json; rm keyboard.json dark.json resetchords.json
 	${JSONVALIDATOR} ${JSONOPTS} \
@@ -164,6 +164,8 @@ rrjson :
 	cp -p ${HOME}/src/JSON-Relaxed/lib/JSON/Relaxed/Parser.pm \
 	  ${HOME}/src/JSON-Relaxed/lib/JSON/Relaxed/ErrorCodes.pm \
 	  lib/ChordPro/lib/JSON/Relaxed/
+	cp -p ${HOME}/src/JSON-Relaxed/scripts/rrjson.pl \
+	  script/
 
 ABCDEST    = ${RES}/abc/abc2svg
 ABCKIT     = abc2svg-be8faee2b4
