@@ -321,6 +321,11 @@ See L</"ERROR HANDLING">.
 Enables/disables some of the extensions described
 L<above|/REALLY RELAXED EXTENSIONS">.
 
+=item key_order
+
+Adds a key C<" key order "> to each hash, containing an array with the
+hash keys in order of appearance. This is used for pretty printing.
+
 =back
 
 =head2 decode
@@ -364,6 +369,8 @@ For a full list, see L<JSON::Relaxed::ErrorCodes>.
 
 =head2 pretty (see "encode")
 
+=head2 key_order
+
 =head2 booleans (see L<"Boolean values">)
 
 Sets/resets options.
@@ -379,8 +386,17 @@ Note that the value must be assigned to, e.g.
 Produces a string with a really relaxed rendition of the data.
 With option C<pretty>, the rendition is pretty-printed.
 
+With option C<key_order> the order of hash keys will be taken from a
+pseudo-key C<" key order ">. This pseudo-key is added when option
+C<key_order> is passed to C<decode>.
+
 A Perl structure is passed as C<data> option. This structure is encoded.
 Note however that this structure may contain only strings, arrays and hashes.
+
+Option C<schema> can be used to provide schema data for structure to
+be encoded. For each item to be encoded, the schema is consulted and
+the following schema items are prepended as comments: C<title>,
+C<description>, and C<infoText>.
 
 =cut
 
@@ -421,6 +437,8 @@ Unquoted C<true> and C<false> will yield JSON::Boolean objects that
 test as boolean (true resp. false) and stringify as C<"true"> resp.
 C<"false">. See L</"Boolean values"> how to change this behaviour.
 
+Likewise unquoted C<on> and C<off> when option C<prp> is specified.
+
 =item *
 
 Other unquoted strings will be treated as quoted strings.
@@ -441,6 +459,8 @@ Strings will be output as unquoted strings if possible, quoted strings
 otherwise. Non-latin characters will be output as C<\u> escapes.
 When some of the quotes C<" ' `> are embedded the others will be tried
 for the string, e.g. C<"a\"b"> will yield C<'a"b'>.
+
+All quotes are equal, there is no difference in interpretation.
 
 =item *
 
@@ -469,6 +489,9 @@ A non-array true value establishes the default.
 Setting to a false value is the same as
 
     $parser->booleans = [ 0, 1 ]
+
+With option C<prp>, unquoted C<on> is the same as C<true>, and C<off>
+is the same as C<false>.
 
 =head1 ERROR HANDLING
 

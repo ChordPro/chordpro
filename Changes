@@ -17,6 +17,7 @@
     - Fix problem that text in a TextBlock did not reset to flush left.
     - Fix problem TextBlock textstyle did not copy the background colour.
     - New function to deal with property settings for the config.
+    - New UI for MacOS. Thanks to Nick Berendsen.
 
 6.050.10 2024-04-06
 
