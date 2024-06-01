@@ -1358,7 +1358,7 @@ sub generate_song {
 
 	if ( $elt->{type} eq "set" ) {
 	    if ( $elt->{name} eq "lyrics-only" ) {
-		$lyrics_only = $elt->{value}
+		$lyrics_only = is_true($elt->{value})
 		  unless $lyrics_only > 1;
 	    }
 	    elsif ( $elt->{name} eq "gridparams" ) {
@@ -1400,14 +1400,7 @@ sub generate_song {
 	    }
 	    # Arbitrary config values.
 	    elsif ( $elt->{name} =~ /^pdf\.(.+)/ ) {
-		# $ps is inuse, modify in place.
-		my @k = split( /[.]/, $1 );
-		my $cc = $ps;
-		my $c = \$cc;
-		foreach ( @k ) {
-		    $c = \($$c->{$_});
-		}
-		$$c = $elt->{value};
+		prpadd2cfg( $ps, $1 => is_ttrue($elt->{value}) );
 	    }
 	    next;
 	}
