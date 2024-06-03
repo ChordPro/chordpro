@@ -1,7 +1,7 @@
 { "$schema" : "https://json-schema.org/draft-07/schema",
 
   "title" : "Configuration for ChordPro",
-  "description" : "\nThis is a relaxed JSON document, so comments are possible.",
+  "description" : "\nThis is a really relaxed JSON document, see\nhttps://metacpan.org/pod/JSON::Relaxed#REALLY-RELAXED-EXTENSIONS",
   "definitions" : {
     "backendspec" : {
       "description" : "Standard properties for backends.",
@@ -119,7 +119,7 @@
   "properties" : {
 
     "include" : {
-      "description" : "Includes are processed first, before the rest of\nthe config file.\n\n\"include\" takes a list of either filenames or preset names.\n\"include\" : [ \"modern1\", \"lib/mycfg.json\" ],",
+      "description" : "Includes are processed first, before the rest of\nthe config file.\n\n\"include\" takes a list of either filenames or preset names.",
       "type" : "array",
       "items" : {
         "type" : "string",
@@ -178,7 +178,7 @@
         },
 
         "inline-chords" : {
-          "description" : "Chords inline.\nMay be a string containing pretext %s posttext.\nDefaults to \"[%s]\" if set to a value that doesn't contain \"%s\".",
+          "description" : "Chords inline instead of above.\nMay be a string containing pretext %s posttext.\nDefaults to \"[%s]\" if set to a value that doesn't contain \"%s\".",
           "default" : false,
           "anyOf" : [
             { "type" : "string" },
@@ -439,7 +439,7 @@
     },
 
     "chords" : {
-      "description" : "User defined chords.\nThis is an array of hashes, one for each chord.\nEach hash should contain the following fields:\n\"name\": Name of the chord\n\"base\": base fret (optional, defaults to 1)\n\"frets\": the frets (optional, use 0 for an empty string, and -1 for a muted string)\n\"fingers\": finger positions (optional)\n\"display\": (optional) can be used to change the way the chord is displayed",
+      "description" : "User defined chords (placeholder).\nThis is an array of hashes, one for each chord.\nEach hash should contain the following fields:\n  \"name\":    name of the chord\n  \"base\":    base fret (optional, defaults to 1)\n  \"frets\":   the frets (optional, use 0 for an empty string,\n             and -1 for a muted string)\n  \"fingers\": finger positions (optional)\n  \"display\": (optional) can be used to change the way the chord is displayed",
       "type" : "array",
       "items" : {
         "additionalProperties" : false,
@@ -584,7 +584,7 @@
     },
 
     "instrument" : {
-      "description" : "Description of the instrument. This is usually set from an included instrument config.",
+      "description" : "Description of the instrument.\nActual values are set from an included instrument config.",
       "type" : "object",
       "additionalProperties" : false,
       "properties" : {
@@ -649,7 +649,7 @@
           "default" : "; "
         },
         "strict" : {
-          "description" : "If strict is nonzero, only the keys named here are allowed.\nIf strict is zero, {meta ...} will accept any key.",
+          "description" : "If strict, only the keys named here are allowed.\nOtherwise, {meta ...} will accept any key.",
           "type" : "boolean",
           "default" : true
         }
@@ -717,7 +717,7 @@
       "additionalProperties" : false,
       "properties" : {
         "abc" : {
-          "description" : "Embedding ABC",
+          "description" : "Embedding ABC.",
           "allOf" : [
             { "$ref" : "#/definitions/delegatespec" },
             { "properties" : {
@@ -738,7 +738,7 @@
           ]
         },
         "ly" : {
-          "description" : "Embedding Lilypond",
+          "description" : "Embedding Lilypond.",
           "allOf" : [
             { "$ref" : "#/definitions/delegatespec" },
             { "properties" : {
@@ -761,7 +761,7 @@
           ]
         },
         "svg" : {
-          "description" : "Embedding SVG",
+          "description" : "Embedding SVG.",
           "allOf" : [
             { "$ref" : "#/definitions/delegatespec" },
             { "properties" : {
@@ -777,7 +777,7 @@
           ]
         },
         "textblock" : {
-          "description" : "Embedding text block",
+          "description" : "Embedding textblock.",
           "allOf" : [
             { "$ref" : "#/definitions/delegatespec" },
             { "properties" : {
@@ -1535,14 +1535,14 @@
 		  "type" : "number"
 		},
 		"base" : {
-		  "description" : "The leftmost white key.",
+		  "description" : "The leftmost white key. Must be \"C\" or \"F\".",
 		  "default" : "C",
 		  "maximum" : 21,
 		  "type" : "string",
 		  "enum" : [ "C", "F" ]
 		},
 		"linewidth" : {
-		  "description" : "Thickness of the diagram lines as a fraction of 'width'.",
+		  "description" : "Thickness of the diagram lines as a fraction of \"width\".",
 		  "default" : 0.1,
 		  "minimum" : 0,
 		  "type" : "number"
@@ -1829,7 +1829,7 @@
     },
 
     "user" : {
-      "description" : "User settings. These are usually set by a separate config file.",
+      "description" : "User settings. Actual values are usually set by a separate config file.",
       "additionalProperties" : false,
       "properties" : {
         "fullname" : {

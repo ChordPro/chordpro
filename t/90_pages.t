@@ -19,7 +19,7 @@ my $csv = $base . "csv";
 my $ref = $base . "ref";
 
 our $options;
-my $config = ChordPro::Config::default_config();
+my $config = ChordPro::Config::pristine_config();
 my $tests = 2;
 
 SKIP: {

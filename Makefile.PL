@@ -41,7 +41,6 @@ WriteMakefile
  MAN3PODS	  => {
     'lib/ChordPro.pm'        => 'blib/man3/ChordPro.3pm',
     'lib/ChordPro/A2Crd.pm'  => 'blib/man3/ChordPro::A2Crd.3pm',
-    'lib/ChordPro/Config.pm' => 'blib/man3/ChordPro::Config.3pm',
     'lib/ChordPro/Wx.pm'     => 'blib/man3/ChordPro::Wx.3pm',
 		     },
  # Always require PDF::API2 or PDF::Builder and Text::Layout.
@@ -107,6 +106,7 @@ WriteMakefile
          file => [
 	    "lib/ChordPro/Songbook.pm",
 	    "lib/ChordPro/Chords.pm",
+	    "lib/ChordPro/Config.pm",
 	    "lib/ChordPro/Testing.pm",
 	    "lib/ChordPro/Utils.pm",
 	    "lib/ChordPro/Version.pm",

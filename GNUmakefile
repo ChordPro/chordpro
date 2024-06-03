@@ -70,17 +70,14 @@ LIB := lib/ChordPro
 RES := ${LIB}/res
 PODSELECT := podselect
 
-resources : ${RES}/config/chordpro.json ${RES}/pod/ChordPro.pod ${RES}/pod/Config.pod ${RES}/pod/A2Crd.pod docs/assets/pub/config60.schema
+resources : ${LIB}/Config/Data.pm ${RES}/config/chordpro.json ${RES}/pod/ChordPro.pod ${RES}/pod/Config.pod ${RES}/pod/A2Crd.pod docs/assets/pub/config60.schema
 
-${RES}/config/chordpro.json : ${LIB}/Config.pm
-	$(PERL) -Ilib $< > $@
+${LIB}/Config/Data.pm : ${RES}/config/chordpro.json
+	perl script/cfgboot.pl $< > $@~
+	cmp $@ $@~ || mv $@~ $@
 
 ${RES}/pod/ChordPro.pod : ${LIB}.pm
 	${PODSELECT} $< > $@
-
-${RES}/pod/Config.pod : ${LIB}/Config.pm
-	${PODSELECT} $< > $@
-	${PERL} -pe 's/^/    /' ${RES}/config/chordpro.json >> $@
 
 ${RES}/pod/A2Crd.pod : ${LIB}/A2Crd.pm
 	${PODSELECT} $< > $@
