@@ -1044,29 +1044,24 @@ method _data_printer( $ddp ) {
 
 # This class distinguises booleans true and false from numeric 1 and 0.
 
-class JSON::Boolean;
+package JSON::Boolean {
 
-field $value		:param = undef;
-field $from		:param;
+    sub as_perl( $self, %options ) { $self }
 
-ADJUST {
-    $value = $from eq "true" ? 1 : 0;
-};
+    sub _data_printer( $self, $ddp ) { "Bool($self)" }
 
-method as_perl( %options ) { $self }
+    use overload '""'     => sub { ${$_[0]} ? "true" : "false" },
+		 "bool"   => sub { !!${$_[0]} },
+		 fallback => 1;
 
-method _data_printer( $ddp ) { "Bool($from)" }
+    # For JSON::PP export.
+    sub TO_JSON { ${$_[0]} ? $JSON::PP::true : $JSON::PP::false }
 
-use overload '""'     => method { $from },
-	     "bool"   => method { $value },
-	     fallback => 1;
+    # Boolean values.
+    our $true  = do { bless \(my $dummy = 1) => __PACKAGE__ };
+    our $false = do { bless \(my $dummy = 0) => __PACKAGE__ };
 
-# For JSON::PP export.
-method TO_JSON { $value ? $JSON::PP::true : $JSON::PP::false }
-
-# Boolean values.
-our $true  = JSON::Boolean->new( from => 'true'  );
-our $false = JSON::Boolean->new( from => 'false' );
+}
 
 ################
 
