@@ -7,38 +7,43 @@
 
 import Foundation
 
-/// A notation we found in the official **ChordPro** source
+/// A notation we found in the **ChordPro** source
 struct Notation: Identifiable {
+    /// The calculated ID of the notation
     var id: URL {
         url
     }
+    /// The `URL` of the notation
     let url: URL
+    /// The calculated label of the notation
     var label: String {
         let label = self.url.deletingPathExtension()
         return label.lastPathComponent
     }
+    /// The description of the notation
+    /// - Note: Hard-coded because we cannot get this from the source
     var description: String {
         switch label {
         case "common":
-            "C, D, E, F, G, A, B"
+            return "C, D, E, F, G, A, B"
         case "dutch":
-            "C, D, E, F, G, A, B"
+            return "C, D, E, F, G, A, B"
         case "german":
-            "C, ... A, Ais/B, H"
+            return "C, ... A, Ais/B, H"
         case "latin":
-            "Do, Re, Mi, Fa, Sol, ..."
+            return "Do, Re, Mi, Fa, Sol, ..."
         case "scandinavian":
-            "C, ... A, A#/Bb, H"
+            return "C, ... A, A#/Bb, H"
         case "solfege":
-            "Do, Re, Mi, Fa, So, ..."
+            return "Do, Re, Mi, Fa, So, ..."
         case "solfège":
-            "Do, Re, Mi, Fa, So, ..."
+            return "Do, Re, Mi, Fa, So, ..."
         case "nashville":
-            "1, 2, 3, ..."
+            return "1, 2, 3, ..."
         case "roman":
-            "I, II, III, ..."
+            return "I, II, III, ..."
         default:
-            "Unknown notation"
+            return "Unknown notation"
         }
     }
 }

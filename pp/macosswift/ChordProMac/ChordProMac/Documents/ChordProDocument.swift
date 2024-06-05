@@ -17,16 +17,27 @@ extension UTType {
 
 /// Define the  **ChordPro** document
 struct ChordProDocument: FileDocument {
-    /// Give the file an unique ID
-    let fileID = UUID().uuidString
-    /// The text of the file
-    var text: String
-    /// Init the text
-    init(text: String = "{title: New Song}") {
-        self.text = text
-    }
-    /// The UTType of the file
+    /// The UTType of the song
     static var readableContentTypes: [UTType] { [.chordProSong] }
+    /// The text of the song
+    var text: String
+    /// Init the song
+    init(text: String = "{title: New Song}\n") {
+        let settings = AppSettings.load()
+        /// Check if we have to use a custom template
+        if
+            settings.useCustomSongTemplate,
+            let persistentURL = try? FileBookmark.getBookmarkURL(CustomFile.customSongTemplate) {
+            /// Get access to the URL
+            _ = persistentURL.startAccessingSecurityScopedResource()
+            let data = try? String(contentsOf: persistentURL, encoding: .utf8)
+            self.text = data ?? text
+            /// Stop access to the URL
+            persistentURL.stopAccessingSecurityScopedResource()
+        } else {
+            self.text = text
+        }
+    }
     /// Black magic
     init(configuration: ReadConfiguration) throws {
         guard
@@ -37,7 +48,7 @@ struct ChordProDocument: FileDocument {
         }
         text = string
     }
-    /// Save the file
+    /// Save the song
     func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
         guard let data = text.data(using: .utf8) else {
             throw AppError.writeDocumentError
