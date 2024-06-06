@@ -8,7 +8,7 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// Define the exported  **ChordPro** document as a PDF
+/// Define the **ChordPro** exported document as PDF
 struct ExportDocument: FileDocument {
     /// The UTType to export
     static var readableContentTypes: [UTType] { [.pdf] }
@@ -20,7 +20,7 @@ struct ExportDocument: FileDocument {
     }
     /// Black magic
     init(configuration: ReadConfiguration) throws {
-        guard 
+        guard
             let data = configuration.file.regularFileContents
         else {
             throw AppError.writeDocumentError

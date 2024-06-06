@@ -1,11 +1,8 @@
 CURRDATE := $(shell date "+%Y-%m-%d")
-TESTBUILDDIR := TestBuild
+WRAPPERBIN := ChordProMac/ChordProMac/Bin
 DMGNAME := ChordPro macOS ${CURRDATE}.dmg
 MKDIR := mkdir
-
-DEST   := build
-
-WRAPPERBIN := ChordProMac/ChordProMac/Bin
+DEST := build
 
 all: archive
 	
@@ -14,6 +11,7 @@ chordpro:
 	cd "../macos" && make ppl TARGET=chordpro
 	@echo "Code signing..."
 	codesign --force -s - "../macos/build/libperl.dylib"
+	find  "../macos/build/" -name '*.bundle' -type f | while read bundle; do codesign --force -s - "$$bundle"; done
 	@echo "Copy core to the wrapper..."
 	rm -fr "${WRAPPERBIN}"
 	$(MKDIR) -p "${WRAPPERBIN}"

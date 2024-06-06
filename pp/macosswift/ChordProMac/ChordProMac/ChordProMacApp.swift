@@ -15,6 +15,7 @@ import SwiftUI
     var body: some Scene {
         DocumentGroup(newDocument: ChordProDocument()) { file in
             ContentView(document: file.$document)
+                /// Below does not seem to work... I think it is because of the editor...
                 .frame(
                     minWidth: 400,
                     idealWidth: 400,
@@ -30,14 +31,19 @@ import SwiftUI
         .commands {
             CommandGroup(after: .importExport) {
                 ExportSongView(label: "Export as PDF…")
+                    .environmentObject(appState)
+            }
+            CommandMenu("Tasks") {
+                TaskMenuView()
+            }
+            CommandGroup(replacing: .help) {
+                HelpButtonsView()
             }
         }
         Settings {
             SettingsView()
-                .frame(width: 300, height: 400)
+                .frame(width: 300, height: 420)
                 .environmentObject(appState)
         }
     }
 }
-
-

@@ -7,9 +7,8 @@
 
 import Foundation
 
-/// The accent of a note
+/// The accents for transposing a song
 public enum Accents: String, CaseIterable, Codable {
-
     /// Default
     case defaults = "Default"
     /// Sharps

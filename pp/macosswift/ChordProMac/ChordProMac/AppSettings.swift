@@ -7,11 +7,40 @@
 
 import Foundation
 
+/// All the settings for the application
 struct AppSettings: Codable, Equatable {
+
+    // MARK: Fonts
+
+    /// The font style of the editor
+    var fontStyle: FontStyle = .monospaced
     /// The font size of the editor
     var fontSize: Double = 14
-    /// The template to use
-    var template: String = "guitar"
+
+    // MARK: Templates
+
+    /// Bool to use an additional library
+    var useAdditionalLibrary: Bool = false
+
+    /// Bool to use a custom song template
+    var useCustomSongTemplate: Bool = false
+
+    /// Bool to use a custom config instead of system
+    var useCustomConfig: Bool = false
+    /// The system config to use
+    var systemConfig: String = "guitar"
+    /// Optional custom config URL
+    var customConfig: URL?
+    /// The label to show in the ``StatusView``
+    var configLabel: String {
+        if useCustomConfig, let url = try? FileBookmark.getBookmarkURL(CustomFile.customConfig) {
+            return url.lastPathComponent
+        }
+        return systemConfig
+    }
+
+    /// Bool not to use default configurations
+    var noDefaultConfigs: Bool = false
 
     // MARK: Transpose
 
@@ -33,12 +62,12 @@ struct AppSettings: Codable, Equatable {
     /// The calculated optional transpose value
     var transposeValue: Int? {
         guard
-            let from = Note.noteValueDict[transposeFrom],
-            let to = Note.noteValueDict[transposeTo]
+            let fromNote = Note.noteValueDict[transposeFrom],
+            let toNote = Note.noteValueDict[transposeTo]
         else {
             return nil
         }
-        var transpose: Int = to - from
+        var transpose: Int = toNote - fromNote
         transpose += transpose < 0 ? 12 : 0
         switch transposeAccents {
         case .defaults:
@@ -50,14 +79,23 @@ struct AppSettings: Codable, Equatable {
         }
         return transpose == 0 ? nil : transpose
     }
+
+    // MARK: Other
+
+    /// Show only lyrics
+    var lyricsOnly: Bool = false
+    /// Suppress chord diagrams
+    var noChordGrids: Bool = false
+    /// Eliminate capo settings by transposing the song
+    var deCapo: Bool = false
 }
 
 extension AppSettings {
 
     /// Load the application settings
-    /// - Returns: The ``ChordProMacSettings``
+    /// - Returns: The ``AppSettings``
     static func load() -> AppSettings {
-        if let settings = try? Cache.get(key: "ChordProMacSettings", as: AppSettings.self) {
+        if let settings = try? Cache.get(key: "ChordProMacSettings", struct: AppSettings.self) {
             return settings
         }
         /// No settings found; return defaults
