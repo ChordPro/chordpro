@@ -7,16 +7,32 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D702E0D72C0CC6F5006D9667 /* SceneState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D702E0D62C0CC6F5006D9667 /* SceneState.swift */; };
+		D702E0DB2C0CE99C006D9667 /* ExportLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D702E0DA2C0CE99C006D9667 /* ExportLogView.swift */; };
+		D702E0DD2C0CEA27006D9667 /* LogDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D702E0DC2C0CEA27006D9667 /* LogDocument.swift */; };
+		D702E0DF2C0CEF42006D9667 /* LogItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = D702E0DE2C0CEF42006D9667 /* LogItem.swift */; };
 		D7146DB92C04B3C3007E77B8 /* script in Resources */ = {isa = PBXBuildFile; fileRef = D7146DB62C04B3C0007E77B8 /* script */; };
 		D7146DBA2C04B3C3007E77B8 /* lib in Resources */ = {isa = PBXBuildFile; fileRef = D7146DB72C04B3C2007E77B8 /* lib */; };
 		D7146DBB2C04B3C3007E77B8 /* chordpro in Resources */ = {isa = PBXBuildFile; fileRef = D7146DB82C04B3C2007E77B8 /* chordpro */; };
 		D7146DBE2C04B68F007E77B8 /* libperl.dylib in Resources */ = {isa = PBXBuildFile; fileRef = D7146DBC2C04B668007E77B8 /* libperl.dylib */; };
+		D72EA32F2C0B2E9400B1BA93 /* CustomFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72EA32E2C0B2E9400B1BA93 /* CustomFile.swift */; };
+		D72EA3312C0B2FF500B1BA93 /* FileBookmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72EA3302C0B2FF500B1BA93 /* FileBookmark.swift */; };
+		D72EA3332C0B31A600B1BA93 /* FileButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72EA3322C0B31A600B1BA93 /* FileButtonView.swift */; };
+		D72EA3352C0B68B600B1BA93 /* FontStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72EA3342C0B68B600B1BA93 /* FontStyle.swift */; };
+		D72EA3382C0B8E2C00B1BA93 /* HelpButtonsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72EA3372C0B8E2C00B1BA93 /* HelpButtonsView.swift */; };
+		D72EA33A2C0B927300B1BA93 /* Credits.html in Resources */ = {isa = PBXBuildFile; fileRef = D72EA3392C0B927300B1BA93 /* Credits.html */; };
+		D72EA33C2C0BB24600B1BA93 /* LogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72EA33B2C0BB24600B1BA93 /* LogView.swift */; };
+		D72EA33E2C0C5C3F00B1BA93 /* LocalizedAlertError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72EA33D2C0C5C3F00B1BA93 /* LocalizedAlertError.swift */; };
+		D72EA3402C0C5E5800B1BA93 /* View+errorAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72EA33F2C0C5E5800B1BA93 /* View+errorAlert.swift */; };
 		D74002CB2C04711000291BE7 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74002CA2C04711000291BE7 /* SettingsView.swift */; };
 		D74002CD2C04725D00291BE7 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74002CC2C04725D00291BE7 /* AppSettings.swift */; };
 		D74002CF2C04728600291BE7 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74002CE2C04728600291BE7 /* AppState.swift */; };
 		D74002D12C049B1800291BE7 /* Cache.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74002D02C049B1800291BE7 /* Cache.swift */; };
 		D75E5FFC2C04D3620083F96F /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = D75E5FFB2C04D3620083F96F /* Logger.swift */; };
 		D75E5FFF2C04FEF00083F96F /* Template.swift in Sources */ = {isa = PBXBuildFile; fileRef = D75E5FFE2C04FEF00083F96F /* Template.swift */; };
+		D75F410E2C0EFDA200F0413B /* TaskMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D75F410D2C0EFDA200F0413B /* TaskMenuView.swift */; };
+		D75F41102C0F240800F0413B /* CustomTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = D75F410F2C0F240800F0413B /* CustomTask.swift */; };
+		D75F41322C0F31DB00F0413B /* SystemTasks in Resources */ = {isa = PBXBuildFile; fileRef = D75F41312C0F31DB00F0413B /* SystemTasks */; };
 		D7723A4D2C0326120031CD0C /* ChordProMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7723A4C2C0326120031CD0C /* ChordProMacApp.swift */; };
 		D7723A4F2C0326120031CD0C /* ChordProDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7723A4E2C0326120031CD0C /* ChordProDocument.swift */; };
 		D7723A512C0326120031CD0C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7723A502C0326120031CD0C /* ContentView.swift */; };
@@ -35,16 +51,32 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D702E0D62C0CC6F5006D9667 /* SceneState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SceneState.swift; sourceTree = "<group>"; };
+		D702E0DA2C0CE99C006D9667 /* ExportLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportLogView.swift; sourceTree = "<group>"; };
+		D702E0DC2C0CEA27006D9667 /* LogDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogDocument.swift; sourceTree = "<group>"; };
+		D702E0DE2C0CEF42006D9667 /* LogItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogItem.swift; sourceTree = "<group>"; };
 		D7146DB62C04B3C0007E77B8 /* script */ = {isa = PBXFileReference; lastKnownFileType = folder; path = script; sourceTree = "<group>"; };
 		D7146DB72C04B3C2007E77B8 /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; path = lib; sourceTree = "<group>"; };
 		D7146DB82C04B3C2007E77B8 /* chordpro */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = chordpro; sourceTree = "<group>"; };
 		D7146DBC2C04B668007E77B8 /* libperl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libperl.dylib; sourceTree = "<group>"; };
+		D72EA32E2C0B2E9400B1BA93 /* CustomFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomFile.swift; sourceTree = "<group>"; };
+		D72EA3302C0B2FF500B1BA93 /* FileBookmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileBookmark.swift; sourceTree = "<group>"; };
+		D72EA3322C0B31A600B1BA93 /* FileButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileButtonView.swift; sourceTree = "<group>"; };
+		D72EA3342C0B68B600B1BA93 /* FontStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontStyle.swift; sourceTree = "<group>"; };
+		D72EA3372C0B8E2C00B1BA93 /* HelpButtonsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpButtonsView.swift; sourceTree = "<group>"; };
+		D72EA3392C0B927300B1BA93 /* Credits.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = Credits.html; sourceTree = "<group>"; };
+		D72EA33B2C0BB24600B1BA93 /* LogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogView.swift; sourceTree = "<group>"; };
+		D72EA33D2C0C5C3F00B1BA93 /* LocalizedAlertError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizedAlertError.swift; sourceTree = "<group>"; };
+		D72EA33F2C0C5E5800B1BA93 /* View+errorAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+errorAlert.swift"; sourceTree = "<group>"; };
 		D74002CA2C04711000291BE7 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		D74002CC2C04725D00291BE7 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		D74002CE2C04728600291BE7 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		D74002D02C049B1800291BE7 /* Cache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cache.swift; sourceTree = "<group>"; };
 		D75E5FFB2C04D3620083F96F /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		D75E5FFE2C04FEF00083F96F /* Template.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Template.swift; sourceTree = "<group>"; };
+		D75F410D2C0EFDA200F0413B /* TaskMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskMenuView.swift; sourceTree = "<group>"; };
+		D75F410F2C0F240800F0413B /* CustomTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTask.swift; sourceTree = "<group>"; };
+		D75F41312C0F31DB00F0413B /* SystemTasks */ = {isa = PBXFileReference; lastKnownFileType = folder; path = SystemTasks; sourceTree = "<group>"; };
 		D7723A492C0326120031CD0C /* ChordPro.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChordPro.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D7723A4C2C0326120031CD0C /* ChordProMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChordProMacApp.swift; sourceTree = "<group>"; };
 		D7723A4E2C0326120031CD0C /* ChordProDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChordProDocument.swift; sourceTree = "<group>"; };
@@ -94,6 +126,11 @@
 				D774F2822C05E18B00CC4E3E /* Accents.swift */,
 				D774F2802C05E07E00CC4E3E /* Note.swift */,
 				D774F2862C05F6CB00CC4E3E /* Notation.swift */,
+				D72EA32E2C0B2E9400B1BA93 /* CustomFile.swift */,
+				D75F410F2C0F240800F0413B /* CustomTask.swift */,
+				D72EA3342C0B68B600B1BA93 /* FontStyle.swift */,
+				D72EA33D2C0C5C3F00B1BA93 /* LocalizedAlertError.swift */,
+				D702E0DE2C0CEF42006D9667 /* LogItem.swift */,
 			);
 			path = Structures;
 			sourceTree = "<group>";
@@ -117,19 +154,23 @@
 		D7723A4B2C0326120031CD0C /* ChordProMac */ = {
 			isa = PBXGroup;
 			children = (
-				D75E5FFD2C04FEDF0083F96F /* Structures */,
-				D7146DB52C04B39B007E77B8 /* Bin */,
 				D7723A4C2C0326120031CD0C /* ChordProMacApp.swift */,
 				D74002CE2C04728600291BE7 /* AppState.swift */,
 				D7723A662C0336C70031CD0C /* AppError.swift */,
 				D74002CC2C04725D00291BE7 /* AppSettings.swift */,
+				D702E0D62C0CC6F5006D9667 /* SceneState.swift */,
 				D7723A6A2C0348590031CD0C /* DocumentFocus.swift */,
+				D72EA3302C0B2FF500B1BA93 /* FileBookmark.swift */,
 				D7723A602C032A190031CD0C /* Terminal.swift */,
 				D74002D02C049B1800291BE7 /* Cache.swift */,
 				D75E5FFB2C04D3620083F96F /* Logger.swift */,
-				D7723A5F2C03291D0031CD0C /* Documents */,
+				D75E5FFD2C04FEDF0083F96F /* Structures */,
 				D7723A5E2C0329150031CD0C /* Views */,
+				D7723A5F2C03291D0031CD0C /* Documents */,
+				D7146DB52C04B39B007E77B8 /* Bin */,
+				D75F41312C0F31DB00F0413B /* SystemTasks */,
 				D7723A522C0326130031CD0C /* Assets.xcassets */,
+				D72EA3392C0B927300B1BA93 /* Credits.html */,
 				D7723A572C0326130031CD0C /* Info.plist */,
 				D7723A582C0326130031CD0C /* ChordProMac.entitlements */,
 				D7723A542C0326130031CD0C /* Preview Content */,
@@ -152,7 +193,13 @@
 				D774F2842C05F2B900CC4E3E /* StatusView.swift */,
 				D7723A6E2C0354250031CD0C /* QuickLookView.swift */,
 				D7723A682C03442F0031CD0C /* ExportSongView.swift */,
+				D702E0DA2C0CE99C006D9667 /* ExportLogView.swift */,
 				D74002CA2C04711000291BE7 /* SettingsView.swift */,
+				D75F410D2C0EFDA200F0413B /* TaskMenuView.swift */,
+				D72EA3322C0B31A600B1BA93 /* FileButtonView.swift */,
+				D72EA3372C0B8E2C00B1BA93 /* HelpButtonsView.swift */,
+				D72EA33B2C0BB24600B1BA93 /* LogView.swift */,
+				D72EA33F2C0C5E5800B1BA93 /* View+errorAlert.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -162,6 +209,7 @@
 			children = (
 				D7723A4E2C0326120031CD0C /* ChordProDocument.swift */,
 				D7723A642C0336910031CD0C /* ExportDocument.swift */,
+				D702E0DC2C0CEA27006D9667 /* LogDocument.swift */,
 			);
 			path = Documents;
 			sourceTree = "<group>";
@@ -176,6 +224,7 @@
 				D7723A452C0326120031CD0C /* Sources */,
 				D7723A462C0326120031CD0C /* Frameworks */,
 				D7723A472C0326120031CD0C /* Resources */,
+				D72EA3362C0B6E1000B1BA93 /* Run SwiftLint */,
 			);
 			buildRules = (
 			);
@@ -225,8 +274,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				D7146DBE2C04B68F007E77B8 /* libperl.dylib in Resources */,
+				D75F41322C0F31DB00F0413B /* SystemTasks in Resources */,
 				D7146DB92C04B3C3007E77B8 /* script in Resources */,
 				D7723A562C0326130031CD0C /* Preview Assets.xcassets in Resources */,
+				D72EA33A2C0B927300B1BA93 /* Credits.html in Resources */,
 				D7146DBB2C04B3C3007E77B8 /* chordpro in Resources */,
 				D7146DBA2C04B3C3007E77B8 /* lib in Resources */,
 				D7723A532C0326130031CD0C /* Assets.xcassets in Resources */,
@@ -235,28 +286,65 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		D72EA3362C0B6E1000B1BA93 /* Run SwiftLint */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Run SwiftLint";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "#if which /opt/homebrew/bin/swiftlint >/dev/null; then\n#  /opt/homebrew/bin/swiftlint\n#else\n#  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\n#fi\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		D7723A452C0326120031CD0C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				D75E5FFF2C04FEF00083F96F /* Template.swift in Sources */,
+				D72EA3352C0B68B600B1BA93 /* FontStyle.swift in Sources */,
 				D7723A4D2C0326120031CD0C /* ChordProMacApp.swift in Sources */,
 				D774F2852C05F2B900CC4E3E /* StatusView.swift in Sources */,
+				D75F41102C0F240800F0413B /* CustomTask.swift in Sources */,
 				D7723A612C032A190031CD0C /* Terminal.swift in Sources */,
 				D7723A6B2C0348590031CD0C /* DocumentFocus.swift in Sources */,
 				D74002CF2C04728600291BE7 /* AppState.swift in Sources */,
 				D7723A6F2C0354250031CD0C /* QuickLookView.swift in Sources */,
 				D7723A692C03442F0031CD0C /* ExportSongView.swift in Sources */,
+				D72EA3332C0B31A600B1BA93 /* FileButtonView.swift in Sources */,
 				D74002D12C049B1800291BE7 /* Cache.swift in Sources */,
 				D74002CD2C04725D00291BE7 /* AppSettings.swift in Sources */,
 				D74002CB2C04711000291BE7 /* SettingsView.swift in Sources */,
 				D7723A4F2C0326120031CD0C /* ChordProDocument.swift in Sources */,
 				D774F2812C05E07E00CC4E3E /* Note.swift in Sources */,
+				D72EA3312C0B2FF500B1BA93 /* FileBookmark.swift in Sources */,
+				D72EA3402C0C5E5800B1BA93 /* View+errorAlert.swift in Sources */,
+				D702E0DF2C0CEF42006D9667 /* LogItem.swift in Sources */,
 				D7723A672C0336C70031CD0C /* AppError.swift in Sources */,
+				D75F410E2C0EFDA200F0413B /* TaskMenuView.swift in Sources */,
+				D702E0DB2C0CE99C006D9667 /* ExportLogView.swift in Sources */,
+				D702E0DD2C0CEA27006D9667 /* LogDocument.swift in Sources */,
+				D702E0D72C0CC6F5006D9667 /* SceneState.swift in Sources */,
+				D72EA32F2C0B2E9400B1BA93 /* CustomFile.swift in Sources */,
+				D72EA33C2C0BB24600B1BA93 /* LogView.swift in Sources */,
 				D75E5FFC2C04D3620083F96F /* Logger.swift in Sources */,
+				D72EA3382C0B8E2C00B1BA93 /* HelpButtonsView.swift in Sources */,
 				D7723A652C0336910031CD0C /* ExportDocument.swift in Sources */,
 				D774F2832C05E18B00CC4E3E /* Accents.swift in Sources */,
+				D72EA33E2C0C5C3F00B1BA93 /* LocalizedAlertError.swift in Sources */,
 				D774F2872C05F6CB00CC4E3E /* Notation.swift in Sources */,
 				D7723A512C0326120031CD0C /* ContentView.swift in Sources */,
 			);
@@ -303,7 +391,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -367,7 +455,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -391,17 +479,17 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = ChordProMac/ChordProMac.entitlements;
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = "ChordPro core 6.050";
 				DEVELOPMENT_ASSET_PATHS = "\"ChordProMac/Preview Content\"";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = FHPCJ7396C;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ChordProMac/Info.plist;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright 2016,2024 Johan Vromans <jvromans@squirrel.nl>";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -424,17 +512,17 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = ChordProMac/ChordProMac.entitlements;
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = "ChordPro core 6.050";
 				DEVELOPMENT_ASSET_PATHS = "\"ChordProMac/Preview Content\"";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = FHPCJ7396C;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ChordProMac/Info.plist;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright 2016,2024 Johan Vromans <jvromans@squirrel.nl>";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",

@@ -7,7 +7,7 @@
 
 import Foundation
 
-    /// The root of a chord
+/// All musical notes
 public enum Note: String, CaseIterable, Codable {
 
     // swiftlint:disable identifier_name
@@ -70,5 +70,4 @@ public enum Note: String, CaseIterable, Codable {
             Note.b: 11
         ]
     }
-
 }
