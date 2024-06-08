@@ -11,13 +11,16 @@ import Foundation
 struct Template: Identifiable {
     /// The calculated ID of the template
     var id: URL {
-        url
+        return url
     }
     /// The `URL` of the template
     let url: URL
+    /// The file name of the template
+    var fileName: String {
+        return self.url.deletingPathExtension().lastPathComponent
+    }
     /// The calculated label of the template
     var label: String {
-        let label = self.url.deletingPathExtension()
-        return label.lastPathComponent
+        return self.url.deletingPathExtension().lastPathComponent.replacingOccurrences(of: "_", with: " ").capitalized
     }
 }

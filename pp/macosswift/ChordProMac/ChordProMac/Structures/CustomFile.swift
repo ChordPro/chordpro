@@ -31,7 +31,7 @@ enum CustomFile: String {
     /// The optional calculated label of the file
     /// - Note: Used in the buttons of the ``SettingsView``
     var label: String? {
-        return try? FileBookmark.getBookmarkURL(self)?.lastPathComponent
+        return try? FileBookmark.getBookmarkURL(self)?.deletingPathExtension().lastPathComponent
     }
     /// The SF icon of the file
     /// - Note: Used in the buttons of the ``SettingsView``
