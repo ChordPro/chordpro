@@ -26,7 +26,6 @@ extension FileBookmark {
             var bookmarkDataIsStale = false
             let urlForBookmark = try URL(
                 resolvingBookmarkData: bookmarkData,
-                options: .withoutImplicitStartAccessing,
                 relativeTo: nil,
                 bookmarkDataIsStale: &bookmarkDataIsStale
             )
@@ -51,7 +50,6 @@ extension FileBookmark {
         do {
             _ = selectedURL.startAccessingSecurityScopedResource()
             let bookmarkData = try selectedURL.bookmarkData(
-                options: .withoutImplicitSecurityScope,
                 includingResourceValuesForKeys: nil,
                 relativeTo: nil
             )
