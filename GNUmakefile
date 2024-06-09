@@ -41,7 +41,9 @@ PROJECT := ChordPro
 TMP_DST := ${HOME}/tmp/${PROJECT}
 RSYNC_ARGS := -rptgoDvHL
 W10DIR := /Users/Johan/${PROJECT}
-MACDST := macky:ChordPro
+MACHOST := macky
+MACDEST := ChordPro
+MACDST  := ${MACHOST}:${MACDEST}
 
 to_tmp : resources
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST    ./ ${TMP_DST}/
@@ -58,7 +60,7 @@ to_mac : resources
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST      ./ ${MACDST}/
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.WX   ./ ${MACDST}/
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.CPAN ./ ${MACDST}/
-	ssh macky rm -fr ${MACDST}/pp/windows
+	ssh ${MACHOST} rm -fr ${MACDEST}/pp/windows
 
 release :
 	${PERL} Makefile.PL
