@@ -22,7 +22,7 @@ print <<EOD;
 --link=/usr/local/lib/libpng16.16.dylib
 --link=/usr/local/lib/libjpeg.8.dylib
 --link=/usr/local/lib/libtiff.6.dylib
---link=/usr/lib/libz.1.dylib
+--link=/usr/local/Cellar/zlib/1.3.1/lib/libz.1.3.1.dylib
 --link=/usr/local/opt/zstd/lib/libzstd.1.dylib
 --link=/usr/local/opt/pcre2/lib/libpcre2-32.0.dylib
 
