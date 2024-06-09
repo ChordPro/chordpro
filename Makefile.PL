@@ -48,6 +48,7 @@ WriteMakefile
 		    @pdfapi,
 		    'Text::Layout'		  => 0.036,
 		    'JSON::PP'			  => 2.27203,
+		    'JSON::XS'			  => 4.03,
 		    'String::Interpolate::Named'  => 1.030,
 		    'File::LoadLines'		  => 1.044,
 		    'File::HomeDir'		  => 1.004,
