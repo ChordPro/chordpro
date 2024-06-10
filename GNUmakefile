@@ -47,6 +47,7 @@ MACDST  := ${MACHOST}:${MACDEST}
 
 to_tmp : resources
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST    ./ ${TMP_DST}/
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST.PP   ./ ${MACDST}/
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.WX ./ ${TMP_DST}/
 
 to_tmp_cpan :
@@ -58,6 +59,7 @@ to_c :
 
 to_mac : resources
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST      ./ ${MACDST}/
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST.PP   ./ ${MACDST}/
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.WX   ./ ${MACDST}/
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.CPAN ./ ${MACDST}/
 	ssh ${MACHOST} rm -fr ${MACDEST}/pp/windows
