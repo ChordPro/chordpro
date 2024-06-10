@@ -9,7 +9,7 @@
       "additionalProperties" : true,
       "properties" : {
         "comments" : {
-          "description" : "Retain or ignore comments",
+          "description" : "Retain comments in the output.",
           "enum" : [ "ignore", "retain" ],
           "type" : "string",
           "default" : "ignore"
@@ -357,11 +357,6 @@
                   }
                 }
               }
-            },
-	    "comments" : {
-               "description" : "Retain comments in the output.",
-               "type" : "string",
-               "default" : "retain"
             }
         } }
       ]

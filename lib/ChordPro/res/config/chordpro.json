@@ -705,9 +705,11 @@ pdf {
 
     // By default, a page has:
     default {
-      title      : [ "" "" "" ]
-      subtitle   : [ "" "" "" ]
-      footer     : [ "%{title}" "" "%{page}" ]
+
+      // Three-part title format specification, left, center, right.
+      title : [ "" "" "" ]
+      subtitle : [ "" "" "" ]
+      footer : [ "%{title}" "" "%{page}" ]
 
       // Background page.
       background : ""
@@ -715,9 +717,11 @@ pdf {
 
     // The first page of a song has:
     title {
-      title      : [ "" "%{title}" "" ]
-      subtitle   : [ "" "%{subtitle}" "" ]
-      footer     : [ "" "" "%{page}" ]
+
+      // Three-part title format specification, left, center, right.
+      title : [ "" "%{title}" "" ]
+      subtitle : [ "" "%{subtitle}" "" ]
+      footer : [ "" "" "%{page}" ]
 
       // Background page.
       background : ""
@@ -725,7 +729,9 @@ pdf {
 
     // The very first output page is slightly different:
     first {
-      footer     : [ "" "" "" ]
+
+      // Three-part title format specification, left, center, right.
+      footer : [ "" "" "" ]
 
       // Background page.
       background : ""
@@ -837,6 +843,8 @@ pdf {
     // Font for numbered chord dots.
     chordfingers {
       file        : ChordProSymbols.ttf
+
+      // Colour specification.
       numbercolor : background
     }
 
@@ -844,6 +852,8 @@ pdf {
     comment {
       name       : Helvetica
       size       : 12
+
+      // Colour specification.
       background : foreground-light
     }
 
