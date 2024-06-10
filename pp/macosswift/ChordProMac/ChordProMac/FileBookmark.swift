@@ -26,7 +26,6 @@ extension FileBookmark {
             var bookmarkDataIsStale = false
             let urlForBookmark = try URL(
                 resolvingBookmarkData: bookmarkData,
-                options: .withSecurityScope,
                 relativeTo: nil,
                 bookmarkDataIsStale: &bookmarkDataIsStale
             )
@@ -51,7 +50,6 @@ extension FileBookmark {
         do {
             _ = selectedURL.startAccessingSecurityScopedResource()
             let bookmarkData = try selectedURL.bookmarkData(
-                options: .withSecurityScope,
                 includingResourceValuesForKeys: nil,
                 relativeTo: nil
             )
@@ -59,7 +57,7 @@ extension FileBookmark {
             selectedURL.stopAccessingSecurityScopedResource()
             Logger.fileAccess.info("Bookmark set for '\(selectedURL.lastPathComponent, privacy: .public)'")
         } catch let error {
-            Logger.fileAccess.error("\(error.localizedDescription, privacy: .public)")
+            Logger.fileAccess.error("Bookmark error: '\(error.localizedDescription, privacy: .public)'")
             selectedURL.stopAccessingSecurityScopedResource()
         }
     }

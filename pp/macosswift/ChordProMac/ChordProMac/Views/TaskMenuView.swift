@@ -13,19 +13,22 @@ struct TaskMenuView: View {
     @FocusedValue(\.sceneState) private var sceneState: SceneState?
     /// The body of the `View`
     var body: some View {
-        Text("System Tasks")
-            .font(.caption)
-        ForEach(getSystemTasks()) { task in
-            button(task: task)
-        }
-        if let userTasks = getUserTasks() {
-            Divider()
-            Text("Your custom Tasks")
+        VStack {
+            Text("System Tasks")
                 .font(.caption)
-            ForEach(userTasks) { task in
+            ForEach(getSystemTasks()) { task in
                 button(task: task)
             }
+            if let userTasks = getUserTasks() {
+                Divider()
+                Text("Your custom Tasks")
+                    .font(.caption)
+                ForEach(userTasks) { task in
+                    button(task: task)
+                }
+            }
         }
+        .disabled(sceneState == nil)
     }
     /// SwiftUI `View for a button`
     /// - Parameter task: The ``CustomTask``

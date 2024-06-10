@@ -41,7 +41,8 @@ struct LogView: View {
                         /// Skip empty lines
                         if !log.line.isEmpty {
                             HStack {
-                                Image(systemName: "pencil.line")
+                                Image(systemName: "exclamationmark.bubble")
+                                Divider()
                                 Text(log.line)
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
