@@ -22,7 +22,7 @@ struct StatusView: View {
                 Text("**Transpose:** from \(appState.settings.transposeFrom.rawValue) to \(appState.settings.transposeTo.rawValue)")
             }
             if appState.settings.transcode {
-                Text("**Transcode:** \(appState.settings.transcodeNotation)")
+                Text("**Transcode:** \(appState.settings.transcodeNotation.capitalized)")
             }
             Spacer()
             HStack {

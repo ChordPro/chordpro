@@ -34,9 +34,9 @@ struct AppSettings: Codable, Equatable {
     /// The label to show in the ``StatusView``
     var configLabel: String {
         if useCustomConfig, let url = try? FileBookmark.getBookmarkURL(CustomFile.customConfig) {
-            return url.lastPathComponent
+            return url.deletingPathExtension().lastPathComponent
         }
-        return systemConfig
+        return systemConfig.replacingOccurrences(of: "_", with: " ").capitalized
     }
 
     /// Bool not to use default configurations

@@ -47,7 +47,6 @@ struct SettingsView: View {
             while let item = items.nextObject() as? URL {
                 /// Check if it is a JSON file
                 if item.pathExtension == UTType.json.preferredFilenameExtension ?? ".json" {
-
                     if item.absoluteString.contains("notes") {
                         /// It is a notation
                         notations.append(Notation(url: item))
@@ -74,26 +73,32 @@ extension SettingsView {
                     bookmark: CustomFile.customSongTemplate
                 ) {}
                 .disabled(!appState.settings.useCustomSongTemplate)
+                Text("You can use your own **ChordPro** file as a starting point when you create a new song")
+                    .font(.caption)
             }
-            .wrapSection(title: "Template for a new song")
+            .wrapSection(title: "Template for a New Song")
             VStack {
-                Picker("The font size of the editor:", selection: $appState.settings.fontSize) {
+                Picker("Size of the font:", selection: $appState.settings.fontSize) {
                     ForEach(12...24, id: \.self) { value in
                         Text("\(value)px")
                             .tag(Double(value))
                     }
                 }
+                /// Give it a random ID to avoid random crashes on macOS Monterey
+                .id(UUID())
                 Picker("The font style of the editor", selection: $appState.settings.fontStyle) {
                     ForEach(FontStyle.allCases, id: \.self) { font in
                         Text("\(font.rawValue)")
                             .font(font.font(size: appState.settings.fontSize))
                     }
                 }
+                /// Give it a random ID to avoid random crashes on macOS Monterey
+                .id(UUID())
                 .pickerStyle(.radioGroup)
                 .labelsHidden()
                 .padding()
             }
-            .wrapSection(title: "Font")
+            .wrapSection(title: "Editor Font")
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
@@ -106,8 +111,8 @@ extension SettingsView {
             VStack {
                 Picker("Build-in:", selection: $appState.settings.systemConfig) {
                     ForEach(systemConfigurations) { template in
-                        Text(template.label.capitalized)
-                            .tag(template.label)
+                        Text(template.label)
+                            .tag(template.fileName)
                     }
                 }
                 .disabled(appState.settings.useCustomConfig)
@@ -123,7 +128,7 @@ extension SettingsView {
                 Text("This prevents **ChordPro** from using system wide, user specific and song specific configurations. Checking this will make sure that **ChordPro** only uses the configuration as set in the _application_.")
                     .font(.caption)
             }
-            .wrapSection(title: "Configuration template")
+            .wrapSection(title: "Configuration Template")
             VStack {
                 Toggle("Add a custom library", isOn: $appState.settings.useAdditionalLibrary)
                 FileButtonView(
@@ -134,7 +139,7 @@ extension SettingsView {
                 Text("**ChordPro** has a built-in library with configs and other data. With *custom library* you can add an additional location where to look for data.")
                     .font(.caption)
             }
-            .wrapSection(title: "Custom library")
+            .wrapSection(title: "Custom Library")
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
@@ -166,17 +171,23 @@ extension SettingsView {
                                     Text(note.rawValue)
                                 }
                             }
+                            /// Give it a random ID to avoid random crashes on macOS Monterey
+                            .id(UUID())
                             Picker("To:", selection: $appState.settings.transposeTo) {
                                 ForEach(Note.allCases, id: \.self) { note in
                                     Text(note.rawValue)
                                 }
                             }
+                            /// Give it a random ID to avoid random crashes on macOS Monterey
+                            .id(UUID())
                         }
                         Picker("Accents:", selection: $appState.settings.transposeAccents) {
                             ForEach(Accents.allCases, id: \.self) { accents in
                                 Text(accents.rawValue)
                             }
                         }
+                        /// Give it a random ID to avoid random crashes on macOS Monterey
+                        .id(UUID())
                     }
                     .padding(.top)
                 }
@@ -191,6 +202,8 @@ extension SettingsView {
                                 .tag(notation.label)
                         }
                     }
+                    /// Give it a random ID to avoid random crashes on macOS Monterey
+                    .id(UUID())
                     .padding(.top)
                 }
             }
