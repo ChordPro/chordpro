@@ -1012,7 +1012,7 @@ sub app_about {
     my ($fh, $level, $exit) = @_;
 
     if ( $level > 2 ) {
-	require JSON::XS ();
+	require JSON::XS;
 	print ${fh} ( JSON::XS->new->canonical->
 		      # pretty->
 		      utf8->convert_blessed->encode(runtime_info() ) );
