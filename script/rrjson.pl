@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Sun Mar 10 18:02:02 2024
 # Last Modified By: 
-# Last Modified On: Tue May 28 20:56:30 2024
-# Update Count    : 121
+# Last Modified On: Sun Jun  9 19:42:00 2024
+# Update Count    : 127
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -188,14 +188,15 @@ for my $file ( @ARGV ) {
     }
     elsif ( $mode eq "json_xs" ) {
 	require JSON::XS;
-	print ( JSON::XS->new->canonical->utf8(0)->pretty($pretty)->encode($data) );
+	print ( JSON::XS->new->canonical->utf8(0)->pretty($pretty)
+		->boolean_values( $JSON::Boolean::false, $JSON::Boolean::true )
+		->convert_blessed->encode($data) );
     }
 
     else {			# default JSON
 	require JSON::PP;
 	print ( JSON::PP->new->canonical->utf8(0)->pretty($pretty)
-		->boolean_values([JSON::Boolean->new(from=>"false"),
-				  JSON::Boolean->new(from=>"true")])
+		->boolean_values( $JSON::Boolean::false, $JSON::Boolean::true )
 		->convert_blessed->encode($data) );
     }
 }

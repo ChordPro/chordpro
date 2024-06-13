@@ -772,9 +772,11 @@ method encode(%opts) {
 		    my $sep = " \\\n" . (" " x length($1));
 
 		    # Get string parts.
-		    my @a = split( /\\n/, $t );
+		    my @a = split( /\\n/, $t, -1 );
 		    while ( @a ) {
-			$s .= $quote.shift(@a)."\\n".$quote;
+			$s .= $quote.shift(@a);
+			$s .= "\\n" if @a;
+			$s .= $quote;
 			$s .= $sep if @a;
 		    }
 		}
@@ -1114,6 +1116,8 @@ method _data_printer( $ddp ) {
 ################ Booleans ################
 
 # This class distinguises booleans true and false from numeric 1 and 0.
+
+use JSON::PP ();
 
 package JSON::Boolean {
 
