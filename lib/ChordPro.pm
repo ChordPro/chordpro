@@ -999,13 +999,25 @@ sub app_setup {
 
 sub app_ident {
     my ($fh, $exit) = @_;
-    print {$fh} ("This is ", ::runtimeinfo("short"), "\n");
+    print {$fh} ("This is ChordPro ",
+		 $::options->{reference} ? "reference " : "core ",
+		 $VERSION,
+		 $VERSION =~ /_/ ? " (Unsupported development snapshot)" : "",
+		 "\n"
+		);
     exit $exit if defined $exit;
 }
 
 sub app_about {
     my ($fh, $level, $exit) = @_;
-    print ${fh} <<EndOfAbout,
+
+    if ( $level > 2 ) {
+	print ${fh} ( JSON::XS->new->canonical->
+		      # pretty->
+		      utf8->convert_blessed->encode(runtime_info() ) );
+    }
+    else {
+	print ${fh} <<EndOfAbout,
 
 ChordPro: A lyrics and chords formatting program.
 
@@ -1022,7 +1034,7 @@ For more information, see https://www.chordpro.org .
 Run-time information:
 EndOfAbout
       ::runtimeinfo( $level > 1 ? "extensive" : "normal" );
-
+    }
     exit $exit if defined $exit;
 }
 
@@ -1030,16 +1042,14 @@ use List::Util qw(uniq);
 
 sub ::runtimeinfo {
     my $level = shift // "normal";
-    my $cp = ChordPro::Paths->get;
+    my %i = %{runtime_info()};
     my $fmt   = "  %-22.22s %-10s\n";
 
-    # Sometimes version numbers are localized...
-    my $dd = sub { my $v = $_[0]; $v =~ s/,/./g; $v };
-
-    my $msg = sprintf( $fmt, "ChordPro core", $dd->($VERSION) );
-    $msg =~ s/core/reference/ if $::options->{reference};
-    if ( $VERSION =~ /_/ ) {
-	$msg =~ s/\n$/ (Unsupported development snapshot)\n/;
+    my $msg;
+    for ( $i{general}->{chordpro} ) {
+	$msg = sprintf( $fmt,
+			"ChordPro " . ($_->{type}//"core"), $_->{version} );
+	$msg =~ s/\n$/sprintf(" (%s)\n", $_->{aux})/e;
     }
 
     if ( $level eq "short" ) {
@@ -1049,101 +1059,170 @@ sub ::runtimeinfo {
 	return $msg;
     }
 
-    $msg .= sprintf( $fmt, "Perl", $^V );
-    $msg =~ s/\n$/sprintf(" (%s)\n", $cp->display($^X))/e;
-
-    if ( CP->packager ) {
-	$msg .= sprintf( $fmt, CP->packager." Packager", CP->packager_version );
+    for ( $i{general}{perl} ) {
+	$msg .= sprintf( $fmt, "Perl", $_->{version} );
+	$msg =~ s/\n$/sprintf(" (%s)\n", $_->{dppath})/e;
     }
- 
+
+    for ( $i{general}{packager} ) {
+	next unless defined;
+	$msg .= sprintf( $fmt, $_->{packager}." Packager", $_->{version} );
+    }
+
     # Determine resource path.
     my @p;
     my $tag = "CHORDPRO_LIB";
-    if ( defined $ENV{CHORDPRO_LIB} ) {
-	for ( $cp->path($ENV{CHORDPRO_LIB}) ) {
-	    $msg .= sprintf( $fmt, $tag, $cp->display($_) );
-	    $tag = "";
-	    push( @p, $cp->display($_) );
-	}
-    }
-    for ( qw( XDG_CONFIG_HOME ) ) {
-	if ( defined($ENV{$_}) && $ENV{$_} ne "" ) {
-	    $msg .= sprintf( $fmt, $_, $cp->display($ENV{$_}) );
-	}
-    }
-    push( @p,  map { $cp->display($_) } @{ $cp->resdirs } );
-    $tag = "Resource path";
-    for ( uniq(@p) ) {
-	$msg .= sprintf( $fmt, $tag, $_ );
+    for ( @{$i{general}{library}} ) {
+	$msg .= sprintf( $fmt, $tag, $_->{dppath} );
 	$tag = "";
     }
+    for ( $i{general}{xdg_home} ) {
+	next unless defined;
+	$msg .= sprintf( $fmt, "XDG_HOME", $_->{dppath} );
+    }
+
+    $tag = "Resource path";
+    for ( @{$i{resources}} ) {
+	$msg .= sprintf( $fmt, $tag, $_->{dppath} );
+	$tag = "";
+    }
+
+    for ( $i{abc} ) {
+	next unless defined;
+	$msg .= sprintf( $fmt, "ABC support", $_ );
+    }
+
+    $msg .= "\nModules and libraries:\n";
+    for ( @{$i{modules}} ) {
+	$msg .= sprintf( $fmt, $_->{name}, $_->{version} );
+	$msg =~ s/\n$/sprintf(" (%s)\n", $_->{dppath})/e if $level ne "normal";
+	if ( $_->{library} ) {
+	    $msg .= sprintf( $fmt, "  library", $_->{library} );
+	}
+    }
+
+    return $msg;
+}
+
+# Gather runtime details.
+sub runtime_info {
+    my $cp = ChordPro::Paths->get;
+    my $res;
+
+    # Sometimes version numbers are localized...
+    my $dd = sub { my $v = $_[0]; $v =~ s/,/./g; $v };
+
+    for ( $res->{general}{chordpro} ) {
+	$_->{version} = $dd->($VERSION);
+	$_{type} = $::options->{reference} ? "reference" : "core";
+	$_->{aux} = "Unsupported development snapshot"
+	  if $VERSION =~ /_/;
+    }
+
+    $res->{general}{perl} =
+      { version => "$^V",
+	path    => $^X,
+	dppath  => $cp->display($^X),
+      };
+
+    $res->{general}{packager} =
+      { packager => CP->packager,
+	version  => CP->packager_version,
+      } if CP->packager;
+
+    # Determine resource path.
+    $res->{general}{library} = [];
+    if ( defined $ENV{CHORDPRO_LIB} ) {
+	for ( $cp->path($ENV{CHORDPRO_LIB}) ) {
+	    push( @{$res->{general}{library}},
+		  { path   => $_,
+		    dppath => $cp->display($_) } );
+	}
+    }
+
+    for ( qw( XDG_CONFIG_HOME ) ) {
+	if ( defined($ENV{$_}) && $ENV{$_} ne "" ) {
+	    $res->{general}{xdg_home} =
+	      { path   => $ENV{$_},
+		dppath => $cp->display($ENV{$_}) }
+	}
+    }
+    $res->{resources} =
+      [ map { { path => $_, dppath => $cp->display($_) } }
+	    uniq( @{ $cp->resdirs } ) ];
+
     eval {
 	require ChordPro::Delegate::ABC;
 	my $x = ChordPro::Delegate::ABC->info();
-	$msg .= sprintf( $fmt, "ABC support", $x->{info} ) if $x->{info};
+	$res->{general}{abc} = $x->{info} if $x->{info};
 	1;
     } or $@ =~ /Can't locate/ or warn($@);
+
+    my @p;
 
     my $vv = sub {
 	my ( $mod ) = @_;
 	no strict 'refs';
-	$msg .= sprintf( $fmt, $mod, $dd->(${${"${mod}::"}{VERSION}}) );
-	return unless $level eq "extensive";
-	chomp($msg);
 	my $pm = $mod =~ s;::;/;gr . ".pm";
 	my $loc = $INC{$pm};
-	if ( 0 ) {
-	    $msg .= "(site)" if $loc =~ /site_perl/;
-	    $msg .= "(vendor)" if $loc =~ /vendor_perl/;
-	    $msg .= "(ChordPro)" if $loc =~ /ChordPro\/lib/;
-	    $msg .= "(private)" if $loc =~ /$ENV{HOME}\/lib\/perl5/;
-	}
-	else {
-	    $msg .= "(".$cp->display($1).")" if $loc =~ /^(.*)\/\Q$pm\E$/;
-	}
-	$msg .= "\n";
+	push( @p, { name    => $mod,
+		    version => "".$dd->(${${"${mod}::"}{VERSION}}),
+		    path    => $loc,
+		    dppath  => $loc =~ /^(.*)\/\Q$pm\E$/ ? $cp->display($1) : $loc,
+		  } );
     };
-    $msg .= "\nModules and libraries:\n";
+
     if ( defined $Wx::VERSION ) {
 	no strict 'subs';
-	$msg .= sprintf( $fmt, "wxPerl", $dd->($Wx::VERSION) );
-	$msg .= sprintf( $fmt, "wxWidgets", $dd->(Wx::wxVERSION) );
+	push( @p,
+	      { name => "wxPerl",    version => $dd->($Wx::VERSION)  },
+	      { name => "wxWidgets", version => $dd->(Wx::wxVERSION) } );
     }
 
     local $SIG{__WARN__} = sub {};
     local $SIG{__DIE__} = sub {};
     $vv->("Storable");
     $vv->("Object::Pad");
-    eval { require Text::Layout;
+    eval {
+	require Text::Layout;
 	$vv->("Text::Layout");
     };
-    eval { require HarfBuzz::Shaper;
+    eval {
+	require HarfBuzz::Shaper;
 	$vv->("HarfBuzz::Shaper");
-	$msg .= sprintf( $fmt, "HarfBuzz library", $dd->(HarfBuzz::Shaper::hb_version_string()) );
+	$p[-1]->{library} = $dd->(HarfBuzz::Shaper::hb_version_string());
     };
     $vv->("File::LoadLines");
-    eval { require PDF::Builder;
+    eval {
+	require PDF::Builder;
 	$vv->("PDF::Builder");
     };
-    eval { require PDF::API2;
+    eval {
+	require PDF::API2;
 	$vv->("PDF::API2");
-	eval { require PDF::API2::XS;
-	       $vv->("PDF::API2::XS");
+	eval {
+	    require PDF::API2::XS;
+	    $vv->("PDF::API2::XS");
 	};
     };
-    eval { require SVGPDF;
+    eval {
+	require SVGPDF;
 	$vv->("SVGPDF");
     };
-    eval { require Font::TTF;
+    eval {
+	require Font::TTF;
 	$vv->("Font::TTF");
     };
-    eval { require JavaScript::QuickJS;
+    eval {
+	require JavaScript::QuickJS;
 	$vv->("JavaScript::QuickJS");
     };
     my $i = json_parser();
     $vv->( $i->{parser} );
-    $msg =~ s/\n$/(relaxed)\n/ if $i->{relaxed};
-    return $msg;
+    $p[-1]->{relaxed} = "relaxed" if $i->{relaxed};
+
+    $res->{modules} = \@p;
+    return $res;
 }
 
 sub splitpath {
@@ -1161,6 +1240,8 @@ sub app_usage {
     for ( qw( config userconfig sysconfig) ) {
 	$cfg{$_} = $configs{$_} || "no default";
     }
+
+    ####TODO: weed out for --reference.
     print ${fh} <<EndOfUsage;
 Usage: $0 [ options ] [ file ... ]
 
