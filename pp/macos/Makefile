@@ -55,8 +55,10 @@ copy_coredll :
 PREFIX := '"script/"'
 CCOPTS := $(shell perl -MExtUtils::Embed -e ccopts) -DSCRIPTPREFIX=${PREFIX}
 LDOPTS := ${DEST}/${PERLSO} -lpthread
+ifeq (${TARGET},wxchordpro)
 WXCLIB := $(shell perl -MAlien::wxWidgets -E 'say Alien::wxWidgets->prefix')
 WXCNFG := ${WXCLIB}/bin/wx-config
+endif
 
 .PHONY :: loaders
 loaders : "${DEST}/${TARGET}" "${DEST}/chordpro"
