@@ -947,43 +947,15 @@ pdf {
 
     // The fields for the CSV.
     fields : [
-      {
-        name : title
-        meta : title
-      }
-      {
-        name : pages
-        meta : pagerange
-      }
-      {
-        name : "sort title"
-        meta : sorttitle
-      }
-      {
-        name : artists
-        meta : artist
-      }
-      {
-        name : composers
-        meta : composer
-      }
-      {
-        name : collections
-        meta : collection
-      }
-      {
-        name : keys
-        meta : key_actual
-      }
-      {
-        name : years
-        meta : year
-      }
-      {
-        name  : my_field
-        value : text
-        omit  : true
-      }
+      { name : title         meta : title      }
+      { name : pages         meta : pagerange  }
+      { name : "sort title"  meta : sorttitle  }
+      { name : artists       meta : artist     }
+      { name : composers     meta : composer   }
+      { name : collections   meta : collection }
+      { name : keys          meta : key_actual }
+      { name : years         meta : year       }
+      { name : my_field     value : text       omit  : true}
     ]
 
     // Separator to join field values.
