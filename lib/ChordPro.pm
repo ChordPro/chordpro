@@ -1013,9 +1013,10 @@ sub app_about {
 
     if ( $level > 2 ) {
 	require JSON::XS;
+	select $fh; $| = 1;	# otherwise no output on MacOS
 	print ${fh} ( JSON::XS->new->canonical->
 		      # pretty->
-		      utf8->convert_blessed->encode(runtime_info() ) );
+		      utf8->convert_blessed->encode(runtime_info()) );
     }
     else {
 	print ${fh} <<EndOfAbout,
@@ -1238,6 +1239,11 @@ sub runtime_info {
     my $i = json_parser();
     $vv->( $i->{parser} );
     $p[-1]->{relaxed} = "relaxed" if $i->{relaxed};
+
+    eval {
+	require JSON::XS;
+	$vv->("JSON::XS");
+    };
 
     $res->{modules} = \@p;
     return $res;
