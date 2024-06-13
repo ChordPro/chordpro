@@ -1012,6 +1012,7 @@ sub app_about {
     my ($fh, $level, $exit) = @_;
 
     if ( $level > 2 ) {
+	require JSON::XS ();
 	print ${fh} ( JSON::XS->new->canonical->
 		      # pretty->
 		      utf8->convert_blessed->encode(runtime_info() ) );
@@ -1043,61 +1044,77 @@ use List::Util qw(uniq);
 sub ::runtimeinfo {
     my $level = shift // "normal";
     my %i = %{runtime_info()};
-    my $fmt   = "  %-22.22s %-10s\n";
+    my $fmt0   = "  %-22.22s %-10s";
+    my $fmt2   = $fmt0 . "\n";
+    my $fmt3   = $fmt0 . " (%s)\n";
 
     my $msg;
     for ( $i{general}->{chordpro} ) {
-	$msg = sprintf( $fmt,
-			"ChordPro " . ($_->{type}//"core"), $_->{version} );
-	$msg =~ s/\n$/sprintf(" (%s)\n", $_->{aux})/e;
-    }
-
-    if ( $level eq "short" ) {
-	$msg =~ s/^\s+//;
-	$msg =~ s/\s+/ /g;
-	$msg =~ s/\s*\n//;
-	return $msg;
+	if ( $_->{aux} ) {
+	    $msg = sprintf( $fmt3,
+			    "ChordPro " . ($_->{type}//"core"), $_->{version},
+			    $_->{aux} );
+	}
+	else {
+	    $msg = sprintf( $fmt2,
+			    "ChordPro " . ($_->{type}//"core"), $_->{version} );
+	}
     }
 
     for ( $i{general}{perl} ) {
-	$msg .= sprintf( $fmt, "Perl", $_->{version} );
-	$msg =~ s/\n$/sprintf(" (%s)\n", $_->{dppath})/e;
+	$msg .= sprintf( $fmt3, "Perl", $_->{version}, $_->{dppath} );
     }
 
     for ( $i{general}{packager} ) {
 	next unless defined;
-	$msg .= sprintf( $fmt, $_->{packager}." Packager", $_->{version} );
+	$msg .= sprintf( $fmt2, $_->{packager}." Packager", $_->{version} );
     }
 
     # Determine resource path.
     my @p;
     my $tag = "CHORDPRO_LIB";
     for ( @{$i{general}{library}} ) {
-	$msg .= sprintf( $fmt, $tag, $_->{dppath} );
+	$msg .= sprintf( $fmt2, $tag, $_->{dppath} );
 	$tag = "";
     }
     for ( $i{general}{xdg_home} ) {
 	next unless defined;
-	$msg .= sprintf( $fmt, "XDG_HOME", $_->{dppath} );
+	$msg .= sprintf( $fmt2, "XDG_CONFIG_HOME", $_->{dppath} );
     }
 
     $tag = "Resource path";
     for ( @{$i{resources}} ) {
-	$msg .= sprintf( $fmt, $tag, $_->{dppath} );
+	$msg .= sprintf( $fmt2, $tag, $_->{dppath} );
 	$tag = "";
     }
 
-    for ( $i{abc} ) {
+    $tag = "FONTDIR";
+    for ( @{$i{general}{fontdir}//[]} ) {
 	next unless defined;
-	$msg .= sprintf( $fmt, "ABC support", $_ );
+	$msg .= sprintf( $fmt2, $tag, $_->{dppath} );
+	$tag = "";
+    }
+
+    for ( $i{general}{abc} ) {
+	next unless defined;
+	$msg .= sprintf( $fmt2, "ABC support", $_ );
     }
 
     $msg .= "\nModules and libraries:\n";
     for ( @{$i{modules}} ) {
-	$msg .= sprintf( $fmt, $_->{name}, $_->{version} );
-	$msg =~ s/\n$/sprintf(" (%s)\n", $_->{dppath})/e if $level ne "normal";
+	if ( $level eq "normal" ) {
+	    $msg .= sprintf( $fmt2, $_->{name}, $_->{version} );
+	}
+	else {
+	    $msg .= sprintf( $fmt3, $_->{name}, $_->{version}, $_->{dppath} );
+	}
 	if ( $_->{library} ) {
-	    $msg .= sprintf( $fmt, "  library", $_->{library} );
+	    if ( $_->{library} =~ /i$/ ) {
+		$msg .= sprintf( $fmt3, "  library", $_->{library}, "embedded" );
+	    }
+	    else {
+		$msg .= sprintf( $fmt2, "  library", $_->{library} );
+	    }
 	}
     }
 
@@ -1140,13 +1157,14 @@ sub runtime_info {
 	}
     }
 
-    for ( qw( XDG_CONFIG_HOME ) ) {
-	if ( defined($ENV{$_}) && $ENV{$_} ne "" ) {
-	    $res->{general}{xdg_home} =
-	      { path   => $ENV{$_},
-		dppath => $cp->display($ENV{$_}) }
+    if ( defined $ENV{FONTDIR} ) {
+	for ( $cp->path($ENV{FONTDIR}) ) {
+	    push( @{$res->{general}{fontdir}},
+		  { path   => $_,
+		    dppath => $cp->display($_) } );
 	}
     }
+
     $res->{resources} =
       [ map { { path => $_, dppath => $cp->display($_) } }
 	    uniq( @{ $cp->resdirs } ) ];
