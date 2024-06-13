@@ -246,7 +246,7 @@ sub json_load( $json, $source = "<builtin>" ) {
 sub json_parser() {
     my $relax = $ENV{CHORDPRO_JSON_RELAXED} // 2;
     if ( $relax > 1 ) {
-	require JSON::Relaxed::Parser;
+	require JSON::Relaxed;
 	return { parser  => "JSON::Relaxed",
 		 version => $JSON::Relaxed::VERSION }
     }

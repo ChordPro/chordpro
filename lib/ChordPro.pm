@@ -1099,7 +1099,7 @@ sub ::runtimeinfo {
 	    $msg .= "(private)" if $loc =~ /$ENV{HOME}\/lib\/perl5/;
 	}
 	else {
-	    $msg .= "($1)" if $loc =~ /^(.*)\/\Q$pm\E$/;
+	    $msg .= "(".$cp->display($1).")" if $loc =~ /^(.*)\/\Q$pm\E$/;
 	}
 	$msg .= "\n";
     };
