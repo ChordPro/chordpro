@@ -76,7 +76,7 @@ extension SettingsView {
                 Text("You can use your own **ChordPro** file as a starting point when you create a new song")
                     .font(.caption)
             }
-            .wrapSection(title: "Template for a New Song")
+            .wrapSettingsSection(title: "Template for a New Song")
             VStack {
                 Picker("Size of the font:", selection: $appState.settings.fontSize) {
                     ForEach(12...24, id: \.self) { value in
@@ -98,7 +98,7 @@ extension SettingsView {
                 .labelsHidden()
                 .padding()
             }
-            .wrapSection(title: "Editor Font")
+            .wrapSettingsSection(title: "Editor Font")
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
@@ -128,7 +128,7 @@ extension SettingsView {
                 Text("This prevents **ChordPro** from using system wide, user specific and song specific configurations. Checking this will make sure that **ChordPro** only uses the configuration as set in the _application_.")
                     .font(.caption)
             }
-            .wrapSection(title: "Configuration Template")
+            .wrapSettingsSection(title: "Configuration Template")
             VStack {
                 Toggle("Add a custom library", isOn: $appState.settings.useAdditionalLibrary)
                 FileButtonView(
@@ -139,7 +139,7 @@ extension SettingsView {
                 Text("**ChordPro** has a built-in library with configs and other data. With *custom library* you can add an additional location where to look for data.")
                     .font(.caption)
             }
-            .wrapSection(title: "Custom Library")
+            .wrapSettingsSection(title: "Custom Library")
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
@@ -160,7 +160,7 @@ extension SettingsView {
                 Text("This will be done by transposing the song")
                     .font(.caption)
             }
-            .wrapSection(title: "General")
+            .wrapSettingsSection(title: "General")
             VStack {
                 Toggle("Transpose the song", isOn: $appState.settings.transpose)
                 if appState.settings.transpose {
@@ -181,9 +181,9 @@ extension SettingsView {
                             /// Give it a random ID to avoid random crashes on macOS Monterey
                             .id(UUID())
                         }
-                        Picker("Accents:", selection: $appState.settings.transposeAccents) {
-                            ForEach(Accents.allCases, id: \.self) { accents in
-                                Text(accents.rawValue)
+                        Picker("Accidentals:", selection: $appState.settings.transposeAccidentals) {
+                            ForEach(Accidentals.allCases, id: \.self) { accidental in
+                                Text(accidental.rawValue)
                             }
                         }
                         /// Give it a random ID to avoid random crashes on macOS Monterey
@@ -192,7 +192,7 @@ extension SettingsView {
                     .padding(.top)
                 }
             }
-            .wrapSection(title: "Transpose")
+            .wrapSettingsSection(title: "Transpose")
             VStack {
                 Toggle("Transcode the notation", isOn: $appState.settings.transcode)
                 if appState.settings.transcode {
@@ -207,7 +207,7 @@ extension SettingsView {
                     .padding(.top)
                 }
             }
-            .wrapSection(title: "Transcode")
+            .wrapSettingsSection(title: "Transcode")
             .padding(.bottom)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -216,7 +216,7 @@ extension SettingsView {
 
 extension SettingsView {
 
-    struct WrapSection: ViewModifier {
+    struct WrapSettingsSection: ViewModifier {
         let title: String
         func body(content: Content) -> some View {
             VStack(alignment: .center) {
@@ -237,7 +237,7 @@ extension SettingsView {
 
 extension View {
 
-    func wrapSection(title: String) -> some View {
-        modifier(SettingsView.WrapSection(title: title))
+    func wrapSettingsSection(title: String) -> some View {
+        modifier(SettingsView.WrapSettingsSection(title: title))
     }
 }

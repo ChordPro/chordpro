@@ -32,7 +32,7 @@ struct ExportSongView: View {
                         do {
                             /// Create the PDF with **ChordPro**
                             let pdf = try await Terminal.exportDocument(
-                                document: document.document,
+                                text: document.document.text,
                                 settings: appState.settings,
                                 sceneState: sceneState
                             )

@@ -108,30 +108,71 @@ extension Terminal {
 
 extension Terminal {
 
-    /// Export a document with the **chordpro** binary to a PDF
+    /// We are using the official **ChordPro** binary to create the PDF
+    /// - Note: The executable is packed in this application
+    static func getChordProBinary() throws -> URL {
+        guard
+            let binary = Bundle.main.url(forResource: "chordpro", withExtension: nil)
+        else {
+            throw AppError.binaryNotFound
+        }
+        return binary
+    }
+}
+
+extension Terminal {
+
+    /// Get information about the **ChordPro** binary
+    /// - Returns: The info in a ``ChordProInfo`` struct
+    static func getChordProInfo() async throws -> ChordProInfo {
+        /// Get the application settings
+        let settings = AppSettings.load()
+        /// Get the **ChordPro** binary
+        let chordProApp = try getChordProBinary()
+        /// Build the arguments to pass to the shell
+        var arguments: [String] = []
+        /// Add the optional additional library to the environment of the shell
+        if
+            settings.useAdditionalLibrary,
+            let persistentURL = try? FileBookmark.getBookmarkURL(CustomFile.customLibrary) {
+            /// Get access to the URL
+            _ = persistentURL.startAccessingSecurityScopedResource()
+            arguments.append("CHORDPRO_LIB='\(persistentURL.path)'")
+            /// Close the access
+            FileBookmark.stopCustomFileAccess(persistentURL: persistentURL)
+        }
+        /// Add the argument to get the information
+        arguments.append("'\(chordProApp.path)' -A -A -A")
+        /// Run **ChordPro** in the shell
+        let output = await Terminal.runInShell(arguments: [arguments.joined(separator: " ")])
+        /// Convert the JSON data to a ``ChordProInfo`` struct
+        let jsonData = output.standardOutput.data(using: .utf8)!
+        let chordProInfo = try JSONDecoder().decode(ChordProInfo.self, from: jsonData)
+        return chordProInfo
+    }
+}
+
+extension Terminal {
+
+    /// Export a document with the **ChordPro** binary to a PDF
     /// - Parameters:
     ///   - document: The current ``ChordProDocument``
     ///   - settings: The current ``AppSettings``
     ///   - sceneState: The current ``SceneState``
     /// - Returns: The PDF as `Data` and the status as ``AppError``
     static func exportDocument(
-        document: ChordProDocument,
+        text: String,
         settings: AppSettings,
         sceneState: SceneState
     ) async throws -> (data: Data, status: AppError) {
-        /// We are using the official **ChordPro** binary to create the PDF
-        /// - Note: The executable is packed in this application
-        guard
-            let chordProApp = Bundle.main.url(forResource: "chordpro", withExtension: nil)
-        else {
-            throw AppError.binaryNotFound
-        }
+        /// Get the **ChordPro** binary
+        let chordProApp = try getChordProBinary()
         /// Remove previous export (if any)
         try? FileManager.default.removeItem(atPath: sceneState.exportURL.path)
         /// Write the song to the source URL
         /// - Note: We don't read the file URL directly because it might not be saved yet
         do {
-            try document.text.write(to: sceneState.sourceURL, atomically: true, encoding: String.Encoding.utf8)
+            try text.write(to: sceneState.sourceURL, atomically: true, encoding: String.Encoding.utf8)
         } catch {
             throw AppError.writeDocumentError
         }

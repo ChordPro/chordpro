@@ -8,7 +8,7 @@
 import Foundation
 import UniformTypeIdentifiers
 
-/// All files that can be chosen in the ``SettingsView`` to override **chordpro** defaults
+/// All files that can be chosen in the ``SettingsView`` to override **ChordPro** defaults
 enum CustomFile: String {
     /// A custom configuration
     case customConfig

@@ -57,8 +57,8 @@ struct AppSettings: Codable, Equatable {
     var transposeFrom: Note = .c
     /// The note to transpose to
     var transposeTo: Note = .c
-    /// The transpose accents
-    var transposeAccents: Accents = .defaults
+    /// The transpose accidentals
+    var transposeAccidentals: Accidentals = .defaults
     /// The calculated optional transpose value
     var transposeValue: Int? {
         guard
@@ -69,7 +69,7 @@ struct AppSettings: Codable, Equatable {
         }
         var transpose: Int = toNote - fromNote
         transpose += transpose < 0 ? 12 : 0
-        switch transposeAccents {
+        switch transposeAccidentals {
         case .defaults:
             break
         case .sharps:
@@ -88,6 +88,8 @@ struct AppSettings: Codable, Equatable {
     var noChordGrids: Bool = false
     /// Eliminate capo settings by transposing the song
     var deCapo: Bool = false
+    /// Enable debug info in the PDF
+    var debug: Bool = false
 }
 
 extension AppSettings {
