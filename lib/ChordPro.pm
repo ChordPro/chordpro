@@ -1107,7 +1107,12 @@ sub ::runtimeinfo {
 	    $msg .= sprintf( $fmt2, $_->{name}, $_->{version} );
 	}
 	else {
-	    $msg .= sprintf( $fmt3, $_->{name}, $_->{version}, $_->{dppath} );
+	    if ( defined $_->{dppath} ) {
+		$msg .= sprintf( $fmt3, $_->{name}, $_->{version}, $_->{dppath} );
+	    }
+	    else {
+		$msg .= sprintf( $fmt2, $_->{name}, $_->{version} );
+	    }
 	}
 	if ( $_->{library} ) {
 	    if ( $_->{library} =~ /i$/ ) {
