@@ -28,6 +28,10 @@ final class SceneState: ObservableObject {
     @Published var customTask: CustomTask?
     /// The optional URL for the QuickView
     @Published var quickLookURL: URL?
+    /// The random ID of the preview
+    @Published var quickLookID = UUID()
+    /// Bool if the quick look is outdated
+    @Published var quickLookOutdated: Bool = false
     /// Init the class
     init() {
         /// Give it an unique ID

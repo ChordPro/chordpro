@@ -52,6 +52,10 @@ final class AppState: ObservableObject {
         if settings.noDefaultConfigs {
             arguments.append("--nodefaultconfigs")
         }
+        /// Optional add debug info to the PDF
+        if settings.debug {
+            arguments.append("--debug")
+        }
         /// Return the basic settings
         return arguments
     }

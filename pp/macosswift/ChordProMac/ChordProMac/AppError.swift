@@ -15,15 +15,15 @@ enum AppError: String, LocalizedError {
     case writeDocumentError
     /// A settings error
     case saveSettingsError
-    /// A binary error if **chordpro** is not found in the package
+    /// A binary error if **ChordPro** is not found in the package
     case binaryNotFound
     /// An error when a custom file is not found
     case customFileNotFound
-    /// An error when **chordpro** did not create a PDF
+    /// An error when **ChordPro** did not create a PDF
     case pdfCreationError
-    /// An error when **chordpro** did  create a PDF but gave errors
+    /// An error when **ChordPro** did  create a PDF but gave errors
     case pdfCreatedWithErrors
-    /// An error when **chordpro** did  not complain but the PDF is not created because the song is empty
+    /// An error when **ChordPro** did  not complain but the PDF is not created because the song is empty
     case emptySong
     /// Not an error, all is well
     /// - Note: Used for PDF export

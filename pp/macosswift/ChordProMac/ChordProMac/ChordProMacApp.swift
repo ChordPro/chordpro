@@ -9,6 +9,7 @@ import SwiftUI
 
 /// SwiftUI `Scene` for **ChordProMac**
 @main struct ChordProMacApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     /// The observable state of the application
     @StateObject private var appState = AppState()
     /// The body of the `Scene`
@@ -29,6 +30,11 @@ import SwiftUI
                 .focusedSceneValue(\.document, file)
         }
         .commands {
+            CommandGroup(replacing: CommandGroupPlacement.appInfo) {
+                Button("About ChordPro") {
+                    appDelegate.showAboutWindow()
+                }
+            }
             CommandGroup(after: .importExport) {
                 ExportSongView(label: "Export as PDF…")
                     .environmentObject(appState)
@@ -38,6 +44,7 @@ import SwiftUI
             }
             CommandGroup(replacing: .help) {
                 HelpButtonsView()
+                    .environmentObject(appState)
             }
         }
         Settings {
