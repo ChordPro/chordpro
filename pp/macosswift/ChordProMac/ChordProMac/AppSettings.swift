@@ -9,87 +9,10 @@ import Foundation
 
 /// All the settings for the application
 struct AppSettings: Codable, Equatable {
-
-    // MARK: Fonts
-
-    /// The font style of the editor
-    var fontStyle: FontStyle = .monospaced
-    /// The font size of the editor
-    var fontSize: Double = 14
-
-    // MARK: Templates
-
-    /// Bool to use an additional library
-    var useAdditionalLibrary: Bool = false
-
-    /// Bool to use a custom song template
-    var useCustomSongTemplate: Bool = false
-
-    /// Bool to use a custom config instead of system
-    var useCustomConfig: Bool = false
-    /// The system config to use
-    var systemConfig: String = "guitar"
-    /// Optional custom config URL
-    var customConfig: URL?
-    /// The label to show in the ``StatusView``
-    var configLabel: String {
-        if useCustomConfig, let url = try? FileBookmark.getBookmarkURL(CustomFile.customConfig) {
-            return url.deletingPathExtension().lastPathComponent
-        }
-        return systemConfig.replacingOccurrences(of: "_", with: " ").capitalized
-    }
-
-    /// Bool not to use default configurations
-    var noDefaultConfigs: Bool = false
-
-    // MARK: Transpose
-
-    /// Bool if the song should be transcoded
-    var transcode: Bool = false
-    /// The optional transcode to use
-    var transcodeNotation: String = "common"
-
-    // MARK: Transpose
-
-    /// Bool if the song should be transposed
-    var transpose: Bool = false
-    /// The note to transpose from
-    var transposeFrom: Note = .c
-    /// The note to transpose to
-    var transposeTo: Note = .c
-    /// The transpose accidentals
-    var transposeAccidentals: Accidentals = .defaults
-    /// The calculated optional transpose value
-    var transposeValue: Int? {
-        guard
-            let fromNote = Note.noteValueDict[transposeFrom],
-            let toNote = Note.noteValueDict[transposeTo]
-        else {
-            return nil
-        }
-        var transpose: Int = toNote - fromNote
-        transpose += transpose < 0 ? 12 : 0
-        switch transposeAccidentals {
-        case .defaults:
-            break
-        case .sharps:
-            transpose += 12
-        case .flats:
-            transpose -= 12
-        }
-        return transpose == 0 ? nil : transpose
-    }
-
-    // MARK: Other
-
-    /// Show only lyrics
-    var lyricsOnly: Bool = false
-    /// Suppress chord diagrams
-    var noChordGrids: Bool = false
-    /// Eliminate capo settings by transposing the song
-    var deCapo: Bool = false
-    /// Enable debug info in the PDF
-    var debug: Bool = false
+    /// Settings that will change the behaviour of the application
+    var application = Application()
+    /// Settings that will change the behaviour of the **ChordPro** binary
+    var chordPro = ChordPro()
 }
 
 extension AppSettings {
@@ -112,5 +35,113 @@ extension AppSettings {
         } catch {
             throw AppError.saveSettingsError
         }
+    }
+}
+
+extension AppSettings {
+
+    /// Settings that will change the behaviour of the application
+    struct Application: Codable, Equatable {
+
+        /// Bool to use a custom song template
+        var useCustomSongTemplate: Bool = false
+
+        // MARK: Fonts
+
+        /// The range of available font sizes
+        static let fontSizeRange: ClosedRange<Double> = 10...24
+        /// The font style of the editor
+        var fontStyle: FontStyle = .monospaced
+        /// The font size of the editor
+        var fontSize: Double = 14
+    }
+
+    /// Settings that will change the behaviour of the **ChordPro** binary
+    struct ChordPro: Codable, Equatable {
+
+        // MARK: Templates
+
+        /// Bool to use an additional library
+        var useAdditionalLibrary: Bool = false
+        /// Bool to use a custom config instead of system
+        var useCustomConfig: Bool = false
+        /// The system config to use
+        var systemConfig: String = "guitar"
+        /// Optional custom config URL
+        var customConfig: URL?
+        /// The label to show in the ``StatusView``
+        var configLabel: String {
+            if useCustomConfig, let url = try? FileBookmark.getBookmarkURL(CustomFile.customConfig) {
+                return url.deletingPathExtension().lastPathComponent
+            }
+            return systemConfig.replacingOccurrences(of: "_", with: " ").capitalized
+        }
+
+        /// Bool not to use default configurations
+        var noDefaultConfigs: Bool = false
+
+        // MARK: Transpose
+
+        /// Bool if the song should be transcoded
+        var transcode: Bool = false
+        /// The optional transcode to use
+        var transcodeNotation: String = "common"
+
+        // MARK: Transpose
+
+        /// Bool if the song should be transposed
+        var transpose: Bool = false
+        /// The note to transpose from
+        var transposeFrom: Note = .c
+        /// The note to transpose to
+        var transposeTo: Note = .c
+        /// The transpose accidentals
+        var transposeAccidentals: Accidentals = .defaults
+        /// The calculated optional transpose value
+        var transposeValue: Int? {
+            guard
+                let fromNote = Note.noteValueDict[transposeFrom],
+                let toNote = Note.noteValueDict[transposeTo]
+            else {
+                return nil
+            }
+            var transpose: Int = toNote - fromNote
+            transpose += transpose < 0 ? 12 : 0
+            switch transposeAccidentals {
+            case .defaults:
+                break
+            case .sharps:
+                transpose += 12
+            case .flats:
+                transpose -= 12
+            }
+            return transpose == 0 || !transposeMakesSense ? nil : transpose
+        }
+        /// Check if the transpose settings makes sense
+        /// - Note: If 'from' and 'to' are the same and the 'accidentals' is default, there is nothing to transpose
+        var transposeMakesSense: Bool {
+            return (transposeFrom != transposeTo) || transposeAccidentals != .defaults
+        }
+        var transposeLabel: String {
+            var label: [String] = []
+            if transposeFrom != transposeTo {
+                label.append("from \(transposeFrom.rawValue) to \(transposeTo.rawValue)")
+            }
+            if transposeAccidentals != .defaults {
+                label.append("with \(transposeAccidentals)")
+            }
+            return label.joined(separator: " ")
+        }
+
+        // MARK: Other
+
+        /// Show only lyrics
+        var lyricsOnly: Bool = false
+        /// Suppress chord diagrams
+        var noChordGrids: Bool = false
+        /// Eliminate capo settings by transposing the song
+        var deCapo: Bool = false
+        /// Enable debug info in the PDF
+        var debug: Bool = false
     }
 }

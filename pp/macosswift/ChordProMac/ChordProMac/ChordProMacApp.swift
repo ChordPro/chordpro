@@ -16,15 +16,6 @@ import SwiftUI
     var body: some Scene {
         DocumentGroup(newDocument: ChordProDocument()) { file in
             ContentView(document: file.$document)
-                /// Below does not seem to work... I think it is because of the editor...
-                .frame(
-                    minWidth: 400,
-                    idealWidth: 400,
-                    maxWidth: .infinity,
-                    minHeight: 400,
-                    idealHeight: 600,
-                    maxHeight: .infinity
-                )
                 .environmentObject(appState)
             /// Give the scene access to the document.
                 .focusedSceneValue(\.document, file)
@@ -41,6 +32,10 @@ import SwiftUI
             }
             CommandMenu("Tasks") {
                 TaskMenuView()
+            }
+            CommandGroup(after: .textEditing) {
+                SettingsView.MenuButtonsView()
+                    .environmentObject(appState)
             }
             CommandGroup(replacing: .help) {
                 HelpButtonsView()

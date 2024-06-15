@@ -41,8 +41,9 @@ extension MacEditorView {
 
     class Coordinator: NSObject, NSTextViewDelegate {
         var parent: MacEditorView
-        var selectedRanges: [NSValue] = []
         var fullHighlight: Bool = true
+        /// The optional balance string, close  a`{` or `[`
+        var balance: String?
 
         init(_ parent: MacEditorView) {
             self.parent = parent
@@ -53,6 +54,8 @@ extension MacEditorView {
             shouldChangeTextIn affectedCharRange: NSRange,
             replacementString: String?
         ) -> Bool {
+            /// The optional balance string, close  a`{` or `[`
+            balance = replacementString == "[" ? "]" : replacementString == "{" ? "}" : nil
             /// For performance, don't highlight all text when not needed
             fullHighlight = replacementString?.count ?? 0 > 1
             return true
@@ -68,6 +71,11 @@ extension MacEditorView {
         func textDidChange(_ notification: Notification) {
             guard let textView = notification.object as? NSTextView else {
                 return
+            }
+            if let balance, let range = textView.selectedRanges.first?.rangeValue {
+                textView.insertText(balance, replacementRange: range)
+                textView.selectedRanges = [NSValue(range: range)]
+                self.balance = nil
             }
             let composeText = textView.string as NSString
             var highlightRange = NSRange()

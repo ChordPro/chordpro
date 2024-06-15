@@ -10,7 +10,7 @@ import UniformTypeIdentifiers
 
 /// SwiftUI `View` with buttons to run a ``CustomTask``
 struct TaskMenuView: View {
-    /// The scene
+    /// The scene in the environment
     @FocusedValue(\.sceneState) private var sceneState: SceneState?
     /// The body of the `View`
     var body: some View {
@@ -61,7 +61,7 @@ struct TaskMenuView: View {
     private func getUserTasks() -> [CustomTask]? {
         /// Get the user settings
         let settings = AppSettings.load()
-        if settings.useAdditionalLibrary {
+        if settings.chordPro.useAdditionalLibrary {
             guard
                 let persistentURL = try? FileBookmark.getBookmarkURL(CustomFile.customLibrary),
                 let regex = try? NSRegularExpression(

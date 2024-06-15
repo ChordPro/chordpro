@@ -26,7 +26,7 @@ struct ChordProDocument: FileDocument {
         let settings = AppSettings.load()
         /// Check if we have to use a custom template
         if
-            settings.useCustomSongTemplate,
+            settings.application.useCustomSongTemplate,
             let persistentURL = try? FileBookmark.getBookmarkURL(CustomFile.customSongTemplate) {
             /// Get access to the URL
             _ = persistentURL.startAccessingSecurityScopedResource()
