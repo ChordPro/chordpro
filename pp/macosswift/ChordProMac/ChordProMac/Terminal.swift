@@ -133,7 +133,7 @@ extension Terminal {
         var arguments: [String] = []
         /// Add the optional additional library to the environment of the shell
         if
-            settings.useAdditionalLibrary,
+            settings.chordPro.useAdditionalLibrary,
             let persistentURL = try? FileBookmark.getBookmarkURL(CustomFile.customLibrary) {
             /// Get access to the URL
             _ = persistentURL.startAccessingSecurityScopedResource()
@@ -180,7 +180,7 @@ extension Terminal {
         var arguments: [String] = []
         /// Add the optional additional library to the environment of the shell
         if
-            settings.useAdditionalLibrary,
+            settings.chordPro.useAdditionalLibrary,
             let persistentURL = try? FileBookmark.getBookmarkURL(CustomFile.customLibrary) {
             /// Get access to the URL
             _ = persistentURL.startAccessingSecurityScopedResource()
@@ -197,7 +197,10 @@ extension Terminal {
         /// This can be one of the following
         /// - A user selected **Custom Config File**
         /// - A system provided configuration
-        if settings.useCustomConfig, let persistentURL = try? FileBookmark.getBookmarkURL(CustomFile.customConfig) {
+        if
+            settings.chordPro.useCustomConfig,
+            let persistentURL = try? FileBookmark.getBookmarkURL(CustomFile.customConfig)
+        {
             /// Get access to the URL
             _ = persistentURL.startAccessingSecurityScopedResource()
             arguments.append("--config='\(persistentURL.path)'")
@@ -205,7 +208,7 @@ extension Terminal {
             FileBookmark.stopCustomFileAccess(persistentURL: persistentURL)
         } else {
             /// Use the system config
-            arguments.append("--config=\(settings.systemConfig)")
+            arguments.append("--config=\(settings.chordPro.systemConfig)")
         }
         /// Get the user settings that are simple and do not need sandbox help
         arguments.append(contentsOf: AppState.getUserSettings(settings: settings))

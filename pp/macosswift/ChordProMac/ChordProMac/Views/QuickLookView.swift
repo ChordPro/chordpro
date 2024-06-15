@@ -41,7 +41,7 @@ struct QuickLookView: View {
                 showQuickView()
             }
         }
-        .onChange(of: appState.settings) { _ in
+        .onChange(of: appState.settings.chordPro) { _ in
             if sceneState.quickLookURL != nil {
                 /// Show a Quick View with the new settings
                 showQuickView()

@@ -16,13 +16,12 @@ struct StatusView: View {
     /// The body of the `View`
     var body: some View {
         HStack {
-            Text("**Configuration:** \(appState.settings.configLabel)")
-            if appState.settings.transpose {
-                // swiftlint:disable:next line_length
-                Text("**Transpose:** from \(appState.settings.transposeFrom.rawValue) to \(appState.settings.transposeTo.rawValue)")
+            Text("**Configuration:** \(appState.settings.chordPro.configLabel)")
+            if appState.settings.chordPro.transpose && appState.settings.chordPro.transposeMakesSense {
+                Text("**Transpose:** \(appState.settings.chordPro.transposeLabel)")
             }
-            if appState.settings.transcode {
-                Text("**Transcode:** \(appState.settings.transcodeNotation.capitalized)")
+            if appState.settings.chordPro.transcode {
+                Text("**Transcode:** \(appState.settings.chordPro.transcodeNotation.capitalized)")
             }
             Spacer()
             HStack {

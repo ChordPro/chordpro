@@ -15,10 +15,14 @@ extension MacEditorView {
     static let chordRegex = try! NSRegularExpression(pattern: "\\[([\\w#b\\/]+)\\]", options: .caseInsensitive)
     /// The regex for directives
     static let directiveRegex = try! NSRegularExpression(pattern: "\\{.*\\}")
+    /// The regex for directive arguments
+    static let directiveArgumentRegex = try! NSRegularExpression(pattern: "(?<=\\:)(.*)(?=\\})")
     /// The regex for comments
-    static let commentsRegex = try! NSRegularExpression(pattern: "#.*\\s")
+    static let commentsRegex = try! NSRegularExpression(pattern: "#[^\\[\\]\\n]*")
     /// The regex for pango
     static let pangoRegex = try! NSRegularExpression(pattern: "<\\/?[^>]*>")
+    /// The regex for brackets
+    static var bracketsRegex = try! NSRegularExpression(pattern: "\\/?[\\[\\]\\{\\}\"]")
 
     // swiftlint:enable force_try
 
@@ -33,10 +37,12 @@ extension MacEditorView {
 
     static let regexes: [(regex: NSRegularExpression, color: NSColor)] =
     [
+        (commentsRegex, NSColor.systemGray),
         (chordRegex, NSColor.systemRed),
         (directiveRegex, NSColor.systemIndigo),
-        (commentsRegex, NSColor.systemGray),
-        (pangoRegex, NSColor.systemTeal)
+        (directiveArgumentRegex, NSColor.systemOrange),
+        (pangoRegex, NSColor.systemTeal),
+        (bracketsRegex, NSColor.systemGray)
     ]
 
     /// Highlight the text in the editor

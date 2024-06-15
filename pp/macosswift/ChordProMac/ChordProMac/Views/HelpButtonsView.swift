@@ -9,7 +9,7 @@ import SwiftUI
 
 /// SwiftUI buttons for the main `help` menu
 struct HelpButtonsView: View {
-    /// The document
+    /// The document in the environment
     @FocusedValue(\.document) private var document: FileDocumentConfiguration<ChordProDocument>?
     /// The observable state of the application
     @EnvironmentObject private var appState: AppState
@@ -36,7 +36,7 @@ struct HelpButtonsView: View {
         }
         Divider()
         Text("Trouble Shooting")
-        Toggle(isOn: $appState.settings.debug) {
+        Toggle(isOn: $appState.settings.chordPro.debug) {
             Text("Enable Debug Info in the PDF")
         }
         if let url = URL(string: "https://chordpro.org/chordpro/trouble-shooting/") {

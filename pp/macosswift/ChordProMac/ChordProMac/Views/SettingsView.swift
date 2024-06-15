@@ -8,6 +8,7 @@
 import SwiftUI
 import UniformTypeIdentifiers
 import OSLog
+import AudioToolbox
 
 /// SwiftUI `View` with the application settings
 struct SettingsView: View {
@@ -24,9 +25,9 @@ struct SettingsView: View {
                 .tabItem {
                     Label("Editor", systemImage: "pencil")
                 }
-            templates
+            presets
                 .tabItem {
-                    Label("Templates", systemImage: "doc.plaintext")
+                    Label("Presets", systemImage: "doc.plaintext")
                 }
             options
                 .tabItem {
@@ -68,28 +69,34 @@ extension SettingsView {
     var editor: some View {
         ScrollView {
             VStack {
-                Toggle("Use a custom template", isOn: $appState.settings.useCustomSongTemplate)
+                Toggle("Use a custom template", isOn: $appState.settings.application.useCustomSongTemplate)
                 FileButtonView(
                     bookmark: CustomFile.customSongTemplate
                 ) {}
-                .disabled(!appState.settings.useCustomSongTemplate)
+                    .disabled(!appState.settings.application.useCustomSongTemplate)
                 Text("You can use your own **ChordPro** file as a starting point when you create a new song")
                     .font(.caption)
             }
             .wrapSettingsSection(title: "Template for a New Song")
             VStack {
-                Picker("Size of the font:", selection: $appState.settings.fontSize) {
-                    ForEach(12...24, id: \.self) { value in
-                        Text("\(value)px")
-                            .tag(Double(value))
-                    }
+                HStack {
+                    Text("A")
+                        .font(.system(size: AppSettings.Application.fontSizeRange.lowerBound))
+                    Slider(
+                        value: $appState.settings.application.fontSize,
+                        in: AppSettings.Application.fontSizeRange,
+                        step: 1
+                    )
+                    Text("A")
+                        .font(.system(size: AppSettings.Application.fontSizeRange.upperBound))
                 }
+                .foregroundColor(.secondary)
                 /// Give it a random ID to avoid random crashes on macOS Monterey
                 .id(UUID())
-                Picker("The font style of the editor", selection: $appState.settings.fontStyle) {
+                Picker("The font style of the editor", selection: $appState.settings.application.fontStyle) {
                     ForEach(FontStyle.allCases, id: \.self) { font in
                         Text("\(font.rawValue)")
-                            .font(font.font(size: appState.settings.fontSize))
+                            .font(font.font(size: appState.settings.application.fontSize))
                     }
                 }
                 /// Give it a random ID to avoid random crashes on macOS Monterey
@@ -105,36 +112,36 @@ extension SettingsView {
 }
 
 extension SettingsView {
-    /// SwiftUI `View` with templates settings
-    var templates: some View {
+    /// SwiftUI `View` with presets settings
+    var presets: some View {
         ScrollView {
             VStack {
-                Picker("Build-in:", selection: $appState.settings.systemConfig) {
+                Picker("Build-in:", selection: $appState.settings.chordPro.systemConfig) {
                     ForEach(systemConfigurations) { template in
                         Text(template.label)
                             .tag(template.fileName)
                     }
                 }
-                .disabled(appState.settings.useCustomConfig)
-                Toggle("Use a custom configuration", isOn: $appState.settings.useCustomConfig)
+                .disabled(appState.settings.chordPro.useCustomConfig)
+                Toggle("Use a custom configuration", isOn: $appState.settings.chordPro.useCustomConfig)
                 FileButtonView(
                     bookmark: CustomFile.customConfig
                 ) {
-                    appState.settings.customConfig = try? FileBookmark.getBookmarkURL(CustomFile.customConfig)
+                    appState.settings.chordPro.customConfig = try? FileBookmark.getBookmarkURL(CustomFile.customConfig)
                 }
-                .disabled(!appState.settings.useCustomConfig)
-                Toggle("Ignore default configurations", isOn: $appState.settings.noDefaultConfigs)
+                .disabled(!appState.settings.chordPro.useCustomConfig)
+                Toggle("Ignore default configurations", isOn: $appState.settings.chordPro.noDefaultConfigs)
                 // swiftlint:disable:next line_length
                 Text("This prevents **ChordPro** from using system wide, user specific and song specific configurations. Checking this will make sure that **ChordPro** only uses the configuration as set in the _application_.")
                     .font(.caption)
             }
-            .wrapSettingsSection(title: "Configuration Template")
+            .wrapSettingsSection(title: "Preset Configurations")
             VStack {
-                Toggle("Add a custom library", isOn: $appState.settings.useAdditionalLibrary)
+                Toggle("Add a custom library", isOn: $appState.settings.chordPro.useAdditionalLibrary)
                 FileButtonView(
                     bookmark: CustomFile.customLibrary
                 ) {}
-                    .disabled(!appState.settings.useAdditionalLibrary)
+                    .disabled(!appState.settings.chordPro.useAdditionalLibrary)
                 // swiftlint:disable:next line_length
                 Text("**ChordPro** has a built-in library with configs and other data. With *custom library* you can add an additional location where to look for data.")
                     .font(.caption)
@@ -150,30 +157,30 @@ extension SettingsView {
     var options: some View {
         ScrollView {
             VStack(alignment: .leading) {
-                Toggle("Show only lyrics", isOn: $appState.settings.lyricsOnly)
+                Toggle("Show only lyrics", isOn: $appState.settings.chordPro.lyricsOnly)
                 Text("This option will hide all chords, ABC and LilyPonds")
                     .font(.caption)
-                Toggle("Suppress chord diagrams", isOn: $appState.settings.noChordGrids)
+                Toggle("Suppress chord diagrams", isOn: $appState.settings.chordPro.noChordGrids)
                 Text("This hide diagrams but still shows inline chords")
                     .font(.caption)
-                Toggle("Eliminate capo settings", isOn: $appState.settings.deCapo)
+                Toggle("Eliminate capo settings", isOn: $appState.settings.chordPro.deCapo)
                 Text("This will be done by transposing the song")
                     .font(.caption)
             }
             .wrapSettingsSection(title: "General")
             VStack {
-                Toggle("Transpose the song", isOn: $appState.settings.transpose)
-                if appState.settings.transpose {
+                Toggle("Transpose the song", isOn: $appState.settings.chordPro.transpose)
+                if appState.settings.chordPro.transpose {
                     VStack {
                         HStack {
-                            Picker("From:", selection: $appState.settings.transposeFrom) {
+                            Picker("From:", selection: $appState.settings.chordPro.transposeFrom) {
                                 ForEach(Note.allCases, id: \.self) { note in
                                     Text(note.rawValue)
                                 }
                             }
                             /// Give it a random ID to avoid random crashes on macOS Monterey
                             .id(UUID())
-                            Picker("To:", selection: $appState.settings.transposeTo) {
+                            Picker("To:", selection: $appState.settings.chordPro.transposeTo) {
                                 ForEach(Note.allCases, id: \.self) { note in
                                     Text(note.rawValue)
                                 }
@@ -181,7 +188,7 @@ extension SettingsView {
                             /// Give it a random ID to avoid random crashes on macOS Monterey
                             .id(UUID())
                         }
-                        Picker("Accidentals:", selection: $appState.settings.transposeAccidentals) {
+                        Picker("Accidentals:", selection: $appState.settings.chordPro.transposeAccidentals) {
                             ForEach(Accidentals.allCases, id: \.self) { accidental in
                                 Text(accidental.rawValue)
                             }
@@ -194,9 +201,9 @@ extension SettingsView {
             }
             .wrapSettingsSection(title: "Transpose")
             VStack {
-                Toggle("Transcode the notation", isOn: $appState.settings.transcode)
-                if appState.settings.transcode {
-                    Picker("Transcode to:", selection: $appState.settings.transcodeNotation) {
+                Toggle("Transcode the notation", isOn: $appState.settings.chordPro.transcode)
+                if appState.settings.chordPro.transcode {
+                    Picker("Transcode to:", selection: $appState.settings.chordPro.transcodeNotation) {
                         ForEach(notations) { notation in
                             Text("\(notation.label.capitalized): \(notation.description)")
                                 .tag(notation.label)
@@ -211,6 +218,40 @@ extension SettingsView {
             .padding(.bottom)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+    }
+}
+
+extension SettingsView {
+
+    /// Menu Items and Keyboard shortcuts for font size
+    /// - Note: Unfortunately, this cannot be placed in a `Menu` because it does not proper update its state...
+    struct MenuButtonsView: View {
+        /// The observable state of the application
+        @EnvironmentObject private var appState: AppState
+        /// The scene in the environment
+        @FocusedValue(\.sceneState) private var sceneState: SceneState?
+        /// The range of font sizes
+        private let fontSizeRange = AppSettings.Application.fontSizeRange
+        /// The body of the `View`
+        var body: some View {
+            Group {
+                Button {
+                    appState.settings.application.fontSize += 1
+                } label: {
+                    Text("Increase Editor Font")
+                }
+                .keyboardShortcut("+")
+                .disabled(appState.settings.application.fontSize == fontSizeRange.upperBound)
+                Button {
+                    appState.settings.application.fontSize -= 1
+                } label: {
+                    Text("Decrease Editor Font")
+                }
+                .keyboardShortcut("-")
+                .disabled(appState.settings.application.fontSize == fontSizeRange.lowerBound)
+            }
+            .disabled(sceneState == nil)
+        }
     }
 }
 

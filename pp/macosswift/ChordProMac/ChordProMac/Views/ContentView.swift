@@ -17,7 +17,7 @@ struct ContentView: View {
     @StateObject private var sceneState = SceneState()
     /// The font for the editor
     var nsFont: NSFont {
-        return appState.settings.fontStyle.nsFont(size: appState.settings.fontSize)
+        return appState.settings.application.fontStyle.nsFont(size: appState.settings.application.fontSize)
     }
     /// The body of the `View`
     var body: some View {

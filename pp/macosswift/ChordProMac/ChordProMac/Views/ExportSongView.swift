@@ -13,11 +13,11 @@ import OSLog
 struct ExportSongView: View {
     /// The label for the button
     let label: String
-    /// The document
+    /// The document in the environment
     @FocusedValue(\.document) private var document: FileDocumentConfiguration<ChordProDocument>?
     /// The observable state of the application
     @EnvironmentObject private var appState: AppState
-    /// The scene
+    /// The scene in the environment
     @FocusedValue(\.sceneState) private var sceneState: SceneState?
     /// Present an export dialog
     @State private var exportSongDialog = false

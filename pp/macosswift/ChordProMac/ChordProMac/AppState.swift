@@ -29,31 +29,31 @@ final class AppState: ObservableObject {
         /// Start with an empty array
         var arguments: [String] = []
         /// Add the optional  transcode
-        if settings.transcode {
-            arguments.append("--transcode=\(settings.transcodeNotation)")
+        if settings.chordPro.transcode {
+            arguments.append("--transcode=\(settings.chordPro.transcodeNotation)")
         }
         /// Add the optional transpose value
-        if settings.transpose, let transpose = settings.transposeValue {
+        if settings.chordPro.transpose, let transpose = settings.chordPro.transposeValue {
             arguments.append("--transpose=\(transpose)")
         }
         /// Optional show only the lyrics
-        if settings.lyricsOnly {
+        if settings.chordPro.lyricsOnly {
             arguments.append("--lyrics-only")
         }
         /// Optional suppress all chords
-        if settings.noChordGrids {
+        if settings.chordPro.noChordGrids {
             arguments.append("--no-chord-grids")
         }
         /// Optional eliminate capo settings by transposing the song
-        if settings.deCapo {
+        if settings.chordPro.deCapo {
             arguments.append("--decapo")
         }
         /// Optional not use default configurations
-        if settings.noDefaultConfigs {
+        if settings.chordPro.noDefaultConfigs {
             arguments.append("--nodefaultconfigs")
         }
         /// Optional add debug info to the PDF
-        if settings.debug {
+        if settings.chordPro.debug {
             arguments.append("--debug")
         }
         /// Return the basic settings
