@@ -27,15 +27,17 @@ struct ContentView: View {
                     text: $document.text,
                     font: nsFont
                 )
-                if let quickView = sceneState.quickLookURL {
-                    QuickLookView.Preview(url: quickView)
-                        .id(sceneState.quickLookID)
-                        .overlay(alignment: .top) {
-                            if sceneState.quickLookOutdated {
-                                QuickLookView.UpdatePreview(document: document)
-
+                VStack {
+                    if let quickView = sceneState.quickLookURL {
+                        QuickLookView.Preview(url: quickView)
+                            .id(sceneState.quickLookID)
+                            .overlay(alignment: .top) {
+                                if sceneState.quickLookOutdated {
+                                    QuickLookView.UpdatePreview(document: document)
+                                    
+                                }
                             }
-                        }
+                    }
                 }
             }
             StatusView()

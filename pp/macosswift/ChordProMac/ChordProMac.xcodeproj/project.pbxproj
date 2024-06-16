@@ -22,7 +22,6 @@
 		D72EA3332C0B31A600B1BA93 /* FileButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72EA3322C0B31A600B1BA93 /* FileButtonView.swift */; };
 		D72EA3352C0B68B600B1BA93 /* FontStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72EA3342C0B68B600B1BA93 /* FontStyle.swift */; };
 		D72EA3382C0B8E2C00B1BA93 /* HelpButtonsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72EA3372C0B8E2C00B1BA93 /* HelpButtonsView.swift */; };
-		D72EA33A2C0B927300B1BA93 /* Credits.html in Resources */ = {isa = PBXBuildFile; fileRef = D72EA3392C0B927300B1BA93 /* Credits.html */; };
 		D72EA33C2C0BB24600B1BA93 /* LogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72EA33B2C0BB24600B1BA93 /* LogView.swift */; };
 		D72EA33E2C0C5C3F00B1BA93 /* LocalizedAlertError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72EA33D2C0C5C3F00B1BA93 /* LocalizedAlertError.swift */; };
 		D72EA3402C0C5E5800B1BA93 /* View+errorAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72EA33F2C0C5E5800B1BA93 /* View+errorAlert.swift */; };
@@ -71,7 +70,6 @@
 		D72EA3322C0B31A600B1BA93 /* FileButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileButtonView.swift; sourceTree = "<group>"; };
 		D72EA3342C0B68B600B1BA93 /* FontStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontStyle.swift; sourceTree = "<group>"; };
 		D72EA3372C0B8E2C00B1BA93 /* HelpButtonsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpButtonsView.swift; sourceTree = "<group>"; };
-		D72EA3392C0B927300B1BA93 /* Credits.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = Credits.html; sourceTree = "<group>"; };
 		D72EA33B2C0BB24600B1BA93 /* LogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogView.swift; sourceTree = "<group>"; };
 		D72EA33D2C0C5C3F00B1BA93 /* LocalizedAlertError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizedAlertError.swift; sourceTree = "<group>"; };
 		D72EA33F2C0C5E5800B1BA93 /* View+errorAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+errorAlert.swift"; sourceTree = "<group>"; };
@@ -182,7 +180,6 @@
 				D7146DB52C04B39B007E77B8 /* Bin */,
 				D75F41312C0F31DB00F0413B /* SystemTasks */,
 				D7723A522C0326130031CD0C /* Assets.xcassets */,
-				D72EA3392C0B927300B1BA93 /* Credits.html */,
 				D7723A572C0326130031CD0C /* Info.plist */,
 				D7723A582C0326130031CD0C /* ChordProMac.entitlements */,
 				D7723A542C0326130031CD0C /* Preview Content */,
@@ -296,7 +293,6 @@
 				D75F41322C0F31DB00F0413B /* SystemTasks in Resources */,
 				D7146DB92C04B3C3007E77B8 /* script in Resources */,
 				D7723A562C0326130031CD0C /* Preview Assets.xcassets in Resources */,
-				D72EA33A2C0B927300B1BA93 /* Credits.html in Resources */,
 				D7146DBB2C04B3C3007E77B8 /* chordpro in Resources */,
 				D7146DBA2C04B3C3007E77B8 /* lib in Resources */,
 				D7723A532C0326130031CD0C /* Assets.xcassets in Resources */,
@@ -507,7 +503,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = "ChordPro core 6.050";
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_ASSET_PATHS = "\"ChordProMac/Preview Content\"";
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -524,7 +520,7 @@
 					"$(PROJECT_DIR)/ChordProMac/Bin",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = nl.desbeers.ChordProMac;
+				PRODUCT_BUNDLE_IDENTIFIER = org.chordpro.chordpro;
 				PRODUCT_NAME = ChordPro;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -542,7 +538,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = "ChordPro core 6.050";
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_ASSET_PATHS = "\"ChordProMac/Preview Content\"";
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -559,7 +555,7 @@
 					"$(PROJECT_DIR)/ChordProMac/Bin",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = nl.desbeers.ChordProMac;
+				PRODUCT_BUNDLE_IDENTIFIER = org.chordpro.chordpro;
 				PRODUCT_NAME = ChordPro;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
