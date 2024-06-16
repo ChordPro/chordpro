@@ -87,6 +87,8 @@ extension SettingsView {
                         in: AppSettings.Application.fontSizeRange,
                         step: 1
                     )
+                    /// Give it a random ID to avoid random crashes on macOS Monterey
+                    .id(UUID())
                     Text("A")
                         .font(.system(size: AppSettings.Application.fontSizeRange.upperBound))
                 }

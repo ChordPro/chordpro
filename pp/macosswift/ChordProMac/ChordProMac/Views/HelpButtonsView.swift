@@ -36,6 +36,7 @@ struct HelpButtonsView: View {
         }
         Divider()
         Text("Trouble Shooting")
+            .font(.caption)
         Toggle(isOn: $appState.settings.chordPro.debug) {
             Text("Enable Debug Info in the PDF")
         }
