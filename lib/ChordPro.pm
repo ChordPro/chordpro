@@ -1255,6 +1255,7 @@ sub runtime_info {
     $res->{metadata} = $::config->{metadata}{keys};
 
     @p = ( qw(title subtitle),
+	   ( grep { !/^(sub)?title$/ } sort(@{$::config->{metadata}{keys}}) ),
 	   grep { !/^(sub)?title$/ } (keys(%{ChordPro::Song::_directives()})) );
     $res->{directives} = [ @p ];
 
