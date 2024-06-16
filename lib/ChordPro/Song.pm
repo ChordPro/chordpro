@@ -1146,6 +1146,10 @@ my %abbrevs = (
    ts         => "textsize",
 	      );
 
+# Use by: runtimeinfo.
+sub _directives { \%directives }
+sub _directive_abbrevs { \%abbrevs }
+
 my $dirpat;
 
 sub parse_directive {

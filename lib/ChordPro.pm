@@ -1250,7 +1250,16 @@ sub runtime_info {
 	$vv->("JSON::XS");
     };
 
-    $res->{modules} = \@p;
+    $res->{modules} = [ @p ];
+
+    $res->{metadata} = $::config->{metadata}{keys};
+
+    @p = ( qw(title subtitle),
+	   grep { !/^(sub)?title$/ } (keys(%{ChordPro::Song::_directives()})) );
+    $res->{directives} = [ @p ];
+
+    $res->{directive_abbrevs} = ChordPro::Song::_directive_abbrevs();
+
     return $res;
 }
 
