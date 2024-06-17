@@ -52,6 +52,7 @@
 		D774F2852C05F2B900CC4E3E /* StatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D774F2842C05F2B900CC4E3E /* StatusView.swift */; };
 		D774F2872C05F6CB00CC4E3E /* Notation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D774F2862C05F6CB00CC4E3E /* Notation.swift */; };
 		D796F0EC2C1A6AB600B3DE40 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D796F0EB2C1A6AB600B3DE40 /* AboutView.swift */; };
+		D7AC53422C20C1A0002B075F /* FontSizeButtonsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7AC53412C20C1A0002B075F /* FontSizeButtonsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -103,6 +104,7 @@
 		D774F2842C05F2B900CC4E3E /* StatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusView.swift; sourceTree = "<group>"; };
 		D774F2862C05F6CB00CC4E3E /* Notation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notation.swift; sourceTree = "<group>"; };
 		D796F0EB2C1A6AB600B3DE40 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
+		D7AC53412C20C1A0002B075F /* FontSizeButtonsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontSizeButtonsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -206,6 +208,7 @@
 				D7723A682C03442F0031CD0C /* ExportSongView.swift */,
 				D702E0DA2C0CE99C006D9667 /* ExportLogView.swift */,
 				D74002CA2C04711000291BE7 /* SettingsView.swift */,
+				D7AC53412C20C1A0002B075F /* FontSizeButtonsView.swift */,
 				D75F410D2C0EFDA200F0413B /* TaskMenuView.swift */,
 				D72EA3322C0B31A600B1BA93 /* FileButtonView.swift */,
 				D72EA3372C0B8E2C00B1BA93 /* HelpButtonsView.swift */,
@@ -345,6 +348,7 @@
 				D74002D12C049B1800291BE7 /* Cache.swift in Sources */,
 				D728FF292C1B26F60028D7A9 /* AppDelegate.swift in Sources */,
 				D74002CD2C04725D00291BE7 /* AppSettings.swift in Sources */,
+				D7AC53422C20C1A0002B075F /* FontSizeButtonsView.swift in Sources */,
 				D7484C162C18426A00D47D1A /* MacEditorView+highlight.swift in Sources */,
 				D74002CB2C04711000291BE7 /* SettingsView.swift in Sources */,
 				D7723A4F2C0326120031CD0C /* ChordProDocument.swift in Sources */,
