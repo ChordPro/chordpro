@@ -6,7 +6,7 @@ use utf8;
 
 package JSON::Relaxed::Parser;
 
-our $VERSION = "0.095";
+our $VERSION = "0.096";
 
 class JSON::Relaxed::Parser;
 
@@ -583,6 +583,7 @@ method encode(%opts) {
     my $prpmode = $opts{prp}                // $prp;
     my $pretty  = $opts{pretty}             // $pretty;
     my $strict  = $opts{strict}             // $strict;
+    my $nouesc  = $opts{nounicodeescapes}   // 0;
 
     if ( $strict ) {
 	$ckeys = $prpmode = $impoh = 0;
@@ -634,7 +635,7 @@ method encode(%opts) {
 	$v =~ s/\013/\\v/g;
 	$v =~ s/\010/\\b/g;
 	$v =~ s/\t/\\t/g;
-	$v =~ s/([^ -ÿ])/sprintf( ord($1) < 0xffff ? "\\u%04x" : "\\u{%x}", ord($1))/ge;
+	$v =~ s/([^ -ÿ])/sprintf( ord($1) < 0xffff ? "\\u%04x" : "\\u{%x}", ord($1))/ge unless $nouesc;
 
 	# Force quotes unless the string can be represented as unquoted.
 	if ( # contains escapes
