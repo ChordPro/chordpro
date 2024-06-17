@@ -423,11 +423,13 @@ sub convert_config ( $from, $to ) {
 
     # First find and process the schema.
     my $schema = CP->findres( "config.schema", class => "config" );
-    my $data = loadlines( $schema, { split => 0 } );
+    my $o = { split => 0, fail => 'soft' };
+    my $data = loadlines( $schema, $o );
+    die("$schema: ", $o->{error}, "\n") if $o->{error};
     $schema = $parser->decode($data);
 
     # Then load the config to be converted.
-    my $o = { split => 0, fail => 'soft' };
+    $o = { split => 0, fail => 'soft' };
     $data = loadlines( $from, $o );
     die("$from: ", $o->{error}, "\n") if $o->{error};
     my $new = $parser->decode($data);
@@ -441,13 +443,13 @@ sub convert_config ( $from, $to ) {
 
     # Write if out.
     if ( $to && $to ne "-" ) {
-	print $res;
-    }
-    else {
 	open( my $fd, '>', $to )
 	  or die("$to: $!\n");
 	print $fd $res;
 	$fd->close;
+    }
+    else {
+	print $res;
     }
 
     1;
