@@ -20,6 +20,7 @@ use File::LoadLines;
 use File::Spec;
 use Scalar::Util qw(reftype);
 use List::Util qw(any);
+use Storable 'dclone';
 use Hash::Util;
 
 #sub hmerge($$;$);
@@ -131,7 +132,7 @@ sub configurator ( $opts = undef ) {
         }
 
         # Process.
-        local $::config = $cfg;
+        local $::config = dclone($cfg);
         process_config( $new, $file );
         # Merge final.
         $cfg = hmerge( $cfg, $new );
@@ -331,7 +332,7 @@ sub process_config ( $cfg, $file ) {
 
     ChordPro::Chords::reset_parser;
     ChordPro::Chords::Parser->reset_parsers;
-    local $::config = hmerge( $::config, $cfg );
+    local $::config = dclone(hmerge( $::config, $cfg ));
     if ( $cfg->{chords} ) {
         ChordPro::Chords::push_parser($cfg->{notes}->{system});
         my $c = $cfg->{chords};
