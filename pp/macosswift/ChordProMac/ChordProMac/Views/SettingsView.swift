@@ -29,6 +29,10 @@ struct SettingsView: View {
                 .tabItem {
                     Label("Presets", systemImage: "doc.plaintext")
                 }
+            library
+                .tabItem {
+                    Label("Library", systemImage: "building.columns")
+                }
             options
                 .tabItem {
                     Label("Options", systemImage: "music.quarternote.3")
@@ -52,13 +56,15 @@ struct SettingsView: View {
                         /// It is a notation
                         notations.append(Notation(url: item))
                     } else {
-                        /// It is a template
-                        templates.append(Template(url: item))
+                        /// It is a template; check if it is enabled
+                        let name = item.deletingPathExtension().lastPathComponent
+                        let enabled = appState.settings.chordPro.systemConfigs.first(where: {$0.fileName == name})
+                        templates.append(Template(url: item, enabled: (enabled == nil) ? false : true))
                     }
                 }
             }
             Logger.application.info("Found \(templates.count) system templates")
-            self.systemConfigurations = templates
+            self.systemConfigurations = templates.sorted { $0.label < $1.label }
             self.notations = notations
         }
     }
@@ -116,40 +122,49 @@ extension SettingsView {
 extension SettingsView {
     /// SwiftUI `View` with presets settings
     var presets: some View {
-        ScrollView {
-            VStack {
-                Picker("Build-in:", selection: $appState.settings.chordPro.systemConfig) {
-                    ForEach(systemConfigurations) { template in
+        VStack {
+            Text("Built-in configurations")
+                .font(.subheadline)
+                .bold()
+            List {
+                ForEach($systemConfigurations) { $template in
+                    Toggle(isOn: $template.enabled) {
                         Text(template.label)
-                            .tag(template.fileName)
                     }
                 }
-                .disabled(appState.settings.chordPro.useCustomConfig)
-                Toggle("Use a custom configuration", isOn: $appState.settings.chordPro.useCustomConfig)
-                FileButtonView(
-                    bookmark: CustomFile.customConfig
-                ) {
-                    appState.settings.chordPro.customConfig = try? FileBookmark.getBookmarkURL(CustomFile.customConfig)
+                .onChange(of: systemConfigurations) { _ in
+                    appState.settings.chordPro.systemConfigs = systemConfigurations.filter({$0.enabled == true})
                 }
-                .disabled(!appState.settings.chordPro.useCustomConfig)
-                Toggle("Ignore default configurations", isOn: $appState.settings.chordPro.noDefaultConfigs)
-                // swiftlint:disable:next line_length
-                Text("This prevents **ChordPro** from using system wide, user specific and song specific configurations. Checking this will make sure that **ChordPro** only uses the configuration as set in the _application_.")
-                    .font(.caption)
             }
-            .wrapSettingsSection(title: "Preset Configurations")
-            VStack {
-                Toggle("Add a custom library", isOn: $appState.settings.chordPro.useAdditionalLibrary)
-                FileButtonView(
-                    bookmark: CustomFile.customLibrary
-                ) {}
-                    .disabled(!appState.settings.chordPro.useAdditionalLibrary)
-                // swiftlint:disable:next line_length
-                Text("**ChordPro** has a built-in library with configs and other data. With *custom library* you can add an additional location where to look for data.")
-                    .font(.caption)
-            }
-            .wrapSettingsSection(title: "Custom Library")
+            Toggle("Add a custom configuration", isOn: $appState.settings.chordPro.useCustomConfig)
+            FileButtonView(
+                bookmark: CustomFile.customConfig
+            ) {}
+            Toggle("Ignore default configurations", isOn: $appState.settings.chordPro.noDefaultConfigs)
+            // swiftlint:disable:next line_length
+            Text("This prevents **ChordPro** from using system wide, user specific and song specific configurations. Checking this will make sure that **ChordPro** only uses the configuration as set in the _application_.")
+                .font(.caption)
         }
+        .wrapSettingsSection(title: "Preset Configurations")
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .padding(.bottom)
+    }
+}
+
+extension SettingsView {
+    /// SwiftUI `View` with presets settings
+    var library: some View {
+        VStack {
+            Toggle("Add a custom library", isOn: $appState.settings.chordPro.useAdditionalLibrary)
+            FileButtonView(
+                bookmark: CustomFile.customLibrary
+            ) {}
+                .disabled(!appState.settings.chordPro.useAdditionalLibrary)
+            // swiftlint:disable:next line_length
+            Text("**ChordPro** has a built-in library with configs and other data. With *custom library* you can add an additional location where to look for data.")
+                .font(.caption)
+        }
+        .wrapSettingsSection(title: "Custom Library")
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 }
@@ -168,6 +183,9 @@ extension SettingsView {
                 Toggle("Eliminate capo settings", isOn: $appState.settings.chordPro.deCapo)
                 Text("This will be done by transposing the song")
                     .font(.caption)
+                Toggle(isOn: $appState.settings.chordPro.debug) {
+                    Text("Enable Debug Info in the PDF")
+                }
             }
             .wrapSettingsSection(title: "General")
             VStack {
@@ -225,40 +243,6 @@ extension SettingsView {
 
 extension SettingsView {
 
-    /// Menu Items and Keyboard shortcuts for font size
-    /// - Note: Unfortunately, this cannot be placed in a `Menu` because it does not proper update its state...
-    struct MenuButtonsView: View {
-        /// The observable state of the application
-        @EnvironmentObject private var appState: AppState
-        /// The scene in the environment
-        @FocusedValue(\.sceneState) private var sceneState: SceneState?
-        /// The range of font sizes
-        private let fontSizeRange = AppSettings.Application.fontSizeRange
-        /// The body of the `View`
-        var body: some View {
-            Group {
-                Button {
-                    appState.settings.application.fontSize += 1
-                } label: {
-                    Text("Increase Editor Font")
-                }
-                .keyboardShortcut("+")
-                .disabled(appState.settings.application.fontSize == fontSizeRange.upperBound)
-                Button {
-                    appState.settings.application.fontSize -= 1
-                } label: {
-                    Text("Decrease Editor Font")
-                }
-                .keyboardShortcut("-")
-                .disabled(appState.settings.application.fontSize == fontSizeRange.lowerBound)
-            }
-            .disabled(sceneState == nil)
-        }
-    }
-}
-
-extension SettingsView {
-
     struct WrapSettingsSection: ViewModifier {
         let title: String
         func body(content: Content) -> some View {
@@ -280,6 +264,9 @@ extension SettingsView {
 
 extension View {
 
+    /// Shortcut to the `WrapSettingsSection` modifier
+    /// - Parameter title: The title
+    /// - Returns: A modified `View`
     func wrapSettingsSection(title: String) -> some View {
         modifier(SettingsView.WrapSettingsSection(title: title))
     }

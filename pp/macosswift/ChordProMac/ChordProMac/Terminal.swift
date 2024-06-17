@@ -122,6 +122,24 @@ extension Terminal {
 
 extension Terminal {
 
+    /// Get access to the optional custom config
+    static func getOptionalCustomConfig(settings: AppSettings) -> String? {
+        if
+            settings.chordPro.useCustomConfig,
+            let persistentURL = try? FileBookmark.getBookmarkURL(CustomFile.customConfig)
+        {
+            /// Get access to the URL
+            _ = persistentURL.startAccessingSecurityScopedResource()
+            /// Close the access
+            FileBookmark.stopCustomFileAccess(persistentURL: persistentURL)
+            return "--config='\(persistentURL.path)'"
+        }
+        return nil
+    }
+}
+
+extension Terminal {
+
     /// Get information about the **ChordPro** binary
     /// - Returns: The info in a ``ChordProInfo`` struct
     static func getChordProInfo() async throws -> ChordProInfo {
@@ -143,11 +161,20 @@ extension Terminal {
         }
         /// Add the argument to get the information
         arguments.append("'\(chordProApp.path)' -A -A -A")
+        /// Add selected built-in presets
+        for preset in settings.chordPro.systemConfigs {
+            arguments.append("--config=\(preset.fileName)")
+        }
+        /// Add the optional custom config file
+        if let customConfig = getOptionalCustomConfig(settings: settings) {
+            arguments.append(customConfig)
+        }
         /// Run **ChordPro** in the shell
         let output = await Terminal.runInShell(arguments: [arguments.joined(separator: " ")])
         /// Convert the JSON data to a ``ChordProInfo`` struct
         let jsonData = output.standardOutput.data(using: .utf8)!
         let chordProInfo = try JSONDecoder().decode(ChordProInfo.self, from: jsonData)
+        Logger.application.log("Loaded ChordPro info")
         return chordProInfo
     }
 }
@@ -192,26 +219,12 @@ extension Terminal {
         arguments.append("'\(chordProApp.path)'")
         /// Add the source file
         arguments.append("'\(sceneState.sourceURL.path)'")
-        /// Add the config file
-        ///
-        /// This can be one of the following
-        /// - A user selected **Custom Config File**
-        /// - A system provided configuration
-        if
-            settings.chordPro.useCustomConfig,
-            let persistentURL = try? FileBookmark.getBookmarkURL(CustomFile.customConfig)
-        {
-            /// Get access to the URL
-            _ = persistentURL.startAccessingSecurityScopedResource()
-            arguments.append("--config='\(persistentURL.path)'")
-            /// Close the access
-            FileBookmark.stopCustomFileAccess(persistentURL: persistentURL)
-        } else {
-            /// Use the system config
-            arguments.append("--config=\(settings.chordPro.systemConfig)")
-        }
         /// Get the user settings that are simple and do not need sandbox help
         arguments.append(contentsOf: AppState.getUserSettings(settings: settings))
+        /// Add the optional custom config file
+        if let customConfig = getOptionalCustomConfig(settings: settings) {
+            arguments.append(customConfig)
+        }
         /// Add the optional selected ``CustomTask``
         if let taskConfig = sceneState.customTask {
             arguments.append("--config='\(taskConfig.url.path)'")
@@ -237,7 +250,7 @@ extension Terminal {
             return (data, output.standardError.isEmpty ? .noErrorOccurred : .pdfCreatedWithErrors)
         } catch {
             /// There is no data, throw an ``AppError``
-            throw AppError.emptySong
+            throw output.standardError.isEmpty ? AppError.emptySong : AppError.pdfCreationError
         }
     }
 }

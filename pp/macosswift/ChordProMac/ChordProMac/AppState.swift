@@ -16,6 +16,8 @@ final class AppState: ObservableObject {
             try? AppSettings.save(settings: settings)
         }
     }
+    /// Information about **ChordPro**
+    @Published var chordProInfo: ChordProInfo?
     /// Init the class; get application settings
     init() {
         self.settings = AppSettings.load()
@@ -55,6 +57,10 @@ final class AppState: ObservableObject {
         /// Optional add debug info to the PDF
         if settings.chordPro.debug {
             arguments.append("--debug")
+        }
+        /// Add selected built-in presets
+        for preset in settings.chordPro.systemConfigs {
+            arguments.append("--config=\(preset.fileName)")
         }
         /// Return the basic settings
         return arguments
