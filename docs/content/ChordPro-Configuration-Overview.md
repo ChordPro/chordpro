@@ -34,7 +34,7 @@ definitions. First strict JSON:
 }
 ````
 
-Note that there are no comments, and there may be no comma's
+Note that there are no comments, and there may be no commas
 after `false` and the closing `]`.
 	
 ````
@@ -55,7 +55,7 @@ after `false` and the closing `]`.
 ````
 
 Relaxed JSON has comments, doesn't require most of the quotes, and 
-doesn't care much about the comma's.
+doesn't care much about the commas.
 
 ````
 // Really Relaxed JSON
@@ -76,6 +76,33 @@ maintain.
 In this documentation we will preferably use RRJSON format, although
 the stricter JSON format can be still be seen in several places for
 legacy reasons.
+
+## Converting configuration files
+
+Config files in JSON, RJSON, RRJSON and PRP formats can easily be
+converted to RRJSON format:
+
+````
+chordpro --convert-config=myconf.json --output=newconf.json
+````
+
+As an additional benefit, the converted config will have comments.
+For example, this trivial config:
+````
+settings.chordnames=strict
+````
+becomes, after conversion:
+````
+// Configuration for ChordPro
+// 
+// This is a really relaxed JSON document, see
+// https://metacpan.org/pod/JSON::Relaxed#REALLY-RELAXED-EXTENSIONS
+
+// General settings, often changed by configs and command line.
+settings.chordnames : strict
+
+// End of Config.
+````
 
 ## Standard configuration files
 
