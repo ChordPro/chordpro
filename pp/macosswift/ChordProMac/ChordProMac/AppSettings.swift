@@ -65,16 +65,15 @@ extension AppSettings {
         var useAdditionalLibrary: Bool = false
         /// Bool to use a custom config instead of system
         var useCustomConfig: Bool = false
-        /// The system config to use
-        var systemConfig: String = "guitar"
-        /// Optional custom config URL
-        var customConfig: URL?
+        /// The system configs to use
+        var systemConfigs: [Template] = []
         /// The label to show in the ``StatusView``
         var configLabel: String {
+            var config = systemConfigs.map {$0.label.replacingOccurrences(of: "_", with: " ").capitalized}
             if useCustomConfig, let url = try? FileBookmark.getBookmarkURL(CustomFile.customConfig) {
-                return url.deletingPathExtension().lastPathComponent
+                config.append(url.deletingPathExtension().lastPathComponent)
             }
-            return systemConfig.replacingOccurrences(of: "_", with: " ").capitalized
+            return config.joined(separator: "・")
         }
 
         /// Bool not to use default configurations

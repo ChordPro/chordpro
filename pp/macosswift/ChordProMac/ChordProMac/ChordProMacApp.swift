@@ -33,10 +33,6 @@ import SwiftUI
             CommandMenu("Tasks") {
                 TaskMenuView()
             }
-            CommandGroup(after: .textEditing) {
-                SettingsView.MenuButtonsView()
-                    .environmentObject(appState)
-            }
             CommandGroup(replacing: .help) {
                 HelpButtonsView()
                     .environmentObject(appState)

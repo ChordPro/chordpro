@@ -34,7 +34,6 @@ struct ContentView: View {
                             .overlay(alignment: .top) {
                                 if sceneState.quickLookOutdated {
                                     QuickLookView.UpdatePreview(document: document)
-                                    
                                 }
                             }
                     }
@@ -52,6 +51,7 @@ struct ContentView: View {
             }
         }
         .toolbar {
+            FontSizeButtonsView()
             ExportSongView(label: "Export as PDF")
             QuickLookView(label: "Show Preview", document: document)
                 .labelStyle(.iconOnly)

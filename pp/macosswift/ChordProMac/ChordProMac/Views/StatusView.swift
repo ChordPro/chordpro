@@ -16,7 +16,9 @@ struct StatusView: View {
     /// The body of the `View`
     var body: some View {
         HStack {
-            Text("**Configuration:** \(appState.settings.chordPro.configLabel)")
+            if !appState.settings.chordPro.configLabel.isEmpty {
+                Text("**Configuration:** \(appState.settings.chordPro.configLabel)")
+            }
             if appState.settings.chordPro.transpose && appState.settings.chordPro.transposeMakesSense {
                 Text("**Transpose:** \(appState.settings.chordPro.transposeLabel)")
             }
