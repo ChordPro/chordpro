@@ -108,6 +108,12 @@ sub chordpro {
     # Establish backend.
     my $of = $options->{output};
 
+    if ( $options->{'convert-config'} ) {
+	die("\"--convert-config\" requires a single config file name\n")
+	  if @ARGV;
+	return ChordPro::Config::convert_config( $options->{'convert-config'}, $of );
+    }
+
     if ( defined($of) && $of ne "" ) {
         if ( $of =~ /\.pdf$/i ) {
             $options->{generate} ||= "PDF";
@@ -637,7 +643,20 @@ The default configuration is commented to explain its contents.
 Prints the final configuration (after processing all system, user and
 other config files)  to standard output, and exits.
 
-The final configuration is not commented. Sorry.
+=back
+
+=item B<--convert-config=>I<file>
+
+This option requires a single file name argument.
+
+The specified config file is loaded and immedeately written out in
+standard format, including schema comments. After this, the program
+exits. B<No songs are processed.>
+
+Output goes to standard output unless `--output` is used to specify an
+alternative.
+
+All other options are ignored.
 
 =back
 
@@ -811,6 +830,7 @@ sub app_setup {
 	  'print-default-config' => \$defcfg,
 	  'print-final-config'   => \$fincfg,
 	  'print-delta-config'   => \$deltacfg,
+	  'convert-config=s',
 
 	  # This aborts option scanning.
 	  'reference|R'		 => sub { $reference++; die("!FINISH!"); },
@@ -991,7 +1011,10 @@ sub app_setup {
     # At this point, there should be filename argument(s)
     # unless we're embedded or just dumping chords.
     app_usage(\*STDERR, 1)
-      unless $::__EMBEDDED__ || $clo->{'dump-chords'} || @ARGV;
+      unless $::__EMBEDDED__
+      || $clo->{'dump-chords'}
+      || $clo->{'convert-config'}
+      || @ARGV;
 
     # Return result.
     $options;

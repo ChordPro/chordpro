@@ -388,7 +388,20 @@ The default configuration is commented to explain its contents.
 Prints the final configuration (after processing all system, user and
 other config files)  to standard output, and exits.
 
-The final configuration is not commented. Sorry.
+=back
+
+=item B<--convert-config=>I<file>
+
+This option requires a single file name argument.
+
+The specified config file is loaded and immedeately written out in
+standard format, including schema comments. After this, the program
+exits. B<No songs are processed.>
+
+Output goes to standard output unless `--output` is used to specify an
+alternative.
+
+All other options are ignored.
 
 =back
 

@@ -415,6 +415,44 @@ sub config_final ( $delta ) {
     }
 }
 
+sub convert_config ( $from, $to ) {
+    # This is a completely independent function.
+
+    # Establish a key order retaining parser.
+    my $parser = JSON::Relaxed::Parser->new( key_order => 1 );
+
+    # First find and process the schema.
+    my $schema = CP->findres( "config.schema", class => "config" );
+    my $data = loadlines( $schema, { split => 0 } );
+    $schema = $parser->decode($data);
+
+    # Then load the config to be converted.
+    my $o = { split => 0, fail => 'soft' };
+    $data = loadlines( $from, $o );
+    die("$from: ", $o->{error}, "\n") if $o->{error};
+    my $new = $parser->decode($data);
+
+    # And re-encode it using the schema.
+    my $res = $parser->encode( data => $new, pretty => 1,
+			       nounicodeescapes => 1, schema => $schema );
+
+    # Add trailer.
+    $res .= "\n// End of Config.\n";
+
+    # Write if out.
+    if ( $to && $to ne "-" ) {
+	print $res;
+    }
+    else {
+	open( my $fd, '>', $to )
+	  or die("$to: $!\n");
+	print $fd $res;
+	$fd->close;
+    }
+
+    1;
+}
+
 # Config in properties format.
 
 sub cfg2props ( $o, $path = "" ) {
