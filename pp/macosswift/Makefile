@@ -1,11 +1,14 @@
+#!/bin/make -f
+
 CURRDATE := $(shell date "+%Y-%m-%d")
+VV := $(shell perl ../../lib/ChordPro/Version.pm)
 WRAPPERBIN := ChordProMac/ChordProMac/Bin
-DMGNAME := ChordPro macOS ${CURRDATE}.dmg
+DMGNAME := ChordPro_MacOS-${VV}.dmg
 MKDIR := mkdir
 DEST := build
 
 all: archive
-	
+
 chordpro:
 	@echo "Building ChordPro core"
 	cd "../macos" && make ppl TARGET=chordpro
@@ -33,14 +36,14 @@ xcodebuild: chordpro
 		CODE_SIGNING_REQUIRED=NO \
 		BUILD_DIR=../../../build
 	rm -fr "${WRAPPERBIN}"
-		
+
 archive: xcodebuild
 	@echo "Archive ChordPro"
 	$(MKDIR) -p "${DEST}/ChordPro"
 	cp -r "${DEST}/Release/ChordPro.app" "build/ChordPro"
 	cp "ChordProMac/Read Me First.html" "${DEST}/ChordPro"
-	rm -f "${TESTBUILDDIR}/${DMGNAME}"
+	rm -f "${DEST}/${DMGNAME}"
 	hdiutil create -format UDZO -srcfolder build/ChordPro/ "${DEST}/${DMGNAME}"
-	
+
 clean:
 	rm -fr ${DEST}
