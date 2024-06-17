@@ -429,10 +429,20 @@ sub convert_config ( $from, $to ) {
     $schema = $parser->decode($data);
 
     # Then load the config to be converted.
+    my $new;
     $o = { split => 0, fail => 'soft' };
     $data = loadlines( $from, $o );
-    die("$from: ", $o->{error}, "\n") if $o->{error};
-    my $new = $parser->decode($data);
+    die("Cannot open config $from [", $o->{error}, "]\n") if $o->{error};
+
+    if ( $data =~ /^\s*#/m ) {	# #-comments -> prp
+	require ChordPro::Config::Properties;
+	my $cfg = new Data::Properties;
+	$cfg->parse_file($from);
+	$new = $cfg->data;
+    }
+    else {			# assume JSON, RJSON, RRJSON
+	$new = $parser->decode($data);
+    }
 
     # And re-encode it using the schema.
     my $res = $parser->encode( data => $new, pretty => 1,
