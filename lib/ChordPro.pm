@@ -1084,6 +1084,12 @@ sub ::runtimeinfo {
 			    "ChordPro " . ($_->{type}//"core"), $_->{version} );
 	}
     }
+    if ( $level eq "short" ) {	# used for PDF Creator info
+	$msg =~ s/^\s+//;
+	$msg =~ s/\s+/ /g;
+	$msg =~ s/\n+$//;
+	return $msg;
+    }
 
     for ( $i{general}{perl} ) {
 	$msg .= sprintf( $fmt3, "Perl", $_->{version}, $_->{dppath} );

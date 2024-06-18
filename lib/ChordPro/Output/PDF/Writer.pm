@@ -62,7 +62,8 @@ sub info {
 	    $self->{pdf}->info_metadata( $_, demarkup($info{$_}) );
 	}
 	if ( $config->{debug}->{runtimeinfo} ) {
-	    $self->{pdf}->info_metadata( "RuntimeInfo", ::runtimeinfo() );
+	    $self->{pdf}->info_metadata( "RuntimeInfo",
+					 "Runtime Info:\n" . ::runtimeinfo() );
 	}
     }
     else {
