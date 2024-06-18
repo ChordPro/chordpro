@@ -1229,6 +1229,22 @@
 		    } }
 		  ]
 		},
+		"subtitle" : {
+		  "description" : "Font for typesetting subtitles.",
+		  "allOf" : [
+		    { "$ref" : "#/definitions/fontspec" },
+		    { "properties" : {
+		      "name" : {
+			"default" : "Times-Roman",
+			"type" : "string"
+		      },
+		      "size" : {
+			"default" : 12,
+			"type" : "number"
+		      }
+		    } }
+		  ]
+		},
 		"tab" : {
 		  "description" : "Font for typesetting tabs.",
 		  "allOf" : [
