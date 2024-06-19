@@ -89,6 +89,11 @@ Note that the top of the page is the top of the paper minus the
 top margin, and that the width of the page is the width of the paper
 minus the left and right margins.
 
+##### `href=`*url*
+
+Provides a URL to open when the image is clicked.
+Most likely this will leave the PDF viewer and transfer to a web browser.
+
 ## Static (stationary) images
 
 ##### `x=`*offset*

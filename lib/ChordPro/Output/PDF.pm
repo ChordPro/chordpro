@@ -2063,6 +2063,7 @@ sub imageline {
 		     border => $opts->{border} || 0,
 		     valign => $opts->{valign} // "top",
 		     align  => $align,
+		     maybe href => $opts->{href},
 		   );
 
     if ( $anchor eq "float" ) {

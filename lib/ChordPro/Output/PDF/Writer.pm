@@ -451,6 +451,10 @@ sub add_object {
 	  ->line_width( $options{border} )
 	    ->stroke;
     }
+    if ( $options{href} ) {
+	my $a = $gfx->{' apipage'}->annotation;
+	$a->url( $options{href}, -rect => [ $x, $y, $x+$w, $y+$h ] );
+    }
 
     $gfx->restore;
 }

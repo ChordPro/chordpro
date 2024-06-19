@@ -1544,7 +1544,7 @@ sub dir_image {
 	elsif ( $k =~ /^(type)$/i && $v ne "" ) {
 	    $opts{type} = $v;
 	}
-	elsif ( $k =~ /^(label)$/i && $v ne "" ) {
+	elsif ( $k =~ /^(label|href)$/i && $v ne "" ) {
 	    $opts{lc($k)} = $v;
 	}
 	elsif ( $k =~ /^(anchor)$/i
@@ -1608,7 +1608,8 @@ sub dir_image {
 	my $opts;
 	$opts->{type} = $opts{type}    if $opts{type};
 	$opts->{persist} = $opts{persist} if $opts{persist};
-	delete $opts{$_} for qw( type persist );
+	$opts->{href} = $opts{href} if $opts{href};
+	delete $opts{$_} for qw( type persist href );
 
 	if ( $id && %opts ) {
 	    do_warn("Asset definition \"$id\" does not take attributes");
