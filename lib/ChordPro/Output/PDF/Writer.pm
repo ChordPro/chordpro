@@ -792,59 +792,36 @@ sub show_vpos {
     $self->{pdfgfx}->move(100*$w,$y)->linewidth(0.25)->hline(100*(1+$w))->stroke;
 }
 
-use File::Temp;
-
-my $cname;
-my $rname;
 sub embed {
     my ( $self, $file ) = @_;
     return unless -f $file;
+
+    # Borrow some routines from PDF Api.
+    *PDFNum = \&{$self->{pdfapi} . '::Basic::PDF::Utils::PDFNum'};
+    *PDFStr = \&{$self->{pdfapi} . '::Basic::PDF::Utils::PDFStr'};
+
+    # The song.
+    # Apparently the 'hidden' flag does not hide it completely,
+    # so give it a rect outside the page.
     my $a = $self->{pdfpage}->annotation();
+    $a->text( loadlines( $file, { split => 0 } ),
+	      -open => 0, -rect => [0,0,-1,-1] );
+    $a->{T} = PDFStr("ChordProSong");
+    $a->{F} = PDFNum(2);		# hidden
 
-    # The only reliable way currently is pretend it's a movie :) .
-    $a->movie($file, "ChordPro" );
-    $a->open(1);
-
-    # Create/reuse temp file for (final) config and run time info.
-    my $cf;
-    if ( $cname ) {
-	open( $cf, '>', $cname );
-    }
-    else {
-	( $cf, $cname ) = File::Temp::tempfile( UNLINK => 0);
-    }
-    binmode( $cf, ':utf8' );
-    print $cf ChordPro::Config::config_final(0);
-    close($cf);
-
+    # The config.
     $a = $self->{pdfpage}->annotation();
-    $a->movie($cname, "ChordProConfig" );
-    $a->open(0);
+    $a->text( ChordPro::Config::config_final(0),
+	      -open => 0, -rect => [0,0,-1,-1]);
+    $a->{T} = PDFStr("ChordProConfig");
+    $a->{F} = PDFNum(2);		# hidden
 
-    my $rf;
-    if ( $rname ) {
-	open( $rf, '>', $rname );
-    }
-    else {
-	( $rf, $rname ) = File::Temp::tempfile( UNLINK => 0);
-    }
-    binmode( $rf, ':utf8' );
-    open( $rf, '>', $rname );
-    binmode( $rf, ':utf8' );
-    print $rf (::runtimeinfo());
-    close($rf);
-
+    # Runtime info.
     $a = $self->{pdfpage}->annotation();
-    $a->movie($rname, "ChordProRunTime" );
-    $a->open(0);
-}
-
-END {
-    return unless $cname;
-    unlink($cname);
-    undef $cname;
-    unlink($rname);
-    undef $rname;
+    $a->text( ::runtimeinfo(),
+	      -open => 0, -rect => [0,0,-1,-1] );
+    $a->{T} = PDFStr("ChordProRunTime");
+    $a->{F} = PDFNum(2);		# hidden
 }
 
 1;
