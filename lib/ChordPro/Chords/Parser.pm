@@ -142,7 +142,7 @@ sub get_parser ( $self, $system = undef, $nofallback = undef ) {
     }
     elsif ( $system ne $::config->{notes}->{system} ) {
 	my $p = ChordPro::Chords::Parser::Common->new
-	  ( { notes => $system } );
+	  ( { notes => { system => $system } } );
 	return $parsers{$system} = $p;
     }
     elsif ( $system ) {
