@@ -14,6 +14,7 @@
     - Upgrade JSON::Relaxed to 0.096.
     - Handle \u escapes for surrogates and extended chars (\u{...}).
     - Fix issue #371, #372.
+    - Fix issue #384.
     - Fix problem that text in a TextBlock did not reset to flush left.
     - Fix problem TextBlock textstyle did not copy the background colour.
     - New function to deal with property settings for the config.

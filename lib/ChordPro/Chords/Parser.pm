@@ -1046,7 +1046,7 @@ package ChordPro::Chord::Nashville;
 
 our @ISA = 'ChordPro::Chord::Base';
 
-sub transpose ( $self ) { $self }
+sub transpose ( $self, $dummy1, $dummy2 ) { $self }
 
 sub show {
     Carp::croak("call canonical instead of show");
