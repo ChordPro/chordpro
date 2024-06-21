@@ -20,7 +20,7 @@ BUILD {
 	{ 'font-family'		    => 'serif',
 	  'font-size'		    => '10',
 	  'color'		    => 'black',
-	  'background-color'	    => 'white',
+	  'background-color'	    => 'none',
 	  'fill'		    => 'currentColor',
 	  'stroke'		    => 'none',
 	  'line-width'		    => 1,
