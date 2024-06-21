@@ -1612,7 +1612,8 @@ sub dir_image {
 	delete $opts{$_} for qw( type persist href );
 
 	if ( $id && %opts ) {
-	    do_warn("Asset definition \"$id\" does not take attributes");
+	    do_warn("Asset definition \"$id\" does not take attributes",
+		   " (" . join(" ",sort keys %opts) . ")");
 	    return;
 	}
 
