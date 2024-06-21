@@ -1,28 +1,49 @@
 0.000
 
+
+    !Highlights
+
+    - Configuration files are now [Really Relaxed JSON](https://metacpan.org/pod/JSON::Relaxed#REALLY-RELAXED-EXTENSIONS) files.
+      These are much easier to write and maintain than JSON.
+      Don't worry, everything is still backward compatible with the
+      older JSON and slightly relaxed JSON formats. And ChordPro can
+      [convert your config files](https://www.chordpro.org/chordpro/using-chordpro/#convert-config) for you.
+
+    - Nick Berendsen kindly offered to create a native GUI for macOS.
+      It looks great and behaves nicely in the way macOS applications should
+      behave. And it doesn't have the restrictions on opening and saving
+      of files that the 'classic' GUI suffers from.
+      Thanks Nick!
+
+    !Functionality
     - (PDF, page sort) Use sorttitle for page sorting.
+    - Images: Ignore align with x percentage. Issue warning.
+    - Detection of attributes in labels now requires quoting.
+    - Handle \u escapes for surrogates and extended chars (\u{...}).
+    - 'chordpro -A -A -A' will produce runtime info in JSON.
+    - Add '--convert-config' to convert config to new style.
+    - Add href property for images.
+    - Upgrade Text::Layout to 0.036.
+    - Upgrade JSON::Relaxed to 0.096.
+    - Upgrade SVGPFG to 0.087. Enables transparant SVG images.
+
+    !Bug fixes
     - Fix/update docker build.
     - Fix issue #367.
-    - Images: Ignore align with x percentage. Issue warning.
     - Fix paper anchored images being restricted to page size instead
       of paper size.
     - Fix problem that blocked pdf documents from being processed as songs.
     - Fixed problems with labels and embedded newlines.
-    - Detection of attributes in labels now requires quoting.
     - Fixed newline issues in TextBlocks.
-    - Upgrade Text::Layout to 0.036.
-    - Upgrade JSON::Relaxed to 0.096.
-    - Handle \u escapes for surrogates and extended chars (\u{...}).
     - Fix issue #371, #372.
     - Fix issue #384.
     - Fix problem that text in a TextBlock did not reset to flush left.
     - Fix problem TextBlock textstyle did not copy the background colour.
+    - Fix colours of keyboard diagrams wrt. theme.
+
+!Internal
     - New function to deal with property settings for the config.
-    - New UI for MacOS. Thanks to Nick Berendsen.
     - Move pp files to separate MANIFEST so they do not clobber the CPAN.
-    - 'chordpro -A -A -A' will produce runtime info in JSON.
-    - Add '--convert-config' to convert config to new style.
-    - Add href property for images.
 
 6.050.10 2024-04-06
 
