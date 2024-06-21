@@ -12,6 +12,18 @@ struct ChordProInfo: Codable, Equatable {
     let general: General
     let modules: [Module]
     let resources: [Resource]
+    let metadata: [String]
+    let directives: [String]
+    let directiveAbbreviations: [String: String]
+
+    enum CodingKeys: String, CodingKey {
+        case general
+        case modules
+        case resources
+        case metadata
+        case directives
+        case directiveAbbreviations = "directive_abbrevs"
+    }
 }
 
 extension ChordProInfo {
