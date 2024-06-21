@@ -25,7 +25,8 @@ struct ContentView: View {
             HStack {
                 MacEditorView(
                     text: $document.text,
-                    font: nsFont
+                    font: nsFont,
+                    directives: appState.directives
                 )
                 VStack {
                     if let quickView = sceneState.quickLookURL {

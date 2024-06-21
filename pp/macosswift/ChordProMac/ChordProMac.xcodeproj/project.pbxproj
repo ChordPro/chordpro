@@ -36,6 +36,7 @@
 		D75F410E2C0EFDA200F0413B /* TaskMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D75F410D2C0EFDA200F0413B /* TaskMenuView.swift */; };
 		D75F41102C0F240800F0413B /* CustomTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = D75F410F2C0F240800F0413B /* CustomTask.swift */; };
 		D75F41322C0F31DB00F0413B /* SystemTasks in Resources */ = {isa = PBXBuildFile; fileRef = D75F41312C0F31DB00F0413B /* SystemTasks */; };
+		D77002BF2C258A7C00B05084 /* ChordProInfo.json in Resources */ = {isa = PBXBuildFile; fileRef = D77002BE2C258A7C00B05084 /* ChordProInfo.json */; };
 		D7723A4D2C0326120031CD0C /* ChordProMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7723A4C2C0326120031CD0C /* ChordProMacApp.swift */; };
 		D7723A4F2C0326120031CD0C /* ChordProDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7723A4E2C0326120031CD0C /* ChordProDocument.swift */; };
 		D7723A512C0326120031CD0C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7723A502C0326120031CD0C /* ContentView.swift */; };
@@ -85,6 +86,7 @@
 		D75F410D2C0EFDA200F0413B /* TaskMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskMenuView.swift; sourceTree = "<group>"; };
 		D75F410F2C0F240800F0413B /* CustomTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTask.swift; sourceTree = "<group>"; };
 		D75F41312C0F31DB00F0413B /* SystemTasks */ = {isa = PBXFileReference; lastKnownFileType = folder; path = SystemTasks; sourceTree = "<group>"; };
+		D77002BE2C258A7C00B05084 /* ChordProInfo.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ChordProInfo.json; sourceTree = "<group>"; };
 		D7723A492C0326120031CD0C /* ChordPro.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChordPro.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D7723A4C2C0326120031CD0C /* ChordProMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChordProMacApp.swift; sourceTree = "<group>"; };
 		D7723A4E2C0326120031CD0C /* ChordProDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChordProDocument.swift; sourceTree = "<group>"; };
@@ -121,6 +123,7 @@
 		D7146DB52C04B39B007E77B8 /* Bin */ = {
 			isa = PBXGroup;
 			children = (
+				D77002BE2C258A7C00B05084 /* ChordProInfo.json */,
 				D7146DB82C04B3C2007E77B8 /* chordpro */,
 				D7146DBC2C04B668007E77B8 /* libperl.dylib */,
 				D7146DB72C04B3C2007E77B8 /* lib */,
@@ -298,6 +301,7 @@
 				D7723A562C0326130031CD0C /* Preview Assets.xcassets in Resources */,
 				D7146DBB2C04B3C3007E77B8 /* chordpro in Resources */,
 				D7146DBA2C04B3C3007E77B8 /* lib in Resources */,
+				D77002BF2C258A7C00B05084 /* ChordProInfo.json in Resources */,
 				D7723A532C0326130031CD0C /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

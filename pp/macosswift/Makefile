@@ -24,6 +24,8 @@ chordpro:
 	cp -r "../macos/build/script" "${WRAPPERBIN}"
 	@echo "Cleanup core..."
 	cd "../macos" && make clean
+	@echo "Add core info to the wrapper..."
+	${WRAPPERBIN}/chordpro -A -A -A -> ${WRAPPERBIN}/ChordProInfo.json
 
 xcodebuild: chordpro
 	@echo "Building ChordProMac"
