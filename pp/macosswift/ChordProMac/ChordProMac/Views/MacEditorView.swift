@@ -10,8 +10,8 @@ import SwiftUI
 /// The editor for **ChordPro**
 struct MacEditorView: NSViewRepresentable {
     @Binding var text: String
-    var font: NSFont
-
+    let font: NSFont
+    let directives: [String]
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
@@ -26,12 +26,17 @@ struct MacEditorView: NSViewRepresentable {
     func updateNSView(_ view: CustomTextView, context: Context) {
         if view.textView.string != text {
             view.textView.string = text
-            let all = NSRange(location: 0, length: text.utf16.count)
-            MacEditorView.highlight(view: view.textView, font: font, range: all)
+            fullHighlight(textView: view.textView)
         }
         if view.textView.font != font {
             view.textView.font = font
+            fullHighlight(textView: view.textView)
         }
+    }
+
+    private func fullHighlight(textView: NSTextView) {
+        let all = NSRange(location: 0, length: text.utf16.count)
+        MacEditorView.highlight(view: textView, font: font, range: all, directives: directives)
     }
 }
 
@@ -89,7 +94,8 @@ extension MacEditorView {
             MacEditorView.highlight(
                 view: textView,
                 font: textView.font ?? .systemFont(ofSize: 14),
-                range: highlightRange
+                range: highlightRange,
+                directives: parent.directives
             )
             parent.text = textView.string
         }

@@ -16,11 +16,20 @@ final class AppState: ObservableObject {
             try? AppSettings.save(settings: settings)
         }
     }
-    /// Information about **ChordPro**
-    @Published var chordProInfo: ChordProInfo?
+    /// All the directives we know about
+    var directives: [String] = []
     /// Init the class; get application settings
     init() {
+        /// Get the application settings from the cache
         self.settings = AppSettings.load()
+        /// Get the static ChordProInfo from the bundle
+        if
+            let chordProInfo = Bundle.main.url(forResource: "ChordProInfo", withExtension: "json"),
+            let data = try? Data(contentsOf: chordProInfo),
+            let info = try? JSONDecoder().decode(ChordProInfo.self, from: data)
+        {
+            self.directives = info.metadata + info.directives + info.directiveAbbreviations.map(\.key)
+        }
     }
     /// Add the user settings as arguments to **ChordPro** for the Terminal action
     /// - Parameter settings: The ``AppSettings``

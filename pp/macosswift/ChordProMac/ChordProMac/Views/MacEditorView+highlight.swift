@@ -50,8 +50,9 @@ extension MacEditorView {
     ///   - view: The `NSTextView`
     ///   - font: The current `NSFont`
     ///   - range: The `NSRange` to highlight
+    ///   - directives: The known directives
     /// - Returns: A highlighted text
-    static func highlight(view: NSTextView, font: NSFont, range: NSRange) {
+    static func highlight(view: NSTextView, font: NSFont, range: NSRange, directives: [String]) {
         let text = view.textStorage?.string ?? ""
         /// Make all text in the default style
         view.textStorage?.setAttributes(
@@ -73,6 +74,21 @@ extension MacEditorView {
                 )
             }
         }
+        /// Some extra love for known directives
+        if let knownDirectiveRegex =  try? NSRegularExpression(
+            pattern: "(?<=\\{)(?:" + directives.joined(separator: "|") + ")(?=[\\}|\\:])"
+        ) {
+            let boldFont = font.fontDescriptor.addingAttributes().withSymbolicTraits(.bold)
+            let matches = knownDirectiveRegex.matches(in: text, options: [], range: range)
+            matches.forEach { match in
+                view.textStorage?.addAttribute(
+                    .font,
+                    value:  NSFont(descriptor: boldFont, size: font.pointSize)!,
+                    range: match.range
+                )
+            }
+        }
+
         /// The attributes for the next typing
         view.typingAttributes = [
             .paragraphStyle: MacEditorView.paragraphStyle,
