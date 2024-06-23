@@ -23,7 +23,7 @@ chordpro:
 	cp -r "../macos/build/lib" "${WRAPPERBIN}"
 	cp -r "../macos/build/script" "${WRAPPERBIN}"
 	@echo "Cleanup core..."
-	cd "../macos" && make clean
+	cd "../macos" && make clean TARGET=chordpro
 	@echo "Add core info to the wrapper..."
 	${WRAPPERBIN}/chordpro -A -A -A -> ${WRAPPERBIN}/ChordProInfo.json
 
@@ -46,7 +46,7 @@ archive: xcodebuild
 	$(MKDIR) -p "${DEST}/ChordPro"
 	cp -r "${DEST}/Release/ChordPro.app" "${DEST}/ChordPro"
 
-dmg : xcodebuild dmg1
+dmg : archive dmg1
 
 dmg1 :
 	rm -f "${DMGNAME}"

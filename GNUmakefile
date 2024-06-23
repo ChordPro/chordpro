@@ -59,6 +59,7 @@ to_c :
 	test -d /mnt/c/Users || mount /mnt/c
 	${MAKE} to_tmp to_tmp_cpan TMP_DST=/mnt/c${WINDIR}
 
+# Windows 10, for Windows installer builds.
 to_win : resources
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST      ./ ${WINDST}/
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.PP   \
@@ -68,6 +69,7 @@ to_win : resources
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.WX   ./ ${WINDST}/
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.CPAN ./ ${WINDST}/
 
+# macOS Cataline 10.15, for classic builds.
 to_mac : resources
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST      ./ ${MACDST}/
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.PP   \
@@ -77,12 +79,12 @@ to_mac : resources
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.WX   ./ ${MACDST}/
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.CPAN ./ ${MACDST}/
 
+# macOS Monterey 12/7/5, for Swift GUI builds.
 to_maccho : resources
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST      ./ ${MACCHODST}/
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.PP   \
 	  --exclude=pp/windows/** --exclude=pp/debian/** \
 	  ./ ${MACCHODST}/
-	rsync ${RSYNC_ARGS} --files-from=MANIFEST.WX   ./ ${MACCHODST}/
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.CPAN ./ ${MACCHODST}/
 
 release :
