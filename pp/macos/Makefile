@@ -115,22 +115,26 @@ endif
 dmg : app dmg1
 
 ifeq (${TARGET},wxchordpro)
-DMG := ChordPro-Installer-${VERSION}.dmg
+VOLTYPE := Classic
 else
-DMG := ChordPro-CLI-${VERSION}.dmg
+VOLTYPE := CLI
 endif
+DMGNAME := ChordPro-${VOLTYPE}-${VERSION}.dmg
 
 dmg1 :
-	rm -f ${DMG}
+	rm -f ${DMGNAME}
 	bash ./create-dmg \
-		--volname "ChordPro Installer" \
-		--volicon "${APPDIR}/chordpro.icns" \
-		--window-pos 200 200 \
-		--window-size 600 300 \
-		--icon "${APPDIR}" 50 50 \
-		--add-file "READ ME FIRST.html" README.html 300 50 \
-		--hide-extension "READ ME FIRST.html" \
-		${DMG} "${APPDIR}"
+	    --volname "ChordPro ${VOLTYPE}" \
+	    --volicon "${APPDIR}/chordpro.icns" \
+	    --window-pos 200 200 \
+	    --window-size 600 300 \
+	    --icon "${APPDIR}" 50 50 \
+	    --add-file "READ ME FIRST.html" README.html 300 50 \
+	    --hide-extension "READ ME FIRST.html" \
+	    "${DMGNAME}" "${APPDIR}"
 
 clean ::
 	rm -fr ${APPDIR}
+
+realclean :: clean
+	rm -f "${DMGNAME}"

@@ -40,14 +40,16 @@ PERL := perl
 PROJECT := ChordPro
 TMP_DST := ${HOME}/tmp/${PROJECT}
 RSYNC_ARGS := -rptgoDvHL
-W10DIR := /Users/Johan/${PROJECT}
+WINDIR := /Users/Johan/${PROJECT}
 MACHOST := macky
 MACDEST := ChordPro
 MACDST  := ${MACHOST}:${MACDEST}
+MACCHODST  := maccho:${MACDEST}
+WINDST := /mnt/c${WINDIR}
 
 to_tmp : resources
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST    ./ ${TMP_DST}/
-	rsync ${RSYNC_ARGS} --files-from=MANIFEST.PP   ./ ${MACDST}/
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST.PP ./ ${TMP_DST}/
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.WX ./ ${TMP_DST}/
 
 to_tmp_cpan :
@@ -55,14 +57,33 @@ to_tmp_cpan :
 
 to_c :
 	test -d /mnt/c/Users || mount /mnt/c
-	${MAKE} to_tmp to_tmp_cpan TMP_DST=/mnt/c${W10DIR}
+	${MAKE} to_tmp to_tmp_cpan TMP_DST=/mnt/c${WINDIR}
+
+to_win : resources
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST      ./ ${WINDST}/
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST.PP   \
+	  --exclude=pp/macos/** --exclude=pp/macosswift/** \
+	  --exclude=pp/linux/** --exclude=pp/debian/** \
+	  ./ ${WINDST}/
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST.WX   ./ ${WINDST}/
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST.CPAN ./ ${WINDST}/
 
 to_mac : resources
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST      ./ ${MACDST}/
-	rsync ${RSYNC_ARGS} --files-from=MANIFEST.PP   ./ ${MACDST}/
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST.PP   \
+	  --exclude=pp/windows/** --exclude=pp/macosswift/** \
+	  --exclude=pp/debian/** \
+	  ./ ${MACDST}/
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.WX   ./ ${MACDST}/
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.CPAN ./ ${MACDST}/
-	ssh ${MACHOST} rm -fr ${MACDEST}/pp/windows
+
+to_maccho : resources
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST      ./ ${MACCHODST}/
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST.PP   \
+	  --exclude=pp/windows/** --exclude=pp/debian/** \
+	  ./ ${MACCHODST}/
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST.WX   ./ ${MACCHODST}/
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST.CPAN ./ ${MACCHODST}/
 
 release :
 	${PERL} Makefile.PL
@@ -109,7 +130,6 @@ checkjson :
 
 # Experimental
 
-WIN := w10
 WINVM := Win10Pro
 
 wkit : _wkit1 _wkit _wkit2

@@ -23,12 +23,7 @@ pp/macos/create-dmg
 pp/macos/dndhandler.cpp
 pp/macos/reloc.pl
 pp/macos/wxchordpro_pp.pl
-pp/macosswift/ChordProMac/ChordProMac.xcodeproj/project.pbxproj
-pp/macosswift/ChordProMac/ChordProMac.xcodeproj/project.xcworkspace/contents.xcworkspacedata
-pp/macosswift/ChordProMac/ChordProMac.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
-pp/macosswift/ChordProMac/ChordProMac.xcodeproj/project.xcworkspace/xcuserdata/Desbeers.xcuserdatad/UserInterfaceState.xcuserstate
-pp/macosswift/ChordProMac/ChordProMac.xcodeproj/xcshareddata/xcschemes/ChordProMac.xcscheme
-pp/macosswift/ChordProMac/ChordProMac.xcodeproj/xcuserdata/Desbeers.xcuserdatad/xcschemes/xcschememanagement.plist
+pp/macosswift/ChordProMac/ChordProMac/AppDelegate.swift
 pp/macosswift/ChordProMac/ChordProMac/AppError.swift
 pp/macosswift/ChordProMac/ChordProMac/AppSettings.swift
 pp/macosswift/ChordProMac/ChordProMac/AppState.swift
@@ -43,9 +38,8 @@ pp/macosswift/ChordProMac/ChordProMac/Assets.xcassets/AppIcon.appiconset/Icon-51
 pp/macosswift/ChordProMac/ChordProMac/Assets.xcassets/AppIcon.appiconset/Icon-64.png
 pp/macosswift/ChordProMac/ChordProMac/Assets.xcassets/Contents.json
 pp/macosswift/ChordProMac/ChordProMac/Cache.swift
-pp/macosswift/ChordProMac/ChordProMac/ChordProMac.entitlements
 pp/macosswift/ChordProMac/ChordProMac/ChordProMacApp.swift
-pp/macosswift/ChordProMac/ChordProMac/Credits.html
+pp/macosswift/ChordProMac/ChordProMac/ChordProMac.entitlements
 pp/macosswift/ChordProMac/ChordProMac/DocumentFocus.swift
 pp/macosswift/ChordProMac/ChordProMac/Documents/ChordProDocument.swift
 pp/macosswift/ChordProMac/ChordProMac/Documents/ExportDocument.swift
@@ -55,7 +49,8 @@ pp/macosswift/ChordProMac/ChordProMac/Info.plist
 pp/macosswift/ChordProMac/ChordProMac/Logger.swift
 pp/macosswift/ChordProMac/ChordProMac/Preview Content/Preview Assets.xcassets/Contents.json
 pp/macosswift/ChordProMac/ChordProMac/SceneState.swift
-pp/macosswift/ChordProMac/ChordProMac/Structures/Accents.swift
+pp/macosswift/ChordProMac/ChordProMac/Structures/Accidentals.swift
+pp/macosswift/ChordProMac/ChordProMac/Structures/ChordProInfo.swift
 pp/macosswift/ChordProMac/ChordProMac/Structures/CustomFile.swift
 pp/macosswift/ChordProMac/ChordProMac/Structures/CustomTask.swift
 pp/macosswift/ChordProMac/ChordProMac/Structures/FontStyle.swift
@@ -67,17 +62,27 @@ pp/macosswift/ChordProMac/ChordProMac/Structures/Template.swift
 pp/macosswift/ChordProMac/ChordProMac/SystemTasks/Lyrics Only Preview.json
 pp/macosswift/ChordProMac/ChordProMac/SystemTasks/No Chord Diagrams Preview.json
 pp/macosswift/ChordProMac/ChordProMac/Terminal.swift
+pp/macosswift/ChordProMac/ChordProMac/Views/AboutView.swift
 pp/macosswift/ChordProMac/ChordProMac/Views/ContentView.swift
 pp/macosswift/ChordProMac/ChordProMac/Views/ExportLogView.swift
 pp/macosswift/ChordProMac/ChordProMac/Views/ExportSongView.swift
 pp/macosswift/ChordProMac/ChordProMac/Views/FileButtonView.swift
+pp/macosswift/ChordProMac/ChordProMac/Views/FontSizeButtonsView.swift
 pp/macosswift/ChordProMac/ChordProMac/Views/HelpButtonsView.swift
 pp/macosswift/ChordProMac/ChordProMac/Views/LogView.swift
+pp/macosswift/ChordProMac/ChordProMac/Views/MacEditorView+highlight.swift
+pp/macosswift/ChordProMac/ChordProMac/Views/MacEditorView.swift
 pp/macosswift/ChordProMac/ChordProMac/Views/QuickLookView.swift
 pp/macosswift/ChordProMac/ChordProMac/Views/SettingsView.swift
 pp/macosswift/ChordProMac/ChordProMac/Views/StatusView.swift
 pp/macosswift/ChordProMac/ChordProMac/Views/TaskMenuView.swift
 pp/macosswift/ChordProMac/ChordProMac/Views/View+errorAlert.swift
+pp/macosswift/ChordProMac/ChordProMac.xcodeproj/project.pbxproj
+pp/macosswift/ChordProMac/ChordProMac.xcodeproj/project.xcworkspace/contents.xcworkspacedata
+pp/macosswift/ChordProMac/ChordProMac.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+pp/macosswift/ChordProMac/ChordProMac.xcodeproj/project.xcworkspace/xcuserdata/Desbeers.xcuserdatad/UserInterfaceState.xcuserstate
+pp/macosswift/ChordProMac/ChordProMac.xcodeproj/xcshareddata/xcschemes/ChordProMac.xcscheme
+pp/macosswift/ChordProMac/ChordProMac.xcodeproj/xcuserdata/Desbeers.xcuserdatad/xcschemes/xcschememanagement.plist
 pp/macosswift/ChordProMac/Read Me First.html
 pp/macosswift/Makefile
 pp/pp2ppl.pl

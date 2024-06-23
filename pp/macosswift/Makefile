@@ -1,13 +1,13 @@
 #!/bin/make -f
 
 CURRDATE := $(shell date "+%Y-%m-%d")
-VV := $(shell perl ../../lib/ChordPro/Version.pm)
+VERSION := $(shell perl ../../lib/ChordPro/Version.pm)
 WRAPPERBIN := ChordProMac/ChordProMac/Bin
-DMGNAME := ChordPro_MacOS-${VV}.dmg
+DMGNAME := ChordPro-${VERSION}.dmg
 MKDIR := mkdir
 DEST := build
 
-all: archive
+all : dmg
 
 chordpro:
 	@echo "Building ChordPro core"
@@ -39,13 +39,29 @@ xcodebuild: chordpro
 		BUILD_DIR=../../../build
 	rm -fr "${WRAPPERBIN}"
 
+APPDIR := ${DEST}/ChordPro/ChordPro.app
+
 archive: xcodebuild
 	@echo "Archive ChordPro"
 	$(MKDIR) -p "${DEST}/ChordPro"
-	cp -r "${DEST}/Release/ChordPro.app" "build/ChordPro"
-	cp "ChordProMac/Read Me First.html" "${DEST}/ChordPro"
-	rm -f "${DEST}/${DMGNAME}"
-	hdiutil create -format UDZO -srcfolder build/ChordPro/ "${DEST}/${DMGNAME}"
+	cp -r "${DEST}/Release/ChordPro.app" "${DEST}/ChordPro"
 
-clean:
-	rm -fr ${DEST}
+dmg : xcodebuild dmg1
+
+dmg1 :
+	rm -f "${DMGNAME}"
+	bash ../macos/create-dmg \
+	    --volname ChordPro \
+	    --volicon "${APPDIR}/Contents/Resources/lib/ChordPro/res/icons/chordpro.icns" \
+	    --window-pos 200 200 \
+	    --window-size 600 300 \
+	    --icon "ChordPro.app" 50 50 \
+	    --add-file "READ ME FIRST.html" "ChordProMac/Read Me First.html" 300 50 \
+	    --hide-extension "READ ME FIRST.html" \
+	    "${DMGNAME}" "${APPDIR}"
+
+clean ::
+	rm -fr "${DEST}"
+
+realclean :: clean
+	rm -f "${DMGNAME}"
