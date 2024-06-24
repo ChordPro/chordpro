@@ -72,6 +72,9 @@ sub init {
        # Skip default (system, user, song) configs.
        skipstdcfg  => 1,
 
+       # Use packaged fonts.
+       usepkgfonts => 0,
+
        # Presets.
        enable_presets => 1,
        cfgpreset      => lc(_T("Default")),
@@ -423,6 +426,9 @@ sub preview {
     my $haveconfig = List::Util::any { $_ eq "--config" } @opts;
     if ( $self->{prefs_skipstdcfg} ) {
 	push( @ARGV, '--nodefaultconfigs' );
+    }
+    if ( $self->{prefs_usepkgfonts } ) {
+	push( @ARGV, '--config', 'GNU_Free_Fonts' );
     }
     if ( $self->{prefs_cfgpreset} ) {
 	foreach ( @{ $self->{prefs_cfgpreset} } ) {
@@ -777,7 +783,7 @@ sub OnPreferences {
     my ($self, $event) = @_;
 
     use ChordPro::Wx::PreferencesDialog;
-    $self->{d_prefs} ||= ChordPro::Wx::PreferencesDialog->new($self, -1, "Preferences");
+    $self->{d_prefs} = ChordPro::Wx::PreferencesDialog->new($self, -1, "Preferences");
     my $ret = $self->{d_prefs}->ShowModal;
     $self->SavePreferences if $ret == wxID_OK;
 }

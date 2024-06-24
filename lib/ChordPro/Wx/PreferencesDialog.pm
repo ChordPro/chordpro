@@ -16,6 +16,7 @@ use parent qw( ChordPro::Wx::PreferencesDialog_wxg );
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
 use ChordPro::Utils qw(is_macos);
+use ChordPro::Paths;
 
 # BUilt-in descriptions for some notation systems.
 my $notdesc =
@@ -72,6 +73,40 @@ sub fetch_prefs {
 
     # Skip default (system, user, song) configs.
     $self->{cb_skipstdcfg}->SetValue($parent->{prefs_skipstdcfg});
+
+    $self->{cb_pkgfonts}->SetValue($parent->{prefs_usepkgfonts});
+
+    # Get the packaged config directory. Last one on the list.
+    my $cfglib = CP->findresdirs("config")->[-1];
+    my $havepkgfonts;
+    if ( -s "$cfglib/GNU_Free_Fonts.json" ) {
+	# Get the packaged fonts directory. Last one on the list.
+	my $fontlib = CP->findresdirs("fonts")->[-1];
+	$havepkgfonts = 1;
+	for ( qw(FreeMonoBoldOblique.ttf
+		 FreeMonoBold.ttf
+		 FreeMonoOblique.ttf
+		 FreeMono.ttf
+		 FreeSansBoldOblique.ttf
+		 FreeSansBold.ttf
+		 FreeSansOblique.ttf
+		 FreeSans.ttf
+		 FreeSerifBoldItalic.ttf
+		 FreeSerifBold.ttf
+		 FreeSerifItalic.ttf
+		 FreeSerif.ttf) ) {
+	    next if -s "$fontlib/$_";
+	    $havepkgfonts = 0;
+	    last;
+	}
+    }
+
+    # Hide the checkbox if we do not have everything packaged.
+    unless ( $havepkgfonts ) {
+	$self->{sz_prefs}->SetEmptyCellSize([0,0]);
+	$self->{sz_prefs}->Hide($self->{cb_pkgfonts});
+	$self->{sz_prefs}->Layout;
+    }
 
     # Presets.
     $self->{cb_presets}->SetValue($parent->{prefs_enable_presets});
@@ -183,6 +218,8 @@ sub store_prefs {
 
     # Skip default (system, user, song) configs.
     $parent->{prefs_skipstdcfg}  = $self->{cb_skipstdcfg}->IsChecked;
+
+    $parent->{prefs_usepkgfonts} = $self->{cb_pkgfonts}->IsChecked;
 
     # Presets.
     $parent->{prefs_enable_presets} = $self->{cb_presets}->IsChecked;
@@ -379,6 +416,11 @@ sub OnCancel {
 }
 
 sub OnSkipStdCfg {
+    my ( $self, $event ) = @_;
+    $event->Skip;
+}
+
+sub OnUsePkgFonts {
     my ( $self, $event ) = @_;
     $event->Skip;
 }
