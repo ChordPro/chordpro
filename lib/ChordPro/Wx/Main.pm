@@ -149,6 +149,8 @@ sub init {
     my $font = $fonts[$self->{prefs_editfont}]->{font};
     $font->SetPointSize($self->{prefs_editsize});
     $self->{t_source}->SetFont($font);
+    my $cfglib = CP->findresdirs("config")->[-1];
+    $self->{_pkgfonts} = "$cfglib/GNU_Free_Fonts.json";
 
     $self->setup_tasks();
 
@@ -427,8 +429,8 @@ sub preview {
     if ( $self->{prefs_skipstdcfg} ) {
 	push( @ARGV, '--nodefaultconfigs' );
     }
-    if ( $self->{prefs_usepkgfonts } ) {
-	push( @ARGV, '--config', 'GNU_Free_Fonts' );
+    if ( $self->{prefs_usepkgfonts} && $self->{_pkgfonts} ) {
+	push( @ARGV, '--config', $self->{_pkgfonts} );
     }
     if ( $self->{prefs_cfgpreset} ) {
 	foreach ( @{ $self->{prefs_cfgpreset} } ) {

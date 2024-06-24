@@ -77,9 +77,8 @@ sub fetch_prefs {
     $self->{cb_pkgfonts}->SetValue($parent->{prefs_usepkgfonts});
 
     # Get the packaged config directory. Last one on the list.
-    my $cfglib = CP->findresdirs("config")->[-1];
     my $havepkgfonts;
-    if ( -s "$cfglib/GNU_Free_Fonts.json" ) {
+    if ( -s $parent->{_pkgfonts} ) {
 	# Get the packaged fonts directory. Last one on the list.
 	my $fontlib = CP->findresdirs("fonts")->[-1];
 	$havepkgfonts = 1;
