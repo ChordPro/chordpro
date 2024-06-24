@@ -826,6 +826,13 @@ sub embed {
 	      -open => 0, -rect => [0,0,-1,-1] );
     $a->{T} = PDFStr("ChordProRunTime");
     $a->{F} = PDFNum(2);		# hidden
+
+    # Call.
+    $a = $self->{pdfpage}->annotation();
+    $a->text( join(" ", @{$::options->{_argv}}) . "\n",
+	      -open => 0, -rect => [0,0,-1,-1] );
+    $a->{T} = PDFStr("ChordProCall");
+    $a->{F} = PDFNum(2);		# hidden
 }
 
 1;
