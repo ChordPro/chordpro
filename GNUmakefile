@@ -38,54 +38,50 @@ Makefile : Makefile.PL lib/ChordPro/Version.pm resources
 
 PERL := perl
 PROJECT := ChordPro
-TMP_DST := ${HOME}/tmp/${PROJECT}
 RSYNC_ARGS := -rptgoDvHL
-WINDIR := /Users/Johan/${PROJECT}
-MACHOST := macky
-MACDEST := ChordPro
-MACDST  := ${MACHOST}:${MACDEST}
-MACCHODST  := maccho:${MACDEST}
-WINDST := /mnt/c${WINDIR}
 
+STDMNF := MANIFEST MANIFEST.CPAN MANIFEST.FONTS
+
+TMPDST := ${HOME}/tmp/${PROJECT}
 to_tmp : resources
-	rsync ${RSYNC_ARGS} --files-from=MANIFEST    ./ ${TMP_DST}/
-	rsync ${RSYNC_ARGS} --files-from=MANIFEST.PP ./ ${TMP_DST}/
-	rsync ${RSYNC_ARGS} --files-from=MANIFEST.WX ./ ${TMP_DST}/
-
-to_tmp_cpan :
-	rsync ${RSYNC_ARGS} --files-from=MANIFEST.CPAN ./ ${TMP_DST}/
-
-to_c :
-	test -d /mnt/c/Users || mount /mnt/c
-	${MAKE} to_tmp to_tmp_cpan TMP_DST=/mnt/c${WINDIR}
+	for mnf in ${STDMNF} MANIFEST.WX MANIFEST.CPAN MANIFEST.PP ; do \
+	    rsync ${RSYNC_ARGS} --files-from=$$mnf ./ ${TMPDST}/; \
+	done
 
 # Windows 10, for Windows installer builds.
+WINDIR := /Users/Johan/${PROJECT}
+WINDST := /mnt/c${WINDIR}
+#WINDST := w10:${PROJECT}
 to_win : resources
-	rsync ${RSYNC_ARGS} --files-from=MANIFEST      ./ ${WINDST}/
+	for mnf in ${STDMNF} MANIFEST.WX ; do \
+	    rsync ${RSYNC_ARGS} --files-from=$$mnf ./ ${WINDST}/; \
+	done
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.PP   \
 	  --exclude=pp/macos/** --exclude=pp/macosswift/** \
 	  --exclude=pp/linux/** --exclude=pp/debian/** \
 	  ./ ${WINDST}/
-	rsync ${RSYNC_ARGS} --files-from=MANIFEST.WX   ./ ${WINDST}/
-	rsync ${RSYNC_ARGS} --files-from=MANIFEST.CPAN ./ ${WINDST}/
 
 # macOS Cataline 10.15, for classic builds.
+MACHOST := macky
+MACDST  := ${MACHOST}:${PROJECT}
 to_mac : resources
-	rsync ${RSYNC_ARGS} --files-from=MANIFEST      ./ ${MACDST}/
+	for mnf in ${STDMNF} MANIFEST.WX ; do \
+	    rsync ${RSYNC_ARGS} --files-from=$$mnf ./ ${MACDST}/; \
+	done
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.PP   \
 	  --exclude=pp/windows/** --exclude=pp/macosswift/** \
 	  --exclude=pp/debian/** \
 	  ./ ${MACDST}/
-	rsync ${RSYNC_ARGS} --files-from=MANIFEST.WX   ./ ${MACDST}/
-	rsync ${RSYNC_ARGS} --files-from=MANIFEST.CPAN ./ ${MACDST}/
 
 # macOS Monterey 12/7/5, for Swift GUI builds.
+MACCHODST  := maccho:${PROJECT}
 to_maccho : resources
-	rsync ${RSYNC_ARGS} --files-from=MANIFEST      ./ ${MACCHODST}/
+	for mnf in ${STDMNF} ; do \
+	    rsync ${RSYNC_ARGS} --files-from=$$mnf ./ ${MACCHODST}/; \
+	done
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.PP   \
 	  --exclude=pp/windows/** --exclude=pp/debian/** \
 	  ./ ${MACCHODST}/
-	rsync ${RSYNC_ARGS} --files-from=MANIFEST.CPAN ./ ${MACCHODST}/
 
 release :
 	${PERL} Makefile.PL
@@ -144,7 +140,7 @@ WINVM := Win10Pro
 wkit : _wkit1 _wkit _wkit2
 
 _wkit :
-	${MAKE} to_c
+	${MAKE} to_win
 	ssh ${WIN} gmake -C ChordPro/pp/windows
 	scp ${WIN}:ChordPro/pp/windows/ChordPro-Installer\*.exe ${HOME}/tmp/
 
