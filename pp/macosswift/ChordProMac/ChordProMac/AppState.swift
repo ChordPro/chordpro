@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import OSLog
 
 /// The observable state of the application
 /// - Note: Every open song window shares this state
@@ -67,11 +68,49 @@ final class AppState: ObservableObject {
         if settings.chordPro.debug {
             arguments.append("--debug")
         }
+        /// Optional add the GNU free fonts
+        if
+            settings.chordPro.usePackagedFonts,
+            let fontJSON = checkGNUFonts() {
+            arguments.append("--config \(fontJSON.path)")
+            Logger.application.info("Added GNU FreeFont")
+        }
         /// Add selected built-in presets
         for preset in settings.chordPro.systemConfigs {
             arguments.append("--config=\(preset.fileName)")
         }
         /// Return the basic settings
         return arguments
+    }
+}
+
+
+extension AppState {
+    
+    /// Check if the GNU FreeFont package is installed in `lib/ChordPro/res/fonts`
+    /// - Returns: True or false
+    static func checkGNUFonts() -> URL? {
+        guard
+            let fontJSON = Bundle.main.url(forResource: "lib/ChordPro/res/config/GNU_Free_Fonts", withExtension: "json"),
+            let fontFolder = Bundle.main.url(forResource: "lib/ChordPro/res/fonts", withExtension: nil),
+            let items = try? FileManager.default.contentsOfDirectory(atPath: fontFolder.path)
+        else {
+            return nil
+        }
+        let fonts: [String] = [
+            "FreeMonoOblique.ttf",
+            "FreeMonoBold.ttf",
+            "FreeSerif.ttf",
+            "FreeSansBoldOblique.ttf",
+            "FreeSansOblique.ttf",
+            "FreeSerifBold.ttf",
+            "FreeSans.ttf",
+            "FreeMonoBoldOblique.ttf",
+            "FreeMono.ttf",
+            "FreeSerifItalic.ttf",
+            "FreeSansBold.ttf",
+            "FreeSerifBoldItalic.ttf"
+        ]
+        return fonts.allSatisfy(items.contains) ? fontJSON : nil
     }
 }

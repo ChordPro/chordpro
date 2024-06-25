@@ -140,6 +140,8 @@ extension AppSettings {
         var noChordGrids: Bool = false
         /// Eliminate capo settings by transposing the song
         var deCapo: Bool = false
+        /// Use packaged fonts
+        var usePackagedFonts: Bool = false
         /// Enable debug info in the PDF
         var debug: Bool = false
     }

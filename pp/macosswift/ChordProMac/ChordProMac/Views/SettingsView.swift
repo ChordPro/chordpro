@@ -183,6 +183,11 @@ extension SettingsView {
                 Toggle("Eliminate capo settings", isOn: $appState.settings.chordPro.deCapo)
                 Text("This will be done by transposing the song")
                     .font(.caption)
+                if AppState.checkGNUFonts() != nil {
+                    Toggle("Use packaged fonts", isOn: $appState.settings.chordPro.usePackagedFonts)
+                    Text("**GNU FreeFont** is part of the application")
+                        .font(.caption)
+                }
                 Toggle(isOn: $appState.settings.chordPro.debug) {
                     Text("Enable Debug Info in the PDF")
                 }
