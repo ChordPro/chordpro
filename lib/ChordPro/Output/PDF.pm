@@ -1401,7 +1401,7 @@ sub generate_song {
 	    }
 	    # Arbitrary config values.
 	    elsif ( $elt->{name} =~ /^pdf\.(.+)/ ) {
-		prpadd2cfg( $ps, $1 => is_ttrue($elt->{value}) );
+		prpadd2cfg( $ps, $1 => $elt->{value} );
 	    }
 	    next;
 	}
