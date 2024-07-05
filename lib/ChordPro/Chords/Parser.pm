@@ -1009,10 +1009,12 @@ sub transcode ( $self, $xcode, $key_ord = 0 ) {
 	$info->{root_ord} -= $key_ord % $p->intervals;
     }
 #    $info->{$_} = $p->{$_} for qw( ns_tbl nf_tbl ns_canon nf_canon );
-    $info->{root_canon} = $info->{root} =
-      $p->root_canon( $info->{root_ord},
-		      $info->{root_mod} >= 0,
-		      $info->{qual_canon} eq "-" );
+    unless ( $self->{rootless} ) {
+	$info->{root_canon} = $info->{root} =
+	  $p->root_canon( $info->{root_ord},
+			  $info->{root_mod} >= 0,
+			  $info->{qual_canon} eq "-" );
+    }
     if ( $p->{system} eq "roman" && $info->{qual_canon} eq "-" ) {
 	# Minor quality is in the root name.
 	$info->{qual_canon} = $info->{qual} = "";

@@ -242,4 +242,5 @@ CPAN/Text/Layout/FontDescriptor.pm
 CPAN/Text/Layout/PDFAPI2/ImageElement.pm
 CPAN/Text/Layout/PDFAPI2.pm
 CPAN/Text/Layout.pm
+CPAN/Text/Layout/Utils.pm
 CPAN/Text/Layout/Version.pm
