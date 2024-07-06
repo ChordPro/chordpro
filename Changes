@@ -41,6 +41,7 @@
     - Fix problem that text in a TextBlock did not reset to flush left.
     - Fix problem TextBlock textstyle did not copy the background colour.
     - Fix colours of keyboard diagrams wrt. theme.
+    - Fix rootless chords with transcode.
 
 !Internal
     - New function to deal with property settings for the config.
