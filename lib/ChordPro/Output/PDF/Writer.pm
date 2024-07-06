@@ -680,6 +680,7 @@ sub init_fonts {
     my $fc = Text::Layout::FontConfig->new( debug => $config->{debug}->{fonts} > 1 );
 
     # Add font dirs.
+    my @dirs;
     my @d = ( @{$ps->{fontdir}}, @{ CP->findresdirs("fonts") }, $ENV{FONTDIR} );
     # Avoid rsc result if dummy.
     splice( @d, -2, 1 ) if $d[-2] eq "fonts/";
@@ -689,6 +690,7 @@ sub init_fonts {
 	if ( -d $fontdir ) {
 	    $self->{pdfapi}->can("addFontDirs")->($fontdir);
 	    $fc->add_fontdirs($fontdir);
+	    push( @dirs, $fontdir );
 	}
 	else {
 	    warn("PDF: Ignoring fontdir $fontdir [$!]\n");
@@ -698,6 +700,34 @@ sub init_fonts {
 
     # Make sure we have this one.
     $fc->register_font( "ChordProSymbols.ttf", "chordprosymbols", "", {} );
+
+    # Remap corefonts if possible.
+    my $remap = $ENV{CHORDPRO_COREFONTS_REMAP} // $ps->{corefonts}->{remap};
+
+    unless ( defined $remap ) {
+
+	# Not defined -- find the GNU Free Fonts.
+	for my $dir ( @dirs ) {
+	    my $have = 1;
+	    for my $font ( qw( FreeSerif.ttf
+			       FreeSerifBoldItalic.ttf
+			       FreeSerifBold.ttf
+			       FreeSerifItalic.ttf
+			       FreeSans.ttf
+			       FreeSansBoldOblique.ttf
+			       FreeSansBold.ttf
+			       FreeSansOblique.ttf
+			       FreeMono.ttf
+			       FreeMonoBoldOblique.ttf
+			       FreeMonoBold.ttf
+			       FreeMonoOblique.ttf
+			    ) ) {
+		$have = 0, last unless -f -s "$dir/$font";;
+	    }
+	    $remap = "free", last if $have;
+	}
+    }
+    $fc->register_corefonts( remap => $remap ) if $remap;
 
     # Process the fontconfig.
     foreach my $ff ( keys( %{ $ps->{fontconfig} } ) ) {

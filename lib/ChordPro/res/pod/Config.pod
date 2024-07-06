@@ -761,6 +761,15 @@
       // "fontdir" : [ "/usr/share/fonts/liberation", "/home/me/fonts" ]
       fontdir : []
     
+      // Experimental: Remap corefonts to real truetype fonts.
+      // This requires a set of truetype fonts to be available in the
+      // fontdir under a well-defined name. See the docs.
+      // Fontsets currenly supported are "free" for the GNU Free Fonts,
+      // and "tex" for the Tex Gyre fonts.
+      // Value "false" inhibits remapping.
+      // Value "null" will have ChordPro look for the fonts itself.
+      corefonts.remap : null
+        
       // The font families.
       fontconfig {
         serif {

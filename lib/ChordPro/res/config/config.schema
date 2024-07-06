@@ -607,7 +607,7 @@
           "type" : "array",
 	  "uniqueItems" : true,
 	  "items" : {
-	    "type" : "string"
+	    "type" : [ "string", "number" ]
 	  }
         }
       }
@@ -958,6 +958,16 @@
 	      "description" : "Distance between columns in multi-column mode.",
 	      "minimum" : 0,
 	      "type" : "number"
+	    },
+
+	    "corefonts" : {
+	    	"properties" : {
+		    "remap" : {
+		        "description" : "Experimental: Remap corefonts to real truetype fonts.\nThis requires a set of truetype fonts to be available in the\nfontdir under a well-defined name. See the docs.\nFontsets currenly supported are \"free\" for the GNU Free Fonts,\nand \"tex\" for the Tex Gyre fonts.\nValue \"false\" inhibits remapping.\nValue \"null\" will have ChordPro look for the fonts itself.",
+		        "type" : [ "string", "boolean", "null" ]
+		    }
+		},
+		"additionalProperties" : false
 	    },
 
 	    "csv" : {

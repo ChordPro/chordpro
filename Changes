@@ -15,6 +15,9 @@
       of files that the 'classic' GUI suffers from.
       Thanks Nick!
 
+    - (Experimental) ChordPro will try to substitute some TrueType
+      font files for the corefonts.
+
     !Functionality
     - (PDF, page sort) Use sorttitle for page sorting.
     - Images: Ignore align with x percentage. Issue warning.
