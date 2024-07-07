@@ -703,6 +703,8 @@ sub init_fonts {
 
     # Remap corefonts if possible.
     my $remap = $ENV{CHORDPRO_COREFONTS_REMAP} // $ps->{corefonts}->{remap};
+    # Packager adds the fonts.
+    $remap //= "free" if CP->packager;
 
     unless ( defined $remap ) {
 
