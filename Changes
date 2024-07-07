@@ -45,6 +45,7 @@
     - Fix problem TextBlock textstyle did not copy the background colour.
     - Fix colours of keyboard diagrams wrt. theme.
     - Fix rootless chords with transcode.
+    - Fix problem with /~ in grid.
 
 !Internal
     - New function to deal with property settings for the config.
