@@ -84,6 +84,12 @@ The ChordPro reference implementation provides additional metadata:
 
  * `chords`: A comma-separated list of chords used in this song.
 
+ * `chordpro`: The string `"ChordPro"`.
+
+ * `chordpro.songsource`: The input file name for the song.
+
+ * `chordpro.version`: The ChordPro version.
+ 
  * `instrument`: Short for `instrument.type`.
 
  * `instrument.description`: Set by instrument configs.

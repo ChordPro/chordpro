@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#! perl
 
 package main;
 
@@ -48,9 +48,10 @@ sub fmt_subst {
 	$m->{"user.fullname"} = [ $config->{user}->{fullname} ];
     }
     setlocale( LC_TIME, "" );
-    $m->{today} //= [ strftime( $config->{dates}->{today}->{format},
-				localtime(time) ) ];
-
+    $m->{today} //= strftime( $config->{dates}->{today}->{format},
+			      localtime(time) );
+    $m->{chordpro} = "ChordPro";
+    $m->{"chordpro.version"} = $ChordPro::VERSION;
     for ( keys %{ $config->{settings} } ) {
 	my $v = $config->{settings}->{$_};
 	$v = '' if $v =~ /^(0|false|off)$/i;

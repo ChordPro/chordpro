@@ -119,6 +119,7 @@ sub generate_songbook {
 	    print STDERR "$page "; # Progress indicator
 	}
 
+	$song->{meta}->{"chordpro.songsource"} //= $song->{source}->{file};
 	$page += $song->{meta}->{pages} =
 	  generate_song( $song, { pr        => $pr,
 				  startpage => $page,
