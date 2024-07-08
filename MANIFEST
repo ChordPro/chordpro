@@ -101,6 +101,7 @@ lib/ChordPro/res/config/ukulele-ly.json
 lib/ChordPro/res/config/ukulele.json
 lib/ChordPro/res/examples/bgdemo.pdf
 lib/ChordPro/res/examples/mollymalone.cho
+lib/ChordPro/res/examples/mollymalone.json
 lib/ChordPro/res/examples/swinglow.cho
 lib/ChordPro/res/fonts/ChordProSymbols.ttf
 lib/ChordPro/res/icons/chordpro-doc.icns
