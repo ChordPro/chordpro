@@ -17,46 +17,30 @@ struct ContentView: View {
     @StateObject private var sceneState = SceneState()
     /// The font for the editor
     var nsFont: NSFont {
-        return appState.settings.application.fontStyle.nsFont(size: appState.settings.application.fontSize)
+        return appState.settings.editor.fontStyle.nsFont(size: appState.settings.editor.fontSize)
     }
     /// The body of the `View`
     var body: some View {
         VStack {
-            HStack {
-                MacEditorView(
-                    text: $document.text,
-                    font: nsFont,
-                    directives: appState.directives
-                )
-                VStack {
-                    if let quickView = sceneState.quickLookURL {
-                        QuickLookView.Preview(url: quickView)
-                            .id(sceneState.quickLookID)
-                            .overlay(alignment: .top) {
-                                if sceneState.quickLookOutdated {
-                                    QuickLookView.UpdatePreview(document: document)
-                                }
-                            }
-                    }
-                }
+            HStack(spacing: 0) {
+                EditorPaneView()
+                PreviewPaneView()
             }
             StatusView()
                 .padding(.horizontal)
         }
-        .animation(.default, value: sceneState.quickLookURL)
-        .animation(.default, value: sceneState.quickLookOutdated)
+        .animation(.default, value: sceneState.preview)
         .errorAlert(error: $sceneState.alertError, log: $sceneState.showLog)
-        .onChange(of: document.text) { _ in
-            if sceneState.quickLookURL != nil {
-                sceneState.quickLookOutdated = true
-            }
-        }
         .toolbar {
             FontSizeButtonsView()
             ExportSongView(label: "Export as PDF")
-            QuickLookView(label: "Show Preview", document: document)
-                .labelStyle(.iconOnly)
+            Group {
+                PreviewPDFButtonView(label: "Show Preview")
+                ShareButtonView()
+            }
+            .labelStyle(.iconOnly)
         }
+        .labelStyle(.titleAndIcon)
         .sheet(isPresented: $sceneState.showLog) {
             LogView()
         }

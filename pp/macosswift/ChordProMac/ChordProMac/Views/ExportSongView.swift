@@ -40,6 +40,8 @@ struct ExportSongView: View {
                             self.pdf = pdf.data
                             /// Show the export dialog
                             exportSongDialog = true
+                            /// The PDF is not outdated
+                            sceneState.preview.outdated = false
                             /// Set the status
                             sceneState.exportStatus = pdf.status
                         } catch {
@@ -52,7 +54,7 @@ struct ExportSongView: View {
                 }
             },
             label: {
-                Text(label)
+                Label(label, systemImage: "square.and.arrow.up.on.square")
             }
         )
         /// Disable the button when there is no document window in focus and no scene state available
@@ -61,7 +63,8 @@ struct ExportSongView: View {
             isPresented: $exportSongDialog,
             document: ExportDocument(pdf: pdf),
             contentType: .pdf,
-            defaultFilename: document?.fileURL?.deletingPathExtension().lastPathComponent ?? "Export"
+            // swiftlint:disable:next line_length
+            defaultFilename: document?.fileURL?.deletingPathExtension().lastPathComponent ?? sceneState?.songFileName ??  "Export"
         ) { _ in
             Logger.pdfBuild.notice("Export completed")
         }

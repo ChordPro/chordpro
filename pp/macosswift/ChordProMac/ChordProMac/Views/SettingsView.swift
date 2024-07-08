@@ -8,7 +8,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
 import OSLog
-import AudioToolbox
 
 /// SwiftUI `View` with the application settings
 struct SettingsView: View {
@@ -71,13 +70,16 @@ struct SettingsView: View {
 }
 
 extension SettingsView {
+
+    // MARK: Editor Settings
+
     /// SwiftUI `View` with editor settings
     var editor: some View {
         ScrollView {
             VStack {
                 Toggle("Use a custom template", isOn: $appState.settings.application.useCustomSongTemplate)
-                FileButtonView(
-                    bookmark: CustomFile.customSongTemplate
+                UserFileButtonView(
+                    userFile: UserFileItem.customSongTemplate
                 ) {}
                     .disabled(!appState.settings.application.useCustomSongTemplate)
                 Text("You can use your own **ChordPro** file as a starting point when you create a new song")
@@ -87,39 +89,63 @@ extension SettingsView {
             VStack {
                 HStack {
                     Text("A")
-                        .font(.system(size: AppSettings.Application.fontSizeRange.lowerBound))
+                        .font(.system(size: ChordProEditor.Settings.fontSizeRange.lowerBound))
                     Slider(
-                        value: $appState.settings.application.fontSize,
-                        in: AppSettings.Application.fontSizeRange,
+                        value: $appState.settings.editor.fontSize,
+                        in: ChordProEditor.Settings.fontSizeRange,
                         step: 1
                     )
-                    /// Give it a random ID to avoid random crashes on macOS Monterey
-                    .id(UUID())
                     Text("A")
-                        .font(.system(size: AppSettings.Application.fontSizeRange.upperBound))
+                        .font(.system(size: ChordProEditor.Settings.fontSizeRange.upperBound))
                 }
                 .foregroundColor(.secondary)
-                /// Give it a random ID to avoid random crashes on macOS Monterey
-                .id(UUID())
-                Picker("The font style of the editor", selection: $appState.settings.application.fontStyle) {
-                    ForEach(FontStyle.allCases, id: \.self) { font in
+                Picker("Font style", selection: $appState.settings.editor.fontStyle) {
+                    ForEach(ChordProEditor.Settings.FontStyle.allCases, id: \.self) { font in
                         Text("\(font.rawValue)")
-                            .font(font.font(size: appState.settings.application.fontSize))
+                            .font(font.font())
                     }
                 }
-                /// Give it a random ID to avoid random crashes on macOS Monterey
-                .id(UUID())
-                .pickerStyle(.radioGroup)
                 .labelsHidden()
-                .padding()
+                .frame(maxHeight: 20)
             }
             .wrapSettingsSection(title: "Editor Font")
+            VStack {
+                ColorPickerButtonView(
+                    selectedColor: $appState.settings.editor.chordColor,
+                    label: "Color for **chords**"
+                )
+                ColorPickerButtonView(
+                    selectedColor: $appState.settings.editor.directiveColor,
+                    label: "Color for **directives**"
+                )
+                ColorPickerButtonView(
+                    selectedColor: $appState.settings.editor.argumentColor,
+                    label: "Color for **arguments**"
+                )
+                ColorPickerButtonView(
+                    selectedColor: $appState.settings.editor.pangoColor,
+                    label: "Color for **pango**"
+                )
+                ColorPickerButtonView(
+                    selectedColor: $appState.settings.editor.bracketColor,
+                    label: "Color for **brackets**"
+                )
+                ColorPickerButtonView(
+                    selectedColor: $appState.settings.editor.commentColor,
+                    label: "Color for **comments**"
+                )
+            }
+            .wrapSettingsSection(title: "Highlight Colors")
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .padding(.bottom)
     }
 }
 
 extension SettingsView {
+
+    // MARK: Presets Settings
+
     /// SwiftUI `View` with presets settings
     var presets: some View {
         VStack {
@@ -137,9 +163,10 @@ extension SettingsView {
                 }
             }
             Toggle("Add a custom configuration", isOn: $appState.settings.chordPro.useCustomConfig)
-            FileButtonView(
-                bookmark: CustomFile.customConfig
+            UserFileButtonView(
+                userFile: UserFileItem.customConfig
             ) {}
+                .disabled(!appState.settings.chordPro.useCustomConfig)
             Toggle("Ignore default configurations", isOn: $appState.settings.chordPro.noDefaultConfigs)
             // swiftlint:disable:next line_length
             Text("This prevents **ChordPro** from using system wide, user specific and song specific configurations. Checking this will make sure that **ChordPro** only uses the configuration as set in the _application_.")
@@ -152,12 +179,15 @@ extension SettingsView {
 }
 
 extension SettingsView {
+
+    // MARK: Library Settings
+
     /// SwiftUI `View` with presets settings
     var library: some View {
         VStack {
             Toggle("Add a custom library", isOn: $appState.settings.chordPro.useAdditionalLibrary)
-            FileButtonView(
-                bookmark: CustomFile.customLibrary
+            UserFileButtonView(
+                userFile: UserFileItem.customLibrary
             ) {}
                 .disabled(!appState.settings.chordPro.useAdditionalLibrary)
             // swiftlint:disable:next line_length
@@ -170,6 +200,9 @@ extension SettingsView {
 }
 
 extension SettingsView {
+
+    // MARK: Options Settings
+
     /// SwiftUI `View` with options settings
     var options: some View {
         ScrollView {
@@ -183,9 +216,6 @@ extension SettingsView {
                 Toggle("Eliminate capo settings", isOn: $appState.settings.chordPro.deCapo)
                 Text("This will be done by transposing the song")
                     .font(.caption)
-                Toggle(isOn: $appState.settings.chordPro.debug) {
-                    Text("Enable Debug Info in the PDF")
-                }
             }
             .wrapSettingsSection(title: "General")
             VStack {
@@ -198,23 +228,17 @@ extension SettingsView {
                                     Text(note.rawValue)
                                 }
                             }
-                            /// Give it a random ID to avoid random crashes on macOS Monterey
-                            .id(UUID())
                             Picker("To:", selection: $appState.settings.chordPro.transposeTo) {
                                 ForEach(Note.allCases, id: \.self) { note in
                                     Text(note.rawValue)
                                 }
                             }
-                            /// Give it a random ID to avoid random crashes on macOS Monterey
-                            .id(UUID())
                         }
                         Picker("Accidentals:", selection: $appState.settings.chordPro.transposeAccidentals) {
                             ForEach(Accidentals.allCases, id: \.self) { accidental in
                                 Text(accidental.rawValue)
                             }
                         }
-                        /// Give it a random ID to avoid random crashes on macOS Monterey
-                        .id(UUID())
                     }
                     .padding(.top)
                 }
@@ -229,8 +253,6 @@ extension SettingsView {
                                 .tag(notation.label)
                         }
                     }
-                    /// Give it a random ID to avoid random crashes on macOS Monterey
-                    .id(UUID())
                     .padding(.top)
                 }
             }
@@ -240,6 +262,8 @@ extension SettingsView {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 }
+
+// MARK: SettingsView Modifiers
 
 extension SettingsView {
 
