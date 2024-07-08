@@ -62,18 +62,14 @@ extension Terminal {
         /// Return the stream
         return AsyncStream { continuation in
             pipe.fileHandleForReading.readabilityHandler = { handler in
-                guard let standardOutput = String(data: handler.availableData, encoding: .utf8) else {
-                    return
-                }
+                let standardOutput = String(decoding: handler.availableData, as: UTF8.self)
                 guard !standardOutput.isEmpty else {
                     return
                 }
                 continuation.yield(.standardOutput(standardOutput))
             }
             errorPipe.fileHandleForReading.readabilityHandler = { handler in
-                guard let errorOutput = String(data: handler.availableData, encoding: .utf8) else {
-                    return
-                }
+                let errorOutput = String(decoding: handler.availableData, as: UTF8.self)
                 guard !errorOutput.isEmpty else {
                     return
                 }
@@ -126,12 +122,11 @@ extension Terminal {
     static func getOptionalCustomConfig(settings: AppSettings) -> String? {
         if
             settings.chordPro.useCustomConfig,
-            let persistentURL = try? FileBookmark.getBookmarkURL(CustomFile.customConfig)
-        {
+            let persistentURL = try? UserFileBookmark.getBookmarkURL(UserFileItem.customConfig) {
             /// Get access to the URL
             _ = persistentURL.startAccessingSecurityScopedResource()
             /// Close the access
-            FileBookmark.stopCustomFileAccess(persistentURL: persistentURL)
+            UserFileBookmark.stopCustomFileAccess(persistentURL: persistentURL)
             return "--config='\(persistentURL.path)'"
         }
         return nil
@@ -152,12 +147,12 @@ extension Terminal {
         /// Add the optional additional library to the environment of the shell
         if
             settings.chordPro.useAdditionalLibrary,
-            let persistentURL = try? FileBookmark.getBookmarkURL(CustomFile.customLibrary) {
+            let persistentURL = try? UserFileBookmark.getBookmarkURL(UserFileItem.customLibrary) {
             /// Get access to the URL
             _ = persistentURL.startAccessingSecurityScopedResource()
             arguments.append("CHORDPRO_LIB='\(persistentURL.path)'")
             /// Close the access
-            FileBookmark.stopCustomFileAccess(persistentURL: persistentURL)
+            UserFileBookmark.stopCustomFileAccess(persistentURL: persistentURL)
         }
         /// Add the argument to get the information
         arguments.append("'\(chordProApp.path)' -A -A -A")
@@ -208,12 +203,12 @@ extension Terminal {
         /// Add the optional additional library to the environment of the shell
         if
             settings.chordPro.useAdditionalLibrary,
-            let persistentURL = try? FileBookmark.getBookmarkURL(CustomFile.customLibrary) {
+            let persistentURL = try? UserFileBookmark.getBookmarkURL(UserFileItem.customLibrary) {
             /// Get access to the URL
             _ = persistentURL.startAccessingSecurityScopedResource()
             arguments.append("CHORDPRO_LIB='\(persistentURL.path)'")
             /// Close the access
-            FileBookmark.stopCustomFileAccess(persistentURL: persistentURL)
+            UserFileBookmark.stopCustomFileAccess(persistentURL: persistentURL)
         }
         /// The **ChordPro** binary
         arguments.append("'\(chordProApp.path)'")
@@ -234,7 +229,6 @@ extension Terminal {
         /// Run **ChordPro** in the shell
         /// - Note: The output is logged
         let output = await Terminal.runInShell(arguments: [arguments.joined(separator: " ")])
-        Logger.pdfBuild.log("ERROR: \(output.standardError, privacy: .public)")
         /// Write to the log file
         let log = output.standardError.isEmpty ? "No errors occurred but the song might be empty" : output.standardError
         do {

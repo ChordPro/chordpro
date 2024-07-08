@@ -21,12 +21,11 @@ struct LogDocument: FileDocument {
     /// Black magic
     init(configuration: ReadConfiguration) throws {
         guard
-            let data = configuration.file.regularFileContents,
-            let string = String(data: data, encoding: .utf8)
+            let data = configuration.file.regularFileContents
         else {
             throw AppError.readDocumentError
         }
-        log = string
+        log = String(decoding: data, as: UTF8.self)
     }
     /// Save the exported Log
     func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {

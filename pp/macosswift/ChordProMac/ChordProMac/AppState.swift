@@ -17,19 +17,13 @@ final class AppState: ObservableObject {
         }
     }
     /// All the directives we know about
-    var directives: [String] = []
+    var directives: [ChordProDirective] = []
     /// Init the class; get application settings
     init() {
         /// Get the application settings from the cache
         self.settings = AppSettings.load()
-        /// Get the static ChordProInfo from the bundle
-        if
-            let chordProInfo = Bundle.main.url(forResource: "ChordProInfo", withExtension: "json"),
-            let data = try? Data(contentsOf: chordProInfo),
-            let info = try? JSONDecoder().decode(ChordProInfo.self, from: data)
-        {
-            self.directives = info.metadata + info.directives + info.directiveAbbreviations.map(\.key)
-        }
+        /// Get all known directives
+        self.directives = Directive.getChordProDirectives()
     }
     /// Add the user settings as arguments to **ChordPro** for the Terminal action
     /// - Parameter settings: The ``AppSettings``

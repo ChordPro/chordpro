@@ -16,6 +16,7 @@ import SwiftUI
     var body: some Scene {
         DocumentGroup(newDocument: ChordProDocument()) { file in
             ContentView(document: file.$document)
+                .frame(minWidth: 680, minHeight: 480)
                 .environmentObject(appState)
             /// Give the scene access to the document.
                 .focusedSceneValue(\.document, file)
@@ -28,6 +29,9 @@ import SwiftUI
             }
             CommandGroup(after: .importExport) {
                 ExportSongView(label: "Export as PDF…")
+                    .environmentObject(appState)
+                Divider()
+                PrintPDFView(label: "Print…")
                     .environmentObject(appState)
             }
             CommandMenu("Tasks") {
