@@ -28,8 +28,9 @@ pdf {
   fonts {
 
     // Fonts for typesetting titles.
-    title.description    : "sans 16"
+    title.description    : "sans bold 16"
     subtitle.description : "sans italic 10"
+    footer.description : "sans 8"
 
     // Fonts for typesetting lyrics and chords.
     text.description     : "sans 12"
