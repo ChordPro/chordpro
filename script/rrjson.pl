@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Sun Mar 10 18:02:02 2024
 # Last Modified By: 
-# Last Modified On: Sun Jun  9 19:42:00 2024
-# Update Count    : 127
+# Last Modified On: Thu Jul 11 14:13:31 2024
+# Update Count    : 138
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -133,19 +133,24 @@ if ( $verbose > 1 ) {
 for my $file ( @ARGV ) {
 
     my $json;
+    my $prp;
     if ( $execute ) {
 	$json = decode_utf8($file);
     }
     else {
-	my $opts = { split => 0, fail => "soft" };
+	$prp = $file =~ /\.prp$/i;
+	my $opts = { split => $prp, fail => "soft" };
 	$json = loadlines( $file, $opts );
 	die( "$file: $opts->{error}\n") if $opts->{error};
+	if ( $pretoks || $tokens ) {
+	    warn( "$file: PRP data, ignoring tokens\n" );
+	}
     }
 
     my $data;
 
     # For debugging/development.
-    if ( $pretoks || $tokens ) {
+    if ( ( $pretoks || $tokens ) && !$prp ) {
 	$parser->croak_on_error = 0;
 	$parser->data = $json;
 	$parser->pretokenize;
@@ -159,6 +164,15 @@ for my $file ( @ARGV ) {
 	    dumper( $tokens, as => "Tokens" );
 	}
 	$data = $parser->structure unless $parser->is_error;
+    }
+
+    elsif ( $prp ) {
+	require ChordPro::Config::Properties;
+	*Data::Properties::_data_internal = \&Data::Properties::__data_internal;
+	my $cfg = new Data::Properties;
+	$cfg->parse_lines( $json, $file );
+	$data = $cfg->data;
+#	use DDumper; DDumper($data);exit;
     }
 
     # Normal call.
@@ -200,6 +214,41 @@ for my $file ( @ARGV ) {
 		->convert_blessed->encode($data) );
     }
 }
+
+################ Subroutines ################
+
+package Data::Properties {
+
+sub __data_internal {
+    my ( $self, $orig ) = @_;
+    my $cur = $orig // '';
+    $cur .= "." if $cur ne '';
+    my $all = $cur;
+    $all .= '@';
+    if ( my $res = $self->{_props}->{lc($all)} ) {
+	if ( _check_array($res) ) {
+	    my $ret = [];
+	    foreach my $prop ( @$res ) {
+		$ret->[$prop] = $self->_data_internal($cur.$prop);
+	    }
+	    return $ret;
+	}
+	else {
+	    my $ret = @$res > 1 ? { " key order " => $res } : {};
+	    foreach my $prop ( @$res ) {
+		$ret->{$prop} = $self->_data_internal($cur.$prop);
+	    }
+	    return $ret;
+	}
+    }
+    else {
+	my $val = $self->{_props}->{lc($orig)};
+	$val = $self->expand($val) if defined $val;
+	return $val;
+    }
+}
+
+}	# Data::Properties
 
 ################ Subroutines ################
 
