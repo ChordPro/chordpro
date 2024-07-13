@@ -831,7 +831,6 @@ sub show_vpos {
 sub embed {
     my ( $self, $file ) = @_;
     return unless -f $file;
-    return if $config->{debug}->{runtimeinfo} < 0;
 
     # Borrow some routines from PDF Api.
     *PDFNum = \&{$self->{pdfapi} . '::Basic::PDF::Utils::PDFNum'};

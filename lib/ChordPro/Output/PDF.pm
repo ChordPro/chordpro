@@ -916,7 +916,11 @@ sub generate_song {
 
     # Embed source and config for debugging;
     $pr->embed($source->{file})
-      if $source->{file} && ( $options->{debug} || $ChordPro::VERSION =~ /_/ );
+      if $source->{file}
+      && ( $options->{debug}
+	   ||
+	   $config->{debug}->{runtimeinfo}
+	   && $ChordPro::VERSION =~ /_/ );
 
     my $prev;			# previous element
 
