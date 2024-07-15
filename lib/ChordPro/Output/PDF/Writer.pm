@@ -830,6 +830,7 @@ sub show_vpos {
 
 sub embed {
     my ( $self, $file ) = @_;
+    $file = encode_utf8($file);
     return unless -f $file;
 
     # Borrow some routines from PDF Api.
