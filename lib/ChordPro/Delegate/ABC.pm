@@ -236,6 +236,11 @@ sub abc2svg( $song, %args ) {
 	warn($@) if $@;
 	undef $js;
 
+	if ( DEBUG ) {
+	    open( my $fd, '>:utf8', $out );
+	    print $fd join("\n", @lines), "\n";
+	    close($fd);
+	}
     }
 
     elsif ( $abc2svg->{method} eq QUICKJS ) {
