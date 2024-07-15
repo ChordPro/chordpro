@@ -1137,6 +1137,7 @@ package JSON::Boolean {
     sub _data_printer( $self, $ddp ) { "Bool($self)" }
 
     use overload '""'     => sub { ${$_[0]} ? "true" : "false" },
+		 "0+"     => sub { ${$_[0]} },
 		 "bool"   => sub { !!${$_[0]} },
 		 fallback => 1;
 
