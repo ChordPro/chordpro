@@ -181,8 +181,8 @@ push( @EXPORT, 'parse_kv' );
 # Map true/false etc to true / false.
 
 sub is_true ( $arg ) {
-    return if !defined($arg) || $arg eq '';
-    return if $arg =~ /^(false|null|no|none|off|\s+|0)$/i;
+    return 0 if !defined($arg) || $arg eq '';
+    return 0 if $arg =~ /^(false|null|no|none|off|\s+|0)$/i;
     return !!$arg;
 }
 
@@ -190,7 +190,7 @@ push( @EXPORT, 'is_true' );
 
 # Stricter form of true.
 sub is_ttrue ( $arg ) {
-    return if !defined($arg);
+    return 0 if !defined($arg);
     $arg =~ /^(on|true|1)$/i;
 }
 
