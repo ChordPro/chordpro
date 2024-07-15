@@ -1686,6 +1686,9 @@ sub dir_meta {
 	    @vals = map { s/s\+$//; $_ }
 	      split( quotemeta($config->{metadata}->{separator}), $vals[0] );
 	}
+	else {
+	    pop(@vals) if $vals[0] eq '';
+	}
 	my $m = $self->{meta};
 
 	# User and instrument cannot be set here.
@@ -1705,6 +1708,7 @@ sub dir_meta {
 		    local( $self->{chordsinfo}->{_dummy_} ) = { root_ord => 0 };
 		    $self->parse_chord($val);
 		};
+		do_warn("Illegal key: \"$val\"\n"), next unless $info;
 		my $name = $info->name;
 		my $act = $name;
 
