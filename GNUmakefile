@@ -194,7 +194,12 @@ rrjson :
 	  script/
 
 ABCDEST    = ${RES}/abc/abc2svg
+
+# 1.22.14
 ABCKIT     = abc2svg-be8faee2b4
+
+# 1.22.18 + Fix for grid widths.
+ABCKIT     = abc2svg-fca05cd348
 
 .PHONY: abc
 

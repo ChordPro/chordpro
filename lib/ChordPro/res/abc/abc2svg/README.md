@@ -349,6 +349,12 @@ They are:
 - `toparam.js`  
   This script just outputs the abc2svg parameters.
 
+- `tosvg.js`  
+  This script creates a SVG file that includes all the SVGs of the generation.
+
+    The included SVG images are updated for being correctly rendered by tools
+  that use librsvg, the SVG library for GNOME (feh, viewnior, swayimg...).
+
 #### 2.3 PDF generation
 
 `abctopdf` is a shell script which converts ABC to PDF using one of the
@@ -501,8 +507,7 @@ Here are the scripts which are used in a web context:
 
     This script also accepts a parameter `with_source`.
     When this parameter is set, the music source is included before the
-    SVG images of the music. An argument `nohead` prevents displaying
-    the source of the first music sequence. The music source is displayed
+    SVG images of the music. The music source is displayed
     in a &lt;pre&gt; element of class `source`. The SVG's are included
     in a &lt;div&gt; of the same class `source`.
     The source may be displayed either above (default) or
@@ -515,7 +520,7 @@ Here are the scripts which are used in a web context:
     The music source may be editable.
     To change it, the script contains two functions:  
     - `abc2svg.get_music` returns the source of the music sequence
-       (in &lt;script&gt; type "text/vnd.abc", class="abc" or inlined ABC)
+       (in &lt;script&gt; type "text/vnd.abc", class="abc" or inlined ABC).
        Its argument is the HTML &lt;div&gt; element that contains the music.  
     - `abc2svg.set_music` has two arguments, the HTML &lt;div&gt; element
        and the new source of the music.
