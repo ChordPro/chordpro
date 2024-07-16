@@ -11,8 +11,8 @@ import SwiftUI
 struct HelpButtonsView: View {
     /// The observable state of the application
     @EnvironmentObject private var appState: AppState
-    /// The scene state in the environment
-    @FocusedValue(\.sceneState) private var sceneState: SceneState?
+    /// The document in the environment
+    @FocusedValue(\.document) private var document: FileDocumentConfiguration<ChordProDocument>?
     /// The body of the `View`
     var body: some View {
         if let url = URL(string: "https://www.chordpro.org/chordpro/") {
@@ -29,13 +29,12 @@ struct HelpButtonsView: View {
             Divider()
             Button("Insert a Song Example") {
                 if
-                    let sceneState,
-                    let textView = sceneState.editorInternals.textView,
+                    let document,
                     let content = try? String(contentsOf: sampleSong, encoding: .utf8) {
-                    textView.replaceText(text: content)
+                    document.document.text = content
                 }
             }
-            .disabled(sceneState == nil)
+            .disabled(document == nil)
         }
         if let url = URL(string: "https://chordpro.org/chordpro/trouble-shooting/") {
             Divider()

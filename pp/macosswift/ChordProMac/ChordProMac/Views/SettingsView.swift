@@ -123,8 +123,8 @@ extension SettingsView {
                     label: "Color for **arguments**"
                 )
                 ColorPickerButtonView(
-                    selectedColor: $appState.settings.editor.pangoColor,
-                    label: "Color for **pango**"
+                    selectedColor: $appState.settings.editor.markupColor,
+                    label: "Color for **markup**"
                 )
                 ColorPickerButtonView(
                     selectedColor: $appState.settings.editor.bracketColor,

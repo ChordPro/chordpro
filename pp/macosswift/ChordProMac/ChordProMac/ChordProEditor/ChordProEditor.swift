@@ -25,10 +25,6 @@ public struct ChordProEditor: NSViewRepresentable {
     ///   - text: The `Binding` to the text of the document
     ///   - settings: The ``Settings`` for the editor
     ///   - directives: All the directives we know about
-    ///
-    /// - Note: While `text`is a 'Binding', it does not goes two-ways. The text will be set by the init and any further updates to the text will be ignored.
-    ///         This is on purpose, because the update form the editor to the `text 'Binding' will be debounced to a maximum of once per second.
-    ///         Updates to the text have to be done trough the ``TextView``.
     public init(text: Binding<String>, settings: Settings, directives: [ChordProDirective]) {
         self._text = text
         self.settings = settings
@@ -60,12 +56,18 @@ public struct ChordProEditor: NSViewRepresentable {
     /// - Parameters:
     ///   - view: The wrapped editor
     ///   - context: The context
-    public func updateNSView(_ view: Wrapper, context: Context) {
+    public func updateNSView(_ wrapper: Wrapper, context: Context) {
+        /// Update the text in the TextView when it is changed from *outside*; like when adding the example song
+        if context.coordinator.task == nil, self.text != wrapper.textView.string {
+            wrapper.textView.string = text
+            highlightText(textView: wrapper.textView)
+        }
+        /// Update the settings when changed
         if context.coordinator.parent.settings != settings {
             context.coordinator.parent = self
-            highlightText(textView: view.textView)
-            view.textView.setFragmentInformation(selectedRange: view.textView.selectedRange())
-            view.textView.chordProEditorDelegate?.selectionNeedsDisplay()
+            highlightText(textView: wrapper.textView)
+            wrapper.textView.setFragmentInformation(selectedRange: wrapper.textView.selectedRange())
+            wrapper.textView.chordProEditorDelegate?.selectionNeedsDisplay()
         }
     }
     /// Highlight the text in the editor

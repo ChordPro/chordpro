@@ -41,8 +41,8 @@ extension ChordProEditor {
         public var directiveColor: Color = .indigo
         /// The color for a directive argument
         public var argumentColor: Color = .orange
-        /// The color for pango stuff
-        public var pangoColor: Color = .teal
+        /// The color for markup
+        public var markupColor: Color = .teal
         /// The color for comments
         public var commentColor: Color = .gray
     }
