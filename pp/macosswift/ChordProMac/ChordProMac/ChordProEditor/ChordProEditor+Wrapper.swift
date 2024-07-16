@@ -76,6 +76,10 @@ extension ChordProEditor {
             textView.textColor = NSColor.labelColor
             textView.allowsUndo = true
             textView.isAutomaticQuoteSubstitutionEnabled = false
+            textView.isAutomaticTextCompletionEnabled = false
+            textView.isAutomaticTextReplacementEnabled = false
+            textView.isAutomaticDashSubstitutionEnabled = false
+            textView.isAutomaticSpellingCorrectionEnabled = false
             textView.layoutManager?.delegate = layoutManager
             textView.chordProEditorDelegate = self
             textView.textContainerInset = .init(width: 2, height: 0)

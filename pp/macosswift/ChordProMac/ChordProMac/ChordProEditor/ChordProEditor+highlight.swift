@@ -29,8 +29,8 @@ extension ChordProEditor {
     static let directiveArgumentRegex = try! NSRegularExpression(pattern: "(?<=\\:)(.*)(?=\\})")
     /// The regex for comments
     static let commentsRegex = try! NSRegularExpression(pattern: "#[^\\[\\]\\n]*")
-    /// The regex for pango
-    static let pangoRegex = try! NSRegularExpression(pattern: "<\\/?[^>]*>")
+    /// The regex for markup
+    static let markupRegex = try! NSRegularExpression(pattern: "<\\/?[^>]*>")
     /// The regex for brackets
     static let bracketsRegex = try! NSRegularExpression(pattern: "\\/?[\\[\\]\\{\\}\"]")
     /// The regex for new lines
@@ -45,7 +45,7 @@ extension ChordProEditor {
             (chordRegex, NSColor(settings.chordColor), .normal),
             (directiveRegex, NSColor(settings.directiveColor), .range),
             (directiveArgumentRegex, NSColor(settings.argumentColor), .argument),
-            (pangoRegex, NSColor(settings.pangoColor), .normal),
+            (markupRegex, NSColor(settings.markupColor), .normal),
             (bracketsRegex, NSColor(settings.bracketColor), .normal)
         ]
     }

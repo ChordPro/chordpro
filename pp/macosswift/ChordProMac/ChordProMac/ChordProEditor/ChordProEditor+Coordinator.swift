@@ -20,7 +20,7 @@ public extension ChordProEditor {
         /// Bool if the whole text must be (re)highlighted or just the current fragment
         private var fullHighlight: Bool = true
         /// Debounce task for the text update
-        private var task: Task<Void, Never>?
+        public var task: Task<Void, Never>?
 
         /// Init the **coordinator**
         /// - Parameter parent: The ``ChordProEditor``
