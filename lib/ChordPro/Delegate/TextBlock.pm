@@ -55,6 +55,7 @@ sub txt2xform( $self, %args ) {
     my $font  = $ps->{fonts}->{$style};
     my $bgcol = $pr->_bgcolor($font->{background});
     $bgcol = "" if $bgcol eq "none";
+    my $sp = $ps->{spacing}->{$style};
 
     my $size   = fontsize( delete($opts->{textsize}), $font->{size} );
     my $color  = delete($opts->{textcolor});
@@ -80,7 +81,7 @@ sub txt2xform( $self, %args ) {
     for ( @$data ) {
 	( $w, $h ) = $pr->strwidth( $_, $font, $size );
 	$awidth = $w if $w > $awidth;
-	$aheight += ($h||$size) * $ps->{spacing}->{lyrics};
+	$aheight += ($h||$size) * $sp;
     }
 
     # Desired width (includes padding).
@@ -94,7 +95,7 @@ sub txt2xform( $self, %args ) {
     }
 
     # Correction for tight y-fit.
-    my $ycorr = $h * ($ps->{spacing}->{lyrics} - 1);
+    my $ycorr = $h * ($sp - 1);
 
     # Desired height (includes padding).
     if ( $height = delete($opts->{height}) ) {
@@ -125,7 +126,6 @@ sub txt2xform( $self, %args ) {
     }
 
     my $y = $height - $ycorr;
-    my $sp = $ps->{spacing}->{$style} || $ps->{spacing}->{lyrics};
 
     if ( $flush eq "right" || $flush eq "center"
 	 || $vflush eq "middle" || $vflush eq "bottom" ) {

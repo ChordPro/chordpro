@@ -48,6 +48,7 @@
     - Fix rootless chords with transcode.
     - Fix problem with /~ in grid.
     - Upgrade to abc2svg fca05cd348 to fix problem with grid widths.
+    - Fix problem with TextBlock not correctly using desired spacing.
 
 !Internal
     - New function to deal with property settings for the config.
