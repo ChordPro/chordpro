@@ -55,7 +55,7 @@ sub txt2xform( $self, %args ) {
     my $font  = $ps->{fonts}->{$style};
     my $bgcol = $pr->_bgcolor($font->{background});
     $bgcol = "" if $bgcol eq "none";
-    my $sp = $ps->{spacing}->{$style};
+    my $sp = $font->{leading} || $ps->{spacing}->{$style} || 1;
 
     my $size   = fontsize( delete($opts->{textsize}), $font->{size} );
     my $color  = delete($opts->{textcolor});
