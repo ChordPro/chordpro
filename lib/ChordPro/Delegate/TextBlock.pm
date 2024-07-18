@@ -103,8 +103,8 @@ sub txt2xform( $self, %args ) {
 	$height = dimension( $height, width => $size ) - 2*($padding||0);
     }
     else {
-	$height = $aheight;
-	$ycorr = 0 unless defined($padding);;
+	$height = $aheight - $ycorr;
+	$ycorr = 0 unless defined($padding);
     }
     # Width and height are now the 'inner' box (w/o padding).
 
