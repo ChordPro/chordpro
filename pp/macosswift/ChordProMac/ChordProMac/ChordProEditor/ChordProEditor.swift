@@ -43,6 +43,7 @@ public struct ChordProEditor: NSViewRepresentable {
         wrapper.delegate = context.coordinator
         wrapper.textView.directives = directives
         wrapper.textView.parent = self
+        wrapper.textView.font = settings.font
         wrapper.textView.string = text
         /// Wait for next cycle and set the textview as first responder
         Task { @MainActor in
