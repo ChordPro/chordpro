@@ -1937,7 +1937,8 @@ sub imageline {
 	$height = $1/100 * $ph;
     }
 
-    my $scale = 1;
+    my $scalex = 1;
+    my $scaley = 1;
     my ( $w, $h ) = ( $width  || $avwidth  || $img->width,
 		      $height || $avheight || $img->height );
 
@@ -1949,40 +1950,20 @@ sub imageline {
 	$w = $height / ($avheight || $img->height) * ($avwidth || $img->width);
     }
 
-
-  if ( $config->{debug}->{x1} ) {
-
-    # Current approach: user scale overrides.
-    if ( defined $opts->{scale} ) {
-	$scale = $opts->{scale} || 1;
-    }
-    else {
-	if ( $w > $pw ) {
-	    $scale = $pw / $w;
-	}
-	if ( $h*$scale > $ph ) {
-	    $scale = $ph / $h;
-	}
-    }
-  }
-  else {
-
-    # Better, but may break things.
     if ( $w > $pw ) {
-	$scale = $pw / $w;
+	$scalex = $pw / $w;
     }
-    if ( $h*$scale > $ph ) {
-	$scale = $ph / $h;
+    if ( $h*$scalex > $ph ) {
+	$scaley = $ph / $h;
     }
     if ( $opts->{scale} ) {
-	$scale *= $opts->{scale} =~ /^(\d+(?:\.\d+)?)\%$/ ? $1/100 : $opts->{scale};
+	$scalex *= $opts->{scale}->[0];
+	$scaley *= $opts->{scale}->[1];
     }
 
-  }
-
-    warn("Image scale: $scale\n") if $config->{debug}->{images};
-    $h *= $scale;
-    $w *= $scale;
+    warn("Image scale: $scalex,$scaley\n") if $config->{debug}->{images};
+    $w *= $scalex;
+    $h *= $scaley;
 
     my $ox = $opts->{x};
     my $oy = $opts->{y};
@@ -1990,7 +1971,7 @@ sub imageline {
     # Not sure I like this...
     if ( defined $oy && $oy =~ /base([-+].*)/ ) {
 	$oy = -$1;
-	$oy += $opts->{base}*$scale if $opts->{base};
+	$oy += $opts->{base}*$scaley if $opts->{base};
 	warn("Y: ", $opts->{y}, " BASE: ", $opts->{base}, " -> $oy\n");
     }
 
@@ -3246,8 +3227,15 @@ method parse( $ctx, $k, $v ) {
 		$ctl{$k} = $v;
 	    }
 	    elsif ( $k =~ /^(scale)$/ ) {
-		$v = $1 / 100 if $v =~ /^([\d.]+)\%$/;
-		$ctl{$k} = $v;
+		my @s;
+		for ( split( /,/, $v ) ) {
+		    $_ = $1 / 100 if /^([\d.]+)\%$/;
+		    push( @s, $_ );
+		}
+		push( @s, $s[0] ) unless @s > 1;
+		carp("Invalid " . TYPE . " attribute: \"$k\" (too many values)\n")
+		  unless @s == 2;
+		$ctl{$k} = \@s;
 	    }
 	    else {
 		carp("Invalid " . TYPE . " attribute: \"$k\" ($kk)\n");

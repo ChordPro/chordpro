@@ -27,9 +27,11 @@
     - Add '--convert-config' to convert config to new style.
     - Add href property for images.
     - New metadata: chordpro, chordpro.version and chordpro.songsource.
-    - Upgrade Text::Layout to 0.036.
     - Upgrade JSON::Relaxed to 0.096.
     - Upgrade SVGPFG to 0.087. Enables transparant SVG images.
+    - Add independent horizontal and vertical scaling for images.
+      Requires Text::Layout 0.037_002.
+    - Upgrade Text::Layout to 0.038.
 
     !Bug fixes
     - Fix/update docker build.

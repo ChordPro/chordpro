@@ -1521,8 +1521,9 @@ sub dir_image {
 	    $opts{lc($k)} = $v;
 	}
 	elsif ( $k =~ /^(scale)$/
-		&& $v =~ /^(\d+(?:\.\d+)?)(%)?$/ ) {
-	    $opts{lc($k)} = $2 ? $1/100 : $1;
+		&& $v =~ /^(\d+(?:\.\d+)?)(%)?(?:,(\d+(?:\.\d+)?)(%)?)?$/ ) {
+	    $opts{lc($k)} = [ $2 ? $1/100 : $1 ];
+	    $opts{lc($k)}->[1] = $3 ? $4 ? $3/100 : $3 : $opts{lc($k)}->[0];
 	}
 	elsif ( $k =~ /^(center|border|spread|persist)$/i ) {
 	    if ( $k eq "center" ) {

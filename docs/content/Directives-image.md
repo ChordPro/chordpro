@@ -62,6 +62,9 @@ image is scaled to fit.
 Scales the image with the factor.
 This may be a floating point number, e.g. `0.2`, or a percentage, e.g. `20%`.
 
+Two comma-separated factors cen be used to specify independent
+horizontal and vertical scaling.
+
 ##### `align=`*aa*  
 Aligns the image on the page. The argument may be `"left"`,
 `"center"` or `"right"`.
@@ -227,6 +230,9 @@ Note the direction is opposite to the markup `<rise>`.
 `scale=`_NNN_
 : A scaling factor, to be applied _after_ width/height scaling.
 The value may be expressed as a percentage.
+
+Two comma-separated factors cen be used to specify independent
+horizontal and vertical scaling.
 
 `align="left"`  `align="right"`  `align="center"`
 : Align the image in the width given by the `w` attribute.
