@@ -144,6 +144,8 @@ public extension ChordProEditor {
                 do {
                     try await Task.sleep(nanoseconds: 1_000_000_000)
                     parent.text = textView.string
+                    /// Remove the task so we allow external updates of the text binding again
+                    self.task = nil
                 } catch { }
             }
         }

@@ -27,6 +27,7 @@ extension ChordProEditor {
         /// The font style of the editor
         public var fontStyle: FontStyle = .monospaced
 
+        /// The calculated font for the editor
         public var font: NSFont {
             return fontStyle.nsFont(size: fontSize)
         }

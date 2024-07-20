@@ -89,11 +89,7 @@ extension ChordProEditor {
         }()
 
         /// The `NSRulerView`
-        //lazy private var lineNumbers = NSRulerView()
-        lazy var lineNumbers: LineNumbersView = {
-            let lineNumbersView = LineNumbersView()
-            return lineNumbersView
-        }()
+        lazy private var lineNumbers = LineNumbersView()
 
         public override func viewWillDraw() {
             super.viewWillDraw()
@@ -106,7 +102,7 @@ extension ChordProEditor {
             lineNumbers.scrollView = scrollView
             lineNumbers.orientation = .verticalRuler
             lineNumbers.clientView = textView
-            lineNumbers.ruleThickness = 40
+            lineNumbers.ruleThickness = (textView.font?.pointSize ?? 14) * 4
 
             scrollView.verticalRulerView = lineNumbers
 
