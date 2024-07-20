@@ -201,6 +201,9 @@ ABCKIT     = abc2svg-be8faee2b4
 # 1.22.18 + Fix for grid widths.
 ABCKIT     = abc2svg-fca05cd348
 
+# 1.22.18 + 'lm' and 'width' for grids
+ABCKIT     = abc2svg-9b12853f66
+
 .PHONY: abc
 
 abc :
