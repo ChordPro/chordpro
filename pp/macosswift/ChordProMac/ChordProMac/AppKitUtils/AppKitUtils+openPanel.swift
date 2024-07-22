@@ -25,7 +25,7 @@ extension AppKitUtils {
         guard let window = NSApp.keyWindow else {
             throw CocoaError(.featureUnsupported)
         }
-        let lastSelectedURL = try UserFileBookmark.getBookmarkURL(userFile)
+        let lastSelectedURL = UserFileBookmark.getBookmarkURL(userFile)
         let openPanel = NSOpenPanel()
         openPanel.showsResizeIndicator = true
         openPanel.showsHiddenFiles = false

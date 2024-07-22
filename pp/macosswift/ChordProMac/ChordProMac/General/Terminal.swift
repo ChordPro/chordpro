@@ -122,7 +122,7 @@ extension Terminal {
     static func getOptionalCustomConfig(settings: AppSettings) -> String? {
         if
             settings.chordPro.useCustomConfig,
-            let persistentURL = try? UserFileBookmark.getBookmarkURL(UserFileItem.customConfig) {
+            let persistentURL = UserFileBookmark.getBookmarkURL(UserFileItem.customConfig) {
             /// Get access to the URL
             _ = persistentURL.startAccessingSecurityScopedResource()
             /// Close the access
@@ -147,7 +147,7 @@ extension Terminal {
         /// Add the optional additional library to the environment of the shell
         if
             settings.chordPro.useAdditionalLibrary,
-            let persistentURL = try? UserFileBookmark.getBookmarkURL(UserFileItem.customLibrary) {
+            let persistentURL = UserFileBookmark.getBookmarkURL(UserFileItem.customLibrary) {
             /// Get access to the URL
             _ = persistentURL.startAccessingSecurityScopedResource()
             arguments.append("CHORDPRO_LIB='\(persistentURL.path)'")
@@ -203,7 +203,7 @@ extension Terminal {
         /// Add the optional additional library to the environment of the shell
         if
             settings.chordPro.useAdditionalLibrary,
-            let persistentURL = try? UserFileBookmark.getBookmarkURL(UserFileItem.customLibrary) {
+            let persistentURL = UserFileBookmark.getBookmarkURL(UserFileItem.customLibrary) {
             /// Get access to the URL
             _ = persistentURL.startAccessingSecurityScopedResource()
             arguments.append("CHORDPRO_LIB='\(persistentURL.path)'")

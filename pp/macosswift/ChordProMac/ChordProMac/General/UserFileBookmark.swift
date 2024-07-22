@@ -19,9 +19,9 @@ extension UserFileBookmark {
     /// Get an optional bookmark URL
     /// - Parameter bookmark: The ``CustomFile``
     /// - Returns: An URL if found
-    public static func getBookmarkURL<T: UserFile>(_ bookmark: T) throws -> URL? {
+    public static func getBookmarkURL<T: UserFile>(_ bookmark: T) -> URL? {
         guard let bookmarkData = UserDefaults.standard.data(forKey: bookmark.id) else {
-            throw CocoaError(.fileReadUnknown)
+            return nil
         }
         do {
             var bookmarkDataIsStale = false
@@ -36,7 +36,7 @@ extension UserFileBookmark {
             return urlForBookmark
         } catch {
             Logger.fileAccess.error("\(error.localizedDescription, privacy: .public)")
-            throw error
+            return nil
         }
     }
 }
