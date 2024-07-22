@@ -63,7 +63,7 @@ extension AppSettings {
         /// The label to show in the ``StatusView``
         var configLabel: String {
             var config = systemConfigs.map {$0.label.replacingOccurrences(of: "_", with: " ").capitalized}
-            if useCustomConfig, let url = try? UserFileBookmark.getBookmarkURL(UserFileItem.customConfig) {
+            if useCustomConfig, let url = UserFileBookmark.getBookmarkURL(UserFileItem.customConfig) {
                 config.append(url.deletingPathExtension().lastPathComponent)
             }
             return config.joined(separator: "・")

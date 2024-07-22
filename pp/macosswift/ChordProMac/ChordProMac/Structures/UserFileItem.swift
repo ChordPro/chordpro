@@ -36,7 +36,7 @@ enum UserFileItem: String, UserFile {
     /// The optional calculated label of the file
     /// - Note: Used in the buttons of the ``SettingsView``
     var label: String? {
-        return try? UserFileBookmark.getBookmarkURL(self)?.deletingPathExtension().lastPathComponent
+        return UserFileBookmark.getBookmarkURL(self)?.deletingPathExtension().lastPathComponent
     }
     /// The SF icon of the file
     /// - Note: Used in the buttons of the ``SettingsView``
