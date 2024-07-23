@@ -42,27 +42,27 @@ So check this first!
 
 These modules should be available as prebuilt packages:
 
-Module | RPM | Debian
---|--|--
-`PDF::API2` | `perl-PDF-API2` | `libpdf-api2-perl`
-`Object::Pad` | `perl-Object-Pad` | `libobject-pad-perl`
-`Image::Info` | `perl-Image-Info` | `libimage-info-perl`
-`JSON::PP` | `perl-JSON-PP` | `libjson-pp-perl`
-`JSON::XS` | `perl-JSON-XS` | `libjson-xs-perl`
-`File::HomeDir` | `perl-File-HomeDir` | `libfile-homedir-perl`
-`Data::Printer` | `perl-Data-Printer` | `libdata-printer-perl`
-`Storable` | `perl-Storable` | `libstorable-perl`
-`Pod::Usage` | `perl-Pod-Usage` | `libpod-usage-perl`
+| Module          | RPM                 | Debian                 |
+|-----------------|---------------------|------------------------|
+| `PDF::API2`     | `perl-PDF-API2`     | `libpdf-api2-perl`     |
+| `Object::Pad`   | `perl-Object-Pad`   | `libobject-pad-perl`   |
+| `Image::Info`   | `perl-Image-Info`   | `libimage-info-perl`   |
+| `JSON::PP`      | `perl-JSON-PP`      | `libjson-pp-perl`      |
+| `JSON::XS`      | `perl-JSON-XS`      | `libjson-xs-perl`      |
+| `File::HomeDir` | `perl-File-HomeDir` | `libfile-homedir-perl` |
+| `Data::Printer` | `perl-Data-Printer` | `libdata-printer-perl` |
+| `Storable`      | `perl-Storable`     | `libstorable-perl`     |
+| `Pod::Usage`    | `perl-Pod-Usage`    | `libpod-usage-perl`    |
 { .table .table-striped .table-bordered .table-sm }
 
 These modules may be available as prebuilt packages:
 
-Module | RPM | Debian
---|--|--
-`Text::Layout` | `perl-Text-Layout` | `libtext-layout-perl`
-`JavaScript::QuickJS` | `perl-JavaScript-QuickJS` | `libjavascript-quickjs-perl`
-`File::LoadLines` | `perl-File-LoadLines` | `libfile-loadlines-perl`
-`String::Interpolate::Named` | `perl-String-Interpolate-Named` | `libstring-interpolate-named-perl`
+| Module                       | RPM                             | Debian                             |
+|------------------------------|---------------------------------|------------------------------------|
+| `Text::Layout`               | `perl-Text-Layout`              | `libtext-layout-perl`              |
+| `JavaScript::QuickJS`        | `perl-JavaScript-QuickJS`       | `libjavascript-quickjs-perl`       |
+| `File::LoadLines`            | `perl-File-LoadLines`           | `libfile-loadlines-perl`           |
+| `String::Interpolate::Named` | `perl-String-Interpolate-Named` | `libstring-interpolate-named-perl` |
 { .table .table-striped .table-bordered .table-sm }
 
 Do not worry if some of these packages are not available, the `cpan`
@@ -70,8 +70,8 @@ install process will build them if necessary.
 
 ## GUI (graphical) interface version
 
-If you are going to use ChordPro on the command line only, skip to the
-next section.
+If you are going to use ChordPro on the command line only, you can
+skip to the next section.
 
 For the GUI version, there is one critical prerequisite that must be
 installed manually: the perl wxWidgets library.
