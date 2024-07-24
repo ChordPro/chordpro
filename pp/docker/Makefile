@@ -17,7 +17,8 @@ prod ::
 	${DOCKER} build -f Dockerfile.tmp -t chordpro/chordpro:latest . --target chordpro-prod
 
 dev ::
-	tar -zcf chordpro-dev.tar.gz -C ../.. -T ../../MANIFEST
+	tar -zcf chordpro-dev.tar.gz -C ../.. \
+	    -T ../../MANIFEST -T ../../MANIFEST.FONTS
 	${DOCKER} build -t chordpro/chordpro-dev:latest . --target=chordpro-dev
 
 clean ::

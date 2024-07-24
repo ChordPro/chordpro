@@ -25,6 +25,8 @@ RUN apt-get install --no-install-recommends -y \
     libpdf-api2-perl \
     libobject-pad-perl \
     libimage-info-perl \
+    libjson-pp-perl \
+    libjson-xs-perl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -35,7 +37,7 @@ RUN cpanm \
     File::LoadLines \
     String::Interpolate::Named \
     HarfBuzz::Shaper \
-    Text::Layout \
+    Text::Layout~0.037 \
     Data::Printer
 
 FROM base AS chordpro-prod
