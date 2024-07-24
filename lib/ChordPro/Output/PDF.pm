@@ -2863,11 +2863,6 @@ sub prepare_assets {
 	    next;
 	}
 
-	if ( $elt->{type} eq "image" && $elt->{data} ) {
-	    # Ready to go.
-	    next;
-	}
-
 	if ( $elt->{type} eq "image" ) {
 	    warn("PDF: Preparing $elt->{subtype} image\n") if $config->{debug}->{images};
 	    if ( ($elt->{uri}//"") =~ /^chord:(.+)/ ) {

@@ -148,7 +148,7 @@ method diagram_xo ($info) {
     return unless $info;
 
     my $col = $pressed // "red";
-    $fg = $info->{diagram} // $fg;
+    $fg = $info->{diagram} // $fg // $ps->{theme}->{foreground};
     my $w = $lw + $kw * $keys;
     my $v = $kh;
 
