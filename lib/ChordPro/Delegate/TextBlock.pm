@@ -26,6 +26,7 @@ package ChordPro::Delegate::TextBlock;
 #  textstyle:  Style (font) to be used. Must be one of "text", "chords",
 #              "comment" etc.
 #  textsize:   Initial value for the text size.
+#  textspacing: Text spacing. A factor (e.g. 1.2) or "flex".
 #  textcolor:  Initial color for the text.
 #  background: Background color of the object.
 #
@@ -55,8 +56,9 @@ sub txt2xform( $self, %args ) {
     my $font  = $ps->{fonts}->{$style};
     my $bgcol = $pr->_bgcolor($font->{background});
     $bgcol = "" if $bgcol eq "none";
-    my $sp = $font->{leading} || $ps->{spacing}->{$style} || 1;
-
+    my $vsp = delete($opts->{textspacing}) // "flex";
+    my $sp = $vsp eq "flex"
+      ? ($font->{leading} || $ps->{spacing}->{$style} || 1) : $vsp;
     my $size   = fontsize( delete($opts->{textsize}), $font->{size} );
     my $color  = delete($opts->{textcolor});
     my $flush  = delete($opts->{flush})  // "left";
@@ -142,7 +144,7 @@ sub txt2xform( $self, %args ) {
 	    $pr->{tmplayout}->set_width($width);
 	    $pr->{tmplayout}->set_alignment($flush);
 	    $pr->{tmplayout}->show( 0, $y, $xo );
-	    $y -= $h * $sp;
+	    $y -= ($vsp eq "flex" ? $h : $size) * $sp;
 	}
     }
     else {			# assume top/left
@@ -150,7 +152,7 @@ sub txt2xform( $self, %args ) {
 	    my $h = $pr->strheight( $_, $font, $size ) || $size;
 	    $pr->{tmplayout}->set_alignment($flush);
 	    $pr->{tmplayout}->show( 0, $y, $xo );
-	    $y -= $h * $sp;
+	    $y -= ($vsp eq "flex" ? $h : $size) * $sp;
 	}
     }
 

@@ -1957,8 +1957,21 @@ sub imageline {
 	$scaley = $ph / $h;
     }
     if ( $opts->{scale} ) {
-	$scalex *= $opts->{scale}->[0];
-	$scaley *= $opts->{scale}->[1];
+	my @s;
+	if ( UNIVERSAL::isa( $opts->{scale}, 'ARRAY' ) ) {
+	    @s = @{$opts->{scale}};
+	}
+	else {
+	    for ( split( /,/, $opts->{scale} ) ) {
+		$_ = $1 / 100 if /^([\d.]+)\%$/;
+		push( @s, $_ );
+	    }
+	    push( @s, $s[0] ) unless @s > 1;
+	    carp("Invalid scale attribute: \"$opts->{scale}\" (too many values)\n")
+	      unless @s == 2;
+	}
+	$scalex *= $s[0];
+	$scaley *= $s[1];
     }
 
     warn("Image scale: $scalex,$scaley\n") if $config->{debug}->{images};
