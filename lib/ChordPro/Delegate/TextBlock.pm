@@ -83,7 +83,7 @@ sub txt2xform( $self, %args ) {
     for ( @$data ) {
 	( $w, $h ) = $pr->strwidth( $_, $font, $size );
 	$awidth = $w if $w > $awidth;
-	$aheight += ($h||$size) * $sp;
+	$aheight += ($vsp eq "flex" ? $h||$size : $size) * $sp;
     }
 
     # Desired width (includes padding).
