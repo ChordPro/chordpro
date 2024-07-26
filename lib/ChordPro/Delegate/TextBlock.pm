@@ -78,12 +78,17 @@ sub txt2xform( $self, %args ) {
     $xo->textstart;
 
     # Pre-pass to establish the actual width/height.
-    my ( $awidth, $aheight ) = ( 0, 0 );
+    my ( $awidth, $aheight ) = ( 0, undef );
     my ( $w, $h );
     for ( @$data ) {
 	( $w, $h ) = $pr->strwidth( $_, $font, $size );
 	$awidth = $w if $w > $awidth;
-	$aheight += ($vsp eq "flex" ? $h||$size : $size) * $sp;
+	if ( defined($aheight) ) {
+	    $aheight += ($vsp eq "flex" ? ($h||$size) : $size) * $vsp;
+	}
+	else {
+	    $aheight = ($h||$size);
+	}
     }
 
     # Desired width (includes padding).
@@ -97,7 +102,7 @@ sub txt2xform( $self, %args ) {
     }
 
     # Correction for tight y-fit.
-    my $ycorr = $h * ($sp - 1);
+    my $ycorr = ($vsp eq "flex" ? $h||$size : $size) * ($sp - 1);
 
     # Desired height (includes padding).
     if ( $height = delete($opts->{height}) ) {
