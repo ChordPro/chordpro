@@ -320,7 +320,7 @@ div.grid_2_4x4_1 div.Z { grid-column: span 1 }
 sub nhtml {
     return unless defined $_[0];
     $layout->set_markup(shift);
-    html($layout->render);
+    $layout->render;
 }
 
 sub html {
@@ -343,6 +343,11 @@ no warnings 'redefine';
 sub new {
     my ( $pkg, @data ) = @_;
     my $self = $pkg->SUPER::new;
+    $self->{_currentfont} = { family => 'default',
+			      style => 'normal',
+			      weight => 'normal' };
+    $self->{_currentcolor} = 'black';
+    $self->{_currentsize} = 12;
     $self;
 }
 
@@ -351,7 +356,34 @@ sub render {
     my $res = "";
     foreach my $fragment ( @{ $self->{_content} } ) {
 	next unless length($fragment->{text});
-	$res .= ChordPro::Utils::fq($fragment->{text});
+	my $f = $fragment->{font} || $self->{_currentfont};
+	my @c;			# styles
+	my @d;			# decorations
+	if ( $f->{style} eq "italic" ) {
+	    push( @c, q{font-style:italic} );
+	}
+	if ( $f->{weight} eq "bold" ) {
+	    push( @c, q{font-weight:bold} );
+	}
+	if ( $fragment->{color} && $fragment->{color} ne $self->{_currentcolor} ) {
+	    push( @c, join(":","color",$fragment->{color}) );
+	}
+	if ( $fragment->{size} && $fragment->{size} ne $self->{_currentsize} ) {
+	    push( @c, join(":","font-size",$fragment->{size}) );
+	}
+	if ( $fragment->{bgcolor} ) {
+	    push( @c, join(":","background-color",$fragment->{bgcolor}) );
+	}
+	if ( $fragment->{underline} ) {
+	    push( @d, q{underline} );
+	}
+	if ( $fragment->{strikethrough} ) {
+	    push( @d, q{line-through} );
+	}
+	push( @c, "text-decoration-line:@d" ) if @d;
+	$res .= "<span style=\"" . join(";",@c) . "\">" if @c;
+	$res .= ChordPro::Output::HTML::html(ChordPro::Utils::fq($fragment->{text}));
+	$res .= "</span>" if @c;
     }
     $res;
 }
