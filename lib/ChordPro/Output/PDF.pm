@@ -1954,8 +1954,9 @@ sub imageline {
 	$scalex = $pw / $w;
     }
     if ( $h*$scalex > $ph ) {
-	$scaley = $ph / $h;
+	$scalex = $ph / $h;
     }
+    $scaley = $scalex;
     if ( $opts->{scale} ) {
 	my @s;
 	if ( UNIVERSAL::isa( $opts->{scale}, 'ARRAY' ) ) {

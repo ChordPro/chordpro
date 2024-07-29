@@ -36,15 +36,12 @@
 
     !Bug fixes
     - Fix/update docker build.
-    - Fix issue #367.
     - Fix paper anchored images being restricted to page size instead
       of paper size.
     - Fix problem that blocked pdf documents from being processed as songs.
     - Fixed problems with labels and embedded newlines.
     - Fixed newline issues in TextBlocks.
-    - Fix issue #371, #372.
-    - Fix issue #384.
-    - Fix issue #388.
+    - Fix issue #367, #371, #372, #384, #388, #399.
     - Fix problem that text in a TextBlock did not reset to flush left.
     - Fix problem TextBlock textstyle did not copy the background colour.
     - Fix colours of keyboard diagrams wrt. theme.
