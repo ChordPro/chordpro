@@ -203,10 +203,14 @@ printed `baselabelofset` frets higher.
 
 ![]({{< asset "images/ex_chords.png" >}})
 
-The `frets` positions are the positions in the chord diagram as shown. The following two definitions are the same chord, shown in two different positions:
+The `frets` positions are the positions in the chord diagram as shown.
+The following two definitions are the same chord, shown in two
+different positions:
 
     { "name" : "F#", "base" : 1, "frets" : [ 2, 4, 4, 3, 2, 2 ] },
     { "name" : "F#", "base" : 2, "frets" : [ 1, 3, 3, 2, 1, 1 ] },
+
+Use `0` for open strings, and `-1` or `"x"` for muted strings.
 
 ![]({{< asset "images/ex_chords2.png" >}})
 

@@ -434,7 +434,7 @@
     },
 
     "chords" : {
-      "description" : "User defined chords (placeholder).\nThis is an array of hashes, one for each chord.\nEach hash should contain the following fields:\n  \"name\":    name of the chord\n  \"base\":    base fret (optional, defaults to 1)\n  \"frets\":   the frets (optional, use 0 for an empty string,\n             and -1 for a muted string)\n  \"fingers\": finger positions (optional)\n  \"display\": (optional) can be used to change the way the chord is displayed",
+      "description" : "User defined chords (placeholder).\nThis is an array of hashes, one for each chord.\nEach hash should contain the following fields:\n  \"name\":    name of the chord\n  \"base\":    base fret (optional, defaults to 1)\n  \"frets\":   the frets (optional, use 0 for an empty string,\n             and -1 or \"x\" for a muted string)\n  \"fingers\": finger positions (optional)\n  \"display\": (optional) can be used to change the way the chord is displayed",
       "type" : "array",
       "items" : {
         "additionalProperties" : false,

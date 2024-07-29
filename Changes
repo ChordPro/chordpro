@@ -32,6 +32,7 @@
     - Add independent horizontal and vertical scaling for images.
       Requires Text::Layout 0.037_002.
     - Upgrade Text::Layout to 0.038.
+    - Allow fret -1 in {define}, and 'x' in json config for consistency.
 
     !Bug fixes
     - Fix/update docker build.

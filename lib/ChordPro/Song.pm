@@ -2048,7 +2048,7 @@ sub define_chord {
 	# frets N N ... N
 	elsif ( $a eq "frets" ) {
 	    my @f;
-	    while ( @a && $a[0] =~ /^(?:[0-9]+|[-xXN])$/ && @f < $strings ) {
+	    while ( @a && $a[0] =~ /^(?:-?[0-9]+|[-xXN])$/ && @f < $strings ) {
 		push( @f, shift(@a) );
 	    }
 	    if ( @f == $strings ) {

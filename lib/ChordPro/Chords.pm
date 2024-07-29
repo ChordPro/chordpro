@@ -434,7 +434,7 @@ sub add_config_chord ( $def ) {
 	    %$def,
 	    base    => $base,
 	    baselabeloffset => $def->{baselabeloffset}||0,
-	    frets   => [ $frets && @$frets ? @$frets : () ],
+	    frets   => [ $frets && @$frets ? map { $_ eq 'x' ? -1 : $_ } @$frets : () ],
 	    fingers => [ $fingers && @$fingers ? @$fingers : () ],
 	    keys    => [ $keys && @$keys ? @$keys : () ]
 	  } => $parser->{target};

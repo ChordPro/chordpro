@@ -70,7 +70,7 @@ The `define` directive details:
   Fret positions are relative to the offset __minus one__, so with `base-fret 1`
   (the default), the topmost fret position is `1`. With `base-fret 3`,
   fret position `1` indicates the 3rd position.  
-  `0` (zero) denotes an open string. Use `N`
+  `0` (zero) denotes an open string. Use `-1`, `N`
   or `x` to denote a non-sounding string.
     
 * `fingers` _pos_ _pos_ … _pos_ defines finger settings. This part may

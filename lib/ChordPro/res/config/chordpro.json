@@ -189,7 +189,7 @@ notes {
 //   "name":    name of the chord
 //   "base":    base fret (optional, defaults to 1)
 //   "frets":   the frets (optional, use 0 for an empty string,
-//              and -1 for a muted string)
+//              and -1 or "x" for a muted string)
 //   "fingers": finger positions (optional)
 //   "display": (optional) can be used to change the way the chord is displayed
 chords : []
