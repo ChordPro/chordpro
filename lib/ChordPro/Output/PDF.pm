@@ -1928,6 +1928,7 @@ sub imageline {
 	    $pw = $ps->{__rightmargin} - $ps->{_leftmargin};
 	}
 	$ph = $ps->{_margintop} - $ps->{_marginbottom};
+	$pw -= $ps->{_indent} if $anchor eq "float";
     }
 
     if ( $width && $width =~ /^(\d+(?:\.\d+)?)\%$/ ) {
