@@ -169,9 +169,22 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "comment" || $elt->{type} eq "comment_italic" ) {
-	    push( @s,
-		  '<div class="' . $elt->{type} . '">' .
-		  '<span>' . nhtml($elt->{text}) . '</span></div>' );
+	    if ( $elt->{chords} ) {
+		my $t = "";
+		for ( my $i=0; $i < @{$elt->{chords}}; $i++ ) {
+		    $t .= $s->{chordsinfo}->{$elt->{chords}->[$i]->key}->name
+		      if $elt->{chords}->[$i];
+		    $t .= $elt->{phrases}->[$i];
+		}
+		push( @s, '<div class="' . $elt->{type} . '"><span>' .
+		      nhtml($t) . '</span></div>' );
+
+	    }
+	    else {
+		push( @s,
+		      '<div class="' . $elt->{type} . '">' .
+		      '<span>' . nhtml($elt->{orig}) . '</span></div>' );
+	    }
 	    push( @s, "" ) if $tidy;
 	    next;
 	}
