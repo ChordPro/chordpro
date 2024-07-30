@@ -36,6 +36,7 @@
 
     !Bug fixes
     - Fix/update docker build.
+    - Add missing shortcodes sog and eog (start/end of grid).
     - Fix paper anchored images being restricted to page size instead
       of paper size.
     - Fix problem that blocked pdf documents from being processed as songs.
