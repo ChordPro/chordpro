@@ -43,9 +43,6 @@ These settings control global behaviour of the ChordPro program and can be chang
       "lyrics-only" : false,
       // Memorize chords in sections, to be recalled by [^].
       "memorize" : false,
-      // Format to show chord names. May contain markup.
-      // "chord-format" : "%{root}%{qual|%{}}%{ext|<sup>%{}</sup>}%{bass|/%{}}",
-      "chord-format" : "%{root}%{qual|%{}}%{ext|%{}}%{bass|/%{}}",
       // Chords inline.
       // May be a string containing pretext %s posttext.
       // Defaults to "[%s]" if set to a value that doesn't contain "%s".
