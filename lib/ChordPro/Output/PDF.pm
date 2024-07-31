@@ -3272,9 +3272,15 @@ method getimage ($fragment) {
     $fragment->{_img} //= do {
 	my $xo;
 	if ( $fragment->{id} ) {
-	    $xo = ChordPro::Output::PDF::assets($fragment->{id})->{data};
-	    unless ( $xo ) {
+	    my $o = ChordPro::Output::PDF::assets($fragment->{id});
+	    $xo = $o->{data} if $o;
+	    unless ( $o && $xo ) {
 		warn("Unknown image ID in <img>: $fragment->{id}\n");
+	    }
+	    $fragment->{design_scale} = $o->{opts}->{scale};
+	    if ( $o->{width} && $o->{vwidth} ) {
+		$fragment->{design_scale} ||= 1;
+		$fragment->{design_scale} *= $o->{vwidth}/$o->{width};
 	    }
 	}
 	elsif ( $fragment->{chord} ) {
