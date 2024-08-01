@@ -84,7 +84,7 @@ sub txt2xform( $self, %args ) {
 	( $w, $h ) = $pr->strwidth( $_, $font, $size );
 	$awidth = $w if $w > $awidth;
 	if ( defined($aheight) ) {
-	    $aheight += ($vsp eq "flex" ? ($h||$size) : $size) * $vsp;
+	    $aheight += $vsp eq "flex" ? ($h||$size)*$sp : $size*$vsp;
 	}
 	else {
 	    $aheight = ($h||$size);

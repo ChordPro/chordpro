@@ -123,6 +123,16 @@ sub ly2svg( $self, %args ) {
     }
 
     warn("SVG: ", -s $svg, " bytes\n") if $config->{debug}->{ly};
+    my $scale;
+    my $design_scale;
+    if ( $kv->{scale} != 1 ) {
+	if ( $kv->{id} ) {
+	    $design_scale = $kv->{scale};
+	}
+	else {
+	    $scale = $kv->{scale};
+	}
+    }
     return
 	  { type => "image",
 	    line => $elt->{line},
@@ -130,8 +140,9 @@ sub ly2svg( $self, %args ) {
 	    uri  => "$im1.cropped.svg",
 	    opts => { maybe id     => $kv->{id},
 		      maybe align  => $kv->{align},
-		      maybe scale  => $kv->{scale},
 		      maybe spread => $kv->{spread},
+		      maybe scale        => $scale,
+		      maybe design_scale => $design_scale,
 		    } };
 }
 
