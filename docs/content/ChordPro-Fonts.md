@@ -245,6 +245,7 @@ and associating output elements to font families. The latter part is
 // Note that font locations may be different on your system.
 
 "fontdir" : [
+    "~/.local/share/fonts",
     "/usr/share/fonts/liberation-serif",
     "/usr/share/fonts/liberation-sans",
     "/usr/share/fonts/liberation-mono",
@@ -326,7 +327,8 @@ and associating output elements to font families. The latter part is
 
 ````
 // Relative filenames are looked up in the fontdirs.
-"fontdir" : [ "C:\\Windows\\Fonts" ],
+"fontdir" : [ "~\\AppData\\Local\\Microsoft\\Windows\\Fonts",
+              "C:\\Windows\\Fonts" ],
 
 // "fontconfig" maps members of font families to physical fonts.
 
