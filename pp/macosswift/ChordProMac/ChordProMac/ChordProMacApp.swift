@@ -75,6 +75,11 @@ public struct ResetApplicationButtonView: View {
                     in: .userDomainMask
                 ).first {
                     try? manager.removeItem(at: cacheFolderURL)
+                    try? manager.createDirectory(
+                        at: cacheFolderURL,
+                        withIntermediateDirectories: false,
+                        attributes: nil
+                    )
                 }
                 /// Terminate the application
                 NSApp.terminate(nil)

@@ -30,7 +30,7 @@ struct PreviewPDFButtonView: View {
                 }
             },
             label: {
-                Label(label, systemImage: sceneState.preview.url == nil ? "eye" : "eye.fill")
+                Label(label, systemImage: sceneState.preview.data == nil ? "eye" : "eye.fill")
             }
         )
         .help("Preview the PDF")

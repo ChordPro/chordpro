@@ -28,7 +28,7 @@ extension ChordProEditor {
     /// The regex for directive arguments
     static let directiveArgumentRegex = try! NSRegularExpression(pattern: "(?<=\\:)(.*)(?=\\})")
     /// The regex for comments
-    static let commentsRegex = try! NSRegularExpression(pattern: "#[^\\[\\]\\n]*")
+    static let commentsRegex = try! NSRegularExpression(pattern: "(?<=^|\\n)#[^\\n]*")
     /// The regex for markup
     static let markupRegex = try! NSRegularExpression(pattern: "<\\/?[^>]*>")
     /// The regex for brackets

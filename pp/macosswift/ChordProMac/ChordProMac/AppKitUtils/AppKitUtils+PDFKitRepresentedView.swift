@@ -43,6 +43,8 @@ extension AppKitUtils {
                 }
                 /// Get the optional debug info
                 if let firstPage = pdfView.document?.page(at: 0) {
+                    /// Clear the annotations
+                    annotations = []
                     for annotation in firstPage.annotations {
                         annotations.append((annotation.userName ?? "Error", annotation.contents ?? "Error"))
                     }
