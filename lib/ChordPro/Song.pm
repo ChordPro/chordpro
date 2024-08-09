@@ -1613,7 +1613,9 @@ sub dir_image {
 	    $opts->{$_} = $opts{$_} if defined $opts{$_};
 	    delete $opts{$_};
 	}
-	$opts->{spread} = $opts{spread};
+	for ( qw( spread ) ) {
+	    $opts->{$_} = $opts{$_} if defined $opts{$_};
+	}
 
 	if ( $id && %opts ) {
 	    do_warn("Asset definition \"$id\" does not take attributes",
