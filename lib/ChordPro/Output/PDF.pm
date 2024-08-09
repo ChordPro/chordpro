@@ -960,7 +960,7 @@ sub generate_song {
 		    # Spread image doesn't indent.
 		    $spreadimage = imagespread( $spreadimage, $x-$ps->{_indent}, $y, $ps );
 		}
-		$y -= $spreadimage;
+		$y -= $ps->{_spreadimage} = $spreadimage;
 	    }
 	    showlayout($ps) if $ps->{showlayout} || $config->{debug}->{spacing};
 	}
@@ -2412,6 +2412,28 @@ sub showlayout {
 	       $ml-$pr->strwidth("$t  "),
 	       $a[1]-2,
 	       $font, $fsz );
+
+    my $spreadimage = $ps->{_spreadimage};
+    if ( defined($spreadimage) && !ref($spreadimage) ) {
+	my $mr = $ps->{marginright};
+	$a[1] = $ps->{papersize}->[1]-$ps->{margintop} - $spreadimage;
+	$a[2] = $ps->{papersize}->[0]-$ml-$mr;
+	$pr->hline(@a);
+	$t = $f->($a[1]);
+	$pr->text( "<span color='red'>$t  </span>",
+		   $ml-$pr->strwidth("$t  "),
+		   $a[1]-2,
+		   $font, $fsz );
+	$a[0] = $ps->{papersize}->[0]-$mr;
+	$a[1] = $ps->{papersize}->[1]-$ps->{margintop};
+	$a[2] = $a[1] - $ps->{marginbottom};
+	$pr->vline(@a);
+	$t = $f->($a[0]);
+	$pr->text( "<span color='red'>$t  </span>",
+		   $a[0]-$pr->strwidth("$t")/2,
+		   $ptop,
+		   $font, $fsz );
+    }
 
     my @off = @{ $ps->{columnoffsets} };
     pop(@off);
