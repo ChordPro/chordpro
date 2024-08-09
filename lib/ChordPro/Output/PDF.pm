@@ -706,7 +706,18 @@ sub generate_song {
 	$y = $ps->{_margintop};
 	$y += $ps->{headspace} if $ps->{'head-first-only'} && $class == 2;
 	$x += $ps->{_indent};
-	undef $spreadimage unless ref($spreadimage);
+
+        if ( $spreadimage ) {
+	    warn("PDF: Preparing spread image\n")
+	      if $config->{debug}->{images} || $config->{debug}->{assets};
+	    prepare_asset( $spreadimage->{id}, $s, $pr );
+	    $assets = $s->{assets} || {};
+	    warn("PDF: Preparing spread image, done\n")
+	      if $config->{debug}->{images} || $config->{debug}->{assets};
+            $y -= $ps->{_spreadimage} = imagespread( $spreadimage, $x, $y, $ps );
+            undef $spreadimage;
+        }
+
 	$ps->{_top} = $y;
 	$col = 0;
 	$vsp_ignorefirst = 1;
@@ -952,16 +963,10 @@ sub generate_song {
 	if ( $elt->{type} ne "set" && !$did++ ) {
 	    # Insert top/left/right/bottom chord diagrams.
  	    $chorddiagrams->() unless $dctl->{show} eq "below";
+
 	    # Prepare the assets now we know the page width.
 	    prepare_assets( $s, $pr );
 
-	    if ( $spreadimage ) {
-		if (ref($spreadimage) eq 'HASH' ) {
-		    # Spread image doesn't indent.
-		    $spreadimage = imagespread( $spreadimage, $x-$ps->{_indent}, $y, $ps );
-		}
-		$y -= $ps->{_spreadimage} = $spreadimage;
-	    }
 	    showlayout($ps) if $ps->{showlayout} || $config->{debug}->{spacing};
 	}
 
@@ -1903,8 +1908,6 @@ sub imageline {
     my $scaley = $scalex;
 
     unless ( $img ) {
-	my $x = $asset;
-	use DDP; p $x;
 	return "Unhandled image type: asset=$id";
     }
     if ( $assets->{$id}->{multi} ) {
@@ -2754,7 +2757,34 @@ sub wrapsimple {
 sub prepare_assets {
     my ( $s, $pr ) = @_;
 
-    my %sa = %{$s->{assets}//{}};	# song assets
+    my %sa;			# song assets
+
+    # Ignore spread asset.
+    while ( my($k,$v) = each %{$s->{assets}//{}} ) {
+	next if $v->{opts}->{spread};
+	$sa{$k} = $v;
+    }
+
+    warn("PDF: Preparing ", scalar(keys %sa), " image",
+	 keys(%sa) == 1 ? "" : "s", "\n")
+      if $config->{debug}->{images} || $config->{debug}->{assets};
+
+    for my $id ( sort keys %sa ) {
+	prepare_asset( $id, $s, $pr );
+    }
+
+    warn("PDF: Preparing ", scalar(keys %sa), " image",
+	 keys(%sa) == 1 ? "" : "s", ", done\n")
+      if $config->{debug}->{images} || $config->{debug}->{assets};
+    $assets = $s->{assets} || {};
+    ::dump( $assets, as => "Assets, Pass 2" )
+      if $config->{debug}->{assets} & 0x02;
+
+}
+
+sub prepare_asset {
+    my ( $id, $s, $pr ) = @_;
+
     $s->{_ps} = $pr->{ps};		# for handlers TODO
 
     # All elements generate zero or one display items, except for SVG images
@@ -2765,11 +2795,8 @@ sub prepare_assets {
     my $pw = $ps->{_marginright} - $ps->{_marginleft};
     my $cw = ( $pw - ( $ps->{columns} - 1 ) * $ps->{columnspace} ) /$ps->{columns}
       - $ps->{_indent};
-    warn("PDF: Preparing ", scalar(keys %sa), " image",
-	 keys(%sa) == 1 ? "" : "s", ", pw=$pw, cw=$cw\n")
-      if $config->{debug}->{images} || $config->{debug}->{assets};
-    for my $id ( sort keys %sa ) {
-	my $elt = $sa{$id};
+
+    for my $elt ( $s->{assets}->{$id} ) {
 
 	$elt->{subtype} //= "image" if $elt->{uri};
 
@@ -2979,14 +3006,7 @@ sub prepare_assets {
 	}
 
     }
-    warn("PDF: Preparing images, done\n")
-      if $config->{debug}->{images} || $config->{debug}->{assets};
-    $assets = $s->{assets} || {};
-    ::dump( $assets, as => "Assets, Pass 2" )
-      if $config->{debug}->{assets} & 0x02;
-
 }
-
 
 my %corefonts =
   (

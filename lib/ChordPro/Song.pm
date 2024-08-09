@@ -1609,10 +1609,11 @@ sub dir_image {
     # Store as asset.
     if ( $uri ) {
 	my $opts;
-	$opts->{type} = $opts{type}    if $opts{type};
-	$opts->{persist} = $opts{persist} if $opts{persist};
-	$opts->{href} = $opts{href} if $opts{href};
-	delete $opts{$_} for qw( type persist href );
+	for ( qw( type persist href ) ) {
+	    $opts->{$_} = $opts{$_} if defined $opts{$_};
+	    delete $opts{$_};
+	}
+	$opts->{spread} = $opts{spread};
 
 	if ( $id && %opts ) {
 	    do_warn("Asset definition \"$id\" does not take attributes",
