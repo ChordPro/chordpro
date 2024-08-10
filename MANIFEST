@@ -167,6 +167,7 @@ t/140_chords.t
 t/141_chords.t
 t/142_chords.t
 t/143_chords.t
+t/144_chords.t
 t/150_fonts.t
 t/151_fonts.t
 t/152_fonts.t
