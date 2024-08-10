@@ -44,6 +44,7 @@
     - Fixed newline issues in TextBlocks.
     - Fix issue #367, #371, #372, #384, #388, #399.
     - Fix spread image handling.
+    - Fix diagrams.sorted.
     - Fix problem that text in a TextBlock did not reset to flush left.
     - Fix problem TextBlock textstyle did not copy the background colour.
     - Fix colours of keyboard diagrams wrt. theme.

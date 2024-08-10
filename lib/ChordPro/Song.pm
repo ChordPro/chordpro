@@ -754,8 +754,8 @@ sub parse_song {
     }
 
     if ( $config->{diagrams}->{sorted} ) {
-	@used_chords =
-	  sort ChordPro::Chords::chordcompare @used_chords;
+	sub byname { ChordPro::Chords::chordcompare($a,$b) }
+	@used_chords = sort byname @used_chords;
     }
 
     # For headings, footers, table of contents, ...

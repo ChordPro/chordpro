@@ -55,6 +55,7 @@ my %chordorderkey; {
 # Compare routine for chord names.
 # API: Used by: Song.
 sub chordcompare {
+    ( $a, $b ) = @_ if @_;
     my ( $a0, $arest ) = $a =~ /^([A-G][b#]?)(.*)/;
     my ( $b0, $brest ) = $b =~ /^([A-G][b#]?)(.*)/;
     $a0 = $chordorderkey{$a0//"\x{ff}"}//return 0;
