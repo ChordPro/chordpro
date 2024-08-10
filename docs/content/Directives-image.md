@@ -212,7 +212,7 @@ Other attributes are:
 
 `width=`_NNN_
 : The desired width for the image.
-The value can be a size (in points, `em` or `ex`) or a percentage.
+The value must be a size (in points), `em` or `ex`.
 The image is scaled if necessary.
 
 `height=`_NNN_
@@ -220,7 +220,7 @@ The image is scaled if necessary.
 
 `dx=`_NNN_
 : A horizontal offset for the image, wrt. the current location in the text.
-The value can be a size (in points, `em` or `ex`) or a percentage.
+The value must be a size (in points), `em` or `ex`).
 
 `dy=`_NNN_
 : Same, but vertical. Positive amounts move up.
