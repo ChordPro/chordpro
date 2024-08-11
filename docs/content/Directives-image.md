@@ -220,7 +220,7 @@ The image is scaled if necessary.
 
 `dx=`_NNN_
 : A horizontal offset for the image, wrt. the current location in the text.
-The value must be a size (in points), `em` or `ex`).
+The value must be a size (in points), `em` or `ex`.
 
 `dy=`_NNN_
 : Same, but vertical. Positive amounts move up.
