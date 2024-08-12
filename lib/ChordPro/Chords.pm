@@ -385,11 +385,13 @@ sub add_config_chord ( $def ) {
 	}
 	$res = $config_chords{$src};
 	return "Cannot copy $src" unless $res;
-	$def = bless { %$res, %$def } => ref($res);
 	if ( $def->{copy} ) {
-	    delete $def->{$_} for @extprops;
+	    my $r = { %$res };
+	    delete $r->{$_} for @extprops;
+	    $def = bless { %$r, %$def } => ref($res);
 	}
 	else {
+	    $def = bless { %$res, %$def } => ref($res);
 	    $def->{copy} = $def->{copyall};
 	}
     }
