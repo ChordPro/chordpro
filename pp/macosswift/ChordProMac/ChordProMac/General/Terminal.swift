@@ -211,9 +211,9 @@ extension Terminal {
             UserFileBookmark.stopCustomFileAccess(persistentURL: persistentURL)
         }
         /// The **ChordPro** binary
-        arguments.append("'\(chordProApp.path)'")
+        arguments.append("\"\(chordProApp.path)\"")
         /// Add the source file
-        arguments.append("'\(sceneState.sourceURL.path)'")
+        arguments.append("\"\(sceneState.sourceURL.path)\"")
         /// Get the user settings that are simple and do not need sandbox help
         arguments.append(contentsOf: AppState.getUserSettings(settings: settings))
         /// Add the optional custom config file
@@ -225,7 +225,7 @@ extension Terminal {
             arguments.append("--config='\(taskConfig.url.path)'")
         }
         /// Add the output file
-        arguments.append("--output='\(sceneState.exportURL.path)'")
+        arguments.append("--output=\"\(sceneState.exportURL.path)\"")
         /// Run **ChordPro** in the shell
         /// - Note: The output is logged
         let output = await Terminal.runInShell(arguments: [arguments.joined(separator: " ")])

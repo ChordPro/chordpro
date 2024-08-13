@@ -40,7 +40,7 @@ extension AppKitUtils {
         public func makeCoordinator() -> Coordinator {
             Coordinator(self)
         }
-        /// The coordinator for the ``SharingServiceRepresentedView``
+        // swiftlint:disable:next nesting
         public class Coordinator: NSObject, NSSharingServicePickerDelegate {
             /// The parent
             let parent: SharingServiceRepresentedView
@@ -59,16 +59,23 @@ extension AppKitUtils {
             ) -> [NSSharingService] {
                 var share = proposedServices
                 /// Add a **print** service to the share-menu
-                if let url = parent.url, let image = NSImage(systemSymbolName: "printer", accessibilityDescription: "Printer") {
+                if
+                    let url = parent.url,
+                    let image = NSImage(systemSymbolName: "printer", accessibilityDescription: "Printer") {
                     let printService = NSSharingService(title: "Print PDF", image: image, alternateImage: image) {
-                        AppKitUtils.printDialog(exportURL: url)
+                        Task {
+                            await AppKitUtils.printDialog(exportURL: url)
+                        }
                     }
                     share.insert(printService, at: 0)
                 }
                 return share
             }
             /// Tells the delegate that the person selected a sharing service for the current item
-            public func sharingServicePicker(_ sharingServicePicker: NSSharingServicePicker, didChoose service: NSSharingService?) {
+            public func sharingServicePicker(
+                _ sharingServicePicker: NSSharingServicePicker,
+                didChoose service: NSSharingService?
+            ) {
                 /// Cleanup
                 sharingServicePicker.delegate = nil
             }

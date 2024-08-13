@@ -58,41 +58,8 @@ public extension ChordProEditor {
                 action: #selector(NSText.selectAll(_:)),
                 keyEquivalent: ""
             )
-
-            /** Experimental code to add **ChordPro** directives to the context-menu
-             newMenu.addItem(.separator())
-             let menuItem = newMenu.addItem(
-             withTitle: "Metadata",
-             action: nil,
-             keyEquivalent: ""
-             )
-             menuItem.isEnabled = textView.currentDirective == nil ? true : false
-             let subMenu = NSMenu()
-             menuItem.submenu = subMenu
-             for directive in parent.directives {
-             let item = subMenu.addItem(
-             withTitle: directive.directive,
-             action: #selector(self.didSelectClickMe(_:)),
-             keyEquivalent: ""
-             )
-             item.representedObject = (directive, textView)
-             item.target = self
-             }
-             */
             return newMenu
         }
-        
-        /**
-         @objc func didSelectClickMe(_ sender: NSMenuItem) {
-         guard
-         let object = sender.representedObject as? (directive: ChordProDirective, textview: TextView)
-         else {
-         return
-         }
-         print("Directive: \(object.directive.directive)")
-         object.textview.insertText(object.directive.directive, replacementRange: object.textview.selectedRange())
-         }
-         */
 
         /// Protocol function to check if a text should change
         /// - Parameters:

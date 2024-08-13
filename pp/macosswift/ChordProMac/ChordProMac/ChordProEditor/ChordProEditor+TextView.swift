@@ -13,10 +13,6 @@ extension ChordProEditor {
 
     /// The text view for the editor
     public class TextView: NSTextView {
-        /// The title of the song
-        public var songTitle: String = "New Song"
-        /// The subtitle of the song
-        public var songSubtitle: String?
         /// The delegate for the ChordProEditor
         var chordProEditorDelegate: ChordProEditorDelegate?
         /// The parent
@@ -75,7 +71,11 @@ extension ChordProEditor {
         }
 
         /// Sets the selection to the characters in an array of ranges in response to user action
-        override public func setSelectedRange(_ charRange: NSRange, affinity: NSSelectionAffinity, stillSelecting stillSelectingFlag: Bool) {
+        override public func setSelectedRange(
+            _ charRange: NSRange,
+            affinity: NSSelectionAffinity,
+            stillSelecting stillSelectingFlag: Bool
+        ) {
             super.setSelectedRange(charRange, affinity: affinity, stillSelecting: stillSelectingFlag)
             needsDisplay = true
             chordProEditorDelegate?.selectionNeedsDisplay()
@@ -89,7 +89,7 @@ extension ChordProEditor {
             let composeText = self.string as NSString
             self.insertText(text, replacementRange: NSRange(location: 0, length: composeText.length))
         }
-        
+
         /// Set the fragment information
         /// - Parameter selectedRange: The current selected range of the text editor
         func setFragmentInformation(selectedRange: NSRange) {
@@ -105,14 +105,17 @@ extension ChordProEditor {
             /// Set the rect of the current paragraph
             currentParagraphRect = layoutManager.boundingRect(forGlyphRange: nsRange, in: textContainer)
             /// Reduce the height of the rect if we have an extra line fragment and are on the last line with content
-            if layoutManager.extraLineFragmentTextContainer != nil, NSMaxRange(nsRange) == composeText.length, nsRange.length != 0 {
+            if
+                layoutManager.extraLineFragmentTextContainer != nil,
+                NSMaxRange(nsRange) == composeText.length,
+                nsRange.length != 0 {
                 currentParagraphRect?.size.height -= layoutManager.lineHeight
             }
             /// Find the optional directive of the fragment
             var directive: ChordProDirective?
             textStorage.enumerateAttribute(.directive, in: nsRange) {values, _, _ in
                 if let value = values as? String, directives.map(\.directive).contains(value) {
-                    directive = directives.first(where: {$0.directive == value})
+                    directive = directives.first { $0.directive == value }
                 }
             }
             /// Find the optional directive argument of the fragment

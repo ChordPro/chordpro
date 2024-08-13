@@ -8,7 +8,7 @@
 import SwiftUI
 
 /// SwiftUI `View` with **About** information
-struct AboutView: View {
+@MainActor struct AboutView: View {
     /// Bool to show the sheet with additional info
     @State private var showMoreInfo: Bool = false
     /// The **ChordPro** information

@@ -34,7 +34,7 @@ struct Directive: ChordProDirective {
 }
 
 extension Directive {
-    
+
     /// Get all the directive we know about
     /// - Returns: An array of directives
     static func getChordProDirectives() -> [Directive] {

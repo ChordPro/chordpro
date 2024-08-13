@@ -8,7 +8,7 @@
 import AppKit
 
 extension ChordProEditor {
-    
+
     /// The type of regex
     enum RegexType {
         /// Normal; only apply a color to the match
@@ -38,7 +38,7 @@ extension ChordProEditor {
 
     // swiftlint:enable force_try
 
-    // swiftlint: disable:next large_tuple
+    // swiftlint:disable:next large_tuple
     static func regexes(settings: Settings) -> [(regex: NSRegularExpression, color: NSColor, regexType: RegexType)] {
         return [
             (commentsRegex, NSColor(settings.commentColor), .normal),
@@ -60,8 +60,7 @@ extension ChordProEditor {
     @MainActor static func highlight(
         view: NSTextView,
         settings: Settings,
-        //font: NSFont,
-        range: NSRange, 
+        range: NSRange,
         directives: [ChordProDirective]
     ) {
         let text = view.textStorage?.string ?? ""
@@ -78,9 +77,7 @@ extension ChordProEditor {
         regexes.forEach { regex in
             let matches = regex.regex.matches(in: text, options: [], range: range)
             matches.forEach { match in
-
                 switch regex.regexType {
-
                 case .normal:
                     view.textStorage?.addAttribute(
                         .foregroundColor,
@@ -88,13 +85,13 @@ extension ChordProEditor {
                         range: match.range
                     )
                 case .range:
-                        view.textStorage?.addAttributes(
-                            [
-                                .foregroundColor: regex.color,
-                                .directiveRange: match.range
-                            ],
-                            range: match.range
-                        )
+                    view.textStorage?.addAttributes(
+                        [
+                            .foregroundColor: regex.color,
+                            .directiveRange: match.range
+                        ],
+                        range: match.range
+                    )
                 case .argument:
                     if let swiftRange = Range(match.range, in: text) {
                         view.textStorage?.addAttributes(
@@ -108,13 +105,16 @@ extension ChordProEditor {
                 }
             }
         }
-        
+
         /// Some extra love for known directives
         guard
             let knownDirectiveRegex = try? NSRegularExpression(
                 pattern: "(?<=\\{)(?:" + directives.map(\.directive).joined(separator: "|") + ")(?=[\\}|\\:])"
             ),
-            let boldFont = NSFont(descriptor: settings.font.fontDescriptor.addingAttributes().withSymbolicTraits(.bold), size: settings.font.pointSize)
+            let boldFont = NSFont(
+                descriptor: settings.font.fontDescriptor.addingAttributes().withSymbolicTraits(.bold),
+                size: settings.font.pointSize
+            )
         else {
             return
         }
@@ -130,7 +130,7 @@ extension ChordProEditor {
                 )
             }
         }
-        
+
         /// The attributes for the next typing
         view.typingAttributes = [
             .foregroundColor: NSColor.textColor,

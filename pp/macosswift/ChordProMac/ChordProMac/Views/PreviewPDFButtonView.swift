@@ -77,10 +77,10 @@ struct PreviewPDFButtonView: View {
 }
 
 extension PreviewPDFButtonView {
-    
+
     /// Update the preview of the current document
     struct UpdatePreview: View {
-        
+        /// The body of the `View`
         var body: some View {
             PreviewPDFButtonView(
                 label: "Update Preview",

@@ -8,7 +8,7 @@
 import Foundation
 
 extension ChordProEditor {
-    
+
     /// Share internal editor stuff with the SwiftUI `View`
     public struct Internals: Sendable {
 

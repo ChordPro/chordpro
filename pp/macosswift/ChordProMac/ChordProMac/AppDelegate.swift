@@ -12,7 +12,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private var aboutBoxWindowController: NSWindowController?
 
-    func showAboutWindow() {
+    @MainActor func showAboutWindow() {
         if aboutBoxWindowController == nil {
             let styleMask: NSWindow.StyleMask = [.closable, .miniaturizable, .titled]
             let window = NSWindow()
