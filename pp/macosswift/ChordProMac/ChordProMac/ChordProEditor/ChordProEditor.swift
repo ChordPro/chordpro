@@ -67,8 +67,6 @@ public struct ChordProEditor: NSViewRepresentable {
         if context.coordinator.parent.settings != settings {
             context.coordinator.parent = self
             highlightText(textView: wrapper.textView)
-            wrapper.textView.setFragmentInformation(selectedRange: wrapper.textView.selectedRange())
-            wrapper.textView.chordProEditorDelegate?.selectionNeedsDisplay()
         }
     }
     /// Highlight the text in the editor
@@ -97,6 +95,7 @@ extension ChordProEditor {
 
     @MainActor func runIntrospect(_ view: TextView) {
         guard let introspect = introspect else { return }
+        /// Set the internals of the editor
         let internals = Internals(
             directive: view.currentDirective,
             directiveArgument: view.currentDirectiveArgument,

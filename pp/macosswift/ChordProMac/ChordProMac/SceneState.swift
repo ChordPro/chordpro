@@ -10,6 +10,10 @@ import SwiftUI
 /// The observable state of the scene
 /// - Note: Every open song window has its own `SceneState` class
 final class SceneState: ObservableObject {
+    /// The optional file location
+    var file: URL?
+    /// The default name for a new song
+    var defaultSongName: String
     /// An error that can happen
     @Published var alertError: Error?
     /// Bool if we want to show the log
@@ -20,16 +24,11 @@ final class SceneState: ObservableObject {
     let temporaryDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
     /// The calculated file name of the song
     var songFileName: String {
-        var result: [String] = []
-        if let textView = editorInternals.textView {
-            if let songSubtitle = textView.songSubtitle {
-                result.append(songSubtitle)
-            }
-            result.append(textView.songTitle)
+        if let file {
+            return file.deletingPathExtension().lastPathComponent
         } else {
-            result.append(UUID().uuidString)
+            return defaultSongName
         }
-        return result.joined(separator: " - ")
     }
     /// The URL of the source file
     var sourceURL: URL {
@@ -51,6 +50,7 @@ final class SceneState: ObservableObject {
     @Published var editorInternals = ChordProEditor.Internals()
     /// Init the class
     init() {
+        self.defaultSongName = "New Song \(Date().formatted(date: .abbreviated, time: .standard))"
     }
 }
 

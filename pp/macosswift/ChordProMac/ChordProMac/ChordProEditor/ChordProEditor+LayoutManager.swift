@@ -1,8 +1,8 @@
 //
 //  ChordProEditor+LayoutManager.swift
-//  Chord Provider
+//  ChordProMac
 //
-//  © 2023 Nick Berendsen
+//  Created by Nick Berendsen on 26/05/2024.
 //
 
 import AppKit
@@ -15,7 +15,7 @@ extension ChordProEditor {
     class LayoutManager: NSLayoutManager, NSLayoutManagerDelegate {
 
         var font: NSFont {
-            return self.firstTextView?.font ?? NSFont.systemFont(ofSize: NSFont.systemFontSize)
+            return self.textStorage?.font ?? NSFont.systemFont(ofSize: NSFont.systemFontSize)
         }
 
         var fontLineHeight: CGFloat {

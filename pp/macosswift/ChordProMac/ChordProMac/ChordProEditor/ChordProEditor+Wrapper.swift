@@ -21,7 +21,7 @@ extension ChordProEditor {
         /// - Parameter frameRect: The rect of the `NSView`
         override init(frame frameRect: NSRect) {
             super.init(frame: frameRect)
-            self.wantsLayer = true;
+            self.wantsLayer = true
             self.layer?.masksToBounds = true
         }
 

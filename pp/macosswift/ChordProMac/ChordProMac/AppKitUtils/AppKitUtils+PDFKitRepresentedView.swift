@@ -16,7 +16,7 @@ extension AppKitUtils {
         /// The data of the PDF
         let data: Data
         /// The optional annotations
-        @Binding private var annotations:  [(userName: String, contents: String)]
+        @Binding private var annotations: [(userName: String, contents: String)]
         /// Init the `View`
         /// - Parameters:
         ///   - data: The data of the PDF
@@ -36,7 +36,8 @@ extension AppKitUtils {
             if #available(macOS 13.0, *) {
                 pdfView.autoScales = true
             }
-            /// Set 'autoScales' at the next run for macOS Monterey or else the PDF will scroll all the way to the bottom on init
+            /// Set 'autoScales' at the next run for macOS Monterey
+            /// or else the PDF will scroll all the way to the bottom on init
             Task { @MainActor in
                 if #unavailable(macOS 13.0) {
                     pdfView.autoScales = true

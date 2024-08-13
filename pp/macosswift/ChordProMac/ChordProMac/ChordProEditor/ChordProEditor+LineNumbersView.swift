@@ -33,7 +33,8 @@ extension ChordProEditor {
             context.move(to: CGPoint(x: bounds.width - 1, y: 0))
             context.addLine(to: CGPoint(x: bounds.width - 1, y: bounds.height))
             context.strokePath()
-            /// - Note: Below usually gets called on super.draw(dirtyRect), but we're not calling it because that will override the background color
+            /// - Note: Below usually gets called on super.draw(dirtyRect),
+            ///         but we're not calling it because that will override the background color
             drawHashMarksAndLabels(in: bounds)
         }
 
@@ -56,21 +57,17 @@ extension ChordProEditor {
             let font: NSFont = layoutManager.font
             /// Set the width of the ruler
             ruleThickness = font.pointSize * 4
-            /// Set the initial line position
-            var linePosition = LinePosition()
+            /// The line number
+            var lineNumber: Int = 1
             /// Get the range of glyphs in the visible area of the text view
             let visibleGlyphRange = layoutManager.glyphRange(forBoundingRect: textView.visibleRect, in: textContainer)
-            /// Get the scalar values of the text view content
-            let scalars = textStorage.string.unicodeScalars
-            /// Set the total count of characters
-            let totalCount = scalars.count
             /// Set the context based on the Y-offset of the text view
             context.translateBy(x: 0, y: convert(NSPoint.zero, from: textView).y)
 
             // MARK: Set first line number
 
             /// The line number for the first visible line
-            linePosition.lineNumber += ChordProEditor.newLineRegex.numberOfMatches(
+            lineNumber += ChordProEditor.newLineRegex.numberOfMatches(
                 in: textView.string,
                 options: [],
                 range: NSRange(location: 0, length: visibleGlyphRange.location)
@@ -78,50 +75,31 @@ extension ChordProEditor {
 
             // MARK: Draw marks
 
-            /// Get the range of each line as we step through the visible Range, starting at the start of the visible range
-            linePosition.lineStart = visibleGlyphRange.location
-            /// Start drawing the line numbers
-            for index in visibleGlyphRange.location..<NSMaxRange(visibleGlyphRange) {
-                linePosition.lineLength += 1
-                if NSCharacterSet.newlines.contains(scalars[index]) || index == (totalCount - 1) {
-                    /// Get the range of the current paragraph
-                    let nsRange = NSRange(location: linePosition.lineStart, length: linePosition.lineLength - 1)
-                    /// Get the rect of the current paragraph
-                    let lineRect = layoutManager.boundingRect(
-                        forGlyphRange: nsRange,
-                        in: textContainer
+            /// Go to all paragraphs
+            if let visibleSwiftRange = Range(visibleGlyphRange, in: textView.string) {
+
+                textView.string.enumerateSubstrings(in: visibleSwiftRange, options: [.byParagraphs]) { _, substringRange, _, _ in
+                    let nsRange = NSRange(substringRange, in: textView.string)
+                    let paragraphRect = layoutManager.boundingRect(forGlyphRange: nsRange, in: textContainer)
+                    /// Set the marker rect
+                    let markerRect = NSRect(
+                        x: 0,
+                        y: paragraphRect.origin.y,
+                        width: rect.width,
+                        height: paragraphRect.height
                     )
+                    /// Bool if the line should be highlighted
+                    let highlight = markerRect.minY == textView.currentParagraphRect?.minY
                     /// Check if the paragraph contains a directive
                     var directive: ChordProDirective?
                     textStorage.enumerateAttribute(.directive, in: nsRange) {values, _, _ in
                         if let value = values as? String, textView.directives.map(\.directive).contains(value) {
-                            directive = textView.directives.first(where: {$0.directive == value})
+                            directive = textView.directives.first { $0.directive == value }
                         }
                     }
-                    if let directive {
-                        /// Get some details to suggest a proper export file name
-                        switch directive.directive {
-                        case "t", "title":
-                            textView.songTitle = getDirectiveArgument(nsRange: nsRange) ?? "New Song"
-                        case "st", "subtitle", "artist":
-                            textView.songSubtitle = getDirectiveArgument(nsRange: nsRange)
-                        default:
-                            break
-                        }
-                    }
-                    /// Set the marker rect
-                    let markerRect = NSRect(
-                        x: 0,
-                        y: lineRect.origin.y,
-                        width: rect.width,
-                        height: lineRect.height
-                    )
-                    /// Bool if the line should be highlighted
-                    let highlight = markerRect.minY == textView.currentParagraphRect?.minY
-
                     /// Draw the line number
                     drawLineNumber(
-                        linePosition.lineNumber,
+                        lineNumber,
                         inRect: markerRect,
                         highlight: highlight
                     )
@@ -133,25 +111,8 @@ extension ChordProEditor {
                             highlight: highlight
                         )
                     }
-                    /// Update the positions
-                    linePosition.lineStart += linePosition.lineLength
-                    linePosition.lineLength = 0
-                    linePosition.lineNumber += 1
-                    linePosition.lastLinePosition = markerRect.origin.y + lineRect.height
+                    lineNumber += 1
                 }
-            }
-            /// Draw the last line number
-            if layoutManager.extraLineFragmentTextContainer != nil {
-                drawLineNumber(
-                    linePosition.lineNumber,
-                    inRect: NSRect(
-                        x: 0,
-                        y: linePosition.lastLinePosition,
-                        width: rect.width,
-                        height: layoutManager.lineHeight
-                    ),
-                    highlight: linePosition.lastLinePosition == textView.currentParagraphRect?.minY
-                )
             }
             /// Draw the number of the line
             func drawLineNumber(_ number: Int, inRect rect: NSRect, highlight: Bool) {
@@ -203,30 +164,7 @@ extension ChordProEditor {
                 }
                 return string
             }
+            textView.parent?.runIntrospect(textView)
         }
-    }
-}
-
-extension ChordProEditor.LineNumbersView {
-
-    /// Position information about a line
-    struct LinePosition {
-        /// The line number
-        var lineNumber: Int = 1
-        /// The start position of the line
-        var lineStart: Int = 0
-        /// The lenght of the line
-        var lineLength: Int = 0
-        /// Y position of the last line
-        var lastLinePosition: CGFloat = 0
-    }
-}
-
-extension String.UnicodeScalarView {
-    /// Get a unicode scalar by subscript
-    subscript(index: Int) -> UnicodeScalar {
-        var startIndex = self.startIndex
-        self.formIndex(&startIndex, offsetBy: index)
-        return self[startIndex]
     }
 }

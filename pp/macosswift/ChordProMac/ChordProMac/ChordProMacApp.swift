@@ -15,7 +15,7 @@ import SwiftUI
     /// The body of the `Scene`
     var body: some Scene {
         DocumentGroup(newDocument: ChordProDocument()) { file in
-            ContentView(document: file.$document)
+            ContentView(file: file.fileURL)
                 .frame(minWidth: 680, minHeight: 480)
                 .environmentObject(appState)
             /// Give the scene access to the document.
