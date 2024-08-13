@@ -460,6 +460,10 @@
             "type" : "string"
           },
           "display" : {
+            "description" : "Show as another chord.",
+            "type" : "string"
+          },
+          "format" : {
             "description" : "How to show the chord name.",
             "type" : "string"
           },
