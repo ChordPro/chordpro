@@ -1166,7 +1166,7 @@ sub runtime_info {
 
     for ( $res->{general}{chordpro} ) {
 	$_->{version} = $dd->($VERSION);
-	$_{type} = $::options->{reference} ? "reference" : "core";
+	$_->{type} = $::options->{reference} ? "reference" : "core";
 	$_->{aux} = "Unsupported development snapshot"
 	  if $VERSION =~ /_/;
     }

@@ -855,7 +855,10 @@ sub _aboutmsg {
 	"\n",
 	"GUI designed with wxGlade\n\n",
 	"Run-time information:\n",
-	::runtimeinfo() );
+	$::config->{settings}
+	? ::runtimeinfo()
+	: "  Not yet available (try again later)\n"
+      );
 
     return $msg;
 }
