@@ -42,7 +42,7 @@
     - Fix problem that blocked pdf documents from being processed as songs.
     - Fixed problems with labels and embedded newlines.
     - Fixed newline issues in TextBlocks.
-    - Fix issue #367, #371, #372, #384, #388, #399.
+    - Fix issue #367, #371, #372, #384, #388, #399, #410.
     - Fix spread image handling.
     - Fix diagrams.sorted.
     - Fix handling of "display"/"format" in config chords.

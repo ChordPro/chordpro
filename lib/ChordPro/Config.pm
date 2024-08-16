@@ -382,6 +382,7 @@ sub config_final ( $delta ) {
 
     if ( $delta ) {
         my $def = pristine_config();
+	config_split_fc_aliases($def);
         $cfg->reduce($def);
     }
     $cfg->unlock;
