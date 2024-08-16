@@ -56,7 +56,7 @@ my $memorizing;			# if memorizing (a.o.t. recalling)
 # Keep track of unknown chords, to avoid dup warnings.
 my %warned_chords;
 
-my $re_chords;			# for chords
+our $re_chords;			# for chords
 my $intervals;			# number of note intervals
 my @labels;			# labels used
 
@@ -979,6 +979,7 @@ sub decompose_grid {
     $line =~ s/^\s+//;
     $line =~ s/\s+$//;
     return ( tokens => [] ) if $line eq "";
+    local $re_chords = qr/(\[.*?\])/;
 
     my $orig;
     my %res;
