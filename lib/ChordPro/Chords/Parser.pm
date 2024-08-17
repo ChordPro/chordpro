@@ -1048,7 +1048,7 @@ package ChordPro::Chord::Nashville;
 
 our @ISA = 'ChordPro::Chord::Base';
 
-sub transpose ( $self, $dummy1, $dummy2 ) { $self }
+sub transpose ( $self, $dummy1, $dummy2=0 ) { $self }
 
 sub show {
     Carp::croak("call canonical instead of show");
@@ -1075,7 +1075,7 @@ package ChordPro::Chord::Roman;
 
 our @ISA = 'ChordPro::Chord::Base';
 
-sub transpose ( $self, $dummy1, $dummy2 ) { $self }
+sub transpose ( $self, $dummy1, $dummy2=0 ) { $self }
 
 sub show {
     Carp::croak("call canonical instead of show");
@@ -1104,8 +1104,8 @@ use String::Interpolate::Named;
 
 our @ISA = 'ChordPro::Chord::Base';
 
-sub transpose ( $self ) { $self }
-sub transcode ( $self ) { $self }
+sub transpose ( $self, $dummy1, $dummy2=0 ) { $self }
+sub transcode ( $self, $dummy1, $dummy2=0 ) { $self }
 
 sub canonical ( $self ) {
     my $res = $self->{text};
