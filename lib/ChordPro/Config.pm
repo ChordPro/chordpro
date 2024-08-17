@@ -370,7 +370,7 @@ sub config_split_fc_aliases ( $cfg ) {
 		# We have aliases. Delete the original.
 		delete( $fc->{$k} );
 		# And insert individual entries.
-		$fc->{$_} = $v for @k;
+		$fc->{$_} = dclone($v) for @k;
 	    }
 	}
     }
