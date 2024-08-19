@@ -354,6 +354,17 @@ sub process_config ( $cfg, $file ) {
         ChordPro::Chords::pop_parser();
     }
     config_split_fc_aliases($cfg);
+    config_expand_font_shortcuts($cfg);
+}
+
+# Expand pdf.fonts.foo: bar to pdf.fonts.foo { description: bar }.
+sub config_expand_font_shortcuts ( $cfg ) {
+    return unless exists $cfg->{pdf}->{fonts};
+    for ( keys %{$cfg->{pdf}->{fonts}} ) {
+	next if ref($cfg->{pdf}->{fonts}->{$_}) eq 'HASH';
+	$cfg->{pdf}->{fonts}->{$_} =
+	  { description => $cfg->{pdf}->{fonts}->{$_}};
+    }
 }
 
 sub config_split_fc_aliases ( $cfg ) {

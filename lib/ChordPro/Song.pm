@@ -170,6 +170,7 @@ sub parse_song {
 		next unless -s $cf;
 		warn("Config[song]: $cf\n") if $options->{verbose};
 		my $have = ChordPro::Config::get_config($cf);
+		ChordPro::Config::config_expand_font_shortcuts ( $have );
 		push( @configs, ChordPro::Config::prep_configs( $have, $cf) );
 		last;
 	    }
