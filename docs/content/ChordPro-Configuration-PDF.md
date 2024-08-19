@@ -509,30 +509,34 @@ the font libraries. The private directories will be searched first.
         // Fonts can be specified by name (for the corefonts)
         // or a filename (for TrueType/OpenType fonts).
         // Relative filenames are looked up in the fontdir.
-        // "fontdir" : [ "/usr/share/fonts/liberation", "/home/me/fonts" ],
-        "fontdir" : null,
+        // fontdir : [ /usr/share/fonts/liberation /home/me/fonts ]
+        fontdir : null
 
 See also [ChordPro Fonts]({{< relref "ChordPro-Fonts" >}}).
 
 ## Fonts
 
-All printable items like lyrics, chords and comments can be associated with a font specification. This allows fine-grained control over the printed output.
+All printable items like lyrics, chords and comments can be associated
+with a font specification. This allows fine-grained control over the
+printed output.
 
 For example:
 
-        "fonts" : {
-            "title" : {
-                "name" : "Times-Bold",
-                "size" : 14,
-                "color" : "blue",
-            },
+        fonts: {
+            title {
+                description  : "serif 14"
+                color : blue
+            }
             ...
-        },
+        }
 
 A font specification consists of the following settings:
 
-* `name` or `file`  
-You can either designate a built-in font by its name, or give the filename of a TrueType (ttf) or OpenType font (otf).  
+* `description`, `name` or `file`  
+The `description` designates a font by a family name, optional style,
+weight and size. This is the preferred way.  
+Alternatively, you can either use `name` to designate a built-in font
+by its name, or `file` to give the filename of a TrueType (ttf) or OpenType font (otf).  
 The filename should be the full name of a file on disk, or a relative filename which will be looked up in system dependent font libraries. See [Font libraries]({{< relref "#font-libraries" >}}).
 * `size`  
 The size of the font, in PDF units (1/72 inch).

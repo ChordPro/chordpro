@@ -14,10 +14,10 @@ are specified for chords, lyrics, page titles and so on. For example, in
 the default config file in section `"pdf"` there is a section `"fonts"` that
 has a specification for the page titles:
 
-    "title" : {
-            "name"        : "Times-Bold",
-            "size"        : 14
-    },
+    title {
+            name : Times-Bold
+            size : 14
+    }
 
 The `"name"` designates the built-in font `"Times-Roman"`.
 Alternatively you can use `"file"` to designate a font file on your
@@ -52,9 +52,13 @@ font family **must** be provided, the other parts are optional.
 For example, to select the bold version of Arial at 14 point size for
 the titles:
 
-    "title" : {
-            "description" : "arial bold 14",
-    },
+    title : "arial bold 14"
+	
+which is shorthand for
+
+    title {
+            description : "arial bold 14"
+    }
 
 The system will then try to find a font file for this font, e.g.
 `Arial-Bold.ttf` or a suitable replacement if this exact font could
@@ -92,45 +96,31 @@ used.
 
 In the config file in section `"pdf"` there is a section `"fontconfig"` that can be used to map family names to real font files. For example:
 
-    "fontconfig" : {
-        "serif" : {
-            ""            : "dejavu/DejaVuSerif-Regular.ttf",
-            "bold"        : "dejavu/DejaVuSerif-Bold.ttf",
-            "italic"      : "dejavu/DejaVuSerif-Italic.ttf",
-            "bolditalic"  : "dejavu/DejaVuSerif-BoldItalic.ttf",
-      },
-    },
+    fontconfig {
+        serif {
+            ""          : dejavu/DejaVuSerif-Regular.ttf
+            bold        : dejavu/DejaVuSerif-Bold.ttf
+            italic      : dejavu/DejaVuSerif-Italic.ttf
+            bolditalic  : dejavu/DejaVuSerif-BoldItalic.ttf
+      }
+    }
 
 For each family name you should specify four members: a regular font (with an empty key), a bold font (key `"bold"`), an italic font (key `"italic"`), and a bold-italic font.
 
 This is the short story. The longer story is that instead of a file name you can specify another set of key/value pairs, for example:
 
-    "fontconfig" : {
-        "serif" : {
-            ""            : {
-                "file"      : "dejavu/DejaVuSerif-Regular.ttf",
-                "interline" : 1,
-            },
+    fontconfig {
+        devanagari {
+            "" {
+                file    : lohit-devanagari/Lohit-Devanagari.ttf
+                shaping : 1
+            }
             ...
-    },
+    }
 
-`"interline"` is a font property that changes the way ChordPro deals
-with the font.
-
-Another property is `"shaping"`. This property is mandatory for
-typesetting languages that need special glyph processing. For example:
-
-    "fontconfig" : {
-        "devanagari" : {
-            ""            : {
-                "file"    : "lohit-devanagari/Lohit-Devanagari.ttf",
-                "shaping" : 1,
-            },
-            ...
-    },
-
-Note that shaping requires the perl module `HarfBuzz::Shaper` to be
-installed on the system.
+The property `"shaping"` is mandatory for typesetting languages that
+need special glyph and ligature processing. Note that shaping requires
+the perl module `HarfBuzz::Shaper` to be installed on the system.
 
 _Exact semantics of font properties are still under development._
 
@@ -140,9 +130,7 @@ Built-in fonts are specified with `"name"`. The ChordPro Reference
 Implementation supports the following built-in font names:
 
 * Courier, Courier-Bold, Courier-BoldOblique, Courier-Oblique
-* Georgia, Georgia,Bold, Georgia,BoldItalic, Georgia,Italic
 * Helvetica, Helvetica-Bold, Helvetica-BoldOblique, Helvetica-Oblique
-* Verdana, Verdana,Bold, Verdana,BoldItalic, Verdana,Italic
 * Times-Roman, Times-Bold, Times-BoldItalic, Times-Italic 
 * Symbol, Webdings, Wingdings, ZapfDingbats
 
@@ -168,237 +156,166 @@ and associating output elements to font families. The latter part is
 ## Example setup using built-in fonts
 
 ````
-// "fontconfig" maps members of font families to built-in fonts.
+  // "fontconfig" maps members of font families to built-in fonts.
 
-"fontconfig" : {
-    "serif" : {
-        ""            : "Times-Roman",
-        "bold"        : "Times-Bold",
-        "italic"      : "Times-Italic",
-        "bolditalic"  : "Times-BoldItalic",
-    },
-    "sans, sans-serif" : {
-        ""            : "Helvetica",
-        "bold"        : "Helvetica-Bold",
-        "italic"      : "Helvetica-Oblique",
-        "bolditalic"  : "Helvetica-BoldOblique",
-    },
-    "mono, monospace" : {
-        ""            : "Courier",
-        "bold"        : "Courier-Bold",
-        "italic"      : "Courier-Italic",
-        "bolditalic"  : "Courier-BoldItalic",
-    },
-    "dingbats" : {
-        ""            : "ZapfDingbats",
-    },
-},
+  fontconfig {
+	serif {
+	  ""         : Times-Roman
+	  bold       : Times-Bold
+	  italic     : Times-Italic
+	  bolditalic : Times-BoldItalic
+	}
+	"sans, sans-serif" {
+	  ""         : Helvetica
+	  bold       : Helvetica-Bold
+	  italic     : Helvetica-Oblique
+	  bolditalic : Helvetica-BoldOblique
+	}
+	"mono, monospace" {
+	  ""         : Courier
+	  bold       : Courier-Bold
+	  italic     : Courier-Italic
+	  bolditalic : Courier-BoldItalic
+	}
+	dingbats.        : ZapfDingbats
+  }
 
-// "fonts" associates output elements to font families as defined in
-// "fontconfig" above.
-// Not all elements need to be associated since they default to other
-// settings.
+  // "fonts" associates output elements to font families as defined in
+  // "fontconfig" above.
+  // Not all elements need to be associated since they default to other
+  // settings.
 
-"fonts" : {
-    "title" : {
-        "description" : "serif bold 14",
-    },
-    "subtitle" : {
-        "description" : "serif 11",
-    },
-    "text" : {
-        "description" : "serif 12",
-    },
-    "chord" : {
-        "description" : "sans italic 10",
-    },
-    "comment" : {
-        "description" : "sans 12",
-        "background" : "#E5E5E5"
-    },
-    "comment_italic" : {
-        "description" : "sans italic 12",
-    },
-    "comment_box" : {
-        "description" : "sans 12",
-        "frame" : 1
-    },
-    "tab" : {
-        "description" : "monospace 10",
-    },
-    "toc" : {
-        "description" : "serif 11",
-    },
-    "grid" : {
-        "description" : "sans 10",
-    },
-    "chordfingers" : {
-        "description" : "dingbats 10",
-    },
-},
+  fonts {
+	title          : "serif bold 14"
+	subtitle       : "serif 11"
+	text           : "serif 12"
+	chord          : "sans italic 10"
+	comment_italic : "sans italic 12"
+	tab            : "monospace 10"
+	toc            : "serif 11"
+	grid           : "sans 10"
+	chordfingers   : "dingbats 10"
+	comment {
+	  description  : "sans 12"
+	  background   : #E5E5E5
+	}
+	comment_box {
+	  description  : "sans 12"
+	  frame        : 1
+	}
+  }
 ````
 
 ## Example setup using TrueType fonts (Linux)
 
 ````
-// Relative filenames are looked up in the fontdirs.
-// Note that font locations may be different on your system.
+  // Relative filenames are looked up in the fontdirs.
+  // Note that font locations may be different on your system.
 
-"fontdir" : [
-    "~/.local/share/fonts",
-    "/usr/share/fonts/liberation-serif",
-    "/usr/share/fonts/liberation-sans",
-    "/usr/share/fonts/liberation-mono",
-],
+  fontdir : [
+    /usr/share/fonts/gnu-free
+  ]
 
-// "fontconfig" maps members of font families to font files.
+  // "fontconfig" maps members of font families to font files.
 
-"fontconfig" : {
-    "serif" : {
-        ""            : "LiberationSerif-Regular.ttf",
-        "bold"        : "LiberationSerif-Bold.ttf",
-        "italic"      : "LiberationSerif-Italic.ttf",
-        "bolditalic"  : "LiberationSerif-BoldItalic.ttf",
-    },
-    "sans, sans-serif" : {
-        ""            : "LiberationSans-Regular.ttf",
-        "bold"        : "LiberationSans-Bold.ttf",
-        "italic"      : "LiberationSans-Italic.ttf",
-        "bolditalic"  : "LiberationSans-BoldItalic.ttf",
-    },
-    "mono, monospace" : {
-        ""            : "LiberationMono-Regular.ttf",
-        "bold"        : "LiberationMono-Bold.ttf",
-        "italic"      : "LiberationMono-Italic.ttf",
-        "bolditalic"  : "LiberationMono-BoldItalic.ttf",
-    },
-    "dingbats" : {
-        // No Liberation equivalent, use corefont.
-        ""            : "ZapfDingbats",
-    },
-},
+  fontconfig {
+    serif {
+      ""         : FreeSerif.ttf
+      bold       : FreeSerifBold.ttf
+      italic     : FreeSerifItalic.ttf
+      bolditalic : FreeSerifBoldItalic.ttf
+    }
+    "sans, sans-serif" {
+      ""         : FreeSans.ttf
+      bold       : FreeSansBold.ttf
+      italic     : FreeSansOblique.ttf
+      bolditalic : FreeSansBoldOblique.ttf
+    }
+    "mono, monospace" {
+      ""         : FreeMono.ttf
+      bold       : FreeMonoBold.ttf
+      italic     : FreeMonoOblique.ttf
+      bolditalic : FreeMonoBoldOblique.ttf
+    }
+    dingbats.    : ChordProSymbols.ttf
+  }
 
-// "fonts" associates output elements to font families as defined in
-// "fontconfig" above.
-// Not all elements need to be associated since they default to other
-// settings.
+  // "fonts" associates output elements to font families as defined in
+  // "fontconfig" above.
 
-"fonts" : {
-    "title" : {
-        "description" : "serif bold 14",
-    },
-    "subtitle" : {
-        "description" : "serif 11",
-    },
-    "text" : {
-        "description" : "serif 12",
-    },
-    "chord" : {
-        "description" : "sans italic 10",
-    },
-    "comment" : {
-        "description" : "sans 12",
-        "background" : "#E5E5E5"
-    },
-    "comment_italic" : {
-        "description" : "sans italic 12",
-    },
-    "comment_box" : {
-        "description" : "sans 12",
-        "frame" : 1
-    },
-    "tab" : {
-        "description" : "monospace 10",
-    },
-    "toc" : {
-        "description" : "serif 11",
-    },
-    "grid" : {
-        "description" : "sans 10",
-    },
-    "chordfingers" : {
-        "description" : "dingbats 10",
-    },
-},
+  fonts {
+	title          : "serif bold 14"
+	subtitle       : "serif 11"
+	text           : "serif 12"
+	chord          : "sans italic 10"
+	comment_italic : "sans italic 12"
+	tab            : "monospace 10"
+	toc            : "serif 11"
+	grid           : "sans 10"
+	chordfingers   : "dingbats 10"
+	comment {
+	  description  : "sans 12"
+	  background   : #E5E5E5
+	}
+	comment_box {
+	  description  : "sans 12"
+	  frame        : 1
+	}
+  }
 
 ````
 
 ## Example setup using TrueType fonts (Microsoft Windows)
 
 ````
-// Relative filenames are looked up in the fontdirs.
-"fontdir" : [ "~\\AppData\\Local\\Microsoft\\Windows\\Fonts",
-              "C:\\Windows\\Fonts" ],
+  fontdir    : [ "~\\AppData\\Local\\Microsoft\\Windows\\Fonts"
+                 "C:\\Windows\\Fonts" ]
+  // "fontconfig" maps members of font families to font files.
 
-// "fontconfig" maps members of font families to physical fonts.
+  fontconfig {
+	serif {
+	  ""         : georgia.ttf
+	  bold       : georgiab.ttf
+	  italic     : georgiai.ttf
+	  bolditalic : georgiaz.ttf
+	}
+	"sans, sans-serif" {
+	  ""         : arial.ttf
+	  bold       : arialbd.ttf
+	  italic     : ariali.ttf
+	  bolditalic : arialbi.ttf
+	}
+	"mono, monospace" {
+	  ""         : cour.ttf
+	  bold       : courbd.ttf
+	  italic     : couri.ttf
+	  bolditalic : courbi.ttf
+	}
+	dingbats.        : ZapfDingbats
+  }
 
-"fontconfig" : {
-    "serif" : {
-        ""            : "georgia.ttf",
-        "bold"        : "georgiab.ttf",
-        "italic"      : "georgiai.ttf",
-        "bolditalic"  : "georgiaz.ttf",
-    },
-    "sans, sans-serif" : {
-        ""            : "arial.ttf",
-        "bold"        : "arialbd.ttf",
-        "italic"      : "ariali.ttf",
-        "bolditalic"  : "arialbi.ttf",
-    },
-    "mono, monospace" : {
-        ""            : "cour.ttf",
-        "bold"        : "courbd.ttf",
-        "italic"      : "couri.ttf",
-        "bolditalic"  : "courbi.ttf",
-    },
-    "dingbats" : {
-        // No equivalent, use corefont.
-        ""            : "ZapfDingbats",
-    },
-},
+  // "fonts" associates output elements to font families as defined in
+  // "fontconfig" above.
 
-// "fonts" associates output elements to font families as defined in
-// "fontconfig" above.
-// Not all elements need to be associated since they default to other
-// settings.
-
-"fonts" : {
-    "title" : {
-        "description" : "serif bold 14",
-    },
-    "subtitle" : {
-        "description" : "serif 11",
-    },
-    "text" : {
-        "description" : "serif 12",
-    },
-    "chord" : {
-        "description" : "sans italic 10",
-    },
-    "comment" : {
-        "description" : "sans 12",
-        "background" : "#E5E5E5"
-    },
-    "comment_italic" : {
-        "description" : "sans italic 12",
-    },
-    "comment_box" : {
-        "description" : "sans 12",
-        "frame" : 1
-    },
-    "tab" : {
-        "description" : "monospace 10",
-    },
-    "toc" : {
-        "description" : "serif 11",
-    },
-    "grid" : {
-        "description" : "sans 10",
-    },
-    "chordfingers" : {
-        "description" : "dingbats 10",
-    },
-},
+  fonts {
+	title          : "serif bold 14"
+	subtitle       : "serif 11"
+	text           : "serif 12"
+	chord          : "sans italic 10"
+	comment_italic : "sans italic 12"
+	tab            : "monospace 10"
+	toc            : "serif 11"
+	grid           : "sans 10"
+	chordfingers   : "dingbats 10"
+	comment {
+	  description  : "sans 12"
+	  background   : #E5E5E5
+	}
+	comment_box {
+	  description  : "sans 12"
+	  frame        : 1
+	}
+  }
 ````
 
 ## Example setup using DejaVu fonts (Mac OS X)
@@ -407,72 +324,57 @@ Instructions to install the DejaVu fonts can be found
 [here](https://dejavu-fonts.github.io/).
 
 ````
-// We have installed the DejaVu fonts in the ~/Library/Fonts
-// directory. See https://dejavu-fonts.github.io/ for downloading
-// the fonts. To install, unzip the fonts bundle and double-click on
-// each of the .ttf files.
+  // We assume the DejaVu fonts to be installed in the ~/Library/Fonts
+  // directory. See https://dejavu-fonts.github.io/ for downloading
+  // the fonts. To install, unzip the fonts bundle and double-click on
+  // each of the .ttf files.
 
-"fontdir" : [ "~/Library/Fonts" ],
+  fontdir : [ "~/Library/Fonts" ]
 
-// "fontconfig" maps members of font families to font files.
-"fontconfig" : {
-   "serif" : {
-       ""            : "DejaVuSerif.ttf",
-       "bold"        : "DejaVuSerif-Bold.ttf",
-       "bolditalic"  : "DejaVuSerif-BoldItalic.ttf",
-       "italic"      : "DejaVuSerif-Italic.ttf",
-   },
-   "sans, sans-serif" : {
-       ""            : "DejaVuSans.ttf",
-       "bold"        : "DejaVuSans-Bold.ttf",
-       "bolditalic"  : "DejaVuSans-BoldOblique.ttf",
-       "italic"      : "DejaVuSans-Oblique.ttf",
-   },
-   "mono, monospace" : {
-       ""            : "DejaVuSansMono.ttf",
-       "bold"        : "DejaVuSansMono-Bold.ttf",
-       "bolditalic"  : "DejaVuSansMono-BoldOblique.ttf",
-       "italic"      : "DejaVuSansMono-Oblique.ttf",
-   },
-},
-// "fonts" associates output elements to font families as defined in
-// "fontconfig" above.
-// Not all elements need to be associated since they default to other
-// settings.
-"fonts" : {
-    "title" : {
-        "description" : "serif bold 14",
-    },
-    "subtitle" : {
-        "description" : "serif 11",
-    },
-    "text" : {
-        "description" : "serif 12",
-    },
-    "chord" : {
-        "description" : "sans italic 10",
-    },
-    "comment" : {
-        "description" : "sans 12",
-        "background" : "#E5E5E5"
-    },
-    "comment_italic" : {
-        "description" : "sans italic 12",
-    },
-    "comment_box" : {
-        "description" : "sans 12",
-        "frame" : 1
-    },
-    "tab" : {
-        "description" : "monospace 10",
-    },
-    "toc" : {
-        "description" : "serif 11",
-    },
-    "grid" : {
-        "description" : "sans 10",
-    },
-},
+  // "fontconfig" maps members of font families to font files.
+  fontconfig {
+	serif {
+	  ""         : DejaVuSerif.ttf
+	  bold       : DejaVuSerif-Bold.ttf
+	  bolditalic : DejaVuSerif-BoldItalic.ttf
+	  italic     : DejaVuSerif-Italic.ttf
+	}
+	"sans, sans-serif" {
+	  ""         : DejaVuSans.ttf
+	  bold       : DejaVuSans-Bold.ttf
+	  bolditalic : DejaVuSans-BoldOblique.ttf
+	  italic     : DejaVuSans-Oblique.ttf
+	}
+	"mono, monospace" {
+	  ""         : DejaVuSansMono.ttf
+	  bold       : DejaVuSansMono-Bold.ttf
+	  bolditalic : DejaVuSansMono-BoldOblique.ttf
+	  italic     : DejaVuSansMono-Oblique.ttf
+	}
+  }
+
+  // "fonts" associates output elements to font families as defined in
+  // "fontconfig" above.
+
+  fonts {
+	title          : "serif bold 14"
+	subtitle       : "serif 11"
+	text           : "serif 12"
+	chord          : "sans italic 10"
+	comment_italic : "sans italic 12"
+	tab            : "monospace 10"
+	toc            : "serif 11"
+	grid           : "sans 10"
+	chordfingers   : "dingbats 10"
+	comment {
+	  description  : "sans 12"
+	  background   : #E5E5E5
+	}
+	comment_box {
+	  description  : "sans 12"
+	  frame        : 1
+	}
+  }
 ````
 
 ## Example font config using system fonts
@@ -488,46 +390,28 @@ update.
 
 // "fonts" associates output elements to font families as defined in
 // "fontconfig" above.
-// Not all elements need to be associated since they default to other
-// settings.
+  // "fonts" associates output elements to font families as defined in
+  // "fontconfig" above.
 
-"fonts" : {
-    "title" : {
-        "description" : "serif bold 14",
-    },
-    "subtitle" : {
-        "description" : "serif 11",
-    },
-    "text" : {
-        "description" : "serif 12",
-    },
-    "chord" : {
-        "description" : "sans italic 10",
-    },
-    "comment" : {
-        "description" : "sans 12",
-        "background" : "#E5E5E5"
-    },
-    "comment_italic" : {
-        "description" : "sans italic 12",
-    },
-    "comment_box" : {
-        "description" : "sans 12",
-        "frame" : 1
-    },
-    "tab" : {
-        "description" : "monospace 10",
-    },
-    "toc" : {
-        "description" : "serif 11",
-    },
-    "grid" : {
-        "description" : "sans 10",
-    },
-    "chordfingers" : {
-        "description" : "dingbats 10",
-    },
-},
+  fonts {
+	title          : "serif bold 14"
+	subtitle       : "serif 11"
+	text           : "serif 12"
+	chord          : "sans italic 10"
+	comment_italic : "sans italic 12"
+	tab            : "monospace 10"
+	toc            : "serif 11"
+	grid           : "sans 10"
+	chordfingers   : "dingbats 10"
+	comment {
+	  description  : "sans 12"
+	  background   : #E5E5E5
+	}
+	comment_box {
+	  description  : "sans 12"
+	  frame        : 1
+	}
+  }
 
 // On my system, this yields:
 // dingbats      --  /usr/share/fonts/urw-base35/D050000L.otf
