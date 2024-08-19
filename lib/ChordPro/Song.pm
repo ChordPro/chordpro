@@ -627,7 +627,7 @@ sub parse_song {
 	    if ( $prep->{directive} ) {
 		$config->{debug}->{pp} && warn("PRE:  ", $_, "\n");
 		$prep->{directive}->($dir);
-		$config->{debug}->{pp} && warn("POST: ", $_, "\n");
+		$config->{debug}->{pp} && warn("POST: {", $dir, "}\n");
 	    }
 	    $self->add( type => "ignore",
 			text => $_ )
