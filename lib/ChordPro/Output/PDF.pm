@@ -3008,29 +3008,6 @@ sub prepare_asset {
     }
 }
 
-my %corefonts =
-  (
-   ( map { lc($_) => $_ }
-     "Times-Roman",
-     "Times-Bold",
-     "Times-Italic",
-     "Times-BoldItalic",
-     "Helvetica",
-     "Helvetica-Bold",
-     "Helvetica-Oblique",
-     "Helvetica-BoldOblique",
-     "Courier",
-     "Courier-Bold",
-     "Courier-Oblique",
-     "Courier-BoldOblique",
-     "Symbol",
-     "ZapfDingbats" ),
-);
-
-sub is_corefont {
-    $corefonts{lc $_[0]};
-}
-
 # Font handler for SVG embedding.
 sub svg_fonthandler {
     my ( $ps, $svg, %args ) = @_;

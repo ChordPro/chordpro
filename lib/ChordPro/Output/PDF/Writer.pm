@@ -15,7 +15,7 @@ use Carp;
 use utf8;
 
 use ChordPro::Paths;
-use ChordPro::Utils qw( expand_tilde demarkup min );
+use ChordPro::Utils qw( expand_tilde demarkup min is_corefont );
 use ChordPro::Output::Common qw( fmt_subst prep_outlines );
 use File::LoadLines qw(loadlines);
 
@@ -811,7 +811,7 @@ sub init_corefont {
 
     my $ps = $self->{ps};
     my $font = $ps->{fonts}->{$ff};
-    my $cf = ChordPro::Output::PDF::is_corefont($font->{name});
+    my $cf = is_corefont($font->{name});
     die("Config error: \"$font->{name}\" is not a built-in font\n")
       unless $cf;
     my $fc = Text::Layout::FontConfig->new( debug => $config->{debug}->{fonts} > 1 );

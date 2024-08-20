@@ -360,10 +360,29 @@ sub process_config ( $cfg, $file ) {
 # Expand pdf.fonts.foo: bar to pdf.fonts.foo { description: bar }.
 sub config_expand_font_shortcuts ( $cfg ) {
     return unless exists $cfg->{pdf}->{fonts};
-    for ( keys %{$cfg->{pdf}->{fonts}} ) {
-	next if ref($cfg->{pdf}->{fonts}->{$_}) eq 'HASH';
-	$cfg->{pdf}->{fonts}->{$_} =
-	  { description => $cfg->{pdf}->{fonts}->{$_}};
+    for my $f ( keys %{$cfg->{pdf}->{fonts}} ) {
+	next if ref($cfg->{pdf}->{fonts}->{$f}) eq 'HASH';
+	for ( $cfg->{pdf}->{fonts}->{$f} ) {
+	    my $v = $_;
+	    my $i = {};
+	    # Break out size.
+	    if ( $v =~ /(.*?)(?:\s+(\d+(?:\.\d+)?))?$/ ) {
+		$i->{size} = $2 if $2;
+		$v = $1;
+	    }
+	    # Check for filename.
+	    if ( $v =~ /^.*\.(ttf|otf)$/i ) {
+		$i->{file} = $v;
+	    }
+	    # Check for corefonts.
+	    elsif ( is_corefont($v) ) {
+		$i->{name} = is_corefont($v);
+	    }
+	    else {
+		$i->{description} = $v;
+	    }
+	    $_ = $i;
+	}
     }
 }
 

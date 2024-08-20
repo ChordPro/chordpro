@@ -281,7 +281,7 @@ sub prpadd2cfg ( $cfg, @defs ) {
 	    # warn("Value => $value\n");
 	}
 	elsif ( !( ref($value)
-		   || $value =~ /^(?:[-+]?\d+(?:\.\d+)?|[\w, -]*)$/ ) ) {
+		   || $value !~ /[\[\{\]\}]/ ) ) {
 	    # Not simple, assume JSON struct.
 	    $value = json_load( $value, $value );
 	    # use DDP; p($value, as => "Value ->");
@@ -290,6 +290,13 @@ sub prpadd2cfg ( $cfg, @defs ) {
 	# Note that ':' is not oficailly supported by RRJson.
 	my @keys = split( /[:.]/, $key );
 	my $lastkey = pop(@keys);
+
+	# Handle pdf.fonts.xxx shortcuts.
+	if ( join( ".", @keys ) eq "pdf.fonts" ) {
+	    my $s = { pdf => { fonts => { $lastkey => $value } } };
+	    ChordPro::Config::config_expand_font_shortcuts($s);
+	    $value = $s->{pdf}{fonts}{$lastkey};
+	}
 
 	my $cur = \$cfg;		# current pointer in struct
 
@@ -435,5 +442,32 @@ sub dimension( $size, %sz ) {
 }
 
 push( @EXPORT, "dimension" );
+
+# Checking font names against the PDF corefonts.
+
+my %corefonts =
+  (
+   ( map { lc($_) => $_ }
+     "Times-Roman",
+     "Times-Bold",
+     "Times-Italic",
+     "Times-BoldItalic",
+     "Helvetica",
+     "Helvetica-Bold",
+     "Helvetica-Oblique",
+     "Helvetica-BoldOblique",
+     "Courier",
+     "Courier-Bold",
+     "Courier-Oblique",
+     "Courier-BoldOblique",
+     "Symbol",
+     "ZapfDingbats" ),
+);
+
+sub is_corefont {
+    $corefonts{lc $_[0]};
+}
+
+push( @EXPORT, "is_corefont" );
 
 1;
