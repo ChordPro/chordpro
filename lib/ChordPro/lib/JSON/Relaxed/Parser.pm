@@ -6,7 +6,7 @@ use utf8;
 
 package JSON::Relaxed::Parser;
 
-our $VERSION = "0.096";
+our $VERSION = "0.097";
 
 class JSON::Relaxed::Parser;
 
@@ -621,8 +621,9 @@ method encode(%opts) {
 	    return "null";
 	}
 
-	if ( UNIVERSAL::isa( $str, 'JSON::Boolean' ) ) {
-	    return "".$str;	# force string result
+	if ( UNIVERSAL::isa( $str, 'JSON::Boolean' )
+	     || UNIVERSAL::isa( $str, 'JSON::PP::Boolean' ) ) {
+	    return (qw(false true))[$str];	# force string result
 	}
 
 	my $v = $str;
@@ -1112,7 +1113,7 @@ method as_perl( %options ) {
 
     # null -> undef
     elsif ( $content eq "null" ) {
-	return;
+	return undef;
     }
 
     # Return as string.

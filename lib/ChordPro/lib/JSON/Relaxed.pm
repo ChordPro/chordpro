@@ -279,7 +279,7 @@ sub decode_rjson {
 sub from_rjson {
     my ( $raw, %options ) = @_;
     $options{croak_on_error} //= 0;
-    decode_json( $raw, %options );
+    decode_rjson( $raw, %options );
 }
 
 =head1 OBJECT-ORIENTED PARSING

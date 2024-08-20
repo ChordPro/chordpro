@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Sun Mar 10 18:02:02 2024
 # Last Modified By: 
-# Last Modified On: Thu Jul 11 14:13:31 2024
-# Update Count    : 138
+# Last Modified On: Tue Aug 20 20:43:14 2024
+# Update Count    : 173
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -48,6 +48,9 @@ my $debug = 0;			# debugging
 my $trace = 0;			# trace (show process)
 my $test = 0;			# test mode.
 
+my $have_yaml = eval { require YAML::PP };
+my $have_toml = eval { require TOML::Tiny };
+
 # Process command line options.
 app_options();
 
@@ -89,6 +92,7 @@ sub maybe ( $key, $value, @rest ) {
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 use JSON::Relaxed;
+use JSON::PP;
 use File::LoadLines;
 use Encode qw(decode_utf8);
 binmode STDOUT => ':utf8';
@@ -103,7 +107,7 @@ if ( $schema ) {
 }
 
 my $parser = JSON::Relaxed::Parser->new
-  ( booleans		  => 1,	# force default
+  ( booleans		  => 1,		# force default
     strict	          => $strict,
     prp		          => $prp,
     combined_keys	  => $combined_keys,
@@ -121,7 +125,8 @@ if ( $mode eq "dumper" ) {
 
 if ( $verbose > 1 ) {
     my @opts;
-    for ( qw( strict pretty prp combined_keys implied_outer_hash croak_on_error extra_tokens_ok booleans ) ) {
+    for ( qw( strict pretty prp combined_keys implied_outer_hash
+	      croak_on_error extra_tokens_ok booleans ) ) {
 	push( @opts, $_ ) if $parser->$_;
     }
     if ( @opts ) {
@@ -142,8 +147,8 @@ for my $file ( @ARGV ) {
 	my $opts = { split => $prp, fail => "soft" };
 	$json = loadlines( $file, $opts );
 	die( "$file: $opts->{error}\n") if $opts->{error};
-	if ( $pretoks || $tokens ) {
-	    warn( "$file: PRP data, ignoring tokens\n" );
+	if ( ($pretoks || $tokens) && $file !~ /\.r?r?json$/i ) {
+	    warn( "$file: not JSON data, ignoring tokens\n" );
 	}
     }
 
@@ -175,6 +180,21 @@ for my $file ( @ARGV ) {
 #	use DDumper; DDumper($data);exit;
     }
 
+    elsif ( $have_yaml && $file =~ /\.yaml$/i  ) {
+	$data = YAML::PP->new
+	  ( boolean => 'JSON::PP,boolean' )->load_string($json);
+    }
+
+    elsif ( $have_toml && $file =~ /\.toml$/i  ) {
+	my $p = TOML::Tiny->new
+	  ( inflate_boolean => sub { $_[0] eq 'true'
+				     ? $JSON::PP::true
+				     : $JSON::PP::false;
+				    }
+				);
+	( $data, my $error ) = $p->decode($json);
+    }
+
     # Normal call.
     else {
 	$data = $parser->decode($json);
@@ -203,14 +223,27 @@ for my $file ( @ARGV ) {
     elsif ( $mode eq "json_xs" ) {
 	require JSON::XS;
 	print ( JSON::XS->new->canonical->utf8(0)->pretty($pretty)
-		->boolean_values( $JSON::Boolean::false, $JSON::Boolean::true )
+		->boolean_values( $JSON::PP::false, $JSON::PP::true )
 		->convert_blessed->encode($data) );
+    }
+
+    elsif ( $mode eq "toml" ) {
+	require TOML::Tiny;
+	my $parser = TOML::Tiny->new();
+	print ( TOML::Tiny::to_toml($data) );
+    }
+
+    elsif ( $mode eq "yaml" ) {
+	require YAML;
+	$YAML::UseAliases = 0;
+	$YAML::Stringify = 1;
+	print ( YAML::Dump($data) );
     }
 
     else {			# default JSON
 	require JSON::PP;
 	print ( JSON::PP->new->canonical->utf8(0)->pretty($pretty)
-		->boolean_values( $JSON::Boolean::false, $JSON::Boolean::true )
+		->boolean_values( $JSON::PP::false, $JSON::PP::true )
 		->convert_blessed->encode($data) );
     }
 }
@@ -292,6 +325,8 @@ sub app_options() {
      'rjson'		    => sub { $mode = "rjson"   },
      'json|json_pp'	    => sub { $mode = "json"    },
      'json_xs'		    => sub { $mode = "json_xs" },
+     $have_toml ? ( toml => sub { $mode = "toml" } ) : (),
+     $have_yaml ? ( yaml => sub { $mode = "yaml" } ) : (),
      'dump'		    => sub { $mode = "dump"    },
      'dumper'		    => sub { $mode = "dumper"  },
      'execute|e'	    => \$execute,
@@ -332,8 +367,16 @@ Usage: $0 [options] [file ...]
   Output modes
    --rrjson		pretty printed RRJSON output (default)
    --rjson		pretty printed RJSON output
-   --json		JSON output (default)
+   --json		JSON output
    --json_xs		JSON_XS output
+EndOfUsage
+    print STDERR <<EndOfUsage if $have_yaml;
+   --yaml		YAML output
+EndOfUsage
+    print STDERR <<EndOfUsage if $have_toml;
+   --toml		TOML output
+EndOfUsage
+    print STDERR <<EndOfUsage;
    --no-pretty		compact (non-pretty) output
    --order		retain order of hash keys
    --dump		dump structure (Data::Printer)
