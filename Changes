@@ -15,8 +15,8 @@
       of files that the 'classic' GUI suffers from.
       Thanks Nick!
 
-    - (Experimental) ChordPro will try to substitute some TrueType
-      font files for the corefonts.
+    - ChordPro bundles free replacement fonts to be used instead of
+      the corefonts. No configs or settings needed.
 
     !Functionality
     - (PDF, page sort) Use sorttitle for page sorting.

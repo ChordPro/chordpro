@@ -171,6 +171,7 @@ t/144_chords.t
 t/150_fonts.t
 t/151_fonts.t
 t/152_fonts.t
+t/153_fonts.t
 t/15_subst.t
 t/160_diagrams.t
 t/161_titles.t
