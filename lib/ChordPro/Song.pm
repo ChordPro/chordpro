@@ -1286,7 +1286,7 @@ sub directive {
 			    value =>  [ @$grid_arg, $shape ] );
 		push( @labels, $shape );
 	    }
-	    if ( $kv->{label} ne "" ) {
+	    if ( ($kv->{label}//"") ne "" ) {
 		$self->add( type  => "set",
 			    name  => "label",
 			    value => $kv->{label} );

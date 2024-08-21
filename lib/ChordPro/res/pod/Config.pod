@@ -556,6 +556,9 @@
         // or "below" the last song line.
         show : bottom
     
+        // "top" and "bottom" can be aligned "left", "center", "right".
+        align : left
+    
         // Width of each diagram cell.
         width : 6
     
@@ -597,6 +600,9 @@
         // "top", "bottom" or "right" side of the first page,
         // or "below" the last song line.
         show : bottom
+    
+        // "top" and "bottom" can be aligned "left", "center", "right".
+        align : left
     
         // Width of a single (white) key.
         width : 4

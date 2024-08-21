@@ -34,6 +34,8 @@
     - Upgrade Text::Layout to 0.038.
     - Allow fret -1 in {define}, and 'x' in json config for consistency.
     - Allow pdf.fonts.foo: bar (short for pdf.fonts.foo { description: bar }).
+    - Allow label="..." for {chorus} and {grid}.
+    - Add align property for diagram display.
 
     !Bug fixes
     - Fix/update docker build.

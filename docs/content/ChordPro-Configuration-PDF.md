@@ -215,8 +215,11 @@ Traditionally, the `{titles}` directive was used to control titles flush. ChordP
 ## Chord diagrams
 
 Chord diagrams are added to the song to show the chords used in the
-song. By default the diagrams are at the end of the song but it is
-also possible to have them at the bottom, or in a side column on the first page of the
+song.
+
+By default the diagrams are at the bottom of the first page,
+but it is also possible to have them at the top, following the song,
+or in a side column on the first page of the
 song. See [Chords diagrams in a side column]({{< relref "#chords-in-a-side-column" >}}) below.
 
 A chord diagram consists of a number of cells. Cell dimensions are specified by `width` and `height`.  
@@ -231,19 +234,20 @@ The vertical distance between lines of diagrams is `vspace` times the cell heigh
 If the chord definition has info for finger settings, these will be
 shown if `fingers` is true.
 
-        "diagrams" : {
-          "show"     :  "bottom",
-          "width"    :  6,      // of a cell
-          "height"   :  6,      // of a cell
-          "vcells"   :  4,      // vertically
-          "linewidth" : 0.1,    // of a cell width
-          "nutwidth" :  5,      // linewidth
-          "hspace"   :  3.95,   // fraction of width
-          "vspace"   :  3,      // fraction of height
-          "dotsize"  :  0.8,    // of a cell
-          "barwidth" :  0.8,    // of a dot
-          "fingers"  :  true,   // show fingering if available (or "below")
-        },
+	diagrams {
+	  show     :  bottom, // or top, right, below, false
+	  align    :  left,   // or right, center, spread
+	  width    :  6,      // of a cell
+	  height   :  6,      // of a cell
+	  vcells   :  4,      // vertically
+	  linewidth : 0.1,    // of a cell width
+	  nutwidth :  5,      // linewidth
+	  hspace   :  3.95,   // horizontal space between, fraction of width
+	  vspace   :  3,      // verticalal space between, fraction of height
+	  dotsize  :  0.8,    // of a cell
+	  barwidth :  0.8,    // of a dot
+	  fingers  :  true,   // show fingering if available (or "below")
+	},
 
 With the above settings, chord diagrams will look like:
 
@@ -254,6 +258,8 @@ separate column at the right of the lyrics instead of at the end of
 the song.
 
 {{< showpage "style_modern3" >}}
+
+The `align` property is ignored for `show:right`.
 
 Note that command line option `--lyricsonly` implies `"show":false`
 for diagrams.
@@ -287,23 +293,26 @@ Finally, the colour to represent keys that are part of the chord
 (pressed) can be specified with `pressed`. It takes the name of a
 colour, or a hex format `#RRGGBB`.
 
-        "kbdiagrams" : {
-            "show"     :  "bottom",   // or "top", or "right", or "below"
-            "width"    :   4,   // of a single key
-            "height"   :  20,   // of the diagram
-            "keys"     :  14,   // or 7, 10, 14, 17, 21
-            "base"     :  "C",  // or "F"
-            "linewidth" : 0.1,  // fraction of a single key width
-            "pressed"  :  "foreground-medium",   // colour of a pressed key
-            "hspace"   :  3.95, // ??
-            "vspace"   :  0.3,  // fraction of height
-        },
+	kbdiagrams {
+	  show     :  bottom, // or top, right, below, false
+	  align    :  left,   // or right, center, spread
+	  width    :   4,     // of a single key
+	  height   :  20,     // of the diagram
+	  keys     :  14,     // or 7, 10, 14, 17, 21
+	  base     :  "C",    // or "F"
+	  linewidth : 0.1,    // fraction of a single key width
+	  pressed  :  foreground-medium,   // colour of a pressed key
+	  hspace   :  3.95,   // horizontal space between, fraction of width
+	  vspace   :  0.3,    // verticalal space between, fraction of height
+	},
 
 With the above settings, keyboard diagrams will look like:
 
 ![]({{< asset "images/ex_kbdiagram.png" >}})
 
-Note that command line option `--lyricsonly` implies `"show":false`
+The `align` property is ignored for `show:right`.
+
+Note that command line option `--lyricsonly` implies `show:false`
 for diagrams.
 
 ## Grid lines

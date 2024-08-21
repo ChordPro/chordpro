@@ -1040,6 +1040,12 @@
 		  "enum" : [ "top", "right", "below", "bottom" ],
 		  "type" : "string"
 		},
+		"align" : {
+		  "description" : "Alignment for \"top\", \"bottom\" and \"below\".\nPossible values are \"left\" (default), \"right\", \"center\" and \"spread\".",
+		  "default" : "left",
+		  "enum" : [ "left", "right", "center", "spread" ],
+		  "type" : "string"
+		},
 		"height" : {
 		  "description" : "Height of each diagram cell.",
 		  "default" : 6,
@@ -1532,6 +1538,12 @@
 		  "description" : "Diagrams for all chords of the song can be shown at the\n\"top\", \"bottom\" or \"right\" side of the first page,\nor \"below\" the last song line.",
 		  "default" : "bottom",
 		  "enum" : [ "top", "right", "below", "bottom" ],
+		  "type" : "string"
+		},
+		"align" : {
+		  "description" : "Alignment for \"top\", \"bottom\" and \"below\".\nPossible values are \"left\" (default), \"right\", \"center\" and \"spread\".",
+		  "default" : "left",
+		  "enum" : [ "left", "right", "center", "spread" ],
 		  "type" : "string"
 		},
 		"height" : {

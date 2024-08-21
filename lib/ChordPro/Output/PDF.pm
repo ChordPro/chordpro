@@ -801,54 +801,43 @@ sub generate_song {
 		$y -= $vsp;
 	    }
 	}
-	elsif ( $show eq "top" && $class <= 1 ) {
+	elsif ( ( $show eq "top" || $show eq "bottom" )
+		&& $class <= 1 && $col == 0) {
 
-	    my $ww = ( $ps->{_marginright} - $ps->{_marginleft} );
+	    my $ww = $ps->{_marginright} - $ps->{_marginleft};
+
+	    my $dwidth = $dd->hsp0(undef,$ps); # diag
+	    my $dadv   = $dd->hsp1(undef,$ps); # adv
+	    my $hsp    = $dwidth + $dadv;      # diag + adv
+	    my $vsp    = $dd->vsp( undef, $ps );
 
 	    # Number of diagrams, based on minimal required interspace.
-	    my $h = int( ( $ww
-			   # Add one interspace (cuts off right)
-			   + $dd->hsp1(undef,$ps) )
-			 / $dd->hsp(undef,$ps) );
+	    # Add one interspace (cuts off right)
+	    my $h = int( ( $ww + $dadv ) / $hsp );
 	    die("ASSERT: $h should be greater than 0") unless $h > 0;
 
-	    my $hsp = $dd->hsp(undef,$ps);
-	    my $vsp = $dd->vsp( undef, $ps );
-	    while ( @chords ) {
-		my $x = $x - $ps->{_indent};
-
-		for ( 0..$h-1 ) {
-		    last unless @chords;
-		    $dd->draw( shift(@chords), $x + $_*$hsp, $y, $ps );
-		}
-
-		$y -= $vsp;
+	    my $y = $y;
+	    if ( $show eq "bottom" ) {
+		$y = $ps->{marginbottom} + (int((@chords-1)/$h) + 1) * $vsp;
+		$ps->{_bottommargin} = $y;
+		$y -= $dd->vsp1( undef, $ps ); # advance height
 	    }
-	    $ps->{_top} = $y;
-	}
-	elsif ( $show eq "bottom" && $class <= 1 && $col == 0 ) {
 
-	    my $ww = ( $ps->{_marginright} - $ps->{_marginleft} );
-
-	    # Number of diagrams, based on minimal required interspace.
-	    my $h = int( ( $ww
-			   # Add one interspace (cuts off right)
-			   + $dd->hsp1(undef,$ps) )
-			 / $dd->hsp(undef,$ps) );
-	    die("ASSERT: $h should be greater than 0") unless $h > 0;
-
-	    my $vsp = $dd->vsp( undef, $ps );
-	    my $hsp = $dd->hsp( undef, $ps );
-
-	    my $y = $ps->{marginbottom} + (int((@chords-1)/$h) + 1) * $vsp;
-	    $ps->{_bottommargin} = $y;
-
-	    $y -= $dd->vsp1( undef, $ps ); # advance height
-
+	    my $h0 = $h;
 	    while ( @chords ) {
 		my $x = $x - $ps->{_indent};
 		$checkspace->($vsp);
 		$pr->show_vpos( $y, 0 ) if $config->{debug}->{spacing};
+
+		if ( $dctl->{align} eq 'spread' && @chords == $h0  ) {
+		    my $delta = $ww + $dadv - min( $h0, 0+@chords ) * $hsp;
+		    $dadv = $dd->hsp1(undef,$ps) + $delta / ($h0-1);
+		}
+		elsif ( $dctl->{align} =~ /center|right|spread/ ) {
+		    my $delta = $ww + $dadv - min( $h0, 0+@chords ) * $hsp;
+		    $delta /= 2 if $dctl->{align} ne 'right';
+		    $x += $delta;
+		}
 
 		for ( 1..$h ) {
 		    last unless @chords;
@@ -859,18 +848,35 @@ sub generate_song {
 		$y -= $vsp;
 		$pr->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
 	    }
+	    $ps->{_top} = $y if $show eq "top";
 	}
 	elsif ( $show eq "below" ) {
 
-	    my $vsp = $dd->vsp( undef, $ps );
-	    my $hsp = $dd->hsp( undef, $ps );
-	    my $h = int( ( $ps->{__rightmargin}
-			   - $ps->{__leftmargin}
-			   + $dd->hsp1( undef, $ps ) ) / $hsp );
+	    my $ww = $ps->{__rightmargin} - $ps->{__leftmargin};
+
+	    my $dwidth = $dd->hsp0(undef,$ps); # diag
+	    my $dadv   = $dd->hsp1(undef,$ps); # adv
+	    my $hsp    = $dwidth + $dadv;      # diag + adv
+	    my $vsp    = $dd->vsp( undef, $ps );
+
+	    my $h = int( ( $ww + $dadv ) / $hsp );
+	    die("ASSERT: $h should be greater than 0") unless $h > 0;
+
+	    my $h0 = $h;
 	    while ( @chords ) {
-		$checkspace->($vsp);
+		$checkspace->( $dd->vsp0( undef, $ps ) );
 		my $x = $x - $ps->{_indent};
 		$pr->show_vpos( $y, 0 ) if $config->{debug}->{spacing};
+
+		if ( $dctl->{align} eq 'spread' && @chords == $h0  ) {
+		    my $delta = $ww + $dadv - min( $h0, 0+@chords ) * $hsp;
+		    $dadv = $dd->hsp1(undef,$ps) + $delta / ($h0-1);
+		}
+		elsif ( $dctl->{align} =~ /center|right|spread/ ) {
+		    my $delta = $ww + $dadv - min( $h0, 0+@chords ) * $hsp;
+		    $delta /= 2 if $dctl->{align} ne 'right';
+		    $x += $delta;
+		}
 
 		for ( 1..$h ) {
 		    last unless @chords;
@@ -882,6 +888,7 @@ sub generate_song {
 		$pr->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
 	    }
 	}
+	$y = $ps->{_top} if $ps->{_top};
     };
 
     my @elts;
