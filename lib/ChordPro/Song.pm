@@ -1256,17 +1256,23 @@ sub directive {
 	@chorus = (), $chorus_xpose = $chorus_xpose_dir = 0
 	  if $in_context eq "chorus";
 	if ( $in_context eq "grid" ) {
-	    if ( $arg eq "" ) {
+	    my $kv;
+	    my $shape = $arg;
+	    if ( $arg =~ /\w+="/ ) {
+		$kv = parse_kv($arg);
+		$shape = $kv->{shape};
+	    }
+	    if ( $shape eq "" ) {
 		$self->add( type => "set",
 			    name => "gridparams",
 			    value => $grid_arg );
 	    }
-	    elsif ( $arg =~ m/^
+	    elsif ( $shape =~ m/^
 			      (?: (\d+) \+)?
 			      (\d+) (?: x (\d+) )?
 			      (?:\+ (\d+) )?
 			      (?:[:\s+] (.*)? )? $/x ) {
-		do_warn("Invalid grid params: $arg (must be non-zero)"), return
+		do_warn("Invalid grid params: $shape (must be non-zero)"), return
 		  unless $2;
 		$grid_arg = [ $2, $3//1, $1//0, $4//0 ];
 		$self->add( type => "set",
@@ -1274,11 +1280,17 @@ sub directive {
 			    value =>  [ @$grid_arg, $5||"" ] );
 		push( @labels, $5 ) if length($5||"");
 	    }
-	    elsif ( $arg ne "" ) {
+	    elsif ( $shape ne "" ) {
 		$self->add( type => "set",
 			    name => "gridparams",
-			    value =>  [ @$grid_arg, $arg ] );
-		push( @labels, $arg );
+			    value =>  [ @$grid_arg, $shape ] );
+		push( @labels, $shape );
+	    }
+	    if ( $kv->{label} ne "" ) {
+		$self->add( type  => "set",
+			    name  => "label",
+			    value => $kv->{label} );
+		push( @labels, $kv->{label} );
 	    }
 	    $grid_cells = [ $grid_arg->[0] * $grid_arg->[1],
 			    $grid_arg->[2],  $grid_arg->[3] ];
@@ -1416,18 +1428,24 @@ sub dir_chorus {
     my $chorus = @chorus ? dclone(\@chorus) : [];
 
     if ( @$chorus && $arg && $arg ne "" ) {
+	my $label = $arg;
+	my $kv;
+	if ( $arg =~ /\w+="/ ) {
+	    $kv = parse_kv($arg);
+	    $label = $kv->{label};
+	}
 	if ( $chorus->[0]->{type} eq "set" && $chorus->[0]->{name} eq "label" ) {
-	    $chorus->[0]->{value} = $arg;
+	    $chorus->[0]->{value} = $label;
 	}
 	else {
 	    unshift( @$chorus,
 		     { type => "set",
 		       name => "label",
-		       value => $arg,
+		       value => $label,
 		       context => "chorus",
 		     } );
 	}
-	push( @labels, $arg )
+	push( @labels, $label )
 	  if $config->{settings}->{choruslabels};
     }
 
