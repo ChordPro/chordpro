@@ -5,11 +5,20 @@ description: "Directives: start_of_grid"
 
 # Directives: start_of_grid
 
-This directive indicates that the lines that follow define a chord grid in the style of [Jazz Grilles](https://fr.wikipedia.org/wiki/Grille_harmonique).
+Abbreviation: `sog`.
 
-Note: Grids must not be confused with _chord diagrams_ that, unfortunately, in some parts of the documentation and implementation also are referred to as ‘chord grids’.
+This directive indicates that the lines that follow define a chord
+grid in the style of [Jazz
+Grilles](https://fr.wikipedia.org/wiki/Grille_harmonique).
 
-In a grid only chords are used, no lyrics, and the chords are arranged in a rectangular pattern for a quick view on the structure of the song. Symbols for bar lines and repeats can also be included in a grid. The chords are subject to transposition.
+Note: Grids must not be confused with _chord diagrams_ that,
+unfortunately, in some parts of the documentation and implementation
+also are referred to as ‘chord grids’.
+
+In a grid only chords are used, no lyrics, and the chords are arranged
+in a rectangular pattern for a quick view on the structure of the
+song. Symbols for bar lines and repeats can also be included in a
+grid. The chords are subject to transposition.
 
 For example, to create a grid for ‘The House of the Rising Sun’:
 
@@ -24,31 +33,44 @@ The result could look like:
 
 ![]({{< asset "images/ex_grid1.png" >}})
 
-The grid consists of a number of cells that can contain chords.
-The desired number of cells per line can be specified as an argument to the `start_of_grid` directive:
+The grid consists of a number of cells that can contain chords. The
+desired number of cells per line can be specified as a `shape`
+property to the `start_of_grid` directive:
 
-`{start_of_grid` _cells_ `}`  
-`{start_of_grid` _measures_ `x` _beats_ `}`
+`{start_of_grid: shape="`_cells_`"}`  
+`{start_of_grid: shape="`_measures_`x`_beats_`"}`
 
-There is no semantic difference between the two forms, just pick the one that is most convenient.
+There is no semantic difference between the two forms, just pick the
+one that is most convenient.
 
-It is possible to specify room for margin notes, both left side and right side, by adding the desired number of cells as follows:
+_For legacy purposes you can leave out the `shape` property and just
+include the shape, optionally followed by label text:_
 
-`{start_of_grid` _left_ `+` _cells_ `+` _right_ `}`  
-`{start_of_grid` _left_ `+` _measures_ `x` _beats_ `+` _right_ `}`
+`{start_of_grid:` _cells_`}`  
+`{start_of_grid:` _measures_`x`_beats_`}`
+
+_However, in this form you cannot use other properties._
+
+It is possible to specify room for margin notes, both left side and
+right side, by adding the desired number of cells in the shape:
+
+_left_`+`_cells_`+`_right_  
+_left_`+`_measures_`x`_beats_`+`_right_
 
 Both margins are optional and may be omitted together with their `+` symbols.
 
-If no argument is supplied to `start_of_grid` then the values from the
+If no shape is supplied to `start_of_grid` then the values from the
 preceding grid, if any, are used. If the first `start_of_grid` does
-not have an argument, a default value `1+4x4+1` is used. The
-specification may be followed by label text.
+not have a shape, a default value `1+4x4+1` is used.
 
-The grid input lines consist of space-separated tokens, which are either valid chords or special symbols. Spaces are not significant but can be used e.g. to align chords in the input lines. 
+The grid input lines consist of space-separated tokens, which are
+either valid chords or special symbols. Spaces are not significant but
+can be used e.g. to align chords in the input lines.
 
 Chords are put into the cells. If a cell does not need to contain a
 chord, the placeholder `.` (period) can be used to designate an empty
 cell.
+
 Alternatively, a slash `/` can be used to designate that a
 chord must be played here.
 Multiple chords can be put in a single cell by separating the chord
@@ -80,7 +102,7 @@ Other symbols that can be used:
 
 Example:
 
-    {start_of_grid 1+4x2+4}
+    {start_of_grid: shape="1+4x2+4"}
     A    || G7 . | % . | %% . | . . |
          | C7 . | %  . || G7 . | % . ||
          |: C7 . | %  . :|: G7 . | % . :| repeat 4 times
@@ -96,11 +118,13 @@ See [PDF configuration - grid lines]({{< relref "chordpro-configuration-pdf/#gri
 This directive may include an optional label, to be printed in the
 left margin. For example:,
 
-    {start_of_grid: Intro}
+    {start_of_grid: label="Intro"}
 
 The ChordPro reference implementation prints the label in the left
 margin, see [labels]({{< relref "ChordPro-Configuration-PDF#labels" >}}).
 
 # Directives: end_of_grid
+
+Abbreviation: `eog`.
 
 This directive indicates the end of the grid.
