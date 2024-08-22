@@ -50,6 +50,6 @@ eval {
 ++$test; use_ok( "List::Util", 1.33 );
 ++$test; use_ok( "Storable", 3.08 );
 ++$test; use_ok( "Object::Pad", 0.78 );
-++$test; use_ok( "JavaScript::QuickJS", 0.21 );
+++$test; use_ok( "JavaScript::QuickJS", 0.18 );
 
 done_testing($test);
