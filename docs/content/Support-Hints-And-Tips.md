@@ -14,15 +14,15 @@ to replace `\u{`_XXXX_`}` (with an arbitrary number of hex digits)
 by the corresponding unicode character.
 
 ````
-{ "parser" : {
-    "preprocess" : {
-      "all" : [
-        { "pattern" : "\\\\u\\{([0-9a-f]+)\\}",
-          "replace" : "chr(hex(\"0x$1\"))",
-          "flags"   : "gie"
-        }
-      ]
-} } }
+parser {
+  preprocess {
+    all : [
+      { pattern : "\\\\u\\{([0-9a-f]+)\\}"
+        replace : "chr(hex(\"0x$1\"))"
+        flags   : "gie"
+      }
+    ]
+} }
 ````
 
 
@@ -34,17 +34,19 @@ You need two modifications to achieve this.
 First off, set some config keys:
 
 ````
-pdf.chorus.indent=0
-pdf.chorus.bar.width=0
-pdf.chorus.recall.quote=1
-pdf.chorus.recall.choruslike=1
+pdf.chorus {
+  indent: 0
+  bar.width: 0
+  recall.quote: true
+  recall.choruslike: true
+}
 ````
 
 Secondly, wrap the chorus in `textfont` directives:
 
 ````
 {soc}
-{textfont Times-Bold}
+{textfont serif bold}
 [E]Dreaming, [A]Dreaming, [B]Just go on
 [E]Dreaming, [A]Dreaming, [B]Just go on
 {textfont}
@@ -62,9 +64,9 @@ being higher above the lyrics.
 You can adjust the chord spacing in the PDF config:
 
 ````
-{ "pdf" :
-  { "spacing" :
-    { "chords" : 1.2,
+pdf {
+  spacing {
+    chords : 1.2
 	...
 ````
 
@@ -78,18 +80,16 @@ You can use the following preprocessor directive
 to suffix chords with an instrument name
 and thus generate versions of different difficulty or specificity.
 ````
-{
-  // Settings for the parser/preprocessor.
-  // Replaces all instrument-specific chords with conditional directives
-  "parser" : {
-    "preprocess" : {
-      "songline" : [
-        { "pattern" : "\\[([^-\\]]+)-(\\w+)\\]",
-          "replace" : "%{instrument=$2|[$1]}"
-        }
-      ],
-    },
-  },
+// Settings for the parser/preprocessor.
+// Replaces all instrument-specific chords with conditional directives
+parser {
+  preprocess {
+    songline : [
+      { pattern : "\\[([^-\\]]+)-(\\w+)\\]"
+        replace : "%{instrument=$2|[$1]}"
+      }
+    ]
+  }
 }
 ````
 

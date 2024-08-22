@@ -11,7 +11,7 @@ TL;DR? See the [examples]({{< relref "#examples" >}}).
 
 ChordPro uses _fonts_ for PDF typesetting. In the config file fonts
 are specified for chords, lyrics, page titles and so on. For example, in
-the default config file in section `"pdf"` there is a section `"fonts"` that
+the default config file in section `pdf` there is a section `fonts` that
 has a specification for the page titles:
 
     title {
@@ -19,30 +19,12 @@ has a specification for the page titles:
             size : 14
     }
 
-The `"name"` designates the built-in font `"Times-Roman"`.
-Alternatively you can use `"file"` to designate a font file on your
-system, or `"description"` to find a suitable font using _font families_.
-The order of precedence is `"file"`, `"description"`, and `"name"`.
+The `name` designates the built-in font `Times-Roman`.
+Alternatively you can use `file` to designate a font file on your
+system, or `description` to find a suitable font using _font families_.
+The order of precedence is `file`, `description`, and `name`.
 
-## Method 1: Using a font filename
-
-A font filename can be specified with `"file"` and must be either an
-absolute filename, or a relative filename which is interpreted
-relative to the _font path_, which consists of [configuration
-setting]({{< relref "ChordPro-Configuration" >}}) `fontdir`, the
-`fonts` resource dir, and the contents of environment variable
-`FONTDIR`. In any case, the filename should point to a valid TrueType
-(`.ttf`) or OpenType (`.otf`) font.
-
-If the font file cannot be found, ChordPro will abort with an
-appropriate error message.
-
-If you have quality PostScript Type1 fonts (a collection of `.pfa` or
-`.pfb`, with `.afm` and/or `.pfm` files) they can easily be converted
-to TrueType or OpenType using a tool like
-[FontForge](https://fontforge.github.io/).
-
-## Method 2: Using a font description
+## Method 1: Using a font description
 
 A font description is a flexible and system independent way to select
 a font. The description is a string containing up to four identifying
@@ -65,9 +47,9 @@ The system will then try to find a font file for this font, e.g.
 not be found.
 
 Generic family names (*aliases*) can be used instead of existing family
-names. So you can use `"serif"` for a serif font, and leave it to the
-system to find an appropriate font for it. Other frequently used
-aliases are `"sans"` and `"mono"`.
+names. ChordPro predefines `serif` as a serif font family, and leave it to the
+implementation to find an appropriate font for it. Other predefined
+families are `sans` and `mono`.
 
 ### Why is using font descriptions important?
 
@@ -94,7 +76,8 @@ if your system does not have `fontconfig`, or when you want to
 override the system behaviour for precise control over the fonts being
 used.
 
-In the config file in section `"pdf"` there is a section `"fontconfig"` that can be used to map family names to real font files. For example:
+In the config file in section `pdf` there is a section `fontconfig`
+that can be used to map family names to real font files. For example:
 
     fontconfig {
         serif {
@@ -105,9 +88,13 @@ In the config file in section `"pdf"` there is a section `"fontconfig"` that can
       }
     }
 
-For each family name you should specify four members: a regular font (with an empty key), a bold font (key `"bold"`), an italic font (key `"italic"`), and a bold-italic font.
+For each family name you should specify four members: a regular font
+(with an empty key), a bold font (key `bold`), an italic font (key
+`italic`), and a bold-italic font (key `bolditalic`). Note that
+ChordPro uses `italic`, even if the font itself uses `oblique`.
 
-This is the short story. The longer story is that instead of a file name you can specify another set of key/value pairs, for example:
+This is the short story. The longer story is that instead of a file
+name you can specify another set of key/value pairs, for example:
 
     fontconfig {
         devanagari {
@@ -124,6 +111,24 @@ the perl module `HarfBuzz::Shaper` to be installed on the system.
 
 _Exact semantics of font properties are still under development._
 
+## Method 2: Using a font filename
+
+A font filename can be specified with `filed"` and must be either an
+absolute filename, or a relative filename which is interpreted
+relative to the _font path_, which consists of [configuration
+setting]({{< relref "ChordPro-Configuration" >}}) `fontdir`, the
+`fonts` resource dir, and the contents of environment variable
+`FONTDIR`. In any case, the filename should point to a valid TrueType
+(`.ttf`) or OpenType (`.otf`) font.
+
+If the font file cannot be found, ChordPro will abort with an
+appropriate error message.
+
+If you have quality PostScript Type1 fonts (a collection of `.pfa` or
+`.pfb`, with `.afm` and/or `.pfm` files) they can easily be converted
+to TrueType or OpenType using a tool like
+[FontForge](https://fontforge.github.io/).
+
 ## Method 3: Using a built-in font
 
 Built-in fonts are specified with `"name"`. The ChordPro Reference
@@ -135,19 +140,21 @@ Implementation supports the following built-in font names:
 * Symbol, Webdings, Wingdings, ZapfDingbats
 
 **Note** that using built-in font names has some disadvantages. The
-fonts have only a limited number of characters (glyphs) and may not be
-suitable for anything but English and Western European languages. The
-quality of the output is less, since the built-in fonts do not support
-kerning. Since real versions of these fonts are [easily
-available](http://mscorefonts2.sourceforge.net/), if not already
-installed, it is **strongly advised** to not use built-in fonts unless
-you can deal with the limitations.
+built-in fonts have only a limited number of characters (glyphs) and
+may not be suitable for anything but English and Western European
+languages. The quality of the output is less, since the built-in fonts
+do not support kerning.
+
+ChordPro comes with a set of replacements for these fonts that it will
+use instead of the built-in fonts. Nevertheless it is still better to
+use the description method described above.
 
 # Examples
 
-Note that the examples only show the `"fontconfig"` and `"fonts"`
-parts. These should be part of the `"pdf"` config as explained in 
-[Configuration for PDF output](http://phoenix.squirrel.nl:1313/chordpro-configuration-pdf/).
+Note that the examples only show the `fontconfig` and `fonts` parts.
+These should be part of the `pdf` config as explained in
+[Configuration for PDF
+output](http://phoenix.squirrel.nl:1313/chordpro-configuration-pdf/).
 
 Each example consists of two parts: the mapping of font families, 
 and associating output elements to font families. The latter part is
@@ -207,6 +214,9 @@ and associating output elements to font families. The latter part is
 ````
 
 ## Example setup using TrueType fonts (Linux)
+
+**This example is for educational purposes. ChordPro uses the GNU Free
+fonts by default.**
 
 ````
   // Relative filenames are looked up in the fontdirs.

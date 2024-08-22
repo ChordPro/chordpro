@@ -562,7 +562,7 @@ The following printable items can have fonts associated.
 
 * `title`  
 The font used for page titles.  
-Default is "Times-Bold" at size 14.
+Default is "serif bold 14".
 * `subtitle`  
 The font used for page subtitles.  
 Default is the setting for `text`.
@@ -570,33 +570,33 @@ Default is the setting for `text`.
 Default is the setting for `subtitle` at 60% size.
 * `text`  
 The font used for lyrics texts.  
-Default is "Times-Roman" at size 12.
+Default is "serif 12".
 * `chorus`  
 The font used for chorus texts.  
 Default is the setting for `text`.
 * `chord`  
 The font used for chords above the lyrics.  
-Default is "Helvetica-Oblique" at size 10.
+Default is "sans italic 10".
 * `annotation`  
 The font used for annotations.  
 Defaults to the `chord` font.
 * `comment`  
 The font used for comments.  
-Default is "Helvetica" at size 12, with a grey background.
+Default is "sans 12", with a grey background.
 * `comment_italic`  
-Default is "HelveticaOblique" at size 12, with a grey background.
+Default is "sans italic 12", with a grey background.
 * `comment_boxed`  
-Default is "Helvetica" at size 12, with a frame.
+Default is "sans 12", with a frame.
 * `tab`  
 The font used for the contents of
 [tab environments]({{< relref "Directives-env_tab" >}}).  
-Default is "Courier" at size 10.
+Default is "mono 10".
 * `label`  
 The font used for section labels.  
 Default is the setting for `text`.
 * `toc`  
 The font used for the table of contents.  
-Default is "Times-Roman" at size 11.
+Default is "serif 11".
 * `grid`  
 The font used for grid elements.  
 Default is the setting for `chord`.
