@@ -848,7 +848,7 @@ sub embed {
 
     # The config.
     $a = $self->{pdfpage}->annotation();
-    $a->text( ChordPro::Config::config_final(0),
+    $a->text( ChordPro::Config::config_final(),
 	      -open => 0, -rect => [0,0,-1,-1]);
     $a->{T} = PDFStr("ChordProConfig");
     $a->{F} = PDFNum(2);		# hidden

@@ -962,13 +962,8 @@ sub app_setup {
     # warn(::dump($options), "\n") if $options->{debug};
 
     if ( $defcfg || $fincfg || $deltacfg ) {
-
-	if ( $defcfg ) {
-	    my $config = CP->findres( "chordpro.json", class => "config" );
-	    print loadlines( $config, { split => 0 } );
-	}
-	print ChordPro::Config::config_final($deltacfg)
-	  if $fincfg || $deltacfg;
+	print ChordPro::Config::config_final( default => $defcfg,
+					      delta   => $deltacfg );
 	exit 0;
     }
 

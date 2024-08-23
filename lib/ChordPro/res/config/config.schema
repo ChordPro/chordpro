@@ -501,6 +501,7 @@
     "contents" : {
       "description" : "Tables of contents.\nAn array of hashes each describing one table of contents.",
       "type" : "array",
+      "keyorder" : "fields label line omit template fold",
       "items" : {
         "additionalProperties" : false,
         "properties" : {
@@ -512,11 +513,6 @@
               "minimum" : 1
             }
           },
-          "fold" : {
-            "description" : "For future use.",
-            "type" : "boolean",
-            "default" : false
-          },
           "label" : {
             "description" : "The label (title) for this toc.",
             "type" : "string",
@@ -526,15 +522,20 @@
             "description" : "The format for the toc lines.",
             "type" : "string"
           },
-          "omit" : {
-            "description" : "Omit this toc.",
-            "type" : "boolean",
-            "default" : false
-          },
           "pageno" : {
             "description" : "The format for the page numbers in the toc.",
             "type" : "string",
             "default" : "%{page}"
+          },
+          "fold" : {
+            "description" : "For future use.",
+            "type" : "boolean",
+            "default" : false
+          },
+          "omit" : {
+            "description" : "Omit this toc.",
+            "type" : "boolean",
+            "default" : false
           },
           "template" : {
             "description" : "Template song for the toc.",

@@ -56,6 +56,7 @@
     - Fix problem with /~ in grid.
     - Upgrade to abc2svg fca05cd348 to fix problem with grid widths.
     - Fix problem with TextBlock not correctly using desired spacing.
+    - Fixed --print-{default,final,delta}-config.
 
 !Internal
     - New function to deal with property settings for the config.
