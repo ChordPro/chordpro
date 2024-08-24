@@ -23,3 +23,10 @@ dev ::
 
 clean ::
 	rm -f Dockerfile.tmp chordpro-dev.tar.gz *~
+
+# publish:
+#
+# docker tag chordpro/chordpro:latest chordpro/chordpro:v6.060.0
+# docker push chordpro/chordpro:v6.060.0
+# docker push chordpro/chordpro:latest
+
