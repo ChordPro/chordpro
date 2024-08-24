@@ -7,7 +7,7 @@ use utf8;
 
 class  SVGPDF;
 
-our $VERSION = '0.083';
+our $VERSION = '0.087';
 
 =head1 NAME
 
@@ -56,12 +56,12 @@ C<width="96"> means 96px (pixels) and is equal to 72pt (points) or 1in (inch).
 For font sizes, CSS defines C<em> to be equal to the font size, and
 C<ex> is half of the font size.
 
-=head1 CONSTRUCTOR
+=head1 CONSTRUCTORS
+
+=head2 SVGPDF->new($pdf)
 
 In its most simple form, a new SVGPDF object can be created with a
 single argument, the PDF document.
-
-     $svg = SVGPDF->new($pdf);
 
 There are a few optional arguments, these can be specified as
 key/value pairs.
@@ -205,8 +205,8 @@ sub BUILDARGS ( @args ) {
 }
 
 BUILD {
-    $verbose      = $atts->{verbose}      // 1;
     $debug        = $atts->{debug}        || 0;
+    $verbose      = $atts->{verbose}      // $debug;
     $grid         = $atts->{grid}         || 0;
     $prog         = $atts->{prog}         || 0;
     $debug_styles = $atts->{debug_styles} || $debug > 1;
@@ -472,7 +472,7 @@ method handle_svg ( $e ) {
 	    $self->_dbg("valign: ", $style->{'vertical-align'}, " ",
 			"\$vb[1] -> $vb[1]");
 	}
-	$vbox = "@vb (inferred)";
+	$vbox = sprintf("%.2f %.2f %.2f %.2f (inferred)", @vb);
     }
 
     $svg->nfi("disproportional vbox/width/height")
@@ -488,9 +488,11 @@ method handle_svg ( $e ) {
     $xo->bbox(@bb);
 
     if ( my $c = $style->{"background-color"} ) {
-	$xo->fill_color($c);
-	$xo->rectangle(@bb);
-	$xo->fill;
+	if ( $c ne "none" ) {
+	    $xo->fill_color($c);
+	    $xo->rectangle(@bb);
+	    $xo->fill;
+	}
     }
 
     # Set up result forms.
@@ -741,7 +743,7 @@ An SVG document on disk, specified as the name of the document.
 
 =item *
 
-A file handle, openened on a SVG document, specified as a glob
+A file handle, opened on a SVG document, specified as a glob
 reference. You can use C<\*DATA> to append the SVG data after a
 C<__DATA__> separator at the end of the program.
 
@@ -768,6 +770,10 @@ The viewBox as specified in the SVG element.
 
 If no viewBox is specified it is set to C<0 0> I<W H>, where I<W> and
 I<H> are the width and the height.
+
+=item C<bbox>
+
+Same as the C<vbox>, but using bottom-left and top-right coordinates.
 
 =item C<width>
 
@@ -809,26 +815,43 @@ match is found, it is resolved and the font is set. If there is no
 appropriate CSS rule for this font, the callback is called with the
 following arguments:
 
-    ( $self, $pdf, $style )
+    ( $self, %args )
 
-where C<$pdf> is de PDF document and C<$style> a hash reference that
-contains values for C<font-family>, C<font-style>, C<font-weight>, and
-C<font-size>. Don't touch C<$self>, it is undocumented for a reason.
+where C<%args> contains at least:
 
-The callback function can use the contents of C<$style> to select an
-appropriate font and return it.
+=over
+
+=item pdf
+
+A reference to the current PDF document.
+
+=item style
+
+A hash reference that contains values for C<font-family>,
+C<font-style>, C<font-weight>, and C<font-size>.
+
+=back
+
+Do not touch C<$self>, it is undocumented for a reason.
+
+The callback function can use the contents of C<< $args->{style} >> to
+select an appropriate font and return it.
 
 SVGPDF will try to call the font handler callback only once for each
 combination of family, style and weight. If the callback function
 returns a 'false' result SVGPDF will try other alternatives to find a
 font.
 
-Example of an (extremely simplified) callback:
+Example of an (extremely simplified) callback.
+It yields the corefont Helvetica when the requested font-family is
+C<sans>, and Times-Roman for everything else. Styles and weights are
+ignored.
 
     sub simple_font_handler {
-        my ( $self, $pdf, $style ) = @_;
+        my ( $self, %args ) = @_;
+        my $pdf = $args->{pdf};
 
-	my $family = $style->{'font-family'};
+	my $family = $args->{style}->{'font-family'};
 
 	my $font;
 	if ( $family eq 'sans' ) {
@@ -841,7 +864,7 @@ Example of an (extremely simplified) callback:
         return $font;
     }
 
-If no callback function is set, SVGPDF will recognize the standard
+If no callback function is set, SVGPDF will recognize the 14 standard
 PDF corefonts, and aliases C<serif>, C<sans> and C<mono>.
 
 B<IMPORTANT: With the standard corefonts only characters of the
@@ -883,7 +906,7 @@ line,
 path,
 polygon,
 polyline,
-rect (no rounded corners),
+rect,
 text and tspan (no white-space styles).
 
 =item *
@@ -995,7 +1018,7 @@ L<https://github.com/sciurius/perl-SVGPDF/issues>.
 
 =head1 LICENSE
 
-Copyright (C) 2022.2023 Johan Vromans,
+Copyright (C) 2022,2024 Johan Vromans,
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided under the terms of the Simplified

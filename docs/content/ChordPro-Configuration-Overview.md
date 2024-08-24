@@ -8,56 +8,114 @@ description: "Configuration: Overview"
 The way the output is formatted and some behavioural aspects of the
 reference implementation are configurable via configuration files.
 
-ChordPro understands two variants (formats) of configuration files:
-PRP and JSON. If both variants of the same config are available, the PRP
-variant takes precedence.
+ChordPro configuration files are JSON files. However, since JSON can
+be tedious and error prone to maintain, ChordPro uses a special
+relaxed version of JSON: Really Relaxed JSON (RRJSON).
 
-[PRP](https://github.com/sciurius/perl-Data-Properties) files have
-filenames with extension `.prp` and are based on the [Java properties
-files](https://en.wikipedia.org/wiki/.properties), but with structure
-and many more extensions. They require much less typing and are much
-less prone to errors than JSON. 
-
-[JSON](http://www.json.org/) files have filenames with extension
-`.json` and can be created and modified using
-any convenient text editor. There are also several JSON editors
-available, often in the form of web services. For schema-based
-editors, the schema can be downloaded [here]({{< asset
-"pub/config60.schema" >}}).
+[RRJSON](https://github.com/sciurius/perl-Json-Relaxed) files have
+filenames with extension `.json` and can be created and modified using
+any convenient text editor.
 
 As an example, compare the variants of the following _identical_
-definitions:
+definitions. First strict JSON:
 ````
-// JSON
-"diagrams" : {
-    "auto"   :  false,
+{
+  "diagrams" : {
+    "auto"   :  true,
     "show"   :  "all",
-    "sorted" :  false,
-},
-"tuning" : [ "E2", "A2", "D3", "G3", "B3", "E4" ],
-````
-````
-# Properties
-diagrams.auto   =  false
-diagrams.show   =  all
-diagrams.sorted =  false
-tuning = [ E2 A2 D3 G3 B3 E4 ]
-````
-````
-# Properties, structured
-diagrams {
-    auto   =  false
-    show   =  all
-    sorted =  false
+    "sorted" :  false
+  },
+  "dates" : {
+    "today" : {
+      "format" : "%A, %B %e, %Y"
+    }
+  },
+  "tuning" : [ "E2", "A2", "D3", "G3", "B3", "E4" ]
 }
-tuning = [ E2 A2 D3 G3 B3 E4 ]
 ````
 
-All forms of config definitions will be used in the documentation.
+Note that there are no comments, and there may be no commas
+after `false` and the closing `]`.
+	
+````
+// Relaxed JSON
+{
+  diagrams : {
+    auto   :  false,
+    show   :  all
+    sorted :  false,
+  },
+  dates : {
+    today : {
+      format: /* for diagnostics */ "%A, %B %e, %Y"
+    },
+  },
+  tuning : [ E2 A2 D3 G3 B3 E4 ],
+}
+````
+
+Relaxed JSON has comments, doesn't require most of the quotes, and 
+doesn't care much about the commas.
+
+````
+// Really Relaxed JSON
+diagrams {
+  auto   :  false
+  show   :  all
+  sorted :  false
+}
+dates.today.format: "%A, %B %e, %Y"
+tuning : [ E2 A2 D3 G3 B3 E4 ]
+````
+
+No need for the outer braces, no need for colons before braces, and
+keys of nested data can be combined into a compact, period-separated
+format. It is not only much shorter, but also much easier to write and
+maintain.
+
+In this documentation we will preferably use RRJSON format, although
+the stricter JSON format can be still be seen in several places for
+legacy reasons.
+
+## Converting configuration files
+
+Config files in JSON, RJSON, RRJSON and PRP formats can easily be
+converted to RRJSON format:
+
+````
+chordpro --convert-config=myconf.json --output=newconf.json
+````
+
+As an additional benefit, the converted config will have comments.
+For example, this trivial config:
+````
+settings.chordnames=strict
+````
+becomes, after conversion:
+````
+// Configuration for ChordPro
+// 
+// This is a really relaxed JSON document, see
+// https://metacpan.org/pod/JSON::Relaxed#REALLY-RELAXED-EXTENSIONS
+
+// General settings, often changed by configs and command line.
+settings.chordnames : strict
+
+// End of Config.
+````
 
 ## Standard configuration files
 
-ChordPro tries to read several configuration files and combines their contents to form the actual configuration. ChordPro always starts with the built-in default configuration. Then all configuration files are processed in order, and their contents are merged into the existing configuration. So all settings accumulate. Configuration files do not need to be complete (i.e., contain all settings), it is often sufficient to only include the settings that must be changed. See for example the preset configurations [modern1]({{< asset "pub/modern1.json" >}}) and [nashville]({{< asset "pub/nashville.json" >}}), that only contains a few changes.
+ChordPro tries to read several configuration files and combines their
+contents to form the actual configuration. ChordPro always starts with
+the built-in default configuration. Then all configuration files are
+processed in order, and their contents are merged into the existing
+configuration. So all settings accumulate. Configuration files do not
+need to be complete (i.e., contain all settings), it is often
+sufficient to only include the settings that must be changed. See for
+example the preset configurations [modern1]({{< asset
+"pub/modern1.json" >}}) and [nashville]({{< asset "pub/nashville.json"
+>}}), that only contains a few changes.
 
 In the examples below the symbol `~` denotes the user's home directory. Windows users may need to change the forward slashes to backward slashes.
 
@@ -100,13 +158,22 @@ In the examples below the symbol `~` denotes the user's home directory. Windows 
 
 ## How config files are combined
 
-The config files are processed in order, and their contents are merged. In general, a config setting from a later file replaces the value from previous files. There are a few exceptions: instrument definitions, hashes and arrays.
+The config files are processed in order, and their contents are
+merged. In general, a config setting from a later file replaces the
+value from previous files. There are a few exceptions: instrument
+definitions, hashes and arrays.
 
 ### Merging instrument definitions
 
-Instrument definitions, in particular the settings `"tuning"`, `"notes"` and `"chords"`, are handled differently. These are processed immediately after parsing a configuration file and then the setting is removed from the configuration.
+Instrument definitions, in particular the settings `"tuning"`,
+`"notes"` and `"chords"`, are handled differently. These are processed
+immediately after parsing a configuration file and then the setting is
+removed from the configuration.
 
-For example, assume `"chords_italian.json"` defines a number of chords using italian (latin) note names and `"chords_german.json"` defines some chords using german note names. Then the following sequence of configuration files will work as expected:
+For example, assume `"chords_italian.json"` defines a number of chords
+using italian (latin) note names and `"chords_german.json"` defines
+some chords using german note names. Then the following sequence of
+configuration files will work as expected:
 
     notes:latin           (built-in, enable latin note names)
     chords_italian.json   (defines chords with latin note names)
@@ -156,4 +223,48 @@ the result would have been:
     { "keys" : [ "title", "subtitle", "composer" ] }
 
 Likewise, use `"prepend"` to prepend items.
+
+## How the config can be adjusted
+
+ChordPro supports two methods to make simple adjustments to the config
+at runtime.
+
+* The command line option `define`:
+
+````
+--define diagrams.auto=true
+````
+
+* The magic `{+ ...}` directive in a song:
+
+````
+{+diagrams.auto:true}
+````
+
+In either method a *key* and a *value* is specified. In the above
+examples, the key is `diagrams.auto` and the value is `true`.
+
+Note that not all config items can be adjusted this way.
+
+## Property files
+
+ChordPro also provides support for
+[PRP](https://github.com/sciurius/perl-Json-Relaxed) files.
+These were an early attempt at providing easier 
+maintainble configs.
+PRP files have a number of shortcomings, in
+particular with regard to array data.
+Although still supported, please use the newer RRJSON format instead.
+As you may have noticed this is very close to the PRP format.
+The main difference is that non-trivial strings must be quoted.
+For example, in PRP:
+
+    toc.title : Table of Contents
+    toc.line: %{line}
+	
+These must be changed to:
+
+    toc.title : "Table of Contents"
+    toc.line: "%{line}"
+
 

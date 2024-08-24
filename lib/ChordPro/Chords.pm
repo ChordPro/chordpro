@@ -55,6 +55,7 @@ my %chordorderkey; {
 # Compare routine for chord names.
 # API: Used by: Song.
 sub chordcompare {
+    ( $a, $b ) = @_ if @_;
     my ( $a0, $arest ) = $a =~ /^([A-G][b#]?)(.*)/;
     my ( $b0, $brest ) = $b =~ /^([A-G][b#]?)(.*)/;
     $a0 = $chordorderkey{$a0//"\x{ff}"}//return 0;
@@ -384,11 +385,13 @@ sub add_config_chord ( $def ) {
 	}
 	$res = $config_chords{$src};
 	return "Cannot copy $src" unless $res;
-	$def = bless { %$res, %$def } => ref($res);
 	if ( $def->{copy} ) {
-	    delete $def->{$_} for @extprops;
+	    my $r = { %$res };
+	    delete $r->{$_} for @extprops;
+	    $def = bless { %$r, %$def } => ref($res);
 	}
 	else {
+	    $def = bless { %$res, %$def } => ref($res);
 	    $def->{copy} = $def->{copyall};
 	}
     }
@@ -434,7 +437,7 @@ sub add_config_chord ( $def ) {
 	    %$def,
 	    base    => $base,
 	    baselabeloffset => $def->{baselabeloffset}||0,
-	    frets   => [ $frets && @$frets ? @$frets : () ],
+	    frets   => [ $frets && @$frets ? map { $_ eq 'x' ? -1 : $_ } @$frets : () ],
 	    fingers => [ $fingers && @$fingers ? @$fingers : () ],
 	    keys    => [ $keys && @$keys ? @$keys : () ]
 	  } => $parser->{target};

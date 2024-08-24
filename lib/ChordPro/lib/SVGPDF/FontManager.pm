@@ -7,12 +7,20 @@ use utf8;
 class SVGPDF::FontManager;
 
 use Carp;
-use List::Util qw( any uniq );
+use List::Util qw( any none uniq );
 use Text::ParseWords qw( quotewords );
 
 field $svg	:mutator :param;
 field $fc       :mutator;
 field $td       :accessor;
+
+# The 14 corefonts.
+my @corefonts =
+  qw( Courier Courier-Bold Courier-BoldOblique Courier-Oblique
+      Helvetica Helvetica-Bold Helvetica-BoldOblique Helvetica-Oblique
+      Symbol
+      Times-Bold Times-BoldItalic Times-Italic Times-Roman
+      ZapfDingbats );
 
 # Set a font according to the style.
 #
@@ -37,76 +45,109 @@ method find_font ( $style ) {
 
 	# Check against @font-faces, if any.
 	for ( @{ $style->{'@font-face'}//[] } ) {
-	    next unless $_->{'font-family'};
+	    my $fam = $_->{'font-family'};
+	    next unless $fam && lc($fam) eq $family;
 	    next unless $_->{src};
 	    next if $_->{'font-style'} && $style->{'font-style'}
 	      && $_->{'font-style'} ne $style->{'font-style'};
 	    next if $_->{'font-weight'} && $style->{'font-weight'}
 	      && $_->{'font-weight'} ne $style->{'font-weight'};
 
-	    # Matching style and weight, check against families.
-	    for my $fam ( ffsplit($_->{'font-family'}) ) {
-		$fam = lc($fam);
-		next unless $family eq $fam;
+	    $fam = lc($fam);
+	    my $key = join( "|", $fam, $stl, $weight );
+	    # Font in cache?
+	    if ( my $f = $fc->{$key} ) {
+		return ( $f->{font},
+			 $style->{'font-size'} || 12,
+			 $f->{src} );
+	    }
 
-		# Yeah! We have a match!
-		my $key = join( "|", $fam, $stl, $weight );
-		# Font in cache?
-		if ( my $f = $fc->{$key} ) {
-		    return ( $f->{font},
-			     $style->{'font-size'} || 12,
-			     $f->{src} );
+	    # Fetch font from source.
+	    my $src = $_->{src};
+	    ####TODO: Multiple sources
+	    if ( $src =~ /^\s*url\s*\((["'])((?:data|https?|file):.*?)\1\s*\)/is ) {
+		use File::LoadLines 1.044;
+		my $opts = {};
+		my $data = File::LoadLines::loadblob( $2, $opts );
+
+		# To load font data from net and data urls.
+		use File::Temp qw( tempfile tempdir );
+		use MIME::Base64 qw( decode_base64 );
+		$td //= tempdir( CLEANUP => 1 );
+
+		my $sfx;	# suffix for font file name
+		if ( $src =~ /\bformat\((["'])(.*?)\1\)/ ) {
+		    $sfx =
+		      lc($2) eq "truetype" ? ".ttf" :
+		      lc($2) eq "opentype" ? ".otf" :
+		      '';
 		}
-
-		# Fetch font from source.
-		my $src = $_->{src};
-		####TODO: Multiple sources
-		if ( $src =~ /^\s*url\s*\((["'])data:application\/octet-stream;base64,(.*?)\1\s*\)/is ) {
-
-		    my $data = $2;
-
-		    # To load font data from net and data urls.
-		    use File::Temp qw( tempfile tempdir );
-		    use MIME::Base64 qw( decode_base64 );
-		    $td //= tempdir( CLEANUP => 1 );
-
-		    my $sfx;	# suffix for font file name
-		    if ( $src =~ /\bformat\((["'])(.*?)\1\)/ ) {
-			$sfx =
-			  lc($2) eq "truetype" ? ".ttf" :
-			  lc($2) eq "opentype" ? ".otf" :
-			  '';
-		    }
-		    # No (or unknown) format, skip.
-		    next unless $sfx;
-
-		    my ($fh,$fn) = tempfile( "${td}SVGXXXX", SUFFIX => $sfx );
-		    binmode( $fh => ':raw' );
-		    print $fh decode_base64($data);
-		    close($fh);
-		    my $font = eval { $svg->pdf->font($fn) };
-		    croak($@) if $@;
-		    my $f = $fc->{$key} =
-		      { font => $font,
-			src => 'data' };
-		    return ( $f->{font},
-			     $style->{'font-size'} || 12,
-			     $f->{src} );
+		elsif ( $opts->{_filesource} =~ /\.(\w+)$/ ) {
+		    $sfx = $2;
 		}
-		elsif ( $src =~ /^\s*url\s*\((["'])(.*?\.[ot]tf)\1\s*\)/is ) {
-		    my $fn = $2;
-		    my $font = eval { $svg->pdf->font($fn) };
-		    croak($@) if $@;
-		    my $f = $fc->{$key} =
-		      { font => $font,
-			src => $fn };
-		    return ( $f->{font},
-			     $style->{'font-size'} || 12,
-			     $f->{src} );
+		# No (or unknown) format, skip.
+		next unless $sfx;
+
+		my ($fh,$fn) = tempfile( "${td}SVGXXXX", SUFFIX => $sfx );
+		binmode( $fh => ':raw' );
+		print $fh $data;
+		close($fh);
+		my $font = eval { $svg->pdf->font($fn) };
+		croak($@) if $@;
+		my $f = $fc->{$key} =
+		  { font => $font,
+		    src => $opts->{_filesource} };
+		#warn("SRC: ", $opts->{_filesource}, "\n");
+		return ( $f->{font},
+			 $style->{'font-size'} || 12,
+			 $f->{src} );
+	    }
+	    # Temp.
+	    elsif ( $src =~ /^\s*url\s*\((["'])data:application\/octet-stream;base64,(.*?)\1\s*\)/is ) {
+
+		my $data = $2;
+
+		# To load font data from net and data urls.
+		use File::Temp qw( tempfile tempdir );
+		use MIME::Base64 qw( decode_base64 );
+		$td //= tempdir( CLEANUP => 1 );
+
+		my $sfx;	# suffix for font file name
+		if ( $src =~ /\bformat\((["'])(.*?)\1\)/ ) {
+		    $sfx =
+		      lc($2) eq "truetype" ? ".ttf" :
+		      lc($2) eq "opentype" ? ".otf" :
+		      '';
 		}
-		else {
-		    croak("\@font-face: Unhandled src \"", substr($src,0,50), "...\"");
-		}
+		# No (or unknown) format, skip.
+		next unless $sfx;
+
+		my ($fh,$fn) = tempfile( "${td}SVGXXXX", SUFFIX => $sfx );
+		binmode( $fh => ':raw' );
+		print $fh decode_base64($data);
+		close($fh);
+		my $font = eval { $svg->pdf->font($fn) };
+		croak($@) if $@;
+		my $f = $fc->{$key} =
+		  { font => $font,
+		    src => 'data' };
+		return ( $f->{font},
+			 $style->{'font-size'} || 12,
+			 $f->{src} );
+	    }
+	    elsif ( $src =~ /^\s*url\s*\((["'])(.*?\.[ot]tf)\1\s*\)/is ) {
+		my $fn = $2;
+		my $font = eval { $svg->pdf->font($fn) };
+		croak($@) if $@;
+		my $f = $fc->{$key} =
+		  { font => $font,
+		    src => $fn };
+		return ( $f->{font},
+			 $style->{'font-size'} || 12,
+			 $f->{src} );
+	    }
+	    else {
+		croak("\@font-face: Unhandled src \"", substr($src,0,50), "...\"");
 	    }
 	}
     }
@@ -125,8 +166,9 @@ method find_font ( $style ) {
 	    $cb = [ $cb ];
 	}
 	# Run callbacks.
+	my %args = ( pdf => $svg->pdf, style => $style );
 	for ( @$cb ) {
-	    eval { $font = $_->( $svg, $svg->pdf, $style ) };
+	    eval { $font = $_->( $svg, %args ) };
 	    croak($@) if $@;
 	    last if $font;
 	}
@@ -152,28 +194,26 @@ method find_font ( $style ) {
     for ( ffsplit($fn) ) {
 	$fn = lc($_);
 
+	# helvetica sans sans-serif text,sans-serif
 	if ( $fn =~ /^(sans|helvetica|(?:text,)?sans-serif)$/ ) {
 	    $fn = $bd
 	      ? $em ? "Helvetica-BoldOblique" : "Helvetica-Bold"
 	      : $em ? "Helvetica-Oblique" : "Helvetica";
 	}
-	elsif ( $fn eq "text" || $fn =~ /^mono(?:-?space)?$/ ) {
+	# courier mono monospace mono-space text
+	elsif ( $fn =~ /^(text|courier|mono(?:-?space)?)$/ ) {
 	    $fn = $bd
 	      ? $em ? "Courier-BoldOblique" : "Courier-Bold"
 	      : $em ? "Courier-Oblique" : "Courier";
 	}
-	elsif ( $fn =~ /^abc2svg(?:\.ttf)?/ or $fn eq "music" ) {
-	    $fn = "abc2svg.ttf";
-	}
-	elsif ( $fn =~ /^musejazz\s*text$/ ) {
-	    $fn = "MuseJazzText.otf";
-	}
+	# times serif text,serif
 	elsif ( $fn =~ /^(serif|times|(?:text,)?serif)$/ ) {
 	    $fn = $bd
 	      ? $em ? "Times-BoldItalic" : "Times-Bold"
 	      : $em ? "Times-Italic" : "Times-Roman";
 	}
-	else {
+	# Any of the corefonts, case insensitive.
+	elsif ( none { $fn eq lc($_) } @corefonts ) {
 	    undef $fn;
 	}
 	last if $fn;

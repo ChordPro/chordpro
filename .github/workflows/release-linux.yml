@@ -1,0 +1,36 @@
+on:
+  release:
+    types: [created]
+name: Handle Release
+jobs:
+  generate:
+    name: Create release appimage artifact
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+      - name: Set Env Vars
+        run: |
+          PERL5LIB=${{ runner.temp }}/build-cpan/lib/perl5
+          CHORDPRO_VERSION=$(perl lib/ChordPro/Version.pm)
+          echo "${{ runner.temp }}" >> "$GITHUB_PATH"
+          echo "PERL5LIB=$PERL5LIB" >> "$GITHUB_ENV"
+          echo "CHORDPRO_VERSION=$CHORDPRO_VERSION" >> "$GITHUB_ENV"
+      - name: Install dependencies
+        run: |
+          sudo apt install -y libwx-perl cpanminus liblocal-lib-perl libgtk-3-dev libperl-dev libdeflate0 libsdl2-2.0-0 libpar-packer-perl desktop-file-utils
+          wget -O ${{ runner.temp }}/appimagetool https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x ${{ runner.temp }}/appimagetool
+          cpanm -n -l ${{ runner.temp }}/build-cpan . HarfBuzz::Shaper
+      - name: Build AppImage
+        run: |
+          cd pp/debian
+          make
+          chmod +x ChordPro-$CHORDPRO_VERSION.AppImage
+          zip -m "${{ runner.temp }}/ChordPro-$CHORDPRO_VERSION-Linux_x86_64-AppImage.zip" ChordPro-$CHORDPRO_VERSION.AppImage
+          ls -l "${{ runner.temp }}"
+      - name: Upload the artifact
+        uses: shogo82148/actions-upload-release-asset@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: "${{ runner.temp }}/ChordPro-${{ env.CHORDPRO_VERSION }}-Linux_x86_64-AppImage.zip"

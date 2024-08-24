@@ -9,14 +9,14 @@ Note: If the intention is to change the appearance for the whole song,
 or collection of songs, it is much better to use [configuration
 files]({{< relref "ChordPro-Configuration" >}}) instead.
 
-    {textfont: Times-Roman}
+    {textfont: serif}
     {textsize: 12}
     {textcolour: blue}
 
 These directives change the font, size and colour of the song lyrics
 that follow.
 
-The font must be a [known font name]({{< relref "ChordPro-Fonts" >}}),
+The font must be a [known font family]({{< relref "ChordPro-Fonts" >}}),
 or the name of a file containing a TrueType or OpenType font.
 
 The size must be a valid number like `12` or `10.5`, or a percentage

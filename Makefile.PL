@@ -1,7 +1,9 @@
 #! perl
 
 # Ease the life of the CPAN testers.
-exit 0 if $ENV{AUTOMATED_TESTING} && $] < 5.026000;
+BEGIN { exit 0 if $ENV{AUTOMATED_TESTING} && $] < 5.026000 }
+
+use v5.26;
 
 use ExtUtils::MakeMaker 7.24;	# comes with 5.26
 
@@ -29,19 +31,24 @@ WriteMakefile
  ABSTRACT         => "A lyrics and chords formatting program",
  VERSION	  => $version,
  AUTHOR	          => 'Johan Vromans <jvromans@squirrel.nl>',
- LICENSE	  => "perl",
+ LICENSE	  => "perl_5",
  MIN_PERL_VERSION => 5.026000,
  INSTALLDIRS	  => 'site',
  EXE_FILES	  => [ map { "script/$_" } @bins ],
  PL_FILES	  => {
 		       'script/ppchordpro.PL' => [ map { "script/$_" } @bins ]
 		     },
-
+ MAN3PODS	  => {
+    'lib/ChordPro.pm'        => 'blib/man3/ChordPro.3pm',
+    'lib/ChordPro/A2Crd.pm'  => 'blib/man3/ChordPro::A2Crd.3pm',
+    'lib/ChordPro/Wx.pm'     => 'blib/man3/ChordPro::Wx.3pm',
+		     },
  # Always require PDF::API2 or PDF::Builder and Text::Layout.
  PREREQ_PM      => {
 		    @pdfapi,
-		    'Text::Layout'		  => 0.032,
+		    'Text::Layout'		  => 0.038,
 		    'JSON::PP'			  => 2.27203,
+		    'JSON::XS'			  => 4.03,
 		    'String::Interpolate::Named'  => 1.030,
 		    'File::LoadLines'		  => 1.044,
 		    'File::HomeDir'		  => 1.004,
@@ -75,12 +82,20 @@ WriteMakefile
 		   },
 
  META_MERGE => {
-     resources => {
-	 license    => "https://dev.perl.org/licenses/",
-	 homepage   => "https://www.chordpro.org",
-	 repository => "https://github.com/sciurius/chordpro",
-	 bugtracker => "https://github.com/sciurius/chordpro/issues",
-     },
+     'meta-spec'  => { version => 2, },
+     resources    => {
+       license    => [ "https://dev.perl.org/licenses/" ],
+       homepage   => 'https://chordpro.org',
+       repository => {
+	 url => 'git://github.com/ChordPro/chordpro.git',
+	 web => 'https://github.com/ChordPro/chordpro',
+	 type => 'git',
+       },
+       bugtracker => {
+	 web => "https://github.com/ChordPro/chordpro/issues",
+	 mailto => 'info@chordpro.org',
+       },
+    },
      provides => {
 	 chordpro => { file => "script/chordpro",
 		       version => $version },
@@ -92,6 +107,7 @@ WriteMakefile
          file => [
 	    "lib/ChordPro/Songbook.pm",
 	    "lib/ChordPro/Chords.pm",
+	    "lib/ChordPro/Config.pm",
 	    "lib/ChordPro/Testing.pm",
 	    "lib/ChordPro/Utils.pm",
 	    "lib/ChordPro/Version.pm",

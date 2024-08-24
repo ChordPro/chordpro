@@ -1,8 +1,11 @@
 {title: Molly Malone}
 {subtitle: Irish Traditional}
-{artist: Traditional}
-{columns 2}
-{start_of_abc spread=32 width="700"}
+# Show the chord diagrams at the top
+{diagrams:top}
+# Two columns
+{columns:2}
+# Spread image on top (after the chord diagrams) and 32pt space after.
+{start_of_abc spread=30 width="700"}
 X: 1
 M: 3/4
 L: 1/4
@@ -18,7 +21,9 @@ P:Chorus
 w: live, a-live O!_* A-live a-live O!_* Cry-ing “Cock-les* and Mus-sels* a-live a-live-O!”
 
 {end_of_abc}
-{image anchor="page" x="100%" y="100%" src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Dublin_-_Molly_Malone.jpg/270px-Dublin_-_Molly_Malone.jpg"}
+# An illutrative image from the net, in the bottom right corner of the page.
+{image anchor="page" x="100%" y="100%" scale="80%" src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Dublin_-_Molly_Malone.jpg/270px-Dublin_-_Molly_Malone.jpg"}
+# First verse of the song, with chords.
 {start_of_verse}
 She [G]was a fish [Em]monger
 but [Am]sure, 'twas no [D7]wonder
@@ -27,14 +32,15 @@ They [G]both wheeled their [Em]barrows
 through [Am]streets broad and [D7]narrow
 Crying [G]“Cockles and Mus[Em]sels, a[A7]live a[D7]live-[G]o”
 {end_of_verse}
-
-{column_break}
-{start_of_verse}
+#
+# Skip to next column.
+{colb}
+# The second verse is right flushed text, aligned to the right side.
+{start_of_textblock align="right" flush="right"}
 She died of the fever,
 and nothing could save her
 And that was the end of sweet Molly Malone
 But her ghost wheels a barrow
 through streets broad and narrow
 Crying “Cockles and Mussels, alive alive-o”
-{end_of_verse}
-
+{end_of_textblock}

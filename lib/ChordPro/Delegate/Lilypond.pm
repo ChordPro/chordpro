@@ -22,7 +22,8 @@ use Text::ParseWords qw(shellwords);
 
 sub DEBUG() { $config->{debug}->{ly} }
 
-sub ly2svg( $s, $pw, $elt ) {
+sub ly2svg( $self, %args ) {
+    my ( $elt, $pw ) = @args{qw(elt pagewidth)};
 
     state $imgcnt = 0;
     state $td = File::Temp::tempdir( CLEANUP => !$config->{debug}->{ly} );
@@ -109,6 +110,7 @@ sub ly2svg( $s, $pw, $elt ) {
     push( @cmd, "--silent" ) unless DEBUG;
     ( my $im1 = $svg ) =~ s/\.\w+$//;
     push( @cmd, "-o", $im1, $src );
+    warn( "+ @cmd\n" ) if DEBUG;
     my $ret = sys( @cmd );
 
     if ( $ret ) {
@@ -121,6 +123,16 @@ sub ly2svg( $s, $pw, $elt ) {
     }
 
     warn("SVG: ", -s $svg, " bytes\n") if $config->{debug}->{ly};
+    my $scale;
+    my $design_scale;
+    if ( $kv->{scale} != 1 ) {
+	if ( $kv->{id} ) {
+	    $design_scale = $kv->{scale};
+	}
+	else {
+	    $scale = $kv->{scale};
+	}
+    }
     return
 	  { type => "image",
 	    line => $elt->{line},
@@ -128,8 +140,9 @@ sub ly2svg( $s, $pw, $elt ) {
 	    uri  => "$im1.cropped.svg",
 	    opts => { maybe id     => $kv->{id},
 		      maybe align  => $kv->{align},
-		      maybe scale  => $kv->{scale},
 		      maybe spread => $kv->{spread},
+		      maybe scale        => $scale,
+		      maybe design_scale => $design_scale,
 		    } };
 }
 

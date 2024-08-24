@@ -1,0 +1,90 @@
+{
+
+    "chords" : [
+	// Make Bdim nicer.
+	{ "name" : "Bdim",
+	  "format" : "%{root}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/%{}}",
+	  "frets" : [ -1, 2, 3, 4, 3, -1 ],
+      },
+    ],
+
+    // Use superscript for chord extensions.
+    "chord-formats" : {
+	"common" : "%{root}%{qual|%{}}%{ext|<sup>%{}</sup>}%{bass|/%{}}",
+    },
+
+    "pdf" : {
+
+	// Lohit-Devanagari font has low extents.
+	"spacing" : {
+	    "lyrics" : 1.5,
+	    "chords" : 0.9,
+	},
+
+	// Special split markers.
+	"split-marker" : [ "<span face='sans' color='red'>→</span>",
+			   "<span face='sans' color='yellow'>→</span>",
+			   "<span face='sans' color='green'>→</span>"
+			 ],
+
+	// Font directories.
+	"fontdir" : [ "~/.fonts" ],
+
+	"fontconfig" : {
+
+	    // For the Devanagari font we enable font shaping using
+	    // HarfBuzz::Shaper to obtain the complex ligature handling
+	    // this font requires.
+	    "devanagari" : {
+		"" : {
+		    "file"    : "Lohit-Devanagari.ttf",
+		    "shaping" : 1,
+		    "language" : "nepali"
+		},
+	    },
+	    // Use a decent sans font (it needs an arrow for the split markers).
+	    "sans" : {
+		""            : "FreeSans.ttf",
+		"bold"        : "FreeSansBold.ttf",
+		"italic"      : "FreeSansOblique.ttf",
+		"bolditalic"  : "FreeSansBoldOblique.ttf",
+	    },
+	},
+	
+	"fonts" : {
+	    "title" : {
+		"description" : "devanagari",
+		"size"  : 14
+	    },
+	    "subtitle" : {
+		"description" : "serif",
+		"size"  : 14
+	    },
+	    "text" : {
+		"description" : "devanagari",
+		"size"  : 12
+	    },
+	    "chord" : {
+		"description" : "sans",
+		"color" : "blue",
+		"size"  : 10
+	    },
+	    "diagram" : {
+		"description" : "sans",
+		"size"  : 11
+	    },
+	},
+
+	// Add a link to the repository where these songs come from.
+	"formats" : {
+	    // The first page of a song has:
+	    "title" : {
+		"footer"    : [ "", "<span href='https://github.com/peanutbutterandcrackers/music'>https://github.com/peanutbutterandcrackers/music</span>", "" ],
+	    },
+	    "first" : {
+		"footer"    : [ "", "<span href='https://github.com/peanutbutterandcrackers/music'>https://github.com/peanutbutterandcrackers/music</span>", "" ],
+	    },
+	},
+
+    },
+}

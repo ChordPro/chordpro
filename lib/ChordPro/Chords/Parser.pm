@@ -142,7 +142,7 @@ sub get_parser ( $self, $system = undef, $nofallback = undef ) {
     }
     elsif ( $system ne $::config->{notes}->{system} ) {
 	my $p = ChordPro::Chords::Parser::Common->new
-	  ( { notes => $system } );
+	  ( { notes => { system => $system } } );
 	return $parsers{$system} = $p;
     }
     elsif ( $system ) {
@@ -1009,10 +1009,12 @@ sub transcode ( $self, $xcode, $key_ord = 0 ) {
 	$info->{root_ord} -= $key_ord % $p->intervals;
     }
 #    $info->{$_} = $p->{$_} for qw( ns_tbl nf_tbl ns_canon nf_canon );
-    $info->{root_canon} = $info->{root} =
-      $p->root_canon( $info->{root_ord},
-		      $info->{root_mod} >= 0,
-		      $info->{qual_canon} eq "-" );
+    unless ( $self->{rootless} ) {
+	$info->{root_canon} = $info->{root} =
+	  $p->root_canon( $info->{root_ord},
+			  $info->{root_mod} >= 0,
+			  $info->{qual_canon} eq "-" );
+    }
     if ( $p->{system} eq "roman" && $info->{qual_canon} eq "-" ) {
 	# Minor quality is in the root name.
 	$info->{qual_canon} = $info->{qual} = "";
@@ -1046,7 +1048,7 @@ package ChordPro::Chord::Nashville;
 
 our @ISA = 'ChordPro::Chord::Base';
 
-sub transpose ( $self ) { $self }
+sub transpose ( $self, $dummy1, $dummy2=0 ) { $self }
 
 sub show {
     Carp::croak("call canonical instead of show");
@@ -1073,7 +1075,7 @@ package ChordPro::Chord::Roman;
 
 our @ISA = 'ChordPro::Chord::Base';
 
-sub transpose ( $self, $dummy1, $dummy2 ) { $self }
+sub transpose ( $self, $dummy1, $dummy2=0 ) { $self }
 
 sub show {
     Carp::croak("call canonical instead of show");
@@ -1102,8 +1104,8 @@ use String::Interpolate::Named;
 
 our @ISA = 'ChordPro::Chord::Base';
 
-sub transpose ( $self ) { $self }
-sub transcode ( $self ) { $self }
+sub transpose ( $self, $dummy1, $dummy2=0 ) { $self }
+sub transcode ( $self, $dummy1, $dummy2=0 ) { $self }
 
 sub canonical ( $self ) {
     my $res = $self->{text};

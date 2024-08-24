@@ -79,7 +79,7 @@ sub generate_song {
 	push(@s, map { +"## $_" } @{$s->{subtitle}});
     }
 
-	if ( $lyrics_only eq 0 ){
+	if ( !$lyrics_only ){
 		my $all_chords = "";
 		# https://chordgenerator.net/D.png?p=xx0212&s=2 # reuse of other projects (https://github.com/einaregilsson/ChordImageGenerator)?
 		# generate png-out of this project? // fingers also possible - but not set in basics.

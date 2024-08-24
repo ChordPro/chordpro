@@ -9,7 +9,7 @@ In a hurry? See the
 [ChordPro Cheat Sheet]({{< relref "ChordPro-Cheat_Sheet" >}}).
 
 Want to know what's new? See the
-[ChordPro 6 Release information]({{< relref "ChordPro-RelNotes" >}}).
+[ChordPro 6 Release information]({{< relref "ChordPro6-RelNotes" >}}).
 
 ## Overview
 
@@ -78,7 +78,7 @@ chords. Annotations are specified with `[*`*text*`]`, again just like
 chords. Depending on the software used to process the ChordPro data,
 annotations may be rendered in an outstanding manner.
 
-Markup and anotations are available as of [ChordPro version 6]({{< relref "ChordPro-RelNotes" >}}).
+Markup and anotations are available as of [ChordPro version 6]({{< relref "ChordPro6-RelNotes" >}}).
 
 ## Is this all?
 

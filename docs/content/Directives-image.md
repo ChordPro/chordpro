@@ -62,6 +62,9 @@ image is scaled to fit.
 Scales the image with the factor.
 This may be a floating point number, e.g. `0.2`, or a percentage, e.g. `20%`.
 
+Two comma-separated factors cen be used to specify independent
+horizontal and vertical scaling.
+
 ##### `align=`*aa*  
 Aligns the image on the page. The argument may be `"left"`,
 `"center"` or `"right"`.
@@ -78,9 +81,6 @@ If _tf_ equals `0`, the image is flushed left.
 Draws a border around the image.
 Without an explicit width, the border is one typographic point.
 
-##### `title=`*text*  
-Provides a title for the image.
-
 ## Advanced features
 
 ##### `spread`=*space*  
@@ -91,6 +91,11 @@ image plus *space*.
 Note that the top of the page is the top of the paper minus the
 top margin, and that the width of the page is the width of the paper
 minus the left and right margins.
+
+##### `href=`*url*
+
+Provides a URL to open when the image is clicked.
+Most likely this will leave the PDF viewer and transfer to a web browser.
 
 ## Static (stationary) images
 
@@ -207,7 +212,7 @@ Other attributes are:
 
 `width=`_NNN_
 : The desired width for the image.
-The value can be a size (in points, `em` or `ex`) or a percentage.
+The value must be a size (in points), `em` or `ex`.
 The image is scaled if necessary.
 
 `height=`_NNN_
@@ -215,7 +220,7 @@ The image is scaled if necessary.
 
 `dx=`_NNN_
 : A horizontal offset for the image, wrt. the current location in the text.
-The value can be a size (in points, `em` or `ex`) or a percentage.
+The value must be a size (in points), `em` or `ex`.
 
 `dy=`_NNN_
 : Same, but vertical. Positive amounts move up.
@@ -225,6 +230,9 @@ Note the direction is opposite to the markup `<rise>`.
 `scale=`_NNN_
 : A scaling factor, to be applied _after_ width/height scaling.
 The value may be expressed as a percentage.
+
+Two comma-separated factors cen be used to specify independent
+horizontal and vertical scaling.
 
 `align="left"`  `align="right"`  `align="center"`
 : Align the image in the width given by the `w` attribute.

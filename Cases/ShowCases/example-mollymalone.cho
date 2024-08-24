@@ -1,0 +1,39 @@
+{title: Molly Malone}
+{subtitle: Irish Traditional}
+{artist: Traditional}
+{diagrams:top}
+{columns:2}
+{start_of_abc spread=32 width="700"}
+X: 1
+M: 3/4
+L: 1/4
+K: G
+D | "G"GGG | "Em"G<BG | "Am"AAA|"D7"A<cA|"G"BAG|"Em"dcB|"A7"BAG | "D7"A2 D/2D/2 | 
+w: In Dub-lin's fair ci-ty where girls are so pret-ty, I first set my eyes on sweet Mol-ly Ma-lone as she
+"G"GGG|"Em"G<BG|"Am"AAA|"D7"A<cA/2A/2| 
+w: wheeled her wheel bar-row through streets broad and nar-row, cry-ing
+"G"B/d/-d c|"Em"B/d-d c|"A7"B>G"D7"A|"G"G2D|
+w: “Cock-les_ and Mus-sels,_ a-live a-live O!” A-
+P:Chorus
+"G"G>GG|"Em"G/B/-BG|"Am"A>AA|"D7"A/c/-cA/A/|"G"G/d/-dc|"Em"B/d/-d c|"A7"B>G"D7"A|"G"G2z |] 
+w: live, a-live O!_* A-live a-live O!_* Cry-ing “Cock-les* and Mus-sels* a-live a-live-O!”
+
+{end_of_abc}
+{image anchor="page" x="100%" y="100%" scale="80%" src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Dublin_-_Molly_Malone.jpg/270px-Dublin_-_Molly_Malone.jpg"}
+{start_of_verse}
+She [G]was a fish [Em]monger
+but [Am]sure, 'twas no [D7]wonder
+For [G]so were her [Em]father and [A7]mother be[D7]fore
+They [G]both wheeled their [Em]barrows
+through [Am]streets broad and [D7]narrow
+Crying [G]“Cockles and Mus[Em]sels, a[A7]live a[D7]live-[G]o”
+{end_of_verse}
+{colb}
+{start_of_textblock align=right flush=right}
+She died of the fever,
+and nothing could save her
+And that was the end of sweet Molly Malone
+But her ghost wheels a barrow
+through streets broad and narrow
+Crying “Cockles and Mussels, alive alive-o”
+{end_of_textblock}

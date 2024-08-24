@@ -138,6 +138,10 @@ push( @EXPORT, 'make_preprocessor' );
 
 # Split (pseudo) command line into key/value pairs.
 
+# Escapes for string expansion. Most make no sense, newline is special.
+my %dqesc = ( n => "\n" );
+my %sqesc = ( n => "\n" );
+
 sub parse_kv ( @lines ) {
 
     if ( is_macos() ) {
@@ -145,12 +149,20 @@ sub parse_kv ( @lines ) {
 	@lines = map { s/“/"/g; s/”/"/g; s/‘/'/g; s/’/'/gr;} @lines;
     }
 
-    use Text::ParseWords qw(shellwords);
-    my @words = shellwords(@lines);
+    use Text::ParseWords qw(quotewords);
+    my @words = quotewords( '\s+', 1, @lines );
 
     my $res = {};
     foreach ( @words ) {
-	if ( /^(.*?)=(.+)/ ) {
+	if ( /^(.*?)="(.*)"$/ ) {
+	    my ( $k, $v ) = ( $1, $2 );
+	    $res->{$k} = $v =~ s;\\(.);$dqesc{$1}//$1;segr;
+	}
+	elsif ( /^(.*?)='(.*)'$/ ) {
+	    my ( $k, $v ) = ( $1, $2 );
+	    $res->{$k} = $v =~ s;\\(.);$sqesc{$1}//$1;segr;
+	}
+	elsif ( /^(.*?)=(.+)$/ ) {
 	    $res->{$1} = $2;
 	}
 	elsif ( /^no[-_]?(.+)/ ) {
@@ -169,8 +181,8 @@ push( @EXPORT, 'parse_kv' );
 # Map true/false etc to true / false.
 
 sub is_true ( $arg ) {
-    return if !defined($arg) || $arg eq '';
-    return if $arg =~ /^(false|null|no|none|off|\s+|0)$/i;
+    return 0 if !defined($arg) || $arg eq '';
+    return 0 if $arg =~ /^(false|null|no|none|off|\s+|0)$/i;
     return !!$arg;
 }
 
@@ -178,7 +190,7 @@ push( @EXPORT, 'is_true' );
 
 # Stricter form of true.
 sub is_ttrue ( $arg ) {
-    return if !defined($arg);
+    return 0 if !defined($arg);
     $arg =~ /^(on|true|1)$/i;
 }
 
@@ -206,39 +218,158 @@ sub qquote ( $arg, $force = 0 ) {
 
 push( @EXPORT, 'qquote' );
 
-# Turn foo.bar.blech=blah into { foo => { bar => { blech ==> "blah" } } }.
+# Processing JSON.
 
-sub prp2cfg ( $defs, $cfg ) {
-    my $ccfg = {};
-    $cfg //= {};
-    while ( my ($k, $v) = each(%$defs) ) {
-	my @k = split( /[:.]/, $k );
-	my $c = \$ccfg;		# new
-	my $o = $cfg;		# current
-	my $lk = pop(@k);	# last key
-
-	# Step through the keys.
-	foreach ( @k ) {
-	    $c = \($$c->{$_});
-	    $o = $o->{$_};
-	}
-
-	# Final key. Merge array if so.
-	if ( $lk =~ /^\d+$/ && ref($o) eq 'ARRAY' ) {
-	    unless ( ref($$c) eq 'ARRAY' ) {
-		# Only copy orig values the first time.
-		$$c->[$_] = $o->[$_] for 0..scalar(@{$o})-1;
-	    }
-	    $$c->[$lk] = $v;
-	}
-	else {
-	    $$c->{$lk} = $v;
-	}
+sub json_load( $json, $source = "<builtin>" ) {
+    my $info = json_parser();
+    if ( $info->{parser} eq "JSON::Relaxed" ) {
+	state $pp = JSON::Relaxed::Parser->new( croak_on_error => 0,
+						strict => 0,
+						prp => 1 );
+	my $data = $pp->decode($json);
+	return $data unless $pp->is_error;
+	$source .= ": " if $source;
+	die("${source}JSON error: " . $pp->err_msg . "\n");
     }
-    return $ccfg;
+    else {
+	state $pp = JSON::PP->new;
+
+	# Glue lines, so we have at lease some relaxation.
+	$json =~ s/"\s*\\\n\s*"//g;
+
+	$pp->relaxed if $info->{relaxed};
+	$pp->decode($json);
+    }
 }
 
-push( @EXPORT, 'prp2cfg' );
+# JSON parser, what and how (also used by runtimeinfo().
+sub json_parser() {
+    my $relax = $ENV{CHORDPRO_JSON_RELAXED} // 2;
+    if ( $relax > 1 ) {
+	require JSON::Relaxed;
+	return { parser  => "JSON::Relaxed",
+		 version => $JSON::Relaxed::VERSION }
+    }
+    else {
+	require JSON::PP;
+	return { parser  => "JSON::PP",
+		 relaxed => $relax,
+		 version => $JSON::PP::VERSION }
+    }
+}
+
+push( @EXPORT, qw(json_parser json_load) );
+
+# Like prp2cfg, but updates.
+# Also allows array pre/append and JSON data.
+# Useful error messages are signalled with exceptions.
+
+push( @EXPORT, 'prpadd2cfg' );
+
+sub prpadd2cfg ( $cfg, @defs ) {
+    $cfg //= {};
+    state $specials = { false => 0, true => 1, null => undef };
+
+    while ( @defs ) {
+	my $key   = shift(@defs);
+	my $value = shift(@defs);
+	# warn("K:$key V:$value\n");
+
+	# Check and process the value, if needed.
+	if ( exists $specials->{$value} ) {
+	    $value = $specials->{$value};
+	    # warn("Value => $value\n");
+	}
+	elsif ( !( ref($value)
+		   || $value !~ /[\[\{\]\}]/ ) ) {
+	    # Not simple, assume JSON struct.
+	    $value = json_load( $value, $value );
+	    # use DDP; p($value, as => "Value ->");
+	}
+
+	# Note that ':' is not oficailly supported by RRJson.
+	my @keys = split( /[:.]/, $key );
+	my $lastkey = pop(@keys);
+
+	# Handle pdf.fonts.xxx shortcuts.
+	if ( join( ".", @keys ) eq "pdf.fonts" ) {
+	    my $s = { pdf => { fonts => { $lastkey => $value } } };
+	    ChordPro::Config::config_expand_font_shortcuts($s);
+	    $value = $s->{pdf}{fonts}{$lastkey};
+	}
+
+	my $cur = \$cfg;		# current pointer in struct
+
+	# Step through the keys.
+	my $errkey = "";		# error trail
+	foreach ( @keys ) {
+	    if ( UNIVERSAL::isa( $$cur, 'ARRAY' ) ) {
+		die("Array ", substr($errkey,0,-1),
+		    " requires integer index (got \"$_\")\n")
+		  unless /^[<>]?[-+]?\d+$/;
+		$cur = \($$cur->[$_]);
+	    }
+	    elsif ( UNIVERSAL::isa( $$cur, 'HASH' ) ) {
+		$cur = \($$cur->{$_});
+	    }
+	    else {
+		die("Key ", substr($errkey,0,-1),
+		    " ", ref($$cur),
+		    " does not refer to an array or hash\n");
+	    }
+	    $errkey .= "$_."
+
+	}
+
+	# Final key.
+	if ( UNIVERSAL::isa( $$cur, 'ARRAY' ) ) {
+	    if ( $lastkey =~ />([-+]?\d+)?$/ ) {	# append
+		if ( defined $1 ) {
+		    splice( @{$$cur},
+			    $1 >= 0 ? 1+$1 : 1+@{$$cur}+$1, 0, $value );
+		}
+		else {
+		    push( @{$$cur}, $value );
+		}
+	    }
+	    elsif ( $lastkey =~ /<([-+]?\d+)?$/ ) {	# prepend
+		if ( defined $1 ) {
+		    splice( @{$$cur}, $1, 0, $value );
+		}
+		else {
+		    unshift( @{$$cur}, $value );
+		}
+	    }
+	    elsif ( $lastkey =~ /\/([-+]?\d+)?$/ ) {	# remove
+		if ( defined $1 ) {
+		    splice( @{$$cur}, $1, 1 );
+		}
+		else {
+		    pop( @{$$cur} );
+		}
+	    }
+	    else {					# replace
+		die("Array $errkey requires integer index (got \"$lastkey\")\n")
+		  unless $lastkey =~ /^[-+]?\d+$/;
+		$$cur->[$lastkey] = $value;
+	    }
+	}
+	elsif ( UNIVERSAL::isa( $$cur, 'HASH' ) ) {
+	    $$cur->{$lastkey} = $value;
+	}
+	else {
+	    die("Key ", substr($errkey,0,-1),
+		" is scalar, not ",
+		$lastkey =~ /^(?:[-+]?\d+|[<>])$/ ? "array" : "hash",
+		"\n");
+	}
+    }
+
+    # The structure has been modified, but also return for covenience.
+    return $cfg;
+}
+
+push( @EXPORT, 'prpadd2cfg' );
 
 # Remove markup.
 sub demarkup ( $t ) {
@@ -269,5 +400,74 @@ sub min { $_[0] < $_[1] ? $_[0] : $_[1] }
 sub max { $_[0] > $_[1] ? $_[0] : $_[1] }
 
 push( @EXPORT, "min", "max" );
+
+# Dimensions.
+# Fontsize allows typical font units, and defaults to ref 12.
+sub fontsize( $size, $ref=12 ) {
+    if ( $size && $size =~ /^([.\d]+)(%|e[mx]|p[tx])$/ ) {
+	return $ref/100 * $1 if $2 eq '%';
+	return $ref     * $1 if $2 eq 'em';
+	return $ref/2   * $1 if $2 eq 'ex';
+	return $1            if $2 eq 'pt';
+	return $1 * 0.75     if $2 eq 'px';
+    }
+    $size || $ref;
+}
+
+push( @EXPORT, "fontsize" );
+
+# Dimension allows arbitrary units, and defaults to ref 12.
+sub dimension( $size, %sz ) {
+    return unless defined $size;
+    my $ref;
+    if ( ( $ref = $sz{fsize} )
+	 && $size =~ /^([.\d]+)(%|e[mx])$/ ) {
+	return $ref/100 * $1  if $2 eq '%';
+	return $ref     * $1  if $2 eq 'em';
+	return $ref/2   * $1  if $2 eq 'ex';
+    }
+    if ( ( $ref = $sz{width} )
+	 && $size =~ /^([.\d]+)(%)$/ ) {
+	return $ref/100 * $1  if $2 eq '%';
+    }
+    if ( $size =~ /^([.\d]+)(p[tx]|[cm]m|in|)$/ ) {
+	return $1             if $2 eq 'pt';
+	return $1 * 0.75      if $2 eq 'px';
+	return $1 * 72 / 2.54 if $2 eq 'cm';
+	return $1 * 72 / 25.4 if $2 eq 'mm';
+	return $1 * 72        if $2 eq 'in';
+	return $1             if $2 eq '';
+    }
+    $size;			# let someone else croak
+}
+
+push( @EXPORT, "dimension" );
+
+# Checking font names against the PDF corefonts.
+
+my %corefonts =
+  (
+   ( map { lc($_) => $_ }
+     "Times-Roman",
+     "Times-Bold",
+     "Times-Italic",
+     "Times-BoldItalic",
+     "Helvetica",
+     "Helvetica-Bold",
+     "Helvetica-Oblique",
+     "Helvetica-BoldOblique",
+     "Courier",
+     "Courier-Bold",
+     "Courier-Oblique",
+     "Courier-BoldOblique",
+     "Symbol",
+     "ZapfDingbats" ),
+);
+
+sub is_corefont {
+    $corefonts{lc $_[0]};
+}
+
+push( @EXPORT, "is_corefont" );
 
 1;

@@ -9,6 +9,7 @@ COMMON := ../common
 SCRIPT := ${ROOT}/script
 DEST   := build
 VERSION := $(shell perl ../../lib/ChordPro/Version.pm)
+TARGET := wxchordpro
 
 PP := pp -u
 
@@ -27,44 +28,44 @@ clean ::
 
 # Portable Perl Launcher
 
-PERLLIB := /usr/lib64
-PERLINC := ${PERLLIB}/perl5/CORE
+SYSLIB := /usr/lib64
+PERL_SO  := $(shell ldd `which perl`|perl -ne 's/^.* => (.*libperl.so.*) \(.*\)/$$1/ && print')
 PERLSO  := $(shell perl -wle 'printf("libperl.so.%d.%d\n",$$1,$$2) if $$] =~ /^(\d+)\.(\d\d\d)/')
 
 .PHONY :: ppl
-ppl :: clean wxchordpro unpack copy_coredll loaders
+ppl :: clean ${TARGET} unpack copy_coredll loaders
 
 .PHONY :: unpack
 unpack :
-	perl ../pp2ppl.pl --dest=${DEST} wxchordpro --quiet
+	perl ../pp2ppl.pl --dest=${DEST} ${TARGET} --quiet
 	cp -p "${ROOT}/script/chordpro.pl" "${DEST}/script/chordpro.pl" 
 	cp -p "${ROOT}/lib/ChordPro/Config.pm" "${DEST}/lib/ChordPro/Config.pm" 
 	cp "${DEST}/res/icons/chordpro.ico" ${DEST}
 	mv "${DEST}/res" "${DEST}/lib/ChordPro/"
 
-# Copy code DLLs.
+# Copy core DLLs.
 # We assume that the target system has:
 #        linux-vdso.so.1
 #        libdl.so.2
 #        libc.so.6
 #        libm.so.6
+#        libpthread.so.1
 #        libcrypt.so.2
 #        /lib64/ld-linux-x86-64.so.2
 
 copy_coredll :
-	cp -pL ${PERLLIB}/libperl.so ${DEST}/${PERLSO}
+	cp -pL ${SYSLIB}/${PERLSO} ${DEST}/${PERLSO}
 	patchelf --set-soname ${PERLSO} ${DEST}/${PERLSO}
-	cp -pL ${PERLLIB}/libpthread.so.0 ${DEST}/
+	cp -pL ${SYSLIB}/libpthread.so.0 ${DEST}/
 	find . -type f -name '*.so' -exec patchelf --set-rpath '$$ORIGIN' {} \;
 	find . -type f -name '*.so.*' -exec patchelf --set-rpath '$$ORIGIN' {} \;
 
 PREFIX := '"script/"'
 CCOPTS := $(shell perl -MExtUtils::Embed -e ccopts) -DSCRIPTPREFIX=${PREFIX}
-LDOPTS := -Wl,--rpath='$${ORIGIN}' ${DEST}/${PERLSO} -lpthread
-LDOPTS := -Wl,--rpath='$$ORIGIN' ${DEST}/${PERLSO} -lpthread
+LDOPTS := -Wl,--rpath='$$ORIGIN' ${DEST}/${PERLSO} # -lpthread
 
 .PHONY :: loaders
-loaders : "${DEST}/wxchordpro" "${DEST}/chordpro"
+loaders : "${DEST}/${TARGET}" "${DEST}/chordpro"
 
 # For testing...
 .PHONY :: _loaders
@@ -83,10 +84,13 @@ clean ::
 # Build AppImage.
 APPIMAGETOOL := appimagetool
 
-appimage : ppl
-	cp AppRun ${DEST}
-	cd ${DEST}; ln lib/ChordPro/res/linux/chordpro.desktop .
-	cd ${DEST}; ln lib/ChordPro/res/icons/chordpro.png .
+appimage : ppl _appimage
+
+_appimage : 
+	sed -e "s/TARGET=.*/TARGET=${TARGET}/" AppRun > ${DEST}/AppRun
+	chmod 0755 ${DEST}/AppRun
+	cd ${DEST}; ln -f lib/ChordPro/res/linux/chordpro.desktop .
+	cd ${DEST}; ln -f lib/ChordPro/res/icons/chordpro.png .
 	${APPIMAGETOOL} -n ${DEST} ChordPro-${VERSION}.AppImage
 
 # Truly dynamic version of loader. Rename to {wx}chordpro if you dare.

@@ -44,7 +44,7 @@ SKIP: {
 	::run();
 	my $ok = !differ( $out, $ref );
 	ok( $ok, $file );
-	unlink($out) if $ok;
+	unlink($out), next if $ok;
 	system( $ENV{CHORDPRO_DIFF}, $out, $ref) if $ENV{CHORDPRO_DIFF};
     }
 

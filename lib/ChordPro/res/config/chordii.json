@@ -68,7 +68,7 @@
 
   	// Chord diagrams.
 	"diagrams" : {
-	    "show"     :  "below",
+	    "show"     :  "bottom",
 	    "linewidth" : 0.15,
 	},
 
@@ -128,7 +128,7 @@
 	    "comment" : {
 		"name" : "Times-Roman",
 		"size" : 12,
-		"background" : "#E5E5E5"
+                "background" : "foreground-light"
 	    },
 	    "tab" : {
 		"name" : "Courier",

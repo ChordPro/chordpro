@@ -91,7 +91,7 @@ $song = {
 				   'title' => 'A red image',
 				   'height' => '150',
 				   'border' => '2',
-				   'scale' => '4',
+				   'scale' => [4,4],
 				   'align' => 'center',
 				   'width' => '200'
 				  },

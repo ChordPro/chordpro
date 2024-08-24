@@ -25,16 +25,19 @@ RUN apt-get install --no-install-recommends -y \
     libpdf-api2-perl \
     libobject-pad-perl \
     libimage-info-perl \
+    libjson-pp-perl \
+    libjson-xs-perl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Perl modules from CPAN.
 RUN cpanm \
+    Pod::Usage \
     JavaScript::QuickJS \
     File::LoadLines \
     String::Interpolate::Named \
     HarfBuzz::Shaper \
-    Text::Layout \
+    Text::Layout~0.037 \
     Data::Printer
 
 FROM base AS chordpro-prod
@@ -48,7 +51,7 @@ ENV DOCKER_PACKAGED=1.00
 RUN chordpro --about
 
 FROM base AS chordpro-dev
-COPY chordpro-dev.tar.gz abc2svg_qjs.tar.gz ./
+COPY chordpro-dev.tar.gz ./
 RUN mkdir ChordPro \
   && tar xf chordpro-dev.tar.gz -C ChordPro \
   && cd ChordPro \

@@ -569,6 +569,16 @@ This option may be specified more than once. Each additional config
 file overrides the corresponding definitions that are currently
 active.
 
+### convert-config
+
+`--convert-config=`*file*
+
+Converts the config in *file* to RRJSON format, writes the result
+to standard output, and exits. No songs are processed.
+
+You can use `--output=`*newfile* to designate an output file instead
+of standard output.
+
 ### define
 
 `--define=`*item*

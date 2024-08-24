@@ -42,10 +42,15 @@ my $regtest = defined($ENV{PERL_HASH_SEED}) && $ENV{PERL_HASH_SEED} == 0;
 sub generate_songbook {
     my ( $self, $sb ) = @_;
 
-    return [] unless $sb->{songs}->[0]->{body}; # no songs
+    return [] unless $sb->{songs}->[0]->{body}
+                  || $sb->{songs}->[0]->{source}->{embedding};
     $verbose ||= $options->{verbose};
 
     $ps = $config->{pdf};
+
+    if ( $ps->{'sort-pages'} ) {
+	sort_songbook($sb);
+    }
 
     my $pr = (__PACKAGE__."::Writer")->new( $ps, $pdfapi );
     warn("Generating PDF ", $options->{output} || "__new__.pdf", "...\n") if $options->{verbose};
@@ -85,12 +90,19 @@ sub generate_songbook {
 	$songindex++;
 
 	# Align.
-	if ( $ps->{'pagealign-songs'} && !($page % 2) ) {
+	if ( $ps->{'pagealign-songs'}
+	     && !( $page % 2 or $ps->{'sort-pages'} =~ /2page|compact/ ) ) {
 	    $pr->newpage($ps, $page);
 	    $page++;
 	    $first_song_aligned //= 1;
 	}
 	$first_song_aligned //= 0;
+
+	if ( ($page % 2) && $song->{meta}->{pages} && $song->{meta}->{pages} == 2 ) {
+	    $pr->newpage($ps, $page+1);
+	    $page++;
+	    print STDERR " " if $options->{verbose}; # Progress indicator
+	}
 
 	$song->{meta}->{tocpage} = $page;
 	push( @book, [ $song->{meta}->{title}->[0], $song ] );
@@ -103,6 +115,11 @@ sub generate_songbook {
 	    }
 	}
 
+	if ( $options->{verbose} ) {
+	    print STDERR "$page "; # Progress indicator
+	}
+
+	$song->{meta}->{"chordpro.songsource"} //= $song->{source}->{file};
 	$page += $song->{meta}->{pages} =
 	  generate_song( $song, { pr        => $pr,
 				  startpage => $page,
@@ -114,6 +131,7 @@ sub generate_songbook {
     }
     $pages_of{songbook} = $page - 1;
     $start_of{back} = $page;
+    print STDERR "\n" if $options->{verbose}; # Progress indicator
 
     $::config->{contents} //=
       [ { $::config->{toc}->{order} eq "alpha"
@@ -495,7 +513,8 @@ sub generate_song {
 	    my $ftext = $fonts->{label} || $fonts->{text};
 	    my $w = $pr->strwidth("    ", $ftext);
 	    for ( @{ $s->{labels} } ) {
-		for ( split( /\\n/, $_ ) ) {
+		# Split on real newlines and \n.
+		for ( split( /\\n|\n/, $_ ) ) {
 		    my $t = $pr->strwidth( $_, $ftext ) + $w;
 		    $longest = $t if $t > $longest;
 		}
@@ -673,7 +692,7 @@ sub generate_song {
 		( $bgpdf, $pg ) = ( $1, $2 );
 	    }
 	    $fn = CP->findres($bgpdf);
-	    if ( -s -r $fn ) {
+	    if ( $fn && -s -r $fn ) {
 		$pg++ if $ps->{"even-odd-pages"} && !$rightpage;
 		$pr->importpage( $fn, $pg );
 	    }
@@ -687,7 +706,18 @@ sub generate_song {
 	$y = $ps->{_margintop};
 	$y += $ps->{headspace} if $ps->{'head-first-only'} && $class == 2;
 	$x += $ps->{_indent};
-	undef $spreadimage unless ref($spreadimage);
+
+        if ( $spreadimage ) {
+	    warn("PDF: Preparing spread image\n")
+	      if $config->{debug}->{images} || $config->{debug}->{assets};
+	    prepare_asset( $spreadimage->{id}, $s, $pr );
+	    $assets = $s->{assets} || {};
+	    warn("PDF: Preparing spread image, done\n")
+	      if $config->{debug}->{images} || $config->{debug}->{assets};
+            $y -= $ps->{_spreadimage} = imagespread( $spreadimage, $x, $y, $ps );
+            undef $spreadimage;
+        }
+
 	$ps->{_top} = $y;
 	$col = 0;
 	$vsp_ignorefirst = 1;
@@ -771,54 +801,43 @@ sub generate_song {
 		$y -= $vsp;
 	    }
 	}
-	elsif ( $show eq "top" && $class <= 1 ) {
+	elsif ( ( $show eq "top" || $show eq "bottom" )
+		&& $class <= 1 && $col == 0) {
 
-	    my $ww = ( $ps->{_marginright} - $ps->{_marginleft} );
+	    my $ww = $ps->{_marginright} - $ps->{_marginleft};
+
+	    my $dwidth = $dd->hsp0(undef,$ps); # diag
+	    my $dadv   = $dd->hsp1(undef,$ps); # adv
+	    my $hsp    = $dwidth + $dadv;      # diag + adv
+	    my $vsp    = $dd->vsp( undef, $ps );
 
 	    # Number of diagrams, based on minimal required interspace.
-	    my $h = int( ( $ww
-			   # Add one interspace (cuts off right)
-			   + $dd->hsp1(undef,$ps) )
-			 / $dd->hsp(undef,$ps) );
+	    # Add one interspace (cuts off right)
+	    my $h = int( ( $ww + $dadv ) / $hsp );
 	    die("ASSERT: $h should be greater than 0") unless $h > 0;
 
-	    my $hsp = $dd->hsp(undef,$ps);
-	    my $vsp = $dd->vsp( undef, $ps );
-	    while ( @chords ) {
-		my $x = $x - $ps->{_indent};
-
-		for ( 0..$h-1 ) {
-		    last unless @chords;
-		    $dd->draw( shift(@chords), $x + $_*$hsp, $y, $ps );
-		}
-
-		$y -= $vsp;
+	    my $y = $y;
+	    if ( $show eq "bottom" ) {
+		$y = $ps->{marginbottom} + (int((@chords-1)/$h) + 1) * $vsp;
+		$ps->{_bottommargin} = $y;
+		$y -= $dd->vsp1( undef, $ps ); # advance height
 	    }
-	    $ps->{_top} = $y;
-	}
-	elsif ( $show eq "bottom" && $class <= 1 && $col == 0 ) {
 
-	    my $ww = ( $ps->{_marginright} - $ps->{_marginleft} );
-
-	    # Number of diagrams, based on minimal required interspace.
-	    my $h = int( ( $ww
-			   # Add one interspace (cuts off right)
-			   + $dd->hsp1(undef,$ps) )
-			 / $dd->hsp(undef,$ps) );
-	    die("ASSERT: $h should be greater than 0") unless $h > 0;
-
-	    my $vsp = $dd->vsp( undef, $ps );
-	    my $hsp = $dd->hsp( undef, $ps );
-
-	    my $y = $ps->{marginbottom} + (int((@chords-1)/$h) + 1) * $vsp;
-	    $ps->{_bottommargin} = $y;
-
-	    $y -= $dd->vsp1( undef, $ps ); # advance height
-
+	    my $h0 = $h;
 	    while ( @chords ) {
 		my $x = $x - $ps->{_indent};
 		$checkspace->($vsp);
 		$pr->show_vpos( $y, 0 ) if $config->{debug}->{spacing};
+
+		if ( $dctl->{align} eq 'spread' && @chords == $h0  ) {
+		    my $delta = $ww + $dadv - min( $h0, 0+@chords ) * $hsp;
+		    $dadv = $dd->hsp1(undef,$ps) + $delta / ($h0-1);
+		}
+		elsif ( $dctl->{align} =~ /center|right|spread/ ) {
+		    my $delta = $ww + $dadv - min( $h0, 0+@chords ) * $hsp;
+		    $delta /= 2 if $dctl->{align} ne 'right';
+		    $x += $delta;
+		}
 
 		for ( 1..$h ) {
 		    last unless @chords;
@@ -829,18 +848,35 @@ sub generate_song {
 		$y -= $vsp;
 		$pr->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
 	    }
+	    $ps->{_top} = $y if $show eq "top";
 	}
 	elsif ( $show eq "below" ) {
 
-	    my $vsp = $dd->vsp( undef, $ps );
-	    my $hsp = $dd->hsp( undef, $ps );
-	    my $h = int( ( $ps->{__rightmargin}
-			   - $ps->{__leftmargin}
-			   + $dd->hsp1( undef, $ps ) ) / $hsp );
+	    my $ww = $ps->{__rightmargin} - $ps->{__leftmargin};
+
+	    my $dwidth = $dd->hsp0(undef,$ps); # diag
+	    my $dadv   = $dd->hsp1(undef,$ps); # adv
+	    my $hsp    = $dwidth + $dadv;      # diag + adv
+	    my $vsp    = $dd->vsp( undef, $ps );
+
+	    my $h = int( ( $ww + $dadv ) / $hsp );
+	    die("ASSERT: $h should be greater than 0") unless $h > 0;
+
+	    my $h0 = $h;
 	    while ( @chords ) {
-		$checkspace->($vsp);
+		$checkspace->( $dd->vsp0( undef, $ps ) );
 		my $x = $x - $ps->{_indent};
 		$pr->show_vpos( $y, 0 ) if $config->{debug}->{spacing};
+
+		if ( $dctl->{align} eq 'spread' && @chords == $h0  ) {
+		    my $delta = $ww + $dadv - min( $h0, 0+@chords ) * $hsp;
+		    $dadv = $dd->hsp1(undef,$ps) + $delta / ($h0-1);
+		}
+		elsif ( $dctl->{align} =~ /center|right|spread/ ) {
+		    my $delta = $ww + $dadv - min( $h0, 0+@chords ) * $hsp;
+		    $delta /= 2 if $dctl->{align} ne 'right';
+		    $x += $delta;
+		}
 
 		for ( 1..$h ) {
 		    last unless @chords;
@@ -852,6 +888,7 @@ sub generate_song {
 		$pr->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
 	    }
 	}
+	$y = $ps->{_top} if $ps->{_top};
     };
 
     my @elts;
@@ -896,7 +933,12 @@ sub generate_song {
     $newpage->();
 
     # Embed source and config for debugging;
-    $pr->embed($source->{file}) if $source->{file} && $options->{debug};
+    $pr->embed($source->{file})
+      if $source->{file}
+      && ( $options->{debug}
+	   ||
+	   $config->{debug}->{runtimeinfo}
+	   && $ChordPro::VERSION =~ /_/ );
 
     my $prev;			# previous element
 
@@ -928,16 +970,10 @@ sub generate_song {
 	if ( $elt->{type} ne "set" && !$did++ ) {
 	    # Insert top/left/right/bottom chord diagrams.
  	    $chorddiagrams->() unless $dctl->{show} eq "below";
+
 	    # Prepare the assets now we know the page width.
 	    prepare_assets( $s, $pr );
 
-	    if ( $spreadimage ) {
-		if (ref($spreadimage) eq 'HASH' ) {
-		    # Spread image doesn't indent.
-		    $spreadimage = imagespread( $spreadimage, $x-$ps->{_indent}, $y, $ps );
-		}
-		$y -= $spreadimage;
-	    }
 	    showlayout($ps) if $ps->{showlayout} || $config->{debug}->{spacing};
 	}
 
@@ -1229,7 +1265,7 @@ sub generate_song {
 		    # Use as margin label.
 		    unshift( @elts, { %$elt,
 				      type => $t->{type} // "comment",
-				      font => $ps->{fonts}->{label},
+				      font => $ps->{fonts}->{$t->{type} // "label"},
 				      text => $ps->{chorus}->{recall}->{tag},
 				    } )
 		      if $ps->{chorus}->{recall}->{tag} ne "";
@@ -1243,7 +1279,7 @@ sub generate_song {
 		    # Use as tag.
 		    unshift( @elts, { %$elt,
 				      type => $t->{type} // "comment",
-				      font => $ps->{fonts}->{label},
+				      font => $ps->{fonts}->{$t->{type} // "label"},
 				      text => $elt->{chorus}->[0]->{value},
 				    } )
 		}
@@ -1340,7 +1376,7 @@ sub generate_song {
 
 	if ( $elt->{type} eq "set" ) {
 	    if ( $elt->{name} eq "lyrics-only" ) {
-		$lyrics_only = $elt->{value}
+		$lyrics_only = is_true($elt->{value})
 		  unless $lyrics_only > 1;
 	    }
 	    elsif ( $elt->{name} eq "gridparams" ) {
@@ -1382,14 +1418,7 @@ sub generate_song {
 	    }
 	    # Arbitrary config values.
 	    elsif ( $elt->{name} =~ /^pdf\.(.+)/ ) {
-		# $ps is inuse, modify in place.
-		my @k = split( /[.]/, $1 );
-		my $cc = $ps;
-		my $c = \$cc;
-		foreach ( @k ) {
-		    $c = \($$c->{$_});
-		}
-		$$c = $elt->{value};
+		prpadd2cfg( $ps, $1 => $elt->{value} );
 	    }
 	    next;
 	}
@@ -1512,7 +1541,10 @@ sub prlabel {
     my $font= $ps->{fonts}->{label} || $ps->{fonts}->{text};
     $font->{size} ||= $font->{fd}->{size};
     $ps->{pr}->setfont($font);	# for strwidth.
-    for ( split( /\\n/, $label ) ) {
+
+    # Now we have quoted strings we can have real newlines.
+    # Split on real and unescaped (old style) newlines.
+    for ( split( /\\n|\n/, $label ) ) {
 	my $label = $_;
 	if ( $align eq "right" ) {
 	    my $avg_space_width = $ps->{pr}->strwidth("m");
@@ -1755,15 +1787,15 @@ sub songline {
 	    # Underline the first word of the phrase, to indicate
 	    # the actual chord position. Skip leading non-letters.
 	    $phrase = " " if $phrase eq "";
-	    my ( $pre, $word, $rest ) = $phrase =~ /^(\W+)?(\w+)(.+)?$/;
-	    my $ulstart = $x;
-	    $ulstart += $pr->strwidth($pre) if defined($pre);
-	    my $w = $pr->strwidth( $word//" ", $ftext );
-	    # Avoid running together of syllables.
-	    $w *= 0.75 unless defined($rest);
 
-	    $pr->hline( $ulstart, $ytext + font_ul($ftext), $w,
-			0.25, $ps->{theme}->{foreground} );
+	    # This may screw up in some markup situations.
+	    my ( $pre, $word, $rest ) =
+	      $phrase =~ /^((?:\<[^>]*?\>|\W)+)?(\w+)(.+)?$/;
+	    # This should take case of most cases...
+	    unless ( $i == $n || defined($rest) && $rest !~ /^\</ ) {
+		$rest = chop($word) . ($rest//"");
+	    }
+	    $phrase = ($pre//"") . "<u>" . $word . "</u>" . ($rest//"");
 
 	    # Print the text.
 	    pr_label_maybe( $ps, $x, $ytext );
@@ -1867,13 +1899,21 @@ sub imageline {
     my $x0 = $x;
     my $pr = $ps->{pr};
     my $id = $elt->{id};
-    my $opts = { %{$assets->{$id}->{opts}//{}}, %{$elt->{opts}//{}} };
-    my $img = $assets->{$id}->{data};
+    my $asset = $assets->{$id};
+    unless ( $asset ) {
+	warn("Undefined image id: \"$id\"\n");
+    }
+    my $opts = { %{$asset->{opts}//{}}, %{$elt->{opts}//{}} };
+    my $img = $asset->{data};
     my $label = $opts->{label};
+    my $anchor = $opts->{anchor} //= "float";
     my $width = $opts->{width};
     my $height = $opts->{height};
-    my $avwidth  = $assets->{$id}->{vwidth};
-    my $avheight = $assets->{$id}->{vheight};
+    my $avwidth  = $asset->{vwidth};
+    my $avheight = $asset->{vheight};
+    my $scalex = $asset->{opts}->{design_scale} || 1;
+    my $scaley = $scalex;
+
     unless ( $img ) {
 	return "Unhandled image type: asset=$id";
     }
@@ -1892,16 +1932,22 @@ sub imageline {
     }
 
     # Available width and height.
-    my $pw;
-    if ( $ps->{columns} > 1 ) {
-	$pw = $ps->{columnoffsets}->[1]
-	  - $ps->{columnoffsets}->[0]
-	    - $ps->{columnspace};
+    my ( $pw, $ph );
+    if ( $anchor eq "paper" ) {
+	( $pw, $ph ) = @{$ps->{papersize}};
     }
     else {
-	$pw = $ps->{__rightmargin} - $ps->{_leftmargin};
+	if ( $ps->{columns} > 1 ) {
+	    $pw = $ps->{columnoffsets}->[1]
+	      - $ps->{columnoffsets}->[0]
+	      - $ps->{columnspace};
+	}
+	else {
+	    $pw = $ps->{__rightmargin} - $ps->{_leftmargin};
+	}
+	$ph = $ps->{_margintop} - $ps->{_marginbottom};
+	$pw -= $ps->{_indent} if $anchor eq "float";
     }
-    my $ph = $ps->{_margintop} - $ps->{_marginbottom};
 
     if ( $width && $width =~ /^(\d+(?:\.\d+)?)\%$/ ) {
 	$width  = $1/100 * $pw;
@@ -1910,7 +1956,6 @@ sub imageline {
 	$height = $1/100 * $ph;
     }
 
-    my $scale = 1;
     my ( $w, $h ) = ( $width  || $avwidth  || $img->width,
 		      $height || $avheight || $img->height );
 
@@ -1922,48 +1967,47 @@ sub imageline {
 	$w = $height / ($avheight || $img->height) * ($avwidth || $img->width);
     }
 
-
-  if ( $config->{debug}->{x1} ) {
-
-    # Current approach: user scale overrides.
-    if ( defined $opts->{scale} ) {
-	$scale = $opts->{scale} || 1;
-    }
-    else {
-	if ( $w > $pw ) {
-	    $scale = $pw / $w;
-	}
-	if ( $h*$scale > $ph ) {
-	    $scale = $ph / $h;
-	}
-    }
-  }
-  else {
-
-    # Better, but may break things.
     if ( $w > $pw ) {
-	$scale = $pw / $w;
+	$scalex = $pw / $w;
     }
-    if ( $h*$scale > $ph ) {
-	$scale = $ph / $h;
+    if ( $h*$scalex > $ph ) {
+	$scalex = $ph / $h;
     }
+    $scaley = $scalex;
     if ( $opts->{scale} ) {
-	$scale *= $opts->{scale} =~ /^(\d+(?:\.\d+)?)\%$/ ? $1/100 : $opts->{scale};
+	my @s;
+	if ( UNIVERSAL::isa( $opts->{scale}, 'ARRAY' ) ) {
+	    @s = @{$opts->{scale}};
+	}
+	else {
+	    for ( split( /,/, $opts->{scale} ) ) {
+		$_ = $1 / 100 if /^([\d.]+)\%$/;
+		push( @s, $_ );
+	    }
+	    push( @s, $s[0] ) unless @s > 1;
+	    carp("Invalid scale attribute: \"$opts->{scale}\" (too many values)\n")
+	      unless @s == 2;
+	}
+	$scalex *= $s[0];
+	$scaley *= $s[1];
     }
 
-  }
+    warn("Image scale: $scalex,$scaley\n") if $config->{debug}->{images};
+    $w *= $scalex;
+    $h *= $scaley;
 
-    warn("Image scale: $scale\n") if $config->{debug}->{images};
-    $h *= $scale;
-    $w *= $scale;
-
-    my $anchor = $opts->{anchor} //= "float";
     my $ox = $opts->{x};
     my $oy = $opts->{y};
 
-    my $align;
+    # Not sure I like this...
+    if ( defined $oy && $oy =~ /base([-+].*)/ ) {
+	$oy = -$1;
+	$oy += $opts->{base}*$scaley if $opts->{base};
+	warn("Y: ", $opts->{y}, " BASE: ", $opts->{base}, " -> $oy\n");
+    }
+
+    my 	$align = $opts->{align};
     if ( $anchor eq "float" ) {
-	$align = $opts->{align};
 	$align //= ( $opts->{center} // 1 ) ? "center" : "left";
 	# Note that image is placed aligned on $x.
 	if ( $align eq "center" ) {
@@ -1976,7 +2020,7 @@ sub imageline {
     }
     $align //= "left";
 
-    my $y = $gety->($h);	# may have been changed by checkspace
+    my $y = $gety->($anchor eq "float" ? $h : 0);	# may have been changed by checkspace
     if ( defined ( my $tag = $i_tag // $label ) ) {
 	$i_tag = $tag;
     	my $ftext = $ps->{fonts}->{comment};
@@ -2034,8 +2078,9 @@ sub imageline {
 		     xscale => $w/$img->width,
 		     yscale => $h/$img->height,
 		     border => $opts->{border} || 0,
-		     valign => "top",
+		     valign => $opts->{valign} // "top",
 		     align  => $align,
+		     maybe href => $opts->{href},
 		   );
 
     if ( $anchor eq "float" ) {
@@ -2051,7 +2096,8 @@ sub imagespread {
     my $tag = "id=" . $si->{id};
     return "Unknown asset: $tag"
       unless exists( $assets->{$si->{id}} );
-    my $img = $assets->{$si->{id}}->{data};
+    my $asset = $assets->{$si->{id}};
+    my $img = $asset->{data};
     return "Unhandled asset: $tag"
       unless $img;
     my $opts = {};
@@ -2060,43 +2106,42 @@ sub imagespread {
     my $pw = $ps->{_marginright} - $ps->{_marginleft};
     my $ph = $ps->{_margintop} - $ps->{_marginbottom};
 
-    my $scale = 1;
     my ( $w, $h ) = ( $opts->{width}  || $img->width,
 		      $opts->{height} || $img->height );
 
-  if ( $config->{debug}->{x1} ) {
+    # Design scale.
+    my $scalex = $asset->{opts}->{scale} || 1;
+    my $scaley = $scalex;
 
-    # Current approach: user scale overrides.
-    if ( defined $opts->{scale} ) {
-	$scale = $opts->{scale} || 1;
-    }
-    else {
-	if ( $w > $pw ) {
-	    $scale = $pw / $w;
-	}
-	if ( $h*$scale > $ph ) {
-	    $scale = $ph / $h;
-	}
-    }
-  }
-  else {
-
-    # Better, but may break things.
     if ( $w > $pw ) {
-	$scale = $pw / $w;
+	$scalex = $pw / $w;
     }
-    if ( $h*$scale > $ph ) {
-	$scale = $ph / $h;
+    if ( $h*$scalex > $ph ) {
+	$scalex = $ph / $h;
     }
+    $scaley = $scalex;
+
     if ( $opts->{scale} ) {
-	$scale *= $opts->{scale};
+	my @s;
+	if ( UNIVERSAL::isa( $opts->{scale}, 'ARRAY' ) ) {
+	    @s = @{$opts->{scale}};
+	}
+	else {
+	    for ( split( /,/, $opts->{scale} ) ) {
+		$_ = $1 / 100 if /^([\d.]+)\%$/;
+		push( @s, $_ );
+	    }
+	    push( @s, $s[0] ) unless @s > 1;
+	    carp("Invalid scale attribute: \"$opts->{scale}\" (too many values)\n")
+	      unless @s == 2;
+	}
+	$scalex *= $s[0];
+	$scaley *= $s[1];
     }
 
-  }
-
-    warn("Image scale: $scale\n") if $config->{debug}->{images};
-    $h *= $scale;
-    $w *= $scale;
+    warn("Image scale: $scalex $scaley\n") if $config->{debug}->{images};
+    $h *= $scalex;
+    $w *= $scaley;
 
     my $align = $opts->{align};
     $align //= ( $opts->{center} // 1 ) ? "center" : "left";
@@ -2378,6 +2423,28 @@ sub showlayout {
 	       $a[1]-2,
 	       $font, $fsz );
 
+    my $spreadimage = $ps->{_spreadimage};
+    if ( defined($spreadimage) && !ref($spreadimage) ) {
+	my $mr = $ps->{marginright};
+	$a[1] = $ps->{papersize}->[1]-$ps->{margintop} - $spreadimage;
+	$a[2] = $ps->{papersize}->[0]-$ml-$mr;
+	$pr->hline(@a);
+	$t = $f->($a[1]);
+	$pr->text( "<span color='red'>$t  </span>",
+		   $ml-$pr->strwidth("$t  "),
+		   $a[1]-2,
+		   $font, $fsz );
+	$a[0] = $ps->{papersize}->[0]-$mr;
+	$a[1] = $ps->{papersize}->[1]-$ps->{margintop};
+	$a[2] = $a[1] - $ps->{marginbottom};
+	$pr->vline(@a);
+	$t = $f->($a[0]);
+	$pr->text( "<span color='red'>$t  </span>",
+		   $a[0]-$pr->strwidth("$t")/2,
+		   $ptop,
+		   $font, $fsz );
+    }
+
     my @off = @{ $ps->{columnoffsets} };
     pop(@off);
     @off = ( $ps->{chordscolumn} ) if $chordscol;
@@ -2521,6 +2588,7 @@ sub configurator {
     $fm->( qw( comment_box    text     ) );
     $fm->( qw( comment        text     ) );
     $fm->( qw( annotation     chord    ) );
+    $fm->( qw( label          text     ) );
     $fm->( qw( toc            text     ) );
     $fm->( qw( empty          text     ) );
     $fm->( qw( grid           chord    ) );
@@ -2696,7 +2764,34 @@ sub wrapsimple {
 sub prepare_assets {
     my ( $s, $pr ) = @_;
 
-    my %sa = %{$s->{assets}//{}};	# song assets
+    my %sa;			# song assets
+
+    # Ignore spread asset.
+    while ( my($k,$v) = each %{$s->{assets}//{}} ) {
+	next if $v->{opts}->{spread};
+	$sa{$k} = $v;
+    }
+
+    warn("PDF: Preparing ", scalar(keys %sa), " image",
+	 keys(%sa) == 1 ? "" : "s", "\n")
+      if $config->{debug}->{images} || $config->{debug}->{assets};
+
+    for my $id ( sort keys %sa ) {
+	prepare_asset( $id, $s, $pr );
+    }
+
+    warn("PDF: Preparing ", scalar(keys %sa), " image",
+	 keys(%sa) == 1 ? "" : "s", ", done\n")
+      if $config->{debug}->{images} || $config->{debug}->{assets};
+    $assets = $s->{assets} || {};
+    ::dump( $assets, as => "Assets, Pass 2" )
+      if $config->{debug}->{assets} & 0x02;
+
+}
+
+sub prepare_asset {
+    my ( $id, $s, $pr ) = @_;
+
     $s->{_ps} = $pr->{ps};		# for handlers TODO
 
     # All elements generate zero or one display items, except for SVG images
@@ -2707,11 +2802,8 @@ sub prepare_assets {
     my $pw = $ps->{_marginright} - $ps->{_marginleft};
     my $cw = ( $pw - ( $ps->{columns} - 1 ) * $ps->{columnspace} ) /$ps->{columns}
       - $ps->{_indent};
-    warn("PDF: Preparing ", scalar(keys %sa), " image",
-	 keys(%sa) == 1 ? "" : "s", ", pw=$pw, cw=$cw\n")
-      if $config->{debug}->{images} || $config->{debug}->{assets};
-    for my $id ( sort keys %sa ) {
-	my $elt = $sa{$id};
+
+    for my $elt ( $s->{assets}->{$id} ) {
 
 	$elt->{subtype} //= "image" if $elt->{uri};
 
@@ -2736,7 +2828,7 @@ sub prepare_assets {
 	    $w = $elt->{opts}->{width}
 	      if $elt->{opts}->{width} && $elt->{opts}->{width} < $w;
 
-	    my $res = $hd->( $s, $w, $elt );
+	    my $res = $hd->( $s, elt => $elt, pagewidth => $w );
 	    if ( $res ) {
 		$res->{opts} = { %{ $res->{opts} // {} },
 				 %{ $elt->{opts} // {} } };
@@ -2748,6 +2840,15 @@ sub prepare_assets {
 		      "\n" )
 		  if $config->{debug}->{images};
 		$s->{assets}->{$id} = $res;
+	    }
+	    else {
+		# Substitute alert image.
+		$s->{assets}->{$id} = $res =
+		  { type => "image",
+		    line => $elt->{line},
+		    subtype => "xform",
+		    data => TextLayoutImageElement::alert(60),
+		    opts => { %{$elt->{opts}//{}} } };
 	    }
 
 	    # If the delegate produced an SVG, continue processing.
@@ -2778,7 +2879,7 @@ sub prepare_assets {
 		fc   => sub { svg_fonthandler( $ps, @_ ) },
 		tc   => sub { svg_texthandler( $ps, @_ ) },
 		atts => { debug   => $config->{debug}->{svg} > 1,
-			  verbose => $config->{debug}->{svg},
+			  verbose => $config->{debug}->{svg} // 0,
 			} );
 	    my $data = $elt->{data};
 	    my $o = $p->process( $data ? \join( "\n", @$data ) : $elt->{uri},
@@ -2810,14 +2911,19 @@ sub prepare_assets {
 	    if ( @$o > 1 ) {
 		$res->{multi} = $o;
 	    }
-
 	    warn("Created asset $id (xform, ",
 		 $o->[0]->{vwidth}, "x", $o->[0]->{vheight}, ")",
 		 " scale=", $res->{opts}->{scale} || 1,
 		 " align=", $res->{opts}->{align}//"default",
 		 " sep=", $sep,
+		 " base=", $res->{opts}->{base}//"",
 		 "\n")
 	      if $config->{debug}->{images};
+	    next;
+	}
+
+	if ( $elt->{type} eq "image" && $elt->{subtype} eq "xform" ) {
+	    # Ready to go.
 	    next;
 	}
 
@@ -2907,56 +3013,12 @@ sub prepare_assets {
 	}
 
     }
-    warn("PDF: Preparing images, done\n")
-      if $config->{debug}->{images} || $config->{debug}->{assets};
-    $assets = $s->{assets} || {};
-    ::dump( $assets, as => "Assets, Pass 2" )
-      if $config->{debug}->{assets} & 0x02;
-}
-
-
-my %corefonts =
-  (
-   ( map { lc($_) => $_ }
-     "Times-Roman",
-     "Times-Bold",
-     "Times-Italic",
-     "Times-BoldItalic",
-     "Helvetica",
-     "Helvetica-Bold",
-     "Helvetica-Oblique",
-     "Helvetica-BoldOblique",
-     "Courier",
-     "Courier-Bold",
-     "Courier-Oblique",
-     "Courier-BoldOblique",
-     "ZapfDingbats",
-     "Georgia",
-     "Georgia,Bold",
-     "Georgia,Italic",
-     "Georgia,BoldItalic",
-     "Verdana",
-     "Verdana,Bold",
-     "Verdana,Italic",
-     "Verdana,BoldItalic",
-     "Webdings",
-     "Wingdings" ),
-   # For convenience.
-   "georgia-bold"	 => "Georgia,Bold",
-   "georgia-italic"	 => "Georgia,Italic",
-   "georgia-bolditalic"	 => "Georgia,BoldItalic",
-   "verdana-bold"	 => "Verdana,Bold",
-   "verdana-italic"	 => "Verdana,Italic",
-   "verdana-bolditalic"	 => "Verdana,BoldItalic",
-);
-
-sub is_corefont {
-    $corefonts{lc $_[0]};
 }
 
 # Font handler for SVG embedding.
 sub svg_fonthandler {
-    my ( $ps, $el, $pdf, $style ) = @_;
+    my ( $ps, $svg, %args ) = @_;
+    my ( $pdf, $style ) = @args{qw(pdf style)};
 
     my $family = lc( $style->{'font-family'} );
     my $stl    = lc( $style->{'font-style'}  // "normal" );
@@ -3016,15 +3078,21 @@ sub svg_fonthandler {
 
 # Text handler for SVG embedding.
 sub svg_texthandler {
-    my ( $ps, $el, $xo, $pdf, $style, $text, %opts ) = @_;
+    my ( $ps, $svg, %args ) = @_;
+    my $xo    = delete($args{xo});
+    my $pdf   = delete($args{pdf});
+    my $style = delete($args{style});
+    my $text  = delete($args{text});
+    my %opts  = %args;
+
     my @t = split( /([♯♭])/, $text );
     if ( @t == 1 ) {
 	# Nothing special.
-	$el->set_font( $xo, $style );
+	$svg->set_font( $xo, $style );
 	return $xo->text( $text, %opts );
     }
 
-    my ( $font, $sz ) = $el->root->fontmanager->find_font($style);
+    my ( $font, $sz ) = $svg->root->fontmanager->find_font($style);
     my $has_sharp = $font->glyphByUni(ord("♯")) ne ".notdef";
     my $has_flat  = $font->glyphByUni(ord("♭")) ne ".notdef";
     # For convenience we assume that either both are available, or missing.
@@ -3068,18 +3136,112 @@ sub _dump {
     }
 }
 
+sub sort_songbook {
+    my ( $sb ) = @_;
+    my $ps = $config->{pdf};
+    my $pri = ( __PACKAGE__."::Writer" )->new( $ps, $pdfapi );
+
+    # Count pages to properly align multi-page songs without
+    # needing to turn page.
+    my $page = $options->{"start-page-number"} ||= 1;
+
+    my $sorting = $ps->{'sort-pages'};
+
+    if ( $sorting =~ /2page|compact/ ) {
+	# Progress indicator
+	print STDERR "Counting pages:\n" if $options->{verbose};
+
+	foreach my $song ( @{$sb->{songs}} ) {
+	    $song->{meta}->{pages} =
+	      generate_song( $song, { pr => $pri, startpage => 1 } );
+	    if ( $options->{verbose} ) {
+		# Progress indicator
+		print STDERR $song->{meta}->{pages}." ";
+	    }
+	}
+	print STDERR "\n" if $options->{verbose}; # Progress indicator
+    }
+	
+	foreach my $song ( @{$sb->{songs}} ) {
+	  if (!defined($song->{meta}->{sorttitle})) {
+	    $song->{meta}->{sorttitle}=$song->{meta}->{title};
+	  }
+	}
+	
+    my @songlist = @{$sb->{songs}};
+
+    if ( $sorting =~ /title/ ) {
+	if ($sorting =~ /desc/ ) {
+	    @songlist = sort { $b->{meta}->{sorttitle}[0] cmp $a->{meta}->{sorttitle}[0]} @songlist;
+	}
+	else {
+	    @songlist = sort { $a->{meta}->{sorttitle}[0] cmp $b->{meta}->{sorttitle}[0]} @songlist;
+	}
+    }
+    elsif ( $sorting =~ /subtitle/ ) {
+	if ($sorting =~ /desc/ ) {
+	    @songlist = sort { $b->{meta}->{subtitle}[0] cmp $a->{meta}->{subtitle}[0] } @songlist;
+	}
+	else {
+	    @songlist = sort { $a->{meta}->{subtitle}[0] cmp $b->{meta}->{subtitle}[0]} @songlist;
+	}
+    }
+
+    if ( $sorting =~ /compact/ ) {
+	my $pagecount = $page;
+	my $songs = @songlist;
+	my $i = 0;
+	while ( $i<$songs ) {
+	    if ( defined($songlist[$i]->{meta}->{order}) ) {
+		#skip already processed entries
+		$i++;
+		next;
+	    }
+	    my $pages = $songlist[$i]->{meta}->{pages};
+	    $songlist[$i]->{meta}->{order} = $pagecount;
+	    if ( ($pagecount % 2) && $pages == 2 ) {
+		my $j = $i+1;
+		#Find next song with != 2 pages
+		while ( $j < $songs ) {
+		    last if ( !defined($songlist[$j]->{meta}->{order}) && $songlist[$j]->{meta}->{pages} != 2 );
+		    $j++;
+		}
+		if ( $j == $songs ) {
+		    $i++;
+		}
+		else {
+		    # Swapped page gets current ID
+		    $songlist[$j]->{meta}->{order} = $pagecount;
+		    # Pushed page gets ID plus swapped page
+		    $songlist[$i]->{meta}->{order} = $pagecount+$songlist[$j]->{meta}->{pages};
+		    # Add the swapped page to pagecount as it will be skipped later
+		    $pages += $songlist[$j]->{meta}->{pages};
+		}
+	    }
+	    else {
+		$i++
+	    }
+	    $pagecount += $pages;
+	}
+	# By Pagelist
+	@songlist = sort { $a->{meta}->{order} <=> $b->{meta}->{order} } @songlist;
+    }
+
+    $sb->{songs} = [@songlist];
+}
+
 use Object::Pad;
 
 class TextLayoutImageElement :isa(Text::Layout::PDFAPI2::ImageElement);
 
-use constant TYPE => "img";
 use Carp;
 
 use Text::ParseWords qw( shellwords );
 
 method parse( $ctx, $k, $v ) {
 
-    my %ctl = ( type => TYPE, size => $ctx->{size} );
+    my %ctl = ( type => "img", size => $ctx->{size} );
+    my $err;
 
     # Split the attributes.
     foreach my $kk ( shellwords($v) ) {
@@ -3092,6 +3254,10 @@ method parse( $ctx, $k, $v ) {
 	    $v = lc $v unless $k =~ /^(id|chord)$/;
 
 	    if ( $k =~ /^(id|bbox|chord|src)$/ ) {
+		if ( $v =~ /^(chord|builtin):/ ) {
+		    $k = $1;
+		    $v = $';
+		}
 		$ctl{$k} = $v;
 	    }
 	    elsif ( $k eq "align" && $v =~ /^(left|right|center)$/ ) {
@@ -3101,23 +3267,53 @@ method parse( $ctx, $k, $v ) {
 		$ctl{instrument} = $v;
 	    }
 	    elsif ( $k =~ /^(width|height|dx|dy|w|h)$/ ) {
+		$v = $1                      if $v =~ /^(-?[\d.]+)pt$/;
 		$v = $1 * $ctx->{size}       if $v =~ /^(-?[\d.]+)em$/;
 		$v = $1 * $ctx->{size} / 2   if $v =~ /^(-?[\d.]+)ex$/;
-		$v = $1 * $ctx->{size} / 100 if $v =~ /^(-?[\d.]+)\%$/;
-		$ctl{$k} = $v;
+		#$v = $1 * $ctx->{size} / 100 if $v =~ /^(-?[\d.]+)\%$/;
+		if ( $v =~ /^(-?[\d.]+)\%$/ ) {
+		    warn("Invalid img attribute: \"$kk\" (percentage not allowed)\n");
+		    $err++;
+		}
+		else {
+		    $ctl{$k} = $v;
+		}
 	    }
 	    elsif ( $k =~ /^(scale)$/ ) {
-		$v = $1 / 100 if $v =~ /^([\d.]+)\%$/;
-		$ctl{$k} = $v;
+		my @s;
+		for ( split( /,/, $v ) ) {
+		    $_ = $1 / 100 if /^([\d.]+)\%$/;
+		    push( @s, $_ );
+		}
+		push( @s, $s[0] ) unless @s > 1;
+		unless ( @s == 2 ) {
+		    warn("Invalid img attribute: \"$kk\" (too many values)\n");
+		    $err++;
+		}
+		$ctl{$k} = \@s;
 	    }
 	    else {
-		carp("Invalid " . TYPE . " attribute: \"$k\" ($kk)\n");
+		warn("Invalid img attribute: \"$k\" ($kk)\n");
+		$err++;
 	    }
 	}
 
 	# Currently we do not have value-less attributes.
 	else {
-	    carp("Invalid " . TYPE . " attribute: \"$kk\"\n");
+	    warn("Invalid img attribute: \"$kk\"\n");
+	    $err++;
+	}
+    }
+
+    if ( $err ) {
+	if ( $ctl{id} ) {
+	    $ctl{id} = "__ERROR__";
+	}
+    }
+    elsif ( $ctl{id} ) {
+	my $a = ChordPro::Output::PDF::assets($ctl{id});
+	if ( $a && $a->{opts}->{base} ) {
+	    $ctl{base} = $a->{opts}->{base};
 	}
     }
 
@@ -3128,15 +3324,34 @@ method getimage ($fragment) {
     $fragment->{_img} //= do {
 	my $xo;
 	if ( $fragment->{id} ) {
-	    $xo = ChordPro::Output::PDF::assets($fragment->{id})->{data};
-	    unless ( $xo ) {
-		warn("Unknown image ID in <img>: $fragment->{id}\n");
+	    my $o = ChordPro::Output::PDF::assets($fragment->{id});
+	    $xo = $o->{data} if $o;
+	    unless ( $o && $xo ) {
+		warn("Unknown image ID in <img>: $fragment->{id}\n")
+		  unless $fragment->{id} eq "__ERROR__";
+		$xo = alert( $fragment->{size} );
+	    }
+	    $fragment->{design_scale} = $o->{opts}->{scale};
+	    if ( $o->{width} && $o->{vwidth} ) {
+		$fragment->{design_scale} ||= 1;
+		$fragment->{design_scale} *= $o->{vwidth}/$o->{width};
+	    }
+	}
+	elsif ( $fragment->{builtin} ) {
+	    my $i = $fragment->{builtin};
+	    if ( $i =~ /^alert(?:\(([\d.]+)\))?$/ ) {
+		$xo = alert( $1 || $fragment->{size} );
+	    }
+	    else {
+		warn("Unknown builtin image in <img>: $i\n");
+		$xo = alert( $fragment->{size} );
 	    }
 	}
 	elsif ( $fragment->{chord} ) {
 	    my $info = ChordPro::Chords::known_chord($fragment->{chord});
 	    unless ( $info ) {
 		warn("Unknown chord in <img>: $fragment->{chord}\n");
+		$xo = alert( $fragment->{size} );
 	    }
 	    else {
 		my $p;

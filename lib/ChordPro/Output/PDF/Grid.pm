@@ -50,7 +50,7 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 		    $t->{text} .= $t->{chords}->[$_]->chord_display . $t->{phrases}->[$_];
 		}
 	    }
-	    $pr->text( $t->{text}, $x, $y, $fonts->{comment} );
+	    $pr->text( $t->{text}, $x, $y, $fonts->{grid_margin} );
 	}
 	$x += $margin->[0] * $cellwidth + $barwidth;
     }
@@ -159,7 +159,7 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 	    my $cellwidth = $cellwidth / @$tok;
 	    for my $t ( @$tok ) {
 		$x += $cellwidth, next if $t eq '';
-		$t = $t->chord_display;
+		$t = $t eq '/' ? $t : $t->chord_display;
 		$pr->text( $t, $x, $y, $fchord );
 		$x += $cellwidth;
 	    }
@@ -204,10 +204,10 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 	if ( $t->{chords} ) {
 	    $t->{text} = "";
 	    for ( 0..$#{ $t->{chords} } ) {
-		$t->{text} .= $t->{chords}->[$_] . $t->{phrases}->[$_];
+		$t->{text} .= $t->{chords}->[$_]->chord_display . $t->{phrases}->[$_];
 	    }
 	}
-	$pr->text( " " . $t->{text}, $x, $y, $fonts->{comment} );
+	$pr->text( " " . $t->{text}, $x, $y, $fonts->{grid_margin} );
     }
 }
 

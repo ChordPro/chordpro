@@ -1,18 +1,20 @@
 #! /bin/make -f
 
-# GNUmakefile for MacOS, Citrus Perl
-
-default : dmg
+# GNUmakefile for MacOS, Wx 3.2
 
 .PHONY :: chordpro wxchordpro
 
 ROOT   := ../..
 COMMON := ../common
+BASE   := ../linux
 SCRIPT := ${ROOT}/script
 DEST   := build
 VERSION := $(shell perl ../../lib/ChordPro/Version.pm)
+TARGET := wxchordpro
 
 PP := pp
+
+default : dmg
 
 # PAR Packer.
 
@@ -29,15 +31,14 @@ clean ::
 # Portable Perl Launcher
 
 PERLLIB := $(shell perl -MConfig -E 'say $$Config{archlib}')
-PERLINC := ${PERLLIB}/perl5/CORE
 PERLSO  := $(shell perl -MConfig -E 'say $$Config{libperl}')
 
 .PHONY :: ppl
-ppl :: clean wxchordpro unpack copy_coredll loaders
+ppl :: clean ${TARGET} unpack copy_coredll loaders
 
 .PHONY :: unpack
 unpack :
-	perl ../pp2ppl.pl --dest=${DEST} wxchordpro --quiet
+	perl ../pp2ppl.pl --dest=${DEST} ${TARGET} --quiet
 	cp -p "${ROOT}/script/chordpro.pl" "${DEST}/script/chordpro.pl" 
 	cp -p "${ROOT}/lib/ChordPro/Config.pm" "${DEST}/lib/ChordPro/Config.pm" 
 	cp "${DEST}/res/icons/chordpro.icns" ${DEST}
@@ -54,33 +55,30 @@ copy_coredll :
 PREFIX := '"script/"'
 CCOPTS := $(shell perl -MExtUtils::Embed -e ccopts) -DSCRIPTPREFIX=${PREFIX}
 LDOPTS := ${DEST}/${PERLSO} -lpthread
+ifeq (${TARGET},wxchordpro)
 WXCLIB := $(shell perl -MAlien::wxWidgets -E 'say Alien::wxWidgets->prefix')
 WXCNFG := ${WXCLIB}/bin/wx-config
+endif
 
 .PHONY :: loaders
-loaders : "${DEST}/wxchordpro" "${DEST}/chordpro"
+loaders : "${DEST}/${TARGET}" "${DEST}/chordpro"
 
 # For testing...
 .PHONY :: _loaders
 _loaders : "${DEST}/chordpro"
 	cp "${DEST}/chordpro" "${DEST}/perl"
 
-"${DEST}/wxchordpro" : ppl.c dndhandler.cpp
-	${CC} ${CCOPTS} -o "${DEST}/wxchordpro" -L${DEST} ${LDOPTS} ppl.c
+"${DEST}/wxchordpro" : ${BASE}/ppl.c dndhandler.cpp
+	${CC} ${CCOPTS} -o "${DEST}/wxchordpro" -L${DEST} ${LDOPTS} ${BASE}/ppl.c
 	${CXX} -o "${DEST}/dndhandler" \
 		dndhandler.cpp `${WXCNFG} --cxxflags --libs`
 	perl ./reloc.pl "${DEST}/dndhandler"
 
-"${DEST}/chordpro" : ppl.c
-	${CC} ${CCOPTS} -o "${DEST}/chordpro" -L${DEST} ${LDOPTS} ppl.c
+"${DEST}/chordpro" : ${BASE}/ppl.c
+	${CC} ${CCOPTS} -o "${DEST}/chordpro" -L${DEST} ${LDOPTS} ${BASE}/ppl.c
 
 clean ::
 	rm -fr ${DEST}
-
-# Truly dynamic version of loader. Rename to {wx}chordpro if you dare.
-
-"${DEST}/poc" : poc.c
-	${CC} ${CCOPTS} -o "${DEST}/poc" poc.c -ldl
 
 APPDIR := ChordPro.app
 
@@ -96,10 +94,11 @@ app1 :
 	cp PkgInfo Info.plist "${APPDIR}/Contents"
 	cp "${DEST}/chordpro.icns" "${APPDIR}/Contents/Resources"
 	cp "${DEST}/chordpro-doc.icns" "${APPDIR}/Contents/Resources"
-	cd "${APPDIR}"; mv chordpro wxchordpro dndhandler Contents/MacOS
 	cd "${APPDIR}"; mv script lib Contents/MacOS
 	cd "${APPDIR}"; mv lib*.dylib Contents/MacOS
 	cd "${APPDIR}"; rm -f MANIFEST META.yml
+ifeq (${TARGET},wxchordpro)
+	cd "${APPDIR}"; mv chordpro wxchordpro dndhandler Contents/MacOS
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libpng16.*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libjpeg.*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libtiff.*.dylib
@@ -108,22 +107,34 @@ app1 :
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libwx*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*.bundle
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*/*.bundle
+else
+	cd "${APPDIR}"; cp chordpro dndhandler
+	cd "${APPDIR}"; mv chordpro dndhandler Contents/MacOS
+endif
 
 dmg : app dmg1
 
-DMG := ChordPro-Installer-${VERSION}.dmg
+ifeq (${TARGET},wxchordpro)
+VOLTYPE := Classic
+else
+VOLTYPE := CLI
+endif
+DMGNAME := ChordPro-${VOLTYPE}-${VERSION}.dmg
 
 dmg1 :
-	rm -f ${DMG}
+	rm -f ${DMGNAME}
 	bash ./create-dmg \
-		--volname "ChordPro Installer" \
-		--volicon "${APPDIR}/chordpro.icns" \
-		--window-pos 200 200 \
-		--window-size 600 300 \
-		--icon "${APPDIR}" 50 50 \
-		--add-file "READ ME FIRST.html" README.html 300 50 \
-		--hide-extension "READ ME FIRST.html" \
-		${DMG} "${APPDIR}"
+	    --volname "ChordPro ${VOLTYPE}" \
+	    --volicon "${APPDIR}/chordpro.icns" \
+	    --window-pos 200 200 \
+	    --window-size 600 300 \
+	    --icon "${APPDIR}" 50 50 \
+	    --add-file "READ ME FIRST.html" README.html 300 50 \
+	    --hide-extension "READ ME FIRST.html" \
+	    "${DMGNAME}" "${APPDIR}"
 
 clean ::
 	rm -fr ${APPDIR}
+
+realclean :: clean
+	rm -f "${DMGNAME}"

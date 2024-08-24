@@ -7,13 +7,12 @@
 #include <sys/types.h>
 #include <EXTERN.h>
 #include <perl.h>
-#include "XSUB.h"
 
 static pTHX;
 
 /* Set up DynaLoader so modules can load modules. */
 
-void xs_init(pTHX);
+static void xs_init(pTHX);
 
 /* Main. */
 
@@ -71,6 +70,7 @@ int main( int argc, char **argv, char **env ) {
   /* Create a perl interpreter. */
   my_perl = perl_alloc();
   perl_construct(my_perl);
+  PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
 
   /* Strip unwanted environment variables. */
   static char **ourenv = NULL;
@@ -126,7 +126,8 @@ int main( int argc, char **argv, char **env ) {
   int result = perl_run(my_perl);
 
   /* Cleanup. */
-  perl_destruct(my_perl);
+  // perl_destruct(my_perl);  <-- gives 
+  // panic: magic_killbackrefs (flags=ff) during global destruction.
   perl_free(my_perl);
 
   /* Terminate perl environment. */
@@ -138,9 +139,9 @@ int main( int argc, char **argv, char **env ) {
   exit(result);
 }
 
-void boot_DynaLoader (pTHX, CV* cv);
+EXTERN_C void boot_DynaLoader (pTHX, CV* cv);
 
-void xs_init(pTHX) {
+EXTERN_C void xs_init(pTHX) {
     static const char file[] = __FILE__;
     dXSUB_SYS;
     PERL_UNUSED_CONTEXT;

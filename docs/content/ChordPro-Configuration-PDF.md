@@ -215,8 +215,11 @@ Traditionally, the `{titles}` directive was used to control titles flush. ChordP
 ## Chord diagrams
 
 Chord diagrams are added to the song to show the chords used in the
-song. By default the diagrams are at the end of the song but it is
-also possible to have them at the bottom, or in a side column on the first page of the
+song.
+
+By default the diagrams are at the bottom of the first page,
+but it is also possible to have them at the top, following the song,
+or in a side column on the first page of the
 song. See [Chords diagrams in a side column]({{< relref "#chords-in-a-side-column" >}}) below.
 
 A chord diagram consists of a number of cells. Cell dimensions are specified by `width` and `height`.  
@@ -231,19 +234,20 @@ The vertical distance between lines of diagrams is `vspace` times the cell heigh
 If the chord definition has info for finger settings, these will be
 shown if `fingers` is true.
 
-        "diagrams" : {
-          "show"     :  "bottom",
-          "width"    :  6,      // of a cell
-          "height"   :  6,      // of a cell
-          "vcells"   :  4,      // vertically
-          "linewidth" : 0.1,    // of a cell width
-          "nutwidth" :  5,      // linewidth
-          "hspace"   :  3.95,   // fraction of width
-          "vspace"   :  3,      // fraction of height
-          "dotsize"  :  0.8,    // of a cell
-          "barwidth" :  0.8,    // of a dot
-          "fingers"  :  true,   // show fingering if available (or "below")
-        },
+	diagrams {
+	  show     :  bottom, // or top, right, below, false
+	  align    :  left,   // or right, center, spread
+	  width    :  6,      // of a cell
+	  height   :  6,      // of a cell
+	  vcells   :  4,      // vertically
+	  linewidth : 0.1,    // of a cell width
+	  nutwidth :  5,      // linewidth
+	  hspace   :  3.95,   // horizontal space between, fraction of width
+	  vspace   :  3,      // verticalal space between, fraction of height
+	  dotsize  :  0.8,    // of a cell
+	  barwidth :  0.8,    // of a dot
+	  fingers  :  true,   // show fingering if available (or "below")
+	},
 
 With the above settings, chord diagrams will look like:
 
@@ -254,6 +258,8 @@ separate column at the right of the lyrics instead of at the end of
 the song.
 
 {{< showpage "style_modern3" >}}
+
+The `align` property is ignored for `show:right`.
 
 Note that command line option `--lyricsonly` implies `"show":false`
 for diagrams.
@@ -287,23 +293,26 @@ Finally, the colour to represent keys that are part of the chord
 (pressed) can be specified with `pressed`. It takes the name of a
 colour, or a hex format `#RRGGBB`.
 
-        "kbdiagrams" : {
-            "show"     :  "bottom",   // or "top", or "right", or "below"
-            "width"    :   4,   // of a single key
-            "height"   :  20,   // of the diagram
-            "keys"     :  14,   // or 7, 10, 14, 17, 21
-            "base"     :  "C",  // or "F"
-            "linewidth" : 0.1,  // fraction of a single key width
-            "pressed"  :  "foreground-medium",   // colour of a pressed key
-            "hspace"   :  3.95, // ??
-            "vspace"   :  0.3,  // fraction of height
-        },
+	kbdiagrams {
+	  show     :  bottom, // or top, right, below, false
+	  align    :  left,   // or right, center, spread
+	  width    :   4,     // of a single key
+	  height   :  20,     // of the diagram
+	  keys     :  14,     // or 7, 10, 14, 17, 21
+	  base     :  "C",    // or "F"
+	  linewidth : 0.1,    // fraction of a single key width
+	  pressed  :  foreground-medium,   // colour of a pressed key
+	  hspace   :  3.95,   // horizontal space between, fraction of width
+	  vspace   :  0.3,    // verticalal space between, fraction of height
+	},
 
 With the above settings, keyboard diagrams will look like:
 
 ![]({{< asset "images/ex_kbdiagram.png" >}})
 
-Note that command line option `--lyricsonly` implies `"show":false`
+The `align` property is ignored for `show:right`.
+
+Note that command line option `--lyricsonly` implies `show:false`
 for diagrams.
 
 ## Grid lines
@@ -360,6 +369,36 @@ resultant PDF to always have an even number of pages.
 Note that with `pagealign-songs` = 1 empty (blank) pages are inserted
 (as conventional in book printing), while with `pagealign-songs` > 1
 the empty pages have headings and footers.
+
+## Page reordering
+
+Pages can be reordered based on the song title or subtitle.
+Also possible is to align songs with two pages on an even page, so
+that you can view it without having to turn a page.
+
+        "sort-pages" : ""
+
+`sort-pages` can be set to a comma separated list of `title`, `subtitle`,
+`2page`, `compact`, and `desc`.
+
+* `title`: sort pages alphabetically by title.
+
+* `subtitle`: sort pages alphabetically by subtitle. If this is
+  used together with title, only title is used.
+
+* `2page`:  make sure songs with even pages are placed on even
+  pages, so most. if not all, of the song is visible
+  in a normal book without needing to turn a page.
+  A blank page is added to align.
+
+* `compact`: implies `2page` - instead of adding a blank page,
+  an odd-paged song is moved in front of this song to achieve
+  even page alignment.  
+  Note: this option requires extra processing time since
+  the songbook has to be processed twice.
+
+* `desc`: modifier for title or author to sort descending.
+
 
 ## Page headers and footers
 
@@ -438,17 +477,18 @@ Page 1 is the very first output page (type `first`). It is like a `title`
 page but, according to typesetting conventions, doesn't have the page
 number in the footer.
 
-Page 4 is the first page of a song, but not the very first (type `title`).
+Page 5 is the first page of a song, but not the very first (type `title`).
 It has the song title and subtitle in the heading, and only the page
-number in the footer.
+number in the footer. By default ChordPro starts each song on an odd
+page and therefore inserts an alignment page (page 4).
 
 The other pages are normal pages (type `default`). They have no heading and
 have the page number and song title in the footer. Pages inserted for
 alignment are completely blank.
 
 Note that by default ChordPro produces different odd and even pages.
-Therefore the page number on (odd) page 3 is at the left side, while it is at
-the right side on (even) pages 2 and 4.
+Therefore the page numbers on (odd) pages 3 and 7 are at the right
+side, while they are at the left side on (even) pages 2 and 6.
 
 ## Front and Back Matter
 
@@ -478,30 +518,34 @@ the font libraries. The private directories will be searched first.
         // Fonts can be specified by name (for the corefonts)
         // or a filename (for TrueType/OpenType fonts).
         // Relative filenames are looked up in the fontdir.
-        // "fontdir" : [ "/usr/share/fonts/liberation", "/home/me/fonts" ],
-        "fontdir" : null,
+        // fontdir : [ /usr/share/fonts/liberation /home/me/fonts ]
+        fontdir : null
 
 See also [ChordPro Fonts]({{< relref "ChordPro-Fonts" >}}).
 
 ## Fonts
 
-All printable items like lyrics, chords and comments can be associated with a font specification. This allows fine-grained control over the printed output.
+All printable items like lyrics, chords and comments can be associated
+with a font specification. This allows fine-grained control over the
+printed output.
 
 For example:
 
-        "fonts" : {
-            "title" : {
-                "name" : "Times-Bold",
-                "size" : 14,
-                "color" : "blue",
-            },
+        fonts: {
+            title {
+                description  : "serif 14"
+                color : blue
+            }
             ...
-        },
+        }
 
 A font specification consists of the following settings:
 
-* `name` or `file`  
-You can either designate a built-in font by its name, or give the filename of a TrueType (ttf) or OpenType font (otf).  
+* `description`, `name` or `file`  
+The `description` designates a font by a family name, optional style,
+weight and size. This is the preferred way.  
+Alternatively, you can either use `name` to designate a built-in font
+by its name, or `file` to give the filename of a TrueType (ttf) or OpenType font (otf).  
 The filename should be the full name of a file on disk, or a relative filename which will be looked up in system dependent font libraries. See [Font libraries]({{< relref "#font-libraries" >}}).
 * `size`  
 The size of the font, in PDF units (1/72 inch).
@@ -518,7 +562,7 @@ The following printable items can have fonts associated.
 
 * `title`  
 The font used for page titles.  
-Default is "Times-Bold" at size 14.
+Default is "serif bold 14".
 * `subtitle`  
 The font used for page subtitles.  
 Default is the setting for `text`.
@@ -526,33 +570,33 @@ Default is the setting for `text`.
 Default is the setting for `subtitle` at 60% size.
 * `text`  
 The font used for lyrics texts.  
-Default is "Times-Roman" at size 12.
+Default is "serif 12".
 * `chorus`  
 The font used for chorus texts.  
 Default is the setting for `text`.
 * `chord`  
 The font used for chords above the lyrics.  
-Default is "Helvetica-Oblique" at size 10.
+Default is "sans italic 10".
 * `annotation`  
 The font used for annotations.  
 Defaults to the `chord` font.
 * `comment`  
 The font used for comments.  
-Default is "Helvetica" at size 12, with a grey background.
+Default is "sans 12", with a grey background.
 * `comment_italic`  
-Default is "HelveticaOblique" at size 12, with a grey background.
+Default is "sans italic 12", with a grey background.
 * `comment_boxed`  
-Default is "Helvetica" at size 12, with a frame.
+Default is "sans 12", with a frame.
 * `tab`  
 The font used for the contents of
 [tab environments]({{< relref "Directives-env_tab" >}}).  
-Default is "Courier" at size 10.
+Default is "mono 10".
 * `label`  
 The font used for section labels.  
 Default is the setting for `text`.
 * `toc`  
 The font used for the table of contents.  
-Default is "Times-Roman" at size 11.
+Default is "serif 11".
 * `grid`  
 The font used for grid elements.  
 Default is the setting for `chord`.

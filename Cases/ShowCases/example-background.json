@@ -1,0 +1,45 @@
+{
+    "metadata" : {
+	"strict" : false,
+    },
+    "pdf" : {
+	// Style of chorus.
+	"chorus" : {
+	    "indent"     :  20,
+	    // Chorus side bar.
+	    "bar" : {
+		"width"  :  0,
+	    },
+	},
+	"spacing" : {
+	    "lyrics" : 1.4,
+	},
+	"fonts" : {
+	    "title" : {
+		"description" : "Sans Bold",
+	    },
+	    "subtitle" : {
+		"description" : "Sans",
+	    },
+	    "text" : {
+		"description" : "Sans",
+		"size" : 11
+	    },
+	    "chorus" : {
+		"description" : "Sans",
+		"size" : 11
+	    },
+	    "chord" : {
+		"description" : "Sans Bold",
+	    },
+	    "diagram" : {
+		"description" : "Sans",
+	    },
+	},
+	"formats" : {
+	    "first" : {
+		"background" : "./back.pdf",
+	    }
+	}
+    }
+}

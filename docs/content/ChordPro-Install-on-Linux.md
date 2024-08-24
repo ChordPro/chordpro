@@ -5,6 +5,19 @@ description: "Installation on Linux"
 
 # Installation on Linux
 
+First of all, check if there is a prebuilt package available for your
+system.
+
+On RPM-based systems (RedHat, Fedora, Suze) packages can be
+installed with `dnf` or `yum`. On Debian/Ubuntu-based systems use the
+`apt-get` tool. For example on a Ubuntu system:
+
+````
+$ sudo apt-get install chordpro
+````
+
+## CPAN install
+
 Assuming your Linux systems has the Perl environment correctly
 installed (standard on nearly all distros), there will be an
 administrator command `cpan`. In a terminal, simply run the
@@ -16,45 +29,52 @@ install everything necessary to run ChordPro.
 
 ChordPro requires a number of Perl modules to run. These will be
 installed automatically by the `cpan` tool if necessary. However, it
-may be advantageous to install platform supplied packages if
-available. On RPM-based systems (RedHat, Fedora, Suze) packages can be
+is strongly advised to install platform supplied packages if
+available.
+On RPM-based systems (RedHat, Fedora, Suze) packages can be
 installed with `dnf` or `yum`. On Debian/Ubuntu-based systems use the
 `apt-get` tool.
 
-Module | RPM | Debian
---|--|--
-`PDF::API2` | `perl-PDF-API2` | `libpdf-api2-perl`
-`Text::Layout` | `perl-Text-Layout` | `libtext-layout-perl`
-`App::Packager` | `perl-App-Packager` | `libapp-packager-perl`
-`File::LoadLines` | `perl-File-LoadLines` | `libfile-loadlines-perl`
-`String::Interpolate::Named` | `perl-String-Interpolate-Named` | `libstring-interpolate-named-perl`
-`Image::Info` | `perl-Image-Info` | `libimage-info-perl`
+The `cpan` tool requires build tools `make`, `gcc` and `g++`.
+Traditionally these were always installed on Linux systems but
+on some modern Linux distributions these must be installed explicitly.
+So check this first!
+
+These modules should be available as prebuilt packages:
+
+| Module          | RPM                 | Debian                 |
+|-----------------|---------------------|------------------------|
+| `PDF::API2`     | `perl-PDF-API2`     | `libpdf-api2-perl`     |
+| `Object::Pad`   | `perl-Object-Pad`   | `libobject-pad-perl`   |
+| `Image::Info`   | `perl-Image-Info`   | `libimage-info-perl`   |
+| `JSON::PP`      | `perl-JSON-PP`      | `libjson-pp-perl`      |
+| `JSON::XS`      | `perl-JSON-XS`      | `libjson-xs-perl`      |
+| `File::HomeDir` | `perl-File-HomeDir` | `libfile-homedir-perl` |
+| `Data::Printer` | `perl-Data-Printer` | `libdata-printer-perl` |
+| `Storable`      | `perl-Storable`     | `libstorable-perl`     |
+| `Pod::Usage`    | `perl-Pod-Usage`    | `libpod-usage-perl`    |
 { .table .table-striped .table-bordered .table-sm }
 
-Do not worry if any of these packages are not available, the `cpan`
+These modules may be available as prebuilt packages:
+
+| Module                       | RPM                             | Debian                             |
+|------------------------------|---------------------------------|------------------------------------|
+| `Text::Layout`               | `perl-Text-Layout`              | `libtext-layout-perl`              |
+| `JavaScript::QuickJS`        | `perl-JavaScript-QuickJS`       | `libjavascript-quickjs-perl`       |
+| `File::LoadLines`            | `perl-File-LoadLines`           | `libfile-loadlines-perl`           |
+| `String::Interpolate::Named` | `perl-String-Interpolate-Named` | `libstring-interpolate-named-perl` |
+{ .table .table-striped .table-bordered .table-sm }
+
+Do not worry if some of these packages are not available, the `cpan`
 install process will build them if necessary.
-
-## Helper programs
-
-To support ABC embedding, ChordPro requires two helper programs:
-
-* `abcm2ps`  
-This proram is used to convert ABC to a vector image.  
-Most Linux distributions have prebuilt packages available.  
-Otherwise, you can find it on [SourceForge](http://abcplus.sourceforge.net/).
-
-* `convert`  
-This is part of the ImageMagick suite of graphical manipulation
-tools. It is used to convert the vector image to a suitable bitmapped
-format for embedding.  
-Most Linux distributions have prebuilt packages available.  
-Otherwise, you can download it from the [ImageMagick web
-site](https://imagemagick.org/).
 
 ## GUI (graphical) interface version
 
-There is one critical prerequisite that must be installed manually:
-the perl wxWidgets library.
+If you are going to use ChordPro on the command line only, you can
+skip to the next section.
+
+For the GUI version, there is one critical prerequisite that must be
+installed manually: the perl wxWidgets library.
 
 For Debian/Ubuntu-based systems:
 
@@ -90,7 +110,7 @@ return a result similar to
 
     This is ChordPro version 6.000
 
-(The version number may be different.)
+(The version number may be higher.)
 
 # Running Chordpro
 

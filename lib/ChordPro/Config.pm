@@ -10,7 +10,7 @@ package ChordPro::Config;
 use v5.26;
 use utf8;
 use Carp;
-use feature qw( signatures );
+use feature qw( signatures state );
 no warnings "experimental::signatures";
 
 use ChordPro;
@@ -18,42 +18,26 @@ use ChordPro::Paths;
 use ChordPro::Utils;
 use File::LoadLines;
 use File::Spec;
-use JSON::PP ();
 use Scalar::Util qw(reftype);
 use List::Util qw(any);
+use Storable 'dclone';
 use Hash::Util;
-
-=head1 NAME
-
-ChordPro::Config - Configurator.
-
-=head1 DESCRIPTION
-
-This module first establishes a well-defined (builtin) configuration.
-
-Then it processes the config files specified by the environment and
-adds the information to the global $config hash.
-
-The configurations files are 'relaxed' JSON files. This means that
-they may contain comments and trailing comma's.
-
-This module can be run standalone and will print the default config.
-
-=encoding utf8
-
-=cut
 
 #sub hmerge($$;$);
 #sub clone($);
 #sub default_config();
 
+sub pristine_config {
+    use ChordPro::Config::Data;
+    ChordPro::Config::Data::config();
+}
+
 sub configurator ( $opts = undef ) {
-    my $pp = JSON::PP->new->relaxed;
 
     # Test programs call configurator without options.
     # Prepare a minimal config.
     unless ( $opts ) {
-        my $cfg = $pp->decode( default_config() );
+        my $cfg = pristine_config();
         $config = $cfg;
 	config_split_fc_aliases($cfg);
         $options = { verbose => 0 };
@@ -70,7 +54,7 @@ sub configurator ( $opts = undef ) {
 
     # Load defaults.
     warn("Reading: <builtin>\n") if $verbose > 1;
-    my $cfg = $pp->decode( default_config() );
+    my $cfg = pristine_config();
 
     # This is easier than splitting out manually :)
     config_split_fc_aliases($cfg);
@@ -148,14 +132,17 @@ sub configurator ( $opts = undef ) {
         }
 
         # Process.
-        local $::config = $cfg;
+        local $::config = dclone($cfg);
         process_config( $new, $file );
         # Merge final.
         $cfg = hmerge( $cfg, $new );
+#	die("PANIC! Config merge error")
+#	  unless UNIVERSAL::isa( $cfg->{settings}->{strict}, 'JSON::Boolean' );
     }
 
     # Handle defines from the command line.
-    $cfg = hmerge( $cfg, prp2cfg( $options->{define}, $cfg ) );
+    # $cfg = hmerge( $cfg, prp2cfg( $options->{define}, $cfg ) );
+    prpadd2cfg( $cfg, %{$options->{define}} );
 
     # Sanitize added extra entries.
     for ( qw(title subtitle footer) ) {
@@ -199,7 +186,9 @@ sub configurator ( $opts = undef ) {
 
     my @allfonts = keys(%{$cfg->{pdf}->{fonts}});
     for my $ff ( @allfonts ) {
-        unless ( $cfg->{pdf}->{fonts}->{$ff}->{name}
+	# Derived chords can have size or color only. Disable
+	# this test for now.
+        unless ( 1 || $cfg->{pdf}->{fonts}->{$ff}->{name}
                  || $cfg->{pdf}->{fonts}->{$ff}->{description}
                  || $cfg->{pdf}->{fonts}->{$ff}->{file} ) {
             delete( $cfg->{pdf}->{fonts}->{$ff} );
@@ -275,8 +264,7 @@ sub get_config ( $file ) {
 
     if ( $file =~ /\.json$/i ) {
         if ( open( my $fd, "<:raw", $file ) ) {
-            my $pp = JSON::PP->new->relaxed;
-            my $new = $pp->decode( loadlines( $fd, { split => 0 } ) );
+            my $new = json_load( loadlines( $fd, { split => 0 } ), $file );
             precheck( $new, $file );
             close($fd);
             return $new;
@@ -344,7 +332,7 @@ sub process_config ( $cfg, $file ) {
 
     ChordPro::Chords::reset_parser;
     ChordPro::Chords::Parser->reset_parsers;
-    local $::config = hmerge( $::config, $cfg );
+    local $::config = dclone(hmerge( $::config, $cfg ));
     if ( $cfg->{chords} ) {
         ChordPro::Chords::push_parser($cfg->{notes}->{system});
         my $c = $cfg->{chords};
@@ -366,6 +354,36 @@ sub process_config ( $cfg, $file ) {
         ChordPro::Chords::pop_parser();
     }
     config_split_fc_aliases($cfg);
+    config_expand_font_shortcuts($cfg);
+}
+
+# Expand pdf.fonts.foo: bar to pdf.fonts.foo { description: bar }.
+sub config_expand_font_shortcuts ( $cfg ) {
+    return unless exists $cfg->{pdf}->{fonts};
+    for my $f ( keys %{$cfg->{pdf}->{fonts}} ) {
+	next if ref($cfg->{pdf}->{fonts}->{$f}) eq 'HASH';
+	for ( $cfg->{pdf}->{fonts}->{$f} ) {
+	    my $v = $_;
+	    my $i = {};
+	    # Break out size.
+	    if ( $v =~ /(.*?)(?:\s+(\d+(?:\.\d+)?))?$/ ) {
+		$i->{size} = $2 if $2;
+		$v = $1;
+	    }
+	    # Check for filename.
+	    if ( $v =~ /^.*\.(ttf|otf)$/i ) {
+		$i->{file} = $v;
+	    }
+	    # Check for corefonts.
+	    elsif ( is_corefont($v) ) {
+		$i->{name} = is_corefont($v);
+	    }
+	    else {
+		$i->{description} = $v;
+	    }
+	    $_ = $i;
+	}
+    }
 }
 
 sub config_split_fc_aliases ( $cfg ) {
@@ -382,47 +400,129 @@ sub config_split_fc_aliases ( $cfg ) {
 		# We have aliases. Delete the original.
 		delete( $fc->{$k} );
 		# And insert individual entries.
-		$fc->{$_} = $v for @k;
+		$fc->{$_} = dclone($v) for @k;
 	    }
 	}
     }
 }
 
-sub config_final ( $delta ) {
+sub config_final ( %args ) {
+    my $delta   = $args{delta} || 0;
+    my $default = $args{default} || 0;
     $options->{'cfg-print'} = 1;
-    my $cfg = configurator($options);
 
-    if ( $delta ) {
-        my $pp = JSON::PP->new->relaxed;
-        my $def = $pp->decode( default_config() );
-        $cfg->reduce($def);
+    my $defcfg;			# pristine config
+    my $cfg;			# actual config
+    if ( $default || $delta ) {
+	local $options->{nosysconfig} = 1;
+	local $options->{nouserconfig} = 1;
+	local $options->{noconfig} = 1;
+	$defcfg = pristine_config();
+	config_split_fc_aliases($defcfg);
+	if ( $delta ) {
+	    delete $defcfg->{chords};
+	    delete $defcfg->{include};
+	}
+	bless $defcfg => __PACKAGE__;
+	$cfg = $defcfg if $default;
     }
+
+    $cfg //= configurator($options);
+
+    # Remove unwanted data.
     $cfg->unlock;
     $cfg->{tuning} = delete $cfg->{_tuning};
-    delete($cfg->{tuning}) if $delta && !defined($cfg->{tuning});
-    $cfg->{chords} = delete $cfg->{_chords};
+    if ( $delta ) {
+	for ( qw( tuning ) ) {
+	    delete($cfg->{$_}) unless defined($cfg->{$_});
+	}
+	for my $f ( keys( %{$cfg->{pdf}{fonts}} ) ) {
+	    for ( qw( background color ) ) {
+		next if defined($defcfg->{pdf}{fonts}{$f}{$_});
+		delete($cfg->{pdf}{fonts}{$f}{$_});
+		delete($defcfg->{pdf}{fonts}{$f}{$_});
+	    }
+	}
+    }
+    delete $cfg->{_chords};
     delete $cfg->{chords};
     delete $cfg->{_src};
-    $cfg->lock;
 
-    if ( $ENV{CHORDPRO_CFGPROPS} ) {
-        cfg2props($cfg);
+    my $parser = JSON::Relaxed::Parser->new( key_order => 1 );
+
+    # Load schema.
+    my $schema = do {
+	my $schema = CP->findres( "config.schema", class => "config" );
+	my $data = loadlines( $schema, { split => 0 } );
+	$parser->decode($data);
+    };
+
+    # Delta cannot handle reference config yet.
+    if ( $delta ) {
+	$defcfg->unlock;
+	$cfg->reduce( $defcfg );
+	return $parser->encode( data => {%$cfg},
+				pretty => 1, schema => $schema );
     }
-    else {
-        my $pp = JSON::PP->new->canonical->indent(4)->pretty;
-        $pp->encode({%$cfg});
-    }
+
+    my $config = do {
+	my $config = CP->findres( "chordpro.json", class => "config" );
+	my $data = loadlines( $config, { split => 0 } );
+	$parser->decode($data);
+    };
+
+    return $parser->encode( data => hmerge( $config, $cfg ),
+			    pretty => 1, schema => $schema );
 }
 
-sub config_default () {
-    if ( $ENV{CHORDPRO_CFGPROPS} ) {
-        my $pp = JSON::PP->new->relaxed;
-        my $cfg = $pp->decode( default_config() );
-        cfg2props($cfg);
+sub convert_config ( $from, $to ) {
+    # This is a completely independent function.
+
+    # Establish a key order retaining parser.
+    my $parser = JSON::Relaxed::Parser->new( key_order => 1 );
+
+    # First find and process the schema.
+    my $schema = CP->findres( "config.schema", class => "config" );
+    my $o = { split => 0, fail => 'soft' };
+    my $data = loadlines( $schema, $o );
+    die("$schema: ", $o->{error}, "\n") if $o->{error};
+    $schema = $parser->decode($data);
+
+    # Then load the config to be converted.
+    my $new;
+    $o = { split => 0, fail => 'soft' };
+    $data = loadlines( $from, $o );
+    die("Cannot open config $from [", $o->{error}, "]\n") if $o->{error};
+
+    if ( $data =~ /^\s*#/m ) {	# #-comments -> prp
+	require ChordPro::Config::Properties;
+	my $cfg = new Data::Properties;
+	$cfg->parse_file($from);
+	$new = $cfg->data;
+    }
+    else {			# assume JSON, RJSON, RRJSON
+	$new = $parser->decode($data);
+    }
+
+    # And re-encode it using the schema.
+    my $res = $parser->encode( data => $new, pretty => 1,
+			       nounicodeescapes => 1, schema => $schema );
+
+    # Add trailer.
+    $res .= "\n// End of Config.\n";
+
+    # Write if out.
+    if ( $to && $to ne "-" ) {
+	open( my $fd, '>', $to )
+	  or die("$to: $!\n");
+	print $fd $res;
+	$fd->close;
     }
     else {
-        default_config();
+	print $res;
     }
+
+    1;
 }
 
 # Config in properties format.
@@ -566,13 +666,13 @@ sub reduce ( $self, $hash ) {
 
     my $locked = $self->is_locked;
 
-    warn("O: ", qd($hash,1), "\n") if DEBUG;
-    warn("N: ", qd($self,1), "\n") if DEBUG;
+    warn("O: ", qd($hash,1), "\n") if DEBUG > 1;
+    warn("N: ", qd($self,1), "\n") if DEBUG > 1;
     my $state = _reduce( $self, $hash, "" );
 
     $self->lock if $locked;
 
-    warn("== ", qd($self,1), "\n") if DEBUG;
+    warn("== ", qd($self,1), "\n") if DEBUG > 1;
     return $self;
 }
 
@@ -596,7 +696,7 @@ sub _reduce ( $self, $orig, $path ) {
               unless exists $self->{$key}
                 || $key =~ /^_/;
 
-            unless ( defined $orig->{$key} ) {
+            unless ( exists $orig->{$key} ) {
                 warn("D: $path$key\n") if DEBUG;
                 delete $self->{$key};
                 $state //= 'M';
@@ -740,7 +840,6 @@ sub hmerge( $left, $right, $path = "" ) {
         if ( ref($right->{$key}) eq 'HASH'
              and
              ref($res{$key}) eq 'HASH' ) {
-
             # Hashes. Recurse.
             $res{$key} = hmerge( $res{$key}, $right->{$key}, "$path$key." );
         }
@@ -878,814 +977,7 @@ use Exporter 'import';
 our @EXPORT = qw( _c );
 sub _c ( @args ) { $::config->gps(@args) }
 
-# Get the raw contents of the builtin (default) config.
-sub default_config () {
-    return <<'End_Of_Config';
-// Configuration for ChordPro.
-//
-// This is a relaxed JSON document, so comments are possible.
-
-{
-    // Includes. These are processed first, before the rest of
-    // the config file.
-    //
-    // "include" takes a list of either filenames or preset names.
-    // "include" : [ "modern1", "lib/mycfg.json" ],
-    "include" : [ "guitar" ],
-
-    // General settings, often changed by configs and command line.
-    "settings" : {
-      // Strict behaviour.
-      "strict" : true,
-      // Obsolete -- lineinfo is always included.
-      "lineinfo" : true,
-      // Titles flush: default center.
-      "titles" : "center",
-      // Columns, default one.
-      "columns" : 1,
-      // Suppress empty chord lines.
-      // Overrides the -a (--single-space) command line options.
-      "suppress-empty-chords" : true,
-      // Suppress blank lyrics lines.
-      "suppress-empty-lyrics" : true,
-      // Suppress chords.
-      // Overrides --lyrics-only command line option.
-      "lyrics-only" : false,
-      // Memorize chords in sections, to be recalled by [^].
-      "memorize" : false,
-      // Chords inline.
-      // May be a string containing pretext %s posttext.
-      // Defaults to "[%s]" if set to a value that doesn't contain "%s".
-      "inline-chords" : false,
-      // Same, for annotations. Ignored unless inline-chords is set.
-      // Must be a string containing pretext %s posttext.
-      // Default is "%s".
-      "inline-annotations" : "%s",
-      // Chords under the lyrics.
-      "chords-under" : false,
-      // Transposing.
-      "transpose" : 0,
-      // Transcoding.
-      "transcode" : "",
-      // Always decapoize.
-      "decapo" : false,
-      // Chords parsing strategy.
-      // Strict (only known) or relaxed (anything that looks sane).
-      "chordnames": "strict",
-      // Allow note names in [].
-      "notenames" : false,
-      // Always replace chords by their canonical form.
-      "chords-canonical" : false,
-      // If false, chorus labels are used as tags.
-      "choruslabels" : true,
-      // Substitute Unicode sharp/flats in chord names.
-      // Will fallback to ChordProSymbols the font doesn't have the glyphs.
-      "truesf" : false,
-      // Amount of indent for wrapped lines. Actual indent is the stringwidth.
-      "wrapindent" : "x",
-      // Flow text. Do not use.
-      "flowtext" : false,
-    },
-
-    // Metadata.
-    // For these keys you can use {meta key ...} as well as {key ...}.
-    // If strict is nonzero, only the keys named here are allowed.
-    // If strict is zero, {meta ...} will accept any key.
-    // Important: "title" and "subtitle" must always be in this list.
-    // The separator is used to concatenate multiple values.
-    // If autosplit is true, the separator is also used to split
-    // values upon input.
-    "metadata" : {
-      "keys" : [ "title", "subtitle",
-                 "artist", "composer", "lyricist", "arranger",
-                 "album", "copyright", "year",
-                 "sorttitle",
-                 "key", "time", "tempo", "capo", "duration" ],
-      "strict" : true,
-      "separator" : "; ",
-      "autosplit" : true,
-    },
-    // Globally defined (added) meta data,
-    // This is explicitly NOT intended for the metadata items above.
-    "meta" : {
-        // Do not remove or change this one.
-        "_configversion" : [ "6.031" ],
-    },
-
-    // Assets.
-    "assets" : {
-    },
-
-    // Dates. Format is a strftime template.
-    "dates" : {
-        "today" : {
-            "format" : "%A, %B %e, %Y"
-        }
-    },
-
-    // User settings. These are usually set by a separate config file.
-    //
-    "user" : {
-        "name"     : "",
-        "fullname" : "",
-    },
-
-    // Instrument settings. These are usually set by a separate
-    // config file.
-    //
-    "instrument" : {
-        "type"     : "",
-        "description" : "",
-    },
-
-    // Note (chord root) names.
-    // Strings and tuning.
-    "tuning" : [ "E2", "A2", "D3", "G3", "B3", "E4" ],
-
-    // In case of alternatives, the first one is used for output.
-    // Note that it is tempting to use real sharps and flats for output,
-    // but most fonts don't have the glyphs :(.
-    "notes" : {
-
-      "system" : "common",
-
-      "sharp" : [ "C", [ "C#", "Cis", "C♯" ],
-                  "D", [ "D#", "Dis", "D♯" ],
-                  "E",
-                  "F", [ "F#", "Fis", "F♯" ],
-                  "G", [ "G#", "Gis", "G♯" ],
-                  "A", [ "A#", "Ais", "A♯" ],
-                  "B",
-                ],
-
-      "flat" :  [ "C",
-                  [ "Db", "Des",        "D♭" ], "D",
-                  [ "Eb", "Es",  "Ees", "E♭" ], "E",
-                  "F",
-                  [ "Gb", "Ges",        "G♭" ], "G",
-                  [ "Ab", "As",  "Aes", "A♭" ], "A",
-                  [ "Bb", "Bes",        "B♭" ], "B",
-                ],
-
-       // Movable means position independent (e.g. nashville).
-       "movable" : false,
-    },
-
-    // User defined chords.
-    // "base" defaults to 1.
-    // Use 0 for an empty string, and -1 for a muted string.
-    // "fingers" is optional.
-    // "display" (optional) can be used to change the way the chord is displayed. 
-    "chords" : [
-      //  {
-      //    "name"  : "Bb",
-      //    "base"  : 1,
-      //    "frets" : [ 1, 1, 3, 3, 3, 1 ],
-      //    "fingers" : [ 1, 1, 2, 3, 4, 1 ],
-      //    "display" : "B<sup>\u266d</sup>",
-      //  },
-      // If the name of the first entry is "defaults" its properties may
-      // be used as defaults for the rest of the chords.
-    ],
-
-      // Format to show chord names. May contain markup.
-      // "chord-format" : "%{root}%{qual|%{}}%{ext|<sup>%{}</sup>}%{bass|/%{}}",
-    "chord-formats" : {
-        "common" :    "%{root|%{}%{qual|%{}}%{ext|%{}}%{bass|/%{}}|%{name}}",
-        "roman" :     "%{root|%{}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}",
-        "nashville" : "%{root|%{}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}",
-    },
-
-    // Printing chord diagrams.
-    // "show": prints the chords used in the song.
-    //         "all": all chords used.
-    //         "user": only prints user defined chords.
-    // "sorted": order the chords by key.
-    // "suppress": a series of chord (names) that will not generate
-    //         diagrams, e.g. if they are considered trivial.
-    // Note: The type of diagram (string or keyboard) is determined
-    // by the value of "instrument.type".
-    "diagrams" : {
-        "show"     :  "all",
-        "sorted"   :  false,
-        "suppress" :  [],
-    },
-
-    // Diagnostic messages.
-    "diagnostics" : {
-        "format" : "\"%f\", line %n, %m\n\t%l",
-    },
-
-    // Table of contents.
-    "contents" : [
-        { "fields"   : [ "songindex" ],
-          "label"    : "Table of Contents",
-          "line"     : "%{title}",
-          "pageno"   : "%{page}",
-          "fold"     : false,
-          "omit"     : false,
-          "template" : "stdtoc",
-        },
-        { "fields"   : [ "sorttitle", "artist" ],
-          "label"    : "Contents by Title",
-          "line"     : "%{title}%{artist| - %{}}",
-          "pageno"   : "%{page}",
-          "fold"     : false,
-          "omit"     : false,
-          "template" : "stdtoc",
-        },
-        { "fields"   : [ "artist", "sorttitle" ],
-          "label"    : "Contents by Artist",
-          "line"     : "%{artist|%{} - }%{title}",
-          "pageno"   : "%{page}",
-          "fold"     : false,
-          "omit"     : true,
-          "template" : "stdtoc",
-        },
-    ],
-    // Table of contents, old style.
-    // This will be ignored when new style contents is present.
-    "toc" : {
-        // Title for ToC.
-        "title" : "Table of Contents",
-        "line" : "%{title}",
-        // Sorting order.
-        // Currently only sorting by page number and alpha is implemented.
-        "order" : "page",
-    },
-
-    // Delegates.
-    // Basically a delegate is a section {start_of_XXX} which content is
-    // collected and handled later by the delegate module.
-    // Note: type = "none" treats the section as a generic section,
-    // type = "omit" ignores the section.
-
-    "delegates" : {
-        "abc" : {
-            "type"     : "image",
-            "module"   : "ABC",
-            "handler"  : "abc2svg",
-            // No longer used -- ./default.abc will always be used if present
-            "config"   : "default", // or "none", or "myformat.fmt"
-            // The preamble is a list of lines inserted before the ABC data,
-            // and after the delegate supplied preamble.
-            // DO NOT MODIFY unless you know what you are doing!
-            "preamble" : [
-               // Use ChordPro fonts for lyrics and chords.
-               "%%textfont pdf.fonts.text",
-               "%%vocalfont pdf.fonts.text",
-               "%%gchordfont pdf.fonts.chord",
-            ],
-            "preprocess" : { "abc" : [] },
-        },
-        "ly" : {
-            "type"     : "image",
-            "module"   : "Lilypond",
-            "handler"  : "ly2svg",
-            "config"   : "default", // or "none", or ...
-            // The preamble is a list of lines inserted before the lilipond data.
-            // This is a good place to set the version and global customizations.
-            "preamble" : [
-                "\\version \"2.21.0\"",
-                "\\header { tagline = ##f }",
-            ],
-        },
-        "svg" : {
-            "type"     : "image",
-            "module"   : "SVG",
-            "handler"  : "svg2svg",
-        },
-        "textblock" : {
-            "type"     : "image",
-            "module"   : "TextBlock",
-            "handler"  : "txt2xform",
-        },
-     },
-
-    // Definitions for PDF output.
-
-    "pdf" : {
-
-      // Choose a PDF::API2 compatible library, or leave empty to
-      // have ChordPro choose one for you.
-      "library" : "",   // or "PDF::API2", or "PDF::Builder"
-
-      // PDF Properties. Arbitrary key/values may be added.
-      // Note that the context for substitutions is the first song.
-      "info" : {
-          "title"    : "%{title}",
-          "author"   : "",
-          "subject"  : "",
-          "keywords" : "",
-      },
-
-      // Papersize, 'a4' or [ 595, 842 ] etc.
-      "papersize" : "a4",
-
-      "theme" : {
-          // Forgeround color. Usually black.
-          "foreground"        : "black",
-          // Shades of grey.
-          // medium is used for pressed keys in keyboard diagrams.
-          "foreground-medium" : "grey70",
-          // light is used as background for comments, cell bars, ...
-          "foreground-light"  : "grey90",
-          // Background color. Usually none or white.
-          "background"        : "none",
-      },
-
-      // Space between columns, in pt.
-      "columnspace"  :  20,
-
-      // Page margins.
-      // Note that top/bottom exclude the head/footspace.
-      "margintop"    :  80,
-      "marginbottom" :  40,
-      "marginleft"   :  40,
-      "marginright"  :  40,
-      "headspace"    :  60,
-      "footspace"    :  20,
-
-      // Special: head on first page only, add the headspace to
-      // the other pages so they become larger.
-      "head-first-only" : false,
-
-      // Spacings.
-      // Baseline distances as a factor of the font size.
-      "spacing" : {
-          "title"  : 1.2,
-          "lyrics" : 1.2,
-          "chords" : 1.2,
-          "diagramchords" : 1.2,
-          "grid"   : 1.2,
-          "tab"    : 1.0,
-          "toc"    : 1.4,
-          "empty"  : 1.0,
-      },
-      // Note: By setting the font size and spacing for empty lines to
-      // smaller values, you get a fine(r)-grained control over the
-      // spacing between the various parts of the song.
-
-      // Style of chorus.
-      "chorus" : {
-          "indent"     :  0,
-          // Chorus side bar.
-          // Suppress by setting offset and/or width to zero.
-          "bar" : {
-              "offset" :  8,
-              "width"  :  1,
-              "color"  : "foreground",
-          },
-          "tag" : "Chorus",
-          // Recall style: Print the tag using the type.
-          // Alternatively quote the lines of the preceding chorus.
-          "recall" : {
-              "choruslike" : false,
-              "tag"   : "Chorus",
-              "type"  : "comment",
-              "quote" : false,
-          },
-      },
-
-      // This opens a margin for margin labels.
-      "labels" : {
-          // Margin width. Default is 0 (no margin labels).
-          // "auto" will automatically reserve a margin if labels are used.
-          "width" : "auto",
-          // Alignment for the labels. Default is left.
-          "align" : "left",
-          // Alternatively, render labels as comments.
-          "comment" : ""        // "comment", "comment_italic" or "comment_box",
-      },
-
-      // Alternative songlines with chords in a side column.
-      // Value is the column position.
-      // "chordscolumn" : 400,
-      "chordscolumn" :  0,
-      "capoheading" : "%{capo|Capo: %{}}",
-
-      // A {titles: left} may conflict with customized formats.
-      // Set to non-zero to ignore the directive.
-      "titles-directive-ignore" : false,
-
-      // Chord diagrams.
-      // A chord diagram consists of a number of cells.
-      // Cell dimensions are specified by "width" and "height".
-      // The horizontal number of cells depends on the number of strings.
-      // The vertical number of cells is "vcells", which should
-      // be 4 or larger to accomodate most chords.
-      // The horizontal distance between diagrams is "hspace" cells.
-      // The vertical distance is "vspace" cells.
-      // "linewidth" is the thickness of the lines as a fraction of "width".
-      // Diagrams for all chords of the song can be shown at the
-      // "top", "bottom" or "right" side of the first page,
-      // or "below" the last song line.
-      "diagrams" : {
-          "show"     :  "bottom",
-          "width"    :  6,      // width of a cell
-          "height"   :  6,      // height of a cell
-          "vcells"   :  4,      // vertical cells
-          "linewidth" : 0.1,    // fraction of cell width
-          "nutwidth" :  5,      // width (in linewidth) of the top nut
-          "hspace"   :  3.95,   // fraction of width
-          "vspace"   :  3,      // fraction of height
-          "dotsize"  :  0.8,    // fraction of a cell
-          "barwidth" :  0.8,    // fraction of a dot
-          "fingers"  :  true,   // show fingering if available (or "below")
-      },
-
-      // Keyboard diagrams.
-      // A keyboard diagram consists of a number of keys.
-      // Dimensions are specified by "width" (a key) and "height".
-      // The horizontal distance between diagrams is "hspace" * keys * width.
-      // The vertical distance is "vspace" * height.
-      // "linewidth" is the thickness of the lines as a fraction of "width".
-      // Diagrams for all chords of the song can be shown at the
-      // "top", "bottom" or "right" side of the first page,
-      // or "below" the last song line.
-      "kbdiagrams" : {
-          "show"     :  "bottom",
-          "width"    :   4,     // of a single key
-          "height"   :  20,     // of the diagram
-          "keys"     :  14,     // or 7, 10, 14, 17, 21
-          "base"     :  "C",    // or "F"
-          "linewidth" : 0.1,    // fraction of a single key width
-          "pressed"  :  "foreground-medium",    // colour of a pressed key
-          "hspace"   :  3.95,   // ??
-          "vspace"   :  0.3,    // fraction of height
-      },
-
-      // Grid section lines.
-      // Suppress when "show" is false, e.g. for singers.
-      // The width and colour of the cell bar lines can be specified.
-      // Enable by setting the width to the desired width.
-      "grids" : {
-          "cellbar" : {
-              "width" : 0,
-              "color" : "foreground-medium",
-          },
-          "show": true,
-          "symbols" : {
-              "color" : "blue",
-          },
-          "volta" : {
-              "span" : 0.7,
-              "color" : "blue",
-          },
-      },
-
-      // Even/odd pages. A value of -1 denotes odd/even pages.
-      "even-odd-pages" : 1,
-      // Align songs to even/odd pages. When greater than 1, force alignment.
-      "pagealign-songs" : 1,
-      // PDF file to add as front matter.
-      "front-matter" : "",
-      // PDF file to add as back matter.
-      "back-matter" : "",
-
-      // Formats.
-      // Pages have two title elements and one footer element. They also
-      // can have a page of an existing PDF file as underlay (background).
-      // Topmost is "title". It uses the "title" font as defined further below.
-      // Second is "subtitle". It uses the "subtitle" font.
-      // The "footer" uses the "footer" font.
-      // All elements can have three fields, that are placed to the left side,
-      // centered, and right side of the page.
-      // The contents of all fields is defined below. You can use metadata
-      // items in the fields as shown. By default, the "title" element shows the
-      // value of metadata item "title", centered on the page. Likewise
-      // "subtitle".
-      // NOTE: The "title" and "subtitle" page elements have the same names
-      // as the default metadata values which may be confusing. To show
-      // metadata item, e.g. "artist", add its value to one of the
-      // title/subtitle fields. Don't try to add an artist page element.
-
-      "formats" : {
-          // Titles/Footers.
-
-          // Titles/footers have 3 parts, which are printed left,
-          // centered and right.
-          // For odd/even printing, the 1st background page is used
-          // for left pages and the next page (if it exists) for right pages.
-          // For even/odd printing, the order is reversed.
-
-          // By default, a page has:
-          "default" : {
-              // No title/subtitle.
-              "title"     : [ "", "", "" ],
-              "subtitle"  : [ "", "", "" ],
-              // Footer is title -- page number.
-              "footer"    : [ "%{title}", "", "%{page}" ],
-              // Background page.
-              "background" : "",
-          },
-          // The first page of a song has:
-          "title" : {
-              // Title and subtitle.
-              "title"     : [ "", "%{title}", "" ],
-              "subtitle"  : [ "", "%{subtitle}", "" ],
-              // Footer with page number.
-              "footer"    : [ "", "", "%{page}" ],
-              // Background page.
-              "background" : "",
-          },
-          // The very first output page is slightly different:
-          "first" : {
-              // It has title and subtitle, like normal 'first' pages.
-              // But no footer.
-              "footer"    : [ "", "", "" ],
-              // Background page.
-              "background" : "",
-          },
-      },
-
-      // Split marker for syllables that are smaller than chord width.
-      // split-marker is a 3-part array: 'start', 'repeat', and 'final'.
-      // 'final' is always printed, last.
-      // 'start' is printed if there is enough room.
-      // 'repeat' is printed repeatedly to fill the rest.
-      // If split-marker is a single string, this is 'start'.
-      // All elements may be left empty strings.
-      "split-marker" : [ "", "", "" ],
-
-      // Font families and properties.
-      // "fontconfig" maps members of font families to physical fonts.
-      // Optionally, additional properties of the fonts can be specified.
-      // Physical fonts can be the names of TrueType/OpenType fonts,
-      // or names of built-in fonts (corefonts).
-      // Relative filenames are looked up in the fontdir.
-      // "fontdir" : [ "/usr/share/fonts/liberation", "/home/me/fonts" ],
-
-      "fontdir" : [],
-      "fontconfig" : {
-          "times, serif" : {
-              ""            : "Times-Roman",
-              "bold"        : "Times-Bold",
-              "italic"      : "Times-Italic",
-              "bolditalic"  : "Times-BoldItalic",
-          },
-          "helvetica" : {
-              ""            : "Helvetica",
-              "bold"        : "Helvetica-Bold",
-              // Only helvetica uses oblique, use italic for all other fonts
-              "oblique"     : "Helvetica-Oblique",
-              "boldoblique" : "Helvetica-BoldOblique",
-          },
-          "sans, sans-serif" : {
-              ""            : "Helvetica",
-              "bold"        : "Helvetica-Bold",
-              "italic"      : "Helvetica-Oblique",
-              "bolditalic"  : "Helvetica-BoldOblique",
-          },
-          "courier, mono, monospace" : {
-              ""            : "Courier",
-              "bold"        : "Courier-Bold",
-              "italic"      : "Courier-Italic",
-              "bolditalic"  : "Courier-BoldItalic",
-          },
-          "dingbats" : {
-              ""            : "ZapfDingbats",
-          },
-      },
-
-      // "fonts" maps output elements to fonts as defined in "fontconfig".
-      // The elements can have a background colour associated.
-      // Colours are "#RRGGBB" or predefined names like "black", "white",
-      // and lots of others.
-      // NOTE: In the built-in config we use only "name" since that can
-      // be overruled with user settings.
-
-      "fonts" : {
-          "title" : {
-              "name" : "Times-Bold",
-              "size" : 14
-          },
-          "text" : {
-              "name" : "Times-Roman",
-              "size" : 12
-          },
-          "chord" : {
-              "name" : "Helvetica-Oblique",
-              "size" : 10
-          },
-          "chordfingers" : {
-              "file" : "ChordProSymbols.ttf",   // do not change
-              "numbercolor" : "background",
-          },
-          "comment" : {
-              "name" : "Helvetica",
-              "size" : 12,
-              "background" : "foreground-light"
-          },
-          "comment_italic" : {
-              "name" : "Helvetica-Oblique",
-              "size" : 12,
-          },
-          "comment_box" : {
-              "name" : "Helvetica",
-              "size" : 12,
-              "frame" : 1
-          },
-          "tab" : {
-              "name" : "Courier",
-              "size" : 10
-          },
-          "toc" : {
-              "name" : "Times-Roman",
-              "size" : 11
-          },
-          "grid" : {
-              "name" : "Helvetica",
-              "size" : 10
-          },
-      },
-
-      // Element mappings that can be specified, but need not since
-      // they default to other elements.
-      // subtitle       --> text
-      // chorus         --> text
-      // comment        --> text
-      // comment_italic --> chord
-      // comment_box    --> chord
-      // annotation     --> chord
-      // toc            --> text
-      // grid           --> chord
-      // grid_margin    --> comment
-      // footer         --> subtitle @ 60%
-      // empty          --> text
-      // diagram        --> comment
-      // diagram_base   --> text (but at a small size)
-
-      // Bookmarks (PDF outlines).
-      // fields:   primary and (optional) secondary fields.
-      // label:    outline label (omitted if there's only one outline)
-      // line:     text of the outline element
-      // collapse: initial display is collapsed
-      // letter:   sublevel with first letters if more
-      // fold:     group by primary (NYI)
-      // omit:     ignore this
-      "outlines" : [
-          { "fields"   : [ "sorttitle", "artist" ],
-            "label"    : "By Title",
-            "line"     : "%{title}%{artist| - %{}}",
-            "collapse" : false,
-            "letter"   : 5,
-            "fold"     : false,
-          },
-          { "fields"   : [ "artist", "sorttitle" ],
-            "label"    : "By Artist",
-            "line"     : "%{artist|%{} - }%{title}",
-            "collapse" : false,
-            "letter"   : 5,
-            "fold"     : false,
-          },
-      ],
-
-      // This will show the page layout if non-zero.
-      "showlayout" : false,
-
-      // CSV generation for MobileSheetsPro. Adapt for other tools.
-      // Note that the resultant file will conform to RFC 4180.
-      "csv" : {
-          "fields" : [
-              { "name" : "title",        "meta" : "title"      },
-              { "name" : "pages",        "meta" : "pagerange"  },
-              { "name" : "sort title",   "meta" : "sorttitle"  },
-              { "name" : "artists",      "meta" : "artist"     },
-              { "name" : "composers",    "meta" : "composer"   },
-              { "name" : "collections",  "meta" : "collection" },
-              { "name" : "keys",         "meta" : "key_actual" },
-              { "name" : "years",        "meta" : "year"       },
-              // Add "omit" : true to omit a field.
-              // To add fields with fixed values, use "value":
-              { "name" : "my_field", "value" : "text", "omit" : true },
-          ],
-          // Field separator.
-          "separator" : ";",
-          // Values separator.
-          "vseparator" : "|",
-          // Restrict CSV to song pages only (do not include matter pages).
-          "songsonly" : true,
-      },
-    },
-
-    // Settings for ChordPro backend.
-    "chordpro" : {
-        // Style of chorus.
-        "chorus" : {
-            // Recall style: Print the tag using the type.
-            // Alternatively quote the lines of the preceding chorus.
-            // If no tag+type or quote: use {chorus}.
-            // Note: Variant 'msp' always uses {chorus}.
-            "recall" : {
-                 // "tag"   : "Chorus", "type"  : "comment",
-                 "tag"   : "", "type"  : "",
-                 // "quote" : false,
-                 "quote" : false,
-            },
-        },
-        // Retain # comments -- we'll output them.
-        "comments" : "retain",
-    },
-
-    // Settings for HTML backend.
-    "html" : {
-        // Stylesheet links.
-        "styles" : {
-            "display" : "chordpro.css",
-            "print"   : "chordpro_print.css",
-        },
-    },
-
-    // Settings for LaTeX backend.
-    "latex" : {
-        "template_include_path" : [ ],
-        "templates" :  {
-            "songbook" : "songbook.tt",
-            "comment" : "comment.tt",
-            "image"   : "image.tt"
-        }
-    },
-
-    // Settings for Text backend.
-    "text" : {
-        // Style of chorus.
-        "chorus" : {
-            // Recall style: Print the tag using the type.
-            // Alternatively quote the lines of the preceding chorus.
-            // If no tag+type or quote: use {chorus}.
-            // Note: Variant 'msp' always uses {chorus}.
-            "recall" : {
-                 // "tag"   : "Chorus", "type"  : "comment",
-                 "tag"   : "", "type"  : "",
-                 // "quote" : false,
-                 "quote" : false,
-            },
-        },
-    },
-
-    // Settings for A2Crd.
-    "a2crd" : {
-        // Treat leading lyrics lines as title/subtitle lines.
-        "infer-titles" : true,
-        // Classification algorithm.
-        "classifier" : "pct_chords",
-        // Tab stop width for tab expansion. Set to zero to disable.
-        "tabstop" : 8,
-    },
-
-    // Settings for the parser/preprocessor.
-    // For selected lines, you can specify a series of 
-    // { "target" : "xxx", "replace" : "yyy" }
-    // Every occurrence of "xxx" will be replaced by "yyy".
-    // Use wisely.
-    "parser" : {
-        "preprocess" : {
-            // All lines.
-            "all" : [],
-            // Directives.
-            "directive" : [],
-            // Song lines (lyrics) only.
-            "songline" : [],
-        },
-    },
-
-    // For (debugging (internal use only)).
-    "debug" : {
-        "runtimeinfo" : 1,
-        "a2crd"     : 0,
-        "assets"    : 0,
-        "chords"    : 0,
-        "config"    : 0,
-        "echo"	    : 0,
-        "fonts"	    : 0,
-        "images"    : 0,
-        "layout"    : 0,
-        "meta"	    : 0,
-        "mma"	    : 0,
-        "paths"	    : 0,
-        "spacing"   : 0,
-        "song"	    : 0,
-        "songfull"  : 0,
-        "ops"	    : 0,
-        "csv"	    : 0,
-        "abc"	    : 0,
-        "ly"	    : 0,
-        "svg"	    : 0,
-        "txtblk"    : 0,
-        // For temporary use.
-        "x1"	    : 0,
-        "x2"	    : 0,
-        "x3"	    : 0,
-    },
-
-}
-// End of config.
-End_Of_Config
-}
-
 # For convenience.
-
 sub diagram_strings ( $self ) {
     # tuning is usually removed from the config.
     # scalar( @{ $self->{tuning} } );
@@ -1715,20 +1007,4 @@ sub qd ( $val, $compact = 0 ) {
     defined wantarray ? $x : warn($x,"\n");
 }
 
-unless ( caller ) {
-    binmode STDOUT => ':utf8';
-    print( default_config() );
-    exit;
-}
-
 1;
-
-=head1 DEFAULT CONFIGURATION
-
-The default configuration as built in. User and system
-configs go on top of this one.
-
-See L<https://www.chordpro.org/chordpro/chordpro-configuration/> for
-extensive details and examples.
-
-

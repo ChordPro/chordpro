@@ -1,0 +1,20 @@
+{
+    "pdf" : {
+	"margintop" : 60,
+	"headspace": 40,
+	"fonts" : {
+	    "text" : {
+		"size" : 15
+	    },
+	},
+	"formats" : {
+	    "first" : {
+		"footer" : [
+		    "",
+		    "Illustrations by Monika Grafik and Xavier Romero-Frias",
+		    ""
+		],
+	    },
+	},
+    },
+}

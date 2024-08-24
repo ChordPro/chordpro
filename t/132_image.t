@@ -142,7 +142,7 @@ my $song = {
 			'opts' => {
 				   'border' => '1',
 				   'anchor' => 'line',
-				   'scale' => '0.5',
+				   'scale' => [0.5,0.5],
 				   'x' => '100%'
 				  },
 			'id' => 'yellow',
@@ -153,7 +153,7 @@ my $song = {
 			'type' => 'image',
 			'opts' => {
 				   'border' => '1',
-				   'scale' => '0.5',
+				   'scale' => [0.5,0.5],
 				   'anchor' => 'line',
 				   'x' => '-30'
 				  },

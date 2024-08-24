@@ -1,0 +1,39 @@
+// Configuration for example: mollymalone.cho.
+// 
+// This is a really relaxed JSON document, see
+// https://metacpan.org/pod/JSON::Relaxed#REALLY-RELAXED-EXTENSIONS
+
+// Settings for PDF output.
+pdf {
+
+  // Appearance of chord diagrams for string instruments.
+  diagrams {
+
+    show : top
+
+    // Diagram cells.
+    vcells : 4, width : 8, height : 8     
+  }
+
+  // Formats.
+  formats.title {
+      // The first page (title page) of a song has:
+    title : [ "%{title}" "" "" ]
+    subtitle : [ "%{subtitle|%{}|%{subtitle}}" "" "" ]
+  }
+
+  // The very first page has:
+  formats.first.footer: [ "%{chordpro.songsource}", "", "%{chordpro|%{} %{chordpro.version}}" ]
+
+  fonts {
+
+    // Fonts for typesetting titles.
+    title.description    : "sans bold 16"
+    subtitle.description : "sans italic 10"
+    footer.description : "sans 8"
+
+    // Fonts for typesetting lyrics and chords.
+    text.description     : "sans 12"
+    chord.description    : "sans bold 12"
+  }
+}

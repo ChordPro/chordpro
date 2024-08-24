@@ -71,7 +71,3 @@ sidebar:
   weight: 330
   title: All Pages
 
-- identifier: search
-  parent: supp
-  weight: 330
-  title: Search

@@ -38,27 +38,50 @@ Makefile : Makefile.PL lib/ChordPro/Version.pm resources
 
 PERL := perl
 PROJECT := ChordPro
-TMP_DST := ${HOME}/tmp/${PROJECT}
 RSYNC_ARGS := -rptgoDvHL
-W10DIR := /Users/Johan/${PROJECT}
-MACDST := macky:ChordPro
 
+STDMNF := MANIFEST MANIFEST.CPAN
+
+TMPDST := ${HOME}/tmp/${PROJECT}
 to_tmp : resources
-	rsync ${RSYNC_ARGS} --files-from=MANIFEST    ./ ${TMP_DST}/
-	rsync ${RSYNC_ARGS} --files-from=MANIFEST.WX ./ ${TMP_DST}/
+	for mnf in ${STDMNF} MANIFEST.WX MANIFEST.CPAN MANIFEST.PP ; do \
+	    rsync ${RSYNC_ARGS} --files-from=$$mnf ./ ${TMPDST}/; \
+	done
 
-to_tmp_cpan :
-	rsync ${RSYNC_ARGS} --files-from=MANIFEST.CPAN ./ ${TMP_DST}/
+# Windows 10, for Windows installer builds.
+WINDIR := /Users/Johan/${PROJECT}
+WINDST := /mnt/c${WINDIR}
+#WINDST := w10:${PROJECT}
+to_win : resources
+	for mnf in ${STDMNF} MANIFEST.WX ; do \
+	    rsync ${RSYNC_ARGS} --files-from=$$mnf ./ ${WINDST}/; \
+	done
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST.PP   \
+	  --exclude=pp/macos/** --exclude=pp/macosswift/** \
+	  --exclude=pp/linux/** --exclude=pp/debian/** \
+	  ./ ${WINDST}/
 
-to_c :
-	test -d /mnt/c/Users || mount /mnt/c
-	${MAKE} to_tmp to_tmp_cpan TMP_DST=/mnt/c${W10DIR}
-
+# macOS Cataline 10.15, for classic builds.
+MACHOST := macky
+MACDST  := ${MACHOST}:${PROJECT}
 to_mac : resources
-	rsync ${RSYNC_ARGS} --files-from=MANIFEST      ./ ${MACDST}/
-	rsync ${RSYNC_ARGS} --files-from=MANIFEST.WX   ./ ${MACDST}/
-	rsync ${RSYNC_ARGS} --files-from=MANIFEST.CPAN ./ ${MACDST}/
-	ssh macky rm -fr ${MACDST}/pp/windows
+	for mnf in ${STDMNF} MANIFEST.WX ; do \
+	    rsync ${RSYNC_ARGS} --files-from=$$mnf ./ ${MACDST}/; \
+	done
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST.PP   \
+	  --exclude=pp/windows/** --exclude=pp/macosswift/** \
+	  --exclude=pp/debian/** \
+	  ./ ${MACDST}/
+
+# macOS Monterey 12/7/5, for Swift GUI builds.
+MACCHODST  := maccho:${PROJECT}
+to_maccho : resources
+	for mnf in ${STDMNF} ; do \
+	    rsync ${RSYNC_ARGS} --files-from=$$mnf ./ ${MACCHODST}/; \
+	done
+	rsync ${RSYNC_ARGS} --files-from=MANIFEST.PP   \
+	  --exclude=pp/windows/** --exclude=pp/debian/** \
+	  ./ ${MACCHODST}/
 
 release :
 	${PERL} Makefile.PL
@@ -70,17 +93,21 @@ LIB := lib/ChordPro
 RES := ${LIB}/res
 PODSELECT := podselect
 
-resources : ${RES}/config/chordpro.json ${RES}/pod/ChordPro.pod ${RES}/pod/Config.pod ${RES}/pod/A2Crd.pod docs/assets/pub/config60.schema
+resources : ${LIB}/Config/Data.pm ${RES}/config/chordpro.json ${RES}/pod/ChordPro.pod ${RES}/pod/Config.pod ${RES}/pod/A2Crd.pod docs/assets/pub/config60.schema
 
-${RES}/config/chordpro.json : ${LIB}/Config.pm
-	$(PERL) -Ilib $< > $@
+${LIB}/Config/Data.pm : ${RES}/config/chordpro.json
+	perl script/cfgboot.pl $< > $@~
+	cmp $@ $@~ || mv $@~ $@
 
 ${RES}/pod/ChordPro.pod : ${LIB}.pm
 	${PODSELECT} $< > $@
 
-${RES}/pod/Config.pod : ${LIB}/Config.pm
-	${PODSELECT} $< > $@
-	${PERL} -pe 's/^/    /' ${RES}/config/chordpro.json >> $@
+${RES}/pod/Config.pod : ${RES}/config/chordpro.json
+	( echo "=head1 ChordPro Default Configuration"; \
+	  echo ""; \
+	  echo "=encoding UTF8"; \
+	  echo ""; \
+	  perl -pe 's/^/    /' $< ) > $@
 
 ${RES}/pod/A2Crd.pod : ${LIB}/A2Crd.pm
 	${PODSELECT} $< > $@
@@ -99,7 +126,7 @@ checkjson :
 	mkdir .json
 	for i in ${CFGLIB}/*.json ; \
 	do \
-	  json_pp -json_opt relaxed < $$i > .json/`basename $$i`; \
+	  perl -Ilib/ChordPro/lib script/rrjson.pl --json $$i > .json/`basename $$i`; \
 	done
 	cd .json; rm keyboard.json dark.json resetchords.json
 	${JSONVALIDATOR} ${JSONOPTS} \
@@ -108,23 +135,39 @@ checkjson :
 
 # Experimental
 
-VM := Win10Pro
-WW := w10
+WINVM := Win10Pro
 
 wkit : _wkit1 _wkit _wkit2
 
 _wkit :
-	${MAKE} to_c
-	ssh ${WW} gmake -C Chordpro/pp/windows
-	scp ${WW}:Chordpro/pp/windows/ChordPro-Installer\*.exe ${HOME}/tmp/
+	${MAKE} to_win
+	ssh ${WIN} gmake -C ChordPro/pp/windows
+	scp ${WIN}:ChordPro/pp/windows/ChordPro-Installer\*.exe ${HOME}/tmp/
 
 _wkit1 :
-	-VBoxManage startvm ${VM} --type headless
+	-VBoxManage startvm ${WINVM} --type headless
 
 _wkit2 :
 	sudo umount /misc/c
-	VBoxManage controlvm ${VM} poweroff
-	VBoxManage snapshot ${VM} restorecurrent
+	VBoxManage controlvm ${WINVM} poweroff
+	VBoxManage snapshot ${WINVM} restorecurrent
+
+DEB := debby
+DEBVM := Debian
+
+appimage : _akit1 _akit _akit2
+
+_akit :
+	rsync -avHi ./ ${DEB}:ChordPro/ --exclude .git --exclude build --exclude docs
+	ssh ${DEB} make -C ChordPro/pp/debian
+	scp ${DEB}:ChordPro/pp/debian/ChordPro-\*.AppImage ${HOME}/tmp/
+
+_akit1 :
+	-VBoxManage startvm ${DEBVM} --type headless
+
+_akit2 :
+	VBoxManage controlvm ${DEBVM} poweroff
+	VBoxManage snapshot ${DEBVM} restorecurrent
 
 .PHONY: TAGS
 
@@ -137,3 +180,37 @@ svg :
 	cp -p ${HOME}/src/SVGPDF/lib/SVGPDF.pm lib/ChordPro/lib
 	cp -p ${HOME}/src/SVGPDF/lib/SVGPDF/*.pm lib/ChordPro/lib/SVGPDF/
 	cp -p ${HOME}/src/SVGPDF/lib/SVGPDF/Contrib/*.pm lib/ChordPro/lib/SVGPDF/Contrib/
+
+.PHONY: svg
+
+rrjson :
+	mkdir -p lib/ChordPro/lib/JSON/Relaxed
+	cp -p ${HOME}/src/JSON-Relaxed/lib/JSON/Relaxed.pm \
+	  lib/ChordPro/lib/JSON/
+	cp -p ${HOME}/src/JSON-Relaxed/lib/JSON/Relaxed/Parser.pm \
+	  ${HOME}/src/JSON-Relaxed/lib/JSON/Relaxed/ErrorCodes.pm \
+	  lib/ChordPro/lib/JSON/Relaxed/
+	cp -p ${HOME}/src/JSON-Relaxed/scripts/rrjson.pl \
+	  script/
+
+ABCDEST    = ${RES}/abc/abc2svg
+
+# 1.22.14
+ABCKIT     = abc2svg-be8faee2b4
+
+# 1.22.18 + Fix for grid widths.
+ABCKIT     = abc2svg-fca05cd348
+
+# 1.22.18 + 'lm' and 'width' for grids
+ABCKIT     = abc2svg-9b12853f66
+
+.PHONY: abc
+
+abc :
+	rm -f ${ABCDEST}/*
+	perl ABC/build.pl --dest=${ABCDEST} ABC/${ABCKIT}.tar.gz 
+	cp -p ABC/README.FIRST ABC/cmdline.js ${ABCDEST}/
+	grep -v ${ABCDEST} MANIFEST > x
+	find ${ABCDEST} -type f -printf "%p\n" \
+	  | sort -u >> x
+	mv x MANIFEST

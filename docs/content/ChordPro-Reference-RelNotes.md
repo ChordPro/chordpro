@@ -1,5 +1,162 @@
 # Release info
 
+## 6.060
+
+Released: 2024-08-24
+
+
+### Highlights
+
+* Configuration files are now [Really Relaxed JSON](https://metacpan.org/pod/JSON::Relaxed#REALLY-RELAXED-EXTENSIONS) files. These are much easier to write and maintain than JSON. Don't worry, everything is still backward compatible with the older JSON and slightly relaxed JSON formats. And ChordPro can [convert your config files](https://www.chordpro.org/chordpro/using-chordpro/#convert-config) for you.
+* Nick Berendsen kindly offered to create a native GUI for macOS. It looks great and behaves nicely in the way macOS applications should behave. And it doesn't have the restrictions on opening and saving of files that the 'classic' GUI suffers from. Thanks Nick!
+* ChordPro bundles free replacement fonts to be used instead of the corefonts. No configs or settings needed.
+
+### Functionality
+
+* (PDF, page sort) Use sorttitle for page sorting.
+* Images: Ignore align with x percentage. Issue warning.
+* Detection of attributes in labels now requires quoting.
+* Handle \u escapes for surrogates and extended chars (\u{...}).
+* 'chordpro -A -A -A' will produce runtime info in JSON.
+* Add '--convert-config' to convert config to new style.
+* Add href property for images.
+* New metadata: chordpro, chordpro.version and chordpro.songsource.
+* Upgrade JSON::Relaxed to 0.096.
+* Upgrade SVGPFG to 0.087. Enables transparant SVG images.
+* Add independent horizontal and vertical scaling for images. Requires Text::Layout 0.037_002.
+* Upgrade Text::Layout to 0.038.
+* Allow fret -1 in {define}, and 'x' in json config for consistency.
+* Allow pdf.fonts.foo: bar (short for pdf.fonts.foo { description: bar }).
+* Allow label="..." for {chorus} and {grid}.
+* Add align property for diagram display.
+
+### Bug fixes
+
+* Fix/update docker build.
+* Add missing shortcodes sog and eog (start/end of grid).
+* Fix paper anchored images being restricted to page size instead of paper size.
+* Fix problem that blocked pdf documents from being processed as songs.
+* Fixed problems with labels and embedded newlines.
+* Fixed newline issues in TextBlocks.
+* Fix issue #353, #367, #371, #372, #384, #388, #399, #410.
+* Fix spread image handling.
+* Fix diagrams.sorted.
+* Fix handling of "display"/"format" in config chords.
+* Fix problem that text in a TextBlock did not reset to flush left.
+* Fix problem TextBlock textstyle did not copy the background colour.
+* Fix colours of keyboard diagrams wrt. theme.
+* Fix rootless chords with transcode.
+* Fix problem with /~ in grid.
+* Upgrade to abc2svg fca05cd348 to fix problem with grid widths.
+* Fix problem with TextBlock not correctly using desired spacing.
+* Fixed --print-{default,final,delta}-config.
+
+### Internal
+
+* New function to deal with property settings for the config.
+* Move pp files to separate MANIFEST so they do not clobber the CPAN.
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.  
+Please use the [issue tracker](https://github.com/ChordPro/chordpro/issues) for bugs reports.
+
+## 6.050.9
+
+Released: 2024-04-05
+
+* Allow very relaxed JSON format for config files.
+* Run with CHORDPRO_JSON_RELAXED=1 in case of emergency.
+* Make times/serif and helvetica/sans soft aliases so they can be redefined individually.
+* Remove Verdana and Georgia from the list of core fonts. They're not.
+* Fix problem with image aligning (see forum 2179).
+* Prevent some SVG diagnostics.
+
+## 6.050.8
+
+Released: 2024-03-21
+
+* Use bublath donated a page reordering feature. See https://chordpro.org/chordpro/chordpro-configuration-pdf/#page-reordering
+* Improve error message for open failures.
+* Improve ppl packaging; add support for debian (static).
+* Upgrade ABC2SVG kit to 1.22.14.
+
+## 6.050.7
+
+Released: 2024-02-27
+
+
+### Functionality
+
+* ABC support will default to QuickJS, either embedded via JavaScript::QuickJS or via an external interpreter. To use another tool, set delegates.abc.program in the config.    
+* Substitute alert image for failed delegates.
+
+### Bugfixes
+
+* (Song) Add col alias for columns.
+* Fix issue #349.
+
+### Internal
+
+* Modify delegate API.
+
+## 6.050.6
+
+Released: 2024-02-25
+
+
+### Internal
+
+* Remove ABC kit from kit. It is not license clean.
+* Add cmdline.js for external QuickJS.
+
+## 6.050.5
+
+Released: 2024-02-23
+
+
+### Internal
+
+* Packaging changes and small typo's.
+
+## 6.050.3
+
+Released: 2024-02-22
+
+
+### Internal
+
+* Packaging changes.
+
+## 6.050.2
+
+Released: 2024-02-21
+
+
+### Functionality
+
+* Upgraded ABC files to 1.22.13 and repackaged.
+
+## 6.050.10
+
+Released: 2024-04-06
+
+* Upgrade PDF::API2 to 2.045.
+
+## 6.050.1
+
+Released: 2024-02-19
+
+
+### Functionality
+
+* Upgrade to SVGPDF 0.086.
+* New sample song: Molly Malone.
+
+### Internal
+
+* Repackaged ABC files.
+
 ## 6.050
 
 Released: 2024-02-09
@@ -24,11 +181,6 @@ Released: 2024-02-09
 * Fix issue #265.
 * Fix spread indent with labels.
 * Fix issue #343.
-
-### Social and support
-
-[User community](https://groups.io/g/ChordPro) for feedback and help.  
-Please use the [issue tracker](https://github.com/ChordPro/chordpro/issues) for bugs reports.
 
 ## 6.042
 

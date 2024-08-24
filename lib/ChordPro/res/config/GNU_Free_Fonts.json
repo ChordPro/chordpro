@@ -1,0 +1,76 @@
+// Preset for GNU Free Fonts, all systems.
+// This assumes the font files to be accessible via the fontdir.
+// In packaged distro's, the fonts are in lib/fonts.
+
+{ "pdf" :
+  {
+    // "fontconfig" maps members of font families to physical fonts.
+    "fontconfig" : {
+
+	"serif" : {
+	    ""            : "FreeSerif.ttf",
+	    "bold"        : "FreeSerifBold.ttf",
+	    "italic"      : "FreeSerifItalic.ttf",
+	    "bolditalic"  : "FreeSerifBoldItalic.ttf",
+	},
+	"sans, sans-serif" : {
+	    ""            : "FreeSans.ttf",
+	    "bold"        : "FreeSansBold.ttf",
+	    "italic"      : "FreeSansOblique.ttf",
+	    "bolditalic"  : "FreeSansBoldOblique.ttf",
+	},
+	"mono, monospace" : {
+	    ""            : "FreeMono.ttf",
+	    "bold"        : "FreeMonoBold.ttf",
+	    "italic"      : "FreeMonoOblique.ttf",
+	    "bolditalic"  : "FreeMonoBoldOblique.ttf",
+	},
+	"dingbats" : {
+	    ""            : "ChordProSymbols.ttf",
+	},
+    },
+
+    // "fonts" associates output elements to font families as defined in
+    // "fontconfig" above.
+    // Not all elements need to be associated since they default to other
+    // settings.
+
+    "fonts" : {
+	"title" : {
+	    "description" : "serif bold 14",
+	},
+	"subtitle" : {
+	    "description" : "serif 11",
+	},
+	"text" : {
+	    "description" : "serif 12",
+	},
+	"chord" : {
+	    "description" : "sans italic 10",
+	},
+	"comment" : {
+	    "description" : "sans 12",
+	    "background" : "#E5E5E5"
+	},
+	"comment_italic" : {
+	    "description" : "sans italic 12",
+	},
+	"comment_box" : {
+	    "description" : "sans 12",
+	    "frame" : 1
+	},
+	"tab" : {
+	    "description" : "mono 10",
+	},
+	"toc" : {
+	    "description" : "serif 11",
+	},
+	"grid" : {
+	    "description" : "sans 10",
+	},
+	"chordfingers" : {
+	    "description" : "dingbats 10",
+	},
+    },
+  }
+}

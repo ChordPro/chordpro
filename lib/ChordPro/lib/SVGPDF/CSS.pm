@@ -20,7 +20,7 @@ BUILD {
 	{ 'font-family'		    => 'serif',
 	  'font-size'		    => '10',
 	  'color'		    => 'black',
-	  'background-color'	    => 'white',
+	  'background-color'	    => 'none',
 	  'fill'		    => 'currentColor',
 	  'stroke'		    => 'none',
 	  'line-width'		    => 1,
@@ -231,14 +231,21 @@ method push ( @args ) {
     ## Class style.
     if ( $args->{class} ) {
 	for ( split( ' ', $args->{class} ), "svg" ) {
-	    next unless exists( $css->{".$_"} );
-	    $self->merge( $ret, $css->{".$_"} );
+	    $self->merge( $ret, $css->{".$_"} )
+	      if exists( $css->{".$_"} );
+	    $self->merge( $ret, $css->{$args->{element}.".$_"} )
+	      if $args->{element} && exists( $css->{$args->{element}.".$_"} );
 	}
     }
 
-    ## ID.
+    ## ID (generic).
     if ( $args->{id} && exists( $css->{ "#" . $args->{id} } ) ) {
 	$self->merge( $ret, $css->{ "#" . $args->{id} } );
+    }
+
+    ## ID (specific).
+    if ( $args->{id} && exists( $css->{ $args->{element} . "#" . $args->{id} } ) ) {
+	$self->merge( $ret, $css->{ $args->{element} . "#" . $args->{id} } );
     }
 
     ## Style attribute.

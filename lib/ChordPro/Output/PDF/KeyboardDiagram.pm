@@ -114,7 +114,7 @@ my %keytypes =
 method draw ( $info, $x, $y, $dummy = 0 ) {
     return unless $info;
     my $w = $lw + $kw * $keys;
-    $fg = $info->{diagram} // "black"; # $ps->{theme}->{foreground};
+    $fg = $info->{diagram} // $ps->{theme}->{foreground};
 
     # Get (or infer) keys.
     my @keys = @{ChordPro::Chords::get_keys($info)};
@@ -148,7 +148,7 @@ method diagram_xo ($info) {
     return unless $info;
 
     my $col = $pressed // "red";
-    $fg = $info->{diagram} // "black"; # $ps->{theme}->{foreground};
+    $fg = $info->{diagram} // $fg // $ps->{theme}->{foreground};
     my $w = $lw + $kw * $keys;
     my $v = $kh;
 

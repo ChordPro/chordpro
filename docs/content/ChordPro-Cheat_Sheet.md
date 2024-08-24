@@ -77,7 +77,7 @@ Arguments to directives may be separated by a colon `:` and/or whitespace. They 
 | [end_of_]({{< relref "Directives-env" >}})_section_                      |           | Ends a specific section.                                                                                    | 6.0   |
 | [end_of_bridge]({{< relref "Directives-env_bridge" >}})                  | eob       | Ends bridge section.                                                                                        | 6.0   |
 | [end_of_chorus]({{< relref "Directives-env_chorus" >}})                  | eoc       | Ends chorus section.                                                                                        | 1.0   |
-| [end_of_grid]({{< relref "Directives-env_grid" >}})                      | eog       | Ends grid section.                                                                                          | 5.0   |
+| [end_of_grid]({{< relref "Directives-env_grid" >}})                      | eog[^6]   | Ends grid section.                                                                                          | 5.0   |
 | [end_of_tab]({{< relref "Directives-env_tab" >}})                        | eot       | Ends tab section.                                                                                           | 3.6   |
 | [end_of_verse]({{< relref "Directives-env_verse" >}})                    | eov       | Ends verse section.                                                                                         | 6.0   |
 | [footersize]({{< relref "Directives-props_footer_legacy" >}}) _size_     |           | Footer size.                                                                                                | 5.0   |
@@ -122,7 +122,7 @@ Arguments to directives may be separated by a colon `:` and/or whitespace. They 
 | [start_of_]({{< relref "Directives-env" >}})_section_                    |           | Starts a specific section. May have a [label]({{< relref "ChordPro-Configuration-PDF#labels" >}}).          | 6.0   |
 | [start_of_bridge]({{< relref "Directives-env_bridge" >}})                | sob       | Starts bridge section. May have a [label]({{< relref "ChordPro-Configuration-PDF#labels" >}}).              | 6.0   |
 | [start_of_chorus]({{< relref "Directives-env_chorus" >}})                | soc       | Starts chorus section. May have a [label]({{< relref "ChordPro-Configuration-PDF#labels" >}}).[^2]          | 1.0   |
-| [start_of_grid]({{< relref "Directives-env_grid" >}})                    | sog       | Starts grid section. May have a [label]({{< relref "ChordPro-Configuration-PDF#labels" >}}).[^2]            | 5.0   |
+| [start_of_grid]({{< relref "Directives-env_grid" >}})                    | sog[^6]   | Starts grid section. May have a [label]({{< relref "ChordPro-Configuration-PDF#labels" >}}).[^2]            | 5.0   |
 | [start_of_tab]({{< relref "Directives-env_tab" >}})                      | sot       | Starts tab section May have a [label]({{< relref "ChordPro-Configuration-PDF#labels" >}}).[^2]              | 3.6   |
 | [start_of_verse]({{< relref "Directives-env_verse" >}})                  | sov       | Starts verse section. May have a [label]({{< relref "ChordPro-Configuration-PDF#labels" >}}).               | 6.0   |
 | [subtitle]({{< relref "Directives-subtitle" >}}) _text_                  | st        | Subtitle for song.                                                                                          | 1.0   |
@@ -165,6 +165,7 @@ all arguments to `chord` and `define` directives are optional.
 [^3]: The short forms were missing in version 5,0, and re-added in 6.0.
 [^4]: Actually, `pagetype` and `pagesize` were never implemented in version 5.0 and higher.
 [^5]: Continuation lines and unicode escapes were introduced in 6.01.
+[^6]: The short forms were missing and added in 6.6.
 
 <!---
 # Local Variables:

@@ -26,6 +26,7 @@ package ChordPro::Delegate::TextBlock;
 #  textstyle:  Style (font) to be used. Must be one of "text", "chords",
 #              "comment" etc.
 #  textsize:   Initial value for the text size.
+#  textspacing: Text spacing. A factor (e.g. 1.2) or "flex".
 #  textcolor:  Initial color for the text.
 #  background: Background color of the object.
 #
@@ -39,9 +40,10 @@ use ChordPro::Utils;
 
 sub DEBUG() { $::config->{debug}->{txtblk} }
 
-sub txt2xform( $s, $pw, $elt ) {
+sub txt2xform( $self, %args ) {
+    my $elt = $args{elt};
 
-    my $ps = $s->{_ps};
+    my $ps = $self->{_ps};
     my $pr = $ps->{pr};
     my $opts = { %{$elt->{opts}} };
 
@@ -52,15 +54,22 @@ sub txt2xform( $s, $pw, $elt ) {
 	$style = "text";
     }
     my $font  = $ps->{fonts}->{$style};
-
-    my $size   = delete($opts->{textsize}) || $font->{size};
+    my $bgcol = $pr->_bgcolor($font->{background});
+    $bgcol = "" if $bgcol eq "none";
+    my $vsp = delete($opts->{textspacing}) // "flex";
+    my $sp = $vsp eq "flex"
+      ? ($font->{leading} || $ps->{spacing}->{$style} || 1) : $vsp;
+    my $size   = fontsize( delete($opts->{textsize}), $font->{size} );
     my $color  = delete($opts->{textcolor});
     my $flush  = delete($opts->{flush})  // "left";
     my $vflush = delete($opts->{vflush}) // "top";
 
     my $data = $elt->{data};
-    if ( $color ) {
-	$data = [ map { "<span color='$color'>$_</span>" } @$data ];
+    if ( $color || $bgcol ) {
+	my $span = "";
+	$span .= " color='$color'" if $color;
+	$span .= " background='$bgcol'" if $bgcol;
+	$data = [ map { "<span$span>$_</span>" } @$data ];
     }
     my $padding  = delete($opts->{padding});
 
@@ -69,33 +78,40 @@ sub txt2xform( $s, $pw, $elt ) {
     $xo->textstart;
 
     # Pre-pass to establish the actual width/height.
-    my ( $awidth, $aheight ) = ( 0, 0 );
+    my ( $awidth, $aheight ) = ( 0, undef );
     my ( $w, $h );
     for ( @$data ) {
 	( $w, $h ) = $pr->strwidth( $_, $font, $size );
 	$awidth = $w if $w > $awidth;
-	$aheight += $h * $ps->{spacing}->{lyrics};
+	if ( defined($aheight) ) {
+	    $aheight += $vsp eq "flex" ? ($h||$size)*$sp : $size*$vsp;
+	}
+	else {
+	    $aheight = ($h||$size);
+	}
     }
 
     # Desired width (includes padding).
     my ( $width, $height );
     if ( $width = delete($opts->{width}) ) {
-	$width -= 2*($padding||0);
+	# Note that using dimension is not yet operational.
+	$width = dimension( $width, width => $size ) - 2*($padding||0);
     }
     else {
 	$width = $awidth;
     }
 
     # Correction for tight y-fit.
-    my $ycorr = $h * ($ps->{spacing}->{lyrics} - 1);
+    my $ycorr = ($vsp eq "flex" ? $h||$size : $size) * ($sp - 1);
 
     # Desired height (includes padding).
     if ( $height = delete($opts->{height}) ) {
-	$height -= 2*($padding||0);
+	# Note that using dimension is not yet operational.
+	$height = dimension( $height, width => $size ) - 2*($padding||0);
     }
     else {
-	$height = $aheight;
-	$ycorr = 0 unless defined($padding);;
+	$height = $aheight - $ycorr;
+	$ycorr = 0 unless defined($padding);
     }
     # Width and height are now the 'inner' box (w/o padding).
 
@@ -129,18 +145,19 @@ sub txt2xform( $s, $pw, $elt ) {
 	}
 
 	for ( @$data ) {
-	    my $w = $pr->strheight( $_, $font, $size );
+	    my $h = $pr->strheight( $_, $font, $size ) || $size;
 	    $pr->{tmplayout}->set_width($width);
 	    $pr->{tmplayout}->set_alignment($flush);
 	    $pr->{tmplayout}->show( 0, $y, $xo );
-	    $y -= $h * $ps->{spacing}->{lyrics};
+	    $y -= ($vsp eq "flex" ? $h : $size) * $sp;
 	}
     }
     else {			# assume top/left
 	for ( @$data ) {
-	    my $h = $pr->strheight( $_, $font, $size );
+	    my $h = $pr->strheight( $_, $font, $size ) || $size;
+	    $pr->{tmplayout}->set_alignment($flush);
 	    $pr->{tmplayout}->show( 0, $y, $xo );
-	    $y -= $h * $ps->{spacing}->{lyrics};
+	    $y -= ($vsp eq "flex" ? $h : $size) * $sp;
 	}
     }
 

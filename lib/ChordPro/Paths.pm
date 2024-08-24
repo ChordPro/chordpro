@@ -228,7 +228,7 @@ method findcfg ( $p ) {
     my $found;
     my @p;
     if ( $p =~ /\.\w+$/ ) {
-	$found = realpath($p), last if -f -s $p;
+	$found = realpath($p) if -f -s $p;
 	@p = ( $p );
     }
     else {

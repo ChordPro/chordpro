@@ -24,16 +24,16 @@ Typical ChordPro input:
 
     {start_of_chorus}
     Swing [D]low, sweet [G]chari[D]ot,
-    Comin’ for to carry me [A7]home.
+    Comin' for to carry me [A7]home.
     Swing [D7]low, sweet [G]chari[D]ot,
-    Comin’ for to [A7]carry me [D]home.
+    Comin' for to [A7]carry me [D]home.
     {end_of_chorus}
 
     # Verse
     I [D]looked over Jordan, and [G]what did I [D]see,
-    Comin’ for to carry me [A7]home.
-    A [D]band of angels [G]comin’ after [D]me,
-    Comin’ for to [A7]carry me [D]home.
+    Comin' for to carry me [A7]home.
+    A [D]band of angels [G]comin' after [D]me,
+    Comin' for to [A7]carry me [D]home.
 
     {c: Chorus}
 
@@ -388,7 +388,20 @@ The default configuration is commented to explain its contents.
 Prints the final configuration (after processing all system, user and
 other config files)  to standard output, and exits.
 
-The final configuration is not commented. Sorry.
+=back
+
+=item B<--convert-config=>I<file>
+
+This option requires a single file name argument.
+
+The specified config file is loaded and immedeately written out in
+standard format, including schema comments. After this, the program
+exits. B<No songs are processed.>
+
+Output goes to standard output unless `--output` is used to specify an
+alternative.
+
+All other options are ignored.
 
 =back
 
@@ -426,9 +439,7 @@ dir, and the contents of environment variable C<FONTDIR>. In any case,
 the filename should point to a valid TrueType (C<.ttf>) or OpenType
 (C<.otf>) font.
 
-If it is not a filename, it must be the name one of the built-in fonts.
-
-Built-in 'Adobe Core Fonts':
+If it is not a filename, it must be the name one of the built-in PDF core fonts:
 
   Courier                             Symbol
   Courier-Bold                        Times-Bold
@@ -438,17 +449,6 @@ Built-in 'Adobe Core Fonts':
   Helvetica-Bold                      ZapfDingbats
   Helvetica-BoldOblique
   Helvetica-Oblique
-
-Built-in 'Windows Fonts':
-
-  Georgia                             Webdings
-  Georgia,Bold                        Wingdings
-  Georgia,BoldItalic
-  Georgia,Italic
-  Verdana
-  Verdana,Bold
-  Verdana,BoldItalic
-  Verdana,Italic
 
 =head1 MOTIVATION
 

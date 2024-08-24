@@ -36,7 +36,9 @@ sub parse_file {
     }
 
     # Loadlines sets $opts->{_filesource}.
+    $opts->{fail} = "soft";
     my $lines = loadlines( $filename, $opts );
+    die( $filename, ": ", $opts->{error}, "\n" ) if $opts->{error};
     # Sense crd input and convert if necessary.
     if ( !(defined($options->{a2crd}) && !$options->{a2crd}) and
 	 !$options->{fragment}
@@ -105,7 +107,7 @@ sub embed_file {
     }
     my $type = "pdf";
 
-    my $song = ChordPro::Song->new( $filename );
+    my $song = ChordPro::Song->new( { filesource => $filename } );
     $song->{meta}->{songindex} = 1 + @{ $self->{songs} };
     $song->{source} =
       { file      => $filename,

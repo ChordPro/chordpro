@@ -20,7 +20,7 @@
 	    // flat and sharp.
 	    "chord" : {
 		"name" : "Helvetica",
-#		"file" : "/usr/share/fonts/gnu-free/FreeSans.ttf",
+//		"file" : "/usr/share/fonts/gnu-free/FreeSans.ttf",
 		"size" : 10,
 	    },
 	},

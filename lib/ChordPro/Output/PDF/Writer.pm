@@ -15,7 +15,7 @@ use Carp;
 use utf8;
 
 use ChordPro::Paths;
-use ChordPro::Utils qw( expand_tilde demarkup min );
+use ChordPro::Utils qw( expand_tilde demarkup min is_corefont );
 use ChordPro::Output::Common qw( fmt_subst prep_outlines );
 use File::LoadLines qw(loadlines);
 
@@ -62,7 +62,8 @@ sub info {
 	    $self->{pdf}->info_metadata( $_, demarkup($info{$_}) );
 	}
 	if ( $config->{debug}->{runtimeinfo} ) {
-	    $self->{pdf}->info_metadata( "RuntimeInfo", ::runtimeinfo() );
+	    $self->{pdf}->info_metadata( "RuntimeInfo",
+					 "Runtime Info:\n" . ::runtimeinfo() );
 	}
     }
     else {
@@ -450,6 +451,10 @@ sub add_object {
 	  ->line_width( $options{border} )
 	    ->stroke;
     }
+    if ( $options{href} ) {
+	my $a = $gfx->{' apipage'}->annotation;
+	$a->url( $options{href}, -rect => [ $x, $y, $x+$w, $y+$h ] );
+    }
 
     $gfx->restore;
 }
@@ -675,6 +680,7 @@ sub init_fonts {
     my $fc = Text::Layout::FontConfig->new( debug => $config->{debug}->{fonts} > 1 );
 
     # Add font dirs.
+    my @dirs;
     my @d = ( @{$ps->{fontdir}}, @{ CP->findresdirs("fonts") }, $ENV{FONTDIR} );
     # Avoid rsc result if dummy.
     splice( @d, -2, 1 ) if $d[-2] eq "fonts/";
@@ -684,6 +690,7 @@ sub init_fonts {
 	if ( -d $fontdir ) {
 	    $self->{pdfapi}->can("addFontDirs")->($fontdir);
 	    $fc->add_fontdirs($fontdir);
+	    push( @dirs, $fontdir );
 	}
 	else {
 	    warn("PDF: Ignoring fontdir $fontdir [$!]\n");
@@ -693,6 +700,36 @@ sub init_fonts {
 
     # Make sure we have this one.
     $fc->register_font( "ChordProSymbols.ttf", "chordprosymbols", "", {} );
+
+    # Remap corefonts if possible.
+    my $remap = $ENV{CHORDPRO_COREFONTS_REMAP} // $ps->{corefonts}->{remap};
+    # Packager adds the fonts.
+    $remap //= "free" if CP->packager;
+
+    unless ( defined $remap ) {
+
+	# Not defined -- find the GNU Free Fonts.
+	for my $dir ( @dirs ) {
+	    my $have = 1;
+	    for my $font ( qw( FreeSerif.ttf
+			       FreeSerifBoldItalic.ttf
+			       FreeSerifBold.ttf
+			       FreeSerifItalic.ttf
+			       FreeSans.ttf
+			       FreeSansBoldOblique.ttf
+			       FreeSansBold.ttf
+			       FreeSansOblique.ttf
+			       FreeMono.ttf
+			       FreeMonoBoldOblique.ttf
+			       FreeMonoBold.ttf
+			       FreeMonoOblique.ttf
+			    ) ) {
+		$have = 0, last unless -f -s "$dir/$font";;
+	    }
+	    $remap = "free", last if $have;
+	}
+    }
+    $fc->register_corefonts( remap => $remap ) if $remap;
 
     # Process the fontconfig.
     foreach my $ff ( keys( %{ $ps->{fontconfig} } ) ) {
@@ -774,7 +811,7 @@ sub init_corefont {
 
     my $ps = $self->{ps};
     my $font = $ps->{fonts}->{$ff};
-    my $cf = ChordPro::Output::PDF::is_corefont($font->{name});
+    my $cf = is_corefont($font->{name});
     die("Config error: \"$font->{name}\" is not a built-in font\n")
       unless $cf;
     my $fc = Text::Layout::FontConfig->new( debug => $config->{debug}->{fonts} > 1 );
@@ -791,59 +828,44 @@ sub show_vpos {
     $self->{pdfgfx}->move(100*$w,$y)->linewidth(0.25)->hline(100*(1+$w))->stroke;
 }
 
-use File::Temp;
-
-my $cname;
-my $rname;
 sub embed {
     my ( $self, $file ) = @_;
+    $file = encode_utf8($file);
     return unless -f $file;
+
+    # Borrow some routines from PDF Api.
+    *PDFNum = \&{$self->{pdfapi} . '::Basic::PDF::Utils::PDFNum'};
+    *PDFStr = \&{$self->{pdfapi} . '::Basic::PDF::Utils::PDFStr'};
+
+    # The song.
+    # Apparently the 'hidden' flag does not hide it completely,
+    # so give it a rect outside the page.
     my $a = $self->{pdfpage}->annotation();
+    $a->text( loadlines( $file, { split => 0 } ),
+	      -open => 0, -rect => [0,0,-1,-1] );
+    $a->{T} = PDFStr("ChordProSong");
+    $a->{F} = PDFNum(2);		# hidden
 
-    # The only reliable way currently is pretend it's a movie :) .
-    $a->movie($file, "ChordPro" );
-    $a->open(1);
-
-    # Create/reuse temp file for (final) config and run time info.
-    my $cf;
-    if ( $cname ) {
-	open( $cf, '>', $cname );
-    }
-    else {
-	( $cf, $cname ) = File::Temp::tempfile( UNLINK => 0);
-    }
-    binmode( $cf, ':utf8' );
-    print $cf ChordPro::Config::config_final(0);
-    close($cf);
-
+    # The config.
     $a = $self->{pdfpage}->annotation();
-    $a->movie($cname, "ChordProConfig" );
-    $a->open(0);
+    $a->text( ChordPro::Config::config_final(),
+	      -open => 0, -rect => [0,0,-1,-1]);
+    $a->{T} = PDFStr("ChordProConfig");
+    $a->{F} = PDFNum(2);		# hidden
 
-    my $rf;
-    if ( $rname ) {
-	open( $rf, '>', $rname );
-    }
-    else {
-	( $rf, $rname ) = File::Temp::tempfile( UNLINK => 0);
-    }
-    binmode( $rf, ':utf8' );
-    open( $rf, '>', $rname );
-    binmode( $rf, ':utf8' );
-    print $rf (::runtimeinfo());
-    close($rf);
-
+    # Runtime info.
     $a = $self->{pdfpage}->annotation();
-    $a->movie($rname, "ChordProRunTime" );
-    $a->open(0);
-}
+    $a->text( ::runtimeinfo(),
+	      -open => 0, -rect => [0,0,-1,-1] );
+    $a->{T} = PDFStr("ChordProRunTime");
+    $a->{F} = PDFNum(2);		# hidden
 
-END {
-    return unless $cname;
-    unlink($cname);
-    undef $cname;
-    unlink($rname);
-    undef $rname;
+    # Call.
+    $a = $self->{pdfpage}->annotation();
+    $a->text( join(" ", @{$::options->{_argv}}) . "\n",
+	      -open => 0, -rect => [0,0,-1,-1] );
+    $a->{T} = PDFStr("ChordProCall");
+    $a->{F} = PDFNum(2);		# hidden
 }
 
 1;
