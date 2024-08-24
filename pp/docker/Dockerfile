@@ -37,7 +37,7 @@ RUN cpanm \
     File::LoadLines \
     String::Interpolate::Named \
     HarfBuzz::Shaper \
-    Text::Layout~0.037 \
+    Text::Layout~0.038 \
     Data::Printer
 
 FROM base AS chordpro-prod
