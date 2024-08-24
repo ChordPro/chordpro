@@ -346,6 +346,14 @@ sub generate_song ( $s ) {
 	    next;
 	}
 
+	if ( $elt->{type} eq "control" ) {
+	    if ( $elt->{name} =~ /^(\w+)-(size|color|font)/ ) {
+		my $t = "{$1$2: " . $elt->{value} . "}";
+		push( @s, $t ) unless $t =~ s/^\{\Kchorus/text/r eq $s[-1];
+	    }
+	    next;
+	}
+
 	if ( $elt->{type} eq "ignore" ) {
 	    push( @s, $elt->{text} );
 	    next;
