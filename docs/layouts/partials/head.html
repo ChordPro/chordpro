@@ -13,5 +13,6 @@
   {{ partial "head_fancybox.html" . }}
   <link rel="stylesheet" href="{{ (resources.Get "css/site.css").RelPermalink }}" />
   <link rel="stylesheet" href="{{ (resources.Get "css/pagefind-ui.css").RelPermalink }}" />
-  <script src="pagefind/pagefind-ui.js"></script>
+  <!-- script src="pagefind/pagefind-ui.js"></script -->
+  <script src="{{ (resources.Get "js/pagefind-ui.js").RelPermalink }}"></script>
 </head>

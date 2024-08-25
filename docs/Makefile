@@ -34,6 +34,7 @@ assets ::
 
 pagefind ::
 	pagefind
+	rsync -avH public/pagefind/ public/js/
 
 popup ::
 	( sleep 5; xdg-open  http://${HOSTNAME}:1313/ ) &

@@ -28,6 +28,4 @@ like ChordPro, please consider a small donation.
 
 [Donate with Paypal](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=WDKWDE6R3KR98&lc=GB&item_name=ChordPro&currency_code=EUR&bn=PP-DonationsBF%3Abtn_donate_LG.gif%3ANonHosted)
 
-Bitcoin: `3GBzu3xC9DzVHfYHt9rRgA6qmjNkRfbr9o`
-
 ### Thanks!
