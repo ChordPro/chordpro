@@ -207,7 +207,8 @@ sub stylelist {
 	}
     }
 
-    push( @stylelist, "chordpro" ) if delete $stylelist{chordpro};
+    # No need for ChordPro style, it's default.
+    delete $stylelist{chordpro};
     foreach ( sort keys %stylelist ) {
 	if ( $stylelist{$_} =~ /^\s+(.*)/ ) {
 	    push( @stylelist, "$_ (User)" );

@@ -910,11 +910,7 @@ sub precheck ( $cfg, $file ) {
     $p = sub {
         my ( $o, $path ) = @_;
         $path //= "";
-        if ( !defined $o ) {
-            warn("$file: Undefined config \"$path\" (using 'false')\n");
-            $_[0] = '';
-        }
-        elsif ( UNIVERSAL::isa( $o, 'HASH' ) ) {
+        if ( UNIVERSAL::isa( $o, 'HASH' ) ) {
             $path .= "." unless $path eq "";
             for ( sort keys %$o ) {
                 $p->( $o->{$_}, $path . $_  );

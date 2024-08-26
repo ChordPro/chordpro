@@ -1,3 +1,8 @@
+0.000
+
+    - Eliminate warning on undefined config entry.
+    - Wx: Remove ChordPro preset.
+
 6.060 2024-08-24
 
     !Highlights
