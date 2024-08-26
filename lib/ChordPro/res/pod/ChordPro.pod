@@ -388,8 +388,6 @@ The default configuration is commented to explain its contents.
 Prints the final configuration (after processing all system, user and
 other config files)  to standard output, and exits.
 
-=back
-
 =item B<--convert-config=>I<file>
 
 This option requires a single file name argument.
