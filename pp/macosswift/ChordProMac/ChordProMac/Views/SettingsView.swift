@@ -62,6 +62,10 @@ struct SettingsView: View {
                     }
                 }
             }
+            /// No need for ChordPro style, it's default.
+            if let index = templates.firstIndex(where: {$0.label == "Chordpro"}) {
+              templates.remove(at: index)
+            }
             Logger.application.info("Found \(templates.count) system templates")
             self.systemConfigurations = templates.sorted { $0.label < $1.label }
             self.notations = notations
