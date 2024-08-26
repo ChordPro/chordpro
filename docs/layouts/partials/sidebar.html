@@ -4,7 +4,10 @@
 <div id="pagefindsearch" class=""></div>
 <script>
     window.addEventListener('DOMContentLoaded', (event) => {
-        new PagefindUI({ element: "#pagefindsearch", showSubResults: true, showImages: false });
+        new PagefindUI({ element: "#pagefindsearch",
+                         baseUrl: "/chordpro/",
+                         showSubResults: true,
+                         showImages: false });
     });
 </script>
 
