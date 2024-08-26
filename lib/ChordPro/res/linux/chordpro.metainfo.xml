@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop">
-  <id>chordpro.desktop</id>
+  <id>org.chordpro.desktop</id>
   <metadata_license>CC0-1.0</metadata_license>
-  <project_license>Artistic 2.0</project_license>
+  <project_license>Artistic-2.0</project_license>
   <name>ChordPro</name>
   <summary>Print songbooks (lyrics + chords)</summary>
   <description>
@@ -11,14 +11,16 @@ songs plus chord information. ChordPro will then generate a
 photo-ready, professional looking, impress-your-friends sheet-music
 suitable for printing on your nearest printer.</p>
     <p>ChordPro is a rewrite of the Chordii program.</p>
-    <p>For more information about ChordPro, see https://www.chordpro.org.</p>
   </description>
   <screenshots>
     <screenshot type="default">
-      <image>https://www.chordpro.org/appdata/screenshot2.png</image>
+      <image>https://screenshots.debian.net/shrine/screenshot/24876/simage/large-43dc01d2abbddc3ed6b3e9f7508ba27c.png</image>
     </screenshot>
     <screenshot>
-      <image>https://www.chordpro.org/appdata/screenshot1.png</image>
+      <image>https://screenshots.debian.net/shrine/screenshot/24877/simage/large-9c92757b6f08ff31c2674fd83f096b19.png</image>
+    </screenshot>
+    <screenshot>
+      <image>https://screenshots.debian.net/shrine/screenshot/24878/simage/large-f7c8348de7bdc1a6b51c5c2a07cdddf4.png</image>
     </screenshot>
     <screenshot>
       <image>https://www.chordpro.org/appdata/screenshot3.png</image>
@@ -29,6 +31,10 @@ suitable for printing on your nearest printer.</p>
     <mediatype>application/x-chordpro</mediatype>
     <mediatype>text/x-chordpro</mediatype>
   </provides>
+  <content_rating type="oars-1.0" />
   <url type="homepage">https://www.chordpro.org/</url>
+  <developer id="org.chordpro">
+    <name>Team ChordPro</name>
+  </developer>
   <update_contact>info_AT_chordpro.org</update_contact>
 </component>
