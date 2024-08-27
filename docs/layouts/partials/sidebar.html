@@ -5,7 +5,7 @@
 <script>
     window.addEventListener('DOMContentLoaded', (event) => {
         new PagefindUI({ element: "#pagefindsearch",
-                         baseUrl: "/chordpro/",
+                         baseUrl: "{{ .Site.BaseURL|relURL }}/",
                          showSubResults: true,
                          showImages: false });
     });
