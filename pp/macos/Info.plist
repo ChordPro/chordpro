@@ -16,6 +16,8 @@
   <string>6.0</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
+  <key>NSPrincipalClass</key>
+  <string>NSApplication</string>
   <key>CFBundleSignature</key>
   <string>CHO#</string>
   <key>CFBundleShortVersion</key>
