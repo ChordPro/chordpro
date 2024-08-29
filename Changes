@@ -2,6 +2,7 @@
 
     - Eliminate warning on undefined config entry.
     - Wx: Remove ChordPro preset.
+    - MacOS: Use _NSGetExecutablePath() to get the correct script location.
 
 6.060 2024-08-24
 

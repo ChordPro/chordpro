@@ -69,13 +69,13 @@ _loaders : "${DEST}/chordpro"
 	cp "${DEST}/chordpro" "${DEST}/perl"
 
 "${DEST}/wxchordpro" : ${BASE}/ppl.c dndhandler.cpp
-	${CC} ${CCOPTS} -o "${DEST}/wxchordpro" -L${DEST} ${LDOPTS} ${BASE}/ppl.c
-	${CXX} -o "${DEST}/dndhandler" \
+	${CC} -DMACOS ${CCOPTS} -o "${DEST}/wxchordpro" -L${DEST} ${LDOPTS} ${BASE}/ppl.c
+	${CXX} -DMACOS -o "${DEST}/dndhandler" \
 		dndhandler.cpp `${WXCNFG} --cxxflags --libs`
 	perl ./reloc.pl "${DEST}/dndhandler"
 
 "${DEST}/chordpro" : ${BASE}/ppl.c
-	${CC} ${CCOPTS} -o "${DEST}/chordpro" -L${DEST} ${LDOPTS} ${BASE}/ppl.c
+	${CC} -DMACOS ${CCOPTS} -o "${DEST}/chordpro" -L${DEST} ${LDOPTS} ${BASE}/ppl.c
 
 clean ::
 	rm -fr ${DEST}
