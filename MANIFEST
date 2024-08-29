@@ -76,6 +76,7 @@ lib/ChordPro/res/config/brandtroemer.json
 lib/ChordPro/res/config/chordii.json
 lib/ChordPro/res/config/chordpro.json
 lib/ChordPro/res/config/config.schema
+lib/ChordPro/res/config/dark.json
 lib/ChordPro/res/config/guitar-br.json
 lib/ChordPro/res/config/guitar-ly.json
 lib/ChordPro/res/config/guitar.json
