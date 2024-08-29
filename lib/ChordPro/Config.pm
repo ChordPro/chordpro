@@ -380,6 +380,8 @@ sub config_expand_font_shortcuts ( $cfg ) {
 	    }
 	    else {
 		$i->{description} = $v;
+		$i->{description} .= " " . delete($i->{size})
+		  if $i->{size};
 	    }
 	    $_ = $i;
 	}
@@ -419,6 +421,7 @@ sub config_final ( %args ) {
 	local $options->{noconfig} = 1;
 	$defcfg = pristine_config();
 	config_split_fc_aliases($defcfg);
+	config_expand_font_shortcuts($defcfg);
 	if ( $delta ) {
 	    delete $defcfg->{chords};
 	    delete $defcfg->{include};
@@ -471,10 +474,39 @@ sub config_final ( %args ) {
 	$parser->decode($data);
     };
 
-    return $parser->encode( data => hmerge( $config, $cfg ),
+#    $cfg = hmerge( $config, $cfg );
+    return $parser->encode( data => {%{$cfg}},
 			    pretty => 1, schema => $schema );
 }
 
+sub config_simplify_fonts( $cfg ) {
+
+    return $cfg unless $cfg->{pdf}->{fonts};
+
+    foreach my $font ( keys %{$cfg->{pdf}->{fonts}} ) {
+	for ( $cfg->{pdf}->{fonts}->{$font} ) {
+	    next unless UNIVERSAL::isa( $_, 'HASH' );
+	    if ( exists( $_->{file} ) ) {
+		delete $_->{description};
+		delete $_->{name};
+	    }
+	    elsif ( exists( $_->{description} ) ) {
+		delete $_->{name};
+		if ( $_->{size} && $_->{description} !~ /\s+[\d.]+$/ ) {
+		    $_->{description} .= " " . $_->{size};
+		}
+		delete $_->{size};
+		$_ = $_->{description} if keys %$_ == 1;
+	    }
+	    elsif ( exists( $_->{name} )
+		    && exists( $_->{size})
+		    && keys %$_ == 2
+		  ) {
+		$_ = $_->{name} .= " " . $_->{size};
+	    }
+	}
+    }
+}
 sub convert_config ( $from, $to ) {
     # This is a completely independent function.
 
@@ -694,7 +726,8 @@ sub _reduce ( $self, $orig, $path ) {
 
             warn("Config reduce error: unknown item $path$key\n")
               unless exists $self->{$key}
-                || $key =~ /^_/;
+                || $key =~ /^_/
+                || $path =~ /^pdf\/\.fonts\./;
 
             unless ( exists $orig->{$key} ) {
                 warn("D: $path$key\n") if DEBUG;
