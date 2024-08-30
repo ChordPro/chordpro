@@ -9,7 +9,7 @@ all :	Makefile cleanup
 
 .PHONY : test
 test : Makefile
-	env PERL5LIB=$(shell pwd)/CPAN $(MAKE) -f Makefile test
+	env PERL5LIB=$(shell pwd)/CPAN:$(shell pwd)/aux $(MAKE) -f Makefile test
 
 .PHONY : tests
 tests : test
