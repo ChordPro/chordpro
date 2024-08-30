@@ -816,6 +816,12 @@ sub generate_song {
 	    my $h = int( ( $ww + $dadv ) / $hsp );
 	    die("ASSERT: $h should be greater than 0") unless $h > 0;
 
+	    # Spread evenly over multiple lines.
+	    if ( $dctl->{align} eq "center" ) {
+		my $lines = int((@chords-1)/$h) + 1;
+		$h = int((@chords-1)/$lines) + 1;
+	    }
+
 	    my $y = $y;
 	    if ( $show eq "bottom" ) {
 		$y = $ps->{marginbottom} + (int((@chords-1)/$h) + 1) * $vsp;
@@ -861,6 +867,12 @@ sub generate_song {
 
 	    my $h = int( ( $ww + $dadv ) / $hsp );
 	    die("ASSERT: $h should be greater than 0") unless $h > 0;
+
+	    # Spread evenly over multiple lines.
+	    if ( $dctl->{align} eq "center" ) {
+		my $lines = int((@chords-1)/$h) + 1;
+		$h = int((@chords-1)/$lines) + 1;
+	    }
 
 	    my $h0 = $h;
 	    while ( @chords ) {
