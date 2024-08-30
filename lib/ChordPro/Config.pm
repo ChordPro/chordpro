@@ -22,6 +22,7 @@ use Scalar::Util qw(reftype);
 use List::Util qw(any);
 use Storable 'dclone';
 use Hash::Util;
+use Ref::Util qw( is_arrayref is_hashref );
 
 #sub hmerge($$;$);
 #sub clone($);
@@ -357,57 +358,6 @@ sub process_config ( $cfg, $file ) {
     config_expand_font_shortcuts($cfg);
 }
 
-# Expand pdf.fonts.foo: bar to pdf.fonts.foo { description: bar }.
-sub config_expand_font_shortcuts ( $cfg ) {
-    return unless exists $cfg->{pdf}->{fonts};
-    for my $f ( keys %{$cfg->{pdf}->{fonts}} ) {
-	next if ref($cfg->{pdf}->{fonts}->{$f}) eq 'HASH';
-	for ( $cfg->{pdf}->{fonts}->{$f} ) {
-	    my $v = $_;
-	    my $i = {};
-	    # Break out size.
-	    if ( $v =~ /(.*?)(?:\s+(\d+(?:\.\d+)?))?$/ ) {
-		$i->{size} = $2 if $2;
-		$v = $1;
-	    }
-	    # Check for filename.
-	    if ( $v =~ /^.*\.(ttf|otf)$/i ) {
-		$i->{file} = $v;
-	    }
-	    # Check for corefonts.
-	    elsif ( is_corefont($v) ) {
-		$i->{name} = is_corefont($v);
-	    }
-	    else {
-		$i->{description} = $v;
-		$i->{description} .= " " . delete($i->{size})
-		  if $i->{size};
-	    }
-	    $_ = $i;
-	}
-    }
-}
-
-sub config_split_fc_aliases ( $cfg ) {
-    # Split fontconfig aliases into individual entries.
-    if ( $cfg->{pdf}->{fontconfig} ) {
-	# Orig.
-	my $fc = $cfg->{pdf}->{fontconfig};
-	# Since we're going to delete/insert keys, we need a copy.
-	my %fc = %$fc;
-	while ( my($k,$v) = each(%fc) ) {
-	    # Split on comma.
-	    my @k = split( /\s*,\s*/, $k );
-	    if ( @k > 1 ) {
-		# We have aliases. Delete the original.
-		delete( $fc->{$k} );
-		# And insert individual entries.
-		$fc->{$_} = dclone($v) for @k;
-	    }
-	}
-    }
-}
-
 sub config_final ( %args ) {
     my $delta   = $args{delta} || 0;
     my $default = $args{default} || 0;
@@ -485,7 +435,7 @@ sub config_simplify_fonts( $cfg ) {
 
     foreach my $font ( keys %{$cfg->{pdf}->{fonts}} ) {
 	for ( $cfg->{pdf}->{fonts}->{$font} ) {
-	    next unless UNIVERSAL::isa( $_, 'HASH' );
+	    next unless is_hashref($_);
 	    if ( exists( $_->{file} ) ) {
 		delete $_->{description};
 		delete $_->{name};
@@ -565,13 +515,13 @@ sub cfg2props ( $o, $path = "" ) {
     if ( !defined $o ) {
         $ret .= "$path: undef\n";
     }
-    elsif ( UNIVERSAL::isa( $o, 'HASH' ) ) {
+    elsif ( is_hashref($o) ) {
         $path .= "." unless $path eq "";
         for ( sort keys %$o ) {
             $ret .= cfg2props( $o->{$_}, $path . $_  );
         }
     }
-    elsif ( UNIVERSAL::isa( $o, 'ARRAY' ) ) {
+    elsif ( is_arrayref($o) ) {
         $path .= "." unless $path eq "";
         for ( my $i = 0; $i < @$o; $i++ ) {
             $ret .= cfg2props( $o->[$i], $path . "$i" );
@@ -943,13 +893,13 @@ sub precheck ( $cfg, $file ) {
     $p = sub {
         my ( $o, $path ) = @_;
         $path //= "";
-        if ( UNIVERSAL::isa( $o, 'HASH' ) ) {
+        if ( is_hashref($o) ) {
             $path .= "." unless $path eq "";
             for ( sort keys %$o ) {
                 $p->( $o->{$_}, $path . $_  );
             }
         }
-        elsif ( UNIVERSAL::isa( $o, 'ARRAY' ) ) {
+        elsif ( is_arrayref($o) ) {
             $path .= "." unless $path eq "";
             for ( my $i = 0; $i < @$o; $i++ ) {
                 $p->( $o->[$i], $path . "$i" );

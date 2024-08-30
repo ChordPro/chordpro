@@ -294,7 +294,7 @@ sub prpadd2cfg ( $cfg, @defs ) {
 	# Handle pdf.fonts.xxx shortcuts.
 	if ( join( ".", @keys ) eq "pdf.fonts" ) {
 	    my $s = { pdf => { fonts => { $lastkey => $value } } };
-	    ChordPro::Config::config_expand_font_shortcuts($s);
+	    config_expand_font_shortcuts($s);
 	    $value = $s->{pdf}{fonts}{$lastkey};
 	}
 
@@ -469,5 +469,65 @@ sub is_corefont {
 }
 
 push( @EXPORT, "is_corefont" );
+
+# Expand pdf.fonts.foo: bar to pdf.fonts.foo { description: bar }.
+
+sub config_expand_font_shortcuts ( $cfg ) {
+    return unless exists $cfg->{pdf}->{fonts};
+    for my $f ( keys %{$cfg->{pdf}->{fonts}} ) {
+	next if ref($cfg->{pdf}->{fonts}->{$f}) eq 'HASH';
+	for ( $cfg->{pdf}->{fonts}->{$f} ) {
+	    my $v = $_;
+	    my $i = {};
+	    # Break out size.
+	    if ( $v =~ /(.*?)(?:\s+(\d+(?:\.\d+)?))?$/ ) {
+		$i->{size} = $2 if $2;
+		$v = $1;
+	    }
+	    # Check for filename.
+	    if ( $v =~ /^.*\.(ttf|otf)$/i ) {
+		$i->{file} = $v;
+	    }
+	    # Check for corefonts.
+	    elsif ( is_corefont($v) ) {
+		$i->{name} = is_corefont($v);
+	    }
+	    else {
+		$i->{description} = $v;
+		$i->{description} .= " " . delete($i->{size})
+		  if $i->{size};
+	    }
+	    $_ = $i;
+	}
+    }
+}
+
+push( @EXPORT, "config_expand_font_shortcuts" );
+
+use Storable qw(dclone);
+
+# Split fontconfig aliases into separate entries.
+
+sub config_split_fc_aliases ( $cfg ) {
+
+    if ( $cfg->{pdf}->{fontconfig} ) {
+	# Orig.
+	my $fc = $cfg->{pdf}->{fontconfig};
+	# Since we're going to delete/insert keys, we need a copy.
+	my %fc = %$fc;
+	while ( my($k,$v) = each(%fc) ) {
+	    # Split on comma.
+	    my @k = split( /\s*,\s*/, $k );
+	    if ( @k > 1 ) {
+		# We have aliases. Delete the original.
+		delete( $fc->{$k} );
+		# And insert individual entries.
+		$fc->{$_} = dclone($v) for @k;
+	    }
+	}
+    }
+}
+
+push( @EXPORT, "config_split_fc_aliases" );
 
 1;

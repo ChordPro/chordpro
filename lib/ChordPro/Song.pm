@@ -139,9 +139,8 @@ sub parse_song {
 	    }
 	}
 	if ( $cf ) {
-	    my $pp = JSON::PP->new->relaxed;
-	    my $precfg = $pp->decode($cf);
 	    my $prename = "__PRECFG__";
+	    my $precfg = json_load( $cf, $prename );
 	    ChordPro::Config::precheck( $precfg, $prename );
 	    push( @configs, ChordPro::Config::prep_configs( $precfg, $prename) );
 	}
