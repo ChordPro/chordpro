@@ -5,6 +5,7 @@
     - (macos) Use _NSGetExecutablePath() to get the correct script location.
     - Sync config files between git and MANIFEST.
     - (Paths) Allow absolute filenames in findres.
+    - (Makefile) Add Ref::Util dependency.
 
 6.060 2024-08-24
 
