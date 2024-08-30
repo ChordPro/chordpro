@@ -140,9 +140,9 @@ sub parse_song {
 	}
 	if ( $cf ) {
 	    my $prename = "__PRECFG__";
-	    my $precfg = json_load( $cf, $prename );
-	    ChordPro::Config::precheck( $precfg, $prename );
-	    push( @configs, ChordPro::Config::prep_configs( $precfg, $prename) );
+	    my $precfg = ChordPro::Config->new( json_load( $cf, $prename ) );
+	    $precfg->precheck($prename);
+	    push( @configs, $precfg->prep_configs($prename) );
 	}
     }
     # Load song-specific config, if any.
@@ -160,7 +160,7 @@ sub parse_song {
 	    warn("Config[song]: $cf\n") if $options->{verbose};
 	    my $have = ChordPro::Config::get_config( CP->findcfg($cf) );
 	    die("Missing config: $cf\n") unless $have;
-	    push( @configs, ChordPro::Config::prep_configs( $have, $cf) );
+	    push( @configs, $have->prep_configs($cf) );
 	}
 	else {
 	    for ( "prp", "json" ) {
@@ -169,7 +169,7 @@ sub parse_song {
 		next unless -s $cf;
 		warn("Config[song]: $cf\n") if $options->{verbose};
 		my $have = ChordPro::Config::get_config($cf);
-		push( @configs, ChordPro::Config::prep_configs( $have, $cf) );
+		push( @configs, $have->prep_configs($cf) );
 		last;
 	    }
 	}

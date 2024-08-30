@@ -5,7 +5,7 @@ use warnings;
 use utf8;
 
 use ChordPro::Testing;
-use ChordPro::Utils qw( config_simplify_fonts config_expand_font_shortcuts );
+use ChordPro::Config;
 
 plan tests => 3;
 
@@ -35,7 +35,9 @@ my $config =
 	},
       }}};
 
-config_simplify_fonts($config);
+$config = ChordPro::Config->new($config);
+
+$config->simplify_fonts;
 
 is_deeply( $config,
 	   { pdf =>
@@ -48,7 +50,7 @@ is_deeply( $config,
 	       }}},
 	   "simplify fonts" );
 
-config_expand_font_shortcuts($config);
+$config->expand_font_shortcuts;
 
 is_deeply( $config,
 	   { pdf =>
@@ -63,7 +65,7 @@ is_deeply( $config,
 
 $config->{pdf}->{fonts}->{ape} = "tim.ttf 12";
 
-config_expand_font_shortcuts($config);
+$config->expand_font_shortcuts;
 
 is_deeply( $config,
 	   { pdf =>
