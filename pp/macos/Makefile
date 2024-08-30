@@ -89,6 +89,7 @@ app : ppl app1
 app1 :
 	rm -fr ${APPDIR} || rm -fr ${APPDIR}
 	cp -a "${DEST}/" "${APPDIR}/"
+	rm "${APPDIR}"/*.icns
 	mkdir -p "${APPDIR}/Contents/MacOS"
 	mkdir -p "${APPDIR}/Contents/Resources"
 	cp PkgInfo Info.plist "${APPDIR}/Contents"
@@ -125,7 +126,7 @@ dmg1 :
 	rm -f ${DMGNAME}
 	bash ./create-dmg \
 	    --volname "ChordPro ${VOLTYPE}" \
-	    --volicon "${APPDIR}/chordpro.icns" \
+	    --volicon "${APPDIR}/Contents/Resources/chordpro.icns" \
 	    --window-pos 200 200 \
 	    --window-size 600 300 \
 	    --icon "${APPDIR}" 50 50 \
