@@ -429,34 +429,6 @@ sub config_final ( %args ) {
 			    pretty => 1, schema => $schema );
 }
 
-sub config_simplify_fonts( $cfg ) {
-
-    return $cfg unless $cfg->{pdf}->{fonts};
-
-    foreach my $font ( keys %{$cfg->{pdf}->{fonts}} ) {
-	for ( $cfg->{pdf}->{fonts}->{$font} ) {
-	    next unless is_hashref($_);
-	    if ( exists( $_->{file} ) ) {
-		delete $_->{description};
-		delete $_->{name};
-	    }
-	    elsif ( exists( $_->{description} ) ) {
-		delete $_->{name};
-		if ( $_->{size} && $_->{description} !~ /\s+[\d.]+$/ ) {
-		    $_->{description} .= " " . $_->{size};
-		}
-		delete $_->{size};
-		$_ = $_->{description} if keys %$_ == 1;
-	    }
-	    elsif ( exists( $_->{name} )
-		    && exists( $_->{size})
-		    && keys %$_ == 2
-		  ) {
-		$_ = $_->{name} .= " " . $_->{size};
-	    }
-	}
-    }
-}
 sub convert_config ( $from, $to ) {
     # This is a completely independent function.
 

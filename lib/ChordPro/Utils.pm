@@ -530,4 +530,39 @@ sub config_split_fc_aliases ( $cfg ) {
 
 push( @EXPORT, "config_split_fc_aliases" );
 
+# Reverse of config_expand_font_shortcuts.
+
+use Ref::Util qw( is_hashref );
+
+sub config_simplify_fonts( $cfg ) {
+
+    return $cfg unless $cfg->{pdf}->{fonts};
+
+    foreach my $font ( keys %{$cfg->{pdf}->{fonts}} ) {
+	for ( $cfg->{pdf}->{fonts}->{$font} ) {
+	    next unless is_hashref($_);
+	    if ( exists( $_->{file} ) ) {
+		delete $_->{description};
+		delete $_->{name};
+	    }
+	    elsif ( exists( $_->{description} ) ) {
+		delete $_->{name};
+		if ( $_->{size} && $_->{description} !~ /\s+[\d.]+$/ ) {
+		    $_->{description} .= " " . $_->{size};
+		}
+		delete $_->{size};
+		$_ = $_->{description} if keys %$_ == 1;
+	    }
+	    elsif ( exists( $_->{name} )
+		    && exists( $_->{size})
+		    && keys %$_ == 2
+		  ) {
+		$_ = $_->{name} .= " " . $_->{size};
+	    }
+	}
+    }
+}
+
+push( @EXPORT, "config_simplify_fonts" );
+
 1;
