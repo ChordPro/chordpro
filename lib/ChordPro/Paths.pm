@@ -15,7 +15,7 @@ method get :common ( $reset = 0 ) {
 }
 
 use Cwd qw(realpath);
-use File::Spec::Functions qw( catfile catdir splitpath catpath );
+use File::Spec::Functions qw( catfile catdir splitpath catpath file_name_is_absolute );
 use File::HomeDir;
 
 field $home      :reader;	# dir
@@ -253,12 +253,17 @@ method findcfg ( $p ) {
 method findres ( $p, %opts ) {
     my $try = $p;
     my $found;
-    if ( defined $opts{class} ) {
-	$try = catfile( $opts{class}, $try );
+    if ( file_name_is_absolute($p) ) {
+	$found = realpath($p);
     }
-    for ( @$resdirs ) {
-	my $f = catfile( $_, $try );
-	$found = realpath($f), last if -f -s $f;
+    else {
+	if ( defined $opts{class} ) {
+	    $try = catfile( $opts{class}, $try );
+	}
+	for ( @$resdirs ) {
+	    my $f = catfile( $_, $try );
+	    $found = realpath($f), last if -f -s $f;
+	}
     }
     warn("Paths: findres", $opts{class} ? " [$opts{class}]" : "",
 	 " $p => ", $self->display($found), "\n")

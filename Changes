@@ -1,9 +1,10 @@
 0.000
 
-    - Eliminate warning on undefined config entry.
-    - Wx: Remove ChordPro preset.
-    - MacOS: Use _NSGetExecutablePath() to get the correct script location.
+    - (Config) Eliminate warning on undefined config entry.
+    - (Wx) Remove ChordPro preset.
+    - (macos) Use _NSGetExecutablePath() to get the correct script location.
     - Sync config files between git and MANIFEST.
+    - (Paths) Allow absolute filenames in findres.
 
 6.060 2024-08-24
 
