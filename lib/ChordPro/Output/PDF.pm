@@ -876,7 +876,7 @@ sub generate_song {
 
 	    my $h0 = $h;
 	    while ( @chords ) {
-		$checkspace->( $dd->vsp0( undef, $ps ) );
+		$checkspace->($vsp);
 		my $x = $x - $ps->{_indent};
 		$pr->show_vpos( $y, 0 ) if $config->{debug}->{spacing};
 
@@ -900,7 +900,7 @@ sub generate_song {
 		$pr->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
 	    }
 	}
-	$y = $ps->{_top} if $ps->{_top};
+	$y = delete $ps->{_top} if $show eq "top";
     };
 
     my @elts;

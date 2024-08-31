@@ -7,6 +7,7 @@
     - (Paths) Allow absolute filenames in findres.
     - (Makefile) Add Ref::Util dependency.
     - Centered chords (top, bottom, below) are now evenly spread over multiple lines.
+    - Fix problem with vertical spacing of {chord}.
     
 6.060 2024-08-24
 
