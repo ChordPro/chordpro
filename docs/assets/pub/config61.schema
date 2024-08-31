@@ -1326,7 +1326,7 @@
 			    "type": "string"
 			},
 		        "subject": {
-			    "description": "Document subjecy.",
+			    "description": "Document subject.",
 			    "default": "",
 			    "type": "string"
 			},
@@ -1459,7 +1459,7 @@
 		},
 
 		"margintop": {
-		    "description": "Page top marging, excluding headspace.",
+		    "description": "Page top margin, excluding headspace.",
 		    "default": 80,
 		    "minimum": 0,
 		    "type": "number"
@@ -1573,7 +1573,7 @@
 			    "type": "number"
 			},
 			"toc": {
-			    "description": "Spacing for table of contens lines.",
+			    "description": "Spacing for table of contents lines.",
 			    "default": 1.4,
 			    "type": "number"
 			}
