@@ -251,7 +251,7 @@ Note that not all config items can be adjusted this way.
 ChordPro also provides support for
 [PRP](https://github.com/sciurius/perl-Json-Relaxed) files.
 These were an early attempt at providing easier 
-maintainble configs.
+maintainable configs.
 PRP files have a number of shortcomings, in
 particular with regard to array data.
 Although still supported, please use the newer RRJSON format instead.

@@ -38,7 +38,7 @@ key `"csv"` under the key `"pdf"`.
     }
 
 `"fields"` enumerate the fields that are to be stored in the CSV. Each
-field definition has a `"name"` property that is used to idenitfy the
+field definition has a `"name"` property that is used to identify the
 field in the first line of the CSV, and either a `"meta"` or
 `"value"` property. Optionally property `"omit"` can be used to 
 (temporarily) suppress fields.

@@ -38,7 +38,7 @@ On Linux systems
 there is an environment variable `HOME` that is usually something like
 `/home/`_username_. On Windows this may be something like
 `C:\Users\`_username_ or `C:\Documents and Settings\`_username_. The
-home directory is conventially specified with a tilde, `~`.  
+home directory is conventionally specified with a tilde, `~`.
 If the user's home directory contains a subdirectory
 `.config/chordpro` this will be added to the resource libraries.
 

@@ -31,7 +31,7 @@ Note that the context for substitutions is the first song.
 ## CSV
 
 With the PDF, ChordPro can optionally generate a CSV document that
-describes the content of the PDF outout. This can be used with some
+describes the content of the PDF output. This can be used with some
 third-party tools when importing or viewing the PDF document.
 
 For details, see [Configuration for CSV output]({{< relref "chordpro-configuration-csv" >}}).
@@ -240,7 +240,7 @@ song. See [Chords diagrams in a side column]({{< relref "#chords-in-a-side-colum
 
 A chord diagram consists of a number of cells. Cell dimensions are specified by `width` and `height`.  
 The horizontal number of cells depends on the number of strings.  
-The vertical number of cells is `vcells`, which should be 4 or larger to accomodate most common chords.
+The vertical number of cells is `vcells`, which should be 4 or larger to accommodate most common chords.
 
 The horizontal distance between diagrams is `hspace` times the cell width.  
 The vertical distance between lines of diagrams is `vspace` times the cell height.
@@ -259,7 +259,7 @@ shown if `fingers` is true.
       linewidth : 0.1,    // of a cell width
       nutwidth :  5,      // linewidth
       hspace   :  3.95,   // horizontal space between, fraction of width
-      vspace   :  3,      // verticalal space between, fraction of height
+      vspace   :  3,      // vertical space between, fraction of height
       dotsize  :  0.8,    // of a cell
       barwidth :  0.8,    // of a dot
       fingers  :  true,   // show fingering if available (or "below")
@@ -319,7 +319,7 @@ colour, or a hex format `#RRGGBB`.
       linewidth : 0.1,    // fraction of a single key width
       pressed  :  foreground-medium,   // colour of a pressed key
       hspace   :  3.95,   // horizontal space between, fraction of width
-      vspace   :  0.3,    // verticalal space between, fraction of height
+      vspace   :  0.3,    // vertical space between, fraction of height
     },
 
 With the above settings, keyboard diagrams will look like:
@@ -657,7 +657,7 @@ Default is the setting for `text` but at a small size.
 The font used for drawing the fret positions that have fingering
 associated. This should **not** be modified unless you know what you
 are doing (and you probably don't).  
-This font has an additonal property `numbercolor` that can be set to
+This font has an additional property `numbercolor` that can be set to
 control the colour of the finger number. By default this is the theme
 background colour. Setting this colour to the foreground colour
 effectively hides the finger numbers.
