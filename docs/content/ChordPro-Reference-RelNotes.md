@@ -22,7 +22,7 @@ Released: 2024-08-24
 * Add href property for images.
 * New metadata: chordpro, chordpro.version and chordpro.songsource.
 * Upgrade JSON::Relaxed to 0.096.
-* Upgrade SVGPFG to 0.087. Enables transparant SVG images.
+* Upgrade SVGPDF to 0.087. Enables transparent SVG images.
 * Add independent horizontal and vertical scaling for images. Requires Text::Layout 0.037_002.
 * Upgrade Text::Layout to 0.038.
 * Allow fret -1 in {define}, and 'x' in json config for consistency.
@@ -164,7 +164,7 @@ Released: 2024-02-09
 
 ### Highlights
 
-* Customize the tables of content by providing a template. The template is processed as a song before the tables and can be used to set title, subtitle, columns, maybe even an introduction text. Since the template it iself a song, it can be associated with its own config file for unlimited customization. [Read more...](https://chordpro.org/chordpro/chordpro-configuration-generic/#customizing-the-table-of-contents)
+* Customize the tables of content by providing a template. The template is processed as a song before the tables and can be used to set title, subtitle, columns, maybe even an introduction text. Since the template itself is a song, it can be associated with its own config file for unlimited customization. [Read more...](https://chordpro.org/chordpro/chordpro-configuration-generic/#customizing-the-table-of-contents)
 * New delegated environment: textblock. The text between start_of_textblock and end_of_textblock is formatted normally, but the result is an image that can be placed anywhere. Several attributes are available to control the appearance of the text, e.g. centered and flush right. [Read more...](https://chordpro.org/chordpro/directives-env_textblock/)
 * Delegate type may now also be 'omit' to omit the content of the section, and 'none' to treat the section a generic. [Read more...](https://chordpro.org/chordpro/directives-delegates/)
 
@@ -241,14 +241,14 @@ Released: 2023-12-26
 * (PDF) Prevent case problems when looking up fonts for SVG.
 * (PDF) Add aliases for web standard fonts like serif, sans, ...
 * (PDF) Ignore leading empty and ignores (was: leading empty only).
-* (Windows) ChordPro now installs as a 64-bit application in \Program Files instead of \Program Files (x86). You are adsvised to remove the old 32bits install first.
+* (Windows) ChordPro now installs as a 64-bit application in \Program Files instead of \Program Files (x86). You are advised to remove the old 32bits install first.
 
 ### Bug fixes
 
-* Prevent warning when parsing {key} and trancode to nashville/roman.
+* Prevent warning when parsing {key} and transcode to nashville/roman.
 * Fix chord inversion (issue 321).
 * Fix comment lines disturbing a consecutive series of {chord}s.
-* Fix typo in Wx Preferencesdialog, causing it to crash.
+* Fix typo in Wx PreferencesDialog, causing it to crash.
 * Fix problem with PDF/SVG caching fonts.
 * Fix comment labels for delegates (issue 329.3).
 * (Wx) Filter configs on prp ans json.
@@ -308,7 +308,7 @@ Released: 2023-07-21
 ### ChordPro functionality
 
 * New directive diagrams obsoletes grid/no_grid with more possibilities, Based on a suggestion and concept implementation from Jörg Bublath.
-* Images without directory can be looked up in CHORDPO_LIB.
+* Images without directory can be looked up in CHORDPRO_LIB.
 * Turn pseudo-chords like | and spaces into annotations.
 
 ### BugFixes
@@ -416,7 +416,7 @@ Released: 2022-10-21
 * Fix problem that toc columns overlapped lefter columns.
 * Fix some problems with {define}.
 * Fix some more problems with {define}.
-* Fix automatic replacement of apostroph (prime) by friendly quote.
+* Fix automatic replacement of apostrophe (prime) by friendly quote.
 * Fix crash when auto-adding an unknown chord.
 * Only print user chords when diagrams.show=user.
 * Make base optional in json chords (part of fix 234).
@@ -449,7 +449,7 @@ Released: 2022-05-17
 * Add config pdf.spacing.diagramchords.
 * Allow meta values for directive selectors.
 * Re-enable agnostic chord lookup.
-* (Wx)(MacOS) Improve prefences dialog.
+* (Wx)(MacOS) Improve preferences dialog.
 * Several ABC fixes/improvements.
 * (PDF) Add support for background document.
 * Markdown export (EXPERIMENTAL). Thanks to Johannes Rumpf.
@@ -468,7 +468,7 @@ Released: 2022-02-08
 ### ChordPro functionality
 
 * Conditional directives can be negated with a trailing !
-* (Wx)(MacOS) Improve prefences dialog.
+* (Wx)(MacOS) Improve preferences dialog.
 
 ### BugFixes
 
@@ -514,7 +514,7 @@ Released: 2022-02-02
 * Fix sorttitles field name in CSV export.
 * Fix issue #194.
 * Fix issue #195.
-* Add workaround for incompatible pagel labels change in PDF::API 2.042.
+* Add workaround for incompatible page labels change in PDF::API 2.042.
 * Fix placement of finger dots.
 * Fix handling of NC chords.
 * Fix config loss problem with '{+pdf...}'. 
@@ -734,7 +734,7 @@ Released: 2020-08-13
 ### ChordPro functionality
 
 * Add PDF outlines (bookmarks).
-* Revamp table of contens (finally).
+* Revamp table of contents (finally).
 * Remove section handling (we now have labels).
 * Allow ~ expansion in file names.
 * Allow relaxed parsing of chords (root name  
@@ -1165,7 +1165,7 @@ Released: 2016-08-22
 
 * Uploaded to GitHub.
 * Added support for {meta} directives.
-* Make the list of known metatada configurable.
+* Make the list of known metadata configurable.
 * Allow using metadata in titles and comments.
 * Remove meta-mapping (no longer needed).
 * Change the way unknown chords are dealt with, for
