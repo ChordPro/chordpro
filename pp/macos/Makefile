@@ -41,8 +41,6 @@ unpack :
 	perl ../pp2ppl.pl --dest=${DEST} ${TARGET} --quiet
 	cp -p "${ROOT}/script/chordpro.pl" "${DEST}/script/chordpro.pl" 
 	cp -p "${ROOT}/lib/ChordPro/Config.pm" "${DEST}/lib/ChordPro/Config.pm" 
-	cp "${DEST}/res/icons/chordpro.icns" ${DEST}
-	cp "${DEST}/res/icons/chordpro-doc.icns" ${DEST}
 	mv "${DEST}/res" "${DEST}/lib/ChordPro/"
 	rm -f "${DEST}/script/main.pl"
 
@@ -89,12 +87,12 @@ app : ppl app1
 app1 :
 	rm -fr ${APPDIR} || rm -fr ${APPDIR}
 	cp -a "${DEST}/" "${APPDIR}/"
-	rm "${APPDIR}"/*.icns
 	mkdir -p "${APPDIR}/Contents/MacOS"
 	mkdir -p "${APPDIR}/Contents/Resources"
 	cp PkgInfo Info.plist "${APPDIR}/Contents"
-	cp "${DEST}/chordpro.icns" "${APPDIR}/Contents/Resources"
-	cp "${DEST}/chordpro-doc.icns" "${APPDIR}/Contents/Resources"
+	cp "${DEST}/lib/ChordPro/res/icons/chordpro.icns" "${APPDIR}/Contents/Resources"
+	cp "${DEST}/lib/ChordPro/res/icons/chordpro-doc.icns" "${APPDIR}/Contents/Resources"
+	cp "${DEST}/lib/ChordPro/res/icons/chordpro-bg.png" "${APPDIR}/Contents/Resources"
 	cd "${APPDIR}"; mv script lib Contents/MacOS
 	cd "${APPDIR}"; mv lib*.dylib Contents/MacOS
 	cd "${APPDIR}"; rm -f MANIFEST META.yml
@@ -128,10 +126,13 @@ dmg1 :
 	    --volname "ChordPro ${VOLTYPE}" \
 	    --volicon "${APPDIR}/Contents/Resources/chordpro.icns" \
 	    --window-pos 200 200 \
-	    --window-size 600 300 \
-	    --icon "${APPDIR}" 50 50 \
-	    --add-file "READ ME FIRST.html" README.html 300 50 \
+	    --window-size 640 500 \
+	    --icon-size 64 \
+	    --add-file "READ ME FIRST.html" README.html 530 50 \
+	    --icon "${APPDIR}" 530 150 \
 	    --hide-extension "READ ME FIRST.html" \
+	    --app-drop-link 530 250 \
+	    --background chordpro-hero-01.png \
 	    "${DMGNAME}" "${APPDIR}"
 
 clean ::
