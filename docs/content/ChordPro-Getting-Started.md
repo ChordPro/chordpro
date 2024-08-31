@@ -143,7 +143,7 @@ Leave empty to use the system default viewer.
 # Legacy ASCII input format
 
 Before ChordPro it was common to write lead sheets with chords on
-seperate lines preceding the lyrics. This is often referred to as
+separate lines preceding the lyrics. This is often referred to as
 **crd** format. For example
 
           D          G    D

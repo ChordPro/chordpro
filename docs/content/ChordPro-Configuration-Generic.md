@@ -185,7 +185,7 @@ The configuration file can hold any number of predefined chords.
         {
             "name"  : "Bb(high)",
             "base"  : 6,
-            "baselabelofset"  : 1,
+            "baselabeloffset"  : 1,
             "frets" : [ 1, 3, 3, 2, 1, 1 ],
             "fingers" : [ 1, 3, 4, 2, 1, 1 ],
 			"display" : "%{root}<sup>high</sup>",
@@ -195,8 +195,8 @@ The configuration file can hold any number of predefined chords.
 `base` specifies the topmost position of the chord diagram. It must be
 1 or higher. If `base` is greater than 1 its value is printed at the
 side the diagram, as can be seen in the illustration below. If
-`baselabelofset` has been defined and is greater than zero, the base value is
-printed `baselabelofset` frets higher.
+`baselabeloffset` has been defined and is greater than zero, the base value is
+printed `baselabeloffset` frets higher.
 
 ![]({{< asset "images/ex_chords.png" >}})
 
@@ -246,7 +246,7 @@ necessary.
 
 Chord keys only depend on the chord type (quality + extension). So all
 major chords have `[0, 4, 7]`, etc. For most common chords no
-defintions are necessary, ChordPro can derive the notes from the chord type.
+definitions are necessary, ChordPro can derive the notes from the chord type.
 
 ## Printing chord diagrams
 
@@ -258,7 +258,7 @@ have been used in a song.
     //         "user": only prints user defined chords.
     //         "none": no song chords will ne printed.
     // "sorted": order the chords by key.
-    // "suppress": a series of chord (names) thet will not generate
+    // "suppress": a series of chord (names) that will not generate
     //         diagrams, e.g. if they are considered trivial.
     // Note: The type of diagram (string or keyboard) is determined
     // by the value of "instrument.type".
@@ -338,13 +338,13 @@ template.
 The template is processed as a song before the table
 and can be used to set title, subtitle, columns, maybe even an
 introduction text.
-Since the template iself a song, it can be
+Since the template itself is a song, it can be
 associated with its own config file for unlimited customization.
 
 A template can be specified with a name, e.g. `"stdtoc"` or with a file
 name, e.g. `"mytoc.cho"`. Default is `"stdtoc"`.
 
-Named templates are lookedp up with extension `.cho` in the `template`
+Named templates are looked up with extension `.cho` in the `template`
 directories of the ChordPro library. 
 Template files are looked up relative to the _first_ song of the songbook.
 
@@ -388,7 +388,7 @@ For example:
 
     { "include" : [ "modern1" ],
       "settings" : {
-          "colums" : 2
+          "columns" : 2
       }
     }
 
@@ -400,7 +400,7 @@ This config file would first load the preset config `modern1`, and then set the 
 
 When ChordPro detects errors while analyzing a song, it will use this format to show diagnostic messages.
 
-In the format, `%f` will be replaced by the song file name, `%n` by the line number in the file where the error was detected, `%m` by the diagnostig message, and `%l` will be replaced by the original content of the line.
+In the format, `%f` will be replaced by the song file name, `%n` by the line number in the file where the error was detected, `%m` by the diagnostic message, and `%l` will be replaced by the original content of the line.
 
     "diagnostics" : {
         "format" : "\"%f\", line %n, %m\n\t%l",

@@ -26,7 +26,7 @@ Specify stylesheets for display and printing.
   	      "print"   : "chordpro_print.css",
       }
 
-The sylesheet URLs will be included as `rel="stylesheet"` links in the
+The stylesheet URLs will be included as `rel="stylesheet"` links in the
 `<head>` of each generated HTML document, for example:
 
 	<head>
