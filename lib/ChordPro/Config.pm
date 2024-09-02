@@ -63,6 +63,7 @@ sub configurator ( $opts = undef ) {
 
     # This is easier than splitting out manually :)
     $cfg->split_fc_aliases;
+    $cfg->expand_font_shortcuts;
 
     # Default first.
     @cfg = prep_configs( $cfg, "<builtin>" );
@@ -427,6 +428,12 @@ sub simplify_fonts( $cfg ) {
     foreach my $font ( keys %{$cfg->{pdf}->{fonts}} ) {
 	for ( $cfg->{pdf}->{fonts}->{$font} ) {
 	    next unless is_hashref($_);
+
+	    delete $_->{color}
+	      if $_->{color} && $_->{color} eq "foreground";
+	    delete $_->{background}
+	      if $_->{background} && $_->{background} eq "background";
+
 	    if ( exists( $_->{file} ) ) {
 		delete $_->{description};
 		delete $_->{name};
@@ -515,7 +522,8 @@ sub config_final ( %args ) {
 	$parser->decode($data);
     };
 
-#    $cfg = hmerge( $config, $cfg );
+    #    $cfg = hmerge( $config, $cfg );
+    $cfg->simplify_fonts;
     return $parser->encode( data => {%{$cfg}},
 			    pretty => 1, schema => $schema );
 }
