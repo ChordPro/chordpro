@@ -132,7 +132,7 @@ dmg1 :
 	    --icon "${APPDIR}" 530 150 \
 	    --hide-extension "READ ME FIRST.html" \
 	    --app-drop-link 530 250 \
-	    --background chordpro-hero-01.png \
+	    --background "${APPDIR}/Contents/Resources/chordpro-bg.png" \
 	    "${DMGNAME}" "${APPDIR}"
 
 clean ::
