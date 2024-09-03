@@ -68,7 +68,7 @@ _loaders : "${DEST}/chordpro"
 
 "${DEST}/wxchordpro" : ${BASE}/ppl.c dndhandler.cpp
 	${CC} -DMACOS ${CCOPTS} -o "${DEST}/wxchordpro" -L${DEST} ${LDOPTS} ${BASE}/ppl.c
-	${CXX} -DMACOS -o "${DEST}/dndhandler" \
+	${CXX} -mmacosx-version-min=10.15 -DMACOS -o "${DEST}/dndhandler" \
 		dndhandler.cpp `${WXCNFG} --cxxflags --libs`
 	perl ./reloc.pl "${DEST}/dndhandler"
 
@@ -106,6 +106,7 @@ ifeq (${TARGET},wxchordpro)
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libwx*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*.bundle
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*/*.bundle
+	codesign --force --deep -s - ${APPDIR}
 else
 	cd "${APPDIR}"; cp chordpro dndhandler
 	cd "${APPDIR}"; mv chordpro dndhandler Contents/MacOS
