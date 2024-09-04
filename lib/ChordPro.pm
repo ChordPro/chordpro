@@ -781,7 +781,11 @@ sub app_setup {
 	  "fragment|F",			# partial (incomplete) song
 	  "strict!",			# strict conformance
 
-          ### Standard Chordii Options ###
+	  ### Experimental ###
+
+	  "progress_callback=s",
+
+	  ### Standard Chordii Options ###
 
           "about|A+" => \$about,        # About...
           "chord-font|C=s",             # Sets chord font

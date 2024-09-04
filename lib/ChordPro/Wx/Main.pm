@@ -698,6 +698,14 @@ sub OnPreviewLyricsOnly {
 		    "--define=delegates.ly.omit=1" );
 }
 
+sub OnExportFolder {
+    my ($self, $event) = @_;
+
+    use ChordPro::Wx::SongbookExport;
+    $self->{d_sbexport} ||= ChordPro::Wx::SongbookExport->new($self, -1, "Export Songbook");
+    my $ret = $self->{d_sbexport}->ShowModal;
+}
+
 sub OnClose {
     my ( $self, $event ) = @_;
     $self->SavePreferences;
