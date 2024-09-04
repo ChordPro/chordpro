@@ -4,6 +4,9 @@ lib/ChordPro/Wx/Main_wxg.pm
 lib/ChordPro/Wx/PreferencesDialog.pm
 lib/ChordPro/Wx/PreferencesDialog.wxg
 lib/ChordPro/Wx/PreferencesDialog_wxg.pm
+lib/ChordPro/Wx/SongbookExport.pm
+lib/ChordPro/Wx/SongbookExport.wxg
+lib/ChordPro/Wx/SongbookExport_wxg.pm
 lib/ChordPro/res/icons/chordpro.ico
 lib/ChordPro/res/icons/chordpro.icns
 lib/ChordPro/res/icons/chordpro-doc.icns
