@@ -17,6 +17,7 @@ use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
 use constant CFGBASE => "songbookexport";
 use Encode qw( decode_utf8 encode_utf8 );
+use ChordPro::Utils qw(demarkup);
 
 sub new {
     my $self = shift;
@@ -88,7 +89,7 @@ sub OnAccept {
 	    $dialog->Update( $ctl->{index},
 			     "Song " . $ctl->{index} . " of " .
 			     $ctl->{songs} . ": " .
-			     $ctl->{title} )
+			     demarkup($ctl->{title}) )
 	      and return 1;
 	    Wx::LogStatus( "Processing cancelled." );
 	    return;
