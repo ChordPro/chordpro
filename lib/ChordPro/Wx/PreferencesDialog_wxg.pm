@@ -64,7 +64,7 @@ sub new {
     $self->{sz_configfile} = Wx::BoxSizer->new(wxHORIZONTAL);
     $self->{sizer_2}->Add($self->{sz_configfile}, Wx::GBPosition->new(2, 1), Wx::GBSpan->new(1, 1), wxEXPAND|wxRIGHT, 5);
     
-    $self->{t_configfiledialog} = Wx::TextCtrl->new($self, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, $^O =~ /darwin/ ? 0 : wxTE_READONLY);
+    $self->{t_configfiledialog} = Wx::TextCtrl->new($self, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
     $self->{t_configfiledialog}->SetToolTipString(_T("Select a custom config file by pressing the [...] button."));
     $self->{sz_configfile}->Add($self->{t_configfiledialog}, 1, wxEXPAND, 0);
     
@@ -77,7 +77,7 @@ sub new {
     $self->{sz_customlib} = Wx::BoxSizer->new(wxHORIZONTAL);
     $self->{sizer_2}->Add($self->{sz_customlib}, Wx::GBPosition->new(3, 1), Wx::GBSpan->new(1, 1), wxEXPAND|wxRIGHT, 5);
     
-    $self->{t_customlibdialog} = Wx::TextCtrl->new($self, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, $^O =~ /darwin/ ? 0 : wxTE_READONLY);
+    $self->{t_customlibdialog} = Wx::TextCtrl->new($self, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
     $self->{t_customlibdialog}->SetToolTipString(_T("Select a custom library by pressing the [...] button."));
     $self->{sz_customlib}->Add($self->{t_customlibdialog}, 1, wxEXPAND, 0);
     
@@ -90,7 +90,7 @@ sub new {
     $self->{sz_tmplfile} = Wx::BoxSizer->new(wxHORIZONTAL);
     $self->{sizer_2}->Add($self->{sz_tmplfile}, Wx::GBPosition->new(4, 1), Wx::GBSpan->new(1, 1), wxEXPAND|wxRIGHT, 5);
     
-    $self->{t_tmplfiledialog} = Wx::TextCtrl->new($self, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, $^O =~ /darwin/ ? 0 : wxTE_READONLY);
+    $self->{t_tmplfiledialog} = Wx::TextCtrl->new($self, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
     $self->{t_tmplfiledialog}->SetToolTipString(_T("Select a song template file by pressing the [...] button."));
     $self->{sz_tmplfile}->Add($self->{t_tmplfiledialog}, 1, wxEXPAND, 0);
     

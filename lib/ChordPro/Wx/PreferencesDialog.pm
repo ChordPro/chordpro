@@ -30,7 +30,7 @@ my $notdesc =
     "roman"	   => "I, II, III, ...",
   };
 
-my $is_macos_crippled = is_macos();
+my $is_macos_crippled = 0; #is_macos();
 
 sub get_configfile {
     my ( $self ) = @_;

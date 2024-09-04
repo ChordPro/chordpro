@@ -89,7 +89,7 @@
                                                 <argument>""</argument>
                                                 <argument>wxDefaultPosition</argument>
                                                 <argument>wxDefaultSize</argument>
-                                                <argument>$^O =~ /darwin/ ? 0 : wxTE_READONLY</argument>
+                                                <argument>wxTE_READONLY</argument>
                                             </arguments>
                                         </object>
                                     </object>
@@ -133,7 +133,7 @@
                                                 <argument>""</argument>
                                                 <argument>wxDefaultPosition</argument>
                                                 <argument>wxDefaultSize</argument>
-                                                <argument>$^O =~ /darwin/ ? 0 : wxTE_READONLY</argument>
+                                                <argument>wxTE_READONLY</argument>
                                             </arguments>
                                         </object>
                                     </object>
@@ -177,7 +177,7 @@
                                                 <argument>""</argument>
                                                 <argument>wxDefaultPosition</argument>
                                                 <argument>wxDefaultSize</argument>
-                                                <argument>$^O =~ /darwin/ ? 0 : wxTE_READONLY</argument>
+                                                <argument>wxTE_READONLY</argument>
                                             </arguments>
                                         </object>
                                     </object>
