@@ -21,8 +21,21 @@ use ChordPro::Output::Common;
 use ChordPro::Utils qw( demarkup is_macos );
 use File::Temp qw( tempfile );
 use Encode qw(decode_utf8);
+use File::Basename qw(basename);
 
 our $VERSION = $ChordPro::VERSION;
+
+# Override Wx::Bitmap to use resource search.
+my $wxbitmapnew = \&Wx::Bitmap::new;
+no warnings 'redefine';
+*Wx::Bitmap::new = sub {
+    # Only handle Wx::Bitmap->new(file, type) case.
+    goto &$wxbitmapnew if @_ != 3 || -f $_[1];
+    my ($self, @rest) = @_;
+    $rest[0] = CP->findres( basename($rest[0]), class => "icons" );
+    $wxbitmapnew->($self, @rest);
+};
+use warnings 'redefine';
 
 sub new {
     my $self = bless $_[0]->SUPER::new(), __PACKAGE__;
@@ -35,7 +48,32 @@ sub new {
     # version of wxPerl.
     $self->{t_source}->OSXDisableAllSmartSubstitutions
       if $self->{t_source}->can("OSXDisableAllSmartSubstitutions");
+
     $self;
+}
+
+use constant MODE_INIT => 0;
+use constant MODE_EDIT => 1;
+use constant MODE_MSGS => 2;
+
+sub select_mode {
+    my ( $self, $mode ) = @_;
+
+    # Hide initial window.
+    if ( $self->{p_init}->IsShown ) {
+	$self->{p_init}->Show(0);
+    }
+    if ( $mode == MODE_MSGS ) {
+	$self->{p_msg}->Show(1);
+	$self->{p_edit}->Show(0);
+	$self->{main_menubar}->FindItem(ChordPro::Wx::Main_wxg::wxID_W_MSG)->Check(1);
+    }
+    else {
+	$self->{p_msg}->Show(0);
+	$self->{p_edit}->Show(1);
+	$self->{main_menubar}->FindItem(ChordPro::Wx::Main_wxg::wxID_W_EDITOR)->Check(1);
+    }
+    $self->{sz_main}->Layout;
 }
 
 use constant FONTSIZE => 12;
@@ -167,10 +205,6 @@ sub init {
 	return 1;
     }
 
-    # Skip initial open dialog for MacOS. Use Finder calls.
-    unless ( $is_macos_crippled ) {
-	$self->opendialog;
-    }
     $self->newfile unless $self->{_currentfile};
     return 1;
 }
@@ -386,8 +420,15 @@ my ( $preview_cho, $preview_pdf );
 my ( $msgs, $fatal, $died );
 
 sub _warn {
-    Wx::LogWarning( "%s", join("",@_) );
+    my $self = shift;
+    $self->select_mode(MODE_MSGS);
+    $self->{t_msg}->AppendText( join("",@_) );
     $msgs++;
+}
+
+sub _info {
+    my $self = shift;
+    $self->{t_msg}->AppendText( join("",@_) );
 }
 
 sub _die {
@@ -409,16 +450,22 @@ sub preview {
 	unlink( $preview_cho, $preview_pdf );
     }
 
-    my $mod = $self->{t_source}->IsModified;
-    $self->{t_source}->SaveFile($preview_cho);
-    $self->{t_source}->SetModified($mod);
+    # When invoked with a filelist (Songbook Export), ignore the
+    # current song in the editor.
+    my $filelist = $opts[0] eq "--filelist";
+    unless ( $filelist ) {
+	my $mod = $self->{t_source}->IsModified;
+	$self->{t_source}->SaveFile($preview_cho);
+	$self->{t_source}->SetModified($mod);
+    }
 
     #### ChordPro
 
     @ARGV = ();			# just to make sure
 
     $msgs = $fatal = $died = 0;
-    $SIG{__WARN__} = \&_warn unless $self->{_log};
+    $SIG{__WARN__} = sub { _warn($self, @_) } unless $self->{_log};
+    $self->{t_msg}->Clear;
 #    $SIG{__DIE__}  = \&_die;
 
     my $haveconfig = List::Util::any { $_ eq "--config" } @opts;
@@ -459,7 +506,7 @@ sub preview {
       if $self->{prefs_xpose};
 
     push( @ARGV, @opts ) if @opts;
-    push( @ARGV, $preview_cho );
+    push( @ARGV, $preview_cho ) unless $filelist;
 
     if ( $self->{_trace} || $self->{_debug}
 	 || $self->{_verbose} && $self->{_verbose} > 1 ) {
@@ -702,7 +749,7 @@ sub OnExportFolder {
     my ($self, $event) = @_;
 
     use ChordPro::Wx::SongbookExport;
-    $self->{d_sbexport} ||= ChordPro::Wx::SongbookExport->new($self, -1, "Export Songbook");
+    $self->{d_sbexport} = ChordPro::Wx::SongbookExport->new($self, -1, "Export Songbook");
     my $ret = $self->{d_sbexport}->ShowModal;
 }
 
@@ -780,6 +827,16 @@ sub OnHelp_Example {
 sub OnHelp_DebugInfo {
     my ($self, $event) = @_;
     $self->{_debuginfo} = $event->IsChecked;
+}
+
+sub OnHelp_ShowEditor {
+    my ($self, $event) = @_;
+    $self->select_mode(MODE_EDIT);
+}
+
+sub OnHelp_ShowMessages {
+    my ($self, $event) = @_;
+    $self->select_mode(MODE_MSGS);
 }
 
 sub OnPreferences {
@@ -904,6 +961,40 @@ sub OnIdle {
     my $f = $self->{_windowtitle} // "";
     $f = "*$f" if $self->{t_source}->IsModified;
     $self->SetTitle($f);
+}
+
+################ Initial Opening ################
+
+sub OnInitialNew {
+    my ( $self, $event ) = @_;
+    $self->select_mode(MODE_EDIT);
+    $self->OnNew($event);
+    $event->Skip;
+}
+
+sub OnInitialOpen {
+    my ( $self, $event ) = @_;
+    $self->select_mode(MODE_EDIT);
+    $self->OnOpen($event);
+    $event->Skip;
+}
+
+sub OnInitialSite {
+    my ( $self, $event ) = @_;
+    Wx::LaunchDefaultBrowser("https://www.chordpro.org/");
+    $event->Skip;
+}
+
+sub OnInitialDocs {
+    my ( $self, $event ) = @_;
+    $self->OnHelp_ChordPro($event);
+    $event->Skip;
+}
+
+sub OnInitialCancel {
+    my ( $self, $event ) = @_;
+    $self->OnQuit($event);
+    $event->Skip;
 }
 
 ################ End of Event handlers ################

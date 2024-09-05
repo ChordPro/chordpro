@@ -15,7 +15,7 @@ use parent qw( ChordPro::Wx::SongbookExport_wxg );
 
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
-use constant CFGBASE => "songbookexport";
+use constant CFGBASE => "songbookexport/";
 use Encode qw( decode_utf8 encode_utf8 );
 use ChordPro::Utils qw(demarkup);
 
@@ -73,11 +73,21 @@ sub OnAccept {
     my $filelist = join( "\n",
 			 map { "$folder/" . decode_utf8($_) } @files );
 
+
+    # Hide the dialog for the progress dialog.
+    $self->GetParent->{d_sbexport}->Show(0);
+
     my $dialog;
     my $pcb = sub {
 	my $ctl = shift;
 
+	$self->GetParent->_info( "Song " . $ctl->{index} . " of " .
+		      $ctl->{songs} . ": " .
+		      demarkup($ctl->{title}) . "\n" )
+	  if $ctl->{index} && $ctl->{songs} > 1;
+
 	if ( $ctl->{index} == 0 ) {
+	    return 1 unless $ctl->{songs} > 1;
 	    $dialog = Wx::ProgressDialog->new
 	      ( 'Processing...',
 		'Starting',
@@ -85,7 +95,7 @@ sub OnAccept {
 		wxPD_CAN_ABORT|wxPD_AUTO_HIDE|wxPD_APP_MODAL|
 		wxPD_ELAPSED_TIME|wxPD_ESTIMATED_TIME|wxPD_REMAINING_TIME );
 	}
-	else {
+	elsif ( $dialog ) {
 	    $dialog->Update( $ctl->{index},
 			     "Song " . $ctl->{index} . " of " .
 			     $ctl->{songs} . ": " .
@@ -114,7 +124,7 @@ sub OnFolderDialog {
     my ( $self, $event ) = @_;
     my $fd = Wx::DirDialog->new
       ($self, _T("Choose folder"),
-       $self->GetParent->{prefs_exportfolder} || "",
+       $self->{t_exportfolder}->GetValue || "",
        0|wxDD_DIR_MUST_EXIST,
        wxDefaultPosition);
     my $ret = $fd->ShowModal;
