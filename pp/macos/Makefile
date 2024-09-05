@@ -11,6 +11,7 @@ SCRIPT := ${ROOT}/script
 DEST   := build
 VERSION := $(shell perl ../../lib/ChordPro/Version.pm)
 TARGET := wxchordpro
+ARCH   := $(shell uname -m)
 
 PP := pp
 
@@ -106,7 +107,9 @@ ifeq (${TARGET},wxchordpro)
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libwx*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*.bundle
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*/*.bundle
+ifeq (${ARCH},arm64)
 	codesign --force --deep -s - ${APPDIR}
+endif
 else
 	cd "${APPDIR}"; cp chordpro dndhandler
 	cd "${APPDIR}"; mv chordpro dndhandler Contents/MacOS
