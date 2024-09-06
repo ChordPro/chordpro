@@ -66,12 +66,10 @@ sub select_mode {
     if ( $mode == MODE_MSGS ) {
 	$self->{p_msg}->Show(1);
 	$self->{p_edit}->Show(0);
-	$self->{main_menubar}->FindItem(ChordPro::Wx::Main_wxg::wxID_W_MSG)->Check(1);
     }
     else {
 	$self->{p_msg}->Show(0);
 	$self->{p_edit}->Show(1);
-	$self->{main_menubar}->FindItem(ChordPro::Wx::Main_wxg::wxID_W_EDITOR)->Check(1);
     }
     $self->{sz_main}->Layout;
 }
@@ -961,6 +959,35 @@ sub OnIdle {
     my $f = $self->{_windowtitle} // "";
     $f = "*$f" if $self->{t_source}->IsModified;
     $self->SetTitle($f);
+}
+
+################ Messages ################
+
+sub OnMsgSave {
+    my ($self, $event) = @_;
+    my $conf = Wx::ConfigBase::Get;
+    my $file = $conf->Read( "messages/savedas", "" );
+    my $fd = Wx::FileDialog->new
+      ($self, _T("Choose file to save in"),
+       "", $file,
+       "*",
+       0|wxFD_SAVE|wxFD_OVERWRITE_PROMPT,
+       wxDefaultPosition);
+    my $ret = $fd->ShowModal;
+    if ( $ret == wxID_OK ) {
+	$file = $fd->GetPath;
+	$self->{t_msg}->SaveFile($file);
+	Wx::LogStatus( "Messages saved." );
+	$conf->Write( "messages/savedas", $file );
+    }
+    $fd->Destroy;
+    return $ret;
+}
+
+sub OnMsgCancel {
+    my ( $self, $event ) = @_;
+    $self->select_mode(MODE_EDIT);
+    $event->Skip;
 }
 
 ################ Initial Opening ################

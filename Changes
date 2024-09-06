@@ -9,6 +9,7 @@
     - Centered chords (top, bottom, below) are now evenly spread over multiple lines.
     - Fix problem with vertical spacing of {chord}.
     - (Wx) Folder processing.
+    - (Wx) Rework initial screen.
     
 6.060 2024-08-24
 
