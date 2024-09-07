@@ -1064,7 +1064,7 @@ use List::Util qw(uniq);
 
 sub ::runtimeinfo {
     my $level = shift // "normal";
-    my %i = %{runtime_info()};
+    my %i = %{runtime_info($level)};
     my $fmt0   = "  %-22.22s %-10s";
     my $fmt2   = $fmt0 . "\n";
     my $fmt3   = $fmt0 . " (%s)\n";
@@ -1155,6 +1155,7 @@ sub ::runtimeinfo {
 
 # Gather runtime details.
 sub runtime_info {
+    my $level = shift // "normal";
     my $cp = ChordPro::Paths->get;
     my $res;
 
@@ -1167,6 +1168,7 @@ sub runtime_info {
 	$_->{aux} = "Unsupported development snapshot"
 	  if $VERSION =~ /_/;
     }
+    return $res if $level eq "short";
 
     $res->{general}{perl} =
       { version => "$^V",
