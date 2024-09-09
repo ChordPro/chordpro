@@ -18,37 +18,38 @@ use Wx::Locale gettext => '_T';
 use constant CFGBASE => "songbookexport/";
 use Encode qw( decode_utf8 encode_utf8 );
 use ChordPro::Utils qw(demarkup);
+use File::LoadLines;
 
 sub new {
     my $self = shift;
     $self = $self->SUPER::new(@_);
 
     my $conf = Wx::ConfigBase::Get;
-    $self->{t_exportfolder}->SetValue($conf->Read( CFGBASE . "folder" ) // "");
+    $self->{dp_folder}->SetPath( $self->GetParent->{_sbefolder} // $conf->Read( CFGBASE . "folder" ) // "");
     $self->{t_exporttitle}->SetValue($conf->Read( CFGBASE . "title" ) // "");
+
+    Wx::Event::EVT_DIRPICKER_CHANGED( $self, $self->{dp_folder}->GetId,
+				      $self->can("OnDirPickerChanged") );
+
+
+    $self->{_sbefiles} = [];
+
+    if ( -d $self->{dp_folder}->GetPath ) {
+	$self->OnDirPickerChanged(undef);
+    }
 
     return $self;
 }
 
 ################ Event handlers ################
 
-sub OnAccept {
+sub OnDirPickerChanged {
     my ( $self, $event ) = @_;
 
-    my $folder = $self->{t_exportfolder}->GetValue;
-    unless ( $folder ) {
-	my $md = Wx::MessageDialog->new
-	  ( $self,
-	    "Please select a folder!",
-	    "No folder selected",
-	    wxOK | wxICON_ERROR );
-	my $ret = $md->ShowModal;
-	$md->Destroy;
-	return;
-    }
-
+    my $folder = $self->{dp_folder}->GetPath;
     opendir( my $dir, $folder )
       or do {
+	$self->GetParent->log( 'W', "Error opening folder $folder: $!");
 	my $md = Wx::MessageDialog->new
 	  ( $self,
 	    "Error opening folder $folder: $!",
@@ -57,22 +58,56 @@ sub OnAccept {
 	my $ret = $md->ShowModal;
 	$md->Destroy;
 	return;
-      };
-    my @files = sort grep {
-	m/^[^.].*\.(cho|crd|chopro|chord|chordpro|pro)$/
-    } readdir($dir);
-    my $n = @files;
-    Wx::LogStatus("Found $n ChordPro file" .
-		      ( $n == 1 ? "" : "s" ) .
-		      " in $folder");
+    };
+
+    my @files;
+    my $src = "filelist.txt";
+    if ( -s "$folder/$src" ) {
+	@files = loadlines("$folder/$src");
+    }
+    else {
+	$src = "folder";
+	@files = map { decode_utf8($_) } sort grep {
+	    m/^[^.].*\.(cho|crd|chopro|chord|chordpro|pro)$/
+	} readdir($dir);
+    }
+
+    my $n = scalar(@files);
+    my $msg = "Found $n ChordPro file" . ( $n == 1 ? "" : "s" ) . " in $src";
+    $self->{l_info}->SetLabel($msg);
+    $self->GetParent->log( 'S', $msg );
+
+    $self->{w_rearrange}->GetList->Set(\@files);
+    $self->{w_rearrange}->GetList->Check($_,1) for 0..$#files;
+    $self->{w_rearrange}->Show;
+    $self->{_sbefiles} = \@files;
+    $self->{sz_export_inner}->Layout;
+}
+
+sub OnAccept {
+    my ( $self, $event ) = @_;
+
+    my $folder = $self->{dp_folder}->GetPath;
+    my @files = @{ $self->{_sbefiles} };
+    unless ( $folder && @files ) {
+	my $md = Wx::MessageDialog->new
+	  ( $self,
+	    "Please select a folder! ($folder)(".scalar(@files).")",
+	    "No folder selected",
+	    wxOK | wxICON_ERROR );
+	my $ret = $md->ShowModal;
+	$md->Destroy;
+	return;
+    }
 
     my $conf = Wx::ConfigBase::Get;
-    $conf->Write( CFGBASE . "folder", $self->{t_exportfolder}->GetValue // "" );
+    $conf->Write( CFGBASE . "folder", $self->{dp_folder}->GetPath // "" );
     $conf->Write( CFGBASE . "title", $self->{t_exporttitle}->GetValue // "" );
 
-    my $filelist = join( "\n",
-			 map { "$folder/" . decode_utf8($_) } @files );
-
+    my $filelist = "";
+    for ( $self->{w_rearrange}->GetList->GetCurrentOrder ) {
+	$filelist .= "$folder/$files[$_]\n" unless $_ < 0;
+    }
 
     # Hide the dialog for the progress dialog.
     $self->GetParent->{d_sbexport}->Show(0);
@@ -81,9 +116,9 @@ sub OnAccept {
     my $pcb = sub {
 	my $ctl = shift;
 
-	$self->GetParent->_info( "Song " . $ctl->{index} . " of " .
-		      $ctl->{songs} . ": " .
-		      demarkup($ctl->{title}) . "\n" )
+	$self->GetParent->log( 'I', "Generating output " . $ctl->{index} .
+			       " of " . $ctl->{songs} . ": " .
+			       demarkup($ctl->{title}) )
 	  if $ctl->{index} && $ctl->{songs} > 1;
 
 	if ( $ctl->{index} == 0 ) {
@@ -101,7 +136,7 @@ sub OnAccept {
 			     $ctl->{songs} . ": " .
 			     demarkup($ctl->{title}) )
 	      and return 1;
-	    Wx::LogStatus( "Processing cancelled." );
+	    $self->GetParent->log( 'I', "Processing cancelled." );
 	    return;
 	}
 
@@ -118,21 +153,6 @@ sub OnAccept {
 sub OnCancel {
     my ( $self, $event ) = @_;
     $event->Skip;
-}
-
-sub OnFolderDialog {
-    my ( $self, $event ) = @_;
-    my $fd = Wx::DirDialog->new
-      ($self, _T("Choose folder"),
-       $self->{t_exportfolder}->GetValue || "",
-       0|wxDD_DIR_MUST_EXIST,
-       wxDefaultPosition);
-    my $ret = $fd->ShowModal;
-    if ( $ret == wxID_OK ) {
-	my $file = $fd->GetPath;
-	$self->{t_exportfolder}->SetValue($file);
-    }
-    $fd->Destroy;
 }
 
 1;

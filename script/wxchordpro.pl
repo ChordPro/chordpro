@@ -4,8 +4,8 @@
 
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
-# Last Modified On: Mon Feb 12 22:12:02 2024
-# Update Count    : 283
+# Last Modified On: Mon Sep  9 21:02:07 2024
+# Update Count    : 284
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -78,7 +78,7 @@ $m->MainLoop();
 use Wx qw( wxEXEC_SYNC );
 
 # Not yet defined in this version of wxPerl.
-use constant wxEXEC_HIDE_CONSOLE => 32;
+use ChordPro::Wx::Utils qw(wxEXEC_HIDE_CONSOLE);
 
 # Synchronous system call. Used in Util module.
 sub ::sys { Wx::ExecuteArgs( \@_, wxEXEC_SYNC | wxEXEC_HIDE_CONSOLE ); }

@@ -15,7 +15,7 @@ use parent qw( ChordPro::Wx::PreferencesDialog_wxg );
 
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
-use ChordPro::Utils qw(is_macos);
+use ChordPro::Wx::Utils;
 
 # BUilt-in descriptions for some notation systems.
 my $notdesc =
@@ -29,8 +29,6 @@ my $notdesc =
     "nashville"	   => "1, 2, 3, ...",
     "roman"	   => "I, II, III, ...",
   };
-
-my $is_macos_crippled = 0; #is_macos();
 
 sub get_configfile {
     my ( $self ) = @_;
@@ -159,16 +157,6 @@ sub fetch_prefs {
 
     $self->_enablecustom;
 
-    if ( $is_macos_crippled ) {
-	# Cannot use chooser, hide button and change tooltip.
-	for ( qw( configfile customlib tmplfile ) ) {
-	    $self->{"sz_$_"}->Hide($self->{"b_${_}dialog"});
-	    $self->{"sz_$_"}->Layout;
-	    my $t = $self->{"t_${_}dialog"}->GetToolTip->GetTip;
-	    $t =~ s/ by pressing .* button//;
-	    $self->{"t_${_}dialog"}->SetToolTipString($t);
-	}
-    }
 }
 
 #               C      D      E  F      G      A        B C
@@ -195,17 +183,6 @@ sub store_prefs {
 	push( @p, $styles->[$n] );
 	if ( $n == $cnt - 1 ) {
 	    my $c = $self->{t_configfiledialog}->GetValue;
-	    if ( $is_macos_crippled && ! -r $c ) {
-		my $md = Wx::MessageDialog->new
-		  ( $self,
-		    "Custom config file $c can not be read.\n".
-		    "Please enter the name of an existing config file.",
-		    "Config file can not be read",
-		    0 | wxOK | wxICON_QUESTION );
-		my $ret = $md->ShowModal;
-		$md->Destroy;
-		return;
-	    }
 	    $parent->{_cfgpresetfile} =
 	      $parent->{prefs_configfile} = $c;
 	}

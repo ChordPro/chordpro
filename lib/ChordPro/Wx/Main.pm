@@ -18,7 +18,7 @@ use Wx::Locale gettext => '_T';
 use ChordPro;
 use ChordPro::Paths;
 use ChordPro::Output::Common;
-use ChordPro::Utils qw( demarkup is_macos );
+use ChordPro::Utils qw( demarkup );
 use File::Temp qw( tempfile );
 use Encode qw(decode_utf8);
 use File::Basename qw(basename);
@@ -37,6 +37,26 @@ no warnings 'redefine';
 };
 use warnings 'redefine';
 
+sub log {
+    my ( $self, $level, $msg, $info ) = @_;
+    if ( $level eq 'I' ) {
+	Wx::LogMessage($msg);
+    }
+    if ( $level eq 'S' ) {
+	Wx::LogMessage($msg);
+	$self->{f_main_statusbar}->SetStatusText($msg);
+    }
+    elsif ( $level eq 'W' ) {
+	Wx::LogWarning($msg);
+    }
+    elsif ( $level eq 'E' ) {
+	Wx::LogError($msg);
+    }
+    elsif ( $level eq 'F' ) {
+	Wx::LogFatal($msg);
+    }
+}
+
 sub new {
     my $self = bless $_[0]->SUPER::new(), __PACKAGE__;
 
@@ -49,12 +69,29 @@ sub new {
     $self->{t_source}->OSXDisableAllSmartSubstitutions
       if $self->{t_source}->can("OSXDisableAllSmartSubstitutions");
 
+    my $log = Wx::LogTextCtrl->new( $self->{t_msg} );
+    #    $log = Wx::LogStderr->new;
+    $self->{old_log} = Wx::Log::SetActiveTarget( $log );
+
+    # Normal (informational),
+    #Wx::LogMessage("Message");
+    # LogTextCtrl -> Normal.
+    #Wx::LogStatus("Status");
+    # LogTextCtrl -> "Error: ..."
+    #Wx::LogError("Error");
+    # To stderr ("Debug: ...")
+    #Wx::LogDebug("Debug");
+
+    $self->SetTitle("ChordPro");
+    $self->SetIcon( Wx::Icon->new(CP->findres( "chordpro-icon.png", class => "icons" ), wxBITMAP_TYPE_ANY) );
     $self;
 }
 
 use constant MODE_INIT => 0;
 use constant MODE_EDIT => 1;
 use constant MODE_MSGS => 2;
+use constant PANEL_EDIT => 0;
+use constant PANEL_MSGS => 1;
 
 sub select_mode {
     my ( $self, $mode ) = @_;
@@ -62,14 +99,13 @@ sub select_mode {
     # Hide initial window.
     if ( $self->{p_init}->IsShown ) {
 	$self->{p_init}->Show(0);
+	$self->{nb_main}->Show(1);
     }
-    if ( $mode == MODE_MSGS ) {
-	$self->{p_msg}->Show(1);
-	$self->{p_edit}->Show(0);
+    if ( $mode == 2 ) {
+	$self->{nb_main}->SetSelection(PANEL_MSGS);
     }
     else {
-	$self->{p_msg}->Show(0);
-	$self->{p_edit}->Show(1);
+	$self->{nb_main}->SetSelection(PANEL_EDIT);
     }
     $self->{sz_main}->Layout;
 }
@@ -95,9 +131,6 @@ my @fonts =
   );
 
 my $prefctl;
-
-# Old GTK2 version is limited due to sandboxing. GTK3 behaves normal.
-my $is_macos_crippled = 0; #is_macos();
 
 # Explicit (re)initialisation of this class.
 sub init {
@@ -191,15 +224,20 @@ sub init {
     $self->{main_menubar}->FindItem(wxID_REDO)
       ->Enable($self->{t_source}->CanRedo);
 
-    # On MacOS, we cannot open arbitrary files due to sandboxing
-    # constraints.
-    if ( $is_macos_crippled ) {
-	$self->{main_menubar}->FindItem(wxID_OPEN) ->Enable(0);
-    }
-
-    Wx::Log::SetTimestamp(' ');
     if ( @ARGV ) {
-	$self->openfile( shift(@ARGV) ) || return 0;
+	my $arg = decode_utf8(shift(@ARGV));
+	if ( -d $arg ) {
+	    $self->select_mode(MODE_MSGS);
+	    $self->{_sbefolder} = $arg;
+	    my $event = Wx::CommandEvent->new( wxEVT_COMMAND_MENU_SELECTED,
+					       $self->wxID_EXPORT_FOLDER );
+	    Wx::PostEvent( $self, $event );
+	    return 1;
+	}
+	else {
+	    $self->select_mode(MODE_EDIT);
+	    $self->openfile($arg) || return 0;
+	}
 	return 1;
     }
 
@@ -347,6 +385,7 @@ sub openfile {
 
     # File tests fail on Windows, so bypass when already checked.
     unless ( $checked || -f -r $file ) {
+	$self->log( 'W',  "Error opening $file: $!",);
 	my $md = Wx::MessageDialog->new
 	  ( $self,
 	    "Error opening $file: $!",
@@ -357,6 +396,7 @@ sub openfile {
 	return;
     }
     unless ( $self->{t_source}->LoadFile($file) ) {
+	$self->log( 'W',  "Error opening $file: $!",);
 	my $md = Wx::MessageDialog->new
 	  ( $self,
 	    "Error opening $file: $!",
@@ -368,13 +408,15 @@ sub openfile {
     }
     #### TODO: Get rid of selection on Windows
     $self->{_currentfile} = $file;
-    if ( $self->{t_source}->GetValue =~ /^\{\s*t(?:itle)[: ]+([^\}]*)\}/m ) {
+    if ( $self->{t_source}->GetValue =~ /^\{\s*t(?:itle)?[: ]+([^\}]*)\}/m ) {
 	my $title = demarkup($1);
 	my $n = $self->{t_source}->GetNumberOfLines;
-	Wx::LogStatus("Loaded: $title ($n line" .
-		      ( $n == 1 ? "" : "s" ) .
-		      ")");
-	$self->{sz_source}->GetStaticBox->SetLabel($title);
+	$self->log( 'S', "Loaded: $title ($n line" . ( $n == 1 ? "" : "s" ) . ")");
+	$self->{nb_main}->SetPageText( PANEL_EDIT, $title );
+    }
+    else {
+	my $n = $self->{t_source}->GetNumberOfLines;
+	$self->log( 'S', "Loaded: $file ($n line" . ( $n == 1 ? "" : "s" ) . ")");
     }
     $self->SetTitle( $self->{_windowtitle} = $file);
 
@@ -390,6 +432,7 @@ sub newfile {
     my $file = $self->{prefs_tmplfile};
     my $content = "{title: New Song}\n\n";
     if ( $file ) {
+	$self->log( 'I', "Loading template $file" );
 	if ( -f -r $file ) {
 	    if ( $self->{t_source}->LoadFile($file) ) {
 		$content = "";
@@ -404,14 +447,9 @@ sub newfile {
      }
     $self->{t_source}->SetValue($content) unless $content eq "";
     $self->{t_source}->SetModified(0);
-    Wx::LogStatus("New file");
+    $self->log( 'S', "New file");
     $self->{prefs_xpose} = 0;
     $self->{prefs_xposesharp} = 0;
-    # On MacOS, we cannot save arbitrary files due to sandboxing
-    # constraints.
-    if ( $is_macos_crippled ) {
-	$self->{main_menubar}->FindItem(wxID_SAVE) ->Enable(0);
-    }
 }
 
 my ( $preview_cho, $preview_pdf );
@@ -420,17 +458,20 @@ my ( $msgs, $fatal, $died );
 sub _warn {
     my $self = shift;
     $self->select_mode(MODE_MSGS);
-    $self->{t_msg}->AppendText( join("",@_) );
+#    $self->{t_msg}->AppendText( join("",@_) );
+    $self->log( 'W',  join("",@_) );
     $msgs++;
 }
 
 sub _info {
     my $self = shift;
-    $self->{t_msg}->AppendText( join("",@_) );
+#    $self->{t_msg}->AppendText( join("",@_) );
+    $self->log( 'I',  join("",@_) );
 }
 
 sub _die {
-    Wx::LogError( "%s", join("", @_) );
+    my $self = shift;
+    $self->log( 'E',  "%s", join("", @_) );
     $msgs++;
     $fatal++;
     $died++;
@@ -450,7 +491,7 @@ sub preview {
 
     # When invoked with a filelist (Songbook Export), ignore the
     # current song in the editor.
-    my $filelist = $opts[0] eq "--filelist";
+    my $filelist = @opts && $opts[0] eq "--filelist";
     unless ( $filelist ) {
 	my $mod = $self->{t_source}->IsModified;
 	$self->{t_source}->SaveFile($preview_cho);
@@ -463,7 +504,6 @@ sub preview {
 
     $msgs = $fatal = $died = 0;
     $SIG{__WARN__} = sub { _warn($self, @_) } unless $self->{_log};
-    $self->{t_msg}->Clear;
 #    $SIG{__DIE__}  = \&_die;
 
     my $haveconfig = List::Util::any { $_ eq "--config" } @opts;
@@ -515,7 +555,7 @@ sub preview {
     eval {
 	$options = ChordPro::app_setup( "ChordPro", $VERSION );
     };
-    _die($@), goto ERROR if $@ && !$died;
+    $self->_die($@), goto ERROR if $@ && !$died;
 
     $options->{verbose} = $self->{_verbose} || 0;
     $options->{trace} = $self->{_trace} || 0;
@@ -526,12 +566,12 @@ sub preview {
     $options->{silent} = 1;
 
     eval {
-	ChordPro::main($options)
+	ChordPro::main($options);
     };
-    _die($@), goto ERROR if $@ && !$died;
+    $self->_die($@), goto ERROR if $@ && !$died;
 
     if ( -e $preview_pdf ) {
-	Wx::LogStatus("Output generated, starting previewer");
+	$self->log( 'S', "Output generated, starting previewer");
 
 	if ( my $cmd = $self->{prefs_pdfviewer} ) {
 	    if ( $cmd =~ s/\%f/$preview_pdf/g ) {
@@ -559,14 +599,14 @@ sub preview {
 
   ERROR:
     if ( $msgs ) {
-	Wx::LogStatus( $msgs . " message" .
-		       ( $msgs == 1 ? "" : "s" ) . "." );
+	$self->log( 'S',  $msgs . " message" .
+			( $msgs == 1 ? "" : "s" ) . "." );
 	if ( $fatal ) {
-	    Wx::LogError( "Fatal problems found!" );
+	    $self->log( 'E',  "Fatal problems found. See Messages tab." );
 	    return;
 	}
 	else {
-	    Wx::LogWarning( "Problems found!" );
+	    $self->log( 'W',  "Problems found. See Messages tab." );
 	}
     }
     unlink( $preview_cho );
@@ -597,16 +637,6 @@ sub checksaved {
 	    $self->saveas( $self->{_currentfile} );
 	}
     }
-    elsif ( $is_macos_crippled ) {
-	my $md = Wx::MessageDialog->new
-	  ( $self,
-	    "Sorry, cannot save your changes due to MacOS constraints.",
-	    "Contents has changed",
-	    0 | wxOK | wxCANCEL );
-	my $ret = $md->ShowModal;
-	$md->Destroy;
-	return if $ret == wxID_CANCEL;
-    }
     else {
 	my $md = Wx::MessageDialog->new
 	  ( $self,
@@ -627,7 +657,7 @@ sub saveas {
     my ( $self, $file ) = @_;
     $self->{t_source}->SaveFile($file);
     $self->SetTitle( $self->{_windowtitle} = $file);
-    Wx::LogStatus( "Saved." );
+    $self->log( 'S',  "Saved." );
 }
 
 sub GetPreferences {
@@ -712,9 +742,7 @@ sub OnSaveAs {
        wxDefaultPosition);
     my $ret = $fd->ShowModal;
     if ( $ret == wxID_OK ) {
-	$self->{_currentfile} = $fd->GetPath;
-	$self->{t_source}->SaveFile($fd->GetPath);
-	Wx::LogStatus( "Saved." );
+	$self->saveas( $self->{_currentfile} = $fd->GetPath );
     }
     $fd->Destroy;
     return $ret;
@@ -747,8 +775,9 @@ sub OnExportFolder {
     my ($self, $event) = @_;
 
     use ChordPro::Wx::SongbookExport;
+    $self->select_mode(MODE_MSGS);
     $self->{d_sbexport} = ChordPro::Wx::SongbookExport->new($self, -1, "Export Songbook");
-    my $ret = $self->{d_sbexport}->ShowModal;
+    my $ret = $self->{d_sbexport}->Show;
 }
 
 sub OnClose {
@@ -767,14 +796,14 @@ sub OnUndo {
     my ($self, $event) = @_;
     $self->{t_source}->CanUndo
       ? $self->{t_source}->Undo
-	: Wx::LogStatus("Sorry, can't undo yet");
+	: $self->log( 'I', "Sorry, can't undo yet");
 }
 
 sub OnRedo {
     my ($self, $event) = @_;
     $self->{t_source}->CanRedo
       ? $self->{t_source}->Redo
-	: Wx::LogStatus("Sorry, can't redo yet");
+	: $self->log( 'I', "Sorry, can't redo yet");
 }
 
 sub OnCut {
@@ -789,6 +818,7 @@ sub OnCopy {
 
 sub OnPaste {
     my ($self, $event) = @_;
+    $self->log( 'I', "Paste" );
     $self->{t_source}->Paste;
 }
 
@@ -814,12 +844,6 @@ sub OnHelp_Example {
     $self->openfile( CP->findres( "swinglow.cho", class => "examples" ) );
     undef $self->{_currentfile};
     $self->{t_source}->SetModified(0);
-
-    # On MacOS, we cannot save arbitrary files due to sandboxing
-    # constraints.
-    if ( $is_macos_crippled ) {
-	$self->{main_menubar}->FindItem(wxID_SAVE) ->Enable(0);
-    }
 }
 
 sub OnHelp_DebugInfo {
@@ -959,6 +983,10 @@ sub OnIdle {
     my $f = $self->{_windowtitle} // "";
     $f = "*$f" if $self->{t_source}->IsModified;
     $self->SetTitle($f);
+    my $t = $self->{nb_main}->GetPageText(0);
+    if ( $self->{t_source}->IsModified && $t =~ s/^(?!\*)/*/ ) {
+	$self->{nb_main}->SetPageText(0, $t);
+    }
 }
 
 ################ Messages ################
@@ -977,11 +1005,17 @@ sub OnMsgSave {
     if ( $ret == wxID_OK ) {
 	$file = $fd->GetPath;
 	$self->{t_msg}->SaveFile($file);
-	Wx::LogStatus( "Messages saved." );
+	$self->log( 'S',  "Messages saved." );
 	$conf->Write( "messages/savedas", $file );
     }
     $fd->Destroy;
     return $ret;
+}
+
+sub OnMsgClear {
+    my ( $self, $event ) = @_;
+    $self->{t_msg}->Clear;
+    $event->Skip;
 }
 
 sub OnMsgCancel {
@@ -1006,6 +1040,13 @@ sub OnInitialOpen {
     $event->Skip;
 }
 
+sub OnInitialExample {
+    my ( $self, $event ) = @_;
+    $self->select_mode(MODE_EDIT);
+    $self->OnHelp_Example($event);
+    $event->Skip;
+}
+
 sub OnInitialSite {
     my ( $self, $event ) = @_;
     Wx::LaunchDefaultBrowser("https://www.chordpro.org/");
@@ -1015,12 +1056,6 @@ sub OnInitialSite {
 sub OnInitialDocs {
     my ( $self, $event ) = @_;
     $self->OnHelp_ChordPro($event);
-    $event->Skip;
-}
-
-sub OnInitialCancel {
-    my ( $self, $event ) = @_;
-    $self->OnQuit($event);
     $event->Skip;
 }
 

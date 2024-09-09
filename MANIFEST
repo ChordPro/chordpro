@@ -37,13 +37,6 @@ lib/ChordPro/Songbook.pm
 lib/ChordPro/Testing.pm
 lib/ChordPro/Utils.pm
 lib/ChordPro/Version.pm
-lib/ChordPro/Wx.pm
-lib/ChordPro/Wx/Main.pm
-lib/ChordPro/Wx/Main_wxg.pm
-lib/ChordPro/Wx/PreferencesDialog.pm
-lib/ChordPro/Wx/PreferencesDialog_wxg.pm
-lib/ChordPro/Wx/RenderDialog.pm
-lib/ChordPro/Wx/RenderDialog_wxg.pm
 lib/ChordPro/lib/JSON/Relaxed.pm
 lib/ChordPro/lib/JSON/Relaxed/Parser.pm
 lib/ChordPro/lib/JSON/Relaxed/ErrorCodes.pm
