@@ -65,12 +65,6 @@ sub new {
     Wx::Event::EVT_IDLE($self, $self->can('OnIdle'));
     Wx::Event::EVT_CLOSE($self, $self->can('OnClose'));
 
-    # By default the TextCtrl on MacOS substitutes smart quotes and dashes.
-    # Note that OSXDisableAllSmartSubstitutions requires an augmented
-    # version of wxPerl.
-    $self->{t_source}->OSXDisableAllSmartSubstitutions
-      if $self->{t_source}->can("OSXDisableAllSmartSubstitutions");
-
     my $log = Wx::LogTextCtrl->new( $self->{t_msg} );
     #    $log = Wx::LogStderr->new;
     $self->{old_log} = Wx::Log::SetActiveTarget( $log );
@@ -91,9 +85,11 @@ sub new {
 
 use constant MODE_INIT => 0;
 use constant MODE_EDIT => 1;
-use constant MODE_MSGS => 2;
+use constant MODE_SBEX => 2;
+use constant MODE_MSGS => 3;
 use constant PANEL_EDIT => 0;
-use constant PANEL_MSGS => 1;
+use constant PANEL_SBEX => 1;
+use constant PANEL_MSGS => 2;
 
 sub select_mode {
     my ( $self, $mode ) = @_;
@@ -103,10 +99,17 @@ sub select_mode {
 	$self->{p_init}->Show(0);
 	$self->{nb_main}->Show(1);
     }
-    if ( $mode == 2 ) {
+    if ( $mode == MODE_MSGS ) {
 	$self->{nb_main}->SetSelection(PANEL_MSGS);
     }
+    elsif ( $mode == MODE_SBEX ) {
+	$self->{p_edit}->Show(0);
+	$self->{p_sbexport}->Show(1);
+	$self->{nb_main}->SetSelection(PANEL_SBEX);
+    }
     else {
+	$self->{p_edit}->Show(1);
+	$self->{p_sbexport}->Show(0);
 	$self->{nb_main}->SetSelection(PANEL_EDIT);
     }
     $self->{sz_main}->Layout;
@@ -216,15 +219,15 @@ sub init {
     $self->GetPreferences;
     my $font = $fonts[$self->{prefs_editfont}]->{font};
     $font->SetPointSize($self->{prefs_editsize});
-    $self->{t_source}->SetFont($font);
+    $self->{p_edit}{t_source}->SetFont($font);
 
     $self->setup_tasks();
 
     # Disable menu items if we cannot.
     $self->{main_menubar}->FindItem(wxID_UNDO)
-      ->Enable($self->{t_source}->CanUndo);
+      ->Enable($self->{p_edit}{t_source}->CanUndo);
     $self->{main_menubar}->FindItem(wxID_REDO)
-      ->Enable($self->{t_source}->CanRedo);
+      ->Enable($self->{p_edit}{t_source}->CanRedo);
 
     if ( @ARGV ) {
 	my $arg = decode_utf8(shift(@ARGV));
@@ -721,6 +724,7 @@ sub OnOpen {
     my ( $self, $event, $create ) = @_;
     return unless $self->checksaved;
 
+    $self->select_mode(MODE_EDIT);
     if ( $create ) {
 	$self->newfile;
     }
@@ -731,6 +735,7 @@ sub OnOpen {
 
 sub OnNew {
     my( $self, $event ) = @_;
+    $self->select_mode(MODE_EDIT);
     OnOpen( $self, $event, 1 );
 }
 
@@ -775,12 +780,7 @@ sub OnPreviewLyricsOnly {
 
 sub OnExportFolder {
     my ($self, $event) = @_;
-
-    use ChordPro::Wx::SongbookExport;
-    $self->select_mode(MODE_MSGS);
-    my $d = ChordPro::Wx::SongbookExport->new($self, -1, "Export Songbook");
-    my $ret = $d->ShowModal;
-    $d->Destroy;
+    $self->select_mode(MODE_SBEX);
 }
 
 sub OnClose {
