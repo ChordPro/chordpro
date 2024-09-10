@@ -33,12 +33,14 @@ no warnings 'redefine';
     goto &$wxbitmapnew if @_ != 3 || -f $_[1];
     my ($self, @rest) = @_;
     $rest[0] = CP->findres( basename($rest[0]), class => "icons" );
+    $rest[0] ||= CP->findres( "missing.png", class => "icons" );
     $wxbitmapnew->($self, @rest);
 };
 use warnings 'redefine';
 
 sub log {
     my ( $self, $level, $msg, $info ) = @_;
+#    $msg = "[$level] $msg";
     if ( $level eq 'I' ) {
 	Wx::LogMessage($msg);
     }
@@ -600,7 +602,7 @@ sub preview {
   ERROR:
     if ( $msgs ) {
 	$self->log( 'S',  $msgs . " message" .
-			( $msgs == 1 ? "" : "s" ) . "." );
+			( $msgs == 1 ? "" : "s" ) . ". See Messages tab." );
 	if ( $fatal ) {
 	    $self->log( 'E',  "Fatal problems found. See Messages tab." );
 	    return;
@@ -776,8 +778,9 @@ sub OnExportFolder {
 
     use ChordPro::Wx::SongbookExport;
     $self->select_mode(MODE_MSGS);
-    $self->{d_sbexport} = ChordPro::Wx::SongbookExport->new($self, -1, "Export Songbook");
-    my $ret = $self->{d_sbexport}->Show;
+    my $d = ChordPro::Wx::SongbookExport->new($self, -1, "Export Songbook");
+    my $ret = $d->ShowModal;
+    $d->Destroy;
 }
 
 sub OnClose {

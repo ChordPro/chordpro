@@ -105,12 +105,23 @@ sub OnAccept {
     $conf->Write( CFGBASE . "title", $self->{t_exporttitle}->GetValue // "" );
 
     my $filelist = "";
+    my @o = $self->{w_rearrange}->GetList->GetCurrentOrder;
     for ( $self->{w_rearrange}->GetList->GetCurrentOrder ) {
 	$filelist .= "$folder/$files[$_]\n" unless $_ < 0;
     }
-
+    $self->GetParent->log( 'I', "Filelist: @o\n$filelist" );
+    unless ( $filelist ) {
+	my $md = Wx::MessageDialog->new
+	  ( $self,
+	    "Please select one or more song files.",
+	    "No songs selected",
+	    wxOK | wxICON_ERROR );
+	my $ret = $md->ShowModal;
+	$md->Destroy;
+	return;
+    }
     # Hide the dialog for the progress dialog.
-    $self->GetParent->{d_sbexport}->Show(0);
+    $self->Show(0);
 
     my $dialog;
     my $pcb = sub {

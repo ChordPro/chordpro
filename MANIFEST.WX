@@ -23,5 +23,6 @@ lib/ChordPro/res/icons/chordpro-web.png
 lib/ChordPro/res/icons/chordpro-icon-narrow.png
 lib/ChordPro/res/icons/chordpro-icon.png
 lib/ChordPro/res/icons/cancel.png
+lib/ChordPro/res/icons/missing.png
 script/wxchordpro.pl
 script/wxchordpro.wxg

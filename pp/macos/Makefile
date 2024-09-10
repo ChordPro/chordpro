@@ -91,9 +91,8 @@ app1 :
 	mkdir -p "${APPDIR}/Contents/MacOS"
 	mkdir -p "${APPDIR}/Contents/Resources"
 	cp PkgInfo Info.plist "${APPDIR}/Contents"
-	cp "${DEST}/lib/ChordPro/res/icons/chordpro.icns" "${APPDIR}/Contents/Resources"
-	cp "${DEST}/lib/ChordPro/res/icons/chordpro-doc.icns" "${APPDIR}/Contents/Resources"
-	cp "${DEST}/lib/ChordPro/res/icons/chordpro-bg.png" "${APPDIR}/Contents/Resources"
+	cp "${DEST}"/lib/ChordPro/res/icons/*.icns "${APPDIR}/Contents/Resources"
+	cp "${DEST}"/lib/ChordPro/res/icons/*.png "${APPDIR}/Contents/Resources"
 	cd "${APPDIR}"; mv script lib Contents/MacOS
 	cd "${APPDIR}"; mv lib*.dylib Contents/MacOS
 	cd "${APPDIR}"; rm -f MANIFEST META.yml
