@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-
+use utf8;
 # Implementation of ChordPro::Wx::Main_wxg details.
 
 package ChordPro::Wx::Main;
@@ -17,6 +17,7 @@ use Wx::Locale gettext => '_T';
 
 use ChordPro;
 use ChordPro::Paths;
+use ChordPro::Wx::Utils;
 use ChordPro::Output::Common;
 use ChordPro::Utils qw( demarkup );
 use File::Temp qw( tempfile );
@@ -40,13 +41,21 @@ use warnings 'redefine';
 
 sub log {
     my ( $self, $level, $msg, $info ) = @_;
-#    $msg = "[$level] $msg";
+
+    unless ( $self->{old_log} ) {
+	my $log = Wx::LogTextCtrl->new( $self->{p_msg}{t_msg} );
+	#    $log = Wx::LogStderr->new;
+	$self->{old_log} = Wx::Log::SetActiveTarget( $log );
+    }
+
+    #    $msg = "[$level] $msg";
     if ( $level eq 'I' ) {
 	Wx::LogMessage($msg);
     }
     if ( $level eq 'S' ) {
-	Wx::LogMessage($msg);
-	$self->{f_main_statusbar}->SetStatusText($msg);
+	Wx::LogMessage( $msg =~ s/\sPress.*$//r );
+	$self->{$_}->{l_status}->SetLabel($msg)
+	  for qw( p_edit p_msg  p_sbexport );
     }
     elsif ( $level eq 'W' ) {
 	Wx::LogWarning($msg);
@@ -65,10 +74,6 @@ sub new {
     Wx::Event::EVT_IDLE($self, $self->can('OnIdle'));
     Wx::Event::EVT_CLOSE($self, $self->can('OnClose'));
 
-    my $log = Wx::LogTextCtrl->new( $self->{t_msg} );
-    #    $log = Wx::LogStderr->new;
-    $self->{old_log} = Wx::Log::SetActiveTarget( $log );
-
     # Normal (informational),
     #Wx::LogMessage("Message");
     # LogTextCtrl -> Normal.
@@ -83,34 +88,41 @@ sub new {
     $self;
 }
 
-use constant MODE_INIT => 0;
-use constant MODE_EDIT => 1;
-use constant MODE_SBEX => 2;
-use constant MODE_MSGS => 3;
-use constant PANEL_EDIT => 0;
-use constant PANEL_SBEX => 1;
-use constant PANEL_MSGS => 2;
-
 sub select_mode {
     my ( $self, $mode ) = @_;
+
+    $mode = lc($mode);
+    my @panels = panels;
+    if ( $mode eq "init" ) {
+	$self->{$_}->Show(0) for @panels;
+	$self->SetStatusBar(undef);
+	$self->{p_init}->Show(1);
+
+	return;
+    }
 
     # Hide initial window.
     if ( $self->{p_init}->IsShown ) {
 	$self->{p_init}->Show(0);
-	$self->{nb_main}->Show(1);
+	$self->SetStatusBar($self->{f_main_statusbar});
+	$self->{p_msg}->Show(1);
     }
-    if ( $mode == MODE_MSGS ) {
-	$self->{nb_main}->SetSelection(PANEL_MSGS);
+    if ( $mode eq "msgs" ) {
+	$self->{$_}->Show( $_ eq "p_msg" ) for @panels;
+	$self->{main_menubar}->FindItem($_)->Enable(0)
+	  for wxID_CUT, wxID_COPY, wxID_PASTE, wxID_DELETE;
     }
-    elsif ( $mode == MODE_SBEX ) {
-	$self->{p_edit}->Show(0);
-	$self->{p_sbexport}->Show(1);
-	$self->{nb_main}->SetSelection(PANEL_SBEX);
+    elsif ( $mode eq "sbex" ) {
+	$self->{$_}->Show( $_ eq "p_sbexport" ) for @panels;
+	$self->{main_menubar}->EnableTop( 2, 0 );
+	$self->{main_menubar}->FindItem($_)->Enable(0)
+	  for wxID_CUT, wxID_COPY, wxID_PASTE, wxID_DELETE;
     }
     else {
-	$self->{p_edit}->Show(1);
-	$self->{p_sbexport}->Show(0);
-	$self->{nb_main}->SetSelection(PANEL_EDIT);
+	$self->{$_}->Show( $_ eq "p_edit" ) for @panels;
+	$self->{main_menubar}->EnableTop( 2, 1 );
+	$self->{main_menubar}->FindItem($_)->Enable(1)
+	  for wxID_CUT, wxID_COPY, wxID_PASTE, wxID_DELETE;
     }
     $self->{sz_main}->Layout;
 }
@@ -216,6 +228,8 @@ sub init {
     $self->{_debug}   = $options->{debug};
     $self->{_log}     = $options->{log};
 
+    $self->SetStatusBar(undef);
+
     $self->GetPreferences;
     my $font = $fonts[$self->{prefs_editfont}]->{font};
     $font->SetPointSize($self->{prefs_editsize});
@@ -223,30 +237,23 @@ sub init {
 
     $self->setup_tasks();
 
-    # Disable menu items if we cannot.
-    $self->{main_menubar}->FindItem(wxID_UNDO)
-      ->Enable($self->{p_edit}{t_source}->CanUndo);
-    $self->{main_menubar}->FindItem(wxID_REDO)
-      ->Enable($self->{p_edit}{t_source}->CanRedo);
-
     if ( @ARGV ) {
 	my $arg = decode_utf8(shift(@ARGV));
 	if ( -d $arg ) {
-	    $self->select_mode(MODE_MSGS);
 	    $self->{_sbefolder} = $arg;
 	    my $event = Wx::CommandEvent->new( wxEVT_COMMAND_MENU_SELECTED,
 					       $self->wxID_EXPORT_FOLDER );
 	    Wx::PostEvent( $self, $event );
 	    return 1;
 	}
-	else {
-	    $self->select_mode(MODE_EDIT);
-	    $self->openfile($arg) || return 0;
+	elsif ( $self->{p_edit}->openfile($arg) ) {
+	    $self->select_mode("EDIT");
+	    return 1;
 	}
-	return 1;
+	return 0;
     }
 
-    $self->newfile unless $self->{_currentfile};
+    $self->{p_edit}->newfile unless $self->{_currentfile};
     return 1;
 }
 
@@ -370,99 +377,11 @@ sub setup_tasks {
 sub tasks { \@tasks }
 sub fonts { \@fonts }
 
-sub opendialog {
-    my ($self) = @_;
-    my $fd = Wx::FileDialog->new
-      ($self, _T("Choose ChordPro file"),
-       "", "",
-       "ChordPro files (*.cho,*.crd,*.chopro,*.chord,*.chordpro,*.pro)|*.cho;*.crd;*.chopro;*.chord;*.chordpro;*.pro|All files|*.*",
-       0|wxFD_OPEN|wxFD_FILE_MUST_EXIST,
-       wxDefaultPosition);
-    my $ret = $fd->ShowModal;
-    if ( $ret == wxID_OK ) {
-	$self->openfile( $fd->GetPath, 1 );
-    }
-    $fd->Destroy;
-}
-
-sub openfile {
-    my ( $self, $file, $checked ) = @_;
-
-    # File tests fail on Windows, so bypass when already checked.
-    unless ( $checked || -f -r $file ) {
-	$self->log( 'W',  "Error opening $file: $!",);
-	my $md = Wx::MessageDialog->new
-	  ( $self,
-	    "Error opening $file: $!",
-	    "File open error",
-	    wxOK | wxICON_ERROR );
-	my $ret = $md->ShowModal;
-	$md->Destroy;
-	return;
-    }
-    unless ( $self->{t_source}->LoadFile($file) ) {
-	$self->log( 'W',  "Error opening $file: $!",);
-	my $md = Wx::MessageDialog->new
-	  ( $self,
-	    "Error opening $file: $!",
-	    "File load error",
-	    wxOK | wxICON_ERROR );
-	$md->ShowModal;
-	$md->Destroy;
-	return;
-    }
-    #### TODO: Get rid of selection on Windows
-    $self->{_currentfile} = $file;
-    if ( $self->{t_source}->GetValue =~ /^\{\s*t(?:itle)?[: ]+([^\}]*)\}/m ) {
-	my $title = demarkup($1);
-	my $n = $self->{t_source}->GetNumberOfLines;
-	$self->log( 'S', "Loaded: $title ($n line" . ( $n == 1 ? "" : "s" ) . ")");
-	$self->{nb_main}->SetPageText( PANEL_EDIT, $title );
-    }
-    else {
-	my $n = $self->{t_source}->GetNumberOfLines;
-	$self->log( 'S', "Loaded: $file ($n line" . ( $n == 1 ? "" : "s" ) . ")");
-    }
-    $self->SetTitle( $self->{_windowtitle} = $file);
-
-    $self->{prefs_xpose} = 0;
-    $self->{prefs_xposesharp} = 0;
-    return 1;
-}
-
-sub newfile {
-    my ( $self ) = @_;
-    undef $self->{_currentfile};
-
-    my $file = $self->{prefs_tmplfile};
-    my $content = "{title: New Song}\n\n";
-    if ( $file ) {
-	$self->log( 'I', "Loading template $file" );
-	if ( -f -r $file ) {
-	    if ( $self->{t_source}->LoadFile($file) ) {
-		$content = "";
-	    }
-	    else {
-		$content = "# Error opening template $file: $!\n\n" . $content;
-	    }
-	}
-	else {
-	    $content = "# Error opening template $file: $!\n\n" . $content;
-	}
-     }
-    $self->{t_source}->SetValue($content) unless $content eq "";
-    $self->{t_source}->SetModified(0);
-    $self->log( 'S', "New file");
-    $self->{prefs_xpose} = 0;
-    $self->{prefs_xposesharp} = 0;
-}
-
 my ( $preview_cho, $preview_pdf );
 my ( $msgs, $fatal, $died );
 
 sub _warn {
     my $self = shift;
-    $self->select_mode(MODE_MSGS);
 #    $self->{t_msg}->AppendText( join("",@_) );
     $self->log( 'W',  join("",@_) );
     $msgs++;
@@ -498,9 +417,9 @@ sub preview {
     # current song in the editor.
     my $filelist = @opts && $opts[0] eq "--filelist";
     unless ( $filelist ) {
-	my $mod = $self->{t_source}->IsModified;
-	$self->{t_source}->SaveFile($preview_cho);
-	$self->{t_source}->SetModified($mod);
+	my $mod = $self->{p_edit}{t_source}->IsModified;
+	$self->{p_edit}{t_source}->SaveFile($preview_cho);
+	$self->{p_edit}{t_source}->SetModified($mod);
     }
 
     #### ChordPro
@@ -604,14 +523,16 @@ sub preview {
 
   ERROR:
     if ( $msgs ) {
+	my $target = $filelist ? $self->{p_sbexport} : $self->{p_edit};
+	$target->alert;
 	$self->log( 'S',  $msgs . " message" .
-			( $msgs == 1 ? "" : "s" ) . ". See Messages tab." );
+		    ( $msgs == 1 ? "" : "s" ) . ". Press ‘Show Messages’." );
 	if ( $fatal ) {
-	    $self->log( 'E',  "Fatal problems found. See Messages tab." );
+	    $self->log( 'E',  "Fatal problems found." );
 	    return;
 	}
 	else {
-	    $self->log( 'W',  "Problems found. See Messages tab." );
+	    $self->log( 'W',  "Problems found." );
 	}
     }
     unlink( $preview_cho );
@@ -623,46 +544,6 @@ sub _makeurl {
     $u =~ s/([^a-z0-9---_\/.~])/sprintf("%%%02X", ord($1))/ieg;
     $u =~ s/^([a-z])%3a/\/$1:/i;	# Windows
     return "file://$u";
-}
-
-sub checksaved {
-    my ( $self ) = @_;
-    return 1 unless ( $self->{t_source} && $self->{t_source}->IsModified );
-    if ( $self->{_currentfile} ) {
-	my $md = Wx::MessageDialog->new
-	  ( $self,
-	    "File " . $self->{_currentfile} . " has been changed.\n".
-	    "Do you want to save your changes?",
-	    "File has changed",
-	    0 | wxCANCEL | wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION );
-	my $ret = $md->ShowModal;
-	$md->Destroy;
-	return if $ret == wxID_CANCEL;
-	if ( $ret == wxID_YES ) {
-	    $self->saveas( $self->{_currentfile} );
-	}
-    }
-    else {
-	my $md = Wx::MessageDialog->new
-	  ( $self,
-	    "Do you want to save your changes?",
-	    "Contents has changed",
-	    0 | wxCANCEL | wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION );
-	my $ret = $md->ShowModal;
-	$md->Destroy;
-	return if $ret == wxID_CANCEL;
-	if ( $ret == wxID_YES ) {
-	    return if $self->OnSaveAs == wxID_CANCEL;
-	}
-    }
-    return 1;
-}
-
-sub saveas {
-    my ( $self, $file ) = @_;
-    $self->{t_source}->SaveFile($file);
-    $self->SetTitle( $self->{_windowtitle} = $file);
-    $self->log( 'S',  "Saved." );
 }
 
 sub GetPreferences {
@@ -707,7 +588,7 @@ sub GetPreferences {
 
 sub SavePreferences {
     my ( $self ) = @_;
-    return unless $self;
+    return unless $self && $self->{prefs_cfgpreset};
     my $conf = Wx::ConfigBase::Get;
     local $self->{prefs_cfgpreset} = join( ",", @{$self->{prefs_cfgpreset}} );
     for ( keys( %$prefctl ) ) {
@@ -722,43 +603,24 @@ sub SavePreferences {
 
 sub OnOpen {
     my ( $self, $event, $create ) = @_;
-    return unless $self->checksaved;
-
-    $self->select_mode(MODE_EDIT);
-    if ( $create ) {
-	$self->newfile;
-    }
-    else {
-	$self->opendialog;
-    }
+    $self->select_mode("EDIT");
+    $self->{p_edit}->open($create);
 }
 
 sub OnNew {
     my( $self, $event ) = @_;
-    $self->select_mode(MODE_EDIT);
+    $self->select_mode("EDIT");
     OnOpen( $self, $event, 1 );
 }
 
 sub OnSaveAs {
     my ($self, $event) = @_;
-    my $fd = Wx::FileDialog->new
-      ($self, _T("Choose output file"),
-       "", "",
-       "*.cho",
-       0|wxFD_SAVE|wxFD_OVERWRITE_PROMPT,
-       wxDefaultPosition);
-    my $ret = $fd->ShowModal;
-    if ( $ret == wxID_OK ) {
-	$self->saveas( $self->{_currentfile} = $fd->GetPath );
-    }
-    $fd->Destroy;
-    return $ret;
+    $self->{p_edit}->saveas;
 }
 
 sub OnSave {
     my ($self, $event) = @_;
-    goto &OnSaveAs unless $self->{_currentfile};
-    $self->saveas( $self->{_currentfile} );
+    $self->{p_edit}->saveas( $self->{_currentfile} );
 }
 
 sub OnPreview {
@@ -780,13 +642,14 @@ sub OnPreviewLyricsOnly {
 
 sub OnExportFolder {
     my ($self, $event) = @_;
-    $self->select_mode(MODE_SBEX);
+    $self->select_mode("SBEX");
+    $self->{p_sbexport}->refresh;
 }
 
 sub OnClose {
     my ( $self, $event ) = @_;
     $self->SavePreferences;
-    return unless $self->checksaved;
+    return unless $self->{p_edit}->checksaved;
     $self->Destroy;
 }
 
@@ -797,38 +660,32 @@ sub OnQuit {			# Exit from menu
 
 sub OnUndo {
     my ($self, $event) = @_;
-    $self->{t_source}->CanUndo
-      ? $self->{t_source}->Undo
-	: $self->log( 'I', "Sorry, can't undo yet");
+    $self->{p_edit}->undo;
 }
 
 sub OnRedo {
     my ($self, $event) = @_;
-    $self->{t_source}->CanRedo
-      ? $self->{t_source}->Redo
-	: $self->log( 'I', "Sorry, can't redo yet");
+    $self->{p_edit}->redo
 }
 
 sub OnCut {
     my ($self, $event) = @_;
-    $self->{t_source}->Cut;
+    $self->{p_edit}->cut;
 }
 
 sub OnCopy {
     my ($self, $event) = @_;
-    $self->{t_source}->Copy;
+    $self->{p_edit}->copy;
 }
 
 sub OnPaste {
     my ($self, $event) = @_;
-    $self->log( 'I', "Paste" );
-    $self->{t_source}->Paste;
+    $self->{p_edit}->paste;
 }
 
 sub OnDelete {
     my ($self, $event) = @_;
-    my ( $from, $to ) = $self->{t_source}->GetSelection;
-    $self->{t_source}->Remove( $from, $to ) if $from < $to;
+    $self->{p_edit}->delete;
 }
 
 sub OnHelp_ChordPro {
@@ -843,25 +700,13 @@ sub OnHelp_Config {
 
 sub OnHelp_Example {
     my ($self, $event) = @_;
-    return unless $self->checksaved;
-    $self->openfile( CP->findres( "swinglow.cho", class => "examples" ) );
-    undef $self->{_currentfile};
-    $self->{t_source}->SetModified(0);
+    $self->select_mode("EDIT");
+    $self->{p_edit}->open( CP->findres( "swinglow.cho", class => "examples" ) );
 }
 
 sub OnHelp_DebugInfo {
     my ($self, $event) = @_;
     $self->{_debuginfo} = $event->IsChecked;
-}
-
-sub OnHelp_ShowEditor {
-    my ($self, $event) = @_;
-    $self->select_mode(MODE_EDIT);
-}
-
-sub OnHelp_ShowMessages {
-    my ($self, $event) = @_;
-    $self->select_mode(MODE_MSGS);
 }
 
 sub OnPreferences {
@@ -918,11 +763,6 @@ sub OnPreviewMore {
 	$i++;
     }
     $self->preview( @args );
-}
-
-sub OnText {
-    my ($self, $event) = @_;
-    $self->{t_source}->SetModified(1);
 }
 
 sub _aboutmsg {
@@ -983,83 +823,15 @@ sub OnAbout {
 
 sub OnIdle {
     my ( $self, $event ) = @_;
+    return if $self->{p_init}->IsShown;
     my $f = $self->{_windowtitle} // "";
-    $f = "*$f" if $self->{t_source}->IsModified;
+#    $f = "*$f" if $self->{t_source}->IsModified;
     $self->SetTitle($f);
+    return;
     my $t = $self->{nb_main}->GetPageText(0);
     if ( $self->{t_source}->IsModified && $t =~ s/^(?!\*)/*/ ) {
 	$self->{nb_main}->SetPageText(0, $t);
     }
-}
-
-################ Messages ################
-
-sub OnMsgSave {
-    my ($self, $event) = @_;
-    my $conf = Wx::ConfigBase::Get;
-    my $file = $conf->Read( "messages/savedas", "" );
-    my $fd = Wx::FileDialog->new
-      ($self, _T("Choose file to save in"),
-       "", $file,
-       "*",
-       0|wxFD_SAVE|wxFD_OVERWRITE_PROMPT,
-       wxDefaultPosition);
-    my $ret = $fd->ShowModal;
-    if ( $ret == wxID_OK ) {
-	$file = $fd->GetPath;
-	$self->{t_msg}->SaveFile($file);
-	$self->log( 'S',  "Messages saved." );
-	$conf->Write( "messages/savedas", $file );
-    }
-    $fd->Destroy;
-    return $ret;
-}
-
-sub OnMsgClear {
-    my ( $self, $event ) = @_;
-    $self->{t_msg}->Clear;
-    $event->Skip;
-}
-
-sub OnMsgCancel {
-    my ( $self, $event ) = @_;
-    $self->select_mode(MODE_EDIT);
-    $event->Skip;
-}
-
-################ Initial Opening ################
-
-sub OnInitialNew {
-    my ( $self, $event ) = @_;
-    $self->select_mode(MODE_EDIT);
-    $self->OnNew($event);
-    $event->Skip;
-}
-
-sub OnInitialOpen {
-    my ( $self, $event ) = @_;
-    $self->select_mode(MODE_EDIT);
-    $self->OnOpen($event);
-    $event->Skip;
-}
-
-sub OnInitialExample {
-    my ( $self, $event ) = @_;
-    $self->select_mode(MODE_EDIT);
-    $self->OnHelp_Example($event);
-    $event->Skip;
-}
-
-sub OnInitialSite {
-    my ( $self, $event ) = @_;
-    Wx::LaunchDefaultBrowser("https://www.chordpro.org/");
-    $event->Skip;
-}
-
-sub OnInitialDocs {
-    my ( $self, $event ) = @_;
-    $self->OnHelp_ChordPro($event);
-    $event->Skip;
 }
 
 ################ End of Event handlers ################

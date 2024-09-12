@@ -20,6 +20,8 @@ my %const =
     wxDIRP_SMALL                   => 0x8000, # wxPB_SMALL
     wxFLP_SMALL                    => 0x8000, # wxPB_SMALL
     wxRESERVE_SPACE_EVEN_IF_HIDDEN => 0x0002,
+    wxID_EXECUTE		   => 0x1417,
+
   );
 
 no strict 'refs';
@@ -30,6 +32,15 @@ while ( my ( $sub, $value ) = each %const ) {
 }
 
 use strict 'refs';
+
+################ ################
+
+sub panels {
+    my @panels = qw( p_edit p_sbexport p_msg );
+    wantarray ? @panels : \@panels;
+}
+
+push( @EXPORT, 'panels' );
 
 ################ ################
 

@@ -15,6 +15,7 @@ use parent qw( ChordPro::Wx::MessagesPanel_wxg );
 
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
+use ChordPro::Wx::Utils;
 
 sub new {
     my( $self, $parent, $id, $pos, $size, $style, $name ) = @_;
@@ -30,9 +31,45 @@ sub new {
 
 }
 
+################ Event handlers ################
 
-sub mine() { yes }
+sub OnHide {
+    my ( $self, $event ) = @_;
+    $self->GetParent->select_mode( $self->GetParent->{_prev_mode} );
+}
 
+sub OnMsgSave {
+    my ($self, $event) = @_;
+    my $conf = Wx::ConfigBase::Get;
+    my $file = $conf->Read( "messages/savedas", "" );
+    my $fd = Wx::FileDialog->new
+      ($self, _T("Choose file to save in"),
+       "", $file,
+       "*",
+       0|wxFD_SAVE|wxFD_OVERWRITE_PROMPT,
+       wxDefaultPosition);
+    my $ret = $fd->ShowModal;
+    if ( $ret == wxID_OK ) {
+	$file = $fd->GetPath;
+	$self->{t_msg}->SaveFile($file);
+	$self->log( 'S',  "Messages saved." );
+	$conf->Write( "messages/savedas", $file );
+    }
+    $fd->Destroy;
+    return $ret;
+}
+
+sub OnMsgClear {
+    my ( $self, $event ) = @_;
+    $self->{t_msg}->Clear;
+    $event->Skip;
+}
+
+sub OnMsgCancel {
+    my ( $self, $event ) = @_;
+    $self->select_mode("EDIT");
+    $event->Skip;
+}
 
 1;
 

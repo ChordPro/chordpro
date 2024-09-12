@@ -15,6 +15,7 @@ use parent qw( ChordPro::Wx::SongbookExportPanel_wxg );
 
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
+use ChordPro::Wx::Utils;
 use constant CFGBASE => "songbookexport/";
 use Encode qw( decode_utf8 encode_utf8 );
 use ChordPro::Utils qw(demarkup);
@@ -24,6 +25,11 @@ sub new {
     my $self = shift;
     $self = $self->SUPER::new(@_);
 
+    return $self;
+}
+
+sub refresh {
+    my ( $self ) = @_;
     my $conf = Wx::ConfigBase::Get;
     $self->{dp_folder}->SetPath( $self->GetParent->{_sbefolder} // $conf->Read( CFGBASE . "folder" ) // "");
     $self->{t_exporttitle}->SetValue($conf->Read( CFGBASE . "title" ) // "");
@@ -38,7 +44,16 @@ sub new {
 	$self->OnDirPickerChanged(undef);
     }
 
-    return $self;
+}
+
+sub log {
+    my $self = shift;
+    $self->GetParent->log(@_);
+}
+
+sub alert {
+    my ( $self ) = @_;
+    $self->{b_msgs}->SetBackgroundColour(Wx::Colour->new(255, 0, 0));
 }
 
 ################ Event handlers ################
@@ -49,7 +64,7 @@ sub OnDirPickerChanged {
     my $folder = $self->{dp_folder}->GetPath;
     opendir( my $dir, $folder )
       or do {
-	$self->GetParent->GetParent->log( 'W', "Error opening folder $folder: $!");
+	$self->GetParent->log( 'W', "Error opening folder $folder: $!");
 	my $md = Wx::MessageDialog->new
 	  ( $self,
 	    "Error opening folder $folder: $!",
@@ -75,16 +90,20 @@ sub OnDirPickerChanged {
     my $n = scalar(@files);
     my $msg = "Found $n ChordPro file" . ( $n == 1 ? "" : "s" ) . " in $src";
     $self->{l_info}->SetLabel($msg);
-    $self->GetParent->GetParent->log( 'S', $msg );
+    $self->log( 'S', $msg );
 
     $self->{w_rearrange}->GetList->Set(\@files);
     $self->{w_rearrange}->GetList->Check($_,1) for 0..$#files;
-    $self->{w_rearrange}->Show;
-    $self->{_sbefiles} = \@files;
-    $self->{sz_export_inner}->Layout;
+    unless ( $self->{w_rearrange}->IsShown ) {
+	$self->{sl_rearrange}->Show;
+	$self->{l_rearrange}->Show;
+	$self->{w_rearrange}->Show;
+	$self->{_sbefiles} = \@files;
+	$self->{sizer_1}->Layout;
+    }
 }
 
-sub OnAccept {
+sub OnPreview {
     my ( $self, $event ) = @_;
 
     my $folder = $self->{dp_folder}->GetPath;
@@ -109,7 +128,7 @@ sub OnAccept {
     for ( $self->{w_rearrange}->GetList->GetCurrentOrder ) {
 	$filelist .= "$folder/$files[$_]\n" unless $_ < 0;
     }
-    $self->GetParent->GetParent->log( 'I', "Filelist: @o\n$filelist" );
+    $self->log( 'I', "Filelist: @o\n$filelist" );
     unless ( $filelist ) {
 	my $md = Wx::MessageDialog->new
 	  ( $self,
@@ -125,7 +144,7 @@ sub OnAccept {
     my $pcb = sub {
 	my $ctl = shift;
 
-	$self->GetParent->GetParent->log( 'I', "Generating output " . $ctl->{index} .
+	$self->log( 'I', "Generating output " . $ctl->{index} .
 			       " of " . $ctl->{songs} . ": " .
 			       demarkup($ctl->{title}) )
 	  if $ctl->{index} && $ctl->{songs} > 1;
@@ -145,23 +164,25 @@ sub OnAccept {
 			     $ctl->{songs} . ": " .
 			     demarkup($ctl->{title}) )
 	      and return 1;
-	    $self->GetParent->GetParent->log( 'I', "Processing cancelled." );
+	    $self->log( 'I', "Processing cancelled." );
 	    return;
 	}
 
 	return 1;
     };
 
-    $self->GetParent->GetParent->preview( "--filelist", \$filelist,
+    $self->GetParent->preview( "--filelist", \$filelist,
 			       "--progress_callback" => $pcb );
 
     $dialog->Destroy if $dialog;
     $event->Skip;
 }
 
-sub OnCancel {
+sub OnShowMessages {
     my ( $self, $event ) = @_;
-    $event->Skip;
+    $self->{b_msgs}->SetBackgroundColour(wxNullColour);
+    $self->GetParent->{_prev_mode} = "SBEX";
+    $self->GetParent->select_mode("MSGS");
 }
 
 1;

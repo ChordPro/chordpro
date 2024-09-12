@@ -15,6 +15,7 @@ use parent qw( ChordPro::Wx::InitialPanel_wxg );
 
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
+use ChordPro::Wx::Utils;
 
 sub new {
     my( $self, $parent, $id, $pos, $size, $style, $name ) = @_;
@@ -30,9 +31,38 @@ sub new {
 
 }
 
+sub OnInitialNew {
+    my ( $self, $event ) = @_;
+    Wx::PostEvent( $self->GetParent,
+		   Wx::CommandEvent->new( wxEVT_COMMAND_MENU_SELECTED,
+					  wxID_NEW ) );
+}
 
-sub mine() { yes }
+sub OnInitialOpen {
+    my ( $self, $event ) = @_;
+    Wx::PostEvent( $self->GetParent,
+		   Wx::CommandEvent->new( wxEVT_COMMAND_MENU_SELECTED,
+					  wxID_OPEN ) );
+}
 
+sub OnInitialExample {
+    my ( $self, $event ) = @_;
+    Wx::PostEvent( $self->GetParent,
+		   Wx::CommandEvent->new( wxEVT_COMMAND_MENU_SELECTED,
+					  $self->GetParent->wxID_HELP_EXAMPLE ) );
+}
+
+sub OnInitialSite {
+    my ( $self, $event ) = @_;
+    Wx::LaunchDefaultBrowser("https://www.chordpro.org/");
+    $event->Skip;
+}
+
+sub OnInitialDocs {
+    my ( $self, $event ) = @_;
+    $self->OnHelp_ChordPro($event);
+    $event->Skip;
+}
 
 1;
 
