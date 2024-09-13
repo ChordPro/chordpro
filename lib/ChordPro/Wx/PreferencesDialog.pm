@@ -16,6 +16,7 @@ use parent qw( ChordPro::Wx::PreferencesDialog_wxg );
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
 use ChordPro::Wx::Utils;
+use Encode qw(encode_utf8);
 
 # BUilt-in descriptions for some notation systems.
 my $notdesc =
@@ -244,48 +245,36 @@ sub OnConfigFile {
     $event->Skip;
 }
 
-sub OnConfigFileDialog {
+sub OnCustomConfigChanged {
     my ( $self, $event ) = @_;
-    my $fd = Wx::FileDialog->new
-      ($self, _T("Choose config file"),
-       "", $self->GetParent->{prefs_configfile} || "",
-       "Config files (*.prp,*.json)|*.prp;*.json|All files|*.*",
-       0|wxFD_OPEN,
-       wxDefaultPosition);
-    my $ret = $fd->ShowModal;
-    if ( $ret == wxID_OK ) {
-	my $file = $fd->GetPath;
-	if ( -f $file ) {
-	    $self->{t_configfiledialog}->SetValue($file);
+    my $path = $self->{fp_customconfig}->GetPath;
+    my $fn = encode_utf8($path);
+    return if -s $fn;		# existing config
+
+    my $md = Wx::MessageDialog->new
+      ( $self,
+	"Create new config $path?",
+	"Creating a config file",
+	wxYES_NO | wxICON_INFORMATION );
+    my $ret = $md->ShowModal;
+    $md->Destroy;
+    if ( $ret == wxID_YES ) {
+	my $fd;
+	if ( open( $fd, ">:utf8", $fn )
+	     and print $fd ChordPro::Config::config_final( default => 1 )
+	     and close($fd) ) {
+	    $self->{fp_customconfig}->SetPath($path);
 	}
 	else {
 	    my $md = Wx::MessageDialog->new
 	      ( $self,
-		"Create new config $file?",
-		"Creating a config file",
-		wxYES_NO | wxICON_INFORMATION );
-	    my $ret = $md->ShowModal;
+		"Error creating $path: $!",
+		"File open error",
+		wxOK | wxICON_ERROR );
+	    $md->ShowModal;
 	    $md->Destroy;
-	    if ( $ret == wxID_YES ) {
-		my $fd;
-		if ( open( $fd, ">:utf8", $file )
-		     and print $fd ChordPro::Config::default_config()
-		     and close($fd) ) {
-		    $self->{t_configfiledialog}->SetValue($file);
-		}
-		else {
-		    my $md = Wx::MessageDialog->new
-		      ( $self,
-			"Error creating $file: $!",
-			"File open error",
-			wxOK | wxICON_ERROR );
-		    $md->ShowModal;
-		    $md->Destroy;
-		}
-	    }
 	}
     }
-    $fd->Destroy;
 }
 
 sub OnCustomLib {

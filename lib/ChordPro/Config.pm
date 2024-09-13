@@ -468,8 +468,8 @@ sub config_final ( %args ) {
 	local $options->{nouserconfig} = 1;
 	local $options->{noconfig} = 1;
 	$defcfg = pristine_config();
-	config_split_fc_aliases($defcfg);
-	config_expand_font_shortcuts($defcfg);
+	split_fc_aliases($defcfg);
+	expand_font_shortcuts($defcfg);
 	if ( $delta ) {
 	    delete $defcfg->{chords};
 	    delete $defcfg->{include};

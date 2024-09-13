@@ -34,6 +34,8 @@ sub refresh {
     $self->{dp_folder}->SetPath( $self->GetParent->{_sbefolder} // $conf->Read( CFGBASE . "folder" ) // "");
     $self->{t_exporttitle}->SetValue($conf->Read( CFGBASE . "title" ) // "");
     $self->{fp_cover}->SetPath($conf->Read( CFGBASE . "cover" ) // "");
+    $self->{cb_stdcover}->SetValue($conf->Read( CFGBASE . "stdcover" ) // 0);
+    $self->OnStdCoverChecked();
 
     Wx::Event::EVT_DIRPICKER_CHANGED( $self, $self->{dp_folder}->GetId,
 				      $self->can("OnDirPickerChanged") );
@@ -55,6 +57,15 @@ sub log {
 sub alert {
     my ( $self ) = @_;
     $self->{b_msgs}->SetBackgroundColour(Wx::Colour->new(255, 0, 0));
+}
+
+sub save_prefs {
+    my ( $self ) = @_;
+    my $conf = Wx::ConfigBase::Get;
+    $conf->Write( CFGBASE . "folder",   $self->{dp_folder}->GetPath // "" );
+    $conf->Write( CFGBASE . "title",    $self->{t_exporttitle}->GetValue // "" );
+    $conf->Write( CFGBASE . "cover",    $self->{fp_cover}->GetPath // "" );
+    $conf->Write( CFGBASE . "stdcover", $self->{cb_stdcover}->IsChecked // 0 );
 }
 
 ################ Event handlers ################
@@ -119,6 +130,11 @@ sub OnFilelistIgnore {
     $self->OnDirPickerChanged($event);
 }
 
+sub OnStdCoverChecked {
+    my ( $self, $event ) = @_;
+    $self->{fp_cover}->Enable( !$self->{cb_stdcover}->IsChecked );
+}
+
 sub OnPreferences {
     my ( $self, $event ) = @_;
     $self->GetParent->OnPreferences($event);
@@ -140,10 +156,7 @@ sub OnPreview {
 	return;
     }
 
-    my $conf = Wx::ConfigBase::Get;
-    $conf->Write( CFGBASE . "folder", $self->{dp_folder}->GetPath // "" );
-    $conf->Write( CFGBASE . "title", $self->{t_exporttitle}->GetValue // "" );
-    $conf->Write( CFGBASE . "cover", $self->{fp_cover}->GetPath // "" );
+    $self->save_prefs();
 
     my $filelist = "";
     my @o = $self->{w_rearrange}->GetList->GetCurrentOrder;
@@ -195,13 +208,18 @@ sub OnPreview {
 
     my @args = ( "--filelist", \$filelist,
 		 "--progress_callback" => $pcb );
+    my %opts = ( filelist => 1 );
+
     if ( my $title = $self->{t_exporttitle}->GetValue ) {
-	push( @args, "--define", "pdf.info.title=".encode_utf8($title) );
+	$opts{title} = $title;
     }
-    if ( my $cover = $self->{fp_cover}->GetPath ) {
+    if ( $self->{cb_stdcover}->IsChecked ) {
+	$opts{stdcover} = 1;
+    }
+    elsif ( my $cover = $self->{fp_cover}->GetPath ) {
 	push( @args, "--cover", encode_utf8($cover) );
     }
-    $self->GetParent->preview(@args);
+    $self->GetParent->preview( \@args, %opts );
 
     $dialog->Destroy if $dialog;
     $event->Skip;
