@@ -46,19 +46,13 @@ sub new {
 sub _enablecustom {
     my ( $self ) = @_;
     my $n = $self->{cb_configfile}->IsChecked;
-    for ( $self->{t_configfiledialog}, $self->{b_configfiledialog} ) {
-	$_->Enable($n);
-    }
+    $self->{fp_customconfig}->Enable($n);
 
     $n = $self->{cb_customlib}->IsChecked;
-    for ( $self->{t_customlibdialog}, $self->{b_customlibdialog} ) {
-	$_->Enable($n);
-    }
+    $self->{dp_customlibrary}->Enable($n);
 
     $n = $self->{cb_tmplfile}->IsChecked;
-    for ( $self->{t_tmplfiledialog}, $self->{b_tmplfiledialog} ) {
-	$_->Enable($n);
-    }
+    $self->{fp_tmplfile}->Enable($n);
 }
 
 sub fetch_prefs {
@@ -100,17 +94,17 @@ sub fetch_prefs {
 
     # Custom config file.
     $self->{cb_configfile}->SetValue($parent->{prefs_enable_configfile});
-    $self->{t_configfiledialog}->SetValue($parent->{prefs_configfile})
+    $self->{fp_customconfig}->SetPath($parent->{prefs_configfile})
       if $parent->{prefs_configfile};
 
     # Custom library.
     $self->{cb_customlib}->SetValue($parent->{prefs_enable_customlib});
-    $self->{t_customlibdialog}->SetValue($parent->{prefs_customlib})
+    $self->{dp_customlibrary}->SetPath($parent->{prefs_customlib})
       if $parent->{prefs_customlib};
 
     # New song template.
     $self->{cb_tmplfile}->SetValue($parent->{prefs_enable_tmplfile});
-    $self->{t_tmplfiledialog}->SetValue($parent->{prefs_tmplfile})
+    $self->{fp_tmplfile}->SetPath($parent->{prefs_tmplfile})
       if $parent->{prefs_tmplfile};
 
     # Editor.
@@ -182,7 +176,7 @@ sub store_prefs {
 	next unless $ctl->IsChecked($n);
 	push( @p, $styles->[$n] );
 	if ( $n == $cnt - 1 ) {
-	    my $c = $self->{t_configfiledialog}->GetValue;
+	    my $c = $self->{fp_customconfig}->GetPath;
 	    $parent->{_cfgpresetfile} =
 	      $parent->{prefs_configfile} = $c;
 	}
@@ -191,15 +185,15 @@ sub store_prefs {
 
     # Custom config file.
     $parent->{prefs_enable_configfile} = $self->{cb_configfile}->IsChecked;
-    $parent->{prefs_configfile}        = $self->{t_configfiledialog}->GetValue;
+    $parent->{prefs_configfile}        = $self->{fp_customconfig}->GetPath;
 
     # Custom library.
     $parent->{prefs_enable_customlib} = $self->{cb_customlib}->IsChecked;
-    $parent->{prefs_customlib}        = $ENV{CHORDPRO_LIB} // $self->{t_customlibdialog}->GetValue;
+    $parent->{prefs_customlib}        = $ENV{CHORDPRO_LIB} // $self->{fp_customlibrary}->GetPath;
 
     # New song template.
     $parent->{prefs_enable_tmplfile} = $self->{cb_tmplfile}->IsChecked;
-    $parent->{prefs_tmplfile}        = $self->{t_tmplfiledialog}->GetValue;
+    $parent->{prefs_tmplfile}        = $self->{fp_tmplfile}->GetPath;
 
     # Editor.
     $parent->{prefs_editfont}	   = $self->{ch_editfont}->GetSelection;
@@ -246,9 +240,7 @@ sub store_prefs {
 sub OnConfigFile {
     my ( $self, $event ) = @_;
     my $n = $self->{cb_configfile}->IsChecked;
-    for ( $self->{t_configfiledialog}, $self->{b_configfiledialog} ) {
-	$_->Enable($n);
-    }
+    $self->{fp_customconfig}->Enable($n);
     $event->Skip;
 }
 
@@ -299,9 +291,7 @@ sub OnConfigFileDialog {
 sub OnCustomLib {
     my ( $self, $event ) = @_;
     my $n = $self->{cb_customlib}->IsChecked;
-    for ( $self->{t_customlibdialog}, $self->{b_customlibdialog} ) {
-	$_->Enable($n);
-    }
+    $self->{dp_customlibrary}->Enable($n);
 }
 
 sub OnCustomLibDialog {
@@ -323,9 +313,7 @@ sub OnCustomLibDialog {
 sub OnTmplFile {
     my ( $self, $event ) = @_;
     my $n = $self->{cb_tmplfile}->IsChecked;
-    for ( $self->{t_tmplfiledialog}, $self->{b_tmplfiledialog} ) {
-	$_->Enable($n);
-    }
+    $self->{fp_tmplfile}->Enable($n);
 }
 
 sub OnTmplFileDialog {

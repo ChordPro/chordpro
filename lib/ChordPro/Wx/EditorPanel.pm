@@ -41,7 +41,7 @@ sub new {
 
 sub log {
     my $self = shift;
-    $self->GetParent->log(@_);
+    wxTheApp->GetTopWindow->log(@_);
 }
 
 ################ API Functions ################
@@ -203,7 +203,7 @@ sub saveas {
     return $ret;
 }
 
-sub saveas {
+sub save_as {
     my ( $self, $file ) = @_;
     $self->{t_source}->SaveFile($file);
     $self->SetTitle( $self->{_windowtitle} = $file);
@@ -256,6 +256,11 @@ sub alert {
 sub OnText {
     my ($self, $event) = @_;
     $self->{t_source}->SetModified(1);
+}
+
+sub OnPreferences {
+    my ( $self, $event ) = @_;
+    $self->GetParent->OnPreferences($event);
 }
 
 sub OnPreview {

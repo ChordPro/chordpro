@@ -41,6 +41,7 @@ use warnings 'redefine';
 
 sub log {
     my ( $self, $level, $msg, $info ) = @_;
+    $msg =~ s/\n+$//;
 
     unless ( $self->{old_log} ) {
 	my $log = Wx::LogTextCtrl->new( $self->{p_msg}{t_msg} );
@@ -85,6 +86,9 @@ sub new {
 
     $self->SetTitle("ChordPro");
     $self->SetIcon( Wx::Icon->new(CP->findres( "chordpro-icon.png", class => "icons" ), wxBITMAP_TYPE_ANY) );
+
+    use ChordPro::Wx::MenuBar;
+    $self->SetMenuBar( ChordPro::Wx::MenuBar->new );
     $self;
 }
 
@@ -95,7 +99,6 @@ sub select_mode {
     my @panels = panels;
     if ( $mode eq "init" ) {
 	$self->{$_}->Show(0) for @panels;
-	$self->SetStatusBar(undef);
 	$self->{p_init}->Show(1);
 
 	return;
@@ -104,25 +107,27 @@ sub select_mode {
     # Hide initial window.
     if ( $self->{p_init}->IsShown ) {
 	$self->{p_init}->Show(0);
-	$self->SetStatusBar($self->{f_main_statusbar});
+	use ChordPro::Wx::MenuBar;
+	$self->SetMenuBar( $self->{main_menubar} );
+	$self->setup_tasks();
 	$self->{p_msg}->Show(1);
     }
     if ( $mode eq "msgs" ) {
 	$self->{$_}->Show( $_ eq "p_msg" ) for @panels;
-	$self->{main_menubar}->FindItem($_)->Enable(0)
-	  for wxID_CUT, wxID_COPY, wxID_PASTE, wxID_DELETE;
+#	$self->{main_menubar}->FindItem($_)->Enable(0)
+#	  for wxID_CUT, wxID_COPY, wxID_PASTE, wxID_DELETE;
     }
     elsif ( $mode eq "sbex" ) {
 	$self->{$_}->Show( $_ eq "p_sbexport" ) for @panels;
-	$self->{main_menubar}->EnableTop( 2, 0 );
-	$self->{main_menubar}->FindItem($_)->Enable(0)
-	  for wxID_CUT, wxID_COPY, wxID_PASTE, wxID_DELETE;
+#	$self->{main_menubar}->EnableTop( 2, 0 );
+#	$self->{main_menubar}->FindItem($_)->Enable(0)
+#	  for wxID_CUT, wxID_COPY, wxID_PASTE, wxID_DELETE;
     }
     else {
 	$self->{$_}->Show( $_ eq "p_edit" ) for @panels;
-	$self->{main_menubar}->EnableTop( 2, 1 );
-	$self->{main_menubar}->FindItem($_)->Enable(1)
-	  for wxID_CUT, wxID_COPY, wxID_PASTE, wxID_DELETE;
+#	$self->{main_menubar}->EnableTop( 2, 1 );
+#	$self->{main_menubar}->FindItem($_)->Enable(1)
+#	  for wxID_CUT, wxID_COPY, wxID_PASTE, wxID_DELETE;
     }
     $self->{sz_main}->Layout;
 }
@@ -234,8 +239,6 @@ sub init {
     my $font = $fonts[$self->{prefs_editfont}]->{font};
     $font->SetPointSize($self->{prefs_editsize});
     $self->{p_edit}{t_source}->SetFont($font);
-
-    $self->setup_tasks();
 
     if ( @ARGV ) {
 	my $arg = decode_utf8(shift(@ARGV));
@@ -434,7 +437,7 @@ sub preview {
     if ( $self->{prefs_skipstdcfg} ) {
 	push( @ARGV, '--nodefaultconfigs' );
     }
-    if ( $self->{prefs_cfgpreset} ) {
+    if ( $self->{prefs_enable_presets} && $self->{prefs_cfgpreset} ) {
 	foreach ( @{ $self->{prefs_cfgpreset} } ) {
 	    push( @ARGV, '--config', $_ =~ s/ \(User\)//ir );
 	    $haveconfig++;
@@ -701,7 +704,7 @@ sub OnHelp_Config {
 sub OnHelp_Example {
     my ($self, $event) = @_;
     $self->select_mode("EDIT");
-    $self->{p_edit}->open( CP->findres( "swinglow.cho", class => "examples" ) );
+    $self->{p_edit}->openfile( CP->findres( "swinglow.cho", class => "examples" ) );
 }
 
 sub OnHelp_DebugInfo {

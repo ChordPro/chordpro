@@ -33,6 +33,7 @@ sub refresh {
     my $conf = Wx::ConfigBase::Get;
     $self->{dp_folder}->SetPath( $self->GetParent->{_sbefolder} // $conf->Read( CFGBASE . "folder" ) // "");
     $self->{t_exporttitle}->SetValue($conf->Read( CFGBASE . "title" ) // "");
+    $self->{fp_cover}->SetPath($conf->Read( CFGBASE . "cover" ) // "");
 
     Wx::Event::EVT_DIRPICKER_CHANGED( $self, $self->{dp_folder}->GetId,
 				      $self->can("OnDirPickerChanged") );
@@ -78,6 +79,16 @@ sub OnDirPickerChanged {
     my @files;
     my $src = "filelist.txt";
     if ( -s "$folder/$src" ) {
+	$self->{l_filelist}->Show;
+	$self->{cb_filelist}->Show;
+	$self->{sz_export_inner}->Layout;
+    }
+    else {
+	$self->{l_filelist}->Hide;
+	$self->{cb_filelist}->Hide;
+	$self->{sz_export_inner}->Layout;
+    }
+    if ( -s "$folder/$src" && !$self->{cb_filelist}->IsChecked ) {
 	@files = loadlines("$folder/$src");
     }
     else {
@@ -103,6 +114,16 @@ sub OnDirPickerChanged {
     }
 }
 
+sub OnFilelistIgnore {
+    my ( $self, $event ) = @_;
+    $self->OnDirPickerChanged($event);
+}
+
+sub OnPreferences {
+    my ( $self, $event ) = @_;
+    $self->GetParent->OnPreferences($event);
+}
+
 sub OnPreview {
     my ( $self, $event ) = @_;
 
@@ -122,6 +143,7 @@ sub OnPreview {
     my $conf = Wx::ConfigBase::Get;
     $conf->Write( CFGBASE . "folder", $self->{dp_folder}->GetPath // "" );
     $conf->Write( CFGBASE . "title", $self->{t_exporttitle}->GetValue // "" );
+    $conf->Write( CFGBASE . "cover", $self->{fp_cover}->GetPath // "" );
 
     my $filelist = "";
     my @o = $self->{w_rearrange}->GetList->GetCurrentOrder;
@@ -171,8 +193,15 @@ sub OnPreview {
 	return 1;
     };
 
-    $self->GetParent->preview( "--filelist", \$filelist,
-			       "--progress_callback" => $pcb );
+    my @args = ( "--filelist", \$filelist,
+		 "--progress_callback" => $pcb );
+    if ( my $title = $self->{t_exporttitle}->GetValue ) {
+	push( @args, "--define", "pdf.info.title=".encode_utf8($title) );
+    }
+    if ( my $cover = $self->{fp_cover}->GetPath ) {
+	push( @args, "--cover", encode_utf8($cover) );
+    }
+    $self->GetParent->preview(@args);
 
     $dialog->Destroy if $dialog;
     $event->Skip;
