@@ -114,7 +114,6 @@ sub generate_songbook {
 	if ( ($page % 2) && $song->{meta}->{pages} && $song->{meta}->{pages} == 2 ) {
 	    $pr->newpage($ps, $page+1);
 	    $page++;
-	    print STDERR " " if $options->{verbose}; # Progress indicator
 	}
 
 	$song->{meta}->{tocpage} = $page;
@@ -136,9 +135,6 @@ sub generate_songbook {
 	     source  => $song->{source}->{file},
 	     title   => $song->{meta}->{title}->[0],
 	   });
-	if ( $options->{verbose} ) {
-	    print STDERR "$page "; # Progress indicator
-	}
 
 	$song->{meta}->{"chordpro.songsource"} //= $song->{source}->{file};
 	$page += $song->{meta}->{pages} =
@@ -152,7 +148,6 @@ sub generate_songbook {
     }
     $pages_of{songbook} = $page - 1;
     $start_of{back} = $page;
-    print STDERR "\n" if $options->{verbose}; # Progress indicator
 
     $::config->{contents} //=
       [ { $::config->{toc}->{order} eq "alpha"

@@ -94,7 +94,7 @@ sub configurator ( $opts = undef ) {
             splice( @cfg, $a, 1 );
             redo;
         }
-        print STDERR ("Config[$a]: ", $cfg[$a]->{_src}, "\n" )
+        warn("Config[$a]: ", $cfg[$a]->{_src}, "\n" )
           if $verbose;
     }
 
