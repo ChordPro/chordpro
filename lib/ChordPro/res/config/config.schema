@@ -1656,7 +1656,7 @@
 	    },
 
 	    "margintop" : {
-	      "description" : "Page top marging, excluding headspace.",
+	      "description" : "Page top margin, excluding headspace.",
 	      "default" : 80,
 	      "minimum" : 0,
 	      "type" : "number"

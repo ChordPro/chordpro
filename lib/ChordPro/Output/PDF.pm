@@ -2841,8 +2841,8 @@ sub prepare_asset {
     # So we first scan the list for SVG and delegate items and turn these
     # into simple display items.
 
-    warn("_MR = ", $ps->{_marginright}, ", _RM = ", $ps->{_rightmargin},
-	 ", __RM = ", $ps->{__rightmargin}, "\n");
+#    warn("_MR = ", $ps->{_marginright}, ", _RM = ", $ps->{_rightmargin},
+#	 ", __RM = ", $ps->{__rightmargin}, "\n");
     my $pw = $ps->{__rightmargin} - $ps->{_marginleft};
     my $cw = ( $pw - ( $ps->{columns} - 1 ) * $ps->{columnspace} ) /$ps->{columns}
       - $ps->{_indent};
