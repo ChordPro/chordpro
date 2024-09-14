@@ -190,7 +190,7 @@ sub store_prefs {
 
     # Custom library.
     $parent->{prefs_enable_customlib} = $self->{cb_customlib}->IsChecked;
-    $parent->{prefs_customlib}        = $ENV{CHORDPRO_LIB} // $self->{fp_customlibrary}->GetPath;
+    $parent->{prefs_customlib}        = $ENV{CHORDPRO_LIB} // $self->{dp_customlibrary}->GetPath;
 
     # New song template.
     $parent->{prefs_enable_tmplfile} = $self->{cb_tmplfile}->IsChecked;
@@ -397,7 +397,7 @@ sub OnSpEditFont {
     my $parent = $self->GetParent;
     my $pedit = $parent->{p_edit};
     my $ctl = $pedit->{t_source};
-    my $n = $self->{ch_editfont}->GetSelection;
+    my $n = $self->{sp_editfont}->GetValue;
     my $font = $ctl->GetFont;
     $font->SetPointSize($n);
     $ctl->SetFont($font);
