@@ -381,25 +381,27 @@ sub OnChTranscode {
 
 sub OnChEditFont {
     my ($self, $event) = @_;
-    my $p = $self->GetParent;
+    my $parent = $self->GetParent;
+    my $pedit = $parent->{p_edit};
+    my $ctl = $pedit->{t_source};
     my $n = $self->{ch_editfont}->GetSelection;
-    my $ctl = $p->{t_source};
-    my $font = $p->fonts->[$n]->{font};
-    $font->SetPointSize($p->{prefs_editsize});
+    my $font = $parent->fonts->[$n]->{font};
+    $font->SetPointSize($parent->{prefs_editsize});
     $ctl->SetFont($font);
-    $p->{prefs_editfont} = $n;
+    $parent->{prefs_editfont} = $n;
     $event->Skip;
 }
 
 sub OnSpEditFont {
     my ($self, $event) = @_;
-    my $p = $self->GetParent;
-    my $n = $self->{sp_editfont}->GetValue;
-    my $ctl = $p->{t_source};
+    my $parent = $self->GetParent;
+    my $pedit = $parent->{p_edit};
+    my $ctl = $pedit->{t_source};
+    my $n = $self->{ch_editfont}->GetSelection;
     my $font = $ctl->GetFont;
     $font->SetPointSize($n);
     $ctl->SetFont($font);
-    $p->{prefs_editsize} = $n;
+    $parent->{prefs_editsize} = $n;
     $event->Skip;
 }
 
