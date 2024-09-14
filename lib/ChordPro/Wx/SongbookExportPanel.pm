@@ -33,6 +33,7 @@ sub refresh {
     my $conf = Wx::ConfigBase::Get;
     $self->{dp_folder}->SetPath( $self->GetParent->{_sbefolder} // $conf->Read( CFGBASE . "folder" ) // "");
     $self->{t_exporttitle}->SetValue($conf->Read( CFGBASE . "title" ) // "");
+    $self->{t_exportstitle}->SetValue($conf->Read( CFGBASE . "subtitle" ) // "");
     $self->{fp_cover}->SetPath($conf->Read( CFGBASE . "cover" ) // "");
     $self->{cb_stdcover}->SetValue($conf->Read( CFGBASE . "stdcover" ) // 0);
     $self->OnStdCoverChecked();
@@ -64,6 +65,7 @@ sub save_prefs {
     my $conf = Wx::ConfigBase::Get;
     $conf->Write( CFGBASE . "folder",   $self->{dp_folder}->GetPath // "" );
     $conf->Write( CFGBASE . "title",    $self->{t_exporttitle}->GetValue // "" );
+    $conf->Write( CFGBASE . "subtitle",    $self->{t_exportstitle}->GetValue // "" );
     $conf->Write( CFGBASE . "cover",    $self->{fp_cover}->GetPath // "" );
     $conf->Write( CFGBASE . "stdcover", $self->{cb_stdcover}->IsChecked // 0 );
 }
@@ -90,27 +92,34 @@ sub OnDirPickerChanged {
     my @files;
     my $src = "filelist.txt";
     if ( -s "$folder/$src" ) {
-	$self->{l_filelist}->Show;
-	$self->{cb_filelist}->Show;
-	$self->{sz_export_inner}->Layout;
+	$self->{cb_filelist}->Enable;
+	$self->{cb_recursive}->Disable;
     }
     else {
-	$self->{l_filelist}->Hide;
-	$self->{cb_filelist}->Hide;
-	$self->{sz_export_inner}->Layout;
+	$self->{cb_filelist}->Disable;
     }
     if ( -s "$folder/$src" && !$self->{cb_filelist}->IsChecked ) {
 	@files = loadlines("$folder/$src");
     }
     else {
 	$src = "folder";
-	@files = map { decode_utf8($_) } sort grep {
-	    m/^[^.].*\.(cho|crd|chopro|chord|chordpro|pro)$/
-	} readdir($dir);
+	use File::Find qw(find);
+	my $recurse = $self->{cb_recursive}->IsChecked;
+	find sub {
+	    if ( -s && m/^[^.].*\.(cho|crd|chopro|chord|chordpro|pro)$/ ) {
+		push( @files, $File::Find::name );
+	    }
+	    if ( -d && $File::Find::name ne $folder ) {
+		$File::Find::prune = !$recurse;
+		$self->{cb_recursive}->Enable;
+	    }
+	}, $folder;
+	@files = map { decode_utf8( s;^\Q$folder\E/?;;r) } sort @files;
     }
 
     my $n = scalar(@files);
-    my $msg = "Found $n ChordPro file" . ( $n == 1 ? "" : "s" ) . " in $src";
+    my $msg = "Found $n ChordPro file" . ( $n == 1 ? "" : "s" ) . " in $src" .
+      ( $self->{cb_recursive}->IsChecked ? "s" : "" );
     $self->{l_info}->SetLabel($msg);
     $self->log( 'S', $msg );
 
@@ -120,12 +129,17 @@ sub OnDirPickerChanged {
 	$self->{sl_rearrange}->Show;
 	$self->{l_rearrange}->Show;
 	$self->{w_rearrange}->Show;
-	$self->{_sbefiles} = \@files;
 	$self->{sizer_1}->Layout;
     }
+    $self->{_sbefiles} = \@files;
 }
 
 sub OnFilelistIgnore {
+    my ( $self, $event ) = @_;
+    $self->OnDirPickerChanged($event);
+}
+
+sub OnRecursive {
     my ( $self, $event ) = @_;
     $self->OnDirPickerChanged($event);
 }
@@ -163,7 +177,6 @@ sub OnPreview {
     for ( $self->{w_rearrange}->GetList->GetCurrentOrder ) {
 	$filelist .= "$folder/$files[$_]\n" unless $_ < 0;
     }
-    $self->log( 'I', "Filelist: @o\n$filelist" );
     unless ( $filelist ) {
 	my $md = Wx::MessageDialog->new
 	  ( $self,
@@ -212,6 +225,9 @@ sub OnPreview {
 
     if ( my $title = $self->{t_exporttitle}->GetValue ) {
 	$opts{title} = $title;
+    }
+    if ( my $stitle = $self->{t_exportstitle}->GetValue ) {
+	$opts{subtitle} = $stitle;
     }
     if ( $self->{cb_stdcover}->IsChecked ) {
 	$opts{stdcover} = 1;

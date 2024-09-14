@@ -398,7 +398,7 @@ sub _info {
 
 sub _die {
     my $self = shift;
-    $self->log( 'E',  "%s", join("", @_) );
+    $self->log( 'E',  join("", @_) );
     $msgs++;
     $fatal++;
     $died++;
@@ -474,13 +474,13 @@ sub preview {
 	open( my $fd, '>:utf8', $preview_tmpl );
 	$opts{subtitle} //= "";
 	print $fd <<EOD;
-{title: $opts{title}}
-{subtitle: $opts{subtitle}}
 {+pdf.fonts.title.size:40}
 {+pdf.fonts.subtitle.size:20}
 {+pdf.margintop:100}
+{title: $opts{title}}
+{subtitle: $opts{subtitle}}
 {image anchor="page" x="50%" y="50%" scale="100%" src="$img"}
-{new_page}
+{np}
 EOD
 	$fd->close;
 	push( @ARGV, '--define',
