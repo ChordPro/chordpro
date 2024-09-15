@@ -211,6 +211,7 @@ sub setfont {
     $self->{font} = $font;
     warn("PDF: Font ", $font->{_ff}, " should have a size!\n")
       unless $size ||= $font->{size};
+    use DDP; p $font unless $font->{fd}->{font};
     $self->{fontsize} = $size ||= $font->{size} || $font->{fd}->{size};
     $self->{pdftext}->font( $font->{fd}->{font}, $size );
 }

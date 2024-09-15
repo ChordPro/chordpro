@@ -1985,7 +1985,9 @@ sub imageline {
 	      - $ps->{columnspace};
 	}
 	else {
-	    $pw = $ps->{__rightmargin} - $ps->{_leftmargin};
+	    # $pw = $ps->{__rightmargin} - $ps->{_leftmargin};
+	    # See issue #428.
+	    $pw = $ps->{_marginright} - $ps->{_leftmargin};
 	}
 	$ph = $ps->{_margintop} - $ps->{_marginbottom};
 	$pw -= $ps->{_indent} if $anchor eq "float";
@@ -2089,6 +2091,7 @@ sub imageline {
 	}
     };
 
+    my $xtrascale = 1;
     if ( $anchor eq "column" ) {
 	# Relative to the column.
 	$calc->( @{$ps}{qw( __leftmargin __rightmargin
@@ -2105,7 +2108,15 @@ sub imageline {
     }
     else {
 	# image is line oriented.
-	$calc->( $x, $ps->{__rightmargin}, $y, $ps->{__bottommargin}, 0 );
+	# See issue #428.
+	# $calc->( $x, $ps->{__rightmargin}, $y, $ps->{__bottommargin}, 0 );
+	$calc->( $x, $ps->{_marginright}, $y, $ps->{__bottommargin}, 0 );
+	$xtrascale = ( $ps->{__rightmargin}-$ps->{_leftmargin} ) /
+	             ( $ps->{_marginright}-$ps->{_leftmargin} );
+	warn("_MR = ", $ps->{_marginright},
+	     ", _RM = ", $ps->{_rightmargin},
+	     ", __RM = ", $ps->{__rightmargin},
+	     ", XS = ", $xtrascale, "\n") if 0;
     }
 
     $x += $ox if defined $ox;
@@ -2117,8 +2128,8 @@ sub imageline {
 		 )) if $config->{debug}->{images};
 
     $pr->add_object( $img, $x, $y,
-		     xscale => $w/$img->width,
-		     yscale => $h/$img->height,
+		     xscale => $w/$img->width * $xtrascale,
+		     yscale => $h/$img->height * $xtrascale,
 		     border => $opts->{border} || 0,
 		     valign => $opts->{valign} // "top",
 		     align  => $align,
@@ -2843,7 +2854,8 @@ sub prepare_asset {
 
 #    warn("_MR = ", $ps->{_marginright}, ", _RM = ", $ps->{_rightmargin},
 #	 ", __RM = ", $ps->{__rightmargin}, "\n");
-    my $pw = $ps->{__rightmargin} - $ps->{_marginleft};
+#    my $pw = $ps->{__rightmargin} - $ps->{_marginleft};
+    my $pw = $ps->{_marginright} - $ps->{_marginleft};
     my $cw = ( $pw - ( $ps->{columns} - 1 ) * $ps->{columnspace} ) /$ps->{columns}
       - $ps->{_indent};
 
