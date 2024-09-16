@@ -18,6 +18,7 @@ use Carp;
 use List::Util qw(any);
 use File::LoadLines;
 use Storable qw(dclone);
+use Ref::Util qw(is_arrayref is_hashref);
 
 sub new {
     my ($pkg) = @_;
@@ -37,7 +38,7 @@ sub parse_file {
 
     # Loadlines sets $opts->{_filesource}.
     $opts->{fail} = "soft";
-    my $lines = loadlines( $filename, $opts );
+    my $lines = is_arrayref($filename) ? $filename : loadlines( $filename, $opts );
     die( $filename, ": ", $opts->{error}, "\n" ) if $opts->{error};
     # Sense crd input and convert if necessary.
     if ( !(defined($options->{a2crd}) && !$options->{a2crd}) and
@@ -61,7 +62,7 @@ sub parse_file {
 	next unless exists $opts->{$_};
 	$options->{$_} = $opts->{$_};
     }
-    bless $config => ChordPro::Config:: if ref $config eq 'HASH';
+    bless $config => ChordPro::Config:: if is_hashref($config);
 
     my $linecnt = 0;
     my $songs = 0;
