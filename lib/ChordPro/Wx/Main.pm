@@ -94,14 +94,24 @@ sub new {
 
 sub select_mode {
     my ( $self, $mode ) = @_;
-
     $mode = lc($mode);
+
     my @panels = panels;
     if ( $mode eq "init" ) {
 	$self->{$_}->Show(0) for @panels;
 	$self->{p_init}->Show(1);
-
 	return;
+    }
+
+    # Enable/disable editor specific menus.
+    sub menuitems {
+	my ($self,$show) = @_;
+	$self->{main_menubar}->EnableTop( $_, $show ) for 1,2,3;
+	$self->{main_menubar}->FindItem
+	  ( $self->{main_menubar}->FindMenuItem
+	    (_T("Help"), _T("Insert song example")) )->Enable($show);
+	$self->{main_menubar}->FindItem($_)->Enable($show)
+	  for wxID_SAVE, wxID_SAVEAS;
     }
 
     # Hide initial window.
@@ -114,20 +124,14 @@ sub select_mode {
     }
     if ( $mode eq "msgs" ) {
 	$self->{$_}->Show( $_ eq "p_msg" ) for @panels;
-#	$self->{main_menubar}->FindItem($_)->Enable(0)
-#	  for wxID_CUT, wxID_COPY, wxID_PASTE, wxID_DELETE;
     }
     elsif ( $mode eq "sbex" ) {
 	$self->{$_}->Show( $_ eq "p_sbexport" ) for @panels;
-#	$self->{main_menubar}->EnableTop( 2, 0 );
-#	$self->{main_menubar}->FindItem($_)->Enable(0)
-#	  for wxID_CUT, wxID_COPY, wxID_PASTE, wxID_DELETE;
+	$self->menuitems(0);
     }
     else {
 	$self->{$_}->Show( $_ eq "p_edit" ) for @panels;
-#	$self->{main_menubar}->EnableTop( 2, 1 );
-#	$self->{main_menubar}->FindItem($_)->Enable(1)
-#	  for wxID_CUT, wxID_COPY, wxID_PASTE, wxID_DELETE;
+	$self->menuitems(1);
     }
     $self->{sz_main}->Layout;
 }
