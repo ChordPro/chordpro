@@ -23,6 +23,7 @@ use ChordPro::Utils qw( demarkup );
 use File::Temp qw( tempfile );
 use Encode qw(decode_utf8 encode_utf8);
 use File::Basename qw(basename);
+use ChordPro::Wx::MenuBar;
 
 our $VERSION = $ChordPro::VERSION;
 
@@ -87,7 +88,6 @@ sub new {
     $self->SetTitle("ChordPro");
     $self->SetIcon( Wx::Icon->new(CP->findres( "chordpro-icon.png", class => "icons" ), wxBITMAP_TYPE_ANY) );
 
-    use ChordPro::Wx::MenuBar;
     $self->SetMenuBar( ChordPro::Wx::MenuBar->new );
     $self;
 }
@@ -117,7 +117,6 @@ sub select_mode {
     # Hide initial window.
     if ( $self->{p_init}->IsShown ) {
 	$self->{p_init}->Show(0);
-	use ChordPro::Wx::MenuBar;
 	$self->SetMenuBar( $self->{main_menubar} );
 	$self->setup_tasks();
 	$self->{p_msg}->Show(1);
