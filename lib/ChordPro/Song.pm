@@ -378,9 +378,15 @@ sub parse_song {
 		last;
 	    }
 	    my $dir = $self->parse_directive($1);
-	    my $kv = parse_kv($dir->{arg}//"");
-	    if ( $kv && $kv->{toc} ) {
+	    next unless my $kv = parse_kv($dir->{arg}//"");
+	    if ( defined $kv->{toc} ) {
 		$self->{meta}->{_TOC} = [ $kv->{toc} ];
+	    }
+	    if ( $kv->{forceifempty} ) {
+		push( @{ $self->{body} },
+		      { type => "set",
+			name => "forceifempty",
+			value => $kv->{forceifempty} } );
 	    }
 	    next;
 	}
@@ -1599,7 +1605,8 @@ sub dir_image {
     # next to the song, and then in the images folder of the
     # resources.
     if ( $uri && CP->is_here($uri) ) {
-	my $found = CP->siblingres( $diag->{file}, $uri, class => "images" );
+	my $found = CP->siblingres( $diag->{file}, $uri, class => "images" )
+	  || CP->siblingres( $diag->{file}, $uri, class => "icons" );
 	if ( $found ) {
 	    $uri = $found;
 	}

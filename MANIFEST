@@ -120,6 +120,7 @@ lib/ChordPro/res/templates/guitar_image.tt
 lib/ChordPro/res/templates/guitar_songbook.tt
 lib/ChordPro/res/templates/image.tt
 lib/ChordPro/res/templates/songbook.tt
+lib/ChordPro/res/templates/toccover.cho
 script/chordpro.pl
 script/ppchordpro.PL
 script/wxchordpro.pl

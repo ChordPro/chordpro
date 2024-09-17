@@ -123,14 +123,27 @@ sub OnDirPickerChanged {
     $self->{l_info}->SetLabel($msg);
     $self->log( 'S', $msg );
 
-    $self->{w_rearrange}->GetList->Set(\@files);
-    $self->{w_rearrange}->GetList->Check($_,1) for 0..$#files;
+    if ( $Wx::wxVERSION < 3.001 ) {
+	# Due to bugs in the implementation of the wxRearrangeCtrl widget
+	# we cannot update it, so we must recreate the widget.
+	# https://github.com/wxWidgets/Phoenix/issues/1052#issuecomment-434388084
+	my @order = ( 0 .. $#files );
+	my $w = Wx::RearrangeCtrl->new($self->{sz_export_outer}->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, \@order, \@files );
+	$self->{sz_export_outer}->Replace( $self->{w_rearrange}, $w, 1 );
+	$self->{w_rearrange}->Destroy;
+	$self->{w_rearrange} = $w;
+    }
+    else {
+	$self->{w_rearrange}->GetList->Set(\@files);
+	$self->{w_rearrange}->GetList->Check($_,1) for 0..$#files;
+    }
     unless ( $self->{w_rearrange}->IsShown ) {
 	$self->{sl_rearrange}->Show;
 	$self->{l_rearrange}->Show;
 	$self->{w_rearrange}->Show;
-	$self->{sizer_1}->Layout;
+	$self->{sz_export_inner}->Layout;
     }
+    $self->{sz_export_outer}->Layout;
     $self->{_sbefiles} = \@files;
 }
 
@@ -146,7 +159,12 @@ sub OnRecursive {
 
 sub OnStdCoverChecked {
     my ( $self, $event ) = @_;
+    $self->{l_cover}->Enable( !$self->{cb_stdcover}->IsChecked );
     $self->{fp_cover}->Enable( !$self->{cb_stdcover}->IsChecked );
+    $self->{l_exporttitle}->Enable( $self->{cb_stdcover}->IsChecked );
+    $self->{t_exporttitle}->Enable( $self->{cb_stdcover}->IsChecked );
+    $self->{l_exportstitle}->Enable( $self->{cb_stdcover}->IsChecked );
+    $self->{t_exportstitle}->Enable( $self->{cb_stdcover}->IsChecked );
 }
 
 sub OnPreferences {
@@ -162,7 +180,7 @@ sub OnPreview {
     unless ( $folder && @files ) {
 	my $md = Wx::MessageDialog->new
 	  ( $self,
-	    "Please select a folder! ($folder)(".scalar(@files).")",
+	    "Please select a folder!",
 	    "No folder selected",
 	    wxOK | wxICON_ERROR );
 	my $ret = $md->ShowModal;
@@ -177,7 +195,7 @@ sub OnPreview {
     for ( $self->{w_rearrange}->GetList->GetCurrentOrder ) {
 	$filelist .= "$folder/$files[$_]\n" unless $_ < 0;
     }
-    unless ( $filelist ) {
+    if ( $filelist eq "" ) {
 	my $md = Wx::MessageDialog->new
 	  ( $self,
 	    "Please select one or more song files.",
@@ -223,14 +241,12 @@ sub OnPreview {
 		 "--progress_callback" => $pcb );
     my %opts = ( filelist => 1 );
 
-    if ( my $title = $self->{t_exporttitle}->GetValue ) {
-	$opts{title} = $title;
-    }
-    if ( my $stitle = $self->{t_exportstitle}->GetValue ) {
-	$opts{subtitle} = $stitle;
-    }
     if ( $self->{cb_stdcover}->IsChecked ) {
-	$opts{stdcover} = 1;
+	push( @args, "--title",
+	      encode_utf8($self->{t_exporttitle}->GetValue // "") );
+	if ( my $stitle = $self->{t_exportstitle}->GetValue ) {
+	    push( @args, "--subtitle", encode_utf8($stitle) );
+	}
     }
     elsif ( my $cover = $self->{fp_cover}->GetPath ) {
 	push( @args, "--cover", encode_utf8($cover) );

@@ -422,6 +422,17 @@ Requires the input to be strictly compliant to the ChordPro standard.
 
 This is enabled by default. See also B<--nostrict>.
 
+=item B<--subtitle=>I<XXX>
+
+Subtitle (for songbooks).
+
+=item B<--title=>I<XXX>
+
+Title (for songbooks).
+
+If specified and a table of contents is requested, a nice coverpage
+will be added.
+
 =item B<--toc> (short: B<-i>)
 
 Includes a table of contents.
@@ -776,6 +787,8 @@ sub app_setup {
 	  "front-matter|cover=s",	# Front matter page(s)
 	  "back-matter=s",		# Back matter page(s)
 	  "filelist=s@",		# List of input files
+	  "title=s",			# Title (for books)
+	  "subtitle=s",			# Subtitle (for books)
 	  "meta=s\%",			# Command line meta data
 	  "decapo",			# remove capo
 	  "fragment|F",			# partial (incomplete) song
@@ -949,7 +962,7 @@ sub app_setup {
 
     # Decode command line strings.
     # File names are dealt with elsewhere.
-    for ( qw(transcode) ) {
+    for ( qw(transcode title subtitle ) ) {
 	next unless defined $clo->{$_};
 	$clo->{$_} = decode_utf8($clo->{$_});
     }

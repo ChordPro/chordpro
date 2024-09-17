@@ -415,7 +415,6 @@ sub preview {
     # is ready. So the best we can do is reuse the files.
     unless ( $preview_cho ) {
 	( undef, $preview_cho ) = tempfile( OPEN => 0 );
-	( undef, $preview_tmpl ) = tempfile( OPEN => 0, SUFFIX => ".cho" );
 	$preview_pdf = $preview_cho . ".pdf";
 	$preview_cho .= ".cho";
 	unlink( $preview_cho, $preview_pdf );
@@ -470,26 +469,6 @@ sub preview {
 
     push( @ARGV, '--output', $preview_pdf );
     push( @ARGV, '--generate', "PDF" );
-
-    push( @ARGV, '--define', "pdf.info.title=".encode_utf8($opts{title}) )
-      if $opts{title};
-    if ( $opts{stdcover} ) {
-	my $img = CP->findres( "chordpro-icon.png", class => "icons" );
-	open( my $fd, '>:utf8', $preview_tmpl );
-	$opts{subtitle} //= "";
-	print $fd <<EOD;
-{+pdf.fonts.title.size:40}
-{+pdf.fonts.subtitle.size:20}
-{+pdf.margintop:100}
-{title: $opts{title}}
-{subtitle: $opts{subtitle}}
-{image anchor="page" x="50%" y="50%" scale="100%" src="$img"}
-{np}
-EOD
-	$fd->close;
-	push( @ARGV, '--define',
-	      'contents.0.template='.encode_utf8($preview_tmpl) );
-    }
 
     push( @ARGV, '--transpose', $self->{prefs_xpose} )
       if $self->{prefs_xpose};
@@ -563,7 +542,6 @@ EOD
 	}
     }
     unlink( $preview_cho );
-    unlink( $preview_tmpl ) if $preview_tmpl;
 }
 
 sub _makeurl {

@@ -1,0 +1,16 @@
+# ToC template that produces a separate cover page.
+# We do not want this in the ToC.
+{ns toc=0}
+{+pdf.fonts.title.size:40}
+{+pdf.fonts.subtitle.size:20}
+{+pdf.margintop:100}
+{+pdf.formats.first.footer.0:ChordPro %{chordpro.version}}
+{+pdf.formats.first.footer.2:%{today}}
+# Title and subtitle will be set from command line.
+{title: ChordPro Songbook}
+{subtitle: }
+{image anchor="page" x="50%" y="50%" scale="100%" src="chordpro-icon.png"}
+
+# New song for the actual ToC.
+# 'forceifempty' prevents this song from being optimized away.
+{ns toc=0 forceifempty}

@@ -18,7 +18,7 @@ use Carp;
 use List::Util qw(any);
 use File::LoadLines;
 use Storable qw(dclone);
-use Ref::Util qw(is_arrayref is_hashref);
+use Ref::Util qw(is_arrayref is_plain_hashref);
 
 sub new {
     my ($pkg) = @_;
@@ -62,7 +62,7 @@ sub parse_file {
 	next unless exists $opts->{$_};
 	$options->{$_} = $opts->{$_};
     }
-    bless $config => ChordPro::Config:: if is_hashref($config);
+    bless $config => ChordPro::Config:: if is_plain_hashref($config);
 
     my $linecnt = 0;
     my $songs = 0;
@@ -97,6 +97,12 @@ sub parse_file {
       unless $songs || $::running_under_test;
 
     return 1;
+}
+
+sub add {
+    my ( $self, $song ) = @_;
+    push( @{$self->{songs}}, $song );
+    $self;
 }
 
 sub embed_file {

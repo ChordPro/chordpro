@@ -52,6 +52,13 @@ sub OnInitialExample {
 					  $self->GetParent->wxID_HELP_EXAMPLE ) );
 }
 
+sub OnInitialSBexp {
+    my ( $self, $event ) = @_;
+    Wx::PostEvent( $self->GetParent,
+		   Wx::CommandEvent->new( wxEVT_COMMAND_MENU_SELECTED,
+					  $self->GetParent->wxID_EXPORT_FOLDER ) );
+}
+
 sub OnInitialSite {
     my ( $self, $event ) = @_;
     Wx::LaunchDefaultBrowser("https://www.chordpro.org/");

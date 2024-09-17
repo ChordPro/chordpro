@@ -17,12 +17,12 @@ lib/ChordPro/Wx/RenderDialog.wxg
 lib/ChordPro/Wx/RenderDialog_wxg.pm
 lib/ChordPro/Wx/SongbookExportPanel.pm
 lib/ChordPro/Wx/SongbookExportPanel_wxg.pm
-lib/ChordPro/Wx/SongbookExport_wxg.pm
 lib/ChordPro/Wx/Utils.pm
 lib/ChordPro/res/icons/cancel.png
 lib/ChordPro/res/icons/chordpro-doc.icns
 lib/ChordPro/res/icons/chordpro-icon-narrow.png
 lib/ChordPro/res/icons/chordpro-icon.png
+lib/ChordPro/res/icons/chordpro-folder.png
 lib/ChordPro/res/icons/chordpro-open.png
 lib/ChordPro/res/icons/chordpro-song.png
 lib/ChordPro/res/icons/chordpro-web.png
