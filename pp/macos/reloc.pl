@@ -14,6 +14,7 @@ my $lv = $1;
 my $srcpat = qr;($prefix.*?)/([-\w.]+\.(?:dylib|bundle));;
 my $dst = '@executable_path';
 my $arch = `uname -m`;
+chomp($arch);
 
 if ( @ARGV && $ARGV[0] =~ /^--?q(?:iet)?$/ ) {
     $verbose = 0;
