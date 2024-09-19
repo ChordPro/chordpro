@@ -487,7 +487,7 @@ sub preview {
 
 	      $self->log( 'I', "Generating output " . $ctl{index} .
 			  " of " . $ctl{total} . ": " .
-			  demarkup($ctl{title}) )
+			  demarkup($ctl{msg}) )
 		if $ctl{index} && $ctl{total} > 1;
 
 	      if ( $ctl{index} == 0 ) {
@@ -503,7 +503,7 @@ sub preview {
 		  $dialog->Update( $ctl{index},
 				   "Song " . $ctl{index} . " of " .
 				   $ctl{total} . ": " .
-				   demarkup($ctl{title}) )
+				   demarkup($ctl{msg}) )
 		    and return 1;
 		  $self->log( 'I', "Processing cancelled." );
 		  return;

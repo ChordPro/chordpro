@@ -85,9 +85,19 @@ sub generate_songbook {
 	warn("Warning: Specifying an even start page when pdf.odd-even-pages is in effect may yield surprising results.\n");
     }
 
-    progress( phase   => "pdf",
+    my $extra_matter = 0;
+    if ( $options->{toc} // @{$sb->{songs}} ) {
+	for ( @{ $::config->{contents} } ) {
+	    $extra_matter++ unless $_->{omit};
+	}
+	$extra_matter++ if $options->{title};
+    }
+    $extra_matter++ if $options->{'front-matter'};
+    $extra_matter++ if $options->{'back-matter'};
+    $extra_matter++ if $options->{csv};
+    progress( phase   => "PDF",
 	      index   => 0,
-	      total   => scalar(@{$sb->{songs}}) );
+	      total   => $extra_matter+scalar(@{$sb->{songs}}) );
 
     my $first_song_aligned;
     my $songindex;
@@ -122,10 +132,7 @@ sub generate_songbook {
 
 	last unless progress
 	  ( index   => $songindex,
-	    total   => scalar(@{$sb->{songs}}),
-	    page    => $page,
-	    source  => $song->{source}->{file},
-	    title   => $song->{meta}->{title}->[0],
+	    msg     => $song->{meta}->{title}->[0],
 	  );
 
 	$song->{meta}->{"chordpro.songsource"} //= $song->{source}->{file};
@@ -251,6 +258,7 @@ sub generate_songbook {
 	# Prepend the front matter songs.
 	$page = 0;
 	for ( @songs, $song ) {
+	    progress( msg => $_->{title} );
 	    my $p = generate_song( $_,
 				   { pr => $pr, prepend => 1, roman => 1,
 				     startpage => 1+$page,
@@ -284,6 +292,7 @@ sub generate_songbook {
 	$page = 1;
 	my $matter = $pdfapi->open( expand_tilde($ps->{'front-matter'}) );
 	die("Missing front matter: ", $ps->{'front-matter'}, "\n") unless $matter;
+	progress( msg => "Front matter" );
 	for ( 1 .. $matter->pages ) {
 	    $pr->{pdf}->import_page( $matter, $_, $_ );
 	    $page++;
@@ -304,6 +313,7 @@ sub generate_songbook {
 	my $matter = $pdfapi->open( expand_tilde($ps->{'back-matter'}) );
 	die("Missing back matter: ", $ps->{'back-matter'}, "\n") unless $matter;
 	$page = $start_of{back};
+	progress( msg => "Back matter" );
 	$pr->newpage($ps), $page++, $start_of{back}++
 	  if $ps->{'even-odd-pages'} && ($page % 2);
 	for ( 1 .. $matter->pages ) {
@@ -331,8 +341,10 @@ sub generate_songbook {
     $pr->finish( $options->{output} || "__new__.pdf" );
     warn("Generated PDF...\n") if $options->{verbose};
 
-    generate_csv( \@book, $page, \%pages_of, \%start_of )
-      if $options->{csv};
+    if ( $options->{csv} ) {
+	progress( msg => "CSV" );
+	generate_csv( \@book, $page, \%pages_of, \%start_of )
+    }
 
     _dump($ps) if $verbose;
 
