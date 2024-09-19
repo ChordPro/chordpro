@@ -19,6 +19,8 @@ pp/macos/Makefile
 pp/macos/PkgInfo
 pp/macos/README.html
 pp/macos/chordpro.pp
+pp/macos/chordpro.icns
+pp/macos/chordpro-doc.icns
 pp/macos/create-dmg
 pp/macos/dndhandler.cpp
 pp/macos/reloc.pl

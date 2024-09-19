@@ -4,6 +4,13 @@
  * then execs the real program.
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <mach-o/dyld.h>
+
 #include "wx/wx.h"
 #include "wx/wxprec.h"
 #include "wx/event.h"
@@ -165,41 +172,24 @@ int chain( int argc, char **argv ) {
   memset (selfpath,   0, PATH_MAX);
   memset (scriptname, 0, PATH_MAX);
 
-  if ( readlink ("/proc/self/exe", selfpath, PATH_MAX-1 ) > 0 ) {
-    char *p = rindex( selfpath, '/' );
-    if ( p ) {
-      p++;
-      strcpy( scriptname, p );
-      *p = 0;
-    }
-    else
-      strcpy( scriptname, selfpath );
+  uint32_t size = sizeof(selfpath);
+  // Get the full path of the executable
+  _NSGetExecutablePath(selfpath, &size);
+
+  // Get a pointer to the last part of the path
+  char *p = rindex( selfpath, '/' );
+
+  // Increment the pointer so the remaining is only the name of the script
+  p++;
+  strcpy( scriptname, p );
+
+  // Remove the name of the script from selfpath
+  *p = 0;
 
 #ifdef DEBUG
-    fprintf( dbgf, "selfpath:   %s\n", selfpath );
-    fprintf( dbgf, "scriptname: %s\n", scriptname );
+  fprintf( stderr, "cwdpath:    %s\n", selfpath );
+  fprintf( stderr, "scriptname: %s\n", scriptname );
 #endif
-  }
-
-  else {
-    strncpy( selfpath, argv[0], PATH_MAX-1 );
-    char *p = rindex( selfpath, '/' );
-    if ( p ) {
-      p++;
-      strcpy( scriptname, p );
-      *p = 0;
-    }
-    else {
-      p = getcwd( selfpath, PATH_MAX-1 );
-      strcat( selfpath, "/" );
-      strncpy( scriptname, argv[0], PATH_MAX-1 );
-    }
-
-#ifdef DEBUG
-    fprintf( dbgf, "cwdpath:    %s\n", selfpath );
-    fprintf( dbgf, "scriptname: %s\n", scriptname );
-#endif
-  }
 
   /* Insert script name in argv. */
   char scriptpath[PATH_MAX];	/* /foo/bar/SCRIPTPREFIXblech.pl */

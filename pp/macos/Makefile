@@ -91,7 +91,7 @@ app1 :
 	mkdir -p "${APPDIR}/Contents/MacOS"
 	mkdir -p "${APPDIR}/Contents/Resources"
 	cp PkgInfo Info.plist "${APPDIR}/Contents"
-	cp "${DEST}"/lib/ChordPro/res/icons/*.icns "${APPDIR}/Contents/Resources"
+	cp *.icns "${APPDIR}/Contents/Resources"
 	cp "${DEST}"/lib/ChordPro/res/icons/*.png "${APPDIR}/Contents/Resources"
 	cd "${APPDIR}"; mv script lib Contents/MacOS
 	cd "${APPDIR}"; mv lib*.dylib Contents/MacOS
