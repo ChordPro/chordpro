@@ -481,6 +481,37 @@ sub preview {
 	warn( "$_\n" ) for split( /\n+/, _aboutmsg() );
     }
     my $options;
+    my $dialog;
+    push( @ARGV, "--progress_callback", sub {
+	      my %ctl = @_;
+
+	      $self->log( 'I', "Generating output " . $ctl{index} .
+			  " of " . $ctl{total} . ": " .
+			  demarkup($ctl{title}) )
+		if $ctl{index} && $ctl{total} > 1;
+
+	      if ( $ctl{index} == 0 ) {
+		  return 1 unless $ctl{total} > 1;
+		  $dialog = Wx::ProgressDialog->new
+		    ( 'Processing...',
+		      'Starting',
+		      $ctl{total}, $self,
+		      wxPD_CAN_ABORT|wxPD_AUTO_HIDE|wxPD_APP_MODAL|
+		      wxPD_ELAPSED_TIME|wxPD_ESTIMATED_TIME|wxPD_REMAINING_TIME );
+	      }
+	      elsif ( $dialog ) {
+		  $dialog->Update( $ctl{index},
+				   "Song " . $ctl{index} . " of " .
+				   $ctl{total} . ": " .
+				   demarkup($ctl{title}) )
+		    and return 1;
+		  $self->log( 'I', "Processing cancelled." );
+		  return;
+	      }
+
+	      return 1;
+	  } );
+
     eval {
 	$options = ChordPro::app_setup( "ChordPro", $VERSION );
     };
@@ -541,6 +572,7 @@ sub preview {
 	}
     }
     unlink( $preview_cho );
+    $dialog->Destroy if $dialog;
 }
 
 sub _makeurl {

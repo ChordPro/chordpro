@@ -16,7 +16,7 @@ use Encode qw( encode_utf8 );
 use File::Temp ();
 use Storable qw(dclone);
 use List::Util qw(any);
-use Ref::Util qw(is_coderef);
+use Ref::Util qw(is_hashref is_coderef);
 use Carp;
 use feature 'state';
 use File::LoadLines qw(loadlines loadblob);
@@ -29,7 +29,6 @@ use ChordPro::Paths;
 use ChordPro::Utils;
 
 my $pdfapi;
-my $progress_callback;
 
 use Text::Layout;
 use String::Interpolate::Named;
@@ -53,10 +52,6 @@ sub generate_songbook {
     if ( $ps->{'sort-pages'} ) {
 	sort_songbook($sb);
     }
-
-    # Progress callback, if any.
-    $progress_callback //= $options->{progress_callback}
-      if $options->{progress_callback};
 
     my $pr = (__PACKAGE__."::Writer")->new( $ps, $pdfapi );
     warn("Generating PDF ", $options->{output} || "__new__.pdf", "...\n") if $options->{verbose};
@@ -90,11 +85,9 @@ sub generate_songbook {
 	warn("Warning: Specifying an even start page when pdf.odd-even-pages is in effect may yield surprising results.\n");
     }
 
-    progress_callback
-	  ({ phase   => "pdf",
-	     index   => 0,
-	     songs   => scalar(@{$sb->{songs}}),
-	   });
+    progress( phase   => "pdf",
+	      index   => 0,
+	      total   => scalar(@{$sb->{songs}}) );
 
     my $first_song_aligned;
     my $songindex;
@@ -127,14 +120,13 @@ sub generate_songbook {
 	    }
 	}
 
-	last unless progress_callback
-	  ({ phase   => "pdf",
-	     index   => $songindex,
-	     songs   => scalar(@{$sb->{songs}}),
-	     page    => $page,
-	     source  => $song->{source}->{file},
-	     title   => $song->{meta}->{title}->[0],
-	   });
+	last unless progress
+	  ( index   => $songindex,
+	    total   => scalar(@{$sb->{songs}}),
+	    page    => $page,
+	    source  => $song->{source}->{file},
+	    title   => $song->{meta}->{title}->[0],
+	  );
 
 	$song->{meta}->{"chordpro.songsource"} //= $song->{source}->{file};
 	$page += $song->{meta}->{pages} =
@@ -345,20 +337,6 @@ sub generate_songbook {
     _dump($ps) if $verbose;
 
     []
-}
-
-sub progress_callback {
-    my ( $ctl ) = @_;
-    return 1 unless $progress_callback;
-
-    if ( is_coderef($progress_callback) ) {
-	eval {
-	    $progress_callback->($ctl);
-	};
-    }
-    else {
-	warn( fmt_subst( { meta => $ctl }, $progress_callback ), "\n" );
-    }
 }
 
 sub generate_csv {

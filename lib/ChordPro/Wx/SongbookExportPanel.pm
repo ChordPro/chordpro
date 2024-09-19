@@ -206,39 +206,7 @@ sub OnPreview {
 	return;
     }
 
-    my $dialog;
-    my $pcb = sub {
-	my $ctl = shift;
-
-	$self->log( 'I', "Generating output " . $ctl->{index} .
-			       " of " . $ctl->{songs} . ": " .
-			       demarkup($ctl->{title}) )
-	  if $ctl->{index} && $ctl->{songs} > 1;
-
-	if ( $ctl->{index} == 0 ) {
-	    return 1 unless $ctl->{songs} > 1;
-	    $dialog = Wx::ProgressDialog->new
-	      ( 'Processing...',
-		'Starting',
-		$ctl->{songs}, $self,
-		wxPD_CAN_ABORT|wxPD_AUTO_HIDE|wxPD_APP_MODAL|
-		wxPD_ELAPSED_TIME|wxPD_ESTIMATED_TIME|wxPD_REMAINING_TIME );
-	}
-	elsif ( $dialog ) {
-	    $dialog->Update( $ctl->{index},
-			     "Song " . $ctl->{index} . " of " .
-			     $ctl->{songs} . ": " .
-			     demarkup($ctl->{title}) )
-	      and return 1;
-	    $self->log( 'I', "Processing cancelled." );
-	    return;
-	}
-
-	return 1;
-    };
-
-    my @args = ( "--filelist", \$filelist,
-		 "--progress_callback" => $pcb );
+    my @args = ( "--filelist", \$filelist );
     my %opts = ( filelist => 1 );
 
     if ( $self->{cb_stdcover}->IsChecked ) {
@@ -253,7 +221,6 @@ sub OnPreview {
     }
     $self->GetParent->preview( \@args, %opts );
 
-    $dialog->Destroy if $dialog;
     $event->Skip;
 }
 

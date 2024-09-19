@@ -108,6 +108,10 @@ sub chordpro {
     # Establish backend.
     my $of = $options->{output};
 
+    # Progress callback, if any.
+    progress( callback => $options->{progress_callback}, index => -1 )
+      if $options->{progress_callback};
+
     if ( $options->{'convert-config'} ) {
 	die("\"--convert-config\" requires a single config file name\n")
 	  if @ARGV;
