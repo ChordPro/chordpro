@@ -512,7 +512,17 @@ sub progress(%args) {
 	}
     }
     else {
-	warn( fmt_subst( { meta => $args }, $callback ), "\n" );
+	if ( $callback eq "warn" ) {
+	    # Simple progress message. Suppress if $index = 0 or total = 1.
+	    $callback =
+	      '%{index=0||' .
+	      '%{total=1||Progress[%{phase}]: %{index} of %{total}}' .
+	      '}';
+	}
+	my $msg = ChordPro::Output::Common::fmt_subst
+	  ( { meta => $args }, $callback );
+	$msg =~ s/\n+$//;
+	warn( $msg, "\n" ) if $msg;
     }
 
     return $ret;
