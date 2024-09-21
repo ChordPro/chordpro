@@ -1,6 +1,6 @@
 //
 //  Directive.swift
-//  Chord Provider
+//  ChordProMac
 //
 //  Created by Nick Berendsen on 24/06/2024.
 //
@@ -37,12 +37,10 @@ extension Directive {
 
     /// Get all the directive we know about
     /// - Returns: An array of directives
-    static func getChordProDirectives() -> [Directive] {
+    static func getChordProDirectives(chordProInfo: ChordProInfo?) -> [Directive] {
         var directives: [Directive] = []
         guard
-            let chordProInfo = Bundle.main.url(forResource: "ChordProInfo", withExtension: "json"),
-            let data = try? Data(contentsOf: chordProInfo),
-            let info = try? JSONDecoder().decode(ChordProInfo.self, from: data)
+            let info = chordProInfo
         else {
             return directives
         }

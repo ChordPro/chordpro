@@ -1,8 +1,8 @@
 //
 //  Cache.swift
-//  Chord Provider
+//  ChordProMac
 //
-//  © 2024 Nick Berendsen
+//  Created by Nick Berendsen on 02/06/2024.
 //
 
 import Foundation

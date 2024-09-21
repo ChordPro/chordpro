@@ -12,7 +12,7 @@ import OSLog
 /// SwiftUI `View` with the application settings
 struct SettingsView: View {
     /// The observable state of the application
-    @EnvironmentObject private var appState: AppState
+    @EnvironmentObject private var appState: AppStateModel
     /// The configurations we found in the official **ChordPro** source
     @State var systemConfigurations: [Template] = []
     /// The notations we found in the official **ChordPro** source
@@ -82,7 +82,7 @@ extension SettingsView {
         ScrollView {
             VStack {
                 Toggle("Use a custom template", isOn: $appState.settings.application.useCustomSongTemplate)
-                UserFileButtonView(
+                UserFileButton(
                     userFile: UserFileItem.customSongTemplate
                 ) {}
                     .disabled(!appState.settings.application.useCustomSongTemplate)
@@ -114,27 +114,27 @@ extension SettingsView {
             }
             .wrapSettingsSection(title: "Editor Font")
             VStack {
-                ColorPickerButtonView(
+                ColorPickerButton(
                     selectedColor: $appState.settings.editor.chordColor,
                     label: "Color for **chords**"
                 )
-                ColorPickerButtonView(
+                ColorPickerButton(
                     selectedColor: $appState.settings.editor.directiveColor,
                     label: "Color for **directives**"
                 )
-                ColorPickerButtonView(
+                ColorPickerButton(
                     selectedColor: $appState.settings.editor.argumentColor,
                     label: "Color for **arguments**"
                 )
-                ColorPickerButtonView(
+                ColorPickerButton(
                     selectedColor: $appState.settings.editor.markupColor,
                     label: "Color for **markup**"
                 )
-                ColorPickerButtonView(
+                ColorPickerButton(
                     selectedColor: $appState.settings.editor.bracketColor,
                     label: "Color for **brackets**"
                 )
-                ColorPickerButtonView(
+                ColorPickerButton(
                     selectedColor: $appState.settings.editor.commentColor,
                     label: "Color for **comments**"
                 )
@@ -167,7 +167,7 @@ extension SettingsView {
                 }
             }
             Toggle("Add a custom configuration", isOn: $appState.settings.chordPro.useCustomConfig)
-            UserFileButtonView(
+            UserFileButton(
                 userFile: UserFileItem.customConfig
             ) {}
                 .disabled(!appState.settings.chordPro.useCustomConfig)
@@ -190,7 +190,7 @@ extension SettingsView {
     var library: some View {
         VStack {
             Toggle("Add a custom library", isOn: $appState.settings.chordPro.useAdditionalLibrary)
-            UserFileButtonView(
+            UserFileButton(
                 userFile: UserFileItem.customLibrary
             ) {}
                 .disabled(!appState.settings.chordPro.useAdditionalLibrary)

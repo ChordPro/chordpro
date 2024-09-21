@@ -10,9 +10,9 @@ import SwiftUI
 /// SwiftUI `View` with the editor
 struct EditorPaneView: View {
     /// The observable state of the application
-    @EnvironmentObject private var appState: AppState
+    @EnvironmentObject private var appState: AppStateModel
     /// The observable state of the scene
-    @EnvironmentObject private var sceneState: SceneState
+    @EnvironmentObject private var sceneState: SceneStateModel
     /// The document in the environment
     @FocusedValue(\.document) private var document: FileDocumentConfiguration<ChordProDocument>?
     /// The body of the `View`
@@ -29,6 +29,8 @@ struct EditorPaneView: View {
                 }
             }
             .frame(maxHeight: .infinity)
+            /// - Note: Make sure we have an up-to-date list of directives
+            .id(appState.directives.map(\.directive))
         }
     }
 }

@@ -17,12 +17,16 @@ enum UserFileItem: String, UserFile {
     case customLibrary
     /// A custom song template
     case customSongTemplate
+    /// An export folder
+    case exportFolder
+    /// A songbook cover
+    case songbookCover
     /// The ID of the file item
     var id: String {
         return self.rawValue
     }
     /// The `UTType` of the file
-    /// - Note: Used to restrict the selection in the ``FileButtonView``
+    /// - Note: Used to restrict the selection in the ``UserFileButton``
     var utTypes: [UTType] {
         switch self {
         case .customConfig:
@@ -31,6 +35,10 @@ enum UserFileItem: String, UserFile {
             return [UTType.folder]
         case .customSongTemplate:
             return [UTType.chordProSong]
+        case .exportFolder:
+            return [UTType.folder]
+        case .songbookCover:
+            return [UTType.pdf]
         }
     }
     /// The optional calculated label of the file
@@ -48,6 +56,10 @@ enum UserFileItem: String, UserFile {
             return "building.columns"
         case .customSongTemplate:
             return "music.note.list"
+        case .exportFolder:
+            return "square.and.arrow.up"
+        case .songbookCover:
+            return "doc.richtext"
         }
     }
     /// Protocol requirement; not supported with macOS 12
@@ -59,6 +71,10 @@ enum UserFileItem: String, UserFile {
             return "Select the folder with your custom library"
         case .customSongTemplate:
             return "Select your custom template"
+        case .exportFolder:
+            return "Select a folder with your songs"
+        case .songbookCover:
+            return "Select a PDF as cover for the songbook"
         }
     }
 }

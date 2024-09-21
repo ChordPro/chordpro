@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UniformTypeIdentifiers
 import OSLog
 
 /// Terminal utilities
@@ -176,16 +177,22 @@ extension Terminal {
 
 extension Terminal {
 
-    /// Export a document with the **ChordPro** binary to a PDF
+    /// Export a document or folder with the **ChordPro** binary to a PDF
     /// - Parameters:
-    ///   - document: The current ``ChordProDocument``
+    ///   - text: The current text of the document
     ///   - settings: The current ``AppSettings``
-    ///   - sceneState: The current ``SceneState``
+    ///   - sceneState: The current ``SceneStateModel``
+    ///   - fileList: The optional list of files (for a songbook)
+    ///   - title: The title of the export
+    ///   - subtitle: The optional subtitle of the export
     /// - Returns: The PDF as `Data` and the status as ``AppError``
-    static func exportDocument(
+    static func exportPDF(
         text: String,
         settings: AppSettings,
-        sceneState: SceneState
+        sceneState: SceneStateModel,
+        fileList: Bool = false,
+        title: String = "",
+        subtitle: String = ""
     ) async throws -> (data: Data, status: AppError) {
         /// Get the **ChordPro** binary
         let chordProApp = try getChordProBinary()
@@ -212,10 +219,32 @@ extension Terminal {
         }
         /// The **ChordPro** binary
         arguments.append("\"\(chordProApp.path)\"")
-        /// Add the source file
-        arguments.append("\"\(sceneState.sourceURL.path)\"")
+        /// Songbook export
+        if fileList {
+            /// Add the system generated front cover if selected
+            if settings.application.songbookGenerateCover {
+                arguments.append("--title='\(title)'")
+                if !subtitle.isEmpty {
+                    arguments.append("--subtitle='\(subtitle)'")
+                }
+            }
+            /// Add a custom cover if selected
+            if
+                settings.application.songbookUseCustomCover,
+                let persistentURL = UserFileBookmark.getBookmarkURL(UserFileItem.songbookCover) {
+                /// Get access to the URL
+                _ = persistentURL.startAccessingSecurityScopedResource()
+                arguments.append("--front-matter='\(persistentURL.path)'")
+                /// Close the access
+                UserFileBookmark.stopCustomFileAccess(persistentURL: persistentURL)
+            }
+            /// Add the file list
+            arguments.append("--filelist=\"\(sceneState.fileListURL.path)\"")
+        } else {
+            arguments.append("\"\(sceneState.sourceURL.path)\"")
+        }
         /// Get the user settings that are simple and do not need sandbox help
-        arguments.append(contentsOf: AppState.getUserSettings(settings: settings))
+        arguments.append(contentsOf: AppStateModel.getUserSettings(settings: settings))
         /// Add the optional custom config file
         if let customConfig = getOptionalCustomConfig(settings: settings) {
             arguments.append(customConfig)
@@ -224,8 +253,15 @@ extension Terminal {
         if let taskConfig = sceneState.customTask {
             arguments.append("--config='\(taskConfig.url.path)'")
         }
+
+        if let localConfigURL = sceneState.localConfigURL, !settings.chordPro.noDefaultConfigs {
+            _ = localConfigURL.startAccessingSecurityScopedResource()
+            arguments.append("--config='\(localConfigURL.path)'")
+            UserFileBookmark.stopCustomFileAccess(persistentURL: localConfigURL)
+        }
+
         /// Add the output file
-        arguments.append("--output=\"\(sceneState.exportURL.path)\"")
+        arguments.append("--output='\(sceneState.exportURL.path)'")
         /// Run **ChordPro** in the shell
         /// - Note: The output is logged
         let output = await Terminal.runInShell(arguments: [arguments.joined(separator: " ")])
