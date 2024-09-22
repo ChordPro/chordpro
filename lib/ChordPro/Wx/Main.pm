@@ -19,11 +19,10 @@ use ChordPro;
 use ChordPro::Paths;
 use ChordPro::Wx::Utils;
 use ChordPro::Output::Common;
-use ChordPro::Utils qw( demarkup );
+use ChordPro::Utils qw( demarkup is_msw );
 use File::Temp qw( tempfile );
 use Encode qw(decode_utf8 encode_utf8);
 use File::Basename qw(basename);
-use ChordPro::Wx::MenuBar;
 
 our $VERSION = $ChordPro::VERSION;
 
@@ -88,7 +87,15 @@ sub new {
     $self->SetTitle("ChordPro");
     $self->SetIcon( Wx::Icon->new(CP->findres( "chordpro-icon.png", class => "icons" ), wxBITMAP_TYPE_ANY) );
 
-    $self->SetMenuBar( ChordPro::Wx::MenuBar->new );
+    my $menu = Wx::MenuBar->new;
+    if ( is_msw ) {
+	my $tmp_menu;
+	$tmp_menu = Wx::Menu->new();
+	$tmp_menu->Append(wxID_EXIT, _T("Exit"), _T("Close window and exit"));
+	$menu->Append($tmp_menu, _T("File"));
+    }
+    $self->SetMenuBar($menu);
+
     $self;
 }
 
@@ -482,16 +489,17 @@ sub preview {
     }
     my $options;
     my $dialog;
+    my $phase;
     push( @ARGV, "--progress_callback", sub {
 	      my %ctl = @_;
-
-	      $self->log( 'I', "Generating output " . $ctl{index} .
+	      $phase = $ctl{phase} if $ctl{phase};
+	      $self->log( 'I', "Progress[$phase] " . $ctl{index} .
 			  " of " . $ctl{total} . ": " .
 			  demarkup($ctl{msg}) )
-		if $ctl{index} && $ctl{total} > 1;
+		if $ctl{index} && ($ctl{total}||0) > 1;
 
 	      if ( $ctl{index} == 0 ) {
-		  return 1 unless $ctl{total} > 1;
+		  return 1 unless ($ctl{total}||0) > 1;
 		  $dialog = Wx::ProgressDialog->new
 		    ( 'Processing...',
 		      'Starting',

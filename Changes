@@ -11,7 +11,9 @@
     - Fix issue #428.
     - (Wx) Folder processing.
     - (Wx) Rework initial screen.
-    
+    - Progress reporting. Options ``progress_callabck and -I. Also
+      enabled with --verbose.
+
 6.060 2024-08-24
 
     !Highlights

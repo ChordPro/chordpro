@@ -6,7 +6,6 @@ lib/ChordPro/Wx/InitialPanel.pm
 lib/ChordPro/Wx/InitialPanel_wxg.pm
 lib/ChordPro/Wx/Main.pm
 lib/ChordPro/Wx/Main_wxg.pm
-lib/ChordPro/Wx/MenuBar.pm
 lib/ChordPro/Wx/MessagesPanel.pm
 lib/ChordPro/Wx/MessagesPanel_wxg.pm
 lib/ChordPro/Wx/PreferencesDialog.pm

@@ -239,8 +239,4 @@
             </object>
         </object>
     </object>
-    <object class="ChordPro::Wx::MenuBar" name="menubar" base="EditMenuBar">
-        <menus>
-        </menus>
-    </object>
 </application>
