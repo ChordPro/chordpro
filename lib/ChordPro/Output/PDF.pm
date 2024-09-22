@@ -49,6 +49,22 @@ sub generate_songbook {
 
     $ps = $config->{pdf};
 
+    my $extra_matter = 0;
+    if ( $options->{toc} // @{$sb->{songs}} ) {
+	for ( @{ $::config->{contents} } ) {
+	    $extra_matter++ unless $_->{omit};
+	}
+	$extra_matter++ if $options->{title};
+    }
+    $extra_matter++ if $options->{'front-matter'};
+    $extra_matter++ if $options->{'back-matter'};
+    $extra_matter++ if $options->{csv};
+    $extra_matter += @{$sb->{songs}} if $ps->{'sort-pages'};
+
+    progress( phase   => "PDF",
+	      index   => 0,
+	      total   => scalar(@{$sb->{songs}}) );
+
     if ( $ps->{'sort-pages'} ) {
 	sort_songbook($sb);
     }
@@ -85,22 +101,9 @@ sub generate_songbook {
 	warn("Warning: Specifying an even start page when pdf.odd-even-pages is in effect may yield surprising results.\n");
     }
 
-    my $extra_matter = 0;
-    if ( $options->{toc} // @{$sb->{songs}} ) {
-	for ( @{ $::config->{contents} } ) {
-	    $extra_matter++ unless $_->{omit};
-	}
-	$extra_matter++ if $options->{title};
-    }
-    $extra_matter++ if $options->{'front-matter'};
-    $extra_matter++ if $options->{'back-matter'};
-    $extra_matter++ if $options->{csv};
-    progress( phase   => "PDF",
-	      index   => 0,
-	      total   => $extra_matter+scalar(@{$sb->{songs}}) );
-
     my $first_song_aligned;
     my $songindex;
+    my $cancelled;
 
     foreach my $song ( @{$sb->{songs}} ) {
 	$songindex++;
@@ -130,10 +133,7 @@ sub generate_songbook {
 	    }
 	}
 
-	last unless progress
-	  ( index   => $songindex,
-	    msg     => $song->{meta}->{title}->[0],
-	  );
+	$cancelled++,last unless progress( msg => $song->{meta}->{title}->[0] );
 
 	$song->{meta}->{"chordpro.songsource"} //= $song->{source}->{file};
 	$page += $song->{meta}->{pages} =
@@ -156,7 +156,14 @@ sub generate_songbook {
 	  line => $::config->{toc}->{line} } ];
 
     my @tocs = @{ $::config->{contents} };
-    while ( @tocs ) {
+
+    if ( $extra_matter ) {
+	progress( phase   => "PDF",
+		  index   => 0,
+		  total   => $extra_matter );
+
+    }
+    while ( !$cancelled && @tocs ) {
 	my $ctl = pop(@tocs);
 	next unless $options->{toc} // @book > 1;
 
@@ -232,7 +239,7 @@ sub generate_songbook {
 
 	my @songs = @{$fmsb->{songs}};
 
-	# The first (of multiple) gets the blobal title/subtitle.
+	# The first (of multiple) gets the global title/subtitle.
 	if ( @songs > 1 ) {
 	    for ( $songs[0] ) {
 		$_->{meta}->{title} =
@@ -258,7 +265,7 @@ sub generate_songbook {
 	# Prepend the front matter songs.
 	$page = 0;
 	for ( @songs, $song ) {
-	    progress( msg => $_->{title} );
+	    $cancelled++,last unless progress( msg => $_->{title} );
 	    my $p = generate_song( $_,
 				   { pr => $pr, prepend => 1, roman => 1,
 				     startpage => 1+$page,
@@ -3248,17 +3255,14 @@ sub sort_songbook {
 
     if ( $sorting =~ /2page|compact/ ) {
 	# Progress indicator
-	warn( "Counting pages:\n" ) if $options->{verbose};
 
+	my $i = 1;
 	foreach my $song ( @{$sb->{songs}} ) {
+	    progress( msg => "Counting pages, song $i" );
+	    $i++;
 	    $song->{meta}->{pages} =
 	      generate_song( $song, { pr => $pri, startpage => 1 } );
-	    if ( $options->{verbose} ) {
-		# Progress indicator
-		print STDERR $song->{meta}->{pages}." ";
-	    }
 	}
-	print STDERR "\n" if $options->{verbose}; # Progress indicator
     }
 
     foreach my $song ( @{$sb->{songs}} ) {
