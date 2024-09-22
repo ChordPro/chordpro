@@ -13,6 +13,7 @@ use warnings;
 use ChordPro;
 use ChordPro::Config;
 use ChordPro::Song;
+use ChordPro::Utils qw(progress);
 
 use Carp;
 use List::Util qw(any);

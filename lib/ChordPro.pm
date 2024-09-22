@@ -193,6 +193,7 @@ sub chordpro {
 
     # Check for metadata in filelist. Actually, this works on the
     # command line as well, but don't tell anybody.
+    progress( phase => "Parsing", index => 0, total => 0+@ARGV );
     foreach my $file ( @ARGV ) {
 	my $opts;
 	if ( $file =~ /(^|\s)--(?:meta|config|define)\b/ ) {
@@ -217,6 +218,7 @@ sub chordpro {
 	$opts->{generate} = $options->{generate};
 	# Wx runs on temp files, so pass real filename in.
 	$opts->{filesource} = $options->{filesource};
+	progress( msg => $file );
 	$s->parse_file( $file, $opts );
     }
 
@@ -861,6 +863,7 @@ sub app_setup {
           'help-config'         => sub { $manual = 2 },
           'manual'              => \$manual,
           'verbose|v+',
+	  I			=> sub { $clo->{progress_callback} = "warn" },
           'trace',
           'debug+',
 
@@ -899,6 +902,7 @@ sub app_setup {
 
     $clo->{trace} ||= $clo->{debug};
     $clo->{verbose} ||= $clo->{trace};
+    $clo->{progress_callback} //= "warn" if $clo->{verbose};
 
     unless ( $ok ) {
         # GNU convention: message to STDERR upon failure.

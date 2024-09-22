@@ -480,7 +480,7 @@ sub progress(%args) {
     state $callback;
     state $phase = "";
     state $index = 0;
-    state $total = 0;
+    state $total = '';
     unless ( %args ) {		# reset
 	undef $callback;
 	$phase = "";
@@ -499,7 +499,7 @@ sub progress(%args) {
 	$index = $args{index};
 
 	# Use index<0 to only set callback/phase.
-	$index = $total = 0, return if $index < 0;
+	$index = 0, $total = '', return if $index < 0;
     }
     if ( exists $args{total} ) {
 	$total = $args{total};
@@ -520,7 +520,7 @@ sub progress(%args) {
 	    # Simple progress message. Suppress if $index = 0 or total = 1.
 	    $callback =
 	      '%{index=0||' .
-	      '%{total=1||Progress[%{phase}]: %{index}/%{total}%{msg| - %{}}}' .
+	      '%{total=1||Progress[%{phase}]: %{index}%{total|/%{}}%{msg| - %{}}}' .
 	      '}';
 	}
 	my $msg = ChordPro::Output::Common::fmt_subst
