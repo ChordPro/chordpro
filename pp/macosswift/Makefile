@@ -1,14 +1,13 @@
 #!/bin/make -f
 
 CURRDATE := $(shell date "+%Y-%m-%d")
-VERSION := $(shell perl ../../lib/ChordPro/Version.pm)
-ROOT   := ../..
-COREDIR := ChordProMac/ChordProMac/Core
-MKDIR := mkdir
-DEST := build
-
+VERSION  := $(shell perl ../../lib/ChordPro/Version.pm)
+ROOT     := ../..
+COREDIR  := ChordProMac/ChordProMac/Core
+MKDIR    := mkdir
+DEST     := build
 # ARCH can be 'x86_64' for Intel or 'arm64' for Apple Silicon
-ARCH := x86_64
+ARCH     := $(shell uname -m)
 
 all : dmg
 
