@@ -17,6 +17,7 @@ use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
 use ChordPro::Wx::Utils;
 use Encode qw(encode_utf8);
+use ChordPro::Utils qw( is_macos );
 
 # BUilt-in descriptions for some notation systems.
 my $notdesc =
@@ -310,7 +311,8 @@ sub OnTmplFileDialog {
     my $fd = Wx::FileDialog->new
       ($self, _T("Choose template for new songs"),
        "", $self->GetParent->{prefs_tmplfile} || "",
-       "ChordPro files (*.cho,*.crd,*.chopro,*.chord,*.chordpro,*.pro)|*.cho;*.crd;*.chopro;*.chord;*.chordpro;*.pro|All files|*.*",
+       "ChordPro files (*.cho,*.crd,*.chopro,*.chord,*.chordpro,*.pro)|*.cho;*.crd;*.chopro;*.chord;*.chordpro;*.pro" .
+       ( is_macos ? ";*.txt" : "|All files|*.*" ),
        0|wxFD_OPEN|wxFD_FILE_MUST_EXIST,
        wxDefaultPosition);
     my $ret = $fd->ShowModal;

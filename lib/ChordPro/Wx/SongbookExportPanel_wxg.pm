@@ -78,7 +78,7 @@ sub new {
     $self->{l_cover} = Wx::StaticText->new($self->{sz_export_outer}->GetStaticBox(), wxID_ANY, _T("Cover"));
     $self->{sz_sbexp}->Add($self->{l_cover}, 0, wxALIGN_CENTER_VERTICAL, 0);
     
-    $self->{fp_cover} = Wx::FilePickerCtrl->new($self->{sz_export_outer}->GetStaticBox(), wxID_ANY, "", _T("Select PDF cover document"), _T("PDF files (*.pdf)|*.pdf|All files|*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL);
+    $self->{fp_cover} = Wx::FilePickerCtrl->new($self->{sz_export_outer}->GetStaticBox(), wxID_ANY, "", _T("Select PDF cover document"), _T("PDF files (*.pdf)|*.pdf"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL);
     $self->{fp_cover}->SetToolTip(_T("Select a PDF document to be prepended as cover page."));
     $self->{sz_sbexp}->Add($self->{fp_cover}, 0, wxEXPAND, 0);
     

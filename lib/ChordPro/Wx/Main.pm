@@ -19,7 +19,7 @@ use ChordPro;
 use ChordPro::Paths;
 use ChordPro::Wx::Utils;
 use ChordPro::Output::Common;
-use ChordPro::Utils qw( demarkup is_msw );
+use ChordPro::Utils qw( demarkup is_msw is_macos );
 use File::Temp qw( tempfile );
 use Encode qw(decode_utf8 encode_utf8);
 use File::Basename qw(basename);
@@ -95,6 +95,8 @@ sub new {
 	$menu->Append($tmp_menu, _T("File"));
     }
     $self->SetMenuBar($menu);
+
+    Wx::SystemOptions::SetOption("osx.openfiledialog.always-show-types", 1) if is_macos;
 
     $self;
 }

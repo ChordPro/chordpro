@@ -16,7 +16,7 @@ use parent qw( ChordPro::Wx::EditorPanel_wxg );
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
 use ChordPro::Wx::Utils;
-use ChordPro::Utils qw(demarkup);
+use ChordPro::Utils qw( demarkup is_macos );
 
 sub new {
     my( $self, $parent, $id, $pos, $size, $style, $name ) = @_;
@@ -72,7 +72,8 @@ sub opendialog {
     my $fd = Wx::FileDialog->new
       ($self, _T("Choose ChordPro file"),
        "", "",
-       "ChordPro files (*.cho,*.crd,*.chopro,*.chord,*.chordpro,*.pro)|*.cho;*.crd;*.chopro;*.chord;*.chordpro;*.pro|All files|*.*",
+       "ChordPro files (*.cho,*.crd,*.chopro,*.chord,*.chordpro,*.pro)|*.cho;*.crd;*.chopro;*.chord;*.chordpro;*.pro".
+       (is_macos ? ";*.txt" : "|All files|*.*"),
        0|wxFD_OPEN|wxFD_FILE_MUST_EXIST,
        wxDefaultPosition);
     my $ret = $fd->ShowModal;

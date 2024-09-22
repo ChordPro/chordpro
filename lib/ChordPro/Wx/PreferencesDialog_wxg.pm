@@ -63,7 +63,7 @@ sub new {
     $self->{cb_configfile} = Wx::CheckBox->new($self, wxID_ANY, _T("Custom config"));
     $self->{sizer_2}->Add($self->{cb_configfile}, Wx::GBPosition->new(2, 0), Wx::GBSpan->new(1, 1), wxALIGN_CENTER_VERTICAL, 5);
     
-    $self->{fp_customconfig} = Wx::FilePickerCtrl->new($self, wxID_ANY, "", _T("Choose config file"), _T("Config files (*.prp,*.json)|*.prp;*.json|All files|*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_OPEN|wxFLP_USE_TEXTCTRL);
+    $self->{fp_customconfig} = Wx::FilePickerCtrl->new($self, wxID_ANY, "", _T("Choose config file"), _T("Config files (*.prp,*.json)|*.prp;*.json"), wxDefaultPosition, wxDefaultSize, wxFLP_OPEN|wxFLP_USE_TEXTCTRL);
     $self->{sizer_2}->Add($self->{fp_customconfig}, Wx::GBPosition->new(2, 1), Wx::GBSpan->new(1, 1), wxEXPAND, 5);
     
     $self->{cb_customlib} = Wx::CheckBox->new($self, wxID_ANY, _T("Custom library"));
@@ -77,7 +77,7 @@ sub new {
     $self->{cb_tmplfile}->SetToolTipString(_T("Use a template for new songs."));
     $self->{sizer_2}->Add($self->{cb_tmplfile}, Wx::GBPosition->new(4, 0), Wx::GBSpan->new(1, 1), wxALIGN_CENTER_VERTICAL|wxEXPAND, 5);
     
-    $self->{fp_tmplfile} = Wx::FilePickerCtrl->new($self, wxID_ANY, "", _T("Choose template for new songs"), _T("ChordPro files (*.cho,*.crd,*.chopro,*.chord,*.chordpro,*.pro)|*.cho;*.crd;*.chopro;*.chord;*.chordpro;*.pro|All files|*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL);
+    $self->{fp_tmplfile} = Wx::FilePickerCtrl->new($self, wxID_ANY, "", _T("Choose template for new songs"), _T("ChordPro files (*.cho,*.crd,*.chopro,*.chord,*.chordpro,*.pro)|*.cho;*.crd;*.chopro;*.chord;*.chordpro;*.pro;*.txt"), wxDefaultPosition, wxDefaultSize, wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL);
     $self->{fp_tmplfile}->SetMinSize($self->{fp_tmplfile}->ConvertDialogSizeToPixels(Wx::Size->new(132, 14)));
     $self->{sizer_2}->Add($self->{fp_tmplfile}, Wx::GBPosition->new(4, 1), Wx::GBSpan->new(1, 1), wxEXPAND, 5);
     

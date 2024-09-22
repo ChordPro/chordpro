@@ -81,7 +81,7 @@
                                         <handler event="EVT_FILEPICKER_CHANGED">OnCustomConfigChanged</handler>
                                     </events>
                                     <style>wxFLP_USE_TEXTCTRL|wxFLP_OPEN</style>
-                                    <wildcard>Config files (*.prp,*.json)|*.prp;*.json|All files|*.*</wildcard>
+                                    <wildcard>Config files (*.prp,*.json)|*.prp;*.json</wildcard>
                                     <message>Choose config file</message>
                                 </object>
                             </object>
@@ -121,7 +121,7 @@
                                 <object class="wxFilePickerCtrl" name="fp_tmplfile" base="EditFilePickerCtrl">
                                     <size>132, 14d</size>
                                     <style>wxFLP_USE_TEXTCTRL|wxFLP_OPEN|wxFLP_FILE_MUST_EXIST</style>
-                                    <wildcard>ChordPro files (*.cho,*.crd,*.chopro,*.chord,*.chordpro,*.pro)|*.cho;*.crd;*.chopro;*.chord;*.chordpro;*.pro|All files|*.*</wildcard>
+                                    <wildcard>ChordPro files (*.cho,*.crd,*.chopro,*.chord,*.chordpro,*.pro)|*.cho;*.crd;*.chopro;*.chord;*.chordpro;*.pro;*.txt</wildcard>
                                     <message>Choose template for new songs</message>
                                 </object>
                             </object>
