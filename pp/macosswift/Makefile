@@ -1,11 +1,13 @@
 #!/bin/make -f
 
 CURRDATE := $(shell date "+%Y-%m-%d")
-VERSION := $(shell perl ../../lib/ChordPro/Version.pm)
-WRAPPERBIN := ChordProMac/ChordProMac/Bin
-DMGNAME := ChordPro-${VERSION}.dmg
-MKDIR := mkdir
-DEST := build
+VERSION  := $(shell perl ../../lib/ChordPro/Version.pm)
+ROOT     := ../..
+COREDIR  := ChordProMac/ChordProMac/Core
+MKDIR    := mkdir
+DEST     := build
+# ARCH can be 'x86_64' for Intel or 'arm64' for Apple Silicon
+ARCH     := $(shell uname -m)
 
 all : dmg
 
@@ -16,16 +18,14 @@ chordpro:
 	codesign --force -s - "../macos/build/libperl.dylib"
 	find  "../macos/build/" -name '*.bundle' -type f | while read bundle; do codesign --force -s - "$$bundle"; done
 	@echo "Copy core to the wrapper..."
-	rm -fr "${WRAPPERBIN}"
-	$(MKDIR) -p "${WRAPPERBIN}"
-	cp -r "../macos/build/chordpro" "${WRAPPERBIN}"
-	cp -r "../macos/build/libperl.dylib" "${WRAPPERBIN}"
-	cp -r "../macos/build/lib" "${WRAPPERBIN}"
-	cp -r "../macos/build/script" "${WRAPPERBIN}"
+	rm -fr "${COREDIR}"
+	$(MKDIR) -p "${COREDIR}"
+	cp -r "../macos/build/chordpro" "${COREDIR}"
+	cp -r "../macos/build/libperl.dylib" "${COREDIR}"
+	cp -r "../macos/build/lib" "${COREDIR}"
+	cp -r "../macos/build/script" "${COREDIR}"
 	@echo "Cleanup core..."
 	cd "../macos" && make clean TARGET=chordpro
-	@echo "Add core info to the wrapper..."
-	${WRAPPERBIN}/chordpro -A -A -A -> ${WRAPPERBIN}/ChordProInfo.json
 
 xcodebuild: chordpro
 	@echo "Building ChordProMac"
@@ -33,11 +33,11 @@ xcodebuild: chordpro
 	$(MKDIR) -p "${DEST}/XcodeSource"
 	cp -r "ChordProMac" "${DEST}/XcodeSource"
 	xcodebuild -project ${DEST}/XcodeSource/ChordProMac/ChordProMac.xcodeproj \
-		-arch x86_64 \
-		CODE_SIGN_IDENTITY="" \
-		CODE_SIGNING_REQUIRED=NO \
+		-arch ${ARCH} \
+		CODE_SIGN_IDENTITY="-" \
+		CODE_SIGNING_REQUIRED=YES \
 		BUILD_DIR=../../../build
-	rm -fr "${WRAPPERBIN}"
+	rm -fr "${COREDIR}"
 
 APPDIR := ${DEST}/ChordPro/ChordPro.app
 
@@ -48,16 +48,27 @@ archive: xcodebuild
 
 dmg : archive dmg1
 
+ifeq (${ARCH},x86_64)
+VOLTYPE := Intel
+DMGNAME := ChordPro-${VERSION}-macOS-INTEL.dmg
+else
+VOLTYPE := Apple Silicon
+DMGNAME := ChordPro-${VERSION}-macOS-ARM.dmg
+endif
+
 dmg1 :
-	rm -f "${DMGNAME}"
+	rm -f ${DMGNAME}
 	bash ../macos/create-dmg \
-	    --volname ChordPro \
-	    --volicon "${APPDIR}/Contents/Resources/lib/ChordPro/res/icons/chordpro.icns" \
+	    --volname "ChordPro (${VOLTYPE})" \
+	    --volicon "${APPDIR}/Contents/Resources/AppIcon.icns" \
 	    --window-pos 200 200 \
-	    --window-size 600 300 \
-	    --icon "ChordPro.app" 50 50 \
-	    --add-file "READ ME FIRST.html" "ChordProMac/Read Me First.html" 300 50 \
+	    --window-size 640 500 \
+	    --icon-size 64 \
+	    --add-file "READ ME FIRST.html" README.html 530 50 \
+	    --icon "ChordPro.app" 530 150 \
 	    --hide-extension "READ ME FIRST.html" \
+	    --app-drop-link 530 250 \
+	    --background "${ROOT}/lib/ChordPro/res/icons/chordpro-bg.png" \
 	    "${DMGNAME}" "${APPDIR}"
 
 clean ::

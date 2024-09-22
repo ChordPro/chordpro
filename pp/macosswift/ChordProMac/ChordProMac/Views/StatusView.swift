@@ -10,15 +10,20 @@ import SwiftUI
 /// SwiftUI `View` wit the status of the scene
 struct StatusView: View {
     /// The observable state of the application
-    @EnvironmentObject private var appState: AppState
+    @EnvironmentObject private var appState: AppStateModel
     /// The observable state of the scene
-    @EnvironmentObject private var sceneState: SceneState
+    @EnvironmentObject private var sceneState: SceneStateModel
     /// The body of the `View`
     var body: some View {
         HStack {
             if !appState.settings.chordPro.configLabel.isEmpty {
                 Text("**Configuration:** \(appState.settings.chordPro.configLabel)")
             }
+
+            if let localConfigURL = sceneState.localConfigURL, !appState.settings.chordPro.noDefaultConfigs {
+                Text("**Local:** \(localConfigURL.deletingPathExtension().lastPathComponent)")
+            }
+
             if appState.settings.chordPro.transpose && appState.settings.chordPro.transposeMakesSense {
                 Text("**Transpose:** \(appState.settings.chordPro.transposeLabel)")
             }
@@ -43,5 +48,9 @@ struct StatusView: View {
         .padding(.bottom, 4)
         .animation(.default, value: appState.settings)
         .animation(.default, value: sceneState.exportStatus)
+        .errorAlert(error: $sceneState.alertError, log: $sceneState.showLog)
+        .sheet(isPresented: $sceneState.showLog) {
+            LogView()
+        }
     }
 }

@@ -78,7 +78,10 @@ extension ChordProEditor {
             /// Go to all paragraphs
             if let visibleSwiftRange = Range(visibleGlyphRange, in: textView.string) {
 
-                textView.string.enumerateSubstrings(in: visibleSwiftRange, options: [.byParagraphs]) { _, substringRange, _, _ in
+                textView.string.enumerateSubstrings(
+                    in: visibleSwiftRange,
+                    options: [.byParagraphs]
+                ) { _, substringRange, _, _ in
                     let nsRange = NSRange(substringRange, in: textView.string)
                     let paragraphRect = layoutManager.boundingRect(forGlyphRange: nsRange, in: textContainer)
                     /// Set the marker rect

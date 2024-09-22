@@ -17,7 +17,7 @@ public enum UserFileBookmark {
 extension UserFileBookmark {
 
     /// Get an optional bookmark URL
-    /// - Parameter bookmark: The ``CustomFile``
+    /// - Parameter bookmark: The ``UserFile``
     /// - Returns: An URL if found
     public static func getBookmarkURL<T: UserFile>(_ bookmark: T) -> URL? {
         guard let bookmarkData = UserDefaults.standard.data(forKey: bookmark.id) else {
@@ -71,7 +71,7 @@ extension UserFileBookmark {
     /// - Note: Always call this function after you are done with the access or else Apple will be really upset!
     public static func stopCustomFileAccess(persistentURL: URL) {
         Task {
-            try? await Task.sleep(nanoseconds: 5_000_000_000)
+            try? await Task.sleep(nanoseconds: 500_000_000_000)
             persistentURL.stopAccessingSecurityScopedResource()
             Logger.fileAccess.info("Stopped access to '\(persistentURL.lastPathComponent, privacy: .public)'")
         }

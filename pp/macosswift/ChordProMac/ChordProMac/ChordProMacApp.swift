@@ -9,17 +9,35 @@ import SwiftUI
 
 /// SwiftUI `Scene` for **ChordProMac**
 @main struct ChordProMacApp: App {
-    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    /// The AppDelegate to bring additional Windows into the SwiftUI world
+    @NSApplicationDelegateAdaptor(AppDelegateModel.self) var appDelegate
     /// The observable state of the application
-    @StateObject private var appState = AppState()
+    @StateObject private var appState = AppStateModel.shared
     /// The body of the `Scene`
     var body: some Scene {
-        DocumentGroup(newDocument: ChordProDocument()) { file in
-            ContentView(file: file.fileURL)
-                .frame(minWidth: 680, minHeight: 480)
-                .environmentObject(appState)
-            /// Give the scene access to the document.
-                .focusedSceneValue(\.document, file)
+
+        // MARK: Song Document View
+
+        DocumentGroup(newDocument: ChordProDocument(text: appState.newDocumentContent)) { file in
+            if file.fileURL == nil && file.document.text.isEmpty {
+                ProgressView()
+                    .withHostingWindow { window in
+                        window?.alphaValue = 0
+                        window?.close()
+                        appDelegate.showWelcomeWindow()
+                    }
+            } else {
+                MainView(file: file.fileURL)
+                    .frame(minWidth: 680, minHeight: 480)
+                    .environmentObject(appState)
+                /// Give the scene access to the document
+                    .focusedSceneValue(\.document, file)
+                    .task {
+                        appDelegate.closeWelcomeWindow()
+                        /// Reset the new content
+                        appState.newDocumentContent = ""
+                    }
+            }
         }
         .commands {
             CommandGroup(replacing: CommandGroupPlacement.appInfo) {
@@ -28,65 +46,38 @@ import SwiftUI
                 }
             }
 #if DEBUG
-            CommandGroup(after: .appInfo) {
-                Divider()
-                ResetApplicationButtonView()
+            CommandMenu("Debug") {
+                DebugButtons()
             }
 #endif
             CommandGroup(after: .importExport) {
-                ExportSongView(label: "Export as PDF…")
+                ExportSongButton(label: "Export as PDF…")
                     .environmentObject(appState)
                 Divider()
-                PrintPDFView(label: "Print…")
+                PrintPDFButton(label: "Print…")
                     .environmentObject(appState)
             }
+            CommandMenu("Songbook") {
+                Button("Export Folder…") {
+                    appDelegate.closeWelcomeWindow()
+                    appDelegate.showExportSongbookWindow()
+                }
+            }
             CommandMenu("Tasks") {
-                TaskMenuView()
+                TaskMenuButtons()
             }
             CommandGroup(replacing: .help) {
-                HelpButtonsView()
+                HelpButtons()
                     .environmentObject(appState)
             }
         }
+
+        // MARK: Settings View
+
         Settings {
             SettingsView()
                 .frame(width: 300, height: 440)
                 .environmentObject(appState)
         }
-    }
-}
-
-/// SwiftUI `View` with a `Button` to reset the application
-public struct ResetApplicationButtonView: View {
-    /// Init the `View`
-    public init() {}
-    /// The body of the `View`
-    public var body: some View {
-        Button(
-            action: {
-                /// Remove user defaults
-                if let bundleID = Bundle.main.bundleIdentifier {
-                    UserDefaults.standard.removePersistentDomain(forName: bundleID)
-                }
-                /// Delete the cache
-                let manager = FileManager.default
-                if let cacheFolderURL = manager.urls(
-                    for: .cachesDirectory,
-                    in: .userDomainMask
-                ).first {
-                    try? manager.removeItem(at: cacheFolderURL)
-                    try? manager.createDirectory(
-                        at: cacheFolderURL,
-                        withIntermediateDirectories: false,
-                        attributes: nil
-                    )
-                }
-                /// Terminate the application
-                NSApp.terminate(nil)
-            },
-            label: {
-                Text("Reset Application")
-            }
-        )
     }
 }

@@ -11,8 +11,8 @@ import SwiftUI
 @MainActor struct AboutView: View {
     /// Bool to show the sheet with additional info
     @State private var showMoreInfo: Bool = false
-    /// The **ChordPro** information
-    @State private var chordProInfo: ChordProInfo?
+    /// The observable state of the application
+    @StateObject private var appState = AppStateModel.shared
     /// The body of the `View`
     var body: some View {
         VStack(spacing: 10) {
@@ -21,8 +21,8 @@ import SwiftUI
                 .frame(width: 80, height: 80)
             Text("ChordPro")
                 .font(.system(size: 20, weight: .bold))
-            Text("ChordPro \(chordProInfo?.general.chordpro.version ?? "…")")
-            Text(chordProInfo?.general.chordpro.aux ?? "…")
+            Text("ChordPro \(appState.chordProInfo?.general.chordpro.version ?? "…")")
+            Text(appState.chordProInfo?.general.chordpro.aux ?? "…")
                 .font(.caption)
             Text("The reference implementation of the **ChordPro** format")
                 .multilineTextAlignment(.center)
@@ -30,11 +30,11 @@ import SwiftUI
             Button("More Info…") {
                 Task {
                     /// Update the info because settings might have changed
-                    chordProInfo = await getInfo()
+                    appState.chordProInfo = await getInfo()
                     showMoreInfo = true
                 }
             }
-            .disabled(chordProInfo == nil)
+            .disabled(appState.chordProInfo == nil)
             Text("Copyright 2016,2024 Johan Vromans\n<jvromans@squirrel.nl>")
                 .font(.caption)
                 .multilineTextAlignment(.center)
@@ -42,13 +42,12 @@ import SwiftUI
         .padding()
         .frame(minWidth: 280, minHeight: 330)
         .sheet(isPresented: $showMoreInfo) {
-            if let chordProInfo {
+            if let chordProInfo = appState.chordProInfo {
                 MoreInfoView(chordProInfo: chordProInfo, showMoreInfo: $showMoreInfo)
             }
         }
-        .animation(.default, value: chordProInfo)
         .task {
-            chordProInfo = await getInfo()
+            appState.chordProInfo = await getInfo()
         }
     }
 
