@@ -122,7 +122,7 @@ pp/macosswift/ChordProMac/ChordProMac.xcodeproj/xcuserdata/Desbeers.xcuserdatad/
 pp/macosswift/Makefile
 pp/macosswift/README.html
 pp/pp2ppl.pl
-pp/windows/Makefile
+pp/windows/GNUmakefile
 pp/windows/chordpro.pp
 pp/windows/chordpro.rc
 pp/windows/chordproinst.bmp
@@ -131,5 +131,5 @@ pp/windows/innosetup.iss
 pp/windows/innosetup_par.iss
 pp/windows/ppl.c
 pp/windows/vfix.pl
-pp/windows/wxchordpro.pp
+pp/windows/wxchordpro_pp.pl
 pp/windows/wxchordpro.rc

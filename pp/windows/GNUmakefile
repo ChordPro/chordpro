@@ -25,7 +25,8 @@ chordpro.exe : chordpro.pp
 # PATH must be set accordingly.
 # To set PATH from the makefile, we need .ONESHELL pseudo target above.
 
-wxchordpro.exe : chordpro.pp wxchordpro.pp
+wxchordpro.exe : chordpro.pp ${COMMON}/chordpro.pp ${COMMON}/wxchordpro.pp
+	perl wxchordpro_pp.pl -o wxchordpro.pp
 	${PP} --output=wxchordpro.exe @wxchordpro.pp ${SCRIPT}/wxchordpro.pl
 
 clean ::
