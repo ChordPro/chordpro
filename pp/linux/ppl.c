@@ -12,7 +12,7 @@ static pTHX;
 
 /* Set up DynaLoader so modules can load modules. */
 
-static void xs_init(pTHX);
+EXTERN_C void xs_init(pTHX);
 
 /* Main. */
 
@@ -21,7 +21,7 @@ static char selfpath[PATH_MAX];	/* /foo/bar */
 int main( int argc, char **argv, char **env ) {
 
   // Make ourselves known.
-  putenv( "PPL_PACKAGED=1.00" );
+  putenv( (char*)"PPL_PACKAGED=1.00" );
 
   /* Assuming the program binary   /foo/bar/blech */
   char scriptname[PATH_MAX];	/* blech */
