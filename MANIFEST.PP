@@ -21,8 +21,10 @@ pp/macos/README.html
 pp/macos/chordpro.pp
 pp/macos/chordpro.icns
 pp/macos/chordpro-doc.icns
+pp/macos/chordpro-dmg.icns
 pp/macos/create-dmg
 pp/macos/dndhandler.cpp
+pp/macos/dndhandler.swift
 pp/macos/reloc.pl
 pp/macos/wxchordpro_pp.pl
 pp/macosswift/ChordProMac/ChordProMac/AppKitUtils/AppKitUtils+openPanel.swift

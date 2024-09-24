@@ -99,11 +99,9 @@ lib/ChordPro/res/examples/mollymalone.json
 lib/ChordPro/res/examples/swinglow.cho
 lib/ChordPro/res/fonts/ChordProSymbols.ttf
 lib/ChordPro/res/icons/chordpro-bg.png
-lib/ChordPro/res/icons/chordpro-doc.icns
 lib/ChordPro/res/icons/chordpro-doc.ico
 lib/ChordPro/res/icons/chordpro-doc.png
 lib/ChordPro/res/icons/chordpro-doc.svg
-lib/ChordPro/res/icons/chordpro.icns
 lib/ChordPro/res/icons/chordpro.ico
 lib/ChordPro/res/icons/chordpro.png
 lib/ChordPro/res/icons/chordpro.svg
