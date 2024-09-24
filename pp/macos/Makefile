@@ -133,7 +133,7 @@ dmg1 :
 	rm -f ${DMGNAME}
 	bash ./create-dmg \
 	    --volname "ChordPro ${VOLTYPE}" \
-	    --volicon "${APPDIR}/Contents/Resources/chordpro.icns" \
+	    --volicon chordpro-dmg.icns \
 	    --window-pos 200 200 \
 	    --window-size 640 500 \
 	    --icon-size 64 \
