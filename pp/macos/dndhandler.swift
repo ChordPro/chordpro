@@ -28,11 +28,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     /// Set the arguments and create a window with **wxchordpro**
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         let path = Bundle.main.executablePath?.replacingOccurrences(of: "dndhandler", with: "wxchordpro")
-        if let path {
+        if let path = path {
             /// We *must* create arguments and the first one is the path to the executable
             var args: [String] = ["\(path)"]
             /// Add the optional file URL as second argument
-            if let open {
+            if let open = open {
                 args.append("\(open.path)")
             }
             /// Black magic
