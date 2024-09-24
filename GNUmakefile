@@ -49,7 +49,7 @@ to_tmp : resources
 	done
 
 # Windows 10, for Windows installer builds.
-WINDIR := /Users/Johan/${PROJECT}
+WINDIR := /Users/Johan/Documents/${PROJECT}
 WINDST := /mnt/c${WINDIR}
 #WINDST := w10:${PROJECT}
 to_win : resources
@@ -63,7 +63,7 @@ to_win : resources
 
 # macOS Cataline 10.15, for classic builds.
 MACHOST := macky
-MACDST  := ${MACHOST}:${PROJECT}
+MACDST  := ${MACHOST}:Documents/${PROJECT}
 to_mac : resources
 	for mnf in ${STDMNF} MANIFEST.WX ; do \
 	    rsync ${RSYNC_ARGS} --files-from=$$mnf ./ ${MACDST}/; \
@@ -74,7 +74,7 @@ to_mac : resources
 	  ./ ${MACDST}/
 
 # macOS Monterey 12/7/5, for Swift GUI builds.
-MACCHODST  := maccho:${PROJECT}
+MACCHODST  := maccho:Documents/${PROJECT}
 to_maccho : resources
 	for mnf in ${STDMNF} ; do \
 	    rsync ${RSYNC_ARGS} --files-from=$$mnf ./ ${MACCHODST}/; \
