@@ -466,7 +466,7 @@ sub preview {
 	push( @ARGV, '--config', $self->{prefs_configfile} );
 
     }
-    if ( $self->{prefs_enablecustomlib} ) {
+    if ( $self->{prefs_enable_customlib} ) {
 	$ENV{CHORDPRO_LIB} = $self->{prefs_customlib};
     }
 
@@ -510,7 +510,7 @@ sub preview {
 	      if ( $ctl{index} == 0 ) {
 		  return 1 unless ($ctl{total}||0) > 1;
 		  $dialog = Wx::ProgressDialog->new
-		    ( 'Processing...',
+		    ( "Processing...",
 		      'Starting',
 		      $ctl{total}, $self,
 		      wxPD_CAN_ABORT|wxPD_AUTO_HIDE|wxPD_APP_MODAL|
