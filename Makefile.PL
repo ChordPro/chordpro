@@ -46,11 +46,20 @@ WriteMakefile
  # Always require PDF::API2 or PDF::Builder and Text::Layout.
  PREREQ_PM      => {
 		    @pdfapi,
+
 		    'Text::Layout'		  => 0.038,
+		    # Optional for Text::Layout; let's have it.
+		    'HarfBuzz::Shaper'		  => 0.026,
+
 		    'JSON::PP'			  => 2.27203,
 		    'JSON::XS'			  => 4.03,
 		    'String::Interpolate::Named'  => 1.030,
+
 		    'File::LoadLines'		  => 1.044,
+		    # Optional for File::LoadLines; let's have it.
+		    'LWP::Protocol::https'	  => 6.14,
+		    'Mozilla::CA'		  => 20230801,
+
 		    'File::HomeDir'		  => 1.004,
 		    'Image::Info'		  => 1.41,
 		    'List::Util'		  => 1.46,
@@ -59,8 +68,10 @@ WriteMakefile
 		    'Object::Pad'                 => 0.78,
 		    'JavaScript::QuickJS'         => 0.18,
 		    'Ref::Util'			  => 0.204,
-		   # Some distro's have removed this from the core.
+
+		    # Some distro's have removed this from the core.
 		    'Pod::Usage'		  => 2.03,
+
 		   # These are only used by the LaTeX backend
 		   # 'Template'			  => 3.010,
 		   # 'LaTeX::Encode'		  => 0.092.0,
