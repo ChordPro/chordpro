@@ -87,6 +87,9 @@ sub new {
     $self->SetTitle("ChordPro");
     $self->SetIcon( Wx::Icon->new(CP->findres( "chordpro-icon.png", class => "icons" ), wxBITMAP_TYPE_ANY) );
 
+    # For the initial panel, suppress the menubar by providing an empty one.
+    # On Windows this causes a problem with the layout, so we'll provide
+    # a dummy menubar.
     my $menu = Wx::MenuBar->new;
     if ( is_msw ) {
 	my $tmp_menu;
@@ -96,7 +99,11 @@ sub new {
     }
     $self->SetMenuBar($menu);
 
-    Wx::SystemOptions::SetOption("osx.openfiledialog.always-show-types", 1) if is_macos;
+    # MacOS file dialogs always filters with all wildcards. So if there is
+    # an "All files|*.*" at the end, all file will match.
+    # So either remove the *.* or use the following code:
+    Wx::SystemOptions::SetOption("osx.openfiledialog.always-show-types", 1)
+	if 0 && is_macos;
 
     $self;
 }
