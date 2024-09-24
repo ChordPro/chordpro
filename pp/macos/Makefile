@@ -11,8 +11,10 @@ SCRIPT := ${ROOT}/script
 DEST   := build
 VERSION := $(shell perl ../../lib/ChordPro/Version.pm)
 TARGET := wxchordpro
+# Check if we build on Intel or ARM
 ARCH   := $(shell uname -m)
-
+# Use C++ (dndhandler.cpp) or Swift (dndhandler.swift) for the dndhandler 
+DNDHANDLER := cpp
 PP := pp
 
 default : dmg
@@ -69,9 +71,13 @@ _loaders : "${DEST}/chordpro"
 
 "${DEST}/wxchordpro" : ${BASE}/ppl.c dndhandler.cpp
 	${CC} -DMACOS ${CCOPTS} -o "${DEST}/wxchordpro" -L${DEST} ${LDOPTS} ${BASE}/ppl.c
+ifeq (${DNDHANDLER},cpp)
 	${CXX} -mmacosx-version-min=10.15 -DMACOS -o "${DEST}/dndhandler" \
 		dndhandler.cpp `${WXCNFG} --cxxflags --libs`
 	perl ./reloc.pl "${DEST}/dndhandler"
+else
+	swiftc dndhandler.swift -target ${ARCH}-apple-macos10.15 -o "${DEST}/dndhandler"
+endif
 
 "${DEST}/chordpro" : ${BASE}/ppl.c
 	${CC} -DMACOS ${CCOPTS} -o "${DEST}/chordpro" -L${DEST} ${LDOPTS} ${BASE}/ppl.c
