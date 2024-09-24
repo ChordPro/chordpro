@@ -108,8 +108,23 @@ BUILD {
     $privlib = $INC{'ChordPro.pm'} =~ s/\.pm$/\/lib/r;
 
     # Now for the resources.
+    $self->setup_resdirs;
+
+    # Check for packaged image.
+    for ( qw( Docker AppImage PPL ) ) {
+	next unless exists $ENV{uc($_)."_PACKAGED"}
+	  && $ENV{uc($_)."_PACKAGED"};
+	$packager = $_;
+	last;
+    }
+
+};
+
+# We need this to be able to re-establish the resdirs, e.g. after a change
+# of CHORDPRO_LIB.
+method setup_resdirs {
     $resdirs = [];
-    @try = ();
+    my @try = ();
     push( @try, $self->path($ENV{CHORDPRO_LIB}) )
       if defined($ENV{CHORDPRO_LIB});
     push( @try, $configdir ) if $configdir;
@@ -132,16 +147,7 @@ BUILD {
     unless ( @$resdirs ) {
 	warn("Paths: Cannot find resources, prepare for disaster\n");
     }
-
-    # Check for packaged image.
-    for ( qw( Docker AppImage PPL ) ) {
-	next unless exists $ENV{uc($_)."_PACKAGED"}
-	  && $ENV{uc($_)."_PACKAGED"};
-	$packager = $_;
-	last;
-    }
-
-};
+}
 
 method debug {
     # We need to take an env var into account, since the Paths

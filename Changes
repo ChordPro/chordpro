@@ -13,7 +13,8 @@
     - (Wx) Rework initial screen.
     - Progress reporting. Options ``progress_callabck and -I. Also
       enabled with --verbose.
-
+    - (Wx) Fix problem with incorrect resource path after CHORDPRO_LIB change.
+    
 6.060 2024-08-24
 
     !Highlights

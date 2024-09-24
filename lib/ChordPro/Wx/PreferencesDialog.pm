@@ -191,7 +191,7 @@ sub store_prefs {
 
     # Custom library.
     $parent->{prefs_enable_customlib} = $self->{cb_customlib}->IsChecked;
-    $parent->{prefs_customlib}        = $ENV{CHORDPRO_LIB} // $self->{dp_customlibrary}->GetPath;
+    $parent->{prefs_customlib}        = $self->{dp_customlibrary}->GetPath;
 
     # New song template.
     $parent->{prefs_enable_tmplfile} = $self->{cb_tmplfile}->IsChecked;
@@ -282,22 +282,6 @@ sub OnCustomLib {
     my ( $self, $event ) = @_;
     my $n = $self->{cb_customlib}->IsChecked;
     $self->{dp_customlibrary}->Enable($n);
-}
-
-sub OnCustomLibDialog {
-    my ( $self, $event ) = @_;
-    my $fd = Wx::DirDialog->new
-      ($self, _T("Choose custom library"),
-       $self->GetParent->{prefs_customlib} || "",
-       0|wxDD_DIR_MUST_EXIST,
-       wxDefaultPosition);
-    my $ret = $fd->ShowModal;
-    if ( $ret == wxID_OK ) {
-	my $file = $fd->GetPath;
-	$self->{t_customlibdialog}->SetValue($file);
-	$ENV{CHORDPRO_LIB} = $file;
-    }
-    $fd->Destroy;
 }
 
 sub OnTmplFile {

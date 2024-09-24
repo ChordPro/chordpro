@@ -192,7 +192,7 @@ sub init {
 
        # Custom library.
        enable_customlib => 0,
-       customlib        => $ENV{CHORDPRO_LIB} // "",
+       customlib        => "",
 
        # New song template.
        enable_tmplfile => 0,
@@ -251,6 +251,7 @@ sub init {
     $self->{_trace}   = $options->{trace};
     $self->{_debug}   = $options->{debug};
     $self->{_log}     = $options->{log};
+    $self->{_customlib} = delete $ENV{CHORDPRO_LIB};
 
     $self->SetStatusBar(undef);
 
@@ -466,9 +467,11 @@ sub preview {
 	push( @ARGV, '--config', $self->{prefs_configfile} );
 
     }
+    delete $ENV{CHORDPRO_LIB};
     if ( $self->{prefs_enable_customlib} ) {
 	$ENV{CHORDPRO_LIB} = $self->{prefs_customlib};
     }
+    CP->setup_resdirs;
 
     if ( $self->{prefs_xcode} ) {
 	$haveconfig++;
@@ -494,6 +497,7 @@ sub preview {
     if ( $self->{_trace} || $self->{_debug}
 	 || $self->{_verbose} && $self->{_verbose} > 1 ) {
 	warn( "Command line: @ARGV\n" );
+	warn( "CHORDPRO_LIB: $ENV{CHORDPRO_LIB}\n" ) if $ENV{CHORDPRO_LIB};
 	warn( "$_\n" ) for split( /\n+/, _aboutmsg() );
     }
     my $options;
