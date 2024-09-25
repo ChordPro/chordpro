@@ -36,7 +36,7 @@ use strict 'refs';
 ################ ################
 
 sub panels {
-    my @panels = qw( p_edit p_sbexport p_msg );
+    my @panels = qw( p_edit p_sbexport p_msg p_preview );
     wantarray ? @panels : \@panels;
 }
 

@@ -16,6 +16,7 @@
 --link=libwx_gtk3u_propgrid-3.2.so.0
 --link=libwx_gtk3u_ribbon-3.2.so.0
 --link=libwx_gtk3u_richtext-3.2.so.0
+--link=libwx_gtk3u_stc-3.2.so.0
 
 # And more...
 --link=libpng16.so.16

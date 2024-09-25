@@ -37,7 +37,7 @@ for ( sort Alien::wxWidgets->shared_libraries ) {
     my $lib = "$prefix/lib/$_";
     warn("Skipped: $_\n"),next unless -f $lib;
     warn("Not needed: $_\n"),next
-      if $lib =~ /[-_](gl|xrc|stc)[-_]/;
+      if $lib =~ /[-_](gl|xrc)[-_]/;
     $lib =~ s/\\/\//g if is_msw;
     print( "--link=$lib\n");
     if ( /_webview[-_]/ ) {

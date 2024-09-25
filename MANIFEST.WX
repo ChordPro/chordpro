@@ -11,6 +11,9 @@ lib/ChordPro/Wx/MessagesPanel_wxg.pm
 lib/ChordPro/Wx/PreferencesDialog.pm
 lib/ChordPro/Wx/PreferencesDialog.wxg
 lib/ChordPro/Wx/PreferencesDialog_wxg.pm
+lib/ChordPro/Wx/PreviewPanel.pm
+lib/ChordPro/Wx/PreviewPanel.wxg
+lib/ChordPro/Wx/PreviewPanel_wxg.pm
 lib/ChordPro/Wx/RenderDialog.pm
 lib/ChordPro/Wx/RenderDialog.wxg
 lib/ChordPro/Wx/RenderDialog_wxg.pm

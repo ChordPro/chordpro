@@ -18,6 +18,8 @@ use Wx::Locale gettext => '_T';
 use ChordPro::Wx::Utils;
 use ChordPro::Utils qw( demarkup is_macos );
 
+my $stc;
+
 sub new {
     my( $self, $parent, $id, $pos, $size, $style, $name ) = @_;
     $parent = undef              unless defined $parent;
@@ -34,6 +36,16 @@ sub new {
     $self->{t_source}->OSXDisableAllSmartSubstitutions
       if $self->{t_source}->can("OSXDisableAllSmartSubstitutions");
 
+    # Try Styled Text Control (Scintilla).
+    $stc = eval { use Wx::STC; 1 };
+    if ( $stc ) {
+	$self->setup_scintilla;
+    }
+    else {
+	# Fallback to placeholder Wx::TextCtrl.
+	# Fortunately, most methods are compatible.
+    }
+
     $self->Layout;
     return $self;
 
@@ -42,6 +54,90 @@ sub new {
 sub log {
     my $self = shift;
     wxTheApp->GetTopWindow->log(@_);
+}
+
+################ API Functions ################
+
+sub setup_scintilla {
+    my ( $self ) = @_;
+
+    # Replace the placeholder Wx::TextCtrl.
+    my $stc = Wx::StyledTextCtrl->new( $self->{sz_source}->GetStaticBox,
+				       wxID_ANY );
+    $self->{sz_source}->Replace( $self->{t_source}, $stc, 1 );
+    $self->{t_source}->Destroy;
+    $self->{t_source} = $stc;
+    $self->{sz_source}->Layout;
+    $stc->SetLexer(wxSTC_LEX_CONTAINER);
+    $stc->SetKeyWords(0, [ "title",
+			   "subtitle",
+			   "album",
+			   "arranger",
+			   "artist",
+			   "capo",
+			   "composer",
+			   "copyright",
+			   "duration",
+			   "key",
+			   "lyricist",
+			   "sorttitle",
+			   "tempo",
+			   "time",
+			   "year",
+			   "chord",
+			   "end_of_grid",
+			   "new_physical_page",
+			   "start_of_bridge",
+			   "titles",
+			   "end_of_tab",
+			   "define",
+			   "column_break",
+			   "grid",
+			   "new_page",
+			   "comment",
+			   "columns",
+			   "start_of_verse",
+			   "image",
+			   "comment_box",
+			   "comment_italic",
+			   "highlight",
+			   "no_grid",
+			   "diagrams",
+			   "start_of_tab",
+			   "meta",
+			   "chorus",
+			   "pagesize",
+			   "new_song",
+			   "start_of_grid",
+			   "transpose",
+			   "end_of_bridge",
+			   "pagetype",
+			   "end_of_verse",
+			   "start_of_chorus",
+			   "end_of_chorus"
+			 ]);
+
+    Wx::Event::EVT_STC_STYLENEEDED($self, -1, $self->can('OnStyleNeeded'));
+
+    $stc->StyleClearAll;
+    # 0 - basic
+    # 1 - comments
+    $stc->StyleSetSpec( 1, "bold,fore:grey" );
+    # 2 - Keywords
+    $stc->StyleSetSpec( 2, "bold,fore:grey" );
+    # 3 - Brackets
+    $stc->StyleSetSpec( 3, "bold,fore:grey" );
+    # 4 - Chords
+    $stc->StyleSetSpec( 4, "fore:red" );
+    # 5 - Directives
+    $stc->StyleSetSpec( 5, "bold,fore:indigo" );
+    # 6 - Directive arguments
+    $stc->StyleSetSpec( 6, "fore:orange" );
+
+    # For linenumbers.
+    $stc->SetMarginType( 1, wxSTC_MARGIN_NUMBER );
+    $stc->SetMarginMask( 1, 0 );
+    $stc->SetMarginWidth( 1, 40 ); # TODO
 }
 
 ################ API Functions ################
@@ -111,14 +207,14 @@ sub openfile {
     }
     #### TODO: Get rid of selection on Windows
     $self->{_currentfile} = $file;
-    if ( $self->{t_source}->GetValue =~ /^\{\s*t(?:itle)?[: ]+([^\}]*)\}/m ) {
+    if ( $self->{t_source}->GetText =~ /^\{\s*t(?:itle)?[: ]+([^\}]*)\}/m ) {
 	my $title = demarkup($1);
-	my $n = $self->{t_source}->GetNumberOfLines;
+	my $n = $self->{t_source}->GetLineCount;
 	$self->log( 'S', "Loaded: $title ($n line" . ( $n == 1 ? "" : "s" ) . ")");
 	$self->{sz_source}->GetStaticBox->SetLabel($title);
     }
     else {
-	my $n = $self->{t_source}->GetNumberOfLines;
+	my $n = $self->{t_source}->GetLineCount;
 	$self->log( 'S', "Loaded: $file ($n line" . ( $n == 1 ? "" : "s" ) . ")");
     }
     $self->SetTitle( $self->{_windowtitle} = $file);
@@ -148,7 +244,7 @@ sub newfile {
 	    $content = "# Error opening template $file: $!\n\n" . $content;
 	}
      }
-    $self->{t_source}->SetValue($content) unless $content eq "";
+    $self->{t_source}->SetText($content) unless $content eq "";
     $self->{t_source}->SetModified(0);
     $self->log( 'S', "New file");
     $self->{prefs_xpose} = 0;
@@ -276,6 +372,75 @@ sub OnShowMessages {
     $self->{b_msgs}->SetBackgroundColour(wxNullColour);
     $self->GetParent->{_prev_mode} = "EDIT";
     $self->GetParent->select_mode("MSGS");
+}
+
+sub OnStyleNeeded {
+    my ( $self, $event ) = @_;
+    my $stc = $self->{t_source};
+    my $start = $stc->GetEndStyled;
+
+    # Scintilla uses byte indices.
+    use Encode;
+    my $text  = Encode::encode_utf8($stc->GetText);
+
+    while ( $text =~ /^(#.*)/gm ) {
+	my $l = length($1);
+	$stc->StartStyling( pos($text)-$l, 0 );
+	$stc->SetStyling( $l, 1 );
+    }
+
+    pos($text) = 0;
+    while ( $text =~ /^\{([-\w!]+)([: ]+)(.*)\}/gm ) {
+	$stc->StartStyling( pos($text)-length($1.$2.$3)-2, 0 );
+	$stc->SetStyling( 1, 3 );
+	$stc->StartStyling( pos($text)-length($1.$2.$3)-1, 0 );
+	$stc->SetStyling( length($1), 5 );
+	$stc->StartStyling( pos($text)-length($2.$3)-1, 0 );
+	$stc->SetStyling( length($2), 3 );
+	$stc->StartStyling( pos($text)-length($3)-1, 0 );
+	$stc->SetStyling( length($3), 6 );
+	$stc->StartStyling( pos($text)-1, 0 );
+	$stc->SetStyling( 1, 3 );
+    }
+
+    pos($text) = 0;
+    while ( $text =~ /\[(.*?)\]/gm ) {
+	$stc->StartStyling( pos($text)-length($1)-2, 0 );
+	$stc->SetStyling( 1, 3 );
+	$stc->StartStyling( pos($text)-length($1)-1, 0 );
+	$stc->SetStyling( length($1), 4 );
+	$stc->StartStyling( pos($text)-1, 0 );
+	$stc->SetStyling( 1, 3 );
+    }
+}
+
+################ Compatibility ################
+
+# This is to facilitate swapping between TextCtrl and Scintilla.
+
+sub Wx::StyledTextCtrl::SetFont {
+    $_[0]->StyleSetFont( $_, $_[1] ) for 0..6;
+}
+
+sub Wx::StyledTextCtrl::GetFont {
+    $_[0]->StyleGetFont(0, $_[1]);
+}
+
+# IsModified, MarkDirty and DiscardEdits need custom patches.
+sub Wx::StyledTextCtrl::SetModified {
+    $_[1] ? $_[0]->MarkDirty : $_[0]->DiscardEdits;
+}
+
+sub Wx::TextCtrl::GetText {
+    $_[0]->GetValue;
+}
+
+sub Wx::TextCtrl::SetText {
+    $_[0]->SetValue;
+}
+
+sub Wx::TextCtrl::GetLineCount {
+    $_[0]->GetNumberOfLines;
 }
 
 1;

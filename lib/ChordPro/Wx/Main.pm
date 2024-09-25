@@ -105,6 +105,9 @@ sub new {
     Wx::SystemOptions::SetOption("osx.openfiledialog.always-show-types", 1)
 	if 0 && is_macos;
 
+    $self->log( 'I', "Using " .
+		( ref($self->{p_edit}{t_source}) eq 'Wx::TextCtrl'
+		  ? "basic" : "styled") . " text editor" );
     $self;
 }
 
@@ -139,6 +142,9 @@ sub select_mode {
     }
     if ( $mode eq "msgs" ) {
 	$self->{$_}->Show( $_ eq "p_msg" ) for @panels;
+    }
+    elsif ( $mode eq "preview" ) {
+	$self->{$_}->Show( $_ eq "p_preview" ) for @panels;
     }
     elsif ( $mode eq "sbex" ) {
 	$self->{$_}->Show( $_ eq "p_sbexport" ) for @panels;
@@ -551,6 +557,8 @@ sub preview {
     };
     $self->_die($@), goto ERROR if $@ && !$died;
 
+=for xxx
+
     if ( -e $preview_pdf ) {
 	$self->log( 'S', "Output generated, starting previewer");
 
@@ -592,8 +600,14 @@ sub preview {
 	    $self->log( 'W',  "Problems found." );
 	}
     }
-    unlink( $preview_cho );
+
+=cut
+
     $dialog->Destroy if $dialog;
+    unlink( $preview_cho );
+
+    $self->select_mode("preview");
+    $self->{p_preview}->{webview}->LoadURL("file://$preview_pdf");
 }
 
 sub _makeurl {
