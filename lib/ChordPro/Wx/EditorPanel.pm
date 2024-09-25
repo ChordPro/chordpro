@@ -36,14 +36,12 @@ sub new {
     $self->{t_source}->OSXDisableAllSmartSubstitutions
       if $self->{t_source}->can("OSXDisableAllSmartSubstitutions");
 
-    # Try Styled Text Control (Scintilla).
+    # Try Styled Text Control (Scintilla). This required an updated
+    # version of Wx.
     $stc = eval { use Wx::STC; 1 };
     if ( $stc ) {
+	# This may decide otherwise.
 	$self->setup_scintilla;
-    }
-    else {
-	# Fallback to placeholder Wx::TextCtrl.
-	# Fortunately, most methods are compatible.
     }
 
     $self->Layout;
@@ -64,58 +62,31 @@ sub setup_scintilla {
     # Replace the placeholder Wx::TextCtrl.
     my $stc = Wx::StyledTextCtrl->new( $self->{sz_source}->GetStaticBox,
 				       wxID_ANY );
+    unless ( $stc->can("IsModified") ) {
+	# Unpatched Wx, missing methods.
+	$stc->Destroy;
+	return;
+    }
+
     $self->{sz_source}->Replace( $self->{t_source}, $stc, 1 );
     $self->{t_source}->Destroy;
     $self->{t_source} = $stc;
     $self->{sz_source}->Layout;
+
     $stc->SetLexer(wxSTC_LEX_CONTAINER);
-    $stc->SetKeyWords(0, [ "title",
-			   "subtitle",
-			   "album",
-			   "arranger",
-			   "artist",
-			   "capo",
-			   "composer",
-			   "copyright",
-			   "duration",
-			   "key",
-			   "lyricist",
-			   "sorttitle",
-			   "tempo",
-			   "time",
-			   "year",
-			   "chord",
-			   "end_of_grid",
-			   "new_physical_page",
-			   "start_of_bridge",
-			   "titles",
-			   "end_of_tab",
-			   "define",
-			   "column_break",
-			   "grid",
-			   "new_page",
-			   "comment",
-			   "columns",
-			   "start_of_verse",
-			   "image",
-			   "comment_box",
-			   "comment_italic",
-			   "highlight",
-			   "no_grid",
-			   "diagrams",
-			   "start_of_tab",
-			   "meta",
-			   "chorus",
-			   "pagesize",
-			   "new_song",
-			   "start_of_grid",
-			   "transpose",
-			   "end_of_bridge",
-			   "pagetype",
-			   "end_of_verse",
-			   "start_of_chorus",
-			   "end_of_chorus"
-			 ]);
+    $stc->SetKeyWords(0,
+		      [qw( album arranger artist capo chord chorus
+			   column_break columns comment comment_box
+			   comment_italic composer copyright define
+			   diagrams duration end_of_bridge end_of_chorus
+			   end_of_grid end_of_tab end_of_verse grid
+			   highlight image key lyricist meta new_page
+			   new_physical_page new_song no_grid pagesize
+			   pagetype sorttitle start_of_bridge
+			   start_of_chorus start_of_grid start_of_tab
+			   start_of_verse subtitle tempo time title
+			   titles transpose year )
+		      ]);
 
     Wx::Event::EVT_STC_STYLENEEDED($self, -1, $self->can('OnStyleNeeded'));
 
@@ -126,7 +97,7 @@ sub setup_scintilla {
     # 2 - Keywords
     $stc->StyleSetSpec( 2, "bold,fore:grey" );
     # 3 - Brackets
-    $stc->StyleSetSpec( 3, "bold,fore:grey" );
+    $stc->StyleSetSpec( 3, "bold,fore:blue" );
     # 4 - Chords
     $stc->StyleSetSpec( 4, "fore:red" );
     # 5 - Directives
@@ -138,6 +109,39 @@ sub setup_scintilla {
     $stc->SetMarginType( 1, wxSTC_MARGIN_NUMBER );
     $stc->SetMarginMask( 1, 0 );
     $stc->SetMarginWidth( 1, 40 ); # TODO
+}
+
+sub style_text {
+    my ( $self, $stc ) = @_;
+
+    # Scintilla uses byte indices.
+    use Encode;
+    my $text  = Encode::encode_utf8($stc->GetText);
+
+    my $style = sub {
+	my ( $re, @styles ) = @_;
+	pos($text) = 0;
+	while ( $text =~ m/$re/g ) {
+	    my @s = @styles;
+	    die("!!! ", scalar(@{^CAPTURE}), ' ', scalar(@s)) unless @s == @{^CAPTURE};
+	    my $end = pos($text);
+	    my $start = $end - length($&);
+	    my $group = 0;
+	    while ( $start < $end ) {
+		my $l = length(${^CAPTURE[$group++]});
+		$stc->StartStyling( $start, 0 );
+		$stc->SetStyling( $l, shift(@s) );
+		$start += $l;
+	    }
+	}
+    };
+
+    # Comments/
+    $style->( qr/^(#.*)/m, 1 );
+    # Directives.
+    $style->( qr/^(\{)([-\w!]+)([: ]+)(.*)(\})/m, 3, 5, 3, 6, 3 );
+    # Chords.
+    $style->( qr/(\[)([^\[\]]*)(\])/m, 3, 4, 3 );
 }
 
 ################ API Functions ################
@@ -376,42 +380,7 @@ sub OnShowMessages {
 
 sub OnStyleNeeded {
     my ( $self, $event ) = @_;
-    my $stc = $self->{t_source};
-    my $start = $stc->GetEndStyled;
-
-    # Scintilla uses byte indices.
-    use Encode;
-    my $text  = Encode::encode_utf8($stc->GetText);
-
-    while ( $text =~ /^(#.*)/gm ) {
-	my $l = length($1);
-	$stc->StartStyling( pos($text)-$l, 0 );
-	$stc->SetStyling( $l, 1 );
-    }
-
-    pos($text) = 0;
-    while ( $text =~ /^\{([-\w!]+)([: ]+)(.*)\}/gm ) {
-	$stc->StartStyling( pos($text)-length($1.$2.$3)-2, 0 );
-	$stc->SetStyling( 1, 3 );
-	$stc->StartStyling( pos($text)-length($1.$2.$3)-1, 0 );
-	$stc->SetStyling( length($1), 5 );
-	$stc->StartStyling( pos($text)-length($2.$3)-1, 0 );
-	$stc->SetStyling( length($2), 3 );
-	$stc->StartStyling( pos($text)-length($3)-1, 0 );
-	$stc->SetStyling( length($3), 6 );
-	$stc->StartStyling( pos($text)-1, 0 );
-	$stc->SetStyling( 1, 3 );
-    }
-
-    pos($text) = 0;
-    while ( $text =~ /\[(.*?)\]/gm ) {
-	$stc->StartStyling( pos($text)-length($1)-2, 0 );
-	$stc->SetStyling( 1, 3 );
-	$stc->StartStyling( pos($text)-length($1)-1, 0 );
-	$stc->SetStyling( length($1), 4 );
-	$stc->StartStyling( pos($text)-1, 0 );
-	$stc->SetStyling( 1, 3 );
-    }
+    $self->style_text($self->{t_source});
 }
 
 ################ Compatibility ################
