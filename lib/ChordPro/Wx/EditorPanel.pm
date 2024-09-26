@@ -405,7 +405,7 @@ sub Wx::TextCtrl::GetText {
 }
 
 sub Wx::TextCtrl::SetText {
-    $_[0]->SetValue;
+    $_[0]->SetValue($_[1]);
 }
 
 sub Wx::TextCtrl::GetLineCount {
