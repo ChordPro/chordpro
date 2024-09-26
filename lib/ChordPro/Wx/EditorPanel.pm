@@ -62,10 +62,14 @@ sub setup_scintilla {
     # Replace the placeholder Wx::TextCtrl.
     my $stc = Wx::StyledTextCtrl->new( $self->{sz_source}->GetStaticBox,
 				       wxID_ANY );
-    unless ( $stc->can("IsModified") ) {
-	# Unpatched Wx, missing methods.
-	$stc->Destroy;
-	return;
+
+    # Check for updated STC.
+    for ( qw( IsModified DiscardEdits MarkDirty ) ) {
+	unless ( $stc->can($_) ) {
+	    # Unpatched Wx, missing methods.
+	    $stc->Destroy;
+	    return;
+	}
     }
 
     $self->{sz_source}->Replace( $self->{t_source}, $stc, 1 );
