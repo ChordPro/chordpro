@@ -12,23 +12,15 @@ import Quartz
 extension AppKitUtils {
 
     /// SwiftUI `NSViewRepresentable` for a PDF View
-    public struct PDFKitRepresentedView: NSViewRepresentable {
+    struct PDFKitRepresentedView: NSViewRepresentable {
         /// The data of the PDF
         let data: Data
         /// The optional annotations
-        @Binding private var annotations: [(userName: String, contents: String)]
-        /// Init the `View`
-        /// - Parameters:
-        ///   - data: The data of the PDF
-        ///   - annotations: The optional annotations
-        public init(data: Data, annotations: Binding<[(userName: String, contents: String)]>) {
-            self.data = data
-            self._annotations = annotations
-        }
+        @Binding var annotations: [(userName: String, contents: String)]
         /// Make the `View`
         /// - Parameter context: The context
         /// - Returns: The PDFView
-        public func makeNSView(context: NSViewRepresentableContext<PDFKitRepresentedView>) -> PDFView {
+        func makeNSView(context: NSViewRepresentableContext<PDFKitRepresentedView>) -> PDFView {
             /// Create a `PDFView` and set its `PDFDocument`.
             let pdfView = PDFView()
             pdfView.document = PDFDocument(data: data)
@@ -57,7 +49,7 @@ extension AppKitUtils {
         /// - Parameters:
         ///   - pdfView: The PDFView
         ///   - context: The context
-        public func updateNSView(_ pdfView: PDFView, context: NSViewRepresentableContext<PDFKitRepresentedView>) {
+        func updateNSView(_ pdfView: PDFView, context: NSViewRepresentableContext<PDFKitRepresentedView>) {
             /// Animate the transition
             pdfView.animator().isHidden = true
             /// Make sure we have a document with a page

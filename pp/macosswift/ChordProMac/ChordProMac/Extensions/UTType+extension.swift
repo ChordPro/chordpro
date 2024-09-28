@@ -8,7 +8,7 @@
 import Foundation
 import UniformTypeIdentifiers
 
-public extension UTType {
+extension UTType {
 
     // MARK: The `UTType` for a `ChordPro` song
 

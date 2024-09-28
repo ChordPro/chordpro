@@ -18,7 +18,6 @@
 		D728FF292C1B26F60028D7A9 /* AppDelegateModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D728FF282C1B26F60028D7A9 /* AppDelegateModel.swift */; };
 		D728FF2B2C1B70B40028D7A9 /* ChordProInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D728FF2A2C1B70B40028D7A9 /* ChordProInfo.swift */; };
 		D72EA32F2C0B2E9400B1BA93 /* UserFileItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72EA32E2C0B2E9400B1BA93 /* UserFileItem.swift */; };
-		D72EA3352C0B68B600B1BA93 /* FontStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72EA3342C0B68B600B1BA93 /* FontStyle.swift */; };
 		D72EA3382C0B8E2C00B1BA93 /* HelpButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72EA3372C0B8E2C00B1BA93 /* HelpButtons.swift */; };
 		D72EA33C2C0BB24600B1BA93 /* LogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72EA33B2C0BB24600B1BA93 /* LogView.swift */; };
 		D72EA33E2C0C5C3F00B1BA93 /* LocalizedAlertError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72EA33D2C0C5C3F00B1BA93 /* LocalizedAlertError.swift */; };
@@ -56,7 +55,6 @@
 		D7D244B32C3C3C240058FB8E /* AppKitUtils+openPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D244AC2C3C3C240058FB8E /* AppKitUtils+openPanel.swift */; };
 		D7D244B42C3C3C240058FB8E /* AppKitUtils+PDFKitRepresentedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D244AD2C3C3C240058FB8E /* AppKitUtils+PDFKitRepresentedView.swift */; };
 		D7D244B52C3C3C240058FB8E /* AppKitUtils+printDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D244AE2C3C3C240058FB8E /* AppKitUtils+printDialog.swift */; };
-		D7D244B62C3C3C240058FB8E /* AppKitUtils+QLPreviewRepresentedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D244AF2C3C3C240058FB8E /* AppKitUtils+QLPreviewRepresentedView.swift */; };
 		D7D244B72C3C3C240058FB8E /* AppKitUtils+SharingServiceRepresentedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D244B02C3C3C240058FB8E /* AppKitUtils+SharingServiceRepresentedView.swift */; };
 		D7D244C42C3C3C320058FB8E /* ChordProEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D244B82C3C3C310058FB8E /* ChordProEditor.swift */; };
 		D7D244C52C3C3C320058FB8E /* ChordProEditor+Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D244B92C3C3C310058FB8E /* ChordProEditor+Coordinator.swift */; };
@@ -97,7 +95,6 @@
 		D728FF282C1B26F60028D7A9 /* AppDelegateModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegateModel.swift; sourceTree = "<group>"; };
 		D728FF2A2C1B70B40028D7A9 /* ChordProInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChordProInfo.swift; sourceTree = "<group>"; };
 		D72EA32E2C0B2E9400B1BA93 /* UserFileItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserFileItem.swift; sourceTree = "<group>"; };
-		D72EA3342C0B68B600B1BA93 /* FontStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontStyle.swift; sourceTree = "<group>"; };
 		D72EA3372C0B8E2C00B1BA93 /* HelpButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpButtons.swift; sourceTree = "<group>"; };
 		D72EA33B2C0BB24600B1BA93 /* LogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogView.swift; sourceTree = "<group>"; };
 		D72EA33D2C0C5C3F00B1BA93 /* LocalizedAlertError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizedAlertError.swift; sourceTree = "<group>"; };
@@ -138,7 +135,6 @@
 		D7D244AC2C3C3C240058FB8E /* AppKitUtils+openPanel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AppKitUtils+openPanel.swift"; sourceTree = "<group>"; };
 		D7D244AD2C3C3C240058FB8E /* AppKitUtils+PDFKitRepresentedView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AppKitUtils+PDFKitRepresentedView.swift"; sourceTree = "<group>"; };
 		D7D244AE2C3C3C240058FB8E /* AppKitUtils+printDialog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AppKitUtils+printDialog.swift"; sourceTree = "<group>"; };
-		D7D244AF2C3C3C240058FB8E /* AppKitUtils+QLPreviewRepresentedView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AppKitUtils+QLPreviewRepresentedView.swift"; sourceTree = "<group>"; };
 		D7D244B02C3C3C240058FB8E /* AppKitUtils+SharingServiceRepresentedView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AppKitUtils+SharingServiceRepresentedView.swift"; sourceTree = "<group>"; };
 		D7D244B82C3C3C310058FB8E /* ChordProEditor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChordProEditor.swift; sourceTree = "<group>"; };
 		D7D244B92C3C3C310058FB8E /* ChordProEditor+Coordinator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ChordProEditor+Coordinator.swift"; sourceTree = "<group>"; };
@@ -203,10 +199,10 @@
 		D71B11362C9D9655007D57D3 /* Buttons */ = {
 			isa = PBXGroup;
 			children = (
+				D7F659B62C2F25D500B65437 /* PrintPDFButton.swift */,
 				D7AC53412C20C1A0002B075F /* FontSizeButtons.swift */,
 				D72EA3372C0B8E2C00B1BA93 /* HelpButtons.swift */,
 				D7723A6E2C0354250031CD0C /* PreviewPDFButton.swift */,
-				D7F659B62C2F25D500B65437 /* PrintPDFButton.swift */,
 				D7723A682C03442F0031CD0C /* ExportSongButton.swift */,
 				D7F627482C33153100117FBF /* ShareButton.swift */,
 				D7D244E32C3C3C780058FB8E /* UserFileButton.swift */,
@@ -229,7 +225,6 @@
 				D774F2862C05F6CB00CC4E3E /* Notation.swift */,
 				D72EA32E2C0B2E9400B1BA93 /* UserFileItem.swift */,
 				D75F410F2C0F240800F0413B /* CustomTask.swift */,
-				D72EA3342C0B68B600B1BA93 /* FontStyle.swift */,
 				D72EA33D2C0C5C3F00B1BA93 /* LocalizedAlertError.swift */,
 				D702E0DE2C0CEF42006D9667 /* LogItem.swift */,
 				D728FF2A2C1B70B40028D7A9 /* ChordProInfo.swift */,
@@ -309,7 +304,6 @@
 				D7D244AC2C3C3C240058FB8E /* AppKitUtils+openPanel.swift */,
 				D7D244AD2C3C3C240058FB8E /* AppKitUtils+PDFKitRepresentedView.swift */,
 				D7D244AE2C3C3C240058FB8E /* AppKitUtils+printDialog.swift */,
-				D7D244AF2C3C3C240058FB8E /* AppKitUtils+QLPreviewRepresentedView.swift */,
 				D7D244B02C3C3C240058FB8E /* AppKitUtils+SharingServiceRepresentedView.swift */,
 			);
 			path = AppKitUtils;
@@ -479,7 +473,6 @@
 			files = (
 				D7D244CE2C3C3C320058FB8E /* ChordProEditorDelegate.swift in Sources */,
 				D75E5FFF2C04FEF00083F96F /* Template.swift in Sources */,
-				D72EA3352C0B68B600B1BA93 /* FontStyle.swift in Sources */,
 				D767276F2C996638001D1947 /* DebugButtons.swift in Sources */,
 				D7723A4D2C0326120031CD0C /* ChordProMacApp.swift in Sources */,
 				D774F2852C05F2B900CC4E3E /* StatusView.swift in Sources */,
@@ -543,7 +536,6 @@
 				D774F2832C05E18B00CC4E3E /* Accidentals.swift in Sources */,
 				D72EA33E2C0C5C3F00B1BA93 /* LocalizedAlertError.swift in Sources */,
 				D7D244B42C3C3C240058FB8E /* AppKitUtils+PDFKitRepresentedView.swift in Sources */,
-				D7D244B62C3C3C240058FB8E /* AppKitUtils+QLPreviewRepresentedView.swift in Sources */,
 				D7D244E42C3C3C780058FB8E /* ColorPickerButton.swift in Sources */,
 				D774F2872C05F6CB00CC4E3E /* Notation.swift in Sources */,
 				D7723A512C0326120031CD0C /* MainView.swift in Sources */,

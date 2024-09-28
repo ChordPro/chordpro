@@ -12,7 +12,7 @@ extension ChordProEditor {
     // MARK: The text view for the editor
 
     /// The text view for the editor
-    public class TextView: NSTextView {
+    class TextView: NSTextView {
         /// The delegate for the ChordProEditor
         var chordProEditorDelegate: ChordProEditorDelegate?
         /// The parent
@@ -30,7 +30,7 @@ extension ChordProEditor {
         /// The optional double-clicked directive in the editor
         var clickedDirective: Bool = false
         /// The selected text in the editor
-        public var selectedText: String {
+        var selectedText: String {
             if let swiftRange = Range(selectedRange(), in: string) {
                 return String(string[swiftRange])
             }
@@ -41,7 +41,7 @@ extension ChordProEditor {
 
         /// Draw a background behind the current fragment
         /// - Parameter dirtyRect: The current rect of the editor
-        override public func draw(_ dirtyRect: CGRect) {
+        override func draw(_ dirtyRect: CGRect) {
             guard let context = NSGraphicsContext.current?.cgContext else { return }
             /// Highlight the current selected paragraph
             if let currentParagraphRect {
@@ -59,7 +59,7 @@ extension ChordProEditor {
 
         /// Handle double-click on directives to edit them
         /// - Parameter event: The mouse click event
-        public override func mouseDown(with event: NSEvent) {
+        override func mouseDown(with event: NSEvent) {
             setFragmentInformation(selectedRange: selectedRange())
             if event.clickCount == 2, let currentDirective, currentDirective.editable == true {
                 clickedDirective = true
@@ -70,8 +70,8 @@ extension ChordProEditor {
             }
         }
 
-        /// Sets the selection to the characters in an array of ranges in response to user action
-        override public func setSelectedRange(
+        /// Set the selection to the characters in an array of ranges in response to user action
+        override func setSelectedRange(
             _ charRange: NSRange,
             affinity: NSSelectionAffinity,
             stillSelecting stillSelectingFlag: Bool
@@ -85,7 +85,7 @@ extension ChordProEditor {
 
         /// Replace the whole text with a new text
         /// - Parameter text: The replacement text
-        public func replaceText(text: String) {
+        func replaceText(text: String) {
             let composeText = self.string as NSString
             self.insertText(text, replacementRange: NSRange(location: 0, length: composeText.length))
         }

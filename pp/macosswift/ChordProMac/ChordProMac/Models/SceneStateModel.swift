@@ -63,6 +63,10 @@ final class SceneStateModel: ObservableObject {
     @Published var preview = PreviewState()
     /// The internals of the **ChordPro** editor
     @Published var editorInternals = ChordProEditor.Internals()
+    /// Bool to show the editor
+    @Published var showEditor: Bool = false
+    /// Bool to show the preview
+    @Published var showPreview: Bool = false
     /// Init the class
     init() {
         self.defaultSongName = "New Song \(Date().formatted(date: .abbreviated, time: .standard))"
@@ -71,45 +75,59 @@ final class SceneStateModel: ObservableObject {
 }
 
 extension SceneStateModel {
-    @MainActor
-    func exportPDF(
+
+    /// Export a document or folder with the **ChordPro** binary to a PDF
+    /// - Parameters:
+    ///   - text: The current text of the document
+    ///   - replace: Bool if the PDF should be replaced with a fresh version
+    ///   - fileList: Bool if the PDF should contain a file list instead of a single song
+    ///   - title: The title of the export (for a songbook)
+    ///   - subtitle: The subtitle of the export (for a songbook)
+    /// - Returns: The PDF as `Data` and the status as ``AppError``
+    @MainActor func exportToPDF(
         text: String,
+        replace: Bool = false,
         fileList: Bool = false,
         title: String = "",
         subtitle: String = ""
     ) async throws -> (data: Data, status: AppError) {
-        do {
-            let pdf = try await Terminal.exportPDF(
-                text: text,
-                settings: AppSettings.load(),
-                sceneState: self,
-                fileList: fileList,
-                title: title,
-                subtitle: subtitle
-            )
-            if !fileList {
-                /// The PDF is not outdated
-                preview.outdated = false
-                /// Update the preview if open
-                if preview.active {
-                    preview.data = pdf.data
+        /// If the preview is open than that is what we are going to return
+        if let data = preview.data, !replace {
+            return (data, exportStatus)
+        } else {
+            do {
+                let pdf = try await Terminal.exportPDF(
+                    text: text,
+                    settings: AppSettings.load(),
+                    sceneState: self,
+                    fileList: fileList,
+                    title: title,
+                    subtitle: subtitle
+                )
+                if !fileList {
+                    /// The PDF is not outdated
+                    preview.outdated = false
+                    /// Update the preview if open
+                    if preview.active {
+                        preview.data = pdf.data
+                    }
                 }
+                /// Set the status
+                exportStatus = pdf.status
+                /// Remove the task (if any)
+                customTask = nil
+                /// Return the PDF data and its status
+                return pdf
+            } catch {
+                /// Show an error
+                alertError = error
+                /// Set the status
+                exportStatus = .pdfCreationError
+                /// Remove the task (if any)
+                customTask = nil
+                /// Trow the error
+                throw error
             }
-            /// Set the status
-            exportStatus = pdf.status
-            /// Remove the task (if any)
-            customTask = nil
-            /// Return the PDF data and its status
-            return pdf
-        } catch {
-            /// Show an error
-            alertError = error
-            /// Set the status
-            exportStatus = .pdfCreationError
-            /// Remove the task (if any)
-            customTask = nil
-            /// Trow the error
-            throw error
         }
     }
 }

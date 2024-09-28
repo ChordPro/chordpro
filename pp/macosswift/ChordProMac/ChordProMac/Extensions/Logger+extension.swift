@@ -9,7 +9,7 @@ import Foundation
 import OSLog
 
 /// Messages for the Logger
-public extension Logger {
+extension Logger {
 
     /// The name of the subsystem
     private static let subsystem = Bundle.main.bundleIdentifier ?? ""

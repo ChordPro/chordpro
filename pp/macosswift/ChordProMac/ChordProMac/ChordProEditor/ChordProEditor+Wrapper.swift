@@ -15,7 +15,7 @@ extension ChordProEditor {
     /// - `NSScrollView`
     /// - `NSTextView`
     /// - `NSRulerView`
-    public class Wrapper: NSView, ChordProEditorDelegate {
+    class Wrapper: NSView, ChordProEditorDelegate {
 
         /// Init the `NSView`
         /// - Parameter frameRect: The rect of the `NSView`
@@ -27,7 +27,7 @@ extension ChordProEditor {
 
         /// Init the `NSView`
         /// - Parameter coder: The `NSCoder`
-        required public init?(coder: NSCoder) {
+        required init?(coder: NSCoder) {
             super.init(coder: coder)
         }
 
@@ -91,7 +91,7 @@ extension ChordProEditor {
         /// The `NSRulerView`
         lazy private var lineNumbers = LineNumbersView()
 
-        public override func viewWillDraw() {
+        override func viewWillDraw() {
             super.viewWillDraw()
 
             setupScrollViewConstraints()

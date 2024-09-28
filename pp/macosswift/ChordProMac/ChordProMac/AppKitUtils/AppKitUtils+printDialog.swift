@@ -12,7 +12,7 @@ extension AppKitUtils {
 
     /// Show a `AppKit` *Print Dialog* for a PDF
     /// - Parameter exportURL: The URL of the export PDF
-    @MainActor public static func printDialog(exportURL: URL) {
+    @MainActor static func printDialog(exportURL: URL) {
         if let window = NSApp.keyWindow {
             /// Set the print info
             let printInfo = NSPrintInfo()

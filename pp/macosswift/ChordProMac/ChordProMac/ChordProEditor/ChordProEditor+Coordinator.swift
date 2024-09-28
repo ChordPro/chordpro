@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-public extension ChordProEditor {
+extension ChordProEditor {
 
     // MARK: The coordinator for the editor
 
@@ -20,17 +20,17 @@ public extension ChordProEditor {
         /// Bool if the whole text must be (re)highlighted or just the current fragment
         private var fullHighlight: Bool = true
         /// Debounce task for the text update
-        public var task: Task<Void, Never>?
+        var task: Task<Void, Never>?
 
         /// Init the **coordinator**
         /// - Parameter parent: The ``ChordProEditor``
-        public init(_ parent: ChordProEditor) {
+        init(_ parent: ChordProEditor) {
             self.parent = parent
         }
 
         // MARK: Protocol Functions
 
-        public func textView(_ view: NSTextView, menu: NSMenu, for event: NSEvent, at charIndex: Int) -> NSMenu? {
+        func textView(_ view: NSTextView, menu: NSMenu, for event: NSEvent, at charIndex: Int) -> NSMenu? {
             /// Rewrite context-menu, the original is full with useless rubbish...
             guard let textView = view as? TextView else {
                 return menu
@@ -67,7 +67,7 @@ public extension ChordProEditor {
         ///   - affectedCharRange: The character range that is affected
         ///   - replacementString: The optional replacement string
         /// - Returns: True or false
-        public func textView(
+        func textView(
             _ textView: NSTextView,
             shouldChangeTextIn affectedCharRange: NSRange,
             replacementString: String?
@@ -79,7 +79,7 @@ public extension ChordProEditor {
 
         /// Protocol function with a notification that the text has changed
         /// - Parameter notification: The notification with the `NSTextView` as object
-        public func textDidChange(_ notification: Notification) {
+        func textDidChange(_ notification: Notification) {
             guard
                 let textView = notification.object as? TextView,
                 let range = textView.selectedRanges.first?.rangeValue
@@ -119,7 +119,7 @@ public extension ChordProEditor {
 
         /// Protocol function with a notification that the text selection has changed
         /// - Parameter notification: The notification with the `NSTextView` as object
-        public func textViewDidChangeSelection(_ notification: Notification) {
+        func textViewDidChangeSelection(_ notification: Notification) {
             guard let textView = notification.object as? TextView, let range = textView.selectedRanges.first?.rangeValue
             else { return }
             /// Update the fragment information

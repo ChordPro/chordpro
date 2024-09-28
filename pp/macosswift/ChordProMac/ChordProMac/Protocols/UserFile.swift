@@ -9,7 +9,7 @@ import Foundation
 import UniformTypeIdentifiers
 
 /// Protocol to define user selectable files
-public protocol UserFile {
+protocol UserFile {
     /// The ID of the user file
     var id: String { get }
     /// The `UTType`s of the file

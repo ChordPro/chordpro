@@ -10,7 +10,7 @@ import OSLog
 import UniformTypeIdentifiers
 
 /// Persistent user file bookmark utilities
-public enum UserFileBookmark {
+enum UserFileBookmark {
     // Just a placeholder
 }
 
@@ -19,7 +19,7 @@ extension UserFileBookmark {
     /// Get an optional bookmark URL
     /// - Parameter bookmark: The ``UserFile``
     /// - Returns: An URL if found
-    public static func getBookmarkURL<T: UserFile>(_ bookmark: T) -> URL? {
+    static func getBookmarkURL<T: UserFile>(_ bookmark: T) -> URL? {
         guard let bookmarkData = UserDefaults.standard.data(forKey: bookmark.id) else {
             return nil
         }
@@ -69,7 +69,7 @@ extension UserFileBookmark {
     /// Stop access to a persistent URL after some time
     /// - Parameter persistentURL: The `URL` that has accessed
     /// - Note: Always call this function after you are done with the access or else Apple will be really upset!
-    public static func stopCustomFileAccess(persistentURL: URL) {
+    static func stopCustomFileAccess(persistentURL: URL) {
         Task {
             try? await Task.sleep(nanoseconds: 500_000_000_000)
             persistentURL.stopAccessingSecurityScopedResource()
@@ -78,7 +78,7 @@ extension UserFileBookmark {
     }
 }
 
-public extension UserFileBookmark {
+extension UserFileBookmark {
 
     /// Open an URL in the Finder
     /// - Parameter url: The URL to open
@@ -90,7 +90,7 @@ public extension UserFileBookmark {
     }
 }
 
-public extension URL {
+extension URL {
 
     /// Open an URL in the Finder
     func openInFinder() {
@@ -98,7 +98,7 @@ public extension URL {
     }
 }
 
-public extension URL {
+extension URL {
 
     /// Check if an URL exists
     /// - Returns: True of false

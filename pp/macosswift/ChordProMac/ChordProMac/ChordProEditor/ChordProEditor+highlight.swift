@@ -42,10 +42,10 @@ extension ChordProEditor {
     static func regexes(settings: Settings) -> [(regex: NSRegularExpression, color: NSColor, regexType: RegexType)] {
         return [
             (commentsRegex, NSColor(settings.commentColor), .normal),
-            (chordRegex, NSColor(settings.chordColor), .normal),
             (directiveRegex, NSColor(settings.directiveColor), .range),
             (directiveArgumentRegex, NSColor(settings.argumentColor), .argument),
             (markupRegex, NSColor(settings.markupColor), .normal),
+            (chordRegex, NSColor(settings.chordColor), .normal),
             (bracketsRegex, NSColor(settings.bracketColor), .normal)
         ]
     }

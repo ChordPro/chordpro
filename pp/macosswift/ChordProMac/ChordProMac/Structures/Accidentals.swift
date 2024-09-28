@@ -8,7 +8,7 @@
 import Foundation
 
 /// The accidentals for transposing a song
-public enum Accidentals: String, CaseIterable, Codable {
+enum Accidentals: String, CaseIterable, Codable {
     /// Default
     case defaults = "Default"
     /// Sharps

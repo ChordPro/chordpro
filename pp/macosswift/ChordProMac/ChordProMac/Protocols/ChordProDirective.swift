@@ -8,7 +8,7 @@
 import Foundation
 
 /// Protocol to define directives
-public protocol ChordProDirective: Sendable {
+protocol ChordProDirective: Sendable {
     /// The name of the directive
     var directive: String { get }
     /// The label of the directive

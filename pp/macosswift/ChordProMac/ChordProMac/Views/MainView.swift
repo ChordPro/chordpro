@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import OSLog
 
 /// SwiftUI `View` for the main content
 struct MainView: View {
@@ -15,6 +16,8 @@ struct MainView: View {
     @EnvironmentObject private var appState: AppStateModel
     /// The observable state of the scene
     @StateObject private var sceneState = SceneStateModel()
+    /// The observable state of the document
+    @FocusedValue(\.document) private var document: FileDocumentConfiguration<ChordProDocument>?
     /// The body of the `View`
     var body: some View {
         VStack {
@@ -25,18 +28,61 @@ struct MainView: View {
             StatusView()
                 .padding(.horizontal)
         }
-        .animation(.default, value: sceneState.preview)
+        .animation(.default, value: sceneState.showEditor)
+        .animation(.default, value: sceneState.showPreview)
         .toolbar {
-            FontSizeButtons()
-            ExportSongButton(label: "Export as PDF")
-            Group {
-                PreviewPDFButton(label: "Show Preview")
-                ShareButton()
+            ToolbarItem(placement: .primaryAction) {
+                HStack {
+                    if sceneState.showEditor {
+                        FontSizeButtons()
+                            .labelStyle(.iconOnly)
+                    }
+                    Button {
+                        sceneState.showEditor.toggle()
+                    } label: {
+                        Label("Edit", systemImage: sceneState.showEditor ? "pencil.circle.fill" : "pencil.circle")
+                    }
+                    .disabled(!sceneState.showPreview)
+                    PreviewPDFButton(label: "Preview")
+                    ExportSongButton(label: "Export as PDF")
+                    ShareButton()
+                        .labelStyle(.iconOnly)
+                }
             }
-            .labelStyle(.iconOnly)
         }
         .labelStyle(.titleAndIcon)
-        /// Store the filename in the scene
+        /// Set the default panes
+        .task {
+            if file == nil {
+                sceneState.showEditor = true
+                sceneState.showPreview = false
+            } else {
+                switch appState.settings.application.openSongAction {
+                case .editorAndPreview:
+                    sceneState.showEditor = true
+                    sceneState.showPreview = true
+                case .editorOnly:
+                    sceneState.showEditor = true
+                    sceneState.showPreview = false
+                case .previewOnly:
+                    sceneState.showEditor = false
+                    sceneState.showPreview = true
+                }
+                /// Create the preview unless we show only the editor
+                if appState.settings.application.openSongAction != .editorOnly {
+                    do {
+                        let pdf = try await sceneState.exportToPDF(text: document?.document.text ?? "error")
+                        /// Show the preview
+                        sceneState.preview.data = pdf.data
+                        sceneState.showPreview = true
+                    } catch {
+                        /// Hide the preview and show the editor; something went wrong
+                        sceneState.showEditor = true
+                        sceneState.showPreview = false
+                    }
+                }
+            }
+        }
         .task(id: file) {
             sceneState.file = file
         }

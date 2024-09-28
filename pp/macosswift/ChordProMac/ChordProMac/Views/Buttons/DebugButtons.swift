@@ -9,7 +9,7 @@ import SwiftUI
 
 /// SwiftUI `View` with debug buttons
 struct DebugButtons: View {
-    /// The scene state in the environment
+    /// The observable state of the scene
     @FocusedValue(\.sceneState) private var sceneState: SceneStateModel?
     /// The body of the `View`
     var body: some View {

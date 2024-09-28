@@ -52,7 +52,7 @@ extension ChordProEditor {
         // MARK: Layout Manager Delegate
 
         // swiftlint:disable:next function_parameter_count
-        public func layoutManager(
+        func layoutManager(
             _ layoutManager: NSLayoutManager,
             shouldSetLineFragmentRect lineFragmentRect: UnsafeMutablePointer<NSRect>,
             lineFragmentUsedRect: UnsafeMutablePointer<NSRect>,

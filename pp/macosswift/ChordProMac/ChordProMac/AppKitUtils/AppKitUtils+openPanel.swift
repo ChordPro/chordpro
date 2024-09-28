@@ -20,7 +20,7 @@ extension AppKitUtils {
     /// - Parameters:
     ///   - userFile: The ``UserFile`` to open
     ///   - action: The action when a file is selected
-    @MainActor public static func openPanel<T: UserFile>(userFile: T, action: @escaping () -> Void) throws {
+    @MainActor static func openPanel<T: UserFile>(userFile: T, action: @escaping () -> Void) throws {
         /// Make sure we have a window to attach the sheet
         guard let window = NSApp.keyWindow else {
             throw CocoaError(.featureUnsupported)

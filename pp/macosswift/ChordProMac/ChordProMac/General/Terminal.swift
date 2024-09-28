@@ -89,9 +89,9 @@ extension Terminal {
     /// The complete output from the shell
     struct Output {
         /// The standard output
-        public var standardOutput: String
+        var standardOutput: String
         /// The standard error
-        public var standardError: String
+        var standardError: String
     }
 
     /// The stream output from the shell

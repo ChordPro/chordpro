@@ -8,7 +8,7 @@
 import Foundation
 
 /// All musical notes
-public enum Note: String, CaseIterable, Codable {
+enum Note: String, CaseIterable, Codable {
 
     // swiftlint:disable identifier_name
 

@@ -20,6 +20,10 @@ struct SettingsView: View {
     /// The body of the `View`
     var body: some View {
         TabView {
+            general
+                .tabItem {
+                    Label("General", systemImage: "gear")
+                }
             editor
                 .tabItem {
                     Label("Editor", systemImage: "pencil")
@@ -75,10 +79,10 @@ struct SettingsView: View {
 
 extension SettingsView {
 
-    // MARK: Editor Settings
+    // MARK: General Settings
 
-    /// SwiftUI `View` with editor settings
-    var editor: some View {
+    /// SwiftUI `View` with general settings
+    var general: some View {
         ScrollView {
             VStack {
                 Toggle("Use a custom template", isOn: $appState.settings.application.useCustomSongTemplate)
@@ -90,6 +94,30 @@ extension SettingsView {
                     .font(.caption)
             }
             .wrapSettingsSection(title: "Template for a New Song")
+            VStack {
+                Picker("Options", selection: $appState.settings.application.openSongAction) {
+                    ForEach(AppSettings.PaneView.allCases, id: \.self) { option in
+                        Text("\(option.rawValue)")
+                    }
+                }
+                .pickerStyle(.radioGroup)
+                .labelsHidden()
+                Text("Set the default action when you open an existing song. You can always hide or show the editor and preview for each song.")
+                    .font(.caption)
+            }
+            .wrapSettingsSection(title: "Open an Existing Song")
+
+        }
+    }
+}
+
+extension SettingsView {
+
+    // MARK: Editor Settings
+
+    /// SwiftUI `View` with editor settings
+    var editor: some View {
+        ScrollView {
             VStack {
                 HStack {
                     Text("A")
@@ -169,7 +197,10 @@ extension SettingsView {
             Toggle("Add a custom configuration", isOn: $appState.settings.chordPro.useCustomConfig)
             UserFileButton(
                 userFile: UserFileItem.customConfig
-            ) {}
+            ) {
+                /// Trigger an update of the Views
+                appState.settings.chordPro.useCustomConfig = true
+            }
                 .disabled(!appState.settings.chordPro.useCustomConfig)
             Toggle("Ignore default configurations", isOn: $appState.settings.chordPro.noDefaultConfigs)
             // swiftlint:disable:next line_length

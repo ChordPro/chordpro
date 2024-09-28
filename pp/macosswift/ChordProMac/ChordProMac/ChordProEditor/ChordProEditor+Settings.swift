@@ -5,52 +5,50 @@
 //  Created by Nick Berendsen on 27/06/2024.
 //
 
-import SwiftUI
+@preconcurrency import SwiftUI
 
 extension ChordProEditor {
 
     // MARK: Settings for the editor
 
     /// Settings for the editor
-    public struct Settings: Equatable, Codable, Sendable {
-
-        public init() {}
+    struct Settings: Equatable, Codable, Sendable {
 
         // MARK: Fonts
 
         /// The range of available font sizes
-        public static let fontSizeRange: ClosedRange<Double> = 10...24
+        static let fontSizeRange: ClosedRange<Double> = 10...24
 
         /// The size of the font
-        public var fontSize: Double = 14
+        var fontSize: Double = 14
 
         /// The font style of the editor
-        public var fontStyle: FontStyle = .monospaced
+        var fontStyle: FontStyle = .monospaced
 
         /// The calculated font for the editor
-        public var font: NSFont {
+        var font: NSFont {
             return fontStyle.nsFont(size: fontSize)
         }
 
         // MARK: Colors (codable with an extension)
 
         /// The color for brackets
-        public var bracketColor: Color = .gray
+        var bracketColor: Color = .gray
         /// The color for a chord
-        public var chordColor: Color = .red
+        var chordColor: Color = .red
         /// The color for a directive
-        public var directiveColor: Color = .indigo
+        var directiveColor: Color = .indigo
         /// The color for a directive argument
-        public var argumentColor: Color = .orange
+        var argumentColor: Color = .orange
         /// The color for markup
-        public var markupColor: Color = .teal
+        var markupColor: Color = .teal
         /// The color for comments
-        public var commentColor: Color = .gray
+        var commentColor: Color = .gray
     }
 }
 
 extension ChordProEditor.Settings {
-    public enum FontStyle: String, CaseIterable, Codable, Sendable {
+    enum FontStyle: String, CaseIterable, Codable, Sendable {
         /// Use a monospaced font
         case monospaced = "Monospaced"
         /// Use a serif font
@@ -58,7 +56,7 @@ extension ChordProEditor.Settings {
         /// Use a sans-serif font
         case sansSerif = "Sans Serif"
         /// The calculated font for the `EditorView`
-        public func nsFont(size: Double) -> NSFont {
+        func nsFont(size: Double) -> NSFont {
             var descriptor: NSFontDescriptor?
             switch self {
             case .monospaced:
@@ -74,7 +72,7 @@ extension ChordProEditor.Settings {
             return NSFont.monospacedSystemFont(ofSize: size, weight: .regular)
         }
         /// The calculated font for the `SettingsView`
-        public func font() -> Font {
+        func font() -> Font {
             switch self {
             case .monospaced:
                 return .system(.body, design: .monospaced)

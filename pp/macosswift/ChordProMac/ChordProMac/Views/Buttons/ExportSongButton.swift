@@ -13,11 +13,11 @@ import OSLog
 struct ExportSongButton: View {
     /// The label for the button
     let label: String
-    /// The document in the environment
+    /// The observable state of the document
     @FocusedValue(\.document) private var document: FileDocumentConfiguration<ChordProDocument>?
     /// The observable state of the application
     @EnvironmentObject private var appState: AppStateModel
-    /// The scene in the environment
+    /// The observable state of the scene
     @FocusedValue(\.sceneState) private var sceneState: SceneStateModel?
     /// Present an export dialog
     @State private var exportSongDialog = false
@@ -30,7 +30,7 @@ struct ExportSongButton: View {
                 if let document, let sceneState {
                     Task {
                         do {
-                            let pdf = try await sceneState.exportPDF(text: document.document.text)
+                            let pdf = try await sceneState.exportToPDF(text: document.document.text)
                             /// Set the PDF as Data
                             self.pdf = pdf.data
                             /// Show the export dialog
