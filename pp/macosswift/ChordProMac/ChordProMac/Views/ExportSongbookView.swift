@@ -274,7 +274,7 @@ struct ExportSongbookView: View, DropDelegate {
 }
 
 extension ExportSongbookView {
-    
+
     /// DropDelegate protocol item to verify a drop
     /// - Parameter info: Information about the dropped area
     /// - Returns: True if a folder is dropped
@@ -302,7 +302,7 @@ extension ExportSongbookView {
         }
         return result
     }
-    
+
     /// DropDelegate protocol item to perform a drop action
     /// - Parameter info: Information about the dropped area
     /// - Returns: True

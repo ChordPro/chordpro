@@ -14,9 +14,9 @@ struct PrintPDFButton: View {
     let label: String
     /// The observable state of the application
     @EnvironmentObject private var appState: AppStateModel
-    /// The scene state in the environment
+    /// The observable state of the scene
     @FocusedValue(\.sceneState) private var sceneState: SceneStateModel?
-    /// The document in the environment
+    /// The observable state of the document
     @FocusedValue(\.document) private var document: FileDocumentConfiguration<ChordProDocument>?
     /// The body of the `View`
     var body: some View {
@@ -25,7 +25,7 @@ struct PrintPDFButton: View {
                 if let sceneState, let document {
                     Task {
                         do {
-                            _ = try await sceneState.exportPDF(text: document.document.text)
+                            _ = try await sceneState.exportToPDF(text: document.document.text)
                             /// Show the print dialog
                             AppKitUtils.printDialog(exportURL: sceneState.exportURL)
                         } catch {

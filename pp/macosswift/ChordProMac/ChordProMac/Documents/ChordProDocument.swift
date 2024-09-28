@@ -13,9 +13,9 @@ struct ChordProDocument: FileDocument {
     /// The UTType of the song
     static var readableContentTypes: [UTType] { [.chordProSong] }
     /// The file extensions **ChordPro** can open
-    public static let fileExtension: [String] = ["chordpro", "cho", "crd", "chopro", "chord", "pro"]
+    static let fileExtension: [String] = ["chordpro", "cho", "crd", "chopro", "chord", "pro"]
     /// The document text for a new song
-    public static let newText: String = "{title: New Song}\n"
+    static let newText: String = "{title: New Song}\n"
     /// The text of the song
     var text: String
     /// Init the song
@@ -36,7 +36,7 @@ struct ChordProDocument: FileDocument {
         }
     }
     /// Init the configuration
-    public init(configuration: ReadConfiguration) throws {
+    init(configuration: ReadConfiguration) throws {
         guard let data = configuration.file.regularFileContents
         else {
             throw AppError.readDocumentError

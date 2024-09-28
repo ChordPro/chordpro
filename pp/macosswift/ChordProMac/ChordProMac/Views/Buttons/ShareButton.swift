@@ -14,7 +14,7 @@ struct ShareButton: View {
     @EnvironmentObject private var appState: AppStateModel
     /// The observable state of the scene
     @EnvironmentObject private var sceneState: SceneStateModel
-    /// The document in the environment
+    /// The observable state of the document
     @FocusedValue(\.document) private var document: FileDocumentConfiguration<ChordProDocument>?
     /// Bool to show the share picker
     @State private var showSharePicker: Bool = false
@@ -27,7 +27,7 @@ struct ShareButton: View {
                 if let document {
                     Task {
                         do {
-                            _ = try await sceneState.exportPDF(text: document.document.text)
+                            _ = try await sceneState.exportToPDF(text: document.document.text)
                             exportURL = sceneState.exportURL
                             showSharePicker = true
                         } catch {

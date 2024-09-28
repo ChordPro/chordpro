@@ -45,6 +45,8 @@ extension AppSettings {
     /// Settings that will change the behaviour of the application
     struct Application: Codable, Equatable {
 
+        /// Action when opening an existing song
+        var openSongAction: PaneView = .editorAndPreview
         /// Bool to use a custom song template
         var useCustomSongTemplate: Bool = false
 
@@ -73,6 +75,8 @@ extension AppSettings {
         var useAdditionalLibrary: Bool = false
         /// Bool to use a custom config instead of system
         var useCustomConfig: Bool = false
+        /// The selected custom config
+        var customConfigURL: URL?
         /// The system configs to use
         var systemConfigs: [Template] = []
         /// The label to show in the ``StatusView``
@@ -150,5 +154,18 @@ extension AppSettings {
         var deCapo: Bool = false
         /// Enable debug info in the PDF
         var debug: Bool = false
+    }
+}
+
+extension AppSettings {
+
+    /// Pane View options
+    enum PaneView: String, Codable, CaseIterable {
+        /// Show only the editor
+        case editorOnly = "Open only the Editor"
+        /// Show the editor and preview
+        case editorAndPreview = "Open the Editor and the Preview"
+        /// Show only the preview
+        case previewOnly = "Open only the Preview"
     }
 }

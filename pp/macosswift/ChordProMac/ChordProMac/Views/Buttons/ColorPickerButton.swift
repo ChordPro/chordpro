@@ -8,7 +8,7 @@
 import SwiftUI
 
 /// SwiftUI `View` with a `Button` to select a `Color`
-public struct ColorPickerButton: View {
+struct ColorPickerButton: View {
     /// Binding to the selected color
     @Binding var selectedColor: Color
     /// The label that goes in front of the button
@@ -39,16 +39,8 @@ public struct ColorPickerButton: View {
         .white,
         .yellow
     ]
-    /// Init the struct
-    /// - Parameters:
-    ///   - selectedColor: Binding to the selected color
-    ///   - label: The label for the color picker
-    public init(selectedColor: Binding<Color>, label: String) {
-        self._selectedColor = selectedColor
-        self.label = label
-    }
     /// The body of the `View`
-    public var body: some View {
+    var body: some View {
         HStack {
             Text(.init(label))
             Spacer()

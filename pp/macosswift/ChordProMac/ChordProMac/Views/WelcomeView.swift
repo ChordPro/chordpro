@@ -96,7 +96,7 @@ struct WelcomeView: View {
                             .frame(maxHeight: .infinity)
                     } else {
                         ScrollView {
-                            VStack(spacing:0) {
+                            VStack(spacing: 0) {
                                 ForEach(appState.recentFiles, id: \.self) { url in
                                     Button(
                                         action: {
@@ -163,7 +163,8 @@ extension WelcomeView {
                     .imageScale(.large)
                 configuration.title
                     .padding(.trailing)
-                    .frame(width: 220, height: 40, alignment: .leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(height: 40, alignment: .leading)
             }
             .padding(.leading)
             .background(Color(nsColor: .windowBackgroundColor).opacity(0.5))

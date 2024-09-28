@@ -16,12 +16,7 @@ import OSLog
 /// So, I just call a good o'l NSOpenPanel here.`
 ///
 /// - Note: A file can be a *normal* file but also a folder
-public struct UserFileButton<T: UserFile>: View {
-    /// Init the struct
-    public init(userFile: T, action: @escaping () -> Void) {
-        self.userFile = userFile
-        self.action = action
-    }
+struct UserFileButton<T: UserFile>: View {
     /// The file to bookmark
     let userFile: T
     /// The action when a file is selected
@@ -29,7 +24,7 @@ public struct UserFileButton<T: UserFile>: View {
     /// The label of the button
     @State private var label: String?
     /// The body of the `View`
-    public var body: some View {
+    var body: some View {
         Button(
             action: {
                 try? AppKitUtils.openPanel(userFile: userFile) {

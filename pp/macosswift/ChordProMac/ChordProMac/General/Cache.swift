@@ -9,14 +9,14 @@ import Foundation
 
 /// Get and set structs to the cache directory
 /// - Note: This is used to get and save the application settings
-public enum Cache {
+enum Cache {
 
     /// Get a struct from the cache
     /// - Parameters:
     ///   - key: The name of the item in the cache
     ///   - struct: The struct to use for decoding
     /// - Returns: decoded cache item
-    public static func get<T: Codable>(key: String, struct: T.Type) throws -> T {
+    static func get<T: Codable>(key: String, struct: T.Type) throws -> T {
         let file = try self.path(for: key)
         let data = try Data(contentsOf: file)
         return try JSONDecoder().decode(T.self, from: data)
@@ -27,7 +27,7 @@ public enum Cache {
     ///   - key: The name for the item in the cache
     ///   - object:The struct to save
     /// - Throws: an error if it can't be saved
-    public static func set<T: Codable>(key: String, object: T) throws {
+    static func set<T: Codable>(key: String, object: T) throws {
         let file = try self.path(for: key)
         let archivedValue = try JSONEncoder().encode(object)
         try archivedValue.write(to: file)
@@ -37,7 +37,7 @@ public enum Cache {
     /// - Parameters:
     ///   - key: The name for the item in the cache
     /// - Throws: an error if it can't be saved
-    public static func delete(key: String) throws {
+    static func delete(key: String) throws {
         let file = try self.path(for: key)
         try FileManager.default.removeItem(atPath: file.path)
     }

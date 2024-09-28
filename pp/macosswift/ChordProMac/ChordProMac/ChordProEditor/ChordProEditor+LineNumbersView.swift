@@ -12,13 +12,13 @@ extension ChordProEditor {
     // MARK: The line numbers view for the editor
 
     /// The line numbers view for the editor
-    public class LineNumbersView: NSRulerView {
+    class LineNumbersView: NSRulerView {
 
         // MARK: Override draw
 
         /// Draw a background a a stroke on the right of the `NSRulerView`
         /// - Parameter dirtyRect: The current rect of the editor
-        override public func draw(_ dirtyRect: NSRect) {
+        override func draw(_ dirtyRect: NSRect) {
             guard
                 let context: CGContext = NSGraphicsContext.current?.cgContext
             else {
@@ -40,7 +40,7 @@ extension ChordProEditor {
 
         // MARK: Override drawHashMarksAndLabels
 
-        override public func drawHashMarksAndLabels(in rect: NSRect) {
+        override func drawHashMarksAndLabels(in rect: NSRect) {
             guard
                 let textView: TextView = self.clientView as? TextView,
                 let textContainer: NSTextContainer = textView.textContainer,
@@ -77,7 +77,6 @@ extension ChordProEditor {
 
             /// Go to all paragraphs
             if let visibleSwiftRange = Range(visibleGlyphRange, in: textView.string) {
-
                 textView.string.enumerateSubstrings(
                     in: visibleSwiftRange,
                     options: [.byParagraphs]

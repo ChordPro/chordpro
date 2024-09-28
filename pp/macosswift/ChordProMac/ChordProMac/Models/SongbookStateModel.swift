@@ -116,7 +116,7 @@ extension SongbookStateModel {
         Task {
             do {
                 /// Create the PDF with **ChordPro**
-                let pdf = try await sceneState.exportPDF(
+                let pdf = try await sceneState.exportToPDF(
                     text: "",
                     fileList: true,
                     title: appState.settings.application.songbookTitle,

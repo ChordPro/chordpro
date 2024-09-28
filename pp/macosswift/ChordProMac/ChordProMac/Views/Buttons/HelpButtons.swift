@@ -11,7 +11,7 @@ import SwiftUI
 struct HelpButtons: View {
     /// The observable state of the application
     @EnvironmentObject private var appState: AppStateModel
-    /// The document in the environment
+    /// The observable state of the document
     @FocusedValue(\.document) private var document: FileDocumentConfiguration<ChordProDocument>?
     /// The body of the `View`
     var body: some View {
