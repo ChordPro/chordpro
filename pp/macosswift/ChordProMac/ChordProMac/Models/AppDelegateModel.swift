@@ -12,6 +12,9 @@ import SwiftUI
 /// - Note: Only from Sonoma, toolbars are supported in a NSHostingView so I just don't use them
 class AppDelegateModel: NSObject, NSApplicationDelegate, ObservableObject {
 
+    /// Bool if the application is launched
+    var applicationHasLaunched: Bool = false
+
     /// Close all windows except the menuBarExtra
     /// - Note: Part of the `DocumentGroup` dirty hack; don't show the NSOpenPanel
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -49,6 +52,7 @@ class AppDelegateModel: NSObject, NSApplicationDelegate, ObservableObject {
         if welcomeWindowController == nil {
             let window = NSWindow()
             window.styleMask = styleMask
+            window.styleMask.remove(.titled)
             window.isMovableByWindowBackground = true
             window.contentView = NSHostingView(rootView: WelcomeView(appDelegate: self))
             window.titlebarAppearsTransparent = true
@@ -60,6 +64,7 @@ class AppDelegateModel: NSObject, NSApplicationDelegate, ObservableObject {
         /// Update the recent files list
         AppStateModel.shared.recentFiles = NSDocumentController.shared.recentDocumentURLs
         welcomeWindowController?.showWindow(welcomeWindowController?.window)
+        welcomeWindowController?.window?.makeKeyAndOrderFront(self)
     }
 
     /// Close the newDocumentViewController window

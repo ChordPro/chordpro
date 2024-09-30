@@ -45,6 +45,8 @@ extension AppSettings {
     /// Settings that will change the behaviour of the application
     struct Application: Codable, Equatable {
 
+        /// Bool to show the Welcome window
+        var showWelcomeWindow: Bool = true
         /// Action when opening an existing song
         var openSongAction: PaneView = .editorAndPreview
         /// Bool to use a custom song template

@@ -28,7 +28,24 @@ struct WelcomeView: View {
                     .padding()
             }
             .padding()
-            .frame(maxWidth: .infinity)
+            .overlay(alignment: .topLeading) {
+                Button {
+                    appDelegate.closeWelcomeWindow()
+                } label: {
+                    Image(systemName: "xmark.circle")
+                        .imageScale(.medium)
+                        .foregroundStyle(.secondary)
+                        .padding(5)
+                }
+            }
+            .overlay(alignment: .bottom) {
+                if appDelegate.applicationHasLaunched {
+                    Toggle("Show this window when creating a new document", isOn: $appState.settings.application.showWelcomeWindow)
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                        .padding([.leading, .top])
+                }
+            }
             .padding(.bottom)
             VStack(spacing: 0) {
                 Picker("Tabs", selection: $selectedTab) {
@@ -44,7 +61,7 @@ struct WelcomeView: View {
                 case .create:
                     Button(
                         action: {
-                            appState.newDocumentContent = ChordProDocument.newText
+                            appState.newDocumentContent = ChordProDocument.newText + "\n"
                             NSDocumentController.shared.newDocument(nil)
                         },
                         label: {
@@ -90,6 +107,19 @@ struct WelcomeView: View {
                             Label("Open an example song", systemImage: "doc.text")
                         }
                     )
+                    Divider()
+                        .frame(width: 240)
+                        .padding([.horizontal, .bottom])
+                    if let url = URL(string: "https://www.chordpro.org/") {
+                        Link(destination: url) {
+                            Label("Visit the **ChordPro** website", systemImage: "globe")
+                        }
+                    }
+                    if let url = URL(string: "https://www.chordpro.org/chordpro") {
+                        Link(destination: url) {
+                            Label("Read the documentation", systemImage: "book")
+                        }
+                    }
                 case .recent:
                     if appState.recentFiles.isEmpty {
                         Text("You have no recent songs")
@@ -117,19 +147,6 @@ struct WelcomeView: View {
                         }
                     }
                 }
-                Divider()
-                    .frame(width: 240)
-                    .padding([.horizontal, .bottom])
-                if let url = URL(string: "https://www.chordpro.org/") {
-                    Link(destination: url) {
-                        Label("Visit the **ChordPro** website", systemImage: "globe")
-                    }
-                }
-                if let url = URL(string: "https://www.chordpro.org/chordpro") {
-                    Link(destination: url) {
-                        Label("Read the documentation", systemImage: "book")
-                    }
-                }
             }
             .padding()
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -139,6 +156,12 @@ struct WelcomeView: View {
         .labelStyle(ButtonLabelStyle())
         .buttonStyle(.plain)
         .frame(width: 580)
+        .task {
+            /// Wait a moment before we can mark the application as launched
+            /// or else the toggle will be shown on first start
+            try? await Task.sleep(nanoseconds: 1000000000)
+            appDelegate.applicationHasLaunched = true
+        }
     }
 }
 
