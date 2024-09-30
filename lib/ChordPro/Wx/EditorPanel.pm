@@ -215,6 +215,7 @@ sub openfile {
     }
     #### TODO: Get rid of selection on Windows
     $self->{_currentfile} = $file;
+    $self->GetParent->Recents->add($file);
     if ( $self->{t_source}->GetText =~ /^\{\s*t(?:itle)?[: ]+([^\}]*)\}/m ) {
 	my $title = demarkup($1);
 	my $n = $self->{t_source}->GetLineCount;
@@ -385,6 +386,11 @@ sub OnShowMessages {
 sub OnStyleNeeded {
     my ( $self, $event ) = @_;
     $self->style_text($self->{t_source});
+}
+
+sub OnInitial {
+    my ( $self, $event ) = @_;
+    $self->Skip if $self->checksaved;
 }
 
 ################ Compatibility ################

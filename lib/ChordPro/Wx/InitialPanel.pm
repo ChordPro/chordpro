@@ -16,6 +16,7 @@ use parent qw( ChordPro::Wx::InitialPanel_wxg );
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
 use ChordPro::Wx::Utils;
+use File::Basename qw(basename);
 
 sub new {
     my( $self, $parent, $id, $pos, $size, $style, $name ) = @_;
@@ -31,11 +32,31 @@ sub new {
 
 }
 
+sub init {
+    my ( $self ) = @_;
+
+    my $r = $self->GetParent->Recents;
+
+    if ( $r->count > 0 ) {
+	my $ctl = $self->{lb_recent};
+	$ctl->Clear;
+	$ctl->Enable(1);
+	for ( my $i = 0; $i < $r->count; $i++ ) {
+	    my $file = $r->get($i);
+	    $ctl->Append( basename($file) );
+	    $ctl->SetClientData( $i, $file );
+	}
+    }
+    $self->{rb_createrecent}->SetSelection(0);
+    $self->OnCreateRecent;
+}
+
 sub OnInitialNew {
     my ( $self, $event ) = @_;
-    Wx::PostEvent( $self->GetParent,
-		   Wx::CommandEvent->new( wxEVT_COMMAND_MENU_SELECTED,
-					  wxID_NEW ) );
+#    Wx::PostEvent( $self->GetParent,
+#		   Wx::CommandEvent->new( wxEVT_COMMAND_MENU_SELECTED,
+    #					  wxID_NEW ) );
+    $self->GetParent->OnNew;
 }
 
 sub OnInitialOpen {
@@ -69,6 +90,44 @@ sub OnInitialDocs {
     my ( $self, $event ) = @_;
     $self->OnHelp_ChordPro($event);
     $event->Skip;
+}
+
+sub OnInitialRecent {
+    my ($self, $event) = @_;
+    warn "Event handler (OnInitialRecent) not implemented";
+    $event->Skip;
+}
+
+sub OnInitialRecentDclick {
+    my ($self, $event) = @_;
+    my $file = $self->{l_recent}->GetLabel;
+    $self->GetParent->select_mode("EDIT");
+    $self->GetParent->{p_edit}->openfile( $file, 0 );
+    $event->Skip;
+}
+
+sub OnInitialRecentSelect {
+    my ($self, $event) = @_;
+    my $n = $self->{lb_recent}->GetSelection;
+    my $file = $self->{lb_recent}->GetClientData($n);
+    $self->{l_recent}->SetLabel($file);
+    $self->{l_recent}->SetToolTip($file);
+    $event->Skip;
+}
+
+sub OnCreateRecent {
+    my ( $self, $event ) = @_;
+    if ( $self->{rb_createrecent}->GetSelection == 0 ) {
+	$self->{p_create}->Show(1);
+	$self->{p_recent}->Show(0);
+    }
+    else {
+	$self->{p_create}->Show(0);
+	$self->{p_recent}->Show(1);
+	$self->{p_recent}->SetSize( $self->{p_create}->GetSize );
+    }
+    $self->{sizer_10}->Layout;
+    $self->{sz_createrecentpanels}->Layout;
 }
 
 1;
