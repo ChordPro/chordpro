@@ -6,7 +6,7 @@
 	<array>
 		<dict>
 			<key>CFBundleTypeIconFile</key>
-			<string>LegacyDocIcon</string>
+			<string></string>
 			<key>CFBundleTypeIconSystemGenerated</key>
 			<integer>1</integer>
 			<key>CFBundleTypeName</key>
@@ -33,7 +33,7 @@
 			<key>UTTypeDescription</key>
 			<string>ChordPro song</string>
 			<key>UTTypeIconFile</key>
-			<string>LegacyDocIcon</string>
+			<string></string>
 			<key>UTTypeIcons</key>
 			<dict>
 				<key>UTTypeIconText</key>
@@ -45,8 +45,8 @@
 			<dict>
 				<key>public.filename-extension</key>
 				<array>
-					<string>chordpro</string>
 					<string>cho</string>
+					<string>chordpro</string>
 					<string>crd</string>
 					<string>chopro</string>
 					<string>chord</string>

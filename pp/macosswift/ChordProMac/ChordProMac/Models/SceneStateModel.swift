@@ -125,6 +125,10 @@ extension SceneStateModel {
                 exportStatus = .pdfCreationError
                 /// Remove the task (if any)
                 customTask = nil
+                /// Open the editor
+                showEditor = true
+                /// Hide the preview
+                showPreview = false
                 /// Trow the error
                 throw error
             }

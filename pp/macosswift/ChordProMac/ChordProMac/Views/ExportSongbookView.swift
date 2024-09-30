@@ -40,7 +40,7 @@ struct ExportSongbookView: View, DropDelegate {
             StatusView()
                 .padding(.horizontal)
         }
-        .frame(minWidth: 680, minHeight: 480, alignment: .top)
+        .frame(minWidth: 680, minHeight: 500, alignment: .top)
         .animation(.default, value: appState.settings.application)
         .overlay {
             VStack {
