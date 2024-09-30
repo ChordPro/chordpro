@@ -30,7 +30,6 @@ pp/macos/wxchordpro_pp.pl
 pp/macosswift/ChordProMac/ChordProMac/AppKitUtils/AppKitUtils+openPanel.swift
 pp/macosswift/ChordProMac/ChordProMac/AppKitUtils/AppKitUtils+PDFKitRepresentedView.swift
 pp/macosswift/ChordProMac/ChordProMac/AppKitUtils/AppKitUtils+printDialog.swift
-pp/macosswift/ChordProMac/ChordProMac/AppKitUtils/AppKitUtils+QLPreviewRepresentedView.swift
 pp/macosswift/ChordProMac/ChordProMac/AppKitUtils/AppKitUtils+SharingServiceRepresentedView.swift
 pp/macosswift/ChordProMac/ChordProMac/AppKitUtils/AppKitUtils.swift
 pp/macosswift/ChordProMac/ChordProMac/ChordProEditor/ChordProEditor+Coordinator.swift
@@ -83,7 +82,6 @@ pp/macosswift/ChordProMac/ChordProMac/Structures/ChordProInfo.swift
 pp/macosswift/ChordProMac/ChordProMac/Structures/CustomTask.swift
 pp/macosswift/ChordProMac/ChordProMac/Structures/Directive.swift
 pp/macosswift/ChordProMac/ChordProMac/Structures/FileListItem.swift
-pp/macosswift/ChordProMac/ChordProMac/Structures/FontStyle.swift
 pp/macosswift/ChordProMac/ChordProMac/Structures/LocalizedAlertError.swift
 pp/macosswift/ChordProMac/ChordProMac/Structures/LogItem.swift
 pp/macosswift/ChordProMac/ChordProMac/Structures/Notation.swift
