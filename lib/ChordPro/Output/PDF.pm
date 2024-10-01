@@ -1552,6 +1552,7 @@ sub generate_song {
 	    # Odd/even printing...
 	    $rightpage = !$rightpage if $ps->{'even-odd-pages'} < 0;
 	}
+	$s->{meta}->{'page.side'} = $rightpage ? "right" : "left";
 
 	# margin* are offsets from the edges of the paper.
 	# _*margin are offsets taking even/odd pages into account.
@@ -1591,6 +1592,7 @@ sub generate_song {
 	elsif ( $thispage == $startpage ) {
 	    $class = 1;		# first of a song
 	}
+	$s->{meta}->{'page.class'} = (qw(first title default))[$class];
 
 	# Three-part title handlers.
 	my $tpt = sub { tpt( $ps, $class, $_[0], $rightpage, $x, $y, $s ) };

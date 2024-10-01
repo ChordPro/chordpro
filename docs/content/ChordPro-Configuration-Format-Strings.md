@@ -103,6 +103,12 @@ The ChordPro reference implementation provides additional metadata:
 
  * `page`: The starting page number of the song.
 
+ * `page.side`: The page side, `left` or `right`.
+
+ * `page.class`: The page class, `default`, `title` or `first`. See 
+[page headers and footers]({{< relref
+"chordpro-configuration-pdf#page-headers-and-footers" >}}). 
+
  * `pages`: The number of pages of the current song.
    Only meaningful in headings and footers.
 
