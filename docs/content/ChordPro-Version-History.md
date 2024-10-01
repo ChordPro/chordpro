@@ -1,6 +1,6 @@
 ## The Stone Age
 
-Due to its simplicity and popularity, many users and tools adopted the ChordPro file format for transcribing songs. Unavoidable, many tools added their own extensions, thus creating several ChordPro ‘dialects’. Fortunately songs written in most of these dialects were exchangable, which means that they still produced usefull results even though parts of the commands in the file were not understood or dealt with correctly.
+Due to its simplicity and popularity, many users and tools adopted the ChordPro file format for transcribing songs. Unavoidable, many tools added their own extensions, thus creating several ChordPro ‘dialects’. Fortunately songs written in most of these dialects were exchangeable, which means that they still produced useful results even though parts of the commands in the file were not understood or dealt with correctly.
 
 ## ChordPro version 5.0
 

@@ -14,6 +14,6 @@ You can report bugs on the github repo:
 
 <https://github.com/ChordPro/chordpro/issues>
 
-We used to be hosting the userforum on google groups, which is still as an archive:
+We used to be hosting the user forum on google groups, which is still as an archive:
 
 <https://groups.google.com/forum/#!forum/chordpro>

@@ -87,7 +87,7 @@ Additionally, the following attributes may be used:
   If set, ChordPro will attempt to split the generated image into individual
   systems so longer scores can be put onto multiple pages.  
   As of 6.030 this is enabled by default. Use `split="0"` to keep the
-  score as a singlee image.
+  score as a single image.
 
 * staffsep="_n_"  
   Add extra vertical space between the systems.
@@ -126,10 +126,10 @@ the external tools support for embedded ABC may be limited, or absent.**
 
 Always include `X:1` as the first line of the ABC content, and insert
 an empty line before the `{end_of_abc}`. This delimits the ABC content
-so 3rd party tools can manupulate the ABC content directly from the
+so 3rd party tools can manipulate the ABC content directly from the
 ChordPro source.
 
 If you encounter problems with ABC content, run your ChordPro file
-through an ABC postprocessor (preferrably `abc2svg`) to see if
+through an ABC postprocessor (preferably `abc2svg`) to see if
 there are errors in the ABC content.
 
