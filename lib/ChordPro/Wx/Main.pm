@@ -211,6 +211,7 @@ sub init {
        # Editor.
        editfont	   => 0,
        editsize	   => FONTSIZE,
+       editcolour  => wxWHITE,
 
        # Notation.
        notation	   => "",
@@ -269,6 +270,8 @@ sub init {
     my $font = $fonts[$self->{prefs_editfont}]->{font};
     $font->SetPointSize($self->{prefs_editsize});
     $self->{p_edit}{t_source}->SetFont($font);
+    $self->{p_edit}{t_source}->SetBackgroundColour
+      (Wx::Colour->new($self->{prefs_editcolour}));
 
     if ( @ARGV ) {
 	my $arg = decode_utf8(shift(@ARGV));
@@ -663,8 +666,8 @@ sub GetPreferences {
 	}
     }
     $self->{prefs_xcode} = $p;
-
-
+    $self->restorewinpos("main");
+    $self->Show(1);
 }
 
 sub SavePreferences {
@@ -677,7 +680,28 @@ sub SavePreferences {
     }
 
     $self->Recents->store;
+    $self->savewinpos("main");
     $conf->Flush;
+}
+
+sub savewinpos {
+    my ( $self, $name, $win, $conf ) = @_;
+    $conf //= Wx::ConfigBase::Get;
+    $win //= $self;
+    $conf->Write( "windows/$name",
+		  join( " ", $win->GetPositionXY, $win->GetSizeWH ) );
+}
+
+sub restorewinpos {
+    my ( $self, $name, $win, $conf ) = @_;
+    $conf //= Wx::ConfigBase::Get;
+    $win //= $self;
+
+    my $t = $conf->Read( "windows/$name" );
+    if ( $t ) {
+	my @a = split( ' ', $t );
+	$win->SetSizeXYWHF( $a[0],$a[1],$a[2],$a[3], 0 );
+    }
 }
 
 ################ Event handlers ################
@@ -802,7 +826,9 @@ sub OnPreferences {
 
     use ChordPro::Wx::PreferencesDialog;
     $self->{d_prefs} ||= ChordPro::Wx::PreferencesDialog->new($self, -1, "Preferences");
+    $self->restorewinpos( "prefs", $self->{d_prefs} );
     my $ret = $self->{d_prefs}->ShowModal;
+    $self->savewinpos( "prefs", $self->{d_prefs} );
     $self->SavePreferences if $ret == wxID_OK;
 }
 

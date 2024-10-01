@@ -14,7 +14,9 @@
     - Progress reporting. Options ``progress_callabck and -I. Also
       enabled with --verbose.
     - (Wx) Fix problem with incorrect resource path after CHORDPRO_LIB change.
-    
+    - (Wx) Add background colour for editor window.    
+    - (Wx) Save/restore windows pos/size.
+
 6.060 2024-08-24
 
     !Highlights

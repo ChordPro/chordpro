@@ -391,4 +391,18 @@ sub OnSpEditFont {
     $event->Skip;
 }
 
+sub OnChEditColour {
+    my ($self, $event) = @_;
+    my $parent = $self->GetParent;
+    my $pedit = $parent->{p_edit};
+    my $ctl = $pedit->{t_source};
+    my $n = $self->{cp_editor}->GetColour;
+    if ( $n && $n->IsOk ) {
+	$ctl->SetBackgroundColour($n)
+	  if $ctl->can("SetBackgroundColour");
+	$parent->{prefs_editcolour} = $n->GetAsString(wxC2S_HTML_SYNTAX);
+    }
+    $event->Skip;
+}
+
 1;
