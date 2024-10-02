@@ -709,6 +709,11 @@
       // metadata item, e.g. "artist", add its value to one of the
       // title/subtitle fields. Don't try to add an artist page element.
       // 
+      // The left, center and right parts are for odd pages.
+      // On even pages, the left and right parts are swapped.
+      // It is possible to define distinct even page formats with "default-even",
+      // "title-even" and "first-even".
+      //    
       // When a background document is specified, with odd/even printing,
       // the 1st background page is used for left pages and
       // the next page (if it exists) for right pages.
@@ -743,6 +748,17 @@
         first {
     
           // Three-part title format specification, left, center, right.
+          footer : [ "" "" "" ]
+    
+          // Background page.
+          background : ""
+        }
+    
+          // Filler pages (for alignment) are empty by default.
+        filler {
+    
+          title : [ "" "" "" ]
+          subtitle : [ "" "" "" ]
           footer : [ "" "" "" ]
     
           // Background page.

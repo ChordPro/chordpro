@@ -402,21 +402,25 @@ that you can view it without having to turn a page.
 
 ## Page headers and footers
 
-ChordPro distinguishes three types of output pages:
+ChordPro distinguishes four classes of output pages:
 
 * the first page of the output: `first`;
 * the first page of a song: `title`;
-* all other pages: `default`.
+* all other pages: `default`;
+* pages for alignment: `filler`.
 
-Each of these page types can have settings for a page title, subtitle,
+Each of these page classes can have settings for a page title, subtitle,
 footer, and background.
 The settings inherit from `default` to `title` to `first`.
 So a `title` page has everything a `default` page has, and a `first`
 page has everything a `title` page has.
+`filler` pages are empty by default.
 
 Each title, subtitle and footer has three parts, which are printed to
 the left of the page, centered, and right. When even/odd page printing
-is selected, the left and right parts are swapped on even pages.
+is selected, ChordPro uses a page class with postfix `-even` on even
+pages, if this is defined. Otherwise, the left and right parts are
+swapped on even pages.
 
 The title, subtitle and footer may also be set to an *array* of three
 part strings, which will be printed on separate lines. 

@@ -154,20 +154,22 @@ sub configurator ( $opts = undef ) {
     for ( qw(title subtitle footer) ) {
         delete($cfg->{pdf}->{formats}->{first}->{$_})
           if ($cfg->{pdf}->{formats}->{first}->{$_} // 1) eq "";
-        for my $class ( qw(title first default) ) {
-            my $t = $cfg->{pdf}->{formats}->{$class}->{$_};
-            next unless $t;
-            die("Config error in pdf.formats.$class.$_: not an array\n")
-              unless ref($t) eq 'ARRAY';
-            if ( ref($t->[0]) ne 'ARRAY' ) {
-                $t = [ $t ];
-            }
-            my $tt = $_;
-            for ( @$t) {
-                die("Config error in pdf.formats.$class.$tt: ",
-                    scalar(@$_), " fields instead of 3\n")
-                  if @$_ && @$_ != 3;
-            }
+        for ( qw(title first default filler) ) {
+	    for my $class ( $_, $_."-even" ) {
+		my $t = $cfg->{pdf}->{formats}->{$class}->{$_};
+		next unless $t;
+		die("Config error in pdf.formats.$class.$_: not an array\n")
+		  unless ref($t) eq 'ARRAY';
+		if ( ref($t->[0]) ne 'ARRAY' ) {
+		    $t = [ $t ];
+		}
+		my $tt = $_;
+		for ( @$t) {
+		    die("Config error in pdf.formats.$class.$tt: ",
+			scalar(@$_), " fields instead of 3\n")
+		      if @$_ && @$_ != 3;
+		}
+	    }
         }
     }
 
@@ -650,6 +652,7 @@ sub _augment ( $self, $hash, $path ) {
         warn("Config augment error: unknown item $path$key\n")
           unless exists $self->{$key}
             || $path =~ /^pdf\.(?:info|fonts|fontconfig)\./
+            || $path =~ /^pdf\.formats\.\w+-even\./
             || $path =~ /^meta\./
             || $key =~ /^_/;
 
@@ -885,6 +888,7 @@ sub hmerge( $left, $right, $path = "" ) {
           unless exists $res{$key}
             || $path eq "pdf.fontconfig."
             || $path =~ /^pdf\.(?:info|fonts)\./
+            || $path =~ /^pdf\.formats\.\w+-even\./
             || $path =~ /^meta\./
             || $path =~ /^delegates\./
             || $path =~ /^parser\.preprocess\./

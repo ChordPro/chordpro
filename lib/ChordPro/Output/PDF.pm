@@ -16,7 +16,7 @@ use Encode qw( encode_utf8 );
 use File::Temp ();
 use Storable qw(dclone);
 use List::Util qw(any);
-use Ref::Util qw(is_hashref is_coderef);
+use Ref::Util qw(is_hashref is_arrayref is_coderef);
 use Carp;
 use feature 'state';
 use File::LoadLines qw(loadlines loadblob);
@@ -39,6 +39,9 @@ my $verbose = 0;
 # This eliminates the arbitrary order of font definitions and triggers
 # us to pinpoint some other data that would otherwise be varying.
 my $regtest = defined($ENV{PERL_HASH_SEED}) && $ENV{PERL_HASH_SEED} == 0;
+
+# Page classes.
+my @classes = qw( first title default filler );
 
 sub generate_songbook {
     my ( $self, $sb ) = @_;
@@ -630,14 +633,14 @@ sub generate_song {
 	 && ! $ps->{'titles-directive-ignore'} ) {
 	my $swap = sub {
 	    my ( $from, $to ) = @_;
-	    for my $class ( qw( default title first ) ) {
+	    for my $class ( @classes ) {
 		for ( qw( title subtitle footer ) ) {
 		    next unless defined $ps->{formats}->{$class}->{$_};
-		    unless ( ref($ps->{formats}->{$class}->{$_}) eq 'ARRAY' ) {
+		    unless ( is_arrayref($ps->{formats}->{$class}->{$_}) ) {
 			warn("Oops -- pdf.formats.$class.$_ is not an array\n");
 			next;
 		    }
-		    unless ( ref($ps->{formats}->{$class}->{$_}->[0]) eq 'ARRAY' ) {
+		    unless ( is_arrayref($ps->{formats}->{$class}->{$_}->[0]) ) {
 			$ps->{formats}->{$class}->{$_} =
 			  [ $ps->{formats}->{$class}->{$_} ];
 		    }
@@ -1592,7 +1595,7 @@ sub generate_song {
 	elsif ( $thispage == $startpage ) {
 	    $class = 1;		# first of a song
 	}
-	$s->{meta}->{'page.class'} = (qw(first title default))[$class];
+	$s->{meta}->{'page.class'} = $classes[$class];
 
 	# Three-part title handlers.
 	my $tpt = sub { tpt( $ps, $class, $_[0], $rightpage, $x, $y, $s ) };
@@ -2713,11 +2716,25 @@ sub configurator {
 # Get a format string for a given page class and type.
 # Page classes have fallbacks.
 sub get_format {
-    my ( $ps, $class, $type ) = @_;
-    my @classes = qw( first title default );
+    my ( $ps, $class, $type, $rightpage  ) = @_;
     for ( my $i = $class; $i < @classes; $i++ ) {
-	next unless exists($ps->{formats}->{$classes[$i]}->{$type});
-	return $ps->{formats}->{$classes[$i]}->{$type};
+	$class = $classes[$i];
+	next if $class eq 'filler';
+	my $fmt;
+	if ( !$rightpage
+	     && exists($ps->{formats}->{$class."-even"}->{$type}) ) {
+	    $fmt = $ps->{formats}->{$class."-even"}->{$type};
+	    $fmt = [ $fmt ] if @$fmt == 3 && !is_arrayref($fmt->[0]);
+	}
+	elsif ( exists($ps->{formats}->{$class}->{$type}) ) {
+	    $fmt = $ps->{formats}->{$class}->{$type};
+	    $fmt = [ $fmt ] if @$fmt == 3 && !is_arrayref($fmt->[0]);
+	    # Swap left/right for even pages.
+	    if ( !$rightpage ) {
+		$_ = [ reverse @$_ ] for @$fmt;
+	    }
+	}
+	return $fmt if $fmt;
     }
     return;
 }
@@ -2726,12 +2743,9 @@ sub get_format {
 # Note: baseline printing.
 sub tpt {
     my ( $ps, $class, $type, $rightpage, $x, $y, $s ) = @_;
-    my $fmt = get_format( $ps, $class, $type );
+    my $fmt = get_format( $ps, $class, $type, $rightpage );
     return unless $fmt;
-    if ( @$fmt == 3 && ref($fmt->[0]) ne 'ARRAY' ) {
-	$fmt = [ $fmt ];
-    }
-    # @fmt = ( left-fmt, center-fmt, right-fmt )
+
     my $pr = $ps->{pr};
     my $font = $ps->{fonts}->{$type};
 
@@ -2743,12 +2757,9 @@ sub tpt {
 	    die("ASSERT: " . scalar(@$fmt)," part format $class $type");
 	}
 
-	my @fmt = @$fmt;
-	@fmt = @fmt[2,1,0] unless $rightpage; # swap
-
 	# Left part. Easiest.
-	if ( $fmt[0] ) {
-	    my $t = fmt_subst( $s, $fmt[0] );
+	if ( $fmt->[0] ) {
+	    my $t = fmt_subst( $s, $fmt->[0] );
 	    if ( $t ne "" ) {
 		$pr->setfont($font) unless $havefont++;
 		$pr->text( $t, $x, $y );
@@ -2756,8 +2767,8 @@ sub tpt {
 	}
 
 	# Center part.
-	if ( $fmt[1] ) {
-	    my $t = fmt_subst( $s, $fmt[1] );
+	if ( $fmt->[1] ) {
+	    my $t = fmt_subst( $s, $fmt->[1] );
 	    if ( $t ne "" ) {
 		$pr->setfont($font) unless $havefont++;
 		$pr->text( $t, ($rm+$x-$pr->strwidth($t))/2, $y );
@@ -2765,8 +2776,8 @@ sub tpt {
 	}
 
 	# Right part.
-	if ( $fmt[2] ) {
-	    my $t = fmt_subst( $s, $fmt[2] );
+	if ( $fmt->[2] ) {
+	    my $t = fmt_subst( $s, $fmt->[2] );
 	    if ( $t ne "" ) {
 		$pr->setfont($font) unless $havefont++;
 		$pr->text( $t, $rm-$pr->strwidth($t), $y );
