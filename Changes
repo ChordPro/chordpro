@@ -20,6 +20,7 @@
     - Distinct page clases for even pages; filler class for alignment pages.
     - Fix issue #429.
     - Add "omit" property for delegated images.
+    - Several image fixes related to issue #428.
 
 6.060 2024-08-24
 

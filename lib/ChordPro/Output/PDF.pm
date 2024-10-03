@@ -791,18 +791,6 @@ sub generate_song {
 	$y = $ps->{_margintop};
 	$y += $ps->{headspace} if $ps->{'head-first-only'} && $class == 2;
 	$x += $ps->{_indent};
-
-        if ( $spreadimage ) {
-	    warn("PDF: Preparing spread image\n")
-	      if $config->{debug}->{images} || $config->{debug}->{assets};
-	    prepare_asset( $spreadimage->{id}, $s, $pr );
-	    $assets = $s->{assets} || {};
-	    warn("PDF: Preparing spread image, done\n")
-	      if $config->{debug}->{images} || $config->{debug}->{assets};
-            $y -= $ps->{_spreadimage} = imagespread( $spreadimage, $x, $y, $ps );
-            undef $spreadimage;
-        }
-
 	$ps->{_top} = $y;
 	$col = 0;
 	$vsp_ignorefirst = 1;
@@ -985,7 +973,7 @@ sub generate_song {
 		$pr->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
 	    }
 	}
-	$y = delete $ps->{_top} if $show eq "top";
+	$y = $ps->{_top} if $show eq "top";
     };
 
     my @elts;
@@ -1070,6 +1058,15 @@ sub generate_song {
 
 	    # Prepare the assets now we know the page width.
 	    prepare_assets( $s, $pr );
+
+	    # Spread image.
+            if ( $spreadimage ) {
+                if (ref($spreadimage) eq 'HASH' ) {
+                    # Spread image doesn't indent.
+                    $spreadimage = imagespread( $spreadimage, $x-$ps->{_indent}, $y, $ps );
+                }
+                $y -= $spreadimage;
+            }
 
 	    showlayout($ps) if $ps->{showlayout} || $config->{debug}->{spacing};
 	}
@@ -2079,7 +2076,7 @@ sub imageline {
     $scaley = $scalex;
     if ( $opts->{scale} ) {
 	my @s;
-	if ( UNIVERSAL::isa( $opts->{scale}, 'ARRAY' ) ) {
+	if ( is_arrayref( $opts->{scale} ) ) {
 	    @s = @{$opts->{scale}};
 	}
 	else {
@@ -2099,6 +2096,14 @@ sub imageline {
     $w *= $scalex;
     $h *= $scaley;
 
+    my 	$align = $opts->{align};
+
+    # If the image is wider than the page width, and scaled to fit, it may
+    # not be centered (https://github.com/ChordPro/chordpro/issues/428#issuecomment-2356447522).
+    if ( $w >= $pw ) {
+	$align = "left";
+    }
+
     my $ox = $opts->{x};
     my $oy = $opts->{y};
 
@@ -2109,7 +2114,6 @@ sub imageline {
 	warn("Y: ", $opts->{y}, " BASE: ", $opts->{base}, " -> $oy\n");
     }
 
-    my 	$align = $opts->{align};
     if ( $anchor eq "float" ) {
 	$align //= ( $opts->{center} // 1 ) ? "center" : "left";
 	# Note that image is placed aligned on $x.
@@ -2172,16 +2176,20 @@ sub imageline {
 	$calc->( $x, $ps->{_marginright}, $y, $ps->{__bottommargin}, 0 );
 	$xtrascale = ( $ps->{__rightmargin}-$ps->{_leftmargin} ) /
 	             ( $ps->{_marginright}-$ps->{_leftmargin} );
-	warn("_MR = ", $ps->{_marginright},
-	     ", _RM = ", $ps->{_rightmargin},
-	     ", __RM = ", $ps->{__rightmargin},
-	     ", XS = ", $xtrascale, "\n") if 0;
+	warn( pv( "_MR = ", $ps->{_marginright} ),
+	      pv( ", _RM = ", $ps->{_rightmargin} ),
+	      pv( ", __RM = ", $ps->{__rightmargin} ),
+	      pv( ", XS = ", $xtrascale ),
+	      "\n") if 0;
     }
 
     $x += $ox if defined $ox;
     $y -= $oy if defined $oy;
-    warn( sprintf("add_image x=%.1f y=%.1f w=%.1f h=%.1f (%s x%+.1f y%+.1f) %s\n",
+    warn( sprintf("add_image x=%.1f y=%.1f w=%.1f h=%.1f scale=%.1f,%.1f,%.1f (%s x%+.1f y%+.1f) %s\n",
 		  $x, $y, $w, $h,
+		  $w/$img->width * $xtrascale,
+		  $h/$img->height * $xtrascale,
+		  $xtrascale,
 		  $anchor,
 		  $ox//0, $oy//0, $align,
 		 )) if $config->{debug}->{images};
@@ -2196,7 +2204,7 @@ sub imageline {
 		   );
 
     if ( $anchor eq "float" ) {
-	return $h + ($oy//0);
+	return ($h + ($oy//0)) * $xtrascale;
     }
     return 0;			# vertical size
 }
@@ -2884,13 +2892,7 @@ sub wrapsimple {
 sub prepare_assets {
     my ( $s, $pr ) = @_;
 
-    my %sa;			# song assets
-
-    # Ignore spread asset.
-    while ( my($k,$v) = each %{$s->{assets}//{}} ) {
-	next if $v->{opts}->{spread};
-	$sa{$k} = $v;
-    }
+    my %sa = %{$s->{assets}//{}} ;	# song assets
 
     warn("PDF: Preparing ", scalar(keys %sa), " image",
 	 keys(%sa) == 1 ? "" : "s", "\n")
