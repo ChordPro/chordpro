@@ -68,6 +68,7 @@ WriteMakefile
 		    'Object::Pad'                 => 0.78,
 		    'JavaScript::QuickJS'         => 0.18,
 		    'Ref::Util'			  => 0.204,
+		    'Scalar::Util'		  => 1.63,
 
 		    # Some distro's have removed this from the core.
 		    'Pod::Usage'		  => 2.03,
@@ -91,6 +92,7 @@ WriteMakefile
 		    'Storable'			  => 3.08,
 		    'Object::Pad'		  => 0.78,
 		    'Ref::Util'			  => 0.204,
+		    'Scalar::Util'		  => 1.63,
 		    @pdfapi,
 		   },
 
