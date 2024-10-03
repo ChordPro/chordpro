@@ -19,12 +19,17 @@ jobs:
         run: brew install perl
       - name: perl -V
         run: perl -V
-      - name: Install Dependencies
+      - name: Install cpanm
         run: |
             curl -L https://cpanmin.us -o cpanm
             chmod +x cpanm
-            ./cpanm HarfBuzz::Shaper
-            cat /Users/runner/.cpanm/build.log
-            ./cpanm --installdeps --notest .
+      - name: Install H::B
+        continue-on-error: true
+        run: ./cpanm HarfBuzz::Shaper
+      - name: Oops
+        continue-on-error: true
+        run: cat /Users/runner/.cpanm/build.log
+      - name: Install Dependencies
+        run: ./cpanm --installdeps --notest .
       - name: Run Tests
         run: prove -l t
