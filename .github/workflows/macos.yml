@@ -21,6 +21,7 @@ jobs:
         run: perl -V
       - name: Install Dependencies
         run: |
+            brew install harfbuzz
             curl -L https://cpanmin.us -o cpanm
             chmod +x cpanm
             ./cpanm --installdeps --notest .
