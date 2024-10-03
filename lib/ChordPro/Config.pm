@@ -61,10 +61,6 @@ sub configurator ( $opts = undef ) {
     warn("Reading: <builtin>\n") if $verbose > 1;
     my $cfg = pristine_config();
 
-    # This is easier than splitting out manually :)
-    $cfg->split_fc_aliases;
-    $cfg->expand_font_shortcuts;
-
     # Default first.
     @cfg = prep_configs( $cfg, "<builtin>" );
     # Bubble default config to be the first.
@@ -321,6 +317,8 @@ sub prep_configs ( $cfg, $src ) {
     }
 
     # Push this and return.
+    $cfg->split_fc_aliases;
+    $cfg->expand_font_shortcuts;
     push( @res, $cfg );
     return @res;
 }

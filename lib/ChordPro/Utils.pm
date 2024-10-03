@@ -294,7 +294,7 @@ sub prpadd2cfg ( $cfg, @defs ) {
 	# Handle pdf.fonts.xxx shortcuts.
 	if ( join( ".", @keys ) eq "pdf.fonts" ) {
 	    my $s = { pdf => { fonts => { $lastkey => $value } } };
-	    config_expand_font_shortcuts($s);
+	    ChordPro::Config::expand_font_shortcuts($s);
 	    $value = $s->{pdf}{fonts}{$lastkey};
 	}
 
