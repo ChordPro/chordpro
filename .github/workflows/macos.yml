@@ -24,6 +24,7 @@ jobs:
             brew install harfbuzz
             curl -L https://cpanmin.us -o cpanm
             chmod +x cpanm
+            ./cpanm HarfBuzz::Shaper || cat /Users/runner/.cpanm/build.log
             ./cpanm --installdeps --notest .
       - name: Run Tests
         run: prove -l t
