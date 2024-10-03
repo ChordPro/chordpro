@@ -318,7 +318,8 @@ sub prpadd2cfg ( $cfg, @defs ) {
 	}
 
 	# Note that ':' is not oficailly supported by RRJson.
-	my @keys = split( /[:.]/, $key );
+	# Note that '/' is only added because I always type it :).
+	my @keys = split( qr;[:./];, $key );
 	my $lastkey = pop(@keys);
 
 	# Handle pdf.fonts.xxx shortcuts.
