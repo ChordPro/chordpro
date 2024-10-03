@@ -218,6 +218,36 @@ sub qquote ( $arg, $force = 0 ) {
 
 push( @EXPORT, 'qquote' );
 
+# Safely print values.
+
+use Scalar::Util qw(looks_like_number);
+
+# We want overload:
+# sub pv( $val )
+# sub pv( $label, $val )
+
+sub pv {
+    my $val   = pop;
+    my $label = pop // "";
+
+    if ( defined $val ) {
+	if ( looks_like_number($val) ) {
+	    $val = sprintf("%.3f", $val);
+	    $val =~ s/0+$//;
+	    $val =~ s/\.$//;
+	}
+	else {
+	    $val = qquote( $val, 1 );
+	}
+    }
+    else {
+	$val = "<undef>"
+    }
+    $label.$val;
+}
+
+push( @EXPORT, 'pv' );
+
 # Processing JSON.
 
 sub json_load( $json, $source = "<builtin>" ) {

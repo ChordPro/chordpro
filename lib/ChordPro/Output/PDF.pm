@@ -680,11 +680,12 @@ sub generate_song {
 
     my $col_adjust = sub {
 	if ( $ps->{columns} <= 1 ) {
-	    warn("L=", $ps->{__leftmargin},
-	     ", R=", $ps->{__rightmargin},
-	     ", T=", $ps->{_top},
-	     ", S=", $spreadimage//"<undef>",
-	     "\n") if $config->{debug}->{spacing};
+	    warn( "C=-",
+		  pv( ", L=", $ps->{__leftmargin} ),
+		  pv( ", R=", $ps->{__rightmargin} ),
+		  pv( ", T=", $ps->{_top} ),
+		  pv( ", S=", $spreadimage//"<undef>" ),
+		  "\n") if $config->{debug}->{spacing};
 	    return;
 	}
 	$x = $ps->{_leftmargin} + $ps->{columnoffsets}->[$col];
@@ -695,11 +696,12 @@ sub generate_song {
 	$ps->{__rightmargin} -= $ps->{columnspace}
 	  if $col < $ps->{columns}-1;
 	$y = $ps->{_top};
-	warn("C=$col, L=", $ps->{__leftmargin},
-	     ", R=", $ps->{__rightmargin},
-	     ", T=", $ps->{_top},
-	     ", S=", $spreadimage//"<undef>",
-	     "\n") if $config->{debug}->{spacing};
+	warn( pv( "C=", $col ),
+	      pv( ", L=", $ps->{__leftmargin} ),
+	      pv( ", R=", $ps->{__rightmargin} ),
+	      pv( ", T=", $ps->{_top} ),
+	      pv( ", S=", $spreadimage ),
+	      "\n") if $config->{debug}->{spacing};
 	$x += $ps->{_indent};
 	$y -= $spreadimage if defined($spreadimage) && !ref($spreadimage);
     };
@@ -1308,6 +1310,8 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "image" ) {
+	    next if $elt->{opts}->{omit};
+
 	    # Images are slightly more complex.
 	    # Only after establishing the desired height we can issue
 	    # the checkspace call, and we must get $y after that.

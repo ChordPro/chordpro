@@ -564,47 +564,49 @@ sub parse_song {
 			}
 		    }
 		    $opts = $a->{opts} = { %$opts, %{$a->{opts}} };
-		    if ( $opts->{align} && $opts->{x} && $opts->{x} =~ /\%$/ ) {
-			do_warn( "Useless combination of x percentage with align (align ignored)" );
-			delete $opts->{align};
-    }
+		    unless ( is_true($opts->{omit}) ) {
+			if ( $opts->{align} && $opts->{x} && $opts->{x} =~ /\%$/ ) {
+			    do_warn( "Useless combination of x percentage with align (align ignored)" );
+			    delete $opts->{align};
+	}
 
-		    my $def = !!$id;
-		    $id //= "_Image".$assetid++;
+			my $def = !!$id;
+			$id //= "_Image".$assetid++;
 
-		    if ( defined $opts->{spread} ) {
-			$def++;
-			if ( exists $self->{spreadimage} ) {
-			    do_warn("Skipping superfluous spread image");
+			if ( defined $opts->{spread} ) {
+			    $def++;
+			    if ( exists $self->{spreadimage} ) {
+				do_warn("Skipping superfluous spread image");
+			    }
+			    else {
+				$self->{spreadimage} =
+				  { id => $id, space => $opts->{spread} };
+				warn("Got spread image $id with space=$opts->{spread}\n")
+				  if $config->{debug}->{images};
+			    }
+			}
+
+			# Move to assets.
+			$self->{assets}->{$id} = $a;
+			if ( $def ) {
+			    my $label = delete $a->{label};
+			    do_warn("Label \"$label\" ignored on non-displaying $in_context section\n")
+			      if $label;
 			}
 			else {
-			    $self->{spreadimage} =
-			      { id => $id, space => $opts->{spread} };
-			    warn("Got spread image $id with space=$opts->{spread}\n")
-			      if $config->{debug}->{images};
-			}
-		    }
-
-		    # Move to assets.
-		    $self->{assets}->{$id} = $a;
-		    if ( $def ) {
-			my $label = delete $a->{label};
-			do_warn("Label \"$label\" ignored on non-displaying $in_context section\n")
-			  if $label;
-		    }
-		    else {
-			my $label = delete $opts->{label};
-			$self->add( type => "set",
-				    name => "label",
-				    value => $label )
-			  if $label && $label ne "";
-			$self->add( type => "image",
-				    opts => $opts,
-				    id => $id );
-			if ( $opts->{label} ) {
-			    push( @labels, $opts->{label} )
-			      unless $in_context eq "chorus"
-			      && !$config->{settings}->{choruslabels};
+			    my $label = delete $opts->{label};
+			    $self->add( type => "set",
+					name => "label",
+					value => $label )
+			      if $label && $label ne "";
+			    $self->add( type => "image",
+					opts => $opts,
+					id => $id );
+			    if ( $opts->{label} ) {
+				push( @labels, $opts->{label} )
+				  unless $in_context eq "chorus"
+				  && !$config->{settings}->{choruslabels};
+			    }
 			}
 		    }
 		}
@@ -1235,12 +1237,19 @@ sub directive {
     my $dd = $self->parse_directive($d);
     return 1 if $dd->{omit} == 1;
 
+    my $dir = $dd->{name};
     my $arg = $dd->{arg};
     if ( $arg ne "" ) {
 	$arg = fmt_subst( $self, $arg );
-	return 1 if $arg !~ /\S/;
+	if ( $arg !~ /\S/ ) { 	# expansion yields empty
+	    if ( $dir =~ /^start_of_/ ) {
+		$dd->{omit} = 2;
+	    }
+	    else {
+		return 1;
+	    }
+	}
     }
-    my $dir = $dd->{name};
 
     if ( $directives{$dir} ) {
 	return $directives{$dir}->( $self, $dir, $arg, $dd->{arg} );
