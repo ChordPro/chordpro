@@ -1538,7 +1538,7 @@ sub dir_image {
 	if ( $k =~ /^(title)$/i && $v ne "" ) {
 	    $opts{lc($k)} = $v;
 	}
-	elsif ( $k =~ /^(border|spread|center|persist)$/i
+	elsif ( $k =~ /^(border|spread|center|persist|omit)$/i
 		&& $v =~ /^(\d+)$/ ) {
 	    if ( $k eq "center" && $v ) {
 		$opts{align} = $k;
@@ -1560,7 +1560,7 @@ sub dir_image {
 	    $opts{lc($k)} = [ $2 ? $1/100 : $1 ];
 	    $opts{lc($k)}->[1] = $3 ? $4 ? $3/100 : $3 : $opts{lc($k)}->[0];
 	}
-	elsif ( $k =~ /^(center|border|spread|persist)$/i ) {
+	elsif ( $k =~ /^(center|border|spread|persist|omit)$/i ) {
 	    if ( $k eq "center" ) {
 		$opts{align} = $k;
 	    }
@@ -1600,6 +1600,8 @@ sub dir_image {
 	    $uri = $k;
 	}
     }
+
+    return if is_true($opts{omit});
 
     unless ( $uri || $id || $chord ) {
 	do_warn( "Missing image source\n" );
