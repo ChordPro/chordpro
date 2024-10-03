@@ -14,9 +14,9 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout
+      - uses: actions/checkout@v4
       - name: Setup Strawberry Perl
-        uses: shogo82148/actions-setup-perl
+        uses: shogo82148/actions-setup-perl@v1
         with:
           distribution: strawberry
       - name: perl -V
