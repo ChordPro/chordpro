@@ -14,9 +14,9 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout
       - name: Setup Strawberry Perl
-        uses: shogo82148/actions-setup-perl@v1
+        uses: shogo82148/actions-setup-perl
         with:
           distribution: strawberry
       - name: perl -V
@@ -29,5 +29,5 @@ jobs:
       - name: Make and run tests
         run: |
           perl Makefile.PL
-          gmake
-          gmake test
+          gmake -f Makefile
+          gmake -f Makefile test

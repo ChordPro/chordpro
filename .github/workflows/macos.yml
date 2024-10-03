@@ -14,14 +14,13 @@ jobs:
     runs-on: macOS-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout
       - name: Set up Perl
         run: brew install perl
       - name: perl -V
         run: perl -V
       - name: Install Dependencies
         run: |
-            brew install harfbuzz
             curl -L https://cpanmin.us -o cpanm
             chmod +x cpanm
             ./cpanm HarfBuzz::Shaper || cat /Users/runner/.cpanm/build.log
