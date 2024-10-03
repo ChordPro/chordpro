@@ -18,6 +18,7 @@
     - (Wx) Save/restore windows pos/size.
     - New meta: page.class (first, title, default) and page.side (left, right).
     - Distinct page clases for even pages; filler class for alignment pages.
+    - Fix issue #429.
 
 6.060 2024-08-24
 

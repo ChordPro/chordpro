@@ -18,6 +18,7 @@ use ChordPro::Paths;
 use ChordPro::Utils qw( expand_tilde demarkup min is_corefont );
 use ChordPro::Output::Common qw( fmt_subst prep_outlines );
 use File::LoadLines qw(loadlines);
+use Ref::Util qw( is_hashref );
 
 # For regression testing, run perl with PERL_HASH_SEED set to zero.
 # This eliminates the arbitrary order of font definitions and triggers
@@ -211,7 +212,6 @@ sub setfont {
     $self->{font} = $font;
     warn("PDF: Font ", $font->{_ff}, " should have a size!\n")
       unless $size ||= $font->{size};
-    use DDP; p $font unless $font->{fd}->{font};
     $self->{fontsize} = $size ||= $font->{size} || $font->{fd}->{size};
     $self->{pdftext}->font( $font->{fd}->{font}, $size );
 }
@@ -737,7 +737,7 @@ sub init_fonts {
 	my @fam = split( /\s*,\s*/, $ff );
 	foreach my $s ( keys( %{ $ps->{fontconfig}->{$ff} } ) ) {
 	    my $v = $ps->{fontconfig}->{$ff}->{$s};
-	    if ( UNIVERSAL::isa( $v, 'HASH' ) ) {
+	    if ( is_hashref($v) ) {
 		my $file = delete( $v->{file} );
 		$fc->register_font( $file, $fam[0], $s, $v );
 	    }
@@ -786,7 +786,8 @@ sub init_pangofont {
 	$font->{_ff} = $ff;
 	$font->{fd}->set_shaping( $font->{fd}->get_shaping || $font->{shaping}//0);
 	$font->{size} = $font->{fd}->get_size if $font->{fd}->get_size;
-    };
+	1;
+    } or return;
     $font->{fd};
 }
 
