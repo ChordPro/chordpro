@@ -30,6 +30,8 @@ jobs:
         continue-on-error: true
         run: cat /Users/runner/.cpanm/build.log
       - name: Install Dependencies
-        run: ./cpanm --installdeps --notest .
+        run: |
+          perl -ni~ -s 'print unless /HarfBuzz/' Makefile.PL
+          ./cpanm --installdeps --notest .
       - name: Run Tests
         run: prove -l t
