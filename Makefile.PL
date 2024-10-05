@@ -72,7 +72,7 @@ WriteMakefile
 
 		    # Core
 		    'Pod::Usage'		  => 2.03,
-		    'File::Copy'		  => 2.41,
+		    'File::Copy'		  => 2.32,
 
 		   # These are only used by the LaTeX backend
 		   # 'Template'			  => 3.010,
