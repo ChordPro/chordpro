@@ -101,17 +101,6 @@ The ChordPro reference implementation provides additional metadata:
 
  * `numchords`: The number of chords used in this song.
 
- * `page`: The starting page number of the song.
-
- * `page.side`: The page side, `left` or `right`.
-
- * `page.class`: The page class, `default`, `title` or `first`. See 
-[page headers and footers]({{< relref
-"chordpro-configuration-pdf#page-headers-and-footers" >}}). 
-
- * `pages`: The number of pages of the current song.
-   Only meaningful in headings and footers.
-
  * `songindex`: The index (serial number) of the song in the songbook.
  
  * `today`: The current date in the format defined in the config file.
@@ -132,6 +121,20 @@ The ChordPro reference implementation provides additional metadata:
 The values of `instrument` and `user` can be used for [directive
 selection]({{< relref "chordpro-directives#conditional-directives"
 >}})
+
+## Page related metadata
+
+Page related metadata are only available in headings and footers.
+
+ * `page`: The starting page number of the song.
+
+ * `page.side`: The current page side, `left` or `right`.
+
+ * `page.class`: The current page class, `default`, `title` or `first`. See 
+[page headers and footers]({{< relref
+"chordpro-configuration-pdf#page-headers-and-footers" >}}). 
+ 
+ * `pages`: The total number of pages of the current song.
 
 ## Command line metadata
 
