@@ -44,6 +44,7 @@ sub new {
 	$self->setup_scintilla;
     }
 
+    $self->{sw_main}->Unsplit(undef);
     $self->Layout;
     return $self;
 
@@ -374,6 +375,16 @@ sub OnPreview {
     $event = Wx::CommandEvent->new( wxEVT_COMMAND_MENU_SELECTED,
 				    $self->wxID_PREVIEW );
     Wx::PostEvent( $self->GetParent, $event );
+}
+
+sub OnPreviewClose {
+    my ( $self, $event ) = @_;
+    $self->{sw_main}->Unsplit(undef) if $self->{sw_main}->IsSplit;
+}
+
+sub OnPreviewSave {
+    my ( $self, $event ) = @_;
+    $self->GetParent->save_preview;
 }
 
 sub OnShowMessages {

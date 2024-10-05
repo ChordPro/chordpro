@@ -70,8 +70,9 @@ WriteMakefile
 		    'Ref::Util'			  => 0.204,
 		    'Scalar::Util'		  => 1.63,
 
-		    # Some distro's have removed this from the core.
+		    # Core
 		    'Pod::Usage'		  => 2.03,
+		    'File::Copy'		  => 2.41,
 
 		   # These are only used by the LaTeX backend
 		   # 'Template'			  => 3.010,

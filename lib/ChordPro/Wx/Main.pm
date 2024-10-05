@@ -615,8 +615,36 @@ sub preview {
     $dialog->Destroy if $dialog;
     unlink( $preview_cho );
 
-    $self->select_mode("preview");
-    $self->{p_preview}->{webview}->LoadURL("file://$preview_pdf");
+#    $self->select_mode("preview");
+#    $self->{p_preview}->{webview}->LoadURL("file://$preview_pdf");
+
+    for ( $self->{p_edit} ) {
+	my $top = wxTheApp->GetTopWindow;
+	my ($w,$h) = $top->GetSizeWH;
+	$top->SetSize( $w+400, $h ) if $w < 700;
+	$_->{sw_main}->SplitVertically
+	  ( $_->{p_left}, $_->{p_preview}, 0 )
+	  unless $_->{sw_main}->IsSplit;
+    }
+    $self->{p_edit}->{webview}->LoadURL("file://$preview_pdf");
+}
+
+sub save_preview {
+    my ( $self ) = @_;
+    return unless -s $preview_pdf;
+    my $fd = Wx::FileDialog->new
+      ($self, _T("Choose output file"),
+       "", "",
+       "*.pdf",
+       0|wxFD_SAVE|wxFD_OVERWRITE_PROMPT,
+       wxDefaultPosition);
+    my $ret = $fd->ShowModal;
+    if ( $ret == wxID_OK ) {
+	use File::Copy;
+	copy( $preview_pdf, $fd->GetPath );
+    }
+    $fd->Destroy;
+    return $ret;
 }
 
 sub _makeurl {
@@ -696,6 +724,7 @@ sub restorewinpos {
     my ( $self, $name, $win, $conf ) = @_;
     $conf //= Wx::ConfigBase::Get;
     $win //= $self;
+    $win = wxTheApp->GetTopWindow if $name eq "main";
 
     my $t = $conf->Read( "windows/$name" );
     if ( $t ) {
