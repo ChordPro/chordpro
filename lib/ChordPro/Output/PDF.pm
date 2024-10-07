@@ -2740,19 +2740,25 @@ sub get_format {
 	$class = $classes[$i];
 	next if $class eq 'filler';
 	my $fmt;
+	my $noswap;
 	if ( !$rightpage
 	     && exists($ps->{formats}->{$class."-even"}->{$type}) ) {
 	    $fmt = $ps->{formats}->{$class."-even"}->{$type};
-	    $fmt = [ $fmt ] if @$fmt == 3 && !is_arrayref($fmt->[0]);
+	    $noswap++;
 	}
 	elsif ( exists($ps->{formats}->{$class}->{$type}) ) {
 	    $fmt = $ps->{formats}->{$class}->{$type};
-	    $fmt = [ $fmt ] if @$fmt == 3 && !is_arrayref($fmt->[0]);
-	    # Swap left/right for even pages.
-	    if ( !$rightpage ) {
-		$_ = [ reverse @$_ ] for @$fmt;
-	    }
 	}
+	next unless $fmt;
+
+	# This should be dealt with in Config...
+	$fmt = [ $fmt ] if @$fmt == 3 && !is_arrayref($fmt->[0]);
+
+	# Swap left/right for even pages.
+	if ( !$rightpage ) {
+	    $_ = [ reverse @$_ ] for @$fmt;
+	}
+
 	return $fmt if $fmt;
     }
     return;

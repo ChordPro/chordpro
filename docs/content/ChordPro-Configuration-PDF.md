@@ -7,11 +7,9 @@ description: "Configuration for PDF output"
 
 Definitions for PDF output are stored in the configuration under the key `"pdf"`.
 
-    {
-       // ... generic part ...
-       "pdf" : {
-         // ... layout definitions ...
-       },
+    // ... generic part ...
+    pdf {
+        // ... layout definitions ...
     }
 
 Topics in this document:
@@ -21,12 +19,12 @@ Topics in this document:
 
 PDF document properties.
 
-      "info" : {
-          "title"    : "%{title}",
-          "author"   : "",
-          "subject"  : "",
-          "keywords" : "",
-      },
+    info {
+      title    : "%{title}"
+      author   : ""
+      subject  : ""
+      keywords : ""
+    }
 
 Note that the context for substitutions is the first song.
 
@@ -42,20 +40,20 @@ For details, see [Configuration for CSV output]({{< relref "chordpro-configurati
 
 The size of the paper for which output must be formatted. The size can be specified either as the name of a known page size, e.g. `"a4"`, or as a 2-element list containing the width and height of the page in _PDF units_ (_DTP points_, _pt_, 1/72 inch).
 
-        "papersize" : "a4",
-        // Same as: "papersize" : [ 595, 842 ]
+    papersize : a4
+    // Same as: papersize: [ 595, 842 ]
 
 ## Theme
 
 These settings can be used to control the foreground and
 background colours of the PDF output.
 
-        "theme" : {
-            "foreground"        : "black",
-            "foreground-light"  : "grey90",
-            "foreground-medium" : "grey70",
-            "background"        : "none",
-        }
+    theme {
+      foreground        : black
+      foreground-light  : grey90
+      foreground-medium : grey70
+      background        : none
+    }
 
 Background `"none"` or `"white"` means there will be no background
 colour added to the output.
@@ -65,15 +63,11 @@ together with additional settings that make up the theme. For example,
 these settings define a 'dark' theme that can be applied to any style.
 
 ````
-{
-    "pdf" : {
-        "theme" : {
-            "foreground"       : "white",
-            "foreground-light" : "#555555",
-            "background"       : "black",
-        },
-    },
-}
+    pdf.theme {
+      foreground       : white
+      foreground-light : #555555
+      background       : black
+    }
 ````
 
 Other configuration settings that use colours can use `foreground`,
@@ -84,7 +78,7 @@ Other configuration settings that use colours can use `foreground`,
 
 When output is produced in multiple columns, this is the space between the columns, in pt.
 
-        "columnspace"  :  20,
+    columnspace : 20
 
 ## Page margins
 
@@ -92,33 +86,33 @@ Click on the image for a larger version.
 
 [![layout.png]({{< asset "images/layout.png" >}})]({{< asset "images/layout-large.png" >}})
 
-        "margintop"    :  80,
-        "marginbottom" :  40,
-        "marginleft"   :  40,
-        "marginright"  :  40,
-        "headspace"    :  60,
-        "footspace"    :  20,
+    margintop    : 80
+    marginbottom : 40
+    marginleft   : 40
+    marginright  : 40
+    headspace    : 60
+    footspace    : 20
 
 ## Heading on first page only
 
 Put the heading on the first page only, and add the headspace to the other pages so they become larger.
 
-        "head-first-only" : false,
+    head-first-only : false
 
 ## Spacing
 
 This controls the distance between lines as a factor of the font size.
 
-        "spacing" : {
-            "title"  : 1.2,
-            "lyrics" : 1.2,
-            "chords" : 1.2,
-            "diagramchords" : 1.2,
-            "grid"   : 1.2,
-            "tab"    : 1.0,
-            "toc"    : 1.4,
-            "empty"  : 1.0,
-        },
+    spacing {
+      title         : 1.2
+      lyrics        : 1.2
+      chords        : 1.2
+      diagramchords : 1.2
+      grid          : 1.2
+      tab           : 1
+      toc           : 1.4
+      empty         : 1
+    }
 
 `lyrics` controls the spacing between songlines (chords + lyrics).
 
@@ -136,15 +130,15 @@ song.
 Section labels can be added to a specific verse, chorus or grid. See
 e.g. [start_of_verse]({{< relref "Directives-env_verse" >}}).
 
-        // This opens a margin for margin labels.
-        "labels" : {
-            // Margin width. Default is "auto".
-            "width" : "auto",
-            // Alignment for the labels. Default is left.
-            "align" : "left",
-            // Alternatively, render labels as comments.
-            "comment" : ""  // "comment", "comment_italic" or "comment_box",
-        },
+    // This opens a margin for margin labels.
+    labels {
+        // Margin width. Default is "auto".
+        width : auto
+        // Alignment for the labels. Default is left.
+        align : left
+        // Alternatively, render labels as comments.
+        comment : ""  // comment, comment_italic or comment_box
+    }
 
 When `comment` is set to one of the suported comment types, the label
 will be printed as a comment before the section contents. The settings
@@ -173,24 +167,46 @@ ChordPro can format a chorus in several different ways:
 * a side bar can be drawn to the left of the chorus part;
 * the `{chorus}` directive can print a comment text (tag), or quote the preceding chorus.
 
-        "chorus" : {
-            // Indentation of the chorus.
-            "indent"     :  0,
-            // Chorus side bar.
-            // Suppress by setting offset and/or width to zero.
-            "bar" : {
-                 "offset" :  8,
-                 "width"  :  1,
-                 "color"  : "foreground",
-            },
-            // Recall style: Print the tag using the type.
-            // Alternatively, quote the lines of the preceding chorus.
-            "recall" : {
-                 "tag"   : "Chorus",
-                 "type"  : "comment",
-                 "quote" : false,
-            },
-        },
+````
+// Appearance of chorus.
+chorus {
+
+  // Indent of the chorus, not including bar.
+  indent : 0
+
+  // Appearance of side bar.
+  bar {
+
+    // Bar offset to the left of the text. Suppress when zero.
+    offset : 8
+
+    // Bar width. Suppress when zero.
+    width : 1
+
+    // Bar colour.
+    color : foreground
+  }
+
+  // Label for Chorus.
+  tag : Chorus
+
+  // Appearance of chorus recall.
+  recall {
+
+    // Quote the chorus like a chorus.
+    choruslike : false
+
+    // Label for recalled chorus.
+    tag : Chorus
+
+    // Font for tag text.
+    type : comment
+
+    // Quote the chorus.
+    quote : false
+  }
+}
+````
 
 ## Chords in a side column
 
@@ -198,11 +214,11 @@ This is an alternative style where the chords are placed in a separate column at
 
 {{< showpage "style_modern2" >}}
 
-        // This style is enabled by setting "chordscolumn" to a nonzero value.
-        // Value is the column position. 
-        // "chordscolumn" : 400,
-        "chordscolumn" :  0,
-        "capoheading" : "%{capo|Capo: %{}}",
+    // This style is enabled by setting "chordscolumn" to a nonzero value.
+    // Value is the column position. 
+    // chordscolumn : 400
+    chordscolumn :  0
+    capoheading : "%{capo|Capo: %{}}"
 
 When a capo is set a heading indicating the current capo setting is added. The text of the heading is defined by `capoheading`.
 
@@ -210,7 +226,7 @@ When a capo is set a heading indicating the current capo setting is added. The t
 
 Traditionally, the `{titles}` directive was used to control titles flush. ChordPro has a much more powerful mechanism but this can conflict with legacy `{titles}` directives. If you use custom title formatting, setting `titles-directive-ignore` to a true makes ChordPro ignore the legacy directives.
 
-        "titles-directive-ignore" : false,
+    titles-directive-ignore : false
 
 ## Chord diagrams
 
@@ -234,20 +250,20 @@ The vertical distance between lines of diagrams is `vspace` times the cell heigh
 If the chord definition has info for finger settings, these will be
 shown if `fingers` is true.
 
-	diagrams {
-	  show     :  bottom, // or top, right, below, false
-	  align    :  left,   // or right, center, spread
-	  width    :  6,      // of a cell
-	  height   :  6,      // of a cell
-	  vcells   :  4,      // vertically
-	  linewidth : 0.1,    // of a cell width
-	  nutwidth :  5,      // linewidth
-	  hspace   :  3.95,   // horizontal space between, fraction of width
-	  vspace   :  3,      // verticalal space between, fraction of height
-	  dotsize  :  0.8,    // of a cell
-	  barwidth :  0.8,    // of a dot
-	  fingers  :  true,   // show fingering if available (or "below")
-	},
+    diagrams {
+      show     :  bottom, // or top, right, below, false
+      align    :  left,   // or right, center, spread
+      width    :  6,      // of a cell
+      height   :  6,      // of a cell
+      vcells   :  4,      // vertically
+      linewidth : 0.1,    // of a cell width
+      nutwidth :  5,      // linewidth
+      hspace   :  3.95,   // horizontal space between, fraction of width
+      vspace   :  3,      // verticalal space between, fraction of height
+      dotsize  :  0.8,    // of a cell
+      barwidth :  0.8,    // of a dot
+      fingers  :  true,   // show fingering if available (or "below")
+    },
 
 With the above settings, chord diagrams will look like:
 
@@ -293,18 +309,18 @@ Finally, the colour to represent keys that are part of the chord
 (pressed) can be specified with `pressed`. It takes the name of a
 colour, or a hex format `#RRGGBB`.
 
-	kbdiagrams {
-	  show     :  bottom, // or top, right, below, false
-	  align    :  left,   // or right, center, spread
-	  width    :   4,     // of a single key
-	  height   :  20,     // of the diagram
-	  keys     :  14,     // or 7, 10, 14, 17, 21
-	  base     :  "C",    // or "F"
-	  linewidth : 0.1,    // fraction of a single key width
-	  pressed  :  foreground-medium,   // colour of a pressed key
-	  hspace   :  3.95,   // horizontal space between, fraction of width
-	  vspace   :  0.3,    // verticalal space between, fraction of height
-	},
+    kbdiagrams {
+      show     :  bottom, // or top, right, below, false
+      align    :  left,   // or right, center, spread
+      width    :   4,     // of a single key
+      height   :  20,     // of the diagram
+      keys     :  14,     // or 7, 10, 14, 17, 21
+      base     :  "C",    // or "F"
+      linewidth : 0.1,    // fraction of a single key width
+      pressed  :  foreground-medium,   // colour of a pressed key
+      hspace   :  3.95,   // horizontal space between, fraction of width
+      vspace   :  0.3,    // verticalal space between, fraction of height
+    },
 
 With the above settings, keyboard diagrams will look like:
 
@@ -319,24 +335,22 @@ for diagrams.
 
 Properties for the lines of grid sections.
 
-      // Grid section lines.
-      // Suppress when "show" is false, e.g. for singers.
-      // The width and colour of the cell bar lines can be specified.
-      // Enable by setting the width to the desired width.
-      "grids" : {
-          "cellbar" : {
-              "width" : 0,
-              "color" : "foreground-medium",
-          },
-          "show": true,
-          "symbols" : {
-              "color" : "blue",
-          },
-          "volta" : {
-              "span" : 0.7,
-              "color" : "blue",
-          },
-      },
+    // Grid section lines.
+    // Suppress when "show" is false, e.g. for singers.
+    // The width and colour of the cell bar lines can be specified.
+    // Enable by setting the width to the desired width.
+    grids {
+      cellbar {
+        width : 0
+        color : foreground-medium
+      }
+      show    : true
+      symbols.color : blue
+      volta {
+        span  : 0.7
+        color : blue
+      }
+    }
 
 Note that command line option `--lyricsonly` implies `"show":false`
 for grids.
@@ -346,7 +360,7 @@ for grids.
 Pages can be printed neutrally (all pages the same) or with differing left and right pages.  
 This affects the page titles and footers, and the page margins.
 
-        "even-odd-pages" : 1,
+    even-odd-pages : 1
 
 The default value is `1`, which means that the first page is right, the second page is left, and so on.  
 The value `-1` means the first page is left, the second page is right, and so
@@ -361,7 +375,7 @@ will start on a right page (`even-odd-pages` = `1`) or a left page
 The setting of `pagealign-songs` controls whether each *song* starts on
 an even or odd page as well.
 
-        "pagealign-songs" : 1,
+    pagealign-songs : 1
 
 With a value greater than `1`, ChordPro will additionally force the
 resultant PDF to always have an even number of pages.
@@ -376,7 +390,7 @@ Pages can be reordered based on the song title or subtitle.
 Also possible is to align songs with two pages on an even page, so
 that you can view it without having to turn a page.
 
-        "sort-pages" : ""
+     sort-pages : ""
 
 `sort-pages` can be set to a comma separated list of `title`, `subtitle`,
 `2page`, `compact`, and `desc`.
@@ -422,8 +436,13 @@ is selected, ChordPro uses a page class with postfix `-even` on even
 pages, if this is defined. Otherwise, the left and right parts are
 swapped on even pages.
 
-The title, subtitle and footer may also be set to an *array* of three
-part strings, which will be printed on separate lines. 
+The title, subtitle and footer may be set to:
+
+* an *array* of three strings, the left, center, and right part;
+* an *array* of arrays of three part strings, which will be printed on
+  separate lines;
+* `false`: no content, same as `[ "" "" "" ]`;
+* `null`: same as omitting the entry.
 
 All heading strings may contain references to metadata in the form
 `%{`*name*`}`, for example `%{title}`. The current page number can be
@@ -438,39 +457,55 @@ Page numbers count from one. If odd/even printing is in effect, the
 designated page number is used for left pages, and the next page (if
 it exists) for right pages.
 
-        "formats" : {
+    formats {
 
-            // By default, a page has:
-            "default" : {
-                // No title/subtitle.
-                "title"     : null,
-                "subtitle"  : null,
-                // Footer is title -- page number.
-                "footer"    : [ "%{title}", "", "%{page}" ],
-                // Background pages: 5 and 6 from bgdemo.
-               "background" : "examples/bgdemo.pdf:5",
-            },
+      // By default, a page has:
+      default {
 
-            // The first page of a song has:
-            "title" : {
-                // Title and subtitle.
-                "title"     : [ "", "%{title}", "" ],
-                "subtitle"  : [ "", "%{subtitle}", "" ],
-                // Footer with page number.
-                "footer"    : [ "", "", "%{page}" ],
-                // Background pages: 3 and 4 from bgdemo.
-               "background" : "examples/bgdemo.pdf:3",
-            },
+        // No title and subtitle.
+        title :      false
+        subtitle :   false
 
-            // The very first output page is slightly different:
-            "first" : {
-                // It has title and subtitle, like normal 'first' pages.
-                // But no footer.
-                "footer"    : null,
-                // Background pages: 1 and 2 from bgdemo.
-               "background" : "examples/bgdemo.pdf:1",
-            },
-        },
+        // Footer is title -- page number.
+        footer :     [ "%{title}" "" "%{page}" ]
+
+        // Background pages: 5 and 6 from bgdemo.
+        background : "examples/bgdemo.pdf:5"
+      }
+
+      // The first page of a song has:
+      title {
+
+        // Title and subtitle.
+        title :      [ ""   "%{title}"      ""        ]
+        subtitle :   [ ""   "%{subtitle}"   ""        ]
+        // Footer with page number.
+        footer :     [ ""   ""              "%{page}" ]
+
+        // Background pages: 3 and 4 from bgdemo.
+        background : "examples/bgdemo.pdf:3"
+      }
+
+      // The very first output page is slightly different:
+      first {
+
+        // It has title and subtitle, like normal 'first' pages.
+        // But no footer.
+        footer :     false
+
+        // Background pages: 1 and 2 from bgdemo.
+        background : "examples/bgdemo.pdf:1"
+      }
+
+        // Filler pages (for alignment) are empty by default.
+      filler {
+
+        title :      false
+        subtitle :   false
+        footer :     false
+        background : false
+      }
+    }
 
 The effect of the above settings can be seen in the following
 picture.
@@ -498,10 +533,10 @@ side, while they are at the left side on (even) pages 2 and 6.
 
 Front matter and back matter can be specified in the config file.
 
-      // PDF file to add as front matter.
-      "front-matter" : "",
-      // PDF file to add as back matter.
-      "back-matter" : "",
+    // PDF file to add as front matter.
+    front-matter : ""
+    // PDF file to add as back matter.
+    back-matter : ""
 
 The value should be the name of a file that contains a PDF document.
 This document is prepended (for back matter, appended) to the
@@ -518,12 +553,12 @@ The filename should be the full name of a file on disk, or a relative filename w
 The `fontdir` setting can be used to add one or more private font directories to
 the font libraries. The private directories will be searched first.
 
-        // Fonts.
-        // Fonts can be specified by name (for the corefonts)
-        // or a filename (for TrueType/OpenType fonts).
-        // Relative filenames are looked up in the fontdir.
-        // fontdir : [ /usr/share/fonts/liberation /home/me/fonts ]
-        fontdir : null
+    // Fonts.
+    // Fonts can be specified by name (for the corefonts)
+    // or a filename (for TrueType/OpenType fonts).
+    // Relative filenames are looked up in the fontdir.
+    // fontdir : [ /usr/share/fonts/liberation /home/me/fonts ]
+    fontdir : null
 
 See also [ChordPro Fonts]({{< relref "ChordPro-Fonts" >}}).
 
@@ -535,13 +570,13 @@ printed output.
 
 For example:
 
-        fonts: {
-            title {
-                description  : "serif 14"
-                color : blue
-            }
-            ...
+    fonts: {
+        title {
+            description  : "serif 14"
+            color : blue
         }
+        ...
+    }
 
 A font specification consists of the following settings:
 
@@ -693,5 +728,5 @@ If `showlayout` is true, the margins and other page layout details are shown on 
 
 See also [Page margins]({{< relref "#page-margins" >}}) above.
 
-        "showlayout" : false,
+    showlayout : false
 

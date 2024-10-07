@@ -147,24 +147,25 @@ sub configurator ( $opts = undef ) {
     prpadd2cfg( $cfg, %{$options->{define}} );
 
     # Sanitize added extra entries.
-    for ( qw(title subtitle footer) ) {
-        delete($cfg->{pdf}->{formats}->{first}->{$_})
-          if ($cfg->{pdf}->{formats}->{first}->{$_} // 1) eq "";
-        for ( qw(title first default filler) ) {
-	    for my $class ( $_, $_."-even" ) {
-		my $t = $cfg->{pdf}->{formats}->{$class}->{$_};
-		next unless $t;
-		die("Config error in pdf.formats.$class.$_: not an array\n")
-		  unless ref($t) eq 'ARRAY';
-		if ( ref($t->[0]) ne 'ARRAY' ) {
-		    $t = [ $t ];
-		}
-		my $tt = $_;
+    for my $format ( qw(title subtitle footer) ) {
+        delete($cfg->{pdf}->{formats}->{first}->{$format})
+          if ($cfg->{pdf}->{formats}->{first}->{$format} // 1) eq "";
+        for my $c ( qw(title first default filler) ) {
+	    for my $class ( $c, $c."-even" ) {
+		my $t = $cfg->{pdf}->{formats}->{$class}->{$format};
+		# Allowed: null, false, [3], [[3], ...].
+		next unless defined $t;
+		$cfg->{pdf}->{formats}->{$class}->{$format} = ["","",""], next
+		  unless $t;
+		die("Config error in pdf.formats.$class.$format: not an array\n")
+		  unless is_arrayref($t);
+		$t = [ $t ] unless is_arrayref($t->[0]);
 		for ( @$t) {
-		    die("Config error in pdf.formats.$class.$tt: ",
+		    die("Config error in pdf.formats.$class.$format: ",
 			scalar(@$_), " fields instead of 3\n")
 		      if @$_ && @$_ != 3;
 		}
+		$cfg->{pdf}->{formats}->{$class}->{$format} = $t;
 	    }
         }
     }
