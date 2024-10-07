@@ -248,7 +248,7 @@ sub parse_chord ( $self, $chord ) {
 
     my $q = $plus{qual} // "";
     $info->{qual} = $q;
-    $q = "-" if $q eq "m" || $q eq "min";
+    $q = "-" if $q eq "m" || $q eq "mi" || $q eq "min";
     $q = "+" if $q eq "aug";
     $q = "0" if $q eq "dim";
     $q = "0" if $q eq "o";
@@ -492,7 +492,7 @@ sub load_notes ( $self, $init ) {
     # Accept root, qual, and only known extensions.
     $c_pat = "(?<root>" . $n_pat . ")";
     $c_pat .= "(?:";
-    $c_pat .= "(?<qual>-|min|m(?!aj))".
+    $c_pat .= "(?<qual>-|min?|m(?!aj))".
       "(?<ext>" . join("|", keys(%$additions_min)) . ")|";
     $c_pat .= "(?<qual>\\+|aug)".
       "(?<ext>" . join("|", keys(%$additions_aug)) . ")|";
@@ -506,7 +506,7 @@ sub load_notes ( $self, $init ) {
 
     # In relaxed form, we accept anything for extension.
     my $c_rpat = "(?<root>" . $n_pat . ")";
-    $c_rpat .= "(?:(?<qual>-|min|m(?!aj)|\\+|aug|0|o|dim|)(?<ext>.*))";
+    $c_rpat .= "(?:(?<qual>-|min?|m(?!aj)|\\+|aug|0|o|dim|)(?<ext>.*))";
     $c_rpat = qr/$c_rpat/;
 
     # Store in the object.
