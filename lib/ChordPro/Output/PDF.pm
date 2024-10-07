@@ -1315,9 +1315,9 @@ sub generate_song {
 
 	    my $gety = sub {
 		my $h = shift;
-		$checkspace->($h);
+		my $have = $checkspace->($h);
 		$ps->{pr}->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
-		return $y;
+		return wantarray ? ($y,$have) : $y;
 	    };
 
 	    my $vsp = imageline( $elt, $x, $ps, $gety );
@@ -2127,7 +2127,17 @@ sub imageline {
     }
     $align //= "left";
 
-    my $y = $gety->($anchor eq "float" ? $h : 0);	# may have been changed by checkspace
+    my $xtrascale = ( $ps->{__rightmargin}-$ps->{_leftmargin} ) /
+      ( $ps->{_marginright}-$ps->{_leftmargin} );
+
+    my ( $y, $spaceok ) = $gety->($anchor eq "float" ? $h*$xtrascale : 0);
+    # y may have been changed by checkspace.
+    # An extra scaled image is flushed to the next page, recalc xtrascale.
+    if ( !$spaceok && $xtrascale < 1 ) {
+	$y = $gety->($anchor eq "float" ? $h : 0);
+	$xtrascale = ( $ps->{__rightmargin}-$ps->{_leftmargin} ) /
+	  ( $ps->{_marginright}-$ps->{_leftmargin} );
+    }
     if ( defined ( my $tag = $i_tag // $label ) ) {
 	$i_tag = $tag;
     	my $ftext = $ps->{fonts}->{comment};
@@ -2154,7 +2164,6 @@ sub imageline {
 	}
     };
 
-    my $xtrascale = 1;
     if ( $anchor eq "column" ) {
 	# Relative to the column.
 	$calc->( @{$ps}{qw( __leftmargin __rightmargin
@@ -2174,8 +2183,6 @@ sub imageline {
 	# See issue #428.
 	# $calc->( $x, $ps->{__rightmargin}, $y, $ps->{__bottommargin}, 0 );
 	$calc->( $x, $ps->{_marginright}, $y, $ps->{__bottommargin}, 0 );
-	$xtrascale = ( $ps->{__rightmargin}-$ps->{_leftmargin} ) /
-	             ( $ps->{_marginright}-$ps->{_leftmargin} );
 	warn( pv( "_MR = ", $ps->{_marginright} ),
 	      pv( ", _RM = ", $ps->{_rightmargin} ),
 	      pv( ", __RM = ", $ps->{__rightmargin} ),
