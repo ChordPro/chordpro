@@ -1269,12 +1269,8 @@ sub directive {
 	@chorus = (), $chorus_xpose = $chorus_xpose_dir = 0
 	  if $in_context eq "chorus";
 	if ( $in_context eq "grid" ) {
-	    my $kv;
-	    my $shape = $arg;
-	    if ( $arg =~ /\w+="/ ) {
-		$kv = parse_kv($arg);
-		$shape = $kv->{shape};
-	    }
+	    my $kv = parse_kv( $arg, "shape" );
+	    my $shape = $kv->{shape};
 	    if ( $shape eq "" ) {
 		$self->add( type => "set",
 			    name => "gridparams",
@@ -1310,19 +1306,13 @@ sub directive {
 	}
 	elsif ( exists $config->{delegates}->{$in_context} ) {
 	    my $d = $config->{delegates}->{$in_context};
-	    my $label = $arg;
 	    my %opts;
 	    if ( $xpose || $config->{settings}->{transpose} ) {
 		$opts{transpose} =
 		  $xpose + ($config->{settings}->{transpose}//0 );
 	    }
-	    my $kv = {};
-	    if ( $arg =~ /\w+=["'](.+)/ ) {
-		$kv = parse_kv($arg);
-	    }
-	    else {
-		$kv->{label} = $arg if $arg ne "";
-	    }
+	    my $kv = parse_kv( $arg, "label" );
+	    delete $kv->{label} if ($kv->{label}//"") eq "";
 	    $self->add( type     => "image",
 			subtype  => "delegate",
 			delegate => $d->{module},
@@ -1331,23 +1321,20 @@ sub directive {
 			opts     => { %opts, %$kv },
 			exists($kv->{id}) ? ( id => $kv->{id} ) : (),
 			open     => 1 );
-	    push( @labels, $kv->{label} ) if $kv->{label}//"" ne "";
+	    push( @labels, $kv->{label} ) if exists $kv->{label};
 	}
 	elsif ( $arg ne "" ) {
-	    # Prefer explicit label.
-	    if ( $arg =~ /^label=/ ) {
-		$arg = parse_kv($arg)->{label};
-	    }
-	    elsif ( $arg =~ /\w+=["'](.+)/ ) {
-		# Doesn't look like a label. Assume a mistake.
+	    my $kv = parse_kv( $arg, "label" );
+	    my $label = delete $kv->{label};
+	    if ( %$kv ) {
+		# Assume a mistake.
 		do_warn("Garbage in start_of_$in_context: $arg (ignored)\n");
-		$arg = "";
 	    }
-	    if ( $arg ne "" ) {
+	    else {
 		$self->add( type  => "set",
 			    name  => "label",
-			    value => $arg );
-		push( @labels, $arg )
+			    value => $label );
+		push( @labels, $label)
 		  unless $in_context eq "chorus"
 		  && !$config->{settings}->{choruslabels};
 	    }
@@ -1441,16 +1428,12 @@ sub dir_chorus {
     my $chorus = @chorus ? dclone(\@chorus) : [];
 
     if ( @$chorus && $arg && $arg ne "" ) {
-	my $label = $arg;
-	my $kv;
-	if ( $arg =~ /\w+="/ ) {
-	    $kv = parse_kv($arg);
-	    $label = $kv->{label};
-	}
+	my $kv = parse_kv( $arg, "label" );
+	my $label = $kv->{label};
 	if ( $chorus->[0]->{type} eq "set" && $chorus->[0]->{name} eq "label" ) {
 	    $chorus->[0]->{value} = $label;
 	}
-	else {
+	elsif ( defined $label ) {
 	    unshift( @$chorus,
 		     { type => "set",
 		       name => "label",
@@ -1528,7 +1511,18 @@ sub dir_comment {
 sub dir_image {
     my ( $self, $dir, $arg ) = @_;
     return 1 if $::running_under_test && !$arg;
-    my $res = parse_kv($arg);
+    use Text::ParseWords qw(quotewords);
+    my @words = quotewords( '\s+', 1, $arg );
+    my $res;
+    # Imply src= if word 0 is not kv.
+    if ( @words && $words[0] !~ /\w+=/ ) {
+	$words[0] = "src=" . $words[0];
+	$res = parse_kv( \@words );
+    }
+    else {
+	$res = parse_kv( \@words, "src" );
+    }
+
     my $uri;
     my $id;
     my $chord;

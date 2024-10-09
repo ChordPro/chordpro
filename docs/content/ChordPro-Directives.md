@@ -5,20 +5,65 @@ description: "ChordPro directives"
 
 # ChordPro directives
 
-ChordPro directives are used to control the appearance of the printed output. They define meta-data like titles, add new chords, control page and column breaks. Therefore it is not always easy to make a distinction between the semantics of a directive, and the way these semantics are implemented in the ChordPro processing program, the _formatter_.
+ChordPro directives are used to control the appearance of the printed
+output. They define meta-data like titles, add new chords, control
+page and column breaks. Therefore it is not always easy to make a
+distinction between the semantics of a directive, and the way these
+semantics are implemented in the ChordPro processing program, the
+_formatter_.
 
 For example, the `title` directive.
 
     {title: Swing Low Sweet Chariot}
 
-The directive _name_ is ‘title’, and its _argument_ is the text ‘Swing Low Sweet Chariot’. This directive defines meta-data, the song title. That is the semantic part. What the formatter does with this meta-data is up to the program and _not part of the ChordPro File Format Specification_. You can consider directives to be a friendly request, or suggestion, but the actual implementation is left to the formatter. For a meta-data item like the song title it will probably be printed on top of the page and be included in a table of contents, if any.
+The directive _name_ is ‘title’, and its _argument_ is the text ‘Swing
+Low Sweet Chariot’. This directive defines meta-data, the song title.
+That is the semantic part. What the formatter does with this meta-data
+is up to the program and _not part of the ChordPro File Format
+Specification_. You can consider directives to be a friendly request,
+or suggestion, but the actual implementation is left to the formatter.
+For a meta-data item like the song title it will probably be printed
+on top of the page and be included in a table of contents, if any.
 
-The [Chordpro Reference Implementation]({{< relref "Chordpro-Reference-Implementation" >}}) provides a default implementation in the style of the original `chord` program. It can be used as a reference to what a directive is assumed to do. It must however be emphasised that the reference implementation can be configured to use different page styles, fonts, sizes, colours, and so on. Where appropriate, this document refers to the default style.
+The [Chordpro Program]({{< relref "Chordpro-Reference-Implementation"
+>}}) provides a default implementation in the style of the original
+`chord` program. It can be used as a reference to what a directive is
+assumed to do. It must however be emphasised that program can be
+configured to use different page styles, fonts, sizes, colours, and so
+on. Where appropriate, this document refers to the default style.
 
-Many directives have long and short names. For example, the long (full) name for the directive `title` is ‘title’,
-and the short (abbreviated) name is ‘t’. It is, however, advised to use the full name whenever possible, since the abbreviations may lead to confusion or ambiguity if new directives are added.
+Many directives have long and short names. For example, the long
+(full) name for the directive `title` is ‘title’, and the short
+(abbreviated) name is ‘t’. It is, however, advised to use the full
+name whenever possible, since the abbreviations may lead to confusion
+or ambiguity if new directives are added.
 
-For directives that take arguments, the arguments are separated from the directive name by a colon `:` and/or whitespace.
+### Arguments and attributes
+
+For directives that take arguments, the arguments are separated from
+the directive name by a colon `:` and/or whitespace, as can be seen
+above with the `title` directive. Some directives require more than a
+single argument. For these, a syntax familiar to HTML attributes is
+used, e.g.
+
+    {image: src="myimage.jpg" scale="50%"}
+
+You can use pairs of single and pairs of double quotes, the result is
+the same.
+
+Some directives with a single argument will also take an attribute
+instead. For example, the following variants of `start_of_verse` are
+the same:
+
+    {start_of_verse Verse 1}
+    {start_of_verse label="Verse 1"}
+
+It is always best to use the variant with explicit attributes. It is
+less confusing, robust, and future-proof.
+
+Note: In this documentation _attributes_ are often denoted with the
+less correct term _properties_. This will be straightened out in the
+future.
 
 ## Preamble directives
 

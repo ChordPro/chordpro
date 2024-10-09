@@ -131,7 +131,7 @@ sub abc2svg( $song, %args ) {
 	@pre = ();
     }
     my $kv = {};
-    $kv = parse_kv( @pre ) if @pre;
+    $kv = parse_kvm( @pre ) if @pre;
     $kv = { %$kv, %{$elt->{opts}} };
     $kv->{split} //= 1;		# less overhead. really.
     $kv->{scale} ||= 1;		# with id: design scale
@@ -481,7 +481,7 @@ sub options( $data ) {
     }
     @pre = () if @pre && !@data;	# no data found
     my $kv = {};
-    $kv = parse_kv( @pre ) if @pre;
+    $kv = parse_kvm( @pre ) if @pre;
     $kv->{align} //= ($kv->{center}//0) ? "center" : "left";
     $kv;
 }

@@ -380,7 +380,7 @@ sub generate_csv {
 
     my $rfc4180 = sub {
 	my ( $v ) = @_;
-	$v = [$v] unless ref($v) eq 'ARRAY';
+	$v = [$v] unless is_arrayref($v);
 	return "" unless defined($v) && defined($v->[0]);
 	$v = join( $sep, @$v );
 	return $v unless $v =~ m/[$sep"\n\r]/s;
@@ -681,10 +681,11 @@ sub generate_song {
     my $col_adjust = sub {
 	if ( $ps->{columns} <= 1 ) {
 	    warn( "C=-",
-		  pv( ", L=", $ps->{__leftmargin} ),
-		  pv( ", R=", $ps->{__rightmargin} ),
 		  pv( ", T=", $ps->{_top} ),
-		  pv( ", S=", $spreadimage//"<undef>" ),
+		  pv( ", L=", $ps->{__leftmargin} ),
+		  pv( ", I=", $ps->{_indent} ),
+		  pv( ", R=", $ps->{__rightmargin} ),
+		  pv( ", S=?", $spreadimage ),
 		  "\n") if $config->{debug}->{spacing};
 	    return;
 	}
@@ -697,10 +698,11 @@ sub generate_song {
 	  if $col < $ps->{columns}-1;
 	$y = $ps->{_top};
 	warn( pv( "C=", $col ),
-	      pv( ", L=", $ps->{__leftmargin} ),
-	      pv( ", R=", $ps->{__rightmargin} ),
 	      pv( ", T=", $ps->{_top} ),
-	      pv( ", S=", $spreadimage ),
+	      pv( ", L=", $ps->{__leftmargin} ),
+	      pv( ", I=", $ps->{_indent} ),
+	      pv( ", R=", $ps->{__rightmargin} ),
+	      pv( ", S=?", $spreadimage ),
 	      "\n") if $config->{debug}->{spacing};
 	$x += $ps->{_indent};
 	$y -= $spreadimage if defined($spreadimage) && !ref($spreadimage);
@@ -980,7 +982,7 @@ sub generate_song {
     my $dbgop = sub {
 	my ( $elts, $pb ) = @_;
 	$elts //= $elts[-1];
-	$elts = [ $elts ] unless ref($elts) eq 'ARRAY';
+	$elts = [ $elts ] unless is_arrayref($elts);
 	for my $elt ( @$elts ) {
 	    my $msg = sprintf("OP L:%2d %s (", $elt->{line},
 			      $pb ? "pushback($elt->{type})" : $elt->{type} );
@@ -1947,7 +1949,7 @@ sub songline {
 			# start is printed if there is enough room.
 			# repeat is printed repeatedly to fill the rest.
 			$marker = [ $marker, "", "" ]
-			  unless UNIVERSAL::isa( $marker, 'ARRAY' );
+			  unless is_arrayref($marker);
 
 			# Reserve space for final.
 			my $w = 0;
@@ -2092,7 +2094,8 @@ sub imageline {
 	$scaley *= $s[1];
     }
 
-    warn("Image scale: $scalex,$scaley\n") if $config->{debug}->{images};
+    warn("Image scale: ", pv($scalex), " ", pv($scaley), "\n")
+      if $config->{debug}->{images};
     $w *= $scalex;
     $h *= $scaley;
 
@@ -2127,16 +2130,20 @@ sub imageline {
     }
     $align //= "left";
 
-    my $xtrascale = ( $ps->{__rightmargin}-$ps->{_leftmargin} ) /
-      ( $ps->{_marginright}-$ps->{_leftmargin} );
+    # Extra scaling in case the available page width is temporarily
+    # reduced, e.g. due to a right column for chords.
+    my $xtrascale = ( $ps->{__rightmargin}-$ps->{_leftmargin}-$ps->{_indent} ) /
+      ( $ps->{_marginright}-$ps->{_leftmargin}-$ps->{_indent} );
 
     my ( $y, $spaceok ) = $gety->($anchor eq "float" ? $h*$xtrascale : 0);
     # y may have been changed by checkspace.
-    # An extra scaled image is flushed to the next page, recalc xtrascale.
     if ( !$spaceok && $xtrascale < 1 ) {
+	# An extra scaled image is flushed to the next page, recalc xtrascale.
 	$y = $gety->($anchor eq "float" ? $h : 0);
 	$xtrascale = ( $ps->{__rightmargin}-$ps->{_leftmargin} ) /
 	  ( $ps->{_marginright}-$ps->{_leftmargin} );
+	warn("ASSERT: xtrascale = $xtrascale, should be 1\n")
+	  unless abs( $xtrascale - 1 ) < 0.01; # fuzz;
     }
     if ( defined ( my $tag = $i_tag // $label ) ) {
 	$i_tag = $tag;
@@ -2250,7 +2257,7 @@ sub imagespread {
 
     if ( $opts->{scale} ) {
 	my @s;
-	if ( UNIVERSAL::isa( $opts->{scale}, 'ARRAY' ) ) {
+	if ( is_arrayref($opts->{scale}) ) {
 	    @s = @{$opts->{scale}};
 	}
 	else {
@@ -2436,7 +2443,7 @@ sub text_vsp {
 sub set_columns {
     my ( $ps, $cols ) = @_;
     my @cols;
-    if ( ref($cols) eq 'ARRAY' ) {
+    if ( is_arrayref($cols) ) {
 	@cols = @$cols;
 	$cols = @$cols;
     }

@@ -22,6 +22,7 @@
     - Add "omit" property for delegated images.
     - Several image fixes related to issue #428.
     - Allow 'mi' as short for 'min' chord quality.
+    - Make properties parsing in directives more robust.
 
 6.060 2024-08-24
 

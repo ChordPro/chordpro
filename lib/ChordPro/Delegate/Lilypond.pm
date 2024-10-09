@@ -81,7 +81,7 @@ sub ly2svg( $self, %args ) {
     }
 
     my $kv = { %$elt };
-    $kv = parse_kv( @pre ) if @pre;
+    $kv = parse_kvm( @pre ) if @pre;
     $kv->{scale} ||= 1;
     $kv->{align} //= ($kv->{center}//0) ? "center" : "left";
 
@@ -161,7 +161,7 @@ sub options( $data ) {
     }
     @pre = () if @pre && !@$data; 	# no LP found
     my $kv = {};
-    $kv = parse_kv( @pre ) if @pre;
+    $kv = parse_kvm( @pre ) if @pre;
     $kv->{align} //= ($kv->{center}//0) ? "center" : "left";
     $kv;
 }
