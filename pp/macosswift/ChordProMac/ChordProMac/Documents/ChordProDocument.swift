@@ -20,20 +20,7 @@ struct ChordProDocument: FileDocument {
     var text: String
     /// Init the song
     init(text: String = ChordProDocument.newText) {
-        let settings = AppSettings.load()
-        /// Check if we have to use a custom template
-        if
-            settings.application.useCustomSongTemplate,
-            let persistentURL = UserFileBookmark.getBookmarkURL(UserFileItem.customSongTemplate) {
-            /// Get access to the URL
-            _ = persistentURL.startAccessingSecurityScopedResource()
-            let data = try? String(contentsOf: persistentURL, encoding: .utf8)
-            self.text = data ?? text
-            /// Stop access to the URL
-            persistentURL.stopAccessingSecurityScopedResource()
-        } else {
-            self.text = text
-        }
+        self.text = text
     }
     /// Init the configuration
     init(configuration: ReadConfiguration) throws {
@@ -50,6 +37,24 @@ struct ChordProDocument: FileDocument {
             throw AppError.writeDocumentError
         }
         return .init(regularFileWithContents: data)
+    }
+}
+
+extension ChordProDocument {
+
+    static func getSongTemplateContent(settings: AppSettings) -> String {
+        if
+            settings.application.useCustomSongTemplate,
+            let persistentURL = UserFileBookmark.getBookmarkURL(UserFileItem.customSongTemplate) {
+            /// Get access to the URL
+            _ = persistentURL.startAccessingSecurityScopedResource()
+            let data = try? String(contentsOf: persistentURL, encoding: .utf8)
+            /// Stop access to the URL
+            persistentURL.stopAccessingSecurityScopedResource()
+            return data ?? ChordProDocument.newText
+        } else {
+            return ChordProDocument.newText
+        }
     }
 }
 

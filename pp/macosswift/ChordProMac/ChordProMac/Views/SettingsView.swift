@@ -90,10 +90,19 @@ extension SettingsView {
                     Text("When enabled you can choose between a new song, a new songbook or open an existing song. When disabled, a new song will be created.")
                         .font(.caption)
                     Toggle("Use a custom template for a new song", isOn: $appState.settings.application.useCustomSongTemplate)
+                        .onChange(of: appState.settings.application.useCustomSongTemplate) { _ in
+                            /// Update the appState with the new song content
+                            appState.standardDocumentContent = ChordProDocument.getSongTemplateContent(settings: appState.settings)
+                            appState.newDocumentContent = appState.standardDocumentContent
+                        }
                 }
                 UserFileButton(
                     userFile: UserFileItem.customSongTemplate
-                ) {}
+                ) {
+                    /// Update the appState with the new song content
+                    appState.standardDocumentContent = ChordProDocument.getSongTemplateContent(settings: appState.settings)
+                    appState.newDocumentContent = appState.standardDocumentContent
+                }
                     .disabled(!appState.settings.application.useCustomSongTemplate)
                 Text("You can use your own **ChordPro** file as a starting point when you create a new song")
                     .font(.caption)

@@ -20,8 +20,11 @@ final class AppStateModel: ObservableObject {
             try? AppSettings.save(settings: settings)
         }
     }
-    /// The content for a new document
-    @Published var newDocumentContent: String = ""
+    /// The standard content for a new document
+    var standardDocumentContent: String
+    /// The actual content for a new song
+    /// - Note: This will be different thah the standard when opened from the ``WelcomeView``
+    var newDocumentContent: String
     /// The **ChordPro** information
     @Published var chordProInfo: ChordProInfo?
     /// The list of known directives
@@ -32,7 +35,16 @@ final class AppStateModel: ObservableObject {
     /// Init the class; get application settings
     private init() {
         /// Get the application settings from the cache
-        self.settings = AppSettings.load()
+        let settings = AppSettings.load()
+        self.settings = settings
+        /// Set the content of a new song
+        self.standardDocumentContent = ChordProDocument.getSongTemplateContent(settings: settings)
+        self.newDocumentContent = self.standardDocumentContent
+//        /// Set the Custom Content if selected
+//        if settings.application.useCustomSongTemplate {
+//            newDocumentContent = ChordProDocument.getSongTemplateContent()
+//        }.a
+        /// Get the **ChordPro** info
         Task { @MainActor in
             chordProInfo = try? await Terminal.getChordProInfo()
             directives = Directive.getChordProDirectives(chordProInfo: chordProInfo)

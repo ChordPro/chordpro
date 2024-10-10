@@ -16,37 +16,25 @@ struct WelcomeView: View {
     let appDelegate: AppDelegateModel
     /// The selected tab
     @State private var selectedTab: NewTabs = .create
+    /// The ID of the Window
+    let windowID: AppDelegateModel.WindowID
     /// The body of the `View`
     var body: some View {
-        HStack {
+        HStack(spacing: 0) {
             VStack {
                 Text("ChordPro")
                     .font(.title)
+                    .bold()
                 Image("ChordProLogo")
                     .resizable()
                     .scaledToFit()
                     .padding()
             }
             .padding()
-            .overlay(alignment: .topLeading) {
-                Button {
-                    appDelegate.closeWelcomeWindow()
-                } label: {
-                    Image(systemName: "xmark.circle")
-                        .imageScale(.medium)
-                        .foregroundStyle(.secondary)
-                        .padding(5)
-                }
-            }
-            .overlay(alignment: .bottom) {
-                if appDelegate.applicationHasLaunched {
-                    Toggle("Show this window when creating a new document", isOn: $appState.settings.application.showWelcomeWindow)
-                        .font(.footnote)
-                        .foregroundColor(.secondary)
-                        .padding([.leading, .top])
-                }
-            }
             .padding(.bottom)
+            .frame(maxHeight: .infinity)
+            .frame(width: 260)
+            .background(.ultraThickMaterial)
             VStack(spacing: 0) {
                 Picker("Tabs", selection: $selectedTab) {
                     ForEach(NewTabs.allCases) { tab in
@@ -57,95 +45,104 @@ struct WelcomeView: View {
                 .pickerStyle(.segmented)
                 .labelsHidden()
                 .padding(.bottom)
-                switch selectedTab {
-                case .create:
-                    Button(
-                        action: {
-                            appState.newDocumentContent = ChordProDocument.newText + "\n"
-                            NSDocumentController.shared.newDocument(nil)
-                        },
-                        label: {
-                            Label("Create a new song", systemImage: "doc")
-                        }
-                    )
-                    Button(
-                        action: {
-                            Task {
-                                if let urls = await NSDocumentController.shared.beginOpenPanel() {
-                                    for url in urls {
-                                        do {
-                                            try await NSDocumentController.shared.openDocument(withContentsOf: url, display: true)
-                                        } catch {
-                                            Logger.application.error("Error opening URL: \(error.localizedDescription, privacy: .public)")
+                VStack(spacing: 0) {
+                    switch selectedTab {
+                    case .create:
+                        Button(
+                            action: {
+                                /// Make sure the new text is different from the default or else the welcome view will show again
+                                appState.newDocumentContent = appState.standardDocumentContent + "\n"
+                                NSDocumentController.shared.newDocument(nil)
+                            },
+                            label: {
+                                Label("Create a new song", systemImage: "doc")
+                            }
+                        )
+                        Button(
+                            action: {
+                                Task {
+                                    if let urls = await NSDocumentController.shared.beginOpenPanel() {
+                                        for url in urls {
+                                            do {
+                                                try await NSDocumentController.shared.openDocument(withContentsOf: url, display: true)
+                                            } catch {
+                                                Logger.application.error("Error opening URL: \(error.localizedDescription, privacy: .public)")
+                                            }
                                         }
                                     }
                                 }
+                            },
+                            label: {
+                                Label("Open an existing song", systemImage: "doc.badge.ellipsis")
                             }
-                        },
-                        label: {
-                            Label("Open an existing song", systemImage: "doc.badge.ellipsis")
-                        }
-                    )
-                    Button(
-                        action: {
-                            appDelegate.closeWelcomeWindow()
-                            appDelegate.showExportSongbookWindow()
-                        },
-                        label: {
-                            Label("Make a songbook", systemImage: "doc.on.doc")
-                        }
-                    )
-                    Button(
-                        action: {
-                            if let sampleSong = Bundle.main.url(forResource: "lib/ChordPro/res/examples/swinglow.cho", withExtension: nil) {
-                                let content = try? String(contentsOf: sampleSong, encoding: .utf8)
-                                appState.newDocumentContent = content ?? ChordProDocument.newText
-                                NSDocumentController.shared.newDocument(nil)
+                        )
+                        Button(
+                            action: {
+                                appDelegate.closeWelcomeWindow()
+                                appDelegate.showExportSongbookWindow()
+                            },
+                            label: {
+                                Label("Make a songbook", systemImage: "doc.on.doc")
                             }
-                        },
-                        label: {
-                            Label("Open an example song", systemImage: "doc.text")
+                        )
+                        Button(
+                            action: {
+                                if let sampleSong = Bundle.main.url(forResource: "lib/ChordPro/res/examples/swinglow.cho", withExtension: nil) {
+                                    let content = try? String(contentsOf: sampleSong, encoding: .utf8)
+                                    appState.newDocumentContent = content ?? ChordProDocument.newText
+                                    NSDocumentController.shared.newDocument(nil)
+                                }
+                            },
+                            label: {
+                                Label("Open an example song", systemImage: "doc.text")
+                            }
+                        )
+                        Divider()
+                            .frame(width: 240)
+                            .padding([.horizontal, .bottom])
+                        if let url = URL(string: "https://www.chordpro.org/") {
+                            Link(destination: url) {
+                                Label("Visit the **ChordPro** website", systemImage: "globe")
+                            }
                         }
-                    )
-                    Divider()
-                        .frame(width: 240)
-                        .padding([.horizontal, .bottom])
-                    if let url = URL(string: "https://www.chordpro.org/") {
-                        Link(destination: url) {
-                            Label("Visit the **ChordPro** website", systemImage: "globe")
+                        if let url = URL(string: "https://www.chordpro.org/chordpro") {
+                            Link(destination: url) {
+                                Label("Read the documentation", systemImage: "book")
+                            }
                         }
-                    }
-                    if let url = URL(string: "https://www.chordpro.org/chordpro") {
-                        Link(destination: url) {
-                            Label("Read the documentation", systemImage: "book")
-                        }
-                    }
-                case .recent:
-                    if appState.recentFiles.isEmpty {
-                        Text("You have no recent songs")
-                            .frame(maxHeight: .infinity)
-                    } else {
-                        ScrollView {
-                            VStack(spacing: 0) {
-                                ForEach(appState.recentFiles, id: \.self) { url in
-                                    Button(
-                                        action: {
-                                            Task {
-                                                do {
-                                                    try await NSDocumentController.shared.openDocument(withContentsOf: url, display: true)
-                                                } catch {
-                                                    Logger.application.error("Error opening URL: \(error.localizedDescription, privacy: .public)")
+                    case .recent:
+                        if appState.recentFiles.isEmpty {
+                            Text("You have no recent songs")
+                                .frame(maxHeight: .infinity)
+                        } else {
+                            ScrollView {
+                                VStack(spacing: 0) {
+                                    ForEach(appState.recentFiles, id: \.self) { url in
+                                        Button(
+                                            action: {
+                                                Task {
+                                                    do {
+                                                        try await NSDocumentController.shared.openDocument(withContentsOf: url, display: true)
+                                                    } catch {
+                                                        Logger.application.error("Error opening URL: \(error.localizedDescription, privacy: .public)")
+                                                    }
                                                 }
+                                            },
+                                            label: {
+                                                Label(url.deletingPathExtension().lastPathComponent, systemImage: "doc.text")
                                             }
-                                        },
-                                        label: {
-                                            Label(url.deletingPathExtension().lastPathComponent, systemImage: "doc.text")
-                                        }
-                                    )
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
+                }
+                if windowID == .welcomeView {
+                    Toggle("Show this window when creating a new document", isOn: $appState.settings.application.showWelcomeWindow)
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                        .padding(.bottom, 6)
                 }
             }
             .padding()
@@ -156,12 +153,6 @@ struct WelcomeView: View {
         .labelStyle(ButtonLabelStyle())
         .buttonStyle(.plain)
         .frame(width: 580)
-        .task {
-            /// Wait a moment before we can mark the application as launched
-            /// or else the toggle will be shown on first start
-            try? await Task.sleep(nanoseconds: 1000000000)
-            appDelegate.applicationHasLaunched = true
-        }
     }
 }
 

@@ -19,7 +19,7 @@ import SwiftUI
         // MARK: Song Document View
 
         DocumentGroup(newDocument: ChordProDocument(text: appState.newDocumentContent)) { file in
-            if file.fileURL == nil && file.document.text == ChordProDocument.newText && appState.settings.application.showWelcomeWindow {
+            if file.fileURL == nil && file.document.text == appState.standardDocumentContent && appState.settings.application.showWelcomeWindow {
                 ProgressView()
                     .withHostingWindow { window in
                         window?.alphaValue = 0
@@ -35,7 +35,7 @@ import SwiftUI
                     .task {
                         appDelegate.closeWelcomeWindow()
                         /// Reset the new content
-                        appState.newDocumentContent = ChordProDocument.newText
+                        appState.newDocumentContent = appState.standardDocumentContent
                     }
             }
         }
