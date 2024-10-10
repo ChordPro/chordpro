@@ -50,6 +50,7 @@
 		D776B5CE2C8A1EC100E10FE8 /* ExportSongbookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D776B5CD2C8A1EC100E10FE8 /* ExportSongbookView.swift */; };
 		D795739D2C95CCC600EE315D /* FileListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = D795739C2C95CCC600EE315D /* FileListItem.swift */; };
 		D796F0EC2C1A6AB600B3DE40 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D796F0EB2C1A6AB600B3DE40 /* AboutView.swift */; };
+		D7A4E2AA2CAB8533000748C2 /* CloseWindowButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A4E2A92CAB8533000748C2 /* CloseWindowButton.swift */; };
 		D7AC53422C20C1A0002B075F /* FontSizeButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7AC53412C20C1A0002B075F /* FontSizeButtons.swift */; };
 		D7D244B22C3C3C240058FB8E /* AppKitUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D244AB2C3C3C240058FB8E /* AppKitUtils.swift */; };
 		D7D244B32C3C3C240058FB8E /* AppKitUtils+openPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D244AC2C3C3C240058FB8E /* AppKitUtils+openPanel.swift */; };
@@ -130,6 +131,7 @@
 		D776B5CD2C8A1EC100E10FE8 /* ExportSongbookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportSongbookView.swift; sourceTree = "<group>"; };
 		D795739C2C95CCC600EE315D /* FileListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileListItem.swift; sourceTree = "<group>"; };
 		D796F0EB2C1A6AB600B3DE40 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
+		D7A4E2A92CAB8533000748C2 /* CloseWindowButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloseWindowButton.swift; sourceTree = "<group>"; };
 		D7AC53412C20C1A0002B075F /* FontSizeButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontSizeButtons.swift; sourceTree = "<group>"; };
 		D7D244AB2C3C3C240058FB8E /* AppKitUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppKitUtils.swift; sourceTree = "<group>"; };
 		D7D244AC2C3C3C240058FB8E /* AppKitUtils+openPanel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AppKitUtils+openPanel.swift"; sourceTree = "<group>"; };
@@ -274,7 +276,6 @@
 			isa = PBXGroup;
 			children = (
 				D74BC6FC2C9DBE8C007FF3D9 /* WelcomeView.swift */,
-				D71B11362C9D9655007D57D3 /* Buttons */,
 				D796F0EB2C1A6AB600B3DE40 /* AboutView.swift */,
 				D7723A502C0326120031CD0C /* MainView.swift */,
 				D75005662C38379C005D23E2 /* EditorPaneView.swift */,
@@ -283,6 +284,8 @@
 				D72EA33B2C0BB24600B1BA93 /* LogView.swift */,
 				D776B5CD2C8A1EC100E10FE8 /* ExportSongbookView.swift */,
 				D74002CA2C04711000291BE7 /* SettingsView.swift */,
+				D71B11362C9D9655007D57D3 /* Buttons */,
+				D7DE16482CB791000020C2BF /* Modifiers */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -360,6 +363,14 @@
 				D7D244DC2C3C3C620058FB8E /* UserFile.swift */,
 			);
 			path = Protocols;
+			sourceTree = "<group>";
+		};
+		D7DE16482CB791000020C2BF /* Modifiers */ = {
+			isa = PBXGroup;
+			children = (
+				D7A4E2A92CAB8533000748C2 /* CloseWindowButton.swift */,
+			);
+			path = Modifiers;
 			sourceTree = "<group>";
 		};
 		D7FBDB8B2C2C956500D242ED /* Frameworks */ = {
@@ -510,6 +521,7 @@
 				D75005692C383C77005D23E2 /* PreviewPaneView.swift in Sources */,
 				D7D244CC2C3C3C320058FB8E /* ChordProEditor+TextView.swift in Sources */,
 				D72EA3402C0C5E5800B1BA93 /* View+extension.swift in Sources */,
+				D7A4E2AA2CAB8533000748C2 /* CloseWindowButton.swift in Sources */,
 				D7D244DE2C3C3C620058FB8E /* ChordProDirective.swift in Sources */,
 				D702E0DF2C0CEF42006D9667 /* LogItem.swift in Sources */,
 				D7D244CB2C3C3C320058FB8E /* ChordProEditor+Static.swift in Sources */,

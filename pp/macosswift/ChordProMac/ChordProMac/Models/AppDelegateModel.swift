@@ -12,9 +12,6 @@ import SwiftUI
 /// - Note: Only from Sonoma, toolbars are supported in a NSHostingView so I just don't use them
 class AppDelegateModel: NSObject, NSApplicationDelegate, ObservableObject {
 
-    /// Bool if the application is launched
-    var applicationHasLaunched: Bool = false
-
     /// Close all windows except the menuBarExtra
     /// - Note: Part of the `DocumentGroup` dirty hack; don't show the NSOpenPanel
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -43,22 +40,23 @@ class AppDelegateModel: NSObject, NSApplicationDelegate, ObservableObject {
     /// Default style mask
     let styleMask: NSWindow.StyleMask = [.closable, .miniaturizable, .titled, .fullSizeContentView]
 
-    // MARK: Welcome View
+    // MARK: Welcome window
 
-    /// The controller for the ``WelcomeView``
+    /// The controller for the `Welcome` window
     private var welcomeWindowController: NSWindowController?
-    /// Create and view the ``WelcomeView`` window
+    /// Show the ``WelcomeView`` in an AppKit window
     @MainActor func showWelcomeWindow() {
         if welcomeWindowController == nil {
-            let window = NSWindow()
-            window.styleMask = styleMask
+            let welcomeView = WelcomeView(appDelegate: self, windowID: .welcomeView)
+                .closeWindowModifier {
+                    self.closeWelcomeWindow()
+                }
+            let window = createWindow(id: .welcomeView)
             window.styleMask.remove(.titled)
             window.isMovableByWindowBackground = true
-            window.contentView = NSHostingView(rootView: WelcomeView(appDelegate: self))
-            window.titlebarAppearsTransparent = true
+            window.backgroundColor = NSColor.clear
+            window.contentView = NSHostingView(rootView: welcomeView)
             window.center()
-            /// Just a fancy animation; it is not a document window
-            window.animationBehavior = .documentWindow
             welcomeWindowController = NSWindowController(window: window)
         }
         /// Update the recent files list
@@ -66,23 +64,23 @@ class AppDelegateModel: NSObject, NSApplicationDelegate, ObservableObject {
         welcomeWindowController?.showWindow(welcomeWindowController?.window)
         welcomeWindowController?.window?.makeKeyAndOrderFront(self)
     }
-
-    /// Close the newDocumentViewController window
+    /// Close the ``WelcomeView`` window
     @MainActor func closeWelcomeWindow() {
         welcomeWindowController?.window?.close()
     }
 
-    // MARK: About View
+    // MARK: About window
 
-    /// The controller for the ``AboutView``
+    /// The controller for the `About` window
     private var aboutWindowController: NSWindowController?
-    /// Create and view the ``AboutView``window
+    /// Show the ``AboutView`` in an AppKit window
     @MainActor func showAboutWindow() {
         if aboutWindowController == nil {
-            let window = NSWindow()
-            window.styleMask = styleMask
-            window.title = "About ChordPro"
-            window.contentView = NSHostingView(rootView: AboutView())
+            let window = createWindow(id: .aboutView)
+            window.styleMask.remove(.titled)
+            window.isMovableByWindowBackground = true
+            window.backgroundColor = NSColor.clear
+            window.contentView = NSHostingView(rootView: AboutView(appDelegate: self))
             window.center()
             /// Just a fancy animation; it is not a document window
             window.animationBehavior = .documentWindow
@@ -90,18 +88,22 @@ class AppDelegateModel: NSObject, NSApplicationDelegate, ObservableObject {
         }
         aboutWindowController?.showWindow(aboutWindowController?.window)
     }
+    /// Close the ``AboutView`` window
+    @MainActor func closeAboutWindow() {
+        aboutWindowController?.window?.close()
+    }
 
-    // MARK: Export Songbook View
+    // MARK: Export Songbook window
 
-    /// The controller for the ``ExportSongbookView``
+    /// The controller for the `Export Songbook` window
     private var exportSongbookWindowController: NSWindowController?
-    /// Create and view the ``ExportSongbookView`` window
+    /// Show the ``ExportSongbookView`` in an AppKit window
     @MainActor func showExportSongbookWindow() {
         if exportSongbookWindowController == nil {
-            let window = NSWindow()
+            let window = createWindow(id: .exportSongbookView)
             window.styleMask = styleMask
+            window.titlebarAppearsTransparent = false
             window.styleMask.update(with: .resizable)
-            window.title = "Export a Folder to a Songbook"
             window.contentView = NSHostingView(rootView: ExportSongbookView())
             window.center()
             /// Just a fancy animation; it is not a document window
@@ -109,5 +111,47 @@ class AppDelegateModel: NSObject, NSApplicationDelegate, ObservableObject {
             exportSongbookWindowController = NSWindowController(window: window)
         }
         exportSongbookWindowController?.showWindow(exportSongbookWindowController?.window)
+    }
+
+    // MARK: Create a default NSWindow
+
+    @MainActor private func createWindow(id: WindowID) -> NSWindow {
+        let window = MyNSWindow()
+        window.title = id.rawValue
+        window.styleMask = styleMask
+        window.titlebarAppearsTransparent = true
+        window.toolbarStyle = .unified
+        window.identifier = NSUserInterfaceItemIdentifier(id.rawValue)
+        /// Just a fancy animation; it is not a document window
+        window.animationBehavior = .documentWindow
+        return window
+    }
+
+    // MARK: App Window ID's
+
+    /// The windows we can open
+    enum WindowID: String {
+        /// The ``WelcomeView``
+        case welcomeView = "ChordPro"
+        /// The ``WelcomeView`` in the menu bar
+        case menuBarExtra = "MenuBarExtra"
+        /// The ``AboutView``
+        case aboutView = "About ChordPro"
+        /// The ``ExportSongbookView``
+        case exportSongbookView = "Export Songs"
+    }
+}
+
+extension AppDelegateModel {
+
+    /// Make a NSWindow that can be kay and main
+    /// - Note:Needed for Windows that that don't have the `.titled` style mask
+    class MyNSWindow: NSWindow {
+        /// The window can become main
+        override var canBecomeMain: Bool { true }
+        /// The window can become key
+        override var canBecomeKey: Bool { true }
+        /// The window accepts first responder
+        override var acceptsFirstResponder: Bool { true }
     }
 }
