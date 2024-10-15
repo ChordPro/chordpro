@@ -72,7 +72,8 @@ sub log {
 }
 
 sub new {
-    my $self = bless $_[0]->SUPER::new(), __PACKAGE__;
+    my $pkg = shift;
+    my $self = bless $pkg->SUPER::new(@_), __PACKAGE__;
 
     Wx::Event::EVT_IDLE($self, $self->can('OnIdle'));
     Wx::Event::EVT_CLOSE($self, $self->can('OnClose'));
@@ -110,6 +111,10 @@ sub new {
     $self->log( 'I', "Using " .
 		( ref($self->{p_edit}{t_source}) eq 'Wx::TextCtrl'
 		  ? "basic" : "styled") . " text editor" );
+    $self->log( 'I', "Using " .
+		( ref($self->{p_edit}{webview}) eq 'Wx::WebView'
+		  ? "embedded" : "external") . " PDF viewer" );
+
     $self;
 }
 
@@ -463,8 +468,31 @@ sub preview {
 
     @ARGV = ();			# just to make sure
 
+    my $stc = $self->{p_edit}->{t_source};
+    my $astyle = 1 + wxSTC_STYLE_LASTPREDEFINED;
+    if ( $stc->isa('Wx::StyledTextCtrl') ) {
+	$stc->AnnotationClearAll;
+	$stc->AnnotationSetVisible(wxSTC_ANNOTATION_BOXED);
+	$stc->StyleSetBackground( $astyle, Wx::Colour->new(255, 255, 160) );
+	$stc->StyleSetForeground( $astyle, wxRED );
+
+	if ( $stc->can("StyleGetSizeFractional") ) { # Wx 3.002
+	    $stc->StyleSetSizeFractional	# size * 100
+	      ( $astyle,
+		( $stc->StyleGetSizeFractional
+		  ( wxSTC_STYLE_DEFAULT ) * 4 ) / 5 );
+	}
+    }
+
     $msgs = $fatal = $died = 0;
-    $SIG{__WARN__} = sub { _warn($self, @_) } unless $self->{_log};
+    $SIG{__WARN__} = sub {
+	_warn($self, @_);
+	if ( $stc->isa('Wx::StyledTextCtrl')
+	     && "@_" =~ /^Line (\d+),\s+(.*)/ ) {
+	    $stc->AnnotationSetText( $1-1, $2 );
+	    $stc->AnnotationSetStyle( $1-1, $astyle );
+	}
+    };
 #    $SIG{__DIE__}  = \&_die;
 
     my $haveconfig = List::Util::any { $_ eq "--config" } @$args;
@@ -505,6 +533,8 @@ sub preview {
 
     push( @ARGV, '--transpose', $self->{prefs_xpose} )
       if $self->{prefs_xpose};
+
+    push( @ARGV, '--define', 'diagnostics.format=Line %n, %m' );
 
     push( @ARGV, @$args ) if @$args;
     push( @ARGV, $preview_cho ) unless $opts{filelist};
@@ -565,10 +595,36 @@ sub preview {
 	ChordPro::main($options);
     };
     $self->_die($@), goto ERROR if $@ && !$died;
+    goto ERROR unless -e $preview_pdf;
 
-=for xxx
+    my $target = $opts{target} // $self->{p_edit};
+    if ( $target->{webview}->isa('Wx::WebView') ) {
 
-    if ( -e $preview_pdf ) {
+	for ( $target ) {
+	    my $top = wxTheApp->GetTopWindow;
+	    my ($w,$h) = $top->GetSizeWH;
+	    my $want = $target eq $self->{p_edit} ? 700 : 900;
+	    $top->SetSize( $w+400, $h ) if $w < $want;
+	    unless ( $_->{sw_main}->IsSplit ) {
+		$_->{sw_main}->SplitVertically ( $_->{p_left}, $_->{p_preview}, 0 );
+		$_->{b_preview_close}->Show(1);
+		$_->{b_preview_save}->Show(1);
+		$_->{sz_buttons}->Layout;
+	    }
+	}
+
+	Wx::Event::EVT_WEBVIEW_LOADED
+	    ( $self, $target->{webview}, $self->can("OnWebViewLoaded") );
+	Wx::Event::EVT_WEBVIEW_ERROR
+	    ( $self, $target->{webview}, $self->can("OnWebViewError") );
+
+	use URI::file;
+	my $wf = URI::file->new($preview_pdf);
+	$wf =~ s;///([A-Z]):/;///$1|/;;
+	$self->log( 'I', "Preview " . substr($wf,0,128) );
+	$target->{webview}->LoadURL($wf);
+    }
+    else {
 	$self->log( 'S', "Output generated, starting previewer");
 
 	if ( my $cmd = $self->{prefs_pdfviewer} ) {
@@ -595,6 +651,9 @@ sub preview {
 	}
     }
 
+    $dialog->Destroy if $dialog;
+    unlink( $preview_cho );
+
   ERROR:
     if ( $msgs ) {
 	my $target = $opts{filelist} ? $self->{p_sbexport} : $self->{p_edit};
@@ -609,24 +668,33 @@ sub preview {
 	    $self->log( 'W',  "Problems found." );
 	}
     }
+}
 
-=cut
+sub OnWebViewLoaded {
+}
 
-    $dialog->Destroy if $dialog;
-    unlink( $preview_cho );
+sub OnWebViewError {
+    my ( $self, $event ) = @_;
+    my $errorstring = $event->GetString;
+    my $url = $event->GetURL;
 
-#    $self->select_mode("preview");
-#    $self->{p_preview}->{webview}->LoadURL("file://$preview_pdf");
+    my $errormap =
+      { wxWEBVIEW_NAV_ERR_CONNECTION()	    => 'wxWEB_NAV_ERR_CONNECTION',
+	wxWEBVIEW_NAV_ERR_CERTIFICATE()	    => 'wxWEB_NAV_ERR_CERTIFICATE',
+	wxWEBVIEW_NAV_ERR_AUTH()	    => 'wxWEB_NAV_ERR_AUTH',
+	wxWEBVIEW_NAV_ERR_SECURITY()	    => 'wxWEB_NAV_ERR_SECURITY',
+	wxWEBVIEW_NAV_ERR_NOT_FOUND()	    => 'wxWEB_NAV_ERR_NOT_FOUND',
+	wxWEBVIEW_NAV_ERR_REQUEST()	    => 'wxWEB_NAV_ERR_REQUEST',
+	wxWEBVIEW_NAV_ERR_USER_CANCELLED()  => 'wxWEB_NAV_ERR_USER_CANCELLED',
+	wxWEBVIEW_NAV_ERR_OTHER()	    => 'wxWEB_NAV_ERR_OTHER',
+      };
 
-    for ( $self->{p_edit} ) {
-	my $top = wxTheApp->GetTopWindow;
-	my ($w,$h) = $top->GetSizeWH;
-	$top->SetSize( $w+400, $h ) if $w < 700;
-	$_->{sw_main}->SplitVertically
-	  ( $_->{p_left}, $_->{p_preview}, 0 )
-	  unless $_->{sw_main}->IsSplit;
-    }
-    $self->{p_edit}->{webview}->LoadURL("file://$preview_pdf");
+    my $errorid = $event->GetInt;
+    my $errname = exists( $errormap->{$errorid} ) ? $errormap->{$errorid} : '<UNKNOWN ID>';
+
+    $self->log( 'E',
+		sprintf( 'Getting %s Webview reports the following error code and string : %s : %s',
+			 $url, $errname, $errorstring ) );
 }
 
 sub save_preview {
@@ -729,7 +797,13 @@ sub restorewinpos {
     my $t = $conf->Read( "windows/$name" );
     if ( $t ) {
 	my @a = split( ' ', $t );
-	$win->SetSizeXYWHF( $a[0],$a[1],$a[2],$a[3], 0 );
+	if ( is_msw || is_macos ) {
+	    $win->SetSizeXYWHF( $a[0],$a[1],$a[2],$a[3], 0 );
+	}
+	else {
+	    # Linux WM usually prevent placement.
+	    $win->SetSize( $a[2],$a[3] );
+	}
     }
 }
 

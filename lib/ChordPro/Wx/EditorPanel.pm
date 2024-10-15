@@ -16,9 +16,11 @@ use parent qw( ChordPro::Wx::EditorPanel_wxg );
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
 use ChordPro::Wx::Utils;
-use ChordPro::Utils qw( demarkup is_macos );
+use ChordPro::Utils qw( demarkup is_macos is_msw );
+use ChordPro::Paths;
 
 my $stc;
+my $wv;
 
 sub new {
     my( $self, $parent, $id, $pos, $size, $style, $name ) = @_;
@@ -44,8 +46,19 @@ sub new {
 	$self->setup_scintilla;
     }
 
+    $wv = is_msw ? 0 : eval { use Wx::WebView; 1 };
+    if ( $wv ) {
+	my $w = Wx::WebView::New( $self->{p_preview},
+				  wxID_ANY,
+				  CP->findres( "chordpro-icon.png",
+					       class => "icons" ) );
+	$self->{sz_prv}->Replace( $self->{webview}, $w, 1 );
+	$self->{webview}->Destroy;
+	$self->{webview} = $w;
+	$self->{sz_prv}->Layout;
+    }
+
     $self->{sw_main}->Unsplit(undef);
-    $self->Layout;
     return $self;
 
 }
@@ -61,7 +74,7 @@ sub setup_scintilla {
     my ( $self ) = @_;
 
     # Replace the placeholder Wx::TextCtrl.
-    my $stc = Wx::StyledTextCtrl->new( $self->{sz_source}->GetStaticBox,
+    my $stc = Wx::StyledTextCtrl->new( $self->{p_left},
 				       wxID_ANY );
 
     # Check for updated STC.
@@ -111,9 +124,7 @@ sub setup_scintilla {
     $stc->StyleSetSpec( 6, "fore:orange" );
 
     # For linenumbers.
-    $stc->SetMarginType( 1, wxSTC_MARGIN_NUMBER );
-    $stc->SetMarginMask( 1, 0 );
-    $stc->SetMarginWidth( 1, 40 ); # TODO
+    $stc->SetMarginWidth( 0, 40 ); # TODO
 }
 
 sub style_text {
@@ -221,7 +232,6 @@ sub openfile {
 	my $title = demarkup($1);
 	my $n = $self->{t_source}->GetLineCount;
 	$self->log( 'S', "Loaded: $title ($n line" . ( $n == 1 ? "" : "s" ) . ")");
-	$self->{sz_source}->GetStaticBox->SetLabel($title);
     }
     else {
 	my $n = $self->{t_source}->GetLineCount;
@@ -372,14 +382,16 @@ sub OnPreferences {
 
 sub OnPreview {
     my ( $self, $event ) = @_;
-    $event = Wx::CommandEvent->new( wxEVT_COMMAND_MENU_SELECTED,
-				    $self->wxID_PREVIEW );
-    Wx::PostEvent( $self->GetParent, $event );
+    $self->GetParent->preview( [], target => $self );
 }
 
 sub OnPreviewClose {
     my ( $self, $event ) = @_;
-    $self->{sw_main}->Unsplit(undef) if $self->{sw_main}->IsSplit;
+    return unless $self->{sw_main}->IsSplit;
+    $self->{sw_main}->Unsplit(undef);
+    $self->{b_preview_close}->Show(0);
+    $self->{b_preview_save}->Show(0);
+    $self->{sz_buttons}->Layout;
 }
 
 sub OnPreviewSave {

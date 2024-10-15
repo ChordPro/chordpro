@@ -18,13 +18,29 @@ use Wx::Locale gettext => '_T';
 use ChordPro::Wx::Utils;
 use constant CFGBASE => "songbookexport/";
 use Encode qw( decode_utf8 encode_utf8 );
-use ChordPro::Utils qw(demarkup);
+use ChordPro::Utils qw( is_msw demarkup );
 use File::LoadLines;
+use ChordPro::Paths;
+
+my $wv;
 
 sub new {
     my $self = shift;
     $self = $self->SUPER::new(@_);
 
+    $wv = is_msw ? 0 : eval { use Wx::WebView; 1 };
+    if ( $wv ) {
+	my $w = Wx::WebView::New( $self->{p_preview},
+				  wxID_ANY,
+				  CP->findres( "chordpro-icon.png",
+					       class => "icons" ) );
+	$self->{sz_prv}->Replace( $self->{webview}, $w, 1 );
+	$self->{webview}->Destroy;
+	$self->{webview} = $w;
+	$self->{sz_prv}->Layout;
+    }
+
+    $self->{sw_main}->Unsplit(undef);
     return $self;
 }
 
@@ -143,7 +159,7 @@ sub OnDirPickerChanged {
 	$self->{w_rearrange}->Show;
 	$self->{sz_export_inner}->Layout;
     }
-    $self->{sz_export_outer}->Layout;
+    $self->{sz_main}->Layout;
     $self->{_sbefiles} = \@files;
 }
 
@@ -207,7 +223,7 @@ sub OnPreview {
     }
 
     my @args = ( "--filelist", \$filelist );
-    my %opts = ( filelist => 1 );
+    my %opts = ( target => $self, filelist => 1 );
 
     if ( $self->{cb_stdcover}->IsChecked ) {
 	push( @args, "--title",
@@ -222,6 +238,20 @@ sub OnPreview {
     $self->GetParent->preview( \@args, %opts );
 
     $event->Skip;
+}
+
+sub OnPreviewClose {
+    my ( $self, $event ) = @_;
+    return unless $self->{sw_main}->IsSplit;
+    $self->{sw_main}->Unsplit(undef);
+    $self->{b_preview_close}->Show(0);
+    $self->{b_preview_save}->Show(0);
+    $self->{sz_buttons}->Layout;
+}
+
+sub OnPreviewSave {
+    my ( $self, $event ) = @_;
+    $self->GetParent->save_preview;
 }
 
 sub OnShowMessages {
