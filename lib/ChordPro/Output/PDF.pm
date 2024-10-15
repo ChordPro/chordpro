@@ -53,7 +53,7 @@ sub generate_songbook {
     $ps = $config->{pdf};
 
     my $extra_matter = 0;
-    if ( $options->{toc} // @{$sb->{songs}} ) {
+    if ( $options->{toc} // (@{$sb->{songs}} > 1) ) {
 	for ( @{ $::config->{contents} } ) {
 	    $extra_matter++ unless $_->{omit};
 	}
@@ -161,7 +161,7 @@ sub generate_songbook {
     my @tocs = @{ $::config->{contents} };
 
     if ( $extra_matter ) {
-	progress( phase   => "PDF",
+	progress( phase   => "PDF(extra)",
 		  index   => 0,
 		  total   => $extra_matter );
 
