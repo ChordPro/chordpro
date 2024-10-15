@@ -25,6 +25,7 @@
     - Make properties parsing in directives more robust.
     - (Wx) Preview with split window.
     - (ChordPro) Include ABC if generating for MSPro.
+    - Fix issue #428.
 
 6.060 2024-08-24
 

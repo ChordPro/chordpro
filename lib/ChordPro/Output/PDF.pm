@@ -2132,8 +2132,9 @@ sub imageline {
 
     # Extra scaling in case the available page width is temporarily
     # reduced, e.g. due to a right column for chords.
-    my $xtrascale = ( $ps->{__rightmargin}-$ps->{_leftmargin}-$ps->{_indent} ) /
-      ( $ps->{_marginright}-$ps->{_leftmargin}-$ps->{_indent} );
+    my $w_actual = $ps->{__rightmargin}-$ps->{_leftmargin}-$ps->{_indent};
+    my $xtrascale = $w < $w_actual ? 1
+      : $w_actual / ( $ps->{_marginright}-$ps->{_leftmargin}-$ps->{_indent} );
 
     my ( $y, $spaceok ) = $gety->($anchor eq "float" ? $h*$xtrascale : 0);
     # y may have been changed by checkspace.
