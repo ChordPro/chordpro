@@ -95,7 +95,7 @@ sub new {
     $xcmov = undef;
     upd_config();
 
-    $diag->{format} = $config->{diagnostics}->{format};
+    $diag->{format} = $opts->{diagformat} // $config->{diagnostics}->{format};
     $diag->{file}   = $filesource;
     $diag->{line}   = 0;
     $diag->{orig}   = "(at start of song)";
