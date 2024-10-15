@@ -27,6 +27,6 @@ jobs:
       - name: Make and run tests
         run: |
             perl Makefile.PL
-            make
-            make test
+            make -f Makefile
+            make -f Makefile test
 
