@@ -9,22 +9,25 @@ import SwiftUI
 
 /// SwiftUI `View` with **About** information
 @MainActor struct AboutView: View {
-    /// Bool to show the sheet with additional info
-    @State private var showMoreInfo: Bool = false
+    /// The AppDelegate to bring additional Windows into the SwiftUI world
+    let appDelegate: AppDelegateModel
     /// The observable state of the application
     @StateObject private var appState = AppStateModel.shared
+    /// Bool to show the sheet with additional info
+    @State private var showMoreInfo: Bool = false
     /// The body of the `View`
     var body: some View {
         VStack(spacing: 10) {
             Image(nsImage: NSImage(named: "AppIcon")!)
                 .resizable()
-                .frame(width: 80, height: 80)
+                .frame(width: 140, height: 140)
             Text("ChordPro")
-                .font(.system(size: 20, weight: .bold))
-            Text("ChordPro \(appState.chordProInfo?.general.chordpro.version ?? "…")")
+                .font(.title)
+                .bold()
+            Text("Version \(appState.chordProInfo?.general.chordpro.version ?? "…")")
             Text(appState.chordProInfo?.general.chordpro.aux ?? "…")
                 .font(.caption)
-            Text("The reference implementation of the **ChordPro** format")
+            Text("The reference implementation of the [ChordPro](https://www.chordpro.org) format")
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
             Button("More Info…") {
@@ -34,13 +37,19 @@ import SwiftUI
                     showMoreInfo = true
                 }
             }
+            .padding(.bottom)
             .disabled(appState.chordProInfo == nil)
             Text("Copyright 2016,2024 Johan Vromans\n<jvromans@squirrel.nl>")
                 .font(.caption)
                 .multilineTextAlignment(.center)
+                .fixedSize(horizontal: true, vertical: true)
         }
         .padding()
-        .frame(minWidth: 280, minHeight: 330)
+        .frame(minWidth: 240)
+        .background(.ultraThickMaterial)
+        .closeWindowModifier {
+            appDelegate.closeAboutWindow()
+        }
         .sheet(isPresented: $showMoreInfo) {
             if let chordProInfo = appState.chordProInfo {
                 MoreInfoView(chordProInfo: chordProInfo, showMoreInfo: $showMoreInfo)
