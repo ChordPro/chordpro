@@ -22,6 +22,7 @@ my %const =
     wxRESERVE_SPACE_EVEN_IF_HIDDEN => 0x0002,
     wxID_EXECUTE		   => 0x1417,
 
+    wxART_CLOSE			   => "wxART_CLOSE",
   );
 
 no strict 'refs';

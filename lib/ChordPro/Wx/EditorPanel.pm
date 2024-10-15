@@ -366,6 +366,7 @@ sub delete {
 sub alert {
     my ( $self ) = @_;
     $self->{b_msgs}->SetBackgroundColour(Wx::Colour->new(255, 0, 0));
+    $self->{bmb_messages}->SetBackgroundColour(Wx::Colour->new(255, 0, 0));
 }
 
 ################ Event Handlers ################
@@ -402,6 +403,7 @@ sub OnPreviewSave {
 sub OnShowMessages {
     my ( $self, $event ) = @_;
     $self->{b_msgs}->SetBackgroundColour(wxNullColour);
+    $self->{bmb_messages}->SetBackgroundColour(wxNullColour);
     $self->GetParent->{_prev_mode} = "EDIT";
     $self->GetParent->select_mode("MSGS");
 }
