@@ -24,6 +24,7 @@
     - Allow 'mi' as short for 'min' chord quality.
     - Make properties parsing in directives more robust.
     - (Wx) Preview with split window.
+    - (ChordPro) Include ABC if generating for MSPro.
 
 6.060 2024-08-24
 

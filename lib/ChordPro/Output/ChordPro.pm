@@ -15,6 +15,7 @@ no warnings "experimental::signatures";
 
 use ChordPro::Output::Common;
 use ChordPro::Utils qw( fq qquote demarkup is_true is_ttrue );
+use Ref::Util qw( is_arrayref );
 
 my $re_meta;
 
@@ -144,6 +145,15 @@ sub generate_song ( $s ) {
 	push(@s, "") if $tidy;
     }
 
+    if ( $s->{spreadimage} && $variant eq "msp" ) {
+	my $a = $s->{assets}->{$s->{spreadimage}->{id}};
+	if ( $a->{delegate} =~ /^abc$/i ) {
+	    push( @s, "{start_of_" . lc($a->{delegate}) . "}",
+		  @{$a->{data}},
+		  "{end_of_" . lc($a->{delegate}) . "}" );
+	}
+    }
+
     my $ctx = "";
 
     my @elts = @{$s->{body}};
@@ -178,6 +188,22 @@ sub generate_song ( $s ) {
 		}
 		$t .= "}";
 		push( @s, $t );
+
+		if ( $ctx =~ /^abc$/ ) {
+		    if ( $elt->{id} && $variant eq "msp" ) {
+			push( @s, @{$s->{assets}->{$elt->{id}}->{data}} );
+			next;
+		    }
+		    else {
+			pop(@s);
+			$ctx = '';
+			next;
+		    }
+		}
+		elsif ( $ctx =~ /^textblock$/ ) {
+		    push( @s, @{$s->{assets}->{$elt->{id}}->{data}} );
+		    next;
+		}
 	    }
 	}
 
@@ -300,14 +326,15 @@ sub generate_song ( $s ) {
 	    next;
 	}
 
-	if ( $elt->{type} eq "image" ) {
-	    my $uri = $elt->{uri};
+	if ( $elt->{type} eq "image" && !$msp ) {
+	    my $uri = $s->{assets}->{$elt->{id}}->{uri};
 	    if ( $msp && $uri !~ /^id=/ ) {
 		$imgs{$uri} //= keys(%imgs);
 		$uri = sprintf("id=img%02d", $imgs{$uri});
 	    }
-	    my @args = ( "image:", $uri );
+	    my @args = ( "image:", qquote($uri) );
 	    while ( my($k,$v) = each( %{ $elt->{opts} } ) ) {
+		$v = join( ",",@$v ) if is_arrayref($v);
 		push( @args, "$k=$v" );
 	    }
 	    foreach ( @args ) {
