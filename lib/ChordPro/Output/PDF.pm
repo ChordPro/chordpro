@@ -1309,6 +1309,7 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "image" ) {
+	    next if defined $elt->{opts}->{spread};
 	    next if $elt->{opts}->{omit};
 
 	    # Images are slightly more complex.
