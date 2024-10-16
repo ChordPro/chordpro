@@ -4,24 +4,22 @@
 
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
-# Last Modified On: Mon Sep  9 21:02:07 2024
-# Update Count    : 284
+# Last Modified On: Wed Oct 16 10:52:43 2024
+# Update Count    : 289
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
-use Wx 0.9912 qw[:allclasses];
 
 use strict;
 use warnings;
+
 use utf8;
-
-package main;
-
 binmode(STDERR, ':utf8');
 binmode(STDOUT, ':utf8');
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";
+
 use ChordPro;
 use ChordPro::Paths;
 CP->pathprepend( "$FindBin::Bin", "$FindBin::Bin/.." );
@@ -32,56 +30,12 @@ my $my_package = 'ChordPro';
 my $my_name = 'WxChordPro';
 my $my_version = $ChordPro::VERSION;
 
-# We need Wx::App for the mainloop.
 # ChordPro::Wx::Main is the main entry of the program.
-use base qw(Wx::App ChordPro::Wx::Main);
+use ChordPro::Wx::Main;
 
 my $options = app_options();
 
-sub OnInit {
-    my ( $self ) = shift;
-
-    $self->SetAppName("ChordPro");
-    $self->SetVendorName("ChordPro.ORG");
-    Wx::InitAllImageHandlers();
-
-    my $main = ChordPro::Wx::Main->new();
-    exit unless $main->init($options);
-
-    $self->SetTopWindow($main);
-    $main->Show(1);
-
-    if ( $options->{maximize} ) {
-	$main->Maximize(1);
-    }
-
-#    elsif ( $options->{geometry}
-#	    && $options->{geometry} =~ /^(?:(\d+)x(\d+))?(?:([+-]\d+)([+-]\d+))?$/ ) {
-#	$main->SetSize( $1, $2 )
-#	  if defined($1) && defined($2);
-#	$main->Move( $3+0, $4+0 )
-#	  if defined($3) && defined($4);
-#    }
-
-    return 1;
-}
-
-# No localisation yet.
-# my $locale = Wx::Locale->new("English", "en", "en_US");
-# $locale->AddCatalog("wxchordpro");
-
-my $m = main->new();
-$m->MainLoop();
-
-################ Subroutines ################
-
-use Wx qw( wxEXEC_SYNC );
-
-# Not yet defined in this version of wxPerl.
-use ChordPro::Wx::Utils qw(wxEXEC_HIDE_CONSOLE);
-
-# Synchronous system call. Used in Util module.
-sub ::sys { Wx::ExecuteArgs( \@_, wxEXEC_SYNC | wxEXEC_HIDE_CONSOLE ); }
+ChordPro::Wx::WxChordPro::run($options);
 
 ################ Subroutines ################
 
@@ -96,11 +50,10 @@ sub app_options {
 
     if ( !GetOptions( $options,
 		      'ident',
-		      'log',
 		     'verbose|v+',
 		      'version|V',
 		      'maximize',
-#		      'geometry=s',
+		      'geometry=s',
 		     'quit',
 		     'trace',
 		     'help|?',
@@ -136,7 +89,7 @@ Usage: $0 [options] [file ...]
     --maximize          show full screen
     --help		this message
     --ident		show identification
-    --version		show identification and exit
+    --version -V	show identification and exit
     --verbose		verbose information
     --quit		don't do anything
 EndOfUsage
@@ -145,7 +98,7 @@ EndOfUsage
 
 =head1 NAME
 
-wxchordpro - a simple Wx-based GUI wrapper for ChordPro
+wxchordpro - a simple Wx-based GUI for ChordPro
 
 =head1 SYNOPSIS
 
@@ -153,7 +106,7 @@ wxchordpro - a simple Wx-based GUI wrapper for ChordPro
 
 =head1 DESCRIPTION
 
-B<wxchordpro> is a GUI wrapper for the ChordPro program. It allows
+B<wxchordpro> is a simple GUI for the ChordPro program. It allows
 opening of files, make changes, and preview (optionally print) the
 formatted result.
 
