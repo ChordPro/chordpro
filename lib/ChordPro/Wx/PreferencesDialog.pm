@@ -15,6 +15,7 @@ use parent qw( ChordPro::Wx::PreferencesDialog_wxg );
 
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
+use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
 use Encode qw(encode_utf8);
 use ChordPro::Utils qw( is_macos );
@@ -35,7 +36,7 @@ my $notdesc =
 sub get_configfile {
     my ( $self ) = @_;
     # warn("CF: ", $self->GetParent->{prefs_configfile} || "");
-    $self->GetParent->{prefs_configfile} || ""
+    $preferences{configfile} || ""
 }
 
 # As of wxGlade 1.0 __set_properties and __do_layout are gone.
@@ -65,11 +66,11 @@ sub fetch_prefs {
     my $parent = $self->GetParent;
 
     # Skip default (system, user, song) configs.
-    $self->{cb_skipstdcfg}->SetValue($parent->{prefs_skipstdcfg});
+    $self->{cb_skipstdcfg}->SetValue($preferences{skipstdcfg});
 
     # Presets.
-    $self->{cb_presets}->SetValue($parent->{prefs_enable_presets});
-    $self->{ch_presets}->Enable($parent->{prefs_enable_presets});
+    $self->{cb_presets}->SetValue($preferences{enable_presets});
+    $self->{ch_presets}->Enable($preferences{enable_presets});
     my $ctl = $self->{ch_presets};
     $ctl->Clear;
     for ( @{ $parent->stylelist } ) {
@@ -79,7 +80,7 @@ sub fetch_prefs {
 	$ctl->Append($t);
     }
 
-    my $p = $parent->{prefs_cfgpreset};
+    my $p = $preferences{cfgpreset};
     foreach ( @$p ) {
 	if ( $_ eq "custom" ) {
 	    $self->{cb_configfile}->SetValue(1);
@@ -95,25 +96,25 @@ sub fetch_prefs {
     }
 
     # Custom config file.
-    $self->{cb_configfile}->SetValue($parent->{prefs_enable_configfile});
-    $self->{fp_customconfig}->SetPath($parent->{prefs_configfile})
-      if $parent->{prefs_configfile};
+    $self->{cb_configfile}->SetValue($preferences{enable_configfile});
+    $self->{fp_customconfig}->SetPath($preferences{configfile})
+      if $preferences{configfile};
 
     # Custom library.
-    $self->{cb_customlib}->SetValue($parent->{prefs_enable_customlib});
-    $self->{dp_customlibrary}->SetPath($parent->{prefs_customlib})
-      if $parent->{prefs_customlib};
+    $self->{cb_customlib}->SetValue($preferences{enable_customlib});
+    $self->{dp_customlibrary}->SetPath($preferences{customlib})
+      if $preferences{customlib};
 
     # New song template.
-    $self->{cb_tmplfile}->SetValue($parent->{prefs_enable_tmplfile});
-    $self->{fp_tmplfile}->SetPath($parent->{prefs_tmplfile})
-      if $parent->{prefs_tmplfile};
+    $self->{cb_tmplfile}->SetValue($preferences{enable_tmplfile});
+    $self->{fp_tmplfile}->SetPath($preferences{tmplfile})
+      if $preferences{tmplfile};
 
     # Editor.
     $ctl = $self->{ch_editfont};
-    $ctl->SetSelection( $parent->{prefs_editfont} );
+    $ctl->SetSelection( $preferences{editfont} );
     $ctl = $self->{sp_editfont};
-    $ctl->SetValue( $parent->{prefs_editsize} );
+    $ctl->SetValue( $preferences{editsize} );
 
     # Notation.
     $ctl = $self->{ch_notation};
@@ -122,7 +123,7 @@ sub fetch_prefs {
     my $check = 0;
     for ( @{ $parent->notationlist } ) {
 	my $s = ucfirst($_);
-	$check = $n if $_ eq lc $parent->{prefs_notation};
+	$check = $n if $_ eq lc $preferences{notation};
 	$s .= " (" . $notdesc->{lc($s)} .")" if $notdesc->{lc($s)};
 	$ctl->Append($s);
 	$ctl->SetClientData( $n, $_);
@@ -139,7 +140,7 @@ sub fetch_prefs {
     $n = 1;
     for ( @{ $parent->notationlist } ) {
 	my $s = ucfirst($_);
-	$check = $n if $_ eq lc $parent->{prefs_xcode};
+	$check = $n if $_ eq lc $preferences{xcode};
 	$s .= " (" . $notdesc->{lc($s)} .")" if $notdesc->{lc($s)};
 	$ctl->Append($s);
 	$ctl->SetClientData( $n, $_);
@@ -148,8 +149,8 @@ sub fetch_prefs {
     $ctl->SetSelection($check);
 
     # PDF Viewer.
-    $self->{t_pdfviewer}->SetValue($parent->{prefs_pdfviewer})
-      if $parent->{prefs_pdfviewer};
+    $self->{t_pdfviewer}->SetValue($preferences{pdfviewer})
+      if $preferences{pdfviewer};
 
     $self->_enablecustom;
 
@@ -166,10 +167,10 @@ sub store_prefs {
     my $parent = $self->GetParent;
 
     # Skip default (system, user, song) configs.
-    $parent->{prefs_skipstdcfg}  = $self->{cb_skipstdcfg}->IsChecked;
+    $preferences{skipstdcfg}  = $self->{cb_skipstdcfg}->IsChecked;
 
     # Presets.
-    $parent->{prefs_enable_presets} = $self->{cb_presets}->IsChecked;
+    $preferences{enable_presets} = $self->{cb_presets}->IsChecked;
     my $ctl = $self->{ch_presets};
     my $cnt = $ctl->GetCount;
     my @p;
@@ -180,59 +181,59 @@ sub store_prefs {
 	if ( $n == $cnt - 1 ) {
 	    my $c = $self->{fp_customconfig}->GetPath;
 	    $parent->{_cfgpresetfile} =
-	      $parent->{prefs_configfile} = $c;
+	      $preferences{configfile} = $c;
 	}
     }
-    $parent->{prefs_cfgpreset} = \@p;
+    $preferences{cfgpreset} = \@p;
 
     # Custom config file.
-    $parent->{prefs_enable_configfile} = $self->{cb_configfile}->IsChecked;
-    $parent->{prefs_configfile}        = $self->{fp_customconfig}->GetPath;
+    $preferences{enable_configfile} = $self->{cb_configfile}->IsChecked;
+    $preferences{configfile}        = $self->{fp_customconfig}->GetPath;
 
     # Custom library.
-    $parent->{prefs_enable_customlib} = $self->{cb_customlib}->IsChecked;
-    $parent->{prefs_customlib}        = $self->{dp_customlibrary}->GetPath;
+    $preferences{enable_customlib} = $self->{cb_customlib}->IsChecked;
+    $preferences{customlib}        = $self->{dp_customlibrary}->GetPath;
 
     # New song template.
-    $parent->{prefs_enable_tmplfile} = $self->{cb_tmplfile}->IsChecked;
-    $parent->{prefs_tmplfile}        = $self->{fp_tmplfile}->GetPath;
+    $preferences{enable_tmplfile} = $self->{cb_tmplfile}->IsChecked;
+    $preferences{tmplfile}        = $self->{fp_tmplfile}->GetPath;
 
     # Editor.
-    $parent->{prefs_editfont}	   = $self->{ch_editfont}->GetSelection;
-    $parent->{prefs_editsize}	   = $self->{sp_editfont}->GetValue;
+    $preferences{editfont}	   = $self->{ch_editfont}->GetSelection;
+    $preferences{editsize}	   = $self->{sp_editfont}->GetValue;
 
     # Notation.
     my $n = $self->{ch_notation}->GetSelection;
     if ( $n > 0 ) {
-	$parent->{prefs_notation} =
+	$preferences{notation} =
 	  $self->{ch_notation}->GetClientData($n);
     }
     else {
-       	$parent->{prefs_notation} = "";
+       	$preferences{notation} = "";
     }
 
     # Transpose.
-    $parent->{prefs_xpose_from} = $xpmap[$self->{ch_xpose_from}->GetSelection];
-    $parent->{prefs_xpose_to  } = $xpmap[$self->{ch_xpose_to  }->GetSelection];
-    $parent->{prefs_xpose_acc}  = $self->{ch_acc}->GetSelection;
-    $n = $parent->{prefs_xpose_to} - $parent->{prefs_xpose_from};
+    $preferences{xpose_from} = $xpmap[$self->{ch_xpose_from}->GetSelection];
+    $preferences{xpose_to  } = $xpmap[$self->{ch_xpose_to  }->GetSelection];
+    $preferences{xpose_acc}  = $self->{ch_acc}->GetSelection;
+    $n = $preferences{xpose_to} - $preferences{xpose_from};
     $n += 12 if $n < 0;
-    $n += 12 if $parent->{prefs_xpose_acc} == 1; # sharps
-    $n -= 12 if $parent->{prefs_xpose_acc} == 2; # flats
-    $parent->{prefs_xpose} = $n;
+    $n += 12 if $preferences{xpose_acc} == 1; # sharps
+    $n -= 12 if $preferences{xpose_acc} == 2; # flats
+    $preferences{xpose} = $n;
 
     # Transcode.
     $n = $self->{ch_transcode}->GetSelection;
     if ( $n > 0 ) {
-	$parent->{prefs_xcode} =
+	$preferences{xcode} =
 	  $self->{ch_transcode}->GetClientData($n);
     }
     else {
-       	$parent->{prefs_xcode} = "";
+       	$preferences{xcode} = "";
     }
 
     # PDF Viewer.
-    $parent->{prefs_pdfviewer} = $self->{t_pdfviewer}->GetValue;
+    $preferences{pdfviewer} = $self->{t_pdfviewer}->GetValue;
 }
 
 ################ Event handlers ################
@@ -372,9 +373,9 @@ sub OnChEditFont {
     my $ctl = $pedit->{t_source};
     my $n = $self->{ch_editfont}->GetSelection;
     my $font = $parent->fonts->[$n]->{font};
-    $font->SetPointSize($parent->{prefs_editsize});
+    $font->SetPointSize($preferences{editsize});
     $ctl->SetFont($font);
-    $parent->{prefs_editfont} = $n;
+    $preferences{editfont} = $n;
     $event->Skip;
 }
 
@@ -387,7 +388,7 @@ sub OnSpEditFont {
     my $font = $ctl->GetFont;
     $font->SetPointSize($n);
     $ctl->SetFont($font);
-    $parent->{prefs_editsize} = $n;
+    $preferences{editsize} = $n;
     $event->Skip;
 }
 
@@ -400,7 +401,7 @@ sub OnChEditColour {
     if ( $n && $n->IsOk ) {
 	$ctl->SetBackgroundColour($n)
 	  if $ctl->can("SetBackgroundColour");
-	$parent->{prefs_editcolour} = $n->GetAsString(wxC2S_HTML_SYNTAX);
+	$preferences{editcolour} = $n->GetAsString(wxC2S_HTML_SYNTAX);
     }
     $event->Skip;
 }

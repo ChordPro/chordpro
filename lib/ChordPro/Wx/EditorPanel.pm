@@ -15,9 +15,11 @@ use parent qw( ChordPro::Wx::EditorPanel_wxg );
 
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
+use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
 use ChordPro::Utils qw( demarkup is_macos is_msw );
 use ChordPro::Paths;
+use File::Basename;
 
 my $stc;
 my $wv;
@@ -35,8 +37,8 @@ sub new {
     # By default the TextCtrl on MacOS substitutes smart quotes and dashes.
     # Note that OSXDisableAllSmartSubstitutions requires an augmented
     # version of wxPerl.
-    $self->{t_source}->OSXDisableAllSmartSubstitutions
-      if $self->{t_source}->can("OSXDisableAllSmartSubstitutions");
+    $self->{t_editor}->OSXDisableAllSmartSubstitutions
+      if $self->{t_editor}->can("OSXDisableAllSmartSubstitutions");
 
     # Try Styled Text Control (Scintilla). This required an updated
     # version of Wx.
@@ -48,17 +50,11 @@ sub new {
 
     $wv = is_msw ? 0 : eval { use Wx::WebView; 1 };
     if ( $wv ) {
-	my $w = Wx::WebView::New( $self->{p_preview},
-				  wxID_ANY,
-				  CP->findres( "chordpro-icon.png",
-					       class => "icons" ) );
-	$self->{sz_prv}->Replace( $self->{webview}, $w, 1 );
-	$self->{webview}->Destroy;
-	$self->{webview} = $w;
-	$self->{sz_prv}->Layout;
+	$self->setup_webview;
     }
 
-    $self->{sw_main}->Unsplit(undef);
+    $self->{sw_e_p}->Unsplit(undef);
+    $self->{sw_ep_m}->Unsplit(undef);
     return $self;
 
 }
@@ -86,10 +82,10 @@ sub setup_scintilla {
 	}
     }
 
-    $self->{sz_source}->Replace( $self->{t_source}, $stc, 1 );
-    $self->{t_source}->Destroy;
-    $self->{t_source} = $stc;
-    $self->{sz_source}->Layout;
+    $self->{sz_editor}->Replace( $self->{t_editor}, $stc, 1 );
+    $self->{t_editor}->Destroy;
+    $self->{t_editor} = $stc;
+    $self->{sz_editor}->Layout;
 
     $stc->SetLexer(wxSTC_LEX_CONTAINER);
     $stc->SetKeyWords(0,
@@ -125,6 +121,7 @@ sub setup_scintilla {
 
     # For linenumbers.
     $stc->SetMarginWidth( 0, 40 ); # TODO
+
 }
 
 sub style_text {
@@ -160,15 +157,113 @@ sub style_text {
     $style->( qr/(\[)([^\[\]]*)(\])/m, 3, 4, 3 );
 }
 
+sub setup_webview {
+    my ( $self ) = @_;
+    my $w = Wx::WebView::New( $self->{p_right},
+			      wxID_ANY,
+			      CP->findres( "chordpro-icon.png",
+					   class => "icons" ) );
+    $self->{sz_preview}->Replace( $self->{webview}, $w, 1 );
+    $self->{webview}->Destroy;
+    $self->{webview} = $w;
+    $self->{sz_preview}->Layout;
+}
+
+sub setup_menubar {
+    my ( $self ) = @_;
+
+    make_menubar( $self,
+      [ [ wxID_FILE,
+	  [ [ wxID_NEW, "", "Create a new ChordPro document", "OnNew" ],
+	    [ wxID_OPEN, "", "Open an existing ChordPro document", "OnOpen" ],
+	    [],
+	    [ wxID_SAVE, "", "Save the current ChordPro file", "OnSave" ],
+	    [ wxID_SAVEAS, "", "Save under a different name", "OnSaveAs" ],
+	    [],
+	    [ wxID_ANY, "Hide/Show messages",
+	      "Hide or show the messages pane", "OnWindowMessages" ],
+	    [ wxID_ANY, "Save messages",
+	      "Save the messages to a file", "OnMessagesSave" ],
+	    [ wxID_ANY, "Clear messages",
+	      "Clear the current messages", "OnMessagesClear" ],
+	    [],
+	    [ wxID_EXIT, "", "Close window and exit", "OnClose" ],
+	  ]
+	],
+	[ wxID_EDIT,
+	  [ [ wxID_UNDO,   "OnUndo" ],
+	    [ wxID_REDO,   "OnRedo" ],
+	    [],
+	    [ wxID_CUT,    "OnCut" ],
+	    [ wxID_COPY,   "OnCopy" ],
+	    [ wxID_PASTE,  "OnPaste" ],
+	    [ wxID_DELETE, "OnDelete" ],
+	    [],
+	    [ wxID_ANY, "Preferences...\tCtrl-R",
+	      "Preferences", "OnPreferences" ],
+	  ]
+	],
+	[ wxID_ANY, "Tasks",
+	  [ [ wxID_ANY, "Default preview\tCtrl-P",
+	      "Preview with default formatting", "OnPreview" ],
+	    [ wxID_ANY, "No chord diagrams",
+	      "Preview without chord diagrams", "OnPreviewNoChords" ],
+	    [ wxID_ANY, "Lyrics only",
+	      "Preview just the lyrics". "OnPreviewLyricsOnly" ],
+	    [ wxID_ANY, "More...",
+	      "Transpose, transcode, and more", "OnPreviewMore" ],
+	    [],
+	    [ wxID_ANY, "Hide/Show Preview",
+	      "Hide or show the preview pane", "OnWindowPreview" ],
+	    [ wxID_ANY, "Save preview", "Save the preview to a PDF",
+	      "OnPreviewSave" ],
+	  ]
+	],
+	[ wxID_HELP,
+	  [ [ wxID_ANY, "ChordPro file format",
+	      "Help about the ChordPro file format", "OnHelp_ChordPro" ],
+	    [ wxID_ANY, "ChordPro config files",
+	      "Help about the config files", "OnHelp_Config" ],
+	    [],
+	    [ wxID_ANY, "Insert song example",
+	      "Insert an example song into the editor window", "OnHelp_Example" ],
+	    [],
+	    [ wxID_ANY, "Enable debug info in PDF",
+	      "Add sources and configs to the PDF for debugging", 1,
+	      "OnHelp_DebugInfo" ],
+	    [],
+	    [ wxID_ABOUT, "", "About WxChordPro", "OnAbout" ],
+	  ]
+	]
+      ] );
+
+}
+
 ################ API Functions ################
 
 sub refresh {
     my ( $self ) = @_;
-    # Enable/disable menu items.
-    for ( $self->GetParent->{main_menubar} ) {
-	$_->FindItem(wxID_UNDO)->Enable($self->{t_source}->CanUndo);
-	$_->FindItem(wxID_REDO)->Enable($self->{t_source}->CanRedo);
-    }
+    my $parent = $self->GetParent;
+
+    my $log = Wx::LogTextCtrl->new( $self->{t_messages} );
+#      my    $log = Wx::LogStderr->new;
+    Wx::Log::SetActiveTarget( $log );
+    $self->setup_menubar;
+    $self->log( 'I', "Using " .
+		( ref($self->{p_editor}{t_editor}) eq 'Wx::TextCtrl'
+		  ? "basic" : "styled") . " text editor" );
+
+    $self->log( 'I', "Using " .
+		( ref($self->{p_editor}{webview}) eq 'Wx::WebView'
+		  ? "embedded" : "external") . " PDF viewer" );
+
+
+    my $font = $state{fonts}[$preferences{editfont}]{font};
+    $font->SetPointSize($preferences{editsize});
+    $self->{t_editor}->SetFont($font);
+    $self->{t_editor}->SetBackgroundColour
+      (Wx::Colour->new($preferences{editcolour}));
+
 }
 
 sub open {
@@ -187,7 +282,7 @@ sub opendialog {
     my ($self) = @_;
     my $fd = Wx::FileDialog->new
       ($self, _T("Choose ChordPro file"),
-       "", "",
+       dirname($state{recents}[0]//""), "",
        "ChordPro files (*.cho,*.crd,*.chopro,*.chord,*.chordpro,*.pro)|*.cho;*.crd;*.chopro;*.chord;*.chordpro;*.pro".
        (is_macos ? ";*.txt" : "|All files|*.*"),
        0|wxFD_OPEN|wxFD_FILE_MUST_EXIST,
@@ -214,7 +309,7 @@ sub openfile {
 	$md->Destroy;
 	return;
     }
-    unless ( $self->{t_source}->LoadFile($file) ) {
+    unless ( $self->{t_editor}->LoadFile($file) ) {
 	$self->log( 'W',  "Error opening $file: $!",);
 	my $md = Wx::MessageDialog->new
 	  ( $self,
@@ -226,34 +321,40 @@ sub openfile {
 	return;
     }
     #### TODO: Get rid of selection on Windows
-    $self->{_currentfile} = $file;
-    $self->GetParent->Recents->add($file);
-    if ( $self->{t_source}->GetText =~ /^\{\s*t(?:itle)?[: ]+([^\}]*)\}/m ) {
+    $state{currentfile} = $file;
+    use List::Util qw(uniq);
+    @{$state{recents}} = uniq( $file, @{$state{recents}} );
+
+    if ( $self->{t_editor}->GetText =~ /^\{\s*t(?:itle)?[: ]+([^\}]*)\}/m ) {
 	my $title = demarkup($1);
-	my $n = $self->{t_source}->GetLineCount;
+	my $n = $self->{t_editor}->GetLineCount;
 	$self->log( 'S', "Loaded: $title ($n line" . ( $n == 1 ? "" : "s" ) . ")");
+	$self->{l_status}->SetLabel($title);
     }
     else {
-	my $n = $self->{t_source}->GetLineCount;
+	my $n = $self->{t_editor}->GetLineCount;
+	$self->{l_status}->SetLabel(basename($file));
 	$self->log( 'S', "Loaded: $file ($n line" . ( $n == 1 ? "" : "s" ) . ")");
     }
-    $self->SetTitle( $self->{_windowtitle} = $file);
+    $self->GetParent->SetTitle( $state{windowtitle} = $file);
 
-    $self->{prefs_xpose} = 0;
-    $self->{prefs_xposesharp} = 0;
+    # Default is no transposing.
+    $preferences{xpose_from} = $preferences{xpose_to} = 0;
+    $preferences{xpose_acc} = 0;
+
     return 1;
 }
 
 sub newfile {
     my ( $self ) = @_;
-    undef $self->{_currentfile};
+    delete $state{currentfile};
 
-    my $file = $self->{prefs_tmplfile};
+    my $file = $preferences{tmplfile};
     my $content = "{title: New Song}\n\n";
     if ( $file ) {
 	$self->log( 'I', "Loading template $file" );
 	if ( -f -r $file ) {
-	    if ( $self->{t_source}->LoadFile($file) ) {
+	    if ( $self->{t_editor}->LoadFile($file) ) {
 		$content = "";
 	    }
 	    else {
@@ -264,20 +365,20 @@ sub newfile {
 	    $content = "# Error opening template $file: $!\n\n" . $content;
 	}
      }
-    $self->{t_source}->SetText($content) unless $content eq "";
-    $self->{t_source}->SetModified(0);
+    $self->{t_editor}->SetText($content) unless $content eq "";
+    $self->{t_editor}->SetModified(0);
     $self->log( 'S', "New file");
-    $self->{prefs_xpose} = 0;
-    $self->{prefs_xposesharp} = 0;
+    $preferences{xpose_from} = $preferences{xpose_to} = 0;
+    $preferences{xpose_acc} = 0;
 }
 
 sub checksaved {
     my ( $self ) = @_;
-    return 1 unless ( $self->{t_source} && $self->{t_source}->IsModified );
-    if ( $self->{_currentfile} ) {
+    return 1 unless ( $self->{t_editor} && $self->{t_editor}->IsModified );
+    if ( $state{currentfile} ) {
 	my $md = Wx::MessageDialog->new
 	  ( $self,
-	    "File " . $self->{_currentfile} . " has been changed.\n".
+	    "File " . $state{currentfile} . " has been changed.\n".
 	    "Do you want to save your changes?",
 	    "File has changed",
 	    0 | wxCANCEL | wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION );
@@ -285,7 +386,7 @@ sub checksaved {
 	$md->Destroy;
 	return if $ret == wxID_CANCEL;
 	if ( $ret == wxID_YES ) {
-	    $self->save_as( $self->{_currentfile} );
+	    $self->save_as( $state{currentfile} );
 	}
     }
     else {
@@ -314,71 +415,82 @@ sub saveas {
        wxDefaultPosition);
     my $ret = $fd->ShowModal;
     if ( $ret == wxID_OK ) {
-	$self->save_as( $self->{_currentfile} = $fd->GetPath );
+	$self->save_as( $state{currentfile} = $fd->GetPath );
     }
     $fd->Destroy;
     return $ret;
 }
 
-sub save_as {
-    my ( $self, $file ) = @_;
-    $self->{t_source}->SaveFile($file);
-    $self->SetTitle( $self->{_windowtitle} = $file);
-    $self->log( 'S',  "Saved." );
-}
-
-sub save {
-    my ( $self ) = @_;
-    goto &saveas unless $self->{_currentfile};
-    $self->save_as( $self->{_currentfile} );
-}
-
-sub undo {
-    my ( $self ) = @_;
-    $self->{t_source}->CanUndo
-      ? $self->{t_source}->Undo
-	: $self->log( 'I', "Sorry, can't undo yet");
-}
-
-sub redo {
-    my ( $self ) = @_;
-    $self->{t_source}->CanRedo
-      ? $self->{t_source}->Redo
-	: $self->log( 'I', "Sorry, can't redo yet");
-}
-
-sub cut {
-    my ( $self ) = @_;
-    $self->{t_source}->Cut;
-}
-
-sub paste {
-    my ( $self ) = @_;
-    $self->{t_source}->Paste;
-}
-
-sub delete {
-    my ( $self ) = @_;
-    my ( $from, $to ) = $self->{t_source}->GetSelection;
-    $self->{t_source}->Remove( $from, $to ) if $from < $to;
-}
-
 sub alert {
     my ( $self ) = @_;
-    $self->{b_msgs}->SetBackgroundColour(Wx::Colour->new(255, 0, 0));
     $self->{bmb_messages}->SetBackgroundColour(Wx::Colour->new(255, 0, 0));
 }
 
 ################ Event Handlers ################
 
+sub OnNew {
+    my ( $self ) = @_;
+    return unless $self->checksaved;
+    $self->GetParent->select_mode("initial");
+}
+
+sub OnOpen {
+    my ( $self ) = @_;
+    $self->open(0);
+}
+
+sub OnSaveAs {
+    my ( $self, $file ) = @_;
+    $self->{t_editor}->SaveFile($file);
+    $state{windowtitle} = $file;
+    $self->log( 'S',  "Saved." );
+}
+
+sub OnSave {
+    my ( $self ) = @_;
+    goto &saveas unless $state{currentfile};
+    $self->save_as( $state{currentfile} );
+}
+
+sub OnUndo {
+    my ( $self ) = @_;
+    $self->{t_editor}->CanUndo && $self->{t_editor}->Undo;
+}
+
+sub OnRedo {
+    my ( $self ) = @_;
+    $self->{t_editor}->CanRedo && $self->{t_editor}->Redo;
+}
+
+sub OnCut {
+    my ( $self ) = @_;
+    $self->{t_editor}->Cut;
+}
+
+sub OnPaste {
+    my ( $self ) = @_;
+    $self->{t_editor}->Paste;
+}
+
+sub OnDelete {
+    my ( $self ) = @_;
+    my ( $from, $to ) = $self->{t_editor}->GetSelection;
+    $self->{t_editor}->Remove( $from, $to ) if $from < $to;
+}
+
 sub OnText {
     my ($self, $event) = @_;
-    $self->{t_source}->SetModified(1);
+    $self->{t_editor}->SetModified(1);
 }
 
 sub OnPreferences {
     my ( $self, $event ) = @_;
-    $self->GetParent->OnPreferences($event);
+    use ChordPro::Wx::PreferencesDialog;
+    $self->{d_prefs} ||= ChordPro::Wx::PreferencesDialog->new($self, -1, "Preferences");
+    $self->restorewinpos( "prefs", $self->{d_prefs} );
+    my $ret = $self->{d_prefs}->ShowModal;
+    $self->savewinpos( "prefs", $self->{d_prefs} );
+    $self->GetParent->SavePreferences if $ret == wxID_OK;
 }
 
 sub OnPreview {
@@ -386,36 +498,161 @@ sub OnPreview {
     $self->GetParent->preview( [], target => $self );
 }
 
+#               C      D      E  F      G      A        B C
+my @xpmap = qw( 0 1  1 2 3  3 4  5 6  6 7 8  8 9 10 10 11 12 );
+my @sfmap = qw( 0 7 -5 2 9 -3 4 -1 6 -6 1 8 -4 3 10 -2  5 0  );
+
+sub OnPreviewMore {
+    my ($self, $event) = @_;
+
+    my @tasks = @{ $self->GetParent->tasks };
+    
+    use ChordPro::Wx::RenderDialog;
+    my $d = $self->{d_render} ||= ChordPro::Wx::RenderDialog->new($self, -1, "Tasks");
+    my $ret = $d->ShowModal;
+    return unless $ret == wxID_OK;
+    my @args;
+    if ( $d->{cb_task_no_diagrams}->IsChecked ) {
+	push( @args, "--no-chord-grids" );
+    }
+    if ( $d->{cb_task_lyrics_only}->IsChecked ) {
+	push( @args, "--lyrics-only",
+	      "--define=delegates.abc.omit=1",
+	      "--define=delegates.ly.omit=1" );
+    }
+    if ( $d->{cb_task_decapo}->IsChecked ) {
+	push( @args, "--decapo" );
+    }
+
+    # Transpose.
+    my $xpose_from = $xpmap[$d->{ch_xpose_from}->GetSelection];
+    my $xpose_to   = $xpmap[$d->{ch_xpose_to  }->GetSelection];
+    my $xpose_acc  = $d->{ch_acc}->GetSelection;
+    my $n = $xpose_to - $xpose_from;
+    $n += 12 if $n < 0;
+    $n += 12 if $xpose_acc == 1; # sharps
+    $n -= 12 if $xpose_acc == 2; # flats
+
+    push( @args, "--transpose=$n" );
+
+
+
+    my $i = 0;
+    for ( @tasks ) {
+	if ( $d->{"cb_customtask_$i"}->IsChecked ) {
+	    push( @args, "--config", $_->[1] );
+	}
+	$i++;
+    }
+    $self->preview( \@args );
+}
+
 sub OnPreviewClose {
     my ( $self, $event ) = @_;
     return unless $self->{sw_main}->IsSplit;
     $self->{sw_main}->Unsplit(undef);
-    $self->{b_preview_close}->Show(0);
-    $self->{b_preview_save}->Show(0);
-    $self->{sz_buttons}->Layout;
-}
-
-sub OnPreviewSave {
-    my ( $self, $event ) = @_;
-    $self->GetParent->save_preview;
 }
 
 sub OnShowMessages {
     my ( $self, $event ) = @_;
-    $self->{b_msgs}->SetBackgroundColour(wxNullColour);
-    $self->{bmb_messages}->SetBackgroundColour(wxNullColour);
-    $self->GetParent->{_prev_mode} = "EDIT";
-    $self->GetParent->select_mode("MSGS");
+    $self->OnWindowMessages;
 }
 
 sub OnStyleNeeded {
     my ( $self, $event ) = @_;
-    $self->style_text($self->{t_source});
+    $self->style_text($self->{t_editor});
 }
 
 sub OnInitial {
     my ( $self, $event ) = @_;
     $self->Skip if $self->checksaved;
+}
+
+sub OnSashLRChanged {
+    my ( $self, $event ) = @_;
+    $state{sash}{lre} = $self->{sw_e_p}->GetSashPosition;
+}
+
+sub OnWindowPreview {
+    my ( $self, $event ) = @_;
+    if ( $self->{sw_e_p}->IsSplit ) {
+	$state{sash}{lre} = $self->{sw_e_p}->GetSashPosition;
+	$self->{sw_e_p}->Unsplit(undef);
+    }
+    else {
+	$self->{sw_e_p}->SplitVertically( $self->{p_left},
+					  $self->{p_right},
+					  $state{sash}{lre} // 0 );
+    }
+}
+
+sub OnSashTBChanged {
+    my ( $self, $event ) = @_;
+    $state{"sash/tbe"} = $self->{sw_ep_m}->GetSashPosition;
+}
+
+sub OnWindowMessages {
+    my ( $self, $event ) = @_;
+    if ( $self->{sw_ep_m}->IsSplit ) {
+	$state{sash}{tbe} = $self->{sw_ep_m}->GetSashPosition;
+	$self->{sw_ep_m}->Unsplit(undef);
+    }
+    else {
+	$self->{bmb_messages}->SetBackgroundColour(wxNullColour);
+	$self->{sw_ep_m}->SplitHorizontally( $self->{p_top},
+					     $self->{p_bottom},
+					     $state{sash}{tbe} // 0 );
+    }
+}
+
+sub OnMessagesClear {
+    my ( $self, $event ) = @_;
+    $self->{t_messages}->Clear;
+}
+
+sub OnMessagesSave {
+    my ( $self, $event ) = @_;
+    my $conf = Wx::ConfigBase::Get;
+    my $file = $state{messages}{savedas} // "";
+    my $fd = Wx::FileDialog->new
+      ($self, _T("Choose file to save in"),
+       "", $file,
+       "*",
+       0|wxFD_SAVE|wxFD_OVERWRITE_PROMPT,
+       wxDefaultPosition);
+
+=for later
+
+    $fd->SetExtraControlCreator
+      ( sub {
+          my $parent = shift;
+          my $panel = Wx::Panel->new( $parent, wxID_ANY );
+          my $cb = Wx::CheckBox->new( $panel, wxID_ANY, _T("Clear messages") );
+          my $sz = Wx::BoxSizer->new( wxHORIZONTAL );
+          $sz->Add( $cb, 0, wxALIGN_CENTER_VERTICAL, 0 );
+          $panel->SetSizer($sz);
+          $sz->Fit($panel);
+          return $panel;
+        } );
+
+=cut
+
+    my $ret = $fd->ShowModal;
+    if ( $ret == wxID_OK ) {
+	$file = $fd->GetPath;
+	$self->log( 'S',  "Messages saved." );
+	$self->{t_messages}->SaveFile($file);
+	$state{messages}{savedas} = $file;
+
+=for later
+
+	$self->{t_messages}->Clear if $cb->IsChecked;
+
+=cut
+
+    }
+    $fd->Destroy;
+    return $ret;
 }
 
 ################ Compatibility ################

@@ -12,7 +12,10 @@ package ChordPro::Wx::WxChordPro;
 
 use parent qw( Wx::App ChordPro::Wx::Main );
 
+use ChordPro::Wx::Config;
+
 use Wx qw( wxACCEL_CTRL WXK_CONTROL_Q wxID_EXIT );
+
 sub run {
     $options = shift;
 
@@ -28,6 +31,7 @@ sub OnInit {
     $self->SetAppName("ChordPro");
     $self->SetVendorName("ChordPro.ORG");
     Wx::InitAllImageHandlers();
+    ChordPro::Wx::Config::Setup;
 
     my $main = ChordPro::Wx::Main->new;
     return 0 unless $main->init($options);
@@ -90,6 +94,7 @@ our $VERSION = $ChordPro::VERSION;
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
 
+use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
 use ChordPro::Output::Common;
 use ChordPro::Utils qw( demarkup is_msw is_macos );
@@ -97,26 +102,16 @@ use File::Temp qw( tempfile );
 use Encode qw(decode_utf8 encode_utf8);
 use File::Basename qw(basename);
 
-sub Recents { $_[0]->{_recents} }
-
 sub log {
     my ( $self, $level, $msg, $info ) = @_;
     $msg =~ s/\n+$//;
-
-    unless ( $self->{old_log} ) {
-	my $log = Wx::LogTextCtrl->new( $self->{p_msg}{t_msg} );
-	#    $log = Wx::LogStderr->new;
-	$self->{old_log} = Wx::Log::SetActiveTarget( $log );
-    }
 
     #    $msg = "[$level] $msg";
     if ( $level eq 'I' ) {
 	Wx::LogMessage($msg);
     }
     if ( $level eq 'S' ) {
-	Wx::LogMessage( $msg =~ s/\sPress.*$//r );
-	$self->{$_}->{l_status}->SetLabel($msg)
-	  for qw( p_edit p_msg  p_sbexport );
+	Wx::LogMessage($msg );
     }
     elsif ( $level eq 'W' ) {
 	Wx::LogWarning($msg);
@@ -135,6 +130,10 @@ sub new {
 
     Wx::Event::EVT_IDLE($self, $self->can('OnIdle'));
     Wx::Event::EVT_CLOSE($self, $self->can('OnClose'));
+
+    #my $log = Wx::LogTextCtrl->new( $self->{p_bottom}{t_messages} );
+    my $log = Wx::LogStderr->new;
+    Wx::Log::SetActiveTarget( $log );
 
     # Normal (informational),
     #Wx::LogMessage("Message");
@@ -166,171 +165,71 @@ sub new {
     Wx::SystemOptions::SetOption("osx.openfiledialog.always-show-types", 1)
 	if 0 && is_macos;
 
-    $self->log( 'I', "Using " .
-		( ref($self->{p_edit}{t_source}) eq 'Wx::TextCtrl'
-		  ? "basic" : "styled") . " text editor" );
-    $self->log( 'I', "Using " .
-		( ref($self->{p_edit}{webview}) eq 'Wx::WebView'
-		  ? "embedded" : "external") . " PDF viewer" );
-
     $self;
 }
 
 sub select_mode {
     my ( $self, $mode ) = @_;
-    $mode = lc($mode);
-
     my @panels = panels;
-    if ( $mode eq "init" ) {
+
+    if ( $mode eq "initial" ) {
 	$self->{$_}->Show(0) for @panels;
-	$self->init_recents;
-	$self->{p_init}->Show(1);
-	$self->{sz_main}->Layout;
-	return;
-    }
-
-    # Enable/disable editor specific menus.
-    sub menuitems {
-	my ($self,$show) = @_;
-	$self->{main_menubar}->EnableTop( $_, $show ) for 1,2,3;
-	$self->{main_menubar}->FindItem
-	  ( $self->{main_menubar}->FindMenuItem
-	    (_T("Help"), _T("Insert song example")) )->Enable($show);
-	$self->{main_menubar}->FindItem($_)->Enable($show)
-	  for wxID_SAVE, wxID_SAVEAS;
-    }
-
-    # Hide initial window.
-    if ( $self->{p_init}->IsShown ) {
-	$self->{p_init}->Show(0);
-	$self->SetMenuBar( $self->{main_menubar} );
-	$self->setup_tasks();
-	$self->{p_msg}->Show(1);
-    }
-    if ( $mode eq "msgs" ) {
-	$self->{$_}->Show( $_ eq "p_msg" ) for @panels;
-    }
-    elsif ( $mode eq "preview" ) {
-	$self->{$_}->Show( $_ eq "p_preview" ) for @panels;
-    }
-    elsif ( $mode eq "sbex" ) {
-	$self->{$_}->Show( $_ eq "p_sbexport" ) for @panels;
-	$self->menuitems(0);
+	$self->{p_initial}->Show(1);
+	$self->refresh;
     }
     else {
-	$self->{$_}->Show( $_ eq "p_edit" ) for @panels;
-	$self->menuitems(1);
+	$self->{p_initial}->Show(0);
+	$self->{$_}->Show( $_ eq "p_$mode" ) for @panels;
+	$self->{"p_$mode"}->refresh;
     }
     $self->{sz_main}->Layout;
 }
-
-use constant FONTSIZE => 12;
-
-my @fonts =
-  ( { name => "Monospace",
-      font => Wx::Font->new( FONTSIZE, wxFONTFAMILY_TELETYPE,
-			     wxFONTSTYLE_NORMAL,
-			     wxFONTWEIGHT_NORMAL ),
-    },
-    { name => "Serif",
-      font => Wx::Font->new( FONTSIZE, wxFONTFAMILY_ROMAN,
-			     wxFONTSTYLE_NORMAL,
-			     wxFONTWEIGHT_NORMAL ),
-    },
-    { name => "Sans serif",
-      font => Wx::Font->new( FONTSIZE, wxFONTFAMILY_SWISS,
-			     wxFONTSTYLE_NORMAL,
-			     wxFONTWEIGHT_NORMAL ),
-    },
-  );
-
-my $prefctl;
 
 # Explicit (re)initialisation of this class.
 sub init {
     my ( $self, $options ) = @_;
 
-    $prefctl ||=
-      {
-       # Skip default (system, user, song) configs.
-       skipstdcfg  => 1,
-
-       # Presets.
-       enable_presets => 1,
-       cfgpreset      => lc(_T("Default")),
-
-       # Custom config file.
-       enable_configfile => 0,
-       configfile        => "",
-
-       # Custom library.
-       enable_customlib => 0,
-       customlib        => "",
-
-       # New song template.
-       enable_tmplfile => 0,
-       tmplfile        => "",
-
-       # Editor.
-       editfont	   => 0,
-       editsize	   => FONTSIZE,
-       editcolour  => wxWHITE,
-
-       # Notation.
-       notation	   => "",
-
-       # Transpose.
-       xpose_from => 0,
-       xpose_to   => 0,
-       xpose_acc  => 0,
-
-       # Transcode.
-       xcode	   => "",
-
-       # PDF Viewer.
-       pdfviewer   => "",
-
-      };
+    ChordPro::Wx::Config::Load;
 
 
-    $self->{_verbose} = $options->{verbose};
-    $self->{_trace}   = $options->{trace};
-    $self->{_debug}   = $options->{debug};
-    $self->{_log}     = $options->{log};
-    $self->{_customlib} = delete $ENV{CHORDPRO_LIB};
+    $state{verbose} = $options->{verbose};
+    $state{trace}   = $options->{trace};
+    $state{debug}   = $options->{debug};
+    $state{customlib} = delete $ENV{CHORDPRO_LIB};
 
     $self->SetStatusBar(undef);
 
     $self->GetPreferences;
-    my $font = $fonts[$self->{prefs_editfont}]->{font};
-    $font->SetPointSize($self->{prefs_editsize});
-    $self->{p_edit}{t_source}->SetFont($font);
-    $self->{p_edit}{t_source}->SetBackgroundColour
-      (Wx::Colour->new($self->{prefs_editcolour}));
 
     if ( @ARGV ) {
 	my $arg = decode_utf8(shift(@ARGV));
 	if ( -d $arg ) {
-	    $self->{_sbefolder} = $arg;
+	    $state{sbefolder} = $arg;
 	    my $event = Wx::CommandEvent->new( wxEVT_COMMAND_MENU_SELECTED,
 					       $self->wxID_EXPORT_FOLDER );
 	    Wx::PostEvent( $self, $event );
 	    return 1;
 	}
-	elsif ( $self->{p_edit}->openfile($arg) ) {
-	    $self->select_mode("EDIT");
+	elsif ( $self->{p_editor}->openfile($arg) ) {
+	    $self->select_mode("editor");
 	    return 1;
 	}
 	return 0;
     }
     else {
-	$self->select_mode("INIT");
+	$self->select_mode("initial");
     }
-    $self->{p_edit}->newfile unless $self->{_currentfile};
+    $self->{p_editor}->newfile unless $state{currentfile};
     return 1;
 }
 
 ################ Internal methods ################
+
+sub refresh {
+    my ( $self ) = @_;
+    $self->init_recents;
+    $self->SetMenuBar(undef);
+}
 
 sub setup_config {
     my ( $self ) = @_;
@@ -368,16 +267,18 @@ sub setup_config {
 sub init_recents {
     my ( $self ) = @_;
 
-    my $r = $self->Recents;
+    my $r = $state{recents};
 
-    if ( $r->count > 0 ) {
+    if ( defined $r->[0] ) {
 	my $ctl = $self->{lb_recent};
 	$ctl->Clear;
 	$ctl->Enable(1);
-	for ( my $i = 0; $i < $r->count; $i++ ) {
-	    my $file = $r->get($i);
+	my $i = 0;
+	for my $file ( @$r ) {
+	    last unless defined $file;
 	    $ctl->Append( basename($file) );
 	    $ctl->SetClientData( $i, $file );
+	    $i++;
 	}
     }
     $self->{rb_createrecent}->SetSelection(0);
@@ -385,9 +286,9 @@ sub init_recents {
 }
 
 # List of available config presets (styles).
-my $stylelist;
 sub stylelist {
     my ( $self ) = @_;
+    my $stylelist = $state{styles};
     return $stylelist if $stylelist && @$stylelist;
     my $cfglib = CP->configdir;
     my @stylelist;
@@ -403,7 +304,7 @@ sub stylelist {
 	}
     }
 
-    my $dir = $self->{prefs_customlib};
+    my $dir = $preferences{customlib};
     if ( $dir && -d ( $cfglib = "$dir/config" ) ) {
 	opendir( my $dh, $cfglib );
 	foreach ( readdir($dh) ) {
@@ -425,12 +326,12 @@ sub stylelist {
 	}
     }
 
-    return $stylelist = \@stylelist;
+    return $state{styles} = \@stylelist;
 }
 
 # List of available notation systems.
-my $notationlist;
 sub notationlist {
+    my $notationlist = $state{notations};
     return $notationlist if $notationlist && @$notationlist;
     $notationlist = [ undef ];
     for my $cfglib ( @{ CP->findresdirs( "notes", class => "config" ) } ) {
@@ -445,7 +346,7 @@ sub notationlist {
 	    push( @$notationlist, $base )
 	}
     }
-    return $notationlist;
+    return $state{notations} = $notationlist;
 }
 
 my @tasks;
@@ -457,7 +358,7 @@ sub setup_tasks {
     $menu = $self->{main_menubar}->GetMenu($menu);
 
     my @libs = @{ CP->findresdirs("tasks") };
-    my $dir = $self->{prefs_customlib};
+    my $dir = $preferences{customlib};
     push( @libs, "$dir/tasks" ) if $dir && -d "$dir/tasks";
     my $did;
     my %dups;
@@ -500,7 +401,6 @@ sub setup_tasks {
 }
 
 sub tasks { \@tasks }
-sub fonts { \@fonts }
 
 my ( $preview_cho, $preview_pdf, $preview_tmpl );
 my ( $msgs, $fatal, $died );
@@ -541,16 +441,16 @@ sub preview {
     # When invoked with a filelist (Songbook Export), ignore the
     # current song in the editor.
     unless ( $opts{filelist} ) {
-	my $mod = $self->{p_edit}{t_source}->IsModified;
-	$self->{p_edit}{t_source}->SaveFile($preview_cho);
-	$self->{p_edit}{t_source}->SetModified($mod);
+	my $mod = $self->{p_editor}{t_editor}->IsModified;
+	$self->{p_editor}{t_editor}->SaveFile($preview_cho);
+	$self->{p_editor}{t_editor}->SetModified($mod);
     }
 
     #### ChordPro
 
     @ARGV = ();			# just to make sure
 
-    my $stc = $self->{p_edit}->{t_source};
+    my $stc = $self->{p_editor}->{t_editor};
     my $astyle = 1 + wxSTC_STYLE_LASTPREDEFINED;
     if ( $stc->isa('Wx::StyledTextCtrl') ) {
 	$stc->AnnotationClearAll;
@@ -578,34 +478,34 @@ sub preview {
 #    $SIG{__DIE__}  = \&_die;
 
     my $haveconfig = List::Util::any { $_ eq "--config" } @$args;
-    if ( $self->{prefs_skipstdcfg} ) {
+    if ( $preferences{skipstdcfg} ) {
 	push( @ARGV, '--nodefaultconfigs' );
     }
-    if ( $self->{prefs_enable_presets} && $self->{prefs_cfgpreset} ) {
-	foreach ( @{ $self->{prefs_cfgpreset} } ) {
+    if ( $preferences{enable_presets} && $preferences{cfgpreset} ) {
+	foreach ( @{ $preferences{cfgpreset} } ) {
 	    push( @ARGV, '--config', $_ =~ s/ \(User\)//ir );
 	    $haveconfig++;
 	}
     }
-    if ( $self->{prefs_enable_configfile} ) {
+    if ( $preferences{enable_configfile} ) {
 	$haveconfig++;
-	push( @ARGV, '--config', $self->{prefs_configfile} );
+	push( @ARGV, '--config', $preferences{configfile} );
 
     }
     delete $ENV{CHORDPRO_LIB};
-    if ( $self->{prefs_enable_customlib} ) {
-	$ENV{CHORDPRO_LIB} = $self->{prefs_customlib};
+    if ( $preferences{enable_customlib} ) {
+	$ENV{CHORDPRO_LIB} = $preferences{customlib};
     }
     CP->setup_resdirs;
 
-    if ( $self->{prefs_xcode} ) {
+    if ( $preferences{xcode} ) {
 	$haveconfig++;
-	push( @ARGV, '--transcode', $self->{prefs_xcode} );
+	push( @ARGV, '--transcode', $preferences{xcode} );
     }
 
-    if ( $self->{prefs_notation} ) {
+    if ( $preferences{notation} ) {
 	$haveconfig++;
-	push( @ARGV, '--config', 'notes:' . $self->{prefs_notation} );
+	push( @ARGV, '--config', 'notes:' . $preferences{notation} );
     }
 
     push( @ARGV, '--noconfig' ) unless $haveconfig;
@@ -613,16 +513,16 @@ sub preview {
     push( @ARGV, '--output', $preview_pdf );
     push( @ARGV, '--generate', "PDF" );
 
-    push( @ARGV, '--transpose', $self->{prefs_xpose} )
-      if $self->{prefs_xpose};
+    push( @ARGV, '--transpose', $preferences{xpose} )
+      if $preferences{xpose};
 
     push( @ARGV, '--define', 'diagnostics.format=Line %n, %m' );
 
     push( @ARGV, @$args ) if @$args;
     push( @ARGV, $preview_cho ) unless $opts{filelist};
 
-    if ( $self->{_trace} || $self->{_debug}
-	 || $self->{_verbose} && $self->{_verbose} > 1 ) {
+    if ( $state{trace} || $state{debug}
+	 || $state{verbose} && $state{verbose} > 1 ) {
 	warn( "Command line: @ARGV\n" );
 	warn( "CHORDPRO_LIB: $ENV{CHORDPRO_LIB}\n" ) if $ENV{CHORDPRO_LIB};
 	warn( "$_\n" ) for split( /\n+/, _aboutmsg() );
@@ -665,12 +565,12 @@ sub preview {
     };
     $self->_die($@), goto ERROR if $@ && !$died;
 
-    $options->{verbose} = $self->{_verbose} || 0;
-    $options->{trace} = $self->{_trace} || 0;
-    $options->{debug} = $self->{_debug} || $self->{_debuginfo};
+    $options->{verbose} = $state{verbose} || 0;
+    $options->{trace} = $state{trace} || 0;
+    $options->{debug} = $state{debug} || $state{debuginfo};
     $options->{diagformat} = 'Line %n, %m';
     # Actual file name.
-    $options->{filesource} = $self->{_currentfile};
+    $options->{filesource} = $state{currentfile};
     $options->{silent} = 1;
 
     eval {
@@ -679,19 +579,18 @@ sub preview {
     $self->_die($@), goto ERROR if $@ && !$died;
     goto ERROR unless -e $preview_pdf;
 
-    my $target = $opts{target} // $self->{p_edit};
+    my $target = $opts{target};
     if ( $target->{webview}->isa('Wx::WebView') ) {
 
 	for ( $target ) {
 	    my $top = wxTheApp->GetTopWindow;
 	    my ($w,$h) = $top->GetSizeWH;
-	    my $want = $target eq $self->{p_edit} ? 700 : 900;
+	    my $want = $target eq $self->{p_editor} ? 700 : 900;
 	    $top->SetSize( $w+400, $h ) if $w < $want;
-	    unless ( $_->{sw_main}->IsSplit ) {
-		$_->{sw_main}->SplitVertically ( $_->{p_left}, $_->{p_preview}, 0 );
-		$_->{b_preview_close}->Show(1);
-		$_->{b_preview_save}->Show(1);
-		$_->{sz_buttons}->Layout;
+	    unless ( $_->{sw_e_p}->IsSplit ) {
+		$_->{sw_e_p}->SplitVertically ( $_->{p_left},
+						$_->{p_right},
+						$_->{sw_lr_sash} // 0.5 );
 	    }
 	}
 
@@ -709,7 +608,7 @@ sub preview {
     else {
 	$self->log( 'S', "Output generated, starting previewer");
 
-	if ( my $cmd = $self->{prefs_pdfviewer} ) {
+	if ( my $cmd = $preferences{pdfviewer} ) {
 	    if ( $cmd =~ s/\%f/$preview_pdf/g ) {
 	    }
 	    elsif ( $cmd =~ /\%u/ ) {
@@ -738,7 +637,7 @@ sub preview {
 
   ERROR:
     if ( $msgs ) {
-	my $target = $opts{filelist} ? $self->{p_sbexport} : $self->{p_edit};
+	my $target = $opts{filelist} ? $self->{p_sbexport} : $self->{p_editor};
 	$target->alert;
 	$self->log( 'S',  $msgs . " message" .
 		    ( $msgs == 1 ? "" : "s" ) . ". Press ‘Show Messages’." );
@@ -779,24 +678,6 @@ sub OnWebViewError {
 			 $url, $errname, $errorstring ) );
 }
 
-sub save_preview {
-    my ( $self ) = @_;
-    return unless -s $preview_pdf;
-    my $fd = Wx::FileDialog->new
-      ($self, _T("Choose output file"),
-       "", "",
-       "*.pdf",
-       0|wxFD_SAVE|wxFD_OVERWRITE_PROMPT,
-       wxDefaultPosition);
-    my $ret = $fd->ShowModal;
-    if ( $ret == wxID_OK ) {
-	use File::Copy;
-	copy( $preview_pdf, $fd->GetPath );
-    }
-    $fd->Destroy;
-    return $ret;
-}
-
 sub _makeurl {
     my $u = shift;
     $u =~ s;\\;/;g;
@@ -807,16 +688,11 @@ sub _makeurl {
 
 sub GetPreferences {
     my ( $self ) = @_;
-    my $conf = Wx::ConfigBase::Get;
-    for ( keys( %$prefctl ) ) {
-	$self->{"prefs_$_"} = $conf->Read( "preferences/$_", $prefctl->{$_} );
-    }
-    $self->{_recents} = RecentsList->new( conf => $conf )->load;
 
     # Find config setting.
-    my $p = lc( $self->{prefs_cfgpreset} ) || $prefctl->{cfgpreset};
+    my $p = lc( $preferences{cfgpreset} );
     if ( ",$p" =~ quotemeta( "," . _T("Custom") ) ) {
-	$self->{_cfgpresetfile} = $self->{prefs_configfile};
+	$state{cfgpresetfile} = $preferences{configfile};
     }
     my @presets;
     foreach ( @{$self->stylelist()} ) {
@@ -824,13 +700,13 @@ sub GetPreferences {
 	    push( @presets, $_ );
 	}
     }
-    $self->{prefs_cfgpreset} = \@presets;
+    $preferences{cfgpreset} = \@presets;
 
     # Find transcode setting.
-    $p = lc $self->{prefs_xcode} || $prefctl->{xcode};
+    $p = lc $preferences{xcode};
     if ( $p ) {
 	if ( $p eq lc(_T("-----")) ) {
-	    $p = $prefctl->{xcode};
+####????	    $p = $prefctl->{xcode};
 
 	}
 	else {
@@ -843,40 +719,40 @@ sub GetPreferences {
 	    $p = $n;
 	}
     }
-    $self->{prefs_xcode} = $p;
+    $preferences{xcode} = $p;
     $self->restorewinpos("main");
     $self->Show(1);
 }
 
 sub SavePreferences {
     my ( $self ) = @_;
-    return unless $self && $self->{prefs_cfgpreset};
-    my $conf = Wx::ConfigBase::Get;
-    local $self->{prefs_cfgpreset} = join( ",", @{$self->{prefs_cfgpreset}} );
-    for ( keys( %$prefctl ) ) {
-	$conf->Write( "preferences/$_", $self->{"prefs_$_"} );
-    }
 
-    $self->Recents->store;
-    $self->savewinpos("main");
-    $conf->Flush;
+    $self->savewinpos( "main", $self );
+
+    #### ????
+#    if ( $preferences{cfgpreset} ) {
+#	local $preferences{cfgpreset} = join( ",", @{$preferences{cfgpreset}} );
+#	for ( keys( %$prefctl ) ) {
+#	    $conf->Write( "preferences/$_", $self->{"prefs_$_"} );
+#	}
+#    }
+
+    ChordPro::Wx::Config::Store;
 }
 
 sub savewinpos {
-    my ( $self, $name, $win, $conf ) = @_;
-    $conf //= Wx::ConfigBase::Get;
+    my ( $self, $name, $win ) = @_;
     $win //= $self;
-    $conf->Write( "windows/$name",
-		  join( " ", $win->GetPositionXY, $win->GetSizeWH ) );
+    $state{windows}->{$name} =
+      join( " ", $win->GetPositionXY, $win->GetSizeWH );
 }
 
 sub restorewinpos {
-    my ( $self, $name, $win, $conf ) = @_;
-    $conf //= Wx::ConfigBase::Get;
+    my ( $self, $name, $win ) = @_;
     $win //= $self;
     $win = wxTheApp->GetTopWindow if $name eq "main";
 
-    my $t = $conf->Read( "windows/$name" );
+    my $t = $state{windows}->{$name};
     if ( $t ) {
 	my @a = split( ' ', $t );
 	if ( is_msw || is_macos ) {
@@ -896,8 +772,8 @@ sub restorewinpos {
 sub OnRecentDclick {
     my ($self, $event) = @_;
     my $file = $self->{l_recent}->GetLabel;
-    $self->select_mode("EDIT");
-    $self->{p_edit}->openfile( $file, 0 );
+    $self->select_mode("editor");
+    $self->{p_editor}->openfile( $file, 0 );
     $event->Skip;
 }
 
@@ -921,95 +797,50 @@ sub OnCreateRecent {
 	$self->{p_recent}->Show(1);
 	$self->{p_recent}->SetSize( $self->{p_create}->GetSize );
     }
-    $self->{sizer_10}->Layout;
+    $self->{sz_recent}->Layout;
     $self->{sz_createrecentpanels}->Layout;
+}
+
+sub OnPreviewSave {
+    my ( $self, $event ) = @_;
+    return unless -s $preview_pdf;
+    my $fd = Wx::FileDialog->new
+      ($self, _T("Choose output file"),
+       "", "",
+       "*.pdf",
+       0|wxFD_SAVE|wxFD_OVERWRITE_PROMPT,
+       wxDefaultPosition);
+    my $ret = $fd->ShowModal;
+    if ( $ret == wxID_OK ) {
+	use File::Copy;
+	copy( $preview_pdf, $fd->GetPath );
+    }
+    $fd->Destroy;
+    return $ret;
 }
 
 sub OnOpen {
     my ( $self, $event, $create ) = @_;
-    $self->select_mode("EDIT");
-    $self->{p_edit}->open($create);
+    $self->{p_editor}->open($create);
+    $self->select_mode("editor");
 }
 
 sub OnNew {
     my( $self, $event ) = @_;
-    $self->select_mode("EDIT");
+    $self->select_mode("editor");
     OnOpen( $self, $event, 1 );
-}
-
-sub OnSaveAs {
-    my ($self, $event) = @_;
-    $self->{p_edit}->saveas;
-}
-
-sub OnSave {
-    my ($self, $event) = @_;
-    $self->{p_edit}->saveas( $self->{_currentfile} );
-}
-
-sub OnPreview {
-    my ( $self, $event ) = @_;
-    $self->preview();
-}
-
-sub OnPreviewNoChords {
-    my ( $self, $event ) = @_;
-    $self->preview( [ "--no-chord-grids" ] );
-}
-
-sub OnPreviewLyricsOnly {
-    my ( $self, $event ) = @_;
-    $self->preview( [ "--lyrics-only",
-		      "--define=delegates.abc.omit=1",
-		      "--define=delegates.ly.omit=1" ] );
 }
 
 sub OnExportFolder {
     my ($self, $event) = @_;
-    $self->select_mode("SBEX");
-    $self->{p_sbexport}->refresh;
+    $self->select_mode("sbexport");
 }
 
 sub OnClose {
     my ( $self, $event ) = @_;
     $self->SavePreferences;
-    return unless $self->{p_edit}->checksaved;
+    return unless $self->{p_editor}->checksaved;
     $self->Destroy;
-}
-
-sub OnQuit {			# Exit from menu
-    my ( $self, $event ) = @_;
-    $self->Close;		# will generate Close event
-}
-
-sub OnUndo {
-    my ($self, $event) = @_;
-    $self->{p_edit}->undo;
-}
-
-sub OnRedo {
-    my ($self, $event) = @_;
-    $self->{p_edit}->redo
-}
-
-sub OnCut {
-    my ($self, $event) = @_;
-    $self->{p_edit}->cut;
-}
-
-sub OnCopy {
-    my ($self, $event) = @_;
-    $self->{p_edit}->copy;
-}
-
-sub OnPaste {
-    my ($self, $event) = @_;
-    $self->{p_edit}->paste;
-}
-
-sub OnDelete {
-    my ($self, $event) = @_;
-    $self->{p_edit}->delete;
 }
 
 sub OnHelp_ChordPro {
@@ -1024,71 +855,8 @@ sub OnHelp_Config {
 
 sub OnHelp_Example {
     my ($self, $event) = @_;
-    $self->select_mode("EDIT");
-    $self->{p_edit}->openfile( CP->findres( "swinglow.cho", class => "examples" ) );
-}
-
-sub OnHelp_DebugInfo {
-    my ($self, $event) = @_;
-    $self->{_debuginfo} = $event->IsChecked;
-}
-
-sub OnPreferences {
-    my ($self, $event) = @_;
-
-    use ChordPro::Wx::PreferencesDialog;
-    $self->{d_prefs} ||= ChordPro::Wx::PreferencesDialog->new($self, -1, "Preferences");
-    $self->restorewinpos( "prefs", $self->{d_prefs} );
-    my $ret = $self->{d_prefs}->ShowModal;
-    $self->savewinpos( "prefs", $self->{d_prefs} );
-    $self->SavePreferences if $ret == wxID_OK;
-}
-
-#               C      D      E  F      G      A        B C
-my @xpmap = qw( 0 1  1 2 3  3 4  5 6  6 7 8  8 9 10 10 11 12 );
-my @sfmap = qw( 0 7 -5 2 9 -3 4 -1 6 -6 1 8 -4 3 10 -2  5 0  );
-
-sub OnPreviewMore {
-    my ($self, $event) = @_;
-
-    use ChordPro::Wx::RenderDialog;
-    my $d = $self->{d_render} ||= ChordPro::Wx::RenderDialog->new($self, -1, "Tasks");
-    my $ret = $d->ShowModal;
-    return unless $ret == wxID_OK;
-    my @args;
-    if ( $d->{cb_task_no_diagrams}->IsChecked ) {
-	push( @args, "--no-chord-grids" );
-    }
-    if ( $d->{cb_task_lyrics_only}->IsChecked ) {
-	push( @args, "--lyrics-only",
-	      "--define=delegates.abc.omit=1",
-	      "--define=delegates.ly.omit=1" );
-    }
-    if ( $d->{cb_task_decapo}->IsChecked ) {
-	push( @args, "--decapo" );
-    }
-
-    # Transpose.
-    my $xpose_from = $xpmap[$d->{ch_xpose_from}->GetSelection];
-    my $xpose_to   = $xpmap[$d->{ch_xpose_to  }->GetSelection];
-    my $xpose_acc  = $d->{ch_acc}->GetSelection;
-    my $n = $xpose_to - $xpose_from;
-    $n += 12 if $n < 0;
-    $n += 12 if $xpose_acc == 1; # sharps
-    $n -= 12 if $xpose_acc == 2; # flats
-
-    push( @args, "--transpose=$n" );
-
-
-
-    my $i = 0;
-    for ( @tasks ) {
-	if ( $d->{"cb_customtask_$i"}->IsChecked ) {
-	    push( @args, "--config", $_->[1] );
-	}
-	$i++;
-    }
-    $self->preview( \@args );
+    $self->select_mode("editor");
+    $self->{p_editor}->openfile( CP->findres( "swinglow.cho", class => "examples" ) );
 }
 
 sub _aboutmsg {
@@ -1120,18 +888,6 @@ sub _aboutmsg {
     return $msg;
 }
 
-sub xOnAbout {
-    my ($self, $event) = @_;
-
-    my $md = Wx::MessageDialog->new
-      ( $self, _aboutmsg(),
-	"About ChordPro",
-	wxOK|wxICON_INFORMATION,
-	wxDefaultPosition);
-    $md->ShowModal;
-    $md->Destroy;
-}
-
 sub OnAbout {
     my ($self, $event) = @_;
 
@@ -1149,9 +905,9 @@ sub OnAbout {
 
 sub OnIdle {
     my ( $self, $event ) = @_;
-    return if $self->{p_init}->IsShown;
-    my $f = $self->{_windowtitle} // "";
-#    $f = "*$f" if $self->{t_source}->IsModified;
+    return if $self->{p_initial}->IsShown;
+    my $f = $state{windowtitle} // "ChordPro";
+    $f = "*$f" if $self->{p_editor}->{t_editor}->IsModified;
     $self->SetTitle($f);
     return;
     my $t = $self->{nb_main}->GetPageText(0);
@@ -1161,63 +917,6 @@ sub OnIdle {
 }
 
 ################ End of Event handlers ################
-
-use Object::Pad;
-
-class RecentsList;
-
-field @recents;
-field $conf		   :param;
-field $max                 :param = 5;
-field $prefix              :param = "recentfile/";
-
-# Load recents, skipping unreachable entries.
-method load() {
-    for ( my $i = 0; $i < $max; $i++ ) {
-	my $file = $conf->Read( $prefix . $i );
-	last unless $file;
-	next unless -s $file;
-	push( @recents, $file );
-    }
-    return $self;
-}
-
-# Load recents, skipping unreachable entries.
-method store() {
-    my $i = 0;
-    for ( @recents ) {
-	$conf->Write( $prefix . $i, $_ );
-	$i++;
-	last if $i >= $max;
-    }
-    $conf->Write( $prefix . $i, "" ); # sentinel
-    return $self;
-}
-
-# Add (prepend) a new entry.
-method add( $new ) {
-    unshift( @recents, $new );
-    for ( my $i = 1; $i < @recents; $i++ ) {
-	if ( $recents[$i] eq $new ) {
-	    splice( @recents, $i, 1 )
-	}
-    }
-    splice( @recents, $max );
-    return $new;
-}
-
-# Get an entry, by default the first.
-method get( $index = 0 ) {
-    $recents[$index];
-}
-
-# Entries and number of entries.
-method recents() {
-    \@recents;
-}
-method count() {
-    scalar( @recents );
-}
 
 package AboutDialog;
 

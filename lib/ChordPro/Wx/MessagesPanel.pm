@@ -48,6 +48,14 @@ sub OnMsgSave {
        "*",
        0|wxFD_SAVE|wxFD_OVERWRITE_PROMPT,
        wxDefaultPosition);
+
+    my $panel = Wx::Panel->new($id);
+    my $cb = Wx::CheckBox->new( wxID_ANY );
+    my $sz = Wx::BoxSizer();
+    $sz->Add($cb);
+    $panel->SetSizer($sz);
+    
+    $fd->SetExtraControlCreator($panel);
     my $ret = $fd->ShowModal;
     if ( $ret == wxID_OK ) {
 	$file = $fd->GetPath;

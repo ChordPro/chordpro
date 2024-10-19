@@ -15,6 +15,7 @@ use parent qw( ChordPro::Wx::SongbookExportPanel_wxg );
 
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
+use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
 use constant CFGBASE => "songbookexport/";
 use Encode qw( decode_utf8 encode_utf8 );
@@ -58,7 +59,7 @@ sub refresh {
 				      $self->can("OnDirPickerChanged") );
 
 
-    $self->{_sbefiles} = [];
+    $state{sbefiles} = [];
 
     if ( -d $self->{dp_folder}->GetPath ) {
 	$self->OnDirPickerChanged(undef);
@@ -73,7 +74,6 @@ sub log {
 
 sub alert {
     my ( $self ) = @_;
-    $self->{b_msgs}->SetBackgroundColour(Wx::Colour->new(255, 0, 0));
     $self->{bmb_messages}->SetBackgroundColour(Wx::Colour->new(255, 0, 0));
 }
 
@@ -161,7 +161,7 @@ sub OnDirPickerChanged {
 	$self->{sz_export_inner}->Layout;
     }
     $self->{sz_main}->Layout;
-    $self->{_sbefiles} = \@files;
+    $state{sbefiles} = \@files;
 }
 
 sub OnFilelistIgnore {
@@ -257,10 +257,7 @@ sub OnPreviewSave {
 
 sub OnShowMessages {
     my ( $self, $event ) = @_;
-    $self->{b_msgs}->SetBackgroundColour(wxNullColour);
     $self->{bmb_messages}->SetBackgroundColour(wxNullColour);
-    $self->GetParent->{_prev_mode} = "SBEX";
-    $self->GetParent->select_mode("MSGS");
 }
 
 1;
