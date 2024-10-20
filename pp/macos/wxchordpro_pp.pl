@@ -36,4 +36,7 @@ for ( sort Alien::wxWidgets->shared_libraries ) {
     if ( /_webview-/ ) {
 	print( "--module=Wx::WebView\n" );
     }
+    elsif ( /_stc[-_]/ ) {
+	print( "--module=Wx::STC\n" );
+    }
 }

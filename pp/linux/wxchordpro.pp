@@ -3,6 +3,7 @@
 @../common/wxchordpro.pp
 
 --module=Wx::WebView
+--module=Wx::STC
 
 # Explicitly link the wxGTK3 libraries.
 --link=libwx_baseu-3.2.so.0
