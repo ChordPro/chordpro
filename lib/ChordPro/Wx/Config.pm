@@ -18,6 +18,8 @@ my $cb;
 
 use Wx qw(:everything);
 use Wx::Locale gettext => '_T';
+use ChordPro::Paths;
+use Encode qw( decode_utf8 );
 
 use constant FONTSIZE => 12;
 
@@ -82,6 +84,7 @@ my %prefs =
    xcode	   => "",
 
    # PDF Viewer.
+   enable_pdfviewer   => "",
    pdfviewer   => "",
 
   );
@@ -120,7 +123,8 @@ method Setup :common {
 }
 
 method Load :common {
-
+    use Hash::Util qw( lock_keys unlock_keys );
+    unlock_keys(%preferences);
     %preferences = ( %prefs );
     %state = ( preferences => \%preferences,
 	       fonts => [ @fonts ],
@@ -162,6 +166,11 @@ method Load :common {
     if ( %pp ) {
 	warn( "Preferences: excess keys: " . join( " ", sort keys %pp ) );
     }
+    lock_keys(%preferences);
+
+    _setup_styles();
+    _setup_notations();
+    _setup_tasks();
 }
 
 method Store :common {
@@ -171,7 +180,7 @@ method Store :common {
     while ( my ( $group, $v ) = each %state ) {
 
 	next if $group =~ /^(fonts|styles|notations|tasks)$/;
-	if ( is_arrayref($v) ) { # recents
+	if ( $group eq "recents" && is_arrayref($v) ) {
 	    $cb->DeleteGroup("/$group");
 	    $cb->SetPath("/$group");
 	    for ( my $i = 0; $i < @$v; $i++ ) {
@@ -199,6 +208,108 @@ method Store :common {
     if ( %pp ) {
 	warn( "Preferences: excess keys: " . join( " ", sort keys %pp ) );
     }
+}
+
+################
+
+# List of available config presets (styles).
+sub _setup_styles {
+    my $stylelist = $state{styles};
+    return $stylelist if $stylelist && @$stylelist;
+    my $cfglib = CP->configdir;
+    my @stylelist;
+    my %stylelist;
+    for my $cfglib ( @{ CP->findresdirs("config") } ) {
+	next unless $cfglib && -d $cfglib;
+	opendir( my $dh, $cfglib );
+	foreach ( readdir($dh) ) {
+	    $_ = decode_utf8($_);
+	    next unless /^(.*)\.json$/;
+	    my $base = $1;
+	    $stylelist{$base} = $_;
+	}
+    }
+
+    my $dir = $preferences{customlib};
+    if ( $dir && -d ( $cfglib = "$dir/config" ) ) {
+	opendir( my $dh, $cfglib );
+	foreach ( readdir($dh) ) {
+	    $_ = decode_utf8($_);
+	    next unless /^(.*)\.json$/;
+	    my $base = $1;
+	    $stylelist{$base} = " $_";
+	}
+    }
+
+    # No need for ChordPro style, it's default.
+    delete $stylelist{chordpro};
+    foreach ( sort keys %stylelist ) {
+	if ( $stylelist{$_} =~ /^\s+(.*)/ ) {
+	    push( @stylelist, "$_ (User)" );
+	}
+	else {
+	    push( @stylelist, "$_" );
+	}
+    }
+
+    $state{styles} = \@stylelist;
+}
+
+# List of available notation systems.
+sub _setup_notations {
+    my $notationlist = $state{notations};
+    return $notationlist if $notationlist && @$notationlist;
+    $notationlist = [ undef ];
+    for my $cfglib ( @{ CP->findresdirs( "notes", class => "config" ) } ) {
+	next unless $cfglib && -d $cfglib;
+	opendir( my $dh, $cfglib );
+	foreach ( sort readdir($dh) ) {
+	    $_ = decode_utf8($_);
+	    next unless /^(.*)\.json$/;
+	    my $base = $1;
+	    $notationlist->[0] = "common", next
+	      if $base eq "common";
+	    push( @$notationlist, $base )
+	}
+    }
+    $state{notations} = $notationlist;
+}
+
+# List of available tasks.
+sub _setup_tasks {
+    my @tasks;
+    my @libs = @{ CP->findresdirs("tasks") };
+    my $dir = $preferences{customlib};
+    push( @libs, "$dir/tasks" ) if $dir && -d "$dir/tasks";
+    my $did;
+    my %dups;
+    for my $cfglib ( @libs ) {
+	next unless $cfglib && -d $cfglib;
+	opendir( my $dh, $cfglib );
+	foreach ( readdir($dh) ) {
+	    $_ = decode_utf8($_);
+	    next unless /^(.*)\.(?:json|prp)$/;
+	    my $base = $1;
+	    my $file = File::Spec->catfile( $cfglib, $_ );
+
+	    # Tentative title (description).
+	    ( my $desc = $base ) =~ s/_/ /g;
+
+	    # Peek in the first line.
+	    my $line;
+	    my $fd;
+	    open( $fd, '<:utf8', $file ) and
+	      $line = <$fd> and
+	      close($fd);
+	    if ( $line =~ m;(?://|\#)\s*(?:chordpro\s*)?task:\s*(.*);i ) {
+		$desc = $1;
+	    }
+	    next if $dups{$desc}++;
+
+	    push( @tasks, [ $desc, $file ] );
+	}
+    }
+    $state{tasks} = \@tasks;
 }
 
 1;

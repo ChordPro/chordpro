@@ -15,6 +15,8 @@ use parent qw( ChordPro::Wx::RenderDialog_wxg );
 
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
+use ChordPro::Wx::Config;
+use ChordPro::Wx::Utils;
 
 # BUilt-in descriptions for some notation systems.
 my $notdesc =
@@ -32,14 +34,11 @@ my $notdesc =
 # As of wxGlade 1.0 __set_properties and __do_layout are gone.
 sub new {
     my $self = shift->SUPER::new(@_);
-    $self->fetch_prefs();
 
-    my $tasks = $self->GetParent->tasks;
-
-    if ( @$tasks ) {
+    if ( @{$state{tasks}} ) {
 	$self->{l_customtasks}->Show(1);
 	my $index = 0;
-	for my $task ( @$tasks ) {
+	for my $task ( @{$state{tasks}} ) {
 	    my $id = Wx::NewId();
 	    $self->{sz_customtasks}->Add
 	      ( $self->{"cb_customtask_$index"} = Wx::CheckBox->new
@@ -50,39 +49,19 @@ sub new {
 	$self->Layout;
 	$self->Fit;
     }
+    restorewinpos( $self, "tasks" );
     $self;
-}
-
-sub _enablecustom {
-    my ( $self ) = @_;
-}
-
-sub fetch_prefs {
-    my ( $self ) = @_;
-
-    # Fetch preferences from parent.
-
-    my $parent = $self->GetParent;
-
 }
 
 #               C      D      E  F      G      A        B C
 my @xpmap = qw( 0 1  1 2 3  3 4  5 6  6 7 8  8 9 10 10 11 12 );
 my @sfmap = qw( 0 7 -5 2 9 -3 4 -1 6 -6 1 8 -4 3 10 -2  5 0  );
 
-sub store_prefs {
-    my ( $self ) = @_;
-
-    # Transfer all preferences to the parent.
-    my $parent = $self->GetParent;
-
-}
-
 ################ Event handlers ################
 
 sub OnAccept {
     my ( $self, $event ) = @_;
-    $self->store_prefs();
+    savewinpos( $self, "tasks" );
     $event->Skip;
 }
 

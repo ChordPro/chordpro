@@ -1,4 +1,5 @@
 lib/ChordPro/Wx.pm
+lib/ChordPro/Wx/Config.pm
 lib/ChordPro/Wx/EditorPanel.pm
 lib/ChordPro/Wx/EditorPanel_wxg.pm
 lib/ChordPro/Wx/Main.pm
@@ -9,6 +10,7 @@ lib/ChordPro/Wx/MessagesPanel_wxg.pm
 lib/ChordPro/Wx/PreferencesDialog.pm
 lib/ChordPro/Wx/PreferencesDialog.wxg
 lib/ChordPro/Wx/PreferencesDialog_wxg.pm
+lib/ChordPro/Wx/Preview.pm
 lib/ChordPro/Wx/PreviewPanel.pm
 lib/ChordPro/Wx/PreviewPanel.wxg
 lib/ChordPro/Wx/PreviewPanel_wxg.pm

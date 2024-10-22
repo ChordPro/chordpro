@@ -1,7 +1,6 @@
 #! perl
 
-use strict;
-use warnings;
+use v5.26;
 use utf8;
 
 # Implementation of ChordPro::Wx::EditorPanel_wxg details.
@@ -70,8 +69,8 @@ sub setup_scintilla {
     my ( $self ) = @_;
 
     # Replace the placeholder Wx::TextCtrl.
-    my $stc = Wx::StyledTextCtrl->new( $self->{p_left},
-				       wxID_ANY );
+    $stc = Wx::StyledTextCtrl->new( $self->{p_left},
+				    wxID_ANY );
 
     # Check for updated STC.
     for ( qw( IsModified DiscardEdits MarkDirty ) ) {
@@ -172,9 +171,10 @@ sub setup_webview {
 sub setup_menubar {
     my ( $self ) = @_;
 
+    my $mb =
     make_menubar( $self,
       [ [ wxID_FILE,
-	  [ [ wxID_NEW, "", "Create a new ChordPro document", "OnNew" ],
+	  [ [ wxID_NEW, "", "Create another ChordPro document", "OnNew" ],
 	    [ wxID_OPEN, "", "Open an existing ChordPro document", "OnOpen" ],
 	    [],
 	    [ wxID_SAVE, "", "Save the current ChordPro file", "OnSave" ],
@@ -207,9 +207,9 @@ sub setup_menubar {
 	  [ [ wxID_ANY, "Default preview\tCtrl-P",
 	      "Preview with default formatting", "OnPreview" ],
 	    [ wxID_ANY, "No chord diagrams",
-	      "Preview without chord diagrams", "OnPreviewNoChords" ],
+	      "Preview without chord diagrams", "OnPreviewNoDiagrams" ],
 	    [ wxID_ANY, "Lyrics only",
-	      "Preview just the lyrics". "OnPreviewLyricsOnly" ],
+	      "Preview just the lyrics", "OnPreviewLyricsOnly" ],
 	    [ wxID_ANY, "More...",
 	      "Transpose, transcode, and more", "OnPreviewMore" ],
 	    [],
@@ -225,9 +225,6 @@ sub setup_menubar {
 	    [ wxID_ANY, "ChordPro config files",
 	      "Help about the config files", "OnHelp_Config" ],
 	    [],
-	    [ wxID_ANY, "Insert song example",
-	      "Insert an example song into the editor window", "OnHelp_Example" ],
-	    [],
 	    [ wxID_ANY, "Enable debug info in PDF",
 	      "Add sources and configs to the PDF for debugging", 1,
 	      "OnHelp_DebugInfo" ],
@@ -237,6 +234,22 @@ sub setup_menubar {
 	]
       ] );
 
+    my $menu = $mb->FindMenu("Tasks");
+    $menu = $mb->GetMenu($menu);
+    # Append separator.
+    $menu->AppendSeparator if @{$state{tasks}};
+    for my $task ( @{$state{tasks} } ) {
+	my ( $desc, $file ) = @$task;
+	my $id = Wx::NewId();
+	# Append to the menu.
+	$menu->Append( $id, $desc, _T("Custom task: ").$desc );
+	Wx::Event::EVT_MENU
+	    ( $self->GetParent, $id,
+	      sub {
+		  my ( $self, $event ) = @_;
+		  $self->preview( [ "--config", $file ] );
+	      } );
+    }
 }
 
 ################ API Functions ################
@@ -421,6 +434,59 @@ sub saveas {
     return $ret;
 }
 
+my $prv;
+
+sub preview {
+    my ( $self, $args, %opts ) = @_;
+    use ChordPro::Wx::Preview;
+    $prv //= ChordPro::Wx::Preview->new( panel => $self );
+
+    my $mod = $self->{t_editor}->IsModified;
+    my $preview_cho = $prv->preview_cho;
+    unlink($preview_cho);
+    my $fd;
+    if ( open( $fd, '>:utf8', $preview_cho )
+	 and print $fd ( $self->{t_editor}->GetText )
+	 and close($fd) ) {
+	$prv->preview( $args, %opts );
+    }
+    else {
+	$self->log( 'E', "$preview_cho: $!" );
+	$self->alert;
+    }
+}
+
+my $astyle;
+
+sub prepare_annotations {
+    my ( $self ) = @_;
+
+    return unless $stc->isa('Wx::StyledTextCtrl');
+
+    $astyle = 1 + wxSTC_STYLE_LASTPREDEFINED;
+    $stc->AnnotationClearAll;
+    $stc->AnnotationSetVisible(wxSTC_ANNOTATION_BOXED);
+    $stc->StyleSetBackground( $astyle, Wx::Colour->new(255, 255, 160) );
+    $stc->StyleSetForeground( $astyle, wxRED );
+
+    if ( $stc->can("StyleGetSizeFractional") ) { # Wx 3.002
+	$stc->StyleSetSizeFractional	# size * 100
+	  ( $astyle,
+	    ( $stc->StyleGetSizeFractional
+	      ( wxSTC_STYLE_DEFAULT ) * 4 ) / 5 );
+    }
+    return 1;
+}
+
+sub add_annotation {
+    my ( $self, $line, $message ) = @_;
+
+    return unless $stc->isa('Wx::StyledTextCtrl');
+
+    $stc->AnnotationSetText( $line, $message );
+    $stc->AnnotationSetStyle( $line, $astyle );
+}
+
 sub alert {
     my ( $self ) = @_;
     $self->{bmb_messages}->SetBackgroundColour(Wx::Colour->new(255, 0, 0));
@@ -483,19 +549,65 @@ sub OnText {
     $self->{t_editor}->SetModified(1);
 }
 
+sub OnPreviewSave {
+    my ( $self, $event ) = @_;
+    return unless $prv;
+    $prv->save;
+}
+
 sub OnPreferences {
     my ( $self, $event ) = @_;
     use ChordPro::Wx::PreferencesDialog;
     $self->{d_prefs} ||= ChordPro::Wx::PreferencesDialog->new($self, -1, "Preferences");
-    $self->restorewinpos( "prefs", $self->{d_prefs} );
+    restorewinpos( $self->{d_prefs}, "prefs" );
     my $ret = $self->{d_prefs}->ShowModal;
-    $self->savewinpos( "prefs", $self->{d_prefs} );
+    savewinpos( $self->{d_prefs}, "prefs" );
     $self->GetParent->SavePreferences if $ret == wxID_OK;
 }
 
-sub OnPreview {
+sub previewtooltip {
+    my ( $self ) = @_;
+    if ( $self->{sw_e_p}->IsSplit ) {
+	$self->{bmb_preview}->SetToolTip(_T("Hide preview"));
+    }
+    else {
+	$self->{bmb_preview}->SetToolTip(_T("Generate and show preview"));
+    }
+}
+
+sub messagestooltip {
+    my ( $self ) = @_;
+    if ( $self->{sw_ep_m}->IsSplit ) {
+	$self->{bmb_messages}->SetToolTip(_T("Hide messages"));
+    }
+    else {
+	$self->{bmb_messages}->SetToolTip(_T("Show messages"));
+    }
+}
+
+sub OnPreview {			# for menu
     my ( $self, $event ) = @_;
-    $self->GetParent->preview( [], target => $self );
+    $self->preview( [] );
+    $self->previewtooltip;
+}
+
+sub OnShowPreview {		# for button
+    my ( $self, $event ) = @_;
+    $self->{sw_e_p}->IsSplit
+      ? goto &OnPreviewClose
+      : goto &OnPreview;
+}
+
+sub OnPreviewLyricsOnly {
+    my ( $self, $event ) = @_;
+    $self->preview( [ '--lyrics-only' ] );
+    $self->previewtooltip;
+}
+
+sub OnPreviewNoDiagrams {
+    my ( $self, $event ) = @_;
+    $self->preview( [ '--no-chord-grids' ] );
+    $self->previewtooltip;
 }
 
 #               C      D      E  F      G      A        B C
@@ -505,8 +617,6 @@ my @sfmap = qw( 0 7 -5 2 9 -3 4 -1 6 -6 1 8 -4 3 10 -2  5 0  );
 sub OnPreviewMore {
     my ($self, $event) = @_;
 
-    my @tasks = @{ $self->GetParent->tasks };
-    
     use ChordPro::Wx::RenderDialog;
     my $d = $self->{d_render} ||= ChordPro::Wx::RenderDialog->new($self, -1, "Tasks");
     my $ret = $d->ShowModal;
@@ -538,19 +648,21 @@ sub OnPreviewMore {
 
 
     my $i = 0;
-    for ( @tasks ) {
+    for ( @{$state{tasks}} ) {
 	if ( $d->{"cb_customtask_$i"}->IsChecked ) {
 	    push( @args, "--config", $_->[1] );
 	}
 	$i++;
     }
-    $self->preview( \@args );
+    $self->preview( \@args  );
+    $self->previewtooltip;
 }
 
 sub OnPreviewClose {
     my ( $self, $event ) = @_;
-    return unless $self->{sw_main}->IsSplit;
-    $self->{sw_main}->Unsplit(undef);
+    return unless $self->{sw_e_p}->IsSplit;
+    $self->{sw_e_p}->Unsplit(undef);
+    $self->previewtooltip;
 }
 
 sub OnShowMessages {
@@ -570,39 +682,41 @@ sub OnInitial {
 
 sub OnSashLRChanged {
     my ( $self, $event ) = @_;
-    $state{sash}{lre} = $self->{sw_e_p}->GetSashPosition;
+    $state{sash}{editor_edit_view} = $self->{sw_e_p}->GetSashPosition;
 }
 
 sub OnWindowPreview {
     my ( $self, $event ) = @_;
     if ( $self->{sw_e_p}->IsSplit ) {
-	$state{sash}{lre} = $self->{sw_e_p}->GetSashPosition;
+	$state{sash}{editor_edit_view} = $self->{sw_e_p}->GetSashPosition;
 	$self->{sw_e_p}->Unsplit(undef);
     }
     else {
 	$self->{sw_e_p}->SplitVertically( $self->{p_left},
 					  $self->{p_right},
-					  $state{sash}{lre} // 0 );
+					  $state{sash}{editor_edit_view} // 0 );
     }
+    $self->previewtooltip;
 }
 
 sub OnSashTBChanged {
     my ( $self, $event ) = @_;
-    $state{"sash/tbe"} = $self->{sw_ep_m}->GetSashPosition;
+    $state{sash}{editor_editview_messages} = $self->{sw_ep_m}->GetSashPosition;
 }
 
 sub OnWindowMessages {
     my ( $self, $event ) = @_;
     if ( $self->{sw_ep_m}->IsSplit ) {
-	$state{sash}{tbe} = $self->{sw_ep_m}->GetSashPosition;
+	$state{sash}{editor_editview_messages} = $self->{sw_ep_m}->GetSashPosition;
 	$self->{sw_ep_m}->Unsplit(undef);
     }
     else {
 	$self->{bmb_messages}->SetBackgroundColour(wxNullColour);
 	$self->{sw_ep_m}->SplitHorizontally( $self->{p_top},
 					     $self->{p_bottom},
-					     $state{sash}{tbe} // 0 );
+					     $state{sash}{editor_editview_messages} // 0 );
     }
+    $self->messagestooltip;
 }
 
 sub OnMessagesClear {
@@ -653,6 +767,11 @@ sub OnMessagesSave {
     }
     $fd->Destroy;
     return $ret;
+}
+
+sub OnHelp_DebugInfo {
+    my ( $self, $event ) = @_;
+    $state{debuginfo} = wxTheApp->GetTopWindow->GetMenuBar->FindItem($event->GetId)->IsChecked;
 }
 
 ################ Compatibility ################

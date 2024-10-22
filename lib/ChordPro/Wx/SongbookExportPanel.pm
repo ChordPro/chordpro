@@ -17,7 +17,6 @@ use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
 use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
-use constant CFGBASE => "songbookexport/";
 use Encode qw( decode_utf8 encode_utf8 );
 use ChordPro::Utils qw( is_msw demarkup );
 use File::LoadLines;
@@ -35,33 +34,51 @@ sub new {
 				  wxID_ANY,
 				  CP->findres( "chordpro-icon.png",
 					       class => "icons" ) );
-	$self->{sz_prv}->Replace( $self->{webview}, $w, 1 );
+	$self->{sz_preview}->Replace( $self->{webview}, $w, 1 );
 	$self->{webview}->Destroy;
 	$self->{webview} = $w;
-	$self->{sz_prv}->Layout;
+	$self->{sz_preview}->Layout;
     }
 
-    $self->{sw_main}->Unsplit(undef);
+    $wv = is_msw ? 0 : eval { use Wx::WebView; 1 };
+    if ( $wv ) {
+	$self->setup_webview;
+    }
+
+    $self->{sw_e_p}->Unsplit(undef);
+    $self->{sw_ep_m}->Unsplit(undef);
     return $self;
 }
 
 sub refresh {
     my ( $self ) = @_;
-    my $conf = Wx::ConfigBase::Get;
-    $self->{dp_folder}->SetPath( $self->GetParent->{_sbefolder} // $conf->Read( CFGBASE . "folder" ) // "");
-    $self->{t_exporttitle}->SetValue($conf->Read( CFGBASE . "title" ) // "");
-    $self->{t_exportstitle}->SetValue($conf->Read( CFGBASE . "subtitle" ) // "");
-    $self->{fp_cover}->SetPath($conf->Read( CFGBASE . "cover" ) // "");
-    $self->{cb_stdcover}->SetValue($conf->Read( CFGBASE . "stdcover" ) // 0);
+
+    my $log = Wx::LogTextCtrl->new( $self->{t_messages} );
+    Wx::Log::SetActiveTarget( $log );
+    $self->setup_menubar;
+    $self->log( 'I', "Using " .
+		( ref($self->{p_editor}{webview}) eq 'Wx::WebView'
+		  ? "embedded" : "external") . " PDF viewer" );
+
+
+    my $c = $state{songbookexport};
+    $self->{dp_folder}->SetPath( $state{sbefolder} // $c->{folder} // "");
+    $self->{t_exporttitle}->SetValue($c->{title} // "");
+    $self->{t_exportstitle}->SetValue($c->{subtitle} // "");
+    $self->{fp_cover}->SetPath($c->{cover} // "");
+    $self->{cb_stdcover}->SetValue($c->{stdcover} // 0);
     $self->OnStdCoverChecked();
 
+    # Not handled yet by wxGlade.
     Wx::Event::EVT_DIRPICKER_CHANGED( $self, $self->{dp_folder}->GetId,
 				      $self->can("OnDirPickerChanged") );
 
 
     $state{sbefiles} = [];
 
-    if ( -d $self->{dp_folder}->GetPath ) {
+    if ( $state{sbefolder} && -d $state{sbefolder} ) {
+	$self->{dp_folder}->SetPath($state{sbefolder});
+	$self->log( 'I', "Using folder " . $state{sbefolder} );
 	$self->OnDirPickerChanged(undef);
     }
 
@@ -79,21 +96,119 @@ sub alert {
 
 sub save_prefs {
     my ( $self ) = @_;
-    my $conf = Wx::ConfigBase::Get;
-    $conf->Write( CFGBASE . "folder",   $self->{dp_folder}->GetPath // "" );
-    $conf->Write( CFGBASE . "title",    $self->{t_exporttitle}->GetValue // "" );
-    $conf->Write( CFGBASE . "subtitle",    $self->{t_exportstitle}->GetValue // "" );
-    $conf->Write( CFGBASE . "cover",    $self->{fp_cover}->GetPath // "" );
-    $conf->Write( CFGBASE . "stdcover", $self->{cb_stdcover}->IsChecked // 0 );
+    my $c = $state{songbookexport};
+    $c->{folder} =   $self->{dp_folder}->GetPath // "";
+    $c->{title} =    $self->{t_exporttitle}->GetValue // "";
+    $c->{subtitle} = $self->{t_exportstitle}->GetValue // "";
+    $c->{cover} =    $self->{fp_cover}->GetPath // "";
+    $c->{stdcover} = $self->{cb_stdcover}->IsChecked // 0;
+}
+
+sub setup_menubar {
+    my ( $self ) = @_;
+
+    my $mb =
+    make_menubar( $self,
+      [ [ wxID_FILE,
+	  [ [ wxID_NEW, "", "Create or open a ChordPro document", "OnNew" ],
+	    [],
+	    [ wxID_ANY, "Hide/Show messages",
+	      "Hide or show the messages pane", "OnWindowMessages" ],
+	    [ wxID_ANY, "Save messages",
+	      "Save the messages to a file", "OnMessagesSave" ],
+	    [ wxID_ANY, "Clear messages",
+	      "Clear the current messages", "OnMessagesClear" ],
+	    [],
+	    [ wxID_EXIT, "", "Close window and exit", "OnClose" ],
+	  ]
+	],
+	[ wxID_EDIT,
+	  [ [ wxID_ANY, "Preferences...\tCtrl-R",
+	      "Preferences", "OnPreferences" ],
+	  ]
+	],
+	[ wxID_ANY, "Tasks",
+	  [ [ wxID_ANY, "Default preview\tCtrl-P",
+	      "Preview with default formatting", "OnPreview" ],
+	    [ wxID_ANY, "No chord diagrams",
+	      "Preview without chord diagrams", "OnPreviewNoDiagrams" ],
+	    [ wxID_ANY, "Lyrics only",
+	      "Preview just the lyrics". "OnPreviewLyricsOnly" ],
+	    [ wxID_ANY, "More...",
+	      "Transpose, transcode, and more", "OnPreviewMore" ],
+	    [],
+	    [ wxID_ANY, "Hide/Show Preview",
+	      "Hide or show the preview pane", "OnWindowPreview" ],
+	    [ wxID_ANY, "Save preview", "Save the preview to a PDF",
+	      "OnPreviewSave" ],
+	  ]
+	],
+	[ wxID_HELP,
+	  [ [ wxID_ANY, "ChordPro file format",
+	      "Help about the ChordPro file format", "OnHelp_ChordPro" ],
+	    [ wxID_ANY, "ChordPro config files",
+	      "Help about the config files", "OnHelp_Config" ],
+	    [],
+	    [ wxID_ANY, "Enable debug info in PDF",
+	      "Add sources and configs to the PDF for debugging", 1,
+	      "OnHelp_DebugInfo" ],
+	    [],
+	    [ wxID_ABOUT, "", "About WxChordPro", "OnAbout" ],
+	  ]
+	]
+      ] );
+
+    my $menu = $mb->FindMenu("Tasks");
+    $menu = $mb->GetMenu($menu);
+    # Append separator.
+    $menu->AppendSeparator if @{$state{tasks}};
+    for my $task ( @{$state{tasks} } ) {
+	my ( $desc, $file ) = @$task;
+	my $id = Wx::NewId();
+	# Append to the menu.
+	$menu->Append( $id, $desc, _T("Custom task: ").$desc );
+	Wx::Event::EVT_MENU
+	    ( $self->GetParent, $id,
+	      sub {
+		  my ( $self, $event ) = @_;
+		  $self->preview( [ "--config", $file ],
+				  target => $self->{p_sbexport},
+				  filelist => 1  );
+	      } );
+    }
+}
+
+sub setup_webview {
+    my ( $self ) = @_;
+    my $w = Wx::WebView::New( $self->{p_right},
+			      wxID_ANY,
+			      CP->findres( "chordpro-icon.png",
+					   class => "icons" ) );
+    $self->{sz_preview}->Replace( $self->{webview}, $w, 1 );
+    $self->{webview}->Destroy;
+    $self->{webview} = $w;
+    $self->{sz_preview}->Layout;
+}
+
+sub opendir {
+    my ( $self, $dir ) = @_;
+    $dir =~ s/[\\\/]$//;
+    $self->{dp_folder}->SetPath($dir);
+    $self->OnDirPickerChanged;
 }
 
 ################ Event handlers ################
+
+sub OnNew {
+    my ( $self ) = @_;
+    $self->GetParent->select_mode("initial");
+}
 
 sub OnDirPickerChanged {
     my ( $self, $event ) = @_;
 
     my $folder = $self->{dp_folder}->GetPath;
-    opendir( my $dir, $folder )
+    CORE::opendir( my $dir, $folder )
       or do {
 	$self->GetParent->log( 'W', "Error opening folder $folder: $!");
 	my $md = Wx::MessageDialog->new
@@ -160,7 +275,7 @@ sub OnDirPickerChanged {
 	$self->{w_rearrange}->Show;
 	$self->{sz_export_inner}->Layout;
     }
-    $self->{sz_main}->Layout;
+    $self->{sz_ep}->Layout;
     $state{sbefiles} = \@files;
 }
 
@@ -184,16 +299,49 @@ sub OnStdCoverChecked {
     $self->{t_exportstitle}->Enable( $self->{cb_stdcover}->IsChecked );
 }
 
+sub previewtooltip {
+    my ( $self ) = @_;
+    if ( $self->{sw_e_p}->IsSplit ) {
+	$self->{bmb_preview}->SetToolTip(_T("Hide preview"));
+    }
+    else {
+	$self->{bmb_preview}->SetToolTip(_T("Generate and show preview"));
+    }
+}
+
+sub messagestooltip {
+    my ( $self ) = @_;
+    if ( $self->{sw_ep_m}->IsSplit ) {
+	$self->{bmb_messages}->SetToolTip(_T("Hide messages"));
+    }
+    else {
+	$self->{bmb_messages}->SetToolTip(_T("Show messages"));
+    }
+}
+
 sub OnPreferences {
     my ( $self, $event ) = @_;
-    $self->GetParent->OnPreferences($event);
+    use ChordPro::Wx::PreferencesDialog;
+    $self->{d_prefs} ||= ChordPro::Wx::PreferencesDialog->new($self, -1, "Preferences");
+    restorewinpos( $self->{d_prefs}, "prefs" );
+    my $ret = $self->{d_prefs}->ShowModal;
+    savewinpos( $self->{d_prefs}, "prefs" );
+    $self->GetParent->SavePreferences if $ret == wxID_OK;
+}
+
+sub OnShowPreview {		# for button
+    my ( $self, $event ) = @_;
+    $self->{sw_e_p}->IsSplit
+      ? goto &OnPreviewClose
+      : goto &OnPreview;
 }
 
 sub OnPreview {
-    my ( $self, $event ) = @_;
+    my ( $self, $event, $args ) = @_;
+    $args //= [];
 
     my $folder = $self->{dp_folder}->GetPath;
-    my @files = @{ $self->{_sbefiles} };
+    my @files = @{ $state{sbefiles} };
     unless ( $folder && @files ) {
 	my $md = Wx::MessageDialog->new
 	  ( $self,
@@ -223,7 +371,7 @@ sub OnPreview {
 	return;
     }
 
-    my @args = ( "--filelist", \$filelist );
+    my @args = ( @$args, "--filelist", \$filelist );
     my %opts = ( target => $self, filelist => 1 );
 
     if ( $self->{cb_stdcover}->IsChecked ) {
@@ -236,18 +384,17 @@ sub OnPreview {
     elsif ( my $cover = $self->{fp_cover}->GetPath ) {
 	push( @args, "--cover", encode_utf8($cover) );
     }
-    $self->GetParent->preview( \@args, %opts );
+    $self->preview( \@args, %opts );
+    $self->previewtooltip;
 
     $event->Skip;
 }
 
 sub OnPreviewClose {
     my ( $self, $event ) = @_;
-    return unless $self->{sw_main}->IsSplit;
-    $self->{sw_main}->Unsplit(undef);
-    $self->{b_preview_close}->Show(0);
-    $self->{b_preview_save}->Show(0);
-    $self->{sz_buttons}->Layout;
+    return unless $self->{sw_ep_m}->IsSplit;
+    $self->{sw_ep_m}->Unsplit(undef);
+    $self->previewtooltip;
 }
 
 sub OnPreviewSave {
@@ -257,7 +404,80 @@ sub OnPreviewSave {
 
 sub OnShowMessages {
     my ( $self, $event ) = @_;
-    $self->{bmb_messages}->SetBackgroundColour(wxNullColour);
+    $self->OnWindowMessages;
+}
+
+sub OnSashLRChanged {
+    my ( $self, $event ) = @_;
+    $state{sash}{sbexport_edit_view} = $self->{sw_e_p}->GetSashPosition;
+}
+
+sub OnWindowPreview {
+    my ( $self, $event ) = @_;
+    if ( $self->{sw_e_p}->IsSplit ) {
+	$state{sash}{sbexport_edit_view} = $self->{sw_e_p}->GetSashPosition;
+	$self->{sw_e_p}->Unsplit(undef);
+    }
+    else {
+	$self->{sw_e_p}->SplitVertically( $self->{p_left},
+					  $self->{p_right},
+					  $state{sash}{sbexport_edit_view} // 0 );
+    }
+    $self->previewtooltip;
+}
+
+sub OnSashTBChanged {
+    my ( $self, $event ) = @_;
+    $state{sash}{sbexport_editview_messages} = $self->{sw_ep_m}->GetSashPosition;
+}
+
+sub OnWindowMessages {
+    my ( $self, $event ) = @_;
+    if ( $self->{sw_ep_m}->IsSplit ) {
+	$state{sash}{sbexport_editview_messages} = $self->{sw_ep_m}->GetSashPosition;
+	$self->{sw_ep_m}->Unsplit(undef);
+    }
+    else {
+	$self->{bmb_messages}->SetBackgroundColour(wxNullColour);
+	$self->{sw_ep_m}->SplitHorizontally( $self->{p_top},
+					     $self->{p_bottom},
+					     $state{sash}{sbexport_editview_messages} // 0 );
+    }
+    $self->messagestooltip;
+}
+
+sub OnMessagesClear {
+    my ( $self, $event ) = @_;
+    $self->{t_messages}->Clear;
+}
+
+sub OnMessagesSave {
+    my ( $self, $event ) = @_;
+    my $conf = Wx::ConfigBase::Get;
+    my $file = $state{messages}{savedas} // "";
+    my $fd = Wx::FileDialog->new
+      ($self, _T("Choose file to save in"),
+       "", $file,
+       "*",
+       0|wxFD_SAVE|wxFD_OVERWRITE_PROMPT,
+       wxDefaultPosition);
+
+    my $ret = $fd->ShowModal;
+    if ( $ret == wxID_OK ) {
+	$file = $fd->GetPath;
+	$self->log( 'S',  "Messages saved." );
+	$self->{t_messages}->SaveFile($file);
+	$state{messages}{savedas} = $file;
+
+=for later
+
+	$self->{t_messages}->Clear if $cb->IsChecked;
+
+=cut
+
+    }
+    $fd->Destroy;
+    return $ret;
 }
 
 1;

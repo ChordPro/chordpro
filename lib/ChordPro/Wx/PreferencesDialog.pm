@@ -73,7 +73,7 @@ sub fetch_prefs {
     $self->{ch_presets}->Enable($preferences{enable_presets});
     my $ctl = $self->{ch_presets};
     $ctl->Clear;
-    for ( @{ $parent->stylelist } ) {
+    for ( @{ $state{styles} } ) {
 	my $t = ucfirst(lc($_));
 	$t =~ s/_/ /g;
 	$t =~ s/ (.)/" ".uc($1)/eg;
@@ -121,7 +121,7 @@ sub fetch_prefs {
     $ctl->Clear;
     my $n = 0;
     my $check = 0;
-    for ( @{ $parent->notationlist } ) {
+    for ( @{ $state{notations} } ) {
 	my $s = ucfirst($_);
 	$check = $n if $_ eq lc $preferences{notation};
 	$s .= " (" . $notdesc->{lc($s)} .")" if $notdesc->{lc($s)};
@@ -138,7 +138,7 @@ sub fetch_prefs {
     $ctl->Clear;
     $ctl->Append("-----");
     $n = 1;
-    for ( @{ $parent->notationlist } ) {
+    for ( @{ $state{notations} } ) {
 	my $s = ucfirst($_);
 	$check = $n if $_ eq lc $preferences{xcode};
 	$s .= " (" . $notdesc->{lc($s)} .")" if $notdesc->{lc($s)};
@@ -149,8 +149,10 @@ sub fetch_prefs {
     $ctl->SetSelection($check);
 
     # PDF Viewer.
+    $self->{cb_pdfviewer}->SetValue($preferences{enable_pdfviewer});
     $self->{t_pdfviewer}->SetValue($preferences{pdfviewer})
       if $preferences{pdfviewer};
+    $self->{t_pdfviewer}->Enable($self->{cb_pdfviewer}->IsChecked);
 
     $self->_enablecustom;
 
@@ -174,7 +176,7 @@ sub store_prefs {
     my $ctl = $self->{ch_presets};
     my $cnt = $ctl->GetCount;
     my @p;
-    my $styles = $parent->stylelist;
+    my $styles = $state{styles};
     for ( my $n = 0; $n < $cnt; $n++ ) {
 	next unless $ctl->IsChecked($n);
 	push( @p, $styles->[$n] );
@@ -220,7 +222,7 @@ sub store_prefs {
     $n += 12 if $n < 0;
     $n += 12 if $preferences{xpose_acc} == 1; # sharps
     $n -= 12 if $preferences{xpose_acc} == 2; # flats
-    $preferences{xpose} = $n;
+    $state{xpose} = $n;
 
     # Transcode.
     $n = $self->{ch_transcode}->GetSelection;
@@ -233,6 +235,7 @@ sub store_prefs {
     }
 
     # PDF Viewer.
+    $preferences{enable_pdfviewer} = $self->{cb_pdfviewer}->IsChecked;
     $preferences{pdfviewer} = $self->{t_pdfviewer}->GetValue;
 }
 
@@ -327,6 +330,12 @@ sub OnSkipStdCfg {
 sub OnPresets {
     my ( $self, $event ) = @_;
     $self->{ch_presets}->Enable( $self->{cb_presets}->GetValue );
+    $event->Skip;
+}
+
+sub OnPDFViewer {
+    my ( $self, $event ) = @_;
+    $self->{t_pdfviewer}->Enable( $self->{cb_pdfviewer}->GetValue );
     $event->Skip;
 }
 

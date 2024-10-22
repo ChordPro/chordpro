@@ -49,9 +49,9 @@
                         <flag>wxRIGHT</flag>
                         <object class="wxBitmapButton" name="bmb_preview" base="EditBitmapButton">
                             <events>
-                                <handler event="EVT_BUTTON">OnPreview</handler>
+                                <handler event="EVT_BUTTON">OnShowPreview</handler>
                             </events>
-                            <tooltip>Preview</tooltip>
+                            <tooltip>Generate and show preview</tooltip>
                             <bitmap>art:wxART_PRINT,wxART_TOOLBAR</bitmap>
                         </object>
                     </object>
