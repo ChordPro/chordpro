@@ -474,6 +474,14 @@ sub max { $_[0] > $_[1] ? $_[0] : $_[1] }
 
 push( @EXPORT, "min", "max" );
 
+# Plural
+sub plural( $n, $tag, $plural=undef ) {
+    $plural //= $tag . "s";
+    ( $n || "no" ) . ( $n == 1 ? $tag : $plural );
+}
+
+push( @EXPORT, "plural" );
+
 # Dimensions.
 # Fontsize allows typical font units, and defaults to ref 12.
 sub fontsize( $size, $ref=12 ) {
