@@ -81,7 +81,6 @@ sub fetch_prefs {
     }
 
     my $p = $preferences{cfgpreset};
-    use DDP;Wx::LogMessage("%s",np($p));
     foreach ( @$p ) {
 	if ( $_ eq "custom" ) {
 	    $self->{cb_configfile}->SetValue(1);

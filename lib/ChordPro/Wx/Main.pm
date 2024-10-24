@@ -282,7 +282,6 @@ method get_preferences() {
 	}
     }
     $preferences{cfgpreset} = \@presets;
-    use DDP; Wx::LogMessage("%s",np(@presets));
 
     # Find transcode setting.
     $p = lc $preferences{xcode};
