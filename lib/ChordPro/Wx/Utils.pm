@@ -36,90 +36,6 @@ use strict 'refs';
 
 ################ ################
 
-sub panels {
-    my @panels = qw( p_editor p_sbexport );
-    wantarray ? @panels : \@panels;
-}
-
-push( @EXPORT, 'panels' );
-
-# Create a menu bar.
-#
-# This is intended to be called by a panel, but the actual menu bar is
-# attached to the top level frame. The callbacks are routed to the
-# methods in the panel, if possible.
-
-sub make_menubar {
-    my ( $self, $ctl ) = @_;
-
-    use Wx::Locale gettext => '_T';
-    my $target = $Wx::wxTheApp->GetTopWindow;
-
-    my $mb = Wx::MenuBar->new;
-
-    for ( @$ctl ) {
-
-	# [ wxID_FILE, [ ... ] ]
-
-	my @data = @$_;
-	my $id   = shift(@data);
-	my $menu = pop(@data);
-	my $text = shift(@data);
-
-	$id = Wx::NewId if $id < 0;
-
-	my $m = Wx::Menu->new;
-	for my $item ( @$menu ) {
-
-	    if ( !@$item ) {
-		# []
-		$m->AppendSeparator;
-		next;
-	    }
-
-	    # [ wxID_NEW, "", "Create new", ..., "OnNew" ],
-
-	    my @data = @$item;
-	    my $id   = shift(@data);
-	    my $cb   = pop(@data);
-	    my $text = shift(@data);
-	    my $tip  = shift(@data);
-
-	    $id = Wx::NewId if $id < 0;
-
-	    $m->Append( $id,
-			_T($text // Wx::GetStockLabel($id)),
-			$tip ? _T($tip) : "", @data );
-
-	    my $code;
-	    if ( $code = $self->can($cb) ) {
-		# Reroute callbacks.
-		Wx::Event::EVT_MENU( $target, $id,
-				     sub { &$code( $self, $_[1] ) } );
-	    }
-	    elsif ( $code = $target->can($cb) ) {
-		# Use parent callbacks.
-		Wx::Event::EVT_MENU( $target, $id, $code );
-	    }
-	    else {
-		$self->log("w", "No callback for $cb" );
-	    }
-	}
-
-	# Add menu to menu bar.
-	$mb->Append( $m, _T($text // Wx::GetStockLabel($id)) );
-    }
-
-    # Add menu bar.
-    $target->SetMenuBar($mb);
-
-    return $mb;
-}
-
-push( @EXPORT, 'make_menubar' );
-
-################ ################
-
 use ChordPro::Utils qw( is_msw is_macos );
 
 sub savewinpos {
@@ -149,4 +65,12 @@ push( @EXPORT, 'savewinpos', 'restorewinpos' );
 
 ################ ################
 
-1;
+sub panels {
+    my @panels = qw( p_editor p_sbexport );
+    wantarray ? @panels : \@panels;
+}
+
+push( @EXPORT, 'panels' );
+
+################ ################
+

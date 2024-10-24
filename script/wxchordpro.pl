@@ -4,8 +4,8 @@
 
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
-# Last Modified On: Wed Oct 16 10:52:43 2024
-# Update Count    : 289
+# Last Modified On: Thu Oct 24 08:29:45 2024
+# Update Count    : 291
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -35,7 +35,7 @@ use ChordPro::Wx::Main;
 
 my $options = app_options();
 
-ChordPro::Wx::WxChordPro::run($options);
+ChordPro::Wx::WxChordPro->run($options);
 
 ################ Subroutines ################
 
@@ -52,6 +52,7 @@ sub app_options {
 		      'ident',
 		     'verbose|v+',
 		      'version|V',
+		      "logstderr",
 		      'maximize',
 		      'geometry=s',
 		     'quit',

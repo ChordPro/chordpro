@@ -7,13 +7,11 @@ lib/ChordPro/Wx/Main.wxg
 lib/ChordPro/Wx/Main_wxg.pm
 lib/ChordPro/Wx/MessagesPanel.pm
 lib/ChordPro/Wx/MessagesPanel_wxg.pm
+lib/ChordPro/Wx/PanelRole.pm
 lib/ChordPro/Wx/PreferencesDialog.pm
 lib/ChordPro/Wx/PreferencesDialog.wxg
 lib/ChordPro/Wx/PreferencesDialog_wxg.pm
 lib/ChordPro/Wx/Preview.pm
-lib/ChordPro/Wx/PreviewPanel.pm
-lib/ChordPro/Wx/PreviewPanel.wxg
-lib/ChordPro/Wx/PreviewPanel_wxg.pm
 lib/ChordPro/Wx/RenderDialog.pm
 lib/ChordPro/Wx/RenderDialog.wxg
 lib/ChordPro/Wx/RenderDialog_wxg.pm
@@ -27,6 +25,7 @@ lib/ChordPro/res/icons/chordpro-icon.png
 lib/ChordPro/res/icons/chordpro-logo-narrow.png
 lib/ChordPro/res/icons/chordpro-open.png
 lib/ChordPro/res/icons/chordpro-song.png
+lib/ChordPro/res/icons/chordpro-splash.png
 lib/ChordPro/res/icons/chordpro-web.png
 lib/ChordPro/res/icons/chordpro-web32.png
 lib/ChordPro/res/icons/chordpro.ico

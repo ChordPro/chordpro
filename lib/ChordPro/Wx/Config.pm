@@ -9,6 +9,7 @@ class ChordPro::Wx::Config;
 our %state;
 our %preferences;
 
+use ChordPro::Utils qw( is_macos );
 use Ref::Util qw( is_hashref is_arrayref );
 
 use Exporter 'import';
@@ -171,6 +172,11 @@ method Load :common {
     _setup_styles();
     _setup_notations();
     _setup_tasks();
+
+    my @ext = qw( cho crd chopro chord chordpro pro );
+    my $lst = "*." . join(",*.",@ext);
+    $state{ffilters} = "ChordPro files ($lst)|" . $lst =~ s/,/;/gr .
+      (is_macos ? ";*.txt" : "|All files|*.*");
 }
 
 method Store :common {

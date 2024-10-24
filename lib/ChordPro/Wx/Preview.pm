@@ -9,8 +9,12 @@ class ChordPro::Wx::Preview;
 
 use ChordPro;
 use ChordPro::Paths;
-use Wx ':everything';
 use ChordPro::Wx::Config;
+use ChordPro::Utils qw( demarkup );
+
+use Wx ':everything';
+use Wx::Locale gettext => '_T';
+
 use File::Temp qw( tempfile );
 use File::Basename qw(basename);
 
@@ -134,7 +138,7 @@ method preview( $args, %opts ) {
 		  $dialog = Wx::ProgressDialog->new
 		    ( "Processing...",
 		      'Starting',
-		      $ctl{total}, $self,
+		      $ctl{total}, $panel,
 		      wxPD_CAN_ABORT|wxPD_AUTO_HIDE|wxPD_APP_MODAL|
 		      wxPD_ELAPSED_TIME|wxPD_ESTIMATED_TIME|wxPD_REMAINING_TIME );
 	      }
@@ -170,6 +174,7 @@ method preview( $args, %opts ) {
     $self->_die($@), goto ERROR if $@ && !$died;
     goto ERROR unless -e $preview_pdf;
 
+    $state{unsavedpreview} = 1;
     if ( !$preferences{enable_pdfviewer}
 	 && $panel->{webview}->isa('Wx::WebView') ) {
 
@@ -178,10 +183,10 @@ method preview( $args, %opts ) {
 	    my ($w,$h) = $top->GetSizeWH;
 	    my $want = ref($panel) =~ /Editor/ ? 700 : 900;
 	    $top->SetSize( $w+400, $h ) if $w < $want;
-	    unless ( $_->{sw_e_p}->IsSplit ) {
-		$_->{sw_e_p}->SplitVertically ( $_->{p_left},
-						$_->{p_right},
-						$_->{sw_lr_sash} // 0.5 );
+	    unless ( $_->{sw_lr}->IsSplit ) {
+		$_->{sw_lr}->SplitVertically ( $_->{p_left},
+					       $_->{p_right},
+					       $_->{$panel->panel."_lr"} // 0.5 );
 	    }
 	}
 
@@ -228,7 +233,7 @@ method preview( $args, %opts ) {
 
   ERROR:
     if ( $msgs ) {
-	$panel->alert;
+	$panel->alert(1);
 	$self->log( 'S',  $msgs . " message" .
 		    ( $msgs == 1 ? "" : "s" ) );
 	if ( $fatal ) {
@@ -279,15 +284,16 @@ sub _makeurl {
 method save {
     return unless -s $preview_pdf;
     my $fd = Wx::FileDialog->new
-      ($self, _T("Choose output file"),
-       "", "",
-       "*.pdf",
-       0|wxFD_SAVE|wxFD_OVERWRITE_PROMPT,
-       wxDefaultPosition);
+      ( $panel,
+	_T("Choose output file"),
+	"", "",
+	"*.pdf",
+	0|wxFD_SAVE|wxFD_OVERWRITE_PROMPT );
     my $ret = $fd->ShowModal;
     if ( $ret == wxID_OK ) {
 	use File::Copy;
 	copy( $preview_pdf, $fd->GetPath );
+	$state{unsavedpreview} = 0;
     }
     $fd->Destroy;
     return $ret;
