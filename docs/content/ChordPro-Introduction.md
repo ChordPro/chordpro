@@ -78,7 +78,7 @@ chords. Annotations are specified with `[*`*text*`]`, again just like
 chords. Depending on the software used to process the ChordPro data,
 annotations may be rendered in an outstanding manner.
 
-Markup and anotations are available as of [ChordPro version 6]({{< relref "ChordPro6-RelNotes" >}}).
+Markup and annotations are available as of [ChordPro version 6]({{< relref "ChordPro6-RelNotes" >}}).
 
 ## Is this all?
 

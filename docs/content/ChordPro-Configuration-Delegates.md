@@ -160,7 +160,7 @@ for the Lilypond program `lilypond` to turn it into an SVG image.
             "handler"  : "ly2svg",
             "type"     : "image",
 
-            // The preamble is a list of lines inserted before the lilipond data.
+            // The preamble is a list of lines inserted before the lilypond data.
             // This is a good place to set the version and global customizations.
             "preamble" : [
                 "\\version \"2.21.0\"",
@@ -185,7 +185,7 @@ for the Lilypond program `lilypond` to turn it into an SVG image.
   nicely embedded in the ChordPro output.  
   Note that Lilypond directives start with a backslash, which has a
   special meaning in JSON data. Two consecutive backslashes will be
-  interpretated as a single backslash without special meaning.
+  interpreted as a single backslash without special meaning.
 
 * `omit`: If `true`, no delegation will be handled. In other words,
   the content of `{start_of_ly}` ... `{end_of_ly}` is silently

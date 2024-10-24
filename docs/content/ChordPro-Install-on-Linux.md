@@ -8,7 +8,7 @@ description: "Installation on Linux"
 First of all, check if there is a prebuilt package available for your
 system.
 
-On RPM-based systems (RedHat, Fedora, Suze) packages can be
+On RPM-based systems (RedHat, Fedora, SUSE) packages can be
 installed with `dnf` or `yum`. On Debian/Ubuntu-based systems use the
 `apt-get` tool. For example on a Ubuntu system:
 
@@ -31,7 +31,7 @@ ChordPro requires a number of Perl modules to run. These will be
 installed automatically by the `cpan` tool if necessary. However, it
 is strongly advised to install platform supplied packages if
 available.
-On RPM-based systems (RedHat, Fedora, Suze) packages can be
+On RPM-based systems (RedHat, Fedora, SUSE) packages can be
 installed with `dnf` or `yum`. On Debian/Ubuntu-based systems use the
 `apt-get` tool.
 

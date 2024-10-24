@@ -165,7 +165,7 @@ ChordPro comes with a couple of predefined instrument configs:
 - `guitar`  
   Guitar with lots of chords.
 - `guitar-legacy`  
-  Guitar with the chords originaly included in Chordii.
+  Guitar with the chords originally included in Chordii.
 - `guitar-ly`  
   Guitar with common chords derived from [Lilypond](https://lilypond.org) data.
 - `mandolin-ly`  
