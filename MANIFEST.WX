@@ -5,8 +5,6 @@ lib/ChordPro/Wx/EditorPanel_wxg.pm
 lib/ChordPro/Wx/Main.pm
 lib/ChordPro/Wx/Main.wxg
 lib/ChordPro/Wx/Main_wxg.pm
-lib/ChordPro/Wx/MessagesPanel.pm
-lib/ChordPro/Wx/MessagesPanel_wxg.pm
 lib/ChordPro/Wx/PanelRole.pm
 lib/ChordPro/Wx/PreferencesDialog.pm
 lib/ChordPro/Wx/PreferencesDialog.wxg
