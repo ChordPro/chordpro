@@ -5,6 +5,7 @@ use Object::Pad;
 use utf8;
 
 class ChordPro::Wx::EditorPanel
+  :repr(HASH)
   :does( ChordPro::Wx::PanelRole )
   :isa( ChordPro::Wx::EditorPanel_wxg );
 

@@ -5,6 +5,7 @@ use Object::Pad;
 use utf8;
 
 class ChordPro::Wx::SongbookExportPanel
+  :repr(HASH)
   :does( ChordPro::Wx::PanelRole )
   :isa( ChordPro::Wx::SongbookExportPanel_wxg );
 
@@ -37,7 +38,6 @@ ADJUST {
     # Single pane.
     $self->unsplit;
 
-    return $self;
 }
 
 ################ ################

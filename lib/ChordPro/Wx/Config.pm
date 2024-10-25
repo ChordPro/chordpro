@@ -94,7 +94,8 @@ use constant MAXRECENTS => 10;
 
 method Setup :common {
     if ( $^O =~ /^mswin/i ) {
-	Wx::ConfigBase::Get->SetPath("/wxchordpro");
+	$cb = Wx::ConfigBase::Get;
+	$cb->SetPath("/wxchordpro");
     }
     else {
 	my $file;
