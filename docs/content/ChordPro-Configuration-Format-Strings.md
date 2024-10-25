@@ -15,7 +15,7 @@ value of metadata items.
 `%{`*name*`|`*true-text*`|`*false-text*`}`  
 `%{`*name*`|`*true-text*`}`
 
-If metadata item _name_, the controling item, has a value, the
+If metadata item _name_, the controlling item, has a value, the
 _true-text_ is substituted. If metadata item _name_ has no value, the
 _false-text_ is substituted. Both alternatives may be left out.
 
@@ -24,8 +24,8 @@ It is possible to test for specific values using the `=` (equality) operator:
 `%{`*name*`=`*value*`|`*true-text*`|`*false-text*`}`
 
 For even more power, _true-text_ and _false-text_ may contain other
-metadata subtitutions. The special `%{}` can be used to substitute the
-value of the controling item. See. however, [nested substitutions]({{<
+metadata substitutions. The special `%{}` can be used to substitute the
+value of the controlling item. See. however, [nested substitutions]({{<
 relref "#nested-substitutions" >}}) below.
 
 For example, if metadata item `album` has the value "Yes",
@@ -66,7 +66,7 @@ When used in a substitution `%{year}` this will yield, as expected,
 
 However, when used in `%{anything|%{year}}` first `%{year}` is
 expanded, resulting in `%{anything|1939|1967}}`.
-This accidentaly introduces an 'else' part.
+This accidentally introduces an 'else' part.
 Then `anything` is examined.
 It is empty so it expands to the 'else' part... `1967`.
 
@@ -146,7 +146,7 @@ Additional metadata can be provided on the [command line]({{< relref
 As can be expected, `%{key}` yields the song key as specified with the
 [key]({{< relref "Directives-key" >}}) directive.
 
-ChordPro provides two additonal metadata for substitution:
+ChordPro provides two additional metadata for substitution:
 
  * `key_actual`: The actual key, which is initially identical to `key`
    but will change when [transpositions]({{< relref
@@ -205,7 +205,7 @@ there will be additional metadata:
  * `xc`: The metadata for the chord _before_ transcoding.
  
 These have all the metadata for chords (i.e. `root`, `qual` etc.), and
-in additon:
+in addition:
  
  * `formatted`: The formatted chord name.
 

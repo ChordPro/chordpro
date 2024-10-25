@@ -59,7 +59,7 @@ margin, see [labels]({{< relref "ChordPro-Configuration-PDF#labels" >}}).
 Since the actual rendering is handled by external tools, ChordPro has
 no control over what and how the output will look like.
 
-## Formatting instructioms
+## Formatting instructions
 
 The Lilypond data may be preceded by formatting instructions:
 

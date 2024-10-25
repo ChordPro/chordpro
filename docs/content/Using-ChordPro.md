@@ -47,7 +47,7 @@ the output. No further processing takes place.
 See also [Legacy ASCII input format]({{< relref
 "chordpro-getting-started#legacy-ascii-input-format" >}}).
 
-Note that `--a2crd` is slightly different from `--generate=ChordPro`. In the latter case the inpur data *is* processed
+Note that `--a2crd` is slightly different from `--generate=ChordPro`. In the latter case the input data *is* processed
 and then written out as a ChordPro file.
 
 See also [`--crd`]({{< relref "#crd" >}}),
@@ -261,7 +261,7 @@ with a `--generate` option:
   a CSV file containing the following metadata:
   title, pages, sorttitle, artist, composer, collection, key and year.
 
-  This CSV file has the same name as the PDF, with extenstion `pdf`
+  This CSV file has the same name as the PDF, with extension `pdf`
   replaced by `csv`. The contents conform to the RFC4180
   recommendations. The column separator is a semicolon. When a
   metadata has multiple values, these are separated with a vertical

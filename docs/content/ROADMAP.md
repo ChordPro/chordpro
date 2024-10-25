@@ -5,7 +5,7 @@ place in the future.
 
 Feel free to feedback on the [community forum](https://groups.io/g/ChordPro).
 
-## Planned for ChrdPro 6.x
+## Planned for ChordPro 6.x
 
 ### Placement of images
 

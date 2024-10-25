@@ -76,7 +76,7 @@ A global configuration file can be placed in `/etc`:
 
 This config file is processed every time any user on the system runs
 ChordPro, unless the user specifies the `--nodefaultconfigs` or
-`--nosystemconfig` command line option.
+`--nosysconfig` command line option.
 
 This may be a good place to set system dependent settings like the
 printer paper size and font paths.
