@@ -18,6 +18,8 @@ questions and answers here sometime soon.
 
 * [How to get my fonts right?]({{< relref "Chordpro-Fonts" >}})
 
+* [How to get multiline titles / subtitles in my page headers?]({{< relref "FAQ-MultiTitles" >}})
+
 * [ChordPro supports UNICODE. Then why can't I see my russian (vietnamese, greek, ...) characters?]({{< relref "FAQ-Unicode-characters" >}})
 
 * [D♯ transposes to D♭ but I want C♯]({{< relref "FAQ-Transpose" >}})
