@@ -261,11 +261,11 @@ method refresh() {
     $self->setup_menubar;
 
     $self->log( 'I', "Using " .
-		( ref($self->{p_editor}{t_editor}) eq 'Wx::TextCtrl'
+		( ref($self->{t_editor}) eq 'Wx::TextCtrl'
 		  ? "basic" : "styled") . " text editor" );
 
     $self->log( 'I', "Using " .
-		( ref($self->{p_editor}{webview}) eq 'Wx::WebView'
+		( ref($self->{webview}) eq 'Wx::WebView'
 		  ? "embedded" : "external") . " PDF viewer" );
 
 

@@ -108,7 +108,7 @@ method refresh() {
     $self->setup_menubar;
 
     $self->log( 'I', "Using " .
-		( ref($self->{p_editor}{webview}) eq 'Wx::WebView'
+		( ref($self->{webview}) eq 'Wx::WebView'
 		  ? "embedded" : "external") . " PDF viewer" );
 
     my $c = $state{songbookexport};

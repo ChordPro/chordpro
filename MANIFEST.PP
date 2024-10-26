@@ -123,6 +123,7 @@ pp/macosswift/Makefile
 pp/macosswift/README.html
 pp/pp2ppl.pl
 pp/windows/GNUmakefile
+pp/windows/WebView2Loader.dll
 pp/windows/chordpro.pp
 pp/windows/chordpro.rc
 pp/windows/chordproinst.bmp

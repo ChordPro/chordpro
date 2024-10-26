@@ -45,16 +45,24 @@ method setup_webview() {
 
     my $try;
     $wv = $self->{webview};
-    if ( !is_msw && eval { use Wx::WebView; 1 } ) {
-	$wv = Wx::WebView::New( $self->{p_right},
-				wxID_ANY,
-				CP->findres( "chordpro-icon.png",
-					     class => "icons" ) );
-	$self->{sz_preview}->Replace( $self->{webview}, $wv, 1 );
-	$self->{webview}->Destroy;
-	$self->{webview} = $wv;
-	$self->{sz_preview}->Layout;
-    }
+    return unless eval { use Wx::WebView; 1 };
+
+    # WebView can only handle PDF on Windows with Edge backend.
+    # Wx::WebView::IsBackendAvailable requires Wx 3.002.
+    return if is_msw
+      && ( $Wx::VERSION < 3.002 || !Wx::WebView::IsBackendAvailable("wxWebViewEdge") );
+
+    $wv = Wx::WebView::New( $self->{p_right},
+			    wxID_ANY,
+			    CP->findres( "chordpro-icon.png",
+					 class => "icons" ),
+			    wxDefaultPosition, wxDefaultSize,
+			    is_msw ? "wxWebViewEdge" : ()
+			  );
+    $self->{sz_preview}->Replace( $self->{webview}, $wv, 1 );
+    $self->{webview}->Destroy;
+    $self->{webview} = $wv;
+    $self->{sz_preview}->Layout;
 }
 
 # Create a menu bar.

@@ -60,6 +60,7 @@ unpack :
 	copy "${DEST}"\res\icons\*.ico "${DEST}"
 	copy "${DEST}"\res\icons\*.png "${DEST}"
 	move "${DEST}\res" "${DEST}\lib\ChordPro"
+	copy WebView2Loader.dll "${DEST}"
 
 # The core DLLs needed for Strawberry perl. The Wx libs have been unpacked already.
 copy_coredll :

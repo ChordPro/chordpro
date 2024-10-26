@@ -27,6 +27,7 @@
     - (ChordPro) Include ABC if generating for MSPro.
     - Fix issue #428, $443.
     - Fix forum issue 2546.
+    - (Wx, MSWindows only) Use Edge for WebView (PDF view). Requires custom wxWidgets build.
 
 6.060 2024-08-24
 
