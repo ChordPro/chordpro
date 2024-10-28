@@ -269,11 +269,13 @@ method refresh() {
 		  ? "embedded" : "external") . " PDF viewer" );
 
 
+    my $mod = $self->{t_editor}->IsModified;
     my $font = $state{fonts}[$preferences{editfont}]{font};
     $font->SetPointSize($preferences{editsize});
     $self->{t_editor}->SetFont($font);
     $self->{t_editor}->SetBackgroundColour
       ( Wx::Colour->new($preferences{editcolour}) );
+    $self->{t_editor}->SetModified($mod);
 
     $self->setup_messages_ctxmenu;
 
