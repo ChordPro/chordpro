@@ -247,7 +247,6 @@ sub OnConfigFile {
     my ( $self, $event ) = @_;
     my $n = $self->{cb_configfile}->IsChecked;
     $self->{fp_customconfig}->Enable($n);
-    $event->Skip;
 }
 
 sub OnCustomConfigChanged {
@@ -286,6 +285,10 @@ sub OnCustomLib {
     my ( $self, $event ) = @_;
     my $n = $self->{cb_customlib}->IsChecked;
     $self->{dp_customlibrary}->Enable($n);
+}
+
+sub OnCustomLibChanged {
+    my ( $self, $event ) = @_;
 }
 
 sub OnTmplFile {
