@@ -4,8 +4,8 @@
 
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
-# Last Modified On: Thu Oct 24 08:29:45 2024
-# Update Count    : 291
+# Last Modified On: Sun Oct 27 16:46:18 2024
+# Update Count    : 294
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -55,6 +55,7 @@ sub app_options {
 		      "logstderr",
 		      'maximize',
 		      'geometry=s',
+		      'config=s',
 		     'quit',
 		     'trace',
 		     'help|?',

@@ -85,15 +85,26 @@ my %prefs =
    xcode	   => "",
 
    # PDF Viewer.
-   enable_pdfviewer   => "",
+   enable_pdfviewer   => 0,
    pdfviewer   => "",
 
   );
 
 use constant MAXRECENTS => 10;
 
-method Setup :common {
-    if ( $^O =~ /^mswin/i ) {
+method Setup :common ($options) {
+
+    if ( $options->{config} ) {
+	Wx::ConfigBase::Set
+	    ( $cb = Wx::FileConfig->new
+	     ( "WxChordPro",
+	       "ChordPro_ORG",
+	       $options->{config},
+	       '',
+	       wxCONFIG_USE_LOCAL_FILE,
+	     ));
+    }
+    elsif ( $^O =~ /^mswin/i ) {
 	$cb = Wx::ConfigBase::Get;
 	$cb->SetPath("/wxchordpro");
     }
@@ -170,6 +181,10 @@ method Load :common {
     }
     lock_keys(%preferences);
 
+    $preferences{customlib} //= $ENV{CHORDPRO_LIB};
+    delete $ENV{CHORDPRO_LIB};
+
+    CP->setup_resdirs;
     _setup_styles();
     _setup_notations();
     _setup_tasks();
