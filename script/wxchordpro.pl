@@ -4,8 +4,8 @@
 
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
-# Last Modified On: Sun Oct 27 16:46:18 2024
-# Update Count    : 294
+# Last Modified On: Mon Oct 28 20:59:15 2024
+# Update Count    : 300
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -56,6 +56,8 @@ sub app_options {
 		      'maximize',
 		      'geometry=s',
 		      'config=s',
+		      'stc!',
+		      'webview!',
 		     'quit',
 		     'trace',
 		     'help|?',
