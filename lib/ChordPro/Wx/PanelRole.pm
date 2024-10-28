@@ -207,7 +207,9 @@ method OnPreferences($event) {
     restorewinpos( $self->{d_prefs}, "prefs" );
     my $ret = $self->{d_prefs}->ShowModal;
     savewinpos( $self->{d_prefs}, "prefs" );
-    $self->GetParent->save_preferences if $ret == wxID_OK;
+    return unless $ret == wxID_OK;
+
+    $self->GetParent->save_preferences;
 }
 
 method OnPreview($event) {		# for menu

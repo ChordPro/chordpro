@@ -145,7 +145,7 @@ method Load :common {
 	     );
 
     my ( $ggoon, $group, $gindex ) = $cb->GetFirstGroup;
-    my %pp = %prefs;
+    my %pp = $ggoon ? %prefs : ();
     while ( $ggoon ) {
 	my $cp = $cb->GetPath;
 	$cb->SetPath("/$group");
@@ -215,7 +215,6 @@ method Store :common {
 
 	$cb->SetPath("/$group");
 	while ( my ( $k, $v ) = each %$v ) {
-	    $cb->Write( $k, $v );
 	    if ( $group eq "preferences" ) {
 		if ( exists $pp{$k} ) {
 		    delete $pp{$k};
@@ -223,7 +222,11 @@ method Store :common {
 		else {
 		    warn("Preferences: unknown key: $k");
 		}
+		if ( $k eq "editcolour" && ref($v) ) {
+		    $v = $preferences{editcolour} = $v->GetAsString(wxC2S_HTML_SYNTAX);
+		}
 	    }
+	    $cb->Write( $k, $v );
 	}
     }
     $cb->Flush;

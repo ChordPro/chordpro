@@ -33,7 +33,7 @@ ADJUST {
     $self->setup_logger;
 
     # Setup WebView, if possible.
-    $self->setup_webview;
+    $self->setup_webview unless $ENV{CHORDPRO_NO_WEBVIEW};
 
     # Single pane.
     $self->unsplit;

@@ -32,7 +32,7 @@ sub OnInit( $self ) {
     $self->SetAppName("ChordPro");
     $self->SetVendorName("ChordPro.ORG");
     Wx::InitAllImageHandlers();
-    ChordPro::Wx::Config::Setup;
+    ChordPro::Wx::Config->Setup($options);
 
     my $main = ChordPro::Wx::Main->new;
     return 0 unless $main->init($options);
@@ -200,13 +200,18 @@ method select_mode( $mode ) {
 # Explicit (re)initialisation of this class.
 method init( $options ) {
 
-    ChordPro::Wx::Config::Load;
+    ChordPro::Wx::Config->Load;
 
-    $state{logstderr} = $options->{logstderr};
+    # General runtime options.
     $state{verbose}   = $options->{verbose};
     $state{trace}     = $options->{trace};
     $state{debug}     = $options->{debug};
-    $state{customlib} = delete $ENV{CHORDPRO_LIB};
+
+    # For development/debugging.
+    $state{logstderr} = $options->{logstderr};
+
+    $state{customlib} //= $ENV{CHORDPRO_LIB} // "";
+    delete $ENV{CHORDPRO_LIB};
 
     $self->SetStatusBar(undef);
     $self->get_preferences;
@@ -310,7 +315,7 @@ method save_preferences() {
 
     my $t = $preferences{cfgpreset};
     $preferences{cfgpreset} = join( ",", @{$preferences{cfgpreset}} ) if $t;
-    ChordPro::Wx::Config::Store;
+    ChordPro::Wx::Config->Store;
     $preferences{cfgpreset} = $t;
 }
 

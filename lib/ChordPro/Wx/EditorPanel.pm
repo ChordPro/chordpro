@@ -44,10 +44,10 @@ ADJUST {
 
     # Try Styled Text Control (Scintilla). This required an updated
     # version of Wx.
-    $self->setup_scintilla;
+    $self->setup_scintilla unless $ENV{CHORDPRO_NO_STC};
 
     # Setup WebView, if possible.
-    $self->setup_webview;
+    $self->setup_webview unless $ENV{CHORDPRO_NO_WEBVIEW};
 
     # Single pane.
     $self->unsplit;
