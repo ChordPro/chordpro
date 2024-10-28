@@ -91,7 +91,6 @@ method preview( $args, %opts ) {
     if ( $preferences{enable_customlib} ) {
 	$ENV{CHORDPRO_LIB} = $preferences{customlib};
     }
-    CP->setup_resdirs;
 
     if ( $preferences{xcode} ) {
 	$haveconfig++;
