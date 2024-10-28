@@ -463,7 +463,7 @@ method OnText($event) {
 }
 
 method OnUndo($event) {
-    $self->{t_editor}->CanUndo && $self->{t_editor}->Undo;
+    $self->{t_editor}->Undo;
 }
 
 ################ Compatibility ################
