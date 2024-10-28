@@ -2434,7 +2434,16 @@ sub text_vsp {
     $layout->set_font_description( $ftext->{fd} );
     $layout->set_font_size( $ftext->{size} );
     #warn("vsp: ".join( "", @{$elt->{phrases}} )."\n");
-    $layout->set_markup( join( "", @{$elt->{phrases}} ) );
+
+    my $msg = "";
+    {
+	local $SIG{__WARN__} = sub { $msg .= "@_" };
+	$layout->set_markup( join( "", @{$elt->{phrases}} ) );
+    }
+    if ( $msg && $elt->{line} ) {
+	$msg =~ s/^(.*)\n\s+//;
+	warn("Line ", $elt->{line}, ", $msg\n");
+    }
     my $vsp = $layout->get_size->{height} * $ps->{spacing}->{lyrics};
     #warn("vsp $vsp \"", $layout->get_text, "\"\n");
     # Calculate the vertical span of this line.
