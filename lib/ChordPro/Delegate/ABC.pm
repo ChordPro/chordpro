@@ -407,7 +407,7 @@ sub slurp {
 sub info {
     state $info = { handler => "" };
     my $ctl = $::config->{delegates}->{abc};
-    my $handler = $ctl->{handler};
+    my $handler = $ctl->{handler} // "abc2svg";
 
     # Use cached info, but allow handler change between songs.
     return $info if $handler eq $info->{handler};
