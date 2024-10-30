@@ -210,9 +210,6 @@ method init( $options ) {
     # For development/debugging.
     $state{logstderr} = $options->{logstderr};
 
-    $state{customlib} //= $ENV{CHORDPRO_LIB} // "";
-    delete $ENV{CHORDPRO_LIB};
-
     $self->SetStatusBar(undef);
     $self->get_preferences;
 
@@ -277,9 +274,6 @@ method get_preferences() {
 
     # Find config setting.
     my $p = lc( $preferences{cfgpreset} );
-    if ( ",$p" =~ quotemeta( "," . _T("Custom") ) ) {
-	$state{cfgpresetfile} = $preferences{configfile};
-    }
     my @presets;
     foreach ( @{$state{styles}} ) {
 	if ( ",$p" =~ quotemeta( "," . lc($_) ) ) {
@@ -312,11 +306,7 @@ method get_preferences() {
 
 method save_preferences() {
     savewinpos( $self, "main" );
-
-    my $t = $preferences{cfgpreset};
-    $preferences{cfgpreset} = join( ",", @{$preferences{cfgpreset}} ) if $t;
     ChordPro::Wx::Config->Store;
-    $preferences{cfgpreset} = $t;
 }
 
 method aboutmsg() {
@@ -329,6 +319,9 @@ method aboutmsg() {
     # Sometimes version numbers are localized...
     my $dd = sub { my $v = $_[0]; $v =~ s/,/./g; $v };
 
+    local $ENV{CHORDPRO_LIB} =
+      $preferences{enable_customlib} ? $preferences{customlib} : "";
+    CP->setup_resdirs;
     my $msg = join
       ( "",
 	"ChordPro Preview Editor version ",
@@ -339,9 +332,7 @@ method aboutmsg() {
 	"\n",
 	"GUI designed with wxGlade\n\n",
 	"Run-time information:\n",
-	$::config->{settings}
-	? ::runtimeinfo()
-	: "  Not yet available (try again later)\n"
+	::runtimeinfo() =~ s/CHORDPRO_LIB/Custom lib  /rm
       );
 
     return $msg;

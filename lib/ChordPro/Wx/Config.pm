@@ -61,8 +61,8 @@ my %prefs =
    configfile        => "",
 
    # Custom library.
-   enable_customlib => 0,
-   customlib        => "",
+   enable_customlib => defined($ENV{CHORDPRO_LIB}),
+   customlib        => $ENV{CHORDPRO_LIB},
 
    # New song template.
    enable_tmplfile => 0,
@@ -71,7 +71,7 @@ my %prefs =
    # Editor.
    editfont	   => 0,
    editsize	   => FONTSIZE,
-   editcolour  => wxWHITE,
+   editcolour	   => wxWHITE,
 
    # Notation.
    notation	   => "",
@@ -157,12 +157,17 @@ method Load :common {
 	    my $value = $cb->Read($entry);
 	    # printf STDERR ( "$group.$entry:\t%s\n", $value );
 	    if ( $group eq "preferences" ) {
-		$preferences{$entry} = $value;
 		if ( exists $pp{$entry} ) {
 		    delete $pp{$entry};
 		}
 		else {
 		    warn("Preferences: unknown key: $entry");
+		}
+		if ( $entry eq "cfgpreset" ) {
+		    $preferences{$entry} = [ split( /,\s*/, $value ) ];
+		}
+		else {
+		    $preferences{$entry} = $value;
 		}
 	    }
 	    elsif ( $group eq "recents" ) {
@@ -181,7 +186,6 @@ method Load :common {
     }
     lock_keys(%preferences);
 
-    $preferences{customlib} //= $ENV{CHORDPRO_LIB};
     delete $ENV{CHORDPRO_LIB};
 
     CP->setup_resdirs;
@@ -225,6 +229,9 @@ method Store :common {
 		if ( $k eq "editcolour" && ref($v) ) {
 		    $v = $preferences{editcolour} = $v->GetAsString(wxC2S_HTML_SYNTAX);
 		}
+		elsif ( $k eq "cfgpreset" ) {
+		    $v = join(",", @$v);
+		}
 	    }
 	    $cb->Write( $k, $v );
 	}
@@ -241,9 +248,11 @@ method Store :common {
 sub _setup_styles {
     my $stylelist = $state{styles};
     return $stylelist if $stylelist && @$stylelist;
-    my $cfglib = CP->configdir;
+
     my @stylelist;
     my %stylelist;
+
+    # Collect standard style files (presets).
     for my $cfglib ( @{ CP->findresdirs("config") } ) {
 	next unless $cfglib && -d $cfglib;
 	opendir( my $dh, $cfglib );
@@ -255,8 +264,10 @@ sub _setup_styles {
 	}
     }
 
+    # Add custom style presets. if appropriate.
     my $dir = $preferences{customlib};
-    if ( $dir && -d ( $cfglib = "$dir/config" ) ) {
+    if ( $preferences{enable_customlib}
+	 && $dir && -d ( my $cfglib = "$dir/config" ) ) {
 	opendir( my $dh, $cfglib );
 	foreach ( readdir($dh) ) {
 	    $_ = decode_utf8($_);

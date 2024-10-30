@@ -203,8 +203,13 @@ method OnOpen($event) {
 
 method OnPreferences($event) {
     use ChordPro::Wx::PreferencesDialog;
-    $self->{d_prefs} ||= ChordPro::Wx::PreferencesDialog->new($self, -1, "Preferences");
-    restorewinpos( $self->{d_prefs}, "prefs" );
+    unless ( $self->{d_prefs} ) {
+	$self->{d_prefs} = ChordPro::Wx::PreferencesDialog->new($self, -1, "Preferences");
+	restorewinpos( $self->{d_prefs}, "prefs" );
+    }
+    else {
+	$self->{d_prefs}->refresh;
+    }
     my $ret = $self->{d_prefs}->ShowModal;
     savewinpos( $self->{d_prefs}, "prefs" );
     return unless $ret == wxID_OK;
