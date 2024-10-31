@@ -108,6 +108,11 @@ sub fetch_prefs {
     $self->{ch_editfont}->SetSelection( $preferences{editfont} );
     $self->{sp_editfont}->SetValue( $preferences{editsize} );
     $self->{cp_editor}->SetColour(Wx::Colour->new($preferences{editcolour}));
+    if ( $state{have_stc} ) {
+	# Currently no background colour.
+	$self->{cp_editor}->Show(0);
+	$self->{sz_edit}->Layout;
+    }
 
     # Notation.
     $ctl = $self->{ch_notation};

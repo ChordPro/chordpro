@@ -337,7 +337,7 @@
                             <object class="sizeritem">
                                 <border>0</border>
                                 <flag>wxEXPAND</flag>
-                                <object class="wxBoxSizer" name="sizer_3" base="EditBoxSizer">
+                                <object class="wxBoxSizer" name="sz_edit" base="EditBoxSizer">
                                     <orient>wxHORIZONTAL</orient>
                                     <object class="sizeritem">
                                         <option>1</option>

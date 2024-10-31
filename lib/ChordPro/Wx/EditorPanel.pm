@@ -228,7 +228,7 @@ method style_text() {
 
 method prepare_annotations() {
 
-    return unless $stc->isa('Wx::StyledTextCtrl');
+    return unless $state{have_stc};
 
     $astyle = 1 + wxSTC_STYLE_LASTPREDEFINED;
     $stc->AnnotationClearAll;
@@ -247,7 +247,7 @@ method prepare_annotations() {
 
 method add_annotation( $line, $message ) {
 
-    return unless $stc->isa('Wx::StyledTextCtrl');
+    return unless $state{have_stc};
 
     $stc->AnnotationSetText( $line, $message );
     $stc->AnnotationSetStyle( $line, $astyle );
@@ -277,9 +277,9 @@ method refresh() {
     $font->SetPointSize($preferences{editsize});
     $self->{t_editor}->SetFont($font);
     if ( $state{have_stc} ) {
-	$stc->StyleSetBackground(wxSTC_STYLE_DEFAULT,
-				 Wx::Colour->new($preferences{editcolour}));
-	$stc->StyleClearAll;
+#	$stc->StyleSetBackground(wxSTC_STYLE_DEFAULT,
+#				 Wx::Colour->new($preferences{editcolour}));
+#	$stc->StyleClearAll;
     }
     else {
 	$self->{t_editor}->SetBackgroundColour
