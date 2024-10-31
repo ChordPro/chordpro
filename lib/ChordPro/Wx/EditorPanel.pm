@@ -149,6 +149,7 @@ method setup_scintilla() {
 	return;
     }
     $stc = $try;
+    $state{have_stc} = 1;		# Note: too early!
 
     # Replace the wxTextCtrl by Scintilla.
     $self->{sz_editor}->Replace( $self->{t_editor}, $stc, 1 );
@@ -260,12 +261,14 @@ method refresh() {
 
     $self->setup_menubar;
 
+    $state{have_stc} = $self->{t_editor}->isa('Wx::StyledTextCtrl');
     $self->log( 'I', "Using " .
-		( ref($self->{t_editor}) eq 'Wx::TextCtrl'
+		( $state{have_stc}
 		  ? "basic" : "styled") . " text editor" );
 
+    $state{have_webview} = $self->{t_editor}->isa('Wx::WebView');
     $self->log( 'I', "Using " .
-		( ref($self->{webview}) eq 'Wx::WebView'
+		( $state{have_webview}
 		  ? "embedded" : "external") . " PDF viewer" );
 
 
@@ -273,8 +276,15 @@ method refresh() {
     my $font = $state{fonts}[$preferences{editfont}]{font};
     $font->SetPointSize($preferences{editsize});
     $self->{t_editor}->SetFont($font);
-    $self->{t_editor}->SetBackgroundColour
-      ( Wx::Colour->new($preferences{editcolour}) );
+    if ( $state{have_stc} ) {
+	$stc->StyleSetBackground(wxSTC_STYLE_DEFAULT,
+				 Wx::Colour->new($preferences{editcolour}));
+	$stc->StyleClearAll;
+    }
+    else {
+	$self->{t_editor}->SetBackgroundColour
+	  ( Wx::Colour->new($preferences{editcolour}) );
+    }
     $self->{t_editor}->SetModified($mod);
 
     $self->setup_messages_ctxmenu;
@@ -472,12 +482,15 @@ method OnUndo($event) {
 
 package Wx::StyledTextCtrl {
 
+    # wxPerl doesn't provide calls (yet) to fetch the fonts, so keep track.
+    my $_font;
     sub SetFont {
 	$_[0]->StyleSetFont( $_, $_[1] ) for 0..6;
+	$_font = $_[1];
     }
 
     sub GetFont {
-	$_[0]->StyleGetFont(0, $_[1]);
+	$_font // $_[0]->StyleGetFont(0);
     }
 
     # IsModified, MarkDirty and DiscardEdits need custom patches.

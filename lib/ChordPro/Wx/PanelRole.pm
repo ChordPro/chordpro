@@ -52,6 +52,7 @@ method setup_webview() {
     return if is_msw
       && ( $Wx::VERSION < 3.002 || !Wx::WebView::IsBackendAvailable("wxWebViewEdge") );
 
+    $state{have_webview} = 1;		# Note: too early
     $wv = Wx::WebView::New( $self->{p_right},
 			    wxID_ANY,
 			    CP->findres( "chordpro-icon.png",
