@@ -105,11 +105,18 @@ sub fetch_prefs {
       if $preferences{tmplfile};
 
     # Editor.
-    $self->{ch_editfont}->SetSelection( $preferences{editfont} );
-    $self->{sp_editfont}->SetValue( $preferences{editsize} );
-    $self->{cp_editor}->SetColour(Wx::Colour->new($preferences{editcolour}));
-    if ( $state{have_stc} ) {
-	# Currently no background colour.
+    if ( $self->GetParent->{t_editor} ) {
+	$self->{ch_editfont}->Show(1);
+	$self->{sp_editfont}->Show(1);
+	$self->{cp_editor}->Show(1);
+	$self->{sz_edit}->Layout;
+	$self->{ch_editfont}->SetSelection( $preferences{editfont} );
+	$self->{sp_editfont}->SetValue( $preferences{editsize} );
+	$self->{cp_editor}->SetColour(Wx::Colour->new($preferences{editcolour}));
+    }
+    else {
+	$self->{ch_editfont}->Show(0);
+	$self->{sp_editfont}->Show(0);
 	$self->{cp_editor}->Show(0);
 	$self->{sz_edit}->Layout;
     }
@@ -238,7 +245,6 @@ sub store_prefs {
     $preferences{pdfviewer} = $self->{t_pdfviewer}->GetValue;
 
     # Editor.
-    $ctl = $parent->{t_editor};
     $preferences{editfont}   = $self->{ch_editfont}->GetSelection;
     $preferences{editsize}   = $self->{sp_editfont}->GetValue;
     $preferences{editcolour} = $self->{cp_editor}->GetColour->GetAsString(wxC2S_HTML_SYNTAX);
@@ -249,6 +255,8 @@ sub restore_prefs {
 
     # Editor (changed are applied live).
     my $ctl = $self->GetParent->{t_editor};
+    return unless $ctl;
+
     my $n = $preferences{editfont};
     my $font = $state{fonts}->[$n]->{font};
     $font->SetPointSize($preferences{editsize});
@@ -412,6 +420,7 @@ sub OnChEditFont {
     my ($self, $event) = @_;
     my $parent = $self->GetParent;
     my $ctl = $parent->{t_editor};
+    return unless $ctl;
     my $n = $self->{ch_editfont}->GetSelection;
     my $font = $state{fonts}->[$n]->{font};
     $font->SetPointSize($preferences{editsize});
@@ -422,6 +431,7 @@ sub OnSpEditFont {
     my ($self, $event) = @_;
     my $parent = $self->GetParent;
     my $ctl = $parent->{t_editor};
+    return unless $ctl;
     my $n = $self->{sp_editfont}->GetValue;
     my $font = $ctl->GetFont;
     $font->SetPointSize($n);
@@ -432,6 +442,7 @@ sub OnChEditColour {
     my ($self, $event) = @_;
     my $parent = $self->GetParent;
     my $ctl = $parent->{t_editor};
+    return unless $ctl;
     my $n = $self->{cp_editor}->GetColour;
     return unless $n && $n->IsOk;
     $self->setnomod( $ctl, sub { $ctl->SetBackgroundColour($n) } )
@@ -442,6 +453,7 @@ sub OnChEditColour {
 
 sub setnomod {
     my ( $self, $ctl, $code ) = @_;
+    Carp::confess("WHOAH!") unless $ctl;
     my $mod = $ctl->IsModified;
     $code->($self, $ctl);
     $ctl->SetModified($mod);
