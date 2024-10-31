@@ -10,6 +10,7 @@ class ChordPro::Wx::SongbookExportPanel
   :isa( ChordPro::Wx::SongbookExportPanel_wxg );
 
 use Wx qw[:everything];
+use Wx::Locale gettext => "_T";
 
 use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
@@ -130,6 +131,8 @@ method refresh() {
     # Not handled yet by wxGlade.
     Wx::Event::EVT_DIRPICKER_CHANGED( $self, $self->{dp_folder}->GetId,
 				      $self->can("OnDirPickerChanged") );
+    Wx::Event::EVT_LISTBOX( $self, $self->{w_rearrange}->GetId,
+			    $self->can("OnRearrangeSelect") );
 
     if ( $state{sbefolder} && -d $state{sbefolder} ) {
 	$self->{dp_folder}->SetPath($state{sbefolder});
@@ -176,8 +179,8 @@ method preview( $args, %opts ) {
     $self->save_preferences;
 
     my $filelist = "";
-    my @o = $self->{w_rearrange}->GetList->GetCurrentOrder;
-    for ( $self->{w_rearrange}->GetList->GetCurrentOrder ) {
+    my @o = $self->{w_rearrange}->GetCurrentOrder;
+    for ( $self->{w_rearrange}->GetCurrentOrder ) {
 	$filelist .= "$folder/$files[$_]\n" unless $_ < 0;
     }
     if ( $filelist eq "" ) {
@@ -234,7 +237,7 @@ method check_preview_saved() {
 sub OnDirPickerChanged {
     my ( $self, $event ) = @_;
 
-    my $folder = $self->{dp_folder}->GetPath;
+    my $folder = $state{sbefolder} = $self->{dp_folder}->GetPath;
     opendir( my $dir, $folder )
       or do {
 	$self->GetParent->log( 'W', "Error opening folder $folder: $!");
@@ -257,7 +260,7 @@ sub OnDirPickerChanged {
     else {
 	$self->{cb_filelist}->Disable;
     }
-    if ( -s "$folder/$src" && !$self->{cb_filelist}->IsChecked ) {
+    if ( -s "$folder/$src" && $self->{cb_filelist}->IsChecked ) {
 	@files = loadlines("$folder/$src");
     }
     else {
@@ -282,33 +285,96 @@ sub OnDirPickerChanged {
     $self->{l_info}->SetLabel($msg);
     $self->log( 'S', $msg );
 
-    if ( $Wx::wxVERSION < 3.001 ) {
-	# Due to bugs in the implementation of the wxRearrangeCtrl widget
-	# we cannot update it, so we must recreate the widget.
-	# https://github.com/wxWidgets/Phoenix/issues/1052#issuecomment-434388084
-	my @order = ( 0 .. $#files );
-	my $w = Wx::RearrangeCtrl->new($self->{sz_export_outer}->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, \@order, \@files );
-	$self->{sz_export_outer}->Replace( $self->{w_rearrange}, $w, 1 );
-	$self->{w_rearrange}->Destroy;
-	$self->{w_rearrange} = $w;
-    }
-    else {
-	$self->{w_rearrange}->GetList->Set(\@files);
-	$self->{w_rearrange}->GetList->Check($_,1) for 0..$#files;
-    }
-    unless ( $self->{w_rearrange}->IsShown ) {
-	$self->{sl_rearrange}->Show;
-	$self->{l_rearrange}->Show;
-	$self->{w_rearrange}->Show;
-	$self->{sz_export_inner}->Layout;
-    }
-    $self->{sz_ep}->Layout;
+    $self->{w_rearrange}->Set(\@files);
+    $self->{w_rearrange}->Check($_,1) for 0..$#files;
+    $self->{sz_rearrange}->Layout;
     $state{sbefiles} = \@files;
 }
 
-sub OnFilelistIgnore {
+sub OnFilelistDeselectAll {
+    my ($self, $event) = @_;
+    $self->{w_rearrange}->Check($_,0) for 0..$#{$state{sbefiles}};
+}
+
+sub OnFilelistOpen {
+    my ($self, $event) = @_;
+    my $md = Wx::FileDialog->new
+      ($self, _T("Choose file list"),
+       $state{sbefolder}, "filelist.txt",
+       "Text files (*.txt)|*.txt",
+       0|wxFD_OPEN|wxFD_FILE_MUST_EXIST,
+       wxDefaultPosition);
+    my $ret = $md->ShowModal;
+    if ( $ret == wxID_OK ) {
+	my $file = $md->GetPath;
+	my @files = loadlines($file);
+	$self->{w_rearrange}->Set(\@files);
+	$self->{w_rearrange}->Check($_,1) for 0..$#files;
+	$self->{sz_rearrange}->Layout;
+	$state{sbefiles} = \@files;
+	$self->log( 'I', "Loaded file list from $file" );
+    }
+    $md->Destroy;
+}
+
+sub OnFilelistSave {
+    my ($self, $event) = @_;
+    my $md = Wx::FileDialog->new
+      ($self, _T("Choose file to store the current file list"),
+       $state{sbefolder}, "filelist.txt",
+       "Text files (*.txt)|*.txt",
+       0|wxFD_SAVE|wxFD_OVERWRITE_PROMPT,
+       wxDefaultPosition);
+    my $ret = $md->ShowModal;
+    if ( $ret == wxID_OK ) {
+	my $file = $md->GetPath;
+	open( my $fd, '>:utf8', $file );
+	my $filelist = "";
+	my @files = @{$state{sbefiles}};
+	for ( $self->{w_rearrange}->GetCurrentOrder ) {
+	    $filelist .= "$files[$_]\n" unless $_ < 0;
+	}
+	print $fd $filelist;
+	$self->log( 'I', "Saved file list to $file" );
+	close($fd);
+    }
+    $md->Destroy;
+}
+
+sub OnFilelistSelectAll {
+    my ($self, $event) = @_;
+    $self->{w_rearrange}->Check($_,1) for 0..$#{$state{sbefiles}};
+}
+
+sub OnFilelistUse {
     my ( $self, $event ) = @_;
     $self->OnDirPickerChanged($event);
+}
+
+sub OnRearrangeDown {
+    my ($self, $event) = @_;
+    for ( $self->{w_rearrange} ) {
+	$_->MoveCurrentDown if $_->CanMoveCurrentDown;
+	$self->{b_down}->Enable($_->CanMoveCurrentDown);
+	$self->{b_up}->Enable($_->CanMoveCurrentUp);
+    }
+}
+
+sub OnRearrangeSelect {
+    my ($self, $event) = @_;
+    for ( $self->{w_rearrange} ) {
+	$self->{b_down}->Enable($_->CanMoveCurrentDown);
+	$self->{b_up}->Enable($_->CanMoveCurrentUp);
+    }
+}
+
+sub OnRearrangeUp {
+    my ($self, $event) = @_;
+    for ( $self->{w_rearrange} ) {
+	$_->MoveCurrentUp if $_->CanMoveCurrentUp;
+	$self->{b_down}->Enable($_->CanMoveCurrentDown);
+	$self->{b_up}->Enable($_->CanMoveCurrentUp);
+    }
 }
 
 sub OnRecursive {
