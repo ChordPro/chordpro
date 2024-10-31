@@ -42,6 +42,10 @@ ADJUST {
 
 ################ ################
 
+method name() { "Export Songbook" }
+
+################ ################
+
 method setup_menubar() {
 
     my $mb =
@@ -49,8 +53,11 @@ method setup_menubar() {
       [ [ wxID_FILE,
 	  [ [ wxID_NEW, "", "Create or open a ChordPro document", "OnNew" ],
 	    [],
-	    [ wxID_ANY, "Hide/Show messages",
-	      "Hide or show the messages pane", "OnWindowMessages" ],
+	    [ wxID_ANY, "Export to PDF...", "Save the preview to a PDF",
+	      "OnPreviewSave" ],
+	    [],
+	    [ wxID_ANY, "Show messages",
+	      "Hide or show the messages pane", 1, "OnWindowMessages" ],
 	    [ wxID_ANY, "Save messages",
 	      "Save the messages to a file", "OnMessagesSave" ],
 	    [ wxID_ANY, "Clear messages",
@@ -74,8 +81,8 @@ method setup_menubar() {
 	    [ wxID_ANY, "More...",
 	      "Transpose, transcode, and more", "OnPreviewMore" ],
 	    [],
-	    [ wxID_ANY, "Hide/Show Preview",
-	      "Hide or show the preview pane", "OnWindowPreview" ],
+	    [ wxID_ANY, "Show Preview",
+	      "Hide or show the preview pane", 1, "OnWindowPreview" ],
 	    [ wxID_ANY, "Save preview", "Save the preview to a PDF",
 	      "OnPreviewSave" ],
 	  ]
@@ -124,9 +131,6 @@ method refresh() {
     Wx::Event::EVT_DIRPICKER_CHANGED( $self, $self->{dp_folder}->GetId,
 				      $self->can("OnDirPickerChanged") );
 
-
-    $state{sbefiles} = [];
-
     if ( $state{sbefolder} && -d $state{sbefolder} ) {
 	$self->{dp_folder}->SetPath($state{sbefolder});
 	$self->log( 'I', "Using folder " . $state{sbefolder} );
@@ -136,7 +140,7 @@ method refresh() {
     setup_messages_ctxmenu($self);
 }
 
-method save_prefs() {
+method save_preferences() {
     my $c = $state{songbookexport};
     $c->{folder}   = $self->{dp_folder}->GetPath       // "";
     $c->{title}    = $self->{t_exporttitle}->GetValue  // "";
@@ -169,7 +173,7 @@ method preview( $args, %opts ) {
 	return;
     }
 
-    $self->save_prefs();
+    $self->save_preferences;
 
     my $filelist = "";
     my @o = $self->{w_rearrange}->GetList->GetCurrentOrder;
@@ -205,21 +209,24 @@ method preview( $args, %opts ) {
 
 }
 
-method checksaved() {
-    return 1 unless $state{unsavedpreview};
+method check_source_saved() { 1 }
+
+method check_preview_saved() {
+    return 1 unless $self->prv && $self->prv->unsaved_preview;
+
     my $md = Wx::MessageDialog->new
       ( $self,
-	"The preview has not yet been saved.\n".
+	"The preview for the songbook has not yet been saved.\n".
 	"Do you want to save your changes?",
 	"Preview has changed",
 	0 | wxCANCEL | wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION );
     my $ret = $md->ShowModal;
     $md->Destroy;
-    return if $ret == wxID_CANCEL;
-    if ( $ret == wxID_YES ) {
-	$self->prv->save;
-    }
-    return 1;
+
+    return 0 if $ret == wxID_CANCEL;
+    $self->prv->unsaved_preview = 0, return 1 if $ret == wxID_NO; # don't save
+    return $self->prv->save;
+    1;
 }
 
 ################ Event handlers ################

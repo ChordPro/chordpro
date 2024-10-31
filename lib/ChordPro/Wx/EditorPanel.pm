@@ -57,6 +57,10 @@ ADJUST {
 
 ################ ################
 
+method name() { "Editor" }
+
+################ ################
+
 method setup_menubar() {
 
     my $mb =
@@ -68,8 +72,11 @@ method setup_menubar() {
 	    [ wxID_SAVE, "", "Save the current ChordPro file", "OnSave" ],
 	    [ wxID_SAVEAS, "", "Save under a different name", "OnSaveAs" ],
 	    [],
-	    [ wxID_ANY, "Hide/Show messages",
-	      "Hide or show the messages pane", "OnWindowMessages" ],
+	    [ wxID_ANY, "Export to PDF...", "Save the preview to a PDF",
+	      "OnPreviewSave" ],
+	    [],
+	    [ wxID_ANY, "Show messages",
+	      "Hide or show the messages pane", 1, "OnWindowMessages" ],
 	    [ wxID_ANY, "Save messages",
 	      "Save the messages to a file", "OnMessagesSave" ],
 	    [ wxID_ANY, "Clear messages",
@@ -101,10 +108,8 @@ method setup_menubar() {
 	    [ wxID_ANY, "More...",
 	      "Transpose, transcode, and more", "OnPreviewMore" ],
 	    [],
-	    [ wxID_ANY, "Hide/Show Preview",
-	      "Hide or show the preview pane", "OnWindowPreview" ],
-	    [ wxID_ANY, "Save preview", "Save the preview to a PDF",
-	      "OnPreviewSave" ],
+	    [ wxID_ANY, "Show Preview",
+	      "Hide or show the preview pane", 1, "OnWindowPreview" ],
 	  ]
 	],
 	[ wxID_HELP,
@@ -221,7 +226,8 @@ method style_text() {
     # Comments/
     $style->( qr/^(#.*)/m, 1 );
     # Directives.
-    $style->( qr/^(\{)([-\w!]+)([: ]+)(.*)(\})/m, 3, 5, 3, 6, 3 );
+    $style->( qr/^(\{)([-\w!]+)(.*)(\})/m, 3, 5, 6, 3 );
+    $style->( qr/^(\{)([-\w!]+)([: ])(.*)(\})/m, 3, 5, 3, 6, 3 );
     # Chords.
     $style->( qr/(\[)([^\[\]]*)(\])/m, 3, 4, 3 );
 }
@@ -291,7 +297,8 @@ method refresh() {
 
 }
 
-method openfile( $file, $checked=0 ) {
+method openfile( $file, $checked=0, $actual=undef ) {
+    $actual //= $file;
 
     # File tests fail on Windows, so bypass when already checked.
     unless ( $checked || -f -r $file ) {
@@ -317,10 +324,15 @@ method openfile( $file, $checked=0 ) {
 	return;
     }
     #### TODO: Get rid of selection on Windows
-    $state{currentfile} = $file;
-    use List::Util qw(uniq);
-    @{$state{recents}} = uniq( $file, @{$state{recents}} );
 
+    if ( $actual =~ /^\s+.*\s+$/ ) {
+	$state{currentfile} = undef;
+    }
+    else {
+	$state{currentfile} = $actual;
+	use List::Util qw(uniq);
+	@{$state{recents}} = uniq( $file, @{$state{recents}} );
+    }
     if ( $self->{t_editor}->GetText =~ /^\{\s*t(?:itle)?[: ]+([^\}]*)\}/m ) {
 	my $title = demarkup($1);
 	my $n = $self->{t_editor}->GetLineCount;
@@ -332,7 +344,7 @@ method openfile( $file, $checked=0 ) {
 	$self->{l_status}->SetLabel(basename($file));
 	$self->log( 'S', "Loaded: $file (" . plural($n, " line") . ")");
     }
-    $self->GetParent->SetTitle( $state{windowtitle} = $file);
+    $self->GetParent->SetTitle( $state{windowtitle} = $actual);
 
     # Default is no transposing.
     $preferences{xpose_from} = $preferences{xpose_to} = 0;
@@ -367,8 +379,11 @@ method newfile() {
     $preferences{xpose_acc} = 0;
 }
 
-method checksaved() {
+method check_source_saved() {
+    # Do we need saving?
     return 1 unless ( $self->{t_editor} && $self->{t_editor}->IsModified );
+
+    # Do we have a filename?
     if ( $state{currentfile} ) {
 	my $md = Wx::MessageDialog->new
 	  ( $self,
@@ -380,7 +395,7 @@ method checksaved() {
 	$md->Destroy;
 	return if $ret == wxID_CANCEL;
 	if ( $ret == wxID_YES ) {
-	    $self->save_as( $state{currentfile} );
+	    $self->save_file( $state{currentfile} );
 	}
     }
     else {
@@ -393,25 +408,46 @@ method checksaved() {
 	$md->Destroy;
 	return if $ret == wxID_CANCEL;
 	if ( $ret == wxID_YES ) {
-	    return if $self->OnSaveAs == wxID_CANCEL;
+	    $self->save_file;
 	}
     }
     return 1;
 }
 
-method saveas() {
-    my $fd = Wx::FileDialog->new
-      ($self, _T("Choose output file"),
-       "", "",
-       "*.cho",
-       0|wxFD_SAVE|wxFD_OVERWRITE_PROMPT,
-       wxDefaultPosition);
-    my $ret = $fd->ShowModal;
-    if ( $ret == wxID_OK ) {
-	$self->save_as( $state{currentfile} = $fd->GetPath );
+method save_file( $file = undef ) {
+    while ( 1 ) {
+	unless ( defined $file ) {
+	    my $fd = Wx::FileDialog->new
+	      ($self, _T("Choose output file"),
+	       "", $state{currentfile}//"",
+	       "*.cho",
+	       0|wxFD_SAVE|wxFD_OVERWRITE_PROMPT,
+	       wxDefaultPosition);
+	    my $ret = $fd->ShowModal;
+	    if ( $ret == wxID_OK ) {
+		$file = $fd->GetPath;
+	    }
+	    $fd->Destroy;
+	}
+	return unless defined $file;
+
+	if ( $self->{t_editor}->SaveFile($file) ) {
+	    $self->{t_editor}->SetModified(0);
+	    $state{currentfile} = $file;
+	    $state{windowtitle} = $file;
+	    $self->log( 'S',  "Saved: $file" );
+	    return;
+	}
+
+	my $md = Wx::MessageDialog->new
+	  ( $self,
+	    "Cannot save to $file",
+	    "Error saving file",
+	    0 | wxOK | wxICON_ERROR);
+	$md->ShowModal;
+	$md->Destroy;
+	undef $file;
     }
-    $fd->Destroy;
-    return $ret;
 }
 
 method preview( $args, %opts ) {
@@ -431,6 +467,26 @@ method preview( $args, %opts ) {
 	$self->log( 'E', "$preview_cho: $!" );
     }
 }
+
+method check_preview_saved() {
+    return 1 unless $self->prv && $self->prv->unsaved_preview;
+
+    my $md = Wx::MessageDialog->new
+      ( $self,
+	"The preview for the song has not yet been saved.\n".
+	"Do you want to save your changes?",
+	"Preview has changed",
+	0 | wxCANCEL | wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION );
+    my $ret = $md->ShowModal;
+    $md->Destroy;
+
+    return 0 if $ret == wxID_CANCEL;
+    $self->prv->unsaved_preview = 0, return 1 if $ret == wxID_NO; # don't save
+    return $self->prv->save;
+    1;
+}
+
+method save_preferences() { 1 }
 
 ################ Event Handlers (alphabetic order) ################
 
@@ -452,16 +508,12 @@ method OnRedo($event) {
 }
 
 method OnSave($event) {
-    $state{currentfile}
-      ? $self->save_as( $state{currentfile} )
-      : $self->saveas;
+    return unless $self->{t_editor}->IsModified;
+    $self->save_file( $state{currentfile} )
 }
 
-sub OnSaveAs {
-    my ( $self, $file ) = @_;
-    $self->{t_editor}->SaveFile($file);
-    $state{windowtitle} = $file;
-    $self->log( 'S',  "Saved." );
+method OnSaveAs {
+    $self->save_file;
 }
 
 method OnStyleNeeded($event) {		# scintilla

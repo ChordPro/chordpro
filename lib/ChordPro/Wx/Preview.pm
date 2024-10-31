@@ -25,6 +25,7 @@ field $died;
 field $preview_cho		:accessor;
 field $preview_pdf;
 field $preview_tmp;
+field $unsaved_preview		:mutator;
 
 ADJUST {
     ( undef, $preview_cho ) = tempfile( OPEN => 0 );
@@ -157,6 +158,7 @@ method preview( $args, %opts ) {
     eval {
 	$options = ChordPro::app_setup( "ChordPro", $ChordPro::VERSION );
     };
+
     $self->_die($@), goto ERROR if $@ && !$died;
 
     $options->{verbose} = $state{verbose} || 0;
@@ -170,10 +172,11 @@ method preview( $args, %opts ) {
     eval {
 	ChordPro::main($options);
     };
+    $dialog->Destroy if $dialog;
     $self->_die($@), goto ERROR if $@ && !$died;
     goto ERROR unless -e $preview_pdf;
 
-    $state{unsavedpreview} = 1;
+    $unsaved_preview = 1;
     if ( !$preferences{enable_pdfviewer}
 	 && $panel->{webview}->isa('Wx::WebView') ) {
 
@@ -292,7 +295,7 @@ method save {
     if ( $ret == wxID_OK ) {
 	use File::Copy;
 	copy( $preview_pdf, $fd->GetPath );
-	$state{unsavedpreview} = 0;
+	$unsaved_preview = 0;
     }
     $fd->Destroy;
     return $ret;

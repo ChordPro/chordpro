@@ -187,6 +187,7 @@ method select_mode( $mode ) {
 	$self->{$_}->Show(0) for @panels;
 	$self->{p_initial}->Show(1);
 	$self->refresh;
+	$self->SetTitle("ChordPro");
     }
     else {
 	$self->{p_initial}->Show(0);
@@ -194,7 +195,7 @@ method select_mode( $mode ) {
 	$self->{"p_$mode"}->refresh;
     }
     $self->{sz_main}->Layout;
-    return $self->{"p_$mode"};
+    return $state{panel} = $self->{"p_$mode"};
 }
 
 # Explicit (re)initialisation of this class.
@@ -338,6 +339,16 @@ method aboutmsg() {
     return $msg;
 }
 
+method check_saved {
+    for ( panels ) {
+	return unless $self->{$_}->check_source_saved;
+	return unless $self->{$_}->check_preview_saved;
+    }
+    # Panels may save prefs to preferences.
+    $self->{$_}->save_preferences for panels;
+    1;
+}
+
 ################ Event handlers (alphabetic order) ################
 
 # This method is called from the helper panels.
@@ -359,10 +370,9 @@ method OnAbout($event) {
 }
 
 method OnClose($event) {
+    return unless $self->check_saved;
+    # Save preferences to persistent storage.
     $self->save_preferences;
-    for ( panels ) {
-	return unless $self->{$_}->checksaved;
-    }
     $self->Destroy;
 }
 
@@ -403,7 +413,9 @@ method OnHelp_Config($event) {
 
 method OnHelp_Example($event) {
     $self->select_mode("editor");
-    $self->{p_editor}->openfile( CP->findres( "swinglow.cho", class => "examples" ) );
+    $self->{p_editor}->openfile( CP->findres( "swinglow.cho",
+					      class => "examples" ),
+				 1, " example.cho " );
 }
 
 method OnHelp_Site($event) {

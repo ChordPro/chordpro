@@ -178,6 +178,13 @@ method unsplit() {
     $self->{sw_tb}->Unsplit(undef);
 }
 
+################ Virtual Methods ################
+
+method name();
+method check_source_saved();
+method check_preview_saved();
+method save_preferences();
+
 ################ Event Handlers (alphabetic order) ################
 
 method OnHelp_DebugInfo($event) {
@@ -185,7 +192,7 @@ method OnHelp_DebugInfo($event) {
 }
 
 method OnNew($event) {
-    return unless $self->checksaved;
+    return unless $self->GetParent->check_saved;
     $self->GetParent->select_mode("initial");
 }
 
