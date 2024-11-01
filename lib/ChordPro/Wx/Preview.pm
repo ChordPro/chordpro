@@ -92,7 +92,7 @@ method preview( $args, %opts ) {
     if ( $preferences{enable_customlib} ) {
 	$ENV{CHORDPRO_LIB} = $preferences{customlib};
     }
-
+    CP->setup_resdirs;
     if ( $preferences{xcode} ) {
 	$haveconfig++;
 	push( @ARGV, '--transcode', $preferences{xcode} );
@@ -120,7 +120,7 @@ method preview( $args, %opts ) {
 	 || $state{verbose} && $state{verbose} > 1 ) {
 	$self->log( 'I', "Command line: @ARGV\n" );
 	$self->log( 'I', "CHORDPRO_LIB: $ENV{CHORDPRO_LIB}\n" ) if $ENV{CHORDPRO_LIB};
-	$self->log( 'I', "$_" ) for split( /\n+/, $panel->GetParent->_aboutmsg() );
+	#$self->log( 'I', "$_" ) for split( /\n+/, $panel->GetParent->aboutmsg() );
     }
     my $options;
     my $dialog;
