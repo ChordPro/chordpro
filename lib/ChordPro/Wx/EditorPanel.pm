@@ -390,6 +390,7 @@ method newfile() {
     $self->{t_editor}->SetText($content) unless $content eq "";
     $self->{t_editor}->SetModified(0);
     $self->log( 'S', "New file");
+    $state{windowtitle} = "New Song";
     $preferences{xpose_from} = $preferences{xpose_to} = 0;
     $preferences{xpose_acc} = 0;
 }
