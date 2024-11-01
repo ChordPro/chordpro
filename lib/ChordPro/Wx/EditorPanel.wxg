@@ -112,7 +112,7 @@
                                                         <handler event="EVT_TEXT">OnText</handler>
                                                     </events>
                                                     <focused>1</focused>
-                                                    <style>wxTE_MULTILINE</style>
+                                                    <style>wxTE_MULTILINE|wxHSCROLL</style>
                                                 </object>
                                             </object>
                                         </object>

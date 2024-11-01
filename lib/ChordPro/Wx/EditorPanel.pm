@@ -14,7 +14,7 @@ use Wx::Locale gettext => '_T';
 
 use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
-use ChordPro::Utils qw( demarkup is_macos is_msw plural );
+use ChordPro::Utils qw( max demarkup is_macos is_msw plural );
 use ChordPro::Paths;
 
 use File::Basename;
@@ -324,6 +324,21 @@ method openfile( $file, $checked=0, $actual=undef ) {
 	return;
     }
     #### TODO: Get rid of selection on Windows
+
+    if ( $stc ) {
+	my @t = split( /\n/, $self->{t_editor}->GetText );
+	my $max = -1;
+	for ( @t ) {
+	    $max = max( $max, length($_) );
+	}
+	if ( $stc->can("SetScrollWidthTracking") ) {
+	    $stc->SetScrollWidth($max);
+	    $stc->SetScrollWidthTracking(1);
+	}
+	else {
+	    $stc->SetScrollWidth($max+10);
+	}
+    }
 
     if ( $actual =~ /^\s+.*\s+$/ ) {
 	$state{currentfile} = undef;
