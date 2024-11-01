@@ -353,10 +353,12 @@ method openfile( $file, $checked=0, $actual=undef ) {
 	my $n = $self->{t_editor}->GetLineCount;
 	$self->log( 'S', "Loaded: $title (" . plural($n, " line") . ")");
 	$self->{l_status}->SetLabel($title);
+	$self->{l_status}->SetToolTip($file);
     }
     else {
 	my $n = $self->{t_editor}->GetLineCount;
 	$self->{l_status}->SetLabel(basename($file));
+	$self->{l_status}->SetToolTip($file);
 	$self->log( 'S', "Loaded: $file (" . plural($n, " line") . ")");
     }
     $self->GetParent->SetTitle( $state{windowtitle} = $actual);
