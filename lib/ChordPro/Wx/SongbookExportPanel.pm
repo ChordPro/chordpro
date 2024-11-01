@@ -101,7 +101,7 @@ method setup_menubar() {
 	      "Insert runtime info into the messages",
 	      "OnMessagesRuntimeInfo" ],
 	    [],
-	    [ wxID_ABOUT, "", "About WxChordPro", "OnAbout" ],
+	    [ wxID_ABOUT, "About ChordPro", "About WxChordPro", "OnAbout" ],
 	  ]
 	]
       ] );

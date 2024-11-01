@@ -336,10 +336,10 @@ method OnAbout($event) {
     $info->SetName("ChordPro");
     $info->SetVersion( $VERSION .
 		       ( $VERSION =~ /_/ ? " (unsupported development snapshot)" : "" ) );
-    $info->SetDescription("ChordPro Preview Editor");
+    $info->SetDescription("ChordPro is free software");
     $info->SetCopyright("Ⓒ 2016-$year Johan Vromans");
-    $info->SetWebSite("https://www.chordpro.org",
-		     "Visit the ChordPro web site");
+    $info->SetWebSite( "https://www.chordpro.org",
+		       "Visit the ChordPro web site");
     my $icon = Wx::Icon->new;
     $info->SetIcon($icon)
       if $icon->LoadFile( CP->findres("chordpro-splash.png",class=>"icons"),wxBITMAP_TYPE_PNG );
