@@ -171,7 +171,8 @@ method Load :common {
 		}
 	    }
 	    elsif ( $group eq "recents" ) {
-		$state{$group}[0+$entry] = $value;
+		push( @{$state{$group}}, $value )
+		  if -s $value;
 	    }
 	    else {
 		$state{$group}->{$entry} = $value;

@@ -247,6 +247,7 @@ method init_recents() {
 	$ctl->Enable(1);
 	my $i = 0;
 	for my $file ( @$r ) {
+	    next unless -s $file;
 	    last unless defined $file;
 	    $ctl->Append( basename($file) );
 	    $ctl->SetClientData( $i, $file );
