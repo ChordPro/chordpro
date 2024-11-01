@@ -295,10 +295,14 @@ method save {
     if ( $ret == wxID_OK ) {
 	use File::Copy;
 	copy( $preview_pdf, $fd->GetPath );
-	$unsaved_preview = 0;
+	$self->discard;
     }
     $fd->Destroy;
     return $ret;
+}
+
+method discard {
+    $unsaved_preview = 0;
 }
 
 1;

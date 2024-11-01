@@ -481,7 +481,7 @@ method check_preview_saved() {
     $md->Destroy;
 
     return 0 if $ret == wxID_CANCEL;
-    $self->prv->unsaved_preview = 0, return 1 if $ret == wxID_NO; # don't save
+    $self->prv->discard, return 1 if $ret == wxID_NO; # don't save
     return $self->prv->save;
     1;
 }
