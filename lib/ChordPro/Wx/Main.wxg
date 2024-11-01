@@ -439,52 +439,6 @@
                                                                 <height>10</height>
                                                             </object>
                                                         </object>
-                                                        <object class="sizeritem">
-                                                            <option>0</option>
-                                                            <border>0</border>
-                                                            <flag>wxEXPAND</flag>
-                                                            <object class="wxStaticLine" name="static_line_2" base="EditStaticLine">
-                                                                <style>wxLI_HORIZONTAL</style>
-                                                            </object>
-                                                        </object>
-                                                        <object class="sizeritem">
-                                                            <option>0</option>
-                                                            <border>0</border>
-                                                            <flag>wxEXPAND</flag>
-                                                            <object class="spacer" name="spacer" base="EditSpacer">
-                                                                <width>1</width>
-                                                                <height>10</height>
-                                                            </object>
-                                                        </object>
-                                                        <object class="sizeritem">
-                                                            <option>0</option>
-                                                            <border>0</border>
-                                                            <flag>wxEXPAND</flag>
-                                                            <object class="wxPanel" name="pn_exit" base="EditPanel">
-                                                                <background>#f3f3f3</background>
-                                                                <tooltip>Exit</tooltip>
-                                                                <style>wxBORDER_THEME</style>
-                                                                <object class="wxBoxSizer" name="sizer_12" base="EditBoxSizer">
-                                                                    <orient>wxHORIZONTAL</orient>
-                                                                    <object class="sizeritem">
-                                                                        <option>0</option>
-                                                                        <border>10</border>
-                                                                        <flag>wxALL</flag>
-                                                                        <object class="wxStaticBitmap" name="bitmap_7" base="EditStaticBitmap">
-                                                                            <bitmap>/usr/local/src/ChordPro/lib/ChordPro/res/icons/exit32.png</bitmap>
-                                                                        </object>
-                                                                    </object>
-                                                                    <object class="sizeritem">
-                                                                        <option>0</option>
-                                                                        <border>0</border>
-                                                                        <flag>wxALIGN_CENTER_VERTICAL</flag>
-                                                                        <object class="wxStaticText" name="label_7" base="EditStaticText">
-                                                                            <label>Exit</label>
-                                                                        </object>
-                                                                    </object>
-                                                                </object>
-                                                            </object>
-                                                        </object>
                                                     </object>
                                                 </object>
                                             </object>

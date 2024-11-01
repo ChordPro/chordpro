@@ -129,18 +129,6 @@ ADJUST {
     $self->SetTitle("ChordPro");
     $self->SetIcon( Wx::Icon->new(CP->findres( "chordpro-icon.png", class => "icons" ), wxBITMAP_TYPE_ANY) );
 
-    # For the initial panel, suppress the menubar by providing an empty one.
-    # On Windows this causes a problem with the layout, so we'll provide
-    # a dummy menubar.
-    my $menu = Wx::MenuBar->new;
-    if ( is_msw ) {
-	my $tmp_menu;
-	$tmp_menu = Wx::Menu->new();
-	$tmp_menu->Append(wxID_EXIT, _T("Exit"), _T("Close window and exit"));
-	$menu->Append($tmp_menu, _T("File"));
-    }
-    $self->SetMenuBar($menu);
-
     $self->attach_events;
 
     # MacOS file dialogs always filters with all wildcards. So if there is
@@ -165,7 +153,6 @@ method attach_events() {
 	example   => "OnHelp_Example",
 	site      => "OnHelp_Site",
 	help      => "OnHelp_ChordPro",
-	exit      => "OnClose",
       );
     while ( my ( $p, $handler ) = each %panels ) {
 	my $panel = $self->{"pn_$p"};
