@@ -376,7 +376,7 @@ method OnExportFolder($event) {
 method OnIdle($event) {
     return if $self->{p_initial}->IsShown;
     my $f = basename($state{windowtitle}) // "ChordPro";
-    $f = "*$f" if $self->{p_editor}->{t_editor}->IsModified;
+    $f .= " (modified)" if $self->{p_editor}->{t_editor}->IsModified;
     $f = "ChordPro — $f" if $state{windowtitle};
     $self->SetTitle($f);
 }
