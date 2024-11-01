@@ -270,7 +270,7 @@ method refresh() {
     $state{have_stc} = $self->{t_editor}->isa('Wx::StyledTextCtrl');
     $self->log( 'I', "Using " .
 		( $state{have_stc}
-		  ? "basic" : "styled") . " text editor" );
+		  ? "styled" : "basic") . " text editor" );
 
     $state{have_webview} = $self->{t_editor}->isa('Wx::WebView');
     $self->log( 'I', "Using " .
