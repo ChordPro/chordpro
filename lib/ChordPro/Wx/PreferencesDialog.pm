@@ -67,21 +67,24 @@ sub fetch_prefs {
     # Add the styles to the presets.
     my $ctl = $self->{ch_presets};
     $ctl->Clear;
-    for ( @{ $state{styles} } ) {
-	my $t = ucfirst(lc($_));
+    my $neat = sub {
+	my ($t ) = @_;
+	$t = ucfirst(lc($t));
 	$t =~ s/_/ /g;
 	$t =~ s/ (.)/" ".uc($1)/eg;
-	$ctl->Append($t);
+	$t;
+    };
+    for ( sort @{ $state{styles} }, map { "$_ (user)" } @{ $state{userstyles} } ) {
+	$ctl->Append( $neat->($_) );
     }
 
     # Check the presets that were selected.
     my $p = $preferences{cfgpreset};
     foreach ( @$p ) {
 	next if $_ eq "custom";	# legacy
-	my $t = ucfirst(lc($_));
-	$t =~ s/_/ /g;
-	$t =~ s/ (.)/" ".uc($1)/eg;
+	my $t = $neat->($_);
 	my $n = $ctl->FindString($t);
+	$n = $ctl->FindString("$t (user)") if $n == wxNOT_FOUND;
 	unless ( $n == wxNOT_FOUND ) {
 	    $ctl->Check( $n, 1 );
 	}

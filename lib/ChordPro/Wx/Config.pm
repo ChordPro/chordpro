@@ -54,7 +54,7 @@ my %prefs =
 
    # Presets.
    enable_presets => 1,
-   cfgpreset      => lc(_T("Default")),
+   cfgpreset      => "",
 
    # Custom config file.
    enable_configfile => 0,
@@ -205,7 +205,7 @@ method Store :common {
     my %pp = %prefs;
     while ( my ( $group, $v ) = each %state ) {
 
-	next if $group =~ /^(fonts|styles|notations|tasks)$/;
+	next if $group =~ /^(fonts|styles|notations|tasks|panel)$/;
 	if ( $group eq "recents" && is_arrayref($v) ) {
 	    $cb->DeleteGroup("/$group");
 	    $cb->SetPath("/$group");
@@ -230,7 +230,7 @@ method Store :common {
 		    $v = $preferences{editcolour} = $v->GetAsString(wxC2S_HTML_SYNTAX);
 		}
 		elsif ( $k eq "cfgpreset" ) {
-		    $v = join(",", @$v);
+		    $v = join( ",", @$v );
 		}
 	    }
 	    $cb->Write( $k, $v );
@@ -249,8 +249,8 @@ sub _setup_styles {
     my $stylelist = $state{styles};
     return $stylelist if $stylelist && @$stylelist;
 
-    my @stylelist;
     my %stylelist;
+    my @userstyles;
 
     # Collect standard style files (presets).
     for my $cfglib ( @{ CP->findresdirs("config") } ) {
@@ -273,22 +273,16 @@ sub _setup_styles {
 	    $_ = decode_utf8($_);
 	    next unless /^(.*)\.json$/;
 	    my $base = $1;
-	    $stylelist{$base} = " $_";
+	    push( @userstyles, $base );
+	    delete $stylelist{$base};
 	}
     }
 
     # No need for ChordPro style, it's default.
     delete $stylelist{chordpro};
-    foreach ( sort keys %stylelist ) {
-	if ( $stylelist{$_} =~ /^\s+(.*)/ ) {
-	    push( @stylelist, "$_ (User)" );
-	}
-	else {
-	    push( @stylelist, "$_" );
-	}
-    }
 
-    $state{styles} = \@stylelist;
+    $state{styles}     = [ sort keys %stylelist ];
+    $state{userstyles} = [ sort @userstyles ];
 }
 
 # List of available notation systems.

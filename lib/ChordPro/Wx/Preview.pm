@@ -78,8 +78,11 @@ method preview( $args, %opts ) {
 	push( @ARGV, '--nodefaultconfigs' );
     }
     if ( $preferences{enable_presets} && $preferences{cfgpreset} ) {
+	# Only include the ones we have.
+	my %s = ( map { $_ => 1 } @{$state{styles}}, @{$state{userstyles}} );
 	foreach ( @{ $preferences{cfgpreset} } ) {
-	    push( @ARGV, '--config', $_ =~ s/ \(User\)//ir );
+	    next unless exists($s{$_});
+	    push( @ARGV, '--config', $_ );
 	    $haveconfig++;
 	}
     }

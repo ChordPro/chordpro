@@ -273,22 +273,11 @@ method create_or_recent( $sel=0 ) {
 
 method get_preferences() {
 
-    # Find config setting.
-    my $p = lc( $preferences{cfgpreset} );
-    my @presets;
-    foreach ( @{$state{styles}} ) {
-	if ( ",$p" =~ quotemeta( "," . lc($_) ) ) {
-	    push( @presets, $_ );
-	}
-    }
-    $preferences{cfgpreset} = \@presets;
-
     # Find transcode setting.
-    $p = lc $preferences{xcode};
+    my $p = lc $preferences{xcode};
     if ( $p ) {
-	if ( $p eq lc(_T("-----")) ) {
-####????	    $p = $prefctl->{xcode};
-
+	if ( $p eq "-----" ) {
+	    $p = 0;
 	}
 	else {
 	    my $n = "";

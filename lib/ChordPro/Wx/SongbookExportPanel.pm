@@ -128,12 +128,6 @@ method refresh() {
     $self->{cb_stdcover}->SetValue($c->{stdcover} // 0);
     $self->OnStdCoverChecked();
 
-    # Not handled yet by wxGlade.
-    Wx::Event::EVT_DIRPICKER_CHANGED( $self, $self->{dp_folder}->GetId,
-				      $self->can("OnDirPickerChanged") );
-    Wx::Event::EVT_LISTBOX( $self, $self->{w_rearrange}->GetId,
-			    $self->can("OnRearrangeSelect") );
-
     if ( $state{sbefolder} && -d $state{sbefolder} ) {
 	$self->{dp_folder}->SetPath($state{sbefolder});
 	$self->log( 'I', "Using folder " . $state{sbefolder} );
@@ -227,7 +221,7 @@ method check_preview_saved() {
     $md->Destroy;
 
     return 0 if $ret == wxID_CANCEL;
-    $self->prv->unsaved_preview = 0, return 1 if $ret == wxID_NO; # don't save
+    $self->prv->discard, return 1 if $ret == wxID_NO; # don't save
     return $self->prv->save;
     1;
 }
@@ -288,7 +282,10 @@ sub OnDirPickerChanged {
     $self->{w_rearrange}->Set(\@files);
     $self->{w_rearrange}->Check($_,1) for 0..$#files;
     $self->{sz_rearrange}->Layout;
+    $self->{b_down}->Enable(0);
+    $self->{b_up}->Enable(0);
     $state{sbefiles} = \@files;
+    $state{windowtitle} = $folder;
 }
 
 sub OnFilelistDeselectAll {
@@ -358,6 +355,15 @@ sub OnRearrangeDown {
 	$self->{b_down}->Enable($_->CanMoveCurrentDown);
 	$self->{b_up}->Enable($_->CanMoveCurrentUp);
     }
+}
+
+sub OnRearrangeDSelect {
+    my ($self, $event) = @_;
+    my $file = join( "/", $state{sbefolder},
+		     $state{sbefiles}->[$self->{w_rearrange}->GetSelection] );
+    return unless $self->GetParent->{p_editor}->openfile($file);
+    $self->prv and $self->prv->discard;
+    $self->GetParent->select_mode("editor");
 }
 
 sub OnRearrangeSelect {
