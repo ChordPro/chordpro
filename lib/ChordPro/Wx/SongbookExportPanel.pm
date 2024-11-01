@@ -68,7 +68,7 @@ method setup_menubar() {
 	  ]
 	],
 	[ wxID_EDIT,
-	  [ [ wxID_ANY, "Preferences...\tCtrl-R",
+	  [ [ wxID_PREFERENCES, "Preferences...\tCtrl-R",
 	      "Preferences", "OnPreferences" ],
 	  ]
 	],
