@@ -94,7 +94,7 @@ method setup_menubar() {
 	    [ wxID_PASTE,  "OnPaste" ],
 	    [ wxID_DELETE, "OnDelete" ],
 	    [],
-	    [ wxID_ANY, "Preferences...\tCtrl-R",
+	    [ wxID_PREFERENCES, "Preferences...\tCtrl-R",
 	      "Preferences", "OnPreferences" ],
 	  ]
 	],
@@ -366,6 +366,8 @@ method openfile( $file, $checked=0, $actual=undef ) {
     # Default is no transposing.
     $preferences{xpose_from} = $preferences{xpose_to} = 0;
     $preferences{xpose_acc} = 0;
+    $self->{sw_lr}->Unsplit(undef) if $self->{sw_lr}->IsSplit;
+    $self->{sw_tb}->Unsplit(undef) if $self->{sw_tb}->IsSplit;
 
     return 1;
 }
@@ -395,6 +397,8 @@ method newfile() {
     $state{windowtitle} = "New Song";
     $preferences{xpose_from} = $preferences{xpose_to} = 0;
     $preferences{xpose_acc} = 0;
+    $self->{sw_lr}->Unsplit(undef) if $self->{sw_lr}->IsSplit;
+    $self->{sw_tb}->Unsplit(undef) if $self->{sw_tb}->IsSplit;
 }
 
 method check_source_saved() {

@@ -406,6 +406,7 @@ method OnNew($event) {
 }
 
 method OnOpen($event) {
+    return unless $self->check_saved;
 
     # We handle the dialog here, so we do not have to switch to the editor
     # unless there's real editing to do.
