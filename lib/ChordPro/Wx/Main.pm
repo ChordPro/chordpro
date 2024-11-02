@@ -241,22 +241,6 @@ method init_recents() {
 	    $i++;
 	}
     }
-    $self->{rb_createrecent}->SetSelection(0);
-    $self->create_or_recent;
-}
-
-method create_or_recent( $sel=0 ) {
-    if ( $sel ) {
-	$self->{p_create}->Show(0);
-	$self->{p_recent}->Show(1);
-	$self->{p_recent}->SetSize( $self->{p_create}->GetSize );
-    }
-    else {
-	$self->{p_create}->Show(1);
-	$self->{p_recent}->Show(0);
-    }
-    $self->{sz_recent}->Layout;
-    $self->{sz_createrecentpanels}->Layout;
 }
 
 method get_preferences() {
