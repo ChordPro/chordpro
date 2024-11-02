@@ -18,6 +18,15 @@
                         <border>0</border>
                         <flag>wxALIGN_CENTER_VERTICAL</flag>
                         <object class="wxStaticText" name="l_status" base="EditStaticText">
+                            <foreground>wxSYS_COLOUR_HOTLIGHT</foreground>
+                            <font>
+                                <size>20</size>
+                                <family>default</family>
+                                <style>normal</style>
+                                <weight>normal</weight>
+                                <underlined>0</underlined>
+                                <face />
+                            </font>
                             <label>ChordPro</label>
                             <attribute>1</attribute>
                         </object>
@@ -52,6 +61,7 @@
                             <events>
                                 <handler event="EVT_BUTTON">OnPreferences</handler>
                             </events>
+                            <style>wxBORDER_NONE</style>
                             <label>Preferences</label>
                             <bitmap>art:wxART_EXECUTABLE_FILE,wxART_TOOLBAR</bitmap>
                             <bitmap_dir>wxTOP</bitmap_dir>
@@ -60,11 +70,12 @@
                     <object class="sizeritem">
                         <option>0</option>
                         <border>5</border>
-                        <flag>wxRIGHT</flag>
+                        <flag>wxALL</flag>
                         <object class="wxButton" name="bmb_preview" base="EditButton">
                             <events>
                                 <handler event="EVT_BUTTON">OnShowPreview</handler>
                             </events>
+                            <style>wxBORDER_NONE</style>
                             <label>Preview</label>
                             <bitmap>art:wxART_PRINT,wxART_TOOLBAR</bitmap>
                             <bitmap_dir>wxTOP</bitmap_dir>
@@ -72,11 +83,13 @@
                     </object>
                     <object class="sizeritem">
                         <option>0</option>
-                        <border>0</border>
+                        <border>5</border>
+                        <flag>wxALL</flag>
                         <object class="wxButton" name="bmb_messages" base="EditButton">
                             <events>
                                 <handler event="EVT_BUTTON">OnShowMessages</handler>
                             </events>
+                            <style>wxBORDER_NONE</style>
                             <label>Messages</label>
                             <bitmap>art:wxART_LIST_VIEW,wxART_TOOLBAR</bitmap>
                             <bitmap_dir>wxTOP</bitmap_dir>
@@ -109,8 +122,8 @@
                                     <events>
                                         <handler event="EVT_SPLITTER_SASH_POS_CHANGED">OnSashLRChanged</handler>
                                     </events>
-                                    <style>wxSP_NOBORDER</style>
-                                    <sash_pos>458</sash_pos>
+                                    <style>wxSP_BORDER</style>
+                                    <sash_pos>274</sash_pos>
                                     <sash_gravity>0.5</sash_gravity>
                                     <min_pane_size>20</min_pane_size>
                                     <orientation>wxSPLIT_VERTICAL</orientation>
@@ -161,7 +174,7 @@
                                 <flag>wxEXPAND</flag>
                                 <object class="wxTextCtrl" name="t_messages" base="EditTextCtrl">
                                     <font>
-                                        <size>11</size>
+                                        <size>12</size>
                                         <family>modern</family>
                                         <style>normal</style>
                                         <weight>normal</weight>

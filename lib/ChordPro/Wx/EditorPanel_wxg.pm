@@ -26,11 +26,11 @@ use Wx::ArtProvider qw/:artid :clientid/;
 
 sub new {
     my( $self, $parent, $id, $pos, $size, $style, $name ) = @_;
-    $parent //= undef;
-    $id     //= -1;
-    $pos    //= wxDefaultPosition;
-    $size   //= wxDefaultSize;
-    $name   //= "";
+    $parent = undef              unless defined $parent;
+    $id     = -1                 unless defined $id;
+    $pos    = wxDefaultPosition  unless defined $pos;
+    $size   = wxDefaultSize      unless defined $size;
+    $name   = ""                 unless defined $name;
 
     # begin wxGlade: ChordPro::Wx::EditorPanel_wxg::new
     use ChordPro::Wx::Utils;
@@ -45,6 +45,8 @@ sub new {
     $self->{sz_outer}->Add($self->{sz_toolbar}, 0, wxBOTTOM|wxEXPAND, 3);
     
     $self->{l_status} = Wx::StaticText->new($self, wxID_ANY, _T("ChordPro"));
+    $self->{l_status}->SetForegroundColour(Wx::SystemSettings::GetColour(wxSYS_COLOUR_HOTLIGHT));
+    $self->{l_status}->SetFont(Wx::Font->new(20, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, 0, ""));
     $self->{sz_toolbar}->Add($self->{l_status}, 0, wxALIGN_CENTER_VERTICAL, 0);
     
     $self->{sz_toolbar}->Add(5, 1, 1, wxEXPAND, 0);
@@ -55,15 +57,15 @@ sub new {
     
     $self->{bmp_preferences} = Wx::Button->new($self, wxID_ANY, _T("Preferences"));
     $self->{bmp_preferences}->SetBitmap(Wx::ArtProvider::GetBitmap(wxART_EXECUTABLE_FILE, wxART_TOOLBAR, wxDefaultSize), wxTOP);
-    $self->{sz_toolbar}->Add($self->{bmp_preferences}, 0, wxEXPAND|wxRIGHT, 5);
+    $self->{sz_toolbar}->Add($self->{bmp_preferences}, 0, wxALL|wxEXPAND, 5);
     
-    $self->{bmb_preview} = Wx::Button->new($self, wxID_ANY, _T("Preview"));
+    $self->{bmb_preview} = Wx::Button->new($self, wxID_ANY, _T("Preview"), wxDefaultPosition, wxDefaultSize, wxBORDER_NONE);
     $self->{bmb_preview}->SetBitmap(Wx::ArtProvider::GetBitmap(wxART_PRINT, wxART_TOOLBAR, wxDefaultSize), wxTOP);
-    $self->{sz_toolbar}->Add($self->{bmb_preview}, 0, wxRIGHT, 5);
+    $self->{sz_toolbar}->Add($self->{bmb_preview}, 0, wxALL, 5);
     
-    $self->{bmb_messages} = Wx::Button->new($self, wxID_ANY, _T("Messages"));
+    $self->{bmb_messages} = Wx::Button->new($self, wxID_ANY, _T("Messages"), wxDefaultPosition, wxDefaultSize, wxBORDER_NONE);
     $self->{bmb_messages}->SetBitmap(Wx::ArtProvider::GetBitmap(wxART_LIST_VIEW, wxART_TOOLBAR, wxDefaultSize), wxTOP);
-    $self->{sz_toolbar}->Add($self->{bmb_messages}, 0, 0, 0);
+    $self->{sz_toolbar}->Add($self->{bmb_messages}, 0, wxALL, 5);
     
     $self->{sw_tb} = Wx::SplitterWindow->new($self, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_NOBORDER);
     $self->{sw_tb}->SetMinimumPaneSize(20);
@@ -73,7 +75,7 @@ sub new {
     
     $self->{sz_lr} = Wx::BoxSizer->new(wxVERTICAL);
     
-    $self->{sw_lr} = Wx::SplitterWindow->new($self->{p_top}, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_NOBORDER);
+    $self->{sw_lr} = Wx::SplitterWindow->new($self->{p_top}, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_BORDER);
     $self->{sw_lr}->SetMinimumPaneSize(20);
     $self->{sw_lr}->SetSashGravity(0.5);
     $self->{sz_lr}->Add($self->{sw_lr}, 1, wxEXPAND, 0);
@@ -98,7 +100,7 @@ sub new {
     $self->{sz_messages} = Wx::BoxSizer->new(wxVERTICAL);
     
     $self->{t_messages} = Wx::TextCtrl->new($self->{p_bottom}, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY);
-    $self->{t_messages}->SetFont(Wx::Font->new(11, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, 0, ""));
+    $self->{t_messages}->SetFont(Wx::Font->new(12, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, 0, ""));
     $self->{sz_messages}->Add($self->{t_messages}, 1, wxEXPAND, 0);
     
     $self->{p_bottom}->SetSizer($self->{sz_messages});

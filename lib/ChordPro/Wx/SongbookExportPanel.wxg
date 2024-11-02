@@ -17,7 +17,16 @@
                         <border>0</border>
                         <flag>wxALIGN_CENTER_VERTICAL</flag>
                         <object class="wxStaticText" name="l_status" base="EditStaticText">
-                            <label>Songbook</label>
+                            <foreground>wxSYS_COLOUR_HOTLIGHT</foreground>
+                            <font>
+                                <size>20</size>
+                                <family>default</family>
+                                <style>normal</style>
+                                <weight>normal</weight>
+                                <underlined>0</underlined>
+                                <face />
+                            </font>
+                            <label>Create a Songbook</label>
                             <attribute>1</attribute>
                         </object>
                     </object>
@@ -33,11 +42,12 @@
                     <object class="sizeritem">
                         <option>0</option>
                         <border>5</border>
-                        <flag>wxRIGHT|wxEXPAND</flag>
+                        <flag>wxALL|wxEXPAND</flag>
                         <object class="wxButton" name="bmp_preferences" base="EditButton">
                             <events>
                                 <handler event="EVT_BUTTON">OnPreferences</handler>
                             </events>
+                            <style>wxBORDER_NONE</style>
                             <label>Preferences</label>
                             <bitmap>art:wxART_EXECUTABLE_FILE,wxART_TOOLBAR</bitmap>
                             <bitmap_dir>wxTOP</bitmap_dir>
@@ -46,11 +56,12 @@
                     <object class="sizeritem">
                         <option>0</option>
                         <border>5</border>
-                        <flag>wxRIGHT</flag>
+                        <flag>wxALL</flag>
                         <object class="wxButton" name="bmb_preview" base="EditButton">
                             <events>
                                 <handler event="EVT_BUTTON">OnShowPreview</handler>
                             </events>
+                            <style>wxBORDER_NONE</style>
                             <label>Preview</label>
                             <bitmap>art:wxART_PRINT,wxART_TOOLBAR</bitmap>
                             <bitmap_dir>wxTOP</bitmap_dir>
@@ -58,11 +69,13 @@
                     </object>
                     <object class="sizeritem">
                         <option>0</option>
-                        <border>0</border>
+                        <border>5</border>
+                        <flag>wxALL</flag>
                         <object class="wxButton" name="bmb_messages" base="EditButton">
                             <events>
                                 <handler event="EVT_BUTTON">OnShowMessages</handler>
                             </events>
+                            <style>wxBORDER_NONE</style>
                             <label>Messages</label>
                             <bitmap>art:wxART_LIST_VIEW,wxART_TOOLBAR</bitmap>
                             <bitmap_dir>wxTOP</bitmap_dir>
