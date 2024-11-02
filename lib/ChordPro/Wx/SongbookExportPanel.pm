@@ -115,7 +115,7 @@ method refresh() {
 
     $self->setup_menubar;
 
-    $state{have_webview} = ref($self->{t_editor}) eq 'Wx::WebView';
+    $state{have_webview} = ref($self->{webview}) eq 'Wx::WebView';
     $self->log( 'I', "Using " .
 		( $state{have_webview}
 		  ? "embedded" : "external") . " PDF viewer" );
@@ -135,7 +135,8 @@ method refresh() {
 	$self->log( 'I', "Using folder " . $state{sbefolder} );
 	$self->OnDirPickerChanged(undef);
     }
-
+    $self->{w_rearrange}->SetSelection($state{from_songbook}-1);
+    $state{from_songbook} = 0;
     setup_messages_ctxmenu($self);
 }
 
@@ -352,6 +353,7 @@ sub OnRearrangeDSelect {
 		     $state{sbefiles}->[$self->{w_rearrange}->GetSelection] );
     return unless $self->GetParent->{p_editor}->openfile($file);
     $self->prv and $self->prv->discard;
+    $state{from_songbook} = 1 + $self->{w_rearrange}->GetSelection;
     $self->GetParent->select_mode("editor");
 }
 
