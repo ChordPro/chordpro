@@ -2002,7 +2002,7 @@ sub imageline {
     my $id = $elt->{id};
     my $asset = $assets->{$id};
     unless ( $asset ) {
-	warn("Undefined image id: \"$id\"\n");
+	warn("Line " . $elt->{line} . ", Undefined image id: \"$id\"\n");
     }
     my $opts = { %{$asset->{opts}//{}}, %{$elt->{opts}//{}} };
     my $img = $asset->{data};
