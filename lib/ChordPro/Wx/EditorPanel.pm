@@ -272,11 +272,18 @@ method refresh() {
 		( $state{have_stc}
 		  ? "styled" : "basic") . " text editor" );
 
-    $state{have_webview} = $self->{t_editor}->isa('Wx::WebView');
+    $state{have_webview} = ref($self->{webview}) eq 'Wx::WebView';
     $self->log( 'I', "Using " .
 		( $state{have_webview}
 		  ? "embedded" : "external") . " PDF viewer" );
 
+    if ( $state{from_songbook} ) {
+	$self->{bmp_songbook}->Show(1);
+    }
+    else {
+	$self->{bmp_songbook}->Show(0);
+    }
+    $self->{sz_toolbar}->Layout;
 
     my $mod = $self->{t_editor}->IsModified;
     my $font = $state{fonts}[$preferences{editfont}]{font};
@@ -536,6 +543,11 @@ method OnSave($event) {
 
 method OnSaveAs {
     $self->save_file;
+}
+
+method OnSongbook {
+    return unless $self->check_source_saved;
+    $self->GetParent->select_mode("sbexport");
 }
 
 method OnStyleNeeded($event) {		# scintilla

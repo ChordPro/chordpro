@@ -115,10 +115,12 @@ method refresh() {
 
     $self->setup_menubar;
 
-    $state{have_webview} = ref($self->{t_editor}) eq 'Wx::WebView';
+    $state{have_webview} = ref($self->{webview}) eq 'Wx::WebView';
     $self->log( 'I', "Using " .
 		( $state{have_webview}
 		  ? "embedded" : "external") . " PDF viewer" );
+
+    $self->{cb_recursive}->SetValue(1);
 
     my $c = $state{songbookexport};
     $self->{dp_folder}->SetPath( $state{sbefolder} // $c->{folder} // "");
@@ -133,7 +135,8 @@ method refresh() {
 	$self->log( 'I', "Using folder " . $state{sbefolder} );
 	$self->OnDirPickerChanged(undef);
     }
-
+    $self->{w_rearrange}->SetSelection($state{from_songbook}-1);
+    $state{from_songbook} = 0;
     setup_messages_ctxmenu($self);
 }
 
@@ -246,32 +249,19 @@ sub OnDirPickerChanged {
     };
 
     my @files;
-    my $src = "filelist.txt";
-    if ( -s "$folder/$src" ) {
-	$self->{cb_filelist}->Enable;
-	$self->{cb_recursive}->Disable;
-    }
-    else {
-	$self->{cb_filelist}->Disable;
-    }
-    if ( -s "$folder/$src" && $self->{cb_filelist}->IsChecked ) {
-	@files = loadlines("$folder/$src");
-    }
-    else {
-	$src = "folder";
-	use File::Find qw(find);
-	my $recurse = $self->{cb_recursive}->IsChecked;
-	find sub {
-	    if ( -s && m/^[^.].*\.(cho|crd|chopro|chord|chordpro|pro)$/ ) {
-		push( @files, $File::Find::name );
-	    }
-	    if ( -d && $File::Find::name ne $folder ) {
-		$File::Find::prune = !$recurse;
-		$self->{cb_recursive}->Enable;
-	    }
-	}, $folder;
-	@files = map { decode_utf8( s;^\Q$folder\E/?;;r) } sort @files;
-    }
+    my $src = "folder";
+    use File::Find qw(find);
+    my $recurse = $self->{cb_recursive}->IsChecked;
+    find sub {
+	if ( -s && m/^[^.].*\.(cho|crd|chopro|chord|chordpro|pro)$/ ) {
+	    push( @files, $File::Find::name );
+	}
+	if ( -d && $File::Find::name ne $folder ) {
+	    $File::Find::prune = !$recurse;
+	    $self->{cb_recursive}->Enable;
+	}
+    }, $folder;
+    @files = map { decode_utf8( s;^\Q$folder\E/?;;r) } sort @files;
 
     my $n = scalar(@files);
     my $msg = "Found $n ChordPro file" . ( $n == 1 ? "" : "s" ) . " in $src" .
@@ -363,6 +353,7 @@ sub OnRearrangeDSelect {
 		     $state{sbefiles}->[$self->{w_rearrange}->GetSelection] );
     return unless $self->GetParent->{p_editor}->openfile($file);
     $self->prv and $self->prv->discard;
+    $state{from_songbook} = 1 + $self->{w_rearrange}->GetSelection;
     $self->GetParent->select_mode("editor");
 }
 
