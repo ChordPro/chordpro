@@ -286,8 +286,7 @@ method refresh() {
     $self->{sz_toolbar}->Layout;
 
     my $mod = $self->{t_editor}->IsModified;
-    my $font = $state{fonts}[$preferences{editfont}]{font};
-    $font->SetPointSize($preferences{editsize});
+    my $font = Wx::Font->new($preferences{editfont});
     $self->{t_editor}->SetFont($font);
     if ( $state{have_stc} ) {
 #	$stc->StyleSetBackground(wxSTC_STYLE_DEFAULT,
@@ -298,10 +297,9 @@ method refresh() {
 	$self->{t_editor}->SetBackgroundColour
 	  ( Wx::Colour->new($preferences{editcolour}) );
     }
-    $self->{t_editor}->SetModified($mod);
 
     $self->setup_messages_ctxmenu;
-
+    $self->{t_editor}->SetModified($mod);
 }
 
 method openfile( $file, $checked=0, $actual=undef ) {

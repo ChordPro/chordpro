@@ -187,6 +187,9 @@ method Load :common {
     }
     lock_keys(%preferences);
 
+    if ( $preferences{editfont} =~ /^\d+$/ ) {
+	$preferences{editfont} = $fonts[$preferences{editfont}]->{font}->GetNativeFontInfoDesc;
+    }
     delete $ENV{CHORDPRO_LIB};
 
     CP->setup_resdirs;

@@ -109,19 +109,23 @@ sub fetch_prefs {
 
     # Editor.
     if ( $self->GetParent->{t_editor} ) {
-	$self->{ch_editfont}->Show(1);
-	$self->{sp_editfont}->Show(1);
+	$self->{l_editor}->Show(1);
+	$self->{sl_editor}->Show(1);
+	$self->{fp_editor}->Show(1);
 	$self->{cp_editor}->Show(1);
-	$self->{sz_edit}->Layout;
-	$self->{ch_editfont}->SetSelection( $preferences{editfont} );
-	$self->{sp_editfont}->SetValue( $preferences{editsize} );
+	$self->{sz_editor}->Layout;
+	$self->{fp_editor}->SetSelectedFont
+	  ( Wx::Font->new($preferences{editfont}) );
+#	$self->{ch_editfont}->SetSelection( $preferences{editfont} );
+#	$self->{sp_editfont}->SetValue( $preferences{editsize} );
 	$self->{cp_editor}->SetColour(Wx::Colour->new($preferences{editcolour}));
     }
     else {
-	$self->{ch_editfont}->Show(0);
-	$self->{sp_editfont}->Show(0);
+	$self->{fp_editor}->Show(0);
 	$self->{cp_editor}->Show(0);
-	$self->{sz_edit}->Layout;
+	$self->{l_editor}->Show(0);
+	$self->{sl_editor}->Show(0);
+	$self->{sz_editor}->Layout;
     }
 
     # Notation.
@@ -210,8 +214,8 @@ sub store_prefs {
     $preferences{tmplfile}        = $self->{fp_tmplfile}->GetPath;
 
     # Editor.
-    $preferences{editfont}	   = $self->{ch_editfont}->GetSelection;
-    $preferences{editsize}	   = $self->{sp_editfont}->GetValue;
+    $preferences{editfont} = $self->{fp_editor}->GetSelectedFont->GetNativeFontInfoDesc;
+    $preferences{editcolour} = $self->{cp_editor}->GetColour->GetAsString(wxC2S_HTML_SYNTAX);
 
     # Notation.
     my $n = $self->{ch_notation}->GetSelection;
@@ -247,10 +251,6 @@ sub store_prefs {
     $preferences{enable_pdfviewer} = $self->{cb_pdfviewer}->IsChecked;
     $preferences{pdfviewer} = $self->{t_pdfviewer}->GetValue;
 
-    # Editor.
-    $preferences{editfont}   = $self->{ch_editfont}->GetSelection;
-    $preferences{editsize}   = $self->{sp_editfont}->GetValue;
-    $preferences{editcolour} = $self->{cp_editor}->GetColour->GetAsString(wxC2S_HTML_SYNTAX);
 }
 
 sub restore_prefs {
@@ -260,9 +260,7 @@ sub restore_prefs {
     my $ctl = $self->GetParent->{t_editor};
     return unless $ctl;
 
-    my $n = $preferences{editfont};
-    my $font = $state{fonts}->[$n]->{font};
-    $font->SetPointSize($preferences{editsize});
+    my $font = Wx::Font->new($preferences{editfont});
     $self->setnomod( $ctl, sub { $ctl->SetFont($font) } );
     $self->setnomod( $ctl,
 		     sub { $ctl->SetBackgroundColour
@@ -427,6 +425,15 @@ sub OnChEditFont {
     my $n = $self->{ch_editfont}->GetSelection;
     my $font = $state{fonts}->[$n]->{font};
     $font->SetPointSize($preferences{editsize});
+    $self->setnomod( $ctl, sub { $ctl->SetFont($font) } );
+}
+
+sub OnFontPickerChanged {
+    my ($self, $event) = @_;
+    my $parent = $self->GetParent;
+    my $ctl = $parent->{t_editor};
+    return unless $ctl;
+    my $font = $self->{fp_editor}->GetSelectedFont;
     $self->setnomod( $ctl, sub { $ctl->SetFont($font) } );
 }
 
