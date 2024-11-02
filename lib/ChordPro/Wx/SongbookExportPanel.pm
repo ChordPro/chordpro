@@ -120,6 +120,8 @@ method refresh() {
 		( $state{have_webview}
 		  ? "embedded" : "external") . " PDF viewer" );
 
+    $self->{cb_recursive}->SetValue(1);
+
     my $c = $state{songbookexport};
     $self->{dp_folder}->SetPath( $state{sbefolder} // $c->{folder} // "");
     $self->{t_exporttitle}->SetValue($c->{title} // "");
@@ -246,32 +248,19 @@ sub OnDirPickerChanged {
     };
 
     my @files;
-    my $src = "filelist.txt";
-    if ( -s "$folder/$src" ) {
-	$self->{cb_filelist}->Enable;
-	$self->{cb_recursive}->Disable;
-    }
-    else {
-	$self->{cb_filelist}->Disable;
-    }
-    if ( -s "$folder/$src" && $self->{cb_filelist}->IsChecked ) {
-	@files = loadlines("$folder/$src");
-    }
-    else {
-	$src = "folder";
-	use File::Find qw(find);
-	my $recurse = $self->{cb_recursive}->IsChecked;
-	find sub {
-	    if ( -s && m/^[^.].*\.(cho|crd|chopro|chord|chordpro|pro)$/ ) {
-		push( @files, $File::Find::name );
-	    }
-	    if ( -d && $File::Find::name ne $folder ) {
-		$File::Find::prune = !$recurse;
-		$self->{cb_recursive}->Enable;
-	    }
-	}, $folder;
-	@files = map { decode_utf8( s;^\Q$folder\E/?;;r) } sort @files;
-    }
+    my $src = "folder";
+    use File::Find qw(find);
+    my $recurse = $self->{cb_recursive}->IsChecked;
+    find sub {
+	if ( -s && m/^[^.].*\.(cho|crd|chopro|chord|chordpro|pro)$/ ) {
+	    push( @files, $File::Find::name );
+	}
+	if ( -d && $File::Find::name ne $folder ) {
+	    $File::Find::prune = !$recurse;
+	    $self->{cb_recursive}->Enable;
+	}
+    }, $folder;
+    @files = map { decode_utf8( s;^\Q$folder\E/?;;r) } sort @files;
 
     my $n = scalar(@files);
     my $msg = "Found $n ChordPro file" . ( $n == 1 ? "" : "s" ) . " in $src" .
