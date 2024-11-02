@@ -191,7 +191,7 @@ Note that you need an `{image}` directive to show it.
 # Inline images
 
 Images can also be placed inside texts using a special markup element
-`<img>`.
+`<img />`. Note that it must be closed with `/>`.
 
 The img element takes several attributes.
 
