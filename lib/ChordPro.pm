@@ -197,6 +197,10 @@ sub chordpro {
       if @ARGV > 1;
     foreach my $file ( @ARGV ) {
 	my $opts;
+	if ( $file =~ /^--((?:sub)?title)\s*(.*)/ ) {
+	    $options->{$1} = decode_utf8($2);
+	    next;
+	}
 	if ( $file =~ /(^|\s)--(?:meta|config|define)\b/ ) {
 	    # Break into words.
 	    my @w = Text::ParseWords::shellwords($file);
