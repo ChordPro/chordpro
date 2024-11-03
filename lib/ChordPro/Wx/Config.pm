@@ -54,7 +54,7 @@ my %prefs =
 
    # Presets.
    enable_presets => 1,
-   cfgpreset      => "",
+   cfgpreset      => [],
 
    # Custom config file.
    enable_configfile => 0,
@@ -181,9 +181,6 @@ method Load :common {
 	}
 	$cb->SetPath($cp);
 	( $ggoon, $group, $gindex ) = $cb->GetNextGroup($gindex);
-    }
-    if ( %pp ) {
-	warn( "Preferences: excess keys: " . join( " ", sort keys %pp ) );
     }
     lock_keys(%preferences);
 
