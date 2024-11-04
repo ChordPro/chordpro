@@ -422,15 +422,19 @@ sub generate_csv {
     #warn( "CSV: $ncols fields\n" );
     print $fd ( join( $sep, @cols ), "\n" );
 
+    # Extra meta info from command line, for non-song CSV.
+    my $xm = $options->{meta} // {};
     unless ( $ctl->{songsonly} ) {
-	$csvline->( { title     => '__front_matter__',
+	$csvline->( { %$xm,
+		      title     => 'Front Matter',
 		      pagerange => $pagerange->("front"),
 		      sorttitle => 'Front Matter',
 		      artist    => 'ChordPro' } )
 	  if $pages_of->{front};
-	$csvline->( { title     => '__table_of_contents__',
+	$csvline->( { %$xm,
+		      title     => "Table of Contents",
 		      pagerange => $pagerange->("toc"),
-		      sorttitle => 'Table of Contents',
+		      sorttitle => "Table of Contents",
 		      artist    => 'ChordPro' } )
 	  if $pages_of->{toc};
     }
@@ -448,7 +452,8 @@ sub generate_csv {
     }
 
     unless ( $ctl->{songsonly} ) {
-	$csvline->( { title     => '__back_matter__',
+	$csvline->( { %$xm,
+		      title     => 'Back Matter',
 		      pagerange => $pagerange->("back"),
 		      sorttitle => 'Back Matter',
 		      artist    => 'ChordPro'} )
