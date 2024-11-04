@@ -348,7 +348,7 @@ method OnExportFolder($event) {
     my $fd = Wx::DirDialog->new
       ( $self,
 	_T("Choose folder to export"),
-	$state{songbookexport}{folder}//"",
+	$state{sbe_folder} // $state{songbookexport}{folder} // "",
 	wxDD_DIR_MUST_EXIST );
     my $ret = $fd->ShowModal;
     if ( $ret == wxID_OK ) {

@@ -17,6 +17,7 @@ use ChordPro::Wx::Utils;
 
 use Encode qw( decode_utf8 encode_utf8 );
 use File::LoadLines;
+use File::Basename;
 
 # WhoamI
 field $panel :accessor = "sbexport";
@@ -122,37 +123,44 @@ method refresh() {
 
     $self->{cb_recursive}->SetValue(1);
 
-    my $c = $state{songbookexport};
-    $self->{dp_folder}->SetPath( $state{sbefolder} // $c->{folder} // "");
-    $self->{t_exporttitle}->SetValue($c->{title} // "");
-    $self->{t_exportstitle}->SetValue($c->{subtitle} // "");
-    $self->{fp_cover}->SetPath($c->{cover} // "");
-    $self->{cb_stdcover}->SetValue($c->{stdcover} // 0);
+    $self->{dp_folder}->SetPath( $state{sbe_folder} // "");
+    $self->{t_exporttitle}->SetValue($state{sbe_title} // basename($state{sbe_folder}//""));
+    $self->{t_exportstitle}->SetValue($state{sbe_subtitle} // "");
+    $self->{fp_cover}->SetPath($state{sbe_cover} // "");
+    $self->{cb_stdcover}->SetValue($state{sbe_stdcover} // 1);
     $self->OnStdCoverChecked();
 
-    if ( $state{sbefolder} && -d $state{sbefolder} ) {
-	$self->{dp_folder}->SetPath($state{sbefolder});
-	$self->log( 'I', "Using folder " . $state{sbefolder} );
+    if ( $state{sbe_folder} && -d $state{sbe_folder} ) {
+	$self->{dp_folder}->SetPath($state{sbe_folder});
+	$self->log( 'I', "Using folder " . $state{sbe_folder} );
 	$self->OnDirPickerChanged(undef);
     }
+
     $self->{w_rearrange}->SetSelection($state{from_songbook}-1)
       if $state{from_songbook};
     $state{from_songbook} = 0;
     setup_messages_ctxmenu($self);
+    $self->{bmb_preview}->SetFocus;
 }
 
 method save_preferences() {
-    my $c = $state{songbookexport};
-    $c->{folder}   = $self->{dp_folder}->GetPath       // "";
-    $c->{title}    = $self->{t_exporttitle}->GetValue  // "";
-    $c->{subtitle} = $self->{t_exportstitle}->GetValue // "";
-    $c->{cover}    = $self->{fp_cover}->GetPath        // "";
-    $c->{stdcover} = $self->{cb_stdcover}->IsChecked   // 0;
+    # Volatile (this run only).
+    $state{sbe_folder}   = $self->{dp_folder}->GetPath       // "";
+    $state{sbe_title}    = $self->{t_exporttitle}->GetValue  // "";
+    $state{sbe_subtitle} = $self->{t_exportstitle}->GetValue // "";
+    $state{sbe_cover}    = $self->{fp_cover}->GetPath        // "";
+    $state{sbe_stdcover} = $self->{cb_stdcover}->IsChecked   // 0;
+    # Persistent.
+    $state{songbookexport}{folder} = $state{sbe_folder};
 }
 
 method open_dir($dir) {
     $dir =~ s/[\\\/]$//;
-    $self->{dp_folder}->SetPath($dir);
+    $self->{dp_folder}->SetPath( $state{sbe_folder} = $dir );
+    $state{sbe_title} //= basename( $state{sbe_folder} );
+    $state{sbe_subtitle} //= "";
+    $self->{t_exporttitle}->SetValue( $state{sbe_title} );
+    $self->{t_exportstitle}->SetValue( $state{sbe_subtitle} );
     $self->OnDirPickerChanged;
 }
 
@@ -162,7 +170,7 @@ method preview( $args, %opts ) {
     $args //= [];
 
     my $folder = $self->{dp_folder}->GetPath;
-    my @files = @{ $state{sbefiles} };
+    my @files = @{ $state{sbe_files} };
     unless ( $folder && @files ) {
 	my $md = Wx::MessageDialog->new
 	  ( $self,
@@ -235,7 +243,7 @@ method check_preview_saved() {
 sub OnDirPickerChanged {
     my ( $self, $event ) = @_;
 
-    my $folder = $state{sbefolder} = $self->{dp_folder}->GetPath;
+    my $folder = $state{sbe_folder} = $self->{dp_folder}->GetPath;
     opendir( my $dir, $folder )
       or do {
 	$self->GetParent->log( 'W', "Error opening folder $folder: $!");
@@ -275,20 +283,20 @@ sub OnDirPickerChanged {
     $self->{sz_rearrange}->Layout;
     $self->{b_down}->Enable(0);
     $self->{b_up}->Enable(0);
-    $state{sbefiles} = \@files;
+    $state{sbe_files} = \@files;
     $state{windowtitle} = $folder;
 }
 
 sub OnFilelistDeselectAll {
     my ($self, $event) = @_;
-    $self->{w_rearrange}->Check($_,0) for 0..$#{$state{sbefiles}};
+    $self->{w_rearrange}->Check($_,0) for 0..$#{$state{sbe_files}};
 }
 
 sub OnFilelistOpen {
     my ($self, $event) = @_;
     my $md = Wx::FileDialog->new
       ($self, _T("Choose file list"),
-       $state{sbefolder}, "filelist.txt",
+       $state{sbe_folder}, "filelist.txt",
        "Text files (*.txt)|*.txt",
        0|wxFD_OPEN|wxFD_FILE_MUST_EXIST,
        wxDefaultPosition);
@@ -299,7 +307,7 @@ sub OnFilelistOpen {
 	$self->{w_rearrange}->Set(\@files);
 	$self->{w_rearrange}->Check($_,1) for 0..$#files;
 	$self->{sz_rearrange}->Layout;
-	$state{sbefiles} = \@files;
+	$state{sbe_files} = \@files;
 	$self->log( 'I', "Loaded file list from $file" );
     }
     $md->Destroy;
@@ -309,7 +317,7 @@ sub OnFilelistSave {
     my ($self, $event) = @_;
     my $md = Wx::FileDialog->new
       ($self, _T("Choose file to store the current file list"),
-       $state{sbefolder}, "filelist.txt",
+       $state{sbe_folder}, "filelist.txt",
        "Text files (*.txt)|*.txt",
        0|wxFD_SAVE|wxFD_OVERWRITE_PROMPT,
        wxDefaultPosition);
@@ -318,7 +326,7 @@ sub OnFilelistSave {
 	my $file = $md->GetPath;
 	open( my $fd, '>:utf8', $file );
 	my $filelist = "";
-	my @files = @{$state{sbefiles}};
+	my @files = @{$state{sbe_files}};
 	for ( $self->{w_rearrange}->GetCurrentOrder ) {
 	    $filelist .= "$files[$_]\n" unless $_ < 0;
 	}
@@ -331,7 +339,7 @@ sub OnFilelistSave {
 
 sub OnFilelistSelectAll {
     my ($self, $event) = @_;
-    $self->{w_rearrange}->Check($_,1) for 0..$#{$state{sbefiles}};
+    $self->{w_rearrange}->Check($_,1) for 0..$#{$state{sbe_files}};
 }
 
 sub OnFilelistUse {
@@ -350,8 +358,8 @@ sub OnRearrangeDown {
 
 sub OnRearrangeDSelect {
     my ($self, $event) = @_;
-    my $file = join( "/", $state{sbefolder},
-		     $state{sbefiles}->[$self->{w_rearrange}->GetSelection] );
+    my $file = join( "/", $state{sbe_folder},
+		     $state{sbe_files}->[$self->{w_rearrange}->GetSelection] );
     return unless $self->GetParent->{p_editor}->openfile($file);
     $self->prv and $self->prv->discard;
     $state{from_songbook} = 1 + $self->{w_rearrange}->GetSelection;

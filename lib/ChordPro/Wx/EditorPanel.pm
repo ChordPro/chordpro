@@ -300,6 +300,7 @@ method refresh() {
 
     $self->setup_messages_ctxmenu;
     $self->{t_editor}->SetModified($mod);
+    $self->{bmb_preview}->SetFocus;
 }
 
 method openfile( $file, $checked=0, $actual=undef ) {

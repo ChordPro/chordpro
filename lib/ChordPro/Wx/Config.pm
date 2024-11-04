@@ -206,7 +206,11 @@ method Store :common {
     my %pp = %prefs;
     while ( my ( $group, $v ) = each %state ) {
 
-	next if $group =~ /^(fonts|styles|notations|tasks|panel)$/;
+	next if $group =~ m{ ^(?:
+				 fonts | styles | notations
+			       | tasks | panel
+			       )$ }x;
+
 	if ( $group eq "recents" && is_arrayref($v) ) {
 	    $cb->DeleteGroup("/$group");
 	    $cb->SetPath("/$group");
