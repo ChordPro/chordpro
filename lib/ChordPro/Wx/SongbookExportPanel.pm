@@ -135,7 +135,8 @@ method refresh() {
 	$self->log( 'I', "Using folder " . $state{sbefolder} );
 	$self->OnDirPickerChanged(undef);
     }
-    $self->{w_rearrange}->SetSelection($state{from_songbook}-1);
+    $self->{w_rearrange}->SetSelection($state{from_songbook}-1)
+      if $state{from_songbook};
     $state{from_songbook} = 0;
     setup_messages_ctxmenu($self);
 }

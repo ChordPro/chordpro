@@ -112,7 +112,7 @@ sub fetch_prefs {
 	$self->{l_editor}->Show(1);
 	$self->{sl_editor}->Show(1);
 	$self->{fp_editor}->Show(1);
-	$self->{cp_editor}->Show(1);
+	$self->{cp_editor}->Show(!$state{have_stc});
 	$self->{sz_editor}->Layout;
 	$self->{fp_editor}->SetSelectedFont
 	  ( Wx::Font->new($preferences{editfont}) );
