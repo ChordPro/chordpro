@@ -333,8 +333,17 @@ method OnMessagesClear($event) {
 }
 
 method OnMessagesRuntimeInfo($event) {
-    $self->log( 'I', $self->GetParent->aboutmsg );
-    $self->alert(0);
+    my $pos = $self->{t_messages}->GetLastPosition;
+    $self->log( 'I', "---- Runtime Information ----\n" . $self->GetParent->aboutmsg );
+    $self->log( 'I', "---- End of Runtime Information ----\n" );
+    unless ( $self->{sw_tb}->IsSplit ) {
+	$self->{bmb_messages}->SetBackgroundColour(wxNullColour);
+	$self->{sw_tb}->SplitHorizontally( $self->{p_top},
+					   $self->{p_bottom},
+					   $state{sash}{$self->panel."_tb"} // 0 );
+    }
+    $self->{t_messages}->ShowPosition($pos);
+    $self->messagestooltip;
 }
 
 method OnMessagesSave($event) {
@@ -375,19 +384,19 @@ method OnWindowPreview($event) {
 
 method previewtooltip() {
     if ( $self->{sw_lr}->IsSplit ) {
-	$self->{bmb_preview}->SetToolTip(_T("Hide preview"));
+	$self->{bmb_preview}->SetToolTip(_T("Hide the preview"));
     }
     else {
-	$self->{bmb_preview}->SetToolTip(_T("Generate and show preview"));
+	$self->{bmb_preview}->SetToolTip(_T("Generate and show a new preview"));
     }
 }
 
 method messagestooltip() {
     if ( $self->{sw_tb}->IsSplit ) {
-	$self->{bmb_messages}->SetToolTip(_T("Hide messages"));
+	$self->{bmb_messages}->SetToolTip(_T("Hide the messages"));
     }
     else {
-	$self->{bmb_messages}->SetToolTip(_T("Show messages"));
+	$self->{bmb_messages}->SetToolTip(_T("Show the messages"));
     }
 }
 

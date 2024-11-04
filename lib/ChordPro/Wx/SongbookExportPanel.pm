@@ -79,7 +79,7 @@ method setup_menubar() {
 	    [ wxID_ANY, "No chord diagrams",
 	      "Preview without chord diagrams", "OnPreviewNoDiagrams" ],
 	    [ wxID_ANY, "Lyrics only",
-	      "Preview just the lyrics". "OnPreviewLyricsOnly" ],
+	      "Preview with just the lyrics". "OnPreviewLyricsOnly" ],
 	    [ wxID_ANY, "More...",
 	      "Transpose, transcode, and more", "OnPreviewMore" ],
 	    [],
@@ -92,14 +92,14 @@ method setup_menubar() {
 	[ wxID_HELP,
 	  [ [ wxID_ANY, "ChordPro file format",
 	      "Help about the ChordPro file format", "OnHelp_ChordPro" ],
-	    [ wxID_ANY, "ChordPro config files",
-	      "Help about the config files", "OnHelp_Config" ],
+	    [ wxID_ANY, "ChordPro configuration files",
+	      "Help about the configuration files", "OnHelp_Config" ],
 	    [],
-	    [ wxID_ANY, "Enable debug info in PDF",
-	      "Add sources and configs to the PDF for debugging", 1,
+	    [ wxID_ANY, "Enable debugging info in PDF",
+	      "Add sources and configurations to the PDF for debugging purposes", 1,
 	      "OnHelp_DebugInfo" ],
 	    [ wxID_ANY, "Insert runtime info",
-	      "Insert runtime info into the messages",
+	      "Insert runtime info into the messages for diagnostic purposes",
 	      "OnMessagesRuntimeInfo" ],
 	    [],
 	    [ wxID_ABOUT, "About ChordPro", "About WxChordPro", "OnAbout" ],
@@ -140,6 +140,8 @@ method refresh() {
       if $state{from_songbook};
     $state{from_songbook} = 0;
     setup_messages_ctxmenu($self);
+    $self->previewtooltip;
+    $self->messagestooltip;
     $self->{bmb_preview}->SetFocus;
 }
 
