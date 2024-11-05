@@ -777,12 +777,11 @@ sub clone {
 
 sub is_note { $_[0]->{isnote} };
 sub is_flat { $_[0]->{isflat} };
-sub is_keyboard { $_[0]->{iskeyboard} };
 
 sub is_nc {
     my ( $self ) = @_;
     # Keyboard...
-    return 1 if $self->is_keyboard && !@{ $self->kbkeys // [1] };
+    return 1 if defined($self->kbkeys) && !@{$self->kbkeys};
     # Strings...
     return unless @{ $self->frets // [] };
     for ( @{ $self->frets } ) {
@@ -1119,6 +1118,32 @@ sub chord_display ( $self ) {
 # For convenience.
 sub is_chord      ( $self ) { 0 };
 sub is_annotation ( $self ) { 1 };
+
+################ Chord objects: NC ################
+
+package ChordPro::Chord::NC;
+
+use String::Interpolate::Named;
+
+our @ISA = 'ChordPro::Chord::Base';
+
+sub transpose ( $self, $dummy1, $dummy2=0 ) { $self }
+sub transcode ( $self, $dummy1, $dummy2=0 ) { $self }
+
+sub canonical ( $self ) {
+    my $res = $self->{name};
+    return $res;
+}
+
+sub chord_display ( $self ) {
+    return interpolate( { args => $self }, $self->{name} );
+}
+
+# For convenience.
+sub is_nc         ( $self ) { 1 };
+sub is_chord      ( $self ) { 0 };
+sub is_annotation ( $self ) { 0 };
+sub has_diagram   ( $self ) { 0 };
 
 ################ Testing ################
 

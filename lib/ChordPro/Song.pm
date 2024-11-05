@@ -2330,6 +2330,8 @@ sub parse_chord {
     if ( $info ) {
 	warn( "Parsing chord: \"$chord\" found \"",
 	      $info->name, "\" in ", $info->{_via}, "\n" ) if $debug > 1;
+	return ChordPro::Chord::NC->new( { name => $info->name } )
+	  if $info->is_nc;
 	$info->dump if $debug > 1;
     }
     else {

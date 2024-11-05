@@ -28,6 +28,7 @@
     - Fix issue #428, #443, #447.
     - Fix forum issue 2546.
     - (Wx, MSWindows only) Use Edge for WebView (PDF view). Requires custom wxWidgets build.
+    - Change handling of NC (issue #441).
 
 6.060 2024-08-24
 

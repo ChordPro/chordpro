@@ -39,7 +39,7 @@ my $data = <<EOD;
 {grid: 0}
 {highlight: 0}
 {image: 0}
-{key: 0}
+{key: C}
 {lyricist: 0}
 {meta: title 0}
 {new_page: 0}
