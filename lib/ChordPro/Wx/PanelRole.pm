@@ -245,7 +245,6 @@ method OnMessagesClear($event) {
 }
 
 method OnMessagesRuntimeInfo($event) {
-    my $pos = $self->{t_messages}->GetLastPosition;
     $self->log( 'I', "---- Runtime Information ----\n" . $self->GetParent->aboutmsg );
     $self->log( 'I', "---- End of Runtime Information ----\n" );
     unless ( $self->{sw_tb}->IsSplit ) {
@@ -254,7 +253,6 @@ method OnMessagesRuntimeInfo($event) {
 					   $self->{p_bottom},
 					   $state{sash}{$self->panel."_tb"} // 0 );
     }
-    $self->{t_messages}->ShowPosition($pos);
     $self->messagestooltip;
 }
 
@@ -271,9 +269,10 @@ method OnMessagesSave($event) {
 
     my $ret = $fd->ShowModal;
     if ( $ret == wxID_OK ) {
+	$self->OnMessagesRuntimeInfo($event);
 	$file = $fd->GetPath;
-	$self->log( 'S',  "Messages saved." );
 	$self->{t_messages}->SaveFile($file);
+	$self->log( 'S',  "Messages saved." );
 	$state{messages}{savedas} = $file;
     }
 
@@ -295,20 +294,28 @@ method OnWindowPreview($event) {
 }
 
 method previewtooltip() {
+    my $mb = wxTheApp->GetTopWindow->GetMenuBar;
+    my $mi = $mb->FindItem($mb->FindMenuItem("View","Show Preview"));
     if ( $self->{sw_lr}->IsSplit ) {
 	$self->{bmb_preview}->SetToolTip(_T("Hide the preview"));
+	$mi->Check(1);
     }
     else {
 	$self->{bmb_preview}->SetToolTip(_T("Generate and show a new preview"));
+	$mi->Check(0);
     }
 }
 
 method messagestooltip() {
+    my $mb = wxTheApp->GetTopWindow->GetMenuBar;
+    my $mi = $mb->FindItem($mb->FindMenuItem("View","Show Messages"));
     if ( $self->{sw_tb}->IsSplit ) {
 	$self->{bmb_messages}->SetToolTip(_T("Hide the messages"));
+	$mi->Check(1);
     }
     else {
 	$self->{bmb_messages}->SetToolTip(_T("Show the messages"));
+	$mi->Check(0);
     }
 }
 
