@@ -192,7 +192,7 @@ method setup_scintilla() {
     # 5 - Directives
     $stc->StyleSetSpec( 5, "bold,fore:indigo" );
     # 6 - Directive arguments
-    $stc->StyleSetSpec( 6, "fore:orange" );
+    $stc->StyleSetSpec( 6, "fore:#ff8c00" );
 
     # For linenumbers.
     $stc->SetMarginWidth( 0, 40 ); # TODO
