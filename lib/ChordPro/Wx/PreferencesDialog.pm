@@ -276,10 +276,8 @@ sub restore_prefs {
 
 sub need_restart {
     my ( $self ) = @_;
-    my $infobar = Wx::InfoBar->new($self);
-    $self->{sz_prefs_inner}->Add($infobar, 0, wxEXPAND|wxALL, 0);
-    $infobar->ShowMessage("Changing the custom library requires restart",
-			  wxICON_INFORMATION);
+    $self->{w_infobar}->ShowMessage("Changing the custom library requires restart",
+				    wxICON_INFORMATION);
 }
 
 ################ Event handlers ################
