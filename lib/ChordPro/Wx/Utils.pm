@@ -16,13 +16,7 @@ our @EXPORT;
 # Constants not (yet) in this version of Wx.
 
 my %const =
-  ( wxEXEC_HIDE_CONSOLE            => 0x0010,
-    wxDIRP_SMALL                   => 0x8000, # wxPB_SMALL
-    wxFLP_SMALL                    => 0x8000, # wxPB_SMALL
-    wxRESERVE_SPACE_EVEN_IF_HIDDEN => 0x0002,
-    wxID_EXECUTE		   => 0x1417,
-
-    wxART_CLOSE			   => "wxART_CLOSE",
+  (
   );
 
 no strict 'refs';
