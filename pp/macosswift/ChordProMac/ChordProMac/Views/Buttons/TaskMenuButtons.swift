@@ -2,8 +2,6 @@
 //  TaskMenuButtons.swift
 //  ChordProMac
 //
-//  Created by Nick Berendsen on 04/06/2024.
-//
 
 import SwiftUI
 import UniformTypeIdentifiers

@@ -2,8 +2,6 @@
 //  Accidentals.swift
 //  ChordProMac
 //
-//  Created by Nick Berendsen on 28/05/2024.
-//
 
 import Foundation
 

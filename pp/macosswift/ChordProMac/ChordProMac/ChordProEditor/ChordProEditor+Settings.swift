@@ -2,8 +2,6 @@
 //  ChordProEditor+Settings.swift
 //  ChordProMac
 //
-//  Created by Nick Berendsen on 27/06/2024.
-//
 
 @preconcurrency import SwiftUI
 
@@ -48,6 +46,8 @@ extension ChordProEditor {
 }
 
 extension ChordProEditor.Settings {
+
+    /// The editor font-style
     enum FontStyle: String, CaseIterable, Codable, Sendable {
         /// Use a monospaced font
         case monospaced = "Monospaced"

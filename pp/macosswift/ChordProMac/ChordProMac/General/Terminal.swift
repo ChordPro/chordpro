@@ -2,8 +2,6 @@
 //  Terminal.swift
 //  ChordProMac
 //
-//  Created by Nick Berendsen on 26/05/2024.
-//
 
 import SwiftUI
 import UniformTypeIdentifiers
@@ -19,24 +17,27 @@ extension Terminal {
     /// Run a script in the shell and return its output
     /// - Parameter arguments: The arguments to pass to the shell
     /// - Returns: The output from the shell
-    static func runInShell(arguments: [String]) async -> Output {
+    @MainActor static func runInShell(arguments: [String], sceneState: SceneStateModel?) async -> Output {
         /// The normal output
-        var allOutput: [String] = []
+        var allOutput: [OutputItem] = []
         /// The error output
-        var allErrors: [String] = []
+        var allErrors: [OutputItem] = []
         /// Await the results
         for await streamedOutput in runInShell(arguments: arguments) {
             switch streamedOutput {
             case let .standardOutput(output):
-                allOutput.append(output)
+                allOutput.append(.init(time: output.time, message: output.message))
             case let .standardError(error):
-                allErrors.append(error)
+                if let sceneState, !error.message.isEmpty {
+                    sceneState.logMessages.append(parseChordProMessage(error, sceneState: sceneState))
+                }
+                allErrors.append(.init(time: error.time, message: error.message))
             }
         }
         /// Return the output
         return Output(
-            standardOutput: allOutput.joined(),
-            standardError: allErrors.joined()
+            standardOutput: allOutput,
+            standardError: allErrors
         )
     }
 
@@ -63,18 +64,16 @@ extension Terminal {
         /// Return the stream
         return AsyncStream { continuation in
             pipe.fileHandleForReading.readabilityHandler = { handler in
-                let standardOutput = String(decoding: handler.availableData, as: UTF8.self)
-                guard !standardOutput.isEmpty else {
+                guard let standardOutput = String(data: handler.availableData, encoding: .utf8) else {
                     return
                 }
-                continuation.yield(.standardOutput(standardOutput))
+                continuation.yield(.standardOutput(.init(time: .now, message: standardOutput)))
             }
             errorPipe.fileHandleForReading.readabilityHandler = { handler in
-                let errorOutput = String(decoding: handler.availableData, as: UTF8.self)
-                guard !errorOutput.isEmpty else {
+                guard let errorOutput = String(data: handler.availableData, encoding: .utf8) else {
                     return
                 }
-                continuation.yield(.standardError(errorOutput))
+                continuation.yield(.standardError(.init(time: .now, message: errorOutput)))
             }
             /// Finish the stream
             task.terminationHandler = { _ in
@@ -89,17 +88,23 @@ extension Terminal {
     /// The complete output from the shell
     struct Output {
         /// The standard output
-        var standardOutput: String
+        var standardOutput: [OutputItem]
         /// The standard error
-        var standardError: String
+        var standardError: [OutputItem]
     }
 
     /// The stream output from the shell
     enum StreamedOutput {
         /// The standard output
-        case standardOutput(String)
+        case standardOutput(OutputItem)
         /// The standard error
-        case standardError(String)
+        case standardError(OutputItem)
+    }
+
+    /// The structure for an output item
+    struct OutputItem {
+        let time: Date
+        let message: String
     }
 }
 
@@ -166,9 +171,10 @@ extension Terminal {
             arguments.append(customConfig)
         }
         /// Run **ChordPro** in the shell
-        let output = await Terminal.runInShell(arguments: [arguments.joined(separator: " ")])
+        let output = await Terminal.runInShell(arguments: [arguments.joined(separator: " ")], sceneState: nil)
         /// Convert the JSON data to a ``ChordProInfo`` struct
-        let jsonData = output.standardOutput.data(using: .utf8)!
+        let json = output.standardOutput.map(\.message).joined()
+        let jsonData = json.data(using: .utf8)!
         let chordProInfo = try JSONDecoder().decode(ChordProInfo.self, from: jsonData)
         Logger.application.log("Loaded ChordPro info")
         return chordProInfo
@@ -186,7 +192,7 @@ extension Terminal {
     ///   - title: The title of the export
     ///   - subtitle: The optional subtitle of the export
     /// - Returns: The PDF as `Data` and the status as ``AppError``
-    static func exportPDF(
+    @MainActor static func exportPDF(
         text: String,
         settings: AppSettings,
         sceneState: SceneStateModel,
@@ -221,6 +227,12 @@ extension Terminal {
         arguments.append("\"\(chordProApp.path)\"")
         /// Songbook export
         if fileList {
+            /// Define the warning messages
+            arguments.append("--define diagnostics.format='%f, line %n, %m'")
+            /// Log in verbose modus to get an idea of the progress
+            arguments.append("--verbose")
+            /// Reset the progress
+            sceneState.songbookProgress = (0, "Processing songs")
             /// Add the system generated front cover if selected
             if settings.application.songbookGenerateCover {
                 arguments.append("--title='\(title)'")
@@ -241,6 +253,9 @@ extension Terminal {
             /// Add the file list
             arguments.append("--filelist=\"\(sceneState.fileListURL.path)\"")
         } else {
+            /// Define the warning messages
+            arguments.append("--define diagnostics.format='Line %n, %m'")
+            /// Add the source file
             arguments.append("\"\(sceneState.sourceURL.path)\"")
         }
         /// Get the user settings that are simple and do not need sandbox help
@@ -253,34 +268,80 @@ extension Terminal {
         if let taskConfig = sceneState.customTask {
             arguments.append("--config='\(taskConfig.url.path)'")
         }
-
+        /// Add the optional local config that is next to a song file
         if let localConfigURL = sceneState.localConfigURL, !settings.chordPro.noDefaultConfigs {
             _ = localConfigURL.startAccessingSecurityScopedResource()
             arguments.append("--config='\(localConfigURL.path)'")
             UserFileBookmark.stopCustomFileAccess(persistentURL: localConfigURL)
         }
-
         /// Add the output file
-        arguments.append("--output='\(sceneState.exportURL.path)'")
+        arguments.append("--output=\"\(sceneState.exportURL.path)\"")
+        /// Add the process to the log
+        sceneState.logMessages = [.init(type: .notice, message: "Creating PDF preview")]
+        /// Clear the editor messages
+        sceneState.editorMessages = []
         /// Run **ChordPro** in the shell
         /// - Note: The output is logged
-        let output = await Terminal.runInShell(arguments: [arguments.joined(separator: " ")])
-        /// Write to the log file
-        let log = output.standardError.isEmpty ? "No errors occurred but the song might be empty" : output.standardError
+        let output = await Terminal.runInShell(arguments: [arguments.joined(separator: " ")], sceneState: sceneState)
+        /// Try to get the `Data` from the created PDF
         do {
-            try log.write(to: sceneState.logFileURL, atomically: true, encoding: String.Encoding.utf8)
-        } catch {
-            throw AppError.writeDocumentError
-        }
-        do {
-            /// Try to get the `Data` from the created PDF
             let data = try Data(contentsOf: sceneState.exportURL)
+            /// If **ChordPro** does not return any output all went well
+            if sceneState.logMessages.count == 1 {
+                sceneState.logMessages.append(.init(type: .notice, message: "No issues found"))
+            }
             /// Return the `Data` and the status of the creation as an ``AppError`
             /// - Note: That does not mean it is has an error, the status is just using the same structure
-            return (data, output.standardError.isEmpty ? .noErrorOccurred : .pdfCreatedWithErrors)
+            return (data, sceneState.logMessages.filter { $0.type == .warning}.isEmpty ? .noErrorOccurred : .pdfCreatedWithErrors)
         } catch {
             /// There is no data, throw an ``AppError``
             throw output.standardError.isEmpty ? AppError.emptySong : AppError.pdfCreationError
+        }
+    }
+}
+
+extension Terminal {
+
+    /// Parse a **ChordPro** mesdsage
+    /// - Parameters:
+    ///   - output: The raw outoput as read from stdError
+    ///   - sceneState: The sceneState of the current document
+    /// - Returns: An item for the internal log
+    @MainActor static func parseChordProMessage(_ output: Terminal.OutputItem, sceneState: SceneStateModel) -> ChordProEditor.LogItem {
+        /// Cleanup the message
+        let message = output.message
+            .replacingOccurrences(of: sceneState.sourceURL.path, with: sceneState.sourceURL.lastPathComponent)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let lineNumberRegex = try? NSRegularExpression(pattern: "^Line (\\d+), (.*)")
+        let progressRegex = try? NSRegularExpression(pattern: "^Progress\\[PDF(.*) - (.*)")
+        /// Check for progress (for a Songbook export)
+        if
+            let match = progressRegex?.firstMatch(in: message, options: [], range: NSRange(location: 0, length: message.utf16.count)),
+            let remaining = Range(match.range(at: 2), in: message) {
+            sceneState.songbookProgress  = (sceneState.songbookProgress.item + 1, String(message[remaining]))
+        }
+        /// Check for a line number
+        if
+            let match = lineNumberRegex?.firstMatch(in: message, options: [], range: NSRange(location: 0, length: message.utf16.count)),
+            let lineNumber = Range(match.range(at: 1), in: message),
+            let remaining = Range(match.range(at: 2), in: message)
+        {
+            let message = ChordProEditor.LogItem(
+                time: output.time,
+                type: .warning,
+                lineNumber: Int(message[lineNumber]),
+                message: "Warning: \(String(message[remaining]))"
+            )
+            sceneState.editorMessages.append(message)
+            return message
+        } else {
+            return (
+                .init(
+                    time: output.time,
+                    type: .notice,
+                    message: message
+                )
+            )
         }
     }
 }

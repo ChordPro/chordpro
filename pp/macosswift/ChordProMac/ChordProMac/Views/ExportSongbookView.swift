@@ -2,8 +2,6 @@
 //  ExportSongbookView.swift
 //  ChordProMac
 //
-//  Created by Nick Berendsen on 05/09/2024.
-//
 
 import SwiftUI
 import UniformTypeIdentifiers
@@ -36,45 +34,18 @@ struct ExportSongbookView: View, DropDelegate {
                 options
                     .frame(width: 300)
             }
-            Divider()
             StatusView()
-                .padding(.horizontal)
         }
+        .disabled(songbookState.chordProRunning || songbookState.pdf != nil)
         .frame(minWidth: 680, minHeight: 500, alignment: .top)
         .animation(.default, value: appState.settings.application)
+        .animation(.default, value: sceneState.showLog)
         .overlay {
-            VStack {
-                Text(songbookState.chordProRunning ? "Making the PDF" : "Your PDF is ready")
-                    .font(.headline)
-                if let data = songbookState.pdf {
-                        AppKitUtils.PDFKitRepresentedView(data: data, annotations: $annotations)
-                            .frame(width: 400, height: 300)
-                            .border(Color.accentColor, width: 1)
-                        HStack {
-                            Button("Close") {
-                                songbookState.pdf = nil
-                            }
-                            Button("Export") {
-                                songbookState.exportFolderDialog = true
-                            }
-                        }
-                        .padding()
-                } else {
-                    ProgressView()
-                        .padding()
-                    Text("This might take some time...")
-                        .font(.caption)
-                }
-            }
-            .padding()
-            .background(Color(nsColor: .textBackgroundColor))
-            .cornerRadius(12)
-            .shadow(radius: 10)
-            .opacity(songbookState.chordProRunning || songbookState.pdf != nil ? 1 : 0)
+            overlay
         }
         .animation(.default, value: songbookState.pdf)
         .task {
-            songbookState.makeFileList(appState: appState)
+            songbookState.makeFileListFromFolder(appState: appState)
         }
         .task(id: appState.settings.application.songbookGenerateCover) {
             if appState.settings.application.songbookGenerateCover {
@@ -87,24 +58,17 @@ struct ExportSongbookView: View, DropDelegate {
             }
         }
         .onDrop(of: [.fileURL], delegate: self)
-        .fileExporter(
-            isPresented: $songbookState.exportFolderDialog,
-            document: ExportDocument(pdf: songbookState.pdf),
-            contentType: .pdf,
-            defaultFilename: appState.settings.application.songbookTitle
-        ) { _ in
-            Logger.pdfBuild.notice("Export completed")
-            songbookState.pdf = nil
-        }
         .quickLookPreview($songbookState.coverPreview)
         .environmentObject(appState)
         .environmentObject(sceneState)
+        /// Give the application access to the scene.
+        .focusedSceneValue(\.sceneState, sceneState)
     }
 
     // MARK: List View
 
     var list: some View {
-        VStack {
+        VStack(spacing: 0) {
             List {
                 ForEach($appState.settings.application.fileList) { $item in
                     HStack {
@@ -151,7 +115,6 @@ struct ExportSongbookView: View, DropDelegate {
                 }
             }
             .listStyle(.inset(alternatesRowBackgrounds: true))
-            .border(Color.accentColor, width: songbookState.isDropping ? 2 : 0)
             .overlay {
                 if appState.settings.application.fileList.isEmpty {
                     Text("Drop a folder with your **ChordPro** files here to view its content and to make a Songbook.")
@@ -159,13 +122,37 @@ struct ExportSongbookView: View, DropDelegate {
                         .wrapSettingsSection(title: "File List")
                 }
             }
+            Divider()
+            /// Selection buttons
+            HStack {
+                Button {
+                    setAllItems(to: true)
+                } label: {
+                    Text("Select All")
+                }
+                .disabled(checkAllStatus(true))
+                Button {
+                    setAllItems(to: false)
+                } label: {
+                    Text("Select None")
+                }
+                .disabled(checkAllStatus(false))
+            }
+            .controlSize(.small)
+            .padding(.horizontal)
+            .padding(.vertical, 6)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(nsColor: .textBackgroundColor))
+            Divider()
             Label(
-                title: { Text("You can reorder the songs by drag and drop\nand swipe left for more actions") },
+                title: { Text("You can reorder the songs by drag and drop. Swipe for more actions.") },
                 icon: { Image(systemName: "info.circle") }
             )
+            .padding(.top, 4)
             .foregroundStyle(.secondary)
             .font(.caption)
         }
+        .border(Color.accentColor, width: songbookState.isDropping ? 2 : 0)
     }
 
     // MARK: Options View
@@ -176,14 +163,14 @@ struct ExportSongbookView: View, DropDelegate {
                 VStack {
                     UserFileButton(userFile: UserFileItem.exportFolder) {
                         songbookState.currentFolder = SongbookStateModel.exportFolderTitle
-                        songbookState.makeFileList(appState: appState)
+                        songbookState.makeFileListFromFolder(appState: appState)
                     }
                     .id(songbookState.currentFolder)
                     Toggle(isOn: $appState.settings.application.recursiveFileList) {
                         Text("Also look for songs in subfolders")
                     }
                     .onChange(of: appState.settings.application.recursiveFileList) { _ in
-                        songbookState.makeFileList(appState: appState)
+                        songbookState.makeFileListFromFolder(appState: appState)
                     }
                     .padding(.vertical)
                     Text(.init(songbookState.songCountLabel(count: appState.settings.application.fileList.count)))
@@ -223,7 +210,6 @@ struct ExportSongbookView: View, DropDelegate {
                         }
                         .padding([.horizontal, .bottom])
                     }
-
                     Toggle(isOn: $appState.settings.application.songbookUseCustomCover, label: {
                         Text("Add a custom cover page")
 
@@ -268,8 +254,77 @@ struct ExportSongbookView: View, DropDelegate {
                 Text("Export Songbook")
             })
             .padding()
-            .disabled(songbookState.currentFolder == nil || appState.settings.application.songbookTitle.isEmpty)
+            .keyboardShortcut(.defaultAction)
+            .disabled(appState.settings.application.fileList.isEmpty)
         }
+    }
+
+    // MARK: Overlay View
+
+    var overlay: some View {
+        VStack {
+            Text(songbookState.chordProRunning ? "Making the PDF" : "Your PDF is ready")
+                .font(.headline)
+            if let data = songbookState.pdf {
+                    AppKitUtils.PDFKitRepresentedView(data: data, annotations: $annotations)
+                        .frame(width: 400, height: 300)
+                        .border(Color.accentColor, width: 1)
+                    HStack {
+                        Button("Close") {
+                            songbookState.pdf = nil
+                        }
+                        Button("Save Songbook") {
+                            songbookState.exportFolderDialog = true
+                        }
+                        .keyboardShortcut(.defaultAction)
+                        .fileExporter(
+                            isPresented: $songbookState.exportFolderDialog,
+                            document: ExportDocument(pdf: songbookState.pdf),
+                            contentType: .pdf,
+                            defaultFilename: appState.settings.application.songbookTitle
+                        ) { _ in
+                            Logger.pdfBuild.notice("Export completed")
+                            songbookState.pdf = nil
+                        }
+                    }
+                    .padding()
+            } else {
+                ProgressView(
+                    value: Double(min(appState.settings.application.fileList.count + 2, sceneState.songbookProgress.item)),
+                    total: Double(appState.settings.application.fileList.count + 2)
+                ) {
+                    Text("This might take some time...")
+                }
+                .progressViewStyle(.circular)
+                Text("\(sceneState.songbookProgress.title)")
+                    .font(.caption)
+                    .padding(.top)
+            }
+        }
+        .padding()
+        .background(Color(nsColor: .textBackgroundColor))
+        .cornerRadius(12)
+        .shadow(radius: 10)
+        .opacity(songbookState.chordProRunning || songbookState.pdf != nil ? 1 : 0)
+    }
+}
+
+extension ExportSongbookView {
+
+    /// Set all **ChordPro** files in the list as enabled or disabled
+    /// - Parameter value: The selection state of the files
+    func setAllItems(to value: Bool) {
+        for (index, _) in appState.settings.application.fileList.enumerated() {
+            appState.settings.application.fileList[index].enabled = value
+        }
+    }
+
+    /// Check the status of the **ChordPro** files in the list
+    /// - Parameter value: The requested state of the files
+    /// - Returns: True or false
+    func checkAllStatus(_ value: Bool) -> Bool {
+        let items = appState.settings.application.fileList
+        return items.count == items.filter({$0.enabled == value}).count
     }
 }
 
@@ -311,7 +366,7 @@ extension ExportSongbookView {
             if let url = droppedURL {
                 UserFileBookmark.setBookmarkURL(UserFileItem.exportFolder, url)
                 songbookState.currentFolder = url.lastPathComponent
-                songbookState.makeFileList(appState: appState)
+                songbookState.makeFileListFromFolder(appState: appState)
             }
         }
         return true

@@ -2,8 +2,6 @@
 //  ChordProEditor+Coordinator.swift
 //  ChordProMac
 //
-//  Created by Nick Berendsen on 27/06/2024.
-//
 
 import SwiftUI
 

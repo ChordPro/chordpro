@@ -2,8 +2,6 @@
 //  MainView.swift
 //  ChordProMac
 //
-//  Created by Nick Berendsen on 26/05/2024.
-//
 
 import SwiftUI
 import OSLog
@@ -17,33 +15,19 @@ struct MainView: View {
     /// The observable state of the scene
     @StateObject private var sceneState = SceneStateModel()
     /// The observable state of the document
-    @FocusedValue(\.document) private var document: FileDocumentConfiguration<ChordProDocument>?
+    @Binding var document: ChordProDocument
     /// The body of the `View`
     var body: some View {
-        VStack {
-            HStack(spacing: 0) {
-                EditorPaneView()
-                PreviewPaneView()
-            }
+        VStack(spacing: 0) {
+            panes
             StatusView()
-                .padding(.horizontal)
         }
-        .animation(.default, value: sceneState.showEditor)
-        .animation(.default, value: sceneState.showPreview)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .animation(.default, value: sceneState.showLog)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 HStack {
-                    if sceneState.showEditor {
-                        FontSizeButtons()
-                            .labelStyle(.iconOnly)
-                    }
-                    Button {
-                        sceneState.showEditor.toggle()
-                    } label: {
-                        Label("Edit", systemImage: sceneState.showEditor ? "pencil.circle.fill" : "pencil.circle")
-                    }
-                    .disabled(!sceneState.showPreview)
-                    PreviewPDFButton(label: "Preview")
+                    PanesButtons(document: $document)
                     ExportSongButton(label: "Export as PDF")
                     ShareButton()
                         .labelStyle(.iconOnly)
@@ -54,31 +38,18 @@ struct MainView: View {
         /// Set the default panes
         .task {
             if file == nil {
-                sceneState.showEditor = true
-                sceneState.showPreview = false
+                sceneState.panes = .editorOnly
             } else {
-                switch appState.settings.application.openSongAction {
-                case .editorAndPreview:
-                    sceneState.showEditor = true
-                    sceneState.showPreview = true
-                case .editorOnly:
-                    sceneState.showEditor = true
-                    sceneState.showPreview = false
-                case .previewOnly:
-                    sceneState.showEditor = false
-                    sceneState.showPreview = true
-                }
                 /// Create the preview unless we show only the editor
                 if appState.settings.application.openSongAction != .editorOnly {
+                    sceneState.file = file
                     do {
-                        let pdf = try await sceneState.exportToPDF(text: document?.document.text ?? "error")
+                        let pdf = try await sceneState.exportToPDF(text: document.text)
                         /// Show the preview
                         sceneState.preview.data = pdf.data
-                        sceneState.showPreview = true
                     } catch {
-                        /// Hide the preview and show the editor; something went wrong
-                        sceneState.showEditor = true
-                        sceneState.showPreview = false
+                        /// Something went wrong
+                        Logger.pdfBuild.error("\(error.localizedDescription, privacy: .public)")
                     }
                 }
             }
@@ -93,6 +64,23 @@ struct MainView: View {
         .task {
             appState.chordProInfo = try? await Terminal.getChordProInfo()
             appState.directives = Directive.getChordProDirectives(chordProInfo: appState.chordProInfo)
+        }
+    }
+    /// The panes of the `View`
+    @ViewBuilder var panes: some View {
+        switch sceneState.panes {
+        case .editorOnly:
+            EditorPaneView(document: $document)
+        case .editorAndPreview:
+            HStack(spacing: 0) {
+                EditorPaneView(document: $document)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                PreviewPaneView(document: $document)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+            .frame(maxHeight: .infinity)
+        case .previewOnly:
+            PreviewPaneView(document: $document)
         }
     }
 }

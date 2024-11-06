@@ -2,8 +2,6 @@
 //  HelpButtons.swift
 //  ChordProMac
 //
-//  Created by Nick Berendsen on 01/06/2024.
-//
 
 import SwiftUI
 

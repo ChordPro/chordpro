@@ -2,8 +2,6 @@
 //  ChordProEditor.swift
 //  ChordProMac
 //
-//  Created by Nick Berendsen on 27/06/2024.
-//
 
 import SwiftUI
 
@@ -13,10 +11,12 @@ import SwiftUI
 struct ChordProEditor: NSViewRepresentable {
     /// The `Binding` to the text of the document
     @Binding var text: String
-    /// The ``Settings`` for the editor
+    /// The  settings for the editor
     let settings: Settings
     /// All the directives we know about
     let directives: [ChordProDirective]
+    /// The log from the song parser
+    let log: [LogItem]
     /// The 'introspect' callback with the editor``Internals``
     private(set) var introspect: IntrospectCallback?
     /// Make a `coordinator` for the `NSViewRepresentable`
@@ -34,6 +34,7 @@ struct ChordProEditor: NSViewRepresentable {
         wrapper.textView.parent = self
         wrapper.textView.font = settings.font
         wrapper.textView.string = text
+        wrapper.textView.log = log
         /// Wait for next cycle and set the textview as first responder
         Task { @MainActor in
             highlightText(textView: wrapper.textView)
@@ -47,6 +48,14 @@ struct ChordProEditor: NSViewRepresentable {
     ///   - view: The wrapped editor
     ///   - context: The context
     func updateNSView(_ wrapper: Wrapper, context: Context) {
+        if wrapper.textView.log != log {
+            wrapper.textView.log = log
+            wrapper.selectionNeedsDisplay()
+        }
+        if wrapper.textView.directives.map(\.directive) != directives.map(\.directive) {
+            wrapper.textView.directives = directives
+            wrapper.selectionNeedsDisplay()
+        }
         /// Update the text in the TextView when it is changed from *outside*; like when adding the example song
         if context.coordinator.task == nil, self.text != wrapper.textView.string {
             wrapper.textView.string = text
@@ -86,6 +95,7 @@ extension ChordProEditor {
         guard let introspect = introspect else { return }
         /// Set the internals of the editor
         let internals = Internals(
+            currentLineNumber: view.currentLineNumber,
             directive: view.currentDirective,
             directiveArgument: view.currentDirectiveArgument,
             directiveRange: view.currentDirectiveRange,

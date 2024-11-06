@@ -2,8 +2,6 @@
 //  ChordProMacApp.swift
 //  ChordProMac
 //
-//  Created by Nick Berendsen on 26/05/2024.
-//
 
 import SwiftUI
 
@@ -19,7 +17,10 @@ import SwiftUI
         // MARK: Song Document View
 
         DocumentGroup(newDocument: ChordProDocument(text: appState.newDocumentContent)) { file in
-            if file.fileURL == nil && file.document.text == appState.standardDocumentContent && appState.settings.application.showWelcomeWindow {
+            if file.fileURL == nil &&
+                file.document.text == appState.standardDocumentContent &&
+                appState.settings.application.showWelcomeWindow &&
+                !(NSDocumentController.shared.currentDocument?.isDocumentEdited ?? false) {
                 ProgressView()
                     .withHostingWindow { window in
                         window?.alphaValue = 0
@@ -27,7 +28,7 @@ import SwiftUI
                         appDelegate.showWelcomeWindow()
                     }
             } else {
-                MainView(file: file.fileURL)
+                MainView(file: file.fileURL, document: file.$document)
                     .frame(minHeight: 680)
                     .environmentObject(appState)
                 /// Give the scene access to the document
@@ -40,7 +41,7 @@ import SwiftUI
             }
         }
         .commands {
-            CommandGroup(replacing: CommandGroupPlacement.appInfo) {
+            CommandGroup(replacing: .appInfo) {
                 Button("About ChordPro") {
                     appDelegate.showAboutWindow()
                 }
@@ -51,11 +52,17 @@ import SwiftUI
             }
 #endif
             CommandGroup(after: .importExport) {
+                LogButtons(buttons: [.export], exportLabel: "Save Messages…")
+                    .environmentObject(appState)
+                Divider()
                 ExportSongButton(label: "Export as PDF…")
                     .environmentObject(appState)
                 Divider()
                 PrintPDFButton(label: "Print…")
                     .environmentObject(appState)
+            }
+            CommandGroup(after: .textEditing) {
+                LogButtons(buttons: [.clear])
             }
             CommandMenu("Songbook") {
                 Button("Export Folder…") {
