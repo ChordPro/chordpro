@@ -76,9 +76,6 @@ method setup_messages_ctxmenu() {
     $id = Wx::NewId;
     $menu->Append( $id, "Save the messages to a file", "", Wx::wxITEM_NORMAL );
     Wx::Event::EVT_MENU( $self, $id, $self->can("OnMessagesSave") );
-    $id = Wx::NewId;
-    $menu->Append( $id, "Insert runtime information", "", Wx::wxITEM_NORMAL );
-    Wx::Event::EVT_MENU( $self, $id, $self->can("OnMessagesRuntimeInfo") );
     Wx::Event::EVT_CONTEXT_MENU( $self->{t_messages},
 				 sub { $_[0]->PopupMenu( $menu,
 							 Wx::wxDefaultPosition ) } );
@@ -259,6 +256,11 @@ method OnMessagesRuntimeInfo($event) {
 method OnMessagesSave($event) {
     my $conf = Wx::ConfigBase::Get;
     my $file = $state{messages}{savedas} // "";
+
+    # Starting the dialog and cancel it is now the official way to get
+    # the runtime info into the log messages :).
+    $self->OnMessagesRuntimeInfo($event);
+
     my $fd = Wx::FileDialog->new
       ( $self,
 	_T("Choose file to save in"),
@@ -269,7 +271,6 @@ method OnMessagesSave($event) {
 
     my $ret = $fd->ShowModal;
     if ( $ret == wxID_OK ) {
-	$self->OnMessagesRuntimeInfo($event);
 	$file = $fd->GetPath;
 	$self->{t_messages}->SaveFile($file);
 	$self->log( 'S',  "Messages saved." );
