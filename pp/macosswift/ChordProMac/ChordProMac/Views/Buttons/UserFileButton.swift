@@ -2,12 +2,8 @@
 //  UserFileButton.swift
 //  ChordProMac
 //
-//  Created by Nick Berendsen on 26/06/2024.
-//
 
 import SwiftUI
-import UniformTypeIdentifiers
-import OSLog
 
 /// SwiftUI `View`to select a file
 /// 

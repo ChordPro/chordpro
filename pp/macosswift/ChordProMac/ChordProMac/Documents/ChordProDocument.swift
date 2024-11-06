@@ -2,8 +2,6 @@
 //  ChordProDocument.swift
 //  ChordProMac
 //
-//  Created by Nick Berendsen on 26/05/2024.
-//
 
 import SwiftUI
 import UniformTypeIdentifiers
@@ -16,6 +14,14 @@ struct ChordProDocument: FileDocument {
     static let fileExtension: [String] = ["chordpro", "cho", "crd", "chopro", "chord", "pro"]
     /// The document text for a new song
     static let newText: String = "{title: New Song}\n"
+    /// A warning for a line in the source; defined as a directive
+    static let warningDirective = Directive(
+        directive: "Warning",
+        group: .metadata,
+        icon: "exclamationmark.triangle",
+        editable: false,
+        help: "A warning is found"
+    )
     /// The text of the song
     var text: String
     /// Init the song
@@ -24,12 +30,14 @@ struct ChordProDocument: FileDocument {
     }
     /// Init the configuration
     init(configuration: ReadConfiguration) throws {
-        guard let data = configuration.file.regularFileContents
+        guard
+            let data = configuration.file.regularFileContents,
+            let text = String(data: data, encoding: .utf8)
         else {
             throw AppError.readDocumentError
         }
         /// Replace any Windows line endings
-        text = String(decoding: data, as: UTF8.self).replacingOccurrences(of: "\r\n", with: "\n")
+        self.text = text.replacingOccurrences(of: "\r\n", with: "\n")
     }
     /// Save the song
     func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {

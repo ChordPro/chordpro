@@ -2,8 +2,6 @@
 //  PDFKitRepresentedView.swift
 //  ChordProMac
 //
-//  Created by Nick Berendsen on 26/07/2023.
-//
 
 import SwiftUI
 import PDFKit

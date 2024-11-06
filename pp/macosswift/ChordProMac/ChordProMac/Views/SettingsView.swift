@@ -2,8 +2,6 @@
 //  SettingsView.swift
 //  ChordProMac
 //
-//  Created by Nick Berendsen on 27/05/2024.
-//
 
 import SwiftUI
 import UniformTypeIdentifiers
@@ -110,8 +108,8 @@ extension SettingsView {
             .wrapSettingsSection(title: "Template for a New Song")
             VStack {
                 Picker("Options", selection: $appState.settings.application.openSongAction) {
-                    ForEach(AppSettings.PaneView.allCases, id: \.self) { option in
-                        Text("\(option.rawValue)")
+                    ForEach(SceneStateModel.Panes.allCases, id: \.self) { option in
+                        Text("\(option.description)")
                     }
                 }
                 .pickerStyle(.radioGroup)

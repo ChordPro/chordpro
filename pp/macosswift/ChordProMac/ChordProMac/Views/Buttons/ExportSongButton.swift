@@ -2,8 +2,6 @@
 //  ExportSongButton.swift
 //  ChordProMac
 //
-//  Created by Nick Berendsen on 26/05/2024.
-//
 
 import SwiftUI
 import OSLog
@@ -42,7 +40,7 @@ struct ExportSongButton: View {
                 }
             },
             label: {
-                Label(label, systemImage: "square.and.arrow.up.on.square")
+                Label(label, systemImage: "doc.text")
             }
         )
         /// Disable the button when there is no document window in focus and no scene state available

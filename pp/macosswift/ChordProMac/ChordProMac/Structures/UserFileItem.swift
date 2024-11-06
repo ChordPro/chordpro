@@ -2,8 +2,6 @@
 //  UserFileItem.swift
 //  ChordProMac
 //
-//  Created by Nick Berendsen on 01/06/2024.
-//
 
 import Foundation
 import UniformTypeIdentifiers
@@ -21,6 +19,8 @@ enum UserFileItem: String, UserFile {
     case exportFolder
     /// A songbook cover
     case songbookCover
+    /// A songbook list
+    case songbookList
     /// The ID of the file item
     var id: String {
         return self.rawValue
@@ -39,6 +39,8 @@ enum UserFileItem: String, UserFile {
             return [UTType.folder]
         case .songbookCover:
             return [UTType.pdf]
+        case .songbookList:
+            return [UTType.plainText]
         }
     }
     /// The optional calculated label of the file
@@ -60,6 +62,8 @@ enum UserFileItem: String, UserFile {
             return "square.and.arrow.up"
         case .songbookCover:
             return "doc.richtext"
+        case .songbookList:
+            return "music.note.list"
         }
     }
     /// Protocol requirement; not supported with macOS 12
@@ -75,6 +79,8 @@ enum UserFileItem: String, UserFile {
             return "Select a folder with your songs"
         case .songbookCover:
             return "Select a PDF as cover for the songbook"
+        case .songbookList:
+            return "Select a file with your list of songs"
         }
     }
 }

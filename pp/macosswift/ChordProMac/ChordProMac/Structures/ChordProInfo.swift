@@ -2,8 +2,6 @@
 //  ChordProInfo.swift
 //  ChordProMac
 //
-//  Created by Nick Berendsen on 13/06/2024.
-//
 
 import Foundation
 

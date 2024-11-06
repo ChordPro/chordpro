@@ -2,8 +2,6 @@
 //  ChordProEditor+LineNumbersView.swift
 //  ChordProMac
 //
-//  Created by Nick Berendsen on 27/06/2024.
-//
 
 import AppKit
 
@@ -92,32 +90,61 @@ extension ChordProEditor {
                     )
                     /// Bool if the line should be highlighted
                     let highlight = markerRect.minY == textView.currentParagraphRect?.minY
+                    /// Bool if the line contains a warning
+                    let warning = textView.log.map(\.lineNumber).contains(lineNumber)
                     /// Check if the paragraph contains a directive
                     var directive: ChordProDirective?
-                    textStorage.enumerateAttribute(.directive, in: nsRange) {values, _, _ in
-                        if let value = values as? String, textView.directives.map(\.directive).contains(value) {
-                            directive = textView.directives.first { $0.directive == value }
+                    if warning {
+                        directive = ChordProDocument.warningDirective
+                    } else {
+                        textStorage.enumerateAttribute(.directive, in: nsRange) {values, _, _ in
+                            if let value = values as? String, textView.directives.map(\.directive).contains(value) {
+                                directive = textView.directives.first { $0.directive == value }
+                            }
                         }
                     }
                     /// Draw the line number
                     drawLineNumber(
                         lineNumber,
                         inRect: markerRect,
-                        highlight: highlight
+                        highlight: highlight,
+                        warning: warning
                     )
                     /// Draw a symbol if we have a known directive
                     if let directive {
                         drawDirectiveIcon(
                             directive,
                             inRect: markerRect,
-                            highlight: highlight
+                            highlight: highlight,
+                            warning: warning
                         )
+                    }
+                    if highlight {
+                        /// Set the current line number of the cursor
+                        textView.currentLineNumber = lineNumber
                     }
                     lineNumber += 1
                 }
             }
+
+            /// Draw line number for the optional extra (empty) line at the end of the text
+            if layoutManager.extraLineFragmentTextContainer != nil {
+                /// Set the marker rect
+                let markerRect = NSRect(
+                    x: 0,
+                    y: layoutManager.extraLineFragmentRect.origin.y,
+                    width: rect.width,
+                    height: layoutManager.extraLineFragmentRect.height
+                )
+                /// Bool if the line should be highlighted
+                let highlight = layoutManager.extraLineFragmentRect.minY == textView.currentParagraphRect?.minY
+                drawLineNumber(lineNumber, inRect: markerRect, highlight: highlight, warning: false)
+            }
+            /// Set the internals of the editor
+            textView.parent?.runIntrospect(textView)
+
             /// Draw the number of the line
-            func drawLineNumber(_ number: Int, inRect rect: NSRect, highlight: Bool) {
+            func drawLineNumber(_ number: Int, inRect rect: NSRect, highlight: Bool, warning: Bool) {
                 var attributes = ChordProEditor.rulerNumberStyle
                 attributes[NSAttributedString.Key.font] = font
                 switch highlight {
@@ -128,6 +155,10 @@ extension ChordProEditor {
                 case false:
                     attributes[NSAttributedString.Key.foregroundColor] = NSColor.secondaryLabelColor
                 }
+                /// Set the foregroundcolor to red if we have a warning
+                if warning {
+                    attributes[NSAttributedString.Key.foregroundColor] = NSColor.red
+                }
                 /// Define the rect of the string
                 var stringRect = rect
                 /// Move the string a bit up
@@ -137,7 +168,7 @@ extension ChordProEditor {
                 NSString(string: "\(number)").draw(in: stringRect, withAttributes: attributes)
             }
             /// Draw the directive icon of the line
-            func drawDirectiveIcon(_ directive: ChordProDirective, inRect rect: NSRect, highlight: Bool) {
+            func drawDirectiveIcon(_ directive: ChordProDirective, inRect rect: NSRect, highlight: Bool, warning: Bool) {
                 var iconRect = rect
                 let imageAttachment = NSTextAttachment()
                 let imageConfiguration = NSImage.SymbolConfiguration(pointSize: font.pointSize * 0.7, weight: .medium)
@@ -146,13 +177,14 @@ extension ChordProEditor {
                     let imageString = NSMutableAttributedString(attachment: imageAttachment)
                     imageString.addAttribute(
                         .foregroundColor,
-                        value: highlight ? NSColor.textColor : NSColor.secondaryLabelColor,
+                        value: warning ? NSColor.red : highlight ? NSColor.textColor : NSColor.secondaryLabelColor,
                         range: NSRange(location: 0, length: imageString.length)
                     )
                     let imageSize = imageString.size()
-                    let offset = (rect.height - imageSize.height) * 0.5
+                    /// Move the image a bit down
+                    iconRect.origin.y += (layoutManager.lineHeight - imageSize.height) - (layoutManager.baselineNudge * 1.4 )
+                    /// And to the right side of the ruler
                     iconRect.origin.x += iconRect.width - (imageSize.width * 1.4)
-                    iconRect.origin.y += (offset)
                     imageString.draw(in: iconRect)
                 }
             }

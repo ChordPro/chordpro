@@ -1,8 +1,6 @@
 //
-//  NSWindow+extension (macOS).swift
-//  Chord Provider
-//
-//  © 2024 Nick Berendsen
+//  NSWindow+extension.swift
+//  ChordProMac
 //
 
 import SwiftUI

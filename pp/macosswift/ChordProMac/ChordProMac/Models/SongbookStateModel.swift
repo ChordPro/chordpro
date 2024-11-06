@@ -2,8 +2,6 @@
 //  SongbookStateModel.swift
 //  ChordProMac
 //
-//  Created by Nick Berendsen on 20/09/2024.
-//
 
 import AppKit
 import OSLog
@@ -12,7 +10,7 @@ import OSLog
 class SongbookStateModel: ObservableObject {
     /// The songbook as PDF
     @Published var pdf: Data?
-    /// Present an export dialog
+    /// Bool to present an export dialog
     @Published  var exportFolderDialog = false
     /// Bool if **ChordPro** is making the songbook
     @Published var chordProRunning: Bool = false
@@ -24,9 +22,14 @@ class SongbookStateModel: ObservableObject {
     @Published var currentFolder: String? = SongbookStateModel.exportFolderTitle
     /// The current selected cover
     @Published var currentCover: String? = SongbookStateModel.exportCoverTitle
+    /// Bool to present the import songlist dialog
+    @Published var importSonglistDialog: Bool = false
+    /// Bool to present the export songlist dialog
+    @Published var exportSonglistDialog: Bool = false
 }
 
 extension SongbookStateModel {
+
     /// Get the label for a song count
     func songCountLabel(count: Int) -> String {
         let folder = UserFileBookmark.getBookmarkURL(UserFileItem.exportFolder)
@@ -38,11 +41,44 @@ extension SongbookStateModel {
         }
     }
 
-    // MARK: Make a list of songs
+    // MARK: Make a list of songs from a file
+
+    /// Make a list of songs from a selected file
+    /// - Parameters:
+    ///   - fileURL: The URL of the selected file
+    ///   - appState: The state of the application with the songbook settings
+    @MainActor func makeFileListFromFile(fileURL: URL, appState: AppStateModel, sceneState: SceneStateModel) {
+        do {
+            let data = try String(contentsOf: fileURL, encoding: .utf8)
+            var fileList: [FileListItem] = []
+            var status: AppError = .noErrorOccurred
+            for file in data.components(separatedBy: .newlines) where !file.isEmpty {
+                let url = URL(fileURLWithPath: file)
+                if url.exist() {
+                    fileList.append(
+                        FileListItem(
+                            url: url,
+                            path: url.deletingLastPathComponent().path.split(separator: "/").map(String.init),
+                            enabled: true
+                        )
+                    )
+                } else {
+                    status = .songbookListMissingItems
+                    sceneState.logMessages.append(.init(type: .error, message: "'\(file)' not found"))
+                }
+            }
+            appState.settings.application.fileList = fileList
+            sceneState.exportStatus = status
+        } catch {
+            Logger.fileAccess.error("\(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    // MARK: Make a list of songs from a folder
 
     /// Make a list of songs from the selected folder
     /// - Parameter appState: The state of the application with the songbook settings
-    @MainActor func makeFileList(appState: AppStateModel) {
+    @MainActor func makeFileListFromFolder(appState: AppStateModel) {
         var fileList: [FileListItem] = []
 
         let enumeratorOptions: FileManager.DirectoryEnumerationOptions = appState.settings.application.recursiveFileList ? [] : [.skipsSubdirectoryDescendants]
@@ -84,6 +120,22 @@ extension SongbookStateModel {
         appState.settings.application.fileList = fileList
     }
 
+    func getSongsPathList(
+        appState: AppStateModel
+    ) -> [String] {
+        /// Start with a fresh list
+        var songsPath: [String] = []
+        /// Collect the songs that are enabled
+        if let songsFolder = UserFileBookmark.getBookmarkURL(UserFileItem.exportFolder) {
+            /// Get access to the URL
+            _ = songsFolder.startAccessingSecurityScopedResource()
+            songsPath = appState.settings.application.fileList.filter {$0.enabled == true}.map(\.url.path)
+            /// Close access to the URL
+            songsFolder.stopAccessingSecurityScopedResource()
+        }
+        return songsPath
+    }
+
     // MARK: Make a Songbook
 
     /// Make a **ChordPro** songbook with the list of songs
@@ -95,19 +147,11 @@ extension SongbookStateModel {
         sceneState: SceneStateModel
     ) {
         chordProRunning = true
-        /// Start with a fresh list
-        var songsURL: [String] = []
-        /// Collect the songs
-        if let songsFolder = UserFileBookmark.getBookmarkURL(UserFileItem.exportFolder) {
-            /// Get access to the URL
-            _ = songsFolder.startAccessingSecurityScopedResource()
-            songsURL = appState.settings.application.fileList.filter {$0.enabled == true}.map(\.url.path)
-            /// Close access to the URL
-            songsFolder.stopAccessingSecurityScopedResource()
-        }
+        /// Get the list with songs that are enabled in the current list
+        let songsPath = getSongsPathList(appState: appState)
         /// Write it to the file list
         do {
-            try songsURL
+            try songsPath
                 .joined(separator: "\n")
                 .write(to: sceneState.fileListURL, atomically: true, encoding: String.Encoding.utf8)
         } catch {

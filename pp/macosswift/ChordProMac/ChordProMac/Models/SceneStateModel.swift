@@ -2,8 +2,6 @@
 //  SceneStateModel.swift
 //  ChordProMac
 //
-//  Created by Nick Berendsen on 26/05/2024.
-//
 
 import SwiftUI
 
@@ -18,6 +16,14 @@ final class SceneStateModel: ObservableObject {
     @Published var alertError: Error?
     /// Bool if we want to show the log
     @Published var showLog: Bool = false
+    /// The log messages
+    @Published var logMessages: [ChordProEditor.LogItem] = [.init()]
+    /// The log messages that are relevant for the editor
+    var editorMessages: [ChordProEditor.LogItem] = [.init()]
+    /// The prgress when creating a songbook
+    @Published var songbookProgress: (item: Int, title: String) = (0, "")
+    /// Bool to export the log mesages
+    @Published var exportLogDialog: Bool = false
     /// Status of the last **ChordPro** export
     @Published var exportStatus: AppError = .noErrorOccurred
     /// The temporary directory URL for processing files
@@ -40,10 +46,6 @@ final class SceneStateModel: ObservableObject {
     var exportURL: URL {
         temporaryDirectoryURL.appendingPathComponent(songFileName, conformingTo: .pdf)
     }
-    /// The URL of the log file
-    var logFileURL: URL {
-        temporaryDirectoryURL.appendingPathComponent(songFileName, conformingTo: .plainText)
-    }
     /// The URL of the file list with songs
     var fileListURL: URL {
         temporaryDirectoryURL.appendingPathComponent("filelist", conformingTo: .plainText)
@@ -63,12 +65,11 @@ final class SceneStateModel: ObservableObject {
     @Published var preview = PreviewState()
     /// The internals of the **ChordPro** editor
     @Published var editorInternals = ChordProEditor.Internals()
-    /// Bool to show the editor
-    @Published var showEditor: Bool = false
-    /// Bool to show the preview
-    @Published var showPreview: Bool = false
+    /// The pane(s) to show in ``MainView``
+    @Published var panes: Panes
     /// Init the class
     init() {
+        self.panes = AppStateModel.shared.settings.application.openSongAction
         self.defaultSongName = "New Song \(Date().formatted(date: .abbreviated, time: .standard))"
         try? FileManager.default.createDirectory(at: temporaryDirectoryURL, withIntermediateDirectories: true)
     }
@@ -125,12 +126,45 @@ extension SceneStateModel {
                 exportStatus = .pdfCreationError
                 /// Remove the task (if any)
                 customTask = nil
-                /// Open the editor
-                showEditor = true
-                /// Hide the preview
-                showPreview = false
-                /// Trow the error
+                /// Open the editor and hide the preview
+                panes = .editorOnly
+                /// Throw the error
                 throw error
+            }
+        }
+    }
+}
+
+extension SceneStateModel {
+
+    /// The panes we can thow in the ``MainView``
+    enum Panes: String, Codable, CaseIterable {
+        /// Show only the editor
+        case editorOnly = "Editor"
+        /// Show the editor and preview
+        case editorAndPreview = "Both"
+        /// Show only the preview
+        case previewOnly = "Preview"
+        /// The description for the ``SettingsView``
+        var description: String {
+            switch self {
+            case .editorOnly:
+                return "Open only the Editor"
+            case .editorAndPreview:
+                return "Open the Editor and the Preview"
+            case .previewOnly:
+                return "Open only the Preview"
+            }
+        }
+        /// Show the preview pane, optionaly with the editor
+        var showPreview: Panes {
+            switch self {
+            case .editorOnly:
+                return .editorAndPreview
+            case .editorAndPreview:
+                return .editorAndPreview
+            case .previewOnly:
+                return .previewOnly
             }
         }
     }

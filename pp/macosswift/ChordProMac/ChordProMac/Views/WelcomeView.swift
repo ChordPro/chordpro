@@ -2,8 +2,6 @@
 //  WelcomeView.swift
 //  ChordProMac
 //
-//  Created by Nick Berendsen on 20/09/2024.
-//
 
 import SwiftUI
 import OSLog
@@ -55,7 +53,7 @@ struct WelcomeView: View {
                                 NSDocumentController.shared.newDocument(nil)
                             },
                             label: {
-                                Label("Create a new song", systemImage: "doc")
+                                Label("Create a New Song", systemImage: "doc")
                             }
                         )
                         Button(
@@ -73,7 +71,7 @@ struct WelcomeView: View {
                                 }
                             },
                             label: {
-                                Label("Open an existing song", systemImage: "doc.badge.ellipsis")
+                                Label("Open an Existing Song", systemImage: "doc.badge.ellipsis")
                             }
                         )
                         Button(
@@ -82,7 +80,7 @@ struct WelcomeView: View {
                                 appDelegate.showExportSongbookWindow()
                             },
                             label: {
-                                Label("Make a songbook", systemImage: "doc.on.doc")
+                                Label("Create a Songbook", systemImage: "doc.on.doc")
                             }
                         )
                         Button(
@@ -94,7 +92,7 @@ struct WelcomeView: View {
                                 }
                             },
                             label: {
-                                Label("Open an example song", systemImage: "doc.text")
+                                Label("Open an Example Song", systemImage: "doc.text")
                             }
                         )
                         Divider()
@@ -102,12 +100,12 @@ struct WelcomeView: View {
                             .padding([.horizontal, .bottom])
                         if let url = URL(string: "https://www.chordpro.org/") {
                             Link(destination: url) {
-                                Label("Visit the **ChordPro** website", systemImage: "globe")
+                                Label("Visit the **ChordPro** Site", systemImage: "globe")
                             }
                         }
                         if let url = URL(string: "https://www.chordpro.org/chordpro") {
                             Link(destination: url) {
-                                Label("Read the documentation", systemImage: "book")
+                                Label("Read the Documentation", systemImage: "book")
                             }
                         }
                     case .recent:
@@ -142,6 +140,7 @@ struct WelcomeView: View {
                     Toggle("Show this window when creating a new document", isOn: $appState.settings.application.showWelcomeWindow)
                         .font(.footnote)
                         .foregroundColor(.secondary)
+                        .controlSize(.small)
                         .padding(.bottom, 6)
                 }
             }
