@@ -127,6 +127,7 @@ sub fetch_prefs {
 	$self->{sl_editor}->Show(0);
 	$self->{sz_editor}->Layout;
     }
+    $self->{fp_messages}->SetSelectedFont( Wx::Font->new($preferences{msgsfont}) );
 
     # Notation.
     $ctl = $self->{ch_notation};
@@ -217,6 +218,9 @@ sub store_prefs {
     $preferences{editfont} = $self->{fp_editor}->GetSelectedFont->GetNativeFontInfoDesc;
     $preferences{editcolour} = $self->{cp_editor}->GetColour->GetAsString(wxC2S_HTML_SYNTAX);
 
+    # Messages.
+    $preferences{msgsfont} = $self->{fp_messages}->GetSelectedFont->GetNativeFontInfoDesc;
+
     # Notation.
     my $n = $self->{ch_notation}->GetSelection;
     if ( $n > 0 ) {
@@ -266,6 +270,8 @@ sub restore_prefs {
 		     sub { $ctl->SetBackgroundColour
 			     ( Wx::Colour->new($preferences{editcolour}) ) } )
       if $ctl->can("SetBackgroundColour");
+    $font = Wx::Font->new($preferences{msgsfont});
+    $self->GetParent->{t_messages}->SetFont($font);
 }
 
 sub need_restart {
@@ -417,17 +423,6 @@ sub OnChTranscode {
     $event->Skip;
 }
 
-sub OnChEditFont {
-    my ($self, $event) = @_;
-    my $parent = $self->GetParent;
-    my $ctl = $parent->{t_editor};
-    return unless $ctl;
-    my $n = $self->{ch_editfont}->GetSelection;
-    my $font = $state{fonts}->[$n]->{font};
-    $font->SetPointSize($preferences{editsize});
-    $self->setnomod( $ctl, sub { $ctl->SetFont($font) } );
-}
-
 sub OnFontPickerChanged {
     my ($self, $event) = @_;
     my $parent = $self->GetParent;
@@ -437,15 +432,13 @@ sub OnFontPickerChanged {
     $self->setnomod( $ctl, sub { $ctl->SetFont($font) } );
 }
 
-sub OnSpEditFont {
+sub OnMessagesFontPickerChanged {
     my ($self, $event) = @_;
     my $parent = $self->GetParent;
-    my $ctl = $parent->{t_editor};
+    my $ctl = $parent->{t_messages};
     return unless $ctl;
-    my $n = $self->{sp_editfont}->GetValue;
-    my $font = $ctl->GetFont;
-    $font->SetPointSize($n);
-    $self->setnomod( $ctl, sub { $ctl->SetFont($font) } );
+    my $font = $self->{fp_messages}->GetSelectedFont;
+    $ctl->SetFont($font);
 }
 
 sub OnChEditColour {

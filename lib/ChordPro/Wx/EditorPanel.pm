@@ -288,6 +288,8 @@ method refresh() {
     my $mod = $self->{t_editor}->IsModified;
     my $font = Wx::Font->new($preferences{editfont});
     $self->{t_editor}->SetFont($font);
+    $font = Wx::Font->new($preferences{msgsfont});
+    $self->{t_messages}->SetFont($font);
     if ( $state{have_stc} ) {
 #	$stc->StyleSetBackground(wxSTC_STYLE_DEFAULT,
 #				 Wx::Colour->new($preferences{editcolour}));

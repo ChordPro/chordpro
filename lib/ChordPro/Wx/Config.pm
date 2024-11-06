@@ -73,6 +73,9 @@ my %prefs =
    editsize	   => FONTSIZE,
    editcolour	   => wxWHITE,
 
+   # Messages.
+   msgsfont	   => 0,
+
    # Notation.
    notation	   => "",
 
@@ -186,6 +189,9 @@ method Load :common {
 
     if ( $preferences{editfont} =~ /^\d+$/ ) {
 	$preferences{editfont} = $fonts[$preferences{editfont}]->{font}->GetNativeFontInfoDesc;
+    }
+    if ( $preferences{msgsfont} =~ /^\d+$/ ) {
+	$preferences{msgsfont} = $fonts[$preferences{msgsfont}]->{font}->GetNativeFontInfoDesc;
     }
     delete $ENV{CHORDPRO_LIB};
 

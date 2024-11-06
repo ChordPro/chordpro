@@ -139,6 +139,8 @@ method refresh() {
     $self->{w_rearrange}->SetSelection($state{from_songbook}-1)
       if $state{from_songbook};
     $state{from_songbook} = 0;
+    my $font = Wx::Font->new($preferences{msgsfont});
+    $self->{t_messages}->SetFont($font);
     setup_messages_ctxmenu($self);
     $self->previewtooltip;
     $self->messagestooltip;
