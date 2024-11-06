@@ -362,6 +362,50 @@
                             <object class="sizeritem">
                                 <border>5</border>
                                 <flag>wxALIGN_CENTER_VERTICAL</flag>
+                                <object class="wxStaticText" name="l_messages" base="EditStaticText">
+                                    <label>Messages</label>
+                                    <attribute>1</attribute>
+                                </object>
+                            </object>
+                            <object class="sizeritem">
+                                <border>0</border>
+                                <flag>wxEXPAND</flag>
+                                <object class="wxBoxSizer" name="sz_messages" base="EditBoxSizer">
+                                    <orient>wxHORIZONTAL</orient>
+                                    <attribute>1</attribute>
+                                    <object class="sizeritem">
+                                        <option>1</option>
+                                        <border>5</border>
+                                        <flag>wxLEFT|wxEXPAND</flag>
+                                        <object class="Wx::FontPickerCtrl" name="fp_messages" base="CustomWidget">
+                                            <events>
+                                                <handler event="EVT_FONTPICKER_CHANGED">OnMessagesFontPickerChanged</handler>
+                                            </events>
+                                            <tooltip>Select a font and font size for the messages</tooltip>
+                                            <arguments>
+                                                <argument>$parent</argument>
+                                                <argument>$id</argument>
+                                                <argument>wxNullFont</argument>
+                                                <argument>wxDefaultPosition</argument>
+                                                <argument>wxDefaultSize</argument>
+                                                <argument>wxFNTP_FONTDESC_AS_LABEL | wxFNTP_USEFONT_FOR_LABEL</argument>
+                                            </arguments>
+                                        </object>
+                                    </object>
+                                </object>
+                            </object>
+                            <object class="sizeritem">
+                                <span>1, 2</span>
+                                <border>0</border>
+                                <flag>wxEXPAND</flag>
+                                <object class="wxStaticLine" name="sl_messages" base="EditStaticLine">
+                                    <style>wxLI_HORIZONTAL</style>
+                                </object>
+                            </object>
+                            <object class="sizerslot" />
+                            <object class="sizeritem">
+                                <border>5</border>
+                                <flag>wxALIGN_CENTER_VERTICAL</flag>
                                 <object class="wxStaticText" name="l_editor" base="EditStaticText">
                                     <label>Editor</label>
                                     <attribute>1</attribute>
@@ -418,50 +462,6 @@
                                 <object class="wxStaticLine" name="sl_editor" base="EditStaticLine">
                                     <style>wxLI_HORIZONTAL</style>
                                     <attribute>1</attribute>
-                                </object>
-                            </object>
-                            <object class="sizerslot" />
-                            <object class="sizeritem">
-                                <border>5</border>
-                                <flag>wxALIGN_CENTER_VERTICAL</flag>
-                                <object class="wxStaticText" name="l_messages" base="EditStaticText">
-                                    <label>Messages</label>
-                                    <attribute>1</attribute>
-                                </object>
-                            </object>
-                            <object class="sizeritem">
-                                <border>0</border>
-                                <flag>wxEXPAND</flag>
-                                <object class="wxBoxSizer" name="sz_messages" base="EditBoxSizer">
-                                    <orient>wxHORIZONTAL</orient>
-                                    <attribute>1</attribute>
-                                    <object class="sizeritem">
-                                        <option>1</option>
-                                        <border>5</border>
-                                        <flag>wxLEFT|wxEXPAND</flag>
-                                        <object class="Wx::FontPickerCtrl" name="fp_messages" base="CustomWidget">
-                                            <events>
-                                                <handler event="EVT_FONTPICKER_CHANGED">OnMessagesFontPickerChanged</handler>
-                                            </events>
-                                            <tooltip>Select a font and font size for the messages</tooltip>
-                                            <arguments>
-                                                <argument>$parent</argument>
-                                                <argument>$id</argument>
-                                                <argument>wxNullFont</argument>
-                                                <argument>wxDefaultPosition</argument>
-                                                <argument>wxDefaultSize</argument>
-                                                <argument>wxFNTP_FONTDESC_AS_LABEL | wxFNTP_USEFONT_FOR_LABEL</argument>
-                                            </arguments>
-                                        </object>
-                                    </object>
-                                </object>
-                            </object>
-                            <object class="sizeritem">
-                                <span>1, 2</span>
-                                <border>0</border>
-                                <flag>wxEXPAND</flag>
-                                <object class="wxStaticLine" name="sl_messages" base="EditStaticLine">
-                                    <style>wxLI_HORIZONTAL</style>
                                 </object>
                             </object>
                             <object class="sizerslot" />

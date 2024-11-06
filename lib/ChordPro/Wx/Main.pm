@@ -165,6 +165,8 @@ method attach_events() {
 	    Wx::Event::EVT_LEFT_UP( $n, $handler );
 	}
     }
+
+    Wx::Event::EVT_MAXIMIZE( $self, $self->can("OnMaximized") );
 }
 
 method select_mode( $mode ) {
@@ -221,7 +223,7 @@ method init( $options ) {
 
 method refresh() {
     $self->init_recents;
-    $self->SetMenuBar(undef);
+    $self->setup_menubar("M");
 }
 
 method init_recents() {
@@ -388,6 +390,12 @@ method OnHelp_Example($event) {
 
 method OnHelp_Site($event) {
     Wx::LaunchDefaultBrowser("https://www.chordpro.org/");
+}
+
+method OnMaximize($event) {
+    my $top = wxTheApp->GetTopWindow;
+    my $full = $top->IsMaximized;
+    $top->Maximize( !$full );
 }
 
 method OnNew($event) {

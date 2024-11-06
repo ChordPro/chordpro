@@ -12,6 +12,7 @@ class ChordPro::Wx::SongbookExportPanel
 use Wx qw[:everything];
 use Wx::Locale gettext => "_T";
 
+use ChordPro::Utils qw(is_macos);
 use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
 
@@ -46,75 +47,13 @@ ADJUST {
 
 method name() { "Export Songbook" }
 
-################ ################
-
-method setup_menubar() {
-
-    my $mb =
-    make_menubar( $self,
-      [ [ wxID_FILE,
-	  [ [ wxID_NEW, "", "Create or open a ChordPro document", "OnNew" ],
-	    [],
-	    [ wxID_ANY, "Export to PDF...", "Save the preview to a PDF",
-	      "OnPreviewSave" ],
-	    [],
-	    [ wxID_ANY, "Show messages",
-	      "Hide or show the messages pane", 1, "OnWindowMessages" ],
-	    [ wxID_ANY, "Save messages",
-	      "Save the messages to a file", "OnMessagesSave" ],
-	    [ wxID_ANY, "Clear messages",
-	      "Clear the current messages", "OnMessagesClear" ],
-	    [],
-	    [ wxID_EXIT, "", "Close window and exit", "OnClose" ],
-	  ]
-	],
-	[ wxID_EDIT,
-	  [ [ wxID_PREFERENCES, "Preferences...\tCtrl-R",
-	      "Preferences", "OnPreferences" ],
-	  ]
-	],
-	[ wxID_ANY, "Tasks",
-	  [ [ wxID_ANY, "Default preview\tCtrl-P",
-	      "Preview with default formatting", "OnPreview" ],
-	    [ wxID_ANY, "No chord diagrams",
-	      "Preview without chord diagrams", "OnPreviewNoDiagrams" ],
-	    [ wxID_ANY, "Lyrics only",
-	      "Preview with just the lyrics". "OnPreviewLyricsOnly" ],
-	    [ wxID_ANY, "More...",
-	      "Transpose, transcode, and more", "OnPreviewMore" ],
-	    [],
-	    [ wxID_ANY, "Show Preview",
-	      "Hide or show the preview pane", 1, "OnWindowPreview" ],
-	    [ wxID_ANY, "Save preview", "Save the preview to a PDF",
-	      "OnPreviewSave" ],
-	  ]
-	],
-	[ wxID_HELP,
-	  [ [ wxID_ANY, "ChordPro file format",
-	      "Help about the ChordPro file format", "OnHelp_ChordPro" ],
-	    [ wxID_ANY, "ChordPro configuration files",
-	      "Help about the configuration files", "OnHelp_Config" ],
-	    [],
-	    [ wxID_ANY, "Enable debugging info in PDF",
-	      "Add sources and configuration files to the PDF for debugging purposes", 1,
-	      "OnHelp_DebugInfo" ],
-	    [ wxID_ANY, "Insert runtime info",
-	      "Insert runtime info into the messages pane for diagnostic purposes",
-	      "OnMessagesRuntimeInfo" ],
-	    [],
-	    [ wxID_ABOUT, "About ChordPro", "About WxChordPro", "OnAbout" ],
-	  ]
-	]
-      ] );
-}
-
 ################ API Functions ################
 
 method refresh() {
 
     setup_logger($self);
 
-    $self->setup_menubar;
+    $self->setup_menubar("S");
 
     $state{have_webview} = ref($self->{webview}) eq 'Wx::WebView';
     $self->log( 'I', "Using " .

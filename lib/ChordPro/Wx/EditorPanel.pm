@@ -12,6 +12,7 @@ class ChordPro::Wx::EditorPanel
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
 
+use ChordPro::Utils qw( is_macos );
 use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
 use ChordPro::Utils qw( max demarkup is_macos is_msw plural );
@@ -58,78 +59,6 @@ ADJUST {
 ################ ################
 
 method name() { "Editor" }
-
-################ ################
-
-method setup_menubar() {
-
-    my $mb =
-    make_menubar( $self,
-      [ [ wxID_FILE,
-	  [ [ wxID_NEW, "", "Create another ChordPro document", "OnNew" ],
-	    [ wxID_OPEN, "", "Open an existing ChordPro document", "OnOpen" ],
-	    [],
-	    [ wxID_SAVE, "", "Save the current ChordPro file", "OnSave" ],
-	    [ wxID_SAVEAS, "", "Save under a different name", "OnSaveAs" ],
-	    [],
-	    [ wxID_ANY, "Export to PDF...", "Save the preview to a PDF",
-	      "OnPreviewSave" ],
-	    [],
-	    [ wxID_ANY, "Show messages",
-	      "Hide or show the messages pane", 1, "OnWindowMessages" ],
-	    [ wxID_ANY, "Save messages",
-	      "Save the messages to a file", "OnMessagesSave" ],
-	    [ wxID_ANY, "Clear messages",
-	      "Clear the current messages", "OnMessagesClear" ],
-	    [],
-	    [ wxID_EXIT, "", "Close window and exit", "OnClose" ],
-	  ]
-	],
-	[ wxID_EDIT,
-	  [ [ wxID_UNDO,   "OnUndo" ],
-	    [ wxID_REDO,   "OnRedo" ],
-	    [],
-	    [ wxID_CUT,    "OnCut" ],
-	    [ wxID_COPY,   "OnCopy" ],
-	    [ wxID_PASTE,  "OnPaste" ],
-	    [ wxID_DELETE, "OnDelete" ],
-	    [],
-	    [ wxID_PREFERENCES, "Preferences...\tCtrl-R",
-	      "Preferences", "OnPreferences" ],
-	  ]
-	],
-	[ wxID_ANY, "Tasks",
-	  [ [ wxID_ANY, "Default preview\tCtrl-P",
-	      "Preview with default formatting", "OnPreview" ],
-	    [ wxID_ANY, "No chord diagrams",
-	      "Preview without chord diagrams", "OnPreviewNoDiagrams" ],
-	    [ wxID_ANY, "Lyrics only",
-	      "Preview with just the lyrics", "OnPreviewLyricsOnly" ],
-	    [ wxID_ANY, "More...",
-	      "Transpose, transcode, and more", "OnPreviewMore" ],
-	    [],
-	    [ wxID_ANY, "Show Preview",
-	      "Hide or show the preview pane", 1, "OnWindowPreview" ],
-	  ]
-	],
-	[ wxID_HELP,
-	  [ [ wxID_ANY, "ChordPro file format",
-	      "Help about the ChordPro file format", "OnHelp_ChordPro" ],
-	    [ wxID_ANY, "ChordPro configuration files",
-	      "Help about the configuration files", "OnHelp_Config" ],
-	    [],
-	    [ wxID_ANY, "Enable debugging info in PDF",
-	      "Add sources and configuration files to the PDF for debugging", 1,
-	      "OnHelp_DebugInfo" ],
-	    [ wxID_ANY, "Insert runtime info",
-	      "Insert runtime info into the message pane for diagnostic purposes",
-	      "OnMessagesRuntimeInfo" ],
-	    [],
-	    [ wxID_ABOUT, "About ChordPro", "About WxChordPro", "OnAbout" ],
-	  ]
-	]
-      ] );
-}
 
 ################ wxStyledTextCtrl (Scintilla) ################
 
@@ -265,7 +194,7 @@ method refresh() {
 
     $self->setup_logger;
 
-    $self->setup_menubar;
+    $self->setup_menubar("E");
 
     $state{have_stc} = $self->{t_editor}->isa('Wx::StyledTextCtrl');
     $self->log( 'I', "Using " .
