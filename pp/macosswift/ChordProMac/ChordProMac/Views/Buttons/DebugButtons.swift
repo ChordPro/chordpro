@@ -2,8 +2,6 @@
 //  DebugButtons.swift
 //  ChordProMac
 //
-//  Created by Nick Berendsen on 17/09/2024.
-//
 
 import SwiftUI
 

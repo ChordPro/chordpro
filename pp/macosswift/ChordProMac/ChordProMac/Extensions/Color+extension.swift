@@ -2,8 +2,6 @@
 //  Color+extension.swift
 //  ChordProMac
 //
-//  Created by Nick Berendsen on 02/06/2024.
-//
 
 import SwiftUI
 

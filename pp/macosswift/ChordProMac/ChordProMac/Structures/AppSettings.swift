@@ -2,8 +2,6 @@
 //  AppSettings.swift
 //  ChordProMac
 //
-//  Created by Nick Berendsen on 27/05/2024.
-//
 
 import Foundation
 
@@ -48,7 +46,7 @@ extension AppSettings {
         /// Bool to show the Welcome window when creating a new document
         var showWelcomeWindow: Bool = true
         /// Action when opening an existing song
-        var openSongAction: PaneView = .editorAndPreview
+        var openSongAction: SceneStateModel.Panes = .editorAndPreview
         /// Bool to use a custom song template
         var useCustomSongTemplate: Bool = false
 
@@ -156,18 +154,5 @@ extension AppSettings {
         var deCapo: Bool = false
         /// Enable debug info in the PDF
         var debug: Bool = false
-    }
-}
-
-extension AppSettings {
-
-    /// Pane View options
-    enum PaneView: String, Codable, CaseIterable {
-        /// Show only the editor
-        case editorOnly = "Open only the Editor"
-        /// Show the editor and preview
-        case editorAndPreview = "Open the Editor and the Preview"
-        /// Show only the preview
-        case previewOnly = "Open only the Preview"
     }
 }

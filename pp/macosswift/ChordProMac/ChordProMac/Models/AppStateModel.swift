@@ -2,18 +2,14 @@
 //  AppStateModel.swift
 //  ChordProMac
 //
-//  Created by Nick Berendsen on 27/05/2024.
-//
 
 import Foundation
-import OSLog
 
 /// The observable state of the application
 /// - Note: Every open song window shares this state
 final class AppStateModel: ObservableObject {
-
+    /// The shared AppStateModel
     static let shared = AppStateModel()
-
     /// All the settings for the application
     @Published var settings: AppSettings {
         didSet {
@@ -40,10 +36,6 @@ final class AppStateModel: ObservableObject {
         /// Set the content of a new song
         self.standardDocumentContent = ChordProDocument.getSongTemplateContent(settings: settings)
         self.newDocumentContent = self.standardDocumentContent
-//        /// Set the Custom Content if selected
-//        if settings.application.useCustomSongTemplate {
-//            newDocumentContent = ChordProDocument.getSongTemplateContent()
-//        }.a
         /// Get the **ChordPro** info
         Task { @MainActor in
             chordProInfo = try? await Terminal.getChordProInfo()
@@ -92,5 +84,64 @@ final class AppStateModel: ObservableObject {
         }
         /// Return the basic settings
         return arguments
+    }
+}
+
+extension AppStateModel {
+
+    /// Export the log together with the runtimw info
+    /// - Parameter messages: All the messages crteated by the **ChordPro** CLI
+    /// - Returns: A formatted string
+    func exportMessages(messages: [ChordProEditor.LogItem]) -> String {
+        let log = messages.map { item -> String in
+            return "\(item.time): \(item.message)"
+        } .joined(separator: "\n")
+        return log + runtimeInfo
+    }
+
+    /// The **ChordPro** runtime info
+    var runtimeInfo: String {
+        if let chordProInfo = chordProInfo {
+            var text =
+"""
+
+-----------------------------------------------
+ChordPro Preview Editor version \(chordProInfo.general.chordpro.version)
+https://www.chordpro.org
+Copyright 2016,2024 Johan Vromans <jvromans@squirrel.nl>
+
+Mac GUI written in SwiftUI
+
+**Run-time information:**
+ ChordProCore:
+    \(chordProInfo.general.chordpro.version) (\(chordProInfo.general.chordpro.aux))
+  Perl:
+    \(chordProInfo.general.abc) (\(chordProInfo.general.perl.path))
+  Resource path:
+
+"""
+            for resource in chordProInfo.resources {
+                text += "    \(resource.path)\n"
+            }
+
+            text +=
+"""
+  ABC support:
+    \(chordProInfo.general.abc)
+
+**Modules and libraries:**
+
+"""
+            for module in chordProInfo.modules {
+                text += "    \(module.name)"
+                text += String(repeating: " ", count: 22 - module.name.count)
+                text += "\(module.version)\n"
+            }
+            text += "-----------------------------------------------"
+            return text
+        } else {
+            /// This should not happen
+            return "Runtime Information not available"
+        }
     }
 }

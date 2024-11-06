@@ -2,8 +2,6 @@
 //  ChordProEditor+highlight.swift
 //  ChordProMac
 //
-//  Created by Nick Berendsen on 27/06/2024.
-//
 
 import AppKit
 
@@ -105,7 +103,6 @@ extension ChordProEditor {
                 }
             }
         }
-
         /// Some extra love for known directives
         guard
             let knownDirectiveRegex = try? NSRegularExpression(

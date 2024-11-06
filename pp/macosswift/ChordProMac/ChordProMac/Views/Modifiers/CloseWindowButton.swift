@@ -2,19 +2,17 @@
 //  CloseWindowModifier.swift
 //  ChordProMac
 //
-//  Created by Nick Berendsen on 01/10/2024.
-//
 
 import SwiftUI
 
+/// SwiftUI `Modifier` to close an NSWindow
 struct CloseWindowModifier: ViewModifier {
-
     /// The action when the close button is pressed
     let action: () -> Void
-
+    /// Bool if the window is hovered
     @State private var hoverWindow = false
+    /// Bool if the close-button is hovered
     @State private var hoverButton = false
-
     /// The body of the `Modifier`
     func body(content: Content) -> some View {
         content
@@ -46,7 +44,7 @@ struct CloseWindowModifier: ViewModifier {
 
 extension View {
 
-    /// Shortcut to the `WrapSettingsSection` modifier
+    /// Shortcut to the `CloseWindowModifier` 
     /// - Parameter title: The title
     /// - Returns: A modified `View`
     func closeWindowModifier(action: @escaping () -> Void) -> some View {
