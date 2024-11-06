@@ -87,7 +87,7 @@ class ChordPro::Wx::Main :isa(ChordPro::Wx::Main_wxg);
 use ChordPro;	our $VERSION = $ChordPro::VERSION;
 use ChordPro::Paths;
 use ChordPro::Output::Common;
-use ChordPro::Utils qw( is_msw is_macos );
+use ChordPro::Utils qw( is_msw is_macos demarkup );
 
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
@@ -184,6 +184,7 @@ method select_mode( $mode ) {
 	$self->{"p_$mode"}->refresh;
     }
     $self->{sz_main}->Layout;
+    $state{mode} = $mode;
     return $state{panel} = $self->{"p_$mode"};
 }
 
@@ -371,6 +372,14 @@ method OnIdle($event) {
     }
     $f = "ChordPro — $f" if $state{windowtitle};
     $self->SetTitle($f);
+
+    if ( $state{mode} eq "editor") {
+	my $t = $self->{p_editor}->{t_editor}->GetText;
+	if ( $t =~ /^\{\s*t(?:itle)?[: ]+([^\}]*)\}/m ) {
+	    $self->{p_editor}->{l_status}->SetLabel(demarkup($1));
+	}
+    }
+
 }
 
 method OnHelp_ChordPro($event) {

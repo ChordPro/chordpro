@@ -331,9 +331,12 @@ method newfile() {
 	}
      }
     $self->{t_editor}->SetText($content) unless $content eq "";
-    $self->{t_editor}->SetModified(0);
+    $self->{t_editor}->EmptyUndoBuffer
+      if $self->{t_editor}->can("EmptyUndoBuffer");
     $self->log( 'S', "New file");
     $state{windowtitle} = "New Song";
+    $self->{l_status}->SetLabel("New Song");
+    $self->{l_status}->SetToolTip("");
     $preferences{xpose_from} = $preferences{xpose_to} = 0;
     $preferences{xpose_acc} = 0;
     $self->{sw_lr}->Unsplit(undef) if $self->{sw_lr}->IsSplit;
