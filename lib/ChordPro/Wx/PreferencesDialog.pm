@@ -25,14 +25,13 @@ use Encode qw(encode_utf8);
 #    $self->refresh;
 #}
 
-field $parent;
-
-method new :common ( $_parent, $id, $title ) {
-    $parent = $_parent;
+no warnings 'redefine';		# TODO
+method new :common ( $parent, $id, $title ) {
     my $self = $class->SUPER::new($parent, $id, $title);
     $self->refresh;
     $self;
 }
+use warnings 'redefine';	# TODO
 
 # BUilt-in descriptions for some notation systems.
 my $notdesc =
@@ -66,6 +65,12 @@ method enablecustom() {
     $self->{fp_tmplfile}->Enable($n);
 }
 
+method all_styles( $userpostfix = "" ) {
+    sort
+      map { lc } @{ $state{styles} },
+                 map { lc "$_$userpostfix" } @{ $state{userstyles} };
+}
+
 method fetch_prefs() {
 
     # Transfer preferences to the dialog.
@@ -83,7 +88,8 @@ method fetch_prefs() {
 	$t =~ s/ (.)/" ".uc($1)/eg;
 	$t;
     };
-    for ( sort @{ $state{styles} }, map { "$_ (user)" } @{ $state{userstyles} } ) {
+    my $i = 0;
+    for ( $self->all_styles( " (user)" ) ) {
 	$ctl->Append( $neat->($_) );
     }
 
@@ -93,7 +99,7 @@ method fetch_prefs() {
 	next if $_ eq "custom";	# legacy
 	my $t = $neat->($_);
 	my $n = $ctl->FindString($t);
-	$n = $ctl->FindString("$t (user)") if $n == wxNOT_FOUND;
+	$n = $ctl->FindString( $t = "$t (user)" ) if $n == wxNOT_FOUND;
 	unless ( $n == wxNOT_FOUND ) {
 	    $ctl->Check( $n, 1 );
 	}
@@ -198,15 +204,10 @@ method store_prefs() {
     my $ctl = $self->{ch_presets};
     my $cnt = $ctl->GetCount;
     my @p;
-    my $styles = $state{styles};
+    my @styles = $self->all_styles;
     for ( my $n = 0; $n < $cnt; $n++ ) {
 	next unless $ctl->IsChecked($n);
-	push( @p, $styles->[$n] );
-	if ( $n == $cnt - 1 ) {
-	    my $c = $self->{fp_customconfig}->GetPath;
-	    $parent->{_cfgpresetfile} =
-	      $preferences{configfile} = $c;
-	}
+	push( @p, $styles[$n] );
     }
     $preferences{cfgpreset} = \@p;
 
