@@ -25,7 +25,10 @@ use Encode qw(encode_utf8);
 #    $self->refresh;
 #}
 
-method new :common ( $parent, $id, $title ) {
+field $parent;
+
+method new :common ( $_parent, $id, $title ) {
+    $parent = $_parent;
     my $self = $class->SUPER::new($parent, $id, $title);
     $self->refresh;
     $self;
