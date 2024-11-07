@@ -194,7 +194,7 @@ method refresh() {
 
     $self->setup_logger;
 
-    $self->setup_menubar("E");
+    $self->update_menubar( M_EDITOR );
 
     $state{have_stc} = $self->{t_editor}->isa('Wx::StyledTextCtrl');
     $self->log( 'I', "Using " .
@@ -426,6 +426,7 @@ method preview( $args, %opts ) {
 	 and print $fd ( $self->{t_editor}->GetText )
 	 and close($fd) ) {
 	$self->prv->preview( $args, %opts );
+	$self->previewtooltip;
     }
     else {
 	$self->log( 'E', "$preview_cho: $!" );

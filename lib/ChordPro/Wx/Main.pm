@@ -203,6 +203,7 @@ method init( $options ) {
 
     $self->SetStatusBar(undef);
     $self->get_preferences;
+    $self->setup_menubar;
 
     if ( @ARGV ) {
 	my $arg = decode_utf8(shift(@ARGV));
@@ -224,7 +225,7 @@ method init( $options ) {
 
 method refresh() {
     $self->init_recents;
-    $self->setup_menubar("M");
+    $self->update_menubar(M_MAIN);
 }
 
 method init_recents() {
@@ -408,8 +409,13 @@ method OnMaximize($event) {
 }
 
 method OnNew($event) {
-    $self->select_mode("editor");
-    $self->{p_editor}->newfile;
+    if ( $state{mode} eq "initial" ) {
+	$self->select_mode("editor");
+	$self->{p_editor}->newfile;
+    }
+    else {
+	$state{panel}->OnNew($event);
+    }
 }
 
 method OnOpen($event) {

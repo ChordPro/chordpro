@@ -244,13 +244,6 @@ method OnMessagesClear($event) {
 method OnMessagesRuntimeInfo($event) {
     $self->log( 'I', "---- Runtime Information ----\n" . $self->GetParent->aboutmsg );
     $self->log( 'I', "---- End of Runtime Information ----\n" );
-    unless ( $self->{sw_tb}->IsSplit ) {
-	$self->{bmb_messages}->SetBackgroundColour(wxNullColour);
-	$self->{sw_tb}->SplitHorizontally( $self->{p_top},
-					   $self->{p_bottom},
-					   $state{sash}{$self->panel."_tb"} // 0 );
-    }
-    $self->messagestooltip;
 }
 
 method OnMessagesSave($event) {

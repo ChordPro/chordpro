@@ -53,7 +53,7 @@ method refresh() {
 
     setup_logger($self);
 
-    $self->setup_menubar("S");
+    $self->update_menubar( M_SONGBOOK );
 
     $state{have_webview} = ref($self->{webview}) eq 'Wx::WebView';
     $self->log( 'I', "Using " .
