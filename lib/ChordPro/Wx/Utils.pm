@@ -186,7 +186,7 @@ sub setup_menubar( $self ) {
 		Wx::Event::EVT_MENU( $target, $id, $code );
 	    }
 	    else {
-		$self->log("W", "No callback for $cb" );
+		# $self->log("W", "No callback for $cb" );
 		Wx::Event::EVT_MENU
 		    ( $target, $id,
 		      sub {
