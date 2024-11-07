@@ -292,7 +292,9 @@ method previewtooltip() {
     my $mb = wxTheApp->GetTopWindow->GetMenuBar;
     my $mi = $mb->FindItem($mb->FindMenuItem("View","Show Preview"));
     if ( $self->{sw_lr}->IsSplit ) {
-	$self->{bmb_preview}->SetToolTip(_T("Hide the preview"));
+	$self->{bmb_preview}->SetToolTip(_T("Hide the preview\nUse ".
+					    (is_macos ? "⌘" : "Ctrl-").
+					    "P to refresh the preview"));
 	$mi->Check(1);
     }
     else {

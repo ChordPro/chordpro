@@ -164,15 +164,12 @@ method preview( $args, %opts ) {
 method check_source_saved() { 1 }
 
 method check_preview_saved() {
-    $self->prv && $self->prv->discard;
-    return 1;
     return 1 unless $self->prv && $self->prv->unsaved_preview;
 
     my $md = Wx::MessageDialog->new
       ( $self,
-	"The preview for the songbook has not yet been saved.\n".
-	"Do you want to save your changes?",
-	"Preview has changed",
+	"Do you want to save the preview as PDF?",
+	"Preview",
 	0 | wxCANCEL | wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION );
     my $ret = $md->ShowModal;
     $md->Destroy;
