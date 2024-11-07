@@ -121,7 +121,8 @@ method OnOpen($event) {
 method OnPreferences($event) {
     use ChordPro::Wx::PreferencesDialog;
     unless ( $self->{d_prefs} ) {
-	$self->{d_prefs} = ChordPro::Wx::PreferencesDialog->new($self, -1, "Preferences");
+	$self->{d_prefs} = ChordPro::Wx::PreferencesDialog->new
+	  ( $self, wxID_ANY, is_macos ? "Settings" : "Preferences"  );
 	restorewinpos( $self->{d_prefs}, "prefs" );
     }
     else {

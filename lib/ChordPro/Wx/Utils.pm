@@ -231,14 +231,12 @@ push( @EXPORT, "setup_menubar", "update_menubar" );
 
 ################ ################
 
-sub savewinpos {
-    my ( $win, $name ) = @_;
+sub savewinpos( $win, $name ) {
     $ChordPro::Wx::Config::state{windows}->{$name} =
       join( " ", $win->GetPositionXY, $win->GetSizeWH );
 }
 
-sub restorewinpos {
-    my ( $win, $name ) = @_;
+sub restorewinpos( $win, $name ) {
     $win = $Wx::wxTheApp->GetTopWindow if $name eq "main";
 
     my $t = $ChordPro::Wx::Config::state{windows}->{$name};
@@ -258,7 +256,7 @@ push( @EXPORT, 'savewinpos', 'restorewinpos' );
 
 ################ ################
 
-sub panels {
+sub panels() {
     my @panels = qw( p_editor p_sbexport );
     wantarray ? @panels : \@panels;
 }
@@ -267,3 +265,15 @@ push( @EXPORT, 'panels' );
 
 ################ ################
 
+sub ellipsize( $widget, %opts ) {
+    my $text = $opts{text} // $widget->GetText;
+    my $width = ($widget->GetSizeWH)[0];
+    my $s = Wx::Control::Ellipsize( $text, Wx::ClientDC->new($widget),
+				    $opts{type} // wxELLIPSIZE_END,
+				    $width-10, wxELLIPSIZE_FLAGS_DEFAULT );
+    $widget->SetText($s);
+}
+
+push( @EXPORT, "ellipsize" );
+
+################ ################
