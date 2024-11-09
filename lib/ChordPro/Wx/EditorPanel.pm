@@ -110,18 +110,18 @@ method setup_scintilla() {
 
     $stc->StyleClearAll;
     # 0 - basic
-    # 1 - comments
-    $stc->StyleSetSpec( 1, "bold,fore:grey" );
-    # 2 - Keywords
-    $stc->StyleSetSpec( 2, "bold,fore:grey" );
-    # 3 - Brackets
-    $stc->StyleSetSpec( 3, "bold,fore:blue" );
-    # 4 - Chords
-    $stc->StyleSetSpec( 4, "fore:red" );
-    # 5 - Directives
-    $stc->StyleSetSpec( 5, "bold,fore:indigo" );
-    # 6 - Directive arguments
-    $stc->StyleSetSpec( 6, "fore:#ff8c00" );
+    # 1 - comments (grey)
+    $stc->StyleSetSpec( 1, "fore:#b1b1b1" );
+    # 2 - Keywords (grey)
+    $stc->StyleSetSpec( 2, "fore:#b1b1b1" );
+    # 3 - Brackets (grey)
+    $stc->StyleSetSpec( 3, "fore:#b1b1b1" );
+    # 4 - Chords (red)
+    $stc->StyleSetSpec( 4, "fore:#ff3c31" );
+    # 5 - Directives (blue, same as status label colour)
+    $stc->StyleSetSpec( 5, "fore:#0068d9" );
+    # 6 - Directive arguments (orange, same as toolbar icon colour)
+    $stc->StyleSetSpec( 6, "fore:#ef6c2a" );
 
     # For linenumbers.
     $stc->SetMarginWidth( 0, 40 ); # TODO
