@@ -2,6 +2,7 @@ lib/ChordPro/Wx.pm
 lib/ChordPro/Wx/Config.pm
 lib/ChordPro/Wx/EditorPanel.pm
 lib/ChordPro/Wx/EditorPanel_wxg.pm
+lib/ChordPro/Wx/FileDirPickerCtrl.pm
 lib/ChordPro/Wx/Main.pm
 lib/ChordPro/Wx/Main.wxg
 lib/ChordPro/Wx/Main_wxg.pm

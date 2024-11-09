@@ -337,16 +337,14 @@ method OnCustomLibChanged($event) {
     $self->need_restart;
 }
 
-method OnTmplFile($event) {
+method OnCbTmplFile($event) {
     my $n = $self->{cb_tmplfile}->IsChecked;
     $self->{fp_tmplfile}->Enable($n);
 }
 
 method OnTmplFileChanged($event) {
-    my $file = $self->{fp_tmplfile}->GetPath;
-    my $w = $self->{fp_tmplfile}->GetTextCtrl;
-    my $width = ($w->GetSizeWH)[0];
-    ellipsize( $w, text => $file, type => wxELLIPSIZE_START );
+    # my $file = $self->{fp_tmplfile}->GetPath;
+    # ellipsize( $self->{t_tmplfile}, text => $file );
 }
 
 method OnAccept($event) {

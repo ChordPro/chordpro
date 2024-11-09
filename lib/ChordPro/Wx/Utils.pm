@@ -21,6 +21,13 @@ use ChordPro::Utils qw( is_msw is_macos );
 
 my %const =
   ( wxID_FULLSCREEN		=> Wx::NewId(),
+
+    # Until Wx 3.003.
+    wxELLIPSIZE_FLAGS_DEFAULT	=> 3,
+    wxELLIPSIZE_NONE		=> 0,
+    wxELLIPSIZE_START		=> 1,
+    wxELLIPSIZE_MIDDLE		=> 2,
+    wxELLIPSIZE_END		=> 3,
   );
 
 no strict 'refs';
@@ -267,11 +274,15 @@ push( @EXPORT, 'panels' );
 
 sub ellipsize( $widget, %opts ) {
     my $text = $opts{text} // $widget->GetText;
-    my $width = ($widget->GetSizeWH)[0];
-    my $s = Wx::Control::Ellipsize( $text, Wx::ClientDC->new($widget),
-				    $opts{type} // wxELLIPSIZE_END,
-				    $width-10, wxELLIPSIZE_FLAGS_DEFAULT );
-    $widget->SetText($s);
+    if ( Wx::Control->can("Ellipsize") ) {
+	my $width = ($widget->GetSizeWH)[0];
+	$text = Wx::Control::Ellipsize( $text, Wx::ClientDC->new($widget),
+					$opts{type} // wxELLIPSIZE_END(),
+					$width-10, wxELLIPSIZE_FLAGS_DEFAULT() );
+    }
+
+    # Change w/o triggering a EVT_TEXT event.
+    $widget->ChangeValue($text);
 }
 
 push( @EXPORT, "ellipsize" );
