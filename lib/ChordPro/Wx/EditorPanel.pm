@@ -361,6 +361,9 @@ method check_source_saved() {
 	if ( $ret == wxID_YES ) {
 	    $self->save_file( $state{currentfile} );
 	}
+	else {
+	    $self->{t_editor}->SetModified(0);
+	}
     }
     else {
 	my $md = Wx::MessageDialog->new
@@ -373,6 +376,9 @@ method check_source_saved() {
 	return if $ret == wxID_CANCEL;
 	if ( $ret == wxID_YES ) {
 	    $self->save_file;
+	}
+	else {
+	    $self->{t_editor}->SetModified(0);
 	}
     }
     return 1;
