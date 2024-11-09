@@ -351,7 +351,7 @@ method OnExportFolder($event) {
     # We handle this here for the same reasons as OnOpen.
     my $fd = Wx::DirDialog->new
       ( $self,
-	_T("Choose folder to export"),
+	_T("Select the folder with the songs"),
 	$state{sbe_folder} // $state{songbookexport}{folder} // "",
 	wxDD_DIR_MUST_EXIST );
     my $ret = $fd->ShowModal;
