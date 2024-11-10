@@ -126,6 +126,8 @@ method setup_scintilla() {
     # For linenumbers.
     $stc->SetMarginWidth( 0, 40 ); # TODO
 
+    $stc->SetWrapMode(3); # wxSTC_WRAP_WHITESPACE );
+    $stc->SetWrapStartIndent(2); # wxSTC_WRAP_WHITESPACE );
 }
 
 method style_text() {
