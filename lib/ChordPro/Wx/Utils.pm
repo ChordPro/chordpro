@@ -71,8 +71,6 @@ sub update_menubar( $self, $sel ) {
 
 sub setup_menubar( $self ) {
 
-    my $pref = ChordPro::Utils::is_macos() ? "Settings" : "Preferences";
-
     state $ctl =
       [ [ wxID_FILE,
 	  [ [ wxID_NEW, M_ALL, "",
@@ -113,8 +111,8 @@ sub setup_menubar( $self ) {
 	      "Convert a text document (chords above the lyrics) to ChordPro format",
 	      "OnA2Crd" ],
 	    [],
-	    [ wxID_PREFERENCES, M_ALL, $pref."...\tCtrl-R",
-	      $pref, "OnPreferences" ],
+	    [ wxID_PREFERENCES, M_ALL, "Settings...\tCtrl-R",
+	      "Open the Settings dialog", "OnPreferences" ],
 	  ]
 	],
 	[ wxID_ANY, M_EDITOR|M_SONGBOOK, "View",

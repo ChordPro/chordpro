@@ -47,8 +47,8 @@
                             <events>
                                 <handler event="EVT_BUTTON">OnPreferences</handler>
                             </events>
-                            <tooltip>Open the Preferences dialog</tooltip>
-                            <label>Preferences</label>
+                            <tooltip>Open the Settings dialog</tooltip>
+                            <label>Settings</label>
                             <bitmap>/usr/local/src/ChordPro/lib/ChordPro/res/icons/wx-toolbar-preferences.png</bitmap>
                             <bitmap_dir>wxTOP</bitmap_dir>
                         </object>

@@ -57,13 +57,13 @@
                     <object class="sizeritem">
                         <option>0</option>
                         <border>5</border>
-                        <flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
+                        <flag>wxALL|wxEXPAND|wxALIGN_CENTER_VERTICAL</flag>
                         <object class="wxButton" name="bmp_preferences" base="EditButton">
                             <events>
                                 <handler event="EVT_BUTTON">OnPreferences</handler>
                             </events>
-                            <tooltip>Open the preferences dialog</tooltip>
-                            <label>Preferences</label>
+                            <tooltip>Open the Settings dialog</tooltip>
+                            <label>Settings</label>
                             <bitmap>/usr/local/src/ChordPro/lib/ChordPro/res/icons/wx-toolbar-preferences.png</bitmap>
                             <bitmap_dir>wxTOP</bitmap_dir>
                         </object>
