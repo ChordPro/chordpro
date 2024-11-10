@@ -460,6 +460,43 @@ method save_preferences() { 1 }
 
 ################ Event Handlers (alphabetic order) ################
 
+method OnA2Crd($event) {
+
+    my $ctrl = $self->{t_editor};
+    my ( $from, $to ) = $ctrl->GetSelection;
+    my $have_selection = $from != $to;
+
+    my $text = $have_selection
+      ? $state{have_stc}
+        ? $ctrl->GetSelectedText
+        : $ctrl->GetStringSelection
+      : $ctrl->GetText;
+
+    require ChordPro::A2Crd;
+    $::options->{nosysconfig} = 1;
+    $::options->{nouserconfig} = 1;
+    $::options->{noconfig} = 1;
+    my $cho = join
+      ( "\n",
+	@{ ChordPro::A2Crd::a2crd
+	    ( { lines => [ split( /\n/, $text ) ] } ) } ) . "\n";
+
+
+    if ( $have_selection ) {
+	if ( $state{have_stc} ) {
+	    $ctrl->ReplaceSelection($cho );
+	}
+	else {
+	    $ctrl->Replace( $from, $to, $cho );
+	}
+    }
+    else {
+	$ctrl->Clear;
+	$ctrl->SetText($cho);
+    }
+    $ctrl->SetInsertionPoint($from) unless $state{have_stc};
+}
+
 method OnCut($event) {
     $self->{t_editor}->Cut;
 }
