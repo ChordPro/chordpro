@@ -37,8 +37,11 @@ method log( $level, @msg ) {
 }
 
 method alert( $severity ) {
-    $self->{bmb_messages}->SetBackgroundColour( $severity ? wxRED : wxGREEN )
-      unless $self->{sw_tb}->IsSplit;
+#    $self->{bmb_messages}->SetBackgroundColour( $severity ? wxRED : wxGREEN )
+#      unless $self->{sw_tb}->IsSplit;
+    return if $self->{sw_tb}->IsSplit;
+    $self->{w_infobar}->ShowMessage("Click Messages to see diagnostic information",
+				    wxICON_INFORMATION);
 }
 
 method setup_webview() {
@@ -293,8 +296,8 @@ method previewtooltip() {
     my $mi = $mb->FindItem($mb->FindMenuItem("View","Show Preview"));
     if ( $self->{sw_lr}->IsSplit ) {
 	$self->{bmb_preview}->SetToolTip(_T("Hide the preview\nUse ".
-					    (is_macos ? "⌘" : "Ctrl-").
-					    "P to refresh the preview"));
+					    kbdkey("Ctrl-P").
+					    " to refresh the preview"));
 	$mi->Check(1);
     }
     else {
@@ -314,6 +317,7 @@ method messagestooltip() {
 	$self->{bmb_messages}->SetToolTip(_T("Show the messages"));
 	$mi->Check(0);
     }
+    $self->{w_infobar}->Dismiss;
 }
 
 1;

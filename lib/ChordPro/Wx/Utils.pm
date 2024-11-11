@@ -293,3 +293,16 @@ sub ellipsize( $widget, %opts ) {
 push( @EXPORT, "ellipsize" );
 
 ################ ################
+
+sub kbdkey( $key ) {
+    $key =~ s/Shift-/⇧/;
+    $key =~ s/Alt-/⎇/;
+    $key =~ s/Option-/⌥/;
+    my $c = is_macos ? "⌘" : "Ctrl-";
+    $key =~ s/Ctrl-/$c/;
+    return $key;
+}
+
+push( @EXPORT, "kbdkey" );
+
+################ ################

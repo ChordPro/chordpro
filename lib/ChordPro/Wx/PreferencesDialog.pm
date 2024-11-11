@@ -124,24 +124,35 @@ method fetch_prefs() {
 
     # Editor.
     if ( $state{mode} eq "editor" ) {
-	$self->{l_editor}->Show(1);
-	$self->{sl_editor}->Show(1);
-	$self->{fp_editor}->Show(1);
-	$self->{cp_editor}->Show(!$state{have_stc});
-	$self->{sz_editor}->Layout;
+	$self->{$_}->Enable(1)
+	  for qw( l_editor_1 fp_editor sl_editor );
 	$self->{fp_editor}->SetSelectedFont
 	  ( Wx::Font->new($preferences{editfont}) );
-#	$self->{ch_editfont}->SetSelection( $preferences{editfont} );
-#	$self->{sp_editfont}->SetValue( $preferences{editsize} );
 	$self->{cp_editor}->SetColour(Wx::Colour->new($preferences{editcolour}));
+	if ( $state{have_stc} ) {
+	    $self->{cp_editor}->Enable(0);
+	    # Show stc editor prefs.
+	    $self->{$_}->Enable(1)
+	      for qw( l_editor_2 l_editorwrap sp_editorwrap b_editorcolours );
+	}
+	else {
+	    $self->{cp_editor}->Enable(1);
+	    # Suppress stc editor prefs.
+	    $self->{$_}->Enable(0)
+	      for qw( l_editor_2 l_editorwrap sp_editorwrap b_editorcolours );
+	}
+#	$self->{sz_editor_1}->Layout;
+#	$self->{sz_editor_2}->Layout;
     }
     else {
-	$self->{fp_editor}->Show(0);
-	$self->{cp_editor}->Show(0);
-	$self->{l_editor}->Show(0);
-	$self->{sl_editor}->Show(0);
-	$self->{sz_editor}->Layout;
+	# Suppress all editor prefs.
+	$self->{$_}->Enable(0)
+	  for qw( l_editor_1 fp_editor cp_editor
+		  l_editor_2 l_editorwrap sp_editorwrap b_editorcolours
+		  sl_editor );
+#	$self->{sz_editor_2}->Layout;
     }
+
     $self->{fp_messages}->SetSelectedFont( Wx::Font->new($preferences{msgsfont}) );
 
     # Notation.
@@ -183,6 +194,7 @@ method fetch_prefs() {
     $self->{t_pdfviewer}->Enable($self->{cb_pdfviewer}->IsChecked);
 
     $self->enablecustom;
+    $self->{sz_prefs}->Layout;
 
 }
 
@@ -283,8 +295,16 @@ method restore_prefs() {
 }
 
 method need_restart() {
+    state $id = wxID_ANY;
+    if ( $id == wxID_ANY ) {
+	$id = Wx::NewId;
+	$self->{w_infobar}->AddButton( $id, "Understood");
+	Wx::Event::EVT_BUTTON( $self->{w_infobar}, $id,
+			       sub { $self->OnIBDismiss($_[1]) } );
+    }
     $self->{w_infobar}->ShowMessage("Changing the custom library requires restart",
 				    wxICON_INFORMATION);
+    $self->{sz_prefs_outer}->Fit($self);
 }
 
 ################ Event handlers ################
@@ -427,6 +447,11 @@ method OnChEditColour($event) {
     return unless $n && $n->IsOk;
     $self->setnomod( $ctl, sub { $ctl->SetBackgroundColour($n) } )
       if $ctl->can("SetBackgroundColour");
+}
+
+method OnIBDismiss($e) {
+    $self->{w_infobar}->Dismiss;
+    $self->{sz_prefs_outer}->Fit($self);
 }
 
 ################ Helpers ################
