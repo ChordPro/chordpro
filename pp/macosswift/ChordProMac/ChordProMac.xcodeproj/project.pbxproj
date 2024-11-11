@@ -52,6 +52,7 @@
 		D77E2BB52CCFE73B0071F57E /* UpdatePreviewButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77E2BB42CCFE73B0071F57E /* UpdatePreviewButton.swift */; };
 		D795739D2C95CCC600EE315D /* FileListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = D795739C2C95CCC600EE315D /* FileListItem.swift */; };
 		D796F0EC2C1A6AB600B3DE40 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D796F0EB2C1A6AB600B3DE40 /* AboutView.swift */; };
+		D79B2B5C2CE26BE900F3FC0C /* cli in Resources */ = {isa = PBXBuildFile; fileRef = D79B2B5B2CE26BE900F3FC0C /* cli */; };
 		D7A4E2AA2CAB8533000748C2 /* CloseWindowButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A4E2A92CAB8533000748C2 /* CloseWindowButton.swift */; };
 		D7AC53422C20C1A0002B075F /* FontSizeButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7AC53412C20C1A0002B075F /* FontSizeButtons.swift */; };
 		D7D244B22C3C3C240058FB8E /* AppKitUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D244AB2C3C3C240058FB8E /* AppKitUtils.swift */; };
@@ -135,6 +136,7 @@
 		D77E2BB42CCFE73B0071F57E /* UpdatePreviewButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdatePreviewButton.swift; sourceTree = "<group>"; };
 		D795739C2C95CCC600EE315D /* FileListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileListItem.swift; sourceTree = "<group>"; };
 		D796F0EB2C1A6AB600B3DE40 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
+		D79B2B5B2CE26BE900F3FC0C /* cli */ = {isa = PBXFileReference; lastKnownFileType = folder; path = cli; sourceTree = "<group>"; };
 		D7A4E2A92CAB8533000748C2 /* CloseWindowButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloseWindowButton.swift; sourceTree = "<group>"; };
 		D7AC53412C20C1A0002B075F /* FontSizeButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontSizeButtons.swift; sourceTree = "<group>"; };
 		D7D244AB2C3C3C240058FB8E /* AppKitUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppKitUtils.swift; sourceTree = "<group>"; };
@@ -184,6 +186,7 @@
 			isa = PBXGroup;
 			children = (
 				D7146DB82C04B3C2007E77B8 /* chordpro */,
+				D79B2B5B2CE26BE900F3FC0C /* cli */,
 				D7146DBC2C04B668007E77B8 /* libperl.dylib */,
 				D7146DB72C04B3C2007E77B8 /* lib */,
 				D7146DB62C04B3C0007E77B8 /* script */,
@@ -453,6 +456,7 @@
 				D75F41322C0F31DB00F0413B /* SystemTasks in Resources */,
 				D7146DB92C04B3C3007E77B8 /* script in Resources */,
 				D7146DBB2C04B3C3007E77B8 /* chordpro in Resources */,
+				D79B2B5C2CE26BE900F3FC0C /* cli in Resources */,
 				D7146DBA2C04B3C3007E77B8 /* lib in Resources */,
 				D7723A532C0326130031CD0C /* Assets.xcassets in Resources */,
 			);
