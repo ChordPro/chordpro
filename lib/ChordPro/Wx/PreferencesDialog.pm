@@ -123,36 +123,21 @@ method fetch_prefs() {
       if $preferences{tmplfile};
 
     # Editor.
-    if ( $state{mode} eq "editor" ) {
-	$self->{$_}->Enable(1)
-	  for qw( l_editor_1 fp_editor sl_editor );
-	$self->{fp_editor}->SetSelectedFont
-	  ( Wx::Font->new($preferences{editfont}) );
-	$self->{cp_editor}->SetColour(Wx::Colour->new($preferences{editcolour}));
-	if ( $state{have_stc} ) {
-	    $self->{cp_editor}->Enable(0);
-	    # Show stc editor prefs.
-	    $self->{$_}->Enable(1)
-	      for qw( l_editor_2 l_editorwrap sp_editorwrap b_editorcolours );
-	}
-	else {
-	    $self->{cp_editor}->Enable(1);
-	    # Suppress stc editor prefs.
-	    $self->{$_}->Enable(0)
-	      for qw( l_editor_2 l_editorwrap sp_editorwrap b_editorcolours );
-	}
-#	$self->{sz_editor_1}->Layout;
-#	$self->{sz_editor_2}->Layout;
+    $self->{fp_editor}->SetSelectedFont
+      ( Wx::Font->new($preferences{editfont}) );
+    $self->{cp_editor}->SetColour(Wx::Colour->new($preferences{editcolour}));
+    if ( $state{have_stc} ) {
+	$self->{cp_editor}->Enable(0);
+	$self->{b_editorcolours}->Enable(1);
     }
     else {
-	# Suppress all editor prefs.
-	$self->{$_}->Enable(0)
-	  for qw( l_editor_1 fp_editor cp_editor
-		  l_editor_2 l_editorwrap sp_editorwrap b_editorcolours
-		  sl_editor );
-#	$self->{sz_editor_2}->Layout;
+	$self->{cp_editor}->Enable(1);
+	$self->{b_editorcolours}->Enable(0);
     }
 
+    $self->{cb_editorwrap}->SetValue($preferences{editorwrap});
+    $self->{sp_editorwrap}->SetValue($preferences{editorwrapindent});
+    $self->OnEditorWrap(undef);
     $self->{fp_messages}->SetSelectedFont( Wx::Font->new($preferences{msgsfont}) );
 
     # Notation.
@@ -194,8 +179,6 @@ method fetch_prefs() {
     $self->{t_pdfviewer}->Enable($self->{cb_pdfviewer}->IsChecked);
 
     $self->enablecustom;
-    $self->{sz_prefs}->Layout;
-
 }
 
 #               C      D      E  F      G      A        B C
@@ -237,7 +220,9 @@ method store_prefs() {
 
     # Editor.
     $preferences{editfont} = $self->{fp_editor}->GetSelectedFont->GetNativeFontInfoDesc;
-    $preferences{editcolour} = $self->{cp_editor}->GetColour->GetAsString(wxC2S_HTML_SYNTAX);
+    $preferences{editcolour} = $self->{cp_editor}->GetAsHTML;
+    $preferences{editorwrap} = $self->{cb_editorwrap}->IsChecked;
+    $preferences{editorwrapindent} = $self->{sp_editorwrap}->GetValue;
 
     # Messages.
     $preferences{msgsfont} = $self->{fp_messages}->GetSelectedFont->GetNativeFontInfoDesc;
@@ -276,6 +261,7 @@ method store_prefs() {
     $preferences{enable_pdfviewer} = $self->{cb_pdfviewer}->IsChecked;
     $preferences{pdfviewer} = $self->{t_pdfviewer}->GetValue;
 
+    $self->GetParent->refresh_editor if $state{mode} eq "editor";
 }
 
 method restore_prefs() {
@@ -362,6 +348,22 @@ method OnCbTmplFile($event) {
     $self->{fp_tmplfile}->Enable($n);
 }
 
+method OnEditorColours($event) {
+
+    require ChordPro::Wx::ColourSettingsDialog;
+    unless ( $self->{d_colours} ) {
+	$self->{d_colours} = ChordPro::Wx::ColourSettingsDialog->new;
+	restorewinpos( $self->{d_colours}, "colours" );
+    }
+    $self->{d_colours}->refresh;
+    my $ret = $self->{d_colours}->ShowModal;
+    savewinpos( $self->{d_colours}, "colours" );
+    return unless $ret == wxID_OK;
+    $state{editcolours} = $self->{d_colours}->GetColours;
+    $self->{d_colours}->Close;
+
+}
+
 method OnTmplFileChanged($event) {
     # my $file = $self->{fp_tmplfile}->GetPath;
     # ellipsize( $self->{t_tmplfile}, text => $file );
@@ -421,6 +423,11 @@ method OnChNotation($event) {
 method OnChTranscode($event) {
     my $n = $self->{ch_transcode}->GetSelection;
     $event->Skip;
+}
+
+method OnEditorWrap($event) {
+    $self->{$_}->Enable( $self->{cb_editorwrap}->IsChecked )
+      for qw( l_editorwrap sp_editorwrap );
 }
 
 method OnFontPickerChanged($event) {

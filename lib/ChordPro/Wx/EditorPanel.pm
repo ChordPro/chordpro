@@ -90,6 +90,9 @@ method setup_scintilla() {
     $self->{t_editor}->Destroy;
     $self->{t_editor} = $stc;
     $self->{sz_editor}->Layout;
+}
+
+method refresh_scintilla() {
 
     $stc->SetLexer(wxSTC_LEX_CONTAINER);
     $stc->SetKeyWords(0,
@@ -109,25 +112,33 @@ method setup_scintilla() {
     Wx::Event::EVT_STC_STYLENEEDED($self, -1, $self->can('OnStyleNeeded'));
 
     $stc->StyleClearAll;
+
+    my @c = split( /,\s*/, $preferences{editcolours} );
     # 0 - basic
+    $stc->StyleSetSpec( 0, "fore:" . shift(@c) );
     # 1 - comments (grey)
-    $stc->StyleSetSpec( 1, "fore:#b1b1b1" );
+    $stc->StyleSetSpec( 1, "fore:" . shift(@c) );
     # 2 - Keywords (grey)
-    $stc->StyleSetSpec( 2, "fore:#b1b1b1" );
+    $stc->StyleSetSpec( 2, "fore:" . shift(@c) );
     # 3 - Brackets (grey)
-    $stc->StyleSetSpec( 3, "fore:#b1b1b1" );
+    $stc->StyleSetSpec( 3, "fore:" . shift(@c) );
     # 4 - Chords (red)
-    $stc->StyleSetSpec( 4, "fore:#ff3c31" );
+    $stc->StyleSetSpec( 4, "fore:" . shift(@c) );
     # 5 - Directives (blue, same as status label colour)
-    $stc->StyleSetSpec( 5, "fore:#0068d9" );
+    $stc->StyleSetSpec( 5, "fore:" . shift(@c) );
     # 6 - Directive arguments (orange, same as toolbar icon colour)
-    $stc->StyleSetSpec( 6, "fore:#ef6c2a" );
+    $stc->StyleSetSpec( 6, "fore " . shift(@c));
 
     # For linenumbers.
     $stc->SetMarginWidth( 0, 40 ); # TODO
 
-    $stc->SetWrapMode(3); # wxSTC_WRAP_WHITESPACE );
-    $stc->SetWrapStartIndent(2); # wxSTC_WRAP_WHITESPACE );
+    if ( $preferences{editorwrap} ) {
+	$stc->SetWrapMode(3); # wxSTC_WRAP_WHITESPACE );
+	$stc->SetWrapStartIndent( $preferences{editorwrapindent} );
+    }
+    else {
+	$stc->SetWrapMode(0); # wxSTC_WRAP_NONE );
+    }
 }
 
 method style_text() {
@@ -190,6 +201,18 @@ method add_annotation( $line, $message ) {
     $stc->AnnotationSetStyle( $line, $astyle );
 }
 
+method refresh_editor {
+    if ( $state{have_stc} ) {
+	$self->refresh_scintilla;
+    }
+    else {
+	$self->{t_editor}->SetBackgroundColour
+	  ( Wx::Colour->new($preferences{editcolour}) );
+    }
+    $self->{t_editor}->SetFont
+      ( Wx::Font->new($preferences{editfont}) );
+}
+
 ################ API Functions ################
 
 method refresh() {
@@ -217,19 +240,10 @@ method refresh() {
     $self->{sz_toolbar}->Layout;
 
     my $mod = $self->{t_editor}->IsModified;
-    my $font = Wx::Font->new($preferences{editfont});
-    $self->{t_editor}->SetFont($font);
-    $font = Wx::Font->new($preferences{msgsfont});
+    my $font = Wx::Font->new($preferences{msgsfont});
     $self->{t_messages}->SetFont($font);
-    if ( $state{have_stc} ) {
-#	$stc->StyleSetBackground(wxSTC_STYLE_DEFAULT,
-#				 Wx::Colour->new($preferences{editcolour}));
-#	$stc->StyleClearAll;
-    }
-    else {
-	$self->{t_editor}->SetBackgroundColour
-	  ( Wx::Colour->new($preferences{editcolour}) );
-    }
+
+    $self->refresh_editor;
 
     $self->setup_messages_ctxmenu;
     $self->previewtooltip;
@@ -478,11 +492,17 @@ method OnA2Crd($event) {
     $::options->{nosysconfig} = 1;
     $::options->{nouserconfig} = 1;
     $::options->{noconfig} = 1;
+
+    # Often text that is pasted from web has additional newlines.
+    $text =~ s/^\n+//;
+    if ( $text =~ m/(.+\n\n)+/ ) {
+	$text =~ s/(.+\n)\n/$1/g;
+    }
+
     my $cho = join
       ( "\n",
 	@{ ChordPro::A2Crd::a2crd
 	    ( { lines => [ split( /\n/, $text ) ] } ) } ) . "\n";
-
 
     if ( $have_selection ) {
 	if ( $state{have_stc} ) {

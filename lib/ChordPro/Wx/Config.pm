@@ -69,12 +69,16 @@ my %prefs =
    tmplfile        => "",
 
    # Editor.
-   editfont	   => 0,
+   editfont	   => 0,	# inital, later "Monospace 10" etc.
    editsize	   => FONTSIZE,
-   editcolour	   => wxWHITE,
+   editcolour	   => wxWHITE,	# !stc
+   editcolours     => join( ",", "#000000", "#b1b1b1", "#b1b1b1", "#b1b1b1",
+			    "#ff3c31", "#0068d0", "#ef6c2a" ),	# stc
+   editorwrap       => 1,		# stc
+   editorwrapindent => 2,		# std
 
    # Messages.
-   msgsfont	   => 0,
+   msgsfont	   => 0,	# inital, later "Monospace 10" etc.
 
    # Notation.
    notation	   => "",
@@ -237,10 +241,7 @@ method Store :common {
 		else {
 		    warn("Preferences: unknown key: $k");
 		}
-		if ( $k eq "editcolour" && ref($v) ) {
-		    $v = $preferences{editcolour} = $v->GetAsString(wxC2S_HTML_SYNTAX);
-		}
-		elsif ( $k eq "cfgpreset" ) {
+		if ( $k eq "cfgpreset" ) {
 		    $v = join( ",", @$v );
 		}
 	    }

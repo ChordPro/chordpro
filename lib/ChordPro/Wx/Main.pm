@@ -364,7 +364,7 @@ method OnExportFolder($event) {
 method OnIdle($event) {
     return if $self->{p_initial}->IsShown;
     my $mod = $self->{p_editor}->{t_editor}->IsModified;
-    my $f = basename($state{windowtitle}) // "ChordPro";
+    my $f = basename($state{windowtitle} // "ChordPro");
     if ( is_macos ) {
 	wxTheApp->GetTopWindow->OSXSetModified($mod);
     }

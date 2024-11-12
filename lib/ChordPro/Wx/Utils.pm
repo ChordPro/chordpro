@@ -306,3 +306,10 @@ sub kbdkey( $key ) {
 push( @EXPORT, "kbdkey" );
 
 ################ ################
+
+sub Wx::ColourPickerCtrl::GetAsHTML( $self ) {
+    $self->GetColour->GetAsString(wxC2S_HTML_SYNTAX);
+}
+
+################ ################
+

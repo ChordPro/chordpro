@@ -142,6 +142,9 @@ method OnPreferences($event) {
     return unless $ret == wxID_OK;
 
     $self->GetParent->save_preferences;
+    if ( $state{mode} eq "editor" ) {
+	$self->refresh_editor;
+    }
 }
 
 method OnPreview($event) {		# for menu
