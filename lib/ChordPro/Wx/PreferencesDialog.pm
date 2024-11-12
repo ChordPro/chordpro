@@ -125,16 +125,8 @@ method fetch_prefs() {
     # Editor.
     $self->{fp_editor}->SetSelectedFont
       ( Wx::Font->new($preferences{editfont}) );
-    $self->{cp_editor}->SetColour(Wx::Colour->new($preferences{editcolour}));
-    if ( $state{have_stc} ) {
-	$self->{cp_editor}->Enable(0);
-	$self->{b_editorcolours}->Enable(1);
-    }
-    else {
-	$self->{cp_editor}->Enable(1);
-	$self->{b_editorcolours}->Enable(0);
-    }
 
+    $state{editbgcolour} = $preferences{editbgcolour};
     $self->{cb_editorwrap}->SetValue($preferences{editorwrap});
     $self->{sp_editorwrap}->SetValue($preferences{editorwrapindent});
     $self->OnEditorWrap(undef);
@@ -220,9 +212,9 @@ method store_prefs() {
 
     # Editor.
     $preferences{editfont} = $self->{fp_editor}->GetSelectedFont->GetNativeFontInfoDesc;
-    $preferences{editcolour} = $self->{cp_editor}->GetAsHTML;
     $preferences{editorwrap} = $self->{cb_editorwrap}->IsChecked;
     $preferences{editorwrapindent} = $self->{sp_editorwrap}->GetValue;
+    $preferences{editbgcolour} = $state{editbgcolour};
 
     # Messages.
     $preferences{msgsfont} = $self->{fp_messages}->GetSelectedFont->GetNativeFontInfoDesc;
@@ -273,11 +265,11 @@ method restore_prefs() {
     my $font = Wx::Font->new($preferences{editfont});
     $self->setnomod( $ctl, sub { $ctl->SetFont($font) } );
     $self->setnomod( $ctl,
-		     sub { $ctl->SetBackgroundColour
-			     ( Wx::Colour->new($preferences{editcolour}) ) } )
-      if $ctl->can("SetBackgroundColour");
+		     sub { $ctl->SetBGColour
+			     ( Wx::Colour->new($preferences{editbgcolour}) ) } );
     $font = Wx::Font->new($preferences{msgsfont});
     $self->GetParent->{t_messages}->SetFont($font);
+    $state{editbgcolour} = $preferences{editbgcolour};
 }
 
 method need_restart() {
@@ -350,18 +342,34 @@ method OnCbTmplFile($event) {
 
 method OnEditorColours($event) {
 
-    require ChordPro::Wx::ColourSettingsDialog;
-    unless ( $self->{d_colours} ) {
-	$self->{d_colours} = ChordPro::Wx::ColourSettingsDialog->new;
-	restorewinpos( $self->{d_colours}, "colours" );
+    if ( $state{have_stc} ) {
+	require ChordPro::Wx::ColourSettingsDialog;
+	my $d = ChordPro::Wx::ColourSettingsDialog->new;
+	restorewinpos( $d, "colours" );
+	$d->refresh;
+	my $ret = $d->ShowModal;
+	savewinpos( $d, "colours" );
+	if ( $ret == wxID_OK ) {
+	    $state{editcolours} = $d->GetColours;
+	}
+	$d->Destroy;
     }
-    $self->{d_colours}->refresh;
-    my $ret = $self->{d_colours}->ShowModal;
-    savewinpos( $self->{d_colours}, "colours" );
-    return unless $ret == wxID_OK;
-    $state{editcolours} = $self->{d_colours}->GetColours;
-    $self->{d_colours}->Close;
-
+    else {
+	my $data = Wx::ColourData->new;
+	$data->SetChooseFull(1);
+	$data->SetColour(Wx::Colour->new($state{editbgcolour}));
+	unless ( $self->{d_colours} ) {
+	    $self->{d_colours} = Wx::ColourDialog->new( $self, $data );
+	    restorewinpos( $self->{d_colours}, "colours" );
+	}
+	my $ret = $self->{d_colours}->ShowModal;
+	savewinpos( $self->{d_colours}, "colours" );
+	return unless $ret == wxID_OK;
+	$data = $self->{d_colours}->GetColourData;
+	my $colour = $data->GetColour;
+	$state{editbgcolour} = $colour->GetAsString(wxC2S_HTML_SYNTAX);
+	$self->GetParent->{t_editor}->SetBGColour($colour);
+    }
 }
 
 method OnTmplFileChanged($event) {
@@ -444,16 +452,6 @@ method OnMessagesFontPickerChanged($event) {
     return unless $ctl;
     my $font = $self->{fp_messages}->GetSelectedFont;
     $ctl->SetFont($font);
-}
-
-method OnChEditColour($event) {
-    my $parent = $self->GetParent;
-    my $ctl = $parent->{t_editor};
-    return unless $ctl;
-    my $n = $self->{cp_editor}->GetColour;
-    return unless $n && $n->IsOk;
-    $self->setnomod( $ctl, sub { $ctl->SetBackgroundColour($n) } )
-      if $ctl->can("SetBackgroundColour");
 }
 
 method OnIBDismiss($e) {

@@ -71,7 +71,7 @@ my %prefs =
    # Editor.
    editfont	   => 0,	# inital, later "Monospace 10" etc.
    editsize	   => FONTSIZE,
-   editcolour	   => wxWHITE,	# !stc
+   editbgcolour	   => wxWHITE,	# !stc
    editcolours     => join( ",", "#000000", "#b1b1b1", "#b1b1b1", "#b1b1b1",
 			    "#ff3c31", "#0068d0", "#ef6c2a" ),	# stc
    editorwrap       => 1,		# stc

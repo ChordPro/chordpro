@@ -206,8 +206,8 @@ method refresh_editor {
 	$self->refresh_scintilla;
     }
     else {
-	$self->{t_editor}->SetBackgroundColour
-	  ( Wx::Colour->new($preferences{editcolour}) );
+	$self->{t_editor}->SetBGColour
+	  ( Wx::Colour->new($preferences{editbgcolour}) );
     }
     $self->{t_editor}->SetFont
       ( Wx::Font->new($preferences{editfont}) );
@@ -293,6 +293,9 @@ method openfile( $file, $checked=0, $actual=undef ) {
 	else {
 	    $stc->SetScrollWidth($max+10);
 	}
+    }
+    else {
+	$self->{t_editor}->ShowPosition(0); # doesn't work?
     }
 
     if ( $actual =~ /^\s+.*\s+$/ ) {
@@ -583,6 +586,9 @@ package Wx::StyledTextCtrl {
     sub SetModified {
 	$_[1] ? $_[0]->MarkDirty : $_[0]->DiscardEdits;
     }
+
+    sub SetBackgroundColour { }
+    sub SetBGColour { }
 }
 
 package Wx::TextCtrl {
@@ -597,6 +603,13 @@ package Wx::TextCtrl {
 
     sub GetLineCount {
 	$_[0]->GetNumberOfLines;
+    }
+
+    sub SetBGColour {
+	my ( $self, $colour ) = @_;
+	my $mod = $self->IsModified;
+	$self->SetBackgroundColour($colour);
+	$self->SetStyle(0, -1, $self->GetDefaultStyle);
     }
 }
 
