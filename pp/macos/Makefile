@@ -11,11 +11,9 @@ SCRIPT := ${ROOT}/script
 DEST   := build
 VERSION := $(shell perl ../../lib/ChordPro/Version.pm)
 TARGET := wxchordpro
+PP := pp
 # Check if we build on Intel or ARM
 ARCH   := $(shell uname -m)
-# Use C++ (dndhandler.cpp) or Swift (dndhandler.swift) for the dndhandler 
-DNDHANDLER := cpp
-PP := pp
 
 default : dmg
 
@@ -69,15 +67,9 @@ loaders : "${DEST}/${TARGET}" "${DEST}/chordpro"
 _loaders : "${DEST}/chordpro"
 	cp "${DEST}/chordpro" "${DEST}/perl"
 
-"${DEST}/wxchordpro" : ${BASE}/ppl.c dndhandler.cpp
+"${DEST}/wxchordpro" : ${BASE}/ppl.c dndhandler.swift
 	${CC} -DMACOS ${CCOPTS} -o "${DEST}/wxchordpro" -L${DEST} ${LDOPTS} ${BASE}/ppl.c
-ifeq (${DNDHANDLER},cpp)
-	${CXX} -mmacosx-version-min=10.15 -DMACOS -o "${DEST}/dndhandler" \
-		dndhandler.cpp `${WXCNFG} --cxxflags --libs`
-	perl ./reloc.pl "${DEST}/dndhandler"
-else
 	swiftc dndhandler.swift -target ${ARCH}-apple-macos10.15 -o "${DEST}/dndhandler"
-endif
 
 "${DEST}/chordpro" : ${BASE}/ppl.c
 	${CC} -DMACOS ${CCOPTS} -o "${DEST}/chordpro" -L${DEST} ${LDOPTS} ${BASE}/ppl.c
@@ -95,10 +87,9 @@ app1 :
 	rm -fr ${APPDIR} || rm -fr ${APPDIR}
 	cp -a "${DEST}/" "${APPDIR}/"
 	mkdir -p "${APPDIR}/Contents/MacOS"
-	mkdir -p "${APPDIR}/Contents/Resources"
+	mkdir -p "${APPDIR}/Contents/Resources/cli"
 	cp PkgInfo Info.plist "${APPDIR}/Contents"
 	cp *.icns "${APPDIR}/Contents/Resources"
-	cp "${DEST}"/lib/ChordPro/res/icons/*.png "${APPDIR}/Contents/Resources"
 	cd "${APPDIR}"; mv script lib Contents/MacOS
 	cd "${APPDIR}"; mv lib*.dylib Contents/MacOS
 	cd "${APPDIR}"; rm -f MANIFEST META.yml
@@ -112,7 +103,10 @@ ifeq (${TARGET},wxchordpro)
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libwx*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*.bundle
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*/*.bundle
+	cd "${APPDIR}"; ln -s ../../MacOS/chordpro Contents/Resources/cli/chordpro
 ifeq (${ARCH},arm64)
+	find  "${APPDIR}/Contents/" -name '*.dylib' -type f | while read bundle; do codesign --force -s - "$$bundle"; done
+	find  "${APPDIR}/Contents/" -name '*.bundle' -type f | while read bundle; do codesign --force -s - "$$bundle"; done
 	codesign --force --deep -s - ${APPDIR}
 endif
 else
@@ -127,22 +121,31 @@ VOLTYPE := Classic
 else
 VOLTYPE := CLI
 endif
-DMGNAME := ChordPro-${VOLTYPE}-${VERSION}.dmg
+
+ifeq (${ARCH},x86_64)
+ARCHTYPE := Intel
+DMGNAME := ChordPro-${VOLTYPE}-${VERSION}-macOS-INTEL.dmg
+else
+ARCHTYPE := Apple Silicon
+DMGNAME := ChordPro-${VOLTYPE}-${VERSION}-macOS-ARM.dmg
+endif
 
 dmg1 :
 	rm -f ${DMGNAME}
 	bash ./create-dmg \
-	    --volname "ChordPro ${VOLTYPE}" \
-	    --volicon chordpro-dmg.icns \
-	    --window-pos 200 200 \
-	    --window-size 640 500 \
-	    --icon-size 64 \
-	    --add-file "READ ME FIRST.html" README.html 530 50 \
-	    --icon "${APPDIR}" 530 150 \
-	    --hide-extension "READ ME FIRST.html" \
-	    --app-drop-link 530 250 \
-	    --background "${APPDIR}/Contents/Resources/chordpro-bg.png" \
-	    "${DMGNAME}" "${APPDIR}"
+		--volname "ChordPro ${VOLTYPE} (${ARCHTYPE})" \
+		--volicon chordpro-dmg.icns \
+		--window-pos 200 120 \
+		--window-size 680 440 \
+		--icon-size 64 \
+		--icon "${APPDIR}" 540 75 \
+		--hide-extension "${APPDIR}" \
+		--add-file "READ ME FIRST.html" README.html  540 175 \
+		--hide-extension "READ ME FIRST.html" \
+		--add-file "Install.zsh" Install.zsh 540 275 \
+		--hide-extension "Install.zsh" \
+		--background "${DEST}/lib/ChordPro/res/icons/chordpro-bg.png" \
+		"${DMGNAME}" "${APPDIR}"
 
 clean ::
 	rm -fr ${APPDIR}

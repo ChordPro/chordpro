@@ -31,8 +31,13 @@ int main( int argc, char **argv, char **env ) {
 #ifdef MACOS
 
   uint32_t size = sizeof(selfpath);
- // Get the full path of the executable
+
+  // Get the full path of the executable
   _NSGetExecutablePath(selfpath, &size);
+
+  /// Resolve symlinks (if any)
+  char buf[PATH_MAX];
+  strcpy( selfpath, realpath( selfpath, buf ) );
 
   // Get a pointer to the last part of the path
   char *p = rindex( selfpath, '/' );
