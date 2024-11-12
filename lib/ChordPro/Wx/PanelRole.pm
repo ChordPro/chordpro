@@ -37,9 +37,15 @@ method log( $level, @msg ) {
 }
 
 method alert( $severity ) {
-#    $self->{bmb_messages}->SetBackgroundColour( $severity ? wxRED : wxGREEN )
-#      unless $self->{sw_tb}->IsSplit;
     return if $self->{sw_tb}->IsSplit;
+    state $id = wxID_ANY;
+    if ( $id == wxID_ANY ) {
+	$id = Wx::NewId;
+	$self->{w_infobar}->AddButton( $id, "Messages");
+	$self->{w_infobar}->AddButton( wxID_CLOSE );
+	Wx::Event::EVT_BUTTON( $self->{w_infobar}, $id,
+			       sub { $self->OnWindowMessages($_[1]) } );
+    }
     $self->{w_infobar}->ShowMessage("Click Messages to see diagnostic information",
 				    wxICON_INFORMATION);
 }
