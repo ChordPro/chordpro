@@ -333,9 +333,14 @@ method openfile( $file, $checked=0, $actual=undef ) {
 method newfile() {
     delete $state{currentfile};
 
+    my $title = "New Song";
+    $state{windowtitle} = $title;
+    $self->{l_status}->SetLabel($title);
+    my $content = "{title: New Song}\n";
+    $self->{t_editor}->SetText($content);
+
     my $file = $preferences{tmplfile};
-    my $content = "{title: New Song}\n\n";
-    if ( $file ) {
+    if ( $file && $preferences{enable_tmplfile} ) {
 	$self->log( 'I', "Loading template $file" );
 	if ( -f -r $file ) {
 	    if ( $self->{t_editor}->LoadFile($file) ) {
@@ -348,14 +353,32 @@ method newfile() {
 	else {
 	    $self->log( 'E', "Cannot open template $file: $!" );
 	}
-     }
-    $self->{t_editor}->SetText($content) unless $content eq "";
-    $self->{t_editor}->EmptyUndoBuffer
-      if $self->{t_editor}->can("EmptyUndoBuffer");
-    $self->log( 'S', "New file");
-    $state{windowtitle} = "New Song";
-    $self->{l_status}->SetLabel("New Song");
-    $self->{l_status}->SetToolTip("");
+    }
+    else {
+	require ChordPro::Wx::NewSongDialog;
+	unless ( $self->{d_newfile} ) {
+	    $self->{d_newfile} = ChordPro::Wx::NewSongDialog->new
+	      ( $self, wxID_ANY, "New Song" );
+	    restorewinpos( $self->{d_newfile}, "newfile" );
+	    $self->{d_newfile}->set_title($title);
+	}
+	$self->{d_newfile}->refresh;
+	my $ret = $self->{d_newfile}->ShowModal;
+	savewinpos( $self->{d_newfile}, "newfile" );
+	if ( $ret == wxID_OK ) {
+	    $title = $self->{d_newfile}->get_title;
+	    $content = $self->{d_newfile}->get_meta;
+	    $state{currentfile} = $self->{d_newfile}->get_file;
+	}
+    }
+
+    $self->{t_editor}->SetText($content);
+    $self->{t_editor}->EmptyUndoBuffer;
+
+    $self->log( 'S', "New song: $title");
+    $state{windowtitle} = $title;
+    $self->{l_status}->SetLabel($title);
+    $self->{l_status}->SetToolTip($state{currentfile});
     $preferences{xpose_from} = $preferences{xpose_to} = 0;
     $preferences{xpose_acc} = 0;
     $self->{sw_lr}->Unsplit(undef) if $self->{sw_lr}->IsSplit;
@@ -611,6 +634,8 @@ package Wx::TextCtrl {
 	$self->SetBackgroundColour($colour);
 	$self->SetStyle(0, -1, $self->GetDefaultStyle);
     }
+
+    sub EmptyUndoBuffer { }
 }
 
 1;

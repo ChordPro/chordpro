@@ -11,6 +11,7 @@ class ChordPro::Wx::FileDirPickerCtrl
   :isa(Wx::Panel);
 
 use Wx ':everything';
+use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
 use File::Basename;
 
@@ -36,7 +37,7 @@ my @args;
 sub BUILDARGS {
     my $class = shift;
 
-    my ( $parent, $id, $path, $message, $wildcard ) = @args = @_;
+    my ( $parent, $id, $path, $message, $wildcard, $new ) = @args = @_;
 
     # Args for SUPER::new.
     ( $parent, $id, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
@@ -44,9 +45,9 @@ sub BUILDARGS {
 
 ADJUSTPARAMS ( $params ) {
 
-    ( $parent, $id, $path, $message, $wildcard ) = @args;
+    ( $parent, $id, $path, $message, $wildcard, my $new ) = @args;
 
-    if ( $wildcard eq "" ) {
+    if ( $wildcard eq "" && !$new ) {
 	$picker = Wx::DirDialog->new( $self, $message,
 				      $path,
 				      wxDD_DIR_MUST_EXIST
@@ -56,8 +57,10 @@ ADJUSTPARAMS ( $params ) {
 	$picker = Wx::FileDialog->new( $self, $message,
 				       basename($path),
 				       $path,
-				       $wildcard,
-				       wxFD_OPEN|wxFD_FILE_MUST_EXIST
+				       $wildcard || $state{ffilters},
+				       $new
+				       ? (wxFD_SAVE|wxFD_OVERWRITE_PROMPT)
+				       : (wxFD_OPEN|wxFD_FILE_MUST_EXIST)
 				     );
     }
 

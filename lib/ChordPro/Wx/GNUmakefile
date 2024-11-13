@@ -4,6 +4,7 @@ WXGLADE := wxglade --generate-code=perl --use-config=dot.wxglade/wxgladerc
 
 all :: 	Main_wxg.pm \
 	EditorPanel_wxg.pm \
+	NewSongDialog_wxg.pm \
 	PreferencesDialog_wxg.pm \
 	ColourSettingsDialog_wxg.pm \
 	RenderDialog_wxg.pm \
@@ -13,6 +14,9 @@ Main_wxg.pm : Main.wxg
 	${WXGLADE} --output=$@ $<
 
 EditorPanel_wxg.pm : EditorPanel.wxg
+	${WXGLADE} --output=$@ $<
+
+NewSongDialog_wxg.pm : NewSongDialog.wxg
 	${WXGLADE} --output=$@ $<
 
 PreferencesDialog_wxg.pm : PreferencesDialog.wxg
