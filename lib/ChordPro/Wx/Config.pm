@@ -249,7 +249,13 @@ method Store :common {
 		    $v = join( ",", @$v );
 		}
 	    }
-	    $cb->Write( $k, $v );
+	    if ( defined $v ) {
+		$cb->Write( $k, $v );
+	    }
+	    else {
+		warn("Preferences: Undefined value for $k\n");
+		$cb->DeleteEntry($entry);
+	    }
 	}
     }
     $cb->Flush;
