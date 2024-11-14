@@ -117,23 +117,25 @@ endif
 dmg : app dmg1
 
 ifeq (${TARGET},wxchordpro)
-VOLTYPE := Classic
+VOLTYPE := 
+VOLPFX  := 
 else
-VOLTYPE := CLI
+VOLPFX  := -CLI
+VOLTYPE := -${VOLPFX}
 endif
 
 ifeq (${ARCH},x86_64)
 ARCHTYPE := Intel
-DMGNAME := ChordPro-${VOLTYPE}-${VERSION}-macOS-INTEL.dmg
+DMGNAME := ChordPro${VOLTYPE}-${VERSION}-macOS-INTEL.dmg
 else
 ARCHTYPE := Apple Silicon
-DMGNAME := ChordPro-${VOLTYPE}-${VERSION}-macOS-ARM.dmg
+DMGNAME := ChordPro${VOLTYPE}-${VERSION}-macOS-ARM.dmg
 endif
 
 dmg1 :
 	rm -f ${DMGNAME}
 	bash ./create-dmg \
-		--volname "ChordPro ${VOLTYPE} (${ARCHTYPE})" \
+		--volname "ChordPro ${VOLPFX} (${ARCHTYPE})" \
 		--volicon chordpro-dmg.icns \
 		--window-pos 200 120 \
 		--window-size 680 440 \
