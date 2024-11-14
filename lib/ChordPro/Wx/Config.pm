@@ -169,6 +169,8 @@ method Load :common {
 		}
 		else {
 		    warn("Preferences: unknown key: $entry");
+		    $cb->DeleteEntry($entry);
+		    next;
 		}
 		if ( $entry eq "cfgpreset" ) {
 		    $preferences{$entry} = [ split( /,\s*/, $value ) ];
@@ -184,6 +186,8 @@ method Load :common {
 	    else {
 		$state{$group}->{$entry} = $value;
 	    }
+	}
+	continue {
 	    ( $goon, $entry, $index ) = $cb->GetNextEntry($index);
 	}
 	$cb->SetPath($cp);
