@@ -404,8 +404,14 @@ method OnHelp_Site($event) {
 
 method OnMaximize($event) {
     my $top = wxTheApp->GetTopWindow;
-    my $full = $top->IsMaximized;
-    $top->Maximize( !$full );
+    if ( is_macos ) {
+	my $full = $top->IsFullScreen;
+	$top->FullScreen( !$full );
+    }
+    else {
+	my $full = $top->IsMaximized;
+	$top->Maximize( !$full );
+    }
 }
 
 method OnNew($event) {
