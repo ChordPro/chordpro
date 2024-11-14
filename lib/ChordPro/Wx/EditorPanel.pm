@@ -127,7 +127,7 @@ method refresh_scintilla() {
     # 5 - Directives (blue, same as status label colour)
     $stc->StyleSetSpec( 5, "fore:" . shift(@c) );
     # 6 - Directive arguments (orange, same as toolbar icon colour)
-    $stc->StyleSetSpec( 6, "fore " . shift(@c));
+    $stc->StyleSetSpec( 6, "fore:" . shift(@c));
 
     # For linenumbers.
     $stc->SetMarginWidth( 0, 40 ); # TODO
