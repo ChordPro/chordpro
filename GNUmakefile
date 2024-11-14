@@ -57,7 +57,7 @@ to_win : resources
 	    rsync ${RSYNC_ARGS} --files-from=$$mnf ./ ${WINDST}/; \
 	done
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.PP   \
-	  --exclude=pp/macos/** --exclude=pp/macosswift/** \
+	  --exclude=pp/macos/** \
 	  --exclude=pp/linux/** --exclude=pp/debian/** \
 	  ./ ${WINDST}/
 
@@ -69,7 +69,7 @@ to_mac : resources
 	    rsync ${RSYNC_ARGS} --files-from=$$mnf ./ ${MACDST}/; \
 	done
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.PP   \
-	  --exclude=pp/windows/** --exclude=pp/macosswift/** \
+	  --exclude=pp/windows/** \
 	  --exclude=pp/debian/** \
 	  ./ ${MACDST}/
 
