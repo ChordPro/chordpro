@@ -254,7 +254,7 @@ method Store :common {
 	    }
 	    else {
 		warn("Preferences: Undefined value for $k\n");
-		$cb->DeleteEntry($entry);
+		$cb->DeleteEntry($k);
 	    }
 	}
     }
