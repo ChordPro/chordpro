@@ -77,7 +77,7 @@ ADJUSTPARAMS ( $params ) {
 
     $sizer = Wx::BoxSizer->new(wxHORIZONTAL);
     $sizer->Add( $textctrl, 1, wxEXPAND|wxRIGHT, 5 );
-    $sizer->Add( $browse, 0, 5, wxLEFT|wxRIGHT );
+    $sizer->Add( $browse, 0, wxLEFT|wxRIGHT, 5 );
     $sizer->Layout;
 
     Wx::Event::EVT_TEXT( $self, $textctrl->GetId,
