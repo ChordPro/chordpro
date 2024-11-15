@@ -59,6 +59,9 @@
       // Transpose chords.
       transpose : 0
     
+      // Force enharmonic when transposing (experimental).
+      enharmonic-transpose: true
+    
       // Transcode chords.
       transcode : ""
     

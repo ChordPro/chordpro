@@ -1747,6 +1747,8 @@ sub dir_meta {
 		do_warn("Illegal key: \"$val\"\n"), next unless $info;
 		my $name = $info->name;
 		my $act = $name;
+		$info->{key} = $name
+		  unless $config->{settings}->{'enharmonic-transpose'};
 
 		if ( $capo ) {
 		    $act = $self->add_chord( $info->transpose($capo) );
@@ -2368,7 +2370,9 @@ sub parse_chord {
 	$info = $i;
 	warn( "Parsing chord: \"$chord\" transposed ",
 	      sprintf("%+d", $xp), " to \"",
-	      $info->name, "\"\n" ) if $debug > 1;
+	      $info->name, "\"",
+	      " key ".$self->{meta}->{key}->[-1],
+	      "\n" ) if $debug > 1;
     }
     # else: warning has been given.
 
@@ -2414,6 +2418,7 @@ sub parse_chord {
 	warn( "Parsing chord: \"$chord\" transcoded to ",
 	      $info->name,
 	      " (", $info->{system}, ")",
+	      defined($key_ord) ? " key ".$self->{meta}->{key}->[-1] : "",
 	      "\n" ) if $debug > 1;
 	if ( my $i = ChordPro::Chords::known_chord($info) ) {
 	    warn( "Parsing chord: \"$chord\" found \"",
@@ -2442,6 +2447,8 @@ sub parse_chord {
     }
 
     if ( $info ) {
+	$info->{key} = $self->{meta}->{key}->[-1]
+	  unless $config->{settings}->{'enharmonic-transpose'};
 	warn( "Parsing chord: \"$chord\" okay: \"",
 	      $info->name, "\" \"",
 	      $info->chord_display, "\"",

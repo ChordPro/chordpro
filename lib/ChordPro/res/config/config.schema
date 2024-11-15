@@ -171,6 +171,12 @@
           "default" : false
         },
 
+        "enharmonic-transpose" : {
+          "description" : "Force enharmonic when transposing (experimental).",
+          "type" : "boolean",
+          "default" : true
+        },
+
         "inline-annotations" : {
           "description" : "Same, for annotations. Ignored unless inline-chords is set.\nMust be a string containing pretext %s posttext.\nDefault is \"%s\".",
           "type" : "string",
@@ -1115,9 +1121,6 @@
 	      "default" : 1,
 	      "description" : "Even/odd pages (1), odd/even (-1) or odd (0).",
 	      "enum" : [ 1, -1, 0 ],
-	      "options" : {
-		"enum_titles" : [ "Even/Odd", "Odd/Even", "Odd" ]
-	      },
 	      "type" : "integer"
 	    },
 
@@ -1433,28 +1436,28 @@
 		  "additionalProperties" : false,
 		  "properties" : {
 		    "background" : {
-		      "type" : "string"
+		      "type" : "string",
 		      "allOf" : [
 			{ "$ref" : "#/definitions/tptspec" },
 			{ "default" : "" }
 		      ]
 		    },
 		    "title" : {
-		      "type" : "string"
+		      "type" : "string",
 		      "allOf" : [
 			{ "$ref" : "#/definitions/tptspec" },
 			{ "default" : "" }
 		      ]
 		    },
 		    "subtitle" : {
-		      "type" : "string"
+		      "type" : "string",
 		      "allOf" : [
 			{ "$ref" : "#/definitions/tptspec" },
 			{ "default" : "" }
 		      ]
 		    },
 		    "footer" : {
-		      "type" : "string"
+		      "type" : "string",
 		      "allOf" : [
 			{ "$ref" : "#/definitions/tptspec" },
 			{ "default" : "" }

@@ -847,6 +847,13 @@ sub chord_display ( $self, $default ) {
     my $args = {};
     $self->flat_copy( $args, $self->{display} // $self );
 
+    if ( !$::config->{settings}->{'enharmonic-transpose'} && $args->{key} ) {
+	$args->{root} = 'E#'
+	  if $args->{root} eq 'F' && $args->{key} eq 'F#';
+	$args->{root} = 'Cb'
+	  if $args->{root} eq 'B' && $args->{key} eq 'Gb';
+    }
+
     for my $fmt ( $default,
 		  $self->{format},
 		  $self->{chordformat} ) {
