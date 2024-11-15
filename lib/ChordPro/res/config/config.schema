@@ -1436,28 +1436,22 @@
 		  "additionalProperties" : false,
 		  "properties" : {
 		    "background" : {
-		      "type" : "string",
-		      "allOf" : [
-			{ "$ref" : "#/definitions/tptspec" },
-			{ "default" : "" }
-		      ]
+		      "description" : "Background page.",
+		      "type" : "string"
 		    },
 		    "title" : {
-		      "type" : "string",
 		      "allOf" : [
 			{ "$ref" : "#/definitions/tptspec" },
 			{ "default" : "" }
 		      ]
 		    },
 		    "subtitle" : {
-		      "type" : "string",
 		      "allOf" : [
 			{ "$ref" : "#/definitions/tptspec" },
 			{ "default" : "" }
 		      ]
 		    },
 		    "footer" : {
-		      "type" : "string",
 		      "allOf" : [
 			{ "$ref" : "#/definitions/tptspec" },
 			{ "default" : "" }
