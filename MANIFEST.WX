@@ -1,7 +1,4 @@
 lib/ChordPro/Wx.pm
-lib/ChordPro/Wx/ColourSettingsDialog.pm
-lib/ChordPro/Wx/ColourSettingsDialog.wxg
-lib/ChordPro/Wx/ColourSettingsDialog_wxg.pm
 lib/ChordPro/Wx/Config.pm
 lib/ChordPro/Wx/EditorPanel.pm
 lib/ChordPro/Wx/EditorPanel_wxg.pm

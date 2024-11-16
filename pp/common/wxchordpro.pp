@@ -4,8 +4,6 @@
 --cachedeps=wxchordpro.pp.deps
 
 # Explicitly include the Wx modules.
---module=ChordPro::Wx::ColourSettingsDialog
---module=ChordPro::Wx::ColourSettingsDialog_wxg
 --module=ChordPro::Wx::Config
 --module=ChordPro::Wx::EditorPanel
 --module=ChordPro::Wx::EditorPanel_wxg
