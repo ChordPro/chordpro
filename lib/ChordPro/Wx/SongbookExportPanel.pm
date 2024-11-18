@@ -97,6 +97,9 @@ method save_preferences() {
     $state{songbookexport}{folder} = $state{sbe_folder};
 }
 
+method update_preferences() {
+}
+
 method open_dir($dir) {
     $dir =~ s/[\\\/]$//;
     $self->{dp_folder}->SetPath( $state{sbe_folder} = $dir );
@@ -223,6 +226,7 @@ sub OnDirPickerChanged {
     $self->{w_rearrange}->Set(\@files);
     $self->{w_rearrange}->Check($_,1) for 0..$#files;
     $self->{sz_rearrange}->Layout;
+    $self->{sz_left}->Layout;
     $self->{b_down}->Enable(0);
     $self->{b_up}->Enable(0);
     $state{sbe_files} = \@files;
