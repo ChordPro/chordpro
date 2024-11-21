@@ -1,5 +1,6 @@
 lib/ChordPro/Wx.pm
 lib/ChordPro/Wx/Config.pm
+lib/ChordPro/Wx/Editor.pm
 lib/ChordPro/Wx/EditorPanel.pm
 lib/ChordPro/Wx/EditorPanel_wxg.pm
 lib/ChordPro/Wx/FileDirPickerCtrl.pm
@@ -10,9 +11,9 @@ lib/ChordPro/Wx/NewSongDialog.pm
 lib/ChordPro/Wx/NewSongDialog.wxg
 lib/ChordPro/Wx/NewSongDialog_wxg.pm
 lib/ChordPro/Wx/PanelRole.pm
-lib/ChordPro/Wx/PreferencesDialog.pm
-lib/ChordPro/Wx/PreferencesDialog.wxg
-lib/ChordPro/Wx/PreferencesDialog_wxg.pm
+lib/ChordPro/Wx/SettingsDialog.pm
+lib/ChordPro/Wx/SettingsDialog.wxg
+lib/ChordPro/Wx/SettingsDialog_wxg.pm
 lib/ChordPro/Wx/Preview.pm
 lib/ChordPro/Wx/RenderDialog.pm
 lib/ChordPro/Wx/RenderDialog.wxg
