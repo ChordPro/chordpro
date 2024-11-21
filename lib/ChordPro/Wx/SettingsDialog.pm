@@ -177,7 +177,7 @@ method fetch_prefs() {
     $self->enablecustom;
     $state{_prefs} = clone(\%preferences);
 
-    use DDP; p %preferences, as => "Fetched";
+    # use DDP; p %preferences, as => "Fetched";
 }
 
 #               C      D      E  F      G      A        B C
@@ -264,12 +264,12 @@ method store_prefs() {
     $preferences{enable_pdfviewer} = $self->{cb_pdfviewer}->IsChecked;
     $preferences{pdfviewer} = $self->{t_pdfviewer}->GetValue;
 
-    use DDP; p %preferences, as => "Stored";
+    # use DDP; p %preferences, as => "Stored";
 }
 
 method restore_prefs() {
     %preferences = %{ $state{_prefs} };
-    use DDP; p %preferences, as => "Restored";
+    # use DDP; p %preferences, as => "Restored";
 }
 
 method need_restart() {
