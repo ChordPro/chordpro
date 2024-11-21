@@ -33,6 +33,7 @@ sub OnInit( $self ) {
     $self->SetVendorName("ChordPro.ORG");
     Wx::InitAllImageHandlers();
     ChordPro::Wx::Config->Setup($options);
+    ChordPro::Wx::Config->Load($options);
 
     my $main = ChordPro::Wx::Main->new;
     return 0 unless $main->init($options);
@@ -191,7 +192,7 @@ method select_mode( $mode ) {
 # Explicit (re)initialisation of this class.
 method init( $options ) {
 
-    ChordPro::Wx::Config->Load;
+    $state{mode} = "initial";
 
     # General runtime options.
     $state{verbose}   = $options->{verbose};
@@ -205,21 +206,17 @@ method init( $options ) {
     $self->get_preferences;
     $self->setup_menubar;
 
+    $self->select_mode("initial");
     if ( @ARGV ) {
 	my $arg = decode_utf8(shift(@ARGV));
-	if ( -d $arg && $self->{p_sbexport}->open_dir($arg) ) {
-	    $self->select_mode("sbexport");
-	    return 1;
+	if ( -d $arg ) {
+	    return 1 if $self->select_mode("sbexport")->open_dir($arg);
 	}
-	elsif ( $self->{p_editor}->openfile($arg) ) {
-	    $self->select_mode("editor");
-	    return 1;
+	else {
+	    return 1 if $self->select_mode("editor")->openfile($arg);
 	}
-	return 0;
     }
-    else {
-	$self->select_mode("initial");
-    }
+    $self->select_mode("initial");
     return 1;
 }
 
@@ -253,11 +250,11 @@ method get_preferences() {
     my $p = lc $preferences{xcode};
     if ( $p ) {
 	if ( $p eq "-----" ) {
-	    $p = 0;
+	    $preferences{enable_xcode} = 0;
 	}
 	else {
 	    my $n = "";
-	    for ( @{ $self->notationlist } ) {
+	    for ( @{ $state{notations} } ) {
 		next unless $_ eq $p;
 		$n = $p;
 		last;
@@ -304,7 +301,7 @@ method aboutmsg() {
     return $msg;
 }
 
-method check_saved {
+method check_saved() {
     for ( panels ) {
 	return unless $self->{$_}->check_source_saved;
 	return unless $self->{$_}->check_preview_saved;
@@ -442,6 +439,29 @@ method OnOpen($event) {
 	$self->select_mode("editor")->openfile( $fd->GetPath, 1 );
     }
     $fd->Destroy;
+}
+
+method OnPreferences($event) {
+    require ChordPro::Wx::SettingsDialog;
+    unless ( $self->{d_prefs} ) {
+	$self->{d_prefs} = ChordPro::Wx::SettingsDialog->new
+	  ( $self, wxID_ANY, "Settings" );
+	restorewinpos( $self->{d_prefs}, "prefs" );
+    }
+    else {
+	$self->{d_prefs}->refresh;
+    }
+
+    # The Settings dialog operates on the current $preferences.
+    my $ret = $self->{d_prefs}->ShowModal;
+    savewinpos( $self->{d_prefs}, "prefs" );
+    return unless $ret == wxID_OK;
+
+    # $preferences may have changed.
+    $self->save_preferences;
+
+    # Update the requestor.
+    $state{panel}->update_preferences unless $state{mode} eq "initial";
 }
 
 # On the recents list, click selects and displays the file name.

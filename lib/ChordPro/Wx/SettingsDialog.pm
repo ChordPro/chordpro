@@ -126,7 +126,7 @@ method fetch_prefs() {
     # Editor.
     $self->{fp_editor}->SetSelectedFont
       ( Wx::Font->new($preferences{editfont}) );
-    $state{editbgcolour} = $preferences{editbgcolour};
+    $self->{cp_bg}->SetColour($preferences{editbgcolour});
     $self->{cb_editorwrap}->SetValue($preferences{editorwrap});
     $self->{sp_editorwrap}->SetValue($preferences{editorwrapindent});
 
@@ -175,6 +175,8 @@ method fetch_prefs() {
     $self->{t_pdfviewer}->Enable($self->{cb_pdfviewer}->IsChecked);
 
     $self->enablecustom;
+    $state{_prefs} = clone(\%preferences);
+
     use DDP; p %preferences, as => "Fetched";
 }
 
@@ -217,9 +219,10 @@ method store_prefs() {
 
     # Editor.
     $preferences{editfont} = $self->{fp_editor}->GetSelectedFont->GetNativeFontInfoDesc;
+    $preferences{editbgcolour} = $self->{cp_bg}->GetAsHTML;
+    $preferences{editcolours} = [ map { $self->{"cp_$_"}->GetAsHTML } 0..6 ];
     $preferences{editorwrap} = $self->{cb_editorwrap}->IsChecked;
     $preferences{editorwrapindent} = $self->{sp_editorwrap}->GetValue;
-    $preferences{editbgcolour} = $state{editbgcolour};
     $self->{t_editor}->refresh;
 
     # Messages.
@@ -265,20 +268,7 @@ method store_prefs() {
 }
 
 method restore_prefs() {
-
-    # Editor (changed are applied live).
-    my $ctl = $self->GetParent->{t_editor};
-    return unless $ctl;
-
-    my $font = Wx::Font->new($preferences{editfont});
-    $self->setnomod( $ctl, sub { $ctl->SetFont($font) } );
-    $self->setnomod( $ctl,
-		     sub { $ctl->SetBGColour
-			     ( Wx::Colour->new($preferences{editbgcolour}) ) } );
-    $font = Wx::Font->new($preferences{msgsfont});
-    $self->GetParent->{t_messages}->SetFont($font);
-    $state{editbgcolour} = $preferences{editbgcolour};
-
+    %preferences = %{ $state{_prefs} };
     use DDP; p %preferences, as => "Restored";
 }
 
@@ -310,18 +300,17 @@ sub SetColours {
     my @c = @$colours;
     my $stc = $self->{t_editor};
     if ( $state{have_stc} ) {
-	$stc->StyleClearAll;
-	$stc->StyleSetSpec( $_, "fore:".$c[$_] ) for 0..7;
+	$stc->StyleSetSpec( $_, "fore:".$c[$_] ) for 0..6;
 	$self->{"cp_$_"}->Enable(1) for 0..7;
 	$self->{"cp_bg"}->Enable(0);
 	$self->{"cp_bg"}->SetColour(wxWHITE);
 	$self->{"l_$_"}->Enable(1) for 0..7;
 	$self->{"l_bg"}->Enable(0);
-	$self->{"cp_$_"}->SetColour($c[$_]) for 0..7;
+	$self->{"cp_$_"}->SetColour($c[$_]) for 0..6;
     }
     else {
 	$self->{"cp_$_"}->Enable(0) for 1..7;
-	$self->{"cp_$_"}->SetColour("#e0e0e0") for 1..7;
+	$self->{"cp_$_"}->SetColour("#e0e0e0") for 1..6;
 	$self->{"l_$_"}->Enable(0) for 1..7;
 	$self->{"cp_0"}->Enable(1);
 	$self->{"l_0"}->Enable(1);
@@ -329,6 +318,7 @@ sub SetColours {
 	$self->{"cp_bg"}->SetColour($preferences{editbgcolour});
 	$self->{"l_bg"}->Enable(1);
     }
+    $stc->refresh;
 }
 
 ################ Event handlers ################
@@ -457,7 +447,8 @@ method OnEditorFontPickerChanged($event) {
     my $ctl = $self->{t_editor};
     return unless $ctl;
     my $font = $self->{fp_editor}->GetSelectedFont;
-    $ctl->SetFont($font);
+    $preferences{editfont} = $font->GetNativeFontInfoDesc;
+    $ctl->refresh;
 }
 
 method OnColour0Changed( $event ) {
@@ -499,13 +490,13 @@ method OnBgColourChanged( $event ) {
 method OnEditorWrap( $event ) {
     $self->{$_}->Enable( $self->{cb_editorwrap}->IsChecked )
       for qw( l_editorwrap sp_editorwrap );
-    local $preferences{editorwrap} = $self->{cb_editorwrap}->IsChecked;
-    local $preferences{editorwrapindent} = $self->{sp_editorwrap}->GetValue;
+    $preferences{editorwrap} = $self->{cb_editorwrap}->IsChecked;
+    $preferences{editorwrapindent} = $self->{sp_editorwrap}->GetValue;
     $self->{t_editor}->refresh;
 }
 
 method OnEditorWrapIndent( $event ) {
- $preferences{editorwrapindent} = $self->{sp_editorwrap}->GetValue;
+    $preferences{editorwrapindent} = $self->{sp_editorwrap}->GetValue;
     $self->{t_editor}->refresh;
 }
 
@@ -527,6 +518,7 @@ method OnMessagesFontPickerChanged($event) {
     return unless $ctl;
     my $font = $self->{fp_messages}->GetSelectedFont;
     $ctl->SetFont($font);
+    $preferences{msgsfont} = $font->GetString(wxC2S_HTML_SYNTAX);
 }
 
 # Previewer.

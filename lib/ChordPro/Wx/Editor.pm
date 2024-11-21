@@ -67,7 +67,6 @@ sub refresh( $self, $prefs = undef ) {
 				    sub { OnStyleNeeded($self, $_[1]) } );
 
     $stc->StyleClearAll;
-    $stc->SetFont( Wx::Font->new($prefs->{editfont}) );
 
     my @c = @{$prefs->{editcolours}};
     # 0 - basic
@@ -94,6 +93,8 @@ sub refresh( $self, $prefs = undef ) {
 			      Wx::Colour->new($prefs->{editcolours}->[-1]) );
     $stc->StyleSetForeground( $self->{astyle}, wxRED );
 
+    $stc->SetFont( Wx::Font->new($prefs->{editfont}) );
+
     # Wrapping.
     if ( $prefs->{editorwrap} ) {
 	$stc->SetWrapMode(3); # wxSTC_WRAP_WHITESPACE );
@@ -102,6 +103,7 @@ sub refresh( $self, $prefs = undef ) {
     else {
 	$stc->SetWrapMode(0); # wxSTC_WRAP_NONE );
     }
+    $self->style_text;
 }
 
 sub style_text( $self ) {
@@ -182,6 +184,7 @@ sub SetModified( $self, $mod ) {
 }
 
 sub SetFont( $self, $font ) {
+    die("XXX\n") unless $font->IsOk;
     $self->StyleSetFont( $_, $font ) for 0..6;
     $self->{font} = $font;
 }
@@ -226,9 +229,14 @@ sub refresh( $self, $prefs = undef ) {
     my $ctrl = $self;
     $prefs //= \%preferences;
 
+    my $mod = $self->IsModified;
+
     # TextCtrl only supports background colour and font.
-    $self->SetBGColour( Wx::Colour->new($prefs->{editbgcolour}) );
+    $self->SetColour( Wx::Colour->new($prefs->{editcolours}->[0]) );
+    $self->SetBackgroundColour( Wx::Colour->new($prefs->{editbgcolour}) );
     $ctrl->SetFont( Wx::Font->new($prefs->{editfont}) );
+
+    $ctrl->SetModfied($mod);
 }
 
 
@@ -249,7 +257,6 @@ sub SetText( $self, $text ) {
 }
 
 sub SetBGColour( $self, $colour ) {
-    my $mod = $self->IsModified;
     $self->SetBackgroundColour($colour);
     $self->SetStyle(0, -1, $self->GetDefaultStyle);
 }

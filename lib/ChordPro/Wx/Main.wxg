@@ -443,7 +443,7 @@
                         <border>0</border>
                         <flag>wxEXPAND</flag>
                         <object class="wxPanel" name="p_editor" base="EditPanel" instance_class="ChordPro::Wx::EditorPanel">
-                            <extracode_pre>use ChordPro::Wx::EditorPanel;</extracode_pre>
+                            <extracode_pre>require ChordPro::Wx::EditorPanel;</extracode_pre>
                             <hidden>1</hidden>
                         </object>
                     </object>
@@ -452,7 +452,7 @@
                         <border>0</border>
                         <flag>wxEXPAND</flag>
                         <object class="wxPanel" name="p_sbexport" base="EditPanel" instance_class="ChordPro::Wx::SongbookExportPanel">
-                            <extracode_pre>use ChordPro::Wx::SongbookExportPanel;</extracode_pre>
+                            <extracode_pre>require ChordPro::Wx::SongbookExportPanel;</extracode_pre>
                             <hidden>1</hidden>
                         </object>
                     </object>
