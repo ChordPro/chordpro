@@ -15,22 +15,10 @@ use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
 use File::Basename;
 
-field $parent;
-field $id;
-field $pos;
-field $size;
-field $style;
-
-field $path     = "";
 field $text     = "";
-field $message  = "";
-field $wildcard = "";
-
 field $textctrl;
-field $picker :accessor;
-field $browse :accessor;
-field $sizer;
-field $widget :accessor;
+field $picker;
+field $picker_event;
 
 my @args;
 
@@ -45,13 +33,15 @@ sub BUILDARGS {
 
 ADJUSTPARAMS ( $params ) {
 
-    ( $parent, $id, $path, $message, $wildcard, my $new ) = @args;
+    my ( $parent, $id, $path, $message, $wildcard, $new ) = @args;
 
     if ( $wildcard eq "" && !$new ) {
 	$picker = Wx::DirDialog->new( $self, $message,
 				      $path,
 				      wxDD_DIR_MUST_EXIST
 				    );
+	$picker_event = Wx::FileDirPickerEvent->new
+	  ( wxEVT_COMMAND_DIRPICKER_CHANGED, $self->GetId );
     }
     else {
 	$picker = Wx::FileDialog->new( $self, $message,
@@ -62,7 +52,11 @@ ADJUSTPARAMS ( $params ) {
 				       ? (wxFD_SAVE|wxFD_OVERWRITE_PROMPT)
 				       : (wxFD_OPEN|wxFD_FILE_MUST_EXIST)
 				     );
+	$picker_event = Wx::FileDirPickerEvent->new
+	  ( wxEVT_COMMAND_FILEPICKER_CHANGED, $self->GetId );
     }
+
+    $picker_event->SetEventObject($self);
 
     $textctrl = Wx::TextCtrl->new( $self, wxID_ANY,
 				   "",
@@ -71,11 +65,11 @@ ADJUSTPARAMS ( $params ) {
 				   0, # |wxTE_READONLY ?
 				 );
 
-    $browse = Wx::Button->new( $self, wxID_ANY, "Browse",
-			       wxDefaultPosition, wxDefaultSize,
-			       0 );
+    my $browse = Wx::Button->new( $self, wxID_ANY, "Browse",
+				  wxDefaultPosition, wxDefaultSize,
+				  0 );
 
-    $sizer = Wx::BoxSizer->new(wxHORIZONTAL);
+    my $sizer = Wx::BoxSizer->new(wxHORIZONTAL);
     $sizer->Add( $textctrl, 1, wxEXPAND|wxRIGHT, 5 );
     $sizer->Add( $browse, 0, wxLEFT|wxRIGHT, 5 );
     $sizer->Layout;
@@ -90,30 +84,34 @@ ADJUSTPARAMS ( $params ) {
     Wx::Event::EVT_BUTTON( $self, $browse->GetId,
 			   sub { $self->OnDialog($_[1]) } );
 
-    $self->SetSizer($widget = $sizer);
+    $self->SetSizer($sizer);
     $sizer->Fit($self);
     $self->Layout;
 
     $self;
 }
 
-################
+################ Widget Accessors ################
 
-method GetPath() { $picker->GetPath }
+method GetPath() {
+    $text;
+}
+
 method SetPath($p) {
     $picker->SetPath( $text = $p );
     ellipsize( $textctrl, text => $text,
 	       type => wxELLIPSIZE_START );
 }
 
-################
+################ Event Handlers ################
 
 method OnDialog($e) {
     my $ret = $picker->ShowModal;
     return unless $ret == wxID_OK;
-    $text = $path = $picker->GetPath;
+    $text = $picker->GetPath;
     ellipsize( $textctrl, text => $text,
 	       type => wxELLIPSIZE_START );
+    $self->ProcessEvent($picker_event);
 }
 
 method OnDirChanged($e) {
@@ -123,7 +121,7 @@ method OnFileChanged($e) {
     warn("OnFileChanged not implemented\n");
 }
 method OnTextChanged($e) {
-    $text = $textctrl->GetText;
+    $text = $textctrl->GetValue;
     $picker->SetPath($text);
     ellipsize( $textctrl, text => $text,
 	       type => wxELLIPSIZE_START );
@@ -134,5 +132,7 @@ method OnTextFocusIn($e) {
 method OnTextFocusOut($e) {
     $textctrl->SetValue($text);
 }
+
+################
 
 1;
