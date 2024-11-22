@@ -349,6 +349,7 @@ sub Wx::ColourPickerCtrl::GetAsHTML( $self ) {
 unless ( $::wxbitmapnew ) {
     $::wxbitmapnew = \&Wx::Bitmap::new;
     no warnings 'redefine';
+    use File::Basename;
     *Wx::Bitmap::new = sub {
 	# Only handle Wx::Bitmap->new(file, type) case.
 	goto &$::wxbitmapnew if @_ != 3 || -f $_[1];
