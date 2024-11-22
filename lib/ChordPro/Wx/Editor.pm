@@ -232,13 +232,18 @@ sub refresh( $self, $prefs = undef ) {
     my $mod = $self->IsModified;
 
     # TextCtrl only supports background colour and font.
-    $self->SetColour( Wx::Colour->new($prefs->{editcolours}->[0]) );
-    $self->SetBackgroundColour( Wx::Colour->new($prefs->{editbgcolour}) );
+    my $bgcol = Wx::Colour->new( $prefs->{editbgcolour} );
+    my $fgcol = Wx::Colour->new( $prefs->{editcolours}->[0] );
+    $ctrl->SetBackgroundColour($bgcol);
+    $ctrl->SetStyle( 0, -1, Wx::TextAttr->new( $fgcol, $bgcol ) );
     $ctrl->SetFont( Wx::Font->new($prefs->{editfont}) );
 
-    $ctrl->SetModfied($mod);
+    $ctrl->SetModified($mod);
 }
 
+sub AddText( $self, $text ) {
+    $self->WriteText($text);
+}
 
 sub GetLineCount( $self ) {
     $self->GetNumberOfLines;
@@ -258,7 +263,15 @@ sub SetText( $self, $text ) {
 
 sub SetBGColour( $self, $colour ) {
     $self->SetBackgroundColour($colour);
-    $self->SetStyle(0, -1, $self->GetDefaultStyle);
+    $self->SetStyle( 0, -1,
+		     Wx::TextAttr->new
+		     ( $self->GetDefaultStyle->GetTextColour,
+		       Wx::Colour->new($colour) ) );
+}
+
+sub SetColour( $self, $colour ) {
+    $self->SetStyle( 0, -1,
+		     Wx::TextAttr->new( Wx::Colour->new($colour) ) );
 }
 
 sub EmptyUndoBuffer($self) {
@@ -267,10 +280,6 @@ sub EmptyUndoBuffer($self) {
 sub OSXDisableAllSmartSubstitutions( $self ) {
     return unless is_macos;
     $self->SUPER::OSXDisableAllSmartSubstitutions;
-}
-
-sub Replace( $self, $from=-1, $to=-1, $text="" ) {
-    $self->Replace( $from, $to, $text );
 }
 
 ################

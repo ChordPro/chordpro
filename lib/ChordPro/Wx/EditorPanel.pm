@@ -333,6 +333,48 @@ method check_preview_saved() {
     1;
 }
 
+method embrace( $pre, $post ) {
+    my $ctrl = $self->{t_editor};
+
+    my ( $from, $to ) = $ctrl->GetSelection;
+    my $have_selection = $from != $to;
+
+    if ( $have_selection ) {
+	my $text = $have_selection ? $ctrl->GetSelectedText : $ctrl->GetText;
+	chomp($text);
+	$text = $pre . $text . $post;
+	$ctrl->Replace( $from, $to, $text );
+	my $pos = $ctrl->GetInsertionPoint;
+	$ctrl->SetSelection( $pos, $pos );
+    }
+    else {
+	$ctrl->AddText($pre);
+	my $pos = $ctrl->GetInsertionPoint;
+	$ctrl->AddText($post);
+	$ctrl->SetSelection( $pos, $pos );
+    }
+}
+
+method embrace_directive($dir) {
+    $self->embrace( "{$dir: ", "}\n" );
+}
+
+method embrace_section($section) {
+
+    unless ( defined($section) ) {
+	my $dialog = Wx::TextEntryDialog->new
+	  ( $self, "Enter section name",
+	    "",
+	    "tab" );
+
+	return if $dialog->ShowModal != wxID_OK;
+	$section = $dialog->GetValue;
+    }
+
+    $self->embrace( "{start_of_$section}\n",
+		    "\n{end_of_$section}\n" );
+}
+
 method save_preferences() { 1 }
 
 method update_preferences() {
@@ -448,6 +490,40 @@ method OnText($event) {
 
 method OnUndo($event) {
     $self->{t_editor}->Undo;
+}
+
+#### Insertions
+
+method OnInsertTitle($event) {
+    $self->embrace_directive("title");
+}
+
+method OnInsertSubtitle($event) {
+    $self->embrace_directive("subtitle");
+}
+
+method OnInsertKey($event) {
+    $self->embrace_directive("key");
+}
+
+method OnInsertArtist($event) {
+    $self->embrace_directive("artist");
+}
+
+method OnInsertChorus($event) {
+    $self->embrace_section("chorus");
+}
+
+method OnInsertVerse($event) {
+    $self->embrace_section("verse");
+}
+
+method OnInsertGrid($event) {
+    $self->embrace_section("grid");
+}
+
+method OnInsertSection($event) {
+    $self->embrace_section(undef);
 }
 
 1;

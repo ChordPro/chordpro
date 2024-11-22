@@ -220,7 +220,7 @@ method store_prefs() {
     # Editor.
     $preferences{editfont} = $self->{fp_editor}->GetSelectedFont->GetNativeFontInfoDesc;
     $preferences{editbgcolour} = $self->{cp_bg}->GetAsHTML;
-    $preferences{editcolours} = [ map { $self->{"cp_$_"}->GetAsHTML } 0..6 ];
+    $preferences{editcolours} = [ map { $self->{"cp_$_"}->GetAsHTML } 0..7 ];
     $preferences{editorwrap} = $self->{cb_editorwrap}->IsChecked;
     $preferences{editorwrapindent} = $self->{sp_editorwrap}->GetValue;
     $self->{t_editor}->refresh;
@@ -306,11 +306,11 @@ sub SetColours {
 	$self->{"cp_bg"}->SetColour(wxWHITE);
 	$self->{"l_$_"}->Enable(1) for 0..7;
 	$self->{"l_bg"}->Enable(0);
-	$self->{"cp_$_"}->SetColour($c[$_]) for 0..6;
+	$self->{"cp_$_"}->SetColour($c[$_]) for 0..7;
     }
     else {
 	$self->{"cp_$_"}->Enable(0) for 1..7;
-	$self->{"cp_$_"}->SetColour("#e0e0e0") for 1..6;
+	$self->{"cp_$_"}->SetColour("#e0e0e0") for 1..7;
 	$self->{"l_$_"}->Enable(0) for 1..7;
 	$self->{"cp_0"}->Enable(1);
 	$self->{"l_0"}->Enable(1);
@@ -484,7 +484,7 @@ method OnColour7Changed( $event ) {
 }
 
 method OnBgColourChanged( $event ) {
-####
+    $self->colourchanged(-1);
 }
 
 method OnEditorWrap( $event ) {
@@ -531,8 +531,13 @@ method OnPDFViewer($event) {
 ################ Helpers ################
 
 method colourchanged($index) {
-    $self->{t_editor}->StyleSetSpec( $index, "bold,fore:".
-				     $self->{"cp_$index"}->GetAsHTML );
+    if ( $index < 0 ) {
+	$preferences{editbgcolour} = $self->{cp_bg}->GetAsHTML;
+    }
+    else {
+	$preferences{editcolours}->[$index] = $self->{"cp_$index"}->GetAsHTML;
+    }
+    $self->{t_editor}->refresh;
 }
 
 method setnomod( $ctl, $code ) {

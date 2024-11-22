@@ -62,22 +62,6 @@ use Wx qw[:everything];
 use ChordPro::Wx::Utils;
 use File::Basename;
 
-# Override Wx::Bitmap to use resource search.
-BEGIN {
-my $wxbitmapnew = \&Wx::Bitmap::new;
-no warnings 'redefine';
-*Wx::Bitmap::new = sub {
-    # Only handle Wx::Bitmap->new(file, type) case.
-    Wx::LogMessage("Bitmap: %d %s", scalar(@_), $_[1]);
-    goto &$wxbitmapnew if @_ != 3 || -f $_[1];
-    my ($self, @rest) = @_;
-    $rest[0] = ChordPro::Paths->get->findres( basename($rest[0]), class => "icons" );
-    $rest[0] ||= ChordPro::Paths->get->findres( "missing.png", class => "icons" );
-    Wx::LogMessage("Bitmap: %s",$rest[0]);
-    $wxbitmapnew->($self, @rest);
-};
-}
-
 # Synchronous system call. Used in ChordPro::Utils module.
 sub ::sys { Wx::ExecuteArgs( \@_, wxEXEC_SYNC | wxEXEC_HIDE_CONSOLE ); }
 
