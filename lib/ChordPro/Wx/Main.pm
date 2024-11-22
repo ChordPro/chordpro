@@ -391,7 +391,7 @@ method OnMaximize($event) {
     my $top = wxTheApp->GetTopWindow;
     if ( is_macos ) {
 	my $full = $top->IsFullScreen;
-	$top->FullScreen( !$full );
+	$top->ShowFullScreen( !$full );
     }
     else {
 	my $full = $top->IsMaximized;
