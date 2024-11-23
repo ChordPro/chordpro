@@ -53,7 +53,7 @@ method setup_webview() {
 
     my $try;
     $wv = $self->{webview};
-    return unless eval { use Wx::WebView; 1 };
+    return unless eval { require Wx::WebView; 1 };
 
     # WebView can only handle PDF on Windows with Edge backend.
     # Wx::WebView::IsBackendAvailable requires Wx 3.002.

@@ -15,7 +15,7 @@ use ChordPro::Wx::Utils;
 sub new( $class, $parent, $id ) {
 
     my $widget;
-    if ( $::options->{stc}//1 && eval { use Wx::STC; 1 } ) {
+    if ( $::options->{stc}//1 && eval { require Wx::STC; 1 } ) {
 	$widget  = Wx::StyledTextCtrl->new($parent);
 	# Check for updated STC.
 	for ( qw( IsModified DiscardEdits ) ) {
