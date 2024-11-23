@@ -263,7 +263,7 @@ method check_source_saved() {
 
 method save_file( $file = undef ) {
     while ( 1 ) {
-	unless ( defined $file ) {
+	unless ( defined $file && $file ne "" ) {
 	    my $fd = Wx::FileDialog->new
 	      ($self, _T("Choose output file"),
 	       "", $state{currentfile}//"",
