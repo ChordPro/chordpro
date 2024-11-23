@@ -167,9 +167,6 @@ sub add_annotation( $self, $line, $message ) {
     $stc->AnnotationSetStyle( $line, $self->{astyle} );
 }
 
-sub SetBGColour( $self, $colour ) {
-}
-
 sub SetModified( $self, $mod ) {
     if ( $mod ) {
 	# $self->MarkDirty;	# NOT IMPLEMENTED
@@ -235,7 +232,8 @@ sub refresh( $self, $prefs = undef ) {
     my $bgcol = Wx::Colour->new( $prefs->{editbgcolour} );
     my $fgcol = Wx::Colour->new( $prefs->{editcolours}->[0] );
     $ctrl->SetBackgroundColour($bgcol);
-    $ctrl->SetStyle( 0, -1, Wx::TextAttr->new( $fgcol, $bgcol ) );
+    $ctrl->SetStyle( 0, $ctrl->GetLastPosition,
+		     Wx::TextAttr->new( $fgcol, $bgcol ) );
     $ctrl->SetFont( Wx::Font->new($prefs->{editfont}) );
 
     $ctrl->SetModified($mod);
@@ -261,16 +259,8 @@ sub SetText( $self, $text ) {
     $self->SetValue($text);
 }
 
-sub SetBGColour( $self, $colour ) {
-    $self->SetBackgroundColour($colour);
-    $self->SetStyle( 0, -1,
-		     Wx::TextAttr->new
-		     ( $self->GetDefaultStyle->GetTextColour,
-		       Wx::Colour->new($colour) ) );
-}
-
 sub SetColour( $self, $colour ) {
-    $self->SetStyle( 0, -1,
+    $self->SetStyle( 0, $self->GetLastPosition,
 		     Wx::TextAttr->new( Wx::Colour->new($colour) ) );
 }
 
