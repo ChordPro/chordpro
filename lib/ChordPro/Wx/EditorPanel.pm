@@ -207,7 +207,7 @@ method newfile() {
 	}
     }
 
-    $self->{t_editor}->SetText($content);
+    $self->{t_editor}->SetText($content) if length($content);
     $self->{t_editor}->EmptyUndoBuffer;
 
     $self->log( 'S', "New song: $title");
