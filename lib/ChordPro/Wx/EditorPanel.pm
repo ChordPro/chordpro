@@ -141,6 +141,7 @@ method openfile( $file, $checked=0, $actual=undef ) {
 	use List::Util qw(uniq);
 	@{$state{recents}} = uniq( $file, @{$state{recents}} );
     }
+    $state{needsaveas} = 0;
     if ( $self->{t_editor}->GetText =~ /^\{\s*t(?:itle)?[: ]+([^\}]*)\}/m ) {
 	my $title = demarkup($1);
 	my $n = $self->{t_editor}->GetLineCount;
@@ -167,6 +168,7 @@ method openfile( $file, $checked=0, $actual=undef ) {
 
 method newfile() {
     delete $state{currentfile};
+    delete $state{needsaveas};
 
     my $title = "New Song";
     $state{windowtitle} = $title;
@@ -204,6 +206,7 @@ method newfile() {
 	    $title = $self->{d_newfile}->get_title;
 	    $content = $self->{d_newfile}->get_meta;
 	    $state{currentfile} = $self->{d_newfile}->get_file;
+	    $state{needsaveas}++;
 	}
     }
 
@@ -263,7 +266,7 @@ method check_source_saved() {
 
 method save_file( $file = undef ) {
     while ( 1 ) {
-	unless ( defined $file && $file ne "" ) {
+	unless ( !$state{needsaveas} && defined $file && $file ne "" ) {
 	    my $fd = Wx::FileDialog->new
 	      ($self, _T("Choose output file"),
 	       "", $state{currentfile}//"",
@@ -281,6 +284,7 @@ method save_file( $file = undef ) {
 	if ( $self->{t_editor}->SaveFile($file) ) {
 	    $self->{t_editor}->SetModified(0);
 	    $state{currentfile} = $file;
+	    $state{needsaveas} = 0;
 	    $state{windowtitle} = $file;
 	    $self->log( 'S',  "Saved: $file" );
 	    return;
