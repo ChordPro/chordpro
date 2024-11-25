@@ -66,32 +66,50 @@ sub refresh( $self, $prefs = undef ) {
     Wx::Event::EVT_STC_STYLENEEDED( $stc, wxID_ANY,
 				    sub { OnStyleNeeded($self, $_[1]) } );
 
+    my $theme = $prefs->{editortheme};
+    my $c = $prefs->{editcolour}{$theme};
+    my $fg = Wx::Colour->new($c->{fg});
+    my $bg = Wx::Colour->new($c->{bg});
+
+    $stc->SetBackgroundColour($bg);
+    # $stc->SetDefaultStyle( Wx::TextAttr->new( $c[0], $bg ) );	# NYI
+    $stc->StyleSetForeground( wxSTC_STYLE_DEFAULT, $fg );
+    $stc->StyleSetBackground( wxSTC_STYLE_DEFAULT, $bg );
     $stc->StyleClearAll;
 
-    my @c = @{$prefs->{editcolours}};
     # 0 - basic
-    $stc->StyleSetSpec( 0, "fore:" . shift(@c) );
+    $stc->StyleSetForeground( 0, $fg );
+    $stc->StyleSetBackground( 0, $bg );
     # 1 - comments (grey)
-    $stc->StyleSetSpec( 1, "fore:" . shift(@c) );
+    $stc->StyleSetForeground( 1, Wx::Colour->new($c->{s1}) );
+    $stc->StyleSetBackground( 1, $bg );
     # 2 - Keywords (grey)
-    $stc->StyleSetSpec( 2, "fore:" . shift(@c) );
+    $stc->StyleSetForeground( 2, Wx::Colour->new($c->{s2}) );
+    $stc->StyleSetBackground( 2, $bg );
     # 3 - Brackets (grey)
-    $stc->StyleSetSpec( 3, "fore:" . shift(@c) );
+    $stc->StyleSetForeground( 3, Wx::Colour->new($c->{s3}) );
+    $stc->StyleSetBackground( 3, $bg );
     # 4 - Chords (red)
-    $stc->StyleSetSpec( 4, "fore:" . shift(@c) );
+    $stc->StyleSetForeground( 4, Wx::Colour->new($c->{s4}) );
+    $stc->StyleSetBackground( 4, $bg );
     # 5 - Directives (blue, same as status label colour)
-    $stc->StyleSetSpec( 5, "fore:" . shift(@c) );
+    $stc->StyleSetForeground( 5, Wx::Colour->new($c->{s5}) );
+    $stc->StyleSetBackground( 5, $bg );
     # 6 - Directive arguments (orange, same as toolbar icon colour)
-    $stc->StyleSetSpec( 6, "fore:" . shift(@c));
+    $stc->StyleSetForeground( 6, Wx::Colour->new($c->{s6}) );
+    $stc->StyleSetBackground( 6, $bg );
 
     # For linenumbers.
     $stc->SetMarginWidth( 0, 40 ); # TODO
+    $stc->StyleSetForeground( wxSTC_STYLE_LINENUMBER,
+			      Wx::Colour->new( $c->{numfg} ) );
+    $stc->StyleSetBackground( wxSTC_STYLE_LINENUMBER,
+			      Wx::Colour->new( $c->{numbg} ) );
 
     # For annotations.
     $self->{astyle} //= 1 + wxSTC_STYLE_LASTPREDEFINED;
-    $stc->StyleSetBackground( $self->{astyle},
-			      Wx::Colour->new($prefs->{editcolours}->[-1]) );
-    $stc->StyleSetForeground( $self->{astyle}, wxRED );
+    $stc->StyleSetBackground( $self->{astyle}, Wx::Colour->new($c->{annbg}) );
+    $stc->StyleSetForeground( $self->{astyle}, Wx::Colour->new($c->{annfg}) );
 
     $stc->SetFont( Wx::Font->new($prefs->{editfont}) );
 
@@ -103,6 +121,7 @@ sub refresh( $self, $prefs = undef ) {
     else {
 	$stc->SetWrapMode(0); # wxSTC_WRAP_NONE );
     }
+
     $self->style_text;
 }
 
@@ -229,8 +248,10 @@ sub refresh( $self, $prefs = undef ) {
     my $mod = $self->IsModified;
 
     # TextCtrl only supports background colour and font.
-    my $bgcol = Wx::Colour->new( $prefs->{editbgcolour} );
-    my $fgcol = Wx::Colour->new( $prefs->{editcolours}->[0] );
+    my $theme = $prefs->{editortheme};
+    my $c = $prefs->{editcolour}{$theme};
+    my $bgcol = Wx::Colour->new( $c->{bg} );
+    my $fgcol = Wx::Colour->new( $c->{fg} );
     $ctrl->SetBackgroundColour($bgcol);
     $ctrl->SetStyle( 0, $ctrl->GetLastPosition,
 		     Wx::TextAttr->new( $fgcol, $bgcol ) );

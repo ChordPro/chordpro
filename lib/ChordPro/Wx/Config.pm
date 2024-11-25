@@ -65,11 +65,36 @@ my %prefs =
    # Editor.
    editfont	   => 0,	# inital, later "Monospace 10" etc.
    editsize	   => FONTSIZE,
-   editbgcolour	   => "#ffffff",	# !stc
-   editcolours     => ["#000000", "#b1b1b1", "#b1b1b1", "#b1b1b1",
-		       "#ff3c31", "#0068d0", "#ef6c2a", "#ffffa0"],	# stc
-   editorwrap       => 1,		# stc
-   editorwrapindent => 2,		# std
+   editortheme	   => "light",
+
+   # Mostly for STC. TextCtrl fallback uses fg and bg only.
+   editcolour_light_fg	   => "#000000",
+   editcolour_light_bg	   => "#ffffff",
+   editcolour_light_s1	   => "#b1b1b1",
+   editcolour_light_s2	   => "#b1b1b1",
+   editcolour_light_s3	   => "#b1b1b1",
+   editcolour_light_s4	   => "#ff3c31",
+   editcolour_light_s5	   => "#0068d0",
+   editcolour_light_s6	   => "#ef6c2a",
+   editcolour_light_annfg  => "#ff0000",
+   editcolour_light_annbg  => "#ffffa0",
+   editcolour_light_numfg  => "#303030",
+   editcolour_light_numbg  => "#e8e8e8",
+   editcolour_dark_fg	   => "#ffffff",
+   editcolour_dark_bg	   => "#000000",
+   editcolour_dark_s1	   => "#b1b1b1",
+   editcolour_dark_s2	   => "#b1b1b1",
+   editcolour_dark_s3	   => "#b1b1b1",
+   editcolour_dark_s4	   => "#ff3c31",
+   editcolour_dark_s5	   => "#0068d0",
+   editcolour_dark_s6	   => "#ef6c2a",
+   editcolour_dark_annfg   => "#ff0000",
+   editcolour_dark_annbg   => "#ffffa0",
+   editcolour_dark_numfg   => "#e8e8e8",
+   editcolour_dark_numbg   => "#303030",
+
+   editorwrap       => 1,
+   editorwrapindent => 2,
 
    # Messages.
    msgsfont	   => 0,	# inital, later "Monospace 10" etc.
@@ -151,6 +176,13 @@ method Load :common {
     use Hash::Util qw( lock_keys unlock_keys );
     unlock_keys(%preferences);
     %preferences = ( %prefs );
+    while ( my ( $k, $v ) = each %prefs ) {
+	next unless $k =~ /^(editcolour)_(\w+)_(\w+)/;
+	$preferences{$1}{$2}{$3} = $v;
+    }
+    while ( my ( $k, $v ) = each %preferences ) {
+	delete $preferences{$k} if $k =~ /^(editcolour)_/;
+    }
     %state = ( preferences => \%preferences,
 	       recents => [],
 	     );
@@ -183,14 +215,22 @@ method Load :common {
 		elsif ( $entry eq "editcolours" ) {
 		    my @c = split( /,\s*/, $value );
 		    if ( @c <= 1 ) {
-			$preferences{$entry} = $o;
+			...;
 		    }
 		    else {
-			$preferences{$entry} = [];
-			for ( my $i = 0; $i < @$o; $i++ ) {
-			    $preferences{$entry}->[$i] = $c[$i] || $o->[$i];
-			}
+			$preferences{editcolour}{light}{fg} = $c[0];
+			$preferences{editcolour}{light}{bg} = $c[1];
+			$preferences{editcolour}{light}{s1} = $c[2];
+			$preferences{editcolour}{light}{s2} = $c[3];
+			$preferences{editcolour}{light}{s3} = $c[4];
+			$preferences{editcolour}{light}{s4} = $c[5];
+			$preferences{editcolour}{light}{s5} = $c[6];
+			$preferences{editcolour}{light}{annbg} = $c[7];
+			$preferences{editcolour}{light}{annfg} = "#ff0000";
 		    }
+		}
+		elsif ( $entry =~ /^(editcolour)_(\w+)_(\w+)$/ ) {
+		    $preferences{$1}{$2}{$3} = $value;
 		}
 		else {
 		    $preferences{$entry} = $value;
@@ -267,6 +307,16 @@ method Store :common {
 	$cb->SetPath("/$group");
 	while ( my ( $k, $v ) = each %$v ) {
 	    if ( $group eq "preferences" ) {
+		if ( $k eq "editcolour" && is_hashref($v) ) {
+		    while ( my ( $k, $v ) = each %$v ) {
+			my $p = "editcolour_$k";
+			while ( my ( $k, $v ) = each %$v ) {
+			    $cb->Write($p."_$k", $v );
+			}
+		    }
+		    next;
+		}
+		next if $k eq "editcolours";
 		$v = join( ",", @$v ) if is_arrayref($v);
 	    }
 	    if ( defined $v ) {

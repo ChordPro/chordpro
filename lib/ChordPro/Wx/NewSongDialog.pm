@@ -56,18 +56,7 @@ method get_meta() {
     return $t;
 }
 
-method get_file() {
-    $self->{fp_file}->GetPath;
-}
-
 ################ Event handlers ################
-
-method OnTitleChanged($event) {
-    my $t = demarkup($self->{t_title}->GetValue);
-    $t =~ s/\s+/_/g;
-    $t .= ".cho" unless $t eq "";
-    $self->{fp_file}->SetPath($t);
-}
 
 method OnAccept($event) {
     $event->Skip;

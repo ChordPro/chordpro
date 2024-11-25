@@ -193,6 +193,9 @@ method init( $options ) {
     $self->SetStatusBar(undef);
     $self->get_preferences;
     $self->setup_menubar;
+    Wx::Event::EVT_SYS_COLOUR_CHANGED( $self,
+				       $self->can("OnSysColourChanged") );
+    $self->init_theme;
 
     $self->select_mode("initial");
     if ( @ARGV ) {
@@ -228,6 +231,21 @@ method init_recents() {
 	    $ctl->Append( basename($file) );
 	    $ctl->SetClientData( $i, $file );
 	    $i++;
+	}
+    }
+}
+
+method init_theme() {
+    $preferences{editortheme} = "light";
+    if ( Wx::SystemSettings->can("GetAppearance") ) {
+	my $a = Wx::SystemSettings::GetAppearance;
+	if ( $a->IsDark ) {
+	    $preferences{editortheme} = "dark";
+	    $self->log( 'I', "Using dark theme" );
+	}
+	elsif ( $a->IsUsingDarkBackground ) {
+	    $preferences{editortheme} = "dark";
+	    $self->log( 'I', "Using darkish theme" );
 	}
     }
 }
@@ -466,6 +484,11 @@ method OnRecentSelect($event) {
     my $file = $self->{lb_recent}->GetClientData($n);
     $self->{l_recent}->SetLabel($file);
     $self->{l_recent}->SetToolTip($file);
+}
+
+method OnSysColourChanged($event) {
+    $self->init_theme;
+    $state{panel}->{t_editor}->refresh unless $state{mode} eq "initial";
 }
 
 ################ End of Event handlers ################

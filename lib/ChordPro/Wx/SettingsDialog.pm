@@ -20,6 +20,8 @@ method new :common ( $parent, $id, $title ) {
     $self->refresh;
     $self->{sz_prefs_outer}->Fit($self);
     $self->Layout;
+    Wx::Event::EVT_SYS_COLOUR_CHANGED( $self,
+				       $self->can("OnSysColourChanged") );
     $self;
 }
 use warnings 'redefine';	# TODO
@@ -52,7 +54,6 @@ method refresh() {
 I went [Em]down to the [Am]St James In[Em]firmary
 I found my [Am]baby [B7]there
 EOD
-    $self->SetColours( $preferences{editcolours} );
 }
 
 method enablecustom() {
@@ -126,7 +127,7 @@ method fetch_prefs() {
     # Editor.
     $self->{fp_editor}->SetSelectedFont
       ( Wx::Font->new($preferences{editfont}) );
-    $self->{cp_bg}->SetColour($preferences{editbgcolour});
+    $self->prefs2colours;
     $self->{cb_editorwrap}->SetValue($preferences{editorwrap});
     $self->{sp_editorwrap}->SetValue($preferences{editorwrapindent});
 
@@ -219,11 +220,9 @@ method store_prefs() {
 
     # Editor.
     $preferences{editfont} = $self->{fp_editor}->GetSelectedFont->GetNativeFontInfoDesc;
-    $preferences{editbgcolour} = $self->{cp_bg}->GetAsHTML;
-    $preferences{editcolours} = [ map { $self->{"cp_$_"}->GetAsHTML } 0..7 ];
+    $self->colours2prefs;
     $preferences{editorwrap} = $self->{cb_editorwrap}->IsChecked;
     $preferences{editorwrapindent} = $self->{sp_editorwrap}->GetValue;
-    $self->{t_editor}->refresh;
 
     # Messages.
     $preferences{msgsfont} = $self->{fp_messages}->GetSelectedFont->GetNativeFontInfoDesc;
@@ -290,35 +289,43 @@ method need_restart() {
     $self->SetSize([$w,-1]);
 }
 
-sub GetColours {
-    my ( $self ) = @_;
-    [ map  { $self->{"cp_$_"}->GetAsHTML } 0..6 ];
+method colours2prefs {
+    my $theme =
+      $preferences{editortheme} = $self->{cb_darkmode}->IsChecked ? "dark" : "light";
+    $preferences{editcolour}{$theme}{fg} = $self->{cp_fg}->GetAsHTML;
+    $preferences{editcolour}{$theme}{bg} = $self->{cp_bg}->GetAsHTML;
+    if ( $state{have_stc} ) {
+	$preferences{editcolour}{$theme}{"s$_"} = $self->{"cp_s$_"}->GetAsHTML for 1..6;
+	$preferences{editcolour}{$theme}{annfg} = $self->{cp_annfg}->GetAsHTML;
+	$preferences{editcolour}{$theme}{annbg} = $self->{cp_annbg}->GetAsHTML;
+    }
+    $self->{t_editor}->refresh;
 }
 
-sub SetColours {
-    my ( $self, $colours ) = @_;
-    my @c = @$colours;
-    my $stc = $self->{t_editor};
+method prefs2colours {
+    my $theme = $preferences{editortheme};
+    $self->{cb_darkmode}->SetValue( $theme eq "dark" );
+    $self->{cp_fg}->SetColour($preferences{editcolour}{$theme}{fg});
+    $self->{cp_bg}->SetColour($preferences{editcolour}{$theme}{bg});
     if ( $state{have_stc} ) {
-	$stc->StyleSetSpec( $_, "fore:".$c[$_] ) for 0..6;
-	$self->{"cp_$_"}->Enable(1) for 0..7;
-	$self->{"cp_bg"}->Enable(0);
-	$self->{"cp_bg"}->SetColour(wxWHITE);
-	$self->{"l_$_"}->Enable(1) for 0..7;
-	$self->{"l_bg"}->Enable(0);
-	$self->{"cp_$_"}->SetColour($c[$_]) for 0..7;
+	for my $c ( "annfg", "annbg", map { "s$_" } 1..6 ) {
+	    $self->{"cp_$c"}->Enable(1);
+	    $self->{"l_$c"}->Enable(1);
+	}
+	$self->{"cp_s$_"}->SetColour($preferences{editcolour}{$theme}{"s$_"})
+	  for 1..6;
+	$self->{cp_annfg}->SetColour($preferences{editcolour}{$theme}{annfg});
+	$self->{cp_annbg}->SetColour($preferences{editcolour}{$theme}{annbg});
     }
     else {
-	$self->{"cp_$_"}->Enable(0) for 1..7;
-	$self->{"cp_$_"}->SetColour("#e0e0e0") for 1..7;
-	$self->{"l_$_"}->Enable(0) for 1..7;
-	$self->{"cp_0"}->Enable(1);
-	$self->{"l_0"}->Enable(1);
-	$self->{"cp_bg"}->Enable(1);
-	$self->{"cp_bg"}->SetColour($preferences{editbgcolour});
-	$self->{"l_bg"}->Enable(1);
+	my $grey = "#e0e0e0";
+	for my $c ( "annfg", "annbg", map { "s$_" } 1..6 ) {
+	    $self->{"cp_$c"}->SetColour($grey);
+	    $self->{"cp_$c"}->Enable(0);
+	    $self->{"l_$c"}->Enable(0);
+	}
     }
-    $stc->refresh;
+    $self->{t_editor}->refresh;
 }
 
 ################ Event handlers ################
@@ -451,40 +458,49 @@ method OnEditorFontPickerChanged($event) {
     $ctl->refresh;
 }
 
-method OnColour0Changed( $event ) {
-    $self->colourchanged(0);
+method OnColourFGChanged( $event ) {
+    $self->colourchanged("fg");
 }
 
-method OnColour1Changed( $event ) {
-    $self->colourchanged(1);
+method OnColourBGChanged( $event ) {
+    $self->colourchanged("bg");
 }
 
-method OnColour2Changed( $event ) {
-    $self->colourchanged(2);
+method OnColourS1Changed( $event ) {
+    $self->colourchanged("s1");
 }
 
-method OnColour3Changed( $event ) {
-    $self->colourchanged(3);
+method OnColourS2Changed( $event ) {
+    $self->colourchanged("s2");
 }
 
-method OnColour4Changed( $event ) {
-    $self->colourchanged(4);
+method OnColourS3Changed( $event ) {
+    $self->colourchanged("s3");
 }
 
-method OnColour5Changed( $event ) {
-    $self->colourchanged(5);
+method OnColourS4Changed( $event ) {
+    $self->colourchanged("s4");
 }
 
-method OnColour6Changed( $event ) {
-    $self->colourchanged(6);
+method OnColourS5Changed( $event ) {
+    $self->colourchanged("s5");
 }
 
-method OnColour7Changed( $event ) {
-    $self->colourchanged(7);
+method OnColourS6Changed( $event ) {
+    $self->colourchanged("s6");
 }
 
-method OnBgColourChanged( $event ) {
-    $self->colourchanged(-1);
+method OnColourAnnFGChanged( $event ) {
+    $self->colourchanged("annfg");
+}
+
+method OnColourAnnBGChanged( $event ) {
+    $self->colourchanged("annbg");
+}
+
+method OnDarkModeChanged( $event ) {
+    $preferences{editortheme} = $self->{cb_darkmode}->IsChecked ? "dark" : "light";
+    $self->prefs2colours;
 }
 
 method OnEditorWrap( $event ) {
@@ -525,19 +541,21 @@ method OnMessagesFontPickerChanged($event) {
 
 method OnPDFViewer($event) {
     $self->{t_pdfviewer}->Enable( $self->{cb_pdfviewer}->GetValue );
+}
+
+# System
+
+method OnSysColourChanged($event) {
+    $self->GetParent->init_theme;
+    $self->{cb_darkmode}->SetValue( $preferences{editortheme} eq "dark" );
+    $self->prefs2colours;
     $event->Skip;
 }
 
 ################ Helpers ################
 
 method colourchanged($index) {
-    if ( $index < 0 ) {
-	$preferences{editbgcolour} = $self->{cp_bg}->GetAsHTML;
-    }
-    else {
-	$preferences{editcolours}->[$index] = $self->{"cp_$index"}->GetAsHTML;
-    }
-    $self->{t_editor}->refresh;
+    $self->colours2prefs;
 }
 
 method setnomod( $ctl, $code ) {
