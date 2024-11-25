@@ -207,14 +207,32 @@ method init( $options ) {
 				       $self->can("OnSysColourChanged") );
     $self->init_theme;
 
-    $self->select_mode("initial");
     if ( @ARGV ) {
 	my $arg = decode_utf8(shift(@ARGV));
 	if ( -d $arg ) {
+	    # This won't work on macOS packaged app.
 	    return 1 if $self->select_mode("sbexport")->open_dir($arg);
 	}
+	elsif ( ! -r $arg ) {
+	    Wx::MessageDialog->new( $self, "Error opening $arg",
+				    "File Open Error",
+				    wxOK | wxICON_ERROR )->ShowModal;
+	}
+	elsif ( is_macos ) {
+	    # Somehow the macOS app crashes when it is started with
+	    # a filename argument. So instead of opening the file
+	    # here, we queue an Open menu command.
+	    my $e = Wx::CommandEvent->new
+	      ( wxEVT_COMMAND_MENU_SELECTED, wxID_OPEN );
+	    $e->SetClientData($arg);
+	    $self->GetEventHandler->AddPendingEvent($e);
+	    return 1;
+	    # The strange thing is that it does work on macOS when
+	    # ChordPro is run as an ordinary program.
+	    # And it also works on all other platforms.
+	}
 	else {
-	    return 1 if $self->select_mode("editor")->openfile($arg);
+	    return $self->select_mode("editor")->openfile($arg);
 	}
     }
     $self->select_mode("initial");
@@ -439,6 +457,12 @@ method OnNew($event) {
 
 method OnOpen($event) {
     return unless $self->check_saved;
+
+    # In case it is a synthetic event.
+    if ( $event && ( my $arg = $event->GetClientData ) ) {
+	$self->select_mode("editor")->openfile( $arg, 1 );
+	return;
+    }
 
     # We handle the dialog here, so we do not have to switch to the editor
     # unless there's real editing to do.
