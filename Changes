@@ -30,6 +30,7 @@
     - (Wx, MSWindows only) Use Edge for WebView (PDF view). Requires custom wxWidgets build.
     - Change handling of NC (issue #441).
     - Remove SwiftUI.
+    - Allow %{} substitutions in grid sections.
 
 6.060 2024-08-24
 

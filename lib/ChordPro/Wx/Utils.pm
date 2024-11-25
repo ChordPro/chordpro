@@ -110,9 +110,33 @@ sub setup_menubar( $self ) {
 	      "Convert Text to ChordPro format\tShift-Ctrl-A",
 	      "Convert a text document (chords above the lyrics) to ChordPro format",
 	      "OnA2Crd" ],
+	    [ wxID_ANY,    M_EDITOR,
+	      "Use external editor\tShift-Ctrl-X",
+	      "Use an external editing program to modify the song",
+	      "OnExternalEditor" ],
 	    [],
 	    [ wxID_PREFERENCES, M_ALL, "Settings...\tCtrl-R",
 	      "Open the Settings dialog", "OnPreferences" ],
+	  ]
+	],
+	[ wxID_ANY, M_EDITOR, "&Insert",
+	  [ [ wxID_ANY, M_EDITOR, "Insert {&title}",
+	      "Insert a {title} directive", "OnInsertTitle" ],
+	    [ wxID_ANY, M_EDITOR, "Insert {&subtitle}",
+	      "Insert a {subtitle} directive", "OnInsertSubTitle" ],
+	    [ wxID_ANY, M_EDITOR, "Insert {&key}",
+	      "Insert a {key} directive", "OnInsertKey" ],
+	    [ wxID_ANY, M_EDITOR, "Insert {&artist}",
+	      "Insert a {artist} directive", "OnInsertArtist" ],
+	    [],
+	    [ wxID_ANY, M_EDITOR, "Insert &Chorus section",
+	      "Insert start/end of chorus directive.", "OnInsertChorus" ],
+	    [ wxID_ANY, M_EDITOR, "Insert &Verse section",
+	      "Insert start/end of verse directive.", "OnInsertVerse" ],
+	    [ wxID_ANY, M_EDITOR, "Insert &Grid section",
+	      "Insert start/end of grid directive.", "OnInsertGrid" ],
+	    [ wxID_ANY, M_EDITOR, "Insert &arbitrary section",
+	      "Insert start/end of section directive.", "OnInsertSection" ],
 	  ]
 	],
 	[ wxID_ANY, M_EDITOR|M_SONGBOOK, "View",
@@ -305,10 +329,37 @@ sub kbdkey( $key ) {
 
 push( @EXPORT, "kbdkey" );
 
+use Storable();
+
+################ ################
+
+sub clone( $struct ) { Storable::dclone($struct) }
+
+push( @EXPORT, "clone" );
+
 ################ ################
 
 sub Wx::ColourPickerCtrl::GetAsHTML( $self ) {
     $self->GetColour->GetAsString(wxC2S_HTML_SYNTAX);
+}
+
+################ ################
+
+# Override Wx::Bitmap to use resource search.
+unless ( $::wxbitmapnew ) {
+    $::wxbitmapnew = \&Wx::Bitmap::new;
+    no warnings 'redefine';
+    use File::Basename;
+    *Wx::Bitmap::new = sub {
+	# Only handle Wx::Bitmap->new(file, type) case.
+	goto &$::wxbitmapnew if @_ != 3 || -f $_[1];
+	my ($self, @rest) = @_;
+	$rest[0] = ChordPro::Paths->get->findres( basename($rest[0]),
+						  class => "icons" );
+	$rest[0] ||= ChordPro::Paths->get->findres( "missing.png",
+						    class => "icons" );
+	$::wxbitmapnew->($self, @rest);
+    };
 }
 
 ################ ################

@@ -96,7 +96,7 @@ method preview( $args, %opts ) {
 	$ENV{CHORDPRO_LIB} = $preferences{customlib};
     }
     CP->setup_resdirs;
-    if ( $preferences{xcode} ) {
+    if ( $preferences{enable_xcode} && $preferences{xcode} ) {
 	$haveconfig++;
 	push( @ARGV, '--transcode', $preferences{xcode} );
     }
@@ -111,7 +111,8 @@ method preview( $args, %opts ) {
     push( @ARGV, '--output', $preview_pdf );
     push( @ARGV, '--generate', "PDF" );
 
-    push( @ARGV, '--transpose', $state{xpose} ) if $state{xpose};
+    push( @ARGV, '--transpose', $state{xpose} )
+	 if $preferences{enable_xpose} && $state{xpose};
 
     push( @ARGV, '--define', 'diagnostics.format=Line %n, %m' );
     push( @ARGV, '--define', 'debug.runtimeinfo=0' ) unless $state{debuginfo};

@@ -43,6 +43,8 @@ sub new {
 	$self->Layout;
 	$self->Fit;
     }
+    $self->{cb_xpose}->SetValue( $preferences{enable_xpose} );
+    $self->OnCbTranspose(undef);
     restorewinpos( $self, "tasks" );
     $self;
 }
@@ -62,6 +64,13 @@ sub OnAccept {
 sub OnCancel {
     my ( $self, $event ) = @_;
     $event->Skip;
+}
+
+sub OnCbTranspose {
+    my ( $self, $event ) = @_;
+    my $n = $self->{cb_xpose}->IsChecked;
+    $self->{$_}->Enable($n)
+      for qw ( ch_xpose_from ch_xpose_to ch_acc );
 }
 
 sub OnXposeFrom {
@@ -91,12 +100,6 @@ sub OnXposeTo {
 sub OnChNotation {
     my ( $self, $event ) = @_;
     my $n = $self->{ch_notation}->GetSelection;
-    $event->Skip;
-}
-
-sub OnChTranscode {
-    my ( $self, $event ) = @_;
-    my $n = $self->{ch_transcode}->GetSelection;
     $event->Skip;
 }
 

@@ -8,11 +8,13 @@ use utf8;
 ################ Entry ################
 
 our $options;
+our $Wx_min = "3.003_002";
 
 package ChordPro::Wx::WxChordPro;
 
 use parent qw( Wx::App ChordPro::Wx::Main );
 
+use ChordPro::Paths;
 use ChordPro::Wx::Config;
 
 use Wx qw( wxACCEL_CTRL WXK_CONTROL_Q wxID_EXIT );
@@ -20,6 +22,14 @@ use Wx qw( wxACCEL_CTRL WXK_CONTROL_Q wxID_EXIT );
 sub run( $self, $opts ) {
 
     $options = $opts;
+
+    unless ( eval { Wx->VERSION($Wx_min) } ) {
+	require ChordPro::Wx::WxUpdateRequired;
+	my $md = ChordPro::Wx::WxUpdateRequired->new;
+	$md->ShowModal;
+	$md->Destroy;
+	exit 1;
+    }
 
     #### Start ################
 
@@ -33,6 +43,7 @@ sub OnInit( $self ) {
     $self->SetVendorName("ChordPro.ORG");
     Wx::InitAllImageHandlers();
     ChordPro::Wx::Config->Setup($options);
+    ChordPro::Wx::Config->Load($options);
 
     my $main = ChordPro::Wx::Main->new;
     return 0 unless $main->init($options);
@@ -60,18 +71,6 @@ sub OnInit( $self ) {
 use Wx qw[:everything];
 use ChordPro::Wx::Utils;
 use File::Basename;
-
-# Override Wx::Bitmap to use resource search.
-my $wxbitmapnew = \&Wx::Bitmap::new;
-no warnings 'redefine';
-*Wx::Bitmap::new = sub {
-    # Only handle Wx::Bitmap->new(file, type) case.
-    goto &$wxbitmapnew if @_ != 3 || -f $_[1];
-    my ($self, @rest) = @_;
-    $rest[0] = ChordPro::Paths->get->findres( basename($rest[0]), class => "icons" );
-    $rest[0] ||= ChordPro::Paths->get->findres( "missing.png", class => "icons" );
-    $wxbitmapnew->($self, @rest);
-};
 
 # Synchronous system call. Used in ChordPro::Utils module.
 sub ::sys { Wx::ExecuteArgs( \@_, wxEXEC_SYNC | wxEXEC_HIDE_CONSOLE ); }
@@ -191,7 +190,7 @@ method select_mode( $mode ) {
 # Explicit (re)initialisation of this class.
 method init( $options ) {
 
-    ChordPro::Wx::Config->Load;
+    $state{mode} = "initial";
 
     # General runtime options.
     $state{verbose}   = $options->{verbose};
@@ -204,22 +203,21 @@ method init( $options ) {
     $self->SetStatusBar(undef);
     $self->get_preferences;
     $self->setup_menubar;
+    Wx::Event::EVT_SYS_COLOUR_CHANGED( $self,
+				       $self->can("OnSysColourChanged") );
+    $self->init_theme;
 
+    $self->select_mode("initial");
     if ( @ARGV ) {
 	my $arg = decode_utf8(shift(@ARGV));
-	if ( -d $arg && $self->{p_sbexport}->open_dir($arg) ) {
-	    $self->select_mode("sbexport");
-	    return 1;
+	if ( -d $arg ) {
+	    return 1 if $self->select_mode("sbexport")->open_dir($arg);
 	}
-	elsif ( $self->{p_editor}->openfile($arg) ) {
-	    $self->select_mode("editor");
-	    return 1;
+	else {
+	    return 1 if $self->select_mode("editor")->openfile($arg);
 	}
-	return 0;
     }
-    else {
-	$self->select_mode("initial");
-    }
+    $self->select_mode("initial");
     return 1;
 }
 
@@ -247,17 +245,32 @@ method init_recents() {
     }
 }
 
+method init_theme() {
+    $preferences{editortheme} = "light";
+    if ( Wx::SystemSettings->can("GetAppearance") ) {
+	my $a = Wx::SystemSettings::GetAppearance();
+	if ( $a->IsDark ) {
+	    $preferences{editortheme} = "dark";
+	    $self->log( 'I', "Using dark theme" );
+	}
+	elsif ( $a->IsUsingDarkBackground ) {
+	    $preferences{editortheme} = "dark";
+	    $self->log( 'I', "Using darkish theme" );
+	}
+    }
+}
+
 method get_preferences() {
 
     # Find transcode setting.
     my $p = lc $preferences{xcode};
     if ( $p ) {
 	if ( $p eq "-----" ) {
-	    $p = 0;
+	    $preferences{enable_xcode} = 0;
 	}
 	else {
 	    my $n = "";
-	    for ( @{ $self->notationlist } ) {
+	    for ( @{ $state{notations} } ) {
 		next unless $_ eq $p;
 		$n = $p;
 		last;
@@ -304,7 +317,7 @@ method aboutmsg() {
     return $msg;
 }
 
-method check_saved {
+method check_saved() {
     for ( panels ) {
 	return unless $self->{$_}->check_source_saved;
 	return unless $self->{$_}->check_preview_saved;
@@ -406,7 +419,7 @@ method OnMaximize($event) {
     my $top = wxTheApp->GetTopWindow;
     if ( is_macos ) {
 	my $full = $top->IsFullScreen;
-	$top->FullScreen( !$full );
+	$top->ShowFullScreen( !$full );
     }
     else {
 	my $full = $top->IsMaximized;
@@ -444,6 +457,29 @@ method OnOpen($event) {
     $fd->Destroy;
 }
 
+method OnPreferences($event) {
+    require ChordPro::Wx::SettingsDialog;
+    unless ( $self->{d_prefs} ) {
+	$self->{d_prefs} = ChordPro::Wx::SettingsDialog->new
+	  ( $self, wxID_ANY, "Settings" );
+	restorewinpos( $self->{d_prefs}, "prefs" );
+    }
+    else {
+	$self->{d_prefs}->refresh;
+    }
+
+    # The Settings dialog operates on the current $preferences.
+    my $ret = $self->{d_prefs}->ShowModal;
+    savewinpos( $self->{d_prefs}, "prefs" );
+    return unless $ret == wxID_OK;
+
+    # $preferences may have changed.
+    $self->save_preferences;
+
+    # Update the requestor.
+    $state{panel}->update_preferences unless $state{mode} eq "initial";
+}
+
 # On the recents list, click selects and displays the file name.
 # Double click selects the entry for processing.
 
@@ -458,6 +494,11 @@ method OnRecentSelect($event) {
     my $file = $self->{lb_recent}->GetClientData($n);
     $self->{l_recent}->SetLabel($file);
     $self->{l_recent}->SetToolTip($file);
+}
+
+method OnSysColourChanged($event) {
+    $self->init_theme;
+    $state{panel}->{t_editor}->refresh unless $state{mode} eq "initial";
 }
 
 ################ End of Event handlers ################

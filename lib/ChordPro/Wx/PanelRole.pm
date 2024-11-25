@@ -36,7 +36,7 @@ method log( $level, @msg ) {
     $self->alert(1) if $level =~ /WEF/;
 }
 
-method alert( $severity ) {
+method alert( $severity, $message = "Click Messages to see diagnostic information" ) {
     return if $self->{sw_tb}->IsSplit;
     state $id = wxID_ANY;
     if ( $id == wxID_ANY ) {
@@ -46,15 +46,14 @@ method alert( $severity ) {
 	Wx::Event::EVT_BUTTON( $self->{w_infobar}, $id,
 			       sub { $self->OnWindowMessages($_[1]) } );
     }
-    $self->{w_infobar}->ShowMessage("Click Messages to see diagnostic information",
-				    wxICON_INFORMATION);
+    $self->{w_infobar}->ShowMessage( $message, wxICON_INFORMATION);
 }
 
 method setup_webview() {
 
     my $try;
     $wv = $self->{webview};
-    return unless eval { use Wx::WebView; 1 };
+    return unless eval { require Wx::WebView; 1 };
 
     # WebView can only handle PDF on Windows with Edge backend.
     # Wx::WebView::IsBackendAvailable requires Wx 3.002.
@@ -96,12 +95,27 @@ method unsplit() {
     $self->{sw_tb}->Unsplit(undef);
 }
 
+method prepare_annotations() {
+    return unless $state{have_stc};
+    $self->{t_editor}->prepare_annotations;
+}
+
+method add_annotation( $line, $msg ) {
+    return unless $state{have_stc};
+    $self->{t_editor}->add_annotation( $line, $msg );
+}
+
+method refresh_messages {
+    $self->{t_messages}->SetFont( Wx::Font->new($preferences{msgsfont}) );
+}
+
 ################ Virtual Methods ################
 
 method name();
 method check_source_saved();
 method check_preview_saved();
 method save_preferences();
+method update_preferences();
 
 ################ Event Handlers (alphabetic order) ################
 
@@ -128,23 +142,10 @@ method OnOpen($event) {
 }
 
 method OnPreferences($event) {
-    use ChordPro::Wx::PreferencesDialog;
-    unless ( $self->{d_prefs} ) {
-	$self->{d_prefs} = ChordPro::Wx::PreferencesDialog->new
-	  ( $self, wxID_ANY, "Settings" );
-	restorewinpos( $self->{d_prefs}, "prefs" );
-    }
-    else {
-	$self->{d_prefs}->refresh;
-    }
-    my $ret = $self->{d_prefs}->ShowModal;
-    savewinpos( $self->{d_prefs}, "prefs" );
-    return unless $ret == wxID_OK;
-
-    $self->GetParent->save_preferences;
-    if ( $state{mode} eq "editor" ) {
-	$self->refresh_editor;
-    }
+    # Dispatch to Main.
+    Wx::PostEvent( $self->GetParent,
+		   Wx::CommandEvent->new
+		   ( wxEVT_COMMAND_MENU_SELECTED, wxID_PREFERENCES) );
 }
 
 method OnPreview($event) {		# for menu

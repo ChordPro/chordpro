@@ -24,27 +24,21 @@ use Encode qw( decode_utf8 );
 
 use constant FONTSIZE => 12;
 
+# Legacy font numbers.
 my @fonts =
-  ( { name => "Monospace",
-      font => Wx::Font->new( FONTSIZE, wxFONTFAMILY_TELETYPE,
-			     wxFONTSTYLE_NORMAL,
-			     wxFONTWEIGHT_NORMAL ),
-    },
-    { name => "Serif",
-      font => Wx::Font->new( FONTSIZE, wxFONTFAMILY_ROMAN,
-			     wxFONTSTYLE_NORMAL,
-			     wxFONTWEIGHT_NORMAL ),
-    },
-    { name => "Sans serif",
-      font => Wx::Font->new( FONTSIZE, wxFONTFAMILY_SWISS,
-			     wxFONTSTYLE_NORMAL,
-			     wxFONTWEIGHT_NORMAL ),
-    },
-    { name => "Modern",
-      font => Wx::Font->new( FONTSIZE, wxFONTFAMILY_MODERN,
-			     wxFONTSTYLE_NORMAL,
-			     wxFONTWEIGHT_NORMAL ),
-    },
+  ( # Monospace
+    Wx::Font->new( FONTSIZE, wxFONTFAMILY_TELETYPE,
+		   wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL ),
+    # Serif
+    Wx::Font->new( FONTSIZE, wxFONTFAMILY_ROMAN,
+		   wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL ),
+
+    # Sans serif
+    Wx::Font->new( FONTSIZE, wxFONTFAMILY_SWISS,
+		   wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL ),
+    # Modern
+    Wx::Font->new( FONTSIZE, wxFONTFAMILY_MODERN,
+		   wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL ),
   );
 
 my %prefs =
@@ -71,11 +65,36 @@ my %prefs =
    # Editor.
    editfont	   => 0,	# inital, later "Monospace 10" etc.
    editsize	   => FONTSIZE,
-   editbgcolour	   => wxWHITE,	# !stc
-   editcolours     => join( ",", "#000000", "#b1b1b1", "#b1b1b1", "#b1b1b1",
-			    "#ff3c31", "#0068d0", "#ef6c2a" ),	# stc
-   editorwrap       => 1,		# stc
-   editorwrapindent => 2,		# std
+   editortheme	   => "light",
+
+   # Mostly for STC. TextCtrl fallback uses fg and bg only.
+   editcolour_light_fg	   => "#000000",
+   editcolour_light_bg	   => "#ffffff",
+   editcolour_light_s1	   => "#b1b1b1",
+   editcolour_light_s2	   => "#b1b1b1",
+   editcolour_light_s3	   => "#b1b1b1",
+   editcolour_light_s4	   => "#ff3c31",
+   editcolour_light_s5	   => "#0068d0",
+   editcolour_light_s6	   => "#ef6c2a",
+   editcolour_light_annfg  => "#ff0000",
+   editcolour_light_annbg  => "#ffffa0",
+   editcolour_light_numfg  => "#303030",
+   editcolour_light_numbg  => "#e8e8e8",
+   editcolour_dark_fg	   => "#ffffff",
+   editcolour_dark_bg	   => "#000000",
+   editcolour_dark_s1	   => "#b1b1b1",
+   editcolour_dark_s2	   => "#b1b1b1",
+   editcolour_dark_s3	   => "#b1b1b1",
+   editcolour_dark_s4	   => "#ff3c31",
+   editcolour_dark_s5	   => "#0068d0",
+   editcolour_dark_s6	   => "#ef6c2a",
+   editcolour_dark_annfg   => "#ff0000",
+   editcolour_dark_annbg   => "#ffffa0",
+   editcolour_dark_numfg   => "#e8e8e8",
+   editcolour_dark_numbg   => "#303030",
+
+   editorwrap       => 1,
+   editorwrapindent => 2,
 
    # Messages.
    msgsfont	   => 0,	# inital, later "Monospace 10" etc.
@@ -84,20 +103,27 @@ my %prefs =
    notation	   => "",
 
    # Transpose.
-   xpose_from => 0,
-   xpose_to   => 0,
-   xpose_acc  => 0,
+   enable_xpose => 0,
+   xpose_from   => 0,
+   xpose_to     => 0,
+   xpose_acc    => 0,
 
    # Transcode.
+   enable_xcode	   => 0,
    xcode	   => "",
 
    # PDF Viewer.
    enable_pdfviewer   => 0,
    pdfviewer   => "",
 
+   # Debug etc.
+   dumpstate => 0,
+
   );
 
 use constant MAXRECENTS => 10;
+
+# Establish a connection with the persistent data store.
 
 method Setup :common ($options) {
 
@@ -142,12 +168,22 @@ method Setup :common ($options) {
     }
 }
 
+# Load all data from the persistent data store into %state.
+# Adds information collected from the environment (e.g. config files).
+# Try to compensate for incompatibilities (legacy).
+
 method Load :common {
     use Hash::Util qw( lock_keys unlock_keys );
     unlock_keys(%preferences);
     %preferences = ( %prefs );
+    while ( my ( $k, $v ) = each %prefs ) {
+	next unless $k =~ /^(editcolour)_(\w+)_(\w+)/;
+	$preferences{$1}{$2}{$3} = $v;
+    }
+    while ( my ( $k, $v ) = each %preferences ) {
+	delete $preferences{$k} if $k =~ /^(editcolour)_/;
+    }
     %state = ( preferences => \%preferences,
-	       fonts => [ @fonts ],
 	       recents => [],
 	     );
 
@@ -164,8 +200,9 @@ method Load :common {
 	    my $value = $cb->Read($entry);
 	    # printf STDERR ( "$group.$entry:\t%s\n", $value );
 	    if ( $group eq "preferences" ) {
+		my $o;
 		if ( exists $pp{$entry} ) {
-		    delete $pp{$entry};
+		    $o = delete $pp{$entry};
 		}
 		else {
 		    warn("Preferences: unknown key: $entry");
@@ -174,6 +211,26 @@ method Load :common {
 		}
 		if ( $entry eq "cfgpreset" ) {
 		    $preferences{$entry} = [ split( /,\s*/, $value ) ];
+		}
+		elsif ( $entry eq "editcolours" ) {
+		    my @c = split( /,\s*/, $value );
+		    if ( @c <= 1 ) {
+			...;
+		    }
+		    else {
+			$preferences{editcolour}{light}{fg} = $c[0];
+			$preferences{editcolour}{light}{bg} = $c[1];
+			$preferences{editcolour}{light}{s1} = $c[2];
+			$preferences{editcolour}{light}{s2} = $c[3];
+			$preferences{editcolour}{light}{s3} = $c[4];
+			$preferences{editcolour}{light}{s4} = $c[5];
+			$preferences{editcolour}{light}{s5} = $c[6];
+			$preferences{editcolour}{light}{annbg} = $c[7];
+			$preferences{editcolour}{light}{annfg} = "#ff0000";
+		    }
+		}
+		elsif ( $entry =~ /^(editcolour)_(\w+)_(\w+)$/ ) {
+		    $preferences{$1}{$2}{$3} = $value;
 		}
 		else {
 		    $preferences{$entry} = $value;
@@ -193,38 +250,47 @@ method Load :common {
 	$cb->SetPath($cp);
 	( $ggoon, $group, $gindex ) = $cb->GetNextGroup($gindex);
     }
+
+    # Catch mistakes and abuse.
     lock_keys(%preferences);
 
-    if ( $preferences{editfont} =~ /^\d+$/ ) {
-	$preferences{editfont} = $fonts[$preferences{editfont}]->{font}->GetNativeFontInfoDesc;
-    }
-    if ( $preferences{msgsfont} =~ /^\d+$/ ) {
-	$preferences{msgsfont} = $fonts[$preferences{msgsfont}]->{font}->GetNativeFontInfoDesc;
+    # Legacy font number -> font desc.
+    for ( qw( editfont msgsfont ) ) {
+	next unless $preferences{$_} =~ /^\d+$/;
+	$preferences{$_} = $fonts[$preferences{$_}]->GetNativeFontInfoDesc;
     }
     delete $ENV{CHORDPRO_LIB};
 
+    # Collect from the environment.
     CP->setup_resdirs;
-    _setup_styles();
-    _setup_notations();
-    _setup_tasks();
+    setup_styles();
+    setup_notations();
+    setup_tasks();
 
+    # For convenience.
     my @ext = qw( cho crd chopro chord chordpro pro );
     my $lst = "*." . join(",*.",@ext);
     $state{ffilters} = "ChordPro files ($lst)|" . $lst =~ s/,/;/gr .
       (is_macos ? ";*.txt" : "|All files|*.*");
+
+    if ( $preferences{dumpstate} ) {
+	use DDP; p %state;
+    }
 }
+
+# Store the preferences and other persistent state.
 
 method Store :common {
 
     my $cp = $cb->GetPath;
-    my %pp = %prefs;
     while ( my ( $group, $v ) = each %state ) {
 
-	next if $group =~ m{ ^(?:
-				 fonts | styles | notations
-			       | tasks | panel
-			       )$ }x;
+	next unless $group =~ m{ ^(?:
+				     preferences | messages | recents |
+				     sash | songbookexport | windows
+				 )$ }x;
 
+	# Re-write the recents. Array.
 	if ( $group eq "recents" && is_arrayref($v) ) {
 	    $cb->DeleteGroup("/$group");
 	    $cb->SetPath("/$group");
@@ -234,20 +300,24 @@ method Store :common {
 	    }
 	    next;
 	}
+
+	# Everything else are hash refs.
 	next unless is_hashref($v);
 
 	$cb->SetPath("/$group");
 	while ( my ( $k, $v ) = each %$v ) {
 	    if ( $group eq "preferences" ) {
-		if ( exists $pp{$k} ) {
-		    delete $pp{$k};
+		if ( $k eq "editcolour" && is_hashref($v) ) {
+		    while ( my ( $k, $v ) = each %$v ) {
+			my $p = "editcolour_$k";
+			while ( my ( $k, $v ) = each %$v ) {
+			    $cb->Write($p."_$k", $v );
+			}
+		    }
+		    next;
 		}
-		else {
-		    warn("Preferences: unknown key: $k");
-		}
-		if ( $k eq "cfgpreset" ) {
-		    $v = join( ",", @$v );
-		}
+		next if $k eq "editcolours";
+		$v = join( ",", @$v ) if is_arrayref($v);
 	    }
 	    if ( defined $v ) {
 		$cb->Write( $k, $v );
@@ -259,15 +329,12 @@ method Store :common {
 	}
     }
     $cb->Flush;
-    if ( %pp ) {
-	warn( "Preferences: excess keys: " . join( " ", sort keys %pp ) );
-    }
 }
 
-################
+################ Private Subroutines ################
 
 # List of available config presets (styles).
-sub _setup_styles {
+sub setup_styles {
     my $stylelist = $state{styles};
     return $stylelist if $stylelist && @$stylelist;
 
@@ -308,7 +375,7 @@ sub _setup_styles {
 }
 
 # List of available notation systems.
-sub _setup_notations {
+sub setup_notations {
     my $notationlist = $state{notations};
     return $notationlist if $notationlist && @$notationlist;
     $notationlist = [ undef ];
@@ -321,14 +388,14 @@ sub _setup_notations {
 	    my $base = $1;
 	    $notationlist->[0] = "common", next
 	      if $base eq "common";
-	    push( @$notationlist, $base )
+	    push( @$notationlist, $base );
 	}
     }
     $state{notations} = $notationlist;
 }
 
 # List of available tasks.
-sub _setup_tasks {
+sub setup_tasks {
     my @tasks;
     my @libs = @{ CP->findresdirs("tasks") };
     my $dir = $preferences{customlib};

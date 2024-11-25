@@ -4,8 +4,8 @@
 
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
-# Last Modified On: Mon Oct 28 20:59:15 2024
-# Update Count    : 300
+# Last Modified On: Mon Nov 25 14:01:42 2024
+# Update Count    : 301
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -102,7 +102,7 @@ EndOfUsage
 
 =head1 NAME
 
-wxchordpro - a simple Wx-based GUI for ChordPro
+wxchordpro - Wx-based GUI for ChordPro
 
 =head1 SYNOPSIS
 
@@ -110,7 +110,7 @@ wxchordpro - a simple Wx-based GUI for ChordPro
 
 =head1 DESCRIPTION
 
-B<wxchordpro> is a simple GUI for the ChordPro program. It allows
+B<wxchordpro> is a GUI for the ChordPro program. It allows
 opening of files, make changes, and preview (optionally print) the
 formatted result.
 

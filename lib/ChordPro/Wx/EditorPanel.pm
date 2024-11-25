@@ -23,12 +23,6 @@ use File::Basename;
 # WhoamI
 field $panel :accessor = "editor";
 
-# Either Wx::StyledTextCtrl or Wx::TextCtrl.
-field $stc;
-
-# Style for annotations.
-field $astyle;
-
 # Just fill in the defaults.
 sub BUILDARGS( $class, $parent=undef, $id=wxID_ANY,
 	   $pos=wxDefaultPosition, $size=wxDefaultSize,
@@ -40,12 +34,7 @@ ADJUST {
     # By default the TextCtrl on MacOS substitutes smart quotes and dashes.
     # Note that OSXDisableAllSmartSubstitutions requires an augmented
     # version of wxPerl.
-    $self->{t_editor}->OSXDisableAllSmartSubstitutions
-      if $self->{t_editor}->can("OSXDisableAllSmartSubstitutions");
-
-    # Try Styled Text Control (Scintilla). This required an updated
-    # version of Wx.
-    $self->setup_scintilla if $::options->{stc}//1;
+    $self->{t_editor}->OSXDisableAllSmartSubstitutions;
 
     # Setup WebView, if possible.
     $self->setup_webview if $::options->{webview}//1;
@@ -60,159 +49,6 @@ ADJUST {
 
 method name() { "Editor" }
 
-################ wxStyledTextCtrl (Scintilla) ################
-
-method setup_scintilla() {
-
-    my $try;
-    $stc = $self->{t_editor};
-    if ( eval { use Wx::STC; 1 } ) {
-	# Replace the placeholder Wx::TextCtrl.
-	$try = Wx::StyledTextCtrl->new( $self->{p_left},
-					wxID_ANY );
-    }
-    else {
-	return;
-    }
-
-    # Check for updated STC.
-    for ( qw( IsModified DiscardEdits MarkDirty ) ) {
-	next if $try->can($_);
-	# Pre 3.x wxPerl, missing methods.
-	$try->Destroy;
-	return;
-    }
-    $stc = $try;
-    $state{have_stc} = 1;		# Note: too early!
-
-    # Replace the wxTextCtrl by Scintilla.
-    $self->{sz_editor}->Replace( $self->{t_editor}, $stc, 1 );
-    $self->{t_editor}->Destroy;
-    $self->{t_editor} = $stc;
-    $self->{sz_editor}->Layout;
-}
-
-method refresh_scintilla() {
-
-    $stc->SetLexer(wxSTC_LEX_CONTAINER);
-    $stc->SetKeyWords(0,
-		      [qw( album arranger artist capo chord chorus
-			   column_break columns comment comment_box
-			   comment_italic composer copyright define
-			   diagrams duration end_of_bridge end_of_chorus
-			   end_of_grid end_of_tab end_of_verse grid
-			   highlight image key lyricist meta new_page
-			   new_physical_page new_song no_grid pagesize
-			   pagetype sorttitle start_of_bridge
-			   start_of_chorus start_of_grid start_of_tab
-			   start_of_verse subtitle tempo time title
-			   titles transpose year )
-		      ]);
-
-    Wx::Event::EVT_STC_STYLENEEDED($self, -1, $self->can('OnStyleNeeded'));
-
-    $stc->StyleClearAll;
-
-    my @c = split( /,\s*/, $preferences{editcolours} );
-    # 0 - basic
-    $stc->StyleSetSpec( 0, "fore:" . shift(@c) );
-    # 1 - comments (grey)
-    $stc->StyleSetSpec( 1, "fore:" . shift(@c) );
-    # 2 - Keywords (grey)
-    $stc->StyleSetSpec( 2, "fore:" . shift(@c) );
-    # 3 - Brackets (grey)
-    $stc->StyleSetSpec( 3, "fore:" . shift(@c) );
-    # 4 - Chords (red)
-    $stc->StyleSetSpec( 4, "fore:" . shift(@c) );
-    # 5 - Directives (blue, same as status label colour)
-    $stc->StyleSetSpec( 5, "fore:" . shift(@c) );
-    # 6 - Directive arguments (orange, same as toolbar icon colour)
-    $stc->StyleSetSpec( 6, "fore:" . shift(@c));
-
-    # For linenumbers.
-    $stc->SetMarginWidth( 0, 40 ); # TODO
-
-    if ( $preferences{editorwrap} ) {
-	$stc->SetWrapMode(3); # wxSTC_WRAP_WHITESPACE );
-	$stc->SetWrapStartIndent( $preferences{editorwrapindent} );
-    }
-    else {
-	$stc->SetWrapMode(0); # wxSTC_WRAP_NONE );
-    }
-}
-
-method style_text() {
-
-    # Scintilla uses byte indices.
-    use Encode;
-    my $text  = Encode::encode_utf8($stc->GetText);
-
-    my $style = sub {
-	my ( $re, @styles ) = @_;
-	pos($text) = 0;
-	while ( $text =~ m/$re/g ) {
-	    my @s = @styles;
-	    die("!!! ", scalar(@{^CAPTURE}), ' ', scalar(@s)) unless @s == @{^CAPTURE};
-	    my $end = pos($text);
-	    my $start = $end - length($&);
-	    my $group = 0;
-	    while ( $start < $end ) {
-		my $l = length(${^CAPTURE[$group++]});
-		$stc->StartStyling( $start, 0 );
-		$stc->SetStyling( $l, shift(@s) );
-		$start += $l;
-	    }
-	}
-    };
-
-    # Comments/
-    $style->( qr/^(#.*)/m, 1 );
-    # Directives.
-    $style->( qr/^(\{)([-\w!]+)(.*)(\})/m, 3, 5, 6, 3 );
-    $style->( qr/^(\{)([-\w!]+)([: ])(.*)(\})/m, 3, 5, 3, 6, 3 );
-    # Chords.
-    $style->( qr/(\[)([^\[\]]*)(\])/m, 3, 4, 3 );
-}
-
-method prepare_annotations() {
-
-    return unless $state{have_stc};
-
-    $astyle = 1 + wxSTC_STYLE_LASTPREDEFINED;
-    $stc->AnnotationClearAll;
-    $stc->AnnotationSetVisible(wxSTC_ANNOTATION_BOXED);
-    $stc->StyleSetBackground( $astyle, Wx::Colour->new(255, 255, 160) );
-    $stc->StyleSetForeground( $astyle, wxRED );
-
-    if ( $stc->can("StyleGetSizeFractional") ) { # Wx 3.002
-	$stc->StyleSetSizeFractional	# size * 100
-	  ( $astyle,
-	    ( $stc->StyleGetSizeFractional
-	      ( wxSTC_STYLE_DEFAULT ) * 4 ) / 5 );
-    }
-    return 1;
-}
-
-method add_annotation( $line, $message ) {
-
-    return unless $state{have_stc};
-
-    $stc->AnnotationSetText( $line, $message );
-    $stc->AnnotationSetStyle( $line, $astyle );
-}
-
-method refresh_editor {
-    if ( $state{have_stc} ) {
-	$self->refresh_scintilla;
-    }
-    else {
-	$self->{t_editor}->SetBGColour
-	  ( Wx::Colour->new($preferences{editbgcolour}) );
-    }
-    $self->{t_editor}->SetFont
-      ( Wx::Font->new($preferences{editfont}) );
-}
-
 ################ API Functions ################
 
 method refresh() {
@@ -221,7 +57,6 @@ method refresh() {
 
     $self->update_menubar( M_EDITOR );
 
-    $state{have_stc} = $self->{t_editor}->isa('Wx::StyledTextCtrl');
     $self->log( 'I', "Using " .
 		( $state{have_stc}
 		  ? "styled" : "basic") . " text editor" );
@@ -240,16 +75,15 @@ method refresh() {
     $self->{sz_toolbar}->Layout;
 
     my $mod = $self->{t_editor}->IsModified;
-    my $font = Wx::Font->new($preferences{msgsfont});
-    $self->{t_messages}->SetFont($font);
-
-    $self->refresh_editor;
+    $self->{t_editor}->refresh;
 
     $self->setup_messages_ctxmenu;
     $self->previewtooltip;
     $self->messagestooltip;
     $self->{t_editor}->SetModified($mod);
     $self->{bmb_preview}->SetFocus;
+
+    $self->refresh_messages;
 }
 
 method openfile( $file, $checked=0, $actual=undef ) {
@@ -280,8 +114,9 @@ method openfile( $file, $checked=0, $actual=undef ) {
     }
     #### TODO: Get rid of selection on Windows
 
-    if ( $stc ) {
-	my @t = split( /\n/, $self->{t_editor}->GetText );
+    if ( $state{have_stc} ) {
+	my $stc = $self->{t_editor};
+	my @t = split( /\n/, $stc->GetText );
 	my $max = -1;
 	for ( @t ) {
 	    $max = max( $max, length($_) );
@@ -342,13 +177,8 @@ method newfile() {
     my $file = $preferences{tmplfile};
     if ( $file && $preferences{enable_tmplfile} ) {
 	$self->log( 'I', "Loading template $file" );
-	if ( -f -r $file ) {
-	    if ( $self->{t_editor}->LoadFile($file) ) {
-		$content = "";
-	    }
-	    else {
-		$self->log( 'E', "Cannot open template $file: $!" );
-	    }
+	if ( -f -r $file && $self->{t_editor}->LoadFile($file) ) {
+	    $content = "";
 	}
 	else {
 	    $self->log( 'E', "Cannot open template $file: $!" );
@@ -368,11 +198,10 @@ method newfile() {
 	if ( $ret == wxID_OK ) {
 	    $title = $self->{d_newfile}->get_title;
 	    $content = $self->{d_newfile}->get_meta;
-	    $state{currentfile} = $self->{d_newfile}->get_file;
 	}
     }
 
-    $self->{t_editor}->SetText($content);
+    $self->{t_editor}->SetText($content) if length($content);
     $self->{t_editor}->EmptyUndoBuffer;
 
     $self->log( 'S', "New song: $title");
@@ -428,7 +257,7 @@ method check_source_saved() {
 
 method save_file( $file = undef ) {
     while ( 1 ) {
-	unless ( defined $file ) {
+	unless ( defined $file && $file ne "" ) {
 	    my $fd = Wx::FileDialog->new
 	      ($self, _T("Choose output file"),
 	       "", $state{currentfile}//"",
@@ -498,7 +327,53 @@ method check_preview_saved() {
     1;
 }
 
+method embrace( $pre, $post ) {
+    my $ctrl = $self->{t_editor};
+
+    my ( $from, $to ) = $ctrl->GetSelection;
+    my $have_selection = $from != $to;
+
+    if ( $have_selection ) {
+	my $text = $have_selection ? $ctrl->GetSelectedText : $ctrl->GetText;
+	chomp($text);
+	$text = $pre . $text . $post;
+	$ctrl->Replace( $from, $to, $text );
+	my $pos = $ctrl->GetInsertionPoint;
+	$ctrl->SetSelection( $pos, $pos );
+    }
+    else {
+	$ctrl->AddText($pre);
+	my $pos = $ctrl->GetInsertionPoint;
+	$ctrl->AddText($post);
+	$ctrl->SetSelection( $pos, $pos );
+    }
+}
+
+method embrace_directive($dir) {
+    $self->embrace( "{$dir: ", "}\n" );
+}
+
+method embrace_section($section) {
+
+    unless ( defined($section) ) {
+	my $dialog = Wx::TextEntryDialog->new
+	  ( $self, "Enter section name",
+	    "",
+	    "tab" );
+
+	return if $dialog->ShowModal != wxID_OK;
+	$section = $dialog->GetValue;
+    }
+
+    $self->embrace( "{start_of_$section}\n",
+		    "\n{end_of_$section}\n" );
+}
+
 method save_preferences() { 1 }
+
+method update_preferences() {
+    $self->refresh;
+}
 
 ################ Event Handlers (alphabetic order) ################
 
@@ -507,12 +382,7 @@ method OnA2Crd($event) {
     my $ctrl = $self->{t_editor};
     my ( $from, $to ) = $ctrl->GetSelection;
     my $have_selection = $from != $to;
-
-    my $text = $have_selection
-      ? $state{have_stc}
-        ? $ctrl->GetSelectedText
-        : $ctrl->GetStringSelection
-      : $ctrl->GetText;
+    my $text = $have_selection ? $ctrl->GetSelectedText : $ctrl->GetText;
 
     require ChordPro::A2Crd;
     $::options->{nosysconfig} = 1;
@@ -531,18 +401,13 @@ method OnA2Crd($event) {
 	    ( { lines => [ split( /\n/, $text ) ] } ) } ) . "\n";
 
     if ( $have_selection ) {
-	if ( $state{have_stc} ) {
-	    $ctrl->ReplaceSelection($cho );
-	}
-	else {
-	    $ctrl->Replace( $from, $to, $cho );
-	}
+	$ctrl->Replace( $from, $to, $cho );
     }
     else {
 	$ctrl->Clear;
 	$ctrl->SetText($cho);
     }
-    $ctrl->SetInsertionPoint($from) unless $state{have_stc};
+    $ctrl->SetInsertionPoint($from);
 }
 
 method OnCut($event) {
@@ -552,6 +417,43 @@ method OnCut($event) {
 method OnDelete($event) {
     my ( $from, $to ) = $self->{t_editor}->GetSelection;
     $self->{t_editor}->Remove( $from, $to ) if $from < $to;
+}
+
+method OnExternalEditor($event) {
+    my $editor = $ENV{VISUAL} // $ENV{EDITOR};
+    $self->alert( 0, "No external editor specified" ), return unless $editor;
+    my $e = $self->{t_editor};
+    my $pos = $e->GetInsertionPoint;
+    my $mod = $e->IsModified;
+
+    # Save in temp file and call editor.
+    use File::Temp qw(tempfile);
+    ( undef, my $file ) = tempfile( SUFFIX => ".cho", OPEN => 0 );
+    $e->SaveFile($file);
+    my @st = stat($file);
+    $self->log( 'I', "Running $editor on $file (" .
+		plural( $e->GetLineCount, " line" ) . ", " .
+		plural( $st[7], " byte" ) . ")" );
+    ::sys( $editor, $file );
+
+    if ( (stat($file))[7] == $st[7] && (stat(_))[9] == $st[9] ) {
+	$self->log( 'I', "Running $editor did not make changes" );
+	$self->alert( 0, "No changes from external editor" );
+    }
+    else {
+	$e->LoadFile($file);
+	$self->log( 'I', "Updated editor from $file (" .
+		    plural( $e->GetLineCount, " line" ) . ", " .
+		    plural( (stat(_))[7], " byte" ) . ")" );
+	$mod = 1;
+	# Clear selection and set insertion point.
+	$e->SetSelection( $pos, $pos );
+	$e->EmptyUndoBuffer;
+    }
+    unlink($file);
+
+    $e->SetModified($mod);
+    $e->SetFocus;
 }
 
 method OnPaste($event) {
@@ -576,10 +478,6 @@ method OnSongbook {
     $self->GetParent->select_mode("sbexport");
 }
 
-method OnStyleNeeded($event) {		# scintilla
-    $self->style_text;
-}
-
 method OnText($event) {
     $self->{t_editor}->SetModified(1);
 }
@@ -588,54 +486,38 @@ method OnUndo($event) {
     $self->{t_editor}->Undo;
 }
 
-################ Compatibility ################
+#### Insertions
 
-# This is to facilitate swapping between TextCtrl and Scintilla.
-
-package Wx::StyledTextCtrl {
-
-    # wxPerl doesn't provide calls (yet) to fetch the fonts, so keep track.
-    my $_font;
-    sub SetFont {
-	$_[0]->StyleSetFont( $_, $_[1] ) for 0..6;
-	$_font = $_[1];
-    }
-
-    sub GetFont {
-	$_font // $_[0]->StyleGetFont(0);
-    }
-
-    # IsModified, MarkDirty and DiscardEdits need custom patches.
-    sub SetModified {
-	$_[1] ? $_[0]->MarkDirty : $_[0]->DiscardEdits;
-    }
-
-    sub SetBackgroundColour { }
-    sub SetBGColour { }
+method OnInsertTitle($event) {
+    $self->embrace_directive("title");
 }
 
-package Wx::TextCtrl {
+method OnInsertSubtitle($event) {
+    $self->embrace_directive("subtitle");
+}
 
-    sub GetText {
-	$_[0]->GetValue;
-    }
+method OnInsertKey($event) {
+    $self->embrace_directive("key");
+}
 
-    sub SetText {
-	$_[0]->SetValue($_[1]);
-    }
+method OnInsertArtist($event) {
+    $self->embrace_directive("artist");
+}
 
-    sub GetLineCount {
-	$_[0]->GetNumberOfLines;
-    }
+method OnInsertChorus($event) {
+    $self->embrace_section("chorus");
+}
 
-    sub SetBGColour {
-	my ( $self, $colour ) = @_;
-	my $mod = $self->IsModified;
-	$self->SetBackgroundColour($colour);
-	$self->SetStyle(0, -1, $self->GetDefaultStyle);
-    }
+method OnInsertVerse($event) {
+    $self->embrace_section("verse");
+}
 
-    sub EmptyUndoBuffer { }
+method OnInsertGrid($event) {
+    $self->embrace_section("grid");
+}
+
+method OnInsertSection($event) {
+    $self->embrace_section(undef);
 }
 
 1;

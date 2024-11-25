@@ -4,9 +4,9 @@ use v5.26;
 use Object::Pad;
 use utf8;
 
-class ChordPro::Wx::PreferencesDialog
+class ChordPro::Wx::SettingsDialog
   :repr(HASH)
-  :isa(ChordPro::Wx::PreferencesDialog_wxg);
+  :isa(ChordPro::Wx::SettingsDialog_wxg);
 
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
@@ -14,21 +14,14 @@ use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
 use Encode qw(encode_utf8);
 
-# Just fill in the defaults.
-#sub BUILDARGS( $class, $parent=undef, $id=wxID_ANY, $title="",
-#	   $pos=wxDefaultPosition, $size=wxDefaultSize,
-#	   $style=0, $name="" ) {
-#   return( $parent, $id, $title, $pos, $size, $style, $name );
-#}
-#
-#ADJUST {
-#    $self->refresh;
-#}
-
 no warnings 'redefine';		# TODO
 method new :common ( $parent, $id, $title ) {
     my $self = $class->SUPER::new($parent, $id, $title);
     $self->refresh;
+    $self->{sz_prefs_outer}->Fit($self);
+    $self->Layout;
+    Wx::Event::EVT_SYS_COLOUR_CHANGED( $self,
+				       $self->can("OnSysColourChanged") );
     $self;
 }
 use warnings 'redefine';	# TODO
@@ -52,6 +45,15 @@ method get_configfile() {
 
 method refresh() {
     $self->fetch_prefs;
+    $self->{t_editor}->refresh;
+    $self->{t_editor}->SetText(<<EOD);
+{title: St. James Infirmary Blues}
+{subtitle: Traditional}
+
+# Song starts here.
+I went [Em]down to the [Am]St James In[Em]firmary
+I found my [Am]baby [B7]there
+EOD
 }
 
 method enablecustom() {
@@ -125,11 +127,11 @@ method fetch_prefs() {
     # Editor.
     $self->{fp_editor}->SetSelectedFont
       ( Wx::Font->new($preferences{editfont}) );
-
-    $state{editbgcolour} = $preferences{editbgcolour};
+    $self->prefs2colours;
     $self->{cb_editorwrap}->SetValue($preferences{editorwrap});
     $self->{sp_editorwrap}->SetValue($preferences{editorwrapindent});
-    $self->OnEditorWrap(undef);
+
+    # Messages.
     $self->{fp_messages}->SetSelectedFont( Wx::Font->new($preferences{msgsfont}) );
 
     # Notation.
@@ -148,12 +150,13 @@ method fetch_prefs() {
     $ctl->SetSelection($check);
 
     # Transpose.
+    $self->{cb_xpose}->SetValue( $preferences{enable_xpose} );
+    $self->OnCbTranspose(undef);
 
     # Transcode.
-    $ctl = $self->{ch_transcode};
+    $ctl = $self->{ch_xcode};
     $ctl->Clear;
-    $ctl->Append("-----");
-    $n = 1;
+    $n = 0;
     for ( @{ $state{notations} } ) {
 	my $s = ucfirst($_);
 	$check = $n if $_ eq lc $preferences{xcode};
@@ -163,6 +166,8 @@ method fetch_prefs() {
 	$n++;
     }
     $ctl->SetSelection($check);
+    $self->{cb_xcode}->SetValue( $preferences{enable_xcode} );
+    $self->OnCbTranscode(undef);
 
     # PDF Viewer.
     $self->{cb_pdfviewer}->SetValue($preferences{enable_pdfviewer});
@@ -171,6 +176,9 @@ method fetch_prefs() {
     $self->{t_pdfviewer}->Enable($self->{cb_pdfviewer}->IsChecked);
 
     $self->enablecustom;
+    $state{_prefs} = clone(\%preferences);
+
+    # use DDP; p %preferences, as => "Fetched";
 }
 
 #               C      D      E  F      G      A        B C
@@ -212,9 +220,9 @@ method store_prefs() {
 
     # Editor.
     $preferences{editfont} = $self->{fp_editor}->GetSelectedFont->GetNativeFontInfoDesc;
+    $self->colours2prefs;
     $preferences{editorwrap} = $self->{cb_editorwrap}->IsChecked;
     $preferences{editorwrapindent} = $self->{sp_editorwrap}->GetValue;
-    $preferences{editbgcolour} = $state{editbgcolour};
 
     # Messages.
     $preferences{msgsfont} = $self->{fp_messages}->GetSelectedFont->GetNativeFontInfoDesc;
@@ -230,6 +238,7 @@ method store_prefs() {
     }
 
     # Transpose.
+    $preferences{enable_xpose} = $self->{cb_xpose}->IsChecked;
     $preferences{xpose_from} = $xpmap[$self->{ch_xpose_from}->GetSelection];
     $preferences{xpose_to  } = $xpmap[$self->{ch_xpose_to  }->GetSelection];
     $preferences{xpose_acc}  = $self->{ch_acc}->GetSelection;
@@ -240,10 +249,11 @@ method store_prefs() {
     $state{xpose} = $n;
 
     # Transcode.
-    $n = $self->{ch_transcode}->GetSelection;
+    $preferences{enable_xcode} = $self->{cb_xcode}->IsChecked;
+    $n = $self->{ch_xcode}->GetSelection;
     if ( $n > 0 ) {
 	$preferences{xcode} =
-	  $self->{ch_transcode}->GetClientData($n);
+	  $self->{ch_xcode}->GetClientData($n);
     }
     else {
        	$preferences{xcode} = "";
@@ -253,23 +263,12 @@ method store_prefs() {
     $preferences{enable_pdfviewer} = $self->{cb_pdfviewer}->IsChecked;
     $preferences{pdfviewer} = $self->{t_pdfviewer}->GetValue;
 
-    $self->GetParent->refresh_editor if $state{mode} eq "editor";
+    # use DDP; p %preferences, as => "Stored";
 }
 
 method restore_prefs() {
-
-    # Editor (changed are applied live).
-    my $ctl = $self->GetParent->{t_editor};
-    return unless $ctl;
-
-    my $font = Wx::Font->new($preferences{editfont});
-    $self->setnomod( $ctl, sub { $ctl->SetFont($font) } );
-    $self->setnomod( $ctl,
-		     sub { $ctl->SetBGColour
-			     ( Wx::Colour->new($preferences{editbgcolour}) ) } );
-    $font = Wx::Font->new($preferences{msgsfont});
-    $self->GetParent->{t_messages}->SetFont($font);
-    $state{editbgcolour} = $preferences{editbgcolour};
+    %preferences = %{ $state{_prefs} };
+    # use DDP; p %preferences, as => "Restored";
 }
 
 method need_restart() {
@@ -280,14 +279,74 @@ method need_restart() {
 	Wx::Event::EVT_BUTTON( $self->{w_infobar}, $id,
 			       sub { $self->OnIBDismiss($_[1]) } );
     }
+
+    # Showing the InfoBar leads to a resize, which may cause
+    # unwanted width change.
+    my ( $w, $h ) = $self->GetSizeWH;
     $self->{w_infobar}->ShowMessage("Changing the custom library requires restart",
 				    wxICON_INFORMATION);
     $self->{sz_prefs_outer}->Fit($self);
+    $self->SetSize([$w,-1]);
+}
+
+method colours2prefs {
+    my $theme =
+      $preferences{editortheme} = $self->{cb_darkmode}->IsChecked ? "dark" : "light";
+    $preferences{editcolour}{$theme}{fg} = $self->{cp_fg}->GetAsHTML;
+    $preferences{editcolour}{$theme}{bg} = $self->{cp_bg}->GetAsHTML;
+    if ( $state{have_stc} ) {
+	$preferences{editcolour}{$theme}{"s$_"} = $self->{"cp_s$_"}->GetAsHTML for 1..6;
+	$preferences{editcolour}{$theme}{annfg} = $self->{cp_annfg}->GetAsHTML;
+	$preferences{editcolour}{$theme}{annbg} = $self->{cp_annbg}->GetAsHTML;
+    }
+    $self->{t_editor}->refresh;
+}
+
+method prefs2colours {
+    my $theme = $preferences{editortheme};
+    $self->{cb_darkmode}->SetValue( $theme eq "dark" );
+    $self->{cp_fg}->SetColour($preferences{editcolour}{$theme}{fg});
+    $self->{cp_bg}->SetColour($preferences{editcolour}{$theme}{bg});
+    if ( $state{have_stc} ) {
+	for my $c ( "annfg", "annbg", map { "s$_" } 1..6 ) {
+	    $self->{"cp_$c"}->Enable(1);
+	    $self->{"l_$c"}->Enable(1);
+	}
+	$self->{"cp_s$_"}->SetColour($preferences{editcolour}{$theme}{"s$_"})
+	  for 1..6;
+	$self->{cp_annfg}->SetColour($preferences{editcolour}{$theme}{annfg});
+	$self->{cp_annbg}->SetColour($preferences{editcolour}{$theme}{annbg});
+    }
+    else {
+	my $grey = "#e0e0e0";
+	for my $c ( "annfg", "annbg", map { "s$_" } 1..6 ) {
+	    $self->{"cp_$c"}->SetColour($grey);
+	    $self->{"cp_$c"}->Enable(0);
+	    $self->{"l_$c"}->Enable(0);
+	}
+    }
+    $self->{t_editor}->refresh;
 }
 
 ################ Event handlers ################
 
-# Event handlers override the subs generated by wxGlade in the _wxg class.
+#### General.
+
+method OnAccept($event) {
+    $self->store_prefs;
+    $event->Skip;
+}
+
+method OnCancel($event) {
+    $self->restore_prefs;
+    $event->Skip;
+}
+
+method OnIBDismiss($e) {
+    $self->{w_infobar}->Dismiss;
+}
+
+#### Configs etc.
 
 method OnConfigFile($event) {
     my $n = $self->{cb_configfile}->IsChecked;
@@ -335,57 +394,6 @@ method OnCustomLibChanged($event) {
     $self->need_restart;
 }
 
-method OnCbTmplFile($event) {
-    my $n = $self->{cb_tmplfile}->IsChecked;
-    $self->{fp_tmplfile}->Enable($n);
-}
-
-method OnEditorColours($event) {
-
-    if ( $state{have_stc} ) {
-	require ChordPro::Wx::ColourSettingsDialog;
-	my $d = ChordPro::Wx::ColourSettingsDialog->new;
-	restorewinpos( $d, "colours" );
-	$d->refresh;
-	my $ret = $d->ShowModal;
-	savewinpos( $d, "colours" );
-	if ( $ret == wxID_OK ) {
-	    $state{editcolours} = $d->GetColours;
-	}
-	$d->Destroy;
-    }
-    else {
-	my $data = Wx::ColourData->new;
-	$data->SetChooseFull(1);
-	$data->SetColour(Wx::Colour->new($state{editbgcolour}));
-	unless ( $self->{d_colours} ) {
-	    $self->{d_colours} = Wx::ColourDialog->new( $self, $data );
-	    restorewinpos( $self->{d_colours}, "colours" );
-	}
-	my $ret = $self->{d_colours}->ShowModal;
-	savewinpos( $self->{d_colours}, "colours" );
-	return unless $ret == wxID_OK;
-	$data = $self->{d_colours}->GetColourData;
-	my $colour = $data->GetColour;
-	$state{editbgcolour} = $colour->GetAsString(wxC2S_HTML_SYNTAX);
-	$self->GetParent->{t_editor}->SetBGColour($colour);
-    }
-}
-
-method OnTmplFileChanged($event) {
-    # my $file = $self->{fp_tmplfile}->GetPath;
-    # ellipsize( $self->{t_tmplfile}, text => $file );
-}
-
-method OnAccept($event) {
-    $self->store_prefs;
-    $event->Skip;
-}
-
-method OnCancel($event) {
-    $self->restore_prefs;
-    $event->Skip;
-}
 
 method OnSkipStdCfg($event) {
     $event->Skip;
@@ -396,9 +404,12 @@ method OnPresets($event) {
     $event->Skip;
 }
 
-method OnPDFViewer($event) {
-    $self->{t_pdfviewer}->Enable( $self->{cb_pdfviewer}->GetValue );
-    $event->Skip;
+#### Notations, Transpose and Transcode.
+
+method OnCbTranspose($event) {
+    my $n = $self->{cb_xpose}->IsChecked;
+    $self->{$_}->Enable($n)
+      for qw( ch_xpose_from ch_xpose_to ch_acc );
 }
 
 method OnXposeFrom($event) {
@@ -429,22 +440,93 @@ method OnChNotation($event) {
 }
 
 method OnChTranscode($event) {
-    my $n = $self->{ch_transcode}->GetSelection;
+    my $n = $self->{ch_xcode}->GetSelection;
     $event->Skip;
 }
 
-method OnEditorWrap($event) {
-    $self->{$_}->Enable( $self->{cb_editorwrap}->IsChecked )
-      for qw( l_editorwrap sp_editorwrap );
+method OnCbTranscode($event) {
+    $self->{ch_xcode}->Enable( $self->{cb_xcode}->IsChecked );
 }
 
-method OnFontPickerChanged($event) {
-    my $parent = $self->GetParent;
-    my $ctl = $parent->{t_editor};
+#### Editor.
+
+method OnEditorFontPickerChanged($event) {
+    my $ctl = $self->{t_editor};
     return unless $ctl;
     my $font = $self->{fp_editor}->GetSelectedFont;
-    $self->setnomod( $ctl, sub { $ctl->SetFont($font) } );
+    $preferences{editfont} = $font->GetNativeFontInfoDesc;
+    $ctl->refresh;
 }
+
+method OnColourFGChanged( $event ) {
+    $self->colourchanged("fg");
+}
+
+method OnColourBGChanged( $event ) {
+    $self->colourchanged("bg");
+}
+
+method OnColourS1Changed( $event ) {
+    $self->colourchanged("s1");
+}
+
+method OnColourS2Changed( $event ) {
+    $self->colourchanged("s2");
+}
+
+method OnColourS3Changed( $event ) {
+    $self->colourchanged("s3");
+}
+
+method OnColourS4Changed( $event ) {
+    $self->colourchanged("s4");
+}
+
+method OnColourS5Changed( $event ) {
+    $self->colourchanged("s5");
+}
+
+method OnColourS6Changed( $event ) {
+    $self->colourchanged("s6");
+}
+
+method OnColourAnnFGChanged( $event ) {
+    $self->colourchanged("annfg");
+}
+
+method OnColourAnnBGChanged( $event ) {
+    $self->colourchanged("annbg");
+}
+
+method OnDarkModeChanged( $event ) {
+    $preferences{editortheme} = $self->{cb_darkmode}->IsChecked ? "dark" : "light";
+    $self->prefs2colours;
+}
+
+method OnEditorWrap( $event ) {
+    $self->{$_}->Enable( $self->{cb_editorwrap}->IsChecked )
+      for qw( l_editorwrap sp_editorwrap );
+    $preferences{editorwrap} = $self->{cb_editorwrap}->IsChecked;
+    $preferences{editorwrapindent} = $self->{sp_editorwrap}->GetValue;
+    $self->{t_editor}->refresh;
+}
+
+method OnEditorWrapIndent( $event ) {
+    $preferences{editorwrapindent} = $self->{sp_editorwrap}->GetValue;
+    $self->{t_editor}->refresh;
+}
+
+method OnCbTmplFile($event) {
+    my $n = $self->{cb_tmplfile}->IsChecked;
+    $self->{fp_tmplfile}->Enable($n);
+}
+
+method OnTmplFileChanged($event) {
+    # my $file = $self->{fp_tmplfile}->GetPath;
+    # ellipsize( $self->{t_tmplfile}, text => $file );
+}
+
+#### Messages.
 
 method OnMessagesFontPickerChanged($event) {
     my $parent = $self->GetParent;
@@ -452,14 +534,29 @@ method OnMessagesFontPickerChanged($event) {
     return unless $ctl;
     my $font = $self->{fp_messages}->GetSelectedFont;
     $ctl->SetFont($font);
+    $preferences{msgsfont} = $font->GetString(wxC2S_HTML_SYNTAX);
 }
 
-method OnIBDismiss($e) {
-    $self->{w_infobar}->Dismiss;
-    $self->{sz_prefs_outer}->Fit($self);
+# Previewer.
+
+method OnPDFViewer($event) {
+    $self->{t_pdfviewer}->Enable( $self->{cb_pdfviewer}->GetValue );
+}
+
+# System
+
+method OnSysColourChanged($event) {
+    $self->GetParent->init_theme;
+    $self->{cb_darkmode}->SetValue( $preferences{editortheme} eq "dark" );
+    $self->prefs2colours;
+    $event->Skip;
 }
 
 ################ Helpers ################
+
+method colourchanged($index) {
+    $self->colours2prefs;
+}
 
 method setnomod( $ctl, $code ) {
     Carp::confess("WHOAH!") unless $ctl;

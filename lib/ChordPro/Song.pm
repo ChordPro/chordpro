@@ -982,13 +982,14 @@ sub cdecompose {
 }
 
 sub decompose_grid {
-    my ($self, $line) = @_;
+    my ($self, $orig) = @_;
+    my $line = fmt_subst( $self, $orig );
+    undef $orig if $orig eq $line;
     $line =~ s/^\s+//;
     $line =~ s/\s+$//;
     return ( tokens => [] ) if $line eq "";
     local $re_chords = qr/(\[.*?\])/;
 
-    my $orig;
     my %res;
     if ( $line !~ /\|/ ) {
 	$res{margin} = { $self->cdecompose($line), orig => $line };
