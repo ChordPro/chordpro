@@ -21,9 +21,9 @@
   <key>CFBundleSignature</key>
   <string>CHO#</string>
   <key>CFBundleShortVersionString</key>
-  <string>Wx</string>
+  <string>6.07.0</string>
   <key>CFBundleVersion</key>
-  <string>Wx</string>
+  <string>6.07.0</string>
   <key>NSHumanReadableCopyright</key>
   <string>Copyright 2016,2024 Johan Vromans &lt;jvromans@squirrel.nl&gt;</string>
   <key>CFBundleDocumentTypes</key>
