@@ -21,6 +21,8 @@ lib/ChordPro/Wx/RenderDialog_wxg.pm
 lib/ChordPro/Wx/SongbookExportPanel.pm
 lib/ChordPro/Wx/SongbookExportPanel.wxg
 lib/ChordPro/Wx/SongbookExportPanel_wxg.pm
+lib/ChordPro/Wx/WxUpdateRequired.pm
+lib/ChordPro/Wx/WxUpdateRequired.wxg
 lib/ChordPro/Wx/Utils.pm
 lib/ChordPro/res/icons/cancel.png
 lib/ChordPro/res/icons/chordpro-icon.png

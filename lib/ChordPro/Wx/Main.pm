@@ -8,11 +8,13 @@ use utf8;
 ################ Entry ################
 
 our $options;
+our $Wx_min = "3.003_002";
 
 package ChordPro::Wx::WxChordPro;
 
 use parent qw( Wx::App ChordPro::Wx::Main );
 
+use ChordPro::Paths;
 use ChordPro::Wx::Config;
 
 use Wx qw( wxACCEL_CTRL WXK_CONTROL_Q wxID_EXIT );
@@ -20,6 +22,14 @@ use Wx qw( wxACCEL_CTRL WXK_CONTROL_Q wxID_EXIT );
 sub run( $self, $opts ) {
 
     $options = $opts;
+
+    unless ( eval { Wx->VERSION($Wx_min) } ) {
+	require ChordPro::Wx::WxUpdateRequired;
+	my $md = ChordPro::Wx::WxUpdateRequired->new;
+	$md->ShowModal;
+	$md->Destroy;
+	exit 1;
+    }
 
     #### Start ################
 
@@ -238,7 +248,7 @@ method init_recents() {
 method init_theme() {
     $preferences{editortheme} = "light";
     if ( Wx::SystemSettings->can("GetAppearance") ) {
-	my $a = Wx::SystemSettings::GetAppearance;
+	my $a = Wx::SystemSettings::GetAppearance();
 	if ( $a->IsDark ) {
 	    $preferences{editortheme} = "dark";
 	    $self->log( 'I', "Using dark theme" );
