@@ -327,7 +327,7 @@ method messagestooltip() {
 	$self->{bmb_messages}->SetToolTip(_T("Show the messages"));
 	$mi->Check(0);
     }
-    $self->{w_infobar}->Dismiss;
+    $self->{w_infobar}->Dismiss if $self->{w_infobar}->IsShown;
 }
 
 1;

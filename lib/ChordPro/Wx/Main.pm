@@ -218,7 +218,7 @@ method init( $options ) {
 				    "File Open Error",
 				    wxOK | wxICON_ERROR )->ShowModal;
 	}
-	elsif ( is_macos ) {
+	elsif ( 0 && is_macos ) {
 	    # Somehow the macOS app crashes when it is started with
 	    # a filename argument. So instead of opening the file
 	    # here, we queue an Open menu command.
