@@ -435,14 +435,10 @@ method OnHelp_Site($event) {
 
 method OnMaximize($event) {
     my $top = wxTheApp->GetTopWindow;
-    if ( is_macos ) {
-	my $full = $top->IsFullScreen;
-	$top->ShowFullScreen( !$full );
-    }
-    else {
-	my $full = $top->IsMaximized;
-	$top->Maximize( !$full );
-    }
+    # Note that ShowFullScreen on macOS isn't really Full Screen.
+    # https://github.com/ChordPro/chordpro/issues/373#issuecomment-2501855028
+    my $full = $top->IsMaximized;
+    $top->Maximize( !$full );
 }
 
 method OnNew($event) {

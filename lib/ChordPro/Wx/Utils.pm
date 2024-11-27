@@ -146,7 +146,7 @@ sub setup_menubar( $self ) {
 	    [ wxID_ANY, M_EDITOR|M_SONGBOOK, "Show Messages",
 	      "Hide or show the messages pane", 1, "OnWindowMessages" ],
 	    [],
-	    [ wxID_FULLSCREEN(), M_ALL, "Toggle Full Screen\tShift-Ctrl-Z",
+	    [ wxID_FULLSCREEN(), M_ALL, "Zoom\tShift-Ctrl-Z",
 	      "OnMaximize" ],
 	  ]
 	],

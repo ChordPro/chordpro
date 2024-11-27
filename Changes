@@ -31,6 +31,7 @@
     - Change handling of NC (issue #441).
     - Remove SwiftUI.
     - Allow %{} substitutions in grid sections.
+    - (Wx) Colours, dark mode, full screen, and more.
 
 6.060 2024-08-24
 
