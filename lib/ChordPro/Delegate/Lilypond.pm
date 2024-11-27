@@ -64,7 +64,7 @@ sub ly2svg( $self, %args ) {
 	unshift( @pre, "\\version \"$v\"" );
 	warn("ly: no \\version seen, assuming \"$v\"\n");
     }
-    printf $fd "$_\n" for @pre,
+    print $fd "$_\n" for @pre,
       "#(ly:set-option 'crop #t)",
       "\\header { tagline = ##f }";
 
