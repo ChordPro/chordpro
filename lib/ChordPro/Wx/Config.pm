@@ -24,6 +24,8 @@ use Encode qw( decode_utf8 );
 
 use constant FONTSIZE => 12;
 
+use constant SETTINGS_VERSION => 2;
+
 # Legacy font numbers.
 my @fonts =
   ( # Monospace
@@ -43,6 +45,9 @@ my @fonts =
 
 my %prefs =
   (
+   # (Old) config version.
+   settings_version => SETTINGS_VERSION - 1,
+
    # Skip default (system, user, song) configs.
    skipstdcfg  => 1,
 
@@ -261,6 +266,14 @@ method Load :common {
     }
     delete $ENV{CHORDPRO_LIB};
 
+    if ( $preferences{settings_version}||1 < SETTINGS_VERSION ) {
+	for ( qw( windows sash ) ) {
+	    delete $state{$_};
+	    $cb->DeleteGroup("/$_");
+	}
+    }
+    $cb->Flush;
+
     # Collect from the environment.
     CP->setup_resdirs;
     setup_styles();
@@ -283,6 +296,8 @@ method Load :common {
 method Store :common {
 
     my $cp = $cb->GetPath;
+    $preferences{settings_version} = SETTINGS_VERSION;
+
     while ( my ( $group, $v ) = each %state ) {
 
 	next unless $group =~ m{ ^(?:
