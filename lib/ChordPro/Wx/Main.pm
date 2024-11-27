@@ -8,7 +8,7 @@ use utf8;
 ################ Entry ################
 
 our $options;
-our $Wx_min = "3.003_002";
+our $Wx_min = "3.004";
 
 package ChordPro::Wx::WxChordPro;
 
