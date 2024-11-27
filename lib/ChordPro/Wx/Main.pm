@@ -24,6 +24,7 @@ sub run( $self, $opts ) {
     $options = $opts;
 
     unless ( eval { Wx->VERSION($Wx_min) } ) {
+	Wx::InitAllImageHandlers();
 	require ChordPro::Wx::WxUpdateRequired;
 	my $md = ChordPro::Wx::WxUpdateRequired->new;
 	$md->ShowModal;
