@@ -110,7 +110,7 @@ sub setup_menubar( $self ) {
 	      "Convert Text to ChordPro format\tShift-Ctrl-A",
 	      "Convert a text document (chords above the lyrics) to ChordPro format",
 	      "OnA2Crd" ],
-	    ( $ENV{EDITOR} || $ENV{VISUAL} ) ?
+	    $ENV{VISUAL} ?
 	    [ wxID_ANY,    M_EDITOR,
 	      "Use external editor\tShift-Ctrl-X",
 	      "Use an external editing program to modify the song",
