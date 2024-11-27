@@ -1271,7 +1271,7 @@ sub directive {
 	  if $in_context eq "chorus";
 	if ( $in_context eq "grid" ) {
 	    my $kv = parse_kv( $arg, "shape" );
-	    my $shape = $kv->{shape};
+	    my $shape = $kv->{shape} // "";
 	    if ( $shape eq "" ) {
 		$self->add( type => "set",
 			    name => "gridparams",
