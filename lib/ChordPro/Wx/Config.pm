@@ -118,7 +118,7 @@ my %prefs =
    xcode	   => "",
 
    # PDF Viewer.
-   enable_pdfviewer   => 0,
+   enable_pdfviewer   => undef,
    pdfviewer   => "",
 
    # Debug etc.
@@ -270,6 +270,9 @@ method Load :common {
 	for ( qw( windows sash ) ) {
 	    delete $state{$_};
 	    $cb->DeleteGroup("/$_");
+	}
+	if ( $preferences{pdfviewer} ) {
+	    $preferences{enable_pdfviewer} //= 1;
 	}
     }
     $cb->Flush;

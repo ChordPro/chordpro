@@ -22,6 +22,8 @@ method new :common ( $parent, $id, $title ) {
     $self->Layout;
     Wx::Event::EVT_SYS_COLOUR_CHANGED( $self,
 				       $self->can("OnSysColourChanged") );
+    $self->{nb_preferences}->DeletePage(4)
+      unless $preferences{pdfviewer};
     $self;
 }
 use warnings 'redefine';	# TODO
