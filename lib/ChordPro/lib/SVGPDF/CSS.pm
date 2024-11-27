@@ -216,7 +216,7 @@ method push ( @args ) {
 
     ## Presentation attributes.
     for ( keys %$args ) {
-	next if /^element|class|style|id$/;
+	next if /^(element|class|style|id)$/;
 	$ret->{$_} = $args->{$_};
     }
 
