@@ -285,8 +285,8 @@ method need_restart() {
     # Showing the InfoBar leads to a resize, which may cause
     # unwanted width change.
     my ( $w, $h ) = $self->GetSizeWH;
-    $self->{w_infobar}->ShowMessage("Changing the custom library requires restart",
-				    wxICON_INFORMATION);
+    $self->{w_infobar}->ShowMessage("    Changing the custom library requires restart",
+				    wxICON_NONE);
     $self->{sz_prefs_outer}->Fit($self);
     $self->SetSize([$w,-1]);
 }

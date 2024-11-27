@@ -22,6 +22,8 @@ use ChordPro::Utils qw( is_msw is_macos );
 my %const =
   ( wxID_FULLSCREEN		=> Wx::NewId(),
 
+    wxICON_NONE			=> 0x00040000,
+
     # Until Wx 3.003.
     wxELLIPSIZE_FLAGS_DEFAULT	=> 3,
     wxELLIPSIZE_NONE		=> 0,
