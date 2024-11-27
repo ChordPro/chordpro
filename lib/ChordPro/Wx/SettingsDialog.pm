@@ -275,9 +275,9 @@ method need_restart() {
     state $id = wxID_ANY;
     if ( $id == wxID_ANY ) {
 	$id = Wx::NewId;
-	$self->{w_infobar}->AddButton( $id, "Understood");
-	Wx::Event::EVT_BUTTON( $self->{w_infobar}, $id,
-			       sub { $self->OnIBDismiss($_[1]) } );
+#	$self->{w_infobar}->AddButton( $id, "Understood");
+#	Wx::Event::EVT_BUTTON( $self->{w_infobar}, $id,
+#			       sub { $self->OnIBDismiss($_[1]) } );
     }
 
     # Showing the InfoBar leads to a resize, which may cause
@@ -342,9 +342,10 @@ method OnCancel($event) {
     $event->Skip;
 }
 
-method OnIBDismiss($e) {
-    $self->{w_infobar}->Dismiss;
-}
+# Only required for custom button.
+# method OnIBDismiss($e) {
+#     $self->{w_infobar}->Dismiss;
+# }
 
 #### Configs etc.
 
