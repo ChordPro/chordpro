@@ -121,13 +121,8 @@ method openfile( $file, $checked=0, $actual=undef ) {
 	for ( @t ) {
 	    $max = max( $max, length($_) );
 	}
-	if ( $stc->can("SetScrollWidthTracking") ) {
-	    $stc->SetScrollWidth($max);
-	    $stc->SetScrollWidthTracking(1);
-	}
-	else {
-	    $stc->SetScrollWidth($max+10);
-	}
+	$stc->SetScrollWidth($max);
+	$stc->SetScrollWidthTracking(1);
     }
     else {
 	$self->{t_editor}->ShowPosition(0); # doesn't work?

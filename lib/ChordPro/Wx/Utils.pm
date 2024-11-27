@@ -304,12 +304,10 @@ push( @EXPORT, 'panels' );
 
 sub ellipsize( $widget, %opts ) {
     my $text = $opts{text} // $widget->GetText;
-    if ( Wx::Control->can("Ellipsize") ) {
-	my $width = ($widget->GetSizeWH)[0];
-	$text = Wx::Control::Ellipsize( $text, Wx::ClientDC->new($widget),
-					$opts{type} // wxELLIPSIZE_END(),
-					$width-10, wxELLIPSIZE_FLAGS_DEFAULT() );
-    }
+    my $width = ($widget->GetSizeWH)[0];
+    $text = Wx::Control::Ellipsize( $text, Wx::ClientDC->new($widget),
+				    $opts{type} // wxELLIPSIZE_END(),
+				    $width-10, wxELLIPSIZE_FLAGS_DEFAULT() );
 
     # Change w/o triggering a EVT_TEXT event.
     $widget->ChangeValue($text);

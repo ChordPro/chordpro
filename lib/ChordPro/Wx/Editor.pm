@@ -17,20 +17,11 @@ sub new( $class, $parent, $id ) {
     my $widget;
     if ( $::options->{stc}//1 && eval { require Wx::STC; 1 } ) {
 	$widget  = Wx::StyledTextCtrl->new($parent);
-	# Check for updated STC.
-	for ( qw( IsModified DiscardEdits ) ) {
-	    next if $widget->can($_);
-	    # Pre 3.x wxPerl, missing methods.
-	    $widget->Destroy;
-	    undef $widget;
-	    last;
-	}
-    }
-
-    if ( defined($widget) ) {
 	$state{have_stc} = 1;
 	return bless $widget => 'ChordPro::Wx::STCEditor';
     }
+
+    # Emergency fallback.
     $state{have_stc} = 0;
     ChordPro::Wx::TextEditor->new($parent);
 }
