@@ -19,6 +19,14 @@
 --module=PDF_API2_Bundle
 --module=SVGPDF
 
+# Same for PerlIO
+--module=PerlIO
+--module=PerlIO::encoding
+
+# Same for Ref::Util
+--module=Ref::Util
+--module=Ref::Util::XS
+
 # Same for Text::Layout
 --module=Text::Layout
 --module=Text_Layout_Bundle
