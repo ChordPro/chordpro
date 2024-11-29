@@ -43,10 +43,14 @@ sub new {
 	$self->Layout;
 	$self->Fit;
     }
+    $self->refresh;
+    $self;
+}
+
+sub refresh {
+    my ( $self ) = @_;
     $self->{cb_xpose}->SetValue( $preferences{enable_xpose} );
     $self->OnCbTranspose(undef);
-    restorewinpos( $self, "tasks" );
-    $self;
 }
 
 #               C      D      E  F      G      A        B C
@@ -57,7 +61,6 @@ my @sfmap = qw( 0 7 -5 2 9 -3 4 -1 6 -6 1 8 -4 3 10 -2  5 0  );
 
 sub OnAccept {
     my ( $self, $event ) = @_;
-    savewinpos( $self, "tasks" );
     $event->Skip;
 }
 

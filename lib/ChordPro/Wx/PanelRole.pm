@@ -170,10 +170,20 @@ method OnPreviewMore($event) {
     state @xpmap = qw( 0 1  1 2 3  3 4  5 6  6 7 8  8 9 10 10 11 12 );
     state @sfmap = qw( 0 7 -5 2 9 -3 4 -1 6 -6 1 8 -4 3 10 -2  5 0  );
 
-    use ChordPro::Wx::RenderDialog;
-    my $d = $self->{d_render} ||= ChordPro::Wx::RenderDialog->new($self, -1, "Tasks");
+    unless ( $self->{d_render} ) {
+	require ChordPro::Wx::RenderDialog;
+	$self->{d_render} = ChordPro::Wx::RenderDialog->new
+	  ( $self, wxID_ANY, "Tasks" );
+	restorewinpos( $self->{d_render}, "render" );
+    }
+    else {
+	$self->{d_render} ->refresh;
+    }
+
+    my $d = $self->{d_render};
     my $ret = $d->ShowModal;
     return unless $ret == wxID_OK;
+
     my @args;
     if ( $d->{cb_task_no_diagrams}->IsChecked ) {
 	push( @args, "--no-chord-grids" );

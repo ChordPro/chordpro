@@ -477,8 +477,8 @@ method OnOpen($event) {
 }
 
 method OnPreferences($event) {
-    require ChordPro::Wx::SettingsDialog;
     unless ( $self->{d_prefs} ) {
+	require ChordPro::Wx::SettingsDialog;
 	$self->{d_prefs} = ChordPro::Wx::SettingsDialog->new
 	  ( $self, wxID_ANY, "Settings" );
 	restorewinpos( $self->{d_prefs}, "prefs" );
