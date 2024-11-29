@@ -40,8 +40,8 @@ sub new {
 		0, 0, 0 );
 	    $index++;
 	}
-	$self->Layout;
-	$self->Fit;
+	$self->{sz_customtasks}->Layout;
+	$self->{sz_prefs_inner}->Fit($self);
     }
     $self->refresh;
     $self;

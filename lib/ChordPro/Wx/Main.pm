@@ -320,7 +320,7 @@ method aboutmsg() {
     CP->setup_resdirs;
     my $msg = join
       ( "",
-	"ChordPro Preview Editor version ",
+	"ChordPro version ",
 	$dd->($ChordPro::VERSION),
 	"\n",
 	"https://www.chordpro.org\n",
