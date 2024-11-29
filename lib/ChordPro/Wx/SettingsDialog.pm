@@ -22,7 +22,8 @@ method new :common ( $parent, $id, $title ) {
     $self->Layout;
     Wx::Event::EVT_SYS_COLOUR_CHANGED( $self,
 				       $self->can("OnSysColourChanged") );
-    $self->{nb_preferences}->DeletePage(4)
+    # Do not DeletePage until we're sure none of the widgets are referenced.
+    $self->{nb_preferences}->RemovePage(4)
       unless $preferences{pdfviewer};
     $self;
 }
@@ -286,7 +287,7 @@ method need_restart() {
     # unwanted width change.
     my ( $w, $h ) = $self->GetSizeWH;
     $self->{w_infobar}->ShowMessage("    Changing the custom library requires restart",
-				    wxICON_NONE);
+				    wxICON_INFORMATION);
     $self->{sz_prefs_outer}->Fit($self);
     $self->SetSize([$w,-1]);
 }

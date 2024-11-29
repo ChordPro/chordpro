@@ -46,7 +46,7 @@ method alert( $severity, $message = "Click Messages to see diagnostic informatio
 	Wx::Event::EVT_BUTTON( $self->{w_infobar}, $id,
 			       sub { $self->OnWindowMessages($_[1]) } );
     }
-    $self->{w_infobar}->ShowMessage( $message, wxICON_NONE);
+    $self->{w_infobar}->ShowMessage( $message, wxICON_INFORMATION);
 }
 
 method setup_webview() {
