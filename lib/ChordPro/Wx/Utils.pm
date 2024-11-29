@@ -271,12 +271,14 @@ push( @EXPORT, "setup_menubar", "update_menubar" );
 ################ ################
 
 sub savewinpos( $win, $name ) {
+    return unless $name eq "main";
     $ChordPro::Wx::Config::state{windows}->{$name} =
       join( " ", $win->GetPositionXY, $win->GetSizeWH );
 }
 
 sub restorewinpos( $win, $name ) {
-    $win = $Wx::wxTheApp->GetTopWindow if $name eq "main";
+    return unless $name eq "main";
+    $win = $Wx::wxTheApp->GetTopWindow;
 
     my $t = $ChordPro::Wx::Config::state{windows}->{$name};
     if ( $t ) {
