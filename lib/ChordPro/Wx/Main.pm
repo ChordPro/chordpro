@@ -326,7 +326,7 @@ method aboutmsg() {
 	"https://www.chordpro.org\n",
 	"Copyright $year Johan Vromans <jvromans\@squirrel.nl>\n",
 	"\n",
-	"GUI designed with wxGlade\n\n",
+	"GUI designed with wxGlade by the ChordPro Team\n\n",
 	"Run-time information:\n",
 	::runtimeinfo() =~ s/CHORDPRO_LIB/Custom lib  /rm
       );
@@ -355,7 +355,7 @@ method OnAbout($event) {
     $info->SetVersion( $VERSION .
 		       ( $VERSION =~ /_/ ? " (unsupported development snapshot)" : "" ) );
     $info->SetDescription("ChordPro is free software");
-    $info->SetCopyright("Ⓒ 2016-$year Johan Vromans");
+    $info->SetCopyright("Ⓒ 2016-$year Johan Vromans\nThe ChordPro Team");
     $info->SetWebSite( "https://www.chordpro.org",
 		       "Visit the ChordPro web site");
     my $icon = Wx::Icon->new;
