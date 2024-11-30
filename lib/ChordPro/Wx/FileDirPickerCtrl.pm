@@ -111,23 +111,20 @@ method OnDialog($e) {
     $self->ProcessEvent($picker_event);
 }
 
-method OnDirChanged($e) {
-    warn("OnDirChanged not implemented\n");
-}
-method OnFileChanged($e) {
-    warn("OnFileChanged not implemented\n");
-}
 method OnTextChanged($e) {
     $text = $textctrl->GetValue;
     $picker->SetPath($text);
     ellipsize( $textctrl, text => $text,
 	       type => wxELLIPSIZE_START );
 }
+
+field $t;
 method OnTextFocusIn($e) {
-    $textctrl->ChangeValue($text);
+    $textctrl->ChangeValue( $t = $text );
 }
 method OnTextFocusOut($e) {
     $textctrl->SetValue($text);
+    $self->ProcessEvent($picker_event) unless $t eq $text;
 }
 
 ################

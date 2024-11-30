@@ -360,12 +360,18 @@ method OnConfigFile($event) {
 method OnCustomConfigChanged($event) {
     my $path = $self->{fp_customconfig}->GetPath;
     my $fn = encode_utf8($path);
+
+    unless ( $fn =~ /\.\w+$/ ) {
+	$fn .= ".json";
+	$self->{fp_customconfig}->SetPath( $path .= ".json" );
+    }
     return if -s $fn;		# existing config
 
     my $md = Wx::MessageDialog->new
       ( $self,
-	"Create new config $path?",
-	"Creating a config file",
+	"The configuration file $path does not exist.\n".
+	"Create a new configuration file?",
+	"Create Configuration",
 	wxYES_NO | wxICON_INFORMATION );
     my $ret = $md->ShowModal;
     $md->Destroy;
@@ -374,7 +380,8 @@ method OnCustomConfigChanged($event) {
 	if ( open( $fd, ">:utf8", $fn )
 	     and print $fd ChordPro::Config::config_final( default => 1 )
 	     and close($fd) ) {
-	    $self->{fp_customconfig}->SetPath($path);
+	    require File::Spec;
+	    $self->{fp_customconfig}->SetPath( File::Spec->rel2abs($path) );
 	}
 	else {
 	    my $md = Wx::MessageDialog->new
