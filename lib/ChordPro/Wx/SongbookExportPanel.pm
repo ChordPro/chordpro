@@ -30,8 +30,7 @@ sub BUILDARGS( $class, $parent=undef, $id=wxID_ANY,
    return( $parent, $id, $pos, $size, $style, $name );
 }
 
-ADJUST {
-
+BUILD {
     # Setup logger.
     $self->setup_logger;
 
@@ -40,7 +39,6 @@ ADJUST {
 
     # Single pane.
     $self->unsplit;
-
 }
 
 ################ ################

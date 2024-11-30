@@ -31,8 +31,7 @@ sub BUILDARGS {
     ( $parent, $id, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 }
 
-ADJUSTPARAMS ( $params ) {
-
+BUILD {
     my ( $parent, $id, $path, $message, $wildcard, $new ) = @args;
 
     if ( $wildcard eq "" && !$new ) {
@@ -87,8 +86,6 @@ ADJUSTPARAMS ( $params ) {
     $self->SetSizer($sizer);
     $sizer->Fit($self);
     $self->Layout;
-
-    $self;
 }
 
 ################ Widget Accessors ################

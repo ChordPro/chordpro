@@ -27,7 +27,7 @@ field $preview_pdf;
 field $preview_tmp;
 field $unsaved_preview		:mutator;
 
-ADJUST {
+BUILD {
     ( undef, $preview_cho ) = tempfile( OPEN => 0 );
     $preview_pdf = $preview_cho . ".pdf";
     $preview_cho .= ".cho";

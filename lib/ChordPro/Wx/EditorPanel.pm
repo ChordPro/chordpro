@@ -30,7 +30,7 @@ sub BUILDARGS( $class, $parent=undef, $id=wxID_ANY,
    return( $parent, $id, $pos, $size, $style, $name );
 }
 
-ADJUST {
+BUILD {
     # By default the TextCtrl on MacOS substitutes smart quotes and dashes.
     # Note that OSXDisableAllSmartSubstitutions requires an augmented
     # version of wxPerl.

@@ -119,7 +119,7 @@ method log( $level, $msg ) {
     }
 }
 
-ADJUST {
+BUILD {
 
     Wx::Event::EVT_IDLE($self, $self->can('OnIdle'));
     Wx::Event::EVT_CLOSE($self, $self->can('OnClose'));
@@ -136,8 +136,6 @@ ADJUST {
     # So either remove the *.* or use the following code:
     Wx::SystemOptions::SetOption("osx.openfiledialog.always-show-types", 1)
 	if 0 && is_macos;
-
-    $self;
 }
 
 method attach_events() {
