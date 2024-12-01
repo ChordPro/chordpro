@@ -50,22 +50,40 @@
 }
 
 h1 {
-    font-size: 1.4rem;
+    font-size: 2.0em;
     font-weight: bold;
+    color: #ef6c2a;
 }
+
 h2 {
-    font-size: 1.2rem;
+    font-size: 1.6em;
     font-weight: bold;
+    color: #ef6c2a;
 }
+
 h3 {
-    font-size: 1rem;
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #ef6c2a;
+}
+
+p, li {
+    line-height: 1.6em;
+}
+
+a, a:visited, .list-group-item-action {
+    color: #0068d9;
+}
+
+code {
+    color: #ef6c2a;
     font-weight: bold;
 }
 
 pre {
     background: #f4f4f4;
     border: 1px solid #ddd;
-    border-left: 3px solid #e83e8c;
+    border-left: 4px solid #0068d9;
     page-break-inside: avoid;
     margin-bottom: 1.6em;
     max-width: 100%;
@@ -74,4 +92,8 @@ pre {
     display: block;
     margin-left: 20px;
     margin-right: 20px;
+}
+
+pre code {
+    font-weight: normal;
 }
