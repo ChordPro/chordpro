@@ -49,6 +49,21 @@
   }
 }
 
+#sidebar-logo {
+    padding: 0.6em;
+}
+
+#sidebar-logo img {
+    width: 50px;
+    height: 50px;
+    float: left;
+}
+#sidebar-logo a {
+    margin: 10px;
+    font-size: 30px;
+    line-height: 1.8em;
+}
+
 h1 {
     font-size: 2.0em;
     font-weight: bold;
@@ -64,7 +79,6 @@ h2 {
 h3 {
     font-size: 1.4em;
     font-weight: bold;
-    color: #ef6c2a;
 }
 
 p, li {
@@ -73,6 +87,10 @@ p, li {
 
 a, a:visited, .list-group-item-action {
     color: #0068d9;
+}
+
+a.heading-anchor {
+    display: none;
 }
 
 code {
