@@ -11,7 +11,7 @@ description: "Welcome to ChordPro!"
 [Join the community](<https://groups.io/g/ChordPro>)
 
 
-![]({{< asset "images/love-me-tender-small.png" >}})
+![]({{< asset "images/gui-main.png" >}})
 
 ## ChordPro 6: The File Format Specification
 * [Overview]({{< relref "ChordPro-Introduction" >}})
