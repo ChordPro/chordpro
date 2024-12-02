@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+
+<!--
+
+This is 'Work in Progress'
+
+It is *stealing* its resources from https://www.chordpro.org/beta/
+The reason is that a 'local' html file cannot load local resources
+and thats how I made it. You can just open this file in your browser now
+
+It should be part of `hugo` but that is for another day
+
+-->
+
+<html lang="en-EN">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <meta charset="utf-8">
+            <title>Welcome to ChordPro! | ChordPro</title>
+            <meta name="keywords" content="music,chord,chords,chordii,chordpro,typesetting,chopro,cho,crd,guitar,music sheets">
+            <link rel="stylesheet" href="https://www.chordpro.org/beta/css/bootstrap4.min.css">
+            <link rel="stylesheet" href="https://www.chordpro.org/beta/css/site.css" />
+            <style>
+                #wrapper {
+                    max-width: fit-content;
+                    margin-left: auto;
+                    margin-right: auto;
+                    text-align: center;
+                    padding: 1em;
+                }
+                #logo {
+                    color: #0068d9;
+                    font-size: 4em;
+                }
+                #logo img {
+                    width: 1em;
+                    height: 1em;
+                }
+                #logo p {
+                    display: inline;
+                }
+                #slogan {
+                    color: grey;
+                }
+                #statement {
+                    font-weight: bold;
+                    font-size: 1.2em;
+                }
+                #information a {
+                    background: #ef6c2a;
+                    padding: 0.4em;
+                    color: white;
+                    border-radius: 0.3em;
+                }
+                #footer {
+                    position: absolute;
+                    left: 0 ; right: 0; bottom: 0;
+                    padding-top: 0.5em;
+                    color: grey;
+                    background: white;
+                    border-top: 1px solid grey;
+                }
+            </style>
+    </head>
+
+    <body>
+        <div id="wrapper">
+            <div id="content" style="max-width:800px">
+                <div id="logo">
+                    <img src="https://www.chordpro.org/beta/images/chordpro-icon.png" />
+                    <p>ChordPro<p>
+                </div>
+                <p id="slogan">A simple text format for the notation of lyrics with chords</p>
+                <p id="statement">This is <em>the</em> ChordPro website; the official site for the ChordPro format</p>
+                <p>Here you can find all the information and tools you need to embrace this format to enhance your musical notations. <strong>ChordPro</strong> will help you to let your songs looks great so you just want to play them.</p>
+                <p id="information">
+                <a href="https://www.chordpro.org/chordpro/">Read more</a>
+                </p>
+                <a href="https://www.chordpro.org/chordpro/"><img src="https://www.chordpro.org/beta/images/chordpro-gui-cli.jpg" class="img-responsive img-fluid"></a>
+                <div id="footer">
+                    <p>This is the official site for <strong>ChordPro</strong></p>
+                    <p>The reference implementation of the open <strong>ChordPro</strong> format</p>
+                </div>
+            </div>
+        </div>
+    </body>
