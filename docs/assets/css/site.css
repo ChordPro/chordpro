@@ -89,10 +89,6 @@ a, a:visited, .list-group-item-action {
     color: #0068d9;
 }
 
-a.heading-anchor {
-    display: none;
-}
-
 code {
     color: #ef6c2a;
     font-weight: bold;
