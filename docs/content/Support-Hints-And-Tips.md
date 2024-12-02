@@ -102,7 +102,7 @@ An example of how to use it:
 {end_of_verse}
 ````
 
-## MacOS _Quick Action_ to create PDFs from within the Finder
+## macOS _Quick Action_ to create PDFs from within the Finder
 
 _Contributed by Daniel Saunders_
 

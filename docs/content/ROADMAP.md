@@ -58,12 +58,6 @@ output should be as perfect as the PDF.
 
 ## Not yet planned
 
-### MacOS
-
-A new wrapper program that provides real MacOS GUI.
-
-![]({{< asset "images/helpwanted50.png" >}}) Requires a MacOS developer.
-
 ### Libraries
 
 Currently ChordPro operates on files. This should be extended (at

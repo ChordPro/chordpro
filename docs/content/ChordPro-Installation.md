@@ -9,6 +9,6 @@ The ChordPro reference implementation is a program written in the Perl programmi
 
 * [Installation on Linux]({{< relref "ChordPro-Install-on-Linux" >}})
 * [Installation on Microsoft Windows]({{< relref "ChordPro-Install-on-Windows" >}})
-* [Installation on MacOS]({{< relref "ChordPro-Install-on-MacOS" >}})
+* [Installation on macOS]({{< relref "ChordPro-Install-on-MacOS" >}})
 
 Want to keep track of the latest developments? [Run from Git]({{< relref "ChordPro-run-from-Git" >}}).

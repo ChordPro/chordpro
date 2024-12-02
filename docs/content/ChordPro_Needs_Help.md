@@ -54,13 +54,13 @@ The installer may need improving, e.g. for Windows 11.
 
 Is a 32-bit version needed?
 
-### MacOS
+### macOS
 
-Currently we provide a basic installer package (dmg) for 64-bit MacOS 
-10.15. It is reported to work on some older and newer versions as
-well. The MacOS GUI version of ChordPro is, however, crippled by MacOS
-constraints that we do not know how to handle. If you are a MacOS
-application developer, or maybe you know one, please get involved.
+Currently we provide an installer package (dmg) for macOS 10.15 and higher. There are separate versions for the *Intel* and *Apple Silicon* architecture.
+
+While working fine; the applications are not *notarised* by a developer with an *Apple Developer certificate*. This prevents a simple ‘drag and drop’ of the application because of the macOS security policy.
+
+If you are a developer with an certificate; it would be great if you can help us delivering a better experience!
 
 ## Donations
 
