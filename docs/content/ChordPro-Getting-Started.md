@@ -37,7 +37,7 @@ Open_ dialog where you can designate an existing ChordPro file.
  will be shown.  
  From the menu bar, choose `Help` > `Insert song example`. A small song will appear in the editor window.
 
-## MacOS
+## macOS
 
 The `ChordPro` app is capable of handling documents with filename
 extensions `.cho`, `.chordpro`, `.chopro`, and `.crd`. If you have

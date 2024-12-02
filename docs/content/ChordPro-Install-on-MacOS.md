@@ -1,17 +1,17 @@
 ---
-title: "Installation on MacOS"
-description: "Installation on MacOS"
+title: "Installation on macOS"
+description: "Installation on macOS"
 ---
 
-# Installation on MacOS
+# Installation on macOS
 
 There are currently no reports that ChordPro can be successfully built 
-using the pre-installed version of Perl that comes with MacOS.
+using the pre-installed version of Perl that comes with macOS.
 
 The command line version of ChordPro can be built with HomeBrew Perl.
 It is currently not possible (well, not easy) to build the GUI version.
 
-Unless you are a seasoned MacOS Perl developer, please use the [binary
+Unless you are a seasoned macOS Perl developer, please use the [binary
 install kit]({{< relref
 "Install-MacOS-Native" >}}).
 This kit includes both the GUI and the command line version of ChordPro.
@@ -60,7 +60,7 @@ there:
 
 `/Users/USER/.config/chordpro/chordpro.json`
 
-where _USER_ is your MacOS user name.
+where _USER_ is your macOS user name.
 
 If there is no `.config` folder, and you do not want to create it, you
 can create a subfolder `.chordpro` in your home and place your

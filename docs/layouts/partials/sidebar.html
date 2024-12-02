@@ -1,9 +1,10 @@
 {{- $ctx := . -}}
+{{ $logo := resources.Get "images/chordpro-icon.png" }}
 
 <div class="bg-light border-right" id="sidebar-wrapper">
     <div id="sidebar-logo">
-        <image src="/images/chordpro-icon.png" />
-        <a href="/home/">
+        <img src="{{ $logo.RelPermalink }}" />
+        <a href="{{ ref . "Home" }}">
             ChordPro
         </a>
     </div>

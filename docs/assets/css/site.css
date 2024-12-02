@@ -50,7 +50,7 @@
 }
 
 #sidebar-logo {
-    padding: 0.6em;
+    margin: 0.6em;
 }
 
 #sidebar-logo img {
@@ -87,10 +87,6 @@ p, li {
 
 a, a:visited, .list-group-item-action {
     color: #0068d9;
-}
-
-a.heading-anchor {
-    display: none;
 }
 
 code {
