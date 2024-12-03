@@ -18,7 +18,7 @@ prod ::
 
 dev ::
 	tar -zcf chordpro-dev.tar.gz -C ../.. \
-	    -T ../../MANIFEST -T ../../MANIFEST.FONTS
+	    -T ../../MANIFEST -T ../../MANIFEST.WX
 	${DOCKER} build -t chordpro/chordpro-dev:latest . --target=chordpro-dev
 
 clean ::
