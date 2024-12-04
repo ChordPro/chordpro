@@ -30,8 +30,19 @@ my $my_package = 'ChordPro';
 my $my_name = 'WxChordPro';
 my $my_version = $ChordPro::VERSION;
 
+# Verify that we have an appropriate Wx version.
+our $Wx_min = "3.004";
+unless ( eval { Wx->VERSION($Wx_min) } ) {
+    require ChordPro::Wx::WxUpdateRequired;
+    my $md = ChordPro::Wx::WxUpdateRequired->new;
+    $md->ShowModal;
+    $md->Destroy;
+    exit 1;
+}
+# Now it is safe to proceed.
+
 # ChordPro::Wx::Main is the main entry of the program.
-use ChordPro::Wx::Main;
+require ChordPro::Wx::Main;
 
 my $options = app_options();
 

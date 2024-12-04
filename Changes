@@ -32,6 +32,7 @@
     - Remove SwiftUI.
     - Allow %{} substitutions in grid sections.
     - (Wx) Colours, dark mode, full screen, and more.
+    - Add Wx files to standard MANIFEST.
 
 6.060 2024-08-24
 
