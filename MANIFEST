@@ -61,8 +61,6 @@ lib/ChordPro/Wx/SongbookExportPanel.pm
 lib/ChordPro/Wx/SongbookExportPanel.wxg
 lib/ChordPro/Wx/SongbookExportPanel_wxg.pm
 lib/ChordPro/Wx/Utils.pm
-lib/ChordPro/Wx/WxUpdateRequired.pm
-lib/ChordPro/Wx/WxUpdateRequired.wxg
 lib/ChordPro/lib/JSON/Relaxed.pm
 lib/ChordPro/lib/JSON/Relaxed/ErrorCodes.pm
 lib/ChordPro/lib/JSON/Relaxed/Parser.pm

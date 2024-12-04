@@ -8,8 +8,7 @@ all :: 	Main_wxg.pm \
 	NewSongDialog_wxg.pm \
 	SettingsDialog_wxg.pm \
 	RenderDialog_wxg.pm \
-	SongbookExportPanel_wxg.pm \
-	WxUpdateRequired.pm
+	SongbookExportPanel_wxg.pm
 
 Main_wxg.pm : Main.wxg
 	${WXGLADE} --output=$@ $<
@@ -32,10 +31,6 @@ RenderDialog_wxg.pm : RenderDialog.wxg
 	${WXG2TXT} $<
 
 SongbookExportPanel_wxg.pm : SongbookExportPanel.wxg
-	${WXGLADE} --output=$@ $<
-	${WXG2TXT} $<
-
-WxUpdateRequired.pm : WxUpdateRequired.wxg
 	${WXGLADE} --output=$@ $<
 	${WXG2TXT} $<
 

@@ -4,8 +4,8 @@
 
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
-# Last Modified On: Mon Nov 25 14:01:42 2024
-# Update Count    : 301
+# Last Modified On: Wed Dec  4 14:52:54 2024
+# Update Count    : 320
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -33,7 +33,6 @@ my $my_version = $ChordPro::VERSION;
 # Verify that we have an appropriate Wx version.
 our $Wx_min = "3.004";
 unless ( eval { Wx->VERSION($Wx_min) } ) {
-    require ChordPro::Wx::WxUpdateRequired;
     my $md = ChordPro::Wx::WxUpdateRequired->new;
     $md->ShowModal;
     $md->Destroy;
@@ -111,6 +110,96 @@ EndOfUsage
     exit $exit if defined $exit && $exit != 0;
 }
 
+package ChordPro::Wx::WxUpdateRequired;
+
+# Dialog to be shown if Wx is not up to date.
+
+use Wx qw[:everything];
+use base qw(Wx::Dialog);
+use strict;
+
+sub new {
+    my $self = shift->SUPER::new( undef, wxID_ANY,
+				  "Update Required",
+				  wxDefaultPosition, wxDefaultSize,
+				  wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER );
+
+    # Main sizer.
+    my $sz = Wx::BoxSizer->new(wxVERTICAL);
+    # sz3: Icon (left), info lines (right side).
+    my $sz3 = Wx::BoxSizer->new(wxHORIZONTAL);
+    # sz4: Information lines, right side,
+    my $sz4 = Wx::BoxSizer->new(wxVERTICAL);
+
+    $sz->Add( $sz3, 0, wxEXPAND, 0 );
+    $sz3->Add( $sz4, 0, wxBOTTOM|wxEXPAND|wxRIGHT|wxTOP, 20 );
+
+    my $icon = ChordPro::Paths->get->findres( "chordpro-splash.png",
+					      class => "icons" )
+      || ChordPro::Paths->get->findres( "missing.png",
+					class => "icons" );
+    Wx::Image::AddHandler(Wx::PNGHandler->new);
+    $sz3->Insert( 0,
+		  Wx::StaticBitmap->new( $self, wxID_ANY,
+					 Wx::Bitmap->new( $icon, wxBITMAP_TYPE_PNG) ),
+		  0, 0, 0 );
+
+
+    for ( Wx::StaticText->new( $self, wxID_ANY,
+			       "Software Update Required" ) ) {
+	$_->SetForegroundColour( Wx::Colour->new(0, 104, 217) );
+	$_->SetFont( Wx::Font->new( 20, wxFONTFAMILY_DEFAULT,
+				    wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL,
+				    0, "" ) );
+	$sz4->Add( $_, 0, wxBOTTOM|wxTOP, 20 );
+    }
+
+    $sz4->Add( Wx::StaticText->new( $self, wxID_ANY,
+				    "ChordPro requires Wx (wxPerl) ".
+				    "version $::Wx_min or later." ),
+	       0, wxTOP, 20 );
+
+    $sz4->Add( Wx::StaticText->new( $self, wxID_ANY,
+				    "You currently have Wx ".
+				    "version $Wx::VERSION." ),
+	       0, wxBOTTOM|wxTOP, 10 );
+
+    # Bottom line (with hyperlink).
+    for ( Wx::BoxSizer->new(wxHORIZONTAL) ) {
+	$_->Add( Wx::StaticText->new( $self, wxID_ANY,
+				      "Please consult the "),
+		 0, wxALIGN_CENTER_VERTICAL, 0 );
+	$_->Add( Wx::HyperlinkCtrl->new( $self, wxID_ANY,
+					 " installation instructions ",
+					 "https://www.chordpro.org/chordpro/chordpro-installation/",
+					 wxDefaultPosition,
+					 wxDefaultSize,
+					 wxHL_DEFAULT_STYLE ),
+		 0, wxALIGN_CENTER_VERTICAL, 0 );
+	$_->Add( Wx::StaticText->new( $self, wxID_ANY,
+				      " on the ChordPro web site." ),
+		 0, wxALIGN_CENTER_VERTICAL, 0 );
+	$sz4->Add( $_, 0, wxEXPAND, 0 );
+    }
+
+    # Dialog close button.
+    for ( Wx::StdDialogButtonSizer->new() ) {
+	for my $b ( Wx::Button->new( $self, wxID_EXIT, "" ) ) {
+	    $b->SetDefault();
+	    $_->Add( $b, 0, wxEXPAND, 0 );
+	    $self->SetAffirmativeId( $b->GetId );
+	}
+	$_->Realize();
+	$sz->Add( $_, 0, wxALIGN_RIGHT|wxALL, 20 );
+    }
+
+    $self->SetSizer($sz);
+    $sz->Fit($self);
+    $self->Layout();
+
+    return $self;
+}
+
 =head1 NAME
 
 wxchordpro - Wx-based GUI for ChordPro
@@ -121,7 +210,7 @@ wxchordpro - Wx-based GUI for ChordPro
 
 =head1 DESCRIPTION
 
-B<wxchordpro> is a GUI for the ChordPro program. It allows
+B<wxchordpro> is the GUI for the ChordPro program. It allows
 opening of files, make changes, and preview (optionally print) the
 formatted result.
 
