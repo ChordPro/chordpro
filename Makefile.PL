@@ -50,7 +50,7 @@ WriteMakefile
 		    'Text::Layout'		  => 0.038,
 		    # Optional for Text::Layout; let's have it.
 		    'HarfBuzz::Shaper'		  => 0.026,
-
+		    'SVGPDF'			  => 0.089,
 		    'JSON::PP'			  => 2.27203,
 		    'JSON::XS'			  => 4.03,
 		    'String::Interpolate::Named'  => 1.030,
@@ -89,6 +89,7 @@ WriteMakefile
  TEST_REQUIRES  => {
 		    'Test::More'                  => 0,
 		    'JSON::PP'	                  => 2.27203,
+		    'SVGPDF'			  => 0.089,
 		    'String::Interpolate::Named'  => 1.01,
 		    'Storable'			  => 3.08,
 		    'Object::Pad'		  => 0.78,
