@@ -254,7 +254,8 @@ method init_recents() {
 }
 
 method init_theme() {
-    $preferences{editortheme} = "light";
+    $preferences{editortheme} = $options->{dark} ? "dark" : "light";
+    return unless Wx::SystemSettings->can("GetAppearance");
     my $a = Wx::SystemSettings::GetAppearance();
     if ( $a->IsDark ) {
 	$preferences{editortheme} = "dark";

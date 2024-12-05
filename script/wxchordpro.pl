@@ -4,8 +4,8 @@
 
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
-# Last Modified On: Wed Dec  4 14:52:54 2024
-# Update Count    : 320
+# Last Modified On: Thu Dec  5 21:19:48 2024
+# Update Count    : 327
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -30,8 +30,11 @@ my $my_package = 'ChordPro';
 my $my_name = 'WxChordPro';
 my $my_version = $ChordPro::VERSION;
 
+my $options = app_options();
+
 # Verify that we have an appropriate Wx version.
-our $Wx_min = "3.004";
+our $Wx_tng = 3.004;
+our $Wx_min = $options->{wxtng} ? $Wx_tng : 0.9932;
 unless ( eval { Wx->VERSION($Wx_min) } ) {
     my $md = ChordPro::Wx::WxUpdateRequired->new;
     $md->ShowModal;
@@ -43,7 +46,10 @@ unless ( eval { Wx->VERSION($Wx_min) } ) {
 # ChordPro::Wx::Main is the main entry of the program.
 require ChordPro::Wx::Main;
 
-my $options = app_options();
+if ( $Wx::VERSION < $Wx_tng) {
+    $options->{stc} = 0;
+    $options->{webview} = 0;
+}
 
 ChordPro::Wx::WxChordPro->run($options);
 
@@ -68,6 +74,8 @@ sub app_options {
 		      'config=s',
 		      'stc!',
 		      'webview!',
+		      'wxtng!',
+		      'dark!',
 		     'quit',
 		     'trace',
 		     'help|?',
