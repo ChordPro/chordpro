@@ -294,8 +294,8 @@ method diagram_xo( $info ) {
 	    $x += $gw;
 	    my $fret = $info->{frets}->[$sx];
 	    next unless $fret > 0;
-	    my $fing = $fingers->[$sx];
-	    next unless $fing > 0;
+	    my $fing = uc $fingers->[$sx];
+	    next unless $fing =~ /^[1-9A-Z]$/;
 
 	    # For barre, only the first and last finger.
 	    if ( $bar->{$fing} && $fsh ne "below" ) {
