@@ -937,8 +937,8 @@ sub generate_song {
 	    $ps->{_top} = $y if $show eq "top";
 	}
 	elsif ( $show eq "below" ) {
-
-	    my $ww = $ps->{__rightmargin} - $ps->{__leftmargin};
+	    # Note that 'below' chords honour the label margin.
+	    my $ww = $ps->{__rightmargin} - $ps->{__leftmargin} - $ps->{_indent};
 
 	    my $dwidth = $dd->hsp0(undef,$ps); # diag
 	    my $dadv   = $dd->hsp1(undef,$ps); # adv
@@ -957,7 +957,7 @@ sub generate_song {
 	    my $h0 = $h;
 	    while ( @chords ) {
 		$checkspace->($vsp);
-		my $x = $x - $ps->{_indent};
+		my $x = $x;
 		$pr->show_vpos( $y, 0 ) if $config->{debug}->{spacing};
 
 		if ( $dctl->{align} eq 'spread' && @chords == $h0  ) {

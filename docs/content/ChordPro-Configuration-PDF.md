@@ -277,6 +277,8 @@ the song.
 
 The `align` property is ignored for `show:right`.
 
+`show:bottom` left aligns to the label margin, if any.
+
 Note that command line option `--lyricsonly` implies `"show":false`
 for diagrams.
 
