@@ -11,10 +11,9 @@ using the pre-installed version of Perl that comes with macOS.
 The command line version of ChordPro can be built with HomeBrew Perl.
 It is currently not possible (well, not easy) to build the GUI version.
 
-Unless you are a seasoned macOS Perl developer, please use the [binary
-install kit]({{< relref
+Unless you are a seasoned macOS Perl developer, please use the [easy installer]({{< relref
 "Install-MacOS-Native" >}}).
-This kit includes both the GUI and the command line version of ChordPro.
+This download includes both the GUI and the command line version of ChordPro.
 
 ## Using HomeBrew
 
