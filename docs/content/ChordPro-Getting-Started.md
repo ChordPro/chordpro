@@ -7,94 +7,51 @@ description: "Getting started with ChordPro"
 
 For a good understanding it is important to know that ChordPro is
 basically a file transformation program. It reads a file containing
-lyrics and chords according to the ChordPro File Standard, and
+lyrics and chords according to the *ChordPro File Standard* and
 produces a neatly formatted PDF document that you can view and print.
 
-## Linux
+## The Graphical Application
 
-When you start the `wxchordpro` program it will show a _File
-Open_ dialog where you can designate an existing ChordPro file.
+We hope you don’t have to read this chapter too often because we made a lot effort to make it *intuitive* for you. It gives you a good start to see the power of the `ChordPro` format with a lot of options to tweak it to your needs.
 
-* If you have one, select it and its contents will be shown in a new window.
-* If you don't have one, press `Cancel` and a (basically empty) window
- will be shown.  
- From the menu bar, choose `Help` > `Insert song example`. A small
- song will appear in the editor window.
+However, this is just *start*. If you **really** want to tweak your songs to your needs you have to get your hands dirty and create your own [configuration]({{< relref "chordpro-configuration" >}}) or even dive into the [command line](#the-command-line-usage) for *real* power. 
 
-## Windows
+`ChordPro` has both covered and in this chapter you can learn more about the terminology that is the base of the ChordPro reference application.
 
-The `wxchordpro` app is capable of handling documents with filename
-extensions `.cho` and `.crd`. If you have
-such a document you can double-click it from the Explorer and ChordPro
-will be started with the document opened. You can also drag a ChordPro
-document to the `ChordPro` desktop icon.
 
-When you start the `wxchordpro` program it will show a _File
-Open_ dialog where you can designate an existing ChordPro file.
+### Settings
 
-* If you have one, select it and its contents will be shown in a new window.
-* If you don't have one, press `Cancel` and a (basically empty) window
- will be shown.  
- From the menu bar, choose `Help` > `Insert song example`. A small song will appear in the editor window.
+From the menu bar, choose `Edit` > `Settings…`. This will show the settings dialog.
 
-## macOS
+*On macOS it is off course in another place; we care about such details.*
 
-The `ChordPro` app is capable of handling documents with filename
-extensions `.cho`, `.chordpro`, `.chopro`, and `.crd`. If you have
-such a document you can double-click it from the Finder and ChordPro
-will be started with the document opened. You can also drag a ChordPro
-document to the `ChordPro` app icon.
+![]({{< asset "images/chordpro-gui-settings-notebooks.png" >}})
 
-When you start the `ChordPro` app without document it will show a
-(basically empty) song in its window.
+#### Presets
 
-* If you have existing ChordPro files, choose `File` from the menu
-  bar, select `Open`, and navigate to a ChordPro document.
-* If you don't have one, from the menu bar, choose `Help` > `Insert
-  song example`. A small song will appear in the editor window.
-
-## All
-
-From the menu bar, choose `File` > `Preview`. If all goes well, a preview window will open showing the formatted PDF document. From the preview window you can print and save the PDF document.
-
-Note that you need to have a PDF file viewer application installed, and the system must be configured to use this viewer to open files with `.pdf` extension.
-
-# Preferences
-
-From the menu bar, choose `Edit` > `Preferences…`. This will show the
-preferences dialog.
-
-![]({{< asset "images/prf_cr_cfg_1.png" >}})
-
-## Ignore default configs
+##### Ignore Default Configuration Files
 
 This prevents ChordPro from processing system wide, user specific and
 song specific config files. Checking this will make sure that ChordPro
 only uses the configs set in the Preferences.
 
-## Presets
+##### Preset Configuration
 
 If enabled, you can choose one or more preset configs to be used.
 
-## Custom config
+##### Custom Configuration File
 
 If enabled, use the `…` button to choose a custom config file. See
 [Creating a config (GUI)]({{< relref "Chordpro-Configuration-Create-GUI" >}}) how to get started
 with a custom config.
 
-## Custom library
+##### Custom ChordPro Library
 
-ChordPro has a built-in library with configs and other data. With
-`Custom library` you can add an additional location where to look for
-data.
+ChordPro has a built-in library with configs and other data. With `Custom library` you can add an additional location where to look for data.
 
-## Template for new songs
+#### Notations
 
-Here you can select a ChordPro song to be used as a template for new
-songs. Its contents are inserted in the edit window when a new song is
-created (`File` > `New`).
-
-## Notation
+##### Notation System
 
 ChordPro supports several notation systems for songs. 
 
@@ -109,7 +66,7 @@ Supported values include:
 * `nashville` (1, 2, 3, ...)
 * `roman` (I, II, III, ...)
 
-## Transpose
+##### Transpose
 
 Transpose the song from a given key to a new key.
 
@@ -120,25 +77,41 @@ behaviour:
 * `Sharps` (always use sharps).
 * `Flats` (always use flats).
 
-## Transcode
+##### Transcode to
 
 Transcode the song to another notation system. See the list of
 supported notation systems above.
 
-## Editor font
+#### Editor
 
-Choose a font and font size for the editor (main window).
+##### Editor Font
 
-## PDF previewer
+Choose a font and font size for the editor.
 
-System command to run an alternative PDF previewer.
+##### Wrap Lines
 
-In the command, `%f` will be replaced by the file name of the
-(temporary) PDF document. `%u` will be replaced by the file URL.
-If no `%f` or `%u` is given, the file name is appended to the command.
-In other words, `atril` and `atril %f` are equivalent.
+Do you want to wrap lines or scroll? Up to you. *If* you want to  wrap you can *move* the wrapped lines a bit further.
 
-Leave empty to use the system default viewer.
+##### Template for new songs
+
+Here you can select a ChordPro song to be used as a template for new songs. Its contents are inserted when you create a new song
+
+##### Editor Colours
+
+Here you can change the *default* highlight colours to your liking.
+
+# The Command Line usage
+
+If you are familiar with working on the *command line*, the basic command to use is:
+
+`chordpro mysong.cho`
+
+This will process `mysong.cho` and produce the PDF document `mysong.pdf`.
+
+`chordpro --help` will give you a list of options that you can pass to the `chordpro` command.
+
+More information can be found in the [User Guide]({{< relref
+"Using-ChordPro" >}}).
 
 # Legacy ASCII input format
 
@@ -157,16 +130,6 @@ format) before processing.
 
     Swing [D]low, sweet [G]chari[D]ot,
     Comin’ for to carry me [A7]home.
+    
+The *Graphical Application* can convert your `cut/pasted` songs from sites like [Ultimate Guitar](https://tabs.ultimate-guitar.com) into **ChordPro** format to tweak it to your needs.
 
-# Command Line operation
-
-If you are familiar with working on the command line, the basic command to use is:
-
-`chordpro mysong.cho`
-
-This will process `mysong.cho` and produce the PDF document `mysong.pdf`.
-
-`chordpro --help` will give you a list of options that you can pass to the `chordpro` command.
-
-More information can be found in the [User Guide]({{< relref
-"Using-ChordPro" >}}).

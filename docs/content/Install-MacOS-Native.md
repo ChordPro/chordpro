@@ -1,9 +1,9 @@
 ---
-title: "Binary installation on macOS"
-description: "Binary installation on macOS"
+title: "Easy installation on macOS"
+description: "Easy installation on macOS"
 ---
 
-# Binary installation on macOS
+# Easy installation on macOS
 
 We provide an installer package (dmg) for macOS 10.15 and higher.
 
