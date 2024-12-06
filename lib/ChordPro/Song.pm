@@ -1174,7 +1174,7 @@ sub parse_directive {
 		     @{$config->{metadata}->{keys}},
 		     keys(%abbrevs),
 		     '(?:start|end)_of_\w+',
-		     '(?:(?:text|chord|chorus|tab|grid|diagrams|title|footer|toc)'.
+		     '(?:(?:text|chord|chorus|tab|grid|diagrams|title|footer|toc|label)'.
 		     '(?:font|size|colou?r))',
 		) . ')';
 	$dirpat = qr/$dirpat/;
@@ -1370,7 +1370,7 @@ sub directive {
 
     # Formatting. {chordsize XX} and such.
     if ( $dir =~ m/ ^( text | chord | chorus | tab | grid | diagrams
-		       | title | footer | toc )
+		       | title | footer | toc | label )
 		     ( font | size | colou?r )
 		     $/x ) {
 	my $item = $1;

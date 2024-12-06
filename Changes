@@ -33,6 +33,7 @@
     - Allow %{} substitutions in grid sections.
     - (Wx) Colours, dark mode, full screen, and more.
     - Add Wx files to standard MANIFEST.
+    - Add labelfont, labelsize and labelcolour directives.
 
 6.060 2024-08-24
 

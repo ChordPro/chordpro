@@ -161,6 +161,9 @@ much more powerful [configuration files]({{< relref "ChordPro-Configuration" >}}
 * [tabfont]({{< relref "Directives-props_tab_legacy" >}}),
    [tabsize]({{< relref "Directives-props_tab_legacy" >}}),
    [tabcolour]({{< relref "Directives-props_tab_legacy" >}})
+* [labelfont]({{< relref "Directives-props_label_legacy" >}}),
+   [labelsize]({{< relref "Directives-props_label_legacy" >}}),
+   [labelcolour]({{< relref "Directives-props_label_legacy" >}})
 * [tocfont]({{< relref "Directives-props_toc_legacy" >}}),
    [tocsize]({{< relref "Directives-props_toc_legacy" >}}),
    [toccolour]({{< relref "Directives-props_toc_legacy" >}})

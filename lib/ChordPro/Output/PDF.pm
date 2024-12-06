@@ -490,7 +490,7 @@ sub assets {
 }
 
 use constant SIZE_ITEMS => [ qw( chord text chorus tab grid diagram
-				 toc title footer ) ];
+				 toc title footer label ) ];
 
 sub generate_song {
     my ( $s, $opts ) = @_;
@@ -1419,7 +1419,7 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "control" ) {
-	    if ( $elt->{name} =~ /^(text|chord|chorus|grid|toc|tab)-size$/ ) {
+	    if ( $elt->{name} =~ /^(text|chord|chorus|grid|toc|tab|label)-size$/ ) {
 		if ( defined $elt->{value} ) {
 		    $do_size->( $1, $elt->{value} );
 		}
@@ -1431,7 +1431,7 @@ sub generate_song {
 		      unless $ps->{fonts}->{$1}->{size};
 		}
 	    }
-	    elsif ( $elt->{name} =~ /^(text|chord|chorus|grid|toc|tab)-font$/ ) {
+	    elsif ( $elt->{name} =~ /^(text|chord|chorus|grid|toc|tab|label)-font$/ ) {
 		my $f = $1;
 		if ( defined $elt->{value} ) {
 		    my ( $fn, $sz ) = $elt->{value} =~ /^(.*) (\d+(?:\.\d+)?)$/;
@@ -1465,7 +1465,7 @@ sub generate_song {
 		}
 		$pr->init_font($f);
 	    }
-	    elsif ( $elt->{name} =~ /^(text|chord|chorus|grid|toc|tab)-color$/ ) {
+	    elsif ( $elt->{name} =~ /^(text|chord|chorus|grid|toc|tab|label)-color$/ ) {
 		if ( defined $elt->{value} ) {
 		    $ps->{fonts}->{$1}->{color} = $elt->{value};
 		}
