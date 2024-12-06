@@ -48,6 +48,7 @@ my $chorus_xpose = 0;
 my $chorus_xpose_dir = 0;
 
 # Memorized chords.
+my $cctag;			# current cc name
 my %memchords;			# all sections
 my $memchords;			# current section
 my $memcrdinx;			# chords tally
@@ -290,6 +291,7 @@ sub parse_song {
     $self->{system}     = $config->{notes}->{system};
     $self->{config}     = $config;
     $self->{meta}       = $meta if $meta;
+    $self->{meta}->{cc} = \%memchords;		# make available to meta
     $self->{chordsinfo} = {};
     $target //= $self->{system};
 
@@ -770,6 +772,22 @@ sub parse_song {
     $self->{meta}->{chords} //= [ @used_chords ];
     $self->{meta}->{numchords} = [ scalar(@{$self->{meta}->{chords}}) ];
 
+    if ( %memchords ) {
+	::dump(\%memchords, as => "cc (atend)") if $config->{debug}->{chords};
+    }
+    else {
+	# Avoid clutter.
+    	delete $self->{meta}->{cc};
+    }
+
+    if ( %memchords ) {
+	::dump(\%memchords, as => "cc (atend)") if $config->{debug}->{chords};
+    }
+    else {
+	# Avoid clutter.
+    	delete $self->{meta}->{cc};
+    }
+
     if ( $diagrams =~ /^(user|all)$/ ) {
 	$self->{chords} =
 	  { type   => "diagrams",
@@ -927,7 +945,7 @@ sub decompose {
 	# Normal chords.
 	if ( $chord =~ s/^\[(.*)\]$/$1/ && $chord ne "^" ) {
 	    push(@chords, $chord eq "" ? "" : $self->chord($chord));
-	    if ( $memchords && !$dummy ) {
+	    if ( $memchords && !$dummy && $chord !~ /^\*/ ) {
 		if ( $memcrdinx == 0 ) {
 		    $memorizing++;
 		}
@@ -942,20 +960,20 @@ sub decompose {
 	}
 
 	# Recall memorized chords.
-	elsif ( $memchords && $in_context ) {
+	elsif ( $memchords && $in_context && $chord !~ /^\*/ ) {
 	    if ( $memcrdinx == 0 && @$memchords == 0 ) {
 		do_warn("No chords memorized for $in_context");
-		push( @chords, $chord );
+		push( @chords, $self->chord($chord) );
 		undef $memchords;
 	    }
 	    elsif ( $memcrdinx >= @$memchords ) {
 		do_warn("Not enough chords memorized for $in_context");
-		push( @chords, $chord );
+		push( @chords, $self->chord($chord) );
 	    }
 	    else {
-		push( @chords, $self->chord($memchords->[$memcrdinx]) );
-		warn("Chord recall $in_context\[$memcrdinx]: ", $chords[-1], "\n")
+		warn("Chord recall $in_context\[$memcrdinx]: ", $memchords->[$memcrdinx], "\n")
 		  if $config->{debug}->{chords};
+		push( @chords, $self->chord($memchords->[$memcrdinx]) );
 	    }
 	    $memcrdinx++;
 	}
@@ -1028,9 +1046,15 @@ sub decompose_grid {
 	}
     }
     my $nbt = 0;		# non-bar tokens
+    my $p0;			# this bar chords
+    my $p1;			# prev chords (for % and %% repeat)
+    my $p2;			# pprev chords (for %% repeat)
+    my $si = 0;			# start index
+
     foreach ( @tokens ) {
 	if ( $_ eq "|:" || $_ eq "{" ) {
 	    $_ = { symbol => $_, class => "bar" };
+	    $si = @$memchords if $memchords;
 	}
 	elsif ( /^\|(\d+)(>?)$/ ) {
 	    $_ = { symbol => '|', volta => $1, class => "bar" };
@@ -1038,9 +1062,16 @@ sub decompose_grid {
 	}
 	elsif ( $_ eq ":|" || $_ eq "}" ) {
 	    $_ = { symbol => $_, class => "bar" };
+	    if ( $memchords ) {
+		push( @$memchords, @$memchords[ $si .. $#{$memchords} ] );
+	    }
 	}
 	elsif ( $_ eq ":|:" || $_ eq "}{" ) {
 	    $_ = { symbol => $_, class => "bar" };
+	    if ( $memchords ) {
+		push( @$memchords, @$memchords[ $si .. $#{$memchords} ] );
+		$si = @$memchords;
+	    }
 	}
 	elsif ( $_ eq "|" ) {
 	    $_ = { symbol => $_, class => "bar" };
@@ -1053,9 +1084,26 @@ sub decompose_grid {
 	}
 	elsif ( $_ eq "%" ) {
 	    $_ = { symbol => $_, class => "repeat1" };
+	    if ( $memchords && $p1 ) {
+		push( @$memchords, @$p1 );
+		if ( $config->{debug}->{chords} ) {
+		    warn("Chord memorized for $cctag\[$memcrdinx]: ",
+			 $_, "\n"), $memcrdinx++
+		      for @$p1;
+		}
+	    }
 	}
 	elsif ( $_ eq '%%' ) {
 	    $_ = { symbol => $_, class => "repeat2" };
+	    if ( $memchords && $p1 ) {
+		push( @$memchords, @$p2 ) if $p2;
+		push( @$memchords, @$p1 );
+		if ( $config->{debug}->{chords} ) {
+		    warn("Chord memorized for $cctag\[$memcrdinx]: ",
+			 $_, "\n"), $memcrdinx++
+		      for @$p2, @$p1;
+		}
+	    }
 	}
 	elsif ( $_ eq "/" ) {
 	    $_ = { symbol => $_, class => "slash" };
@@ -1081,7 +1129,19 @@ sub decompose_grid {
 				   : $self->chord($_) } @a ],
 		       class => "chords" };
 	    }
+	    if ( $memchords ) {
+		push( @$memchords, @a );
+		push( @$p0, @a );
+		if ( $config->{debug}->{chords} ) {
+		    warn("Chord memorized for $cctag\[$memcrdinx]: ",
+			 $_, "\n"), $memcrdinx++
+		      for @a;
+		}
+	    }
 	    $nbt++;
+	}
+	if ( $_->{class} eq "bar" ) {
+	    $p2 = $p1; $p1 = $p0; undef $p0;
 	}
     }
     if ( $nbt > $grid_cells->[0] ) {
@@ -1270,7 +1330,10 @@ sub directive {
 	}
 	@chorus = (), $chorus_xpose = $chorus_xpose_dir = 0
 	  if $in_context eq "chorus";
+	undef $cctag;
+
 	if ( $in_context eq "grid" ) {
+	    $cctag = "grid";
 	    my $kv = parse_kv( $arg, "shape" );
 	    my $shape = $kv->{shape} // "";
 	    if ( $shape eq "" ) {
@@ -1303,8 +1366,17 @@ sub directive {
 			    value => $kv->{label} );
 		push( @labels, $kv->{label} );
 	    }
+
+	    # Grid sections always memorize unless "cc=".
+	    if ( ($kv->{cc}//="grid") ne "" ) {
+		$cctag = $kv->{cc};
+		$memchords = $memchords{$cctag} //= [];
+		$memcrdinx = 0;
+		$memorizing = 1;
+	    }
 	    $grid_cells = [ $grid_arg->[0] * $grid_arg->[1],
 			    $grid_arg->[2],  $grid_arg->[3] ];
+	    return 1;
 	}
 	elsif ( exists $config->{delegates}->{$in_context} ) {
 	    my $d = $config->{delegates}->{$in_context};
@@ -1328,11 +1400,12 @@ sub directive {
 	elsif ( $arg ne "" ) {
 	    my $kv = parse_kv( $arg, "label" );
 	    my $label = delete $kv->{label};
+	    my $chords = delete $kv->{cc};
 	    if ( %$kv ) {
 		# Assume a mistake.
 		do_warn("Garbage in start_of_$in_context: $arg (ignored)\n");
 	    }
-	    else {
+	    elsif ( $label ) {
 		$self->add( type  => "set",
 			    name  => "label",
 			    value => $label );
@@ -1340,12 +1413,54 @@ sub directive {
 		  unless $in_context eq "chorus"
 		  && !$config->{settings}->{choruslabels};
 	    }
+	    if ( $chords ) {
+		$chords =~ s/^\s*(.*)\s*/$1/;
+		$cctag = $in_context;
+		# Do we have a name? Chords? Both?
+		# name:C D E
+		# :C D E
+		# :
+		if ( $chords =~ /^(\w*):(.*)/ ) {
+		    # Name, possibly empty.
+		    $cctag = $1 if length($1);
+		    # Chords, possibly empty.
+		    $chords = $2;
+		}
+		# C D E
+		elsif ( $chords =~ /\s/ ) {
+		    # Whitespace separated chords.
+		}
+		# name
+		elsif ( $chords =~ /^\w+$/ ) {
+		    $cctag = $chords;
+		    $chords = "";
+		}
+		# ???
+		else {
+		    warn("Unrecognized cc value: \"$chords\"\n")
+		      if $chords;
+		    $chords = "";
+		}
+		if ( $chords ne "" ) {
+		    $memchords = [ split( ' ', $chords ) ];
+		    $memchords{$cctag} = $memchords;
+		    $memcrdinx = 0;
+		    $memorizing = 0;
+		    if ( $config->{debug}->{chords} ) {
+			my $i = 0;
+			warn("Chord memorized for $cctag\[$i]: ",
+			     $_, "\n"), $i++
+			       for @$memchords;
+		    }
+		    return 1;
+		}
+	    }
 	}
 
 	# Enabling this always would allow [^] to recall anyway.
 	# Feature?
 	if ( $config->{settings}->{memorize} ) {
-	    $memchords = $memchords{$in_context} //= [];
+	    $memchords = ($memchords{$cctag//$in_context} //= []);
 	    $memcrdinx = 0;
 	    $memorizing = 0;
 	}
