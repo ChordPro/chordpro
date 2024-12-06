@@ -291,7 +291,6 @@ sub parse_song {
     $self->{system}     = $config->{notes}->{system};
     $self->{config}     = $config;
     $self->{meta}       = $meta if $meta;
-    $self->{meta}->{cc} = \%memchords;		# make available to meta
     $self->{chordsinfo} = {};
     $target //= $self->{system};
 
