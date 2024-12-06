@@ -11,6 +11,7 @@ use Ref::Util qw(is_arrayref);
 
 use Exporter 'import';
 our @EXPORT;
+our @EXPORT_OK;
 
 ################ Platforms ################
 
@@ -614,5 +615,19 @@ sub progress(%args) {
 }
 
 push( @EXPORT, "progress" );
+
+# Common items for property directives ({textsize} etc.).
+
+sub propitems() {
+    qw(  chord chorus diagrams footer grid label tab text title toc );
+}
+
+sub propitems_re() {
+    my $re = join( '|', propitems() );
+    qr/(?:$re)/;
+}
+
+push( @EXPORT, "propitems_re" );
+push( @EXPORT_OK, "propitems" );
 
 1;

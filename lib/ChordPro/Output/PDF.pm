@@ -474,6 +474,7 @@ my $inlineannots;		# format for inline annots
 my $chordsunder = 0;		# chords under the lyrics
 my $chordscol = 0;		# chords in a separate column
 my $chordscapo = 0;		# capo in a separate column
+my $propitems_re = propitems_re();
 
 my $i_tag;
 sub pr_label_maybe {
@@ -1419,7 +1420,7 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "control" ) {
-	    if ( $elt->{name} =~ /^(text|chord|chorus|grid|toc|tab|label)-size$/ ) {
+	    if ( $elt->{name} =~ /^($propitems_re)-size$/ ) {
 		if ( defined $elt->{value} ) {
 		    $do_size->( $1, $elt->{value} );
 		}
@@ -1431,7 +1432,7 @@ sub generate_song {
 		      unless $ps->{fonts}->{$1}->{size};
 		}
 	    }
-	    elsif ( $elt->{name} =~ /^(text|chord|chorus|grid|toc|tab|label)-font$/ ) {
+	    elsif ( $elt->{name} =~ /^($propitems_re)-font$/ ) {
 		my $f = $1;
 		if ( defined $elt->{value} ) {
 		    my ( $fn, $sz ) = $elt->{value} =~ /^(.*) (\d+(?:\.\d+)?)$/;
@@ -1465,7 +1466,7 @@ sub generate_song {
 		}
 		$pr->init_font($f);
 	    }
-	    elsif ( $elt->{name} =~ /^(text|chord|chorus|grid|toc|tab|label)-color$/ ) {
+	    elsif ( $elt->{name} =~ /^($propitems_re)-color$/ ) {
 		if ( defined $elt->{value} ) {
 		    $ps->{fonts}->{$1}->{color} = $elt->{value};
 		}

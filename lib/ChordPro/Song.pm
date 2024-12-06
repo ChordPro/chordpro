@@ -57,6 +57,7 @@ my $memorizing;			# if memorizing (a.o.t. recalling)
 my %warned_chords;
 
 our $re_chords;			# for chords
+my $propitems_re = propitems_re();
 my $intervals;			# number of note intervals
 my @labels;			# labels used
 
@@ -1174,7 +1175,7 @@ sub parse_directive {
 		     @{$config->{metadata}->{keys}},
 		     keys(%abbrevs),
 		     '(?:start|end)_of_\w+',
-		     '(?:(?:text|chord|chorus|tab|grid|diagrams|title|footer|toc|label)'.
+		     "(?:$propitems_re".
 		     '(?:font|size|colou?r))',
 		) . ')';
 	$dirpat = qr/$dirpat/;
@@ -1369,8 +1370,7 @@ sub directive {
     }
 
     # Formatting. {chordsize XX} and such.
-    if ( $dir =~ m/ ^( text | chord | chorus | tab | grid | diagrams
-		       | title | footer | toc | label )
+    if ( $dir =~ m/ ^( $propitems_re )
 		     ( font | size | colou?r )
 		     $/x ) {
 	my $item = $1;
