@@ -1,12 +1,12 @@
 NAME
 
-    wxchordpro - a simple Wx-based GUI for ChordPro
+    wxchordpro - Wx based GUI for ChordPro
 
 DESCRIPTION
 
-wxchordpro is a GUI wrapper for the ChordPro program. It allows
-opening of files, make changes, and preview (optionally print) the
-formatted result.
+wxchordpro is a GUI for the ChordPro program. It allows opening of
+files, make changes, and preview (optionally print) the formatted
+result.
 
 For more information about the ChordPro file format, see
 http://www.chordpro.org .
@@ -16,7 +16,7 @@ https://metacpan.org/pod/App::Music::ChordPro .
 
 LICENSE
 
-Copyright (C) 2016,2017 Johan Vromans,
+Copyright (C) 2016,2024 Johan Vromans,
 
 This module is free software. You can redistribute it and/or
 modify it under the terms of the Artistic License 2.0.
