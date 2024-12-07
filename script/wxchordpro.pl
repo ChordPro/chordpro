@@ -4,8 +4,8 @@
 
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
-# Last Modified On: Fri Dec  6 07:28:15 2024
-# Update Count    : 330
+# Last Modified On: Sat Dec  7 16:11:10 2024
+# Update Count    : 335
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -48,7 +48,9 @@ require ChordPro::Wx::Main;
 
 if ( $Wx::VERSION < $Wx_tng) {
     # Cannot do Scintilla without Wx_tng;
-    $options->{stc} = 0;
+    # $options->{stc} //= 0;
+    # Cannot do WebView without Wx_tng;
+    # $options->{webview} //= 0;
 }
 
 ChordPro::Wx::WxChordPro->run($options);

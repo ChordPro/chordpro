@@ -122,7 +122,8 @@ method openfile( $file, $checked=0, $actual=undef ) {
 	    $max = max( $max, length($_) );
 	}
 	$stc->SetScrollWidth($max);
-	$stc->SetScrollWidthTracking(1);
+	$stc->SetScrollWidthTracking(1)
+	  if $stc->can("SetScrollWidthTracking");
     }
     else {
 	$self->{t_editor}->ShowPosition(0); # doesn't work?
@@ -402,7 +403,8 @@ method OnA2Crd($event) {
 	$ctrl->Clear;
 	$ctrl->SetText($cho);
     }
-    $ctrl->SetInsertionPoint($from);
+    $ctrl->SetInsertionPoint($from)
+      if $ctrl->can("SetInsertionPoint");
 }
 
 method OnCut($event) {

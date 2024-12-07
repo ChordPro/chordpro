@@ -15,7 +15,8 @@ use ChordPro::Wx::Utils;
 sub new( $class, $parent, $id ) {
 
     my $widget;
-    if ( $::options->{stc}//1 && eval { require Wx::STC; 1 } ) {
+    $::options->{stc} //= 1;
+    if ( $::options->{stc} && eval { require Wx::STC; 1 } ) {
 	$widget  = Wx::StyledTextCtrl->new($parent);
 	$state{have_stc} = 1;
 	return bless $widget => 'ChordPro::Wx::STCEditor';
@@ -63,6 +64,7 @@ sub refresh( $self, $prefs = undef ) {
     my $bg = Wx::Colour->new($c->{bg});
 
     $stc->SetBackgroundColour($bg);
+    $stc->SetCaretForeground($fg);
     # $stc->SetDefaultStyle( Wx::TextAttr->new( $c[0], $bg ) );	# NYI
     $stc->StyleSetForeground( wxSTC_STYLE_DEFAULT, $fg );
     $stc->StyleSetBackground( wxSTC_STYLE_DEFAULT, $bg );
@@ -177,13 +179,21 @@ sub add_annotation( $self, $line, $message ) {
     $stc->AnnotationSetStyle( $line, $self->{astyle} );
 }
 
+unless ( __PACKAGE__->can("IsModified") ) {
+    *IsModified = sub($self) {
+	$self->{_modified} || $self->CanUndo;
+    };
+}
+unless ( __PACKAGE__->can("DiscardEdits") ) {
+    *DiscardEdits = sub($self) {
+	$self->EmptyUndoBuffer;
+	$self->{_modified} = 0;
+    };
+}
+
 sub SetModified( $self, $mod ) {
     if ( $mod ) {
-	# $self->MarkDirty;	# NOT IMPLEMENTED
-	my $pos = $self->GetInsertionPoint;
-	$self->LineDuplicate;
-	$self->LineDelete;
-	$self->SetInsertionPoint($pos);
+	$self->{_modified} = 1;
     }
     else {
 	$self->DiscardEdits;
