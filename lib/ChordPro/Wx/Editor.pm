@@ -17,7 +17,9 @@ sub new( $class, $parent, $id ) {
     my $widget;
     $::options->{stc} //= 1;
     if ( $::options->{stc} && eval { require Wx::STC; 1 } ) {
+#    if ( $::options->{stc} && eval { require Wx::Scintilla; 1 } ) {
 	$widget  = Wx::StyledTextCtrl->new($parent);
+#	$widget  = Wx::Scintilla::TextCtrl->new($parent);
 	$state{have_stc} = 1;
 	return bless $widget => 'ChordPro::Wx::STCEditor';
     }
@@ -30,6 +32,7 @@ sub new( $class, $parent, $id ) {
 package ChordPro::Wx::STCEditor;
 
 use parent qw( -norequire Wx::StyledTextCtrl );
+#use parent qw( -norequire Wx::Scintilla::TextCtrl );
 
 use Wx ':everything';
 use ChordPro::Wx::Config;

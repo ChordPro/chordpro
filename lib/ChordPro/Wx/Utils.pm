@@ -43,6 +43,12 @@ while ( my ( $sub, $value ) = each %const ) {
 
 use strict 'refs';
 
+{ no feature 'signatures';
+  sub Wx::Event::EVT_STC_CLIPBOARD_PASTE($$$) {
+    $_[0]->Connect( $_[1], -1, Wx::wxEVT_STC_AUTOCOMP_CHAR_DELETED()+3, $_[2] );
+  }
+}
+
 ################ ################
 
 # Create / update menu bar.
@@ -128,7 +134,7 @@ sub setup_menubar( $self ) {
 	  [ [ wxID_ANY, M_EDITOR, "Insert {&title}",
 	      "Insert a {title} directive", "OnInsertTitle" ],
 	    [ wxID_ANY, M_EDITOR, "Insert {&subtitle}",
-	      "Insert a {subtitle} directive", "OnInsertSubTitle" ],
+	      "Insert a {subtitle} directive", "OnInsertSubtitle" ],
 	    [ wxID_ANY, M_EDITOR, "Insert {&key}",
 	      "Insert a {key} directive", "OnInsertKey" ],
 	    [ wxID_ANY, M_EDITOR, "Insert {&artist}",

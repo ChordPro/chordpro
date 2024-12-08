@@ -42,6 +42,11 @@ BUILD {
     # Single pane.
     $self->unsplit;
 
+    Wx::Event::EVT_STC_CHARADDED( $self, $self->{t_editor}->GetId,
+				  $self->can("OnCharAdded") );
+    Wx::Event::EVT_STC_CLIPBOARD_PASTE( $self, $self->{t_editor}->GetId,
+				  $self->can("OnClipBoardPaste") );
+
     $self;
 }
 
@@ -330,16 +335,16 @@ method embrace( $pre, $post ) {
     my $have_selection = $from != $to;
 
     if ( $have_selection ) {
-	my $text = $have_selection ? $ctrl->GetSelectedText : $ctrl->GetText;
+	my $text = $ctrl->GetSelectedText;
 	chomp($text);
 	$text = $pre . $text . $post;
 	$ctrl->Replace( $from, $to, $text );
-	my $pos = $ctrl->GetInsertionPoint;
+	my $pos = $ctrl->GetCurrentPos;
 	$ctrl->SetSelection( $pos, $pos );
     }
     else {
 	$ctrl->AddText($pre);
-	my $pos = $ctrl->GetInsertionPoint;
+	my $pos = $ctrl->GetCurrentPos;
 	$ctrl->AddText($post);
 	$ctrl->SetSelection( $pos, $pos );
     }
@@ -403,8 +408,51 @@ method OnA2Crd($event) {
 	$ctrl->Clear;
 	$ctrl->SetText($cho);
     }
-    $ctrl->SetInsertionPoint($from)
-      if $ctrl->can("SetInsertionPoint");
+    $ctrl->SetCurrentPos($from);
+}
+
+method OnCharAdded( $event ) {
+    my $stc = $self->{t_editor};
+    my $key = $event->GetKey;
+warn("KEY: ", sprintf("%d 0x%x (%c)\n", $key, $key, $key ));
+    if ( $key eq ord("]") ) {
+	# Complete a chord.
+	my $pos = $stc->GetCurrentPos;
+	my $t = $stc->GetTextRange( max(0, $pos-10), $pos );
+	if ( $t =~ /\[([a-h])(.*?)\]/ ) {
+	    $t = "[" . uc($1) . $2 . "]";
+	    $stc->SetSelection( $pos-length($t), $pos );
+	    $stc->ReplaceSelection($t);
+	}
+    }
+
+    elsif ( $key eq ord("\n") ) {
+	# Move newline before trailing } to next line.
+	my $ln = $stc->GetCurrentLine;
+	my $line = $stc->GetLine($ln);
+	if ( $line eq "}\n" ) {
+	    my $pos = $stc->GetCurrentPos;
+	    $stc->SetSelection( $pos-1, $pos+1 );
+	    $stc->ReplaceSelection("}\n");
+	}
+    }
+
+    elsif ( $key eq ord("\t") ) {
+	my $ln = $stc->GetCurrentLine;
+	my $line = $stc->GetLine($ln);
+	if ( $line =~ /^\{\s*(\w+)\s*\}?$/ ) {
+	    warn("XXX: »$1«\n");
+	}
+    }
+}
+
+method OnClipBoardPaste($event) {
+    my $text = $event->GetString;
+    $text =~ s/^\n+//;
+    if ( $text =~ m/(.+\n\n)+/ ) {
+	$text =~ s/(.+\n)\n/$1/g;
+    }
+    $event->SetString($text);
 }
 
 method OnCut($event) {
@@ -420,7 +468,7 @@ method OnExternalEditor($event) {
     my $editor = $ENV{VISUAL} // $ENV{EDITOR};
     $self->alert( 0, "No external editor specified" ), return unless $editor;
     my $e = $self->{t_editor};
-    my $pos = $e->GetInsertionPoint;
+    my $pos = $e->GetCurrentPos;
     my $mod = $e->IsModified;
 
     # Save in temp file and call editor.
