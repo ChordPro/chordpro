@@ -254,16 +254,29 @@ method init_recents() {
 }
 
 method init_theme() {
-    $preferences{editortheme} = $options->{dark} ? "dark" : "light";
-    return unless Wx::SystemSettings->can("GetAppearance");
-    my $a = Wx::SystemSettings::GetAppearance();
-    if ( $a->IsDark ) {
-	$preferences{editortheme} = "dark";
-	$self->log( 'I', "Using dark theme" );
+    if ( defined $options->{dark} ) {
+	$preferences{editortheme} = $options->{dark} ? "dark" : "light";
+	$self->log( 'I', "Forcing $preferences{editortheme} theme" );
     }
-    elsif ( $a->IsUsingDarkBackground ) {
-	$preferences{editortheme} = "dark";
-	$self->log( 'I', "Using darkish theme" );
+    else {
+	$preferences{editortheme} //= "light";
+	if ( Wx::SystemSettings->can("GetAppearance") ) {
+	    my $a = Wx::SystemSettings::GetAppearance();
+	    if ( $a->IsDark ) {
+		$preferences{editortheme} = "dark";
+		$self->log( 'I', "Using dark theme" );
+	    }
+	    elsif ( $a->IsUsingDarkBackground ) {
+		$preferences{editortheme} = "dark";
+		$self->log( 'I', "Using darkish theme" );
+	    }
+	    else {
+		$self->log( 'I', "Assuming $preferences{editortheme} theme" );
+	    }
+	}
+	else {
+	    $self->log( 'I', "Assuming $preferences{editortheme} theme" );
+	}
     }
 }
 
