@@ -121,7 +121,8 @@ my %prefs =
    enable_pdfviewer   => undef,
    pdfviewer   => "",
 
-   # Debug etc.
+   # Preferences w/o UI.
+   chordproext => ".chordpro",	# for Nick
    dumpstate => 0,
 
   );
