@@ -70,7 +70,7 @@ my %prefs =
    # Editor.
    editfont	   => 0,	# inital, later "Monospace 10" etc.
    editsize	   => FONTSIZE,
-   editortheme	   => "light",
+   editortheme	   => "auto",
 
    # Mostly for STC. TextCtrl fallback uses fg and bg only.
    editcolour_light_fg	   => "#000000",
@@ -124,6 +124,7 @@ my %prefs =
    # Preferences w/o UI.
    chordproext => ".chordpro",	# for Nick
    dumpstate => 0,
+   expert => 0,
 
   );
 
