@@ -420,7 +420,12 @@ method OnA2Crd($event) {
 method OnCharAdded( $event ) {
     my $stc = $self->{t_editor};
     my $key = $event->GetKey;
-warn("KEY: ", sprintf("%d 0x%x (%c)\n", $key, $key, $key ));
+    return unless chr($key) =~ /[\]\n :]/;
+
+    #warn("KEY: ", sprintf("%d 0x%x (%c)\n", $key, $key, $key ));
+    my $ln = $stc->GetCurrentLine;
+    my $line = $stc->GetLine($ln);
+    #$stc->CallTipShow( $stc->GetCurrentPos, "LINE: »$line«");
     if ( $key eq ord("]") ) {
 	# Complete a chord.
 	my $pos = $stc->GetCurrentPos;
@@ -434,20 +439,23 @@ warn("KEY: ", sprintf("%d 0x%x (%c)\n", $key, $key, $key ));
 
     elsif ( $key eq ord("\n") ) {
 	# Move newline before trailing } to next line.
-	my $ln = $stc->GetCurrentLine;
-	my $line = $stc->GetLine($ln);
-	if ( $line eq "}\n" ) {
+	if ( $line eq "}\n" || $line eq "}\r" || $line eq "}" ) {
 	    my $pos = $stc->GetCurrentPos;
-	    $stc->SetSelection( $pos-1, $pos+1 );
+	    $stc->SetSelection( $stc->PositionBefore($pos),
+				$stc->PositionAfter($pos) );
 	    $stc->ReplaceSelection("}\n");
 	}
     }
 
-    elsif ( $key eq ord("\t") ) {
-	my $ln = $stc->GetCurrentLine;
-	my $line = $stc->GetLine($ln);
-	if ( $line =~ /^\{\s*(\w+)\s*\}?$/ ) {
-	    warn("XXX: »$1«\n");
+    elsif ( $key eq ord(" ") || $key eq ord(":") ) { # TODO: }
+	my $pos0 = $stc->PositionFromLine($ln);
+	my $pos = $stc->GetCurrentPos;
+	my $txt = $stc->GetTextRange( $pos0, $pos );
+	if ( $txt =~ /^(\{\s*)(\w+)(-\w+!?)?[ :]*$/
+	     &&
+	     ( my $c = $state{rti}{directive_abbrevs}{$2} ) ) {
+	    $stc->SetSelection( $pos0, $pos );
+	    $stc->ReplaceSelection( $1.$c.($3//"").": " );
 	}
     }
 }
