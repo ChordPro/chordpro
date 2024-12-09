@@ -420,7 +420,7 @@ method OnA2Crd($event) {
 method OnCharAdded( $event ) {
     my $stc = $self->{t_editor};
     my $key = $event->GetKey;
-    return unless chr($key) =~ /[\]\n :]/;
+    return unless chr($key) =~ /[\]\n :\}]/;
 
     #warn("KEY: ", sprintf("%d 0x%x (%c)\n", $key, $key, $key ));
     my $ln = $stc->GetCurrentLine;
@@ -428,34 +428,42 @@ method OnCharAdded( $event ) {
     #$stc->CallTipShow( $stc->GetCurrentPos, "LINE: »$line«");
     if ( $key eq ord("]") ) {
 	# Complete a chord.
-	my $pos = $stc->GetCurrentPos;
-	my $t = $stc->GetTextRange( max(0, $pos-10), $pos );
-	if ( $t =~ /\[([a-h])(.*?)\]/ ) {
-	    $t = "[" . uc($1) . $2 . "]";
-	    $stc->SetSelection( $pos-length($t), $pos );
+	my $pos = $stc->PositionBefore($stc->GetCurrentPos);
+	my $p0 = $stc->BraceMatch($pos);
+	return if $p0 < 0;
+	$p0 = $stc->PositionAfter($p0);
+	my $t = $stc->GetTextRange( $p0, $pos );
+
+	if ( $t =~ s/(^|\/)([a-hu])/sprintf("%s%s", $1, uc($2))/ge ) {
+	    $stc->SetSelection( $p0, $pos );
 	    $stc->ReplaceSelection($t);
+	    $stc->CharRight;
 	}
     }
 
     elsif ( $key eq ord("\n") ) {
 	# Move newline before trailing } to next line.
-	if ( $line eq "}\n" || $line eq "}\r" || $line eq "}" ) {
+	if ( $line =~ /^\}(\r\n|\r|\n)?\Z/ ) {
+	    my $nl = $self->nl;
 	    my $pos = $stc->GetCurrentPos;
 	    $stc->SetSelection( $stc->PositionBefore($pos),
 				$stc->PositionAfter($pos) );
-	    $stc->ReplaceSelection("}\n");
+	    $stc->CharRightExtend if length($nl) == 2;
+	    $stc->ReplaceSelection("}" . $nl);
 	}
     }
 
-    elsif ( $key eq ord(" ") || $key eq ord(":") ) { # TODO: }
+    elsif ( $key eq ord(" ") || $key eq ord(":") || $key eq ord("}") ) {
 	my $pos0 = $stc->PositionFromLine($ln);
 	my $pos = $stc->GetCurrentPos;
 	my $txt = $stc->GetTextRange( $pos0, $pos );
-	if ( $txt =~ /^(\{\s*)(\w+)(-\w+!?)?[ :]*$/
+	if ( $txt =~ /^(\{\s*)(\w+)(-\w+!?)?([ :\}])$/
 	     &&
 	     ( my $c = $state{rti}{directive_abbrevs}{$2} ) ) {
+	    warn("XXX »$4«\n");
 	    $stc->SetSelection( $pos0, $pos );
-	    $stc->ReplaceSelection( $1.$c.($3//"").": " );
+	    $stc->ReplaceSelection( $1.$c.($3//"").
+				    ($4 eq "}" ? "}" : ": " ) );
 	}
     }
 }
