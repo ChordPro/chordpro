@@ -378,3 +378,10 @@ unless ( $::wxbitmapnew ) {
 
 ################ ################
 
+sub has_appearance() {
+    Wx::SystemSettings->can("GetAppearance");
+}
+
+push( @EXPORT, 'has_appearance' );
+
+################ ################
