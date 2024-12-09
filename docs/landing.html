@@ -14,13 +14,21 @@ It should be part of `hugo` but that is for another day
 
 <html lang="en-EN">
     <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <meta charset="utf-8">
-            <title>Welcome to ChordPro! | ChordPro</title>
-            <meta name="keywords" content="music,chord,chords,chordii,chordpro,typesetting,chopro,cho,crd,guitar,music sheets">
-            <link rel="stylesheet" href="https://www.chordpro.org/beta/css/bootstrap4.min.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta charset="utf-8" />
+        <title>Welcome to ChordPro! | ChordPro</title>
+        <meta name="keywords" content="music,chord,chords,chordii,chordpro,typesetting,chopro,cho,crd,guitar,music sheets">
+            <link rel="stylesheet" href="https://www.chordpro.org/beta/css/bootstrap4.min.css" />
             <link rel="stylesheet" href="https://www.chordpro.org/beta/css/site.css" />
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+            <link rel="stylesheet" href="https://www.chordpro.org/beta/css/jquery.fancybox.min.css" />
+            <script src="https://www.chordpro.org/beta/js/jquery.min.js"></script>
+            <script src="https://www.chordpro.org/beta/js/jquery.fancybox.min.js"></script>
             <style>
+                body {
+                    background: linear-gradient(to bottom, #E5F3FF 0%,#ffffff 20em,#ffffff 100%);
+                    background-attachment: fixed;
+                }
                 #wrapper {
                     max-width: fit-content;
                     margin-left: auto;
@@ -46,23 +54,50 @@ It should be part of `hugo` but that is for another day
                     font-weight: bold;
                     font-size: 1.2em;
                 }
-                #information a {
+                #statements {
+                    margin: 2em;
+                    text-align: left;
+                }
+                .information a {
                     background: #ef6c2a;
                     padding: 0.4em;
                     color: white;
                     border-radius: 0.3em;
                 }
                 #footer {
-                    position: absolute;
-                    left: 0 ; right: 0; bottom: 0;
-                    padding-top: 0.5em;
-                    color: grey;
-                    background: white;
-                    border-top: 1px solid grey;
+                    background-color: grey;
+                    color: white;
+                    border-top: 1px solid black;
+                    padding: 1em;
+                }
+                dt {
+                    color: #0068d9;
+                    font-size: 1.2em;
+                }
+                dt span {
+                    padding-left: 0.5em;
+                }
+                dd {
+                    padding: 0.5em;
+                }
+                #examples {
+                    margin-bottom: 2em;
+                }
+                #examples p, #examples img {
+                    margin: 0.5em;
+                }
+                #about {
+                    background-color: #143968;
+                    color: white;
+                    padding: 1em;
+                    border-radius: 0.5em;
+                    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+                }
+                #about h1 {
+                    color: white;
                 }
             </style>
     </head>
-
     <body>
         <div id="wrapper">
             <div id="content" style="max-width:800px">
@@ -73,14 +108,57 @@ It should be part of `hugo` but that is for another day
                 <p id="slogan">A simple text format for the notation of lyrics with chords</p>
                 <p id="statement">This is <em>the</em> ChordPro website; the official site for the ChordPro format</p>
                 <p>Here you can find all the information and tools you need to embrace this format to enhance your musical notations. <strong>ChordPro</strong> will help you to let your songs looks great so you just want to play them.</p>
-                <p id="information">
+                <p class="information">
                 <a href="https://www.chordpro.org/chordpro/">Read more</a>
                 </p>
-                <a href="https://www.chordpro.org/chordpro/"><img src="https://www.chordpro.org/beta/images/chordpro-gui-cli.jpg" class="img-responsive img-fluid"></a>
-                <div id="footer">
-                    <p>This is the official site for <strong>ChordPro</strong></p>
-                    <p>The reference implementation of the open <strong>ChordPro</strong> format</p>
+                <div id= "screenshot">
+                    <a href="https://www.chordpro.org/chordpro/"><img src="https://www.chordpro.org/beta/images/chordpro-gui-cli.jpg" class="img-responsive img-fluid"></a>
+                    (image should be a PNG...)
+                </div>
+                <div id="statements">
+                    <dl>
+                        <dt><i class="fa fa-music"></i><span>Any Musical Purpose</span></dt>
+                        <dd>Although initially intended for guitarists, it can be used for all kinds of musical purposes.</dd>
+                        <dt><i class="fa fa-check-circle-o"></i><span>Popular Standard</span></dt>
+                        <dd>ChordPro became a popular way to write lead sheets and many tools adopted its format.</dd>
+                        <dt><i class="fa fa-file-text-o"></i><span>Simple Text Format</span></dt>
+                        <dd>ChordPro is a simple text file format. Any text editor can be used to create and maintain them.</dd>
+                        <dt><i class="fa fa-code"></i><span>Markup</span></dt>
+                        <dd>It is possible to use markup in lyrics and other texts to change the way how these will be displayed.</dd>
+                    </dl>
+                </div>
+                <div id="examples">
+                    <h1>ChordPro In Action</h1>
+                    <p>Here you can see a couple of examples of what ChordPro can do for you with its powerful PDF creation:</p>
+                    <a data-fancybox="gallery" href="https://www.chordpro.org/beta/images/style_default.png">
+                        <img src="https://www.chordpro.org/beta/images/style_default-small.png">
+                    </a>
+                    <a data-fancybox="gallery" href="https://www.chordpro.org/beta/images/style_keyboard.png">
+                        <img src="https://www.chordpro.org/beta/images/style_keyboard-small.png">
+                    </a>
+                    <a data-fancybox="gallery" href="https://www.chordpro.org/beta/images/style_modern2.png">
+                        <img src="https://www.chordpro.org/beta/images/style_modern2-small.png">
+                    </a>
+                    <a data-fancybox="gallery" href="https://www.chordpro.org/beta/images/style_modern3.png">
+                        <img src="https://www.chordpro.org/beta/images/style_modern3-small.png">
+                    </a>
+                    <a data-fancybox="gallery" href="https://www.chordpro.org/beta/images/style_ukulele.png">
+                        <img src="https://www.chordpro.org/beta/images/style_ukulele-small.png">
+                    </a>
+                    <p>(images to be replaced with more fancy ones that should be part of the `hugo` resources)</p>
+                </div>
+                <div id="about">
+                    <h1>About ChordPro</h1>
+                    <p>In 1992 Martin Leclerc and Mario Dorion developed a simple text file format to write lead sheets, songs with lyrics and chords, and a tool to create neatly printed lead sheets out of these text files. The tool was called chord, and the text files were called chord files. It soon became a popular way to write lead sheets and many users and tools adopted this format for similar purposes. For still unknown reasons people started calling the files chordpro files.</p>
+                    <div class="information">
+                        <a href="https://www.chordpro.org/chordpro/chordpro-history/">More about the ChordPro History...</a>
+                    </div>
                 </div>
             </div>
         </div>
+        <div id="footer">
+            <p>This is the official site for <strong>ChordPro</strong></p>
+            <p>The reference implementation of the open <strong>ChordPro</strong> format</p>
+        </div>
     </body>
+</html>
