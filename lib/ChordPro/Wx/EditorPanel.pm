@@ -42,11 +42,6 @@ BUILD {
     # Single pane.
     $self->unsplit;
 
-    Wx::Event::EVT_STC_CHARADDED( $self, $self->{t_editor}->GetId,
-				  $self->can("OnCharAdded") );
-    Wx::Event::EVT_STC_CLIPBOARD_PASTE( $self, $self->{t_editor}->GetId,
-				  $self->can("OnClipBoardPaste") );
-
     $self;
 }
 
@@ -89,6 +84,14 @@ method refresh() {
     $self->{bmb_preview}->SetFocus;
 
     $self->refresh_messages;
+
+    if ( $state{have_stc} ) {
+	Wx::Event::EVT_STC_CHARADDED( $self, $self->{t_editor}->GetId,
+				      $self->can("OnCharAdded") );
+	Wx::Event::EVT_STC_CLIPBOARD_PASTE( $self, $self->{t_editor}->GetId,
+					    $self->can("OnClipBoardPaste") );
+    }
+
 }
 
 method openfile( $file, $checked=0, $actual=undef ) {
