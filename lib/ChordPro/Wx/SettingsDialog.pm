@@ -13,6 +13,7 @@ use Wx::Locale gettext => '_T';
 use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
 use Encode qw(encode_utf8);
+use File::Basename;
 
 no warnings 'redefine';		# TODO
 method new :common ( $parent, $id, $title ) {
@@ -62,6 +63,7 @@ EOD
 method enablecustom() {
     my $n = $self->{cb_configfile}->IsChecked;
     $self->{fp_customconfig}->Enable($n);
+    $self->{b_createconfig}->Enable($n);
 
     $n = $self->{cb_customlib}->IsChecked;
     $self->{dp_customlibrary}->Enable($n);
@@ -128,8 +130,7 @@ method fetch_prefs() {
       if $preferences{tmplfile};
 
     # Editor.
-    $self->{fp_editor}->SetSelectedFont
-      ( Wx::Font->new($preferences{editfont}) );
+    $self->{fp_editor}->SetSelectedFont( Wx::Font->new($preferences{editfont}) );
     $self->prefs2colours;
     $self->{cb_editorwrap}->SetValue($preferences{editorwrap});
     $self->{sp_editorwrap}->SetValue($preferences{editorwrapindent});
@@ -278,9 +279,6 @@ method need_restart() {
     state $id = wxID_ANY;
     if ( $id == wxID_ANY ) {
 	$id = Wx::NewId;
-#	$self->{w_infobar}->AddButton( $id, "Understood");
-#	Wx::Event::EVT_BUTTON( $self->{w_infobar}, $id,
-#			       sub { $self->OnIBDismiss($_[1]) } );
     }
 
     # Showing the InfoBar leads to a resize, which may cause
@@ -355,6 +353,43 @@ method OnCancel($event) {
 method OnConfigFile($event) {
     my $n = $self->{cb_configfile}->IsChecked;
     $self->{fp_customconfig}->Enable($n);
+    $self->{b_createconfig}->Enable($n);
+}
+
+method OnCreateConfig($event) {
+    $self->_OnCreateConfig( $event );
+}
+
+method _OnCreateConfig( $event, $fn = undef ) {
+    unless ( defined $fn ) {
+	my $fd = Wx::FileDialog->new( $self,
+				      "Select a new configuration file",
+				      "", "",
+				      "*.json",
+				      wxFD_SAVE|wxFD_OVERWRITE_PROMPT
+				    );
+	my $ret = $fd->ShowModal;
+	return unless $ret == wxID_OK;
+	$fn = $fd->GetPath;
+	$fd->Destroy;
+    }
+    $fn .= ".json" unless $fn =~ /\.json$/;
+    my $fd;
+    if ( open( $fd, ">:utf8", $fn )
+	 and print $fd ChordPro::Config::config_final( default => 1 )
+	 and close($fd) ) {
+	require File::Spec;
+	$self->{fp_customconfig}->SetPath( File::Spec->rel2abs($fn) );
+    }
+    else {
+	my $md = Wx::MessageDialog->new
+	  ( $self,
+	    "Error creating $fn: $!",
+	    "File open error",
+	    wxOK | wxICON_ERROR );
+	$md->ShowModal;
+	$md->Destroy;
+    }
 }
 
 method OnCustomConfigChanged($event) {
@@ -369,30 +404,14 @@ method OnCustomConfigChanged($event) {
 
     my $md = Wx::MessageDialog->new
       ( $self,
-	"The configuration file $path does not exist.\n".
-	"Create a new configuration file?",
-	"Create Configuration",
-	wxYES_NO | wxICON_INFORMATION );
+	"The configuration file ".basename($path)." does not exist.".
+	"Create it?",
+	"Missing Configuration",
+	wxYES | wxICON_QUESTION );
     my $ret = $md->ShowModal;
     $md->Destroy;
-    if ( $ret == wxID_YES ) {
-	my $fd;
-	if ( open( $fd, ">:utf8", $fn )
-	     and print $fd ChordPro::Config::config_final( default => 1 )
-	     and close($fd) ) {
-	    require File::Spec;
-	    $self->{fp_customconfig}->SetPath( File::Spec->rel2abs($path) );
-	}
-	else {
-	    my $md = Wx::MessageDialog->new
-	      ( $self,
-		"Error creating $path: $!",
-		"File open error",
-		wxOK | wxICON_ERROR );
-	    $md->ShowModal;
-	    $md->Destroy;
-	}
-    }
+    return unless $ret == wxID_YES;
+    $self->_OnCreateConfig( $event, $fn );
 }
 
 method OnCustomLib($event) {
