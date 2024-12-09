@@ -9,7 +9,7 @@ This is the official site for ChordPro, a simple text format for the notation of
 
 [Join the community](<https://groups.io/g/ChordPro>)
 
-![]({{< asset "images/chordpro-gui-cli.jpg" >}})
+![]({{< asset "images/chordpro-gui-cli.png" >}})
 
 ## ChordPro 6: The File Format Specification
 * [Overview]({{< relref "ChordPro-Introduction" >}})
