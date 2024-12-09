@@ -90,7 +90,7 @@ sub setup_menubar( $self ) {
 	    [],
 	    [ wxID_SAVE, M_EDITOR, "",
 	      "Save the current ChordPro file", "OnSave" ],
-	    [ wxID_SAVEAS, M_EDITOR, "",
+	    [ wxID_SAVEAS, M_EDITOR, "Save &As...\tShift-Ctrl-S",
 	      "Save under a different name", "OnSaveAs" ],
 	    [],
 	    [ wxID_ANY, M_EDITOR|M_SONGBOOK, "Export to PDF...",
