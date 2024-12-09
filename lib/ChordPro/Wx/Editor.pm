@@ -119,6 +119,10 @@ sub refresh( $self, $prefs = undef ) {
     }
 
     $self->style_text;
+
+    # Expert...
+    $stc->SetViewEOL( $state{vieweol} );
+    $stc->SetViewWhiteSpace( $state{viewws} );
 }
 
 sub style_text( $self ) {

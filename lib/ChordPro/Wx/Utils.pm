@@ -81,6 +81,8 @@ sub update_menubar( $self, $sel ) {
 
 sub setup_menubar( $self ) {
 
+    state $expert = $ChordPro::Wx::Config::state{preferences}{expert};
+
     state $ctl =
       [ [ wxID_FILE,
 	  [ [ wxID_NEW, M_ALL, "",
@@ -135,6 +137,15 @@ sub setup_menubar( $self ) {
 	      "Hide or show the preview pane", 1, "OnWindowPreview" ],
 	    [ wxID_ANY, M_EDITOR|M_SONGBOOK, "Show Messages",
 	      "Hide or show the messages pane", 1, "OnWindowMessages" ],
+	    $expert ?
+	    ( [],
+	      [ wxID_ANY, M_ALL, "View Line Endings",
+		"Make line endings visible for debugging", 1,
+		"OnExpertLineEndings" ],
+	      [ wxID_ANY, M_ALL, "View White Space",
+		"Make white space visible for debugging", 1,
+		"OnExpertWhiteSpace" ],
+	    ) : (),
 	    [],
 	    [ wxID_FULLSCREEN(), M_ALL, "Zoom\tShift-Ctrl-Z",
 	      "OnMaximize" ],

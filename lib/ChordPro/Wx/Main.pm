@@ -254,30 +254,24 @@ method init_recents() {
 }
 
 method init_theme() {
-    if ( defined $options->{dark} ) {
-	$preferences{editortheme} = $options->{dark} ? "dark" : "light";
-	$self->log( 'I', "Forcing $preferences{editortheme} theme" );
+    # Command line always overrides. Once.
+    if ( !defined $state{editortheme} && defined $options->{dark} ) {
+	$state{editortheme} = $options->{dark} ? "dark" : "light";
     }
-    else {
-	$preferences{editortheme} //= "light";
-	if ( Wx::SystemSettings->can("GetAppearance") ) {
-	    my $a = Wx::SystemSettings::GetAppearance();
-	    if ( $a->IsDark ) {
-		$preferences{editortheme} = "dark";
-		$self->log( 'I', "Using dark theme" );
-	    }
-	    elsif ( $a->IsUsingDarkBackground ) {
-		$preferences{editortheme} = "dark";
-		$self->log( 'I', "Using darkish theme" );
-	    }
-	    else {
-		$self->log( 'I', "Assuming $preferences{editortheme} theme" );
-	    }
+    elsif ( $preferences{editortheme} eq "auto"
+	    && Wx::SystemSettings->can("GetAppearance") ) {
+	my $a = Wx::SystemSettings::GetAppearance();
+	if ( $a->IsDark ) {
+	    $state{editortheme} = "dark";
 	}
 	else {
-	    $self->log( 'I', "Assuming $preferences{editortheme} theme" );
+	    $state{editortheme} = "light";
 	}
     }
+    else {
+	$state{editortheme} = $preferences{editortheme};
+    }
+    $self->log( 'I', "Using $state{editortheme} theme" );
 }
 
 method get_preferences() {
@@ -429,6 +423,20 @@ method OnHelp_Example($event) {
     $self->{p_editor}->openfile( CP->findres( "swinglow.cho",
 					      class => "examples" ),
 				 1, " example.cho " );
+}
+
+method OnExpertLineEndings($event) {
+    $state{vieweol} = wxTheApp->GetTopWindow->GetMenuBar->FindItem($event->GetId)->IsChecked;
+    if ( $state{mode} eq "editor" ) {
+	$self->{p_editor}->{t_editor}->SetViewEOL($state{vieweol});
+    }
+}
+
+method OnExpertWhiteSpace($event) {
+    $state{viewws} = wxTheApp->GetTopWindow->GetMenuBar->FindItem($event->GetId)->IsChecked;
+    if ( $state{mode} eq "editor" ) {
+	$self->{p_editor}->{t_editor}->SetViewWhiteSpace($state{viewws});
+    }
 }
 
 method OnHelp_Site($event) {
