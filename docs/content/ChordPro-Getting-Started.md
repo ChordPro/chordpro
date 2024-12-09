@@ -10,20 +10,30 @@ basically a file transformation program. It reads a file containing
 lyrics and chords according to the *ChordPro File Standard* and
 produces a neatly formatted PDF document that you can view and print.
 
-## The Graphical Application
+## The graphical application
+
+![]({{< asset "images/chordpro-gui-main.png" >}})
 
 We hope you don’t have to read this chapter too often because we made a lot effort to make it *intuitive* for you. It gives you a good start to see the power of the `ChordPro` format with a lot of options to tweak it to your needs.
 
-However, this is just *start*. If you **really** want to tweak your songs to your needs you have to get your hands dirty and create your own [configuration]({{< relref "chordpro-configuration" >}}) or even dive into the [command line](#the-command-line-usage) for *real* power. 
+However, this is just *start*. If you **really** want to tweak your songs to your needs you have to get your hands dirty and create your own [configuration]({{< relref "chordpro-configuration-create-gui" >}}) or even dive into the [command line](#the-command-line-usage) for *real* power. 
 
 `ChordPro` has both covered and in this chapter you can learn more about the terminology that is the base of the ChordPro reference application.
 
+### Basic Usage
+
+When you open ChordPro you have several options to get started.
+
+- Create a new song
+- Open an existing song
+- Create a *Songbook* from a folder with ChordPro files
+- Open recent files
 
 ### Settings
 
 From the menu bar, choose `Edit` > `Settings…`. This will show the settings dialog.
 
-*On macOS it is off course in another place; we care about such details.*
+*On macOS, the Settings are in the `ChordPro` menu.*
 
 ![]({{< asset "images/chordpro-gui-settings-notebooks.png" >}})
 
@@ -33,7 +43,7 @@ From the menu bar, choose `Edit` > `Settings…`. This will show the settings di
 
 This prevents ChordPro from processing system wide, user specific and
 song specific config files. Checking this will make sure that ChordPro
-only uses the configs set in the Preferences.
+only uses the configs set in the `Settings`.
 
 ##### Preset Configuration
 
@@ -42,12 +52,12 @@ If enabled, you can choose one or more preset configs to be used.
 ##### Custom Configuration File
 
 If enabled, use the `…` button to choose a custom config file. See
-[Creating a config (GUI)]({{< relref "Chordpro-Configuration-Create-GUI" >}}) how to get started
+[Create a configuration using the GUI]({{< relref "Chordpro-Configuration-Create-GUI" >}}) how to get started
 with a custom config.
 
 ##### Custom ChordPro Library
 
-ChordPro has a built-in library with configs and other data. With `Custom library` you can add an additional location where to look for data.
+ChordPro has a built-in library with configs and other data. With a `Custom library` you can add an additional location where to look for data.
 
 #### Notations
 
