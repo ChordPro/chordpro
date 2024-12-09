@@ -206,7 +206,6 @@ method newfile() {
     }
 
     $self->{t_editor}->SetText($content) if length($content);
-    $self->{t_editor}->EmptyUndoBuffer;
 
     $self->log( 'S', "New song: $title");
     $state{windowtitle} = $title;
@@ -226,7 +225,7 @@ method check_source_saved() {
     if ( $state{currentfile} ) {
 	my $md = Wx::MessageDialog->new
 	  ( $self,
-	    "File " . $state{currentfile} . " has been changed.\n".
+	    "File " . basename($state{currentfile}) . " has been changed.\n".
 	    "Do you want to save your changes?",
 	    "File has changed",
 	    0 | wxCANCEL | wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION );
@@ -275,7 +274,6 @@ method save_file( $file = undef ) {
 	    $fd->Destroy;
 	}
 	return unless defined $file;
-
 	if ( $self->{t_editor}->SaveFile($file) ) {
 	    $self->{t_editor}->SetModified(0);
 	    $state{currentfile} = $file;
