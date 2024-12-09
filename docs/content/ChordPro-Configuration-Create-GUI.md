@@ -1,17 +1,14 @@
 ---
-title: "Creating a config (GUI)"
-description: "Creating a config (GUI)"
+title: "Create a configuration using the GUI"
+description: "Create a configuration using the GUI"
 ---
 
-# Creating a config (GUI)
-
-_Note: This does not work on Mac OS/X due to system constraints_
-
-## Create a sample configuration using the GUI
+# Create a configuration using the GUI
 
 _Note that the appearance of dialogs and file names may differ between systems._
 
-From the `Edit` menu choose `Preferences…`.
+From the `Edit` menu choose `Settingss…`.  
+*(On macOS, the Settings are in the `ChordPro` menu)*
 
 ![]({{< asset "images/prf_cr_cfg_1.png" >}})
 
