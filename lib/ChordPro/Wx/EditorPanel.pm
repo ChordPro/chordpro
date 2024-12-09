@@ -351,8 +351,12 @@ method embrace( $pre, $post ) {
     }
 }
 
+method nl() {
+    ("\r\n","\r","\n")[ $self->{t_editor}->GetEOLMode ];
+}
+
 method embrace_directive($dir) {
-    $self->embrace( "{$dir: ", "}\n" );
+    $self->embrace( "{$dir: ", "}".$self->nl );
 }
 
 method embrace_section($section) {
@@ -367,8 +371,9 @@ method embrace_section($section) {
 	$section = $dialog->GetValue;
     }
 
-    $self->embrace( "{start_of_$section}\n",
-		    "\n{end_of_$section}\n" );
+    my $nl = $self->nl;
+    $self->embrace( "{start_of_$section}$nl",
+		    $nl."{end_of_$section}".$nl );
 }
 
 method save_preferences() { 1 }
@@ -454,6 +459,23 @@ method OnClipBoardPaste($event) {
 	$text =~ s/(.+\n)\n/$1/g;
     }
     $event->SetString($text);
+}
+
+method OnCloseSection($event) {
+    my $stc = $self->{t_editor};
+    my $ln = $stc->GetCurrentLine;
+    while ( $ln > 0 ) {
+	$ln--;
+	my $line = $stc->GetLine($ln);
+	if ( $line =~ /^\{(\s*)start_of_(\w+(?:-\w*!?)?)/ ) {
+	    $stc->AddText( "{$1end_of_$2}" . $self->nl );
+	    last;
+	}
+	elsif ( $line =~ /^\{(\s*)so(\w(?:-\w*!?)?)/ ) {
+	    $stc->AddText( "{$1eo$2}" . $self->nl );
+	    last;
+	}
+    }
 }
 
 method OnCut($event) {
