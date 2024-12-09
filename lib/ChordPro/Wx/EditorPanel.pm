@@ -264,7 +264,7 @@ method save_file( $file = undef ) {
 	    my $fd = Wx::FileDialog->new
 	      ($self, _T("Choose output file"),
 	       "", $state{currentfile}//"",
-	       "*.cho",
+	       "*".$preferences{chordproext},
 	       0|wxFD_SAVE|wxFD_OVERWRITE_PROMPT,
 	       wxDefaultPosition);
 	    my $ret = $fd->ShowModal;
@@ -474,7 +474,8 @@ method OnExternalEditor($event) {
 
     # Save in temp file and call editor.
     use File::Temp qw(tempfile);
-    ( undef, my $file ) = tempfile( SUFFIX => ".cho", OPEN => 0 );
+    ( undef, my $file ) = tempfile( SUFFIX => $preferences{chordproext},
+				    OPEN => 0 );
     $e->SaveFile($file);
     my @st = stat($file);
     $self->log( 'I', "Running $editor on $file (" .
