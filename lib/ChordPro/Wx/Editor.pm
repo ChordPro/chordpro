@@ -63,7 +63,7 @@ sub refresh( $self, $prefs = undef ) {
     Wx::Event::EVT_STC_STYLENEEDED( $stc, wxID_ANY,
 				    sub { OnStyleNeeded($self, $_[1]) } );
 
-    my $theme = $prefs->{editortheme};
+    my $theme = $state{editortheme};
     my $c = $prefs->{editcolour}{$theme};
     my $fg = Wx::Colour->new($c->{fg});
     my $bg = Wx::Colour->new($c->{bg});

@@ -26,6 +26,11 @@ method new :common ( $parent, $id, $title ) {
     # Do not DeletePage until we're sure none of the widgets are referenced.
     $self->{nb_preferences}->RemovePage(4)
       unless $preferences{pdfviewer};
+
+    unless ( has_appearance() ) {
+	$self->{ch_theme}->Delete(2); # Follow System
+    }
+
     $self;
 }
 use warnings 'redefine';	# TODO
@@ -290,9 +295,17 @@ method need_restart() {
     $self->SetSize([$w,-1]);
 }
 
+method get_selected_theme() {
+    (qw(light dark auto))[$self->{ch_theme}->GetSelection];
+}
+
+method set_selected_theme($theme) {
+    $self->{ch_theme}->SetSelection
+      ( $theme eq "light" ? 0 : $theme eq "dark" ? 1 : 2 );
+}
+
 method colours2prefs {
-    my $theme =
-      $preferences{editortheme} = $self->{cb_darkmode}->IsChecked ? "dark" : "light";
+    my $theme = $state{editortheme} = $self->get_selected_theme;
     $preferences{editcolour}{$theme}{fg} = $self->{cp_fg}->GetAsHTML;
     $preferences{editcolour}{$theme}{bg} = $self->{cp_bg}->GetAsHTML;
     if ( $state{have_stc} ) {
@@ -303,9 +316,21 @@ method colours2prefs {
     $self->{t_editor}->refresh;
 }
 
-method prefs2colours {
-    my $theme = $preferences{editortheme};
-    $self->{cb_darkmode}->SetValue( $theme eq "dark" );
+method prefs2colours() {
+
+    $self->set_selected_theme( $preferences{editortheme} );
+    if ( $preferences{editortheme} eq "auto" ) {
+	$self->GetParent->init_theme;
+	$self->{l_theme}->SetLabel( ucfirst $state{editortheme} );
+    }
+    else {
+	$state{editortheme} = $preferences{editortheme};
+	$self->{l_theme}->SetLabel("");
+    }
+
+    my $theme = $state{editortheme};
+    die unless $theme eq "light" || $theme eq "dark";
+
     $self->{cp_fg}->SetColour($preferences{editcolour}{$theme}{fg});
     $self->{cp_bg}->SetColour($preferences{editcolour}{$theme}{bg});
     if ( $state{have_stc} ) {
@@ -528,8 +553,7 @@ method OnColourAnnBGChanged( $event ) {
     $self->colourchanged("annbg");
 }
 
-method OnDarkModeChanged( $event ) {
-    $preferences{editortheme} = $self->{cb_darkmode}->IsChecked ? "dark" : "light";
+method OnThemeChanged( $event ) {
     $self->prefs2colours;
 }
 
@@ -577,8 +601,7 @@ method OnPDFViewer($event) {
 
 method OnSysColourChanged($event) {
     $self->GetParent->init_theme;
-    $self->{cb_darkmode}->SetValue( $preferences{editortheme} eq "dark" );
-    $self->prefs2colours;
+    $self->OnThemeChanged;
     $event->Skip;
 }
 
