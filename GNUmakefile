@@ -53,6 +53,9 @@ WINDIR := /Users/Johan/Documents/${PROJECT}
 WINDST := /mnt/c${WINDIR}
 #WINDST := w10:${PROJECT}
 to_win : resources
+	for mnf in ${STDMNF} ; do \
+	    rsync ${RSYNC_ARGS} --files-from=$$mnf ./ ${WINDST}/; \
+	done
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.PP   \
 	  --exclude=pp/macos/** \
 	  --exclude=pp/linux/** --exclude=pp/debian/** \
@@ -62,6 +65,9 @@ to_win : resources
 MACHOST := macky
 MACDST  := ${MACHOST}:Documents/${PROJECT}
 to_mac : resources
+	for mnf in ${STDMNF} ; do \
+	    rsync ${RSYNC_ARGS} --files-from=$$mnf ./ ${MACDST}/; \
+	done
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.PP   \
 	  --exclude=pp/windows/** \
 	  --exclude=pp/debian/** \
