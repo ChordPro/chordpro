@@ -41,7 +41,9 @@ use ChordPro::Wx::Utils;
 
 sub refresh( $self, $prefs = undef ) {
     my $stc = $self;
+
     $prefs //= \%preferences;
+    $state{rti} = ChordPro::runtime_info();
 
     $stc->SetLexer(wxSTC_LEX_CONTAINER);
     $stc->SetKeyWords(0,
