@@ -51,9 +51,11 @@ If enabled, you can choose one or more preset configs to be used.
 
 ##### Custom Configuration File
 
-If enabled, use the `…` button to choose a custom config file. See
-[Create a configuration using the GUI]({{< relref "Chordpro-Configuration-Create-GUI" >}}) how to get started
-with a custom config.
+![]({{< asset "images/chordpro-gui-settings-custom configuration.png" >}})
+
+If enabled, use the `Browse` button to choose your custom configuration file. 
+
+See [Create a configuration using the GUI]({{< relref "Chordpro-Configuration-Create-GUI" >}}) how to get started with a `New` custom config.
 
 ##### Custom ChordPro Library
 
