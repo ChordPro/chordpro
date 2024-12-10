@@ -441,10 +441,10 @@ method OnCharAdded( $event ) {
 	# Complete a chord.
 	my $pos = $stc->PositionBefore($stc->GetCurrentPos);
 	my $p0 = $stc->BraceMatch($pos);
-	return if $p0 < 0;
+	return if $p0 < $stc->PositionFromLine($ln);
 	$p0 = $stc->PositionAfter($p0);
 	my $t = $stc->GetTextRange( $p0, $pos );
-
+	return if $t =~ /\s/;
 	if ( $t =~ s/(^|\/)([a-hu])/sprintf("%s%s", $1, uc($2))/ge ) {
 	    $stc->SetSelection( $p0, $pos );
 	    $stc->ReplaceSelection($t);
@@ -471,7 +471,6 @@ method OnCharAdded( $event ) {
 	if ( $txt =~ /^(\{\s*)(\w+)(-\w+!?)?([ :\}])$/
 	     &&
 	     ( my $c = $state{rti}{directive_abbrevs}{$2} ) ) {
-	    warn("XXX »$4«\n");
 	    $stc->SetSelection( $pos0, $pos );
 	    $stc->ReplaceSelection( $1.$c.($3//"").
 				    ($4 eq "}" ? "}" : ": " ) );

@@ -158,7 +158,7 @@ sub style_text( $self ) {
     $style->( qr/^(\{)([-\w!]+)(.*)(\})/m, 3, 5, 6, 3 );
     $style->( qr/^(\{)([-\w!]+)([: ])(.*)(\})/m, 3, 5, 3, 6, 3 );
     # Chords.
-    $style->( qr/(\[)([^\[\]]*)(\])/m, 3, 4, 3 );
+    $style->( qr/(\[)([^\[\]\s]*)(\])/m, 3, 4, 3 );
 }
 
 sub prepare_annotations( $self ) {
