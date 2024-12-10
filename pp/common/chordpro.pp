@@ -49,6 +49,11 @@
 --module=JavaScript::QuickJS::Date
 --module=JavaScript::QuickJS::RegExp
 
+# Same for Data::Printer
+--module=Data::Printer
+--module=Data::Printer::Theme::Material
+--module=Data::Printer::Theme::Zellner
+
 # Resources.
 --addfile=../../lib/ChordPro/res;res
 
