@@ -305,7 +305,10 @@ method set_selected_theme($theme) {
 }
 
 method colours2prefs {
-    my $theme = $state{editortheme} = $self->get_selected_theme;
+    my $theme = $state{editortheme};
+    $self->GetParent->init_theme;
+    die("INTERNAL ERROR: invalid theme1\n")
+      unless $theme eq "light" || $theme eq "dark";
     $preferences{editcolour}{$theme}{fg} = $self->{cp_fg}->GetAsHTML;
     $preferences{editcolour}{$theme}{bg} = $self->{cp_bg}->GetAsHTML;
     if ( $state{have_stc} ) {
@@ -329,7 +332,8 @@ method prefs2colours() {
     }
 
     my $theme = $state{editortheme};
-    die unless $theme eq "light" || $theme eq "dark";
+    die("INTERNAL ERROR: invalid theme2\n")
+      unless $theme eq "light" || $theme eq "dark";
 
     $self->{cp_fg}->SetColour($preferences{editcolour}{$theme}{fg});
     $self->{cp_bg}->SetColour($preferences{editcolour}{$theme}{bg});
@@ -554,6 +558,7 @@ method OnColourAnnBGChanged( $event ) {
 }
 
 method OnThemeChanged( $event ) {
+    $preferences{editortheme} = $self->get_selected_theme;
     $self->prefs2colours;
 }
 

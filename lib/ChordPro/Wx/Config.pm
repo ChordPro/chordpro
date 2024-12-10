@@ -234,9 +234,14 @@ method Load :common {
 			$preferences{editcolour}{light}{s5} = $c[6];
 			$preferences{editcolour}{light}{annbg} = $c[7];
 			$preferences{editcolour}{light}{annfg} = "#ff0000";
+			$preferences{editcolour}{light}{numbg} =
+			  $preferences{editcolour}{dark}{numfg} = "#e8e8e8";
+			$preferences{editcolour}{light}{numfg} =
+			  $preferences{editcolour}{dark}{numbg} = "#303030";
 		    }
 		}
 		elsif ( $entry =~ /^(editcolour)_(\w+)_(\w+)$/ ) {
+		    $cb->DeleteEntry($entry), next if $2 eq "auto";
 		    $preferences{$1}{$2}{$3} = $value;
 		}
 		else {

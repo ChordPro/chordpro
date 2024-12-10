@@ -70,7 +70,7 @@ sub refresh( $self, $prefs = undef ) {
 
     $stc->SetBackgroundColour($bg);
     $stc->SetCaretForeground($fg);
-    # $stc->SetDefaultStyle( Wx::TextAttr->new( $c[0], $bg ) );	# NYI
+
     $stc->StyleSetForeground( wxSTC_STYLE_DEFAULT, $fg );
     $stc->StyleSetBackground( wxSTC_STYLE_DEFAULT, $bg );
     $stc->StyleClearAll;

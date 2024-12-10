@@ -258,14 +258,19 @@ method init_theme() {
     if ( !defined $state{editortheme} && defined $options->{dark} ) {
 	$state{editortheme} = $options->{dark} ? "dark" : "light";
     }
-    elsif ( $preferences{editortheme} eq "auto"
-	    && Wx::SystemSettings->can("GetAppearance") ) {
-	my $a = Wx::SystemSettings::GetAppearance();
-	if ( $a->IsDark ) {
-	    $state{editortheme} = "dark";
+    elsif ( $preferences{editortheme} eq "auto" ) {
+	if ( Wx::SystemSettings->can("GetAppearance") ) {
+	    my $a = Wx::SystemSettings::GetAppearance();
+	    if ( $a->IsDark ) {
+		$state{editortheme} = "dark";
+	    }
+	    else {
+		$state{editortheme} = "light";
+	    }
 	}
 	else {
-	    $state{editortheme} = "light";
+	    # Auto and no clue? Use light.
+	    $preferences{editortheme} = $state{editortheme} = "light";
 	}
     }
     else {
