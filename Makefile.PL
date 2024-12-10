@@ -89,7 +89,7 @@ WriteMakefile
  TEST_REQUIRES  => {
 		    'Test::More'                  => 0,
 		    'JSON::PP'	                  => 2.27203,
-		    'SVGPDF'			  => 0.089,
+		    # 'SVGPDF'			  => 0.089,
 		    'String::Interpolate::Named'  => 1.01,
 		    'Storable'			  => 3.08,
 		    'Object::Pad'		  => 0.78,
