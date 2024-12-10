@@ -7,7 +7,7 @@ use utf8;
 
 class  SVGPDF;
 
-our $VERSION = '0.088.1';
+our $VERSION = '0.090';
 
 =head1 NAME
 

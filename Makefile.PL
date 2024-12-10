@@ -50,7 +50,7 @@ WriteMakefile
 		    'Text::Layout'		  => 0.038,
 		    # Optional for Text::Layout; let's have it.
 		    'HarfBuzz::Shaper'		  => 0.026,
-		    'SVGPDF'			  => 0.089,
+		    # 'SVGPDF'			  => 0.089,
 		    'JSON::PP'			  => 2.27203,
 		    'JSON::XS'			  => 4.03,
 		    'String::Interpolate::Named'  => 1.030,
