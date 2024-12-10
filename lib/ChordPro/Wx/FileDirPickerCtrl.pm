@@ -61,7 +61,7 @@ BUILD {
 				   "",
 				   wxDefaultPosition,
 				   wxDefaultSize,
-				   0, # |wxTE_READONLY ?
+				   0|wxTE_READONLY
 				 );
 
     my $browse = Wx::Button->new( $self, wxID_ANY, "Browse",

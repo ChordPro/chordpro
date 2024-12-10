@@ -10,14 +10,14 @@ class ChordPro::Wx::SettingsDialog
 
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
+use ChordPro::Paths;
 use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
 use Encode qw(encode_utf8);
 use File::Basename;
+use File::Spec;
 
-no warnings 'redefine';		# TODO
-method new :common ( $parent, $id, $title ) {
-    my $self = $class->SUPER::new($parent, $id, $title);
+BUILD ( $parent, $id, $title ) {
     $self->refresh;
     $self->{sz_prefs_outer}->Fit($self);
     $self->Layout;
@@ -33,7 +33,6 @@ method new :common ( $parent, $id, $title ) {
 
     $self;
 }
-use warnings 'redefine';	# TODO
 
 # BUilt-in descriptions for some notation systems.
 my $notdesc =
@@ -403,11 +402,10 @@ method _OnCreateConfig( $event, $fn = undef ) {
 	$fd->Destroy;
     }
     $fn .= ".json" unless $fn =~ /\.json$/;
-    my $fd;
-    if ( open( $fd, ">:utf8", $fn )
-	 and print $fd ChordPro::Config::config_final( default => 1 )
-	 and close($fd) ) {
-	require File::Spec;
+    use File::Copy;
+    my $cfg = File::Spec->catfile( CP->findresdirs("config")->[-1],
+				   "chordpro.json" );
+    if ( copy( $cfg, $fn ) ) {
 	$self->{fp_customconfig}->SetPath( File::Spec->rel2abs($fn) );
     }
     else {
