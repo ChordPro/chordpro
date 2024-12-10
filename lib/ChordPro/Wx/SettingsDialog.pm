@@ -606,7 +606,7 @@ method OnPDFViewer($event) {
 
 method OnSysColourChanged($event) {
     $self->GetParent->init_theme;
-    $self->OnThemeChanged;
+    $self->OnThemeChanged($event);
     $event->Skip;
 }
 
