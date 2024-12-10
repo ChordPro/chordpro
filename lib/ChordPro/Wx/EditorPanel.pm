@@ -158,6 +158,10 @@ method openfile( $file, $checked=0, $actual=undef ) {
 	$self->{l_status}->SetToolTip($file);
 	$self->log( 'S', "Loaded: $file (" . plural($n, " line") . ")");
     }
+    if ( $state{have_stc} && $preferences{expert} ) {
+	$self->log( 'S', "Line endings: " .
+		    (qw(CRLF CR LF))[$self->{t_editor}->GetEOLMode] );
+    }
     $self->GetParent->SetTitle( $state{windowtitle} = $actual);
 
     # Default is no transposing.
@@ -208,6 +212,10 @@ method newfile() {
     $self->{t_editor}->SetText($content) if length($content);
 
     $self->log( 'S', "New song: $title");
+    if ( $state{have_stc} && $preferences{expert} ) {
+	$self->log( 'S', "Line endings: " .
+		    (qw(CRLF CR LF))[$self->{t_editor}->GetEOLMode] );
+    }
     $state{windowtitle} = $title;
     $self->{l_status}->SetLabel($title);
     $self->{l_status}->SetToolTip($state{currentfile});
@@ -301,7 +309,10 @@ method preview( $args, %opts ) {
     my $preview_cho = $self->prv->preview_cho;
     unlink($preview_cho);
     my $fd;
-    if ( open( $fd, '>:utf8', $preview_cho )
+    # The text that we get from the editor can have CRLF line endings,
+    # that on Windows will result in double line ends. Write with
+    # 'raw' layer.
+    if ( open( $fd, '>:utf8:raw', $preview_cho )
 	 and print $fd ( $self->{t_editor}->GetText )
 	 and close($fd) ) {
 	$self->prv->preview( $args, %opts );
