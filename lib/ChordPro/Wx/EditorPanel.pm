@@ -560,7 +560,8 @@ method OnRedo($event) {
 }
 
 method OnSave($event) {
-    return unless $self->{t_editor}->IsModified;
+    return unless $self->{t_editor}->IsModified
+      || !defined $state{currentfile};
     $self->save_file( $state{currentfile} )
 }
 
