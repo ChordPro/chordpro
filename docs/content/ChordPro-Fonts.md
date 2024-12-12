@@ -15,14 +15,16 @@ the default config file in section `pdf` there is a section `fonts` that
 has a specification for the page titles:
 
     title {
-            name : Times-Bold
+            name : serif
             size : 14
     }
 
-The `name` designates the built-in font `Times-Roman`.
+The `name` designates the built-in font `serif`.
 Alternatively you can use `file` to designate a font file on your
 system, or `description` to find a suitable font using _font families_.
 The order of precedence is `file`, `description`, and `name`.
+
+**Note** The use of `name` is strongly discouraged.
 
 ## Method 1: Using a font description
 
@@ -47,9 +49,11 @@ The system will then try to find a font file for this font, e.g.
 not be found.
 
 Generic family names (*aliases*) can be used instead of existing family
-names. ChordPro predefines `serif` as a serif font family, and leave it to the
-implementation to find an appropriate font for it. Other predefined
-families are `sans` and `mono`.
+names. ChordPro predefines the following font families:
+
+* `sans` and `sans-serif`, a modern sans-serif font;
+* `serif`, a modern serif font;
+* `mono` and `monospace`, a monospace font.
 
 ### Why is using font descriptions important?
 
@@ -131,23 +135,15 @@ to TrueType or OpenType using a tool like
 
 ## Method 3: Using a built-in font
 
-Built-in fonts are specified with `"name"`. The ChordPro Reference
-Implementation supports the following built-in font names:
+Built-in fonts are specified with `"name"`. For legacy reasons the
+following names are understood:
 
-* Courier, Courier-Bold, Courier-BoldOblique, Courier-Oblique
-* Helvetica, Helvetica-Bold, Helvetica-BoldOblique, Helvetica-Oblique
-* Times-Roman, Times-Bold, Times-BoldItalic, Times-Italic 
-* Symbol, Webdings, Wingdings, ZapfDingbats
-
-**Note** that using built-in font names has some disadvantages. The
-built-in fonts have only a limited number of characters (glyphs) and
-may not be suitable for anything but English and Western European
-languages. The quality of the output is less, since the built-in fonts
-do not support kerning.
-
-ChordPro comes with a set of replacements for these fonts that it will
-use instead of the built-in fonts. Nevertheless it is still better to
-use the description method described above.
+* Courier, Courier-Bold, Courier-BoldOblique, Courier-Oblique  
+  Same as `mono`.
+* Helvetica, Helvetica-Bold, Helvetica-BoldOblique, Helvetica-Oblique  
+  Same as `sans`.
+* Times-Roman, Times-Bold, Times-BoldItalic, Times-Italic  
+  Same as `serif`.
 
 # Examples
 
@@ -159,59 +155,6 @@ output](http://phoenix.squirrel.nl:1313/chordpro-configuration-pdf/).
 Each example consists of two parts: the mapping of font families, 
 and associating output elements to font families. The latter part is
 **identical in all examples** but included for convenience.
-
-## Example setup using built-in fonts
-
-````
-  // "fontconfig" maps members of font families to built-in fonts.
-
-  fontconfig {
-	serif {
-	  ""         : Times-Roman
-	  bold       : Times-Bold
-	  italic     : Times-Italic
-	  bolditalic : Times-BoldItalic
-	}
-	"sans, sans-serif" {
-	  ""         : Helvetica
-	  bold       : Helvetica-Bold
-	  italic     : Helvetica-Oblique
-	  bolditalic : Helvetica-BoldOblique
-	}
-	"mono, monospace" {
-	  ""         : Courier
-	  bold       : Courier-Bold
-	  italic     : Courier-Italic
-	  bolditalic : Courier-BoldItalic
-	}
-	dingbats.        : ZapfDingbats
-  }
-
-  // "fonts" associates output elements to font families as defined in
-  // "fontconfig" above.
-  // Not all elements need to be associated since they default to other
-  // settings.
-
-  fonts {
-	title          : "serif bold 14"
-	subtitle       : "serif 11"
-	text           : "serif 12"
-	chord          : "sans italic 10"
-	comment_italic : "sans italic 12"
-	tab            : "monospace 10"
-	toc            : "serif 11"
-	grid           : "sans 10"
-	chordfingers   : "dingbats 10"
-	comment {
-	  description  : "sans 12"
-	  background   : #E5E5E5
-	}
-	comment_box {
-	  description  : "sans 12"
-	  frame        : 1
-	}
-  }
-````
 
 ## Example setup using TrueType fonts (Linux)
 
@@ -431,3 +374,59 @@ update.
 // serif         --  /usr/share/fonts/dejavu/DejaVuSerif.ttf
 // serif bold    --  /usr/share/fonts/dejavu/DejaVuSerif-Bold.ttf
 ````
+
+## Example setup using built-in fonts
+
+**Note** This is strongly discouraged.
+
+````
+  // "fontconfig" maps members of font families to built-in fonts.
+
+  fontconfig {
+	serif {
+	  ""         : Times-Roman
+	  bold       : Times-Bold
+	  italic     : Times-Italic
+	  bolditalic : Times-BoldItalic
+	}
+	"sans, sans-serif" {
+	  ""         : Helvetica
+	  bold       : Helvetica-Bold
+	  italic     : Helvetica-Oblique
+	  bolditalic : Helvetica-BoldOblique
+	}
+	"mono, monospace" {
+	  ""         : Courier
+	  bold       : Courier-Bold
+	  italic     : Courier-Italic
+	  bolditalic : Courier-BoldItalic
+	}
+	dingbats.        : ZapfDingbats
+  }
+
+  // "fonts" associates output elements to font families as defined in
+  // "fontconfig" above.
+  // Not all elements need to be associated since they default to other
+  // settings.
+
+  fonts {
+	title          : "serif bold 14"
+	subtitle       : "serif 11"
+	text           : "serif 12"
+	chord          : "sans italic 10"
+	comment_italic : "sans italic 12"
+	tab            : "monospace 10"
+	toc            : "serif 11"
+	grid           : "sans 10"
+	chordfingers   : "dingbats 10"
+	comment {
+	  description  : "sans 12"
+	  background   : #E5E5E5
+	}
+	comment_box {
+	  description  : "sans 12"
+	  frame        : 1
+	}
+  }
+````
+
