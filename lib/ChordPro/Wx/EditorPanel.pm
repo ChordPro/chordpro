@@ -380,11 +380,15 @@ method embrace( $pre, $post, $nl = 1 ) {
 	$ctrl->SetSelection( $pos, $pos );
     }
     else {
-	my $ln = $ctrl->GetCurrentLine;
-	my $line = $ctrl->GetLine($ln);
-	unless ( $line eq "" ) {
-	    $ctrl->LineEnd;
-	    $ctrl->CharRight;
+	if ( $nl ) {
+	    my $ln = $ctrl->GetCurrentLine;
+	    my $line = $ctrl->GetLine($ln);
+	    unless ( $line =~ /^\R*\z/ ) {
+		$ctrl->LineEnd;
+		$ctrl->CharRight;
+		$ctrl->NewLine;
+		$ctrl->CharLeft;
+	    }
 	}
 	$ctrl->AddText($pre);
 	my $pos = $ctrl->GetCurrentPos;
@@ -398,7 +402,7 @@ method nl() {
 }
 
 method embrace_directive($dir) {
-    $self->embrace( "{$dir: ", "}".$self->nl );
+    $self->embrace( "{$dir: ", "}" );
 }
 
 method embrace_section($section) {
@@ -415,7 +419,7 @@ method embrace_section($section) {
 
     my $nl = $self->nl;
     $self->embrace( "{start_of_$section}$nl",
-		    $nl."{end_of_$section}".$nl );
+		    $nl."{end_of_$section}" );
 }
 
 method save_preferences() { 1 }
