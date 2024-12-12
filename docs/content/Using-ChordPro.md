@@ -1,12 +1,12 @@
 ---
-title: "Using ChordPro"
-description: "Using ChordPro"
+title: "Using the ChordPro CLI"
+description: "Using the ChordPro CLI"
 ---
 
-# Using ChordPro
+# Using the ChordPro CLI
 
 First of all, please read the
-[Getting Started]({{< relref "ChordPro-Getting-Started" >}}) page.
+[Getting started with the CLI]({{< relref "ChordPro-Getting-Started-CLI" >}}) page.
 
 ## Command line options
 
