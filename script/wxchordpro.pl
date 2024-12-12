@@ -4,8 +4,8 @@
 
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
-# Last Modified On: Sat Dec  7 16:11:10 2024
-# Update Count    : 335
+# Last Modified On: Thu Dec 12 07:57:36 2024
+# Update Count    : 336
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -78,6 +78,7 @@ sub app_options {
 		      'webview!',
 		      'wxtng!',
 		      'dark!',
+		      'new',
 		     'quit',
 		     'trace',
 		     'help|?',

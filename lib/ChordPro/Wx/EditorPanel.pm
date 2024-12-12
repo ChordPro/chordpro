@@ -136,6 +136,7 @@ method openfile( $file, $checked=0, $actual=undef ) {
     else {
 	$self->{t_editor}->ShowPosition(0); # doesn't work?
     }
+    $self->{t_editor}->SetFocus;
 
     if ( $actual =~ /^\s+.*\s+$/ ) {
 	$state{currentfile} = undef;
@@ -173,13 +174,25 @@ method openfile( $file, $checked=0, $actual=undef ) {
     return 1;
 }
 
-method newfile() {
-    delete $state{currentfile};
-
+method newfile( $file = undef ) {
     my $title = "New Song";
+
+    if ( defined($file) ) {
+	my $t = $file;
+	$t =~ s/\.\w+//;
+	$t =~ s/_/ /g;
+	$t =~ s/\s+/ /g;
+	$t =~ s/^\s+//;
+	$t =~ s/\s+$//;
+	$title = join( " ", map { ucfirst($_) } split( ' ', $t ) );
+    }
+    else {
+	delete $state{currentfile};
+    }
+
     $state{windowtitle} = $title;
     $self->{l_status}->SetLabel($title);
-    my $content = "{title: New Song}\n";
+    my $content = "{title: $title}";
     $self->{t_editor}->SetText($content);
 
     my $file = $preferences{tmplfile};
@@ -192,11 +205,14 @@ method newfile() {
 	    $self->log( 'E', "Cannot open template $file: $!" );
 	}
     }
+    elsif ( 1 ) {
+	$content = "{title: $title}";
+    }
     else {
 	require ChordPro::Wx::NewSongDialog;
 	unless ( $self->{d_newfile} ) {
 	    $self->{d_newfile} = ChordPro::Wx::NewSongDialog->new
-	      ( $self, wxID_ANY, "New Song" );
+	      ( $self, wxID_ANY, $title );
 	    restorewinpos( $self->{d_newfile}, "newfile" );
 	    $self->{d_newfile}->set_title($title);
 	}
@@ -209,7 +225,14 @@ method newfile() {
 	}
     }
 
-    $self->{t_editor}->SetText($content) if length($content);
+    for ( $self->{t_editor} ) {
+	$content =~ s/[\n\r]*\Z//;
+	$_->SetText($content) if length($content);
+	$_->DocumentEnd;
+	$_->NewLine;
+	$_->SetSelection(0,0);
+	$_->SetFocus;
+    }
 
     $self->log( 'S', "New song: $title");
     if ( $state{have_stc} && $preferences{expert} ) {
@@ -223,6 +246,8 @@ method newfile() {
     $preferences{xpose_acc} = 0;
     $self->{sw_lr}->Unsplit(undef) if $self->{sw_lr}->IsSplit;
     $self->{sw_tb}->Unsplit(undef) if $self->{sw_tb}->IsSplit;
+
+    1;
 }
 
 method check_source_saved() {
@@ -340,7 +365,7 @@ method check_preview_saved() {
     1;
 }
 
-method embrace( $pre, $post ) {
+method embrace( $pre, $post, $nl = 1 ) {
     my $ctrl = $self->{t_editor};
 
     my ( $from, $to ) = $ctrl->GetSelection;
@@ -355,6 +380,12 @@ method embrace( $pre, $post ) {
 	$ctrl->SetSelection( $pos, $pos );
     }
     else {
+	my $ln = $ctrl->GetCurrentLine;
+	my $line = $ctrl->GetLine($ln);
+	unless ( $line eq "" ) {
+	    $ctrl->LineEnd;
+	    $ctrl->CharRight;
+	}
 	$ctrl->AddText($pre);
 	my $pos = $ctrl->GetCurrentPos;
 	$ctrl->AddText($post);
