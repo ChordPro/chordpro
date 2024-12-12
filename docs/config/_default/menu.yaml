@@ -50,7 +50,7 @@ sidebar:
 - identifier: Using-ChordPro
   parent: impl
   weight: 250
-  title: Full User guide
+  title: CLI User guide
 
 - title: Support
   identifier: supp

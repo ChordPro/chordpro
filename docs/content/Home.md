@@ -7,8 +7,6 @@ description: "Welcome to ChordPro!"
 
 This is the official site for ChordPro, a simple text format for the notation of lyrics with chords.
 
-[Join the community](<https://groups.io/g/ChordPro>)
-
 ![]({{< asset "images/chordpro-gui-cli.png" >}})
 
 ## ChordPro 6: The File Format Specification
@@ -21,3 +19,7 @@ This is the official site for ChordPro, a simple text format for the notation of
 * [Installation]({{< relref "ChordPro-Installation" >}})
 * [Configuration]({{< relref "ChordPro-Configuration" >}})
 * [User guide]({{< relref "Using-ChordPro" >}})
+
+---
+
+[Join the community!](<https://groups.io/g/ChordPro>)
