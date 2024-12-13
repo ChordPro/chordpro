@@ -2486,7 +2486,7 @@ sub parse_chord {
 	warn( "Parsing chord: \"$chord\" transposed ",
 	      sprintf("%+d", $xp), " to \"",
 	      $info->name, "\"",
-	      " key ".$self->{meta}->{key}->[-1],
+	      ( $self->{meta}->{key} ? (" key ".$self->{meta}->{key}->[-1]) : ()),
 	      "\n" ) if $debug > 1;
     }
     # else: warning has been given.
