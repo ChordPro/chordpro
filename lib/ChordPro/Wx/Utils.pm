@@ -85,7 +85,10 @@ sub setup_menubar( $self ) {
 
     state $ctl =
       [ [ wxID_FILE,
-	  [ [ wxID_NEW, M_ALL, "",
+	  [ [ wxID_HOME, M_EDITOR|M_SONGBOOK, "Start Screen",
+	      "Return to the Start Screen.", "OnStart" ],
+	    [],
+	    [ wxID_NEW, M_ALL, "",
 	      "Create another ChordPro document", "OnNew" ],
 	    [ wxID_OPEN, M_ALL, "",
 	      "Open an existing ChordPro document", "OnOpen" ],

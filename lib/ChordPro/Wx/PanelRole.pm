@@ -123,10 +123,10 @@ method OnHelp_DebugInfo($event) {
     $state{debuginfo} = wxTheApp->GetTopWindow->GetMenuBar->FindItem($event->GetId)->IsChecked;
 }
 
-method OnNew($event) {
-    return unless $self->GetParent->check_saved;
-    $self->GetParent->select_mode("initial");
-}
+#method OnNew($event) {
+#    return unless $self->GetParent->check_saved;
+#    $self->GetParent->select_mode("initial");
+#}
 
 method OnOpen($event) {
     # Let the parent handle this one.

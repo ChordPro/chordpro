@@ -453,11 +453,11 @@ method OnMaximize($event) {
 method OnNew($event) {
     if ( $state{mode} eq "initial" ) {
 	$self->select_mode("editor");
-	$self->{p_editor}->newfile;
     }
     else {
-	$state{panel}->OnNew($event);
+	return unless $self->check_saved;
     }
+    $self->{p_editor}->newfile;
 }
 
 method OnOpen($event) {
@@ -523,6 +523,11 @@ method OnRecentSelect($event) {
     my $file = $self->{lb_recent}->GetClientData($n);
     $self->{l_recent}->SetLabel($file);
     $self->{l_recent}->SetToolTip($file);
+}
+
+method OnStart($event) {
+    return unless $self->check_saved;
+    $self->select_mode("initial");
 }
 
 method OnSysColourChanged($event) {
