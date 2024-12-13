@@ -381,13 +381,32 @@ method embrace( $pre, $post, $nl = 1 ) {
     }
     else {
 	if ( $nl ) {
+	    $nl = $self->nl;
 	    my $ln = $ctrl->GetCurrentLine;
 	    my $line = $ctrl->GetLine($ln);
-	    unless ( $line =~ /^\R*\z/ ) {
+	    #warn("LINE[$ln]: »$line«\n");
+	    if ( $line =~ /\R\z/ ) {
+		# Terminated
+		#warn("LINE[$ln]: terminated\n");
+	    }
+	    else {
 		$ctrl->LineEnd;
-		$ctrl->CharRight;
 		$ctrl->NewLine;
 		$ctrl->CharLeft;
+		$ln = $ctrl->GetCurrentLine;
+		$line = $ctrl->GetLine($ln);
+		#warn("LINE[$ln]: »$line«\n");
+	    }
+	    if ( $line eq $nl ) {
+		#warn("LINE[$ln]: empty\n");
+		# Empty line
+	    }
+	    else {
+		$ctrl->LineEnd;
+		$ctrl->NewLine;
+		$ln = $ctrl->GetCurrentLine;
+		$line = $ctrl->GetLine($ln);
+		#warn("LINE[$ln]: »$line«\n");
 	    }
 	}
 	$ctrl->AddText($pre);
@@ -525,18 +544,38 @@ method OnClipBoardPaste($event) {
 method OnCloseSection($event) {
     my $stc = $self->{t_editor};
     my $ln = $stc->GetCurrentLine;
+    my $closed = "";
+    my $did;
     while ( $ln > 0 ) {
 	$ln--;
 	my $line = $stc->GetLine($ln);
 	if ( $line =~ /^\{(\s*)start_of_(\w+(?:-\w*!?)?)/ ) {
+	    if ( $2 eq $closed ) {
+		$closed = "";
+		next;
+	    }
 	    $stc->AddText( "{$1end_of_$2}" . $self->nl );
+	    $did++;
 	    last;
 	}
 	elsif ( $line =~ /^\{(\s*)so(\w(?:-\w*!?)?)/ ) {
+	    if ( $2 eq $closed ) {
+		$closed = "";
+		next;
+	    }
 	    $stc->AddText( "{$1eo$2}" . $self->nl );
+	    $did++;
 	    last;
 	}
+	elsif ( $line =~ /^\{(\s*)end_of_(\w+(?:-\w*!?)?)/ ) {
+	    $closed = $2;
+	}
+	elsif ( $line =~ /^\{(\s*)so(\w(?:-\w*!?)?)/ ) {
+	    $closed = $2;
+	}
     }
+    return if $did;
+    $stc->CallTipShow( $stc->GetCurrentPos, "No open section to close" );
 }
 
 method OnCut($event) {
