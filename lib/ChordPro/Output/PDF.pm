@@ -600,11 +600,12 @@ sub generate_song {
 	if ( $s->{labels} && @{ $s->{labels} } ) {
 	    my $longest = 0;
 	    my $ftext = $fonts->{label} || $fonts->{text};
-	    my $w = $pr->strwidth("    ", $ftext);
+	    my $size = $ftext->{size};
+	    my $w = $pr->strwidth("    ", $ftext, $size);
 	    for ( @{ $s->{labels} } ) {
 		# Split on real newlines and \n.
 		for ( split( /\\n|\n/, $_ ) ) {
-		    my $t = $pr->strwidth( $_, $ftext ) + $w;
+		    my $t = $pr->strwidth( $_, $ftext, $size ) + $w;
 		    $longest = $t if $t > $longest;
 		}
 	    }
