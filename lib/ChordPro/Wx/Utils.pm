@@ -329,6 +329,8 @@ push( @EXPORT, 'panels' );
 
 sub ellipsize( $widget, %opts ) {
     my $text = $opts{text} // $widget->GetText;
+    my $home = ChordPro::Paths->get->home;
+    $text =~ s/^\Q$home\E\/*/~\//;
     my $width = ($widget->GetSizeWH)[0];
     $text = Wx::Control::Ellipsize( $text, Wx::ClientDC->new($widget),
 				    $opts{type} // wxELLIPSIZE_END(),
