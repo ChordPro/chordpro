@@ -532,6 +532,11 @@ method OnCharAdded( $event ) {
     }
 }
 
+method OnClearAnnotations($event) {
+    return unless $state{have_stc};
+    $self->{t_editor}->AnnotationClearAll;
+}
+
 method OnClipBoardPaste($event) {
     my $text = $event->GetString;
     $text =~ s/^\n+//;
