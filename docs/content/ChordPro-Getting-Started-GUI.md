@@ -12,7 +12,10 @@ tweak it to your needs.
 
 ![ChordPro GUI]({{< asset "images/chordpro-gui-overview.png" >}})
 
-While **ChordPro, the application** is a great utility to work with **ChordPro, the file standard**; its biggest strength is that it can create beautiful [songbooks]({{< relref "ChordPro-GUI-Songbook" >}}) from your collection of *ChordPro* files.
+While **ChordPro, the application** is a great utility to work with
+**ChordPro, the file standard**; its biggest strength is that it can
+create beautiful [songbooks]({{< relref "ChordPro-GUI-Songbook" >}})
+from your collection of *ChordPro* song files.
 
 ## Basic Usage
 
@@ -43,8 +46,8 @@ three *important* buttons at your service:
 
 - The **Settings button** will open the 
 [`settings dialog`]({{< relref "chordpro-gui-settings" >}}), where you
-you can change the GUI preferences.
-- The **Preview button**, will show a `preview` of your [Songbook]({{<
+you can change the GUI and preview preferences.
+- The **Preview button**, will generate and show a `preview` of your [Songbook]({{<
   relref "ChordPro-GUI-Songbook" >}}) or your *ChordPro* song file.
 - The **Message button** will open the `message log` with the result
   of *ChordPro* creating the preview PDF. It might give you warnings
