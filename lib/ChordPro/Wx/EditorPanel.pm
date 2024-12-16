@@ -583,6 +583,10 @@ method OnCloseSection($event) {
     $stc->CallTipShow( $stc->GetCurrentPos, "No open section to close" );
 }
 
+method OnCopy($event) {
+    $self->{t_editor}->Copy;
+}
+
 method OnCut($event) {
     $self->{t_editor}->Cut;
 }
