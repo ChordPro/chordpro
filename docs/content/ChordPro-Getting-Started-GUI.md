@@ -22,13 +22,13 @@ from your collection of *ChordPro* song files.
 When you open the *ChordPro* GUI you have several options to get started.
 
 Are you new to *ChordPro* and ChordPro song files? Choose 
-[`Open an example song`]({{< relref "ChordPro-GUI-Songbook" >}}).
+[`Open an example song`]({{< relref "ChordPro-GUI-Editor" >}}).
 
 Do you have some songs already? Choose [`Create a songbook`]({{< relref "ChordPro-GUI-Songbook" >}}) and navigate
 to the folder with the songs.
 
-And of course you can open existing ChordPro song files, and create
-new ones.
+And of course you can open existing ChordPro song files, and [`create
+new ones`]({{< relref "ChordPro-GUI-Editor" >}}).
 
 On the top of the page you can choose between `Create` and `Recent`.
 When you click on `Recent` you'll be presented with a list of song
