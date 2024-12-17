@@ -424,7 +424,8 @@ sub setup_tasks {
     my @tasks;
     my @libs = @{ CP->findresdirs("tasks") };
     my $dir = $preferences{customlib};
-    push( @libs, "$dir/tasks" ) if $dir && -d "$dir/tasks";
+    push( @libs, "$dir/tasks" )
+      if $preferences{enable_customlib} && $dir && -d "$dir/tasks";
     my $did;
     my %dups;
     for my $cfglib ( @libs ) {
