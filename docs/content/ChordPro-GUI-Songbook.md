@@ -37,3 +37,4 @@ The *standard* 'Settings, preview and 'message' buttons will have an additional 
 
 ![Back to the Songbook]({{< asset "images/chordpro-gui-backbutton.png" >}})
 
+Next: [Tasks]({{< relref "chordpro-gui-tasks" >}}).

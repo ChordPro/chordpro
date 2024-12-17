@@ -57,3 +57,5 @@ preview. You can also clear them manually from the `Edit` menu.
 When you stop ChordPro, or switch to another file, you are prompted to
 save the song first. If a preview was generated you are offered to
 save this too.
+
+Next: [Tasks]({{< relref "chordpro-gui-tasks" >}}).

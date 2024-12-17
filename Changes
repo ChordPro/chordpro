@@ -8,7 +8,6 @@
     - (Makefile) Add Ref::Util dependency.
     - Centered chords (top, bottom, below) are now evenly spread over multiple lines.
     - Fix problem with vertical spacing of {chord}.
-    - Fix issue #428.
     - (Wx) Folder processing.
     - (Wx) Rework initial screen.
     - Progress reporting. Options ``progress_callabck and -I. Also
@@ -18,14 +17,13 @@
     - (Wx) Save/restore windows pos/size.
     - New meta: page.class (first, title, default) and page.side (left, right).
     - Distinct page clases for even pages; filler class for alignment pages.
-    - Fix issue #429.
     - Add "omit" property for delegated images.
     - Several image fixes related to issue #428.
     - Allow 'mi' as short for 'min' chord quality.
     - Make properties parsing in directives more robust.
     - (Wx) Preview with split window.
     - (ChordPro) Include ABC if generating for MSPro.
-    - Fix issue #411, #428, #443, #447, #471, #473, #482.
+    - Fix issue #411, #428, #429, #443, #447, #471, #473, #482.
     - Fix forum issue 2546.
     - (Wx, MSWindows only) Use Edge for WebView (PDF view). Requires custom wxWidgets build.
     - Change handling of NC (issue #441).
