@@ -43,7 +43,10 @@ sub refresh( $self, $prefs = undef ) {
     my $stc = $self;
 
     $prefs //= \%preferences;
-    $state{rti} = ChordPro::runtime_info();
+
+    # RTI loading is currently too slow.
+    # $state{rti} = ChordPro::runtime_info();
+    $state{rti}->{directive_abbrevs} = ChordPro::Song::_directive_abbrevs();
 
     $stc->SetLexer(wxSTC_LEX_CONTAINER);
     $stc->SetKeyWords(0,
