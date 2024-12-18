@@ -164,8 +164,9 @@ sub generate_songbook {
 	progress( phase   => "PDF(extra)",
 		  index   => 0,
 		  total   => $extra_matter );
-
     }
+    my $covertpl;
+
     while ( !$cancelled && @tocs ) {
 	my $ctl = pop(@tocs);
 	next unless $options->{toc} // @book > 1;
@@ -187,16 +188,16 @@ sub generate_songbook {
 
 	# If we have a template, process it as a song and prepend.
 	my $song;
-	my $tmplfile;
 	if ( defined($options->{title}) && !@tocs ) {
-	    my $tpl = "toccover";
-	    $tmplfile = CP->findres( "$tpl.cho", class => "templates" );
+	    my $tpl = "cover";
+	    $covertpl = CP->findres( "$tpl.cho", class => "templates" );
 	    if ( $verbose ) {
-		warn("ToC template",
-		     $tmplfile ? " found: $tmplfile" : " not found: $tpl.cho\n")
+		warn("Cover template",
+		     $covertpl ? " found: $covertpl" : " not found: $tpl.cho\n")
 	    }
 	}
-	elsif ( $ctl->{template} ) {
+	my $tmplfile;
+	if ( $ctl->{template} ) {
 	    my $tpl = $ctl->{template};
 	    if ( $tpl =~ /\.\w+/ ) { # file
 		$tmplfile = CP->siblingres( $book[0][-1]->{source}->{file},
@@ -319,6 +320,39 @@ sub generate_songbook {
 	$start_of{back}     += $page - 1;
     }
 
+    if ( $covertpl ) {
+	my $page = 1;
+	my $opts = {};
+	my $lines = loadlines( $covertpl, $opts );
+	my $csb = ChordPro::Songbook->new;
+	$csb->parse_file( $lines, { %$opts,
+				    generate => 'PDF' } );
+	for ( $csb->{songs}->[0] ) {
+	    $_->{meta}->{title} =
+	      $options->{title} ?
+	      $options->{title} : $_->{meta}->{title}->[0];
+	    $_->{meta}->{subtitle} =
+	      $options->{subtitle} ?
+	      $options->{subtitle} : $_->{meta}->{subtitle};
+	}
+	for ( @{$csb->{songs}} ) {
+	use DDP; p $_;
+	    my $p = generate_song( $_,
+				   { pr => $pr, prepend => 1, roman => 1,
+				     startpage => 0,
+				     songindex => 1, numsongs => 1,
+			       } );
+	    $page += $p;
+	    if ( $ps->{'pagealign-songs'}
+		 && !( $page % 2 ) ) {
+		$pr->newpage($ps, $page);
+		$page++;
+		$p++;
+	    }
+	    $start_of{$_} += $p for qw( songbook front toc back );
+	}
+    }
+
     if ( $ps->{'back-matter'} ) {
 	my $matter = $pdfapi->open( expand_tilde($ps->{'back-matter'}) );
 	die("Missing back matter: ", $ps->{'back-matter'}, "\n") unless $matter;
@@ -336,6 +370,7 @@ sub generate_songbook {
     # warn ::dump(\%pages_of) =~ s/\s+/ /gsr, "\n";
 
     # Note that the page indices run from zero.
+    $pr->pagelabel( 0,                     'arabic', 'cover-' );
     $pr->pagelabel( $start_of{front}-1,    'arabic', 'front-' )
       if $pages_of{front};
     $pr->pagelabel( $start_of{toc}-1,      'roman'            )
