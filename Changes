@@ -1,38 +1,44 @@
-0.000
+6.070
 
-    - (Config) Eliminate warning on undefined config entry.
+    !Highlights
+
+    - A brand new ChordPro GUI makes it a pleasure to create nice songbooks.
+      It has been completely redesigned using feedback from Nick Berendsen's macOS version.
+      The new GUI is identical on Linux, Windows and macOS.
+      It comes with a built-in PDF previewer.
+      It can create songbooks from folders of songs.
+
+    !Other improvements
+
+    - Centered chords (top, bottom, below) are now evenly spread over multiple lines.
+
     - (Wx) Remove ChordPro preset.
     - (macos) Use _NSGetExecutablePath() to get the correct script location.
     - Sync config files between git and MANIFEST.
     - (Paths) Allow absolute filenames in findres.
     - (Makefile) Add Ref::Util dependency.
-    - Centered chords (top, bottom, below) are now evenly spread over multiple lines.
-    - Fix problem with vertical spacing of {chord}.
-    - (Wx) Folder processing.
-    - (Wx) Rework initial screen.
     - Progress reporting. Options ``progress_callabck and -I. Also
       enabled with --verbose.
-    - (Wx) Fix problem with incorrect resource path after CHORDPRO_LIB change.
-    - (Wx) Add background colour for editor window.    
-    - (Wx) Save/restore windows pos/size.
     - New meta: page.class (first, title, default) and page.side (left, right).
     - Distinct page clases for even pages; filler class for alignment pages.
     - Add "omit" property for delegated images.
-    - Several image fixes related to issue #428.
     - Allow 'mi' as short for 'min' chord quality.
     - Make properties parsing in directives more robust.
-    - (Wx) Preview with split window.
     - (ChordPro) Include ABC if generating for MSPro.
+    - Allow %{} substitutions in grid sections.
+    - Add labelfont, labelsize and labelcolour directives.
+    - (Experimental) Chord changes.
+
+    !Bug Fixes
+
+    - Several image fixes related to issue #428.
+    - (Wx) Fix problem with incorrect resource path after CHORDPRO_LIB change.
+    - (Config) Eliminate warning on undefined config entry.
+    - Fix problem with vertical spacing of {chord}.
     - Fix issue #411, #428, #429, #443, #447, #471, #473, #482.
     - Fix forum issue 2546.
     - (Wx, MSWindows only) Use Edge for WebView (PDF view). Requires custom wxWidgets build.
     - Change handling of NC (issue #441).
-    - Remove SwiftUI.
-    - Allow %{} substitutions in grid sections.
-    - (Wx) Colours, dark mode, full screen, and more.
-    - Add Wx files to standard MANIFEST.
-    - Add labelfont, labelsize and labelcolour directives.
-    - (Experimental) Chord changes.
 
 6.060 2024-08-24
 
