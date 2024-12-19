@@ -165,7 +165,6 @@ sub generate_songbook {
 		  index   => 0,
 		  total   => $extra_matter );
     }
-    my $covertpl;
 
     while ( !$cancelled && @tocs ) {
 	my $ctl = pop(@tocs);
@@ -186,16 +185,7 @@ sub generate_songbook {
 	my $tltpl = $ctl->{line};
 	my $pgtpl = $ctl->{pageno};
 
-	# If we have a template, process it as a song and prepend.
 	my $song;
-	if ( defined($options->{title}) && !@tocs ) {
-	    my $tpl = "cover";
-	    $covertpl = CP->findres( "$tpl.cho", class => "templates" );
-	    if ( $verbose ) {
-		warn("Cover template",
-		     $covertpl ? " found: $covertpl" : " not found: $tpl.cho\n")
-	    }
-	}
 	my $tmplfile;
 	if ( $ctl->{template} ) {
 	    my $tpl = $ctl->{template};
@@ -320,6 +310,16 @@ sub generate_songbook {
 	$start_of{back}     += $page - 1;
     }
 
+    # If we have a template, process it as a song and prepend.
+    my $covertpl;
+    if ( defined($options->{title}) && !@tocs ) {
+	my $tpl = "cover";
+	$covertpl = CP->findres( "$tpl.cho", class => "templates" );
+	if ( $verbose ) {
+	    warn("Cover template",
+		 $covertpl ? " found: $covertpl" : " not found: $tpl.cho\n")
+	}
+    }
     if ( $covertpl ) {
 	my $page = 1;
 	my $opts = {};
@@ -336,7 +336,6 @@ sub generate_songbook {
 	      $options->{subtitle} : $_->{meta}->{subtitle};
 	}
 	for ( @{$csb->{songs}} ) {
-	use DDP; p $_;
 	    my $p = generate_song( $_,
 				   { pr => $pr, prepend => 1, roman => 1,
 				     startpage => 0,
