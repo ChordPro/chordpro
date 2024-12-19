@@ -1045,12 +1045,13 @@ sub app_setup {
 
 sub app_ident {
     my ($fh, $exit) = @_;
+    my $pfx = " (Unsupported development snapshot)";
+    $pfx = "" unless $VERSION =~ /_/;
+    $pfx = sprintf( " (%d.%02d0 Release Candidate %d)", $1, 1+$2, 1+$3 )
+      if $VERSION =~ /^(\d+)\.(\d+)9_(\d+)/;
     print {$fh} ("This is ChordPro ",
 		 $::options->{reference} ? "reference " : "core ",
-		 $VERSION,
-		 $VERSION =~ /_/ ? " (Unsupported development snapshot)" : "",
-		 "\n"
-		);
+		 $VERSION, $pfx, "\n" );
     exit $exit if defined $exit;
 }
 
