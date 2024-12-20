@@ -822,14 +822,14 @@ pdf {
     courier {
       ""         : Courier
       bold       : Courier-Bold
-      italic     : Courier-Italic
-      bolditalic : Courier-BoldItalic
+      italic     : Courier-Oblique
+      bolditalic : Courier-BoldOblique
     }
     "mono, monospace" {
       ""         : Courier
       bold       : Courier-Bold
-      italic     : Courier-Italic
-      bolditalic : Courier-BoldItalic
+      italic     : Courier-Oblique
+      bolditalic : Courier-BoldOblique
     }
     dingbats.        : ZapfDingbats
   }
