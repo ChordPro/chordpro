@@ -91,7 +91,7 @@ sub generate_songbook {
     # 3. The songs.
     # 4. The back matter.
     my ( %start_of, %pages_of );
-    for ( qw( front toc songbook back ) ) {
+    for ( qw( cover front toc songbook back ) ) {
 	$start_of{$_} = 1;
 	$pages_of{$_} = 0;
     }
@@ -335,7 +335,9 @@ sub generate_songbook {
 	      $options->{subtitle} ?
 	      $options->{subtitle} : $_->{meta}->{subtitle};
 	}
+	my $adjusted;
 	for ( @{$csb->{songs}} ) {
+	    $adjusted = 0;
 	    my $p = generate_song( $_,
 				   { pr => $pr, prepend => 1, roman => 1,
 				     startpage => 0,
@@ -347,9 +349,11 @@ sub generate_songbook {
 		$pr->newpage($ps, $page);
 		$page++;
 		$p++;
+		$adjusted++;
 	    }
 	    $start_of{$_} += $p for qw( songbook front toc back );
 	}
+	$pages_of{cover} = $page - ( $adjusted ? 2 : 1 );
     }
 
     if ( $ps->{'back-matter'} ) {
@@ -459,6 +463,12 @@ sub generate_csv {
     # Extra meta info from command line, for non-song CSV.
     my $xm = $options->{meta} // {};
     unless ( $ctl->{songsonly} ) {
+	$csvline->( { %$xm,
+		      title     => 'Cover',
+		      pagerange => $pagerange->("cover"),
+		      sorttitle => 'Cover',
+		      artist    => 'ChordPro' } )
+	  if $pages_of->{cover};
 	$csvline->( { %$xm,
 		      title     => 'Front Matter',
 		      pagerange => $pagerange->("front"),
