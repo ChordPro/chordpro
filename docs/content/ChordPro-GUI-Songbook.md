@@ -5,7 +5,9 @@ description: "Create a Songbook"
 
 # Create a Songbook
 
-While all those *individual* files are nice, its even *nicer* when you can combine them into one beautiful PDF. **ChordPro** can do that for you with just a few clicks of the mouse.
+While all those *individual* files are nice, its even *nicer* when you
+can combine them into one beautiful PDF. **ChordPro** can do that for
+you with just a few clicks of the mouse.
 
 Start a new Songbook from the main screen and it will ask you for a
 folder with your songs.
@@ -31,9 +33,12 @@ button, and it will be used as cover page instead.
 
 ## Editing songs for the songbook
 
-If you crated your `preview` but found some songs that are not to your liking; just *double-click* on the song in the *file list* and this will bring you the the editor where you can change the song.
+If you created your `preview` but found some songs that are not to
+your liking; just *double-click* on the song in the *file list* and
+this will bring you the the editor where you can change the song.
 
-The *standard* 'Settings, preview and 'message' buttons will have an additional **Songbook** button to go back to your songbook again.
+The *standard* 'Settings, preview and 'message' buttons will have an
+additional **Songbook** button to go back to your songbook again.
 
 ![Back to the Songbook]({{< asset "images/chordpro-gui-backbutton.png" >}})
 

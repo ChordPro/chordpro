@@ -64,9 +64,16 @@ menu and the hotkey is Command-R).
 
 ## Settings
 
-*ChordPro* has many settings available. Not just to adjust the look of your PDF. You can change the look of the application but also enable powerful utilities like transposing and transcode your song.
+*ChordPro* has many settings available. Not just to adjust the look of
+your PDF. You can change the look of the application but also enable
+powerful utilities like transposing and transcode your song.
 
-However, these settings are just *start*. If you **really** want to tweak your songs to your needs you have to get your hands dirty and create your own [configuration]({{< relref "chordpro-configuration-create-gui" >}}) or even dive into the [command line](#the-command-line-usage) for *real* power.
+However, these settings are just a *start*. If you **really** want to
+tweak your songs to your needs you have to get your hands dirty and
+create your own [configuration]({{< relref
+"chordpro-configuration-create-gui" >}}) or even dive into the
+[command line](#the-command-line-usage) for *real* power.
 
-Read the [Settings]({{< relref "ChordPro-GUI-Settings" >}}) page for a complete overview.
+Read the [Settings]({{< relref "ChordPro-GUI-Settings" >}}) page for a
+complete overview.
 
