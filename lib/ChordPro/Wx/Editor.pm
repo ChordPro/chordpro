@@ -99,6 +99,9 @@ sub refresh( $self, $prefs = undef ) {
     # 6 - Directive arguments (orange, same as toolbar icon colour)
     $stc->StyleSetForeground( 6, Wx::Colour->new($c->{s6}) );
     $stc->StyleSetBackground( 6, $bg );
+    # 7 - Errors
+    $stc->StyleSetForeground( 7, $fg );
+    $stc->StyleSetBackground( 7, wxRED );
 
     # For linenumbers.
     $stc->SetMarginWidth( 0, 40 ); # TODO
@@ -158,8 +161,8 @@ sub style_text( $self ) {
     # Comments/
     $style->( qr/^(#.*)/m, 1 );
     # Directives.
-    $style->( qr/^(\{)([-\w!]+)(.*)(\})/m, 3, 5, 6, 3 );
-    $style->( qr/^(\{)([-\w!]+)([: ])(.*)(\})/m, 3, 5, 3, 6, 3 );
+    $style->( qr/^(\s*)(\{)([-\w!]+)(.*)(\})/m, 7, 3, 5, 6, 3 );
+    $style->( qr/^(\s*)(\{)([-\w!]+)([: ])(.*)(\})/m, 7, 3, 5, 3, 6, 3 );
     # Chords.
     $style->( qr/(\[)([^\[\]\s]*)(\])/m, 3, 4, 3 );
 }
@@ -214,7 +217,7 @@ sub SetModified( $self, $mod ) {
 
 sub SetFont( $self, $font ) {
     die("XXX\n") unless $font->IsOk;
-    $self->StyleSetFont( $_, $font ) for 0..6;
+    $self->StyleSetFont( $_, $font ) for 0..7;
     $self->{font} = $font;
 }
 

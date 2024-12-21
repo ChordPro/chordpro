@@ -522,7 +522,7 @@ method OnCharAdded( $event ) {
 	my $pos0 = $stc->PositionFromLine($ln);
 	my $pos = $stc->GetCurrentPos;
 	my $txt = $stc->GetTextRange( $pos0, $pos );
-	if ( $txt =~ /^(\{\s*)(\w+)(-\w+!?)?([ :\}])$/
+	if ( $txt =~ /^\s*(\{\s*)(\w+)(-\w+!?)?([ :\}])$/
 	     &&
 	     ( my $c = $state{rti}{directive_abbrevs}{$2} ) ) {
 	    $stc->SetSelection( $pos0, $pos );
