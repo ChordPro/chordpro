@@ -61,11 +61,8 @@ method setup_webview() {
       && ( $Wx::VERSION < 3.002 || !Wx::WebView::IsBackendAvailable("wxWebViewEdge") );
 
     $state{have_webview} = 1;		# Note: too early
-    my $default = CP->findres( "chordpro-icon.png",
-			       class => "icons" );
-    $default = "file://" . $default unless is_msw;
     $wv = Wx::WebView::New( $self->{p_right},
-			    wxID_ANY, $default,
+			    wxID_ANY, "",
 			    wxDefaultPosition, wxDefaultSize,
 			    is_msw ? "wxWebViewEdge" : ()
 			  );
@@ -305,6 +302,7 @@ method OnWindowPreview($event) {
 	$self->{sw_lr}->Unsplit(undef);
     }
     else {
+	return $self->OnPreview($event) unless $self->prv;
 	$self->{sw_lr}->SplitVertically( $self->{p_left},
 					 $self->{p_right},
 					 $state{sash}{$self->panel."_lr"} // 0 );
