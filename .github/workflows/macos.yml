@@ -32,8 +32,6 @@ jobs:
       - name: Install Dependencies
         run: |
           perl -ni~ -e 'print unless /HarfBuzz/' Makefile.PL
-            ./cpanm --notest XS::Parse::Sublike::Builder·
-            ./cpanm --notest Object::Pad@0.816
             ./cpanm --installdeps --notest .
       - name: Run Tests
         run: prove -l t

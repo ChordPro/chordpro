@@ -9,7 +9,13 @@ class ChordPro::Paths;
 
 my $instance;
 
-method get :common ( $reset = 0 ) {
+# Work around Object::Pad 0.817 breakage.
+#method get :common ( $reset = 0 ) {
+#    undef $instance if $reset;
+#    $instance //= $class->new;
+#}
+
+sub get( $class, $reset = 0 ) {
     undef $instance if $reset;
     $instance //= $class->new;
 }

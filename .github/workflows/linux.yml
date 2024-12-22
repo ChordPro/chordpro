@@ -24,8 +24,6 @@ jobs:
         run: perl -V
       - name: Install Dependencies
         run: |
-            cpanm --notest XS::Parse::Sublike::Builder
-            cpanm --notest Object::Pad@0.816
             cpanm --installdeps --notest .
       - name: Make and run tests
         run: |

@@ -132,7 +132,8 @@ use constant MAXRECENTS => 10;
 
 # Establish a connection with the persistent data store.
 
-method Setup :common ($options) {
+#method Setup :common ($options) {
+sub Setup( $class, $options ) {
 
     if ( $options->{config} ) {
 	Wx::ConfigBase::Set
