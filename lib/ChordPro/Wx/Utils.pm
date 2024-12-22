@@ -141,9 +141,9 @@ sub setup_menubar( $self ) {
 	  ]
 	],
 	[ wxID_ANY, M_EDITOR|M_SONGBOOK, "View",
-	  [ [ wxID_ANY, M_EDITOR|M_SONGBOOK, "Show Preview",
+	  [ [ wxID_ANY, M_EDITOR|M_SONGBOOK, "Preview Panel",
 	      "Hide or show the preview pane", 1, "OnWindowPreview" ],
-	    [ wxID_ANY, M_EDITOR|M_SONGBOOK, "Show Messages",
+	    [ wxID_ANY, M_EDITOR|M_SONGBOOK, "Messages Panel",
 	      "Hide or show the messages pane", 1, "OnWindowMessages" ],
 	    $expert ?
 	    ( [],

@@ -313,7 +313,7 @@ method OnWindowPreview($event) {
 
 method previewtooltip() {
     my $mb = wxTheApp->GetTopWindow->GetMenuBar;
-    my $mi = $mb->FindItem($mb->FindMenuItem("View","Show Preview"));
+    my $mi = $mb->FindItem($mb->FindMenuItem("View","Preview Panel"));
     if ( $self->{sw_lr}->IsSplit ) {
 	$self->{bmb_preview}->SetToolTip(_T("Hide the preview\nUse ".
 					    kbdkey("Ctrl-P").
@@ -328,7 +328,7 @@ method previewtooltip() {
 
 method messagestooltip() {
     my $mb = wxTheApp->GetTopWindow->GetMenuBar;
-    my $mi = $mb->FindItem($mb->FindMenuItem("View","Show Messages"));
+    my $mi = $mb->FindItem($mb->FindMenuItem("View","Messages Panel"));
     if ( $self->{sw_tb}->IsSplit ) {
 	$self->{bmb_messages}->SetToolTip(_T("Hide the messages"));
 	$mi->Check(1);
