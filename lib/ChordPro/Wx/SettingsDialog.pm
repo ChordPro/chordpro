@@ -392,7 +392,7 @@ method _OnCreateConfig( $event, $fn = undef ) {
     unless ( defined $fn ) {
 	my $fd = Wx::FileDialog->new( $self,
 				      "Select a new configuration file",
-				      "", "",
+				      "", "customconfig",
 				      "*.json",
 				      wxFD_SAVE|wxFD_OVERWRITE_PROMPT
 				    );
@@ -401,7 +401,6 @@ method _OnCreateConfig( $event, $fn = undef ) {
 	$fn = $fd->GetPath;
 	$fd->Destroy;
     }
-    $fn .= ".json" unless $fn =~ /\.json$/;
     use File::Copy;
     my $cfg = File::Spec->catfile( CP->findresdirs("config")->[-1],
 				   $state{expert}
