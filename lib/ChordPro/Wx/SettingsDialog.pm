@@ -404,7 +404,9 @@ method _OnCreateConfig( $event, $fn = undef ) {
     $fn .= ".json" unless $fn =~ /\.json$/;
     use File::Copy;
     my $cfg = File::Spec->catfile( CP->findresdirs("config")->[-1],
-				   "chordpro.json" );
+				   $state{expert}
+				   ? "chordpro.json"
+				   : "config.tmpl" );
     if ( copy( $cfg, $fn ) ) {
 	$self->{fp_customconfig}->SetPath( File::Spec->rel2abs($fn) );
     }

@@ -655,7 +655,19 @@ The default configuration is fully commented to explain its contents.
 Prints the final configuration (after processing all system, user
 and other config files) to standard output, and exits.
 
-The final configuration is not commented. Sorry.
+The final configuration is not commented. Sorry. In fact, it may not
+work at all.
+
+### print-template-config
+
+`--print-template-config`
+
+Prints a simplified template configuration to standard output, and
+exits. The configuration is commented to explain its contents.
+
+The config contains most of the ChordPro configuration items, all
+commented out. It is easy to get started with configuring ChordPro
+by enabling and modifyng just a few items at a time.
 
 ### sysconfig
 

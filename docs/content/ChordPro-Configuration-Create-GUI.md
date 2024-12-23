@@ -21,6 +21,7 @@ A file-dialog will give you the opportunity the give your new configuration a na
 
 ### Important
 
-Configuration files accumulate, and **ChordPro** always starts with the
-built-in default config. It is **strongly advised** to strip all default
-values from the generated config and only leave the modified settings in.
+The configuration file contains most of the ChordPro configuration
+items, **all commented out**. It is easy to get started with configuring
+ChordPro by enabling and modifyng just a few items at a time.
+

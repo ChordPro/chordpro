@@ -654,6 +654,15 @@ the command line.
 This guarantees that the program is running with the default
 configuration.
 
+=item B<--print-template-config>
+
+Prints a simplified template configuration to standard output, and
+exits. The configuration is commented to explain its contents.
+
+The config contains most of the ChordPro configuration items, all
+commented out. It is easy to get started with configuring ChordPro
+by enabling and modifyng just a few items at a time.
+
 =item B<--print-default-config>
 
 Prints the default configuration to standard output, and exits.
@@ -724,6 +733,7 @@ sub app_setup {
     my $defcfg = 0;		# handled locally
     my $fincfg = 0;		# handled locally
     my $deltacfg = 0;		# handled locally
+    my $tmplcfg = 0;		# handled locally
     my $dump_chords = 0;	# handled locally
 
     # Package name.
@@ -853,9 +863,10 @@ sub app_setup {
           'nouserconfig|no-userconfig',
 	  'nodefaultconfigs|no-default-configs|X',
 	  'define=s%',
-	  'print-default-config' => \$defcfg,
-	  'print-final-config'   => \$fincfg,
-	  'print-delta-config'   => \$deltacfg,
+	  'print-default-config'  => \$defcfg,
+	  'print-final-config'    => \$fincfg,
+	  'print-delta-config'    => \$deltacfg,
+	  'print-template-config' => \$tmplcfg,
 	  'convert-config=s',
 
 	  # This aborts option scanning.
@@ -989,6 +1000,14 @@ sub app_setup {
     $::options = $options;
     # warn(::dump($options), "\n") if $options->{debug};
 
+    if ( $tmplcfg ) {
+	use File::Copy;
+	my $cfg = File::Spec->catfile( CP->findresdirs("config")->[-1],
+				       "config.tmpl" );
+	binmode STDOUT => ':raw';
+	copy( $cfg, \*STDOUT );
+	exit 0;
+    }
     if ( $defcfg || $fincfg || $deltacfg ) {
 	print ChordPro::Config::config_final( default => $defcfg,
 					      delta   => $deltacfg );
