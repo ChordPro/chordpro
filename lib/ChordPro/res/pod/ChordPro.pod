@@ -388,6 +388,15 @@ the command line.
 This guarantees that the program is running with the default
 configuration.
 
+=item B<--print-template-config>
+
+Prints a simplified template configuration to standard output, and
+exits. The configuration is commented to explain its contents.
+
+The config contains most of the ChordPro configuration items, all
+commented out. It is easy to get started with configuring ChordPro
+by enabling and modifyng just a few items at a time.
+
 =item B<--print-default-config>
 
 Prints the default configuration to standard output, and exits.

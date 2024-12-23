@@ -65,10 +65,14 @@ method preview( $args, %opts ) {
 
     $msgs = $fatal = $died = 0;
     local $SIG{__WARN__} = sub {
-	$self->_warn(@_);
-	$panel->add_annotation( $1-1, $2 )
-	  if $annotate && "@_" =~ /^Line (\d+),\s+(.*)/;
-
+	if ( $state{debuginfo} && $_[0] =~ /^ChordPro invoked/ ) {
+	    $self->log( 'I', "@_" );
+	}
+	else {
+	    $self->_warn(@_);
+	    $panel->add_annotation( $1-1, $2 )
+	      if $annotate && "@_" =~ /^Line (\d+),\s+(.*)/;
+	}
     };
 
     #    $SIG{__DIE__}  = \&_die;
