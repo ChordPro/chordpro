@@ -254,6 +254,11 @@ method preview( $args, %opts ) {
 	    $self->log( 'W',  "Problems found." );
 	}
     }
+    elsif ( ! -s $preview_pdf ) {
+	$panel->alert(1);
+	$self->log( 'W',  "Nothing to view. Empty song?" );
+    }
+    return;
 }
 
 sub OnWebViewLoaded {
@@ -296,21 +301,27 @@ method save {
     my $fd = Wx::FileDialog->new
       ( $panel,
 	_T("Choose output file"),
-	"", "",
+	"", "preview",
 	"*.pdf",
 	0|wxFD_SAVE|wxFD_OVERWRITE_PROMPT );
     my $ret = $fd->ShowModal;
     if ( $ret == wxID_OK ) {
 	use File::Copy;
-	copy( $preview_pdf, $fd->GetPath );
-	$self->discard;
+	my $fn = $fd->GetPath;
+	copy( $preview_pdf, $fn );
+	$unsaved_preview = 0;
     }
     $fd->Destroy;
     return $ret;
 }
 
+method have_preview {
+    -s $preview_pdf;
+}
+
 method discard {
     $unsaved_preview = 0;
+    unlink($preview_pdf);
 }
 
 1;

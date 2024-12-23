@@ -223,8 +223,13 @@ method OnPreviewNoDiagrams($event) {
 }
 
 method OnPreviewSave($event) {
-    return unless $self->prv;
-    $self->prv->save;
+    if ( $self->prv && $self->prv->have_preview ) {
+	return $self->prv->save;
+    }
+    Wx::MessageDialog->new( $self,
+			    "No preview to save",
+			    "No Preview",
+			    wxOK | wxICON_ERROR )->ShowModal;
 }
 
 method OnSashLRChanged($event) {
@@ -302,7 +307,8 @@ method OnWindowPreview($event) {
 	$self->{sw_lr}->Unsplit(undef);
     }
     else {
-	return $self->OnPreview($event) unless $self->prv;
+	return $self->OnPreview($event)
+	  unless $self->prv && $self->prv->have_preview;
 	$self->{sw_lr}->SplitVertically( $self->{p_left},
 					 $self->{p_right},
 					 $state{sash}{$self->panel."_lr"} // 0 );

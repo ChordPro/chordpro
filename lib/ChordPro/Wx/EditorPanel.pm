@@ -168,8 +168,15 @@ method openfile( $file, $checked=0, $actual=undef ) {
     # Default is no transposing.
     $preferences{xpose_from} = $preferences{xpose_to} = 0;
     $preferences{xpose_acc} = 0;
-    $self->{sw_lr}->Unsplit(undef) if $self->{sw_lr}->IsSplit;
-    $self->{sw_tb}->Unsplit(undef) if $self->{sw_tb}->IsSplit;
+    if ( $self->{sw_lr}->IsSplit ) {
+	$self->{sw_lr}->Unsplit(undef);
+	$self->previewtooltip;
+    }
+    if ( $self->{sw_tb}->IsSplit ) {
+	$self->{sw_tb}->Unsplit(undef);
+	$self->messagestooltip;
+    }
+    $self->prv->discard if $self->prv;
 
     return 1;
 }
@@ -244,8 +251,15 @@ method newfile( $file = undef ) {
     $self->{l_status}->SetToolTip($state{currentfile});
     $preferences{xpose_from} = $preferences{xpose_to} = 0;
     $preferences{xpose_acc} = 0;
-    $self->{sw_lr}->Unsplit(undef) if $self->{sw_lr}->IsSplit;
-    $self->{sw_tb}->Unsplit(undef) if $self->{sw_tb}->IsSplit;
+    if ( $self->{sw_lr}->IsSplit ) {
+	$self->{sw_lr}->Unsplit(undef);
+	$self->previewtooltip;
+    }
+    if ( $self->{sw_tb}->IsSplit ) {
+	$self->{sw_tb}->Unsplit(undef);
+	$self->messagestooltip;
+    }
+    $self->prv->discard if $self->prv;
 
     1;
 }
@@ -337,8 +351,9 @@ method preview( $args, %opts ) {
     # The text that we get from the editor can have CRLF line endings,
     # that on Windows will result in double line ends. Write with
     # 'raw' layer.
-    if ( open( $fd, '>:utf8:raw', $preview_cho )
-	 and print $fd ( $self->{t_editor}->GetText )
+    use Encode 'encode_utf8';
+    if ( open( $fd, '>:raw', $preview_cho )
+	 and print $fd ( encode_utf8($self->{t_editor}->GetText) )
 	 and close($fd) ) {
 	$self->prv->preview( $args, %opts );
 	$self->previewtooltip;
