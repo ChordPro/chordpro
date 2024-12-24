@@ -1,5 +1,50 @@
 # Release info
 
+## 6.070
+
+Released: 2024-12-25
+
+
+### Highlights
+
+* A brand new ChordPro GUI makes it a pleasure to create nice songbooks. It has been completely redesigned using feedback from Nick Berendsen's macOS version. The new GUI is identical on Linux, Windows and macOS. It comes with a built-in PDF previewer. It can create songbooks from folders of songs.
+
+### Other improvements
+
+* Centered chords (top, bottom, below) are now evenly spread over multiple lines.
+* (Wx) Remove ChordPro preset.
+* (macos) Use _NSGetExecutablePath() to get the correct script location.
+* Sync config files between git and MANIFEST.
+* (Paths) Allow absolute filenames in findres.
+* (Makefile) Add Ref::Util dependency.
+* Progress reporting. Options ``progress_callabck and -I. Also enabled with --verbose.
+* New meta: page.class (first, title, default) and page.side (left, right).
+* Distinct page clases for even pages; filler class for alignment pages.
+* Add "omit" property for delegated images.
+* Allow 'mi' as short for 'min' chord quality.
+* Make properties parsing in directives more robust.
+* (ChordPro) Include ABC if generating for MSPro.
+* Allow %{} substitutions in grid sections.
+* Add labelfont, labelsize and labelcolour directives.
+* (Experimental) Chord changes.
+
+### Bug Fixes
+
+* Several image fixes related to issue #428.
+* (Wx) Fix problem with incorrect resource path after CHORDPRO_LIB change.
+* (Config) Eliminate warning on undefined config entry.
+* Fix problem with vertical spacing of {chord}.
+* Fix issue #411, #428, #429, #443, #447, #471, #473, #482.
+* Fix forum issue 2546.
+* (Wx, MSWindows only) Use Edge for WebView (PDF view). Requires custom wxWidgets build.
+* Change handling of NC (issue #441).
+* Fix invalid font names for Courier/Mono Italic (should be Oblique).
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.  
+Please use the [issue tracker](https://github.com/ChordPro/chordpro/issues) for bugs reports.
+
 ## 6.060
 
 Released: 2024-08-24
@@ -55,11 +100,6 @@ Released: 2024-08-24
 
 * New function to deal with property settings for the config.
 * Move pp files to separate MANIFEST so they do not clobber the CPAN.
-
-### Social and support
-
-[User community](https://groups.io/g/ChordPro) for feedback and help.  
-Please use the [issue tracker](https://github.com/ChordPro/chordpro/issues) for bugs reports.
 
 ## 6.050.9
 
@@ -269,7 +309,7 @@ Released: 2023-09-18
 ### Highlights
 
 * [ABC](https://www.chordpro.org/chordpro/directives-env_abc/) and [Lilypond](https://www.chordpro.org/chordpro/directives-env_ly/) embedding now use SVG (vector graphics) instead of pixmap images. This is very crisp at all sizes, and greatly reduces the size of the resultant PDF document.  
-  No additional tools are required for embedding, except the `abc2svg` and `lilypond` tools. The installer kits for MS Windows and macOS already include the `abc2svg` tool.
+  No additional tools are required for embedding, except the `abc2svg` and `lilypond` tools. The installer kits for MS Windows and MacOS already include the `abc2svg` tool.
 * The ChordPro GUI (`wxchordpro`) has been extended with a Tasks menu that can be used to quickly select presets for a specific task. For example, to produce a PDF with only lyrics, or with keyboard diagrams instead of string diagrams. User presets can be added by placing small config files in a `tasks` folder under the `CHORDPRO_LIB`.
 
 ### ChordPro functionality
@@ -347,7 +387,7 @@ Released: 2023-06-05
 ### BugFixes
 
 * Add Pod::Usage to required modules. Some distros seem to have removed it from the core.
-* Add jpeg library to macOS kit.
+* Add jpeg library to MacOS kit.
 * Add some missing files for docs building.
 * Fix root relocation when transcoding to a movable system.
 * Fix missing parser in {define XX} without frets etc.
@@ -401,7 +441,7 @@ Released: 2022-10-21
 * Add volta for grid.
 * Add display for {define}.
 * Replace TAB characters by a single space on input.
-* Support building installer with macOS homebrew perl.
+* Support building installer with MacOS homebrew perl.
 * Allow empty chord defines (just the name) to make the chord known.
 * Allow front-matter and back-matter in the config and filelist.
 * (Experimental) Allow PDF filenames in the filelist.
@@ -449,7 +489,7 @@ Released: 2022-05-17
 * Add config pdf.spacing.diagramchords.
 * Allow meta values for directive selectors.
 * Re-enable agnostic chord lookup.
-* (Wx)(macOS) Improve preferences dialog.
+* (Wx)(MacOS) Improve preferences dialog.
 * Several ABC fixes/improvements.
 * (PDF) Add support for background document.
 * Markdown export (EXPERIMENTAL). Thanks to Johannes Rumpf.
@@ -468,7 +508,7 @@ Released: 2022-02-08
 ### ChordPro functionality
 
 * Conditional directives can be negated with a trailing !
-* (Wx)(macOS) Improve preferences dialog.
+* (Wx)(MacOS) Improve preferences dialog.
 
 ### BugFixes
 
@@ -677,7 +717,7 @@ Released: 2021-03-05
 * Allow array element addressing in --define.
 * Retain line numbers for backend diagnostics.
 * Experimental support for ABC.
-* Experimental support for macOS.
+* Experimental support for MacOS.
 * New icons.
 * Windows: Installer associates ChordPro with .cho files.
 * Linux: Support for desktop and app icons.
