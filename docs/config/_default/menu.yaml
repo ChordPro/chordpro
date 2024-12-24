@@ -37,15 +37,20 @@ sidebar:
   weight: 220
   title: Installation
 
-- identifier: ChordPro-Configuration
+- identifier: ChordPro-Getting-Started
   parent: impl
   weight: 230
+  title: Getting Started
+
+- identifier: ChordPro-Configuration
+  parent: impl
+  weight: 240
   title: Configuration
 
 - identifier: Using-ChordPro
   parent: impl
-  weight: 240
-  title: User guide
+  weight: 250
+  title: CLI User guide
 
 - title: Support
   identifier: supp

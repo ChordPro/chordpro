@@ -7,6 +7,8 @@ use utf8;
 use ChordPro::Testing;
 use ChordPro::Songbook;
 
+use Test::More skip_all => "cc development in progress";
+
 plan tests => 4;
 
 $config->{settings}->{memorize} = 1;

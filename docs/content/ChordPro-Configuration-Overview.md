@@ -138,9 +138,10 @@ In the examples below the symbol `~` denotes the user's home directory. Windows 
 
    Instead of a project specific configuration file you can specify arbitrary configuration files.
 
-   * In the GUI, select `Preferences...` from the `Edit` menu.  
-     Using the configuration dropdown list, choose `Custom`.  
-     Click `...` for a file dialog to choose the desired configuration file.
+   * In the GUI, select `Settings...` from the `Edit` menu.  
+     *(On macOS, the Settings are in the `ChordPro` menu)*  
+     On the `Presets` tab, choose `Custom Configuration File`.  
+     Click `Browse` for a file dialog to choose the desired configuration file.
    * On the command line, pass the name of the configuration file with
      `--config`, for example `--config=myconfig.json`.
 
@@ -251,7 +252,7 @@ Note that not all config items can be adjusted this way.
 ChordPro also provides support for
 [PRP](https://github.com/sciurius/perl-Json-Relaxed) files.
 These were an early attempt at providing easier 
-maintainble configs.
+maintainable configs.
 PRP files have a number of shortcomings, in
 particular with regard to array data.
 Although still supported, please use the newer RRJSON format instead.

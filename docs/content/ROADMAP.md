@@ -5,7 +5,7 @@ place in the future.
 
 Feel free to feedback on the [community forum](https://groups.io/g/ChordPro).
 
-## Planned for ChrdPro 6.x
+## Planned for ChordPro 6.x
 
 ### Placement of images
 
@@ -57,12 +57,6 @@ HTML support is currently limited. With the power of modern CSS HTML
 output should be as perfect as the PDF.
 
 ## Not yet planned
-
-### MacOS
-
-A new wrapper program that provides real MacOS GUI.
-
-![]({{< asset "images/helpwanted50.png" >}}) Requires a MacOS developer.
 
 ### Libraries
 

@@ -12,7 +12,7 @@ static pTHX;
 
 /* Set up DynaLoader so modules can load modules. */
 
-static void xs_init(pTHX);
+EXTERN_C void xs_init(pTHX);
 
 /* Main. */
 
@@ -21,13 +21,41 @@ static char selfpath[PATH_MAX];	/* /foo/bar */
 int main( int argc, char **argv, char **env ) {
 
   // Make ourselves known.
-  putenv( "PPL_PACKAGED=1.00" );
+  putenv( (char*)"PPL_PACKAGED=1.00" );
 
   /* Assuming the program binary   /foo/bar/blech */
   char scriptname[PATH_MAX];	/* blech */
   memset (selfpath,   0, PATH_MAX);
   memset (scriptname, 0, PATH_MAX);
 
+#ifdef MACOS
+
+  uint32_t size = sizeof(selfpath);
+
+  // Get the full path of the executable
+  _NSGetExecutablePath(selfpath, &size);
+
+  /// Resolve symlinks (if any)
+  char buf[PATH_MAX];
+  strcpy( selfpath, realpath( selfpath, buf ) );
+
+  // Get a pointer to the last part of the path
+  char *p = rindex( selfpath, '/' );
+
+  // Increment the pointer so the remaining is only the name of the script
+  p++;
+  strcpy( scriptname, p );
+
+  // Remove the name of the script from selfpath
+  *p = 0;
+
+#ifdef DEBUG
+  fprintf( stderr, "cwdpath:    %s\n", selfpath );
+  fprintf( stderr, "scriptname: %s\n", scriptname );
+#endif
+
+#else
+  
   if ( readlink ("/proc/self/exe", selfpath, PATH_MAX-1 ) > 0 ) {
     char *p = rindex( selfpath, '/' );
     if ( p ) {
@@ -63,6 +91,7 @@ int main( int argc, char **argv, char **env ) {
     fprintf( stderr, "scriptname: %s\n", scriptname );
 #endif
   }
+#endif /* !MACOS */
 
   /* Start perl environment. */
   PERL_SYS_INIT3( &argc, &argv, &env );

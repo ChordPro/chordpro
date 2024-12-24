@@ -26,7 +26,7 @@ with additional features such as native PDF generation,
 Unicode input and fully customizable layout, fonts and sizes.
 
 Prominent features of ChordPro 6 are
-Pango style text markup, annotations,
+advanced text markup, annotations, integrated support for ABC,
 and a more powerful way of assigning typefaces to layout items.
 
 For up-to-date information, see [The ChordPro implementation](https://chordpro.org/chordpro/chordpro-reference-implementation/).

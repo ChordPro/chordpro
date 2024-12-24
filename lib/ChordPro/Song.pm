@@ -48,6 +48,7 @@ my $chorus_xpose = 0;
 my $chorus_xpose_dir = 0;
 
 # Memorized chords.
+my $cctag;			# current cc name
 my %memchords;			# all sections
 my $memchords;			# current section
 my $memcrdinx;			# chords tally
@@ -57,6 +58,7 @@ my $memorizing;			# if memorizing (a.o.t. recalling)
 my %warned_chords;
 
 our $re_chords;			# for chords
+my $propitems_re = propitems_re();
 my $intervals;			# number of note intervals
 my @labels;			# labels used
 
@@ -95,7 +97,7 @@ sub new {
     $xcmov = undef;
     upd_config();
 
-    $diag->{format} = $config->{diagnostics}->{format};
+    $diag->{format} = $opts->{diagformat} // $config->{diagnostics}->{format};
     $diag->{file}   = $filesource;
     $diag->{line}   = 0;
     $diag->{orig}   = "(at start of song)";
@@ -139,11 +141,10 @@ sub parse_song {
 	    }
 	}
 	if ( $cf ) {
-	    my $pp = JSON::PP->new->relaxed;
-	    my $precfg = $pp->decode($cf);
 	    my $prename = "__PRECFG__";
-	    ChordPro::Config::precheck( $precfg, $prename );
-	    push( @configs, ChordPro::Config::prep_configs( $precfg, $prename) );
+	    my $precfg = ChordPro::Config->new( json_load( $cf, $prename ) );
+	    $precfg->precheck($prename);
+	    push( @configs, $precfg->prep_configs($prename) );
 	}
     }
     # Load song-specific config, if any.
@@ -161,7 +162,7 @@ sub parse_song {
 	    warn("Config[song]: $cf\n") if $options->{verbose};
 	    my $have = ChordPro::Config::get_config( CP->findcfg($cf) );
 	    die("Missing config: $cf\n") unless $have;
-	    push( @configs, ChordPro::Config::prep_configs( $have, $cf) );
+	    push( @configs, $have->prep_configs($cf) );
 	}
 	else {
 	    for ( "prp", "json" ) {
@@ -170,8 +171,7 @@ sub parse_song {
 		next unless -s $cf;
 		warn("Config[song]: $cf\n") if $options->{verbose};
 		my $have = ChordPro::Config::get_config($cf);
-		ChordPro::Config::config_expand_font_shortcuts ( $have );
-		push( @configs, ChordPro::Config::prep_configs( $have, $cf) );
+		push( @configs, $have->prep_configs($cf) );
 		last;
 	    }
 	}
@@ -380,9 +380,15 @@ sub parse_song {
 		last;
 	    }
 	    my $dir = $self->parse_directive($1);
-	    my $kv = parse_kv($dir->{arg}//"");
-	    if ( $kv && $kv->{toc} ) {
+	    next unless my $kv = parse_kv($dir->{arg}//"");
+	    if ( defined $kv->{toc} ) {
 		$self->{meta}->{_TOC} = [ $kv->{toc} ];
+	    }
+	    if ( $kv->{forceifempty} ) {
+		push( @{ $self->{body} },
+		      { type => "set",
+			name => "forceifempty",
+			value => $kv->{forceifempty} } );
 	    }
 	    next;
 	}
@@ -560,47 +566,49 @@ sub parse_song {
 			}
 		    }
 		    $opts = $a->{opts} = { %$opts, %{$a->{opts}} };
-		    if ( $opts->{align} && $opts->{x} && $opts->{x} =~ /\%$/ ) {
-			do_warn( "Useless combination of x percentage with align (align ignored)" );
-			delete $opts->{align};
-    }
+		    unless ( is_true($opts->{omit}) ) {
+			if ( $opts->{align} && $opts->{x} && $opts->{x} =~ /\%$/ ) {
+			    do_warn( "Useless combination of x percentage with align (align ignored)" );
+			    delete $opts->{align};
+	}
 
-		    my $def = !!$id;
-		    $id //= "_Image".$assetid++;
+			my $def = !!$id;
+			$id //= "_Image".$assetid++;
 
-		    if ( defined $opts->{spread} ) {
-			$def++;
-			if ( exists $self->{spreadimage} ) {
-			    do_warn("Skipping superfluous spread image");
+			if ( defined $opts->{spread} ) {
+			    $def++;
+			    if ( exists $self->{spreadimage} ) {
+				do_warn("Skipping superfluous spread image");
+			    }
+			    else {
+				$self->{spreadimage} =
+				  { id => $id, space => $opts->{spread} };
+				warn("Got spread image $id with space=$opts->{spread}\n")
+				  if $config->{debug}->{images};
+			    }
+			}
+
+			# Move to assets.
+			$self->{assets}->{$id} = $a;
+			if ( $def ) {
+			    my $label = delete $a->{label};
+			    do_warn("Label \"$label\" ignored on non-displaying $in_context section\n")
+			      if $label;
 			}
 			else {
-			    $self->{spreadimage} =
-			      { id => $id, space => $opts->{spread} };
-			    warn("Got spread image $id with space=$opts->{spread}\n")
-			      if $config->{debug}->{images};
-			}
-		    }
-
-		    # Move to assets.
-		    $self->{assets}->{$id} = $a;
-		    if ( $def ) {
-			my $label = delete $a->{label};
-			do_warn("Label \"$label\" ignored on non-displaying $in_context section\n")
-			  if $label;
-		    }
-		    else {
-			my $label = delete $opts->{label};
-			$self->add( type => "set",
-				    name => "label",
-				    value => $label )
-			  if $label && $label ne "";
-			$self->add( type => "image",
-				    opts => $opts,
-				    id => $id );
-			if ( $opts->{label} ) {
-			    push( @labels, $opts->{label} )
-			      unless $in_context eq "chorus"
-			      && !$config->{settings}->{choruslabels};
+			    my $label = delete $opts->{label};
+			    $self->add( type => "set",
+					name => "label",
+					value => $label )
+			      if $label && $label ne "";
+			    $self->add( type => "image",
+					opts => $opts,
+					id => $id );
+			    if ( $opts->{label} ) {
+				push( @labels, $opts->{label} )
+				  unless $in_context eq "chorus"
+				  && !$config->{settings}->{choruslabels};
+			    }
 			}
 		    }
 		}
@@ -763,6 +771,22 @@ sub parse_song {
     $self->{meta}->{chords} //= [ @used_chords ];
     $self->{meta}->{numchords} = [ scalar(@{$self->{meta}->{chords}}) ];
 
+    if ( %memchords ) {
+	::dump(\%memchords, as => "cc (atend)") if $config->{debug}->{chords};
+    }
+    else {
+	# Avoid clutter.
+    	delete $self->{meta}->{cc};
+    }
+
+    if ( %memchords ) {
+	::dump(\%memchords, as => "cc (atend)") if $config->{debug}->{chords};
+    }
+    else {
+	# Avoid clutter.
+    	delete $self->{meta}->{cc};
+    }
+
     if ( $diagrams =~ /^(user|all)$/ ) {
 	$self->{chords} =
 	  { type   => "diagrams",
@@ -920,7 +944,7 @@ sub decompose {
 	# Normal chords.
 	if ( $chord =~ s/^\[(.*)\]$/$1/ && $chord ne "^" ) {
 	    push(@chords, $chord eq "" ? "" : $self->chord($chord));
-	    if ( $memchords && !$dummy ) {
+	    if ( $memchords && !$dummy && $chord !~ /^\*/ ) {
 		if ( $memcrdinx == 0 ) {
 		    $memorizing++;
 		}
@@ -935,20 +959,20 @@ sub decompose {
 	}
 
 	# Recall memorized chords.
-	elsif ( $memchords && $in_context ) {
+	elsif ( $memchords && $in_context && $chord !~ /^\*/ ) {
 	    if ( $memcrdinx == 0 && @$memchords == 0 ) {
 		do_warn("No chords memorized for $in_context");
-		push( @chords, $chord );
+		push( @chords, $self->chord($chord) );
 		undef $memchords;
 	    }
 	    elsif ( $memcrdinx >= @$memchords ) {
 		do_warn("Not enough chords memorized for $in_context");
-		push( @chords, $chord );
+		push( @chords, $self->chord($chord) );
 	    }
 	    else {
-		push( @chords, $self->chord($memchords->[$memcrdinx]) );
-		warn("Chord recall $in_context\[$memcrdinx]: ", $chords[-1], "\n")
+		warn("Chord recall $in_context\[$memcrdinx]: ", $memchords->[$memcrdinx], "\n")
 		  if $config->{debug}->{chords};
+		push( @chords, $self->chord($memchords->[$memcrdinx]) );
 	    }
 	    $memcrdinx++;
 	}
@@ -976,13 +1000,14 @@ sub cdecompose {
 }
 
 sub decompose_grid {
-    my ($self, $line) = @_;
+    my ($self, $orig) = @_;
+    my $line = fmt_subst( $self, $orig );
+    undef $orig if $orig eq $line;
     $line =~ s/^\s+//;
     $line =~ s/\s+$//;
     return ( tokens => [] ) if $line eq "";
     local $re_chords = qr/(\[.*?\])/;
 
-    my $orig;
     my %res;
     if ( $line !~ /\|/ ) {
 	$res{margin} = { $self->cdecompose($line), orig => $line };
@@ -1020,9 +1045,15 @@ sub decompose_grid {
 	}
     }
     my $nbt = 0;		# non-bar tokens
+    my $p0;			# this bar chords
+    my $p1;			# prev chords (for % and %% repeat)
+    my $p2;			# pprev chords (for %% repeat)
+    my $si = 0;			# start index
+
     foreach ( @tokens ) {
 	if ( $_ eq "|:" || $_ eq "{" ) {
 	    $_ = { symbol => $_, class => "bar" };
+	    $si = @$memchords if $memchords;
 	}
 	elsif ( /^\|(\d+)(>?)$/ ) {
 	    $_ = { symbol => '|', volta => $1, class => "bar" };
@@ -1030,9 +1061,16 @@ sub decompose_grid {
 	}
 	elsif ( $_ eq ":|" || $_ eq "}" ) {
 	    $_ = { symbol => $_, class => "bar" };
+	    if ( $memchords ) {
+		push( @$memchords, @$memchords[ $si .. $#{$memchords} ] );
+	    }
 	}
 	elsif ( $_ eq ":|:" || $_ eq "}{" ) {
 	    $_ = { symbol => $_, class => "bar" };
+	    if ( $memchords ) {
+		push( @$memchords, @$memchords[ $si .. $#{$memchords} ] );
+		$si = @$memchords;
+	    }
 	}
 	elsif ( $_ eq "|" ) {
 	    $_ = { symbol => $_, class => "bar" };
@@ -1045,9 +1083,26 @@ sub decompose_grid {
 	}
 	elsif ( $_ eq "%" ) {
 	    $_ = { symbol => $_, class => "repeat1" };
+	    if ( $memchords && $p1 ) {
+		push( @$memchords, @$p1 );
+		if ( $config->{debug}->{chords} ) {
+		    warn("Chord memorized for $cctag\[$memcrdinx]: ",
+			 $_, "\n"), $memcrdinx++
+		      for @$p1;
+		}
+	    }
 	}
 	elsif ( $_ eq '%%' ) {
 	    $_ = { symbol => $_, class => "repeat2" };
+	    if ( $memchords && $p1 ) {
+		push( @$memchords, @$p2 ) if $p2;
+		push( @$memchords, @$p1 );
+		if ( $config->{debug}->{chords} ) {
+		    warn("Chord memorized for $cctag\[$memcrdinx]: ",
+			 $_, "\n"), $memcrdinx++
+		      for @$p2, @$p1;
+		}
+	    }
 	}
 	elsif ( $_ eq "/" ) {
 	    $_ = { symbol => $_, class => "slash" };
@@ -1073,7 +1128,19 @@ sub decompose_grid {
 				   : $self->chord($_) } @a ],
 		       class => "chords" };
 	    }
+	    if ( $memchords ) {
+		push( @$memchords, @a );
+		push( @$p0, @a );
+		if ( $config->{debug}->{chords} ) {
+		    warn("Chord memorized for $cctag\[$memcrdinx]: ",
+			 $_, "\n"), $memcrdinx++
+		      for @a;
+		}
+	    }
 	    $nbt++;
+	}
+	if ( $_->{class} eq "bar" ) {
+	    $p2 = $p1; $p1 = $p0; undef $p0;
 	}
     }
     if ( $nbt > $grid_cells->[0] ) {
@@ -1167,7 +1234,7 @@ sub parse_directive {
 		     @{$config->{metadata}->{keys}},
 		     keys(%abbrevs),
 		     '(?:start|end)_of_\w+',
-		     '(?:(?:text|chord|chorus|tab|grid|diagrams|title|footer|toc)'.
+		     "(?:$propitems_re".
 		     '(?:font|size|colou?r))',
 		) . ')';
 	$dirpat = qr/$dirpat/;
@@ -1231,12 +1298,19 @@ sub directive {
     my $dd = $self->parse_directive($d);
     return 1 if $dd->{omit} == 1;
 
+    my $dir = $dd->{name};
     my $arg = $dd->{arg};
     if ( $arg ne "" ) {
 	$arg = fmt_subst( $self, $arg );
-	return 1 if $arg !~ /\S/;
+	if ( $arg !~ /\S/ ) { 	# expansion yields empty
+	    if ( $dir =~ /^start_of_/ ) {
+		$dd->{omit} = 2;
+	    }
+	    else {
+		return 1;
+	    }
+	}
     }
-    my $dir = $dd->{name};
 
     if ( $directives{$dir} ) {
 	return $directives{$dir}->( $self, $dir, $arg, $dd->{arg} );
@@ -1255,13 +1329,12 @@ sub directive {
 	}
 	@chorus = (), $chorus_xpose = $chorus_xpose_dir = 0
 	  if $in_context eq "chorus";
+	undef $cctag;
+
 	if ( $in_context eq "grid" ) {
-	    my $kv;
-	    my $shape = $arg;
-	    if ( $arg =~ /\w+="/ ) {
-		$kv = parse_kv($arg);
-		$shape = $kv->{shape};
-	    }
+	    $cctag = "grid";
+	    my $kv = parse_kv( $arg, "shape" );
+	    my $shape = $kv->{shape} // "";
 	    if ( $shape eq "" ) {
 		$self->add( type => "set",
 			    name => "gridparams",
@@ -1292,24 +1365,27 @@ sub directive {
 			    value => $kv->{label} );
 		push( @labels, $kv->{label} );
 	    }
+
+	    # Grid sections always memorize unless "cc=".
+	    if ( ($kv->{cc}//="grid") ne "" ) {
+		$cctag = $kv->{cc};
+		$memchords = $memchords{$cctag} //= [];
+		$memcrdinx = 0;
+		$memorizing = 1;
+	    }
 	    $grid_cells = [ $grid_arg->[0] * $grid_arg->[1],
 			    $grid_arg->[2],  $grid_arg->[3] ];
+	    return 1;
 	}
 	elsif ( exists $config->{delegates}->{$in_context} ) {
 	    my $d = $config->{delegates}->{$in_context};
-	    my $label = $arg;
 	    my %opts;
 	    if ( $xpose || $config->{settings}->{transpose} ) {
 		$opts{transpose} =
 		  $xpose + ($config->{settings}->{transpose}//0 );
 	    }
-	    my $kv = {};
-	    if ( $arg =~ /\w+=["'](.+)/ ) {
-		$kv = parse_kv($arg);
-	    }
-	    else {
-		$kv->{label} = $arg if $arg ne "";
-	    }
+	    my $kv = parse_kv( $arg, "label" );
+	    delete $kv->{label} if ($kv->{label}//"") eq "";
 	    $self->add( type     => "image",
 			subtype  => "delegate",
 			delegate => $d->{module},
@@ -1318,32 +1394,72 @@ sub directive {
 			opts     => { %opts, %$kv },
 			exists($kv->{id}) ? ( id => $kv->{id} ) : (),
 			open     => 1 );
-	    push( @labels, $kv->{label} ) if $kv->{label}//"" ne "";
+	    push( @labels, $kv->{label} ) if exists $kv->{label};
 	}
 	elsif ( $arg ne "" ) {
-	    # Prefer explicit label.
-	    if ( $arg =~ /^label=/ ) {
-		$arg = parse_kv($arg)->{label};
-	    }
-	    elsif ( $arg =~ /\w+=["'](.+)/ ) {
-		# Doesn't look like a label. Assume a mistake.
+	    my $kv = parse_kv( $arg, "label" );
+	    my $label = delete $kv->{label};
+	    my $chords = delete $kv->{cc};
+	    if ( %$kv ) {
+		# Assume a mistake.
 		do_warn("Garbage in start_of_$in_context: $arg (ignored)\n");
-		$arg = "";
 	    }
-	    if ( $arg ne "" ) {
+	    elsif ( $label ) {
 		$self->add( type  => "set",
 			    name  => "label",
-			    value => $arg );
-		push( @labels, $arg )
+			    value => $label );
+		push( @labels, $label)
 		  unless $in_context eq "chorus"
 		  && !$config->{settings}->{choruslabels};
+	    }
+	    if ( $chords ) {
+		$chords =~ s/^\s*(.*)\s*/$1/;
+		$cctag = $in_context;
+		# Do we have a name? Chords? Both?
+		# name:C D E
+		# :C D E
+		# :
+		if ( $chords =~ /^(\w*):(.*)/ ) {
+		    # Name, possibly empty.
+		    $cctag = $1 if length($1);
+		    # Chords, possibly empty.
+		    $chords = $2;
+		}
+		# C D E
+		elsif ( $chords =~ /\s/ ) {
+		    # Whitespace separated chords.
+		}
+		# name
+		elsif ( $chords =~ /^\w+$/ ) {
+		    $cctag = $chords;
+		    $chords = "";
+		}
+		# ???
+		else {
+		    warn("Unrecognized cc value: \"$chords\"\n")
+		      if $chords;
+		    $chords = "";
+		}
+		if ( $chords ne "" ) {
+		    $memchords = [ split( ' ', $chords ) ];
+		    $memchords{$cctag} = $memchords;
+		    $memcrdinx = 0;
+		    $memorizing = 0;
+		    if ( $config->{debug}->{chords} ) {
+			my $i = 0;
+			warn("Chord memorized for $cctag\[$i]: ",
+			     $_, "\n"), $i++
+			       for @$memchords;
+		    }
+		    return 1;
+		}
 	    }
 	}
 
 	# Enabling this always would allow [^] to recall anyway.
 	# Feature?
 	if ( $config->{settings}->{memorize} ) {
-	    $memchords = $memchords{$in_context} //= [];
+	    $memchords = ($memchords{$cctag//$in_context} //= []);
 	    $memcrdinx = 0;
 	    $memorizing = 0;
 	}
@@ -1368,8 +1484,7 @@ sub directive {
     }
 
     # Formatting. {chordsize XX} and such.
-    if ( $dir =~ m/ ^( text | chord | chorus | tab | grid | diagrams
-		       | title | footer | toc )
+    if ( $dir =~ m/ ^( $propitems_re )
 		     ( font | size | colou?r )
 		     $/x ) {
 	my $item = $1;
@@ -1428,16 +1543,12 @@ sub dir_chorus {
     my $chorus = @chorus ? dclone(\@chorus) : [];
 
     if ( @$chorus && $arg && $arg ne "" ) {
-	my $label = $arg;
-	my $kv;
-	if ( $arg =~ /\w+="/ ) {
-	    $kv = parse_kv($arg);
-	    $label = $kv->{label};
-	}
+	my $kv = parse_kv( $arg, "label" );
+	my $label = $kv->{label};
 	if ( $chorus->[0]->{type} eq "set" && $chorus->[0]->{name} eq "label" ) {
 	    $chorus->[0]->{value} = $label;
 	}
-	else {
+	elsif ( defined $label ) {
 	    unshift( @$chorus,
 		     { type => "set",
 		       name => "label",
@@ -1515,7 +1626,18 @@ sub dir_comment {
 sub dir_image {
     my ( $self, $dir, $arg ) = @_;
     return 1 if $::running_under_test && !$arg;
-    my $res = parse_kv($arg);
+    use Text::ParseWords qw(quotewords);
+    my @words = quotewords( '\s+', 1, $arg );
+    my $res;
+    # Imply src= if word 0 is not kv.
+    if ( @words && $words[0] !~ /\w+=/ ) {
+	$words[0] = "src=" . $words[0];
+	$res = parse_kv( \@words );
+    }
+    else {
+	$res = parse_kv( \@words, "src" );
+    }
+
     my $uri;
     my $id;
     my $chord;
@@ -1525,7 +1647,7 @@ sub dir_image {
 	if ( $k =~ /^(title)$/i && $v ne "" ) {
 	    $opts{lc($k)} = $v;
 	}
-	elsif ( $k =~ /^(border|spread|center|persist)$/i
+	elsif ( $k =~ /^(border|spread|center|persist|omit)$/i
 		&& $v =~ /^(\d+)$/ ) {
 	    if ( $k eq "center" && $v ) {
 		$opts{align} = $k;
@@ -1547,7 +1669,7 @@ sub dir_image {
 	    $opts{lc($k)} = [ $2 ? $1/100 : $1 ];
 	    $opts{lc($k)}->[1] = $3 ? $4 ? $3/100 : $3 : $opts{lc($k)}->[0];
 	}
-	elsif ( $k =~ /^(center|border|spread|persist)$/i ) {
+	elsif ( $k =~ /^(center|border|spread|persist|omit)$/i ) {
 	    if ( $k eq "center" ) {
 		$opts{align} = $k;
 	    }
@@ -1588,6 +1710,8 @@ sub dir_image {
 	}
     }
 
+    return if is_true($opts{omit});
+
     unless ( $uri || $id || $chord ) {
 	do_warn( "Missing image source\n" );
 	return;
@@ -1601,7 +1725,8 @@ sub dir_image {
     # next to the song, and then in the images folder of the
     # resources.
     if ( $uri && CP->is_here($uri) ) {
-	my $found = CP->siblingres( $diag->{file}, $uri, class => "images" );
+	my $found = CP->siblingres( $diag->{file}, $uri, class => "images" )
+	  || CP->siblingres( $diag->{file}, $uri, class => "icons" );
 	if ( $found ) {
 	    $uri = $found;
 	}
@@ -1737,6 +1862,8 @@ sub dir_meta {
 		do_warn("Illegal key: \"$val\"\n"), next unless $info;
 		my $name = $info->name;
 		my $act = $name;
+		$info->{key} = $name
+		  unless $config->{settings}->{'enharmonic-transpose'};
 
 		if ( $capo ) {
 		    $act = $self->add_chord( $info->transpose($capo) );
@@ -2320,6 +2447,8 @@ sub parse_chord {
     if ( $info ) {
 	warn( "Parsing chord: \"$chord\" found \"",
 	      $info->name, "\" in ", $info->{_via}, "\n" ) if $debug > 1;
+	return ChordPro::Chord::NC->new( { name => $info->name } )
+	  if $info->is_nc;
 	$info->dump if $debug > 1;
     }
     else {
@@ -2356,7 +2485,9 @@ sub parse_chord {
 	$info = $i;
 	warn( "Parsing chord: \"$chord\" transposed ",
 	      sprintf("%+d", $xp), " to \"",
-	      $info->name, "\"\n" ) if $debug > 1;
+	      $info->name, "\"",
+	      ( $self->{meta}->{key} ? (" key ".$self->{meta}->{key}->[-1]) : ()),
+	      "\n" ) if $debug > 1;
     }
     # else: warning has been given.
 
@@ -2402,6 +2533,7 @@ sub parse_chord {
 	warn( "Parsing chord: \"$chord\" transcoded to ",
 	      $info->name,
 	      " (", $info->{system}, ")",
+	      defined($key_ord) ? " key ".$self->{meta}->{key}->[-1] : "",
 	      "\n" ) if $debug > 1;
 	if ( my $i = ChordPro::Chords::known_chord($info) ) {
 	    warn( "Parsing chord: \"$chord\" found \"",
@@ -2430,6 +2562,8 @@ sub parse_chord {
     }
 
     if ( $info ) {
+	$info->{key} = $self->{meta}->{key}->[-1]
+	  unless $config->{settings}->{'enharmonic-transpose'};
 	warn( "Parsing chord: \"$chord\" okay: \"",
 	      $info->name, "\" \"",
 	      $info->chord_display, "\"",

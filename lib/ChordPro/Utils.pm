@@ -7,9 +7,11 @@ use utf8;
 use Carp;
 use feature qw( signatures );
 no warnings "experimental::signatures";
+use Ref::Util qw(is_arrayref);
 
 use Exporter 'import';
 our @EXPORT;
+our @EXPORT_OK;
 
 ################ Platforms ################
 
@@ -138,36 +140,54 @@ push( @EXPORT, 'make_preprocessor' );
 
 # Split (pseudo) command line into key/value pairs.
 
-# Escapes for string expansion. Most make no sense, newline is special.
-my %dqesc = ( n => "\n" );
-my %sqesc = ( n => "\n" );
+# Similar to JavaScript, we do not distinguish single- and double
+# quoted strings.
+# \\ \' \" yield \ ' " (JS)
+# \n yields a newline (convenience)
+# Everything else yields the character following the backslash (JS)
 
-sub parse_kv ( @lines ) {
+my %esc = ( n => "\n", '\\' => '\\', '"' => '"', "'" => "'" );
 
-    if ( is_macos() ) {
-	# MacOS has the nasty habit to smartify quotes.
-	@lines = map { s/“/"/g; s/”/"/g; s/‘/'/g; s/’/'/gr;} @lines;
+sub parse_kv ( $line, $kdef = undef ) {
+
+    my @words;
+    if ( is_arrayref($line) ) {
+	@words = @$line;
     }
+    else {
+	# Strip.
+	$line =~ s/^\s+//;
+	$line =~ s/\s+$//;
 
-    use Text::ParseWords qw(quotewords);
-    my @words = quotewords( '\s+', 1, @lines );
+	# If it doesn't look like key=value, use the default key (if any).
+	if ( $kdef && $line !~ /^\w+=(?:['"]|[-+]?\d|\w)/ ) {
+	    return { $kdef => $line };
+	}
+
+	use Text::ParseWords qw(quotewords);
+	@words = quotewords( '\s+', 1, $line );
+    }
 
     my $res = {};
     foreach ( @words ) {
-	if ( /^(.*?)="(.*)"$/ ) {
-	    my ( $k, $v ) = ( $1, $2 );
-	    $res->{$k} = $v =~ s;\\(.);$dqesc{$1}//$1;segr;
+
+	# Quoted values.
+	if ( /^(.*?)=(["'])(.*)\2$/ ) {
+	    my ( $k, $v ) = ( $1, $3 );
+	    $res->{$k} = $v =~ s;\\(.);$esc{$1}//$1;segr;
 	}
-	elsif ( /^(.*?)='(.*)'$/ ) {
-	    my ( $k, $v ) = ( $1, $2 );
-	    $res->{$k} = $v =~ s;\\(.);$sqesc{$1}//$1;segr;
-	}
+
+	# Unquoted values.
 	elsif ( /^(.*?)=(.+)$/ ) {
 	    $res->{$1} = $2;
 	}
+
+	# Negated keywords.
 	elsif ( /^no[-_]?(.+)/ ) {
 	    $res->{$1} = 0;
 	}
+
+	# Standalone keywords.
 	else {
 	    $res->{$_}++;
 	}
@@ -177,6 +197,24 @@ sub parse_kv ( @lines ) {
 }
 
 push( @EXPORT, 'parse_kv' );
+
+# Split (pseudo) command lines into key/value pairs.
+
+#### LEGACY -- WILL BE REMOVED ####
+
+sub parse_kvm ( @lines ) {
+
+    if ( is_macos() ) {
+	# MacOS has the nasty habit to smartify quotes.
+	@lines = map { s/“/"/g; s/”/"/g; s/‘/'/g; s/’/'/gr;} @lines;
+    }
+
+    use Text::ParseWords qw(quotewords);
+    my @words = quotewords( '\s+', 1, @lines );
+    parse_kv( \@words );
+}
+
+push( @EXPORT, 'parse_kvm' );
 
 # Map true/false etc to true / false.
 
@@ -217,6 +255,42 @@ sub qquote ( $arg, $force = 0 ) {
 }
 
 push( @EXPORT, 'qquote' );
+
+# Safely print values.
+
+use Scalar::Util qw(looks_like_number);
+
+# We want overload:
+# sub pv( $val )
+# sub pv( $label, $val )
+
+sub pv {
+    my $val   = pop;
+    my $label = pop // "";
+
+    my $suppressundef;
+    if ( $label =~ /\?$/ ) {
+	$suppressundef++;
+	$label = $';
+    }
+    if ( defined $val ) {
+	if ( looks_like_number($val) ) {
+	    $val = sprintf("%.3f", $val);
+	    $val =~ s/0+$//;
+	    $val =~ s/\.$//;
+	}
+	else {
+	    $val = qquote( $val, 1 );
+	}
+    }
+    else {
+	return "" if $suppressundef;
+	$val = "<undef>"
+    }
+    defined wantarray ? $label.$val : warn($label.$val."\n");
+}
+
+push( @EXPORT, 'pv' );
 
 # Processing JSON.
 
@@ -294,7 +368,7 @@ sub prpadd2cfg ( $cfg, @defs ) {
 	# Handle pdf.fonts.xxx shortcuts.
 	if ( join( ".", @keys ) eq "pdf.fonts" ) {
 	    my $s = { pdf => { fonts => { $lastkey => $value } } };
-	    ChordPro::Config::config_expand_font_shortcuts($s);
+	    ChordPro::Config::expand_font_shortcuts($s);
 	    $value = $s->{pdf}{fonts}{$lastkey};
 	}
 
@@ -401,6 +475,14 @@ sub max { $_[0] > $_[1] ? $_[0] : $_[1] }
 
 push( @EXPORT, "min", "max" );
 
+# Plural
+sub plural( $n, $tag, $plural=undef ) {
+    $plural //= $tag . "s";
+    ( $n || "no" ) . ( $n == 1 ? $tag : $plural );
+}
+
+push( @EXPORT, "plural" );
+
 # Dimensions.
 # Fontsize allows typical font units, and defaults to ref 12.
 sub fontsize( $size, $ref=12 ) {
@@ -469,5 +551,83 @@ sub is_corefont {
 }
 
 push( @EXPORT, "is_corefont" );
+
+# Progress reporting.
+
+use Ref::Util qw(is_coderef);
+
+# Progress can return a false result to allow caller to stop.
+
+sub progress(%args) {
+    state $callback;
+    state $phase = "";
+    state $index = 0;
+    state $total = '';
+    unless ( %args ) {		# reset
+	undef $callback;
+	$phase = "";
+	$index = 0;
+	return;
+    }
+
+    $callback = $args{callback} if exists $args{callback};
+    return 1 unless $callback;
+
+    if ( exists $args{phase} ) {
+	$index = 0 if $phase ne $args{phase};
+	$phase = $args{phase};
+    }
+    if ( exists $args{index} ) {
+	$index = $args{index};
+
+	# Use index<0 to only set callback/phase.
+	$index = 0, $total = '', return if $index < 0;
+    }
+    if ( exists $args{total} ) {
+	$total = $args{total};
+    }
+
+    my $args = { phase => $phase, index => $index, total => $total, %args };
+
+    my $ret = ++$index;
+    if ( is_coderef($callback) ) {
+	$ret = eval { $callback->(%$args) };
+	if ( $@ ) {
+	    warn($@);
+	    undef $callback;
+	}
+    }
+    else {
+	if ( $callback eq "warn" ) {
+	    # Simple progress message. Suppress if $index = 0 or total = 1.
+	    $callback =
+	      '%{index=0||' .
+	      '%{total=1||Progress[%{phase}]: %{index}%{total|/%{}}%{msg| - %{}}}' .
+	      '}';
+	}
+	my $msg = ChordPro::Output::Common::fmt_subst
+	  ( { meta => $args }, $callback );
+	$msg =~ s/\n+$//;
+	warn( $msg, "\n" ) if $msg;
+    }
+
+    return $ret;
+}
+
+push( @EXPORT, "progress" );
+
+# Common items for property directives ({textsize} etc.).
+
+sub propitems() {
+    qw(  chord chorus diagrams footer grid label tab text title toc );
+}
+
+sub propitems_re() {
+    my $re = join( '|', propitems() );
+    qr/(?:$re)/;
+}
+
+push( @EXPORT, "propitems_re" );
+push( @EXPORT_OK, "propitems" );
 
 1;

@@ -11,7 +11,7 @@ DEST   := build
 VERSION := $(shell perl ../../lib/ChordPro/Version.pm)
 TARGET := wxchordpro
 
-PP := pp -u
+PP := pp
 
 default : appimage
 

@@ -97,7 +97,7 @@ method draw( $info, $x, $y, $dummy=0 ) {
     warn("BB [ @bb ] $x $y\n") if DIAG_DEBUG;
     $pr->{pdfgfx}->object( $xo, $x,
 
-			   $y - ($font->{size} * $ps->{spacing}->{diagramchords} + $dot/2 + $lw) );
+			   $y - ($font->{size} * $ps->{spacing}->{diagramchords} + $dot + $lw) );
 
     # Draw name.
     my $w = $gw * ($strings - 1);
@@ -105,7 +105,8 @@ method draw( $info, $x, $y, $dummy=0 ) {
     my $name = $info->chord_display;
     $name = "<span color='$fg'>$name</span>"
       if $info->{diagram};
-    $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y-font_bl($font) );
+    $pr->text( $name, $x + ($w - $pr->strwidth($name))/2,
+	       $y-font_bl($font));#+$font->{fd}->{ascender}/1000 );
 }
 
 # Returns the complete diagram as an xo. This includes the core grid,
@@ -293,8 +294,8 @@ method diagram_xo( $info ) {
 	    $x += $gw;
 	    my $fret = $info->{frets}->[$sx];
 	    next unless $fret > 0;
-	    my $fing = $fingers->[$sx];
-	    next unless $fing > 0;
+	    my $fing = uc $fingers->[$sx];
+	    next unless $fing =~ /^[1-9A-Z]$/;
 
 	    # For barre, only the first and last finger.
 	    if ( $bar->{$fing} && $fsh ne "below" ) {

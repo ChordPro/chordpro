@@ -73,9 +73,8 @@ sub txt2xform( $self, %args ) {
     }
     my $padding  = delete($opts->{padding});
 
-    # New xo, and put it in text mode.
+    # New xo.
     my $xo = $pr->{pdf}->xo_form;
-    $xo->textstart;
 
     # Pre-pass to establish the actual width/height.
     my ( $awidth, $aheight ) = ( 0, undef );
@@ -131,6 +130,9 @@ sub txt2xform( $self, %args ) {
 	$xo->fill_color($bg);
 	$xo->fill;
     }
+
+    # Put it in text mode.
+    $xo->textstart;
 
     my $y = $height - $ycorr;
 

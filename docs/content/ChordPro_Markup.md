@@ -78,7 +78,7 @@ as `red`.
   Portability note: Colour names and codes depend on the ChordPro
   implementation. The following should be portable across all
   implementations: `#RRGGBB` where RR, GG and BB denote the red, green
-  and blue components of the colour in hexadeximal notation, and the
+  and blue components of the colour in hexadecimal notation, and the
   colour names `red`, `green`, `blue`, `yellow`, `magenta`, `cyan`,
   `white`, `grey`, and `black`.
 

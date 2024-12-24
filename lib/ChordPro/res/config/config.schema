@@ -171,6 +171,12 @@
           "default" : false
         },
 
+        "enharmonic-transpose" : {
+          "description" : "Force enharmonic when transposing (experimental).",
+          "type" : "boolean",
+          "default" : true
+        },
+
         "inline-annotations" : {
           "description" : "Same, for annotations. Ignored unless inline-chords is set.\nMust be a string containing pretext %s posttext.\nDefault is \"%s\".",
           "type" : "string",
@@ -1115,9 +1121,6 @@
 	      "default" : 1,
 	      "description" : "Even/odd pages (1), odd/even (-1) or odd (0).",
 	      "enum" : [ 1, -1, 0 ],
-	      "options" : {
-		"enum_titles" : [ "Even/Odd", "Odd/Even", "Odd" ]
-	      },
 	      "type" : "integer"
 	    },
 
@@ -1345,7 +1348,7 @@
 	    },
 
 	    "formats" : {
-	      "description" : "Formats.\nPages have two title elements and one footer element. They also\ncan have a page of an existing PDF file as underlay (background).\nTopmost is \"title\". It uses the \"title\" font as defined further below.\nSecond is \"subtitle\". It uses the \"subtitle\" font.\nThe \"footer\" uses the \"footer\" font.\nAll elements can have three fields, that are placed to the left side,\ncentered, and right side of the page.\nThe contents of all fields is defined below. You can use metadata\nitems in the fields as shown. By default, the \"title\" element shows the\nvalue of metadata item \"title\", centered on the page. Likewise\n\"subtitle\".\nNOTE: The \"title\" and \"subtitle\" page elements have the same names\nas the default metadata values which may be confusing. To show\nmetadata item, e.g. \"artist\", add its value to one of the\ntitle/subtitle fields. Don't try to add an artist page element.\n\nWhen a background document is specified, with odd/even printing,\nthe 1st background page is used for left pages and\nthe next page (if it exists) for right pages.\nFor even/odd printing, the order is reversed.",
+	      "description" : "Formats.\nPages have two title elements and one footer element. They also\ncan have a page of an existing PDF file as underlay (background).\nTopmost is \"title\". It uses the \"title\" font as defined further below.\nSecond is \"subtitle\". It uses the \"subtitle\" font.\nThe \"footer\" uses the \"footer\" font.\nAll elements can have three fields, that are placed to the left side,\ncentered, and right side of the page.\nThe contents of all fields is defined below. You can use metadata\nitems in the fields as shown. By default, the \"title\" element shows the\nvalue of metadata item \"title\", centered on the page. Likewise\n\"subtitle\".\nNOTE: The \"title\" and \"subtitle\" page elements have the same names\nas the default metadata values which may be confusing. To show\nmetadata item, e.g. \"artist\", add its value to one of the\ntitle/subtitle fields. Don't try to add an artist page element.\n\nThe left, center and right parts are for odd pages.\nOn even pages, the left and right parts are swapped.\nIt is possible to define distinct even page formats with \"default-even\",\n\"title-even\" and \"first-even\".\n   \nWhen a background document is specified, with odd/even printing,\nthe 1st background page is used for left pages and\nthe next page (if it exists) for right pages.\nFor even/odd printing, the order is reversed.\n",
 	      "additionalProperties" : false,
 	      "properties" : {
 		"default" : {
@@ -1419,6 +1422,34 @@
 		    "subtitle" : {
 		      "description" : "Defaults to default.",
 		      "$ref" : "#/definitions/tptspec"
+		    },
+		    "footer" : {
+		      "allOf" : [
+			{ "$ref" : "#/definitions/tptspec" },
+			{ "default" : "" }
+		      ]
+		    }
+		  }
+		},
+		"filler" : {
+		  "description" : "Filler pages (for alignment) are empty by default.",
+		  "additionalProperties" : false,
+		  "properties" : {
+		    "background" : {
+		      "description" : "Background page.",
+		      "type" : "string"
+		    },
+		    "title" : {
+		      "allOf" : [
+			{ "$ref" : "#/definitions/tptspec" },
+			{ "default" : "" }
+		      ]
+		    },
+		    "subtitle" : {
+		      "allOf" : [
+			{ "$ref" : "#/definitions/tptspec" },
+			{ "default" : "" }
+		      ]
 		    },
 		    "footer" : {
 		      "allOf" : [
@@ -1656,7 +1687,7 @@
 	    },
 
 	    "margintop" : {
-	      "description" : "Page top marging, excluding headspace.",
+	      "description" : "Page top margin, excluding headspace.",
 	      "default" : 80,
 	      "minimum" : 0,
 	      "type" : "number"

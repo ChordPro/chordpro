@@ -1,32 +1,27 @@
 ---
-title: "Creating a config (GUI)"
-description: "Creating a config (GUI)"
+title: "Create a new configuration using the GUI"
+description: "Create a new configuration using the GUI"
 ---
 
-# Creating a config (GUI)
+# Create a new configuration using the GUI
 
-_Note: This does not work on Mac OS/X due to system constraints_
+From the `Edit` menu choose `Settings…` and select the `Presets` tab.  
 
-## Create a sample configuration using the GUI
+*On macOS, the Settings are in the `ChordPro` menu.*
 
-_Note that the appearance of dialogs and file names may differ between systems._
+Here you will find the option for a new *Custom Configuration File*.
 
-From the `Edit` menu choose `Preferences…`.
 
-![]({{< asset "images/prf_cr_cfg_1.png" >}})
+![]({{< asset "images/chordpro-gui-settings-custom configuration.png" >}})
 
-Click the checkbox `Custom config` and click the `…` button to open a file dialog.  
 
-![]({{< asset "images/prf_cr_cfg_2.png" >}})
+To create a *new configuration file*, filled with *the default configuration*; just click '**New**'.
 
-Select a folder and enter the name of a new file, for example `myconfig.json`.  
-Click `Open`.
+A file-dialog will give you the opportunity the give your new configuration a name, save it and select it. Alter it to your [needs]({{< relref "ChordPro-Configuration-Overview" >}}).
 
-![]({{< asset "images/prf_cr_cfg_4.png" >}})
+### Important
 
-The new configuration file will be created and filled with default
-configuration values.
+The configuration file contains most of the ChordPro configuration
+items, **all commented out**. It is easy to get started with configuring
+ChordPro by enabling and modifyng just a few items at a time.
 
-Note: Config files accumulate, and ChordPro always starts with the
-built-in default config. It is **strongly advised** to strip all default
-values from the generated config and only leave the modified settings in.

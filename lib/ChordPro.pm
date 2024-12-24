@@ -108,6 +108,10 @@ sub chordpro {
     # Establish backend.
     my $of = $options->{output};
 
+    # Progress callback, if any.
+    progress( callback => $options->{progress_callback}, index => -1 )
+      if $options->{progress_callback};
+
     if ( $options->{'convert-config'} ) {
 	die("\"--convert-config\" requires a single config file name\n")
 	  if @ARGV;
@@ -189,8 +193,14 @@ sub chordpro {
 
     # Check for metadata in filelist. Actually, this works on the
     # command line as well, but don't tell anybody.
+    progress( phase => "Parsing", index => 0, total => 0+@ARGV )
+      if @ARGV > 1;
     foreach my $file ( @ARGV ) {
 	my $opts;
+	if ( $file =~ /^--((?:sub)?title)\s*(.*)/ ) {
+	    $options->{$1} = decode_utf8($2);
+	    next;
+	}
 	if ( $file =~ /(^|\s)--(?:meta|config|define)\b/ ) {
 	    # Break into words.
 	    my @w = Text::ParseWords::shellwords($file);
@@ -213,6 +223,7 @@ sub chordpro {
 	$opts->{generate} = $options->{generate};
 	# Wx runs on temp files, so pass real filename in.
 	$opts->{filesource} = $options->{filesource};
+	progress( msg => $file ) if @ARGV > 1;
 	$s->parse_file( $file, $opts );
     }
 
@@ -421,6 +432,17 @@ Sets the starting page number for the output.
 Requires the input to be strictly compliant to the ChordPro standard.
 
 This is enabled by default. See also B<--nostrict>.
+
+=item B<--subtitle=>I<XXX>
+
+Subtitle (for songbooks).
+
+=item B<--title=>I<XXX>
+
+Title (for songbooks).
+
+If specified and a table of contents is requested, a nice coverpage
+will be added.
 
 =item B<--toc> (short: B<-i>)
 
@@ -632,6 +654,15 @@ the command line.
 This guarantees that the program is running with the default
 configuration.
 
+=item B<--print-template-config>
+
+Prints a simplified template configuration to standard output, and
+exits. The configuration is commented to explain its contents.
+
+The config contains most of the ChordPro configuration items, all
+commented out. It is easy to get started with configuring ChordPro
+by enabling and modifyng just a few items at a time.
+
 =item B<--print-default-config>
 
 Prints the default configuration to standard output, and exits.
@@ -702,6 +733,7 @@ sub app_setup {
     my $defcfg = 0;		# handled locally
     my $fincfg = 0;		# handled locally
     my $deltacfg = 0;		# handled locally
+    my $tmplcfg = 0;		# handled locally
     my $dump_chords = 0;	# handled locally
 
     # Package name.
@@ -776,12 +808,18 @@ sub app_setup {
 	  "front-matter|cover=s",	# Front matter page(s)
 	  "back-matter=s",		# Back matter page(s)
 	  "filelist=s@",		# List of input files
+	  "title=s",			# Title (for books)
+	  "subtitle=s",			# Subtitle (for books)
 	  "meta=s\%",			# Command line meta data
 	  "decapo",			# remove capo
 	  "fragment|F",			# partial (incomplete) song
 	  "strict!",			# strict conformance
 
-          ### Standard Chordii Options ###
+	  ### Experimental ###
+
+	  "progress_callback=s",
+
+	  ### Standard Chordii Options ###
 
           "about|A+" => \$about,        # About...
           "chord-font|C=s",             # Sets chord font
@@ -825,9 +863,10 @@ sub app_setup {
           'nouserconfig|no-userconfig',
 	  'nodefaultconfigs|no-default-configs|X',
 	  'define=s%',
-	  'print-default-config' => \$defcfg,
-	  'print-final-config'   => \$fincfg,
-	  'print-delta-config'   => \$deltacfg,
+	  'print-default-config'  => \$defcfg,
+	  'print-final-config'    => \$fincfg,
+	  'print-delta-config'    => \$deltacfg,
+	  'print-template-config' => \$tmplcfg,
 	  'convert-config=s',
 
 	  # This aborts option scanning.
@@ -840,6 +879,7 @@ sub app_setup {
           'help-config'         => sub { $manual = 2 },
           'manual'              => \$manual,
           'verbose|v+',
+	  I			=> sub { $clo->{progress_callback} = "warn" },
           'trace',
           'debug+',
 
@@ -878,6 +918,7 @@ sub app_setup {
 
     $clo->{trace} ||= $clo->{debug};
     $clo->{verbose} ||= $clo->{trace};
+    $clo->{progress_callback} //= "warn" if $clo->{verbose};
 
     unless ( $ok ) {
         # GNU convention: message to STDERR upon failure.
@@ -945,7 +986,7 @@ sub app_setup {
 
     # Decode command line strings.
     # File names are dealt with elsewhere.
-    for ( qw(transcode) ) {
+    for ( qw(transcode title subtitle ) ) {
 	next unless defined $clo->{$_};
 	$clo->{$_} = decode_utf8($clo->{$_});
     }
@@ -959,6 +1000,14 @@ sub app_setup {
     $::options = $options;
     # warn(::dump($options), "\n") if $options->{debug};
 
+    if ( $tmplcfg ) {
+	use File::Copy;
+	my $cfg = File::Spec->catfile( CP->findresdirs("config")->[-1],
+				       "config.tmpl" );
+	binmode STDOUT => ':raw';
+	copy( $cfg, \*STDOUT );
+	exit 0;
+    }
     if ( $defcfg || $fincfg || $deltacfg ) {
 	print ChordPro::Config::config_final( default => $defcfg,
 					      delta   => $deltacfg );
@@ -1060,7 +1109,7 @@ use List::Util qw(uniq);
 
 sub ::runtimeinfo {
     my $level = shift // "normal";
-    my %i = %{runtime_info()};
+    my %i = %{runtime_info($level)};
     my $fmt0   = "  %-22.22s %-10s";
     my $fmt2   = $fmt0 . "\n";
     my $fmt3   = $fmt0 . " (%s)\n";
@@ -1151,6 +1200,7 @@ sub ::runtimeinfo {
 
 # Gather runtime details.
 sub runtime_info {
+    my $level = shift // "normal";
     my $cp = ChordPro::Paths->get;
     my $res;
 
@@ -1163,6 +1213,7 @@ sub runtime_info {
 	$_->{aux} = "Unsupported development snapshot"
 	  if $VERSION =~ /_/;
     }
+    return $res if $level eq "short";
 
     $res->{general}{perl} =
       { version => "$^V",
@@ -1222,7 +1273,7 @@ sub runtime_info {
 	no strict 'subs';
 	push( @p,
 	      { name => "wxPerl",    version => $dd->($Wx::VERSION)  },
-	      { name => "wxWidgets", version => $dd->(Wx::wxVERSION) } );
+	      { name => "wxWidgets", version => $dd->($Wx::wxVERSION) } );
     }
 
     local $SIG{__WARN__} = sub {};
@@ -1277,7 +1328,7 @@ sub runtime_info {
     $res->{metadata} = $::config->{metadata}{keys};
 
     @p = ( qw(title subtitle),
-	   ( grep { !/^(sub)?title$/ } sort(@{$::config->{metadata}{keys}}) ),
+	   ( grep { !/^(sub)?title$/ } sort(@{$::config->{metadata}{keys}//[]}) ),
 	   grep { !/^(sub)?title$/ } (keys(%{ChordPro::Song::_directives()})) );
     $res->{directives} = [ @p ];
 

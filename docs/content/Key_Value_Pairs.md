@@ -21,7 +21,7 @@ Using quotes is optional unless the value contains spaces.
 
 ## To be or not to be
 
-Often an atribute takes a _logical_ value to enable or disable
+Often an attribute takes a _logical_ value to enable or disable
 something.
 
     diagram=no

@@ -1,12 +1,12 @@
 ---
-title: "Using ChordPro"
-description: "Using ChordPro"
+title: "Using the ChordPro CLI"
+description: "Using the ChordPro CLI"
 ---
 
-# Using ChordPro
+# Using the ChordPro CLI
 
 First of all, please read the
-[Getting Started]({{< relref "ChordPro-Getting-Started" >}}) page.
+[Getting started with the CLI]({{< relref "ChordPro-Getting-Started-CLI" >}}) page.
 
 ## Command line options
 
@@ -47,7 +47,7 @@ the output. No further processing takes place.
 See also [Legacy ASCII input format]({{< relref
 "chordpro-getting-started#legacy-ascii-input-format" >}}).
 
-Note that `--a2crd` is slightly different from `--generate=ChordPro`. In the latter case the inpur data *is* processed
+Note that `--a2crd` is slightly different from `--generate=ChordPro`. In the latter case the input data *is* processed
 and then written out as a ChordPro file.
 
 See also [`--crd`]({{< relref "#crd" >}}),
@@ -261,7 +261,7 @@ with a `--generate` option:
   a CSV file containing the following metadata:
   title, pages, sorttitle, artist, composer, collection, key and year.
 
-  This CSV file has the same name as the PDF, with extenstion `pdf`
+  This CSV file has the same name as the PDF, with extension `pdf`
   replaced by `csv`. The contents conform to the RFC4180
   recommendations. The column separator is a semicolon. When a
   metadata has multiple values, these are separated with a vertical
@@ -655,7 +655,19 @@ The default configuration is fully commented to explain its contents.
 Prints the final configuration (after processing all system, user
 and other config files) to standard output, and exits.
 
-The final configuration is not commented. Sorry.
+The final configuration is not commented. Sorry. In fact, it may not
+work at all.
+
+### print-template-config
+
+`--print-template-config`
+
+Prints a simplified template configuration to standard output, and
+exits. The configuration is commented to explain its contents.
+
+The config contains most of the ChordPro configuration items, all
+commented out. It is easy to get started with configuring ChordPro
+by enabling and modifyng just a few items at a time.
 
 ### sysconfig
 

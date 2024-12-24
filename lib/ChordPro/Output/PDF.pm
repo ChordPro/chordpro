@@ -16,6 +16,7 @@ use Encode qw( encode_utf8 );
 use File::Temp ();
 use Storable qw(dclone);
 use List::Util qw(any);
+use Ref::Util qw(is_hashref is_arrayref is_coderef);
 use Carp;
 use feature 'state';
 use File::LoadLines qw(loadlines loadblob);
@@ -39,6 +40,9 @@ my $verbose = 0;
 # us to pinpoint some other data that would otherwise be varying.
 my $regtest = defined($ENV{PERL_HASH_SEED}) && $ENV{PERL_HASH_SEED} == 0;
 
+# Page classes.
+my @classes = qw( first title default filler );
+
 sub generate_songbook {
     my ( $self, $sb ) = @_;
 
@@ -47,6 +51,22 @@ sub generate_songbook {
     $verbose ||= $options->{verbose};
 
     $ps = $config->{pdf};
+
+    my $extra_matter = 0;
+    if ( $options->{toc} // (@{$sb->{songs}} > 1) ) {
+	for ( @{ $::config->{contents} } ) {
+	    $extra_matter++ unless $_->{omit};
+	}
+	$extra_matter++ if $options->{title};
+    }
+    $extra_matter++ if $options->{'front-matter'};
+    $extra_matter++ if $options->{'back-matter'};
+    $extra_matter++ if $options->{csv};
+    $extra_matter += @{$sb->{songs}} if $ps->{'sort-pages'};
+
+    progress( phase   => "PDF",
+	      index   => 0,
+	      total   => scalar(@{$sb->{songs}}) );
 
     if ( $ps->{'sort-pages'} ) {
 	sort_songbook($sb);
@@ -71,7 +91,7 @@ sub generate_songbook {
     # 3. The songs.
     # 4. The back matter.
     my ( %start_of, %pages_of );
-    for ( qw( front toc songbook back ) ) {
+    for ( qw( cover front toc songbook back ) ) {
 	$start_of{$_} = 1;
 	$pages_of{$_} = 0;
     }
@@ -86,6 +106,8 @@ sub generate_songbook {
 
     my $first_song_aligned;
     my $songindex;
+    my $cancelled;
+
     foreach my $song ( @{$sb->{songs}} ) {
 	$songindex++;
 
@@ -101,7 +123,6 @@ sub generate_songbook {
 	if ( ($page % 2) && $song->{meta}->{pages} && $song->{meta}->{pages} == 2 ) {
 	    $pr->newpage($ps, $page+1);
 	    $page++;
-	    print STDERR " " if $options->{verbose}; # Progress indicator
 	}
 
 	$song->{meta}->{tocpage} = $page;
@@ -115,9 +136,7 @@ sub generate_songbook {
 	    }
 	}
 
-	if ( $options->{verbose} ) {
-	    print STDERR "$page "; # Progress indicator
-	}
+	$cancelled++,last unless progress( msg => $song->{meta}->{title}->[0] );
 
 	$song->{meta}->{"chordpro.songsource"} //= $song->{source}->{file};
 	$page += $song->{meta}->{pages} =
@@ -131,7 +150,6 @@ sub generate_songbook {
     }
     $pages_of{songbook} = $page - 1;
     $start_of{back} = $page;
-    print STDERR "\n" if $options->{verbose}; # Progress indicator
 
     $::config->{contents} //=
       [ { $::config->{toc}->{order} eq "alpha"
@@ -140,7 +158,16 @@ sub generate_songbook {
 	  label => $::config->{toc}->{title},
 	  line => $::config->{toc}->{line} } ];
 
-    foreach my $ctl ( reverse( @{ $::config->{contents} } ) ) {
+    my @tocs = @{ $::config->{contents} };
+
+    if ( $extra_matter ) {
+	progress( phase   => "PDF(extra)",
+		  index   => 0,
+		  total   => $extra_matter );
+    }
+
+    while ( !$cancelled && @tocs ) {
+	my $ctl = pop(@tocs);
 	next unless $options->{toc} // @book > 1;
 
 	for ( qw( fields label line pageno ) ) {
@@ -152,61 +179,104 @@ sub generate_songbook {
 	my $book = prep_outlines( [ map { $_->[1] } @book ], $ctl );
 
 	# Create a pseudo-song for the table of contents.
-	my $t = fmt_subst( $book[0][-1], $ctl->{label} );
-	my $l = $ctl->{line};
+	my $toctitle = fmt_subst( $book[0][-1], $ctl->{label} );
 	my $start = $start_of{songbook} - $options->{"start-page-number"};
+	# Templates for toc line and page.
+	my $tltpl = $ctl->{line};
 	my $pgtpl = $ctl->{pageno};
 
-	# If we have a template, process it as a song and prepend.
 	my $song;
-	    my $cf;
+	my $tmplfile;
 	if ( $ctl->{template} ) {
 	    my $tpl = $ctl->{template};
 	    if ( $tpl =~ /\.\w+/ ) { # file
-		$cf = CP->siblingres( $book[0][-1]->{source}->{file},
+		$tmplfile = CP->siblingres( $book[0][-1]->{source}->{file},
 				      $tpl, class => "templates" );
-		warn("ToC template not found: $tpl\n") unless $cf;
+		warn("ToC template not found: $tpl\n") unless $tmplfile;
 	    }
 	    else {
-		$cf = CP->findres( $tpl.".cho", class => "templates" );
+		$tmplfile = CP->findres( $tpl.".cho", class => "templates" );
 		if ( $verbose ) {
 		    warn("ToC template",
-			 $cf ? " found: $cf" : " not found: $tpl.cho\n")
+			 $tmplfile ? " found: $tmplfile" : " not found: $tpl.cho\n")
 		}
 	    }
 	}
-	if ( $cf ) {
+
+	# Construct front matter songbook.
+	my $fmsb;
+	if ( $tmplfile ) {
+	    # Songbook from template file.
 	    my $opts = {};
-	    my $lines = loadlines( $cf, $opts );
-	    $song = ChordPro::Song->new( { %$opts,
-					   generate => 'PDF' } );
-	    my $l = 0;
-	    $song->parse_song( $lines, \$l, {}, {} );
-	    $t = fmt_subst( $book[0][-1], $song->{title} )
-	      if $song->{title};
-	    my $st = fmt_subst( $book[0][-1], $song->{meta}->{subtitle}->[0] )
-	      if $song->{meta}->{subtitle} && $song->{meta}->{subtitle}->[0];
+	    my $lines = loadlines( $tmplfile, $opts );
+	    $fmsb = ChordPro::Songbook->new;
+	    $fmsb->parse_file( $lines, { %$opts,
+					 generate => 'PDF' } );
+	    for ( $fmsb->{songs}->[-1] ) {
+		$_->{title} = $_->{title}
+		  ? fmt_subst( $book[0][-1], $_->{title} )
+		  : $toctitle;
+		$_->{meta}->{title} //= [ $_->{title} ];
+#	    my $st = fmt_subst( $book[0][-1], $song->{meta}->{subtitle}->[0] )
+#	      if $song->{meta}->{subtitle} && $song->{meta}->{subtitle}->[0];
+	    }
 	}
 	else {
+	    # Create single-song songbook.
+	    $fmsb = ChordPro::Songbook->new;
+	    my $song = ChordPro::Song->new( { generate => 'PDF' } );
 	    $song = { meta => {} };
-	    $song->{title} //= $t;
-	    $song->{meta}->{title} //= [ $t ];
+	    $song->{title} //= $toctitle;
+	    $song->{meta}->{title} //= [ $toctitle ];
+	    $fmsb->add($song);
 	}
+
+	my @songs = @{$fmsb->{songs}};
+
+	# The first (of multiple) gets the global title/subtitle.
+	if ( @songs > 1 ) {
+	    for ( $songs[0] ) {
+		$_->{meta}->{title} =
+		  [ fmt_subst( $_, $options->{title} ) ]
+		  if defined $options->{title};
+		$_->{meta}->{subtitle} =
+		  [ fmt_subst( $_, $options->{subtitle} ) ]
+		  if defined $options->{subtitle};
+		$_->{title} = $_->{meta}->{title}->[0];
+	    }
+	}
+
+	# The last song gets the ToC appended.
+	$song = pop(@songs);
 	push( @{ $song->{body} //= [] },
 	      map { +{ type    => "tocline",
 		       context => "toc",
-		       title   => fmt_subst( $_->[-1], $l ),
+		       title   => fmt_subst( $_->[-1], $tltpl ),
 		       page    => $pr->{pdf}->openpage($_->[-1]->{meta}->{tocpage}+$start),
 		       pageno  => fmt_subst( $_->[-1], $pgtpl ),
 		     } } @$book );
 
-	# Prepend the toc.
-	$page = generate_song( $song,
-			       { pr => $pr, prepend => 1, roman => 1,
-				 startpage => 1,
-				 songindex => 1, numsongs => 1,
-			       } );
+	# Prepend the front matter songs.
+	$page = 0;
+	for ( @songs, $song ) {
+	    $cancelled++,last unless progress( msg => $_->{title} );
+	    my $p = generate_song( $_,
+				   { pr => $pr, prepend => 1, roman => 1,
+				     startpage => 1+$page,
+				     songindex => 1, numsongs => 1,
+				   } );
+	    $page += $p;
+	    if ( $ps->{'pagealign-songs'}
+		 && !( $page % 2 ) ) {
+		$pr->newpage($ps, $page);
+		$page++;
+		$p++;
+	    }
+	    $pages_of{front} += $p unless $_ eq $song;
+	    $start_of{toc} = $page if $_ eq $song;
+	}
 	$pages_of{toc} += $page;
+
 	#### TODO: This is not correct if there are more TOCs.
 	$pages_of{toc}++ if $first_song_aligned;
 
@@ -223,6 +293,7 @@ sub generate_songbook {
 	$page = 1;
 	my $matter = $pdfapi->open( expand_tilde($ps->{'front-matter'}) );
 	die("Missing front matter: ", $ps->{'front-matter'}, "\n") unless $matter;
+	progress( msg => "Front matter" );
 	for ( 1 .. $matter->pages ) {
 	    $pr->{pdf}->import_page( $matter, $_, $_ );
 	    $page++;
@@ -239,10 +310,57 @@ sub generate_songbook {
 	$start_of{back}     += $page - 1;
     }
 
+    # If we have a template, process it as a song and prepend.
+    my $covertpl;
+    if ( defined($options->{title}) && !@tocs ) {
+	my $tpl = "cover";
+	$covertpl = CP->findres( "$tpl.cho", class => "templates" );
+	if ( $verbose ) {
+	    warn("Cover template",
+		 $covertpl ? " found: $covertpl" : " not found: $tpl.cho\n")
+	}
+    }
+    if ( $covertpl ) {
+	my $page = 1;
+	my $opts = {};
+	my $lines = loadlines( $covertpl, $opts );
+	my $csb = ChordPro::Songbook->new;
+	$csb->parse_file( $lines, { %$opts,
+				    generate => 'PDF' } );
+	for ( $csb->{songs}->[0] ) {
+	    $_->{meta}->{title} =
+	      $options->{title} ?
+	      $options->{title} : $_->{meta}->{title}->[0];
+	    $_->{meta}->{subtitle} =
+	      $options->{subtitle} ?
+	      $options->{subtitle} : $_->{meta}->{subtitle};
+	}
+	my $adjusted;
+	for ( @{$csb->{songs}} ) {
+	    $adjusted = 0;
+	    my $p = generate_song( $_,
+				   { pr => $pr, prepend => 1, roman => 1,
+				     startpage => 0,
+				     songindex => 1, numsongs => 1,
+			       } );
+	    $page += $p;
+	    if ( $ps->{'pagealign-songs'}
+		 && !( $page % 2 ) ) {
+		$pr->newpage($ps, $page);
+		$page++;
+		$p++;
+		$adjusted++;
+	    }
+	    $start_of{$_} += $p for qw( songbook front toc back );
+	}
+	$pages_of{cover} = $page - ( $adjusted ? 2 : 1 );
+    }
+
     if ( $ps->{'back-matter'} ) {
 	my $matter = $pdfapi->open( expand_tilde($ps->{'back-matter'}) );
 	die("Missing back matter: ", $ps->{'back-matter'}, "\n") unless $matter;
 	$page = $start_of{back};
+	progress( msg => "Back matter" );
 	$pr->newpage($ps), $page++, $start_of{back}++
 	  if $ps->{'even-odd-pages'} && ($page % 2);
 	for ( 1 .. $matter->pages ) {
@@ -255,6 +373,7 @@ sub generate_songbook {
     # warn ::dump(\%pages_of) =~ s/\s+/ /gsr, "\n";
 
     # Note that the page indices run from zero.
+    $pr->pagelabel( 0,                     'arabic', 'cover-' );
     $pr->pagelabel( $start_of{front}-1,    'arabic', 'front-' )
       if $pages_of{front};
     $pr->pagelabel( $start_of{toc}-1,      'roman'            )
@@ -270,8 +389,10 @@ sub generate_songbook {
     $pr->finish( $options->{output} || "__new__.pdf" );
     warn("Generated PDF...\n") if $options->{verbose};
 
-    generate_csv( \@book, $page, \%pages_of, \%start_of )
-      if $options->{csv};
+    if ( $options->{csv} ) {
+	progress( msg => "CSV" );
+	generate_csv( \@book, $page, \%pages_of, \%start_of )
+    }
 
     _dump($ps) if $verbose;
 
@@ -297,7 +418,7 @@ sub generate_csv {
 
     my $rfc4180 = sub {
 	my ( $v ) = @_;
-	$v = [$v] unless ref($v) eq 'ARRAY';
+	$v = [$v] unless is_arrayref($v);
 	return "" unless defined($v) && defined($v->[0]);
 	$v = join( $sep, @$v );
 	return $v unless $v =~ m/[$sep"\n\r]/s;
@@ -339,15 +460,25 @@ sub generate_csv {
     #warn( "CSV: $ncols fields\n" );
     print $fd ( join( $sep, @cols ), "\n" );
 
+    # Extra meta info from command line, for non-song CSV.
+    my $xm = $options->{meta} // {};
     unless ( $ctl->{songsonly} ) {
-	$csvline->( { title     => '__front_matter__',
+	$csvline->( { %$xm,
+		      title     => 'Cover',
+		      pagerange => $pagerange->("cover"),
+		      sorttitle => 'Cover',
+		      artist    => 'ChordPro' } )
+	  if $pages_of->{cover};
+	$csvline->( { %$xm,
+		      title     => 'Front Matter',
 		      pagerange => $pagerange->("front"),
 		      sorttitle => 'Front Matter',
 		      artist    => 'ChordPro' } )
 	  if $pages_of->{front};
-	$csvline->( { title     => '__table_of_contents__',
+	$csvline->( { %$xm,
+		      title     => "Table of Contents",
 		      pagerange => $pagerange->("toc"),
-		      sorttitle => 'Table of Contents',
+		      sorttitle => "Table of Contents",
 		      artist    => 'ChordPro' } )
 	  if $pages_of->{toc};
     }
@@ -365,7 +496,8 @@ sub generate_csv {
     }
 
     unless ( $ctl->{songsonly} ) {
-	$csvline->( { title     => '__back_matter__',
+	$csvline->( { %$xm,
+		      title     => 'Back Matter',
 		      pagerange => $pagerange->("back"),
 		      sorttitle => 'Back Matter',
 		      artist    => 'ChordPro'} )
@@ -386,6 +518,7 @@ my $inlineannots;		# format for inline annots
 my $chordsunder = 0;		# chords under the lyrics
 my $chordscol = 0;		# chords in a separate column
 my $chordscapo = 0;		# capo in a separate column
+my $propitems_re = propitems_re();
 
 my $i_tag;
 sub pr_label_maybe {
@@ -402,7 +535,7 @@ sub assets {
 }
 
 use constant SIZE_ITEMS => [ qw( chord text chorus tab grid diagram
-				 toc title footer ) ];
+				 toc title footer label ) ];
 
 sub generate_song {
     my ( $s, $opts ) = @_;
@@ -511,11 +644,12 @@ sub generate_song {
 	if ( $s->{labels} && @{ $s->{labels} } ) {
 	    my $longest = 0;
 	    my $ftext = $fonts->{label} || $fonts->{text};
-	    my $w = $pr->strwidth("    ", $ftext);
+	    my $size = $ftext->{size};
+	    my $w = $pr->strwidth("    ", $ftext, $size);
 	    for ( @{ $s->{labels} } ) {
 		# Split on real newlines and \n.
 		for ( split( /\\n|\n/, $_ ) ) {
-		    my $t = $pr->strwidth( $_, $ftext ) + $w;
+		    my $t = $pr->strwidth( $_, $ftext, $size ) + $w;
 		    $longest = $t if $t > $longest;
 		}
 	    }
@@ -550,14 +684,14 @@ sub generate_song {
 	 && ! $ps->{'titles-directive-ignore'} ) {
 	my $swap = sub {
 	    my ( $from, $to ) = @_;
-	    for my $class ( qw( default title first ) ) {
+	    for my $class ( @classes ) {
 		for ( qw( title subtitle footer ) ) {
 		    next unless defined $ps->{formats}->{$class}->{$_};
-		    unless ( ref($ps->{formats}->{$class}->{$_}) eq 'ARRAY' ) {
+		    unless ( is_arrayref($ps->{formats}->{$class}->{$_}) ) {
 			warn("Oops -- pdf.formats.$class.$_ is not an array\n");
 			next;
 		    }
-		    unless ( ref($ps->{formats}->{$class}->{$_}->[0]) eq 'ARRAY' ) {
+		    unless ( is_arrayref($ps->{formats}->{$class}->{$_}->[0]) ) {
 			$ps->{formats}->{$class}->{$_} =
 			  [ $ps->{formats}->{$class}->{$_} ];
 		    }
@@ -597,11 +731,13 @@ sub generate_song {
 
     my $col_adjust = sub {
 	if ( $ps->{columns} <= 1 ) {
-	    warn("L=", $ps->{__leftmargin},
-	     ", R=", $ps->{__rightmargin},
-	     ", T=", $ps->{_top},
-	     ", S=", $spreadimage//"<undef>",
-	     "\n") if $config->{debug}->{spacing};
+	    warn( "C=-",
+		  pv( ", T=", $ps->{_top} ),
+		  pv( ", L=", $ps->{__leftmargin} ),
+		  pv( ", I=", $ps->{_indent} ),
+		  pv( ", R=", $ps->{__rightmargin} ),
+		  pv( ", S=?", $spreadimage ),
+		  "\n") if $config->{debug}->{spacing};
 	    return;
 	}
 	$x = $ps->{_leftmargin} + $ps->{columnoffsets}->[$col];
@@ -612,11 +748,13 @@ sub generate_song {
 	$ps->{__rightmargin} -= $ps->{columnspace}
 	  if $col < $ps->{columns}-1;
 	$y = $ps->{_top};
-	warn("C=$col, L=", $ps->{__leftmargin},
-	     ", R=", $ps->{__rightmargin},
-	     ", T=", $ps->{_top},
-	     ", S=", $spreadimage//"<undef>",
-	     "\n") if $config->{debug}->{spacing};
+	warn( pv( "C=", $col ),
+	      pv( ", T=", $ps->{_top} ),
+	      pv( ", L=", $ps->{__leftmargin} ),
+	      pv( ", I=", $ps->{_indent} ),
+	      pv( ", R=", $ps->{__rightmargin} ),
+	      pv( ", S=?", $spreadimage ),
+	      "\n") if $config->{debug}->{spacing};
 	$x += $ps->{_indent};
 	$y -= $spreadimage if defined($spreadimage) && !ref($spreadimage);
     };
@@ -706,18 +844,6 @@ sub generate_song {
 	$y = $ps->{_margintop};
 	$y += $ps->{headspace} if $ps->{'head-first-only'} && $class == 2;
 	$x += $ps->{_indent};
-
-        if ( $spreadimage ) {
-	    warn("PDF: Preparing spread image\n")
-	      if $config->{debug}->{images} || $config->{debug}->{assets};
-	    prepare_asset( $spreadimage->{id}, $s, $pr );
-	    $assets = $s->{assets} || {};
-	    warn("PDF: Preparing spread image, done\n")
-	      if $config->{debug}->{images} || $config->{debug}->{assets};
-            $y -= $ps->{_spreadimage} = imagespread( $spreadimage, $x, $y, $ps );
-            undef $spreadimage;
-        }
-
 	$ps->{_top} = $y;
 	$col = 0;
 	$vsp_ignorefirst = 1;
@@ -816,6 +942,12 @@ sub generate_song {
 	    my $h = int( ( $ww + $dadv ) / $hsp );
 	    die("ASSERT: $h should be greater than 0") unless $h > 0;
 
+	    # Spread evenly over multiple lines.
+	    if ( $dctl->{align} eq "center" ) {
+		my $lines = int((@chords-1)/$h) + 1;
+		$h = int((@chords-1)/$lines) + 1;
+	    }
+
 	    my $y = $y;
 	    if ( $show eq "bottom" ) {
 		$y = $ps->{marginbottom} + (int((@chords-1)/$h) + 1) * $vsp;
@@ -851,8 +983,8 @@ sub generate_song {
 	    $ps->{_top} = $y if $show eq "top";
 	}
 	elsif ( $show eq "below" ) {
-
-	    my $ww = $ps->{__rightmargin} - $ps->{__leftmargin};
+	    # Note that 'below' chords honour the label margin.
+	    my $ww = $ps->{__rightmargin} - $ps->{__leftmargin} - $ps->{_indent};
 
 	    my $dwidth = $dd->hsp0(undef,$ps); # diag
 	    my $dadv   = $dd->hsp1(undef,$ps); # adv
@@ -862,10 +994,16 @@ sub generate_song {
 	    my $h = int( ( $ww + $dadv ) / $hsp );
 	    die("ASSERT: $h should be greater than 0") unless $h > 0;
 
+	    # Spread evenly over multiple lines.
+	    if ( $dctl->{align} eq "center" ) {
+		my $lines = int((@chords-1)/$h) + 1;
+		$h = int((@chords-1)/$lines) + 1;
+	    }
+
 	    my $h0 = $h;
 	    while ( @chords ) {
-		$checkspace->( $dd->vsp0( undef, $ps ) );
-		my $x = $x - $ps->{_indent};
+		$checkspace->($vsp);
+		my $x = $x;
 		$pr->show_vpos( $y, 0 ) if $config->{debug}->{spacing};
 
 		if ( $dctl->{align} eq 'spread' && @chords == $h0  ) {
@@ -888,14 +1026,14 @@ sub generate_song {
 		$pr->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
 	    }
 	}
-	$y = $ps->{_top} if $ps->{_top};
+	$y = $ps->{_top} if $show eq "top";
     };
 
     my @elts;
     my $dbgop = sub {
 	my ( $elts, $pb ) = @_;
 	$elts //= $elts[-1];
-	$elts = [ $elts ] unless ref($elts) eq 'ARRAY';
+	$elts = [ $elts ] unless is_arrayref($elts);
 	for my $elt ( @$elts ) {
 	    my $msg = sprintf("OP L:%2d %s (", $elt->{line},
 			      $pb ? "pushback($elt->{type})" : $elt->{type} );
@@ -973,6 +1111,15 @@ sub generate_song {
 
 	    # Prepare the assets now we know the page width.
 	    prepare_assets( $s, $pr );
+
+	    # Spread image.
+            if ( $spreadimage ) {
+                if (ref($spreadimage) eq 'HASH' ) {
+                    # Spread image doesn't indent.
+                    $spreadimage = imagespread( $spreadimage, $x-$ps->{_indent}, $y, $ps );
+                }
+                $y -= $spreadimage;
+            }
 
 	    showlayout($ps) if $ps->{showlayout} || $config->{debug}->{spacing};
 	}
@@ -1213,15 +1360,18 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "image" ) {
+	    next if defined $elt->{opts}->{spread};
+	    next if $elt->{opts}->{omit};
+
 	    # Images are slightly more complex.
 	    # Only after establishing the desired height we can issue
 	    # the checkspace call, and we must get $y after that.
 
 	    my $gety = sub {
 		my $h = shift;
-		$checkspace->($h);
+		my $have = $checkspace->($h);
 		$ps->{pr}->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
-		return $y;
+		return wantarray ? ($y,$have) : $y;
 	    };
 
 	    my $vsp = imageline( $elt, $x, $ps, $gety );
@@ -1315,7 +1465,7 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "control" ) {
-	    if ( $elt->{name} =~ /^(text|chord|chorus|grid|toc|tab)-size$/ ) {
+	    if ( $elt->{name} =~ /^($propitems_re)-size$/ ) {
 		if ( defined $elt->{value} ) {
 		    $do_size->( $1, $elt->{value} );
 		}
@@ -1327,7 +1477,7 @@ sub generate_song {
 		      unless $ps->{fonts}->{$1}->{size};
 		}
 	    }
-	    elsif ( $elt->{name} =~ /^(text|chord|chorus|grid|toc|tab)-font$/ ) {
+	    elsif ( $elt->{name} =~ /^($propitems_re)-font$/ ) {
 		my $f = $1;
 		if ( defined $elt->{value} ) {
 		    my ( $fn, $sz ) = $elt->{value} =~ /^(.*) (\d+(?:\.\d+)?)$/;
@@ -1361,7 +1511,7 @@ sub generate_song {
 		}
 		$pr->init_font($f);
 	    }
-	    elsif ( $elt->{name} =~ /^(text|chord|chorus|grid|toc|tab)-color$/ ) {
+	    elsif ( $elt->{name} =~ /^($propitems_re)-color$/ ) {
 		if ( defined $elt->{value} ) {
 		    $ps->{fonts}->{$1}->{color} = $elt->{value};
 		}
@@ -1460,6 +1610,7 @@ sub generate_song {
 	    # Odd/even printing...
 	    $rightpage = !$rightpage if $ps->{'even-odd-pages'} < 0;
 	}
+	$s->{meta}->{'page.side'} = $rightpage ? "right" : "left";
 
 	# margin* are offsets from the edges of the paper.
 	# _*margin are offsets taking even/odd pages into account.
@@ -1499,6 +1650,7 @@ sub generate_song {
 	elsif ( $thispage == $startpage ) {
 	    $class = 1;		# first of a song
 	}
+	$s->{meta}->{'page.class'} = $classes[$class];
 
 	# Three-part title handlers.
 	my $tpt = sub { tpt( $ps, $class, $_[0], $rightpage, $x, $y, $s ) };
@@ -1849,7 +2001,7 @@ sub songline {
 			# start is printed if there is enough room.
 			# repeat is printed repeatedly to fill the rest.
 			$marker = [ $marker, "", "" ]
-			  unless UNIVERSAL::isa( $marker, 'ARRAY' );
+			  unless is_arrayref($marker);
 
 			# Reserve space for final.
 			my $w = 0;
@@ -1901,7 +2053,7 @@ sub imageline {
     my $id = $elt->{id};
     my $asset = $assets->{$id};
     unless ( $asset ) {
-	warn("Undefined image id: \"$id\"\n");
+	warn("Line " . $elt->{line} . ", Undefined image id: \"$id\"\n");
     }
     my $opts = { %{$asset->{opts}//{}}, %{$elt->{opts}//{}} };
     my $img = $asset->{data};
@@ -1943,7 +2095,9 @@ sub imageline {
 	      - $ps->{columnspace};
 	}
 	else {
-	    $pw = $ps->{__rightmargin} - $ps->{_leftmargin};
+	    # $pw = $ps->{__rightmargin} - $ps->{_leftmargin};
+	    # See issue #428.
+	    $pw = $ps->{_marginright} - $ps->{_leftmargin};
 	}
 	$ph = $ps->{_margintop} - $ps->{_marginbottom};
 	$pw -= $ps->{_indent} if $anchor eq "float";
@@ -1976,7 +2130,7 @@ sub imageline {
     $scaley = $scalex;
     if ( $opts->{scale} ) {
 	my @s;
-	if ( UNIVERSAL::isa( $opts->{scale}, 'ARRAY' ) ) {
+	if ( is_arrayref( $opts->{scale} ) ) {
 	    @s = @{$opts->{scale}};
 	}
 	else {
@@ -1992,9 +2146,18 @@ sub imageline {
 	$scaley *= $s[1];
     }
 
-    warn("Image scale: $scalex,$scaley\n") if $config->{debug}->{images};
+    warn("Image scale: ", pv($scalex), " ", pv($scaley), "\n")
+      if $config->{debug}->{images};
     $w *= $scalex;
     $h *= $scaley;
+
+    my 	$align = $opts->{align};
+
+    # If the image is wider than the page width, and scaled to fit, it may
+    # not be centered (https://github.com/ChordPro/chordpro/issues/428#issuecomment-2356447522).
+    if ( $w >= $pw ) {
+	$align = "left";
+    }
 
     my $ox = $opts->{x};
     my $oy = $opts->{y};
@@ -2006,7 +2169,6 @@ sub imageline {
 	warn("Y: ", $opts->{y}, " BASE: ", $opts->{base}, " -> $oy\n");
     }
 
-    my 	$align = $opts->{align};
     if ( $anchor eq "float" ) {
 	$align //= ( $opts->{center} // 1 ) ? "center" : "left";
 	# Note that image is placed aligned on $x.
@@ -2020,7 +2182,22 @@ sub imageline {
     }
     $align //= "left";
 
-    my $y = $gety->($anchor eq "float" ? $h : 0);	# may have been changed by checkspace
+    # Extra scaling in case the available page width is temporarily
+    # reduced, e.g. due to a right column for chords.
+    my $w_actual = $ps->{__rightmargin}-$ps->{_leftmargin}-$ps->{_indent};
+    my $xtrascale = $w < $w_actual ? 1
+      : $w_actual / ( $ps->{_marginright}-$ps->{_leftmargin}-$ps->{_indent} );
+
+    my ( $y, $spaceok ) = $gety->($anchor eq "float" ? $h*$xtrascale : 0);
+    # y may have been changed by checkspace.
+    if ( !$spaceok && $xtrascale < 1 ) {
+	# An extra scaled image is flushed to the next page, recalc xtrascale.
+	$y = $gety->($anchor eq "float" ? $h : 0);
+	$xtrascale = ( $ps->{__rightmargin}-$ps->{_leftmargin} ) /
+	  ( $ps->{_marginright}-$ps->{_leftmargin} );
+	warn("ASSERT: xtrascale = $xtrascale, should be 1\n")
+	  unless abs( $xtrascale - 1 ) < 0.01; # fuzz;
+    }
     if ( defined ( my $tag = $i_tag // $label ) ) {
 	$i_tag = $tag;
     	my $ftext = $ps->{fonts}->{comment};
@@ -2063,20 +2240,30 @@ sub imageline {
     }
     else {
 	# image is line oriented.
-	$calc->( $x, $ps->{__rightmargin}, $y, $ps->{__bottommargin}, 0 );
+	# See issue #428.
+	# $calc->( $x, $ps->{__rightmargin}, $y, $ps->{__bottommargin}, 0 );
+	$calc->( $x, $ps->{_marginright}, $y, $ps->{__bottommargin}, 0 );
+	warn( pv( "_MR = ", $ps->{_marginright} ),
+	      pv( ", _RM = ", $ps->{_rightmargin} ),
+	      pv( ", __RM = ", $ps->{__rightmargin} ),
+	      pv( ", XS = ", $xtrascale ),
+	      "\n") if 0;
     }
 
     $x += $ox if defined $ox;
     $y -= $oy if defined $oy;
-    warn( sprintf("add_image x=%.1f y=%.1f w=%.1f h=%.1f (%s x%+.1f y%+.1f) %s\n",
+    warn( sprintf("add_image x=%.1f y=%.1f w=%.1f h=%.1f scale=%.1f,%.1f,%.1f (%s x%+.1f y%+.1f) %s\n",
 		  $x, $y, $w, $h,
+		  $w/$img->width * $xtrascale,
+		  $h/$img->height * $xtrascale,
+		  $xtrascale,
 		  $anchor,
 		  $ox//0, $oy//0, $align,
 		 )) if $config->{debug}->{images};
 
     $pr->add_object( $img, $x, $y,
-		     xscale => $w/$img->width,
-		     yscale => $h/$img->height,
+		     xscale => $w/$img->width * $xtrascale,
+		     yscale => $h/$img->height * $xtrascale,
 		     border => $opts->{border} || 0,
 		     valign => $opts->{valign} // "top",
 		     align  => $align,
@@ -2084,7 +2271,7 @@ sub imageline {
 		   );
 
     if ( $anchor eq "float" ) {
-	return $h + ($oy//0);
+	return ($h + ($oy//0)) * $xtrascale;
     }
     return 0;			# vertical size
 }
@@ -2123,7 +2310,7 @@ sub imagespread {
 
     if ( $opts->{scale} ) {
 	my @s;
-	if ( UNIVERSAL::isa( $opts->{scale}, 'ARRAY' ) ) {
+	if ( is_arrayref($opts->{scale}) ) {
 	    @s = @{$opts->{scale}};
 	}
 	else {
@@ -2298,7 +2485,16 @@ sub text_vsp {
     $layout->set_font_description( $ftext->{fd} );
     $layout->set_font_size( $ftext->{size} );
     #warn("vsp: ".join( "", @{$elt->{phrases}} )."\n");
-    $layout->set_markup( join( "", @{$elt->{phrases}} ) );
+
+    my $msg = "";
+    {
+	local $SIG{__WARN__} = sub { $msg .= "@_" };
+	$layout->set_markup( join( "", @{$elt->{phrases}} ) );
+    }
+    if ( $msg && $elt->{line} ) {
+	$msg =~ s/^(.*)\n\s+//;
+	warn("Line ", $elt->{line}, ", $msg\n");
+    }
     my $vsp = $layout->get_size->{height} * $ps->{spacing}->{lyrics};
     #warn("vsp $vsp \"", $layout->get_text, "\"\n");
     # Calculate the vertical span of this line.
@@ -2309,7 +2505,7 @@ sub text_vsp {
 sub set_columns {
     my ( $ps, $cols ) = @_;
     my @cols;
-    if ( ref($cols) eq 'ARRAY' ) {
+    if ( is_arrayref($cols) ) {
 	@cols = @$cols;
 	$cols = @$cols;
     }
@@ -2608,11 +2804,31 @@ sub configurator {
 # Get a format string for a given page class and type.
 # Page classes have fallbacks.
 sub get_format {
-    my ( $ps, $class, $type ) = @_;
-    my @classes = qw( first title default );
+    my ( $ps, $class, $type, $rightpage  ) = @_;
     for ( my $i = $class; $i < @classes; $i++ ) {
-	next unless exists($ps->{formats}->{$classes[$i]}->{$type});
-	return $ps->{formats}->{$classes[$i]}->{$type};
+	$class = $classes[$i];
+	next if $class eq 'filler';
+	my $fmt;
+	my $noswap;
+	if ( !$rightpage
+	     && exists($ps->{formats}->{$class."-even"}->{$type}) ) {
+	    $fmt = $ps->{formats}->{$class."-even"}->{$type};
+	    $noswap++;
+	}
+	elsif ( exists($ps->{formats}->{$class}->{$type}) ) {
+	    $fmt = $ps->{formats}->{$class}->{$type};
+	}
+	next unless $fmt;
+
+	# This should be dealt with in Config...
+	$fmt = [ $fmt ] if @$fmt == 3 && !is_arrayref($fmt->[0]);
+
+	# Swap left/right for even pages.
+	if ( !$rightpage ) {
+	    $_ = [ reverse @$_ ] for @$fmt;
+	}
+
+	return $fmt if $fmt;
     }
     return;
 }
@@ -2621,12 +2837,9 @@ sub get_format {
 # Note: baseline printing.
 sub tpt {
     my ( $ps, $class, $type, $rightpage, $x, $y, $s ) = @_;
-    my $fmt = get_format( $ps, $class, $type );
+    my $fmt = get_format( $ps, $class, $type, $rightpage );
     return unless $fmt;
-    if ( @$fmt == 3 && ref($fmt->[0]) ne 'ARRAY' ) {
-	$fmt = [ $fmt ];
-    }
-    # @fmt = ( left-fmt, center-fmt, right-fmt )
+
     my $pr = $ps->{pr};
     my $font = $ps->{fonts}->{$type};
 
@@ -2638,12 +2851,9 @@ sub tpt {
 	    die("ASSERT: " . scalar(@$fmt)," part format $class $type");
 	}
 
-	my @fmt = @$fmt;
-	@fmt = @fmt[2,1,0] unless $rightpage; # swap
-
 	# Left part. Easiest.
-	if ( $fmt[0] ) {
-	    my $t = fmt_subst( $s, $fmt[0] );
+	if ( $fmt->[0] ) {
+	    my $t = fmt_subst( $s, $fmt->[0] );
 	    if ( $t ne "" ) {
 		$pr->setfont($font) unless $havefont++;
 		$pr->text( $t, $x, $y );
@@ -2651,8 +2861,8 @@ sub tpt {
 	}
 
 	# Center part.
-	if ( $fmt[1] ) {
-	    my $t = fmt_subst( $s, $fmt[1] );
+	if ( $fmt->[1] ) {
+	    my $t = fmt_subst( $s, $fmt->[1] );
 	    if ( $t ne "" ) {
 		$pr->setfont($font) unless $havefont++;
 		$pr->text( $t, ($rm+$x-$pr->strwidth($t))/2, $y );
@@ -2660,8 +2870,8 @@ sub tpt {
 	}
 
 	# Right part.
-	if ( $fmt[2] ) {
-	    my $t = fmt_subst( $s, $fmt[2] );
+	if ( $fmt->[2] ) {
+	    my $t = fmt_subst( $s, $fmt->[2] );
 	    if ( $t ne "" ) {
 		$pr->setfont($font) unless $havefont++;
 		$pr->text( $t, $rm-$pr->strwidth($t), $y );
@@ -2764,24 +2974,16 @@ sub wrapsimple {
 sub prepare_assets {
     my ( $s, $pr ) = @_;
 
-    my %sa;			# song assets
+    my %sa = %{$s->{assets}//{}} ;	# song assets
 
-    # Ignore spread asset.
-    while ( my($k,$v) = each %{$s->{assets}//{}} ) {
-	next if $v->{opts}->{spread};
-	$sa{$k} = $v;
-    }
-
-    warn("PDF: Preparing ", scalar(keys %sa), " image",
-	 keys(%sa) == 1 ? "" : "s", "\n")
+    warn("PDF: Preparing ", plural(scalar(keys %sa), " image"), "\n")
       if $config->{debug}->{images} || $config->{debug}->{assets};
 
     for my $id ( sort keys %sa ) {
 	prepare_asset( $id, $s, $pr );
     }
 
-    warn("PDF: Preparing ", scalar(keys %sa), " image",
-	 keys(%sa) == 1 ? "" : "s", ", done\n")
+    warn("PDF: Preparing ", plural(scalar(keys %sa), " image"), ", done\n")
       if $config->{debug}->{images} || $config->{debug}->{assets};
     $assets = $s->{assets} || {};
     ::dump( $assets, as => "Assets, Pass 2" )
@@ -2799,6 +3001,9 @@ sub prepare_asset {
     # So we first scan the list for SVG and delegate items and turn these
     # into simple display items.
 
+#    warn("_MR = ", $ps->{_marginright}, ", _RM = ", $ps->{_rightmargin},
+#	 ", __RM = ", $ps->{__rightmargin}, "\n");
+#    my $pw = $ps->{__rightmargin} - $ps->{_marginleft};
     my $pw = $ps->{_marginright} - $ps->{_marginleft};
     my $cw = ( $pw - ( $ps->{columns} - 1 ) * $ps->{columnspace} ) /$ps->{columns}
       - $ps->{_indent};
@@ -2886,8 +3091,8 @@ sub prepare_asset {
 				 combine => $combine,
 				 sep     => $sep,
 			       );
-	    warn( "PDF: Preparing SVG image => ", 0+@$o, " element",
-		  @$o == 1 ? "" : "s", ", combine=$combine\n")
+	    warn( "PDF: Preparing SVG image => ",
+		  plural(0+@$o, " element"), ", combine=$combine\n")
 	      if $config->{debug}->{images};
 	    if ( ! @$o ) {
 		warn("Error in SVG embedding (no SVG objects found)\n");
@@ -3149,25 +3354,22 @@ sub sort_songbook {
 
     if ( $sorting =~ /2page|compact/ ) {
 	# Progress indicator
-	print STDERR "Counting pages:\n" if $options->{verbose};
 
+	my $i = 1;
 	foreach my $song ( @{$sb->{songs}} ) {
+	    progress( msg => "Counting pages, song $i" );
+	    $i++;
 	    $song->{meta}->{pages} =
 	      generate_song( $song, { pr => $pri, startpage => 1 } );
-	    if ( $options->{verbose} ) {
-		# Progress indicator
-		print STDERR $song->{meta}->{pages}." ";
-	    }
 	}
-	print STDERR "\n" if $options->{verbose}; # Progress indicator
     }
-	
-	foreach my $song ( @{$sb->{songs}} ) {
-	  if (!defined($song->{meta}->{sorttitle})) {
+
+    foreach my $song ( @{$sb->{songs}} ) {
+	if (!defined($song->{meta}->{sorttitle})) {
 	    $song->{meta}->{sorttitle}=$song->{meta}->{title};
-	  }
 	}
-	
+    }
+
     my @songlist = @{$sb->{songs}};
 
     if ( $sorting =~ /title/ ) {

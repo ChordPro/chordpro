@@ -11,8 +11,9 @@ SCRIPT := ${ROOT}/script
 DEST   := build
 VERSION := $(shell perl ../../lib/ChordPro/Version.pm)
 TARGET := wxchordpro
-
 PP := pp
+# Check if we build on Intel or ARM
+ARCH   := $(shell uname -m)
 
 default : dmg
 
@@ -41,8 +42,6 @@ unpack :
 	perl ../pp2ppl.pl --dest=${DEST} ${TARGET} --quiet
 	cp -p "${ROOT}/script/chordpro.pl" "${DEST}/script/chordpro.pl" 
 	cp -p "${ROOT}/lib/ChordPro/Config.pm" "${DEST}/lib/ChordPro/Config.pm" 
-	cp "${DEST}/res/icons/chordpro.icns" ${DEST}
-	cp "${DEST}/res/icons/chordpro-doc.icns" ${DEST}
 	mv "${DEST}/res" "${DEST}/lib/ChordPro/"
 	rm -f "${DEST}/script/main.pl"
 
@@ -68,14 +67,12 @@ loaders : "${DEST}/${TARGET}" "${DEST}/chordpro"
 _loaders : "${DEST}/chordpro"
 	cp "${DEST}/chordpro" "${DEST}/perl"
 
-"${DEST}/wxchordpro" : ${BASE}/ppl.c dndhandler.cpp
-	${CC} ${CCOPTS} -o "${DEST}/wxchordpro" -L${DEST} ${LDOPTS} ${BASE}/ppl.c
-	${CXX} -o "${DEST}/dndhandler" \
-		dndhandler.cpp `${WXCNFG} --cxxflags --libs`
-	perl ./reloc.pl "${DEST}/dndhandler"
+"${DEST}/wxchordpro" : ${BASE}/ppl.c dndhandler.swift
+	${CC} -DMACOS ${CCOPTS} -o "${DEST}/wxchordpro" -L${DEST} ${LDOPTS} ${BASE}/ppl.c
+	swiftc dndhandler.swift -target ${ARCH}-apple-macos10.15 -o "${DEST}/dndhandler"
 
 "${DEST}/chordpro" : ${BASE}/ppl.c
-	${CC} ${CCOPTS} -o "${DEST}/chordpro" -L${DEST} ${LDOPTS} ${BASE}/ppl.c
+	${CC} -DMACOS ${CCOPTS} -o "${DEST}/chordpro" -L${DEST} ${LDOPTS} ${BASE}/ppl.c
 
 clean ::
 	rm -fr ${DEST}
@@ -90,10 +87,9 @@ app1 :
 	rm -fr ${APPDIR} || rm -fr ${APPDIR}
 	cp -a "${DEST}/" "${APPDIR}/"
 	mkdir -p "${APPDIR}/Contents/MacOS"
-	mkdir -p "${APPDIR}/Contents/Resources"
+	mkdir -p "${APPDIR}/Contents/Resources/cli"
 	cp PkgInfo Info.plist "${APPDIR}/Contents"
-	cp "${DEST}/chordpro.icns" "${APPDIR}/Contents/Resources"
-	cp "${DEST}/chordpro-doc.icns" "${APPDIR}/Contents/Resources"
+	cp *.icns "${APPDIR}/Contents/Resources"
 	cd "${APPDIR}"; mv script lib Contents/MacOS
 	cd "${APPDIR}"; mv lib*.dylib Contents/MacOS
 	cd "${APPDIR}"; rm -f MANIFEST META.yml
@@ -103,10 +99,17 @@ ifeq (${TARGET},wxchordpro)
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libjpeg.*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libtiff.*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libz*.dylib
+	perl ./reloc.pl ${APPDIR}/Contents/MacOS/liblzma*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libpcre2-32.*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libwx*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*.bundle
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*/*.bundle
+	cd "${APPDIR}"; ln -s ../../MacOS/chordpro Contents/Resources/cli/chordpro
+ifeq (${ARCH},arm64)
+	find  "${APPDIR}/Contents/" -name '*.dylib' -type f | while read bundle; do codesign --force -s - "$$bundle"; done
+	find  "${APPDIR}/Contents/" -name '*.bundle' -type f | while read bundle; do codesign --force -s - "$$bundle"; done
+	codesign --force --deep -s - ${APPDIR}
+endif
 else
 	cd "${APPDIR}"; cp chordpro dndhandler
 	cd "${APPDIR}"; mv chordpro dndhandler Contents/MacOS
@@ -115,23 +118,37 @@ endif
 dmg : app dmg1
 
 ifeq (${TARGET},wxchordpro)
-VOLTYPE := Classic
+VOLTYPE := 
+VOLPFX  := 
 else
-VOLTYPE := CLI
+VOLPFX  := -CLI
+VOLTYPE := -${VOLPFX}
 endif
-DMGNAME := ChordPro-${VOLTYPE}-${VERSION}.dmg
+
+ifeq (${ARCH},x86_64)
+ARCHTYPE := Intel
+DMGNAME := ChordPro${VOLTYPE}-${VERSION}-macOS-INTEL.dmg
+else
+ARCHTYPE := Apple Silicon
+DMGNAME := ChordPro${VOLTYPE}-${VERSION}-macOS-ARM.dmg
+endif
 
 dmg1 :
 	rm -f ${DMGNAME}
 	bash ./create-dmg \
-	    --volname "ChordPro ${VOLTYPE}" \
-	    --volicon "${APPDIR}/chordpro.icns" \
-	    --window-pos 200 200 \
-	    --window-size 600 300 \
-	    --icon "${APPDIR}" 50 50 \
-	    --add-file "READ ME FIRST.html" README.html 300 50 \
-	    --hide-extension "READ ME FIRST.html" \
-	    "${DMGNAME}" "${APPDIR}"
+		--volname "ChordPro ${VOLPFX} (${ARCHTYPE})" \
+		--volicon chordpro-dmg.icns \
+		--window-pos 200 120 \
+		--window-size 680 440 \
+		--icon-size 64 \
+		--icon "${APPDIR}" 540 75 \
+		--hide-extension "${APPDIR}" \
+		--add-file "READ ME FIRST.html" README.html  540 175 \
+		--hide-extension "READ ME FIRST.html" \
+		--add-file "Install.zsh" Install.zsh 540 275 \
+		--hide-extension "Install.zsh" \
+		--background "${DEST}/lib/ChordPro/res/icons/chordpro-bg.png" \
+		"${DMGNAME}" "${APPDIR}"
 
 clean ::
 	rm -fr ${APPDIR}

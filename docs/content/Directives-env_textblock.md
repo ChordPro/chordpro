@@ -73,3 +73,6 @@ Additionally, the following attributes may be used:
 
 * `background="`_colour_`"`  
    The background color of the object.
+
+* `omit="`_b_`"`  
+   If true, the delegate is ignored.

@@ -441,15 +441,6 @@ echo "Fixing permissions..."
 chmod -Rf go-w "${MOUNT_DIR}" &> /dev/null || true
 echo "Done fixing permissions"
 
-# Make the top window open itself on mount:
-if [[ $SANDBOX_SAFE -eq 0 ]]; then
-	echo "Blessing started"
-	bless --folder "${MOUNT_DIR}" --openfolder "${MOUNT_DIR}"
-	echo "Blessing finished"
-else
-	echo "Skipping blessing on sandbox"
-fi
-
 if [[ -n "$VOLUME_ICON_FILE" ]]; then
 	# Tell the volume that it has a special file attribute
 	SetFile -a C "$MOUNT_DIR"

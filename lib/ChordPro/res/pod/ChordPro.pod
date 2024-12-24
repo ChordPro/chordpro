@@ -167,6 +167,17 @@ Requires the input to be strictly compliant to the ChordPro standard.
 
 This is enabled by default. See also B<--nostrict>.
 
+=item B<--subtitle=>I<XXX>
+
+Subtitle (for songbooks).
+
+=item B<--title=>I<XXX>
+
+Title (for songbooks).
+
+If specified and a table of contents is requested, a nice coverpage
+will be added.
+
 =item B<--toc> (short: B<-i>)
 
 Includes a table of contents.
@@ -376,6 +387,15 @@ the command line.
 
 This guarantees that the program is running with the default
 configuration.
+
+=item B<--print-template-config>
+
+Prints a simplified template configuration to standard output, and
+exits. The configuration is commented to explain its contents.
+
+The config contains most of the ChordPro configuration items, all
+commented out. It is easy to get started with configuring ChordPro
+by enabling and modifyng just a few items at a time.
 
 =item B<--print-default-config>
 

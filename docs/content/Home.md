@@ -5,13 +5,9 @@ description: "Welcome to ChordPro!"
 
 # Welcome to ChordPro!
 
-{{< yell "ChordPro 6 is out!" >}}
-[Read all about it]({{< relref "ChordPro6-Relnotes.html" >}})
+This is the official site for ChordPro, a simple text format for the notation of lyrics with chords.
 
-[Join the community](<https://groups.io/g/ChordPro>)
-
-
-![]({{< asset "images/love-me-tender-small.png" >}})
+![]({{< asset "images/chordpro-gui-cli.png" >}})
 
 ## ChordPro 6: The File Format Specification
 * [Overview]({{< relref "ChordPro-Introduction" >}})
@@ -23,3 +19,7 @@ description: "Welcome to ChordPro!"
 * [Installation]({{< relref "ChordPro-Installation" >}})
 * [Configuration]({{< relref "ChordPro-Configuration" >}})
 * [User guide]({{< relref "Using-ChordPro" >}})
+
+---
+
+[Join the community!](<https://groups.io/g/ChordPro>)

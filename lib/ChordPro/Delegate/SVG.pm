@@ -22,7 +22,7 @@ sub svg2svg( $self, %args ) {
     while ( $data[0] !~ /<svg/ ) {
 	push( @pre, shift(@data) );
     }
-    my $kv = parse_kv( @pre ) if @pre;
+    my $kv = parse_kvm( @pre ) if @pre;
     $kv->{split} //= 1;		# less overhead. really.
     $kv->{scale} ||= 1;
 
@@ -43,7 +43,7 @@ sub options( $data ) {
     while ( $data->[0] !~ /<svg/ ) {
 	push( @pre, shift(@$data) );
     }
-    my $kv = parse_kv( @pre ) if @pre;
+    my $kv = parse_kvm( @pre ) if @pre;
     $kv;
 }
 

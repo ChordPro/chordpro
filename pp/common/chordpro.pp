@@ -19,6 +19,14 @@
 --module=PDF_API2_Bundle
 --module=SVGPDF
 
+# Same for PerlIO
+--module=PerlIO
+--module=PerlIO::encoding
+
+# Same for Ref::Util
+--module=Ref::Util
+--module=Ref::Util::XS
+
 # Same for Text::Layout
 --module=Text::Layout
 --module=Text_Layout_Bundle
@@ -40,6 +48,11 @@
 --module=JavaScript::QuickJS::Function
 --module=JavaScript::QuickJS::Date
 --module=JavaScript::QuickJS::RegExp
+
+# Same for Data::Printer
+--module=Data::Printer
+--module=Data::Printer::Theme::Material
+--module=Data::Printer::Theme::Zellner
 
 # Resources.
 --addfile=../../lib/ChordPro/res;res

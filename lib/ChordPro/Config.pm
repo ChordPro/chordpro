@@ -22,14 +22,19 @@ use Scalar::Util qw(reftype);
 use List::Util qw(any);
 use Storable 'dclone';
 use Hash::Util;
+use Ref::Util qw( is_arrayref is_hashref );
 
 #sub hmerge($$;$);
 #sub clone($);
 #sub default_config();
 
+sub new ( $pkg, $cf = {} ) {
+    bless $cf => $pkg;
+}
+
 sub pristine_config {
     use ChordPro::Config::Data;
-    ChordPro::Config::Data::config();
+    __PACKAGE__->new(ChordPro::Config::Data::config());
 }
 
 sub configurator ( $opts = undef ) {
@@ -39,7 +44,7 @@ sub configurator ( $opts = undef ) {
     unless ( $opts ) {
         my $cfg = pristine_config();
         $config = $cfg;
-	config_split_fc_aliases($cfg);
+	$cfg->split_fc_aliases;
         $options = { verbose => 0 };
         process_config( $cfg, "<builtin>" );
         $cfg->{settings}->{lineinfo} = 0;
@@ -56,9 +61,6 @@ sub configurator ( $opts = undef ) {
     warn("Reading: <builtin>\n") if $verbose > 1;
     my $cfg = pristine_config();
 
-    # This is easier than splitting out manually :)
-    config_split_fc_aliases($cfg);
-
     # Default first.
     @cfg = prep_configs( $cfg, "<builtin>" );
     # Bubble default config to be the first.
@@ -68,7 +70,7 @@ sub configurator ( $opts = undef ) {
     my $add_config = sub {
         my $fn = shift;
         $cfg = get_config( $fn );
-        push( @cfg, prep_configs( $cfg, $fn ) );
+        push( @cfg, $cfg->prep_configs($fn) );
     };
 
     foreach my $c ( qw( sysconfig userconfig config ) ) {
@@ -88,7 +90,7 @@ sub configurator ( $opts = undef ) {
             splice( @cfg, $a, 1 );
             redo;
         }
-        print STDERR ("Config[$a]: ", $cfg[$a]->{_src}, "\n" )
+        warn("Config[$a]: ", $cfg[$a]->{_src}, "\n" )
           if $verbose;
     }
 
@@ -145,23 +147,26 @@ sub configurator ( $opts = undef ) {
     prpadd2cfg( $cfg, %{$options->{define}} );
 
     # Sanitize added extra entries.
-    for ( qw(title subtitle footer) ) {
-        delete($cfg->{pdf}->{formats}->{first}->{$_})
-          if ($cfg->{pdf}->{formats}->{first}->{$_} // 1) eq "";
-        for my $class ( qw(title first default) ) {
-            my $t = $cfg->{pdf}->{formats}->{$class}->{$_};
-            next unless $t;
-            die("Config error in pdf.formats.$class.$_: not an array\n")
-              unless ref($t) eq 'ARRAY';
-            if ( ref($t->[0]) ne 'ARRAY' ) {
-                $t = [ $t ];
-            }
-            my $tt = $_;
-            for ( @$t) {
-                die("Config error in pdf.formats.$class.$tt: ",
-                    scalar(@$_), " fields instead of 3\n")
-                  if @$_ && @$_ != 3;
-            }
+    for my $format ( qw(title subtitle footer) ) {
+        delete($cfg->{pdf}->{formats}->{first}->{$format})
+          if ($cfg->{pdf}->{formats}->{first}->{$format} // 1) eq "";
+        for my $c ( qw(title first default filler) ) {
+	    for my $class ( $c, $c."-even" ) {
+		my $t = $cfg->{pdf}->{formats}->{$class}->{$format};
+		# Allowed: null, false, [3], [[3], ...].
+		next unless defined $t;
+		$cfg->{pdf}->{formats}->{$class}->{$format} = ["","",""], next
+		  unless $t;
+		die("Config error in pdf.formats.$class.$format: not an array\n")
+		  unless is_arrayref($t);
+		$t = [ $t ] unless is_arrayref($t->[0]);
+		for ( @$t) {
+		    die("Config error in pdf.formats.$class.$format: ",
+			scalar(@$_), " fields instead of 3\n")
+		      if @$_ && @$_ != 3;
+		}
+		$cfg->{pdf}->{formats}->{$class}->{$format} = $t;
+	    }
         }
     }
 
@@ -267,7 +272,7 @@ sub get_config ( $file ) {
             my $new = json_load( loadlines( $fd, { split => 0 } ), $file );
             precheck( $new, $file );
             close($fd);
-            return $new;
+            return __PACKAGE__->new($new);
         }
         else {
             die("Cannot open config $file [$!]\n");
@@ -276,9 +281,9 @@ sub get_config ( $file ) {
     elsif ( $file =~ /\.prp$/i ) {
         if ( -e -f -r $file ) {
             require ChordPro::Config::Properties;
-            my $cfg = new Data::Properties;
+            my $cfg = Data::Properties->new;
             $cfg->parse_file($file);
-            return $cfg->data;
+            return __PACKAGE__->new($cfg->data);
         }
         else {
             die("Cannot open config $file [$!]\n");
@@ -309,10 +314,12 @@ sub prep_configs ( $cfg, $src ) {
         }
         my $cfg = get_config($c);
         # Recurse.
-        push( @res, prep_configs( $cfg, $c ) );
+        push( @res, $cfg->prep_configs($c) );
     }
 
     # Push this and return.
+    $cfg->split_fc_aliases;
+    $cfg->expand_font_shortcuts;
     push( @res, $cfg );
     return @res;
 }
@@ -353,12 +360,13 @@ sub process_config ( $cfg, $file ) {
         $cfg->{_chords} = delete $cfg->{chords};
         ChordPro::Chords::pop_parser();
     }
-    config_split_fc_aliases($cfg);
-    config_expand_font_shortcuts($cfg);
+    $cfg->split_fc_aliases;
+    $cfg->expand_font_shortcuts;
 }
 
 # Expand pdf.fonts.foo: bar to pdf.fonts.foo { description: bar }.
-sub config_expand_font_shortcuts ( $cfg ) {
+
+sub expand_font_shortcuts ( $cfg ) {
     return unless exists $cfg->{pdf}->{fonts};
     for my $f ( keys %{$cfg->{pdf}->{fonts}} ) {
 	next if ref($cfg->{pdf}->{fonts}->{$f}) eq 'HASH';
@@ -380,14 +388,20 @@ sub config_expand_font_shortcuts ( $cfg ) {
 	    }
 	    else {
 		$i->{description} = $v;
+		$i->{description} .= " " . delete($i->{size})
+		  if $i->{size};
 	    }
 	    $_ = $i;
 	}
     }
 }
 
-sub config_split_fc_aliases ( $cfg ) {
-    # Split fontconfig aliases into individual entries.
+use Storable qw(dclone);
+
+# Split fontconfig aliases into separate entries.
+
+sub split_fc_aliases ( $cfg ) {
+
     if ( $cfg->{pdf}->{fontconfig} ) {
 	# Orig.
 	my $fc = $cfg->{pdf}->{fontconfig};
@@ -406,6 +420,43 @@ sub config_split_fc_aliases ( $cfg ) {
     }
 }
 
+# Reverse of config_expand_font_shortcuts.
+
+sub simplify_fonts( $cfg ) {
+
+    return $cfg unless $cfg->{pdf}->{fonts};
+
+    foreach my $font ( keys %{$cfg->{pdf}->{fonts}} ) {
+	for ( $cfg->{pdf}->{fonts}->{$font} ) {
+	    next unless is_hashref($_);
+
+	    delete $_->{color}
+	      if $_->{color} && $_->{color} eq "foreground";
+	    delete $_->{background}
+	      if $_->{background} && $_->{background} eq "background";
+
+	    if ( exists( $_->{file} ) ) {
+		delete $_->{description};
+		delete $_->{name};
+	    }
+	    elsif ( exists( $_->{description} ) ) {
+		delete $_->{name};
+		if ( $_->{size} && $_->{description} !~ /\s+[\d.]+$/ ) {
+		    $_->{description} .= " " . $_->{size};
+		}
+		delete $_->{size};
+		$_ = $_->{description} if keys %$_ == 1;
+	    }
+	    elsif ( exists( $_->{name} )
+		    && exists( $_->{size})
+		    && keys %$_ == 2
+		  ) {
+		$_ = $_->{name} .= " " . $_->{size};
+	    }
+	}
+    }
+}
+
 sub config_final ( %args ) {
     my $delta   = $args{delta} || 0;
     my $default = $args{default} || 0;
@@ -418,7 +469,8 @@ sub config_final ( %args ) {
 	local $options->{nouserconfig} = 1;
 	local $options->{noconfig} = 1;
 	$defcfg = pristine_config();
-	config_split_fc_aliases($defcfg);
+	split_fc_aliases($defcfg);
+	expand_font_shortcuts($defcfg);
 	if ( $delta ) {
 	    delete $defcfg->{chords};
 	    delete $defcfg->{include};
@@ -471,7 +523,9 @@ sub config_final ( %args ) {
 	$parser->decode($data);
     };
 
-    return $parser->encode( data => hmerge( $config, $cfg ),
+    #    $cfg = hmerge( $config, $cfg );
+    $cfg->simplify_fonts;
+    return $parser->encode( data => {%{$cfg}},
 			    pretty => 1, schema => $schema );
 }
 
@@ -496,7 +550,7 @@ sub convert_config ( $from, $to ) {
 
     if ( $data =~ /^\s*#/m ) {	# #-comments -> prp
 	require ChordPro::Config::Properties;
-	my $cfg = new Data::Properties;
+	my $cfg = Data::Properties->new;
 	$cfg->parse_file($from);
 	$new = $cfg->data;
     }
@@ -533,13 +587,13 @@ sub cfg2props ( $o, $path = "" ) {
     if ( !defined $o ) {
         $ret .= "$path: undef\n";
     }
-    elsif ( UNIVERSAL::isa( $o, 'HASH' ) ) {
+    elsif ( is_hashref($o) ) {
         $path .= "." unless $path eq "";
         for ( sort keys %$o ) {
             $ret .= cfg2props( $o->{$_}, $path . $_  );
         }
     }
-    elsif ( UNIVERSAL::isa( $o, 'ARRAY' ) ) {
+    elsif ( is_arrayref($o) ) {
         $path .= "." unless $path eq "";
         for ( my $i = 0; $i < @$o; $i++ ) {
             $ret .= cfg2props( $o->[$i], $path . "$i" );
@@ -597,6 +651,7 @@ sub _augment ( $self, $hash, $path ) {
         warn("Config augment error: unknown item $path$key\n")
           unless exists $self->{$key}
             || $path =~ /^pdf\.(?:info|fonts|fontconfig)\./
+            || $path =~ /^pdf\.formats\.\w+-even\./
             || $path =~ /^meta\./
             || $key =~ /^_/;
 
@@ -694,7 +749,8 @@ sub _reduce ( $self, $orig, $path ) {
 
             warn("Config reduce error: unknown item $path$key\n")
               unless exists $self->{$key}
-                || $key =~ /^_/;
+                || $key =~ /^_/
+                || $path =~ /^pdf\/\.fonts\./;
 
             unless ( exists $orig->{$key} ) {
                 warn("D: $path$key\n") if DEBUG;
@@ -831,6 +887,7 @@ sub hmerge( $left, $right, $path = "" ) {
           unless exists $res{$key}
             || $path eq "pdf.fontconfig."
             || $path =~ /^pdf\.(?:info|fonts)\./
+            || $path =~ /^pdf\.formats\.\w+-even\./
             || $path =~ /^meta\./
             || $path =~ /^delegates\./
             || $path =~ /^parser\.preprocess\./
@@ -910,17 +967,13 @@ sub precheck ( $cfg, $file ) {
     $p = sub {
         my ( $o, $path ) = @_;
         $path //= "";
-        if ( !defined $o ) {
-            warn("$file: Undefined config \"$path\" (using 'false')\n");
-            $_[0] = '';
-        }
-        elsif ( UNIVERSAL::isa( $o, 'HASH' ) ) {
+        if ( is_hashref($o) ) {
             $path .= "." unless $path eq "";
             for ( sort keys %$o ) {
                 $p->( $o->{$_}, $path . $_  );
             }
         }
-        elsif ( UNIVERSAL::isa( $o, 'ARRAY' ) ) {
+        elsif ( is_arrayref($o) ) {
             $path .= "." unless $path eq "";
             for ( my $i = 0; $i < @$o; $i++ ) {
                 $p->( $o->[$i], $path . "$i" );

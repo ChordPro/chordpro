@@ -248,7 +248,7 @@ sub parse_chord ( $self, $chord ) {
 
     my $q = $plus{qual} // "";
     $info->{qual} = $q;
-    $q = "-" if $q eq "m" || $q eq "min";
+    $q = "-" if $q eq "m" || $q eq "mi" || $q eq "min";
     $q = "+" if $q eq "aug";
     $q = "0" if $q eq "dim";
     $q = "0" if $q eq "o";
@@ -492,7 +492,7 @@ sub load_notes ( $self, $init ) {
     # Accept root, qual, and only known extensions.
     $c_pat = "(?<root>" . $n_pat . ")";
     $c_pat .= "(?:";
-    $c_pat .= "(?<qual>-|min|m(?!aj))".
+    $c_pat .= "(?<qual>-|min?|m(?!aj))".
       "(?<ext>" . join("|", keys(%$additions_min)) . ")|";
     $c_pat .= "(?<qual>\\+|aug)".
       "(?<ext>" . join("|", keys(%$additions_aug)) . ")|";
@@ -506,7 +506,7 @@ sub load_notes ( $self, $init ) {
 
     # In relaxed form, we accept anything for extension.
     my $c_rpat = "(?<root>" . $n_pat . ")";
-    $c_rpat .= "(?:(?<qual>-|min|m(?!aj)|\\+|aug|0|o|dim|)(?<ext>.*))";
+    $c_rpat .= "(?:(?<qual>-|min?|m(?!aj)|\\+|aug|0|o|dim|)(?<ext>.*))";
     $c_rpat = qr/$c_rpat/;
 
     # Store in the object.
@@ -777,12 +777,11 @@ sub clone {
 
 sub is_note { $_[0]->{isnote} };
 sub is_flat { $_[0]->{isflat} };
-sub is_keyboard { $_[0]->{iskeyboard} };
 
 sub is_nc {
     my ( $self ) = @_;
     # Keyboard...
-    return 1 if $self->is_keyboard && !@{ $self->kbkeys // [1] };
+    return 1 if defined($self->kbkeys) && !@{$self->kbkeys};
     # Strings...
     return unless @{ $self->frets // [] };
     for ( @{ $self->frets } ) {
@@ -847,6 +846,13 @@ sub chord_display ( $self, $default ) {
     my $res = $self->name;
     my $args = {};
     $self->flat_copy( $args, $self->{display} // $self );
+
+    if ( !$::config->{settings}->{'enharmonic-transpose'} && $args->{key} ) {
+	$args->{root} = 'E#'
+	  if $args->{root} eq 'F' && $args->{key} eq 'F#';
+	$args->{root} = 'Cb'
+	  if $args->{root} eq 'B' && $args->{key} eq 'Gb';
+    }
 
     for my $fmt ( $default,
 		  $self->{format},
@@ -1119,6 +1125,32 @@ sub chord_display ( $self ) {
 # For convenience.
 sub is_chord      ( $self ) { 0 };
 sub is_annotation ( $self ) { 1 };
+
+################ Chord objects: NC ################
+
+package ChordPro::Chord::NC;
+
+use String::Interpolate::Named;
+
+our @ISA = 'ChordPro::Chord::Base';
+
+sub transpose ( $self, $dummy1, $dummy2=0 ) { $self }
+sub transcode ( $self, $dummy1, $dummy2=0 ) { $self }
+
+sub canonical ( $self ) {
+    my $res = $self->{name};
+    return $res;
+}
+
+sub chord_display ( $self ) {
+    return interpolate( { args => $self }, $self->{name} );
+}
+
+# For convenience.
+sub is_nc         ( $self ) { 1 };
+sub is_chord      ( $self ) { 0 };
+sub is_annotation ( $self ) { 0 };
+sub has_diagram   ( $self ) { 0 };
 
 ################ Testing ################
 

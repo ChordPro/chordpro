@@ -23,10 +23,11 @@ jobs:
       - name: perl -V
         run: perl -V
       - name: Install Dependencies
-        run: cpanm --installdeps --notest .
+        run: |
+            cpanm --installdeps --notest .
       - name: Make and run tests
         run: |
             perl Makefile.PL
-            make
-            make test
+            make -f Makefile
+            make -f Makefile test
 

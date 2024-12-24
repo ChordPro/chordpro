@@ -16,14 +16,16 @@
   <string>6.0</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
+  <key>NSPrincipalClass</key>
+  <string>NSApplication</string>
   <key>CFBundleSignature</key>
   <string>CHO#</string>
-  <key>CFBundleShortVersion</key>
-  <string>0.977</string>
+  <key>CFBundleShortVersionString</key>
+  <string>6.07.0</string>
   <key>CFBundleVersion</key>
-  <string>0.977.13.1</string>
+  <string>6.07.0</string>
   <key>NSHumanReadableCopyright</key>
-  <string>ⓒ 2010,2020 The ChordPro Team, www.chordpro.org</string>
+  <string>Copyright 2016,2024 Johan Vromans &lt;jvromans@squirrel.nl&gt;</string>
   <key>CFBundleDocumentTypes</key>
   <array>
     <dict>

@@ -1,0 +1,18 @@
+[wxglade]
+allow_custom_widgets = True
+local_widget_path = ./dot.wxglade/widgets
+
+[layout]
+height = 1079
+layout = 0
+sash_positions_l0_l0 = 400
+sash_positions_l0_l1 = 380
+sash_positions_l1_l0 = 539
+sash_positions_l1_l1 = 400
+sash_positions_l2_l0 = 719
+sash_positions_l2_l1 = 359
+widths_l0 = 800
+widths_l1 = 500
+x = 0
+y = 1
+

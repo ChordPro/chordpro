@@ -4,24 +4,22 @@
 
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
-# Last Modified On: Mon Feb 12 22:12:02 2024
-# Update Count    : 283
+# Last Modified On: Thu Dec 12 07:57:36 2024
+# Update Count    : 336
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
-use Wx 0.9912 qw[:allclasses];
 
 use strict;
 use warnings;
+
 use utf8;
-
-package main;
-
 binmode(STDERR, ':utf8');
 binmode(STDOUT, ':utf8');
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";
+
 use ChordPro;
 use ChordPro::Paths;
 CP->pathprepend( "$FindBin::Bin", "$FindBin::Bin/.." );
@@ -32,56 +30,30 @@ my $my_package = 'ChordPro';
 my $my_name = 'WxChordPro';
 my $my_version = $ChordPro::VERSION;
 
-# We need Wx::App for the mainloop.
-# ChordPro::Wx::Main is the main entry of the program.
-use base qw(Wx::App ChordPro::Wx::Main);
-
 my $options = app_options();
 
-sub OnInit {
-    my ( $self ) = shift;
+# Verify that we have an appropriate Wx version.
+our $Wx_tng = 3.004;
+our $Wx_min = $options->{wxtng} ? $Wx_tng : 0.9932;
+unless ( eval { Wx->VERSION($Wx_min) } ) {
+    my $md = ChordPro::Wx::WxUpdateRequired->new;
+    $md->ShowModal;
+    $md->Destroy;
+    exit 1;
+}
+# Now it is safe to proceed.
 
-    $self->SetAppName("ChordPro");
-    $self->SetVendorName("ChordPro.ORG");
-    Wx::InitAllImageHandlers();
+# ChordPro::Wx::Main is the main entry of the program.
+require ChordPro::Wx::Main;
 
-    my $main = ChordPro::Wx::Main->new();
-    exit unless $main->init($options);
-
-    $self->SetTopWindow($main);
-    $main->Show(1);
-
-    if ( $options->{maximize} ) {
-	$main->Maximize(1);
-    }
-
-#    elsif ( $options->{geometry}
-#	    && $options->{geometry} =~ /^(?:(\d+)x(\d+))?(?:([+-]\d+)([+-]\d+))?$/ ) {
-#	$main->SetSize( $1, $2 )
-#	  if defined($1) && defined($2);
-#	$main->Move( $3+0, $4+0 )
-#	  if defined($3) && defined($4);
-#    }
-
-    return 1;
+if ( $Wx::VERSION < $Wx_tng) {
+    # Cannot do Scintilla without Wx_tng;
+    # $options->{stc} //= 0;
+    # Cannot do WebView without Wx_tng;
+    # $options->{webview} //= 0;
 }
 
-# No localisation yet.
-# my $locale = Wx::Locale->new("English", "en", "en_US");
-# $locale->AddCatalog("wxchordpro");
-
-my $m = main->new();
-$m->MainLoop();
-
-################ Subroutines ################
-
-use Wx qw( wxEXEC_SYNC );
-
-# Not yet defined in this version of wxPerl.
-use constant wxEXEC_HIDE_CONSOLE => 32;
-
-# Synchronous system call. Used in Util module.
-sub ::sys { Wx::ExecuteArgs( \@_, wxEXEC_SYNC | wxEXEC_HIDE_CONSOLE ); }
+ChordPro::Wx::WxChordPro->run($options);
 
 ################ Subroutines ################
 
@@ -96,11 +68,17 @@ sub app_options {
 
     if ( !GetOptions( $options,
 		      'ident',
-		      'log',
 		     'verbose|v+',
 		      'version|V',
+		      "logstderr",
 		      'maximize',
-#		      'geometry=s',
+		      'geometry=s',
+		      'config=s',
+		      'stc!',
+		      'webview!',
+		      'wxtng!',
+		      'dark!',
+		      'new',
 		     'quit',
 		     'trace',
 		     'help|?',
@@ -136,16 +114,106 @@ Usage: $0 [options] [file ...]
     --maximize          show full screen
     --help		this message
     --ident		show identification
-    --version		show identification and exit
+    --version -V	show identification and exit
     --verbose		verbose information
     --quit		don't do anything
 EndOfUsage
     exit $exit if defined $exit && $exit != 0;
 }
 
+package ChordPro::Wx::WxUpdateRequired;
+
+# Dialog to be shown if Wx is not up to date.
+
+use Wx qw[:everything];
+use base qw(Wx::Dialog);
+use strict;
+
+sub new {
+    my $self = shift->SUPER::new( undef, wxID_ANY,
+				  "Update Required",
+				  wxDefaultPosition, wxDefaultSize,
+				  wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER );
+
+    # Main sizer.
+    my $sz = Wx::BoxSizer->new(wxVERTICAL);
+    # sz3: Icon (left), info lines (right side).
+    my $sz3 = Wx::BoxSizer->new(wxHORIZONTAL);
+    # sz4: Information lines, right side,
+    my $sz4 = Wx::BoxSizer->new(wxVERTICAL);
+
+    $sz->Add( $sz3, 0, wxEXPAND, 0 );
+    $sz3->Add( $sz4, 0, wxBOTTOM|wxEXPAND|wxRIGHT|wxTOP, 20 );
+
+    my $icon = ChordPro::Paths->get->findres( "chordpro-splash.png",
+					      class => "icons" )
+      || ChordPro::Paths->get->findres( "missing.png",
+					class => "icons" );
+    Wx::Image::AddHandler(Wx::PNGHandler->new);
+    $sz3->Insert( 0,
+		  Wx::StaticBitmap->new( $self, wxID_ANY,
+					 Wx::Bitmap->new( $icon, wxBITMAP_TYPE_PNG) ),
+		  0, 0, 0 );
+
+
+    for ( Wx::StaticText->new( $self, wxID_ANY,
+			       "Software Update Required" ) ) {
+	$_->SetForegroundColour( Wx::Colour->new(0, 104, 217) );
+	$_->SetFont( Wx::Font->new( 20, wxFONTFAMILY_DEFAULT,
+				    wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL,
+				    0, "" ) );
+	$sz4->Add( $_, 0, wxBOTTOM|wxTOP, 20 );
+    }
+
+    $sz4->Add( Wx::StaticText->new( $self, wxID_ANY,
+				    "ChordPro requires Wx (wxPerl) ".
+				    "version $::Wx_min or later." ),
+	       0, wxTOP, 20 );
+
+    $sz4->Add( Wx::StaticText->new( $self, wxID_ANY,
+				    "You currently have Wx ".
+				    "version $Wx::VERSION." ),
+	       0, wxBOTTOM|wxTOP, 10 );
+
+    # Bottom line (with hyperlink).
+    for ( Wx::BoxSizer->new(wxHORIZONTAL) ) {
+	$_->Add( Wx::StaticText->new( $self, wxID_ANY,
+				      "Please consult the "),
+		 0, wxALIGN_CENTER_VERTICAL, 0 );
+	$_->Add( Wx::HyperlinkCtrl->new( $self, wxID_ANY,
+					 " installation instructions ",
+					 "https://www.chordpro.org/chordpro/chordpro-installation/",
+					 wxDefaultPosition,
+					 wxDefaultSize,
+					 wxHL_DEFAULT_STYLE ),
+		 0, wxALIGN_CENTER_VERTICAL, 0 );
+	$_->Add( Wx::StaticText->new( $self, wxID_ANY,
+				      " on the ChordPro web site." ),
+		 0, wxALIGN_CENTER_VERTICAL, 0 );
+	$sz4->Add( $_, 0, wxEXPAND, 0 );
+    }
+
+    # Dialog close button.
+    for ( Wx::StdDialogButtonSizer->new() ) {
+	for my $b ( Wx::Button->new( $self, wxID_EXIT, "" ) ) {
+	    $b->SetDefault();
+	    $_->Add( $b, 0, wxEXPAND, 0 );
+	    $self->SetAffirmativeId( $b->GetId );
+	}
+	$_->Realize();
+	$sz->Add( $_, 0, wxALIGN_RIGHT|wxALL, 20 );
+    }
+
+    $self->SetSizer($sz);
+    $sz->Fit($self);
+    $self->Layout();
+
+    return $self;
+}
+
 =head1 NAME
 
-wxchordpro - a simple Wx-based GUI wrapper for ChordPro
+wxchordpro - Wx-based GUI for ChordPro
 
 =head1 SYNOPSIS
 
@@ -153,7 +221,7 @@ wxchordpro - a simple Wx-based GUI wrapper for ChordPro
 
 =head1 DESCRIPTION
 
-B<wxchordpro> is a GUI wrapper for the ChordPro program. It allows
+B<wxchordpro> is the GUI for the ChordPro program. It allows
 opening of files, make changes, and preview (optionally print) the
 formatted result.
 

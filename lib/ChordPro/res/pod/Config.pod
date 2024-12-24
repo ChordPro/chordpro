@@ -59,6 +59,9 @@
       // Transpose chords.
       transpose : 0
     
+      // Force enharmonic when transposing (experimental).
+      enharmonic-transpose: true
+    
       // Transcode chords.
       transcode : ""
     
@@ -709,6 +712,11 @@
       // metadata item, e.g. "artist", add its value to one of the
       // title/subtitle fields. Don't try to add an artist page element.
       // 
+      // The left, center and right parts are for odd pages.
+      // On even pages, the left and right parts are swapped.
+      // It is possible to define distinct even page formats with "default-even",
+      // "title-even" and "first-even".
+      //    
       // When a background document is specified, with odd/even printing,
       // the 1st background page is used for left pages and
       // the next page (if it exists) for right pages.
@@ -743,6 +751,17 @@
         first {
     
           // Three-part title format specification, left, center, right.
+          footer : [ "" "" "" ]
+    
+          // Background page.
+          background : ""
+        }
+    
+          // Filler pages (for alignment) are empty by default.
+        filler {
+    
+          title : [ "" "" "" ]
+          subtitle : [ "" "" "" ]
           footer : [ "" "" "" ]
     
           // Background page.
@@ -807,14 +826,14 @@
         courier {
           ""         : Courier
           bold       : Courier-Bold
-          italic     : Courier-Italic
-          bolditalic : Courier-BoldItalic
+          italic     : Courier-Oblique
+          bolditalic : Courier-BoldOblique
         }
         "mono, monospace" {
           ""         : Courier
           bold       : Courier-Bold
-          italic     : Courier-Italic
-          bolditalic : Courier-BoldItalic
+          italic     : Courier-Oblique
+          bolditalic : Courier-BoldOblique
         }
         dingbats.        : ZapfDingbats
       }
@@ -844,22 +863,13 @@
       fonts {
     
         // Font for typesetting titles.
-        title {
-          name : Times-Bold
-          size : 14
-        }
+        title : "Times-Bold 14"
     
         // Font for typesetting lyrics.
-        text {
-          name : Times-Roman
-          size : 12
-        }
+        text : "Times-Roman 12"
     
         // Font for typesetting chord names.
-        chord {
-          name : Helvetica-Oblique
-          size : 10
-        }
+        chord : "Helvetica-Oblique 10"
     
         // Font for numbered chord dots.
         chordfingers {
@@ -879,10 +889,7 @@
         }
     
         // Font for typesetting italised comment text.
-        comment_italic {
-          name : Helvetica-Oblique
-          size : 12
-        }
+        comment_italic : "Helvetica-Oblique 12"
     
         // Font for typesetting boxed comment text.
         comment_box {
@@ -892,22 +899,13 @@
         }
     
         // Font for typesetting tabs.
-        tab {
-          name : Courier
-          size : 10
-        }
+        tab : "Courier 10"
     
         // Font for typesetting the table of contents.
-        toc {
-          name : Times-Roman
-          size : 11
-        }
+        toc : "Times-Roman 11"
     
         // Font for typesetting grids.
-        grid {
-          name : Helvetica
-          size : 10
-        }
+        grid : "Helvetica 10"
       }
     
       // PDF outlines (index) can be used in most PDF viewers

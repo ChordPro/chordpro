@@ -12,7 +12,7 @@ websites.
 | Item | Description |
 | ---- | ----------- |
 | assets | Static files, like images and style sheets |
-| config/\_default/config.yaml | Site confguration |
+| config/\_default/config.yaml | Site configuration |
 | config/\_default/menu.yaml | Sidebar menu config |
 | contents | The actual documentation files |
 | layout | Templates for hugo |

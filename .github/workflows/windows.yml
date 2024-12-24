@@ -14,7 +14,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Setup Strawberry Perl
         uses: shogo82148/actions-setup-perl@v1
         with:
@@ -22,12 +22,13 @@ jobs:
       - name: perl -V
         run: perl -V
       - name: Install Dependencies
-        run: cpanm --installdeps --notest .
+        run: |
+            cpanm --installdeps --notest .
       - name: Install Optional Dependencies
         continue-on-error: true
         run: cpanm HarfBuzz::Shaper
       - name: Make and run tests
         run: |
           perl Makefile.PL
-          gmake
-          gmake test
+          gmake -f Makefile
+          gmake -f Makefile test

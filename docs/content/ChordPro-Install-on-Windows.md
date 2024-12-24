@@ -10,7 +10,7 @@ _This information may be sub-optimal and/or incomplete. Please help improving it
 ## Binaries
 
 If you're not sure which option to take, use the
-[Native install kit]({{< relref "Install-Windows-Native" >}}) (reported to run on
+[easy installer]({{< relref "Install-Windows-Native" >}}) (reported to run on
 64-bit Windows 7, 8 and 10) and download the installer.
 
 To support ABC embedding, you must also install [ImageMagick](https://imagemagick.org).

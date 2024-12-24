@@ -1,9 +1,9 @@
 ---
-title: "Binary installation on Microsoft Windows"
-description: "Binary installation on Microsoft Windows"
+title: "Easy installation on Microsoft Windows"
+description: "Easy installation on Microsoft Windows"
 ---
 
-# Binary installation on Microsoft Windows
+# Easy installation on Microsoft Windows
 
 Download ChordPro-installer-xxxx-msw-x64.exe from
 [GitHub](https://github.com/ChordPro/chordpro/releases/latest) and

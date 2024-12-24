@@ -9,7 +9,7 @@ all :	Makefile cleanup
 
 .PHONY : test
 test : Makefile
-	env PERL5LIB=$(shell pwd)/CPAN $(MAKE) -f Makefile test
+	env PERL5LIB=$(shell pwd)/CPAN:$(shell pwd)/aux $(MAKE) -f Makefile test
 
 .PHONY : tests
 tests : test
@@ -44,37 +44,37 @@ STDMNF := MANIFEST MANIFEST.CPAN
 
 TMPDST := ${HOME}/tmp/${PROJECT}
 to_tmp : resources
-	for mnf in ${STDMNF} MANIFEST.WX MANIFEST.CPAN MANIFEST.PP ; do \
+	for mnf in ${STDMNF} MANIFEST.CPAN MANIFEST.PP ; do \
 	    rsync ${RSYNC_ARGS} --files-from=$$mnf ./ ${TMPDST}/; \
 	done
 
 # Windows 10, for Windows installer builds.
-WINDIR := /Users/Johan/${PROJECT}
+WINDIR := /Users/Johan/Documents/${PROJECT}
 WINDST := /mnt/c${WINDIR}
 #WINDST := w10:${PROJECT}
 to_win : resources
-	for mnf in ${STDMNF} MANIFEST.WX ; do \
+	for mnf in ${STDMNF} ; do \
 	    rsync ${RSYNC_ARGS} --files-from=$$mnf ./ ${WINDST}/; \
 	done
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.PP   \
-	  --exclude=pp/macos/** --exclude=pp/macosswift/** \
+	  --exclude=pp/macos/** \
 	  --exclude=pp/linux/** --exclude=pp/debian/** \
 	  ./ ${WINDST}/
 
 # macOS Cataline 10.15, for classic builds.
 MACHOST := macky
-MACDST  := ${MACHOST}:${PROJECT}
+MACDST  := ${MACHOST}:Documents/${PROJECT}
 to_mac : resources
-	for mnf in ${STDMNF} MANIFEST.WX ; do \
+	for mnf in ${STDMNF} ; do \
 	    rsync ${RSYNC_ARGS} --files-from=$$mnf ./ ${MACDST}/; \
 	done
 	rsync ${RSYNC_ARGS} --files-from=MANIFEST.PP   \
-	  --exclude=pp/windows/** --exclude=pp/macosswift/** \
+	  --exclude=pp/windows/** \
 	  --exclude=pp/debian/** \
 	  ./ ${MACDST}/
 
 # macOS Monterey 12/7/5, for Swift GUI builds.
-MACCHODST  := maccho:${PROJECT}
+MACCHODST  := maccho:Documents/${PROJECT}
 to_maccho : resources
 	for mnf in ${STDMNF} ; do \
 	    rsync ${RSYNC_ARGS} --files-from=$$mnf ./ ${MACCHODST}/; \
@@ -87,13 +87,16 @@ release :
 	${PERL} Makefile.PL
 	${MAKE} -f Makefile all test dist
 
+wxg :
+	make -C lib/ChordPro/Wx
+
 # Actualize resources.
 
 LIB := lib/ChordPro
 RES := ${LIB}/res
 PODSELECT := podselect
 
-resources : ${LIB}/Config/Data.pm ${RES}/config/chordpro.json ${RES}/pod/ChordPro.pod ${RES}/pod/Config.pod ${RES}/pod/A2Crd.pod docs/assets/pub/config60.schema
+resources : wxg ${LIB}/Config/Data.pm ${RES}/config/chordpro.json ${RES}/pod/ChordPro.pod ${RES}/pod/Config.pod ${RES}/pod/A2Crd.pod docs/assets/pub/config60.schema
 
 ${LIB}/Config/Data.pm : ${RES}/config/chordpro.json
 	perl script/cfgboot.pl $< > $@~
@@ -177,7 +180,7 @@ TAGS:
 .PHONY: svg
 
 svg :
-	cp -p ${HOME}/src/SVGPDF/lib/SVGPDF.pm lib/ChordPro/lib
+	cp -p ${HOME}/src/SVGPDF/lib/SVGPDF.pm lib/ChordPro/lib/
 	cp -p ${HOME}/src/SVGPDF/lib/SVGPDF/*.pm lib/ChordPro/lib/SVGPDF/
 	cp -p ${HOME}/src/SVGPDF/lib/SVGPDF/Contrib/*.pm lib/ChordPro/lib/SVGPDF/Contrib/
 

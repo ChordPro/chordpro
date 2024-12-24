@@ -30,8 +30,9 @@ sub fmt_subst {
 	####CHECK
 	$m->{_key} =
 	  [ map { ChordPro::Chords::transpose( $_, $capo ) }
-	        @{$m->{key}} ];
+	    @{$m->{key}} ];
     }
+    $m->{capo} = [] if $config->{settings}->{decapo};
     $m->{key_actual} //= $m->{key};
     $m->{tuning} //= [ join(" ", ChordPro::Chords::get_tuning) ];
     # If config->{instrument} is missing, or null, the program abends with

@@ -4,7 +4,7 @@ title: "ChordPro Cheat Sheet"
 description: "ChordPro Cheat Sheet"
 ---
 
-# ChordPro 6.04 Cheat Sheet
+# ChordPro 6.07 Cheat Sheet
 
 ## General
 
@@ -49,9 +49,9 @@ Arguments to directives may be separated by a colon `:` and/or whitespace. They 
 | ... `base-fret` _base_                                                   |           | Specify base-fret (1 or higher).[^1]                                                                        | 5.0   |
 | ... `diagram` _display_                                                  |           | Override diagram display. May be a colour.                                                                  | 6.03  |
 | ... `display` _display_                                                  |           | Override chord properties.[^1]                                                                              | 6.02  |
-| ... `fingers` _pos1_ _pos2_ _pos3_ ...                                   |           | Specify finger postions.[^1]                                                                                | 6.0   |
+| ... `fingers` _pos1_ _pos2_ _pos3_ ...                                   |           | Specify finger positions.[^1]                                                                                | 6.0   |
 | ... `format` _format_                                                    |           | Format string for display purposes.[^1]                                                                     | 6.02  |
-| ... `frets` _pos1_ _pos2_ _pos3_ ...                                     |           | Specify fret postions.[^1]                                                                                  | 5.0   |
+| ... `frets` _pos1_ _pos2_ _pos3_ ...                                     |           | Specify fret positions.[^1]                                                                                  | 5.0   |
 | ... `keys` _pos1_ _pos2_ _pos3_ ...                                      |           | Specify keyboard keys.[^1]                                                                                  | 6.0   |
 | [chordcolour]({{< relref "Directives-props_chord_legacy" >}}) _colour_   |           | Chord colour.                                                                                               | 5.0   |
 | [chordfont]({{< relref "Directives-props_chord_legacy" >}}) _font_       | cf[^3]    | Chord font.                                                                                                 | 1.0   |
@@ -69,9 +69,9 @@ Arguments to directives may be separated by a colon `:` and/or whitespace. They 
 | ... `base-fret` _base_                                                   |           | Specify base-fret (1 or higher).[^1]                                                                        | 1.0   |
 | ... `diagram` _display_                                                  |           | Override diagram display. May be a colour.                                                                  | 6.03  |
 | ... `display` _display_                                                  |           | Override chord properties.[^1]                                                                              | 6.02  |
-| ... `fingers` _pos1_ _pos2_ _pos3_ ...                                   |           | Specify finger postions.[^1]                                                                                | 6.0   |
+| ... `fingers` _pos1_ _pos2_ _pos3_ ...                                   |           | Specify finger positions.[^1]                                                                                | 6.0   |
 | ... `format` _format_                                                    |           | Format string for display purposes.[^1]                                                                     | 6.02  |
-| ... `frets` _pos1_ _pos2_ _pos3_ ...                                     |           | Specify fret postions.[^1]                                                                                  | 1.0   |
+| ... `frets` _pos1_ _pos2_ _pos3_ ...                                     |           | Specify fret positions.[^1]                                                                                  | 1.0   |
 | ... `keys` _pos1_ _pos2_ _pos3_ ...                                      |           | Specify keyboard keys.[^1]                                                                                  | 6.0   |
 | [diagrams]({{< relref "Directives-diagrams" >}})                         |           | Control diagrams printing                                                                                   | 6.02  |
 | [end_of_]({{< relref "Directives-env" >}})_section_                      |           | Ends a specific section.                                                                                    | 6.0   |
@@ -100,6 +100,9 @@ Arguments to directives may be separated by a colon `:` and/or whitespace. They 
 | ... `width=` _width_                                                     |           | Width (points).                                                                                             | 5.0   |
 | ... `x=` _offset_                                                        |           | Horizontal offset (points) for [static image]({{< relref "Directives-image/#static-stationary-images" >}}). | 6.01  |
 | ... `y=` _offset_                                                        |           | Vertical offset (points) for [static image]({{< relref "Directives-image/#static-stationary-images" >}}).   | 6.01  |
+| [labelcolour]({{< relref "Directives-props_label_legacy" >}}) _colour_   |           | Margin abels colour.                                                                                        | 6.07  |
+| [labelfont]({{< relref "Directives-props_label_legacy" >}}) _font_       |           | Margin labels font.                                                                                         | 6.07  |
+| [labelsize]({{< relref "Directives-props_label_legacy" >}}) _size_       |           | Margin labels size.                         								     | 6.07  |
 | [meta]({{< relref "Directives-meta" >}}) _item_                          |           | Metadata.                                                                                                   | 5.0   |
 | [meta album]({{< relref "Directives-album" >}}) _name_                   | album     | Album name.                                                                                                 | 5.0   |
 | [meta artist]({{< relref "Directives-artist" >}}) _name_                 | artist    | Artist name.                                                                                                | 5.0   |

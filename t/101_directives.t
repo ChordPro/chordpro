@@ -39,7 +39,7 @@ my $data = <<EOD;
 {grid: 0}
 {highlight: 0}
 {image: 0}
-{key: 0}
+{key: C}
 {lyricist: 0}
 {meta: title 0}
 {new_page: 0}
@@ -82,7 +82,7 @@ my $data = <<EOD;
 {year: 0}
 EOD
 
-for ( qw( chord chorus diagrams footer grid tab text title toc ) ) {
+for ( qw( chord chorus diagrams footer grid label tab text title toc ) ) {
     $data .= <<EOD;
 {${_}color: green}
 {${_}colour: lime}
@@ -110,7 +110,8 @@ for ( @data ) {
 for my $dir ( @data ) {
     my $result = $song->parse_directive($dir);
     ok( $result->{omit} > 0, "ignored ok: $dir ($result->{name})" );
-    p($result) unless $result->{omit} > 0;
+    next if $result->{omit} > 0;
+    require DDP; DDP::p($result);
 }
 
 $song->{meta}->{foo} = [ 1 ];
@@ -118,5 +119,6 @@ $song->{meta}->{foo} = [ 1 ];
 for my $dir ( @data ) {
     my $result = $song->parse_directive($dir);
     ok( $result->{omit} == 0, "not ignored ok: $dir ($result->{name})" );
-    p($result) unless $result->{omit} == 0;
+    next if $result->{omit} == 0;
+    require DDP; DDP::p($result);
 }

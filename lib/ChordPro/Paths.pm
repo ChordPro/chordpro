@@ -9,13 +9,19 @@ class ChordPro::Paths;
 
 my $instance;
 
-method get :common ( $reset = 0 ) {
+# Work around Object::Pad 0.817 breakage.
+#method get :common ( $reset = 0 ) {
+#    undef $instance if $reset;
+#    $instance //= $class->new;
+#}
+
+sub get( $class, $reset = 0 ) {
     undef $instance if $reset;
     $instance //= $class->new;
 }
 
 use Cwd qw(realpath);
-use File::Spec::Functions qw( catfile catdir splitpath catpath );
+use File::Spec::Functions qw( catfile catdir splitpath catpath file_name_is_absolute );
 use File::HomeDir;
 
 field $home      :reader;	# dir
@@ -108,8 +114,23 @@ BUILD {
     $privlib = $INC{'ChordPro.pm'} =~ s/\.pm$/\/lib/r;
 
     # Now for the resources.
+    $self->setup_resdirs;
+
+    # Check for packaged image.
+    for ( qw( Docker AppImage PPL ) ) {
+	next unless exists $ENV{uc($_)."_PACKAGED"}
+	  && $ENV{uc($_)."_PACKAGED"};
+	$packager = $_;
+	last;
+    }
+
+};
+
+# We need this to be able to re-establish the resdirs, e.g. after a change
+# of CHORDPRO_LIB.
+method setup_resdirs {
     $resdirs = [];
-    @try = ();
+    my @try = ();
     push( @try, $self->path($ENV{CHORDPRO_LIB}) )
       if defined($ENV{CHORDPRO_LIB});
     push( @try, $configdir ) if $configdir;
@@ -132,16 +153,7 @@ BUILD {
     unless ( @$resdirs ) {
 	warn("Paths: Cannot find resources, prepare for disaster\n");
     }
-
-    # Check for packaged image.
-    for ( qw( Docker AppImage PPL ) ) {
-	next unless exists $ENV{uc($_)."_PACKAGED"}
-	  && $ENV{uc($_)."_PACKAGED"};
-	$packager = $_;
-	last;
-    }
-
-};
+}
 
 method debug {
     # We need to take an env var into account, since the Paths
@@ -253,12 +265,17 @@ method findcfg ( $p ) {
 method findres ( $p, %opts ) {
     my $try = $p;
     my $found;
-    if ( defined $opts{class} ) {
-	$try = catfile( $opts{class}, $try );
+    if ( file_name_is_absolute($p) ) {
+	$found = realpath($p);
     }
-    for ( @$resdirs ) {
-	my $f = catfile( $_, $try );
-	$found = realpath($f), last if -f -s $f;
+    else {
+	if ( defined $opts{class} ) {
+	    $try = catfile( $opts{class}, $try );
+	}
+	for ( @$resdirs ) {
+	    my $f = catfile( $_, $try );
+	    $found = realpath($f), last if -f -s $f;
+	}
     }
     warn("Paths: findres", $opts{class} ? " [$opts{class}]" : "",
 	 " $p => ", $self->display($found), "\n")

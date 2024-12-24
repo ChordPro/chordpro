@@ -181,43 +181,33 @@ Note that `^` is an alternative for `maj`.
    7sus2 7sus4
    13sus2 13sus4
 ````
+
 ### Extensions for minor chords
 
-A minus sign `-` may be used instead of the `m` to denote a minor
-chord.
+Minor chords can use `m`, `mi`, `min` and `-`. 
+
+In the list below only the `m` variants are enumerated,
+
 ````
    m#5
-   -#5
    m11
-   -11
    m6
-   -6
    m69
-   -69
    m7b5
-   -7b5
    m7-5
-   -7-5
    mmaj7
-   -maj7
    mmaj9
-   -maj9
    m9maj7
-   -9maj7
    m9^7
-   -9^7
    madd9
-   -add9
    mb6
-   -b6
    m#7
-   -#7
    msus4 msus9
-   -sus4 -sus9
    m7sus4
-   -7sus4
 ````
+
 ### Other extensions
+
 ````
    aug +
    dim 0
