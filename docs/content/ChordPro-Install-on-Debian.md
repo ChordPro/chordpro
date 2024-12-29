@@ -5,9 +5,11 @@ description: "Installation on Debian"
 
 # Installation on Debian
 
-Debian and Debian based systems like Ubuntu ship with a crippled
-wxWidgets package. To fully enjoy ChordPro on these systems, perform
-the following steps.
+Debian and Debian based systems like Ubuntu install by default a
+subset of the wxWidgets packages. As a result, the ChordPro GUI can
+not use its embedded PDF viewer.
+
+To fully enjoy ChordPro GUI on these systems, perform the following steps.
 
 1. Add the missing wxWidgets component:
 ````
@@ -15,20 +17,20 @@ sudo apt-get install libwxgtk-webview3.2-dev
 ````
 2. Remove the distributed Alien::wxWidgets and Wx packages:
 ````
-sudo apt-get remove libalien-wxwidgets-perl
+sudo apt-get remove libalien-wxwidgets-perl libwx-perl
 sudo apt-get purge libalien-wxwidgets-perl
 ````
 3. Install `cpanm`, if you don't already have it:
 ````
 sudo apt-get install cpanminus
 ````
-4. Rebuild Alien::wxWidgets:
+4. Rebuild (not reinstall!) Alien::wxWidgets from the CPAN:
 ````
 sudo cpanm Alien::wxWidgets
 ````
-5. Rebuild Wx:
+5. Rebuild (not reinstall!) Wx from the ChordPro site:
 ````
-sudo cpanm https://github.com/sciurius/wxPerl/releases/download/R3.004/Wx-3.004.tar.gz
+sudo cpanm https://github.com/chordpro/chordpro/releases/download/R6.070/Wx-3.004.tar.gz
 ````
 
 6. Install ChordPro:
