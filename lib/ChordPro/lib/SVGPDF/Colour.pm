@@ -2,7 +2,6 @@
 
 use v5.26;
 use Object::Pad;
-no feature qw(indirect);
 use utf8;
 
 class SVGPDF::Colour;
