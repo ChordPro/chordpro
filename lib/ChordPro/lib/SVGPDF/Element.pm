@@ -184,15 +184,7 @@ method set_graphics () {
 	$stroke = $color;
     }
     if ( $stroke ne "none" ) {
-	$stroke =~ s/\s+//g;
-	# Ignore alpha.
-	if ( $stroke =~ /rgba?\(([\d.]+)%,([\d.]+)%,([\d.]+)%/ ) {
-	    $stroke = sprintf("#%02X%02X%02X",
-			      map { $_*2.55 } $1, $2, $3);
-	}
-	elsif ( $stroke =~ /rgba?\(([\d.]+),([\d.]+),([\d.]+)/ ) {
-	    $stroke = sprintf("#%02X%02X%02X", $1, $2, $3);
-	}
+	$stroke = SVGPDF::Colour->new( colour => $stroke )->rgb;
 	$xo->stroke_color($stroke);
 	$msg .= " stroke=$stroke";
     }
@@ -207,15 +199,7 @@ method set_graphics () {
 	$fill = $color;
     }
     if ( lc($fill) ne "none" && $fill ne "transparent" ) {
-	$fill =~ s/\s+//g;
-	# Ignore alpha.
-	if ( $fill =~ /rgba\(([\d.]+)%,([\d.]+)%,([\d.]+)%/ ) {
-	    $fill = sprintf("#%02X%02X%02X",
-			    map { $_*2.55 } $1, $2, $3);
-	}
-	elsif ( $fill =~ /rgba?\(([\d.]+),([\d.]+),([\d.]+)/ ) {
-	    $fill = sprintf("#%02X%02X%02X", $1, $2, $3);
-	}
+	$fill = SVGPDF::Colour->new( colour => $fill )->rgb;
 	$xo->fill_color($fill);
 	$msg .= " fill=$fill";
     }

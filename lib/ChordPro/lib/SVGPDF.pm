@@ -155,6 +155,7 @@ use SVGPDF::Element;
 use SVGPDF::CSS;
 use SVGPDF::FontManager;
 use SVGPDF::PAST;
+use SVGPDF::Colour;
 
 # The SVG elements.
 use SVGPDF::Circle;
