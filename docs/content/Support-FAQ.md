@@ -28,3 +28,6 @@ questions and answers here sometime soon.
 
 * [I’ve added a Copyright (Artist, ...) directive but I do not see it in the output]({{< relref "FAQ-PageTitles" >}})
 
+* [Preview does not show, and I get “Failed to get GBM device”]({{<
+  relref "FAQ-webkitgtk" >}}).
+  
