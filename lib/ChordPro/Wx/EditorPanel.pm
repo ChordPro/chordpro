@@ -308,9 +308,10 @@ method check_source_saved() {
 method save_file( $file = undef ) {
     while ( 1 ) {
 	unless ( defined $file && $file ne "" ) {
+	    my $cf = $state{currentfile} // "Untitled";
 	    my $fd = Wx::FileDialog->new
 	      ($self, _T("Choose output file"),
-	       "", $state{currentfile}//"",
+	       dirname($cf), basename($cf),
 	       "*".$preferences{chordproext},
 	       0|wxFD_SAVE|wxFD_OVERWRITE_PROMPT,
 	       wxDefaultPosition);
@@ -321,7 +322,13 @@ method save_file( $file = undef ) {
 	    $fd->Destroy;
 	}
 	return unless defined $file;
-	if ( $self->{t_editor}->SaveFile($file) ) {
+
+	# On macOS Catalina DMG STC seems to have problems saving.
+	my $fd;
+	if ( open( $fd, '>:utf8', $file )
+	     and print $fd $self->{t_editor}->GetText
+	     and $fd->close ) {
+#	if ( $self->{t_editor}->SaveFile($file) ) {
 	    $self->{t_editor}->SetModified(0);
 	    $state{currentfile} = $file;
 	    $state{windowtitle} = $file;
@@ -331,7 +338,8 @@ method save_file( $file = undef ) {
 
 	my $md = Wx::MessageDialog->new
 	  ( $self,
-	    "Cannot save to $file",
+#	    "Cannot save to $file\nSTC code = " . $self->{t_editor}->GetStatus,
+	    "Cannot save to $file\n$!",
 	    "Error saving file",
 	    0 | wxOK | wxICON_ERROR);
 	$md->ShowModal;

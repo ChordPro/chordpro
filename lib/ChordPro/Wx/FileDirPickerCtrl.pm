@@ -44,8 +44,7 @@ BUILD {
     }
     else {
 	$picker = Wx::FileDialog->new( $self, $message,
-				       basename($path),
-				       $path,
+				       dirname($path), basename($path),
 				       $wildcard || $state{ffilters},
 				       $new
 				       ? (wxFD_SAVE|wxFD_OVERWRITE_PROMPT)
