@@ -28,20 +28,22 @@ if #available(macOS 10.15, *) {
         /// Current open **wxchordpro** windows
         var openWindows: [String: Int32] = [:]
         
+        /// # Static
+        
+        /// The URL to the Bundle
+        let bundleURL = Bundle.main.bundleURL
+        /// Bundle launch configuration  options
+        let configuration = NSWorkspace.OpenConfiguration()
+        
         /// # Protocol functions
         
         /// Store the requested file URL to add as argument for **wxchordpro**
         func application(_ sender: NSApplication, open urls: [URL]) {
             open = urls
-            /// The dndhandler is already running, open the **wxchordpro** windows
+            /// The **dndhandler** is already running, open the **wxchordpro** windows
             if running {
                 createWxChordProProcess()
             }
-        }
-        
-        /// Hide the dock icon of the **dndhandler**
-        func applicationWillFinishLaunching(_ notification: Notification) {
-            NSApp.setActivationPolicy(.prohibited)
         }
 
         /// Set the arguments and create a window with **wxchordpro**
@@ -87,9 +89,9 @@ if #available(macOS 10.15, *) {
         }
         
         private func launchProcess(argument: String) {
-            let path = Bundle.main.executablePath?.replacingOccurrences(of: "dndhandler", with: "wxchordpro")
+            let wxURL = URL(fileURLWithPath: "\(self.bundleURL.path )/Contents/MacOS/wxchordpro")
             let process = Process()
-            process.launchPath = path ?? ""
+            process.executableURL = wxURL
             /// Add the file argument
             /// - Note: Main means no file argument
             if argument != "main" {
@@ -103,12 +105,20 @@ if #available(macOS 10.15, *) {
                     NSApplication.shared.terminate(nil)
                 }
             }
-            process.launch()
+            try? process.run()
             /// Remember the window ID
             openWindows[argument] = process.processIdentifier
-            /// Make sure the **dndhandler** is still hidden
-            /// - Note: This is needed for macOS Sequoia
-            NSApp.setActivationPolicy(.prohibited)
+            /// Make sure we have the focus
+            /// - Note: Needed for Ventura and lower or else the menu bar is unresponsive
+            if #unavailable(macOS 14.0) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    NSWorkspace.shared.openApplication(
+                        at: self.bundleURL,
+                        configuration: self.configuration,
+                        completionHandler: nil
+                    )
+                }
+            }
         }
     }
 }
