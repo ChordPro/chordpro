@@ -34,9 +34,9 @@ sudo apt-get purge libalien-wxwidgets-perl libwx-perl
 ````
 sudo apt-get install cpanminus
 ````
-4. Rebuild (not reinstall!) Alien::wxWidgets from the CPAN:
+4. Rebuild (not reinstall!) Alien::wxWidgets:
 ````
-sudo cpanm Alien::wxWidgets
+sudo cpanm https://github.com/sciurius/perl-Alien-wxWidgets/releases/download/R0.71/Alien-wxWidgets-0.71.tar.gz
 ````
 5. Rebuild (not reinstall!) Wx from the ChordPro site:
 ````
