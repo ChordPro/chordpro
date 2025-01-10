@@ -76,7 +76,7 @@ WriteMakefile
 
 		    # Windows
 		    ( $^O =~ /mswin/i )
-		    ? ( 'Win32::LongPathx' => 2.0 )
+		    ? ( 'Win32::LongPath' => 2.0 )
 		    : (),
 		   # These are only used by the LaTeX backend
 		   # 'Template'			  => 3.010,
