@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta charset="utf-8">
+        <title>Welcome to ChordPro! | ChordPro</title>
+        <meta name="keywords" content="music,chord,chords,chordii,chordpro,typesetting,chopro,cho,crd,guitar,music sheets">
+        <meta property="og:title" content="ChordPro">
+        <meta property="og:description" content="The official site for the ChordPro file format and its reference implementation">
+        <meta property="og:type"  content="website">
+        <meta property="og:url" content="https://www.chordpro.org">
+        <meta property="og:image" content="https://www.chordpro.org/beta/images/chordpro-icon.png">
+        <link rel="icon" type="image/x-icon" href="https://www.chordpro.org/beta/images/chordpro-icon.png">
+        <link rel="stylesheet" href="https://www.chordpro.org/beta/css/bootstrap4.min.css">
+        <link rel="stylesheet" href="https://www.chordpro.org/beta/css/site.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="https://www.chordpro.org/beta/css/jquery.fancybox.min.css">
+        <script src="https://www.chordpro.org/beta/js/jquery.min.js"></script>
+        <script src="https://www.chordpro.org/beta/js/jquery.fancybox.min.js"></script>
+        <style>
+            body {
+                background: linear-gradient(to bottom, #E5F3FF 0%,#ffffff 20em,#ffffff 100%);
+                background-attachment: fixed;
+            }
+            
+            /* id's */
+
+            #wrapper {
+                max-width: fit-content;
+                margin-left: auto;
+                margin-right: auto;
+                text-align: center;
+                padding: 1em;
+            }
+            #logo {
+                color: #0068d9;
+                font-size: 4em;
+            }
+            #logo img {
+                width: 1em;
+                height: 1em;
+            }
+            #logo p {
+                display: inline;
+                vertical-align: text-top;
+            }
+            #slogan {
+                color: grey;
+            }
+            #statement {
+                font-weight: bold;
+                font-size: 1.2em;
+            }
+            #examples {
+                margin-bottom: 2em;
+            }
+            #examples p, #examples img {
+                margin: 0.5em;
+            }
+            #examples img {
+                box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            }
+            #about {
+                background-color: #143968;
+                color: white;
+                padding: 1em;
+                border-radius: 0.5em;
+                box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+                margin-bottom: 1em;
+            }
+            #about h1 {
+                color: white;
+            }
+            #footer {
+                background-color: #3a3a3a;
+                color: white;
+                border-top: 1px solid black;
+                padding: 0 2em 0 2em;
+            }
+            #footer p {
+                margin: 0;
+            }
+            #footer a {
+                color: white;
+                margin-left: 1em;
+                font-size: 1.5em;
+            }
+
+            /* classes */
+
+            .statements {
+                margin: 2em;
+                text-align: left;
+            }
+            .link-button a {
+                background: #ef6c2a;
+                padding: 0.4em;
+                color: white;
+                border-radius: 0.3em;
+            }
+            .row {
+                display: flex;
+            }
+            .column {
+                padding: 1em;
+                flex: 50%;
+            }
+            .left-align {
+                text-align: left;
+            }
+            .right-align {
+                text-align: right;
+            }
+
+            /* elements */
+
+            dt {
+                color: #0068d9;
+                font-size: 1.2em;
+            }
+            dt span, p span {
+                padding-left: 0.5em;
+            }
+            dd {
+                padding: 0.5em;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="wrapper">
+            <div id="content" style="max-width:800px">
+                <div id="logo">
+                    <img src="https://www.chordpro.org/beta/images/chordpro-icon.png" alt="ChordPro icon">
+                    <p>
+                        ChordPro
+                    </p>
+                </div>
+                <p id="slogan">
+                    A simple text format for the notation of lyrics with chords
+                </p>
+                <p id="statement">
+                    The official site for the ChordPro file format and its reference implementation
+                </p>
+                <p>
+                    Here you can find all the information and tools you need to embrace this format to enhance your musical notations. <strong>ChordPro</strong> will help you to let your songs looks great so you just want to play them.
+                </p>
+                <p class="link-button">
+                    <a href="https://www.chordpro.org/beta/">
+                        Read more
+                    </a>
+                </p>
+                <div id= "screenshot">
+                    <a href="https://www.chordpro.org/beta/">
+                        <img class="img-responsive img-fluid" src="https://www.chordpro.org/beta/images/chordpro-gui-cli.png" alt="ChordPro GUI and CLI">
+                    </a>
+                </div>
+                <div class="statements">
+                    <dl>
+                        <dt>
+                            <i class="fa fa-book"></i><span>Create Songbooks</span>
+                        </dt>
+                        <dd>
+                            Turn your <strong>ChordPro</strong> formatted songs into beautiful looking <a href="https://www.chordpro.org/beta/chordpro-gui-songbook/">songbooks</a>.
+                        </dd>
+                        <dt>
+                            <i class="fa fa-music"></i><span>Any Musical Purpose</span>
+                        </dt>
+                        <dd>
+                            Although initially intended for guitarists, <strong>ChordPro</strong> can be used for all kinds of musical purposes.
+                        </dd>
+                        <dt>
+                            <i class="fa fa-check-circle-o"></i><span>Popular Standard</span>
+                        </dt>
+                        <dd>
+                            <strong>ChordPro</strong> became a popular way to write lead sheets and many tools adopted its format.
+                        </dd>
+                        <dt>
+                            <i class="fa fa-file-text-o"></i><span>Simple Text Format</span>
+                        </dt>
+                        <dd>
+                            <strong>ChordPro</strong> is a simple text file format. Any text editor can be used to create and maintain them.
+                        </dd>
+                    </dl>
+                </div>
+                <div id="examples">
+                    <h1>
+                        ChordPro examples
+                    </h1>
+                    <p>
+                        Here you can see a couple of examples of what <strong>ChordPro</strong> can do for you with its powerful PDF creation:
+                    </p>
+                    <a data-fancybox="gallery" href="https://www.chordpro.org/beta/images/example-armenian.png">
+                        <img src="https://www.chordpro.org/beta/images/example-armenian-small.png" alt="Example">
+                    </a>
+                    <a data-fancybox="gallery" href="https://www.chordpro.org/beta/images/example-background.png">
+                        <img src="https://www.chordpro.org/beta/images/example-background-small.png" alt="Example">
+                    </a>
+                    <a data-fancybox="gallery" href="https://www.chordpro.org/beta/images/example-biscuit1.png">
+                        <img src="https://www.chordpro.org/beta/images/example-biscuit1-small.png" alt="Example">
+                    </a>
+                    <a data-fancybox="gallery" href="https://www.chordpro.org/beta/images/example-mollymalone.png">
+                        <img src="https://www.chordpro.org/beta/images/example-mollymalone-small.png" alt="Example">
+                    </a>
+                    <a data-fancybox="gallery" href="https://www.chordpro.org/beta/images/example-twelvedays.png">
+                        <img src="https://www.chordpro.org/beta/images/example-twelvedays-small.png" alt="Example">
+                    </a>
+                    <a data-fancybox="gallery" href="https://www.chordpro.org/beta/images/example-biscuit2.png">
+                        <img src="https://www.chordpro.org/beta/images/example-biscuit2-small.png" alt="Example">
+                    </a>
+                </div>
+                <div id="powerful">
+                    <h1>
+                        A simple format but not <em>simple</em>
+                    </h1>
+                    <p>
+                        While <em>simple</em> by nature, the reference implementation of <strong>ChordPro</strong> has very powerful features.
+                    </p>
+                    <div class="statements">
+                        <dl>
+                            <dt>
+                                <i class="fa fa-code"></i><span>Markup</span>
+                            </dt>
+                            <dd>
+                                It is possible to use markup in lyrics and other texts to change the way how these will be displayed.
+                            </dd>
+                            <dt>
+                                <i class="fa fa-exchange"></i><span>Custom Tunings and Notes</span>
+                            </dt>
+                            <dd>
+                                Not just C F G on a 6-string EADGBE tuned guitar. C D E or Do Re Mi? Nashville or Roman? <strong>ChordPro</strong> supports alternative tunings and note naming systems.
+                            </dd>
+                            <dt>
+                                <i class="fa fa-music"></i><span>Integrated ABC</span>
+                            </dt>
+                            <dd>
+                                Include fragments of musical scores with the integrated <a href="https://abcnotation.com">ABC</a> support.
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+                <div id="about">
+                    <h1>
+                        About ChordPro
+                    </h1>
+                    <div class="row">
+                        <div class="column">
+                            <p>
+                                In 1992 Martin Leclerc and Mario Dorion developed a simple text file format to write lead sheets, songs with lyrics and chords, and a tool to create neatly printed lead sheets out of these text files. The tool was called <em>chord</em>, and the text files were called chord files. It soon became a popular way to write lead sheets and many users and tools adopted this format for similar purposes. For still unknown reasons people started calling the files <em>chordpro</em> files.
+                            </p>
+                            <div class="link-button">
+                                <a href="https://www.chordpro.org/beta/chordpro-history/">
+                                    Read more about its history
+                                </a>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <h2>ChordPro.ORG</h2>
+                            <p>
+                                In 2015 a small team of enthusiast <strong>ChordPro</strong> users took over the maintenance of the <strong>ChordPro</strong> standard from Martin and Mario and developed a new reference implementation with many new features and an easy to use graphical application.
+                            </p>
+                            <p>
+                                All is <em>Open Source</em> and contributions are always welcome!
+                            </p>
+                            <div class="link-button">
+                                <a href="https://github.com/ChordPro/chordpro">
+                                    Contribute on Github
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="support">
+                    <h1>Support us</h1>
+                    <div class="row">
+                        <div class="column right-align">
+                            <p>
+                                The <strong>ChordPro</strong> standard and reference implementation are free products. Free as in speech. However, web sites, storage and bandwidth cost real money. If you like <strong>ChordPro</strong>, please consider a small donation. We will appreciate it!
+                            </p>
+                        </div>
+                        <div class="column left-align">
+                            <p>
+                                <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=WDKWDE6R3KR98&amp;lc=GB&amp;item_name=ChordPro&amp;currency_code=EUR&amp;bn=PP-DonationsBF%3Abtn_donate_LG.gif%3ANonHosted">
+                                    <i class="fa fa-paypal"></i><span>Paypal</span>
+                                </a>
+                            </p>
+                            <p>
+                                <a href="https://ko-fi.com/chordpro">
+                                    <i class="fa fa-coffee"></i><span>Buy a coffee</span>
+                                </a>
+                            </p>
+                            <p>
+                                <strong>Support us so we can support you!</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="footer">
+            <div class="row">
+                <div class="column left-align">
+                    <p>
+                        This is the official site for <strong>ChordPro</strong>
+                    </p>
+                    <p>
+                        The reference implementation of the open <strong>ChordPro</strong> format
+                    </p>
+                </div>
+                <div class="column right-align">
+                    <a href="https://github.com/ChordPro/chordpro">
+                        <i class="fa fa-github"></i>
+                    </a>
+                    <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=WDKWDE6R3KR98&amp;lc=GB&amp;item_name=ChordPro&amp;currency_code=EUR&amp;bn=PP-DonationsBF%3Abtn_donate_LG.gif%3ANonHosted">
+                        <i class="fa fa-paypal"></i>
+                    </a>
+                    <a href="https://ko-fi.com/chordpro">
+                        <i class="fa fa-coffee"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

@@ -89,6 +89,7 @@ app1 :
 	mkdir -p "${APPDIR}/Contents/MacOS"
 	mkdir -p "${APPDIR}/Contents/Resources/cli"
 	cp PkgInfo Info.plist "${APPDIR}/Contents"
+	perl vfix.pl "${APPDIR}/Contents/Info.plist"
 	cp *.icns "${APPDIR}/Contents/Resources"
 	cd "${APPDIR}"; mv script lib Contents/MacOS
 	cd "${APPDIR}"; mv lib*.dylib Contents/MacOS

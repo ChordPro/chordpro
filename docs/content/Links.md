@@ -8,9 +8,6 @@ description: "ChordPro related links"
 * [Official ChordPro site](https://www.chordpro.org)  
   Contact us via [email](mailto:info@chordpro.org).
 
-* Follow us on [Twitter](https://twitter.com/ChordPro_Org) for
-  announcements of new releases and other interesting things.  
-
 * [Chordie.com](https://www.chordie.com)  
   Searchable web site with a vast collection of ChordPro notated
   songs.

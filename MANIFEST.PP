@@ -26,6 +26,7 @@ pp/macos/Makefile
 pp/macos/PkgInfo
 pp/macos/README.html
 pp/macos/reloc.pl
+pp/macos/vfix.pl
 pp/macos/wxchordpro_pp.pl
 pp/pp2ppl.pl
 pp/windows/GNUmakefile

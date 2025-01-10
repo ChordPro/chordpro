@@ -120,6 +120,7 @@ The first release of `ChordPro`, an alpha version, was on June 4, 2016.
 | 6.042             | 2024-01-09   | ChordPro 6.042             |
 | 6.050             | 2024-02-09   | ChordPro 6.05              |
 | 6.060             | 2024-08-24   | ChordPro 6.06              |
+| 6.070             | 2024-12-25   | ChordPro 6.07              |
 { .table .table-striped .table-bordered .table-sm }
 
 Note that ChordPro 5 was never officially released, but went straight

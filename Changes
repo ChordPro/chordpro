@@ -1,3 +1,9 @@
+0.000
+
+    !Bug Fixes
+
+    - Some issues with Unicode filenames on Windows.
+
 6.070 2024-12-25
 
     !Highlights

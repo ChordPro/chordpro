@@ -284,8 +284,7 @@ method OnMessagesSave($event) {
     my $fd = Wx::FileDialog->new
       ( $self,
 	_T("Choose file to save in"),
-	"",
-	$file,
+	dirname($file), basename($file),
 	"*",
 	wxFD_SAVE|wxFD_OVERWRITE_PROMPT );
 

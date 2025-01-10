@@ -74,6 +74,10 @@ WriteMakefile
 		    'Pod::Usage'		  => 2.03,
 		    'File::Copy'		  => 2.32,
 
+		    # Windows
+		    ( $^O =~ /mswin/i )
+		    ? ( 'Win32::LongPath' => 2.0 )
+		    : (),
 		   # These are only used by the LaTeX backend
 		   # 'Template'			  => 3.010,
 		   # 'LaTeX::Encode'		  => 0.092.0,
@@ -96,6 +100,9 @@ WriteMakefile
 		    'Ref::Util'			  => 0.204,
 		    'Scalar::Util'		  => 1.63,
 		    @pdfapi,
+		    ( $^O =~ /mswin/i )
+		    ? ( 'Win32::LongPath' => 2.0 )
+		    : (),
 		   },
 
  META_MERGE => {

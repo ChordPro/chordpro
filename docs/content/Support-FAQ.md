@@ -28,3 +28,10 @@ questions and answers here sometime soon.
 
 * [I’ve added a Copyright (Artist, ...) directive but I do not see it in the output]({{< relref "FAQ-PageTitles" >}})
 
+### Using the ChordPro editor
+
+* [Why do I see `PU2` in my source?]({{< relref "faq-encoding" >}}).
+
+* [Preview does not show, and I get “Failed to get GBM device”]({{<
+  relref "FAQ-webkitgtk" >}}).
+  
