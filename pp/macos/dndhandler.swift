@@ -110,7 +110,7 @@ if #available(macOS 10.15, *) {
             openWindows[argument] = process.processIdentifier
             /// Make sure we have the focus
             /// - Note: Needed for Ventura and lower or else the menu bar is unresponsive
-            if #unavailable(macOS 14.0) {
+            if #available(macOS 14.0, *) { } else {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     NSWorkspace.shared.openApplication(
                         at: self.bundleURL,
