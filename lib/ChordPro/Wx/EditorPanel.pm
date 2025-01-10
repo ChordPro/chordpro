@@ -13,12 +13,14 @@ use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
 
 use ChordPro::Utils qw( is_macos );
+use ChordPro::Files;
 use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
 use ChordPro::Utils qw( max demarkup is_macos is_msw plural );
 use ChordPro::Paths;
 
 use File::Basename;
+use File::LoadLines;
 
 # WhoamI
 field $panel :accessor = "editor";
@@ -98,7 +100,8 @@ method openfile( $file, $checked=0, $actual=undef ) {
     $actual //= $file;
 
     # File tests fail on Windows, so bypass when already checked.
-    unless ( $checked || -f -r $file ) {
+    unless ( $checked
+	     || fs_test( $file, 'f' ) && fs_test( $file, 'r') ) {
 	$self->log( 'W',  "Error opening $file: $!",);
 	my $md = Wx::MessageDialog->new
 	  ( $self,
@@ -109,7 +112,13 @@ method openfile( $file, $checked=0, $actual=undef ) {
 	$md->Destroy;
 	return;
     }
-    unless ( $self->{t_editor}->LoadFile($file) ) {
+    if ( my $f = loadlines(encode_utf8($file)) ) {
+	# This has the (desired) sideeffect that all newlines
+	# are now \n .
+	$self->{t_editor}->SetText(join("\n",@$f)."\n");
+	$self->{t_editor}->DiscardEdits;
+    }
+    else {
 	$self->log( 'W',  "Error opening $file: $!",);
 	my $md = Wx::MessageDialog->new
 	  ( $self,
@@ -324,11 +333,10 @@ method save_file( $file = undef ) {
 	return unless defined $file;
 
 	# On macOS Catalina DMG STC seems to have problems saving.
-	my $fd;
-	if ( open( $fd, '>:utf8', $file )
+	my $fd = fs_open( $file, '>:utf8' );
+	if ( $fd
 	     and print $fd $self->{t_editor}->GetText
 	     and $fd->close ) {
-#	if ( $self->{t_editor}->SaveFile($file) ) {
 	    $self->{t_editor}->SetModified(0);
 	    $state{currentfile} = $file;
 	    $state{windowtitle} = $file;
@@ -338,7 +346,6 @@ method save_file( $file = undef ) {
 
 	my $md = Wx::MessageDialog->new
 	  ( $self,
-#	    "Cannot save to $file\nSTC code = " . $self->{t_editor}->GetStatus,
 	    "Cannot save to $file\n$!",
 	    "Error saving file",
 	    0 | wxOK | wxICON_ERROR);

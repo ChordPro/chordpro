@@ -223,7 +223,7 @@ sub chordpro {
 	$opts->{generate} = $options->{generate};
 	# Wx runs on temp files, so pass real filename in.
 	$opts->{filesource} = $options->{filesource};
-	progress( msg => $file ) if @ARGV > 1;
+	progress( msg => decode_utf8($file) ) if @ARGV > 1;
 	$s->parse_file( $file, $opts );
     }
 

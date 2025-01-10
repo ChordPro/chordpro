@@ -18,6 +18,7 @@ lib/ChordPro/Delegate/Lilypond.pm
 lib/ChordPro/Delegate/SVG.pm
 lib/ChordPro/Delegate/TextBlock.pm
 lib/ChordPro/Dumper.pm
+lib/ChordPro/Files.pm
 lib/ChordPro/Output/ChordPro.pm
 lib/ChordPro/Output/Common.pm
 lib/ChordPro/Output/Debug.pm
@@ -212,6 +213,7 @@ script/wxchordpro.pl
 t/00_basic.pl
 t/01_prereq.t
 t/02_load.t
+t/10_files.t
 t/100_basic.t
 t/101_directives.t
 t/101_empty.t

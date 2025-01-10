@@ -16,6 +16,8 @@ my $test;
 
 ++$test; use_ok("ChordPro");
 ++$test; use_ok("ChordPro::Config");
+++$test; use_ok("ChordPro::Files");
+++$test; use_ok("ChordPro::Utils");
 ++$test; use_ok("ChordPro::Testing");
 ++$test; use_ok("ChordPro::Songbook");
 ++$test; use_ok("ChordPro::Output::Debug");
