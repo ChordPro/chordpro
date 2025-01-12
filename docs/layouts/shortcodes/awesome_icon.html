@@ -1,0 +1,5 @@
+{{ if len .Params | eq 2 }}
+<i class="fa {{ .Get 0 }}"></i><span>{{ .Get 1 }}</span>
+{{ else }}
+<i class="fa {{ .Get 0 }}"></i>
+{{ end }}

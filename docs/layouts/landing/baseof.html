@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="{{ .Site.LanguageCode }}">
+{{ partial "head.html" . }}
+<body>
+    <div id="wrapper">
+        <div id="content" style="max-width:800px">
+            <div id="logo">
+                <img src="{{ (resources.Get "images/chordpro-icon.png").Permalink }}" alt="ChordPro icon">
+                <p>
+                    {{ .Site.Title }}
+                </p>
+            </div>
+            <p id="subtitle">
+                {{ .Params.Subtitle }}
+            </p>
+            <p id="statement">
+                {{ .Params.Description }}
+            </p>
+            {{- block "main" . }}{{- end }}
+        </div>
+    </div>
+    <div id="footer">
+        <div class="row">
+            <div class="column left-align">
+                <p>{{ .Params.Footer1 | markdownify }}</p>
+                <p>{{ .Params.Footer2 | markdownify }}</p>
+            </div>
+            <div class="column right-align">
+                <a href="{{ .Site.Params.link_github }}">
+                    <i class="fa fa-github"></i>
+                </a>
+                <a href="{{ .Site.Params.link_paypal }}">
+                    <i class="fa fa-paypal"></i>
+                </a>
+                <a href="{{ .Site.Params.link_coffee }}">
+                    <i class="fa fa-coffee"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</body>

@@ -8,12 +8,12 @@
 {{- end -}}
 {{- end -}}
 {{- if $found -}}
-<a href="{{ $found.RelPermalink }}"
+<a href="{{ $found.Permalink }}"
    {{- with $found.Title}} title="{{ . }}"{{ end }}>
 {{- .Text | safeHTML }}</a>
 {{- else -}}
 <a href="{{ .Destination | safeURL }}"
    {{- with .Title}} title="{{ . }}"{{ end -}}
-   {{ if strings.HasPrefix .Destination "http" }} target="_blank" rel="noopener"{{ end }}>
+>
 {{- .Text | safeHTML }}</a>
 {{- end -}}

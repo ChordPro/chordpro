@@ -4,7 +4,7 @@
 <h1>All documentation pages</h1>
 
 {{ range .Pages }}
-<p><a href="{{ .RelPermalink }}">{{ .Title | safeHTML }}</a>
+<p><a href="{{ .Permalink }}">{{ .Title | safeHTML }}</a>
 {{ end }}
 
 {{ end }}

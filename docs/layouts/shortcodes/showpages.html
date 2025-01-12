@@ -6,7 +6,7 @@
 {{ range .Params }}
 {{- $large := resources.Get (printf "images/%s.png" .) -}}
 {{- $small := resources.Get (printf "images/%s-small.png" .) -}}
-  <a data-fancybox="gallery" href="{{ $large.RelPermalink }}">
-  <img src="{{ $small.RelPermalink }}"></a>
+  <a data-fancybox="gallery" href="{{ $large.Permalink }}">
+  <img src="{{ $small.Permalink }}" alt="Thumbnail"></a>
 {{ end }}
 </div>
