@@ -21,6 +21,7 @@ method process () {
     my $color = $style->{fill};
     $color = $style->{color} if $color && $color eq "currentColor";
     my $anchor = $style->{'text-anchor'} || "left";
+    $self->set_graphics;
 
     $self->_dbg( $self->name, " ",
 		 defined($atts->{x}) ? ( " x=$x" ) : (),
@@ -71,10 +72,6 @@ method process () {
     }
     # NOTE: rotate applies to the individual characters, not the text
     # as a whole.
-
-    if ( $color ) {
-	$xo->fill_color($color);
-    }
 
     if ( @$x > 1 ) {
       for ( @$x ) {
