@@ -369,7 +369,7 @@ The value `-1` means the first page is left, the second page is right, and so
 on.  
 The value `0` makes all pages the same (left).
 
-The setting of `even-off-pages` affects content items cover page (if
+The setting of `even-odd-pages` affects content items cover page (if
 any), table of contents (if any) and the songbook. These content items
 will start on a right page (`even-odd-pages` = `1`) or a left page
 (`even-odd-pages` = `-1`).
