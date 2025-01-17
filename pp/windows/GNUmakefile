@@ -80,12 +80,12 @@ loaders : "${DEST}\wxchordpro.exe" "${DEST}\chordpro.exe"
 "${DEST}\wxchordpro.exe" : ppl.c wxchordpro.rc
 	perl vfix.pl wxchordpro.rc
 	windres wxchordpro.rc ppl.o
-	${CC} -mwindows -o "${DEST}\wxchordpro.exe" ppl.c ppl.o
+	${CC} -DUTF8 -mwindows -o "${DEST}\wxchordpro.exe" ppl.c ppl.o
 
 "${DEST}\chordpro.exe" : ppl.c chordpro.rc
 	perl vfix.pl chordpro.rc
 	windres chordpro.rc ppl.o
-	${CC} -mconsole -o "${DEST}\chordpro.exe" ppl.c ppl.o
+	${CC} -DUTF8 -mconsole -o "${DEST}\chordpro.exe" ppl.c ppl.o
 
 # And finally, the installer.
 
