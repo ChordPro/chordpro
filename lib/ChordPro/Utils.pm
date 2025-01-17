@@ -630,4 +630,12 @@ sub propitems_re() {
 push( @EXPORT, "propitems_re" );
 push( @EXPORT_OK, "propitems" );
 
+# For debugging encoding problems.
+
+sub as( $s ) {
+    $s =~ s{ ( [^\x{20}-\x{7f}] ) }
+	   { join( '', map { sprintf '\x{%02x}', ord $_ } split //, $1) }gex;
+    return $s;
+}
+
 1;
