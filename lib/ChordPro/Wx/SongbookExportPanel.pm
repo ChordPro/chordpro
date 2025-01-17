@@ -55,6 +55,12 @@ method refresh() {
     $self->update_menubar( M_SONGBOOK );
 
     $state{have_webview} = ref($self->{webview}) eq 'Wx::WebView';
+
+    # Flush pending messages.
+    if ( $state{msgs} ) {
+	$self->log( 'I', $_ ) for @{$state{msgs}};
+	$state{msgs} = [];
+    }
     $self->log( 'I', "Using " .
 		( $state{have_webview}
 		  ? "embedded" : "external") . " PDF viewer" );
