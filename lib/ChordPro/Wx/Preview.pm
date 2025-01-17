@@ -8,13 +8,14 @@ use Carp;
 class ChordPro::Wx::Preview;
 
 use ChordPro;
+use ChordPro::Files;
 use ChordPro::Paths;
 use ChordPro::Wx::Config;
 use ChordPro::Utils qw( demarkup );
 
 use Wx ':everything';
 use Wx::Locale gettext => '_T';
-
+use Encode qw( encode_utf8 );
 use File::Temp qw( tempfile );
 use File::Basename qw(basename);
 
@@ -92,7 +93,7 @@ method preview( $args, %opts ) {
     }
     if ( $preferences{enable_configfile} ) {
 	$haveconfig++;
-	push( @ARGV, '--config', $preferences{configfile} );
+	push( @ARGV, '--config', encode_utf8($preferences{configfile}) );
 
     }
     delete $ENV{CHORDPRO_LIB};
@@ -305,13 +306,22 @@ method save {
 	"*.pdf",
 	0|wxFD_SAVE|wxFD_OVERWRITE_PROMPT );
     my $ret = $fd->ShowModal;
-    if ( $ret == wxID_OK ) {
-	use File::Copy;
-	my $fn = $fd->GetPath;
-	copy( $preview_pdf, $fn );
-	$unsaved_preview = 0;
-    }
+    my $fn = $fd->GetPath;
     $fd->Destroy;
+    if ( $ret == wxID_OK ) {
+	if ( fs_copy( $preview_pdf, $fn ) ) {
+	    $unsaved_preview = 0;
+	}
+	else {
+	    my $md = Wx::MessageDialog->new
+	      ( $self,
+		"Cannot save to $fn\n$!",
+		"Error saving file",
+		0 | wxOK | wxICON_ERROR);
+	    $md->ShowModal;
+	    $md->Destroy;
+	}
+    }
     return $ret;
 }
 

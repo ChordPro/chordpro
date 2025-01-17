@@ -76,6 +76,7 @@ use Object::Pad;
 class ChordPro::Wx::Main :isa(ChordPro::Wx::Main_wxg);
 
 use ChordPro;	our $VERSION = $ChordPro::VERSION;
+use ChordPro::Files;
 use ChordPro::Paths;
 use ChordPro::Output::Common;
 use ChordPro::Utils qw( is_msw is_macos demarkup );
@@ -198,12 +199,26 @@ method init( $options ) {
     $self->init_theme;
 
     if ( @ARGV ) {
-	my $arg = decode_utf8(shift(@ARGV));
-	if ( -d $arg ) {
-	    # This won't work on macOS packaged app.
+	use DDP;
+	use charnames ':full';
+	require _charnames;
+	push( @{$state{msgs}},
+	      "ARGV: " . np(@ARGV,
+			      show_unicode => 1,
+			      escape_chars => 'nonascii',
+			      unicode_charnames => 1 ) );
+	my $arg = shift(@ARGV);
+	$arg = decode_utf8($arg);
+	push( @{$state{msgs}},
+	      'DECODED: ' . np($arg,
+			    show_unicode => 1,
+			    escape_chars => 'nonascii',
+			    unicode_charnames => 1 ) );
+
+	if ( fs_test( 'd', $arg ) ) {
 	    return 1 if $self->select_mode("sbexport")->open_dir($arg);
 	}
-	elsif ( ! -r $arg ) {
+	elsif ( !fs_test( 'r', $arg ) ) {
 	    return 1 if $self->select_mode("editor")->newfile($arg);
 	    Wx::MessageDialog->new( $self, "Error opening $arg",
 				    "File Open Error",
@@ -270,7 +285,7 @@ method init_theme() {
     else {
 	$state{editortheme} = $preferences{editortheme};
     }
-    $self->log( 'I', "Using $state{editortheme} theme" );
+    push( @{$state{msgs}}, "Using $state{editortheme} theme" );
 }
 
 method get_preferences() {
