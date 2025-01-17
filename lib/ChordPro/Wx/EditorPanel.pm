@@ -59,6 +59,11 @@ method refresh() {
 
     $self->update_menubar( M_EDITOR );
 
+    # Flush pending messages.
+    if ( $state{msgs} ) {
+	$self->log( 'I', $_ ) for @{$state{msgs}};
+	$state{msgs} = [];
+    }
     $self->log( 'I', "Using " .
 		( $state{have_stc}
 		  ? "styled" : "basic") . " text editor" );
@@ -99,9 +104,8 @@ method refresh() {
 method openfile( $file, $checked=0, $actual=undef ) {
     $actual //= $file;
 
-    # File tests fail on Windows, so bypass when already checked.
-    unless ( $checked
-	     || fs_test( $file, 'f' ) && fs_test( $file, 'r') ) {
+    # Bypass test when already checked. TODO?
+    unless ( $checked || fs_test( 'fr', $file ) ) {
 	$self->log( 'W',  "Error opening $file: $!",);
 	my $md = Wx::MessageDialog->new
 	  ( $self,
@@ -112,7 +116,7 @@ method openfile( $file, $checked=0, $actual=undef ) {
 	$md->Destroy;
 	return;
     }
-    if ( my $f = loadlines(encode_utf8($file)) ) {
+    if ( my $f = loadlines( encode_utf8($file) ) ) {
 	# This has the (desired) sideeffect that all newlines
 	# are now \n .
 	$self->{t_editor}->SetText(join("\n",@$f)."\n");

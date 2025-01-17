@@ -10,6 +10,16 @@ package ChordPro::Files;
 # Generalize some file system operations so they use LongPath on Windows.
 # This is necessary for long filenames and unicode filenames.
 
+# NOTE: FILENAMES SHOULD AT ALL TIMES BE PERL STRINGS!
+
+# Where do filenames come from?
+#
+# 1. Command line arguments. Decode ASAP.
+# 2. File (and directory) dialogs: Always perl string.
+# 3. Preferences, configs, recents: should all be perl strings.
+# 4. From filelists. We expect these lists to have UTF8 filenames that
+#    get decoded when the list is read.
+
 use ChordPro::Utils qw( is_msw );
 use Encode qw( decode_utf8 encode_utf8 );
 
@@ -21,17 +31,23 @@ if ( is_msw ) {
     require Win32::LongPath;
 }
 
+# General pattern:
+# If Windows, call Windows specific function.
+# Otherwise
+#  If the filename contains UTF8 characters, encode.
+#  Call standard perl function.
+
 sub fs_open( $name, $mode = '<:utf8' ) {
     my $fd;
-    my $uname = $name;
-    if ( utf8::is_utf8($uname) ) {
-	if ( is_msw ) {
-	    Win32::LongPath::openL( \$fd, $mode, $uname )
-		or die("$name: $^E\n");
-	    return $fd;
-	}
-	$uname = encode_utf8($name);
+    if ( is_msw ) {
+	Win32::LongPath::openL( \$fd, $mode, $name )
+	    or die("$name: $^E\n");
+	return $fd;
     }
+
+    my $uname = $name;
+    $uname = encode_utf8($name) if utf8::is_utf8($uname);
+
     open( $fd, $mode, $uname )
       or die("$name: $!\n");
     return $fd;
@@ -39,39 +55,49 @@ sub fs_open( $name, $mode = '<:utf8' ) {
 
 push( @EXPORT, qw(fs_open) );
 
-sub fs_test( $name, $test = 's' ) {
-    if ( utf8::is_utf8($name) ) {
-	return Win32::LongPath::testL( $test, $name ) if is_msw;
-	$name = encode_utf8($name);
+sub fs_test( $tests, $name ) {
+    my $res = 1;
+    for my $test ( split( //, $tests ) ) {
+	$res = _fs_test( $test, $name );
+	return unless $res;
     }
+    $res;
+}
 
-    if    ( $test eq 'b' ) { return -b $name }
-    elsif ( $test eq 'c' ) { return -c $name }
-    elsif ( $test eq 'd' ) { return -d $name }
-    elsif ( $test eq 'e' ) { return -e $name }
-    elsif ( $test eq 'f' ) { return -f $name }
-    elsif ( $test eq 'l' ) { return -l $name }
-    elsif ( $test eq 'o' ) { return -o $name }
-    elsif ( $test eq 'O' ) { return -O $name }
-    elsif ( $test eq 'r' ) { return -r $name }
-    elsif ( $test eq 'R' ) { return -R $name }
-    elsif ( $test eq 's' ) { return -s $name }
-    elsif ( $test eq 'w' ) { return -w $name }
-    elsif ( $test eq 'W' ) { return -W $name }
-    elsif ( $test eq 'x' ) { return -x $name }
-    elsif ( $test eq 'X' ) { return -X $name }
-    elsif ( $test eq 'z' ) { return -z $name }
+sub _fs_test( $test, $name ) {
+    return Win32::LongPath::testL( $test, $name ) if is_msw;
+
+    my $uname = $name;
+    $uname = encode_utf8($name) if utf8::is_utf8($uname);
+
+    if    ( $test eq 'b' ) { return -b $uname }
+    elsif ( $test eq 'c' ) { return -c $uname }
+    elsif ( $test eq 'd' ) { return -d $uname }
+    elsif ( $test eq 'e' ) { return -e $uname }
+    elsif ( $test eq 'f' ) { return -f $uname }
+    elsif ( $test eq 'l' ) { return -l $uname }
+    elsif ( $test eq 'o' ) { return -o $uname }
+    elsif ( $test eq 'O' ) { return -O $uname }
+    elsif ( $test eq 'r' ) { return -r $uname }
+    elsif ( $test eq 'R' ) { return -R $uname }
+    elsif ( $test eq 's' ) { return -s $uname }
+    elsif ( $test eq 'w' ) { return -w $uname }
+    elsif ( $test eq 'W' ) { return -W $uname }
+    elsif ( $test eq 'x' ) { return -x $uname }
+    elsif ( $test eq 'X' ) { return -X $uname }
+    elsif ( $test eq 'z' ) { return -z $uname }
     else { die("Invalid test '$test' for $name\n") }
 }
 
 push( @EXPORT, qw(fs_test) );
 
 sub fs_unlink( $name ) {
-    if ( utf8::is_utf8($name) ) {
-	return Win32::LongPath::unlinkL($name) if is_msw;
-	$name = encode_utf8($name);
-    }
-    unlink($name);
+
+    return Win32::LongPath::unlinkL($name) if is_msw;
+
+    my $uname = $name;
+    $uname = encode_utf8($name) if utf8::is_utf8($uname);
+    unlink($uname);
 }
 
 push( @EXPORT, qw(fs_unlink) );
@@ -84,9 +110,7 @@ sub fs_find( $folder, $opts = {} ) {
 
     unless ( is_msw ) {
 	my $ufolder = $folder;
-	if ( utf8::is_utf8($folder) ) {
-	    $ufolder = encode_utf8($folder);
-	}
+	$ufolder = encode_utf8($folder) if utf8::is_utf8($folder);
 
 	use File::Find qw(find);
 	my @files;
@@ -112,7 +136,7 @@ sub fs_find( $folder, $opts = {} ) {
 	return \@files;
     }
 
-    sub search_tree( $path, $opts ) {
+    sub search_tree( $path, $opts, $folder ) {
 
 	my $filter = $opts->{filter} // qr/[.]/i;
 	my $recurse = $opts->{recurse} // 1;
@@ -135,7 +159,7 @@ sub fs_find( $folder, $opts = {} ) {
 		       & ( Win32::LongPath::FILE_ATTRIBUTE_DIRECTORY()
 			   | Win32::LongPath::FILE_ATTRIBUTE_REPARSE_POINT() ) )
 		      == Win32::LongPath::FILE_ATTRIBUTE_DIRECTORY() ) ) {
-		push( @files, @{ search_tree( $name, $opts ) } )
+		push( @files, @{ search_tree( $name, $opts, $folder ) } )
 		  if $recurse;
 		$opts->{subfolders} = 1;
 		next;
@@ -152,10 +176,22 @@ sub fs_find( $folder, $opts = {} ) {
     }
 
     return [ sort { $a->{name} cmp $b->{name} }
-	     @{ search_tree( $folder, $opts ) } ];
+	     @{ search_tree( $folder, $opts, $folder ) } ];
 
 }
 
 push( @EXPORT, qw(fs_find) );
+
+sub fs_copy( $from, $to ) {
+    return Win32::LongPath::copyL( $from, $to ) if is_msw;
+
+    $to   = encode_utf8($to)   if utf8::is_utf8($to);
+    $from = encode_utf8($from) if utf8::is_utf8($from);
+
+    use File::Copy;
+    copy( $from, $to );
+}
+
+push( @EXPORT, qw(fs_copy) );
 
 1;

@@ -25,6 +25,7 @@ use ChordPro::Output::Common
 use feature 'signatures';
 
 use ChordPro::Output::PDF::Writer;
+use ChordPro::Files;
 use ChordPro::Paths;
 use ChordPro::Utils;
 
@@ -405,7 +406,7 @@ sub generate_csv {
     # Create an MSPro compatible CSV for this PDF.
     push( @$book, [ "CSV", { meta => { tocpage => $page } } ] );
     my $csv = CP->sibling( $options->{output}, ext => ".csv" );
-    open( my $fd, '>:utf8', encode_utf8($csv) )
+    my $fd = fs_open( encode_utf8($csv), '>:utf8' )
       or die( encode_utf8($csv), ": $!\n" );
 
     warn("Generating CSV ", encode_utf8($csv), "...\n")

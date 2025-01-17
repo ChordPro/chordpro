@@ -4,6 +4,7 @@ use v5.26;
 
 package ChordPro;
 
+use ChordPro::Files;
 use ChordPro::Utils;
 use ChordPro::Chords;
 use ChordPro::Output::Common;
@@ -286,8 +287,7 @@ sub chordpro {
     # array of lines to be written.
     if ( $res && @$res > 0 ) {
         if ( $of && $of ne "-" ) {
-            open( my $fd, '>', $of );
-	    binmode( $fd, ":utf8" );
+            my $fd = fs_open( $of, '>:utf8' );
 	    push( @$res, '' ) unless $res->[-1] eq '';
 	    print { $fd } ( join( "\n", @$res ) );
 	    close($fd);
@@ -963,10 +963,10 @@ sub app_setup {
                 foreach my $c ( @$_ ) {
 		    my $try = $c;
 		    # Check for resource names.
-		    if ( ! -r $try ) {
+		    if ( !fs_test( 'r', $try ) ) {
 			$try = CP->findcfg($c);
 		    }
-                    die("$c: $!\n") unless $try && -r $try;
+                    die("$c: $!\n") unless $try && fs_test( 'r', $try );
 		    $c = $try;
                 }
                 next;
@@ -975,7 +975,7 @@ sub app_setup {
 	    next if $clo->{nodefaultconfigs};
 	    next unless $configs{$config};
             $_ = [ $configs{$config} ];
-            undef($_) unless -r -f $_->[0];
+            undef($_) unless fs_test( 'fr', $_->[0] );
         }
     }
     # If no config was specified, and no default is available, force no.

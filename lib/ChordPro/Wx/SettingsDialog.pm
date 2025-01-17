@@ -10,6 +10,7 @@ class ChordPro::Wx::SettingsDialog
 
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
+use ChordPro::Files;
 use ChordPro::Paths;
 use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
@@ -406,7 +407,7 @@ method _OnCreateConfig( $event, $fn = undef ) {
 				   $state{expert}
 				   ? "chordpro.json"
 				   : "config.tmpl" );
-    if ( copy( $cfg, $fn ) ) {
+    if ( fs_copy( $cfg, $fn ) ) {
 	$self->{fp_customconfig}->SetPath( File::Spec->rel2abs($fn) );
     }
     else {

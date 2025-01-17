@@ -24,7 +24,7 @@ my %files = ( "Test.fstst"    => 1,
 	      "Café.fstst"    => 1,
 	      "I♡Perl.fstst" => 1 );
 
-plan tests => 2 + 8 * keys(%files);
+plan tests => 2 + 10 * keys(%files);
 
 for ( keys %files ) {
     my $fd = fs_open( $_, '>:utf8' );
@@ -33,8 +33,10 @@ for ( keys %files ) {
     print $fd $msg;
     ok( close($fd), "$_ closed" );
     $msg = encode_utf8($msg);
-    is( fs_test($_), length($msg) + ( is_msw ? 1 : 0 ),
-	length($msg)." bytes" );
+    my $size = length($msg) + ( is_msw ? 1 : 0 );
+    is( fs_test( 's',  $_ ), $size, length($msg)." bytes" );
+    is( fs_test( 'rs', $_ ), $size, "test rs" );
+    is( fs_test( 'sr', $_ ), 1,	"test sr" );
     $fd = fs_open($_);
     ok( $fd, "$_ opened" );
     my $read = do { local $/; <$fd> };

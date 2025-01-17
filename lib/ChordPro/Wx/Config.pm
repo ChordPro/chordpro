@@ -19,6 +19,7 @@ my $cb;
 
 use Wx qw(:everything);
 use Wx::Locale gettext => '_T';
+use ChordPro::Files;
 use ChordPro::Paths;
 use Encode qw( decode_utf8 );
 
@@ -251,7 +252,7 @@ method Load :common {
 	    }
 	    elsif ( $group eq "recents" ) {
 		push( @{$state{$group}}, $value )
-		  if -s $value;
+		  if fs_test( 's', $value );
 	    }
 	    else {
 		$state{$group}->{$entry} = $value;
