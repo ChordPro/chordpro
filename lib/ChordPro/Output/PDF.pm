@@ -12,7 +12,6 @@ package ChordPro::Output::PDF;
 
 use strict;
 use warnings;
-use Encode qw( encode_utf8 );
 use File::Temp ();
 use Storable qw(dclone);
 use List::Util qw(any);
@@ -406,10 +405,10 @@ sub generate_csv {
     # Create an MSPro compatible CSV for this PDF.
     push( @$book, [ "CSV", { meta => { tocpage => $page } } ] );
     my $csv = CP->sibling( $options->{output}, ext => ".csv" );
-    my $fd = fs_open( encode_utf8($csv), '>:utf8' )
-      or die( encode_utf8($csv), ": $!\n" );
+    my $fd = fs_open( $csv, '>:utf8' )
+      or die( $csv, ": $!\n" );
 
-    warn("Generating CSV ", encode_utf8($csv), "...\n")
+    warn("Generating CSV $csv...\n")
       if  $config->{debug}->{csv} || $options->{verbose};
 
     $ps = $config->{pdf};
@@ -831,7 +830,7 @@ sub generate_song {
 		( $bgpdf, $pg ) = ( $1, $2 );
 	    }
 	    $fn = CP->findres($bgpdf);
-	    if ( $fn && -s -r $fn ) {
+	    if ( $fn && fs_test( rs => $fn ) ) {
 		$pg++ if $ps->{"even-odd-pages"} && !$rightpage;
 		$pr->importpage( $fn, $pg );
 	    }

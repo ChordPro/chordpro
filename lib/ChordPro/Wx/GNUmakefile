@@ -5,7 +5,6 @@ WXG2TXT := perl wxg2txt.pl
 
 all :: 	Main_wxg.pm \
 	EditorPanel_wxg.pm \
-	NewSongDialog_wxg.pm \
 	SettingsDialog_wxg.pm \
 	RenderDialog_wxg.pm \
 	SongbookExportPanel_wxg.pm
@@ -15,10 +14,6 @@ Main_wxg.pm : Main.wxg
 	${WXG2TXT} $<
 
 EditorPanel_wxg.pm : EditorPanel.wxg
-	${WXGLADE} --output=$@ $<
-	${WXG2TXT} $<
-
-NewSongDialog_wxg.pm : NewSongDialog.wxg
 	${WXGLADE} --output=$@ $<
 	${WXG2TXT} $<
 

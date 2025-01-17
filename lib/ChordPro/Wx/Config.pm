@@ -21,7 +21,7 @@ use Wx qw(:everything);
 use Wx::Locale gettext => '_T';
 use ChordPro::Files;
 use ChordPro::Paths;
-use Encode qw( decode_utf8 );
+use File::Basename qw(basename);
 
 use constant FONTSIZE => 12;
 
@@ -152,7 +152,7 @@ sub Setup( $class, $options ) {
     }
     else {
 	my $file;
-	if ( $ENV{XDG_CONFIG_HOME} && -d $ENV{XDG_CONFIG_HOME} ) {
+	if ( $ENV{XDG_CONFIG_HOME} && fs_test( d => $ENV{XDG_CONFIG_HOME} ) ) {
 	    $file =
 	      $ENV{XDG_CONFIG_HOME} . "/wxchordpro/wxchordpro";
 	}
@@ -163,8 +163,8 @@ sub Setup( $class, $options ) {
 	else {
 	    $file = "$ENV{HOME}/.wxchordpro";
 	}
-	unless ( -f $file ) {
-	    open( my $fd, '>', $file );
+	unless ( fs_test( f => $file ) ) {
+	    my $fd = fs_open( $file, '>' );
 	}
 	Wx::ConfigBase::Set
 	    ( $cb = Wx::FileConfig->new
@@ -367,28 +367,25 @@ sub setup_styles {
 
     my %stylelist;
     my @userstyles;
+    my $findopts = { filter => qr/^.*\.json$/i, recurse => 0 };
 
     # Collect standard style files (presets).
     for my $cfglib ( @{ CP->findresdirs("config") } ) {
-	next unless $cfglib && -d $cfglib;
-	opendir( my $dh, $cfglib );
-	foreach ( readdir($dh) ) {
-	    $_ = decode_utf8($_);
-	    next unless /^(.*)\.json$/;
-	    my $base = $1;
-	    $stylelist{$base} = $_;
+	next unless $cfglib && fs_test( d => $cfglib );
+	next unless my $entries = fs_find( $cfglib, $findopts );
+	foreach ( @$entries ) {
+	    my $base = basename( $_->{name}, ".json" );
+	    $stylelist{$base} = $_->{name};
 	}
     }
 
     # Add custom style presets. if appropriate.
     my $dir = $preferences{customlib};
     if ( $preferences{enable_customlib}
-	 && $dir && -d ( my $cfglib = "$dir/config" ) ) {
-	opendir( my $dh, $cfglib );
-	foreach ( readdir($dh) ) {
-	    $_ = decode_utf8($_);
-	    next unless /^(.*)\.json$/;
-	    my $base = $1;
+	 && $dir && fs_test( d => ( my $cfglib = "$dir/config" ) ) ) {
+	next unless my $entries = fs_find( $cfglib, $findopts );
+	foreach ( @$entries ) {
+	    my $base = basename( $_->{name}, ".json" );
 	    push( @userstyles, $base );
 	    delete $stylelist{$base};
 	}
@@ -406,13 +403,12 @@ sub setup_notations {
     my $notationlist = $state{notations};
     return $notationlist if $notationlist && @$notationlist;
     $notationlist = [ undef ];
+    my $findopts = { filter => qr/^.*\.json$/i, recurse => 0 };
     for my $cfglib ( @{ CP->findresdirs( "notes", class => "config" ) } ) {
-	next unless $cfglib && -d $cfglib;
-	opendir( my $dh, $cfglib );
-	foreach ( sort readdir($dh) ) {
-	    $_ = decode_utf8($_);
-	    next unless /^(.*)\.json$/;
-	    my $base = $1;
+	next unless $cfglib && fs_test( d => $cfglib );
+	next unless my $entries = fs_find( $cfglib, $findopts );
+	foreach ( @$entries ) {
+	    my $base = basename( $_->{name}, ".json" );
 	    $notationlist->[0] = "common", next
 	      if $base eq "common";
 	    push( @$notationlist, $base );
@@ -427,17 +423,16 @@ sub setup_tasks {
     my @libs = @{ CP->findresdirs("tasks") };
     my $dir = $preferences{customlib};
     push( @libs, "$dir/tasks" )
-      if $preferences{enable_customlib} && $dir && -d "$dir/tasks";
+      if $preferences{enable_customlib} && $dir && fs_test( d => "$dir/tasks" );
     my $did;
     my %dups;
+    my $findopts = { filter => qr/^.*\.(?:json|prp)$/i, recurse => 0 };
     for my $cfglib ( @libs ) {
-	next unless $cfglib && -d $cfglib;
-	opendir( my $dh, $cfglib );
-	foreach ( readdir($dh) ) {
-	    $_ = decode_utf8($_);
-	    next unless /^(.*)\.(?:json|prp)$/;
-	    my $base = $1;
-	    my $file = File::Spec->catfile( $cfglib, $_ );
+	next unless $cfglib && fs_test( d => $cfglib );
+	next unless my $entries = fs_find( $cfglib, $findopts );
+	foreach ( @$entries ) {
+	    my $base = basename( $_->{name}, ".json", ".prp" );
+	    my $file = File::Spec->catfile( $cfglib, $_->{name} );
 
 	    # Tentative title (description).
 	    ( my $desc = $base ) =~ s/_/ /g;
@@ -445,7 +440,7 @@ sub setup_tasks {
 	    # Peek in the first line.
 	    my $line;
 	    my $fd;
-	    open( $fd, '<:utf8', $file ) and
+	    $fd = fs_open( $file ) and
 	      $line = <$fd> and
 	      close($fd);
 	    if ( $line =~ m;(?://|\#)\s*(?:chordpro\s*)?task:\s*(.*);i ) {

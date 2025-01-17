@@ -13,6 +13,7 @@ our @EXPORT;
 
 use Wx ':everything';
 use Wx::Locale gettext => '_T';
+use ChordPro::Files;
 use ChordPro::Utils qw( is_msw is_macos );
 
 ################ Constants ################
@@ -384,7 +385,7 @@ unless ( $::wxbitmapnew ) {
     use File::Basename;
     *Wx::Bitmap::new = sub {
 	# Only handle Wx::Bitmap->new(file, type) case.
-	goto &$::wxbitmapnew if @_ != 3 || -f $_[1];
+	goto &$::wxbitmapnew if @_ != 3 || fs_test( f => $_[1] );
 	my ($self, @rest) = @_;
 	$rest[0] = ChordPro::Paths->get->findres( basename($rest[0]),
 						  class => "icons" );

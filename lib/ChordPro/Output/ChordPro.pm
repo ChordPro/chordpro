@@ -409,13 +409,11 @@ sub generate_song ( $s ) {
 	require Image::Info;
 
 	# Slurp the image.
-	my $fd;
-	unless ( open( $fd, '<:raw', $url ) ) {
+	my $data = fs_blob($url);
+	unless ( defined $data ) {
 	    warn("$url: $!\n");
 	    next;
 	}
-	my $data = do { local $/; <$fd> };
-	close($fd);
 
 	# Get info.
 	my $info = Image::Info::image_info(\$data);

@@ -116,7 +116,7 @@ method openfile( $file, $checked=0, $actual=undef ) {
 	$md->Destroy;
 	return;
     }
-    if ( my $f = loadlines( encode_utf8($file) ) ) {
+    if ( my $f = fs_load($file) ) {
 	# This has the (desired) sideeffect that all newlines
 	# are now \n .
 	$self->{t_editor}->SetText(join("\n",@$f)."\n");
@@ -218,31 +218,15 @@ method newfile( $file = undef ) {
     my $file = $preferences{tmplfile};
     if ( $file && $preferences{enable_tmplfile} ) {
 	$self->log( 'I', "Loading template $file" );
-	if ( -f -r $file && $self->{t_editor}->LoadFile($file) ) {
+	if ( fs_test( fr => $file ) && $self->{t_editor}->LoadFile($file) ) {
 	    $content = "";
 	}
 	else {
 	    $self->log( 'E', "Cannot open template $file: $!" );
 	}
     }
-    elsif ( 1 ) {
-	$content = "{title: $title}";
-    }
     else {
-	require ChordPro::Wx::NewSongDialog;
-	unless ( $self->{d_newfile} ) {
-	    $self->{d_newfile} = ChordPro::Wx::NewSongDialog->new
-	      ( $self, wxID_ANY, $title );
-	    restorewinpos( $self->{d_newfile}, "newfile" );
-	    $self->{d_newfile}->set_title($title);
-	}
-	$self->{d_newfile}->refresh;
-	my $ret = $self->{d_newfile}->ShowModal;
-	savewinpos( $self->{d_newfile}, "newfile" );
-	if ( $ret == wxID_OK ) {
-	    $title = $self->{d_newfile}->get_title;
-	    $content = $self->{d_newfile}->get_meta;
-	}
+	$content = "{title: $title}";
     }
 
     for ( $self->{t_editor} ) {
@@ -370,9 +354,9 @@ method preview( $args, %opts ) {
     # The text that we get from the editor can have CRLF line endings,
     # that on Windows will result in double line ends. Write with
     # 'raw' layer.
-    use Encode 'encode_utf8';
-    if ( open( $fd, '>:raw', $preview_cho )
-	 and print $fd ( encode_utf8($self->{t_editor}->GetText) )
+    require Encode;
+    if ( $fd = fs_open( $preview_cho, '>:raw' )
+	 and print $fd ( Encode::encode_utf8($self->{t_editor}->GetText) )
 	 and close($fd) ) {
 	$self->prv->preview( $args, %opts );
 	$self->previewtooltip;

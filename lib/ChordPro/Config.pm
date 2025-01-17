@@ -14,9 +14,9 @@ use feature qw( signatures state );
 no warnings "experimental::signatures";
 
 use ChordPro;
+use ChordPro::Files;
 use ChordPro::Paths;
 use ChordPro::Utils;
-use File::LoadLines;
 use File::Spec;
 use Scalar::Util qw(reftype);
 use List::Util qw(any);
@@ -268,10 +268,9 @@ sub get_config ( $file ) {
     $file = expand_tilde($file);
 
     if ( $file =~ /\.json$/i ) {
-        if ( open( my $fd, "<:raw", $file ) ) {
-            my $new = json_load( loadlines( $fd, { split => 0 } ), $file );
+        if ( my $lines = fs_load( $file, { split => 0, fail => "soft" } ) ) {
+            my $new = json_load( $lines, $file );
             precheck( $new, $file );
-            close($fd);
             return __PACKAGE__->new($new);
         }
         else {
@@ -279,7 +278,7 @@ sub get_config ( $file ) {
         }
     }
     elsif ( $file =~ /\.prp$/i ) {
-        if ( -e -f -r $file ) {
+        if ( fs_test( efr => $file ) ) {
             require ChordPro::Config::Properties;
             my $cfg = Data::Properties->new;
             $cfg->parse_file($file);
@@ -505,7 +504,7 @@ sub config_final ( %args ) {
     # Load schema.
     my $schema = do {
 	my $schema = CP->findres( "config.schema", class => "config" );
-	my $data = loadlines( $schema, { split => 0 } );
+	my $data = fs_load( $schema, { split => 0 } );
 	$parser->decode($data);
     };
 
@@ -519,7 +518,7 @@ sub config_final ( %args ) {
 
     my $config = do {
 	my $config = CP->findres( "chordpro.json", class => "config" );
-	my $data = loadlines( $config, { split => 0 } );
+	my $data = fs_load( $config, { split => 0 } );
 	$parser->decode($data);
     };
 

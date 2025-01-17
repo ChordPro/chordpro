@@ -22,6 +22,7 @@ package ChordPro::Files;
 
 use ChordPro::Utils qw( is_msw );
 use Encode qw( decode_utf8 encode_utf8 );
+use Ref::Util qw(is_ref);
 
 use Exporter 'import';
 our @EXPORT;
@@ -193,5 +194,39 @@ sub fs_copy( $from, $to ) {
 }
 
 push( @EXPORT, qw(fs_copy) );
+
+# Wrapper for File::LoadLines.
+
+sub fs_load( $name, $opts = {} ) {
+
+    use File::LoadLines;
+
+    $opts->{fail} //= "soft";
+
+    my $ret;
+    eval {
+	if ( is_ref($name) ) {
+	    $ret = loadlines( $name, $opts );
+	}
+	else {
+	    my $fd = fs_open($name);
+	    $ret = loadlines( $fd, $opts );
+	    $opts->{_filesource} = $name;
+	}
+    };
+    return $ret unless $@;
+
+    my $msg = $@;
+    $msg = $1 if $msg =~ /^\Q$name\E: (.*)$/;
+    die( "$msg\n" ) unless $opts->{fail} ne "soft";
+    $opts->{error} = $msg;
+    return;
+}
+
+sub fs_blob( $name, $opts = {} ) {
+    fs_load( $name, { blob => 1, %$opts } );
+}
+
+push( @EXPORT, qw(fs_load fs_blob) );
 
 1;

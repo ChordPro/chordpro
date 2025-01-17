@@ -17,7 +17,6 @@ use ChordPro::Files;
 use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
 
-use Encode qw( decode_utf8 encode_utf8 );
 use File::LoadLines;
 use File::Basename;
 
@@ -74,7 +73,7 @@ method refresh() {
     $self->{cb_stdcover}->SetValue($state{sbe_stdcover} // 1);
     $self->OnStdCoverChecked();
 
-    if ( $state{sbe_folder} && -d $state{sbe_folder} ) {
+    if ( $state{sbe_folder} && fs_test( d => $state{sbe_folder} ) ) {
 	$self->{dp_folder}->SetPath($state{sbe_folder});
 	$self->log( 'I', "Using folder " . $state{sbe_folder} );
 	$self->OnDirPickerChanged(undef);
@@ -156,13 +155,13 @@ method preview( $args, %opts ) {
 
     if ( $self->{cb_stdcover}->IsChecked ) {
 	push( @args, "--title",
-	      encode_utf8($self->{t_exporttitle}->GetValue // "") );
+	      $self->{t_exporttitle}->GetValue // "" );
 	if ( my $stitle = $self->{t_exportstitle}->GetValue ) {
-	    push( @args, "--subtitle", encode_utf8($stitle) );
+	    push( @args, "--subtitle", $stitle );
 	}
     }
     elsif ( my $cover = $self->{fp_cover}->GetPath ) {
-	push( @args, "--cover", encode_utf8($cover) );
+	push( @args, "--cover", $cover );
     }
     $self->prv->preview( \@args, %opts );
     $self->previewtooltip;

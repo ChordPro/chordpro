@@ -23,6 +23,7 @@ sub get( $class, $reset = 0 ) {
 use Cwd qw(realpath);
 use File::Spec::Functions qw( catfile catdir splitpath catpath file_name_is_absolute );
 use File::HomeDir;
+use ChordPro::Files;
 
 field $home      :reader;	# dir
 field $configdir :reader;	# dir
@@ -82,14 +83,14 @@ BUILD {
     }
 
     for ( @try ) {
-	next unless $_ && -d $_;
+	next unless $_ && fs_test( d => $_);
 	my $path = $self->normalize($_);
 	warn("Paths: configdir try $_ => $path\n") if $self->debug > 1;
-	next unless $path && -d $path;
+	next unless $path && fs_test( d => $path);
 	$configdir = $path;
 	for ( $self->normalize( catfile( $path, "$app_lc.prp" ) ),
 	      $self->normalize( catfile( $path, "$app_lc.json" ) ) ) {
-	    next unless $_ && -f $_;
+	    next unless $_ && fs_test( f => $_ );
 	    $configs->{userconfig} = $_;
 	    last;
 	}
@@ -99,7 +100,7 @@ BUILD {
 
     for ( $self->normalize(".$app_lc.json"),
 	  $self->normalize("$app_lc.json") ) {
-	    next unless $_ && -f $_;
+	    next unless $_ && fs_test( f => $_ );
 	$configs->{config} = $_;
 	last;
     }
@@ -140,7 +141,7 @@ method setup_resdirs {
 	next unless $_;
 	my $path = $self->normalize($_);
 	warn("Paths: resdirs try $_ => $path\n") if $self->debug > 1;
-	next unless $path && -d $path;
+	next unless $path && fs_test( d => $path );
 	push( @$resdirs, $path );
     }
 
@@ -227,7 +228,7 @@ method findexe ( $p, %opts ) {
     }
     for ( $self->path ) {
 	my $e = catfile( $_, $try );
-	$found = realpath($e), last if -f -x $e;
+	$found = realpath($e), last if fs_test( fx => $e );
     }
     warn("Paths: findexe $p => ", $self->display($found), "\n")
       if $self->debug;
@@ -240,7 +241,7 @@ method findcfg ( $p ) {
     my $found;
     my @p;
     if ( $p =~ /\.\w+$/ ) {
-	$found = realpath($p) if -f -s $p;
+	$found = realpath($p) if fs_test( fs => $p );
 	@p = ( $p );
     }
     else {
@@ -251,7 +252,7 @@ method findcfg ( $p ) {
 	for ( @$resdirs ) {
 	    for my $cfg ( @p ) {
 		my $f = catfile( $_, "config", $cfg );
-		$found = realpath($f), last if -f -s $f;
+		$found = realpath($f), last if fs_test( fs => $f );
 	    }
 	}
     }
@@ -274,7 +275,7 @@ method findres ( $p, %opts ) {
 	}
 	for ( @$resdirs ) {
 	    my $f = catfile( $_, $try );
-	    $found = realpath($f), last if -f -s $f;
+	    $found = realpath($f), last if fs_test( fs => $f );
 	}
     }
     warn("Paths: findres", $opts{class} ? " [$opts{class}]" : "",
@@ -293,7 +294,7 @@ method findresdirs ( $p, %opts ) {
     }
     for ( @$resdirs ) {
 	my $d = catdir( $_, $p );
-	push( @found, realpath($d) ) if -d $d;
+	push( @found, realpath($d) ) if fs_test( d => $d );
     }
     if ( $self->debug ) {
 	my $i = 0;
@@ -338,7 +339,7 @@ method sibling ( $orig, %opts ) {
 method siblingres ( $orig, $name, %opts ) {
     return unless defined $orig;
     my $try = $self->sibling( $orig, name => $name );
-    my $found = ( $try && -s $try )
+    my $found = ( $try && fs_test( s => $try ) )
       ? $try
       : $self->findres( $name, class => $opts{class} );
     return $found;

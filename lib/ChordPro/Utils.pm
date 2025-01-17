@@ -81,7 +81,7 @@ sub findexe ( $prog, $silent = 0 ) {
     }
     foreach ( @path ) {
 	my $try = "$_/$prog";
-	if ( -f -x $try ) {
+	if ( fs_test( fx => $try ) ) {
 	    #warn("Found $prog in $_\n");
 	    return $try;
 	}

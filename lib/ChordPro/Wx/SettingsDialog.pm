@@ -14,7 +14,6 @@ use ChordPro::Files;
 use ChordPro::Paths;
 use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
-use Encode qw(encode_utf8);
 use File::Basename;
 use File::Spec;
 
@@ -423,13 +422,11 @@ method _OnCreateConfig( $event, $fn = undef ) {
 
 method OnCustomConfigChanged($event) {
     my $path = $self->{fp_customconfig}->GetPath;
-    my $fn = encode_utf8($path);
 
-    unless ( $fn =~ /\.\w+$/ ) {
-	$fn .= ".json";
+    unless ( $path =~ /\.\w+$/ ) {
 	$self->{fp_customconfig}->SetPath( $path .= ".json" );
     }
-    return if -s $fn;		# existing config
+    return if fs_test( s => $path );		# existing config
 
     my $md = Wx::MessageDialog->new
       ( $self,
@@ -440,7 +437,7 @@ method OnCustomConfigChanged($event) {
     my $ret = $md->ShowModal;
     $md->Destroy;
     return unless $ret == wxID_YES;
-    $self->_OnCreateConfig( $event, $fn );
+    $self->_OnCreateConfig( $event, $path );
 }
 
 method OnCustomLib($event) {

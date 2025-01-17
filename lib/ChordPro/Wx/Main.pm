@@ -207,7 +207,7 @@ method init( $options ) {
 			      show_unicode => 1,
 			      escape_chars => 'nonascii',
 			      unicode_charnames => 1 ) );
-	my $arg = shift(@ARGV);
+	my $arg = shift(@ARGV);	# ignore rest
 	$arg = decode_utf8($arg);
 	push( @{$state{msgs}},
 	      'DECODED: ' . np($arg,
@@ -253,7 +253,7 @@ method init_recents() {
 	$ctl->Enable(1);
 	my $i = 0;
 	for my $file ( @$r ) {
-	    next unless -s $file;
+	    next unless fs_test( s => $file );
 	    last unless defined $file;
 	    $ctl->Append( basename($file) );
 	    $ctl->SetClientData( $i, $file );

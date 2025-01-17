@@ -15,7 +15,6 @@ use ChordPro::Utils qw( demarkup );
 
 use Wx ':everything';
 use Wx::Locale gettext => '_T';
-use Encode qw( encode_utf8 );
 use File::Temp qw( tempfile );
 use File::Basename qw(basename);
 
@@ -63,6 +62,9 @@ method preview( $args, %opts ) {
     #### ChordPro
 
     @ARGV = ();			# just to make sure
+    push( @ARGV, "--debug" ) if $state{debug};
+    push( @ARGV, "--trace" ) if $state{trace};
+    push( @ARGV, "--verbose" ) for 1..($state{verbose}//0);
 
     $msgs = $fatal = $died = 0;
     local $SIG{__WARN__} = sub {
@@ -93,7 +95,7 @@ method preview( $args, %opts ) {
     }
     if ( $preferences{enable_configfile} ) {
 	$haveconfig++;
-	push( @ARGV, '--config', encode_utf8($preferences{configfile}) );
+	push( @ARGV, '--config', $preferences{configfile} );
 
     }
     delete $ENV{CHORDPRO_LIB};
@@ -164,6 +166,12 @@ method preview( $args, %opts ) {
 	      return 1;
 	  } );
 
+    require Encode;
+    for ( @ARGV ) {
+	next if ref ne "";
+#	$_ = Encode::encode_utf8($_);
+    }
+
     eval {
 	$options = ChordPro::app_setup( "ChordPro", $ChordPro::VERSION );
     };
@@ -183,7 +191,7 @@ method preview( $args, %opts ) {
     };
     $dialog->Destroy if $dialog;
     $self->_die($@), goto ERROR if $@ && !$died;
-    goto ERROR unless -e $preview_pdf;
+    goto ERROR unless fs_test( e => $preview_pdf );
 
     $unsaved_preview = 1;
     if ( !$preferences{enable_pdfviewer}
@@ -255,7 +263,7 @@ method preview( $args, %opts ) {
 	    $self->log( 'W',  "Problems found." );
 	}
     }
-    elsif ( ! -s $preview_pdf ) {
+    elsif ( !fs_test( s => $preview_pdf ) ) {
 	$panel->alert(1);
 	$self->log( 'W',  "Nothing to view. Empty song?" );
     }
@@ -298,7 +306,7 @@ sub _makeurl {
 }
 
 method save {
-    return unless -s $preview_pdf;
+    return unless fs_test( s => $preview_pdf );
     my $fd = Wx::FileDialog->new
       ( $panel,
 	_T("Choose output file"),
@@ -326,7 +334,7 @@ method save {
 }
 
 method have_preview {
-    -s $preview_pdf;
+    fs_test( s => $preview_pdf );
 }
 
 method discard {

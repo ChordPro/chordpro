@@ -12,6 +12,7 @@ use warnings;
 
 use ChordPro;
 use ChordPro::Config;
+use ChordPro::Files;
 use ChordPro::Song;
 use ChordPro::Utils qw(progress);
 
@@ -39,8 +40,10 @@ sub parse_file {
 
     # Loadlines sets $opts->{_filesource}.
     $opts->{fail} = "soft";
-    my $lines = is_arrayref($filename) ? $filename : loadlines( $filename, $opts );
+    my $lines = is_arrayref($filename) ? $filename
+      : fs_load( $filename, $opts );
     die( $filename, ": ", $opts->{error}, "\n" ) if $opts->{error};
+
     # Sense crd input and convert if necessary.
     if ( !(defined($options->{a2crd}) && !$options->{a2crd}) and
 	 !$options->{fragment}
@@ -109,7 +112,7 @@ sub add {
 sub embed_file {
     my ( $self, $filename, $meta, $defs ) = @_;
 
-    unless ( -s -r $filename ) {
+    unless ( fs_test( sr => $filename ) ) {
 	warn("$filename: $! (skipped)\n");
 	return;
     }

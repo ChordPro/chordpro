@@ -75,7 +75,7 @@ our $config;
 package ChordPro;
 
 use ChordPro::Paths;
-use Encode qw(decode decode_utf8 encode_utf8);
+use Encode qw(decode_utf8);
 
 sub import {
     # Add private library.
@@ -89,6 +89,11 @@ sub import {
 sub ::run {
     binmode(STDERR, ':utf8');
     binmode(STDOUT, ':utf8');
+    for ( @ARGV ) {
+	next if ref ne "";
+	$_ = decode_utf8($_);
+    }
+
     $options = app_setup( "ChordPro", $VERSION );
     $options->{trace}   = 1 if $options->{debug};
     $options->{verbose} = 1 if $options->{trace};
@@ -199,7 +204,7 @@ sub chordpro {
     foreach my $file ( @ARGV ) {
 	my $opts;
 	if ( $file =~ /^--((?:sub)?title)\s*(.*)/ ) {
-	    $options->{$1} = decode_utf8($2);
+	    $options->{$1} = $2;
 	    next;
 	}
 	if ( $file =~ /(^|\s)--(?:meta|config|define)\b/ ) {
@@ -224,7 +229,7 @@ sub chordpro {
 	$opts->{generate} = $options->{generate};
 	# Wx runs on temp files, so pass real filename in.
 	$opts->{filesource} = $options->{filesource};
-	progress( msg => decode_utf8($file) ) if @ARGV > 1;
+	progress( msg => $file ) if @ARGV > 1;
 	$s->parse_file( $file, $opts );
     }
 
@@ -984,17 +989,6 @@ sub app_setup {
     }
     $clo->{nosongconfig} ||= $clo->{nodefaultconfigs};
 
-    # Decode command line strings.
-    # File names are dealt with elsewhere.
-    for ( qw(transcode title subtitle ) ) {
-	next unless defined $clo->{$_};
-	$clo->{$_} = decode_utf8($clo->{$_});
-    }
-    ####TODO: Should decode all, and remove filename exception.
-    for ( keys %{ $clo->{define} } ) {
-	$clo->{define}->{$_} = decode_utf8($clo->{define}->{$_});
-    }
-
     # Plug in command-line options.
     @{$options}{keys %$clo} = values %$clo;
     $::options = $options;
@@ -1034,7 +1028,7 @@ sub app_setup {
 		next unless /\S/;
 		next if /^#/;
 		s/[\r\n]+$//;
-		push( @files, encode_utf8($_) );
+		push( @files, $_ );
 	    }
 	}
 	if ( @files ) {

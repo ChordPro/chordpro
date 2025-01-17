@@ -8,16 +8,15 @@ package ChordPro::Output::PDF::Writer;
 
 use strict;
 use warnings;
-use Encode;
 use Text::Layout;
 use IO::String;
 use Carp;
 use utf8;
 
+use ChordPro::Files;
 use ChordPro::Paths;
 use ChordPro::Utils qw( expand_tilde demarkup min is_corefont );
 use ChordPro::Output::Common qw( fmt_subst prep_outlines );
-use File::LoadLines qw(loadlines);
 use Ref::Util qw( is_hashref );
 
 # For regression testing, run perl with PERL_HASH_SEED set to zero.
@@ -688,7 +687,7 @@ sub init_fonts {
     for my $fontdir ( @d ) {
 	next unless $fontdir;
 	$fontdir = expand_tilde($fontdir);
-	if ( -d $fontdir ) {
+	if ( fs_test( d => $fontdir ) ) {
 	    $self->{pdfapi}->can("addFontDirs")->($fontdir);
 	    $fc->add_fontdirs($fontdir);
 	    push( @dirs, $fontdir );
@@ -725,7 +724,7 @@ sub init_fonts {
 			       FreeMonoBold.ttf
 			       FreeMonoOblique.ttf
 			    ) ) {
-		$have = 0, last unless -f -s "$dir/$font";;
+		$have = 0, last unless fs_test( fs => "$dir/$font" );
 	    }
 	    $remap = "free", last if $have;
 	}
@@ -832,8 +831,7 @@ sub show_vpos {
 
 sub embed {
     my ( $self, $file ) = @_;
-    $file = encode_utf8($file);
-    return unless -f $file;
+    return unless fs_test( 'f', $file );
 
     # Borrow some routines from PDF Api.
     *PDFNum = \&{$self->{pdfapi} . '::Basic::PDF::Utils::PDFNum'};
@@ -843,7 +841,7 @@ sub embed {
     # Apparently the 'hidden' flag does not hide it completely,
     # so give it a rect outside the page.
     my $a = $self->{pdfpage}->annotation();
-    $a->text( loadlines( $file, { split => 0 } ),
+    $a->text( fs_load( $file, { fail => "soft", split => 0 } ),
 	      -open => 0, -rect => [0,0,-1,-1] );
     $a->{T} = PDFStr("ChordProSong");
     $a->{F} = PDFNum(2);		# hidden
