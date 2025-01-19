@@ -47,9 +47,6 @@ lib/ChordPro/Wx/FileDirPickerCtrl.pm
 lib/ChordPro/Wx/Main.pm
 lib/ChordPro/Wx/Main.wxg
 lib/ChordPro/Wx/Main_wxg.pm
-lib/ChordPro/Wx/NewSongDialog.pm
-lib/ChordPro/Wx/NewSongDialog.wxg
-lib/ChordPro/Wx/NewSongDialog_wxg.pm
 lib/ChordPro/Wx/PanelRole.pm
 lib/ChordPro/Wx/Preview.pm
 lib/ChordPro/Wx/RenderDialog.pm
@@ -193,8 +190,8 @@ lib/ChordPro/res/icons/wx-toolbar-back.png
 lib/ChordPro/res/icons/wx-toolbar-messages.png
 lib/ChordPro/res/icons/wx-toolbar-preferences.png
 lib/ChordPro/res/icons/wx-toolbar-preview.png
-lib/ChordPro/res/linux/chordpro.desktop
-lib/ChordPro/res/linux/chordpro.metainfo.xml
+lib/ChordPro/res/linux/org.chordpro.desktop
+lib/ChordPro/res/linux/org.chordpro.metainfo.xml
 lib/ChordPro/res/linux/chordpro.xml
 lib/ChordPro/res/linux/setup_desktop.sh
 lib/ChordPro/res/pod/A2Crd.pod

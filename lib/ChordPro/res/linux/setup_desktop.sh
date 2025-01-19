@@ -26,8 +26,8 @@ XDG_ICONS=${XDG}/icons
 ILIB=${RES}/icons
 # Templates.
 TLIB=${RES}/linux
-TPL=chordpro.desktop
-XML=chordpro.xml
+TPL=org.chordpro.desktop
+XML=org.chordpro.xml
 ISIZE=256
 
 if [ $action = "install" ]
