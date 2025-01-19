@@ -638,4 +638,6 @@ sub as( $s ) {
     return $s;
 }
 
+push( @EXPORT_OK, "as" );
+
 1;
