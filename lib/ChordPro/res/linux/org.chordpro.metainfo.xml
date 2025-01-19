@@ -14,19 +14,24 @@ suitable for printing on your nearest printer.</p>
   </description>
   <screenshots>
     <screenshot type="default">
-      <image>https://screenshots.debian.net/shrine/screenshot/24876/simage/large-43dc01d2abbddc3ed6b3e9f7508ba27c.png</image>
+      <image>https://www.chordpro.org/appdata/screenshot1.png</image>
+      <caption>Main window.</caption>
     </screenshot>
     <screenshot>
-      <image>https://screenshots.debian.net/shrine/screenshot/24877/simage/large-9c92757b6f08ff31c2674fd83f096b19.png</image>
-    </screenshot>
-    <screenshot>
-      <image>https://screenshots.debian.net/shrine/screenshot/24878/simage/large-f7c8348de7bdc1a6b51c5c2a07cdddf4.png</image>
-    </screenshot>
-    <screenshot>
-      <image>https://www.chordpro.org/appdata/screenshot3.png</image>
+      <image>https://www.chordpro.org/appdata/screenshot2.png</image>
+      <caption>Song window.</caption>
     </screenshot>
     <screenshot>
       <image>https://www.chordpro.org/appdata/screenshot3.png</image>
+      <caption>Song window with preview.</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://www.chordpro.org/appdata/screenshot4.png</image>
+      <caption>Songbook window with preview.</caption>
+    </screenshot>
+    </screenshot>
+      <image>https://www.chordpro.org/appdata/screenshot5.png</image>
+      <caption>Command line.</caption>
     </screenshot>
   </screenshots>
   <launchable type="desktop-id">org.chordpro.desktop</launchable>

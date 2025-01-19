@@ -26,7 +26,6 @@ clean ::
 server: popup serve
 
 serve :: assets
-	( sleep 3; xdg-open  http://${HOSTNAME}:1313 ) &
 	${HUGO} server --disableFastRender --navigateToChanged --bind ${HOSTNAME} --baseURL http://${HOSTNAME}:1313
 
 assets ::
@@ -38,8 +37,8 @@ pagefind ::
 
 popup ::
 	( sleep 5; xdg-open  http://${HOSTNAME}:1313/ ) &
-	
+
+# A target to run the server on macOS as 'localhost' because it is more restrictive
 macos: assets
-	# A target to run the server on macOS as 'localhost' because it is more restrictive
 	( sleep 3; open  http://localhost:1313 ) &
 	${HUGO} server --baseURL=http://localhost/ --disableFastRender --navigateToChanged
