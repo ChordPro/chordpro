@@ -439,7 +439,8 @@ sub info {
 	if ( $handler ne "quickjs_qjs" && have_xs() ) {
 	    $info->{method} = QUICKJSXS;
 	}
-	elsif ( $handler ne "quickjs_xs" && ($exe = CP->findexe("qjs")) ) {
+	elsif ( $handler ne "quickjs_xs"
+		&& ($exe = CP->findexe("qjs", silent => 1 )) ) {
 	    $info->{method} = QUICKJS;
 	}
 	if ( $info->{method} ) {
@@ -460,7 +461,7 @@ sub info {
     }
 
     elsif ( $handler eq "abc2svg" && $ctl->{program}
-	    && ( $exe = CP->findexe($ctl->{program}) ) ) {
+	    && ( $exe = CP->findexe($ctl->{program}, silent => 1 ) ) ) {
 	$info->{handler} = $handler;
 	$info->{method} = CP->display($exe);
 	$info->{info} = $info->{method};
