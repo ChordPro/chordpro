@@ -21,6 +21,7 @@ use File::Temp ();
 use File::LoadLines;
 use feature 'state';
 
+use ChordPro::Files;
 use ChordPro::Paths;
 use ChordPro::Utils;
 use Text::ParseWords qw(shellwords);
