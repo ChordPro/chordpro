@@ -20,7 +20,9 @@ package ChordPro::Files;
 # 4. From filelists. We expect these lists to have UTF8 filenames that
 #    get decoded when the list is read.
 
-use ChordPro::Utils qw( is_msw );
+# Utils uses Files...
+#use ChordPro::Utils qw( is_msw );
+
 use Encode qw( decode_utf8 encode_utf8 );
 use Ref::Util qw(is_ref);
 
