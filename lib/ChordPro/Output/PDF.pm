@@ -1097,6 +1097,7 @@ sub generate_song {
 
 	if ( $elt->{type} eq "newpage" ) {
 	    $newpage->();
+	    showlayout($ps) if $ps->{showlayout} || $config->{debug}->{spacing};
 	    next;
 	}
 
@@ -2170,13 +2171,14 @@ sub imageline {
     }
 
     if ( $anchor eq "float" ) {
+	# Note that with indent, the image is aligned to the indented area.
 	$align //= ( $opts->{center} // 1 ) ? "center" : "left";
 	# Note that image is placed aligned on $x.
 	if ( $align eq "center" ) {
-	    $x += ($pw - $ps->{_indent}) / 2;
+	    $x += $pw / 2;
 	}
 	elsif ( $align eq "right" ) {
-	    $x += $pw - $ps->{_indent};
+	    $x += $pw;
 	}
 	warn("Image $align: $_[1] -> $x\n") if $config->{debug}->{images};
     }
