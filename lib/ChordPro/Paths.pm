@@ -226,12 +226,25 @@ method findexe ( $p, %opts ) {
     if ( $self->is_msw ) {
 	$try .= ".exe";
     }
+
+    if ( File::Spec->file_name_is_absolute($p)
+	 && ChordPro::Files::fs_test( fx => $p ) ) {
+	warn("Paths: findexe $p => ", $self->display($p), "\n")
+	  if $self->debug;
+	return $p;
+    }
+
     for ( $self->path ) {
 	my $e = catfile( $_, $try );
 	$found = realpath($e), last if fs_test( fx => $e );
     }
-    warn("Paths: findexe $p => ", $self->display($found), "\n")
-      if $self->debug;
+    if ( $self->debug ) {
+	warn("Paths: findexe $p => ", $self->display($found), "\n");
+    }
+    elsif ( !$opts{silent} ) {
+	warn("Could not find $p in ",
+	     join( " ", map { qq{"$_"} } $self->path ), "\n");
+    }
     return $found;
 }
 

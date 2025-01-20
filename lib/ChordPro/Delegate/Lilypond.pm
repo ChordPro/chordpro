@@ -102,7 +102,7 @@ sub ly2svg( $self, %args ) {
     }
 
     my $program = $config->{delegates}->{ly}->{program} || "lilypond";
-    state $lilypond = findexe( $program, "silent" );
+    state $lilypond = CP->findexe( $program, silent => 1 );
     unless ( $lilypond ) {
 	warn("Error in Lilypond embedding: missing 'lilypond' tool.\n");
 	return;

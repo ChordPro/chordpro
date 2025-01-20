@@ -25,8 +25,6 @@ push( @EXPORT, qw( is_msw is_macos is_wx ) );
 
 ################ Filenames ################
 
-use ChordPro::Files;
-
 use File::Glob ( ":bsd_glob" );
 use File::Spec;
 
@@ -70,36 +68,6 @@ sub expand_tilde ( $dir ) {
 }
 
 push( @EXPORT, 'expand_tilde' );
-
-sub findexe ( $prog, $silent = 0 ) {
-    my @path;
-    if ( MSWIN ) {
-	$prog .= ".exe" unless $prog =~ /\.\w+$/;
-	@path = split( ';', $ENV{PATH} );
-	unshift( @path, '.' );
-    }
-    else {
-	@path = split( ':', $ENV{PATH} );
-    }
-
-    if ( File::Spec->file_name_is_absolute($prog)
-	 && ChordPro::Files::fs_test( fx => $prog ) ) {
-	return $prog;
-    }
-
-    foreach ( @path ) {
-	my $try = "$_/$prog";
-	if ( ChordPro::Files::fs_test( fx => $try ) ) {
-	    #warn("Found $prog in $_\n");
-	    return $try;
-	}
-    }
-    warn("Could not find $prog in ",
-	 join(" ", map { qq{"$_"} } @path), "\n") unless $silent;
-    return;
-}
-
-push( @EXPORT, 'findexe' );
 
 sub sys ( @cmd ) {
     warn("+ @cmd\n") if $::options->{trace};
