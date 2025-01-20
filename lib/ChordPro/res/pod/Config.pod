@@ -356,6 +356,7 @@
         type     : image
         module   : Lilypond
         handler  : ly2svg
+        program  : ""
         config   : default
     
         // The preamble is a list of lines inserted before the lilipond data,

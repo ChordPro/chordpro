@@ -1,8 +1,14 @@
 0.000
 
+    !Other improvements
+
+    - Lilypond delegate supports a property "program" to explicitly
+      designate the Lilypond program.
+
     !Bug Fixes
 
     - Some issues with Unicode filenames on Windows.
+    - Fix image alignment with indent.
 
 6.070 2024-12-25
 

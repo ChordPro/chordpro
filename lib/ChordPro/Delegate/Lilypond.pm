@@ -101,7 +101,8 @@ sub ly2svg( $self, %args ) {
 	$pw = $kv->{width};
     }
 
-    state $lilypond = findexe( "lilypond", "silent" );
+    my $program = $config->{delegates}->{ly}->{program} || "lilypond";
+    state $lilypond = findexe( $program, "silent" );
     unless ( $lilypond ) {
 	warn("Error in Lilypond embedding: missing 'lilypond' tool.\n");
 	return;

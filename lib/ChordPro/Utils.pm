@@ -25,6 +25,8 @@ push( @EXPORT, qw( is_msw is_macos is_wx ) );
 
 ################ Filenames ################
 
+use ChordPro::Files;
+
 use File::Glob ( ":bsd_glob" );
 use File::Spec;
 
@@ -79,9 +81,15 @@ sub findexe ( $prog, $silent = 0 ) {
     else {
 	@path = split( ':', $ENV{PATH} );
     }
+
+    if ( File::Spec->file_name_is_absolute($prog)
+	 && ChordPro::Files::fs_test( fx => $prog ) ) {
+	return $prog;
+    }
+
     foreach ( @path ) {
 	my $try = "$_/$prog";
-	if ( fs_test( fx => $try ) ) {
+	if ( ChordPro::Files::fs_test( fx => $try ) ) {
 	    #warn("Found $prog in $_\n");
 	    return $try;
 	}
