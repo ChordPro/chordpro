@@ -1080,6 +1080,7 @@
       layout      : 0
       meta        : 0
       mma         : 0
+      pages       : 0
       paths       : 0
       pp          : 0
       spacing     : 0
