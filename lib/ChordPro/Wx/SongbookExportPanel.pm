@@ -12,7 +12,6 @@ class ChordPro::Wx::SongbookExportPanel
 use Wx qw[:everything];
 use Wx::Locale gettext => "_T";
 
-use ChordPro::Utils qw(is_macos);
 use ChordPro::Files;
 use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;

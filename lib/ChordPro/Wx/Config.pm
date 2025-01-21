@@ -9,7 +9,6 @@ class ChordPro::Wx::Config;
 our %state;
 our %preferences;
 
-use ChordPro::Utils qw( is_macos );
 use Ref::Util qw( is_hashref is_arrayref );
 
 use Exporter 'import';

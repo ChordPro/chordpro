@@ -5,7 +5,6 @@ use warnings;
 use utf8;
 
 use Test::More;
-use ChordPro::Utils qw( is_msw );
 use ChordPro::Files;
 use Encode qw( encode_utf8 decode_utf8 );
 

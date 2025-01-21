@@ -14,7 +14,6 @@ our @EXPORT;
 use Wx ':everything';
 use Wx::Locale gettext => '_T';
 use ChordPro::Files;
-use ChordPro::Utils qw( is_msw is_macos );
 
 ################ Constants ################
 

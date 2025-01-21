@@ -20,9 +20,6 @@ package ChordPro::Files;
 # 4. From filelists. We expect these lists to have UTF8 filenames that
 #    get decoded when the list is read.
 
-# Utils uses Files...
-#use ChordPro::Utils qw( is_msw );
-
 use Encode qw( decode_utf8 encode_utf8 );
 use Ref::Util qw(is_ref);
 
@@ -30,9 +27,21 @@ use Exporter 'import';
 our @EXPORT;
 our @EXPORT_OK;
 
+################ Platforms ################
+
+use constant MSWIN => $^O =~ /MSWin|Windows_NT/i ? 1 : 0;
+
+sub is_msw ()   { MSWIN }
+sub is_macos () { $^O =~ /darwin/ }
+sub is_wx ()    { main->can("OnInit") }
+
+push( @EXPORT, qw( is_msw is_macos is_wx ) );
+
 if ( is_msw ) {
     require Win32::LongPath;
 }
+
+################ ################
 
 # General pattern:
 # If Windows, call Windows specific function.

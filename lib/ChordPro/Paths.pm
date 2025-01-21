@@ -41,7 +41,7 @@ BUILD {
     my $app = "ChordPro";
     my $app_lc = lc($app);
 
-    $pathsep = $self->is_msw ? ';' : ':';
+    $pathsep = is_msw ? ';' : ':';
 
     $home     = realpath( $ENV{HOME} = File::HomeDir->my_home );
 
@@ -162,10 +162,6 @@ method debug {
     $ENV{CHORDPRO_DEBUG_PATHS} || $::config->{debug}->{paths} || 0;
 }
 
-method is_msw {
-    $^O =~ /mswin/i;
-}
-
 # Is absolute.
 
 method is_absolute ( $p ) {
@@ -202,7 +198,7 @@ method path ( $p = undef ) {
 	local $ENV{PATH} = $p;
 	my @p = File::Spec->path();
 	# On MSWindows, '.' is always prepended.
-	shift(@p) if $self->is_msw;
+	shift(@p) if is_msw;
 	return @p;
     }
     return File::Spec->path();
@@ -223,7 +219,7 @@ method pathcombine( @d ) {
 method findexe ( $p, %opts ) {
     my $try = $p;
     my $found;
-    if ( $self->is_msw ) {
+    if ( is_msw ) {
 	$try .= ".exe";
     }
 

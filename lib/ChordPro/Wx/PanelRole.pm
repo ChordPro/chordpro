@@ -9,10 +9,11 @@ role ChordPro::Wx::PanelRole;
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
 
+use ChordPro::Files;
+use ChordPro::Paths;
+use ChordPro::Utils qw( demarkup plural );
 use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
-use ChordPro::Utils qw( demarkup is_macos is_msw plural );
-use ChordPro::Paths;
 
 use File::Basename;
 

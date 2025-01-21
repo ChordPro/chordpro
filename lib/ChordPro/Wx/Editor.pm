@@ -244,9 +244,9 @@ package ChordPro::Wx::TextEditor;
 use parent qw( -norequire Wx::TextCtrl );
 
 use Wx ':everything';
+use ChordPro::Files;
 use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
-use ChordPro::Utils qw( is_macos );
 
 sub new( $class, $parent, $id=undef ) {
 

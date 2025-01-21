@@ -12,11 +12,10 @@ class ChordPro::Wx::EditorPanel
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
 
-use ChordPro::Utils qw( is_macos );
 use ChordPro::Files;
 use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
-use ChordPro::Utils qw( max demarkup is_macos is_msw plural );
+use ChordPro::Utils qw( max demarkup plural );
 use ChordPro::Paths;
 
 use File::Basename;

@@ -13,15 +13,7 @@ use Exporter 'import';
 our @EXPORT;
 our @EXPORT_OK;
 
-################ Platforms ################
-
-use constant MSWIN => $^O =~ /MSWin|Windows_NT/i ? 1 : 0;
-
-sub is_msw ()   { MSWIN }
-sub is_macos () { $^O =~ /darwin/ }
-sub is_wx ()    { main->can("OnInit") }
-
-push( @EXPORT, qw( is_msw is_macos is_wx ) );
+use ChordPro::Files qw( is_msw is_macos );
 
 ################ Filenames ################
 
@@ -35,7 +27,7 @@ use constant BSD_GLOB_FLAGS => GLOB_NOCHECK | GLOB_QUOTE | GLOB_TILDE | GLOB_ERR
   | ($^O =~ m/\A(?:MSWin32|VMS|os2|dos|riscos)\z/ ? GLOB_NOCASE : 0);
 
 # File::Glob did not try %USERPROFILE% (set in Windows NT derivatives) for ~ before 5.16
-use constant WINDOWS_USERPROFILE => MSWIN && $] < 5.016;
+use constant WINDOWS_USERPROFILE => is_msw && $] < 5.016;
 
 sub expand_tilde ( $dir ) {
 

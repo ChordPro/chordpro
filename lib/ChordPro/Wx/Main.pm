@@ -79,7 +79,7 @@ use ChordPro;	our $VERSION = $ChordPro::VERSION;
 use ChordPro::Files;
 use ChordPro::Paths;
 use ChordPro::Output::Common;
-use ChordPro::Utils qw( is_msw is_macos demarkup );
+use ChordPro::Utils qw( demarkup );
 
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
