@@ -44,8 +44,8 @@ this option is used the input is converted from **crd** (chords on top
 of lyrics) to **cho** (chords between lyrics) and the result written to
 the output. No further processing takes place.
 
-See also [Legacy ASCII input format]({{< relref
-"chordpro-getting-started#legacy-ascii-input-format" >}}).
+See also [Chords over Lyrics]({{< relref
+"Chords-over-Lyrics" >}}).
 
 Note that `--a2crd` is slightly different from `--generate=ChordPro`. In the latter case the input data *is* processed
 and then written out as a ChordPro file.
