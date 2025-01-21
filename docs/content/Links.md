@@ -10,6 +10,8 @@ description: "ChordPro related links"
 
 * [Screenshots]({{< relref "appdata" >}})
 
+* [ChordPro development on GitHub](https://github.com/chordpro/chordpro).
+
 * [Chordie.com](https://www.chordie.com)  
   Searchable web site with a vast collection of ChordPro notated
   songs.
