@@ -8,8 +8,8 @@ use warnings;
 # Author          : Johan Vromans
 # Created On      : Mon Mar  4 11:51:54 2002
 # Last Modified By: 
-# Last Modified On: Fri Jan 17 22:55:27 2025
-# Update Count    : 558
+# Last Modified On: Wed Jan 22 14:14:14 2025
+# Update Count    : 559
 # Status          : Unknown, Use with caution!
 
 =head1 NAME
@@ -91,7 +91,7 @@ lightweight so shell scripts can use it to query properties.
 our $VERSION = "2.001";
 
 use Text::ParseWords qw(parse_line);
-use File::LoadLines;
+use ChordPro::Files;
 use String::Interpolate::Named;
 use Carp;
 
