@@ -321,8 +321,12 @@ method save_file( $file = undef ) {
 
 	# On macOS Catalina DMG STC seems to have problems saving.
 	my $fd = fs_open( $file, '>:utf8' );
+	$self->{t_editor}->ConvertEOLs(wxSTC_EOL_LF);
+	my $t = $self->{t_editor}->GetText;
+	$self->log( 'I', ChordPro::Utils::as($t));
+	$t .= "\n" unless $t =~ /\n$/;
 	if ( $fd
-	     and print $fd $self->{t_editor}->GetText
+	     and print $fd $t
 	     and $fd->close ) {
 	    $self->{t_editor}->SetModified(0);
 	    $state{currentfile} = $file;
