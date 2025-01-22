@@ -269,7 +269,7 @@ sub get_config ( $file ) {
 
     if ( $file =~ /\.json$/i ) {
         if ( my $lines = fs_load( $file, { split => 1, fail => "soft" } ) ) {
-            my $new = json_load( join( "\n", @$lines ), $file );
+            my $new = json_load( join( "\n", @$lines, '' ), $file );
             precheck( $new, $file );
             return __PACKAGE__->new($new);
         }

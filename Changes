@@ -8,6 +8,7 @@
     !Bug Fixes
 
     - Some issues with Unicode filenames on Windows.
+    - Some issues with line endings on Windows.
     - Fix image alignment with indent.
 
 6.070 2024-12-25
