@@ -65,6 +65,7 @@ lib/ChordPro/lib/JSON/Relaxed/Parser.pm
 lib/ChordPro/lib/SVGPDF.pm
 lib/ChordPro/lib/SVGPDF/CSS.pm
 lib/ChordPro/lib/SVGPDF/Circle.pm
+lib/ChordPro/lib/SVGPDF/Colour.pm
 lib/ChordPro/lib/SVGPDF/Contrib/Bogen.pm
 lib/ChordPro/lib/SVGPDF/Contrib/PathExtract.pm
 lib/ChordPro/lib/SVGPDF/Defs.pm
