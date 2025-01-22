@@ -1,4 +1,5 @@
 .??*
+:*
 !.github/
 *~
 \#.*#
@@ -33,3 +34,13 @@ xtest*
 *.out
 MYMETA.*
 MANIFEST.SKIP
+ABC/
+Cases/
+Design/
+aux/
+cava/
+ghstats/
+orig/
+testing/
+tools/
+wiki/
