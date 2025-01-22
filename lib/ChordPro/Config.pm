@@ -268,8 +268,8 @@ sub get_config ( $file ) {
     $file = expand_tilde($file);
 
     if ( $file =~ /\.json$/i ) {
-        if ( my $lines = fs_load( $file, { split => 0, fail => "soft" } ) ) {
-            my $new = json_load( $lines, $file );
+        if ( my $lines = fs_load( $file, { split => 1, fail => "soft" } ) ) {
+            my $new = json_load( join( "\n", @$lines ), $file );
             precheck( $new, $file );
             return __PACKAGE__->new($new);
         }
@@ -537,15 +537,16 @@ sub convert_config ( $from, $to ) {
     # First find and process the schema.
     my $schema = CP->findres( "config.schema", class => "config" );
     my $o = { split => 0, fail => 'soft' };
-    my $data = loadlines( $schema, $o );
+    my $data = fs_load( $schema, $o );
     die("$schema: ", $o->{error}, "\n") if $o->{error};
     $schema = $parser->decode($data);
 
     # Then load the config to be converted.
     my $new;
-    $o = { split => 0, fail => 'soft' };
-    $data = loadlines( $from, $o );
+    $o = { split => 1, fail => 'soft' };
+    $data = fs_load( $from, $o );
     die("Cannot open config $from [", $o->{error}, "]\n") if $o->{error};
+    $data = join( "\n", @$data );
 
     if ( $data =~ /^\s*#/m ) {	# #-comments -> prp
 	require ChordPro::Config::Properties;
@@ -560,7 +561,7 @@ sub convert_config ( $from, $to ) {
     # And re-encode it using the schema.
     my $res = $parser->encode( data => $new, pretty => 1,
 			       nounicodeescapes => 1, schema => $schema );
-
+use DDP; p $res;
     # Add trailer.
     $res .= "\n// End of Config.\n";
 
