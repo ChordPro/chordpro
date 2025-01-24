@@ -1,37 +1,37 @@
-name: CI for MacOS
+name: Build on MacOS
 
-on:
-  push:
-    branches:
-      - '*'
-    tags-ignore:
-      - '*'
-  pull_request:
+on: push
 
 jobs:
-  perl:
-
+  macOS:
     runs-on: macOS-latest
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Perl
-        run: brew install perl
+      - name: Check out repository code
+        uses: actions/checkout@v4
       - name: perl -V
         run: perl -V
       - name: Install cpanm
-        run: |
-            curl -L https://cpanmin.us -o cpanm
-            chmod +x cpanm
+        run: brew install cpanm
       - name: Install H::B
         continue-on-error: true
-        run: ./cpanm HarfBuzz::Shaper
+        run: cpanm HarfBuzz::Shaper
       - name: Oops
         continue-on-error: true
         run: cat /Users/runner/.cpanm/build.log
       - name: Install Dependencies
         run: |
           perl -ni~ -e 'print unless /HarfBuzz/' Makefile.PL
-            ./cpanm --installdeps --notest .
+          cpanm --installdeps --notest .
       - name: Run Tests
         run: prove -l t
+      - name: Set up wxWidgets
+        run: brew install wxwidgets@3.2
+      - name: Install Dependencies
+        run: |
+          cpanm Net::SSLeay --notest
+          cpanm https://github.com/sciurius/perl-Alien-wxWidgets/releases/download/R0.71/Alien-wxWidgets-0.71.tar.gz
+          perl -MAlien::wxWidgets -e 'Alien::wxWidgets->libraries(qw(stc media webview propgrid ribbon aui xrc qa html))'
+          cpan https://github.com/sciurius/wxPerl/releases/download/R3.005/Wx-3.005.tar.gz
+      - name: Build DMG
+        run: make -C pp/macos
