@@ -32,6 +32,6 @@ jobs:
           cpanm Net::SSLeay --notest
           cpanm https://github.com/sciurius/perl-Alien-wxWidgets/releases/download/R0.71/Alien-wxWidgets-0.71.tar.gz
           perl -MAlien::wxWidgets -e 'Alien::wxWidgets->libraries(qw(stc media webview propgrid ribbon aui xrc qa html))'
-          cpan https://github.com/sciurius/wxPerl/releases/download/R3.005/Wx-3.005.tar.gz
+          cpanm https://github.com/sciurius/wxPerl/releases/download/R3.005/Wx-3.005.tar.gz
       - name: Build DMG
         run: make -C pp/macos
