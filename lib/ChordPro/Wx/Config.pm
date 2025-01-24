@@ -2,7 +2,6 @@
 
 use v5.26;
 use Object::Pad;
-use open ':std', IO => ':encoding(UTF-8)';
 
 class ChordPro::Wx::Config;
 
