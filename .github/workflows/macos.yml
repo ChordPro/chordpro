@@ -25,21 +25,3 @@ jobs:
           cpanm --installdeps --notest .
       - name: Run Tests
         run: prove -l t
-      - name: Set up wxWidgets
-        run: brew install wxwidgets@3.2
-      - name: Install Dependencies
-        run: |
-          cpanm Net::SSLeay --notest
-      - name: Install Alien;;wxWidgets
-        run: |
-          cpanm https://github.com/sciurius/perl-Alien-wxWidgets/releases/download/R0.71/Alien-wxWidgets-0.71.tar.gz
-          perl -MAlien::wxWidgets -e 'Alien::wxWidgets->libraries(qw(stc media webview propgrid ribbon aui xrc qa html))'
-      - name: Install wxPerl
-        continue-on-error: true
-        run: |
-          cpanm https://github.com/sciurius/wxPerl/releases/download/R3.005/Wx-3.005.tar.gz --notest
-      - name: Oops2
-        continue-on-error: true
-        run: cat /Users/runner/.cpanm/build.log
-      - name: Build DMG
-        run: make -C pp/macos
