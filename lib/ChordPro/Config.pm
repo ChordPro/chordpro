@@ -888,6 +888,7 @@ sub hmerge( $left, $right, $path = "" ) {
             || $path eq "pdf.fontconfig."
             || $path =~ /^pdf\.(?:info|fonts)\./
             || $path =~ /^pdf\.formats\.\w+-even\./
+            || ( $path =~ /^pdf\.formats\./ && $key =~ /\w+-even$/ )
             || $path =~ /^meta\./
             || $path =~ /^delegates\./
             || $path =~ /^parser\.preprocess\./

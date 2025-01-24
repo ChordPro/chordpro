@@ -13,6 +13,7 @@
     - Some issues with Unicode filenames on Windows.
     - Some issues with line endings on Windows.
     - Fix image alignment with indent.
+    - Fix title swap even when using title-even format.
 
 6.070 2024-12-25
 

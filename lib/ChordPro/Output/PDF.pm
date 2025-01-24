@@ -2857,7 +2857,7 @@ sub get_format {
 	$fmt = [ $fmt ] if @$fmt == 3 && !is_arrayref($fmt->[0]);
 
 	# Swap left/right for even pages.
-	if ( !$rightpage ) {
+	if ( !$rightpage && !$noswap ) {
 	    $_ = [ reverse @$_ ] for @$fmt;
 	}
 
