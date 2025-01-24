@@ -2,6 +2,9 @@
 
     !Other improvements
 
+    - (Experimental) "allpages" anchor for images. Similar to the
+      "page" anchor, but the image is repeated on *every* page of the song.
+
     - Lilypond delegate supports a property "program" to explicitly
       designate the Lilypond program.
 

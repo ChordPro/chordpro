@@ -151,6 +151,10 @@ the page:
 
     anchor="page" x="100%" y="100%"
 
+`allpages`
+: (Experimental). Like `page`, but the image is repeated on *every*
+page of the song.
+
 `column`
 : Same as page boundaries, but taking column layout into account.
 

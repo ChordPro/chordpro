@@ -533,6 +533,8 @@ sub assets {
     my ( $id ) = @_;
     $assets->{$id};
 }
+# Images that go on all pages.
+my @allpages;
 
 use constant SIZE_ITEMS => [ qw( chord text chorus tab grid diagram
 				 toc title footer label ) ];
@@ -583,6 +585,7 @@ sub generate_song {
 
     $structured = ( $options->{'backend-option'}->{structure} // '' ) eq 'structured';
     $s->structurize if $structured;
+    @allpages = ();
 
     # Diagrams drawer.
     my $dd;
@@ -848,6 +851,15 @@ sub generate_song {
 	$col = 0;
 	$vsp_ignorefirst = 1;
 	$col_adjust->();
+
+	# Render the 'allpages' images.
+	for ( @allpages ) {
+	    my %imageinfo = %$_;
+	    my $img = delete $imageinfo{img};
+	    my $x   = delete $imageinfo{x};
+	    my $y   = delete $imageinfo{y};
+	    $pr->add_object( $img, $x, $y, %imageinfo );
+	}
     };
 
     my $checkspace = sub {
@@ -2060,6 +2072,11 @@ sub imageline {
     my $img = $asset->{data};
     my $label = $opts->{label};
     my $anchor = $opts->{anchor} //= "float";
+    my $allpages = 0;
+    if ( $anchor eq "allpages" ) {
+	$anchor = "page";
+	$allpages = 1;
+    }
     my $width = $opts->{width};
     my $height = $opts->{height};
     my $avwidth  = $asset->{vwidth};
@@ -2271,6 +2288,20 @@ sub imageline {
 		     align  => $align,
 		     maybe href => $opts->{href},
 		   );
+
+    # For 'allpages' images, remember the calculated results.
+    if ( $allpages ) {
+	push( @allpages,
+	      { img => $img,
+		x => $x, y => $y,
+		xscale => $w/$img->width * $xtrascale,
+		yscale => $h/$img->height * $xtrascale,
+		border => $opts->{border} || 0,
+		valign => $opts->{valign} // "top",
+		align  => $align,
+		maybe href => $opts->{href},
+	      } );
+    }
 
     if ( $anchor eq "float" ) {
 	return ($h + ($oy//0)) * $xtrascale;

@@ -1694,7 +1694,7 @@ sub dir_image {
 	    $opts{lc($k)} = $v;
 	}
 	elsif ( $k =~ /^(anchor)$/i
-		&& $v =~ /^(paper|page|column|float|line)$/ ) {
+		&& $v =~ /^(paper|page|allpages|column|float|line)$/ ) {
 	    $opts{lc($k)} = lc($v);
 	}
 	elsif ( $k =~ /^(align)$/i
