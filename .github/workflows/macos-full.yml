@@ -38,4 +38,6 @@ jobs:
         run: |
           cpanm https://github.com/sciurius/wxPerl/releases/download/R3.005/Wx-3.005.tar.gz --notest
       - name: Build DMG
-        run: make -C pp/macos
+        run: |
+          find / -type f \( -name libpng\*.dylib \) -o \( -name libjpeg\*.dylib \) -o \( -name libtiff\*.dylib \) -o \( -name libz\*.dylib \) -o \( -name liblzma\*.dylib \) -o \( -name libzstd\*.dylib \) -o \( -name libpcre2\*.dylib \) -print
+          make -C pp/macos
