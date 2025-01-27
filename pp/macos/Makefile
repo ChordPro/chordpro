@@ -11,7 +11,7 @@ SCRIPT := ${ROOT}/script
 DEST   := build
 VERSION := $(shell perl ../../lib/ChordPro/Version.pm)
 TARGET := wxchordpro
-PP := pp
+PP     := perl ./pp.pl
 # Check if we build on Intel or ARM
 ARCH   := $(shell uname -m)
 
