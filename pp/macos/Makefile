@@ -96,13 +96,7 @@ app1 :
 	cd "${APPDIR}"; rm -f MANIFEST META.yml
 ifeq (${TARGET},wxchordpro)
 	cd "${APPDIR}"; mv chordpro wxchordpro dndhandler Contents/MacOS
-	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libpng16.*.dylib
-	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libjpeg.*.dylib
-	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libtiff.*.dylib
-	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libz*.dylib
-	perl ./reloc.pl ${APPDIR}/Contents/MacOS/liblzma*.dylib
-	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libpcre2-32.*.dylib
-	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libwx*.dylib
+	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*.bundle
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*/*.bundle
 	cd "${APPDIR}"; ln -s ../../MacOS/chordpro Contents/Resources/cli/chordpro

@@ -4,28 +4,53 @@ use strict;
 use warnings;
 use Alien::wxWidgets;
 
+my $arch = `uname -m`;
 my $prefix = Alien::wxWidgets->prefix;
+my $wxversion = Alien::wxWidgets->version;
+$wxversion = sprintf("%d.%d", $wxversion =~ /^(\d+)\.(\d\d\d)/ );
 
 my $perltype = "Generic";
 $perltype = "Citrus Perl" if $^X =~ /citrusperl/;
 $perltype = "HomeBrew Perl" if $^X =~ /Cellar/;
+die("Perl must be brewed!\n") unless $perltype =~ /brew/i;
 
 print <<EOD;
 # Packager settings for WxChordPro.
 
-# $perltype + wxWidgets 3.2.
+# $perltype + wxWidgets $wxversion.
 
 @../common/wxchordpro.pp
 --gui
 
 # Explicit libraries.
---link=$prefix/lib/libpng16.16.dylib
---link=$prefix/lib/libjpeg.8.dylib
---link=$prefix/lib/libtiff.6.dylib
---link=$prefix/Cellar/zlib/1.3.1/lib/libz.1.3.1.dylib
---link=$prefix/Cellar/xz/5.4.4/lib/liblzma.5.dylib
---link=$prefix/opt/zstd/lib/libzstd.1.dylib
---link=$prefix/opt/pcre2/lib/libpcre2-32.0.dylib
+EOD
+
+# No idea who used liblzma.
+# libz seems to be standard.
+
+my $fail = 0;
+for my $lib ( qw( libpng16 libjpeg libtiff-4
+		  libzstd libpcre2-32 ) ) {
+    my $res = `pkg-config --silence-errors --libs $lib`;
+    if ( $res =~ /-l/ && $res =~ /-L(.+)\s+-l(.+)/ ) {
+	my $path = $1 . "/lib" . $2 . ".dylib";
+	if ( -s $path ) {
+	    print( "--link=$path\n");
+	}
+	else {
+	    print("# $path: NOT FOUND\n");
+	    $fail++;
+	}
+    }
+    else {
+	print( "# Library for $lib NOT FOUND\n");
+	$fail++;
+    }
+}
+
+exit($fail) if $fail;
+
+print <<EOD;
 
 # Explicitly link the wx libraries.
 EOD
