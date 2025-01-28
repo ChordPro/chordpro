@@ -1,4 +1,8 @@
-name: Full Build on MacOS
+name: Full Build on macOS
+
+# Open a new branch 'macosbuild' and push this workflow to it.
+# Maybe adjust the version as well.
+
 on:
   push:
     branches:
