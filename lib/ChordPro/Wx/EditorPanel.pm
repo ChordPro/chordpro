@@ -323,7 +323,7 @@ method save_file( $file = undef ) {
 	my $fd = fs_open( $file, '>:utf8' );
 	$self->{t_editor}->ConvertEOLs(wxSTC_EOL_LF);
 	my $t = $self->{t_editor}->GetText;
-	$self->log( 'I', ChordPro::Utils::as($t));
+	# $self->log( 'I', ChordPro::Utils::as($t));
 	$t .= "\n" unless $t =~ /\n$/;
 	if ( $fd
 	     and print $fd $t
