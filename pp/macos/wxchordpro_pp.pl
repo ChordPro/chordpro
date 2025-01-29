@@ -29,7 +29,7 @@ EOD
 # libz seems to be standard.
 
 my $fail = 0;
-for my $lib ( qw( libpng16 libjpeg libtiff-4
+for my $lib ( qw( libpng16 libjpeg libtiff-4 liblzma
 		  libzstd libpcre2-32 ) ) {
     my $res = `pkg-config --silence-errors --libs $lib`;
     if ( $res =~ /-l/ && $res =~ /-L(.+)\s+-l(.+)/ ) {
