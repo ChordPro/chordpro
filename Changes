@@ -14,6 +14,7 @@
     - Some issues with line endings on Windows.
     - Fix image alignment with indent.
     - Fix title swap even when using title-even format.
+    - Fix problems with save/restore settings on Windows.
 
 6.070 2024-12-25
 

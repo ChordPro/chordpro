@@ -23,7 +23,7 @@ use File::Basename qw(basename);
 
 use constant FONTSIZE => 12;
 
-use constant SETTINGS_VERSION => 2;
+use constant SETTINGS_VERSION => 3;
 
 # Legacy font numbers.
 my @fonts =
@@ -175,6 +175,13 @@ sub Setup( $class, $options ) {
     }
 }
 
+method Ok :common {
+    $preferences{settings_version} == SETTINGS_VERSION;
+}
+method SetOk :common {
+    $preferences{settings_version} = SETTINGS_VERSION;
+}
+
 # Load all data from the persistent data store into %state.
 # Adds information collected from the environment (e.g. config files).
 # Try to compensate for incompatibilities (legacy).
@@ -198,7 +205,7 @@ method Load :common {
     my %pp = $ggoon ? %prefs : ();
     while ( $ggoon ) {
 	my $cp = $cb->GetPath;
-	$cb->SetPath("/$group");
+	$cb->SetPath($group);
 
 	$state{$group} = [] if $group eq "recents";
 
@@ -276,7 +283,7 @@ method Load :common {
     if ( $preferences{settings_version}||1 < SETTINGS_VERSION ) {
 	for ( qw( windows sash ) ) {
 	    delete $state{$_};
-	    $cb->DeleteGroup("/$_");
+	    $cb->DeleteGroup($_);
 	}
 	if ( $preferences{pdfviewer} ) {
 	    $preferences{enable_pdfviewer} //= 1;
@@ -314,11 +321,12 @@ method Store :common {
 				     preferences | messages | recents |
 				     sash | songbookexport | windows
 				 )$ }x;
+	$cb->SetPath($cp);
 
 	# Re-write the recents. Array.
 	if ( $group eq "recents" && is_arrayref($v) ) {
-	    $cb->DeleteGroup("/$group");
-	    $cb->SetPath("/$group");
+	    $cb->DeleteGroup($group);
+	    $cb->SetPath($group);
 	    for ( my $i = 0; $i < @$v; $i++ ) {
 		last if $i >= MAXRECENTS;
 		$cb->Write( "$i", $v->[$i] );
@@ -329,7 +337,7 @@ method Store :common {
 	# Everything else are hash refs.
 	next unless is_hashref($v);
 
-	$cb->SetPath("/$group");
+	$cb->SetPath($group);
 	while ( my ( $k, $v ) = each %$v ) {
 	    if ( $group eq "preferences" ) {
 		if ( $k eq "editcolour" && is_hashref($v) ) {

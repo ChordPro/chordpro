@@ -332,6 +332,8 @@ method save_file( $file = undef ) {
 	    $state{currentfile} = $file;
 	    $state{windowtitle} = $file;
 	    $self->log( 'S',  "Saved: $file" );
+	    use List::Util qw(uniq);
+	    @{$state{recents}} = uniq( $file, @{$state{recents}} );
 	    return;
 	}
 
