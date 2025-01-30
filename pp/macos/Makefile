@@ -15,7 +15,10 @@ PP     := perl ./pp.pl
 # Check if we build on Intel or ARM
 ARCH   := $(shell uname -m)
 
-default : dmg
+default : checklibs dmg
+
+checklibs :
+	perl libtool.pl --checklibs
 
 # PAR Packer.
 
@@ -23,7 +26,7 @@ chordpro : chordpro.pp ${COMMON}/chordpro.pp
 	${PP} --output=chordpro @chordpro.pp ${SCRIPT}/chordpro.pl
 
 wxchordpro : chordpro.pp ${COMMON}/chordpro.pp ${COMMON}/wxchordpro.pp
-	perl wxchordpro_pp.pl > wxchordpro.pp
+	perl libtool.pl --pp=wxchordpro.pp
 	${PP} --output=wxchordpro @wxchordpro.pp ${SCRIPT}/wxchordpro.pl
 
 clean ::
