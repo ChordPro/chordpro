@@ -40,20 +40,6 @@ sub OnInit( $self ) {
     my $main = ChordPro::Wx::Main->new;
     return 0 unless $main->init($options);
 
-    unless ( ChordPro::Wx::Config->Ok ) {
-	my $md = Wx::MessageDialog->new
-	  ( undef,
-	    "Your Settings have been migrated.\n".
-	    "Some Settings may have been reset to default values.\n".
-	    "\n".
-	    "Sorry for the inconvenience.",
-	    "Check your Settings",
-	    Wx::wxOK|Wx::wxICON_WARNING );
-	$md->ShowModal;
-	$md->Destroy;
-    }
-    ChordPro::Wx::Config->SetOk;
-
     $self->SetTopWindow($main);
     $main->Show(1);
 
@@ -417,6 +403,19 @@ method OnExportFolder($event) {
 }
 
 method OnIdle($event) {
+    # Cannot check from init. Do it here.
+    unless ( ChordPro::Wx::Config->Ok ) {
+	ChordPro::Wx::Config->SetOk;
+	my $md = Wx::MessageDialog->new
+	  ( undef,
+	    "Your Settings have been migrated.\n".
+	    "Some Settings may have been reset to default values.\n".
+	    "\n".
+	    "Sorry for the inconvenience.",
+	    "Check your Settings",
+	    Wx::wxOK|Wx::wxICON_WARNING|Wx::wxDIALOG_NO_PARENT );
+	$md->ShowModal;
+    }
     return if $self->{p_initial}->IsShown;
     my $mod = $self->{p_editor}->{t_editor}->IsModified;
     my $f = basename($state{windowtitle} // "ChordPro");
