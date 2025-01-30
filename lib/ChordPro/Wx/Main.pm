@@ -447,7 +447,9 @@ method OnHelp_Config($event) {
 
 method OnHelp_Example($event) {
     $self->select_mode("editor");
-    $self->{p_editor}->openfile( CP->findres( "swinglow.cho",
+    $self->{p_editor}->openfile( CP->findres( $preferences{expert}
+					      ? "mollymalone.cho"
+					      : "swinglow.cho",
 					      class => "examples" ),
 				 1, " example.cho " );
 }
