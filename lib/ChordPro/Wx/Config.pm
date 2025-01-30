@@ -285,10 +285,8 @@ method Load :common {
 	    delete $state{$_};
 	    $cb->DeleteGroup($_);
 	}
-	if ( $preferences{pdfviewer} ) {
-	    $preferences{enable_pdfviewer} //= 1;
-	}
     }
+    $preferences{enable_pdfviewer} //= 0;
     $cb->Flush;
 
     # Collect from the environment.
