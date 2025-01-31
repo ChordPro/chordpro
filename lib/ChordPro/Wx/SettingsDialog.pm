@@ -133,6 +133,9 @@ method fetch_prefs() {
     $self->{fp_tmplfile}->SetPath($preferences{tmplfile})
       if $preferences{tmplfile};
 
+    # Preferred filename extension.
+    $self->{t_prefext}->SetValue( $preferences{chordproext} );
+
     # Editor.
     $self->{fp_editor}->SetSelectedFont( Wx::Font->new($preferences{editfont}) );
     $self->prefs2colours;
@@ -225,6 +228,9 @@ method store_prefs() {
     # New song template.
     $preferences{enable_tmplfile} = $self->{cb_tmplfile}->IsChecked;
     $preferences{tmplfile}        = $self->{fp_tmplfile}->GetPath;
+
+    # Preferred filename extension.
+    $preferences{chordproext} = $self->{t_prefext}->GetValue;
 
     # Editor.
     $preferences{editfont} = $self->{fp_editor}->GetSelectedFont->GetNativeFontInfoDesc;
@@ -457,6 +463,14 @@ method OnSkipStdCfg($event) {
 
 method OnPresets($event) {
     $self->{ch_presets}->Enable( $self->{cb_presets}->GetValue );
+    $event->Skip;
+}
+
+method OnPrefExtChanged($event) {
+    $preferences{chordproext} = $self->{t_prefext}->GetValue;
+    $preferences{chordproext} =~ s;^\.*(\w+)?$;sprintf(".%s",$1//substr($state{_prefs}{chordproext},1));e
+      && $self->{t_prefext}->ChangeValue($preferences{chordproext});
+    ChordPro::Wx::Config::setup_filters();
     $event->Skip;
 }
 

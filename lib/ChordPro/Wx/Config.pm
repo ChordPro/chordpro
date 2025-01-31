@@ -9,6 +9,7 @@ our %state;
 our %preferences;
 
 use Ref::Util qw( is_hashref is_arrayref );
+use List::Util qw(uniq);
 
 use Exporter 'import';
 our @EXPORT = qw( %state %preferences );
@@ -296,10 +297,7 @@ method Load :common {
     setup_tasks();
 
     # For convenience.
-    my @ext = qw( cho crd chopro chord chordpro pro );
-    my $lst = "*." . join(",*.",@ext);
-    $state{ffilters} = "ChordPro files ($lst)|" . $lst =~ s/,/;/gr .
-      (is_macos ? ";*.txt" : "|All files|*.*");
+    setup_filters();
 
     if ( $preferences{dumpstate} ) {
 	use DDP; p %state;
@@ -456,6 +454,15 @@ sub setup_tasks {
 	}
     }
     $state{tasks} = \@tasks;
+}
+
+sub setup_filters() {
+    my $lst = "*." .
+      join( ",*.",
+	    uniq( substr($preferences{chordproext},1),
+		  qw( cho crd chopro chord chordpro pro ) ) );
+    $state{ffilters} = "ChordPro files ($lst)|" . $lst =~ s/,/;/gr .
+      (is_macos ? ";*.txt" : "|All files|*.*");
 }
 
 1;

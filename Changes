@@ -8,6 +8,8 @@
     - Lilypond delegate supports a property "program" to explicitly
       designate the Lilypond program.
 
+    - Allow setting of preferred extension for ChordPro song file names.
+
     !Bug Fixes
 
     - Some issues with Unicode filenames on Windows.
