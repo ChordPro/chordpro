@@ -24,7 +24,7 @@ jobs:
         run: perl -V
       - name: Install Dependencies
         run: |
-            cpanm HafBuzz::Shaper || cat ${HOME}/.cpanm/build.log
+            cpanm HarfBuzz::Shaper || cat ${HOME}/.cpanm/build.log
             cpanm --installdeps --notest .
       - name: Make and run tests
         run: |
