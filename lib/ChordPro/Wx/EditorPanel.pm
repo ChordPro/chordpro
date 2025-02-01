@@ -477,6 +477,7 @@ method OnA2Crd($event) {
     my $ctrl = $self->{t_editor};
     my ( $from, $to ) = $ctrl->GetSelection;
     my $have_selection = $from != $to;
+    $ctrl->ConvertEOLs(wxSTC_EOL_LF);
     my $text = $have_selection ? $ctrl->GetSelectedText : $ctrl->GetText;
 
     require ChordPro::A2Crd;

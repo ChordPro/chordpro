@@ -21,6 +21,7 @@
     - Fix title swap even when using title-even format.
     - Fix problems with save/restore settings on Windows.
     - Fix reading from "-" (standard input).
+    - Fix problem with a2crd from wx on Windows.
 
 6.070 2024-12-25
 
