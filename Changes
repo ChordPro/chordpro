@@ -10,6 +10,9 @@
 
     - Allow setting of preferred extension for ChordPro song file names.
 
+    - Filenames in filelists may be quoted, even if no options
+      are involved.
+
     !Bug Fixes
 
     - Some issues with Unicode filenames on Windows.

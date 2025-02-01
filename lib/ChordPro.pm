@@ -202,29 +202,34 @@ sub chordpro {
     progress( phase => "Parsing", index => 0, total => 0+@ARGV )
       if @ARGV > 1;
     foreach my $file ( @ARGV ) {
-	my $opts;
-	if ( $file =~ /^--((?:sub)?title)\s*(.*)/ ) {
-	    $options->{$1} = $2;
-	    next;
+
+	my @w = ( $file );
+	if ( $file =~ /(^|\s)--\w+/ || $file =~ /^["']/ ) {
+	    @w = Text::ParseWords::shellwords($file);
 	}
-	if ( $file =~ /(^|\s)--(?:meta|config|define)\b/ ) {
-	    # Break into words.
-	    my @w = Text::ParseWords::shellwords($file);
-	    my %meta;
-	    my %defs;
-	    my @cfg;
-	    die("Error in filelist: $file\n")
-	      unless Getopt::Long::GetOptionsFromArray
-	      ( \@w, 'config=s@' => \@cfg, 'meta=s%' => \%meta,
-		'define=s%' => \%defs,
-	      )
-	      && @w == 1;
-	    $file = $w[0];
-	    $opts = { meta => { map { $_, [ $meta{$_} ] } keys %meta },
-		      defs => \%defs };
-	    if ( @cfg ) {
-		$opts->{meta}->{__config} = \@cfg;
-	    }
+	my %meta;
+	my %defs;
+	my @cfg;
+	my $title;
+	my $subtitle;
+	die("Error in filelist: $file\n")
+	  unless Getopt::Long::GetOptionsFromArray
+	  ( \@w, 'config=s@' => \@cfg, 'meta=s%' => \%meta,
+	    'define=s%' => \%defs,
+	    'title=s' => \$title, 'subtitle=s' => \$subtitle,
+	  )
+	  && (    ( @w == 1 && ! ( $title || $subtitle ) )
+	       || ( @w == 0 &&   ( $title || $subtitle ) ) );
+
+	$options->{title} = $title if defined $title;
+	$options->{subtitle} = $subtitle if defined $subtitle;
+	next unless @w;
+
+	$file = $w[0];
+	my $opts = { meta => { map { $_, [ $meta{$_} ] } keys %meta },
+		     defs => \%defs };
+	if ( @cfg ) {
+	    $opts->{meta}->{__config} = \@cfg;
 	}
 	$opts->{generate} = $options->{generate};
 	# Wx runs on temp files, so pass real filename in.

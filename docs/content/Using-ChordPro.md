@@ -167,8 +167,7 @@ MySong.cho  --meta voice=bass
 MySong.cho  --meta voice=alto --config=ukulele.json
 ````
 
-Important notice: Filelist lines that have `--meta` and/or `--config`
-**must** quote whitespace, e.g.
+Filenames lines that contain whitespace must be quoted to avoid ambiguities.
 
 ````
 "My New Song.cho" --meta voice=soprano
