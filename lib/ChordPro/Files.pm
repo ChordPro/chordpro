@@ -220,7 +220,7 @@ sub fs_load( $name, $opts = {} ) {
 	    $ret = loadlines( $name, $opts );
 	}
 	else {
-	    my $fd = fs_open($name);
+	    my $fd = $name eq '-' ? \*STDIN : fs_open($name);
 	    $ret = loadlines( $fd, $opts );
 	    $opts->{_filesource} = $name;
 	}
