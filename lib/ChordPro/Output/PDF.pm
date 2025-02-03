@@ -3042,6 +3042,8 @@ sub prepare_asset {
       - $ps->{_indent};
 
     for my $elt ( $s->{assets}->{$id} ) {
+	# Already prepared, e.g. multi-pass songbook.
+	next if UNIVERSAL::can($elt->{data}, "width");
 
 	$elt->{subtype} //= "image" if $elt->{uri};
 
