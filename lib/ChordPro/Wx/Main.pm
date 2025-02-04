@@ -199,21 +199,21 @@ method init( $options ) {
     $self->init_theme;
 
     if ( @ARGV ) {
-	use DDP;
+	# use DDP;
 	use charnames ':full';
 	require _charnames;
 	push( @{$state{msgs}},
 	      "ARGV: " . np(@ARGV,
 			      show_unicode => 1,
 			      escape_chars => 'nonascii',
-			      unicode_charnames => 1 ) );
+			      unicode_charnames => 1 ) ) if 0;
 	my $arg = shift(@ARGV);	# ignore rest
 	$arg = decode_utf8($arg);
 	push( @{$state{msgs}},
 	      'DECODED: ' . np($arg,
 			    show_unicode => 1,
 			    escape_chars => 'nonascii',
-			    unicode_charnames => 1 ) );
+			    unicode_charnames => 1 ) ) if 0;
 
 	if ( fs_test( 'd', $arg ) ) {
 	    return 1 if $self->select_mode("sbexport")->open_dir($arg);

@@ -4,6 +4,7 @@ use v5.26;
 
 package ChordPro;
 
+use ChordPro::Logger;
 use ChordPro::Files;
 use ChordPro::Utils;
 use ChordPro::Chords;

@@ -19,6 +19,7 @@ lib/ChordPro/Delegate/SVG.pm
 lib/ChordPro/Delegate/TextBlock.pm
 lib/ChordPro/Dumper.pm
 lib/ChordPro/Files.pm
+lib/ChordPro/Logger.pm
 lib/ChordPro/Output/ChordPro.pm
 lib/ChordPro/Output/Common.pm
 lib/ChordPro/Output/Debug.pm
