@@ -18,7 +18,6 @@ use List::Util qw(any);
 use Ref::Util qw(is_hashref is_arrayref is_coderef);
 use Carp;
 use feature 'state';
-use File::LoadLines qw(loadlines loadblob);
 use ChordPro::Output::Common
   qw( roman prep_outlines fmt_subst );
 use feature 'signatures';
@@ -206,8 +205,8 @@ sub generate_songbook {
 	my $fmsb;
 	if ( $tmplfile ) {
 	    # Songbook from template file.
-	    my $opts = {};
-	    my $lines = loadlines( $tmplfile, $opts );
+	    my $opts = { fail => 'hard' };
+	    my $lines = fs_load( $tmplfile, $opts );
 	    $fmsb = ChordPro::Songbook->new;
 	    $fmsb->parse_file( $lines, { %$opts,
 					 generate => 'PDF' } );
@@ -321,8 +320,8 @@ sub generate_songbook {
     }
     if ( $covertpl ) {
 	my $page = 1;
-	my $opts = {};
-	my $lines = loadlines( $covertpl, $opts );
+	my $opts = { fail => 'hard' };
+	my $lines = fs_load( $covertpl, $opts );
 	my $csb = ChordPro::Songbook->new;
 	$csb->parse_file( $lines, { %$opts,
 				    generate => 'PDF' } );
@@ -3059,7 +3058,7 @@ sub prepare_asset {
 	    my $hd = $pkg->can($elt->{handler}) //
 	      die("PDF: Missing delegate handler ${pkg}::$elt->{handler}\n");
 	    unless ( $elt->{data} ) {
-		$elt->{data} = [ loadlines($elt->{uri}) ];
+		$elt->{data} = [ fs_load( $elt->{uri}, { fail => 'hard' } ) ];
 	    }
 
 	    # Determine actual width.
@@ -3213,7 +3212,7 @@ sub prepare_asset {
 	    }
 	    else {
 		if ( $elt->{uri} && !$elt->{data} ) {
-		    $elt->{data} = loadblob($elt->{uri});
+		    $elt->{data} = fs_blob( $elt->{uri}, { fail => 'hard' } );
 		}
 		my $data = $elt->{data} ? IO::String->new($elt->{data}) : $elt->{uri};
 		my $img = $pr->{pdf}->image($data);

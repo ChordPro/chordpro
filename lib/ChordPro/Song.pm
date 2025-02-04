@@ -23,7 +23,6 @@ use ChordPro::Utils;
 
 use Carp;
 use List::Util qw(any);
-use File::LoadLines;
 use Storable qw(dclone);
 use feature 'state';
 use Text::ParseWords qw(quotewords);
@@ -511,7 +510,7 @@ sub parse_song {
 			}
 		    }
 		    if ( $uri ) {
-			unshift( @$lines, loadlines($uri), "##include: end=1" );
+			unshift( @$lines, fs_load($uri), "##include: end=1" );
 			push( @diag, { %$diag } );
 			$diag->{file} = $uri;
 			$diag->{line} = $$linecnt = 0;

@@ -249,7 +249,7 @@ push( @EXPORT, qw(fs_load fs_blob) );
 use File::Spec;
 require File::Spec::Unix;
 
-my @funcs1 =
+my @funcs =
   qw( canonpath
       catdir
       catfile
@@ -257,21 +257,17 @@ my @funcs1 =
       rootdir
       updir
       is_absolute
-      path
-   );
-push( @EXPORT, map { "fn_$_" } @funcs1 );
-
-my @funcs2 =
-  qw( devnull
-      tmpdir
       splitpath
-      splitdir
       catpath
+      path
+      devnull
+      tmpdir
+      splitdir
       abs2rel
       rel2abs
       case_tolerant
    );
-push( @EXPORT_OK, map { "fn_$_" } @funcs2 );
+push( @EXPORT, map { "fn_$_" } @funcs );
 
 my %udeps = ( canonpath	      => [],
 	      catdir	      => [ qw(canonpath) ],
@@ -283,7 +279,7 @@ my %udeps = ( canonpath	      => [],
 	      updir	      => [],
 );
 
-foreach my $meth ( @funcs1, @funcs2 ) {
+foreach my $meth ( @funcs ) {
     $meth = 'file_name_is_absolute' if $meth eq 'is_absolute';
     my $sub = File::Spec->can($meth);
     no strict 'refs';

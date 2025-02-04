@@ -306,7 +306,7 @@ sub prep_configs ( $cfg, $src ) {
             $c = CP->findcfg($c);
         }
         elsif ( $dir ne ""
-                && !fn_file_name_is_absolute($c) ) {
+                && !fn_is_absolute($c) ) {
             # Prepend dir of the caller, if needed.
             $c = fn_catpath( $vol, $dir, $c );
         }

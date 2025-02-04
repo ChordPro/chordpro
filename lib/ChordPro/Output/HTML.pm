@@ -9,6 +9,7 @@ package ChordPro::Output::HTML;
 
 use strict;
 use warnings;
+use ChordPro::Files;
 use ChordPro::Output::Common;
 use ChordPro::Utils qw();
 
@@ -155,7 +156,7 @@ sub generate_song {
 		}
 		if ( $e->{type} eq "svg" ) {
 		    push( @s, '<div class="' . $e->{type} . '">' );
-		    push( @s, File::LoadLines::loadlines( $e->{uri} ) );
+		    push( @s, fs_load( $e->{uri} ) );
 		    push( @s, "</div>" );
 		    push( @s, "" ) if $tidy;
 		    next;

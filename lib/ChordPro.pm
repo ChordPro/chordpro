@@ -236,7 +236,7 @@ sub chordpro {
 
 	$file = $w[0];
 	if ( defined($gopts{dir})
-	     && !fn_file_name_is_absolute($file) ) {
+	     && !fn_is_absolute($file) ) {
 	    $file = fn_catfile( $gopts{dir}, $file );
 	}
 	my $opts = { meta => { map { $_, [ $meta{$_} ] } keys %meta },
@@ -737,7 +737,6 @@ Provides more verbose information of what is going on.
 =cut
 
 use Getopt::Long 2.13 qw( :config no_ignorecase );
-use File::LoadLines;
 
 # Package name.
 my $my_package;

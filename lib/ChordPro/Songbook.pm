@@ -18,7 +18,6 @@ use ChordPro::Utils qw(progress);
 
 use Carp;
 use List::Util qw(any);
-use File::LoadLines;
 use Storable qw(dclone);
 use Ref::Util qw(is_arrayref is_plain_hashref);
 
@@ -38,7 +37,7 @@ sub parse_file {
 	return $self->embed_file( $filename, $meta, $defs );
     }
 
-    # Loadlines sets $opts->{_filesource}.
+    # fs_load sets $opts->{_filesource}.
     $opts->{fail} = "soft";
     my $lines = is_arrayref($filename) ? $filename
       : fs_load( $filename, $opts );
