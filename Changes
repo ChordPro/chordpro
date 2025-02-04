@@ -13,6 +13,8 @@
     - Filenames in filelists may be quoted, even if no options
       are involved.
 
+    - Filenames in filelists are considered relative to the filelist.
+
     !Bug Fixes
 
     - Some issues with Unicode filenames on Windows.

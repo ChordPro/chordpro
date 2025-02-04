@@ -64,6 +64,7 @@ use strict;
 use warnings;
 use Carp;
 use Text::ParseWords ();
+use File::Basename qw(dirname);
 
 ################ The Process ################
 
@@ -201,6 +202,8 @@ sub chordpro {
     # command line as well, but don't tell anybody.
     progress( phase => "Parsing", index => 0, total => 0+@ARGV )
       if @ARGV > 1;
+
+    my %gopts;
     foreach my $file ( @ARGV ) {
 
 	my @w = ( $file );
@@ -210,22 +213,32 @@ sub chordpro {
 	my %meta;
 	my %defs;
 	my @cfg;
-	my $title;
-	my $subtitle;
+	my %opts;
 	die("Error in filelist: $file\n")
 	  unless Getopt::Long::GetOptionsFromArray
-	  ( \@w, 'config=s@' => \@cfg, 'meta=s%' => \%meta,
+	  ( \@w, \%opts, 'config=s@' => \@cfg, 'meta=s%' => \%meta,
 	    'define=s%' => \%defs,
-	    'title=s' => \$title, 'subtitle=s' => \$subtitle,
+	    'title=s', 'subtitle=s', 'dir:s', 'filelist:s',
 	  )
-	  && (    ( @w == 1 && ! ( $title || $subtitle ) )
-	       || ( @w == 0 &&   ( $title || $subtitle ) ) );
+	  && (    ( @w == 1 && ! keys(%opts) ) # filename
+	       || ( @w == 0 &&   keys(%opts) ) # options
+	     );
 
-	$options->{title} = $title if defined $title;
-	$options->{subtitle} = $subtitle if defined $subtitle;
+	for ( qw( title subtitle ) ) {
+	    next unless defined $opts{$_};
+	    $options->{$_} = $opts{$_};
+	}
+	for ( qw( filelist dir ) ) {
+	    next unless defined $opts{$_};
+	    $gopts{$_} = $opts{$_} eq "" ? undef : $opts{$_};
+	}
 	next unless @w;
 
 	$file = $w[0];
+	if ( defined($gopts{dir})
+	     && !File::Spec->file_name_is_absolute($file) ) {
+	    $file = File::Spec->catfile( $gopts{dir}, $file );
+	}
 	my $opts = { meta => { map { $_, [ $meta{$_} ] } keys %meta },
 		     defs => \%defs };
 	if ( @cfg ) {
@@ -1028,13 +1041,17 @@ sub app_setup {
     if ( $clo->{filelist} ) {
 	my @files;
 	foreach ( @{ $clo->{filelist} } ) {
-	    my $list = loadlines( $_, $clo );
+	    push( @files, "--filelist=$_" );
+	    my $dir = dirname($_);
+	    my $list = fs_load( $_, $clo );
+	    push( @files, "--dir=$dir" );
 	    foreach ( @$list ) {
 		next unless /\S/;
 		next if /^#/;
 		s/[\r\n]+$//;
 		push( @files, $_ );
 	    }
+	    push( @files, "--filelist", "--dir" );
 	}
 	if ( @files ) {
 	    if ( $files[0] =~ /\.pdf$/i ) {

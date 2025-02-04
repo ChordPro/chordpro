@@ -140,6 +140,7 @@ particular order.
 
 Every line from the named file is taken to be a file name, with the
 exception of empty lines and lines that start with a `#` which are ignored.
+File names are considered relative to the filelist.
 
 This option may be specified multiple times.
 
