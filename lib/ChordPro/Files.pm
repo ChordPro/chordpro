@@ -229,7 +229,7 @@ sub fs_load( $name, $opts = {} ) {
 
     my $msg = $@;
     $msg = $1 if $msg =~ /^\Q$name\E: (.*)$/;
-    die( "$msg\n" ) unless $opts->{fail} ne "soft";
+    die( "$msg\n" ) unless $opts->{fail} eq "soft";
     $opts->{error} = $msg;
     return;
 }

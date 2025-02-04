@@ -24,6 +24,7 @@
     - Fix problem with a2crd from wx on Windows.
     - Fix issue #512.
     - (PDF) Fix progress count if multi-pass.
+    - Fix diagnostic in file load.
 
 6.070 2024-12-25
 
