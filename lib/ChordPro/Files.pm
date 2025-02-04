@@ -296,4 +296,23 @@ foreach my $meth ( @funcs ) {
     }
 }
 
+################ File::Basename functions ################
+
+# For now, use File:Basename functions.
+# Refine to File::Spec functions later.
+
+use File::Basename ();
+
+sub fn_basename( $fullname, @suffixlist ) {
+    File::Basename::basename( $fullname, @suffixlist );
+}
+
+push( @EXPORT, "fn_basename" );
+
+sub fn_dirname( $fullname ) {
+    File::Basename::dirname( $fullname );
+}
+
+push( @EXPORT, "fn_dirname" );
+
 1;

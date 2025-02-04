@@ -15,8 +15,6 @@ use ChordPro::Utils qw( demarkup plural );
 use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
 
-use File::Basename;
-
 # Either Wx::WebView or Wx::StaticText.
 field $wv			:accessor;
 
@@ -285,7 +283,7 @@ method OnMessagesSave($event) {
     my $fd = Wx::FileDialog->new
       ( $self,
 	_T("Choose file to save in"),
-	dirname($file), basename($file),
+	fn_dirname($file), fn_basename($file),
 	"*",
 	wxFD_SAVE|wxFD_OVERWRITE_PROMPT );
 

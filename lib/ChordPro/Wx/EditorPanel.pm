@@ -18,9 +18,6 @@ use ChordPro::Wx::Utils;
 use ChordPro::Utils qw( max demarkup plural );
 use ChordPro::Paths;
 
-use File::Basename;
-use File::LoadLines;
-
 # WhoamI
 field $panel :accessor = "editor";
 
@@ -167,7 +164,7 @@ method openfile( $file, $checked=0, $actual=undef ) {
     }
     else {
 	my $n = $self->{t_editor}->GetLineCount;
-	$self->{l_status}->SetLabel(basename($file));
+	$self->{l_status}->SetLabel(fn_basename($file));
 	$self->{l_status}->SetToolTip($file);
 	$self->log( 'S', "Loaded: $file (" . plural($n, " line") . ")");
     }
@@ -268,7 +265,7 @@ method check_source_saved() {
     if ( $state{currentfile} ) {
 	my $md = Wx::MessageDialog->new
 	  ( $self,
-	    "File " . basename($state{currentfile}) . " has been changed.\n".
+	    "File " . fn_basename($state{currentfile}) . " has been changed.\n".
 	    "Do you want to save your changes?",
 	    "File has changed",
 	    0 | wxCANCEL | wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION );
@@ -307,7 +304,7 @@ method save_file( $file = undef ) {
 	    my $cf = $state{currentfile} // "Untitled";
 	    my $fd = Wx::FileDialog->new
 	      ($self, _T("Choose output file"),
-	       dirname($cf), basename($cf),
+	       fn_dirname($cf), fn_basename($cf),
 	       "*".$preferences{chordproext},
 	       0|wxFD_SAVE|wxFD_OVERWRITE_PROMPT,
 	       wxDefaultPosition);

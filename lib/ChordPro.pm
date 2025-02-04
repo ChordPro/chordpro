@@ -65,7 +65,6 @@ use strict;
 use warnings;
 use Carp;
 use Text::ParseWords ();
-use File::Basename qw(dirname);
 
 ################ The Process ################
 
@@ -233,7 +232,10 @@ sub chordpro {
 	    next unless defined $opts{$_};
 	    $gopts{$_} = $opts{$_} eq "" ? undef : $opts{$_};
 	}
-	next unless @w;
+	unless ( @w ) {
+	    progress( msg => $file ) if @ARGV > 1;
+	    next;
+	}
 
 	$file = $w[0];
 	if ( defined($gopts{dir})
@@ -1041,7 +1043,7 @@ sub app_setup {
 	my @files;
 	foreach ( @{ $clo->{filelist} } ) {
 	    push( @files, "--filelist=$_" );
-	    my $dir = dirname($_);
+	    my $dir = fn_dirname($_);
 	    my $list = fs_load( $_, $clo );
 	    push( @files, "--dir=$dir" );
 	    foreach ( @$list ) {

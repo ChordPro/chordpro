@@ -62,7 +62,6 @@ sub OnInit( $self ) {
 
 use Wx qw[:everything];
 use ChordPro::Wx::Utils;
-use File::Basename;
 
 # Synchronous system call. Used in ChordPro::Utils module.
 sub ::sys { Wx::ExecuteArgs( \@_, wxEXEC_SYNC | wxEXEC_HIDE_CONSOLE ); }
@@ -88,7 +87,6 @@ use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
 
 use Encode qw(decode_utf8);
-use File::Basename;
 
 method log( $level, $msg ) {
     $msg =~ s/\n+$//;
@@ -255,7 +253,7 @@ method init_recents() {
 	for my $file ( @$r ) {
 	    next unless fs_test( s => $file );
 	    last unless defined $file;
-	    $ctl->Append( basename($file) );
+	    $ctl->Append( fn_basename($file) );
 	    $ctl->SetClientData( $i, $file );
 	    $i++;
 	}
@@ -418,7 +416,7 @@ method OnIdle($event) {
     }
     return if $self->{p_initial}->IsShown;
     my $mod = $self->{p_editor}->{t_editor}->IsModified;
-    my $f = basename($state{windowtitle} // "ChordPro");
+    my $f = fn_basename($state{windowtitle} // "ChordPro");
     if ( is_macos ) {
 	wxTheApp->GetTopWindow->OSXSetModified($mod);
     }
@@ -505,7 +503,7 @@ method OnOpen($event) {
     my $fd = Wx::FileDialog->new
       ( $self,
 	_T("Choose ChordPro file"),
-	dirname($state{recents}[0]//""),
+	fn_dirname($state{recents}[0]//""),
 	"",
 	$state{ffilters},
 	wxFD_OPEN|wxFD_FILE_MUST_EXIST );
