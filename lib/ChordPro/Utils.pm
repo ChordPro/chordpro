@@ -13,12 +13,11 @@ use Exporter 'import';
 our @EXPORT;
 our @EXPORT_OK;
 
-use ChordPro::Files qw( is_msw is_macos );
+use ChordPro::Files;
 
 ################ Filenames ################
 
 use File::Glob ( ":bsd_glob" );
-use File::Spec;
 
 # Derived from Path::ExpandTilde.
 
@@ -32,13 +31,13 @@ use constant WINDOWS_USERPROFILE => is_msw && $] < 5.016;
 sub expand_tilde ( $dir ) {
 
     return undef unless defined $dir;
-    return File::Spec->canonpath($dir) unless $dir =~ m/^~/;
+    return fn_canonpath($dir) unless $dir =~ m/^~/;
 
     # Parse path into segments.
-    my ( $volume, $directories, $file ) = File::Spec->splitpath( $dir, 1 );
-    my @parts = File::Spec->splitdir($directories);
+    my ( $volume, $directories, $file ) = fn_splitpath( $dir, 1 );
+    my @parts = fn_splitdir($directories);
     my $first = shift( @parts );
-    return File::Spec->canonpath($dir) unless defined $first;
+    return fn_canonpath($dir) unless defined $first;
 
     # Expand first segment.
     my $expanded;
@@ -50,13 +49,13 @@ sub expand_tilde ( $dir ) {
 	($expanded) = bsd_glob( $pattern, BSD_GLOB_FLAGS );
 	croak( "Failed to expand $first: $!") if GLOB_ERROR;
     }
-    return File::Spec->canonpath($dir)
+    return fn_canonpath($dir)
       if !defined $expanded or $expanded eq $first;
 
     # Replace first segment with new path.
-    ( $volume, $directories ) = File::Spec->splitpath( $expanded, 1 );
-    $directories = File::Spec->catdir( $directories, @parts );
-    return File::Spec->catpath($volume, $directories, $file);
+    ( $volume, $directories ) = fn_splitpath( $expanded, 1 );
+    $directories = fn_catdir( $directories, @parts );
+    return fn_catpath($volume, $directories, $file);
 }
 
 push( @EXPORT, 'expand_tilde' );

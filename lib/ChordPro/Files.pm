@@ -240,4 +240,64 @@ sub fs_blob( $name, $opts = {} ) {
 
 push( @EXPORT, qw(fs_load fs_blob) );
 
+################ File::Spec functions ################
+
+# Adapted from File::Spec::Functions 3.75.
+
+# Function fn_catfile = File::Spec->catfile, etc.
+
+use File::Spec;
+require File::Spec::Unix;
+
+my @funcs1 =
+  qw( canonpath
+      catdir
+      catfile
+      curdir
+      rootdir
+      updir
+      is_absolute
+      path
+   );
+push( @EXPORT, map { "fn_$_" } @funcs1 );
+
+my @funcs2 =
+  qw( devnull
+      tmpdir
+      splitpath
+      splitdir
+      catpath
+      abs2rel
+      rel2abs
+      case_tolerant
+   );
+push( @EXPORT_OK, map { "fn_$_" } @funcs2 );
+
+my %udeps = ( canonpath	      => [],
+	      catdir	      => [ qw(canonpath) ],
+	      catfile	      => [ qw(canonpath catdir) ],
+	      case_tolerant   => [],
+	      curdir	      => [],
+	      devnull	      => [],
+	      rootdir	      => [],
+	      updir	      => [],
+);
+
+foreach my $meth ( @funcs1, @funcs2 ) {
+    $meth = 'file_name_is_absolute' if $meth eq 'is_absolute';
+    my $sub = File::Spec->can($meth);
+    no strict 'refs';
+    if ( exists( $udeps{$meth} )
+	 && $sub == File::Spec::Unix->can($meth)
+	 && !( grep { File::Spec->can($_) != File::Spec::Unix->can($_) }
+	            @{$udeps{$meth} } )
+	 && defined( &{"File::Spec::Unix::_fn_$meth"} ) ) {
+        *{"fn_$meth"} = \&{"File::Spec::Unix::_fn_$meth"};
+    }
+    else {
+	$meth = 'is_absolute' if $meth eq 'file_name_is_absolute';
+        *{"fn_$meth"} = sub { &$sub( 'File::Spec', @_) };
+    }
+}
+
 1;

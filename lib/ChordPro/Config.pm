@@ -17,7 +17,6 @@ use ChordPro;
 use ChordPro::Files;
 use ChordPro::Paths;
 use ChordPro::Utils;
-use File::Spec;
 use Scalar::Util qw(reftype);
 use List::Util qw(any);
 use Storable 'dclone';
@@ -300,16 +299,16 @@ sub prep_configs ( $cfg, $src ) {
     my @res;
 
     # If there are includes, add them first.
-    my ( $vol, $dir, undef ) = File::Spec->splitpath($cfg->{_src});
+    my ( $vol, $dir, undef ) = fn_splitpath($cfg->{_src});
     foreach my $c ( @{ $cfg->{include} } ) {
         # Check for resource names.
         if ( $c !~ m;[/.]; ) {
             $c = CP->findcfg($c);
         }
         elsif ( $dir ne ""
-                && !File::Spec->file_name_is_absolute($c) ) {
+                && !fn_file_name_is_absolute($c) ) {
             # Prepend dir of the caller, if needed.
-            $c = File::Spec->catpath( $vol, $dir, $c );
+            $c = fn_catpath( $vol, $dir, $c );
         }
         my $cfg = get_config($c);
         # Recurse.

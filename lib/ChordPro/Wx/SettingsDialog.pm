@@ -15,7 +15,6 @@ use ChordPro::Paths;
 use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
 use File::Basename;
-use File::Spec;
 
 BUILD ( $parent, $id, $title ) {
     $self->refresh;
@@ -408,12 +407,12 @@ method _OnCreateConfig( $event, $fn = undef ) {
 	$fd->Destroy;
     }
     use File::Copy;
-    my $cfg = File::Spec->catfile( CP->findresdirs("config")->[-1],
-				   $state{expert}
-				   ? "chordpro.json"
-				   : "config.tmpl" );
+    my $cfg = fn_catfile( CP->findresdirs("config")->[-1],
+			  $state{expert}
+			  ? "chordpro.json"
+			  : "config.tmpl" );
     if ( fs_copy( $cfg, $fn ) ) {
-	$self->{fp_customconfig}->SetPath( File::Spec->rel2abs($fn) );
+	$self->{fp_customconfig}->SetPath( fn_rel2abs($fn) );
     }
     else {
 	my $md = Wx::MessageDialog->new

@@ -304,8 +304,8 @@ sub OnRearrangeDown {
 
 sub OnRearrangeDSelect {
     my ($self, $event) = @_;
-    my $file = join( "/", $state{sbe_folder},
-		     $state{sbe_files}->[$self->{w_rearrange}->GetSelection] );
+    my $file = fn_catfile( $state{sbe_folder},
+			   $state{sbe_files}->[$self->{w_rearrange}->GetSelection] );
     return unless $self->GetParent->{p_editor}->openfile($file);
     $self->prv and $self->prv->discard;
     $state{from_songbook} = 1 + $self->{w_rearrange}->GetSelection;

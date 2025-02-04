@@ -12,7 +12,6 @@ use warnings;
 use feature qw( signatures );
 no warnings "experimental::signatures";
 use utf8;
-use File::Spec;
 use File::Temp ();
 use File::LoadLines;
 use feature 'state';
@@ -31,8 +30,8 @@ sub ly2svg( $self, %args ) {
     state $td = File::Temp::tempdir( CLEANUP => !$config->{debug}->{ly} );
 
     $imgcnt++;
-    my $src  = File::Spec->catfile( $td, "tmp${imgcnt}.ly" );
-    my $svg  = File::Spec->catfile( $td, "tmp${imgcnt}.svg" );
+    my $src  = fn_catfile( $td, "tmp${imgcnt}.ly" );
+    my $svg  = fn_catfile( $td, "tmp${imgcnt}.svg" );
 
     my $fd;
     unless ( $fd = fs_open( $src, '>:utf8' ) ) {

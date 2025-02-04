@@ -236,8 +236,8 @@ sub chordpro {
 
 	$file = $w[0];
 	if ( defined($gopts{dir})
-	     && !File::Spec->file_name_is_absolute($file) ) {
-	    $file = File::Spec->catfile( $gopts{dir}, $file );
+	     && !fn_file_name_is_absolute($file) ) {
+	    $file = fn_catfile( $gopts{dir}, $file );
 	}
 	my $opts = { meta => { map { $_, [ $meta{$_} ] } keys %meta },
 		     defs => \%defs };
@@ -737,7 +737,6 @@ Provides more verbose information of what is going on.
 =cut
 
 use Getopt::Long 2.13 qw( :config no_ignorecase );
-use File::Spec;
 use File::LoadLines;
 
 # Package name.
@@ -1014,8 +1013,8 @@ sub app_setup {
 
     if ( $tmplcfg ) {
 	use File::Copy;
-	my $cfg = File::Spec->catfile( CP->findresdirs("config")->[-1],
-				       "config.tmpl" );
+	my $cfg = fn_catfile( CP->findresdirs("config")->[-1],
+			      "config.tmpl" );
 	binmode STDOUT => ':raw';
 	copy( $cfg, \*STDOUT );
 	exit 0;
@@ -1305,7 +1304,10 @@ sub runtime_info {
 	$vv->("HarfBuzz::Shaper");
 	$p[-1]->{library} = $dd->(HarfBuzz::Shaper::hb_version_string());
     };
-    $vv->("File::LoadLines");
+    eval {
+	require File::LoadLines;
+	$vv->("File::LoadLines");
+    };
     eval {
 	require PDF::Builder;
 	$vv->("PDF::Builder");

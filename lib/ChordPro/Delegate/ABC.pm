@@ -16,7 +16,6 @@ use feature qw( signatures );
 no warnings "experimental::signatures";
 use utf8;
 use Carp;
-use File::Spec;
 use File::Temp ();
 use File::LoadLines;
 use feature 'state';
@@ -83,10 +82,10 @@ sub abc2svg( $song, %args ) {
     # Prepare names for temporary files.
     state $imgcnt = 0;
     $imgcnt++;
-    my $src  = File::Spec->catfile( $td, "tmp${imgcnt}.abc" );
-    my $svg  = File::Spec->catfile( $td, "tmp${imgcnt}.svg" );
-    my $out  = File::Spec->catfile( $td, "tmp${imgcnt}.out" );
-    my $err  = File::Spec->catfile( $td, "tmp${imgcnt}.err" );
+    my $src  = fn_catfile( $td, "tmp${imgcnt}.abc" );
+    my $svg  = fn_catfile( $td, "tmp${imgcnt}.svg" );
+    my $out  = fn_catfile( $td, "tmp${imgcnt}.out" );
+    my $err  = fn_catfile( $td, "tmp${imgcnt}.err" );
 
     # Get rid of as much space as possible.
     # Jean-François Moine:

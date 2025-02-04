@@ -21,7 +21,6 @@ sub get( $class, $reset = 0 ) {
 }
 
 use Cwd qw(realpath);
-use File::Spec::Functions qw( catfile catdir splitpath catpath file_name_is_absolute );
 use File::HomeDir;
 use ChordPro::Files;
 
@@ -70,15 +69,15 @@ BUILD {
     if ( defined( $ENV{XDG_CONFIG_HOME} ) && $ENV{XDG_CONFIG_HOME} ne "" ) {
 	push( @try,
 	      # See https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
-	      # catdir( $ENV{XDG_CONFIG_HOME}, ".config", $app_lc ),
-	      # catdir( $ENV{XDG_CONFIG_HOME}, ".config" ),
-	      # catdir( $ENV{XDG_CONFIG_HOME}, ".$app_lc" ) );
-	      catdir( $ENV{XDG_CONFIG_HOME}, "$app_lc" ) );
+	      # fn_catdir( $ENV{XDG_CONFIG_HOME}, ".config", $app_lc ),
+	      # fn_catdir( $ENV{XDG_CONFIG_HOME}, ".config" ),
+	      # fn_catdir( $ENV{XDG_CONFIG_HOME}, ".$app_lc" ) );
+	      fn_catdir( $ENV{XDG_CONFIG_HOME}, "$app_lc" ) );
     }
     else {
 	push( @try,
-	      catdir( $home, ".config", $app_lc ),
-	      catdir( $home, ".$app_lc" ),
+	      fn_catdir( $home, ".config", $app_lc ),
+	      fn_catdir( $home, ".$app_lc" ),
 	      File::HomeDir->my_dist_config($app) );
     }
 
@@ -88,8 +87,8 @@ BUILD {
 	warn("Paths: configdir try $_ => $path\n") if $self->debug > 1;
 	next unless $path && fs_test( d => $path);
 	$configdir = $path;
-	for ( $self->normalize( catfile( $path, "$app_lc.prp" ) ),
-	      $self->normalize( catfile( $path, "$app_lc.json" ) ) ) {
+	for ( $self->normalize( fn_catfile( $path, "$app_lc.prp" ) ),
+	      $self->normalize( fn_catfile( $path, "$app_lc.json" ) ) ) {
 	    next unless $_ && fs_test( f => $_ );
 	    $configs->{userconfig} = $_;
 	    last;
@@ -165,13 +164,13 @@ method debug {
 # Is absolute.
 
 method is_absolute ( $p ) {
-    File::Spec->file_name_is_absolute( $p );
+    fn_is_absolute( $p );
 }
 
 # Is bare (no volume/dir).
 
 method is_here ( $p ) {
-    my ( $v, $d, $f ) = splitpath($p);
+    my ( $v, $d, $f ) = fn_splitpath($p);
     $v eq '' && $d eq '';
 }
 
@@ -223,7 +222,7 @@ method findexe ( $p, %opts ) {
 	$try .= ".exe";
     }
 
-    if ( File::Spec->file_name_is_absolute($p)
+    if ( fn_is_absolute($p)
 	 && ChordPro::Files::fs_test( fx => $p ) ) {
 	warn("Paths: findexe $p => ", $self->display($p), "\n")
 	  if $self->debug;
@@ -231,7 +230,7 @@ method findexe ( $p, %opts ) {
     }
 
     for ( $self->path ) {
-	my $e = catfile( $_, $try );
+	my $e = fn_catfile( $_, $try );
 	$found = realpath($e), last if fs_test( fx => $e );
     }
     if ( $self->debug ) {
@@ -260,7 +259,7 @@ method findcfg ( $p ) {
     unless ( $found ) {
 	for ( @$resdirs ) {
 	    for my $cfg ( @p ) {
-		my $f = catfile( $_, "config", $cfg );
+		my $f = fn_catfile( $_, "config", $cfg );
 		$found = realpath($f), last if fs_test( fs => $f );
 	    }
 	}
@@ -275,15 +274,15 @@ method findcfg ( $p ) {
 method findres ( $p, %opts ) {
     my $try = $p;
     my $found;
-    if ( file_name_is_absolute($p) ) {
+    if ( fn_is_absolute($p) ) {
 	$found = realpath($p);
     }
     else {
 	if ( defined $opts{class} ) {
-	    $try = catfile( $opts{class}, $try );
+	    $try = fn_catfile( $opts{class}, $try );
 	}
 	for ( @$resdirs ) {
-	    my $f = catfile( $_, $try );
+	    my $f = fn_catfile( $_, $try );
 	    $found = realpath($f), last if fs_test( fs => $f );
 	}
     }
@@ -299,10 +298,10 @@ method findresdirs ( $p, %opts ) {
     my $try = $p;
     my @found;
     if ( defined $opts{class} ) {
-	$p = catdir( $opts{class}, $p );
+	$p = fn_catdir( $opts{class}, $p );
     }
     for ( @$resdirs ) {
-	my $d = catdir( $_, $p );
+	my $d = fn_catdir( $_, $p );
 	push( @found, realpath($d) ) if fs_test( d => $d );
     }
     if ( $self->debug ) {
@@ -321,10 +320,10 @@ method findresdirs ( $p, %opts ) {
 
 method sibling ( $orig, %opts ) {
     # Split.
-    my ( $v, $d, $f ) = splitpath($orig);
+    my ( $v, $d, $f ) = fn_splitpath($orig);
     my $res;
     if ( $opts{name} ) {
-	$res = catpath( $v, $d, $opts{name} );
+	$res = fn_catpath( $v, $d, $opts{name} );
     }
     else {
 	# Get base and extension.
@@ -336,7 +335,7 @@ method sibling ( $orig, %opts ) {
 	$f = $b;
 	$f .= $e if defined $e;
 	# Join with path.
-	$res = catpath( $v, $d, $f );
+	$res = fn_catpath( $v, $d, $f );
     }
     warn("Paths: sibling $orig => ", $self->display($res), "\n")
       if $self->debug;
