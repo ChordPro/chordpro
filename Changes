@@ -23,6 +23,7 @@
     - Fix reading from "-" (standard input).
     - Fix problem with a2crd from wx on Windows.
     - Fix issue #512.
+    - (PDF) Fix progress count if multi-pass.
 
 6.070 2024-12-25
 

@@ -66,7 +66,9 @@ sub generate_songbook {
 
     progress( phase   => "PDF",
 	      index   => 0,
-	      total   => scalar(@{$sb->{songs}}) );
+	      total   => scalar(@{$sb->{songs}})
+	                 * ( $ps->{'sort-pages'} =~ /2page|compact/ ? 2 : 1 )
+	    );
 
     if ( $ps->{'sort-pages'} ) {
 	sort_songbook($sb);
