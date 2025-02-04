@@ -62,17 +62,14 @@ sub generate_songbook {
     $extra_matter++ if $options->{'front-matter'};
     $extra_matter++ if $options->{'back-matter'};
     $extra_matter++ if $options->{csv};
-    $extra_matter += @{$sb->{songs}} if $ps->{'sort-pages'};
-
-    progress( phase   => "PDF",
-	      index   => 0,
-	      total   => scalar(@{$sb->{songs}})
-	                 * ( $ps->{'sort-pages'} =~ /2page|compact/ ? 2 : 1 )
-	    );
 
     if ( $ps->{'sort-pages'} ) {
 	sort_songbook($sb);
     }
+
+    progress( phase   => "PDF",
+	      index   => 0,
+	      total   => scalar(@{$sb->{songs}}) );
 
     my $pr = (__PACKAGE__."::Writer")->new( $ps, $pdfapi );
     warn("Generating PDF ", $options->{output} || "__new__.pdf", "...\n") if $options->{verbose};
@@ -3391,10 +3388,13 @@ sub sort_songbook {
 
     if ( $sorting =~ /2page|compact/ ) {
 	# Progress indicator
+	progress( phase   => "Counting",
+		  index   => 0,
+		  total   => scalar(@{$sb->{songs}}) );
 
 	my $i = 1;
 	foreach my $song ( @{$sb->{songs}} ) {
-	    progress( msg => "Counting pages, song $i" );
+	    progress( msg => $song->{title} );
 	    $i++;
 	    $song->{meta}->{pages} =
 	      generate_song( $song, { pr => $pri, startpage => 1 } );
