@@ -554,7 +554,6 @@ sub parse_song {
 		if ( $d->{type} eq "image" ) {
 		    local $_;
 		    my $a = pop( @{ $self->{body} } );
-		    delete( $a->{context} );
 		    my $id = $a->{id};
 		    my $opts = {};
 		    unless ( $id ) {
