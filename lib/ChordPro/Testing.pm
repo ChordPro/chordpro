@@ -19,6 +19,7 @@ our @EXPORT = qw( $config );
 
 use Test::More ();
 
+use ChordPro::Files;
 use ChordPro::Config;
 use ChordPro::Paths;
 use ChordPro::Chords;
