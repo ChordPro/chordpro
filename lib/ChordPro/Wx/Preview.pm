@@ -307,15 +307,25 @@ sub _makeurl {
 
 method save {
     return unless fs_test( s => $preview_pdf );
+
+    my $savefile = "preview";
+    if ( $state{mode} eq "editor" && $state{currentfile} ) {
+	$savefile = $state{currentfile} =~ s/\.\w+$//r;
+    }
+    if ( $state{mode} eq "sbexport" && $state{sbe_folder} ) {
+	$savefile = $state{sbe_folder} . ".pdf";
+    }
+
     my $fd = Wx::FileDialog->new
       ( $panel,
 	_T("Choose output file"),
-	"", "preview",
+	fn_dirname($savefile), fn_basename($savefile),
 	"*.pdf",
 	0|wxFD_SAVE|wxFD_OVERWRITE_PROMPT );
     my $ret = $fd->ShowModal;
     my $fn = $fd->GetPath;
     $fd->Destroy;
+
     if ( $ret == wxID_OK ) {
 	if ( fs_copy( $preview_pdf, $fn ) ) {
 	    $unsaved_preview = 0;

@@ -15,6 +15,9 @@
 
     - Filenames in filelists are considered relative to the filelist.
 
+    - When saving a preview PDF, the default filename is derived from
+      the current song or folder.
+
     !Bug Fixes
 
     - Some issues with Unicode filenames on Windows.
