@@ -3089,8 +3089,8 @@ sub prepare_asset {
 		    opts => { %{$elt->{opts}//{}} } };
 	    }
 
-	    # If the delegate produced an SVG, continue processing.
-	    if ( $res && $res->{type} eq "image" && $res->{subtype} eq "svg" ) {
+	    # If the delegate produced an image, continue processing.
+	    if ( $res && $res->{type} eq "image" ) {
 		$elt = $res;
 	    }
 	    else {
