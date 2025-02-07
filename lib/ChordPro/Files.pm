@@ -33,7 +33,7 @@ use constant MSWIN => $^O =~ /MSWin|Windows_NT/i ? 1 : 0;
 
 sub is_msw ()   { MSWIN }
 sub is_macos () { $^O =~ /darwin/ }
-sub is_wx ()    { main->can("OnInit") }
+sub is_wx ()    { defined($Wx::wxVERSION) }
 
 push( @EXPORT, qw( is_msw is_macos is_wx ) );
 

@@ -13,6 +13,7 @@ use ChordPro::Output::Text;
 use ChordPro::Output::HTML;
 use ChordPro::Delegate::ABC;
 use ChordPro::Delegate::Lilypond;
+use ChordPro::Delegate::Program;
 use ChordPro::Delegate::SVG;
 use ChordPro::Delegate::TextBlock;
 

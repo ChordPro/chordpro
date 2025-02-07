@@ -15,6 +15,7 @@ lib/ChordPro/Config/Data.pm
 lib/ChordPro/Config/Properties.pm
 lib/ChordPro/Delegate/ABC.pm
 lib/ChordPro/Delegate/Lilypond.pm
+lib/ChordPro/Delegate/Program.pm
 lib/ChordPro/Delegate/SVG.pm
 lib/ChordPro/Delegate/TextBlock.pm
 lib/ChordPro/Dumper.pm

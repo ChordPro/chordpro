@@ -69,7 +69,7 @@ WriteMakefile
 		    'JavaScript::QuickJS'         => 0.18,
 		    'Ref::Util'			  => 0.204,
 		    'Scalar::Util'		  => 1.63,
-
+		    'IPC::Run3'			  => 0.049,
 		    # Core
 		    'Pod::Usage'		  => 2.03,
 		    'File::Copy'		  => 2.32,

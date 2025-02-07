@@ -24,6 +24,30 @@ use Text::ParseWords qw(shellwords);
 sub DEBUG() { $config->{debug}->{ly} }
 
 sub ly2svg( $self, %args ) {
+
+=for later
+
+    my $elt = $args{elt};
+    my $ctl = { %{ $::config->{delegates}->{$elt->{context}} } };
+
+    $ctl->{program} ||= "lilypond";
+    $ctl->{input} = "argfile";
+    $ctl->{result} = "\%{tmpbase}.cropped.svg";
+    $ctl->{args} =  [ "-dno-point-and-click", "--svg", "--silent",
+		      "--output",  "\%{tmpbase}"
+		    ];
+    $ctl->{align} = "left";
+    unshift( @{ $ctl->{preamble} },
+	     "#(ly:set-option 'crop #t)" );
+
+    use ChordPro::Delegate::Program;
+    ChordPro::Delegate::Program::_cmd2image( $self, $ctl, %args );
+}
+
+sub _ly2svg( $self, %args ) {
+
+=cut
+
     my ( $elt, $pw ) = @args{qw(elt pagewidth)};
 
     state $imgcnt = 0;
