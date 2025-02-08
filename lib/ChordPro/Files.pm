@@ -216,7 +216,7 @@ sub fs_load( $name, $opts = {} ) {
 
     my $ret;
     eval {
-	if ( is_ref($name) ) {
+	if ( is_ref($name) || $name =~ m;^\w\w+:; ) {
 	    $ret = loadlines( $name, $opts );
 	}
 	else {
@@ -228,8 +228,8 @@ sub fs_load( $name, $opts = {} ) {
     return $ret unless $@;
 
     my $msg = $@;
-    $msg = $1 if $msg =~ /^\Q$name\E: (.*)$/;
     die( "$msg\n" ) unless $opts->{fail} eq "soft";
+    $msg = $1 if $msg =~ /^\Q$name\E: (.*)$/;
     $opts->{error} = $msg;
     return;
 }
