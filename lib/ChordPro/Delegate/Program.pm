@@ -64,6 +64,9 @@ Example config file:
 	// (Optional) Input lines to apppend to the user data.
 	postamble : []
 
+        // Preprocessing.
+        preprocess.ly : []
+
 	// Default alignment is center, but ly delegate wants left.
 	align     : left
 
@@ -83,7 +86,7 @@ Notes:
 =cut
 
 use ChordPro::Files;
-use ChordPro::Utils qw(dimension maybe);
+use ChordPro::Utils qw(dimension maybe make_preprocessor);
 use ChordPro::Output::Common qw(fmt_subst);
 use IPC::Run3 qw(run3);
 use Ref::Util qw( is_arrayref );
@@ -100,6 +103,7 @@ sub cmd2image( $song, %args ) {
 sub _cmd2image( $song, $ctl, %args ) {
     my $elt = $args{elt};
     my $kv = { %{$elt->{opts}} };
+    my $context = $elt->{context};
 
     # Default alignment.
     $kv->{align} //= $ctl->{align};
@@ -144,6 +148,17 @@ sub _cmd2image( $song, $ctl, %args ) {
     }
     if ( is_arrayref($ctl->{postamble}) ) {
 	push( @data, @{ $ctl->{postamble} } );
+    }
+
+    # Preprocessing.
+    my $prep = make_preprocessor( $ctl->{preprocess} );
+    if ( $prep->{$context} ) {
+	my @d;
+	for ( @data ) {
+	    $prep->{$context}->($_);
+	    push( @d, $_ );
+	}
+	@data = @d;
     }
 
     my $input_data;
