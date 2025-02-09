@@ -64,9 +64,6 @@ Example config file:
 	// (Optional) Input lines to apppend to the user data.
 	postamble : []
 
-        // Preprocessing.
-        preprocess.ly : []
-
 	// Default alignment is center, but ly delegate wants left.
 	align     : left
 
