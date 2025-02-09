@@ -142,14 +142,6 @@ sub _cmd2image( $song, $ctl, %args ) {
     my $input  = $subst->($ctl->{input})  || "stdin";
     my @data = @{$elt->{data}};
 
-    # Optional pre- and postamble.
-    if ( is_arrayref($ctl->{preamble}) ) {
-	unshift( @data, @{ $ctl->{preamble} } );
-    }
-    if ( is_arrayref($ctl->{postamble}) ) {
-	push( @data, @{ $ctl->{postamble} } );
-    }
-
     # Preprocessing.
     my $prep = make_preprocessor( $ctl->{preprocess} );
     if ( $prep->{$context} ) {
@@ -159,6 +151,14 @@ sub _cmd2image( $song, $ctl, %args ) {
 	    push( @d, $_ );
 	}
 	@data = @d;
+    }
+
+    # Optional pre- and postamble.
+    if ( is_arrayref($ctl->{preamble}) ) {
+	unshift( @data, @{ $ctl->{preamble} } );
+    }
+    if ( is_arrayref($ctl->{postamble}) ) {
+	push( @data, @{ $ctl->{postamble} } );
     }
 
     my $input_data;
