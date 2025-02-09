@@ -348,6 +348,8 @@
           "%%vocalfont pdf.fonts.text"
           "%%gchordfont pdf.fonts.chord"
         ]
+    
+        // Obsolete. Please use parser.preprocess.env-abc instead.
         preprocess.abc : []
       }
     

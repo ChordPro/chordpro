@@ -18,6 +18,9 @@
     - When saving a preview PDF, the default filename is derived from
       the current song or folder.
 
+    - Are you using the preprocessor in your abc and ly environments?
+      Please use the more general parser.preprocess.env-... instead.
+
     !Bug Fixes
 
     - Some issues with Unicode filenames on Windows.

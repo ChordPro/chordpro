@@ -53,6 +53,7 @@
           "default" : "ABC"
         },
         "preprocess" : {
+	  "description" : "Obsolete. Please use parser.preprocess.env-... instead."
           "type" : "object"
         }
       },
