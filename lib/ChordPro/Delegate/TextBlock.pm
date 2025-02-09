@@ -168,7 +168,7 @@ sub txt2xform( $self, %args ) {
 
     return
       { type      => "image",
-	subtype   => "xoform",
+	subtype   => "xform",
 	line      => $elt->{line},
 	data      => $xo,
 	width     => $width  + 2*$padding,
