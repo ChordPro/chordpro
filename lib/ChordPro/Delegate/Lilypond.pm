@@ -63,19 +63,6 @@ sub _ly2svg( $self, %args ) {
 	return;
     }
 
-    # Preprocessing.
-    my $ctl = $config->{delegates}->{ly};
-    my @data = @{$elt->{data}};
-    my $prep = make_preprocessor( $ctl->{preprocess} );
-    if ( $prep->{ly} ) {
-	my @d;
-	for ( @data ) {
-	    $prep->{ly}->($_);
-	    push( @d, $_ );
-	}
-	@data = @d;
-    }
-
     my $need_version = 1;
     my @pre;
     for ( keys(%{$elt->{opts}}) ) {
@@ -107,6 +94,7 @@ sub _ly2svg( $self, %args ) {
       "\\header { tagline = ##f }";
 
     @pre = ();
+    my @data = @{$elt->{data}};
     while ( @data ) {
 	$_ = shift(@data);
 	unshift( @data, $_ ), last if /^[%\\]/; # LP data
