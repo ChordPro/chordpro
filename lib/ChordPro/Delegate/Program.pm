@@ -168,7 +168,7 @@ sub _cmd2image( $song, $ctl, %args ) {
 	my $fd = fs_open( $input, '>:utf8' );
 	print $fd "$_\n" for @data;
 	close($fd);
-	DEBUG && ::dump( $input_data, as => "Input from $input");
+	DEBUG && ::dump( \@data, as => "Input from $input");
     }
 
     #### Output handling ####
@@ -229,8 +229,12 @@ sub _cmd2image( $song, $ctl, %args ) {
 
     $o = { fail => 'soft' };
     if ( $errors eq 'stderr' ) {
-	$errors = is_arrayref($stderr_buf)
-	  ? join( "\n", @$stderr_buf ) : $stderr_buf;
+	if ( is_arrayref($stderr_buf) ) {
+	    $errors = $stderr_buf;
+	}
+	else {
+	    $errors = split( /[\r\n]/, $stderr_buf );
+	}
     }
     else {
 	$errors = fs_load( $errors, $o );
