@@ -1494,7 +1494,7 @@ sub directive {
 	# Derived props.
 	$self->propset( "chorus", $prop, $arg ) if $item eq "text";
 
-	#::dump( { %propstack, line => $diag->{line} } );
+	# ::dump( { %propstack, line => $diag->{line} } );
 	return 1;
     }
     # More private hacks.
@@ -2056,6 +2056,7 @@ sub propset {
     $propstack{$name} //= [];
 
     if ( $value eq "" ) {
+	my @toadd;
 	# Pop current value from stack.
 	if ( @{ $propstack{$name} } ) {
 	    my $old = pop( @{ $propstack{$name} } );
@@ -2063,12 +2064,13 @@ sub propset {
 	    # was also a size saved. Pop it.
 	    if ( $prop eq "font" && $old =~ /\s(\d+(?:\.\d+)?)$/ ) {
 		pop( @{ $propstack{"$item-size"} } );
-		$self->add( type  => "control",
-			    name  => "$item-size",
-			    value =>
-			    @{ $propstack{"$item-size"} }
-			    ? $propstack{"$item-size"}->[-1]
-			    : undef )
+		# Resetting the size must follow the font reset.
+		push( @toadd, type  => "control",
+		      name  => "$item-size",
+		      value =>
+		      @{ $propstack{"$item-size"} }
+		      ? $propstack{"$item-size"}->[-1]
+		      : undef );
 	    }
 	}
 	else {
@@ -2084,6 +2086,7 @@ sub propset {
 	$self->add( type  => "control",
 		    name  => $name,
 		    value => $value );
+	$self->add( @toadd ) if @toadd;
 	return 1;
     }
 
