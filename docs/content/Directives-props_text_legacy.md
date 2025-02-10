@@ -26,12 +26,19 @@ current value for the size.
 The colour must be a [known colour]({{< relref "ChordPro-Colours"
 >}}), or a hexadecimal colour code like `#4491ff`.
 
+The font family and size can be set simultaneously.
+
+    {textfont: sans 13}
+	
+This sets both the font family and the size.
+
     {textfont}
-    {textsize}
+	{textsize}
     {textcolour}
 
 Change the font, size and colour of the song lyrics that follow back
-to the previous (or default) value.
+to the previous (or default) value. You can omit `{textsize}` since
+`{textfont}` will also reset the size.
 
 Example:
 
