@@ -193,12 +193,16 @@ sub _cmd2image( $song, $ctl, %args ) {
 	DEBUG && warn("Using Wx::ExecuteStdoutStderr\n");
 	( $status, $stdout_buf, $stderr_buf ) =
 	  Wx::ExecuteStdoutStderr( "@cmd" );
+	# $stdout_buf and $stderr_buf will be strings.
     }
     else {
 	DEBUG && warn("Using IPC::Run3::run3\n");
+	$stdout_buf = '';
+	$stderr_buf = '';
 	run3( \@cmd, \$input_data, \$stdout_buf, \$stderr_buf,
 	      { binmode_stdout => ':raw',
 		return_if_system_error => 1 } );
+	# $stdout_buf and $stderr_buf will be strings.
 	$status = $? >> 8;
     }
 
@@ -215,8 +219,7 @@ sub _cmd2image( $song, $ctl, %args ) {
 
     my $o = { fail => 'soft' };
     if ( $result eq 'stdout'  ) {
-	$result = is_arrayref($stdout_buf)
-	  ? join( "\n", @$stdout_buf ) : $stdout_buf;
+	$result = $stdout_buf;
     }
     else {
 	$result = fs_blob( $result, $o );
@@ -228,17 +231,7 @@ sub _cmd2image( $song, $ctl, %args ) {
     DEBUG && ::dump( $result, as => "Result" );
 
     $o = { fail => 'soft' };
-    if ( $errors eq 'stderr' ) {
-	if ( is_arrayref($stderr_buf) ) {
-	    $errors = $stderr_buf;
-	}
-	else {
-	    $errors = split( /[\r\n]/, $stderr_buf );
-	}
-    }
-    else {
-	$errors = fs_load( $errors, $o );
-    }
+    $errors = fs_load( \$stderr_buf, $o );
     if ( $o->{error} ) {
 	warn("?Error fetching diagnostics: ", $o->{error}, "\n" );
 	return;
