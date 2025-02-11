@@ -139,6 +139,7 @@ checkjson :
 # Experimental
 
 WINVM := Win10Pro
+WIN   := w10
 
 wkit : _wkit1 _wkit _wkit2
 
@@ -149,6 +150,7 @@ _wkit :
 
 _wkit1 :
 	-VBoxManage startvm ${WINVM} --type headless
+	sleep 10
 
 _wkit2 :
 	sudo umount /misc/c
