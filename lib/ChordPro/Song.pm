@@ -349,6 +349,9 @@ sub parse_song {
 	}
 
 	for my $pp ( "all", "env-$in_context" ) {
+	    next if $pp eq "env-$in_context"
+	      && /^\s*\{(\w+)\}\s*$/
+	      && $self->parse_directive($1)->{name} eq "end_of_$in_context";
 	    if ( $prep->{$pp} ) {
 		$config->{debug}->{pp} && warn("PRE:  ", $_, "\n");
 		$prep->{$pp}->($_);
