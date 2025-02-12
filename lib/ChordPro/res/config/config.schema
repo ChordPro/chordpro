@@ -744,6 +744,22 @@
             } }
           ]
         },
+        "grille" : {
+          "description" : "Embedding Grilles.",
+          "allOf" : [
+            { "$ref" : "#/definitions/delegatespec" },
+            { "properties" : {
+              "handler" : {
+                "type" : "string",
+                "default" : "grille2xo"
+              },
+              "module" : {
+                "type" : "string",
+                "default" : "Grille"
+              },
+            } }
+          ]
+        },
         "ly" : {
           "description" : "Embedding Lilypond.",
           "allOf" : [
@@ -759,6 +775,29 @@
               },
               "preamble" : {
 	        "description" : "The preamble is a list of lines inserted before the lilipond data,\nThis is a good place to set the version and global customizations.\n",
+                "type" : "array",
+		"items" : {
+		  "type" : "string"
+		}
+              }
+            } }
+          ]
+        },
+        "pgm" : {
+          "description" : "Embedding external tools.",
+          "allOf" : [
+            { "$ref" : "#/definitions/delegatespec" },
+            { "properties" : {
+              "handler" : {
+                "type" : "string",
+                "default" : "cmd2image"
+              },
+              "module" : {
+                "type" : "string",
+                "default" : "Program"
+              },
+              "preamble" : {
+	        "description" : "The preamble is a list of lines inserted before the data,",
                 "type" : "array",
 		"items" : {
 		  "type" : "string"

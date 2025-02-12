@@ -117,7 +117,7 @@ metadata {
 // Globally defined (added) meta data,
 // This is explicitly NOT intended for the metadata items above.
 // Do NOT remove or change "_configversion"!
-meta._configversion : [ 6.031 ]
+meta._configversion : [ 6.071 ]
 
 // Assets (placeholder).
 assets {}
@@ -347,6 +347,13 @@ delegates {
 
     // Obsolete. Please use parser.preprocess.env-abc instead.
     preprocess.abc : []
+  }
+
+  // Embedding Grilles.
+  grille {
+    type    : image
+    module  : Grille
+    handler : grille2xo
   }
 
   // Embedding Lilypond.
@@ -1070,25 +1077,26 @@ parser.preprocess {
 debug {
   runtimeinfo : 1
   a2crd       : 0
+  abc         : 0
   assets      : 0
   chords      : 0
   config      : 0
+  csv         : 0
   echo        : 0
   fonts       : 0
   images      : 0
   layout      : 0
+  ly          : 0
   meta        : 0
   mma         : 0
+  ops         : 0
   pages       : 0
   paths       : 0
+  pgm         : 0
   pp          : 0
-  spacing     : 0
   song        : 0
   songfull    : 0
-  ops         : 0
-  csv         : 0
-  abc         : 0
-  ly          : 0
+  spacing     : 0
   svg         : 0
   txtblk      : 0
   x1          : 0
