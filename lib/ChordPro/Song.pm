@@ -513,7 +513,7 @@ sub parse_song {
 			}
 		    }
 		    if ( $uri ) {
-			unshift( @$lines, fs_load($uri), "##include: end=1" );
+			unshift( @$lines, @{fs_load($uri)}, "##include: end=1" );
 			push( @diag, { %$diag } );
 			$diag->{file} = $uri;
 			$diag->{line} = $$linecnt = 0;

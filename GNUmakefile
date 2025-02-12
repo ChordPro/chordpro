@@ -51,7 +51,7 @@ to_tmp : resources
 # Windows 10, for Windows installer builds.
 WINDIR := /Users/Johan/Documents/${PROJECT}
 WINDST := /mnt/c${WINDIR}
-#WINDST := w10:${PROJECT}
+#WINDST := w10:Documents/${PROJECT}
 to_win : resources
 	for mnf in ${STDMNF} ; do \
 	    rsync ${RSYNC_ARGS} --files-from=$$mnf ./ ${WINDST}/; \
@@ -141,19 +141,26 @@ checkjson :
 WINVM := Win10Pro
 WIN   := w10
 
-wkit : _wkit1 _wkit _wkit2
+wkit : _wkit1 _wkit _wkiti _wkit2
 
 _wkit :
 	${MAKE} to_win
-	ssh ${WIN} gmake -C ChordPro/pp/windows
-	scp ${WIN}:ChordPro/pp/windows/ChordPro-Installer\*.exe ${HOME}/tmp/
+	ssh ${WIN} gmake -C ${WINDIR}/pp/windows
+	cp /mnt/c${WINDIR}/pp/windows/ChordPro-Installer*.exe ${HOME}/tmp/
+
+_wkiti :
+	cp /mnt/c${WINDIR}/pp/windows/ChordPro-Installer*.exe \
+	  ${HOME}/tmp/ChordPro-Installer-6-70-dev-msw-x64.exe
+	scp ${HOME}/tmp/ChordPro-Installer-6-70-dev-msw-x64.exe \
+	  chordpro-site:www/dl/
 
 _wkit1 :
 	-VBoxManage startvm ${WINVM} --type headless
 	sleep 10
 
 _wkit2 :
-	sudo umount /misc/c
+	sleep 10
+	sudo umount /mnt/c
 	VBoxManage controlvm ${WINVM} poweroff
 	VBoxManage snapshot ${WINVM} restorecurrent
 

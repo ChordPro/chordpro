@@ -181,7 +181,7 @@ sub options( $data ) {
 
     my @pre;
     my @data = @$data;
-    while ( @$data ) {
+    while ( @data ) {
 	last if $data[0] =~ /^[%\\]/; # LP data
 	push( @pre, shift(@data) );
     }
