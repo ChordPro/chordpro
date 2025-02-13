@@ -49,6 +49,10 @@ src.em = dst.em
 gcopy( "uniE040", 0xe040 )
 gcopy( "uniE041", 0xe041 )
 gcopy( "uniE042", 0xe042 )
+# Copy repeat symbols.
+tf = psMat.compose(psMat.translate(0,600),psMat.scale(1.5))
+gcopy( "uni1D10F", 0x1d10f, tf )
+gcopy( "uni1D10E", 0x1d10e, tf )
 
 # We're missing a fullly filled circle for unfingered strings.
 # MANUALLY CHANGED /slash -> black circle.
