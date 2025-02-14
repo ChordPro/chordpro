@@ -349,13 +349,6 @@ delegates {
     preprocess.abc : []
   }
 
-  // Embedding Grilles.
-  grille {
-    type    : image
-    module  : Grille
-    handler : grille2xo
-  }
-
   // Embedding Lilypond.
   ly {
     type     : image
@@ -878,7 +871,7 @@ pdf {
     // Font for typesetting chord names.
     chord : "Helvetica-Oblique 10"
 
-    // Font for numbered chord dots.
+    // Font for numbered chord dots and other symbols.
     chordfingers {
       file        : ChordProSymbols.ttf
 
@@ -913,6 +906,9 @@ pdf {
 
     // Font for typesetting grids.
     grid : "Helvetica 10"
+
+    // Font for typesetting grilles.
+    grille : "Helvetica 10"
   }
 
   // PDF outlines (index) can be used in most PDF viewers

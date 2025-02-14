@@ -31,8 +31,9 @@ use Text::ParseWords qw(quotewords);
 my $def_context = "";
 my $in_context = $def_context;
 my $skip_context = 0;
-my $grid_arg;
-my $grid_cells;
+my $grid_arg;			# also used for grilles?
+my $grid_cells;			# also used for grilles?
+my @grille;
 
 # Local transposition.
 my $xpose = 0;
@@ -663,6 +664,11 @@ sub parse_song {
 	    $self->add( type => "gridline", $self->decompose_grid($_) );
 	    next;
 	}
+	if ( $in_context eq "grille" && @grille ) {
+	    push( @grille, { line => $diag->{line},
+			     $self->decompose_grid($_) } );
+	    next;
+	}
 
 	if ( /\S/ ) {
 	    if ( $prep->{songline} ) {
@@ -1020,13 +1026,13 @@ sub decompose_grid {
 	    $line = $1;
 	    $res{comment} = { $self->cdecompose($2), orig => $2 };
 	    do_warn( "No margin cell for trailing comment" )
-	      unless $grid_cells->[2];
+	      unless $in_context eq "grille" || $grid_cells->[2];
 	}
 	if ( $line =~ /^([^|]+?)\s*(\|.*)/ ) {
 	    $line = $2;
 	    $res{margin} = { $self->cdecompose($1), orig => $1 };
 	    do_warn( "No cell for margin text" )
-	      unless $grid_cells->[1];
+	      unless $in_context eq "grille" || $grid_cells->[1];
 	}
     }
 
@@ -1166,6 +1172,7 @@ my %directives = (
 		  end_of_bridge	     => undef,
 		  end_of_chorus	     => undef,
 		  end_of_grid	     => undef,
+		  end_of_grille	     => undef,
 		  end_of_tab	     => undef,
 		  end_of_verse	     => undef,
 		  grid		     => \&dir_grid,
@@ -1181,6 +1188,7 @@ my %directives = (
 		  start_of_bridge    => undef,
 		  start_of_chorus    => undef,
 		  start_of_grid	     => undef,
+		  start_of_grille    => undef,
 		  start_of_tab	     => undef,
 		  start_of_verse     => undef,
 		  subtitle	     => \&dir_subtitle,
@@ -1333,11 +1341,14 @@ sub directive {
 	  if $in_context eq "chorus";
 	undef $cctag;
 
-	if ( $in_context eq "grid" ) {
-	    $cctag = "grid";
+	if ( $in_context eq "grid"
+	     || ( $in_context eq "grille" && !exists $config->{delegates}->{$in_context} ) ) {
+	    $cctag = $in_context;
 	    my $kv = parse_kv( $arg, "shape" );
 	    my $shape = $kv->{shape} // "";
-	    if ( $shape eq "" ) {
+	    if ( $in_context eq "grille" ) {
+	    }
+	    elsif ( $shape eq "" ) {
 		$self->add( type => "set",
 			    name => "gridparams",
 			    value => $grid_arg );
@@ -1377,6 +1388,8 @@ sub directive {
 	    }
 	    $grid_cells = [ $grid_arg->[0] * $grid_arg->[1],
 			    $grid_arg->[2],  $grid_arg->[3] ];
+
+	    @grille = ( $kv ) if $in_context eq "grille";
 	    return 1;
 	}
 	elsif ( exists $config->{delegates}->{$in_context} ) {
@@ -1471,9 +1484,69 @@ sub directive {
     if ( $dir =~ /^end_of_(\w+)$/ ) {
 	do_warn("Not in " . ucfirst($1) . " context\n")
 	  unless $in_context eq $1;
-	$self->add( type => "set",
-		    name => "context",
-		    value => $def_context );
+	if ( $in_context eq "grille" && @grille > 1 ) {
+	    my $opts = shift(@grille);
+	    my $id = $opts->{id};
+	    unless ( is_true($opts->{omit}) ) {
+		if ( $opts->{align} && $opts->{x} && $opts->{x} =~ /\%$/ ) {
+		    do_warn( "Useless combination of x percentage with align (align ignored)" );
+		    delete $opts->{align};
+		}
+
+		my $def = !!$id;
+		$id //= "_Image".$assetid++;
+
+		if ( defined $opts->{spread} ) {
+		    $def++;
+		    if ( exists $self->{spreadimage} ) {
+			do_warn("Skipping superfluous spread image");
+		    }
+		    else {
+			$self->{spreadimage} =
+			  { id => $id, space => $opts->{spread} };
+			warn("Got spread image $id with space=$opts->{spread}\n")
+			  if $config->{debug}->{images};
+		    }
+		}
+
+		# Move to assets.
+		$self->{assets}->{$id} =
+		  { type      => "image",
+		    subtype   => "delegate",
+		    delegate  => "Grille",
+		    handler   => "grille2xo",
+		    opts      => $opts,
+		    line      => $grille[0]{line},
+		    data      => \@grille,
+		    context   => $in_context,
+		  };
+		if ( $def ) {
+		    my $label = delete $a->{label};
+		    do_warn("Label \"$label\" ignored on non-displaying $in_context section\n")
+		      if $label;
+		}
+		else {
+		    my $label = delete $opts->{label};
+		    $self->add( type => "set",
+				name => "label",
+				value => $label )
+		      if $label && $label ne "";
+		    $self->add( type => "image",
+				opts => $opts,
+				id => $id );
+		    if ( $opts->{label} ) {
+			push( @labels, $opts->{label} )
+			  unless $in_context eq "chorus"
+			  && !$config->{settings}->{choruslabels};
+		    }
+		}
+	    }
+	}
+	else {
+	    $self->add( type => "set",
+			name => "context",
+			value => $def_context );
+	}
 	$in_context = $def_context;
 	undef $memchords;
 	return 1;
