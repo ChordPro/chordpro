@@ -3058,7 +3058,7 @@ sub prepare_asset {
 	    my $hd = $pkg->can($elt->{handler}) //
 	      die("PDF: Missing delegate handler ${pkg}::$elt->{handler}\n");
 	    unless ( $elt->{data} ) {
-		$elt->{data} = [ fs_load( $elt->{uri}, { fail => 'hard' } ) ];
+		$elt->{data} = fs_load( $elt->{uri}, { fail => 'hard' } );
 	    }
 
 	    # Determine actual width.
