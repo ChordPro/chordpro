@@ -49,6 +49,7 @@ src.em = dst.em
 gcopy( "uniE040", 0xe040 )
 gcopy( "uniE041", 0xe041 )
 gcopy( "uniE042", 0xe042 )
+gcopy( "uniE043", 0xe043 )
 # Copy repeat symbols.
 tf = psMat.compose(psMat.translate(0,600),psMat.scale(1.5))
 gcopy( "uni1D10F", 0x1d10f, tf )
