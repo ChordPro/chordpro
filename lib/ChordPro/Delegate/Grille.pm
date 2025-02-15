@@ -54,7 +54,9 @@ sub grille2xo( $song, %args ) {
     }
 
     my $data = compose( \@{$elt->{data}} );
-use DDP; p $data;
+    if ( DEBUG ) {
+	use DDP; p $data;
+    }
 
     my $txtfont = $ps->{fonts}->{grille}->{fd};
     my $size = $kv->{size} || $txtfont->{size} || 12;
@@ -71,16 +73,14 @@ use DDP; p $data;
 	@structure = split( /([IABCDCVZ0-9]\d*'?)/, $go->structure // "" );
     }
 
-    my $do = DrawingObject->new( gfx     => $pr->{pdfgfx},
-				 txtfont => $txtfont,
-				 symfont => $symfont,
-				 size    => $size,
-				 color   => "red",
-			       );
-
     my $gr = Grille->new( grille => $go );
 
-    my $xo = $gr->build( do => $do );
+    my $xo = $gr->build( gfx     => $pr->{pdfgfx},
+			 txtfont => $txtfont,
+			 symfont => $symfont,
+			 size    => $size,
+			 color   => "red",
+		       );
 
     # Finish.
     my $scale;
@@ -144,6 +144,18 @@ sub compose( $data ) {
 		elsif ( $t->{symbol} eq "|." ) {
 		    if ( %$cell ) {
 			$cell->{end_bar} = 1;
+			$cell = {};
+		    }
+		    else {
+			$cell = {};
+		    }
+		}
+		elsif ( $t->{symbol} eq "|:" ) {
+		    $cell = { repeat_start => 1 };
+		}
+		elsif ( $t->{symbol} eq ":|" ) {
+		    if ( %$cell ) {
+			$cell->{repeat_end} = 1;
 			$cell = {};
 		    }
 		    else {
@@ -222,7 +234,7 @@ sub json2xo( $song, %args ) {
 				 txtfont => $txtfont,
 				 symfont => $symfont,
 				 size    => $fz,
-				 color   => "red",
+				 color   => "blue",
 			       );
 
     my $gr = Grille->new( grille => $go );
@@ -327,15 +339,16 @@ field $cw	 :param = 0;	# cell width
 field $ch	 :param = 0;	# cell height
 field $gw	 :param = 0;	# number of cells
 
+# These are initialized by 'build' method.
 field $do;			# drawing object
-field $size       :mutator  :param = undef;
-field $txtfont    :mutator  :param = undef;
-field $symfont    :mutator  :param = undef;
-field $color      :mutator  :param = undef;
+field $size;
+field $txtfont;
+field $symfont;
+field $color;
 field $fontsize;
 
 ADJUST {
-    $gw = $grille->cells;
+    $gw ||= $grille->cells;
 }
 
 method grille_cell( $xc, $yc, $cell, %args ) {
@@ -379,6 +392,24 @@ method grille_cell( $xc, $yc, $cell, %args ) {
 	    my $d = $size / 8;
 	    $do->move( $xc+$d, $yc-$ch )->vline($yc)->stroke;
 	}
+	if ( $cell->repeat_start ) {
+	    my $d = $size / 16;
+	    $do->set_symfont;
+	    $do->set_markup("\x{27}");
+	    my ( $w, $h ) = $do->get_size;
+	    $do->show( $xc+$d, $yc -$ch/2+ $h/2 );
+	}
+	if ( $cell->repeat_end ) {
+	    my $d = $size / 16;
+	    $do->set_symfont;
+	    $do->set_markup("\x{27}");
+	    my ( $w, $h ) = $do->get_size;
+	    $do->show( $xc+$cw-$w-$d, $yc -$ch/2+ $h/2 );
+	}
+	if ( $cell->dbar_end ) {
+	    my $d = $size / 8;
+	    $do->move( $xc+$cw-$d, $yc-$ch )->vline($yc)->stroke;
+	}
 	if ( $cell->end_bar ) {
 	    my $d = $size / 8;
 	    $do->rectangle( $xc+$cw-$d, $yc-$ch, $xc+$cw, $yc )->fill;
@@ -411,16 +442,14 @@ method grille_cell( $xc, $yc, $cell, %args ) {
     if ( $nc == 1 ) {
 	$c = $c->[0];
 	if ( $c eq ' R2' ) {
-	    $do->set_font_description($symfont);
-	    $do->set_font_size( $fontsize );
-	    $do->set_markup("\x{27}"); # ·//.
+	    $do->set_symfont($fontsize);
+	    $do->set_markup("\x{28}"); # ·//.
 	    my ($w, $h) = $do->get_size;
 	    $do->show( $xc+$cw-$w/2, $yc-$ch/2+$h/2 );
 	}
 	elsif ( $c eq 'R' ) {
-	    $do->set_font_description($symfont);
-	    $do->set_font_size( $fontsize );
-	    $do->set_markup("\x{28}");
+	    $do->set_symfont($fontsize);
+	    $do->set_markup("\x{29}");
 	    my ($w, $h) = $do->get_size;
 	    $do->show( $xc+$cw/2-$w/2, $yc-$ch/2+$h/2 );
 	}
@@ -552,8 +581,7 @@ method fit_cell( $xc, $yc, $c, $top=0, $left=0, %args ) {
     elsif ( is_arrayref($c) ) {
 	$c = join("~", @$c );
     }
-    $do->set_font_description($txtfont);
-    $do->set_font_size($sz);
+    $do->set_txtfont($sz);
     $c =~ s/~/ /g;
     $do->set_markup($c);
     # my $ink = $do->get_extents;
@@ -655,7 +683,7 @@ method grille_part( $xp, $yp, $p, %args ) {
 	DEBUG && warn("Grid cells = $gw\n");
     }
 
-    $cw = 2 * $size;
+    $cw ||= 2 * $size;
 
     # Convenience.
     if ( $part eq 'I' ) {
@@ -669,8 +697,7 @@ method grille_part( $xp, $yp, $p, %args ) {
     my $wp = 0;
     if ( $part ne ' ' ) {
 	# p $p, as => "Part $part";
-	$do->set_font_description($txtfont);
-	$do->set_font_size($size);
+	$do->set_txtfont($size);
 	$do->set_markup($part." ");
 	( $wp, my $h ) = $do->get_size;
 	$do->show( $xp-$wp, $yp );
@@ -697,37 +724,44 @@ method grille_part( $xp, $yp, $p, %args ) {
 }
 
 method build( %args ) {
-    $do        = $args{do};
 
-    $symfont = $args{symfont} if defined $args{symfont};
-    $txtfont = $args{txtfont} if defined $args{txtfont};
+    my $missing = "";
+    for ( qw( gfx symfont txtfont size ) ) {
+	$missing .= "$_ " unless defined $args{$_};
+    }
+    die("Missing arguments to Grille::build: $missing\n") if $missing;
+
+    my $gfx  = $args{gfx};
+    $symfont = $args{symfont};
+    $txtfont = $args{txtfont};
     $color   = $args{color}   if defined $args{color};
-    $size    = $args{size}    if defined $args{size};
+    $size    = $args{size};
 
-    defined($size)    ? $do->size    = $size    : $size    = $do->size;
-    defined($txtfont) ? $do->txtfont = $txtfont : $txtfont = $do->txtfont;
-    defined($symfont) ? $do->symfont = $symfont : $symfont = $do->symfont;
-    defined($color)   ? $do->color   = $color   : $color   = $do->color;
+    $do = DrawingObject->new( gfx     => $gfx,
+			      txtfont => $txtfont,
+			      symfont => $symfont,
+			      size    => $size,
+			      color   => $color // "cyan",
+			    );
     $fontsize = $size;
 
     my $xp = 0;
     my $yp = 0;
     my %did;
     $gw = $grille->cells;
-    my $xo = $do->pdf->xo_form;
+    my $xo = $do->newxo;
+    my $lw = $do->lw;
     my $i;
 
-    my $lw = $size / 50;
-
     for my $p ( @{$grille->parts} ) {
-	my $gfx = $do->newgfx;
+	$do->newxo;
 	my $part = $p->part;
 	next unless $part;
 	next if $did{$part}++;
 	( my $w, my $h, $i ) =
 	  $self->grille_part( 0, 0, $p, %args, part => $part );
-	$gfx->bbox( -$lw/2-$i, $lw/2, $w+$i+$lw/2, -$h-$lw/2 );
-	$xo->object( $gfx, $xp, $yp, 1 );
+	$do->bboxlw( -$i, 0, $w+$i, -$h );
+	$xo->object( $do->gfx, $xp, $yp, 1 );
 	$yp -= $h + 1 + int($cw/10);
     }
 
@@ -735,62 +769,34 @@ method build( %args ) {
     return $xo;
 }
 
-method show( $x, $y, %args ) {
-    # warn("show x = $x, y = $y\n" );
-    $do = $args{do};
-    my $xp = $x;
-    my $yp = $y;
-    my %did;
-    $gw = $grille->cells;
-    my $gfx = $do->gfx;
-    for my $p ( @{$grille->parts} ) {
-	$do->gfx = $do->pdf->xo_form;
-	my $lw = $do->lw;
-	$do->gfx->line_width( $lw );
-	$do->gfx->stroke_color( $do->color );
-	$do->gfx->fill_color( $do->color );
-	my $part = $p->part;
-	next unless $part;
-	next if $did{$part}++;
-	my ( $w, $h, $i ) =
-	  $self->grille_part( 0, 0, $p, %args, part => $part );
-	$do->gfx->bbox( $lw/2-$i, $lw/2, $w+$i+$lw/2, -$h-$lw/2 );
-	$gfx->object( $do->gfx, $xp, $yp, 1 );
-	$yp -= $h + 4;
-    }
-
-    my $yi = 1 + int($cw/10);
-    wantarray ? ( $gw*$cw, $y - $yp - $yi ) : $y - $yp - $yi;
-}
-
 ################ Draw Object ################
 
 class DrawingObject;
 
+field $gfx	:accessor :param;
+field $size     :accessor :param;
+field $txtfont  :accessor :param;
+field $symfont  :accessor :param;
+field $color    :accessor :param = "lime";
+field $lw       :accessor :param = undef;
+
 field $pdf	:accessor;
-field $page;
-field $gfx	:mutator  :param;
-field $layout	:accessor :param = undef;
-field $size     :mutator  :param = undef;
-field $txtfont  :mutator  :param = undef;
-field $symfont  :mutator  :param = undef;
-field $color    :mutator  :param = undef;
-field $lw       :mutator  :param = undef;
+field $layout;
 
 ADJUST {
-    $page = $gfx->{' apipage'};
-    $pdf  = $page->{' api'};
+    $pdf = $gfx->{' apipage'}->{' api'};
+    $lw //= $size / 50;
 };
 
-method newgfx() {
+method newxo() {
     $gfx = $pdf->xo_form;
     $gfx->fill_color($color);
     $gfx->stroke_color($color);
-    $gfx->line_width( $lw = $size/50 );
+    $gfx->line_width($lw);
     $gfx;
 }
 
-# Drawing methods.
+# Drawing methods. Most of them return self for call chaining.
 method move( $x, $y ) {
     $gfx->move( $x, $y );
     $self;
@@ -812,12 +818,10 @@ method close() {
     $self;
 }
 method fill() {
-#    $gfx->fill_color($color);
     $gfx->close;
     $self;
 }
 method stroke() {
-#    $gfx->stroke_color($color);
     $gfx->stroke;
     $self;
 }
@@ -825,22 +829,31 @@ method rectangle( $x1,$y1, $x2,$y2 ) {
     $gfx->rectangle( $x1,$y1, $x2,$y2 );
     $self;
 }
-
-# Text methods.
-method set_font_description($desc) {
-    $layout //= Text::Layout->new($pdf);
-    $layout->set_font_description($desc);
+method bboxlw( $x1,$y1, $x2,$y2 ) {
+    my $lw2 = $lw/2;
+    $gfx->bbox( $x1-$lw2, $y1+$lw2, $x2+$lw2, $y2-$lw2 );
     $self;
 }
-method set_font_size($sz) {
+
+# Text methods.
+method set_txtfont( $sz = undef ) {
     $layout //= Text::Layout->new($pdf);
+    $layout->set_font_description($txtfont);
+    $layout->set_font_size( $sz || $size );
+}
+method set_symfont( $sz = undef ) {
+    $layout //= Text::Layout->new($pdf);
+    $layout->set_font_description($symfont);
+    $layout->set_font_size( $sz || $size );
+}
+method set_font_size($sz) {
     $layout->set_font_size($sz);
     $self;
 }
 method set_markup($t) {
     $layout //= Text::Layout->new($pdf);
-#    $layout->set_markup("<span color='$color'>$t</span>");
-    $layout->set_markup($t);
+    $layout->set_markup("<span color='$color'>$t</span>");
+#    $layout->set_markup($t);
     $self;
 }
 method get_size() {
