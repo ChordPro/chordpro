@@ -32,6 +32,13 @@ Differences with grid content:
 
  * Cells are fixed size (but may get higher).
 
+Misc.
+
+   | A | B |:1 C | D |:2 E | F |
+becomes
+   | A | B | C | D |
+   | - | - | E | F |
+
 =cut
 
 use ChordPro::Files;
@@ -153,10 +160,12 @@ sub compose( $data ) {
 		elsif ( $t->{symbol} eq "|:" ) {
 		    $cell = { repeat_start => 1 };
 		}
-		elsif ( $t->{symbol} eq ":|" ) {
+		elsif ( $t->{symbol} eq ":|" || $t->{symbol} eq ":|:" ) {
 		    if ( %$cell ) {
 			$cell->{repeat_end} = 1;
 			$cell = {};
+			$cell->{repeat_start} = 1
+			  if $t->{symbol} eq ":|:";
 		    }
 		    else {
 			$cell = {};
