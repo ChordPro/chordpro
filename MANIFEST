@@ -61,6 +61,8 @@ lib/ChordPro/Wx/SongbookExportPanel.pm
 lib/ChordPro/Wx/SongbookExportPanel.wxg
 lib/ChordPro/Wx/SongbookExportPanel_wxg.pm
 lib/ChordPro/Wx/Utils.pm
+lib/ChordPro/lib/Class/JSON_Object.pm
+lib/ChordPro/lib/Data/Printer/Theme/Zellner.pm
 lib/ChordPro/lib/JSON/Relaxed.pm
 lib/ChordPro/lib/JSON/Relaxed/ErrorCodes.pm
 lib/ChordPro/lib/JSON/Relaxed/Parser.pm
