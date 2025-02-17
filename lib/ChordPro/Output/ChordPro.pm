@@ -147,7 +147,7 @@ sub generate_song ( $s ) {
 
     if ( $s->{spreadimage} && $variant eq "msp" ) {
 	my $a = $s->{assets}->{$s->{spreadimage}->{id}};
-	if ( $a->{delegate} =~ /^abc$/i ) {
+	if ( $a->{delegate} =~ /^abc$/i && !$a->{uri} ) {
 	    push( @s, "{start_of_" . lc($a->{delegate}) . "}",
 		  @{$a->{data}},
 		  "{end_of_" . lc($a->{delegate}) . "}" );
