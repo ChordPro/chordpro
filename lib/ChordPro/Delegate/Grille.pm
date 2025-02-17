@@ -32,6 +32,12 @@ Differences with grid content:
 
  * Cells are fixed size (but may get higher).
 
+ * Repeats are expanded.
+
+ * Double-bars are part separators.
+
+ * No end bar.
+
 Misc.
 
    | A | B |:1 C | D |:2 E | F |
@@ -126,6 +132,7 @@ sub compose( $data ) {
 	my @cells = ();
 	my @lines = ();
 	my $line;
+	my $repstart;
 	my $cell = {};
 	if ( $l->{margin} ) {
 	    push( @parts, $part ) if $part;
@@ -159,12 +166,15 @@ sub compose( $data ) {
 		}
 		elsif ( $t->{symbol} eq "|:" ) {
 		    $cell = { repeat_start => 1 };
+		    $repstart = @cells;
 		}
 		elsif ( $t->{symbol} eq ":|" || $t->{symbol} eq ":|:" ) {
 		    if ( %$cell ) {
 			$cell->{repeat_end} = 1;
 			$cell = {};
-			$cell->{repeat_start} = 1
+			push( @cells, @cells[$repstart..$#cells] );
+			$repstart = 0;
+			$repstart = @cells, $cell->{repeat_start} = 1
 			  if $t->{symbol} eq ":|:";
 		    }
 		    else {
@@ -182,12 +192,14 @@ sub compose( $data ) {
 		push( @{$cell->{chords}}, "." );
 	    }
 	    elsif ( $c eq "repeat1" ) {
-		push( @{$cell->{chords}}, "R" );
+		$cell->{chords} = [ "R" ];
+		shift( @{$l->{tokens}} )
+		  while $l->{tokens}->[0]->{class} eq "space";
 	    }
 	    elsif ( $c eq "repeat2" ) {
 		$cell->{chords} = [ "R2" ];
 		shift( @{$l->{tokens}} )
-		  while $l->{tokens}->[0] eq ".";
+		  while $l->{tokens}->[0]->{class} eq "space";
 	    }
 	}
 	push( @cells, $cell )
@@ -301,13 +313,24 @@ class O_Grille_Part  :does(Class::JSON_Object) {
 class O_Grille_Line  :does(Class::JSON_Object) {
     field @cells     :Class(O_Grille_Cell);
 
-    method expand_rests {
+    method expand_repeats {
 	my @pl = ();
 	for ( @cells ) {
 	    push( @pl, $_ );
 	    if ( @{$_->chords} == 1 && $_->chords->[0] eq 'R2' ) {
-		$_->chords->[0] = ' R2';
-		push( @pl, O_Grille_EmptyCell->new );
+		if ( @pl > 2 && $pl[-3]->is_simple && $pl[-2]->isa("O_Grille_EmptyCell") ) {
+		    $pl[-1] = O_Grille_EmptyCell->new;
+		    push( @pl, O_Grille_EmptyCell->new );
+		}
+		else {
+		    $_->chords->[0] = ' R2';
+		    push( @pl, O_Grille_EmptyCell->new );
+		}
+	    }
+	    if ( @{$_->chords} == 1 && $_->chords->[0] eq 'R' ) {
+		if ( @pl > 1 && $pl[-2]->is_simple ) {
+		    $pl[-1] = O_Grille_EmptyCell->new;
+		}
 	    }
 	}
 	@cells = @pl;
@@ -326,9 +349,14 @@ class O_Grille_Cell  :does(Class::JSON_Object) {
 
     method is_dot(@c) {
 	for ( @c ) {
-	    return 0 unless $_ =~ /^(?:\s+|\.|\/)$/;
+	    return 0 unless $chords[$_] =~ /^(?:\s+|\.|\/)$/;
 	}
 	return 1;
+    }
+
+    method is_simple() {
+	return 1 if @chords == 1;
+	return $self->is_dot( 1..$#chords );
     }
 }
 
@@ -357,7 +385,16 @@ field $color;
 field $fontsize;
 
 ADJUST {
-    $gw ||= $grille->cells;
+    $gw = 0;
+    # Establish total width of the grid.
+    for ( @{$grille->parts} ) {
+        for ( @{$_->lines} ) {
+	    $_->expand_repeats;
+	    $gw = @{$_->cells}
+	      if $gw < @{$_->cells};
+	}
+    }
+    DEBUG && warn("Grid cells = $gw\n");
 }
 
 method grille_cell( $xc, $yc, $cell, %args ) {
@@ -397,29 +434,29 @@ method grille_cell( $xc, $yc, $cell, %args ) {
 	    $do->vline($yc-$ch);
 	}
 	$do->stroke;
-	if ( $cell->dbar_start ) {
+	if ( $cell->dbar_start & 0 ) {
 	    my $d = $size / 8;
 	    $do->move( $xc+$d, $yc-$ch )->vline($yc)->stroke;
 	}
-	if ( $cell->repeat_start ) {
+	if ( $cell->repeat_start && 0 ) {
 	    my $d = $size / 16;
 	    $do->set_symfont;
 	    $do->set_markup("\x{27}");
 	    my ( $w, $h ) = $do->get_size;
 	    $do->show( $xc+$d, $yc -$ch/2+ $h/2 );
 	}
-	if ( $cell->repeat_end ) {
+	if ( $cell->repeat_end && 0 ) {
 	    my $d = $size / 16;
 	    $do->set_symfont;
 	    $do->set_markup("\x{27}");
 	    my ( $w, $h ) = $do->get_size;
 	    $do->show( $xc+$cw-$w-$d, $yc -$ch/2+ $h/2 );
 	}
-	if ( $cell->dbar_end ) {
+	if ( $cell->dbar_end & 0 ) {
 	    my $d = $size / 8;
 	    $do->move( $xc+$cw-$d, $yc-$ch )->vline($yc)->stroke;
 	}
-	if ( $cell->end_bar ) {
+	if ( $cell->end_bar & 0 ) {
 	    my $d = $size / 8;
 	    $do->rectangle( $xc+$cw-$d, $yc-$ch, $xc+$cw, $yc )->fill;
 	}
@@ -432,16 +469,16 @@ method grille_cell( $xc, $yc, $cell, %args ) {
     $c = [ $c ] unless is_arrayref($c);
 
     my $nc = @$c;
-    if ( $nc == 4 && $cell->is_dot(@$c[1..3]) ) {
+    if ( $nc == 4 && $cell->is_dot(1..3) ) {
 	$nc = 1;
     }
-    elsif ( $nc == 3 && $cell->is_dot(@$c[1..2]) ) {
+    elsif ( $nc == 3 && $cell->is_dot(1..2) ) {
 	$nc = 1;
     }
-    elsif ( $nc == 2 && $cell->is_dot($c->[1]) ) {
+    elsif ( $nc == 2 && $cell->is_dot(1) ) {
 	$nc = 1;
     }
-    elsif ( $nc == 4 && $cell->is_dot(@$c[1,3]) ) {
+    elsif ( $nc == 4 && $cell->is_dot(1,3) ) {
 	$nc = 2;
 	$c->[1] = $c->[2];
     }
@@ -498,24 +535,24 @@ method grille_cell( $xc, $yc, $cell, %args ) {
     }
 
     elsif ( $nc == 3 ) { # BL T BR
-	unless ( $cell->is_dot(@$c[1,2]) ) {
+	unless ( $cell->is_dot(1,2) ) {
 	    $do->move( $xc+$cw/2, $yc-$ch/1.5 );
 	    $do->line( $xc+$cw/2, $yc-$ch );
 	    $do->stroke;
 	}
-	unless ( $cell->is_dot($c->[0]) ) {
-	    if ( $cell->is_dot($c->[1]) ) {
+	unless ( $cell->is_dot(0) ) {
+	    if ( $cell->is_dot(1) ) {
 		$self->fit_cell( $xc, $yc, $c->[0],  1,  1 );
 	    }
 	    else {
 		$self->fit_cell( $xc, $yc, $c->[0],  -1,  1 );
 	    }
 	}
-	unless ( $cell->is_dot($c->[1]) ) {
+	unless ( $cell->is_dot(1) ) {
 	    $do->move( $xc+$cw/2, $yc-$ch/1.5 );
 	    $do->line( $xc, $yc );
 	    $do->stroke;
-	    if ( $cell->is_dot($c->[2]) ) {
+	    if ( $cell->is_dot(2) ) {
 		$self->fit_cell( $xc, $yc, $c->[1],   1,  -1 );
 	    }
 	    else {
@@ -523,7 +560,7 @@ method grille_cell( $xc, $yc, $cell, %args ) {
 				 scale => 0.6);
 	    }
 	}
-	unless ( $cell->is_dot($c->[2]) ) {
+	unless ( $cell->is_dot(2) ) {
 	    $do->move( $xc+$cw/2, $yc-$ch/1.5 );
 	    $do->line( $xc+$cw, $yc );
 	    $do->stroke;
@@ -533,7 +570,7 @@ method grille_cell( $xc, $yc, $cell, %args ) {
 
     elsif ( $nc == 4 ) { # LTBR
 	my $drawn = 0;
-	unless ( $cell->is_dot($c->[0]) ) {
+	unless ( $cell->is_dot(0) ) {
 #	    $do->move( $xc+$cw/2, $yc-$ch/2 );
 #	    $do->line( $xc, $yc );
 #	    $do->move( $xc+$cw/2, $yc-$ch/2 );
@@ -542,7 +579,7 @@ method grille_cell( $xc, $yc, $cell, %args ) {
 	    $drawn |= 0x1001;
 	    $self->fit_cell( $xc, $yc, $c->[0],  0,  1 );
 	}
-	unless ( $cell->is_dot($c->[1]) ) {
+	unless ( $cell->is_dot(1) ) {
 	    unless ( $drawn & 0b100 ) {
 		$do->move( $xc+$cw/2, $yc-$ch/2 );
 		$do->line( $xc, $yc );
@@ -553,7 +590,7 @@ method grille_cell( $xc, $yc, $cell, %args ) {
 	    $drawn |= 0x1100;
 	    $self->fit_cell( $xc, $yc, $c->[1],  1,  0 );
 	}
-	unless ( $cell->is_dot($c->[2]) ) {
+	unless ( $cell->is_dot(2) ) {
 	    $do->move( $xc+$cw/2, $yc-$ch/2 );
 	    $do->line( $xc, $yc-$ch );
 	    unless ( $drawn & 0b0100 ) {
@@ -564,7 +601,7 @@ method grille_cell( $xc, $yc, $cell, %args ) {
 	    $drawn |= 0x0011;
 	    $self->fit_cell( $xc, $yc, $c->[2], -1,  0 );
 	}
-	unless ( $cell->is_dot($c->[3]) ) {
+	unless ( $cell->is_dot(3) ) {
 	    unless ( $drawn & 0b0100 ) {
 		$do->move( $xc+$cw/2, $yc-$ch/2 );
 		$do->line( $xc+$cw, $yc );
@@ -681,17 +718,6 @@ method grille_part( $xp, $yp, $p, %args ) {
     my $part = $p->part // " ";
     # warn("part: $part, x = $xp, y = $yp\n");
 
-    $_->expand_rests for @{$p->lines};
-
-    # Establish total width of the grid.
-    # If not specified, derive from the first A part.
-    if ( !$gw && $part =~ /^(A\d*| )$/ ) {
-	for ( @{$p->lines->[0]->cells } ) {
-	    $gw++;
-	}
-	DEBUG && warn("Grid cells = $gw\n");
-    }
-
     $cw ||= 2 * $size;
 
     # Convenience.
@@ -757,7 +783,6 @@ method build( %args ) {
     my $xp = 0;
     my $yp = 0;
     my %did;
-    $gw = $grille->cells;
     my $xo = $do->newxo;
     my $lw = $do->lw;
     my $i;
