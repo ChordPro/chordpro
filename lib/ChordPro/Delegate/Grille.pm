@@ -26,13 +26,17 @@ Differences with grid directive:
 
 Differences with grid content:
 
- * Margin text = part name.
+ * Margin text = part name (single letter), top comment, (part) comment.
 
  * No trailing comments.
 
  * Cells are fixed size (but may get higher).
 
- * Repeats are expanded.
+ * :: Repeats are expanded. (?)
+
+ * R/R2 repeats are expanded/blanked/asis.
+
+ * Alternative repeats are expanded/blanked.
 
  * Double-bars are part separators.
 
@@ -300,12 +304,14 @@ use Object::Pad;
 use Class::JSON_Object;
 
 class O_Grille       :does(Class::JSON_Object) {
+    field $title     :Optional;
     field $cells     :Optional;
     field $structure :Optional;
     field @parts     :Class(O_Grille_Part);
 }
 
 class O_Grille_Part  :does(Class::JSON_Object) {
+    field $title     :Optional;
     field $part;
     field @lines     :Class(O_Grille_Line);
 }
@@ -318,15 +324,18 @@ class O_Grille_Line  :does(Class::JSON_Object) {
 	for ( @cells ) {
 	    push( @pl, $_ );
 	    if ( @{$_->chords} == 1 && $_->chords->[0] eq 'R2' ) {
+		# If R2 follows an simple (one-chord) cell, make it empty.
 		if ( @pl > 2 && $pl[-3]->is_simple && $pl[-2]->isa("O_Grille_EmptyCell") ) {
 		    $pl[-1] = O_Grille_EmptyCell->new;
 		    push( @pl, O_Grille_EmptyCell->new );
 		}
 		else {
+		    # Otherwise, add an empty cell.
 		    $_->chords->[0] = ' R2';
 		    push( @pl, O_Grille_EmptyCell->new );
 		}
 	    }
+	    # If R follows an simple (one-chord) cell, make it empty.
 	    if ( @{$_->chords} == 1 && $_->chords->[0] eq 'R' ) {
 		if ( @pl > 1 && $pl[-2]->is_simple ) {
 		    $pl[-1] = O_Grille_EmptyCell->new;
