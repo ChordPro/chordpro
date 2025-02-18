@@ -54,6 +54,15 @@ Example config file:
 		    // Input from... (appended, see "argfile" above)
 		  ]
 
+        // Preprocessing. "first" and "last" are applied to the whole
+        // data at once. "lines" is applied line by line, after "first"
+        // and before "last".
+        preprocess {
+            first : [ {...} ]
+            lines : [ {...} ]
+            last  : [ {...} ]
+        }
+
 	// (Optional) Input lines to prepend to the user data.
 	preamble : [
 	    '\\version "2.21.0"'
@@ -139,10 +148,45 @@ sub _cmd2image( $song, $ctl, %args ) {
     my $input  = $subst->($ctl->{input})  || "stdin";
     my @data = @{$elt->{data}};
 
+    # Preprocessor.
+    my $prep = make_preprocessor( $ctl->{preprocess} );
+
+    my $data;
+    if ( $prep->{first} ) {
+	$data = join( "\n", @data );
+	$::config->{debug}->{pp} && warn("PRE[first]: ---\n", $data, "\n---\n");
+	$prep->{first}->($data);
+	$::config->{debug}->{pp} && warn("POST[first]: ---\n", $data, "\n---\n");
+    }
+
+    if ( $prep->{lines} ) {
+	@data = split( /\n/, $data ) if defined $data;
+	undef $data;
+	while ( @data ) {
+	    $_ = shift(@data);
+	    $::config->{debug}->{pp} && warn("PRE:  ", $_, "\n");
+	    $prep->{lines}->($_);
+	    $::config->{debug}->{pp} && warn("POST: ", $_, "\n");
+	    if ( /\n/ ) {
+		my @a = split( /\n/, $_ );
+		unshift( @data, @a );
+	    }
+	}
+    }
+
+    if ( $prep->{last} ) {
+	$data = join( "\n", @data ) unless defined $data;
+	$::config->{debug}->{pp} && warn("PRE[last]: ---\n", $data, "\n---\n");
+	$prep->{last}->($data);
+	$::config->{debug}->{pp} && warn("POST[last]: ---\n", $data, "\n---\n");
+    }
+    @data = split( /\n/, $data ) if defined $data;
+
     # Optional pre- and postamble.
     if ( is_arrayref($ctl->{preamble}) ) {
 	unshift( @data, @{ $ctl->{preamble} } );
     }
+
     if ( is_arrayref($ctl->{postamble}) ) {
 	push( @data, @{ $ctl->{postamble} } );
     }
