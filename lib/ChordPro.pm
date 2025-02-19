@@ -200,7 +200,8 @@ sub chordpro {
 
     # Check for metadata in filelist. Actually, this works on the
     # command line as well, but don't tell anybody.
-    progress( phase => "Parsing", index => 0, total => 0+@ARGV )
+    progress( phase => "Parsing", index => 0,
+	      total => 0+grep { !/^--/ } @ARGV )
       if @ARGV > 1;
 
     my %gopts;
@@ -233,7 +234,7 @@ sub chordpro {
 	    $gopts{$_} = $opts{$_} eq "" ? undef : $opts{$_};
 	}
 	unless ( @w ) {
-	    progress( msg => $file ) if @ARGV > 1;
+	    progress( msg => $file ) if @ARGV > 1 && $file !~ /^--/;
 	    next;
 	}
 
@@ -1042,10 +1043,10 @@ sub app_setup {
     if ( $clo->{filelist} ) {
 	my @files;
 	foreach ( @{ $clo->{filelist} } ) {
-	    push( @files, "--filelist", $_ );
+	    push( @files, "--filelist=" . qquote($_) );
 	    my $dir = fn_dirname($_);
 	    my $list = fs_load( $_, $clo );
-	    push( @files, "--dir", $dir );
+	    push( @files, "--dir=" . qquote($dir) );
 	    foreach ( @$list ) {
 		next unless /\S/;
 		next if /^#/;
