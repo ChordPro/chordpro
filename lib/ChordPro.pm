@@ -1042,10 +1042,10 @@ sub app_setup {
     if ( $clo->{filelist} ) {
 	my @files;
 	foreach ( @{ $clo->{filelist} } ) {
-	    push( @files, "--filelist=$_" );
+	    push( @files, "--filelist", $_ );
 	    my $dir = fn_dirname($_);
 	    my $list = fs_load( $_, $clo );
-	    push( @files, "--dir=$dir" );
+	    push( @files, "--dir", $dir );
 	    foreach ( @$list ) {
 		next unless /\S/;
 		next if /^#/;
