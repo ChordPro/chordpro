@@ -2554,7 +2554,8 @@ sub parse_chord {
 	  if $xp || $xc || $config->{debug}->{chords};
     }
 
-    if ( $xp && $info ) {
+    if ( $xp && $info 
+	 && !( $xc && ( $xc eq "nashville" || $xc eq "roman" ) ) ) {
 	# For transpose/transcode, chord must be wellformed.
 	my $i = $info->transpose( $xp,
 				  $xpose_dir // $global_dir);
