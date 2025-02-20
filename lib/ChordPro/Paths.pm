@@ -117,7 +117,7 @@ BUILD {
     $self->setup_resdirs;
 
     # Check for packaged image.
-    for ( qw( Docker AppImage PPL ) ) {
+    for ( qw( OCI Docker AppImage PPL ) ) {
 	next unless exists $ENV{uc($_)."_PACKAGED"}
 	  && $ENV{uc($_)."_PACKAGED"};
 	$packager = $_;
