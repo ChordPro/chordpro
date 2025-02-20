@@ -7,9 +7,6 @@ lib/ChordPro/Wx/FileDirPickerCtrl.pm
 lib/ChordPro/Wx/Main.pm
 lib/ChordPro/Wx/Main.wxg
 lib/ChordPro/Wx/Main_wxg.pm
-lib/ChordPro/Wx/NewSongDialog.pm
-lib/ChordPro/Wx/NewSongDialog.wxg
-lib/ChordPro/Wx/NewSongDialog_wxg.pm
 lib/ChordPro/Wx/PanelRole.pm
 lib/ChordPro/Wx/SettingsDialog.pm
 lib/ChordPro/Wx/SettingsDialog.wxg
