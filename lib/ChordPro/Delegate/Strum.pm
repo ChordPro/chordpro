@@ -45,6 +45,10 @@ sub strum2xo( $song, %args ) {
     my $kv = { %{$elt->{opts}} };
     my $ps = $song->{_ps};
     my $pr = $ps->{pr};
+    my $bpm = 4;
+    if ( ($song->{meta}->{time}->[0] // "4/4") =~ /^\s*(\d+)\s*\/\s*(\d+)\s*$/ ) { 
+	$bpm = $1;
+    }
 
     if ( DEBUG > 1 ) {
 	use DDP; p %args, as => "args";
@@ -54,17 +58,18 @@ sub strum2xo( $song, %args ) {
 
     my $xo = $pr->{pdfgfx}->{' apipage'}->{' api'}->xo_form;
     my @xo;
-    my $txtfont = $ps->{fonts}->{strum}->{fd};
+    my $txtfont = ($ps->{fonts}->{strum}//$ps->{fonts}->{text})->{fd};
 
     for ( @{ $elt->{data} } ) {
 
 	my $s = Strum->new( data => $_ );
 
 	push( @xo, $s->build( gfx     => $pr->{pdfgfx},
-			      color   => "red",
+			      color   => $kv->{color} // $pr->_fgcolor,
 			      txtfont => $txtfont,
-			      size    => 30,
-			      triplet => 3,
+			      size    => $kv->{size} || 30,
+			      bpm     => $bpm,
+			      tuplet  => $kv->{tuplet} || 1,
 			    ) );
     }
     $xo = $xo[0];
@@ -107,6 +112,7 @@ class Strum;
 
 sub DEBUG() { $::config->{debug}->{x2} }
 use Ref::Util qw( is_arrayref );
+use ChordPro::Utils qw(maybe);
 
 field $data    :param;
 
@@ -114,6 +120,18 @@ field $data    :param;
 field $do;			# drawing object
 field $size;
 field $color;
+
+BUILD {
+    my @d;
+    while ( $data =~ m/([x+]?)(a?)([ud]| )/g ) {
+	push( @d, {       arrow  => $3,
+			  maybe mute   => ($1 eq 'x'),
+			  maybe accent => ($1 eq '+'),
+			  maybe arpeggio => ($2 eq 'a'),
+		  } );
+    }
+    $data = \@d;
+};
 
 method build( %args ) {
 
@@ -125,44 +143,32 @@ method build( %args ) {
 
     my $gfx  = $args{gfx};
     $size = $args{size};
-    my $triplet = $args{triplet};
     my $x = 0;
     my $y = 0;
     $do = DrawingObject->new( gfx     => $gfx,
 			      size    => $size,
 			      txtfont => $args{txtfont},
-			      color   => $color // "blue",
+			      color   => $color = $args{color} // "black",
 			    );
-    my $lw = $do->lw;
-    my $hw = $do->hw;
+    my $lw  = $do->lw;
+    my $hw  = $do->hw;
     my $hhw = $do->hhw;
-    my $xo = $do->newxo;
-    my $i = 0;
+    my $xo  = $do->newxo;
+    my $i   = 0;
     my ( $w, $h );
-    while ( $data =~ m/([x+]?)([ud]| )/g ) {
+
+    while ( 1 ) {
 	$i++;
-	warn( sprintf("%d: x = %6.2f, \"%s\"\n", $i, $x, $1.$2 ) );
-	$do->strum( $x, $y,
-		    up     => $2 eq 'u',
-		    mute   => $1 eq 'x',
-		    accent => $1 eq '+' ) if $2 ne " ";
-	if ( $i == 3 ) {
-	    $x -= $hw;
-	    $i = 0;
-	}
-	else {
-	    $do->grid( $x, $y - $hw - $hhw );
-	    if ( $triplet && $i == 1) {
-		$do->set_txtfont(10);
-		$do->set_markup("3");
-		( $w, $h ) = $do->get_size;
-		$do->show( $x + 2*$hw + $w/2, $y - $h );
-	    }
-	}
-	$x += 2*$hw;
+	$x =
+	$do->strum( $x, $y, $data,
+		    bpm => $args{bpm} || 4,
+		    tuplet => $args{tuplet} || 1,
+		  );
+	last;
     }
 
-    $xo->bbox( -$lw/2, -$hw-$hhw-$lw/2 - ( $triplet ? $h : 0 ),
+    $xo->bbox( -$lw/2,
+	       -$hw-$hhw-$lw/2,
 	       $x+$lw/2, $size+$hw+$lw/2 );
     return $xo;
 }
@@ -242,62 +248,104 @@ method bboxlw( $x1,$y1, $x2,$y2 ) {
 
 #### High level methods.
 
-method strum( $x, $y, %args ) {
-    my $up     = $args{up}     || 0;
-    my $mute   = $args{mute}   || 0;
-    my $accent = $args{accent} || 0;
+method strum( $x, $y, $data, %args ) {
 
-#    $args{x} = $x; $args{y} = $y; use DDP; p %args;
+    my $tuplet = $args{tuplet} || 1;
+    my $bpm    = $args{bpm}    || 4;
+    $data = [ @$data ];
 
-    $x += $hhw;
+    while ( @$data ) {
+	for my $beat ( 1 .. $bpm ) {
+	    for my $tp ( 1 .. $tuplet ) {
 
-    if ( $up ) {
-	$self->move( $x, 0 );
-	$self->vline( $y+$size-$hhw );
-	$self->triangle( $x, $y+$size - $hhw, up => 1 );
-    }
-    else {
-	$self->move( $x, $hhw );
-	$self->vline( $y+$size );
-	$self->triangle( $x, $y - $hw );
+		$_ = shift(@$data);
+		my $arrow  = $_->{arrow}  || " ";
+		my $mute   = $_->{mute}   || 0;
+		my $accent = $_->{accent} || 0;
+		my $arpeggio = $_->{arpeggio} || 0;
+
+		# $args{x} = $x; $args{y} = $y; use DDP; p %args;
+
+		$x += $hhw;
+
+		if ( $arrow eq "u" ) {
+		    $self->move( $x, $y );
+		    if ( $arpeggio ) {
+			$self->gfx->line_dash_pattern(3);
+			$self->vline( $y+$size-$hhw )->stroke;
+			$self->gfx->line_dash_pattern();
+		    }
+		    else {
+			$self->vline( $y+$size-$hhw );
+		    }
+		    $self->triangle( $x, $y+$size - $hhw, up => 1 );
+		}
+		elsif ( $arrow eq "d" ) {
+		    $self->move( $x, $hhw );
+		    if ( $arpeggio ) {
+			$self->gfx->line_dash_pattern( $size/10 );
+			$self->vline( $y+$size )->stroke;
+			$self->gfx->line_dash_pattern();
+		    }
+		    else {
+			$self->vline( $y+$size );
+		    }
+		    $self->triangle( $x, $y - $hw );
+		}
+
+		if ( $mute ) {
+		    $self->move( $x - 0.8*$hhw, $y+$size + $hw )
+		      ->line( $x + 0.8*$hhw, $y+$size + 0.2*$hw )->stroke;
+		    $self->move( $x - 0.8*$hhw, $y+$size + 0.2*$hw )
+		      ->line( $x + 0.8*$hhw, $y+$size + $hw )->stroke;
+		}
+		elsif ( $accent ) {
+		    $self->move( $x - 0.8*$hhw, $y+$size + $hw )
+		      ->line( $x + 0.8*$hhw, $y+$size + 0.6*$hw)
+		      ->line( $x - 0.8*$hhw, $y+$size + 0.2*$hw )->stroke;
+		}
+
+		if ( $tp == 1 ) {
+		    $self->set_txtfont($hw);
+		    $self->cshow( $x, $y - $hhw/2, $beat );
+		}
+		else {
+		    $self->set_txtfont($hw);
+		    $self->cshow( $x, $y - $hhw/2, "&" );
+		}
+		if ( 0 and $tp < $tuplet ) {
+		    my $dx = 2*$hw;
+		    my $dy = $hw;
+		    $self->move( $x, $y - $hhw - $hw )
+		      ->vline( $y - 2*$hw )
+		      ->hline( $x+$dx )
+		      ->vline( $y - $hhw - $hw )
+		      ->stroke;
+		}
+		$x += 3*$hhw;
+	    }
+	}
     }
 
-    if ( $args{mute} ) {
-	$self->move( $x - $hhw, $y+$size + $hw )
-	  ->line( $x + $hhw, $y+$size )->stroke;
-	$self->move( $x - $hhw, $y+$size )
-	  ->line( $x + $hhw, $y+$size + $hw )->stroke;
-    }
-    elsif ( $args{accent} ) {
-	$self->move( $x - $hhw, $y+$size + $hw )
-	  ->line( $x + $hhw, $y+$size + $hhw)
-	  ->line( $x - $hhw, $y+$size )->stroke;
-    }
-    $self;
+    $x - $hw;
 }
 
 method triangle( $x, $y, %args ) {
     if ( $args{up} ) {
 	$gfx->move( $x, $y-$hhw );
-	$gfx->polyline( $x-$hhw,$y-$hhw, $x,$y+$hhw, $x+$hhw,$y-$hhw );
+	$gfx->polyline( $x-0.8*$hhw,$y-$hhw, $x,$y+$hhw, $x+0.8*$hhw,$y-$hhw );
     }
     else {
 	$gfx->move( $x, $hw );
-	$gfx->polyline( $x-$hhw,$hw, $x,0, $x+$hhw,$hw );
+	$gfx->polyline( $x-0.8*$hhw,$hw, $x,0, $x+0.8*$hhw,$hw );
     }
     $gfx->close->fillstroke;
     $self;
 }
 
-method grid( $x, $y, %args ) {
-    my $dx = 2*$hw;
-    $x += $hhw;
-    my $dy = $hw;
-    $self->move( $x, $y+$dy )
-      ->vline( $y )
-      ->hline( $x+$dx )
-      ->vline( $y+$dy )
-      ->stroke;
+method curve( $cx1,$cy1, $cx2,$cy2, $x,$y ) {
+    $gfx->curve($cx1,$cy1, $cx2,$cy2, $x,$y);
+    $gfx;
 }
 
 # Text methods.
@@ -317,12 +365,23 @@ method set_markup($t) {
     $self;
 }
 method get_size() {
-    $layout->get_size();
+    $layout->get_size;
 }
-method show( $x, $y ) {
+method show( $x, $y, $markup = undef ) {
+    $self->set_markup($markup) if defined $markup;
     $gfx->textstart;
     $layout->show( $x, $y, $gfx );
     $gfx->textend;
     $self;
 }
+
+method cshow( $x, $y, $markup = undef ) {
+    $self->set_markup($markup) if defined $markup;
+    my ( $w, $h ) = $layout->get_size;
+    $gfx->textstart;
+    $layout->show( $x - $w/2, $y, $gfx );
+    $gfx->textend;
+    $self;
+}
+
 1;
