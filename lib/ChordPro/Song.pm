@@ -304,6 +304,8 @@ sub parse_song {
 	    $self->{meta}->{$k} = [ $v ];
 	}
     }
+    $self->{meta}->{"chordpro.songsource"} = $diag->{file}
+      unless $::running_under_test;
 
     # Build regexp to split out chords.
     if ( $config->{settings}->{memorize} ) {

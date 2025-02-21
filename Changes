@@ -34,6 +34,7 @@
     - (PDF) Fix progress count if multi-pass.
     - Fix diagnostic in file load.
     - Fix *size reset after *font reset.
+    - Fix/Doc song and page metadata substitutions. 
 
 6.070 2024-12-25
 

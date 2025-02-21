@@ -82,8 +82,6 @@ metadata items.
 
 The ChordPro reference implementation provides additional metadata:
 
- * `chords`: A comma-separated list of chords used in this song.
-
  * `chordpro`: The string `"ChordPro"`.
 
  * `chordpro.songsource`: The input file name for the song.
@@ -99,10 +97,6 @@ The ChordPro reference implementation provides additional metadata:
  * `instrument.type`: The name of the instrument as set by instrument
    configs. Default `"guitar"`.
 
- * `numchords`: The number of chords used in this song.
-
- * `songindex`: The index (serial number) of the song in the songbook.
- 
  * `today`: The current date in the format defined in the config file.
    See [Dates and Times]({{< relref
    "ChordPro-Configuration-Generic#dates-and-times" >}}).
@@ -126,6 +120,10 @@ selection]({{< relref "chordpro-directives#conditional-directives"
 
 Page related metadata are only available in headings and footers.
 
+ * `chords`: A comma-separated list of chords used in this song.
+
+ * `numchords`: The number of chords used in this song.
+
  * `page`: The starting page number of the song.
 
  * `page.side`: The current page side, `left` or `right`.
@@ -136,6 +134,8 @@ Page related metadata are only available in headings and footers.
  
  * `pages`: The total number of pages of the current song.
 
+ * `songindex`: The index (serial number) of the song in the songbook.
+ 
 ## Command line metadata
 
 Additional metadata can be provided on the [command line]({{< relref
