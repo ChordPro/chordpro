@@ -117,7 +117,7 @@ metadata {
 // Globally defined (added) meta data,
 // This is explicitly NOT intended for the metadata items above.
 // Do NOT remove or change "_configversion"!
-meta._configversion : [ 6.071 ]
+meta._configversion : [ 6.072 ]
 
 // Assets (placeholder).
 assets {}
@@ -364,6 +364,14 @@ delegates {
       "\\header { tagline = ##f }"
     ]
     preprocess.ly : []
+  }
+
+  // Strum patterns.
+  strum {
+    type     : image
+    module   : Strum
+    handler  : strum2xo
+    preamble : []
   }
 
   // Embedding SVG.

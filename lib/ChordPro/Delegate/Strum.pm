@@ -24,6 +24,8 @@ Experimental delegate to produce a 'strum' image.
     xu = muted up
     +d = accented down
     +u = accented up
+    ad = arpeggio down
+    au = arpeggio up
 
 Config:
 
@@ -120,17 +122,37 @@ field $data    :param;
 field $do;			# drawing object
 field $size;
 field $color;
+field $tuplet;
+field $bpm;
 
 BUILD {
-    my @d;
-    while ( $data =~ m/([x+]?)(a?)([ud]| )/g ) {
-	push( @d, {       arrow  => $3,
-			  maybe mute   => ($1 eq 'x'),
-			  maybe accent => ($1 eq '+'),
-			  maybe arpeggio => ($2 eq 'a'),
-		  } );
+    if ( $data =~ /-(\d+)(t?)\s*$/ ) {
+	$bpm = 4;
+	$tuplet = 1;#$1/$bpm;
+	$tuplet *= 3 if $2;
+	my @d;
+	while ( $data =~ m/([udUdMmAa r])/g ) {
+	    my $c = $1;
+	    push( @d, {       arrow  =>
+			      ( $c =~ /[r ]/ ? " "
+				: ( !!($c =~ /[uUma]/) ? "u" : "d" ) ),
+			maybe mute   => !!( $c =~ /m/i ),
+			maybe arpeggio => !!( $c =~ /a/i ),
+		      } );
+	}
+	$data = \@d;
     }
-    $data = \@d;
+    else {
+	my @d;
+	while ( $data =~ m/([x+]?)(a?)([ud]| )/g ) {
+	    push( @d, {       arrow  => $3,
+			maybe mute   => ($1 eq 'x'),
+			maybe accent => ($1 eq '+'),
+			maybe arpeggio => ($2 eq 'a'),
+		      } );
+	}
+	$data = \@d;
+    }
 };
 
 method build( %args ) {
@@ -161,8 +183,8 @@ method build( %args ) {
 	$i++;
 	$x =
 	$do->strum( $x, $y, $data,
-		    bpm => $args{bpm} || 4,
-		    tuplet => $args{tuplet} || 1,
+		    bpm => $bpm || $args{bpm} || 4,
+		    tuplet => $tuplet || $args{tuplet} || 1,
 		  );
 	last;
     }
