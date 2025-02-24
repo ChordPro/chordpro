@@ -74,5 +74,34 @@ xdst = 0x1F150
 for i in range(0,26):
     gcopy( chr(ord("A")+i),  xdst+i )
 
+# Inkscape export >>selection<<
+tf = psMat.compose(psMat.scale(0.71),psMat.translate(150,291))
+arrow = dst.createChar( 0x2191, 'up' )
+arrow.importOutlines('up.svg')
+arrow.transform(tf)
+arrow.width = 2048
+arrow = dst.createChar( 0x218c, 'accup' )
+arrow.importOutlines('accup.svg')
+arrow.transform(tf)
+arrow.width = 2048
+arrow = dst.createChar( 0x218d, 'arpup' )
+arrow.importOutlines('arpup.svg')
+arrow.transform(tf)
+arrow.width = 2048
+
+tf = psMat.compose(psMat.scale(0.71),psMat.translate(150,270))
+arrow = dst.createChar( 0x2193, 'down' )
+arrow.importOutlines('down.svg')
+arrow.transform(tf)
+arrow.width = 2048
+arrow = dst.createChar( 0x218e, 'accdown' )
+arrow.importOutlines('accdown.svg')
+arrow.transform(tf)
+arrow.width = 2048
+arrow = dst.createChar( 0x218f, 'arpdown' )
+arrow.importOutlines('arpdown.svg')
+arrow.transform(tf)
+arrow.width = 2048
+
 # Generate new font.
 dst.generate("ChordProSymbols.ttf")
