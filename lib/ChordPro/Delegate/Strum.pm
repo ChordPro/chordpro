@@ -293,21 +293,34 @@ method strum( $x, $y, $data, %args ) {
 		if ( $arrow eq "u" ) {
 		    $self->move( $x, $y );
 		    if ( $arpeggio ) {
-			$self->gfx->line_dash_pattern(3);
-			$self->vline( $y+$size-$hhw )->stroke;
-			$self->gfx->line_dash_pattern();
+			#$self->gfx->line_dash_pattern(3);
+			#$self->vline( $y+$size-$hhw )->stroke;
+			#$self->gfx->line_dash_pattern();
+			$self->vline(            $y +   $hhw );
+			$self->curve( $x,        $y + 2*$hhw,
+				      $x - $hhw, $y + 2*$hhw,
+				      $x,        $y + 3*$hhw );
+			$self->curve( $x + $hhw, $y + 4*$hhw,
+				      $x,        $y + 4*$hhw,
+				      $x,        $y + 5*$hhw );
+			$self->vline(            $y+$size )->stroke;
 		    }
 		    else {
-			$self->vline( $y+$size-$hhw );
+			$self->vline( $y + $size - $hhw );
 		    }
-		    $self->triangle( $x, $y+$size - $hhw, up => 1 );
+		    $self->triangle( $x, $y + $size - $hhw, up => 1 );
 		}
 		elsif ( $arrow eq "d" ) {
-		    $self->move( $x, $hhw );
+		    $self->move( $x, $y + $hhw );
 		    if ( $arpeggio ) {
-			$self->gfx->line_dash_pattern( $size/10 );
-			$self->vline( $y+$size )->stroke;
-			$self->gfx->line_dash_pattern();
+			$self->vline(            $y + 3*$hhw );
+			$self->curve( $x,        $y + 4*$hhw,
+				      $x - $hhw, $y + 4*$hhw,
+				      $x,        $y + 5*$hhw );
+			$self->curve( $x + $hhw, $y + 6*$hhw,
+				      $x,        $y + 6*$hhw,
+				      $x,        $y + 7*$hhw );
+			$self->vline(            $y+$size )->stroke;
 		    }
 		    else {
 			$self->vline( $y+$size );
