@@ -33,6 +33,7 @@ my $in_context = $def_context;
 my $skip_context = 0;
 my $grid_arg;			# also used for grilles?
 my $grid_cells;			# also used for grilles?
+my $grid_type = 0;		# 0 = chords, 1 = strums, 2 = ???
 my @grille;
 
 # Local transposition.
@@ -1017,6 +1018,7 @@ sub decompose_grid {
     $line =~ s/\s+$//;
     return ( tokens => [] ) if $line eq "";
     local $re_chords = qr/(\[.*?\])/;
+    my $memchords = $memchords;
 
     my %res;
     if ( $line !~ /\|/ ) {
@@ -1059,6 +1061,13 @@ sub decompose_grid {
     my $p1;			# prev chords (for % and %% repeat)
     my $p2;			# pprev chords (for %% repeat)
     my $si = 0;			# start index
+
+    $grid_type = 0;
+    if ( @tokens && uc($tokens[0]) eq "|S" ) {
+	$grid_type = 1;		# strum line
+	$memchords = 0;
+	shift(@tokens);
+    }
 
     foreach ( @tokens ) {
 	if ( $_ eq "|:" || $_ eq "{" ) {
@@ -1138,7 +1147,8 @@ sub decompose_grid {
 				   : $self->chord($_) } @a ],
 		       class => "chords" };
 	    }
-	    if ( $memchords ) {
+	    if ( $memchords && $grid_type == 0 ) {
+		@a = grep { !m;^[/.]?$; } @a;
 		push( @$memchords, @a );
 		push( @$p0, @a );
 		if ( $config->{debug}->{chords} ) {
@@ -1156,7 +1166,9 @@ sub decompose_grid {
     if ( $nbt > $grid_cells->[0] ) {
 	do_warn( "Too few cells for grid content" );
     }
-    return ( tokens => \@tokens, %res );
+    return ( tokens => \@tokens,
+	     $grid_type == 1 ? ( type => "strumline" ) : (),
+	     %res );
 }
 
 ################ Parsing directives ################
@@ -2520,8 +2532,8 @@ sub parse_chord {
     my $global_dir = $config->{settings}->{transpose} <=> 0;
     my $unk;
 
-    # When called from {define} ignore xc/xp.
-    $xc = $xp = '' if $def;
+    # When called from {define} or strum ignore xc/xp.
+    $xc = $xp = '' if $def || $grid_type == 1;
 
     $info = ChordPro::Chords::known_chord($chord);
     if ( $info ) {

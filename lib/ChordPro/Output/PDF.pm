@@ -1310,7 +1310,7 @@ sub generate_song {
 	    next;
 	}
 
-	if ( $elt->{type} eq "gridline" ) {
+	if ( $elt->{type} eq "gridline" || $elt->{type} eq "strumline" ) {
 
 	    next if $lyrics_only || !$ps->{grids}->{show};
 
@@ -1336,7 +1336,8 @@ sub generate_song {
 		  $grid_cellwidth,
 		  $grid_barwidth,
 		  $grid_margin,
-		  $ps, song => $s );
+		  $ps, song => $s, type => $elt->{type}
+		);
 
 	    $y -= $vsp;
 	    $pr->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
