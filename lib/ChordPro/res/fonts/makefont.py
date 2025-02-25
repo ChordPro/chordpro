@@ -28,10 +28,10 @@ def gcopy(name, f, tf = 0 ):
 # Create new font, set some properties.
 dst  = fontforge.font()
 dst.fontname = "ChordProSymbols"
-dst.familyname = "MusicalSymbolsForChordPro"
+dst.familyname = "ChordProSymbols"
 dst.fullname = "Musical Symbols For ChordPro"
 dst.copyright = "Open Font License"
-dst.version = "000.300"
+dst.version = "000.400"
 dst.em = 2048;
 
 # Next slot for glyphs.
@@ -75,33 +75,56 @@ for i in range(0,26):
     gcopy( chr(ord("A")+i),  xdst+i )
 
 # Inkscape export >>selection<<
+
+ind = 0x2190    # arrows
 tf = psMat.compose(psMat.scale(0.71),psMat.translate(150,291))
-arrow = dst.createChar( 0x2191, 'up' )
-arrow.importOutlines('up.svg')
+#arrow.width = 2048
+# Custom location.
+arrow = dst.createChar( ind, 'strumarrowup' )
+arrow.importOutlines('arrowup.svg')
 arrow.transform(tf)
 arrow.width = 2048
-arrow = dst.createChar( 0x218c, 'accup' )
-arrow.importOutlines('accup.svg')
+ind += 1
+# Accented
+arrow = dst.createChar( ind, 'strumarrowupacc' )
+arrow.importOutlines('arrowup-acc.svg')
 arrow.transform(tf)
 arrow.width = 2048
-arrow = dst.createChar( 0x218d, 'arpup' )
-arrow.importOutlines('arpup.svg')
+ind += 1
+# Arpeggio
+arrow = dst.createChar( ind, 'strumarrowuparp' )
+arrow.importOutlines('arrowup-arp.svg')
+arrow.transform(tf)
+arrow.width = 2048
+ind += 1
+# Muted
+arrow = dst.createChar( ind, 'strumarrowupmut' )
+arrow.importOutlines('arrowup-mut.svg')
 arrow.transform(tf)
 arrow.width = 2048
 
+ind = 0x21a0
 tf = psMat.compose(psMat.scale(0.71),psMat.translate(150,270))
-arrow = dst.createChar( 0x2193, 'down' )
-arrow.importOutlines('down.svg')
+arrow = dst.createChar( ind, 'strumarrowdown' )
+arrow.importOutlines('arrowdown.svg')
 arrow.transform(tf)
 arrow.width = 2048
-arrow = dst.createChar( 0x218e, 'accdown' )
-arrow.importOutlines('accdown.svg')
+ind += 1
+arrow = dst.createChar( ind, 'strumarrowdownacc' )
+arrow.importOutlines('arrowdown-acc.svg')
 arrow.transform(tf)
 arrow.width = 2048
-arrow = dst.createChar( 0x218f, 'arpdown' )
-arrow.importOutlines('arpdown.svg')
+ind += 1
+arrow = dst.createChar( ind, 'strumarrowdownarp' )
+arrow.importOutlines('arrowdown-arp.svg')
 arrow.transform(tf)
 arrow.width = 2048
+ind += 1
+arrow = dst.createChar( ind, 'strumarrowdownmut' )
+arrow.importOutlines('arrowdown-mut.svg')
+arrow.transform(tf)
+arrow.width = 2048
+ind += 1
 
 # Generate new font.
 dst.generate("ChordProSymbols.ttf")
