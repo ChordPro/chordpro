@@ -211,6 +211,9 @@ method _parse( $col ) {
 	# Known. Parse HEX.
 	return $self->_parse($colours{$col});
     }
+    elsif ( $col =~ /^url\(/ ) {
+	return $self->_parse($colours{"grey"});
+    }
     else {
 	carp("Illegal colour \"$col\"");
     }
