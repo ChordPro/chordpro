@@ -57,7 +57,9 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 
     my $ctl = $pr->{ps}->{grids}->{cellbar};
     my $col = $pr->{ps}->{grids}->{symbols}->{color};
-    my $needcell = $opts{type} eq "gridline" && $ctl->{width};
+    $opts{subtype} //= $opts{type} eq "gridline" ? "cellbars" : "";
+    my $needcell = ( $opts{type} eq "gridline"
+		     || $opts{subtype} eq "cellbars" ) && $ctl->{width};
 
     state $prevvoltastart;
     my $align;
@@ -95,7 +97,7 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 	    $lcr = 0 if $i > $firstbar;
 	    $lcr = 1 if $i == $lastbar;
 
-	    if ( $opts{type} eq "strumline" ) {
+	    unless ( $opts{subtype} eq "cellbars" ) {
 		$x += $barwidth;
 		$prevbar = $i;
 		$needcell = 0;
@@ -159,7 +161,8 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 	pr_cellline( $x-$barwidth, $y, 0, $sz, $ctl->{width},
 		     $pr->_fgcolor($ctl->{color}), $pr )
 	  if $needcell;
-	$needcell = $opts{type} eq "gridline" && $ctl->{width};
+	$needcell = ( $opts{type} eq "gridline"
+		      || $opts{subtype} eq "cellbars" ) && $ctl->{width};
 
 	if ( $token->{class} eq "chord" || $token->{class} eq "chords" ) {
 	    my $tok = $token->{chords} // [ $token->{chord} ];

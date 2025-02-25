@@ -1336,7 +1336,8 @@ sub generate_song {
 		  $grid_cellwidth,
 		  $grid_barwidth,
 		  $grid_margin,
-		  $ps, song => $s, type => $elt->{type}
+		  $ps, song => $s, type => $elt->{type},
+		  maybe subtype => $elt->{subtype},
 		);
 
 	    $y -= $vsp;

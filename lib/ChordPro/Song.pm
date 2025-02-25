@@ -33,7 +33,7 @@ my $in_context = $def_context;
 my $skip_context = 0;
 my $grid_arg;			# also used for grilles?
 my $grid_cells;			# also used for grilles?
-my $grid_type = 0;		# 0 = chords, 1 = strums, 2 = ???
+my $grid_type = 0;		# 0 = chords, 1,2 = strums
 my @grille;
 
 # Local transposition.
@@ -1064,9 +1064,9 @@ sub decompose_grid {
 
     $grid_type = 0;
     if ( @tokens && uc($tokens[0]) eq "|S" ) {
-	$grid_type = 1;		# strum line
+	$grid_type = 1 + ($tokens[0] eq "|S"); # strum line
 	$memchords = 0;
-	shift(@tokens);
+	$tokens[0] = "|";
     }
 
     foreach ( @tokens ) {
@@ -1168,6 +1168,7 @@ sub decompose_grid {
     }
     return ( tokens => \@tokens,
 	     $grid_type == 1 ? ( type => "strumline" ) : (),
+	     $grid_type == 2 ? ( type => "strumline", subtype => "cellbars" ) : (),
 	     %res );
 }
 
@@ -2533,7 +2534,7 @@ sub parse_chord {
     my $unk;
 
     # When called from {define} or strum ignore xc/xp.
-    $xc = $xp = '' if $def || $grid_type == 1;
+    $xc = $xp = '' if $def || $grid_type == 1 || $grid_type == 2;
 
     $info = ChordPro::Chords::known_chord($chord);
     if ( $info ) {
