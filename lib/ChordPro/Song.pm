@@ -1069,6 +1069,18 @@ sub decompose_grid {
 	$tokens[0] = "|";
     }
 
+    my $chord = sub {
+	my $c = shift;
+	if ( $grid_type == 0 ) {
+	    $self->chord($c);
+	}
+	else {
+	    my $i = ChordPro::Chord::Strum->new( { name => $c } );
+	    ChordPro::Chords::Appearance->new
+		( key => $self->add_chord($i), info => $i );
+	}
+    };
+
     foreach ( @tokens ) {
 	if ( $_ eq "|:" || $_ eq "{" ) {
 	    $_ = { symbol => $_, class => "bar" };
@@ -1135,7 +1147,7 @@ sub decompose_grid {
 	    my @a = split( /~/, $_, -1 );
 	    if ( @a == 1) {
 		# Normal case, single chord.
-		$_ = { chord => $self->chord($_), class => "chord" };
+		$_ = { chord => $chord->($_), class => "chord" };
 	    }
 	    else {
 		# Multiple chords.
@@ -1144,7 +1156,7 @@ sub decompose_grid {
 				 ? ''
 				 : $_ eq "/"
 				   ? "/"
-				   : $self->chord($_) } @a ],
+				   : $chord->($_) } @a ],
 		       class => "chords" };
 	    }
 	    if ( $memchords && $grid_type == 0 ) {

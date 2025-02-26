@@ -102,6 +102,12 @@ arrow = dst.createChar( ind, 'strumarrowupmut' )
 arrow.importOutlines('arrowup-mut.svg')
 arrow.transform(tf)
 arrow.width = 2048
+ind += 1
+arrow = dst.createChar( ind, 'strumarrowupmxt' )
+arrow.importOutlines('arrowup-mxt.svg')
+arrow.transform(tf)
+arrow.width = 2048
+ind += 1
 
 ind = 0x21a0
 tf = psMat.compose(psMat.scale(0.71),psMat.translate(150,270))
@@ -122,6 +128,11 @@ arrow.width = 2048
 ind += 1
 arrow = dst.createChar( ind, 'strumarrowdownmut' )
 arrow.importOutlines('arrowdown-mut.svg')
+arrow.transform(tf)
+arrow.width = 2048
+ind += 1
+arrow = dst.createChar( ind, 'strumarrowdownmxt' )
+arrow.importOutlines('arrowdown-mxt.svg')
 arrow.transform(tf)
 arrow.width = 2048
 ind += 1

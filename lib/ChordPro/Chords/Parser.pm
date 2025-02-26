@@ -1126,6 +1126,62 @@ sub chord_display ( $self ) {
 sub is_chord      ( $self ) { 0 };
 sub is_annotation ( $self ) { 1 };
 
+################ Chord objects: Strums ################
+
+package ChordPro::Chord::Strum;
+
+# Special 'chord'-like objects for strums in grids.
+#
+# Main purpose is to show an arrow from the CHordProSymbols font.
+
+our @ISA = 'ChordPro::Chord::Base';
+
+my %strums =
+  ( up  => "\x{2190}",		# arrow up
+   "u+" => "\x{2191}",		# arrow up with accent
+    ua  => "\x{2192}",		# arrow up with strum
+  # ux  => "\x{2193}",		# arrow up with mute (crossed)
+    ux  => "\x{2194}",		# arrow up with mute (cross head)
+    dn  => "\x{21a0}",		# arrow down
+   "a+" => "\x{21a1}",		# arrow down with accent
+    da  => "\x{21a2}",		# arrow down with strum
+  # dx  => "\x{21a3}",		# arrow down with mute (crossed)
+    dx  => "\x{21a4}",		# arrow down with mute (cross head)
+  );
+
+sub new( $pkg, $data ) {
+    my $self = $pkg->SUPER::new( $data );
+    unless ( defined $strums{$data->{name}} ) {
+	warn("Unknown strum: $data->{name}\n");
+	$self->{format} = "";
+    }
+    else {
+	$self->{format} =
+	  "<span face='chordprosymbols' size='140%'>" .
+	  $strums{$data->{name}} . "</span>";
+    }
+    return $self;
+}
+
+sub chord_display ( $self, $default = undef ) {
+    $self->{format};
+}
+
+sub transpose ( $self, $dummy1, $dummy2=0 ) { $self }
+sub transcode ( $self, $dummy1, $dummy2=0 ) { $self }
+
+sub canonical ( $self ) {
+    my $res = $self->{text};
+    return $res;
+}
+
+# For convenience.
+sub is_chord      ( $self ) { 0 };
+sub is_annotation ( $self ) { 1 };
+sub is_nc         ( $self ) { 1 };
+sub is_xpxc       ( $self ) { 0 };
+sub has_diagram   ( $self ) { 0 };
+
 ################ Chord objects: NC ################
 
 package ChordPro::Chord::NC;
