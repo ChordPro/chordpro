@@ -37,8 +37,8 @@ The grid consists of a number of cells that can contain chords. The
 desired number of cells per line can be specified as a `shape`
 property to the `start_of_grid` directive:
 
-`{start_of_grid: shape="`_cells_`"}`  
-`{start_of_grid: shape="`_measures_`x`_beats_`"}`
+`{start_of_grid shape="`_cells_`"}`  
+`{start_of_grid shape="`_measures_`x`_beats_`"}`
 
 There is no semantic difference between the two forms, just pick the
 one that is most convenient.
@@ -102,7 +102,7 @@ Other symbols that can be used:
 
 Example:
 
-    {start_of_grid: shape="1+4x2+4"}
+    {start_of_grid shape="1+4x2+4"}
     A    || G7 . | % . | %% . | . . |
          | C7 . | %  . || G7 . | % . ||
          |: C7 . | %  . :|: G7 . | % . :| repeat 4 times
@@ -118,10 +118,47 @@ See [PDF configuration - grid lines]({{< relref "chordpro-configuration-pdf/#gri
 This directive may include an optional label, to be printed in the
 left margin. For example:,
 
-    {start_of_grid: label="Intro"}
+    {start_of_grid label="Intro"}
 
 The ChordPro reference implementation prints the label in the left
 margin, see [labels]({{< relref "ChordPro-Configuration-PDF#labels" >}}).
+
+## Strums
+
+Strums are a special kind of grid lines. Instead of chords they show
+arrows to indicate strum patterns. Strums can be combined with
+ordinary grid lines to show chords and strum patterns.
+
+A grid line becomes a strum by putting `|S` (uppsercase `s`) as the
+first bar symbol. When using `|s` (lowercase `s`) the bar symbols and
+cell lines will be omitted.
+
+The following strum arrows can be used:
+
+| arrow    | name |      |
+|----------|------|------|
+| normal   | `u`  | `d`  |
+| accent   | `u+` | `d+` |
+| arpeggio | `ua` | `da` |
+| muted    | `ux` | `dx` |
+{ .table .table-striped .table-bordered .table-sm }
+
+For example:
+
+````
+{start_of_grid shape="0+2x4+4"}
+| C ~A . . | C ~A . . |
+|s d~u d~u ~u d~u | d~u d~u ~u d~u |
+| C ~A ~G ~F | . ~F6 F D |
+|s d~u d~u ~da ~ua | ~u ~u d d |
+| D . . . | % . . . |
+|s d+~u+ ~u d+~u+ ~u | d+~u+ ~u d+~u+ ~ux |
+{end_of_grid}
+````
+
+This will produce a grid similar to:
+
+![]({{< asset "images/ex_grid3.png" >}})
 
 # Directives: end_of_grid
 

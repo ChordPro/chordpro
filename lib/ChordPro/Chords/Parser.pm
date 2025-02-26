@@ -1132,17 +1132,17 @@ package ChordPro::Chord::Strum;
 
 # Special 'chord'-like objects for strums in grids.
 #
-# Main purpose is to show an arrow from the CHordProSymbols font.
+# Main purpose is to show an arrow from the ChordProSymbols font.
 
 our @ISA = 'ChordPro::Chord::Base';
 
 my %strums =
-  ( up  => "\x{2190}",		# arrow up
+  ( u   => "\x{2190}",		# arrow up
    "u+" => "\x{2191}",		# arrow up with accent
     ua  => "\x{2192}",		# arrow up with strum
   # ux  => "\x{2193}",		# arrow up with mute (crossed)
     ux  => "\x{2194}",		# arrow up with mute (cross head)
-    dn  => "\x{21a0}",		# arrow down
+    d   => "\x{21a0}",		# arrow down
    "d+" => "\x{21a1}",		# arrow down with accent
     da  => "\x{21a2}",		# arrow down with strum
   # dx  => "\x{21a3}",		# arrow down with mute (crossed)

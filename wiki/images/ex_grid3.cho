@@ -1,0 +1,11 @@
+{title: }
+{chordfont Arial}
+{no_grid}
+{start_of_grid shape="0+2x4+4"}
+| C ~A . . | C ~A . . |
+|s d~u d~u ~u d~u | d~u d~u ~u d~u |
+| C ~A ~G ~F | . ~F6 F D |
+|s d~u d~u ~da ~ua | ~u ~u d d |
+| D . . . | % . . . |
+|s d+~u+ ~u d+~u+ ~u | d+~u+ ~u d+~u+ ~ux |
+{end_of_grid}
