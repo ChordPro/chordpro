@@ -1071,7 +1071,7 @@ sub decompose_grid {
 
     my $chord = sub {
 	my $c = shift;
-	if ( $grid_type == 0 ) {
+	if ( $grid_type == 0 || $c !~ /^[ud][+ax]?$/ ) {
 	    $self->chord($c);
 	}
 	else {
