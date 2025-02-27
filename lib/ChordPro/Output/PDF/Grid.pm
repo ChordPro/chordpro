@@ -48,10 +48,22 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 	    if ( $t->{chords} ) {
 		$t->{text} = "";
 		for ( 0..$#{ $t->{chords} } ) {
-		    $t->{text} .= $t->{chords}->[$_]->chord_display . $t->{phrases}->[$_];
+		    $t->{text} .= $t->{chords}->[$_]->chord_display
+		      unless $t->{chords}->[$_] eq "";
+		    $t->{text} .= $t->{phrases}->[$_];
 		}
 	    }
 	    $pr->text( $t->{text}, $x, $y, $fonts->{grid_margin} );
+#	    if ( $t->{chords} ) {
+#		my $x = $x;
+#		for ( 0..$#{ $t->{chords} } ) {
+#		    $x = $pr->text( $t->{chords}->[$_]->chord_display,
+#				    $x, $y, $fonts->{chord} )
+#		      unless $t->{chords}->[$_] eq "";
+#		    $x = $pr->text( $t->{phrases}->[$_],
+#				    $x, $y, $fonts->{grid_margin} )
+#		}
+#	    }
 	}
 	$x += $margin->[0] * $cellwidth + $barwidth;
     }

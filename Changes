@@ -41,6 +41,7 @@
     - Fix/Doc song and page metadata substitutions.
     - Suppress labels for grids when lyrics-only.
     - Suppress empty lines after grids when lyrics-only.
+    - Fix crash with chords in grid margins.
 
 6.070 2024-12-25
 
