@@ -38,7 +38,9 @@
     - (PDF) Fix progress count if multi-pass.
     - Fix diagnostic in file load.
     - Fix *size reset after *font reset.
-    - Fix/Doc song and page metadata substitutions. 
+    - Fix/Doc song and page metadata substitutions.
+    - Suppress labels for grids when lyrics-only.
+    - Suppress empty lines after grids when lyrics-only.
 
 6.070 2024-12-25
 

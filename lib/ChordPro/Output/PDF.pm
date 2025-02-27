@@ -1312,7 +1312,7 @@ sub generate_song {
 
 	if ( $elt->{type} eq "gridline" || $elt->{type} eq "strumline" ) {
 
-	    next if $lyrics_only || !$ps->{grids}->{show};
+	    $vsp_ignorefirst = 1, next if $lyrics_only || !$ps->{grids}->{show};
 
 	    my $vsp = grid_vsp( $elt, $ps );
 	    $checkspace->($vsp);
@@ -1564,9 +1564,10 @@ sub generate_song {
 				    } );
 		    redo;
 		}
-		$i_tag = $v[4];
+		$i_tag = $v[4] unless $lyrics_only;
 	    }
 	    elsif ( $elt->{name} eq "label" ) {
+		next if $elt->{context} eq "grid" && $lyrics_only;
 		if ( $ps->{labels}->{comment} && $elt->{value} ne ""  ) {
 		    unshift( @elts, { %$elt,
 				      type => $ps->{labels}->{comment},
