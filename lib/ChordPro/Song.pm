@@ -1063,10 +1063,9 @@ sub decompose_grid {
     my $si = 0;			# start index
 
     $grid_type = 0;
-    if ( @tokens && uc($tokens[0]) eq "|S" ) {
-	$grid_type = 1 + ($tokens[0] eq "|S"); # strum line
+    if ( @tokens && uc($tokens[0]) =~ /^\|.*S/i ) {
+	$grid_type = 1 + (chop($tokens[0]) eq "S"); # strum line
 	$memchords = 0;
-	$tokens[0] = "|";
     }
 
     my $chord = sub {
