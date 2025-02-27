@@ -18,6 +18,7 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 
     # Use the chords font for the chords, and for the symbols size.
     my $fchord = { %{ $fonts->{grid} || $fonts->{chord} } };
+    my $schord = $fonts->{gridstrum};
     delete($fchord->{background});
     $y -= font_bl($fchord);
 
@@ -169,8 +170,9 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 	    my $cellwidth = $cellwidth / @$tok;
 	    for my $t ( @$tok ) {
 		$x += $cellwidth, next if $t eq '';
-		$t = $t eq '/' ? $t : $t->chord_display;
-		$pr->text( $t, $x, $y, $fchord );
+		my $text = $t eq '/' ? $t : $t->chord_display;
+		$pr->text( $text, $x, $y,
+			   $t->info->is_gridstrum ? $schord : $fchord );
 		$x += $cellwidth;
 	    }
 	}

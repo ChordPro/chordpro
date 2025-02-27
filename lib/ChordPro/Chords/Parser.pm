@@ -807,6 +807,7 @@ sub is_chord      { defined $_[0]->{root_ord} }
 sub is_rootless   { $_[0]->{rootless} }
 sub is_annotation { 0 }
 sub is_movable    { $_[0]->{movable} }
+sub is_gridstrum  { 0 }
 
 # Common accessors.
 sub name          {
@@ -1136,29 +1137,15 @@ package ChordPro::Chord::Strum;
 
 our @ISA = 'ChordPro::Chord::Base';
 
-my %strums =
-  ( u   => "\x{2190}",		# arrow up
-   "u+" => "\x{2191}",		# arrow up with accent
-    ua  => "\x{2192}",		# arrow up with strum
-  # ux  => "\x{2193}",		# arrow up with mute (crossed)
-    ux  => "\x{2194}",		# arrow up with mute (cross head)
-    d   => "\x{21a0}",		# arrow down
-   "d+" => "\x{21a1}",		# arrow down with accent
-    da  => "\x{21a2}",		# arrow down with strum
-  # dx  => "\x{21a3}",		# arrow down with mute (crossed)
-    dx  => "\x{21a4}",		# arrow down with mute (cross head)
-  );
-
 sub new( $pkg, $data ) {
     my $self = $pkg->SUPER::new( $data );
-    unless ( defined $strums{$data->{name}} ) {
+    my $syms = $::config->{gridstrum}->{symbols};
+    unless ( defined $syms->{$data->{name}} ) {
 	warn("Unknown strum: $data->{name}\n");
 	$self->{format} = "";
     }
     else {
-	$self->{format} =
-	  "<span face='chordprosymbols' size='140%'>" .
-	  $strums{$data->{name}} . "</span>";
+	$self->{format} = $syms->{$data->{name}};
     }
     return $self;
 }
@@ -1181,6 +1168,7 @@ sub is_annotation ( $self ) { 1 };
 sub is_nc         ( $self ) { 1 };
 sub is_xpxc       ( $self ) { 0 };
 sub has_diagram   ( $self ) { 0 };
+sub is_gridstrum  ( $self ) { 1 };
 
 ################ Chord objects: NC ################
 
