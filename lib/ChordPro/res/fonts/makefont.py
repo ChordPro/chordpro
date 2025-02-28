@@ -78,35 +78,34 @@ for i in range(0,26):
 
 ind = 0x2190    # arrows
 tf = psMat.compose(psMat.scale(0.71),psMat.translate(150,291))
-#arrow.width = 2048
 # Custom location.
 arrow = dst.createChar( ind, 'strumarrowup' )
 arrow.importOutlines('arrowup.svg')
 arrow.transform(tf)
-arrow.width = 2048
+arrow.width = 1150
 ind += 1
 # Accented
 arrow = dst.createChar( ind, 'strumarrowupacc' )
 arrow.importOutlines('arrowup-acc.svg')
 arrow.transform(tf)
-arrow.width = 2048
+arrow.width = 1150
 ind += 1
 # Arpeggio
 arrow = dst.createChar( ind, 'strumarrowuparp' )
 arrow.importOutlines('arrowup-arp.svg')
 arrow.transform(tf)
-arrow.width = 2048
+arrow.width = 1150
 ind += 1
 # Muted
 arrow = dst.createChar( ind, 'strumarrowupmut' )
 arrow.importOutlines('arrowup-mut.svg')
 arrow.transform(tf)
-arrow.width = 2048
+arrow.width = 1150
 ind += 1
 arrow = dst.createChar( ind, 'strumarrowupmxt' )
 arrow.importOutlines('arrowup-mxt.svg')
 arrow.transform(tf)
-arrow.width = 2048
+arrow.width = 1150
 ind += 1
 
 ind = 0x21a0
@@ -114,27 +113,27 @@ tf = psMat.compose(psMat.scale(0.71),psMat.translate(150,270))
 arrow = dst.createChar( ind, 'strumarrowdown' )
 arrow.importOutlines('arrowdown.svg')
 arrow.transform(tf)
-arrow.width = 2048
+arrow.width = 1150
 ind += 1
 arrow = dst.createChar( ind, 'strumarrowdownacc' )
 arrow.importOutlines('arrowdown-acc.svg')
 arrow.transform(tf)
-arrow.width = 2048
+arrow.width = 1150
 ind += 1
 arrow = dst.createChar( ind, 'strumarrowdownarp' )
 arrow.importOutlines('arrowdown-arp.svg')
 arrow.transform(tf)
-arrow.width = 2048
+arrow.width = 1150
 ind += 1
 arrow = dst.createChar( ind, 'strumarrowdownmut' )
 arrow.importOutlines('arrowdown-mut.svg')
 arrow.transform(tf)
-arrow.width = 2048
+arrow.width = 1150
 ind += 1
 arrow = dst.createChar( ind, 'strumarrowdownmxt' )
 arrow.importOutlines('arrowdown-mxt.svg')
 arrow.transform(tf)
-arrow.width = 2048
+arrow.width = 1150
 ind += 1
 
 # Generate new font.

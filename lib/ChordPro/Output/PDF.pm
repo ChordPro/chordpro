@@ -544,6 +544,8 @@ sub generate_song {
     if ( $pr->{layout}->can("register_element") ) {
 	$pr->{layout}->register_element
 	  ( TextLayoutImageElement->new( pdf => $pr->{pdf} ), "img" );
+	$pr->{layout}->register_element
+	  ( TextLayoutSymbolElement->new( pdf => $pr->{pdf} ), "sym" );
     }
 
     unless ( $s->{body} ) {	# empty song, or embedded
@@ -3625,5 +3627,57 @@ sub alert ($size) {
     return $xo;
 }
 
-1;
+class TextLayoutSymbolElement :does(Text::Layout::ElementRole);
 
+use ChordPro::Utils qw(parse_kv);
+
+field $glyphs;
+
+BUILD {
+    $glyphs =
+      { "flat"			=> '!',
+	"natural"		=> '"',
+	"sharp"			=> '#',
+	"repeat-start"		=> '$',
+	"repeat-end"		=> '%',
+	"repeat-end-start"	=> '&',
+	"repeat2"		=> '(',
+	"repeat1"		=> ')',
+	"arrow-up"		=> "\x{2190}",
+	"arrow-up-accent"	=> "\x{2191}",
+	"arrow-up-arpeggio"	=> "\x{2192}",
+	"arrow-up-crossed"	=> "\x{2193}",
+	"arrow-up-muted"	=> "\x{2194}",
+	"arrow-down"		=> "\x{21a0}",
+	"arrow-down-accent"	=> "\x{21a1}",
+	"arrow-down-arpeggio"	=> "\x{21a2}",
+	"arrow-down-crossed"	=> "\x{21a3}",
+	"arrow-down-muted"	=> "\x{21a4}",
+      };
+    $glyphs->{"circle-$_"} = $_ for "0".."9";
+    $glyphs->{"circle-$_"} = $_ for "A".."Z";
+};
+
+method parse( $ctx, $k, $v ) {
+    my $kv = parse_kv($v);
+    my $res =
+      { %$ctx,
+	type => "text",
+	font => Text::Layout::FontConfig->from_string("ChordProSymbols"),
+      };
+
+    while ( ( $k,$v) = each(%$kv) ) {
+	$res->{$k} = $v, next
+	  if $k =~ /^(size|color|bgcolor|base|href)$/;
+	$res->{text} = $glyphs->{$k}, next if defined $glyphs->{$k};
+	warn("Unknown attribute in <sym>: $k (ignored)\n");
+    }
+
+    return $res;
+}
+
+# These methods must be defined for the role, but will not be used.
+method render( $hash, $gfx, $x, $y ) {}
+method bbox( $hash ) {}
+
+1;

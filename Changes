@@ -25,6 +25,8 @@
     - Are you using the preprocessor in your abc and ly environments?
       Please use the more general parser.preprocess.env-... instead.
 
+    - (Experimental) Use ChordPro Symbols from markup.
+
     !Bug Fixes
 
     - Some issues with Unicode filenames on Windows.
