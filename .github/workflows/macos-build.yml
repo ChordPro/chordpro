@@ -38,7 +38,7 @@ jobs:
 
       # No use to proceed if we do not have all wx components.
       - name: Check libraries
-        run: perl pp/macos/checklibs.pl
+        run: perl pp/macos/libtool.pl
 
       - name: Install SSLeay
         run: |
