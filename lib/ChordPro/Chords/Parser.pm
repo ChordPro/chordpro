@@ -892,16 +892,17 @@ sub fix_musicsyms ( $self, $str ) {
     push( @c, '' ) if @c % 2;
     my $did = 0;		# TODO: not for roman
     while ( @c ) {
-	$_ = shift(@c);
-	if ( $did ) {
-	    s/b/♭/g;
+	for ( shift(@c) ) {
+	    if ( $did ) {
+		s/b/♭/g;
+	    }
+	    else {
+		s/(?<=[[:alnum:]])b/♭/g;
+		$did++;
+	    }
+	    s/#/♯/g;
+	    $res .= $_ . shift(@c);
 	}
-	else {
-	    s/(?<=[[:alnum:]])b/♭/g;
-	    $did++;
-	}
-	s/#/♯/g;
-	$res .= $_ . shift(@c);
     }
     $res;
 }
