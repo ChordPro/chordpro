@@ -36,7 +36,7 @@
     - Fix problems with save/restore settings on Windows.
     - Fix reading from "-" (standard input).
     - Fix problem with a2crd from wx on Windows.
-    - Fix issues #512, #528.
+    - Fix issues #512, #528, #534.
     - (PDF) Fix progress count if multi-pass.
     - Fix diagnostic in file load.
     - Fix *size reset after *font reset.

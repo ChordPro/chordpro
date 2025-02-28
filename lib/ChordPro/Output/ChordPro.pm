@@ -81,6 +81,7 @@ sub generate_song ( $s ) {
     }
 
     if ( $s->{meta} ) {
+	    use DDP; p $s->{meta};
 	if ( $msp ) {
 	    $s->{meta}->{source} //= [ "Lead Sheet" ];
 	    $s->{meta}->{custom2} //= [ $seq ] if defined $seq;
@@ -99,6 +100,7 @@ sub generate_song ( $s ) {
 	    next if $used{$k};
 	    next if $k =~ /^(?:title|subtitle|songindex|key_.*|chords|numchords)$/;
 	    next if $k =~ /^_/;
+	    next if $k =~ /\./;
 	    push( @s, map { +"{meta: $k ".fq($_)."}" } @{ $s->{meta}->{$k} } );
 	}
     }
