@@ -115,3 +115,13 @@ pre {
 pre code {
     font-weight: normal;
 }
+
+@font-face {
+    font-family: ChordProSymbols;
+    src: url(../pub/ChordProSymbols.ttf) format("truetype")
+}
+
+span.sym {
+    font-family: ChordProSymbols;
+    font-size: 1.4em;
+}

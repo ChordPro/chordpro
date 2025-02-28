@@ -15,6 +15,7 @@ build :: assets
 	${HUGO}
 	mv public/index.html public/allpages/index.html
 	cp public/home/index.html public/
+	cp -p ../lib/ChordPro/res/fonts/ChordProSymbols.ttf public/pub/
 
 publish ::
 	rsync -rlpgocHi --delete public/ chordpro-site:www/${TARGET}/
@@ -42,3 +43,4 @@ popup ::
 macos: assets
 	( sleep 3; open  http://localhost:1313 ) &
 	${HUGO} server --baseURL=http://localhost/ --disableFastRender --navigateToChanged
+

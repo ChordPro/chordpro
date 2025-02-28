@@ -125,22 +125,22 @@ margin, see [labels]({{< relref "ChordPro-Configuration-PDF#labels" >}}).
 
 ## Strums
 
-Strums are a special kind of grid lines. Instead of chords they show
-arrows to indicate strum patterns. Strums can be combined with
-ordinary grid lines to show chords and strum patterns.
+Strums are a special kind of grid lines. Beside chords they also
+recognize some pseudo-chords that show arrows to indicate strum
+patterns.
 
-A grid line becomes a strum by putting `|S` (uppsercase `s`) as the
-first bar symbol. When using `|s` (lowercase `s`) the bar symbols and
-cell lines will be omitted.
+A grid line becomes a strum by putting `S` (uppercase `s`)
+**immediately after** the first bar symbol. When using `s` (lowercase
+`s`) the bar symbols and cell lines will be omitted.
 
-The following strum arrows can be used:
-
-| arrow    | name |      |
-|----------|------|------|
-| normal   | `u`  | `d`  |
-| accent   | `u+` | `d+` |
-| arpeggio | `ua` | `da` |
-| muted    | `ux` | `dx` |
+The following pseudo-chords can be used:
+ 
+| arrow    | up   |                                   | down |                                   |
+|----------|------|-----------------------------------|------|-----------------------------------|
+| normal   | `u`  | <span class="sym">&#x2190;</span> | `d`  | <span class="sym">&#x21a0;</span> |
+| accent   | `u+` | <span class="sym">&#x2191;</span> | `d+` | <span class="sym">&#x21a1;</span> |
+| arpeggio | `ua` | <span class="sym">&#x2192;</span> | `da` | <span class="sym">&#x21a2;</span> |
+| muted    | `ux` | <span class="sym">&#x2193;</span> | `dx` | <span class="sym">&#x21a4;</span> |
 { .table .table-striped .table-bordered .table-sm }
 
 For example:
