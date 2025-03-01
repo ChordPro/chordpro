@@ -65,6 +65,9 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 		$pr->text( $t->{text}, $x, $y, $fonts->{grid_margin} );
 	    }
 	}
+	elsif ( $t ) {
+	    $pr->text( $t->{text}, $x, $y, $fonts->{grid_margin} );
+	}
 	$x += $margin->[0] * $cellwidth + $barwidth;
     }
 
