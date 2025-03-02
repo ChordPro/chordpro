@@ -555,6 +555,7 @@ sub parse_song {
 	    # 'open' indicates open.
 	    if ( /^\s*\{(?:end_of_\Q$in_context\E)\}\s*$/ ) {
 		delete $self->{body}->[-1]->{open};
+		$grid_type = 0;
 		# A subsequent {start_of_XXX} will open a new item
 
 		my $d = $config->{delegates}->{$in_context};
@@ -1070,7 +1071,7 @@ sub decompose_grid {
 
     my $chord = sub {
 	my $c = shift;
-	if ( $grid_type == 0 || $c !~ /^[ud][+ax]?$/ ) {
+	if ( $grid_type == 0 || !exists($::config->{gridstrum}->{symbols}->{$c}) ) {
 	    $self->chord($c);
 	}
 	else {
@@ -1510,6 +1511,7 @@ sub directive {
     if ( $dir =~ /^end_of_(\w+)$/ ) {
 	do_warn("Not in " . ucfirst($1) . " context\n")
 	  unless $in_context eq $1;
+	$grid_type = 0;
 	if ( $in_context eq "grille" && @grille > 1 ) {
 	    my $opts = shift(@grille);
 	    my $id = $opts->{id};

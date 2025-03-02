@@ -213,12 +213,12 @@ chord-formats {
 gridstrum {
     // Unicode code points for the glyphs from ChordProSymbols.
     symbols {
-        u   : \u2190            // arrow up
+        up  : \u2190            // arrow up
        "u+" : \u2191            // arrow up with accent
         ua  : \u2192            // arrow up with strum
      // ux  : \u2193            // arrow up with mute (crossed)
         ux  : \u2194            // arrow up with mute (cross head)
-        d   : \u21a0            // arrow down
+        dn  : \u21a0            // arrow down
        "d+" : \u21a1            // arrow down with accent
         da  : \u21a2            // arrow down with strum
      // dx  : \u21a3            // arrow down with mute (crossed)
