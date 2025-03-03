@@ -982,6 +982,11 @@ sub transpose ( $self, $xpose, $dir = 0 ) {
     my $info = $self->clone;
     my $p = $self->{parser};
 
+    my $dodir = sub( $root, $dir ) {
+	return 0 if $root =~ /^(0|2|4|5|7|9|11)$/;
+	$dir;
+    };
+
     unless ( $self->{rootless} ) {
 	$info->{root_ord} = ( $self->{root_ord} + $xpose ) % $p->intervals;
 	$info->{root_canon} = $info->{root} =
@@ -993,9 +998,9 @@ sub transpose ( $self, $xpose, $dir = 0 ) {
 	$info->{bass_ord} = ( $self->{bass_ord} + $xpose ) % $p->intervals;
 	$info->{bass_canon} = $info->{bass} =
 	  $p->root_canon( $info->{bass_ord}, $xpose > 0 );
-	$info->{bass_mod} = $dir;
+	$info->{bass_mod} = $dodir->( $info->{bass_ord}, $dir );
     }
-    $info->{root_mod} = $dir;
+    $info->{root_mod} = $dodir->( $info->{root_ord}, $dir );
     $info->{name} = $info->{name_canon} = $info->canonical;
 
     delete $info->{$_} for qw( copy base frets fingers keys display );
