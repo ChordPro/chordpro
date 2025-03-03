@@ -81,7 +81,6 @@ sub generate_song ( $s ) {
     }
 
     if ( $s->{meta} ) {
-	    use DDP; p $s->{meta};
 	if ( $msp ) {
 	    $s->{meta}->{source} //= [ "Lead Sheet" ];
 	    $s->{meta}->{custom2} //= [ $seq ] if defined $seq;
