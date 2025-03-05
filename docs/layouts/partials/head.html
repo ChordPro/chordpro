@@ -2,24 +2,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="utf-8">
   <title>{{ if not .IsHome }}{{ with .Title }}{{ . }} | {{ end }}{{ end }}{{ .Site.Title }}</title>
+  <link rel="icon" type="image/x-icon" href="{{ (resources.Get "images/chordpro-icon.png").Permalink }}">
   <meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ with .Summary }}{{ . }}{{ else }}{{ .Site.Params.description }}{{end }}{{ end }} ">
-  <link rel="canonical" href="{{ .Permalink }}" />
-  {{ template "_internal/opengraph.html" . }}
+  {{ partial "opengraph.html" . }}
   {{ template "_internal/twitter_cards.html" . }}
   {{- with .Site.Params.keywords -}}
     <meta name="keywords" content="{{ . | safeHTMLAttr }}">
-  {{ end -}}
+  {{- end -}}
   {{ partial "head_bs4.html" . }}
   {{ partial "head_fancybox.html" . }}
-  <link rel="stylesheet" href="{{ (resources.Get "css/site.css").RelPermalink }}" />
-  <link rel="stylesheet" href="{{ (resources.Get "css/pagefind-ui.css").RelPermalink }}" />
+  <link rel="stylesheet" href="{{ (resources.Get "css/site.css").Permalink }}">
+  <link rel="stylesheet" href="{{ (resources.Get "css/pagefind-ui.css").Permalink }}">
   <!-- script src="pagefind/pagefind-ui.js"></script -->
-  <script src="{{ (resources.Get "js/pagefind-ui.js").RelPermalink }}"></script>
+  <script src="{{ (resources.Get "js/pagefind-ui.js").Permalink }}"></script>
+  {{- if eq .Type "landing" }}
+  <link rel="stylesheet" href="{{ (resources.Get "css/landing.css").Permalink }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  {{ end -}}
   {{- if eq hugo.Environment "stable" }}
   <style>
       a.heading-anchor {
           display: none;
       }
   </style>
-  {{- end }}
+  {{ end -}}
 </head>

@@ -1,0 +1,108 @@
+body {
+    background: linear-gradient(to bottom, #E5F3FF 0%,#ffffff 20em,#ffffff 100%);
+    background-attachment: fixed;
+}
+
+/* id's */
+
+#wrapper {
+    max-width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    padding: 1em;
+}
+#logo {
+    color: #0068d9;
+    font-size: 4em;
+}
+#logo img {
+    width: 1em;
+    height: 1em;
+}
+#logo p {
+    display: inline;
+    vertical-align: text-top;
+}
+#subtitle {
+    color: grey;
+}
+#statement {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+#examples {
+    margin-bottom: 2em;
+}
+#examples p, #examples img {
+    margin: 0.5em;
+}
+#examples img {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+#about {
+    background-color: #143968;
+    color: white;
+    padding: 1em;
+    border-radius: 0.5em;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    margin-bottom: 1em;
+}
+#about h1 {
+    color: white;
+}
+#footer {
+	display: absolute;
+    background-color: #3a3a3a;
+    color: white;
+    border-top: 1px solid black;
+    padding: 0 2em 0 2em;
+}
+#footer p {
+    margin: 0;
+}
+#footer a {
+    color: white;
+    margin-left: 1em;
+    font-size: 1.5em;
+}
+
+/* classes */
+
+.link-button a {
+    background: #ef6c2a;
+    padding: 0.4em;
+    color: white;
+    border-radius: 0.3em;
+}
+.row {
+    display: flex;
+}
+.column {
+    padding: 1em;
+    flex: 50%;
+}
+.left-align {
+    text-align: left;
+}
+.right-align {
+    text-align: right;
+}
+
+/* Definition lists */
+
+dl {
+    margin: 2em;
+    text-align: left;
+}
+
+dt {
+    color: #0068d9;
+    font-size: 1.2em;
+}
+dt span, p span {
+    padding-left: 0.5em;
+}
+dd {
+    padding: 0.5em;
+}
