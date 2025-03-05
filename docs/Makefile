@@ -16,6 +16,7 @@ build :: assets
 	mv public/index.html public/allpages/index.html
 	cp public/home/index.html public/
 	cp -p ../lib/ChordPro/res/fonts/ChordProSymbols.ttf public/pub/
+	cp -p public/landing/index.html public/index.html
 
 publish ::
 	rsync -rlpgocHi --delete public/ chordpro-site:www/${TARGET}/
