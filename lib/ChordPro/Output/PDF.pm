@@ -1667,6 +1667,9 @@ sub generate_song {
 	    $class = 1;		# first of a song
 	}
 	$s->{meta}->{'page.class'} = $classes[$class];
+	warn("page: $p side = ", $s->{meta}->{'page.side'},
+	     " class = ", $classes[$class], "\n")
+	  if $::config->{debug}->{pages};
 
 	# Three-part title handlers.
 	my $tpt = sub { tpt( $ps, $class, $_[0], $rightpage, $x, $y, $s ) };
@@ -2875,6 +2878,10 @@ sub tpt {
     my ( $ps, $class, $type, $rightpage, $x, $y, $s ) = @_;
     my $fmt = get_format( $ps, $class, $type, $rightpage );
     return unless $fmt;
+    warn("page: ", $s->{meta}->{page}->[0],
+	 ", fmt[", $s->{meta}->{"page.class"}, ",$type] = \"",
+	 join('" "',@{$fmt->[0]}), "\"\n" )
+      if $::config->{debug}->{pages};
 
     my $pr = $ps->{pr};
     my $font = $ps->{fonts}->{$type};
