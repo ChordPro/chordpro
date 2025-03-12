@@ -1669,7 +1669,7 @@ sub generate_song {
 	$s->{meta}->{'page.class'} = $classes[$class];
 	warn("page: $p side = ", $s->{meta}->{'page.side'},
 	     " class = ", $classes[$class], "\n")
-	  if $::config->{debug}->{pages};
+	  if $::config->{debug}->{pages} & 0x01;
 
 	# Three-part title handlers.
 	my $tpt = sub { tpt( $ps, $class, $_[0], $rightpage, $x, $y, $s ) };
@@ -2848,11 +2848,11 @@ sub get_format {
 	$class = $classes[$i];
 	next if $class eq 'filler';
 	my $fmt;
-	my $noswap;
+	my $swap = !$rightpage;
 	if ( !$rightpage
 	     && exists($ps->{formats}->{$class."-even"}->{$type}) ) {
 	    $fmt = $ps->{formats}->{$class."-even"}->{$type};
-	    $noswap++;
+	    $swap = 0;
 	}
 	elsif ( exists($ps->{formats}->{$class}->{$type}) ) {
 	    $fmt = $ps->{formats}->{$class}->{$type};
@@ -2863,10 +2863,17 @@ sub get_format {
 	$fmt = [ $fmt ] if @$fmt == 3 && !is_arrayref($fmt->[0]);
 
 	# Swap left/right for even pages.
-	if ( !$rightpage && !$noswap ) {
-	    $_ = [ reverse @$_ ] for @$fmt;
+	if ( $swap ) {
+	    # make a copy!
+	    $fmt = [ map { [ reverse @$_ ] } @$fmt ];
 	}
 
+	if ( $::config->{debug}->{pages} & 0x02 ) {
+	    warn( "format[$class,$type], ",
+		  $rightpage ? "right" : "left",
+		  ", swap = ", $swap ? "yes" : "no",
+		  ", fmt = \"" . join('" "', @{$fmt->[0]}) . "\"\n");
+	}
 	return $fmt if $fmt;
     }
     return;
@@ -2881,7 +2888,7 @@ sub tpt {
     warn("page: ", $s->{meta}->{page}->[0],
 	 ", fmt[", $s->{meta}->{"page.class"}, ",$type] = \"",
 	 join('" "',@{$fmt->[0]}), "\"\n" )
-      if $::config->{debug}->{pages};
+      if $::config->{debug}->{pages} & 0x01;
 
     my $pr = $ps->{pr};
     my $font = $ps->{fonts}->{$type};
