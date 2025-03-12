@@ -15,4 +15,10 @@ Examples:
     {meta: title Swing Low Sweet Chariot}
     {t: Swing Low Sweet Chariot}
 
-See also: [meta]({{< relref "Directives-meta" >}}).
+Although `{meta: title ...}` is semantically equivalent to 
+`{title: ...}`, it is good practice to always use the latter. 
+Many external tools will only recognize the `{title: ...}` directive.
+
+See also [sorttitle]({{< relref "Directives-sorttitle" >}}),
+[Table of Contents]({{< relref "Table_Of_Contents" >}}),
+and [meta]({{< relref "Directives-meta" >}}).
