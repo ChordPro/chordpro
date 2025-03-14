@@ -2,6 +2,15 @@ name: Full Build on macOS
 
 # Open a new branch 'macosbuild' and push this workflow to it.
 # Maybe adjust the version as well.
+#
+# git checkout -b macosbuild
+# edit lib/ChordPro/Version.pm
+# git commit --no-verify -m "Force macOS build." lib/ChordPro/Version.pm
+# git push --set-upstream origin macosbuild
+#
+# git checkout dev
+# git branch -D macosbuild
+# git push origin :macosbuild
 
 on:
   push:
