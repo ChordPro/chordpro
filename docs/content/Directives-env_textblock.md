@@ -68,6 +68,10 @@ Additionally, the following attributes may be used:
    This may be relative to the size specified in the config using `%`, `em`,
    and `ex`.
 
+* `textspacing="`_n_`"`  
+   Initial value for the text spacing.
+   This is expressed as a fraction of the font size.
+
 * `textcolor="`_colour_`"`  
    Initial value for the text colour.
 
