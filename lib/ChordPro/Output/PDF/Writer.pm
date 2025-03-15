@@ -15,7 +15,7 @@ use utf8;
 
 use ChordPro::Files;
 use ChordPro::Paths;
-use ChordPro::Utils qw( expand_tilde demarkup min is_corefont );
+use ChordPro::Utils qw( expand_tilde demarkup min is_corefont maybe );
 use ChordPro::Output::Common qw( fmt_subst prep_outlines );
 use Ref::Util qw( is_hashref );
 
@@ -446,11 +446,32 @@ sub add_object {
 
     if ( $options{border} ) {
 	my $bc = $options{"bordercolor"} || $options{"color"};
+	my $lw = $options{border};
+
+	# Selective parts, Top Right Bottom Left.
+	my $trbl = lc( $options{bordertrbl} // "trbl" );
+	unless ( $trbl =~ /^[trbl]*$/ ) {
+	    warn("Image with invalid bordertrbl ($trbl)\n");
+	    $trbl = "trbl";
+	}
 	$gfx->stroke_color($bc) if $bc;
-	$gfx->rectangle( $x, $y, $x+$w, $y+$h )
-	  ->line_width( $options{border} )
-	    ->stroke;
+	if (    $trbl =~ /t/ && $trbl =~ /r/
+	     && $trbl =~ /b/ && $trbl =~ /l/ ) {	# full rect
+	    $gfx->rectangle( $x, $y, $x+$w, $y+$h )
+	      ->line_width($lw)
+	      ->stroke;
+	}
+	elsif ( $trbl ) {
+	    # Projecting square cap.
+	    $gfx->line_width($lw)->line_cap(2);
+	    $gfx->move( $x,    $y )->vline( $y+$h ) if $trbl =~ /l/;
+	    $gfx->move( $x,    $y )->hline( $x+$w ) if $trbl =~ /b/;
+	    $gfx->move( $x+$w, $y )->vline( $y+$h ) if $trbl =~ /r/;
+	    $gfx->move( $x, $y+$h )->hline( $x+$w ) if $trbl =~ /t/;
+	    $gfx->stroke;
+	}
     }
+
     if ( $options{href} ) {
 	my $a = $gfx->{' apipage'}->annotation;
 	$a->url( $options{href}, -rect => [ $x, $y, $x+$w, $y+$h ] );
@@ -481,12 +502,14 @@ sub crosshairs {
 }
 
 sub add_image {
-    my ( $self, $img, $x, $y, $w, $h, $border ) = @_;
+    my ( $self, $img, $x, $y, $w, $h,
+	 $border, $trbl ) = @_;
     $self->add_object( $img, $x, $y,
 		       xscale => $w/$img->width,
 		       yscale => $h/$img->height,
 		       valign => "bottom",
-		       $border ? ( border => $border ) : () );
+		       maybe border     => $border,
+		       maybe bordertrbl => $trbl );
 }
 
 sub newpage {

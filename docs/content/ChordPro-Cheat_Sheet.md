@@ -89,6 +89,7 @@ Arguments to directives may be separated by a colon `:` and/or whitespace. They 
 | ... `anchor=` _anchor_                                                   |           | Anchor for [static image]({{< relref "Directives-image/#static-stationary-images" >}}).                     | 6.01  |
 | ... `border`                                                             |           | Draws a 1 point border around the image.                                                                    | 5.0   |
 | ... `border=` _width_                                                    |           | Draws a border around the image (points).                                                                   | 5.0   |
+| ... `bordertrbl=` _trbl_                                                 |           | Selects borders to draw (top, right, bottom. left).							     | 5.08  |
 | ... `center`                                                             |           | Center image.                                                                                               | 5.0   |
 | ... `center=` _arg_                                                      |           | Center image if _arg_ .                                                                                     | 5.0   |
 | ... `height=` _height_                                                   |           | Height (points).                                                                                            | 5.0   |
@@ -112,6 +113,7 @@ Arguments to directives may be separated by a colon `:` and/or whitespace. They 
 | [meta duration]({{< relref "Directives-duration" >}}) ...                | duration  | Duration (_mm:ss_ or seconds).                                                                              | 5.0   |
 | [meta key]({{< relref "Directives-key" >}}) _key_                        | key       | Key.                                                                                                        | 5.0   |
 | [meta lyricist]({{< relref "Directives-lyricist" >}}) _name_             | lyricist  | Lyricist name.                                                                                              | 5.0   |
+| [meta sortartist]({{< relref "Directives-sortartist" >}}) _text_         | sortartist | Sort artist. 												     | 6.08  |
 | [meta sorttitle]({{< relref "Directives-sorttitle" >}}) _text_           | sorttitle | Sort title.                                                                                                 | 6.0   |
 | [meta tempo]({{< relref "Directives-tempo" >}}) _bpm_                    | tempo     | Tempo (beats per minute).                                                                                   | 5.0   |
 | [meta time]({{< relref "Directives-time" >}}) _n_ `/` _m_                | time      | Time signature.                                                                                             | 5.0   |

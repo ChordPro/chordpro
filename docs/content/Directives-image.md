@@ -92,6 +92,15 @@ Note that the top of the page is the top of the paper minus the
 top margin, and that the width of the page is the width of the paper
 minus the left and right margins.
 
+##### `trbl=`*sel*
+
+For selective printing of the border, if any. 
+
+*sel* is a sequence of the letters `t` (for the top border line),
+`r` (right), `b` (bottom) and `l` (left border line).
+
+Default is to print all four borders.
+
 ##### `href=`*url*
 
 Provides a URL to open when the image is clicked.

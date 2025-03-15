@@ -1803,6 +1803,10 @@ sub dir_image {
 		&& $v =~ /^(center|left|right)$/ ) {
 	    $opts{lc($k)} = lc($v);
 	}
+	elsif ( $k =~ /^(bordertrbl)$/i
+		&& $v =~ /^[trbl]*$/ ) {
+	    $opts{lc($k)} = lc($v);
+	}
 	elsif ( $uri ) {
 	    do_warn( "Unknown image attribute: $k\n" );
 	    next;

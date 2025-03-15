@@ -2290,6 +2290,7 @@ sub imageline {
 		     xscale => $w/$img->width * $xtrascale,
 		     yscale => $h/$img->height * $xtrascale,
 		     border => $opts->{border} || 0,
+		     maybe bordertrbl => $opts->{bordertrbl},
 		     valign => $opts->{valign} // "top",
 		     align  => $align,
 		     maybe href => $opts->{href},
@@ -2303,6 +2304,7 @@ sub imageline {
 		xscale => $w/$img->width * $xtrascale,
 		yscale => $h/$img->height * $xtrascale,
 		border => $opts->{border} || 0,
+		maybe bordertrbl => $opts->{bordertrbl},
 		valign => $opts->{valign} // "top",
 		align  => $align,
 		maybe href => $opts->{href},
@@ -2386,6 +2388,7 @@ sub imagespread {
 		     xscale => $w/$img->width,
 		     yscale => $h/$img->height,
 		     border => $opts->{border} || 0,
+		     maybe bordertrbl => $opts->{bordertrbl},
 		     valign => "top",
 		     align  => $align,
 		   );
