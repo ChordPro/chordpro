@@ -121,7 +121,7 @@
     // Globally defined (added) meta data,
     // This is explicitly NOT intended for the metadata items above.
     // Do NOT remove or change "_configversion"!
-    meta._configversion : [ 6.072 ]
+    meta._configversion : [ 6.073 ]
     
     // Assets (placeholder).
     assets {}
@@ -281,7 +281,7 @@
       {
       
         // The metadata for this toc. One or two items.
-        fields : [ sorttitle artist ]
+        fields : [ title artist ]
       
         // The label (title) for this toc.
         label : "Contents by Title"
@@ -304,7 +304,7 @@
       {
       
         // The metadata for this toc. One or two items.
-        fields : [ artist sorttitle ]
+        fields : [ artist title ]
       
         // The label (title) for this toc.
         label : "Contents by Artist"
