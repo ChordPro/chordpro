@@ -6,7 +6,16 @@ description: "Table of Contents"
 # Table of Contents
 
 When ChordPro generates a PDF for printing or viewing, it can include
-an automatically generated table of contents (ToC).
+one or more automatically generated table of contents (ToC).
+
+By default ToCs are generated if there is more than one song involved.
+This can be forced for a single song with the `--toc` command line
+option. Likewise, all ToCs can be suppressed with the `--no-toc`
+command line option.
+
+See [Using the ChordPro CLI]({{< relref
+"using-chordpro/#command-line-options" >}}) for details on command
+line options.
 
 ## Configuration
 
@@ -17,6 +26,7 @@ configuration file.
 contents : [
   {
     // The metadata for this toc. One or two items.
+	// This is used for sorting the ToC.
     fields : [ title ]
   
     // The label (title) for this toc.
@@ -39,66 +49,65 @@ contents : [
 
 Is it easiest to consider the ToC to be just like a song, one that is
 inserted before the other songs. It has a title, specified by `label`,
-and only contains *content lines*, lines that have a left part,
+but only contains *content lines*, lines that have a left part,
 specified by `line`, and a right part, specified by `pageno`.
 
-A description of the properties:
-
-* `fields`  
-  A list of one or two metadata items to sort this ToC on.  
-  `title` is the song title, but there is some magic,
-  [see below]({{< relref "#magic-sorting" >}}).  
-  `artist` is the artist name, also with magic.  
-  `songindex` is the ordinal of appearance in the list of songs.  
-  All metadata can be used for sorting, but the above items are most
-  commonly used.
-* `label`  
-  The title for this ToC.
-* `line`  
-  The format for the entries in the ToC. This string may contain
-  [metadata substitutions]({{< relref
-  "ChordPro-configuration-format-strings" >}}).
-* `pageno`  
-  The format for the page numbers in the toc.
-* `omit`  
-  If true, this ToC will not be included in the output.
-* `template`  
-  The name of a template.
-  More magic, [see below]({{< relref "#templates" >}}).
-  
 The default ChordPro configuration provides two ToCs, one as described
 above and a similar ToC that sorts on song title and artist.
 
-## Magic sorting
+## The Table of Content properties
 
-ChordPro has `sorttitle` and `sortartist` directives to set a specific
-sort-version for `title` and `artist`.
+### `fields`
 
-For example:
-````
-{title: The Long And Winding Road}
-{artist: The Beatles}
-{sorttitle: Long And Winding Road, The}
-{sortartist: Beatles, The}
-````
+A list of one or two metadata items to sort this ToC on.
 
-When a ToC is sorted on the `title` metadatum, and the song has a
-`sorttitle`, ChordPro will use the value of `sorttitle` instead of
-`title`.
+All metadata can be used for sorting, but most relevant are:
 
-Also, when a ToC is sorted on the `sorttitle` metadatum, and the song has no
-`sorttitle`, ChordPro will use the value of `title` instead.
+* `title` — the song title,
+* `artist` — the artist name, and
+* `songindex` — the ordinal of appearance in the list of songs.
 
-This magic applies for all sort fields, even though only `title` and
-`artist` have official sort variants.
+If a song has set a value for the `sorttitle` metadatum, this value
+will be used for sorting instead of `title`. 
+Likewise, a value for `sortartist`, if set, will be used instead of `artist`.
 
+### `label`
+
+The title for this ToC.
+
+### `line`
+
+The format for the left part of the content lines.  
+This string may contain
+[metadata substitutions]({{< relref
+"ChordPro-configuration-format-strings" >}}).
+
+### `pageno`
+
+The format for the right part of the content lines, which is usually
+the page number for the song.  
+This string may contain
+[metadata substitutions]({{< relref
+"ChordPro-configuration-format-strings" >}}).
+
+### `omit`
+
+If true, this ToC will not be included in the output.
+
+### `template`
+
+The name of a template.
+[See below]({{< relref "#templates" >}}).
+  
 ## Templates
 
 As stated earlier, is it easiest to consider the ToC to be just like a
-song. More than that: it **is** a song. And you can define your own.
+song. It has a page layout as defined in the configuration file. It
+has page headings and footers.
 
 The `template` field in the ToC specification may contain the name of
-a ChordPro song file, which is then used as a ToC. This way you can
+a ChordPro song file, which is then used as a template for the ToC.
+This way you can
 add introduction text, logo's etc.. The content lines that form the
 actual ToC are appended to the song contents.
 
