@@ -95,10 +95,22 @@ metadata {
 
   // Known metadata items.
   keys : [
-    title  sorttitle subtitle
-    artist composer  lyricist arranger
-    album  copyright year
-    key    time      tempo    capo     duration
+    title
+    subtitle
+    album
+    arranger
+    artist
+    capo
+    composer
+    copyright
+    duration
+    key
+    lyricist
+    sortartist
+    sorttitle
+    tempo
+    time
+    year
   ]
 
   // If strict, only the keys named here are allowed.
@@ -117,7 +129,7 @@ metadata {
 // Globally defined (added) meta data,
 // This is explicitly NOT intended for the metadata items above.
 // Do NOT remove or change "_configversion"!
-meta._configversion : [ 6.073 ]
+meta._configversion : [ 6.074 ]
 
 // Assets (placeholder).
 assets {}

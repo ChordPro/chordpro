@@ -78,6 +78,7 @@ organizing collections of ChordPro songs.
 * [sorttitle]({{< relref "Directives-sorttitle" >}})
 * [subtitle]({{< relref "Directives-subtitle" >}}) (short: st)
 * [artist]({{< relref "Directives-artist" >}})
+* [sortartist]({{< relref "Directives-sortartist" >}})
 * [composer]({{< relref "Directives-composer" >}})
 * [lyricist]({{< relref "Directives-lyricist" >}})
 * [copyright]({{< relref "Directives-copyright" >}})
