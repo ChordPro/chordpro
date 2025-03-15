@@ -986,7 +986,7 @@ sub generate_song {
 		for ( 1..$h ) {
 		    last unless @chords;
 		    $dd->draw( shift(@chords), $x, $y, $ps );
-		    $x += $hsp;
+		    $x += $dwidth + $dadv;
 		}
 
 		$y -= $vsp;
