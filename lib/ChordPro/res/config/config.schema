@@ -745,7 +745,7 @@
           ]
         },
         "grille" : {
-          "description" : "Embedding Grilles.",
+          "description" : "Embedding Grilles. EXPERIMENTAL",
           "allOf" : [
             { "$ref" : "#/definitions/delegatespec" },
             { "properties" : {
@@ -806,6 +806,22 @@
             } }
           ]
         },
+        "strum" : {
+          "description" : "Embedding Strums. EXPERIMENTAL",
+          "allOf" : [
+            { "$ref" : "#/definitions/delegatespec" },
+            { "properties" : {
+              "handler" : {
+                "type" : "string",
+                "default" : "strum2xo"
+              },
+              "module" : {
+                "type" : "string",
+                "default" : "Strum"
+              },
+            } }
+          ]
+        },
         "svg" : {
           "description" : "Embedding SVG.",
           "allOf" : [
@@ -838,6 +854,57 @@
             } }
           ]
         }
+      }
+    },
+
+    "gridstrum" : {
+      "description" : "Grid strums.\nUnicode code points for the glyphs from ChordProSymbols.",
+      "properties" : {
+        "symbols" : {
+	  "description" : "Unicode code points for the glyphs from ChordProSymbols.",
+	  "properties" : {
+	    "up" : {
+	      "description" : "arrow up",
+	      "type" : "string",
+	      "default" : "\u2190"
+	    },
+	    "u+" : {
+	      "description" : "arrow up with accent",
+	      "type" : "string",
+	      "default" : "\u2191"
+	    },
+	    "ua" : {
+	      "description" : "arrow up with arpeggio",
+	      "type" : "string",
+	      "default" : "\u2192"
+	    },
+	    "ux" : {
+	      "description" : "arrow up with mute",
+	      "type" : "string",
+	      "default" : "\u2194"
+	    },
+	    "dn" : {
+	      "description" : "arrow down",
+	      "type" : "string",
+	      "default" : "\u21a0"
+	    },
+	    "d+" : {
+	      "description" : "arrow down with accent",
+	      "type" : "string",
+	      "default" : "\u21a1"
+	    },
+	    "da" : {
+	      "description" : "arrow down with arpeggio",
+	      "type" : "string",
+	      "default" : "\u21a2"
+	    },
+	    "dx" : {
+	      "description" : "arrow down with mute",
+	      "type" : "string",
+	      "default" : "\u21a4"
+	    }
+	  }
+	}
       }
     },
 
@@ -1279,6 +1346,38 @@
 		},
 		"grid" : {
 		  "description" : "Font for typesetting grids.",
+		  "allOf" : [
+		    { "$ref" : "#/definitions/fontspec" },
+		    { "properties" : {
+		      "name" : {
+			"default" : "Helvetica",
+			"type" : "string"
+		      },
+		      "size" : {
+			"default" : 10,
+			"type" : "number"
+		      }
+		    } }
+		  ]
+		},
+		"gridstrum" : {
+		  "description" : "Font for typesetting gridstrum symbols.",
+		  "allOf" : [
+		    { "$ref" : "#/definitions/fontspec" },
+		    { "properties" : {
+		      "name" : {
+			"default" : "ChordProSymbols",
+			"type" : "string"
+		      },
+		      "size" : {
+			"default" : 13,
+			"type" : "number"
+		      }
+		    } }
+		  ]
+		},
+		"grille" : {
+		  "description" : "Font for typesetting grilles.",
 		  "allOf" : [
 		    { "$ref" : "#/definitions/fontspec" },
 		    { "properties" : {
