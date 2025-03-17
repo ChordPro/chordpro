@@ -686,7 +686,9 @@ sub finish {
     my ( $self, $file ) = @_;
 
     if ( $file && $file ne "-" ) {
-	$self->{pdf}->saveas($file);
+	my $fd = fs_open( $file, '>:raw' );
+	print $fd $self->{pdf}->stringify;
+	close($fd);
     }
     else {
 	binmode(STDOUT);

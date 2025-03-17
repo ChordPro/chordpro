@@ -37,6 +37,7 @@
     - Fix reading from "-" (standard input).
     - Fix problem with a2crd from wx on Windows.
     - Fix issues #459, #512, #528, #534, #537.
+    - Fix issue #544 Issue with special character in metadata during export when used in filename.
     - (PDF) Fix progress count if multi-pass.
     - Fix diagnostic in file load.
     - Fix *size reset after *font reset.
