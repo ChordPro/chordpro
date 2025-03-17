@@ -445,7 +445,7 @@ sub add_object {
     }
 
     if ( $options{border} ) {
-	my $bc = $options{"bordercolor"} || $options{"color"};
+	my $bc = $self->_fgcolor($options{"bordercolor"} || $options{"color"});
 	my $lw = $options{border};
 
 	# Selective parts, Top Right Bottom Left.
