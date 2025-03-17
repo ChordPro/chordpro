@@ -60,7 +60,7 @@ sub txt2xform( $self, %args ) {
     my $sp = $vsp eq "flex"
       ? ($font->{leading} || $ps->{spacing}->{$style} || 1) : $vsp;
     my $size   = fontsize( delete($opts->{textsize}), $font->{size} );
-    my $color  = delete($opts->{textcolor});
+    my $color  = delete($opts->{textcolor}) // $font->{color};
     my $flush  = delete($opts->{flush})  // "left";
     my $vflush = delete($opts->{vflush}) // "top";
 

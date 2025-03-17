@@ -45,6 +45,7 @@
     - Suppress empty lines after grids when lyrics-only.
     - Fix crash with chords in grid margins.
     - Fix topic localization in fix_musicsyms.
+    - TextBlock: Default colour to style colour.
 
 6.070 2024-12-25
 
