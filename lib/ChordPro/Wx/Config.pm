@@ -121,6 +121,9 @@ my %prefs =
    enable_pdfviewer   => undef,
    pdfviewer   => "",
 
+   # HTML Viewer.
+   enable_htmlviewer => undef,
+
    # Preferences w/o UI.
    chordproext => ".chordpro",	# for Nick
    dumpstate => 0,
@@ -288,6 +291,7 @@ method Load :common {
 	}
     }
     $preferences{enable_pdfviewer} //= 0;
+    $preferences{enable_htmlviewer} //= 0;
     $cb->Flush;
 
     # Collect from the environment.

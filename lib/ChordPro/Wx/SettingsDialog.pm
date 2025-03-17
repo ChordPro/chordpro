@@ -23,6 +23,8 @@ BUILD ( $parent, $id, $title ) {
     Wx::Event::EVT_SYS_COLOUR_CHANGED( $self,
 				       $self->can("OnSysColourChanged") );
     # Do not DeletePage until we're sure none of the widgets are referenced.
+    $self->{nb_preferences}->RemovePage(5)
+      unless $preferences{expert};
     $self->{nb_preferences}->RemovePage(4)
       unless $preferences{pdfviewer};
 
@@ -185,6 +187,9 @@ method fetch_prefs() {
       if $preferences{pdfviewer};
     $self->{t_pdfviewer}->Enable($self->{cb_pdfviewer}->IsChecked);
 
+    # HTML Viewer.
+    $self->{cb_htmlviewer}->SetValue($preferences{enable_htmlviewer});
+
     $self->enablecustom;
     $state{_prefs} = clone(\%preferences);
 
@@ -275,6 +280,9 @@ method store_prefs() {
     # PDF Viewer.
     $preferences{enable_pdfviewer} = $self->{cb_pdfviewer}->IsChecked;
     $preferences{pdfviewer} = $self->{t_pdfviewer}->GetValue;
+
+    # HTML Viewer.
+    $preferences{enable_htmlviewer} = $self->{cb_htmlviewer}->IsChecked;
 
     # use DDP; p %preferences, as => "Stored";
 }
@@ -610,6 +618,8 @@ method OnMessagesFontPickerChanged($event) {
 
 method OnPDFViewer($event) {
     $self->{t_pdfviewer}->Enable( $self->{cb_pdfviewer}->GetValue );
+}
+method OnHTMLViewer($event) {
 }
 
 # System

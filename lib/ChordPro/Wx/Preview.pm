@@ -23,13 +23,12 @@ field $msgs;
 field $fatal;
 field $died;
 field $preview_cho		:accessor;
-field $preview_pdf;
+field $preview_file;
 field $preview_tmp;
 field $unsaved_preview		:mutator;
 
 BUILD {
     ( undef, $preview_cho ) = tempfile( OPEN => 0 );
-    $preview_pdf = $preview_cho . ".pdf";
     $preview_cho .= ".cho";
 }
 
@@ -55,7 +54,7 @@ method log( $level, $msg ) {
 
 method preview( $args, %opts ) {
 
-    unlink($preview_pdf);
+    unlink($preview_file) if $preview_file;
 
     my $annotate = eval { $panel->prepare_annotations };
 
@@ -115,8 +114,15 @@ method preview( $args, %opts ) {
 
     push( @ARGV, '--noconfig' ) unless $haveconfig;
 
-    push( @ARGV, '--output', $preview_pdf );
-    push( @ARGV, '--generate', "PDF" );
+    if ( $preferences{enable_htmlviewer} ) {
+	( $preview_file = $preview_cho ) =~ s/\.cho$/.html/;
+	push( @ARGV, '--generate', "HTML" );
+    }
+    else {
+	( $preview_file = $preview_cho ) =~ s/\.cho$/.pdf/;
+	push( @ARGV, '--generate', "PDF" );
+    }
+    push( @ARGV, '--output', $preview_file );
 
     push( @ARGV, '--transpose', $state{xpose} )
 	 if $preferences{enable_xpose} && $state{xpose};
@@ -191,7 +197,7 @@ method preview( $args, %opts ) {
     };
     $dialog->Destroy if $dialog;
     $self->_die($@), goto ERROR if $@ && !$died;
-    goto ERROR unless fs_test( e => $preview_pdf );
+    goto ERROR unless fs_test( e => $preview_file );
 
     $unsaved_preview = 1;
     if ( !$preferences{enable_pdfviewer}
@@ -215,7 +221,7 @@ method preview( $args, %opts ) {
 	    ( $panel, $panel->{webview}, $self->can("OnWebViewError") );
 
 	use URI::file;
-	my $wf = URI::file->new($preview_pdf);
+	my $wf = URI::file->new($preview_file);
 	$wf =~ s;///([A-Z]):/;///$1|/;;
 	$self->log( 'I', "Preview " . substr($wf,0,128) );
 	$panel->{webview}->LoadURL($wf);
@@ -224,25 +230,26 @@ method preview( $args, %opts ) {
 	$self->log( 'S', "Output generated, starting previewer");
 
 	if ( my $cmd = $preferences{pdfviewer} ) {
-	    if ( $cmd =~ s/\%f/$preview_pdf/g ) {
+	    if ( $cmd =~ s/\%f/$preview_file/g ) {
 	    }
 	    elsif ( $cmd =~ /\%u/ ) {
-		my $u = _makeurl($preview_pdf);
+		my $u = _makeurl($preview_file);
 		$cmd =~ s/\%u/$u/g;
 	    }
 	    else {
-		$cmd .= " \"$preview_pdf\"";
+		$cmd .= " \"$preview_file\"";
 	    }
 	    Wx::ExecuteCommand($cmd);
 	}
 	else {
 	    my $wxTheMimeTypesManager = Wx::MimeTypesManager->new;
-	    my $ft = $wxTheMimeTypesManager->GetFileTypeFromExtension("pdf");
-	    if ( $ft && ( my $cmd = $ft->GetOpenCommand($preview_pdf) ) ) {
+	    my $ft = $wxTheMimeTypesManager->GetFileTypeFromExtension
+	      ( $preferences{enable_htmlviewer} ? "html" : "pdf");
+	    if ( $ft && ( my $cmd = $ft->GetOpenCommand($preview_file) ) ) {
 		Wx::ExecuteCommand($cmd);
 	    }
 	    else {
-		Wx::LaunchDefaultBrowser($preview_pdf);
+		Wx::LaunchDefaultBrowser($preview_file);
 	    }
 	}
     }
@@ -263,7 +270,7 @@ method preview( $args, %opts ) {
 	    $self->log( 'W',  "Problems found." );
 	}
     }
-    elsif ( !fs_test( s => $preview_pdf ) ) {
+    elsif ( !fs_test( s => $preview_file ) ) {
 	$panel->alert(1);
 	$self->log( 'W',  "Nothing to view. Empty song?" );
     }
@@ -306,7 +313,7 @@ sub _makeurl {
 }
 
 method save {
-    return unless fs_test( s => $preview_pdf );
+    return unless fs_test( s => $preview_file );
 
     my $savefile = "preview";
     if ( $state{mode} eq "editor" && $state{currentfile} ) {
@@ -327,7 +334,7 @@ method save {
     $fd->Destroy;
 
     if ( $ret == wxID_OK ) {
-	if ( fs_copy( $preview_pdf, $fn ) ) {
+	if ( fs_copy( $preview_file, $fn ) ) {
 	    $unsaved_preview = 0;
 	}
 	else {
@@ -344,12 +351,12 @@ method save {
 }
 
 method have_preview {
-    fs_test( s => $preview_pdf );
+    fs_test( s => $preview_file );
 }
 
 method discard {
     $unsaved_preview = 0;
-    unlink($preview_pdf);
+    unlink($preview_file);
 }
 
 1;
