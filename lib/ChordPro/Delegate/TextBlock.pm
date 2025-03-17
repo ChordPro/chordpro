@@ -63,6 +63,7 @@ sub txt2xform( $self, %args ) {
     my $color  = delete($opts->{textcolor}) // $font->{color};
     my $flush  = delete($opts->{flush})  // "left";
     my $vflush = delete($opts->{vflush}) // "top";
+    $color = $ps->{pr}->_fgcolor($color) if $color;
 
     my $data = $elt->{data};
     if ( $color || $bgcol ) {
