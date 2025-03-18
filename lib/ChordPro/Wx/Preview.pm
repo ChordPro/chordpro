@@ -15,21 +15,22 @@ use ChordPro::Utils qw( demarkup );
 
 use Wx ':everything';
 use Wx::Locale gettext => '_T';
-use File::Temp qw( tempfile );
+use File::Temp qw( tempfile tempdir );
 use File::Basename qw(basename);
 
 field $panel			:param;
 field $msgs;
 field $fatal;
 field $died;
+field $tmpdir;
 field $preview_cho		:accessor;
 field $preview_file;
 field $preview_tmp;
 field $unsaved_preview		:mutator;
 
 BUILD {
-    ( undef, $preview_cho ) = tempfile( OPEN => 0 );
-    $preview_cho .= ".cho";
+    $tmpdir = tempdir( CLEANUP => 1 );
+    $preview_cho = fn_catfile( $tmpdir, "preview.cho" );
 }
 
 method _warn( @m ) {
@@ -115,11 +116,11 @@ method preview( $args, %opts ) {
     push( @ARGV, '--noconfig' ) unless $haveconfig;
 
     if ( $preferences{enable_htmlviewer} ) {
-	( $preview_file = $preview_cho ) =~ s/\.cho$/.html/;
+	$preview_file = fn_catfile( $tmpdir, "preview.html" );
 	push( @ARGV, '--generate', "HTML" );
     }
     else {
-	( $preview_file = $preview_cho ) =~ s/\.cho$/.pdf/;
+	$preview_file = fn_catfile( $tmpdir, "preview.pdf" );
 	push( @ARGV, '--generate', "PDF" );
     }
     push( @ARGV, '--output', $preview_file );
@@ -200,6 +201,12 @@ method preview( $args, %opts ) {
     goto ERROR unless fs_test( e => $preview_file );
 
     $unsaved_preview = 1;
+    if ( $preferences{enable_htmlviewer} ) {
+	fs_copy( CP->findres( $_, class => "styles" ),
+		 fn_catfile( $tmpdir, $_ ) )
+	  for qw( chordpro.css chordpro_print.css );
+    }
+
     if ( !$preferences{enable_pdfviewer}
 	 && $panel->{webview}->isa('Wx::WebView') ) {
 

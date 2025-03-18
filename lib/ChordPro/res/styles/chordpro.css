@@ -54,10 +54,9 @@ table.songline td.indent {
     padding-left: 2em;
 }
 div.comment span {
-    background: #c0c0c0;
+    background: #e0e0e0;
 }
 div.comment_italic span {
-    background: #c0c0c0;
     font-style: italic;
 }
 div.image {
