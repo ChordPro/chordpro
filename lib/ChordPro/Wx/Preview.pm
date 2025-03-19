@@ -322,6 +322,10 @@ sub _makeurl {
 method save {
     return unless fs_test( s => $preview_file );
 
+    if ( $preferences{enable_htmlviewer} ) {
+	return $panel->{webview}->Print;
+    }
+
     my $savefile = "preview";
     if ( $state{mode} eq "editor" && $state{currentfile} ) {
 	$savefile = $state{currentfile} =~ s/\.\w+$//r;
