@@ -197,6 +197,10 @@ sub generate_song {
 	    }
 	    # First shot code. Fortunately (not surprisingly :))
 	    # HTML understands most arguments.
+
+	    if ( $elt->{type} eq "image" ) {
+		$elt->{uri} //= $s->{assets}->{$elt->{id}}->{uri};
+	    }
 	    push( @s,
 		  '<div class="' . $elt->{type} . '">' .
 		  '<img src="' . $elt->{uri} . '" ' .
