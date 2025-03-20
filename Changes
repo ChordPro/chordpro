@@ -27,6 +27,9 @@
 
     - (Experimental) Use ChordPro Symbols from markup.
 
+    - GUI does not longer offer saving the preview on exit. It can
+      easily be regenerated and exported if needed.
+
     !Bug Fixes
 
     - Some issues with Unicode filenames on Windows.

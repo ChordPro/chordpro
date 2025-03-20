@@ -170,6 +170,9 @@ method preview( $args, %opts ) {
 method check_source_saved() { 1 }
 
 method check_preview_saved() {
+    # Do not ask for preview save. It's regenerated easily.
+    return 1;
+
     return 1 unless $self->prv && $self->prv->unsaved_preview;
 
     my $md = Wx::MessageDialog->new
