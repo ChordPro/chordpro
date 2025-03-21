@@ -65,7 +65,9 @@ sub refresh( $self, $prefs = undef ) {
 
     Wx::Event::EVT_STC_STYLENEEDED( $stc, wxID_ANY,
 				    sub { OnStyleNeeded($self, $_[1]) } );
-
+    Wx::Event::EVT_STC_CHANGE( $stc, wxID_ANY,
+			       sub { OnChanged($self, $_[1]) } );
+    $self->SetModEventMask(0x01|0x02|0x10);
     my $theme = $state{editortheme};
     my $c = $prefs->{editcolour}{$theme};
     my $fg = Wx::Colour->new($c->{fg});
@@ -230,6 +232,10 @@ sub OSXDisableAllSmartSubstitutions( $self ) {
 
 sub OnStyleNeeded( $self, $event ) {		# scintilla
     $self->style_text;
+}
+
+sub OnChanged( $self, $event ) {		# scintilla
+    $state{editchanged}++;
 }
 
 sub Replace( $self, $from=-1, $to=-1, $text="" ) {

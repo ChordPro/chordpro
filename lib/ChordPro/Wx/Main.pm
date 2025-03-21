@@ -428,8 +428,22 @@ method OnIdle($event) {
 
     if ( $state{mode} eq "editor") {
 	my $t = $self->{p_editor}->{t_editor}->GetText;
+
 	if ( $t =~ /^\{\s*t(?:itle)?[: ]+([^\}]*)\}/m ) {
 	    $self->{p_editor}->{l_status}->SetLabel(demarkup($1));
+	}
+
+	if ( $state{editchanged}
+	     && $self->{p_editor}->{sw_lr}->IsSplit ) {
+
+	    if ( $state{have_webview}
+		 && $preferences{enable_htmlviewer} ) {
+		$self->{p_editor}->preview([]);
+		$state{editchanged} = 0;
+	    }
+	    else {
+		# Preview is no longer actual -- how to signal?
+	    }
 	}
     }
 
