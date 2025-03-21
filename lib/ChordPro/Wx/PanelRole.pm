@@ -327,6 +327,7 @@ method previewtooltip() {
 	$self->{bmb_preview}->SetToolTip(_T("Generate and show a new preview"));
 	$mi->Check(0);
     }
+    $state{panel} && $state{panel}->set_focus;
 }
 
 method messagestooltip() {
@@ -341,6 +342,7 @@ method messagestooltip() {
 	$mi->Check(0);
     }
     $self->{w_infobar}->Dismiss if $self->{w_infobar}->IsShown;
+    $state{panel} && $state{panel}->set_focus;
 }
 
 1;

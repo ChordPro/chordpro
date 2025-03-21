@@ -86,7 +86,7 @@ method refresh() {
     setup_messages_ctxmenu($self);
     $self->previewtooltip;
     $self->messagestooltip;
-    $self->{bmb_preview}->SetFocus;
+    $self->set_focus;
 }
 
 method save_preferences() {
@@ -187,6 +187,10 @@ method check_preview_saved() {
     $self->prv->discard, return 1 if $ret == wxID_NO; # don't save
     return $self->prv->save;
     1;
+}
+
+method set_focus {
+    $self->{dp_folder}->SetFocus;
 }
 
 ################ Event handlers ################

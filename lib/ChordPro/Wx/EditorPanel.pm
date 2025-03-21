@@ -470,6 +470,10 @@ method update_preferences() {
     $self->refresh;
 }
 
+method set_focus {
+    $self->{t_editor}->SetFocus;
+}
+
 ################ Event Handlers (alphabetic order) ################
 
 method OnA2Crd($event) {
