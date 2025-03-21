@@ -556,7 +556,7 @@ method OnCharAdded( $event ) {
     }
 }
 
-method OnClearAnnotations($event) {
+method OnClearDiagnosticFlags($event) {
     return unless $state{have_stc};
     $self->{t_editor}->AnnotationClearAll;
 }
