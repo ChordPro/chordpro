@@ -218,7 +218,7 @@ method preview( $args, %opts ) {
 	    unless ( $_->{sw_lr}->IsSplit ) {
 		$_->{sw_lr}->SplitVertically ( $_->{p_left},
 					       $_->{p_right},
-					       $_->{$panel->panel."_lr"} // 0.5 );
+					       $state{sash}{$_->panel."_lr"} // 0.5 );
 	    }
 	}
 

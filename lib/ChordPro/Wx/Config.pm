@@ -285,7 +285,7 @@ method Load :common {
     }
     delete $ENV{CHORDPRO_LIB};
 
-    if ( $preferences{settings_version}||1 < SETTINGS_VERSION ) {
+    if ( ($preferences{settings_version}||1) < SETTINGS_VERSION ) {
 	for ( qw( windows sash ) ) {
 	    delete $state{$_};
 	    $cb->DeleteGroup($_);
