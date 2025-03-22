@@ -30,6 +30,10 @@
     - GUI does not longer offer saving the preview on exit. It can
       easily be regenerated and exported if needed.
 
+    - GUI editor no longer shows line numbers by default. You can
+      change this in the settings for the editor.
+      Line numbers will always be shown when the messages pane is visible.
+      
     !Bug Fixes
 
     - Some issues with Unicode filenames on Windows.
