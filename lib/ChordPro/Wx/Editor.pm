@@ -106,7 +106,6 @@ sub refresh( $self, $prefs = undef ) {
     $stc->StyleSetBackground( 7, wxRED );
 
     # For linenumbers.
-    $stc->SetMarginWidth( 0, 40 ); # TODO
     $stc->StyleSetForeground( wxSTC_STYLE_LINENUMBER,
 			      Wx::Colour->new( $c->{numfg} ) );
     $stc->StyleSetBackground( wxSTC_STYLE_LINENUMBER,
@@ -123,16 +122,22 @@ sub refresh( $self, $prefs = undef ) {
     if ( $prefs->{editorwrap} ) {
 	$stc->SetWrapMode(3); # wxSTC_WRAP_WHITESPACE );
 	$stc->SetWrapStartIndent( $prefs->{editorwrapindent} );
+	$stc->SetWrapVisualFlags(3); # wxSTC_WRAPVISUALFLAG_START );
+	$stc->SetWrapVisualFlagsLocation(3); # wxSTC_WRAPVISUALFLAG_START );
     }
     else {
 	$stc->SetWrapMode(0); # wxSTC_WRAP_NONE );
     }
 
     $self->style_text;
-
     # Expert...
     $stc->SetViewEOL( $state{vieweol} );
     $stc->SetViewWhiteSpace( $state{viewws} );
+    $stc->SetViewLineNumbers( $preferences{editorlines} );
+}
+
+sub SetViewLineNumbers( $self, $b ) {
+    $self->SetMarginWidth( 0, $b ? 40 : 0 ); # TODO length
 }
 
 sub style_text( $self ) {
@@ -167,6 +172,12 @@ sub style_text( $self ) {
     $style->( qr/^([ \t]*)(\{)([-\w!]+)([: ])(.*)(\})/m, 7, 3, 5, 3, 6, 3 );
     # Chords.
     $style->( qr/(\[)([^\[\]\s]*)(\])/m, 3, 4, 3 );
+
+    # For later. Much later...
+    #$self->MarkerDefine($_,$_,wxGREEN,wxBLACK) for 0..31;
+    #$self->MarkerAdd( 6, 8 );
+    #$self->MarkerAdd( 7, 9 );
+    #$self->MarkerAdd( 8, 10 );
 }
 
 sub prepare_annotations( $self ) {
@@ -305,6 +316,9 @@ sub SetText( $self, $text ) {
 sub SetColour( $self, $colour ) {
     $self->SetStyle( 0, $self->GetLastPosition,
 		     Wx::TextAttr->new( Wx::Colour->new($colour) ) );
+}
+
+sub SetViewLineNumbers( $self, $b ) {
 }
 
 sub EmptyUndoBuffer($self) {

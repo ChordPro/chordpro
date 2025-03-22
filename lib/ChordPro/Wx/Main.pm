@@ -542,6 +542,7 @@ method OnPreferences($event) {
     # The Settings dialog operates on the current $preferences.
     my $ret = $self->{d_prefs}->ShowModal;
     savewinpos( $self->{d_prefs}, "prefs" );
+    $state{panel}->set_focus unless $state{mode} eq "initial";
     return unless $ret == wxID_OK;
 
     # $preferences may have changed.
