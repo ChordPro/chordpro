@@ -564,7 +564,13 @@ sub generate_song {
     }
 
     local $config = dclone( $s->{config} // $config );
-
+    while ( my($k,$v) = each( %{$config->{markup}->{shortcodes}}) ) {
+	unless ( $pr->{layout}->can("register_shortcode") ) {
+	    warn("Cannot register shortcodes, upgrade Text::Layout module\n");
+	    last;
+	}
+	$pr->{layout}->register_shortcode( $k, $v );
+    }
     $source = $s->{source};
 
     $suppress_empty_chordsline = $::config->{settings}->{'suppress-empty-chords'};
@@ -2523,7 +2529,7 @@ sub text_vsp {
 
     my $ftext = $ps->{fonts}->{ $elt->{context} eq "chorus"
 				? "chorus" : "text" };
-    my $layout = Text::Layout->new( $ps->{pr}->{pdf} );
+    my $layout = $ps->{pr}->{layout}->copy;
     $layout->set_font_description( $ftext->{fd} );
     $layout->set_font_size( $ftext->{size} );
     #warn("vsp: ".join( "", @{$elt->{phrases}} )."\n");
@@ -3319,7 +3325,7 @@ sub svg_fonthandler {
 	my $try =
 	  eval {
 	      $t = Text::Layout::FontConfig->find_font( $family, $stl, $weight );
-	      $t->get_font(Text::Layout->new($pdf));
+	      $t->get_font($ps->{pr}->{layout}->copy);
 	  };
 	if ( $try ) {
 	    warn("SVG: Font $key found in font config: ",

@@ -647,6 +647,14 @@ settings.strict : true
 // Tab stop width for tab expansion. Set to zero to disable.
 # a2crd.tabstop : 8
 
+// Settings for the markup processor.
+// Shortcodes allow user defined markup, e.g. <foo>...</foo>.
+// With shortcode
+//    heavy :  "weight='bold' size='large'"
+// each occurrence of <heavy>...</heavy> will be replaced by
+// <span weight='bold' size='large'>...</span>.
+# markup.shortcodes {}
+
 // Settings for the parser/preprocessor.
 // For selected lines, you can specify a series of 
 // { "target" : "xxx", "replace" : "yyy" }

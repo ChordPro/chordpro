@@ -53,7 +53,7 @@
           "default" : "ABC"
         },
         "preprocess" : {
-	  "description" : "Obsolete. Please use parser.preprocess.env-... instead."
+	  "description" : "Obsolete. Please use parser.preprocess.env-... instead.",
           "type" : "object"
         }
       },
@@ -756,7 +756,7 @@
               "module" : {
                 "type" : "string",
                 "default" : "Grille"
-              },
+              }
             } }
           ]
         },
@@ -818,7 +818,7 @@
               "module" : {
                 "type" : "string",
                 "default" : "Strum"
-              },
+              }
             } }
           ]
         },
@@ -965,6 +965,18 @@
               "type" : "array"
             }
           }
+        }
+      }
+    },
+
+    "markup" : {
+      "description" : "Settings for the markup processor.\nShortcodes allow user defined markup, e.g. <foo>...</foo>.\nmarkup.shortcode {\n   heavy :  \"weight='bold' size='large'\"\n}\nEach occurrence of <heavy>...</heavy> will be replaced by\n<span weight='bold' size='large'>...</span>.\n",
+      "type" : "object",
+      "additionalProperties" : false,
+      "properties" : {
+        "shortcodes" : {
+          "description" : "",
+          "additionalProperties" : true
         }
       }
     },

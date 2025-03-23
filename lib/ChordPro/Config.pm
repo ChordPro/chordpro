@@ -652,6 +652,7 @@ sub _augment ( $self, $hash, $path ) {
             || $path =~ /^pdf\.(?:info|fonts|fontconfig)\./
             || $path =~ /^pdf\.formats\.\w+-even\./
             || $path =~ /^meta\./
+            || $path =~ /^markup\.shortcodes\./
             || $key =~ /^_/;
 
         # Hash -> Hash.
@@ -891,6 +892,7 @@ sub hmerge( $left, $right, $path = "" ) {
             || $path =~ /^meta\./
             || $path =~ /^delegates\./
             || $path =~ /^parser\.preprocess\./
+            || $path =~ /^markup\.shortcodes\./
             || $path =~ /^debug\./
             || $key =~ /^_/;
 

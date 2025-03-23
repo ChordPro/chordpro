@@ -12,6 +12,7 @@ use warnings;
 use ChordPro::Files;
 use ChordPro::Output::Common;
 use ChordPro::Utils qw();
+use Storable 'dclone';
 
 sub generate_songbook {
     my ( $self, $sb ) = @_;
@@ -43,6 +44,7 @@ sub generate_songbook {
     \@book;
 }
 
+my $config;
 my $single_space = 0;		# suppress chords line when empty
 my $lyrics_only = 0;		# suppress all chords lines
 my $layout;
@@ -52,9 +54,17 @@ sub generate_song {
 
     my $tidy      = $::options->{tidy};
     $single_space = $::options->{'single-space'};
-    $lyrics_only  = $::config->{settings}->{'lyrics-only'};
+    $config = dclone( $s->{config} // $::config );
+    $lyrics_only  = $config->{settings}->{'lyrics-only'};
     $s->structurize;
     $layout = Text::Layout::Text->new;
+    while ( my($k,$v) = each( %{$config->{markup}->{shortcodes}}) ) {
+	unless ( $layout->can("register_shortcode") ) {
+	    warn("Cannot register shortcodes, upgrade Text::Layout module\n");
+	    last;
+	}
+	$layout->register_shortcode( $k, $v );
+    }
 
     my @s;
 
@@ -245,7 +255,7 @@ sub songline {
 		 '</table>' );
     }
 
-    if ( $::config->{settings}->{'chords-under'} ) {
+    if ( $config->{settings}->{'chords-under'} ) {
 	return ( '<table class="songline">',
 		 '  <tr class="lyrics">',
 		 '    ' . join( '',

@@ -220,7 +220,7 @@ sub strwidth {
     $font ||= $self->{font};
     $text = fix_musicsyms( $text, $font );
     $size ||= $self->{fontsize} || $font->{size};
-    $self->{tmplayout} //= Text::Layout->new( $self->{pdf} );
+    $self->{tmplayout} //= $self->{layout}->copy;
     $self->{tmplayout}->set_font_description($font->{fd});
     $self->{tmplayout}->set_font_size($size);
     $self->{tmplayout}->set_markup($text);
@@ -233,7 +233,7 @@ sub strheight {
     $font ||= $self->{font};
     $text = fix_musicsyms( $text, $font );
     $size ||= $self->{fontsize} || $font->{size};
-    $self->{tmplayout} //= Text::Layout->new( $self->{pdf} );
+    $self->{tmplayout} //= $self->{layout}->copy;
     $self->{tmplayout}->set_font_description($font->{fd});
     $self->{tmplayout}->set_font_size($size);
     $self->{tmplayout}->set_markup($text);
