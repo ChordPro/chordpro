@@ -84,7 +84,6 @@ method refresh() {
     $self->previewtooltip;
     $self->messagestooltip;
     $self->{t_editor}->SetModified($mod);
-    $self->{bmb_preview}->SetFocus;
 
     $self->refresh_messages;
 
@@ -94,7 +93,7 @@ method refresh() {
 	Wx::Event::EVT_STC_CLIPBOARD_PASTE( $self, $self->{t_editor}->GetId,
 					    $self->can("OnClipBoardPaste") );
     }
-
+    $self->set_focus;
 }
 
 method openfile( $file, $checked=0, $actual=undef ) {
