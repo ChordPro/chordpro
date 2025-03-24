@@ -22,7 +22,7 @@ Type `My First`.
 ![]({{< asset "images/chordpro-gui-editor-p3.png" >}})
 
 Press the Enter key and notice that the closing brace of the
-directice stays at the right place.
+directive stays at the right place.
 
 Add a song line: Type `[` followed by a lowercase `a`. Now type the
 closing `]`. You will see that the chord name is automatically

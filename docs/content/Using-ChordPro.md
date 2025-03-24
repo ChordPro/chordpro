@@ -670,7 +670,7 @@ exits. The configuration is commented to explain its contents.
 
 The config contains most of the ChordPro configuration items, all
 commented out. It is easy to get started with configuring ChordPro
-by enabling and modifyng just a few items at a time.
+by enabling and modifying just a few items at a time.
 
 ### sysconfig
 

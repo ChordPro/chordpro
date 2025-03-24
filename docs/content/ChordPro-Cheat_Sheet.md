@@ -101,7 +101,7 @@ Arguments to directives may be separated by a colon `:` and/or whitespace. They 
 | ... `width=` _width_                                                     |           | Width (points).                                                                                             | 5.0   |
 | ... `x=` _offset_                                                        |           | Horizontal offset (points) for [static image]({{< relref "Directives-image/#static-stationary-images" >}}). | 6.01  |
 | ... `y=` _offset_                                                        |           | Vertical offset (points) for [static image]({{< relref "Directives-image/#static-stationary-images" >}}).   | 6.01  |
-| [labelcolour]({{< relref "Directives-props_label_legacy" >}}) _colour_   |           | Margin abels colour.                                                                                        | 6.07  |
+| [labelcolour]({{< relref "Directives-props_label_legacy" >}}) _colour_   |           | Margin labels colour.                                                                                        | 6.07  |
 | [labelfont]({{< relref "Directives-props_label_legacy" >}}) _font_       |           | Margin labels font.                                                                                         | 6.07  |
 | [labelsize]({{< relref "Directives-props_label_legacy" >}}) _size_       |           | Margin labels size.                         								     | 6.07  |
 | [meta]({{< relref "Directives-meta" >}}) _item_                          |           | Metadata.                                                                                                   | 5.0   |

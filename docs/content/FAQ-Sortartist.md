@@ -13,7 +13,7 @@ including `sortartist` and `tag`.
 
 If you have ever copied the ChordPro configuration file to
 create your own, chances are that the metadata definitions are also there.
-Basicsally, your list of metadata directives —which does not have the
+Basically, your list of metadata directives —which does not have the
 new items— overwrites ChordPro's updated list. As a result, when you
 run ChordPro, it will not know the new added items.
 

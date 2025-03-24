@@ -15,7 +15,7 @@ From the command prompt, type
 
 The generated file contains most of the ChordPro configuration
 items, **all commented out**. It is easy to get started with configuring
-ChordPro by enabling and modifyng just a few items at a time.
+ChordPro by enabling and modifying just a few items at a time.
 
 For a full config, with everything set to default values, type
 

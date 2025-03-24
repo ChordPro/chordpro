@@ -17,9 +17,9 @@ Released: 2024-12-25
 * Sync config files between git and MANIFEST.
 * (Paths) Allow absolute filenames in findres.
 * (Makefile) Add Ref::Util dependency.
-* Progress reporting. Options ``progress_callabck and -I. Also enabled with --verbose.
+* Progress reporting. Options `progress_callback` and -I. Also enabled with --verbose.
 * New meta: page.class (first, title, default) and page.side (left, right).
-* Distinct page clases for even pages; filler class for alignment pages.
+* Distinct page classes for even pages; filler class for alignment pages.
 * Add "omit" property for delegated images.
 * Allow 'mi' as short for 'min' chord quality.
 * Make properties parsing in directives more robust.
