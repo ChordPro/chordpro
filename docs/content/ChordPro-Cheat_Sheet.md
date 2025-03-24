@@ -115,6 +115,7 @@ Arguments to directives may be separated by a colon `:` and/or whitespace. They 
 | [meta lyricist]({{< relref "Directives-lyricist" >}}) _name_             | lyricist  | Lyricist name.                                                                                              | 5.0   |
 | [meta sortartist]({{< relref "Directives-sortartist" >}}) _text_         | sortartist | Sort artist. 												     | 6.08  |
 | [meta sorttitle]({{< relref "Directives-sorttitle" >}}) _text_           | sorttitle | Sort title.                                                                                                 | 6.0   |
+| [meta tag]({{< relref "Directives-tag" >}}) _text_                       | tag       | Generic tag.                                                                                                | 6.08  |
 | [meta tempo]({{< relref "Directives-tempo" >}}) _bpm_                    | tempo     | Tempo (beats per minute).                                                                                   | 5.0   |
 | [meta time]({{< relref "Directives-time" >}}) _n_ `/` _m_                | time      | Time signature.                                                                                             | 5.0   |
 | [meta year]({{< relref "Directives-year" >}}) _text_                     | year      | Release date.                                                                                               | 5.0   |
