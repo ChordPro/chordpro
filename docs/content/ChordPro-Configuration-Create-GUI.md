@@ -23,5 +23,5 @@ A file-dialog will give you the opportunity the give your new configuration a na
 
 The configuration file contains most of the ChordPro configuration
 items, **all commented out**. It is easy to get started with configuring
-ChordPro by enabling and modifyng just a few items at a time.
+ChordPro by enabling and modifying just a few items at a time.
 

@@ -14,7 +14,7 @@ previews.
 You can choose between the normal, default preview, a preview without
 chord diagrams, and a lyrics only preview for singers.
 
-Choosing `More…` gives access to more possibillities.
+Choosing `More…` gives access to more possibilities.
 
 ![]({{< asset "images/chordpro-gui-tasks-p2.png" >}})
 
@@ -44,7 +44,7 @@ A 'quick and dirty' guide to creating custom tasks. If you are
 familiar with creating folders and files you can skip most of this.
 
 1. You need to have a custom library. This can be an arbitrary,
-   preferrably empty folder. In this guide we use `ChordProLib` in the
+   preferably empty folder. In this guide we use `ChordProLib` in the
    home folder. Consult your system documentation on how to create
    this folder.
    

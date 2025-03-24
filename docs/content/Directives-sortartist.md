@@ -5,7 +5,7 @@ description: "Directives: sortartist"
 
 # Directives: sortartist
 
-This directive defines the sortname for an artist.
+This directive defines the sort name for an artist.
 
 The main purpose of the `sortartist` metadata is to provide a sort order
 for artists in the Table of Contents (ToC).

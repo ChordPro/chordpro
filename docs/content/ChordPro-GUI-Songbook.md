@@ -35,7 +35,7 @@ button, and it will be used as cover page instead.
 
 If you created your `preview` but found some songs that are not to
 your liking; just *double-click* on the song in the *file list* and
-this will bring you the the editor where you can change the song.
+this will bring you to the editor where you can change the song.
 
 The *standard* 'Settings, preview and 'message' buttons will have an
 additional **Songbook** button to go back to your songbook again.

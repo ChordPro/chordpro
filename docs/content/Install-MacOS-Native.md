@@ -32,7 +32,7 @@ export PATH="/Applications/ChordPro.app/Contents/Resources/cli":$PATH
 ````
 
 The `.dmg` contains also an installation script that you can use to install 
-the application and it will add the the command line program permanently to your PATH as well.
+the application and it will add the command line program permanently to your PATH as well.
 
 Its usage is explained in the **READ ME FIRST** document as well.
 
