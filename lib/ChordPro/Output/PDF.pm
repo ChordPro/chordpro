@@ -2767,9 +2767,15 @@ sub configurator {
 		$fonts->{$type}->{file} = $_;
 	    }
 	    else {
-		die("Config error: \"$_\" is not a built-in font\n")
-		  unless is_corefont($_);
-		$fonts->{$type}->{name} = is_corefont($_);
+		if ( is_corefont($_) ) {
+		    $fonts->{$type}->{name} = is_corefont($_);
+		}
+		elsif ( defined $pdf->{fontconfig}->{s/\s+\d+$//r} ) {
+		    $fonts->{$type}->{description} = $_;
+		}
+		else {
+		    die("Config error: \"$_\" is not a built-in font\n")
+		}
 	    }
 	}
 	for ( $options->{"$type-size"} ) {
