@@ -112,6 +112,7 @@
         lyricist
         sortartist
         sorttitle
+        tag
         tempo
         time
         year

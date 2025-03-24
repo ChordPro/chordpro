@@ -74,6 +74,7 @@ future.
 Each song can have meta-data associated, for example the song title. Meta-data are mostly used by programs that help
 organizing collections of ChordPro songs.
 
+{{% columns %}}
 * [title]({{< relref "Directives-title" >}}) (short: t)
 * [sorttitle]({{< relref "Directives-sorttitle" >}})
 * [subtitle]({{< relref "Directives-subtitle" >}}) (short: st)
@@ -84,12 +85,15 @@ organizing collections of ChordPro songs.
 * [copyright]({{< relref "Directives-copyright" >}})
 * [album]({{< relref "Directives-album" >}})
 * [year]({{< relref "Directives-year" >}})
+<--->
 * [key]({{< relref "Directives-key" >}})
 * [time]({{< relref "Directives-time" >}})
 * [tempo]({{< relref "Directives-tempo" >}})
 * [duration]({{< relref "Directives-duration" >}})
 * [capo]({{< relref "Directives-capo" >}})
+* [tag]({{< relref "Directives-tag" >}})
 * [meta]({{< relref "Directives-meta" >}})
+{{% /columns %}}
 
 See also [Using metadata in texts]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
 

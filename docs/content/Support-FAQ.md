@@ -28,6 +28,8 @@ questions and answers here sometime soon.
 
 * [I’ve added a Copyright (Artist, ...) directive but I do not see it in the output]({{< relref "FAQ-PageTitles" >}})
 
+* [I’ve added `{sortartist...}` or `{tag...}` but I get _Unknown directive_]({{< relref "FAQ-Sortartist" >}})
+
 ### Using the ChordPro editor
 
 * [Why do I see `PU2` in my source?]({{< relref "faq-encoding" >}}).
