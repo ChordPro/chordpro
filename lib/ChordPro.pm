@@ -692,9 +692,10 @@ by enabling and modifyng just a few items at a time.
 
 =item B<--print-default-config>
 
-Prints the default configuration to standard output, and exits.
+If used once, behaves like `--print-template-config`. This is to avoid
+confusing novice users.
 
-The default configuration is commented to explain its contents.
+To get the full default configuration, repeat this option.
 
 =item B<--print-final-config>
 
@@ -888,7 +889,7 @@ sub app_setup {
           'nouserconfig|no-userconfig',
 	  'nodefaultconfigs|no-default-configs|X',
 	  'define=s%',
-	  'print-default-config'  => \$defcfg,
+	  'print-default-config+' => \$defcfg,
 	  'print-final-config'    => \$fincfg,
 	  'print-delta-config'    => \$deltacfg,
 	  'print-template-config' => \$tmplcfg,
@@ -1014,7 +1015,18 @@ sub app_setup {
     $::options = $options;
     # warn(::dump($options), "\n") if $options->{debug};
 
-    if ( $tmplcfg ) {
+    # To avoid confusion, produce a template if the user asks for a
+    # default config.
+    # Unless she insists...
+    if ( $defcfg >= 2 ) {
+	use File::Copy;
+	my $cfg = fn_catfile( CP->findresdirs("config")->[-1],
+			      "chordpro.json" );
+	binmode STDOUT => ':raw';
+	copy( $cfg, \*STDOUT );
+	exit 0;
+    }
+    if ( $tmplcfg || $defcfg ) {
 	use File::Copy;
 	my $cfg = fn_catfile( CP->findresdirs("config")->[-1],
 			      "config.tmpl" );
@@ -1022,9 +1034,8 @@ sub app_setup {
 	copy( $cfg, \*STDOUT );
 	exit 0;
     }
-    if ( $defcfg || $fincfg || $deltacfg ) {
-	print ChordPro::Config::config_final( default => $defcfg,
-					      delta   => $deltacfg );
+    if ( $fincfg || $deltacfg ) {
+	print ChordPro::Config::config_final( delta   => $deltacfg );
 	exit 0;
     }
 

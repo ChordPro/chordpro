@@ -399,9 +399,10 @@ by enabling and modifyng just a few items at a time.
 
 =item B<--print-default-config>
 
-Prints the default configuration to standard output, and exits.
+If used once, behaves like `--print-template-config`. This is to avoid
+confusing novice users.
 
-The default configuration is commented to explain its contents.
+To get the full default configuration, repeat this option.
 
 =item B<--print-final-config>
 

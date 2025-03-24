@@ -644,7 +644,10 @@ Don't use the user specific config file, even if it exists.
 
 `--print-default-config`
 
-Prints the default configuration to standard output, and exits.
+If used once, behaves like `--print-template-config`. This is to avoid
+confusing novice users.
+
+To get the full default configuration, repeat this option.
 
 The default configuration is fully commented to explain its contents.
 
