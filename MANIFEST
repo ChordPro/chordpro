@@ -173,6 +173,8 @@ lib/ChordPro/res/fonts/FreeSerif.ttf
 lib/ChordPro/res/fonts/FreeSerifBold.ttf
 lib/ChordPro/res/fonts/FreeSerifBoldItalic.ttf
 lib/ChordPro/res/fonts/FreeSerifItalic.ttf
+lib/ChordPro/res/fonts/MuseJazzText.otf
+lib/ChordPro/res/fonts/LICENSES.md
 lib/ChordPro/res/icons/cancel.png
 lib/ChordPro/res/icons/chordpro-bg.png
 lib/ChordPro/res/icons/chordpro-doc.ico

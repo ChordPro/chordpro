@@ -876,6 +876,12 @@
           italic     : Courier-Oblique
           bolditalic : Courier-BoldOblique
         }
+        "muse, musejazztext" {
+          ""         : MuseJazzText.otf
+          bold       : MuseJazzText.otf
+          italic     : MuseJazzText.otf
+          bolditalic : MuseJazzText.otf
+        }
         dingbats.        : ZapfDingbats
       }
     
