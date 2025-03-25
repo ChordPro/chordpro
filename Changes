@@ -41,7 +41,10 @@
     - Command line option --print-default-config will print the template
       config unless the option is repeated. This is to avoid confusing
       novice users.
-      
+
+    - In case of emergency it is now possible to obtain chord brackets
+      in lyrics and annotations.
+
     !Bug Fixes
 
     - Some issues with Unicode filenames on Windows.

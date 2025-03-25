@@ -218,6 +218,10 @@ sub parse_song {
     }
 
     $config->unlock;
+    if ( my $a = $config->{parser}->{altbrackets} ) {
+	die("Config error: parser.altbrackets must be a 2-character string\n")
+	  unless length($a) == 2;
+    }
 
     if ( %$defs ) {
 	prpadd2cfg( $config, %$defs );
@@ -941,6 +945,12 @@ sub decompose {
 	return ( phrases => [ $line ],
 		 $orig ? ( orig => $orig ) : (),
 	       );
+    }
+
+    # For the exceptional case you need brackets [] in your lyrics
+    # or annotations.
+    if ( my $a = $config->{parser}->{altbrackets} ) {
+	@a = map { eval "tr/$a/[]/r" } @a;
     }
 
     my $dummy;

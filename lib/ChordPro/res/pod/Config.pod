@@ -1115,6 +1115,11 @@
     markup.shortcodes {}
     
     // Settings for the parser/preprocessor.
+    // For the exceptional case you need brackets [] in your lyrics or annotations.
+    // These characters are replaced by normal brackets **after** chord analysis.
+    // E.g. parser.altbrackets: "\u301a\u301b"
+    parser.altbrackets: null
+    
     // For selected lines, you can specify a series of 
     // { "target" : "xxx", "replace" : "yyy" }
     // Every occurrence of "xxx" will be replaced by "yyy".
