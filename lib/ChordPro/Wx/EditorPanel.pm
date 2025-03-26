@@ -492,6 +492,7 @@ method OnA2Crd($event) {
     $::options->{nosysconfig} = 1;
     $::options->{nouserconfig} = 1;
     $::options->{noconfig} = 1;
+    $::options->{fragment} = $have_selection;
 
     # Often text that is pasted from web has additional newlines.
     $text =~ s/^\n+//;

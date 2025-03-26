@@ -531,7 +531,7 @@ sub format_comment_line
     $line =~ s/\[// ;
     $line =~ s/\]// ;
     return '' if $line eq '' ;
-    return "{comment:" . $line . "}" ;
+    return "{comment: " . $line . "}" ;
 }
 
 # Process the lines via the map.
@@ -539,7 +539,8 @@ my $infer_titles;
 sub maplines {
     my ( $map, $lines ) = @_;
     my @out;
-    $infer_titles //= $::config->{a2crd}->{'infer-titles'};
+    $infer_titles = $config->{a2crd}->{'infer-titles'}
+      && !$options->{fragment};
 
     # Preamble.
     # Pass empty lines.
