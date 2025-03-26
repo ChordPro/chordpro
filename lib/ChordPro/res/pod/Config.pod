@@ -1114,21 +1114,26 @@
     // <span weight='bold' size='large'>...</span>.
     markup.shortcodes {}
     
-    // Settings for the parser/preprocessor.
-    // For the exceptional case you need brackets [] in your lyrics or annotations.
-    // These characters are replaced by normal brackets **after** chord analysis.
-    // E.g. parser.altbrackets: "\u301a\u301b"
-    parser.altbrackets: null
+    // Settings for the parser.
+    parser {
     
-    // For selected lines, you can specify a series of 
-    // { "target" : "xxx", "replace" : "yyy" }
-    // Every occurrence of "xxx" will be replaced by "yyy".
-    // Use "pattern" instead of "target" for regular expression replacement.
-    // Use wisely.
-    parser.preprocess {
-      all       : []
-      directive : []
-      songline  : []
+      // For the exceptional case you need brackets [] in your lyrics or annotations.
+      // These characters are replaced by normal brackets **after** chord analysis.
+      // E.g. parser.altbrackets: "«»"
+      // Use wisely. Better still, don't use this.
+      altbrackets : null
+    
+      // Settings for the parser/preprocessor.
+      // For selected lines, you can specify a series of 
+      // { "target" : "xxx", "replace" : "yyy" }
+      // Every occurrence of "xxx" will be replaced by "yyy".
+      // Use "pattern" instead of "target" for regular expression replacement.
+      // Use wisely.
+      preprocess {
+        all       : []
+        directive : []
+        songline  : []
+      }
     }
     
     // Miscellaneous debug settings.

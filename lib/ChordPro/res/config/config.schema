@@ -944,12 +944,17 @@
     },
 
     "parser" : {
-      "description" : "Settings for the parser/preprocessor.\nFor selected lines, you can specify a series of \n{ \"target\" : \"xxx\", \"replace\" : \"yyy\" }\nEvery occurrence of \"xxx\" will be replaced by \"yyy\".\nUse \"pattern\" instead of \"target\" for regular expression replacement.\nUse wisely.",
+      "description" : "Settings for the parser.",
       "type" : "object",
       "additionalProperties" : false,
       "properties" : {
+        "altbrackets" : {
+	  "description" : "For the exceptional case you need brackets [] in your lyrics or annotations.\nThese characters are replaced by normal brackets **after** chord analysis.\nE.g. parser.altbrackets: \"«»\"\nUse wisely. Better still, don't use this.",
+	  "default" : null,
+	  "type" : [ "string", "null" ]
+	},
         "preprocess" : {
-          "description" : "",
+        "description" : "Settings for the parser/preprocessor.\nFor selected lines, you can specify a series of \n{ \"target\" : \"xxx\", \"replace\" : \"yyy\" }\nEvery occurrence of \"xxx\" will be replaced by \"yyy\".\nUse \"pattern\" instead of \"target\" for regular expression replacement.\nUse wisely.",
           "additionalProperties" : false,
           "properties" : {
             "all" : {
