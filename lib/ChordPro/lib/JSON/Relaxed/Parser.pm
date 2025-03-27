@@ -570,8 +570,7 @@ method is_comment_opener( $pretok ) {
     $pretok eq '//' || $pretok eq '/*';
 }
 
-sub min { $_[0] < $_[1] ? $_[0] : $_[1] }
-sub max { $_[0] > $_[1] ? $_[0] : $_[1] }
+use List::Util qw( min max uniqstr );
 
 method encode(%opts) {
     my $schema  = $opts{schema};
@@ -709,6 +708,9 @@ method encode(%opts) {
 	my @ko = $rv->{" key order "}
 	  ? @{ delete($rv->{" key order "}) }
 	  : sort(keys(%$rv));
+
+	# Dedup.
+	@ko = uniqstr(@ko);
 
 	my $ll = 0;
 	for ( @ko ) {

@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Sun Mar 10 18:02:02 2024
 # Last Modified By: 
-# Last Modified On: Tue Aug 20 20:43:14 2024
-# Update Count    : 173
+# Last Modified On: Wed Jan 22 16:23:11 2025
+# Update Count    : 181
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -144,9 +144,10 @@ for my $file ( @ARGV ) {
     }
     else {
 	$prp = $file =~ /\.prp$/i;
-	my $opts = { split => $prp, fail => "soft" };
+	my $opts = { split => 1, fail => "soft" };
 	$json = loadlines( $file, $opts );
 	die( "$file: $opts->{error}\n") if $opts->{error};
+	$json = join( "\n", @$json, '' ) unless $prp;
 	if ( ($pretoks || $tokens) && $file !~ /\.r?r?json$/i ) {
 	    warn( "$file: not JSON data, ignoring tokens\n" );
 	}
