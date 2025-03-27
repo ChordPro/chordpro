@@ -101,11 +101,6 @@ sub setup_menubar( $self ) {
 	    [ wxID_ANY, M_EDITOR|M_SONGBOOK, "Export to PDF...",
 	      "Save the preview to a PDF", "OnPreviewSave" ],
 	    [],
-	    [ wxID_ANY, M_EDITOR|M_SONGBOOK, "Save Messages",
-	      "Save the messages to a file", "OnMessagesSave" ],
-	    [ wxID_ANY, M_EDITOR|M_SONGBOOK, "Clear Messages",
-	      "Clear the current messages", "OnMessagesClear" ],
-	    [],
 	    [ wxID_EXIT, M_ALL, "",
 	      "Close Window and Exit", "OnClose" ],
 	  ]

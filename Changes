@@ -38,6 +38,8 @@
       change this in the settings for the editor.
       Line numbers will always be shown when the messages pane is visible.
 
+    - GUI button changes for messages pane.
+
     - Command line option --print-default-config will print the template
       config unless the option is repeated. This is to avoid confusing
       novice users.
