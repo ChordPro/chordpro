@@ -134,6 +134,9 @@ sub refresh( $self, $prefs = undef ) {
     $stc->SetViewEOL( $state{vieweol} );
     $stc->SetViewWhiteSpace( $state{viewws} );
     $stc->SetViewLineNumbers( $preferences{editorlines} );
+
+    # Free Ctrl-Shift-U for iBus input (doesn't work).
+    # $stc->CmdKeyClear( ord('U'), 3 ); # Ctrl-Shift-U
 }
 
 sub SetViewLineNumbers( $self, $b ) {
