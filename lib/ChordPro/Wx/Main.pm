@@ -192,6 +192,7 @@ method init( $options ) {
     $self->SetStatusBar(undef);
     $self->get_preferences;
     $self->setup_menubar;
+    $self->setup_statusbar;
     Wx::Event::EVT_SYS_COLOUR_CHANGED( $self,
 				       $self->can("OnSysColourChanged") );
     $self->init_theme;
@@ -351,6 +352,13 @@ method check_saved() {
     # Panels may save prefs to preferences.
     $self->{$_}->save_preferences for panels;
     1;
+}
+
+method setup_statusbar() {
+    # Add statusbar.
+    return unless $preferences{expert};
+    $self->{f_main_statusbar} = $self->CreateStatusBar(1);
+    $self->{f_main_statusbar}->SetStatusWidths(-1);
 }
 
 ################ Event handlers (alphabetic order) ################
