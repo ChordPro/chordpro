@@ -592,6 +592,8 @@ method OnCloseSection($event) {
 		$closed = "";
 		next;
 	    }
+	    $stc->AddText( $self->nl )
+	      if $stc->GetColumn($stc->GetCurrentPos);
 	    $stc->AddText( "{$1end_of_$2}" . $self->nl );
 	    $did++;
 	    last;
@@ -601,6 +603,8 @@ method OnCloseSection($event) {
 		$closed = "";
 		next;
 	    }
+	    $stc->AddText( $self->nl )
+	      if $stc->GetColumn($stc->GetCurrentPos);
 	    $stc->AddText( "{$1eo$2}" . $self->nl );
 	    $did++;
 	    last;
@@ -726,6 +730,10 @@ method OnInsertVerse($event) {
 
 method OnInsertGrid($event) {
     $self->embrace_section("grid");
+}
+
+method OnInsertTab($event) {
+    $self->embrace_section("tab");
 }
 
 method OnInsertSection($event) {
