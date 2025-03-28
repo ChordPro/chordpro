@@ -86,7 +86,7 @@ sub new {
     my $filesource = $opts->{filesource} || $opts->{_filesource};
 
     $xpose = 0;
-    $grid_arg = [ 4, 4, 1, 1 ];	# 1+4x4+1
+    $grid_arg = [ 4, 4, 1, 1, "" ];	# 1+4x4+1
     $in_context = $def_context;
     @used_chords = ();
     %warned_chords = ();
