@@ -1146,6 +1146,7 @@
       config      : 0
       csv         : 0
       echo        : 0
+      fit         : 0
       fonts       : 0
       images      : 0
       layout      : 0
