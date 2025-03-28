@@ -64,7 +64,7 @@ method CARP_TRACE {
 }
 
 method _data_printer($ddp) {
-    $self->CARP_TRACE;
+    "$key (" . __CLASS__ . ")";
 }
 
 1;
