@@ -437,8 +437,9 @@ sub maybe ( $key, $value, @rest ) {
 push( @EXPORT, "maybe" );
 
 # Min/Max.
-sub min { $_[0] < $_[1] ? $_[0] : $_[1] }
-sub max { $_[0] > $_[1] ? $_[0] : $_[1] }
+use List::Util ();
+*min = \&List::Util::min;
+*max = \&List::Util::max;
 
 push( @EXPORT, "min", "max" );
 
