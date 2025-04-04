@@ -91,7 +91,7 @@ method fetch_prefs() {
     $self->{cb_skipstdcfg}->SetValue($preferences{skipstdcfg});
 
     # Add the styles to the presets.
-    my $ctl = $self->{ch_presets};
+    my $ctl = $self->{ch_extra2};
     $ctl->Clear;
     my $neat = sub {
 	my ($t ) = @_;
@@ -104,6 +104,17 @@ method fetch_prefs() {
     for ( $self->all_styles( " (user)" ) ) {
 	$ctl->Append( $neat->($_) );
     }
+    $ctl = $self->{ch_style};
+    $ctl->Clear;
+    $ctl->Append( "Default",
+		  { desc => "Default ChordPro look." } );
+    for ( sort keys %{$state{style_presets}} ) {
+	$ctl->Append( $state{style_presets}->{$_}->{title},
+		      $state{style_presets}->{$_},
+		    );
+    }
+    $ctl->SetSelection(0);
+    $self->set_style_desc("Default ChordPro look.");
 
     # Check the presets that were selected.
     my $p = $preferences{cfgpreset};
@@ -116,8 +127,8 @@ method fetch_prefs() {
 	    $ctl->Check( $n, 1 );
 	}
     }
-    $self->{cb_presets}->SetValue($preferences{enable_presets});
-    $self->{ch_presets}->Enable($preferences{enable_presets});
+#    $self->{cb_presets}->SetValue($preferences{enable_presets});
+    $self->{ch_extra2}->Enable($preferences{enable_presets});
 
     # Custom config file.
     $self->{cb_configfile}->SetValue($preferences{enable_configfile});
@@ -211,8 +222,8 @@ method store_prefs() {
     $preferences{skipstdcfg}  = $self->{cb_skipstdcfg}->IsChecked;
 
     # Presets.
-    $preferences{enable_presets} = $self->{cb_presets}->IsChecked;
-    my $ctl = $self->{ch_presets};
+#    $preferences{enable_presets} = $self->{cb_presets}->IsChecked;
+    my $ctl = $self->{ch_extra2};
     my $cnt = $ctl->GetCount;
     my @p;
     my @styles = $self->all_styles;
@@ -470,7 +481,7 @@ method OnSkipStdCfg($event) {
 }
 
 method OnPresets($event) {
-    $self->{ch_presets}->Enable( $self->{cb_presets}->GetValue );
+#    $self->{ch_presets}->Enable( $self->{cb_presets}->GetValue );
     $event->Skip;
 }
 
@@ -636,7 +647,36 @@ method OnSysColourChanged($event) {
     $event->Skip;
 }
 
+method OnAdvancedMode( $event ) {
+    my $st = $self->{cb_advanced}->IsChecked;
+    $preferences{advanced} = $st;
+    for ( qw( ch_extra2
+	      cb_configfile fp_customconfig b_createconfig
+	      cb_customlib dp_customlibrary
+	      cb_skipstdcfg
+	      sl_line
+	   ) ) {
+	$self->{$_}->Show($st);
+    }
+    for ( qw( ch_extra1 l_extra1_desc
+	   ) ) {
+	$self->{$_}->Show(!$st);
+    }
+    $self->{sz_extra}->Layout;
+    $self->{sz_presets}->Layout;
+}
+
+method OnChangeStyle( $event ) {
+    my $c = $event->GetClientData;
+    $self->set_style_desc($c->{desc});
+}
+
 ################ Helpers ################
+
+method set_style_desc( $desc ) {
+    $self->{l_style_desc}->SetLabel($desc);
+    $self->{l_style_desc}->Wrap(($self->{ch_style}->GetSizeWH)[0]);
+}
 
 method colourchanged($index) {
     $self->colours2prefs;

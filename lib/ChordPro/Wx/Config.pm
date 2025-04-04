@@ -20,6 +20,7 @@ use Wx qw(:everything);
 use Wx::Locale gettext => '_T';
 use ChordPro::Files;
 use ChordPro::Paths;
+use ChordPro::Utils qw( json_load );
 use File::Basename qw(basename);
 
 use constant FONTSIZE => 12;
@@ -129,6 +130,7 @@ my %prefs =
    chordproext => ".chordpro",	# for Nick
    dumpstate => 0,
    expert => 0,
+   advanced => 0,
 
   );
 
@@ -373,6 +375,7 @@ sub setup_styles {
     return $stylelist if $stylelist && @$stylelist;
 
     my %stylelist;
+    my %styles;			# new style
     my @userstyles;
     my $findopts = { filter => qr/^.*\.json$/i, recurse => 0 };
 
@@ -381,8 +384,21 @@ sub setup_styles {
 	next unless $cfglib && fs_test( d => $cfglib );
 	next unless my $entries = fs_find( $cfglib, $findopts );
 	foreach ( @$entries ) {
+	    my $file = fn_catfile( $cfglib, $_->{name} );
+	    warn("try $file\n");
+	    next unless fs_test( s => $file );
+	    my $data = fs_blob( $file );
+	    $data = json_load( $data, $file );
+	    next unless $data->{config}->{type};
+	    use DDP; p $data;
+	    next unless $data->{config}->{type} eq "style";
 	    my $base = basename( $_->{name}, ".json" );
 	    $stylelist{$base} = $_->{name};
+	    $styles{$_->{name}} = { %$_,
+				    type => $data->{config}->{type},
+				    title => $data->{config}->{title},
+				    desc => $data->{config}->{description},
+				  };
 	}
     }
 
@@ -402,6 +418,7 @@ sub setup_styles {
     delete $stylelist{chordpro};
 
     $state{styles}     = [ sort keys %stylelist ];
+    $state{style_presets}     = \%styles;
     $state{userstyles} = [ sort @userstyles ];
 }
 
