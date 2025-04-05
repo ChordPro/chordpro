@@ -236,14 +236,17 @@ method store_prefs() {
     # Custom config file.
     $preferences{enable_configfile} = $self->{cb_configfile}->IsChecked;
     $preferences{configfile}        = $self->{fp_customconfig}->GetPath;
+    $preferences{enable_configfile} = 0 if $preferences{configfile} eq "";
 
     # Custom library.
     $preferences{enable_customlib} = $self->{cb_customlib}->IsChecked;
     $preferences{customlib}        = $self->{dp_customlibrary}->GetPath;
+    $preferences{enable_customlib} = 0 if $preferences{customlib} eq "";
 
     # New song template.
     $preferences{enable_tmplfile} = $self->{cb_tmplfile}->IsChecked;
     $preferences{tmplfile}        = $self->{fp_tmplfile}->GetPath;
+    $preferences{enable_tmplfile} = 0 if $preferences{tmplfile} eq "";
 
     # Preferred filename extension.
     $preferences{chordproext} = $self->{t_prefext}->GetValue;
