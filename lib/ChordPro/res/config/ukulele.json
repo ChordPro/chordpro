@@ -1,4 +1,11 @@
-{ "instrument" : {
+{ // For GUI.
+  "config" : {
+    "type"        : "instrument",
+    "title"       : "Ukulele",
+    "description" : "Ukulele, 4 strings, tuning G C E A, 100+ chords.",
+  },
+
+  "instrument" : {
     "description" : "Ukulele, 4 strings, standard tuning",
     "type" : "ukulele"
   },

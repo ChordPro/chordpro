@@ -90,8 +90,19 @@ method fetch_prefs() {
     # Skip default (system, user, song) configs.
     $self->{cb_skipstdcfg}->SetValue($preferences{skipstdcfg});
 
+    # Add instruments.
+    my $ctl = $self->{ch_instrument};
+    $ctl->Clear;
+    for ( sort keys %{$state{instrument_presets}} ) {
+	$ctl->Append( $state{instrument_presets}->{$_}->{title},
+		      $state{instrument_presets}->{$_},
+		    );
+    }
+    $ctl->SetSelection(0);
+#    $self->set_instrument_desc("Default ChordPro style.");
+
     # Add the styles to the presets.
-    my $ctl = $self->{ch_extra2};
+    $ctl = $self->{ch_extra2};
     $ctl->Clear;
     my $neat = sub {
 	my ($t ) = @_;
@@ -669,6 +680,11 @@ method OnAdvancedMode( $event ) {
     $self->{sz_presets}->Layout;
 }
 
+method OnChangeInstrument( $event ) {
+    my $c = $event->GetClientData;
+    $self->set_instrument_desc($c->{desc});
+}
+
 method OnChangeStyle( $event ) {
     my $c = $event->GetClientData;
     $self->set_style_desc($c->{desc});
@@ -679,6 +695,11 @@ method OnChangeStyle( $event ) {
 method set_style_desc( $desc ) {
     $self->{l_style_desc}->SetLabel($desc);
     $self->{l_style_desc}->Wrap(($self->{ch_style}->GetSizeWH)[0]);
+}
+
+method set_instrument_desc( $desc ) {
+    $self->{l_instrument_desc}->SetLabel($desc);
+    $self->{l_instrument_desc}->Wrap(($self->{ch_instrument}->GetSizeWH)[0]);
 }
 
 method colourchanged($index) {

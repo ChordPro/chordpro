@@ -1,4 +1,11 @@
-{ "instrument" :
+{ // For GUI.
+  "config" : {
+    "type"        : "instrument",
+    "title"       : "Mandolin (alt.)",
+    "description" : "Mandolin, 4 stringsets, tuning G D A E, 300+ chords with finger indicators.",
+  },
+
+  "instrument" :
   { "description" : "Mandolin, 8 strings, standard tuning",
     "type" : "mandolin"
   },

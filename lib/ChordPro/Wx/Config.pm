@@ -376,6 +376,7 @@ sub setup_styles {
 
     my %stylelist;
     my %styles;			# new style
+    my %instruments;		# new style
     my @userstyles;
     my $findopts = { filter => qr/^.*\.json$/i, recurse => 0 };
 
@@ -390,15 +391,24 @@ sub setup_styles {
 	    my $data = fs_blob( $file );
 	    $data = json_load( $data, $file );
 	    next unless $data->{config}->{type};
-	    use DDP; p $data;
-	    next unless $data->{config}->{type} eq "style";
 	    my $base = basename( $_->{name}, ".json" );
-	    $stylelist{$base} = $_->{name};
-	    $styles{$_->{name}} = { %$_,
-				    type => $data->{config}->{type},
-				    title => $data->{config}->{title},
-				    desc => $data->{config}->{description},
-				  };
+	    if ( $data->{config}->{type} eq "style" ) {
+		$stylelist{$base} = $_->{name};
+		$styles{$_->{name}} =
+		  { %$_,
+		    type => $data->{config}->{type},
+		    title => $data->{config}->{title},
+		    desc => $data->{config}->{description},
+		  };
+	    }
+	    elsif ( $data->{config}->{type} eq "instrument" ) {
+		$instruments{$_->{name}} =
+		  { %$_,
+		    type => $data->{config}->{type},
+		    title => $data->{config}->{title},
+		    desc => $data->{config}->{description},
+		  };
+	    }
 	}
     }
 
@@ -419,6 +429,7 @@ sub setup_styles {
 
     $state{styles}     = [ sort keys %stylelist ];
     $state{style_presets}     = \%styles;
+    $state{instrument_presets}     = \%instruments;
     $state{userstyles} = [ sort @userstyles ];
 }
 

@@ -1,6 +1,13 @@
 // ChordPro instrument definition.
 
-{ "instrument" : {
+{ // For GUI.
+  "config" : {
+    "type"        : "instrument",
+    "title"       : "Guitar",
+    "description" : "Guitar, 6 strings, standard tuning, 400+ chords.",
+  },
+
+  "instrument" : {
       "description" : "Guitar, 6 strings, standard tuning",
       "type" : "guitar"
   },
