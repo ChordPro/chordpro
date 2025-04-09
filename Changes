@@ -67,6 +67,7 @@
     - Fix crash with chords in grid margins.
     - Fix topic localization in fix_musicsyms.
     - TextBlock: Default colour to style colour.
+    - (Wx) Prevent recursion in saved preferences.
 
 6.070 2024-12-25
 
