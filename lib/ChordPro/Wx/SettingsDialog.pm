@@ -107,14 +107,14 @@ method fetch_prefs() {
     $ctl = $self->{ch_style};
     $ctl->Clear;
     $ctl->Append( "Default",
-		  { desc => "Default ChordPro look." } );
+		  { desc => "Default ChordPro style." } );
     for ( sort keys %{$state{style_presets}} ) {
 	$ctl->Append( $state{style_presets}->{$_}->{title},
 		      $state{style_presets}->{$_},
 		    );
     }
     $ctl->SetSelection(0);
-    $self->set_style_desc("Default ChordPro look.");
+    $self->set_style_desc("Default ChordPro style.");
 
     # Check the presets that were selected.
     my $p = $preferences{cfgpreset};
