@@ -313,8 +313,9 @@ method Load :common {
 
 method Store :common {
 
-    my $cp = $cb->GetPath;
+    my $cp = '';
     $preferences{settings_version} = SETTINGS_VERSION;
+    $cb->DeleteAll;
 
     while ( my ( $group, $v ) = each %state ) {
 
@@ -326,7 +327,7 @@ method Store :common {
 
 	# Re-write the recents. Array.
 	if ( $group eq "recents" && is_arrayref($v) ) {
-	    $cb->DeleteGroup($group);
+	    # $cb->DeleteGroup($group);
 	    $cb->SetPath($group);
 	    for ( my $i = 0; $i < @$v; $i++ ) {
 		last if $i >= MAXRECENTS;
@@ -358,7 +359,7 @@ method Store :common {
 	    }
 	    else {
 		warn("Preferences: Undefined value for $k\n");
-		$cb->DeleteEntry($k);
+		# $cb->DeleteEntry($k);
 	    }
 	}
     }
