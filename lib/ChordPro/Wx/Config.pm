@@ -23,7 +23,6 @@ use ChordPro::Paths;
 use File::Basename qw(basename);
 
 use constant FONTSIZE => 12;
-
 use constant SETTINGS_VERSION => 3;
 
 # Legacy font numbers.
@@ -133,6 +132,7 @@ my %prefs =
   );
 
 use constant MAXRECENTS => 10;
+my $config_root = "/";
 
 # Establish a connection with the persistent data store.
 
@@ -151,7 +151,8 @@ sub Setup( $class, $options ) {
     }
     elsif ( $^O =~ /^mswin/i ) {
 	$cb = Wx::ConfigBase::Get;
-	$cb->SetPath("/wxchordpro");
+	$config_root = "/wxchordpro";
+	$cb->SetPath($config_root);
     }
     else {
 	my $file;
@@ -206,6 +207,7 @@ method Load :common {
 	       recents => [],
 	     );
 
+    $cb->SetPath($config_root);
     my ( $ggoon, $group, $gindex ) = $cb->GetFirstGroup;
     my %pp = $ggoon ? %prefs : ();
     while ( $ggoon ) {
@@ -313,9 +315,10 @@ method Load :common {
 
 method Store :common {
 
-    my $cp = '';
+    my $cp = $config_root;
     $preferences{settings_version} = SETTINGS_VERSION;
     $cb->DeleteAll;
+    $cb->SetPath($cp);
 
     while ( my ( $group, $v ) = each %state ) {
 
