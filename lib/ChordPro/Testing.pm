@@ -55,7 +55,9 @@ sub is_deeply {
 	    }
 	}
 	for ( qw( instrument user key_from key_actual chords numchords
-		  _configversion _bookmarks bookmark.toc bookmark.top ) ) {
+		  _configversion _bookmarks bookmark.toc bookmark.top
+		  bookmark.front bookmark.back
+	       ) ) {
 	    delete $got->{meta}->{$_} unless exists $expect->{meta}->{$_};
 	}
     }
