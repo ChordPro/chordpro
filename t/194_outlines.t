@@ -181,5 +181,7 @@ foreach ( @$res ) {
     delete $_->[1]->{meta}->{_bookmarks};
     delete $_->[1]->{meta}->{"bookmark.top"};
     delete $_->[1]->{meta}->{"bookmark.toc"};
+    delete $_->[1]->{meta}->{"bookmark.front"};
+    delete $_->[1]->{meta}->{"bookmark.back"};
 }
 is_deeply( $res, $xp, "outlined");
