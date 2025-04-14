@@ -24,7 +24,6 @@ use ChordPro::Utils qw( json_load );
 use File::Basename qw(basename);
 
 use constant FONTSIZE => 12;
-
 use constant SETTINGS_VERSION => 3;
 
 # Legacy font numbers.
@@ -135,6 +134,7 @@ my %prefs =
   );
 
 use constant MAXRECENTS => 10;
+my $config_root = "/";
 
 # Establish a connection with the persistent data store.
 
@@ -153,7 +153,8 @@ sub Setup( $class, $options ) {
     }
     elsif ( $^O =~ /^mswin/i ) {
 	$cb = Wx::ConfigBase::Get;
-	$cb->SetPath("/wxchordpro");
+	$config_root = "/wxchordpro";
+	$cb->SetPath($config_root);
     }
     else {
 	my $file;
@@ -208,6 +209,7 @@ method Load :common {
 	       recents => [],
 	     );
 
+    $cb->SetPath($config_root);
     my ( $ggoon, $group, $gindex ) = $cb->GetFirstGroup;
     my %pp = $ggoon ? %prefs : ();
     while ( $ggoon ) {
@@ -315,9 +317,10 @@ method Load :common {
 
 method Store :common {
 
-    my $cp = '';
+    my $cp = $config_root;
     $preferences{settings_version} = SETTINGS_VERSION;
     $cb->DeleteAll;
+    $cb->SetPath($cp);
 
     while ( my ( $group, $v ) = each %state ) {
 
@@ -382,9 +385,30 @@ sub setup_styles {
     my $findopts = { filter => qr/^.*\.json$/i, recurse => 0 };
 
     # Collect standard style files (presets).
-    for my $cfglib ( @{ CP->findresdirs("config") } ) {
+    my @cfglibs = @{ CP->findresdirs("config") };
+
+    # At this point, we can have one or two libs. The last one is
+    # the ChordPro standard library.
+    # If there are two, the first one is the user config lib.
+    # To this/these we prepend the custom lib.
+    @cfglibs[-1] = { src => "std", lib => $cfglibs[-1] };
+    if ( @cfglibs == 2 ) {
+	my $t = shift(@cfglibs);
+	push( @cfglibs, { src => "user", lib => $t } )
+	  unless $preferences{advanced} && $preferences{skipstdcfg};
+    }
+    push( @cfglibs, { src => "custom",
+		      lib => fn_catfile( $preferences{customlib}, "config" ) } )
+      if $preferences{advanced} && $preferences{enable_customlib};
+    use DDP; p @cfglibs;
+
+    while ( @cfglibs ) {
+	my $cfglib = shift(@cfglibs);
+	my $src = $cfglib->{src};
+	$cfglib = $cfglib->{lib};
 	next unless $cfglib && fs_test( d => $cfglib );
 	next unless my $entries = fs_find( $cfglib, $findopts );
+
 	foreach ( @$entries ) {
 	    my $file = fn_catfile( $cfglib, $_->{name} );
 #	    warn("try $file\n");
@@ -392,30 +416,31 @@ sub setup_styles {
 	    my $data = fs_blob( $file );
 	    $data = json_load( $data, $file );
 	    next unless $data->{config}->{type};
+	    my $types = $data->{config}->{type};
+	    $types = [ $types ] unless is_arrayref($types);
 	    my $base = basename( $_->{name}, ".json" );
-	    if ( $data->{config}->{type} eq "style" ) {
-		$stylelist{$base} = $_->{name};
-		$styles{$_->{name}} =
-		  { %$_,
-		    type => $data->{config}->{type},
-		    title => $data->{config}->{title},
-		    desc => $data->{config}->{description},
-		  };
-	    }
-	    elsif ( $data->{config}->{type} eq "instrument" ) {
-		$instruments{$_->{name}} =
-		  { %$_,
-		    type => $data->{config}->{type},
-		    title => $data->{config}->{title},
-		    desc => $data->{config}->{description},
-		  };
+	    for my $type ( @$types ) {
+		my %meta = ( type  => $type,
+			     title => $data->{config}->{title},
+			     desc  => $data->{config}->{description},
+			     src   => $src,
+			   );
+
+		if ( $type eq "style" ) {
+		    $stylelist{$base} = $_->{name};
+		    $styles{$_->{name}} = { %$_, %meta };
+		}
+		elsif ( $type eq "instrument" ) {
+		    $instruments{$_->{name}} = { %$_, %meta };
+		}
 	    }
 	}
     }
-
+    use DDP; p %styles;
     # Add custom style presets. if appropriate.
     my $dir = $preferences{customlib};
-    if ( $preferences{enable_customlib}
+    if ( $preferences{advanced}
+	 && $preferences{enable_customlib}
 	 && $dir && fs_test( d => ( my $cfglib = "$dir/config" ) ) ) {
 	next unless my $entries = fs_find( $cfglib, $findopts );
 	foreach ( @$entries ) {
