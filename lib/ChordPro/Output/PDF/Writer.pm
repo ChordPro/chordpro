@@ -17,7 +17,7 @@ use ChordPro::Files;
 use ChordPro::Paths;
 use ChordPro::Utils qw( expand_tilde demarkup min is_corefont maybe );
 use ChordPro::Output::Common qw( fmt_subst prep_outlines );
-use Ref::Util qw( is_hashref );
+use Ref::Util qw( is_arrayref is_hashref );
 
 # For regression testing, run perl with PERL_HASH_SEED set to zero.
 # This eliminates the arbitrary order of font definitions and triggers
@@ -686,7 +686,7 @@ sub make_outlines {
     $outline->title("Bookmarks");
     $outline->closed;
     for ( "front", "toc",
-	  ( grep { /^song/ } sort keys %{ $self->{_nd} } ),
+	  ( grep { ! /^(?:front|toc|back)$/ } sort keys %{ $self->{_nd} } ),
 	  "back" ) {
 	next unless my $p = $self->{_nd}->{$_};
 	my $ol = $outline->outline;
@@ -915,6 +915,7 @@ sub embed {
 
 sub named_dest {
     my ( $self, $name, $page ) = @_;
+    $name = $name->[-1] if is_arrayref($name);
     my $pdf = $self->{pdf};
     my $nd = ref($pdf) . '::NamedDestination';
     my $dest = $nd->new($pdf);
