@@ -47,7 +47,7 @@ WriteMakefile
  PREREQ_PM      => {
 		    @pdfapi,
 
-		    'Text::Layout'		  => 0.038,
+		    'Text::Layout'		  => 0.040,
 		    # Optional for Text::Layout; let's have it.
 		    'HarfBuzz::Shaper'		  => 0.026,
 		    # 'SVGPDF'			  => 0.089,

@@ -59,6 +59,7 @@ sub fmt_subst {
 	$v = 1  if $v=~ /^(true|on)$/i;
 	$m->{"settings.$_"} = $v;
     }
+
     interpolate( { %$s, args => $m,
 		   separator => $config->{metadata}->{separator} },
 		 $t );

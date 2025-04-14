@@ -178,5 +178,8 @@ my $xp = [
 
 foreach ( @$res ) {
     delete $_->[1]->{meta}->{_configversion};
+    delete $_->[1]->{meta}->{_bookmarks};
+    delete $_->[1]->{meta}->{"bookmark.top"};
+    delete $_->[1]->{meta}->{"bookmark.toc"};
 }
 is_deeply( $res, $xp, "outlined");

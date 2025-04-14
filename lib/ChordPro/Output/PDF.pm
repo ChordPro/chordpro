@@ -246,11 +246,19 @@ sub generate_songbook {
 
 	# The last song gets the ToC appended.
 	$song = pop(@songs);
+	my $pdf = $pr->{pdf};
+	my $nd = ref($pdf) . '::NamedDestination';
 	push( @{ $song->{body} //= [] },
-	      map { +{ type    => "tocline",
+	      map { my $p = $pdf->openpage($_->[-1]->{meta}->{tocpage}+$start);
+		    my $d = $nd->new($pdf);
+		    $d->goto($p, xyz => (undef,undef,undef));
+		    $pdf->named_destination( 'Dests',
+					     $_->[-1]->{meta}->{"bookmark.top"},
+					     $d );
+		    +{ type    => "tocline",
 		       context => "toc",
 		       title   => fmt_subst( $_->[-1], $tltpl ),
-		       page    => $pr->{pdf}->openpage($_->[-1]->{meta}->{tocpage}+$start),
+		       page    => $p,
 		       pageno  => fmt_subst( $_->[-1], $pgtpl ),
 		     } } @$book );
 
@@ -384,6 +392,17 @@ sub generate_songbook {
     # Add the outlines.
     $pr->make_outlines( [ map { $_->[1] } @book ], $start_of{songbook} );
 
+    # Add the bookmarks.
+    my $sb_bm_key = $sb->{songs}->[0]->{meta}->{_bookmarks};
+    my $pdf = $pr->{pdf};
+    my $nd = ref($pdf) . '::NamedDestination';
+    for ( qw( front toc back ) ) {
+	next unless $pages_of{$_};
+	my $d = $nd->new($pdf);
+	$d->goto( $pr->{pdf}->openpage($start_of{$_}),
+		  xyz => (undef,undef,undef) );
+	$pdf->named_destination( 'Dests', $sb_bm_key . ".$_", $d );
+    }
     $pr->finish( $options->{output} || "__new__.pdf" );
     warn("Generated PDF...\n") if $options->{verbose};
 
