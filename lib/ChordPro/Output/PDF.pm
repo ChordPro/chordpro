@@ -71,7 +71,8 @@ sub generate_songbook {
 	      total   => scalar(@{$sb->{songs}}) );
 
     my $pr = (__PACKAGE__."::Writer")->new( $ps, $pdfapi );
-    warn("Generating PDF ", $options->{output} || "__new__.pdf", "...\n") if $options->{verbose};
+    warn("Generating PDF ", $options->{output} || "__new__.pdf", "...\n")
+      if $options->{verbose};
 
     my $name = ::runtimeinfo("short");
     $name =~ s/version.*/regression testing/ if $regtest;
@@ -145,6 +146,8 @@ sub generate_songbook {
 				} );
 	# Easy access to toc page.
 	$song->{meta}->{page} = $song->{meta}->{tocpage};
+	$pr->named_dest( $song->{meta}->{"bookmark.top"},
+			 $pr->{pdf}->openpage($song->{meta}->{page}) );
     }
     $pages_of{songbook} = $page - 1;
     $start_of{back} = $page;
@@ -246,15 +249,8 @@ sub generate_songbook {
 
 	# The last song gets the ToC appended.
 	$song = pop(@songs);
-	my $pdf = $pr->{pdf};
-	my $nd = ref($pdf) . '::NamedDestination';
 	push( @{ $song->{body} //= [] },
-	      map { my $p = $pdf->openpage($_->[-1]->{meta}->{tocpage}+$start);
-		    my $d = $nd->new($pdf);
-		    $d->goto($p, xyz => (undef,undef,undef));
-		    $pdf->named_destination( 'Dests',
-					     $_->[-1]->{meta}->{"bookmark.top"},
-					     $d );
+	      map { my $p = $pr->{pdf}->openpage($_->[-1]->{meta}->{tocpage}+$start);
 		    +{ type    => "tocline",
 		       context => "toc",
 		       title   => fmt_subst( $_->[-1], $tltpl ),
@@ -389,20 +385,17 @@ sub generate_songbook {
     $pr->pagelabel( $start_of{back}-1,     'arabic', 'back-'  )
       if $pages_of{back};
 
+    # Add the bookmarks.
+    # my $sb_bm_key = $sb->{songs}->[0]->{meta}->{_bookmarks};
+    for ( qw( front toc back ) ) {
+	next unless $pages_of{$_};
+	my $p = $pr->{pdf}->openpage( $start_of{$_} );
+	$pr->named_dest( $_, $p );
+    }
+
     # Add the outlines.
     $pr->make_outlines( [ map { $_->[1] } @book ], $start_of{songbook} );
 
-    # Add the bookmarks.
-    my $sb_bm_key = $sb->{songs}->[0]->{meta}->{_bookmarks};
-    my $pdf = $pr->{pdf};
-    my $nd = ref($pdf) . '::NamedDestination';
-    for ( qw( front toc back ) ) {
-	next unless $pages_of{$_};
-	my $d = $nd->new($pdf);
-	$d->goto( $pr->{pdf}->openpage($start_of{$_}),
-		  xyz => (undef,undef,undef) );
-	$pdf->named_destination( 'Dests', $sb_bm_key . ".$_", $d );
-    }
     $pr->finish( $options->{output} || "__new__.pdf" );
     warn("Generated PDF...\n") if $options->{verbose};
 

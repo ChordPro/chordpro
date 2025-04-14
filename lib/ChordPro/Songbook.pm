@@ -79,11 +79,13 @@ sub parse_file {
 	my $song = ChordPro::Song->new($opts)
 	  ->parse_song( $lines, \$linecnt,
 			{ %{dclone($meta)},
-			  _bookmarks => $sb_bm_key,
-			  "bookmark.toc" => $sb_bm_key . ".toc",
-			  "bookmark.front" => $sb_bm_key . ".front",
-			  "bookmark.back" => $sb_bm_key . ".back",
-			  "bookmark.top" => sprintf( "$sb_bm_key%06d.top", 1 + @{ $self->{songs} } ),
+			  # _bookmarks       => $sb_bm_key,
+			  "bookmark.toc"   => "toc",
+			  "bookmark.front" => "front",
+			  "bookmark.back"  => "back",
+			  # "bookmark.top"   => sprintf( "$sb_bm_key%06d.top", 1 + @{ $self->{songs} } ),
+			  # "bookmark.top"   => sprintf( "song%06d.top", 1 + @{ $self->{songs} } ),
+			  "bookmark.top"   => sprintf( "song_%d", 1 + @{ $self->{songs} } ),
 			},
 			{ %$defs } );
 

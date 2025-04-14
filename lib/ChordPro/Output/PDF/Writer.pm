@@ -680,6 +680,24 @@ sub make_outlines {
 	    }
 	}
     }
+
+    # Add bookmarks.
+    my $outline = $ol_root->outline;
+    $outline->title("Bookmarks");
+    $outline->closed;
+    for ( "front", "toc",
+	  ( grep { /^song/ } sort keys %{ $self->{_nd} } ),
+	  "back" ) {
+	next unless my $p = $self->{_nd}->{$_};
+	my $ol = $outline->outline;
+	$ol->title($_);
+	if ( my $c = $ol->can("destination") ) {
+	    $c->( $ol, $p );
+	}
+	else {
+	    $ol->dest($p);
+	}
+    }
 }
 
 sub finish {
@@ -891,6 +909,18 @@ sub embed {
 	      -open => 0, -rect => [0,0,-1,-1] );
     $a->{T} = PDFStr("ChordProCall");
     $a->{F} = PDFNum(2);		# hidden
+}
+
+# Add a Named Destination.
+
+sub named_dest {
+    my ( $self, $name, $page ) = @_;
+    my $pdf = $self->{pdf};
+    my $nd = ref($pdf) . '::NamedDestination';
+    my $dest = $nd->new($pdf);
+    $dest->goto( $page, xyz => (undef,undef,undef) );
+    $pdf->named_destination( 'Dests', $name, $dest );
+    $self->{_nd}->{$name} = $page;
 }
 
 1;
