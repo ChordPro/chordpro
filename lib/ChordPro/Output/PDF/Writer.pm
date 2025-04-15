@@ -46,10 +46,12 @@ sub new {
 	no warnings 'redefine';
 	*{$pdfapi . '::_is_date'} = sub { 1 };
     }
+    *{$pdfapi . '::named_dest_register' } = \&pdfapi_named_dest_register;
+    *{$pdfapi . '::named_dest_fiddle'   } = \&pdfapi_named_dest_fiddle;
 
     %fontcache = ();
 
-    $self;
+    $self->{pdf}->{_pr} = $self;
 }
 
 sub info {
@@ -921,7 +923,17 @@ sub named_dest {
     my $dest = $nd->new($pdf);
     $dest->goto( $page, xyz => (undef,undef,undef) );
     $pdf->named_destination( 'Dests', $name, $dest );
-    $self->{_nd}->{$name} = $page;
+    $pdf->named_dest_register( $name, $page );
+}
+
+sub pdfapi_named_dest_register {
+    my ( $self, $name, $page ) = @_;
+    $self->{_pr}->{_nd}->{$name} = $page;
+}
+
+sub pdfapi_named_dest_fiddle {
+    my ( $self, $name ) = @_;
+    $name eq 'top' ? $self->{_pr}->{'bookmark.top'} : $name;
 }
 
 1;

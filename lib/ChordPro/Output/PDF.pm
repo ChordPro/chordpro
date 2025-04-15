@@ -138,6 +138,7 @@ sub generate_songbook {
 	$cancelled++,last unless progress( msg => $song->{meta}->{title}->[0] );
 
 	$song->{meta}->{"chordpro.songsource"} //= $song->{source}->{file};
+	$pr->{'bookmark.top'} = "song_$songindex";
 	$page += $song->{meta}->{pages} =
 	  generate_song( $song, { pr        => $pr,
 				  startpage => $page,
