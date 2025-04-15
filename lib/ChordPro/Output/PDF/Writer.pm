@@ -687,9 +687,15 @@ sub make_outlines {
     my $outline = $ol_root->outline;
     $outline->title("Bookmarks");
     $outline->closed;
-    for ( "front", "toc",
-	  ( grep { ! /^(?:front|toc|back)$/ } sort keys %{ $self->{_nd} } ),
-	  "back" ) {
+
+    my @tops =
+      map  { $_->[0] }
+      sort { $a->[1] <=> $b->[1] }
+      map  { [ $_ => s/[^0-9]//gr ] }
+      grep { ! /^(?:cover|front|toc|back)$/ }
+      keys %{ $self->{_nd} };
+
+    for ( "cover", "front", "toc", @tops, "back" ) {
 	next unless my $p = $self->{_nd}->{$_};
 	my $ol = $outline->outline;
 	$ol->title($_);

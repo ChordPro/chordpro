@@ -388,7 +388,7 @@ sub generate_songbook {
 
     # Add the bookmarks.
     # my $sb_bm_key = $sb->{songs}->[0]->{meta}->{_bookmarks};
-    for ( qw( front toc back ) ) {
+    for ( qw( cover front toc back ) ) {
 	next unless $pages_of{$_};
 	my $p = $pr->{pdf}->openpage( $start_of{$_} );
 	$pr->named_dest( $_, $p );
