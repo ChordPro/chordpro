@@ -288,7 +288,7 @@ my $xp = [
 
 foreach ( @$res ) {
     delete $_->[2]->{meta}->{_configversion};
-    delete $_->[2]->{meta}->{_bookmarks};
+    delete $_->[2]->{meta}->{bookmark};
     delete $_->[2]->{meta}->{"bookmark.top"};
     delete $_->[2]->{meta}->{"bookmark.toc"};
     delete $_->[2]->{meta}->{"bookmark.front"};

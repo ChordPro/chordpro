@@ -360,7 +360,10 @@ active.
 
 =item B<--cover=>I<FILE>
 
-See B<--front-matter>.
+Prepends the contents of the named PDF document to the output. This can
+be used to add cover pages.
+
+See also B<--title>.
 
 =item B<--csv>
 
@@ -397,10 +400,10 @@ This option may be specified multiple times.
 Song file names listed on the command line are processed I<after> the
 files from the filelist arguments.
 
-=item B<--front-matter=>I<FILE> B<--cover=>I<FILE>
+=item B<--front-matter=>I<FILE>
 
 Prepends the contents of the named PDF document to the output. This can
-be used to produce documents with front matter (cover) pages.
+be used to produce documents with front matter pages.
 
 =item B<--lyrics-only> (short: B<-l>)
 
@@ -470,6 +473,8 @@ Title (for songbooks).
 
 If specified and a table of contents is requested, a nice coverpage
 will be added.
+
+Note that B<--title> overrides B<--cover>.
 
 =item B<--toc> (short: B<-i>)
 
@@ -831,7 +836,8 @@ sub app_setup {
 	  "diagrams=s",			# Prints chord diagrams
           "encoding=s",
 	  "csv!",			# Generates contents CSV
-	  "front-matter|cover=s",	# Front matter page(s)
+	  "front-matter=s",		# Front matter page(s)
+	  "cover=s",			# Cover page(s)
 	  "back-matter=s",		# Back matter page(s)
 	  "filelist=s@",		# List of input files
 	  "title=s",			# Title (for books)
@@ -1403,12 +1409,14 @@ Options:
     --encoding=ENC                Encoding for input files (UTF-8)
     --filelist=FILE               Reads song file names from FILE
     --fragment -F                 Partial (incomplete) song
-    --front-matter=FILE           Add cover pages from PDF document
+    --front-matter=FILE           Add front matter pages from PDF document
     --lyrics-only  -l             Only prints lyrics
     --meta KEY=VALUE              Add meta data
     --output=FILE  -o             Saves the output to FILE
     --[no]strict                  Strict conformance
     --start-page-number=N  -p     Starting page number [1]
+    --subtitle=VALUE		  Use with --title for a nice subtitle.
+    --title=VALUE		  Adds a nice cover page using this title.
     --toc --notoc -i              Generates/suppresses a table of contents
     --transcode=SYS  -xc          Transcodes to notation system
     --transpose=N  -x             Transposes by N semi-tones

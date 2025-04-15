@@ -100,6 +100,7 @@ sub generate_song ( $s ) {
 	    next if $k =~ /^(?:title|subtitle|songindex|key_.*|chords|numchords)$/;
 	    next if $k =~ /^_/;
 	    next if $k =~ /\./;
+	    next if $k =~ /^bookmark/;
 	    push( @s, map { +"{meta: $k ".fq($_)."}" } @{ $s->{meta}->{$k} } );
 	}
     }

@@ -358,6 +358,23 @@ sub generate_songbook {
 	}
 	$pages_of{cover} = $page - ( $adjusted ? 2 : 1 );
     }
+    elsif ( defined( $options->{cover} ) ) {
+	my $cover = $pdfapi->open( expand_tilde($options->{cover}) );
+	die("Missing cover: ", $options->{cover}, "\n") unless $cover;
+	$page = 0;
+	progress( msg => "Cover" );
+	for ( 1 .. $cover->pages ) {
+	    $pr->{pdf}->import_page( $cover, $_, 1+$page );
+	    $page++;
+	}
+	$pages_of{cover} = $page;
+	if ( $ps->{'pagealign-songs'}
+	     && ( $page % 2 ) ) {
+	    $page++;
+	    $pr->newpage($ps, $page);
+	}
+	$start_of{$_} += $page for qw( songbook front toc back );
+    }
 
     if ( $ps->{'back-matter'} ) {
 	my $matter = $pdfapi->open( expand_tilde($ps->{'back-matter'}) );

@@ -998,6 +998,26 @@ pdf {
       // For future use.
       fold : false
     }
+    {
+    
+      // Primary and (optional) secondary fields.
+      fields : [ bookmark ]
+    
+      // Title, omitted if there's only one outline.
+      label : "Bookmarks"
+    
+      // The format for the outline entries.
+      line : "%{bookmark}"
+    
+      // Initial display is collapsed.
+      collapse : true
+    
+      // Make letter level if more entries than this value.
+      letter : 0
+    
+      // For future use.
+      fold : false
+    }
   ]
 
   // Show the page layout structure.

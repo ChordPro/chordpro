@@ -604,7 +604,8 @@ sub make_outlines {
 
     # Process outline defs from config.
     foreach my $ctl ( @{ $self->{ps}->{outlines} } ) {
-	my $book = prep_outlines( $book, $ctl );
+	my $book = prep_outlines( $book, $ctl, $self->{ps}->{pr} );
+
 	next unless @$book;
 
 	# Seems not to matter whether we re-use the root or create new.
@@ -653,12 +654,10 @@ sub make_outlines {
 		    my $ol = $cur_ol->outline;
 		    # Display info.
 		    $ol->title( demarkup( fmt_subst( $song, $ctl->{line} ) ) );
-		    if ( my $c = $ol->can("destination") ) {
-			$c->( $ol, $pdf->openpage( $song->{meta}->{tocpage} + $start ) );
-		    }
-		    else {
-			$ol->dest($pdf->openpage( $song->{meta}->{tocpage} + $start ));
-		    }
+		    my $p = $song->{meta}->{tocpage};
+		    $p = $pdf->openpage( $p + $start ) unless ref($p);
+		    my $c = $ol->can("destination") // $ol->can("dest");
+		    $ol->$c($p);
 		}
 	    }
 	}
@@ -673,15 +672,15 @@ sub make_outlines {
 		my $ol = $outline->outline;
 		# Display info.
 		$ol->title( demarkup( fmt_subst( $song, $ctl->{line} ) ) );
-		if ( my $c = $ol->can("destination") ) {
-		    $c->( $ol, $pdf->openpage( $song->{meta}->{tocpage} + $start ) );
-		}
-		else {
-		    $ol->dest($pdf->openpage( $song->{meta}->{tocpage} + $start ));
-		}
+		my $p = $song->{meta}->{tocpage};
+		$p = $pdf->openpage( $p + $start ) unless ref($p);
+		my $c = $ol->can("destination") // $ol->can("dest");
+		$ol->$c($p);
 	    }
 	}
     }
+
+=for xxx
 
     # Add bookmarks.
     my $outline = $ol_root->outline;
@@ -706,6 +705,9 @@ sub make_outlines {
 	    $ol->dest($p);
 	}
     }
+
+=cut
+
 }
 
 sub finish {

@@ -67,7 +67,10 @@ active.
 
 =item B<--cover=>I<FILE>
 
-See B<--front-matter>.
+Prepends the contents of the named PDF document to the output. This can
+be used to add cover pages.
+
+See also B<--title>.
 
 =item B<--csv>
 
@@ -104,10 +107,10 @@ This option may be specified multiple times.
 Song file names listed on the command line are processed I<after> the
 files from the filelist arguments.
 
-=item B<--front-matter=>I<FILE> B<--cover=>I<FILE>
+=item B<--front-matter=>I<FILE>
 
 Prepends the contents of the named PDF document to the output. This can
-be used to produce documents with front matter (cover) pages.
+be used to produce documents with front matter pages.
 
 =item B<--lyrics-only> (short: B<-l>)
 
@@ -177,6 +180,8 @@ Title (for songbooks).
 
 If specified and a table of contents is requested, a nice coverpage
 will be added.
+
+Note that B<--title> overrides B<--cover>.
 
 =item B<--toc> (short: B<-i>)
 

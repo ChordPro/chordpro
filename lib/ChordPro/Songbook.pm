@@ -86,6 +86,7 @@ sub parse_file {
 			  # "bookmark.top"   => sprintf( "$sb_bm_key%06d.top", 1 + @{ $self->{songs} } ),
 			  # "bookmark.top"   => sprintf( "song%06d.top", 1 + @{ $self->{songs} } ),
 			  "bookmark.top"   => sprintf( "song_%d", 1 + @{ $self->{songs} } ),
+			  "bookmark"   => sprintf( "song_%d", 1 + @{ $self->{songs} } ),
 			},
 			{ %$defs } );
 
