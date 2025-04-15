@@ -690,8 +690,8 @@ sub make_outlines {
 
     my @tops =
       map  { $_->[0] }
-      sort { $a->[1] <=> $b->[1] }
-      map  { [ $_ => s/[^0-9]//gr ] }
+      sort { $a->[1] cmp $b->[1] }
+      map  { [ $_ => s/^song_([0-9]+)$/sprintf("song_%06d",$1)/er ] }
       grep { ! /^(?:cover|front|toc|back)$/ }
       keys %{ $self->{_nd} };
 
