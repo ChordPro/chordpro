@@ -42,10 +42,6 @@ sub new {
     no strict 'refs';
     *{$pdfapi . '::Resource::XObject::Form::width' } = \&_xo_width;
     *{$pdfapi . '::Resource::XObject::Form::height'} = \&_xo_height;
-    if ( $pdfapi eq 'PDF::API2' ) {
-	no warnings 'redefine';
-	*{$pdfapi . '::_is_date'} = sub { 1 };
-    }
     *{$pdfapi . '::named_dest_register' } = \&pdfapi_named_dest_register;
     *{$pdfapi . '::named_dest_fiddle'   } = \&pdfapi_named_dest_fiddle;
 
