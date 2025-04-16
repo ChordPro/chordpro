@@ -138,7 +138,7 @@ sub generate_songbook {
 	$cancelled++,last unless progress( msg => $song->{meta}->{title}->[0] );
 
 	$song->{meta}->{"chordpro.songsource"} //= $song->{source}->{file};
-	$pr->{'bookmark.top'} = "song_$songindex";
+	$pr->{'bookmark'} = "song_$songindex";
 	$page += $song->{meta}->{pages} =
 	  generate_song( $song, { pr        => $pr,
 				  startpage => $page,
@@ -147,7 +147,7 @@ sub generate_songbook {
 				} );
 	# Easy access to toc page.
 	$song->{meta}->{page} = $song->{meta}->{tocpage};
-	$pr->named_dest( $song->{meta}->{"bookmark.top"},
+	$pr->named_dest( $song->{meta}->{"bookmark"},
 			 $pr->{pdf}->openpage($song->{meta}->{page}) );
     }
     $pages_of{songbook} = $page - 1;
@@ -404,7 +404,6 @@ sub generate_songbook {
       if $pages_of{back};
 
     # Add the bookmarks.
-    # my $sb_bm_key = $sb->{songs}->[0]->{meta}->{_bookmarks};
     for ( qw( cover front toc back ) ) {
 	next unless $pages_of{$_};
 	my $p = $pr->{pdf}->openpage( $start_of{$_} );

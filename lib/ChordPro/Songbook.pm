@@ -73,19 +73,11 @@ sub parse_file {
 
     my $linecnt = 0;
     my $songs = 0;
-    state $sb_bm_key = $regtest ? "000000" : encode_base64( time, '' );
 
     while ( @$lines ) {
 	my $song = ChordPro::Song->new($opts)
 	  ->parse_song( $lines, \$linecnt,
 			{ %{dclone($meta)},
-			  # _bookmarks       => $sb_bm_key,
-			  "bookmark.toc"   => "toc",
-			  "bookmark.front" => "front",
-			  "bookmark.back"  => "back",
-			  # "bookmark.top"   => sprintf( "$sb_bm_key%06d.top", 1 + @{ $self->{songs} } ),
-			  # "bookmark.top"   => sprintf( "song%06d.top", 1 + @{ $self->{songs} } ),
-			  "bookmark.top"   => sprintf( "song_%d", 1 + @{ $self->{songs} } ),
 			  "bookmark"   => sprintf( "song_%d", 1 + @{ $self->{songs} } ),
 			},
 			{ %$defs } );

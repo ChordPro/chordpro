@@ -154,7 +154,7 @@ sub _suppresstoc {
 }
 
 sub prep_outlines {
-    my ( $book, $ctl, $pr ) = @_;
+    my ( $book, $ctl ) = @_;
     return [] unless $book && @$book; # unlikely
     return [] if $ctl->{omit};
 
@@ -166,18 +166,6 @@ sub prep_outlines {
 	return [ map { [ $_->{meta}->{songindex}, $_ ] }
 		 grep { !_suppresstoc($_->{meta}) } @$book ];
     }
-
-    if ( @fields == 1 && $fields[0] eq "bookmark" ) {
-	my @book;
-	while ( my ($k,$v) = each %{$pr->{_nd}} ) {
-	    push( @book,
-		  [ $k =~ s/^song_([0-9]+)$/sprintf("song_%06d",$1)/er,
-		    { meta => { tocpage => $v,
-				bookmark => $k } } ] );
-	}
-	return [ sort { $a->[0] cmp $b->[0] } @book ];
-    }
-
     return $book unless @fields; # ?
 
     my @book;

@@ -595,8 +595,8 @@ sub pagelabel {
 }
 
 sub make_outlines {
-    my ( $self, $book, $start ) = @_;
-    return unless $book && @$book; # unlikely
+    my ( $self, $bk, $start ) = @_;
+    return unless $bk && @$bk; # unlikely
 
     my $pdf = $self->{pdf};
     $start--;			# 1-relative
@@ -604,8 +604,21 @@ sub make_outlines {
 
     # Process outline defs from config.
     foreach my $ctl ( @{ $self->{ps}->{outlines} } ) {
-	my $book = prep_outlines( $book, $ctl, $self->{ps}->{pr} );
+	my $book;
 
+	if ( @{$ctl->{fields}} == 1 && $ctl->{fields}->[0] eq "bookmark" ) {
+	    my @book;
+	    while ( my ($k,$v) = each %{$self->{ps}->{pr}->{_nd}} ) {
+		push( @book,
+		      [ $k =~ s/^song_([0-9]+)$/sprintf("song_%06d",$1)/er,
+			{ meta => { tocpage => $v,
+				    bookmark => $k } } ] );
+	    }
+	    $book = [ sort { $a->[0] cmp $b->[0] }  @book ];
+	}
+	else {
+	    $book = prep_outlines( $bk, $ctl );
+	}
 	next unless @$book;
 
 	# Seems not to matter whether we re-use the root or create new.
@@ -941,7 +954,7 @@ sub pdfapi_named_dest_register {
 
 sub pdfapi_named_dest_fiddle {
     my ( $self, $name ) = @_;
-    $name eq 'top' ? $self->{_pr}->{'bookmark.top'} : $name;
+    $name eq 'top' ? $self->{_pr}->{bookmark} : $name;
 }
 
 1;
