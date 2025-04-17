@@ -9,7 +9,7 @@ use ChordPro::Testing;
 use ChordPro::Utils qw(prpadd2cfg);
 use ChordPro::Config;
 
-plan tests => 29;
+plan tests => 31;
 
 my $cfg = struct();
 
@@ -74,6 +74,19 @@ is_deeply( $cfg, { a => [ "b", ["c"], { a => { x => "y", b => "c" }, f => "g" } 
 $cfg = struct();
 testit( $cfg, "a.2.a" => [ qw(x y) ], "a.2.a.>" => "c" );
 is_deeply( $cfg, { a => [ "b", ["c"], { a => [ qw(x y c) ], f => "g" } ] }, "a.2.a/>" );
+
+# Name-based access to array.
+$cfg = { a => [ { name => "one", val => 1 }, { name => "two", val => 2 } ] };
+testit( $cfg, "a.one.val" => 42 );
+is_deeply( $cfg,
+	   { a => [ { name => "one", val => 42 }, { name => "two", val => 2 } ] },
+	   "a.one.val" );
+
+$cfg = { a => [ { name => "one", val => 1 }, { name => "two", val => 2 } ] };
+testit( $cfg, "a.0.val" => 42 );
+is_deeply( $cfg,
+	   { a => [ { name => "one", val => 42 }, { name => "two", val => 2 } ] },
+	   "a.0.val" );
 
 # Testing array manipulations.
 is_deeply( prpadd2cfg( [qw(x y z)], ">"   => "a" ), [qw(x y z a)], ">" );

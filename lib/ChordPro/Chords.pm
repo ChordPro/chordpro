@@ -353,6 +353,10 @@ sub check_chord ( $ii ) {
     return;
 }
 
+# API: Access the chords table.
+# Used by: Utils.
+sub config_chords { \%config_chords }
+
 # API: Add a config defined chord.
 # Used by: Config.
 sub add_config_chord ( $def ) {

@@ -51,6 +51,8 @@
     - In case of emergency it is now possible to obtain chord brackets
       in lyrics and annotations.
 
+    - Allow name based array access in config augment.
+
     !Bug Fixes
 
     - Some issues with Unicode filenames on Windows.
