@@ -529,6 +529,10 @@
             "description" : "The format for the toc lines.",
             "type" : "string"
           },
+	  "name" : {
+	    "description" : "An identifying name for this table of contents.",
+	    "type" : "string"
+	  },
           "pageno" : {
             "description" : "The format for the page numbers in the toc.",
             "type" : "string",
@@ -1886,6 +1890,10 @@
 		  },
 		  "line" : {
 		    "description" : "The format for the outline entries.",
+		    "type" : "string"
+		  },
+		  "name" : {
+		    "description" : "An identifying name for this outline.",
 		    "type" : "string"
 		  },
 		  "omit" : {
