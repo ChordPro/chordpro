@@ -130,7 +130,7 @@ metadata {
 // Globally defined (added) meta data,
 // This is explicitly NOT intended for the metadata items above.
 // Do NOT remove or change "_configversion"!
-meta._configversion : [ 6.074 ]
+meta._configversion : [ 6.075 ]
 
 // Assets (placeholder).
 assets {}
@@ -265,7 +265,9 @@ diagnostics.format : '"%f", line %n, %m\n\t%l'
 // An array of hashes each describing one table of contents.
 contents : [
   {
-  
+    // Identifying name.
+    name: table_of_contents
+
     // The metadata for this toc. One or two items.
     fields : [ songindex ]
   
@@ -288,6 +290,8 @@ contents : [
     template : stdtoc
   }
   {
+    // Identifying name.
+    name: contents_by_title
   
     // The metadata for this toc. One or two items.
     fields : [ title artist ]
@@ -311,6 +315,8 @@ contents : [
     template : stdtoc
   }
   {
+    // Identifying name.
+    name: contents_by_artist
   
     // The metadata for this toc. One or two items.
     fields : [ artist title ]
@@ -959,6 +965,8 @@ pdf {
   // for quick navigation.
   outlines : [
     {
+      // Identifying name.
+      name: by_title
     
       // Primary and (optional) secondary fields.
       fields : [ sorttitle artist ]
@@ -979,6 +987,8 @@ pdf {
       fold : false
     }
     {
+      // Identifying name.
+      name: by_artist
     
       // Primary and (optional) secondary fields.
       fields : [ artist sorttitle ]
@@ -999,10 +1009,15 @@ pdf {
       fold : false
     }
     {
-    
+      // Identifying name.
+      name: bookmarks
+
       // Primary and (optional) secondary fields.
       fields : [ bookmark ]
-    
+
+      // Omit by default.
+      omit: true
+
       // Title, omitted if there's only one outline.
       label : "Bookmarks"
     

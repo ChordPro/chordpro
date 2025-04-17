@@ -15,7 +15,7 @@ use utf8;
 
 use ChordPro::Files;
 use ChordPro::Paths;
-use ChordPro::Utils qw( expand_tilde demarkup min is_corefont maybe );
+use ChordPro::Utils qw( expand_tilde demarkup min is_corefont maybe is_true );
 use ChordPro::Output::Common qw( fmt_subst prep_outlines );
 use Ref::Util qw( is_arrayref is_hashref );
 
@@ -600,6 +600,7 @@ sub make_outlines {
 
     # Process outline defs from config.
     foreach my $ctl ( @{ $self->{ps}->{outlines} } ) {
+	next if is_true( $ctl->{omit} // 0 );
 	my $book;
 
 	if ( @{$ctl->{fields}} == 1 && $ctl->{fields}->[0] eq "bookmark" ) {
