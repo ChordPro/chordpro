@@ -168,6 +168,7 @@ sub generate_songbook {
 		  total   => $extra_matter );
     }
 
+    my $tocix;
     while ( !$cancelled && @tocs ) {
 	my $ctl = pop(@tocs);
 	next unless $options->{toc} // @book > 1;
@@ -177,6 +178,7 @@ sub generate_songbook {
 	    die("Config error: \"contents\" is missing \"$_\"\n");
 	}
 	next if $ctl->{omit};
+	$tocix++;
 
 	my $book = prep_outlines( [ map { $_->[1] } @book ], $ctl );
 
@@ -262,6 +264,10 @@ sub generate_songbook {
 	# Prepend the front matter songs.
 	$page = 0;
 	for ( @songs, $song ) {
+	    if ( $_ eq $song ) {
+		$pages_of{front} += $page unless $tocix > 1;
+		$start_of{toc} = $page+1 if $tocix == 1;
+	    }
 	    $cancelled++,last unless progress( msg => $_->{title} );
 	    my $p = generate_song( $_,
 				   { pr => $pr, prepend => 1, roman => 1,
@@ -275,8 +281,6 @@ sub generate_songbook {
 		$page++;
 		$p++;
 	    }
-	    $pages_of{front} += $p unless $_ eq $song;
-	    $start_of{toc} = $page if $_ eq $song;
 	}
 	$pages_of{toc} += $page;
 
@@ -389,8 +393,13 @@ sub generate_songbook {
 	}
 	$pages_of{back} = $matter->pages;
     }
-    # warn ::dump(\%start_of) =~ s/\s+/ /gsr, "\n";
-    # warn ::dump(\%pages_of) =~ s/\s+/ /gsr, "\n";
+
+    if ( 0 ) {
+	for ( qw( cover front toc songbook back ) ) {
+	    warn( sprintf("%4d %-10s %4d pages\n",
+			  $start_of{$_}, $_, $pages_of{$_} ));
+	}
+    }
 
     # Note that the page indices run from zero.
     $pr->pagelabel( 0,                     'arabic', 'cover-' );
