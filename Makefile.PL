@@ -17,9 +17,9 @@ my @bins = qw( chordpro wxchordpro );
 my $mv =
   { 'File::LoadLines'		   => 1.047,
     'HarfBuzz::Shaper'		   => 0.026, # Text::Layout
-    'String::Interpolate::Named'   => 1.030,
+    'String::Interpolate::Named'   => 1.030, # pref: 1.05
      # 'SVGPDF'			   => 0.089,
-    'Text::Layout'		   => 0.042,
+    'Text::Layout'		   => 0.042, # pref: 0.043
 
     'Data::Printer'		   => 1.001001,
     'File::Copy'		   => 2.32, # Core
@@ -40,7 +40,7 @@ my $mv =
   };
 
 # PDF API.
-$mv->{'PDF::API2'} = 2.045;
+$mv->{'PDF::API2'} = 2.045; # pref: 2.047
 if ( my $a = $ENV{CHORDPRO_PDF_API} ) {
     if ( $a =~ /PDF::Builder/ ) {
 	$mv->{'PDF::Builder'} = 3.025;
