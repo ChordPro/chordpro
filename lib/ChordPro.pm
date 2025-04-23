@@ -1145,7 +1145,7 @@ use List::Util qw(uniq);
 sub ::runtimeinfo {
     my $level = shift // "normal";
     my %i = %{runtime_info($level)};
-    my $fmt0   = "  %-22.22s %-10s";
+    my $fmt0   = "  %-26.26s %-10s";
     my $fmt2   = $fmt0 . "\n";
     my $fmt3   = $fmt0 . " (%s)\n";
 
@@ -1323,6 +1323,10 @@ sub runtime_info {
 	require HarfBuzz::Shaper;
 	$vv->("HarfBuzz::Shaper");
 	$p[-1]->{library} = $dd->(HarfBuzz::Shaper::hb_version_string());
+    };
+    eval {
+	require String::Interpolate::Named;
+	$vv->("String::Interpolate::Named");
     };
     eval {
 	require File::LoadLines;
