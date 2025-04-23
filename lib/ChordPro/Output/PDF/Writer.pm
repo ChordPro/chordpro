@@ -38,10 +38,18 @@ sub new {
     $self->{layout} = Text::Layout->new( $self->{pdf} );
     $self->{tmplayout} = undef;
 
-    # Patches and enhancements to PDF library.
     no strict 'refs';
+    # Patches and enhancements to PDF library.
     *{$pdfapi . '::Resource::XObject::Form::width' } = \&_xo_width;
     *{$pdfapi . '::Resource::XObject::Form::height'} = \&_xo_height;
+
+    # Enhanced version that allows named destinations.
+    no warnings 'redefine';
+    eval "use $pdfapi" . "::Annotation";
+    *{$pdfapi . '::Annotation::pdf'     } = \&pdfapi_annotation_pdf
+      if ${$pdfapi . '::VERSION'} < 999; # no milestone yet
+
+    # Text::Layout hooks.
     *{$pdfapi . '::named_dest_register' } = \&pdfapi_named_dest_register;
     *{$pdfapi . '::named_dest_fiddle'   } = \&pdfapi_named_dest_fiddle;
 
@@ -952,6 +960,49 @@ sub pdfapi_named_dest_register {
 sub pdfapi_named_dest_fiddle {
     my ( $self, $name ) = @_;
     $name eq 'top' ? $self->{_pr}->{bookmark} : $name;
+}
+
+# Enhanced version that allows named destinations.
+sub pdfapi_annotation_pdf {
+    package PDF::API2;
+    my $self = shift();
+    my $file = shift();
+    my $dest = shift();
+    my $location;
+    my @args;
+
+    # Deprecated options
+    my %options;
+    if ($_[0] and $_[0] =~ /^-/) {
+        %options = @_;
+    }
+    else {
+        $location = shift();
+        @args = @_;
+    }
+
+    $self->{'Subtype'}  = PDFName('Link');
+    $self->{'A'}        = PDFDict();
+    $self->{'A'}->{'S'} = PDFName('GoToR');
+    $self->{'A'}->{'F'} = PDFStr($file);
+
+    unless (%options) {
+	if ( $dest =~ /^#(.+)/ ) { # named dest
+	    $self->{'A'}->{'D'} = PDFStr($1);
+	}
+	else {
+	    my $destination = PDFNum($dest);
+	    $self->{'A'}->{'D'} = _destination($destination, $location, @args);
+	}
+    }
+    else {
+        # Deprecated
+        $self->dest(PDFNum($dest), %options);
+        $self->rect(@{$options{'-rect'}})     if defined $options{'-rect'};
+        $self->border(@{$options{'-border'}}) if defined $options{'-border'};
+    }
+
+    return $self;
 }
 
 1;
