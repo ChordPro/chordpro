@@ -209,7 +209,7 @@ the document:
 
 * `cover`, for the cover page;
 * `front`, for the front matter;
-* `toc`, for the table of contents;
+* `toc`, for the (first) table of contents;
 * `top`, for the beginning of the current song;
 * `back`, for the back matter.
 
@@ -217,6 +217,15 @@ If one or more of these are not part of the document, the
 corresponding bookmark will be omitted. If you try to use a
 non-existent bookmark the result will depend on the document viewer.
 Some will do nothing, some will jump to the start of the document.
+
+The songs will get an additional bookmarks with names `song_1`,
+`song_2` and so on. You can change the bookmark for a song with the
+`bookmark` meta data:
+
+    {meta: bookmark my_favourite_song}
+
+See also [Metadata]({{< relref
+"chordpro-configuration-generic/#metadata" >}}).
 
 ## Using markup in chords
 
