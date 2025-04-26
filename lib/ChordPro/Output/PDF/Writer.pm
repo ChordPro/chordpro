@@ -731,6 +731,9 @@ sub make_outlines {
 sub finish {
     my ( $self, $file ) = @_;
 
+    ::dump($self->{pdf}->{pagestack})
+      if $::config->{debug}->{pages} & 0x04;
+
     if ( $file && $file ne "-" ) {
 	my $fd = fs_open( $file, '>:raw' );
 	print $fd $self->{pdf}->stringify;

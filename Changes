@@ -74,6 +74,7 @@
     - Fix topic localization in fix_musicsyms.
     - TextBlock: Default colour to style colour.
     - (Wx) Prevent recursion in saved preferences.
+    - Fix #555, #542, #315.
 
 6.070 2024-12-25
 

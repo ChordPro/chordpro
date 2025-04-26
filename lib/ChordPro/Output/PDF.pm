@@ -54,7 +54,8 @@ sub generate_songbook {
     my $extra_matter = 0;
     if ( $options->{toc} // (@{$sb->{songs}} > 1) ) {
 	for ( @{ $::config->{contents} } ) {
-	    $extra_matter++ unless $_->{omit};
+	    # Treat ToCs as one.
+	    $extra_matter++, last unless $_->{omit};
 	}
 	$extra_matter++ if $options->{title};
     }
@@ -63,7 +64,7 @@ sub generate_songbook {
     $extra_matter++ if $options->{csv};
 
     if ( $ps->{'sort-pages'} ) {
-	sort_songbook($sb);
+	return unless sort_songbook($sb); # cancelled
     }
 
     progress( phase   => "PDF",
@@ -97,34 +98,40 @@ sub generate_songbook {
 
     # The songbook...
     my @book;
-    my $page = $options->{"start-page-number"} ||= 1;
 
-    if ( $ps->{'even-odd-pages'} && !($page % 2) ) {
+    # Page number in the PDF (for now, later we'll prepend tocs etc.).
+    my $page = 1;
+    # Logical page number offset.
+    my $page_offset = ( $options->{'start-page-number'} || 1 ) - 1;
+
+    if ( $ps->{'even-odd-pages'} && !(($page+$page_offset) % 2) ) {
 	warn("Warning: Specifying an even start page when pdf.odd-even-pages is in effect may yield surprising results.\n");
     }
 
     my $first_song_aligned;
     my $songindex;
-    my $cancelled;
 
     foreach my $song ( @{$sb->{songs}} ) {
 	$songindex++;
 
 	# Align.
 	if ( $ps->{'pagealign-songs'}
-	     && !( $page % 2 or $ps->{'sort-pages'} =~ /2page|compact/ ) ) {
-	    $pr->newpage($ps, $page);
+	     && !(    ($page+$page_offset) % 2
+		   or $ps->{'sort-pages'} =~ /2page|compact/ ) ) {
+	    $pr->newpage( $ps, $page );
 	    $page++;
 	    $first_song_aligned //= 1;
 	}
 	$first_song_aligned //= 0;
 
-	if ( ($page % 2) && $song->{meta}->{pages} && $song->{meta}->{pages} == 2 ) {
-	    $pr->newpage($ps, $page+1);
+	if (    ( ($page+$page_offset) % 2)
+	     && $song->{meta}->{pages}
+	     && $song->{meta}->{pages} == 2 ) {
+	    $pr->newpage( $ps, $page+1 );
 	    $page++;
 	}
 
-	$song->{meta}->{tocpage} = $page;
+	$song->{meta}->{tocpage} = $page; # physical
 	push( @book, [ $song->{meta}->{title}->[0], $song ] );
 
 	# Copy persistent assets into each of the songs.
@@ -135,20 +142,23 @@ sub generate_songbook {
 	    }
 	}
 
-	$cancelled++,last unless progress( msg => $song->{meta}->{title}->[0] );
+	return unless progress( msg => $song->{meta}->{title}->[0] );
 
 	$song->{meta}->{"chordpro.songsource"} //= $song->{source}->{file};
 	$pr->{'bookmark'} = "song_$songindex";
-	$page += $song->{meta}->{pages} =
-	  generate_song( $song, { pr        => $pr,
-				  startpage => $page,
-				  songindex => $songindex,
-				  numsongs  => scalar(@{$sb->{songs}}),
-				} );
+	my $pages =
+	  generate_song( $song,
+			 { pr         => $pr,
+			   page_idx   => $page,
+			   page_num   => $page+$page_offset,
+			   songindex  => $songindex,
+			   numsongs   => scalar(@{$sb->{songs}}),
+			 } );
 	# Easy access to toc page.
-	$song->{meta}->{page} = $song->{meta}->{tocpage};
+	$song->{meta}->{page} = $page+$page_offset;
 	$pr->named_dest( $song->{meta}->{"bookmark"},
-			 $pr->{pdf}->openpage($song->{meta}->{page}) );
+			 $pr->{pdf}->openpage($page));
+	$page += $song->{meta}->{pages} = $pages;
     }
     $pages_of{songbook} = $page - 1;
     $start_of{back} = $page;
@@ -169,8 +179,9 @@ sub generate_songbook {
     }
 
     my $tocix;
-    while ( !$cancelled && @tocs ) {
-	my $ctl = pop(@tocs);
+    my $frontmatter_songbook;
+    while ( @tocs ) {
+	my $ctl = shift(@tocs);
 	next unless $options->{toc} // @book > 1;
 
 	for ( qw( fields label line pageno ) ) {
@@ -184,7 +195,7 @@ sub generate_songbook {
 
 	# Create a pseudo-song for the table of contents.
 	my $toctitle = fmt_subst( $book[0][-1], $ctl->{label} );
-	my $start = $start_of{songbook} - $options->{"start-page-number"};
+	my $start = $start_of{songbook} - $page_offset;
 	# Templates for toc line and page.
 	my $tltpl = $ctl->{line};
 	my $pgtpl = $ctl->{pageno};
@@ -253,7 +264,7 @@ sub generate_songbook {
 	# The last song gets the ToC appended.
 	$song = pop(@songs);
 	push( @{ $song->{body} //= [] },
-	      map { my $p = $pr->{pdf}->openpage($_->[-1]->{meta}->{tocpage}+$start);
+	      map { my $p = $pr->{pdf}->openpage($_->[-1]->{meta}->{tocpage});
 		    +{ type    => "tocline",
 		       context => "toc",
 		       title   => fmt_subst( $_->[-1], $tltpl ),
@@ -261,46 +272,51 @@ sub generate_songbook {
 		       pageno  => fmt_subst( $_->[-1], $pgtpl ),
 		     } } @$book );
 
-	# Prepend the front matter songs.
-	$page = 0;
-	for ( @songs, $song ) {
-	    if ( $_ eq $song ) {
-		$pages_of{front} += $page unless $tocix > 1;
-		$start_of{toc} = $page+1 if $tocix == 1;
-	    }
-	    $cancelled++,last unless progress( msg => $_->{title} );
-	    my $p = generate_song( $_,
-				   { pr => $pr, prepend => 1, roman => 1,
-				     startpage => 1+$page,
-				     songindex => 1, numsongs => 1,
-				   } );
-	    $page += $p;
-	    if ( $ps->{'pagealign-songs'}
-		 && !( $page % 2 ) ) {
-		$pr->newpage($ps, $page);
-		$page++;
-		$p++;
-	    }
-	}
-	$pages_of{toc} += $page;
 
-	#### TODO: This is not correct if there are more TOCs.
-	$pages_of{toc}++ if $first_song_aligned;
+	$frontmatter_songbook //= ChordPro::Songbook->new;
+	$frontmatter_songbook->add($_) for @songs;
+	$frontmatter_songbook->add($song);
+    }
+
+    # Prepend the front matter songs.
+    return unless progress( msg => "ToC" );
+
+    $page = 1;
+    for ( @{$frontmatter_songbook->{songs}} ) {
+	my $pages =
+	  generate_song( $_,
+			 { pr		=> $pr,
+			   prepend	=> 1,
+			   roman	=> 1,
+			   page_idx	=> $page,
+			   page_num	=> $page,
+			   songindex	=> 1,
+			   numsongs	=> 1,
+			 } );
+	$page += $pages;
+	if ( $ps->{'pagealign-songs'}
+	     && !( $page % 2 ) ) {
+	    $pr->newpage( $ps, $page );
+	    $page++;
+	    $pages++;
+	}
+
+	$pages_of{toc} += $pages;
 
 	# Align.
-	if ( $ps->{'even-odd-pages'} && $page % 2 && !$first_song_aligned ) {
-	    $pr->newpage($ps, $page+1);
+	if ( $ps->{'even-odd-pages'} && !($page % 2) ) {
+	    $pr->newpage( $ps, $page );
 	    $page++;
 	}
-	$start_of{songbook} += $page;
-	$start_of{back}     += $page;
     }
+    $start_of{songbook} += $page-1;
+    $start_of{back}     += $page-1;
 
     if ( $ps->{'front-matter'} ) {
 	$page = 1;
 	my $matter = $pdfapi->open( expand_tilde($ps->{'front-matter'}) );
 	die("Missing front matter: ", $ps->{'front-matter'}, "\n") unless $matter;
-	progress( msg => "Front matter" );
+	return unless progress( msg => "Front matter" );
 	for ( 1 .. $matter->pages ) {
 	    $pr->{pdf}->import_page( $matter, $_, $_ );
 	    $page++;
@@ -366,7 +382,7 @@ sub generate_songbook {
 	my $cover = $pdfapi->open( expand_tilde($options->{cover}) );
 	die("Missing cover: ", $options->{cover}, "\n") unless $cover;
 	$page = 0;
-	progress( msg => "Cover" );
+	return unless progress( msg => "Cover" );
 	for ( 1 .. $cover->pages ) {
 	    $pr->{pdf}->import_page( $cover, $_, 1+$page );
 	    $page++;
@@ -384,7 +400,7 @@ sub generate_songbook {
 	my $matter = $pdfapi->open( expand_tilde($ps->{'back-matter'}) );
 	die("Missing back matter: ", $ps->{'back-matter'}, "\n") unless $matter;
 	$page = $start_of{back};
-	progress( msg => "Back matter" );
+	return unless progress( msg => "Back matter" );
 	$pr->newpage($ps), $page++, $start_of{back}++
 	  if $ps->{'even-odd-pages'} && ($page % 2);
 	for ( 1 .. $matter->pages ) {
@@ -394,7 +410,7 @@ sub generate_songbook {
 	$pages_of{back} = $matter->pages;
     }
 
-    if ( 0 ) {
+    if ( $::config->{debug}->{pages} & 0x01 ) {
 	for ( qw( cover front toc songbook back ) ) {
 	    warn( sprintf("%4d %-10s %4d pages\n",
 			  $start_of{$_}, $_, $pages_of{$_} ));
@@ -426,11 +442,9 @@ sub generate_songbook {
     warn("Generated PDF...\n") if $options->{verbose};
 
     if ( $options->{csv} ) {
-	progress( msg => "CSV" );
+	return unless progress( msg => "CSV" );
 	generate_csv( \@book, $page, \%pages_of, \%start_of )
     }
-
-    _dump($ps) if $verbose;
 
     []
 }
@@ -523,8 +537,7 @@ sub generate_csv {
       if $config->{debug}->{csv};
     for ( my $p = 0; $p < @$book-1; $p++ ) {
 	my ( $title, $song ) = @{$book->[$p]};
-	my $page = $start_of->{songbook} + $song->{meta}->{tocpage}
-	  - ($options->{"start-page-number"} || 1);
+	my $page = $start_of->{songbook} + $song->{meta}->{tocpage} - 1;
 	my $pp = $song->{meta}->{pages};
 	my $m = { %{$song->{meta}},
 		  pagerange => [ $pagerange->($pp, $page) ] };
@@ -807,14 +820,18 @@ sub generate_song {
     };
 
     my $vsp_ignorefirst;
-    my $startpage = $opts->{startpage} || 1;
+    my $startpage = $opts->{page_num};
     my $thispage = $startpage - 1;
+
+    my $page_idx = $opts->{page_idx}; # page # in PDF
+    my $page_num = $opts->{page_num}; # page number
 
     # Physical newpage handler.
     my $newpage = sub {
 
 	# Add page to the PDF.
-	$pr->newpage($ps, $opts->{prepend} ? $thispage+1 : () );
+	$pr->newpage( $ps,
+		      $opts->{prepend} ? $page_idx : () );
 
 	# Put titles and footer.
 
@@ -823,7 +840,7 @@ sub generate_song {
 	my $rightpage = 1;
 	if ( $ps->{"even-odd-pages"} ) {
 	    # Even/odd printing...
-	    $rightpage = $thispage % 2 == 0;
+	    $rightpage = $page_num % 2 == 0;
 	    # Odd/even printing...
 	    $rightpage = !$rightpage if $ps->{'even-odd-pages'} < 0;
 	}
@@ -854,19 +871,22 @@ sub generate_song {
 	$ps->{__bottommargin} = $ps->{_marginbottom};
 
 	$thispage++;
-	$s->{meta}->{page} = [ $s->{page} = $opts->{roman}
-			       ? roman($thispage) : $thispage ];
+	$page_idx++;
+	$page_num++;
+	$s->{meta}->{page} =
+	  [ $s->{page} = $opts->{roman}
+	                 ? roman($page_num) : $page_num ];
 
 	# Determine page class and background.
 	my $class = 2;		# default
 	my $bgpdf = $ps->{formats}->{default}->{background};
-	if ( $thispage == 1 ) {
+	if ( $page_num == 1 ) {
 	    $class = 0;		# very first page
 	    $bgpdf = $ps->{formats}->{first}->{background}
 	      || $ps->{formats}->{title}->{background}
 	      || $bgpdf;
 	}
-	elsif ( $thispage == $startpage ) {
+	elsif ( $page_num == $startpage ) {
 	    $class = 1;		# first of a song
 	    $bgpdf = $ps->{formats}->{title}->{background}
 	      || $bgpdf;
@@ -945,10 +965,10 @@ sub generate_song {
 
 	# Determine page class.
 	my $class = 2;		# default
-	if ( $thispage == 1 ) {
+	if ( $page_num == 1 ) {
 	    $class = 0;		# very first page
 	}
-	elsif ( $thispage == $startpage ) {
+	elsif ( $page_num == $startpage ) {
 	    $class = 1;		# first of a song
 	}
 
@@ -1646,18 +1666,23 @@ sub generate_song {
 	$chorddiagrams->( undef, "below");
     }
 
-    my $pages = $thispage - $startpage + 1;
+    my $pages = $page_num - $startpage;
     $newpage->(), $pages++,
       if $ps->{'pagealign-songs'} > 1 && $pages % 2
          && $opts->{songindex} < $opts->{numsongs};
 
     # Now for the page headings and footers.
-    $thispage = $startpage - 1;
+    $page_num = $opts->{page_num} - 1;
+    $page_idx = $opts->{page_idx} - 1;
     $s->{meta}->{pages} = [ $pages ];
 
     for my $p ( 1 .. $pages ) {
-
-	$pr->openpage($ps, $thispage+1 );
+	$page_num++;
+	$page_idx++;
+	warn( "page: $page_num($page_idx), ", $s->{meta}->{title}->[0],
+	      ", ", plural($pages," page"), "\n")
+	  if $config->{debug}->{pages} & 0x01;
+	$pr->openpage($ps, $page_idx );
 
 	# Put titles and footer.
 
@@ -1666,7 +1691,7 @@ sub generate_song {
 	my $rightpage = 1;
 	if ( $ps->{"even-odd-pages"} ) {
 	    # Even/odd printing...
-	    $rightpage = $thispage % 2 == 0;
+	    $rightpage = $page_num % 2 != 0;
 	    # Odd/even printing...
 	    $rightpage = !$rightpage if $ps->{'even-odd-pages'} < 0;
 	}
@@ -1698,20 +1723,19 @@ sub generate_song {
 	$ps->{__topmargin}    = $ps->{_margintop};
 	$ps->{__bottommargin} = $ps->{_marginbottom};
 
-	$thispage++;
 	$s->{meta}->{page} = [ $s->{page} = $opts->{roman}
-			       ? roman($thispage) : $thispage ];
+			       ? roman($page_num) : $page_num ];
 
 	# Determine page class.
 	my $class = 2;		# default
-	if ( $thispage == 1 ) {
+	if ( $page_num == 1 ) {
 	    $class = 0;		# very first page
 	}
-	elsif ( $thispage == $startpage ) {
+	elsif ( $page_num == $startpage ) {
 	    $class = 1;		# first of a song
 	}
 	$s->{meta}->{'page.class'} = $classes[$class];
-	warn("page: $p side = ", $s->{meta}->{'page.side'},
+	warn("page: $page_num($page_idx), side = ", $s->{meta}->{'page.side'},
 	     " class = ", $classes[$class], "\n")
 	  if $::config->{debug}->{pages} & 0x01;
 
@@ -3465,7 +3489,7 @@ sub sort_songbook {
 
 	my $i = 1;
 	foreach my $song ( @{$sb->{songs}} ) {
-	    progress( msg => $song->{title} );
+	    return unless progress( msg => $song->{title} );
 	    $i++;
 	    $song->{meta}->{pages} =
 	      generate_song( $song, { pr => $pri, startpage => 1 } );
