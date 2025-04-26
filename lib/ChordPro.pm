@@ -838,7 +838,7 @@ sub app_setup {
 	  "csv!",			# Generates contents CSV
 	  "front-matter=s",		# Front matter page(s)
 	  "cover=s",			# Cover page(s)
-	  "back-matter=s",		# Back matter page(s)
+	  "back|back-matter=s",		# Back matter page(s)
 	  "filelist=s@",		# List of input files
 	  "title=s",			# Title (for books)
 	  "subtitle=s",			# Subtitle (for books)
