@@ -840,7 +840,7 @@ sub generate_song {
 	my $rightpage = 1;
 	if ( $ps->{"even-odd-pages"} ) {
 	    # Even/odd printing...
-	    $rightpage = $page_num % 2 == 0;
+	    $rightpage = $page_num % 2;
 	    # Odd/even printing...
 	    $rightpage = !$rightpage if $ps->{'even-odd-pages'} < 0;
 	}
