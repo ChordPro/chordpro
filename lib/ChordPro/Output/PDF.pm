@@ -3579,7 +3579,7 @@ use Text::ParseWords qw( shellwords );
 
 method parse( $ctx, $k, $v ) {
 
-    my %ctl = ( type => "img", size => $ctx->{size} );
+    my %ctl = ( type => "img", %$ctx );
     my $err;
 
     # Split the attributes.
