@@ -591,6 +591,10 @@ use constant SIZE_ITEMS => [ qw( chord text chorus tab grid diagram
 sub generate_song {
     my ( $s, $opts ) = @_;
 
+    warn("Generate song \"", $s->{title}, "\", ",
+	 "page ", $opts->{page_num}, " (", $opts->{page_idx}, ")\n")
+      if $config->{debug}->{pages} & 0x01;
+
     my $pr = $opts->{pr};
     if ( $pr->{layout}->can("register_element") ) {
 	$pr->{layout}->register_element
@@ -821,17 +825,23 @@ sub generate_song {
 
     my $vsp_ignorefirst;
     my $startpage = $opts->{page_num};
-    my $thispage = $startpage - 1;
-
-    my $page_idx = $opts->{page_idx}; # page # in PDF
-    my $page_num = $opts->{page_num}; # page number
+    # These are 1 smaller since they'll be incremented first.
+    my $page_num = $startpage - 1; # page number
+    my $page_idx = $opts->{page_idx}-1; # page # in PDF
 
     # Physical newpage handler.
     my $newpage = sub {
+	$page_idx++;
+	$page_num++;
+	$s->{meta}->{page} =
+	  [ $s->{page} = $opts->{roman}
+	                 ? roman($page_num) : $page_num ];
 
 	# Add page to the PDF.
 	$pr->newpage( $ps,
 		      $opts->{prepend} ? $page_idx : () );
+	warn("page: $page_idx(",$s->{page},") added\n")
+	  if $config->{debug}->{pages} & 0x01;
 
 	# Put titles and footer.
 
@@ -869,13 +879,6 @@ sub generate_song {
 	$ps->{__rightmargin}  = $ps->{_marginright};
 	$ps->{__topmargin}    = $ps->{_margintop};
 	$ps->{__bottommargin} = $ps->{_marginbottom};
-
-	$thispage++;
-	$page_idx++;
-	$page_num++;
-	$s->{meta}->{page} =
-	  [ $s->{page} = $opts->{roman}
-	                 ? roman($page_num) : $page_num ];
 
 	# Determine page class and background.
 	my $class = 2;		# default
@@ -971,6 +974,8 @@ sub generate_song {
 	elsif ( $page_num == $startpage ) {
 	    $class = 1;		# first of a song
 	}
+	warn( "page: ", $page_num, " ($startpage) cls=$class\n")
+	  if $config->{debug}->{pages} & 0x01;
 
 	# If chord diagrams are to be printed in the right column, put
 	# them on the first page.
@@ -1666,7 +1671,7 @@ sub generate_song {
 	$chorddiagrams->( undef, "below");
     }
 
-    my $pages = $page_num - $startpage;
+    my $pages = $page_num - $startpage + 1;
     $newpage->(), $pages++,
       if $ps->{'pagealign-songs'} > 1 && $pages % 2
          && $opts->{songindex} < $opts->{numsongs};
