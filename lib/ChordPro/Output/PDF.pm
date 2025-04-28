@@ -108,6 +108,14 @@ sub generate_songbook {
 	warn("Warning: Specifying an even start page when pdf.odd-even-pages is in effect may yield surprising results.\n");
     }
 
+    # Align.
+    my $page_align = sub {
+	my ( $page ) = @_;
+	return 0 unless $ps->{'pagealign-songs'} && !( $page % 2 );
+	$pr->newpage( $ps, $page );
+	return 1;		# number of pages added
+    };
+
     my $first_song_aligned;
     my $songindex;
 
@@ -290,24 +298,12 @@ sub generate_songbook {
 			   roman	=> 1,
 			   page_idx	=> $page,
 			   page_num	=> $page,
-			   songindex	=> 1,
+			   songindex	=> 0,
 			   numsongs	=> 1,
 			 } );
 	$page += $pages;
-	if ( $ps->{'pagealign-songs'}
-	     && !( $page % 2 ) ) {
-	    $pr->newpage( $ps, $page );
-	    $page++;
-	    $pages++;
-	}
+	$pages_of{toc} += $pages + $page_align->($page);
 
-	$pages_of{toc} += $pages;
-
-	# Align.
-	if ( $ps->{'even-odd-pages'} && !($page % 2) ) {
-	    $pr->newpage( $ps, $page );
-	    $page++;
-	}
     }
     $start_of{songbook} += $page-1;
     $start_of{back}     += $page-1;
@@ -388,11 +384,7 @@ sub generate_songbook {
 	    $page++;
 	}
 	$pages_of{cover} = $page;
-	if ( $ps->{'pagealign-songs'}
-	     && ( $page % 2 ) ) {
-	    $page++;
-	    $pr->newpage($ps, $page);
-	}
+	$page += $page_align->($page);
 	$start_of{$_} += $page for qw( songbook front toc back );
     }
 
@@ -423,7 +415,9 @@ sub generate_songbook {
       if $pages_of{front};
     $pr->pagelabel( $start_of{toc}-1,      'roman'            )
       if $pages_of{toc};
-    $pr->pagelabel( $start_of{songbook}-1, 'arabic'           )
+    # Label song pages according to the user visible number.
+    $pr->pagelabel( $start_of{songbook}-1, 'arabic', '',           ,
+		    $options->{'start-page-number'} || 1 )
       if $pages_of{songbook};
     $pr->pagelabel( $start_of{back}-1,     'arabic', 'back-'  )
       if $pages_of{back};

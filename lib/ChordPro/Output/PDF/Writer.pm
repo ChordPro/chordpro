@@ -576,8 +576,9 @@ sub importfile {
 }
 
 sub pagelabel {
-    my ( $self, $page, $style, $prefix ) = @_;
+    my ( $self, $page, $style, $prefix, $start ) = @_;
     $style //= 'arabic';
+    $start //= 1;
 
     # PDF::API2 2.042 has some incompatible changes...
     my $c = $self->{pdf}->can("page_labels");
@@ -587,13 +588,13 @@ sub pagelabel {
                               $style eq 'Alpha' ? 'A' :
                               $style eq 'alpha' ? 'a' : 'D',
 		     defined $prefix ? ( prefix => $prefix ) : (),
-		     start => 1 };
+		     start => $start };
 	$c->( $self->{pdf}, $page+1, %$opts );
     }
     else {
 	my $opts = { -style => $style,
 		     defined $prefix ? ( -prefix => $prefix ) : (),
-		     -start => 1 };
+		     -start => $start };
 	$self->{pdf}->pageLabel( $page, $opts );
     }
 }
