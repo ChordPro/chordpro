@@ -165,7 +165,7 @@ sub generate_songbook {
 	# Easy access to toc page.
 	$song->{meta}->{page} = $page+$page_offset;
 	$pr->named_dest( $song->{meta}->{"bookmark"},
-			 $pr->{pdf}->openpage($page));
+			 $pr->{pdf}->openpage($page)) if $pages;
 	$page += $song->{meta}->{pages} = $pages;
     }
     $pages_of{songbook} = $page - 1;
@@ -256,6 +256,10 @@ sub generate_songbook {
 
 	my @songs = @{$fmsb->{songs}};
 
+	# Copy meta data.
+	@{$songs[0]->{meta}}{ keys( %{$config->{meta}} ) } =
+		  values ( %{$config->{meta}} );
+
 	# The first (of multiple) gets the global title/subtitle.
 	if ( @songs > 1 ) {
 	    for ( $songs[0] ) {
@@ -302,7 +306,7 @@ sub generate_songbook {
 			   numsongs	=> 1,
 			 } );
 	$page += $pages;
-	$pages_of{toc} += $pages + $page_align->($page);
+	$pages_of{toc} += $pages + $page_align->(1+$page);
 
     }
     $start_of{songbook} += $page-1;
@@ -318,12 +322,7 @@ sub generate_songbook {
 	    $page++;
 	}
 	$pages_of{front} = $matter->pages;
-
-	# Align to ODD page. Frontmatter starts on a right page but
-	# songs on a left page.
-	$pr->newpage( $ps, 1+$matter->pages ), $page++
-	  if $ps->{'even-odd-pages'} && !($page % 2);
-
+	$page += $page_align->($page);
 	$start_of{toc}      += $page - 1;
 	$start_of{songbook} += $page - 1;
 	$start_of{back}     += $page - 1;
@@ -347,6 +346,8 @@ sub generate_songbook {
 	$csb->parse_file( $lines, { %$opts,
 				    generate => 'PDF' } );
 	for ( $csb->{songs}->[0] ) {
+	    @{$_->{meta}}{ keys( %{$config->{meta}} ) } =
+	      values ( %{$config->{meta}} );
 	    $_->{meta}->{title} =
 	      $options->{title} ?
 	      $options->{title} : $_->{meta}->{title}->[0];
@@ -380,11 +381,11 @@ sub generate_songbook {
 	$page = 0;
 	return unless progress( msg => "Cover" );
 	for ( 1 .. $cover->pages ) {
-	    $pr->{pdf}->import_page( $cover, $_, 1+$page );
 	    $page++;
+	    $pr->{pdf}->import_page( $cover, $_, $page );
 	}
 	$pages_of{cover} = $page;
-	$page += $page_align->($page);
+	$page += $page_align->(1+$page);
 	$start_of{$_} += $page for qw( songbook front toc back );
     }
 
@@ -404,8 +405,9 @@ sub generate_songbook {
 
     if ( $::config->{debug}->{pages} & 0x01 ) {
 	for ( qw( cover front toc songbook back ) ) {
-	    warn( sprintf("%4d %-10s %4d pages\n",
-			  $start_of{$_}, $_, $pages_of{$_} ));
+	    warn( sprintf("%4d %-10s %s\n",
+			  $start_of{$_}, $_,
+			  plural( sprintf("%4d",$pages_of{$_})," page") ));
 	}
     }
 
