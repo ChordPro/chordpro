@@ -31,6 +31,9 @@
     - Are you using the preprocessor in your abc and ly environments?
       Please use the more general parser.preprocess.env-... instead.
 
+    - Config settings.maj7delta to obtain a delta symbol instead of 'maj7'
+      in chord names.
+
     - (Experimental) Use ChordPro Symbols from markup.
 
     - Songbooks now can have both a cover and front matter.
