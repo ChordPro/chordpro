@@ -55,6 +55,9 @@ tf = psMat.compose(psMat.translate(0,600),psMat.scale(1.5))
 gcopy( "uni1D10F", 0x1d10f, tf )
 gcopy( "uni1D10E", 0x1d10e, tf )
 
+src = fontforge.open("Cadman.ttf")
+gcopy( "delta", 0x25b3 )
+
 # We're missing a fullly filled circle for unfingered strings.
 # MANUALLY CHANGED /slash -> black circle.
 src = fontforge.open("ChordProSymbolsBase.ttf")

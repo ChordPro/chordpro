@@ -155,6 +155,12 @@ sub fix_musicsyms {
 		s;♭;<span font="chordprosymbols">!</span>;g;
 	    }
 	}
+	if ( /Δ/ ) {
+	    unless ( $font->{has_delta} //=
+		     $font->{fd}->{font}->glyphByUni(ord("Δ")) ne ".notdef" ) {
+		s;Δ;<span font="chordprosymbols">*</span>;g;
+	    }
+	}
     }
     return $text;
 }

@@ -865,7 +865,9 @@ sub chord_display ( $self, $default ) {
     }
 
     # Substitute musical symbols if wanted.
-    return $::config->{settings}->{truesf} ? $self->fix_musicsyms($res) : $res;
+    $res = $self->fix_musicsyms($res)
+      if $::config->{settings}->{truesf} || $::config->{settings}->{maj7delta};
+    return $res;
 }
 
 sub flat_copy ( $self, $ret, $o, $pfx = "" ) {
@@ -885,7 +887,8 @@ sub fix_musicsyms ( $self, $str ) {
 
     use ChordPro::Utils qw( splitmarkup );
 
-    return $str unless $::config->{settings}->{truesf};
+    my $sf = $::config->{settings}->{truesf};
+    my $delta = $::config->{settings}->{maj7delta};
 
     my @c = splitmarkup($str);
     my $res = '';
@@ -893,14 +896,19 @@ sub fix_musicsyms ( $self, $str ) {
     my $did = 0;		# TODO: not for roman
     while ( @c ) {
 	for ( shift(@c) ) {
-	    if ( $did ) {
-		s/b/♭/g;
+	    if ( $sf ) {
+		if ( $did ) {
+		    s/b/♭/g;
+		}
+		else {
+		    s/(?<=[[:alnum:]])b/♭/g;
+		    $did++;
+		}
+		s/#/♯/g;
 	    }
-	    else {
-		s/(?<=[[:alnum:]])b/♭/g;
-		$did++;
+	    if ( $delta ) {
+		s/maj7/Δ/g;
 	    }
-	    s/#/♯/g;
 	    $res .= $_ . shift(@c);
 	}
     }
