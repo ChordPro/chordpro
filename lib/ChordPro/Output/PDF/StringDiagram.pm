@@ -82,10 +82,6 @@ method hsp( $elt, $dummy = 0 ) {
     $self->hsp0($elt) + $self->hsp1($elt);
 }
 
-sub font_bl ($font) {
-    ChordPro::Output::PDF::font_bl($font);
-}
-
 # The actual draw method.
 method draw( $info, $x, $y, $dummy=0 ) {
     return unless $info;
@@ -106,7 +102,7 @@ method draw( $info, $x, $y, $dummy=0 ) {
     $name = "<span color='$fg'>$name</span>"
       if $info->{diagram};
     $pr->text( $name, $x + ($w - $pr->strwidth($name))/2,
-	       $y-font_bl($font));#+$font->{fd}->{ascender}/1000 );
+	       $y-$pr->font_bl($font));#+$font->{fd}->{ascender}/1000 );
 }
 
 # Returns the complete diagram as an xo. This includes the core grid,

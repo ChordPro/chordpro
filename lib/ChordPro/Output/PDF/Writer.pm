@@ -221,6 +221,17 @@ sub setfont {
     $self->{pdftext}->font( $font->{fd}->{font}, $size );
 }
 
+sub font_bl {
+    my ( $self, $font ) = @_;
+#    $font->{size} / ( 1 - $font->{fd}->{font}->descender / $font->{fd}->{font}->ascender );
+    $font->{size} * $font->{fd}->{font}->ascender / 1000;
+}
+
+sub font_ul {
+    my ( $self, $font ) = @_;
+    $font->{fd}->{font}->underlineposition / 1024 * $font->{size};
+}
+
 sub strwidth {
     my ( $self, $text, $font, $size ) = @_;
     $font ||= $self->{font};
@@ -519,7 +530,8 @@ sub add_image {
 }
 
 sub newpage {
-    my ( $self, $ps, $page ) = @_;
+    my ( $self, $page ) = @_;
+    my $ps = $self->{ps};
     #$self->{pdftext}->textend if $self->{pdftext};
     $page ||= 0;
 
@@ -546,8 +558,26 @@ sub newpage {
     }
 }
 
+# Align. Assuming the next page to be written is $page, do we need
+# to insert alignment pages?
+# If so, insert them, update the $page argument and return the
+# number of pages inserted.
+sub page_align {
+    my ( $self, $page, $alt ) = @_;
+    my $even = $alt ? ( $page & 1 ) : !( $page & 1 );
+    my $ps = $self->{ps};
+    if ( $ps->{'pagealign-songs'}
+	 and
+	 ( ( $ps->{'even-odd-pages'} < 0 ) xor $even ) ) {
+	$self->newpage($page);
+	$_[1]++;		# update $page
+	return 1;		# number of pages added
+    }
+    return 0;
+}
+
 sub openpage {
-    my ( $self, $ps, $page ) = @_;
+    my ( $self, $page ) = @_;
     $self->{pdfpage} = $self->{pdf}->openpage($page);
     confess("Fatal: Page $page not found.") unless $self->{pdfpage};
     $self->{pdfgfx}  = $self->{pdfpage}->gfx;
