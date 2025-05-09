@@ -43,11 +43,29 @@ sub new {
     *{$pdfapi . '::Resource::XObject::Form::width' } = \&_xo_width;
     *{$pdfapi . '::Resource::XObject::Form::height'} = \&_xo_height;
 
-    # Enhanced version that allows named destinations.
-    no warnings 'redefine';
-    eval "use $pdfapi" . "::Annotation";
-    *{$pdfapi . '::Annotation::pdf'     } = \&pdfapi_annotation_pdf
-      if ${$pdfapi . '::VERSION'} < 999; # no milestone yet
+    if ( $pdfapi eq 'PDF::API2' ) {
+	my $apiversion = ${$pdfapi . '::VERSION'};
+	no warnings 'redefine';
+
+	# Enhanced version that allows named destinations.
+	eval "use $pdfapi" . "::Annotation";
+	*{$pdfapi . '::Annotation::pdf'     } = \&pdfapi_annotation_pdf
+	  if $apiversion < 999; # no milestone yet
+
+	# Enhanced version that doesn't blow up.
+	eval "use $pdfapi" . "::Basic::PDF::Array";
+	*{$pdfapi . '::Basic::PDF::Array::outobjdeep' } = \&pdfapi_outobjdeep
+	  if $apiversion < 999; # no milestone yet
+    }
+    elsif ( $pdfapi eq 'PDF::Builder' ) {
+	my $apiversion = ${$pdfapi . '::VERSION'};
+	no warnings 'redefine';
+
+	# Enhanced version that allows named destinations.
+	eval "use $pdfapi" . "::Annotation";
+	*{$pdfapi . '::Annotation::pdf'     } = \&pdfapi_annotation_pdf
+	  if $apiversion < 999; # no milestone yet
+    }
 
     # Text::Layout hooks.
     *{$pdfapi . '::named_dest_register' } = \&pdfapi_named_dest_register;
@@ -1043,6 +1061,23 @@ sub pdfapi_annotation_pdf {
     }
 
     return $self;
+}
+
+# Prevent from blowing up.
+sub pdfapi_outobjdeep {
+    my ( $self, $fh, $pdf ) = @_;
+
+    $fh->print('[ ');
+    foreach my $obj (@{$self->{' val'}}) {
+	# if no graphics object (page->gfx), creates an invalid Contents object
+	# (unblessed HASH containing no keys) for this page's graphics, and
+	# this function blows up
+        if ($obj !~ /^PDF::API2/) { next; }
+
+        $obj->outobj($fh, $pdf);
+        $fh->print(' ');
+    }
+    $fh->print(']');
 }
 
 1;
