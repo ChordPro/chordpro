@@ -311,8 +311,7 @@ sub generate_song {
 	                 ? roman($page_num) : $page_num ];
 
 	# Add page to the PDF.
-	$pr->newpage( $ps,
-		      $opts->{prepend} ? $page_idx : () );
+	$pr->newpage( $opts->{prepend} ? $page_idx : () );
 	warn("page: $page_idx(",$s->{page},") added\n")
 	  if $config->{debug}->{pages} & 0x01;
 

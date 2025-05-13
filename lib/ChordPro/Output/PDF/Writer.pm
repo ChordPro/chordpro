@@ -15,7 +15,7 @@ use utf8;
 
 use ChordPro::Files;
 use ChordPro::Paths;
-use ChordPro::Utils qw( expand_tilde demarkup min is_corefont maybe is_true );
+use ChordPro::Utils qw( expand_tilde demarkup min is_corefont maybe is_true is_odd );
 use ChordPro::Output::Common qw( fmt_subst prep_outlines );
 use Ref::Util qw( is_arrayref is_hashref );
 
@@ -582,22 +582,36 @@ sub newpage {
     }
 }
 
-# Align. Assuming the next page to be written is $page, do we need
+# Align.
+# Ordinal page numbers start with 1.
+# Assuming the next page to be written is $page, do we need
 # to insert alignment pages?
 # If so, insert them, update the $page argument and return the
-# number of pages inserted.
+# number of pages inserted (zero or one).
+# Alignment is to an odd page, except for the back matter, whose
+# final page must be even.
+
 sub page_align {
-    my ( $self, $page, $alt ) = @_;
-    my $even = $alt ? ( $page & 1 ) : !( $page & 1 );
+    my ( $self, $page, $even ) = @_;
+    $even ||= 0;
+
+    # Only align to odd pages.
+    return 0 if $even xor is_odd($page);	# already odd/even
     my $ps = $self->{ps};
-    if ( $ps->{'pagealign-songs'}
-	 and
-	 ( ( $ps->{'even-odd-pages'} < 0 ) xor $even ) ) {
-	$self->newpage($page);
-	$_[1]++;		# update $page
-	return 1;		# number of pages added
+    return 0 unless $ps->{'pagealign-songs'}; # no alignment
+
+    my $bg;
+    if ( ($bg = $ps->{formats}->{filler}->{background})
+	 &&
+	 ( my $filler = $self->{pdfapi}->open( expand_tilde($bg) ) )
+       ) {
+	$self->{pdf}->import_page( $filler, 1, $page );
     }
-    return 0;
+    else {
+	$self->newpage($page);
+    }
+    $_[1]++;		# update $page
+    return 1;		# number of pages added
 }
 
 sub openpage {
@@ -1045,8 +1059,8 @@ sub pdfapi_annotation_pdf {
     $self->{'A'}->{'F'} = PDFStr($file);
 
     unless (%options) {
-	if ( $dest =~ /^#(.+)/ ) { # named dest
-	    $self->{'A'}->{'D'} = PDFStr($1);
+	if ( $dest =~ /^\/(.+)/ ) { # named dest
+	    $self->{'A'}->{'D'} = PDFName($1);
 	}
 	else {
 	    my $destination = PDFNum($dest);

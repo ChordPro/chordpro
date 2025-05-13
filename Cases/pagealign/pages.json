@@ -1,0 +1,63 @@
+# pdf.pagealign-songs: 0
+# pdf.even-odd-pages : -1
+
+pdf.spacing.toc: 10
+pdf.marginbottom: 60
+diagrams.show: false
+
+contents : [
+  {
+    name: table_of_contents
+    fields : [ songindex ]
+    label : "Table of Contents"
+    line : "%{title}"
+    pageno : "%{page}"
+    omit : false
+    template: toc1tpl.cho
+  }
+  {
+    name: contents_by_title
+    fields : [ title artist ]
+    label : "Contents by Title"
+    line : "%{title}%{artist| - %{}}"
+    pageno : "%{page}"
+    omit : false
+    template: toc2tpl.cho
+  }
+]
+
+pdf.marginleft: 100
+pdf.marginright: 40
+
+pdf.formats {
+    default {
+	subtitle: [ INNER MIDDLE OUTER]
+	footer:   [ "" "" "%{page}" ]
+    }
+    title {
+	subtitle: [ INNER MIDDLE OUTER ]
+	footer:   [ "" "" "%{page}" ]
+    }
+    first {
+	subtitle: [ INNER MIDDLE OUTER ]
+	footer:   [ "" "" "(%{page})" ]
+    }
+    // Filler pages (for alignment) are empty by default.
+    filler {
+	title:    [ "" "" "" ]
+	subtitle: [ "" "" "" ]
+	footer:   [ "" "" "(%{page})" ]
+	background: fill.pdf
+    }
+}
+
+pdf.fonts.text: "sans bold"
+pdf.fonts.footer {
+    description: "sans bold"
+    size: 100
+    color: green
+}
+
+pdf.csv.songsonly: false
+
+debug.runtimeinfo: false

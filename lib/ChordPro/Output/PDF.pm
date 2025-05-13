@@ -103,17 +103,21 @@ sub generate_songbook {
     # Logical page number offset.
     my $page_offset = ( $options->{'start-page-number'} || 1 ) - 1;
 
-    if ( $ps->{'even-odd-pages'} && !(($page+$page_offset) % 2) ) {
-	warn("Warning: Specifying an even start page when pdf.odd-even-pages is in effect may yield surprising results.\n");
+    if ( $ps->{'even-odd-pages'} && is_odd($page_offset) ) {
+	warn("Warning: Specifying an even start page when ".
+	     "pdf.odd-even-pages is in effect may yield surprising results.\n");
     }
 
-    my $force_align;
-    # If there is back matter, and it has odd pages, force
+    # If there is back matter, and it has even pages, force
     # alignment of the final song as well.
-    if ( $ps->{'pagealign-songs'} > 1
-	 and $ps->{'back-matter'}
-	 and my $matter = $pdfapi->open( expand_tilde($ps->{'back-matter'}) ) ) {
-	$force_align = ! $matter->pages & 1;
+    my $back_matter;
+    my $force_align;
+    if ( $ps->{'back-matter'} ) {
+	$back_matter = $pdfapi->open( expand_tilde($ps->{'back-matter'}) );
+	die("Missing back matter: ", $ps->{'back-matter'}, "\n")
+	  unless $back_matter;
+	$force_align = is_even($back_matter->pages)
+	  if $ps->{'pagealign-songs'} > 1;
     }
 
     for my $songindex ( 1 .. @{$sb->{songs}} ) {
@@ -290,24 +294,24 @@ sub generate_songbook {
     # Prepend the front matter songs.
     return unless progress( msg => "ToC" );
 
-    $page = 1;
-    for ( @{$frontmatter_songbook->{songs}} ) {
-	my $pages =
-	  generate_song( $_,
-			 { pr		=> $pr,
-			   prepend	=> 1,
-			   roman	=> 1,
-			   page_idx	=> $page,
-			   page_num	=> $page,
-			   songindex	=> 0,
-			   numsongs	=> 1,
-			 } );
-	$page += $pages;
-	$pages_of{toc} += $pages + $pr->page_align(1+$page);
-
+    if ( $frontmatter_songbook && @{$frontmatter_songbook->{songs}} ) {
+	$page = 1;
+	for ( @{$frontmatter_songbook->{songs}} ) {
+	    $pr->page_align($page);
+	    $page +=
+	      generate_song( $_,
+			     { pr	 => $pr,
+			       prepend	 => 1,
+			       roman	 => 1,
+			       page_idx	 => $page,
+			       page_num	 => $page,
+			       songindex => 0,
+			       numsongs	 => 1,
+			     } );
+	}
+	$pages_of{toc} = $page - 1;
+	$start_of{$_} += $page - 1 for qw( songbook back );
     }
-    $start_of{songbook} += $page-1;
-    $start_of{back}     += $page-1;
 
     if ( $ps->{'front-matter'} ) {
 	$page = 1;
@@ -319,9 +323,7 @@ sub generate_songbook {
 	    $page++;
 	}
 	$pages_of{front} = $matter->pages;
-	$start_of{toc}      += $page - 1;
-	$start_of{songbook} += $page - 1;
-	$start_of{back}     += $page - 1;
+	$start_of{$_} += $page - 1 for qw( toc songbook back );
     }
 
     # If we have a template, process it as a song and prepend.
@@ -346,34 +348,26 @@ sub generate_songbook {
 	      values ( %{$config->{meta}} );
 	    $_->{meta}->{title} =
 	      $options->{title} ?
-	      $options->{title} : $_->{meta}->{title}->[0];
+	      [ $options->{title} ] : [ $_->{meta}->{title}->[0] ];
 	    $_->{meta}->{subtitle} =
 	      $options->{subtitle} ?
-	      $options->{subtitle} : $_->{meta}->{subtitle};
+	      [ $options->{subtitle} ] : $_->{meta}->{subtitle};
 	}
-	my $adjusted;
 	for ( @{$csb->{songs}} ) {
-	    $adjusted = 0;
 	    my $p =
 	      generate_song( $_,
 			     { pr	  => $pr,
 			       prepend	  => 1,
 			       roman	  => 1,
-			       startpage  => 0,
-			       songindex  => 1,
+			       page_idx   => $page,
+			       page_num   => $page,
+			       songindex  => 0,
 			       numsongs	  => 1,
 			     } );
 	    $page += $p;
-	    if ( $ps->{'pagealign-songs'}
-		 && !( $page % 2 ) ) {
-		$pr->newpage($page);
-		$page++;
-		$p++;
-		$adjusted++;
-	    }
 	    $start_of{$_} += $p for qw( songbook front toc back );
 	}
-	$pages_of{cover} = $page - ( $adjusted ? 2 : 1 );
+	$pages_of{cover} = $page - 1;
     }
     elsif ( defined( $options->{cover} ) ) {
 	my $cover = $pdfapi->open( expand_tilde($options->{cover}) );
@@ -385,26 +379,46 @@ sub generate_songbook {
 	    $pr->{pdf}->import_page( $cover, $_, $page );
 	}
 	$pages_of{cover} = $page;
-	$page += $pr->page_align(1+$page);
 	$start_of{$_} += $page for qw( songbook front toc back );
     }
 
-    # At this point, all front matter is inserted. We may need an
-    # alignment page here.
-    
-    if ( $ps->{'back-matter'} ) {
-	my $matter = $pdfapi->open( expand_tilde($ps->{'back-matter'}) );
-	die("Missing back matter: ", $ps->{'back-matter'}, "\n") unless $matter;
+    # Back matter (if any) has already been opened.
+    if ( $back_matter ) {
 	$page = $start_of{back};
 	return unless progress( msg => "Back matter" );
-	$pr->page_align( $page, $matter->pages & 1 );
-	$pr->newpage(), $page++, $start_of{back}++
-	  if $ps->{'even-odd-pages'} && ($page % 2);
-	for ( 1 .. $matter->pages ) {
-	    $pr->{pdf}->import_page( $matter, $_, $page );
+	warn( "ASSERT: pages=", $pr->{pdf}->pages,
+	      " back=", $start_of{back}, "\n" )
+	  unless 1+$pr->{pdf}->pages == $start_of{back};
+	for ( 1 .. $back_matter->pages ) {
+	    $pr->{pdf}->import_page( $back_matter, $_, $page );
 	    $page++;
 	}
-	$pages_of{back} = $matter->pages;
+	$pages_of{back} = $back_matter->pages;
+    }
+
+    if ( 0 and $::config->{debug}->{pages} & 0x01 ) {
+	warn("-- pre alignment\n");
+	for ( qw( cover front toc songbook back ) ) {
+	    warn( sprintf("%4d %-10s %s\n",
+			  $start_of{$_}, $_,
+			  plural( sprintf("%4d",$pages_of{$_})," page") ));
+	}
+	warn("-- final\n");
+    }
+
+    # Alignment.
+    my @parts = qw( cover front toc songbook back );
+    while ( @parts ) {
+	my $part = shift(@parts);
+	next unless $pages_of{$part};
+	if ( @parts ) {
+	    if ( $pr->page_align( $start_of{$part} ) ) {
+		$start_of{$_}++ for @parts;
+	    }
+	}
+	else {
+	    $pr->page_align( $start_of{$part}, is_odd($back_matter->pages) );
+	}
     }
 
     if ( $::config->{debug}->{pages} & 0x01 ) {
