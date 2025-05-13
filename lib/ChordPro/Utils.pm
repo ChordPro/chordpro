@@ -183,6 +183,17 @@ sub parse_kvm ( @lines ) {
 
 push( @EXPORT, 'parse_kvm' );
 
+# Odd/even.
+
+sub is_odd( $arg ) {
+    ( $arg % 2 ) != 0;
+}
+sub is_even( $arg ) {
+    ( $arg % 2 ) == 0;
+}
+
+push( @EXPORT, qw( is_odd is_even ) );
+
 # Map true/false etc to true / false.
 
 sub is_true ( $arg ) {
