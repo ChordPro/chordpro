@@ -805,14 +805,11 @@ pdf {
       background : ""
     }
 
-      // Filler pages (for alignment) are empty by default.
+    // Filler pages (for alignment) are empty by default.
+    // You can only set a background.
     filler {
 
-      title : [ "" "" "" ]
-      subtitle : [ "" "" "" ]
-      footer : [ "" "" "" ]
-
-      // Background page.
+      // Background page. Ignored if not found.
       background : ""
     }
   }
@@ -926,31 +923,16 @@ pdf {
     chord : "Helvetica-Oblique 10"
 
     // Font for numbered chord dots and other symbols.
-    chordfingers {
-      file        : ChordProSymbols.ttf
-
-      // Colour specification.
-      numbercolor : background
-    }
+    chordfingers : "ChordProSymbols.ttf; numbercolor=background"
 
     // Font for typesetting comment text.
-    comment {
-      name       : Helvetica
-      size       : 12
-
-      // Colour specification.
-      background : foreground-light
-    }
+    comment : "Helvetica 12; background=foreground-light"
 
     // Font for typesetting italised comment text.
     comment_italic : "Helvetica-Oblique 12"
 
     // Font for typesetting boxed comment text.
-    comment_box {
-      name  : Helvetica
-      size  : 12
-      frame : 1
-    }
+    comment_box : "Helvetica 12; frame=1"
 
     // Font for typesetting tabs.
     tab : "Courier 10"

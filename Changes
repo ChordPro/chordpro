@@ -56,6 +56,9 @@
 
     - Allow name based array access in config augment.
 
+    - Font specifications in the config may now carry (some) properties.
+      E.g. pdf.fonts.comment_box : "Helvetica 12; frame=1".
+
     !Bug Fixes
 
     - Some issues with Unicode filenames on Windows.
