@@ -1,5 +1,11 @@
-# pdf.pagealign-songs: 0
-# pdf.even-odd-pages : -1
+// Config file for Cases/pagealign.
+//
+// Very big page numbers and illustrating backgrounds so
+// it can be view with much shrinking.
+
+// These will be overriden from the command line to produce different cases.
+# pdf.pagealign-songs: 1
+# pdf.even-odd-pages : 1
 
 pdf.spacing.toc: 10
 pdf.marginbottom: 60
@@ -7,21 +13,21 @@ diagrams.show: false
 
 contents : [
   {
-    name: table_of_contents
-    fields : [ songindex ]
-    label : "Table of Contents"
-    line : "%{title}"
-    pageno : "%{page}"
-    omit : false
+    name:     table_of_contents
+    fields:   [ songindex ]
+    label:    "Table of Contents"
+    line:     "%{title}"
+    pageno:   "%{page}"
+    omit:     false
     template: toc1tpl.cho
   }
   {
-    name: contents_by_title
-    fields : [ title artist ]
-    label : "Contents by Title"
-    line : "%{title}%{artist| - %{}}"
-    pageno : "%{page}"
-    omit : false
+    name:     contents_by_title
+    fields:   [ title artist ]
+    label:    "Contents by Title"
+    line:     "%{title}%{artist| - %{}}"
+    pageno:   "%{page}"
+    omit:     false
     template: toc2tpl.cho
   }
 ]
@@ -43,20 +49,14 @@ pdf.formats {
 	footer:   [ "" "" "(%{page})" ]
     }
     // Filler pages (for alignment) are empty by default.
+    // You can only set a background.
     filler {
-	title:    [ "" "" "" ]
-	subtitle: [ "" "" "" ]
-	footer:   [ "" "" "(%{page})" ]
 	background: fill.pdf
     }
 }
 
 pdf.fonts.text: "sans bold"
-pdf.fonts.footer {
-    description: "sans bold"
-    size: 100
-    color: green
-}
+pdf.fonts.footer: "sans bold 100; color=green"
 
 pdf.csv.songsonly: false
 
