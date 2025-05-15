@@ -1386,7 +1386,8 @@ sub songline {
 	if ( $elt->{chords} ) {
 	    $t = "";
 	    my @ph = @{ $elt->{phrases} };
-	    for my $chord ( @{ $elt->{chords} }) {
+	    for ( @{ $elt->{chords} }) {
+		my $chord = $_;	# prevent chord clobber in 2pass mode
 		if ( $chord eq '' ) {
 		}
 		else {
