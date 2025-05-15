@@ -4,6 +4,8 @@
 
     - Support for strum patterns in grids.
 
+    - Bookmarks.
+
     !Other improvements
 
     - New metadata directives: sortartist and tag.
@@ -29,7 +31,12 @@
     - Are you using the preprocessor in your abc and ly environments?
       Please use the more general parser.preprocess.env-... instead.
 
+    - Config settings.maj7delta to obtain a delta symbol instead of 'maj7'
+      in chord names.
+
     - (Experimental) Use ChordPro Symbols from markup.
+
+    - Songbooks now can have both a cover and front matter.
 
     - GUI does not longer offer saving the preview on exit. It can
       easily be regenerated and exported if needed.
@@ -46,6 +53,11 @@
 
     - In case of emergency it is now possible to obtain chord brackets
       in lyrics and annotations.
+
+    - Allow name based array access in config augment.
+
+    - Font specifications in the config may now carry (some) properties.
+      E.g. pdf.fonts.comment_box : "Helvetica 12; frame=1".
 
     !Bug Fixes
 
@@ -67,6 +79,9 @@
     - Fix crash with chords in grid margins.
     - Fix topic localization in fix_musicsyms.
     - TextBlock: Default colour to style colour.
+    - (Wx) Prevent recursion in saved preferences.
+    - Fix #555, #542, #315.
+    - Fix crash with {comment: [chord]} in 2-pass mode.
 
 6.070 2024-12-25
 

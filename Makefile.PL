@@ -13,16 +13,56 @@ $master =~ s;/Version;;;
 
 my @bins = qw( chordpro wxchordpro );
 
-my @pdfapi = ( 'PDF::API2' => 2.043 ); # default
+# Module/Version requirements.
+my $mv =
+  { 'File::LoadLines'		   => 1.047,
+    'HarfBuzz::Shaper'		   => 0.026, # Text::Layout
+    'String::Interpolate::Named'   => 1.030, # pref: 1.05
+     # 'SVGPDF'			   => 0.089,
+    'Text::Layout'		   => 0.042, # pref: 0.043
+
+    'Data::Printer'		   => 1.001001,
+    'File::Copy'		   => 2.32, # Core
+    'File::HomeDir'		   => 1.004,
+    'IPC::Run3'			   => 0.049,
+    'Image::Info'		   => 1.41,
+    'JSON::PP'			   => 2.27203,
+    'JSON::XS'			   => 4.03,
+    'JavaScript::QuickJS'	   => 0.18,
+    'LWP::Protocol::https'	   => 6.14, # File::LoadLines
+    'List::Util'		   => 1.46,
+    'Mozilla::CA'		   => 20230801, # File::LoadLines
+    'Object::Pad'		   => 0.818,
+    'Pod::Usage'		   => 2.03, # Core
+    'Ref::Util'			   => 0.204,
+    'Scalar::Util'		   => 1.63,
+    'Storable'			   => 3.08,
+  };
+
+# PDF API.
+$mv->{'PDF::API2'} = 2.045; # pref: 2.047
 if ( my $a = $ENV{CHORDPRO_PDF_API} ) {
     if ( $a =~ /PDF::Builder/ ) {
-	@pdfapi = ( 'PDF::Builder' => 3.025 );
+	$mv->{'PDF::Builder'} = 3.025;
+	delete $mv->{'PDF::API2'};
     }
     elsif ( $a =~ /PDF::API2/ ) {
     }
     else {
-	@pdfapi = ( $a => 0 );
+	$mv->{$a} = 0;
+	delete $mv->{'PDF::API2'};
     }
+}
+
+# Windows
+if ( $^O =~ /mswin/i ) {
+    $mv->{'Win32::LongPath'} = 2.0;
+}
+
+# These are only used by the LaTeX backend
+if ( 0 ) {
+    $mv->{'Template'}      = 3.010;
+    $mv->{'LaTeX::Encode'} = 0.092.0;
 }
 
 WriteMakefile
@@ -43,67 +83,13 @@ WriteMakefile
     'lib/ChordPro/A2Crd.pm'  => 'blib/man3/ChordPro::A2Crd.3pm',
     'lib/ChordPro/Wx.pm'     => 'blib/man3/ChordPro::Wx.3pm',
 		     },
- # Always require PDF::API2 or PDF::Builder and Text::Layout.
- PREREQ_PM      => {
-		    @pdfapi,
-
-		    'Text::Layout'		  => 0.038,
-		    # Optional for Text::Layout; let's have it.
-		    'HarfBuzz::Shaper'		  => 0.026,
-		    # 'SVGPDF'			  => 0.089,
-		    'JSON::PP'			  => 2.27203,
-		    'JSON::XS'			  => 4.03,
-		    'String::Interpolate::Named'  => 1.030,
-
-		    'File::LoadLines'		  => 1.047,
-		    # Optional for File::LoadLines; let's have it.
-		    'LWP::Protocol::https'	  => 6.14,
-		    'Mozilla::CA'		  => 20230801,
-
-		    'File::HomeDir'		  => 1.004,
-		    'Image::Info'		  => 1.41,
-		    'List::Util'		  => 1.46,
-		    'Data::Printer'		  => 1.001001,
-		    'Storable'			  => 3.08,
-		    'Object::Pad'                 => 0.78,
-		    'JavaScript::QuickJS'         => 0.18,
-		    'Ref::Util'			  => 0.204,
-		    'Scalar::Util'		  => 1.63,
-		    'IPC::Run3'			  => 0.049,
-		    # Core
-		    'Pod::Usage'		  => 2.03,
-		    'File::Copy'		  => 2.32,
-
-		    # Windows
-		    ( $^O =~ /mswin/i )
-		    ? ( 'Win32::LongPath' => 2.0 )
-		    : (),
-		   # These are only used by the LaTeX backend
-		   # 'Template'			  => 3.010,
-		   # 'LaTeX::Encode'		  => 0.092.0,
-		   },
-
+ PREREQ_PM        => $mv,
  CONFIGURE_REQUIRES => {
 		    'ExtUtils::MakeMaker'	  => 7.24,
 		    },
 
-# BUILD_REQUIRES => {
-# },
-
- TEST_REQUIRES  => {
-		    'Test::More'                  => 0,
-		    'JSON::PP'	                  => 2.27203,
-		    # 'SVGPDF'			  => 0.089,
-		    'String::Interpolate::Named'  => 1.01,
-		    'Storable'			  => 3.08,
-		    'Object::Pad'		  => 0.78,
-		    'Ref::Util'			  => 0.204,
-		    'Scalar::Util'		  => 1.63,
-		    @pdfapi,
-		    ( $^O =~ /mswin/i )
-		    ? ( 'Win32::LongPath' => 2.0 )
-		    : (),
-		   },
+ BUILD_REQUIRES   => $mv,
+ TEST_REQUIRES    => $mv,
 
  META_MERGE => {
      'meta-spec'  => { version => 2, },

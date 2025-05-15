@@ -26,6 +26,7 @@ use List::Util qw(any);
 use Storable qw(dclone);
 use feature 'state';
 use Text::ParseWords qw(quotewords);
+use Ref::Util qw( is_arrayref );
 
 # Parser context.
 my $def_context = "";
@@ -2033,7 +2034,11 @@ sub dir_meta {
 		return;
 	    }
 
-	    push( @{ $self->{meta}->{$key} }, $val ) if defined $val;
+	    if ( defined $val ) {
+		$self->{meta}->{$key} = [ $self->{meta}->{$key} ]
+		  if $self->{meta}->{$key} && !is_arrayref($self->{meta}->{$key});
+		push( @{ $self->{meta}->{$key} }, $val );
+	    }
 	}
     }
     else {

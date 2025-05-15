@@ -7,7 +7,7 @@ use utf8;
 use Carp;
 use feature qw( signatures );
 no warnings "experimental::signatures";
-use Ref::Util qw(is_arrayref);
+use Ref::Util qw( is_arrayref is_hashref );
 
 use Exporter 'import';
 our @EXPORT;
@@ -183,6 +183,17 @@ sub parse_kvm ( @lines ) {
 
 push( @EXPORT, 'parse_kvm' );
 
+# Odd/even.
+
+sub is_odd( $arg ) {
+    ( $arg % 2 ) != 0;
+}
+sub is_even( $arg ) {
+    ( $arg % 2 ) == 0;
+}
+
+push( @EXPORT, qw( is_odd is_even ) );
+
 # Map true/false etc to true / false.
 
 sub is_true ( $arg ) {
@@ -328,7 +339,7 @@ sub prpadd2cfg ( $cfg, @defs ) {
 	    # use DDP; p($value, as => "Value ->");
 	}
 
-	# Note that ':' is not oficailly supported by RRJson.
+	# Note that ':' is not oficially supported by RRJson.
 	my @keys = split( /[:.]/, $key );
 	my $lastkey = pop(@keys);
 
@@ -340,17 +351,41 @@ sub prpadd2cfg ( $cfg, @defs ) {
 	}
 
 	my $cur = \$cfg;		# current pointer in struct
+	my $errkey = "";		# error trail
+	if ( $keys[0] eq "chords" ) {
+	    # Chords are not in the config, but elsewhere.
+	    $cur = \ChordPro::Chords::config_chords();
+	    $errkey = "chords.";
+	    shift(@keys);
+	}
 
 	# Step through the keys.
-	my $errkey = "";		# error trail
 	foreach ( @keys ) {
-	    if ( UNIVERSAL::isa( $$cur, 'ARRAY' ) ) {
-		die("Array ", substr($errkey,0,-1),
-		    " requires integer index (got \"$_\")\n")
-		  unless /^[<>]?[-+]?\d+$/;
-		$cur = \($$cur->[$_]);
+	    if ( is_arrayref($$cur) ) {
+		my $ok;
+		if ( /^[<>]?[-+]?\d+$/ ) {
+		    $cur = \($$cur->[$_]);
+		    $ok++;
+		}
+		elsif ( ! exists( $$cur->[0]->{name} ) ) {
+		    die("Array ", substr($errkey,0,-1),
+			" requires integer index (got \"$_\")\n");
+		}
+		else {
+		    for my $i ( 0..@{$$cur} ) {
+			if ( $$cur->[$i]->{name} eq $_ ) {
+			    $cur = \($$cur->[$i]);
+			    $ok++;
+			    last;
+			}
+		    }
+		}
+		unless ( $ok ) {
+		    die("Array ", substr($errkey,0,-1),
+				" has no matching element with name \"$_\"\n");
+		}
 	    }
-	    elsif ( UNIVERSAL::isa( $$cur, 'HASH' ) ) {
+	    elsif ( is_hashref($$cur) ) {
 		$cur = \($$cur->{$_});
 	    }
 	    else {
@@ -363,7 +398,7 @@ sub prpadd2cfg ( $cfg, @defs ) {
 	}
 
 	# Final key.
-	if ( UNIVERSAL::isa( $$cur, 'ARRAY' ) ) {
+	if ( is_arrayref($$cur) ) {
 	    if ( $lastkey =~ />([-+]?\d+)?$/ ) {	# append
 		if ( defined $1 ) {
 		    splice( @{$$cur},
@@ -395,8 +430,15 @@ sub prpadd2cfg ( $cfg, @defs ) {
 		$$cur->[$lastkey] = $value;
 	    }
 	}
-	elsif ( UNIVERSAL::isa( $$cur, 'HASH' ) ) {
-	    $$cur->{$lastkey} = $value;
+	elsif ( is_hashref($$cur) ) {
+	    if ( $errkey =~ /^chords\./ ) {
+		# Chords must be defined.
+		ChordPro::Chords::add_config_chord( { name => $lastkey,
+						      %$value } );
+	    }
+	    else {
+		$$cur->{$lastkey} = $value;
+	    }
 	}
 	else {
 	    die("Key ", substr($errkey,0,-1),

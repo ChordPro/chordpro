@@ -150,6 +150,83 @@ Use a monospace font.
 * `u`  
 Underline the text.
 
+ChordPro allows extending the set of convenience tags in the config file.
+
+## Struts
+
+A _strut_ is a markup element that has a size, but no content.
+Strut markup elements may only occur as closed elements,
+i.e., `<strut/>`.
+
+Struts can have the following attributes:
+
+* `label="`_LABEL_`"`  
+An optional identifying label.
+Strut labels can be used as bookmarks, see [below]({{<
+relref "#bookmarks" >}}).
+
+* `width="`_WIDTH_`"` (short `w`)  
+The width of the strut. Default value is zero.  
+Width may be expressed in points, `em` (font size) or `ex` (half of
+font size).
+
+* `ascender="`_ASC_`"` (short: `a`)  
+The ascender of the strut. Optional.  
+May be expressed in points, `em` (font size) or `ex` (half of
+font size).
+
+* `descender="`_DESC_`"` (short: `d`)  
+The descender of the strut. Optional.  
+May be expressed in points, `em` (font size) or `ex` (half of
+font size).
+
+For example,
+
+    Hello<strut w="20"/>world
+	
+This will create 20pt space between the words.
+
+## Bookmarks
+
+Bookmarks can be used to identify a particular position in the
+document.
+
+To set a bookmark, use a strut with a label. 
+
+    <strut label="verse"/>In the [Am]merry [G]month of [Am]may ...
+
+To refer to a bookmark, use it in a `href` attribute of a `span`
+element. The bookmark must be preceded with a `#`.
+
+    <span href="#verse">Go to verse</span>
+
+You won't see the strut in your document, but when you click on the `Go
+to verse` text the viewer will switch to the page where the bookmark
+is defined. 
+
+ChordPro automatically provides bookmarks for the individual parts of
+the document:
+
+* `cover`, for the cover page;
+* `front`, for the front matter;
+* `toc`, for the (first) table of contents;
+* `top`, for the beginning of the current song;
+* `back`, for the back matter.
+
+If one or more of these are not part of the document, the
+corresponding bookmark will be omitted. If you try to use a
+non-existent bookmark the result will depend on the document viewer.
+Some will do nothing, some will jump to the start of the document.
+
+The songs will get an additional bookmarks with names `song_1`,
+`song_2` and so on. You can change the bookmark for a song with the
+`bookmark` meta data:
+
+    {meta: bookmark my_favourite_song}
+
+See also [Metadata]({{< relref
+"chordpro-configuration-generic/#metadata" >}}).
+
 ## Using markup in chords
 
 Markup in chords is supported, provided the chord name is not split by

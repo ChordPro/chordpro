@@ -15,13 +15,27 @@ no warnings 'experimental::signatures';
 sub _warn(@msg) {
     my $msg = shift(@msg);
     $msg =~ s/^[?!]//;
-    CORE::warn( $msg, @msg );
+    if ( $ENV{CHORDPRO_CARP_VERBOSE} ) {
+	$msg .= join( '', @msg );
+	$msg =~ s/\n+$//;
+	Carp::cluck( $msg );
+    }
+    else {
+	CORE::warn( $msg, @msg );
+    }
 }
 
 sub _die(@msg) {
     my $msg = shift(@msg);
     $msg =~ s/^[?!]//;		# ignore, it's fatal anyway
-    CORE::die( $msg, @msg );
+    if ( $ENV{CHORDPRO_CARP_VERBOSE} ) {
+	$msg .= join( '', @msg );
+	$msg =~ s/\n+$//;
+	Carp::croak( $msg );
+    }
+    else {
+	CORE::die( $msg, @msg );
+    }
 }
 
 BEGIN {

@@ -44,9 +44,16 @@ sudo cpanm https://github.com/chordpro/chordpro/releases/download/R6.070/Wx-3.00
 ````
 
 6. Install ChordPro:
+
 ````
-sudo cpanm https://github.com/chordpro/chordpro/releases/download/R6.070/App-Music-ChordPro-6.070.tar.gz
+sudo cpanm https://github.com/chordpro/chordpro/releases/download/R6.070/App-Music-ChordPro-6.070.7.tar.gz
 ````
+
+It the source kit cannot be found, visit the [ChordPro
+Releases](https://github.com/chordpro/chordpro/releases/R6.070/)
+page on GitHub. Scroll down to the assets and note the actual release
+number as shown with `App-Music-ChordPro-`_XXX_`.tar.gz`. Retry the
+above `sudo cpan` command using the actual kit name.
 
 To check for successful install, run `chordpro --version`. That should
 return a result similar to

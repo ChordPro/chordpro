@@ -14,6 +14,7 @@ use ChordPro::Utils qw( demarkup is_true );
 use String::Interpolate::Named;
 use utf8;
 use POSIX qw(setlocale LC_TIME strftime);
+use Ref::Util qw( is_arrayref );
 
 use Exporter 'import';
 our @EXPORT;
@@ -59,6 +60,7 @@ sub fmt_subst {
 	$v = 1  if $v=~ /^(true|on)$/i;
 	$m->{"settings.$_"} = $v;
     }
+
     interpolate( { %$s, args => $m,
 		   separator => $config->{metadata}->{separator} },
 		 $t );
@@ -178,7 +180,7 @@ sub prep_outlines {
 	    push( @split, [ $coreitem, [""] ] ), next unless $meta->{$coreitem};
 
 	    my @s = map { [ $_ ] }
-	      @{ UNIVERSAL::isa( $meta->{$coreitem}, 'ARRAY' )
+	      @{ is_arrayref( $meta->{$coreitem} )
 		? $meta->{$coreitem}
 		: [ $meta->{$coreitem} ]
 	    };

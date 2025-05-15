@@ -81,6 +81,11 @@ settings {
   // doesn't have the glyphs.
   truesf : false
 
+  // Substitute delta for maj7 in chord names.
+  // Will fallback to the ChordProSymbols font if the selected chord font
+  // doesn't have the glyphs.
+  maj7delta : false
+
   // Indent for wrapped lines. Actual indent is the stringwidth.
   wrapindent : x
 
@@ -130,7 +135,7 @@ metadata {
 // Globally defined (added) meta data,
 // This is explicitly NOT intended for the metadata items above.
 // Do NOT remove or change "_configversion"!
-meta._configversion : [ 6.074 ]
+meta._configversion : [ 6.075 ]
 
 // Assets (placeholder).
 assets {}
@@ -265,7 +270,9 @@ diagnostics.format : '"%f", line %n, %m\n\t%l'
 // An array of hashes each describing one table of contents.
 contents : [
   {
-  
+    // Identifying name.
+    name: table_of_contents
+
     // The metadata for this toc. One or two items.
     fields : [ songindex ]
   
@@ -288,6 +295,8 @@ contents : [
     template : stdtoc
   }
   {
+    // Identifying name.
+    name: contents_by_title
   
     // The metadata for this toc. One or two items.
     fields : [ title artist ]
@@ -311,6 +320,8 @@ contents : [
     template : stdtoc
   }
   {
+    // Identifying name.
+    name: contents_by_artist
   
     // The metadata for this toc. One or two items.
     fields : [ artist title ]
@@ -794,14 +805,11 @@ pdf {
       background : ""
     }
 
-      // Filler pages (for alignment) are empty by default.
+    // Filler pages (for alignment) are empty by default.
+    // You can only set a background.
     filler {
 
-      title : [ "" "" "" ]
-      subtitle : [ "" "" "" ]
-      footer : [ "" "" "" ]
-
-      // Background page.
+      // Background page. Ignored if not found.
       background : ""
     }
   }
@@ -915,31 +923,16 @@ pdf {
     chord : "Helvetica-Oblique 10"
 
     // Font for numbered chord dots and other symbols.
-    chordfingers {
-      file        : ChordProSymbols.ttf
-
-      // Colour specification.
-      numbercolor : background
-    }
+    chordfingers : "ChordProSymbols.ttf; numbercolor=background"
 
     // Font for typesetting comment text.
-    comment {
-      name       : Helvetica
-      size       : 12
-
-      // Colour specification.
-      background : foreground-light
-    }
+    comment : "Helvetica 12; background=foreground-light"
 
     // Font for typesetting italised comment text.
     comment_italic : "Helvetica-Oblique 12"
 
     // Font for typesetting boxed comment text.
-    comment_box {
-      name  : Helvetica
-      size  : 12
-      frame : 1
-    }
+    comment_box : "Helvetica 12; frame=1"
 
     // Font for typesetting tabs.
     tab : "Courier 10"
@@ -959,6 +952,8 @@ pdf {
   // for quick navigation.
   outlines : [
     {
+      // Identifying name.
+      name: by_title
     
       // Primary and (optional) secondary fields.
       fields : [ sorttitle artist ]
@@ -979,6 +974,8 @@ pdf {
       fold : false
     }
     {
+      // Identifying name.
+      name: by_artist
     
       // Primary and (optional) secondary fields.
       fields : [ artist sorttitle ]
@@ -994,6 +991,31 @@ pdf {
     
       // Make letter level if more entries than this value.
       letter : 5
+    
+      // For future use.
+      fold : false
+    }
+    {
+      // Identifying name.
+      name: bookmarks
+
+      // Primary and (optional) secondary fields.
+      fields : [ bookmark ]
+
+      // Omit by default.
+      omit: true
+
+      // Title, omitted if there's only one outline.
+      label : "Bookmarks"
+    
+      // The format for the outline entries.
+      line : "%{bookmark}"
+    
+      // Initial display is collapsed.
+      collapse : true
+    
+      // Make letter level if more entries than this value.
+      letter : 0
     
       // For future use.
       fold : false

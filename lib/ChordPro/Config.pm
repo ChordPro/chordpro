@@ -370,12 +370,28 @@ sub expand_font_shortcuts ( $cfg ) {
 	next if ref($cfg->{pdf}->{fonts}->{$f}) eq 'HASH';
 	for ( $cfg->{pdf}->{fonts}->{$f} ) {
 	    my $v = $_;
+	    $v =~ s/\s*;\s*$//;
 	    my $i = {};
+
+	    # Break out ;xx=yy properties.
+	    while ( $v =~ s/\s*;\s*(\w+)\s*=\s*(.*?)\s*(;|$)/$3/ ) {
+		my ( $k, $v ) = ( $1, $2 );
+		if ( $k =~ /^(colou?r|background|frame|numbercolou?r|size)$/ ) {
+		    $k =~ s/colour/color/;
+		    $v =~ s/^(['"]?)(.*)\1$/$2/;
+		    $i->{$k} = $v;
+		}
+		else {
+		    warn("Unknown font property: $k (ignored)\n");
+		}
+	    }
+
 	    # Break out size.
-	    if ( $v =~ /(.*?)(?:\s+(\d+(?:\.\d+)?))?$/ ) {
-		$i->{size} = $2 if $2;
+	    if ( $v =~ /(.*?)(?:\s+(\d+(?:\.\d+)?))?\s*(?:;|$)/ ) {
+		$i->{size} //= $2 if $2;
 		$v = $1;
 	    }
+
 	    # Check for filename.
 	    if ( $v =~ /^.*\.(ttf|otf)$/i ) {
 		$i->{file} = $v;

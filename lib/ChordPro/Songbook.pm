@@ -9,6 +9,7 @@ package ChordPro::Songbook;
 
 use strict;
 use warnings;
+use feature 'state';
 
 use ChordPro;
 use ChordPro::Config;
@@ -20,6 +21,9 @@ use Carp;
 use List::Util qw(any);
 use Storable qw(dclone);
 use Ref::Util qw(is_arrayref is_plain_hashref);
+use MIME::Base64;
+
+my $regtest = defined($ENV{PERL_HASH_SEED}) && $ENV{PERL_HASH_SEED} == 0;
 
 sub new {
     my ($pkg) = @_;
@@ -69,9 +73,14 @@ sub parse_file {
 
     my $linecnt = 0;
     my $songs = 0;
+
     while ( @$lines ) {
 	my $song = ChordPro::Song->new($opts)
-	  ->parse_song( $lines, \$linecnt, {%{dclone($meta)}}, {%$defs} );
+	  ->parse_song( $lines, \$linecnt,
+			{ %{dclone($meta)},
+			  "bookmark"   => sprintf( "song_%d", 1 + @{ $self->{songs} } ),
+			},
+			{ %$defs } );
 
 	$song->{meta}->{songindex} = 1 + @{ $self->{songs} };
 	push( @{ $self->{songs} }, $song );

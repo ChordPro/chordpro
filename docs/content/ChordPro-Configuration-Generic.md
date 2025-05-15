@@ -98,6 +98,11 @@ of them can be changed from the command line.
 	  // doesn't have the glyphs.
 	  truesf : false
 
+	  // Substitute delta for maj7 in chord names.
+	  // Will fallback to the ChordProSymbols font if the selected chord font
+	  // doesn't have the glyphs.
+	  maj7delta : false
+
 	  // Indent for wrapped lines. Actual indent is the stringwidth.
 	  wrapindent : x
 

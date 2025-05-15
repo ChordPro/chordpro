@@ -55,7 +55,8 @@ sub is_deeply {
 	    }
 	}
 	for ( qw( instrument user key_from key_actual chords numchords
-		  _configversion ) ) {
+		  _configversion bookmark
+	       ) ) {
 	    delete $got->{meta}->{$_} unless exists $expect->{meta}->{$_};
 	}
     }

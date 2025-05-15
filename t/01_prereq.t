@@ -6,10 +6,10 @@ use warnings;
 use Test::More;
 
 my $pdfapi = "PDF::API2";
-my $pdfapiv = "2.036";
+my $pdfapiv = "2.045";
 
 # PDF::API2 2.036 is ok, 2.042 is better, 2.043 is best.
-for ( qw( PDF::Builder@3.023 PDF::API2@2.036 ) ) {
+for ( qw( PDF::Builder@3.025 PDF::API2@2.045 ) ) {
     ( $pdfapi, $pdfapiv ) = split( '@', $_ );
     eval "require $pdfapi" or next;
     eval '$pdfapiv = $pdfapi->VERSION($pdfapiv)' or next;
@@ -33,7 +33,7 @@ else {
     ++$test; use_ok( $pdfapi,  $pdfapiv );
     diag("Using $pdfapi $pdfapiv for PDF generation");
 }
-++$test; use_ok( "Text::Layout",   0.038 );
+++$test; use_ok( "Text::Layout",   0.042 );
 eval {
     require HarfBuzz::Shaper;
     HarfBuzz::Shaper->VERSION(0.026);
@@ -49,7 +49,7 @@ eval {
 ++$test; use_ok( "Image::Info", 1.41 );
 ++$test; use_ok( "List::Util", 1.33 );
 ++$test; use_ok( "Storable", 3.08 );
-++$test; use_ok( "Object::Pad", 0.78 );
+++$test; use_ok( "Object::Pad", 0.818 );
 ++$test; use_ok( "JavaScript::QuickJS", 0.18 );
 
 done_testing($test);

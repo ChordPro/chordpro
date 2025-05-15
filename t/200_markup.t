@@ -11,7 +11,7 @@ use ChordPro::Output::PDF;
 
 plan tests => 2;
 
-*defrag = \&ChordPro::Output::PDF::defrag;
+*defrag = \&ChordPro::Output::PDF::Song::defrag;
 
 my $res;
 

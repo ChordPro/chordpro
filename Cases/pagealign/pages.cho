@@ -1,0 +1,42 @@
+{title: Song1}
+[A]Hello, [Bm]world
+{start_of_textblock anchor="page" x="50%" y="50%" textsize="100"}
+S1
+{end_of_textblock}
+{ns}
+{title: Song2}
+[A]Hello, [Bm]world
+{start_of_textblock anchor="page" x="50%" y="50%" textsize="100"}
+S2a
+{end_of_textblock}
+{np}
+[A]Hello, [Bm]world
+{start_of_textblock anchor="page" x="50%" y="50%" textsize="100"}
+S2b
+{end_of_textblock}
+{ns}
+{title: Song3}
+[A]Hello, [Bm]world
+{start_of_textblock anchor="page" x="50%" y="50%" textsize="100"}
+S3a
+{end_of_textblock}
+{np}
+[A]Hello, [Bm]world
+{start_of_textblock anchor="page" x="50%" y="50%" textsize="100"}
+S3b
+{end_of_textblock}
+{np}
+[A]Hello, [Bm]world
+{start_of_textblock anchor="page" x="50%" y="50%" textsize="100"}
+S3c
+{end_of_textblock}
+{c: <span href="#top">Beginning of this song</span>}
+{c: <span href="#toc">Goto Table of Contents</span>}
+{c: <span href="#front">Goto Front Matter</span>}
+{c: <span href="#back">Goto Back Matter</span>}
+{ns}
+{title: Song4}
+[A]Hello, [Bm]world
+{start_of_textblock anchor="page" x="50%" y="50%" textsize="100"}
+S4
+{end_of_textblock}
