@@ -1945,7 +1945,7 @@ sub tocline {
     my $vsp;
     my $lines = 0;
 
-    my $p = $elt->{pageno};
+    my $p = $elt->{pageno} // "";
     my $pw = $pr->strwidth($p);
     my $ww = $ps->{__rightmargin} - $x - $pr->strwidth("xxx$p");
     for my $text ( split( /\\n/, $tpl ) ) {
@@ -1969,9 +1969,13 @@ sub tocline {
 	    redo;
 	}
     }
-    my $ann = $pr->{pdfpage}->annotation;
-    $ann->link($elt->{page});
-    $ann->rect( $ps->{__leftmargin}, $y0-$lines*$vsp, $ps->{__rightmargin}, $y0 );
+
+    if ( $elt->{page} ) {
+	my $ann = $pr->{pdfpage}->annotation;
+	$ann->link($elt->{page});
+	$ann->rect( $ps->{__leftmargin}, $y0-$lines*$vsp, $ps->{__rightmargin}, $y0 );
+    }
+
     return $lines;
 }
 
