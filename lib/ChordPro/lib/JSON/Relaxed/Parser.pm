@@ -6,7 +6,7 @@ use utf8;
 
 package JSON::Relaxed::Parser;
 
-our $VERSION = "0.097";
+our $VERSION = "0.097_002";
 
 class JSON::Relaxed::Parser;
 
