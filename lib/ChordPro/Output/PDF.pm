@@ -55,6 +55,7 @@ sub generate_songbook {
 	}
 	$extra_matter++ if $options->{title};
     }
+    $extra_matter++ if $options->{cover} && !$options->{title};
     $extra_matter++ if $options->{'front-matter'};
     $extra_matter++ if $options->{'back-matter'};
     $extra_matter++ if $options->{csv};
@@ -125,7 +126,6 @@ sub generate_songbook {
 
 	# Align.
 	if ( $song->{meta}->{pages} ) { # 2nd pass
-	    ...;
 	    if (    ( ($page+$page_offset) % 2)
 		 && $song->{meta}->{pages}
 		 && $song->{meta}->{pages} == 2 ) {
@@ -292,9 +292,9 @@ sub generate_songbook {
     }
 
     # Prepend the front matter songs.
-    return unless progress( msg => "ToC" );
 
     if ( $frontmatter_songbook && @{$frontmatter_songbook->{songs}} ) {
+	return unless progress( msg => "ToC" );
 	$page = 1;
 	for ( @{$frontmatter_songbook->{songs}} ) {
 	    $pr->page_align($page);
