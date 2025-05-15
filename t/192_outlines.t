@@ -10,9 +10,8 @@ use ChordPro::Output::Common;
 
 plan tests => 4;
 
-# For transcoding, both source and target notation systems must be
-# defined. The source system must be last, so it is current and used
-# to parse the the input data.
+# Same as 191 but using artist instead of sortartist.
+# Should not make a difference.
 
 ok( $config, "got config" );
 
@@ -60,7 +59,7 @@ my $res = ChordPro::Output::Common::prep_outlines( $book, $ctl );
 
 my $xp = [
   [
-    '24 fietsen',
+    'fietsenhok, het',
     'december',
     {
       meta => {
@@ -73,26 +72,26 @@ my $xp = [
           0,
         ],
         key => [
-          'D',
+          'C',
         ],
         key_actual => [
-          'D',
+          'C',
         ],
-        songindex => 2,
+        songindex => 3,
         sortartist => [
           'December',
         ],
         sorttitle => [
-          'Vierentwintig Fietsen',
+          'Fietsenhok, Het',
         ],
         title => [
-          '24 Fietsen',
+          'Het Fietsenhok',
         ],
       },
     },
   ],
   [
-    '24 fietsen',
+    'fietsenhok, het',
     'september',
     {
       meta => {
@@ -105,26 +104,26 @@ my $xp = [
           0,
         ],
         key => [
-          'D',
+          'C',
         ],
         key_actual => [
-          'D',
+          'C',
         ],
-        songindex => 2,
+        songindex => 3,
         sortartist => [
           'September',
         ],
         sorttitle => [
-          'Vierentwintig Fietsen',
+          'Fietsenhok, Het',
         ],
         title => [
-          '24 Fietsen',
+          'Het Fietsenhok',
         ],
       },
     },
   ],
   [
-    'de fietsenstalling',
+    'fietsenstalling, de',
     'december',
     {
       meta => {
@@ -156,7 +155,7 @@ my $xp = [
     },
   ],
   [
-    'de fietsenstalling',
+    'fietsenstalling, de',
     'september',
     {
       meta => {
@@ -188,7 +187,7 @@ my $xp = [
     },
   ],
   [
-    'de fietspomp',
+    'fietspomp, de',
     'september',
     {
       meta => {
@@ -221,7 +220,7 @@ my $xp = [
     },
   ],
   [
-    'het fietsenhok',
+    'vierentwintig fietsen',
     'december',
     {
       meta => {
@@ -234,26 +233,26 @@ my $xp = [
           0,
         ],
         key => [
-          'C',
+          'D',
         ],
         key_actual => [
-          'C',
+          'D',
         ],
-        songindex => 3,
+        songindex => 2,
         sortartist => [
           'December',
         ],
         sorttitle => [
-          'Fietsenhok, Het',
+          'Vierentwintig Fietsen',
         ],
         title => [
-          'Het Fietsenhok',
+          '24 Fietsen',
         ],
       },
     },
   ],
   [
-    'het fietsenhok',
+    'vierentwintig fietsen',
     'september',
     {
       meta => {
@@ -266,20 +265,20 @@ my $xp = [
           0,
         ],
         key => [
-          'C',
+          'D',
         ],
         key_actual => [
-          'C',
+          'D',
         ],
-        songindex => 3,
+        songindex => 2,
         sortartist => [
           'September',
         ],
         sorttitle => [
-          'Fietsenhok, Het',
+          'Vierentwintig Fietsen',
         ],
         title => [
-          'Het Fietsenhok',
+          '24 Fietsen',
         ],
       },
     },
