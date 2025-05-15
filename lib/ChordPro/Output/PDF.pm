@@ -276,6 +276,34 @@ sub generate_songbook {
 
 	# The last song gets the ToC appended.
 	$song = pop(@songs);
+
+	if ( $ctl->{break} ) {
+	    my $prevbreak = "";
+	    $song->{body} //= [];
+	    for ( @$book ) {
+		my $break = fmt_subst( $_->[-1], $ctl->{break} );
+		if ( $break ne $prevbreak ) {
+		    push( @{ $song->{body} },
+			  { type => "empty",
+			    context => "toc",
+			  },
+			  { type => "tocline",
+			    context => "toc",
+			    title => $break,
+			  } );
+		    $prevbreak = $break;
+		}
+		my $p = $pr->{pdf}->openpage($_->[-1]->{meta}->{tocpage});
+		push( @{ $song->{body} },
+		      { type    => "tocline",
+			context => "toc",
+			title   => fmt_subst( $_->[-1], $tltpl ),
+			page    => $p,
+			pageno  => fmt_subst( $_->[-1], $pgtpl ),
+		      } );
+	    }
+	}
+	else {
 	push( @{ $song->{body} //= [] },
 	      map { my $p = $pr->{pdf}->openpage($_->[-1]->{meta}->{tocpage});
 		    +{ type    => "tocline",
@@ -284,7 +312,7 @@ sub generate_songbook {
 		       page    => $p,
 		       pageno  => fmt_subst( $_->[-1], $pgtpl ),
 		     } } @$book );
-
+        }
 
 	$frontmatter_songbook //= ChordPro::Songbook->new;
 	$frontmatter_songbook->add($_) for @songs;

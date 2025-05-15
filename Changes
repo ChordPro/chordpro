@@ -6,6 +6,8 @@
 
     - Bookmarks.
 
+    - Break items in Table of Content lines.
+
     !Other improvements
 
     - New metadata directives: sortartist and tag.

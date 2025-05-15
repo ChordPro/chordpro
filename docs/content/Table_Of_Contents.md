@@ -75,6 +75,16 @@ Likewise, a value for `sortartist`, if set, will be used instead of `artist`.
 
 The title for this ToC.
 
+### `break`
+
+A string that is used to group entries.  
+This string may contain
+[metadata substitutions]({{< relref
+"ChordPro-configuration-format-strings" >}}).
+
+If the break value for a content line changes, an empty line is
+generated, followed by a line containing the break value.
+
 ### `line`
 
 The format for the left part of the content lines.  

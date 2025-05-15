@@ -328,9 +328,12 @@ contents : [
   
     // The label (title) for this toc.
     label : "Contents by Artist"
-  
+
+    // Break on artist name.
+    break : "%{sortartist|%{}|%{artist}}"
+
     // The format for the toc lines.
-    line : "%{artist|%{} - }%{title}"
+    line : "    %{title}"
   
     // The format for the page numbers in the toc.
     pageno : "%{page}"

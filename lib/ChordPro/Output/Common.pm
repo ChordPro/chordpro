@@ -292,7 +292,9 @@ sub prep_outlines {
     @book =
       sort $srt
       map { my $t = $_;
-	    [ ( map { demarkup(lc($t->{meta}->{$_}->[0] // "")) }
+	    [ ( map { demarkup(lc(   $t->{meta}->{"sort$_"}->[0]
+				  // $t->{meta}->{$_}->[0]
+				  // "")) }
 		    @fields ),
 	      $_ ] }
 	  @book;
