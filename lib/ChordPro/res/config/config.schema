@@ -205,6 +205,12 @@
           "default" : false
         },
 
+        "maj7delta" : {
+          "description" : "Substitute delta for maj7 in chord names.\nWill fallback to the ChordProSymbols font if the selected chord font\ndoesn't have the glyphs.",
+          "type" : "boolean",
+          "default" : false
+        },
+
         "memorize" : {
           "description" : "Memorize the chords from sections.",
           "type" : "boolean",
@@ -512,6 +518,11 @@
       "items" : {
         "additionalProperties" : false,
         "properties" : {
+          "break" : {
+            "description" : "A break value to group toc entries with.",
+            "type" : "string",
+            "default" : ""
+          },
           "fields" : {
             "description" : "The metadata for this toc. One or two items.",
             "type" : "array",
@@ -1302,7 +1313,7 @@
 		  ]
 		},
 		"chordfingers" : {
-		  "description" : "Font for numbered chord dots.",
+		  "description" : "Font for numbered chord dots and other symbols.",
 		  "allOf" : [
 		    { "$ref" : "#/definitions/fontspec" },
 		    { "properties" : {
