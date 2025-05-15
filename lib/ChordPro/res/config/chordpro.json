@@ -265,8 +265,7 @@ diagrams {
 }
 
 // Format for error messages.
-diagnostics.format : '"%f", line %n, %m\n' \
-                     '\t%l'
+diagnostics.format : '"%f", line %n, %m\n\t%l'
 
 // Tables of contents.
 // An array of hashes each describing one table of contents.
