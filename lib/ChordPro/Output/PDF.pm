@@ -152,7 +152,7 @@ sub generate_songbook {
 	return unless progress( msg => $song->{meta}->{title}->[0] );
 
 	$song->{meta}->{"chordpro.songsource"} //= $song->{source}->{file};
-	$pr->{'bookmark'} = "song_$songindex";
+	$pr->{bookmark} = "song_$songindex";
 	my $pages =
 	  generate_song( $song,
 			 { pr	      => $pr,
@@ -165,7 +165,7 @@ sub generate_songbook {
 
 	# Easy access to toc page.
 	$song->{meta}->{page} = $page+$page_offset;
-	$pr->named_dest( $song->{meta}->{"bookmark"},
+	$pr->named_dest( $song->{meta}->{bookmark},
 			 $pr->{pdf}->openpage($page)) if $pages;
 	$page += $song->{meta}->{pages} = $pages;
     }
@@ -229,37 +229,29 @@ sub generate_songbook {
 
 	# Construct front matter songbook.
 	my $fmsb;
+	my $lines;
+	my $opts;
 	if ( $tmplfile ) {
 	    # Songbook from template file.
-	    my $opts = { fail => 'hard' };
-	    my $lines = fs_load( $tmplfile, $opts );
-	    $fmsb = ChordPro::Songbook->new;
-	    $fmsb->parse_file( $lines, { %$opts,
-					 generate => 'PDF' } );
-	    for ( $fmsb->{songs}->[-1] ) {
-		$_->{title} = $_->{title}
-		  ? fmt_subst( $book[0][-1], $_->{title} )
-		  : $toctitle;
-		$_->{meta}->{title} //= [ $_->{title} ];
-#	    my $st = fmt_subst( $book[0][-1], $song->{meta}->{subtitle}->[0] )
-#	      if $song->{meta}->{subtitle} && $song->{meta}->{subtitle}->[0];
-	    }
+	    $opts = { fail => 'hard' };
+	    $lines = fs_load( $tmplfile, $opts );
 	}
 	else {
-	    # Create single-song songbook.
-	    $fmsb = ChordPro::Songbook->new;
-	    my $song = ChordPro::Song->new( { generate => 'PDF' } );
-	    $song = { meta => {} };
-	    $song->{title} //= $toctitle;
-	    $song->{meta}->{title} //= [ $toctitle ];
-	    $fmsb->add($song);
+	    $lines = [ "{title: $toctitle}" ];
+	    $opts = { _filesource => "<builtin>" };
+	}
+	$fmsb = ChordPro::Songbook->new;
+	$fmsb->parse_file( $lines, { %$opts,
+				     bookmark => "toc_$tocix",
+				     generate => 'PDF' } );
+	for ( $fmsb->{songs}->[-1] ) {
+	    $_->{title} = $_->{title}
+	      ? fmt_subst( $book[0][-1], $_->{title} )
+	      : $toctitle;
+	    $_->{meta}->{title} //= [ $_->{title} ];
 	}
 
 	my @songs = @{$fmsb->{songs}};
-
-	# Copy meta data.
-	@{$songs[0]->{meta}}{ keys( %{$config->{meta}} ) } =
-		  values ( %{$config->{meta}} );
 
 	# The first (of multiple) gets the global title/subtitle.
 	if ( @songs > 1 ) {
@@ -324,18 +316,25 @@ sub generate_songbook {
     if ( $frontmatter_songbook && @{$frontmatter_songbook->{songs}} ) {
 	return unless progress( msg => "ToC" );
 	$page = 1;
+	my $toc = 0;
 	for ( @{$frontmatter_songbook->{songs}} ) {
+	    $toc++;
+	    $pr->{bookmark} = "toc_$toc";
 	    $pr->page_align($page);
-	    $page +=
+	    my $pages =
 	      generate_song( $_,
 			     { pr	 => $pr,
 			       prepend	 => 1,
 			       roman	 => 1,
 			       page_idx	 => $page,
 			       page_num	 => $page,
-			       songindex => 0,
-			       numsongs	 => 1,
+			       songindex => $toc,
+			       numsongs	 => 0+@{$frontmatter_songbook->{songs}},
+			       bookmark  => $pr->{bookmark},
 			     } );
+	    $pr->named_dest( $_->{meta}->{bookmark},
+			     $pr->{pdf}->openpage($page)) if $pages;
+	    $page += $pages;
 	}
 	$pages_of{toc} = $page - 1;
 	$start_of{$_} += $page - 1 for qw( songbook back );
