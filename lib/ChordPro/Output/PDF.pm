@@ -934,7 +934,7 @@ method parse( $ctx, $k, $v ) {
 	}
     }
     elsif ( $ctl{id} ) {
-	my $a = ChordPro::Output::PDF::assets($ctl{id});
+	my $a = ChordPro::Output::PDF::Song::assets($ctl{id});
 	if ( $a && $a->{opts}->{base} ) {
 	    $ctl{base} = $a->{opts}->{base};
 	}
@@ -947,7 +947,7 @@ method getimage ($fragment) {
     $fragment->{_img} //= do {
 	my $xo;
 	if ( $fragment->{id} ) {
-	    my $o = ChordPro::Output::PDF::assets($fragment->{id});
+	    my $o = ChordPro::Output::PDF::Song::assets($fragment->{id});
 	    $xo = $o->{data} if $o;
 	    unless ( $o && $xo ) {
 		warn("Unknown image ID in <img>: $fragment->{id}\n")
