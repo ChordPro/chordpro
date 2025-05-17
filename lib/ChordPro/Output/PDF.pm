@@ -313,6 +313,7 @@ sub generate_songbook {
 
     # Prepend the front matter songs.
 
+    $force_align = $ps->{'pagealign-songs'} > 1;
     if ( $frontmatter_songbook && @{$frontmatter_songbook->{songs}} ) {
 	return unless progress( msg => "ToC" );
 	$page = 1;
@@ -323,14 +324,15 @@ sub generate_songbook {
 	    $pr->page_align($page);
 	    my $pages =
 	      generate_song( $_,
-			     { pr	 => $pr,
-			       prepend	 => 1,
-			       roman	 => 1,
-			       page_idx	 => $page,
-			       page_num	 => $page,
-			       songindex => $toc,
-			       numsongs	 => 0+@{$frontmatter_songbook->{songs}},
-			       bookmark  => $pr->{bookmark},
+			     { pr	  => $pr,
+			       prepend	  => 1,
+			       roman	  => 1,
+			       page_idx	  => $page,
+			       page_num	  => $page,
+			       songindex  => $toc,
+			       numsongs	  => 0+@{$frontmatter_songbook->{songs}},
+			       bookmark   => $pr->{bookmark},
+			       forcealign => $force_align,
 			     } );
 	    $pr->named_dest( $_->{meta}->{bookmark},
 			     $pr->{pdf}->openpage($page)) if $pages;
