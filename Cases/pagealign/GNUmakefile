@@ -91,5 +91,4 @@ pe2.pdf : ${PDEPS}
 test :
 	rm -f p{e,o,n}{0,1,2}.{pdf,csv}
 	perl makepages.pl
-	${MAKE} p{e,o,n}{0,1,2}.pdf
-
+	${MAKE} $(shell echo p{e,o,n}{0,1,2}.pdf)

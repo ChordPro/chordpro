@@ -82,8 +82,13 @@ This string may contain
 [metadata substitutions]({{< relref
 "ChordPro-configuration-format-strings" >}}).
 
-If the break value for a content line changes, an empty line is
-generated, followed by a line containing the break value.
+If the break value for a content line changes, the break value is
+printed before the content line.
+
+The break value may contain `\n` sequences to obtain empty lines, e.g.
+
+     break : "\\nSongs by %{artist}"
+
 
 ### `line`
 

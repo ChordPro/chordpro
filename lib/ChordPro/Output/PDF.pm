@@ -274,25 +274,25 @@ sub generate_songbook {
 	    $song->{body} //= [];
 	    for ( @$book ) {
 		my $break = fmt_subst( $_->[-1], $ctl->{break} );
-		if ( $break ne $prevbreak ) {
+		my $nl = 0;
+		$nl++ while $break =~ s/^(\n|\\n)//;
+
+		my $p = $pr->{pdf}->openpage($_->[-1]->{meta}->{tocpage});
+		if ( $nl && $break ne $prevbreak ) {
 		    push( @{ $song->{body} },
 			  { type => "empty",
 			    context => "toc",
-			  },
-			  { type => "tocline",
-			    context => "toc",
-			    title => $break,
-			  } );
-		    $prevbreak = $break;
+			  } ) for 1..$nl;
 		}
-		my $p = $pr->{pdf}->openpage($_->[-1]->{meta}->{tocpage});
 		push( @{ $song->{body} },
 		      { type    => "tocline",
 			context => "toc",
 			title   => fmt_subst( $_->[-1], $tltpl ),
 			page    => $p,
 			pageno  => fmt_subst( $_->[-1], $pgtpl ),
+			maybe break => ($break ne $prevbreak ? $break : undef),
 		      } );
+		$prevbreak = $break;
 	    }
 	}
 	else {
