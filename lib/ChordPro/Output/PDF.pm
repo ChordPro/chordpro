@@ -104,10 +104,10 @@ sub generate_songbook {
     # Logical page number offset.
     my $page_offset = ( $options->{'start-page-number'} || 1 ) - 1;
 
-    if ( $ps->{'even-odd-pages'} && is_odd($page_offset) ) {
-	warn("Warning: Specifying an even start page when ".
-	     "pdf.odd-even-pages is in effect may yield surprising results.\n");
-    }
+#    if ( $ps->{'even-odd-pages'} && is_odd($page_offset) ) {
+#	warn("Warning: Specifying an even start page when ".
+#	     "pdf.odd-even-pages is in effect may yield surprising results.\n");
+#    }
 
     # If there is back matter, and it has even pages, force
     # alignment of the final song as well.
@@ -117,12 +117,16 @@ sub generate_songbook {
 	$back_matter = $pdfapi->open( expand_tilde($ps->{'back-matter'}) );
 	die("Missing back matter: ", $ps->{'back-matter'}, "\n")
 	  unless $back_matter;
-	$force_align = is_even($back_matter->pages)
+	$force_align =
+	  !( is_even($page_offset) xor is_even($back_matter->pages))
 	  if $ps->{'pagealign-songs'} > 1;
     }
 
     for my $songindex ( 1 .. @{$sb->{songs}} ) {
 	my $song = $sb->{songs}->[$songindex-1];
+	local $ps->{'even-odd-pages'} = $ps->{'even-odd-pages'};
+	$ps->{'even-odd-pages'} = -($ps->{'even-odd-pages'})
+	  if is_odd($page_offset);
 
 	# Align.
 	if ( $song->{meta}->{pages} ) { # 2nd pass
@@ -135,7 +139,7 @@ sub generate_songbook {
 
 	}
 	else {
-	    $pr->page_align( $page, is_odd($page_offset) ); # updates $page
+	    $pr->page_align($page); # updates $page
 	}
 
 	$song->{meta}->{tocpage} = $page; # physical
@@ -317,18 +321,19 @@ sub generate_songbook {
     if ( $frontmatter_songbook && @{$frontmatter_songbook->{songs}} ) {
 	return unless progress( msg => "ToC" );
 	$page = 1;
+
 	my $toc = 0;
 	for ( @{$frontmatter_songbook->{songs}} ) {
 	    $toc++;
 	    $pr->{bookmark} = "toc_$toc";
-	    $pr->page_align( $page, is_odd($page_offset) );
+	    $pr->page_align($page);
 	    my $pages =
 	      generate_song( $_,
 			     { pr	  => $pr,
 			       prepend	  => 1,
 			       roman	  => 1,
 			       page_idx	  => $page,
-			       page_num	  => $page-$page_offset,
+			       page_num	  => $page,
 			       songindex  => $toc,
 			       numsongs	  => 0+@{$frontmatter_songbook->{songs}},
 			       bookmark   => $pr->{bookmark},
@@ -436,12 +441,13 @@ sub generate_songbook {
     }
 
     # Alignment.
-    my @parts = qw( cover front toc songbook back );
+    my @parts = qw( front toc songbook back );
     while ( @parts ) {
 	my $part = shift(@parts);
 	next unless $pages_of{$part};
 	if ( @parts ) {
-	    if ( $pr->page_align( $start_of{$part}, is_odd($page_offset) ) ) {
+	    if ( $pr->page_align( $start_of{$part},
+				  $part eq "songbook" ? is_odd($page_offset) : 0 ) ) {
 		$start_of{$_}++ for @parts;
 	    }
 	}
