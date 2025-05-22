@@ -595,6 +595,11 @@ sub newpage {
 # final page must be even.
 
 sub page_align {
+    my $ret = _page_align(@_);
+    warn("ALIGN($_[1]", defined($_[2])?",$_[2]":"", ") -> $ret\n");
+    return $ret;
+}
+sub _page_align {
     my ( $self, $page, $even ) = @_;
     $even ||= 0;
 

@@ -3,7 +3,7 @@
 // Very big page numbers and illustrating backgrounds so
 // it can be view with much shrinking.
 
-// These will be overriden from the command line to produce different cases.
+// These will be overridden from the command line to produce different cases.
 # pdf.pagealign-songs: 1
 # pdf.even-odd-pages : 1
 

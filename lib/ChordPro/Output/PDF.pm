@@ -135,7 +135,7 @@ sub generate_songbook {
 
 	}
 	else {
-	    $pr->page_align($page); # updates $page
+	    $pr->page_align( $page, is_odd($page_offset) ); # updates $page
 	}
 
 	$song->{meta}->{tocpage} = $page; # physical
@@ -321,14 +321,14 @@ sub generate_songbook {
 	for ( @{$frontmatter_songbook->{songs}} ) {
 	    $toc++;
 	    $pr->{bookmark} = "toc_$toc";
-	    $pr->page_align($page);
+	    $pr->page_align( $page, is_odd($page_offset) );
 	    my $pages =
 	      generate_song( $_,
 			     { pr	  => $pr,
 			       prepend	  => 1,
 			       roman	  => 1,
 			       page_idx	  => $page,
-			       page_num	  => $page,
+			       page_num	  => $page-$page_offset,
 			       songindex  => $toc,
 			       numsongs	  => 0+@{$frontmatter_songbook->{songs}},
 			       bookmark   => $pr->{bookmark},
@@ -441,7 +441,7 @@ sub generate_songbook {
 	my $part = shift(@parts);
 	next unless $pages_of{$part};
 	if ( @parts ) {
-	    if ( $pr->page_align( $start_of{$part} ) ) {
+	    if ( $pr->page_align( $start_of{$part}, is_odd($page_offset) ) ) {
 		$start_of{$_}++ for @parts;
 	    }
 	}
