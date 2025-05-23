@@ -78,7 +78,7 @@ sub parse_file {
 	my $song = ChordPro::Song->new($opts)
 	  ->parse_song( $lines, \$linecnt,
 			{ %{dclone($meta)},
-			  "bookmark"   => sprintf( "song_%d", 1 + @{ $self->{songs} } ),
+			  "bookmark"   => $opts->{bookmark} //= sprintf( "song_%d", 1 + @{ $self->{songs} } ),
 			},
 			{ %$defs } );
 

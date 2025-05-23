@@ -6,6 +6,8 @@
 
     - Bookmarks.
 
+    - Break items in Table of Content lines.
+
     !Other improvements
 
     - New metadata directives: sortartist and tag.
@@ -80,7 +82,7 @@
     - Fix topic localization in fix_musicsyms.
     - TextBlock: Default colour to style colour.
     - (Wx) Prevent recursion in saved preferences.
-    - Fix #555, #542, #315.
+    - Fix #555, #550, #542, #315.
     - Fix crash with {comment: [chord]} in 2-pass mode.
 
 6.070 2024-12-25

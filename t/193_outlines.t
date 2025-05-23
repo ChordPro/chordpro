@@ -10,10 +10,6 @@ use ChordPro::Output::Common;
 
 plan tests => 3;
 
-# For transcoding, both source and target notation systems must be
-# defined. The source system must be last, so it is current and used
-# to parse the the input data.
-
 my $s = ChordPro::Songbook->new;
 
 my $data = <<EOD;

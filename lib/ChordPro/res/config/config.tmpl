@@ -77,6 +77,11 @@ settings.strict : true
 // does not have the glyphs.
 # settings.truesf : false
 
+// Substitute delta for maj7 in chord names.
+// Will fallback to the ChordProSymbols font if the selected chord font
+// doesn't have the glyphs.
+# maj7delta : false
+
 // Indent for wrapped lines. Actual indent is the stringwidth.
 # settings.wrapindent : x
 
@@ -502,15 +507,6 @@ settings.strict : true
 
 // Filler pages (for alignment) are empty by default.
 
-// Three-part title format specification, left, center, right.
-# pdf.formats.filler.title : [ "" "" "" ]
-
-// Three-part title format specification, left, center, right.
-# pdf.formats.filler.subtitle : [ "" "" "" ]
-
-// Three-part title format specification, left, center, right.
-# pdf.formats.filler.footer : [ "" "" "" ]
-
 // Background page.
 # pdf.formats.filler.background : ""
 
@@ -579,6 +575,16 @@ settings.strict : true
 # pdf.fontconfig.monospace.italic     : Courier-Oblique
 # pdf.fontconfig.monospace.bolditalic : Courier-BoldOblique
 
+# pdf.fontconfig.muse.           : MuseJazzText.otf
+# pdf.fontconfig.muse.bold       : MuseJazzText.otf
+# pdf.fontconfig.muse.italic     : MuseJazzText.otf
+# pdf.fontconfig.muse.bolditalic : MuseJazzText.otf
+
+# pdf.fontconfig.musejazztext.           : MuseJazzText.otf
+# pdf.fontconfig.musejazztext.bold       : MuseJazzText.otf
+# pdf.fontconfig.musejazztext.italic     : MuseJazzText.otf
+# pdf.fontconfig.musejazztext.bolditalic : MuseJazzText.otf
+
 // "fonts" maps output elements to fonts as defined in "fontconfig".
 // The elements can have a background colour associated.
 // Colours are "#RRGGBB" or predefined names like "black", "white",
@@ -615,17 +621,13 @@ settings.strict : true
 # pdf.fonts.chordfingers.numbercolor : background
 
 // Font for typesetting comment text.
-# pdf.fonts.comment.name       : Sans
-# pdf.fonts.comment.size       : 12
-# pdf.fonts.comment.background : foreground-light
+# pdf.fonts.comment : "sans 12; background=foreground-light"
 
 // Font for typesetting italised comment text.
 # pdf.fonts.comment_italic : "Helvetica-Oblique 12"
 
 // Font for typesetting boxed comment text.
-# pdf.fonts.comment_box.name  : Sans
-# pdf.fonts.comment_box.size  : 12
-# pdf.fonts.comment_box.frame : 1
+# pdf.fonts.comment_box : "sans 12; frame=1"
 
 // Font for typesetting tabs.
 # pdf.fonts.tab : "mono 10"

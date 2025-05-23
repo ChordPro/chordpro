@@ -104,10 +104,10 @@ sub generate_songbook {
     # Logical page number offset.
     my $page_offset = ( $options->{'start-page-number'} || 1 ) - 1;
 
-    if ( $ps->{'even-odd-pages'} && is_odd($page_offset) ) {
-	warn("Warning: Specifying an even start page when ".
-	     "pdf.odd-even-pages is in effect may yield surprising results.\n");
-    }
+#    if ( $ps->{'even-odd-pages'} && is_odd($page_offset) ) {
+#	warn("Warning: Specifying an even start page when ".
+#	     "pdf.odd-even-pages is in effect may yield surprising results.\n");
+#    }
 
     # If there is back matter, and it has even pages, force
     # alignment of the final song as well.
@@ -117,12 +117,16 @@ sub generate_songbook {
 	$back_matter = $pdfapi->open( expand_tilde($ps->{'back-matter'}) );
 	die("Missing back matter: ", $ps->{'back-matter'}, "\n")
 	  unless $back_matter;
-	$force_align = is_even($back_matter->pages)
+	$force_align =
+	  !( is_even($page_offset) xor is_even($back_matter->pages))
 	  if $ps->{'pagealign-songs'} > 1;
     }
 
     for my $songindex ( 1 .. @{$sb->{songs}} ) {
 	my $song = $sb->{songs}->[$songindex-1];
+	local $ps->{'even-odd-pages'} = $ps->{'even-odd-pages'};
+	$ps->{'even-odd-pages'} = -($ps->{'even-odd-pages'})
+	  if is_odd($page_offset);
 
 	# Align.
 	if ( $song->{meta}->{pages} ) { # 2nd pass
@@ -152,7 +156,7 @@ sub generate_songbook {
 	return unless progress( msg => $song->{meta}->{title}->[0] );
 
 	$song->{meta}->{"chordpro.songsource"} //= $song->{source}->{file};
-	$pr->{'bookmark'} = "song_$songindex";
+	$pr->{bookmark} = "song_$songindex";
 	my $pages =
 	  generate_song( $song,
 			 { pr	      => $pr,
@@ -165,7 +169,7 @@ sub generate_songbook {
 
 	# Easy access to toc page.
 	$song->{meta}->{page} = $page+$page_offset;
-	$pr->named_dest( $song->{meta}->{"bookmark"},
+	$pr->named_dest( $song->{meta}->{bookmark},
 			 $pr->{pdf}->openpage($page)) if $pages;
 	$page += $song->{meta}->{pages} = $pages;
     }
@@ -229,37 +233,29 @@ sub generate_songbook {
 
 	# Construct front matter songbook.
 	my $fmsb;
+	my $lines;
+	my $opts;
 	if ( $tmplfile ) {
 	    # Songbook from template file.
-	    my $opts = { fail => 'hard' };
-	    my $lines = fs_load( $tmplfile, $opts );
-	    $fmsb = ChordPro::Songbook->new;
-	    $fmsb->parse_file( $lines, { %$opts,
-					 generate => 'PDF' } );
-	    for ( $fmsb->{songs}->[-1] ) {
-		$_->{title} = $_->{title}
-		  ? fmt_subst( $book[0][-1], $_->{title} )
-		  : $toctitle;
-		$_->{meta}->{title} //= [ $_->{title} ];
-#	    my $st = fmt_subst( $book[0][-1], $song->{meta}->{subtitle}->[0] )
-#	      if $song->{meta}->{subtitle} && $song->{meta}->{subtitle}->[0];
-	    }
+	    $opts = { fail => 'hard' };
+	    $lines = fs_load( $tmplfile, $opts );
 	}
 	else {
-	    # Create single-song songbook.
-	    $fmsb = ChordPro::Songbook->new;
-	    my $song = ChordPro::Song->new( { generate => 'PDF' } );
-	    $song = { meta => {} };
-	    $song->{title} //= $toctitle;
-	    $song->{meta}->{title} //= [ $toctitle ];
-	    $fmsb->add($song);
+	    $lines = [ "{title: $toctitle}" ];
+	    $opts = { _filesource => "<builtin>" };
+	}
+	$fmsb = ChordPro::Songbook->new;
+	$fmsb->parse_file( $lines, { %$opts,
+				     bookmark => "toc_$tocix",
+				     generate => 'PDF' } );
+	for ( $fmsb->{songs}->[-1] ) {
+	    $_->{title} = $_->{title}
+	      ? fmt_subst( $book[0][-1], $_->{title} )
+	      : $toctitle;
+	    $_->{meta}->{title} //= [ $_->{title} ];
 	}
 
 	my @songs = @{$fmsb->{songs}};
-
-	# Copy meta data.
-	@{$songs[0]->{meta}}{ keys( %{$config->{meta}} ) } =
-		  values ( %{$config->{meta}} );
 
 	# The first (of multiple) gets the global title/subtitle.
 	if ( @songs > 1 ) {
@@ -276,6 +272,34 @@ sub generate_songbook {
 
 	# The last song gets the ToC appended.
 	$song = pop(@songs);
+
+	if ( $ctl->{break} ) {
+	    my $prevbreak = "";
+	    $song->{body} //= [];
+	    for ( @$book ) {
+		my $break = fmt_subst( $_->[-1], $ctl->{break} );
+		my $nl = 0;
+		$nl++ while $break =~ s/^(\n|\\n)//;
+
+		my $p = $pr->{pdf}->openpage($_->[-1]->{meta}->{tocpage});
+		if ( $nl && $break ne $prevbreak ) {
+		    push( @{ $song->{body} },
+			  { type => "empty",
+			    context => "toc",
+			  } ) for 1..$nl;
+		}
+		push( @{ $song->{body} },
+		      { type    => "tocline",
+			context => "toc",
+			title   => fmt_subst( $_->[-1], $tltpl ),
+			page    => $p,
+			pageno  => fmt_subst( $_->[-1], $pgtpl ),
+			maybe break => ($break ne $prevbreak ? $break : undef),
+		      } );
+		$prevbreak = $break;
+	    }
+	}
+	else {
 	push( @{ $song->{body} //= [] },
 	      map { my $p = $pr->{pdf}->openpage($_->[-1]->{meta}->{tocpage});
 		    +{ type    => "tocline",
@@ -284,7 +308,7 @@ sub generate_songbook {
 		       page    => $p,
 		       pageno  => fmt_subst( $_->[-1], $pgtpl ),
 		     } } @$book );
-
+        }
 
 	$frontmatter_songbook //= ChordPro::Songbook->new;
 	$frontmatter_songbook->add($_) for @songs;
@@ -293,21 +317,31 @@ sub generate_songbook {
 
     # Prepend the front matter songs.
 
+    $force_align = $ps->{'pagealign-songs'} > 1;
     if ( $frontmatter_songbook && @{$frontmatter_songbook->{songs}} ) {
 	return unless progress( msg => "ToC" );
 	$page = 1;
+
+	my $toc = 0;
 	for ( @{$frontmatter_songbook->{songs}} ) {
+	    $toc++;
+	    $pr->{bookmark} = "toc_$toc";
 	    $pr->page_align($page);
-	    $page +=
+	    my $pages =
 	      generate_song( $_,
-			     { pr	 => $pr,
-			       prepend	 => 1,
-			       roman	 => 1,
-			       page_idx	 => $page,
-			       page_num	 => $page,
-			       songindex => 0,
-			       numsongs	 => 1,
+			     { pr	  => $pr,
+			       prepend	  => 1,
+			       roman	  => 1,
+			       page_idx	  => $page,
+			       page_num	  => $page,
+			       songindex  => $toc,
+			       numsongs	  => 0+@{$frontmatter_songbook->{songs}},
+			       bookmark   => $pr->{bookmark},
+			       forcealign => $force_align,
 			     } );
+	    $pr->named_dest( $_->{meta}->{bookmark},
+			     $pr->{pdf}->openpage($page)) if $pages;
+	    $page += $pages;
 	}
 	$pages_of{toc} = $page - 1;
 	$start_of{$_} += $page - 1 for qw( songbook back );
@@ -407,12 +441,13 @@ sub generate_songbook {
     }
 
     # Alignment.
-    my @parts = qw( cover front toc songbook back );
+    my @parts = qw( front toc songbook back );
     while ( @parts ) {
 	my $part = shift(@parts);
 	next unless $pages_of{$part};
 	if ( @parts ) {
-	    if ( $pr->page_align( $start_of{$part} ) ) {
+	    if ( $pr->page_align( $start_of{$part},
+				  $part eq "songbook" ? is_odd($page_offset) : 0 ) ) {
 		$start_of{$_}++ for @parts;
 	    }
 	}
@@ -905,7 +940,7 @@ method parse( $ctx, $k, $v ) {
 	}
     }
     elsif ( $ctl{id} ) {
-	my $a = ChordPro::Output::PDF::assets($ctl{id});
+	my $a = ChordPro::Output::PDF::Song::assets($ctl{id});
 	if ( $a && $a->{opts}->{base} ) {
 	    $ctl{base} = $a->{opts}->{base};
 	}
@@ -918,7 +953,7 @@ method getimage ($fragment) {
     $fragment->{_img} //= do {
 	my $xo;
 	if ( $fragment->{id} ) {
-	    my $o = ChordPro::Output::PDF::assets($fragment->{id});
+	    my $o = ChordPro::Output::PDF::Song::assets($fragment->{id});
 	    $xo = $o->{data} if $o;
 	    unless ( $o && $xo ) {
 		warn("Unknown image ID in <img>: $fragment->{id}\n")

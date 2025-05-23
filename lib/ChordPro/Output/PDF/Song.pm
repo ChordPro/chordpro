@@ -1007,10 +1007,11 @@ sub generate_song {
 
 	if ( $elt->{type} eq "tocline" ) {
 	    my $vsp = toc_vsp( $elt, $ps );
+	    my $vsp0 = toc_vsp( { title => "" }, $ps );
 	    $checkspace->($vsp);
 	    $pr->show_vpos( $y, 0 ) if $config->{debug}->{spacing};
 
-	    $y -= $vsp * tocline( $elt, $x, $y, $ps );
+	    $y -= $vsp0 * tocline( $elt, $x, $y, $ps );
 	    $pr->show_vpos( $y, 1 ) if $config->{debug}->{spacing};
 	    next;
 	}
@@ -1948,6 +1949,7 @@ sub tocline {
     my $p = $elt->{pageno} // "";
     my $pw = $pr->strwidth($p);
     my $ww = $ps->{__rightmargin} - $x - $pr->strwidth("xxx$p");
+    $tpl = ( $elt->{break} =~ s/\n/\\n/gr ) . "\\n" . $tpl if $elt->{break};
     for my $text ( split( /\\n/, $tpl ) ) {
 	$lines++;
 	# Suppress unclosed markup warnings.
@@ -2051,6 +2053,7 @@ sub tab_vsp   { _vsp( "tab",   $_[1] ) }
 sub toc_vsp   {
     my $vsp = _vsp( "toc",   $_[1] );
     my $tpl = $_[0]->{title};
+    $tpl = $_[0]->{break} . "\\n" . $tpl if $_[0]->{break};
     my $ret = $vsp;
     while ( $tpl =~ /\\n/g ) {
 	$ret += $vsp;

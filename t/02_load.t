@@ -28,4 +28,9 @@ my $test;
 
 diag( "Testing ChordPro $ChordPro::VERSION, Perl $], $^X" );
 
+my $rt = ::runtimeinfo();
+for ( split( /\n/, $rt ) ) {
+    diag($_);
+}
+
 done_testing($test);

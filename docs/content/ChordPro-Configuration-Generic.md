@@ -333,7 +333,8 @@ the config file.
 	  {
 		fields   : [ artist title ]
 		label    : "Contents by Artist"
-		line     : "%{artist|%{} - }%{title}"
+		break    : "%{sortartist|%{}|"%{artist}}
+		line     : "    %{title}"
 		pageno   : "%{page}"
 		omit     : true
 		template : stdtoc

@@ -86,6 +86,12 @@ sub configurator ( $opts = undef ) {
     # Now we have a list of all config files. Weed out dups.
     for ( my $a = 0; $a < @cfg; $a++ ) {
         if ( $a && $cfg[$a]->{_src} eq $cfg[$a-1]->{_src} ) {
+	    if ( $a == $#cfg ) {
+		# If this is the last entry, splice/redo will create
+		# a new, empty entry triggering issue #550.
+		pop(@cfg);
+		last;
+	    }
             splice( @cfg, $a, 1 );
             redo;
         }

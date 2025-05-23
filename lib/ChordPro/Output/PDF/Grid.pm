@@ -20,7 +20,7 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
     my $fchord = { %{ $fonts->{grid} || $fonts->{chord} } };
     my $schord = $fonts->{gridstrum};
     delete($fchord->{background});
-    $y -= font_bl($fchord);
+    $y -= $pr->font_bl($fchord);
 
     pr_label_maybe( $ps, $x, $y );
 
@@ -332,7 +332,6 @@ sub pr_endline( $x, $y, $lcr, $sz, $col, $pr ) {
 
 ################ Hooks ################
 
-*font_bl        = *ChordPro::Output::PDF::font_bl;
-*pr_label_maybe = *ChordPro::Output::PDF::pr_label_maybe;
+*pr_label_maybe = *ChordPro::Output::PDF::Song::pr_label_maybe;
 
 1;

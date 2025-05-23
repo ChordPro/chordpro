@@ -170,7 +170,7 @@ sub prep_outlines {
 
     my @book;
     foreach my $song ( @$book ) {
-	my $meta = $song->{meta};
+	my $meta = { %{$song->{meta}} };
 	next if _suppresstoc($meta);
 
 	my @split;
@@ -292,7 +292,11 @@ sub prep_outlines {
     @book =
       sort $srt
       map { my $t = $_;
-	    [ ( map { demarkup(lc($t->{meta}->{$_}->[0] // "")) }
+	    [ ( map { demarkup(lc(  ( index($_,"sort") && is_arrayref($t->{meta}->{"sort$_"})
+				      ? $t->{meta}->{"sort$_"}->[0]
+				      : undef ) //
+				   $t->{meta}->{$_}->[0] //
+				   "")) }
 		    @fields ),
 	      $_ ] }
 	  @book;

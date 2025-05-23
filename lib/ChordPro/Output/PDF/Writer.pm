@@ -47,6 +47,9 @@ sub new {
 	my $apiversion = ${$pdfapi . '::VERSION'};
 	no warnings 'redefine';
 
+	# This is supposed to have been fixed but still croaks...?
+	*{$pdfapi . '::_is_date'} = sub { 1 };
+
 	# Enhanced version that allows named destinations.
 	eval "use $pdfapi" . "::Annotation";
 	*{$pdfapi . '::Annotation::pdf'     } = \&pdfapi_annotation_pdf
@@ -592,6 +595,11 @@ sub newpage {
 # final page must be even.
 
 sub page_align {
+#    my $ret = _page_align(@_);
+#    warn("ALIGN($_[1]", defined($_[2])?",$_[2]":"", ") -> $ret\n");
+#    return $ret;
+#}
+#sub _page_align {
     my ( $self, $page, $even ) = @_;
     $even ||= 0;
 

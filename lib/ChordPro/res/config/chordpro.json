@@ -56,7 +56,7 @@ settings {
   transpose : 0
 
   // Force enharmonic when transposing (experimental).
-  enharmonic-transpose: true
+  enharmonic-transpose : true
 
   // Transcode chords.
   transcode : ""
@@ -228,6 +228,7 @@ chord-formats {
   nashville : "%{root|%{}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}"
 }
 
+// Grid strums.
 gridstrum {
     // Unicode code points for the glyphs from ChordProSymbols.
     symbols {
@@ -270,9 +271,10 @@ diagnostics.format : '"%f", line %n, %m\n\t%l'
 // An array of hashes each describing one table of contents.
 contents : [
   {
-    // Identifying name.
-    name: table_of_contents
-
+  
+    // An identifying name for this table of contents.
+    name : table_of_contents
+  
     // The metadata for this toc. One or two items.
     fields : [ songindex ]
   
@@ -295,8 +297,9 @@ contents : [
     template : stdtoc
   }
   {
-    // Identifying name.
-    name: contents_by_title
+  
+    // An identifying name for this table of contents.
+    name : contents_by_title
   
     // The metadata for this toc. One or two items.
     fields : [ title artist ]
@@ -320,8 +323,9 @@ contents : [
     template : stdtoc
   }
   {
-    // Identifying name.
-    name: contents_by_artist
+  
+    // An identifying name for this table of contents.
+    name : contents_by_artist
   
     // The metadata for this toc. One or two items.
     fields : [ artist title ]
@@ -329,8 +333,11 @@ contents : [
     // The label (title) for this toc.
     label : "Contents by Artist"
   
+    // A break value to group toc entries with.
+    break : "%{sortartist|%{}|%{artist}}"
+  
     // The format for the toc lines.
-    line : "%{artist|%{} - }%{title}"
+    line : "    %{title}"
   
     // The format for the page numbers in the toc.
     pageno : "%{page}"
@@ -385,17 +392,17 @@ delegates {
       "%%gchordfont pdf.fonts.chord"
     ]
 
-    // Obsolete. Please use parser.preprocess.env-abc instead.
+    // Obsolete. Please use parser.preprocess.env-... instead.
     preprocess.abc : []
   }
 
   // Embedding Lilypond.
   ly {
-    type     : image
-    module   : Lilypond
-    handler  : ly2svg
-    program  : ""
-    config   : default
+    type       : image
+    module     : Lilypond
+    handler    : ly2svg
+    program    : ""
+    config     : default
 
     // The preamble is a list of lines inserted before the lilipond data,
     // This is a good place to set the version and global customizations.
@@ -403,10 +410,12 @@ delegates {
       '\\version "2.21.0"'
       "\\header { tagline = ##f }"
     ]
+
+    // Obsolete. Please use parser.preprocess.env-... instead.
     preprocess.ly : []
   }
 
-  // Strum patterns.
+  // Embedding Strums. EXPERIMENTAL
   strum {
     type     : image
     module   : Strum
@@ -475,7 +484,7 @@ pdf {
   // Distance between columns in multi-column mode.
   columnspace : 20
 
-  // Page top marging, excluding headspace.
+  // Page top margin, excluding headspace.
   margintop : 80
 
   // Page bottom margin, excluding footspace.
@@ -806,12 +815,7 @@ pdf {
     }
 
     // Filler pages (for alignment) are empty by default.
-    // You can only set a background.
-    filler {
-
-      // Background page. Ignored if not found.
-      background : ""
-    }
+    filler.background : ""
   }
 
   // Split marker for syllables that are smaller than chord width.
@@ -832,7 +836,7 @@ pdf {
   // For example:
   // "fontdir" : [ "/usr/share/fonts/liberation", "/home/me/fonts" ]
   fontdir : []
-
+ 
   // Experimental: Remap corefonts to real truetype fonts.
   // This requires a set of truetype fonts to be available in the
   // fontdir under a well-defined name. See the docs.
@@ -886,7 +890,7 @@ pdf {
       italic     : MuseJazzText.otf
       bolditalic : MuseJazzText.otf
     }
-    dingbats.        : ZapfDingbats
+    dingbats.          : ZapfDingbats
   }
 
   // "fonts" maps output elements to fonts as defined in "fontconfig".
@@ -942,6 +946,8 @@ pdf {
 
     // Font for typesetting grids.
     grid : "Helvetica 10"
+
+    // Font for typesetting gridstrum symbols.
     gridstrum : "ChordProSymbols 13"
 
     // Font for typesetting grilles.
@@ -952,8 +958,9 @@ pdf {
   // for quick navigation.
   outlines : [
     {
-      // Identifying name.
-      name: by_title
+    
+      // An identifying name for this outline.
+      name : by_title
     
       // Primary and (optional) secondary fields.
       fields : [ sorttitle artist ]
@@ -974,8 +981,9 @@ pdf {
       fold : false
     }
     {
-      // Identifying name.
-      name: by_artist
+    
+      // An identifying name for this outline.
+      name : by_artist
     
       // Primary and (optional) secondary fields.
       fields : [ artist sorttitle ]
@@ -996,17 +1004,18 @@ pdf {
       fold : false
     }
     {
-      // Identifying name.
-      name: bookmarks
-
+    
+      // An identifying name for this outline.
+      name : bookmarks
+    
       // Primary and (optional) secondary fields.
       fields : [ bookmark ]
-
-      // Omit by default.
-      omit: true
-
+    
+      // Omit this outline.
+      omit : true
+    
       // Title, omitted if there's only one outline.
-      label : "Bookmarks"
+      label : Bookmarks
     
       // The format for the outline entries.
       line : "%{bookmark}"
