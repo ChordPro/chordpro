@@ -7,6 +7,16 @@
     // This is a really relaxed JSON document, see
     // https://metacpan.org/pod/JSON::Relaxed#REALLY-RELAXED-EXTENSIONS
     
+    // For GUI.
+    config {
+        // Type of config: config, style, style_mod, instrument, task ...
+        type        : config
+        // Title for menus, choices, if applicable.
+        title       : "ChordPro"
+        // Helpful descriptive text.
+        description : "Main ChordPro config."
+    }
+    
     // Includes are processed first, before the rest of
     // the config file.
     // 

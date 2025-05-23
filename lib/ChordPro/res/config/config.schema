@@ -117,7 +117,28 @@
 
   "additionalProperties" : false,
   "basicCategoryTitle" : "Settings",
+
   "properties" : {
+
+    "config" : {
+      "optional" : true,
+      "description" : "For GUI.",
+      "properties" : {
+	"type" : {
+	  "description" : "Type of config: config, style, style_mod, instrument, task...",
+	  "type" : "string"
+	},
+	"title" : {
+	  "description" : "Title for menus, choices, if applicable.",
+	  "type" : "string"
+	},
+	"description" : {
+	  "description" : "Helpful descriptive text.",
+	  "type" : "string"
+	}
+      },
+      "additionalProperties" : false
+    },
 
     "include" : {
       "description" : "Includes are processed first, before the rest of\nthe config file.\n\n\"include\" takes a list of either filenames or preset names.",
