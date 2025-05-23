@@ -9,6 +9,17 @@
 // ALL CONFIGURATION SETTINGS ARE COMMENTED OUT WITH A LEADING "# ".
 // IF YOU WANT TO CHANGE A CONFIGURATION SETTING, REMOVE THE "# " FIRST.
 
+/**************** For GUI ****************/
+
+// Type of config: config, style, style_mod, instrument, task...
+config.type : config
+
+// Title for menus, choices, if applicable.
+config.title : "User Config"
+
+// Main ChordPro config.
+config.description : "User config settings for ChordPro."
+
 // General settings, often changed by configs and command line.
 
 // Chords parsing strategy.
@@ -79,7 +90,7 @@ settings.strict : true
 
 // Substitute delta for maj7 in chord names.
 // Will fallback to the ChordProSymbols font if the selected chord font
-// doesn't have the glyphs.
+// does not have the glyphs.
 # maj7delta : false
 
 // Indent for wrapped lines. Actual indent is the stringwidth.
@@ -88,7 +99,8 @@ settings.strict : true
 // Consider text flowed.
 # settings.flowtext : false
 
-// Metadata.
+/**************** Metadata ****************/
+
 // For these keys you can use {meta key ...} as well as {key ...}.
 // Important: "title" and "subtitle" must always be in this list.
 
@@ -108,8 +120,11 @@ settings.strict : true
 // Split data on separator.
 # metadata.autosplit : true
 
-// Date formats. Format is a strftime template.
+/**************** Date formats. Format is a strftime template ****************/
+
 # dates.today.format : "%A, %B %e, %Y"
+
+/**************** User info ****************/
 
 // Short user name.
 # user.name : ""
@@ -118,7 +133,8 @@ settings.strict : true
 # user.fullname : ""
 
 
-// User defined chords (placeholder).
+/**************** User defined chords (placeholder) ****************/
+
 // This is an array of hashes, one for each chord.
 // Each hash should contain the following fields:
 //   "name":    name of the chord
@@ -132,7 +148,7 @@ settings.strict : true
 // Example: Alternative for Bes chord.
 # chords: [ { name: Bes, frets: [ 1 1 3 3 3 1 ], fingers: [ 1 1 2 3 4 1 ] } ]
 
-// Format to show chord names. May contain markup
+/**************** Format to show chord names. May contain marku ****************/
 
 // Format string for rendering common chord names.
 # chord-formats.common : "%{root|%{}%{qual|%{}}%{ext|%{}}%{bass|/%{}}|%{name}}"
@@ -143,7 +159,7 @@ settings.strict : true
 // Format string for rendering nashville chord names.
 # chord-formats.nashville : "%{root|%{}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}"
 
-// Shows selected or all chord diagrams at end.
+/**************** Shows selected or all chord diagrams at end ****************/
 
 // "all": shows all chords
 // "user": shows user defined chords only
@@ -157,7 +173,7 @@ settings.strict : true
 // are considered trivial.
 # diagrams.suppress : [ C F G A E Am ]
 
-// Settings for PDF output.
+/**************** Settings for PDF output ****************/
 
 // PDF Properties. Arbitrary key/values may be added.
 // Note that the context for substitutions is the first song.
@@ -638,7 +654,7 @@ settings.strict : true
 // Font for typesetting grids.
 # pdf.fonts.grid : "sans 10"
 
-// Settings for A2Crd (input) frontend.
+/**************** Settings for A2Crd (input) frontend ****************/
 
 // Treat leading lyrics lines as title/subtitle lines.
 # a2crd.infer-titles : true
@@ -649,7 +665,8 @@ settings.strict : true
 // Tab stop width for tab expansion. Set to zero to disable.
 # a2crd.tabstop : 8
 
-// Settings for the markup processor.
+/**************** Settings for the markup processor ****************/
+
 // Shortcodes allow user defined markup, e.g. <foo>...</foo>.
 // With shortcode
 //    heavy :  "weight='bold' size='large'"
@@ -657,7 +674,8 @@ settings.strict : true
 // <span weight='bold' size='large'>...</span>.
 # markup.shortcodes {}
 
-// Settings for the parser/preprocessor.
+/**************** Settings for the parser/preprocessor ****************/
+
 // For selected lines, you can specify a series of 
 // { "target" : "xxx", "replace" : "yyy" }
 // Every occurrence of "xxx" will be replaced by "yyy".
