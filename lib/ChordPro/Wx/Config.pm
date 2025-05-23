@@ -400,7 +400,7 @@ sub setup_styles {
     push( @cfglibs, { src => "custom",
 		      lib => fn_catfile( $preferences{customlib}, "config" ) } )
       if $preferences{advanced} && $preferences{enable_customlib};
-    use DDP; p @cfglibs;
+    use DDP; p @cfglibs, as => "cfglibs";
 
     while ( @cfglibs ) {
 	my $cfglib = shift(@cfglibs);
@@ -436,7 +436,7 @@ sub setup_styles {
 	    }
 	}
     }
-    use DDP; p %styles;
+    use DDP; p %styles, as => "styles";
     # Add custom style presets. if appropriate.
     my $dir = $preferences{customlib};
     if ( $preferences{advanced}
