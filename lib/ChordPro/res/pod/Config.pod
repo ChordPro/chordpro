@@ -248,14 +248,18 @@
         symbols {
             up  : \u2190            // arrow up
            "u+" : \u2191            // arrow up with accent
-            ua  : \u2192            // arrow up with strum
+            ua  : \u2192            // arrow up with strum (arpeggio)
          // ux  : \u2193            // arrow up with mute (crossed)
             ux  : \u2194            // arrow up with mute (cross head)
+            us  : \u2195            // arrow up with dot (staccato)
+            uk  : \u2196            // arrow up with accent and dot (staccato)
             dn  : \u21a0            // arrow down
            "d+" : \u21a1            // arrow down with accent
-            da  : \u21a2            // arrow down with strum
+            da  : \u21a2            // arrow down with strum (arpeggio)
          // dx  : \u21a3            // arrow down with mute (crossed)
             dx  : \u21a4            // arrow down with mute (cross head)
+            ds  : \u21a5            // arrow down with dot (staccato)
+            dk  : \u21a6            // arrow down with accent and dot (staccato)
         }
     }
     

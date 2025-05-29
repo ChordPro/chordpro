@@ -110,6 +110,16 @@ arrow.importOutlines('arrowup-mxt.svg')
 arrow.transform(tf)
 arrow.width = 1150
 ind += 1
+arrow = dst.createChar( ind, 'strumarrowupdot' )
+arrow.importOutlines('arrowup-dot.svg')
+arrow.transform(tf)
+arrow.width = 1150
+ind += 1
+arrow = dst.createChar( ind, 'strumarrowupaccdot' )
+arrow.importOutlines('arrowup-accdot.svg')
+arrow.transform(tf)
+arrow.width = 1150
+ind += 1
 
 ind = 0x21a0
 tf = psMat.compose(psMat.scale(0.71),psMat.translate(150,270))
@@ -135,6 +145,16 @@ arrow.width = 1150
 ind += 1
 arrow = dst.createChar( ind, 'strumarrowdownmxt' )
 arrow.importOutlines('arrowdown-mxt.svg')
+arrow.transform(tf)
+arrow.width = 1150
+ind += 1
+arrow = dst.createChar( ind, 'strumarrowdowndot' )
+arrow.importOutlines('arrowdown-dot.svg')
+arrow.transform(tf)
+arrow.width = 1150
+ind += 1
+arrow = dst.createChar( ind, 'strumarrowdownaccdot' )
+arrow.importOutlines('arrowdown-accdot.svg')
 arrow.transform(tf)
 arrow.width = 1150
 ind += 1
