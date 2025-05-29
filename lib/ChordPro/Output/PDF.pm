@@ -1029,16 +1029,27 @@ BUILD {
 	"repeat-end-start"	=> '&',
 	"repeat2"		=> '(',
 	"repeat1"		=> ')',
+
 	"arrow-up"		=> "\x{2190}",
 	"arrow-up-accent"	=> "\x{2191}",
 	"arrow-up-arpeggio"	=> "\x{2192}",
 	"arrow-up-crossed"	=> "\x{2193}",
 	"arrow-up-muted"	=> "\x{2194}",
+	"arrow-up-staccato"	=> "\x{2195}",
+	"arrow-up-staccato-accent"   => "\x{2196}",
+	"arrow-up-crossed-accent"    => "\x{2197}",
+	"arrow-up-muted-accent"	     => "\x{2198}",
+	"arrow-up-arpeggio-accent"   => "\x{2199}",
+
 	"arrow-down"		=> "\x{21a0}",
 	"arrow-down-accent"	=> "\x{21a1}",
 	"arrow-down-arpeggio"	=> "\x{21a2}",
 	"arrow-down-crossed"	=> "\x{21a3}",
 	"arrow-down-muted"	=> "\x{21a4}",
+	"arrow-down-staccato-accent" => "\x{21a6}",
+	"arrow-down-crossed-accent"  => "\x{21a7}",
+	"arrow-down-muted-accent"    => "\x{21a8}",
+	"arrow-down-arpeggio-accent" => "\x{21a9}",
       };
     $glyphs->{"circle-$_"} = $_ for "0".."9";
     $glyphs->{"circle-$_"} = $_ for "A".."Z";

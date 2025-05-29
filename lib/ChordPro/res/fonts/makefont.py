@@ -82,79 +82,109 @@ for i in range(0,26):
 ind = 0x2190    # arrows
 tf = psMat.compose(psMat.scale(0.71),psMat.translate(150,291))
 # Custom location.
-arrow = dst.createChar( ind, 'strumarrowup' )
-arrow.importOutlines('arrowup.svg')
+arrow = dst.createChar( ind, 'strumarrow-up' )
+arrow.importOutlines('arrow-up.svg')
 arrow.transform(tf)
 arrow.width = 1150
 ind += 1
 # Accented
-arrow = dst.createChar( ind, 'strumarrowupacc' )
-arrow.importOutlines('arrowup-acc.svg')
+arrow = dst.createChar( ind, 'strumarrow-up-acc' )
+arrow.importOutlines('arrow-up-acc.svg')
 arrow.transform(tf)
 arrow.width = 1150
 ind += 1
 # Arpeggio
-arrow = dst.createChar( ind, 'strumarrowuparp' )
-arrow.importOutlines('arrowup-arp.svg')
+arrow = dst.createChar( ind, 'strumarrow-up-arp' )
+arrow.importOutlines('arrow-up-arp.svg')
 arrow.transform(tf)
 arrow.width = 1150
 ind += 1
 # Muted
-arrow = dst.createChar( ind, 'strumarrowupmut' )
-arrow.importOutlines('arrowup-mut.svg')
+arrow = dst.createChar( ind, 'strumarrow-up-mut' )
+arrow.importOutlines('arrow-up-mut.svg')
 arrow.transform(tf)
 arrow.width = 1150
 ind += 1
-arrow = dst.createChar( ind, 'strumarrowupmxt' )
-arrow.importOutlines('arrowup-mxt.svg')
+arrow = dst.createChar( ind, 'strumarrow-up-mxt' )
+arrow.importOutlines('arrow-up-mxt.svg')
 arrow.transform(tf)
 arrow.width = 1150
 ind += 1
-arrow = dst.createChar( ind, 'strumarrowupdot' )
-arrow.importOutlines('arrowup-dot.svg')
+arrow = dst.createChar( ind, 'strumarrow-up-dot' )
+arrow.importOutlines('arrow-up-dot.svg')
 arrow.transform(tf)
 arrow.width = 1150
 ind += 1
-arrow = dst.createChar( ind, 'strumarrowupaccdot' )
-arrow.importOutlines('arrowup-accdot.svg')
+arrow = dst.createChar( ind, 'strumarrow-up-dot-acc' )
+arrow.importOutlines('arrow-up-dot-acc.svg')
+arrow.transform(tf)
+arrow.width = 1150
+ind += 1
+arrow = dst.createChar( ind, 'strumarrow-up-mut-acc' )
+arrow.importOutlines('arrow-up-mut-acc.svg')
+arrow.transform(tf)
+arrow.width = 1150
+ind += 1
+arrow = dst.createChar( ind, 'strumarrow-up-mxt-acc' )
+arrow.importOutlines('arrow-up-mxt-acc.svg')
+arrow.transform(tf)
+arrow.width = 1150
+ind += 1
+arrow = dst.createChar( ind, 'strumarrow-up-arp-acc' )
+arrow.importOutlines('arrow-up-arp-acc.svg')
 arrow.transform(tf)
 arrow.width = 1150
 ind += 1
 
 ind = 0x21a0
 tf = psMat.compose(psMat.scale(0.71),psMat.translate(150,270))
-arrow = dst.createChar( ind, 'strumarrowdown' )
-arrow.importOutlines('arrowdown.svg')
+arrow = dst.createChar( ind, 'strumarrow-down' )
+arrow.importOutlines('arrow-down.svg')
 arrow.transform(tf)
 arrow.width = 1150
 ind += 1
-arrow = dst.createChar( ind, 'strumarrowdownacc' )
-arrow.importOutlines('arrowdown-acc.svg')
+arrow = dst.createChar( ind, 'strumarrow-down-acc' )
+arrow.importOutlines('arrow-down-acc.svg')
 arrow.transform(tf)
 arrow.width = 1150
 ind += 1
-arrow = dst.createChar( ind, 'strumarrowdownarp' )
-arrow.importOutlines('arrowdown-arp.svg')
+arrow = dst.createChar( ind, 'strumarrow-down-arp' )
+arrow.importOutlines('arrow-down-arp.svg')
 arrow.transform(tf)
 arrow.width = 1150
 ind += 1
-arrow = dst.createChar( ind, 'strumarrowdownmut' )
-arrow.importOutlines('arrowdown-mut.svg')
+arrow = dst.createChar( ind, 'strumarrow-down-mut' )
+arrow.importOutlines('arrow-down-mut.svg')
 arrow.transform(tf)
 arrow.width = 1150
 ind += 1
-arrow = dst.createChar( ind, 'strumarrowdownmxt' )
-arrow.importOutlines('arrowdown-mxt.svg')
+arrow = dst.createChar( ind, 'strumarrow-down-mxt' )
+arrow.importOutlines('arrow-down-mxt.svg')
 arrow.transform(tf)
 arrow.width = 1150
 ind += 1
-arrow = dst.createChar( ind, 'strumarrowdowndot' )
-arrow.importOutlines('arrowdown-dot.svg')
+arrow = dst.createChar( ind, 'strumarrow-down-dot' )
+arrow.importOutlines('arrow-down-dot.svg')
 arrow.transform(tf)
 arrow.width = 1150
 ind += 1
-arrow = dst.createChar( ind, 'strumarrowdownaccdot' )
-arrow.importOutlines('arrowdown-accdot.svg')
+arrow = dst.createChar( ind, 'strumarrow-down-dot-acc' )
+arrow.importOutlines('arrow-down-dot-acc.svg')
+arrow.transform(tf)
+arrow.width = 1150
+ind += 1
+arrow = dst.createChar( ind, 'strumarrow-down-mut-acc' )
+arrow.importOutlines('arrow-down-mut-acc.svg')
+arrow.transform(tf)
+arrow.width = 1150
+ind += 1
+arrow = dst.createChar( ind, 'strumarrow-down-mxt-acc' )
+arrow.importOutlines('arrow-down-mxt-acc.svg')
+arrow.transform(tf)
+arrow.width = 1150
+ind += 1
+arrow = dst.createChar( ind, 'strumarrow-down-arp-acc' )
+arrow.importOutlines('arrow-down-arp-acc.svg')
 arrow.transform(tf)
 arrow.width = 1150
 ind += 1
