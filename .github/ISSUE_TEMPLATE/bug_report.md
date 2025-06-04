@@ -10,7 +10,7 @@ assignees: ''
 <!--
 The issue tracker is only for bug reporting.
 Please refer to the ChordPro user group for general questions on how to use ChordPro.
-https://groups.google.com/forum/#!forum/chordpro
+https://groups.io/g/ChordPro
 -->
 
 ## Describe the bug
