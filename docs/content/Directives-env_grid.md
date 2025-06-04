@@ -141,8 +141,8 @@ The following pseudo-chords can be used:
 | accent          | `u+`  | <span class="sym">&#x2193;</span> | `d+`  | <span class="sym">&#x21a3;</span> |
 | arpeggio        | `ua`  | <span class="sym">&#x2191;</span> | `da`  | <span class="sym">&#x21a1;</span> |
 | arpeggio accent | `ua+` | <span class="sym">&#x2194;</span> | `da+` | <span class="sym">&#x21a4;</span> |
-| muted           | `u-`  | <span class="sym">&#x2196;</span> | `d-`  | <span class="sym">&#x21a6;</span> |
-| muted accent    | `u+-` | <span class="sym">&#x2199;</span> | `d+-` | <span class="sym">&#x21a9;</span> |
+| muted           | `ux`  | <span class="sym">&#x2196;</span> | `dx`  | <span class="sym">&#x21a6;</span> |
+| muted accent    | `ux+` | <span class="sym">&#x2199;</span> | `dx+` | <span class="sym">&#x21a9;</span> |
 | staccato        | `us`  | <span class="sym">&#x2192;</span> | `ds`  | <span class="sym">&#x21a2;</span> |
 | staccato accent | `us+` | <span class="sym">&#x2195;</span> | `ds+` | <span class="sym">&#x21a5;</span> |
 { .table .table-striped .table-bordered .table-sm }
