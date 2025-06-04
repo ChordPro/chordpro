@@ -1151,15 +1151,17 @@ package ChordPro::Chord::Strum;
 
 our @ISA = 'ChordPro::Chord::Base';
 
+use ChordPro::Symbols qw( strum );
+
 sub new( $pkg, $data ) {
     my $self = $pkg->SUPER::new( $data );
-    my $syms = $::config->{gridstrum}->{symbols};
-    unless ( defined $syms->{$data->{name}} ) {
+    my $fmt = strum( $data->{name} );
+    unless ( defined $fmt ) {
 	warn("Unknown strum: $data->{name}\n");
 	$self->{format} = "";
     }
     else {
-	$self->{format} = $syms->{$data->{name}};
+	$self->{format} = $fmt;
     }
     return $self;
 }

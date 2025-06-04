@@ -39,6 +39,7 @@ lib/ChordPro/Output/Text.pm
 lib/ChordPro/Paths.pm
 lib/ChordPro/Song.pm
 lib/ChordPro/Songbook.pm
+lib/ChordPro/Symbols.pm
 lib/ChordPro/Testing.pm
 lib/ChordPro/Utils.pm
 lib/ChordPro/Version.pm

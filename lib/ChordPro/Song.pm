@@ -20,6 +20,7 @@ use ChordPro::Chords::Appearance;
 use ChordPro::Chords::Parser;
 use ChordPro::Output::Common;
 use ChordPro::Utils;
+use ChordPro::Symbols qw( is_strum );
 
 use Carp;
 use List::Util qw(any);
@@ -1082,7 +1083,7 @@ sub decompose_grid {
 
     my $chord = sub {
 	my $c = shift;
-	if ( $grid_type == 0 || !exists($::config->{gridstrum}->{symbols}->{$c}) ) {
+	if ( $grid_type == 0 || !is_strum($c) ) {
 	    $self->chord($c);
 	}
 	else {
