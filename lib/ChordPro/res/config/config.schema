@@ -893,6 +893,16 @@
       }
     },
 
+    "gridstrum" : {
+      "description" : "Grid strum overrides.",
+      "properties" : {
+        "symbols" : {
+	  "description" : "Symbol or Unicode code points for the glyphs from ChordProSymbols.",
+	  "additionalProperties": true
+	}
+      }
+    },
+
     "latex" : {
       "description" : "Settings for LaTeX backend.",
       "allOf" : [

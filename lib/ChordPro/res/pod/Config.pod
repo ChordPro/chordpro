@@ -357,6 +357,9 @@
         order : page
     }
     
+    // Grid strum overrides.
+    gridstrum.symbols {}
+    
     // Delegates.
     // Basically a delegate is a section {start_of_XXX} which content is
     // collected and handled later by the delegate module.

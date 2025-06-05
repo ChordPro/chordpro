@@ -673,7 +673,7 @@ sub _augment ( $self, $hash, $path ) {
           unless exists $self->{$key}
             || $path =~ /^pdf\.(?:info|fonts|fontconfig)\./
             || $path =~ /^pdf\.formats\.\w+-even\./
-            || $path =~ /^meta\./
+            || $path =~ /^(meta|gridstrum\.symbols)\./
             || $path =~ /^markup\.shortcodes\./
             || $key =~ /^_/;
 
@@ -911,7 +911,7 @@ sub hmerge( $left, $right, $path = "" ) {
             || $path =~ /^pdf\.(?:info|fonts)\./
             || $path =~ /^pdf\.formats\.\w+-even\./
             || ( $path =~ /^pdf\.formats\./ && $key =~ /\w+-even$/ )
-            || $path =~ /^meta\./
+            || $path =~ /^(meta|gridstrum\.symbols)\./
             || $path =~ /^delegates\./
             || $path =~ /^parser\.preprocess\./
             || $path =~ /^markup\.shortcodes\./

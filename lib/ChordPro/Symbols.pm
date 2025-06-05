@@ -116,7 +116,10 @@ sub is_symbol( $name ) {
 push( @EXPORT, qw( is_symbol ) );
 
 sub strum( $code ) {
-    $symbols->{"strum_$code"};
+    # Allow override by config.
+    exists($::config->{gridstrum}->{symbols}->{$code})
+      ? $::config->{gridstrum}->{symbols}->{$code}
+      : $symbols->{"strum_$code"};
 }
 
 push( @EXPORT, qw( strum ) );
