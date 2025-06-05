@@ -7,6 +7,9 @@ package ChordPro::Logger;
 use feature 'signatures';
 no warnings 'experimental::signatures';
 
+use Carp;
+$Carp::Internal{ (__PACKAGE__) }++;
+
 # die    => fatal
 # warn ? => error
 # warn ! => warning
@@ -48,10 +51,10 @@ BEGIN {
 package main;
 
 unless ( caller ) {
-    use Carp qw(carp verbose);
+    require Carp;
     sub a($x) { b($x) }
     sub b($x) { c($x) }
-    sub c($x) { carp($x) }
+    sub c($x) { Carp::cluck($x) }
     a("Hi");
 }
 

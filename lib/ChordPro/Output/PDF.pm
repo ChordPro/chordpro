@@ -1016,32 +1016,12 @@ sub alert ($size) {
 class TextLayoutSymbolElement :does(Text::Layout::ElementRole);
 
 use ChordPro::Utils qw(parse_kv);
+use ChordPro::Symbols;
 
 field $glyphs;
 
 BUILD {
-    $glyphs =
-      { "flat"			=> '!',
-	"natural"		=> '"',
-	"sharp"			=> '#',
-	"repeat-start"		=> '$',
-	"repeat-end"		=> '%',
-	"repeat-end-start"	=> '&',
-	"repeat2"		=> '(',
-	"repeat1"		=> ')',
-	"arrow-up"		=> "\x{2190}",
-	"arrow-up-accent"	=> "\x{2191}",
-	"arrow-up-arpeggio"	=> "\x{2192}",
-	"arrow-up-crossed"	=> "\x{2193}",
-	"arrow-up-muted"	=> "\x{2194}",
-	"arrow-down"		=> "\x{21a0}",
-	"arrow-down-accent"	=> "\x{21a1}",
-	"arrow-down-arpeggio"	=> "\x{21a2}",
-	"arrow-down-crossed"	=> "\x{21a3}",
-	"arrow-down-muted"	=> "\x{21a4}",
-      };
-    $glyphs->{"circle-$_"} = $_ for "0".."9";
-    $glyphs->{"circle-$_"} = $_ for "A".."Z";
+    $glyphs = ChordPro::Symbols::symbols();
 };
 
 method parse( $ctx, $k, $v ) {

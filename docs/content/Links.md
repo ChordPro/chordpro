@@ -44,3 +44,6 @@ description: "ChordPro related links"
   into a formatted section of your Office document ­ and vice versa.
   By modifying the paragraph styles you have ultimate control over how
   your song will look like.
+
+* [Chord Provider](https://github.com/Desbeers/Chord-Provider)  
+  Chord Provider is a native, open-source ChordPro file editor and viewer built specifically for macOS. The developer is a regular contributor to the official implementation.

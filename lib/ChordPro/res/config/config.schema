@@ -893,57 +893,6 @@
       }
     },
 
-    "gridstrum" : {
-      "description" : "Grid strums.\nUnicode code points for the glyphs from ChordProSymbols.",
-      "properties" : {
-        "symbols" : {
-	  "description" : "Unicode code points for the glyphs from ChordProSymbols.",
-	  "properties" : {
-	    "up" : {
-	      "description" : "arrow up",
-	      "type" : "string",
-	      "default" : "\u2190"
-	    },
-	    "u+" : {
-	      "description" : "arrow up with accent",
-	      "type" : "string",
-	      "default" : "\u2191"
-	    },
-	    "ua" : {
-	      "description" : "arrow up with arpeggio",
-	      "type" : "string",
-	      "default" : "\u2192"
-	    },
-	    "ux" : {
-	      "description" : "arrow up with mute",
-	      "type" : "string",
-	      "default" : "\u2194"
-	    },
-	    "dn" : {
-	      "description" : "arrow down",
-	      "type" : "string",
-	      "default" : "\u21a0"
-	    },
-	    "d+" : {
-	      "description" : "arrow down with accent",
-	      "type" : "string",
-	      "default" : "\u21a1"
-	    },
-	    "da" : {
-	      "description" : "arrow down with arpeggio",
-	      "type" : "string",
-	      "default" : "\u21a2"
-	    },
-	    "dx" : {
-	      "description" : "arrow down with mute",
-	      "type" : "string",
-	      "default" : "\u21a4"
-	    }
-	  }
-	}
-      }
-    },
-
     "latex" : {
       "description" : "Settings for LaTeX backend.",
       "allOf" : [

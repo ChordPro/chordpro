@@ -26,6 +26,7 @@ pp/macos/Makefile
 pp/macos/PkgInfo
 pp/macos/README.html
 pp/macos/libtool.pl
+pp/macos/pp.pl
 pp/macos/reloc.pl
 pp/macos/vfix.pl
 pp/pp2ppl.pl

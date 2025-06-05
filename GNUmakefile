@@ -90,6 +90,9 @@ release :
 wxg :
 	make -C lib/ChordPro/Wx
 
+sym :
+	make -C lib/ChordPro/res/fonts
+
 # Actualize resources.
 
 LIB := lib/ChordPro
