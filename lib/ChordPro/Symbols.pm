@@ -125,6 +125,11 @@ sub strum( $code ) {
 push( @EXPORT, qw( strum ) );
 
 sub is_strum( $code ) {
+    # In case of settings.notenames, prevent arrow codes from hiding
+    # lowercase note names.
+    return if $::config->{settings}->{notenames}
+      && ChordPro::Chords::known_chord(uc $code);
+
     exists( $symbols->{"strum_$code"} );
 }
 

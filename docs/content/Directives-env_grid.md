@@ -135,17 +135,24 @@ A grid line becomes a strum by putting `S` (uppercase `s`)
 
 The following pseudo-chords can be used:
  
-| arrow           | up    |                                   | down  |                                   |
-|-----------------|-------|-----------------------------------|-------|-----------------------------------|
-| normal          | `up`  | <span class="sym">&#x2190;</span> | `dn`  | <span class="sym">&#x21a0;</span> |
-| accent          | `u+`  | <span class="sym">&#x2193;</span> | `d+`  | <span class="sym">&#x21a3;</span> |
-| arpeggio        | `ua`  | <span class="sym">&#x2191;</span> | `da`  | <span class="sym">&#x21a1;</span> |
-| arpeggio accent | `ua+` | <span class="sym">&#x2194;</span> | `da+` | <span class="sym">&#x21a4;</span> |
-| muted           | `ux`  | <span class="sym">&#x2196;</span> | `dx`  | <span class="sym">&#x21a6;</span> |
-| muted accent    | `ux+` | <span class="sym">&#x2199;</span> | `dx+` | <span class="sym">&#x21a9;</span> |
-| staccato        | `us`  | <span class="sym">&#x2192;</span> | `ds`  | <span class="sym">&#x21a2;</span> |
-| staccato accent | `us+` | <span class="sym">&#x2195;</span> | `ds+` | <span class="sym">&#x21a5;</span> |
+| arrow           | up          |                                   | down        |                                   |
+|-----------------|-------------|:---------------------------------:|-------------|:---------------------------------:|
+| normal          | `up` or `u` | <span class="sym">&#x2190;</span> | `dn` or `d` <sup>(see below)</sup> | <span class="sym">&#x21a0;</span> |
+| accent          | `u+`        | <span class="sym">&#x2193;</span> | `d+`        | <span class="sym">&#x21a3;</span> |
+| arpeggio        | `ua`        | <span class="sym">&#x2191;</span> | `da`        | <span class="sym">&#x21a1;</span> |
+| arpeggio accent | `ua+`       | <span class="sym">&#x2194;</span> | `da+`       | <span class="sym">&#x21a4;</span> |
+| muted           | `ux`        | <span class="sym">&#x2196;</span> | `dx`        | <span class="sym">&#x21a6;</span> |
+| muted accent    | `ux+`       | <span class="sym">&#x2199;</span> | `dx+`       | <span class="sym">&#x21a9;</span> |
+| staccato        | `us`        | <span class="sym">&#x2192;</span> | `ds`        | <span class="sym">&#x21a2;</span> |
+| staccato accent | `us+`       | <span class="sym">&#x2195;</span> | `ds+`       | <span class="sym">&#x21a5;</span> |
 { .table .table-striped .table-bordered .table-sm }
+
+If you are using notenames (`settings.notenames`) then you can
+not use `d` if that would be a valid chord. Use `dn` instead.
+
+There is also `x` to denote that nothing is strummed and sound is
+muted: <span class="sym">&#x21b0;</span>.
+
 
 For example:
 

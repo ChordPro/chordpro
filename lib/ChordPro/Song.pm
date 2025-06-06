@@ -121,6 +121,10 @@ sub upd_config {
 
 sub ::break() {}
 
+sub is_gridstrum($) {
+    $_[0] == 1 || $_[0] == 2;
+}
+
 sub parse_song {
     my ( $self, $lines, $linecnt, $meta, $defs ) = @_;
     die("OOPS! Wrong meta") unless ref($meta) eq 'HASH';
@@ -1083,13 +1087,13 @@ sub decompose_grid {
 
     my $chord = sub {
 	my $c = shift;
-	if ( $grid_type == 0 || !is_strum($c) ) {
-	    $self->chord($c);
-	}
-	else {
+	if ( is_gridstrum($grid_type) && is_strum($c) ) {
 	    my $i = ChordPro::Chord::Strum->new( { name => $c } );
 	    ChordPro::Chords::Appearance->new
 		( key => $self->add_chord($i), info => $i );
+	}
+	else {
+	    $self->chord($c);
 	}
     };
 
@@ -1171,7 +1175,7 @@ sub decompose_grid {
 				   : $chord->($_) } @a ],
 		       class => "chords" };
 	    }
-	    if ( $memchords && $grid_type == 0 ) {
+	    if ( $memchords && !is_gridstrum($grid_type) ) {
 		@a = grep { !m;^[/.]?$; } @a;
 		push( @$memchords, @a );
 		push( @$p0, @a );
@@ -2566,8 +2570,8 @@ sub parse_chord {
     my $global_dir = $config->{settings}->{transpose} <=> 0;
     my $unk;
 
-    # When called from {define} or strum ignore xc/xp.
-    $xc = $xp = '' if $def || $grid_type == 1 || $grid_type == 2;
+    # When called from {define} ignore xc/xp.
+    $xc = $xp = '' if $def;
 
     $info = ChordPro::Chords::known_chord($chord);
     if ( $info ) {
