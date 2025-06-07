@@ -3,7 +3,6 @@
 use v5.26;
 use feature qw( signatures );
 no warnings qw( experimental::signatures );
-no feature qw(indirect);
 use utf8;
 use Carp;
 
