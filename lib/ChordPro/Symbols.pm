@@ -53,7 +53,6 @@ dxs	\x{21a8}	arrow-down-muted-with-staccato
 dx+	\x{21a9}	arrow-down-muted-with-accent
 dxa+	\x{21aa}	arrow-down-muted-with-accent-and-arpeggio
 dxs+	\x{21ab}	arrow-down-muted-with-accent-and-staccato
-dxn+	\x{21a9}	arrow-down-muted-with-accent
 dxa+	\x{21aa}	arrow-down-muted-with-accent-and-arpeggio
 dxs+	\x{21ab}	arrow-down-muted-with-accent-and-staccato
 x	\x{21b0}	arrow-mute
