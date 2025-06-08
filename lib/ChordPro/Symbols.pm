@@ -133,4 +133,23 @@ sub is_strum( $code ) {
 
 push( @EXPORT, qw( is_strum ) );
 
+sub as_json() {
+    my $ret = "{\n";
+    for ( sort keys %$symbols ) {
+	$ret .= qq{  "$_" : };
+	my $s = $symbols->{$_};
+	if ( $s ge "0" && $s le "Z" ) {
+	    $ret .= qq{"$s"};
+	}
+	else {
+	    $ret .= sprintf(qq{"\\u%04x"}, ord($s) );
+	}
+	$ret .= ",\n";
+    }
+    $ret =~ s/,\n$/\n/;
+    $ret .= "}\n";
+}
+
+push( @EXPORT_OK, qw( as_json ) );
+
 1;
