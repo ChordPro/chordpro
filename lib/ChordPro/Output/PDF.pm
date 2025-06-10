@@ -645,11 +645,24 @@ sub sort_songbook {
 	foreach my $song ( @{$sb->{songs}} ) {
 	    return unless progress( msg => $song->{title} );
 	    $i++;
+
+	    #### HACK ATTACK.
+	    # Assets will be rendered, but then they are part of the temp
+	    # PDF, not the final one.
+	    # We copy the unprocessed assets and restore after the 1st pass.
+	    use Storable qw(dclone);
+	    my $assets;
+	    $assets = dclone( $song->{assets} ) if $song->{assets};
+	    ####
+
 	    $song->{meta}->{pages} =
 	      generate_song( $song,
 			     { pr	  => $pri,
 			       startpage  => 1,
 			     } );
+	    ####
+	    $song->{assets} = $assets if $assets;
+	    ####
 	}
     }
 
