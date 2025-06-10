@@ -4,7 +4,6 @@ use v5.26;
 use feature qw( signatures );
 no warnings qw( experimental::signatures );
 use utf8;
-use Carp;
 
 package ChordPro::Symbols;
 
@@ -14,6 +13,9 @@ our @EXPORT;
 our @EXPORT_OK;
 
 my $symbols;
+
+use List::Util qw( any );
+use Ref::Util qw( is_arrayref );
 
 sub import {
     $symbols || _build();
@@ -125,8 +127,13 @@ push( @EXPORT, qw( strum ) );
 sub is_strum( $code ) {
     # In case of settings.notenames, prevent arrow codes from hiding
     # lowercase note names.
-    return if $::config->{settings}->{notenames}
-      && ChordPro::Chords::known_chord(uc $code);
+    if ( $::config->{settings}->{notenames} ) {
+	return
+	  if any { $_ eq $code }
+	    map { is_arrayref($_) ? ( map{lc}@$_ ) : lc($_) }
+	      @{ $::config->{notes}->{flat} },
+	      @{ $::config->{notes}->{sharp} };
+    }
 
     exists( $symbols->{"strum_$code"} );
 }
