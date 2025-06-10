@@ -56,8 +56,8 @@ sub generate_songbook {
 	$extra_matter++ if $options->{title};
     }
     $extra_matter++ if $options->{cover} && !$options->{title};
-    $extra_matter++ if $options->{'front-matter'};
-    $extra_matter++ if $options->{'back-matter'};
+    $extra_matter++ if $ps->{'front-matter'};
+    $extra_matter++ if $ps->{'back-matter'};
     $extra_matter++ if $options->{csv};
 
     if ( $ps->{'sort-pages'} ) {
