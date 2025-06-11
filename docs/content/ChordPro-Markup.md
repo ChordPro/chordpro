@@ -227,6 +227,8 @@ The songs will get an additional bookmarks with names `song_1`,
 See also [Metadata]({{< relref
 "chordpro-configuration-generic/#metadata" >}}).
 
+{{% include ChordPro-Symbols.md %}}
+
 ## Using markup in chords
 
 Markup in chords is supported, provided the chord name is not split by

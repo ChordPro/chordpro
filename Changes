@@ -2,41 +2,41 @@
 
     !Highlights
 
-    - Support for strum patterns in grids.
+    - Support for [strum patterns](https://www.chordpro.org/beta/directives-env_grid/#strums) in grids.
 
-    - Bookmarks.
+    - [Bookmarks](https://www.chordpro.org/beta/chordpro_markup/#bookmarks).
 
-    - Break items in Table of Content lines.
+    - [Break items](https://www.chordpro.org/beta/table_of_contents/#break) in Table of Content lines.
 
     !Other improvements
 
-    - New metadata directives: sortartist and tag.
+    - New metadata directives: [sortartist](https://www.chordpro.org/beta/directives-sortartist/) and [tag](https://www.chordpro.org/beta/directives-tag/).
 
-    - New font: MuseJazzText.
+    - New font: [MuseJazzText](https://www.chordpro.org/beta/chordpro-fonts/#method-1-using-a-font-description).
 
-    - (Experimental) "allpages" anchor for images. Similar to the
-      "page" anchor, but the image is repeated on *every* page of the song.
+    - (Experimental) [allpages](https://www.chordpro.org/beta/directives-image/#anchoranchor) anchor for images. Similar to the
+      _page_ anchor, but the image is repeated on *every* page of the song.
 
     - Lilypond delegate supports a property "program" to explicitly
       designate the Lilypond program.
 
-    - Allow setting of preferred extension for ChordPro song file names.
+    - GUI: Allow setting of preferred extension for ChordPro song file names.
 
     - Filenames in filelists may be quoted, even if no options
       are involved.
 
     - Filenames in filelists are considered relative to the filelist.
 
-    - When saving a preview PDF, the default filename is derived from
+    - GUI: When saving a preview PDF, the default filename is derived from
       the current song or folder.
 
     - Are you using the preprocessor in your abc and ly environments?
       Please use the more general parser.preprocess.env-... instead.
 
-    - Config settings.maj7delta to obtain a delta symbol instead of 'maj7'
+    - Config [settings.maj7delta[(https://www.chordpro.org/beta/chordpro-configuration-generic/#general-settings) to obtain a delta symbol instead of 'maj7'
       in chord names.
 
-    - (Experimental) Use ChordPro Symbols from markup.
+    - (Experimental) Use [ChordPro Symbols]() from markup.
 
     - Songbooks now can have both a cover and front matter.
 

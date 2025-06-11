@@ -59,7 +59,7 @@ names. ChordPro predefines the following font families:
 ### Why is using font descriptions important?
 
 Because ChordPro allows you to use [markup]({{< relref
-"ChordPro_Markup.html" >}}) in all your lyrics, titles and so on. For
+"ChordPro-Markup.html" >}}) in all your lyrics, titles and so on. For
 example:
 
     [C]winkle, twinkle <bold>little</bold> [G]star

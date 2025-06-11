@@ -28,7 +28,7 @@ Example:
 [C]Twinkle, twinkle, [F]little [C]star
 ````
 
-Texts and chords can use [ChordPro Markup]({{< relref "ChordPro_Markup" >}})
+Texts and chords can use [ChordPro Markup]({{< relref "ChordPro-Markup" >}})
 and [metadata]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
 
 Lines that start with a hash `#` are ignored.
