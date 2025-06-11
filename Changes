@@ -1,4 +1,4 @@
-0.000
+6.079.0
 
     !Highlights
 
@@ -7,6 +7,24 @@
     - [Bookmarks](https://www.chordpro.org/beta/chordpro_markup/#bookmarks).
 
     - [Break items](https://www.chordpro.org/beta/table_of_contents/#break) in Table of Content lines.
+
+    !GUI improvements
+
+    - You can now set the preferred filename extension for ChordPro
+      song file names.
+
+    - When saving a preview PDF, the default output filename is derived from
+      the current song or folder.
+
+    - ChordPro will no longer offer saving the preview on exit. It can
+      easily be regenerated and exported if needed.
+
+    - The editor no longer shows line numbers by default. You can
+      change this in the settings for the editor.
+      Line numbers will always be shown when the messages pane is visible.
+
+    - The save and clean operations for the messages are now
+      provided by buttons on the messages pane itself.
 
     !Other improvements
 
@@ -20,38 +38,26 @@
     - Lilypond delegate supports a property "program" to explicitly
       designate the Lilypond program.
 
-    - GUI: Allow setting of preferred extension for ChordPro song file names.
-
     - Filenames in filelists may be quoted, even if no options
       are involved.
 
     - Filenames in filelists are considered relative to the filelist.
 
-    - GUI: When saving a preview PDF, the default filename is derived from
-      the current song or folder.
-
     - Are you using the preprocessor in your abc and ly environments?
       Please use the more general parser.preprocess.env-... instead.
 
-    - Config [settings.maj7delta[(https://www.chordpro.org/beta/chordpro-configuration-generic/#general-settings) to obtain a delta symbol instead of 'maj7'
+    - Config [settings.maj7delta](https://www.chordpro.org/beta/chordpro-configuration-generic/#general-settings) to obtain a delta symbol instead of 'maj7'
       in chord names.
 
-    - (Experimental) Use [ChordPro Symbols]() from markup.
+    - You can now use the special [ChordPro
+      Symbols](https://www.chordpro.org/beta/chordpro-symbols/) from
+      markup.
 
-    - Songbooks now can have both a cover and front matter.
+    - Songbooks now can have both a [cover](https://www.chordpro.org/beta/using-chordpro/#cover) and [front matter](https://www.chordpro.org/beta/using-chordpro/#front-matter).
 
-    - GUI does not longer offer saving the preview on exit. It can
-      easily be regenerated and exported if needed.
-
-    - GUI editor no longer shows line numbers by default. You can
-      change this in the settings for the editor.
-      Line numbers will always be shown when the messages pane is visible.
-
-    - GUI button changes for messages pane.
-
-    - Command line option --print-default-config will print the template
-      config unless the option is repeated. This is to avoid confusing
-      novice users.
+    - To avoid confusion, command line option `--print-default-config`
+      will now print the **template** config instead of the **full**
+      config. To print the full config, repeat the option.
 
     - In case of emergency it is now possible to obtain chord brackets
       in lyrics and annotations.
@@ -59,7 +65,7 @@
     - Allow name based array access in config augment.
 
     - Font specifications in the config may now carry (some) properties.
-      E.g. pdf.fonts.comment_box : "Helvetica 12; frame=1".
+      E.g. `pdf.fonts.comment_box : "sans 12; frame=1"`.
 
     !Bug Fixes
 
@@ -84,6 +90,7 @@
     - (Wx) Prevent recursion in saved preferences.
     - Fix #555, #550, #542, #315.
     - Fix crash with {comment: [chord]} in 2-pass mode.
+    - Fix problems with images in 2-pass mode.
 
 6.070 2024-12-25
 

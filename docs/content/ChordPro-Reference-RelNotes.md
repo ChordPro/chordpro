@@ -1,5 +1,71 @@
 # Release info
 
+## 6.079.0
+
+Under development
+
+
+### Highlights
+
+* Support for [strum patterns](https://www.chordpro.org/beta/directives-env_grid/#strums) in grids.
+* [Bookmarks](https://www.chordpro.org/beta/chordpro_markup/#bookmarks).
+* [Break items](https://www.chordpro.org/beta/table_of_contents/#break) in Table of Content lines.
+
+### GUI improvements
+
+* You can now set the preferred filename extension for ChordPro song file names.
+* When saving a preview PDF, the default output filename is derived from the current song or folder.
+* ChordPro will no longer offer saving the preview on exit. It can easily be regenerated and exported if needed.
+* The editor no longer shows line numbers by default. You can change this in the settings for the editor. Line numbers will always be shown when the messages pane is visible.
+* The save and clean operations for the messages are now provided by buttons on the messages pane itself.
+
+### Other improvements
+
+* New metadata directives: [sortartist](https://www.chordpro.org/beta/directives-sortartist/) and [tag](https://www.chordpro.org/beta/directives-tag/).
+* New font: [MuseJazzText](https://www.chordpro.org/beta/chordpro-fonts/#method-1-using-a-font-description).
+* (Experimental) [allpages](https://www.chordpro.org/beta/directives-image/#anchoranchor) anchor for images. Similar to the _page_ anchor, but the image is repeated on *every* page of the song.
+* Lilypond delegate supports a property "program" to explicitly designate the Lilypond program.
+* Filenames in filelists may be quoted, even if no options are involved.
+* Filenames in filelists are considered relative to the filelist.
+* Are you using the preprocessor in your abc and ly environments? Please use the more general parser.preprocess.env-... instead.
+* Config [settings.maj7delta](https://www.chordpro.org/beta/chordpro-configuration-generic/#general-settings) to obtain a delta symbol instead of 'maj7' in chord names.
+* You can now use the special [ChordPro Symbols](https://www.chordpro.org/beta/chordpro-symbols/) from markup.
+* Songbooks now can have both a [cover](https://www.chordpro.org/beta/using-chordpro/#cover) and [front matter](https://www.chordpro.org/beta/using-chordpro/#front-matter).
+* To avoid confusion, command line option `--print-default-config` will now print the **template** config instead of the **full** config. To print the full config, repeat the option.
+* In case of emergency it is now possible to obtain chord brackets in lyrics and annotations.
+* Allow name based array access in config augment.
+* Font specifications in the config may now carry (some) properties. E.g. `pdf.fonts.comment_box : "sans 12; frame=1"`.
+
+### Bug Fixes
+
+* Some issues with Unicode filenames on Windows.
+* Some issues with line endings on Windows.
+* Fix image alignment with indent.
+* Fix title swap even when using title-even format.
+* Fix problems with save/restore settings on Windows.
+* Fix reading from "-" (standard input).
+* Fix problem with a2crd from wx on Windows.
+* Fix issues #459, #512, #528, #534, #537.
+* Fix issue #544 Issue with special character in metadata during export when used in filename.
+* (PDF) Fix progress count if multi-pass.
+* Fix diagnostic in file load.
+* Fix *size reset after *font reset.
+* Fix/Doc song and page metadata substitutions.
+* Suppress labels for grids when lyrics-only.
+* Suppress empty lines after grids when lyrics-only.
+* Fix crash with chords in grid margins.
+* Fix topic localization in fix_musicsyms.
+* TextBlock: Default colour to style colour.
+* (Wx) Prevent recursion in saved preferences.
+* Fix #555, #550, #542, #315.
+* Fix crash with {comment: [chord]} in 2-pass mode.
+* Fix problems with images in 2-pass mode.
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.  
+Please use the [issue tracker](https://github.com/ChordPro/chordpro/issues) for bugs reports.
+
 ## 6.070
 
 Released: 2024-12-25
@@ -39,11 +105,6 @@ Released: 2024-12-25
 * (Wx, MSWindows only) Use Edge for WebView (PDF view). Requires custom wxWidgets build.
 * Change handling of NC (issue #441).
 * Fix invalid font names for Courier/Mono Italic (should be Oblique).
-
-### Social and support
-
-[User community](https://groups.io/g/ChordPro) for feedback and help.  
-Please use the [issue tracker](https://github.com/ChordPro/chordpro/issues) for bugs reports.
 
 ## 6.060
 

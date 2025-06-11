@@ -133,7 +133,6 @@ output.
 * [start_of_abc]({{< relref "Directives-env_abc" >}}) / [end_of_abc]({{< relref "Directives-env_abc" >}})
 * [start_of_ly]({{< relref "Directives-env_ly" >}}) / [end_of_ly]({{<
   relref "Directives-env_ly" >}}) (Lilypond embedding)
-* [start_of_strum]({{< relref "Directives-env_strum" >}}) / [end_of_strum]({{< relref "Directives-env_strum" >}})
 * [start_of_svg]({{< relref "Directives-env_svg" >}}) / [end_of_svg]({{< relref "Directives-env_svg" >}})
 * [start_of_textblock]({{< relref "Directives-env_textblock" >}}) / [end_of_textblock]({{< relref "Directives-env_textblock" >}})
 

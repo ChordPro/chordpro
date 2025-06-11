@@ -685,3 +685,8 @@ settings.strict : true
 # parser.preprocess.directive : []
 # parser.preprocess.songline  : []
 
+// For the exceptional case you need brackets [] in your lyrics or annotations.
+// These characters are replaced by normal brackets **after** chord analysis.
+// E.g. parser.altbrackets: "«»"
+// Use wisely. Better still, do not use this.
+# parser.altbrackets : null

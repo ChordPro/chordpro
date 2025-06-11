@@ -68,7 +68,20 @@ be used to produce documents with cover and back pages.
 
 ### cover
 
-Same as [`--front-matter`]({{< relref "#front-matter" >}}).
+`--cover=`*FILE*
+
+Prepends the contents of the named PDF document to the output. This can
+be used to produce documents with cover pages.
+
+See also [`--front-matter`]({{< relref "#front-matter" >}}).
+
+If both a cover and front matter is used, the cover will be first,
+followed by the front matter.
+
+See also [`--title`]({{< relref "#title" >}}).
+
+If both a cover and title is used, an automatically generated cover
+based on the title will be used instead.
 
 ### crd
 
@@ -177,10 +190,14 @@ Filenames lines that contain whitespace must be quoted to avoid ambiguities.
 ### front-matter
 
 `--front-matter=`*FILE*
-`--cover=`*FILE*
 
 Prepends the contents of the named PDF document to the output. This can
 be used to produce documents with cover pages.
+
+See also [`--cover`]({{< relref "#cover" >}}).
+
+If both a cover and front matter is used, the cover will be first,
+followed by the front matter.
 
 ### lyrics-only
 
@@ -307,6 +324,23 @@ ChordPro standard.
 Enabled by default.
 
 See [`--no-strict`]({{< relref "#no-strict" >}}).
+
+### subtitle
+
+See [`--title`]({{< relref "#title" >}}).
+
+### title
+
+`--title=` _text_  
+`--subtitle=` _text_
+
+Using `--title` will make ChordPro prepend a standard cover page to
+the output document.  
+`--subtitle` can be used to provide an additional (sub)title.
+
+See also [`--cover`]({{< relref "#cover" >}}).
+
+If both a cover and title is used, `--cover` is ignored.
 
 ### toc
 

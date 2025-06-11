@@ -71,3 +71,26 @@ Note that the selector is always a pattern.
 See also [Unicode escape characters in input]({{<relref
 "Support-Hints-And-Tips#unicode-escape-characters-in-input">}}) in the 
 [Hints and Tips]({{< relref "Support-Hints-And-Tips" >}}).
+
+## Alternative chord brackets
+
+In the exceptional case you really need chord brackets `[` `]` in your
+lyrics or annotations, you can set `parser.altbrackets` to a
+string of two characters.
+These characters will be  replaced by normal brackets **after**
+chord analysis.
+
+For example:
+
+    parser.altbrackets: "«»"
+
+Now the lyrics line
+
+    [A]A beautifull «B»day
+	
+Will result in
+
+    A
+	A beautifull [B]day
+
+Use wisely. Better still, do not use this.
