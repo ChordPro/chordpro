@@ -1394,7 +1394,7 @@ sub directive {
 	    elsif ( $shape eq "" ) {
 		$self->add( type => "set",
 			    name => "gridparams",
-			    value => $grid_arg );
+			    value => [ @$grid_arg[0..3] ] );
 	    }
 	    elsif ( $shape =~ m/^
 			      (?: (\d+) \+)?
@@ -1404,15 +1404,16 @@ sub directive {
 		do_warn("Invalid grid params: $shape (must be non-zero)"), return
 		  unless $2;
 		$grid_arg = [ $2, $3//1, $1//0, $4//0 ];
+		push( @$grid_arg, $5 ) if defined $5;
 		$self->add( type => "set",
 			    name => "gridparams",
-			    value =>  [ @$grid_arg, $5||"" ] );
-		push( @labels, $5 ) if length($5||"");
+			    value =>  [ @$grid_arg ] );
+		push( @labels, $5 ) if defined($5);
 	    }
 	    elsif ( $shape ne "" ) {
 		$self->add( type => "set",
 			    name => "gridparams",
-			    value =>  [ @$grid_arg, $shape ] );
+			    value =>  [ @$grid_arg[0..3], $shape ] );
 		push( @labels, $shape );
 	    }
 	    if ( ($kv->{label}//"") ne "" ) {
