@@ -60,4 +60,8 @@ pdf.fonts.footer: "sans bold 100; color=green"
 
 pdf.csv.songsonly: false
 
+pdf.csv.fields : [ append
+	    { name : side          meta : page.side  }
+	]
+
 debug.runtimeinfo: false

@@ -445,6 +445,10 @@ sub generate_songbook {
     while ( @parts ) {
 	my $part = shift(@parts);
 	next unless $pages_of{$part};
+
+	# Always align parts, regardless of pagealign-songs.
+	local $pr->{ps}->{'pagealign-songs'} = 1;
+
 	if ( @parts ) {
 	    if ( $pr->page_align( $start_of{$part},
 				  $part eq "songbook" ? is_odd($page_offset) : 0 ) ) {

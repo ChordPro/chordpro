@@ -1214,6 +1214,8 @@ sub generate_song {
 	    $class = 1;		# first of a song
 	}
 	$s->{meta}->{'page.class'} = $classes[$class];
+	# Remember first page (see below).
+	$s->{meta}->{'page.first.side'} //= $s->{meta}->{'page.side'};
 	warn("page: $page_num($page_idx), side = ", $s->{meta}->{'page.side'},
 	     " class = ", $classes[$class], "\n")
 	  if $::config->{debug}->{pages} & 0x01;
@@ -1237,6 +1239,9 @@ sub generate_song {
 	}
 
     }
+
+    # This is mainly for debugging/development.
+    $s->{meta}->{'page.side'} = delete $s->{meta}->{'page.first.side'};
 
     return $pages;
 }
