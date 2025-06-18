@@ -167,19 +167,19 @@ sub fix_musicsyms {
 	if ( /♯/ ) {
 	    unless ( $font->{has_sharp} //=
 		     $font->{fd}->{font}->glyphByUni(ord("♯")) ne ".notdef" ) {
-		s;♯;<span font="chordprosymbols">#</span>;g;
+		s;♯;<sym sharp/>;g;
 	    }
 	}
 	if ( /♭/ ) {
 	    unless ( $font->{has_flat} //=
 		     $font->{fd}->{font}->glyphByUni(ord("♭")) ne ".notdef" ) {
-		s;♭;<span font="chordprosymbols">!</span>;g;
+		s;♭;<sym flat/>;g;
 	    }
 	}
 	if ( /Δ/ ) {
 	    unless ( $font->{has_delta} //=
 		     $font->{fd}->{font}->glyphByUni(ord("Δ")) ne ".notdef" ) {
-		s;Δ;<span font="chordprosymbols">*</span>;g;
+		s;Δ;<sym delta/>;g;
 	    }
 	}
     }

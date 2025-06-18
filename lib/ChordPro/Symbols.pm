@@ -74,23 +74,16 @@ EOD
 	$symbols->{$name} = $glyph;
     }
 
-    @a = split( /\s+/, <<'EOD' );
-flat              !
-natural           "
-sharp             #
-repeat-start      $
-repeat-end        %
-repeat-end-start  &
-repeat2           (
-repeat1           )
-delta             *
-EOD
+    my $start = ord("!");
+    # Something peculiar happening here...
+    # If repeat-end-start1 maps to ' it cannot be used (comes out as undefined glyph).
+    $symbols->{$_} = sprintf("%c", $start++ )
+      for qw( flat natural sharp delta
+	      repeat-start repeat-end repeat-end-start1 repeat-colon repeat1 repeat2 repeat-end-start );
 
-    while ( @a ) {
-	my $name  = shift(@a);
-	my $glyph = shift(@a);
-	$symbols->{$name} = $glyph;
-    }
+    $start = ord(":");
+    $symbols->{$_} = sprintf("%c", $start++ )
+      for qw( bar double-bar end-bar start-bar thick-bar double-thick-bar );
 
     $symbols->{"circle-$_"} = $_ for "0".."9";
     $symbols->{"circle-$_"} = $_ for "A".."Z";
@@ -145,7 +138,7 @@ sub as_json() {
     for ( sort keys %$symbols ) {
 	$ret .= qq{  "$_" : };
 	my $s = $symbols->{$_};
-	if ( $s ge "0" && $s le "Z" ) {
+	if ( $s ge "!" && $s le "}" ) {
 	    $ret .= qq{"$s"};
 	}
 	else {
@@ -160,3 +153,8 @@ sub as_json() {
 push( @EXPORT_OK, qw( as_json ) );
 
 1;
+
+unless ( caller ) {
+    $symbols || _build();
+    print as_json();
+}

@@ -1,6 +1,6 @@
 ---
 title: "ChordPro Symbols"
-description: "ChordPro Sy,bols"
+description: "ChordPro Symbols"
 ---
 
 ## ChordPro Symbols
@@ -53,6 +53,7 @@ where _name_ is one of the names from the list below.
 | <span class="sym">&#x2195;</span> | `arrow-up-with-accent-and-staccato` |
 | <span class="sym">&#x2191;</span> | `arrow-up-with-arpeggio` |
 | <span class="sym">&#x2192;</span> | `arrow-up-with-staccato` |
+| <span class="sym">&#x003a;</span> | `bar` |
 | <span class="sym">&#x0030;</span> | `circle-0` |
 | <span class="sym">&#x0031;</span> | `circle-1` |
 | <span class="sym">&#x0032;</span> | `circle-2` |
@@ -89,13 +90,19 @@ where _name_ is one of the names from the list below.
 | <span class="sym">&#x0058;</span> | `circle-X` |
 | <span class="sym">&#x0059;</span> | `circle-Y` |
 | <span class="sym">&#x005a;</span> | `circle-Z` |
-| <span class="sym">&#x002a;</span> | `delta` |
+| <span class="sym">&#x0024;</span> | `delta` |
+| <span class="sym">&#x003b;</span> | `double-bar` |
+| <span class="sym">&#x003f;</span> | `double-thick-bar` |
+| <span class="sym">&#x003c;</span> | `end-bar` |
 | <span class="sym">&#x0021;</span> | `flat` |
 | <span class="sym">&#x0022;</span> | `natural` |
-| <span class="sym">&#x0025;</span> | `repeat-end` |
-| <span class="sym">&#x0026;</span> | `repeat-end-start` |
-| <span class="sym">&#x0024;</span> | `repeat-start` |
+| <span class="sym">&#x0028;</span> | `repeat-colon` |
+| <span class="sym">&#x0026;</span> | `repeat-end` |
+| <span class="sym">&#x0027;</span> | `repeat-end-start` |
+| <span class="sym">&#x0025;</span> | `repeat-start` |
 | <span class="sym">&#x0029;</span> | `repeat1` |
-| <span class="sym">&#x0028;</span> | `repeat2` |
+| <span class="sym">&#x002a;</span> | `repeat2` |
 | <span class="sym">&#x0023;</span> | `sharp` |
+| <span class="sym">&#x003d;</span> | `start-bar` |
+| <span class="sym">&#x003e;</span> | `thick-bar` |
 { .table .table-striped .table-bordered .table-sm }
