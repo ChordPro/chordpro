@@ -566,11 +566,11 @@ Prints chord diagrams of all user defined chords used in a song.
 
 =item B<--even-pages-number-left> (short B<-L>)
 
-Prints even/odd pages with pages numbers left on even pages.
+Not supported. Use C<pdf.even-odd-pages> in the config instead.
 
 =item B<--odd-pages-number-left>
 
-Prints even/odd pages with pages numbers left on odd pages.
+Not supported. Use C<pdf.even-odd-pages> in the config instead.
 
 =item B<--page-size=>I<FMT> (short: B<-P>) *
 
@@ -1427,19 +1427,18 @@ Options:
     --version  -V                 Prints version and exits
 
 Chordii compatibility.
-Options marked with * are better specified in the config file.
-Options marked with - are ignored.
+Options marked with * are better handled in the config file.
     --chord-font=FONT  -C         *Sets chord font
     --chord-grid-size=N  -s       *Sets chord diagram size [30]
     --chord-grids-sorted  -S      *Prints chord diagrams ordered by key
     --chord-size=N  -c            *Sets chord size [9]
-    --dump-chords  -D             Dumps chords definitions (PostScript)
+    --dump-chords  -D             Dumps chords definitions (PDF)
     --dump-chords-text  -d        Dumps chords definitions (Text)
-    --even-pages-number-left  -L  *Even pages numbers on left
-    --odd-pages-number-left       *Odd pages numbers on left
+    --even-pages-number-left  -L  *Not supported
+    --odd-pages-number-left       *Not supported.
     --no-chord-grids  -G          *Disables printing of chord diagrams
     --no-easy-chord-grids  -g     Not supported
-    --page-number-logical  -n     -Numbers logical pages, not physical
+    --page-number-logical  -n     Not supported
     --page-size=FMT  -P           *Specifies page size [letter, a4 (default)]
     --single-space  -a            *Automatic single space lines without chords
     --text-size=N  -t             *Sets text size [12]

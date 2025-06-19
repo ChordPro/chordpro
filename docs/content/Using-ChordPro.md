@@ -471,11 +471,12 @@ Not supported.
 
 `--even-pages-number-left` (short `-L`)
 
-Prints even/odd pages with pages numbers left on even pages.
+Not supported.
 
-Configuration file settings:
+Use configuration file settings:
 [`pdf.even-odd-pages`]({{< relref "ChordPro-Configuration-PDF#even-odd-page-printing" >}})
-and [Page headers and footers]({{< relref "ChordPro-Configuration-PDF#page-headers-and-footers" >}}).
+and [Page headers and footers]({{< relref
+"ChordPro-Configuration-PDF#page-headers-and-footers" >}}) instead.
 
 ### no-easy-chord-grids
 
@@ -505,11 +506,12 @@ Configuration file setting:
 
 `--odd-pages-number-left`
 
-Prints even/odd pages with pages numbers left on odd pages.
+Not supported.
 
-Configuration file settings:
+Use configuration file settings:
 [`pdf.even-odd-pages`]({{< relref "ChordPro-Configuration-PDF#even-odd-page-printing" >}})
-and [Page headers and footers]({{< relref "ChordPro-Configuration-PDF#page-headers-and-footers" >}}).
+and [Page headers and footers]({{< relref
+"ChordPro-Configuration-PDF#page-headers-and-footers" >}}) instead.
 
 ### page-number-logical
 

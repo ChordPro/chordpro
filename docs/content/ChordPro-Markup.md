@@ -247,4 +247,4 @@ This may be considered a feature.
 
 ## Credits
 
-Parts of this information is derived from the official [Pango documentation](https://docs.gtk.org/Pango/pango_markup.html#pango-markup).
+Parts of this information are derived from the official [Pango documentation](https://docs.gtk.org/Pango/pango_markup.html#pango-markup).

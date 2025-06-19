@@ -213,8 +213,9 @@ sub generate_song {
     my $x;
     my $y = $ps->{papersize}->[1] - $ps->{margintop};
 
-    $ps->{'even-odd-pages'} =  1 if $options->{'even-pages-number-left'};
-    $ps->{'even-odd-pages'} = -1 if $options->{'odd-pages-number-left'};
+    # We do no longer support these. They were wrong anyway,
+    # $ps->{'even-odd-pages'} =  1 if $options->{'even-pages-number-left'};
+    # $ps->{'even-odd-pages'} = -1 if $options->{'odd-pages-number-left'};
 
     my $st = $s->{settings}->{titles} || $::config->{settings}->{titles};
     if ( defined($st)
