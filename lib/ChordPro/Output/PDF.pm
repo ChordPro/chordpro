@@ -64,8 +64,13 @@ sub generate_songbook {
     # get the songs properly aligned.
     my $prefill = 0;
     if ( $ps->{'sort-pages'} ) {
-	$prefill = sort_songbook($sb);
-	return unless defined $prefill; # cancelled
+	if ( $ps->{'sort-pages'} eq '2page' ) {
+	    $prefill = 1;
+	}
+	else {
+	    $prefill = sort_songbook($sb);
+	    return unless defined $prefill; # cancelled
+	}
     }
 
     progress( phase   => "PDF",
@@ -107,7 +112,7 @@ sub generate_songbook {
     my $page = 1;
     # Logical page number offset.
     my $page_offset = ( $options->{'start-page-number'} || 1 ) - 1;
-    $page_offset++ if $prefill;
+    $page_offset++ if $prefill && is_even($page_offset);
 
 #    if ( $ps->{'even-odd-pages'} && is_odd($page_offset) ) {
 #	warn("Warning: Specifying an even start page when ".
@@ -705,7 +710,7 @@ sub sort_songbook {
 	}
     }
 
-    if ( $sorting =~ /compact/ ) {
+    if ( 0 and $sorting =~ /compact/ ) {
 	my $pagecount = $page;
 	my $songs = @songlist;
 	my $i = 0;
@@ -750,6 +755,7 @@ sub sort_songbook {
 	my $used = "";
 	# First an arbitrary odd-pages song.
 	for ( my $i=0; $i < @songlist; $i++ ) {
+	    next unless is_odd( $options->{'start-page-number'}||1 );
 	    next unless is_odd($songlist[$i]->{meta}->{pages});
 	    push( @new, $songlist[$i] );
 	    vec( $used, $i, 1 ) = 1;

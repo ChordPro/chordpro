@@ -446,7 +446,6 @@ that you can view it without having to turn a page.
 
 * `desc`: modifier for title or author to sort descending.
 
-
 ## Page headers and footers
 
 ChordPro distinguishes four classes of output pages:

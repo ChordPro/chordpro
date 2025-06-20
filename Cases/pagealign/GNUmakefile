@@ -15,6 +15,7 @@ base := $(addprefix p,\
 $(foreach x,n e o,\
 $(foreach y,0 1 2,\
 $(foreach z,1 2,$x$y$z))))
+base += po11p po11c
 pdfs := $(addsuffix .pdf,${base})
 csvs := $(addsuffix .csv,${base})
 
@@ -43,3 +44,23 @@ $(foreach even,-1 0 1,\
   $(foreach align,0 1 2,\
     $(foreach page,1 2,\
       $(eval $(call rule,${even},${align},${page})))))
+
+po11c.pdf : ${PDEPS}
+	${CHORDPRO} $< -o $@ \
+	  --def pdf.even-odd-pages=1 \
+	  --def pdf.pagealign-songs=1 \
+	  --start-page-number=1 \
+	  --def pdf.sort-pages=compact \
+	  ${OPTS}
+	setmeta.sh $@
+	diff $(addprefix $(basename $@), .csv .ref)
+
+po11p.pdf : ${PDEPS}
+	${CHORDPRO} $< -o $@ \
+	  --def pdf.even-odd-pages=1 \
+	  --def pdf.pagealign-songs=1 \
+	  --start-page-number=1 \
+	  --def pdf.sort-pages=2page \
+	  ${OPTS}
+	setmeta.sh $@
+	diff $(addprefix $(basename $@), .csv .ref)

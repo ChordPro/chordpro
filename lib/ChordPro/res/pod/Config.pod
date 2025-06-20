@@ -722,7 +722,7 @@
     	}
         }
     
-        // Dual (odd/even) pages when set to true (1).
+        // Dual (odd/even) pages when set to true.
         // False means all pages will be the same (odd)
         // A value of -1 will produce dual pages with the left/right
         // parts of headings/footers swapped.
@@ -733,7 +733,7 @@
         // (with headings/footers) is used to align.
         // Note this only applies to songs. Other parts (covers,
         // tables of conents, etc.) are always aligned.
-        pagealign-songs : 1
+        pagealign-songs : true
     
         // How to reorder song pages.
         // Sort pages by "title", "subtitle", "2page", "compact", "desc".
