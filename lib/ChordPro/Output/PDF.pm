@@ -327,7 +327,7 @@ sub generate_songbook {
 
     # Prepend the front matter songs.
 
-    $force_align = $ps->{'pagealign-songs'} > 1;
+    $force_align = $ps->{'even-odd-pages'} && ($ps->{'pagealign-songs'} > 1);
     if ( $frontmatter_songbook && @{$frontmatter_songbook->{songs}} ) {
 	return unless progress( msg => "ToC" );
 	$page = 1;
@@ -450,27 +450,29 @@ sub generate_songbook {
 	warn("-- final\n");
     }
 
-    # Alignment.
-    my @parts = qw( front toc songbook back );
-    while ( @parts ) {
-	my $part = shift(@parts);
-	next unless $pages_of{$part};
+    # Alignment. Only if odd/even pages.
+    if ( $ps->{'even-odd-pages'} ) {
+	my @parts = qw( front toc songbook back );
+	while ( @parts ) {
+	    my $part = shift(@parts);
+	    next unless $pages_of{$part};
 
-	# Always align parts, regardless of pagealign-songs.
-	local $pr->{ps}->{'pagealign-songs'} = 1;
+	    # Always align parts, regardless of pagealign-songs.
+	    local $pr->{ps}->{'pagealign-songs'} = 1;
 
-	if ( @parts ) {
-	    if ( $pr->page_align( $start_of{$part},
-				  $part eq "songbook"
-				  ? $prefill
-				    ? 1
-				    : is_odd($page_offset)
-				  : 0 ) ) {
-		$start_of{$_}++ for @parts;
+	    if ( @parts ) {
+		if ( $pr->page_align( $start_of{$part},
+				      $part eq "songbook"
+				      ? $prefill
+				        ? 1
+				        : is_odd($page_offset)
+				      : 0 ) ) {
+		    $start_of{$_}++ for @parts;
+		}
 	    }
-	}
-	else {
-	    $pr->page_align( $start_of{$part}, is_odd($back_matter->pages) );
+	    else {
+		$pr->page_align( $start_of{$part}, is_odd($back_matter->pages) );
+	    }
 	}
     }
 

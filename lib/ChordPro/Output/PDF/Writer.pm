@@ -606,7 +606,8 @@ sub page_align {
     # Only align to odd pages.
     return 0 if $even xor is_odd($page);	# already odd/even
     my $ps = $self->{ps};
-    return 0 unless $ps->{'pagealign-songs'}; # no alignment
+    return 0 unless $ps->{'even-odd-pages'};	# no alignment
+    return 0 unless $ps->{'pagealign-songs'};	# no alignment
 
     my $bg;
     if ( ($bg = $ps->{formats}->{filler}->{background})

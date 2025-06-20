@@ -1147,7 +1147,7 @@ sub generate_song {
 
     my $pages = $page_num - $startpage + 1;
     $newpage->(), $pages++,
-      if ( $ps->{'pagealign-songs'} > 1 && $pages % 2
+      if ( $ps->{'even-odd-pages'} && $ps->{'pagealign-songs'} > 1 && $pages % 2
 	   && ( $opts->{songindex} < $opts->{numsongs}
 		|| $opts->{forcealign} ) );
 
