@@ -357,38 +357,69 @@ Properties for the lines of grid sections.
 Note that command line option `--lyricsonly` implies `"show":false`
 for grids.
 
-## Even/odd page printing
+## Dual page printing
 
-Pages can be printed neutrally (all pages the same) or with differing left and right pages.  
-This affects the page titles and footers, and the page margins.
+### Page numbering basics
 
-    even-odd-pages : 1
+Pages in PDF output are numbered sequentially, each with an _ordinal
+number_. The ordinal number of the first page is `1`, the third `3`
+_etc._, so these are 'odd' pages, because their ordinal number is odd.
+Similarly, the second (`2`) and fourth (`4`) ordinal pages are 'even'.
 
-The default value is `1`, which means that the first page is right, the second page is left, and so on.  
-The value `-1` means the first page is left, the second page is right, and so
-on.  
-The value `0` makes all pages the same (right).
+The _page number_ is what gets displayed on the page, and usually
+differs from the ordinal number. Contents pages use lower-case Roman
+page numbers, such as `i`, `ii`, `iii`. Song pages then use Arabic
+page numbers, such as `1`, `2`, `3`, usually starting at `1`. So, for
+example, if a songbook has four pages of Contents, the first song will
+then have an _ordinal_ number of `5`, but a _page number_ of `1`.
 
-The setting of `even-odd-pages` affects content items cover page (if
-any), table of contents (if any) and the songbook. These content items
-will start on a right page (`even-odd-pages` = `1`) or a left page
-(`even-odd-pages` = `-1`).
+### Dual page settings
 
-The setting of `pagealign-songs` controls whether each *song* starts on
-an even or odd page as well.
+ChordPro can produce PDF documents with single-page layout (all pages the same) or with dual layout (different left and right pages).
 
-    pagealign-songs : 1
+    even-odd-pages : true
 
-With a value greater than `1`, ChordPro will additionally force the
-resultant PDF to always have an even number of pages.
+The default value is `true`, to use dual page layout. A value of
+`false` means a single-page layout is used for all pages.
 
-Note that with `pagealign-songs` = 1 empty (blank) pages are inserted
-(as conventional in book printing), while with `pagealign-songs` > 1
-the empty pages have headings and footers.
+In dual page printing, pages with odd ordinal numbers fall on the
+right, so they use margins and headers/footer settings for right-hand
+(default) pages. Even-numbered pages use a different layout – either
+mirroring the right page margins and headers/footers, or applying
+custom settings for even pages.
+
+In single-page layout (`even-odd-pages : false`), all pages use the
+default (right) page layout for margins and headers/footers.
+
+Enabling dual page layout will have all output parts (cover page,
+front matter, tables of contents, the songbook, and back matter)
+aligned to an odd page.
+
+### Aligning songs with page layouts
+
+If dual page layout is enabled, the setting of `pagealign-songs` controls
+whether each *song* will start on an odd page as well.
+
+    pagealign-songs : true
+
+With a value of `false` or `0`, each one starts on the next available page.
+
+The value `true` or `1` (default) will make each song start on an odd page.
+If necessary, an empty (blank) filler page will be inserted to obtain the
+desired alignment.
+
+With a value greater than `1`, the alignment pages will have headings
+and footers as if they were part of the song. Additionally, the
+resultant PDF will be padded with an empty page to an even number of pages.
+
+Note: with `even-odd-pages : true`, cover, front matter, contents and
+back matter pages are always aligned, to achieve standard book layout,
+such as front cover on a right (odd) page and back cover on a left
+(even) page.
 
 ## Page reordering
 
-Pages can be reordered based on the song title or subtitle.
+Song pages can be reordered based on the song title or subtitle.
 Also possible is to align songs with two pages on an even page, so
 that you can view it without having to turn a page.
 

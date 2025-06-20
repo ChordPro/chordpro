@@ -60,8 +60,12 @@ sub generate_songbook {
     $extra_matter++ if $ps->{'back-matter'};
     $extra_matter++ if $options->{csv};
 
+    # $prefill indicates that in 2page mode, a filler page is needed to
+    # get the songs properly aligned.
+    my $prefill = 0;
     if ( $ps->{'sort-pages'} ) {
-	return unless sort_songbook($sb); # cancelled
+	$prefill = sort_songbook($sb);
+	return unless defined $prefill; # cancelled
     }
 
     progress( phase   => "PDF",
@@ -103,6 +107,7 @@ sub generate_songbook {
     my $page = 1;
     # Logical page number offset.
     my $page_offset = ( $options->{'start-page-number'} || 1 ) - 1;
+    $page_offset++ if $prefill;
 
 #    if ( $ps->{'even-odd-pages'} && is_odd($page_offset) ) {
 #	warn("Warning: Specifying an even start page when ".
@@ -451,7 +456,11 @@ sub generate_songbook {
 
 	if ( @parts ) {
 	    if ( $pr->page_align( $start_of{$part},
-				  $part eq "songbook" ? is_odd($page_offset) : 0 ) ) {
+				  $part eq "songbook"
+				  ? $prefill
+				    ? 1
+				    : is_odd($page_offset)
+				  : 0 ) ) {
 		$start_of{$_}++ for @parts;
 	    }
 	}
@@ -638,6 +647,7 @@ sub sort_songbook {
     my $page = $options->{"start-page-number"} ||= 1;
 
     my $sorting = $ps->{'sort-pages'};
+    my $filler = 0;		# filler for 2page
 
     if ( $sorting =~ /2page|compact/ ) {
 	# Progress indicator
@@ -735,7 +745,44 @@ sub sort_songbook {
 	@songlist = sort { $a->{meta}->{order} <=> $b->{meta}->{order} } @songlist;
     }
 
+    if ( $sorting =~ /compact/ ) {
+	my @new;
+	my $used = "";
+	# First an arbitrary odd-pages song.
+	for ( my $i=0; $i < @songlist; $i++ ) {
+	    next unless is_odd($songlist[$i]->{meta}->{pages});
+	    push( @new, $songlist[$i] );
+	    vec( $used, $i, 1 ) = 1;
+	    last;
+	}
+	##### TODO: If still empty, need filler.
+	$filler++ unless @new;
+
+	# Then all even-pages songs.
+	for ( my $i=0; $i < @songlist; $i++ ) {
+	    next if vec( $used, $i, 1 );
+	    next unless is_even($songlist[$i]->{meta}->{pages});
+	    push( @new, $songlist[$i] );
+	    vec( $used, $i, 1 ) = 1;
+	}
+
+	# Finally, all other odd-pages songs.
+	for ( my $i=0; $i < @songlist; $i++ ) {
+	    next if vec( $used, $i, 1 );
+	    next unless is_odd($songlist[$i]->{meta}->{pages});
+	    push( @new, $songlist[$i] );
+	    vec( $used, $i, 1 ) = 1;
+	}
+
+	die("compact ", scalar(@new), " <> ", scalar(@songlist), "!\n")
+	  unless scalar(@new) == scalar(@songlist);
+
+	@songlist = @new;
+    }
+
     $sb->{songs} = [@songlist];
+
+    return $filler;
 }
 
 sub config_pdfapi {

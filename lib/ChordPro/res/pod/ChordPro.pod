@@ -273,11 +273,11 @@ Prints chord diagrams of all user defined chords used in a song.
 
 =item B<--even-pages-number-left> (short B<-L>)
 
-Prints even/odd pages with pages numbers left on even pages.
+Not supported. Use C<pdf.even-odd-pages> in the config instead.
 
 =item B<--odd-pages-number-left>
 
-Prints even/odd pages with pages numbers left on odd pages.
+Not supported. Use C<pdf.even-odd-pages> in the config instead.
 
 =item B<--page-size=>I<FMT> (short: B<-P>) *
 

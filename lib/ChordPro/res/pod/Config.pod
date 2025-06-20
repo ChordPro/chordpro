@@ -722,15 +722,25 @@
     	}
         }
     
-        // Even/odd pages (1), odd/even (-1) or odd (0).
-        even-odd-pages : 1
+        // Dual (odd/even) pages when set to true (1).
+        // False means all pages will be the same (odd)
+        // A value of -1 will produce dual pages with the left/right
+        // parts of headings/footers swapped.
+        even-odd-pages : true
     
-        // Align songs to even/odd pages. When greater than 1, force alignment.
+        // With dual pages, align songs to odd pages by inserting
+        // a blank filler page. When greater than 1, a song page
+        // (with headings/footers) is used to align.
+        // Note this only applies to songs. Other parts (covers,
+        // tables of conents, etc.) are always aligned.
         pagealign-songs : 1
     
-        // How to reorder pages.
+        // How to reorder song pages.
         // Sort pages by "title", "subtitle", "2page", "compact", "desc".
         // "sort-pages" is a comma separated list of the options above.
+        // Note this only applies to songs. Other parts (covers,
+        // tables of conents, etc.) are not reordered.
+        //
         // title  : sort pages alphabetically by title.
         // subtitle : sort pages alphabetically by subtitle. If this is
         //          used together with title, only title is used.
