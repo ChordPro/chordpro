@@ -1106,7 +1106,7 @@ method parse( $ctx, $k, $v ) {
 
     while ( ( $k,$v) = each(%$kv) ) {
 	$res->{$k} = $v, next
-	  if $k =~ /^(size|color|bgcolor|base|href)$/;
+	  if $k =~ /^(size|color|bgcolor|href)$/;
 	$res->{text} = $glyphs->{$k}, next if defined $glyphs->{$k};
 	warn("Unknown attribute in <sym>: $k (ignored)\n");
     }
