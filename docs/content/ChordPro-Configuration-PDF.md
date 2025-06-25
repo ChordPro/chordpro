@@ -261,6 +261,7 @@ shown if `fingers` is true.
       hspace   :  3.95,   // horizontal space between, fraction of width
       vspace   :  3,      // vertical space between, fraction of height
       dotsize  :  0.8,    // of a cell
+      barstyle :  line    // or arc
       barwidth :  0.8,    // of a dot
       fingers  :  true,   // show fingering if available (or "below")
     },

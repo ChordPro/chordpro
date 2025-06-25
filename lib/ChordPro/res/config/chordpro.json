@@ -640,6 +640,9 @@ pdf {
 	// Size of the fret dot, fraction of cell width.
 	dotsize : 0.8
 
+	// Bas style. Straight line or arc.
+	barstyle: line
+
 	// Thickness of bars, fraction of dot width.
 	barwidth : 0.8
 

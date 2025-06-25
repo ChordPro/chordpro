@@ -1184,6 +1184,12 @@
 		  "minimum" : 0,
 		  "type" : "number"
 		},
+		"barstyle" : {
+		  "description" : "Style of bars, line or arc.",
+		  "default" : "line",
+		  "enum" : [ "line", "arc" ],
+		  "type" : "string"
+		},
 		"barwidth" : {
 		  "description" : "Thickness of bars, fraction of dot width.",
 		  "default" : 0.8,
