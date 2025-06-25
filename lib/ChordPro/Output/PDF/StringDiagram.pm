@@ -24,6 +24,7 @@ field $strings;			# number of strings
 field $hc;			# cells, horizontal (= strings)
 field $dot;			# dot size, fraction of cell width
 field $bsz;			# barre size, fraction of dot
+field $bstyle;      # barre style ("line", "arc")
 field $fsh;			# show fingers (0, 1, "below")
 field $fg;			# foreground color
 
@@ -41,6 +42,7 @@ ADJUST {
     $hc		  = $strings;
     $dot	  = $ctl->{dotsize} * ( $gh < $gw ? $gh : $gw );
     $bsz	  = $ctl->{barwidth} * $dot;
+    $bstyle   = $ctl->{barstyle} || "line";
     $fsh	  = $ctl->{fingers} || 0;
     $dcache = {} if $pr->{pdf} ne $pdf;
     $pdf          = $pr->{pdf};
@@ -197,6 +199,7 @@ method diagram_xo( $info ) {
 	my %h;
 	my $str = 0;
 	my $got = 0;
+	
 	foreach ( @{ $fingers } ) {
 	    $str++, next unless $info->{frets}->[$str] > 0;
 	    if ( $bar->{$_} ) {
@@ -210,19 +213,54 @@ method diagram_xo( $info ) {
 	    }
 	    $str++;
 	}
+	
 	if ( $got ) {
 	    $xo->save;
+	    
+	    if ($bstyle eq "line") {
 	    $xo->line_width($bsz)->line_cap(0);
+	    } else {
+	    #bar in "arc" style
+	    $xo->line_width($lw+0.2);
+	    }
+	    
 	    foreach ( sort keys %$bar ) {
 		my @bi = @{ $bar->{$_} };
+		#$bi array description = [finger, fret, first_string, last_string]
+		
 		if ( $bi[-2] == $bi[-1] ) { # not a bar
 		    delete $bar->{$_};
 		    next;
-		}
+		}		
+		
+		if ($bstyle eq "line") {
 		# Print the bar line.
 		$x = $bi[2]*$gw;
 		$xo->move( $x, -$nw -$bi[1]*$gh+$gh/2 );
 		$xo->hline( $x+($bi[3]-$bi[2])*$gw);
+		} else {
+		# Print arcs for barre
+		my $arcw = (($bi[3]-$bi[2])*$gw + 0.7*$gw)/2;
+		my $arch = 0.4*$gw;
+		my $arcy = -$nw -$bi[1]*$gh +$gh+0.25*$gh;
+		my $arcx = $bi[2]*$gw - (0.7*$gw)/2;
+		
+		if ($bi[1] == 1) {
+		# bar is on the first fret so bar arcs must be drawn above the nut
+		$arcy += ($nw);
+		}
+		
+		#draw first arc
+		$xo->move($arcx, $arcy);
+		$xo->arc($arcx+$arcw, $arcy, $arcw, $arch, 180, 0);
+		
+		#draw second arc a little higher, this is a fast way to have narrower corners look at the arc edge
+		$xo->move($arcx, $arcy-0.8);
+		$xo->arc($arcx+$arcw, $arcy-0.8, $arcw, $arch, 180, 0);
+		}
+				
+		$xo->stroke;
+		$xo->fill;
 	    }
 	    $xo->stroke->restore;
 	}
@@ -250,8 +288,8 @@ method diagram_xo( $info ) {
 	my $fing = -1;
 	$fing = $fingers->[$sx] // -1 if $fingers;
 
-	# For bars, only the first and last finger.
-	if ( $fing && $bar->{$fing} ) {
+	# For bars in "line" style, only the first and last finger.
+	if ( $fing && $bar->{$fing} && ($bstyle eq "line") ) {
 	    next unless $sx == $bar->{$fing}->[2] || $sx == $bar->{$fing}->[3];
 	}
 
