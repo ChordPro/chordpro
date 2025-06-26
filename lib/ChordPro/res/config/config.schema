@@ -1244,8 +1244,8 @@
 
 	    "even-odd-pages" : {
 	      "default" : true,
-	      "description" : "Dual (odd/even) pages when set to true.\nFalse means all pages will be the same (odd)\nA value of -1 will produce dual pages with the left/right\nparts of headings/footers swapped.",
-	      "type" : [ "boolean", "integer" ]
+	      "description" : "Dual (odd/even) pages when set to true.\nFalse means all pages will be the same (odd, right).",
+	      "type" : "boolean"
 	    },
 
 	    "fontdir" : {
@@ -1903,8 +1903,20 @@
 
 	    "pagealign-songs" : {
 	      "default" : true,
-	      "description" : "With dual pages, align songs to odd pages by inserting\na blank filler page. When greater than 1, a song page\n(with headings/footers) is used to align.\nNote this only applies to songs. Other parts (covers,\ntables of conents, etc.) are always aligned.",
-	      "type" : [ "boolean", "integer" ]
+	      "description" : "With dual pages, align songs to right pages by inserting\na blank filler page.\nNote this only applies to songs. Other parts (covers,\ntables of contents, etc.) are always aligned.",
+	      "type" : "boolean"
+	    },
+
+	    "pagealign-songs-spread" : {
+	      "default" : false,
+	      "description" : "With dual pages, start all songs on an even (left) page.",
+	      "type" : "boolean"
+	    },
+
+	    "pagealign-songs-extend" : {
+	      "default" : true,
+	      "description" : "When songs need alignment, extend the song with a page (true) or\nuse a blank filler page (false).",
+	      "type" : "boolean"
 	    },
 
 	    "papersize" : {
@@ -1970,7 +1982,7 @@
 	    },
 
 	    "sort-pages" : {
-	        "description" : "How to reorder song pages.\nSort pages by \"title\", \"subtitle\", \"2page\", \"compact\", \"desc\".\n\"sort-pages\" is a comma separated list of the options above.\nNote this only applies to songs. Other parts (covers,\ntables of conents, etc.) are not reordered.\n\ntitle  : sort pages alphabetically by title.\nsubtitle : sort pages alphabetically by subtitle. If this is\n         used together with title, only title is used.\n2page :  make sure songs with even pages are placed on even\n         pages, so most. if not all, of the song is visible\n         in a normal book without needing to turn a page.\n         A blank page is added to align.\ncompact: implies 2page - instead of adding a blank page,\n         an odd-paged song is moved in front of this song to achieve\n         even page alignment.\n         Note: this option requires extra processing time since\n         the songbook has to be processed twice.\ndesc :   modifier to sort descending.",
+	        "description" : "How to reorder song pages.\nSort pages by \"title\", \"subtitle\", or \"compact\".\ntitle  : sort pages alphabetically by title.\ntitle,desc  : same, but descending order.\nsubtitle : sort pages alphabetically by subtitle. If this is\n         used together with title, only title is used.\nsubtitle,desc  : same, but descending order\ncompact: reorder to make the songbook as compact as possible, while\n         each of the songs require minimal page turns.\n         Note: this option requires extra processing time since\n         the songbook has to be processed twice.\n",
 		"default" : "",
 		"type" : "string"
 	    },

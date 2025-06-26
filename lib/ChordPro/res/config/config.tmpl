@@ -431,28 +431,34 @@ pdf.barwidth : 0.8
 // Colour of the volta.
 # pdf.grids.volta.color : blue
 
-// Odd/even pages (true) or all odd (false).
+// Dual (odd/even) pages when set to true.
+// False means all pages will be the same (odd, right)
 # pdf.even-odd-pages : true
 
-// With odd/even pages, align songs to start on an odd page.
+// With dual pages, all songs will start on a right.
+// A blank filler page is inserted if needed for alignment.
+// Note this only applies to songs. Other parts (covers,
+// tables of contents, etc.) are always aligned.
 # pdf.pagealign-songs : true
 
+// With dual pages, start all songs on an even (left) page.
+# pdf.pagealign-songs-spread : false
+
+// When songs need alignment, extend the song with a page (true) or
+// use a blank filler page (false).
+# pdf.pagealign-songs-extend: false
+
 // How to reorder song pages.
-// Sort pages by "title", "subtitle", "2page", "compact", "desc".
-// "sort-pages" is a comma separated list of the options above.
+// Sort pages by "title", "subtitle", or "compact".
 // title  : sort pages alphabetically by title.
+// title,desc  : same, but descending order
 // subtitle : sort pages alphabetically by subtitle. If this is
 //          used together with title, only title is used.
-// 2page :  make sure songs with even pages are placed on even
-//          pages, so most. if not all, of the song is visible
-//          in a normal book without needing to turn a page.
-//          A blank page is added to align.
-// compact: implies 2page - instead of adding a blank page,
-//          an odd-paged song is moved in front of this song to achieve
-//          even page alignment.
+// subtitle,desc  : same, but descending order
+// compact: reorder to make the songbook as compact as possible, while
+//          each of the songs require minimal page turns.
 //          Note: this option requires extra processing time since
 //          the songbook has to be processed twice.
-// desc :   modifier to sort descending.
 # pdf.sort-pages : ""
 
 // PDF file to add as front matter.

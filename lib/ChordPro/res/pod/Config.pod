@@ -726,37 +726,33 @@
         }
     
         // Dual (odd/even) pages when set to true.
-        // False means all pages will be the same (odd)
-        // A value of -1 will produce dual pages with the left/right
-        // parts of headings/footers swapped.
+        // False means all pages will be the same (odd, right)
         even-odd-pages : true
     
-        // With dual pages, align songs to odd pages by inserting
-        // a blank filler page. When greater than 1, a song page
-        // (with headings/footers) is used to align.
+        // With dual pages, align songs to right pages by inserting
+        // a blank filler page. 
         // Note this only applies to songs. Other parts (covers,
-        // tables of conents, etc.) are always aligned.
+        // tables of contents, etc.) are always aligned.
         pagealign-songs : true
     
+        // With dual pages, start all songs on an even (left) page.
+        pagealign-songs-spread : false
+    
+        // When songs need alignment, extend the song with a page (true) or
+        // use a blank filler page (false).
+        pagealign-songs-extend : false
+    
         // How to reorder song pages.
-        // Sort pages by "title", "subtitle", "2page", "compact", "desc".
-        // "sort-pages" is a comma separated list of the options above.
-        // Note this only applies to songs. Other parts (covers,
-        // tables of conents, etc.) are not reordered.
-        //
+        // Sort pages by "title", "subtitle", or "compact".
         // title  : sort pages alphabetically by title.
+        // title,desc  : same, but descending order
         // subtitle : sort pages alphabetically by subtitle. If this is
         //          used together with title, only title is used.
-        // 2page :  make sure songs with even pages are placed on even
-        //          pages, so most. if not all, of the song is visible
-        //          in a normal book without needing to turn a page.
-        //          A blank page is added to align.
-        // compact: implies 2page - instead of adding a blank page,
-        //          an odd-paged song is moved in front of this song to achieve
-        //          even page alignment.
+        // subtitle,desc  : same, but descending order
+        // compact: reorder to make the songbook as compact as possible, while
+        //          each of the songs require minimal page turns.
         //          Note: this option requires extra processing time since
         //          the songbook has to be processed twice.
-        // desc :   modifier to sort descending.
         sort-pages : ""
     
         // PDF file to add as front matter.

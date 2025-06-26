@@ -6,7 +6,7 @@ use utf8;
 
 package JSON::Relaxed::Parser;
 
-our $VERSION = "0.097_002";
+our $VERSION = "0.098";
 
 class JSON::Relaxed::Parser;
 
@@ -834,6 +834,7 @@ method encode(%opts) {
     }
 
     # Final make-up.
+    $s =~ s/^ +$//gm;
     if ( $pretty && !$level ) {
 	$s =~ s/^\n*//s;
 	$s .= "\n" if $s !~ /\n$/;
