@@ -274,7 +274,7 @@ method diagram_xo( $info ) {
 
     # Color of the dots and numbers.
     my $fbg = "";		# numbers
-    my $ffg = "";		# dots
+    my $ffg = $fg;		# dots
     unless ( $fsh eq "below" ) {
 	# The numbercolor property of the chordfingers is used for the
 	# color of the dot numbers.
