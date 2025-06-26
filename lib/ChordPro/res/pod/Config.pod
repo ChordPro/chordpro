@@ -9,10 +9,13 @@
     
     // For GUI.
     config {
-        // Type of config: config, style, style_mod, instrument, task ...
-        type        : config
+    
+        // Type of config: config, style, style_mod, instrument, task...
+        type : config
+    
         // Title for menus, choices, if applicable.
-        title       : "ChordPro"
+        title : ChordPro
+    
         // Helpful descriptive text.
         description : "Main ChordPro config."
     }
@@ -114,23 +117,23 @@
     
         // Known metadata items.
         keys : [
-    	title
-    	subtitle
-    	album
-    	arranger
-    	artist
-    	capo
-    	composer
-    	copyright
-    	duration
-    	key
-    	lyricist
-    	sortartist
-    	sorttitle
-    	tag
-    	tempo
-    	time
-    	year
+            title
+            subtitle
+            album
+            arranger
+            artist
+            capo
+            composer
+            copyright
+            duration
+            key
+            lyricist
+            sortartist
+            sorttitle
+            tag
+            tempo
+            time
+            year
         ]
     
         // If strict, only the keys named here are allowed.
@@ -194,24 +197,24 @@
     
         // Note names, using sharps. \u266f is MUSICAL SYMBOL SHARP.
         sharp : [
-    	C   [ C# Cis "C\u266f" ]
-    	D   [ D# Dis "D\u266f" ]
-    	E
-    	F   [ F# Fis "F\u266f" ]
-    	G   [ G# Gis "G\u266f" ]
-    	A   [ A# Ais "A\u266f" ]
-    	B
+            C   [ C# Cis "C\u266f" ]
+            D   [ D# Dis "D\u266f" ]
+            E
+            F   [ F# Fis "F\u266f" ]
+            G   [ G# Gis "G\u266f" ]
+            A   [ A# Ais "A\u266f" ]
+            B
         ]
     
         // Note names, using flats. \u266f is MUSICAL SYMBOL FLAT.
         flat : [
-    	C
-    	[ Db    Des "D\u266d" ]   D
-    	[ Eb Es Ees "E\u266d" ]   E
-    	F
-    	[ Gb    Ges "G\u266d" ]   G
-    	[ Ab As Aes "A\u266d" ]   A
-    	[ Bb    Bes "B\u266d" ]   B
+            C
+            [ Db    Des "D\u266d" ]   D
+            [ Eb Es Ees "E\u266d" ]   E
+            F
+            [ Gb    Ges "G\u266d" ]   G
+            [ Ab As Aes "A\u266d" ]   A
+            [ Bb    Bes "B\u266d" ]   B
         ]
     
         // Movable means position independent (e.g. nashville).
@@ -268,85 +271,85 @@
     // An array of hashes each describing one table of contents.
     contents : [
         {
-    	
-    	// An identifying name for this table of contents.
-    	name : table_of_contents
-    	
-    	// The metadata for this toc. One or two items.
-    	fields : [ songindex ]
-    	
-    	// The label (title) for this toc.
-    	label : "Table of Contents"
-    	
-    	// The format for the toc lines.
-    	line : "%{title}"
-    	
-    	// The format for the page numbers in the toc.
-    	pageno : "%{page}"
-    	
-    	// For future use.
-    	fold : false
-    	
-    	// Omit this toc.
-    	omit : false
-    	
-    	// Template song for the toc.
-    	template : stdtoc
+    
+            // An identifying name for this table of contents.
+            name : table_of_contents
+    
+            // The metadata for this toc. One or two items.
+            fields : [ songindex ]
+    
+            // The label (title) for this toc.
+            label : "Table of Contents"
+    
+            // The format for the toc lines.
+            line : "%{title}"
+    
+            // The format for the page numbers in the toc.
+            pageno : "%{page}"
+    
+            // For future use.
+            fold : false
+    
+            // Omit this toc.
+            omit : false
+    
+            // Template song for the toc.
+            template : stdtoc
         }
         {
-    	
-    	// An identifying name for this table of contents.
-    	name : contents_by_title
-    	
-    	// The metadata for this toc. One or two items.
-    	fields : [ title artist ]
-    	
-    	// The label (title) for this toc.
-    	label : "Contents by Title"
-    	
-    	// The format for the toc lines.
-    	line : "%{title}%{artist| - %{}}"
-    	
-    	// The format for the page numbers in the toc.
-    	pageno : "%{page}"
-    	
-    	// For future use.
-    	fold : false
-    	
-    	// Omit this toc.
-    	omit : false
-    	
-    	// Template song for the toc.
-    	template : stdtoc
+    
+            // An identifying name for this table of contents.
+            name : contents_by_title
+    
+            // The metadata for this toc. One or two items.
+            fields : [ title artist ]
+    
+            // The label (title) for this toc.
+            label : "Contents by Title"
+    
+            // The format for the toc lines.
+            line : "%{title}%{artist| - %{}}"
+    
+            // The format for the page numbers in the toc.
+            pageno : "%{page}"
+    
+            // For future use.
+            fold : false
+    
+            // Omit this toc.
+            omit : false
+    
+            // Template song for the toc.
+            template : stdtoc
         }
         {
-    	
-    	// An identifying name for this table of contents.
-    	name : contents_by_artist
-    	
-    	// The metadata for this toc. One or two items.
-    	fields : [ artist title ]
-    	
-    	// The label (title) for this toc.
-    	label : "Contents by Artist"
-    	
-    	// A break value to group toc entries with.
-    	break : "%{sortartist|%{}|%{artist}}"
-    	
-    	// The format for the toc lines.
-    	line : "    %{title}"
-    	
-    	// The format for the page numbers in the toc.
-    	pageno : "%{page}"
-    	
-    	// For future use.
-    	fold : false
-    	
-    	// Omit this toc.
-    	omit : true
-    	
-    	// Template song for the toc.
-    	template : stdtoc
+    
+            // An identifying name for this table of contents.
+            name : contents_by_artist
+    
+            // The metadata for this toc. One or two items.
+            fields : [ artist title ]
+    
+            // The label (title) for this toc.
+            label : "Contents by Artist"
+    
+            // A break value to group toc entries with.
+            break : "%{sortartist|%{}|%{artist}}"
+    
+            // The format for the toc lines.
+            line : "    %{title}"
+    
+            // The format for the page numbers in the toc.
+            pageno : "%{page}"
+    
+            // For future use.
+            fold : false
+    
+            // Omit this toc.
+            omit : true
+    
+            // Template song for the toc.
+            template : stdtoc
         }
     ]
     
@@ -373,68 +376,68 @@
     
         // Embedding ABC.
         abc {
-    	type       : image
-    	module     : ABC
+            type       : image
+            module     : ABC
     
-    	// Default handler "abc2svg" uses program (if set),
-    	// otherwise embedded QuickJS or external QuickJS.
-    	// Handler "quickjs_xs" uses embedded QuickJS only.
-    	// Handler "quickjs_qjs" uses external QuickJS only.
-    	// Handler "quickjs" uses internal or external QuickJS.
-    	handler : abc2svg
-    	program    : ""
+            // Default handler "abc2svg" uses program (if set),
+            // otherwise embedded QuickJS or external QuickJS.
+            // Handler "quickjs_xs" uses embedded QuickJS only.
+            // Handler "quickjs_qjs" uses external QuickJS only.
+            // Handler "quickjs" uses internal or external QuickJS.
+            handler : abc2svg
+            program    : ""
     
-    	// No longer used -- ./default.abc will be used if program tool.
-    	config : default
-    	preamble   : [
-    	    "%%textfont pdf.fonts.text"
-    	    "%%vocalfont pdf.fonts.text"
-    	    "%%gchordfont pdf.fonts.chord"
-    	]
+            // No longer used -- ./default.abc will be used if program tool.
+            config : default
+            preamble   : [
+                "%%textfont pdf.fonts.text"
+                "%%vocalfont pdf.fonts.text"
+                "%%gchordfont pdf.fonts.chord"
+            ]
     
-    	// Obsolete. Please use parser.preprocess.env-... instead.
-    	preprocess.abc : []
+            // Obsolete. Please use parser.preprocess.env-... instead.
+            preprocess.abc : []
         }
     
         // Embedding Lilypond.
         ly {
-    	type       : image
-    	module     : Lilypond
-    	handler    : ly2svg
-    	program    : ""
-    	config     : default
+            type       : image
+            module     : Lilypond
+            handler    : ly2svg
+            program    : ""
+            config     : default
     
-    	// The preamble is a list of lines inserted before the lilipond data,
-    	// This is a good place to set the version and global customizations.
-    	preamble : [
-    	    '\\version "2.21.0"'
-    	    "\\header { tagline = ##f }"
-    	]
+            // The preamble is a list of lines inserted before the lilipond data,
+            // This is a good place to set the version and global customizations.
+            preamble : [
+                '\\version "2.21.0"'
+                "\\header { tagline = ##f }"
+            ]
     
-    	// Obsolete. Please use parser.preprocess.env-... instead.
-    	preprocess.ly : []
+            // Obsolete. Please use parser.preprocess.env-... instead.
+            preprocess.ly : []
         }
     
         // Embedding Strums. EXPERIMENTAL
         strum {
-    	type     : image
-    	module   : Strum
-    	handler  : strum2xo
-    	preamble : []
+            type     : image
+            module   : Strum
+            handler  : strum2xo
+            preamble : []
         }
     
         // Embedding SVG.
         svg {
-    	type    : image
-    	module  : SVG
-    	handler : svg2svg
+            type    : image
+            module  : SVG
+            handler : svg2svg
         }
     
         // Embedding textblock.
         textblock {
-    	type    : image
-    	module  : TextBlock
-    	handler : txt2xform
+            type    : image
+            module  : TextBlock
+            handler : txt2xform
         }
     }
     
@@ -449,17 +452,17 @@
         // Note that the context for substitutions is the first song.
         info {
     
-    	// Document title.
-    	title : "%{title}"
+            // Document title.
+            title : "%{title}"
     
-    	// Name of the author.
-    	author : ""
+            // Name of the author.
+            author : ""
     
-    	// Document subject.
-    	subject : ""
+            // Document subject.
+            subject : ""
     
-    	// Document keywords.
-    	keywords : ""
+            // Document keywords.
+            keywords : ""
         }
     
         // Output paper size, e.g. "a4" or [595,842].
@@ -468,17 +471,17 @@
         // Theme
         theme {
     
-    	// Foreground colour. Usually black.
-    	foreground : black
+            // Foreground colour. Usually black.
+            foreground : black
     
-    	// Light foreground colour
-    	foreground-medium : grey70
+            // Light foreground colour
+            foreground-medium : grey70
     
-    	// Very light foreground colour
-    	foreground-light : grey90
+            // Very light foreground colour
+            foreground-light : grey90
     
-    	// Background colour. Usually white.
-    	background : none
+            // Background colour. Usually white.
+            background : none
         }
     
         // Distance between columns in multi-column mode.
@@ -509,85 +512,85 @@
         // Baseline distances as a factor of the font size.
         spacing {
     
-    	// Spacing for page titles.
-    	title : 1.2
+            // Spacing for page titles.
+            title : 1.2
     
-    	// Spacing for lyrics.
-    	lyrics : 1.2
+            // Spacing for lyrics.
+            lyrics : 1.2
     
-    	// Spacing for chord names.
-    	chords : 1.2
+            // Spacing for chord names.
+            chords : 1.2
     
-    	// Spacing for diagram chords.
-    	diagramchords : 1.2
+            // Spacing for diagram chords.
+            diagramchords : 1.2
     
-    	// Spacing for grid lines.
-    	grid : 1.2
+            // Spacing for grid lines.
+            grid : 1.2
     
-    	// Spacing for tab lines.
-    	tab : 1
+            // Spacing for tab lines.
+            tab : 1
     
-    	// Spacing for table of contents lines.
-    	toc : 1.4
+            // Spacing for table of contents lines.
+            toc : 1.4
     
-    	// Spacing for empty (blank) lines.
-    	// By setting this to a small value you get fine-grained control over
-    	// the distance between song elements by adding empty lines.
-    	empty : 1
+            // Spacing for empty (blank) lines.
+            // By setting this to a small value you get fine-grained control over
+            // the distance between song elements by adding empty lines.
+            empty : 1
         }
     
         // Appearance of chorus.
         chorus {
     
-    	// Indent of the chorus, not including bar.
-    	indent : 0
+            // Indent of the chorus, not including bar.
+            indent : 0
     
-    	// Appearance of side bar.
-    	bar {
+            // Appearance of side bar.
+            bar {
     
-    	    // Bar offset to the left of the text. Suppress when zero.
-    	    offset : 8
+                // Bar offset to the left of the text. Suppress when zero.
+                offset : 8
     
-    	    // Bar width. Suppress when zero.
-    	    width : 1
+                // Bar width. Suppress when zero.
+                width : 1
     
-    	    // Bar colour.
-    	    color : foreground
-    	}
+                // Bar colour.
+                color : foreground
+            }
     
-    	// Label for Chorus.
-    	tag : Chorus
+            // Label for Chorus.
+            tag : Chorus
     
-    	// Appearance of chorus recall.
-    	recall {
+            // Appearance of chorus recall.
+            recall {
     
-    	    // Quote the chorus like a chorus.
-    	    choruslike : false
+                // Quote the chorus like a chorus.
+                choruslike : false
     
-    	    // Label for recalled chorus.
-    	    tag : Chorus
+                // Label for recalled chorus.
+                tag : Chorus
     
-    	    // Font for tag text.
-    	    type : comment
+                // Font for tag text.
+                type : comment
     
-    	    // Quote the chorus.
-    	    quote : false
-    	}
+                // Quote the chorus.
+                quote : false
+            }
         }
     
         // This opens a margin for margin labels.
         labels {
     
-    	// Margin width. Default is 0 (no margin labels).
-    	// "auto" will automatically reserve a margin if labels are used.
-    	width : auto
+            // Margin width. Default is 0 (no margin labels).
+            // "auto" will automatically reserve a margin if labels are used.
+            width : auto
     
-    	// Alignment for the labels. Default is left.
-    	align : left
+            // Alignment for the labels. Default is left.
+            align : left
     
-    	// Alternatively, render labels as comments.
-    	// Values are "comment", "comment_italic" and "comment_box".
-    	comment : ""
+            // Alternatively, render labels as comments.
+            // Values are "comment", "comment_italic" and "comment_box".
+            comment : ""
         }
     
         // Alternative songlines with chords in a side column.
@@ -611,47 +614,54 @@
         // The vertical distance is "vspace" cells.
         diagrams {
     
-    	// Diagrams for all chords of the song can be shown at the
-    	// "top", "bottom" or "right" side of the first page,
-    	// or "below" the last song line.
-    	show : bottom
+            // Diagrams for all chords of the song can be shown at the
+            // "top", "bottom" or "right" side of the first page,
+            // or "below" the last song line.
+            show : bottom
     
-    	// Alignment for "top", "bottom" and "below".
-    	// Possible values are "left" (default), "right", "center" and "spread".
-    	align : left
+            // Alignment for "top", "bottom" and "below".
+            // Possible values are "left" (default), "right", "center" and "spread".
+            align : left
     
-    	// Width of each diagram cell.
-    	width : 6
+            // Width of each diagram cell.
+            width : 6
     
-    	// Height of each diagram cell.
-    	height : 6
+            // Height of each diagram cell.
+            height : 6
     
-    	// The number of frets shown.
-    	vcells : 4
+            // The number of frets shown.
+            vcells : 4
     
-    	// Thickness of the diagram lines as a fraction of 'width'.
-    	linewidth : 0.1
+            // Thickness of the diagram lines as a fraction of 'width'.
+            linewidth : 0.1
     
-    	// Thickness of the top nut, in 'linewidth'.
-    	nutwidth : 5
+            // Thickness of the top nut, in 'linewidth'.
+            nutwidth : 5
     
-    	// Horizontal space between diagrams.
-    	hspace : 3.95
+            // Horizontal space between diagrams.
+            hspace : 3.95
     
-    	// Vertical space between diagrams.
-    	vspace : 3
+            // Vertical space between diagrams.
+            vspace : 3
     
-    	// Size of the fret dot, fraction of cell width.
-    	dotsize : 0.8
+            // Size of the fret dot, fraction of cell width.
+            dotsize : 0.8
     
-    	// Bas style. Straight line or arc.
-    	barstyle: line
+            // Style of bars, line or arc.
+            barstyle : line
     
-    	// Thickness of bars, fraction of dot width.
-    	barwidth : 0.8
+            // Thickness of bars, fraction of dot width.
+            barwidth : 0.8
     
-    	// Show finger settings, if available.
-    	fingers : true
+            // Show finger settings, if available.
+            fingers : true
+    
+            // Text to show the fret base, if greater than one.
+            // "%s" will be replaced by the actual fret base number.
+            fretbasetext : %s
+    
+            // Position for the fret base, left (default) or right.
+            fretbaseposition : left
         }
     
         // Appearance of chord diagrams for keyboards.
@@ -660,38 +670,38 @@
         // The horizontal distance between diagrams is "hspace" * "keys" * "width".
         kbdiagrams {
     
-    	// Diagrams for all chords of the song can be shown at the
-    	// "top", "bottom" or "right" side of the first page,
-    	// or "below" the last song line.
-    	show : bottom
+            // Diagrams for all chords of the song can be shown at the
+            // "top", "bottom" or "right" side of the first page,
+            // or "below" the last song line.
+            show : bottom
     
-    	// Alignment for "top", "bottom" and "below".
-    	// Possible values are "left" (default), "right", "center" and "spread".
-    	align : left
+            // Alignment for "top", "bottom" and "below".
+            // Possible values are "left" (default), "right", "center" and "spread".
+            align : left
     
-    	// Width of a single (white) key.
-    	width : 4
+            // Width of a single (white) key.
+            width : 4
     
-    	// Height of the diagram.
-    	height : 20
+            // Height of the diagram.
+            height : 20
     
-    	// The number of white keys shown.
-    	keys : 14
+            // The number of white keys shown.
+            keys : 14
     
-    	// The leftmost white key. Must be "C" or "F".
-    	base : C
+            // The leftmost white key. Must be "C" or "F".
+            base : C
     
-    	// Thickness of the diagram lines as a fraction of "width".
-    	linewidth : 0.1
+            // Thickness of the diagram lines as a fraction of "width".
+            linewidth : 0.1
     
-    	// Color of the 'pressed' keys.
-    	pressed : foreground-medium
+            // Color of the 'pressed' keys.
+            pressed : foreground-medium
     
-    	// Horizontal space between diagrams.
-    	hspace : 3.95
+            // Horizontal space between diagrams.
+            hspace : 3.95
     
-    	// Vertical space between diagrams.
-    	vspace : 0.3
+            // Vertical space between diagrams.
+            vspace : 0.3
         }
     
         // Grid section lines.
@@ -699,38 +709,38 @@
         // The width and colour of the cell bar lines can be specified.
         // Enable by setting the width to the desired width.
         grids {
-    	cellbar {
+            cellbar {
     
-    	    // Width of the cell bar.
-    	    width : 0
+                // Width of the cell bar.
+                width : 0
     
-    	    // Colour of the cell bar.
-    	    color : foreground-medium
-    	}
+                // Colour of the cell bar.
+                color : foreground-medium
+            }
     
-    	// Show grid context in output.
-    	show : true
+            // Show grid context in output.
+            show : true
     
-    	// Colour of special symbols.
-    	symbols.color : blue
+            // Colour of special symbols.
+            symbols.color : blue
     
-    	// Properties of the volta.
-    	volta {
+            // Properties of the volta.
+            volta {
     
-    	    // Volta span (fraction of measure).
-    	    span : 0.7
+                // Volta span (fraction of measure).
+                span : 0.7
     
-    	    // Colour of the volta.
-    	    color : blue
-    	}
+                // Colour of the volta.
+                color : blue
+            }
         }
     
         // Dual (odd/even) pages when set to true.
-        // False means all pages will be the same (odd, right)
+        // False means all pages will be the same (odd, right).
         even-odd-pages : true
     
         // With dual pages, align songs to right pages by inserting
-        // a blank filler page. 
+        // a blank filler page.
         // Note this only applies to songs. Other parts (covers,
         // tables of contents, etc.) are always aligned.
         pagealign-songs : true
@@ -745,7 +755,7 @@
         // How to reorder song pages.
         // Sort pages by "title", "subtitle", or "compact".
         // title  : sort pages alphabetically by title.
-        // title,desc  : same, but descending order
+        // title,desc  : same, but descending order.
         // subtitle : sort pages alphabetically by subtitle. If this is
         //          used together with title, only title is used.
         // subtitle,desc  : same, but descending order
@@ -789,42 +799,50 @@
         // For even/odd printing, the order is reversed.
         formats {
     
-    	// By default, a page has:
-    	default {
+            // By default, a page has:
+            default {
     
-    	    // Three-part title format specification, left, center, right.
-    	    title : [ "" "" "" ]
-    	    subtitle : [ "" "" "" ]
-    	    footer : [ "%{title}" "" "%{page}" ]
+                // Three-part title format specification, left, center, right.
+                title : [ "" "" "" ]
     
-    	    // Background page.
-    	    background : ""
-    	}
+                // Three-part title format specification, left, center, right.
+                subtitle : [ "" "" "" ]
     
-    	// The first page of a song has:
-    	title {
+                // Three-part title format specification, left, center, right.
+                footer : [ "%{title}" "" "%{page}" ]
     
-    	    // Three-part title format specification, left, center, right.
-    	    title : [ "" "%{title}" "" ]
-    	    subtitle : [ "" "%{subtitle}" "" ]
-    	    footer : [ "" "" "%{page}" ]
+                // Background page.
+                background : ""
+            }
     
-    	    // Background page.
-    	    background : ""
-    	}
+            // The first page of a song has:
+            title {
     
-    	// The very first output page is slightly different:
-    	first {
+                // Three-part title format specification, left, center, right.
+                title : [ "" "%{title}" "" ]
     
-    	    // Three-part title format specification, left, center, right.
-    	    footer : [ "" "" "" ]
+                // Three-part title format specification, left, center, right.
+                subtitle : [ "" "%{subtitle}" "" ]
     
-    	    // Background page.
-    	    background : ""
-    	}
+                // Three-part title format specification, left, center, right.
+                footer : [ "" "" "%{page}" ]
     
-    	// Filler pages (for alignment) are empty by default.
-    	filler.background : ""
+                // Background page.
+                background : ""
+            }
+    
+            // The very first output page is slightly different:
+            first {
+    
+                // Three-part title format specification, left, center, right.
+                footer : [ "" "" "" ]
+    
+                // Background page.
+                background : ""
+            }
+    
+            // Filler pages (for alignment) are empty by default.
+            filler.background : ""
         }
     
         // Split marker for syllables that are smaller than chord width.
@@ -845,7 +863,7 @@
         // For example:
         // "fontdir" : [ "/usr/share/fonts/liberation", "/home/me/fonts" ]
         fontdir : []
-        
+    
         // Experimental: Remap corefonts to real truetype fonts.
         // This requires a set of truetype fonts to be available in the
         // fontdir under a well-defined name. See the docs.
@@ -854,52 +872,52 @@
         // Value "false" inhibits remapping.
         // Value "null" will have ChordPro look for the fonts itself.
         corefonts.remap : null
-        
+    
         // The font families.
         fontconfig {
-    	serif {
-    	    ""         : Times-Roman
-    	    bold       : Times-Bold
-    	    italic     : Times-Italic
-    	    bolditalic : Times-BoldItalic
-    	}
-    	times {
-    	    ""         : Times-Roman
-    	    bold       : Times-Bold
-    	    italic     : Times-Italic
-    	    bolditalic : Times-BoldItalic
-    	}
-    	helvetica {
-    	    ""          : Helvetica
-    	    bold        : Helvetica-Bold
-    	    oblique     : Helvetica-Oblique
-    	    boldoblique : Helvetica-BoldOblique
-    	}
-    	"sans, sans-serif" {
-    	    ""         : Helvetica
-    	    bold       : Helvetica-Bold
-    	    italic     : Helvetica-Oblique
-    	    bolditalic : Helvetica-BoldOblique
-    	}
-    	courier {
-    	    ""         : Courier
-    	    bold       : Courier-Bold
-    	    italic     : Courier-Oblique
-    	    bolditalic : Courier-BoldOblique
-    	}
-    	"mono, monospace" {
-    	    ""         : Courier
-    	    bold       : Courier-Bold
-    	    italic     : Courier-Oblique
-    	    bolditalic : Courier-BoldOblique
-    	}
-    	"muse, musejazztext" {
-    	    ""         : MuseJazzText.otf
-    	    bold       : MuseJazzText.otf
-    	    italic     : MuseJazzText.otf
-    	    bolditalic : MuseJazzText.otf
-    	}
-    	dingbats.          : ZapfDingbats
+            serif {
+                ""         : Times-Roman
+                bold       : Times-Bold
+                italic     : Times-Italic
+                bolditalic : Times-BoldItalic
+            }
+            times {
+                ""         : Times-Roman
+                bold       : Times-Bold
+                italic     : Times-Italic
+                bolditalic : Times-BoldItalic
+            }
+            helvetica {
+                ""          : Helvetica
+                bold        : Helvetica-Bold
+                oblique     : Helvetica-Oblique
+                boldoblique : Helvetica-BoldOblique
+            }
+            "sans, sans-serif" {
+                ""         : Helvetica
+                bold       : Helvetica-Bold
+                italic     : Helvetica-Oblique
+                bolditalic : Helvetica-BoldOblique
+            }
+            courier {
+                ""         : Courier
+                bold       : Courier-Bold
+                italic     : Courier-Oblique
+                bolditalic : Courier-BoldOblique
+            }
+            "mono, monospace" {
+                ""         : Courier
+                bold       : Courier-Bold
+                italic     : Courier-Oblique
+                bolditalic : Courier-BoldOblique
+            }
+            "muse, musejazztext" {
+                ""         : MuseJazzText.otf
+                bold       : MuseJazzText.otf
+                italic     : MuseJazzText.otf
+                bolditalic : MuseJazzText.otf
+            }
+            dingbats.          : ZapfDingbats
         }
     
         // "fonts" maps output elements to fonts as defined in "fontconfig".
@@ -926,118 +944,118 @@
         // diagram_base   --> text (but at a small size)
         fonts {
     
-    	// Font for typesetting titles.
-    	title : "Times-Bold 14"
+            // Font for typesetting titles.
+            title : "Times-Bold 14"
     
-    	// Font for typesetting lyrics.
-    	text : "Times-Roman 12"
+            // Font for typesetting lyrics.
+            text : "Times-Roman 12"
     
-    	// Font for typesetting chord names.
-    	chord : "Helvetica-Oblique 10"
+            // Font for typesetting chord names.
+            chord : "Helvetica-Oblique 10"
     
-    	// Font for numbered chord dots and other symbols.
-    	chordfingers : "ChordProSymbols.ttf; numbercolor=background"
+            // Font for numbered chord dots and other symbols.
+            chordfingers : "ChordProSymbols.ttf; numbercolor=background"
     
-    	// Font for typesetting comment text.
-    	comment : "Helvetica 12; background=foreground-light"
+            // Font for typesetting comment text.
+            comment : "Helvetica 12; background=foreground-light"
     
-    	// Font for typesetting italised comment text.
-    	comment_italic : "Helvetica-Oblique 12"
+            // Font for typesetting italised comment text.
+            comment_italic : "Helvetica-Oblique 12"
     
-    	// Font for typesetting boxed comment text.
-    	comment_box : "Helvetica 12; frame=1"
+            // Font for typesetting boxed comment text.
+            comment_box : "Helvetica 12; frame=1"
     
-    	// Font for typesetting tabs.
-    	tab : "Courier 10"
+            // Font for typesetting tabs.
+            tab : "Courier 10"
     
-    	// Font for typesetting the table of contents.
-    	toc : "Times-Roman 11"
+            // Font for typesetting the table of contents.
+            toc : "Times-Roman 11"
     
-    	// Font for typesetting grids.
-    	grid : "Helvetica 10"
+            // Font for typesetting grids.
+            grid : "Helvetica 10"
     
-    	// Font for typesetting gridstrum symbols.
-    	gridstrum : "ChordProSymbols 13"
+            // Font for typesetting gridstrum symbols.
+            gridstrum : "ChordProSymbols 13"
     
-    	// Font for typesetting grilles.
-    	grille : "Helvetica 10"
+            // Font for typesetting grilles.
+            grille : "Helvetica 10"
         }
     
         // PDF outlines (index) can be used in most PDF viewers
         // for quick navigation.
         outlines : [
-    	{
-    	    
-    	    // An identifying name for this outline.
-    	    name : by_title
-    	    
-    	    // Primary and (optional) secondary fields.
-    	    fields : [ sorttitle artist ]
-    	    
-    	    // Title, omitted if there's only one outline.
-    	    label : "By Title"
-    	    
-    	    // The format for the outline entries.
-    	    line : "%{title}%{artist| - %{}}"
-    	    
-    	    // Initial display is collapsed.
-    	    collapse : false
-    	    
-    	    // Make letter level if more entries than this value.
-    	    letter : 5
-    	    
-    	    // For future use.
-    	    fold : false
-    	}
-    	{
-    	    
-    	    // An identifying name for this outline.
-    	    name : by_artist
-    	    
-    	    // Primary and (optional) secondary fields.
-    	    fields : [ artist sorttitle ]
-    	    
-    	    // Title, omitted if there's only one outline.
-    	    label : "By Artist"
-    	    
-    	    // The format for the outline entries.
-    	    line : "%{artist|%{} - }%{title}"
-    	    
-    	    // Initial display is collapsed.
-    	    collapse : false
-    	    
-    	    // Make letter level if more entries than this value.
-    	    letter : 5
-    	    
-    	    // For future use.
-    	    fold : false
-    	}
-    	{
-    	    
-    	    // An identifying name for this outline.
-    	    name : bookmarks
-    	    
-    	    // Primary and (optional) secondary fields.
-    	    fields : [ bookmark ]
-    	    
-    	    // Omit this outline.
-    	    omit : true
-    	    
-    	    // Title, omitted if there's only one outline.
-    	    label : Bookmarks
-    	    
-    	    // The format for the outline entries.
-    	    line : "%{bookmark}"
-    	    
-    	    // Initial display is collapsed.
-    	    collapse : true
-    	    
-    	    // Make letter level if more entries than this value.
-    	    letter : 0
-    	    
-    	    // For future use.
-    	    fold : false
-    	}
+            {
+    
+                // An identifying name for this outline.
+                name : by_title
+    
+                // Primary and (optional) secondary fields.
+                fields : [ sorttitle artist ]
+    
+                // Title, omitted if there's only one outline.
+                label : "By Title"
+    
+                // The format for the outline entries.
+                line : "%{title}%{artist| - %{}}"
+    
+                // Initial display is collapsed.
+                collapse : false
+    
+                // Make letter level if more entries than this value.
+                letter : 5
+    
+                // For future use.
+                fold : false
+            }
+            {
+    
+                // An identifying name for this outline.
+                name : by_artist
+    
+                // Primary and (optional) secondary fields.
+                fields : [ artist sorttitle ]
+    
+                // Title, omitted if there's only one outline.
+                label : "By Artist"
+    
+                // The format for the outline entries.
+                line : "%{artist|%{} - }%{title}"
+    
+                // Initial display is collapsed.
+                collapse : false
+    
+                // Make letter level if more entries than this value.
+                letter : 5
+    
+                // For future use.
+                fold : false
+            }
+            {
+    
+                // An identifying name for this outline.
+                name : bookmarks
+    
+                // Primary and (optional) secondary fields.
+                fields : [ bookmark ]
+    
+                // Omit this outline.
+                omit : true
+    
+                // Title, omitted if there's only one outline.
+                label : Bookmarks
+    
+                // The format for the outline entries.
+                line : "%{bookmark}"
+    
+                // Initial display is collapsed.
+                collapse : true
+    
+                // Make letter level if more entries than this value.
+                letter : 0
+    
+                // For future use.
+                fold : false
+            }
         ]
     
         // Show the page layout structure.
@@ -1051,27 +1069,27 @@
         // values, use "value". See the entry with name "my_field".
         csv {
     
-    	// The fields for the CSV.
-    	fields : [
-    	    { name : title         meta : title      }
-    	    { name : pages         meta : pagerange  }
-    	    { name : "sort title"  meta : sorttitle  }
-    	    { name : artists       meta : artist     }
-    	    { name : composers     meta : composer   }
-    	    { name : collections   meta : collection }
-    	    { name : keys          meta : key_actual }
-    	    { name : years         meta : year       }
-    	    { name : my_field     value : text       omit  : true}
-    	]
+            // The fields for the CSV.
+            fields : [
+                { name : title         meta : title      }
+                { name : pages         meta : pagerange  }
+                { name : "sort title"  meta : sorttitle  }
+                { name : artists       meta : artist     }
+                { name : composers     meta : composer   }
+                { name : collections   meta : collection }
+                { name : keys          meta : key_actual }
+                { name : years         meta : year       }
+                { name : my_field     value : text       omit  : true}
+            ]
     
-    	// Separator to join field values.
-    	separator : ;
+            // Separator to join field values.
+            separator : ;
     
-    	// Separator to join meta values.
-    	vseparator : |
+            // Separator to join meta values.
+            vseparator : |
     
-    	// Restrict CSV to song pages only (do not include matter pages)
-    	songsonly : true
+            // Restrict CSV to song pages only (do not include matter pages)
+            songsonly : true
         }
     }
     
@@ -1084,9 +1102,9 @@
         // If no tag+type or quote: use {chorus}.
         // Note: Variant 'msp' always uses {chorus}.
         chorus.recall {
-    	tag   : ""
-    	type  : ""
-    	quote : false
+            tag   : ""
+            type  : ""
+            quote : false
         }
     
         // Retain comments in the output.
@@ -1109,14 +1127,14 @@
         // Templates for LaTeX generation.
         templates {
     
-    	// Master template to render the songbook.
-    	songbook : songbook.tt
+            // Master template to render the songbook.
+            songbook : songbook.tt
     
-    	// Helper template to render comments.
-    	comment : comment.tt
+            // Helper template to render comments.
+            comment : comment.tt
     
-    	// Helper template to render images.
-    	image : image.tt
+            // Helper template to render images.
+            image : image.tt
         }
     }
     
@@ -1166,9 +1184,9 @@
         // Use "pattern" instead of "target" for regular expression replacement.
         // Use wisely.
         preprocess {
-    	all       : []
-    	directive : []
-    	songline  : []
+            all       : []
+            directive : []
+            songline  : []
         }
     }
     

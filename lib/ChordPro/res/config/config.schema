@@ -1160,6 +1160,17 @@
 		  "default" : "true",
 		  "type" : [ "boolean", "string" ]
 		},
+		"fretbaseposition" : {
+		  "description" : "Position for the fret base, left (default) or right.",
+		  "default" : "left",
+		  "enum" : [ "left", "right" ],
+		  "type" : "string"
+		},
+		"fretbasetext" : {
+		  "description" : "Text to show the fret base, if greater than one.\n\"%s\" will be replaced by the actual fret base number.",
+		  "default" : "%s",
+		  "type" : "string"
+		},
 		"show" : {
 		  "description" : "Diagrams for all chords of the song can be shown at the\n\"top\", \"bottom\" or \"right\" side of the first page,\nor \"below\" the last song line.",
 		  "default" : "bottom",

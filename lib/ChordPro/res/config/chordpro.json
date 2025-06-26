@@ -651,6 +651,13 @@ pdf {
 
         // Show finger settings, if available.
         fingers : true
+
+        // Text to show the fret base, if greater than one.
+        // "%s" will be replaced by the actual fret base number.
+        fretbasetext : %s
+
+        // Position for the fret base, left (default) or right.
+        fretbaseposition : left
     }
 
     // Appearance of chord diagrams for keyboards.
