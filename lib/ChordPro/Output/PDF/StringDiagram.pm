@@ -27,6 +27,7 @@ field $bsz;			# barre size, fraction of dot
 field $bstyle;			# barre style ("line", "arc")
 field $fsh;			# show fingers (0, 1, "below")
 field $fg;			# foreground color
+field $fbp;			# fret base position ("left", "right")
 
 ADJUST {
     $config	  = $::config;
@@ -44,6 +45,7 @@ ADJUST {
     $bsz	  = $ctl->{barwidth} * $dot;
     $bstyle	  = $ctl->{barstyle} || "line";
     $fsh	  = $ctl->{fingers} || 0;
+    $fbp	  = $ctl->{fretbaseposition} || "left";
     $dcache = {} if $pr->{pdf} ne $pdf;
     $pdf          = $pr->{pdf};
 }
@@ -140,7 +142,14 @@ method diagram_xo( $info ) {
 	$basefont = $ps->{fonts}->{diagram_base}->{fd}->{font};
 	$basesize = $gh/0.85;
 	$basefretno = sprintf( "%2d", $basefretno );
-	$bb[0] -= $basefont->width("xx$basefretno") * $basesize;
+
+        if ($fbp eq "left") {
+            $bb[0] -= $basefont->width("xx$basefretno") * $basesize;
+        } else {
+            #fret base position on "right" side
+            $bb[0] -= $dot/2;
+            $bb[2] += $basefont->width("xx$basefretno") * $basesize;
+        }
     }
     else {
 	$basefretno = "";
@@ -184,10 +193,19 @@ method diagram_xo( $info ) {
     if ( $basefretno ) {
 	$xo->textstart;
 	$xo->font( $basefont, $basesize );
-	$xo->translate( -$basefont->width("x") * 0.85 * $basesize,
-			-$nw - ($baselabeloffset+0.85)*$gh );
-	$xo->text( $basefretno, align => "right" );
-	$xo->textend;
+
+        if ( $fbp eq "left" ) {
+            $xo->translate( -$basefont->width("x") * 0.85 * $basesize,
+                            -$nw - ($baselabeloffset+0.85)*$gh );
+            $xo->text( $basefretno, align => "right" );
+        } else {
+            #fret base position on "right" side
+            $xo->translate( ($strings-1)*$gw + $dot/2,
+                            -$nw - ($baselabeloffset+0.85)*$gh );
+            $xo->text( $basefretno, align => "left" );
+        }
+
+        $xo->textend;
     }
 
     my $fingers;
