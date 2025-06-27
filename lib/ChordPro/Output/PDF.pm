@@ -179,8 +179,14 @@ sub generate_songbook {
 
 	# Easy access to toc page.
 	$song->{meta}->{page} = $page+$page_offset;
-	$pr->named_dest( $song->{meta}->{bookmark},
-			 $pr->{pdf}->openpage($page)) if $pages;
+	if ( $song->{meta}->{bookmark} ) {
+	    $pr->named_dest( $song->{meta}->{bookmark},
+			     $pr->{pdf}->openpage($page)) if $pages;
+	}
+	else {
+	    # Embedded PDF -> no toc.
+	    $song->{meta}->{_TOC} = [ "no" ];
+	}
 	$page += $song->{meta}->{pages} = $pages;
     }
     $pages_of{songbook} = $page - 1;
