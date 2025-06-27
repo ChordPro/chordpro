@@ -139,12 +139,10 @@ dmg1 :
 		--window-pos 200 120 \
 		--window-size 680 440 \
 		--icon-size 64 \
-		--icon "${APPDIR}" 540 75 \
+		--icon "${APPDIR}" 540 125 \
 		--hide-extension "${APPDIR}" \
-		--add-file "READ ME FIRST.html" README.html  540 175 \
+		--add-file "READ ME FIRST.html" README.html  540 250 \
 		--hide-extension "READ ME FIRST.html" \
-		--add-file "Install.zsh" Install.zsh 540 275 \
-		--hide-extension "Install.zsh" \
 		--background "${DEST}/lib/ChordPro/res/icons/chordpro-bg.png" \
 		"${DMGNAME}" "${APPDIR}"
 
