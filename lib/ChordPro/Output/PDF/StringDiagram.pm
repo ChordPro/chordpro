@@ -28,6 +28,7 @@ field $bstyle;			# barre style ("line", "arc")
 field $fsh;			# show fingers (0, 1, "below")
 field $fg;			# foreground color
 field $fbp;			# fret base position ("left", "right")
+field $fbt;			# fret base text ("%s" is default)
 
 ADJUST {
     $config	  = $::config;
@@ -46,6 +47,7 @@ ADJUST {
     $bstyle	  = $ctl->{barstyle} || "line";
     $fsh	  = $ctl->{fingers} || 0;
     $fbp	  = $ctl->{fretbaseposition} || "left";
+    $fbt	  = $ctl->{fretbasetext} || "%s";
     $dcache = {} if $pr->{pdf} ne $pdf;
     $pdf          = $pr->{pdf};
 }
@@ -125,6 +127,7 @@ method diagram_xo( $info ) {
     my $w = $gw * ($strings - 1);
     my $baselabeloffset = $info->{baselabeloffset} || 0;
     my $basefretno = $info->{base} + $baselabeloffset;
+    my $basefrettext="";	# for base label
     my $basefont;		# for base label
     my $basesize;		# for base label
 
@@ -141,20 +144,20 @@ method diagram_xo( $info ) {
     if ( $basefretno > 1 ) {
 	$basefont = $ps->{fonts}->{diagram_base}->{fd}->{font};
 	$basesize = $gh/0.85;
+        my $basefretformat = $fbt;
+        $basefretformat = '%s' unless $basefretformat =~ /^[^%]*\%s[^%]*$/;
+        $basefrettext = sprintf($basefretformat, $basefretno);
 
         if ( $fbp eq "left" ) {
-            $basefretno = sprintf( "%2d", $basefretno );
-            $bb[0] -= $basefont->width("xx$basefretno") * $basesize;
+            $bb[0] -= $basefont->width("xx$basefrettext") * $basesize;
         }
         else {
             #fret base position on "right" side
-            $basefretno = "$basefretno";
             $bb[0] -= $dot/2;
-            $bb[2] += $basefont->width("xx$basefretno") * $basesize;
+            $bb[2] += $basefont->width("xx$basefrettext") * $basesize;
         }
     }
     else {
-	$basefretno = "";
 	$bb[0] -= $dot/2;
     }
     if ( $fsh eq "below" && $info->{fingers} ) {
@@ -192,20 +195,20 @@ method diagram_xo( $info ) {
     }
 
     # Draw first fret number, if > 1.
-    if ( $basefretno ) {
+    if ( $basefretno > 1 ) {
 	$xo->textstart;
 	$xo->font( $basefont, $basesize );
 
         if ( $fbp eq "left" ) {
             $xo->translate( -$basefont->width("x") * 0.85 * $basesize,
                             -$nw - ($baselabeloffset+0.85)*$gh );
-            $xo->text( $basefretno, align => "right" );
+            $xo->text( $basefrettext, align => "right" );
         }
         else {
             #fret base position on "right" side
             $xo->translate( ($strings-1)*$gw + $basefont->width("x") * 0.85 * $basesize,
                             -$nw - ($baselabeloffset+0.85)*$gh );
-            $xo->text( $basefretno, align => "left" );
+            $xo->text( $basefrettext, align => "left" );
         }
 
         $xo->textend;
