@@ -614,7 +614,9 @@ sub page_align {
 	 &&
 	 ( my $filler = $self->{pdfapi}->open( expand_tilde($bg) ) )
        ) {
-	$self->{pdf}->import_page( $filler, 1, $page );
+	# Pick a random page.
+	$self->{pdf}->import_page( $filler,
+				   1+int(rand($filler->pages)), $page );
     }
     else {
 	$self->newpage($page);
