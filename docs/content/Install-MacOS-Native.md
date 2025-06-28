@@ -15,7 +15,7 @@ open it.
 
 Once the `.dmg` is open, you will see a **READ ME FIRST** document.
 
-**Please read it; do to macOS safety restrictions you cannot just run the program:**
+**Please read it; due to macOS safety restrictions you cannot just run the program:**
 
 *Your download contains an almost ready to go **ChordPro**; except that the application is only ad-hoc signed by us and not by an approved Apple Developer with a valid certificate. So, the security system on your Mac will give an error when you double-click the application.*
 
