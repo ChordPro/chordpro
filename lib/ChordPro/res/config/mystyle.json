@@ -1,0 +1,112 @@
+// Configuration for ChordPro.
+//
+// This is a relaxed JSON document, so comments are possible.
+
+{
+	"settings" : {
+		"truesf": true,
+		"notenames": true,
+	},
+
+    // Layout definitions for PDF output.
+
+    "pdf" : {
+     
+	// Style of chorus.
+	"chorus" : {
+	    // Chorus side bar.
+	    "bar" : {
+		"width"  :  0,
+	    },
+	},
+		
+	"labels" : {
+		"align" : "right"
+	},
+
+	// Slightly larger diagrams, shown at the right side.
+	"diagrams" : {
+            "show"             :  "top",
+            "width"            :  8,
+            "height"           :  8,
+            "hspace"           :  4.8,
+            "vspace"           :  3,
+            "vcells"           :  5,
+            "linewidth"        :  0.1,
+            "barstyle"         :  "arc",
+            "fingers"          :  "below",
+            "fretbaseposition" :  "right",
+            "fretbasetext"     :  "%sfr."
+	},
+
+	// Keyboard diagrams, shown at the right side.
+	"kbdiagrams" : {
+	    "show"     :  "right",
+	},
+
+	// A {titles: left} may conflict with customized formats.
+	// Set to non-zero to ignore the directive.
+	"titles-directive-ignore" : true,
+
+	// Formats.
+	"formats" : {
+	    // Titles/Footers.
+	    // By default, a page has:
+        "default" : {
+            "footer"    : [ "", "", "" ],
+        },
+	    
+	    // The first page of a song has:
+	    "title" : {
+	        // Title and subtitle.
+	    	"title"     : [ "", "%{title}", ""],
+	    	"subtitle"  : [ "", "%{subtitle|%{}|%{subtitle}}", "%{capo|Capo: %{}}"],
+	    },
+	},
+
+	"spacing" : {
+        "title"  : 0.7,
+        "lyrics" : 1.4,
+        "chords" : 1.2,
+        "diagramchords" : 1.2,
+        "grid"   : 1.2,
+        "tab"    : 1.0,
+        "toc"    : 1.4,
+        "empty"  : 1.0,
+    },
+	
+	// Fonts.
+
+	"fonts" : {
+	    "title" : {
+		"file" : "/usr/share/fonts/truetype/timesbd.ttf",  
+		"size": 24
+	    },
+	    "subtitle" : {
+		"file" : "/usr/share/fonts/truetype/times.ttf",
+		"size": 11
+	    },
+	    "text" : {
+		"file" : "/usr/share/fonts/truetype/DejaVuSans.ttf",
+		"size" : 12
+	    },
+	    "chord" : {
+		"file" : "/usr/share/fonts/truetype/timesbd.ttf",
+		"size" : 12
+	    },
+	    "comment" : {
+		"file" : "/usr/share/fonts/truetype/times.ttf",
+		"size" : 11
+	    },
+	    "toc" : {
+		"file" : "/usr/share/fonts/truetype/times.ttf",
+		"size" : 11
+	    },
+	    "label" : {
+	    "file" : "/usr/share/fonts/truetype/timesbd.ttf",  
+		"size": 11
+	    },
+	},
+    },
+}
+// End of config.

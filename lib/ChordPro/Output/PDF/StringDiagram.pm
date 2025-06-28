@@ -201,7 +201,7 @@ method diagram_xo( $info ) {
             $xo->text( $basefretno, align => "right" );
         } else {
             #fret base position on "right" side
-            $xo->translate( ($strings-1)*$gw + $dot/2 + 1,
+            $xo->translate( ($strings-1)*$gw + $basefont->width("x") * 0.85 * $basesize,
                             -$nw - ($baselabeloffset+0.85)*$gh );
             $xo->text( $basefretno, align => "left" );
         }
