@@ -490,6 +490,9 @@ Page numbers count from one. If odd/even printing is in effect, the
 designated page number is used for left pages, and the next page (if
 it exists) for right pages.
 
+If a `background` is set for filler pages, a random page from the
+document is used as filler page.
+
     formats {
 
       // By default, a page has:
