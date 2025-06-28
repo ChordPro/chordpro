@@ -142,10 +142,11 @@ method diagram_xo( $info ) {
 	$basefont = $ps->{fonts}->{diagram_base}->{fd}->{font};
 	$basesize = $gh/0.85;
 
-        if ($fbp eq "left") {
+        if ( $fbp eq "left" ) {
             $basefretno = sprintf( "%2d", $basefretno );
             $bb[0] -= $basefont->width("xx$basefretno") * $basesize;
-        } else {
+        }
+        else {
             #fret base position on "right" side
             $basefretno = "$basefretno";
             $bb[0] -= $dot/2;
@@ -199,7 +200,8 @@ method diagram_xo( $info ) {
             $xo->translate( -$basefont->width("x") * 0.85 * $basesize,
                             -$nw - ($baselabeloffset+0.85)*$gh );
             $xo->text( $basefretno, align => "right" );
-        } else {
+        }
+        else {
             #fret base position on "right" side
             $xo->translate( ($strings-1)*$gw + $basefont->width("x") * 0.85 * $basesize,
                             -$nw - ($baselabeloffset+0.85)*$gh );
