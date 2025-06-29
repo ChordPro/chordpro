@@ -102,18 +102,48 @@
 
             <h2>The Terminal Application</h2>
 
-            <p>The <em>Terminal</em> application, simply called <code>chordpro</code> is part of the package.</p>
+            <p>The <code>Terminal</code> application, simply called <code>chordpro</code> is part of the package.</p>
+            
+            <blockquote><strong>To use the <code>Terminal</code> application you first have give the GUI application permission to run on your system. Do that first.</strong></blockquote>
 
-            <p>To <em>temporarily</em> add the command line program to the system path issue the following command in the <em>Terminal</em> window:</p>
+            <h3>Temporarily add it to your system path</h3>
+            
+            <p>To <em>temporarily</em> add the <strong>chordpro</strong> command line application to the system path issue the following command in the <code>Terminal</code> window:</p>
 
             <div class="terminal">
                 <code>export PATH="/Applications/ChordPro.app/Contents/Resources/cli":$PATH
                 </code>
             </div>
+            
+            <p>Now you can use the <strong>chordpro</strong> command line application in the <em>Terminal</em> without its full path, however, when you close the <em>Terminal</em> you have add the path again the next time. It is recommended to add it permanently; see below.
 
-            <p>To add a command line application <em>permanently</em> to your system path, there are simply no <em>simple</em> instructions. It depends on your version of macOS.
-            Please use your favourite search engine.</p>
+            <h3>Permanently add it to your system path</h3>
+            
+            <p>To add the command line application <em>permanently</em> to your system path there is no simple command for the <em>Terminal</em>. However, it is not difficult.</p>
+            
+            <p>First, create a file pointing to your <strong>chordpro</strong> CLI directory in the <code>Terminal</code>:
 
+            <div class="terminal">
+                <code>echo "/Applications/ChordPro.app/Contents/Resources/cli" > ~/Desktop/chordpro
+                </code>
+            </div>
+            
+            <p>This will create a file with the location of the <strong>chordpro</strong> CLI command on your Desktop. You have to move this file with the <code>Finder</code> so the <code>Terminal</code> will see it:</p>
+            
+            <ol>
+                <li>In the <code>Finder</code>, go to its menu at the top and 'Go -> Go to Folder...'</li>
+                <li>In the dialog, enter `/etc/paths.d`. It should <em>auto-complete</em> and if you press the `Enter` key it will open a new Finder window.</li>
+                <li>Now Drag & Drop' the 'chordpro' file you just created on your Desktop to this folder. It will ask for your <em>administration password</em>.</li>
+                <li>Open a new <code>Terminal</code> window and check if it is all ok:</li>
+            </ol>
+
+            <div class="terminal">
+                <code>chordpro --about
+                </code>
+            </div>
+            
+            <p><em>This should show you information about <strong>chordpro</strong> if all went well</em>.</p>
+            
             <h2>Enjoy!</h2>
 
             <p>We hope you appreciate our best efforts to bring <strong>ChordPro</strong> to macOS.</p>
