@@ -544,6 +544,9 @@ method OnCharAdded( $event ) {
 	    $stc->CharRightExtend if length($nl) == 2;
 	    $stc->ReplaceSelection("}" . $nl);
 	}
+	elsif ( $ln > 1 && $stc->GetLine($ln-1) =~ /^\{\s*start_of_(\w+).*\}$/ ) {
+	    $stc->InsertText( -1, "\n{end_of_$1}" );
+	}
     }
 
     elsif ( $key eq ord(" ") || $key eq ord(":") || $key eq ord("}") ) {

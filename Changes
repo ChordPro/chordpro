@@ -24,6 +24,9 @@
 
     - Simplified the editor Insert menu.
 
+    - Typing a {start_of_section} will automatically provide the
+      corresponding {end_of_section}.
+    
     !Other improvements
 
     - New metadata directives: [sortartist](https://www.chordpro.org/beta/directives-sortartist/) and [tag](https://www.chordpro.org/beta/directives-tag/).
