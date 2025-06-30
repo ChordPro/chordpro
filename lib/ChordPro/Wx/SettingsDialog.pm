@@ -140,7 +140,6 @@ method fetch_prefs() {
     # Editor.
     $self->{fp_editor}->SetSelectedFont( Wx::Font->new($preferences{editfont}) );
     $self->prefs2colours;
-    $self->{cb_editorlines}->SetValue($preferences{editorlines});
     $self->{cb_editorwrap}->SetValue($preferences{editorwrap});
     $self->{sp_editorwrap}->SetValue($preferences{editorwrapindent});
 
@@ -579,11 +578,6 @@ method OnColourAnnBGChanged( $event ) {
 method OnThemeChanged( $event ) {
     $preferences{editortheme} = $self->get_selected_theme;
     $self->prefs2colours;
-}
-
-method OnEditorLineNumbers( $event ) {
-    $preferences{editorlines} = $self->{cb_editorlines}->IsChecked;
-    $self->{t_editor}->refresh;
 }
 
 method OnEditorWrap( $event ) {

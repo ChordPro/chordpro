@@ -122,8 +122,6 @@ sub refresh( $self, $prefs = undef ) {
     if ( $prefs->{editorwrap} ) {
 	$stc->SetWrapMode(3); # wxSTC_WRAP_WHITESPACE );
 	$stc->SetWrapStartIndent( $prefs->{editorwrapindent} );
-	$stc->SetWrapVisualFlags(3); # wxSTC_WRAPVISUALFLAG_START );
-	$stc->SetWrapVisualFlagsLocation(3); # wxSTC_WRAPVISUALFLAG_START );
     }
     else {
 	$stc->SetWrapMode(0); # wxSTC_WRAP_NONE );
@@ -133,7 +131,7 @@ sub refresh( $self, $prefs = undef ) {
     # Expert...
     $stc->SetViewEOL( $state{vieweol} );
     $stc->SetViewWhiteSpace( $state{viewws} );
-    $stc->SetViewLineNumbers( $preferences{editorlines} );
+    $stc->SetViewLineNumbers(1);
 
     # Free Ctrl-Shift-U for iBus input (doesn't work).
     # $stc->CmdKeyClear( ord('U'), 3 ); # Ctrl-Shift-U
@@ -141,6 +139,7 @@ sub refresh( $self, $prefs = undef ) {
 
 sub SetViewLineNumbers( $self, $b ) {
     $self->SetMarginWidth( 0, $b ? 40 : 0 ); # TODO length
+    $self->SetMarginWidth( 1, 0 ); # hide
 }
 
 sub style_text( $self ) {

@@ -473,11 +473,6 @@ method set_focus {
     $self->{t_editor}->SetFocus;
 }
 
-method showlinenumbers( $b ) {
-    $b ||= $preferences{editorlines};
-    $self->{t_editor}->SetViewLineNumbers($b);
-}
-
 ################ Event Handlers (alphabetic order) ################
 
 method OnA2Crd($event) {
