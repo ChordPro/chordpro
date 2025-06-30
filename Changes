@@ -22,6 +22,8 @@
     - The save and clean operations for the messages are now
       provided by buttons on the messages pane itself.
 
+    - Simplified the editor Insert menu.
+
     !Other improvements
 
     - New metadata directives: [sortartist](https://www.chordpro.org/beta/directives-sortartist/) and [tag](https://www.chordpro.org/beta/directives-tag/).
