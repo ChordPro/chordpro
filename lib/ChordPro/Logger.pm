@@ -16,6 +16,13 @@ $Carp::Internal{ (__PACKAGE__) }++;
 # warn   => informational
 
 sub _warn(@msg) {
+    __warn( \&CORE::warn, @msg );
+}
+sub _die(@msg) {
+    __warn( \&CORE::die, @msg );
+}
+
+sub __warn( $proc, @msg ) {
     my $msg = shift(@msg);
     $msg =~ s/^[?!]//;
     if ( $ENV{CHORDPRO_CARP_VERBOSE} ) {
@@ -24,20 +31,18 @@ sub _warn(@msg) {
 	Carp::cluck( $msg );
     }
     else {
-	CORE::warn( $msg, @msg );
-    }
-}
-
-sub _die(@msg) {
-    my $msg = shift(@msg);
-    $msg =~ s/^[?!]//;		# ignore, it's fatal anyway
-    if ( $ENV{CHORDPRO_CARP_VERBOSE} ) {
-	$msg .= join( '', @msg );
-	$msg =~ s/\n+$//;
-	Carp::croak( $msg );
-    }
-    else {
-	CORE::die( $msg, @msg );
+	$msg .= "@msg";
+	if ( $msg =~ /\n$/ ) {
+	    $msg = Carp::shortmess($msg);
+	    chomp($msg);
+	    $msg =~ s/ at .*line \d+.$//;
+	}
+	else {
+	    chomp($msg);
+	    $msg = Carp::shortmess($msg);
+	    chomp($msg);
+	}
+	$proc->($msg);
     }
 }
 
