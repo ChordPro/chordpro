@@ -31,18 +31,17 @@ sub __warn( $proc, @msg ) {
 	Carp::cluck( $msg );
     }
     else {
-	$msg .= "@msg";
-	if ( $msg =~ /\n$/ ) {
+	$msg .= join( '', @msg );
+	if ( $msg =~ s/\n+$// ) {
 	    $msg = Carp::shortmess($msg);
 	    chomp($msg);
-	    $msg =~ s/ at .*line \d+.$//;
+	    $msg =~ s/ at .* line \d+\.$//s;
 	}
 	else {
-	    chomp($msg);
 	    $msg = Carp::shortmess($msg);
 	    chomp($msg);
 	}
-	$proc->($msg);
+	$proc->($msg."\n");
     }
 }
 
