@@ -22,7 +22,7 @@
     - The save and clean operations for the messages are now
       provided by buttons on the messages pane itself.
 
-    - Simplified the editor Insert menu.
+    - Simplified the editor Insert menu. Add inserting special symbols.
 
     - Typing a {start_of_section} will automatically provide the
       corresponding {end_of_section}.

@@ -169,6 +169,9 @@ sub setup_menubar( $self ) {
 	      "Insert start/end of tab directive.", "OnInsertTab" ],
 	    [ wxID_ANY, M_EDITOR, "&Grid section",
 	      "Insert start/end of grid directive.", "OnInsertGrid" ],
+	    [],
+	    [ wxID_ANY, M_EDITOR, "Special symbol",
+	      "Insert a special symbol.", "OnInsertSymbol" ],
 	  ]
 	],
 	[ wxID_ANY, M_EDITOR|M_SONGBOOK, "Tasks",

@@ -475,6 +475,15 @@ method set_focus {
 
 ################ Event Handlers (alphabetic order) ################
 
+method OnInsertSymbol($event) {
+    my $ctrl = $self->{t_editor};
+    state $sym = "\x{2665}";
+    my $d = Wx::SymbolPickerDialog->new( $sym, "", "", $self );
+    if ( $d->ShowModal == wxID_OK ) {
+	$ctrl->AddText( $sym = $d->GetSymbol );
+    }
+}
+
 method OnA2Crd($event) {
 
     my $ctrl = $self->{t_editor};
