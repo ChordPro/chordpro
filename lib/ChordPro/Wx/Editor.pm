@@ -139,7 +139,17 @@ sub refresh( $self, $prefs = undef ) {
 
 sub SetViewLineNumbers( $self, $b ) {
     $self->SetMarginWidth( 0, $b ? 40 : 0 ); # TODO length
-    $self->SetMarginWidth( 1, 0 ); # hide
+    if ( $self->can("SetMarginBackground") ) { # wxPerl 3.005
+	$self->SetMarginType( 1, wxSTC_MARGIN_SYMBOL|wxSTC_MARGIN_COLOUR );
+	$self->SetMarginWidth( 1, 3 );
+	my $theme = $state{editortheme};
+	my $c = $preferences{editcolour}{$theme};
+	my $bg = Wx::Colour->new($c->{bg});
+	$self->SetMarginBackground( 1, $bg );
+    }
+    else {
+	$self->SetMarginWidth( 1, 0 );
+    }
 }
 
 sub style_text( $self ) {

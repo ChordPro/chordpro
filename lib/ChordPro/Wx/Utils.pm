@@ -32,6 +32,7 @@ my %const =
       wxELLIPSIZE_END			=> 3,
       wxEVT_COMMAND_FILEPICKER_CHANGED	=> 0x000027b8,
       wxEVT_COMMAND_DIRPICKER_CHANGED	=> 0x000027b9,
+      wxSTC_MARGIN_COLOUR		=> 6,
     ) : () );
 
 no strict 'refs';
