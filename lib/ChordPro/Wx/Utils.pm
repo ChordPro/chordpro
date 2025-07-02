@@ -20,20 +20,36 @@ use ChordPro::Files;
 # Constants not (yet) in this version of Wx, and constants specific to us.
 
 my %const =
-  ( wxID_FULLSCREEN		=> Wx::NewId(),
-    wxICON_NONE			=> 0x00040000,
+  ( wxID_FULLSCREEN	=> Wx::NewId(),	# for menu
+    wxICON_NONE         => 0x00040000,	# unused for now
 
-    $Wx::VERSION < $::Wx_tng ?
-    ( wxEXEC_HIDE_CONSOLE		=> 0x00000020,
-      wxELLIPSIZE_FLAGS_DEFAULT		=> 3,
+    $Wx::VERSION < 3.006 ?
+    ( wxSTC_MARGIN_COLOUR		=> 6,
+    ) : (),
+
+    $Wx::VERSION < 3.004 ?
+    ( wxEVT_COMMAND_FILEPICKER_CHANGED	=> 0x000027b8,
+      wxEVT_COMMAND_DIRPICKER_CHANGED	=> 0x000027b9,
+    ) : (),
+
+    $Wx::VERSION < 3.003 ?
+    ( wxELLIPSIZE_FLAGS_DEFAULT		=> 3,
       wxELLIPSIZE_NONE			=> 0,
       wxELLIPSIZE_START			=> 1,
       wxELLIPSIZE_MIDDLE		=> 2,
       wxELLIPSIZE_END			=> 3,
-      wxEVT_COMMAND_FILEPICKER_CHANGED	=> 0x000027b8,
-      wxEVT_COMMAND_DIRPICKER_CHANGED	=> 0x000027b9,
-      wxSTC_MARGIN_COLOUR		=> 6,
-    ) : () );
+    ) : (),
+
+    $Wx::VERSION < 3.000 ?
+    ( wxEXEC_HIDE_CONSOLE		=> 0x00000020,
+      # wxID_EXECUTE
+      # wxDIRP_SMALL
+      # wxFLP_SMALL
+      # wxPB_SMALL
+      # wxRESERVE_SPACE_EVEN_IF_HIDDEN
+    ) : (),
+
+  );
 
 no strict 'refs';
 
