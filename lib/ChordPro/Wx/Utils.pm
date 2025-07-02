@@ -172,9 +172,9 @@ sub setup_menubar( $self ) {
 	  ]
 	],
 	[ wxID_ANY, M_EDITOR, "&Insert",
-	  [ [ wxID_ANY, M_EDITOR, "&Title directive",
+	  [ [ wxID_ANY, M_EDITOR, "{&title}",
 	      "Insert a {title} directive", "OnInsertTitle" ],
-	    [ wxID_ANY, M_EDITOR, "&Subtitle directive",
+	    [ wxID_ANY, M_EDITOR, "{&subtitle}",
 	      "Insert a {subtitle} directive", "OnInsertSubtitle" ],
 	    [],
 	    [ wxID_ANY, M_EDITOR, "&Verse section",
