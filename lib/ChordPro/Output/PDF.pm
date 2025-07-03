@@ -7,6 +7,8 @@ our $config;
 our $options;
 
 our $ps;
+our $pr;
+our $dw;
 
 package ChordPro::Output::PDF;
 
@@ -27,6 +29,7 @@ use ChordPro::Utils;
 my $pdfapi;
 
 use Text::Layout;
+use List::Util qw(any);
 
 my $verbose = 0;
 
@@ -45,7 +48,11 @@ sub generate_songbook {
                   || $sb->{songs}->[0]->{source}->{embedding};
     $verbose ||= $options->{verbose};
 
+
+    $config->unlock;
     $ps = $config->{pdf};
+    my $pagectrl = $self->page_ctrl;
+    $config->lock;
 
     my $extra_matter = 0;
     if ( $options->{toc} // (@{$sb->{songs}} > 1) ) {
@@ -63,21 +70,19 @@ sub generate_songbook {
     # $prefill indicates that in 2page mode, a filler page is needed to
     # get the songs properly aligned.
     my $prefill = 0;
-    if ( $ps->{'sort-pages'} ) {
-	if ( $ps->{'sort-pages'} eq '2page' ) {
-	    $prefill = 1;
-	}
-	else {
-	    $prefill = sort_songbook($sb);
-	    return unless defined $prefill; # cancelled
-	}
+    if ( $pagectrl->{align_songs_spread} ) {
+	$prefill = 1;
+    }
+    elsif ( $pagectrl->{sort_songs} ) {
+	$prefill = sort_songbook( $sb, $pagectrl );
+	return unless defined $prefill; # cancelled
     }
 
     progress( phase   => "PDF",
 	      index   => 0,
 	      total   => scalar(@{$sb->{songs}}) );
 
-    my $pr = (__PACKAGE__."::Writer")->new( $ps, $pdfapi );
+    $pr = (__PACKAGE__."::Writer")->new( $ps, $pdfapi );
     warn("Generating PDF ", $options->{output} || "__new__.pdf", "...\n")
       if $options->{verbose};
 
@@ -89,6 +94,14 @@ sub generate_songbook {
 	next unless defined($v) && $v ne "";
 	$info{ucfirst($k)} = fmt_subst( $sb->{songs}->[0], $v );
     }
+
+    $info{PageCtrl} = $pagectrl->{dual_pages} ? "dual" : "single";
+    if ( $pagectrl->{align_songs} ) {
+	$info{PageCtrl} .= ", align_songs";
+	$info{PageCtrl} .= ", extend" if $pagectrl->{align_songs_extend};
+	$info{PageCtrl} .= ", spread" if $pagectrl->{align_songs_spread};
+    }
+    $info{PageCtrl} .= ", " . $pagectrl->{sort_songs} if $pagectrl->{sort_songs};
     $pr->info(%info);
 
     # The resultant songbook consists of 5 parts:
@@ -114,7 +127,7 @@ sub generate_songbook {
     my $page_offset = ( $options->{'start-page-number'} || 1 ) - 1;
     $page_offset++ if $prefill && is_even($page_offset);
 
-#    if ( $ps->{'even-odd-pages'} && is_odd($page_offset) ) {
+#    if ( $pagectrl->{dual_pages} && is_odd($page_offset) ) {
 #	warn("Warning: Specifying an even start page when ".
 #	     "pdf.odd-even-pages is in effect may yield surprising results.\n");
 #    }
@@ -129,14 +142,13 @@ sub generate_songbook {
 	  unless $back_matter;
 	$force_align =
 	  !( is_even($page_offset) xor is_even($back_matter->pages))
-	  if $ps->{'pagealign-songs'} > 1;
+	  if $pagectrl->{align_songs_extend};
     }
 
     for my $songindex ( 1 .. @{$sb->{songs}} ) {
 	my $song = $sb->{songs}->[$songindex-1];
-	local $ps->{'even-odd-pages'} = $ps->{'even-odd-pages'};
-	$ps->{'even-odd-pages'} = -($ps->{'even-odd-pages'})
-	  if is_odd($page_offset);
+	local $pagectrl->{align_songs_spread} = $pagectrl->{align_songs_spread};
+	$pagectrl->{align_songs_spread} = 1 if is_odd($page_offset);
 
 	# Align.
 	if ( $song->{meta}->{pages} ) { # 2nd pass
@@ -149,7 +161,7 @@ sub generate_songbook {
 
 	}
 	else {
-	    $pr->page_align($page); # updates $page
+	    $pr->page_align( $pagectrl, "song$songindex", $page ); # updates $page
 	}
 
 	$song->{meta}->{tocpage} = $page; # physical
@@ -175,6 +187,7 @@ sub generate_songbook {
 			   songindex  => $songindex,
 			   numsongs   => scalar(@{$sb->{songs}}),
 			   forcealign => $force_align,
+			   pagectrl   => $pagectrl,
 			 } );
 
 	# Easy access to toc page.
@@ -333,16 +346,19 @@ sub generate_songbook {
 
     # Prepend the front matter songs.
 
-    $force_align = $ps->{'even-odd-pages'} && ($ps->{'pagealign-songs'} > 1);
+    $force_align = $pagectrl->{align_songs_extend};
     if ( $frontmatter_songbook && @{$frontmatter_songbook->{songs}} ) {
 	return unless progress( msg => "ToC" );
 	$page = 1;
 
 	my $toc = 0;
 	for ( @{$frontmatter_songbook->{songs}} ) {
+	    local $pagectrl->{align_songs} = 1;
 	    $toc++;
 	    $pr->{bookmark} = "toc_$toc";
-	    $pr->page_align($page);
+#	    warn("TOC $toc $page\n");
+	    $pr->page_align( $pagectrl, "toc$toc", $page );
+#	    warn("TOC $toc $page\n");
 	    my $pages =
 	      generate_song( $_,
 			     { pr	  => $pr,
@@ -354,10 +370,12 @@ sub generate_songbook {
 			       numsongs	  => 0+@{$frontmatter_songbook->{songs}},
 			       bookmark   => $pr->{bookmark},
 			       forcealign => $force_align,
+			       pagectrl   => $pagectrl,
 			     } );
 	    $pr->named_dest( $_->{meta}->{bookmark},
 			     $pr->{pdf}->openpage($page)) if $pages;
 	    $page += $pages;
+#	    warn("TOC $toc $page\n");
 	}
 	$pages_of{toc} = $page - 1;
 	$start_of{$_} += $page - 1 for qw( songbook back );
@@ -413,6 +431,7 @@ sub generate_songbook {
 			       page_num   => $page,
 			       songindex  => 0,
 			       numsongs	  => 1,
+			       pagectrl	  => $pagectrl,
 			     } );
 	    $page += $p;
 	    $start_of{$_} += $p for qw( songbook front toc back );
@@ -457,17 +476,19 @@ sub generate_songbook {
     }
 
     # Alignment. Only if odd/even pages.
-    if ( $ps->{'even-odd-pages'} ) {
+    if ( $pagectrl->{dual_pages} ) {
 	my @parts = qw( front toc songbook back );
 	while ( @parts ) {
 	    my $part = shift(@parts);
 	    next unless $pages_of{$part};
 
 	    # Always align parts, regardless of pagealign-songs.
-	    local $pr->{ps}->{'pagealign-songs'} = 1;
+	    local $pagectrl->{align_songs} = 1;
 
 	    if ( @parts ) {
-		if ( $pr->page_align( $start_of{$part},
+		if ( $pr->page_align( $pagectrl,
+				      $part,
+				      $start_of{$part},
 				      $part eq "songbook"
 				      ? $prefill
 				        ? 1
@@ -477,7 +498,8 @@ sub generate_songbook {
 		}
 	    }
 	    else {
-		$pr->page_align( $start_of{$part}, is_odd($back_matter->pages) );
+		$pr->page_align( $pagectrl, $part, $start_of{$part},
+				 is_odd($back_matter->pages) );
 	    }
 	}
     }
@@ -650,8 +672,55 @@ sub _dump {
     }
 }
 
+# Derive new style page controls from old style.
+sub page_ctrl {
+    my ( $self ) = @_;
+    my $ps = $config->{pdf};
+    my $pagectrl = { dual_pages		 => abs($ps->{'even-odd-pages'}),
+		     align_songs	 => !!$ps->{'pagealign-songs'},
+		     align_songs_spread	 => 0,
+		     align_songs_extend	 => 0,
+		     sort_songs		 => $ps->{'sort-pages'},
+		   };
+
+    if ( $ps->{'even-odd-pages'} < 0 ) {
+	warn( "Setting \"pdf.even-odd-pages\" to a negative value is deprecated. ",
+	      "Use \"pdf.even-odd-pages:true\" + \"pdf.pagealign-songs-spread:true\".\n");
+	$pagectrl->{align_songs_spread} = 1;
+    }
+    my @s = split( /,\s*/, $pagectrl->{sort_songs} );
+    if ( any { $_ eq "2page" } @s ) {
+	warn( "Setting \"pdf.sort-pages\" to \"2page\" is deprecated.",
+	      " Use \"pdf.pagealign-songs:spread\" instead.\n");
+	$pagectrl->{sort_songs} = join( ",", grep { $_ ne "2page" } @s );
+	$pagectrl->{align_songs_spread} = 1;
+    }
+    if ( $ps->{'pagealign-songs'} > 1 ) {
+	warn( "Setting \"pdf.pagealign-songs\" to \"2\" is deprecated.",
+	      " Use \"pdf.pagealign-songs:true\" + \"pdf.pagealign-songs-extend:true\" instead.\n");
+	$pagectrl->{align_songs_extend} = 1;
+    }
+
+    # Sanity.
+    unless ( $pagectrl->{dual_pages} ) {
+	$pagectrl->{$_} = 0
+	  for qw( align_songs align_songs_spread align_songs_extend );
+	# So we can test any of these without worrying about dual_pages.
+    }
+    unless ( $pagectrl->{align_songs} ) {
+	$pagectrl->{$_} = 0
+	  for qw( align_songs_spread align_songs_extend );
+	# So we can test any of these without worrying about align_songs.
+    }
+    delete($ps->{$_})
+      for qw( sort-pages even-odd-pages pagealign-songs );
+
+    # use DDP; p $pagectrl, as => "pagectrl";
+    return $pagectrl;
+}
+
 sub sort_songbook {
-    my ( $sb ) = @_;
+    my ( $sb, $pagectrl ) = @_;
     my $ps = $config->{pdf};
     my $pri = ( __PACKAGE__."::Writer" )->new( $ps, $pdfapi );
 
@@ -659,10 +728,10 @@ sub sort_songbook {
     # needing to turn page.
     my $page = $options->{"start-page-number"} ||= 1;
 
-    my $sorting = $ps->{'sort-pages'};
+    my $sorting = $pagectrl->{sort_songs};
     my $filler = 0;		# filler for 2page
 
-    if ( $sorting =~ /2page|compact/ ) {
+    if ( $sorting eq "compact" ) {
 	# Progress indicator
 	progress( phase   => "Counting",
 		  index   => 0,
@@ -686,6 +755,7 @@ sub sort_songbook {
 	      generate_song( $song,
 			     { pr	  => $pri,
 			       startpage  => 1,
+			       pagectrl	  => $pagectrl,
 			     } );
 	    ####
 	    $song->{assets} = $assets if $assets;
@@ -718,7 +788,7 @@ sub sort_songbook {
 	}
     }
 
-    if ( 0 and $sorting =~ /compact/ ) {
+    if ( 0 and $sorting eq "compact" ) {
 	my $pagecount = $page;
 	my $songs = @songlist;
 	my $i = 0;
@@ -758,7 +828,7 @@ sub sort_songbook {
 	@songlist = sort { $a->{meta}->{order} <=> $b->{meta}->{order} } @songlist;
     }
 
-    if ( $sorting =~ /compact/ ) {
+    if ( $sorting eq "compact" ) {
 	my @new;
 	my $used = "";
 	# First an arbitrary odd-pages song.
@@ -883,10 +953,6 @@ sub configurator {
 	next unless defined $_;
 	$pdf->{"suppress-empty-chords"} = $_;
     }
-    for ( $options->{"even-pages-number-left"} ) {
-	next unless defined $_;
-	$pdf->{"even-pages-number-left"} = $_;
-    }
 
     # Chord grid width.
     if ( $options->{'chord-grid-size'} ) {
@@ -935,6 +1001,20 @@ sub configurator {
     # This one is fixed.
     $fonts->{chordfingers}->{file} = "ChordProSymbols.ttf";
     $fonts->{chordprosymbols} = $fonts->{chordfingers};
+}
+
+sub diagrammer {
+    my ( $type ) = @_;
+    my $p;
+    if ( $type eq "keyboard" ) {
+	require ChordPro::Output::PDF::KeyboardDiagram;
+	$p = ChordPro::Output::PDF::KeyboardDiagram->new( pr => $pr );
+    }
+    else {
+	require ChordPro::Output::PDF::StringDiagram;
+	$p = ChordPro::Output::PDF::StringDiagram->new( pr => $pr );
+    }
+    return $p;
 }
 
 use Object::Pad;
@@ -1061,15 +1141,8 @@ method getimage ($fragment) {
 		$xo = alert( $fragment->{size} );
 	    }
 	    else {
-		my $p;
-		if ( ($fragment->{instrument} // $config->{instrument}->{type}) eq "keyboard" ) {
-		    require ChordPro::Output::PDF::KeyboardDiagram;
-		    $p = ChordPro::Output::PDF::KeyboardDiagram->new( ps => $ps );
-		}
-		else {
-		    require ChordPro::Output::PDF::StringDiagram;
-		    $p = ChordPro::Output::PDF::StringDiagram->new( ps => $ps );
-		}
+		my $type = $fragment->{instrument} // $config->{instrument}->{type};
+		my $p = ChordPro::Output::PDF::diagrammer($type);
 		$xo = $p->diagram_xo($info);
 	    }
 	}

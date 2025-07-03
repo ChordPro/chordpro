@@ -595,20 +595,24 @@ sub newpage {
 # final page must be even.
 
 sub page_align {
-#    my $ret = _page_align(@_);
-#    warn("ALIGN($_[1]", defined($_[2])?",$_[2]":"", ") -> $ret\n");
-#    return $ret;
-#}
-#sub _page_align {
-    my ( $self, $page, $even ) = @_;
+    my ( $self, $pagectrl, $part, $page, $even ) = @_;
+    my $ret = $self->_page_align( $pagectrl, $part, $page, $even );
+    warn("ALIGN( $part, page $page, ",
+	 defined($even) ? "even $even, " : "",
+	 $self->{pdf}->info_metadata("PageCtrl"),
+	 " ) -> $ret\n");
+    return $ret;
+}
+sub _page_align {
+    my ( $self, $pagectrl, $part, $page, $even ) = @_;
     $even ||= 0;
 
     # Only align to odd pages.
     return 0 if $even xor is_odd($page);	# already odd/even
-    my $ps = $self->{ps};
-    return 0 unless $ps->{'even-odd-pages'};	# no alignment
-    return 0 unless $ps->{'pagealign-songs'};	# no alignment
+    return 0 unless $pagectrl->{dual_pages};	# no alignment
+    return 0 unless $pagectrl->{align_songs};	# no alignment
 
+    my $ps = $self->{ps};
     my $bg;
     if ( ($bg = $ps->{formats}->{filler}->{background})
 	 &&
@@ -621,7 +625,7 @@ sub page_align {
     else {
 	$self->newpage($page);
     }
-    $_[1]++;		# update $page
+    $_[3]++;		# update $page
     return 1;		# number of pages added
 }
 
@@ -1037,6 +1041,8 @@ sub named_dest {
 
 sub pdfapi_named_dest_register {
     my ( $self, $name, $page ) = @_;
+    Carp::cluck("Undef \$name in pdfapi_named_dest_register")
+	unless defined $name;
     $self->{_pr}->{_nd}->{$name} = $page;
 }
 

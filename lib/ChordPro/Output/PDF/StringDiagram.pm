@@ -9,10 +9,10 @@ my $pdf = "";			# for cache flush
 
 class ChordPro::Output::PDF::StringDiagram;
 
-field $ps	:param;
+field $pr	:param;
 
 field $config;
-field $pr;
+field $ps;
 
 field $gw;			# width of a cell, pt
 field $gh;			# height of a cell, pt
@@ -32,8 +32,8 @@ field $fbt;			# fret base text ("%s" is default)
 
 ADJUST {
     $config	  = $::config;
+    $ps		  = $pr->{ps};
     $strings	  = $config->diagram_strings;
-    $pr		  = $ps->{pr};
     my $ctl	  = $ps->{diagrams};
     $gw		  = $ctl->{width} || 6;
     $gh		  = $ctl->{height} || 6;

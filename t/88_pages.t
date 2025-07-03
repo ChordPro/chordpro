@@ -92,7 +92,8 @@ ok( close($fd), "Close $cho" );
 
 @ARGV = ( "--no-default-configs",
 	  "--define", "pdf.csv.songsonly=0",
-	  "--define", "pdf.pagealign-songs=2",
+	  "--define", "pdf.pagealign-songs=1",
+	  "--define", "pdf.pagealign-songs-extend=1",
 	  "--cover", $cover,
 	  "--front-matter", $front,
 	  "--back-matter", $back,

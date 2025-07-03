@@ -127,16 +127,55 @@ sub configurator ( $opts = undef ) {
     foreach my $new ( @cfg ) {
         my $file = $new->{_src}; # for diagnostics
         # Handle obsolete keys.
-        if ( exists $new->{pdf}->{diagramscolumn} ) {
-            $new->{pdf}->{diagrams}->{show} //= "right";
-            delete $new->{pdf}->{diagramscolumn};
+	my $ps = $new->{pdf};
+        if ( exists $ps->{diagramscolumn} ) {
+            $ps->{diagrams}->{show} //= "right";
+            delete $ps->{diagramscolumn};
             warn("$file: pdf.diagramscolumn is obsolete, use pdf.diagrams.show instead\n");
         }
-        if ( exists $new->{pdf}->{formats}->{default}->{'toc-title'} ) {
-            $new->{toc}->{title} //= $new->{pdf}->{formats}->{default}->{'toc-title'};
-            delete $new->{pdf}->{formats}->{default}->{'toc-title'};
+        if ( exists $ps->{formats}->{default}->{'toc-title'} ) {
+            $new->{toc}->{title} //= $ps->{formats}->{default}->{'toc-title'};
+            delete $ps->{formats}->{default}->{'toc-title'};
             warn("$file: pdf.formats.default.toc-title is obsolete, use toc.title instead\n");
         }
+
+	# Page controls.
+	# Check for old and newer keywords conflicts.
+	if ( defined($ps->{'pagealign-songs-spread'})
+	     && defined($ps->{'even-odd-pages'} )
+	     && $ps->{'even-odd-pages'} < 0 ) {
+	    warn( "$file: Conflict: \"pdf.pagealign-songs-spread\" overrules \"pdf.even-odd-pages < 0\"\n" );
+	    $ps->{'even-odd-pages'} = 1;
+	}
+
+	if ( defined($ps->{'pagealign-songs-extend'})
+	     && defined($ps->{'even-odd-pages'} )
+	     && $ps->{'pagealign-songs'} > 1 ) {
+	    warn( "$file: Conflict: \"pdf.pagealign-songs-extend\" overrules \"pdf.pagealign-songs > 0\"\n");
+	    delete $ps->{'pagealign-songs'};
+	}
+
+	# Unless this config uses newer keywords, convert the old.
+	unless ( defined($ps->{'pagealign-songs-spread'})
+		 || defined($ps->{'pagealign-songs-extend'}) ) {
+	    if ( $ps->{'even-odd-pages'} < 0 ) {
+		warn( "$file: Setting \"pdf.even-odd-pages\" to a negative value is deprecated. ",
+		  "Use \"pdf.even-odd-pages:true\" + \"pdf.pagealign-songs-spread:true\".\n");
+		$ps->{'even-odd-pages'} = 1;
+		$ps->{'pagealign-songs-spread'} = 1;
+	    }
+	    if ( $ps->{sort_songs} =~ /\b2page\b/ ) {
+		warn( "$file: Setting \"pdf.sort-pages\" to \"2page\" is deprecated.",
+		      " Use \"pdf.pagealign-songs:spread\" instead.\n");
+		delete $ps->{sort_songs};
+		$ps->{'pagealign-songs-spread'} = 1;
+	    }
+	    if ( $ps->{'pagealign-songs'} > 1 ) {
+		warn( "$file: Setting \"pdf.pagealign-songs\" to \"2\" is deprecated.",
+		      " Use \"pdf.pagealign-songs:true\" + \"pdf.pagealign-songs-extend:true\" instead.\n");
+		$ps->{'pagealign-songs-extend'} = 1;
+	    }
+	}
 
         # Process.
         local $::config = dclone($cfg);

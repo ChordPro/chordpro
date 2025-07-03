@@ -68,7 +68,7 @@ sub generate_song {
       if $config->{debug}->{pages} & 0x01;
 
     my $pr = $opts->{pr};
-    my $ps = $pr->{ps};
+    my $pagectrl = $opts->{pagectrl};
     if ( $pr->{layout}->can("register_element") ) {
 	$pr->{layout}->register_element
 	  ( TextLayoutImageElement->new( pdf => $pr->{pdf} ), "img" );
@@ -106,7 +106,7 @@ sub generate_song {
     $inlinechords = $::config->{settings}->{'inline-chords'};
     $inlineannots = $::config->{settings}->{'inline-annotations'};
     $chordsunder  = $::config->{settings}->{'chords-under'};
-    $ps = $::config->clone->{pdf};
+    my $ps = $::config->clone->{pdf};
     $ps->{pr} = $pr;
     $pr->{ps} = $ps;
     $ps->{_s} = $s;
@@ -126,12 +126,12 @@ sub generate_song {
     my $dctl;
     if ( $::config->{instrument}->{type} eq "keyboard" ) {
 	require ChordPro::Output::PDF::KeyboardDiagram;
-	$dd = ChordPro::Output::PDF::KeyboardDiagram->new( ps => $ps );
+	$dd = ChordPro::Output::PDF::KeyboardDiagram->new( ps => $ps, pr => $pr );
 	$dctl = $ps->{kbdiagrams};
     }
     else {
 	require ChordPro::Output::PDF::StringDiagram;
-	$dd = ChordPro::Output::PDF::StringDiagram->new( ps => $ps );
+	$dd = ChordPro::Output::PDF::StringDiagram->new( ps => $ps, pr => $pr );
 	$dctl = $ps->{diagrams};
     }
     $dctl->{show} = $s->{settings}->{diagrampos}
@@ -212,10 +212,6 @@ sub generate_song {
 
     my $x;
     my $y = $ps->{papersize}->[1] - $ps->{margintop};
-
-    # We do no longer support these. They were wrong anyway,
-    # $ps->{'even-odd-pages'} =  1 if $options->{'even-pages-number-left'};
-    # $ps->{'even-odd-pages'} = -1 if $options->{'odd-pages-number-left'};
 
     my $st = $s->{settings}->{titles} || $::config->{settings}->{titles};
     if ( defined($st)
@@ -321,11 +317,11 @@ sub generate_song {
 	# If even/odd pages, leftpage signals whether the
 	# header/footer parts must be swapped.
 	my $rightpage = 1;
-	if ( $ps->{"even-odd-pages"} ) {
+	if ( $pagectrl->{dual_pages} ) {
 	    # Even/odd printing...
 	    $rightpage = $page_num % 2;
 	    # Odd/even printing...
-	    $rightpage = !$rightpage if $ps->{'even-odd-pages'} < 0;
+	    $rightpage = !$rightpage if $pagectrl->{align_songs_spread};
 	}
 
 	# margin* are offsets from the edges of the paper.
@@ -374,7 +370,7 @@ sub generate_song {
 	    }
 	    $fn = CP->findres($bgpdf);
 	    if ( $fn && fs_test( rs => $fn ) ) {
-		$pg++ if $ps->{"even-odd-pages"} && !$rightpage;
+		$pg++ if $pagectrl->{dual_pages} && !$rightpage;
 		$pr->importpage( $fn, $pg );
 	    }
 	    else {
@@ -1147,7 +1143,7 @@ sub generate_song {
 
     my $pages = $page_num - $startpage + 1;
     $newpage->(), $pages++,
-      if ( $ps->{'even-odd-pages'} && $ps->{'pagealign-songs'} > 1 && $pages % 2
+      if ( $pagectrl->{align_songs_extend} && $pages % 2
 	   && ( $opts->{songindex} < $opts->{numsongs}
 		|| $opts->{forcealign} ) );
 
@@ -1169,11 +1165,11 @@ sub generate_song {
 	# If even/odd pages, leftpage signals whether the
 	# header/footer parts must be swapped.
 	my $rightpage = 1;
-	if ( $ps->{"even-odd-pages"} ) {
+	if ( $pagectrl->{dual_pages} ) {
 	    # Even/odd printing...
 	    $rightpage = $page_num % 2 != 0;
 	    # Odd/even printing...
-	    $rightpage = !$rightpage if $ps->{'even-odd-pages'} < 0;
+	    $rightpage = !$rightpage if $pagectrl->{align_songs_spread};
 	}
 	$s->{meta}->{'page.side'} = $rightpage ? "right" : "left";
 
@@ -2624,15 +2620,7 @@ sub prepare_asset {
 		}
 		else {
 		    my $type = $elt->{opts}->{type} || $config->{instrument}->{type};
-		    my $p;
-		    if ( $type eq "keyboard" ) {
-			require ChordPro::Output::PDF::KeyboardDiagram;
-			$p = ChordPro::Output::PDF::KeyboardDiagram->new( ps => $ps );
-		    }
-		    else {
-			require ChordPro::Output::PDF::StringDiagram;
-			$p = ChordPro::Output::PDF::StringDiagram->new( ps => $ps );
-		    }
+		    my $p = ChordPro::Output::PDF::diagrammer($type);
 		    $xo = $p->diagram_xo($info);
 		}
 		my $res =

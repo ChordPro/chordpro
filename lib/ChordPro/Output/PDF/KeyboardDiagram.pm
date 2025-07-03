@@ -9,10 +9,10 @@ my $pdf = "";			# for cache flush
 
 class ChordPro::Output::PDF::KeyboardDiagram;
 
-field $ps	:param;
+field $pr       :param;
 
 field $config;
-field $pr;
+field $ps;
 
 field $kw;
 field $kh;
@@ -26,7 +26,7 @@ field $pressed;
 
 ADJUST {
     $config	  = $::config;
-    $pr		  = $ps->{pr};
+    $ps		  = $pr->{ps};
     my $ctl	  = $ps->{kbdiagrams};
     $kw		  = $ctl->{width} || 6;
     $kh		  = $ctl->{height} || 6;
