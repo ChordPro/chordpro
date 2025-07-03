@@ -51,7 +51,7 @@ sub generate_songbook {
 
     $config->unlock;
     $ps = $config->{pdf};
-    my $pagectrl = $self->page_ctrl;
+    my $pagectrl = $self->pagectrl;
     $config->lock;
 
     my $extra_matter = 0;
@@ -95,13 +95,7 @@ sub generate_songbook {
 	$info{ucfirst($k)} = fmt_subst( $sb->{songs}->[0], $v );
     }
 
-    $info{PageCtrl} = $pagectrl->{dual_pages} ? "dual" : "single";
-    if ( $pagectrl->{align_songs} ) {
-	$info{PageCtrl} .= ", align_songs";
-	$info{PageCtrl} .= ", extend" if $pagectrl->{align_songs_extend};
-	$info{PageCtrl} .= ", spread" if $pagectrl->{align_songs_spread};
-    }
-    $info{PageCtrl} .= ", " . $pagectrl->{sort_songs} if $pagectrl->{sort_songs};
+    $info{PageCtrl} = pagectrl_msg($pagectrl);
     $pr->info(%info);
 
     # The resultant songbook consists of 5 parts:
@@ -161,7 +155,7 @@ sub generate_songbook {
 
 	}
 	else {
-	    $pr->page_align( $pagectrl, "song$songindex", $page ); # updates $page
+	    $page += $pr->page_align( $pagectrl, "song$songindex", $page );
 	}
 
 	$song->{meta}->{tocpage} = $page; # physical
@@ -357,7 +351,7 @@ sub generate_songbook {
 	    $toc++;
 	    $pr->{bookmark} = "toc_$toc";
 #	    warn("TOC $toc $page\n");
-	    $pr->page_align( $pagectrl, "toc$toc", $page );
+	    $page += $pr->page_align( $pagectrl, "toc$toc", $page );
 #	    warn("TOC $toc $page\n");
 	    my $pages =
 	      generate_song( $_,
@@ -369,7 +363,7 @@ sub generate_songbook {
 			       songindex  => $toc,
 			       numsongs	  => 0+@{$frontmatter_songbook->{songs}},
 			       bookmark   => $pr->{bookmark},
-			       forcealign => $force_align,
+#			       forcealign => $force_align,
 			       pagectrl   => $pagectrl,
 			     } );
 	    $pr->named_dest( $_->{meta}->{bookmark},
@@ -494,12 +488,13 @@ sub generate_songbook {
 				        ? 1
 				        : is_odd($page_offset)
 				      : 0 ) ) {
-		    $start_of{$_}++ for @parts;
+		    $start_of{$_}++ for $part, @parts;
 		}
 	    }
 	    else {
-		$pr->page_align( $pagectrl, $part, $start_of{$part},
-				 is_odd($back_matter->pages) );
+		$start_of{$part} +=
+		  $pr->page_align( $pagectrl, $part, $start_of{$part},
+				   is_odd($back_matter->pages) );
 	    }
 	}
     }
@@ -673,7 +668,7 @@ sub _dump {
 }
 
 # Derive new style page controls from old style.
-sub page_ctrl {
+sub pagectrl {
     my ( $self ) = @_;
     my $ps = $config->{pdf};
     my $pagectrl = { dual_pages		 => abs($ps->{'even-odd-pages'}),
@@ -717,6 +712,19 @@ sub page_ctrl {
 
     # use DDP; p $pagectrl, as => "pagectrl";
     return $pagectrl;
+}
+
+sub pagectrl_msg {
+    my ( $pagectrl ) = @_;
+    my $msg = $pagectrl->{dual_pages} ? "dual" : "single";
+    if ( $pagectrl->{align_songs} ) {
+	$msg .= ", align_songs";
+	$msg .= ", extend" if $pagectrl->{align_songs_extend};
+	$msg .= ", spread" if $pagectrl->{align_songs_spread};
+    }
+    $msg .= ", " . $pagectrl->{sort_songs} if $pagectrl->{sort_songs};
+
+    return $msg;
 }
 
 sub sort_songbook {

@@ -589,18 +589,19 @@ sub newpage {
 # Ordinal page numbers start with 1.
 # Assuming the next page to be written is $page, do we need
 # to insert alignment pages?
-# If so, insert them, update the $page argument and return the
-# number of pages inserted (zero or one).
+# If so, insert them, and return the number of pages inserted (zero or one).
 # Alignment is to an odd page, except for the back matter, whose
 # final page must be even.
 
 sub page_align {
     my ( $self, $pagectrl, $part, $page, $even ) = @_;
     my $ret = $self->_page_align( $pagectrl, $part, $page, $even );
-    warn("ALIGN( $part, page $page, ",
-	 defined($even) ? "even $even, " : "",
-	 $self->{pdf}->info_metadata("PageCtrl"),
-	 " ) -> $ret\n");
+    warn( "ALIGN( $part, page $page, ",
+	  defined($even) ? "even $even, " : "",
+	  ChordPro::Output::PDF::pagectrl_msg($pagectrl),
+	  " ) -> $ret\n")
+      if exists($::config->{debug}->{pagealign})
+      && $::config->{debug}->{pagealign};
     return $ret;
 }
 sub _page_align {
@@ -625,7 +626,6 @@ sub _page_align {
     else {
 	$self->newpage($page);
     }
-    $_[3]++;		# update $page
     return 1;		# number of pages added
 }
 
