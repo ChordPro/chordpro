@@ -98,7 +98,8 @@ sub update_menubar( $self, $sel ) {
 
 sub setup_menubar( $self ) {
 
-    state $expert = $ChordPro::Wx::Config::state{preferences}{expert};
+    state $expert   = $ChordPro::Wx::Config::state{preferences}{expert};
+    state $advanced = $ChordPro::Wx::Config::state{preferences}{advanced};
 
     state $ctl =
       [ [ wxID_FILE,
@@ -134,8 +135,8 @@ sub setup_menubar( $self ) {
 	    [ wxID_DELETE, M_EDITOR|M_SONGBOOK, "", "OnDelete" ],
 	    [],
 	    [ wxID_ANY,    M_EDITOR,
-	      "Clear Diag&nostic Flags",
-	      "Clear the diagnostic flags in the edit window.",
+	      "Clear Editor Warnings",
+	      "Clear the warning messages in the edit window.",
 	      "OnClearDiagnosticFlags" ],
 	    [],
 	    [ wxID_ANY,    M_EDITOR,
@@ -185,9 +186,11 @@ sub setup_menubar( $self ) {
 	      "Insert start/end of tab directive.", "OnInsertTab" ],
 	    [ wxID_ANY, M_EDITOR, "&Grid section",
 	      "Insert start/end of grid directive.", "OnInsertGrid" ],
-	    [],
-	    [ wxID_ANY, M_EDITOR, "Special symbol",
-	      "Insert a special symbol.", "OnInsertSymbol" ],
+	    $advanced ?
+	    ( [],
+	      [ wxID_ANY, M_EDITOR, "Special symbol",
+		"Insert a special symbol.", "OnInsertSymbol" ],
+	    ) : (),
 	  ]
 	],
 	[ wxID_ANY, M_EDITOR|M_SONGBOOK, "Tasks",
