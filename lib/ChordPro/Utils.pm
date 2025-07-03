@@ -643,6 +643,7 @@ push( @EXPORT_OK, "propitems" );
 # For debugging encoding problems.
 
 sub as( $s ) {
+    return "<undef>" unless defined $s;
     $s =~ s{ ( [^\x{20}-\x{7f}] ) }
 	   { join( '', map { sprintf '\x{%02x}', ord $_ } split //, $1) }gex;
     return $s;
