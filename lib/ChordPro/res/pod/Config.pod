@@ -745,7 +745,7 @@
         // to right pages by inserting a blank filler page.
         // Values are true, false, or "song". In the latter case the
         // pagealign settings for songs are used for the tables of contents.
-        pagealign-tocs : song
+        pagealign-tocs : true
     
         // With dual pages, align songs to right pages by inserting
         // a blank filler page.
