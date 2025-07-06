@@ -7,7 +7,11 @@ BACK   := --back=back.pdf
 CHORDPRO := chordpro -X --config=pages.json --csv ${COVER} ${FRONT} ${BACK}
 OPTS :=
 
+ifeq (${ONE},)
 default : test
+else
+default : one
+endif
 
 PDEPS := pages.cho pages.json ../../lib/ChordPro/Output/PDF.pm cover.pdf
 
@@ -64,3 +68,7 @@ po11p.pdf : ${PDEPS}
 	  ${OPTS}
 	setmeta.sh $@
 	diff $(addprefix $(basename $@), .csv .ref)
+
+one :
+	rm -f ${ONE}
+	${MAKE} ${ONE}; cp ${ONE} ${HOME}/tmp/x.pdf
