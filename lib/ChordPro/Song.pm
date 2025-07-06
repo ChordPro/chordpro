@@ -1517,7 +1517,7 @@ sub directive {
 
 	# Enabling this always would allow [^] to recall anyway.
 	# Feature?
-	if ( $config->{settings}->{memorize} ) {
+	if ( 1 || $config->{settings}->{memorize} ) {
 	    $memchords = ($memchords{$cctag//$in_context} //= []);
 	    $memcrdinx = 0;
 	    $memorizing = 0;

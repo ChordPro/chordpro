@@ -233,7 +233,7 @@
         },
 
         "memorize" : {
-          "description" : "Memorize the chords from sections.",
+          "description" : "Allow bare ^ (as well as [^]) to recall memorized chords.",
           "type" : "boolean",
           "default" : false
         },
