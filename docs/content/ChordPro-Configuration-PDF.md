@@ -418,6 +418,24 @@ back matter pages are always aligned, to achieve standard book layout,
 such as front cover on a right (odd) page and back cover on a left
 (even) page.
 
+### Aligning tables of contents with page layouts
+
+If dual page layout is enabled, first table of contents (ToC) will
+always start on a right (odd) page. If there are more than one ToCs,
+the setting of `pagealign-tocs` controls whether subsequent ToCs will
+start on an odd page as well.
+
+    pagealign-tocs : true
+
+With the (default) value of `true` (or `1`), each table of contents will start
+on an odd page.
+
+With a value of `false` (or `0`), each subsequent ToC will start on
+the next available page.
+
+The value `"song"` can be used to have the ToCs follow the settings
+for song aligment.
+
 ## Page reordering
 
 Song pages can be reordered based on the song title or subtitle.

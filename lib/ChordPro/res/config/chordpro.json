@@ -733,12 +733,18 @@ pdf {
 
     // Dual (odd/even) pages when set to true.
     // False means all pages will be the same (odd, right).
+    // With dual pages, all the parts of the songbook (covers,
+    // tables of contents, etc.) are always aligned to a right page.
     even-odd-pages : true
+
+    // With dual pages, align individual tables of content
+    // to right pages by inserting a blank filler page.
+    // Values are true, false, or "song". In the latter case the
+    // pagealign settings for songs are used for the tables of contents.
+    pagealign-tocs : song
 
     // With dual pages, align songs to right pages by inserting
     // a blank filler page.
-    // Note this only applies to songs. Other parts (covers,
-    // tables of contents, etc.) are always aligned.
     pagealign-songs : true
 
     // With dual pages, start all songs on an even (left) page.

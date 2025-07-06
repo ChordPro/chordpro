@@ -347,7 +347,17 @@ sub generate_songbook {
 
 	my $toc = 0;
 	for ( @{$frontmatter_songbook->{songs}} ) {
-	    local $pagectrl->{align_songs} = 1;
+	    # Localize song alignment settings.
+	    local $pagectrl->{align_songs}        = $pagectrl->{align_songs};
+	    local $pagectrl->{align_songs_spread} = $pagectrl->{align_songs_spread};
+	    local $pagectrl->{align_songs_extend} = $pagectrl->{align_songs_extend};
+	    # Override with toc specifics.
+	    unless ( $pagectrl->{align_tocs} eq "song" ) {
+		$pagectrl->{align_songs} = $pagectrl->{align_tocs};
+		$pagectrl->{align_songs_spread} = 0;
+		$pagectrl->{align_songs_extend} = 0;
+	    }
+
 	    $toc++;
 	    $pr->{bookmark} = "toc_$toc";
 #	    warn("TOC $toc $page\n");
@@ -672,6 +682,7 @@ sub pagectrl {
     my ( $self ) = @_;
     my $ps = $config->{pdf};
     my $pagectrl = { dual_pages		 => abs($ps->{'even-odd-pages'}),
+		     align_tocs		 => $ps->{'pagealign-tocs'},
 		     align_songs	 => !!$ps->{'pagealign-songs'},
 		     align_songs_spread	 => 0,
 		     align_songs_extend	 => 0,
@@ -717,6 +728,10 @@ sub pagectrl {
 sub pagectrl_msg {
     my ( $pagectrl ) = @_;
     my $msg = $pagectrl->{dual_pages} ? "dual" : "single";
+    if ( $pagectrl->{align_tocs} ) {
+	$msg .= ", align_tocs";
+	$msg .= "_song" if $pagectrl->{align_tocs} eq "song";
+    }
     if ( $pagectrl->{align_songs} ) {
 	$msg .= ", align_songs";
 	$msg .= ", extend" if $pagectrl->{align_songs_extend};

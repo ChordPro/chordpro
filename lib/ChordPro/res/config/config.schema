@@ -1255,7 +1255,7 @@
 
 	    "even-odd-pages" : {
 	      "default" : true,
-	      "description" : "Dual (odd/even) pages when set to true.\nFalse means all pages will be the same (odd, right).",
+	      "description" : "Dual (odd/even) pages when set to true.\nFalse means all pages will be the same (odd, right).\nWith dual pages, all the parts of the songbook (covers,\ntables of contents, etc.) are always aligned to a right page.",
 	      "type" : "boolean"
 	    },
 
@@ -1914,7 +1914,7 @@
 
 	    "pagealign-songs" : {
 	      "default" : true,
-	      "description" : "With dual pages, align songs to right pages by inserting\na blank filler page.\nNote this only applies to songs. Other parts (covers,\ntables of contents, etc.) are always aligned.",
+	      "description" : "With dual pages, align songs to right pages by inserting\na blank filler page.",
 	      "type" : "boolean"
 	    },
 
@@ -1928,6 +1928,15 @@
 	      "default" : true,
 	      "description" : "When songs need alignment, extend the song with a page (true) or\nuse a blank filler page (false).",
 	      "type" : "boolean"
+	    },
+
+	    "pagealign-tocs" : {
+	      "default" : true,
+	      "description" : "With dual pages, align individual tables of content\nto right pages by inserting a blank filler page.\nValues are true, false, or \"song\". In the latter case the\npagealign settings for songs are used for the tables of contents.",
+	      "oneOf" : [
+	        { "type" : "boolean" },
+		{ "type" : "string", "enum" : [ "song" ] }
+	      ]
 	    },
 
 	    "papersize" : {
