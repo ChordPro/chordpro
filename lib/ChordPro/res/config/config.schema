@@ -1309,7 +1309,7 @@
 		  ]
 		},
 		"chordfingers" : {
-		  "description" : "Font for numbered chord dots and other symbols.",
+		  "description" : "Font for numbered chord dots and other symbols.\nYou can set size and colours, but you cannot change the font.",
 		  "allOf" : [
 		    { "$ref" : "#/definitions/fontspec" },
 		    { "properties" : {
@@ -1389,7 +1389,7 @@
 		  ]
 		},
 		"gridstrum" : {
-		  "description" : "Font for typesetting gridstrum symbols.",
+		  "description" : "Font for typesetting gridstrum symbols.\nYou can set size and colours, but you cannot change the font.",
 		  "allOf" : [
 		    { "$ref" : "#/definitions/fontspec" },
 		    { "properties" : {
