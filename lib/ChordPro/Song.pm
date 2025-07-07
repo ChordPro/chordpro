@@ -1008,7 +1008,7 @@ sub decompose {
 	# Not memorizing.
 	else {
 	    # do_warn("No chords memorized for $in_context");
-	    push( @chords, $chord );
+	    push( @chords, $self->chord($chord) );
 	}
 	$dummy = 0;
     }
