@@ -7,11 +7,8 @@ use utf8;
 use ChordPro::Testing;
 use ChordPro::Songbook;
 
-use Test::More skip_all => "cc development in progress";
+plan tests => 8;
 
-plan tests => 4;
-
-$config->{settings}->{memorize} = 1;
 # Prevent a dummy {body} for chord grids.
 $config->{diagrams}->{show} = 0;
 my $s = ChordPro::Songbook->new;
@@ -29,12 +26,12 @@ The [A]quick [B]brown [F]ox jumps over the lazy [D]dog
 The [E]quick [C]brown [F]ox jumps over the lazy [D]dog
 {end_of_verse2}
 {start_of_verse}
-^The quick ^brown ^ox jumps over the lazy ^dog
-^The quick [G]brown ^ox jumps over the lazy ^dog
+[^]The quick [^]brown [^]ox jumps over the lazy [^]dog
+[^]The quick [G]brown [^]ox jumps over the lazy [^]dog
 {end_of_verse}
 {start_of_verse2}
-The ^quick ^brown ^ox jumps over the lazy ^dog
-^The quick ^brown ^ox jumps over the lazy ^dog
+The [^]quick [^]brown [^]ox jumps over the lazy [^]dog
+[^]The quick [^]brown [^]ox jumps over the lazy [^]dog
 {end_of_verse2}
 {start_of_verse3}
 ^The quick ^brown ^ox jumps over the lazy ^dog
@@ -48,15 +45,228 @@ my $warning = "";
     eval { $s->parse_file(\$data) } or diag("$@");
 }
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
-ok( $warning =~ /No chords memorized for verse3/, "You have been warned" );
+is( $warning, "", "No warnings" );
 isa_ok( $s->{songs}->[0], 'ChordPro::Song', "It's a song" );
-#use Data::Dumper; warn(Dumper($s));
+#use Data::Dumper; warn(Dumper( {%{$s->{songs}->[0]},config=>{}}));
 my $song = {
 	    'meta' => {
 		       'songindex' => 1,
 		       'title' => [
 				   'Test Memorize'
-				  ]
+				  ],
+		       numchords => [ 7 ],
+		      },
+	    'body' => [
+		       {
+			'type' => 'songline',
+			'phrases' => [
+				      'The ',
+				      'quick ',
+				      'brown ',
+				      'ox jumps over the lazy ',
+				      'dog'
+				     ],
+			'context' => 'verse',
+			'chords' => [
+				     '',
+				     'A',
+				     'B',
+				     'F',
+				     'D'
+				    ]
+		       },
+		       {
+			'chords' => [
+				     'A',
+				     'NC',
+				     'F',
+				     'D'
+				    ],
+			'context' => 'verse',
+			'phrases' => [
+				      'The quick ',
+				      'brown ',
+				      'ox jumps over the lazy ',
+				      'dog'
+				     ],
+			'type' => 'songline'
+		       },
+		       {
+			'value' => '',
+			'context' => 'verse',
+			'name' => 'context',
+			'type' => 'set'
+		       },
+		       {
+			'type' => 'songline',
+			'phrases' => [
+				      'The quick ',
+				      'brown ',
+				      'ox jumps over the lazy ',
+				      'dog'
+				     ],
+			'context' => 'verse2',
+			'chords' => [
+				     'E',
+				     'B',
+				     'F',
+				     'D'
+				    ]
+		       },
+		       {
+			'type' => 'songline',
+			'chords' => [
+				     '',
+				     'E',
+				     'C',
+				     'F',
+				     'D'
+				    ],
+			'context' => 'verse2',
+			'phrases' => [
+				      'The ',
+				      'quick ',
+				      'brown ',
+				      'ox jumps over the lazy ',
+				      'dog'
+				     ]
+		       },
+		       {
+			'value' => '',
+			'context' => 'verse2',
+			'name' => 'context',
+			'type' => 'set'
+		       },
+		       {
+			'phrases' => [
+				      'The quick ',
+				      'brown ',
+				      'ox jumps over the lazy ',
+				      'dog'
+				     ],
+			'context' => 'verse',
+			'chords' => [
+				     'A',
+				     'B',
+				     'F',
+				     'D'
+				    ],
+			'type' => 'songline'
+		       },
+		       {
+			'chords' => [
+				     'A',
+				     'G',
+				     'F',
+				     'D'
+				    ],
+			'context' => 'verse',
+			'phrases' => [
+				      'The quick ',
+				      'brown ',
+				      'ox jumps over the lazy ',
+				      'dog'
+				     ],
+			'type' => 'songline'
+		       },
+		       {
+			'value' => '',
+			'context' => 'verse',
+			'name' => 'context',
+			'type' => 'set'
+		       },
+		       {
+			'chords' => [
+				     '',
+				     'E',
+				     'B',
+				     'F',
+				     'D'
+				    ],
+			'context' => 'verse2',
+			'phrases' => [
+				      'The ',
+				      'quick ',
+				      'brown ',
+				      'ox jumps over the lazy ',
+				      'dog'
+				     ],
+			'type' => 'songline'
+		       },
+		       {
+			'type' => 'songline',
+			'chords' => [
+				     'E',
+				     'C',
+				     'F',
+				     'D'
+				    ],
+			'context' => 'verse2',
+			'phrases' => [
+				      'The quick ',
+				      'brown ',
+				      'ox jumps over the lazy ',
+				      'dog'
+				     ]
+		       },
+		       {
+			'value' => '',
+			'context' => 'verse2',
+			'name' => 'context',
+			'type' => 'set'
+		       },
+		       {
+			'phrases' => [
+				      '^The quick ^brown ^ox jumps over the lazy ^dog'
+				     ],
+			'type' => 'songline',
+			'context' => 'verse3'
+		       },
+		       {
+			'phrases' => [
+				      '^The quick ^brown ^ox jumps over the lazy ^dog'
+				     ],
+			'type' => 'songline',
+			'context' => 'verse3'
+		       },
+		       {
+			'value' => '',
+			'context' => 'verse3',
+			'name' => 'context',
+			'type' => 'set'
+		       },
+		      ],
+	    'source' => {
+			 'line' => 1,
+			 'file' => '__STRING__'
+			},
+	    'chordsinfo' => { map { $_ => $_ } qw( A B C D E F G NC ) },
+	    'title' => 'Test Memorize',
+	    'system' => 'common',
+	    'structure' => 'linear',
+	    'settings' => {},
+	   };
+
+is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );
+
+$s = ChordPro::Songbook->new;
+$config->{settings}->{memorize} = 1;
+$warning = "";
+{
+    local $SIG{__WARN__} = sub { $warning .= "@_" };
+    eval { $s->parse_file(\$data) } or diag("$@");
+}
+ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
+ok( $warning =~ /No chords memorized for verse3/, "You have been warned" );
+isa_ok( $s->{songs}->[0], 'ChordPro::Song', "It's a song" );
+#use Data::Dumper; warn(Dumper( {%{$s->{songs}->[0]},config=>{}}));
+$song = {
+	    'meta' => {
+		       'songindex' => 1,
+		       'title' => [
+				   'Test Memorize'
+				  ],
+		       numchords => [ 7 ],
 		      },
 	    'body' => [
 		       {
@@ -260,7 +470,7 @@ my $song = {
 			 'line' => 1,
 			 'file' => '__STRING__'
 			},
-	    'chordsinfo' => { map { $_ => $_ } qw( A B C D E F G NC ) },
+	    'chordsinfo' => { map { $_ => $_ } qw( A B C D E F G NC ^ ) },
 	    'title' => 'Test Memorize',
 	    'system' => 'common',
 	    'structure' => 'linear',
