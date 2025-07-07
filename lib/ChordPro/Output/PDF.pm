@@ -1016,14 +1016,15 @@ sub configurator {
     $fm->( qw( grid_margin    comment  ) );
     $fm->( qw( diagram        comment  ) );
     $fm->( qw( diagram_base   comment  ) );
+    $fm->( qw( chordfingers   diagram  ) );
 
     # Default footer is small subtitle.
     $fonts->{footer}->{size} //= 0.6 * $fonts->{subtitle}->{size};
     $fm->( qw( footer         subtitle ) );
 
     # This one is fixed.
-    $fonts->{chordfingers}->{file} = "ChordProSymbols.ttf";
-    $fonts->{chordprosymbols} = $fonts->{chordfingers};
+    $fonts->{chordprosymbols}->{file} = "ChordProSymbols.ttf";
+
 }
 
 sub diagrammer {

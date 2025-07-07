@@ -959,8 +959,8 @@
             // Font for typesetting chord names.
             chord : "Helvetica-Oblique 10"
     
-            // Font for numbered chord dots and other symbols.
-            chordfingers : "ChordProSymbols.ttf; numbercolor=background"
+            // Font for numbers in chord diagram dots.
+            chordfingers : "sans 5; numbercolor=background"
     
             // Font for typesetting comment text.
             comment : "Helvetica 12; background=foreground-light"
@@ -981,6 +981,7 @@
             grid : "Helvetica 10"
     
             // Font for typesetting gridstrum symbols.
+    	// You can set size and colours, but you cannot change the font.
             gridstrum : "ChordProSymbols 13"
     
             // Font for typesetting grilles.

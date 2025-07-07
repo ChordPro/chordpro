@@ -299,15 +299,13 @@ method diagram_xo( $info ) {
     # Color of the dots and numbers.
     my $fbg = "";		# numbers
     my $ffg = $fg;		# dots
-    unless ( $fsh eq "below" ) {
-	# The numbercolor property of the chordfingers is used for the
-	# color of the dot numbers.
-	my $fcf = $ps->{fonts}->{chordfingers};
-	$fbg = $pr->_bgcolor($fcf->{numbercolor});
-	$ffg = $pr->_bgcolor($fcf->{color});
-	# However, if none we should really use white.
-	$fbg = "white" if $fbg eq "none";
-    }
+    # The numbercolor property of the chordfingers is used for the
+    # color of the dot numbers.
+    my $fcf = $ps->{fonts}->{chordfingers};
+    $fbg = $pr->_bgcolor($fcf->{numbercolor});
+    $ffg = $pr->_bgcolor($fcf->{color});
+    # However, if none we should really use white.
+    $fbg = "white" if $fbg eq "none";
 
     $x = -$gw;
     for my $sx ( 0 .. $strings-1 ) {
@@ -345,8 +343,15 @@ method diagram_xo( $info ) {
 
     # Show the fingers, if any.
     if ( $fingers && @$fingers ) {
-	my $font = $ps->{fonts}->{diagram}->{fd}->{font};
-	my $size = $dot;
+	my ( $font, $size );
+	$font = "chordfingers";
+	$size = $dot;
+	if ( $fsh eq "below" ) {
+	    $size = $ps->{fonts}->{$font}->{size};
+	    $size = $dot if $size <= 0;
+	}
+	$font = $ps->{fonts}->{$font}->{fd}->{font};
+	warn("XXX ", $font->{' data'}->{fontname}, " $size\n");
 	my $asc;		# space if "below"
 
 	$x = -$gw;
@@ -369,9 +374,7 @@ method diagram_xo( $info ) {
 		if ( $fsh eq "below" ) {
 		    $size *= 1.4;
 		}
-		else {
-		    $xo->fill_color($fbg);
-		}
+		$xo->fill_color($fbg);
 		$xo->textstart;
 		$xo->font( $font, $size );
 		$asc = $font->ascender/1000 * $size;

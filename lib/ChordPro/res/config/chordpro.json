@@ -955,9 +955,11 @@ pdf {
         // Font for typesetting chord names.
         chord : "Helvetica-Oblique 10"
 
-        // Font for numbered chord dots and other symbols.
-	// You can set size and colours, but you cannot change the font.
-        chordfingers : "ChordProSymbols; numbercolor=background"
+        // Font for numbers in chord diagram dots.
+	// Color is for the numbers.
+	// Numbercolor is for the dots.
+	// Size doesn't matter unless diagrams.fingers = below.
+        chordfingers : "sans; numbercolor=background"
 
         // Font for typesetting comment text.
         comment : "Helvetica 12; background=foreground-light"

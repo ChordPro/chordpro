@@ -1309,7 +1309,7 @@
 		  ]
 		},
 		"chordfingers" : {
-		  "description" : "Font for numbered chord dots and other symbols.\nYou can set size and colours, but you cannot change the font.",
+		  "description" : "Font for numbers in chord diagram dots.\nColor is for the numbers.\nNumbercolor is for the dots.\nSize doesn't matter unless diagrams.fingers = below.",
 		  "allOf" : [
 		    { "$ref" : "#/definitions/fontspec" },
 		    { "properties" : {
