@@ -354,10 +354,10 @@ method diagram_xo( $info ) {
 	$font = "chordfingers";
 	$size = $dot;
 	if ( $fsh eq "below" ) {
-            $size = $ps->{fonts}->{$font}->{size};
-            #just a little smaller and provides also smaller finger texts in the default "below" style
-            $size -= 1;
-            $size = $dot if $size <= 0;
+	    $size = $ps->{fonts}->{$font}->{size};
+	    #just a little smaller and provides also smaller finger texts in the default "below" style
+	    $size -= 1;
+	    $size = $dot if $size <= 0;
 	}
 	$font = $ps->{fonts}->{$font}->{fd}->{font};
         warn("XXX ", $font->{' data'}->{fontname}, " $size\n") if DIAG_DEBUG;
