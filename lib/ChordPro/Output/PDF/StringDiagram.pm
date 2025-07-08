@@ -305,7 +305,14 @@ method diagram_xo( $info ) {
     $fbg = $pr->_bgcolor($fcf->{numbercolor});
     $ffg = $pr->_bgcolor($fcf->{color});
     # However, if none we should really use white.
-    $fbg = "white" if $fbg eq "none";
+    if ( $fsh ne "below" ) {
+        # However, if none we should really use white.
+        $fbg = "white" if $fbg eq "none";
+    }
+    else {
+        # However, if none we should really use black for "below" case.
+        $fbg = "black" if $fbg eq "none";
+    }
 
     $x = -$gw;
     for my $sx ( 0 .. $strings-1 ) {
@@ -347,17 +354,17 @@ method diagram_xo( $info ) {
 	$font = "chordfingers";
 	$size = $dot;
 	if ( $fsh eq "below" ) {
-	    $size = $ps->{fonts}->{$font}->{size};
-	    $size = $dot if $size <= 0;
+            $size = $ps->{fonts}->{$font}->{size};
+            $size = $dot if $size <= 0;
 	}
 	$font = $ps->{fonts}->{$font}->{fd}->{font};
-	warn("XXX ", $font->{' data'}->{fontname}, " $size\n");
-	my $asc;		# space if "below"
+        warn("XXX ", $font->{' data'}->{fontname}, " $size\n") if DIAG_DEBUG;
 
 	$x = -$gw;
 	my $did = 0;
 	for my $sx ( 0 .. $strings-1 ) {
-	    last if $fbg eq $fg;
+            #when "below", chord fingers should be always drawn and not take into account the dot color
+            last if ( $fsh ne "below" ) && ( $fbg eq $ffg );
 	    $x += $gw;
 	    my $fret = $info->{frets}->[$sx];
 	    next unless $fret > 0;
@@ -371,13 +378,9 @@ method diagram_xo( $info ) {
 	    }
 
 	    unless ( $did++ ) {
-		if ( $fsh eq "below" ) {
-		    $size *= 1.4;
-		}
 		$xo->fill_color($fbg);
 		$xo->textstart;
 		$xo->font( $font, $size );
-		$asc = $font->ascender/1000 * $size;
 	    }
 	    if ( $fsh eq "below" ) {
 		$xo->translate( $x, -$nw - $lw - ($vc+1)*$gh  );
