@@ -355,6 +355,8 @@ method diagram_xo( $info ) {
 	$size = $dot;
 	if ( $fsh eq "below" ) {
             $size = $ps->{fonts}->{$font}->{size};
+            #just a little smaller and provides also smaller finger texts in the default "below" style
+            $size -= 1;
             $size = $dot if $size <= 0;
 	}
 	$font = $ps->{fonts}->{$font}->{fd}->{font};
