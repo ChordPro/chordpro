@@ -27,6 +27,7 @@ field $bsz;			# barre size, fraction of dot
 field $bstyle;			# barre style ("line", "arc")
 field $fsh;			# show fingers (0, 1, "below")
 field $fg;			# foreground color
+field $bg;			# background color
 field $fbp;			# fret base position ("left", "right")
 field $fbt;			# fret base text ("%s" is default)
 
@@ -122,6 +123,11 @@ method draw( $info, $x, $y, $dummy=0 ) {
 method diagram_xo( $info ) {
     return unless $info;
     $fg = $info->{diagram} // $config->{pdf}->{theme}->{foreground};
+    $bg = $config->{pdf}->{theme}->{background};
+
+    # Set default options for safety if they have not already been set
+    $fg = "black" if $fg eq "none";
+    $bg = "white" if $bg eq "none";
 
     my $x = 0;
     my $w = $gw * ($strings - 1);
@@ -304,14 +310,14 @@ method diagram_xo( $info ) {
     my $fcf = $ps->{fonts}->{chordfingers};
     $fbg = $pr->_bgcolor($fcf->{numbercolor});
     $ffg = $pr->_bgcolor($fcf->{color});
-    # However, if none we should really use white.
+
     if ( $fsh ne "below" ) {
-        # However, if none we should really use white.
-        $fbg = "white" if $fbg eq "none";
+        # However, if none we should really use "background" color.
+        $fbg = $bg if $fbg eq "none";
     }
     else {
-        # However, if none we should really use black for "below" case.
-        $fbg = "black" if $fbg eq "none";
+        # However, for "below" case if none or numbercolor equals background color we should really use "foreground".
+        $fbg = $fg if ( $fbg eq "none") || ( $fbg eq $bg );
     }
 
     $x = -$gw;
@@ -356,7 +362,7 @@ method diagram_xo( $info ) {
 	if ( $fsh eq "below" ) {
 	    $size = $ps->{fonts}->{$font}->{size};
 	    #just a little smaller and provides also smaller finger texts in the default "below" style
-	    $size -= 1;
+            $size *= 0.9;
 	    $size = $dot if $size <= 0;
 	}
 	$font = $ps->{fonts}->{$font}->{fd}->{font};
