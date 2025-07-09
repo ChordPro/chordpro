@@ -27,6 +27,7 @@ lib/ChordPro/Output/Debug.pm
 lib/ChordPro/Output/HTML.pm
 lib/ChordPro/Output/LaTeX.pm
 lib/ChordPro/Output/MMA.pm
+lib/ChordPro/Output/Meta.pm
 lib/ChordPro/Output/Markdown.pm
 lib/ChordPro/Output/PDF.pm
 lib/ChordPro/Output/PDF/Grid.pm

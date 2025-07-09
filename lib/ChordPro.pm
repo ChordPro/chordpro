@@ -154,6 +154,9 @@ sub chordpro {
         elsif ( $of =~ /\.(md|markdown)$/i ) {
             $options->{generate} ||= "Markdown";
         }
+        elsif ( $of =~ /\.meta$/i ) {
+            $options->{generate} ||= "Meta";
+        }
         elsif ( $of =~ /\.(debug)$/i ) {
             $options->{generate} ||= "Debug";
         }
