@@ -384,9 +384,9 @@ method diagram_xo( $info ) {
 	    }
 
 	    unless ( $did++ ) {
-                if ( $fsh eq "below" ) {
-                    $size *= 1.4;
-                }
+		if ( $fsh eq "below" ) {
+		    $size *= 1.4;
+		}
 		$xo->fill_color($fbg);
 		$xo->textstart;
 		$xo->font( $font, $size );
