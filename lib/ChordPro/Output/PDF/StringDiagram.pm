@@ -27,6 +27,7 @@ field $bsz;			# barre size, fraction of dot
 field $bstyle;			# barre style ("line", "arc")
 field $fsh;			# show fingers (0, 1, "below")
 field $fg;			# foreground color
+field $bg;			# background color
 field $fbp;			# fret base position ("left", "right")
 field $fbt;			# fret base text ("%s" is default)
 
@@ -122,6 +123,11 @@ method draw( $info, $x, $y, $dummy=0 ) {
 method diagram_xo( $info ) {
     return unless $info;
     $fg = $info->{diagram} // $config->{pdf}->{theme}->{foreground};
+    $bg = $config->{pdf}->{theme}->{background};
+
+    # Set default options for safety if they have not already been set
+    $fg = "black" if $fg eq "none";
+    $bg = "white" if $bg eq "none";
 
     my $x = 0;
     my $w = $gw * ($strings - 1);
@@ -304,8 +310,15 @@ method diagram_xo( $info ) {
     my $fcf = $ps->{fonts}->{chordfingers};
     $fbg = $pr->_bgcolor($fcf->{numbercolor});
     $ffg = $pr->_bgcolor($fcf->{color});
-    # However, if none we should really use white.
-    $fbg = "white" if $fbg eq "none";
+
+    if ( $fsh ne "below" ) {
+        # However, if none we should really use "background" color.
+        $fbg = $bg if $fbg eq "none";
+    }
+    else {
+        # However, for "below" case if none or numbercolor equals background color we should really use "foreground".
+        $fbg = $fg if ( $fbg eq "none") || ( $fbg eq $bg );
+    }
 
     $x = -$gw;
     for my $sx ( 0 .. $strings-1 ) {
@@ -351,13 +364,13 @@ method diagram_xo( $info ) {
 	    $size = $dot if $size <= 0;
 	}
 	$font = $ps->{fonts}->{$font}->{fd}->{font};
-	warn("XXX ", $font->{' data'}->{fontname}, " $size\n");
-	my $asc;		# space if "below"
+        warn("XXX ", $font->{' data'}->{fontname}, " $size\n") if DIAG_DEBUG;
 
 	$x = -$gw;
 	my $did = 0;
 	for my $sx ( 0 .. $strings-1 ) {
-	    last if $fbg eq $fg;
+            #when "below", chord fingers should be always drawn and not take into account the dot color
+            last if ( $fsh ne "below" ) && ( $fbg eq $ffg );
 	    $x += $gw;
 	    my $fret = $info->{frets}->[$sx];
 	    next unless $fret > 0;
@@ -377,7 +390,6 @@ method diagram_xo( $info ) {
 		$xo->fill_color($fbg);
 		$xo->textstart;
 		$xo->font( $font, $size );
-		$asc = $font->ascender/1000 * $size;
 	    }
 	    if ( $fsh eq "below" ) {
 		$xo->translate( $x, -$nw - $lw - ($vc+1)*$gh  );
