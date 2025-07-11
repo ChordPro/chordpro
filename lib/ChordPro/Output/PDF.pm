@@ -1000,6 +1000,7 @@ sub configurator {
 	my ( $font, $def ) = @_;
 	for ( keys %{ $fonts->{$def} } ) {
 	    next if /^(?:background|frame)$/;
+	    next if $font eq "chordfingers" && $_ eq "size";
 	    $fonts->{$font}->{$_} //= $fonts->{$def}->{$_};
 	}
     };

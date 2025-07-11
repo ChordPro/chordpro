@@ -360,7 +360,7 @@ method diagram_xo( $info ) {
 	$font = "chordfingers";
 	$size = $dot;
 	if ( $fsh eq "below" ) {
-	    $size = $ps->{fonts}->{$font}->{size};
+	    $size = $ps->{fonts}->{$font}->{size} // "00";
 	    $size = $dot if $size <= 0;
 	}
 	$font = $ps->{fonts}->{$font}->{fd}->{font};
