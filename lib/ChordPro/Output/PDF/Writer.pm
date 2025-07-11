@@ -47,8 +47,9 @@ sub new {
 	my $apiversion = ${$pdfapi . '::VERSION'};
 	no warnings 'redefine';
 
-	# This is supposed to have been fixed but still croaks...?
-	*{$pdfapi . '::_is_date'} = sub { 1 };
+	# Fix date validation.
+	*{$pdfapi . '::_is_date'} = sub { 1 }
+	  if $apiversion < 2.045;
 
 	# Enhanced version that allows named destinations.
 	eval "use $pdfapi" . "::Annotation";
