@@ -264,13 +264,26 @@ shown if `fingers` is true.
       barstyle :  line    // or arc
       barwidth :  0.8,    // of a dot
       fingers  :  true,   // show fingering if available (or "below")
+      fretbasetext : %s   // Text to show the fret base
+      fretbaseposition : left   // Position for the fret base
     },
 
 With the above settings, chord diagrams will look like:
 
 ![]({{< asset "images/ex_chords.png" >}})
 
-An example of `"show":"right"`, where the chord diagrams are placed in a
+With
+
+      barstyle :  arc
+      fretbasetext : "fr.%s"     // Text to show the fret base
+      fretbaseposition : right   // Position for the fret base
+      fingers  :  below,         // show fingering below
+
+it looks like
+
+![]({{< asset "images/ex_chords_arc.png" >}})
+
+An example of `show:right`, where the chord diagrams are placed in a
 separate column at the right of the lyrics instead of at the end of
 the song.
 
@@ -280,7 +293,7 @@ The `align` property is ignored for `show:right`.
 
 `show:bottom` left aligns to the label margin, if any.
 
-Note that command line option `--lyricsonly` implies `"show":false`
+Note that command line option `--lyricsonly` implies `show:false`
 for diagrams.
 
 ## Keyboard diagrams
