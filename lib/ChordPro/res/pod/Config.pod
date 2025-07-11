@@ -960,7 +960,10 @@
             chord : "Helvetica-Oblique 10"
     
             // Font for numbers in chord diagram dots.
-            chordfingers : "sans 5; numbercolor=background"
+            // Color is for the numbers.
+            // Numbercolor is for the dots.
+            // Size doesn't matter unless diagrams.fingers = below.
+            chordfingers : "sans; numbercolor=background"
     
             // Font for typesetting comment text.
             comment : "Helvetica 12; background=foreground-light"
@@ -981,7 +984,7 @@
             grid : "Helvetica 10"
     
             // Font for typesetting gridstrum symbols.
-    	// You can set size and colours, but you cannot change the font.
+            // You can set size and colours, but you cannot change the font.
             gridstrum : "ChordProSymbols 13"
     
             // Font for typesetting grilles.
