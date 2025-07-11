@@ -124,10 +124,10 @@ my %prefs =
    enable_htmlviewer => undef,
 
    # Preferences w/o UI.
-   chordproext => ".chordpro",	# for Nick
-   dumpstate => 0,
-   expert => 0,
-
+   chordproext	=> ".chordpro",	# for Nick
+   dumpstate	=> 0,
+   expert	=> 0,
+   advanced	=> 0,
   );
 
 use constant MAXRECENTS => 10;
