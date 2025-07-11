@@ -75,11 +75,11 @@ method process () {
 	$img = $self->root->pdf->image( $fh, format => $format,
 					silent => 1, nouseIPL => 1 );
     }
-    elsif ( $link =~ m!^.+\.(png|jpe?g|gif)$!i && fs_test( s => $link ) ) {
+    elsif ( $link =~ m!^.+\.(png|jpe?g|gif)$!i && -s $link ) {
 	# Autodetected. Make the image.
 	$img = $self->root->pdf->image( $link, silent => 1 );
     }
-    elsif ( $link =~ m!^.+\.(tiff?|p[bgp]m|x[bp]m)$!i && fs_test( s => $link ) ) {
+    elsif ( $link =~ m!^.+\.(tiff?|p[bgp]m|x[bp]m)$!i && -s $link ) {
 	# Not autodetected, need format.
 	# Note that xbm and xpm are bonus.
 	my $format = $1 =~ /tif/i ? "tiff" : "pnm";
