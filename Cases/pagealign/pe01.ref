@@ -1,9 +1,9 @@
 title;pages;sort title;artists;composers;collections;keys;years;side
 Cover;1;Cover;ChordPro;;;;;
 Front Matter;3-4;Front Matter;ChordPro;;;;;
-Table of Contents;5-6;Table of Contents;ChordPro;;;;;
-Song1;7;;;;;;;left
-Song2;8-9;;;;;;;right
-Song3;10-12;;;;;;;right
-Song4;13;;;;;;;left
-Back Matter;14;Back Matter;ChordPro;;;;;
+Table of Contents;5-7;Table of Contents;ChordPro;;;;;
+Song1;9;;;;;;;right
+Song2;10-11;;;;;;;left
+Song3;12-14;;;;;;;left
+Song4;15;;;;;;;right
+Back Matter;16;Back Matter;ChordPro;;;;;

@@ -7,7 +7,8 @@ even=1
 if [ "$1" == "" ]; then even=0; fi
 
 case `basename "${file}"` in
-    pe[0-2]?.pdf) even=1;;
+    pe[0-2]?.pdf) even=0;;
+    pn[0-2]?.pdf) even=0;;
     po[0-2]?.pdf) even=0;;
 esac
 		  

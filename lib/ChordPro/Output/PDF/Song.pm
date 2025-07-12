@@ -318,10 +318,7 @@ sub generate_song {
 	# header/footer parts must be swapped.
 	my $rightpage = 1;
 	if ( $pagectrl->{dual_pages} ) {
-	    # Even/odd printing...
-	    $rightpage = $page_num % 2;
-	    # Odd/even printing...
-	    $rightpage = !$rightpage if $pagectrl->{align_songs_spread};
+	    $rightpage = is_odd($page_num);
 	}
 
 	# margin* are offsets from the edges of the paper.
@@ -1166,10 +1163,7 @@ sub generate_song {
 	# header/footer parts must be swapped.
 	my $rightpage = 1;
 	if ( $pagectrl->{dual_pages} ) {
-	    # Even/odd printing...
-	    $rightpage = $page_num % 2 != 0;
-	    # Odd/even printing...
-	    $rightpage = !$rightpage if $pagectrl->{align_songs_spread};
+	    $rightpage = is_odd($page_num);
 	}
 	$s->{meta}->{'page.side'} = $rightpage ? "right" : "left";
 
