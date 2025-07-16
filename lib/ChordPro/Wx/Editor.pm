@@ -170,7 +170,12 @@ sub style_text( $self ) {
 	    my $group = 0;
 	    while ( $start < $end ) {
 		my $l = length(${^CAPTURE[$group++]});
-		$stc->StartStyling( $start, 0 );
+		if ( $Wx::VERSION < 3.006 ) {
+		    $stc->StartStyling( $start, 0 );
+		}
+		else {
+		    $stc->StartStyling( $start );
+		}
 		$stc->SetStyling( $l, shift(@s) );
 		$start += $l;
 	    }
