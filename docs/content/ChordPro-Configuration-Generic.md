@@ -53,9 +53,6 @@ of them can be changed from the command line.
 	  // Command line: -l (--lyrics-only)
 	  lyrics-only : false
 
-	  // Allow bare ^ (as well as [^]) to recall memorized chords.
-	  memorize : false
-
 	  // Chords inline instead of above.
 	  // May be a string containing pretext %s posttext.
 	  // Defaults to "[%s]" if set to a value that doesn't contain "%s".

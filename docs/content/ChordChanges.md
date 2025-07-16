@@ -49,12 +49,6 @@ Chord memory is available only for sections defined using `{start_of_
 sections like `{start_of_verse_a}` and `{start_of_verse_b}` to
 memorise and recall two different sets of verse chords.
 
-In the ChordPro config you can add
-
-    settings.memorize: true
-
-This will allow a sole `^` character to recall chords:
-
 ````
 {start_of_verse}
 If ^you get back to heaven be^fore I ^do,

@@ -233,7 +233,7 @@
         },
 
         "memorize" : {
-          "description" : "Allow bare ^ (as well as [^]) to recall memorized chords.",
+          "description" : "Deprecated, Do not use.",
           "type" : "boolean",
           "default" : false
         },

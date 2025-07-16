@@ -53,7 +53,7 @@
         // Command line: -l (--lyrics-only)
         lyrics-only : false
     
-        // Allow bare ^ (as well as [^]) to recall memorized chords.
+        // Deprecated, Do not use.
         memorize : false
     
         // Chords inline instead of above.
