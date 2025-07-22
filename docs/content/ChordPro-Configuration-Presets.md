@@ -91,7 +91,7 @@ variable `CHORDPRO_LIB`.
 
 `CHORDPRO_LIB` should have the name of the custom folder, and a
 subfolder `config` where the custom configs can be placed. For
-example, assume `CONFIG_LIB` is `~/lib/ChordPro` and this folder
+example, assume `CHORDPRO_LIB` is `~/lib/ChordPro` and this folder
 contains `config/mspro.json`, then this config can be used as
 
     --config mspro
