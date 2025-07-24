@@ -410,6 +410,7 @@ my $additions_min =
    "69",
    "7b5",
    "7-5",
+   "711",			# for George Kooymans
    ( map { ( "$_", "maj$_", "^$_" ) }
      "7",
      "9",
