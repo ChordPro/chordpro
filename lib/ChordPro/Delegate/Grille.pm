@@ -96,7 +96,7 @@ sub grille2xo( $song, %args ) {
 			 txtfont => $txtfont,
 			 symfont => $symfont,
 			 size    => $size,
-			 color   => "red",
+			 color   => "black" ###TODO "red",
 		       );
 
     # Finish.
@@ -642,38 +642,41 @@ method fit_cell( $xc, $yc, $c, $top=0, $left=0, %args ) {
     # my $ink = $do->get_extents;
     # my ($w, $h) = @{$ink}{qw(width height)};
     my ($w, $h) = $do->get_size;
-    $xc += 4;
-    my $xx = ( $c2 eq "" ? $cw : 0.55*$cw ) - 8;
-    my $cw = $cw - 8;
+
+    my $fill = 0.9;
+    my $cw = $cw * $fill;
+    my $xx = ( $c2 eq "" ? $cw : 0.55*$cw ) * $fill;
     if ( $w > $scale * $xx ) {
 	$_ = ($_ * $scale * $xx) / $w for $sz, $h, $w;
 	$do->set_font_size($sz);
 	$do->set_markup($c);
-	DEBUG && warn("\"$c\" \@$sz\n");
+	DEBUG || 1 and warn("\"$c\" \@$sz\n");
     }
-    $do->show( $left > 0
-	       ? $xc
-	       : $left < 0
-	         ? $xc+$cw-$w
-	         : $xc+$cw/2-$w/2,
-	       $top > 0
-	       ? $yc
-	       : $top < 0
-	         ? $yc-$ch+$h
-	         : $yc-$ch/2+( $c2 eq "" ? $h/2 : $h/1.2 ) );
+    $xc += $cw * (( 1 - $fill ) / 2);
+    my $x = $left > 0 ? $xc
+          : $left < 0 ? $xc+$cw-$w : $xc+$cw/2-$w/2;
+    my $y = $top > 0 ? $yc
+          : $top < 0 ? $yc-$ch+$h : $yc-$ch/2+( $c2 eq "" ? $h/2 : $h/1.2 );
+    $do->show( $x, $y );
+    my $fmt = "%-8s %s %s %6.2f %5.2f %5.2f => %6.2f %6.2f\n";
+    DEBUG || 1 and
+    warn(sprintf( $fmt, qq{"$c"},
+		  $left > 0 ? "L" : $left < 0 ? "R" : "C",
+		  $top  > 0 ? "T" : $top  < 0 ? "B" : "M",
+		  $xc, $cw, $w, $x, $y ) );
 
     if ( $c2 ne "" ) {
 	$do->set_markup($c2);
-	$do->show( $left > 0
-		   ? $xc
-		   : $left < 0
-		   ? $xc+$cw-$w
-		   : $xc+$cw/2-$w/2,
-		   $top > 0
-		   ? $yc
-		   : $top < 0
-		   ? $yc-$ch+$h
-		   : $yc-$ch/2+$h/5 );
+	$x = $left > 0 ? $xc
+	   : $left < 0 ? $xc+$cw-$w : $xc+$cw/2-$w/2;
+	$y = $top > 0 ? $yc
+	   : $top < 0 ? $yc-$ch+$h : $yc-$ch/2+( $c2 eq "" ? $h/2 : $h/1.2 );
+        $do->show( $x, $y );
+        DEBUG || 1 and
+	warn(sprintf( $fmt, qq{"$c"},
+		      $left > 0 ? "L" : $left < 0 ? "R" : "C",
+		      $top  > 0 ? "T" : $top  < 0 ? "B" : "M",
+		      $xc, $cw, $w, $x, $y ) );
     }
 }
 
