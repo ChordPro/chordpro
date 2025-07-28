@@ -2773,7 +2773,7 @@ sub svg_texthandler {
 	$d += $xo->text($text);
 	$this = $font;
 	next unless $fs;
-	$xo->font( $ps->{fonts}->{chordfingers}->{fd}->{font}, $sz );
+	$xo->font( $ps->{fonts}->{chordprosymbols}->{fd}->{font}, $sz );
 	$this = 0;
 	$d += $xo->text( $fs eq '♭' ? '!' : '#' );
     }

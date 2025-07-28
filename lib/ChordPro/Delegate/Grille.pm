@@ -77,7 +77,6 @@ sub grille2xo( $song, %args ) {
 
     my $txtfont = $ps->{fonts}->{grille}->{fd};
     my $size = $kv->{size} || $txtfont->{size} || 12;
-    my $symfont = $ps->{fonts}->{chordfingers}->{fd};
     my $go = O_Grille->new;
 
     my @structure;
@@ -94,7 +93,6 @@ sub grille2xo( $song, %args ) {
 
     my $xo = $gr->build( gfx     => $pr->{pdfgfx},
 			 txtfont => $txtfont,
-			 symfont => $symfont,
 			 size    => $size,
 			 color   => "black" ###TODO "red",
 		       );
@@ -242,7 +240,6 @@ sub json2xo( $song, %args ) {
 
     my $txtfont = $ps->{fonts}->{grille}->{fd};
     my $fz = $kv->{size} || $txtfont->{size} || 30;
-    my $symfont = $ps->{fonts}->{chordfingers}->{fd};
     my $go = O_Grille->new;
 
     my @structure;
@@ -257,7 +254,6 @@ sub json2xo( $song, %args ) {
 
     my $do = DrawingObject->new( gfx     => $pr->{pdfgfx},
 				 txtfont => $txtfont,
-				 symfont => $symfont,
 				 size    => $fz,
 				 color   => "blue",
 			       );
@@ -389,7 +385,6 @@ field $gw	 :param = 0;	# number of cells
 field $do;			# drawing object
 field $size;
 field $txtfont;
-field $symfont;
 field $color;
 field $fontsize;
 
@@ -449,15 +444,13 @@ method grille_cell( $xc, $yc, $cell, %args ) {
 	}
 	if ( $cell->repeat_start && 0 ) {
 	    my $d = $size / 16;
-	    $do->set_symfont;
-	    $do->set_markup("\x{27}");
+	    $do->set_markup("<sym repeat-start/>");
 	    my ( $w, $h ) = $do->get_size;
 	    $do->show( $xc+$d, $yc -$ch/2+ $h/2 );
 	}
 	if ( $cell->repeat_end && 0 ) {
 	    my $d = $size / 16;
-	    $do->set_symfont;
-	    $do->set_markup("\x{27}");
+	    $do->set_markup("<sym repeat-start/>");
 	    my ( $w, $h ) = $do->get_size;
 	    $do->show( $xc+$cw-$w-$d, $yc -$ch/2+ $h/2 );
 	}
@@ -497,14 +490,12 @@ method grille_cell( $xc, $yc, $cell, %args ) {
     if ( $nc == 1 ) {
 	$c = $c->[0];
 	if ( $c eq ' R2' ) {
-	    $do->set_symfont($fontsize);
-	    $do->set_markup("\x{28}"); # ·//.
+	    $do->set_markup("<sym repeat2 />");
 	    my ($w, $h) = $do->get_size;
 	    $do->show( $xc+$cw-$w/2, $yc-$ch/2+$h/2 );
 	}
 	elsif ( $c eq 'R' ) {
-	    $do->set_symfont($fontsize);
-	    $do->set_markup("\x{29}");
+	    $do->set_markup("<sym repeat1 />");
 	    my ($w, $h) = $do->get_size;
 	    $do->show( $xc+$cw/2-$w/2, $yc-$ch/2+$h/2 );
 	}
@@ -773,20 +764,18 @@ method grille_part( $xp, $yp, $p, %args ) {
 method build( %args ) {
 
     my $missing = "";
-    for ( qw( gfx symfont txtfont size ) ) {
+    for ( qw( gfx txtfont size ) ) {
 	$missing .= "$_ " unless defined $args{$_};
     }
     die("Missing arguments to Grille::build: $missing\n") if $missing;
 
     my $gfx  = $args{gfx};
-    $symfont = $args{symfont};
     $txtfont = $args{txtfont};
     $color   = $args{color}   if defined $args{color};
     $size    = $args{size};
 
     $do = DrawingObject->new( gfx     => $gfx,
 			      txtfont => $txtfont,
-			      symfont => $symfont,
 			      size    => $size,
 			      color   => $color // "cyan",
 			    );
@@ -822,7 +811,6 @@ class DrawingObject;
 field $gfx	:accessor :param;
 field $size     :accessor :param;
 field $txtfont  :accessor :param;
-field $symfont  :accessor :param;
 field $color    :accessor :param = "lime";
 field $lw       :accessor :param = undef;
 
@@ -887,16 +875,12 @@ method set_txtfont( $sz = undef ) {
     $layout->set_font_description($txtfont);
     $layout->set_font_size( $sz || $size );
 }
-method set_symfont( $sz = undef ) {
-    $layout //= Text::Layout->new($pdf);
-    $layout->set_font_description($symfont);
-    $layout->set_font_size( $sz || $size );
-}
 method set_font_size($sz) {
     $layout->set_font_size($sz);
     $self;
 }
 method set_markup($t) {
+    warn("XXX \"$t\"\n");
     $layout //= Text::Layout->new($pdf);
     $layout->set_markup("<span color='$color'>$t</span>");
 #    $layout->set_markup($t);
