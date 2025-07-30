@@ -352,7 +352,8 @@ sub ellipsize( $widget, %opts ) {
     my $home = ChordPro::Paths->get->home;
     $text =~ s/^\Q$home\E\/*/~\//;
     my $width = ($widget->GetSizeWH)[0];
-    $text = Wx::Control::Ellipsize( $text, Wx::ClientDC->new($widget),
+
+    $text = Wx::Control::Ellipsize( $text, Wx::WindowDC->new($widget),
 				    $opts{type} // wxELLIPSIZE_END(),
 				    $width-10, wxELLIPSIZE_FLAGS_DEFAULT() )
       if Wx::Control->can("Ellipsize");
