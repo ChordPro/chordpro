@@ -7,7 +7,7 @@ ROOT   := ../..
 COMMON := ../common
 SCRIPT := ${ROOT}/script
 RES    := ..\..\lib\ChordPro\res
-PP := pp -u
+PP := pp
 
 all : ppl iss
 
