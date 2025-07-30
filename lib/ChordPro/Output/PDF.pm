@@ -794,21 +794,16 @@ sub sort_songbook {
 
     my @songlist = @{$sb->{songs}};
 
-    if ( $sorting =~ /title/ ) {
-	if ($sorting =~ /desc/ ) {
-	    @songlist = sort { $b->{meta}->{sorttitle}[0] cmp $a->{meta}->{sorttitle}[0]} @songlist;
-	}
-	else {
-	    @songlist = sort { $a->{meta}->{sorttitle}[0] cmp $b->{meta}->{sorttitle}[0]} @songlist;
-	}
+    my @tbs;			# to be sorted
+    if ( $sorting =~ /\btitle\b/ ) {
+	@tbs = map { [ $_->{meta}->{sorttitle}->[0], $_ ] } @songlist;
     }
-    elsif ( $sorting =~ /subtitle/ ) {
-	if ($sorting =~ /desc/ ) {
-	    @songlist = sort { $b->{meta}->{subtitle}[0] cmp $a->{meta}->{subtitle}[0] } @songlist;
-	}
-	else {
-	    @songlist = sort { $a->{meta}->{subtitle}[0] cmp $b->{meta}->{subtitle}[0]} @songlist;
-	}
+    elsif ( $sorting =~ /\bsubtitle\b/ ) {
+	@tbs = map { [ $_->{meta}->{subtitle}->[0], $_ ] } @songlist;
+    }
+    if ( @tbs ) {
+	use locale;
+	@songlist = map { $_->[1] } sort { $a->[0] cmp $b->[0] } @tbs;
     }
 
     if ( 0 and $sorting eq "compact" ) {
