@@ -651,4 +651,15 @@ sub as( $s ) {
 
 push( @EXPORT_OK, "as" );
 
+sub enumerated( @s ) {
+    return "" unless @s;
+    my $last = pop(@s);
+    my $ret = "";
+    $ret .= join(", ", @s) . " and " if @s;
+    $ret .= $last;
+    return $ret;
+}
+
+push( @EXPORT_OK, "enumerated" );
+
 1;
