@@ -51,6 +51,7 @@ sub generate_songbook {
 
     $config->unlock;
     $ps = $config->{pdf};
+    # use DDP; p $ps->{songbook}, as => "in PDF";
     my $pagectrl = $self->pagectrl;
     $config->lock;
 
@@ -62,9 +63,9 @@ sub generate_songbook {
 	}
 	$extra_matter++ if $options->{title};
     }
-    $extra_matter++ if $options->{cover} && !$options->{title};
-    $extra_matter++ if $ps->{'front-matter'};
-    $extra_matter++ if $ps->{'back-matter'};
+    $extra_matter++ if $pagectrl->{cover} && !$options->{title};
+    $extra_matter++ if $pagectrl->{front_matter};
+    $extra_matter++ if $pagectrl->{back_matter};
     $extra_matter++ if $options->{csv};
 
     # $prefill indicates that in 2page mode, a filler page is needed to
@@ -130,9 +131,9 @@ sub generate_songbook {
     # alignment of the final song as well.
     my $back_matter;
     my $force_align;
-    if ( $ps->{'back-matter'} ) {
-	$back_matter = $pdfapi->open( expand_tilde($ps->{'back-matter'}) );
-	die("Missing back matter: ", $ps->{'back-matter'}, "\n")
+    if ( $pagectrl->{back_matter} ) {
+	$back_matter = $pdfapi->open( expand_tilde($pagectrl->{back_matter}) );
+	die("Missing back matter: ", $pagectrl->{back_matter}, "\n")
 	  unless $back_matter;
 	$force_align =
 	  !( is_even($page_offset) xor is_even($back_matter->pages))
@@ -385,10 +386,10 @@ sub generate_songbook {
 	$start_of{$_} += $page - 1 for qw( songbook back );
     }
 
-    if ( $ps->{'front-matter'} ) {
+    if ( $pagectrl->{front_matter} ) {
 	$page = 1;
-	my $matter = $pdfapi->open( expand_tilde($ps->{'front-matter'}) );
-	die("Missing front matter: ", $ps->{'front-matter'}, "\n") unless $matter;
+	my $matter = $pdfapi->open( expand_tilde($pagectrl->{front_matter}) );
+	die("Missing front matter: ", $pagectrl->{front_matter}, "\n") unless $matter;
 	return unless progress( msg => "Front matter" );
 	for ( 1 .. $matter->pages ) {
 	    $pr->{pdf}->import_page( $matter, $_, $_ );
@@ -442,9 +443,9 @@ sub generate_songbook {
 	}
 	$pages_of{cover} = $page - 1;
     }
-    elsif ( defined( $options->{cover} ) ) {
-	my $cover = $pdfapi->open( expand_tilde($options->{cover}) );
-	die("Missing cover: ", $options->{cover}, "\n") unless $cover;
+    elsif ( defined( $pagectrl->{cover} ) ) {
+	my $cover = $pdfapi->open( expand_tilde($pagectrl->{cover}) );
+	die("Missing cover: ", $pagectrl->{cover}, "\n") unless $cover;
 	$page = 0;
 	return unless progress( msg => "Cover" );
 	for ( 1 .. $cover->pages ) {
@@ -680,48 +681,36 @@ sub _dump {
 # Derive new style page controls from old style.
 sub pagectrl {
     my ( $self ) = @_;
-    my $ps = $config->{pdf};
-    my $pagectrl = { dual_pages		 => abs($ps->{'even-odd-pages'}),
-		     align_tocs		 => $ps->{'pagealign-tocs'},
-		     align_songs	 => !!$ps->{'pagealign-songs'},
-		     align_songs_spread	 => 0,
-		     align_songs_extend	 => 0,
-		     sort_songs		 => $ps->{'sort-pages'},
-		   };
 
-    if ( $ps->{'even-odd-pages'} < 0 ) {
-	warn( "Setting \"pdf.even-odd-pages\" to a negative value is deprecated. ",
-	      "Use \"pdf.even-odd-pages:true\" + \"pdf.pagealign-songs-spread:true\".\n");
-	$pagectrl->{align_songs_spread} = 1;
-    }
-    my @s = split( /,\s*/, $pagectrl->{sort_songs} );
-    if ( any { $_ eq "2page" } @s ) {
-	warn( "Setting \"pdf.sort-pages\" to \"2page\" is deprecated.",
-	      " Use \"pdf.pagealign-songs:spread\" instead.\n");
-	$pagectrl->{sort_songs} = join( ",", grep { $_ ne "2page" } @s );
-	$pagectrl->{align_songs_spread} = 1;
-    }
-    if ( $ps->{'pagealign-songs'} > 1 ) {
-	warn( "Setting \"pdf.pagealign-songs\" to \"2\" is deprecated.",
-	      " Use \"pdf.pagealign-songs:true\" + \"pdf.pagealign-songs-extend:true\" instead.\n");
-	$pagectrl->{align_songs_extend} = 1;
-    }
+    # If at this point we still have old style page controls,
+    # they were passed via command line and thus override.
+    # $config->migrate_songbook_pagectrl;
 
-    # Sanity.
+    my $sb = $config->{pdf}->{songbook};
+    my $pagectrl = { dual_pages		 => $sb->{'dual-pages'},
+		     align_tocs		 => $sb->{'align-tocs'},
+		     align_songs	 => $sb->{'align-songs'},
+		     align_songs_spread	 => $sb->{'align-songs-spread'},
+		     align_songs_extend	 => $sb->{'align-songs-extend'},
+		     sort_songs		 => $sb->{'sort-songs'},
+		     sort_localized	 => $sb->{'sort-localized'},
+		     compact_songs	 => $sb->{'compact-songs'},
+		     cover		 => $sb->{cover},
+		     front_matter	 => $sb->{'front-matter'},
+		     back_matter	 => $sb->{'back-matter'},
+		 };
+
     unless ( $pagectrl->{dual_pages} ) {
-	$pagectrl->{$_} = 0
-	  for qw( align_songs align_songs_spread align_songs_extend );
-	# So we can test any of these without worrying about dual_pages.
+	$pagectrl->{align_songs} = 0;
+	$pagectrl->{align_tocs} = 0;
     }
     unless ( $pagectrl->{align_songs} ) {
 	$pagectrl->{$_} = 0
-	  for qw( align_songs_spread align_songs_extend );
-	# So we can test any of these without worrying about align_songs.
+	  for qw( align_songs_spread align_songs_extend compact_songs);
     }
-    delete($ps->{$_})
-      for qw( sort-pages even-odd-pages pagealign-songs );
-
-    # use DDP; p $pagectrl, as => "pagectrl";
+    if ( $config->{debug}->{pagectrl} ) {
+	use DDP; p $pagectrl, as => "pagectrl";
+    }
     return $pagectrl;
 }
 
@@ -802,8 +791,14 @@ sub sort_songbook {
 	@tbs = map { [ $_->{meta}->{subtitle}->[0], $_ ] } @songlist;
     }
     if ( @tbs ) {
-	use locale;
-	@songlist = map { $_->[1] } sort { $a->[0] cmp $b->[0] } @tbs;
+	if ( $pagectrl->{sort_localized} ) {
+	    use locale;
+	    @songlist = map { $_->[1] } sort { $a->[0] cmp $b->[0] } @tbs;
+	}
+	else {
+	    no locale;
+	    @songlist = map { $_->[1] } sort { $a->[0] cmp $b->[0] } @tbs;
+	}
     }
 
     if ( 0 and $sorting eq "compact" ) {

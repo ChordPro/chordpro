@@ -439,43 +439,53 @@ pdf.diagrams.fretbaseposition : left
 // False means all pages will be the same (odd, right)
 // With dual pages, all the parts of the songbook (covers,
 // tables of contents, etc.) are always aligned to a right page.
-# pdf.even-odd-pages : true
+# pdf.songbook.dual-pages : true
 
 // With dual pages, align individual tables of content
 // to right pages by inserting a blank filler page.
 // Values are true, false, or "song". In the latter case the
 // pagealign settings for songs are used for the tables of contents.
-# pagealign-tocs : true
+# pdf.songbook.align-tocs : true
 
-/ With dual pages, all songs will start on a right.
+// With dual pages, all songs will start on a right.
 // A blank filler page is inserted if needed for alignment.
-# pdf.pagealign-songs : true
+// If false, no alignment takes place, all pages follow
+// each other.
+# pdf.songbook.align-songs : true
 
-// With dual pages, start all songs on an even (left) page.
-# pdf.pagealign-songs-spread : false
+// If true, all songs will start on left pages instead of right pages.
+# pdf.songbook.align-songs-spread : false
 
-// When songs need alignment, extend the song with a page (true) or
-// use a blank filler page (false).
-# pdf.pagealign-songs-extend: false
+// If true, filler pages will have headings and footers
+// as if they were part of the song.
+pdf.songbook.align-songs-extend : false
 
-// How to reorder song pages.
-// Sort pages by "title", "subtitle", or "compact".
-// title  : sort pages alphabetically by title.
-// title,desc  : same, but descending order
-// subtitle : sort pages alphabetically by subtitle. If this is
-//          used together with title, only title is used.
-// subtitle,desc  : same, but descending order
-// compact: reorder to make the songbook as compact as possible, while
-//          each of the songs require minimal page turns.
-//          Note: this option requires extra processing time since
-//          the songbook has to be processed twice.
-# pdf.sort-pages : ""
+// Sort songs by "title" or "subtitle".
+// title    : sort songs ascending by title.
+// subtitle : sort songs ascending by subtitle.
+// Put a minus sign before the value to obtain descending order.
+pdf.songbook.sort-songs : false
+
+// Localized sorting uses the rules of the system language or
+// locale, which affects how characters are compared, including
+// considerations for accents and case sensitivity.
+pdf.songbook.sort-localized : true
+
+// If true, the order of the songs is adjusted to make the
+// songbook as compact as possible, while each of the songs
+// require minimal page turns.
+// Note: this option requires extra processing time since
+// the songbook has to be processed twice.
+pdf.songbook.compact-songs : false
+
+// PDF file to add as cover page(s).
+pdf.songbook.cover : false
 
 // PDF file to add as front matter.
-# pdf.front-matter : ""
+pdf.songbook.front-matter : false
 
 // PDF file to add as back matter.
-# pdf.back-matter : ""
+pdf.songbook.back-matter : false
 
 // Formats.
 // Pages have two title elements and one footer element. They also

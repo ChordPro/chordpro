@@ -17,6 +17,7 @@ use ChordPro;
 use ChordPro::Files;
 use ChordPro::Paths;
 use ChordPro::Utils;
+use ChordPro::Utils qw( enumerated );
 use Scalar::Util qw(reftype);
 use List::Util qw(any);
 use Storable 'dclone';
@@ -141,41 +142,29 @@ sub configurator ( $opts = undef ) {
 
 	# Page controls.
 	# Check for old and newer keywords conflicts.
-	if ( defined($ps->{'pagealign-songs-spread'})
-	     && defined($ps->{'even-odd-pages'} )
-	     && $ps->{'even-odd-pages'} < 0 ) {
-	    warn( "$file: Conflict: \"pdf.pagealign-songs-spread\" overrules \"pdf.even-odd-pages < 0\"\n" );
-	    $ps->{'even-odd-pages'} = 1;
+	if ( $ps->{songbook}
+	     && is_hashref($ps->{songbook})
+	     && %{$ps->{songbook}} ) {
+	    # Using new style page controls.
+	    my @depr;
+	    for ( qw( front-matter back-matter sort-pages ) ) {
+		push( @depr, $_) if $ps->{$_};
+	    }
+	    push( @depr, "even-odd-songs" )
+	      if $ps->{'even-odd-songs'} <= 0;
+	    push( @depr, "pagealign-songs" )
+	      if $ps->{'pagealign-songs'} != 1;
+	    if ( @depr ) {
+		warn("Config \"$file\" uses \"pdf.songbook\", ignoring ",
+		     enumerated( map { qq{"pdf.$_"} } @depr ), "\n" );
+		delete $ps->{$_} for @depr;
+	    }
+	}
+	else {
+	    migrate_songbook_pagectrl( $new, $ps );
 	}
 
-	if ( defined($ps->{'pagealign-songs-extend'})
-	     && defined($ps->{'even-odd-pages'} )
-	     && $ps->{'pagealign-songs'} > 1 ) {
-	    warn( "$file: Conflict: \"pdf.pagealign-songs-extend\" overrules \"pdf.pagealign-songs > 0\"\n");
-	    delete $ps->{'pagealign-songs'};
-	}
-
-	# Unless this config uses newer keywords, convert the old.
-	unless ( defined($ps->{'pagealign-songs-spread'})
-		 || defined($ps->{'pagealign-songs-extend'}) ) {
-	    if ( $ps->{'even-odd-pages'} < 0 ) {
-		warn( "$file: Setting \"pdf.even-odd-pages\" to a negative value is deprecated. ",
-		  "Use \"pdf.even-odd-pages:true\" + \"pdf.pagealign-songs-spread:true\".\n");
-		$ps->{'even-odd-pages'} = 1;
-		$ps->{'pagealign-songs-spread'} = 1;
-	    }
-	    if ( $ps->{sort_songs} =~ /\b2page\b/ ) {
-		warn( "$file: Setting \"pdf.sort-pages\" to \"2page\" is deprecated.",
-		      " Use \"pdf.pagealign-songs:spread\" instead.\n");
-		delete $ps->{sort_songs};
-		$ps->{'pagealign-songs-spread'} = 1;
-	    }
-	    if ( $ps->{'pagealign-songs'} > 1 ) {
-		warn( "$file: Setting \"pdf.pagealign-songs\" to \"2\" is deprecated.",
-		      " Use \"pdf.pagealign-songs:true\" + \"pdf.pagealign-songs-extend:true\" instead.\n");
-		$ps->{'pagealign-songs-extend'} = 1;
-	    }
-	}
+	# use DDP; p $ps->{songbook}, as => "after \"$file\"";
 
         # Process.
         local $::config = dclone($cfg);
@@ -184,11 +173,15 @@ sub configurator ( $opts = undef ) {
         $cfg = hmerge( $cfg, $new );
 #	die("PANIC! Config merge error")
 #	  unless UNIVERSAL::isa( $cfg->{settings}->{strict}, 'JSON::Boolean' );
+	# use DDP; p $cfg->{pdf}->{songbook}, as => "accum after \"$file\"";
     }
 
     # Handle defines from the command line.
     # $cfg = hmerge( $cfg, prp2cfg( $options->{define}, $cfg ) );
+    # use DDP; p $options->{define}, as => "clo";
     prpadd2cfg( $cfg, %{$options->{define}} );
+    migrate_songbook_pagectrl($cfg);
+    # use DDP; p $cfg->{pdf}->{songbook}, as => "accum after clo";
 
     # Sanitize added extra entries.
     for my $format ( qw(title subtitle footer) ) {
@@ -271,9 +264,9 @@ sub configurator ( $opts = undef ) {
         $cfg->{settings}->{$_} = $options->{$_};
     }
 
-    for ( "front-matter", "back-matter" ) {
+    for ( "cover", "front-matter", "back-matter" ) {
         next unless defined $options->{$_};
-        $cfg->{pdf}->{$_} = $options->{$_};
+        $cfg->{pdf}->{songbook}->{$_} = $options->{$_};
     }
 
     if ( defined $options->{'chord-grids-sorted'} ) {
@@ -516,6 +509,62 @@ sub simplify_fonts( $cfg ) {
     }
 }
 
+sub migrate_songbook_pagectrl( $self, $ps = undef ) {
+
+    # Migrate old to new.
+    $ps //= $self->{pdf};
+    my $sb = $ps->{songbook} // {};
+    for ( qw( front-matter back-matter ) ) {
+	$sb->{$_} = delete($ps->{$_}) if $ps->{$_};
+    }
+    for ( $ps->{'even-odd-pages'} ) {
+	next unless defined;
+	$sb->{'dual-pages'} = !!$_;
+	$sb->{'align-songs-spread'} = 1 if $_ < 0;
+    }
+    for ( $ps->{'pagealign-songs'} ) {
+	next unless defined;
+	$sb->{'align-songs'} = !!$_;
+	$sb->{'align-tocs'} = !!$_;
+	$sb->{'align-songs-extend'} = $_ > 1;
+    }
+    for ( $ps->{'sort-pages'} ) {
+	next unless defined;
+	my $a = $_;
+	$a =~ s/\s+//g;
+	my ( $sort, $desc, $spread, $compact );
+	$desc = "";
+	for ( split( /,/, lc $a ) ) {
+	    if ( $_ eq "title" ) {
+		$sort = "title";
+	    }
+	    elsif ( $_ eq "subtitle" ) {
+		$sort //= "subtitle";
+	    }
+	    elsif ( $_ eq "2page" ) {
+		$spread++;
+	    }
+	    elsif ( $_ eq "desc" ) {
+		$desc = "-";
+	    }
+	    elsif ( $_ eq "compact" ) {
+		$compact++;
+	    }
+	    else {
+		warn("??? \"$_\"\n");
+	    }
+	}
+	$sb->{'sort-songs'} = "${desc}${sort}" if $sort;
+	$sb->{'compact-songs'} = 1 if $compact;
+	$sb->{'align-songs-spread'} = 1 if $spread;
+    }
+    $ps->{songbook} = $sb;
+    # Remove the obsoleted entries.
+    delete( $ps->{$_} )
+      for qw( even-odd-pages sort-pages pagealign-songs );
+
+}
+
 sub config_final ( %args ) {
     my $delta   = $args{delta} || 0;
     my $default = $args{default} || 0;
@@ -621,7 +670,7 @@ sub convert_config ( $from, $to ) {
     # And re-encode it using the schema.
     my $res = $parser->encode( data => $new, pretty => 1,
 			       nounicodeescapes => 1, schema => $schema );
-use DDP; p $res;
+    # use DDP; p $res;
     # Add trailer.
     $res .= "\n// End of Config.\n";
 

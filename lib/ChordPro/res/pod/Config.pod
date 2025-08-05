@@ -735,47 +735,73 @@
             }
         }
     
-        // Dual (odd/even) pages when set to true.
-        // False means all pages will be the same (odd, right).
-        // With dual pages, all the parts of the songbook (covers,
-        // tables of contents, etc.) are always aligned to a right page.
-        even-odd-pages : true
+        // New style page control.
+        songbook {
+    	// Dual (odd/even) pages when set to true.
+    	// False means all pages will be the same (odd, right).
+    	// With dual pages, all the parts of the songbook (covers,
+    	// tables of contents, etc.) are always aligned to a right page.
+    	dual-pages : true
     
-        // With dual pages, align individual tables of content
-        // to right pages by inserting a blank filler page.
-        // Values are true, false, or "song". In the latter case the
-        // pagealign settings for songs are used for the tables of contents.
-        pagealign-tocs : true
+    	// With dual pages, align individual tables of content
+    	// to right pages by inserting a blank filler page.
+    	// Values are true, false, or "song". In the latter case the
+    	// pagealign settings for songs are used for the tables of contents.
+    	align-tocs : true
     
-        // With dual pages, align songs to right pages by inserting
-        // a blank filler page.
+    	// With dual pages, a true value aligns songs to right pages
+    	// by inserting a blank filler page if necessary.
+    	// If false, no alignment takes place, all pages follow
+    	// each other.
+    	align-songs : true
+    
+    	// If true, all songs will start on left pages instead of right pages.
+    	align-songs-spread : false
+    
+    	// If true, the fill pages will have headings and footers
+    	// as if they were part of the song.
+    	align-songs-extend : false
+    
+    	// Sort songs by "title" or "subtitle".
+    	// title    : sort pages alphabetically by title.
+    	// subtitle : sort pages alphabetically by subtitle. If this is
+    	//            used together with title, only title is used.
+    	// Put a minus sign before title and/or subtitle to obtain
+    	// descending order.
+    	sort-songs : false
+    
+    	// Localized sorting uses the rules of the system language or
+    	// locale, which affects how characters are compared, including
+    	// considerations for accents and case sensitivity.
+    	sort-localized : true
+    
+    	// If true, the order of the songs is adjusted to make the
+    	// songbook as compact as possible, while each of the songs
+    	// require minimal page turns.
+    	// Note: this option requires extra processing time since
+    	// the songbook has to be processed twice.
+    	compact-songs : false
+    
+    	// PDF file to add as cover page(s).
+    	cover : false
+    
+    	// PDF file to add as front matter.
+    	front-matter : false
+    
+    	// PDF file to add as back matter.
+    	back-matter : false
+        }
+    
+        // Legacy settings. These will be converted to new style page controls.
+        // However, if a config contains any new style page controls they
+        // will all be ignoredd.
+        /*
+        even-odd-pages  : true
         pagealign-songs : true
-    
-        // With dual pages, start all songs on an even (left) page.
-        pagealign-songs-spread : false
-    
-        // When songs need alignment, extend the song with a page (true) or
-        // use a blank filler page (false).
-        pagealign-songs-extend : false
-    
-        // How to reorder song pages.
-        // Sort pages by "title", "subtitle", or "compact".
-        // title  : sort pages alphabetically by title.
-        // title,desc  : same, but descending order.
-        // subtitle : sort pages alphabetically by subtitle. If this is
-        //          used together with title, only title is used.
-        // subtitle,desc  : same, but descending order
-        // compact: reorder to make the songbook as compact as possible, while
-        //          each of the songs require minimal page turns.
-        //          Note: this option requires extra processing time since
-        //          the songbook has to be processed twice.
-        sort-pages : ""
-    
-        // PDF file to add as front matter.
-        front-matter : ""
-    
-        // PDF file to add as back matter.
-        back-matter : ""
+        sort-pages :      false
+        front-matter :    false
+        back-matter :     false
+        */
     
         // Formats.
         // Pages have two title elements and one footer element. They also
@@ -1219,6 +1245,7 @@
         mma         : 0
         ops         : 0
         pages       : 0
+        pagectrl    : 0
         paths       : 0
         pgm         : 0
         pp          : 0
