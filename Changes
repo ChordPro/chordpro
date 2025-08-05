@@ -78,6 +78,7 @@
 
     !Bug Fixes
 
+    - Prevent "settings migrated" dialog if not applicable.
     - Some issues with Unicode filenames on Windows.
     - Some issues with line endings on Windows.
     - Fix image alignment with indent.

@@ -178,6 +178,10 @@ sub Setup( $class, $options ) {
 	       wxCONFIG_USE_LOCAL_FILE,
 	     ));
     }
+
+    unless ( $cb->Exists("preferences") ) { # new
+	$cb->Write("/preferences/settings_version", SETTINGS_VERSION );
+    }
 }
 
 method Ok :common {
@@ -286,7 +290,7 @@ method Load :common {
     }
     delete $ENV{CHORDPRO_LIB};
 
-    if ( ($preferences{settings_version}||1) < SETTINGS_VERSION ) {
+    if ( $preferences{settings_version} < SETTINGS_VERSION ) {
 	for ( qw( windows sash ) ) {
 	    delete $state{$_};
 	    $cb->DeleteGroup($_);
@@ -305,7 +309,7 @@ method Load :common {
     # For convenience.
     setup_filters();
 
-    if ( $preferences{dumpstate} ) {
+    if ( 1 || $preferences{dumpstate} ) {
 	use DDP; p %state;
     }
 }
