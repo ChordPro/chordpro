@@ -711,6 +711,9 @@ sub pagectrl {
 	$pagectrl->{$_} = 0
 	  for qw( align_songs_spread align_songs_extend compact_songs);
     }
+    for ( qw( cover front_matter back_matter ) ) {
+	$pagectrl->{$_} = undef unless is_true($pagectrl->{$_});
+    }
     if ( $config->{debug}->{pagectrl} ) {
 	use DDP; p $pagectrl, as => "pagectrl";
     }
