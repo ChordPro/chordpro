@@ -74,8 +74,11 @@ sub generate_songbook {
     if ( $pagectrl->{align_songs_spread} ) {
 	$prefill = 1;
     }
-    elsif ( $pagectrl->{sort_songs} ) {
-	$prefill = sort_songbook( $sb, $pagectrl );
+    if ( $pagectrl->{sort_songs} ) {
+	sort_songbook( $sb, $pagectrl );
+    }
+    if ( $pagectrl->{compact_songs} ) {
+	$prefill = compact_songbook( $sb, $pagectrl );
 	return unless defined $prefill; # cancelled
     }
 
@@ -733,6 +736,43 @@ sub pagectrl_msg {
 
 sub sort_songbook {
     my ( $sb, $pagectrl ) = @_;
+    return unless my $sorting = $pagectrl->{sort_songs};
+
+    foreach my $song ( @{$sb->{songs}} ) {
+	if (!defined($song->{meta}->{sorttitle})) {
+	    $song->{meta}->{sorttitle} = $song->{meta}->{title};
+	}
+    }
+
+    my @songlist = @{$sb->{songs}};
+
+    my @tbs;			# to be sorted
+    my $desc = 0;		# descending
+    if ( $sorting =~ /^([-+]?)title$/i ) {
+	$desc = $1 eq "-";
+	@tbs = map { [ $_->{meta}->{sorttitle}->[0], $_ ] } @songlist;
+    }
+    elsif ( $sorting =~ /^([-+]?)subtitle$/i ) {
+	$desc = $1 eq "-";
+	@tbs = map { [ $_->{meta}->{subtitle}->[0], $_ ] } @songlist;
+    }
+    return unless @tbs;
+
+    my $proc = 'sub { my $tbs = shift; ';
+    $proc .= $pagectrl->{sort_localized} ? "use" : "no";
+    $proc .= " locale; ";
+    $proc .= '[ map { $_->[1] } sort { ';
+    $proc .= $desc ? '$b->[0] cmp $a->[0]' : '$a->[0] cmp $b->[0]';
+    $proc .= ' } @$tbs ] }';
+    my $sorter = eval $proc;
+    die("OOPS $proc\n$@") if $@;
+    $sb->{songs} = $sorter->(\@tbs);
+}
+
+sub compact_songbook {
+    my ( $sb, $pagectrl ) = @_;
+    return 0 unless $pagectrl->{compact_songs};
+
     my $ps = $config->{pdf};
     my $pri = ( __PACKAGE__."::Writer" )->new( $ps, $pdfapi );
 
@@ -740,142 +780,78 @@ sub sort_songbook {
     # needing to turn page.
     my $page = $options->{"start-page-number"} ||= 1;
 
-    my $sorting = $pagectrl->{sort_songs};
-    my $filler = 0;		# filler for 2page
-
-    if ( $sorting eq "compact" ) {
-	# Progress indicator
-	progress( phase   => "Counting",
-		  index   => 0,
-		  total   => scalar(@{$sb->{songs}}) );
-
-	my $i = 1;
-	foreach my $song ( @{$sb->{songs}} ) {
-	    return unless progress( msg => $song->{title} );
-	    $i++;
-
-	    #### HACK ATTACK.
-	    # Assets will be rendered, but then they are part of the temp
-	    # PDF, not the final one.
-	    # We copy the unprocessed assets and restore after the 1st pass.
-	    use Storable qw(dclone);
-	    my $assets;
-	    $assets = dclone( $song->{assets} ) if $song->{assets};
-	    ####
-
-	    $song->{meta}->{pages} =
-	      generate_song( $song,
-			     { pr	  => $pri,
-			       startpage  => 1,
-			       pagectrl	  => $pagectrl,
-			     } );
-	    ####
-	    $song->{assets} = $assets if $assets;
-	    ####
-	}
-    }
-
     foreach my $song ( @{$sb->{songs}} ) {
 	if (!defined($song->{meta}->{sorttitle})) {
-	    $song->{meta}->{sorttitle}=$song->{meta}->{title};
+	    $song->{meta}->{sorttitle} = $song->{meta}->{title};
 	}
     }
 
     my @songlist = @{$sb->{songs}};
+    my $filler = 0;		# filler for 2page
 
-    my @tbs;			# to be sorted
-    if ( $sorting =~ /\btitle\b/ ) {
-	@tbs = map { [ $_->{meta}->{sorttitle}->[0], $_ ] } @songlist;
-    }
-    elsif ( $sorting =~ /\bsubtitle\b/ ) {
-	@tbs = map { [ $_->{meta}->{subtitle}->[0], $_ ] } @songlist;
-    }
-    if ( @tbs ) {
-	if ( $pagectrl->{sort_localized} ) {
-	    use locale;
-	    @songlist = map { $_->[1] } sort { $a->[0] cmp $b->[0] } @tbs;
-	}
-	else {
-	    no locale;
-	    @songlist = map { $_->[1] } sort { $a->[0] cmp $b->[0] } @tbs;
-	}
-    }
+    # Progress indicator
+    progress( phase   => "Counting",
+	      index   => 0,
+	      total   => scalar(@{$sb->{songs}}) );
 
-    if ( 0 and $sorting eq "compact" ) {
-	my $pagecount = $page;
-	my $songs = @songlist;
-	my $i = 0;
-	while ( $i<$songs ) {
-	    if ( defined($songlist[$i]->{meta}->{order}) ) {
-		#skip already processed entries
-		$i++;
-		next;
-	    }
-	    my $pages = $songlist[$i]->{meta}->{pages};
-	    $songlist[$i]->{meta}->{order} = $pagecount;
-	    if ( ($pagecount % 2) && $pages == 2 ) {
-		my $j = $i+1;
-		#Find next song with != 2 pages
-		while ( $j < $songs ) {
-		    last if ( !defined($songlist[$j]->{meta}->{order}) && $songlist[$j]->{meta}->{pages} != 2 );
-		    $j++;
-		}
-		if ( $j == $songs ) {
-		    $i++;
-		}
-		else {
-		    # Swapped page gets current ID
-		    $songlist[$j]->{meta}->{order} = $pagecount;
-		    # Pushed page gets ID plus swapped page
-		    $songlist[$i]->{meta}->{order} = $pagecount+$songlist[$j]->{meta}->{pages};
-		    # Add the swapped page to pagecount as it will be skipped later
-		    $pages += $songlist[$j]->{meta}->{pages};
-		}
-	    }
-	    else {
-		$i++
-	    }
-	    $pagecount += $pages;
-	}
-	# By Pagelist
-	@songlist = sort { $a->{meta}->{order} <=> $b->{meta}->{order} } @songlist;
+    my $i = 1;
+    foreach my $song ( @songlist ) {
+	return unless progress( msg => $song->{title} );
+	$i++;
+
+	#### HACK ATTACK.
+	# Assets will be rendered, but then they are part of the temp
+	# PDF, not the final one.
+	# We copy the unprocessed assets and restore after the 1st pass.
+	use Storable qw(dclone);
+	my $assets;
+	$assets = dclone( $song->{assets} ) if $song->{assets};
+	####
+
+	$song->{meta}->{pages} =
+	  generate_song( $song,
+			 { pr	  => $pri,
+			   startpage  => 1,
+			   pagectrl	  => $pagectrl,
+			 } );
+	####
+	$song->{assets} = $assets if $assets;
+	####
     }
 
-    if ( $sorting eq "compact" ) {
-	my @new;
-	my $used = "";
-	# First an arbitrary odd-pages song.
-	for ( my $i=0; $i < @songlist; $i++ ) {
-	    next unless is_odd( $options->{'start-page-number'}||1 );
-	    next unless is_odd($songlist[$i]->{meta}->{pages});
-	    push( @new, $songlist[$i] );
-	    vec( $used, $i, 1 ) = 1;
-	    last;
-	}
-	##### TODO: If still empty, need filler.
-	$filler++ unless @new;
-
-	# Then all even-pages songs.
-	for ( my $i=0; $i < @songlist; $i++ ) {
-	    next if vec( $used, $i, 1 );
-	    next unless is_even($songlist[$i]->{meta}->{pages});
-	    push( @new, $songlist[$i] );
-	    vec( $used, $i, 1 ) = 1;
-	}
-
-	# Finally, all other odd-pages songs.
-	for ( my $i=0; $i < @songlist; $i++ ) {
-	    next if vec( $used, $i, 1 );
-	    next unless is_odd($songlist[$i]->{meta}->{pages});
-	    push( @new, $songlist[$i] );
-	    vec( $used, $i, 1 ) = 1;
-	}
-
-	die("compact ", scalar(@new), " <> ", scalar(@songlist), "!\n")
-	  unless scalar(@new) == scalar(@songlist);
-
-	@songlist = @new;
+    my @new;
+    my $used = "";
+    # First an arbitrary odd-pages song.
+    for ( my $i=0; $i < @songlist; $i++ ) {
+	next unless is_odd( $options->{'start-page-number'}||1 );
+	next unless is_odd($songlist[$i]->{meta}->{pages});
+	push( @new, $songlist[$i] );
+	vec( $used, $i, 1 ) = 1;
+	last;
     }
+    ##### TODO: If still empty, need filler.
+    $filler++ unless @new;
+
+    # Then all even-pages songs.
+    for ( my $i=0; $i < @songlist; $i++ ) {
+	next if vec( $used, $i, 1 );
+	next unless is_even($songlist[$i]->{meta}->{pages});
+	push( @new, $songlist[$i] );
+	vec( $used, $i, 1 ) = 1;
+    }
+
+    # Finally, all other odd-pages songs.
+    for ( my $i=0; $i < @songlist; $i++ ) {
+	next if vec( $used, $i, 1 );
+	next unless is_odd($songlist[$i]->{meta}->{pages});
+	push( @new, $songlist[$i] );
+	vec( $used, $i, 1 ) = 1;
+    }
+
+    die("compact ", scalar(@new), " <> ", scalar(@songlist), "!\n")
+      unless scalar(@new) == scalar(@songlist);
+
+    @songlist = @new;
 
     $sb->{songs} = [@songlist];
 
