@@ -18,6 +18,7 @@ use ChordPro::Paths;
 use ChordPro::Utils qw( expand_tilde demarkup min is_corefont maybe is_true is_odd );
 use ChordPro::Output::Common qw( fmt_subst prep_outlines );
 use Ref::Util qw( is_arrayref is_hashref );
+use feature 'state';
 
 # For regression testing, run perl with PERL_HASH_SEED set to zero.
 # This eliminates the arbitrary order of font definitions and triggers
@@ -623,15 +624,25 @@ sub _page_align {
     return 0 unless $pagectrl->{dual_pages};	# no alignment
     return 0 unless $pagectrl->{align_songs};	# no alignment
 
+    use List::Util 'shuffle';
     my $ps = $self->{ps};
     my $bg;
+    my $ffile;
+    my $filler;
     if ( ($bg = $ps->{formats}->{filler}->{background})
 	 &&
-	 ( my $filler = $self->{pdfapi}->open( expand_tilde($bg) ) )
+	 ( $ffile = expand_tilde($bg) )
+	 &&
+	 ( $filler = $self->{pdfapi}->open($ffile) )
        ) {
+	state $file = "";
+	state @pages;
+	if ( $file ne $ffile || !@pages ) {
+	    $file = $ffile;
+	    @pages = shuffle( 1..$filler->pages );
+	}
 	# Pick a random page.
-	$self->{pdf}->import_page( $filler,
-				   1+int(rand($filler->pages)), $page );
+	$self->{pdf}->import_page( $filler, shift(@pages), $page );
     }
     else {
 	$self->newpage($page);
