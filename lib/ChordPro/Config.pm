@@ -525,7 +525,6 @@ sub migrate_songbook_pagectrl( $self, $ps = undef ) {
     for ( $ps->{'pagealign-songs'} ) {
 	next unless defined;
 	$sb->{'align-songs'} = !!$_;
-	$sb->{'align-tocs'} = !!$_;
 	$sb->{'align-songs-extend'} = $_ > 1;
     }
     for ( $ps->{'sort-pages'} ) {

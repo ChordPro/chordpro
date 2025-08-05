@@ -352,19 +352,19 @@ sub generate_songbook {
 	my $toc = 0;
 	for ( @{$frontmatter_songbook->{songs}} ) {
 	    # Localize song alignment settings.
-	    local $pagectrl->{align_songs}        = $pagectrl->{align_songs};
-	    local $pagectrl->{align_songs_spread} = $pagectrl->{align_songs_spread};
-	    local $pagectrl->{align_songs_extend} = $pagectrl->{align_songs_extend};
-	    # Override with toc specifics.
-	    unless ( $pagectrl->{align_tocs} eq "song" ) {
-		$pagectrl->{align_songs} = $pagectrl->{align_tocs};
-		$pagectrl->{align_songs_spread} = 0;
-		$pagectrl->{align_songs_extend} = 0;
-	    }
+	    local $pagectrl->{align_songs} =
+	      $pagectrl->{align_tocs};
+	    local $pagectrl->{align_songs_spread} =
+	      $pagectrl->{align_tocs} eq "songs"
+	      ? $pagectrl->{align_songs_spread} : 0;
+	    local $pagectrl->{align_songs_extend} =
+	      $pagectrl->{align_tocs} eq "songs"
+	      ? $pagectrl->{align_songs_extend} : 0;
 
 	    $toc++;
 	    $pr->{bookmark} = "toc_$toc";
 #	    warn("TOC $toc $page\n");
+#	    use DDP; p $pagectrl, as => "for toc";
 	    $page += $pr->page_align( $pagectrl, "toc$toc", $page );
 #	    warn("TOC $toc $page\n");
 	    my $pages =
