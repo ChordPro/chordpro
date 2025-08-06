@@ -61,6 +61,7 @@ jobs:
           curl -o awx.tgz -L https://github.com/sciurius/perl-Alien-wxWidgets/releases/download/R0.71/Alien-wxWidgets-$AWV.tar.gz
           tar xf awx.tgz
           cd Alien-wxWidgets-$AWV
+          cpanm --installdeps --notest ,
           perl ./Build.PL --wxWidgets-build=0
           perl ./Build
           perl ./Build install
