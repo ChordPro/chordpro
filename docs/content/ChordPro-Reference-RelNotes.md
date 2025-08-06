@@ -2,7 +2,7 @@
 
 ## 6.079.0
 
-Under development
+Released: 2025-08-06
 
 
 ### Highlights
@@ -37,7 +37,7 @@ Under development
 * To avoid confusion, command line option `--print-default-config` will now print the **template** config instead of the **full** config. To print the full config, repeat the option.
 * In case of emergency it is now possible to obtain chord brackets in lyrics and annotations.
 * Allow name based array access in config augment.
-* Font specifications in the config may now carry (some) properties. E.g. `pdf.fonts.comment_box : "sans 12; frame=1"`.
+* Font specifications in the config may now carry (some) properties. E.g. `pdf.fonts.comment_box : "sans 12; color=blue; frame=1"`.
 * Command line options `--even-pages-number-left` (`-L`) and `--odd-pages-numbers-left` are no longer functional. They did the wrong thing anyway. Use [`pdf.songbook`](https://www.chordpro.org/beta/chordpro-configuration-pdf/#songbook-pages) in the config file instead.
 
 ### Bug Fixes

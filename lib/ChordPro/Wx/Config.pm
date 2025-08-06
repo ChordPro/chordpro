@@ -309,7 +309,7 @@ method Load :common {
     # For convenience.
     setup_filters();
 
-    if ( 1 || $preferences{dumpstate} ) {
+    if ( $preferences{dumpstate} ) {
 	use DDP; p %state;
     }
 }
