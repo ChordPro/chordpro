@@ -615,6 +615,7 @@ sub page_align {
       && $::config->{debug}->{pagealign};
     return $ret;
 }
+
 sub _page_align {
     my ( $self, $pagectrl, $part, $page, $even ) = @_;
     $even ||= 0;
@@ -639,6 +640,9 @@ sub _page_align {
 	state @pages;
 	if ( $file ne $ffile || !@pages ) {
 	    $file = $ffile;
+	    # Try to make it reproducible.
+	    local $ENV{PERL_HASH_SEED} = 0x12a02ab;
+	    srand();
 	    @pages = shuffle( 1..$filler->pages );
 	}
 	# Pick a random page.
