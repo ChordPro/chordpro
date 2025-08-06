@@ -73,7 +73,7 @@ jobs:
 
       - name: Install wxPerl
         run: |
-          cpanm https://github.com/sciurius/wxPerl/releases/download/R3.007/Wx-3.007.tar.gz --notest || cat $HOME/.cpanm/build.log
+          cpanm https://github.com/sciurius/wxPerl/releases/download/R3.008/Wx-3.009.tar.gz --notest || cat $HOME/.cpanm/build.log
           cat $HOME/.cpanm/build.log
 
       - name: Install other dependencies
