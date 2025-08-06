@@ -19,7 +19,7 @@ on:
       - M6.079.0
 
 env:
-  AWV: 0.71
+  AWV: 0.72
 
 jobs:
 
@@ -72,7 +72,8 @@ jobs:
           perl -MAlien::wxWidgets -e 'Alien::wxWidgets->libraries(qw(stc media webview propgrid ribbon aui xrc qa html))'
 
       - name: Install wxPerl
-        run: "cpanm https://github.com/sciurius/wxPerl/releases/download/R3.007/Wx-3.007.tar.gz --notest\n"
+        run: |
+          cpanm https://github.com/sciurius/wxPerl/releases/download/R3.007/Wx-3.007.tar.gz --notest || cat $HOME/.cpanm/build.log
 
       - name: Install other dependencies
         run: |
