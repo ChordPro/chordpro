@@ -8,6 +8,8 @@
 
     - [Break items](https://www.chordpro.org/beta/table_of_contents/#break) in Table of Content lines.
 
+    - [Improved control](https://www.chordpro.org/beta/chordpro-configuration-pdf/#songbook-pages) over page order and alignment.
+
     !GUI improvements
 
     - You can now set the preferred filename extension for ChordPro
@@ -24,8 +26,8 @@
 
     - Simplified the editor Insert menu. Add inserting special symbols.
 
-    - Typing a {start_of_section} will automatically provide the
-      corresponding {end_of_section}.
+    - Typing a `{start_of_section}` will automatically provide the
+      corresponding `{end_of_section}`.
     
     !Other improvements
 
@@ -48,7 +50,7 @@
     - Filenames in filelists are considered relative to the filelist.
 
     - Are you using the preprocessor in your abc and ly environments?
-      Please use the more general parser.preprocess.env-... instead.
+      Please use the more general `parser.preprocess.env-`... instead.
 
     - Config [settings.maj7delta](https://www.chordpro.org/beta/chordpro-configuration-generic/#general-settings) to obtain a delta symbol instead of 'maj7'
       in chord names.
@@ -69,11 +71,11 @@
     - Allow name based array access in config augment.
 
     - Font specifications in the config may now carry (some) properties.
-      E.g. `pdf.fonts.comment_box : "sans 12; frame=1"`.
+      E.g. `pdf.fonts.comment_box : "sans 12; color=blue; frame=1"`.
 
-    - Command line options --even-pages-number-left (-L) and
-      --odd-pages-numbers-left are no longer functional. They did the
-      wrong thing anyway. Use pdf.even-odd-pages in the config file
+    - Command line options `--even-pages-number-left` (`-L`) and
+      `--odd-pages-numbers-left` are no longer functional. They did the
+      wrong thing anyway. Use [`pdf.songbook`](https://www.chordpro.org/beta/chordpro-configuration-pdf/#songbook-pages) in the config file
       instead.
 
     !Bug Fixes

@@ -10,34 +10,39 @@ Under development
 * Support for [strum patterns](https://www.chordpro.org/beta/directives-env_grid/#strums) in grids.
 * [Bookmarks](https://www.chordpro.org/beta/chordpro_markup/#bookmarks).
 * [Break items](https://www.chordpro.org/beta/table_of_contents/#break) in Table of Content lines.
+* [Improved control](https://www.chordpro.org/beta/chordpro-configuration-pdf/#songbook-pages) over page order and alignment.
 
 ### GUI improvements
 
 * You can now set the preferred filename extension for ChordPro song file names.
 * When saving a preview PDF, the default output filename is derived from the current song or folder.
 * ChordPro will no longer offer saving the preview on exit. It can easily be regenerated and exported if needed.
-* The editor no longer shows line numbers by default. You can change this in the settings for the editor. Line numbers will always be shown when the messages pane is visible.
 * The save and clean operations for the messages are now provided by buttons on the messages pane itself.
+* Simplified the editor Insert menu. Add inserting special symbols.
+* Typing a `{start_of_section}` will automatically provide the corresponding `{end_of_section}`.
 
 ### Other improvements
 
 * New metadata directives: [sortartist](https://www.chordpro.org/beta/directives-sortartist/) and [tag](https://www.chordpro.org/beta/directives-tag/).
 * New font: [MuseJazzText](https://www.chordpro.org/beta/chordpro-fonts/#method-1-using-a-font-description).
+* Chord diagrams can now have nice, curly barres. Thanks to Michail Vourlakos for contributing.
 * (Experimental) [allpages](https://www.chordpro.org/beta/directives-image/#anchoranchor) anchor for images. Similar to the _page_ anchor, but the image is repeated on *every* page of the song.
 * Lilypond delegate supports a property "program" to explicitly designate the Lilypond program.
 * Filenames in filelists may be quoted, even if no options are involved.
 * Filenames in filelists are considered relative to the filelist.
-* Are you using the preprocessor in your abc and ly environments? Please use the more general parser.preprocess.env-... instead.
+* Are you using the preprocessor in your abc and ly environments? Please use the more general `parser.preprocess.env-`... instead.
 * Config [settings.maj7delta](https://www.chordpro.org/beta/chordpro-configuration-generic/#general-settings) to obtain a delta symbol instead of 'maj7' in chord names.
-* You can now use the special [ChordPro Symbols](https://www.chordpro.org/beta/chordpro-symbols/) from markup.
+* You can now use special [ChordPro Symbols](https://www.chordpro.org/beta/chordpro-symbols/) from markup.
 * Songbooks now can have both a [cover](https://www.chordpro.org/beta/using-chordpro/#cover) and [front matter](https://www.chordpro.org/beta/using-chordpro/#front-matter).
 * To avoid confusion, command line option `--print-default-config` will now print the **template** config instead of the **full** config. To print the full config, repeat the option.
 * In case of emergency it is now possible to obtain chord brackets in lyrics and annotations.
 * Allow name based array access in config augment.
 * Font specifications in the config may now carry (some) properties. E.g. `pdf.fonts.comment_box : "sans 12; frame=1"`.
+* Command line options `--even-pages-number-left` (`-L`) and `--odd-pages-numbers-left` are no longer functional. They did the wrong thing anyway. Use [`pdf.songbook`](https://www.chordpro.org/beta/chordpro-configuration-pdf/#songbook-pages) in the config file instead.
 
 ### Bug Fixes
 
+* Prevent "settings migrated" dialog if not applicable.
 * Some issues with Unicode filenames on Windows.
 * Some issues with line endings on Windows.
 * Fix image alignment with indent.
@@ -57,7 +62,7 @@ Under development
 * Fix topic localization in fix_musicsyms.
 * TextBlock: Default colour to style colour.
 * (Wx) Prevent recursion in saved preferences.
-* Fix #555, #550, #542, #315.
+* Fix #555, #550, #542, #315, #569.
 * Fix crash with {comment: [chord]} in 2-pass mode.
 * Fix problems with images in 2-pass mode.
 
