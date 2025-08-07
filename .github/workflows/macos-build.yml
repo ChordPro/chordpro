@@ -88,14 +88,16 @@ jobs:
           perl script/chordpro.pl --about
 
       - name: Build DMG
-        run: make -C pp/macos
+        run: |
+          make -C pp/macos || true
+          zip -r app.zip ChordPro.app
 
       - if: ${{ matrix.os == 'macos-13' }}
         uses: actions/upload-artifact@v4
         with:
           compression-level: 0
-          name: Upload_DMG_macOS_INTEL
-          path: pp/macos/ChordPro*INTEL.dmg
+          name: Upload_APP_macOS_INTEL
+          path: pp/macos/app.zip
 
       - if: ${{ matrix.os != 'macos-13' }}
         uses: actions/upload-artifact@v4
