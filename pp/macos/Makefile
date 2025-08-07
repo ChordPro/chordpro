@@ -143,7 +143,7 @@ dmg1 :
 		--hide-extension "${APPDIR}" \
 		--add-file "READ ME FIRST.html" README.html  540 250 \
 		--hide-extension "READ ME FIRST.html" \
-		--background "${DEST}/lib/ChordPro/res/icons/chordpro-bg.png" \
+		--background "${ROOT}/lib/ChordPro/res/icons/chordpro-bg.png" \
 		"${DMGNAME}" "${APPDIR}"
 
 clean ::

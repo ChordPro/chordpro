@@ -2,9 +2,9 @@
 
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
-# Last Modified By: 
-# Last Modified On: Thu Jan 30 11:52:08 2025
-# Update Count    : 23
+# Last Modified By: Johan Vromans
+# Last Modified On: Thu Aug  7 15:24:22 2025
+# Update Count    : 24
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -57,7 +57,7 @@ die("Perl must be brewed!\n") unless $^X =~ /Cellar/;
 # libtiff uses liblzma.
 # libz seems to be standard.
 my @libs = qw( libpng16 libjpeg libtiff-4 liblzma
-	       libzstd libpcre2-32 );
+	       libzstd libpcre2-32 libwebpdemux );
 my %libs;
 
 if ( $checklibs ) {
