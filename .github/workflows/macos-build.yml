@@ -16,6 +16,10 @@ on:
   push:
     branches:
       - macosbuild
+      - M6.079.0
+
+env:
+  AWV: 0.72
 
 jobs:
 
@@ -26,7 +30,6 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - macos-13
           - macos-14
 
     runs-on: ${{ matrix.os }}
@@ -43,7 +46,7 @@ jobs:
         run: brew install cpanm
 
       - name: Set up wxWidgets
-        run: brew install wxwidgets@3.2
+        run: brew install wxwidgets
 
       # No use to proceed if we do not have all wx components.
       - name: Check libraries
@@ -55,11 +58,23 @@ jobs:
 
       - name: Install Alien::wxWidgets
         run: |
-          cpanm https://github.com/sciurius/perl-Alien-wxWidgets/releases/download/R0.71/Alien-wxWidgets-0.71.tar.gz
+          curl -o awx.tgz -L https://github.com/sciurius/perl-Alien-wxWidgets/releases/download/R0.71/Alien-wxWidgets-$AWV.tar.gz
+          tar xf awx.tgz
+          cd Alien-wxWidgets-$AWV
+          cpanm --installdeps --notest .
+          perl ./Build.PL --wxWidgets-build=0
+          perl ./Build
+          perl ./Build install
+          cd ..
+          rm -fr Alien-wsWidgets-$AWV
+          wx-config --list
+          wx-config --version --release --version-full
           perl -MAlien::wxWidgets -e 'Alien::wxWidgets->libraries(qw(stc media webview propgrid ribbon aui xrc qa html))'
 
       - name: Install wxPerl
-        run: "cpanm https://github.com/sciurius/wxPerl/releases/download/R3.005/Wx-3.005.tar.gz --notest\n"
+        run: |
+          cpanm https://github.com/sciurius/wxPerl/releases/download/R3.008/Wx-3.008.tar.gz --notest || cat $HOME/.cpanm/build.log
+          cat $HOME/.cpanm/build.log
 
       - name: Install other dependencies
         run: |
