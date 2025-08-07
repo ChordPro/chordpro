@@ -3,10 +3,8 @@ name: CI for Microsoft Windows
 on:
   push:
     branches:
-      - '*'
-    tags-ignore:
-      - '*'
-  pull_request:
+      - master
+      - dev
 
 jobs:
   perl:

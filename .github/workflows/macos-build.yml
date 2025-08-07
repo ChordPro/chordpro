@@ -91,7 +91,7 @@ jobs:
         run: |
           make -C pp/macos || true
           ( cd pp/macos; zip -r app.zip ChordPro.app )
-          touch pp/macos/ChordPro-0-ARM.dmg
+          touch pp/macos/ChordPro-0-INTEL.dmg
 
       - if: ${{ matrix.os == 'macos-13' }}
         uses: actions/upload-artifact@v4
@@ -100,7 +100,7 @@ jobs:
           name: Upload_DMG_macOS_INTEL
           path: |
             pp/macos/app.zip
-            pp/macos/ChordPro*ARM.dmg
+            pp/macos/ChordPro*INTEL.dmg
 
       - if: ${{ matrix.os != 'macos-13' }}
         uses: actions/upload-artifact@v4
