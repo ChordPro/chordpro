@@ -123,6 +123,9 @@ my %prefs =
    # HTML Viewer.
    enable_htmlviewer => undef,
 
+   # Insert spec chars.
+   enable_insert_symbols => 0,
+
    # Preferences w/o UI.
    chordproext	=> ".chordpro",	# for Nick
    dumpstate	=> 0,
