@@ -224,7 +224,8 @@ method init( $options ) {
 				    wxOK | wxICON_ERROR )->ShowModal;
 	}
 	else {
-	    return $self->select_mode("editor")->openfile($arg);
+	    return $self->select_mode("sbexport")->load_filelist($arg)
+	      || $self->select_mode("editor")->openfile($arg);
 	}
     }
     if ( $options->{new} ) {

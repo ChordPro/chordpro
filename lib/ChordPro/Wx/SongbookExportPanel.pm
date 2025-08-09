@@ -113,6 +113,40 @@ method open_dir($dir) {
     $self->OnDirPickerChanged;
 }
 
+method load_filelist($file) {
+    my @files;
+    my $sbok = 0;
+    my $dir =  fn_dirname( fn_rel2abs( $file ) );
+    for ( loadlines($file) ) { 
+	unless ( $sbok ) {
+	    unless ( m;^//\s*chordpro\s+songbook;i ) {
+		return undef;
+	    }
+	    $sbok++;
+	    next;
+	}
+	next unless $_;
+	next if m;^(#|//);;
+	if ( /--title(?:=|\s+)(.*)/ ) {
+	    $self->{t_exporttitle}->SetValue($1);
+	}
+	elsif ( /--subtitle(?:=|\s+)(.*)/ ) {
+	    $self->{t_exportstitle}->SetValue($1);
+	}
+	else {
+	    push( @files, $_ );
+	}
+    }
+    $self->{dp_folder}->SetPath($dir);
+    $self->{w_rearrange}->Set(\@files);
+    $self->{w_rearrange}->Check($_,1) for 0..$#files;
+    $self->{sz_rearrange}->Layout;
+    $state{sbe_folder} = $dir;
+    $state{sbe_files} = \@files;
+    $self->log( 'I', "Loaded file list from $file" );
+    return $sbok;
+}
+
 method preview( $args, %opts ) {
     use ChordPro::Wx::Preview;
     $self->prv //= ChordPro::Wx::Preview->new( panel => $self );
@@ -255,13 +289,7 @@ sub OnFilelistOpen {
        wxDefaultPosition);
     my $ret = $md->ShowModal;
     if ( $ret == wxID_OK ) {
-	my $file = $md->GetPath;
-	my @files = loadlines($file);
-	$self->{w_rearrange}->Set(\@files);
-	$self->{w_rearrange}->Check($_,1) for 0..$#files;
-	$self->{sz_rearrange}->Layout;
-	$state{sbe_files} = \@files;
-	$self->log( 'I', "Loaded file list from $file" );
+	$self->load_filelist();
     }
     $md->Destroy;
 }
