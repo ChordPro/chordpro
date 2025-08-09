@@ -123,6 +123,9 @@ my %prefs =
    # HTML Viewer.
    enable_htmlviewer => undef,
 
+   # Insert spec chars.
+   enable_insert_symbols => 0,
+
    # Preferences w/o UI.
    chordproext	=> ".chordpro",	# for Nick
    dumpstate	=> 0,
@@ -309,7 +312,7 @@ method Load :common {
     # For convenience.
     setup_filters();
 
-    if ( 1 || $preferences{dumpstate} ) {
+    if ( $preferences{dumpstate} ) {
 	use DDP; p %state;
     }
 }

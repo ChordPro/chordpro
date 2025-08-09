@@ -476,6 +476,21 @@ method set_focus {
 ################ Event Handlers (alphabetic order) ################
 
 method OnInsertSymbol($event) {
+    unless ( $preferences{enable_insert_symbols} ) {
+	my $md = Wx::MessageDialog->new
+	  ( undef,
+	    "Inserting special symbols introduces the risk that you can ".
+	    "insert symbols that are visible on the screen, but are not ".
+	    "supported by the fonts that are used for the PDF output.\n".
+	    "So these symbols may clobber your output.\n".
+	    "\n".
+	    "Keep this operation disabled?",
+	    "Advanced operation warning",
+	    wxYES_NO|wxICON_WARNING|wxDIALOG_NO_PARENT );
+	return unless $md->ShowModal == wxID_NO;
+	$preferences{enable_insert_symbols} = 1;
+
+    }
     my $ctrl = $self->{t_editor};
     state $sym = "\x{2665}";
     my $d = Wx::SymbolPickerDialog->new( $sym, "", "", $self );
