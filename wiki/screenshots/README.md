@@ -10,6 +10,17 @@ the center of the screen.
 Before taking a screenshot, move the pointer out of the chordpro
 window!
 
+## Using Gnome screenshot
+
+Alt+Print dumps the image in ~/Pictures/Screenshots (in the vbox
+system).
+
+Advantage: it is cut to size, and contains a nice, transparent border.
+
+For transients, make 2 screenshots and use gimp.
+
+## Using VirtualBox
+
 User Host+E for a screenshot.
 
 Or
@@ -47,6 +58,7 @@ Unpack the zip in $HOME.
 .config/wxchordpro/wxchordpro
 lib/ChordPro/config/myconfig.json
 lib/ChordPro/tasks/Chords_On_Top.json
+Music/Irish_Ballads/filelist.txt
 Music/Irish_Ballads/Kilkelly.cho
 Music/Irish_Ballads/May_Morning_Dew.cho
 Music/Irish_Ballads/My_Donald.cho
