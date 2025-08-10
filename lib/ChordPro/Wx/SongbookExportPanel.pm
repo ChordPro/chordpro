@@ -129,9 +129,14 @@ method load_filelist($file) {
 	next if m;^(#|//);;
 	if ( /--title(?:=|\s+)(.*)/ ) {
 	    $self->{t_exporttitle}->SetValue($1);
+	    $self->{cb_stdcover}->SetValue(1);
 	}
 	elsif ( /--subtitle(?:=|\s+)(.*)/ ) {
 	    $self->{t_exportstitle}->SetValue($1);
+	}
+	elsif ( /--cover(?:=|\s+)(.*)/ ) {
+	    $self->{fp_cover}->SetPath($1);
+	    $self->{cb_stdcover}->SetValue(0);
 	}
 	else {
 	    push( @files, $_ );
@@ -143,6 +148,7 @@ method load_filelist($file) {
     $self->{sz_rearrange}->Layout;
     $state{sbe_folder} = $dir;
     $state{sbe_files} = \@files;
+    $self->OnStdCoverChecked(undef);
     $self->log( 'I', "Loaded file list from $file" );
     return $sbok;
 }
