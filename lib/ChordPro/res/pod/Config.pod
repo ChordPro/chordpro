@@ -770,11 +770,6 @@
     	// descending order.
     	sort-songs : false
     
-    	// Localized sorting uses the rules of the system language or
-    	// locale, which affects how characters are compared, including
-    	// considerations for accents and case sensitivity.
-    	sort-localized : true
-    
     	// If true, the order of the songs is adjusted to make the
     	// songbook as compact as possible, while each of the songs
     	// require minimal page turns.

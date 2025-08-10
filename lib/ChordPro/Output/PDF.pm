@@ -247,7 +247,7 @@ sub generate_songbook {
 	    if ( $tpl =~ /\.\w+/ ) { # file
 		$tmplfile = CP->siblingres( $book[0][-1]->{source}->{file},
 				      $tpl, class => "templates" );
-		warn("ToC template not found: $tpl\n") unless $tmplfile;
+s		warn("ToC template not found: $tpl\n") unless $tmplfile;
 	    }
 	    else {
 		$tmplfile = CP->findres( $tpl.".cho", class => "templates" );
@@ -696,7 +696,6 @@ sub pagectrl {
 		     align_songs_spread	 => $sb->{'align-songs-spread'},
 		     align_songs_extend	 => $sb->{'align-songs-extend'},
 		     sort_songs		 => $sb->{'sort-songs'},
-		     sort_localized	 => $sb->{'sort-localized'},
 		     compact_songs	 => $sb->{'compact-songs'},
 		     cover		 => $sb->{cover},
 		     front_matter	 => $sb->{'front-matter'},
@@ -761,9 +760,7 @@ sub sort_songbook {
     }
     return unless @tbs;
 
-    my $proc = 'sub { my $tbs = shift; ';
-    $proc .= $pagectrl->{sort_localized} ? "use" : "no";
-    $proc .= " locale; ";
+    my $proc = 'sub { my $tbs = shift; use locale; ';
     $proc .= '[ map { $_->[1] } sort { ';
     $proc .= $desc ? '$b->[0] cmp $a->[0]' : '$a->[0] cmp $b->[0]';
     $proc .= ' } @$tbs ] }';

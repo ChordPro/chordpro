@@ -529,18 +529,6 @@ that you can view it without having to turn a page.
 
 When the value is preceded by a minus `-`, the sort order is reversed.
 
-When sorting is requested, the sort method can be specified with:
-
-    songbook.sort-localized : true
-
-Default (true); sort using the rules of the system language or
-locale, which affects how characters are compared, including
-considerations for accents and case sensitivity.
-
-If false, sort according to the ASCII collating sequence.
-Simply put: digits first, then uppercase characters, then lowercase
-characters. Non-ASCII characters last.
-
 Finally, if dual page layout is enabled,
 
     songbook.compact-songs: false
