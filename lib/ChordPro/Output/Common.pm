@@ -276,7 +276,7 @@ sub prep_outlines {
     # Sort.
     my $i = -1;
     my $srt =
-      "sub { " .
+      "sub { use locale; " .
       join( " or ",
 	    map { $i++;
 		  my ( $rev, $f ) = /^([-+]*)(.*)/;
