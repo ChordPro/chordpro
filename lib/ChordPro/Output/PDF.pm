@@ -247,7 +247,7 @@ sub generate_songbook {
 	    if ( $tpl =~ /\.\w+/ ) { # file
 		$tmplfile = CP->siblingres( $book[0][-1]->{source}->{file},
 				      $tpl, class => "templates" );
-s		warn("ToC template not found: $tpl\n") unless $tmplfile;
+		warn("ToC template not found: $tpl\n") unless $tmplfile;
 	    }
 	    else {
 		$tmplfile = CP->findres( $tpl.".cho", class => "templates" );
