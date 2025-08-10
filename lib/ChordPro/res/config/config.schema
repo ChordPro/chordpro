@@ -987,12 +987,6 @@
         { "$ref" : "#/definitions/backendspec" },
         { "properties" : {
 
-	    "back-matter" : {
-	      "default" : "",
-	      "description" : "PDF file to add as back matter.",
-	      "type" : "string"
-	    },
-
 	    "capoheading" : {
 	      "description" : "Value for Capo heading when using chordscolumn.",
 	      "type" : "string",
@@ -1251,12 +1245,6 @@
 	      "default" : 0,
 	      "minimum" : 0,
 	      "type" : "number"
-	    },
-
-	    "even-odd-pages" : {
-	      "default" : true,
-	      "description" : "Dual (odd/even) pages when set to true.\nFalse means all pages will be the same (odd, right).\nWith dual pages, all the parts of the songbook (covers,\ntables of contents, etc.) are always aligned to a right page.",
-	      "type" : "boolean"
 	    },
 
 	    "fontdir" : {
@@ -1629,12 +1617,6 @@
 	      }
 	    },
 
-	    "front-matter" : {
-	      "default" : "",
-	      "description" : "PDF file to add as front matter.",
-	      "type" : "string"
-	    },
-
 	    "grids" : {
 	      "description" : "Grid section lines.\nSuppress when \"show\" is false, e.g. for singers.\nThe width and colour of the cell bar lines can be specified.\nEnable by setting the width to the desired width.",
 	      "additionalProperties" : false,
@@ -1912,33 +1894,6 @@
 	      }
 	    },
 
-	    "pagealign-songs" : {
-	      "default" : true,
-	      "description" : "With dual pages, align songs to right pages by inserting\na blank filler page.",
-	      "type" : "boolean"
-	    },
-
-	    "pagealign-songs-spread" : {
-	      "default" : false,
-	      "description" : "With dual pages, start all songs on an even (left) page.",
-	      "type" : "boolean"
-	    },
-
-	    "pagealign-songs-extend" : {
-	      "default" : true,
-	      "description" : "When songs need alignment, extend the song with a page (true) or\nuse a blank filler page (false).",
-	      "type" : "boolean"
-	    },
-
-	    "pagealign-tocs" : {
-	      "default" : true,
-	      "description" : "With dual pages, align individual tables of content\nto right pages by inserting a blank filler page.\nValues are true, false, or \"song\". In the latter case the\npagealign settings for songs are used for the tables of contents.",
-	      "oneOf" : [
-	        { "type" : "boolean" },
-		{ "type" : "string", "enum" : [ "song" ] }
-	      ]
-	    },
-
 	    "papersize" : {
 	      "description" : "Output paper size, e.g. \"a4\" or [595,842].",
 	      "default" : "a4",
@@ -1952,6 +1907,72 @@
 	      "description" : "Show the page layout structure.\nThis is mainly for design and debugging.",
 	      "default" : false,
 	      "type" : "boolean"
+	    },
+
+	    "songbook" : {
+	      "description" : "New style page control.",
+	      "additionalProperties" : false,
+	      "properties" : {
+	        "align-songs" : {
+		  "description" : "With dual pages, a true value aligns songs to right pages\nby inserting a blank filler page if necessary.\nIf false, no alignment takes place, all pages follow\neach other.",
+		  "default" : true,
+		  "type" : "boolean"
+		},
+	        "align-songs-extend" : {
+		  "description" : "If true, the fill pages will have headings and footers\nas if they were part of the song.",
+		  "default" : false,
+		  "type" : "boolean"
+		},
+	        "align-songs-spread" : {
+		  "description" : "If true, all songs will start on left pages instead of right pages.",
+		  "default" : false,
+		  "type" : "boolean"
+		},
+	        "align-tocs" : {
+		  "description" : "With dual pages, align individual tables of content\nto right pages by inserting a blank filler page.\nValues are true, false, or \"song\". In the latter case the\npagealign settings for songs are used for the tables of contents.",
+		  "default" : true,
+		  "type" : "boolean"
+		},
+		"back-matter" : {
+		  "description" : "PDF file to add as back matter.",
+		  "type" : [ "string", "boolean" ],
+		  "default" : false
+		},
+	        "compact-songs" : {
+		  "description" : "If true, the order of the songs is adjusted to make the\nsongbook as compact as possible, while each of the songs\nrequire minimal page turns.\nNote: this option requires extra processing time since\nthe songbook has to be processed twice.",
+		  "default" : false,
+		  "type" : "boolean"
+		},
+		"cover" : {
+		  "description" : "PDF file to add as cover page(s).",
+		  "type" : [ "string", "boolean" ],
+		  "default" : false
+		},
+	        "dual-pages" : {
+		  "description" : "Dual (odd/even) pages when set to true.\nFalse means all pages will be the same (odd, right).\nWith dual pages, all the parts of the songbook (covers,\ntables of contents, etc.) are always aligned to a right page.",
+		  "default" : true,
+		  "type" : "boolean"
+		},
+		"front-matter" : {
+		  "description" : "PDF file to add as front matter.",
+		  "type" : [ "string", "boolean" ],
+		  "default" : false
+		},
+	        "sort-songs" : {
+		  "description" : "Sort songs by \"title\" or \"subtitle\".\ntitle    : sort pages alphabetically by title.\nsubtitle : sort pages alphabetically by subtitle. If this is\n           used together with title, only title is used.\nPut a minus sign before title and/or subtitle to obtain\ndescending order.",
+		  "anyOf" : [
+		    {
+		      "default" : false,
+		      "type" : "boolean"
+		    },
+		    {
+		      "type" : "string",
+		      "enum" : [ "title", "-title", "subtitle", "-subtitle" ],
+		      "default" : ""
+		    }
+		  ]
+		}
+	      }
 	    },
 
 	    "spacing" : {
