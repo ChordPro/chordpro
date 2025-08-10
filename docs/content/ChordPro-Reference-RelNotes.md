@@ -1,8 +1,8 @@
 # Release info
 
-## 6.079.0
+## 6.079.1
 
-Released: 2025-08-06
+Released: 2025-08-10
 
 
 ### Highlights
@@ -24,6 +24,7 @@ Released: 2025-08-06
 ### Other improvements
 
 * New metadata directives: [sortartist](https://www.chordpro.org/beta/directives-sortartist/) and [tag](https://www.chordpro.org/beta/directives-tag/).
+* Titles, artists and outlines will now be sorted according to the system settings.
 * New font: [MuseJazzText](https://www.chordpro.org/beta/chordpro-fonts/#method-1-using-a-font-description).
 * Chord diagrams can now have nice, curly barres. Thanks to Michail Vourlakos for contributing.
 * (Experimental) [allpages](https://www.chordpro.org/beta/directives-image/#anchoranchor) anchor for images. Similar to the _page_ anchor, but the image is repeated on *every* page of the song.
