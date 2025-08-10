@@ -733,6 +733,7 @@ pdf {
 
     // New style page control.
     songbook {
+
 	// Dual (odd/even) pages when set to true.
 	// False means all pages will be the same (odd, right).
 	// With dual pages, all the parts of the songbook (covers,
