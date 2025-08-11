@@ -275,16 +275,20 @@ sub prep_outlines {
 
     # Sort.
     my $i = -1;
+    use Unicode::Collate;
+    my $collator = Unicode::Collate->new;
     my $srt =
-      "sub { use locale; " .
+      "sub { " .
       join( " or ",
 	    map { $i++;
 		  my ( $rev, $f ) = /^([-+]*)(.*)/;
 		  my $num = $rev =~ s/\+//g;
+		  my ( $a, $b ) = $rev =~ /-/ ? qw( b a ) : qw( a b );
+		  my $l = "\$$a"."->[$i]";
+		  my $r = "\$$b"."->[$i]";
 		  warn("F: $f, N: $num, R: $rev\n") if PODBG;
-		  "\$" . ( $rev =~ /-/ ? "b" : "a" ) . "->[$i] " .
-		  ($num ? '<=>' : 'cmp') .
-		  " \$" . ( $rev =~ /-/  ? "a" : "b" ) . "->[$i]" }
+		  $num ? "$l <=> $r" : "\$collator->cmp( $l, $r )"
+	       }
 		@{$ctl->{fields}} ) .
       " }";
     warn("SRT; $srt\n") if PODBG;

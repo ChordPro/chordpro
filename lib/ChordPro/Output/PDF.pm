@@ -30,6 +30,7 @@ my $pdfapi;
 
 use Text::Layout;
 use List::Util qw(any);
+use Unicode::Collate;
 
 my $verbose = 0;
 
@@ -760,13 +761,20 @@ sub sort_songbook {
     }
     return unless @tbs;
 
-    my $proc = 'sub { my $tbs = shift; use locale; ';
-    $proc .= '[ map { $_->[1] } sort { ';
-    $proc .= $desc ? '$b->[0] cmp $a->[0]' : '$a->[0] cmp $b->[0]';
-    $proc .= ' } @$tbs ] }';
-    my $sorter = eval $proc;
-    die("OOPS $proc\n$@") if $@;
-    $sb->{songs} = $sorter->(\@tbs);
+    if ( 1 ) {
+	my @sorted = Unicode::Collate->new()->sort(@tbs);
+	@sorted = reverse(@sorted) if $desc;
+	$sb->{songs} = \@sorted;
+    }
+    else {
+	my $proc = 'sub { my $tbs = shift; use locale; ';
+	$proc .= '[ map { $_->[1] } sort { ';
+	$proc .= $desc ? '$b->[0] cmp $a->[0]' : '$a->[0] cmp $b->[0]';
+	$proc .= ' } @$tbs ] }';
+	my $sorter = eval $proc;
+	die("OOPS $proc\n$@") if $@;
+	$sb->{songs} = $sorter->(\@tbs);
+    }
 }
 
 sub compact_songbook {
