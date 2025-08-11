@@ -151,9 +151,9 @@ sub configurator ( $opts = undef ) {
 		push( @depr, $_) if $ps->{$_};
 	    }
 	    push( @depr, "even-odd-songs" )
-	      if $ps->{'even-odd-songs'} <= 0;
+	      if defined($ps->{'even-odd-songs'}) && $ps->{'even-odd-songs'} <= 0;
 	    push( @depr, "pagealign-songs" )
-	      if $ps->{'pagealign-songs'} != 1;
+	      if defined($ps->{'pagealign-songs'}) && $ps->{'pagealign-songs'} != 1;
 	    if ( @depr ) {
 		warn("Config \"$file\" uses \"pdf.songbook\", ignoring ",
 		     enumerated( map { qq{"pdf.$_"} } @depr ), "\n" );
@@ -532,7 +532,7 @@ sub migrate_songbook_pagectrl( $self, $ps = undef ) {
 	my $a = $_;
 	$a =~ s/\s+//g;
 	my ( $sort, $desc, $spread, $compact );
-	$desc = "";
+	$sort = $desc = "";
 	for ( split( /,/, lc $a ) ) {
 	    if ( $_ eq "title" ) {
 		$sort = "title";
@@ -553,7 +553,7 @@ sub migrate_songbook_pagectrl( $self, $ps = undef ) {
 		warn("??? \"$_\"\n");
 	    }
 	}
-	$sb->{'sort-songs'} = "${desc}${sort}" if $sort;
+	$sb->{'sort-songs'} = "${desc}${sort}";
 	$sb->{'compact-songs'} = 1 if $compact;
 	$sb->{'align-songs-spread'} = 1 if $spread;
     }
