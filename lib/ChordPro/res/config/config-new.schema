@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://json.schemastore.org/chordpro.json",
   "title": "Configuration for ChordPro",
   "description": "A configuration file for ChordPro. Supports Really Relaxed JSON.",
@@ -7,7 +7,6 @@
     "backendspec": {
       "description": "Standard properties for backends.",
       "type": "object",
-      "additionalProperties": true,
       "properties": {
         "comments": {
           "description": "Retain comments in the output.",
@@ -22,7 +21,7 @@
     },
     "themeColor": {
       "type": "string",
-      "title": "Names of colours in theme.",
+      "description": "Names of colours in theme.",
       "enum": [
         "foreground",
         "foreground-medium",
@@ -60,12 +59,12 @@
           ]
         },
         {
-          "title": "Any named colour.",
+          "title": "Any named colour",
           "pattern": "^[-A-Za-z0-9]+$"
         },
         {
-          "const": "none",
-          "title": "A lack of colour, transparent."
+          "title": "A lack of colour, transparent",
+          "const": "none"
         }
       ],
       "not": {
@@ -142,6 +141,7 @@
     },
     "fontConfigFont": {
       "type": "object",
+      "additionalProperties": false,
       "required": [
         ""
       ],
@@ -254,6 +254,10 @@
     },
     "fontspec": {
       "description": "Font specification.",
+      "type": [
+        "string",
+        "object"
+      ],
       "oneOf": [
         {
           "$ref": "#/definitions/fontDescription"
@@ -456,6 +460,7 @@
     },
     "lyDelegateFields": {
       "type": "object",
+      "additionalProperties": false,
       "anyOf": [
         {
           "$ref": "#/definitions/delegatespec"
@@ -495,60 +500,54 @@
       ]
     },
     "parserPreprocessingElement": {
-      "allOf": [
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "replace"
+      ],
+      "properties": {
+        "replace": {
+          "type": "string",
+          "description": "A string that replaces occurrences of `target`/`pattern`."
+        },
+        "flags": {
+          "type": "string",
+          "description": "Regular expression flags.",
+          "examples": [
+            "g",
+            "gi"
+          ]
+        }
+      },
+      "oneOf": [
         {
-          "type": "object",
           "required": [
-            "replace"
+            "pattern"
           ],
           "properties": {
-            "replace": {
+            "pattern": {
               "type": "string",
-              "description": "A string that replaces occurrences of `target`/`pattern`."
-            },
-            "flags": {
-              "type": "string",
-              "description": "Regular expression flags.",
-              "examples": [
-                "g",
-                "gi"
-              ]
+              "description": "A regular expression to search for and replace.",
+              "format": "regex"
             }
           }
         },
         {
-          "oneOf": [
-            {
-              "type": "object",
-              "required": [
-                "pattern"
-              ],
-              "properties": {
-                "pattern": {
-                  "type": "string",
-                  "description": "A regular expression to search for and replace.",
-                  "format": "regex"
-                }
-              }
-            },
-            {
-              "type": "object",
-              "required": [
-                "target"
-              ],
-              "properties": {
-                "target": {
-                  "type": "string",
-                  "description": "A string to search for and replace."
-                }
-              }
+          "required": [
+            "target"
+          ],
+          "properties": {
+            "target": {
+              "type": "string",
+              "description": "A string to search for and replace."
             }
-          ]
+          }
         }
       ]
     },
     "preprocessspec": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "preprocess": {
           "type": "object",
@@ -563,14 +562,18 @@
             "directive": {
               "type": "array",
               "items": {
-                "allOf": [
+                "type": "object",
+                "additionalProperties": false,
+                "anyOf": [
                   {
                     "$ref": "#/definitions/parserPreprocessingElement"
                   },
                   {
                     "properties": {
                       "select": {
-                        "description": "A regular expression against which directive names are compared to restrict processing only to directives that match."
+                        "description": "A regular expression against which directive names are compared to, restricting processing only to directives that match.",
+                        "type": "string",
+                        "format": "regex"
                       }
                     }
                   }
@@ -595,6 +598,8 @@
       }
     },
     "backendChorusRecallSettings": {
+      "type": "object",
+      "additionalProperties": false,
       "properties": {
         "chorus": {
           "type": "object",
@@ -726,7 +731,6 @@
     }
   },
   "additionalProperties": false,
-  "basicCategoryTitle": "Settings",
   "allOf": [
     {
       "title": "Generic Part",
@@ -736,8 +740,7 @@
           "type": "array",
           "description": "Includes are processed first, before the rest of the config file.\n\nA config file can specify a list of other config files that are to be processed *before* the contents of the current file. This makes it straightforward to create config files that extend existing config files.\n\"include\" takes a list of either filenames or preset names.\nIf a file name is not absolute, it is taken relative to the location of the including config file.",
           "items": {
-            "type": "string",
-            "headerTemplate": "Config {{ i1 }}"
+            "type": "string"
           },
           "examples": [
             [
@@ -749,6 +752,7 @@
           "type": "object",
           "description": "General settings, often changed by configs and command line.\n\nThese settings control global behaviour of the ChordPro program and can be changed by configs and command line.",
           "additionalProperties": false,
+          "required": [],
           "properties": {
             "chordnames": {
               "default": "strict",
@@ -800,7 +804,7 @@
                   "maximum": 3
                 },
                 {
-                  "title": "An array of column widths.",
+                  "description": "An array of column widths.",
                   "items": {
                     "oneOf": [
                       {
@@ -808,15 +812,15 @@
                           "*",
                           0
                         ],
-                        "title": "Distributes the available width."
+                        "description": "Distributes the available width."
                       },
                       {
                         "pattern": "^\\d+%$",
-                        "title": "Percentage of total width.",
+                        "description": "Percentage of total width.",
                         "type": "string"
                       },
                       {
-                        "title": "PDF points. `0` distributes the available width.",
+                        "description": "PDF points. `0` distributes the available width.",
                         "type": "number"
                       }
                     ]
@@ -940,6 +944,7 @@
           "description": "Format to show chord names. May contain markup",
           "type": "object",
           "additionalProperties": false,
+          "required": [],
           "properties": {
             "common": {
               "description": "Format string for rendering common chord names.",
@@ -969,15 +974,15 @@
               "oneOf": [
                 {
                   "const": "all",
-                  "title": "Prints all chords used."
+                  "title": "Prints all chords used"
                 },
                 {
                   "const": "user",
-                  "title": "Only prints user-defined chords."
+                  "title": "Only prints user-defined chords"
                 },
                 {
                   "const": "none",
-                  "title": "No song chords will be printed."
+                  "title": "No song chords will be printed"
                 }
               ],
               "default": "all"
@@ -1000,8 +1005,7 @@
         "assets": {
           "$comment": "Not sure yet which category this property belongs in.",
           "description": "Assets (placeholder).",
-          "type": "object",
-          "additionalProperties": true
+          "type": "object"
         },
         "chords": {
           "type": "array",
@@ -1177,7 +1181,6 @@
         "contents": {
           "description": "Tables of contents.\nAn array of hashes each describing one table of contents.",
           "type": "array",
-          "keyorder": "fields label line omit template fold",
           "items": {
             "type": "object",
             "additionalProperties": false,
@@ -1186,9 +1189,10 @@
                 "type": "array",
                 "description": "The metadata for this table of contents. One or two items.\nThe ordering of the table.\nPrefix the sort key with `+` to force numeric sorting. Likewise, a `-` prefix reverses sort order.\nWhen you specify a metadata item that has multiple values they are split out in the table.\n`songindex` is a built-in metadata item that yields the sequence number of the song in the songbook. Sorting on `songindex` will produce the songs in songbook order.",
                 "items": {
-                  "type": "string",
-                  "minimum": 1
-                }
+                  "type": "string"
+                },
+                "minItems": 1,
+                "maxItems": 2
               },
               "label": {
                 "description": "The label (title) for this table.",
@@ -1287,6 +1291,7 @@
         },
         "meta": {
           "description": "Globally defined (added) meta data,\nThis is explicitly NOT intended for the metadata items above.\nDo NOT remove or change `_configversion`!",
+          "type": "object",
           "additionalProperties": {
             "type": "object"
           },
@@ -1319,7 +1324,6 @@
               "description": "The list of known metadata keys.\nFor these keys you can use `{meta key …}` as well as `{key …}`.\nImportant: `\"title\"` and `\"subtitle\"` must always be in this list.",
               "type": "array",
               "uniqueItems": true,
-              "additionalItems": true,
               "items": {
                 "type": "string"
               },
@@ -1379,7 +1383,7 @@
         },
         "dates": {
           "type": "object",
-          "title": "Date formats.",
+          "title": "Date formats",
           "description": "Defines the date format used by the metadata value `today`.\nFormat is a `strftime` template, so the format string can use anything that `strftime` understands.",
           "properties": {
             "today": {
@@ -1442,6 +1446,7 @@
         },
         "toc": {
           "description": "Deprecated. Table of Contents (obsolete, do not use).",
+          "type": "object",
           "additionalProperties": false,
           "properties": {
             "line": {
@@ -1470,6 +1475,8 @@
       "properties": {
         "pdf": {
           "description": "Settings for PDF output.",
+          "type": "object",
+          "additionalProperties": false,
           "allOf": [
             {
               "$ref": "#/definitions/backendspec"
@@ -1605,19 +1612,19 @@
                       "oneOf": [
                         {
                           "const": "free",
-                          "title": "GNU Free Fonts."
+                          "title": "GNU Free Fonts"
                         },
                         {
                           "const": "tex",
-                          "title": "Tex Gyre fonts."
+                          "title": "Tex Gyre fonts"
                         },
                         {
                           "const": false,
-                          "title": "Inhibits remapping."
+                          "title": "Inhibits remapping"
                         },
                         {
                           "const": null,
-                          "title": "Tells ChordPro look for the fonts itself."
+                          "title": "Tells ChordPro look for the fonts itself"
                         }
                       ],
                       "default": null
@@ -1833,7 +1840,7 @@
                   "oneOf": [
                     {
                       "const": 1,
-                      "title": "Even/odd pages.",
+                      "title": "Even/odd pages",
                       "description": "The value `1` means that the first page is right, the second page is left, and so on."
                     },
                     {
@@ -1894,6 +1901,8 @@
                       "$ref": "#/definitions/fontConfigFont"
                     },
                     "dingbats": {
+                      "type": "object",
+                      "additionalProperties": false,
                       "": {
                         "type": "string"
                       }
@@ -1942,8 +1951,9 @@
                   }
                 },
                 "fonts": {
-                  "type": "object",
                   "description": "`fonts` maps output elements to fonts as defined in `fontconfig`.\n\nSome element mappings can be specified, but it's not needed for all since they default to other elements:\nsubtitle       --> text\nchorus         --> text\ncomment        --> text\ncomment_italic --> chord\ncomment_box    --> chord\nannotation     --> chord\ntoc            --> text\ngrid           --> chord\ngrid_margin    --> comment\nfooter         --> subtitle @ 60%\nempty          --> text\ndiagram        --> comment\ndiagram_base   --> text (but at a small size)",
+                  "type": "object",
+                  "additionalProperties": false,
                   "properties": {
                     "annotation": {
                       "$ref": "#/definitions/fontspec",
@@ -1974,6 +1984,8 @@
                           "$ref": "#/definitions/fontspec"
                         },
                         {
+                          "type": "object",
+                          "additionalProperties": false,
                           "properties": {
                             "numbercolor": {
                               "$ref": "#/definitions/color",
@@ -2320,7 +2332,9 @@
                 "info": {
                   "description": "PDF Properties.\nArbitrary key/values may be added.\nNote that the context for substitutions is the first song.",
                   "type": "object",
-                  "additionalProperties": true,
+                  "additionalProperties": {
+                    "type": "string"
+                  },
                   "properties": {
                     "author": {
                       "description": "Name of the author.",
@@ -2352,12 +2366,13 @@
                 },
                 "kbdiagrams": {
                   "description": "Appearance of chord diagrams for keyboards.\nA keyboard diagram consists of a number of keys.\nDimensions are specified by `width` and `height`.\nThe horizontal distance between diagrams is `hspace` * `keys` * `width`.",
+                  "type": "object",
+                  "additionalProperties": false,
                   "allOf": [
                     {
                       "$ref": "#/definitions/chordDiagramPDFLayout"
                     },
                     {
-                      "type": "object",
                       "properties": {
                         "height": {
                           "description": "Height of the diagram.",
@@ -2729,6 +2744,8 @@
       "properties": {
         "html": {
           "description": "Settings for HTML output.",
+          "type": "object",
+          "additionalProperties": false,
           "allOf": [
             {
               "$ref": "#/definitions/backendspec"
@@ -2736,8 +2753,9 @@
             {
               "properties": {
                 "styles": {
-                  "type": "object",
                   "description": "Stylesheets for display and printing.",
+                  "type": "object",
+                  "additionalProperties": false,
                   "properties": {
                     "display": {
                       "description": "Relative path to a CSS file to use for styling displayed HTML output (rather than printed).",
@@ -2899,11 +2917,11 @@
               "oneOf": [
                 {
                   "const": "pct_chords",
-                  "title": "Strategy is based on the percentage of chords recognized."
+                  "title": "Strategy is based on the percentage of chords recognized"
                 },
                 {
                   "const": "classic",
-                  "title": "The legacy strategy."
+                  "title": "The legacy strategy"
                 }
               ],
               "default": "pct_chords"
@@ -2913,13 +2931,12 @@
       }
     },
     {
-      "title": "Settings for the parser/preprocessor.",
+      "title": "Settings for the parser/preprocessor",
       "type": "object",
       "description": "For selected lines, you can specify a series of `{ \"target\" : \"xxx\", \"replace\" : \"yyy\" }`.\nEvery occurrence of \"xxx\" will be replaced by \"yyy\".\nUse \"pattern\" instead of \"target\" for regular expression replacement.\nChordPro allows using Unicode escape sequence in the form `\\u`*XXXX*. In case you need more (or less) hexadecimal digits, you can use the following preprocessor directive to replace `\\u{`*XXXX*`}` (with an arbitrary number of hex digits) by the corresponding unicode character.\nUse wisely.",
       "properties": {
         "parser": {
-          "$ref": "#/definitions/preprocessspec",
-          "additionalProperties": false
+          "$ref": "#/definitions/preprocessspec"
         }
       }
     },
@@ -2996,7 +3013,6 @@
         "debug": {
           "description": "Miscellaneous debug settings.",
           "type": "object",
-          "additionalProperties": true,
           "properties": {
             "a2crd": {
               "$ref": "#/definitions/booleanInt",
