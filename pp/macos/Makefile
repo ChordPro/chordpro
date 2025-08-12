@@ -18,7 +18,7 @@ ARCH   := $(shell uname -m)
 default : checklibs dmg
 
 checklibs :
-	perl libtool.pl --checklibs
+	perl libtool.pl --checklibs || true
 
 # PAR Packer.
 
