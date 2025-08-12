@@ -224,8 +224,13 @@ method init( $options ) {
 				    wxOK | wxICON_ERROR )->ShowModal;
 	}
 	else {
-	    return $self->select_mode("sbexport")->load_filelist($arg)
-	      || $self->select_mode("editor")->openfile($arg);
+	    my $lines = fs_load($arg);
+	    if ( $lines->[0] =~ m;^//\s*chordpro\s+songbook;i ) {
+		$lines->[0] = $arg;
+		return $self->select_mode("sbexport")->load_filelist($lines)
+	    }
+	    unshift( @$lines, $arg );
+	    return $self->select_mode("editor")->openfile($lines);
 	}
     }
     if ( $options->{new} ) {

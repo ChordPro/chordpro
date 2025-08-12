@@ -113,18 +113,11 @@ method open_dir($dir) {
     $self->OnDirPickerChanged;
 }
 
-method load_filelist($file) {
+method load_filelist($files) {
+    my $file = shift( @$files );
     my @files;
-    my $sbok = 0;
-    my $dir =  fn_dirname( fn_rel2abs( $file ) );
-    for ( loadlines($file) ) { 
-	unless ( $sbok ) {
-	    unless ( m;^//\s*chordpro\s+songbook;i ) {
-		return undef;
-	    }
-	    $sbok++;
-	    next;
-	}
+    my $dir = fn_dirname( fn_rel2abs( $file ) );
+    for ( @$files ) {
 	next unless $_;
 	next if m;^(#|//);;
 	if ( /--title(?:=|\s+)(.*)/ ) {
@@ -150,7 +143,7 @@ method load_filelist($file) {
     $state{sbe_files} = \@files;
     $self->OnStdCoverChecked(undef);
     $self->log( 'I', "Loaded file list from $file" );
-    return $sbok;
+    return 1;
 }
 
 method preview( $args, %opts ) {
@@ -295,7 +288,7 @@ sub OnFilelistOpen {
        wxDefaultPosition);
     my $ret = $md->ShowModal;
     if ( $ret == wxID_OK ) {
-	$self->load_filelist();
+	$self->load_filelist( $md->GetPath );
     }
     $md->Destroy;
 }

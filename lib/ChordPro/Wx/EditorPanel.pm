@@ -17,6 +17,7 @@ use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
 use ChordPro::Utils qw( max demarkup plural );
 use ChordPro::Paths;
+use Ref::Util qw( is_arrayref );
 
 # WhoamI
 field $panel :accessor = "editor";
@@ -97,10 +98,15 @@ method refresh() {
 }
 
 method openfile( $file, $checked=0, $actual=undef ) {
+    my $files;
+    if ( is_arrayref($file) ) {
+	$files = $file;
+	$file = shift( @$files );
+    }
     $actual //= $file;
 
     # Bypass test when already checked. TODO?
-    unless ( $checked || fs_test( 'fr', $file ) ) {
+    unless ( $files || $checked || fs_test( 'fr', $file ) ) {
 	$self->log( 'W',  "Error opening $file: $!",);
 	my $md = Wx::MessageDialog->new
 	  ( $self,
@@ -111,7 +117,7 @@ method openfile( $file, $checked=0, $actual=undef ) {
 	$md->Destroy;
 	return;
     }
-    if ( my $f = fs_load($file) ) {
+    if ( my $f = $files || fs_load($file) ) {
 	# This has the (desired) sideeffect that all newlines
 	# are now \n .
 	$self->{t_editor}->SetText(join("\n",@$f)."\n");
