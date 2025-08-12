@@ -10,10 +10,7 @@
       "properties": {
         "comments": {
           "description": "Retain comments in the output.",
-          "enum": [
-            "ignore",
-            "retain"
-          ],
+          "enum": ["ignore", "retain"],
           "type": "string",
           "default": "ignore"
         }
@@ -36,10 +33,7 @@
         {
           "title": "Hex colour",
           "pattern": "^#[0-9A-Fa-f]{6}$",
-          "examples": [
-            "#FFFFFF",
-            "#393939"
-          ]
+          "examples": ["#FFFFFF", "#393939"]
         },
         {
           "title": "Shade of grey",
@@ -85,29 +79,15 @@
       "type": "object",
       "properties": {
         "show": {
-          "type": [
-            "string",
-            "boolean"
-          ],
+          "type": ["string", "boolean"],
           "description": "Diagrams for all chords of the song can be shown at the `\"top\"`, `\"bottom\"` or `\"right\"` side of the first page, or `\"below\"` the last song line. Set to `false` to not show any diagrams.",
-          "enum": [
-            "top",
-            "bottom",
-            "below",
-            "right",
-            false
-          ],
+          "enum": ["top", "bottom", "below", "right", false],
           "default": "bottom"
         },
         "align": {
           "type": "string",
           "description": "Alignment for when `show` is set to `\"top\"`, `\"bottom\"` or `\"below\"`.",
-          "enum": [
-            "left",
-            "right",
-            "center",
-            "spread"
-          ],
+          "enum": ["left", "right", "center", "spread"],
           "default": "left"
         }
       }
@@ -132,19 +112,14 @@
         "background": {
           "type": "string",
           "description": "Page background.\nThis can be used to designate an existing PDF document to be used as the background of the output page. It has the form `filename` or `filename:page`. Page numbers count from one.\nIf odd/even printing is in effect, the designated page number is used for left pages, and the next page (if it exists) for right pages.",
-          "examples": [
-            "examples/bgdemo.pdf",
-            "examples/bgdemo.pdf:5"
-          ]
+          "examples": ["examples/bgdemo.pdf", "examples/bgdemo.pdf:5"]
         }
       }
     },
     "fontConfigFont": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        ""
-      ],
+      "required": [""],
       "properties": {
         "bold": {
           "type": "string"
@@ -177,11 +152,7 @@
     "delegatespec": {
       "description": "Shared properties between all delegate types.",
       "type": "object",
-      "required": [
-        "type",
-        "module",
-        "handler"
-      ],
+      "required": ["type", "module", "handler"],
       "additionalProperties": false,
       "properties": {
         "type": {
@@ -227,7 +198,9 @@
           "description": "The name of the (perl) module that implements the delegate."
         },
         "preprocess": {
-          "$ref": "#/definitions/preprocessspec"
+          "$ref": "#/definitions/preprocessspec",
+          // TODO: check this out
+          "description": "Obsolete. Please use parser.preprocess.env-... instead."
         },
         "omit": {
           "type": "boolean",
@@ -254,10 +227,7 @@
     },
     "fontspec": {
       "description": "Font specification.",
-      "type": [
-        "string",
-        "object"
-      ],
+      "type": ["string", "object"],
       "oneOf": [
         {
           "$ref": "#/definitions/fontDescription"
@@ -291,34 +261,14 @@
             },
             "frame": {
               "description": "A boolean value indicating that a frame (box) should be drawn around the text.\nPrimarily used to specify the thickness of a comment box (`comment_box` directive) via the `comment_box` font, but can be used for any font.",
-              "type": [
-                "boolean",
-                "integer"
-              ],
-              "enum": [
-                true,
-                false,
-                0,
-                1
-              ]
+              "type": ["boolean", "integer"],
+              "enum": [true, false, 0, 1]
             }
           },
           "anyOf": [
-            {
-              "required": [
-                "description"
-              ]
-            },
-            {
-              "required": [
-                "name"
-              ]
-            },
-            {
-              "required": [
-                "file"
-              ]
-            }
+            { "required": ["description"] },
+            { "required": ["name"] },
+            { "required": ["file"] }
           ]
         }
       ],
@@ -358,9 +308,7 @@
         {
           "type": "boolean",
           "description": "No content, same as `[ \"\" \"\" \"\" ]`.",
-          "enum": [
-            false
-          ]
+          "enum": [false]
         },
         {
           "type": "null",
@@ -485,10 +433,7 @@
               "items": {
                 "type": "string"
               },
-              "default": [
-                "\\version \"2.21.0\"",
-                "\\header { tagline = ##f }"
-              ]
+              "default": ["\\version \"2.21.0\"", "\\header { tagline = ##f }"]
             },
             "omit": {
               "type": "boolean",
@@ -502,9 +447,7 @@
     "parserPreprocessingElement": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "replace"
-      ],
+      "required": ["replace"],
       "properties": {
         "replace": {
           "type": "string",
@@ -513,17 +456,12 @@
         "flags": {
           "type": "string",
           "description": "Regular expression flags.",
-          "examples": [
-            "g",
-            "gi"
-          ]
+          "examples": ["g", "gi"]
         }
       },
       "oneOf": [
         {
-          "required": [
-            "pattern"
-          ],
+          "required": ["pattern"],
           "properties": {
             "pattern": {
               "type": "string",
@@ -533,9 +471,7 @@
           }
         },
         {
-          "required": [
-            "target"
-          ],
+          "required": ["target"],
           "properties": {
             "target": {
               "type": "string",
@@ -611,10 +547,7 @@
               "additionalProperties": false,
               "anyOf": [
                 {
-                  "required": [
-                    "tag",
-                    "type"
-                  ],
+                  "required": ["tag", "type"],
                   "properties": {
                     "tag": {
                       "default": "Chorus",
@@ -625,12 +558,7 @@
                       "description": "Type for tag text.",
                       "default": "comment",
                       "type": "string",
-                      "enum": [
-                        "",
-                        "comment",
-                        "comment_italic",
-                        "comment_box"
-                      ]
+                      "enum": ["", "comment", "comment_italic", "comment_box"]
                     }
                   }
                 },
@@ -667,10 +595,7 @@
     "booleanInt": {
       "description": "A boolean value represented as an integer, `0` for `false` and `1` for `true`.",
       "type": "integer",
-      "enum": [
-        0,
-        1
-      ]
+      "enum": [0, 1]
     },
     "noteSystem": {
       "type": "string",
@@ -719,10 +644,7 @@
       "uniqueItems": true,
       "items": {
         "description": "If the element is a string, it's the only possible representation of that note. If it's an array, it's all of its possible representations.",
-        "type": [
-          "string",
-          "array"
-        ],
+        "type": ["string", "array"],
         "uniqueItems": true,
         "items": {
           "type": "string"
@@ -742,11 +664,7 @@
           "items": {
             "type": "string"
           },
-          "examples": [
-            [
-              "guitar"
-            ]
-          ]
+          "examples": [["guitar"]]
         },
         "settings": {
           "type": "object",
@@ -757,10 +675,7 @@
             "chordnames": {
               "default": "strict",
               "description": "Strictness of parsing chord names.\n\nStrict (only known) or relaxed (anything that looks sane).",
-              "enum": [
-                "relaxed",
-                "strict"
-              ],
+              "enum": ["relaxed", "strict"],
               "type": "string"
             },
             "chords-canonical": {
@@ -781,21 +696,7 @@
             "columns": {
               "default": 1,
               "description": "Number of columns, default: 1.",
-              "examples": [
-                2,
-                [
-                  "*",
-                  "50%"
-                ],
-                [
-                  "50%",
-                  "50%"
-                ],
-                [
-                  0,
-                  0
-                ]
-              ],
+              "examples": [2, ["*", "50%"], ["50%", "50%"], [0, 0]],
               "oneOf": [
                 {
                   "description": "Equal width columns.",
@@ -808,10 +709,7 @@
                   "items": {
                     "oneOf": [
                       {
-                        "enum": [
-                          "*",
-                          0
-                        ],
+                        "enum": ["*", 0],
                         "description": "Distributes the available width."
                       },
                       {
@@ -897,11 +795,7 @@
             "titles": {
               "default": "center",
               "description": "Titles flush.",
-              "enum": [
-                "center",
-                "left",
-                "right"
-              ],
+              "enum": ["center", "left", "right"],
               "type": "string"
             },
             "transcode": {
@@ -1017,9 +911,7 @@
             "allOf": [
               {
                 "$comment": "Basic chord definition metadata consistent between all definition types.",
-                "required": [
-                  "name"
-                ],
+                "required": ["name"],
                 "properties": {
                   "name": {
                     "type": "string",
@@ -1055,9 +947,7 @@
                 "oneOf": [
                   {
                     "$comment": "Copy chord definition from another.",
-                    "required": [
-                      "copy"
-                    ],
+                    "required": ["copy"],
                     "properties": {
                       "copy": {
                         "type": "string",
@@ -1067,9 +957,7 @@
                   },
                   {
                     "$comment": "Define a chord for fretted instrument.",
-                    "required": [
-                      "frets"
-                    ],
+                    "required": ["frets"],
                     "properties": {
                       "frets": {
                         "type": "array",
@@ -1097,10 +985,7 @@
                                 {
                                   "type": "string",
                                   "description": "`\"x\"` or `\"N\"` denotes a string without finger information",
-                                  "enum": [
-                                    "x",
-                                    "N"
-                                  ]
+                                  "enum": ["x", "N"]
                                 },
                                 {
                                   "type": "integer",
@@ -1132,9 +1017,7 @@
                   },
                   {
                     "$comment": "Define a chord for keyboard.",
-                    "required": [
-                      "keys"
-                    ],
+                    "required": ["keys"],
                     "properties": {
                       "keys": {
                         "type": "array",
@@ -1152,14 +1035,7 @@
               {
                 "name": "F",
                 "base": 1,
-                "frets": [
-                  1,
-                  3,
-                  3,
-                  2,
-                  1,
-                  1
-                ]
+                "frets": [1, 3, 3, 2, 1, 1]
               },
               {
                 "name": "F#",
@@ -1169,11 +1045,7 @@
               {
                 "name": "Eb(inv)",
                 "display": "E♭¹",
-                "keys": [
-                  4,
-                  7,
-                  12
-                ]
+                "keys": [4, 7, 12]
               }
             ]
           }
@@ -1226,9 +1098,7 @@
             },
             "examples": [
               {
-                "fields": [
-                  "songindex"
-                ],
+                "fields": ["songindex"],
                 "label": "Table of Contents",
                 "line": "%{title}",
                 "pageno": "%{page}",
@@ -1236,10 +1106,7 @@
                 "template": "stdtoc"
               },
               {
-                "fields": [
-                  "sorttitle",
-                  "artist"
-                ],
+                "fields": ["sorttitle", "artist"],
                 "label": "Contents by Title",
                 "line": "%{title}%{artist| - %{}}",
                 "pageno": "%{page}",
@@ -1247,10 +1114,7 @@
                 "template": "stdtoc"
               },
               {
-                "fields": [
-                  "artist",
-                  "sorttitle"
-                ],
+                "fields": ["artist", "sorttitle"],
                 "label": "Contents by Artist",
                 "line": "%{artist|%{} - }%{title}",
                 "pageno": "%{page}",
@@ -1301,10 +1165,7 @@
               "type": "array",
               "uniqueItems": true,
               "items": {
-                "type": [
-                  "string",
-                  "number"
-                ]
+                "type": ["string", "number"]
               }
             }
           }
@@ -1407,25 +1268,8 @@
             "type": "string",
             "pattern": "^[A-G][b#]?[1-9]$"
           },
-          "default": [
-            "E2",
-            "A2",
-            "D3",
-            "G3",
-            "B3",
-            "E4"
-          ],
-          "examples": [
-            [
-              "G4",
-              "C4",
-              "E4",
-              "A4"
-            ],
-            [
-              0
-            ]
-          ]
+          "default": ["E2", "A2", "D3", "G3", "B3", "E4"],
+          "examples": [["G4", "C4", "E4", "A4"], [0]]
         },
         "user": {
           "description": "User settings.\nThese (optional) settings can be used to add user information.",
@@ -1454,10 +1298,7 @@
               "type": "string"
             },
             "order": {
-              "enum": [
-                "page",
-                "alpha"
-              ],
+              "enum": ["page", "alpha"],
               "default": "page",
               "type": "string"
             },
@@ -1492,9 +1333,7 @@
                   "type": "string",
                   "description": "Value for Capo heading when using `chordscolumn`.\nWhen a capo is set a heading indicating the current capo setting is added.",
                   "default": "",
-                  "examples": [
-                    "%{capo|Capo: %{}}"
-                  ]
+                  "examples": ["%{capo|Capo: %{}}"]
                 },
                 "chordscolumn": {
                   "description": "This is an alternative style where the chords are placed in a separate column at the right of the lyrics. Chord changes are marked by underlining the lyrics.\nThis style is enabled by setting to a nonzero value.\nValue is the column position.",
@@ -1660,19 +1499,13 @@
                             "default": false
                           }
                         },
-                        "required": [
-                          "name"
-                        ],
+                        "required": ["name"],
                         "anyOf": [
                           {
-                            "required": [
-                              "meta"
-                            ]
+                            "required": ["meta"]
                           },
                           {
-                            "required": [
-                              "value"
-                            ]
+                            "required": ["value"]
                           }
                         ],
                         "examples": [
@@ -1872,10 +1705,7 @@
                   "minItems": 0,
                   "default": [],
                   "examples": [
-                    [
-                      "/usr/share/fonts/liberation",
-                      "/home/me/fonts"
-                    ]
+                    ["/usr/share/fonts/liberation", "/home/me/fonts"]
                   ]
                 },
                 "fontconfig": {
@@ -1962,9 +1792,7 @@
                         "name": "Helvetica-Oblique",
                         "size": 10
                       },
-                      "examples": [
-                        "sans italics 10"
-                      ]
+                      "examples": ["sans italics 10"]
                     },
                     "chord": {
                       "$ref": "#/definitions/fontspec",
@@ -1973,9 +1801,7 @@
                         "name": "Helvetica-Oblique",
                         "size": 10
                       },
-                      "examples": [
-                        "sans italics 10"
-                      ]
+                      "examples": ["sans italics 10"]
                     },
                     "chordfingers": {
                       "description": "Font for numbered chord dots.\nThe font used for drawing the fret positions that have fingering associated. This should **not** be modified unless you know what you are doing (and you probably don’t). This font has an additonal property `numbercolor` that can be set to control the colour of the finger number. By default this is the theme background colour. Setting this colour to the foreground colour effectively hides the finger numbers.",
@@ -2007,9 +1833,7 @@
                         "name": "Helvetica",
                         "size": 12
                       },
-                      "examples": [
-                        "sans 12"
-                      ]
+                      "examples": ["sans 12"]
                     },
                     "comment_italic": {
                       "$ref": "#/definitions/fontspec",
@@ -2018,9 +1842,7 @@
                         "name": "Helvetica-Oblique",
                         "size": 12
                       },
-                      "examples": [
-                        "sans italics 12"
-                      ]
+                      "examples": ["sans italics 12"]
                     },
                     "comment_box": {
                       "$ref": "#/definitions/fontspec",
@@ -2057,9 +1879,7 @@
                         "name": "Times-Roman",
                         "size": 12
                       },
-                      "examples": [
-                        "serif 12"
-                      ]
+                      "examples": ["serif 12"]
                     },
                     "tab": {
                       "$ref": "#/definitions/fontspec",
@@ -2068,9 +1888,7 @@
                         "name": "Courier",
                         "size": 10
                       },
-                      "examples": [
-                        "mono 10"
-                      ]
+                      "examples": ["mono 10"]
                     },
                     "text": {
                       "$ref": "#/definitions/fontspec",
@@ -2079,9 +1897,7 @@
                         "name": "Times-Roman",
                         "size": 12
                       },
-                      "examples": [
-                        "serif 12"
-                      ]
+                      "examples": ["serif 12"]
                     },
                     "title": {
                       "$ref": "#/definitions/fontspec",
@@ -2090,9 +1906,7 @@
                         "name": "Times-Bold",
                         "size": 14
                       },
-                      "examples": [
-                        "serif bold 14"
-                      ]
+                      "examples": ["serif bold 14"]
                     },
                     "toc": {
                       "$ref": "#/definitions/fontspec",
@@ -2101,9 +1915,7 @@
                         "name": "Times-Roman",
                         "size": 11
                       },
-                      "examples": [
-                        "serif 11"
-                      ]
+                      "examples": ["serif 11"]
                     },
                     "footer": {
                       "$ref": "#/definitions/fontspec",
@@ -2152,32 +1964,16 @@
                       "default": {
                         "title": "",
                         "subtitle": "",
-                        "footer": [
-                          "%{title}",
-                          "",
-                          "%{page}"
-                        ]
+                        "footer": ["%{title}", "", "%{page}"]
                       }
                     },
                     "title": {
                       "$ref": "#/definitions/pageFormat",
                       "description": "Headers/footers/background for the first page of a song.",
                       "default": {
-                        "title": [
-                          "",
-                          "%{title}",
-                          ""
-                        ],
-                        "subtitle": [
-                          "",
-                          "%{subtitle}",
-                          ""
-                        ],
-                        "footer": [
-                          "",
-                          "",
-                          "%{page}"
-                        ]
+                        "title": ["", "%{title}", ""],
+                        "subtitle": ["", "%{subtitle}", ""],
+                        "footer": ["", "", "%{page}"]
                       }
                     },
                     "first": {
@@ -2200,47 +1996,19 @@
                   "examples": [
                     {
                       "default": {
-                        "title": [
-                          "",
-                          "",
-                          ""
-                        ],
-                        "subtitle": [
-                          "",
-                          "",
-                          ""
-                        ],
-                        "footer": [
-                          "%{title}",
-                          "",
-                          "%{page}"
-                        ],
+                        "title": ["", "", ""],
+                        "subtitle": ["", "", ""],
+                        "footer": ["%{title}", "", "%{page}"],
                         "background": ""
                       },
                       "title": {
-                        "title": [
-                          "",
-                          "%{title}",
-                          ""
-                        ],
-                        "subtitle": [
-                          "",
-                          "%{subtitle}",
-                          ""
-                        ],
-                        "footer": [
-                          "",
-                          "",
-                          "%{page}"
-                        ],
+                        "title": ["", "%{title}", ""],
+                        "subtitle": ["", "%{subtitle}", ""],
+                        "footer": ["", "", "%{page}"],
                         "background": ""
                       },
                       "first": {
-                        "footer": [
-                          "",
-                          "",
-                          ""
-                        ],
+                        "footer": ["", "", ""],
                         "background": ""
                       }
                     }
@@ -2270,9 +2038,7 @@
                           "type": "integer",
                           "description": "Width of the cell bar.",
                           "default": 1,
-                          "examples": [
-                            0
-                          ]
+                          "examples": [0]
                         }
                       }
                     },
@@ -2290,9 +2056,7 @@
                           "$ref": "#/definitions/color",
                           "description": "Colour of special symbols.",
                           "default": "foreground-light",
-                          "examples": [
-                            "blue"
-                          ]
+                          "examples": ["blue"]
                         }
                       }
                     },
@@ -2305,9 +2069,7 @@
                           "$ref": "#/definitions/color",
                           "description": "Colour of the volta.",
                           "default": "foreground-light",
-                          "examples": [
-                            "blue"
-                          ]
+                          "examples": ["blue"]
                         },
                         "span": {
                           "type": "number",
@@ -2394,21 +2156,12 @@
                         },
                         "keys": {
                           "description": "The number of white keys shown.",
-                          "enum": [
-                            7,
-                            10,
-                            14,
-                            17,
-                            21
-                          ],
+                          "enum": [7, 10, 14, 17, 21],
                           "default": 14
                         },
                         "base": {
                           "description": "The leftmost white key. Must be `\"C\"` or `\"F\"`.",
-                          "enum": [
-                            "C",
-                            "F"
-                          ],
+                          "enum": ["C", "F"],
                           "default": "C"
                         },
                         "linewidth": {
@@ -2441,11 +2194,7 @@
                       "description": "Alignment for the labels.",
                       "type": "string",
                       "default": "left",
-                      "enum": [
-                        "left",
-                        "center",
-                        "right"
-                      ]
+                      "enum": ["left", "center", "right"]
                     },
                     "width": {
                       "description": "Margin width.\n`0` hides margin labels entirely. `\"auto\"` will automatically reserve a margin if labels are used.",
@@ -2458,20 +2207,13 @@
                         }
                       ],
                       "default": 0,
-                      "examples": [
-                        "auto"
-                      ]
+                      "examples": ["auto"]
                     },
                     "comment": {
                       "description": "Alternatively, render labels as comments.\nWhen `comment` is set to one of the suported comment types, the label will be printed as a comment before the section contents. The settings of `width` and `align` are ignored.",
                       "type": "string",
                       "default": "",
-                      "enum": [
-                        "",
-                        "comment",
-                        "comment_italic",
-                        "comment_box"
-                      ]
+                      "enum": ["", "comment", "comment_italic", "comment_box"]
                     }
                   }
                 },
@@ -2535,9 +2277,7 @@
                         "description": "Title, omitted if there's only one outline.",
                         "type": "string",
                         "default": "Table of Contents",
-                        "examples": [
-                          "%{title}%{artist| - %{}}"
-                        ]
+                        "examples": ["%{title}%{artist| - %{}}"]
                       },
                       "letter": {
                         "description": "Make letter level if more entries than this value.\nIf there are at least as many outline items with differing first letters than the amount specified here, an extra level of outlines (letter index) is created for easy navigation. A value of zero (`0`) disables this.",
@@ -2557,10 +2297,7 @@
                   },
                   "default": [
                     {
-                      "fields": [
-                        "sorttitle",
-                        "artist"
-                      ],
+                      "fields": ["sorttitle", "artist"],
                       "label": "By Title",
                       "line": "%{title}%{artist| - %{}}",
                       "collapse": false,
@@ -2568,10 +2305,7 @@
                       "fold": false
                     },
                     {
-                      "fields": [
-                        "artist",
-                        "sorttitle"
-                      ],
+                      "fields": ["artist", "sorttitle"],
                       "label": "By Artist",
                       "line": "%{artist|%{} - }%{title}",
                       "collapse": false,
@@ -2582,10 +2316,7 @@
                 },
                 "pagealign-songs": {
                   "description": "Align songs to even/odd pages.\nWith a value greater than `1`, ChordPro will additionally force the resultant PDF to always have an even number of pages.\nNote that with `pagealign-songs` = `1`, empty (blank) pages are inserted (as conventional in book printing), while with `pagealign-songs` > `1` the empty pages have headings and footers.",
-                  "type": [
-                    "boolean",
-                    "integer"
-                  ],
+                  "type": ["boolean", "integer"],
                   "default": true
                 },
                 "papersize": {
@@ -2593,10 +2324,7 @@
                   "oneOf": [
                     {
                       "type": "string",
-                      "enum": [
-                        "a4",
-                        "letter"
-                      ]
+                      "enum": ["a4", "letter"]
                     },
                     {
                       "type": "array",
@@ -2608,14 +2336,7 @@
                     }
                   ],
                   "default": "a4",
-                  "examples": [
-                    "a4",
-                    "letter",
-                    [
-                      595,
-                      842
-                    ]
-                  ]
+                  "examples": ["a4", "letter", [595, 842]]
                 },
                 "showlayout": {
                   "description": "Show the page layout structure.\nThis is mainly for design and debugging.",
@@ -2689,15 +2410,8 @@
                       "maxItems": 3
                     }
                   ],
-                  "default": [
-                    "",
-                    "",
-                    ""
-                  ],
-                  "examples": [
-                    "",
-                    "-"
-                  ]
+                  "default": ["", "", ""],
+                  "examples": ["", "-"]
                 },
                 "theme": {
                   "title": "Theme",
