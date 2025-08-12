@@ -198,7 +198,7 @@
           "description": "The name of the (perl) module that implements the delegate."
         },
         "preprocess": {
-          "$ref": "#/definitions/preprocessspec",
+          "$ref": "#/definitions/parserspec",
           // TODO: check this out
           "description": "Obsolete. Please use parser.preprocess.env-... instead."
         },
@@ -481,7 +481,7 @@
         }
       ]
     },
-    "preprocessspec": {
+    "parserspec": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
@@ -2650,7 +2650,7 @@
       "description": "For selected lines, you can specify a series of `{ \"target\" : \"xxx\", \"replace\" : \"yyy\" }`.\nEvery occurrence of \"xxx\" will be replaced by \"yyy\".\nUse \"pattern\" instead of \"target\" for regular expression replacement.\nChordPro allows using Unicode escape sequence in the form `\\u`*XXXX*. In case you need more (or less) hexadecimal digits, you can use the following preprocessor directive to replace `\\u{`*XXXX*`}` (with an arbitrary number of hex digits) by the corresponding unicode character.\nUse wisely.",
       "properties": {
         "parser": {
-          "$ref": "#/definitions/preprocessspec"
+          "$ref": "#/definitions/parserspec",
         }
       }
     },
