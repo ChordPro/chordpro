@@ -34,7 +34,7 @@
     - New metadata directives: [sortartist](https://www.chordpro.org/beta/directives-sortartist/) and [tag](https://www.chordpro.org/beta/directives-tag/).
 
     - Titles, artists and outlines will now be sorted according to the
-      system settings.
+      Unicode Technical Standard #10 (UTS #10) Collation Algorithm,
     
     - New font: [MuseJazzText](https://www.chordpro.org/beta/chordpro-fonts/#method-1-using-a-font-description).
 
