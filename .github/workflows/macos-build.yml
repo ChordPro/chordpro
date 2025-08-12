@@ -17,6 +17,7 @@ on:
     branches:
       - macosbuild
       - M6.079.0
+      - M6.079.2
 
 env:
   AWV: 0.72

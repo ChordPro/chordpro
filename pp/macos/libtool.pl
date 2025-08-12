@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Sun Aug 10 17:06:48 2025
-# Update Count    : 26
+# Last Modified On: Tue Aug 12 17:29:02 2025
+# Update Count    : 27
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -108,6 +108,9 @@ sub writepp($pp) {
     my $prefix = Alien::wxWidgets->prefix;
     my $wxversion = Alien::wxWidgets->version;
     $wxversion = sprintf("%d.%d", $wxversion =~ /^(\d+)\.(\d\d\d)/ );
+    if ( $wxversion ge "3.3" ) {
+	push( @libs, libsharpyuv libwebp libwebpdemux );
+    }
     my $perlversion = sprintf("%d.%d", $] =~ /^(\d+)\.(\d\d\d)/ );
     my $perltype = "Generic";
     $perltype = "Citrus Perl" if $^X =~ /citrusperl/;
