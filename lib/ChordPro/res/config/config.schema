@@ -2028,7 +2028,6 @@
                 },
                 "comment": {
                   "description": "Alternatively, render labels as comments.\nValues are \"comment\", \"comment_italic\" and \"comment_box\".",
-                  "default": "",
                   "enum": [
                     "comment",
                     "comment_italic",
