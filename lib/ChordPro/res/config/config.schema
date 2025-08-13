@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://json.schemastore.org/chordpro.json",
   "title": "Configuration for ChordPro",
-  "description": "A configuration file for ChordPro. Supports Really Relaxed JSON.",
+  "description": "A configuration file for ChordPro.\nThis is a really relaxed JSON document, see https://metacpan.org/pod/JSON::Relaxed#REALLY-RELAXED-EXTENSIONS",
   "definitions": {
     "backendspec": {
       "description": "Standard properties for backends.",
