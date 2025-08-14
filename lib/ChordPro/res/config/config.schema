@@ -1370,11 +1370,6 @@
             },
             {
               "properties": {
-                "back-matter": {
-                  "description": "PDF file to add as front matter.\nThe value should be the name of a file that contains a PDF document. This document is appended to the songbook.",
-                  "type": "string",
-                  "default": ""
-                },
                 "capoheading": {
                   "type": "string",
                   "description": "Value for Capo heading when using `chordscolumn`.\nWhen a capo is set a heading indicating the current capo setting is added.",
@@ -1714,27 +1709,6 @@
                   "default": 0,
                   "minimum": 0
                 },
-                "even-odd-pages": {
-                  "description": "Pages can be printed neutrally (all pages the same) or with differing left and right pages. This affects the page titles and footers, and the page margins.\nThe setting of `even-odd-pages` affects content items cover page (if any), table of contents (if any) and the songbook. These content items will start on a right page (`even-odd-pages` = `1`) or a left page (`even-odd-pages` = `-1`).\nThe default value is `1`, which means that the first page is right, the second page is left, and so on.\nThe value `-1` means the first page is left, the second page is right, and so on.\nThe value `0` makes all pages the same (left).",
-                  "oneOf": [
-                    {
-                      "const": 1,
-                      "title": "Even/odd pages",
-                      "description": "The value `1` means that the first page is right, the second page is left, and so on."
-                    },
-                    {
-                      "const": -1,
-                      "title": "Odd/even pages",
-                      "description": "The value `-1` means the first page is left, the second page is right, and so on."
-                    },
-                    {
-                      "const": 0,
-                      "title": "Odd pages",
-                      "description": "The value `0` makes all pages the same (left)."
-                    }
-                  ],
-                  "default": 1
-                },
                 "fontdir": {
                   "description": "The `fontdir` setting can be used to add one or more private font directories to the font libraries. The private directories will be searched first.",
                   "oneOf": [
@@ -2060,11 +2034,6 @@
                     }
                   ]
                 },
-                "front-matter": {
-                  "type": "string",
-                  "description": "PDF file to add as front matter.\nThe value should be the name of a file that contains a PDF document. This document is prepended to the songbook.",
-                  "default": ""
-                },
                 "grids": {
                   "description": "Grid section lines.\nSuppress when `show` is `false`, e.g. for singers.\nEnable by setting the width to the desired width.",
                   "type": "object",
@@ -2360,11 +2329,6 @@
                     }
                   ]
                 },
-                "pagealign-songs": {
-                  "description": "Align songs to even/odd pages.\nWith a value greater than `1`, ChordPro will additionally force the resultant PDF to always have an even number of pages.\nNote that with `pagealign-songs` = `1`, empty (blank) pages are inserted (as conventional in book printing), while with `pagealign-songs` > `1` the empty pages have headings and footers.",
-                  "type": ["boolean", "integer"],
-                  "default": true
-                },
                 "papersize": {
                   "description": "Output paper size.\nThe size can be specified either as the name of a known page size, e.g. \"a4\", or as a 2-element list containing the width and height of the page in PDF units (DTP points, pt, 1/72 inch).",
                   "oneOf": [
@@ -2383,6 +2347,71 @@
                   ],
                   "default": "a4",
                   "examples": ["a4", "letter", [595, 842]]
+                },
+                "songbook": {
+                  "additionalProperties": false,
+                  "description": "New style page control.",
+                  "properties": {
+                    "align-songs": {
+                      "default": true,
+                      "description": "With dual pages, a true value aligns songs to right pages\nby inserting a blank filler page if necessary.\nIf false, no alignment takes place, all pages follow\neach other.",
+                      "type": "boolean"
+                    },
+                    "align-songs-extend": {
+                      "default": false,
+                      "description": "If true, the fill pages will have headings and footers\nas if they were part of the song.",
+                      "type": "boolean"
+                    },
+                    "align-songs-spread": {
+                      "default": false,
+                      "description": "If true, all songs will start on left pages instead of right pages.",
+                      "type": "boolean"
+                    },
+                    "align-tocs": {
+                      "default": true,
+                      "description": "With dual pages, align individual tables of content\nto right pages by inserting a blank filler page.\nValues are true, false, or \"song\". In the latter case the\npagealign settings for songs are used for the tables of contents.",
+                      "type": "boolean"
+                    },
+                    "back-matter": {
+                      "default": false,
+                      "description": "PDF file to add as back matter.",
+                      "type": ["string", "boolean"]
+                    },
+                    "compact-songs": {
+                      "default": false,
+                      "description": "If true, the order of the songs is adjusted to make the\nsongbook as compact as possible, while each of the songs\nrequire minimal page turns.\nNote: this option requires extra processing time since\nthe songbook has to be processed twice.",
+                      "type": "boolean"
+                    },
+                    "cover": {
+                      "default": false,
+                      "description": "PDF file to add as cover page(s).",
+                      "type": ["string", "boolean"]
+                    },
+                    "dual-pages": {
+                      "default": true,
+                      "description": "Dual (odd/even) pages when set to true.\nFalse means all pages will be the same (odd, right).\nWith dual pages, all the parts of the songbook (covers,\ntables of contents, etc.) are always aligned to a right page.",
+                      "type": "boolean"
+                    },
+                    "front-matter": {
+                      "default": false,
+                      "description": "PDF file to add as front matter.",
+                      "type": ["string", "boolean"]
+                    },
+                    "sort-songs": {
+                      "anyOf": [
+                        {
+                          "default": false,
+                          "type": "boolean"
+                        },
+                        {
+                          "default": "",
+                          "enum": ["title", "-title", "subtitle", "-subtitle"],
+                          "type": "string"
+                        }
+                      ],
+                      "description": "Sort songs by `\"title\"` or `\"subtitle\"`.\ntitle    : sort pages alphabetically by title.\nsubtitle : sort pages alphabetically by subtitle. If this is\n           used together with title, only title is used.\nPut a minus sign before title and/or subtitle to obtain\ndescending order."
+                    }
+                  }
                 },
                 "showlayout": {
                   "description": "Show the page layout structure.\nThis is mainly for design and debugging.",
