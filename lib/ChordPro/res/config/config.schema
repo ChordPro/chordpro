@@ -786,7 +786,7 @@
             },
             "memorize": {
               "default": false,
-              "description": "Memorize chords in sections, to be recalled using `[^]`.",
+              "description": "Deprecated, Do not use.",
               "type": "boolean"
             },
             "notenames": {
