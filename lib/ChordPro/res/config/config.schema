@@ -53,7 +53,7 @@
           "default" : "ABC"
         },
         "preprocess" : {
-	  "description" : "Obsolete. Please use parser.preprocess.env-... instead.",
+	  "description" : "For experts only.",
           "type" : "object"
         }
       },
@@ -2020,12 +2020,6 @@
 		  "type" : "number"
 		}
 	      }
-	    },
-
-	    "sort-pages" : {
-	        "description" : "How to reorder song pages.\nSort pages by \"title\", \"subtitle\", or \"compact\".\ntitle  : sort pages alphabetically by title.\ntitle,desc  : same, but descending order.\nsubtitle : sort pages alphabetically by subtitle. If this is\n         used together with title, only title is used.\nsubtitle,desc  : same, but descending order\ncompact: reorder to make the songbook as compact as possible, while\n         each of the songs require minimal page turns.\n         Note: this option requires extra processing time since\n         the songbook has to be processed twice.\n",
-		"default" : "",
-		"type" : "string"
 	    },
 
 	    "split-marker" : {
