@@ -190,6 +190,7 @@
           "default": "default"
         },
         "preamble": {
+          "description": "Input lines to prepend to the user data",
           "type": "array",
           "items": {
             "type": "string"
