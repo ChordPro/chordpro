@@ -1663,6 +1663,23 @@
                           "default": 0.8,
                           "minimum": 0
                         },
+                        "barstyle": {
+                          "default": "line",
+                          "description": "Style of bars, line or arc.",
+                          "enum": ["line", "arc"],
+                          "type": "string"
+                        },
+                        "fretbaseposition": {
+                          "default": "left",
+                          "description": "Position for the fret base, left (default) or right.",
+                          "enum": ["left", "right"],
+                          "type": "string"
+                        },
+                        "fretbasetext": {
+                          "default": "%s",
+                          "description": "Text to show the fret base, if greater than one.\n`\"%s\"` will be replaced by the actual fret base number.",
+                          "type": "string"
+                        },
                         "barwidth": {
                           "description": "Thickness of bars, as a fraction of dot width.",
                           "type": "number",
