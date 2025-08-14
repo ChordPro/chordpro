@@ -197,6 +197,7 @@
           }
         },
         "program": {
+          "description": "The program/command to execute.\nIt will be wrapped in quotes when used, so paths with spaces will work without issue.",
           "type": "string",
           "default": ""
         },
