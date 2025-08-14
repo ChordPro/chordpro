@@ -779,6 +779,11 @@
               "title": "Suppress chords",
               "type": "boolean"
             },
+            "maj7delta": {
+              "default": false,
+              "description": "Substitute delta for maj7 in chord names.\nWill fallback to the ChordProSymbols font if the selected chord font doesn't have the glyphs.",
+              "type": "boolean"
+            },
             "memorize": {
               "default": false,
               "description": "Memorize chords in sections, to be recalled using `[^]`.",
