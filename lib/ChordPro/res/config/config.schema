@@ -205,9 +205,9 @@
           "description": "The name of the (perl) module that implements the delegate."
         },
         "preprocess": {
-          "$ref": "#/definitions/parserspec",
           // TODO: check this out
           "description": "Obsolete. Please use parser.preprocess.env-... instead."
+          "type": "object"
         },
         "omit": {
           "type": "boolean",
