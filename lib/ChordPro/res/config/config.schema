@@ -1841,7 +1841,7 @@
                       "examples": ["sans italics 10"]
                     },
                     "chordfingers": {
-                      "description": "Font for numbered chord dots.\nThe font used for drawing the fret positions that have fingering associated. This should **not** be modified unless you know what you are doing (and you probably don’t). This font has an additonal property `numbercolor` that can be set to control the colour of the finger number. By default this is the theme background colour. Setting this colour to the foreground colour effectively hides the finger numbers.",
+                      "description": "Font for numbers in chord diagram dots.\n`color` is for the numbers.\n`numbercolor` is for the dots.\n`size` doesn't matter unless `diagrams.fingers` = `\"below\"`.",
                       "anyOf": [
                         {
                           "$ref": "#/definitions/fontspec"
@@ -1852,7 +1852,8 @@
                           "properties": {
                             "numbercolor": {
                               "$ref": "#/definitions/color",
-                              "description": "Finger number colour specification.\nBy default this is the theme background colour. Setting this colour to the foreground colour (`\"foreground\"`) effectively hides the finger numbers."
+                              "description": "Finger number colour specification.\nBy default this is the theme background colour. Setting this colour to the foreground colour (`\"foreground\"`) effectively hides the finger numbers.",
+                              "default": "foreground"
                             }
                           }
                         }
