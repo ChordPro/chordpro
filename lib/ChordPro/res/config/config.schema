@@ -2338,6 +2338,10 @@
                         "description": "The format for the outline entries.",
                         "type": "string"
                       },
+                      "name": {
+                        "description": "An identifying name for this outline.",
+                        "type": "string"
+                      },
                       "omit": {
                         "description": "Omit this outline.",
                         "type": "boolean",
