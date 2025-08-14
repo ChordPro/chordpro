@@ -2649,6 +2649,26 @@
                 }
               }
             },
+            "grille": {
+              "description": "Embedding Grilles. EXPERIMENTAL",
+              "allOf": [
+                {
+                  "$ref": "#/definitions/delegatespec"
+                },
+                {
+                  "properties": {
+                    "handler": {
+                      "default": "grille2xo",
+                      "type": "string"
+                    },
+                    "module": {
+                      "default": "Grille",
+                      "type": "string"
+                    }
+                  }
+                }
+              ]
+            },
             "ly": {
               "$ref": "#/definitions/lyDelegateFields",
               "description": "Embedding Lilypond.",
@@ -2662,6 +2682,26 @@
                   "\\header { tagline = ##f }"
                 ]
               }
+            },
+            "strum": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/delegatespec"
+                },
+                {
+                  "properties": {
+                    "handler": {
+                      "default": "strum2xo",
+                      "type": "string"
+                    },
+                    "module": {
+                      "default": "Strum",
+                      "type": "string"
+                    }
+                  }
+                }
+              ],
+              "description": "Embedding Strums. EXPERIMENTAL"
             },
             "svg": {
               "description": "Embedding SVG.",
