@@ -155,6 +155,12 @@
       "required": ["type", "module", "handler"],
       "additionalProperties": false,
       "properties": {
+        "align": {
+          "description": "Horizontal alignment of the resulting image, if `type` is `image`.",
+          "type": "string",
+          "enum": ["left", "center", "right"],
+          "default": "center"
+        },
         "type": {
           "description": "The result produced by the delegate handler.",
           "type": "string",
