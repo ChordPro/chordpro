@@ -1955,6 +1955,23 @@
                       },
                       "examples": ["serif 11"]
                     },
+                    "gridstrum": {
+                      "$ref": "#/definitions/fontspec",
+                      "description": "Font for typesetting gridstrum symbols.\nYou can set size and colours, but you cannot change the font.",
+                      "default": {
+                        "name": "ChordProSymbols",
+                        "size": 13
+                      }
+                    },
+                    "grille": {
+                      "$ref": "#/definitions/fontspec",
+                      "description": "Font for typesetting grilles.",
+                      "default": {
+                        "name": "Helvetica",
+                        "size": 10
+                      },
+                      "examples": ["sans 10"]
+                    },
                     "footer": {
                       "$ref": "#/definitions/fontspec",
                       "description": "The font used for footer texts. If not set, falls back on the `subtitle` font at 60% size."
