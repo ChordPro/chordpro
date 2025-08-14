@@ -492,6 +492,11 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "altbrackets": {
+          "default": null,
+          "description": "For the exceptional case you need brackets [] in your lyrics or annotations.\nThese characters are replaced by normal brackets **after** chord analysis.\nE.g. `parser.altbrackets: \"«»\"`\nUse wisely. Better still, don't use this.",
+          "type": ["string", "null"]
+        },
         "preprocess": {
           "type": "object",
           "additionalProperties": false,
