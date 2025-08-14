@@ -1074,6 +1074,11 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
+              "break": {
+                "default": "",
+                "description": "A break value to group toc entries with.",
+                "type": "string"
+              },
               "fields": {
                 "type": "array",
                 "description": "The metadata for this table of contents. One or two items.\nThe ordering of the table.\nPrefix the sort key with `+` to force numeric sorting. Likewise, a `-` prefix reverses sort order.\nWhen you specify a metadata item that has multiple values they are split out in the table.\n`songindex` is a built-in metadata item that yields the sequence number of the song in the songbook. Sorting on `songindex` will produce the songs in songbook order.",
@@ -1090,6 +1095,10 @@
               },
               "line": {
                 "description": "The format of the table's lines.\nYou can use all song metadata.",
+                "type": "string"
+              },
+              "name": {
+                "description": "An identifying name for this table of contents.",
                 "type": "string"
               },
               "omit": {
