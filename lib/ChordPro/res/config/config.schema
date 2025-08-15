@@ -158,7 +158,7 @@
       "description": "Shared properties between all delegate types.",
       "type": "object",
       "required": ["type", "module", "handler"],
-      "additionalProperties": false,
+      "$comment": "Due to use of `allOf` to allow reuse of shared structure, `additionalProperties` doesn't work properly to disallow any undefined properties. The correct keywork to use is `unevaluatedProperties`, but it is not supported until `JSON Schema Draft 2019-09`, which isn't widely supported yet. Eventually add `unevaluatedProperties: false`.",
       "properties": {
         "align": {
           "description": "Horizontal alignment of the resulting image, if `type` is `image`.",
@@ -330,6 +330,7 @@
     },
     "abcDelegateFields": {
       "type": "object",
+      "$comment": "Due to use of `allOf` to allow reuse of shared structure, `additionalProperties` doesn't work properly to disallow any undefined properties. The correct keywork to use is `unevaluatedProperties`, but it is not supported until `JSON Schema Draft 2019-09`, which isn't widely supported yet. Eventually add `unevaluatedProperties: false`.",
       "allOf": [
         {
           "$ref": "#/definitions/delegatespec"
@@ -420,7 +421,7 @@
     },
     "lyDelegateFields": {
       "type": "object",
-      "additionalProperties": false,
+      "$comment": "Due to use of `allOf` to allow reuse of shared structure, `additionalProperties` doesn't work properly to disallow any undefined properties. The correct keywork to use is `unevaluatedProperties`, but it is not supported until `JSON Schema Draft 2019-09`, which isn't widely supported yet. Eventually add `unevaluatedProperties: false`.",
       "anyOf": [
         {
           "$ref": "#/definitions/delegatespec"
@@ -929,7 +930,7 @@
           "default": [],
           "items": {
             "type": "object",
-            "additionalProperties": false,
+            "$comment": "Due to use of `allOf` to allow reuse of shared structure, `additionalProperties` doesn't work properly to disallow any undefined properties. The correct keywork to use is `unevaluatedProperties`, but it is not supported until `JSON Schema Draft 2019-09`, which isn't widely supported yet. Eventually add `unevaluatedProperties: false`.",
             "allOf": [
               {
                 "$comment": "Basic chord definition metadata consistent between all definition types.",
@@ -2573,7 +2574,7 @@
         "html": {
           "description": "Settings for HTML output.",
           "type": "object",
-          "additionalProperties": false,
+          "$comment": "Due to use of `allOf` to allow reuse of shared structure, `additionalProperties` doesn't work properly to disallow any undefined properties. The correct keywork to use is `unevaluatedProperties`, but it is not supported until `JSON Schema Draft 2019-09`, which isn't widely supported yet. Eventually add `unevaluatedProperties: false`.",
           "allOf": [
             {
               "$ref": "#/definitions/backendspec"
