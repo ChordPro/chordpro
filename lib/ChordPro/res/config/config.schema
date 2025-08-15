@@ -1879,7 +1879,6 @@
                         },
                         {
                           "type": "object",
-                          "additionalProperties": false,
                           "properties": {
                             "numbercolor": {
                               "$ref": "#/definitions/color",
