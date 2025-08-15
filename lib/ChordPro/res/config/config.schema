@@ -123,22 +123,43 @@
     },
     "fontConfigFont": {
       "type": "object",
-      "additionalProperties": false,
       "required": [""],
-      "properties": {
-        "bold": {
-          "type": "string"
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "": {
+              "type": "string"
+            },
+            "bold": {
+              "type": "string"
+            },
+            "italic": {
+              "type": "string"
+            },
+            "bolditalic": {
+              "type": "string"
+            }
+          }
         },
-        "italic": {
-          "type": "string"
-        },
-        "bolditalic": {
-          "type": "string"
-        },
-        "": {
-          "type": "string"
+        {
+          "additionalProperties": false,
+          "properties": {
+            "": {
+              "type": "string"
+            },
+            "bold": {
+              "type": "string"
+            },
+            "oblique": {
+              "type": "string"
+            },
+            "boldoblique": {
+              "type": "string"
+            }
+          }
         }
-      }
+      ]
     },
     "fontClass": {
       "type": "string",
@@ -224,7 +245,7 @@
     "fontDescription": {
       "type": "string",
       "description": "A shorthand description of a font. In the format of `fontclass (bold)?(italic)? fontsize`.",
-      "pattern": "^([a-zA-Z\\-]+) (bold)?(italic)? ?(\\d+(\\.\\d+)?)$",
+      "pattern": "^([a-zA-Z\\-]+) (bold)?(italic|oblique)? ?(\\d+(\\.\\d+)?)$",
       "examples": [
         "serif bold 14",
         "serif 11",
