@@ -2504,11 +2504,6 @@
                     }
                   }
                 },
-                "sort-pages": {
-                  "description": "How to reorder pages.\n`sort-pages` is a comma separated list of the below options.\n`title`: Sort pages alphabetically by title.\n`subtitle`: Sort pages alphabetically by subtitle. If this is used together with title, only title is used.\n`2page`: Make sure songs with even pages are placed on even pages, so most. if not all, of the song is visible in a normal book without needing to turn a page. A blank page is added to align.\n`compact`: Implies `2page` - instead of adding a blank page, an odd-paged song is moved in front of this song to achieve even page alignment. Note: this option requires extra processing time since the songbook has to be processed twice.\n`desc`: Modifier to sort descending.",
-                  "type": "string",
-                  "default": ""
-                },
                 "split-marker": {
                   "description": "Split marker for syllables that are smaller than chord width.\n`split-marker` is a 3-part array: `start`, `repeat`, and `final`, or can be a single string representing `start`.\n`final` is always printed, last.\n`start` is printed if there is enough room.\n`repeat` is printed repeatedly to fill the rest.\nIf `split-marker` is a single string, this is `start`.\nAll elements may be left empty strings.",
                   "oneOf": [
