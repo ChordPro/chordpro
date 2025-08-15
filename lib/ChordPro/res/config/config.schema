@@ -264,11 +264,11 @@
               "description": "Font size."
             },
             "color": {
-              "$ref": "#/definitions/colorspec",
+              "$ref": "#/definitions/color",
               "description": "The colour of the font. See [ChordPro Colours](https://www.chordpro.org/chordpro/chordpro-colours/) for details on colours."
             },
             "background": {
-              "$ref": "#/definitions/colorspec",
+              "$ref": "#/definitions/color",
               "description": "Background color for the element."
             },
             "frame": {
