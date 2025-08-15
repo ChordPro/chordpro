@@ -2628,7 +2628,6 @@
         "delegates": {
           "description": "Delegates.\nBasically a delegate is a section `{start_of_XXX}` which content is collected and handled later by the delegate module.",
           "type": "object",
-          "additionalProperties": false,
           "properties": {
             "abc": {
               "$ref": "#/definitions/abcDelegateFields",
