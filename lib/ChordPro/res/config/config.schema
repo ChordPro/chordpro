@@ -224,7 +224,7 @@
     "fontDescription": {
       "type": "string",
       "description": "A shorthand description of a font. In the format of `fontclass (bold)|(italics) fontsize`.",
-      "pattern": "^([a-zA-Z\\-]+) ((bold|italic) )?(\\d+(\\.\\d+)?)$",
+      "pattern": "^([a-zA-Z\\-]+) (bold)?(italic)? ?(\\d+(\\.\\d+)?)$",
       "examples": [
         "serif bold 14",
         "serif 11",
