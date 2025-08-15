@@ -239,7 +239,6 @@
     },
     "fontspec": {
       "description": "Font specification.",
-      "type": ["string", "object"],
       "oneOf": [
         {
           "$ref": "#/definitions/fontDescription"
