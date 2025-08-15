@@ -31,16 +31,16 @@
       "type": "string",
       "oneOf": [
         {
-          "title": "Hex colour",
+          "description": "Hex colour",
           "pattern": "^#[0-9A-Fa-f]{6}$",
           "examples": ["#FFFFFF", "#393939"]
         },
         {
-          "title": "Shade of grey",
+          "description": "Shade of grey",
           "pattern": "^grey\\d{2}$"
         },
         {
-          "title": "Colour name",
+          "description": "Colour name",
           "enum": [
             "red",
             "green",
@@ -53,11 +53,11 @@
           ]
         },
         {
-          "title": "Any named colour",
+          "description": "Any named colour",
           "pattern": "^[-A-Za-z0-9]+$"
         },
         {
-          "title": "A lack of colour, transparent",
+          "description": "A lack of colour, transparent",
           "const": "none"
         }
       ],
