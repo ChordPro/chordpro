@@ -762,9 +762,17 @@ sub sort_songbook {
     return unless @tbs;
 
     if ( 1 ) {
-	my @sorted = Unicode::Collate->new()->sort(@tbs);
-	@sorted = reverse(@sorted) if $desc;
-	$sb->{songs} = \@sorted;
+	my $collator = Unicode::Collate->new;
+	my ( $aa, $bb ) = $desc ? qw( b a ) : qw( a b );
+	my $l = "\$$aa"."->[0]";
+	my $r = "\$$bb"."->[0]";
+	my $proc = 'sub { my $tbs = shift; ';
+	$proc .= '[ map { $_->[1] } sort { ';
+	$proc .= "\$collator->cmp( $l, $r )";
+	$proc .= ' } @$tbs ] }';
+	my $sorter = eval $proc;
+	die("OOPS $proc\n$@") if $@;
+	$sb->{songs} = $sorter->(\@tbs);
     }
     else {
 	my $proc = 'sub { my $tbs = shift; use locale; ';
