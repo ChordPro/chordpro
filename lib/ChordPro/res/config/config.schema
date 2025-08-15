@@ -2752,6 +2752,137 @@
                 "handler": "txt2xform"
               }
             }
+          },
+          "additionalProperties": {
+            "description": "Embedding external tools.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/definitions/delegatespec"
+              },
+              {
+                "required": ["program", "input", "result"],
+                "properties": {
+                  "type": {
+                    "const": "image"
+                  },
+                  "handler": {
+                    "type": "string",
+                    "const": "cmd2image"
+                  },
+                  "module": {
+                    "type": "string",
+                    "const": "Program"
+                  },
+                  "input": {
+                    "description": "Program input.\nUse value `\"stdin\"` to pass data via standard input.\nUse value `\"argfileN\"` or `\"argfile\"` to pass data via temporary file whose name is appended to the command arguments.\nUse value \"argfile0\" to pass data via temporary file whose name is prepended to the command arguments.\nAlternatively, the name of one of the predefined temporary files (`%{tmpfile1}` and `%{tmpfile2}`) can be used. Do not forget to add this name to the command arguments.",
+                    "type": "string",
+                    "oneOf": [
+                      {
+                        "const": "stdin",
+                        "description": "Pass data via standard input."
+                      },
+                      {
+                        "const": "argfile0",
+                        "description": "Use value `\"argfile0\"` to pass data via temporary file whose name is *prepended* to the command arguments."
+                      },
+                      {
+                        "pattern": "^argfileN?$",
+                        "description": "Use value `\"argfileN\"` or `\"argfile\"` to pass data via temporary file whose name is *appended* to the command arguments."
+                      },
+                      {
+                        "enum": ["tmpfile1", "tmpfile2"],
+                        "description": "Alternatively, the name of one of the predefined temporary files (`%{tmpfile1}` and `%{tmpfile2}`) can be used. Do not forget to add this name to the command arguments."
+                      }
+                    ]
+                  },
+                  "result": {
+                    "description": "Get the resultant output from a (temporary) file.\nUse value `\"stdout\"` to collect results from standard output.\nNote that lilypond will append `\".cropped.svg\"`, so we pass the base of the file names.",
+                    "type": "string",
+                    "oneOf": [
+                      {
+                        "const": "stdout",
+                        "description": "Collect results from standard output"
+                      },
+                      {
+                        "const": "%{tmpbase}.cropped.svg",
+                        "description": "Collect results from a temporary file.\nNote that lilypond will append `\".cropped.svg\"`, so we pass the base of the file names."
+                      }
+                    ]
+                  },
+                  "args": {
+                    "description": "Command arguments.\nEach argument will effectively be wrapped in quotes.",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "preprocess": {
+                    "description": "Preprocessing.\n`\"first\"` and `\"last\"` are applied to the whole data at once. `\"lines\"` is applied line by line, after `\"first\"` and before `\"last\"`.",
+                    "type": "object",
+                    "properties": {
+                      "first": {
+                        "description": "Preprocessing run first, applied to the entire environment content at once.",
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/definitions/parserPreprocessingElement"
+                        }
+                      },
+                      "lines": {
+                        "description": "Preprocessing run after `first` and before `last`, but applied to each line of the environment content one at a time.",
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/definitions/parserPreprocessingElement"
+                        }
+                      },
+                      "last": {
+                        "description": "Preprocessing run last, applied to the entire environment content at once.",
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/definitions/parserPreprocessingElement"
+                        }
+                      }
+                    }
+                  },
+                  "postamble": {
+                    "description": "Input lines to apppend to the user data.",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            ],
+            "examples": [
+              {
+                "module": "Program",
+                "handler": "cmd2image",
+                "type": "image",
+                "program": "/usr/bin/lilypond",
+                "input": "argfile",
+                "result": "%{tmpbase}.cropped.svg",
+                "args": [
+                  "-dno-point-and-click",
+                  "--svg",
+                  "--silent",
+                  "--output",
+                  "%{tmpbase}"
+                ],
+                "preprocess": {
+                  "first": [],
+                  "lines": [],
+                  "last": []
+                },
+                "preamble": [
+                  "\\version \"2.21.0\"",
+                  "#(ly:set-option 'crop #t)",
+                  "\\header { tagline = ##f }"
+                ],
+                "postamble": [],
+                "align": "left"
+              }
+            ]
           }
         }
       }
