@@ -329,12 +329,12 @@
       ]
     },
     "abcDelegateFields": {
+      "type": "object",
       "allOf": [
         {
           "$ref": "#/definitions/delegatespec"
         },
         {
-          "type": "object",
           "properties": {
             "module": {
               "const": "ABC"
