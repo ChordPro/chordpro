@@ -2207,7 +2207,7 @@
                   }
                 },
                 "kbdiagrams": {
-                  "description": "Appearance of chord diagrams for keyboards.\nA keyboard diagram consists of a number of keys.\nDimensions are specified by `width` and `height`.\nThe horizontal distance between diagrams is `hspace` * `keys` * `width`.",
+                  "description": "Appearance of chord diagrams for keyboards.\nA keyboard diagram consists of a number of keys.\nDimensions are specified by `width` and `height`.\nThe horizontal distance between diagrams is `hspace * keys * width`.",
                   "type": "object",
                   "additionalProperties": false,
                   "allOf": [
