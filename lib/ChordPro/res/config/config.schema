@@ -669,7 +669,7 @@
       }
     }
   },
-  "additionalProperties": false,
+  "$comment": "Due to use of `allOf` to allow reuse of shared structure, `additionalProperties` doesn't work properly to disallow any undefined properties. The correct keywork to use is `unevaluatedProperties`, but it is not supported until `JSON Schema Draft 2019-09`, which isn't widely supported yet. Eventually add `unevaluatedProperties: false`.",
   "allOf": [
     {
       "title": "Generic Part",
@@ -1368,7 +1368,7 @@
         "pdf": {
           "description": "Settings for PDF output.",
           "type": "object",
-          "additionalProperties": false,
+          "$comment": "Due to use of `allOf` to allow reuse of shared structure, `additionalProperties` doesn't work properly to disallow any undefined properties. The correct keywork to use is `unevaluatedProperties`, but it is not supported until `JSON Schema Draft 2019-09`, which isn't widely supported yet. Eventually add `unevaluatedProperties: false`.",
           "allOf": [
             {
               "$ref": "#/definitions/backendspec"
@@ -1631,7 +1631,7 @@
                 "diagrams": {
                   "description": "Appearance of chord diagrams for string instruments.\nA chord diagram consists of a number of cells.\nThe horizontal number of cells depends on the number of strings.\nThe vertical number of cells is \"vcells\", which should be 4 or larger to accommodate most chords.",
                   "type": "object",
-                  "additionalProperties": false,
+                  "$comment": "Due to use of `allOf` to allow reuse of shared structure, `additionalProperties` doesn't work properly to disallow any undefined properties. The correct keywork to use is `unevaluatedProperties`, but it is not supported until `JSON Schema Draft 2019-09`, which isn't widely supported yet. Eventually add `unevaluatedProperties: false`.",
                   "allOf": [
                     {
                       "$ref": "#/definitions/chordDiagramPDFLayout"
