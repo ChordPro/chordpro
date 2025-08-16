@@ -86,6 +86,7 @@
     - Prevent "settings migrated" dialog if not applicable.
     - Some issues with Unicode filenames on Windows.
     - Some issues with line endings on Windows.
+    - Some issues with button bitmaps on Windows.
     - Fix image alignment with indent.
     - Fix title swap even when using title-even format.
     - Fix problems with save/restore settings on Windows.

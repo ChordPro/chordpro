@@ -49,8 +49,32 @@ elsif ( $ARGV[0] =~ /\.rc$/ ) {
 			 $1, $maj, $min, $aux//0, $resetbuildnum ? 1 : 1+$5);
 	    next;
 	}
-	if ( /^(\s*VALUE\s+"(?:Product|File)Version",\s+)/ ) {
-	    $_ = "$1 \"$vv\"\n";
+	if ( /^(\s*VALUE\s+"FileVersion",\s+)/ ) {
+	    $_ = "$1\"$vv\"\n";
+	    next;
+	}
+	if ( /^(\s*VALUE\s+"ProductVersion",\s+)/ ) {
+	    $_ = "$1\"" . $vv =~ s/_.*//r . "\"\n";
+	    next;
+	}
+	if ( /^(\s*VALUE\s+"Comments",\s+)/ ) {
+	    $_ = $1;
+	    if ( $vv =~ /_/ ) {
+		$_ .= q{"Development version, use at your own risk"};
+	    }
+	    else {
+		$_ .= q{"https://chordpro.org"};
+	    }
+	    $_ .= "\n";
+	    next;
+	}
+	if ( /^(\s*VALUE\s+"LegalCopyright",\s+)/ ) {
+	    $_ = $1;
+	    my @tm = localtime(time);
+	    $_ .= q{"Copyright 2010,};
+	    $_ .= 1900+$tm[5];
+	    $_ .= q{ The ChordPro Team"};
+	    $_ .= "\n";
 	    next;
 	}
     }

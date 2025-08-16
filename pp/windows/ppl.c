@@ -18,7 +18,7 @@ static const char pathreplace[] = ".pl";
 static const char dllsearch[] = "perl5*.dll";
 
 // act like the original "perl.exe" if our name is "perl.exe" (case sensitive!)
-static const char perlexe[] = "perl.exe"; // set to NULL to disable
+static const char perlexe[] = "perl.exe"; // set to "\0" to disable
 
 // number of arguments we put in front of the user provided args
 #define ARGS_ADDED 1
@@ -90,7 +90,7 @@ int main( int argc, char **argv, char **env ) {
     (void)memmove(dllpath, scriptpath, sizeof scriptpath);
     dlldir = strrchr(dllpath, '\\'); // find the last backslash
     dlldir = dlldir ? (dlldir + 1) : dllpath; // if find no backslash (unlikely), use the whole buffer
-    emulate_perlexe = ((perlexe != 0) &&  (!strncmp(dlldir, perlexe, sizeof perlexe)));
+    emulate_perlexe = !strncmp(dlldir, perlexe, sizeof perlexe);
 
     char *rep = strrchr(scriptpath, pathreplace[0]); // find the last delimiter in path
     if( !rep ) {
@@ -113,7 +113,7 @@ int main( int argc, char **argv, char **env ) {
 #endif
   }
   else {
-    (void)fprintf(stderr, "Path to %s is too long for my %I64i bytes buffer \n", argv[0], sizeof(scriptpath));
+    (void)fprintf(stderr, "Path to %s is too long for my %llu bytes buffer \n", argv[0], sizeof(scriptpath));
     return 1; // ---> early return
   }
 
@@ -161,7 +161,7 @@ int main( int argc, char **argv, char **env ) {
   // as a positive side-effect, this removes the current directory from the search path
 
 #ifdef DEBUGOUT
-  fprintf( DEBUGOUT, "DLL name found:      \"%s\" (length = %I64i)\n",
+  fprintf( DEBUGOUT, "DLL name found:      \"%s\" (length = %llu)\n",
 	   ffd.cFileName, strlen(ffd.cFileName) );
   fprintf( DEBUGOUT, "DLL search path set: \"%s\"\n", dllpath);
 #endif

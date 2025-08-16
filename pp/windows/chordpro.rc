@@ -1,6 +1,6 @@
 // see https://docs.microsoft.com/en-us/windows/desktop/menurc/versioninfo-resource
 
-4711 ICON "..\\..\\lib\\ChordPro\\res\\icons\\chordpro.ico"
+AppIcon ICON "../../lib/ChordPro/res/icons/chordpro.ico"
 
 1 VERSIONINFO
 FILEVERSION     0,975,0,0
@@ -11,15 +11,15 @@ BEGIN
   BEGIN
     BLOCK "040904E4" // US English CP 1252 (Windows ANSI)
     BEGIN
-      VALUE "Comments", "Beta version, use at your own risk"
-      VALUE "CompanyName", "ChordPro.ORG"
-      VALUE "FileDescription", "ChordPro CLI Launcher"
-      VALUE "FileVersion", "0.975"
-      VALUE "InternalName", "chordpro"
-      VALUE "LegalCopyright", "Copyright 2010,2018,2020 The ChordPro Team"
-      VALUE "OriginalFilename", "chordpro.exe"
-      VALUE "ProductName", "ChordPro"
-      VALUE "ProductVersion", "0.975.beta"
+      VALUE "Comments",         "Beta version, use at your own risk"
+      VALUE "CompanyName",      "ChordPro.ORG"
+      VALUE "FileDescription",  "ChordPro CLI Application"
+      VALUE "FileVersion",      "0.975"
+      VALUE "InternalName",     "wxchordpro"
+      VALUE "LegalCopyright",   "Copyright 2010,2018,2020 The ChordPro Team"
+      VALUE "OriginalFilename", "wxchordpro.exe"
+      VALUE "ProductName",      "ChordPro"
+      VALUE "ProductVersion",   "0.975.beta"
     END
   END
   BLOCK "VarFileInfo"
