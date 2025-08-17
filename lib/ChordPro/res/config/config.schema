@@ -708,7 +708,6 @@
           "type": "object",
           "description": "General settings, often changed by configs and command line.\n\nThese settings control global behaviour of the ChordPro program and can be changed by configs and command line.",
           "additionalProperties": false,
-          "required": [],
           "properties": {
             "chordnames": {
               "default": "strict",
@@ -881,7 +880,6 @@
           "description": "Format to show chord names. May contain markup",
           "type": "object",
           "additionalProperties": false,
-          "required": [],
           "properties": {
             "common": {
               "description": "Format string for rendering common chord names.",
