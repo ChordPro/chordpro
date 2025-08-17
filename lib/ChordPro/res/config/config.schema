@@ -33,6 +33,7 @@
         {
           "description": "Hex colour",
           "pattern": "^#[0-9A-Fa-f]{6}$",
+          "format": "color",
           "examples": ["#FFFFFF", "#393939"]
         },
         {
