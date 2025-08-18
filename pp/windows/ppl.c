@@ -113,7 +113,9 @@ int main( int argc, char **argv, char **env ) {
 #endif
   }
   else {
-    (void)fprintf(stderr, "Path to %s is too long for my %llu bytes buffer \n", argv[0], sizeof(scriptpath));
+    int len = (int)sizeof(scriptpath);
+    (void)fprintf(stderr, "Path to %s is too long for my %i bytes buffer \n",
+		  argv[0], len);
     return 1; // ---> early return
   }
 
@@ -161,9 +163,11 @@ int main( int argc, char **argv, char **env ) {
   // as a positive side-effect, this removes the current directory from the search path
 
 #ifdef DEBUGOUT
-  fprintf( DEBUGOUT, "DLL name found:      \"%s\" (length = %llu)\n",
-	   ffd.cFileName, strlen(ffd.cFileName) );
-  fprintf( DEBUGOUT, "DLL search path set: \"%s\"\n", dllpath);
+  { int len = (int)strlen(ffd.cFileName);
+    fprintf( DEBUGOUT, "DLL name found:      \"%s\" (length = %i)\n",
+	     ffd.cFileName, len );
+    fprintf( DEBUGOUT, "DLL search path set: \"%s\"\n", dllpath);
+  }
 #endif
 
   // search first in the directory set by SetDllDirectory()

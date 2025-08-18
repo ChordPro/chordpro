@@ -1,5 +1,8 @@
 #! /bin/make -f
 
+# Windows 10, for Windows installer builds.
+WINVM := Win10ProClassic
+
 ################ Pass-through ################
 
 .PHONY : all
@@ -50,8 +53,15 @@ to_tmp : resources
 
 # Windows 10, for Windows installer builds.
 WINDIR := /Users/Johan/Documents/${PROJECT}
-WINDST := /mnt/c${WINDIR}
-#WINDST := w10:Documents/${PROJECT}
+ifeq (${WINVM},Win10ProClassic)
+WIN    := w10c
+WINMNT := /mnt/c2
+else
+WIN    := w10
+WINMNT := /mnt/c
+endif
+WINDST := ${WINMNT}/${WINDIR}
+
 to_win : resources
 	for mnf in ${STDMNF} ; do \
 	    rsync ${RSYNC_ARGS} --files-from=$$mnf ./ ${WINDST}/; \
@@ -141,18 +151,15 @@ checkjson :
 
 # Experimental
 
-WINVM := Win10Pro
-WIN   := w10
-
 wkit : _wkit1 _wkit _wkiti _wkit2
 
 _wkit :
 	${MAKE} to_win
 	ssh ${WIN} gmake -C ${WINDIR}/pp/windows
-	cp /mnt/c${WINDIR}/pp/windows/ChordPro-Installer*.exe ${HOME}/tmp/
+	cp ${WINDST}/pp/windows/ChordPro-Installer*.exe ${HOME}/tmp/
 
 _wkiti :
-	cp /mnt/c${WINDIR}/pp/windows/ChordPro-Installer*.exe \
+	cp ${WINDST}/pp/windows/ChordPro-Installer*.exe \
 	  ${HOME}/tmp/ChordPro-Installer-6-70-dev-msw-x64.exe
 	scp ${HOME}/tmp/ChordPro-Installer-6-70-dev-msw-x64.exe \
 	  chordpro-site:www/dl/
@@ -163,7 +170,7 @@ _wkit1 :
 
 _wkit2 :
 	sleep 10
-	sudo umount /mnt/c
+	sudo umount ${WINMNT}
 	VBoxManage controlvm ${WINVM} poweroff
 	VBoxManage snapshot ${WINVM} restorecurrent
 
