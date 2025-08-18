@@ -132,16 +132,18 @@
     "fontConfigFont": {
       "type": "object",
       "required": [""],
-      "anyOf": [
+      "properties": {
+        "": {
+          "type": "string"
+        },
+        "bold": {
+          "type": "string"
+        }
+      },
+      "oneOf": [
         {
           "additionalProperties": false,
           "properties": {
-            "": {
-              "type": "string"
-            },
-            "bold": {
-              "type": "string"
-            },
             "italic": {
               "type": "string"
             },
@@ -153,12 +155,6 @@
         {
           "additionalProperties": false,
           "properties": {
-            "": {
-              "type": "string"
-            },
-            "bold": {
-              "type": "string"
-            },
             "oblique": {
               "type": "string"
             },
