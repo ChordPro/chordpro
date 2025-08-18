@@ -1214,15 +1214,16 @@
           }
         },
         "markup": {
-          "additionalProperties": false,
           "description": "Settings for the markup processor.\nShortcodes allow user defined markup, e.g. <foo>...</foo>.\n```\nmarkup.shortcode {\n   heavy :  \"weight='bold' size='large'\"\n}\nEach occurrence of <heavy>...</heavy> will be replaced by\n<span weight='bold' size='large'>...</span>.\n```",
+          "type": "object",
+          "additionalProperties": false,
           "properties": {
             "shortcodes": {
-              "additionalProperties": true,
-              "description": ""
+              "description": "",
+              "type": "object",
+              "additionalProperties": true
             }
-          },
-          "type": "object"
+          }
         },
         "meta": {
           "description": "Globally defined (added) meta data,\nThis is explicitly NOT intended for the metadata items above.\nDo NOT remove or change `_configversion`!",
