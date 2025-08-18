@@ -9,8 +9,10 @@ package ChordPro::Output::HTML;
 
 use strict;
 use warnings;
+use ChordPro::Files;
 use ChordPro::Output::Common;
 use ChordPro::Utils qw();
+use Storable 'dclone';
 
 sub generate_songbook {
     my ( $self, $sb ) = @_;
@@ -42,6 +44,7 @@ sub generate_songbook {
     \@book;
 }
 
+my $config;
 my $single_space = 0;		# suppress chords line when empty
 my $lyrics_only = 0;		# suppress all chords lines
 my $layout;
@@ -51,9 +54,17 @@ sub generate_song {
 
     my $tidy      = $::options->{tidy};
     $single_space = $::options->{'single-space'};
-    $lyrics_only  = $::config->{settings}->{'lyrics-only'};
+    $config = dclone( $s->{config} // $::config );
+    $lyrics_only  = $config->{settings}->{'lyrics-only'};
     $s->structurize;
-    $layout = Text::Layout::Text->new;
+    $layout = Text::Layout::HTML->new;
+    while ( my($k,$v) = each( %{$config->{markup}->{shortcodes}}) ) {
+	unless ( $layout->can("register_shortcode") ) {
+	    warn("Cannot register shortcodes, upgrade Text::Layout module\n");
+	    last;
+	}
+	$layout->register_shortcode( $k, $v );
+    }
 
     my @s;
 
@@ -155,7 +166,7 @@ sub generate_song {
 		}
 		if ( $e->{type} eq "svg" ) {
 		    push( @s, '<div class="' . $e->{type} . '">' );
-		    push( @s, File::LoadLines::loadlines( $e->{uri} ) );
+		    push( @s, fs_load( $e->{uri} ) );
 		    push( @s, "</div>" );
 		    push( @s, "" ) if $tidy;
 		    next;
@@ -196,6 +207,10 @@ sub generate_song {
 	    }
 	    # First shot code. Fortunately (not surprisingly :))
 	    # HTML understands most arguments.
+
+	    if ( $elt->{type} eq "image" ) {
+		$elt->{uri} //= $s->{assets}->{$elt->{id}}->{uri};
+	    }
 	    push( @s,
 		  '<div class="' . $elt->{type} . '">' .
 		  '<img src="' . $elt->{uri} . '" ' .
@@ -240,7 +255,7 @@ sub songline {
 		 '</table>' );
     }
 
-    if ( $::config->{settings}->{'chords-under'} ) {
+    if ( $config->{settings}->{'chords-under'} ) {
 	return ( '<table class="songline">',
 		 '  <tr class="lyrics">',
 		 '    ' . join( '',
@@ -346,9 +361,11 @@ sub html {
 
 # Temporary. Eventually we'll have a decent HTML backend for Text::Layout.
 
-package Text::Layout::Text;
+package Text::Layout::HTML;
 
 use parent 'Text::Layout';
+
+use ChordPro::Utils qw(fq);
 
 # Eliminate warning when HTML backend is loaded together with Text backend.
 no warnings 'redefine';
@@ -364,10 +381,17 @@ sub new {
     $self;
 }
 
+*html = \&ChordPro::Output::HTML::html;
+
 sub render {
     my ( $self ) = @_;
     my $res = "";
     foreach my $fragment ( @{ $self->{_content} } ) {
+	if ( $fragment->{type} eq 'strut' ) {
+	    next unless length($fragment->{label}//"");
+	    $res .= "<span id=\"".$fragment->{label}."\"/>";
+	    next;
+	}
 	next unless length($fragment->{text});
 	my $f = $fragment->{font} || $self->{_currentfont};
 	my @c;			# styles
@@ -394,9 +418,12 @@ sub render {
 	    push( @d, q{line-through} );
 	}
 	push( @c, "text-decoration-line:@d" ) if @d;
-	$res .= "<span style=\"" . join(";",@c) . "\">" if @c;
-	$res .= ChordPro::Output::HTML::html(ChordPro::Utils::fq($fragment->{text}));
+	my $href = $fragment->{href} // "";
+	$res .= "<a href=\"".html($href)."\">" if length($href);
+	$res .= "<span$href style=\"" . join(";",@c) . "\">" if @c;
+	$res .= html(fq($fragment->{text}));
 	$res .= "</span>" if @c;
+	$res .= "</a>" if length($href);
     }
     $res;
 }

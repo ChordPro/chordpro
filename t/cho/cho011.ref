@@ -4,12 +4,12 @@
 {define: D/F# base-fret 1 frets N N 4 2 3 2}
 {define: E/G# base-fret 1 frets 4 2 2 1 0 0}
 
-{start_of_verse: verse 1}
+{start_of_verse label="verse 1"}
  [G]This is a [Bm]funky verse in [A]D    [D/F#]
 {end_of_verse}
 
 
-{start_of_verse: verse 2}
+{start_of_verse label="verse 2"}
  [A]Now it’s a [C#m]funky verse in [B]E    [E/G#]
 {end_of_verse}
 

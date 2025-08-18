@@ -13,3 +13,12 @@ V000.200
 
 Redesign font to em 2048.
 Use Cadman font for musical symbols.
+
+V000.300
+
+
+V000.400
+
+Add arrows for grid strums.
+
+Arrow glyphs are generated from arrow*.svg files.

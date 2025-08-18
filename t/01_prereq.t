@@ -6,10 +6,10 @@ use warnings;
 use Test::More;
 
 my $pdfapi = "PDF::API2";
-my $pdfapiv = "2.036";
+my $pdfapiv = "2.045";
 
 # PDF::API2 2.036 is ok, 2.042 is better, 2.043 is best.
-for ( qw( PDF::Builder@3.023 PDF::API2@2.036 ) ) {
+for ( qw( PDF::Builder@3.025 PDF::API2@2.045 ) ) {
     ( $pdfapi, $pdfapiv ) = split( '@', $_ );
     eval "require $pdfapi" or next;
     eval '$pdfapiv = $pdfapi->VERSION($pdfapiv)' or next;
@@ -33,7 +33,7 @@ else {
     ++$test; use_ok( $pdfapi,  $pdfapiv );
     diag("Using $pdfapi $pdfapiv for PDF generation");
 }
-++$test; use_ok( "Text::Layout",   0.038 );
+++$test; use_ok( "Text::Layout",   0.045 );
 eval {
     require HarfBuzz::Shaper;
     HarfBuzz::Shaper->VERSION(0.026);
@@ -42,14 +42,14 @@ eval {
 } || diag( "Shaping disabled (HarfBuzz::Shaper not found)" );
 ++$test; use_ok( "JSON::PP",   2.27203 );
 ++$test; require_ok( "JSON::XS" ); JSON::XS->VERSION(4.03);
-++$test; use_ok( "String::Interpolate::Named", 1.030 );
+++$test; use_ok( "String::Interpolate::Named", 1.060 );
 ++$test; use_ok( "File::HomeDir", 1.004 );
-++$test; use_ok( "File::LoadLines", 1.044 );
+++$test; use_ok( "File::LoadLines", 1.047 );
 ++$test; use_ok( "SVGPDF", 0.080 );
 ++$test; use_ok( "Image::Info", 1.41 );
 ++$test; use_ok( "List::Util", 1.33 );
 ++$test; use_ok( "Storable", 3.08 );
-++$test; use_ok( "Object::Pad", 0.78 );
+++$test; use_ok( "Object::Pad", 0.818 );
 ++$test; use_ok( "JavaScript::QuickJS", 0.18 );
 
 done_testing($test);

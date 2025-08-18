@@ -50,7 +50,7 @@ sub txt2xform( $self, %args ) {
     # Text style must be one of the known styles (text, chord, comment, ...).
     my $style = delete($opts->{textstyle}) // "text";
     unless ( defined($ps->{fonts}->{$style} ) ) {
-	warn("TextBlock: Unknown font style \"$style\", using \"text\"\n");
+	warn("TextBlock: Unknown style \"$style\", using \"text\"\n");
 	$style = "text";
     }
     my $font  = $ps->{fonts}->{$style};
@@ -60,9 +60,10 @@ sub txt2xform( $self, %args ) {
     my $sp = $vsp eq "flex"
       ? ($font->{leading} || $ps->{spacing}->{$style} || 1) : $vsp;
     my $size   = fontsize( delete($opts->{textsize}), $font->{size} );
-    my $color  = delete($opts->{textcolor});
+    my $color  = delete($opts->{textcolor}) // $font->{color};
     my $flush  = delete($opts->{flush})  // "left";
     my $vflush = delete($opts->{vflush}) // "top";
+    $color = $ps->{pr}->_fgcolor($color) if $color;
 
     my $data = $elt->{data};
     if ( $color || $bgcol ) {
@@ -101,7 +102,7 @@ sub txt2xform( $self, %args ) {
     }
 
     # Correction for tight y-fit.
-    my $ycorr = ($vsp eq "flex" ? $h||$size : $size) * ($sp - 1);
+    my $ycorr = 0;#($vsp eq "flex" ? $h||$size : $size) * ($sp - 1);
 
     # Desired height (includes padding).
     if ( $height = delete($opts->{height}) ) {
@@ -120,6 +121,9 @@ sub txt2xform( $self, %args ) {
     }
     else {
 	$padding = 0;
+    }
+    if ( $::config->{debug}->{txtblk} ) {
+	warn("tb: w = $width, h = $height, p = $padding, sp = $sp, c = $ycorr\n");
     }
     # Note that the padding will be dealt with in the bbox.
 
@@ -168,7 +172,7 @@ sub txt2xform( $self, %args ) {
 
     return
       { type      => "image",
-	subtype   => "xoform",
+	subtype   => "xform",
 	line      => $elt->{line},
 	data      => $xo,
 	width     => $width  + 2*$padding,

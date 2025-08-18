@@ -11,11 +11,14 @@ SCRIPT := ${ROOT}/script
 DEST   := build
 VERSION := $(shell perl ../../lib/ChordPro/Version.pm)
 TARGET := wxchordpro
-PP := pp
+PP     := perl ./pp.pl
 # Check if we build on Intel or ARM
 ARCH   := $(shell uname -m)
 
-default : dmg
+default : checklibs dmg
+
+checklibs :
+	perl libtool.pl --checklibs
 
 # PAR Packer.
 
@@ -23,7 +26,7 @@ chordpro : chordpro.pp ${COMMON}/chordpro.pp
 	${PP} --output=chordpro @chordpro.pp ${SCRIPT}/chordpro.pl
 
 wxchordpro : chordpro.pp ${COMMON}/chordpro.pp ${COMMON}/wxchordpro.pp
-	perl wxchordpro_pp.pl > wxchordpro.pp
+	perl libtool.pl --pp=wxchordpro.pp
 	${PP} --output=wxchordpro @wxchordpro.pp ${SCRIPT}/wxchordpro.pl
 
 clean ::
@@ -89,19 +92,14 @@ app1 :
 	mkdir -p "${APPDIR}/Contents/MacOS"
 	mkdir -p "${APPDIR}/Contents/Resources/cli"
 	cp PkgInfo Info.plist "${APPDIR}/Contents"
+	perl vfix.pl "${APPDIR}/Contents/Info.plist"
 	cp *.icns "${APPDIR}/Contents/Resources"
 	cd "${APPDIR}"; mv script lib Contents/MacOS
 	cd "${APPDIR}"; mv lib*.dylib Contents/MacOS
 	cd "${APPDIR}"; rm -f MANIFEST META.yml
 ifeq (${TARGET},wxchordpro)
 	cd "${APPDIR}"; mv chordpro wxchordpro dndhandler Contents/MacOS
-	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libpng16.*.dylib
-	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libjpeg.*.dylib
-	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libtiff.*.dylib
-	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libz*.dylib
-	perl ./reloc.pl ${APPDIR}/Contents/MacOS/liblzma*.dylib
-	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libpcre2-32.*.dylib
-	perl ./reloc.pl ${APPDIR}/Contents/MacOS/libwx*.dylib
+	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*.bundle
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*/*.bundle
 	cd "${APPDIR}"; ln -s ../../MacOS/chordpro Contents/Resources/cli/chordpro
@@ -141,13 +139,11 @@ dmg1 :
 		--window-pos 200 120 \
 		--window-size 680 440 \
 		--icon-size 64 \
-		--icon "${APPDIR}" 540 75 \
+		--icon "${APPDIR}" 540 125 \
 		--hide-extension "${APPDIR}" \
-		--add-file "READ ME FIRST.html" README.html  540 175 \
+		--add-file "READ ME FIRST.html" README.html  540 250 \
 		--hide-extension "READ ME FIRST.html" \
-		--add-file "Install.zsh" Install.zsh 540 275 \
-		--hide-extension "Install.zsh" \
-		--background "${DEST}/lib/ChordPro/res/icons/chordpro-bg.png" \
+		--background "${ROOT}/lib/ChordPro/res/icons/chordpro-bg.png" \
 		"${DMGNAME}" "${APPDIR}"
 
 clean ::

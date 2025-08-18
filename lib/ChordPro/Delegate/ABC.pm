@@ -16,12 +16,11 @@ use feature qw( signatures );
 no warnings "experimental::signatures";
 use utf8;
 use Carp;
-use File::Spec;
 use File::Temp ();
 use File::LoadLines;
 use feature 'state';
-use Encode 'decode_utf8';
 
+use ChordPro::Files;
 use ChordPro::Paths;
 use ChordPro::Utils;
 use Text::ParseWords qw(shellwords);
@@ -58,7 +57,7 @@ sub abc2svg( $song, %args ) {
 	if ( ($config->{delegates}{abc}{config} // "default") ne "default" ) {
 	    warn("ABC: delegates.abc.config is no longer used.\n");
 	    warn("ABC: Config \"default.abc\" will be loaded instead.\n")
-	      if !$abc2svg->{external} && -s "default.abc";
+	      if !$abc2svg->{external} && fs_test( s => "default.abc" );
 	}
     }
 
@@ -72,21 +71,21 @@ sub abc2svg( $song, %args ) {
     }
 
     state $td = File::Temp::tempdir( CLEANUP => !$config->{debug}->{abc} );
-    my $cfg = $config->{delegates}->{abc};
+    my $cfg = { %{$config->{delegates}->{abc} } };
 
     # External tools usually process a default.abc.
     warn("ABC: Using config \"default.abc\".\n")
-      if index( $abc2svg->{method}, QUICKJSXS ) < 0 && -s "default.abc";
+      if index( $abc2svg->{method}, QUICKJSXS ) < 0 && fs_test( s => "default.abc" );
 
     my $prep = make_preprocessor( $cfg->{preprocess} );
 
     # Prepare names for temporary files.
     state $imgcnt = 0;
     $imgcnt++;
-    my $src  = File::Spec->catfile( $td, "tmp${imgcnt}.abc" );
-    my $svg  = File::Spec->catfile( $td, "tmp${imgcnt}.svg" );
-    my $out  = File::Spec->catfile( $td, "tmp${imgcnt}.out" );
-    my $err  = File::Spec->catfile( $td, "tmp${imgcnt}.err" );
+    my $src  = fn_catfile( $td, "tmp${imgcnt}.abc" );
+    my $svg  = fn_catfile( $td, "tmp${imgcnt}.svg" );
+    my $out  = fn_catfile( $td, "tmp${imgcnt}.out" );
+    my $err  = fn_catfile( $td, "tmp${imgcnt}.err" );
 
     # Get rid of as much space as possible.
     # Jean-François Moine:
@@ -106,7 +105,7 @@ sub abc2svg( $song, %args ) {
 	"%%stretchlast 0",
 	"%%trimsvg 1",
 	"%%staffsep 0",
-	@{ $cfg->{preamble} } );
+	@{ $cfg->{preamble}//[] } );
 
     for ( keys(%{$elt->{opts}}) ) {
 
@@ -147,7 +146,7 @@ sub abc2svg( $song, %args ) {
 
     # Create the temp file for the ABC source.
     my $fd;
-    unless ( open( $fd, '>:utf8', $src ) ) {
+    unless ( $fd = fs_open( $src, '>:utf8' ) ) {
 	warn("Error in ABC embedding: $src: $!\n");
 	return;
     }
@@ -159,6 +158,10 @@ sub abc2svg( $song, %args ) {
     }
     for ( @data ) {
 	$prep->{abc}->($_) if $prep->{abc};
+	print $fd $_, "\n";
+	warn($_, "\n") if DEBUG > 1;
+    }
+    for ( @{ $cfg->{postamble}//[] } ) {
 	print $fd $_, "\n";
 	warn($_, "\n") if DEBUG > 1;
     }
@@ -191,7 +194,7 @@ sub abc2svg( $song, %args ) {
 	   },
 	   loadjs    => sub {
 	       my ( $fn, $relay, $onerror ) = @_;
-	       if ( -s -r "$base/$fn" ) {
+	       if ( fs_test( sr => "$base/$fn" ) ) {
 		   $js->eval(slurp("$base/$_[0]"));
 		   $relay->() if $relay;
 	       }
@@ -213,7 +216,7 @@ sub abc2svg( $song, %args ) {
 
 	warn( "+ QuickJS_XS[", CP->display($base), "] $src\n") if DEBUG;
 	my $hooks = "$base/../hooks.js";
-	undef $hooks unless -s $hooks;
+	undef $hooks unless fs_test( s => $hooks );
 
 	eval {
 	    $js->eval( slurp("$base/abc2svg-1.js") );
@@ -237,7 +240,7 @@ sub abc2svg( $song, %args ) {
 	undef $js;
 
 	if ( DEBUG ) {
-	    open( my $fd, '>:utf8', $out );
+	    my $fd = fs_open( $out, '>:utf8' );
 	    print $fd join("\n", @lines), "\n";
 	    close($fd);
 	}
@@ -359,7 +362,7 @@ sub abc2svg( $song, %args ) {
 	open( $fd, '>:utf8', $svg );
 	print( $fd $_, "\n" ) for @data;
 	close($fd);
-	warn("SVG: ", 1+$lines, " lines (", -s $svg, " bytes)\n") if DEBUG > 1;
+	warn("SVG: ", 1+$lines, " lines (", fs_test( s => $svg ), " bytes)\n") if DEBUG > 1;
     }
 
     my $scale;
@@ -439,7 +442,8 @@ sub info {
 	if ( $handler ne "quickjs_qjs" && have_xs() ) {
 	    $info->{method} = QUICKJSXS;
 	}
-	elsif ( $handler ne "quickjs_xs" && ($exe = CP->findexe("qjs")) ) {
+	elsif ( $handler ne "quickjs_xs"
+		&& ($exe = CP->findexe("qjs", silent => 1 )) ) {
 	    $info->{method} = QUICKJS;
 	}
 	if ( $info->{method} ) {
@@ -460,7 +464,7 @@ sub info {
     }
 
     elsif ( $handler eq "abc2svg" && $ctl->{program}
-	    && ( $exe = CP->findexe($ctl->{program}) ) ) {
+	    && ( $exe = CP->findexe($ctl->{program}, silent => 1 ) ) ) {
 	$info->{handler} = $handler;
 	$info->{method} = CP->display($exe);
 	$info->{info} = $info->{method};

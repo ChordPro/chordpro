@@ -65,7 +65,9 @@ sub refresh( $self, $prefs = undef ) {
 
     Wx::Event::EVT_STC_STYLENEEDED( $stc, wxID_ANY,
 				    sub { OnStyleNeeded($self, $_[1]) } );
-
+    Wx::Event::EVT_STC_CHANGE( $stc, wxID_ANY,
+			       sub { OnChanged($self, $_[1]) } );
+    $self->SetModEventMask(0x01|0x02|0x10);
     my $theme = $state{editortheme};
     my $c = $prefs->{editcolour}{$theme};
     my $fg = Wx::Colour->new($c->{fg});
@@ -104,7 +106,6 @@ sub refresh( $self, $prefs = undef ) {
     $stc->StyleSetBackground( 7, wxRED );
 
     # For linenumbers.
-    $stc->SetMarginWidth( 0, 40 ); # TODO
     $stc->StyleSetForeground( wxSTC_STYLE_LINENUMBER,
 			      Wx::Colour->new( $c->{numfg} ) );
     $stc->StyleSetBackground( wxSTC_STYLE_LINENUMBER,
@@ -127,17 +128,35 @@ sub refresh( $self, $prefs = undef ) {
     }
 
     $self->style_text;
-
     # Expert...
     $stc->SetViewEOL( $state{vieweol} );
     $stc->SetViewWhiteSpace( $state{viewws} );
+    $stc->SetViewLineNumbers(1);
+
+    # Free Ctrl-Shift-U for iBus input (doesn't work).
+    # $stc->CmdKeyClear( ord('U'), 3 ); # Ctrl-Shift-U
+}
+
+sub SetViewLineNumbers( $self, $b ) {
+    $self->SetMarginWidth( 0, $b ? 40 : 0 ); # TODO length
+    if ( $self->can("SetMarginBackground") ) { # wxPerl 3.005
+	$self->SetMarginType( 1, wxSTC_MARGIN_SYMBOL|wxSTC_MARGIN_COLOUR );
+	$self->SetMarginWidth( 1, 3 );
+	my $theme = $state{editortheme};
+	my $c = $preferences{editcolour}{$theme};
+	my $bg = Wx::Colour->new($c->{bg});
+	$self->SetMarginBackground( 1, $bg );
+    }
+    else {
+	$self->SetMarginWidth( 1, 0 );
+    }
 }
 
 sub style_text( $self ) {
     my $stc = $self;
 
     # Scintilla uses byte indices.
-    use Encode;
+    require Encode;
     my $text  = Encode::encode_utf8($stc->GetText);
 
     my $style = sub {
@@ -151,7 +170,12 @@ sub style_text( $self ) {
 	    my $group = 0;
 	    while ( $start < $end ) {
 		my $l = length(${^CAPTURE[$group++]});
-		$stc->StartStyling( $start, 0 );
+		if ( $Wx::VERSION < 3.006 ) {
+		    $stc->StartStyling( $start, 0 );
+		}
+		else {
+		    $stc->StartStyling( $start );
+		}
 		$stc->SetStyling( $l, shift(@s) );
 		$start += $l;
 	    }
@@ -165,6 +189,12 @@ sub style_text( $self ) {
     $style->( qr/^([ \t]*)(\{)([-\w!]+)([: ])(.*)(\})/m, 7, 3, 5, 3, 6, 3 );
     # Chords.
     $style->( qr/(\[)([^\[\]\s]*)(\])/m, 3, 4, 3 );
+
+    # For later. Much later...
+    #$self->MarkerDefine($_,$_,wxGREEN,wxBLACK) for 0..31;
+    #$self->MarkerAdd( 6, 8 );
+    #$self->MarkerAdd( 7, 9 );
+    #$self->MarkerAdd( 8, 10 );
 }
 
 sub prepare_annotations( $self ) {
@@ -232,6 +262,10 @@ sub OnStyleNeeded( $self, $event ) {		# scintilla
     $self->style_text;
 }
 
+sub OnChanged( $self, $event ) {		# scintilla
+    $state{editchanged}++;
+}
+
 sub Replace( $self, $from=-1, $to=-1, $text="" ) {
     # We will only call this to replace the selection.
     $self->ReplaceSelection($text);
@@ -244,9 +278,9 @@ package ChordPro::Wx::TextEditor;
 use parent qw( -norequire Wx::TextCtrl );
 
 use Wx ':everything';
+use ChordPro::Files;
 use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
-use ChordPro::Utils qw( is_macos );
 
 sub new( $class, $parent, $id=undef ) {
 
@@ -299,6 +333,9 @@ sub SetText( $self, $text ) {
 sub SetColour( $self, $colour ) {
     $self->SetStyle( 0, $self->GetLastPosition,
 		     Wx::TextAttr->new( Wx::Colour->new($colour) ) );
+}
+
+sub SetViewLineNumbers( $self, $b ) {
 }
 
 sub EmptyUndoBuffer($self) {

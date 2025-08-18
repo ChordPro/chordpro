@@ -6,7 +6,7 @@ use utf8;
 
 package JSON::Relaxed::Parser;
 
-our $VERSION = "0.097";
+our $VERSION = "0.098";
 
 class JSON::Relaxed::Parser;
 
@@ -570,8 +570,7 @@ method is_comment_opener( $pretok ) {
     $pretok eq '//' || $pretok eq '/*';
 }
 
-sub min { $_[0] < $_[1] ? $_[0] : $_[1] }
-sub max { $_[0] > $_[1] ? $_[0] : $_[1] }
+use List::Util qw( min max uniqstr );
 
 method encode(%opts) {
     my $schema  = $opts{schema};
@@ -710,6 +709,9 @@ method encode(%opts) {
 	  ? @{ delete($rv->{" key order "}) }
 	  : sort(keys(%$rv));
 
+	# Dedup.
+	@ko = uniqstr(@ko);
+
 	my $ll = 0;
 	for ( @ko ) {
 	    # This may be wrong if \ escapes or combined keys are involved.
@@ -832,6 +834,7 @@ method encode(%opts) {
     }
 
     # Final make-up.
+    $s =~ s/^ +$//gm;
     if ( $pretty && !$level ) {
 	$s =~ s/^\n*//s;
 	$s .= "\n" if $s !~ /\n$/;

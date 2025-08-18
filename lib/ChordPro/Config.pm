@@ -14,10 +14,10 @@ use feature qw( signatures state );
 no warnings "experimental::signatures";
 
 use ChordPro;
+use ChordPro::Files;
 use ChordPro::Paths;
 use ChordPro::Utils;
-use File::LoadLines;
-use File::Spec;
+use ChordPro::Utils qw( enumerated );
 use Scalar::Util qw(reftype);
 use List::Util qw(any);
 use Storable 'dclone';
@@ -87,6 +87,12 @@ sub configurator ( $opts = undef ) {
     # Now we have a list of all config files. Weed out dups.
     for ( my $a = 0; $a < @cfg; $a++ ) {
         if ( $a && $cfg[$a]->{_src} eq $cfg[$a-1]->{_src} ) {
+	    if ( $a == $#cfg ) {
+		# If this is the last entry, splice/redo will create
+		# a new, empty entry triggering issue #550.
+		pop(@cfg);
+		last;
+	    }
             splice( @cfg, $a, 1 );
             redo;
         }
@@ -122,16 +128,43 @@ sub configurator ( $opts = undef ) {
     foreach my $new ( @cfg ) {
         my $file = $new->{_src}; # for diagnostics
         # Handle obsolete keys.
-        if ( exists $new->{pdf}->{diagramscolumn} ) {
-            $new->{pdf}->{diagrams}->{show} //= "right";
-            delete $new->{pdf}->{diagramscolumn};
+	my $ps = $new->{pdf};
+        if ( exists $ps->{diagramscolumn} ) {
+            $ps->{diagrams}->{show} //= "right";
+            delete $ps->{diagramscolumn};
             warn("$file: pdf.diagramscolumn is obsolete, use pdf.diagrams.show instead\n");
         }
-        if ( exists $new->{pdf}->{formats}->{default}->{'toc-title'} ) {
-            $new->{toc}->{title} //= $new->{pdf}->{formats}->{default}->{'toc-title'};
-            delete $new->{pdf}->{formats}->{default}->{'toc-title'};
+        if ( exists $ps->{formats}->{default}->{'toc-title'} ) {
+            $new->{toc}->{title} //= $ps->{formats}->{default}->{'toc-title'};
+            delete $ps->{formats}->{default}->{'toc-title'};
             warn("$file: pdf.formats.default.toc-title is obsolete, use toc.title instead\n");
         }
+
+	# Page controls.
+	# Check for old and newer keywords conflicts.
+	if ( $ps->{songbook}
+	     && is_hashref($ps->{songbook})
+	     && %{$ps->{songbook}} ) {
+	    # Using new style page controls.
+	    my @depr;
+	    for ( qw( front-matter back-matter sort-pages ) ) {
+		push( @depr, $_) if $ps->{$_};
+	    }
+	    push( @depr, "even-odd-songs" )
+	      if defined($ps->{'even-odd-songs'}) && $ps->{'even-odd-songs'} <= 0;
+	    push( @depr, "pagealign-songs" )
+	      if defined($ps->{'pagealign-songs'}) && $ps->{'pagealign-songs'} != 1;
+	    if ( @depr ) {
+		warn("Config \"$file\" uses \"pdf.songbook\", ignoring ",
+		     enumerated( map { qq{"pdf.$_"} } @depr ), "\n" );
+		delete $ps->{$_} for @depr;
+	    }
+	}
+	else {
+	    migrate_songbook_pagectrl( $new, $ps );
+	}
+
+	# use DDP; p $ps->{songbook}, as => "after \"$file\"";
 
         # Process.
         local $::config = dclone($cfg);
@@ -140,11 +173,15 @@ sub configurator ( $opts = undef ) {
         $cfg = hmerge( $cfg, $new );
 #	die("PANIC! Config merge error")
 #	  unless UNIVERSAL::isa( $cfg->{settings}->{strict}, 'JSON::Boolean' );
+	# use DDP; p $cfg->{pdf}->{songbook}, as => "accum after \"$file\"";
     }
 
     # Handle defines from the command line.
     # $cfg = hmerge( $cfg, prp2cfg( $options->{define}, $cfg ) );
+    # use DDP; p $options->{define}, as => "clo";
     prpadd2cfg( $cfg, %{$options->{define}} );
+    migrate_songbook_pagectrl($cfg);
+    # use DDP; p $cfg->{pdf}->{songbook}, as => "accum after clo";
 
     # Sanitize added extra entries.
     for my $format ( qw(title subtitle footer) ) {
@@ -227,9 +264,9 @@ sub configurator ( $opts = undef ) {
         $cfg->{settings}->{$_} = $options->{$_};
     }
 
-    for ( "front-matter", "back-matter" ) {
+    for ( "cover", "front-matter", "back-matter" ) {
         next unless defined $options->{$_};
-        $cfg->{pdf}->{$_} = $options->{$_};
+        $cfg->{pdf}->{songbook}->{$_} = $options->{$_};
     }
 
     if ( defined $options->{'chord-grids-sorted'} ) {
@@ -268,10 +305,9 @@ sub get_config ( $file ) {
     $file = expand_tilde($file);
 
     if ( $file =~ /\.json$/i ) {
-        if ( open( my $fd, "<:raw", $file ) ) {
-            my $new = json_load( loadlines( $fd, { split => 0 } ), $file );
+        if ( my $lines = fs_load( $file, { split => 1, fail => "soft" } ) ) {
+            my $new = json_load( join( "\n", @$lines, '' ), $file );
             precheck( $new, $file );
-            close($fd);
             return __PACKAGE__->new($new);
         }
         else {
@@ -279,7 +315,7 @@ sub get_config ( $file ) {
         }
     }
     elsif ( $file =~ /\.prp$/i ) {
-        if ( -e -f -r $file ) {
+        if ( fs_test( efr => $file ) ) {
             require ChordPro::Config::Properties;
             my $cfg = Data::Properties->new;
             $cfg->parse_file($file);
@@ -301,16 +337,16 @@ sub prep_configs ( $cfg, $src ) {
     my @res;
 
     # If there are includes, add them first.
-    my ( $vol, $dir, undef ) = File::Spec->splitpath($cfg->{_src});
+    my ( $vol, $dir, undef ) = fn_splitpath($cfg->{_src});
     foreach my $c ( @{ $cfg->{include} } ) {
         # Check for resource names.
         if ( $c !~ m;[/.]; ) {
             $c = CP->findcfg($c);
         }
         elsif ( $dir ne ""
-                && !File::Spec->file_name_is_absolute($c) ) {
+                && !fn_is_absolute($c) ) {
             # Prepend dir of the caller, if needed.
-            $c = File::Spec->catpath( $vol, $dir, $c );
+            $c = fn_catpath( $vol, $dir, $c );
         }
         my $cfg = get_config($c);
         # Recurse.
@@ -372,12 +408,28 @@ sub expand_font_shortcuts ( $cfg ) {
 	next if ref($cfg->{pdf}->{fonts}->{$f}) eq 'HASH';
 	for ( $cfg->{pdf}->{fonts}->{$f} ) {
 	    my $v = $_;
+	    $v =~ s/\s*;\s*$//;
 	    my $i = {};
+
+	    # Break out ;xx=yy properties.
+	    while ( $v =~ s/\s*;\s*(\w+)\s*=\s*(.*?)\s*(;|$)/$3/ ) {
+		my ( $k, $v ) = ( $1, $2 );
+		if ( $k =~ /^(colou?r|background|frame|numbercolou?r|size)$/ ) {
+		    $k =~ s/colour/color/;
+		    $v =~ s/^(['"]?)(.*)\1$/$2/;
+		    $i->{$k} = $v;
+		}
+		else {
+		    warn("Unknown font property: $k (ignored)\n");
+		}
+	    }
+
 	    # Break out size.
-	    if ( $v =~ /(.*?)(?:\s+(\d+(?:\.\d+)?))?$/ ) {
-		$i->{size} = $2 if $2;
+	    if ( $v =~ /(.*?)(?:\s+(\d+(?:\.\d+)?))?\s*(?:;|$)/ ) {
+		$i->{size} //= $2 if $2;
 		$v = $1;
 	    }
+
 	    # Check for filename.
 	    if ( $v =~ /^.*\.(ttf|otf)$/i ) {
 		$i->{file} = $v;
@@ -457,6 +509,61 @@ sub simplify_fonts( $cfg ) {
     }
 }
 
+sub migrate_songbook_pagectrl( $self, $ps = undef ) {
+
+    # Migrate old to new.
+    $ps //= $self->{pdf};
+    my $sb = $ps->{songbook} // {};
+    for ( qw( front-matter back-matter ) ) {
+	$sb->{$_} = delete($ps->{$_}) if $ps->{$_};
+    }
+    for ( $ps->{'even-odd-pages'} ) {
+	next unless defined;
+	$sb->{'dual-pages'} = !!$_;
+	$sb->{'align-songs-spread'} = 1 if $_ < 0;
+    }
+    for ( $ps->{'pagealign-songs'} ) {
+	next unless defined;
+	$sb->{'align-songs'} = !!$_;
+	$sb->{'align-songs-extend'} = $_ > 1;
+    }
+    for ( $ps->{'sort-pages'} ) {
+	next unless defined;
+	my $a = $_;
+	$a =~ s/\s+//g;
+	my ( $sort, $desc, $spread, $compact );
+	$sort = $desc = "";
+	for ( split( /,/, lc $a ) ) {
+	    if ( $_ eq "title" ) {
+		$sort = "title";
+	    }
+	    elsif ( $_ eq "subtitle" ) {
+		$sort //= "subtitle";
+	    }
+	    elsif ( $_ eq "2page" ) {
+		$spread++;
+	    }
+	    elsif ( $_ eq "desc" ) {
+		$desc = "-";
+	    }
+	    elsif ( $_ eq "compact" ) {
+		$compact++;
+	    }
+	    else {
+		warn("??? \"$_\"\n");
+	    }
+	}
+	$sb->{'sort-songs'} = "${desc}${sort}";
+	$sb->{'compact-songs'} = 1 if $compact;
+	$sb->{'align-songs-spread'} = 1 if $spread;
+    }
+    $ps->{songbook} = $sb;
+    # Remove the obsoleted entries.
+    delete( $ps->{$_} )
+      for qw( even-odd-pages sort-pages pagealign-songs );
+
+}
+
 sub config_final ( %args ) {
     my $delta   = $args{delta} || 0;
     my $default = $args{default} || 0;
@@ -505,7 +612,7 @@ sub config_final ( %args ) {
     # Load schema.
     my $schema = do {
 	my $schema = CP->findres( "config.schema", class => "config" );
-	my $data = loadlines( $schema, { split => 0 } );
+	my $data = fs_load( $schema, { split => 0 } );
 	$parser->decode($data);
     };
 
@@ -519,7 +626,7 @@ sub config_final ( %args ) {
 
     my $config = do {
 	my $config = CP->findres( "chordpro.json", class => "config" );
-	my $data = loadlines( $config, { split => 0 } );
+	my $data = fs_load( $config, { split => 0 } );
 	$parser->decode($data);
     };
 
@@ -538,15 +645,16 @@ sub convert_config ( $from, $to ) {
     # First find and process the schema.
     my $schema = CP->findres( "config.schema", class => "config" );
     my $o = { split => 0, fail => 'soft' };
-    my $data = loadlines( $schema, $o );
+    my $data = fs_load( $schema, $o );
     die("$schema: ", $o->{error}, "\n") if $o->{error};
     $schema = $parser->decode($data);
 
     # Then load the config to be converted.
     my $new;
-    $o = { split => 0, fail => 'soft' };
-    $data = loadlines( $from, $o );
+    $o = { split => 1, fail => 'soft' };
+    $data = fs_load( $from, $o );
     die("Cannot open config $from [", $o->{error}, "]\n") if $o->{error};
+    $data = join( "\n", @$data );
 
     if ( $data =~ /^\s*#/m ) {	# #-comments -> prp
 	require ChordPro::Config::Properties;
@@ -561,7 +669,7 @@ sub convert_config ( $from, $to ) {
     # And re-encode it using the schema.
     my $res = $parser->encode( data => $new, pretty => 1,
 			       nounicodeescapes => 1, schema => $schema );
-
+    # use DDP; p $res;
     # Add trailer.
     $res .= "\n// End of Config.\n";
 
@@ -652,7 +760,8 @@ sub _augment ( $self, $hash, $path ) {
           unless exists $self->{$key}
             || $path =~ /^pdf\.(?:info|fonts|fontconfig)\./
             || $path =~ /^pdf\.formats\.\w+-even\./
-            || $path =~ /^meta\./
+            || $path =~ /^(meta|gridstrum\.symbols)\./
+            || $path =~ /^markup\.shortcodes\./
             || $key =~ /^_/;
 
         # Hash -> Hash.
@@ -888,9 +997,11 @@ sub hmerge( $left, $right, $path = "" ) {
             || $path eq "pdf.fontconfig."
             || $path =~ /^pdf\.(?:info|fonts)\./
             || $path =~ /^pdf\.formats\.\w+-even\./
-            || $path =~ /^meta\./
+            || ( $path =~ /^pdf\.formats\./ && $key =~ /\w+-even$/ )
+            || $path =~ /^(meta|gridstrum\.symbols)\./
             || $path =~ /^delegates\./
             || $path =~ /^parser\.preprocess\./
+            || $path =~ /^markup\.shortcodes\./
             || $path =~ /^debug\./
             || $key =~ /^_/;
 

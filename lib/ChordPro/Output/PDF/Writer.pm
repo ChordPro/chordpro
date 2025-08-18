@@ -8,17 +8,17 @@ package ChordPro::Output::PDF::Writer;
 
 use strict;
 use warnings;
-use Encode;
 use Text::Layout;
 use IO::String;
 use Carp;
 use utf8;
 
+use ChordPro::Files;
 use ChordPro::Paths;
-use ChordPro::Utils qw( expand_tilde demarkup min is_corefont );
+use ChordPro::Utils qw( expand_tilde demarkup min is_corefont maybe is_true is_odd );
 use ChordPro::Output::Common qw( fmt_subst prep_outlines );
-use File::LoadLines qw(loadlines);
-use Ref::Util qw( is_hashref );
+use Ref::Util qw( is_arrayref is_hashref );
+use feature 'state';
 
 # For regression testing, run perl with PERL_HASH_SEED set to zero.
 # This eliminates the arbitrary order of font definitions and triggers
@@ -39,18 +39,46 @@ sub new {
     $self->{layout} = Text::Layout->new( $self->{pdf} );
     $self->{tmplayout} = undef;
 
-    # Patches and enhancements to PDF library.
     no strict 'refs';
+    # Patches and enhancements to PDF library.
     *{$pdfapi . '::Resource::XObject::Form::width' } = \&_xo_width;
     *{$pdfapi . '::Resource::XObject::Form::height'} = \&_xo_height;
+
     if ( $pdfapi eq 'PDF::API2' ) {
+	my $apiversion = ${$pdfapi . '::VERSION'};
 	no warnings 'redefine';
-	*{$pdfapi . '::_is_date'} = sub { 1 };
+
+	# Fix date validation.
+	*{$pdfapi . '::_is_date'} = sub { 1 }
+	  if $apiversion < 2.045;
+
+	# Enhanced version that allows named destinations.
+	eval "use $pdfapi" . "::Annotation";
+	*{$pdfapi . '::Annotation::pdf'     } = \&pdfapi_annotation_pdf
+	  if $apiversion < 999; # no milestone yet
+
+	# Enhanced version that doesn't blow up.
+	eval "use $pdfapi" . "::Basic::PDF::Array";
+	*{$pdfapi . '::Basic::PDF::Array::outobjdeep' } = \&pdfapi_outobjdeep
+	  if $apiversion < 999; # no milestone yet
     }
+    elsif ( $pdfapi eq 'PDF::Builder' ) {
+	my $apiversion = ${$pdfapi . '::VERSION'};
+	no warnings 'redefine';
+
+	# Enhanced version that allows named destinations.
+	eval "use $pdfapi" . "::Annotation";
+	*{$pdfapi . '::Annotation::pdf'     } = \&pdfapi_annotation_pdf
+	  if $apiversion < 999; # no milestone yet
+    }
+
+    # Text::Layout hooks.
+    *{$pdfapi . '::named_dest_register' } = \&pdfapi_named_dest_register;
+    *{$pdfapi . '::named_dest_fiddle'   } = \&pdfapi_named_dest_fiddle;
 
     %fontcache = ();
 
-    $self;
+    $self->{pdf}->{_pr} = $self;
 }
 
 sub info {
@@ -78,9 +106,18 @@ sub pdf_date {
     $t ||= $regtest ? $faketime : time;
 
     use POSIX qw( strftime );
-    my $r = strftime( "%Y%m%d%H%M%S%z", localtime($t) );
-    # Don't use s///r to keep PERL_MIN_VERSION low.
-    $r =~ s/(..)$/'$1'/;	# +0100 -> +01'00'
+    my $r;
+    if ( is_msw && $] < 5.040 ) {
+	# Work around a bug in older strftime.
+	my @tm = gmtime($t);
+	$r = sprintf( "%04d%02d%02d%02d%02d%02d+00'00'",
+		      1900+$tm[5], @tm[4,3,2,1,0] );
+    }
+    else {
+	$r = strftime( "%Y%m%d%H%M%S%z", localtime($t) );
+	# Don't use s///r to keep PERL_MIN_VERSION low.
+	$r =~ s/(..)$/'$1'/;	# +0100 -> +01'00'
+    }
     $r;
 }
 
@@ -141,13 +178,19 @@ sub fix_musicsyms {
 	if ( /♯/ ) {
 	    unless ( $font->{has_sharp} //=
 		     $font->{fd}->{font}->glyphByUni(ord("♯")) ne ".notdef" ) {
-		s;♯;<span font="chordprosymbols">#</span>;g;
+		s;♯;<sym sharp/>;g;
 	    }
 	}
 	if ( /♭/ ) {
 	    unless ( $font->{has_flat} //=
 		     $font->{fd}->{font}->glyphByUni(ord("♭")) ne ".notdef" ) {
-		s;♭;<span font="chordprosymbols">!</span>;g;
+		s;♭;<sym flat/>;g;
+	    }
+	}
+	if ( /Δ/ ) {
+	    unless ( $font->{has_delta} //=
+		     $font->{fd}->{font}->glyphByUni(ord("Δ")) ne ".notdef" ) {
+		s;Δ;<sym delta/>;g;
 	    }
 	}
     }
@@ -216,12 +259,23 @@ sub setfont {
     $self->{pdftext}->font( $font->{fd}->{font}, $size );
 }
 
+sub font_bl {
+    my ( $self, $font ) = @_;
+#    $font->{size} / ( 1 - $font->{fd}->{font}->descender / $font->{fd}->{font}->ascender );
+    $font->{size} * $font->{fd}->{font}->ascender / 1000;
+}
+
+sub font_ul {
+    my ( $self, $font ) = @_;
+    $font->{fd}->{font}->underlineposition / 1024 * $font->{size};
+}
+
 sub strwidth {
     my ( $self, $text, $font, $size ) = @_;
     $font ||= $self->{font};
     $text = fix_musicsyms( $text, $font );
     $size ||= $self->{fontsize} || $font->{size};
-    $self->{tmplayout} //= Text::Layout->new( $self->{pdf} );
+    $self->{tmplayout} //= $self->{layout}->copy;
     $self->{tmplayout}->set_font_description($font->{fd});
     $self->{tmplayout}->set_font_size($size);
     $self->{tmplayout}->set_markup($text);
@@ -234,7 +288,7 @@ sub strheight {
     $font ||= $self->{font};
     $text = fix_musicsyms( $text, $font );
     $size ||= $self->{fontsize} || $font->{size};
-    $self->{tmplayout} //= Text::Layout->new( $self->{pdf} );
+    $self->{tmplayout} //= $self->{layout}->copy;
     $self->{tmplayout}->set_font_description($font->{fd});
     $self->{tmplayout}->set_font_size($size);
     $self->{tmplayout}->set_markup($text);
@@ -446,12 +500,33 @@ sub add_object {
     }
 
     if ( $options{border} ) {
-	my $bc = $options{"bordercolor"} || $options{"color"};
+	my $bc = $self->_fgcolor($options{"bordercolor"} || $options{"color"});
+	my $lw = $options{border};
+
+	# Selective parts, Top Right Bottom Left.
+	my $trbl = lc( $options{bordertrbl} // "trbl" );
+	unless ( $trbl =~ /^[trbl]*$/ ) {
+	    warn("Image with invalid bordertrbl ($trbl)\n");
+	    $trbl = "trbl";
+	}
 	$gfx->stroke_color($bc) if $bc;
-	$gfx->rectangle( $x, $y, $x+$w, $y+$h )
-	  ->line_width( $options{border} )
-	    ->stroke;
+	if (    $trbl =~ /t/ && $trbl =~ /r/
+	     && $trbl =~ /b/ && $trbl =~ /l/ ) {	# full rect
+	    $gfx->rectangle( $x, $y, $x+$w, $y+$h )
+	      ->line_width($lw)
+	      ->stroke;
+	}
+	elsif ( $trbl ) {
+	    # Projecting square cap.
+	    $gfx->line_width($lw)->line_cap(2);
+	    $gfx->move( $x,    $y )->vline( $y+$h ) if $trbl =~ /l/;
+	    $gfx->move( $x,    $y )->hline( $x+$w ) if $trbl =~ /b/;
+	    $gfx->move( $x+$w, $y )->vline( $y+$h ) if $trbl =~ /r/;
+	    $gfx->move( $x, $y+$h )->hline( $x+$w ) if $trbl =~ /t/;
+	    $gfx->stroke;
+	}
     }
+
     if ( $options{href} ) {
 	my $a = $gfx->{' apipage'}->annotation;
 	$a->url( $options{href}, -rect => [ $x, $y, $x+$w, $y+$h ] );
@@ -482,16 +557,19 @@ sub crosshairs {
 }
 
 sub add_image {
-    my ( $self, $img, $x, $y, $w, $h, $border ) = @_;
+    my ( $self, $img, $x, $y, $w, $h,
+	 $border, $trbl ) = @_;
     $self->add_object( $img, $x, $y,
 		       xscale => $w/$img->width,
 		       yscale => $h/$img->height,
 		       valign => "bottom",
-		       $border ? ( border => $border ) : () );
+		       maybe border     => $border,
+		       maybe bordertrbl => $trbl );
 }
 
 sub newpage {
-    my ( $self, $ps, $page ) = @_;
+    my ( $self, $page ) = @_;
+    my $ps = $self->{ps};
     #$self->{pdftext}->textend if $self->{pdftext};
     $page ||= 0;
 
@@ -518,8 +596,66 @@ sub newpage {
     }
 }
 
+# Align.
+# Ordinal page numbers start with 1.
+# Assuming the next page to be written is $page, do we need
+# to insert alignment pages?
+# If so, insert them, and return the number of pages inserted (zero or one).
+# Alignment is to an odd page, except for the back matter, whose
+# final page must be even.
+
+sub page_align {
+    my ( $self, $pagectrl, $part, $page, $even ) = @_;
+    my $ret = $self->_page_align( $pagectrl, $part, $page, $even );
+    warn( "ALIGN( $part, page $page, ",
+	  defined($even) ? "even $even, " : "",
+	  ChordPro::Output::PDF::pagectrl_msg($pagectrl),
+	  " ) -> $ret\n")
+      if exists($::config->{debug}->{pagealign})
+      && $::config->{debug}->{pagealign};
+    return $ret;
+}
+
+sub _page_align {
+    my ( $self, $pagectrl, $part, $page, $even ) = @_;
+    $even ||= 0;
+
+    # Only align to odd pages.
+    return 0 if $even xor is_odd($page);	# already odd/even
+    return 0 unless $pagectrl->{dual_pages};	# no alignment
+    return 0 unless $pagectrl->{align_songs};	# no alignment
+
+    use List::Util 'shuffle';
+    my $ps = $self->{ps};
+    my $bg;
+    my $ffile;
+    my $filler;
+    if ( ($bg = $ps->{formats}->{filler}->{background})
+	 &&
+	 ( $ffile = expand_tilde($bg) )
+	 &&
+	 ( $filler = $self->{pdfapi}->open($ffile) )
+       ) {
+	state $file = "";
+	state @pages;
+	if ( $file ne $ffile || !@pages ) {
+	    $file = $ffile;
+	    # Try to make it reproducible.
+	    local $ENV{PERL_HASH_SEED} = 0x12a02ab;
+	    srand();
+	    @pages = shuffle( 1..$filler->pages );
+	}
+	# Pick a random page.
+	$self->{pdf}->import_page( $filler, shift(@pages), $page );
+    }
+    else {
+	$self->newpage($page);
+    }
+    return 1;		# number of pages added
+}
+
 sub openpage {
-    my ( $self, $ps, $page ) = @_;
+    my ( $self, $page ) = @_;
     $self->{pdfpage} = $self->{pdf}->openpage($page);
     confess("Fatal: Page $page not found.") unless $self->{pdfpage};
     $self->{pdfgfx}  = $self->{pdfpage}->gfx;
@@ -548,8 +684,9 @@ sub importfile {
 }
 
 sub pagelabel {
-    my ( $self, $page, $style, $prefix ) = @_;
+    my ( $self, $page, $style, $prefix, $start ) = @_;
     $style //= 'arabic';
+    $start //= 1;
 
     # PDF::API2 2.042 has some incompatible changes...
     my $c = $self->{pdf}->can("page_labels");
@@ -559,20 +696,20 @@ sub pagelabel {
                               $style eq 'Alpha' ? 'A' :
                               $style eq 'alpha' ? 'a' : 'D',
 		     defined $prefix ? ( prefix => $prefix ) : (),
-		     start => 1 };
+		     start => $start };
 	$c->( $self->{pdf}, $page+1, %$opts );
     }
     else {
 	my $opts = { -style => $style,
 		     defined $prefix ? ( -prefix => $prefix ) : (),
-		     -start => 1 };
+		     -start => $start };
 	$self->{pdf}->pageLabel( $page, $opts );
     }
 }
 
 sub make_outlines {
-    my ( $self, $book, $start ) = @_;
-    return unless $book && @$book; # unlikely
+    my ( $self, $bk, $start ) = @_;
+    return unless $bk && @$bk; # unlikely
 
     my $pdf = $self->{pdf};
     $start--;			# 1-relative
@@ -580,7 +717,22 @@ sub make_outlines {
 
     # Process outline defs from config.
     foreach my $ctl ( @{ $self->{ps}->{outlines} } ) {
-	my $book = prep_outlines( $book, $ctl );
+	next if is_true( $ctl->{omit} // 0 );
+	my $book;
+
+	if ( @{$ctl->{fields}} == 1 && $ctl->{fields}->[0] eq "bookmark" ) {
+	    my @book;
+	    while ( my ($k,$v) = each %{$self->{ps}->{pr}->{_nd}} ) {
+		push( @book,
+		      [ $k =~ s/^song_([0-9]+)$/sprintf("song_%06d",$1)/er,
+			{ meta => { tocpage => $v,
+				    bookmark => $k } } ] );
+	    }
+	    $book = [ sort { $a->[0] cmp $b->[0] }  @book ];
+	}
+	else {
+	    $book = prep_outlines( $bk, $ctl );
+	}
 	next unless @$book;
 
 	# Seems not to matter whether we re-use the root or create new.
@@ -629,12 +781,10 @@ sub make_outlines {
 		    my $ol = $cur_ol->outline;
 		    # Display info.
 		    $ol->title( demarkup( fmt_subst( $song, $ctl->{line} ) ) );
-		    if ( my $c = $ol->can("destination") ) {
-			$c->( $ol, $pdf->openpage( $song->{meta}->{tocpage} + $start ) );
-		    }
-		    else {
-			$ol->dest($pdf->openpage( $song->{meta}->{tocpage} + $start ));
-		    }
+		    my $p = $song->{meta}->{tocpage};
+		    $p = $pdf->openpage( $p + $start ) unless ref($p);
+		    my $c = $ol->can("destination") // $ol->can("dest");
+		    $ol->$c($p);
 		}
 	    }
 	}
@@ -649,22 +799,54 @@ sub make_outlines {
 		my $ol = $outline->outline;
 		# Display info.
 		$ol->title( demarkup( fmt_subst( $song, $ctl->{line} ) ) );
-		if ( my $c = $ol->can("destination") ) {
-		    $c->( $ol, $pdf->openpage( $song->{meta}->{tocpage} + $start ) );
-		}
-		else {
-		    $ol->dest($pdf->openpage( $song->{meta}->{tocpage} + $start ));
-		}
+		my $p = $song->{meta}->{tocpage};
+		$p = $pdf->openpage( $p + $start ) unless ref($p);
+		my $c = $ol->can("destination") // $ol->can("dest");
+		$ol->$c($p);
 	    }
 	}
     }
+
+=for xxx
+
+    # Add bookmarks.
+    my $outline = $ol_root->outline;
+    $outline->title("Bookmarks");
+    $outline->closed;
+
+    my @tops =
+      map  { $_->[0] }
+      sort { $a->[1] cmp $b->[1] }
+      map  { [ $_ => s/^song_([0-9]+)$/sprintf("song_%06d",$1)/er ] }
+      grep { ! /^(?:cover|front|toc|back)$/ }
+      keys %{ $self->{_nd} };
+
+    for ( "cover", "front", "toc", @tops, "back" ) {
+	next unless my $p = $self->{_nd}->{$_};
+	my $ol = $outline->outline;
+	$ol->title($_);
+	if ( my $c = $ol->can("destination") ) {
+	    $c->( $ol, $p );
+	}
+	else {
+	    $ol->dest($p);
+	}
+    }
+
+=cut
+
 }
 
 sub finish {
     my ( $self, $file ) = @_;
 
+    ::dump($self->{pdf}->{pagestack})
+      if $::config->{debug}->{pages} & 0x04;
+
     if ( $file && $file ne "-" ) {
-	$self->{pdf}->saveas($file);
+	my $fd = fs_open( $file, '>:raw' );
+	print $fd $self->{pdf}->stringify;
+	close($fd);
     }
     else {
 	binmode(STDOUT);
@@ -688,7 +870,7 @@ sub init_fonts {
     for my $fontdir ( @d ) {
 	next unless $fontdir;
 	$fontdir = expand_tilde($fontdir);
-	if ( -d $fontdir ) {
+	if ( fs_test( d => $fontdir ) ) {
 	    $self->{pdfapi}->can("addFontDirs")->($fontdir);
 	    $fc->add_fontdirs($fontdir);
 	    push( @dirs, $fontdir );
@@ -725,7 +907,7 @@ sub init_fonts {
 			       FreeMonoBold.ttf
 			       FreeMonoOblique.ttf
 			    ) ) {
-		$have = 0, last unless -f -s "$dir/$font";;
+		$have = 0, last unless fs_test( fs => "$dir/$font" );
 	    }
 	    $remap = "free", last if $have;
 	}
@@ -832,8 +1014,7 @@ sub show_vpos {
 
 sub embed {
     my ( $self, $file ) = @_;
-    $file = encode_utf8($file);
-    return unless -f $file;
+    return unless fs_test( 'f', $file );
 
     # Borrow some routines from PDF Api.
     *PDFNum = \&{$self->{pdfapi} . '::Basic::PDF::Utils::PDFNum'};
@@ -843,7 +1024,7 @@ sub embed {
     # Apparently the 'hidden' flag does not hide it completely,
     # so give it a rect outside the page.
     my $a = $self->{pdfpage}->annotation();
-    $a->text( loadlines( $file, { split => 0 } ),
+    $a->text( fs_load( $file, { fail => "soft", split => 0 } ),
 	      -open => 0, -rect => [0,0,-1,-1] );
     $a->{T} = PDFStr("ChordProSong");
     $a->{F} = PDFNum(2);		# hidden
@@ -868,6 +1049,91 @@ sub embed {
 	      -open => 0, -rect => [0,0,-1,-1] );
     $a->{T} = PDFStr("ChordProCall");
     $a->{F} = PDFNum(2);		# hidden
+}
+
+# Add a Named Destination.
+
+sub named_dest {
+    my ( $self, $name, $page ) = @_;
+    $name = $name->[-1] if is_arrayref($name);
+    my $pdf = $self->{pdf};
+    my $nd = ref($pdf) . '::NamedDestination';
+    my $dest = $nd->new($pdf);
+    $dest->goto( $page, xyz => (undef,undef,undef) );
+    $pdf->named_destination( 'Dests', $name, $dest );
+    $pdf->named_dest_register( $name, $page );
+}
+
+sub pdfapi_named_dest_register {
+    my ( $self, $name, $page ) = @_;
+    Carp::cluck("Undef \$name in pdfapi_named_dest_register")
+	unless defined $name;
+    $self->{_pr}->{_nd}->{$name} = $page;
+}
+
+sub pdfapi_named_dest_fiddle {
+    my ( $self, $name ) = @_;
+    $name eq 'top' ? $self->{_pr}->{bookmark} : $name;
+}
+
+# Enhanced version that allows named destinations.
+sub pdfapi_annotation_pdf {
+    package PDF::API2;
+    my $self = shift();
+    my $file = shift();
+    my $dest = shift();
+    my $location;
+    my @args;
+
+    # Deprecated options
+    my %options;
+    if ($_[0] and $_[0] =~ /^-/) {
+        %options = @_;
+    }
+    else {
+        $location = shift();
+        @args = @_;
+    }
+
+    $self->{'Subtype'}  = PDFName('Link');
+    $self->{'A'}        = PDFDict();
+    $self->{'A'}->{'S'} = PDFName('GoToR');
+    $self->{'A'}->{'F'} = PDFStr($file);
+
+    unless (%options) {
+	if ( $dest =~ /^\/(.+)/ ) { # named dest
+	    $self->{'A'}->{'D'} = PDFName($1);
+	}
+	else {
+	    my $destination = PDFNum($dest);
+	    $self->{'A'}->{'D'} = _destination($destination, $location, @args);
+	}
+    }
+    else {
+        # Deprecated
+        $self->dest(PDFNum($dest), %options);
+        $self->rect(@{$options{'-rect'}})     if defined $options{'-rect'};
+        $self->border(@{$options{'-border'}}) if defined $options{'-border'};
+    }
+
+    return $self;
+}
+
+# Prevent from blowing up.
+sub pdfapi_outobjdeep {
+    my ( $self, $fh, $pdf ) = @_;
+
+    $fh->print('[ ');
+    foreach my $obj (@{$self->{' val'}}) {
+	# if no graphics object (page->gfx), creates an invalid Contents object
+	# (unblessed HASH containing no keys) for this page's graphics, and
+	# this function blows up
+        if ($obj !~ /^PDF::API2/) { next; }
+
+        $obj->outobj($fh, $pdf);
+        $fh->print(' ');
+    }
+    $fh->print(']');
 }
 
 1;

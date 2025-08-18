@@ -11,8 +11,6 @@
 --module=ChordPro::Wx::FileDirPickerCtrl
 --module=ChordPro::Wx::Main
 --module=ChordPro::Wx::Main_wxg
---module=ChordPro::Wx::NewSongDialog
---module=ChordPro::Wx::NewSongDialog_wxg
 --module=ChordPro::Wx::PanelRole
 --module=ChordPro::Wx::SettingsDialog
 --module=ChordPro::Wx::SettingsDialog_wxg

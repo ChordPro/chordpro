@@ -5,11 +5,15 @@ description: "Configuration for PDF output"
 
 # Configuration for PDF output
 
-Definitions for PDF output are stored in the configuration under the key `"pdf"`.
+Definitions for PDF output are stored in the configuration under the
+key `"pdf"`. For example, when setting `papersize` to `a4`, this really means
 
-    // ... generic part ...
+    pdf.papersize: a4
+
+or
+
     pdf {
-        // ... layout definitions ...
+        papersize: "a4"
     }
 
 Topics in this document:
@@ -261,15 +265,29 @@ shown if `fingers` is true.
       hspace   :  3.95,   // horizontal space between, fraction of width
       vspace   :  3,      // vertical space between, fraction of height
       dotsize  :  0.8,    // of a cell
+      barstyle :  line    // or arc
       barwidth :  0.8,    // of a dot
       fingers  :  true,   // show fingering if available (or "below")
+      fretbasetext : %s   // Text to show the fret base
+      fretbaseposition : left   // Position for the fret base
     },
 
 With the above settings, chord diagrams will look like:
 
 ![]({{< asset "images/ex_chords.png" >}})
 
-An example of `"show":"right"`, where the chord diagrams are placed in a
+With
+
+      barstyle :  arc
+      fretbasetext : "fr.%s"     // Text to show the fret base
+      fretbaseposition : right   // Position for the fret base
+      fingers  :  below,         // show fingering below
+
+it looks like
+
+![]({{< asset "images/ex_chords_arc.png" >}})
+
+An example of `show:right`, where the chord diagrams are placed in a
 separate column at the right of the lyrics instead of at the end of
 the song.
 
@@ -279,7 +297,7 @@ The `align` property is ignored for `show:right`.
 
 `show:bottom` left aligns to the label margin, if any.
 
-Note that command line option `--lyricsonly` implies `"show":false`
+Note that command line option `--lyricsonly` implies `show:false`
 for diagrams.
 
 ## Keyboard diagrams
@@ -357,64 +375,169 @@ Properties for the lines of grid sections.
 Note that command line option `--lyricsonly` implies `"show":false`
 for grids.
 
-## Even/odd page printing
+## Songbook pages
 
-Pages can be printed neutrally (all pages the same) or with differing left and right pages.  
-This affects the page titles and footers, and the page margins.
+### Songbook parts
 
-    even-odd-pages : 1
+The PDF output of the songbook may contain the following parts:
 
-The default value is `1`, which means that the first page is right, the second page is left, and so on.  
-The value `-1` means the first page is left, the second page is right, and so
-on.  
-The value `0` makes all pages the same (left).
+1. One or more _cover_ pages (optional)
+2. One or more _front matter_ pages (optional)
+3. One or more _tables of contents_ (optional)
+4. The songs
+5. One or more _back matter_ pages (optional)
 
-The setting of `even-off-pages` affects content items cover page (if
-any), table of contents (if any) and the songbook. These content items
-will start on a right page (`even-odd-pages` = `1`) or a left page
-(`even-odd-pages` = `-1`).
+The PDF is designed to be printed as a book with facing (left and
+right) pages. As is conventional for printed materials, each part
+starts at a right page, with the exception of the back matter that
+_ends_ on a left page.
 
-The setting of `pagealign-songs` controls whether each *song* starts on
-an even or odd page as well.
+![]({{< asset "images/dualpages.jpg" >}})
 
-    pagealign-songs : 1
+### Cover, front and back matter
 
-With a value greater than `1`, ChordPro will additionally force the
-resultant PDF to always have an even number of pages.
+Cover, front matter and back matter are separate PDF documents that
+are included. They can be specified in the config file.
 
-Note that with `pagealign-songs` = 1 empty (blank) pages are inserted
-(as conventional in book printing), while with `pagealign-songs` > 1
-the empty pages have headings and footers.
+    // PDF file to add as cover page.
+	songbook.cover : ""
+    // PDF file to add as front matter.
+	songbook.front-matter : ""
+    // PDF file to add as back matter.
+    songbook.back-matter : ""
 
-## Page reordering
+The value should be the name of a PDF file.
+This document is prepended (for back matter, appended) to the
+songbook.
 
-Pages can be reordered based on the song title or subtitle.
+Cover, front matter and back matter can be overridden with command
+line options.
+
+### Page numbering basics
+
+Pages in the PDF output of the songbook are numbered sequentially,
+each with an _ordinal number_. The ordinal number of the first page is
+`1`, the third `3` _etc._, so these are 'odd' pages, because their
+ordinal number is odd. Similarly, the second (`2`) and fourth (`4`)
+ordinal pages are 'even'.
+
+The _page number_ is what gets displayed on the page, and usually
+differs from the ordinal number. Contents pages use lower-case Roman
+page numbers, such as `i`, `ii`, `iii`. Song pages then use Arabic
+page numbers, such as `1`, `2`, `3`, usually starting at `1`. So, for
+example, if a songbook has four pages of Contents, the first song will
+then have an _ordinal_ number of `5`, but a _page number_ of `1`.
+
+### Dual page settings
+
+ChordPro can produce PDF documents with single-page layout (all pages
+the same) or with dual layout (different left and right pages).
+
+    songbook.dual-pages : true
+
+The default value is `true`, to use dual page layout. A value of
+`false` means a single-page layout is used for all pages.
+
+In dual page printing, pages with odd ordinal numbers fall on the
+right, so they use margins and headers/footer settings for right-hand
+(default) pages. Even-numbered pages use a different layout – either
+mirroring the right page margins and headers/footers, or applying
+custom settings for even pages.
+
+In single-page layout (`songbook.dual-pages : false`), all pages use
+the default (right) page layout for margins and headers/footers.
+
+Enabling dual page layout will have all output parts (cover page,
+front matter, tables of contents, the songbook, and back matter)
+aligned to an odd page.
+
+### Aligning songs
+
+If dual page layout is enabled, the setting of `songbook.align-songs`
+controls whether each individual *song* will start on a right page.
+
+    songbook.align-songs : true
+
+With a value of `false`, each song starts on the next available page.
+
+The value `true` (default) will make each song start on a right page.
+If necessary, a _filler_ page will be inserted after a song, to ensure
+correct alignment for the next song.
+
+    songbook.align-songs-spread : false
+
+When set to `true`, all songs will start on a left page. This will
+require less page turns for songs that have an even number of pages.
+If necessary, a _filler_ page will be inserted after a song, to ensure
+correct alignment for the next song.
+
+    songbook.align-songs-extend : false
+
+When set to `true`, the filler pages will have headings and footers
+as if they were part of the song. Additionally, the resultant PDF will
+be padded with an empty page to a total even number of pages.
+
+When set to `false` (default), filler pages are as described in the
+next section.
+
+Note: that cover, front matter, contents and back matter pages are
+always aligned to standard book layout, see above.
+
+### Filler pages
+
+As described above, song alignment will be obtained by inserting
+filler pages if necessary.
+
+Unless you set `songbook.align-songs-extend` to true, the filler pages
+will be empty (blank) pages. It is also possible to insert pages
+from an already existing PDF document, see
+[Page headers and footers]({{< relref "#page-headers-and-footers" >}}).
+
+### Aligning tables of contents with page layouts
+
+If dual page layout is enabled, the first table of contents (ToC) will
+always start on a right (odd) page. If there is more than one ToC, the
+setting of `songbook.align-tocs` controls whether subsequent ToCs will
+start on an odd page as well.
+
+    songbook.align-tocs : true
+
+With the (default) value of `true`, each table of contents will start
+on a right page.
+
+With a value of `false`, each subsequent ToC will start on the next
+available page.
+
+The value `"song"` can be used to have the ToCs follow the settings
+for song aligment.
+
+### Page reordering
+
+Song pages can be reordered based on the song title or subtitle.
 Also possible is to align songs with two pages on an even page, so
 that you can view it without having to turn a page.
 
-     sort-pages : ""
+     songbook.sort-songs : false
 
-`sort-pages` can be set to a comma separated list of `title`, `subtitle`,
-`2page`, `compact`, and `desc`.
+`sort-songs` can be set to `false` (default, no sorting), `title`, or
+`subtitle`.
 
-* `title`: sort pages alphabetically by title.
 
-* `subtitle`: sort pages alphabetically by subtitle. If this is
-  used together with title, only title is used.
+* `title`: sort pages by sorttitle, if any, otherwise title.
 
-* `2page`:  make sure songs with even pages are placed on even
-  pages, so most. if not all, of the song is visible
-  in a normal book without needing to turn a page.
-  A blank page is added to align.
+* `subtitle`: sort pages by subtitle.
 
-* `compact`: implies `2page` - instead of adding a blank page,
-  an odd-paged song is moved in front of this song to achieve
-  even page alignment.  
-  Note: this option requires extra processing time since
-  the songbook has to be processed twice.
+When the value is preceded by a minus `-`, the sort order is reversed.
 
-* `desc`: modifier for title or author to sort descending.
+Finally, if dual page layout is enabled,
 
+    songbook.compact-songs: false
+
+If `true`, the order of the songs will be rearranged so that all songs
+can be viewed with a minimal number of page turns. No filler pages
+will be inserted  
+Note: this option requires extra processing time since the songbook
+has to be processed twice.
 
 ## Page headers and footers
 
@@ -458,6 +581,9 @@ used as background. It has the form _filename_ or _filename:page_.
 Page numbers count from one. If odd/even printing is in effect, the
 designated page number is used for left pages, and the next page (if
 it exists) for right pages.
+
+If a `background` is set for filler pages, a random page from the
+document is used as filler page.
 
     formats {
 
@@ -530,22 +656,6 @@ alignment are completely blank.
 Note that by default ChordPro produces different odd and even pages.
 Therefore the page numbers on (odd) pages 3 and 7 are at the right
 side, while they are at the left side on (even) pages 2 and 6.
-
-## Front and Back Matter
-
-Front matter and back matter can be specified in the config file.
-
-    // PDF file to add as front matter.
-    front-matter : ""
-    // PDF file to add as back matter.
-    back-matter : ""
-
-The value should be the name of a file that contains a PDF document.
-This document is prepended (for back matter, appended) to the
-songbook.
-
-Front matter and back matter can be overriden with command line
-options.
 
 ## Font libraries
 

@@ -25,8 +25,10 @@ pp/macos/Install.zsh
 pp/macos/Makefile
 pp/macos/PkgInfo
 pp/macos/README.html
+pp/macos/libtool.pl
+pp/macos/pp.pl
 pp/macos/reloc.pl
-pp/macos/wxchordpro_pp.pl
+pp/macos/vfix.pl
 pp/pp2ppl.pl
 pp/windows/GNUmakefile
 pp/windows/WebView2Loader.dll

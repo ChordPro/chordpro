@@ -20,7 +20,7 @@ been merged here.
 In all texts (lyrics, titles, chordnames, comments, etc.) markup
 instructions can be used to manipulate the appearance.
 
-The [markup instructions]({{< relref "ChordPro_Markup" >}}) resemble the
+The [markup instructions]({{< relref "ChordPro-Markup" >}}) resemble the
 [Pango Markup Language](https://docs.gtk.org/Pango/pango_markup.html)
 as defined by the [Gnome organisation](https://www.gnome.org/).
 

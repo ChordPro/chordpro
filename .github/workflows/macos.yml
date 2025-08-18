@@ -1,37 +1,28 @@
 name: CI for MacOS
 
 on:
-  push:
-    branches:
-      - '*'
-    tags-ignore:
-      - '*'
-  pull_request:
+    push:
+        branches: '*'
 
 jobs:
-  perl:
-
+  macOS:
     runs-on: macOS-latest
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Perl
-        run: brew install perl
+      - name: Check out repository code
+        uses: actions/checkout@v4
       - name: perl -V
         run: perl -V
+
       - name: Install cpanm
-        run: |
-            curl -L https://cpanmin.us -o cpanm
-            chmod +x cpanm
-      - name: Install H::B
-        continue-on-error: true
-        run: ./cpanm HarfBuzz::Shaper
-      - name: Oops
-        continue-on-error: true
-        run: cat /Users/runner/.cpanm/build.log
+        run: brew install cpanm
+
       - name: Install Dependencies
         run: |
-          perl -ni~ -e 'print unless /HarfBuzz/' Makefile.PL
-            ./cpanm --installdeps --notest .
+          cpanm HarfBuzz::Shaper@0.028
+          cpanm --installdeps --notest .
+
       - name: Run Tests
-        run: prove -l t
+        run: |
+          prove -l t
+          perl script/chordpro.pl --about

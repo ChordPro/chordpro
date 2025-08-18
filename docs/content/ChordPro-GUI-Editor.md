@@ -22,7 +22,7 @@ Type `My First`.
 ![]({{< asset "images/chordpro-gui-editor-p3.png" >}})
 
 Press the Enter key and notice that the closing brace of the
-directice stays at the right place.
+directive stays at the right place.
 
 Add a song line: Type `[` followed by a lowercase `a`. Now type the
 closing `]`. You will see that the chord name is automatically
@@ -43,7 +43,7 @@ song in the [settings]({{< relref "chordpro-gui-settings/#presets"
 >}}).
 
 In the unlikely event that you made some typing errors, helpful
-information is given in the form of in-source *annotations*.
+information is given in the form of in-source *diagnostic flags*.
 
 ![]({{< asset "images/chordpro-gui-editor-p6.png" >}})
 
@@ -51,7 +51,7 @@ Click on one of the `Messages` buttons to view additional diagnostics.
 
 ![]({{< asset "images/chordpro-gui-editor-p7.png" >}})
 
-The annotations will automatically be cleared when you generate a new
+The diagnostic flags will automatically be cleared when you generate a new
 preview. You can also clear them manually from the `Edit` menu.
 
 When you stop ChordPro, or switch to another file, you are prompted to

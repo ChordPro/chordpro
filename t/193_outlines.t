@@ -10,10 +10,6 @@ use ChordPro::Output::Common;
 
 plan tests => 3;
 
-# For transcoding, both source and target notation systems must be
-# defined. The source system must be last, so it is current and used
-# to parse the the input data.
-
 my $s = ChordPro::Songbook->new;
 
 my $data = <<EOD;
@@ -177,5 +173,6 @@ my $xp = [
 
 foreach ( @$res ) {
     delete $_->[1]->{meta}->{_configversion};
+    delete $_->[1]->{meta}->{bookmark};
 }
 is_deeply( $res, $xp, "outlined");

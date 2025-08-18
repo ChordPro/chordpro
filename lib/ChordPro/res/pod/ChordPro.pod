@@ -67,7 +67,10 @@ active.
 
 =item B<--cover=>I<FILE>
 
-See B<--front-matter>.
+Prepends the contents of the named PDF document to the output. This can
+be used to add cover pages.
+
+See also B<--title>.
 
 =item B<--csv>
 
@@ -104,10 +107,10 @@ This option may be specified multiple times.
 Song file names listed on the command line are processed I<after> the
 files from the filelist arguments.
 
-=item B<--front-matter=>I<FILE> B<--cover=>I<FILE>
+=item B<--front-matter=>I<FILE>
 
 Prepends the contents of the named PDF document to the output. This can
-be used to produce documents with front matter (cover) pages.
+be used to produce documents with front matter pages.
 
 =item B<--lyrics-only> (short: B<-l>)
 
@@ -177,6 +180,8 @@ Title (for songbooks).
 
 If specified and a table of contents is requested, a nice coverpage
 will be added.
+
+Note that B<--title> overrides B<--cover>.
 
 =item B<--toc> (short: B<-i>)
 
@@ -268,11 +273,11 @@ Prints chord diagrams of all user defined chords used in a song.
 
 =item B<--even-pages-number-left> (short B<-L>)
 
-Prints even/odd pages with pages numbers left on even pages.
+Not supported. Use C<pdf.even-odd-pages> in the config instead.
 
 =item B<--odd-pages-number-left>
 
-Prints even/odd pages with pages numbers left on odd pages.
+Not supported. Use C<pdf.even-odd-pages> in the config instead.
 
 =item B<--page-size=>I<FMT> (short: B<-P>) *
 
@@ -399,9 +404,10 @@ by enabling and modifyng just a few items at a time.
 
 =item B<--print-default-config>
 
-Prints the default configuration to standard output, and exits.
+If used once, behaves like `--print-template-config`. This is to avoid
+confusing novice users.
 
-The default configuration is commented to explain its contents.
+To get the full default configuration, repeat this option.
 
 =item B<--print-final-config>
 

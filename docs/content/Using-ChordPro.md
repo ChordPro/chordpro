@@ -44,8 +44,8 @@ this option is used the input is converted from **crd** (chords on top
 of lyrics) to **cho** (chords between lyrics) and the result written to
 the output. No further processing takes place.
 
-See also [Legacy ASCII input format]({{< relref
-"chordpro-getting-started#legacy-ascii-input-format" >}}).
+See also [Chords over Lyrics]({{< relref
+"Chords-over-Lyrics" >}}).
 
 Note that `--a2crd` is slightly different from `--generate=ChordPro`. In the latter case the input data *is* processed
 and then written out as a ChordPro file.
@@ -68,7 +68,20 @@ be used to produce documents with cover and back pages.
 
 ### cover
 
-Same as [`--front-matter`]({{< relref "#front-matter" >}}).
+`--cover=`*FILE*
+
+Prepends the contents of the named PDF document to the output. This can
+be used to produce documents with cover pages.
+
+See also [`--front-matter`]({{< relref "#front-matter" >}}).
+
+If both a cover and front matter is used, the cover will be first,
+followed by the front matter.
+
+See also [`--title`]({{< relref "#title" >}}).
+
+If both a cover and title is used, an automatically generated cover
+based on the title will be used instead.
 
 ### crd
 
@@ -140,6 +153,7 @@ particular order.
 
 Every line from the named file is taken to be a file name, with the
 exception of empty lines and lines that start with a `#` which are ignored.
+File names are considered relative to the filelist.
 
 This option may be specified multiple times.
 
@@ -167,8 +181,7 @@ MySong.cho  --meta voice=bass
 MySong.cho  --meta voice=alto --config=ukulele.json
 ````
 
-Important notice: Filelist lines that have `--meta` and/or `--config`
-**must** quote whitespace, e.g.
+Filenames lines that contain whitespace must be quoted to avoid ambiguities.
 
 ````
 "My New Song.cho" --meta voice=soprano
@@ -177,10 +190,14 @@ Important notice: Filelist lines that have `--meta` and/or `--config`
 ### front-matter
 
 `--front-matter=`*FILE*
-`--cover=`*FILE*
 
 Prepends the contents of the named PDF document to the output. This can
 be used to produce documents with cover pages.
+
+See also [`--cover`]({{< relref "#cover" >}}).
+
+If both a cover and front matter is used, the cover will be first,
+followed by the front matter.
 
 ### lyrics-only
 
@@ -307,6 +324,23 @@ ChordPro standard.
 Enabled by default.
 
 See [`--no-strict`]({{< relref "#no-strict" >}}).
+
+### subtitle
+
+See [`--title`]({{< relref "#title" >}}).
+
+### title
+
+`--title=` _text_  
+`--subtitle=` _text_
+
+Using `--title` will make ChordPro prepend a standard cover page to
+the output document.  
+`--subtitle` can be used to provide an additional (sub)title.
+
+See also [`--cover`]({{< relref "#cover" >}}).
+
+If both a cover and title is used, `--cover` is ignored.
 
 ### toc
 
@@ -437,11 +471,12 @@ Not supported.
 
 `--even-pages-number-left` (short `-L`)
 
-Prints even/odd pages with pages numbers left on even pages.
+Not supported.
 
-Configuration file settings:
+Use configuration file settings:
 [`pdf.even-odd-pages`]({{< relref "ChordPro-Configuration-PDF#even-odd-page-printing" >}})
-and [Page headers and footers]({{< relref "ChordPro-Configuration-PDF#page-headers-and-footers" >}}).
+and [Page headers and footers]({{< relref
+"ChordPro-Configuration-PDF#page-headers-and-footers" >}}) instead.
 
 ### no-easy-chord-grids
 
@@ -471,11 +506,12 @@ Configuration file setting:
 
 `--odd-pages-number-left`
 
-Prints even/odd pages with pages numbers left on odd pages.
+Not supported.
 
-Configuration file settings:
+Use configuration file settings:
 [`pdf.even-odd-pages`]({{< relref "ChordPro-Configuration-PDF#even-odd-page-printing" >}})
-and [Page headers and footers]({{< relref "ChordPro-Configuration-PDF#page-headers-and-footers" >}}).
+and [Page headers and footers]({{< relref
+"ChordPro-Configuration-PDF#page-headers-and-footers" >}}) instead.
 
 ### page-number-logical
 
@@ -644,7 +680,10 @@ Don't use the user specific config file, even if it exists.
 
 `--print-default-config`
 
-Prints the default configuration to standard output, and exits.
+If used once, behaves like `--print-template-config`. This is to avoid
+confusing novice users.
+
+To get the full default configuration, repeat this option.
 
 The default configuration is fully commented to explain its contents.
 
@@ -667,7 +706,7 @@ exits. The configuration is commented to explain its contents.
 
 The config contains most of the ChordPro configuration items, all
 commented out. It is easy to get started with configuring ChordPro
-by enabling and modifyng just a few items at a time.
+by enabling and modifying just a few items at a time.
 
 ### sysconfig
 

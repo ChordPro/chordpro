@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# Take a screenshot of a (single) ChordPro window in the Rawhide VM.
+
+TMP=/tmp/vb$$.png
+VBX=Rawhide
+NEW="$1"
+
+VBoxManage controlvm ${VBX} screenshotpng ${TMP}
+magick ${TMP} -shave 50x50 -define "trim:percent-background=0%" -trim "${NEW}"

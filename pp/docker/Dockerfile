@@ -43,6 +43,8 @@ RUN cpanm \
     String::Interpolate::Named \
     HarfBuzz::Shaper \
     Text::Layout~0.038 \
+    XS::Parse::Sublike~0.32 \
+    Object::Pad~0.818 \
     Data::Printer
 
 FROM base AS chordpro-prod

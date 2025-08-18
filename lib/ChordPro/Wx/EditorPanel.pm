@@ -12,13 +12,11 @@ class ChordPro::Wx::EditorPanel
 use Wx qw[:everything];
 use Wx::Locale gettext => '_T';
 
-use ChordPro::Utils qw( is_macos );
+use ChordPro::Files;
 use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
-use ChordPro::Utils qw( max demarkup is_macos is_msw plural );
+use ChordPro::Utils qw( max demarkup plural );
 use ChordPro::Paths;
-
-use File::Basename;
 
 # WhoamI
 field $panel :accessor = "editor";
@@ -57,6 +55,11 @@ method refresh() {
 
     $self->update_menubar( M_EDITOR );
 
+    # Flush pending messages.
+    if ( $state{msgs} ) {
+	$self->log( 'I', $_ ) for @{$state{msgs}};
+	$state{msgs} = [];
+    }
     $self->log( 'I', "Using " .
 		( $state{have_stc}
 		  ? "styled" : "basic") . " text editor" );
@@ -81,7 +84,6 @@ method refresh() {
     $self->previewtooltip;
     $self->messagestooltip;
     $self->{t_editor}->SetModified($mod);
-    $self->{bmb_preview}->SetFocus;
 
     $self->refresh_messages;
 
@@ -91,14 +93,14 @@ method refresh() {
 	Wx::Event::EVT_STC_CLIPBOARD_PASTE( $self, $self->{t_editor}->GetId,
 					    $self->can("OnClipBoardPaste") );
     }
-
+    $self->set_focus;
 }
 
 method openfile( $file, $checked=0, $actual=undef ) {
     $actual //= $file;
 
-    # File tests fail on Windows, so bypass when already checked.
-    unless ( $checked || -f -r $file ) {
+    # Bypass test when already checked. TODO?
+    unless ( $checked || fs_test( 'fr', $file ) ) {
 	$self->log( 'W',  "Error opening $file: $!",);
 	my $md = Wx::MessageDialog->new
 	  ( $self,
@@ -109,7 +111,13 @@ method openfile( $file, $checked=0, $actual=undef ) {
 	$md->Destroy;
 	return;
     }
-    unless ( $self->{t_editor}->LoadFile($file) ) {
+    if ( my $f = fs_load($file) ) {
+	# This has the (desired) sideeffect that all newlines
+	# are now \n .
+	$self->{t_editor}->SetText(join("\n",@$f)."\n");
+	$self->{t_editor}->DiscardEdits;
+    }
+    else {
 	$self->log( 'W',  "Error opening $file: $!",);
 	my $md = Wx::MessageDialog->new
 	  ( $self,
@@ -155,7 +163,7 @@ method openfile( $file, $checked=0, $actual=undef ) {
     }
     else {
 	my $n = $self->{t_editor}->GetLineCount;
-	$self->{l_status}->SetLabel(basename($file));
+	$self->{l_status}->SetLabel(fn_basename($file));
 	$self->{l_status}->SetToolTip($file);
 	$self->log( 'S', "Loaded: $file (" . plural($n, " line") . ")");
     }
@@ -205,31 +213,15 @@ method newfile( $file = undef ) {
     my $file = $preferences{tmplfile};
     if ( $file && $preferences{enable_tmplfile} ) {
 	$self->log( 'I', "Loading template $file" );
-	if ( -f -r $file && $self->{t_editor}->LoadFile($file) ) {
+	if ( fs_test( fr => $file ) && $self->{t_editor}->LoadFile($file) ) {
 	    $content = "";
 	}
 	else {
 	    $self->log( 'E', "Cannot open template $file: $!" );
 	}
     }
-    elsif ( 1 ) {
-	$content = "{title: $title}";
-    }
     else {
-	require ChordPro::Wx::NewSongDialog;
-	unless ( $self->{d_newfile} ) {
-	    $self->{d_newfile} = ChordPro::Wx::NewSongDialog->new
-	      ( $self, wxID_ANY, $title );
-	    restorewinpos( $self->{d_newfile}, "newfile" );
-	    $self->{d_newfile}->set_title($title);
-	}
-	$self->{d_newfile}->refresh;
-	my $ret = $self->{d_newfile}->ShowModal;
-	savewinpos( $self->{d_newfile}, "newfile" );
-	if ( $ret == wxID_OK ) {
-	    $title = $self->{d_newfile}->get_title;
-	    $content = $self->{d_newfile}->get_meta;
-	}
+	$content = "{title: $title}";
     }
 
     for ( $self->{t_editor} ) {
@@ -272,7 +264,7 @@ method check_source_saved() {
     if ( $state{currentfile} ) {
 	my $md = Wx::MessageDialog->new
 	  ( $self,
-	    "File " . basename($state{currentfile}) . " has been changed.\n".
+	    "File " . fn_basename($state{currentfile}) . " has been changed.\n".
 	    "Do you want to save your changes?",
 	    "File has changed",
 	    0 | wxCANCEL | wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION );
@@ -308,9 +300,10 @@ method check_source_saved() {
 method save_file( $file = undef ) {
     while ( 1 ) {
 	unless ( defined $file && $file ne "" ) {
+	    my $cf = $state{currentfile} // "Untitled";
 	    my $fd = Wx::FileDialog->new
 	      ($self, _T("Choose output file"),
-	       "", $state{currentfile}//"",
+	       fn_dirname($cf), fn_basename($cf),
 	       "*".$preferences{chordproext},
 	       0|wxFD_SAVE|wxFD_OVERWRITE_PROMPT,
 	       wxDefaultPosition);
@@ -321,17 +314,28 @@ method save_file( $file = undef ) {
 	    $fd->Destroy;
 	}
 	return unless defined $file;
-	if ( $self->{t_editor}->SaveFile($file) ) {
+
+	# On macOS Catalina DMG STC seems to have problems saving.
+	my $fd = fs_open( $file, '>:utf8' );
+	$self->{t_editor}->ConvertEOLs(wxSTC_EOL_LF);
+	my $t = $self->{t_editor}->GetText;
+	# $self->log( 'I', ChordPro::Utils::as($t));
+	$t .= "\n" unless $t =~ /\n$/;
+	if ( $fd
+	     and print $fd $t
+	     and $fd->close ) {
 	    $self->{t_editor}->SetModified(0);
 	    $state{currentfile} = $file;
 	    $state{windowtitle} = $file;
 	    $self->log( 'S',  "Saved: $file" );
+	    use List::Util qw(uniq);
+	    @{$state{recents}} = uniq( $file, @{$state{recents}} );
 	    return;
 	}
 
 	my $md = Wx::MessageDialog->new
 	  ( $self,
-	    "Cannot save to $file",
+	    "Cannot save to $file\n$!",
 	    "Error saving file",
 	    0 | wxOK | wxICON_ERROR);
 	$md->ShowModal;
@@ -351,9 +355,9 @@ method preview( $args, %opts ) {
     # The text that we get from the editor can have CRLF line endings,
     # that on Windows will result in double line ends. Write with
     # 'raw' layer.
-    use Encode 'encode_utf8';
-    if ( open( $fd, '>:raw', $preview_cho )
-	 and print $fd ( encode_utf8($self->{t_editor}->GetText) )
+    require Encode;
+    if ( $fd = fs_open( $preview_cho, '>:raw' )
+	 and print $fd ( Encode::encode_utf8($self->{t_editor}->GetText) )
 	 and close($fd) ) {
 	$self->prv->preview( $args, %opts );
 	$self->previewtooltip;
@@ -364,6 +368,9 @@ method preview( $args, %opts ) {
 }
 
 method check_preview_saved() {
+    # Do not ask for preview save. It's regenerated easily.
+    return 1;
+
     return 1 unless $self->prv && $self->prv->unsaved_preview;
 
     my $md = Wx::MessageDialog->new
@@ -462,19 +469,49 @@ method update_preferences() {
     $self->refresh;
 }
 
+method set_focus {
+    $self->{t_editor}->SetFocus;
+}
+
 ################ Event Handlers (alphabetic order) ################
+
+method OnInsertSymbol($event) {
+    unless ( $preferences{enable_insert_symbols} ) {
+	my $md = Wx::MessageDialog->new
+	  ( undef,
+	    "Inserting special symbols introduces the risk that you can ".
+	    "insert symbols that are visible on the screen, but are not ".
+	    "supported by the fonts that are used for the PDF output.\n".
+	    "So these symbols may clobber your output.\n".
+	    "\n".
+	    "Keep this operation disabled?",
+	    "Advanced operation warning",
+	    wxYES_NO|wxICON_WARNING|wxDIALOG_NO_PARENT );
+	return unless $md->ShowModal == wxID_NO;
+	$preferences{enable_insert_symbols} = 1;
+
+    }
+    my $ctrl = $self->{t_editor};
+    state $sym = "\x{2665}";
+    my $d = Wx::SymbolPickerDialog->new( $sym, "", "", $self );
+    if ( $d->ShowModal == wxID_OK ) {
+	$ctrl->AddText( $sym = $d->GetSymbol );
+    }
+}
 
 method OnA2Crd($event) {
 
     my $ctrl = $self->{t_editor};
     my ( $from, $to ) = $ctrl->GetSelection;
     my $have_selection = $from != $to;
+    $ctrl->ConvertEOLs(wxSTC_EOL_LF);
     my $text = $have_selection ? $ctrl->GetSelectedText : $ctrl->GetText;
 
     require ChordPro::A2Crd;
     $::options->{nosysconfig} = 1;
     $::options->{nouserconfig} = 1;
     $::options->{noconfig} = 1;
+    $::options->{fragment} = $have_selection;
 
     # Often text that is pasted from web has additional newlines.
     $text =~ s/^\n+//;
@@ -531,6 +568,9 @@ method OnCharAdded( $event ) {
 	    $stc->CharRightExtend if length($nl) == 2;
 	    $stc->ReplaceSelection("}" . $nl);
 	}
+	elsif ( $ln > 1 && $stc->GetLine($ln-1) =~ /^\{\s*start_of_(\w+).*\}$/ ) {
+	    $stc->InsertText( -1, "\n{end_of_$1}" );
+	}
     }
 
     elsif ( $key eq ord(" ") || $key eq ord(":") || $key eq ord("}") ) {
@@ -547,7 +587,7 @@ method OnCharAdded( $event ) {
     }
 }
 
-method OnClearAnnotations($event) {
+method OnClearDiagnosticFlags($event) {
     return unless $state{have_stc};
     $self->{t_editor}->AnnotationClearAll;
 }
@@ -574,6 +614,8 @@ method OnCloseSection($event) {
 		$closed = "";
 		next;
 	    }
+	    $stc->AddText( $self->nl )
+	      if $stc->GetColumn($stc->GetCurrentPos);
 	    $stc->AddText( "{$1end_of_$2}" . $self->nl );
 	    $did++;
 	    last;
@@ -583,6 +625,8 @@ method OnCloseSection($event) {
 		$closed = "";
 		next;
 	    }
+	    $stc->AddText( $self->nl )
+	      if $stc->GetColumn($stc->GetCurrentPos);
 	    $stc->AddText( "{$1eo$2}" . $self->nl );
 	    $did++;
 	    last;
@@ -708,6 +752,10 @@ method OnInsertVerse($event) {
 
 method OnInsertGrid($event) {
     $self->embrace_section("grid");
+}
+
+method OnInsertTab($event) {
+    $self->embrace_section("tab");
 }
 
 method OnInsertSection($event) {

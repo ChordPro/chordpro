@@ -7,7 +7,7 @@ use utf8;
 
 class  SVGPDF;
 
-our $VERSION = '0.090';
+our $VERSION = '0.091';
 
 =head1 NAME
 
@@ -155,6 +155,7 @@ use SVGPDF::Element;
 use SVGPDF::CSS;
 use SVGPDF::FontManager;
 use SVGPDF::PAST;
+use SVGPDF::Colour;
 
 # The SVG elements.
 use SVGPDF::Circle;

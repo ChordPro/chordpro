@@ -11,9 +11,9 @@ class ChordPro::Wx::FileDirPickerCtrl
   :isa(Wx::Panel);
 
 use Wx ':everything';
+use ChordPro::Files;
 use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
-use File::Basename;
 
 field $text     = "";
 field $textctrl;
@@ -44,8 +44,7 @@ BUILD {
     }
     else {
 	$picker = Wx::FileDialog->new( $self, $message,
-				       basename($path),
-				       $path,
+				       fn_dirname($path), fn_basename($path),
 				       $wildcard || $state{ffilters},
 				       $new
 				       ? (wxFD_SAVE|wxFD_OVERWRITE_PROMPT)

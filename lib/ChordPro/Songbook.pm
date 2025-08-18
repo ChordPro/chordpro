@@ -9,17 +9,21 @@ package ChordPro::Songbook;
 
 use strict;
 use warnings;
+use feature 'state';
 
 use ChordPro;
 use ChordPro::Config;
+use ChordPro::Files;
 use ChordPro::Song;
 use ChordPro::Utils qw(progress);
 
 use Carp;
 use List::Util qw(any);
-use File::LoadLines;
 use Storable qw(dclone);
 use Ref::Util qw(is_arrayref is_plain_hashref);
+use MIME::Base64;
+
+my $regtest = defined($ENV{PERL_HASH_SEED}) && $ENV{PERL_HASH_SEED} == 0;
 
 sub new {
     my ($pkg) = @_;
@@ -37,10 +41,12 @@ sub parse_file {
 	return $self->embed_file( $filename, $meta, $defs );
     }
 
-    # Loadlines sets $opts->{_filesource}.
+    # fs_load sets $opts->{_filesource}.
     $opts->{fail} = "soft";
-    my $lines = is_arrayref($filename) ? $filename : loadlines( $filename, $opts );
+    my $lines = is_arrayref($filename) ? $filename
+      : fs_load( $filename, $opts );
     die( $filename, ": ", $opts->{error}, "\n" ) if $opts->{error};
+
     # Sense crd input and convert if necessary.
     if ( !(defined($options->{a2crd}) && !$options->{a2crd}) and
 	 !$options->{fragment}
@@ -67,9 +73,14 @@ sub parse_file {
 
     my $linecnt = 0;
     my $songs = 0;
+
     while ( @$lines ) {
 	my $song = ChordPro::Song->new($opts)
-	  ->parse_song( $lines, \$linecnt, {%{dclone($meta)}}, {%$defs} );
+	  ->parse_song( $lines, \$linecnt,
+			{ %{dclone($meta)},
+			  "bookmark"   => $opts->{bookmark} //= sprintf( "song_%d", 1 + @{ $self->{songs} } ),
+			},
+			{ %$defs } );
 
 	$song->{meta}->{songindex} = 1 + @{ $self->{songs} };
 	push( @{ $self->{songs} }, $song );
@@ -109,7 +120,7 @@ sub add {
 sub embed_file {
     my ( $self, $filename, $meta, $defs ) = @_;
 
-    unless ( -s -r $filename ) {
+    unless ( fs_test( sr => $filename ) ) {
 	warn("$filename: $! (skipped)\n");
 	return;
     }

@@ -18,8 +18,9 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 
     # Use the chords font for the chords, and for the symbols size.
     my $fchord = { %{ $fonts->{grid} || $fonts->{chord} } };
+    my $schord = $fonts->{gridstrum};
     delete($fchord->{background});
-    $y -= font_bl($fchord);
+    $y -= $pr->font_bl($fchord);
 
     pr_label_maybe( $ps, $x, $y );
 
@@ -42,14 +43,29 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 
     if ( $margin->[0] ) {
 	$x -= $barwidth;
-	if ( $elt->{margin} ) {
-	    my $t = $elt->{margin};
-	    if ( $t->{chords} ) {
-		$t->{text} = "";
+	my $t = $elt->{margin};
+	if ( $t && $t->{chords} ) {
+	    if ( 0 && $::config->{settings}->{'chords-as-chords'} ) {
+		my $x = $x;
 		for ( 0..$#{ $t->{chords} } ) {
-		    $t->{text} .= $t->{chords}->[$_]->chord_display . $t->{phrases}->[$_];
+		    $x = $pr->text( $t->{chords}->[$_]->chord_display,
+				    $x, $y, $fonts->{chord} )
+		      unless $t->{chords}->[$_] eq "";
+		    $x = $pr->text( $t->{phrases}->[$_],
+				    $x, $y, $fonts->{grid_margin} )
 		}
 	    }
+	    else {
+		$t->{text} = "";
+		for ( 0..$#{ $t->{chords} } ) {
+		    $t->{text} .= $t->{chords}->[$_]->chord_display
+		      unless $t->{chords}->[$_] eq "";
+		    $t->{text} .= $t->{phrases}->[$_];
+		}
+		$pr->text( $t->{text}, $x, $y, $fonts->{grid_margin} );
+	    }
+	}
+	elsif ( $t ) {
 	    $pr->text( $t->{text}, $x, $y, $fonts->{grid_margin} );
 	}
 	$x += $margin->[0] * $cellwidth + $barwidth;
@@ -57,7 +73,9 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 
     my $ctl = $pr->{ps}->{grids}->{cellbar};
     my $col = $pr->{ps}->{grids}->{symbols}->{color};
-    my $needcell = $ctl->{width};
+    $opts{subtype} //= $opts{type} eq "gridline" ? "cellbars" : "";
+    my $needcell = ( $opts{type} eq "gridline"
+		     || $opts{subtype} eq "cellbars" ) && $ctl->{width};
 
     state $prevvoltastart;
     my $align;
@@ -94,6 +112,13 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 	    my $lcr = -1;	# left, center, right
 	    $lcr = 0 if $i > $firstbar;
 	    $lcr = 1 if $i == $lastbar;
+
+	    unless ( $opts{subtype} eq "cellbars" ) {
+		$x += $barwidth;
+		$prevbar = $i;
+		$needcell = 0;
+		next;
+	    }
 
 	    if ( $t eq "|" ) {
 		if ( $token->{volta} ) {
@@ -152,15 +177,17 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 	pr_cellline( $x-$barwidth, $y, 0, $sz, $ctl->{width},
 		     $pr->_fgcolor($ctl->{color}), $pr )
 	  if $needcell;
-	$needcell = $ctl->{width};
+	$needcell = ( $opts{type} eq "gridline"
+		      || $opts{subtype} eq "cellbars" ) && $ctl->{width};
 
 	if ( $token->{class} eq "chord" || $token->{class} eq "chords" ) {
 	    my $tok = $token->{chords} // [ $token->{chord} ];
 	    my $cellwidth = $cellwidth / @$tok;
 	    for my $t ( @$tok ) {
 		$x += $cellwidth, next if $t eq '';
-		$t = $t eq '/' ? $t : $t->chord_display;
-		$pr->text( $t, $x, $y, $fchord );
+		my $text = $t eq '/' ? $t : $t->chord_display;
+		$pr->text( $text, $x, $y,
+			   $t->info->is_gridstrum ? $schord : $fchord );
 		$x += $cellwidth;
 	    }
 	}
@@ -305,7 +332,6 @@ sub pr_endline( $x, $y, $lcr, $sz, $col, $pr ) {
 
 ################ Hooks ################
 
-*font_bl        = *ChordPro::Output::PDF::font_bl;
-*pr_label_maybe = *ChordPro::Output::PDF::pr_label_maybe;
+*pr_label_maybe = *ChordPro::Output::PDF::Song::pr_label_maybe;
 
 1;

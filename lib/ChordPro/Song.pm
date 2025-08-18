@@ -13,26 +13,30 @@ use strict;
 use warnings;
 
 use ChordPro;
+use ChordPro::Files;
 use ChordPro::Paths;
 use ChordPro::Chords;
 use ChordPro::Chords::Appearance;
 use ChordPro::Chords::Parser;
 use ChordPro::Output::Common;
 use ChordPro::Utils;
+use ChordPro::Symbols qw( is_strum );
 
 use Carp;
 use List::Util qw(any);
-use File::LoadLines;
 use Storable qw(dclone);
 use feature 'state';
 use Text::ParseWords qw(quotewords);
+use Ref::Util qw( is_arrayref );
 
 # Parser context.
 my $def_context = "";
 my $in_context = $def_context;
 my $skip_context = 0;
-my $grid_arg;
-my $grid_cells;
+my $grid_arg;			# also used for grilles?
+my $grid_cells;			# also used for grilles?
+my $grid_type = 0;		# 0 = chords, 1,2 = strums
+my @grille;
 
 # Local transposition.
 my $xpose = 0;
@@ -84,7 +88,7 @@ sub new {
     my $filesource = $opts->{filesource} || $opts->{_filesource};
 
     $xpose = 0;
-    $grid_arg = [ 4, 4, 1, 1 ];	# 1+4x4+1
+    $grid_arg = [ 4, 4, 1, 1, "" ];	# 1+4x4+1
     $in_context = $def_context;
     @used_chords = ();
     %warned_chords = ();
@@ -116,6 +120,10 @@ sub upd_config {
 }
 
 sub ::break() {}
+
+sub is_gridstrum($) {
+    $_[0] == 1 || $_[0] == 2;
+}
 
 sub parse_song {
     my ( $self, $lines, $linecnt, $meta, $defs ) = @_;
@@ -168,7 +176,7 @@ sub parse_song {
 	    for ( "prp", "json" ) {
 		( my $cf = $diag->{file} ) =~ s/\.\w+$/.$_/;
 		$cf .= ".$_" if $cf eq $diag->{file};
-		next unless -s $cf;
+		next unless fs_test( s => $cf );
 		warn("Config[song]: $cf\n") if $options->{verbose};
 		my $have = ChordPro::Config::get_config($cf);
 		push( @configs, $have->prep_configs($cf) );
@@ -216,6 +224,10 @@ sub parse_song {
     }
 
     $config->unlock;
+    if ( my $a = $config->{parser}->{altbrackets} ) {
+	die("Config error: parser.altbrackets must be a 2-character string\n")
+	  unless length($a) == 2;
+    }
 
     if ( %$defs ) {
 	prpadd2cfg( $config, %$defs );
@@ -303,6 +315,8 @@ sub parse_song {
 	    $self->{meta}->{$k} = [ $v ];
 	}
     }
+    $self->{meta}->{"chordpro.songsource"} = $diag->{file}
+      unless $::running_under_test;
 
     # Build regexp to split out chords.
     if ( $config->{settings}->{memorize} ) {
@@ -349,6 +363,9 @@ sub parse_song {
 	}
 
 	for my $pp ( "all", "env-$in_context" ) {
+	    next if $pp eq "env-$in_context"
+	      && /^\s*\{(\w+)\}\s*$/
+	      && $self->parse_directive($1)->{name} eq "end_of_$in_context";
 	    if ( $prep->{$pp} ) {
 		$config->{debug}->{pp} && warn("PRE:  ", $_, "\n");
 		$prep->{$pp}->($_);
@@ -510,7 +527,7 @@ sub parse_song {
 			}
 		    }
 		    if ( $uri ) {
-			unshift( @$lines, loadlines($uri), "##include: end=1" );
+			unshift( @$lines, @{fs_load($uri)}, "##include: end=1" );
 			push( @diag, { %$diag } );
 			$diag->{file} = $uri;
 			$diag->{line} = $$linecnt = 0;
@@ -548,13 +565,13 @@ sub parse_song {
 	    # 'open' indicates open.
 	    if ( /^\s*\{(?:end_of_\Q$in_context\E)\}\s*$/ ) {
 		delete $self->{body}->[-1]->{open};
+		$grid_type = 0;
 		# A subsequent {start_of_XXX} will open a new item
 
 		my $d = $config->{delegates}->{$in_context};
 		if ( $d->{type} eq "image" ) {
 		    local $_;
 		    my $a = pop( @{ $self->{body} } );
-		    delete( $a->{context} );
 		    my $id = $a->{id};
 		    my $opts = {};
 		    unless ( $id ) {
@@ -659,6 +676,11 @@ sub parse_song {
 
 	if ( $in_context eq "grid" ) {
 	    $self->add( type => "gridline", $self->decompose_grid($_) );
+	    next;
+	}
+	if ( $in_context eq "grille" && @grille ) {
+	    push( @grille, { line => $diag->{line},
+			     $self->decompose_grid($_) } );
 	    next;
 	}
 
@@ -931,6 +953,12 @@ sub decompose {
 	       );
     }
 
+    # For the exceptional case you need brackets [] in your lyrics
+    # or annotations.
+    if ( my $a = $config->{parser}->{altbrackets} ) {
+	@a = map { eval "tr/$a/[]/r" } @a;
+    }
+
     my $dummy;
     shift(@a) if $a[0] eq "";
     unshift(@a, '[]'), $dummy++ if $a[0] !~ $re_chords;
@@ -980,7 +1008,7 @@ sub decompose {
 	# Not memorizing.
 	else {
 	    # do_warn("No chords memorized for $in_context");
-	    push( @chords, $chord );
+	    push( @chords, $self->chord($chord) );
 	}
 	$dummy = 0;
     }
@@ -1007,6 +1035,7 @@ sub decompose_grid {
     $line =~ s/\s+$//;
     return ( tokens => [] ) if $line eq "";
     local $re_chords = qr/(\[.*?\])/;
+    my $memchords = $memchords;
 
     my %res;
     if ( $line !~ /\|/ ) {
@@ -1018,13 +1047,13 @@ sub decompose_grid {
 	    $line = $1;
 	    $res{comment} = { $self->cdecompose($2), orig => $2 };
 	    do_warn( "No margin cell for trailing comment" )
-	      unless $grid_cells->[2];
+	      unless $in_context eq "grille" || $grid_cells->[2];
 	}
 	if ( $line =~ /^([^|]+?)\s*(\|.*)/ ) {
 	    $line = $2;
 	    $res{margin} = { $self->cdecompose($1), orig => $1 };
 	    do_warn( "No cell for margin text" )
-	      unless $grid_cells->[1];
+	      unless $in_context eq "grille" || $grid_cells->[1];
 	}
     }
 
@@ -1049,6 +1078,24 @@ sub decompose_grid {
     my $p1;			# prev chords (for % and %% repeat)
     my $p2;			# pprev chords (for %% repeat)
     my $si = 0;			# start index
+
+    $grid_type = 0;
+    if ( @tokens && uc($tokens[0]) =~ /^\|.*S/i ) {
+	$grid_type = 1 + (chop($tokens[0]) eq "S"); # strum line
+	$memchords = 0;
+    }
+
+    my $chord = sub {
+	my $c = shift;
+	if ( is_gridstrum($grid_type) && is_strum($c) ) {
+	    my $i = ChordPro::Chord::Strum->new( { name => $c } );
+	    ChordPro::Chords::Appearance->new
+		( key => $self->add_chord($i), info => $i );
+	}
+	else {
+	    $self->chord($c);
+	}
+    };
 
     foreach ( @tokens ) {
 	if ( $_ eq "|:" || $_ eq "{" ) {
@@ -1116,7 +1163,7 @@ sub decompose_grid {
 	    my @a = split( /~/, $_, -1 );
 	    if ( @a == 1) {
 		# Normal case, single chord.
-		$_ = { chord => $self->chord($_), class => "chord" };
+		$_ = { chord => $chord->($_), class => "chord" };
 	    }
 	    else {
 		# Multiple chords.
@@ -1125,10 +1172,11 @@ sub decompose_grid {
 				 ? ''
 				 : $_ eq "/"
 				   ? "/"
-				   : $self->chord($_) } @a ],
+				   : $chord->($_) } @a ],
 		       class => "chords" };
 	    }
-	    if ( $memchords ) {
+	    if ( $memchords && !is_gridstrum($grid_type) ) {
+		@a = grep { !m;^[/.]?$; } @a;
 		push( @$memchords, @a );
 		push( @$p0, @a );
 		if ( $config->{debug}->{chords} ) {
@@ -1146,7 +1194,10 @@ sub decompose_grid {
     if ( $nbt > $grid_cells->[0] ) {
 	do_warn( "Too few cells for grid content" );
     }
-    return ( tokens => \@tokens, %res );
+    return ( tokens => \@tokens,
+	     $grid_type == 1 ? ( type => "strumline" ) : (),
+	     $grid_type == 2 ? ( type => "strumline", subtype => "cellbars" ) : (),
+	     %res );
 }
 
 ################ Parsing directives ################
@@ -1164,6 +1215,7 @@ my %directives = (
 		  end_of_bridge	     => undef,
 		  end_of_chorus	     => undef,
 		  end_of_grid	     => undef,
+		  end_of_grille	     => undef,
 		  end_of_tab	     => undef,
 		  end_of_verse	     => undef,
 		  grid		     => \&dir_grid,
@@ -1179,6 +1231,7 @@ my %directives = (
 		  start_of_bridge    => undef,
 		  start_of_chorus    => undef,
 		  start_of_grid	     => undef,
+		  start_of_grille    => undef,
 		  start_of_tab	     => undef,
 		  start_of_verse     => undef,
 		  subtitle	     => \&dir_subtitle,
@@ -1331,14 +1384,17 @@ sub directive {
 	  if $in_context eq "chorus";
 	undef $cctag;
 
-	if ( $in_context eq "grid" ) {
-	    $cctag = "grid";
+	if ( $in_context eq "grid"
+	     || ( $in_context eq "grille" && !exists $config->{delegates}->{$in_context} ) ) {
+	    $cctag = $in_context;
 	    my $kv = parse_kv( $arg, "shape" );
 	    my $shape = $kv->{shape} // "";
-	    if ( $shape eq "" ) {
+	    if ( $in_context eq "grille" ) {
+	    }
+	    elsif ( $shape eq "" ) {
 		$self->add( type => "set",
 			    name => "gridparams",
-			    value => $grid_arg );
+			    value => [ @$grid_arg[0..3] ] );
 	    }
 	    elsif ( $shape =~ m/^
 			      (?: (\d+) \+)?
@@ -1348,15 +1404,16 @@ sub directive {
 		do_warn("Invalid grid params: $shape (must be non-zero)"), return
 		  unless $2;
 		$grid_arg = [ $2, $3//1, $1//0, $4//0 ];
+		push( @$grid_arg, $5 ) if defined $5;
 		$self->add( type => "set",
 			    name => "gridparams",
-			    value =>  [ @$grid_arg, $5||"" ] );
-		push( @labels, $5 ) if length($5||"");
+			    value =>  [ @$grid_arg ] );
+		push( @labels, $5 ) if defined($5);
 	    }
 	    elsif ( $shape ne "" ) {
 		$self->add( type => "set",
 			    name => "gridparams",
-			    value =>  [ @$grid_arg, $shape ] );
+			    value =>  [ @$grid_arg[0..3], $shape ] );
 		push( @labels, $shape );
 	    }
 	    if ( ($kv->{label}//"") ne "" ) {
@@ -1375,6 +1432,8 @@ sub directive {
 	    }
 	    $grid_cells = [ $grid_arg->[0] * $grid_arg->[1],
 			    $grid_arg->[2],  $grid_arg->[3] ];
+
+	    @grille = ( $kv ) if $in_context eq "grille";
 	    return 1;
 	}
 	elsif ( exists $config->{delegates}->{$in_context} ) {
@@ -1458,7 +1517,7 @@ sub directive {
 
 	# Enabling this always would allow [^] to recall anyway.
 	# Feature?
-	if ( $config->{settings}->{memorize} ) {
+	if ( 1 || $config->{settings}->{memorize} ) {
 	    $memchords = ($memchords{$cctag//$in_context} //= []);
 	    $memcrdinx = 0;
 	    $memorizing = 0;
@@ -1469,9 +1528,70 @@ sub directive {
     if ( $dir =~ /^end_of_(\w+)$/ ) {
 	do_warn("Not in " . ucfirst($1) . " context\n")
 	  unless $in_context eq $1;
-	$self->add( type => "set",
-		    name => "context",
-		    value => $def_context );
+	$grid_type = 0;
+	if ( $in_context eq "grille" && @grille > 1 ) {
+	    my $opts = shift(@grille);
+	    my $id = $opts->{id};
+	    unless ( is_true($opts->{omit}) ) {
+		if ( $opts->{align} && $opts->{x} && $opts->{x} =~ /\%$/ ) {
+		    do_warn( "Useless combination of x percentage with align (align ignored)" );
+		    delete $opts->{align};
+		}
+
+		my $def = !!$id;
+		$id //= "_Image".$assetid++;
+
+		if ( defined $opts->{spread} ) {
+		    $def++;
+		    if ( exists $self->{spreadimage} ) {
+			do_warn("Skipping superfluous spread image");
+		    }
+		    else {
+			$self->{spreadimage} =
+			  { id => $id, space => $opts->{spread} };
+			warn("Got spread image $id with space=$opts->{spread}\n")
+			  if $config->{debug}->{images};
+		    }
+		}
+
+		# Move to assets.
+		$self->{assets}->{$id} =
+		  { type      => "image",
+		    subtype   => "delegate",
+		    delegate  => "Grille",
+		    handler   => "grille2xo",
+		    opts      => $opts,
+		    line      => $grille[0]{line},
+		    data      => \@grille,
+		    context   => $in_context,
+		  };
+		if ( $def ) {
+		    my $label = delete $a->{label};
+		    do_warn("Label \"$label\" ignored on non-displaying $in_context section\n")
+		      if $label;
+		}
+		else {
+		    my $label = delete $opts->{label};
+		    $self->add( type => "set",
+				name => "label",
+				value => $label )
+		      if $label && $label ne "";
+		    $self->add( type => "image",
+				opts => $opts,
+				id => $id );
+		    if ( $opts->{label} ) {
+			push( @labels, $opts->{label} )
+			  unless $in_context eq "chorus"
+			  && !$config->{settings}->{choruslabels};
+		    }
+		}
+	    }
+	}
+	else {
+	    $self->add( type => "set",
+			name => "context",
+			value => $def_context );
+	}
 	$in_context = $def_context;
 	undef $memchords;
 	return 1;
@@ -1495,7 +1615,7 @@ sub directive {
 	# Derived props.
 	$self->propset( "chorus", $prop, $arg ) if $item eq "text";
 
-	#::dump( { %propstack, line => $diag->{line} } );
+	# ::dump( { %propstack, line => $diag->{line} } );
 	return 1;
     }
     # More private hacks.
@@ -1693,11 +1813,15 @@ sub dir_image {
 	    $opts{lc($k)} = $v;
 	}
 	elsif ( $k =~ /^(anchor)$/i
-		&& $v =~ /^(paper|page|column|float|line)$/ ) {
+		&& $v =~ /^(paper|page|allpages|column|float|line)$/ ) {
 	    $opts{lc($k)} = lc($v);
 	}
 	elsif ( $k =~ /^(align)$/i
 		&& $v =~ /^(center|left|right)$/ ) {
+	    $opts{lc($k)} = lc($v);
+	}
+	elsif ( $k =~ /^(bordertrbl)$/i
+		&& $v =~ /^[trbl]*$/ ) {
 	    $opts{lc($k)} = lc($v);
 	}
 	elsif ( $uri ) {
@@ -1916,7 +2040,11 @@ sub dir_meta {
 		return;
 	    }
 
-	    push( @{ $self->{meta}->{$key} }, $val ) if defined $val;
+	    if ( defined $val ) {
+		$self->{meta}->{$key} = [ $self->{meta}->{$key} ]
+		  if $self->{meta}->{$key} && !is_arrayref($self->{meta}->{$key});
+		push( @{ $self->{meta}->{$key} }, $val );
+	    }
 	}
     }
     else {
@@ -2057,6 +2185,7 @@ sub propset {
     $propstack{$name} //= [];
 
     if ( $value eq "" ) {
+	my @toadd;
 	# Pop current value from stack.
 	if ( @{ $propstack{$name} } ) {
 	    my $old = pop( @{ $propstack{$name} } );
@@ -2064,12 +2193,13 @@ sub propset {
 	    # was also a size saved. Pop it.
 	    if ( $prop eq "font" && $old =~ /\s(\d+(?:\.\d+)?)$/ ) {
 		pop( @{ $propstack{"$item-size"} } );
-		$self->add( type  => "control",
-			    name  => "$item-size",
-			    value =>
-			    @{ $propstack{"$item-size"} }
-			    ? $propstack{"$item-size"}->[-1]
-			    : undef )
+		# Resetting the size must follow the font reset.
+		push( @toadd, type  => "control",
+		      name  => "$item-size",
+		      value =>
+		      @{ $propstack{"$item-size"} }
+		      ? $propstack{"$item-size"}->[-1]
+		      : undef );
 	    }
 	}
 	else {
@@ -2085,6 +2215,7 @@ sub propset {
 	$self->add( type  => "control",
 		    name  => $name,
 		    value => $value );
+	$self->add( @toadd ) if @toadd;
 	return 1;
     }
 
@@ -2476,7 +2607,8 @@ sub parse_chord {
 	  if $xp || $xc || $config->{debug}->{chords};
     }
 
-    if ( $xp && $info ) {
+    if ( $xp && $info 
+	 && !( $xc && ( $xc eq "nashville" || $xc eq "roman" ) ) ) {
 	# For transpose/transcode, chord must be wellformed.
 	my $i = $info->transpose( $xp,
 				  $xpose_dir // $global_dir);
@@ -2628,25 +2760,6 @@ sub dump {
 	}
     }
     ::dump($a);
-}
-
-unless ( caller ) {
-    require DDumper;
-    binmode STDERR => ':utf8';
-    ChordPro::Config::configurator();
-    my $s = ChordPro::Song->new;
-    $options->{settings}->{transpose} = 0;
-    for ( @ARGV ) {
-	if ( /^[a-z]/ ) {
-	    $options->{settings}->{transcode} = $_;
-	    next;
-	}
-#	DDumper::DDumper( $s->parse_chord($_) );
-	my ( undef, $i ) = $s->parse_chord($_);
-	warn("$_ => ", $i->name, " => ", $s->add_chord($i, $i->name eq 'D'), "\n" );
-	$xpose++;
-    }
-    DDumper::DDumper($s->{chordsinfo});
 }
 
 1;

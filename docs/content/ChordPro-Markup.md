@@ -1,0 +1,250 @@
+---
+title: "ChordPro markup"
+description: "ChordPro markup"
+---
+
+# ChordPro markup language
+
+The ChordPro markup language provides a means for text
+formatting using a subset of the Pango markup language as developed by
+the Gnome organisation.
+
+The Pango markup language is a very simple SGML-like language that
+allows you specify attributes with the text they are applied to by
+using a small set of markup tags. A simple example of a string using
+markup is:
+
+    <span foreground="blue" size="100">Blue text</span> is <i>cool</i>!
+
+ChordPro implements a variant of a subset of the Pango markup
+language, more suitable for the needs of musicians.
+
+Markup can be applied to all texts and chords, but note that in a
+lyrics line the markup of chords is independent from the markup of the
+lyrics.
+
+## `<span>` tags
+
+The most general markup tag is `<span>`, shown above. The `<span>` tag
+takes attributes in the form `name="value"` or `name='value'`.
+
+Unrecognized and invalid attributes are ignored.
+The following attributes are recognized:
+
+* `font_desc`  
+A font description string, such as "Sans Italic 12"; note that any
+other span attributes will override this description. So if you have
+`"Sans Italic"` and also a `style="normal"` attribute, you will get Sans
+normal, not italic.
+
+  Portability note: Selecting fonts using description strings is
+  inherently dependent on the ChordPro implementation and the system it
+  runs on.
+  Do not use this if you want to share songs with other ChordPro supporting tools.
+
+* `font_family`  
+A font family name such as `normal`, `sans`, `serif` or
+`monospace`.
+
+  Portability note: The family names listed above should be safe to
+  use since they can be supported by all ChordPro implementations.
+
+* `face`  
+A synonym for `font_family`.
+
+* `size`  
+The font size in points, a percentage, or one of the 
+sizes `xx-small`, `x-small`, `small`, `medium`, `large`, `x-large`,
+`xx-large`, or one of the relative sizes `smaller` or `larger`.
+
+  The symbolic sizes are all interpreted relative to the current font
+  size. From `xx-large` to `xx-small` each step is approx. 80%.
+  `smaller` is the same as `small`, `larger` is the same as `large`.
+  
+  Portability note: Actual font sizes depend on the ChordPro
+  implementation. For portability only use percentages or symbolic
+  sizes.
+
+* `style`  
+The slant style, one of `normal`, `oblique`, or `italic`.
+
+* `weight`  
+The font weight - one of `normal` or `bold`.
+
+* `foreground`  
+An RGB colour specification such as `#00FF00` or a colour name such
+as `red`.
+
+  Portability note: Colour names and codes depend on the ChordPro
+  implementation. The following should be portable across all
+  implementations: `#RRGGBB` where RR, GG and BB denote the red, green
+  and blue components of the colour in hexadecimal notation, and the
+  colour names `red`, `green`, `blue`, `yellow`, `magenta`, `cyan`,
+  `white`, `grey`, and `black`.
+
+* `background`  
+An colour to use for the background. See `foreground` for details on colours.
+
+* `underline`  
+The underline style - one of `single`, `double`, or `none`.
+
+* `underline_colour`  
+The colour to be used for underlines.
+See `foreground` for details on colours.
+
+* `overline`  
+The overline style - one of `single`, `double`, or `none`.
+
+* `overline_colour`  
+The colour to be used for overlines.
+See `foreground` for details on colours.
+
+* `rise`  
+The vertical displacement from the baseline, in points or a
+percentage.
+Can be negative for subscript, positive for superscript.
+
+  Portability note: Use percentages only.
+
+* `strikethrough`  
+`true` or `false` whether to strike through the text.
+
+* `strikethrough_colour`  
+The colour to be used for strikes.
+See `foreground` for details on colours.
+
+* `href`  
+The URL for a hyperlink.  
+
+## Convenience tags
+
+There are a number of convenience tags that encapsulate specific span
+options:
+
+* `b`  
+Make the text bold.
+
+* `big`  
+Makes font relatively larger, equivalent to `<span size="larger">`.
+
+* `i`  
+Make the text italic.
+
+* `s`  
+Strikethrough the text.
+
+* `sub`  
+Subscript the text.
+Equivalent to `<span size="smaller" rise="-30%">`.
+
+* `sup`  
+Superscript the text.
+Equivalent to `<span size="smaller" rise="30%">`.
+
+* `small`  
+Makes font relatively smaller, equivalent to `<span size="smaller">`.
+
+* `tt`  
+Use a monospace font.
+
+* `u`  
+Underline the text.
+
+ChordPro allows extending the set of convenience tags in the config file.
+
+## Struts
+
+A _strut_ is a markup element that has a size, but no content.
+Strut markup elements may only occur as closed elements,
+i.e., `<strut/>`.
+
+Struts can have the following attributes:
+
+* `label="`_LABEL_`"`  
+An optional identifying label.
+Strut labels can be used as bookmarks, see [below]({{<
+relref "#bookmarks" >}}).
+
+* `width="`_WIDTH_`"` (short `w`)  
+The width of the strut. Default value is zero.  
+Width may be expressed in points, `em` (font size) or `ex` (half of
+font size).
+
+* `ascender="`_ASC_`"` (short: `a`)  
+The ascender of the strut. Optional.  
+May be expressed in points, `em` (font size) or `ex` (half of
+font size).
+
+* `descender="`_DESC_`"` (short: `d`)  
+The descender of the strut. Optional.  
+May be expressed in points, `em` (font size) or `ex` (half of
+font size).
+
+For example,
+
+    Hello<strut w="20"/>world
+	
+This will create 20pt space between the words.
+
+## Bookmarks
+
+Bookmarks can be used to identify a particular position in the
+document.
+
+To set a bookmark, use a strut with a label. 
+
+    <strut label="verse"/>In the [Am]merry [G]month of [Am]may ...
+
+To refer to a bookmark, use it in a `href` attribute of a `span`
+element. The bookmark must be preceded with a `#`.
+
+    <span href="#verse">Go to verse</span>
+
+You won't see the strut in your document, but when you click on the `Go
+to verse` text the viewer will switch to the page where the bookmark
+is defined. 
+
+ChordPro automatically provides bookmarks for the individual parts of
+the document:
+
+* `cover`, for the cover page;
+* `front`, for the front matter;
+* `toc`, for the (first) table of contents;
+* `top`, for the beginning of the current song;
+* `back`, for the back matter.
+
+If one or more of these are not part of the document, the
+corresponding bookmark will be omitted. If you try to use a
+non-existent bookmark the result will depend on the document viewer.
+Some will do nothing, some will jump to the start of the document.
+
+The songs will get an additional bookmarks with names `song_1`,
+`song_2` and so on. You can change the bookmark for a song with the
+`bookmark` meta data:
+
+    {meta: bookmark my_favourite_song}
+
+See also [Metadata]({{< relref
+"chordpro-configuration-generic/#metadata" >}}).
+
+{{% include ChordPro-Symbols.md %}}
+
+## Using markup in chords
+
+Markup in chords is supported, provided the chord name is not split by
+markup.
+
+For example, this is valid:
+
+    [<span color="red">Daug</span>]
+	
+This is not valid:
+
+    [<span color="red">D<sup>aug</sup></span>]
+
+Marked up chords appear as individual entries in the chord diagrams.
+This may be considered a feature.
+
+## Credits
+
+Parts of this information are derived from the official [Pango documentation](https://docs.gtk.org/Pango/pango_markup.html#pango-markup).

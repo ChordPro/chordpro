@@ -37,8 +37,8 @@ The grid consists of a number of cells that can contain chords. The
 desired number of cells per line can be specified as a `shape`
 property to the `start_of_grid` directive:
 
-`{start_of_grid: shape="`_cells_`"}`  
-`{start_of_grid: shape="`_measures_`x`_beats_`"}`
+`{start_of_grid shape="`_cells_`"}`  
+`{start_of_grid shape="`_measures_`x`_beats_`"}`
 
 There is no semantic difference between the two forms, just pick the
 one that is most convenient.
@@ -102,7 +102,7 @@ Other symbols that can be used:
 
 Example:
 
-    {start_of_grid: shape="1+4x2+4"}
+    {start_of_grid shape="1+4x2+4"}
     A    || G7 . | % . | %% . | . . |
          | C7 . | %  . || G7 . | % . ||
          |: C7 . | %  . :|: G7 . | % . :| repeat 4 times
@@ -118,10 +118,58 @@ See [PDF configuration - grid lines]({{< relref "chordpro-configuration-pdf/#gri
 This directive may include an optional label, to be printed in the
 left margin. For example:,
 
-    {start_of_grid: label="Intro"}
+    {start_of_grid label="Intro"}
 
 The ChordPro reference implementation prints the label in the left
 margin, see [labels]({{< relref "ChordPro-Configuration-PDF#labels" >}}).
+
+## Strums
+
+Strums are a special kind of grid lines. Beside chords they also
+recognize some pseudo-chords that show arrows to indicate strum
+patterns.
+
+A grid line becomes a strum by putting `S` (uppercase `s`)
+**immediately after** the first bar symbol. When using `s` (lowercase
+`s`) the bar symbols and cell lines will be omitted.
+
+The following pseudo-chords can be used:
+ 
+| arrow           | up          |                                   | down        |                                   |
+|-----------------|-------------|:---------------------------------:|-------------|:---------------------------------:|
+| normal          | `up` or `u` | <span class="sym">&#x2190;</span> | `dn` or `d` <sup>(see below)</sup> | <span class="sym">&#x21a0;</span> |
+| accent          | `u+`        | <span class="sym">&#x2193;</span> | `d+`        | <span class="sym">&#x21a3;</span> |
+| arpeggio        | `ua`        | <span class="sym">&#x2191;</span> | `da`        | <span class="sym">&#x21a1;</span> |
+| arpeggio accent | `ua+`       | <span class="sym">&#x2194;</span> | `da+`       | <span class="sym">&#x21a4;</span> |
+| muted           | `ux`        | <span class="sym">&#x2196;</span> | `dx`        | <span class="sym">&#x21a6;</span> |
+| muted accent    | `ux+`       | <span class="sym">&#x2199;</span> | `dx+`       | <span class="sym">&#x21a9;</span> |
+| staccato        | `us`        | <span class="sym">&#x2192;</span> | `ds`        | <span class="sym">&#x21a2;</span> |
+| staccato accent | `us+`       | <span class="sym">&#x2195;</span> | `ds+`       | <span class="sym">&#x21a5;</span> |
+{ .table .table-striped .table-bordered .table-sm }
+
+If you are using notenames (`settings.notenames`) then you can
+not use `d` if that would be a valid chord. Use `dn` instead.
+
+There is also `x` to denote that nothing is strummed and sound is
+muted: <span class="sym">&#x21b0;</span>.
+
+
+For example:
+
+````
+{start_of_grid shape="0+2x4+4"}
+| C ~A . . | C ~A . . |
+|s dn~up dn~up ~up dn~up | dn~up dn~up ~up dn~up |
+| C ~A ~G ~F | . ~F6 F D |
+|s dn~up dn~up ~da ~ua | ~up ~up dn dn |
+| D . . . | % . . . |
+|s d+~u+ ~up d+~u+ ~up | d+~u+ ~up d+~u+ ~ux |
+{end_of_grid}
+````
+
+This will produce a grid similar to:
+
+![]({{< asset "images/ex_grid3.png" >}})
 
 # Directives: end_of_grid
 

@@ -12,28 +12,53 @@ use warnings;
 use feature qw( signatures );
 no warnings "experimental::signatures";
 use utf8;
-use File::Spec;
 use File::Temp ();
 use File::LoadLines;
 use feature 'state';
 
+use ChordPro::Files;
+use ChordPro::Paths;
 use ChordPro::Utils;
 use Text::ParseWords qw(shellwords);
 
 sub DEBUG() { $config->{debug}->{ly} }
 
 sub ly2svg( $self, %args ) {
+
+=for later
+
+    my $elt = $args{elt};
+    my $ctl = { %{ $::config->{delegates}->{$elt->{context}} } };
+
+    $ctl->{program} ||= "lilypond";
+    $ctl->{input} = "argfile";
+    $ctl->{result} = "\%{tmpbase}.cropped.svg";
+    $ctl->{args} =  [ "-dno-point-and-click", "--svg", "--silent",
+		      "--output",  "\%{tmpbase}"
+		    ];
+    $ctl->{align} = "left";
+    unshift( @{ $ctl->{preamble} },
+	     "#(ly:set-option 'crop #t)" );
+
+    use ChordPro::Delegate::Program;
+    ChordPro::Delegate::Program::_cmd2image( $self, $ctl, %args );
+}
+
+sub _ly2svg( $self, %args ) {
+
+=cut
+
     my ( $elt, $pw ) = @args{qw(elt pagewidth)};
 
     state $imgcnt = 0;
     state $td = File::Temp::tempdir( CLEANUP => !$config->{debug}->{ly} );
 
     $imgcnt++;
-    my $src  = File::Spec->catfile( $td, "tmp${imgcnt}.ly" );
-    my $svg  = File::Spec->catfile( $td, "tmp${imgcnt}.svg" );
+    my $src  = fn_catfile( $td, "tmp${imgcnt}.ly" );
+    my $svg  = fn_catfile( $td, "tmp${imgcnt}.svg" );
 
     my $fd;
-    unless ( open( $fd, '>:utf8', $src ) ) {
+    unless ( $fd = fs_open( $src, '>:utf8' ) ) {
 	warn("Error in Lilypond embedding: $src: $!\n");
 	return;
     }
@@ -100,7 +125,8 @@ sub ly2svg( $self, %args ) {
 	$pw = $kv->{width};
     }
 
-    state $lilypond = findexe( "lilypond", "silent" );
+    my $program = $config->{delegates}->{ly}->{program} || "lilypond";
+    state $lilypond = CP->findexe( $program, silent => 1 );
     unless ( $lilypond ) {
 	warn("Error in Lilypond embedding: missing 'lilypond' tool.\n");
 	return;
@@ -117,12 +143,12 @@ sub ly2svg( $self, %args ) {
 	warn( sprintf( "Error in Lilypond embedding (ret = 0x%x)\n", $ret ) );
 	return;
     }
-    if ( ! -s "$im1.cropped.svg" ) {
+    if ( !fs_test( s => "$im1.cropped.svg" ) ) {
 	warn("Error in Lilypond embedding (no output?)\n");
 	return;
     }
 
-    warn("SVG: ", -s $svg, " bytes\n") if $config->{debug}->{ly};
+    warn("SVG: ", fs_test( s => $svg ), " bytes\n") if $config->{debug}->{ly};
     my $scale;
     my $design_scale;
     if ( $kv->{scale} != 1 ) {
@@ -155,7 +181,7 @@ sub options( $data ) {
 
     my @pre;
     my @data = @$data;
-    while ( @$data ) {
+    while ( @data ) {
 	last if $data[0] =~ /^[%\\]/; # LP data
 	push( @pre, shift(@data) );
     }

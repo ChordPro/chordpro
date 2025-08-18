@@ -1,5 +1,8 @@
 #! /bin/make -f
 
+# Windows 10, for Windows installer builds.
+WINVM := Win10ProClassic
+
 ################ Pass-through ################
 
 .PHONY : all
@@ -50,8 +53,15 @@ to_tmp : resources
 
 # Windows 10, for Windows installer builds.
 WINDIR := /Users/Johan/Documents/${PROJECT}
-WINDST := /mnt/c${WINDIR}
-#WINDST := w10:${PROJECT}
+ifeq (${WINVM},Win10ProClassic)
+WIN    := w10c
+WINMNT := /mnt/c2
+else
+WIN    := w10
+WINMNT := /mnt/c
+endif
+WINDST := ${WINMNT}/${WINDIR}
+
 to_win : resources
 	for mnf in ${STDMNF} ; do \
 	    rsync ${RSYNC_ARGS} --files-from=$$mnf ./ ${WINDST}/; \
@@ -90,6 +100,9 @@ release :
 wxg :
 	make -C lib/ChordPro/Wx
 
+sym :
+	make -C lib/ChordPro/res/fonts
+
 # Actualize resources.
 
 LIB := lib/ChordPro
@@ -121,37 +134,52 @@ docs/assets/pub/config61.schema : ${RES}/config/config.schema
 # Verify JSON data
 
 CFGLIB := ${LIB}/res/config
-JSONVALIDATOR = java -jar lib/jar/json-schema-validator-*-lib.jar
-JSONOPTS := --brief
+# JSONVALIDATOR = java -jar lib/jar/json-schema-validator-*-lib.jar
+# JSONOPTS := --brief
+# This requires npm install ajv-cli .
+JSONVALIDATOR = ajv --validate-formats=false
+JSONOPTS := 
 
 checkjson :
 	rm -fr .json
 	mkdir .json
-	for i in ${CFGLIB}/*.json ; \
+	cp -p ${CFGLIB}/config.schema .json/schema.json
+	for i in $(shell git ls-files ${CFGLIB}) ; \
 	do \
+	  case "$$i" in \
+	    */keyboard.json)    continue;; \
+	    */dark.json)        continue;; \
+	    */notes/*)          continue;; \
+	    */*.tmpl)           continue;; \
+	    */*.schema)         continue;; \
+	  esac; \
 	  perl -Ilib/ChordPro/lib script/rrjson.pl --json $$i > .json/`basename $$i`; \
+	  ${JSONVALIDATOR} ${JSONOPTS} -s .json/schema.json -d .json/`basename $$i`; \
 	done
-	cd .json; rm keyboard.json dark.json resetchords.json
-	${JSONVALIDATOR} ${JSONOPTS} \
-	  ${CFGLIB}/config.schema .json/*.json
 	rm -fr .json
 
 # Experimental
 
-WINVM := Win10Pro
-
-wkit : _wkit1 _wkit _wkit2
+wkit : _wkit1 _wkit _wkiti _wkit2
 
 _wkit :
 	${MAKE} to_win
-	ssh ${WIN} gmake -C ChordPro/pp/windows
-	scp ${WIN}:ChordPro/pp/windows/ChordPro-Installer\*.exe ${HOME}/tmp/
+	ssh ${WIN} gmake -C ${WINDIR}/pp/windows
+	cp ${WINDST}/pp/windows/ChordPro-Installer*.exe ${HOME}/tmp/
+
+_wkiti :
+	cp ${WINDST}/pp/windows/ChordPro-Installer*.exe \
+	  ${HOME}/tmp/ChordPro-Installer-6-70-dev-msw-x64.exe
+	scp ${HOME}/tmp/ChordPro-Installer-6-70-dev-msw-x64.exe \
+	  chordpro-site:www/dl/
 
 _wkit1 :
 	-VBoxManage startvm ${WINVM} --type headless
+	sleep 10
 
 _wkit2 :
-	sudo umount /misc/c
+	sleep 10
+	sudo umount ${WINMNT}
 	VBoxManage controlvm ${WINVM} poweroff
 	VBoxManage snapshot ${WINVM} restorecurrent
 

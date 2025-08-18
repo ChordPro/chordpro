@@ -14,6 +14,7 @@ use ChordPro::Utils qw( demarkup is_true );
 use String::Interpolate::Named;
 use utf8;
 use POSIX qw(setlocale LC_TIME strftime);
+use Ref::Util qw( is_arrayref );
 
 use Exporter 'import';
 our @EXPORT;
@@ -59,6 +60,7 @@ sub fmt_subst {
 	$v = 1  if $v=~ /^(true|on)$/i;
 	$m->{"settings.$_"} = $v;
     }
+
     interpolate( { %$s, args => $m,
 		   separator => $config->{metadata}->{separator} },
 		 $t );
@@ -168,7 +170,7 @@ sub prep_outlines {
 
     my @book;
     foreach my $song ( @$book ) {
-	my $meta = $song->{meta};
+	my $meta = { %{$song->{meta}} };
 	next if _suppresstoc($meta);
 
 	my @split;
@@ -178,7 +180,7 @@ sub prep_outlines {
 	    push( @split, [ $coreitem, [""] ] ), next unless $meta->{$coreitem};
 
 	    my @s = map { [ $_ ] }
-	      @{ UNIVERSAL::isa( $meta->{$coreitem}, 'ARRAY' )
+	      @{ is_arrayref( $meta->{$coreitem} )
 		? $meta->{$coreitem}
 		: [ $meta->{$coreitem} ]
 	    };
@@ -273,16 +275,20 @@ sub prep_outlines {
 
     # Sort.
     my $i = -1;
+    use Unicode::Collate;
+    my $collator = Unicode::Collate->new;
     my $srt =
       "sub { " .
       join( " or ",
 	    map { $i++;
 		  my ( $rev, $f ) = /^([-+]*)(.*)/;
 		  my $num = $rev =~ s/\+//g;
+		  my ( $a, $b ) = $rev =~ /-/ ? qw( b a ) : qw( a b );
+		  my $l = "\$$a"."->[$i]";
+		  my $r = "\$$b"."->[$i]";
 		  warn("F: $f, N: $num, R: $rev\n") if PODBG;
-		  "\$" . ( $rev =~ /-/ ? "b" : "a" ) . "->[$i] " .
-		  ($num ? '<=>' : 'cmp') .
-		  " \$" . ( $rev =~ /-/  ? "a" : "b" ) . "->[$i]" }
+		  $num ? "$l <=> $r" : "\$collator->cmp( $l, $r )"
+	       }
 		@{$ctl->{fields}} ) .
       " }";
     warn("SRT; $srt\n") if PODBG;
@@ -290,7 +296,11 @@ sub prep_outlines {
     @book =
       sort $srt
       map { my $t = $_;
-	    [ ( map { demarkup(lc($t->{meta}->{$_}->[0] // "")) }
+	    [ ( map { demarkup(lc(  ( index($_,"sort") && is_arrayref($t->{meta}->{"sort$_"})
+				      ? $t->{meta}->{"sort$_"}->[0]
+				      : undef ) //
+				   $t->{meta}->{$_}->[0] //
+				   "")) }
 		    @fields ),
 	      $_ ] }
 	  @book;

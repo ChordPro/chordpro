@@ -7,9 +7,9 @@ use warnings;
 
 # Author          : Johan Vromans
 # Created On      : Mon Mar  4 11:51:54 2002
-# Last Modified By: Johan Vromans
-# Last Modified On: Mon Dec  6 10:53:33 2021
-# Update Count    : 557
+# Last Modified By: 
+# Last Modified On: Wed Jan 22 14:14:14 2025
+# Update Count    : 559
 # Status          : Unknown, Use with caution!
 
 =head1 NAME
@@ -91,7 +91,7 @@ lightweight so shell scripts can use it to query properties.
 our $VERSION = "2.001";
 
 use Text::ParseWords qw(parse_line);
-use File::LoadLines;
+use ChordPro::Files;
 use String::Interpolate::Named;
 use Carp;
 
@@ -284,10 +284,10 @@ sub _parse_file_internal {
 	# Fetch one.
 	my $cfg = $file;
 	$cfg = $path . $file unless $file =~ m:^/:;
-	next unless -e $cfg;
+	next unless fs_test( e => $cfg );
 
 	my $opt = { strip => qr/[ \t]*\\(?:\r\n|\n|\r)[ \t]*/ };
-	my $lines = loadlines( $cfg, $opt );
+	my $lines = fs_load( $cfg, $opt );
 	$self->parse_lines( $lines, $cfg, $context );
 	$did++;
 

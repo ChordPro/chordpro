@@ -13,26 +13,43 @@ our @EXPORT;
 
 use Wx ':everything';
 use Wx::Locale gettext => '_T';
-use ChordPro::Utils qw( is_msw is_macos );
+use ChordPro::Files;
 
 ################ Constants ################
 
 # Constants not (yet) in this version of Wx, and constants specific to us.
 
 my %const =
-  ( wxID_FULLSCREEN		=> Wx::NewId(),
-    wxICON_NONE			=> 0x00040000,
+  ( wxID_FULLSCREEN	=> Wx::NewId(),	# for menu
+    wxICON_NONE         => 0x00040000,	# unused for now
 
-    $Wx::VERSION < $::Wx_tng ?
-    ( wxEXEC_HIDE_CONSOLE		=> 0x00000020,
-      wxELLIPSIZE_FLAGS_DEFAULT		=> 3,
+    $Wx::VERSION < 3.006 ?
+    ( wxSTC_MARGIN_COLOUR		=> 6,
+    ) : (),
+
+    $Wx::VERSION < 3.004 ?
+    ( wxEVT_COMMAND_FILEPICKER_CHANGED	=> 0x000027b8,
+      wxEVT_COMMAND_DIRPICKER_CHANGED	=> 0x000027b9,
+    ) : (),
+
+    $Wx::VERSION < 3.003 ?
+    ( wxELLIPSIZE_FLAGS_DEFAULT		=> 3,
       wxELLIPSIZE_NONE			=> 0,
       wxELLIPSIZE_START			=> 1,
       wxELLIPSIZE_MIDDLE		=> 2,
       wxELLIPSIZE_END			=> 3,
-      wxEVT_COMMAND_FILEPICKER_CHANGED	=> 0x000027b8,
-      wxEVT_COMMAND_DIRPICKER_CHANGED	=> 0x000027b9,
-    ) : () );
+    ) : (),
+
+    $Wx::VERSION < 3.000 ?
+    ( wxEXEC_HIDE_CONSOLE		=> 0x00000020,
+      # wxID_EXECUTE
+      # wxDIRP_SMALL
+      # wxFLP_SMALL
+      # wxPB_SMALL
+      # wxRESERVE_SPACE_EVEN_IF_HIDDEN
+    ) : (),
+
+  );
 
 no strict 'refs';
 
@@ -81,7 +98,8 @@ sub update_menubar( $self, $sel ) {
 
 sub setup_menubar( $self ) {
 
-    state $expert = $ChordPro::Wx::Config::state{preferences}{expert};
+    state $expert   = $ChordPro::Wx::Config::state{preferences}{expert};
+    state $advanced = $ChordPro::Wx::Config::state{preferences}{advanced};
 
     state $ctl =
       [ [ wxID_FILE,
@@ -101,11 +119,6 @@ sub setup_menubar( $self ) {
 	    [ wxID_ANY, M_EDITOR|M_SONGBOOK, "Export to PDF...",
 	      "Save the preview to a PDF", "OnPreviewSave" ],
 	    [],
-	    [ wxID_ANY, M_EDITOR|M_SONGBOOK, "Save Messages",
-	      "Save the messages to a file", "OnMessagesSave" ],
-	    [ wxID_ANY, M_EDITOR|M_SONGBOOK, "Clear Messages",
-	      "Clear the current messages", "OnMessagesClear" ],
-	    [],
 	    [ wxID_EXIT, M_ALL, "",
 	      "Close Window and Exit", "OnClose" ],
 	  ]
@@ -122,9 +135,9 @@ sub setup_menubar( $self ) {
 	    [ wxID_DELETE, M_EDITOR|M_SONGBOOK, "", "OnDelete" ],
 	    [],
 	    [ wxID_ANY,    M_EDITOR,
-	      "Clear A&nnotations",
-	      "Clear the editor annotations in the edit window.",
-	      "OnClearAnnotations" ],
+	      "Clear Editor Warnings",
+	      "Clear the warning messages in the edit window.",
+	      "OnClearDiagnosticFlags" ],
 	    [],
 	    [ wxID_ANY,    M_EDITOR,
 	      "Convert Text to ChordPro format\tShift-Ctrl-A",
@@ -160,22 +173,22 @@ sub setup_menubar( $self ) {
 	  ]
 	],
 	[ wxID_ANY, M_EDITOR, "&Insert",
-	  [ [ wxID_ANY, M_EDITOR, "Insert {&title}",
+	  [ [ wxID_ANY, M_EDITOR, "{&title}",
 	      "Insert a {title} directive", "OnInsertTitle" ],
-	    [ wxID_ANY, M_EDITOR, "Insert {&subtitle}",
+	    [ wxID_ANY, M_EDITOR, "{&subtitle}",
 	      "Insert a {subtitle} directive", "OnInsertSubtitle" ],
 	    [],
-	    [ wxID_ANY, M_EDITOR, "Insert &Chorus section",
-	      "Insert start/end of chorus directive.", "OnInsertChorus" ],
-	    [ wxID_ANY, M_EDITOR, "Insert &Verse section",
+	    [ wxID_ANY, M_EDITOR, "&Verse section",
 	      "Insert start/end of verse directive.", "OnInsertVerse" ],
-	    [ wxID_ANY, M_EDITOR, "Insert &Grid section",
+	    [ wxID_ANY, M_EDITOR, "&Chorus section",
+	      "Insert start/end of chorus directive.", "OnInsertChorus" ],
+	    [ wxID_ANY, M_EDITOR, "&Tab section",
+	      "Insert start/end of tab directive.", "OnInsertTab" ],
+	    [ wxID_ANY, M_EDITOR, "&Grid section",
 	      "Insert start/end of grid directive.", "OnInsertGrid" ],
-	    [ wxID_ANY, M_EDITOR, "Insert an &arbitrary section",
-	      "Insert start/end of section directive.", "OnInsertSection" ],
 	    [],
-	    [ wxID_ANY, M_EDITOR, "Clos&e current section",
-	      "Insert an end directive for current section.", "OnCloseSection" ],
+	    [ wxID_ANY, M_EDITOR, "Special symbol",
+	      "Insert a special symbol.", "OnInsertSymbol" ],
 	  ]
 	],
 	[ wxID_ANY, M_EDITOR|M_SONGBOOK, "Tasks",
@@ -337,7 +350,8 @@ sub ellipsize( $widget, %opts ) {
     my $home = ChordPro::Paths->get->home;
     $text =~ s/^\Q$home\E\/*/~\//;
     my $width = ($widget->GetSizeWH)[0];
-    $text = Wx::Control::Ellipsize( $text, Wx::ClientDC->new($widget),
+
+    $text = Wx::Control::Ellipsize( $text, Wx::WindowDC->new($widget),
 				    $opts{type} // wxELLIPSIZE_END(),
 				    $width-10, wxELLIPSIZE_FLAGS_DEFAULT() )
       if Wx::Control->can("Ellipsize");
@@ -384,7 +398,7 @@ unless ( $::wxbitmapnew ) {
     use File::Basename;
     *Wx::Bitmap::new = sub {
 	# Only handle Wx::Bitmap->new(file, type) case.
-	goto &$::wxbitmapnew if @_ != 3 || -f $_[1];
+	goto &$::wxbitmapnew if @_ != 3 || fs_test( f => $_[1] );
 	my ($self, @rest) = @_;
 	$rest[0] = ChordPro::Paths->get->findres( basename($rest[0]),
 						  class => "icons" );

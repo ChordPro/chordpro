@@ -5,6 +5,8 @@ description: "Configuration file contents - Generic"
 
 # Configuration file contents - Generic
 
+{{< toc >}}
+
 ## User
 
 These (optional) settings can be used to add user information.
@@ -51,9 +53,6 @@ of them can be changed from the command line.
 	  // Command line: -l (--lyrics-only)
 	  lyrics-only : false
 
-	  // Memorize the chords from sections.
-	  memorize : false
-
 	  // Chords inline instead of above.
 	  // May be a string containing pretext %s posttext.
 	  // Defaults to "[%s]" if set to a value that doesn't contain "%s".
@@ -95,6 +94,11 @@ of them can be changed from the command line.
 	  // Will fallback to the ChordProSymbols font if the selected chord font
 	  // doesn't have the glyphs.
 	  truesf : false
+
+	  // Substitute delta for maj7 in chord names.
+	  // Will fallback to the ChordProSymbols font if the selected chord font
+	  // doesn't have the glyphs.
+	  maj7delta : false
 
 	  // Indent for wrapped lines. Actual indent is the stringwidth.
 	  wrapindent : x
@@ -306,80 +310,40 @@ diagrams, for example for chords that you consider trivial.
 Multiple tables of contents can be produced, controlled by settings in
 the config file.
 
-      // Table of contents.
-      "contents" : [
-          { "fields"   : [ "songindex" ],
-            "label"    : "Table of Contents",
-            "line"     : "%{title}",
-            "pageno"   : "%{page},
-            "omit"     : false,
-            "template" : "stdtoc",
-          },
-          { "fields"   : [ "sorttitle", "artist" ],
-            "label"    : "Contents by Title",
-            "line"     : "%{title}%{artist| - %{}}",
-            "pageno"   : "%{page},
-            "omit"     : false,
-            "template" : "stdtoc",
-          },
-          { "fields"   : [ "artist", "sorttitle" ],
-            "label"    : "Contents by Artist",
-            "line"     : "%{artist|%{} - }%{title}",
-            "pageno"   : "%{page},
-            "omit"     : true,
-            "template" : "stdtoc",
-          },
-      ],
+	contents : [
+	  {
+		fields   : [ songindex ]
+		label    : "Table of Contents"
+		line     : "%{title}"
+		pageno   : "%{page}"
+		omit     : false
+		template : stdtoc
+	  }
+	  {
+		fields   : [ title artist ]
+		label    : "Contents by Title"
+		line     : "%{title}%{artist| - %{}}"
+		pageno   : "%{page}"
+		omit     : false
+		template : stdtoc
+	  }
+	  {
+		fields   : [ artist title ]
+		label    : "Contents by Artist"
+		break    : "%{sortartist|%{}|"%{artist}}
+		line     : "    %{title}"
+		pageno   : "%{page}"
+		omit     : true
+		template : stdtoc
+	  }
+	]
 
 The default configuration generates two tables, one labelled `Table of
 Contents` and one labelled `Contents by Title`.
 The table with title `Contents by Artist` will be omitted (see `omit`) below.
 
-Each table is ordered according to the meta data specified in
-`"fields"`.
-The format of the content lines is specified in `"line"`.
-
-* `fields`  
-The ordering of the table.  
-Prefix the sort key with `+` to force numeric sorting. Likewise, a
-`-` prefix reverses sort order.  
-When you specify a metadata item that has multiple values they are
-split out in the table.  
-`songindex` is a built-in meta data item that yields the sequence
-number of the song in the songbook. Sorting on `songindex` will
-produce the songs in songbook order.
-* `label`  
-The label (title) for this table.
-* `line`  
-The format of the table lines.  
-You can use all song metadata, see [here]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
-* `pageno`  
-The format for the page number.  
-You can use all song metadata, see [here]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
-* `omit`  
-If true, this table is omitted.
-* `template`  
-The template for this table.
-
-### Customizing the table of contents
-
-It is possible to customize the tables of content by providing a
-template.
-The template is processed as a song before the table
-and can be used to set title, subtitle, columns, maybe even an
-introduction text.
-Since the template itself is a song, it can be
-associated with its own config file for unlimited customization.
-
-A template can be specified with a name, e.g. `"stdtoc"` or with a file
-name, e.g. `"mytoc.cho"`. Default is `"stdtoc"`.
-
-Named templates are looked up with extension `.cho` in the `template`
-directories of the ChordPro library. 
-Template files are looked up relative to the _first_ song of the songbook.
-
-Note that the first table in the default configuration is equivalent to
-the legacy table of contents.
+For more information, see [Table of Contents]({{< relref
+"table_of_contents" >}}).
 
 ## Table of Contents (legacy)
 

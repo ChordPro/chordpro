@@ -54,11 +54,12 @@ names. ChordPro predefines the following font families:
 * `sans` and `sans-serif`, a modern sans-serif font;
 * `serif`, a modern serif font;
 * `mono` and `monospace`, a monospace font.
+* `muse` and `musejazztext`, a jazzy font for chords.
 
 ### Why is using font descriptions important?
 
 Because ChordPro allows you to use [markup]({{< relref
-"ChordPro_Markup.html" >}}) in all your lyrics, titles and so on. For
+"ChordPro-Markup.html" >}}) in all your lyrics, titles and so on. For
 example:
 
     [C]winkle, twinkle <bold>little</bold> [G]star

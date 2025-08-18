@@ -21,8 +21,8 @@ sub get( $class, $reset = 0 ) {
 }
 
 use Cwd qw(realpath);
-use File::Spec::Functions qw( catfile catdir splitpath catpath file_name_is_absolute );
 use File::HomeDir;
+use ChordPro::Files;
 
 field $home      :reader;	# dir
 field $configdir :reader;	# dir
@@ -40,7 +40,7 @@ BUILD {
     my $app = "ChordPro";
     my $app_lc = lc($app);
 
-    $pathsep = $self->is_msw ? ';' : ':';
+    $pathsep = is_msw ? ';' : ':';
 
     $home     = realpath( $ENV{HOME} = File::HomeDir->my_home );
 
@@ -69,27 +69,27 @@ BUILD {
     if ( defined( $ENV{XDG_CONFIG_HOME} ) && $ENV{XDG_CONFIG_HOME} ne "" ) {
 	push( @try,
 	      # See https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
-	      # catdir( $ENV{XDG_CONFIG_HOME}, ".config", $app_lc ),
-	      # catdir( $ENV{XDG_CONFIG_HOME}, ".config" ),
-	      # catdir( $ENV{XDG_CONFIG_HOME}, ".$app_lc" ) );
-	      catdir( $ENV{XDG_CONFIG_HOME}, "$app_lc" ) );
+	      # fn_catdir( $ENV{XDG_CONFIG_HOME}, ".config", $app_lc ),
+	      # fn_catdir( $ENV{XDG_CONFIG_HOME}, ".config" ),
+	      # fn_catdir( $ENV{XDG_CONFIG_HOME}, ".$app_lc" ) );
+	      fn_catdir( $ENV{XDG_CONFIG_HOME}, "$app_lc" ) );
     }
     else {
 	push( @try,
-	      catdir( $home, ".config", $app_lc ),
-	      catdir( $home, ".$app_lc" ),
+	      fn_catdir( $home, ".config", $app_lc ),
+	      fn_catdir( $home, ".$app_lc" ),
 	      File::HomeDir->my_dist_config($app) );
     }
 
     for ( @try ) {
-	next unless $_ && -d $_;
+	next unless $_ && fs_test( d => $_);
 	my $path = $self->normalize($_);
 	warn("Paths: configdir try $_ => $path\n") if $self->debug > 1;
-	next unless $path && -d $path;
+	next unless $path && fs_test( d => $path);
 	$configdir = $path;
-	for ( $self->normalize( catfile( $path, "$app_lc.prp" ) ),
-	      $self->normalize( catfile( $path, "$app_lc.json" ) ) ) {
-	    next unless $_ && -f $_;
+	for ( $self->normalize( fn_catfile( $path, "$app_lc.prp" ) ),
+	      $self->normalize( fn_catfile( $path, "$app_lc.json" ) ) ) {
+	    next unless $_ && fs_test( f => $_ );
 	    $configs->{userconfig} = $_;
 	    last;
 	}
@@ -99,7 +99,7 @@ BUILD {
 
     for ( $self->normalize(".$app_lc.json"),
 	  $self->normalize("$app_lc.json") ) {
-	    next unless $_ && -f $_;
+	    next unless $_ && fs_test( f => $_ );
 	$configs->{config} = $_;
 	last;
     }
@@ -117,7 +117,7 @@ BUILD {
     $self->setup_resdirs;
 
     # Check for packaged image.
-    for ( qw( Docker AppImage PPL ) ) {
+    for ( qw( OCI Docker AppImage PPL ) ) {
 	next unless exists $ENV{uc($_)."_PACKAGED"}
 	  && $ENV{uc($_)."_PACKAGED"};
 	$packager = $_;
@@ -140,7 +140,7 @@ method setup_resdirs {
 	next unless $_;
 	my $path = $self->normalize($_);
 	warn("Paths: resdirs try $_ => $path\n") if $self->debug > 1;
-	next unless $path && -d $path;
+	next unless $path && fs_test( d => $path );
 	push( @$resdirs, $path );
     }
 
@@ -161,20 +161,16 @@ method debug {
     $ENV{CHORDPRO_DEBUG_PATHS} || $::config->{debug}->{paths} || 0;
 }
 
-method is_msw {
-    $^O =~ /mswin/i;
-}
-
 # Is absolute.
 
 method is_absolute ( $p ) {
-    File::Spec->file_name_is_absolute( $p );
+    fn_is_absolute( $p );
 }
 
 # Is bare (no volume/dir).
 
 method is_here ( $p ) {
-    my ( $v, $d, $f ) = splitpath($p);
+    my ( $v, $d, $f ) = fn_splitpath($p);
     $v eq '' && $d eq '';
 }
 
@@ -201,7 +197,7 @@ method path ( $p = undef ) {
 	local $ENV{PATH} = $p;
 	my @p = File::Spec->path();
 	# On MSWindows, '.' is always prepended.
-	shift(@p) if $self->is_msw;
+	shift(@p) if is_msw;
 	return @p;
     }
     return File::Spec->path();
@@ -222,15 +218,28 @@ method pathcombine( @d ) {
 method findexe ( $p, %opts ) {
     my $try = $p;
     my $found;
-    if ( $self->is_msw ) {
+    if ( is_msw ) {
 	$try .= ".exe";
     }
-    for ( $self->path ) {
-	my $e = catfile( $_, $try );
-	$found = realpath($e), last if -f -x $e;
+
+    if ( fn_is_absolute($p)
+	 && ChordPro::Files::fs_test( fx => $p ) ) {
+	warn("Paths: findexe $p => ", $self->display($p), "\n")
+	  if $self->debug;
+	return $p;
     }
-    warn("Paths: findexe $p => ", $self->display($found), "\n")
-      if $self->debug;
+
+    for ( $self->path ) {
+	my $e = fn_catfile( $_, $try );
+	$found = realpath($e), last if fs_test( fx => $e );
+    }
+    if ( $self->debug ) {
+	warn("Paths: findexe $p => ", $self->display($found), "\n");
+    }
+    elsif ( !$opts{silent} ) {
+	warn("Could not find $p in ",
+	     join( " ", map { qq{"$_"} } $self->path ), "\n");
+    }
     return $found;
 }
 
@@ -240,7 +249,7 @@ method findcfg ( $p ) {
     my $found;
     my @p;
     if ( $p =~ /\.\w+$/ ) {
-	$found = realpath($p) if -f -s $p;
+	$found = realpath($p) if fs_test( fs => $p );
 	@p = ( $p );
     }
     else {
@@ -250,8 +259,8 @@ method findcfg ( $p ) {
     unless ( $found ) {
 	for ( @$resdirs ) {
 	    for my $cfg ( @p ) {
-		my $f = catfile( $_, "config", $cfg );
-		$found = realpath($f), last if -f -s $f;
+		my $f = fn_catfile( $_, "config", $cfg );
+		$found = realpath($f), last if fs_test( fs => $f );
 	    }
 	}
     }
@@ -265,16 +274,16 @@ method findcfg ( $p ) {
 method findres ( $p, %opts ) {
     my $try = $p;
     my $found;
-    if ( file_name_is_absolute($p) ) {
+    if ( fn_is_absolute($p) ) {
 	$found = realpath($p);
     }
     else {
 	if ( defined $opts{class} ) {
-	    $try = catfile( $opts{class}, $try );
+	    $try = fn_catfile( $opts{class}, $try );
 	}
 	for ( @$resdirs ) {
-	    my $f = catfile( $_, $try );
-	    $found = realpath($f), last if -f -s $f;
+	    my $f = fn_catfile( $_, $try );
+	    $found = realpath($f), last if fs_test( fs => $f );
 	}
     }
     warn("Paths: findres", $opts{class} ? " [$opts{class}]" : "",
@@ -289,11 +298,11 @@ method findresdirs ( $p, %opts ) {
     my $try = $p;
     my @found;
     if ( defined $opts{class} ) {
-	$p = catdir( $opts{class}, $p );
+	$p = fn_catdir( $opts{class}, $p );
     }
     for ( @$resdirs ) {
-	my $d = catdir( $_, $p );
-	push( @found, realpath($d) ) if -d $d;
+	my $d = fn_catdir( $_, $p );
+	push( @found, realpath($d) ) if fs_test( d => $d );
     }
     if ( $self->debug ) {
 	my $i = 0;
@@ -311,10 +320,10 @@ method findresdirs ( $p, %opts ) {
 
 method sibling ( $orig, %opts ) {
     # Split.
-    my ( $v, $d, $f ) = splitpath($orig);
+    my ( $v, $d, $f ) = fn_splitpath($orig);
     my $res;
     if ( $opts{name} ) {
-	$res = catpath( $v, $d, $opts{name} );
+	$res = fn_catpath( $v, $d, $opts{name} );
     }
     else {
 	# Get base and extension.
@@ -326,7 +335,7 @@ method sibling ( $orig, %opts ) {
 	$f = $b;
 	$f .= $e if defined $e;
 	# Join with path.
-	$res = catpath( $v, $d, $f );
+	$res = fn_catpath( $v, $d, $f );
     }
     warn("Paths: sibling $orig => ", $self->display($res), "\n")
       if $self->debug;
@@ -338,7 +347,7 @@ method sibling ( $orig, %opts ) {
 method siblingres ( $orig, $name, %opts ) {
     return unless defined $orig;
     my $try = $self->sibling( $orig, name => $name );
-    my $found = ( $try && -s $try )
+    my $found = ( $try && fs_test( s => $try ) )
       ? $try
       : $self->findres( $name, class => $opts{class} );
     return $found;

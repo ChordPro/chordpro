@@ -29,5 +29,6 @@ For more advanced installation methods, please refer to the following documentat
 * [Installation on Windows]({{< relref "ChordPro-Install-on-Windows" >}})
 * [Installation on macOS]({{< relref "ChordPro-Install-on-MacOS" >}})
 * [Installation on Linux]({{< relref "ChordPro-Install-on-Linux" >}})
+* [Installation on Debian, Ubuntu]({{< relref "ChordPro-Install-on-Debian" >}})
 
 Want to keep track of the latest developments? [Run ChordPro from Git]({{< relref "ChordPro-run-from-Git" >}}).

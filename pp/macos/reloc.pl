@@ -28,6 +28,7 @@ relocate($_) for @ARGV;
 sub relocate {
     my ( $lib ) = @_;
 
+    next if $lib =~ m;/libperl.dylib$;; # dealt elsewhere
     die("$lib: $!") unless -w $lib;
 
     my $odata = `otool -L "$lib"`;

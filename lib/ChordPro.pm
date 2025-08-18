@@ -4,6 +4,8 @@ use v5.26;
 
 package ChordPro;
 
+use ChordPro::Logger;
+use ChordPro::Files;
 use ChordPro::Utils;
 use ChordPro::Chords;
 use ChordPro::Output::Common;
@@ -74,7 +76,7 @@ our $config;
 package ChordPro;
 
 use ChordPro::Paths;
-use Encode qw(decode decode_utf8 encode_utf8);
+use Encode qw(decode_utf8);
 
 sub import {
     # Add private library.
@@ -88,6 +90,11 @@ sub import {
 sub ::run {
     binmode(STDERR, ':utf8');
     binmode(STDOUT, ':utf8');
+    for ( @ARGV ) {
+	next if ref ne "";
+	$_ = decode_utf8($_);
+    }
+
     $options = app_setup( "ChordPro", $VERSION );
     $options->{trace}   = 1 if $options->{debug};
     $options->{verbose} = 1 if $options->{trace};
@@ -147,6 +154,9 @@ sub chordpro {
         elsif ( $of =~ /\.(md|markdown)$/i ) {
             $options->{generate} ||= "Markdown";
         }
+        elsif ( $of =~ /\.meta$/i ) {
+            $options->{generate} ||= "Meta";
+        }
         elsif ( $of =~ /\.(debug)$/i ) {
             $options->{generate} ||= "Debug";
         }
@@ -193,32 +203,53 @@ sub chordpro {
 
     # Check for metadata in filelist. Actually, this works on the
     # command line as well, but don't tell anybody.
-    progress( phase => "Parsing", index => 0, total => 0+@ARGV )
+    progress( phase => "Parsing", index => 0,
+	      total => 0+grep { !/^--/ } @ARGV )
       if @ARGV > 1;
+
+    my %gopts;
     foreach my $file ( @ARGV ) {
-	my $opts;
-	if ( $file =~ /^--((?:sub)?title)\s*(.*)/ ) {
-	    $options->{$1} = decode_utf8($2);
+
+	my @w = ( $file );
+	if ( $file =~ /(^|\s)--\w+/ || $file =~ /^["']/ ) {
+	    @w = Text::ParseWords::shellwords($file);
+	}
+	my %meta;
+	my %defs;
+	my @cfg;
+	my %opts;
+	die("Error in filelist: $file\n")
+	  unless Getopt::Long::GetOptionsFromArray
+	  ( \@w, \%opts, 'config=s@' => \@cfg, 'meta=s%' => \%meta,
+	    'define=s%' => \%defs,
+	    'title=s', 'subtitle=s', 'dir:s', 'filelist:s',
+	  )
+	  && (    ( @w == 1 && ! keys(%opts) ) # filename
+	       || ( @w == 0 &&   keys(%opts) ) # options
+	     );
+
+	for ( qw( title subtitle ) ) {
+	    next unless defined $opts{$_};
+	    $options->{$_} = $opts{$_};
+	}
+	for ( qw( filelist dir ) ) {
+	    next unless defined $opts{$_};
+	    $gopts{$_} = $opts{$_} eq "" ? undef : $opts{$_};
+	}
+	unless ( @w ) {
+	    progress( msg => $file ) if @ARGV > 1 && $file !~ /^--/;
 	    next;
 	}
-	if ( $file =~ /(^|\s)--(?:meta|config|define)\b/ ) {
-	    # Break into words.
-	    my @w = Text::ParseWords::shellwords($file);
-	    my %meta;
-	    my %defs;
-	    my @cfg;
-	    die("Error in filelist: $file\n")
-	      unless Getopt::Long::GetOptionsFromArray
-	      ( \@w, 'config=s@' => \@cfg, 'meta=s%' => \%meta,
-		'define=s%' => \%defs,
-	      )
-	      && @w == 1;
-	    $file = $w[0];
-	    $opts = { meta => { map { $_, [ $meta{$_} ] } keys %meta },
-		      defs => \%defs };
-	    if ( @cfg ) {
-		$opts->{meta}->{__config} = \@cfg;
-	    }
+
+	$file = $w[0];
+	if ( defined($gopts{dir})
+	     && !fn_is_absolute($file) ) {
+	    $file = fn_catfile( $gopts{dir}, $file );
+	}
+	my $opts = { meta => { map { $_, [ $meta{$_} ] } keys %meta },
+		     defs => \%defs };
+	if ( @cfg ) {
+	    $opts->{meta}->{__config} = \@cfg;
 	}
 	$opts->{generate} = $options->{generate};
 	# Wx runs on temp files, so pass real filename in.
@@ -286,8 +317,7 @@ sub chordpro {
     # array of lines to be written.
     if ( $res && @$res > 0 ) {
         if ( $of && $of ne "-" ) {
-            open( my $fd, '>', $of );
-	    binmode( $fd, ":utf8" );
+            my $fd = fs_open( $of, '>:utf8' );
 	    push( @$res, '' ) unless $res->[-1] eq '';
 	    print { $fd } ( join( "\n", @$res ) );
 	    close($fd);
@@ -333,7 +363,10 @@ active.
 
 =item B<--cover=>I<FILE>
 
-See B<--front-matter>.
+Prepends the contents of the named PDF document to the output. This can
+be used to add cover pages.
+
+See also B<--title>.
 
 =item B<--csv>
 
@@ -370,10 +403,10 @@ This option may be specified multiple times.
 Song file names listed on the command line are processed I<after> the
 files from the filelist arguments.
 
-=item B<--front-matter=>I<FILE> B<--cover=>I<FILE>
+=item B<--front-matter=>I<FILE>
 
 Prepends the contents of the named PDF document to the output. This can
-be used to produce documents with front matter (cover) pages.
+be used to produce documents with front matter pages.
 
 =item B<--lyrics-only> (short: B<-l>)
 
@@ -443,6 +476,8 @@ Title (for songbooks).
 
 If specified and a table of contents is requested, a nice coverpage
 will be added.
+
+Note that B<--title> overrides B<--cover>.
 
 =item B<--toc> (short: B<-i>)
 
@@ -534,11 +569,11 @@ Prints chord diagrams of all user defined chords used in a song.
 
 =item B<--even-pages-number-left> (short B<-L>)
 
-Prints even/odd pages with pages numbers left on even pages.
+Not supported. Use C<pdf.even-odd-pages> in the config instead.
 
 =item B<--odd-pages-number-left>
 
-Prints even/odd pages with pages numbers left on odd pages.
+Not supported. Use C<pdf.even-odd-pages> in the config instead.
 
 =item B<--page-size=>I<FMT> (short: B<-P>) *
 
@@ -665,9 +700,10 @@ by enabling and modifyng just a few items at a time.
 
 =item B<--print-default-config>
 
-Prints the default configuration to standard output, and exits.
+If used once, behaves like `--print-template-config`. This is to avoid
+confusing novice users.
 
-The default configuration is commented to explain its contents.
+To get the full default configuration, repeat this option.
 
 =item B<--print-final-config>
 
@@ -714,8 +750,6 @@ Provides more verbose information of what is going on.
 =cut
 
 use Getopt::Long 2.13 qw( :config no_ignorecase );
-use File::Spec;
-use File::LoadLines;
 
 # Package name.
 my $my_package;
@@ -805,8 +839,9 @@ sub app_setup {
 	  "diagrams=s",			# Prints chord diagrams
           "encoding=s",
 	  "csv!",			# Generates contents CSV
-	  "front-matter|cover=s",	# Front matter page(s)
-	  "back-matter=s",		# Back matter page(s)
+	  "front-matter=s",		# Front matter page(s)
+	  "cover=s",			# Cover page(s)
+	  "back-matter|back=s",		# Back matter page(s)
 	  "filelist=s@",		# List of input files
 	  "title=s",			# Title (for books)
 	  "subtitle=s",			# Subtitle (for books)
@@ -863,7 +898,7 @@ sub app_setup {
           'nouserconfig|no-userconfig',
 	  'nodefaultconfigs|no-default-configs|X',
 	  'define=s%',
-	  'print-default-config'  => \$defcfg,
+	  'print-default-config+' => \$defcfg,
 	  'print-final-config'    => \$fincfg,
 	  'print-delta-config'    => \$deltacfg,
 	  'print-template-config' => \$tmplcfg,
@@ -963,10 +998,10 @@ sub app_setup {
                 foreach my $c ( @$_ ) {
 		    my $try = $c;
 		    # Check for resource names.
-		    if ( ! -r $try ) {
+		    if ( !fs_test( 'r', $try ) ) {
 			$try = CP->findcfg($c);
 		    }
-                    die("$c: $!\n") unless $try && -r $try;
+                    die("$c: $!\n") unless $try && fs_test( 'r', $try );
 		    $c = $try;
                 }
                 next;
@@ -975,7 +1010,7 @@ sub app_setup {
 	    next if $clo->{nodefaultconfigs};
 	    next unless $configs{$config};
             $_ = [ $configs{$config} ];
-            undef($_) unless -r -f $_->[0];
+            undef($_) unless fs_test( 'fr', $_->[0] );
         }
     }
     # If no config was specified, and no default is available, force no.
@@ -984,33 +1019,32 @@ sub app_setup {
     }
     $clo->{nosongconfig} ||= $clo->{nodefaultconfigs};
 
-    # Decode command line strings.
-    # File names are dealt with elsewhere.
-    for ( qw(transcode title subtitle ) ) {
-	next unless defined $clo->{$_};
-	$clo->{$_} = decode_utf8($clo->{$_});
-    }
-    ####TODO: Should decode all, and remove filename exception.
-    for ( keys %{ $clo->{define} } ) {
-	$clo->{define}->{$_} = decode_utf8($clo->{define}->{$_});
-    }
-
     # Plug in command-line options.
     @{$options}{keys %$clo} = values %$clo;
     $::options = $options;
     # warn(::dump($options), "\n") if $options->{debug};
 
-    if ( $tmplcfg ) {
+    # To avoid confusion, produce a template if the user asks for a
+    # default config.
+    # Unless she insists...
+    if ( $defcfg >= 2 ) {
 	use File::Copy;
-	my $cfg = File::Spec->catfile( CP->findresdirs("config")->[-1],
-				       "config.tmpl" );
+	my $cfg = fn_catfile( CP->findresdirs("config")->[-1],
+			      "chordpro.json" );
 	binmode STDOUT => ':raw';
 	copy( $cfg, \*STDOUT );
 	exit 0;
     }
-    if ( $defcfg || $fincfg || $deltacfg ) {
-	print ChordPro::Config::config_final( default => $defcfg,
-					      delta   => $deltacfg );
+    if ( $tmplcfg || $defcfg ) {
+	use File::Copy;
+	my $cfg = fn_catfile( CP->findresdirs("config")->[-1],
+			      "config.tmpl" );
+	binmode STDOUT => ':raw';
+	copy( $cfg, \*STDOUT );
+	exit 0;
+    }
+    if ( $fincfg || $deltacfg ) {
+	print ChordPro::Config::config_final( delta   => $deltacfg );
 	exit 0;
     }
 
@@ -1029,13 +1063,17 @@ sub app_setup {
     if ( $clo->{filelist} ) {
 	my @files;
 	foreach ( @{ $clo->{filelist} } ) {
-	    my $list = loadlines( $_, $clo );
+	    push( @files, "--filelist=" . qquote($_) );
+	    my $dir = fn_dirname($_);
+	    my $list = fs_load( $_, $clo );
+	    push( @files, "--dir=" . qquote($dir) );
 	    foreach ( @$list ) {
 		next unless /\S/;
 		next if /^#/;
 		s/[\r\n]+$//;
-		push( @files, encode_utf8($_) );
+		push( @files, $_ );
 	    }
+	    push( @files, "--filelist", "--dir" );
 	}
 	if ( @files ) {
 	    if ( $files[0] =~ /\.pdf$/i ) {
@@ -1110,7 +1148,7 @@ use List::Util qw(uniq);
 sub ::runtimeinfo {
     my $level = shift // "normal";
     my %i = %{runtime_info($level)};
-    my $fmt0   = "  %-22.22s %-10s";
+    my $fmt0   = "  %-26.26s %-10s";
     my $fmt2   = $fmt0 . "\n";
     my $fmt3   = $fmt0 . " (%s)\n";
 
@@ -1289,7 +1327,14 @@ sub runtime_info {
 	$vv->("HarfBuzz::Shaper");
 	$p[-1]->{library} = $dd->(HarfBuzz::Shaper::hb_version_string());
     };
-    $vv->("File::LoadLines");
+    eval {
+	require String::Interpolate::Named;
+	$vv->("String::Interpolate::Named");
+    };
+    eval {
+	require File::LoadLines;
+	$vv->("File::LoadLines");
+    };
     eval {
 	require PDF::Builder;
 	$vv->("PDF::Builder");
@@ -1371,31 +1416,32 @@ Options:
     --encoding=ENC                Encoding for input files (UTF-8)
     --filelist=FILE               Reads song file names from FILE
     --fragment -F                 Partial (incomplete) song
-    --front-matter=FILE           Add cover pages from PDF document
+    --front-matter=FILE           Add front matter pages from PDF document
     --lyrics-only  -l             Only prints lyrics
     --meta KEY=VALUE              Add meta data
     --output=FILE  -o             Saves the output to FILE
     --[no]strict                  Strict conformance
     --start-page-number=N  -p     Starting page number [1]
+    --subtitle=VALUE		  Use with --title for a nice subtitle.
+    --title=VALUE		  Adds a nice cover page using this title.
     --toc --notoc -i              Generates/suppresses a table of contents
     --transcode=SYS  -xc          Transcodes to notation system
     --transpose=N  -x             Transposes by N semi-tones
     --version  -V                 Prints version and exits
 
 Chordii compatibility.
-Options marked with * are better specified in the config file.
-Options marked with - are ignored.
+Options marked with * are better handled in the config file.
     --chord-font=FONT  -C         *Sets chord font
     --chord-grid-size=N  -s       *Sets chord diagram size [30]
     --chord-grids-sorted  -S      *Prints chord diagrams ordered by key
     --chord-size=N  -c            *Sets chord size [9]
-    --dump-chords  -D             Dumps chords definitions (PostScript)
+    --dump-chords  -D             Dumps chords definitions (PDF)
     --dump-chords-text  -d        Dumps chords definitions (Text)
-    --even-pages-number-left  -L  *Even pages numbers on left
-    --odd-pages-number-left       *Odd pages numbers on left
+    --even-pages-number-left  -L  *Not supported
+    --odd-pages-number-left       *Not supported.
     --no-chord-grids  -G          *Disables printing of chord diagrams
     --no-easy-chord-grids  -g     Not supported
-    --page-number-logical  -n     -Numbers logical pages, not physical
+    --page-number-logical  -n     Not supported
     --page-size=FMT  -P           *Specifies page size [letter, a4 (default)]
     --single-space  -a            *Automatic single space lines without chords
     --text-size=N  -t             *Sets text size [12]

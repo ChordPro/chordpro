@@ -19,6 +19,7 @@ our @EXPORT = qw( $config );
 
 use Test::More ();
 
+use ChordPro::Files;
 use ChordPro::Config;
 use ChordPro::Paths;
 use ChordPro::Chords;
@@ -54,7 +55,8 @@ sub is_deeply {
 	    }
 	}
 	for ( qw( instrument user key_from key_actual chords numchords
-		  _configversion ) ) {
+		  _configversion bookmark
+	       ) ) {
 	    delete $got->{meta}->{$_} unless exists $expect->{meta}->{$_};
 	}
     }
@@ -108,15 +110,13 @@ sub cmp {
     }
 }
 
-use File::LoadLines qw( loadlines );
-
 sub differ {
     my ($file1, $file2) = @_;
     $file2 = "$file1" unless $file2;
     $file1 = "$file1";
 
-    my @lines1 = loadlines($file1);
-    my @lines2 = loadlines($file2);
+    my @lines1 = fs_load( $file1, { fail => 'hard' } );
+    my @lines2 = fs_load( $file2, { fail => 'hard' } );
     my $linesm = @lines1 > @lines2 ? @lines1 : @lines2;
     for ( my $line = 1; $line < $linesm; $line++ ) {
 	next if $lines1[$line] eq $lines2[$line];

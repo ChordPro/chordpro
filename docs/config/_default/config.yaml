@@ -2,7 +2,7 @@
 
 title: ChordPro
 baseURL: https://www.chordpro.org/beta/
-languageCode: en-EN
+languageCode: en-GB
 
 # Build properties.
 
@@ -26,6 +26,10 @@ params:
   keywords: music,chord,chords,chordii,chordpro,typesetting,chopro,cho,crd,guitar,music sheets
 
   stable: https://www.chordpro.org/chordpro/
+  
+  link_github: https://github.com/ChordPro/chordpro
+  link_paypal: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=WDKWDE6R3KR98&lc=GB&item_name=ChordPro&currency_code=EUR&bn=PP-DonationsBF%3Abtn_donate_LG.gif%3ANonHosted
+  link_coffee: https://ko-fi.com/chordpro
 
 # Currently the goldmark parser misinterprets `[%`_name_`%]`.
 #markup:

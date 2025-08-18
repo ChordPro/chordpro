@@ -1,5 +1,79 @@
 # Release info
 
+## 6.080.0
+
+Released: 2025-08-18
+
+
+### Highssortlights
+
+* Support for [strum patterns](https://www.chordpro.org/chordpro/directives-env_grid/#strums) in grids.
+* [Bookmarks](https://www.chordpro.org/chordpro/chordpro_markup/#bookmarks).
+* [Break items](https://www.chordpro.org/chordpro/table_of_contents/#break) in Table of Content lines.
+* [Improved control](https://www.chordpro.org/chordpro/chordpro-configuration-pdf/#songbook-pages) over page order and alignment.
+
+### GUI improvements
+
+* You can now set the preferred filename extension for ChordPro song file names.
+* When saving a preview PDF, the default output filename is derived from the current song or folder.
+* ChordPro will no longer offer saving the preview on exit. It can easily be regenerated and exported if needed.
+* The save and clean operations for the messages are now provided by buttons on the messages pane itself.
+* Simplified the editor Insert menu. Add inserting special symbols.
+* Typing a `{start_of_section}` will automatically provide the corresponding `{end_of_section}`.
+
+### Other improvements
+
+* New metadata directives: [sortartist](https://www.chordpro.org/chordpro/directives-sortartist/) and [tag](https://www.chordpro.org/chordpro/directives-tag/).
+* Titles, artists and outlines will now be sorted according to the Unicode Technical Standard #10 (UTS #10) Collation Algorithm.
+* New font: [MuseJazzText](https://www.chordpro.org/chordpro/chordpro-fonts/#method-1-using-a-font-description).
+* Chord diagrams can now have nice, curly barres. Thanks to Michail Vourlakos for contributing.
+* (Experimental) [allpages](https://www.chordpro.org/chordpro/directives-image/#anchoranchor) anchor for images. Similar to the _page_ anchor, but the image is repeated on *every* page of the song.
+* Edon V. kindly donated a state-of-the art revised version of the config schema. Thanks, Edon!
+* Lilypond delegate supports a property "program" to explicitly designate the Lilypond program.
+* Filenames in filelists may be quoted, even if no options are involved.
+* Filenames in filelists are considered relative to the filelist.
+* Are you using the preprocessor in your abc and ly environments? Please use the more general `parser.preprocess.env-`... instead.
+* Config [settings.maj7delta](https://www.chordpro.org/chordpro/chordpro-configuration-generic/#general-settings) to obtain a delta symbol instead of 'maj7' in chord names.
+* You can now use special [ChordPro Symbols](https://www.chordpro.org/chordpro/chordpro-symbols/) from markup.
+* Songbooks now can have both a [cover](https://www.chordpro.org/chordpro/using-chordpro/#cover) and [front matter](https://www.chordpro.org/chordpro/using-chordpro/#front-matter).
+* To avoid confusion, command line option `--print-default-config` will now print the **template** config instead of the **full** config. To print the full config, repeat the option.
+* In case of emergency it is now possible to obtain chord brackets in lyrics and annotations.
+* Allow name based array access in config augment.
+* Font specifications in the config may now carry (some) properties. E.g. `pdf.fonts.comment_box : "sans 12; color=blue; frame=1"`.
+* Command line options `--even-pages-number-left` (`-L`) and `--odd-pages-numbers-left` are no longer functional. They did the wrong thing anyway. Use [`pdf.songbook`](https://www.chordpro.org/chordpro/chordpro-configuration-pdf/#songbook-pages) in the config file instead.
+
+### Bug Fixes
+
+* Prevent "settings migrated" dialog if not applicable.
+* Some issues with Unicode filenames on Windows.
+* Some issues with line endings on Windows.
+* Some issues with button bitmaps on Windows.
+* Fix image alignment with indent.
+* Fix title swap even when using title-even format.
+* Fix problems with save/restore settings on Windows.
+* Fix reading from "-" (standard input).
+* Fix problem with a2crd from wx on Windows.
+* Fix issues #459, #512, #528, #534, #537.
+* Fix issue #544 Issue with special character in metadata during export when used in filename.
+* (PDF) Fix progress count if multi-pass.
+* Fix diagnostic in file load.
+* Fix *size reset after *font reset.
+* Fix/Doc song and page metadata substitutions.
+* Suppress labels for grids when lyrics-only.
+* Suppress empty lines after grids when lyrics-only.
+* Fix crash with chords in grid margins.
+* Fix topic localization in fix_musicsyms.
+* TextBlock: Default colour to style colour.
+* (Wx) Prevent recursion in saved preferences.
+* Fix #555, #550, #542, #315, #569.
+* Fix crash with {comment: [chord]} in 2-pass mode.
+* Fix problems with images in 2-pass mode.
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.  
+Please use the [issue tracker](https://github.com/ChordPro/chordpro/issues) for bugs reports.
+
 ## 6.070
 
 Released: 2024-12-25
@@ -17,9 +91,9 @@ Released: 2024-12-25
 * Sync config files between git and MANIFEST.
 * (Paths) Allow absolute filenames in findres.
 * (Makefile) Add Ref::Util dependency.
-* Progress reporting. Options ``progress_callabck and -I. Also enabled with --verbose.
+* Progress reporting. Options `progress_callback` and -I. Also enabled with --verbose.
 * New meta: page.class (first, title, default) and page.side (left, right).
-* Distinct page clases for even pages; filler class for alignment pages.
+* Distinct page classes for even pages; filler class for alignment pages.
 * Add "omit" property for delegated images.
 * Allow 'mi' as short for 'min' chord quality.
 * Make properties parsing in directives more robust.
@@ -39,11 +113,6 @@ Released: 2024-12-25
 * (Wx, MSWindows only) Use Edge for WebView (PDF view). Requires custom wxWidgets build.
 * Change handling of NC (issue #441).
 * Fix invalid font names for Courier/Mono Italic (should be Oblique).
-
-### Social and support
-
-[User community](https://groups.io/g/ChordPro) for feedback and help.  
-Please use the [issue tracker](https://github.com/ChordPro/chordpro/issues) for bugs reports.
 
 ## 6.060
 

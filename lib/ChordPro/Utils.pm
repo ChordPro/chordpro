@@ -7,26 +7,17 @@ use utf8;
 use Carp;
 use feature qw( signatures );
 no warnings "experimental::signatures";
-use Ref::Util qw(is_arrayref);
+use Ref::Util qw( is_arrayref is_hashref );
 
 use Exporter 'import';
 our @EXPORT;
 our @EXPORT_OK;
 
-################ Platforms ################
-
-use constant MSWIN => $^O =~ /MSWin|Windows_NT/i ? 1 : 0;
-
-sub is_msw ()   { MSWIN }
-sub is_macos () { $^O =~ /darwin/ }
-sub is_wx ()    { main->can("OnInit") }
-
-push( @EXPORT, qw( is_msw is_macos is_wx ) );
+use ChordPro::Files;
 
 ################ Filenames ################
 
 use File::Glob ( ":bsd_glob" );
-use File::Spec;
 
 # Derived from Path::ExpandTilde.
 
@@ -35,18 +26,18 @@ use constant BSD_GLOB_FLAGS => GLOB_NOCHECK | GLOB_QUOTE | GLOB_TILDE | GLOB_ERR
   | ($^O =~ m/\A(?:MSWin32|VMS|os2|dos|riscos)\z/ ? GLOB_NOCASE : 0);
 
 # File::Glob did not try %USERPROFILE% (set in Windows NT derivatives) for ~ before 5.16
-use constant WINDOWS_USERPROFILE => MSWIN && $] < 5.016;
+use constant WINDOWS_USERPROFILE => is_msw && $] < 5.016;
 
 sub expand_tilde ( $dir ) {
 
     return undef unless defined $dir;
-    return File::Spec->canonpath($dir) unless $dir =~ m/^~/;
+    return fn_canonpath($dir) unless $dir =~ m/^~/;
 
     # Parse path into segments.
-    my ( $volume, $directories, $file ) = File::Spec->splitpath( $dir, 1 );
-    my @parts = File::Spec->splitdir($directories);
+    my ( $volume, $directories, $file ) = fn_splitpath( $dir, 1 );
+    my @parts = fn_splitdir($directories);
     my $first = shift( @parts );
-    return File::Spec->canonpath($dir) unless defined $first;
+    return fn_canonpath($dir) unless defined $first;
 
     # Expand first segment.
     my $expanded;
@@ -58,40 +49,16 @@ sub expand_tilde ( $dir ) {
 	($expanded) = bsd_glob( $pattern, BSD_GLOB_FLAGS );
 	croak( "Failed to expand $first: $!") if GLOB_ERROR;
     }
-    return File::Spec->canonpath($dir)
+    return fn_canonpath($dir)
       if !defined $expanded or $expanded eq $first;
 
     # Replace first segment with new path.
-    ( $volume, $directories ) = File::Spec->splitpath( $expanded, 1 );
-    $directories = File::Spec->catdir( $directories, @parts );
-    return File::Spec->catpath($volume, $directories, $file);
+    ( $volume, $directories ) = fn_splitpath( $expanded, 1 );
+    $directories = fn_catdir( $directories, @parts );
+    return fn_catpath($volume, $directories, $file);
 }
 
 push( @EXPORT, 'expand_tilde' );
-
-sub findexe ( $prog, $silent = 0 ) {
-    my @path;
-    if ( MSWIN ) {
-	$prog .= ".exe" unless $prog =~ /\.\w+$/;
-	@path = split( ';', $ENV{PATH} );
-	unshift( @path, '.' );
-    }
-    else {
-	@path = split( ':', $ENV{PATH} );
-    }
-    foreach ( @path ) {
-	my $try = "$_/$prog";
-	if ( -f -x $try ) {
-	    #warn("Found $prog in $_\n");
-	    return $try;
-	}
-    }
-    warn("Could not find $prog in ",
-	 join(" ", map { qq{"$_"} } @path), "\n") unless $silent;
-    return;
-}
-
-push( @EXPORT, 'findexe' );
 
 sub sys ( @cmd ) {
     warn("+ @cmd\n") if $::options->{trace};
@@ -215,6 +182,17 @@ sub parse_kvm ( @lines ) {
 }
 
 push( @EXPORT, 'parse_kvm' );
+
+# Odd/even.
+
+sub is_odd( $arg ) {
+    ( $arg % 2 ) != 0;
+}
+sub is_even( $arg ) {
+    ( $arg % 2 ) == 0;
+}
+
+push( @EXPORT, qw( is_odd is_even ) );
 
 # Map true/false etc to true / false.
 
@@ -361,7 +339,7 @@ sub prpadd2cfg ( $cfg, @defs ) {
 	    # use DDP; p($value, as => "Value ->");
 	}
 
-	# Note that ':' is not oficailly supported by RRJson.
+	# Note that ':' is not oficially supported by RRJson.
 	my @keys = split( /[:.]/, $key );
 	my $lastkey = pop(@keys);
 
@@ -373,17 +351,41 @@ sub prpadd2cfg ( $cfg, @defs ) {
 	}
 
 	my $cur = \$cfg;		# current pointer in struct
+	my $errkey = "";		# error trail
+	if ( $keys[0] eq "chords" ) {
+	    # Chords are not in the config, but elsewhere.
+	    $cur = \ChordPro::Chords::config_chords();
+	    $errkey = "chords.";
+	    shift(@keys);
+	}
 
 	# Step through the keys.
-	my $errkey = "";		# error trail
 	foreach ( @keys ) {
-	    if ( UNIVERSAL::isa( $$cur, 'ARRAY' ) ) {
-		die("Array ", substr($errkey,0,-1),
-		    " requires integer index (got \"$_\")\n")
-		  unless /^[<>]?[-+]?\d+$/;
-		$cur = \($$cur->[$_]);
+	    if ( is_arrayref($$cur) ) {
+		my $ok;
+		if ( /^[<>]?[-+]?\d+$/ ) {
+		    $cur = \($$cur->[$_]);
+		    $ok++;
+		}
+		elsif ( ! exists( $$cur->[0]->{name} ) ) {
+		    die("Array ", substr($errkey,0,-1),
+			" requires integer index (got \"$_\")\n");
+		}
+		else {
+		    for my $i ( 0..@{$$cur} ) {
+			if ( $$cur->[$i]->{name} eq $_ ) {
+			    $cur = \($$cur->[$i]);
+			    $ok++;
+			    last;
+			}
+		    }
+		}
+		unless ( $ok ) {
+		    die("Array ", substr($errkey,0,-1),
+				" has no matching element with name \"$_\"\n");
+		}
 	    }
-	    elsif ( UNIVERSAL::isa( $$cur, 'HASH' ) ) {
+	    elsif ( is_hashref($$cur) ) {
 		$cur = \($$cur->{$_});
 	    }
 	    else {
@@ -396,7 +398,7 @@ sub prpadd2cfg ( $cfg, @defs ) {
 	}
 
 	# Final key.
-	if ( UNIVERSAL::isa( $$cur, 'ARRAY' ) ) {
+	if ( is_arrayref($$cur) ) {
 	    if ( $lastkey =~ />([-+]?\d+)?$/ ) {	# append
 		if ( defined $1 ) {
 		    splice( @{$$cur},
@@ -428,8 +430,15 @@ sub prpadd2cfg ( $cfg, @defs ) {
 		$$cur->[$lastkey] = $value;
 	    }
 	}
-	elsif ( UNIVERSAL::isa( $$cur, 'HASH' ) ) {
-	    $$cur->{$lastkey} = $value;
+	elsif ( is_hashref($$cur) ) {
+	    if ( $errkey =~ /^chords\./ ) {
+		# Chords must be defined.
+		ChordPro::Chords::add_config_chord( { name => $lastkey,
+						      %$value } );
+	    }
+	    else {
+		$$cur->{$lastkey} = $value;
+	    }
 	}
 	else {
 	    die("Key ", substr($errkey,0,-1),
@@ -470,8 +479,9 @@ sub maybe ( $key, $value, @rest ) {
 push( @EXPORT, "maybe" );
 
 # Min/Max.
-sub min { $_[0] < $_[1] ? $_[0] : $_[1] }
-sub max { $_[0] > $_[1] ? $_[0] : $_[1] }
+use List::Util ();
+*min = \&List::Util::min;
+*max = \&List::Util::max;
 
 push( @EXPORT, "min", "max" );
 
@@ -629,5 +639,27 @@ sub propitems_re() {
 
 push( @EXPORT, "propitems_re" );
 push( @EXPORT_OK, "propitems" );
+
+# For debugging encoding problems.
+
+sub as( $s ) {
+    return "<undef>" unless defined $s;
+    $s =~ s{ ( [^\x{20}-\x{7f}] ) }
+	   { join( '', map { sprintf '\x{%02x}', ord $_ } split //, $1) }gex;
+    return $s;
+}
+
+push( @EXPORT_OK, "as" );
+
+sub enumerated( @s ) {
+    return "" unless @s;
+    my $last = pop(@s);
+    my $ret = "";
+    $ret .= join(", ", @s) . " and " if @s;
+    $ret .= $last;
+    return $ret;
+}
+
+push( @EXPORT_OK, "enumerated" );
 
 1;

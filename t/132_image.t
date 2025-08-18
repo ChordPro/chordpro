@@ -87,6 +87,7 @@ my $song = {
 				  },
 			 'green' => {
 				     'delegate' => 'SVG',
+				     'context' => 'svg',
 				     'data' => [
 						'<svg width="50" height="50" viewBox="0 0 50 50">',
 						'<rect x="0" y="0" width="100%" height="100%" stroke="none" fill="lime"/>',
@@ -105,6 +106,7 @@ my $song = {
 					 'type' => 'image',
 					 'subtype' => 'delegate',
 					 'delegate' => 'SVG',
+					 'context' => 'svg',
 					 'data' => [
 						    '<svg width="50" height="50" viewBox="0 0 50 50">',
 						    '<rect x="0" y="0" width="100%" height="100%" stroke="none" fill="blue"/>',

@@ -42,7 +42,7 @@ my $song = {
 	       { context => 'grid',
 		 name => 'gridparams',
 		 type => 'set',
-		 value => [4, 3, 0, 0, '']},
+		 value => [4, 3, 0, 0]},
 	       { context => 'grid',
 		 type => 'gridline',
 		 tokens => [
@@ -170,7 +170,7 @@ $song = {
       context => 'grid',
       name => 'gridparams',
       type => 'set',
-      value => [ 4, 3, 1, 2, '' ],
+      value => [ 4, 3, 1, 2 ],
     },
     {
       context => 'grid',

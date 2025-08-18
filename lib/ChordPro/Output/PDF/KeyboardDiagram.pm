@@ -9,10 +9,10 @@ my $pdf = "";			# for cache flush
 
 class ChordPro::Output::PDF::KeyboardDiagram;
 
-field $ps	:param;
+field $pr       :param;
 
 field $config;
-field $pr;
+field $ps;
 
 field $kw;
 field $kh;
@@ -26,7 +26,7 @@ field $pressed;
 
 ADJUST {
     $config	  = $::config;
-    $pr		  = $ps->{pr};
+    $ps		  = $pr->{ps};
     my $ctl	  = $ps->{kbdiagrams};
     $kw		  = $ctl->{width} || 6;
     $kh		  = $ctl->{height} || 6;
@@ -91,10 +91,6 @@ method hsp ( $elt, $dummy = 0 ) {
     $self->hsp0($elt) + $self->hsp1($ps);
 }
 
-sub font_bl ($font) {
-    &ChordPro::Output::PDF::font_bl($font);
-}
-
 my %keytypes =
   (  0 => [0,"L"],		# Left
      1 => [0,"B"],		# Black
@@ -136,7 +132,7 @@ method draw ( $info, $x, $y, $dummy = 0 ) {
     $name .= "?" unless @keys;
     $name = "<span color='$fg'>$name</span>"
       if $info->{diagram};
-    $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y - font_bl($font) );
+    $pr->text( $name, $x + ($w - $pr->strwidth($name))/2, $y - $pr->font_bl($font) );
 }
 
 # Returns the complete diagram as an xo. This includes the core grid

@@ -63,4 +63,8 @@ method CARP_TRACE {
     "<<Appearance(\"$key\")>>";
 }
 
+method _data_printer($ddp) {
+    "$key (" . __CLASS__ . ")";
+}
+
 1;

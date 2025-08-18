@@ -410,6 +410,7 @@ my $additions_min =
    "69",
    "7b5",
    "7-5",
+   "711",			# for George Kooymans
    ( map { ( "$_", "maj$_", "^$_" ) }
      "7",
      "9",
@@ -807,6 +808,7 @@ sub is_chord      { defined $_[0]->{root_ord} }
 sub is_rootless   { $_[0]->{rootless} }
 sub is_annotation { 0 }
 sub is_movable    { $_[0]->{movable} }
+sub is_gridstrum  { 0 }
 
 # Common accessors.
 sub name          {
@@ -864,7 +866,9 @@ sub chord_display ( $self, $default ) {
     }
 
     # Substitute musical symbols if wanted.
-    return $::config->{settings}->{truesf} ? $self->fix_musicsyms($res) : $res;
+    $res = $self->fix_musicsyms($res)
+      if $::config->{settings}->{truesf} || $::config->{settings}->{maj7delta};
+    return $res;
 }
 
 sub flat_copy ( $self, $ret, $o, $pfx = "" ) {
@@ -884,23 +888,30 @@ sub fix_musicsyms ( $self, $str ) {
 
     use ChordPro::Utils qw( splitmarkup );
 
-    return $str unless $::config->{settings}->{truesf};
+    my $sf = $::config->{settings}->{truesf};
+    my $delta = $::config->{settings}->{maj7delta};
 
     my @c = splitmarkup($str);
     my $res = '';
     push( @c, '' ) if @c % 2;
     my $did = 0;		# TODO: not for roman
     while ( @c ) {
-	$_ = shift(@c);
-	if ( $did ) {
-	    s/b/♭/g;
+	for ( shift(@c) ) {
+	    if ( $sf ) {
+		if ( $did ) {
+		    s/b/♭/g;
+		}
+		else {
+		    s/(?<=[[:alnum:]])b/♭/g;
+		    $did++;
+		}
+		s/#/♯/g;
+	    }
+	    if ( $delta ) {
+		s/maj7/Δ/g;
+	    }
+	    $res .= $_ . shift(@c);
 	}
-	else {
-	    s/(?<=[[:alnum:]])b/♭/g;
-	    $did++;
-	}
-	s/#/♯/g;
-	$res .= $_ . shift(@c);
     }
     $res;
 }
@@ -980,6 +991,11 @@ sub transpose ( $self, $xpose, $dir = 0 ) {
     my $info = $self->clone;
     my $p = $self->{parser};
 
+    my $dodir = sub( $root, $dir ) {
+	return 0 if $root =~ /^(0|2|4|5|7|9|11)$/;
+	$dir;
+    };
+
     unless ( $self->{rootless} ) {
 	$info->{root_ord} = ( $self->{root_ord} + $xpose ) % $p->intervals;
 	$info->{root_canon} = $info->{root} =
@@ -991,9 +1007,9 @@ sub transpose ( $self, $xpose, $dir = 0 ) {
 	$info->{bass_ord} = ( $self->{bass_ord} + $xpose ) % $p->intervals;
 	$info->{bass_canon} = $info->{bass} =
 	  $p->root_canon( $info->{bass_ord}, $xpose > 0 );
-	$info->{bass_mod} = $dir;
+	$info->{bass_mod} = $dodir->( $info->{bass_ord}, $dir );
     }
-    $info->{root_mod} = $dir;
+    $info->{root_mod} = $dodir->( $info->{root_ord}, $dir );
     $info->{name} = $info->{name_canon} = $info->canonical;
 
     delete $info->{$_} for qw( copy base frets fingers keys display );
@@ -1125,6 +1141,51 @@ sub chord_display ( $self ) {
 # For convenience.
 sub is_chord      ( $self ) { 0 };
 sub is_annotation ( $self ) { 1 };
+
+################ Chord objects: Strums ################
+
+package ChordPro::Chord::Strum;
+
+# Special 'chord'-like objects for strums in grids.
+#
+# Main purpose is to show an arrow from the ChordProSymbols font.
+
+our @ISA = 'ChordPro::Chord::Base';
+
+use ChordPro::Symbols qw( strum );
+
+sub new( $pkg, $data ) {
+    my $self = $pkg->SUPER::new( $data );
+    my $fmt = strum( $data->{name} );
+    unless ( defined $fmt ) {
+	warn("Unknown strum: $data->{name}\n");
+	$self->{format} = "";
+    }
+    else {
+	$self->{format} = $fmt;
+    }
+    return $self;
+}
+
+sub chord_display ( $self, $default = undef ) {
+    $self->{format};
+}
+
+sub transpose ( $self, $dummy1, $dummy2=0 ) { $self }
+sub transcode ( $self, $dummy1, $dummy2=0 ) { $self }
+
+sub canonical ( $self ) {
+    my $res = $self->{text};
+    return $res;
+}
+
+# For convenience.
+sub is_chord      ( $self ) { 0 };
+sub is_annotation ( $self ) { 1 };
+sub is_nc         ( $self ) { 1 };
+sub is_xpxc       ( $self ) { 0 };
+sub has_diagram   ( $self ) { 0 };
+sub is_gridstrum  ( $self ) { 1 };
 
 ################ Chord objects: NC ################
 

@@ -1,6 +1,10 @@
 // see https://docs.microsoft.com/en-us/windows/desktop/menurc/versioninfo-resource
+// see https://docs.wxwidgets.org/latest/plat_msw_install.html#msw_manifest
 
-4711 ICON "..\\..\\lib\\ChordPro\\res\\icons\\chordpro.ico"
+AppIcon ICON "../../lib/ChordPro/res/icons/chordpro.ico"
+
+#define wxUSE_DPI_AWARE_MANIFEST 2
+#include <wx/msw/wx.rc>
 
 1 VERSIONINFO
 FILEVERSION     0,0,975,0
@@ -11,15 +15,15 @@ BEGIN
   BEGIN
     BLOCK "040904E4" // US English CP 1252 (Windows ANSI)
     BEGIN
-      VALUE "Comments", "Beta version, use at your own risk"
-      VALUE "CompanyName", "ChordPro.ORG"
-      VALUE "FileDescription", "ChordPro GUI Launcher"
-      VALUE "FileVersion", "0.975"
-      VALUE "InternalName", "wxchordpro"
-      VALUE "LegalCopyright", "Copyright 2010,2018,2020 The ChordPro Team"
+      VALUE "Comments",         "Beta version, use at your own risk"
+      VALUE "CompanyName",      "ChordPro.ORG"
+      VALUE "FileDescription",  "ChordPro Application"
+      VALUE "FileVersion",      "0.975"
+      VALUE "InternalName",     "wxchordpro"
+      VALUE "LegalCopyright",   "Copyright 2010,2018,2020 The ChordPro Team"
       VALUE "OriginalFilename", "wxchordpro.exe"
-      VALUE "ProductName", "ChordPro"
-      VALUE "ProductVersion", "0.975.beta"
+      VALUE "ProductName",      "ChordPro"
+      VALUE "ProductVersion",   "0.975.beta"
     END
   END
   BLOCK "VarFileInfo"

@@ -4,34 +4,34 @@
  * Licensed under MIT (https://github.com/StartBootstrap/startbootstrap-simple-sidebar/blob/master/LICENSE)
  */
 
- #wrapper {
+#wrapper {
     overflow-x: hidden;
- }
+}
 
- #sidebar-wrapper {
-  min-height: 100vh;
-  margin-left: -15rem;
-  -webkit-transition: margin .25s ease-out;
-  -moz-transition: margin .25s ease-out;
-  -o-transition: margin .25s ease-out;
-  transition: margin .25s ease-out;
+#sidebar-wrapper {
+    min-height: 100vh;
+    margin-left: -15rem;
+    -webkit-transition: margin .25s ease-out;
+    -moz-transition: margin .25s ease-out;
+    -o-transition: margin .25s ease-out;
+    transition: margin .25s ease-out;
 }
 
 #sidebar-wrapper .sidebar-heading {
-  padding: 0.875rem 1.25rem;
-  font-size: 1.2rem;
+    padding: 0.875rem 1.25rem;
+    font-size: 1.2rem;
 }
 
 #sidebar-wrapper .list-group {
-  width: 15rem;
+    width: 15rem;
 }
 
 #page-content-wrapper {
-  min-width: 100vw;
+    min-width: 100vw;
 }
 
 #wrapper.toggled #sidebar-wrapper {
-  margin-left: 0;
+    margin-left: 0;
 }
 
 @media (min-width: 768px) {
@@ -114,4 +114,34 @@ pre {
 
 pre code {
     font-weight: normal;
+}
+
+@font-face {
+    font-family: ChordProSymbols;
+    src: url(../pub/ChordProSymbols.ttf) format("truetype")
+}
+
+span.sym {
+    font-family: ChordProSymbols;
+    font-size: 1.4em;
+}
+
+.md-columns {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: -1rem;
+  margin-right: -1rem;
+
+  >div {
+    flex: 1 1;
+    margin: 1rem 0;
+    min-width: 100px;
+    max-width: 100%;
+    padding: 0 1rem;
+  }
+
+  .markdown-inner {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
 }

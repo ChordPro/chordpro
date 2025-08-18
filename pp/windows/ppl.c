@@ -18,7 +18,7 @@ static const char pathreplace[] = ".pl";
 static const char dllsearch[] = "perl5*.dll";
 
 // act like the original "perl.exe" if our name is "perl.exe" (case sensitive!)
-static const char perlexe[] = "perl.exe"; // set to NULL to disable
+static const char perlexe[] = "perl.exe"; // set to "\0" to disable
 
 // number of arguments we put in front of the user provided args
 #define ARGS_ADDED 1
@@ -36,11 +36,37 @@ static const char perlexe[] = "perl.exe"; // set to NULL to disable
 // RunPerl.
 typedef int (* RunPerl_t)(int argc, char **argv, char **env);
 
+#ifdef UTF8
+// Forward declare.
+char* toUTF8( const wchar_t* src,
+	      size_t src_length,  /* = 0 */
+	      size_t* out_length  /* = NULL */
+	      );
+#endif
+
 // Main.
 int main( int argc, char **argv, char **env ) {
 
+#ifdef UTF8
+
+  /* Get the real command line (UTF16) and convert to UTF8. */
+  wchar_t** wargv = CommandLineToArgvW(GetCommandLineW(), &argc);
+
+  argv = (char **)malloc((argc+1) * sizeof(char**));
+
+  int ix;
+  for ( ix = 0; ix < argc; ix++ )
+    argv[ix] = toUTF8( wargv[ix], 0, NULL );
+  argv[ix] = NULL;
+
   // Make ourselves known.
+  putenv( "PPL_PACKAGED=1.01" );
+
+#else
+
   putenv( "PPL_PACKAGED=1.00" );
+  
+#endif
 
   // to construct script path from exe path
   char scriptpath[PATHBUFLEN];
@@ -64,7 +90,7 @@ int main( int argc, char **argv, char **env ) {
     (void)memmove(dllpath, scriptpath, sizeof scriptpath);
     dlldir = strrchr(dllpath, '\\'); // find the last backslash
     dlldir = dlldir ? (dlldir + 1) : dllpath; // if find no backslash (unlikely), use the whole buffer
-    emulate_perlexe = ((perlexe != 0) &&  (!strncmp(dlldir, perlexe, sizeof perlexe)));
+    emulate_perlexe = !strncmp(dlldir, perlexe, sizeof perlexe);
 
     char *rep = strrchr(scriptpath, pathreplace[0]); // find the last delimiter in path
     if( !rep ) {
@@ -87,7 +113,9 @@ int main( int argc, char **argv, char **env ) {
 #endif
   }
   else {
-    (void)fprintf(stderr, "Path to %s is too long for my %I64i bytes buffer \n", argv[0], sizeof(scriptpath));
+    int len = (int)sizeof(scriptpath);
+    (void)fprintf(stderr, "Path to %s is too long for my %i bytes buffer \n",
+		  argv[0], len);
     return 1; // ---> early return
   }
 
@@ -135,9 +163,11 @@ int main( int argc, char **argv, char **env ) {
   // as a positive side-effect, this removes the current directory from the search path
 
 #ifdef DEBUGOUT
-  fprintf( DEBUGOUT, "DLL name found:      \"%s\" (length = %I64i)\n",
-	   ffd.cFileName, strlen(ffd.cFileName) );
-  fprintf( DEBUGOUT, "DLL search path set: \"%s\"\n", dllpath);
+  { int len = (int)strlen(ffd.cFileName);
+    fprintf( DEBUGOUT, "DLL name found:      \"%s\" (length = %i)\n",
+	     ffd.cFileName, len );
+    fprintf( DEBUGOUT, "DLL search path set: \"%s\"\n", dllpath);
+  }
 #endif
 
   // search first in the directory set by SetDllDirectory()
@@ -193,3 +223,55 @@ int main( int argc, char **argv, char **env ) {
 
 }
 
+#ifdef UTF8
+
+/* Found these on the net, but couldn't find it again to give credits */
+
+wchar_t* fromUTF8( const char* src,
+		   size_t src_length,  /* = 0 */
+		   size_t* out_length  /* = NULL */
+		   ) {
+  if ( !src )
+    return NULL;
+
+  if ( src_length == 0 )
+    src_length = strlen(src);
+
+  int length = MultiByteToWideChar( CP_UTF8, 0, src, src_length, 0, 0 );
+  wchar_t *output_buffer = (wchar_t*)malloc( (length+1) * sizeof(wchar_t) );
+  if ( output_buffer ) {
+    MultiByteToWideChar( CP_UTF8, 0, src, src_length, output_buffer, length );
+    output_buffer[length] = L'\0';
+  }
+  if ( out_length )
+    *out_length = length;
+
+  return output_buffer;
+}
+
+char* toUTF8( const wchar_t* src,
+	      size_t src_length,  /* = 0 */
+	      size_t* out_length  /* = NULL */
+	      ) {
+  if ( !src )
+    return NULL;
+
+  if ( src_length == 0 )
+    src_length = wcslen(src);
+
+  int length = WideCharToMultiByte( CP_UTF8, 0, src, src_length,
+				    0, 0, NULL, NULL );
+  char *output_buffer = (char*)malloc( (length+1) * sizeof(char) );
+  if ( output_buffer ) {
+    WideCharToMultiByte( CP_UTF8, 0, src, src_length,
+			output_buffer, length, NULL, NULL );
+    output_buffer[length] = '\0';
+  }
+  if ( out_length )
+    *out_length = length;
+
+  return output_buffer;
+}
+
+#endif
+ 

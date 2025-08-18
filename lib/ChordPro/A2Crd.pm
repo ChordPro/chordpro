@@ -5,6 +5,7 @@ use v5.26;
 package ChordPro::A2Crd;
 
 use ChordPro::Version;
+use ChordPro::Files;
 use ChordPro::Paths;
 use ChordPro::Chords;
 
@@ -89,8 +90,6 @@ package ChordPro::A2Crd;
 
 use ChordPro::Config;
 
-use File::LoadLines;
-use Encode qw(decode decode_utf8 encode_utf8);
 my $local_debug;
 
 # API: Main entry point.
@@ -105,7 +104,7 @@ sub a2crd {
     # Process input.
     my $lines = $opts->{lines}
       ? delete($opts->{lines})
-      : loadlines( @ARGV ? $ARGV[0] : \*STDIN);
+      : fs_load( @ARGV ? $ARGV[0] : \*STDIN);
 
     return [ a2cho($lines) ];
 }
@@ -532,7 +531,7 @@ sub format_comment_line
     $line =~ s/\[// ;
     $line =~ s/\]// ;
     return '' if $line eq '' ;
-    return "{comment:" . $line . "}" ;
+    return "{comment: " . $line . "}" ;
 }
 
 # Process the lines via the map.
@@ -540,7 +539,8 @@ my $infer_titles;
 sub maplines {
     my ( $map, $lines ) = @_;
     my @out;
-    $infer_titles //= $::config->{a2crd}->{'infer-titles'};
+    $infer_titles = $config->{a2crd}->{'infer-titles'}
+      && !$options->{fragment};
 
     # Preamble.
     # Pass empty lines.
@@ -942,11 +942,6 @@ sub app_setup {
     # If no config was specified, and no default is available, force no.
     for my $config ( qw(sysconfig userconfig config) ) {
         $clo->{"no$config"} = 1 unless $clo->{$config};
-    }
-
-    ####TODO: Should decode all, and remove filename exception.
-    for ( keys %{ $clo->{define} } ) {
-	$clo->{define}->{$_} = decode_utf8($clo->{define}->{$_});
     }
 
     # Plug in command-line options.

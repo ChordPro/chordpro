@@ -9,10 +9,10 @@ my $pdf = "";			# for cache flush
 
 class ChordPro::Output::PDF::StringDiagram;
 
-field $ps	:param;
+field $pr	:param;
 
 field $config;
-field $pr;
+field $ps;
 
 field $gw;			# width of a cell, pt
 field $gh;			# height of a cell, pt
@@ -24,13 +24,17 @@ field $strings;			# number of strings
 field $hc;			# cells, horizontal (= strings)
 field $dot;			# dot size, fraction of cell width
 field $bsz;			# barre size, fraction of dot
+field $bstyle;			# barre style ("line", "arc")
 field $fsh;			# show fingers (0, 1, "below")
 field $fg;			# foreground color
+field $bg;			# background color
+field $fbp;			# fret base position ("left", "right")
+field $fbt;			# fret base text ("%s" is default)
 
 ADJUST {
     $config	  = $::config;
+    $ps		  = $pr->{ps};
     $strings	  = $config->diagram_strings;
-    $pr		  = $ps->{pr};
     my $ctl	  = $ps->{diagrams};
     $gw		  = $ctl->{width} || 6;
     $gh		  = $ctl->{height} || 6;
@@ -41,7 +45,10 @@ ADJUST {
     $hc		  = $strings;
     $dot	  = $ctl->{dotsize} * ( $gh < $gw ? $gh : $gw );
     $bsz	  = $ctl->{barwidth} * $dot;
+    $bstyle	  = $ctl->{barstyle} || "line";
     $fsh	  = $ctl->{fingers} || 0;
+    $fbp	  = $ctl->{fretbaseposition} || "left";
+    $fbt	  = $ctl->{fretbasetext} || "%s";
     $dcache = {} if $pr->{pdf} ne $pdf;
     $pdf          = $pr->{pdf};
 }
@@ -82,10 +89,6 @@ method hsp( $elt, $dummy = 0 ) {
     $self->hsp0($elt) + $self->hsp1($elt);
 }
 
-sub font_bl ($font) {
-    ChordPro::Output::PDF::font_bl($font);
-}
-
 # The actual draw method.
 method draw( $info, $x, $y, $dummy=0 ) {
     return unless $info;
@@ -106,7 +109,7 @@ method draw( $info, $x, $y, $dummy=0 ) {
     $name = "<span color='$fg'>$name</span>"
       if $info->{diagram};
     $pr->text( $name, $x + ($w - $pr->strwidth($name))/2,
-	       $y-font_bl($font));#+$font->{fd}->{ascender}/1000 );
+	       $y-$pr->font_bl($font));#+$font->{fd}->{ascender}/1000 );
 }
 
 # Returns the complete diagram as an xo. This includes the core grid,
@@ -120,11 +123,17 @@ method draw( $info, $x, $y, $dummy=0 ) {
 method diagram_xo( $info ) {
     return unless $info;
     $fg = $info->{diagram} // $config->{pdf}->{theme}->{foreground};
+    $bg = $config->{pdf}->{theme}->{background};
+
+    # Set default options for safety if they have not already been set
+    $fg = "black" if $fg eq "none";
+    $bg = "white" if $bg eq "none";
 
     my $x = 0;
     my $w = $gw * ($strings - 1);
     my $baselabeloffset = $info->{baselabeloffset} || 0;
     my $basefretno = $info->{base} + $baselabeloffset;
+    my $basefrettext="";	# for base label
     my $basefont;		# for base label
     my $basesize;		# for base label
 
@@ -141,11 +150,20 @@ method diagram_xo( $info ) {
     if ( $basefretno > 1 ) {
 	$basefont = $ps->{fonts}->{diagram_base}->{fd}->{font};
 	$basesize = $gh/0.85;
-	$basefretno = sprintf( "%2d", $basefretno );
-	$bb[0] -= $basefont->width("xx$basefretno") * $basesize;
+        my $basefretformat = $fbt;
+        $basefretformat = '%s' unless $basefretformat =~ /^[^%]*\%s[^%]*$/;
+        $basefrettext = sprintf($basefretformat, $basefretno);
+
+        if ( $fbp eq "left" ) {
+            $bb[0] -= $basefont->width("xx$basefrettext") * $basesize;
+        }
+        else {
+            #fret base position on "right" side
+            $bb[0] -= $dot/2;
+            $bb[2] += $basefont->width("xx$basefrettext") * $basesize;
+        }
     }
     else {
-	$basefretno = "";
 	$bb[0] -= $dot/2;
     }
     if ( $fsh eq "below" && $info->{fingers} ) {
@@ -183,13 +201,23 @@ method diagram_xo( $info ) {
     }
 
     # Draw first fret number, if > 1.
-    if ( $basefretno ) {
+    if ( $basefretno > 1 ) {
 	$xo->textstart;
 	$xo->font( $basefont, $basesize );
-	$xo->translate( -$basefont->width("x") * 0.85 * $basesize,
-			-$nw - ($baselabeloffset+0.85)*$gh );
-	$xo->text( $basefretno, align => "right" );
-	$xo->textend;
+
+        if ( $fbp eq "left" ) {
+            $xo->translate( -$basefont->width("x") * 0.85 * $basesize,
+                            -$nw - ($baselabeloffset+0.85)*$gh );
+            $xo->text( $basefrettext, align => "right" );
+        }
+        else {
+            #fret base position on "right" side
+            $xo->translate( ($strings-1)*$gw + $basefont->width("x") * 0.85 * $basesize,
+                            -$nw - ($baselabeloffset+0.85)*$gh );
+            $xo->text( $basefrettext, align => "left" );
+        }
+
+        $xo->textend;
     }
 
     my $fingers;
@@ -201,6 +229,7 @@ method diagram_xo( $info ) {
 	my %h;
 	my $str = 0;
 	my $got = 0;
+
 	foreach ( @{ $fingers } ) {
 	    $str++, next unless $info->{frets}->[$str] > 0;
 	    if ( $bar->{$_} ) {
@@ -214,19 +243,58 @@ method diagram_xo( $info ) {
 	    }
 	    $str++;
 	}
+
 	if ( $got ) {
 	    $xo->save;
-	    $xo->line_width($bsz)->line_cap(0);
+ 
+	    if ( $bstyle eq "line" ) {
+		$xo->line_width($bsz)->line_cap(0);
+	    }
+	    else {
+		# bar in "arc" style.
+		$xo->line_width($lw+0.2);
+	    }
+
 	    foreach ( sort keys %$bar ) {
 		my @bi = @{ $bar->{$_} };
+		# $bi array description = [finger, fret, first_string, last_string].
+
 		if ( $bi[-2] == $bi[-1] ) { # not a bar
 		    delete $bar->{$_};
 		    next;
 		}
-		# Print the bar line.
-		$x = $bi[2]*$gw;
-		$xo->move( $x, -$nw -$bi[1]*$gh+$gh/2 );
-		$xo->hline( $x+($bi[3]-$bi[2])*$gw);
+
+		if ( $bstyle eq "line" ) {
+		    # Print the bar line.
+		    $x = $bi[2]*$gw;
+		    $xo->move( $x, -$nw -$bi[1]*$gh+$gh/2 );
+		    $xo->hline( $x+($bi[3]-$bi[2])*$gw);
+		}
+		else {
+		    # Print arcs for barre
+		    my $arcw = (($bi[3]-$bi[2])*$gw + 0.7*$gw)/2;
+		    my $arch = 0.4*$gw;
+		    my $arcy = -$nw -$bi[1]*$gh +$gh+0.25*$gh;
+		    my $arcx = $bi[2]*$gw - (0.7*$gw)/2;
+
+		    if ( $bi[1] == 1 ) {
+			# Bar is on the first fret so bar arcs
+			# must be drawn above the nut.
+			$arcy += $nw;
+		    }
+
+		    # Draw first arc.
+		    $xo->move( $arcx, $arcy );
+		    $xo->arc( $arcx+$arcw, $arcy, $arcw, $arch, 180, 0 );
+
+		    # Draw second arc a little higher, this is
+		    # a fast way to have narrower corners look at the arc edge.
+		    $xo->move( $arcx, $arcy-0.8 );
+		    $xo->arc( $arcx+$arcw, $arcy-0.8, $arcw, $arch, 180, 0 );
+		}
+
+		$xo->stroke;
+		$xo->fill;
 	    }
 	    $xo->stroke->restore;
 	}
@@ -236,15 +304,20 @@ method diagram_xo( $info ) {
 
     # Color of the dots and numbers.
     my $fbg = "";		# numbers
-    my $ffg = "";		# dots
-    unless ( $fsh eq "below" ) {
-	# The numbercolor property of the chordfingers is used for the
-	# color of the dot numbers.
-	my $fcf = $ps->{fonts}->{chordfingers};
-	$fbg = $pr->_bgcolor($fcf->{numbercolor});
-	$ffg = $pr->_bgcolor($fcf->{color});
-	# However, if none we should really use white.
-	$fbg = "white" if $fbg eq "none";
+    my $ffg = $fg;		# dots
+    # The numbercolor property of the chordfingers is used for the
+    # color of the dot numbers.
+    my $fcf = $ps->{fonts}->{chordfingers};
+    $fbg = $pr->_bgcolor($fcf->{numbercolor});
+    $ffg = $pr->_bgcolor($fcf->{color});
+
+    if ( $fsh ne "below" ) {
+        # However, if none we should really use "background" color.
+        $fbg = $bg if $fbg eq "none";
+    }
+    else {
+        # However, for "below" case if none or numbercolor equals background color we should really use "foreground".
+        $fbg = $fg if ( $fbg eq "none") || ( $fbg eq $bg );
     }
 
     $x = -$gw;
@@ -254,8 +327,8 @@ method diagram_xo( $info ) {
 	my $fing = -1;
 	$fing = $fingers->[$sx] // -1 if $fingers;
 
-	# For bars, only the first and last finger.
-	if ( $fing && $bar->{$fing} ) {
+	# For bars in "line" style, only the first and last finger.
+	if ( $fing && $bar->{$fing} && $bstyle eq "line" ) {
 	    next unless $sx == $bar->{$fing}->[2] || $sx == $bar->{$fing}->[3];
 	}
 
@@ -283,14 +356,21 @@ method diagram_xo( $info ) {
 
     # Show the fingers, if any.
     if ( $fingers && @$fingers ) {
-	my $font = $ps->{fonts}->{diagram}->{fd}->{font};
-	my $size = $dot;
-	my $asc;		# space if "below"
+	my ( $font, $size );
+	$font = "chordfingers";
+	$size = $dot;
+	if ( $fsh eq "below" ) {
+	    $size = $ps->{fonts}->{$font}->{size} // "00";
+	    $size = $dot if $size <= 0;
+	}
+	$font = $ps->{fonts}->{$font}->{fd}->{font};
+        warn("XXX ", $font->{' data'}->{fontname}, " $size\n") if DIAG_DEBUG;
 
 	$x = -$gw;
 	my $did = 0;
 	for my $sx ( 0 .. $strings-1 ) {
-	    last if $fbg eq $fg;
+            #when "below", chord fingers should be always drawn and not take into account the dot color
+            last if ( $fsh ne "below" ) && ( $fbg eq $ffg );
 	    $x += $gw;
 	    my $fret = $info->{frets}->[$sx];
 	    next unless $fret > 0;
@@ -307,12 +387,9 @@ method diagram_xo( $info ) {
 		if ( $fsh eq "below" ) {
 		    $size *= 1.4;
 		}
-		else {
-		    $xo->fill_color($fbg);
-		}
+		$xo->fill_color($fbg);
 		$xo->textstart;
 		$xo->font( $font, $size );
-		$asc = $font->ascender/1000 * $size;
 	    }
 	    if ( $fsh eq "below" ) {
 		$xo->translate( $x, -$nw - $lw - ($vc+1)*$gh  );

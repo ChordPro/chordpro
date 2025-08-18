@@ -74,21 +74,26 @@ future.
 Each song can have meta-data associated, for example the song title. Meta-data are mostly used by programs that help
 organizing collections of ChordPro songs.
 
+{{% columns %}}
 * [title]({{< relref "Directives-title" >}}) (short: t)
 * [sorttitle]({{< relref "Directives-sorttitle" >}})
 * [subtitle]({{< relref "Directives-subtitle" >}}) (short: st)
 * [artist]({{< relref "Directives-artist" >}})
+* [sortartist]({{< relref "Directives-sortartist" >}})
 * [composer]({{< relref "Directives-composer" >}})
 * [lyricist]({{< relref "Directives-lyricist" >}})
 * [copyright]({{< relref "Directives-copyright" >}})
 * [album]({{< relref "Directives-album" >}})
 * [year]({{< relref "Directives-year" >}})
+<--->
 * [key]({{< relref "Directives-key" >}})
 * [time]({{< relref "Directives-time" >}})
 * [tempo]({{< relref "Directives-tempo" >}})
 * [duration]({{< relref "Directives-duration" >}})
 * [capo]({{< relref "Directives-capo" >}})
+* [tag]({{< relref "Directives-tag" >}})
 * [meta]({{< relref "Directives-meta" >}})
+{{% /columns %}}
 
 See also [Using metadata in texts]({{< relref "ChordPro-Configuration-Format-Strings" >}}).
 
@@ -126,7 +131,8 @@ output.
 
 * [Introduction to delegated environments]({{< relref "Directives-delegates" >}})
 * [start_of_abc]({{< relref "Directives-env_abc" >}}) / [end_of_abc]({{< relref "Directives-env_abc" >}})
-* [start_of_ly]({{< relref "Directives-env_ly" >}}) / [end_of_ly]({{< relref "Directives-env_ly" >}})
+* [start_of_ly]({{< relref "Directives-env_ly" >}}) / [end_of_ly]({{<
+  relref "Directives-env_ly" >}}) (Lilypond embedding)
 * [start_of_svg]({{< relref "Directives-env_svg" >}}) / [end_of_svg]({{< relref "Directives-env_svg" >}})
 * [start_of_textblock]({{< relref "Directives-env_textblock" >}}) / [end_of_textblock]({{< relref "Directives-env_textblock" >}})
 

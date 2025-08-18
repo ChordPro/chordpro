@@ -25,8 +25,9 @@
                 code {
                     font-size: 1.2em;
                 }
-                code::before, code::after {
-                    content: "“";
+                .terminal {
+                    border-left: 0.2em solid #ef6c2a;
+                    padding-left: 1em;
                 }
                 #content {
                     width: 40em;
@@ -48,7 +49,7 @@
                 <p>“A simple text format for the notation of lyrics with chords”.</p>
             </blockquote>
 
-            <p>It has a very pleasant and easy to use interface that gives you the basics of using ChordPro; both the application as well its text-format.</p>
+            <p>It has a very pleasant and easy to use interface that gives you the basics of using <strong>ChordPro</strong>; both the <em>application</em> as well its <em>text-format</em>.</p>
 
             <h3>Advanced usage</h3>
 
@@ -70,47 +71,84 @@
 
             <p>Your download contains an <em>almost</em> ready to go <strong>ChordPro</strong>; except that the application is only ad-hoc signed by us and not by an approved Apple Developer with a valid certificate. So, the security system on your Mac will give an error when you double-click the application. You have met the <em>Gatekeeper</em>. Depending of the version of macOS you have a different message and have to do different additional handlings to open <strong>ChordPro</strong>.</p>
 
-            <p>The message will be more or less like this:</p>
+            <ol>
+                <li>Drag the application to your <code>Applications</code> folder.
+                <li>Open the application by <em>double-clicking</em> on it.
+            </ol>
+
+            <p>A prompt saying '“<strong>ChordPro</strong>“ Not Opened' will appear.</p>
+
+            <p>The message will be more or less like this, depending on your macOS version:</p>
 
             <blockquote>
                 <p>Apple could not verify “ChordPro.app“ is free of malware that may harm your Mac or compromise your privacy.</p>
             </blockquote>
 
+            <p><em>There is a small 'question mark' button at the right top of the dialog that opens the 'Mac User Guide' with more information.</em></p>
+
             <p>On macOS versions before 15 (Sequoia) it was common practice to <code>right-click</code> the application and choose <code>Open</code> from the menu. That trick will bypass the gatekeeper and let you open the application.</p>
 
-            <p>Unfortunately, that does not work anymore on Sequoia and you have to go trough System Settings:</p>
+            <p>Unfortunately, that does not work anymore on Sequoia and you have to go trough <code>System Settings</code>:</p>
 
-            <ol>
-                <li>Try to open the application. A prompt saying “ChordPro.app“ Not Opened' may appear.</li>
-                <li>Go to <code>System Settings -&gt; Privacy &amp; Security</code>. Scroll down to find <em>ChordPro</em>, and an option to &quot;Open Anyway&quot;.</li>
+            <ol start="3">
+                <li>Go to <code>System Settings -&gt; Privacy &amp; Security</code>.</li>
+                <li>Scroll down to find <strong>ChordPro</strong>, and an option to &quot;Open Anyway&quot;.</li>
                 <li>Choose &quot;Open Anyway&quot;.</li>
                 <li>Authenticate as an administrator.</li>
-                <li><em>ChordPro</em> will now open.</li>
+                <li><strong>ChordPro</strong> will now open.</li>
             </ol>
 
-            <h2>Install with the Terminal</h2>
+            <p><strong>ChordPro</strong> is saved as an exception to your security settings and you can open it in the future by double-clicking it, just as you can with any other application.</p>
 
-            <p>Your download also contains an <code>Install</code> script that can do this for you. Same as with the <code>ChordPro.app</code>, you can not just double click to run the script. You have to run it manually in the Terminal yourself:</p>
+            <h2>The Terminal Application</h2>
 
-            <blockquote>
-                <p>Open the <strong>Terminal</strong> application in <code>Applications/Utilities</code> and just <em>drag and drop</em> the <code>Install</code> script into its window.</p>
-            </blockquote>
+            <p>The <code>Terminal</code> application, simply called <code>chordpro</code> is part of the package.</p>
+            
+            <blockquote><strong>To use the <code>Terminal</code> application you first have give the GUI application permission to run on your system. Do that first.</strong></blockquote>
 
-            <p>It will do the following:</p>
+            <h3>Temporarily add it to your system path</h3>
+            
+            <p>To <em>temporarily</em> add the <strong>chordpro</strong> command line application to the system path issue the following command in the <code>Terminal</code> window:</p>
 
-            <ul>
-                <li>Copy <em>ChordPro</em> to your applications folder</li>
-                <li>Move <em>ChordPro</em> out of quarantine so the Gatekeeper will let you start the application with just a double-click.</li>
-                <li>Add the <em>ChordPro</em> command-line command to your Terminal $PATH</li>
-            </ul>
+            <div class="terminal">
+                <code>export PATH="/Applications/ChordPro.app/Contents/Resources/cli":$PATH
+                </code>
+            </div>
+            
+            <p>Now you can use the <strong>chordpro</strong> command line application in the <em>Terminal</em> without its full path, however, when you close the <em>Terminal</em> you have add the path again the next time. It is recommended to add it permanently; see below.
 
-            <p><strong>It will not do anything without your permission but by providing your administration password, you will bypass all Apple’s security measurements.</strong></p>
+            <h3>Permanently add it to your system path</h3>
+            
+            <p>To add the command line application <em>permanently</em> to your system path there is no simple command for the <em>Terminal</em>. However, it is not difficult.</p>
+            
+            <p>First, create a file pointing to your <strong>chordpro</strong> CLI directory in the <code>Terminal</code>:
 
+            <div class="terminal">
+                <code>echo "/Applications/ChordPro.app/Contents/Resources/cli" > ~/Desktop/chordpro
+                </code>
+            </div>
+            
+            <p>This will create a file with the location of the <strong>chordpro</strong> CLI command on your Desktop. You have to move this file with the <code>Finder</code> so the <code>Terminal</code> will see it:</p>
+            
+            <ol>
+                <li>In the <code>Finder</code>, go to its menu at the top and 'Go -> Go to Folder...'</li>
+                <li>In the dialog, enter `/etc/paths.d`. It should <em>auto-complete</em> and if you press the `Enter` key it will open a new Finder window.</li>
+                <li>Now Drag & Drop' the 'chordpro' file you just created on your Desktop to this folder. It will ask for your <em>administration password</em>.</li>
+                <li>Open a new <code>Terminal</code> window and check if it is all ok:</li>
+            </ol>
+
+            <div class="terminal">
+                <code>chordpro --about
+                </code>
+            </div>
+            
+            <p><em>This should show you information about <strong>chordpro</strong> if all went well</em>.</p>
+            
             <h2>Enjoy!</h2>
 
-            <p>We hope you appreciate our best efforts.</p>
+            <p>We hope you appreciate our best efforts to bring <strong>ChordPro</strong> to macOS.</p>
 
-            <p>The Mac is a beautiful platform for its users.</p>
+            <p>The Mac is a beautiful platform for its users. However, not so much for its Mac developers nowadays. We do our best.</p>
 
             <p><strong>Are you a macOS developer with an Developer Account? Please help us to provide a signed package to improve the user experience.</strong></p>
 
