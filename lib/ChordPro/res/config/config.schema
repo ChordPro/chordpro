@@ -1577,14 +1577,6 @@
                             "description": "The field name in the exported CSV.",
                             "type": "string"
                           },
-                          "meta": {
-                            "description": "The metadata key to use as the value in the exported CSV.",
-                            "type": "string"
-                          },
-                          "value": {
-                            "description": "A static value in the exported CSV. If provided, overrides the value of the provided `meta` key.",
-                            "type": "string"
-                          },
                           "omit": {
                             "description": "`true` to omit a field.",
                             "type": "boolean",
@@ -1594,10 +1586,22 @@
                         "required": ["name"],
                         "anyOf": [
                           {
-                            "required": ["meta"]
+                            "required": ["meta"],
+                            "properties": {
+                              "meta": {
+                                "description": "The metadata key to use as the value in the exported CSV.",
+                                "type": "string"
+                              }
+                            }
                           },
                           {
-                            "required": ["value"]
+                            "required": ["value"],
+                            "properties": {
+                              "value": {
+                                "description": "A static value in the exported CSV. If provided, overrides the value of the provided `meta` key.",
+                                "type": "string"
+                              }
+                            }
                           }
                         ],
                         "examples": [
