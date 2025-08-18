@@ -2485,9 +2485,16 @@
                       "type": "boolean"
                     },
                     "back-matter": {
-                      "default": false,
                       "description": "PDF file to add as back matter.",
-                      "type": ["string", "boolean"]
+                      "oneOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ],
+                      "default": false
                     },
                     "compact-songs": {
                       "default": false,
