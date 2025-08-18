@@ -610,30 +610,32 @@
             "recall": {
               "type": "object",
               "additionalProperties": false,
-              "properties": {
-                "tag": {
-                  "description": "Label for recalled chorus.",
-                  "type": "string",
-                  "default": "Chorus"
-                },
-                "type": {
-                  "description": "Type for tag text.",
-                  "type": "string",
-                  "enum": ["", "comment", "comment_italic", "comment_box"],
-                  "default": "comment"
-                },
-                "quote": {
-                  "description": "Quote the chorus.",
-                  "type": "boolean",
-                  "default": false
-                }
-              },
               "anyOf": [
                 {
-                  "required": ["tag", "type"]
+                  "required": ["tag", "type"],
+                  "properties": {
+                    "tag": {
+                      "description": "Label for recalled chorus.",
+                      "type": "string",
+                      "default": "Chorus"
+                    },
+                    "type": {
+                      "description": "Type for tag text.",
+                      "type": "string",
+                      "enum": ["", "comment", "comment_italic", "comment_box"],
+                      "default": "comment"
+                    }
+                  }
                 },
                 {
-                  "required": ["quote"]
+                  "required": ["quote"],
+                  "properties": {
+                    "quote": {
+                      "description": "Quote the chorus.",
+                      "type": "boolean",
+                      "default": false
+                    }
+                  }
                 }
               ]
             }
