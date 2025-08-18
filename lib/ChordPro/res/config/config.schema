@@ -2521,7 +2521,7 @@
                           "type": "string"
                         }
                       ],
-                      "description": "Sort songs by `\"title\"` or `\"subtitle\"`.\ntitle    : sort pages alphabetically by title.\nsubtitle : sort pages alphabetically by subtitle. If this is\n           used together with title, only title is used.\nPut a minus sign before title and/or subtitle to obtain\ndescending order."
+                      "description": "Sort songs by `\"title\"` or `\"subtitle\"`.\ntitle    : sort pages alphabetically by title.\nsubtitle : sort pages alphabetically by subtitle. If this is used together with title, only title is used.\nPut a minus sign before title and/or subtitle to obtain descending order."
                     }
                   }
                 },
