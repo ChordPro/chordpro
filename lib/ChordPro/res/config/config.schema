@@ -681,12 +681,20 @@
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "description": "If the element is a string, it's the only possible representation of that note. If it's an array, it's all of its possible representations.",
-        "type": ["string", "array"],
-        "uniqueItems": true,
-        "items": {
-          "type": "string"
-        }
+        "oneOf": [
+          {
+            "description": "If a string, it's the only possible representation of that note.",
+            "type": "string"
+          },
+          {
+            "description": "If an array, it's all of its possible representations.",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          }
+        ]
       }
     }
   },
