@@ -44,6 +44,9 @@
     - (Experimental) [allpages](https://www.chordpro.org/beta/directives-image/#anchoranchor) anchor for images. Similar to the
       _page_ anchor, but the image is repeated on *every* page of the song.
 
+    - Edon V. kindly donated a state-of-the art revised version of the
+      config schema. Thanks, Edon!
+
     - Lilypond delegate supports a property "program" to explicitly
       designate the Lilypond program.
 
