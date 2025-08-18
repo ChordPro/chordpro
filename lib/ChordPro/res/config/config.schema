@@ -1245,7 +1245,14 @@
               "type": "array",
               "uniqueItems": true,
               "items": {
-                "type": ["string", "number"]
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
               }
             }
           }
