@@ -131,6 +131,7 @@
     },
     "fontConfigFont": {
       "type": "object",
+      "additionalProperties": false,
       "required": [""],
       "properties": {
         "": {
@@ -138,32 +139,54 @@
         },
         "bold": {
           "type": "string"
+        },
+        "italic": {
+          "type": "string"
+        },
+        "bolditalic": {
+          "type": "string"
+        },
+        "oblique": {
+          "type": "string"
+        },
+        "boldoblique": {
+          "type": "string"
         }
       },
-      "oneOf": [
-        {
-          "additionalProperties": false,
-          "properties": {
-            "italic": {
-              "type": "string"
-            },
-            "bolditalic": {
-              "type": "string"
-            }
+      "if": {
+        "anyOf": [
+          {
+            "required": ["italic"]
+          },
+          {
+            "required": ["bolditalic"]
           }
-        },
-        {
-          "additionalProperties": false,
-          "properties": {
-            "oblique": {
-              "type": "string"
+        ]
+      },
+      "then": {
+        "not": {
+          "anyOf": [
+            {
+              "required": ["oblique"]
             },
-            "boldoblique": {
-              "type": "string"
+            {
+              "required": ["boldoblique"]
             }
-          }
+          ]
         }
-      ]
+      },
+      "else": {
+        "not": {
+          "anyOf": [
+            {
+              "required": ["italic"]
+            },
+            {
+              "required": ["bolditalic"]
+            }
+          ]
+        }
+      }
     },
     "fontClass": {
       "type": "string",
