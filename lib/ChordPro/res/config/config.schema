@@ -290,7 +290,14 @@
             },
             "frame": {
               "description": "A boolean value indicating that a frame (box) should be drawn around the text.\nPrimarily used to specify the thickness of a comment box (`comment_box` directive) via the `comment_box` font, but can be used for any font.",
-              "type": ["boolean", "integer"],
+              "oneOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "integer"
+                }
+              ],
               "enum": [true, false, 0, 1]
             }
           },
