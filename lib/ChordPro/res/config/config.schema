@@ -85,8 +85,15 @@
       "type": "object",
       "properties": {
         "show": {
-          "type": ["string", "boolean"],
           "description": "Diagrams for all chords of the song can be shown at the `\"top\"`, `\"bottom\"` or `\"right\"` side of the first page, or `\"below\"` the last song line. Set to `false` to not show any diagrams.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "const": false
+            }
+          ],
           "enum": ["top", "bottom", "below", "right", false],
           "default": "bottom"
         },
