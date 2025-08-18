@@ -2502,9 +2502,16 @@
                       "type": "boolean"
                     },
                     "cover": {
-                      "default": false,
                       "description": "PDF file to add as cover page(s).",
-                      "type": ["string", "boolean"]
+                      "oneOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ],
+                      "default": false
                     },
                     "dual-pages": {
                       "default": true,
