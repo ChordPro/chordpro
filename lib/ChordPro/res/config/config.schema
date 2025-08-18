@@ -272,7 +272,8 @@
     "fontDescription": {
       "type": "string",
       "description": "A shorthand description of a font. In the format of `fontclass (bold)?(italic)? fontsize`.",
-      "pattern": "^([a-zA-Z\\-]+) (bold)?(italic|oblique)? ?(\\d+(\\.\\d+)?)$",
+      "$comment": "While visually complex, `pattern` was written so that each portion now has named capture groups, which can help with understanding and debugging the composition of the regular expression.",
+      "pattern": "^(?<nameOrType>[a-zA-Z\\-]+) ?(?<style>(?:bold)?(?:italic|oblique)?) ?(?<size>\\d+(?:\\.\\d+)?)?(?:;(?<addlProps> [^\\s=]+=[^\\s=]+)+)?$",
       "examples": [
         "serif bold 14",
         "serif 11",
