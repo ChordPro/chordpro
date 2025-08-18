@@ -276,6 +276,17 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
+            "name": {
+              "type": "string",
+              "description": "Font name."
+            },
+            "file": {
+              "type": "string",
+              "description": "Relative path to a font file."
+            },
+            "description": {
+              "$ref": "#/definitions/fontDescription"
+            },
             "size": {
               "type": "number",
               "description": "Font size."
@@ -303,30 +314,13 @@
           },
           "anyOf": [
             {
-              "required": ["description"],
-              "properties": {
-                "description": {
-                  "$ref": "#/definitions/fontDescription"
-                }
-              }
+              "required": ["description"]
             },
             {
-              "required": ["name"],
-              "properties": {
-                "name": {
-                  "type": "string",
-                  "description": "Font name."
-                }
-              }
+              "required": ["name"]
             },
             {
-              "required": ["file"],
-              "properties": {
-                "file": {
-                  "type": "string",
-                  "description": "Relative path to a font file."
-                }
-              }
+              "required": ["file"]
             }
           ]
         }
@@ -1602,27 +1596,23 @@
                             "description": "`true` to omit a field.",
                             "type": "boolean",
                             "default": false
+                          },
+                          "meta": {
+                            "description": "The metadata key to use as the value in the exported CSV.",
+                            "type": "string"
+                          },
+                          "value": {
+                            "description": "A static value in the exported CSV. If provided, overrides the value of the provided `meta` key.",
+                            "type": "string"
                           }
                         },
                         "required": ["name"],
                         "anyOf": [
                           {
-                            "required": ["meta"],
-                            "properties": {
-                              "meta": {
-                                "description": "The metadata key to use as the value in the exported CSV.",
-                                "type": "string"
-                              }
-                            }
+                            "required": ["meta"]
                           },
                           {
-                            "required": ["value"],
-                            "properties": {
-                              "value": {
-                                "description": "A static value in the exported CSV. If provided, overrides the value of the provided `meta` key.",
-                                "type": "string"
-                              }
-                            }
+                            "required": ["value"]
                           }
                         ],
                         "examples": [
