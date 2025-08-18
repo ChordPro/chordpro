@@ -2751,6 +2751,7 @@
                   "$ref": "#/definitions/delegatespec"
                 },
                 {
+                  "type": "object",
                   "properties": {
                     "handler": {
                       "default": "grille2xo",
@@ -2784,6 +2785,7 @@
                   "$ref": "#/definitions/delegatespec"
                 },
                 {
+                  "type": "object",
                   "properties": {
                     "handler": {
                       "default": "strum2xo",
