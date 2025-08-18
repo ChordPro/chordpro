@@ -276,17 +276,6 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "name": {
-              "type": "string",
-              "description": "Font name."
-            },
-            "file": {
-              "type": "string",
-              "description": "Relative path to a font file."
-            },
-            "description": {
-              "$ref": "#/definitions/fontDescription"
-            },
             "size": {
               "type": "number",
               "description": "Font size."
@@ -306,9 +295,32 @@
             }
           },
           "anyOf": [
-            { "required": ["description"] },
-            { "required": ["name"] },
-            { "required": ["file"] }
+            {
+              "required": ["description"],
+              "properties": {
+                "description": {
+                  "$ref": "#/definitions/fontDescription"
+                }
+              }
+            },
+            {
+              "required": ["name"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Font name."
+                }
+              }
+            },
+            {
+              "required": ["file"],
+              "properties": {
+                "file": {
+                  "type": "string",
+                  "description": "Relative path to a font file."
+                }
+              }
+            }
           ]
         }
       ],
