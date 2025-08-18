@@ -1188,10 +1188,11 @@
         },
         "gridstrum": {
           "description": "Grid strum overrides.",
+          "type": "object",
           "properties": {
             "symbols": {
-              "additionalProperties": true,
-              "description": "Symbol or Unicode code points for the glyphs from ChordProSymbols."
+              "description": "Symbol or Unicode code points for the glyphs from ChordProSymbols.",
+              "type": "object"
             }
           }
         },
