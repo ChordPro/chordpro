@@ -1790,7 +1790,6 @@
                       }
                     }
                   ],
-                  "minItems": 0,
                   "default": [],
                   "examples": [
                     ["/usr/share/fonts/liberation", "/home/me/fonts"]
