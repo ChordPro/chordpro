@@ -1835,8 +1835,10 @@
                     "dingbats": {
                       "type": "object",
                       "additionalProperties": false,
-                      "": {
-                        "type": "string"
+                      "properties": {
+                        "": {
+                          "type": "string"
+                        }
                       }
                     }
                   },
