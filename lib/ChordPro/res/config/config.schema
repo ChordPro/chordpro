@@ -1255,6 +1255,9 @@
                 ]
               }
             }
+          },
+          "default": {
+            "_configversion": [6]
           }
         },
         "metadata": {
