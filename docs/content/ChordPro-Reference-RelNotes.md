@@ -1,16 +1,16 @@
 # Release info
 
-## 6.079.0
+## 6.080.0
 
-Under development
+Released: 2025-08-18
 
 
-### Highlights
+### Highssortlights
 
-* Support for [strum patterns](https://www.chordpro.org/beta/directives-env_grid/#strums) in grids.
-* [Bookmarks](https://www.chordpro.org/beta/chordpro_markup/#bookmarks).
-* [Break items](https://www.chordpro.org/beta/table_of_contents/#break) in Table of Content lines.
-* [Improved control](https://www.chordpro.org/beta/chordpro-configuration-pdf/#songbook-pages) over page order and alignment.
+* Support for [strum patterns](https://www.chordpro.org/chordpro/directives-env_grid/#strums) in grids.
+* [Bookmarks](https://www.chordpro.org/chordpro/chordpro_markup/#bookmarks).
+* [Break items](https://www.chordpro.org/chordpro/table_of_contents/#break) in Table of Content lines.
+* [Improved control](https://www.chordpro.org/chordpro/chordpro-configuration-pdf/#songbook-pages) over page order and alignment.
 
 ### GUI improvements
 
@@ -23,28 +23,31 @@ Under development
 
 ### Other improvements
 
-* New metadata directives: [sortartist](https://www.chordpro.org/beta/directives-sortartist/) and [tag](https://www.chordpro.org/beta/directives-tag/).
-* New font: [MuseJazzText](https://www.chordpro.org/beta/chordpro-fonts/#method-1-using-a-font-description).
+* New metadata directives: [sortartist](https://www.chordpro.org/chordpro/directives-sortartist/) and [tag](https://www.chordpro.org/chordpro/directives-tag/).
+* Titles, artists and outlines will now be sorted according to the Unicode Technical Standard #10 (UTS #10) Collation Algorithm.
+* New font: [MuseJazzText](https://www.chordpro.org/chordpro/chordpro-fonts/#method-1-using-a-font-description).
 * Chord diagrams can now have nice, curly barres. Thanks to Michail Vourlakos for contributing.
-* (Experimental) [allpages](https://www.chordpro.org/beta/directives-image/#anchoranchor) anchor for images. Similar to the _page_ anchor, but the image is repeated on *every* page of the song.
+* (Experimental) [allpages](https://www.chordpro.org/chordpro/directives-image/#anchoranchor) anchor for images. Similar to the _page_ anchor, but the image is repeated on *every* page of the song.
+* Edon V. kindly donated a state-of-the art revised version of the config schema. Thanks, Edon!
 * Lilypond delegate supports a property "program" to explicitly designate the Lilypond program.
 * Filenames in filelists may be quoted, even if no options are involved.
 * Filenames in filelists are considered relative to the filelist.
 * Are you using the preprocessor in your abc and ly environments? Please use the more general `parser.preprocess.env-`... instead.
-* Config [settings.maj7delta](https://www.chordpro.org/beta/chordpro-configuration-generic/#general-settings) to obtain a delta symbol instead of 'maj7' in chord names.
-* You can now use special [ChordPro Symbols](https://www.chordpro.org/beta/chordpro-symbols/) from markup.
-* Songbooks now can have both a [cover](https://www.chordpro.org/beta/using-chordpro/#cover) and [front matter](https://www.chordpro.org/beta/using-chordpro/#front-matter).
+* Config [settings.maj7delta](https://www.chordpro.org/chordpro/chordpro-configuration-generic/#general-settings) to obtain a delta symbol instead of 'maj7' in chord names.
+* You can now use special [ChordPro Symbols](https://www.chordpro.org/chordpro/chordpro-symbols/) from markup.
+* Songbooks now can have both a [cover](https://www.chordpro.org/chordpro/using-chordpro/#cover) and [front matter](https://www.chordpro.org/chordpro/using-chordpro/#front-matter).
 * To avoid confusion, command line option `--print-default-config` will now print the **template** config instead of the **full** config. To print the full config, repeat the option.
 * In case of emergency it is now possible to obtain chord brackets in lyrics and annotations.
 * Allow name based array access in config augment.
-* Font specifications in the config may now carry (some) properties. E.g. `pdf.fonts.comment_box : "sans 12; frame=1"`.
-* Command line options `--even-pages-number-left` (`-L`) and `--odd-pages-numbers-left` are no longer functional. They did the wrong thing anyway. Use [`pdf.songbook`](https://www.chordpro.org/beta/chordpro-configuration-pdf/#songbook-pages) in the config file instead.
+* Font specifications in the config may now carry (some) properties. E.g. `pdf.fonts.comment_box : "sans 12; color=blue; frame=1"`.
+* Command line options `--even-pages-number-left` (`-L`) and `--odd-pages-numbers-left` are no longer functional. They did the wrong thing anyway. Use [`pdf.songbook`](https://www.chordpro.org/chordpro/chordpro-configuration-pdf/#songbook-pages) in the config file instead.
 
 ### Bug Fixes
 
 * Prevent "settings migrated" dialog if not applicable.
 * Some issues with Unicode filenames on Windows.
 * Some issues with line endings on Windows.
+* Some issues with button bitmaps on Windows.
 * Fix image alignment with indent.
 * Fix title swap even when using title-even format.
 * Fix problems with save/restore settings on Windows.

@@ -17,9 +17,9 @@ my @bins = qw( chordpro wxchordpro );
 my $mv =
   { 'File::LoadLines'		   => 1.047,
     'HarfBuzz::Shaper'		   => 0.026, # Text::Layout
-    'String::Interpolate::Named'   => 1.030, # pref: 1.05
+    'String::Interpolate::Named'   => 1.060,
      # 'SVGPDF'			   => 0.089,
-    'Text::Layout'		   => 0.042, # pref: 0.043
+    'Text::Layout'		   => 0.045,
 
     'Data::Printer'		   => 1.001001,
     'File::Copy'		   => 2.32, # Core

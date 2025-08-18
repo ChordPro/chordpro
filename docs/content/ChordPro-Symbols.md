@@ -17,7 +17,7 @@ Attributes are allowed, e.g.
 
     <sym color="red" arrow-up />
 
-Recognized attributes are `size`, `color`, `bgcolor`, `base` and `href`.
+Recognized attributes are `size`, `color`, `bgcolor` and `href`.
 
 | Symbol | Name |
 |--------|------|

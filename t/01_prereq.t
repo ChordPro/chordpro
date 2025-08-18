@@ -33,7 +33,7 @@ else {
     ++$test; use_ok( $pdfapi,  $pdfapiv );
     diag("Using $pdfapi $pdfapiv for PDF generation");
 }
-++$test; use_ok( "Text::Layout",   0.042 );
+++$test; use_ok( "Text::Layout",   0.045 );
 eval {
     require HarfBuzz::Shaper;
     HarfBuzz::Shaper->VERSION(0.026);
@@ -42,7 +42,7 @@ eval {
 } || diag( "Shaping disabled (HarfBuzz::Shaper not found)" );
 ++$test; use_ok( "JSON::PP",   2.27203 );
 ++$test; require_ok( "JSON::XS" ); JSON::XS->VERSION(4.03);
-++$test; use_ok( "String::Interpolate::Named", 1.030 );
+++$test; use_ok( "String::Interpolate::Named", 1.060 );
 ++$test; use_ok( "File::HomeDir", 1.004 );
 ++$test; use_ok( "File::LoadLines", 1.047 );
 ++$test; use_ok( "SVGPDF", 0.080 );
