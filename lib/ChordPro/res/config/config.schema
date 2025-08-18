@@ -2460,8 +2460,9 @@
                   "examples": ["a4", "letter", [595, 842]]
                 },
                 "songbook": {
-                  "additionalProperties": false,
                   "description": "New style page control.",
+                  "type": "object",
+                  "additionalProperties": false,
                   "properties": {
                     "align-songs": {
                       "default": true,
