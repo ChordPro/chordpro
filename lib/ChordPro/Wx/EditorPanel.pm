@@ -112,6 +112,13 @@ method openfile( $file, $checked=0, $actual=undef ) {
 	return;
     }
     if ( my $f = fs_load($file) ) {
+
+	# Check for filelist.
+	if ( $f->[0] =~ m;^//\s*chordpro\s+songbook;i ) {
+	    $f->[0] = $file;
+	    return $self->GetParent->select_mode("sbexport")->load_filelist($f)
+	}
+
 	# This has the (desired) sideeffect that all newlines
 	# are now \n .
 	$self->{t_editor}->SetText(join("\n",@$f)."\n");
