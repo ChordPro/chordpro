@@ -418,14 +418,6 @@
             preprocess.ly : []
         }
     
-        // Embedding Strums. EXPERIMENTAL
-        strum {
-            type     : image
-            module   : Strum
-            handler  : strum2xo
-            preamble : []
-        }
-    
         // Embedding SVG.
         svg {
             type    : image
