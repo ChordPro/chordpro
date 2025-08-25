@@ -250,7 +250,7 @@ sub parse_song {
     # Remove inactive delegates.
     while ( my ($k,$v) = each %{ $config->{delegates} } ) {
 	delete( $config->{delegates}->{$k} )
-	  if $v->{type} eq 'none';
+	  if !$v || $v->{type} eq 'none';
     }
 
     # And lock the config.
