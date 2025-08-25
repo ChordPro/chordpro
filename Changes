@@ -4,6 +4,7 @@
     - Reworded symbols insert dialog.
     - Add dependency Unicode::Collate.
     - Trimmed usage message for reference mode.
+    - Prevent warning when a delegate is set to null.
 
 6.080 2025-08-18
 
