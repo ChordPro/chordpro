@@ -905,7 +905,8 @@ sub app_setup {
 	  'convert-config=s',
 
 	  # This aborts option scanning.
-	  'reference|R'		 => sub { $reference++; die("!FINISH!"); },
+	  'reference|R'		 => sub { $reference++;
+					  CORE::die("!FINISH!"); },
 
           ### Standard options ###
 
@@ -1396,6 +1397,23 @@ sub app_usage {
     my %cfg;
     for ( qw( config userconfig sysconfig) ) {
 	$cfg{$_} = $configs{$_} || "no default";
+    }
+
+    if ( $::options->{reference} ) {
+	print ${fh} <<EndOfUsage;
+Usage: $0 [ options ] [ file ... ]
+
+Options:
+    --[no]strict        Strict conformance
+    --output=FILE  -o   Saves the output to FILE
+    --about  -A         About ChordPro...
+    --version  -V       Prints version and exits
+    --help  -h          This message
+    --ident             Show identification
+    --verbose           Verbose information. Repeat for more.
+EndOfUsage
+	exit $exit if defined $exit;
+	return;
     }
 
     ####TODO: weed out for --reference.

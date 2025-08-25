@@ -3,6 +3,7 @@
     - Remove experimental 'strum' section.
     - Reworded symbols insert dialog.
     - Add dependency Unicode::Collate.
+    - Trimmed usage message for reference mode.
 
 6.080 2025-08-18
 
