@@ -1,10 +1,11 @@
 0.000
 
     - Reworded symbols insert dialog.
-
     - Re-enable (experimental) songbook loading.
-
     - Fix outlines sorting.
+    - Add dependency Unicode::Collate.
+    - Trimmed usage message for reference mode.
+    - Prevent warning when a delegate is set to null.
 
 6.080 2025-08-18
 
