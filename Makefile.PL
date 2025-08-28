@@ -37,7 +37,8 @@ my $mv =
     'Ref::Util'			   => 0.204,
     'Scalar::Util'		   => 1.63,
     'Storable'			   => 3.08,
-    'Unicode::Collate'		   => 1.31
+    'Unicode::Collate'		   => 1.31,
+    'Unicode::Normalize'	   => 1.26,
   };
 
 # PDF API.
