@@ -1,14 +1,16 @@
-6.080.1
+6.080.1	2025-08-28
 
     - Remove experimental 'strum' section.
     - Reworded symbols insert dialog.
+    - Re-enable (experimental) songbook loading.
+    - Fix outlines sorting.
     - Add dependency Unicode::Collate.
     - Trimmed usage message for reference mode.
     - Prevent warning when a delegate is set to null.
 
 6.080 2025-08-18
 
-    !Highssortlights
+    !Highlights
 
     - Support for [strum patterns](https://www.chordpro.org/chordpro/directives-env_grid/#strums) in grids.
 

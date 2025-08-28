@@ -1294,12 +1294,19 @@ sub parse_directive {
     }
 
     # $d is the complete directive line, without leading/trailing { }.
+    if ( $options->{reference} and $d =~ s/^\s*:[: ]*//) {
+	do_warn("Incorrect start of directive (':' not allowed at start)");
+    }
     $d =~ s/^[: ]+//;
     $d =~ s/\s+$//;
     my $dir = lc($d);
     my $arg = "";
-    if ( $d =~ /^(.*?)[: ]\s*(.*)/ ) {
-	( $dir, $arg ) = ( lc($1), $2 );
+    if ( $d =~ /^(.*?)([: ])\s*(.*)/ ) {
+	( $dir, $arg ) = ( lc($1), $3 );
+	if ( $options->{reference} ) {
+	    do_warn("Directive name must be followed by a ':'")
+	      unless $2 eq ":";
+	}
     }
     $dir =~ s/[: ]+$//;
     # $dir is the lowcase directive name.

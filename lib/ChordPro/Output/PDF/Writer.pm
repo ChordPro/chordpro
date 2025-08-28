@@ -19,6 +19,8 @@ use ChordPro::Utils qw( expand_tilde demarkup min is_corefont maybe is_true is_o
 use ChordPro::Output::Common qw( fmt_subst prep_outlines );
 use Ref::Util qw( is_arrayref is_hashref );
 use feature 'state';
+use Unicode::Collate;
+use Unicode::Normalize;
 
 # For regression testing, run perl with PERL_HASH_SEED set to zero.
 # This eliminates the arbitrary order of font definitions and triggers
@@ -728,7 +730,8 @@ sub make_outlines {
 			{ meta => { tocpage => $v,
 				    bookmark => $k } } ] );
 	    }
-	    $book = [ sort { $a->[0] cmp $b->[0] }  @book ];
+	    my $cmp = Unicode::Collate->new;
+	    $book = [ sort { $cmp->cmp($a->[0], $b->[0]) }  @book ];
 	}
 	else {
 	    $book = prep_outlines( $bk, $ctl );
@@ -769,13 +772,16 @@ sub make_outlines {
 	if ( $needlh ) {
 	    my $cur_ol;
 	    my $cur_let = "";
-	    foreach my $let ( sort keys %lh ) {
+	    my $cmp = Unicode::Collate->new;
+	    foreach my $let ( $cmp->sort( keys %lh )) {
 		foreach my $song ( @{$lh{$let}} ) {
-		    unless ( defined $cur_ol && $cur_let eq $let ) {
+		    unless ( defined $cur_ol
+			     && ( my $t = substr(NFKD($let),0,1) ) eq $cur_let ) {
+			$t //= substr(NFKD($let),0,1);
 			# Intermediate level autoline.
 			$cur_ol = $outline->outline;
-			$cur_ol->title($let);
-			$cur_let = $let;
+			$cur_ol->title($t);
+			$cur_let = $t;
 		    }
 		    # Leaf outline.
 		    my $ol = $cur_ol->outline;
