@@ -1,14 +1,13 @@
 # Release info
 
-## 6.080.0
+## 6.080.1
 
 Released: 2025-08-18
 
-
-### Highlights
+### Highssortlights
 
 * Support for [strum patterns](https://www.chordpro.org/chordpro/directives-env_grid/#strums) in grids.
-* [Bookmarks](https://www.chordpro.org/chordpro/chordpro-markup/#bookmarks).
+* [Bookmarks](https://www.chordpro.org/chordpro/chordpro_markup/#bookmarks).
 * [Break items](https://www.chordpro.org/chordpro/table_of_contents/#break) in Table of Content lines.
 * [Improved control](https://www.chordpro.org/chordpro/chordpro-configuration-pdf/#songbook-pages) over page order and alignment.
 
@@ -69,10 +68,23 @@ Released: 2025-08-18
 * Fix crash with {comment: [chord]} in 2-pass mode.
 * Fix problems with images in 2-pass mode.
 
+## 6.080.1
+
+Released: 2025-08-28
+
+* Reworded symbols insert dialog.
+* Re-enable (experimental) songbook loading.
+* Fix outlines sorting.
+* Add dependency Unicode::Collate.
+* Trimmed usage message for reference mode.
+* Prevent warning when a delegate is set to null.
+
 ### Social and support
 
 [User community](https://groups.io/g/ChordPro) for feedback and help.  
 Please use the [issue tracker](https://github.com/ChordPro/chordpro/issues) for bugs reports.
+
+
 
 ## 6.070
 
