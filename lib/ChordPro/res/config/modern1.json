@@ -1,33 +1,33 @@
-// Configuration for ChordPro.
-//
-// This is a relaxed JSON document, so comments are possible.
+// Configuration for ChordPro
+// 
+// This is a really relaxed JSON document, see
+// https://metacpan.org/pod/JSON::Relaxed#REALLY-RELAXED-EXTENSIONS
 
-{
-    // Layout definitions for PDF output.
-
-    "pdf" : {
-
-	// Style of chorus.
-	"chorus" : {
-	    "indent"     :  12,
-	    // Chorus side bar.
-	    "bar" : {
-		"width"  :  0.5,
-	    },
-	},
-
-	// Fonts.
-	"fonts" : {
-	    "title" : {
-		"name" : "Helvetica-Bold",
-	    },
-	    "text" : {
-		"name" : "Helvetica",
-	    },
-	    "toc" : {
-		"name" : "Helvetica",
-	    },
-	},
-    },
+config {
+    type: style
+    title: "Modern 1"
+    description: "Nice, modern look with sans-serif fonts."
 }
-// End of config.
+
+// Settings for PDF output.
+pdf {
+
+  // Appearance of chorus.
+  chorus {
+
+    // Indent of the chorus, not including bar.
+    indent : 12
+
+    // Appearance of side bar.
+    bar.width : 0.5
+  }
+
+  // "fonts" maps output elements to fonts as defined in "fontconfig".
+  fonts {
+    title: "sans-serif bold"
+    text :  sans-serif
+    toc :   sans-serif
+  }
+}
+
+// End of Config.

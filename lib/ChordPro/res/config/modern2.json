@@ -1,62 +1,53 @@
-// Configuration for ChordPro.
-//
-// This is a relaxed JSON document, so comments are possible.
+// Configuration for ChordPro
+// 
+// This is a really relaxed JSON document, see
+// https://metacpan.org/pod/JSON::Relaxed#REALLY-RELAXED-EXTENSIONS
 
-{
-    // Layout definitions for PDF output.
+config {
+    type: style
+    title: "Modern 2"
+    description: "Modern look with sans-serif fonts and chords in a side column."
+}
 
-    "pdf" : {
+// Settings for PDF output.
+pdf {
 
-	// Style of chorus.
-	"chorus" : {
-	    "indent"     :  12,
-	    // Chorus side bar.
-	    "bar" : {
-		"width"  :  0.5,
-	    },
-	},
+  // Appearance of chorus.
+  chorus {
 
-	// Alternative songlines with chords in a side column.
-	// Value is the column position.
-	"chordscolumn" :  300,
-	"capoheading"  :  "%{capo|Capo: %{}}",
+    // Indent of the chorus, not including bar.
+    indent : 12
 
-	// A {titles: left} may conflict with customized formats.
-	// Set to non-zero to ignore the directive.
-	"titles-directive-ignore" : true,
+    // Appearance of side bar.
+    bar.width : 0.5
+  }
 
-	// Formats.
-	"formats" : {
-	    // Titles/Footers.
-	    // The first page of a song has:
-	    "title" : {
-	        // Title and subtitle.
-	    	"title"     : [ "%{title}", "", "" ],
-	    	"subtitle"  : [ "%{subtitle|%{}|%{subtitle}}", "", "" ],
-	    },
-	},
+  // Alternative songlines with chords in a side column.
+  // Value is the column position.
+  chordscolumn : 300
 
-	// Fonts.
+  // Value for Capo heading when using chordscolumn.
+  capoheading : "%{capo|Capo: %{}}"
 
-	"fonts" : {
-	    "title" : {
-		"name" : "Helvetica-Bold",
-	    },
-	    "text" : {
-		"name" : "Helvetica",
-	    },
-	    "chord" : {
-		"name" : "Helvetica-Bold",
-		"size" : 12
-	    },
-	    "comment" : {
-		"name" : "Helvetica",
-		"size" : 12
-	    },
-	    "toc" : {
-		"name" : "Helvetica",
-	    },
-	},
-    },
+  // A {titles: left} directive may conflict with customized formats.
+  // Set to true to ignore the directive.
+  titles-directive-ignore : true
+
+  // Formats.
+  formats.title {
+
+    // The first page of a song has:
+    title : [ "%{title}" "" "" ]
+    subtitle : [ "%{subtitle|%{}|%{subtitle}}" "" "" ]
+  }
+
+  // "fonts" maps output elements to fonts as defined in "fontconfig".
+  fonts {
+    title   : "sans-serif bold"
+    text    : sans-serif
+    chord   : "sans-serif bold 12"
+    comment : "sans-serif 12"
+    toc     : sans-serif
+  }
 }
 // End of config.

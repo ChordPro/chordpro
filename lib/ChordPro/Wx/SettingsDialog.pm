@@ -23,10 +23,10 @@ BUILD ( $parent, $id, $title ) {
     Wx::Event::EVT_SYS_COLOUR_CHANGED( $self,
 				       $self->can("OnSysColourChanged") );
     # Do not DeletePage until we're sure none of the widgets are referenced.
-    $self->{nb_preferences}->RemovePage(5)
+    $self->{nb_preferences}->RemovePage(5) # HTML viewer
       unless $preferences{expert};
-    $self->{nb_preferences}->RemovePage(4)
-      unless $preferences{pdfviewer};
+    $self->{nb_preferences}->RemovePage(4) # PDF viewer
+      unless $preferences{pdfviewer} || $preferences{advanced};
 
     unless ( has_appearance() ) {
 	$self->{ch_theme}->Delete(2); # Follow System
@@ -63,6 +63,8 @@ method refresh() {
 I went [Em]down to the [Am]St James In[Em]firmary
 I found my [Am]baby [B7]there
 EOD
+
+    $self->set_advanced_mode($preferences{advanced});
 }
 
 method enablecustom() {
@@ -75,6 +77,58 @@ method enablecustom() {
 
     $n = $self->{cb_tmplfile}->IsChecked;
     $self->{fp_tmplfile}->Enable($n);
+
+    # Add instruments.
+    my $ctl = $self->{ch_instrument};
+    $ctl->Clear;
+    for ( sort keys %{$state{instrument_presets}} ) {
+	$ctl->Append( $state{instrument_presets}->{$_}->{title},
+		      $state{instrument_presets}->{$_},
+		    );
+    }
+    $ctl->SetSelection(0);
+#    $self->set_instrument_desc("Default ChordPro style.");
+
+    # Add the styles to the presets.
+    $ctl = $self->{ch_extra2};
+    $ctl->Clear;
+    my $neat = sub {
+	my ($t ) = @_;
+	$t = ucfirst(lc($t));
+	$t =~ s/_/ /g;
+	$t =~ s/ (.)/" ".uc($1)/eg;
+	$t;
+    };
+    my $i = 0;
+    for ( $self->all_styles( " (user)" ) ) {
+	$ctl->Append( $neat->($_) );
+    }
+    $ctl = $self->{ch_style};
+    $ctl->Clear;
+    $ctl->Append( "Default",
+		  { desc => "Default ChordPro style." } );
+    for ( sort keys %{$state{style_presets}} ) {
+	for ( $state{style_presets}->{$_} ) {
+	    my $title = $_->{title};
+	    $title .= " (" . $_->{src} . ")"
+	      unless $_->{src} eq "std";
+	    $ctl->Append( $title, $_ );
+	}
+    }
+    $ctl->SetSelection(0);
+    $self->set_style_desc("Default ChordPro style.");
+
+    # Check the presets that were selected.
+    my $p = $preferences{cfgpreset};
+    foreach ( @$p ) {
+	next if $_ eq "custom";	# legacy
+	my $t = $neat->($_);
+	my $n = $ctl->FindString($t);
+	$n = $ctl->FindString( $t = "$t (user)" ) if $n == wxNOT_FOUND;
+	unless ( $n == wxNOT_FOUND ) {
+	    $ctl->Check( $n, 1 );
+	}
+    }
 }
 
 method all_styles( $userpostfix = "" ) {
@@ -90,34 +144,8 @@ method fetch_prefs() {
     # Skip default (system, user, song) configs.
     $self->{cb_skipstdcfg}->SetValue($preferences{skipstdcfg});
 
-    # Add the styles to the presets.
-    my $ctl = $self->{ch_presets};
-    $ctl->Clear;
-    my $neat = sub {
-	my ($t ) = @_;
-	$t = ucfirst(lc($t));
-	$t =~ s/_/ /g;
-	$t =~ s/ (.)/" ".uc($1)/eg;
-	$t;
-    };
-    my $i = 0;
-    for ( $self->all_styles( " (user)" ) ) {
-	$ctl->Append( $neat->($_) );
-    }
-
-    # Check the presets that were selected.
-    my $p = $preferences{cfgpreset};
-    foreach ( @$p ) {
-	next if $_ eq "custom";	# legacy
-	my $t = $neat->($_);
-	my $n = $ctl->FindString($t);
-	$n = $ctl->FindString( $t = "$t (user)" ) if $n == wxNOT_FOUND;
-	unless ( $n == wxNOT_FOUND ) {
-	    $ctl->Check( $n, 1 );
-	}
-    }
-    $self->{cb_presets}->SetValue($preferences{enable_presets});
-    $self->{ch_presets}->Enable($preferences{enable_presets});
+#    $self->{cb_presets}->SetValue($preferences{enable_presets});
+    $self->{ch_extra2}->Enable($preferences{enable_presets});
 
     # Custom config file.
     $self->{cb_configfile}->SetValue($preferences{enable_configfile});
@@ -147,7 +175,7 @@ method fetch_prefs() {
     $self->{fp_messages}->SetSelectedFont( Wx::Font->new($preferences{msgsfont}) );
 
     # Notation.
-    $ctl = $self->{ch_notation};
+    my $ctl = $self->{ch_notation};
     $ctl->Clear;
     my $n = 0;
     my $check = 0;
@@ -190,6 +218,7 @@ method fetch_prefs() {
     # HTML Viewer.
     $self->{cb_htmlviewer}->SetValue($preferences{enable_htmlviewer});
 
+    $self->set_advanced_mode( $preferences{advanced} );
     $self->enablecustom;
     $state{_prefs} = clone(\%preferences);
 
@@ -210,8 +239,8 @@ method store_prefs() {
     $preferences{skipstdcfg}  = $self->{cb_skipstdcfg}->IsChecked;
 
     # Presets.
-    $preferences{enable_presets} = $self->{cb_presets}->IsChecked;
-    my $ctl = $self->{ch_presets};
+#    $preferences{enable_presets} = $self->{cb_presets}->IsChecked;
+    my $ctl = $self->{ch_extra2};
     my $cnt = $ctl->GetCount;
     my @p;
     my @styles = $self->all_styles;
@@ -224,14 +253,17 @@ method store_prefs() {
     # Custom config file.
     $preferences{enable_configfile} = $self->{cb_configfile}->IsChecked;
     $preferences{configfile}        = $self->{fp_customconfig}->GetPath;
+    $preferences{enable_configfile} = 0 if $preferences{configfile} eq "";
 
     # Custom library.
     $preferences{enable_customlib} = $self->{cb_customlib}->IsChecked;
     $preferences{customlib}        = $self->{dp_customlibrary}->GetPath;
+    $preferences{enable_customlib} = 0 if $preferences{customlib} eq "";
 
     # New song template.
     $preferences{enable_tmplfile} = $self->{cb_tmplfile}->IsChecked;
     $preferences{tmplfile}        = $self->{fp_tmplfile}->GetPath;
+    $preferences{enable_tmplfile} = 0 if $preferences{tmplfile} eq "";
 
     # Preferred filename extension.
     $preferences{chordproext} = $self->{t_prefext}->GetValue;
@@ -293,6 +325,11 @@ method restore_prefs() {
 }
 
 method need_restart() {
+    undef $state{styles};
+    warn("****\n");
+    ChordPro::Wx::Config::setup_styles();
+    $self->enablecustom;
+    return;
     state $id = wxID_ANY;
     if ( $id == wxID_ANY ) {
 	$id = Wx::NewId;
@@ -466,10 +503,11 @@ method OnCustomLibChanged($event) {
 
 method OnSkipStdCfg($event) {
     $event->Skip;
+    $self->need_restart;
 }
 
 method OnPresets($event) {
-    $self->{ch_presets}->Enable( $self->{cb_presets}->GetValue );
+#    $self->{ch_presets}->Enable( $self->{cb_presets}->GetValue );
     $event->Skip;
 }
 
@@ -630,7 +668,51 @@ method OnSysColourChanged($event) {
     $event->Skip;
 }
 
+method OnAdvancedMode( $event ) {
+    $self->set_advanced_mode( $self->{cb_advanced}->IsChecked );
+    $self->need_restart;
+}
+
+method OnChangeInstrument( $event ) {
+    my $c = $event->GetClientData;
+    $self->set_instrument_desc($c->{desc});
+}
+
+method OnChangeStyle( $event ) {
+    my $c = $event->GetClientData;
+    $self->set_style_desc($c->{desc});
+}
+
 ################ Helpers ################
+
+method set_advanced_mode( $t ) {
+    $preferences{advanced} = $t;
+    $self->{cb_advanced}->SetValue($t);
+    for ( qw( ch_extra2
+	      cb_configfile fp_customconfig b_createconfig
+	      cb_customlib dp_customlibrary
+	      cb_skipstdcfg
+	      sl_line
+	   ) ) {
+	$self->{$_}->Show($t);
+    }
+    for ( qw( ch_extra1 l_extra1_desc
+	   ) ) {
+	$self->{$_}->Show(!$t);
+    }
+    $self->{sz_extra}->Layout;
+    $self->{sz_presets}->Layout;
+}
+
+method set_style_desc( $desc ) {
+    $self->{l_style_desc}->SetLabel($desc);
+    $self->{l_style_desc}->Wrap(($self->{ch_style}->GetSizeWH)[0]);
+}
+
+method set_instrument_desc( $desc ) {
+    $self->{l_instrument_desc}->SetLabel($desc);
+    $self->{l_instrument_desc}->Wrap(($self->{ch_instrument}->GetSizeWH)[0]);
+}
 
 method colourchanged($index) {
     $self->colours2prefs;

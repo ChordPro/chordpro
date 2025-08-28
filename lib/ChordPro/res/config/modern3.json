@@ -2,78 +2,73 @@
 //
 // This is a relaxed JSON document, so comments are possible.
 
-{
+config {
+    type: style
+    title: "Modern 3"
+    description: "Modern look with sans-serif fonts and chords diagrams in a side column."
+}
 
-    "settings" : {
-	"columns" : 1
-    },
+// Settings for PDF output.
+pdf {
 
-    // Layout definitions for PDF output.
+  // Appearance of chorus.
+  chorus {
 
-    "pdf" : {
+    // Indent of the chorus, not including bar.
+    indent : 12
 
-	// Style of chorus.
-	"chorus" : {
-	    "indent"     :  12,
-	    // Chorus side bar.
-	    "bar" : {
-		"width"  :  0.5,
-	    },
-	},
+    // Appearance of side bar.
+    bar.width : 0.5
+  }
 
-	// Slightly larger diagrams, shown at the right side.
-	"diagrams" : {
-	    "show"     :  "right",
-	    "width"    :  8,
-  	    "height"   :  8,
-	    "hspace"   :  3.95,
-	    "vspace"   :  3,
-  	    "vcells"   :  4,
-	    "linewidth" : 0.1,
-	},
+  // Appearance of chord diagrams for string instruments.
+  diagrams {
 
-	// Beyboard diagrams, shown at the right side.
-	"kbdiagrams" : {
-	    "show"     :  "right",
-	},
+    // Diagrams for all chords of the song can be shown at the
+    // "top", "bottom" or "right" side of the first page,
+    // or "below" the last song line.
+    show : right
 
-	// A {titles: left} may conflict with customized formats.
-	// Set to non-zero to ignore the directive.
-	"titles-directive-ignore" : true,
+    // Width of each diagram cell.
+    width : 8
 
-	// Formats.
-	"formats" : {
-	    // Titles/Footers.
-	    // The first page of a song has:
-	    "title" : {
-	        // Title and subtitle.
-	    	"title"     : [ "%{title}", "", "" ],
-	    	"subtitle"  : [ "%{subtitle|%{}|%{subtitle}}", "", "" ],
-	    },
-	},
+    // Height of each diagram cell.
+    height : 8
 
-	// Fonts.
+    // Horizontal space between diagrams.
+    hspace : 3.95
 
-	"fonts" : {
-	    "title" : {
-		"name" : "Helvetica-Bold",
-	    },
-	    "text" : {
-		"name" : "Helvetica",
-	    },
-	    "chord" : {
-		"name" : "Helvetica-Bold",
-		"size" : 12
-	    },
-	    "comment" : {
-		"name" : "Helvetica",
-		"size" : 12
-	    },
-	    "toc" : {
-		"name" : "Helvetica",
-		"size" : 11
-	    },
-	},
-    },
+    // Vertical space between diagrams.
+    vspace : 3
+
+    // The number of frets shown.
+    vcells : 4
+
+    // Thickness of the diagram lines as a fraction of 'width'.
+    linewidth : 0.1
+  }
+
+  // Appearance of chord diagrams for keyboards.
+  kbdiagrams.show : right
+
+  // A {titles: left} directive may conflict with customized formats.
+  // Set to true to ignore the directive.
+  titles-directive-ignore : true
+
+  // Formats.
+  formats.title {
+
+    // The first page of a song has:
+    title : [ "%{title}" "" "" ]
+    subtitle : [ "%{subtitle|%{}|%{subtitle}}" "" "" ]
+  }
+
+  fonts {
+    title   : "sans-serif bold"
+    text    : sans-serif
+    chord   : "sans-serif bold 12"
+    comment : "sans-serif 12"
+    toc     : "sans-serif 11"
+  }
 }
 // End of config.

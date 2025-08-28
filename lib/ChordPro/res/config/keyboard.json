@@ -1,4 +1,11 @@
-{ "instrument" : {
+{ // For GUI.
+  "config" : {
+    "type"        : "instrument",
+    "title"       : "Keyboard",
+    "description" : "Keyboard, tempered tuning.",
+  },
+
+  "instrument" : {
     "description" : "Keyboard, Piano, ...",
     "type" : "keyboard"
   },
