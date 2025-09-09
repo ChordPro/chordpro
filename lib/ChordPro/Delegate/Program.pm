@@ -301,7 +301,7 @@ sub _cmd2image( $song, $ctl, %args ) {
 	# Get info.
 	my $info = image_info(\$result);
 	if ( $info->{error} ) {
-	    warn("?Error execting @cmd: ", $info->{error}, "\n");
+	    warn("?Error executing @cmd: ", $info->{error}, "\n");
 	    return;
 	}
 	$subtype = $info->{file_ext};
