@@ -96,7 +96,7 @@ use ChordPro::Utils qw(dimension maybe make_preprocessor);
 use ChordPro::Output::Common qw(fmt_subst);
 use IPC::Run3 qw(run3);
 use Ref::Util qw( is_arrayref );
-use Image::Info qw(image_info);
+use ChordPro::Utils qw(detect_image_format);
 
 sub DEBUG() { $::config->{debug}->{x1} }
 
@@ -299,7 +299,7 @@ sub _cmd2image( $song, $ctl, %args ) {
     my $subtype;
     unless ( $subtype = $ctl->{subtype} ) {
 	# Get info.
-	my $info = image_info(\$result);
+	my $info = detect_image_format(\$result);
 	if ( $info->{error} ) {
 	    warn("?Error executing @cmd: ", $info->{error}, "\n");
 	    return;
