@@ -148,7 +148,7 @@ metadata {
 // Globally defined (added) meta data,
 // This is explicitly NOT intended for the metadata items above.
 // Do NOT remove or change "_configversion"!
-meta._configversion : [ 6.075 ]
+meta._configversion : "6.081"
 
 // Assets (placeholder).
 assets {}

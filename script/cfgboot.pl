@@ -4,9 +4,9 @@
 
 # Author          : Johan Vromans
 # Created On      : Mon Jun  3 08:14:35 2024
-# Last Modified By: 
-# Last Modified On: Mon Jun  3 14:06:25 2024
-# Update Count    : 53
+# Last Modified By: Johan Vromans
+# Last Modified On: Wed Sep 10 12:11:09 2025
+# Update Count    : 54
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -80,7 +80,7 @@ use JSON::Relaxed::Parser qw();
 use feature qw(state);
 EOD
 
-print "\nour \$VERSION = ", $data->{meta}->{_configversion}->[0], ";\n\n";
+print "\nour \$VERSION = ", $data->{meta}->{_configversion}, ";\n\n";
 
 print <<'EOD';
 sub config {
