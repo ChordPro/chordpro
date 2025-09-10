@@ -890,13 +890,14 @@
             },
             "transcode": {
               "default": "",
-              "description": "Transcode chords.",
+              "description": "Transcode chords to a different notation system.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/noteSystem"
                 },
                 {
-                  "const": ""
+                  "const": "",
+                  "title": "Don't transcode chords."
                 }
               ]
             },
