@@ -2892,19 +2892,19 @@
                     "oneOf": [
                       {
                         "const": "stdin",
-                        "description": "Pass data via standard input."
+                        "title": "Pass data via standard input."
                       },
                       {
                         "const": "argfile0",
-                        "description": "Use value `\"argfile0\"` to pass data via temporary file whose name is *prepended* to the command arguments."
+                        "title": "Use value `\"argfile0\"` to pass data via temporary file whose name is *prepended* to the command arguments."
                       },
                       {
                         "pattern": "^argfileN?$",
-                        "description": "Use value `\"argfileN\"` or `\"argfile\"` to pass data via temporary file whose name is *appended* to the command arguments."
+                        "title": "Use value `\"argfileN\"` or `\"argfile\"` to pass data via temporary file whose name is *appended* to the command arguments."
                       },
                       {
                         "enum": ["tmpfile1", "tmpfile2"],
-                        "description": "Alternatively, the name of one of the predefined temporary files (`%{tmpfile1}` and `%{tmpfile2}`) can be used. Do not forget to add this name to the command arguments."
+                        "title": "Alternatively, the name of one of the predefined temporary files (`%{tmpfile1}` and `%{tmpfile2}`) can be used. Do not forget to add this name to the command arguments."
                       }
                     ]
                   },
