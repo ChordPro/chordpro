@@ -2899,7 +2899,7 @@
                         "title": "Use value `\"argfile0\"` to pass data via temporary file whose name is *prepended* to the command arguments."
                       },
                       {
-                        "pattern": "^argfileN?$",
+                        "enum": ["argfileN", "argfile"],
                         "title": "Use value `\"argfileN\"` or `\"argfile\"` to pass data via temporary file whose name is *appended* to the command arguments."
                       },
                       {
