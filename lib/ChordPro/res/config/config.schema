@@ -680,39 +680,39 @@
       "oneOf": [
         {
           "const": "common",
-          "description": "C, D, E, F, G, A, B"
+          "title": "C, D, E, F, G, A, B"
         },
         {
           "const": "dutch",
-          "description": "same as `common`"
+          "title": "same as `common`"
         },
         {
           "const": "german",
-          "description": "C, … A, Ais/B, H"
+          "title": "C, … A, Ais/B, H"
         },
         {
           "const": "latin",
-          "description": "Do, Re, Mi, Fa, Sol, …"
+          "title": "Do, Re, Mi, Fa, Sol, …"
         },
         {
           "const": "nashville",
-          "description": "1, 2, 3, …"
+          "title": "1, 2, 3, …"
         },
         {
           "const": "roman",
-          "description": "I, II, III, …"
+          "title": "I, II, III, …"
         },
         {
           "const": "scandinavian",
-          "description": "C, … A, A#/Bb, H"
+          "title": "C, … A, A#/Bb, H"
         },
         {
           "const": "solfege",
-          "description": "same as `solfège`"
+          "title": "same as `solfège`"
         },
         {
           "const": "solfège",
-          "description": "Do, Re, Mi, Fa, So, …"
+          "title": "Do, Re, Mi, Fa, So, …"
         }
       ]
     },
