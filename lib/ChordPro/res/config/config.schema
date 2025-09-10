@@ -2914,11 +2914,11 @@
                     "oneOf": [
                       {
                         "const": "stdout",
-                        "description": "Collect results from standard output"
+                        "title": "Collect results from standard output"
                       },
                       {
                         "const": "%{tmpbase}.cropped.svg",
-                        "description": "Collect results from a temporary file.\nNote that lilypond will append `\".cropped.svg\"`, so we pass the base of the file names."
+                        "title": "Collect results from a temporary file.\nNote that lilypond will append `\".cropped.svg\"`, so we pass the base of the file names."
                       }
                     ]
                   },
