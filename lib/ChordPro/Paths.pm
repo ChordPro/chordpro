@@ -203,10 +203,14 @@ method path ( $p = undef ) {
     return File::Spec->path();
 }
 
-# Prepend dirs in front of path.
+# Prepend/append dirs to path.
 
 method pathprepend( @d ) {
-    $ENV{PATH} = join( $pathsep, @d, $ENV{PATH} );
+    $ENV{PATH} = $self->pathcombine( @d, $ENV{PATH} );
+}
+
+method pathappend( @d ) {
+    $ENV{PATH} = $self->pathcombine( $ENV{PATH}, @d );
 }
 
 method pathcombine( @d ) {
