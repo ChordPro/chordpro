@@ -27,7 +27,7 @@
       ]
     },
     "colorspec": {
-      "description": "Colour specification.",
+      "title": "Colour specification.",
       "type": "string",
       "oneOf": [
         {
@@ -37,14 +37,14 @@
           "examples": ["#FFFFFF", "#393939"]
         },
         {
-          "title": "Named colour",
+          "description": "Named colour",
           "anyOf": [
             {
-              "description": "Shade of grey",
+              "title": "Shade of grey",
               "pattern": "^grey\\d{2}$"
             },
             {
-              "description": "Colour name",
+              "title": "Colour name",
               "enum": [
                 "red",
                 "green",
@@ -57,11 +57,11 @@
               ]
             },
             {
-              "description": "A lack of colour, transparent",
+              "title": "A lack of colour, transparent",
               "const": "none"
             },
             {
-              "description": "Any named colour",
+              "title": "Any named colour",
               "pattern": "^[-A-Za-z0-9]+$"
             }
           ]
