@@ -1072,15 +1072,13 @@
                         "items": {
                           "oneOf": [
                             {
+                              "description": "`\"x\"`, `\"N\"`, or a negative number indicates a string without finger information.",
                               "oneOf": [
                                 {
-                                  "type": "string",
-                                  "description": "`\"x\"` or `\"N\"` denotes a string without finger information",
                                   "enum": ["x", "N"]
                                 },
                                 {
                                   "type": "integer",
-                                  "description": "A negative number indicates a string without finger information.",
                                   "maximum": -1
                                 }
                               ]
@@ -1089,19 +1087,19 @@
                               "oneOf": [
                                 {
                                   "type": "integer",
+                                  "description": "Finger number",
                                   "minimum": 0,
                                   "maximum": 9
                                 },
                                 {
                                   "type": "string",
-                                  "pattern": "^[A-Z]$",
-                                  "not": {
-                                    "const": "N"
-                                  }
+                                  "description": "Finger letter",
+                                  "pattern": "^[A-MO-Z]$"
                                 }
                               ]
                             }
-                          ]
+                          ],
+                          "examples": [-1, "T"]
                         }
                       }
                     }
