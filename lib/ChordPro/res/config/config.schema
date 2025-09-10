@@ -233,6 +233,29 @@
           ],
           "default": "image"
         },
+        "subtype": {
+          "description": "Type of the `image` produced. If not specified, it will be auto-detected.\nFor standard delegates, this is ignored, as they already know which type of image will be produced.\nFor cusotm delegates, this can be optionally specified if `type` is set to `\"image\"`.",
+          "oneOf": [
+            {
+              "title": "Equivalent to omitting `subtype` altogether.",
+              "enum": [false, ""]
+            },
+            {
+              "title": "A type of image.",
+              "enum": [
+                "jpg",
+                "jpeg",
+                "png",
+                "svg",
+                "gif",
+                "tiff",
+                "xbm",
+                "pbm",
+                "pnm"
+              ]
+            }
+          ]
+        },
         "handler": {
           "type": "string",
           "description": "The entry point in the module.",
