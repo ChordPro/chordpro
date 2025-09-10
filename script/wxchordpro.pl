@@ -4,8 +4,8 @@
 
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
-# Last Modified On: Thu Dec 12 07:57:36 2024
-# Update Count    : 336
+# Last Modified On: Wed Sep 10 11:54:50 2025
+# Update Count    : 337
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -19,8 +19,17 @@ binmode(STDOUT, ':utf8');
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";
-
 use ChordPro;
+
+# Library overrides.
+my @xxlibs;
+BEGIN {
+    for ( $ENV{CHORDPRO_XXLIBS} ) {
+	push( @xxlibs, split( $^O =~ /msw/ ? ";" : ":", $_ ) ) if $_;
+    }
+};
+use lib @xxlibs;
+
 use ChordPro::Paths;
 CP->pathprepend( "$FindBin::Bin", "$FindBin::Bin/.." );
 

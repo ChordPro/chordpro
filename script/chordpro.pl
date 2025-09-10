@@ -4,8 +4,8 @@
 
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
-# Last Modified On: Mon Feb 12 22:11:02 2024
-# Update Count    : 282
+# Last Modified On: Wed Sep 10 11:53:50 2025
+# Update Count    : 289
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -41,8 +41,18 @@ use strict;
 use warnings;
 
 use FindBin;
-use lib "$FindBin::Bin/../lib";
+use lib ( "$FindBin::Bin/../lib" );
 use ChordPro;
+
+# Library overrides.
+my @xxlibs;
+BEGIN {
+    for ( $ENV{CHORDPRO_XXLIBS} ) {
+	push( @xxlibs, split( $^O =~ /msw/ ? ";" : ":", $_ ) ) if $_;
+    }
+};
+use lib @xxlibs;
+
 use ChordPro::Paths;
 CP->pathprepend( "$FindBin::Bin", "$FindBin::Bin/.." );
 
