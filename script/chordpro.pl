@@ -4,8 +4,8 @@
 
 # Author          : Johan Vromans
 # Created On      : Fri Jul  9 14:32:34 2010
-# Last Modified On: Wed Sep 10 11:53:50 2025
-# Update Count    : 289
+# Last Modified On: Fri Sep 12 22:51:49 2025
+# Update Count    : 299
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -41,18 +41,28 @@ use strict;
 use warnings;
 
 use FindBin;
-use lib ( "$FindBin::Bin/../lib" );
-use ChordPro;
 
-# Library overrides.
-my @xxlibs;
+# @INC construction...
+# Standard paths are lib and lib/ChordPro/lib relative to the parent
+# of the script directory.
+# Directories in CHORDPRO_XLIBS follow, to augment the path.
+# For example, to add custom delegates.
+# Directories in CHORDPRO_XXLIBS are put in front, these can be used
+# to overrule standard modules. For example, to provide a patches
+# module to an installed kit. Caveat emptor.
+my @xlibs;
 BEGIN {
     for ( $ENV{CHORDPRO_XXLIBS} ) {
-	push( @xxlibs, split( $^O =~ /msw/ ? ";" : ":", $_ ) ) if $_;
+	push( @xlibs, split( $^O =~ /msw/ ? ";" : ":", $_ ) ) if $_;
+    }
+    push( @xlibs, "$FindBin::Bin/../lib", "$FindBin::Bin/../lib/ChordPro/lib",  );
+    for ( $ENV{CHORDPRO_XLIBS} ) {
+	push( @xlibs, split( $^O =~ /msw/ ? ";" : ":", $_ ) ) if $_;
     }
 };
-use lib @xxlibs;
+use lib @xlibs;
 
+use ChordPro;
 use ChordPro::Paths;
 CP->pathprepend( "$FindBin::Bin", "$FindBin::Bin/.." );
 

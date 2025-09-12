@@ -78,7 +78,7 @@ package ChordPro;
 use ChordPro::Paths;
 use Encode qw(decode_utf8);
 
-sub import {
+sub xximport {
     # Add private library.
     my $lib = CP->privlib;
     for ( @INC ) {
