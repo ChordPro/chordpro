@@ -258,11 +258,13 @@ sub parse_song {
 
     for ( keys %{ $config->{meta} } ) {
 	$meta->{$_} //= [];
-	if ( UNIVERSAL::isa($config->{meta}->{$_}, 'ARRAY') ) {
-	    push( @{ $meta->{$_} }, @{ $config->{meta}->{$_} } );
+	my $v = $config->{meta}->{$_};
+	$v = [ $v ] unless is_arrayref($v);
+	if ( is_arrayref($meta->{$_}) ) {
+	    push( @{ $meta->{$_} }, @$v );
 	}
 	else {
-	    push( @{ $meta->{$_} }, $config->{meta}->{$_} );
+	    $meta->{$_} = $v;
 	}
     }
 

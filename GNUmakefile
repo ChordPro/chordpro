@@ -2,6 +2,7 @@
 
 # Windows 10, for Windows installer builds.
 WINVM := Win10ProClassic
+WINVM := Win10Pro
 
 ################ Pass-through ################
 

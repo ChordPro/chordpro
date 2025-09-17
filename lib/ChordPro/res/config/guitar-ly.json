@@ -1,4 +1,11 @@
-{ "instrument" : {
+{ // For GUI.
+  "config" : {
+    "type"        : "instrument",
+    "title"       : "Guitar (alt.)",
+    "description" : "Guitar, 6 strings, standard tuning, 200+ chords with finger indicators.",
+  },
+
+  "instrument" : {
     "description" : "Guitar, 6 strings, standard tuning",
     "type" : "guitar",
   },

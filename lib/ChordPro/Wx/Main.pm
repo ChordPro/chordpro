@@ -385,6 +385,10 @@ method OnClose($event) {
     return unless $self->check_saved;
     # Save preferences to persistent storage.
     $self->save_preferences;
+    # Stop webview process (GTK).
+    if ( $self->{panel} && $self->{panel}->{webview} ) {
+	$self->{panel}->{webview}->Close;
+    }
     $self->Destroy;
 }
 

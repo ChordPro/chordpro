@@ -4,6 +4,10 @@ use strict;
 use warnings;
 use utf8;
 
+BEGIN { -d "t" && chdir "t" }
+
+use lib ( "../script", "../lib", "../lib/ChordPro/lib" );
+
 use ChordPro;
 use Test::More;
 
