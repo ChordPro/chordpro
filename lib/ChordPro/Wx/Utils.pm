@@ -285,13 +285,15 @@ sub setup_menubar( $self ) {
     # Append the tasks.
     my $menu = $mb->FindMenu("Tasks");
     $menu = $mb->GetMenu($menu);
-    $menu->AppendSeparator if @{$ChordPro::Wx::Config::state{tasks}};
 
-    for my $task ( @{$ChordPro::Wx::Config::state{tasks} } ) {
-	my ( $desc, $file ) = @$task;
+    my $tasks = $ChordPro::Wx::Config::state{presets}{tasks};
+    $menu->AppendSeparator if %{$tasks};
+
+    while ( my ($title,$info) = each %{$tasks} ) {
+	my $file = $info->{file};
 	my $id = Wx::NewId();
 	# Append to the menu.
-	my $mi = $menu->Append( $id, $desc, _T("Custom task: ").$desc );
+	my $mi = $menu->Append( $id, $title, _T("Custom task: ").$title );
 	Wx::Event::EVT_MENU
 	    ( $self, $id,
 	      sub { $ChordPro::Wx::Config::state{panel}->preview( [ "--config", $file ] ) }
