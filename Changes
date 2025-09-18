@@ -1,3 +1,7 @@
+6.080.2
+
+    - Improve break handling in ToC. Fixes issue #606.
+
 6.080.1	2025-08-28
 
     - Reworded symbols insert dialog.
