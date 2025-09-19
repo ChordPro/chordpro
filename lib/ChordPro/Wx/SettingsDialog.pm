@@ -81,16 +81,21 @@ method enablecustom() {
     # Add instruments.
     my $ctl = $self->{ch_instrument};
     $ctl->Clear;
-    for ( sort keys %{$state{instrument_presets}} ) {
-	$ctl->Append( $state{instrument_presets}->{$_}->{title},
-		      $state{instrument_presets}->{$_},
+    for ( sort keys %{$state{presets}{instruments}} ) {
+	$ctl->Append( $state{presets}{instruments}->{$_}->{title},
+		      $state{presets}{instruments}->{$_},
 		    );
     }
     $ctl->SetSelection(0);
+    if ( $preferences{preset_instrument} ) {
+	my $n = $ctl->FindString($preferences{preset_instrument});
+	$ctl->SetSelection($n)
+	  unless $n == wxNOT_FOUND;
+    }
 #    $self->set_instrument_desc("Default ChordPro style.");
 
     # Add the styles to the presets.
-    $ctl = $self->{ch_extra2};
+    $ctl = $self->{ch_stylemods};
     $ctl->Clear;
     my $neat = sub {
 	my ($t ) = @_;
@@ -100,15 +105,19 @@ method enablecustom() {
 	$t;
     };
     my $i = 0;
-    for ( $self->all_styles( " (user)" ) ) {
-	$ctl->Append( $neat->($_) );
+    for ( sort keys %{$state{presets}{stylemods}} ) {
+	$ctl->Append( $state{presets}{stylemods}->{$_}->{title},
+		      $state{presets}{stylemods}->{$_},
+		    );
     }
     $ctl = $self->{ch_style};
     $ctl->Clear;
     $ctl->Append( "Default",
-		  { desc => "Default ChordPro style." } );
-    for ( sort keys %{$state{style_presets}} ) {
-	for ( $state{style_presets}->{$_} ) {
+		  { desc => "Default ChordPro style.",
+		    preview => "style_default-small.jpg",
+		  } );
+    for ( sort keys %{$state{presets}{styles}} ) {
+	for ( $state{presets}{styles}->{$_} ) {
 	    my $title = $_->{title};
 	    $title .= " (" . $_->{src} . ")"
 	      unless $_->{src} eq "std";
@@ -119,9 +128,8 @@ method enablecustom() {
     $self->set_style_desc("Default ChordPro style.");
 
     # Check the presets that were selected.
-    my $p = $preferences{cfgpreset};
+    my $p = $preferences{preset_stylemods};
     foreach ( @$p ) {
-	next if $_ eq "custom";	# legacy
 	my $t = $neat->($_);
 	my $n = $ctl->FindString($t);
 	$n = $ctl->FindString( $t = "$t (user)" ) if $n == wxNOT_FOUND;
@@ -144,8 +152,13 @@ method fetch_prefs() {
     # Skip default (system, user, song) configs.
     $self->{cb_skipstdcfg}->SetValue($preferences{skipstdcfg});
 
-#    $self->{cb_presets}->SetValue($preferences{enable_presets});
-    $self->{ch_extra2}->Enable($preferences{enable_presets});
+    if ( $preferences{preset_instrument} ) {
+	for ( $self->{ch_instrument} ) {
+	    my $n = $_->FindString($preferences{preset_instrument});
+	    $_->SetSelection($n)
+	      unless $n == wxNOT_FOUND;
+	}
+    }
 
     # Custom config file.
     $self->{cb_configfile}->SetValue($preferences{enable_configfile});
@@ -238,9 +251,12 @@ method store_prefs() {
     # Skip default (system, user, song) configs.
     $preferences{skipstdcfg}  = $self->{cb_skipstdcfg}->IsChecked;
 
+    # Preset instrument.
+    my $n = $self->{ch_instrument}->GetSelection;
+    $preferences{preset_instrument} = $self->{ch_instrument}->GetString($n);
+
     # Presets.
-#    $preferences{enable_presets} = $self->{cb_presets}->IsChecked;
-    my $ctl = $self->{ch_extra2};
+    my $ctl = $self->{ch_stylemods};
     my $cnt = $ctl->GetCount;
     my @p;
     my @styles = $self->all_styles;
@@ -278,7 +294,7 @@ method store_prefs() {
     $preferences{msgsfont} = $self->{fp_messages}->GetSelectedFont->GetNativeFontInfoDesc;
 
     # Notation.
-    my $n = $self->{ch_notation}->GetSelection;
+    $n = $self->{ch_notation}->GetSelection;
     if ( $n > 0 ) {
 	$preferences{notation} =
 	  $self->{ch_notation}->GetClientData($n);
@@ -681,6 +697,33 @@ method OnChangeInstrument( $event ) {
 method OnChangeStyle( $event ) {
     my $c = $event->GetClientData;
     $self->set_style_desc($c->{desc});
+    # $self->set_style_preview($c->{preview});
+}
+
+method OnChangeStylemod( $event ) {
+    my $c = $event->GetClientData;
+    $self->set_stylemod_desc($c->{desc});
+}
+
+method OnChangeStylemods( $event ) {
+    my $n = $event->GetInt;
+    my $ctl = $self->{ch_stylemods};
+    my $c = $ctl->GetClientData($n);
+    my $desc = $c->{desc};
+
+    # If checking a choice has an exclude_id, uncheck checked choices
+    # that use the same exclude_id.
+    if ( $ctl->IsChecked($n) and
+	 my $id = $c->{exclude_id} ) {
+	for ( my $i = $ctl->GetCount; $i >= 0; $i-- ) {
+	    next if $i == $n;
+	    next unless $ctl->IsChecked($i);
+	    if ( $id eq ($ctl->GetClientData($i)->{exclude_id}//"") ) {
+		$ctl->Check( $i, 0 );
+	    }
+	}
+    }
+    $self->set_stylemods_desc($desc);
 }
 
 ################ Helpers ################
@@ -688,7 +731,7 @@ method OnChangeStyle( $event ) {
 method set_advanced_mode( $t ) {
     $preferences{advanced} = $t;
     $self->{cb_advanced}->SetValue($t);
-    for ( qw( ch_extra2
+    for ( qw( ch_stylemods
 	      cb_configfile fp_customconfig b_createconfig
 	      cb_customlib dp_customlibrary
 	      cb_skipstdcfg
@@ -696,17 +739,39 @@ method set_advanced_mode( $t ) {
 	   ) ) {
 	$self->{$_}->Show($t);
     }
-    for ( qw( ch_extra1 l_extra1_desc
-	   ) ) {
+    for ( qw( ch_stylemod ) ) {
 	$self->{$_}->Show(!$t);
     }
-    $self->{sz_extra}->Layout;
+    $self->{l_stylemods}->SetLabel( $t ? "Style Modifiers" : "Style Modifier" );
+    $self->{l_stylemod_desc}->SetLabel("");
+    $self->{sz_stylemods}->Layout;
     $self->{sz_presets}->Layout;
 }
 
 method set_style_desc( $desc ) {
     $self->{l_style_desc}->SetLabel($desc);
     $self->{l_style_desc}->Wrap(($self->{ch_style}->GetSizeWH)[0]);
+}
+
+method set_style_preview( $preview ) {
+    $preview //= "style_nopreview-small.png";
+    warn("XX1 $preview\n");
+    $preview = CP->findres( $preview, class => "images" )
+      || CP->findres( "style_nopreview-small.png", class => "images" );
+    warn("XX2 $preview\n");
+    return unless $preview;
+    $self->{bm_style_preview}->SetBitmap
+      ( Wx::Bitmap->new( $preview, wxBITMAP_TYPE_ANY ) );
+}
+
+method set_stylemod_desc( $desc ) {
+    $self->{l_stylemod_desc}->SetLabel($desc);
+    $self->{l_stylemod_desc}->Wrap(($self->{ch_stylemod}->GetSizeWH)[0]);
+}
+
+method set_stylemods_desc( $desc ) {
+    $self->{l_stylemod_desc}->SetLabel($desc);
+    $self->{l_stylemod_desc}->Wrap(($self->{ch_stylemods}->GetSizeWH)[0]);
 }
 
 method set_instrument_desc( $desc ) {
