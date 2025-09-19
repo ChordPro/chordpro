@@ -10,7 +10,7 @@ assignees: ''
 <!--
 The issue tracker is only for bug reporting.
 Please refer to the ChordPro user group for general questions on how to use ChordPro.
-https://groups.google.com/forum/#!forum/chordpro
+https://groups.io/g/ChordPro
 -->
 
 ## Describe the bug
@@ -40,8 +40,8 @@ include the resultant PDF in the bug report.
  - OS: <!-- [e.g. Ubuntu 18.08, Windows 8, Fedora 29] -->
  - Where did you get ChordPro from? <!-- [e.g. CPAN, SourceForge, GitHub] -->
 <!-- The versions below are best provided by `chordpro --about` or as screenshot of the `About` window. -->
- - ChordPro version: <!-- [e.g. 0.975 (use `chordpro --version` on the command line)] -->
- - Perl version: <!-- [e.g. 5.28.1 (use `perl --version` on the command line)] -->
+ - ChordPro version: <!-- [e.g. 6.070.1 (use `chordpro --version` on the command line)] -->
+ - If you are **not** running the packaged ChordPro for Windows or macOS, what is your Perl version: <!-- [e.g. 5.40.1 (use `perl --version` on the command line)] -->
 
 ## Additional context
 <!-- Add any other context about the problem here. -->

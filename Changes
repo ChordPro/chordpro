@@ -4,6 +4,7 @@
 
 6.080.1	2025-08-28
 
+    - Remove experimental 'strum' section.
     - Reworded symbols insert dialog.
     - Re-enable (experimental) songbook loading.
     - Fix outlines sorting.
@@ -13,7 +14,7 @@
 
 6.080 2025-08-18
 
-    !Highssortlights
+    !Highlights
 
     - Support for [strum patterns](https://www.chordpro.org/chordpro/directives-env_grid/#strums) in grids.
 
