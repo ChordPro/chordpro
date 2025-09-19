@@ -3,6 +3,12 @@
 // This is a relaxed JSON document, so comments are possible.
 
 {
+    "config" : {
+	"type" : "style",
+	"title" : "Chordii",
+	"description" : "Legacy Chordii compatible.",
+    },
+
     "settings" : {
       // Suppress empty chord lines.
       // Overrides the -a (--single-space) command line options.
