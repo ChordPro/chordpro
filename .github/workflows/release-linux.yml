@@ -2,7 +2,7 @@ on:
   release:
     types: [created]
   workflow_dispatch
-  
+
 name: Handle Release
 jobs:
   generate:
@@ -45,4 +45,3 @@ jobs:
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: "${{ runner.temp }}/ChordPro-${{ env.CHORDPRO_VERSION }}-Linux_x86_64-AppImage.zip"
-
