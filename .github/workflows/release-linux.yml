@@ -29,14 +29,14 @@ jobs:
           zip -m "${{ runner.temp }}/ChordPro-$CHORDPRO_VERSION-Linux_x86_64-AppImage.zip" ChordPro-$CHORDPRO_VERSION.AppImage
           ls -l "${{ runner.temp }}"
 
-      - if {{ false }}
+      - if ${{ false }}
         name: Upload the release artifact
         uses: shogo82148/actions-upload-release-asset@v1
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: "${{ runner.temp }}/ChordPro-${{ env.CHORDPRO_VERSION }}-Linux_x86_64-AppImage.zip"
 
-      - if {{ true }}
+      - if ${{ true }}
         name: Upload the testing artifact
         uses: actions/upload-artifact@v4
         with:
