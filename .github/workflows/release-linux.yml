@@ -38,7 +38,7 @@ jobs:
         with:
           compression-level: 0
           name: "ChordPro-${{ env.CHORDPRO_VERSION }}.AppImage"
-          path: "ChordPro-${{ env.CHORDPRO_VERSION "}}.AppImage"
+          path: "ChordPro-${{ env.CHORDPRO_VERSION }}.AppImage"
 
       - if: ${{ github.event.release.upload_url }}
         name: Upload the release artifact
