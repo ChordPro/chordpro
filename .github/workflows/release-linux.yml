@@ -36,7 +36,7 @@ jobs:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: "${{ runner.temp }}/ChordPro-${{ env.CHORDPRO_VERSION }}-Linux_x86_64-AppImage.zip"
 
-      if {{ true }}
+      - if {{ true }}
         name: Upload the testing artifact
         uses: actions/upload-artifact@v4
         with:
