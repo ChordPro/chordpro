@@ -91,6 +91,6 @@ appimage : ppl _appimage
 _appimage :
 	cp ${BASE}/AppRun ${DEST}/AppRun
 	chmod 0755 ${DEST}/AppRun
-	cd ${DEST}; ln -f lib/ChordPro/res/linux/chordpro.desktop .
+	cd ${DEST}; ln -f lib/ChordPro/res/linux/org.chordpro.desktop .
 	cd ${DEST}; ln -f lib/ChordPro/res/icons/chordpro.png .
 	${APPIMAGETOOL} -n ${DEST} ChordPro-${VERSION}.AppImage
