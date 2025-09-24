@@ -143,3 +143,12 @@ WriteMakefile
 # Note about the no_index: CPAN and MetaCPAN have differing opinions
 # on how no_index must be interpreted, in particular in combination
 # with provides.
+
+sub MY::postamble {
+    return <<'MAKE_FRAG';
+config :: lib/ChordPro/Config/Data.pm
+lib/ChordPro/Config/Data.pm : lib/ChordPro/res/config/chordpro.json
+	perl script/cfgboot.pl $< > $@
+
+MAKE_FRAG
+}

@@ -104,34 +104,6 @@ wxg :
 sym :
 	make -C lib/ChordPro/res/fonts
 
-# Actualize resources.
-
-LIB := lib/ChordPro
-RES := ${LIB}/res
-PODSELECT := podselect
-
-resources : wxg ${LIB}/Config/Data.pm ${RES}/config/chordpro.json ${RES}/pod/ChordPro.pod ${RES}/pod/Config.pod ${RES}/pod/A2Crd.pod docs/assets/pub/config60.schema
-
-${LIB}/Config/Data.pm : ${RES}/config/chordpro.json
-	perl script/cfgboot.pl $< > $@~
-	cmp $@ $@~ || mv $@~ $@
-
-${RES}/pod/ChordPro.pod : ${LIB}.pm
-	${PODSELECT} $< > $@
-
-${RES}/pod/Config.pod : ${RES}/config/chordpro.json
-	( echo "=head1 ChordPro Default Configuration"; \
-	  echo ""; \
-	  echo "=encoding UTF8"; \
-	  echo ""; \
-	  perl -pe 's/^/    /' $< ) > $@
-
-${RES}/pod/A2Crd.pod : ${LIB}/A2Crd.pm
-	${PODSELECT} $< > $@
-
-docs/assets/pub/config61.schema : ${RES}/config/config.schema
-	cp -p $< $@
-
 # Verify JSON data
 
 CFGLIB := ${LIB}/res/config
