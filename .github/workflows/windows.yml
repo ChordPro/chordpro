@@ -1,8 +1,10 @@
 name: CI for Microsoft Windows
 
 on:
-    push:
-        branches: '*'
+  push:
+    branches:
+      - master
+      - dev
 
 jobs:
   perl:

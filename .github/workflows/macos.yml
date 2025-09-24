@@ -1,8 +1,10 @@
 name: CI for MacOS
 
 on:
-    push:
-        branches: '*'
+  push:
+    branches:
+      - master
+      - dev
 
 jobs:
   macOS:
