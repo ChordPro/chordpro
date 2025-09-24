@@ -21,5 +21,5 @@
 --link=libjpeg.so.8
 --link=libpng16.so.16
 --link=libSDL2-2.0.so.0
---link=libtiff.so.5
---link=libwebp.so.6
+--link=libtiff.so.6
+--link=libwebp.so.7
