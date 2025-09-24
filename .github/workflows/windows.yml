@@ -28,3 +28,4 @@ jobs:
           perl Makefile.PL
           gmake -f Makefile
           gmake -f Makefile test
+          perl script/chordpro --about
