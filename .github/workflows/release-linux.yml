@@ -46,8 +46,9 @@ jobs:
 
       - name: Build ChordPro
         run: |
-          perl Makefile.pl
+          perl Makefile.PL
           make -f Makefile all test
+          sudo make install
 
       - name: Build AppImage
         run: |
