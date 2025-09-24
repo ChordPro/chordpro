@@ -80,7 +80,7 @@ use JSON::Relaxed::Parser qw();
 use feature qw(state);
 EOD
 
-print "\nour \$VERSION = ", $data->{meta}->{_configversion}, ";\n\n";
+print "# Config version.\nour \$VERSION = ", $data->{meta}->{_configversion}, ";\n\n";
 
 print <<'EOD';
 sub config {
