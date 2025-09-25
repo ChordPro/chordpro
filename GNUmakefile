@@ -104,6 +104,14 @@ wxg :
 sym :
 	make -C lib/ChordPro/res/fonts
 
+# Actualize resources.
+
+LIB := lib/ChordPro
+RES := ${LIB}/res
+PODSELECT := podselect
+
+resources : wxg
+
 # Verify JSON data
 
 CFGLIB := ${LIB}/res/config

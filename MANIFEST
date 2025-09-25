@@ -11,7 +11,6 @@ lib/ChordPro/Chords.pm
 lib/ChordPro/Chords/Appearance.pm
 lib/ChordPro/Chords/Parser.pm
 lib/ChordPro/Config.pm
-lib/ChordPro/Config/Data.pm
 lib/ChordPro/Config/Properties.pm
 lib/ChordPro/Delegate/ABC.pm
 lib/ChordPro/Delegate/Lilypond.pm
@@ -204,9 +203,6 @@ lib/ChordPro/res/linux/org.chordpro.desktop
 lib/ChordPro/res/linux/org.chordpro.metainfo.xml
 lib/ChordPro/res/linux/chordpro.xml
 lib/ChordPro/res/linux/setup_desktop.sh
-lib/ChordPro/res/pod/A2Crd.pod
-lib/ChordPro/res/pod/ChordPro.pod
-lib/ChordPro/res/pod/Config.pod
 lib/ChordPro/res/styles/chordpro.css
 lib/ChordPro/res/styles/chordpro_print.css
 lib/ChordPro/res/templates/comment.tt
