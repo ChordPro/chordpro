@@ -14,6 +14,7 @@
 --link=libwx_gtk3u_propgrid-3.2.so.0
 --link=libwx_gtk3u_ribbon-3.2.so.0
 --link=libwx_gtk3u_richtext-3.2.so.0
+--link=libwx_gtk3u_webview-3.2.so.0
 
 # And more...
 --link=libdeflate.so.0
