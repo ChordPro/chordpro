@@ -10,8 +10,10 @@ jobs:
     name: Create release appimage artifact
     runs-on: ubuntu-latest
     steps:
+
       - name: Checkout the repository
         uses: actions/checkout@v4
+
       - name: Set Env Vars
         run: |
           PERL5LIB=${{ runner.temp }}/build-cpan/lib/perl5
@@ -19,12 +21,36 @@ jobs:
           echo "${{ runner.temp }}" >> "$GITHUB_PATH"
           echo "PERL5LIB=$PERL5LIB" >> "$GITHUB_ENV"
           echo "CHORDPRO_VERSION=$CHORDPRO_VERSION" >> "$GITHUB_ENV"
-      - name: Install dependencies
+
+      - name: Install wxWidgets
         run: |
-          sudo apt install -y libwx-perl cpanminus liblocal-lib-perl libgtk-3-dev libperl-dev libdeflate0 libsdl2-2.0-0 libpar-packer-perl desktop-file-utils
+          sudo apt install -y libwxgtk-media3.2-dev libwxgtk-webview3.2-dev cpanminus
+          sudo apt-get remove libalien-wxwidgets-perl libwx-perl
+          sudo apt-get purge libalien-wxwidgets-perl libwx-perl
+
+      - name: Install Alien-wxWidgets
+        run: |
+          cpanm --sudo https://github.com/sciurius/perl-Alien-wxWidgets/releases/download/R0.71/Alien-wxWidgets-0.72.tar.gz
+          perl -MAlien::wxWidgets -E 'say Alien::wxWidgets->libraries'
+
+      - name: Install wxPerl
+        run: |
+          cpanm --sudo --notest https://github.com/sciurius/wxPerl/releases/download/R3.008/Wx-3.008.tar.gz
+
+      - name: Install other dependencies
+        run: |
+          sudo apt install -y liblocal-lib-perl libgtk-3-dev libperl-dev libdeflate0 libsdl2-2.0-0 libpar-packer-perl desktop-file-utils
           wget -O ${{ runner.temp }}/appimagetool https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod +x ${{ runner.temp }}/appimagetool
-          cpanm -n -l ${{ runner.temp }}/build-cpan . HarfBuzz::Shaper
+          cpanm -n -l ${{ runner.temp }}/build-cpan HarfBuzz::Shaper
+          cpanm --sudo --installdeps .
+
+      - name: Build ChordPro
+        run: |
+          perl Makefile.PL
+          make -f Makefile all test
+          sudo make install
+
       - name: Build AppImage
         run: |
           cd pp/debian

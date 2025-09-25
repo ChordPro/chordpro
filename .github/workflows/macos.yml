@@ -1,8 +1,10 @@
 name: CI for MacOS
 
 on:
-    push:
-        branches: '*'
+  push:
+    branches:
+      - master
+      - dev
 
 jobs:
   macOS:
@@ -22,7 +24,9 @@ jobs:
           cpanm HarfBuzz::Shaper@0.028
           cpanm --installdeps --notest .
 
-      - name: Run Tests
+      - name: Make and run tests
         run: |
-          prove -l t
-          perl script/chordpro.pl --about
+          perl Makefile.PL
+          make -f Makefile
+          make -f Makefile test
+          perl script/chordpro --about
