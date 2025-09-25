@@ -2,6 +2,9 @@
 
 @../common/wxchordpro.pp
 
+--module=Wx::WebView
+--module=Wx::STC
+
 # Explicitly link the wxGTK3 libraries.
 --link=libwx_baseu-3.2.so.0
 --link=libwx_baseu_net-3.2.so.0
@@ -14,6 +17,7 @@
 --link=libwx_gtk3u_propgrid-3.2.so.0
 --link=libwx_gtk3u_ribbon-3.2.so.0
 --link=libwx_gtk3u_richtext-3.2.so.0
+--link=libwx_gtk3u_webview-3.2.so.0
 
 # And more...
 --link=libdeflate.so.0
