@@ -24,7 +24,7 @@ jobs:
 
       - name: Install wxWidgets
         run: |
-          sudo apt install -y libwxgtk-webview3.2-dev cpanminus
+          sudo apt install -y libwxgtk-media3.2-dev libwxgtk-webview3.2-dev cpanminus
           sudo apt-get remove libalien-wxwidgets-perl libwx-perl
           sudo apt-get purge libalien-wxwidgets-perl libwx-perl
 
