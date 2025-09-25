@@ -1,8 +1,10 @@
 name: CI for Linux
 
 on:
-    push:
-        branches: '*'
+  push:
+    branches:
+      - master
+      - dev
 
 jobs:
   perl-job:
