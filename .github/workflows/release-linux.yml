@@ -43,6 +43,7 @@ jobs:
           wget -O ${{ runner.temp }}/appimagetool https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod +x ${{ runner.temp }}/appimagetool
           cpanm -n -l ${{ runner.temp }}/build-cpan HarfBuzz::Shaper
+          cpanm --sudo --installdeps .
 
       - name: Build ChordPro
         run: |
