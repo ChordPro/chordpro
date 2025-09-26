@@ -146,9 +146,12 @@ WriteMakefile
 
 sub MY::postamble {
     return <<'MAKE_FRAG';
-config :: lib/ChordPro/Config/Data.pm
+config :: resources
+
+resources :: lib/ChordPro/Config/Data.pm
+
 lib/ChordPro/Config/Data.pm : lib/ChordPro/res/config/chordpro.json
-	perl script/cfgboot.pl $< > $@
+	perl script/cfgboot.pl $< -o $@
 
 MAKE_FRAG
 }

@@ -145,6 +145,8 @@ wkit : _wkit1 _wkit _wkiti _wkit2
 
 _wkit :
 	${MAKE} to_win
+	ssh ${WIN} 'cd ${WINDIR} ; perl Makefile.PL'
+	ssh ${WIN} gmake -C ${WINDIR} resources
 	ssh ${WIN} gmake -C ${WINDIR}/pp/windows
 	cp ${WINDST}/pp/windows/ChordPro-Installer*.exe ${HOME}/tmp/
 

@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Mon Jun  3 08:14:35 2024
 # Last Modified By: Johan Vromans
-# Last Modified On: Wed Sep 10 12:11:09 2025
-# Update Count    : 54
+# Last Modified On: Fri Sep 26 20:45:43 2025
+# Update Count    : 56
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -16,6 +16,7 @@ use feature 'signatures';
 no warnings 'experimental::signatures';
 use FindBin;
 use lib "$FindBin::Bin/../lib";
+use lib "$FindBin::Bin/../CPAN";
 use lib "$FindBin::Bin/../lib/ChordPro/lib";
 
 # Package name.
