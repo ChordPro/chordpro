@@ -16,6 +16,11 @@ disableKinds:
 
 enableRobotsTXT: "true"
 
+# Allow ChordPro specific environment variables.
+security:
+  funcs:
+    getenv: [ "^CHORDPRO_" ]
+
 ################ Parameters ################
 
 params:
@@ -30,10 +35,6 @@ params:
   link_github: https://github.com/ChordPro/chordpro
   link_paypal: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=WDKWDE6R3KR98&lc=GB&item_name=ChordPro&currency_code=EUR&bn=PP-DonationsBF%3Abtn_donate_LG.gif%3ANonHosted
   link_coffee: https://ko-fi.com/chordpro
-
-# Currently the goldmark parser misinterprets `[%`_name_`%]`.
-#markup:
-#  defaultMarkdownHandler: blackFriday
 
 markup:
   goldmark:
