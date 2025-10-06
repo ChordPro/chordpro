@@ -240,7 +240,7 @@ method findexe ( $p, %opts ) {
     if ( $self->debug ) {
 	warn("Paths: findexe $p => ", $self->display($found), "\n");
     }
-    elsif ( !$opts{silent} ) {
+    elsif ( !$found && !$opts{silent} ) {
 	warn("Could not find $p in ",
 	     join( " ", map { qq{"$_"} } $self->path ), "\n");
     }
