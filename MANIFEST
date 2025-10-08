@@ -216,6 +216,7 @@ script/chordpro.pl
 script/ppchordpro.PL
 script/wxchordpro.pl
 script/cfgboot.pl
+script/ttc.pl
 t/00_basic.pl
 t/01_prereq.t
 t/02_load.t

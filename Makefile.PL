@@ -11,7 +11,7 @@ my $master = 'lib/ChordPro/Version.pm';
 my $version = MM->parse_version($master);
 $master =~ s;/Version;;;
 
-my @bins = qw( chordpro wxchordpro );
+my @bins = qw( chordpro wxchordpro rrjson ttc );
 
 # Module/Version requirements.
 my $mv =
