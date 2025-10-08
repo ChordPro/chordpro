@@ -762,6 +762,7 @@ sub _augment ( $self, $hash, $path ) {
             || $path =~ /^pdf\.formats\.\w+-even\./
             || $path =~ /^(meta|gridstrum\.symbols)\./
             || $path =~ /^markup\.shortcodes\./
+            || $path =~ /^delegates\./
             || $key =~ /^_/;
 
         # Hash -> Hash.
