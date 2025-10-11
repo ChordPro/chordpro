@@ -2,6 +2,7 @@
 
     - Improve break handling in ToC. Fixes issue #606.
     - Fix E9 and F9 chords. Thanks to Eric Bell.
+    - Remove colons from --define in docs and pod.
 
 6.080.1	2025-08-28
 
