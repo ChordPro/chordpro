@@ -3,6 +3,8 @@
     - Improve break handling in ToC. Fixes issue #606.
     - Fix E9 and F9 chords. Thanks to Eric Bell.
     - Remove colons from --define in docs and pod.
+    - Add pdf.page_layout to request a particular document view mode, e.g.
+      "two_page_left". Note that not all PDF viewers support this.
 
 6.080.1	2025-08-28
 

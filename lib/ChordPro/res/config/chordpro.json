@@ -14,6 +14,10 @@ config {
 
     // Helpful descriptive text.
     description : "Main ChordPro config."
+
+    // Exclusive control.
+    // If multiple configs have the same exclude_id, only one will be used.
+    exclude_id: false
 }
 
 // Includes are processed first, before the rest of
@@ -463,6 +467,13 @@ pdf {
 
     // Output paper size, e.g. "a4" or [595,842].
     papersize : a4
+
+    // Page open mode (for viewers).
+    // Can be one of the following:
+    // "single_page" (default), "one_column", "two_column_left",
+    // "two_column_right", "two_page_left", "two_page_right".
+    // Note that many PDF viewers do not support this.
+    page_layout: single_page
 
     // Theme
     theme {

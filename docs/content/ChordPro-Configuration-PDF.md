@@ -47,6 +47,17 @@ The size of the paper for which output must be formatted. The size can be specif
     papersize : a4
     // Same as: papersize: [ 595, 842 ]
 
+## Page layout
+
+Advisory open mode for PDF viewers.
+
+Can be one of the following: "single_page" (default), "one_column",
+"two_column_left", "two_column_right", "two_page_left", "two_page_right".
+
+    page_layout: single_page
+
+**Note:** Many PDF viewers do not support this.
+
 ## Theme
 
 These settings can be used to control the foreground and

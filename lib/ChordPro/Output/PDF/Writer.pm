@@ -38,6 +38,8 @@ sub new {
     $self->{pdf}->{forcecompress} = 0 if $regtest;
     $self->{pdf}->mediabox( $ps->{papersize}->[0],
 			    $ps->{papersize}->[1] );
+    $self->{pdf}->page_layout( $ps->{page_layout} )
+      if $ps->{page_layout};
     $self->{layout} = Text::Layout->new( $self->{pdf} );
     $self->{tmplayout} = undef;
 
