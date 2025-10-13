@@ -59,7 +59,10 @@ Can be one of the following: `single_page` (default), `one_column`,
 
     page_layout: single_page
 
-**Note:** Many PDF viewers do not support this.
+**Note:** Many PDF viewers do not support this. The ChordPro GUI
+previewer supports 'No Spreads' (`single_page`, `one_column`), 'Odd
+Spreads' (`two_column_left`, `two_page_left`) and `Even Spreads`
+(`two_column_right`, `two_page_right`).
 
 ## Theme
 
