@@ -2,7 +2,7 @@
 
 config {
     title: "Dual Page View"
-    description: "Kindly ask the viewer to display the document in dual pge view."
+    description: "Use a two-page preview."
     type: [ stylemod task ]
 }
 
