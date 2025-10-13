@@ -42,7 +42,10 @@ For details, see [Configuration for CSV output]({{< relref "chordpro-configurati
 
 ## Papersize
 
-The size of the paper for which output must be formatted. The size can be specified either as the name of a known page size, e.g. `"a4"`, or as a 2-element list containing the width and height of the page in _PDF units_ (_DTP points_, _pt_, 1/72 inch).
+The size of the paper for which output must be formatted.
+The size can be specified either as the name of a known page size,
+e.g. `a4`, or as a 2-element list containing the width and height
+of the page in _PDF units_ (_DTP points_, _pt_, 1/72 inch).
 
     papersize : a4
     // Same as: papersize: [ 595, 842 ]
@@ -51,8 +54,8 @@ The size of the paper for which output must be formatted. The size can be specif
 
 Advisory open mode for PDF viewers.
 
-Can be one of the following: "single_page" (default), "one_column",
-"two_column_left", "two_column_right", "two_page_left", "two_page_right".
+Can be one of the following: `single_page` (default), `one_column`,
+`two_column_left`, `two_column_right`, `two_page_left`, `two_page_right`.
 
     page_layout: single_page
 
@@ -70,7 +73,7 @@ background colours of the PDF output.
       background        : none
     }
 
-Background `"none"` or `"white"` means there will be no background
+Background `none` or `white` means there will be no background
 colour added to the output.
 
 It may be useful to put your theme settings in a separate config file,
@@ -163,7 +166,7 @@ Otherwise, when `width` is set to a positive value, the lyrics and associated
 chords will be indented by this amount and section labels, if any, are
 printed.
 
-When `width` is set to `"auto"`, the song will indented automatically,
+When `width` is set to `auto`, the song will indented automatically,
 but only if labels are actually used.
 
 `align` will control how the labels are aligned in the margin.
@@ -319,7 +322,7 @@ also possible to have them at the bottom, or in a side column on the first page 
 song. See [Chords diagrams in a side column]({{< relref "#chords-diagrams-in-a-side-column" >}}) below.
 
 By default ChordPro adds diagrams for string instruments. To add
-keyboard diagrams set `diagrams.type` to `"keyboard"`, see
+keyboard diagrams set `diagrams.type` to `keyboard`, see
 [Configuration file contents - Generic]({{< relref
 "chordpro-configuration-generic/#printing-chord-diagrams" >}}).
 
@@ -383,7 +386,7 @@ Properties for the lines of grid sections.
       }
     }
 
-Note that command line option `--lyricsonly` implies `"show":false`
+Note that command line option `--lyricsonly` implies `show:false`
 for grids.
 
 ## Songbook pages
@@ -519,7 +522,7 @@ on a right page.
 With a value of `false`, each subsequent ToC will start on the next
 available page.
 
-The value `"song"` can be used to have the ToCs follow the settings
+The value `song` can be used to have the ToCs follow the settings
 for song aligment.
 
 ### Page reordering
@@ -820,8 +823,8 @@ use them for easy navigation.
 
 The default configuration generates two outlines, one labelled `By
 Title` and one labelled `By Artist`. Each outline is ordered according
-to the meta data specified in `"fields"`. The format of the outlines
-is specified in `"line"`.
+to the meta data specified in `fields`. The format of the outlines
+is specified in `line`.
 
 * `fields`  
 The ordering of the outline. You can specify one or two metadata
