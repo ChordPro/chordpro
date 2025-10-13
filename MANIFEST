@@ -134,7 +134,7 @@ lib/ChordPro/res/config/chordpro.json
 lib/ChordPro/res/config/config.schema
 lib/ChordPro/res/config/config.tmpl
 lib/ChordPro/res/config/dark.json
-lib/ChordPro/res/config/dualpageview.json
+lib/ChordPro/res/config/evenspreadsview.json
 lib/ChordPro/res/config/guitar-br.json
 lib/ChordPro/res/config/guitar-ly.json
 lib/ChordPro/res/config/guitar.json
@@ -154,6 +154,7 @@ lib/ChordPro/res/config/notes/nashville.json
 lib/ChordPro/res/config/notes/roman.json
 lib/ChordPro/res/config/notes/scandinavian.json
 lib/ChordPro/res/config/notes/solfege.json
+lib/ChordPro/res/config/oddspreadsview.json
 lib/ChordPro/res/config/roman.json
 lib/ChordPro/res/config/songbook_latex.json
 lib/ChordPro/res/config/ukulele-ly.json

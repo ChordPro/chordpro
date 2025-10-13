@@ -1,0 +1,9 @@
+// chordpro task: Even Spreads View
+
+config {
+    title: "Even Spreads View"
+    description: "Two-page preview, even page left."
+    type: [ stylemod task ]
+}
+
+pdf.page_layout: two_page_right

@@ -1,0 +1,9 @@
+// chordpro task: Odd Spreads View
+
+config {
+    title: "Odd Spreads View"
+    description: "Two-page preview, odd page left."
+    type: [ stylemod task ]
+}
+
+pdf.page_layout: two_page_left

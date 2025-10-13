@@ -1,9 +1,0 @@
-// chordpro task: Dual Page View
-
-config {
-    title: "Dual Page View"
-    description: "Use a two-page preview."
-    type: [ stylemod task ]
-}
-
-pdf.page_layout: two_page_left
