@@ -1,0 +1,9 @@
+// chordpro task: Dual Page View
+
+config {
+    title: "Dual Page View"
+    description: "Kindly ask the viewer to display the document in dual pge view."
+    type: [ stylemod task ]
+}
+
+pdf.page_layout: two_page_left
