@@ -4,6 +4,7 @@
 --cachedeps=wxchordpro.pp.deps
 
 # Explicitly include the Wx modules.
+--module=ChordPro::Wx::CheckListBox
 --module=ChordPro::Wx::Config
 --module=ChordPro::Wx::Editor
 --module=ChordPro::Wx::EditorPanel

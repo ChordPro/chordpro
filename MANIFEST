@@ -43,6 +43,7 @@ lib/ChordPro/Testing.pm
 lib/ChordPro/Utils.pm
 lib/ChordPro/Version.pm
 lib/ChordPro/Wx.pm
+lib/ChordPro/Wx/CheckListBox.pm
 lib/ChordPro/Wx/Config.pm
 lib/ChordPro/Wx/Editor.pm
 lib/ChordPro/Wx/EditorPanel.pm

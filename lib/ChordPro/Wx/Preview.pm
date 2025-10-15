@@ -84,15 +84,14 @@ method preview( $args, %opts ) {
     if ( $preferences{skipstdcfg} ) {
 	push( @ARGV, '--nodefaultconfigs' );
     }
-    if ( $preferences{enable_presets} && $preferences{cfgpreset} ) {
-	# Only include the ones we have.
-	my %s = ( map { $_ => 1 } @{$state{styles}}, @{$state{userstyles}} );
-	foreach ( @{ $preferences{cfgpreset} } ) {
-	    next unless exists($s{$_});
-	    push( @ARGV, '--config', $_ );
+
+    for my $preset ( qw( instruments styles stylemods ) ) {
+	for my $p ( @{$preferences{"preset_$preset"}} ) {
+	    push( @ARGV, "--config", $p->{file} );
 	    $haveconfig++;
 	}
     }
+
     if ( $preferences{enable_configfile} ) {
 	$haveconfig++;
 	push( @ARGV, '--config', $preferences{configfile} );
