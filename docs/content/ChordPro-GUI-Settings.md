@@ -18,16 +18,27 @@ settings.
 
 ![]({{< asset "images/chordpro-gui-settings-p4.png" >}})
 
-### Ignore Default Configuration Files
+### Instrument
 
-This prevents *ChordPro* from processing system wide, user specific and
-song specific configuration files.
-Checking this will make sure that *ChordPro*
-only uses the configurations set in the `Settings`.
+Here you can choose the instrument for your songs. This is relevant
+for printing chord diagrams.
 
-### Preset Configuration
+Default is a 6-string guitar in standard tuning. Other instruments
+distributed with ChordPro are keyboard, mandolin and ukulele.
 
-If enabled, you can choose one or more preset configurations to be used.
+### Style
+
+The style (layout) of the output for the songs. The default style is
+usually good to begin with, later you may want to try the other styles
+provided. Or add your own styles.
+
+### Style Modifiers
+
+Style modifiers, as the name implies, make usually small
+modifications to the selected style. In the above example, two
+modifiers are selected: 'Inline Chords' and 'Two Columns'. A
+description of the selected modifiers can be seen at the right of the
+list.
 
 ### Custom Configuration File
 
@@ -39,12 +50,17 @@ one, see [Create a configuration using the GUI]({{< relref "Chordpro-Configurati
 
 ### Custom ChordPro Library
 
-ChordPro has a built-in library with configurations and other data.
+*ChordPro* has a built-in library with configurations and other data.
 With a `Custom library` you can add an additional location where to
-look for data.
+look for configuration data.
 
-Changing the `Custom library` requires a restart of the ChordPro program.
-A message will appear as a reminder.
+### Use Default Configuration Files
+
+This enables *ChordPro* to process system wide, user specific and
+song specific configuration files. Note that checking this may result
+in ChordPro using configuration settings different from what you can
+control in the GUI, so it is best to leave this unchecked until you
+are familiar with ChordPro's configuration files.
 
 ## The Notations tab
 
