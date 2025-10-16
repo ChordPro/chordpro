@@ -1,7 +1,7 @@
-// chordpro task: Odd Spreads View
+// chordpro task: Spreads View
 
 config {
-    title: "Odd Spreads View"
+    title: "Spreads View"
     description: "Two-page preview, odd page left."
     type: [ stylemod task ]
     exclude_id: oddevenspreadsview

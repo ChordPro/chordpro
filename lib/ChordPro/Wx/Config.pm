@@ -9,7 +9,7 @@ our %state;
 our %preferences;
 
 use Ref::Util qw( is_hashref is_arrayref );
-use List::Util qw(uniq);
+use List::Util qw( uniq any );
 
 use Exporter 'import';
 our @EXPORT = qw( %state %preferences );
@@ -20,10 +20,12 @@ use Wx qw(:everything);
 use Wx::Locale gettext => '_T';
 use ChordPro::Files;
 use ChordPro::Paths;
-use ChordPro::Utils qw( plural json_load );
+use ChordPro::Utils qw( plural json_load is_true );
 
 use constant FONTSIZE => 12;
 use constant SETTINGS_VERSION => 3;
+
+use Encode qw( decode_utf8 );
 
 # Legacy font numbers.
 my @fonts =
@@ -439,13 +441,18 @@ sub setup_styles( $refresh = 0 ) {
 	    next unless fs_test( s => $file );
 
 	    my $data = fs_blob( $file );
-	    $data = json_load( $data, $file );
+	    $data = json_load( decode_utf8($data), $file );
+	    next if is_true($data->{config}->{omit});
 
 	    my $types;
 	    my %meta = ( src => $src, file => $file );
 	    if ( $data->{config}->{type} ) {
 		$types = $data->{config}->{type};
 		$types = [ $types ] unless is_arrayref($types);
+
+		# If there is a type, it must be one of the supported types.
+		next unless any { /^(?:style|stylemod|instrument|task)$/ } @$types;
+
 		$meta{title}       = $data->{config}->{title};
 		$meta{desc}        = $data->{config}->{description};
 		$meta{exclude_id}  = $data->{config}->{exclude_id};
@@ -583,7 +590,8 @@ sub _add_tasks( $tasks ) {
 	    next unless fs_test( s => $file );
 
 	    my $blob = fs_blob( $file );
-	    my $data = json_load( $blob, $file );
+	    my $data = json_load( decode_utf8($blob), $file );
+	    next if is_true($data->{config}->{omit});
 
 	    my $types;
 	    my %meta = ( src => $src, file => $file );
@@ -627,9 +635,9 @@ sub _add_notations( $notes ) {
 	pop( @cfglibs ) unless fs_test( d => $cfglibs[-1]->{lib} );
     }
     # use DDP; p @cfglibs, as => "cfglibs (for notes)";
-#    warn("Config libs for notes\n");
-#    warn( sprintf("  %-6s  %s\n", $_->{src}, $_->{lib} ) )
-#      for @cfglibs;
+    # warn("Config libs for notes\n");
+    # warn( sprintf("  %-6s  %s\n", $_->{src}, $_->{lib} ) )
+    #   for @cfglibs;
 
     my $findopts = { filter => qr/^.*\.json$/i, recurse => 0 };
 
@@ -645,7 +653,8 @@ sub _add_notations( $notes ) {
 	    next unless fs_test( s => $file );
 
 	    my $blob = fs_blob( $file );
-	    my $data = json_load( $blob, $file );
+	    my $data = json_load( decode_utf8($blob), $file );
+	    next if is_true($data->{config}->{omit});
 	    my $types = $data->{config}->{type};
 	    next unless $types;
 
@@ -659,6 +668,7 @@ sub _add_notations( $notes ) {
 	    }
 	}
     }
+    # use DDP; p $notes, as => "notes";
 }
 
 sub _neat {

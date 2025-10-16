@@ -1,30 +1,15 @@
 // Configuration for Nashville Notation System.
 
-{
-    // Printing chord grids.
-    "diagrams" : {
-        "show"     :  "none",
-    },
+// IMPORTANT: This stylemod is to make Nashville chords look nicer in
+// the PDF output. It does NOT enable parsing and/or transcoding
+// from/to Nashville notation!
 
-    // Layout definitions for PDF output.
-
-    "pdf" : {
-
-	// Fonts.
-
-	"fonts" : {
-
-	    // For Nashville chord notation, it is best to use
-	    // a non-italic font.
-	    // FreeSans is advised since it has additional glyphs for
-	    // flat and sharp.
-	    "chord" : {
-		"name" : "Helvetica",
-//		"file" : "/usr/share/fonts/gnu-free/FreeSans.ttf",
-		"size" : 10,
-	    },
-	},
-
-    },
+config {
+    type        : stylemod
+    title       : "Nashville"
+    description : "Additional support for Nashville chords."
+    omit        : true
 }
-// End of config.
+
+diagrams.show : none
+pdf.fonts.chord : "sans 10"

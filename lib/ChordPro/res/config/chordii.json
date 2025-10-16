@@ -1,154 +1,131 @@
-// Chordii compatible configuration for ChordPro.
-//
-// This is a relaxed JSON document, so comments are possible.
+// A configuration file for ChordPro.
 
-{
-    "config" : {
-	"type" : "style",
-	"title" : "Chordii",
-	"description" : "Legacy Chordii compatible.",
-    },
+// See ChordPro website for more details: https://www.chordpro.org/chordpro/chordpro-configuration-file/.
+// This is a really relaxed JSON document, see https://metacpan.org/pod/JSON::Relaxed#REALLY-RELAXED-EXTENSIONS
 
-    "settings" : {
-      // Suppress empty chord lines.
-      // Overrides the -a (--single-space) command line options.
-      "suppress-empty-chords" : false,
-      // Suppress blank lyrics lines.
-      "suppress-empty-lyrics" : false,
-    },
-
-    // Printing chord diagrams.
-    // "show": prints the chords used in the song.
-    // "sorted": order the chords by key.
-    "diagrams" : {
-	"show"     :  "all",
-	"sorted"   :  false,
-    },
-
-    // Table of contents.
-    "toc" : {
-	  // Title for ToC.
-	  "title" : "Table of Contents",
-	  // Sorting order.
-	  "order" : "alpha",
-    },
-    
-    // Layout definitions for PDF output.
-
-    "pdf" : {
-
-  	// Papersize, 'a4' or [ 595, 842 ] etc.
-  	"papersize" : "letter",
-
-	// Space between columns, in pt.
-	"columnspace"  :  20,
-
-	// Page margins.
-	// Note that top/bottom exclude the head/footspace.
-	"margintop"    :  88,
-	"marginbottom" :  40,
-	"marginleft"   :  72,
-	"marginright"  :  40,
-	"headspace"    :  57,
-	"footspace"    :  20,
-
-	// Special: head on first page only, add the headspace to
-	// the other pages so they become larger.
-	"head-first-only" : true,
-
-	// Spacings.
-	// Baseline distances as a factor of the font size.
-	"spacing" : {
-	    "title"  : 1.5,
-	    "lyrics" : 1.0,
-	    "chords" : 1.0,
-	    "grid"   : 1.2,
-	    "tab"    : 1.0,
-	    "toc"    : 1.4,
-	    "empty"  : 1.7,
-	},
-	// Note: By setting the font size and spacing for empty lines to
-	// smaller values, you get a fine(r)-grained control over the
-	// spacing between the various parts of the song.
-
-
-  	// Chord diagrams.
-	"diagrams" : {
-	    "show"     :  "bottom",
-	    "linewidth" : 0.15,
-	},
-
-	// Formats.
-	"formats" : {
-	    // Titles/Footers.
-
-	    // Titles/footers have 3 parts, which are printed left,
-	    // centered and right.
-	    // For even/odd printing, the order is reversed.
-
-	    // By default, a page has:
-	    "default" : {
-	        // No title/subtitle.
-	    	"title"     : [ "", "", "" ],
-	    	"subtitle"  : [ "", "", "" ],
-		// Footer is title -- page number.
-	    	"footer"    : [ "%{title}", "", "%{page}" ],
-	    },
-	    // The first page of a song has:
-	    "title" : {
-	        // Title and subtitle.
-	    	"title"     : [ "", "%{title}", "" ],
-	    	"subtitle"  : [ "", "%{subtitle}", "" ],
-		// Footer with page number.
-	    	"footer"    : [ "", "", "%{page}" ],
-	    },
-	    // The very first output page is slightly different:
-	    "first" : {
-	    	// It has title and subtitle, like normal 'first' pages.
-		// But no footer.
-	    	"footer"    : [ "", "", "" ],
-	    },
-	},
-
-	// Fonts.
-	// Fonts can be specified by name (for the corefonts)
-	// or a filename (for TrueType/OpenType fonts).
-	// Fonts for chords and comments can have a background
-	// colour associated.
-	// Colours are "#RRGGBB" or predefined names like "black", "white",
-	// and lots of others.
-
-	"fonts" : {
-	    "title" : {
-		"name" : "Times-Roman",
-		"size" : 17
-	    },
-	    "text" : {
-		"name" : "Times-Roman",
-		"size" : 12
-	    },
-	    "chord" : {
-		"name" : "Helvetica-Oblique",
-		"size" : 9
-	    },
-	    "comment" : {
-		"name" : "Times-Roman",
-		"size" : 12,
-                "background" : "foreground-light"
-	    },
-	    "tab" : {
-		"name" : "Courier",
-		"size" : 10
-	    },
-	    "toc" : {
-		"name" : "Times-Roman",
-		"size" : 12
-	    },
-	    "grid" : {
-		"name" : "Times-Roman",
-		"size" : 10
-	    },
-	},
-    },
+config {
+  type        : style
+  title       : Chordii
+  description : "Legacy Chordii compatible."
 }
-// End of config.
+
+// Note that this config only contains the differences with the
+// default ChordPro config.
+
+settings {
+
+  // Suppress empty chord lines.
+  suppress-empty-chords : false
+
+  // Suppress blank lyrics lines.
+  suppress-empty-lyrics : false
+}
+
+contents : [
+  {
+
+    // An identifying name for this table of contents.
+    name : contents_by_title
+
+    // The metadata for this table of contents. One or two items.
+    fields : [ title artist ]
+
+    // The label (title) for this table.
+    label : "Contents"
+
+    // The format of the table's lines.
+    // You can use all song metadata.
+    line : "%{title}"
+
+    // The format for the page number in the table.
+    // You can use all song metadata.
+    pageno : "%{page}"
+
+    // For future use.
+    fold : false
+
+    // If `true`, this table is omitted.
+    omit : false
+
+    // The template for this table.
+    template : stdtoc
+  }
+]
+
+// Settings for PDF output.
+pdf {
+
+  // Output paper size.
+  papersize : letter
+
+  // Distance between columns in multi-column mode.
+  columnspace : 20
+
+  // Page top margin, excluding `headspace`.
+  margintop : 88
+
+  // Page bottom margin, excluding `footspace`.
+  marginbottom : 40
+
+  // Page left margin.
+  marginleft : 72
+
+  // Page right margin.
+  marginright : 40
+
+  // Space for page titles.
+  headspace : 57
+
+  // Space for page footers.
+  footspace : 20
+
+  // Heading on first page only, add the headspace to the other pages so they become larger.
+
+  head-first-only : true
+
+  // Baseline distances as a factor of the font size.
+  spacing {
+
+    // Spacing for page titles.
+    title : 1.5
+
+    // Spacing between songlines (grouped chords + lyrics).
+    lyrics : 1
+
+    // Spacing between chords and lyrics in songlines.
+    chords : 1
+
+    // Spacing for empty (blank) lines.
+    empty : 1.7
+  }
+
+  // Appearance of chord diagrams for string instruments.
+  diagrams {
+    show : below
+    linewidth : 0.15
+  }
+
+  // Page formats.
+  formats {
+
+    default.footer : [ "" " %{title}" "Page %{page}" ]
+    title.footer : [ "" "" "Page %{page}" ]
+    first.footer : [ "" "" "" ]
+  }
+
+  // `fonts` maps output elements to fonts as defined in `fontconfig`.
+  fonts {
+
+    // The font used for page titles.
+    title : "Times-Roman 17"
+
+    // The font used for chords above the lyrics.
+    chord : "Helvetica-Oblique 9"
+
+    // The font used for comments. If not set, falls back on the `text` font.
+    comment: "Times-Roman 12; background=foreground-light"
+
+    // The font used for the table of contents. If not set, falls back on the `text` font.
+    toc: "Times-Roman 12"
+  }
+}

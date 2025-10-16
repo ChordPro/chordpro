@@ -44,24 +44,7 @@ BUILD ( $parent, $id, $title ) {
     $self;
 }
 
-# BUilt-in descriptions for some notation systems.
-my $notdesc =
-  { "common"	   => "C, D, E, F, G, A, B",
-    "dutch"	   => "C, D, E, F, G, A, B",
-    "german"	   => "C, ... A, Ais/B, H",
-    "latin"	   => "Do, Re, Mi, Fa, Sol, ...",
-    "scandinavian" => "C, ... A, A#/Bb, H",
-    "solfege"	   => "Do, Re, Mi, Fa, So, ...",
-    "solfège"	   => "Do, Re, Mi, Fa, So, ...",
-    "nashville"	   => "1, 2, 3, ...",
-    "roman"	   => "I, II, III, ...",
-  };
-
 my $checkpfx = "✔ ";
-
-method get_configfile() {
-    $preferences{configfile} || ""
-}
 
 method refresh() {
     $self->fetch_prefs;
@@ -163,6 +146,46 @@ method enablecustom() {
 	    $ctl->SetFirstItem($first);
 	}
     }
+
+    # Notation systems.
+    for my $ctl ( $self->{ch_notation} ) {
+	$ctl->Clear;
+	my $n = 0;
+	my $check;
+	for ( sort keys %{$state{presets}{notes}} ) {
+	    $ctl->Append( $state{presets}{notes}->{$_}->{title} .
+			  " (" . $state{presets}{notes}->{$_}->{desc} . ")",
+			  $state{presets}{notes}->{$_},
+			);
+	    $check = $n
+	      if lc($state{presets}{notes}->{$_}->{title}) eq lc($preferences{notation});
+	    $check //= $n
+	      if lc($state{presets}{notes}->{$_}->{title}) eq "common notation";
+	    $n++;
+	}
+
+	$ctl->SetSelection($check);
+    }
+
+    # Transcodings
+    for my $ctl ( $self->{ch_xcode} ) {
+	$ctl->Clear;
+	my $n = 0;
+	my $check;
+	for ( sort keys %{$state{presets}{notes}} ) {
+	    $ctl->Append( $state{presets}{notes}->{$_}->{title} .
+			  " (" . $state{presets}{notes}->{$_}->{desc} . ")",
+			  $state{presets}{notes}->{$_},
+			);
+	    $check = $n
+	      if lc($state{presets}{notes}->{$_}->{title}) eq lc($preferences{xcode});
+	    $check //= $n
+	      if lc($state{presets}{notes}->{$_}->{title}) eq "common notation";
+	    $n++;
+	}
+
+	$ctl->SetSelection($check);
+    }
 }
 
 method fetch_prefs() {
@@ -208,38 +231,10 @@ method fetch_prefs() {
     # Messages.
     $self->{fp_messages}->SetSelectedFont( Wx::Font->new($preferences{msgsfont}) );
 
-    # Notation.
-    my $ctl = $self->{ch_notation};
-    $ctl->Clear;
-    my $n = 0;
-    my $check = 0;
-    for ( @{ $state{notations} } ) {
-	my $s = ucfirst($_);
-	$check = $n if $_ eq lc $preferences{notation};
-	$s .= " (" . $notdesc->{lc($s)} .")" if $notdesc->{lc($s)};
-	$ctl->Append($s);
-	$ctl->SetClientData( $n, $_);
-	$n++;
-    }
-    $ctl->SetSelection($check);
-
     # Transpose.
     $self->{cb_xpose}->SetValue( $preferences{enable_xpose} );
     $self->OnCbTranspose(undef);
 
-    # Transcode.
-    $ctl = $self->{ch_xcode};
-    $ctl->Clear;
-    $n = 0;
-    for ( @{ $state{notations} } ) {
-	my $s = ucfirst($_);
-	$check = $n if $_ eq lc $preferences{xcode};
-	$s .= " (" . $notdesc->{lc($s)} .")" if $notdesc->{lc($s)};
-	$ctl->Append($s);
-	$ctl->SetClientData( $n, $_);
-	$n++;
-    }
-    $ctl->SetSelection($check);
     $self->{cb_xcode}->SetValue( $preferences{enable_xcode} );
     $self->OnCbTranscode(undef);
 

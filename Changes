@@ -12,7 +12,8 @@
       config. Currently recognized types are: 'instrument', 'style',
       'stylemod' and 'task'.
 
-      Configuration file types are mostly used in the GUI.
+      Configuration file types are mostly used in the GUI. All
+      packaged config files are modernized to use these types.
 
     !GUI Improvements
 

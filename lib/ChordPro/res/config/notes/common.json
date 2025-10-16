@@ -17,8 +17,8 @@ config {
 // In case of alternatives, the first one is used for output.
 notes {
 
-    // System dutch is the same as common.
-    system : common,
+    // System 'dutch' is the same as 'common'.
+    system : common
 
     sharp : [ C [ C# Cis C♯ ]
 	      D [ D# Dis D♯ ]
@@ -29,13 +29,14 @@ notes {
 	      B
     ]
 
-    flat : [ C
-	     [ Db Des     D♭ ] D
-	     [ Eb Es  Ees E♭ ] E
-	     F
-	     [ Gb Ges     G♭ ] G
-	     [ Ab As  Aes A♭ ] A
-	     [ Bb Bes     B♭ ] B
-    ]
+    flat :  [                   C
+	      [ Db Des     D♭ ] D
+	      [ Eb Es  Ees E♭ ] E
+				F
+	      [ Gb Ges     G♭ ] G
+	      [ Ab As  Aes A♭ ] A
+	      [ Bb Bes     B♭ ] B
+     ]
 }
+
 // End of config.

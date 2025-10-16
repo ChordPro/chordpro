@@ -3,9 +3,9 @@
 // This is a relaxed JSON document, so comments are possible.
 
 config {
-    type: style
-    title: "Modern 3"
-    description: "Modern look with sans-serif fonts and chords diagrams in a side column."
+    type        : style
+    title       : "Modern 3"
+    description : "Modern look with sans-serif fonts and chords diagrams in a side column."
 }
 
 // Settings for PDF output.

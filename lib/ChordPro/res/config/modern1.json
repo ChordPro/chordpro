@@ -4,9 +4,9 @@
 // https://metacpan.org/pod/JSON::Relaxed#REALLY-RELAXED-EXTENSIONS
 
 config {
-    type: style
-    title: "Modern 1"
-    description: "Nice, modern look with sans-serif fonts."
+    type        : style
+    title       : "Modern 1"
+    description : "Nice, modern look with sans-serif fonts."
 }
 
 // Settings for PDF output.

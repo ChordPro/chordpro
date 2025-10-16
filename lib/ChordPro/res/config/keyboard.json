@@ -1,21 +1,17 @@
-{ // For GUI.
-  "config" : {
-    "type"        : "instrument",
-    "title"       : "Keyboard",
-    "description" : "Keyboard, tempered tuning.",
-  },
+// ChordPro Configuration.
 
-  "instrument" : {
-    "description" : "Keyboard, Piano, ...",
-    "type" : "keyboard"
-  },
-  // Not used, but must be non-empty to force chords flush.
-  //"tuning" : [ "A1" ],
-  "chords" : [
-      { "name": "NC",   "keys": [] },
-      { "name": "N.C.", "keys": [] },
-  ],
+config {
+  type        : instrument
+  title       : Keyboard
+  description : "Keyboard, tempered tuning."
 }
 
+instrument {
+  description : "Keyboard, Piano, ..."
+  type        : keyboard
+}
 
-  
+chords : [
+  { name : "NC"   keys : [] }
+  { name : "N.C." keys : [] }
+]
