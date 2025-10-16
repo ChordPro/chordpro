@@ -193,7 +193,7 @@ method fetch_prefs() {
     # Transfer preferences to the dialog.
 
     # Skip default (system, user, song) configs.
-    $self->{cb_skipstdcfg}->SetValue($preferences{skipstdcfg});
+    $self->{cb_usestdcfg}->SetValue(!$preferences{skipstdcfg});
 
     if ( is_arrayref($preferences{preset_instruments})
 	 && @{$preferences{preset_instruments}} ) {
@@ -264,7 +264,7 @@ method store_prefs() {
     my $parent = $self->GetParent;
 
     # Skip default (system, user, song) configs.
-    $preferences{skipstdcfg}  = $self->{cb_skipstdcfg}->IsChecked;
+    $preferences{skipstdcfg}  = !$self->{cb_usestdcfg}->IsChecked;
 
     # Preset instrument.
     my $n = $self->{ch_instrument}->GetSelection;
@@ -359,9 +359,9 @@ method restore_prefs() {
     # use DDP; p %preferences, as => "Restored";
 }
 
-method need_restart() {
+method reload() {
     # Temporary store dialog values into preferences.
-    local $preferences{skipstdcfg} = $self->{cb_skipstdcfg}->IsChecked;
+    local $preferences{skipstdcfg} = !$self->{cb_usestdcfg}->IsChecked;
     local $preferences{customlib} = $self->{dp_customlibrary}->GetPath;
     local $preferences{enable_customlib} = $self->{cb_customlib}->IsChecked;
 
@@ -521,17 +521,16 @@ method OnCustomConfigChanged($event) {
 method OnCustomLib($event) {
     my $n = $self->{cb_customlib}->IsChecked;
     $self->{dp_customlibrary}->Enable($n);
-    $self->need_restart;
+    $self->reload;
 }
 
 method OnCustomLibChanged($event) {
-    $self->need_restart;
+    $self->reload;
 }
 
-
-method OnSkipStdCfg($event) {
+method OnUseStdCfg($event) {
     $event->Skip;
-    $self->need_restart;
+    $self->reload;
 }
 
 method OnPresets($event) {

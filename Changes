@@ -26,6 +26,9 @@
     - The GUI no longer uses environment variable CHORDPRO_LIB. You
       must set the custom library explicitly in the settings dialog.
 
+    - Warning: On the 'Preset' Settings dialog, the checkbox 'Ignore
+      Standard Configs' has been renamed to 'Use Standard Configs'.
+
     !Other Improvements
 
     - Improve break handling in ToC. Fixes issue #606.
