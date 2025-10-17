@@ -38,6 +38,7 @@
       "two_page_left". Note that not all PDF viewers support this.
     - Add task/stylemods for Spread Pages view.
     - (HTML) Annotations have a distinct td class.
+    - Grid bar symbols are better aligned.
 
     !Bug Fixes
 
