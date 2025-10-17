@@ -9,8 +9,8 @@ SCRIPT := ${ROOT}/script
 RES    := ..\..\lib\ChordPro\res
 PP     := pp
 PLDIR  := C:\Strawberry
-WXDIR  := C:\wxWidgets-3.2.6
-PERL   := perl530
+WXDIR  := C:\wxWidgets-3.3.1
+PERL   := perl540
 
 all : ppl iss
 
