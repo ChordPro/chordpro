@@ -22,24 +22,28 @@
 
       config.title  -- a string to show in selections
       config.description -- a descriptive text for this config
+      config.omit -- do not show this one in the selection list
 
     - The GUI no longer uses environment variable CHORDPRO_LIB. You
       must set the custom library explicitly in the settings dialog.
 
     - Warning: On the 'Preset' Settings dialog, the checkbox 'Ignore
       Standard Configs' has been renamed to 'Use Standard Configs'.
+      Its meaning is inversed.
 
     !Other Improvements
 
     - Improve break handling in ToC. Fixes issue #606.
     - Add pdf.page_layout to request a particular document view mode, e.g.
       "two_page_left". Note that not all PDF viewers support this.
-    - Add task/stylemods for Even and Odd Pages view.
+    - Add task/stylemods for Spread Pages view.
+    - (HTML) Annotations have a distinct td class.
 
     !Bug Fixes
 
     - Fix E9 and F9 chords. Thanks to Eric Bell.
     - Remove colons from --define in docs and pod.
+    - Fix issue 599.
 
 6.080.1	2025-08-28
 
