@@ -22,14 +22,14 @@ jobs:
         run: perl -V
 
       - name: Install cpanm
-        run: apt-get install -y cpanminus
+        run: sudo apt-get install -y cpanminus
 
       - name: Set up wxWidgets
         run: |
-          apt-key adv --fetch-keys https://repos.codelite.org/CodeLite.asc
-          apt-add-repository 'deb https://repos.codelite.org/wx3.2/ubuntu/ jammy universe'
-          apt-get update
-          apt-get install libwxbase3.2-0-unofficial \
+          sudo apt-key adv --fetch-keys https://repos.codelite.org/CodeLite.asc
+          sudo apt-add-repository 'deb https://repos.codelite.org/wx3.2/ubuntu/ jammy universe'
+          suso apt-get update
+          sudo apt-get install libwxbase3.2-0-unofficial \
                 libwxbalibjpeg-devse3.2unofficial-dev \
                 libwxgtk3.2-0-unofficial \
                 libwxgtk3.2unofficial-dev \
@@ -45,12 +45,12 @@ jobs:
                 libwxgtk-media3.2-0-unofficial-dbg \
                 wx3.2-i18n \
                 wx3.2-examples
-          apt-get install -y libdeflate-dev libjpeg-dev \
+          sudo apt-get install -y libdeflate-dev libjpeg-dev \
                 libpng16-dev libsdl2-dev libtiff-dev libwebp-dev     
 
       - name: Install SSLeay
         run: |
-          cpanm Net::SSLeay --notest
+          sudo cpanm Net::SSLeay --notest
 
       - name: Install Alien::wxWidgets
         run: |
@@ -60,7 +60,7 @@ jobs:
           cpanm --installdeps --notest .
           perl ./Build.PL --wxWidgets-build=0
           perl ./Build
-          perl ./Build install
+          sudo perl ./Build install
           cd ..
           rm -fr Alien-wsWidgets-0.72
           wx-config --list
@@ -69,15 +69,15 @@ jobs:
 
       - name: Install wxPerl
         run: |
-          apt-get install -y libextutils-xspp-perl libperl-dev
-          cpanm https://github.com/sciurius/wxPerl/releases/download/R3.009/Wx-3.009.tar.gz --notest || cat $HOME/.cpanm/build.log && false
+          sudo apt-get install -y libextutils-xspp-perl libperl-dev
+          cpanm --sudo https://github.com/sciurius/wxPerl/releases/download/R3.009/Wx-3.009.tar.gz --notest || cat $HOME/.cpanm/build.log && false
           cat $HOME/.cpanm/build.log
 
       - name: Install other dependencies
         run: |
-          cpanm --notest PAR::Packer Object:Pad JSON::XS \
+          cpanm --sudo --notest PAR::Packer Object:Pad JSON::XS \
               JavaScript::QuickJS HarfBuzz::Shaper
-          cpanm --installdeps --notest .
+          cpanm --sudo --installdeps --notest .
 
       - name: Run Test suite
         run: |
@@ -86,7 +86,7 @@ jobs:
 
       - name: Install AppImage + deps
         run: |
-          apt-get install -y patchelf fuse
+          sudo apt-get install -y patchelf fuse
           curl -o pp/appimage/appimagetool https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod 0755 pp/appimage/appimagetool
 
