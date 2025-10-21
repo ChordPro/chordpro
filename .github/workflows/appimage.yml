@@ -76,7 +76,7 @@ jobs:
 
       - name: Install other dependencies
         run: |
-          cpanm --sudo --notest PAR::Packer Object:Pad JSON::XS \
+          cpanm --sudo --notest PAR::Packer Object::Pad JSON::XS \
               JavaScript::QuickJS HarfBuzz::Shaper
           cpanm --sudo --installdeps --notest .
 
