@@ -30,7 +30,7 @@ jobs:
           sudo apt-add-repository 'deb https://repos.codelite.org/wx3.2/ubuntu/ jammy universe'
           sudo apt-get update
           sudo apt-get install libwxbase3.2-0-unofficial \
-                libwxbalibjpeg-devse3.2unofficial-dev \
+                libwxbase3.2unofficial-dev \
                 libwxgtk3.2-0-unofficial \
                 libwxgtk3.2unofficial-dev \
                 wx3.2-headers \
