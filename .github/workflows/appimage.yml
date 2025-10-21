@@ -8,6 +8,11 @@ on:
     branches:
       - appimage
 
+env:
+  PPROOT: pp/ubuntu-lts
+  AWV: 0.72
+  WXV: 3.009
+
 jobs:
 
   AppImage:
@@ -20,6 +25,11 @@ jobs:
 
       - name: perl -V
         run: perl -V
+
+      - name: Set Env Vars
+        run: |
+          CHORDPRO_VERSION=$(perl lib/ChordPro/Version.pm)
+          echo "CHORDPRO_VERSION=$CHORDPRO_VERSION" >> "$GITHUB_ENV"
 
       - name: Install cpanm
         run: sudo apt-get install -y cpanminus
@@ -54,9 +64,9 @@ jobs:
 
       - name: Install Alien::wxWidgets
         run: |
-          curl -o awx.tgz -L https://github.com/sciurius/perl-Alien-wxWidgets/releases/download/R0.71/Alien-wxWidgets-0.72.tar.gz
+          curl -o awx.tgz -L https://github.com/sciurius/perl-Alien-wxWidgets/releases/download/R0.71/Alien-wxWidgets-$AWV.tar.gz
           tar xf awx.tgz
-          cd Alien-wxWidgets-0.72
+          cd Alien-wxWidgets-$AWV
           cpanm --sudo --installdeps --notest .
           perl ./Build.PL --wxWidgets-build=0
           perl ./Build
@@ -64,7 +74,7 @@ jobs:
           sudo perl -pi~ -e "s/'unofficial'/'base'/" \
               /usr/local/lib/x86_64-linux-gnu/perl/5.34.0/Alien/wxWidgets/Config/gtk_3_2_4_gcc_3_4.pm
           cd ..
-          rm -fr Alien-wsWidgets-0.72
+          rm -fr Alien-wsWidgets-$AWV
           wx-config --list
           wx-config --version --release --version-full
           perl -MAlien::wxWidgets -e 'Alien::wxWidgets->libraries(qw(stc media webview propgrid ribbon aui xrc qa html))'
@@ -72,7 +82,7 @@ jobs:
       - name: Install wxPerl
         run: |
           sudo apt-get install -y libextutils-xspp-perl libperl-dev
-          cpanm --sudo https://github.com/sciurius/wxPerl/releases/download/R3.009/Wx-3.009.tar.gz --notest
+          cpanm --sudo https://github.com/sciurius/wxPerl/releases/download/R$WXV/Wx-$WXV.tar.gz --notest
 
       - name: Install other dependencies
         run: |
@@ -92,11 +102,16 @@ jobs:
           chmod 0755 appimagetool
 
       - name: Build AppImage
-        run: make -C pp/ubuntu-lts APPIMAGETOOL=../../appimagetool
+        run: make -C $PPROOT APPIMAGETOOL=../../appimagetool
 
-      - name: Upload AppImage
+      - name: Huh
+        run: |
+          rm -fr $PPROOT/build
+          find  $PPROOT -type f -print
+
+      - name: Upload AppImage (fixe)
         uses: actions/upload-artifact@v4
         with:
           compression-level: 0
-          name: Upload_AppImage
-          path: pp/ubuntu-lts/ChordPro*AppImage
+          name: "ChordPro-${{ env.CHORDPRO_VERSION }}.AppImage"
+          path: "$PPROOT/ChordPro-${{ env.CHORDPRO_VERSION }}.AppImage"
