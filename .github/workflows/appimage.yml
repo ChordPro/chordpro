@@ -88,11 +88,11 @@ jobs:
       - name: Install AppImage + deps
         run: |
           sudo apt-get install -y patchelf fuse
-          curl -o pp/appimage/appimagetool https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
-          chmod 0755 pp/appimage/appimagetool
+          curl -o appimagetool https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod 0755 appimagetool
 
       - name: Build AppImage
-        run: make -C pp/ubuntu-lts APPIMAGETOOL=./appimagetool
+        run: make -C pp/ubuntu-lts APPIMAGETOOL=../../appimagetool
 
       - name: Upload AppImage
         uses: actions/upload-artifact@v4
