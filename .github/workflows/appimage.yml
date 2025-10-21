@@ -61,6 +61,8 @@ jobs:
           perl ./Build.PL --wxWidgets-build=0
           perl ./Build
           sudo perl ./Build install
+          sudo perl -pi~ -e "s/'unofficial'/'base'/" \
+              /usr/local/lib/x86_64-linux-gnu/perl/5.34.0/Alien/wxWidgets/Config/gtk_3_2_4_gcc_3_4.pm
           cd ..
           rm -fr Alien-wsWidgets-0.72
           wx-config --list
