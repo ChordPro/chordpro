@@ -108,9 +108,33 @@ sym :
 
 LIB := lib/ChordPro
 RES := ${LIB}/res
-PODSELECT := podselect
+# PODSELECT := podselect
 
-resources : wxg
+RESOURCES := wxg ${LIB}/Config/Data.pm ${RES}/config/chordpro.json
+# RESOURCES += ${RES}/pod/ChordPro.pod ${RES}/pod/Config.pod ${RES}/pod/A2Crd.pod
+RESOURCES += docs/assets/pub/config60.schema
+
+resources : ${RESOURCES}
+
+${LIB}/Config/Data.pm : ${RES}/config/chordpro.json
+	perl script/cfgboot.pl $< > $@~
+	cmp $@ $@~ || mv $@~ $@
+
+${RES}/pod/ChordPro.pod : ${LIB}.pm
+	${PODSELECT} $< > $@
+
+${RES}/pod/Config.pod : ${RES}/config/chordpro.json
+	( echo "=head1 ChordPro Default Configuration"; \
+	  echo ""; \
+	  echo "=encoding UTF8"; \
+	  echo ""; \
+	  perl -pe 's/^/    /' $< ) > $@
+
+${RES}/pod/A2Crd.pod : ${LIB}/A2Crd.pm
+	${PODSELECT} $< > $@
+
+docs/assets/pub/config61.schema : ${RES}/config/config.schema
+	cp -p $< $@
 
 # Verify JSON data
 
@@ -166,22 +190,23 @@ _wkit2 :
 	VBoxManage controlvm ${WINVM} poweroff
 	VBoxManage snapshot ${WINVM} restorecurrent
 
-DEB := debby
-DEBVM := Debian
+LTS   := ubuntu-lts
+LTSVM := "Ubuntu 22.04 LTS"
 
 appimage : _akit1 _akit _akit2
 
 _akit :
-	rsync -avHi ./ ${DEB}:ChordPro/ --exclude .git --exclude build --exclude docs
-	ssh ${DEB} make -C ChordPro/pp/debian
-	scp ${DEB}:ChordPro/pp/debian/ChordPro-\*.AppImage ${HOME}/tmp/
+	${MAKE} to_mac MACHOST=${LTS}
+	ssh ${LTS} make -C Documents/ChordPro/pp/${LTS}
+	scp ${LTS}:Documents/ChordPro/pp/${LTS}/ChordPro-\*.AppImage ${HOME}/tmp/
 
 _akit1 :
-	-VBoxManage startvm ${DEBVM} --type headless
+	-VBoxManage startvm ${LTSVM} --type headless
+	ssh root@${LTS} ntpdate -b ntp.squirrel.nl
 
 _akit2 :
-	VBoxManage controlvm ${DEBVM} poweroff
-	VBoxManage snapshot ${DEBVM} restorecurrent
+	VBoxManage controlvm ${LTSVM} poweroff
+	VBoxManage snapshot ${LTSVM} restorecurrent
 
 .PHONY: TAGS
 

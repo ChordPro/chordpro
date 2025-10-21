@@ -1,3 +1,4 @@
+lib/ChordPro/Config/Data.pm
 pp/README
 pp/debian/chordpro.pp
 pp/debian/wxchordpro.pp
@@ -30,6 +31,10 @@ pp/macos/pp.pl
 pp/macos/reloc.pl
 pp/macos/vfix.pl
 pp/pp2ppl.pl
+pp/ubuntu-lts/chordpro.pp
+pp/ubuntu-lts/Makefile
+pp/ubuntu-lts/README
+pp/ubuntu-lts/wxchordpro.pp
 pp/windows/GNUmakefile
 pp/windows/WebView2Loader.dll
 pp/windows/chordpro.pp
