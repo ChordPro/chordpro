@@ -1,11 +1,11 @@
-name: AppImage build on Ubuntu 22.04 LTS.
+name: AppImage build
 
 # This is the oldest but still supported Ubuntu LTS, as adviced by the
 # AppImage team.
 
 on:
   push:
-    branches:
+    tags:
       - appimage
 
 env:
@@ -104,11 +104,6 @@ jobs:
 
       - name: Build AppImage
         run: make -C $PPROOT APPIMAGETOOL=../../appimagetool-x86_64.AppImage
-
-      - name: Huh
-        run: |
-          rm -fr $PPROOT/build
-          find  $PPROOT -type f -print
 
       - name: Upload AppImage (fixe)
         uses: actions/upload-artifact@v4
