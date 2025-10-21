@@ -30,6 +30,7 @@ jobs:
         run: |
           CHORDPRO_VERSION=$(perl lib/ChordPro/Version.pm)
           echo "CHORDPRO_VERSION=$CHORDPRO_VERSION" >> "$GITHUB_ENV"
+          echo "PPROOT=$PPROOT" >> "$GITHUB_ENV"
 
       - name: Install cpanm
         run: sudo apt-get install -y cpanminus
@@ -114,4 +115,4 @@ jobs:
         with:
           compression-level: 0
           name: "ChordPro-${{ env.CHORDPRO_VERSION }}.AppImage"
-          path: "$PPROOT/ChordPro-${{ env.CHORDPRO_VERSION }}.AppImage"
+          path: "${{ env.PPROOT }}/ChordPro-${{ env.CHORDPRO_VERSION }}.AppImage"
