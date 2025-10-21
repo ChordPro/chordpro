@@ -46,7 +46,7 @@ jobs:
                 wx3.2-i18n \
                 wx3.2-examples
           sudo apt-get install -y libdeflate-dev libjpeg-dev \
-                libpng16-dev libsdl2-dev libtiff-dev libwebp-dev     
+                libpng-dev libsdl2-dev libtiff-dev libwebp-dev     
 
       - name: Install SSLeay
         run: |
