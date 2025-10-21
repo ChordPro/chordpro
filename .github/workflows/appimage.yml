@@ -97,12 +97,12 @@ jobs:
 
       - name: Install AppImage + deps
         run: |
-          sudo apt-get install -y patchelf fuse
-          curl -o appimagetool https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
-          chmod 0755 appimagetool
+          sudo apt-get install -y patchelf fuse wget
+          wget -nv -c https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod 0755 appimagetool-x86_64.AppImage
 
       - name: Build AppImage
-        run: make -C $PPROOT APPIMAGETOOL=../../appimagetool
+        run: make -C $PPROOT APPIMAGETOOL=../../appimagetool-x86_64.AppImage
 
       - name: Huh
         run: |
