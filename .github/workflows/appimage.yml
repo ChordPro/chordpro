@@ -1,0 +1,101 @@
+name: AppImage build on Ubuntu 22.04 LTS.
+
+# This is the oldest but still supported Ubuntu LTS, as adviced by the
+# AppImage team.
+
+on:
+  push:
+    branches:
+      - appimage
+
+jobs:
+
+  AppImage:
+    runs-on: ubuntu-22.04
+
+    steps:
+
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: perl -V
+        run: perl -V
+
+      - name: Install cpanm
+        run: apt-get install -y cpanminus
+
+      - name: Set up wxWidgets
+        run: |
+          apt-key adv --fetch-keys https://repos.codelite.org/CodeLite.asc
+          apt-add-repository 'deb https://repos.codelite.org/wx3.2/ubuntu/ jammy universe'
+          apt-get update
+          apt-get install libwxbase3.2-0-unofficial \
+                libwxbalibjpeg-devse3.2unofficial-dev \
+                libwxgtk3.2-0-unofficial \
+                libwxgtk3.2unofficial-dev \
+                wx3.2-headers \
+                wx-common \
+                libwxgtk-media3.2-0-unofficial \
+                libwxgtk-media3.2unofficial-dev \
+                libwxgtk-webview3.2-0-unofficial \
+                libwxgtk-webview3.2unofficial-dev \
+                libwxgtk-webview3.2-0-unofficial-dbg \
+                libwxbase3.2-0-unofficial-dbg \
+                libwxgtk3.2-0-unofficial-dbg \
+                libwxgtk-media3.2-0-unofficial-dbg \
+                wx3.2-i18n \
+                wx3.2-examples
+          apt-get install -y libdeflate-dev libjpeg-dev \
+                libpng16-dev libsdl2-dev libtiff-dev libwebp-dev     
+
+      - name: Install SSLeay
+        run: |
+          cpanm Net::SSLeay --notest
+
+      - name: Install Alien::wxWidgets
+        run: |
+          curl -o awx.tgz -L https://github.com/sciurius/perl-Alien-wxWidgets/releases/download/R0.71/Alien-wxWidgets-0.72.tar.gz
+          tar xf awx.tgz
+          cd Alien-wxWidgets-0.72
+          cpanm --installdeps --notest .
+          perl ./Build.PL --wxWidgets-build=0
+          perl ./Build
+          perl ./Build install
+          cd ..
+          rm -fr Alien-wsWidgets-0.72
+          wx-config --list
+          wx-config --version --release --version-full
+          perl -MAlien::wxWidgets -e 'Alien::wxWidgets->libraries(qw(stc media webview propgrid ribbon aui xrc qa html))'
+
+      - name: Install wxPerl
+        run: |
+          apt-get install -y libextutils-xspp-perl libperl-dev
+          cpanm https://github.com/sciurius/wxPerl/releases/download/R3.009/Wx-3.009.tar.gz --notest || cat $HOME/.cpanm/build.log && false
+          cat $HOME/.cpanm/build.log
+
+      - name: Install other dependencies
+        run: |
+          cpanm --notest PAR::Packer Object:Pad JSON::XS \
+              JavaScript::QuickJS HarfBuzz::Shaper
+          cpanm --installdeps --notest .
+
+      - name: Run Test suite
+        run: |
+          prove -l t
+          perl script/chordpro.pl --about
+
+      - name: Install AppImage + deps
+        run: |
+          apt-get install -y patchelf fuse
+          curl -o pp/appimage/appimagetool https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod 0755 pp/appimage/appimagetool
+
+      - name: Build AppImage
+        run: make -C pp/ubuntu-lts APPIMAGETOOL=./appimagetool
+
+      - name: Upload AppImage
+        uses: actions/upload-artifact@v4
+        with:
+          compression-level: 0
+          name: Upload_AppImage
+          path: pp/ubuntu-lts/ChordPro*AppImage
