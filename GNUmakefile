@@ -183,22 +183,26 @@ _wkit2 :
 	VBoxManage controlvm ${WINVM} poweroff
 	VBoxManage snapshot ${WINVM} restorecurrent
 
-DEB := debby
-DEBVM := Debian
+LTS   := ubuntu-lts
+LTSVM := "Ubuntu 22.04 LTS"
 
 appimage : _akit1 _akit _akit2
 
+#	rsync -avHi ./ ${LTSHOST}:ChordPro/ --exclude .git --exclude build --exclude docs
+
 _akit :
-	rsync -avHi ./ ${DEB}:ChordPro/ --exclude .git --exclude build --exclude docs
-	ssh ${DEB} make -C ChordPro/pp/debian
-	scp ${DEB}:ChordPro/pp/debian/ChordPro-\*.AppImage ${HOME}/tmp/
+	${MAKE} to_mac MACHOST=${LTS}
+	ssh ${LTS} make -C Documents/ChordPro/pp/${LTS}
+	scp ${LTS}:Documents/ChordPro/pp/${LTS}/ChordPro-\*.AppImage ${HOME}/tmp/
 
 _akit1 :
-	-VBoxManage startvm ${DEBVM} --type headless
+	-VBoxManage startvm ${LTSVM} --type headless
+	ssh root@${LTS} apt-get install --quiet --yes ntpdate
+	ssh root@${LTS} ntpdate -b ntp.squirrel.nl
 
 _akit2 :
-	VBoxManage controlvm ${DEBVM} poweroff
-	VBoxManage snapshot ${DEBVM} restorecurrent
+	VBoxManage controlvm ${LTSVM} poweroff
+	VBoxManage snapshot ${LTSVM} restorecurrent
 
 .PHONY: TAGS
 

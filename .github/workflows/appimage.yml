@@ -1,0 +1,113 @@
+name: AppImage build
+
+# This is the oldest but still supported Ubuntu LTS, as adviced by the
+# AppImage team.
+
+on:
+  push:
+    tags:
+      - appimage
+
+env:
+  PPROOT: pp/ubuntu-lts
+  AWV: 0.72
+  WXV: 3.009
+
+jobs:
+
+  AppImage:
+    runs-on: ubuntu-22.04
+
+    steps:
+
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: perl -V
+        run: perl -V
+
+      - name: Set Env Vars
+        run: |
+          CHORDPRO_VERSION=$(perl lib/ChordPro/Version.pm)
+          echo "CHORDPRO_VERSION=$CHORDPRO_VERSION" >> "$GITHUB_ENV"
+          echo "PPROOT=$PPROOT" >> "$GITHUB_ENV"
+
+      - name: Install cpanm
+        run: sudo apt-get install -y cpanminus
+
+      - name: Set up wxWidgets
+        run: |
+          sudo apt-key adv --fetch-keys https://repos.codelite.org/CodeLite.asc
+          sudo apt-add-repository 'deb https://repos.codelite.org/wx3.2/ubuntu/ jammy universe'
+          sudo apt-get update
+          sudo apt-get install libwxbase3.2-0-unofficial \
+                libwxbase3.2unofficial-dev \
+                libwxgtk3.2-0-unofficial \
+                libwxgtk3.2unofficial-dev \
+                wx3.2-headers \
+                wx-common \
+                libwxgtk-media3.2-0-unofficial \
+                libwxgtk-media3.2unofficial-dev \
+                libwxgtk-webview3.2-0-unofficial \
+                libwxgtk-webview3.2unofficial-dev \
+                libwxgtk-webview3.2-0-unofficial-dbg \
+                libwxbase3.2-0-unofficial-dbg \
+                libwxgtk3.2-0-unofficial-dbg \
+                libwxgtk-media3.2-0-unofficial-dbg \
+                wx3.2-i18n \
+                wx3.2-examples
+          sudo apt-get install -y libdeflate-dev libjpeg-dev \
+                libpng-dev libsdl2-dev libtiff-dev libwebp-dev     
+
+      - name: Install SSLeay
+        run: |
+          sudo cpanm Net::SSLeay --notest
+
+      - name: Install Alien::wxWidgets
+        run: |
+          curl -o awx.tgz -L https://github.com/sciurius/perl-Alien-wxWidgets/releases/download/R0.71/Alien-wxWidgets-$AWV.tar.gz
+          tar xf awx.tgz
+          cd Alien-wxWidgets-$AWV
+          cpanm --sudo --installdeps --notest .
+          perl ./Build.PL --wxWidgets-build=0
+          perl ./Build
+          sudo perl ./Build install
+          sudo perl -pi~ -e "s/'unofficial'/'base'/" \
+              /usr/local/lib/x86_64-linux-gnu/perl/5.34.0/Alien/wxWidgets/Config/gtk_3_2_4_gcc_3_4.pm
+          cd ..
+          rm -fr Alien-wsWidgets-$AWV
+          wx-config --list
+          wx-config --version --release --version-full
+          perl -MAlien::wxWidgets -e 'Alien::wxWidgets->libraries(qw(stc media webview propgrid ribbon aui xrc qa html))'
+
+      - name: Install wxPerl
+        run: |
+          sudo apt-get install -y libextutils-xspp-perl libperl-dev
+          cpanm --sudo https://github.com/sciurius/wxPerl/releases/download/R$WXV/Wx-$WXV.tar.gz --notest
+
+      - name: Install other dependencies
+        run: |
+          cpanm --sudo --notest PAR::Packer Object::Pad JSON::XS \
+              JavaScript::QuickJS HarfBuzz::Shaper
+          cpanm --sudo --installdeps --notest .
+
+      - name: Run Test suite
+        run: |
+          prove -l t
+          perl script/chordpro.pl --about
+
+      - name: Install AppImage + deps
+        run: |
+          sudo apt-get install -y patchelf fuse wget
+          wget -nv -c https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod 0755 appimagetool-x86_64.AppImage
+
+      - name: Build AppImage
+        run: make -C $PPROOT APPIMAGETOOL=../../appimagetool-x86_64.AppImage
+
+      - name: Upload AppImage (fixe)
+        uses: actions/upload-artifact@v4
+        with:
+          compression-level: 0
+          name: "ChordPro-${{ env.CHORDPRO_VERSION }}.AppImage"
+          path: "${{ env.PPROOT }}/ChordPro-${{ env.CHORDPRO_VERSION }}.AppImage"
