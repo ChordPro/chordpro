@@ -72,8 +72,7 @@ jobs:
       - name: Install wxPerl
         run: |
           sudo apt-get install -y libextutils-xspp-perl libperl-dev
-          cpanm --sudo https://github.com/sciurius/wxPerl/releases/download/R3.009/Wx-3.009.tar.gz --notest || cat $HOME/.cpanm/build.log && false
-          cat $HOME/.cpanm/build.log
+          cpanm --sudo https://github.com/sciurius/wxPerl/releases/download/R3.009/Wx-3.009.tar.gz --notest
 
       - name: Install other dependencies
         run: |
