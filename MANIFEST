@@ -10,6 +10,7 @@ lib/ChordPro/A2Crd.pm
 lib/ChordPro/Chords.pm
 lib/ChordPro/Chords/Appearance.pm
 lib/ChordPro/Chords/Parser.pm
+lib/ChordPro/Config/Data.pm
 lib/ChordPro/Config.pm
 lib/ChordPro/Config/Properties.pm
 lib/ChordPro/Delegate/ABC.pm
