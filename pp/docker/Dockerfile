@@ -7,6 +7,9 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LC_ALL=C.UTF-8 \
     LANGUAGE=en_US.UTF-8
 
+ARG AWV=0.71
+ARG WXV=0.004
+
 # Install perl and runtime packages.
 # We have a libpdf-api2-perl but that's not recent enough.
 # Also skip wxperl, we need a better version anyway.
@@ -36,16 +39,24 @@ RUN apt-get install --no-install-recommends -y \
 
 # Perl modules from CPAN.
 RUN cpanm \
-    Alien::wxWidgets \
+    https://github.com/sciurius/perl-Alien-wxWidgets/releases/download/R0.71/Alien-wxWidgets-${AWV}.tar.gz \
     Pod::Usage \
     JavaScript::QuickJS \
     File::LoadLines \
     String::Interpolate::Named \
     HarfBuzz::Shaper \
-    Text::Layout~0.038 \
-    XS::Parse::Sublike~0.32 \
-    Object::Pad~0.818 \
+    Text::Layout \
+    XS::Parse::Sublike \
+    Object::Pad \
     Data::Printer
+
+RUN cpanm ExtUtils::XSpp
+COPY Wx-${WXV}.tar.gz ./
+RUN tar xf Wx-${WXV}.tar.gz \
+    && cd Wx-${WXV} \
+    && perl Makefile.PL \
+    && make \
+    && make install
 
 FROM base AS chordpro-prod
 RUN cpanm chordpro
@@ -58,20 +69,13 @@ ENV DOCKER_PACKAGED=1.00
 RUN chordpro --about
 
 FROM base AS chordpro-dev
-RUN cpanm ExtUtils::XSpp
-COPY Wx-3.004.tar.gz ./
-RUN tar xf Wx-3.004.tar.gz \
-    && cd Wx-3.004 \
-    && perl Makefile.PL \
-    && make \
-    && make install
 COPY chordpro-dev.tar.gz ./
 RUN mkdir ChordPro \
   && tar xf chordpro-dev.tar.gz -C ChordPro \
   && cd ChordPro \
   && perl Makefile.PL \
-  && make && make install
-
+  && make resources && make && make install
+RUN apt-get update; apt-get install -y strace
 # Cleanup.
 RUN rm -fr .cpanminus
 
