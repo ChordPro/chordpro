@@ -17,6 +17,7 @@ use Wx ':everything';
 use Wx::Locale gettext => '_T';
 use File::Temp qw( tempfile tempdir );
 use File::Basename qw(basename);
+use Ref::Util qw( is_hashref );
 
 field $panel			:param;
 field $msgs;
@@ -97,7 +98,7 @@ method preview( $args, %opts ) {
 	push( @ARGV, '--config', $preferences{configfile} );
 
     }
-    delete $ENV{CHORDPRO_LIB};
+    local $ENV{CHORDPRO_LIB};
     if ( $preferences{enable_customlib} ) {
 	$ENV{CHORDPRO_LIB} = $preferences{customlib};
     }
@@ -107,9 +108,12 @@ method preview( $args, %opts ) {
 	push( @ARGV, '--transcode', $preferences{xcode} );
     }
 
-    if ( $preferences{notation} ) {
+    if ( $preferences{notation}
+	 && lc( is_hashref($preferences{notation})
+		? $preferences{notation}->{title}
+		: $preferences{notation} ) ne "common notation" ) {
 	$haveconfig++;
-	push( @ARGV, '--config', 'notes:' . $preferences{notation} );
+	push( @ARGV, '--config', 'notes:' . $preferences{notation}->{file} );
     }
 
     push( @ARGV, '--noconfig' ) unless $haveconfig;

@@ -370,7 +370,7 @@ method Store :common {
 		    }
 		    next;
 		}
-		if ( $k =~ /^preset_(instruments|styles|stylemods)$/ ) {
+		if ( $k =~ /^(preset_(instruments|styles|stylemods)|notation)$/ ) {
 		    $v = [ defined($v) ? $v : () ] unless is_arrayref($v);
 		    $v = join( "\t",
 			       sort( uniq( map { lc( is_hashref($_) ? $_->{title} : $_ ) } @$v ) ) ) if @$v;
@@ -402,33 +402,42 @@ sub setup_styles( $refresh = 0 ) {
 
     my $findopts = { filter => qr/^.*\.json$/i, recurse => 0 };
 
+    local $ENV{CHORDPRO_LIB} =
+      $preferences{enable_customlib} ? $preferences{customlib} : "";
+    CP->setup_resdirs;
+
     # Collect standard style files (presets).
     my @cfglibs = @{ CP->findresdirs("config") };
+    # use DDP; p @cfglibs, as => "cfglibs (for configs, raw)";
 
     # At this point, we can have one or two libs. The last one is
     # the ChordPro standard library.
     # If there are two, the first one is the user config lib.
     # To this/these we prepend the custom lib.
-    @cfglibs[-1] = { src => "std", lib => $cfglibs[-1] };
-    if ( @cfglibs == 2 ) {
-	# Split off user config lib.
-	my $t = shift(@cfglibs);
+    my @c;
+    if ( @cfglibs > 2 ) {
+	# Split off custom config lib.
+	my $c = shift(@cfglibs);
 	# Push back only when !skipping.
-	push( @cfglibs, { src => "user", lib => $t } )
+	push( @c, { src => "custom", lib => $c } )
+	  if $preferences{enable_customlib};
+    }
+    if ( @cfglibs > 1) {
+	# Split off user config lib.
+	my $u = shift(@cfglibs);
+	# Push back only when !skipping.
+	push( @c, { src => "user", lib => $u } )
 	  if !$preferences{skipstdcfg};
     }
-
-    # Aff the custom config, only when enabled.
-    push( @cfglibs, { src => "custom",
-		      lib => fn_catfile( $preferences{customlib}, "config" ) } )
-      if $preferences{enable_customlib};
-    $state{cfglibs} = \@cfglibs;
-    # use DDP; p @cfglibs, as => "cfglibs (for configs)";
+    # Add ChordPro lib.
+    push( @c, { src => "std", lib => $cfglibs[-1] } );
+    $state{cfglibs} = \@c;
+    # use DDP; p @c, as => "cfglibs (for configs)";
     #warn("Config libs for configs\n");
     #warn( sprintf("  %-6s  %s\n", $_->{src}, $_->{lib} ) )
-    #  for @cfglibs;
+    #  for @c;
 
-    for ( @cfglibs ) {
+    for ( @c ) {
 	my $cfglib = $_;
 	my $src = $cfglib->{src};
 	$cfglib = $cfglib->{lib};
