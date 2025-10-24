@@ -206,6 +206,9 @@ lib/ChordPro/res/linux/org.chordpro.desktop
 lib/ChordPro/res/linux/org.chordpro.metainfo.xml
 lib/ChordPro/res/linux/chordpro.xml
 lib/ChordPro/res/linux/setup_desktop.sh
+lib/ChordPro/res/pod/A2Crd.pod
+lib/ChordPro/res/pod/ChordPro.pod
+lib/ChordPro/res/pod/Config.pod
 lib/ChordPro/res/styles/chordpro.css
 lib/ChordPro/res/styles/chordpro_print.css
 lib/ChordPro/res/templates/comment.tt

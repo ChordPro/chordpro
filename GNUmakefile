@@ -108,10 +108,10 @@ sym :
 
 LIB := lib/ChordPro
 RES := ${LIB}/res
-# PODSELECT := podselect
+PODSELECT := podselect
 
 RESOURCES := wxg ${LIB}/Config/Data.pm ${RES}/config/chordpro.json
-# RESOURCES += ${RES}/pod/ChordPro.pod ${RES}/pod/Config.pod ${RES}/pod/A2Crd.pod
+RESOURCES += ${RES}/pod/ChordPro.pod ${RES}/pod/Config.pod ${RES}/pod/A2Crd.pod
 RESOURCES += docs/assets/pub/config60.schema
 
 resources : ${RESOURCES}
