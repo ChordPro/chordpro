@@ -1,13 +1,62 @@
 # Release info
 
+## 6.080.2
+
+Under development
+
+
+### Highlights
+
+
+### Other improvements
+
+* Configuration files can have a distinguishing type. config.type: style These types can be used to designate a particular purpose for a config. Currently recognized types are: 'instrument', 'style', 'stylemod' and 'task'. Configuration file types are mostly used in the GUI. All packaged config files are modernized to use these types.
+
+### GUI Improvements
+
+* The settings dialog has been reworked to support configuration file types. The settings dialog can make use of some more properties: config.title  -- a string to show in selections config.description -- a descriptive text for this config config.omit -- do not show this one in the selection list
+* The GUI no longer uses environment variable CHORDPRO_LIB. You must set the custom library explicitly in the settings dialog.
+* Warning: On the 'Preset' Settings dialog, the checkbox 'Ignore Standard Configs' has been renamed to 'Use Standard Configs'. Its meaning is inversed.
+
+### Other Improvements
+
+* Improve break handling in ToC. Fixes issue #606.
+* Add pdf.page_layout to request a particular document view mode, e.g. "two_page_left". Note that not all PDF viewers support this.
+* Add task/stylemods for Spread Pages view.
+* (HTML) Annotations have a distinct td class.
+* Grid bar symbols are better aligned.
+
+### Bug Fixes
+
+* Fix E9 and F9 chords. Thanks to Eric Bell.
+* Remove colons from --define in docs and pod.
+* Fix issue 599.
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.  
+Please use the [issue tracker](https://github.com/ChordPro/chordpro/issues) for bugs reports.
+
 ## 6.080.1
 
+Released: 2025-08-28
+
+* Reworded symbols insert dialog.
+* Re-enable (experimental) songbook loading.
+* Fix outlines sorting.
+* Add dependency Unicode::Collate.
+* Trimmed usage message for reference mode.
+* Prevent warning when a delegate is set to null.
+
+## 6.080
+
 Released: 2025-08-18
+
 
 ### Highlights
 
 * Support for [strum patterns](https://www.chordpro.org/chordpro/directives-env_grid/#strums) in grids.
-* [Bookmarks](https://www.chordpro.org/chordpro/chordpro-markup/#bookmarks).
+* [Bookmarks](https://www.chordpro.org/chordpro/chordpro_markup/#bookmarks).
 * [Break items](https://www.chordpro.org/chordpro/table_of_contents/#break) in Table of Content lines.
 * [Improved control](https://www.chordpro.org/chordpro/chordpro-configuration-pdf/#songbook-pages) over page order and alignment.
 
@@ -67,24 +116,6 @@ Released: 2025-08-18
 * Fix #555, #550, #542, #315, #569.
 * Fix crash with {comment: [chord]} in 2-pass mode.
 * Fix problems with images in 2-pass mode.
-
-## 6.080.1
-
-Released: 2025-08-28
-
-* Reworded symbols insert dialog.
-* Re-enable (experimental) songbook loading.
-* Fix outlines sorting.
-* Add dependency Unicode::Collate.
-* Trimmed usage message for reference mode.
-* Prevent warning when a delegate is set to null.
-
-### Social and support
-
-[User community](https://groups.io/g/ChordPro) for feedback and help.  
-Please use the [issue tracker](https://github.com/ChordPro/chordpro/issues) for bugs reports.
-
-
 
 ## 6.070
 
