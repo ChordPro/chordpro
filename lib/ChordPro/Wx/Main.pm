@@ -140,7 +140,7 @@ method attach_events() {
 	sbexport  => "OnExportFolder",
 	example   => "OnHelp_Example",
 	site      => "OnHelp_Site",
-	help      => "OnHelp_ChordPro",
+	help      => "OnHelp_Docs",
       );
     while ( my ( $p, $handler ) = each %panels ) {
 	my $panel = $self->{"pn_$p"};
@@ -461,10 +461,12 @@ method OnIdle($event) {
 
 }
 
+# From menu.
 method OnHelp_ChordPro($event) {
-    Wx::LaunchDefaultBrowser("https://www.chordpro.org/chordpro/");
+    Wx::LaunchDefaultBrowser("https://www.chordpro.org/chordpro/chordpro-introduction/");
 }
 
+# From menu.
 method OnHelp_Config($event) {
     Wx::LaunchDefaultBrowser("https://www.chordpro.org/chordpro/chordpro-configuration/");
 }
@@ -492,6 +494,12 @@ method OnExpertWhiteSpace($event) {
     }
 }
 
+# From opening panel.
+method OnHelp_Docs($event) {
+    Wx::LaunchDefaultBrowser("https://www.chordpro.org/chordpro/home/");
+}
+
+# From opening panel.
 method OnHelp_Site($event) {
     Wx::LaunchDefaultBrowser("https://www.chordpro.org/");
 }
