@@ -152,15 +152,16 @@ method enablecustom() {
 	$ctl->Clear;
 	my $n = 0;
 	my $check;
-	for ( sort keys %{$state{presets}{notes}} ) {
-	    $ctl->Append( $state{presets}{notes}->{$_}->{title} .
-			  " (" . $state{presets}{notes}->{$_}->{desc} . ")",
-			  $state{presets}{notes}->{$_},
+	for ( sort keys %{$state{presets}{notations}} ) {
+	    $ctl->Append( $state{presets}{notations}->{$_}->{title} .
+			  " (" . $state{presets}{notations}->{$_}->{desc} . ")",
+			  $state{presets}{notations}->{$_},
 			);
 	    $check = $n
-	      if lc($state{presets}{notes}->{$_}->{title}) eq lc($preferences{notation});
+	      if @{$preferences{preset_notations}}
+	      && lc($state{presets}{notations}->{$_}->{title}) eq lc($preferences{preset_notations}[0]->{title});
 	    $check //= $n
-	      if lc($state{presets}{notes}->{$_}->{title}) eq "common notation";
+	      if lc($state{presets}{notations}->{$_}->{title}) eq "common notation";
 	    $n++;
 	}
 
@@ -172,15 +173,15 @@ method enablecustom() {
 	$ctl->Clear;
 	my $n = 0;
 	my $check;
-	for ( sort keys %{$state{presets}{notes}} ) {
-	    $ctl->Append( $state{presets}{notes}->{$_}->{title} .
-			  " (" . $state{presets}{notes}->{$_}->{desc} . ")",
-			  $state{presets}{notes}->{$_},
+	for ( sort keys %{$state{presets}{notations}} ) {
+	    $ctl->Append( $state{presets}{notations}->{$_}->{title} .
+			  " (" . $state{presets}{notations}->{$_}->{desc} . ")",
+			  $state{presets}{notations}->{$_},
 			);
 	    $check = $n
-	      if lc($state{presets}{notes}->{$_}->{title}) eq lc($preferences{xcode});
+	      if lc($state{presets}{notations}->{$_}->{title}) eq lc($preferences{xcode});
 	    $check //= $n
-	      if lc($state{presets}{notes}->{$_}->{title}) eq "common notation";
+	      if lc($state{presets}{notations}->{$_}->{title}) eq "common notation";
 	    $n++;
 	}
 
@@ -315,11 +316,11 @@ method store_prefs() {
     # Notation.
     $n = $self->{ch_notation}->GetSelection;
     if ( $n > 0 ) {
-	$preferences{notation} =
-	  $self->{ch_notation}->GetClientData($n);
+	$preferences{preset_notations} =
+	  [ $self->{ch_notation}->GetClientData($n) ];
     }
     else {
-       	$preferences{notation} = "";
+       	$preferences{preset_notation} = [];
     }
 
     # Transpose.

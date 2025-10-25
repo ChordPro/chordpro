@@ -29,14 +29,15 @@ my $notdesc =
 sub new {
     my $self = shift->SUPER::new(@_);
 
-    if ( @{$state{tasks}} ) {
+	$DB::single=1;
+    if ( %{$state{presets}{tasks}} ) {
 	$self->{l_customtasks}->Show(1);
 	my $index = 0;
-	for my $task ( @{$state{tasks}} ) {
+	for my $task ( sort keys %{$state{presets}{tasks}} ) {
 	    my $id = Wx::NewId();
 	    $self->{sz_customtasks}->Add
 	      ( $self->{"cb_customtask_$index"} = Wx::CheckBox->new
-		($self, $id, $task->[0] ),
+		($self, $id, $state{presets}{tasks}{$task}->{title} ),
 		0, 0, 0 );
 	    $index++;
 	}

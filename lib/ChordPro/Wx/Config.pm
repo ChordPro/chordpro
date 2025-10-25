@@ -57,9 +57,14 @@ my %prefs =
    # Presets.
    # Title as defined by or derived from the JSON file.
    # When multiple presets are possible, a list of titles separated by TABs.
-   preset_instruments => [],
-   preset_styles      => [],
+   # Note it is always a [] even when there's only one.
+   # Every preset_xxx is a list of entries from $state{preset}{xxx}.
+   preset_instruments => [],	# single
+   preset_styles      => [],	# single
    preset_stylemods   => [],
+   preset_notations   => [],	# single
+   preset_tasks       => [],	# not used
+
 
    # Custom config file.
    enable_configfile => 0,
@@ -109,9 +114,6 @@ my %prefs =
 
    # Messages.
    msgsfont	   => 0,	# inital, later "Monospace 10" etc.
-
-   # Notation.
-   notation	   => "",
 
    # Transpose.
    enable_xpose => 0,
@@ -243,9 +245,13 @@ method Load :common {
 		    $cb->DeleteEntry($entry);
 		    next;
 		}
-		if ( $entry =~ m/^preset_(instruments|styles|stylemods)/ ) {
-		    $preferences{$entry} = [ split( /\t+/, $value ) ];
+
+		# These are always returned as lists of hashes.
+		if ( $entry =~ m/^preset_(instruments|styles|stylemods|notations|tasks)/ ) {
+		    $preferences{$entry} =
+		      [ map { +{ title => lc($_) } } split( /\t+/, $value ) ];
 		}
+
 		elsif ( $entry eq "editcolours" ) {
 		    my @c = split( /,\s*/, $value );
 		    if ( @c <= 1 ) {
@@ -370,10 +376,10 @@ method Store :common {
 		    }
 		    next;
 		}
-		if ( $k =~ /^(preset_(instruments|styles|stylemods)|notation)$/ ) {
-		    $v = [ defined($v) ? $v : () ] unless is_arrayref($v);
+		if ( $k =~ /^preset_(instruments|styles|stylemods|notations)$/ ) {
 		    $v = join( "\t",
-			       sort( uniq( map { lc( is_hashref($_) ? $_->{title} : $_ ) } @$v ) ) ) if @$v;
+			       sort( uniq( map { lc($_->{title}) } @$v ) ) )
+		      if @$v;
 		}
 		next if $k eq "editcolours";
 		$v = join( ",", @$v ) if is_arrayref($v);
@@ -433,9 +439,9 @@ sub setup_styles( $refresh = 0 ) {
     push( @c, { src => "std", lib => $cfglibs[-1] } );
     $state{cfglibs} = \@c;
     # use DDP; p @c, as => "cfglibs (for configs)";
-    #warn("Config libs for configs\n");
-    #warn( sprintf("  %-6s  %s\n", $_->{src}, $_->{lib} ) )
-    #  for @c;
+    # warn("Config libs for configs\n");
+    # warn( sprintf("  %-6s  %s\n", $_->{src}, $_->{lib} ) )
+    #   for @c;
 
     for ( @c ) {
 	my $cfglib = $_;
@@ -505,7 +511,7 @@ sub setup_styles( $refresh = 0 ) {
 	tasks       => \%tasks,
 	stylemods   => \%stylemods,
 	instruments => \%instruments,
-	notes       => \%notes,
+	notations   => \%notes,
       };
 
 #    for ( qw( instruments styles  stylemods tasks notes ) ) {
@@ -514,7 +520,7 @@ sub setup_styles( $refresh = 0 ) {
 #    }
 
     # Associate preset names with actual config files.
-    assoc_presets($_) for qw( instruments styles stylemods );
+    assoc_presets($_) for qw( instruments styles stylemods notations );
 
 #    use DDP; warn np $state{presets}, as => "presets";
 
@@ -529,10 +535,10 @@ sub assoc_presets( $preset ) {
     0 and warn("assoc: $preset\n");
     $preferences{"preset_$preset"} = [];
     for ( values %$list ) {
-	my $looking_for = is_hashref($_) ? lc($_->{title}) : lc($_);
+	my $looking_for = lc($_->{title});
 	0 and warn("assoc: looking for $preset ($looking_for)\n");
 	for my $v ( @$args ) {
-	    my $have = lc( is_hashref($v) ? $v->{title} : $v );
+	    my $have = $v->{title};
 	    0 and warn("assoc: try $have <> $looking_for\n");
 	    if ( $_->{exclude_id} ) {
 		for my $p ( @{$preferences{"preset_$preset"}} ) {
@@ -548,12 +554,12 @@ sub assoc_presets( $preset ) {
     }
 
     # Look up in the stylemods if not yet found.
-    unless ( $found || $multi ) {
+    unless ( $found || $preset =~ /^(stylemods|tasks|notations)$/ ) {
 	for ( values %{$state{presets}{stylemods}} ) {
-	    my $looking_for = is_hashref($_) ? lc($_->{title}) : lc($_);
+	    my $looking_for = lc($_->{title});
 	    0 and warn("assoc: looking for $looking_for in stylemods\n");
 	    for my $v ( @$args ) {
-		my $have = lc( is_hashref($v) ? $v->{title} : $v );
+		my $have = $v->{title};
 		0 and warn("assoc: try $have <> $looking_for\n");
 		push( @{$preferences{"preset_$preset"}}, $_ )
 		  if $have eq $looking_for;
@@ -563,17 +569,18 @@ sub assoc_presets( $preset ) {
 	}
     }
 
+    return;
     # use DDP; p $preferences{"preset_$preset"};
-#    warn("Presets for $preset\n");
-#    warn( sprintf("  %-6s  %s\n", $_->{src}, $_->{title} ) )
-#      for @{$preferences{"preset_$preset"}};
+    warn("Presets for $preset\n");
+    warn( sprintf("  %-6s  %s\n", $_->{src}, $_->{title} ) )
+      for @{$preferences{"preset_$preset"}};
 }
 
 # Fetch available tasks. Called by setup_presets.
 sub _add_tasks( $tasks ) {
 
     my @cfglibs;
-    for ( my $i = 1; $i < @{ $state{cfglibs} }; $i++ ) {
+    for ( my $i = 0; $i < @{ $state{cfglibs} }; $i++ ) {
 	my $lib = $state{cfglibs}->[$i];
 	push( @cfglibs,
 	      { src => $lib->{src},
@@ -581,9 +588,9 @@ sub _add_tasks( $tasks ) {
 	pop( @cfglibs ) unless fs_test( d => $cfglibs[-1]->{lib} );
     }
     #use DDP; p @cfglibs, as => "cfglibs (for tasks)";
-#    warn("Config libs for tasks\n");
-#    warn( sprintf("  %-6s  %s\n", $_->{src}, $_->{lib} ) )
-#      for @cfglibs;
+    #warn("Config libs for tasks\n");
+    #warn( sprintf("  %-6s  %s\n", $_->{src}, $_->{lib} ) )
+    #  for @cfglibs;
 
     my $findopts = { filter => qr/^.*\.(?:json|prp)$/i, recurse => 0 };
 
@@ -669,8 +676,9 @@ sub _add_notations( $notes ) {
 
 	    my %meta = ( src => $src, file => $file );
 	    $types = [ $types ] unless is_arrayref($types);
-	    $meta{title} = $data->{config}->{title};
-	    $meta{desc}  = $data->{config}->{description};
+	    $meta{title}  = $data->{config}->{title};
+	    $meta{desc}   = $data->{config}->{description};
+	    $meta{system} = $data->{notes}->{system};
 	    for my $type ( @$types ) {
 		next unless $type eq "notes";
 		$notes->{$meta{title}} = { %$_, %meta };

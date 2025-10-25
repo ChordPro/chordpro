@@ -570,6 +570,8 @@ method OnPreferences($event) {
 
     # Update the requestor.
     $state{panel}->update_preferences unless $state{mode} eq "initial";
+
+    $self->setup_menubar;
 }
 
 # On the recents list, click selects and displays the file name.

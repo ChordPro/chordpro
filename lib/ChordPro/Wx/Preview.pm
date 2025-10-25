@@ -105,15 +105,15 @@ method preview( $args, %opts ) {
     CP->setup_resdirs;
     if ( $preferences{enable_xcode} && $preferences{xcode} ) {
 	$haveconfig++;
-	push( @ARGV, '--transcode', $preferences{xcode} );
+	push( @ARGV, '--transcode',
+	      $state{presets}{notations}->{lc $preferences{xcode}}->{system} );
     }
 
-    if ( $preferences{notation}
-	 && lc( is_hashref($preferences{notation})
-		? $preferences{notation}->{title}
-		: $preferences{notation} ) ne "common notation" ) {
+    if ( $preferences{preset_notations}
+	 && @{$preferences{preset_notations}}
+	 && $preferences{preset_notations}[0]->{title} ne "common notation" ) {
 	$haveconfig++;
-	push( @ARGV, '--config', 'notes:' . $preferences{notation}->{file} );
+	push( @ARGV, '--config', $preferences{preset_notations}[0]->{file} );
     }
 
     push( @ARGV, '--noconfig' ) unless $haveconfig;
