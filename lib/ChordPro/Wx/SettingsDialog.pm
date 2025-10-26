@@ -320,7 +320,7 @@ method store_prefs() {
 	  [ $self->{ch_notation}->GetClientData($n) ];
     }
     else {
-       	$preferences{preset_notation} = [];
+       	$preferences{preset_notations} = [];
     }
 
     # Transpose.
