@@ -136,6 +136,7 @@ lib/ChordPro/res/config/chordpro.json
 lib/ChordPro/res/config/config.schema
 lib/ChordPro/res/config/config.tmpl
 lib/ChordPro/res/config/dark.json
+lib/ChordPro/res/config/diagramsright.json
 lib/ChordPro/res/config/guitar-br.json
 lib/ChordPro/res/config/guitar-ly.json
 lib/ChordPro/res/config/guitar.json
@@ -143,10 +144,13 @@ lib/ChordPro/res/config/guitar_latex.json
 lib/ChordPro/res/config/inline.json
 lib/ChordPro/res/config/keyboard.json
 lib/ChordPro/res/config/mandolin-ly.json
+lib/ChordPro/res/config/lyricsonly.json
 lib/ChordPro/res/config/modern1.json
 lib/ChordPro/res/config/modern2.json
 lib/ChordPro/res/config/modern3.json
+lib/ChordPro/res/config/musejazz.json
 lib/ChordPro/res/config/nashville.json
+lib/ChordPro/res/config/nodiagrams.json
 lib/ChordPro/res/config/notes/common.json
 lib/ChordPro/res/config/notes/dutch.json
 lib/ChordPro/res/config/notes/german.json
