@@ -69,13 +69,13 @@ ENV DOCKER_PACKAGED=1.00
 RUN chordpro --about
 
 FROM base AS chordpro-dev
+RUN apt-get update; apt-get install -y strace
 COPY chordpro-dev.tar.gz ./
 RUN mkdir ChordPro \
   && tar xf chordpro-dev.tar.gz -C ChordPro \
   && cd ChordPro \
   && perl Makefile.PL \
   && make resources && make && make install
-RUN apt-get update; apt-get install -y strace
 # Cleanup.
 RUN rm -fr .cpanminus
 
