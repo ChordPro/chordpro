@@ -4,6 +4,7 @@ config {
   type        : instrument
   title       : Guitar
   description : "Guitar, 6 strings, standard tuning, 400+ chords."
+  default     : true
 }
 instrument {
   description : "Guitar, 6 strings, standard tuning"

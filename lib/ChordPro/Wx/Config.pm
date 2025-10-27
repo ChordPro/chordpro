@@ -9,7 +9,7 @@ our %state;
 our %preferences;
 
 use Ref::Util qw( is_hashref is_arrayref );
-use List::Util qw( uniq any );
+use List::Util qw( uniq any first );
 
 use Exporter 'import';
 our @EXPORT = qw( %state %preferences );
@@ -56,7 +56,8 @@ my %prefs =
 
    # Presets.
    # Title as defined by or derived from the JSON file.
-   # When multiple presets are possible, a list of titles separated by TABs.
+   # When multiple presets are possible, a list of titles separated by TABs
+   # (which are imported as a []).
    # Note it is always a [] even when there's only one.
    # Every preset_xxx is a list of entries from $state{preset}{xxx}.
    preset_instruments => [],	# single
@@ -65,6 +66,8 @@ my %prefs =
    preset_notations   => [],	# single
    preset_tasks       => [],	# not used
 
+   # This one is slightly different, since it does not have configs associated.
+   preset_xcodes      => [],	# single
 
    # Custom config file.
    enable_configfile => 0,
@@ -123,7 +126,6 @@ my %prefs =
 
    # Transcode.
    enable_xcode	   => 0,
-   xcode	   => "",
 
    # PDF Viewer.
    enable_pdfviewer   => undef,
@@ -247,7 +249,7 @@ method Load :common {
 		}
 
 		# These are always returned as lists of hashes.
-		if ( $entry =~ m/^preset_(instruments|styles|stylemods|notations|tasks)/ ) {
+		if ( $entry =~ m/^preset_(instruments|styles|stylemods|notations|tasks|xcodes)/ ) {
 		    $preferences{$entry} =
 		      [ map { +{ title => lc($_) } } split( /\t+/, $value ) ];
 		}
@@ -376,7 +378,8 @@ method Store :common {
 		    }
 		    next;
 		}
-		if ( $k =~ /^preset_(instruments|styles|stylemods|notations)$/ ) {
+		if ( $k =~ /^preset_(instruments|styles|stylemods|notations|xcodes)$/ ) {
+		    die("ASSERT $k is array") unless is_arrayref($v);
 		    $v = join( "\t",
 			       sort( uniq( map { lc($_->{title}) } @$v ) ) )
 		      if @$v;
@@ -472,6 +475,7 @@ sub setup_styles( $refresh = 0 ) {
 		$meta{desc}        = $data->{config}->{description};
 		$meta{exclude_id}  = $data->{config}->{exclude_id};
 		$meta{preview}     = $data->{config}->{preview};
+		$meta{default}     = $data->{config}->{default};
 	    }
 	    else {
 		next if $preferences{skipoldcfg};
@@ -484,19 +488,19 @@ sub setup_styles( $refresh = 0 ) {
 		$meta{type} = $type;
 
 		if ( $type eq "style" ) {
-		    $styles{$meta{title}} = { %$_, %meta };
+		    $styles{lc $meta{title}} = { %$_, %meta };
 		}
 		elsif ( $type eq "stylemod" ) {
-		    $stylemods{$meta{title}} = { %$_, %meta };
+		    $stylemods{lc $meta{title}} = { %$_, %meta };
 		}
 		elsif ( $type eq "instrument" ) {
-		    $instruments{$meta{title}} = { %$_, %meta };
+		    $instruments{lc $meta{title}} = { %$_, %meta };
 		}
 		elsif ( $type eq "task" ) {
-		    $tasks{$meta{title}} = { %$_, %meta };
+		    $tasks{lc $meta{title}} = { %$_, %meta };
 		}
 		elsif ( $type eq "unknown" ) {
-		    $stylemods{$meta{title}} = { %$_, %meta };
+		    $stylemods{lc $meta{title}} = { %$_, %meta };
 		}
 	    }
 	}
@@ -520,7 +524,8 @@ sub setup_styles( $refresh = 0 ) {
 #    }
 
     # Associate preset names with actual config files.
-    assoc_presets($_) for qw( instruments styles stylemods notations );
+    assoc_presets($_) for qw( instruments styles stylemods );
+    assoc_notations($_) for qw( notations xcodes );
 
 #    use DDP; warn np $state{presets}, as => "presets";
 
@@ -576,6 +581,38 @@ sub assoc_presets( $preset ) {
       for @{$preferences{"preset_$preset"}};
 }
 
+sub assoc_notations( $preset ) {
+    my $args = $preferences{"preset_$preset"};
+    my $list = $state{presets}{notations};
+    my $found;
+
+    0 and warn("assoc: $preset\n");
+
+    $preferences{"preset_$preset"} =
+      [ first { $_->{default} } values %$list ];
+
+    for ( values %$list ) {
+	my $looking_for = lc($_->{title});
+	0 and warn("assoc: looking for $preset ($looking_for)\n");
+	for my $v ( @$args ) {
+	    my $have = $v->{title};
+	    0 and warn("assoc: try $have <> $looking_for\n");
+	    if ( $have eq $looking_for ) {
+		$preferences{"preset_$preset"} = [ $_ ];
+		$found++;
+		last;
+	    }
+	}
+	last if $found;
+    }
+
+    return;
+    # use DDP; p $preferences{"preset_$preset"};
+    warn("Presets for $preset\n");
+    warn( sprintf("  %-6s  %s\n", $_->{src}, $_->{title} ) )
+      for @{$preferences{"preset_$preset"}};
+}
+
 # Fetch available tasks. Called by setup_presets.
 sub _add_tasks( $tasks ) {
 
@@ -618,7 +655,7 @@ sub _add_tasks( $tasks ) {
 		$meta{desc}  = $data->{config}->{description};
 		for my $type ( @$types ) {
 		    next unless $type eq "task";
-		    $tasks->{$meta{title}} = { %$_, %meta };
+		    $tasks->{lc $meta{title}} = { %$_, %meta };
 		}
 	    }
 	    else {
@@ -633,7 +670,7 @@ sub _add_tasks( $tasks ) {
 		    $desc = $1;
 		}
 		$meta{title} = $meta{desc}  = $desc;
-		$tasks->{$desc} = { %$_, %meta };
+		$tasks->{lc $desc} = { %$_, %meta };
 	    }
 	}
     }
@@ -656,6 +693,7 @@ sub _add_notations( $notes ) {
     #   for @cfglibs;
 
     my $findopts = { filter => qr/^.*\.json$/i, recurse => 0 };
+    delete $state{default_notation};
 
     for ( @cfglibs ) {
 	my $cfglib = $_;
@@ -676,16 +714,21 @@ sub _add_notations( $notes ) {
 
 	    my %meta = ( src => $src, file => $file );
 	    $types = [ $types ] unless is_arrayref($types);
-	    $meta{title}  = $data->{config}->{title};
-	    $meta{desc}   = $data->{config}->{description};
-	    $meta{system} = $data->{notes}->{system};
+	    $meta{title}   = $data->{config}->{title};
+	    $meta{desc}    = $data->{config}->{description};
+	    $meta{default} = $data->{config}->{default};
+	    $meta{system}  = $data->{notes}->{system};
 	    for my $type ( @$types ) {
 		next unless $type eq "notes";
-		$notes->{$meta{title}} = { %$_, %meta };
+		$notes->{lc $meta{title}} = { %$_, %meta };
+		$state{default_notation} =  { %$_, %meta }
+		  if $meta{default};
 	    }
 	}
     }
     # use DDP; p $notes, as => "notes";
+    $state{default_notation} or
+      die("ASSERT FAIL: No default notation found\n");
 }
 
 sub _neat {

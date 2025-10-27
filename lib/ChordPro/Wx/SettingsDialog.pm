@@ -16,6 +16,7 @@ use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
 use File::Basename;
 use Ref::Util qw( is_arrayref );
+use List::Util qw( first );
 
 BUILD ( $parent, $id, $title ) {
     $self->refresh;
@@ -158,13 +159,15 @@ method enablecustom() {
 			  $state{presets}{notations}->{$_},
 			);
 	    $check = $n
-	      if @{$preferences{preset_notations}}
-	      && lc($state{presets}{notations}->{$_}->{title}) eq lc($preferences{preset_notations}[0]->{title});
+	      if $_ eq lc($preferences{preset_notations}[0]->{title});
 	    $check //= $n
-	      if lc($state{presets}{notations}->{$_}->{title}) eq "common notation";
+	      if $state{presets}{notations}->{$_}->{default};
 	    $n++;
 	}
 
+	unless ( defined $check ) {
+	    use DDP; p $state{presets}{notations}, as => "Missing default in notations";
+	}
 	$ctl->SetSelection($check);
     }
 
@@ -179,9 +182,9 @@ method enablecustom() {
 			  $state{presets}{notations}->{$_},
 			);
 	    $check = $n
-	      if lc($state{presets}{notations}->{$_}->{title}) eq lc($preferences{xcode});
+	      if $_ eq lc($preferences{preset_xcodes}[0]->{title});
 	    $check //= $n
-	      if lc($state{presets}{notations}->{$_}->{title}) eq "common notation";
+	      if $state{presets}{notations}->{$_}->{default};
 	    $n++;
 	}
 
@@ -338,11 +341,12 @@ method store_prefs() {
     $preferences{enable_xcode} = $self->{cb_xcode}->IsChecked;
     $n = $self->{ch_xcode}->GetSelection;
     if ( $n > 0 ) {
-	$preferences{xcode} =
-	  $self->{ch_xcode}->GetClientData($n);
+	$preferences{preset_xcodes} =
+	  [ $self->{ch_xcode}->GetClientData($n) ];
     }
     else {
-       	$preferences{xcode} = "";
+       	$preferences{preset_xcodes} =
+	  [ first { $_->{default} } values %{$state{presets}{notations}} ];
     }
 
     # PDF Viewer.

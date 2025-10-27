@@ -11,6 +11,8 @@ config {
     type :        notes
     title :       "Common Notation"
     description : "C, D, E, F, G, A, B"
+    // Only one notes config should be 'default'.
+    default :     true
 }
 
 // Note (chord root) names.

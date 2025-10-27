@@ -289,23 +289,6 @@ method init_theme() {
 
 method get_preferences() {
 
-    # Find transcode setting.
-    my $p = lc $preferences{xcode};
-    if ( $p ) {
-	if ( $p eq "-----" ) {
-	    $preferences{enable_xcode} = 0;
-	}
-	else {
-	    my $n = "";
-	    for ( @{ $state{notations} } ) {
-		next unless $_ eq $p;
-		$n = $p;
-		last;
-	    }
-	    $p = $n;
-	}
-    }
-    $preferences{xcode} = $p;
     restorewinpos( $self, "main" );
     $self->Show(1);
 }

@@ -3,7 +3,7 @@
 config {
     type        : stylemod
     title       : "Lyrics Only"
-    description : "Lyrics only, no chords, no diagerams."
+    description : "Lyrics only, no chords, no diagrams."
     exclude_id  : diagramplacement
 }
 

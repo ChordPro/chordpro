@@ -18,6 +18,10 @@ config {
     // Exclusive control.
     // If multiple configs have the same exclude_id, only one will be used.
     exclude_id: false
+
+    // True if this is the default config for a specific type.
+    // Do not use unless you know what you are doing!
+    default: true
 }
 
 // Includes are processed first, before the rest of

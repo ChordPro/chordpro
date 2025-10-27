@@ -88,6 +88,8 @@ method preview( $args, %opts ) {
 
     for my $preset ( qw( instruments styles stylemods ) ) {
 	for my $p ( @{$preferences{"preset_$preset"}} ) {
+	    next if $p->{default};
+	    next unless defined $p->{file};
 	    push( @ARGV, "--config", $p->{file} );
 	    $haveconfig++;
 	}
@@ -103,17 +105,21 @@ method preview( $args, %opts ) {
 	$ENV{CHORDPRO_LIB} = $preferences{customlib};
     }
     CP->setup_resdirs;
-    if ( $preferences{enable_xcode} && $preferences{xcode} ) {
-	$haveconfig++;
-	push( @ARGV, '--transcode',
-	      $state{presets}{notations}->{lc $preferences{xcode}}->{system} );
+
+    if ( $preferences{enable_xcode} ) {
+	my $c = $preferences{preset_notations}[0];
+	unless ( $c->{default} ) {
+	    $haveconfig++;
+	    push( @ARGV, '--transcode', $c->{system} );
+	}
     }
 
-    if ( $preferences{preset_notations}
-	 && @{$preferences{preset_notations}}
-	 && $preferences{preset_notations}[0]->{title} ne "common notation" ) {
-	$haveconfig++;
-	push( @ARGV, '--config', $preferences{preset_notations}[0]->{file} );
+    if ( $preferences{preset_notations} ) {
+	my $c = $preferences{preset_notations}[0];
+	unless ( $c->{default} ) {
+	    $haveconfig++;
+	    push( @ARGV, '--config', $c->{file} );
+	}
     }
 
     push( @ARGV, '--noconfig' ) unless $haveconfig;
