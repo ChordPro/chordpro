@@ -107,7 +107,7 @@ method preview( $args, %opts ) {
     CP->setup_resdirs;
 
     if ( $preferences{enable_xcode} ) {
-	my $c = $preferences{preset_notations}[0];
+	my $c = $preferences{preset_xcodes}[0];
 	unless ( $c->{default} ) {
 	    $haveconfig++;
 	    push( @ARGV, '--transcode', $c->{system} );

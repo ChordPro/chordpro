@@ -340,13 +340,12 @@ method store_prefs() {
     # Transcode.
     $preferences{enable_xcode} = $self->{cb_xcode}->IsChecked;
     $n = $self->{ch_xcode}->GetSelection;
-    if ( $n > 0 ) {
+    if ( $n >= 0 ) {
 	$preferences{preset_xcodes} =
 	  [ $self->{ch_xcode}->GetClientData($n) ];
     }
     else {
-       	$preferences{preset_xcodes} =
-	  [ first { $_->{default} } values %{$state{presets}{notations}} ];
+       	$preferences{preset_xcodes} = [ $state{default_notation} ];
     }
 
     # PDF Viewer.

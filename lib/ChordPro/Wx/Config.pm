@@ -588,8 +588,7 @@ sub assoc_notations( $preset ) {
 
     0 and warn("assoc: $preset\n");
 
-    $preferences{"preset_$preset"} =
-      [ first { $_->{default} } values %$list ];
+    $preferences{"preset_$preset"} = [ $state{default_notation} ];
 
     for ( values %$list ) {
 	my $looking_for = lc($_->{title});
@@ -607,7 +606,8 @@ sub assoc_notations( $preset ) {
     }
 
     return;
-    # use DDP; p $preferences{"preset_$preset"};
+    # use DDP; p $list, as => "list";
+    # use DDP; p $preferences{"preset_$preset"}, as => "select";
     warn("Presets for $preset\n");
     warn( sprintf("  %-6s  %s\n", $_->{src}, $_->{title} ) )
       for @{$preferences{"preset_$preset"}};
