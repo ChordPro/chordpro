@@ -1,0 +1,12 @@
+// Configuration for ChordPro.
+
+config {
+    type        : stylemod
+    title       : "MuseJazz font"
+    description : "Use the MuseJazzText font for chords"
+}
+
+pdf.fonts {
+    chord.description: "musejazztext 10"
+    annotation.description: "musejazztext 10"
+}
