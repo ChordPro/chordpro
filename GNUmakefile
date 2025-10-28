@@ -197,12 +197,12 @@ appimage : _akit1 _akit _akit2
 
 _akit :
 	${MAKE} to_mac MACHOST=${LTS}
-	ssh ${LTS} make -C Documents/ChordPro/pp/${LTS}
-	scp ${LTS}:Documents/ChordPro/pp/${LTS}/ChordPro-\*.AppImage ${HOME}/tmp/
+	ssh ${LTS} make -C Documents/ChordPro/pp/ubuntu-lts
+	scp ${LTS}:Documents/ChordPro/pp/ubuntu-lts/ChordPro-\*.AppImage ${HOME}/tmp/
 
 _akit1 :
 	-VBoxManage startvm ${LTSVM} --type headless
-	ssh root@${LTS} ntpdate -b ntp.squirrel.nl
+	ssh ${LTS} sudo ntpdate -b ntp.squirrel.nl
 
 _akit2 :
 	VBoxManage controlvm ${LTSVM} poweroff

@@ -4,8 +4,8 @@
 
 # Author          : Johan Vromans
 # Last Modified By: Johan Vromans
-# Last Modified On: Tue Oct 28 19:20:06 2025
-# Update Count    : 85
+# Last Modified On: Tue Oct 28 21:05:17 2025
+# Update Count    : 86
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -118,7 +118,7 @@ for my $lib ( sort Alien::wxWidgets->shared_libraries ) {
 
 print("\n# And more...\n");
 
-for ( qw( deflate jbig jpeg libpng16 SDL2-2.0 tiff webp ) ) {
+for ( qw( deflate jbig jpeg libpng16.so.16 SDL2-2.0 tiff webp ) ) {
     print("-l $_\n");
 }
 
