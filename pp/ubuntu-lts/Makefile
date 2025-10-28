@@ -24,6 +24,9 @@ chordpro : chordpro.pp ${COMMON}/chordpro.pp
 wxchordpro : wxchordpro.pp ${COMMON}/chordpro.pp ${COMMON}/wxchordpro.pp
 	${PP} --output=wxchordpro @wxchordpro.pp ${SCRIPT}/wxchordpro.pl
 
+wxchordpro.pp : ../common/libtool.pl
+	perl $< -o $@
+
 clean ::
 	rm -f *.pp.deps *~ chordpro wxchordpro
 

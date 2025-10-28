@@ -9,6 +9,7 @@ pp/common/PAR/Filter/Null.pm
 pp/common/PDF_API2_Bundle.pm
 pp/common/Text_Layout_Bundle.pm
 pp/common/chordpro.pp
+pp/common/libtool.pl
 pp/common/wxchordpro.pp
 pp/linux/AppRun
 pp/linux/Makefile
@@ -34,7 +35,6 @@ pp/pp2ppl.pl
 pp/ubuntu-lts/chordpro.pp
 pp/ubuntu-lts/Makefile
 pp/ubuntu-lts/README
-pp/ubuntu-lts/wxchordpro.pp
 pp/windows/GNUmakefile
 pp/windows/WebView2Loader.dll
 pp/windows/chordpro.pp
