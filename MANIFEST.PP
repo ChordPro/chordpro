@@ -16,7 +16,7 @@ pp/macos/create-dmg
 pp/macos/dndhandler.swift
 pp/macos/Info.plist
 pp/macos/Install.zsh
-pp/macos/Makefile
+pp/macos/GNUmakefile
 pp/macos/PkgInfo
 pp/macos/README.html
 pp/macos/libtool.pl
