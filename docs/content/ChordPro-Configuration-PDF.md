@@ -382,6 +382,7 @@ Properties for the lines of grid sections.
         color : foreground-medium
       }
       show    : true
+	  stretch : 0.825
       symbols.color : blue
       volta {
         span  : 0.7

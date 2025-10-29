@@ -39,6 +39,7 @@
     - Add task/stylemods for Spread Pages view.
     - (HTML) Annotations have a distinct td class.
     - Grid bar symbols are better aligned.
+    - Grid bar lines can be stretched vertically.
     - scripts/ttc can be used to show the contents of TTF (font
       collection) files.
     - scripts/rrjson can be used to convert from/to miscellaneous JSON

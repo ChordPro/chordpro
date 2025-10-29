@@ -736,6 +736,9 @@
             // Show grid context in output.
             show : true
     
+    	// Stretch the bar lines vertically.
+    	stretch : 0.825
+    
             // Colour of special symbols.
             symbols.color : blue
     

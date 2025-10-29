@@ -8,6 +8,7 @@ use Carp;
 use feature 'state';
 use feature 'signatures';
 no warnings 'experimental::signatures';
+use ChordPro::Utils qw( is_ttrue );
 
 sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 
@@ -247,15 +248,9 @@ sub is_bar( $elt ) {
 
 # Location and size of vertical bars
 sub yh( $y, $h, $pr ) {
-    if ( 0 ) {
-	# This makes the vertical bars continuous, but I'm not sure
-	# this is an improvement.
-	return ( $y + $h - ( $pr->{ps}->{spacing}->{grid} - 1) / 2,
-		 $h * $pr->{ps}->{spacing}->{grid} );
-    }
-    else {
-	return ( $y + 0.9*$h, $h );
-    }
+    my $d = $pr->{ps}->{grids}->{stretch} || 0.825;
+    return ( $y + 0.9 * $h,
+	     $h * $d * $pr->{ps}->{spacing}->{grid} );
 }
 
 sub pr_cellline( $x, $y, $lcr, $sz, $w, $col, $pr ) {
