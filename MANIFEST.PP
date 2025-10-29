@@ -1,9 +1,5 @@
 lib/ChordPro/Config/Data.pm
 pp/README
-pp/debian/chordpro.pp
-pp/debian/wxchordpro.pp
-pp/debian/Makefile
-pp/debian/README
 pp/common/ChordPro_Bundle.pm
 pp/common/PAR/Filter/Null.pm
 pp/common/PDF_API2_Bundle.pm
@@ -11,11 +7,7 @@ pp/common/Text_Layout_Bundle.pm
 pp/common/chordpro.pp
 pp/common/libtool.pl
 pp/common/wxchordpro.pp
-pp/linux/AppRun
-pp/linux/Makefile
-pp/linux/chordpro.pp
 pp/linux/ppl.c
-pp/linux/wxchordpro.pp
 pp/macos/chordpro-dmg.icns
 pp/macos/chordpro-doc.icns
 pp/macos/chordpro.icns
@@ -32,9 +24,10 @@ pp/macos/pp.pl
 pp/macos/reloc.pl
 pp/macos/vfix.pl
 pp/pp2ppl.pl
-pp/ubuntu-lts/chordpro.pp
-pp/ubuntu-lts/Makefile
-pp/ubuntu-lts/README
+pp/appimage/AppRun
+pp/appimage/chordpro.pp
+pp/appimage/GNUmakefile
+pp/appimage/README.md
 pp/windows/GNUmakefile
 pp/windows/WebView2Loader.dll
 pp/windows/chordpro.pp

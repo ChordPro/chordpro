@@ -169,8 +169,6 @@ wkit : _wkit1 _wkit _wkiti _wkit2
 
 _wkit :
 	${MAKE} to_win
-	ssh ${WIN} 'cd ${WINDIR} ; perl Makefile.PL'
-	ssh ${WIN} gmake -C ${WINDIR} resources
 	ssh ${WIN} gmake -C ${WINDIR}/pp/windows
 	cp ${WINDST}/pp/windows/ChordPro-Installer*.exe ${HOME}/tmp/
 
@@ -190,19 +188,20 @@ _wkit2 :
 	VBoxManage controlvm ${WINVM} poweroff
 	VBoxManage snapshot ${WINVM} restorecurrent
 
-LTS   := ubuntu-lts
-LTSVM := "Ubuntu 22.04 LTS"
+LTS     := 22
+LTSHOST := ubuntu${LTS}
+LTSVM   := "Ubuntu ${LTS}.04 LTS"
 
 appimage : _akit1 _akit _akit2
 
 _akit :
-	${MAKE} to_mac MACHOST=${LTS}
-	ssh ${LTS} make -C Documents/ChordPro/pp/ubuntu-lts
-	scp ${LTS}:Documents/ChordPro/pp/ubuntu-lts/ChordPro-\*.AppImage ${HOME}/tmp/
+	${MAKE} to_mac MACHOST=${LTSHOST}
+	ssh ${LTSHOST} make -C Documents/ChordPro/pp/appimage
+	scp ${LTSHOST}:Documents/ChordPro/pp/appimage/ChordPro-\*.AppImage ${HOME}/tmp/
 
 _akit1 :
 	-VBoxManage startvm ${LTSVM} --type headless
-	ssh ${LTS} sudo ntpdate -b ntp.squirrel.nl
+	ssh ${LTSHOST} sudo ntpdate -b ntp.squirrel.nl
 
 _akit2 :
 	VBoxManage controlvm ${LTSVM} poweroff
