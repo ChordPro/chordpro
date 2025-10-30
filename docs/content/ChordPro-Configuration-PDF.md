@@ -50,20 +50,6 @@ of the page in _PDF units_ (_DTP points_, _pt_, 1/72 inch).
     papersize : a4
     // Same as: papersize: [ 595, 842 ]
 
-## Page layout
-
-Advisory open mode for PDF viewers.
-
-Can be one of the following: `single_page` (default), `one_column`,
-`two_column_left`, `two_column_right`, `two_page_left`, `two_page_right`.
-
-    page_layout: single_page
-
-**Note:** Many PDF viewers do not support this. The ChordPro GUI
-previewer supports 'No Spreads' (`single_page`, `one_column`), 'Odd
-Spreads' (`two_column_left`, `two_page_left`) and `Even Spreads`
-(`two_column_right`, `two_page_right`).
-
 ## Theme
 
 These settings can be used to control the foreground and

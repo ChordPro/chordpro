@@ -2453,13 +2453,6 @@
                     }
                   ]
                 },
-		"page_layout": {
-		  "description": "Page open mode (for viewers).\nCan be one of the following:\n\"single_page\" (default), \"one_column\", \"two_column_left\",\n\"two_column_right\", \"two_page_left\", \"two_page_right\".\nNote that many PDF viewers do not support this.",
-                  "type": "string",
-                    "enum": ["single_page", "one_column", "two_column_left", "two_column_right", "two_page_left", "two_page_right"],
-                  "default": false,
-                  "examples": ["single_page", "two_page_left"]
-		},
                 "papersize": {
                   "description": "Output paper size.\nThe size can be specified either as the name of a known page size, e.g. \"a4\", or as a 2-element list containing the width and height of the page in PDF units (DTP points, pt, 1/72 inch).",
                   "oneOf": [
