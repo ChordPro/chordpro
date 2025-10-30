@@ -278,7 +278,7 @@ sub json_load( $json, $source = "<builtin>" ) {
 	state $pp = JSON::Relaxed::Parser->new( croak_on_error => 0,
 						strict => 0,
 						prp => 1 );
-	my $data = $pp->decode($json);
+	my $data = $pp->decode($json."\n");
 	return $data unless $pp->is_error;
 	$source .= ": " if $source;
 	die("${source}JSON error: " . $pp->err_msg . "\n");
@@ -290,7 +290,7 @@ sub json_load( $json, $source = "<builtin>" ) {
 	$json =~ s/"\s*\\\n\s*"//g;
 
 	$pp->relaxed if $info->{relaxed};
-	$pp->decode($json);
+	$pp->decode($json."\n");
     }
 }
 
