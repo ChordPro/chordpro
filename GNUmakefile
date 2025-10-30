@@ -1,9 +1,5 @@
 #! /bin/make -f
 
-# Windows 10, for Windows installer builds.
-WINVM := Win10ProClassic
-WINVM := Win10Pro
-
 ################ Pass-through ################
 
 .PHONY : all
@@ -53,14 +49,10 @@ to_tmp : resources
 	done
 
 # Windows 10, for Windows installer builds.
+WINVM  := Win10Pro
 WINDIR := /Users/Johan/Documents/${PROJECT}
-ifeq (${WINVM},Win10ProClassic)
-WIN    := w10c
-WINMNT := /mnt/c2
-else
 WIN    := w10
 WINMNT := /mnt/c
-endif
 WINDST := ${WINMNT}/${WINDIR}
 
 to_win : resources
