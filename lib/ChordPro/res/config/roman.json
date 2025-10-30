@@ -7,8 +7,8 @@
 config {
     type        : stylemod
     title       : "Roman"
-    description : "Additional support for Roman chords."
-    omit        : true
+    description : "Additional support for Roman chords.\n" \
+     		  "Note that you must also enable Roman notation on the Notations tab,"
 }
 
 diagrams.show : none

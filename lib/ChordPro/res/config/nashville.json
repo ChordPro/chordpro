@@ -7,8 +7,8 @@
 config {
     type        : stylemod
     title       : "Nashville"
-    description : "Additional support for Nashville chords."
-    omit        : true
+    description : "Additional support for Nashville chords.\n" \
+     		  "Note that you must also enable Nashville notation on the Notations tab,"
 }
 
 diagrams.show : none
