@@ -476,6 +476,9 @@
         // Output paper size, e.g. "a4" or [595,842].
         papersize : a4
     
+        // For future use.
+        page_layout : false
+    
         // Theme
         theme {
     
