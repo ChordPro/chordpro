@@ -188,15 +188,14 @@ _wkit_stopvm :
 	VBoxManage controlvm ${WINVM} poweroff
 	VBoxManage snapshot ${WINVM} restorecurrent
 
-
+# Host must use .zshenv to set the correct path.
 MACVM := "MacOS"
 
 mkit : _mkit_startvm _mkit _mkit_stopvm
 
 _mkit :
 	${MAKE} to_mac
-	ssh ${MACHOST} env PATH=/usr/local/bin:\$$PATH \
-	    make -C Documents/${PROJECT}/pp/macos
+	ssh ${MACHOST} make -C Documents/${PROJECT}/pp/macos
 	scp ${MACDST}/pp/macos/ChordPro-*.dmg ${HOME}/tmp/
 
 _mkit_startvm :
