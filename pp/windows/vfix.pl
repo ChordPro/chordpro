@@ -6,7 +6,7 @@ use lib "../../lib";
 use ChordPro::Version;
 my $vv = $ChordPro::Version::VERSION;
 
-my ( $maj, $min, $aux ) = $vv =~ /^(\d+)\.(\d+)(?:_(\d+))?/;
+my ( $maj, $min, $aux ) = $vv =~ /^(\d+)\.(\d+)(?:[._](\d+))?/;
 
 @ARGV = qw( innosetup.iss ) unless @ARGV;
 
@@ -27,7 +27,7 @@ if ( $ARGV[0] =~ /\.iss$/ ) {
 	}
 	s/(^\#\s+define\s+BuildNum\s+)(\d+).*
 	 /sprintf("%s%d", $1, $resetbuildnum ? 1 : 1+$2)
-	   /ex;
+	   /ex && warn($_);
     }
     continue {
 	print;
@@ -47,10 +47,12 @@ elsif ( $ARGV[0] =~ /\.rc$/ ) {
 	    }
 	    $_ = sprintf("%s%d,%d,%d,%d\n",
 			 $1, $maj, $min, $aux//0, $resetbuildnum ? 1 : 1+$5);
+	    warn($_);
 	    next;
 	}
 	if ( /^(\s*VALUE\s+"FileVersion",\s+)/ ) {
 	    $_ = "$1\"$vv\"\n";
+	    warn($_);
 	    next;
 	}
 	if ( /^(\s*VALUE\s+"ProductVersion",\s+)/ ) {

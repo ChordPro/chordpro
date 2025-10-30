@@ -102,3 +102,8 @@ iss : ${DEST}\wxchordpro.exe innosetup.iss
 
 clean ::
 	-rmdir /q/s ${DEST}
+
+bump ::
+	perl vfix.pl chordpro.rc
+	perl vfix.pl wxchordpro.rc
+	perl vfix.pl
