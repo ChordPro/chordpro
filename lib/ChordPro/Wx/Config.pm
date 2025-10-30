@@ -411,12 +411,11 @@ sub setup_styles( $refresh = 0 ) {
 
     my $findopts = { filter => qr/^.*\.json$/i, recurse => 0 };
 
-    local $ENV{CHORDPRO_LIB} =
-      $preferences{enable_customlib} ? $preferences{customlib} : "";
+    local $ENV{CHORDPRO_LIB};
     CP->setup_resdirs;
 
     # Collect standard style files (presets).
-    my @cfglibs = @{ CP->findresdirs("config") };
+    my @cfglibs = @{ CP->findresdirs("") };
     # use DDP; p @cfglibs, as => "cfglibs (for configs, raw)";
 
     # At this point, we can have one or two libs. The last one is
@@ -424,22 +423,21 @@ sub setup_styles( $refresh = 0 ) {
     # If there are two, the first one is the user config lib.
     # To this/these we prepend the custom lib.
     my @c;
-    if ( @cfglibs > 2 ) {
-	# Split off custom config lib.
-	my $c = shift(@cfglibs);
-	# Push back only when !skipping.
-	push( @c, { src => "custom", lib => $c } )
-	  if $preferences{enable_customlib};
+    if ( $preferences{enable_customlib} && $preferences{customlib} ) {
+	push( @c, { src => "custom",
+		    lib => fn_catfile( $preferences{customlib}, "config" ) } );
     }
     if ( @cfglibs > 1) {
 	# Split off user config lib.
 	my $u = shift(@cfglibs);
 	# Push back only when !skipping.
-	push( @c, { src => "user", lib => $u } )
+	push( @c, { src => "user",
+		    lib => fn_catfile( $u, "config" ) } )
 	  if !$preferences{skipstdcfg};
     }
     # Add ChordPro lib.
-    push( @c, { src => "std", lib => $cfglibs[-1] } );
+    push( @c, { src => "std",
+		lib => fn_catfile( $cfglibs[-1], "config" ) } );
     $state{cfglibs} = \@c;
     # use DDP; p @c, as => "cfglibs (for configs)";
     # warn("Config libs for configs\n");
@@ -615,7 +613,6 @@ sub assoc_notations( $preset ) {
 
 # Fetch available tasks. Called by setup_presets.
 sub _add_tasks( $tasks ) {
-
     my @cfglibs;
     for ( my $i = 0; $i < @{ $state{cfglibs} }; $i++ ) {
 	my $lib = $state{cfglibs}->[$i];
@@ -639,7 +636,7 @@ sub _add_tasks( $tasks ) {
 
 	foreach ( @$entries ) {
 	    my $file = fn_catfile( $cfglib, $_->{name} );
-#	    warn("try $file\n");
+	    # warn("try $file\n");
 	    next unless fs_test( s => $file );
 
 	    my $blob = fs_blob( $file );
