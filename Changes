@@ -1,8 +1,6 @@
-6.089.2
+6.090.0
 
     !Highlights
-
-    !Other improvements
 
     - Configuration files can have a distinguishing type.
 
@@ -12,13 +10,15 @@
       config. Currently recognized types are: 'instrument', 'style',
       'stylemod' and 'task'.
 
-      Configuration file types are mostly used in the GUI. All
+      Configuration file types are only used in the GUI. All
       packaged config files are modernized to use these types.
+      Some no longer relevant stylemods have been removed and
+      new ones added.
 
     !GUI Improvements
 
     - The settings dialog has been reworked to support configuration
-      file types. The settings dialog can make use of some more properties:
+      file types. The settings dialog can make use of config properties:
 
       config.title  -- a string to show in selections
       config.description -- a descriptive text for this config
@@ -31,12 +31,12 @@
       Standard Configs' has been renamed to 'Use Standard Configs'.
       Its meaning is inversed.
 
+    - Breaking: Selected presets for configurations are lost when
+      migrating to this new version. Apologies for the inconvenience.
+
     !Other Improvements
 
     - Improve break handling in ToC. Fixes issue #606.
-    - Add pdf.page_layout to request a particular document view mode, e.g.
-      "two_page_left". Note that not all PDF viewers support this.
-    - Add task/stylemods for Spread Pages view.
     - (HTML) Annotations have a distinct td class.
     - Grid bar symbols are better aligned.
     - Grid bar lines can be stretched vertically.
@@ -50,7 +50,9 @@
     - Fix E9 and F9 chords. Thanks to Eric Bell.
     - Remove colons from --define in docs and pod.
     - Fix issue 599.
-
+    - Fix problem loading JSON files that end with a comment line that has
+      no line ending.
+    
 6.080.1	2025-08-28
 
     - Reworded symbols insert dialog.
