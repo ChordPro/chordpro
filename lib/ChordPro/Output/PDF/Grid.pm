@@ -8,6 +8,7 @@ use Carp;
 use feature 'state';
 use feature 'signatures';
 no warnings 'experimental::signatures';
+use ChordPro::Utils qw( is_ttrue );
 
 sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 
@@ -152,6 +153,9 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 	    elsif ( $t eq " %" ) { # repeat2Bars
 		pr_repeat( $x+$sz/2, $y, 0, $sz, $col, $pr );
 	    }
+	    elsif ( $t eq " %%" ) { # repeat2Bars
+		pr_repeat2( $x+$sz/2, $y, 0, $sz, $col, $pr );
+	    }
 	    else {
 		die($t);	# can't happen
 	    }
@@ -168,7 +172,7 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 		    && !is_bar($tokens[$k]) ) {
 		$k++;
 	    }
-	    $tokens[$k] = { symbol => " %", class => "bar" };
+	    $tokens[$k] = { symbol => " %%", class => "bar" };
 	    $x += $cellwidth;
 	    $needcell = 0;
 	    next;
@@ -242,29 +246,39 @@ sub is_bar( $elt ) {
     exists( $elt->{class} ) && $elt->{class} eq "bar";
 }
 
+# Location and size of vertical bars
+sub yh( $y, $h, $pr ) {
+    my $d = $pr->{ps}->{grids}->{stretch} || 0.825;
+    return ( $y + 0.9 * $h,
+	     $h * $d * $pr->{ps}->{spacing}->{grid} );
+}
+
 sub pr_cellline( $x, $y, $lcr, $sz, $w, $col, $pr ) {
-    $x -= $w / 2 * ($lcr + 1);
-    $pr->vline( $x, $y+0.9*$sz, $sz, $w, $col );
+    $x -= $w / 2;
+    $pr->vline( $x, yh($y,$sz,$pr), $w, $col );
 }
 
 sub pr_barline( $x, $y, $lcr, $sz, $col, $pr ) {
     my $w = $sz / 10;		# glyph width = $w
-    $x -= $w / 2 * ($lcr + 1);
-    $pr->vline( $x, $y+0.9*$sz, $sz, $w, $col );
+    $x -= $w / 2;
+    $x += $w if $lcr < 0;
+    $pr->vline( $x, yh($y,$sz,$pr), $w, $col );
 }
 
 sub pr_dbarline( $x, $y, $lcr, $sz, $col, $pr ) {
     my $w = $sz / 10;		# glyph width = 3 * $w
-    $x -= 1.5 * $w * ($lcr + 1);
-    $pr->vline( $x, $y+0.9*$sz, $sz, $w, $col );
+    $x -= 0.5 + $w * ($lcr + 1);
+#    $x -= $w * (( 0.5, 1.5, 2.5 )[1+$lcr]);
+    $pr->vline( $x, yh($y,$sz,$pr), $w, $col );
     $x += 2 * $w;
-    $pr->vline( $x, $y+0.9*$sz, $sz, $w, $col );
+    $pr->vline( $x, yh($y,$sz,$pr), $w, $col );
 }
 
 sub pr_rptstart( $x, $y, $lcr, $sz, $col, $pr ) {
     my $w = $sz / 10;		# glyph width = 3 * $w
-    $x -= 1.5 * $w * ($lcr + 1);
-    $pr->vline( $x, $y+0.9*$sz, $sz, $w, $col );
+    $x -= 0.5;
+    $x += $w if $lcr < 0;
+    $pr->vline( $x, yh($y,$sz,$pr), $w, $col );
     $x += 2 * $w;
     $y += 0.55 * $sz;
     $pr->line( $x, $y, $x, $y+$w, $w, $col );
@@ -275,8 +289,9 @@ sub pr_rptstart( $x, $y, $lcr, $sz, $col, $pr ) {
 sub pr_rptvolta( $x, $y, $lcr, $sz, $symcol, $pr, $token ) {
     my $w = $sz / 10;		# glyph width = 3 * $w
     my $col = $pr->{ps}->{grids}->{volta}->{color};
-    my $ret = $x -= 1.5 * $w * ($lcr + 1);
-    $pr->vline( $x, $y+0.9*$sz, $sz, $w, $col );
+    $x += $w if $lcr < 0;
+    my $ret = $x -= $w / 2;
+    $pr->vline( $x, yh($y,$sz,$pr), $w, $col );
     $x += 2 * $w;
     my $font = $pr->{ps}->{fonts}->{grid};
     $pr->setfont($font);
@@ -293,8 +308,9 @@ sub pr_voltafinish( $x, $y, $width, $sz, $symcol, $pr ) {
 
 sub pr_rptend( $x, $y, $lcr, $sz, $col, $pr ) {
     my $w = $sz / 10;		# glyph width = 3 * $w
-    $x -= 1.5 * $w * ($lcr + 1);
-    $pr->vline( $x + 2*$w, $y+0.9*$sz, $sz, $w, $col );
+    $x -= 2.5 * $w if $lcr >= 0;
+    $x += $w if $lcr < 0;
+    $pr->vline( $x + 2*$w, yh($y,$sz,$pr), $w, $col );
     $y += 0.55 * $sz;
     $pr->line( $x, $y, $x, $y+$w, $w, $col );
     $y -= 0.4 * $sz;
@@ -303,8 +319,10 @@ sub pr_rptend( $x, $y, $lcr, $sz, $col, $pr ) {
 
 sub pr_rptendstart( $x, $y, $lcr, $sz, $col, $pr ) {
     my $w = $sz / 10;		# glyph width = 5 * $w
+    $lcr = 0;			# center
     $x -= 2.5 * $w * ($lcr + 1);
-    $pr->vline( $x + 2*$w, $y+0.9*$sz, $sz, $w, $col );
+    $x += $w if $lcr < 0;
+    $pr->vline( $x + 2*$w, yh($y,$sz,$pr), $w, $col );
     $y += 0.55 * $sz;
     $pr->line( $x,      $y, $x     , $y+$w, $w, $col );
     $pr->line( $x+4*$w, $y, $x+4*$w, $y+$w, $w, $col );
@@ -315,7 +333,7 @@ sub pr_rptendstart( $x, $y, $lcr, $sz, $col, $pr ) {
 
 sub pr_repeat( $x, $y, $lcr, $sz, $col, $pr ) {
     my $w = $sz / 3;		# glyph width = 3 * $w
-    $x -= 1.5 * $w * ($lcr + 1);
+    $x -= 1.5 * $w;
     my $lw = $sz / 10;
     $x -= $w / 2;
     $pr->line( $x, $y+0.2*$sz, $x + $w, $y+0.7*$sz, $lw );
@@ -324,10 +342,24 @@ sub pr_repeat( $x, $y, $lcr, $sz, $col, $pr ) {
     $pr->line( $x - 0.05*$sz, $y+0.2*$sz, $x + 0.02*$sz, $y+0.3*$sz, $lw );
 }
 
+sub pr_repeat2( $x, $y, $lcr, $sz, $col, $pr ) {
+    my $w = $sz / 4;		# glyph width = 4 * $w
+    $x -= 2.7 * $w;
+    my $lw = $sz / 10;
+    $x -= $w / 2;
+    $pr->line( $x, $y+0.2*$sz, $x + $w, $y+0.7*$sz, $lw );
+    $pr->line( $x, $y+0.6*$sz, $x + 0.07*$sz , $y+0.7*$sz, $lw );
+    $x += $w;
+    $pr->line( $x - $w/4, $y+0.2*$sz, $x + 0.75*$w, $y+0.7*$sz, $lw );
+    $x += 0.75 * $w;
+    $pr->line( $x - 0.05*$sz, $y+0.2*$sz, $x + 0.02*$sz, $y+0.3*$sz, $lw );
+}
+
 sub pr_endline( $x, $y, $lcr, $sz, $col, $pr ) {
     my $w = $sz / 10;		# glyph width = 2 * $w
-    $x -= 0.75 * $w * ($lcr + 1);
-    $pr->vline( $x, $y+0.85*$sz, 0.9*$sz, 2*$w );
+    $x -= 0.5 * $w * ($lcr + 1);
+    $x += $w if $lcr < 0;
+    $pr->vline( $x, yh($y,$sz,$pr), 2*$w );
 }
 
 ################ Hooks ################

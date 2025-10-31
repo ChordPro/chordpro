@@ -13,30 +13,18 @@ use Wx::Locale gettext => '_T';
 use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
 
-# Built-in descriptions for some notation systems.
-my $notdesc =
-  { "common"	   => "C, D, E, F, G, A, B",
-    "dutch"	   => "C, D, E, F, G, A, B",
-    "german"	   => "C, ... A, Ais/B, H",
-    "latin"	   => "Do, Re, Mi, Fa, Sol, ...",
-    "scandinavian" => "C, ... A, A#/Bb, H",
-    "solfege"	   => "Do, Re, Mi, Fa, So, ...",
-    "solfège"	   => "Do, Re, Mi, Fa, So, ...",
-    "nashville"	   => "1, 2, 3, ...",
-    "roman"	   => "I, II, III, ...",
-  };
-
 sub new {
     my $self = shift->SUPER::new(@_);
 
-    if ( @{$state{tasks}} ) {
+	$DB::single=1;
+    if ( %{$state{presets}{tasks}} ) {
 	$self->{l_customtasks}->Show(1);
 	my $index = 0;
-	for my $task ( @{$state{tasks}} ) {
+	for my $task ( sort keys %{$state{presets}{tasks}} ) {
 	    my $id = Wx::NewId();
 	    $self->{sz_customtasks}->Add
 	      ( $self->{"cb_customtask_$index"} = Wx::CheckBox->new
-		($self, $id, $task->[0] ),
+		($self, $id, $state{presets}{tasks}{$task}->{title} ),
 		0, 0, 0 );
 	    $index++;
 	}

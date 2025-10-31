@@ -1,9 +1,13 @@
-{
-    "latex" : {  // please check for LaTeX Songbook/Guitar packages and have a look into config-examples
-        "templates" :  {
-           "songbook" : "guitar_songbook.tt",
-           "comment" : "guitar_comment.tt",
-           "image" : "guitar_image.tt"
-         }
-     }
+// ChordPro Config.
+
+config {
+    type        : backend
+    title       : "LaTeX/Guitar"
+    description : "Backend support for LaTeX generation."
+}
+
+latex.templates {
+    songbook : guitar_songbook.tt
+    comment  : guitar_comment.tt
+    image    : guitar_image.tt
 }

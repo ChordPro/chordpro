@@ -1,0 +1,13 @@
+// ChordPro Config
+
+config {
+  title       : "Guitar (Brandt-Roemer, MuseJazz)"
+  description : "Guitar Chord naming and formatting according to Brandt-Roemer using MuseJazzText font."
+  type        : instrument
+  exclude_id  : brandtroemer
+}
+
+// Guitar chords with naming according to Brandt-Roemer.
+// Note that BR considers 'dim' to mean 'dim7' and shown as '0'.
+
+include : [ guitar-ly brandtroemer-muse ]

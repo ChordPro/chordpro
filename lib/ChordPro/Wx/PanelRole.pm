@@ -206,9 +206,10 @@ method OnPreviewMore($event) {
     push( @args, "--transpose=$n" );
 
     my $i = 0;
-    for ( @{$state{tasks}} ) {
+    while ( exists $d->{"cb_customtask_$i"} ) {
 	if ( $d->{"cb_customtask_$i"}->IsChecked ) {
-	    push( @args, "--config", $_->[1] );
+	    push( @args, "--config",
+		  $state{presets}{tasks}{lc $d->{"cb_customtask_$i"}->GetLabel}->{file} );
 	}
 	$i++;
     }

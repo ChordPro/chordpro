@@ -203,10 +203,14 @@ method path ( $p = undef ) {
     return File::Spec->path();
 }
 
-# Prepend dirs in front of path.
+# Prepend/append dirs to path.
 
 method pathprepend( @d ) {
-    $ENV{PATH} = join( $pathsep, @d, $ENV{PATH} );
+    $ENV{PATH} = $self->pathcombine( @d, $ENV{PATH} );
+}
+
+method pathappend( @d ) {
+    $ENV{PATH} = $self->pathcombine( $ENV{PATH}, @d );
 }
 
 method pathcombine( @d ) {
@@ -236,7 +240,7 @@ method findexe ( $p, %opts ) {
     if ( $self->debug ) {
 	warn("Paths: findexe $p => ", $self->display($found), "\n");
     }
-    elsif ( !$opts{silent} ) {
+    elsif ( !$found && !$opts{silent} ) {
 	warn("Could not find $p in ",
 	     join( " ", map { qq{"$_"} } $self->path ), "\n");
     }

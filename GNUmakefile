@@ -1,8 +1,5 @@
 #! /bin/make -f
 
-# Windows 10, for Windows installer builds.
-WINVM := Win10ProClassic
-
 ################ Pass-through ################
 
 .PHONY : all
@@ -52,14 +49,10 @@ to_tmp : resources
 	done
 
 # Windows 10, for Windows installer builds.
+WINVM  := Win10Pro
 WINDIR := /Users/Johan/Documents/${PROJECT}
-ifeq (${WINVM},Win10ProClassic)
-WIN    := w10c
-WINMNT := /mnt/c2
-else
 WIN    := w10
 WINMNT := /mnt/c
-endif
 WINDST := ${WINMNT}/${WINDIR}
 
 to_win : resources
@@ -109,7 +102,11 @@ LIB := lib/ChordPro
 RES := ${LIB}/res
 PODSELECT := podselect
 
-resources : wxg ${LIB}/Config/Data.pm ${RES}/config/chordpro.json ${RES}/pod/ChordPro.pod ${RES}/pod/Config.pod ${RES}/pod/A2Crd.pod docs/assets/pub/config60.schema
+RESOURCES := wxg ${LIB}/Config/Data.pm ${RES}/config/chordpro.json
+RESOURCES += ${RES}/pod/ChordPro.pod ${RES}/pod/Config.pod ${RES}/pod/A2Crd.pod
+RESOURCES += docs/assets/pub/config60.schema
+
+resources : ${RESOURCES}
 
 ${LIB}/Config/Data.pm : ${RES}/config/chordpro.json
 	perl script/cfgboot.pl $< > $@~
@@ -160,7 +157,7 @@ checkjson :
 
 # Experimental
 
-wkit : _wkit1 _wkit _wkiti _wkit2
+wkit : _wkit_startvm _wkit _wkiti _wkit_stopvm
 
 _wkit :
 	${MAKE} to_win
@@ -169,38 +166,56 @@ _wkit :
 
 _wkiti :
 	cp ${WINDST}/pp/windows/ChordPro-Installer*.exe \
-	  ${HOME}/tmp/ChordPro-Installer-6-70-dev-msw-x64.exe
-	scp ${HOME}/tmp/ChordPro-Installer-6-70-dev-msw-x64.exe \
+	  ${HOME}/tmp/ChordPro-Installer-6-80-dev-msw-x64.exe
+	scp ${HOME}/tmp/ChordPro-Installer-6-80-dev-msw-x64.exe \
 	  chordpro-site:www/dl/
 
-_wkit1 :
+_wkit_startvm :
 	-VBoxManage startvm ${WINVM} --type headless
 	sleep 10
 
-_wkit2 :
+_wkit_stopvm :
 	sleep 10
 	sudo umount ${WINMNT}
 	VBoxManage controlvm ${WINVM} poweroff
 	VBoxManage snapshot ${WINVM} restorecurrent
 
-LTS   := ubuntu-lts
-LTSVM := "Ubuntu 22.04 LTS"
+# Host must use .zshenv to set the correct path.
+MACVM := "MacOS"
 
-appimage : _akit1 _akit _akit2
+mkit : _mkit_startvm _mkit _mkit_stopvm
+
+_mkit :
+	${MAKE} to_mac
+	ssh ${MACHOST} make -C Documents/${PROJECT}/pp/macos
+	scp ${MACDST}/pp/macos/ChordPro-*.dmg ${HOME}/tmp/
+
+_mkit_startvm :
+	-VBoxManage startvm ${MACVM} --type headless
+	sleep 10
+
+_mkit_stopvm :
+	VBoxManage controlvm ${MACVM} poweroff
+	VBoxManage snapshot ${MACVM} restorecurrent
+
+LTS     := 22
+LTSHOST := ubuntu${LTS}
+LTSVM   := "Ubuntu ${LTS}.04 LTS"
+
+appimage : _akit_startvm _akit _akit_stopvm
 
 #	rsync -avHi ./ ${LTSHOST}:ChordPro/ --exclude .git --exclude build --exclude docs
 
 _akit :
-	${MAKE} to_mac MACHOST=${LTS}
-	ssh ${LTS} make -C Documents/ChordPro/pp/${LTS}
-	scp ${LTS}:Documents/ChordPro/pp/${LTS}/ChordPro-\*.AppImage ${HOME}/tmp/
+	${MAKE} to_mac MACHOST=${LTSHOST}
+	ssh ${LTSHOST} make -C Documents/ChordPro/pp/appimage
+	scp ${LTSHOST}:Documents/ChordPro/pp/appimage/ChordPro-\*.AppImage ${HOME}/tmp/
 
-_akit1 :
+_akit_startvm :
 	-VBoxManage startvm ${LTSVM} --type headless
-	ssh root@${LTS} apt-get install --quiet --yes ntpdate
-	ssh root@${LTS} ntpdate -b ntp.squirrel.nl
+	ssh ${LTSHOST} sudo ntpdate -b ntp.squirrel.nl
 
-_akit2 :
+_akit_stopvm :
 	VBoxManage controlvm ${LTSVM} poweroff
 	VBoxManage snapshot ${LTSVM} restorecurrent
 

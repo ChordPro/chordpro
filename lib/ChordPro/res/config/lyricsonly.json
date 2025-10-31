@@ -1,0 +1,14 @@
+// Configuration for ChordPro.
+
+config {
+    type        : stylemod
+    title       : "Lyrics Only"
+    description : "Lyrics only, no chords, no diagrams."
+    exclude_id  : diagramplacement
+}
+
+settings {
+    suppress-empty-chords : true
+    lyrics-only           : true
+}
+

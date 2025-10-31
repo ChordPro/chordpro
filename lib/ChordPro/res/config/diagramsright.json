@@ -1,0 +1,10 @@
+// Configuration for ChordPro.
+
+config {
+    type        : stylemod
+    title       : "Diagrams at the Right"
+    description : "Place the chord diagrams at the right side of the page."
+    exclude_id  : diagramplacement
+}
+
+diagrams.show : none

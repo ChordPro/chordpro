@@ -38,6 +38,8 @@ sub new {
     $self->{pdf}->{forcecompress} = 0 if $regtest;
     $self->{pdf}->mediabox( $ps->{papersize}->[0],
 			    $ps->{papersize}->[1] );
+    $self->{pdf}->page_layout( $ps->{page_layout} )
+      if $ps->{page_layout};
     $self->{layout} = Text::Layout->new( $self->{pdf} );
     $self->{tmplayout} = undef;
 
@@ -760,7 +762,7 @@ sub make_outlines {
 	    for ( @$book ) {
 		# Group on first letter.
 		# That's why we left the sort fields in...
-		my $cur = uc(substr( $_->[0], 0, 1 ));
+		my $cur = uc(substr(NFKD($_->[0]),0,1) );
 		$lh{$cur} //= [];
 		# Last item is the song.
 		push( @{$lh{$cur}}, $_->[-1] );
@@ -775,13 +777,11 @@ sub make_outlines {
 	    my $cmp = Unicode::Collate->new;
 	    foreach my $let ( $cmp->sort( keys %lh )) {
 		foreach my $song ( @{$lh{$let}} ) {
-		    unless ( defined $cur_ol
-			     && ( my $t = substr(NFKD($let),0,1) ) eq $cur_let ) {
-			$t //= substr(NFKD($let),0,1);
+		    unless ( defined $cur_ol && ( $let eq $cur_let ) ) {
 			# Intermediate level autoline.
 			$cur_ol = $outline->outline;
-			$cur_ol->title($t);
-			$cur_let = $t;
+			$cur_ol->title($let);
+			$cur_let = $let;
 		    }
 		    # Leaf outline.
 		    my $ol = $cur_ol->outline;

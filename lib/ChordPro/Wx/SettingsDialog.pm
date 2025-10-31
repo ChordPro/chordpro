@@ -15,6 +15,8 @@ use ChordPro::Paths;
 use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
 use File::Basename;
+use Ref::Util qw( is_arrayref );
+use List::Util qw( first );
 
 BUILD ( $parent, $id, $title ) {
     $self->refresh;
@@ -22,11 +24,19 @@ BUILD ( $parent, $id, $title ) {
     $self->Layout;
     Wx::Event::EVT_SYS_COLOUR_CHANGED( $self,
 				       $self->can("OnSysColourChanged") );
+
+    Wx::Event::EVT_ENTER_WINDOW( $self->{ch_stylemods},
+				 $self->{ch_stylemods}->can("OnEnter") );
+    Wx::Event::EVT_LEAVE_WINDOW( $self->{ch_stylemods},
+				 $self->{ch_stylemods}->can("OnLeave") );
+    Wx::Event::EVT_MOTION( $self->{ch_stylemods},
+				 $self->{ch_stylemods}->can("OnMotion") );
+
     # Do not DeletePage until we're sure none of the widgets are referenced.
-    $self->{nb_preferences}->RemovePage(5)
+    $self->{nb_preferences}->RemovePage(5) # HTML viewer
       unless $preferences{expert};
-    $self->{nb_preferences}->RemovePage(4)
-      unless $preferences{pdfviewer};
+    $self->{nb_preferences}->RemovePage(4) # PDF viewer
+      unless $preferences{pdfviewer} || $preferences{enable_pdfviewer};
 
     unless ( has_appearance() ) {
 	$self->{ch_theme}->Delete(2); # Follow System
@@ -35,22 +45,7 @@ BUILD ( $parent, $id, $title ) {
     $self;
 }
 
-# BUilt-in descriptions for some notation systems.
-my $notdesc =
-  { "common"	   => "C, D, E, F, G, A, B",
-    "dutch"	   => "C, D, E, F, G, A, B",
-    "german"	   => "C, ... A, Ais/B, H",
-    "latin"	   => "Do, Re, Mi, Fa, Sol, ...",
-    "scandinavian" => "C, ... A, A#/Bb, H",
-    "solfege"	   => "Do, Re, Mi, Fa, So, ...",
-    "solfège"	   => "Do, Re, Mi, Fa, So, ...",
-    "nashville"	   => "1, 2, 3, ...",
-    "roman"	   => "I, II, III, ...",
-  };
-
-method get_configfile() {
-    $preferences{configfile} || ""
-}
+my $checkpfx = "✔ ";
 
 method refresh() {
     $self->fetch_prefs;
@@ -75,12 +70,126 @@ method enablecustom() {
 
     $n = $self->{cb_tmplfile}->IsChecked;
     $self->{fp_tmplfile}->Enable($n);
-}
 
-method all_styles( $userpostfix = "" ) {
-    sort
-      map { lc } @{ $state{styles} },
-                 map { lc "$_$userpostfix" } @{ $state{userstyles} };
+    # Add instruments.
+    for my $ctl ( $self->{ch_instrument} ) {
+	$ctl->Clear;
+	for ( sort keys %{$state{presets}{instruments}} ) {
+	    $ctl->Append( $state{presets}{instruments}->{$_}->{title},
+			  $state{presets}{instruments}->{$_},
+			);
+	}
+	my $first = 0;
+	my $def =
+	  is_arrayref($preferences{preset_instruments})
+	  && @{$preferences{preset_instruments}}
+	  ? $preferences{preset_instruments}[0]->{title}
+	  : "Guitar";
+	my $n = $ctl->FindString($def);
+	$first = $n unless $n == wxNOT_FOUND;
+	$ctl->SetSelection($first);
+	$self->set_instrument_desc( $ctl->GetClientData($first)->{desc} );
+    }
+
+    # Add styles.
+    for my $ctl ( $self->{ch_style} ) {
+	$ctl->Clear;
+	$ctl->Append( "Default",
+		      { title   => "Default",
+			desc    => "Default ChordPro style.",
+			preview => "style_default-small.jpg",
+		      } );
+	for ( sort keys %{$state{presets}{styles}} ) {
+	    $ctl->Append( $state{presets}{styles}->{$_}->{title},
+			  $state{presets}{styles}->{$_},
+			);
+	}
+	my $first = 0;
+	my $def =
+	  is_arrayref($preferences{preset_styles})
+	  && @{$preferences{preset_styles}}
+	  ? $preferences{preset_styles}[0]->{title}
+	  : "Default";
+	my $n = $ctl->FindString($def);
+	$first = $n unless $n == wxNOT_FOUND;
+	$ctl->SetSelection($n);
+	$self->set_style_desc( $ctl->GetClientData($n)->{desc} );
+    }
+
+    # Add the styles to the presets.
+    for my $ctl ( $self->{ch_stylemods} ) {
+	$ctl->Clear;
+	for ( sort keys %{$state{presets}{stylemods}} ) {
+	    $ctl->Append( $state{presets}{stylemods}->{$_}->{title},
+			  $state{presets}{stylemods}->{$_},
+			);
+	}
+
+	# Check the presets that were selected.
+	my $p = $preferences{preset_stylemods} // [];
+	my $desc = "";
+	my $first = 0;
+	foreach ( sort { $a->{title} cmp $b->{title} } @$p ) {
+	    my $n = $ctl->FindString( $_->{title} );
+	    next if $n == wxNOT_FOUND;
+	    $ctl->Check( $n, 1 );
+	    if ( $_->{desc} ) {
+		$desc .= $checkpfx;
+		$desc .= ucfirst($_->{src}) . ": "
+		  unless $_->{src} eq "std";
+		$desc .= $_->{desc} . "\n";
+	    }
+	    $first //= $n;
+	}
+	if ( $desc ) {
+	    $desc =~ s/\n+$//;
+	    $self->set_stylemods_desc($desc);
+	    $ctl->SetFirstItem($first);
+	}
+    }
+
+    # Notation systems.
+    for my $ctl ( $self->{ch_notation} ) {
+	$ctl->Clear;
+	my $n = 0;
+	my $check;
+	for ( sort keys %{$state{presets}{notations}} ) {
+	    $ctl->Append( $state{presets}{notations}->{$_}->{title} .
+			  " (" . $state{presets}{notations}->{$_}->{desc} . ")",
+			  $state{presets}{notations}->{$_},
+			);
+	    $check = $n
+	      if $_ eq lc($preferences{preset_notations}[0]->{title});
+	    $check //= $n
+	      if $state{presets}{notations}->{$_}->{default};
+	    $n++;
+	}
+
+	unless ( defined $check ) {
+	    use DDP; p $state{presets}{notations}, as => "Missing default in notations";
+	}
+	$ctl->SetSelection($check);
+    }
+
+    # Transcodings
+    for my $ctl ( $self->{ch_xcode} ) {
+	$ctl->Clear;
+	my $n = 0;
+	my $check;
+	for ( sort keys %{$state{presets}{notations}} ) {
+	    $ctl->Append( $state{presets}{notations}->{$_}->{title} .
+			  " (" . $state{presets}{notations}->{$_}->{desc} . ")",
+			  $state{presets}{notations}->{$_},
+			);
+	    $check = $n
+	      if $_ eq lc($preferences{preset_xcodes}[0]->{title});
+	    $check //= $n
+	      if $state{presets}{notations}->{$_}->{default};
+	    $n++;
+	}
+
+	$ctl->SetSelection($check);
+    }
 }
 
 method fetch_prefs() {
@@ -88,36 +197,16 @@ method fetch_prefs() {
     # Transfer preferences to the dialog.
 
     # Skip default (system, user, song) configs.
-    $self->{cb_skipstdcfg}->SetValue($preferences{skipstdcfg});
+    $self->{cb_usestdcfg}->SetValue(!$preferences{skipstdcfg});
 
-    # Add the styles to the presets.
-    my $ctl = $self->{ch_presets};
-    $ctl->Clear;
-    my $neat = sub {
-	my ($t ) = @_;
-	$t = ucfirst(lc($t));
-	$t =~ s/_/ /g;
-	$t =~ s/ (.)/" ".uc($1)/eg;
-	$t;
-    };
-    my $i = 0;
-    for ( $self->all_styles( " (user)" ) ) {
-	$ctl->Append( $neat->($_) );
-    }
-
-    # Check the presets that were selected.
-    my $p = $preferences{cfgpreset};
-    foreach ( @$p ) {
-	next if $_ eq "custom";	# legacy
-	my $t = $neat->($_);
-	my $n = $ctl->FindString($t);
-	$n = $ctl->FindString( $t = "$t (user)" ) if $n == wxNOT_FOUND;
-	unless ( $n == wxNOT_FOUND ) {
-	    $ctl->Check( $n, 1 );
+    if ( is_arrayref($preferences{preset_instruments})
+	 && @{$preferences{preset_instruments}} ) {
+	for ( $self->{ch_instrument} ) {
+	    my $n = $_->FindString($preferences{preset_instruments}[0]);
+	    $_->SetSelection($n)
+	      unless $n == wxNOT_FOUND;
 	}
     }
-    $self->{cb_presets}->SetValue($preferences{enable_presets});
-    $self->{ch_presets}->Enable($preferences{enable_presets});
 
     # Custom config file.
     $self->{cb_configfile}->SetValue($preferences{enable_configfile});
@@ -146,38 +235,10 @@ method fetch_prefs() {
     # Messages.
     $self->{fp_messages}->SetSelectedFont( Wx::Font->new($preferences{msgsfont}) );
 
-    # Notation.
-    $ctl = $self->{ch_notation};
-    $ctl->Clear;
-    my $n = 0;
-    my $check = 0;
-    for ( @{ $state{notations} } ) {
-	my $s = ucfirst($_);
-	$check = $n if $_ eq lc $preferences{notation};
-	$s .= " (" . $notdesc->{lc($s)} .")" if $notdesc->{lc($s)};
-	$ctl->Append($s);
-	$ctl->SetClientData( $n, $_);
-	$n++;
-    }
-    $ctl->SetSelection($check);
-
     # Transpose.
     $self->{cb_xpose}->SetValue( $preferences{enable_xpose} );
     $self->OnCbTranspose(undef);
 
-    # Transcode.
-    $ctl = $self->{ch_xcode};
-    $ctl->Clear;
-    $n = 0;
-    for ( @{ $state{notations} } ) {
-	my $s = ucfirst($_);
-	$check = $n if $_ eq lc $preferences{xcode};
-	$s .= " (" . $notdesc->{lc($s)} .")" if $notdesc->{lc($s)};
-	$ctl->Append($s);
-	$ctl->SetClientData( $n, $_);
-	$n++;
-    }
-    $ctl->SetSelection($check);
     $self->{cb_xcode}->SetValue( $preferences{enable_xcode} );
     $self->OnCbTranscode(undef);
 
@@ -207,31 +268,41 @@ method store_prefs() {
     my $parent = $self->GetParent;
 
     # Skip default (system, user, song) configs.
-    $preferences{skipstdcfg}  = $self->{cb_skipstdcfg}->IsChecked;
+    $preferences{skipstdcfg}  = !$self->{cb_usestdcfg}->IsChecked;
 
-    # Presets.
-    $preferences{enable_presets} = $self->{cb_presets}->IsChecked;
-    my $ctl = $self->{ch_presets};
+    # Preset instrument.
+    my $n = $self->{ch_instrument}->GetSelection;
+    $preferences{preset_instruments} =
+      [ $self->{ch_instrument}->GetClientData($n) ];
+
+    # Preset style.
+    $n = $self->{ch_style}->GetSelection;
+    $preferences{preset_styles} =
+      [ $self->{ch_style}->GetClientData($n) ];
+
+    # Preset stylemods.
+    my $ctl = $self->{ch_stylemods};
     my $cnt = $ctl->GetCount;
-    my @p;
-    my @styles = $self->all_styles;
+    $preferences{preset_stylemods} = [];
     for ( my $n = 0; $n < $cnt; $n++ ) {
 	next unless $ctl->IsChecked($n);
-	push( @p, $styles[$n] );
+	push( @{$preferences{preset_stylemods}}, $ctl->GetClientData($n) );
     }
-    $preferences{cfgpreset} = \@p;
 
     # Custom config file.
     $preferences{enable_configfile} = $self->{cb_configfile}->IsChecked;
     $preferences{configfile}        = $self->{fp_customconfig}->GetPath;
+    $preferences{enable_configfile} = 0 if $preferences{configfile} eq "";
 
     # Custom library.
     $preferences{enable_customlib} = $self->{cb_customlib}->IsChecked;
     $preferences{customlib}        = $self->{dp_customlibrary}->GetPath;
+    $preferences{enable_customlib} = 0 if $preferences{customlib} eq "";
 
     # New song template.
     $preferences{enable_tmplfile} = $self->{cb_tmplfile}->IsChecked;
     $preferences{tmplfile}        = $self->{fp_tmplfile}->GetPath;
+    $preferences{enable_tmplfile} = 0 if $preferences{tmplfile} eq "";
 
     # Preferred filename extension.
     $preferences{chordproext} = $self->{t_prefext}->GetValue;
@@ -246,13 +317,13 @@ method store_prefs() {
     $preferences{msgsfont} = $self->{fp_messages}->GetSelectedFont->GetNativeFontInfoDesc;
 
     # Notation.
-    my $n = $self->{ch_notation}->GetSelection;
+    $n = $self->{ch_notation}->GetSelection;
     if ( $n > 0 ) {
-	$preferences{notation} =
-	  $self->{ch_notation}->GetClientData($n);
+	$preferences{preset_notations} =
+	  [ $self->{ch_notation}->GetClientData($n) ];
     }
     else {
-       	$preferences{notation} = "";
+       	$preferences{preset_notations} = [];
     }
 
     # Transpose.
@@ -269,12 +340,12 @@ method store_prefs() {
     # Transcode.
     $preferences{enable_xcode} = $self->{cb_xcode}->IsChecked;
     $n = $self->{ch_xcode}->GetSelection;
-    if ( $n > 0 ) {
-	$preferences{xcode} =
-	  $self->{ch_xcode}->GetClientData($n);
+    if ( $n >= 0 ) {
+	$preferences{preset_xcodes} =
+	  [ $self->{ch_xcode}->GetClientData($n) ];
     }
     else {
-       	$preferences{xcode} = "";
+       	$preferences{preset_xcodes} = [ $state{default_notation} ];
     }
 
     # PDF Viewer.
@@ -292,19 +363,17 @@ method restore_prefs() {
     # use DDP; p %preferences, as => "Restored";
 }
 
-method need_restart() {
-    state $id = wxID_ANY;
-    if ( $id == wxID_ANY ) {
-	$id = Wx::NewId;
-    }
+method reload() {
+    # Temporary store dialog values into preferences.
+    local $preferences{skipstdcfg} = !$self->{cb_usestdcfg}->IsChecked;
+    local $preferences{customlib} = $self->{dp_customlibrary}->GetPath;
+    local $preferences{enable_customlib} = $self->{cb_customlib}->IsChecked;
 
-    # Showing the InfoBar leads to a resize, which may cause
-    # unwanted width change.
-    my ( $w, $h ) = $self->GetSizeWH;
-    $self->{w_infobar}->ShowMessage("    Changing the custom library requires restart",
-				    wxICON_INFORMATION);
-    $self->{sz_prefs_outer}->Fit($self);
-    $self->SetSize([$w,-1]);
+    # Rebuild the lists of config styles.
+    ChordPro::Wx::Config::setup_styles(1);
+
+    # Update the dialog.
+    $self->enablecustom;
 }
 
 method get_selected_theme() {
@@ -456,20 +525,20 @@ method OnCustomConfigChanged($event) {
 method OnCustomLib($event) {
     my $n = $self->{cb_customlib}->IsChecked;
     $self->{dp_customlibrary}->Enable($n);
-    $self->need_restart;
+    $self->reload;
 }
 
 method OnCustomLibChanged($event) {
-    $self->need_restart;
+    $self->reload;
 }
 
-
-method OnSkipStdCfg($event) {
+method OnUseStdCfg($event) {
     $event->Skip;
+    $self->reload;
 }
 
 method OnPresets($event) {
-    $self->{ch_presets}->Enable( $self->{cb_presets}->GetValue );
+#    $self->{ch_presets}->Enable( $self->{cb_presets}->GetValue );
     $event->Skip;
 }
 
@@ -630,7 +699,76 @@ method OnSysColourChanged($event) {
     $event->Skip;
 }
 
+method OnChangeInstrument( $event ) {
+    my $c = $event->GetClientData;
+    $self->set_instrument_desc($c->{desc});
+}
+
+method OnChangeStyle( $event ) {
+    my $c = $event->GetClientData;
+    $self->set_style_desc($c->{desc});
+    # $self->set_style_preview($c->{preview});
+}
+
+method OnChangeStylemods( $event ) {
+    my $n = $event->GetInt;
+    my $ctl = $self->{ch_stylemods};
+    my $data = $ctl->GetClientData($n);
+    my $desc = "";
+    my $xid = $ctl->IsChecked($n) ? $data->{exclude_id} : "";
+
+    # Collect descriptions.
+    # If checking a choice has an exclude_id, uncheck checked choices
+    # that use the same exclude_id.
+    for ( my $i = 0; $i < $ctl->GetCount; $i++ ) {
+	next unless $ctl->IsChecked($i);
+	$data = $ctl->GetClientData($i);
+	if ( $i != $n and $xid and ($data->{exclude_id}//"") eq $xid ) {
+	    $ctl->Check( $i, 0 );
+	    next;
+	}
+
+	if ( $data->{desc} ) {
+	    $desc .= $checkpfx;
+	    $desc .= ucfirst($data->{src}) . ": "
+	      unless $data->{src} eq "std";
+	    $desc .= $data->{desc} . "\n";
+	}
+    }
+    $self->set_stylemods_desc($desc);
+}
+
 ################ Helpers ################
+
+method set_style_desc( $desc ) {
+    $self->{l_style_desc}->SetLabel($desc);
+#    $self->{l_style_desc}->Wrap(($self->{ch_style}->GetSizeWH)[0]);
+}
+
+=for later
+
+method set_style_preview( $preview ) {
+    $preview //= "style_nopreview-small.png";
+    warn("XX1 $preview\n");
+    $preview = CP->findres( $preview, class => "images" )
+      || CP->findres( "style_nopreview-small.png", class => "images" );
+    warn("XX2 $preview\n");
+    return unless $preview;
+    $self->{bm_style_preview}->SetBitmap
+      ( Wx::Bitmap->new( $preview, wxBITMAP_TYPE_ANY ) );
+}
+
+=cut
+
+method set_stylemods_desc( $desc ) {
+    $self->{l_stylemods_desc}->SetLabel($desc);
+#    $self->{l_stylemods_desc}->Wrap(($self->{ch_stylemods}->GetSizeWH)[0]);
+}
+
+method set_instrument_desc( $desc ) {
+    $self->{l_instrument_desc}->SetLabel($desc);
+#    $self->{l_instrument_desc}->Wrap(($self->{ch_instrument}->GetSizeWH)[0]);
+}
 
 method colourchanged($index) {
     $self->colours2prefs;

@@ -1,0 +1,10 @@
+// Configuration for ChordPro.
+
+config {
+    type        : stylemod
+    title       : "No Chord Diagrams"
+    description : "Suppress the chord diagrams."
+    exclude_id  : diagramplacement
+}
+
+diagrams.show : none

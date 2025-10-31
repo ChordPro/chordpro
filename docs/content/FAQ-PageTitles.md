@@ -20,19 +20,10 @@ See [Page headers and footers](
 For example, to get the copyright in the footer on the title pages:
 
 ````
-{ "pdf" : {
-    "formats" : {
-        // The first page of a song has:
-        "title" : {
-            // Footer with copyright and page number.
-            "footer"    : [ "%{copyright}", "", "%{page}" ],
-        },
-        // The very first page of a songbook has:
-        "first" : {
-            // Footer with copyright.
-            "footer"    : [ "%{copyright}", "", "" ],
-        },
-     }
-} }
+pdf.formats {
+    // The first page of a song has:
+    title.footer : [ "%{copyright}", "", "%{page}" ]
+    first.footer : [ "%{copyright}", "", "" ]
+}
 ````
 

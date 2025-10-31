@@ -78,7 +78,7 @@ package ChordPro;
 use ChordPro::Paths;
 use Encode qw(decode_utf8);
 
-sub import {
+sub xximport {
     # Add private library.
     my $lib = CP->privlib;
     for ( @INC ) {
@@ -677,7 +677,7 @@ Don't use the specific config file, even if it exists.
 Sets a configuration item. I<item> must be in the format of
 colon-separated configuration keys, an equal sign, and the value. For
 example, the equivalent of B<--diagrams=none> is
-B<--define=diagrams:show=0>.
+B<--define=diagrams.show=0>.
 
 B<--define> may be used multiple times to set multiple items.
 

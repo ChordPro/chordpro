@@ -1,0 +1,11 @@
+// chordpro task: Spreads View
+
+config {
+    title       : "Spreads View"
+    description : "Two-page preview, odd page left."
+    type        : [ stylemod task ]
+    exclude_id  : oddevenspreadsview
+    omit        : true
+}
+
+pdf.page_layout: two_page_left

@@ -10,7 +10,7 @@ if ( -d "t" ) {
     $0 =~ s;(^|/)t/;$1;;
 }
 
-use lib "../script";
+use lib ( "../script", "../lib", "../lib/ChordPro/lib" );
 
 my $test;
 

@@ -50,6 +50,9 @@ table.songline tr.chords {
 table.songline tr.lyrics {
     font-size: 12pt;
 }
+table.songline td.annotation {
+    color: red;
+}
 table.songline td.indent {
     padding-left: 2em;
 }

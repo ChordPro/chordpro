@@ -1159,7 +1159,7 @@ method getimage ($fragment) {
 
 sub alert ($size) {
     my $scale = $size/20;
-    my $xo = $ps->{pr}->{pdf}->xo_form;
+    my $xo = $pr->{pdf}->xo_form;
     $xo->bbox( 0, -18*$scale, 20*$scale, 0 );
     $xo->matrix( $scale, 0, 0, -$scale, 0, 0 );
     $xo->line_width(2)->line_join(1);

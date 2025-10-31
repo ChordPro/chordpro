@@ -255,31 +255,34 @@ sub songline {
 		 '</table>' );
     }
 
+    my $cr = "";		# chords row
+    for ( @{$elt->{chords}} ) {
+	if ( $_ eq "" ) {
+	    $cr .= "<td></td>";
+	    next;
+	}
+	my $c = $song->{chordsinfo}->{$_->key};
+	if ( $c->isa("ChordPro::Chord::Annotation") ) {
+	    $cr .= "<td class=\"annotation\">" . $c->{text} . "</td>";
+	}
+	else {
+	    $cr .= "<td>" . $c->name . "</td>";
+	}
+    }
+
+    my $pr = join( '',		# phrases row
+		   map { ( $_ =~ s/^\s+// ? '<td class="indent">' : '<td>' ) . nhtml($_) . '</td>' }
+		   ( @{ $elt->{phrases} } ) );
+
     if ( $config->{settings}->{'chords-under'} ) {
 	return ( '<table class="songline">',
-		 '  <tr class="lyrics">',
-		 '    ' . join( '',
-				map { ( $_ =~ s/^\s+// ? '<td class="indent">' : '<td>' ) . nhtml($_) . '</td>' }
-				( @{ $elt->{phrases} } ) ),
-		 '  </tr>',
-		 '  <tr class="chords">',
-		 '    ' . join( '',
-				map { '<td>' . nhtml($_) . ' </td>' }
-				( @c ) ),
-		 '  </tr>',
+		 '  <tr class="lyrics">', '    ' . $pr, '  </tr>',
+		 '  <tr class="chords">', '    ' . $cr, '  </tr>',
 		 '</table>' );
     }
     return ( '<table class="songline">',
-	     '  <tr class="chords">',
-	     '    ' . join( '',
-			    map { '<td>' . nhtml($_) . ' </td>' }
-			    ( @c ) ),
-	     '  </tr>',
-	     '  <tr class="lyrics">',
-	     '    ' . join( '',
-			    map { ( $_ =~ s/^\s+// ? '<td class="indent">' : '<td>' ) . nhtml($_) . '</td>' }
-			    ( @{ $elt->{phrases} } ) ),
-	     '  </tr>',
+	     '  <tr class="chords">', '    ' . $cr, '  </tr>',
+	     '  <tr class="lyrics">', '    ' . $pr, '  </tr>',
 	     '</table>' );
 }
 

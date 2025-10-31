@@ -1939,42 +1939,59 @@ sub tocline {
     $y -= $pr->font_bl($ftoc);
     $pr->setfont($ftoc);
     my $tpl = $elt->{title};
-    my $vsp;
     my $lines = 0;
+    my $blines = 0;		# lines for break
+    my $vsp;
 
     my $p = $elt->{pageno} // "";
     my $pw = $pr->strwidth($p);
     my $ww = $ps->{__rightmargin} - $x - $pr->strwidth("xxx$p");
-    $tpl = ( $elt->{break} =~ s/\n/\\n/gr ) . "\\n" . $tpl if $elt->{break};
-    for my $text ( split( /\\n/, $tpl ) ) {
-	$lines++;
-	# Suppress unclosed markup warnings.
-	local $SIG{__WARN__} = sub{
-	    CORE::warn(@_) unless "@_" =~ /Unclosed markup/;
-	};
-	# Get the part that fits (hopefully, all) and print.
-	( $text, my $ex ) = @{ defrag( [ $pr->wrap( $text, $ww ) ] ) };
-	$pr->text( $text, $x, $y );
-	unless ($vsp) {
-	    $ps->{pr}->text( $p, $ps->{__rightmargin} - $pw, $y );
-	    $vsp = _vsp("toc", $ps);
-	    $x += $pr->strwidth( $config->{settings}->{wrapindent} )
-	      if $ex ne "";
+
+    # Formatter sub.
+    my $f = sub {
+	my ( $tpl, $p ) = @_;
+	my $vsp;
+	for my $text ( split( /\\n|\n/, $tpl ) ) {
+	    $lines++;
+	    # Suppress unclosed markup warnings.
+	    local $SIG{__WARN__} = sub{
+		CORE::warn(@_) unless "@_" =~ /Unclosed markup/;
+	    };
+	    # Get the part that fits (hopefully, all) and print.
+	    ( $text, my $ex ) = @{ defrag( [ $pr->wrap( $text, $ww ) ] ) };
+	    $pr->text( $text, $x, $y );
+	    unless ($vsp) {
+		$ps->{pr}->text( $p, $ps->{__rightmargin} - $pw, $y );
+		$vsp = _vsp("toc", $ps);
+		$x += $pr->strwidth( $config->{settings}->{wrapindent} )
+		  if $ex ne "";
+	    }
+	    $y -= $vsp;
+	    if ( $ex ne "" ) {
+		$text = $ex;
+		redo;
+	    }
 	}
-	$y -= $vsp;
-	if ( $ex ne "" ) {
-	    $text = $ex;
-	    redo;
-	}
+	return $vsp;
+    };
+
+    # First the break, if any. No page number.
+    if ( $elt->{break} ) {
+	$vsp = $f->( $elt->{break}, "" );
+	$blines = $lines;
+	$lines = 0;
     }
+
+    # Then the actual content line, with page number.
+    $vsp = $f->( $tpl, $p );
 
     if ( $elt->{page} ) {
 	my $ann = $pr->{pdfpage}->annotation;
 	$ann->link($elt->{page});
-	$ann->rect( $ps->{__leftmargin}, $y0-$lines*$vsp, $ps->{__rightmargin}, $y0 );
+	$ann->rect( $ps->{__leftmargin}, $y0-($blines+$lines)*$vsp, $ps->{__rightmargin}, $y0-$blines*$vsp );
     }
 
-    return $lines;
+    return $blines + $lines;
 }
 
 sub has_visible_chords {

@@ -9,7 +9,7 @@ our %state;
 our %preferences;
 
 use Ref::Util qw( is_hashref is_arrayref );
-use List::Util qw(uniq);
+use List::Util qw( uniq any first );
 
 use Exporter 'import';
 our @EXPORT = qw( %state %preferences );
@@ -20,10 +20,12 @@ use Wx qw(:everything);
 use Wx::Locale gettext => '_T';
 use ChordPro::Files;
 use ChordPro::Paths;
-use File::Basename qw(basename);
+use ChordPro::Utils qw( plural json_load is_true );
 
 use constant FONTSIZE => 12;
 use constant SETTINGS_VERSION => 3;
+
+use Encode qw( decode_utf8 );
 
 # Legacy font numbers.
 my @fonts =
@@ -49,18 +51,31 @@ my %prefs =
 
    # Skip default (system, user, song) configs.
    skipstdcfg  => 1,
+   # Skip legacy (un-classified) configs.
+   skipoldcfg  => 0,
 
    # Presets.
-   enable_presets => 1,
-   cfgpreset      => [],
+   # Title as defined by or derived from the JSON file.
+   # When multiple presets are possible, a list of titles separated by TABs
+   # (which are imported as a []).
+   # Note it is always a [] even when there's only one.
+   # Every preset_xxx is a list of entries from $state{preset}{xxx}.
+   preset_instruments => [],	# single
+   preset_styles      => [],	# single
+   preset_stylemods   => [],
+   preset_notations   => [],	# single
+   preset_tasks       => [],	# not used
+
+   # This one is slightly different, since it does not have configs associated.
+   preset_xcodes      => [],	# single
 
    # Custom config file.
    enable_configfile => 0,
    configfile        => "",
 
    # Custom library.
-   enable_customlib => defined($ENV{CHORDPRO_LIB}),
-   customlib        => $ENV{CHORDPRO_LIB},
+   enable_customlib => 0,	# defined($ENV{CHORDPRO_LIB}),
+   customlib        => "",	# $ENV{CHORDPRO_LIB},
 
    # New song template.
    enable_tmplfile => 0,
@@ -103,9 +118,6 @@ my %prefs =
    # Messages.
    msgsfont	   => 0,	# inital, later "Monospace 10" etc.
 
-   # Notation.
-   notation	   => "",
-
    # Transpose.
    enable_xpose => 0,
    xpose_from   => 0,
@@ -114,7 +126,6 @@ my %prefs =
 
    # Transcode.
    enable_xcode	   => 0,
-   xcode	   => "",
 
    # PDF Viewer.
    enable_pdfviewer   => undef,
@@ -236,9 +247,13 @@ method Load :common {
 		    $cb->DeleteEntry($entry);
 		    next;
 		}
-		if ( $entry eq "cfgpreset" ) {
-		    $preferences{$entry} = [ split( /,\s*/, $value ) ];
+
+		# These are always returned as lists of hashes.
+		if ( $entry =~ m/^preset_(instruments|styles|stylemods|notations|tasks|xcodes)/ ) {
+		    $preferences{$entry} =
+		      [ map { +{ title => lc($_) } } split( /\t+/, $value ) ];
 		}
+
 		elsif ( $entry eq "editcolours" ) {
 		    my @c = split( /,\s*/, $value );
 		    if ( @c <= 1 ) {
@@ -299,6 +314,7 @@ method Load :common {
 	    $cb->DeleteGroup($_);
 	}
     }
+
     $preferences{enable_pdfviewer} //= 0;
     $preferences{enable_htmlviewer} //= 0;
     $cb->Flush;
@@ -306,8 +322,6 @@ method Load :common {
     # Collect from the environment.
     CP->setup_resdirs;
     setup_styles();
-    setup_notations();
-    setup_tasks();
 
     # For convenience.
     setup_filters();
@@ -326,7 +340,9 @@ method Store :common {
     $cb->DeleteAll;
     $cb->SetPath($cp);
 
-    while ( my ( $group, $v ) = each %state ) {
+    # We sort all the keys, so we can compare configs (for testing).
+    for my $group ( sort keys %state ) {
+	my $v = $state{$group};
 
 	next unless $group =~ m{ ^(?:
 				     preferences | messages | recents |
@@ -349,16 +365,24 @@ method Store :common {
 	next unless is_hashref($v);
 
 	$cb->SetPath($group);
-	while ( my ( $k, $v ) = each %$v ) {
+	for my $k ( sort keys %$v ) {
+	    my $v = $v->{$k};
 	    if ( $group eq "preferences" ) {
 		if ( $k eq "editcolour" && is_hashref($v) ) {
-		    while ( my ( $k, $v ) = each %$v ) {
+		    for my $k ( sort keys %$v ) {
+			my $v = $v->{$k};
 			my $p = "editcolour_$k";
-			while ( my ( $k, $v ) = each %$v ) {
-			    $cb->Write($p."_$k", $v );
+			for my $k ( sort keys %$v ) {
+			    $cb->Write($p."_$k", $v->{$k} );
 			}
 		    }
 		    next;
+		}
+		if ( $k =~ /^preset_(instruments|styles|stylemods|notations|xcodes)$/ ) {
+		    die("ASSERT $k is array") unless is_arrayref($v);
+		    $v = join( "\t",
+			       sort( uniq( map { lc($_->{title}) } @$v ) ) )
+		      if @$v;
 		}
 		next if $k eq "editcolours";
 		$v = join( ",", @$v ) if is_arrayref($v);
@@ -367,8 +391,7 @@ method Store :common {
 		$cb->Write( $k, $v );
 	    }
 	    else {
-		warn("Preferences: Undefined value for $k\n");
-		# $cb->DeleteEntry($k);
+		warn("Preferences: No value for $group.$k (removed)\n");
 	    }
 	}
     }
@@ -377,98 +400,340 @@ method Store :common {
 
 ################ Private Subroutines ################
 
-# List of available config presets (styles).
-sub setup_styles {
-    my $stylelist = $state{styles};
-    return $stylelist if $stylelist && @$stylelist;
+# Fetch available config presets (styles, stylemods, ...).
+sub setup_styles( $refresh = 0 ) {
+    return if $state{presets}->{styles} && !$refresh;
 
-    my %stylelist;
-    my @userstyles;
+    my %styles;			# new style
+    my %stylemods;		# new style
+    my %instruments;		# new style
+    my %tasks;			# new style
+
     my $findopts = { filter => qr/^.*\.json$/i, recurse => 0 };
 
+    local $ENV{CHORDPRO_LIB};
+    CP->setup_resdirs;
+
     # Collect standard style files (presets).
-    for my $cfglib ( @{ CP->findresdirs("config") } ) {
+    my @cfglibs = @{ CP->findresdirs("") };
+    # use DDP; p @cfglibs, as => "cfglibs (for configs, raw)";
+
+    # At this point, we can have one or two libs. The last one is
+    # the ChordPro standard library.
+    # If there are two, the first one is the user config lib.
+    # To this/these we prepend the custom lib.
+    my @c;
+    if ( $preferences{enable_customlib} && $preferences{customlib} ) {
+	push( @c, { src => "custom",
+		    lib => fn_catfile( $preferences{customlib}, "config" ) } );
+    }
+    if ( @cfglibs > 1) {
+	# Split off user config lib.
+	my $u = shift(@cfglibs);
+	# Push back only when !skipping.
+	push( @c, { src => "user",
+		    lib => fn_catfile( $u, "config" ) } )
+	  if !$preferences{skipstdcfg};
+    }
+    # Add ChordPro lib.
+    push( @c, { src => "std",
+		lib => fn_catfile( $cfglibs[-1], "config" ) } );
+    $state{cfglibs} = \@c;
+    # use DDP; p @c, as => "cfglibs (for configs)";
+    # warn("Config libs for configs\n");
+    # warn( sprintf("  %-6s  %s\n", $_->{src}, $_->{lib} ) )
+    #   for @c;
+
+    for ( @c ) {
+	my $cfglib = $_;
+	my $src = $cfglib->{src};
+	$cfglib = $cfglib->{lib};
 	next unless $cfglib && fs_test( d => $cfglib );
 	next unless my $entries = fs_find( $cfglib, $findopts );
+
 	foreach ( @$entries ) {
-	    my $base = basename( $_->{name}, ".json" );
-	    $stylelist{$base} = $_->{name};
+	    my $file = fn_catfile( $cfglib, $_->{name} );
+#	    warn("try $file\n");
+	    next unless fs_test( s => $file );
+
+	    my $data = fs_blob( $file );
+	    $data = json_load( decode_utf8($data), $file );
+	    next if is_true($data->{config}->{omit});
+
+	    my $types;
+	    my %meta = ( src => $src, file => $file );
+	    if ( $data->{config}->{type} ) {
+		$types = $data->{config}->{type};
+		$types = [ $types ] unless is_arrayref($types);
+
+		# If there is a type, it must be one of the supported types.
+		next unless any { /^(?:style|stylemod|instrument|task)$/ } @$types;
+
+		$meta{title}       = $data->{config}->{title};
+		$meta{desc}        = $data->{config}->{description};
+		$meta{exclude_id}  = $data->{config}->{exclude_id};
+		$meta{preview}     = $data->{config}->{preview};
+		$meta{default}     = $data->{config}->{default};
+	    }
+	    else {
+		next if $preferences{skipoldcfg};
+		$types = [ "unknown" ];
+		my $base = fn_basename( $_->{name}, ".json" );
+		$meta{title} = $meta{desc}  = _neat($base);
+	    }
+
+	    for my $type ( @$types ) {
+		$meta{type} = $type;
+
+		if ( $type eq "style" ) {
+		    $styles{lc $meta{title}} = { %$_, %meta };
+		}
+		elsif ( $type eq "stylemod" ) {
+		    $stylemods{lc $meta{title}} = { %$_, %meta };
+		}
+		elsif ( $type eq "instrument" ) {
+		    $instruments{lc $meta{title}} = { %$_, %meta };
+		}
+		elsif ( $type eq "task" ) {
+		    $tasks{lc $meta{title}} = { %$_, %meta };
+		}
+		elsif ( $type eq "unknown" ) {
+		    $stylemods{lc $meta{title}} = { %$_, %meta };
+		}
+	    }
 	}
     }
 
-    # Add custom style presets. if appropriate.
-    my $dir = $preferences{customlib};
-    if ( $preferences{enable_customlib}
-	 && $dir && fs_test( d => ( my $cfglib = "$dir/config" ) ) ) {
+    # Add the tasks and notations.
+    _add_tasks( \%tasks );
+    _add_notations( \my %notes );
+
+    $state{presets} =
+      { styles      => \%styles,
+	tasks       => \%tasks,
+	stylemods   => \%stylemods,
+	instruments => \%instruments,
+	notations   => \%notes,
+      };
+
+#    for ( qw( instruments styles  stylemods tasks notes ) ) {
+#	warn( ucfirst($_), ": ",
+#	      plural( 0+keys(%{$state{presets}{$_}}), " entry", " entries" ), "\n" );
+#    }
+
+    # Associate preset names with actual config files.
+    assoc_presets($_) for qw( instruments styles stylemods );
+    assoc_notations($_) for qw( notations xcodes );
+
+#    use DDP; warn np $state{presets}, as => "presets";
+
+}
+
+sub assoc_presets( $preset ) {
+    my $args = $preferences{"preset_$preset"};
+    my $list = $state{presets}{$preset};
+    my $found;
+    my $multi = $preset eq "stylemods";
+
+    0 and warn("assoc: $preset\n");
+    $preferences{"preset_$preset"} = [];
+    for ( values %$list ) {
+	my $looking_for = lc($_->{title});
+	0 and warn("assoc: looking for $preset ($looking_for)\n");
+	for my $v ( @$args ) {
+	    my $have = $v->{title};
+	    0 and warn("assoc: try $have <> $looking_for\n");
+	    if ( $_->{exclude_id} ) {
+		for my $p ( @{$preferences{"preset_$preset"}} ) {
+		    $have = "", last
+		      if $p->{exclude_id} // "" eq $_->{exclude_id};
+		}
+	    }
+	    push( @{$preferences{"preset_$preset"}}, $_ )
+	      if $have eq $looking_for;
+	    last unless $multi;
+	}
+	last if $found && !$multi;
+    }
+
+    # Look up in the stylemods if not yet found.
+    unless ( $found || $preset =~ /^(stylemods|tasks|notations)$/ ) {
+	for ( values %{$state{presets}{stylemods}} ) {
+	    my $looking_for = lc($_->{title});
+	    0 and warn("assoc: looking for $looking_for in stylemods\n");
+	    for my $v ( @$args ) {
+		my $have = $v->{title};
+		0 and warn("assoc: try $have <> $looking_for\n");
+		push( @{$preferences{"preset_$preset"}}, $_ )
+		  if $have eq $looking_for;
+		last unless $multi;
+	    }
+	    last if $found && !$multi;
+	}
+    }
+
+    return;
+    # use DDP; p $preferences{"preset_$preset"};
+    warn("Presets for $preset\n");
+    warn( sprintf("  %-6s  %s\n", $_->{src}, $_->{title} ) )
+      for @{$preferences{"preset_$preset"}};
+}
+
+sub assoc_notations( $preset ) {
+    my $args = $preferences{"preset_$preset"};
+    my $list = $state{presets}{notations};
+    my $found;
+
+    0 and warn("assoc: $preset\n");
+
+    $preferences{"preset_$preset"} = [ $state{default_notation} ];
+
+    for ( values %$list ) {
+	my $looking_for = lc($_->{title});
+	0 and warn("assoc: looking for $preset ($looking_for)\n");
+	for my $v ( @$args ) {
+	    my $have = $v->{title};
+	    0 and warn("assoc: try $have <> $looking_for\n");
+	    if ( $have eq $looking_for ) {
+		$preferences{"preset_$preset"} = [ $_ ];
+		$found++;
+		last;
+	    }
+	}
+	last if $found;
+    }
+
+    return;
+    # use DDP; p $list, as => "list";
+    # use DDP; p $preferences{"preset_$preset"}, as => "select";
+    warn("Presets for $preset\n");
+    warn( sprintf("  %-6s  %s\n", $_->{src}, $_->{title} ) )
+      for @{$preferences{"preset_$preset"}};
+}
+
+# Fetch available tasks. Called by setup_presets.
+sub _add_tasks( $tasks ) {
+    my @cfglibs;
+    for ( my $i = 0; $i < @{ $state{cfglibs} }; $i++ ) {
+	my $lib = $state{cfglibs}->[$i];
+	push( @cfglibs,
+	      { src => $lib->{src},
+		lib => fn_catfile( fn_dirname($lib->{lib}), "tasks" ) } );
+	pop( @cfglibs ) unless fs_test( d => $cfglibs[-1]->{lib} );
+    }
+    #use DDP; p @cfglibs, as => "cfglibs (for tasks)";
+    #warn("Config libs for tasks\n");
+    #warn( sprintf("  %-6s  %s\n", $_->{src}, $_->{lib} ) )
+    #  for @cfglibs;
+
+    my $findopts = { filter => qr/^.*\.(?:json|prp)$/i, recurse => 0 };
+
+    for ( @cfglibs ) {
+	my $cfglib = $_;
+	my $src = $cfglib->{src};
+	$cfglib = $cfglib->{lib};
 	next unless my $entries = fs_find( $cfglib, $findopts );
+
 	foreach ( @$entries ) {
-	    my $base = basename( $_->{name}, ".json" );
-	    push( @userstyles, $base );
-	    delete $stylelist{$base};
+	    my $file = fn_catfile( $cfglib, $_->{name} );
+	    # warn("try $file\n");
+	    next unless fs_test( s => $file );
+
+	    my $blob = fs_blob( $file );
+	    my $data = json_load( decode_utf8($blob), $file );
+	    next if is_true($data->{config}->{omit});
+
+	    my $types;
+	    my %meta = ( src => $src, file => $file );
+	    if ( $data->{config}->{type} ) {
+		$types = $data->{config}->{type};
+		$types = [ $types ] unless is_arrayref($types);
+		$meta{title} = $data->{config}->{title};
+		$meta{desc}  = $data->{config}->{description};
+		for my $type ( @$types ) {
+		    next unless $type eq "task";
+		    $tasks->{lc $meta{title}} = { %$_, %meta };
+		}
+	    }
+	    else {
+		my $base = fn_basename( $_->{name}, ".json", ".prp" );
+
+		# Tentative title (description).
+		my $desc = _neat($base);
+
+		# See if there's a title in the first line.
+		# E.g. // ChordPro Task: Chords In-line
+		if ( $blob =~ m;(?://|\#)\s*(?:chordpro\s*)?task:\s*(.*);i ) {
+		    $desc = $1;
+		}
+		$meta{title} = $meta{desc}  = $desc;
+		$tasks->{lc $desc} = { %$_, %meta };
+	    }
 	}
     }
-
-    # No need for ChordPro style, it's default.
-    delete $stylelist{chordpro};
-
-    $state{styles}     = [ sort keys %stylelist ];
-    $state{userstyles} = [ sort @userstyles ];
 }
 
 # List of available notation systems.
-sub setup_notations {
-    my $notationlist = $state{notations};
-    return $notationlist if $notationlist && @$notationlist;
-    $notationlist = [ undef ];
+sub _add_notations( $notes ) {
+
+    my @cfglibs;
+    for ( my $i = 0; $i < @{ $state{cfglibs} }; $i++ ) {
+	my $lib = $state{cfglibs}->[$i];
+	push( @cfglibs,
+	      { src => $lib->{src},
+		lib => fn_catfile( $lib->{lib}, "notes" ) } );
+	pop( @cfglibs ) unless fs_test( d => $cfglibs[-1]->{lib} );
+    }
+    # use DDP; p @cfglibs, as => "cfglibs (for notes)";
+    # warn("Config libs for notes\n");
+    # warn( sprintf("  %-6s  %s\n", $_->{src}, $_->{lib} ) )
+    #   for @cfglibs;
+
     my $findopts = { filter => qr/^.*\.json$/i, recurse => 0 };
-    for my $cfglib ( @{ CP->findresdirs( "notes", class => "config" ) } ) {
-	next unless $cfglib && fs_test( d => $cfglib );
+    delete $state{default_notation};
+
+    for ( @cfglibs ) {
+	my $cfglib = $_;
+	my $src = $cfglib->{src};
+	$cfglib = $cfglib->{lib};
 	next unless my $entries = fs_find( $cfglib, $findopts );
+
 	foreach ( @$entries ) {
-	    my $base = basename( $_->{name}, ".json" );
-	    $notationlist->[0] = "common", next
-	      if $base eq "common";
-	    push( @$notationlist, $base );
+	    my $file = fn_catfile( $cfglib, $_->{name} );
+#	    warn("try $file\n");
+	    next unless fs_test( s => $file );
+
+	    my $blob = fs_blob( $file );
+	    my $data = json_load( decode_utf8($blob), $file );
+	    next if is_true($data->{config}->{omit});
+	    my $types = $data->{config}->{type};
+	    next unless $types;
+
+	    my %meta = ( src => $src, file => $file );
+	    $types = [ $types ] unless is_arrayref($types);
+	    $meta{title}   = $data->{config}->{title};
+	    $meta{desc}    = $data->{config}->{description};
+	    $meta{default} = $data->{config}->{default};
+	    $meta{system}  = $data->{notes}->{system};
+	    for my $type ( @$types ) {
+		next unless $type eq "notes";
+		$notes->{lc $meta{title}} = { %$_, %meta };
+		$state{default_notation} =  { %$_, %meta }
+		  if $meta{default};
+	    }
 	}
     }
-    $state{notations} = $notationlist;
+    # use DDP; p $notes, as => "notes";
+    $state{default_notation} or
+      die("ASSERT FAIL: No default notation found\n");
 }
 
-# List of available tasks.
-sub setup_tasks {
-    my @tasks;
-    my @libs = @{ CP->findresdirs("tasks") };
-    my $dir = $preferences{customlib};
-    push( @libs, "$dir/tasks" )
-      if $preferences{enable_customlib} && $dir && fs_test( d => "$dir/tasks" );
-    my $did;
-    my %dups;
-    my $findopts = { filter => qr/^.*\.(?:json|prp)$/i, recurse => 0 };
-    for my $cfglib ( @libs ) {
-	next unless $cfglib && fs_test( d => $cfglib );
-	next unless my $entries = fs_find( $cfglib, $findopts );
-	foreach ( @$entries ) {
-	    my $base = basename( $_->{name}, ".json", ".prp" );
-	    my $file = File::Spec->catfile( $cfglib, $_->{name} );
-
-	    # Tentative title (description).
-	    ( my $desc = $base ) =~ s/_/ /g;
-
-	    # Peek in the first line.
-	    my $line;
-	    my $fd;
-	    $fd = fs_open( $file ) and
-	      $line = <$fd> and
-	      close($fd);
-	    if ( $line =~ m;(?://|\#)\s*(?:chordpro\s*)?task:\s*(.*);i ) {
-		$desc = $1;
-	    }
-	    next if $dups{$desc}++;
-
-	    push( @tasks, [ $desc, $file ] );
-	}
-    }
-    $state{tasks} = \@tasks;
+sub _neat {
+    my ($t ) = @_;
+    $t = ucfirst(lc($t));
+    $t =~ s/_/ /g;
+    $t =~ s/ (.)/" ".uc($1)/eg;
+    $t;
 }
 
 sub setup_filters() {

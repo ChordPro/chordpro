@@ -11,7 +11,7 @@ my $master = 'lib/ChordPro/Version.pm';
 my $version = MM->parse_version($master);
 $master =~ s;/Version;;;
 
-my @bins = qw( chordpro wxchordpro );
+my @bins = qw( chordpro wxchordpro rrjson ttc );
 
 # Module/Version requirements.
 my $mv =
@@ -143,3 +143,15 @@ WriteMakefile
 # Note about the no_index: CPAN and MetaCPAN have differing opinions
 # on how no_index must be interpreted, in particular in combination
 # with provides.
+
+sub MY::postamble {
+    return <<'MAKE_FRAG';
+config :: resources
+
+resources :: lib/ChordPro/Config/Data.pm
+
+lib/ChordPro/Config/Data.pm : lib/ChordPro/res/config/chordpro.json
+	perl script/cfgboot.pl $< -o $@
+
+MAKE_FRAG
+}

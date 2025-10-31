@@ -1,30 +1,15 @@
-// Configuration for Roman Numbers Notation System.
+// Configuration for Roman Notation System.
 
-{
-    // Printing chord grids.
-    "diagrams" : {
-        "show"     :  "none",
-    },
+// IMPORTANT: This stylemod is to make Roman chords look nicer in
+// the PDF output. It does NOT enable parsing and/or transcoding
+// from/to Roman notation!
 
-    // Layout definitions for PDF output.
-
-    "pdf" : {
-
-	// Fonts.
-
-	"fonts" : {
-
-	    // For Roman numbers chord notation, it is best to use
-	    // a serif font.
-	    // FreeSerif is advised since it has additional glyphs for
-	    // flat and sharp.
-	    "chord" : {
-		"name" : "Times-Roman",
-//		"file" : "/usr/share/fonts/gnu-free/FreeSerif.ttf",
-		"size" : 10,
-	    },
-	},
-
-    },
+config {
+    type        : stylemod
+    title       : "Roman"
+    description : "Additional support for Roman chords.\n" \
+     		  "Note that you must also enable Roman notation on the Notations tab,"
 }
-// End of config.
+
+diagrams.show : none
+pdf.fonts.chord : "sans 10"

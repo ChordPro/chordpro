@@ -14,6 +14,14 @@ config {
 
     // Helpful descriptive text.
     description : "Main ChordPro config."
+
+    // Exclusive control.
+    // If multiple configs have the same exclude_id, only one will be used.
+    exclude_id: false
+
+    // True if this is the default config for a specific type.
+    // Do not use unless you know what you are doing!
+    default: true
 }
 
 // Includes are processed first, before the rest of
@@ -148,7 +156,7 @@ metadata {
 // Globally defined (added) meta data,
 // This is explicitly NOT intended for the metadata items above.
 // Do NOT remove or change "_configversion"!
-meta._configversion : [ 6.075 ]
+meta._configversion : "6.081"
 
 // Assets (placeholder).
 assets {}
@@ -456,6 +464,9 @@ pdf {
     // Output paper size, e.g. "a4" or [595,842].
     papersize : a4
 
+    // For future use.
+    page_layout : false
+
     // Theme
     theme {
 
@@ -708,6 +719,9 @@ pdf {
 
         // Show grid context in output.
         show : true
+
+	// Stretch the bar lines vertically.
+	stretch : 0.825
 
         // Colour of special symbols.
         symbols.color : blue

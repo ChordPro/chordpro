@@ -271,6 +271,11 @@ sub Replace( $self, $from=-1, $to=-1, $text="" ) {
     $self->ReplaceSelection($text);
 }
 
+# STC::Remove is missing...
+sub Remove( $self, $from=-1, $to=-1 ) {
+    $self->Replace( $from, $to, "" );
+}
+
 ################ Methods ################
 
 package ChordPro::Wx::TextEditor;

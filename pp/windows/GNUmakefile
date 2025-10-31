@@ -9,8 +9,8 @@ SCRIPT := ${ROOT}/script
 RES    := ..\..\lib\ChordPro\res
 PP     := pp
 PLDIR  := C:\Strawberry
-WXDIR  := C:\wxWidgets-3.2.6
-PERL   := perl530
+WXDIR  := C:\wxWidgets-3.3.1
+PERL   := perl540
 
 all : ppl iss
 
@@ -28,9 +28,11 @@ chordpro.exe : chordpro.pp
 # PATH must be set accordingly.
 # To set PATH from the makefile, we need .ONESHELL pseudo target above.
 
-wxchordpro.exe : chordpro.pp ${COMMON}/chordpro.pp ${COMMON}/wxchordpro.pp
-	perl wxchordpro_pp.pl -o wxchordpro.pp
+wxchordpro.exe : chordpro.pp wxchordpro.pp ${COMMON}/chordpro.pp ${COMMON}/wxchordpro.pp
 	${PP} --output=wxchordpro.exe @wxchordpro.pp ${SCRIPT}/wxchordpro.pl
+
+wxchordpro.pp : ../common/libtool.pl
+	perl $< --output=$@
 
 clean ::
 	del *chordpro.exe
@@ -100,3 +102,8 @@ iss : ${DEST}\wxchordpro.exe innosetup.iss
 
 clean ::
 	-rmdir /q/s ${DEST}
+
+bump ::
+	perl vfix.pl chordpro.rc
+	perl vfix.pl wxchordpro.rc
+	perl vfix.pl

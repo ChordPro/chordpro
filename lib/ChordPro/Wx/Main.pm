@@ -140,7 +140,7 @@ method attach_events() {
 	sbexport  => "OnExportFolder",
 	example   => "OnHelp_Example",
 	site      => "OnHelp_Site",
-	help      => "OnHelp_ChordPro",
+	help      => "OnHelp_Docs",
       );
     while ( my ( $p, $handler ) = each %panels ) {
 	my $panel = $self->{"pn_$p"};
@@ -289,23 +289,6 @@ method init_theme() {
 
 method get_preferences() {
 
-    # Find transcode setting.
-    my $p = lc $preferences{xcode};
-    if ( $p ) {
-	if ( $p eq "-----" ) {
-	    $preferences{enable_xcode} = 0;
-	}
-	else {
-	    my $n = "";
-	    for ( @{ $state{notations} } ) {
-		next unless $_ eq $p;
-		$n = $p;
-		last;
-	    }
-	    $p = $n;
-	}
-    }
-    $preferences{xcode} = $p;
     restorewinpos( $self, "main" );
     $self->Show(1);
 }
@@ -385,6 +368,10 @@ method OnClose($event) {
     return unless $self->check_saved;
     # Save preferences to persistent storage.
     $self->save_preferences;
+    # Stop webview process (GTK).
+    if ( $self->{panel} && $self->{panel}->{webview} ) {
+	$self->{panel}->{webview}->Close;
+    }
     $self->Destroy;
 }
 
@@ -457,10 +444,12 @@ method OnIdle($event) {
 
 }
 
+# From menu.
 method OnHelp_ChordPro($event) {
-    Wx::LaunchDefaultBrowser("https://www.chordpro.org/chordpro/");
+    Wx::LaunchDefaultBrowser("https://www.chordpro.org/chordpro/chordpro-introduction/");
 }
 
+# From menu.
 method OnHelp_Config($event) {
     Wx::LaunchDefaultBrowser("https://www.chordpro.org/chordpro/chordpro-configuration/");
 }
@@ -488,6 +477,12 @@ method OnExpertWhiteSpace($event) {
     }
 }
 
+# From opening panel.
+method OnHelp_Docs($event) {
+    Wx::LaunchDefaultBrowser("https://www.chordpro.org/chordpro/home/");
+}
+
+# From opening panel.
 method OnHelp_Site($event) {
     Wx::LaunchDefaultBrowser("https://www.chordpro.org/");
 }
@@ -558,6 +553,8 @@ method OnPreferences($event) {
 
     # Update the requestor.
     $state{panel}->update_preferences unless $state{mode} eq "initial";
+
+    $self->setup_menubar;
 }
 
 # On the recents list, click selects and displays the file name.

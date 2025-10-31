@@ -278,7 +278,7 @@ sub json_load( $json, $source = "<builtin>" ) {
 	state $pp = JSON::Relaxed::Parser->new( croak_on_error => 0,
 						strict => 0,
 						prp => 1 );
-	my $data = $pp->decode($json);
+	my $data = $pp->decode($json."\n");
 	return $data unless $pp->is_error;
 	$source .= ": " if $source;
 	die("${source}JSON error: " . $pp->err_msg . "\n");
@@ -290,7 +290,7 @@ sub json_load( $json, $source = "<builtin>" ) {
 	$json =~ s/"\s*\\\n\s*"//g;
 
 	$pp->relaxed if $info->{relaxed};
-	$pp->decode($json);
+	$pp->decode($json."\n");
     }
 }
 
@@ -661,5 +661,36 @@ sub enumerated( @s ) {
 }
 
 push( @EXPORT_OK, "enumerated" );
+
+# Determine image type.
+
+sub _detect_image_format( $test ) {
+
+    for ( ref($test) ? $$test : $test ) {
+	/^GIF\d\d[a-z]/            and return 'gif';
+	/^\xFF\xD8\xFF/            and return 'jpeg';
+	/^\x89PNG\x0D\x0A\x1A\x0A/ and return 'png';
+	/^\s*P[1-6]/               and return 'pnm';
+	/^II\x2A\x00/              and return 'tiff';
+	/^MM\x00\x2A/              and return 'tiff';
+	/^<svg\s/is                and return 'svg';
+    }
+
+    # Not recognized.
+    return;
+}
+
+sub detect_image_format( $test ) {
+    my $format = _detect_image_format($test);
+
+    if ( $format ) {
+	return { file_ext => $format, error => "" };
+    }
+    return { file_ext => "", error => "Unrecognized image type." };
+}
+
+push( @EXPORT_OK, "detect_image_format" );
+
+=cut
 
 1;

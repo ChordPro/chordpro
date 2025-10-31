@@ -628,8 +628,6 @@ period-separated configuration keys, an equal sign, and the value.
 For example, the equivalent of command line option `--no-chord-grids` is
 `--define=diagrams.show=0`.
 
-You can also use colons to separate the keys, e.g., `diagrams:show`.
-
 `--define` may be used more than once to set multiple items.
 
 Array items can be addressed with a (final) numeric key, e,g,

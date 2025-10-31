@@ -1,6 +1,54 @@
 # Release info
 
+## 6.090.0
+
+Under development
+
+
+### Highlights
+
+* Configuration files can have a distinguishing type. config.type: style These types can be used to designate a particular purpose for a config. Currently recognized types are: 'instrument', 'style', 'stylemod' and 'task'. Configuration file types are only used in the GUI. All packaged config files are modernized to use these types. Some no longer relevant stylemods have been removed and new ones added.
+
+### GUI Improvements
+
+* The settings dialog has been reworked to support configuration file types. The settings dialog can make use of config properties: config.title  -- a string to show in selections config.description -- a descriptive text for this config config.omit -- do not show this one in the selection list
+* The GUI no longer uses environment variable CHORDPRO_LIB. You must set the custom library explicitly in the settings dialog.
+* Warning: On the 'Preset' Settings dialog, the checkbox 'Ignore Standard Configs' has been renamed to 'Use Standard Configs'. Its meaning is inversed.
+* Breaking: Selected presets for configurations are lost when migrating to this new version. Apologies for the inconvenience.
+
+### Other Improvements
+
+* Improve break handling in ToC. Fixes issue #606.
+* (HTML) Annotations have a distinct td class.
+* Grid bar symbols are better aligned.
+* Grid bar lines can be stretched vertically.
+* scripts/ttc can be used to show the contents of TTF (font collection) files.
+* scripts/rrjson can be used to convert from/to miscellaneous JSON formats.
+
+### Bug Fixes
+
+* Fix E9 and F9 chords. Thanks to Eric Bell.
+* Remove colons from --define in docs and pod.
+* Fix issue 599.
+* Fix problem loading JSON files that end with a comment line that has no line ending.
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.  
+Please use the [issue tracker](https://github.com/ChordPro/chordpro/issues) for bugs reports.
+
 ## 6.080.1
+
+Released: 2025-08-28
+
+* Reworded symbols insert dialog.
+* Re-enable (experimental) songbook loading.
+* Fix outlines sorting.
+* Add dependency Unicode::Collate.
+* Trimmed usage message for reference mode.
+* Prevent warning when a delegate is set to null.
+
+## 6.080
 
 Released: 2025-08-18
 
@@ -67,24 +115,6 @@ Released: 2025-08-18
 * Fix #555, #550, #542, #315, #569.
 * Fix crash with {comment: [chord]} in 2-pass mode.
 * Fix problems with images in 2-pass mode.
-
-## 6.080.1
-
-Released: 2025-08-28
-
-* Reworded symbols insert dialog.
-* Re-enable (experimental) songbook loading.
-* Fix outlines sorting.
-* Add dependency Unicode::Collate.
-* Trimmed usage message for reference mode.
-* Prevent warning when a delegate is set to null.
-
-### Social and support
-
-[User community](https://groups.io/g/ChordPro) for feedback and help.  
-Please use the [issue tracker](https://github.com/ChordPro/chordpro/issues) for bugs reports.
-
-
 
 ## 6.070
 

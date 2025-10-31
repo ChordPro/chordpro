@@ -4,9 +4,9 @@
 
 # Author          : Johan Vromans
 # Created On      : Mon Jun  3 08:14:35 2024
-# Last Modified By: 
-# Last Modified On: Mon Jun  3 14:06:25 2024
-# Update Count    : 53
+# Last Modified By: Johan Vromans
+# Last Modified On: Fri Sep 26 20:45:43 2025
+# Update Count    : 56
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -16,6 +16,7 @@ use feature 'signatures';
 no warnings 'experimental::signatures';
 use FindBin;
 use lib "$FindBin::Bin/../lib";
+use lib "$FindBin::Bin/../CPAN";
 use lib "$FindBin::Bin/../lib/ChordPro/lib";
 
 # Package name.
@@ -80,7 +81,7 @@ use JSON::Relaxed::Parser qw();
 use feature qw(state);
 EOD
 
-print "\nour \$VERSION = ", $data->{meta}->{_configversion}->[0], ";\n\n";
+print "# Config version.\nour \$VERSION = ", $data->{meta}->{_configversion}, ";\n\n";
 
 print <<'EOD';
 sub config {

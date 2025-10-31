@@ -1,14 +1,16 @@
-{
-    "pdf" : {
-        "theme" : {
-            "foreground" : "white",
-            "foreground-light" : "#555555",
-            "background" : "black",
-        },
-        "fonts" : {
-            "chord" : {
-                "color" : "red",
-            },
-        },
-    },
+// ChordPro Config
+
+config {
+  title       : "Dark Mode"
+  type        : stylemod
+  description : "Emulation of a dark mode."
+}
+
+pdf {
+  theme {
+    foreground       : white
+    foreground-light : #555555
+    background       : black
+  }
+  fonts.chord.color : red
 }

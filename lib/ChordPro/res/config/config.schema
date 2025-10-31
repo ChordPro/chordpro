@@ -1305,10 +1305,7 @@
           "properties": {
             "_configversion": {
               "description": "Config file version.",
-              "type": "array",
-              "uniqueItems": true,
-              "items": {
-                "oneOf": [
+              "oneOf": [
                   {
                     "type": "string"
                   },
@@ -1316,7 +1313,6 @@
                     "type": "number"
                   }
                 ]
-              }
             }
           },
           "default": {
@@ -2204,6 +2200,11 @@
                       "type": "boolean",
                       "default": true
                     },
+                    "stretch": {
+                      "description": "Stretch grid lines vertically.",
+                      "type": "number",
+                      "default": 0.825
+                    },
                     "symbols": {
                       "description": "Properties of special symbols.",
                       "type": "object",
@@ -2475,6 +2476,12 @@
                     }
                   ]
                 },
+		"page_layout": {
+		  "description": "For future use.",
+		  "oneOf": [ { "type": "string"  },
+		  	     { "type": "boolean" } ],
+                  "default": false
+		},
                 "papersize": {
                   "description": "Output paper size.\nThe size can be specified either as the name of a known page size, e.g. \"a4\", or as a 2-element list containing the width and height of the page in PDF units (DTP points, pt, 1/72 inch).",
                   "oneOf": [

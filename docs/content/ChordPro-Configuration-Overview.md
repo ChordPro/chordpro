@@ -8,6 +8,10 @@ description: "Configuration: Overview"
 The way the output is formatted and some behavioural aspects of the
 reference implementation are configurable via configuration files.
 
+{{< toc >}}
+
+## Configuration file format
+
 ChordPro configuration files are JSON files. However, since JSON can
 be tedious and error prone to maintain, ChordPro uses a special
 relaxed version of JSON: Really Relaxed JSON (RRJSON).
@@ -77,7 +81,7 @@ In this documentation we will preferably use RRJSON format, although
 the stricter JSON format can be still be seen in several places for
 legacy reasons.
 
-## Converting configuration files
+### Converting configuration files
 
 Config files in JSON, RJSON, RRJSON and PRP formats can easily be
 converted to RRJSON format:
@@ -102,6 +106,94 @@ becomes, after conversion:
 settings.chordnames : strict
 
 // End of Config.
+````
+
+## Configuration types
+
+Configuration files can have `config` properties to designate the
+purpose of the file. For example,
+
+````
+config.title       : ChordPro
+config.description : "Main ChordPro config."
+config.type        : style
+````
+
+The `title` and `description` are used by the ChordPro GUI to show in
+the menus and choice lists, as you can see on [The Presets tab]({{<
+relref "/chordpro-gui-settings/#the-presets-tab" >}}),
+
+### `config.type: instrument`
+
+This config defines an instrument, e.g. a guitar or a keyboard.
+From the GUI, you must select one instrument.
+
+Instrument config must set the properties `instrument.type`,
+`instrument.description` and `tuning`. It may contain `chords`.
+
+````
+instrument.description : "Guitar, 6 strings, standard tuning"
+instrument.type        : guitar
+tuning                 : [ E2 A2 D3 G3 B3 E4 ]
+````
+
+If an instrument has chords, ChordPro will try to provide chord
+diagrams.
+These will be string diagrams for all instruments except keyboard.
+The instrument config may contain other settings specific for the
+diagrams, e.g.
+````
+pdf.diagrams.vcells : 4
+````
+
+### `config.type: style`
+
+This type of configuration file defines the style and layout of the
+generated output document. This includes settings for paper formats,
+page margins, columns and fonts.
+From the GUI, you must select one style.
+
+ChordPro always uses its built-in style as a default, so anything that
+is default does not need to be specified in a style. For example, this
+is the complete `Modern 1` style (excluding comments):
+````
+config.title : "Modern 1"
+config.description : "Nice, modern look with sans-serif fonts."
+config.type : style
+pdf.chorus.indent : 12
+pdf.chorus.bar.width : 0.5
+pdf.fonts.title : "sans-serif bold"
+pdf.fonts.text : sans-serif
+pdf.fonts.toc : sans-serif
+````
+
+### `config.type: stylemod`
+
+Stylemods are intended to make one or more functionally related
+changes to the selected style.
+From the GUI, you can select zero or more stylemods from the choice
+list.
+
+For example, a stylemod to show chords in-line:
+````
+config.type : stylemod
+config.title : "Inline Chords"
+config.description : "Chords are placed within the lyrics."
+settings.suppress-empty-chords : true
+settings.inline-chords : true
+pdf.fonts.chord.description : "sans 10"
+pdf.fonts.annotation.description : "sans 10"
+````
+
+### `config.type: task`
+
+Tasks are functionally similar to stylemods, but instead of being
+permanently selected from the Settings dialog, they can be invoked
+ad-hoc from the `Tasks` menu.
+
+You can designate a stylemod to be used as a task as well with:
+````
+config.type : [ stylemod task ]
 ````
 
 ## Standard configuration files
@@ -248,6 +340,9 @@ examples, the key is `diagrams.auto` and the value is `true`.
 Note that not all config items can be adjusted this way.
 
 ## Property files
+
+_Property files are obsolete. Please convert them as described
+[above]({{< relref "#converting-configuration-files" >}})._
 
 ChordPro also provides support for
 [PRP](https://github.com/sciurius/perl-Json-Relaxed) files.

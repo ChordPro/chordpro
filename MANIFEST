@@ -10,8 +10,8 @@ lib/ChordPro/A2Crd.pm
 lib/ChordPro/Chords.pm
 lib/ChordPro/Chords/Appearance.pm
 lib/ChordPro/Chords/Parser.pm
-lib/ChordPro/Config.pm
 lib/ChordPro/Config/Data.pm
+lib/ChordPro/Config.pm
 lib/ChordPro/Config/Properties.pm
 lib/ChordPro/Delegate/ABC.pm
 lib/ChordPro/Delegate/Lilypond.pm
@@ -44,6 +44,7 @@ lib/ChordPro/Testing.pm
 lib/ChordPro/Utils.pm
 lib/ChordPro/Version.pm
 lib/ChordPro/Wx.pm
+lib/ChordPro/Wx/CheckListBox.pm
 lib/ChordPro/Wx/Config.pm
 lib/ChordPro/Wx/Editor.pm
 lib/ChordPro/Wx/EditorPanel.pm
@@ -135,6 +136,7 @@ lib/ChordPro/res/config/chordpro.json
 lib/ChordPro/res/config/config.schema
 lib/ChordPro/res/config/config.tmpl
 lib/ChordPro/res/config/dark.json
+lib/ChordPro/res/config/diagramsright.json
 lib/ChordPro/res/config/guitar-br.json
 lib/ChordPro/res/config/guitar-ly.json
 lib/ChordPro/res/config/guitar.json
@@ -142,10 +144,13 @@ lib/ChordPro/res/config/guitar_latex.json
 lib/ChordPro/res/config/inline.json
 lib/ChordPro/res/config/keyboard.json
 lib/ChordPro/res/config/mandolin-ly.json
+lib/ChordPro/res/config/lyricsonly.json
 lib/ChordPro/res/config/modern1.json
 lib/ChordPro/res/config/modern2.json
 lib/ChordPro/res/config/modern3.json
+lib/ChordPro/res/config/musejazz.json
 lib/ChordPro/res/config/nashville.json
+lib/ChordPro/res/config/nodiagrams.json
 lib/ChordPro/res/config/notes/common.json
 lib/ChordPro/res/config/notes/dutch.json
 lib/ChordPro/res/config/notes/german.json
@@ -154,6 +159,7 @@ lib/ChordPro/res/config/notes/nashville.json
 lib/ChordPro/res/config/notes/roman.json
 lib/ChordPro/res/config/notes/scandinavian.json
 lib/ChordPro/res/config/notes/solfege.json
+lib/ChordPro/res/config/oddspreadsview.json
 lib/ChordPro/res/config/roman.json
 lib/ChordPro/res/config/songbook_latex.json
 lib/ChordPro/res/config/ukulele-ly.json
@@ -216,9 +222,12 @@ lib/ChordPro/res/templates/guitar_songbook.tt
 lib/ChordPro/res/templates/image.tt
 lib/ChordPro/res/templates/songbook.tt
 lib/ChordPro/res/templates/cover.cho
+script/cfgboot.pl
 script/chordpro.pl
 script/ppchordpro.PL
+script/rrjson.pl
 script/wxchordpro.pl
+script/ttc.pl
 t/00_basic.pl
 t/01_prereq.t
 t/02_load.t

@@ -15,10 +15,7 @@ PP     := perl ./pp.pl
 # Check if we build on Intel or ARM
 ARCH   := $(shell uname -m)
 
-default : checklibs dmg
-
-checklibs :
-	perl libtool.pl --checklibs
+default : dmg
 
 # PAR Packer.
 
@@ -26,7 +23,7 @@ chordpro : chordpro.pp ${COMMON}/chordpro.pp
 	${PP} --output=chordpro @chordpro.pp ${SCRIPT}/chordpro.pl
 
 wxchordpro : chordpro.pp ${COMMON}/chordpro.pp ${COMMON}/wxchordpro.pp
-	perl libtool.pl --pp=wxchordpro.pp
+	perl ../common/libtool.pl --output=wxchordpro.pp
 	${PP} --output=wxchordpro @wxchordpro.pp ${SCRIPT}/wxchordpro.pl
 
 clean ::
@@ -57,22 +54,31 @@ copy_coredll :
 PREFIX := '"script/"'
 CCOPTS := $(shell perl -MExtUtils::Embed -e ccopts) -DSCRIPTPREFIX=${PREFIX}
 LDOPTS := ${DEST}/${PERLSO} -lpthread
+# ? LDOPTS := ${DEST}/${PERLSO} -lpthread -Xlinker -rpath -Xlinker .
+
 ifeq (${TARGET},wxchordpro)
 WXCLIB := $(shell perl -MAlien::wxWidgets -E 'say Alien::wxWidgets->prefix')
 WXCNFG := ${WXCLIB}/bin/wx-config
 endif
 
+LOADERS := "${DEST}/chordpro"
+ifeq (${TARGET},wxchordpro)
+LOADERS += "${DEST}/wxchordpro" "${DEST}/dndhandler"
+endif
+
 .PHONY :: loaders
-loaders : "${DEST}/${TARGET}" "${DEST}/chordpro"
+loaders : ${LOADERS}
 
 # For testing...
 .PHONY :: _loaders
 _loaders : "${DEST}/chordpro"
 	cp "${DEST}/chordpro" "${DEST}/perl"
 
-"${DEST}/wxchordpro" : ${BASE}/ppl.c dndhandler.swift
-	${CC} -DMACOS ${CCOPTS} -o "${DEST}/wxchordpro" -L${DEST} ${LDOPTS} ${BASE}/ppl.c
+"${DEST}/dndhandler" : dndhandler.swift
 	swiftc dndhandler.swift -target ${ARCH}-apple-macos10.15 -o "${DEST}/dndhandler"
+
+"${DEST}/wxchordpro" : ${BASE}/ppl.c
+	${CC} -DMACOS ${CCOPTS} -o "${DEST}/wxchordpro" -L${DEST} ${LDOPTS} ${BASE}/ppl.c
 
 "${DEST}/chordpro" : ${BASE}/ppl.c
 	${CC} -DMACOS ${CCOPTS} -o "${DEST}/chordpro" -L${DEST} ${LDOPTS} ${BASE}/ppl.c
@@ -97,8 +103,9 @@ app1 :
 	cd "${APPDIR}"; mv script lib Contents/MacOS
 	cd "${APPDIR}"; mv lib*.dylib Contents/MacOS
 	cd "${APPDIR}"; rm -f MANIFEST META.yml
+	cd "${APPDIR}"; mv chordpro Contents/MacOS
 ifeq (${TARGET},wxchordpro)
-	cd "${APPDIR}"; mv chordpro wxchordpro dndhandler Contents/MacOS
+	cd "${APPDIR}"; mv wxchordpro dndhandler Contents/MacOS
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib*.dylib
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*.bundle
 	perl ./reloc.pl ${APPDIR}/Contents/MacOS/lib/auto/Wx/*/*.bundle

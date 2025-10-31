@@ -5,7 +5,7 @@ description: "Installation on Debian"
 
 # Installation on Debian
 
-For current Debian systems, ChordPro is available as a standard
+For some Debian systems, ChordPro may be available as a standard
 package. You can install it with:
 
 ````
@@ -17,50 +17,58 @@ sudo apt-get install chordpro
 
 Debian LTS and Debian based systems like Ubuntu LTS install by default
 a subset of the wxWidgets packages. As a result, the ChordPro GUI can
-not use its embedded PDF viewer.
+not function fully.
 
 To fully enjoy ChordPro GUI on these systems, perform the following steps.
 
-1. Add the missing wxWidgets component:
+1. Add the missing wxWidgets components
 ````
-sudo apt-get install libwxgtk-webview3.2-dev
+sudo apt-get install libwxgtk-webview3.2-dev libwxgtk-media3.2-dev
 ````
-2. Remove the distributed Alien::wxWidgets and Wx packages:
+2. Remove the distributed Alien::wxWidgets and Wx packages
 ````
 sudo apt-get remove libalien-wxwidgets-perl libwx-perl
 sudo apt-get purge libalien-wxwidgets-perl libwx-perl
 ````
-3. Install `cpanm`, if you don't already have it:
+3. Install `cpanm`, if you don't already have it
 ````
 sudo apt-get install cpanminus
 ````
-4. Rebuild (not reinstall!) Alien::wxWidgets:
-````
-sudo cpanm https://github.com/sciurius/perl-Alien-wxWidgets/releases/download/R0.71/Alien-wxWidgets-0.71.tar.gz
-````
-5. Rebuild (not reinstall!) Wx from the ChordPro site:
-````
-sudo cpanm https://github.com/chordpro/chordpro/releases/download/R6.070/Wx-3.005.tar.gz
-````
+4. Rebuild (not reinstall!) Alien::wxWidgets
 
-6. Install ChordPro:
+   _Consult https://github.com/sciurius/perl-Alien-wxWidgets/releases/
+   for the latest release of Alien::wxWidgets. Substitute the actual 
+   version number for the "0.000" in the URL below._
 
 ````
-sudo cpanm https://github.com/chordpro/chordpro/releases/download/R6.070/App-Music-ChordPro-6.070.7.tar.gz
+cpanm --sudo https://github.com/sciurius/perl-Alien-wxWidgets/releases/download/latest/Alien-wxWidgets-0.000.tar.gz
+````
+5. Rebuild (not reinstall!) Wx
+
+   _Consult https://github.com/sciurius/wxPerl/releases/
+   for the latest release of Wx. Substitute the actual version
+   number for the "0.000" in the URL below._
+
+````
+cpanm --sudo --notest https://github.com/sciurius/wxPerl/releases/download/latest/Wx-0.000.tar.gz
 ````
 
-It the source kit cannot be found, visit the [ChordPro
-Releases](https://github.com/chordpro/chordpro/releases/R6.070/)
-page on GitHub. Scroll down to the assets and note the actual release
-number as shown with `App-Music-ChordPro-`_XXX_`.tar.gz`. Retry the
-above `sudo cpan` command using the actual kit name.
+6. Install ChordPro
+
+   _Consult https://github.com/chordpro/chordpro/releases/
+   for the latest release of ChordPro. Substitute the actual version
+   number for the "0.000" in the URL below._
+
+````
+cpanm --sudo https://github.com/chordpro/chordpro/releases/download/latest/App-Music-ChordPro-0.000.tar.gz
+````
 
 To check for successful install, run `chordpro --version`. That should
 return a result similar to
 
-    This is ChordPro version 6.070
+    This is ChordPro version {{< chordpro_version >}}
 
-(The version number may be higher.)
+(The version number may differ.)
 
 # Running Chordpro
 
