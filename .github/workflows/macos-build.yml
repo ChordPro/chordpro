@@ -47,12 +47,6 @@ jobs:
       - name: Set up wxWidgets
         run: brew install wxwidgets@3.2
 
-      - name: Fix wxWidgets
-        run: |
-          which wx-config
-          which wx-config-3.2
-          exit 1
-        
       # No use to proceed if we do not have all wx components.
       - name: Check libraries
         run: perl pp/macos/libtool.pl
@@ -67,9 +61,9 @@ jobs:
           tar xf awx.tgz
           cd Alien-wxWidgets-$AWV
           cpanm --installdeps --notest .
-          perl ./Build.PL --wxWidgets-build=0
-          perl ./Build
-          perl ./Build install
+          env WX_CONFIG=wx-config-3.2 perl ./Build.PL --wxWidgets-build=0
+          env WX_CONFIG=wx-config-3.2 perl ./Build
+          env WX_CONFIG=wx-config-3.2 perl ./Build install
           cd ..
           rm -fr Alien-wsWidgets-$AWV
           wx-config --list
