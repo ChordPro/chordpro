@@ -18,7 +18,7 @@ prod :: prep
 	    Dockerfile > Dockerfile.tmp
 	${DOCKER} build ${BUILDARGS} --file Dockerfile.tmp \
 	    --target chordpro-prod \
-	    --tag chordpro/chordpro:${VERSION} \
+	    --tag chordpro/chordpro:v${VERSION} \
 	    --tag chordpro/chordpro:latest .
 
 dev :: prep
@@ -43,9 +43,9 @@ clean ::
 # publish:
 #
 # Always tag latest as vX.YYY and vX.YYY.x
-# docker tag chordpro/chordpro:latest chordpro/chordpro:v6.060.0
-# docker tag chordpro/chordpro:latest chordpro/chordpro:v6.060
-# docker push chordpro/chordpro:v6.060.0
-# docker push chordpro/chordpro:v6.060
+# docker tag chordpro/chordpro:latest chordpro/chordpro:v6.090.0
+# docker tag chordpro/chordpro:latest chordpro/chordpro:v6.090
+# docker push chordpro/chordpro:v6.090.0
+# docker push chordpro/chordpro:v6.090
 # docker push chordpro/chordpro:latest
 
