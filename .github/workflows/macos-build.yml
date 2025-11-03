@@ -51,7 +51,7 @@ jobs:
         run: |
           echo $PATH
           wx-config-3.2 --prefix --version
-          sudo install `which wx-config-3.2` /usr/local/bin
+          sudo install `which wx-config-3.2` /usr/local/bin/wx-config
 
       # No use to proceed if we do not have all wx components.
       - name: Check libraries
