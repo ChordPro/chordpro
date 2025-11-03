@@ -47,6 +47,9 @@ jobs:
       - name: Set up wxWidgets
         run: brew install wxwidgets@3.2
 
+      - name: Check wxWidgets
+        run: wx-config-3.2 --prefix --version
+
       # No use to proceed if we do not have all wx components.
       - name: Check libraries
         run: perl pp/macos/libtool.pl
