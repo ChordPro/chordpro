@@ -1,4 +1,4 @@
-name: Full Build on macOS
+name: Full Build on macOS (ARM)
 
 # Open a new branch 'macosbuild' and push this workflow to it.
 # Maybe adjust the version as well.
@@ -16,23 +16,15 @@ on:
   push:
     branches:
       - macosbuild
-      - M6.079.0
 
 env:
   AWV: 0.72
+  WXP: 3.009
 
 jobs:
 
-  macOS:
-    # macOS 13 = Intel
-    # macOS 14 = Apple Silicon (ARM)
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - macos-14
-
-    runs-on: ${{ matrix.os }}
+  macARM:
+    runs-on: macos-14
 
     steps:
 
@@ -45,8 +37,12 @@ jobs:
       - name: Install cpanm
         run: brew install cpanm
 
+      # Install wxWidgets 3.2.
+      # This installs wx-config as wx-config-3.2, so fix that.
       - name: Set up wxWidgets
-        run: brew install wxwidgets
+        run: |
+          brew install wxwidgets@3.2
+          sudo install `which wx-config-3.2` /usr/local/bin/wx-config
 
       # No use to proceed if we do not have all wx components.
       - name: Check libraries
@@ -73,13 +69,11 @@ jobs:
 
       - name: Install wxPerl
         run: |
-          cpanm https://github.com/sciurius/wxPerl/releases/download/R3.008/Wx-3.008.tar.gz --notest || cat $HOME/.cpanm/build.log
-          cat $HOME/.cpanm/build.log
+          cpanm https://github.com/sciurius/wxPerl/releases/download/R$WXP/Wx-$WXP.tar.gz --notest || ( cat $HOME/.cpanm/build.log; false )
 
       - name: Install other dependencies
         run: |
-          cpanm PAR::Packer
-          cpanm https://github.com/sciurius/perl-HarfBuzz-Shaper/releases/download/R0.028/HarfBuzz-Shaper-0.028.tar.gz
+          cpanm PAR::Packer HarfBuzz::Shaper
           cpanm --installdeps --notest .
 
       - name: Run Test suite
@@ -90,14 +84,7 @@ jobs:
       - name: Build DMG
         run: make -C pp/macos
 
-      - if: ${{ matrix.os == 'macos-13' }}
-        uses: actions/upload-artifact@v4
-        with:
-          compression-level: 0
-          name: Upload_DMG_macOS_INTEL
-          path: pp/macos/ChordPro*INTEL.dmg
-
-      - if: ${{ matrix.os != 'macos-13' }}
+      - name: Upload DMG
         uses: actions/upload-artifact@v4
         with:
           compression-level: 0
