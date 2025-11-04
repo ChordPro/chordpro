@@ -16,6 +16,23 @@ installed with `dnf` or `yum`. On Debian/Ubuntu-based systems use the
 $ sudo apt-get install chordpro
 ````
 
+## AppImage
+
+The ChordPro [release page](https://github.com/ChordPro/chordpro/releases) provides [AppImage](https://appimage.org/) kits, suitable for
+most Linux systems. You may have to try all of them to find the one
+suitable for your system.
+
+The [AppImage](https://appimage.org/) site contains a lot of
+documentation on how to install and run AppImages.
+
+If starting the AppImage complains about FUSE, see
+[here](https://docs.appimage.org/user-guide/troubleshooting/fuse.html#the-appimage-tells-me-it-needs-fuse-to-run).
+If it complains about GLIBC versions, try another AppImage.
+
+If you have a working AppImage, you can install it as `wxchordpro` for
+convenience. If you install it as `chordpro` it will run the command
+line version of ChordPro.
+
 ## CPAN install
 
 Assuming your Linux systems has the Perl environment correctly
