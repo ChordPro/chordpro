@@ -166,8 +166,8 @@ _wkit :
 
 _wkiti :
 	cp ${WINDST}/pp/windows/ChordPro-Installer*.exe \
-	  ${HOME}/tmp/ChordPro-Installer-6-80-dev-msw-x64.exe
-	scp ${HOME}/tmp/ChordPro-Installer-6-80-dev-msw-x64.exe \
+	  ${HOME}/tmp/ChordPro-Installer-6-90-dev-msw-x64.exe
+	scp ${HOME}/tmp/ChordPro-Installer-6-90-dev-msw-x64.exe \
 	  chordpro-site:www/dl/
 
 _wkit_startvm :
