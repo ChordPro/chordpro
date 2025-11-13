@@ -1,3 +1,10 @@
+6.xxx.x
+
+    !Highlights
+
+    - Added a new configuration setting `settings.wraplines` to
+      control line wrapping. Enabled by default.
+
 6.090.0
 
     !Highlights

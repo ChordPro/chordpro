@@ -917,6 +917,11 @@
               "type": "string",
               "default": "x"
             },
+            "wraplines": {
+              "description": "Wrap long lines. This may trigger issue #355.",
+              "type": "boolean",
+              "default": true
+            },
             "flowtext": {
               "description": "Consider text flowed.",
               "type": "boolean",

@@ -107,6 +107,9 @@ settings {
     // doesn't have the glyphs.
     maj7delta : false
 
+    // Wrap long lines. This may trigger siiue #355.
+    wraplines : true
+
     // Indent for wrapped lines. Actual indent is the stringwidth.
     wrapindent : x
 

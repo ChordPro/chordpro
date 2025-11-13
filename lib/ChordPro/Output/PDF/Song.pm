@@ -2365,6 +2365,8 @@ sub tpt {
 
 sub wrap {
     my ( $pr, $elt, $x ) = @_;
+    return [ $elt ] unless $::config->{settings}->{wraplines};
+
     my $res = [];
     my @chords  = @{ $elt->{chords} // [] };
     my @phrases = @{ defrag( $elt->{phrases} // [] ) };
@@ -2443,6 +2445,7 @@ sub wrap {
 sub wrapsimple {
     my ( $pr, $text, $x, $font ) = @_;
     return ( "", "" ) unless length($text);
+    return ( $text, "" ) unless $::config->{settings}->{wraplines};
 
     $font ||= $pr->{font};
     $pr->setfont($font);

@@ -100,6 +100,9 @@ of them can be changed from the command line.
 	  // doesn't have the glyphs.
 	  maj7delta : false
 
+	  // Wrap long lines. This may trigger issue #355.
+	  wraplines : true
+
 	  // Indent for wrapped lines. Actual indent is the stringwidth.
 	  wrapindent : x
 
