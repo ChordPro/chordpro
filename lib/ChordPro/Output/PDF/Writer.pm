@@ -127,7 +127,6 @@ sub pdf_date {
 
 sub wrap {
     my ( $self, $text, $m ) = @_;
-    Carp::confess("Writer::wrap");
 
     my $ex = "";
     my $sp = "";
