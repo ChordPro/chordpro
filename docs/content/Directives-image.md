@@ -220,7 +220,10 @@ Alternatively, an asset id can be used:
 Finally, chord diagrams are images too:
 
     chord="Am7"
-	
+
+By writing the chord name between chord brackets `[ ]` the chord will
+be eligible for transposing/transcoding.
+
 Other attributes are:
 
 `width=`_NNN_
