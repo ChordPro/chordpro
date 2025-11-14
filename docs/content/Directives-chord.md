@@ -8,11 +8,16 @@ description: "Directives: chord"
 This directive is similar to [define]({{< relref "Directives-define" >}}) but it only displays the chord immediately in the song where the directive occurs.
 
 `{chord:` _name_`}`  
+`{chord:[` _name_`]}`  
 `{chord:` _name_ `base-fret` _offset_ `frets` _pos_ _pos_ … _pos_`}`  
 `{chord:` _name_ `base-fret` _offset_ `frets` _pos_ _pos_ … _pos_ `fingers` _pos_ _pos_ … _pos_`}`
 
 _name_ is the name to be used for this chord. If the directive is
 used to show a known chord the rest of the arguments may be omitted.
+
+The chords are not transposed or transcoded unless you write the
+chord name between chord brackets `[ ]`. In this case not other
+attributes may be specified.
 
 See [define]({{< relref "Directives-define" >}}) for all possible arguments.
 

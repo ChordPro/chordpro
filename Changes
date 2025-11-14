@@ -5,6 +5,8 @@
     - Added a new configuration setting `settings.wraplines` to
       control line wrapping. Enabled by default.
 
+    - Chords in `{define}` and `{chord}` can now be transposable.
+
 6.090.0
 
     !Highlights

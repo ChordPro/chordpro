@@ -948,8 +948,12 @@ sub decompose {
     undef $orig if $orig eq $line;
     $line =~ s/\s+$//;
     my @a = split( $re_chords, $line, -1);
-
     if ( @a <= 1 ) {
+	# For the exceptional case you need brackets [] in your lyrics
+	# or annotations.
+	if ( my $a = $config->{parser}->{altbrackets} ) {
+	    eval "\$line =~ tr/$a/[]/";
+	}
 	return ( phrases => [ $line ],
 		 $orig ? ( orig => $orig ) : (),
 	       );
@@ -1868,7 +1872,14 @@ sub dir_image {
 	    return;
 	}
     }
-    $uri = "chord:$chord" if $chord;
+
+    if ( $chord ) {
+	if ( $chord =~ /^\[(.*)\]$/ ) { # transposable
+	    my $info = $self->parse_chord($1);
+	    $chord = $info->{name} if $info;
+	}
+	$uri = "chord:$chord";
+    }
 
     my $aid = $id || "_Image".$assetid++;
 
@@ -2423,11 +2434,22 @@ sub define_chord {
     return 1 if $fail;
     # All options are verified and stored in %kv;
 
+    my $fixed = 1;		   # not transposable
+    if ( $name =~ /^\[(.*)\]$/ ) { # transposable
+	if ( %kv > 1 ) {
+	    use DDP; p %kv;
+	    do_warn("Transposable chord $name does not allow attributes");
+	    %kv = ();
+	}
+	$name = $1;
+	$fixed = 0;
+    }
+
     # Result structure.
     my $res = { name => $name };
 
     # Try to find info.
-    my $info = $self->parse_chord( $name, "def" );
+    my $info = $self->parse_chord( $name, $fixed );
     if ( $info ) {
 	# Copy the chord info.
 	$res->{$_} //= $info->{$_} // ''
@@ -2571,6 +2593,11 @@ sub parse_chord {
     my ( $self, $chord, $def ) = @_;
 
     my $debug = $config->{debug}->{chords};
+
+    if ( $chord =~ /^\[(.*)\]$/ ) {
+	$chord = $1;
+	$def = 0;
+    }
 
     warn("Parsing chord: \"$chord\"\n") if $debug;
     my $info;

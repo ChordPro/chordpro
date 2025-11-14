@@ -1045,13 +1045,16 @@ method parse( $ctx, $k, $v ) {
 	    my ( $k, $v ) = ( $1, $2 );
 
 	    # Ignore case unless required.
-	    $v = lc $v unless $k =~ /^(id|chord)$/;
+	    $v = lc $v unless $k =~ /^(id|chord|src)$/;
 
-	    if ( $k =~ /^(id|bbox|chord|src)$/ ) {
+	    if ( $k =~ /^(chord|src)$/ ) {
 		if ( $v =~ /^(chord|builtin):/ ) {
 		    $k = $1;
 		    $v = $';
 		}
+		$ctl{$k} = $v;
+	    }
+	    elsif ( $k =~ /^(id|bbox)$/ ) {
 		$ctl{$k} = $v;
 	    }
 	    elsif ( $k eq "align" && $v =~ /^(left|right|center)$/ ) {
