@@ -7,6 +7,10 @@
 
     - Chords in `{define}` and `{chord}` can now be transposable.
 
+    !Bug Fixes
+
+    - Fixed issue #315, #357, #512, #541 and more.
+
 6.090.0
 
     !Highlights
