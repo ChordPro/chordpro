@@ -2691,7 +2691,14 @@ sub parse_chord {
 	if ( $xc && $info ) {
 		my $key_ord;
 		if ( $self->{meta}->{key} ) {
-			my $key_info = $self->{chordsinfo}->{$self->{meta}->{key}->[-1]};
+			my $key_name = $self->{meta}->{key}->[-1];
+			my $key_info = $self->{chordsinfo}->{$key_name};
+			
+			# If the key was already transcoded, get the original
+			if ( $key_info->{xc} ) {
+				$key_info = $key_info->{xc};
+			}
+			
 			$key_ord = $key_info->{root_ord};
 			# For Nashville/Roman notation, convert minor keys to relative major
 			if ( $xcmov && $key_info->{qual_canon} && $key_info->{qual_canon} eq "-" ) {
