@@ -2688,15 +2688,24 @@ sub parse_chord {
 	}
     }
 
-    if ( $xc && $info ) {
-	my $key_ord;
-	$key_ord = $self->{chordsinfo}->{$self->{meta}->{key}->[-1]}->{root_ord}
-	  if $self->{meta}->{key};
-	if ( $xcmov && !defined $key_ord ) {
-	    do_warn("Warning: Transcoding to $xc without key may yield unexpected results\n");
-	    undef $xcmov;
-	}
-	my $i = $info->transcode( $xc, $key_ord );
+	if ( $xc && $info ) {
+		my $key_ord;
+		if ( $self->{meta}->{key} ) {
+			my $key_info = $self->{chordsinfo}->{$self->{meta}->{key}->[-1]};
+			$key_ord = $key_info->{root_ord};
+			# For Nashville/Roman notation, convert minor keys to relative major
+			if ( $xcmov && $key_info->{qual_canon} && $key_info->{qual_canon} eq "-" ) {
+				# Minor key: transpose up 3 semitones to get relative major
+				my $p = ChordPro::Chords::get_parser();
+				$key_ord = ( $key_ord + 3 ) % $p->intervals;
+			}
+		}
+		if ( $xcmov && !defined $key_ord ) {
+			do_warn("Warning: Transcoding to $xc without key may yield unexpected results\n");
+			undef $xcmov;
+    }
+    my $i = $info->transcode( $xc, $key_ord );
+	
 	# Prevent self-references.
 	$i->{xc} = $info unless $i eq $info;
 	$info = $i;
