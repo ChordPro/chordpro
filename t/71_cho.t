@@ -31,6 +31,16 @@ foreach my $file ( sort @files ) {
 	      "--backend-option", "expand=1",
 	      "--output", $out,
 	      $file );
+    if ( $file =~ /n\./ ) {
+	splice( @ARGV, -1, 0, "--transcode", "nashville",
+		"--define", "diagrams.show=false",
+	      );
+    }
+    elsif ( $file =~ /r\./ ) {
+	splice( @ARGV, -1, 0, "--transcode", "roman",
+		"--define", "diagrams.show=false",
+	      );
+    }
     ::run();
     my $ok = !differ( $out, $ref );
     ok( $ok, $file );
