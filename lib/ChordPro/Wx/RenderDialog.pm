@@ -16,7 +16,6 @@ use ChordPro::Wx::Utils;
 sub new {
     my $self = shift->SUPER::new(@_);
 
-	$DB::single=1;
     if ( %{$state{presets}{tasks}} ) {
 	$self->{l_customtasks}->Show(1);
 	my $index = 0;
@@ -31,24 +30,26 @@ sub new {
 	$self->{sz_customtasks}->Layout;
 	$self->{sz_prefs_inner}->Fit($self);
     }
+    $state{"xpose_$_"} ||= 0
+      for qw( enabled semitones accidentals );
+
     $self->refresh;
     $self;
 }
 
 sub refresh {
     my ( $self ) = @_;
-    $self->{cb_xpose}->SetValue( $preferences{enable_xpose} );
+    $self->{cb_xpose}->SetValue( $state{xpose_enabled} );
     $self->OnCbTranspose(undef);
 }
-
-#               C      D      E  F      G      A        B C
-my @xpmap = qw( 0 1  1 2 3  3 4  5 6  6 7 8  8 9 10 10 11 12 );
-my @sfmap = qw( 0 7 -5 2 9 -3 4 -1 6 -6 1 8 -4 3 10 -2  5 0  );
 
 ################ Event handlers ################
 
 sub OnAccept {
     my ( $self, $event ) = @_;
+    $state{xpose_enabled}     = $self->{cb_xpose}->IsChecked;
+    $state{xpose_semitones}   = $self->{sp_xpose}->GetValue;
+    $state{xpose_accidentals} = $self->{ch_acc}->GetSelection;
     $event->Skip;
 }
 
@@ -61,37 +62,7 @@ sub OnCbTranspose {
     my ( $self, $event ) = @_;
     my $n = $self->{cb_xpose}->IsChecked;
     $self->{$_}->Enable($n)
-      for qw ( ch_xpose_from ch_xpose_to ch_acc );
-}
-
-sub OnXposeFrom {
-    my ( $self, $event ) = @_;
-    $self->OnXposeTo($event);
-}
-
-sub OnXposeTo {
-    my ( $self, $event ) = @_;
-    my $sel = $self->{ch_xpose_to}->GetSelection;
-    my $sf = $sfmap[$sel];
-    if ( $sf == 0 ) {
-	$sf = $sel - $self->{ch_xpose_from}->GetSelection;
-    }
-    if ( $sf < 0 ) {
-	$self->{ch_acc}->SetSelection(2);
-    }
-    elsif ( $sf > 0 ) {
-	$self->{ch_acc}->SetSelection(1);
-    }
-    else {
-	$self->{ch_acc}->SetSelection(0);
-    }
-    $event->Skip;
-}
-
-sub OnChNotation {
-    my ( $self, $event ) = @_;
-    my $n = $self->{ch_notation}->GetSelection;
-    $event->Skip;
+      for qw ( sp_xpose ch_acc );
 }
 
 1;

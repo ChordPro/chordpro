@@ -194,16 +194,12 @@ method OnPreviewMore($event) {
 	push( @args, "--decapo" );
     }
 
-    # Transpose.
-    my $xpose_from = $xpmap[$d->{ch_xpose_from}->GetSelection];
-    my $xpose_to   = $xpmap[$d->{ch_xpose_to  }->GetSelection];
-    my $xpose_acc  = $d->{ch_acc}->GetSelection;
-    my $n = $xpose_to - $xpose_from;
-    $n += 12 if $n < 0;
-    $n += 12 if $xpose_acc == 1; # sharps
-    $n -= 12 if $xpose_acc == 2; # flats
-
-    push( @args, "--transpose=$n" );
+    # Transpose. See also Preview.pm.
+    $state{"xpose_$_"} ||= 0
+      for qw( enabled semitones accidentals );
+    my $pfx = ( "", qw( s f k) )[$state{xpose_accidentals}];
+    push( @ARGV, '--transpose', $state{xpose_semitones} . $pfx )
+	 if $state{xpose_enabled};
 
     my $i = 0;
     while ( exists $d->{"cb_customtask_$i"} ) {

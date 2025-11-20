@@ -134,8 +134,12 @@ method preview( $args, %opts ) {
     }
     push( @ARGV, '--output', $preview_file );
 
-    push( @ARGV, '--transpose', $state{xpose} )
-	 if $preferences{enable_xpose} && $state{xpose};
+    # Transpose. See also PanelRole.pm.
+    $state{"xpose_$_"} ||= 0
+      for qw( enabled semitones accidentals );
+    my $pfx = ( "", qw( s f k) )[$state{xpose_accidentals}];
+    push( @ARGV, '--transpose', $state{xpose_semitones} . $pfx )
+	 if $state{xpose_enabled};
 
     push( @ARGV, '--define', 'diagnostics.format=Line %n, %m' );
     push( @ARGV, '--define', 'debug.runtimeinfo=0' ) unless $state{debuginfo};

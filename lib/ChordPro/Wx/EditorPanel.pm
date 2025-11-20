@@ -180,9 +180,6 @@ method openfile( $file, $checked=0, $actual=undef ) {
     }
     $self->GetParent->SetTitle( $state{windowtitle} = $actual);
 
-    # Default is no transposing.
-    $preferences{xpose_from} = $preferences{xpose_to} = 0;
-    $preferences{xpose_acc} = 0;
     if ( $self->{sw_lr}->IsSplit ) {
 	$self->{sw_lr}->Unsplit(undef);
 	$self->previewtooltip;
@@ -248,8 +245,6 @@ method newfile( $file = undef ) {
     $state{windowtitle} = $title;
     $self->{l_status}->SetLabel($title);
     $self->{l_status}->SetToolTip($state{currentfile});
-    $preferences{xpose_from} = $preferences{xpose_to} = 0;
-    $preferences{xpose_acc} = 0;
     if ( $self->{sw_lr}->IsSplit ) {
 	$self->{sw_lr}->Unsplit(undef);
 	$self->previewtooltip;

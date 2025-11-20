@@ -235,10 +235,7 @@ method fetch_prefs() {
     # Messages.
     $self->{fp_messages}->SetSelectedFont( Wx::Font->new($preferences{msgsfont}) );
 
-    # Transpose.
-    $self->{cb_xpose}->SetValue( $preferences{enable_xpose} );
-    $self->OnCbTranspose(undef);
-
+    # Transcode.
     $self->{cb_xcode}->SetValue( $preferences{enable_xcode} );
     $self->OnCbTranscode(undef);
 
@@ -325,17 +322,6 @@ method store_prefs() {
     else {
        	$preferences{preset_notations} = [];
     }
-
-    # Transpose.
-    $preferences{enable_xpose} = $self->{cb_xpose}->IsChecked;
-    $preferences{xpose_from} = $xpmap[$self->{ch_xpose_from}->GetSelection];
-    $preferences{xpose_to  } = $xpmap[$self->{ch_xpose_to  }->GetSelection];
-    $preferences{xpose_acc}  = $self->{ch_acc}->GetSelection;
-    $n = $preferences{xpose_to} - $preferences{xpose_from};
-    $n += 12 if $n < 0;
-    $n += 12 if $preferences{xpose_acc} == 1; # sharps
-    $n -= 12 if $preferences{xpose_acc} == 2; # flats
-    $state{xpose} = $n;
 
     # Transcode.
     $preferences{enable_xcode} = $self->{cb_xcode}->IsChecked;
@@ -550,35 +536,7 @@ method OnPrefExtChanged($event) {
     $event->Skip;
 }
 
-#### Notations, Transpose and Transcode.
-
-method OnCbTranspose($event) {
-    my $n = $self->{cb_xpose}->IsChecked;
-    $self->{$_}->Enable($n)
-      for qw( ch_xpose_from ch_xpose_to ch_acc );
-}
-
-method OnXposeFrom($event) {
-    $self->OnXposeTo($event);
-}
-
-method OnXposeTo($event) {
-    my $sel = $self->{ch_xpose_to}->GetSelection;
-    my $sf = $sfmap[$sel];
-    if ( $sf == 0 ) {
-	$sf = $sel - $self->{ch_xpose_from}->GetSelection;
-    }
-    if ( $sf < 0 ) {
-	$self->{ch_acc}->SetSelection(2);
-    }
-    elsif ( $sf > 0 ) {
-	$self->{ch_acc}->SetSelection(1);
-    }
-    else {
-	$self->{ch_acc}->SetSelection(0);
-    }
-    $event->Skip;
-}
+#### Notations and Transcode.
 
 method OnChNotation($event) {
     my $n = $self->{ch_notation}->GetSelection;
