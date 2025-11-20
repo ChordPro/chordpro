@@ -115,8 +115,8 @@ sub differ {
     $file2 = "$file1" unless $file2;
     $file1 = "$file1";
 
-    my @lines1 = fs_load( $file1, { fail => 'hard' } );
-    my @lines2 = fs_load( $file2, { fail => 'hard' } );
+    my @lines1 = @{ fs_load( $file1, { fail => 'hard' } ) };
+    my @lines2 = @{ fs_load( $file2, { fail => 'hard' } ) };
     my $linesm = @lines1 > @lines2 ? @lines1 : @lines2;
     for ( my $line = 1; $line < $linesm; $line++ ) {
 	next if $lines1[$line] eq $lines2[$line];
