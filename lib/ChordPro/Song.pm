@@ -2614,8 +2614,10 @@ sub parse_chord {
     if ( $info ) {
 	warn( "Parsing chord: \"$chord\" found \"",
 	      $info->name, "\" in ", $info->{_via}, "\n" ) if $debug > 1;
+	#### This return triggered issue #580. Exclude format/display.
 	return ChordPro::Chord::NC->new( { name => $info->name } )
-	  if $info->is_nc;
+	  if $info->is_nc
+	     && !( $info->{display} || $info->{format} );
 	$info->dump if $debug > 1;
     }
     else {
