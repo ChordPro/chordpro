@@ -158,6 +158,7 @@ sub parse_song {
     # Load song-specific config, if any.
     if ( !$options->{nosongconfig} && $diag->{file} ) {
 	if ( $options->{verbose} ) {
+	    ChordPro::Chords::set_parser( $config->{notes}->{system} );
 	    my $this = ChordPro::Chords::get_parser();
 	    $this = defined($this) ? $this->{system} : "";
 	    print STDERR ("Parsers at start of ", $diag->{file}, ":");
