@@ -118,7 +118,7 @@ sub differ {
     my @lines1 = @{ fs_load( $file1, { fail => 'hard' } ) };
     my @lines2 = @{ fs_load( $file2, { fail => 'hard' } ) };
     my $linesm = @lines1 > @lines2 ? @lines1 : @lines2;
-    for ( my $line = 1; $line < $linesm; $line++ ) {
+    for ( my $line = 0; $line < $linesm; $line++ ) {
 	next if $lines1[$line] eq $lines2[$line];
 	Test::More::diag("Files $file1 and $file2 differ at line $line");
 	Test::More::diag("  <  $lines1[$line]");

@@ -51,7 +51,7 @@ BbM7 alt=003234
 {define Bm9 base-fret 0 frets 2 2 0 2 2 2}
 {define C/B base-fret 0 frets 0 2 0 0 1 0}
 {define C6 base-fret 0 frets - 3 2 2 1 0}
-{comment:C7alt='xx2313}
+{comment: C7alt='xx2313}
 {define C7/9 base-fret 0 frets 0 3 2 3 3 0}
 {define C9 base-fret 0 frets 3 3 2 0 3 0}
 C alt=032013
