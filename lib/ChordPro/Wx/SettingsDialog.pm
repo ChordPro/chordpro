@@ -315,9 +315,11 @@ method store_prefs() {
 
     # Notation.
     $n = $self->{ch_notation}->GetSelection;
-    if ( $n > 0 ) {
+    if ( $n != wxNOT_FOUND ) {
 	$preferences{preset_notations} =
 	  [ $self->{ch_notation}->GetClientData($n) ];
+	$preferences{preset_notations} = []
+	  if $preferences{preset_notations}->[0]->{default};
     }
     else {
        	$preferences{preset_notations} = [];

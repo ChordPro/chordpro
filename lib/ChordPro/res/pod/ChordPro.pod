@@ -190,11 +190,16 @@ Includes a table of contents.
 By default a table of contents is included in the PDF output when
 it contains more than one song.
 
-=item B<--transpose=>I<N> (short: -x)
+=item B<--transpose=>I<XX> (short: -x)
 
-Transposes all songs by I<N> semi-tones. Note that I<N> may be
-specified as B<+>I<N> to transpose upward, using sharps, or as
-B<->I<N> to transpose downward, using flats.
+I<XX> must be a number in the range -24 .. +24, optionally followed by
+one of C<s>, or C<f>.
+
+Transposes all songs by the given number of semi-tones.
+A positive number transposes up, a negative number transposes down.
+
+If the resultant key requires accidentals the postfix controls whether
+sharps or flats are used. See the docs.
 
 =item B<--version> (short: B<-V>)
 

@@ -19,7 +19,7 @@ use ChordPro::Chords;
 use ChordPro::Chords::Appearance;
 use ChordPro::Chords::Parser;
 use ChordPro::Output::Common;
-use ChordPro::Utils;
+use ChordPro::Utils qw( :DEFAULT :xp );
 use ChordPro::Symbols qw( is_strum );
 
 use Carp;
@@ -41,6 +41,7 @@ my @grille;
 # Local transposition.
 my $xpose = 0;
 my $xpose_dir;
+my $xpose_type = XP_DEFAULT;
 my $capo;
 
 # Used chords, in order of appearance.
@@ -50,6 +51,7 @@ my @used_chords;
 my @chorus;
 my $chorus_xpose = 0;
 my $chorus_xpose_dir = 0;
+my $chorus_xpose_type = XP_DEFAULT;
 
 # Memorized chords.
 my $cctag;			# current cc name
@@ -87,7 +89,8 @@ sub new {
 
     my $filesource = $opts->{filesource} || $opts->{_filesource};
 
-    $xpose = 0;
+    $xpose = $xpose_dir = 0;
+    $xpose_type = XP_DEFAULT;
     $grid_arg = [ 4, 4, 1, 1, "" ];	# 1+4x4+1
     $in_context = $def_context;
     @used_chords = ();
@@ -853,6 +856,7 @@ sub add {
 	push( @chorus, { context => $in_context, @_ } );
 	$chorus_xpose = $xpose;
 	$chorus_xpose_dir = $xpose_dir;
+	$chorus_xpose_type = $xpose_type;
     }
 }
 

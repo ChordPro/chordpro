@@ -11,7 +11,7 @@ use ChordPro;
 use ChordPro::Files;
 use ChordPro::Paths;
 use ChordPro::Wx::Config;
-use ChordPro::Utils qw( demarkup );
+use ChordPro::Utils qw( demarkup :xp );
 
 use Wx ':everything';
 use Wx::Locale gettext => '_T';
@@ -116,7 +116,7 @@ method preview( $args, %opts ) {
 
     if ( $preferences{preset_notations} ) {
 	my $c = $preferences{preset_notations}[0];
-	unless ( $c->{default} ) {
+	if ( $c && !$c->{default} ) {
 	    $haveconfig++;
 	    push( @ARGV, '--config', $c->{file} );
 	}
@@ -137,9 +137,19 @@ method preview( $args, %opts ) {
     # Transpose. See also PanelRole.pm.
     $state{"xpose_$_"} ||= 0
       for qw( enabled semitones accidentals );
-    my $pfx = ( "", qw( s f k) )[$state{xpose_accidentals}];
-    push( @ARGV, '--transpose', $state{xpose_semitones} . $pfx )
-	 if $state{xpose_enabled};
+    if ( $state{xpose_enabled} ) {
+	my $pfx;
+	if ( $state{xpose_accidentals} == XP_SHARP ) {
+	    $pfx = "s"
+	}
+	elsif ( $state{xpose_accidentals} == XP_FLAT ) {
+	    $pfx = "f"
+	}
+	else {
+	    $pfx = "";
+	}
+	push( @ARGV, '--transpose', $state{xpose_semitones} . $pfx );
+    }
 
     push( @ARGV, '--define', 'diagnostics.format=Line %n, %m' );
     push( @ARGV, '--define', 'debug.runtimeinfo=0' ) unless $state{debuginfo};

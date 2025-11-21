@@ -135,7 +135,7 @@ CFGLIB := ${LIB}/res/config
 # JSONOPTS := --brief
 # This requires npm install ajv-cli .
 JSONVALIDATOR = ajv --validate-formats=false
-JSONOPTS := 
+JSONOPTS := --allowUnionTypes=true
 
 checkjson :
 	rm -fr .json

@@ -45,6 +45,11 @@ This will print:
     D      E         Gb      G
     A song line with chords
 
+The use of sharps and flats can be overruled by appending the letter
+`s` or `f` to the transposition. For example, `{transpose: 2f}` will
+transpose 2 semitones up, but still use flats when accidentals are
+needed.
+
 A `{transpose}` directive without a value will cancel the current
 transposition, possibly restoring a preceding transposition.
 

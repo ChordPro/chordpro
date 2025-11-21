@@ -73,7 +73,10 @@ settings {
     // Chords under the lyrics.
     chords-under : false
 
-    // Transpose chords.
+    // Transpose the song by a number of semitones.
+    // A positive number transposes up, a negative number transposes down.
+    // An optional postfix of "s" or "f" can be used to enforce the use
+    // of sharps resp. flats when a transposed chord requires accidentals.
     transpose : 0
 
     // Force enharmonic when transposing (experimental).

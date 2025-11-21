@@ -11,7 +11,7 @@ use Wx::Locale gettext => '_T';
 
 use ChordPro::Files;
 use ChordPro::Paths;
-use ChordPro::Utils qw( demarkup plural );
+use ChordPro::Utils qw( demarkup plural :xp );
 use ChordPro::Wx::Config;
 use ChordPro::Wx::Utils;
 
@@ -197,9 +197,19 @@ method OnPreviewMore($event) {
     # Transpose. See also Preview.pm.
     $state{"xpose_$_"} ||= 0
       for qw( enabled semitones accidentals );
-    my $pfx = ( "", qw( s f k) )[$state{xpose_accidentals}];
-    push( @ARGV, '--transpose', $state{xpose_semitones} . $pfx )
-	 if $state{xpose_enabled};
+    if ( $state{xpose_enabled} ) {
+	my $pfx;
+	if ( $state{xpose_accidentals} == XP_SHARP ) {
+	    $pfx = "s"
+	}
+	elsif ( $state{xpose_accidentals} == XP_FLAT ) {
+	    $pfx = "f"
+	}
+	else {
+	    $pfx = "";
+	}
+	push( @ARGV, '--transpose', $state{xpose_semitones} . $pfx );
+    }
 
     my $i = 0;
     while ( exists $d->{"cb_customtask_$i"} ) {

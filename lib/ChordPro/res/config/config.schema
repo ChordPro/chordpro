@@ -902,10 +902,9 @@
             },
             "transpose": {
               "default": 0,
-              "description": "Transpose chords.",
-              "type": "integer",
-              "minimum": -12,
-              "maximum": 12
+              "description": "Transpose the song by a number of semitones.\nA positive number transposes up, a negative number transposes down.\nAn optional postfix of \"s\" or \"f\" can be used to enforce the use of sharps resp. flats when a transposed chord requires accidentals.",
+              "type": [ "number", "string" ],
+	      "pattern": "^[-+]?\\d+[sf]?$"
             },
             "truesf": {
               "default": false,

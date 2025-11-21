@@ -12,6 +12,7 @@ use Ref::Util qw( is_arrayref is_hashref );
 use Exporter 'import';
 our @EXPORT;
 our @EXPORT_OK;
+our %EXPORT_TAGS;
 
 use ChordPro::Files;
 
@@ -690,6 +691,16 @@ sub detect_image_format( $test ) {
 }
 
 push( @EXPORT_OK, "detect_image_format" );
+
+# Transpose types
+
+sub XP_DEFAULT() { 0 }
+sub XP_FOLLOW()  { 0 }
+sub XP_SHARP()   { 1 }
+sub XP_FLAT()    { 2 }
+
+$EXPORT_TAGS{"xp"} = [ qw( XP_DEFAULT XP_FOLLOW XP_SHARP XP_FLAT ) ];
+push( @EXPORT_OK, @{ $EXPORT_TAGS{"xp"} } );
 
 =cut
 

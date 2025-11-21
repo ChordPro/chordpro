@@ -486,11 +486,16 @@ Includes a table of contents.
 By default a table of contents is included in the PDF output when
 it contains more than one song.
 
-=item B<--transpose=>I<N> (short: -x)
+=item B<--transpose=>I<XX> (short: -x)
 
-Transposes all songs by I<N> semi-tones. Note that I<N> may be
-specified as B<+>I<N> to transpose upward, using sharps, or as
-B<->I<N> to transpose downward, using flats.
+I<XX> must be a number in the range -24 .. +24, optionally followed by
+one of C<s>, or C<f>.
+
+Transposes all songs by the given number of semi-tones.
+A positive number transposes up, a negative number transposes down.
+
+If the resultant key requires accidentals the postfix controls whether
+sharps or flats are used. See the docs.
 
 =item B<--version> (short: B<-V>)
 
@@ -878,7 +883,7 @@ sub app_setup {
           "text-font|T=s",              # Sets text font
           "i" => sub { $clo->{toc} = 1 },
           "toc!",                       # Generates a table of contents
-          "transpose|x=i",              # Transposes by N semi-tones
+          "transpose|x=s",              # Transposes by N semi-tones
           "transcode|xc=s",             # Transcodes to another notation
           "user-chord-grids!",          # Do[esn't] print diagrams for user defined chords.
           "version|V" => \$version,     # Prints version and exits
@@ -950,6 +955,13 @@ sub app_setup {
 	$clo->{nodefaultconfigs} = 1;
 	$clo->{nosongconfig} = 1;
 	$::options->{reference} = 1;
+    }
+
+    if ( $ok ) {
+	if ( defined $clo->{transpose} ) {
+	    $ok = $clo->{transpose} =~ /^[-+]?(\d+)[sf]?$/
+	      && $1 <= 24;	# arb limit
+	}
     }
 
     $clo->{trace} ||= $clo->{debug};
