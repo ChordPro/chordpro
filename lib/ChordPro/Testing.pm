@@ -120,14 +120,14 @@ sub differ {
     my $linesm = @lines1 > @lines2 ? @lines1 : @lines2;
     for ( my $line = 0; $line < $linesm; $line++ ) {
 	next if $lines1[$line] eq $lines2[$line];
-	Test::More::diag("Files $file1 and $file2 differ at line $line");
+	Test::More::diag("Files $file1 and $file2 differ at line ", 1+$line);
 	Test::More::diag("  <  $lines1[$line]");
 	Test::More::diag("  >  $lines2[$line]");
 	return 1;
     }
     return 0 if @lines1 == @lines2;
     $linesm++;
-    Test::More::diag("Files $file1 and $file2 differ at line $linesm" );
+    Test::More::diag("Files $file1 and $file2 differ at line ", 1+$linesm);
     Test::More::diag("  <  ", $lines1[$linesm] // "***missing***");
     Test::More::diag("  >  ", $lines2[$linesm] // "***missing***");
     1;
