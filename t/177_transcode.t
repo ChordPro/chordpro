@@ -78,7 +78,7 @@ my $song = {
 	    chordsinfo => { map { $_ => $_ } qw( Re Solm7 )  },
 	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear',
-	    'system' => 'common',
+	    'system' => 'latin',
 	   };
 
 is_deeply( { %{ $s->{songs}->[0] } }, $song, "Song contents" );
