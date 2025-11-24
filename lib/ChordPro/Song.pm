@@ -306,7 +306,7 @@ sub parse_song {
 
     upd_config();
     $self->{source}     = { file => $diag->{file}, line => 1 + $$linecnt };
-    $self->{system}     = $config->{notes}->{system};
+    $self->{system}     = $target // $config->{notes}->{system};
     $self->{config}     = $config;
     $self->{meta}       = $meta if $meta;
     $self->{chordsinfo} = {};
