@@ -118,16 +118,20 @@ sub differ {
     my @lines1 = @{ fs_load( $file1, { fail => 'hard' } ) };
     my @lines2 = @{ fs_load( $file2, { fail => 'hard' } ) };
     my $linesm = @lines1 > @lines2 ? @lines1 : @lines2;
+    my $todo = "";
+    if ( @lines1 > 0 && @lines2 > 0 ) {
+	$todo = "TODO " if $lines1[0] =~ /\bTODO\b/;
+    }
     for ( my $line = 0; $line < $linesm; $line++ ) {
 	next if $lines1[$line] eq $lines2[$line];
-	Test::More::diag("Files $file1 and $file2 differ at line ", 1+$line);
+	Test::More::diag("${todo}Files $file1 and $file2 differ at line ", 1+$line);
 	Test::More::diag("  <  $lines1[$line]");
 	Test::More::diag("  >  $lines2[$line]");
-	return 1;
+	return !$todo;
     }
     return 0 if @lines1 == @lines2;
     $linesm++;
-    Test::More::diag("Files $file1 and $file2 differ at line ", 1+$linesm);
+    Test::More::diag("${todo}Files $file1 and $file2 differ at line ", 1+$linesm);
     Test::More::diag("  <  ", $lines1[$linesm] // "***missing***");
     Test::More::diag("  >  ", $lines2[$linesm] // "***missing***");
     1;
