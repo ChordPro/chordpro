@@ -7,6 +7,9 @@
 
     - Chords in `{define}` and `{chord}` can now be transposable.
 
+    - ChordPro output: Suppress key directive when transocding to a
+      movable system.
+
     !Bug Fixes
 
     - Fixed issue #315, #357, #512, #526 (thanks Merijn) #541, #580 and more.

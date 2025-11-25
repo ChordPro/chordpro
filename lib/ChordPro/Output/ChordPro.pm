@@ -65,6 +65,7 @@ sub generate_song ( $s ) {
     my $seq  = $options->{'backend-option'}->{seq};
     my $expand = $options->{'backend-option'}->{expand};
     my $msp  = $variant eq "msp";
+    my $movable = ChordPro::Chords::Parser->get_parser($s->{system})->movable;
     upd_config();
 
     my @s;
@@ -90,8 +91,9 @@ sub generate_song ( $s ) {
 	foreach my $k ( sort keys %{ $s->{meta} } ) {
 	    next if $k =~ /^(?:title|subtitle)$/;
 	    if ( $k =~ $re_meta ) {
-		push( @s, map { +"{$k: ".fq($_)."}" } @{ $s->{meta}->{$k} } );
 		$used{$k}++;
+		next if $k eq "key" && $movable;
+		push( @s, map { +"{$k: ".fq($_)."}" } @{ $s->{meta}->{$k} } );
 	    }
 	}
 	# Unknowns with meta prefix.
