@@ -1,6 +1,6 @@
 #! perl
 
-package ChordPro::lib::OutputBase;
+package ChordPro::Output::Base;
 
 # Base class for all ChordPro output backends.
 # Provides minimal language features that every backend must implement.
@@ -11,7 +11,7 @@ use Object::Pad;
 use utf8;
 use Carp;
 
-class ChordPro::lib::OutputBase {
+class ChordPro::Output::Base {
     
     # Configuration from ChordPro
     field $config :param;
@@ -328,6 +328,6 @@ Get current song being processed.
 
 =head1 SEE ALSO
 
-L<ChordPro::lib::OutputChordProBase>, L<ChordPro::Output::HTML5>
+L<ChordPro::Output::ChordProBase>, L<ChordPro::Output::HTML5>
 
 =cut

@@ -37,8 +37,8 @@ Working HTML output demonstrating all features.
 **To view:** Open `html5-demo-output.html` in any web browser
 
 ### 4. **Base Classes** (Created in previous step)
-- `lib/ChordPro/lib/OutputBase.pm` - Abstract base class
-- `lib/ChordPro/lib/OutputChordProBase.pm` - ChordPro-specific base
+- `lib/ChordPro/Output/Base.pm` - Abstract base class
+- `lib/ChordPro/Output/ChordProBase.pm` - ChordPro-specific base
 
 Note: These base classes are designed for future use with Object::Pad but the HTML5 backend uses traditional Perl style to match existing ChordPro backends.
 
@@ -287,8 +287,8 @@ All goals achieved. Ready for Phase 2 or integration testing.
 | lib/ChordPro/Output/HTML5.pm | 646 | Main HTML5 backend module |
 | html5-mvp-demo.pl | 358 | Standalone demonstration |
 | html5-demo-output.html | 221 | Generated HTML example |
-| lib/ChordPro/lib/OutputBase.pm | 305 | Abstract base class (future use) |
-| lib/ChordPro/lib/OutputChordProBase.pm | 515 | ChordPro base class (future use) |
+| lib/ChordPro/Output/Base.pm | 305 | Abstract base class (future use) |
+| lib/ChordPro/Output/ChordProBase.pm | 515 | ChordPro base class (future use) |
 
 **Total:** 2,045 lines of production code + documentation
 

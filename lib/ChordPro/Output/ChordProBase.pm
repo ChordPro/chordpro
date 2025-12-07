@@ -1,6 +1,6 @@
 #! perl
 
-package ChordPro::lib::OutputChordProBase;
+package ChordPro::Output::ChordProBase;
 
 # ChordPro-specific base class.
 # Extends OutputBase with ChordPro directive handling and music notation.
@@ -11,8 +11,10 @@ use Object::Pad;
 use utf8;
 use Carp;
 
-class ChordPro::lib::OutputChordProBase
-  :isa(ChordPro::lib::OutputBase) {
+use ChordPro::Output::Base;
+
+class ChordPro::Output::ChordProBase
+  :isa(ChordPro::Output::Base) {
     
     # Handler registry for directives
     field %directive_handlers;
@@ -568,6 +570,6 @@ The following directives are handled by default:
 
 =head1 SEE ALSO
 
-L<ChordPro::lib::OutputBase>, L<ChordPro::Output::HTML5>
+L<ChordPro::Output::Base>, L<ChordPro::Output::HTML5>
 
 =cut
