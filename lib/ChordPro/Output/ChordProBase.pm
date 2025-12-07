@@ -207,6 +207,9 @@ class ChordPro::Output::ChordProBase
         return $self->handle_colb($elt)         if $type eq 'colb';
         return $self->handle_newpage($elt)      if $type eq 'newpage';
         
+        # Text elements
+        return $self->handle_comment($elt)      if $type eq 'comment';
+        
         # Environment containers
         return $self->handle_chorus($elt)       if $type eq 'chorus';
         return $self->handle_verse($elt)        if $type eq 'verse';

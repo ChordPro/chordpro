@@ -8,345 +8,289 @@ our $options;
 package ChordPro::Output::HTML5;
 
 # Modern HTML5 output backend for ChordPro
-# Uses clean architecture with CSS for styling
+# Uses Object::Pad with ChordProBase class
 
 use v5.26;
+use Object::Pad;
 use utf8;
-use strict;
-use warnings;
-use feature 'signatures';
 
-my $single_space = 0;  # suppress chords line when empty
-my $lyrics_only = 0;   # suppress all chords lines
+use ChordPro::Output::ChordProBase;
 
-sub generate_songbook {
-    my ( $self, $sb ) = @_;
+class ChordPro::Output::HTML5
+  :isa(ChordPro::Output::ChordProBase) {
     
-    $single_space = $options->{'single-space'};
-    $lyrics_only = $config->{settings}->{'lyrics-only'};
+    # =================================================================
+    # REQUIRED BASE CLASS METHODS - Document Structure
+    # =================================================================
     
-    my @book;
-    
-    # Document begin
-    my $title = $sb->{songs}->[0]->{title} // 'ChordPro Songbook';
-    push @book, document_begin($title);
-    
-    # Generate each song
-    foreach my $song ( @{$sb->{songs}} ) {
-        push @book, @{generate_song($song)};
-    }
-    
-    # Document end
-    push @book, document_end();
-    
-    return \@book;
-}
-
-sub generate_song {
-    my ( $song ) = @_;
-    my @output;
-    
-    # Song container
-    push @output, qq{<div class="cp-song">\n};
-    
-    # Title
-    if ($song->{title}) {
-        my $escaped_title = escape_html($song->{title});
-        push @output, qq{  <h1 class="cp-title">$escaped_title</h1>\n};
-    }
-    
-    # Subtitles
-    if ($song->{subtitle}) {
-        foreach my $subtitle (@{$song->{subtitle}}) {
-            my $escaped = escape_html($subtitle);
-            push @output, qq{  <h2 class="cp-subtitle">$escaped</h2>\n};
-        }
-    }
-    
-    # Metadata section
-    if ($song->{artist} || $song->{composer} || $song->{album}) {
-        push @output, qq{  <div class="cp-metadata">\n};
+    method render_document_begin($metadata) {
+        my $title = $self->escape_text($metadata->{title} // 'ChordPro Songbook');
         
-        if ($song->{artist}) {
-            foreach my $artist (@{$song->{artist}}) {
-                my $escaped = escape_html($artist);
-                push @output, qq{    <div class="cp-artist">$escaped</div>\n};
-            }
-        }
-        
-        if ($song->{composer}) {
-            foreach my $composer (@{$song->{composer}}) {
-                my $escaped = escape_html($composer);
-                push @output, qq{    <div class="cp-composer">$escaped</div>\n};
-            }
-        }
-        
-        if ($song->{album}) {
-            my $escaped = escape_html($song->{album});
-            push @output, qq{    <div class="cp-album">$escaped</div>\n};
-        }
-        
-        push @output, qq{  </div>\n};
-    }
-    
-    # Process song body
-    if ($song->{body}) {
-        foreach my $elt (@{$song->{body}}) {
-            push @output, dispatch_element($elt);
-        }
-    }
-    
-    # Close song container
-    push @output, qq{</div><!-- .cp-song -->\n\n};
-    
-    return \@output;
-}
-
-# =================================================================
-# ELEMENT DISPATCH
-# =================================================================
-
-sub dispatch_element {
-    my ($elt) = @_;
-    my $type = $elt->{type};
-    
-    return songline($elt)     if $type eq 'songline';
-    return comment_text($elt) if $type eq 'comment';
-    return tabline($elt)      if $type eq 'tabline';
-    return gridline($elt)     if $type eq 'gridline';
-    return empty_line()       if $type eq 'empty';
-    
-    # Handle container elements with body
-    if ($elt->{body}) {
-        my @output;
-        if ($type eq 'chorus') {
-            push @output, chorus_begin($elt);
-            foreach my $child (@{$elt->{body}}) {
-                push @output, dispatch_element($child);
-            }
-            push @output, chorus_end();
-        }
-        elsif ($type eq 'verse') {
-            push @output, verse_begin($elt);
-            foreach my $child (@{$elt->{body}}) {
-                push @output, dispatch_element($child);
-            }
-            push @output, verse_end();
-        }
-        elsif ($type eq 'bridge') {
-            push @output, bridge_begin($elt);
-            foreach my $child (@{$elt->{body}}) {
-                push @output, dispatch_element($child);
-            }
-            push @output, bridge_end();
-        }
-        elsif ($type eq 'tab') {
-            push @output, tab_begin($elt);
-            foreach my $child (@{$elt->{body}}) {
-                push @output, dispatch_element($child);
-            }
-            push @output, tab_end();
-        }
-        elsif ($type eq 'grid') {
-            push @output, grid_begin($elt);
-            foreach my $child (@{$elt->{body}}) {
-                push @output, dispatch_element($child);
-            }
-            push @output, grid_end();
-        }
-        return join('', @output);
-    }
-    
-    return '';
-}
-
-# =================================================================
-# SONGLINE RENDERING - Core chord positioning
-# =================================================================
-
-sub songline {
-    my ($elt) = @_;
-    my $phrases = $elt->{phrases};
-    my $chords = $elt->{chords};
-    
-    my $html = qq{<div class="cp-songline">\n};
-    
-    # Check if lyrics-only mode
-    if ($lyrics_only) {
-        my $text = join('', @$phrases);
-        $html .= qq{  <span class="cp-lyrics">} . escape_html($text) . qq{</span>\n};
-        $html .= qq{</div>\n};
-        return $html;
-    }
-    
-    # Check if single-space mode (suppress empty chord lines)
-    my $has_chords = 0;
-    if ($chords) {
-        foreach my $chord (@$chords) {
-            if ($chord && ref($chord) && $chord->key) {
-                $has_chords = 1;
-                last;
-            }
-        }
-    }
-    
-    if ($single_space && !$has_chords) {
-        my $text = join('', @$phrases);
-        $html .= qq{  <span class="cp-lyrics">} . escape_html($text) . qq{</span>\n};
-        $html .= qq{</div>\n};
-        return $html;
-    }
-    
-    # Render chord-lyric pairs
-    for (my $i = 0; $i < @$phrases; $i++) {
-        my $phrase = $phrases->[$i] // '';
-        my $chord = $chords->[$i];
-        
-        $html .= qq{  <span class="cp-chord-lyric-pair">\n};
-        
-        # Chord span (empty if no chord)
-        if ($chord && ref($chord) && $chord->key) {
-            my $chord_name = escape_html($chord->name);
-            $html .= qq{    <span class="cp-chord">$chord_name</span>\n};
-        } else {
-            $html .= qq{    <span class="cp-chord cp-chord-empty"></span>\n};
-        }
-        
-        # Lyric span
-        my $escaped_phrase = escape_html($phrase);
-        $html .= qq{    <span class="cp-lyrics">$escaped_phrase</span>\n};
-        
-        $html .= qq{  </span>\n};
-    }
-    
-    $html .= qq{</div>\n};
-    return $html;
-}
-
-# =================================================================
-# OTHER ELEMENTS
-# =================================================================
-
-sub comment_text {
-    my ($elt) = @_;
-    my $text = escape_html($elt->{text});
-    my $class = $elt->{italic} ? 'cp-comment cp-comment-italic' : 'cp-comment';
-    return qq{<div class="$class">$text</div>\n};
-}
-
-sub tabline {
-    my ($elt) = @_;
-    my $text = escape_html($elt->{text});
-    return qq{<div class="cp-tabline">$text</div>\n};
-}
-
-sub gridline {
-    my ($elt) = @_;
-    my $tokens = $elt->{tokens};
-    my $html = qq{<div class="cp-gridline">\n};
-    
-    foreach my $token (@$tokens) {
-        if ($token->{class} eq 'chord') {
-            my $chord_name = escape_html($token->{chord}->key);
-            $html .= qq{  <span class="cp-grid-chord">$chord_name</span>\n};
-        } else {
-            my $symbol = escape_html($token->{symbol});
-            $html .= qq{  <span class="cp-grid-symbol">$symbol</span>\n};
-        }
-    }
-    
-    $html .= qq{</div>\n};
-    return $html;
-}
-
-sub empty_line {
-    return qq{<div class="cp-empty">&nbsp;</div>\n};
-}
-
-# =================================================================
-# ENVIRONMENT BLOCKS
-# =================================================================
-
-sub chorus_begin {
-    my ($elt) = @_;
-    return qq{<div class="cp-chorus">\n};
-}
-
-sub chorus_end {
-    return qq{</div><!-- .cp-chorus -->\n};
-}
-
-sub verse_begin {
-    my ($elt) = @_;
-    return qq{<div class="cp-verse">\n};
-}
-
-sub verse_end {
-    return qq{</div><!-- .cp-verse -->\n};
-}
-
-sub bridge_begin {
-    my ($elt) = @_;
-    return qq{<div class="cp-bridge">\n};
-}
-
-sub bridge_end {
-    return qq{</div><!-- .cp-bridge -->\n};
-}
-
-sub tab_begin {
-    my ($elt) = @_;
-    return qq{<div class="cp-tab">\n};
-}
-
-sub tab_end {
-    return qq{</div><!-- .cp-tab -->\n};
-}
-
-sub grid_begin {
-    my ($elt) = @_;
-    return qq{<div class="cp-grid">\n};
-}
-
-sub grid_end {
-    return qq{</div><!-- .cp-grid -->\n};
-}
-
-# =================================================================
-# DOCUMENT STRUCTURE
-# =================================================================
-
-sub document_begin {
-    my ($title) = @_;
-    my $escaped_title = escape_html($title);
-    
-    return qq{<!DOCTYPE html>
+        return qq{<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ChordPro HTML5 Backend">
-    <title>$escaped_title</title>
+    <title>$title</title>
     <style>
-} . generate_default_css() . qq{
+} . $self->generate_default_css() . qq{
     </style>
 </head>
 <body class="chordpro-songbook">
 };
-}
-
-sub document_end {
-    return qq{</body>
+    }
+    
+    method render_document_end() {
+        return qq{</body>
 </html>
 };
-}
-
-# =================================================================
-# CSS GENERATION
-# =================================================================
-
-sub generate_default_css {
-    return q{
+    }
+    
+    # =================================================================
+    # REQUIRED BASE CLASS METHODS - Text Rendering
+    # =================================================================
+    
+    method render_text($text, $style=undef) {
+        my $escaped = $self->escape_text($text);
+        
+        return $escaped unless $style;
+        
+        return qq{<span class="cp-$style">$escaped</span>};
+    }
+    
+    method render_line_break() {
+        return "<br>\n";
+    }
+    
+    method render_paragraph_break() {
+        return "\n";
+    }
+    
+    # =================================================================
+    # REQUIRED BASE CLASS METHODS - Structural Elements
+    # =================================================================
+    
+    method render_section_begin($type, $label=undef) {
+        my $label_attr = '';
+        if (defined $label && $label ne '') {
+            my $escaped_label = $self->escape_text($label);
+            $label_attr = qq{ data-label="$escaped_label"};
+        }
+        
+        return qq{<div class="cp-$type"$label_attr>\n};
+    }
+    
+    method render_section_end($type) {
+        return qq{</div><!-- .cp-$type -->\n};
+    }
+    
+    # =================================================================
+    # REQUIRED BASE CLASS METHODS - Media
+    # =================================================================
+    
+    method render_image($uri, $opts={}) {
+        my $escaped_uri = $self->escape_text($uri);
+        my $alt = $self->escape_text($opts->{alt} // '');
+        
+        my @attrs;
+        push @attrs, qq{src="$escaped_uri"};
+        push @attrs, qq{alt="$alt"};
+        push @attrs, qq{width="$opts->{width}"} if $opts->{width};
+        push @attrs, qq{height="$opts->{height}"} if $opts->{height};
+        push @attrs, qq{class="$opts->{class}"} if $opts->{class};
+        
+        my $attrs_str = join(' ', @attrs);
+        return qq{<img $attrs_str>\n};
+    }
+    
+    method render_metadata($key, $value) {
+        my $escaped_key = $self->escape_text($key);
+        my $escaped_value = $self->escape_text($value);
+        
+        return qq{<meta name="chordpro:$escaped_key" content="$escaped_value">\n};
+    }
+    
+    # =================================================================
+    # REQUIRED CHORDPRO METHODS - Music Notation
+    # =================================================================
+    
+    method render_chord($chord_obj) {
+        my $chord_name = $self->escape_text($chord_obj->name);
+        return qq{<span class="cp-chord">$chord_name</span>};
+    }
+    
+    method render_songline($phrases, $chords) {
+        my $html = qq{<div class="cp-songline">\n};
+        
+        # Check if lyrics-only mode
+        if ($self->is_lyrics_only()) {
+            my $text = join('', @$phrases);
+            $html .= qq{  <span class="cp-lyrics">} . $self->escape_text($text) . qq{</span>\n};
+            $html .= qq{</div>\n};
+            return $html;
+        }
+        
+        # Check if single-space mode (suppress empty chord lines)
+        my $has_chords = 0;
+        if ($chords) {
+            foreach my $chord (@$chords) {
+                if ($chord && ref($chord) && $chord->key) {
+                    $has_chords = 1;
+                    last;
+                }
+            }
+        }
+        
+        if ($self->is_single_space() && !$has_chords) {
+            my $text = join('', @$phrases);
+            $html .= qq{  <span class="cp-lyrics">} . $self->escape_text($text) . qq{</span>\n};
+            $html .= qq{</div>\n};
+            return $html;
+        }
+        
+        # Render chord-lyric pairs
+        for (my $i = 0; $i < @$phrases; $i++) {
+            my $phrase = $phrases->[$i] // '';
+            my $chord = $chords->[$i];
+            
+            $html .= qq{  <span class="cp-chord-lyric-pair">\n};
+            
+            # Chord span (empty if no chord)
+            if ($chord && ref($chord) && $chord->key) {
+                my $chord_name = $self->escape_text($chord->name);
+                $html .= qq{    <span class="cp-chord">$chord_name</span>\n};
+            } else {
+                $html .= qq{    <span class="cp-chord cp-chord-empty"></span>\n};
+            }
+            
+            # Lyric span
+            my $escaped_phrase = $self->escape_text($phrase);
+            $html .= qq{    <span class="cp-lyrics">$escaped_phrase</span>\n};
+            
+            $html .= qq{  </span>\n};
+        }
+        
+        $html .= qq{</div>\n};
+        return $html;
+    }
+    
+    method render_grid_line($tokens) {
+        my $html = qq{<div class="cp-gridline">\n};
+        
+        foreach my $token (@$tokens) {
+            if ($token->{class} eq 'chord') {
+                my $chord_name = $self->escape_text($token->{chord}->key);
+                $html .= qq{  <span class="cp-grid-chord">$chord_name</span>\n};
+            } else {
+                my $symbol = $self->escape_text($token->{symbol});
+                $html .= qq{  <span class="cp-grid-symbol">$symbol</span>\n};
+            }
+        }
+        
+        $html .= qq{</div>\n};
+        return $html;
+    }
+    
+    # =================================================================
+    # SONG GENERATION - Override to customize structure
+    # =================================================================
+    
+    method generate_song($song) {
+        my @output;
+        
+        # Song container
+        push @output, qq{<div class="cp-song">\n};
+        
+        # Title
+        if ($song->{title}) {
+            my $escaped_title = $self->escape_text($song->{title});
+            push @output, qq{  <h1 class="cp-title">$escaped_title</h1>\n};
+        }
+        
+        # Subtitles
+        if ($song->{subtitle}) {
+            foreach my $subtitle (@{$song->{subtitle}}) {
+                my $escaped = $self->escape_text($subtitle);
+                push @output, qq{  <h2 class="cp-subtitle">$escaped</h2>\n};
+            }
+        }
+        
+        # Metadata section
+        if ($song->{artist} || $song->{composer} || $song->{album}) {
+            push @output, qq{  <div class="cp-metadata">\n};
+            
+            if ($song->{artist}) {
+                foreach my $artist (@{$song->{artist}}) {
+                    my $escaped = $self->escape_text($artist);
+                    push @output, qq{    <div class="cp-artist">$escaped</div>\n};
+                }
+            }
+            
+            if ($song->{composer}) {
+                foreach my $composer (@{$song->{composer}}) {
+                    my $escaped = $self->escape_text($composer);
+                    push @output, qq{    <div class="cp-composer">$escaped</div>\n};
+                }
+            }
+            
+            if ($song->{album}) {
+                my $escaped = $self->escape_text($song->{album});
+                push @output, qq{    <div class="cp-album">$escaped</div>\n};
+            }
+            
+            push @output, qq{  </div>\n};
+        }
+        
+        # Process song body using base class dispatch
+        if ($song->{body}) {
+            foreach my $elt (@{$song->{body}}) {
+                push @output, $self->dispatch_element($elt);
+            }
+        }
+        
+        # Close song container
+        push @output, qq{</div><!-- .cp-song -->\n\n};
+        
+        return join('', @output);
+    }
+    
+    # =================================================================
+    # HTML-SPECIFIC OVERRIDES
+    # =================================================================
+    
+    # Override text formatting helpers
+    method wrap_bold($text) {
+        return qq{<strong>$text</strong>};
+    }
+    
+    method wrap_italic($text) {
+        return qq{<em>$text</em>};
+    }
+    
+    method wrap_monospace($text) {
+        return qq{<code>$text</code>};
+    }
+    
+    # Override escape_text for HTML
+    method escape_text($text) {
+        return '' unless defined $text;
+        
+        $text =~ s/&/&amp;/g;
+        $text =~ s/</&lt;/g;
+        $text =~ s/>/&gt;/g;
+        $text =~ s/"/&quot;/g;
+        $text =~ s/'/&#39;/g;
+        
+        return $text;
+    }
+    
+    # =================================================================
+    # CSS GENERATION
+    # =================================================================
+    
+    method generate_default_css() {
+        return q{
 /* ChordPro HTML5 Default Stylesheet */
 
 :root {
@@ -563,23 +507,43 @@ body.chordpro-songbook {
     }
 }
 };
+    }
 }
 
 # =================================================================
-# HELPER FUNCTIONS
+# COMPATIBILITY WRAPPER - ChordPro calls as class method
 # =================================================================
 
-sub escape_html {
-    my ($text) = @_;
-    return '' unless defined $text;
+# This sub is called by ChordPro as a class method.
+# It creates an instance and manually generates output (can't call inherited method due to name conflict).
+sub generate_songbook {
+    my ( $pkg, $sb ) = @_;
     
-    $text =~ s/&/&amp;/g;
-    $text =~ s/</&lt;/g;
-    $text =~ s/>/&gt;/g;
-    $text =~ s/"/&quot;/g;
-    $text =~ s/'/&#39;/g;
+    # Create instance with config/options from global variables
+    my $backend = $pkg->new(
+        config => $main::config,
+        options => $main::options,
+    );
     
-    return $text;
+    # Manually implement what Base.generate_songbook does
+    # (We can't call the inherited method because the sub name conflicts)
+    my @output;
+    
+    # Begin document
+    push @output, $backend->render_document_begin({
+        title => $sb->{title} // $sb->{songs}->[0]->{title} // 'Songbook',
+        songs => scalar(@{$sb->{songs}}),
+    });
+    
+    # Process each song
+    foreach my $s (@{$sb->{songs}}) {
+        push @output, $backend->generate_song($s);
+    }
+    
+    # End document
+    push @output, $backend->render_document_end();
+    
+    return \@output;
 }
 
 1;
@@ -601,6 +565,8 @@ Key features:
 
 =over 4
 
+=item * Object::Pad architecture with ChordProBase
+
 =item * Flexbox-based chord positioning (works with any fonts)
 
 =item * CSS variables for easy customization
@@ -610,6 +576,34 @@ Key features:
 =item * Embedded CSS (no external dependencies)
 
 =item * Semantic HTML5 structure
+
+=back
+
+=head1 ARCHITECTURE
+
+This backend extends ChordPro::Output::ChordProBase which provides:
+
+=over 4
+
+=item * Directive handler registry and dispatch
+
+=item * Common ChordPro rendering methods
+
+=item * Context tracking (verse, chorus, etc.)
+
+=back
+
+The HTML5 backend implements format-specific rendering:
+
+=over 4
+
+=item * HTML document structure
+
+=item * CSS stylesheet generation
+
+=item * Chord-lyric pair rendering with Flexbox
+
+=item * HTML entity escaping
 
 =back
 
@@ -640,6 +634,10 @@ Users can override CSS variables:
         --cp-font-chord: Helvetica, sans-serif;
         --cp-color-chord: #cc0000;
     }
+
+=head1 SEE ALSO
+
+L<ChordPro::Output::ChordProBase>, L<ChordPro::Output::Base>
 
 =head1 AUTHOR
 
