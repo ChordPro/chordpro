@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ChordPro HTML5 Backend MVP">
+    <title>Amazing Grace</title>
+    <style>
+
+/* ChordPro HTML5 Stylesheet */
+
+:root {
+    --cp-font-text: Georgia, serif;
+    --cp-font-chord: Arial, sans-serif;
+    --cp-size-text: 12pt;
+    --cp-size-chord: 10pt;
+    --cp-size-title: 18pt;
+    --cp-size-subtitle: 14pt;
+    --cp-color-chord: #0066cc;
+    --cp-color-comment: #666;
+    --cp-color-chorus-bg: #f5f5f5;
+    --cp-color-chorus-border: #0066cc;
+    --cp-spacing-line: 0.3em;
+    --cp-spacing-verse: 1em;
+}
+
+body.chordpro-songbook {
+    font-family: var(--cp-font-text);
+    font-size: var(--cp-size-text);
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    line-height: 1.4;
+}
+
+.cp-song {
+    margin-bottom: 3em;
+}
+
+.cp-title {
+    font-size: var(--cp-size-title);
+    font-weight: bold;
+    margin: 0.5em 0;
+}
+
+.cp-subtitle {
+    font-size: var(--cp-size-subtitle);
+    font-style: italic;
+    margin: 0.3em 0;
+}
+
+.cp-metadata {
+    margin: 1em 0;
+    font-size: 0.9em;
+    color: #555;
+}
+
+.cp-artist, .cp-composer {
+    margin: 0.2em 0;
+}
+
+/* CORE INNOVATION: Flexbox chord positioning */
+.cp-songline {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: var(--cp-spacing-line);
+    line-height: 1.2;
+}
+
+.cp-chord-lyric-pair {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.cp-chord {
+    font-family: var(--cp-font-chord);
+    font-size: var(--cp-size-chord);
+    color: var(--cp-color-chord);
+    font-weight: bold;
+    line-height: 1.2;
+    min-height: 1.2em;
+    padding-bottom: 0.2em;
+}
+
+.cp-chord-empty {
+    visibility: hidden;
+}
+
+.cp-lyrics {
+    font-family: var(--cp-font-text);
+    font-size: var(--cp-size-text);
+    white-space: pre;
+    line-height: 1.2;
+}
+
+.cp-comment {
+    font-size: 11pt;
+    color: var(--cp-color-comment);
+    margin: 0.5em 0;
+    font-style: italic;
+}
+
+.cp-verse {
+    margin: var(--cp-spacing-verse) 0;
+}
+
+.cp-chorus {
+    margin: var(--cp-spacing-verse) 0;
+    padding: 0.5em 0 0.5em 1em;
+    border-left: 3px solid var(--cp-color-chorus-border);
+    background: var(--cp-color-chorus-bg);
+}
+
+@media print {
+    @page {
+        size: A4;
+        margin: 2cm;
+    }
+    
+    body.chordpro-songbook {
+        max-width: 100%;
+        padding: 0;
+    }
+    
+    .cp-verse, .cp-chorus {
+        page-break-inside: avoid;
+    }
+}
+
+    </style>
+</head>
+<body class="chordpro-songbook">
+<div class="cp-song">
+  <h1 class="cp-title">Amazing Grace</h1>
+  <h2 class="cp-subtitle">Traditional Hymn</h2>
+  <div class="cp-metadata">
+    <div class="cp-artist">John Newton</div>
+    <div class="cp-composer">John Newton</div>
+  </div>
+<div class="cp-verse">
+  <div class="cp-songline">
+    <span class="cp-chord-lyric-pair">
+      <span class="cp-chord">G</span>
+      <span class="cp-lyrics">A</span>
+    </span>
+    <span class="cp-chord-lyric-pair">
+      <span class="cp-chord">G/B</span>
+      <span class="cp-lyrics">mazing </span>
+    </span>
+    <span class="cp-chord-lyric-pair">
+      <span class="cp-chord">C</span>
+      <span class="cp-lyrics">grace! How </span>
+    </span>
+    <span class="cp-chord-lyric-pair">
+      <span class="cp-chord">G</span>
+      <span class="cp-lyrics">sweet the </span>
+    </span>
+    <span class="cp-chord-lyric-pair">
+      <span class="cp-chord cp-chord-empty"></span>
+      <span class="cp-lyrics">sound</span>
+    </span>
+  </div>
+  <div class="cp-songline">
+    <span class="cp-chord-lyric-pair">
+      <span class="cp-chord">G</span>
+      <span class="cp-lyrics">That </span>
+    </span>
+    <span class="cp-chord-lyric-pair">
+      <span class="cp-chord">Em</span>
+      <span class="cp-lyrics">saved a </span>
+    </span>
+    <span class="cp-chord-lyric-pair">
+      <span class="cp-chord">D</span>
+      <span class="cp-lyrics">wretch like </span>
+    </span>
+    <span class="cp-chord-lyric-pair">
+      <span class="cp-chord cp-chord-empty"></span>
+      <span class="cp-lyrics">me!</span>
+    </span>
+  </div>
+</div>
+  <div class="cp-comment">Simple and beautiful</div>
+<div class="cp-chorus">
+  <div class="cp-songline">
+    <span class="cp-chord-lyric-pair">
+      <span class="cp-chord">G</span>
+      <span class="cp-lyrics">&#39;Twas </span>
+    </span>
+    <span class="cp-chord-lyric-pair">
+      <span class="cp-chord">C</span>
+      <span class="cp-lyrics">grace that </span>
+    </span>
+    <span class="cp-chord-lyric-pair">
+      <span class="cp-chord">G</span>
+      <span class="cp-lyrics">taught my </span>
+    </span>
+    <span class="cp-chord-lyric-pair">
+      <span class="cp-chord cp-chord-empty"></span>
+      <span class="cp-lyrics">heart to fear,</span>
+    </span>
+  </div>
+  <div class="cp-songline">
+    <span class="cp-chord-lyric-pair">
+      <span class="cp-chord">Em</span>
+      <span class="cp-lyrics">And </span>
+    </span>
+    <span class="cp-chord-lyric-pair">
+      <span class="cp-chord">D</span>
+      <span class="cp-lyrics">grace my </span>
+    </span>
+    <span class="cp-chord-lyric-pair">
+      <span class="cp-chord cp-chord-empty"></span>
+      <span class="cp-lyrics">fears relieved;</span>
+    </span>
+  </div>
+</div>
+</div><!-- .cp-song -->
+</body>
+</html>
