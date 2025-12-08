@@ -10,6 +10,7 @@ use v5.26;
 use Object::Pad;
 use utf8;
 use Carp;
+use Ref::Util qw(is_hashref);
 
 class ChordPro::Output::Base :abstract {
 
@@ -114,7 +115,7 @@ class ChordPro::Output::Base :abstract {
         my $ref = $config;
 
         foreach my $part (@parts) {
-            return 0 unless ref($ref) eq 'HASH' && exists $ref->{$part};
+            return 0 unless is_hashref($ref) && exists $ref->{$part};
             $ref = $ref->{$part};
         }
 
@@ -127,7 +128,7 @@ class ChordPro::Output::Base :abstract {
         my $ref = $config;
 
         foreach my $part (@parts) {
-            return $default unless ref($ref) eq 'HASH' && exists $ref->{$part};
+            return $default unless is_hashref($ref) && exists $ref->{$part};
             $ref = $ref->{$part};
         }
 

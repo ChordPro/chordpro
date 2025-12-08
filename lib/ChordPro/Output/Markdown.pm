@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+
 package main;
 
 our $options;
@@ -6,389 +7,501 @@ our $config;
 
 package ChordPro::Output::Markdown;
 # Author: Johannes Rumpf / 2022
+# Migrated to Object::Pad architecture: 2025
 
 use strict;
 use warnings;
+use v5.26;
+use Object::Pad;
+use utf8;
+
+use ChordPro::Output::ChordProBase;
 use ChordPro::Output::Common;
 use Text::Layout::Markdown;
+use Ref::Util qw(is_arrayref);
 
-my $single_space = 0;		# suppress chords line when empty
-my $lyrics_only = 0;		# suppress all chords lines
-my $chords_under = 0;		# chords under lyrics
-my $text_layout = Text::Layout::Markdown->new; # Text::Layout::Text->new; 
-my %line_routines = ();
-my $tidy;
-my $rechorus; # not implemented @todo
-my $act_song;
-my $cp = "\t"; # Chord-Prefix // Verbatim / Code line in Markdown
+class ChordPro::Output::Markdown
+  :isa(ChordPro::Output::ChordProBase) {
 
-sub upd_config {
-    $lyrics_only  = $config->{settings}->{'lyrics-only'};
-    $chords_under = $config->{settings}->{'chords-under'};
-    $rechorus  = $config->{text}->{chorus}->{recall};
+    # Markdown-specific fields
+    field $text_layout;
+    field $chords_under;
+    field $tidy;
+    field $cp;  # Chord-Prefix for code blocks
+    field $current_song;  # Current song being processed
+
+    BUILD {
+        $text_layout = Text::Layout::Markdown->new;
+        $chords_under = 0;
+        $tidy = 0;
+        $cp = "\t";  # Tab for code blocks in Markdown
+
+        # Get Markdown-specific config
+        $chords_under = $self->config->{settings}->{'chords-under'} // 0;
+        $tidy = $self->options->{'backend-option'}->{tidy} // 0;
+    }
+
+    # =================================================================
+    # REQUIRED BASE CLASS METHODS - Document Structure
+    # =================================================================
+
+    method render_document_begin($metadata) {
+        # Markdown has no document wrapper - just start with content
+        return "";
+    }
+
+    method render_document_end() {
+        # Markdown has no document wrapper
+        return "";
+    }
+
+    # =================================================================
+    # REQUIRED BASE CLASS METHODS - Text Rendering
+    # =================================================================
+
+    method render_text($text, $style=undef) {
+        # Use Text::Layout for markup handling
+        $text_layout->set_markup($text);
+        my $rendered = $text_layout->render;
+
+        return $rendered unless $style;
+
+        # Apply Markdown styling
+        return "**$rendered**" if $style eq 'bold';
+        return "*$rendered*" if $style eq 'italic';
+        return "`$rendered`" if $style eq 'monospace' || $style eq 'code';
+
+        return $rendered;
+    }
+
+    method render_line_break() {
+        return "  \n";  # Two spaces + newline in Markdown
+    }
+
+    method render_paragraph_break() {
+        return "\n\n";
+    }
+
+    # =================================================================
+    # REQUIRED BASE CLASS METHODS - Structural Elements
+    # =================================================================
+
+    method render_section_begin($type, $label=undef) {
+        # Most sections in Markdown don't have explicit begin markers
+        # Handle special cases
+        if ($type eq 'chorus') {
+            return "**Chorus**\n\n";
+        }
+        elsif ($type eq 'tab') {
+            return "**Tabulatur**  \n\n";
+        }
+        elsif ($type eq 'grid') {
+            return "**Grid**  \n\n";
+        }
+        elsif ($type eq 'comment' || $type eq 'comment_italic') {
+            return "> ";
+        }
+
+        return "";
+    }
+
+    method render_section_end($type) {
+        # Handle special section endings
+        if ($type eq 'chorus') {
+            return "---------------  \n";
+        }
+        elsif ($type eq 'verse' || $type eq 'tab' || $type eq 'grid') {
+            return "\n";
+        }
+        elsif ($type eq 'comment' || $type eq 'comment_italic') {
+            return "  \n";
+        }
+
+        return "";
+    }
+
+    # =================================================================
+    # REQUIRED BASE CLASS METHODS - Media
+    # =================================================================
+
+    method render_image($uri, $opts={}) {
+        my $alt = $opts->{alt} // '';
+        return "![$alt]($uri)";
+    }
+
+    method render_metadata($key, $value) {
+        # Markdown doesn't have metadata in the same way
+        return "";
+    }
+
+    # =================================================================
+    # REQUIRED CHORDPRO METHODS - Music Notation
+    # =================================================================
+
+    method render_chord($chord_obj) {
+        return "" unless $chord_obj;
+        return $chord_obj->key if $chord_obj->info->is_annotation;
+        $text_layout->set_markup($chord_obj->chord_display);
+        return $text_layout->render;
+    }
+
+    method render_songline($phrases, $chords) {
+        my @rendered_phrases = map {
+            $text_layout->set_markup($_);
+            $text_layout->render;
+        } @$phrases;
+
+        # Lyrics-only mode
+        if ($self->is_lyrics_only()) {
+            my $line = join("", @rendered_phrases);
+            return $self->markdown_textline($cp . $line);
+        }
+
+        # Single-space mode (suppress empty chord lines)
+        my $has_chords = 0;
+        if ($chords) {
+            foreach my $chord (@$chords) {
+                if ($chord && $chord->raw =~ /\S/) {
+                    $has_chords = 1;
+                    last;
+                }
+            }
+        }
+
+        if ($self->is_single_space() && !$has_chords) {
+            my $line = join("", @rendered_phrases);
+            return $self->markdown_textline($cp . $line);
+        }
+
+        # No chords
+        unless ($chords) {
+            return $self->markdown_textline($cp . join(" ", @rendered_phrases));
+        }
+
+        # Inline chords mode
+        if (my $f = $config->{settings}->{'inline-chords'}) {
+            $f = '[%s]' unless $f =~ /^[^%]*\%s[^%]*$/;
+            $f .= '%s';
+            my $t_line = "";
+            foreach (0..$#{$chords}) {
+                $t_line .= sprintf($f,
+                    $self->render_chord($chords->[$_]),
+                    $rendered_phrases[$_]);
+            }
+            return $self->markdown_textline($cp . $t_line);
+        }
+
+        # Standard mode: chords above lyrics
+        my $c_line = "";
+        my $t_line = "";
+        foreach (0..$#{$chords}) {
+            $c_line .= $self->render_chord($chords->[$_]) . " ";
+            $t_line .= $rendered_phrases[$_];
+            my $d = length($c_line) - length($t_line);
+            $t_line .= "-" x $d if $d > 0;
+            $c_line .= " " x -$d if $d < 0;
+        }
+
+        $t_line =~ s/\s+$//;
+        $c_line =~ s/\s+$//;
+
+        if ($c_line ne "") {
+            $t_line = $cp . $t_line . "  ";
+            $c_line = $cp . $c_line . "  ";
+        } else {
+            $t_line = $self->markdown_textline($cp . $t_line);
+        }
+
+        # Return as array ref for chord/lyric pairs
+        return $chords_under
+            ? [$t_line, $c_line]
+            : [$c_line, $t_line];
+    }
+
+    method render_grid_line($tokens) {
+        my @parts = map {
+            $_->{class} eq 'chord'
+                ? $_->{chord}->raw
+                : $_->{symbol}
+        } @$tokens;
+
+        return "\t" . join("", @parts);
+    }
+
+    # =================================================================
+    # OVERRIDE GENERATE_SONG - Custom Markdown structure
+    # =================================================================
+
+    method generate_song($song) {
+        my @output;
+
+        # Store current song for metadata substitution in comments
+        $current_song = $song;
+
+        # Assume songlines without context are verses
+        foreach my $item (@{$song->{body}}) {
+            if ($item->{type} eq "songline" && $item->{context} eq '') {
+                $item->{context} = 'verse';
+            }
+        }
+
+        # Structurize the song
+        $song->structurize;
+
+        # Title
+        push @output, "# " . $song->{title} if defined $song->{title};
+
+        # Subtitles
+        if (defined $song->{subtitle}) {
+            push @output, map { "## $_" } @{$song->{subtitle}};
+        }
+        push @output, "" if defined $song->{subtitle};
+
+        # Chord diagrams (if not lyrics-only)
+        unless ($self->is_lyrics_only()) {
+            my $all_chords = "";
+            if ($song->{chords} && $song->{chords}->{chords}) {
+                foreach my $mchord (@{$song->{chords}->{chords}}) {
+                    if ($song->{chordsinfo} && $song->{chordsinfo}->{$mchord}) {
+                        my $frets = join("", map {
+                            $_ eq '-1' ? 'x' : $_
+                        } @{$song->{chordsinfo}->{$mchord}->{frets}});
+                        $all_chords .= "![$mchord](https://chordgenerator.net/$mchord.png?p=$frets&s=2) ";
+                    }
+                }
+            }
+            if ($all_chords) {
+                push @output, $all_chords;
+                push @output, "";
+            }
+        }
+
+        # Process song body
+        if ($song->{body}) {
+            foreach my $elt (@{$song->{body}}) {
+                # Set chord prefix based on whether body has chords
+                if ($elt->{body} && ($elt->{type} eq 'verse' || $elt->{type} eq 'chorus')) {
+                    $cp = $self->body_has_chords($elt->{body}) ? "\t" : "";
+                }
+
+                my $result = $self->dispatch_element($elt);
+                if (is_arrayref($result)) {
+                    push @output, @$result;
+                } else {
+                    push @output, $result;
+                }
+            }
+        }
+
+        return join("\n", @output) . "\n";
+    }
+
+    # Override generate_songbook to add separators and clean up
+    method generate_songbook_impl($songbook) {
+        my @book;
+
+        foreach my $song (@{$songbook->{songs}}) {
+            if (@book) {
+                push @book, "" if $tidy;
+            }
+            push @book, $self->generate_song($song);
+            push @book, "---------------  \n";
+        }
+
+        push @book, "";
+
+        # Remove all double empty lines
+        my @new;
+        my $count = 0;
+        foreach (@book) {
+            if ($_ =~ /.{1,}/) {
+                push @new, $_;
+                $count = 0;
+            } else {
+                push @new, $_ if $count == 0;
+                $count++;
+            }
+        }
+
+        return \@new;
+    }
+
+    # =================================================================
+    # OVERRIDE ELEMENT HANDLERS
+    # =================================================================
+
+    method handle_songline($elt) {
+        my $result = $self->render_songline($elt->{phrases}, $elt->{chords});
+        if (ref($result) eq 'ARRAY') {
+            return join("\n", @$result) . "\n";
+        }
+        return $result . "\n";
+    }
+
+    method handle_tabline($elt) {
+        return "\t" . $elt->{text} . "\n";
+    }
+
+    method handle_gridline($elt) {
+        return $self->render_grid_line($elt->{tokens}) . "\n";
+    }
+
+    method handle_empty($elt) {
+        return "$cp\n";
+    }
+
+    method handle_comment($elt) {
+        my $text = $elt->{text};
+
+        # Handle metadata substitution in comments
+        if ($text && $text =~ /%\{/ && $current_song) {
+            require ChordPro::Output::Common;
+            $text = ChordPro::Output::Common::fmt_subst($current_song, $text);
+        }
+
+        # Handle chords in comments
+        if ($elt->{chords}) {
+            $text = "";
+            for (0..$#{$elt->{chords}}) {
+                $text .= "[" . $elt->{chords}->[$_]->raw . "]"
+                    if $elt->{chords}->[$_] ne "";
+                $text .= $elt->{phrases}->[$_];
+            }
+        }
+
+        if ($elt->{type} =~ /italic$/) {
+            $text = "*" . $text . "*  ";
+        }
+
+        return "> $text  \n";
+    }
+
+    method handle_comment_italic($elt) {
+        return "> *" . $elt->{text} . "*  \n";
+    }
+
+    method handle_set($elt) {
+        # Set directives are configuration and don't produce output
+        return "";
+    }
+
+    method handle_diagrams($elt) {
+        # Diagrams are handled in generate_song(), not in body
+        return "";
+    }
+
+    method handle_colb($elt) {
+        return "\n\n\n";
+    }
+
+    method handle_newpage($elt) {
+        return "---------------  \n";
+    }
+
+    method handle_image($elt) {
+        return $self->render_image($elt->{uri}) . "\n";
+    }
+
+    method handle_chorus($elt) {
+        my $output = '';
+        $output .= $self->render_section_begin('chorus');
+
+        if ($elt->{body}) {
+            foreach my $child (@{$elt->{body}}) {
+                $output .= $self->dispatch_element($child);
+            }
+        }
+
+        $output .= $self->render_section_end('chorus');
+        return $output;
+    }
+
+    method handle_verse($elt) {
+        my $output = '';
+
+        if ($elt->{body}) {
+            foreach my $child (@{$elt->{body}}) {
+                $output .= $self->dispatch_element($child);
+            }
+        }
+
+        $output .= $self->render_section_end('verse');
+        return $output;
+    }
+
+    method handle_tab($elt) {
+        my $output = '';
+        $output .= $self->render_section_begin('tab');
+
+        if ($elt->{body}) {
+            foreach my $child (@{$elt->{body}}) {
+                my $line = $self->dispatch_element($child);
+                # Add tab prefix for tab content
+                $line =~ s/^/\t/mg;
+                $output .= $line;
+            }
+        }
+
+        return $output;
+    }
+
+    method handle_grid($elt) {
+        my $output = '';
+        $output .= $self->render_section_begin('grid');
+
+        if ($elt->{body}) {
+            foreach my $child (@{$elt->{body}}) {
+                $output .= $self->dispatch_element($child);
+            }
+        }
+
+        $output .= $self->render_section_end('grid');
+        return $output;
+    }
+
+    # =================================================================
+    # MARKDOWN-SPECIFIC HELPER METHODS
+    # =================================================================
+
+    method markdown_textline($line) {
+        my $nbsp = "\x{00A0}";  # Unicode for nbsp
+        if ($line =~ /^\s+/) {
+            my $spaces = $line;
+            $spaces =~ s/^(\s+).*$/$1/;
+            my $replaces = $spaces;
+            $replaces =~ s/\s/$nbsp/g;
+            $line =~ s/$spaces/$replaces/;
+        }
+        return $line . "  ";  # Two spaces for line break
+    }
+
+    method body_has_chords($elts) {
+        foreach my $elt (@$elts) {
+            if ($elt->{type} eq 'songline') {
+                if (defined $elt->{chords} && scalar @{$elt->{chords}} > 0) {
+                    return 1;
+                }
+            }
+        }
+        return 0;
+    }
 }
+
+# =================================================================
+# COMPATIBILITY WRAPPER - ChordPro calls as class method
+# =================================================================
 
 sub generate_songbook {
-    my ( $self, $sb ) = @_;
-    my @book;
-   # push(@book, "[TOC]"); # maybe https://metacpan.org/release/IMAGO/Markdown-TOC-0.01 to create a TOC?
+    my ($pkg, $sb) = @_;
 
-    foreach my $song ( @{$sb->{songs}} ) {
-		if ( @book ) {
-			push(@book, "") if $options->{'backend-option'}->{tidy};
-		}
-		push(@book, @{generate_song($song)});
-		push(@book, "---------------  \n"); #Horizontal line between each song
-	}
+    # Create instance with config/options from global variables
+    my $backend = $pkg->new(
+        config => $main::config,
+        options => $main::options,
+    );
 
-    push( @book, "");
-
-	# remove all double empty lines
-	my @new;
-	my $count = 0;
-	foreach (@book){
-		if ($_ =~ /.{1,}/ ){
-			push(@new, $_);
-			$count = 0
-		} else {
-			push(@new, $_) if $count == 0;
-			$count++;
-		}
-	}
-    \@new;
+    # Call custom implementation
+    return $backend->generate_songbook_impl($sb);
 }
-
-sub generate_song {
-    my ( $s ) = @_;
-	$act_song = $s;
-    $tidy      = $options->{'backend-option'}->{tidy};
-    $single_space = $options->{'single-space'};
-
-    upd_config();
-
-	# asume songline a verse when no context is applied. # check https://github.com/ChordPro/chordpro/pull/211
-	foreach my $item ( @{ $s->{body} } ) {
-	if ( $item->{type} eq "songline" &&  $item->{context} eq '' ){
-		$item->{context} = 'verse';
-	}} # end of pull -- 
- 
-    $s->structurize;
-    my @s;
-    push(@s, "# " . $s->{title}) if defined $s->{title};
-    if ( defined $s->{subtitle} ) {
-	push(@s, map { +"## $_" } @{$s->{subtitle}});
-    }
-
-	if ( !$lyrics_only ){
-		my $all_chords = "";
-		# https://chordgenerator.net/D.png?p=xx0212&s=2 # reuse of other projects (https://github.com/einaregilsson/ChordImageGenerator)?
-		# generate png-out of this project? // fingers also possible - but not set in basics.
-		foreach my $mchord (@{$s->{chords}->{chords}}){
-			# replace -1 with 'x' - alternative '-'
-			my $frets = join("", map { if($_ eq '-1'){ $_ = 'x'; } +"$_"} @{$s->{chordsinfo}->{$mchord}->{frets}});
-			$all_chords .= "![$mchord](https://chordgenerator.net/$mchord.png?p=$frets&s=2) ";
-			
-		}
-		push(@s, $all_chords);
-		push(@s, "");
-  	}  
-	push(@s, elt_handler($s->{body}));
-    return \@s;
-}
-
-sub line_default {
-    my ( $lineobject, $ref_lineobjects ) = @_;
-    return "";
-}
-$line_routines{line_default} = \&line_default;
-
-sub chord {
-    my ( $c ) = @_;
-    return "" unless length($c);
-    return $c->key if $c->info->is_annotation;
-    $text_layout->set_markup($c->chord_display);
-    return $text_layout->render;
-}
-
-sub md_textline{
-	my ( $songline ) = @_;
-	my $empty = $songline;
-    my $textline = $songline;
-    my $nbsp = "\x{00A0}"; #unicode for nbsp sign
-    if($empty =~ /^\s+/){ # starts with spaces
-	    $empty =~ s/^(\s+).*$/$1/; # not the elegant solution - but working - replace all spaces in the beginning of a line
-        my $replaces = $empty;  #with a nbsp symbol as the intend tend to be intentional
-        $replaces =~ s/\s/$nbsp/g;
-        $textline =~ s/$empty/$replaces/;
-    }
-	$textline = $textline."  "; # append two spaces to force linebreak in Markdown
-	return $textline;
-}
-
-sub line_songline {
-    my ( $elt ) = @_;
-    my $t_line = "";
-    my @phrases = map { $text_layout->set_markup($_); $text_layout->render }
-      @{ $elt->{phrases} };
-
-    if ( $lyrics_only or
-	   $single_space && ! ( $elt->{chords} && join( "", map { $_->raw } @{ $elt->{chords} } ) =~ /\S/ )
-       ) {
-	$t_line = join( "", @phrases );
-	return md_textline($cp.$t_line);
-    }
-
-    unless ( $elt->{chords} ) { # i guess we have a line with no chords now... 
-	   return ($cp.  md_textline( join( " ", @phrases )) );
-    }
- 	
-	if ( my $f = $::config->{settings}->{'inline-chords'} ) {
-	$f = '[%s]' unless $f =~ /^[^%]*\%s[^%]*$/;
-	$f .= '%s';
-	foreach ( 0..$#{$elt->{chords}} ) {
-	    $t_line .= sprintf( $f,
-				chord( $elt->{chords}->[$_]->raw ),
-				$phrases[$_] );
-	}
-	return ( md_textline($cp.$t_line) );
-    }
-
-    my $c_line = "";
-    foreach ( 0..$#{$elt->{chords}} ) {
-		$c_line .= chord( $elt->{chords}->[$_] ) . " ";
-		$t_line .= $phrases[$_];
-		my $d = length($c_line) - length($t_line);
-		$t_line .= "-" x $d if $d > 0;
-		$c_line .= " " x -$d if $d < 0;
-    } # this looks like setting the chords above the words.
-
-    s/\s+$// for ( $t_line, $c_line );
-
-	# main problem in markdown - a fixed position is only available in "Code escapes" so weather to set
-	# a tab or a double backticks (``)  - i tend to the tab - so all lines with tabs are "together"
-	if ($c_line ne ""){ # Block-lines are not replacing initial spaces - as the are "code"
-		$t_line = $cp.$t_line."  ";
-		$c_line = $cp.$c_line."  ";
-		}
-	else{
-		$t_line = md_textline($cp.$t_line);
-	}
-	return $chords_under
-		? ( $t_line, $c_line )
-		: ( $c_line, $t_line );
-}
-$line_routines{line_songline} = \&line_songline;
-
-sub line_newpage {
-    return "---------------  \n";
-}
-$line_routines{line_newpage} = \&line_newpage;
-
-sub line_empty {
-    return "$cp";
-}
-$line_routines{line_empty} = \&line_empty;
-
-sub line_comment {
-    my ( $elt ) = @_; # Template for comment?
-	my @s;
-	my $text = $elt->{text};
-	if ( $elt->{chords} ) {
-		$text = "";
-		for ( 0..$#{ $elt->{chords} } ) {
-		    $text .= "[" . $elt->{chords}->[$_]->raw . "]"
-		      if $elt->{chords}->[$_] ne "";
-		    $text .= $elt->{phrases}->[$_];
-	}}
-	if ($elt->{type} =~ /italic$/) {
-			$text = "*" . $text . "*  ";
-		}
-	push(@s, "> $text  ");	
-    return @s;
-}
-$line_routines{line_comment} = \&line_comment;
-
-sub line_comment_italic {
-    my ( $lineobject ) = @_; # Template for comment?
-    return "> *". $lineobject->{text} ."*";;
-}
-$line_routines{line_comment_italic} = \&line_comment_italic;
-
-
-sub line_image {
-    my ( $elt ) = @_;
-	return "![](".$elt->{uri}.")";
-}
-$line_routines{line_image} = \&line_image;
-
-sub line_colb {
-    return "\n\n\n";
-}
-$line_routines{line_colb} = \&line_colb;
-
-sub body_has_chords{
-	my ( $elts ) = @_; # reference to array
-	my $has_chord = 0; # default false has no chords
-	foreach my $elt (@{ $elts }) {
-		if ($elt->{type} eq 'songline'){ 
-			if ((defined $elt->{chords}) && (scalar @{$elt->{chords}} > 0 )){
-				$has_chord = 1;
-				return $has_chord;
-		}}
-	}
-	return $has_chord;
-}
-sub line_chorus {
-    my ( $lineobject ) = @_; #
-	my @s;
-	$cp = (body_has_chords($lineobject->{body})) ?  "\t" :  ""; # Verbatim on Verse/Chorus because Chords are present
-    push(@s, "**Chorus**");
-	push(@s, "");
-	push(@s, elt_handler($lineobject->{body}));
-	# push(@s, "\x{00A0}  "); # nbsp
-	push(@s, "---------------  \n");
-   return @s;
-}
-$line_routines{line_chorus} = \&line_chorus;
-
-sub line_verse {
-	my ( $lineobject ) = @_; #
-	my @s;
-	$cp = (body_has_chords($lineobject->{body})) ?  "\t" :  ""; # Verbatim on Verse/Chorus because Chords are present
-	push(@s, elt_handler($lineobject->{body}));
-	push(@s, "");	
-    # push(@s, "\x{00A0}  "); # nbsp
-	return @s;
-}
-$line_routines{line_verse} = \&line_verse;
-
-sub line_set { # potential comments in fe. Chorus or verse or .... complicated handling - potential contextsensitiv.
-    my ( $elt ) = @_;
-	if ( $elt->{name} eq "lyrics-only" ) {
-	$lyrics_only = $elt->{value}
-		unless $lyrics_only > 1;
-	}
-	# Arbitrary config values.
-	elsif ( $elt->{name} =~ /^(text\..+)/ ) {
-	my @k = split( /[.]/, $1 );
-	my $cc = {};
-	my $c = \$cc;
-	foreach ( @k ) {
-		$c = \($$c->{$_});
-	}
-	$$c = $elt->{value};
-	$config->augment($cc);
-	upd_config();
-	}
-    return "";
-}
-$line_routines{line_set} = \&line_set;
-
-sub line_tabline {
-    my ( $lineobject ) = @_;
-	return  "\t".$lineobject->{text};
-}
-$line_routines{line_tabline} = \&line_tabline;
-
-sub line_tab {
-    my ( $lineobject ) = @_;
-	my @s;
-	push(@s, "**Tabulatur**  "); #@todo
-	push(@s, "");	
-	push(@s, map { "\t".$_ } elt_handler($lineobject->{body}) ); #maybe this need to go for code markup as well´?
-    return @s;
-}
-$line_routines{line_tab} = \&line_tab;
-
-sub line_grid { 
-    my ( $lineobject ) = @_;
-	my @s;
-	push(@s, "**Grid**  ");
-	push(@s, "");
-	push(@s, elt_handler($lineobject->{body}));
-    # push(@s, "\x{00A0}  ");
-	push(@s, "");
-    return @s;
-}
-$line_routines{line_grid} = \&line_grid;
-
-sub line_gridline {
-    my ( $elt ) = @_;
-	my @a = @{ $elt->{tokens} };
-	@a = map { $_->{class} eq 'chord'
-			 ? $_->{chord}->raw
-			 : $_->{symbol} } @a;
-    return "\t".join("", @a);
-}
-$line_routines{line_gridline} = \&line_gridline;
-
-sub elt_handler {
-    my ( $elts ) = @_; # reference to array
-    my $cref; #command reference to subroutine
-	my $init_context = 1;
-	my $ctx = "";
-
-    my @lines;
-	my $last_type='';
-    foreach my $elt (@{ $elts }) {
-		if (($elt->{type} eq 'verse') && ($last_type =~ /comment/)){ 
-			push(@lines, "");
-		}
-    # Gang of Four-Style - sort of command pattern 
-    my $sub_type = "line_".$elt->{type}; # build command "line_<linetype>"
-     if (defined $line_routines{$sub_type}) {
-        $cref = $line_routines{$sub_type}; #\&$sub_type; # due to use strict - we need to get an reference to the command 
-        push(@lines, &$cref($elt)); # call line with actual line-object
-    }
-    else {
-        push(@lines, line_default($elt)); # default = empty line
-    }
-  $last_type = $elt->{type};
-  }
-  return @lines;
-}
-
-#################
-
-# package Text::Layout::Text;
-
-# use parent 'Text::Layout';
-
-# # Eliminate warning when HTML backend is loaded together with Text backend.
-# no warnings 'redefine';
-
-# sub new {
-#     my ( $pkg, @data ) = @_;
-#     my $self = $pkg->SUPER::new;
-#     $self;
-# }
-
-# sub render {
-#     my ( $self ) = @_;
-#     my $res = "";
-#     foreach my $fragment ( @{ $self->{_content} } ) {
-# 	next unless length($fragment->{text});
-# 	$res .= $fragment->{text};
-#     }
-#     $res;
-# }
-
 
 1;
-# @todo 
-# sub line_rechorus {
-#     my ( $lineobject ) = @_;
-	    # if ( $rechorus->{quote} ) {
-		# unshift( @elts, @{ $elt->{chorus} } );
-	    # }
-	    # elsif ( $rechorus->{type} &&  $rechorus->{tag} ) {
-		# push( @s, "{".$rechorus->{type}.": ".$rechorus->{tag}."}" );
-	    # }
-	    # else {
-		# push( @s, "{chorus}" );
-	    # }	 
-# }
-
-# sub line_control {
-#     my ( $lineobject ) = @_;
-# }

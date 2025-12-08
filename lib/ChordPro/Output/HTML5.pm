@@ -13,6 +13,7 @@ package ChordPro::Output::HTML5;
 use v5.26;
 use Object::Pad;
 use utf8;
+use Ref::Util qw(is_ref);
 
 use ChordPro::Output::ChordProBase;
 
@@ -135,7 +136,7 @@ class ChordPro::Output::HTML5
         my $has_chords = 0;
         if ($chords) {
             foreach my $chord (@$chords) {
-                if ($chord && ref($chord) && $chord->key) {
+                if ($chord && is_ref($chord) && $chord->key) {
                     $has_chords = 1;
                     last;
                 }
@@ -157,7 +158,7 @@ class ChordPro::Output::HTML5
             $html .= qq{  <span class="cp-chord-lyric-pair">\n};
 
             # Chord span (empty if no chord)
-            if ($chord && ref($chord) && $chord->key) {
+            if ($chord && is_ref($chord) && $chord->key) {
                 my $chord_name = $self->escape_text($chord->chord_display);
                 $html .= qq{    <span class="cp-chord">$chord_name</span>\n};
             } else {
