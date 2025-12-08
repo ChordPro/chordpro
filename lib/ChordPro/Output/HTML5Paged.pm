@@ -1,0 +1,472 @@
+#! perl
+
+package main;
+
+our $config;
+our $options;
+
+package ChordPro::Output::HTML5Paged;
+
+# HTML5 output backend with paged.js for printing
+# Extends HTML5 backend with print-optimized layout
+
+use v5.26;
+use Object::Pad;
+use utf8;
+
+use ChordPro::Output::HTML5;
+
+class ChordPro::Output::HTML5Paged
+  :isa(ChordPro::Output::HTML5) {
+
+    # =================================================================
+    # OVERRIDE DOCUMENT STRUCTURE FOR PAGED.JS
+    # =================================================================
+
+    method render_document_begin($metadata) {
+        my $title = $self->escape_text($metadata->{title} // 'ChordPro Songbook');
+        my $pagedjs_version = '0.4.3';
+
+        return qq{<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ChordPro HTML5Paged Backend">
+    <title>$title</title>
+
+    <!-- Paged.js for pagination -->
+    <script src="https://unpkg.com/pagedjs\@$pagedjs_version/dist/paged.polyfill.js"></script>
+
+    <style>
+} . $self->generate_paged_css() . qq{
+    </style>
+</head>
+<body class="chordpro-songbook chordpro-paged">
+    <div class="book-content">
+};
+    }
+
+    method render_document_end() {
+        return qq{    </div>
+</body>
+</html>
+};
+    }
+
+    # =================================================================
+    # PAGED.JS CSS GENERATION
+    # =================================================================
+
+    method generate_paged_css() {
+        return q{
+/* ChordPro HTML5 with Paged.js Stylesheet */
+
+/* Page Setup */
+@page {
+    size: A4;
+    margin: 15mm 20mm;
+
+    @bottom-center {
+        content: counter(page);
+        font-size: 10pt;
+        color: #666;
+    }
+}
+
+/* First page has no header */
+@page :first {
+    @top-left { content: none; }
+    @top-center { content: none; }
+    @top-right { content: none; }
+}
+
+/* Named pages for different sections */
+@page song {
+    @top-center {
+        content: string(song-title);
+        font-size: 10pt;
+        font-style: italic;
+        color: #666;
+    }
+}
+
+/* Root variables */
+:root {
+    /* Typography */
+    --cp-font-text: Georgia, serif;
+    --cp-font-chord: Arial, sans-serif;
+    --cp-font-mono: 'Courier New', monospace;
+
+    /* Font Sizes */
+    --cp-size-text: 11pt;
+    --cp-size-chord: 9pt;
+    --cp-size-title: 16pt;
+    --cp-size-subtitle: 13pt;
+    --cp-size-comment: 10pt;
+
+    /* Colors */
+    --cp-color-text: #000;
+    --cp-color-chord: #0066cc;
+    --cp-color-comment: #666;
+    --cp-color-chorus-bg: #f5f5f5;
+    --cp-color-chorus-border: #0066cc;
+
+    /* Spacing */
+    --cp-spacing-line: 0.2em;
+    --cp-spacing-verse: 0.8em;
+    --cp-spacing-chord: 0.15em;
+}
+
+/* Body and container */
+body.chordpro-paged {
+    font-family: var(--cp-font-text);
+    font-size: var(--cp-size-text);
+    color: var(--cp-color-text);
+    line-height: 1.3;
+    margin: 0;
+    padding: 0;
+}
+
+.book-content {
+    width: 100%;
+}
+
+/* Song Container */
+.cp-song {
+    page: song;
+    page-break-before: always;
+    page-break-after: always;
+    margin-bottom: 2em;
+}
+
+.cp-song:first-child {
+    page-break-before: avoid;
+}
+
+/* Set running header with song title */
+.cp-title {
+    string-set: song-title content();
+}
+
+/* Titles */
+.cp-title {
+    font-size: var(--cp-size-title);
+    font-weight: bold;
+    margin: 0 0 0.5em 0;
+    color: var(--cp-color-text);
+    page-break-after: avoid;
+}
+
+.cp-subtitle {
+    font-size: var(--cp-size-subtitle);
+    font-style: italic;
+    margin: 0 0 0.3em 0;
+    color: var(--cp-color-text);
+    page-break-after: avoid;
+}
+
+/* Metadata */
+.cp-metadata {
+    margin: 0.8em 0 1.2em 0;
+    font-size: 0.9em;
+    page-break-after: avoid;
+}
+
+.cp-artist,
+.cp-composer,
+.cp-album {
+    margin: 0.2em 0;
+    color: #555;
+}
+
+/* Songline - Flexbox chord positioning */
+.cp-songline {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: var(--cp-spacing-line);
+    line-height: 1.2;
+    page-break-inside: avoid;
+}
+
+.cp-chord-lyric-pair {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    vertical-align: bottom;
+}
+
+.cp-chord {
+    font-family: var(--cp-font-chord);
+    font-size: var(--cp-size-chord);
+    color: var(--cp-color-chord);
+    font-weight: bold;
+    line-height: 1.2;
+    min-height: 1.2em;
+    height: 1.2em;
+    padding-bottom: var(--cp-spacing-chord);
+}
+
+.cp-chord-empty {
+    visibility: hidden;
+}
+
+.cp-lyrics {
+    font-family: var(--cp-font-text);
+    font-size: var(--cp-size-text);
+    white-space: pre;
+    line-height: 1.2;
+}
+
+/* Comments */
+.cp-comment {
+    font-size: var(--cp-size-comment);
+    color: var(--cp-color-comment);
+    margin: 0.4em 0;
+    font-style: italic;
+    page-break-inside: avoid;
+}
+
+.cp-comment-italic {
+    font-style: italic;
+}
+
+/* Chorus */
+.cp-chorus {
+    margin: var(--cp-spacing-verse) 0;
+    padding: 0.4em 0 0.4em 1em;
+    border-left: 3px solid var(--cp-color-chorus-border);
+    background: var(--cp-color-chorus-bg);
+    page-break-inside: avoid;
+}
+
+/* Verse */
+.cp-verse {
+    margin: var(--cp-spacing-verse) 0;
+    page-break-inside: avoid;
+}
+
+/* Bridge */
+.cp-bridge {
+    margin: var(--cp-spacing-verse) 0;
+    padding-left: 1em;
+    border-left: 2px dashed #999;
+    page-break-inside: avoid;
+}
+
+/* Tab */
+.cp-tab {
+    font-family: var(--cp-font-mono);
+    font-size: 0.85em;
+    white-space: pre;
+    background: #f9f9f9;
+    padding: 0.4em;
+    border: 1px solid #ddd;
+    margin: 0.8em 0;
+    page-break-inside: avoid;
+}
+
+.cp-tabline {
+    margin: 0;
+}
+
+/* Grid */
+.cp-grid {
+    font-family: var(--cp-font-mono);
+    margin: 0.8em 0;
+    background: #f9f9f9;
+    padding: 0.4em;
+    border: 1px solid #ddd;
+    page-break-inside: avoid;
+}
+
+.cp-gridline {
+    display: flex;
+    gap: 0.5em;
+    margin: 0.2em 0;
+}
+
+.cp-grid-chord {
+    font-family: var(--cp-font-chord);
+    color: var(--cp-color-chord);
+    font-weight: bold;
+    min-width: 3em;
+}
+
+.cp-grid-symbol {
+    color: #999;
+}
+
+/* Empty lines */
+.cp-empty {
+    height: 0.6em;
+}
+
+/* Screen preview styles */
+@media screen {
+    body.chordpro-paged {
+        background: #525252;
+        padding: 20px;
+    }
+
+    .book-content {
+        background: white;
+        box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        max-width: 210mm;
+        margin: 0 auto;
+        padding: 15mm 20mm;
+    }
+
+    .cp-song {
+        page-break-before: auto;
+        border-bottom: 1px dashed #ccc;
+        padding-bottom: 2em;
+    }
+
+    .cp-song:last-child {
+        border-bottom: none;
+    }
+}
+
+/* Print styles */
+@media print {
+    body.chordpro-paged {
+        background: white;
+        padding: 0;
+    }
+
+    .book-content {
+        background: white;
+        box-shadow: none;
+        max-width: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Let paged.js handle page breaks */
+    .cp-song {
+        border-bottom: none;
+    }
+}
+};
+    }
+}
+
+# =================================================================
+# COMPATIBILITY WRAPPER - ChordPro calls as class method
+# =================================================================
+
+sub generate_songbook {
+    my ( $pkg, $sb ) = @_;
+
+    # Create instance with config/options from global variables
+    my $backend = $pkg->new(
+        config => $main::config,
+        options => $main::options,
+    );
+
+    # Manually implement what Base.generate_songbook does
+    my $output = '';
+
+    # Begin document
+    $output .= $backend->render_document_begin({
+        title => $sb->{title} // $sb->{songs}->[0]->{title} // 'Songbook',
+        songs => scalar(@{$sb->{songs}}),
+    });
+
+    # Process each song
+    foreach my $s (@{$sb->{songs}}) {
+        $output .= $backend->generate_song($s);
+    }
+
+    # End document
+    $output .= $backend->render_document_end();
+
+    # Return as array ref of lines (ChordPro expects this format)
+    return [ $output =~ /^.*\n?/gm ];
+}
+
+1;
+
+=head1 NAME
+
+ChordPro::Output::HTML5Paged - HTML5 output with paged.js for printing
+
+=head1 SYNOPSIS
+
+    chordpro --generate=HTML5Paged -o songbook.html songs.cho
+
+=head1 DESCRIPTION
+
+This backend extends the HTML5 output backend with paged.js support for
+professional printing and PDF generation.
+
+Key features:
+
+=over 4
+
+=item * Based on HTML5 backend (inherits all features)
+
+=item * Paged.js integration for pagination
+
+=item * Print-optimized CSS with @page rules
+
+=item * Automatic page breaks between songs
+
+=item * Running headers with song titles
+
+=item * Page numbers in footer
+
+=item * Screen preview mode
+
+=item * Professional print layout
+
+=back
+
+=head1 USAGE
+
+Generate a songbook with paged.js:
+
+    chordpro --generate=HTML5Paged -o songbook.html *.cho
+
+Open the generated HTML file in a browser. Paged.js will automatically:
+
+=over 4
+
+=item * Paginate the content
+
+=item * Add page numbers
+
+=item * Insert running headers
+
+=item * Handle page breaks
+
+=back
+
+To generate a PDF, use the browser's "Print to PDF" function or use a
+headless browser like Puppeteer:
+
+    npx puppeteer print songbook.html songbook.pdf
+
+=head1 PAGED.JS
+
+Paged.js is a polyfill for paged media CSS. It allows you to create
+print-ready documents using web technologies. The library is loaded
+from a CDN and requires an internet connection on first view.
+
+Learn more at: https://pagedjs.org/
+
+=head1 CUSTOMIZATION
+
+The CSS can be customized by modifying the generate_paged_css() method
+or by adding a custom stylesheet in the document.
+
+=head1 SEE ALSO
+
+L<ChordPro::Output::HTML5>, L<ChordPro::Output::ChordProBase>, L<ChordPro::Output::Base>
+
+=head1 AUTHOR
+
+ChordPro Development Team
+
+=cut

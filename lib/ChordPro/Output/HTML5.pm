@@ -378,6 +378,7 @@ body.chordpro-songbook {
     display: inline-flex;
     flex-direction: column;
     align-items: flex-start;
+    vertical-align: bottom;
 }
 
 .cp-chord {
@@ -387,6 +388,7 @@ body.chordpro-songbook {
     font-weight: bold;
     line-height: 1.2;
     min-height: 1.2em;
+    height: 1.2em;
     padding-bottom: var(--cp-spacing-chord);
 }
 
