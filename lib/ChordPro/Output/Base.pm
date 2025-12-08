@@ -11,99 +11,81 @@ use Object::Pad;
 use utf8;
 use Carp;
 
-class ChordPro::Output::Base {
-    
+class ChordPro::Output::Base :abstract {
+
     # Configuration from ChordPro
-    field $config :param;
-    
+    field $config :param :reader;
+
     # Output options
-    field $options :param //= {};
-    
+    field $options :param :reader //= {};
+
     # Current song being processed
-    field $song;
-    
+    field $song :reader :writer;
+
     # =================================================================
     # ABSTRACT METHODS - Must be implemented by subclasses
     # =================================================================
-    
+
     # Document structure
-    method render_document_begin($metadata) {
-        croak("render_document_begin() must be implemented by subclass");
-    }
-    
-    method render_document_end() {
-        croak("render_document_end() must be implemented by subclass");
-    }
-    
+    method render_document_begin :abstract ($metadata);
+
+    method render_document_end :abstract ();
+
     # Text rendering
-    method render_text($text, $style=undef) {
-        croak("render_text() must be implemented by subclass");
-    }
-    
-    method render_line_break() {
-        croak("render_line_break() must be implemented by subclass");
-    }
-    
-    method render_paragraph_break() {
-        croak("render_paragraph_break() must be implemented by subclass");
-    }
-    
+    method render_text :abstract ($text, $style=undef);
+
+    method render_line_break :abstract ();
+
+    method render_paragraph_break :abstract ();
+
     # Structural elements
-    method render_section_begin($type, $label=undef) {
-        croak("render_section_begin() must be implemented by subclass");
-    }
-    
-    method render_section_end($type) {
-        croak("render_section_end() must be implemented by subclass");
-    }
-    
+    method render_section_begin :abstract ($type, $label=undef);
+
+    method render_section_end :abstract ($type);
+
     # Lists (optional - some backends may not support)
     method render_list_begin($ordered=0) {
         return "";  # Default: no-op
     }
-    
+
     method render_list_item($content) {
         return $content;  # Default: just return content
     }
-    
+
     method render_list_end() {
         return "";  # Default: no-op
     }
-    
+
     # Media
-    method render_image($uri, $opts={}) {
-        croak("render_image() must be implemented by subclass");
-    }
-    
+    method render_image :abstract ($uri, $opts={});
+
     # Metadata
-    method render_metadata($key, $value) {
-        croak("render_metadata() must be implemented by subclass");
-    }
-    
+    method render_metadata :abstract ($key, $value);
+
     # =================================================================
     # OPTIONAL FEATURES - Backends declare capabilities
     # =================================================================
-    
+
     method supports_feature($feature_name) {
         # Default: no special features
         return 0;
     }
-    
+
     # =================================================================
     # HELPER METHODS - Provided to all subclasses
     # =================================================================
-    
+
     method escape_text($text) {
         # Default: no escaping
         # Subclasses override for format-specific escaping
         return $text;
     }
-    
+
     method format_text($text, $format={}) {
         # Default: basic text formatting
         # Subclasses can override for richer formatting
         my $result = $text;
-        
+
         if ($format->{bold}) {
             $result = $self->wrap_bold($result);
         }
@@ -113,92 +95,76 @@ class ChordPro::Output::Base {
         if ($format->{monospace}) {
             $result = $self->wrap_monospace($result);
         }
-        
+
         return $result;
     }
-    
+
     # Text formatting wrappers - override in subclasses
     method wrap_bold($text) { return $text; }
     method wrap_italic($text) { return $text; }
     method wrap_monospace($text) { return $text; }
-    
+
     # =================================================================
     # UTILITY METHODS
     # =================================================================
-    
-    method set_song($s) {
-        $song = $s;
-    }
-    
-    method get_song() {
-        return $song;
-    }
-    
-    method get_config() {
-        return $config;
-    }
-    
-    method get_options() {
-        return $options;
-    }
-    
+
     # Helper to check if a config key exists
     method config_has($key) {
         my @parts = split(/\./, $key);
         my $ref = $config;
-        
+
         foreach my $part (@parts) {
             return 0 unless ref($ref) eq 'HASH' && exists $ref->{$part};
             $ref = $ref->{$part};
         }
-        
+
         return 1;
     }
-    
+
     # Helper to get config value with default
     method config_get($key, $default=undef) {
         my @parts = split(/\./, $key);
         my $ref = $config;
-        
+
         foreach my $part (@parts) {
             return $default unless ref($ref) eq 'HASH' && exists $ref->{$part};
             $ref = $ref->{$part};
         }
-        
+
         return $ref;
     }
-    
+
     # =================================================================
     # LIFECYCLE METHODS
     # =================================================================
-    
+
     BUILD {
         # Validate that we have required config
         croak("config parameter is required") unless defined $config;
     }
-    
+
     # Entry point for generating a songbook
     method generate_songbook($songbook) {
-        my @output;
-        
+        my $output = '';
+
         # Begin document
-        push @output, $self->render_document_begin({
+        $output .= $self->render_document_begin({
             title => $songbook->{title} // 'Songbook',
             songs => scalar(@{$songbook->{songs}}),
         });
-        
+
         # Process each song
         foreach my $s (@{$songbook->{songs}}) {
-            $self->set_song($s);
-            push @output, $self->generate_song($s);
+            $song = $s;
+            $output .= $self->generate_song($s);
         }
-        
+
         # End document
-        push @output, $self->render_document_end();
-        
-        return \@output;
+        $output .= $self->render_document_end();
+
+        return [ $output =~ /^.*\n?/gm ];
     }
-    
+
     # Entry point for generating a single song
     method generate_song($s) {
         croak("generate_song() must be implemented by subclass");
@@ -214,17 +180,17 @@ ChordPro::lib::OutputBase - Base class for ChordPro output backends
 =head1 SYNOPSIS
 
     package ChordPro::Output::MyFormat;
-    
+
     use v5.26;
     use Object::Pad;
-    
+
     class ChordPro::Output::MyFormat
       :isa(ChordPro::lib::OutputBase) {
-        
+
         method render_text($text, $style=undef) {
             return $self->escape_text($text);
         }
-        
+
         method generate_song($song) {
             my @output;
             # ... generate output ...

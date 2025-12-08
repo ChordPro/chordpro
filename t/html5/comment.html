@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="generator" content="ChordPro HTML5 Backend">
+
+    <title>Comment Test</title>
+
+    <style>
+
+
+
+/* ChordPro HTML5 Default Stylesheet */
+
+
+
+:root {
+
+    /* Typography */
+
+    --cp-font-text: Georgia, serif;
+
+    --cp-font-chord: Arial, sans-serif;
+
+    --cp-font-mono: 'Courier New', monospace;
+
+
+
+    /* Font Sizes */
+
+    --cp-size-text: 12pt;
+
+    --cp-size-chord: 10pt;
+
+    --cp-size-title: 18pt;
+
+    --cp-size-subtitle: 14pt;
+
+    --cp-size-comment: 11pt;
+
+
+
+    /* Colors */
+
+    --cp-color-text: #000;
+
+    --cp-color-chord: #0066cc;
+
+    --cp-color-comment: #666;
+
+    --cp-color-highlight: #ff0;
+
+    --cp-color-chorus-bg: #f5f5f5;
+
+    --cp-color-chorus-border: #0066cc;
+
+
+
+    /* Spacing */
+
+    --cp-spacing-line: 0.3em;
+
+    --cp-spacing-verse: 1em;
+
+    --cp-spacing-chord: 0.2em;
+
+}
+
+
+
+/* Body and Page */
+
+body.chordpro-songbook {
+
+    font-family: var(--cp-font-text);
+
+    font-size: var(--cp-size-text);
+
+    color: var(--cp-color-text);
+
+    line-height: 1.4;
+
+    max-width: 800px;
+
+    margin: 0 auto;
+
+    padding: 20px;
+
+}
+
+
+
+/* Song Container */
+
+.cp-song {
+
+    margin-bottom: 3em;
+
+    page-break-after: always;
+
+}
+
+
+
+/* Titles */
+
+.cp-title {
+
+    font-size: var(--cp-size-title);
+
+    font-weight: bold;
+
+    margin: 0.5em 0;
+
+    color: var(--cp-color-text);
+
+}
+
+
+
+.cp-subtitle {
+
+    font-size: var(--cp-size-subtitle);
+
+    font-style: italic;
+
+    margin: 0.3em 0;
+
+    color: var(--cp-color-text);
+
+}
+
+
+
+/* Metadata */
+
+.cp-metadata {
+
+    margin: 1em 0;
+
+    font-size: 0.9em;
+
+}
+
+
+
+.cp-artist,
+
+.cp-composer,
+
+.cp-album {
+
+    margin: 0.2em 0;
+
+    color: #555;
+
+}
+
+
+
+/* Songline - The Core Innovation */
+
+.cp-songline {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    margin-bottom: var(--cp-spacing-line);
+
+    line-height: 1.2;
+
+}
+
+
+
+.cp-chord-lyric-pair {
+
+    display: inline-flex;
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+}
+
+
+
+.cp-chord {
+
+    font-family: var(--cp-font-chord);
+
+    font-size: var(--cp-size-chord);
+
+    color: var(--cp-color-chord);
+
+    font-weight: bold;
+
+    line-height: 1.2;
+
+    min-height: 1.2em;
+
+    padding-bottom: var(--cp-spacing-chord);
+
+}
+
+
+
+.cp-chord-empty {
+
+    visibility: hidden;
+
+}
+
+
+
+.cp-lyrics {
+
+    font-family: var(--cp-font-text);
+
+    font-size: var(--cp-size-text);
+
+    white-space: pre;
+
+    line-height: 1.2;
+
+}
+
+
+
+/* Comments */
+
+.cp-comment {
+
+    font-size: var(--cp-size-comment);
+
+    color: var(--cp-color-comment);
+
+    margin: 0.5em 0;
+
+    font-style: italic;
+
+}
+
+
+
+.cp-comment-italic {
+
+    font-style: italic;
+
+}
+
+
+
+/* Chorus */
+
+.cp-chorus {
+
+    margin: var(--cp-spacing-verse) 0;
+
+    padding: 0.5em 0 0.5em 1em;
+
+    border-left: 3px solid var(--cp-color-chorus-border);
+
+    background: var(--cp-color-chorus-bg);
+
+}
+
+
+
+/* Verse */
+
+.cp-verse {
+
+    margin: var(--cp-spacing-verse) 0;
+
+}
+
+
+
+/* Bridge */
+
+.cp-bridge {
+
+    margin: var(--cp-spacing-verse) 0;
+
+    padding-left: 1em;
+
+    border-left: 2px dashed #999;
+
+}
+
+
+
+/* Tab */
+
+.cp-tab {
+
+    font-family: var(--cp-font-mono);
+
+    font-size: 0.9em;
+
+    white-space: pre;
+
+    background: #f9f9f9;
+
+    padding: 0.5em;
+
+    border: 1px solid #ddd;
+
+    margin: 1em 0;
+
+    overflow-x: auto;
+
+}
+
+
+
+.cp-tabline {
+
+    margin: 0;
+
+}
+
+
+
+/* Grid */
+
+.cp-grid {
+
+    font-family: var(--cp-font-mono);
+
+    margin: 1em 0;
+
+    background: #f9f9f9;
+
+    padding: 0.5em;
+
+    border: 1px solid #ddd;
+
+}
+
+
+
+.cp-gridline {
+
+    display: flex;
+
+    gap: 0.5em;
+
+    margin: 0.2em 0;
+
+}
+
+
+
+.cp-grid-chord {
+
+    font-family: var(--cp-font-chord);
+
+    color: var(--cp-color-chord);
+
+    font-weight: bold;
+
+    min-width: 3em;
+
+}
+
+
+
+.cp-grid-symbol {
+
+    color: #999;
+
+}
+
+
+
+/* Empty lines */
+
+.cp-empty {
+
+    height: 0.8em;
+
+}
+
+
+
+/* Print Styles */
+
+@media print {
+
+    @page {
+
+        size: A4;
+
+        margin: 2cm;
+
+    }
+
+
+
+    body.chordpro-songbook {
+
+        max-width: 100%;
+
+        padding: 0;
+
+    }
+
+
+
+    .cp-song {
+
+        page-break-after: always;
+
+        page-break-inside: avoid;
+
+    }
+
+
+
+    .cp-chorus,
+
+    .cp-verse,
+
+    .cp-bridge {
+
+        page-break-inside: avoid;
+
+    }
+
+
+
+    .cp-chord {
+
+        color: #000;
+
+    }
+
+}
+
+
+
+    </style>
+
+</head>
+
+<body class="chordpro-songbook">
+
+<div class="cp-song">
+
+  <h1 class="cp-title">Comment Test</h1>
+
+  <h2 class="cp-subtitle">Testing Comments</h2>
+
+
+
+<div class="cp-songline">
+
+  <span class="cp-chord-lyric-pair">
+
+    <span class="cp-chord cp-chord-empty"></span>
+
+    <span class="cp-lyrics">This is a normal </span>
+
+  </span>
+
+  <span class="cp-chord-lyric-pair">
+
+    <span class="cp-chord">C</span>
+
+    <span class="cp-lyrics">line.</span>
+
+  </span>
+
+</div>
+
+
+
+<div class="cp-comment">
+
+This is a directive comment</div><!-- .cp-comment -->
+
+<div class="cp-songline">
+
+  <span class="cp-chord-lyric-pair">
+
+    <span class="cp-chord cp-chord-empty"></span>
+
+    <span class="cp-lyrics">Another </span>
+
+  </span>
+
+  <span class="cp-chord-lyric-pair">
+
+    <span class="cp-chord">G</span>
+
+    <span class="cp-lyrics">line here.</span>
+
+  </span>
+
+</div>
+
+</div><!-- .cp-song -->
+
+
+
+</body>
+
+</html>
+
