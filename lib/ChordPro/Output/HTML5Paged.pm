@@ -59,15 +59,39 @@ class ChordPro::Output::HTML5Paged
     # =================================================================
 
     method generate_paged_css() {
-        return q{
+        my $config = $self->config // {};
+        my $pdf = $config->{pdf} // {};
+        
+        # Check for html5.paged config (may not exist in all configs)
+        my $html5_paged = {};
+        if (exists $config->{html5} && ref($config->{html5}) eq 'HASH') {
+            $html5_paged = $config->{html5}->{paged} // {};
+        }
+
+        # Get page setup configuration (html5.paged overrides pdf settings)
+        my $papersize = $html5_paged->{papersize} // $pdf->{papersize} // 'a4';
+        my $margintop = $html5_paged->{margintop} // $pdf->{margintop} // 80;
+        my $marginbottom = $html5_paged->{marginbottom} // $pdf->{marginbottom} // 40;
+        my $marginleft = $html5_paged->{marginleft} // $pdf->{marginleft} // 40;
+        my $marginright = $html5_paged->{marginright} // $pdf->{marginright} // 40;
+        my $headspace = $html5_paged->{headspace} // $pdf->{headspace} // 60;
+        my $footspace = $html5_paged->{footspace} // $pdf->{footspace} // 20;
+
+        # Convert papersize to CSS
+        my $css_pagesize = $self->_format_papersize($papersize);
+
+        # Convert margins to CSS (PDF uses pt, we convert to mm for paged.js)
+        my $css_margins = $self->_format_margins($margintop, $marginright, $marginbottom, $marginleft);
+
+        return qq{
 /* ChordPro HTML5 with Paged.js Stylesheet */
 
 /* Page Setup */
-@page {
-    size: A4;
-    margin: 15mm 20mm;
+\@page {
+    size: $css_pagesize;
+    margin: $css_margins;
 
-    @bottom-center {
+    \@bottom-center {
         content: counter(page);
         font-size: 10pt;
         color: #666;
@@ -75,15 +99,15 @@ class ChordPro::Output::HTML5Paged
 }
 
 /* First page has no header */
-@page :first {
-    @top-left { content: none; }
-    @top-center { content: none; }
-    @top-right { content: none; }
+\@page :first {
+    \@top-left { content: none; }
+    \@top-center { content: none; }
+    \@top-right { content: none; }
 }
 
 /* Named pages for different sections */
-@page song {
-    @top-center {
+\@page song {
+    \@top-center {
         content: string(song-title);
         font-size: 10pt;
         font-style: italic;
@@ -303,7 +327,7 @@ body.chordpro-paged {
 }
 
 /* Screen preview styles */
-@media screen {
+\@media screen {
     body.chordpro-paged {
         background: #525252;
         padding: 20px;
@@ -329,7 +353,7 @@ body.chordpro-paged {
 }
 
 /* Print styles */
-@media print {
+\@media print {
     body.chordpro-paged {
         background: white;
         padding: 0;
@@ -349,6 +373,62 @@ body.chordpro-paged {
     }
 }
 };
+    }
+
+    # =================================================================
+    # CONFIGURATION HELPER METHODS
+    # =================================================================
+
+    method _format_papersize($papersize) {
+        # Named paper sizes (case-insensitive)
+        my %sizes = (
+            a4     => 'A4',
+            letter => 'letter',
+            legal  => 'legal',
+            a3     => 'A3',
+            a5     => 'A5',
+            b5     => 'B5',
+        );
+
+        # Check if it's a named size
+        if (!ref($papersize)) {
+            my $lower = lc($papersize);
+            return $sizes{$lower} if exists $sizes{$lower};
+            return uc($papersize);  # Return as-is, uppercase
+        }
+
+        # Array format: [width, height] in pt -> convert to mm
+        if (ref($papersize) eq 'ARRAY' && @$papersize == 2) {
+            my $width_mm = $self->_pt_to_mm($papersize->[0]);
+            my $height_mm = $self->_pt_to_mm($papersize->[1]);
+            return sprintf("%.2fmm %.2fmm", $width_mm, $height_mm);
+        }
+
+        # Fallback
+        return 'A4';
+    }
+
+    method _format_margins {
+        my ($top, $right, $bottom, $left) = @_;
+
+        # Convert pt to mm and format as CSS margin shorthand
+        my $top_mm = $self->_pt_to_mm($top);
+        my $right_mm = $self->_pt_to_mm($right);
+        my $bottom_mm = $self->_pt_to_mm($bottom);
+        my $left_mm = $self->_pt_to_mm($left);
+
+        return sprintf("%.2fmm %.2fmm %.2fmm %.2fmm",
+                      $top_mm, $right_mm, $bottom_mm, $left_mm);
+    }
+
+    method _pt_to_mm($pt) {
+        # 1 pt = 0.352778 mm
+        return $pt * 0.352778;
+    }
+
+    method _mm_to_pt($mm) {
+        # 1 mm = 2.83465 pt
+        return $mm * 2.83465;
     }
 }
 
