@@ -890,7 +890,7 @@ sub fix_musicsyms ( $self, $str ) {
 
     my $sf = $::config->{settings}->{truesf};
     my $delta = $::config->{settings}->{maj7delta};
-
+    $DB::single = 1 if $str =~ />bb</;
     my @c = splitmarkup($str);
     my $res = '';
     push( @c, '' ) if @c % 2;
@@ -901,7 +901,7 @@ sub fix_musicsyms ( $self, $str ) {
 		if ( $did ) {
 		    s/b/♭/g;
 		}
-		else {
+		elsif ( length($_) ) {
 		    s/(?<=[[:alnum:]])b/♭/g;
 		    $did++;
 		}
