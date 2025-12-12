@@ -14,6 +14,7 @@ use v5.26;
 use Object::Pad;
 use utf8;
 use Ref::Util qw(is_ref);
+use Text::Layout;
 
 use ChordPro::Output::ChordProBase;
 
@@ -53,11 +54,11 @@ class ChordPro::Output::HTML5
     # =================================================================
 
     method render_text($text, $style=undef) {
-        my $escaped = $self->escape_text($text);
+        my $processed = $self->process_text_with_markup($text);
 
-        return $escaped unless $style;
+        return $processed unless $style;
 
-        return qq{<span class="cp-$style">$escaped</span>};
+        return qq{<span class="cp-$style">$processed</span>};
     }
 
     method render_line_break() {
@@ -147,7 +148,7 @@ class ChordPro::Output::HTML5
         # This applies in single-space mode OR when line genuinely has no chords
         if (!$has_chords) {
             my $text = join('', @$phrases);
-            $html .= qq{  <span class="cp-lyrics">} . $self->escape_text($text) . qq{</span>\n};
+            $html .= qq{  <span class="cp-lyrics">} . $self->process_text_with_markup($text) . qq{</span>\n};
             $html .= qq{</div>\n};
             return $html;
         }
@@ -165,15 +166,15 @@ class ChordPro::Output::HTML5
 
             # Chord span (empty if no chord)
             if ($chord && is_ref($chord) && $chord->key) {
-                my $chord_name = $self->escape_text($chord->chord_display);
+                my $chord_name = $self->process_text_with_markup($chord->chord_display);
                 $html .= qq{    <span class="cp-chord">$chord_name</span>\n};
             } else {
                 $html .= qq{    <span class="cp-chord cp-chord-empty"></span>\n};
             }
 
             # Lyric span
-            my $escaped_phrase = $self->escape_text($phrase);
-            $html .= qq{    <span class="cp-lyrics">$escaped_phrase</span>\n};
+            my $processed_phrase = $self->process_text_with_markup($phrase);
+            $html .= qq{    <span class="cp-lyrics">$processed_phrase</span>\n};
 
             $html .= qq{  </span>\n};
         }
@@ -187,10 +188,10 @@ class ChordPro::Output::HTML5
 
         foreach my $token (@$tokens) {
             if ($token->{class} eq 'chord') {
-                my $chord_name = $self->escape_text($token->{chord}->key);
+                my $chord_name = $self->process_text_with_markup($token->{chord}->key);
                 $html .= qq{  <span class="cp-grid-chord">$chord_name</span>\n};
             } else {
-                my $symbol = $self->escape_text($token->{symbol});
+                my $symbol = $self->process_text_with_markup($token->{symbol});
                 $html .= qq{  <span class="cp-grid-symbol">$symbol</span>\n};
             }
         }
@@ -211,15 +212,15 @@ class ChordPro::Output::HTML5
 
         # Title
         if ($song->{title}) {
-            my $escaped_title = $self->escape_text($song->{title});
-            $output .= qq{  <h1 class="cp-title">$escaped_title</h1>\n};
+            my $processed_title = $self->process_text_with_markup($song->{title});
+            $output .= qq{  <h1 class="cp-title">$processed_title</h1>\n};
         }
 
         # Subtitles
         if ($song->{subtitle}) {
             foreach my $subtitle (@{$song->{subtitle}}) {
-                my $escaped = $self->escape_text($subtitle);
-                $output .= qq{  <h2 class="cp-subtitle">$escaped</h2>\n};
+                my $processed = $self->process_text_with_markup($subtitle);
+                $output .= qq{  <h2 class="cp-subtitle">$processed</h2>\n};
             }
         }
 
@@ -229,21 +230,21 @@ class ChordPro::Output::HTML5
 
             if ($song->{artist}) {
                 foreach my $artist (@{$song->{artist}}) {
-                    my $escaped = $self->escape_text($artist);
-                    $output .= qq{    <div class="cp-artist">$escaped</div>\n};
+                    my $processed = $self->process_text_with_markup($artist);
+                    $output .= qq{    <div class="cp-artist">$processed</div>\n};
                 }
             }
 
             if ($song->{composer}) {
                 foreach my $composer (@{$song->{composer}}) {
-                    my $escaped = $self->escape_text($composer);
-                    $output .= qq{    <div class="cp-composer">$escaped</div>\n};
+                    my $processed = $self->process_text_with_markup($composer);
+                    $output .= qq{    <div class="cp-composer">$processed</div>\n};
                 }
             }
 
             if ($song->{album}) {
-                my $escaped = $self->escape_text($song->{album});
-                $output .= qq{    <div class="cp-album">$escaped</div>\n};
+                my $processed = $self->process_text_with_markup($song->{album});
+                $output .= qq{    <div class="cp-album">$processed</div>\n};
             }
 
             $output .= qq{  </div>\n};
@@ -290,6 +291,21 @@ class ChordPro::Output::HTML5
         $text =~ s/'/&#39;/g;
 
         return $text;
+    }
+
+    # Process text with Pango-style markup support
+    method process_text_with_markup($text) {
+        return '' unless defined $text;
+        
+        # Check if text contains markup tags
+        if ($text =~ /</) {
+            my $layout = Text::Layout::HTML->new;
+            $layout->set_markup($text);
+            return $layout->render;
+        }
+        
+        # Plain text - just escape
+        return $self->escape_text($text);
     }
 
     # =================================================================
@@ -570,6 +586,87 @@ sub generate_songbook {
     # Split on newlines and keep them attached
     return [ $output =~ /^.*\n?/gm ];
 }
+
+# =================================================================
+# TEXT::LAYOUT::HTML - Markup renderer for HTML output
+# =================================================================
+
+package Text::Layout::HTML;
+
+use parent 'Text::Layout';
+use ChordPro::Utils qw(fq);
+
+sub new {
+    my ( $pkg, @data ) = @_;
+    my $self = $pkg->SUPER::new;
+    $self->{_currentfont} = { 
+        family => 'default',
+        style => 'normal',
+        weight => 'normal' 
+    };
+    $self->{_currentcolor} = 'black';
+    $self->{_currentsize} = 12;
+    $self;
+}
+
+sub html {
+    my $t = shift;
+    $t =~ s/&/&amp;/g;
+    $t =~ s/</&lt;/g;
+    $t =~ s/>/&gt;/g;
+    $t;
+}
+
+sub render {
+    my ( $self ) = @_;
+    my $res = "";
+    
+    foreach my $fragment ( @{ $self->{_content} } ) {
+        if ( $fragment->{type} eq 'strut' ) {
+            next unless length($fragment->{label}//"");
+            $res .= "<span id=\"".$fragment->{label}."\"></span>";
+            next;
+        }
+        next unless length($fragment->{text});
+        
+        my $f = $fragment->{font} || $self->{_currentfont};
+        my @c;  # styles
+        my @d;  # decorations
+        
+        if ( $f->{style} eq "italic" ) {
+            push( @c, q{font-style:italic} );
+        }
+        if ( $f->{weight} eq "bold" ) {
+            push( @c, q{font-weight:bold} );
+        }
+        if ( $fragment->{color} && $fragment->{color} ne $self->{_currentcolor} ) {
+            push( @c, join(":","color",$fragment->{color}) );
+        }
+        if ( $fragment->{size} && $fragment->{size} ne $self->{_currentsize} ) {
+            push( @c, join(":","font-size",$fragment->{size}) );
+        }
+        if ( $fragment->{bgcolor} ) {
+            push( @c, join(":","background-color",$fragment->{bgcolor}) );
+        }
+        if ( $fragment->{underline} ) {
+            push( @d, q{underline} );
+        }
+        if ( $fragment->{strikethrough} ) {
+            push( @d, q{line-through} );
+        }
+        push( @c, "text-decoration-line:".join(" ",@d) ) if @d;
+        
+        my $href = $fragment->{href} // "";
+        $res .= "<a href=\"".html($href)."\">" if length($href);
+        $res .= "<span style=\"" . join(";",@c) . "\">" if @c;
+        $res .= html(fq($fragment->{text}));
+        $res .= "</span>" if @c;
+        $res .= "</a>" if length($href);
+    }
+    $res;
+}
+
+package ChordPro::Output::HTML5;
 
 1;
 
