@@ -132,7 +132,7 @@ class ChordPro::Output::HTML5
             return $html;
         }
 
-        # Check if single-space mode (suppress empty chord lines)
+        # Check if line has any real chords
         my $has_chords = 0;
         if ($chords) {
             foreach my $chord (@$chords) {
@@ -143,7 +143,9 @@ class ChordPro::Output::HTML5
             }
         }
 
-        if ($self->is_single_space() && !$has_chords) {
+        # If no chords in this line, render as simple lyrics (no chord spacing)
+        # This applies in single-space mode OR when line genuinely has no chords
+        if (!$has_chords) {
             my $text = join('', @$phrases);
             $html .= qq{  <span class="cp-lyrics">} . $self->escape_text($text) . qq{</span>\n};
             $html .= qq{</div>\n};
@@ -154,8 +156,12 @@ class ChordPro::Output::HTML5
         for (my $i = 0; $i < @$phrases; $i++) {
             my $phrase = $phrases->[$i] // '';
             my $chord = $chords->[$i];
+            
+            # Check if this is a chord-only pair (chord with empty lyrics)
+            my $is_chord_only = ($chord && is_ref($chord) && $chord->key && $phrase eq '');
+            my $pair_class = $is_chord_only ? 'cp-chord-lyric-pair cp-chord-only' : 'cp-chord-lyric-pair';
 
-            $html .= qq{  <span class="cp-chord-lyric-pair">\n};
+            $html .= qq{  <span class="$pair_class">\n};
 
             # Chord span (empty if no chord)
             if ($chord && is_ref($chord) && $chord->key) {
@@ -291,34 +297,13 @@ class ChordPro::Output::HTML5
     # =================================================================
 
     method generate_default_css() {
+        my $css_vars = $self->_get_default_css_variables();
+        
         return q{
 /* ChordPro HTML5 Default Stylesheet */
 
 :root {
-    /* Typography */
-    --cp-font-text: Georgia, serif;
-    --cp-font-chord: Arial, sans-serif;
-    --cp-font-mono: 'Courier New', monospace;
-
-    /* Font Sizes */
-    --cp-size-text: 12pt;
-    --cp-size-chord: 10pt;
-    --cp-size-title: 18pt;
-    --cp-size-subtitle: 14pt;
-    --cp-size-comment: 11pt;
-
-    /* Colors */
-    --cp-color-text: #000;
-    --cp-color-chord: #0066cc;
-    --cp-color-comment: #666;
-    --cp-color-highlight: #ff0;
-    --cp-color-chorus-bg: #f5f5f5;
-    --cp-color-chorus-border: #0066cc;
-
-    /* Spacing */
-    --cp-spacing-line: 0.3em;
-    --cp-spacing-verse: 1em;
-    --cp-spacing-chord: 0.2em;
+} . $css_vars . q{
 }
 
 /* Body and Page */
@@ -379,6 +364,11 @@ body.chordpro-songbook {
     flex-direction: column;
     align-items: flex-start;
     vertical-align: bottom;
+}
+
+/* Spacing for chord-only pairs (chords with no lyrics) */
+.cp-chord-only {
+    margin-right: 0.5em;
 }
 
 .cp-chord {
@@ -483,8 +473,8 @@ body.chordpro-songbook {
 }
 
 /* Print Styles */
-@media print {
-    @page {
+\\@media print {
+    \\@page {
         size: A4;
         margin: 2cm;
     }
@@ -509,6 +499,36 @@ body.chordpro-songbook {
         color: #000;
     }
 }
+};
+    }
+    
+    method _get_default_css_variables() {
+        # Return default CSS variables
+        # TODO: Make this configurable from config file
+        return q{    /* Typography */
+    --cp-font-text: Georgia, serif;
+    --cp-font-chord: Arial, sans-serif;
+    --cp-font-mono: 'Courier New', monospace;
+
+    /* Font Sizes */
+    --cp-size-text: 12pt;
+    --cp-size-chord: 10pt;
+    --cp-size-title: 18pt;
+    --cp-size-subtitle: 14pt;
+    --cp-size-comment: 11pt;
+
+    /* Colors */
+    --cp-color-text: #000;
+    --cp-color-chord: #0066cc;
+    --cp-color-comment: #666;
+    --cp-color-highlight: #ff0;
+    --cp-color-chorus-bg: #f5f5f5;
+    --cp-color-chorus-border: #0066cc;
+
+    /* Spacing */
+    --cp-spacing-line: 0.3em;
+    --cp-spacing-verse: 1em;
+    --cp-spacing-chord: 0.2em;
 };
     }
 }

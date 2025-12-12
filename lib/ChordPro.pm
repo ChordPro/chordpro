@@ -308,6 +308,12 @@ sub chordpro {
 	}
     }
 
+    # Structurize songs (convert start_of_verse/end_of_verse to verse containers)
+    # unless backend explicitly opts out with --backend-option structure=unstructured
+    unless ( ( $options->{'backend-option'}->{structure} // '' ) eq 'unstructured' ) {
+	$s->structurize();
+    }
+
     # Call backend to produce output.
     $res = $pkg->generate_songbook($s);
     return $res if $options->{output} eq '*';

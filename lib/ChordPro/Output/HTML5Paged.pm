@@ -82,6 +82,9 @@ class ChordPro::Output::HTML5Paged
 
         # Convert margins to CSS (PDF uses pt, we convert to mm for paged.js)
         my $css_margins = $self->_format_margins($margintop, $marginright, $marginbottom, $marginleft);
+        
+        # Generate format rules (headers/footers)
+        my $format_rules = $self->_generate_format_rules($pdf);
 
         return qq{
 /* ChordPro HTML5 with Paged.js Stylesheet */
@@ -90,30 +93,11 @@ class ChordPro::Output::HTML5Paged
 \@page {
     size: $css_pagesize;
     margin: $css_margins;
-
-    \@bottom-center {
-        content: counter(page);
-        font-size: 10pt;
-        color: #666;
-    }
 }
 
-/* First page has no header */
-\@page :first {
-    \@top-left { content: none; }
-    \@top-center { content: none; }
-    \@top-right { content: none; }
-}
+$format_rules
 
-/* Named pages for different sections */
-\@page song {
-    \@top-center {
-        content: string(song-title);
-        font-size: 10pt;
-        font-style: italic;
-        color: #666;
-    }
-}
+/* Page-specific rules are generated from config above */
 
 /* Root variables */
 :root {
@@ -218,6 +202,11 @@ body.chordpro-paged {
     flex-direction: column;
     align-items: flex-start;
     vertical-align: bottom;
+}
+
+/* Spacing for chord-only pairs (chords with no lyrics) */
+.cp-chord-only {
+    margin-right: 0.5em;
 }
 
 .cp-chord {
@@ -429,6 +418,153 @@ body.chordpro-paged {
     method _mm_to_pt($mm) {
         # 1 mm = 2.83465 pt
         return $mm * 2.83465;
+    }
+    
+    # =================================================================
+    # PHASE 3: HEADERS & FOOTERS CONFIGURATION
+    # =================================================================
+    
+    method _generate_format_rules($pdf) {
+        my $formats = $pdf->{formats} // {};
+        my @rules;
+        
+        # Generate rules for each format type
+        push @rules, $self->_generate_format_rule('default', $formats->{default});
+        push @rules, $self->_generate_format_rule('title', $formats->{title});
+        push @rules, $self->_generate_format_rule('first', $formats->{first}, ':first');
+        
+        # Handle even page formats if they exist
+        push @rules, $self->_generate_format_rule('default-even', $formats->{'default-even'}, ':left')
+            if exists $formats->{'default-even'};
+        push @rules, $self->_generate_format_rule('title-even', $formats->{'title-even'})
+            if exists $formats->{'title-even'};
+        
+        return join("\n\n", grep { $_ } @rules);
+    }
+    
+    method _generate_format_rule($format_name, $format_config, $page_selector=undef) {
+        return '' unless $format_config;
+        
+        # Determine page selector
+        my $selector = $page_selector // $format_name;
+        $selector = "\@page $selector" unless $selector =~ /^\@page/;
+        $selector = "\@page" if $format_name eq 'default' && !$page_selector;
+        
+        my @margin_boxes;
+        
+        # Process title (top)
+        if (exists $format_config->{title}) {
+            push @margin_boxes, $self->_generate_margin_boxes(
+                'top', $format_config->{title}, $format_name
+            );
+        }
+        
+        # Process subtitle (top, below title)
+        if (exists $format_config->{subtitle}) {
+            # Subtitle uses top boxes but with smaller font
+            push @margin_boxes, $self->_generate_margin_boxes(
+                'subtitle', $format_config->{subtitle}, $format_name
+            );
+        }
+        
+        # Process footer (bottom)
+        if (exists $format_config->{footer}) {
+            push @margin_boxes, $self->_generate_margin_boxes(
+                'bottom', $format_config->{footer}, $format_name
+            );
+        }
+        
+        return '' unless @margin_boxes;
+        
+        my $boxes = join("\n\n", grep { $_ } @margin_boxes);
+        
+        return qq{/* Format: $format_name */
+$selector {
+$boxes
+}};
+    }
+    
+    method _generate_margin_boxes($position, $format_spec, $format_name) {
+        # format_spec is either an array [left, center, right] or [[left, center, right]] or false
+        return '' if !$format_spec || (ref($format_spec) eq 'SCALAR' && !$$format_spec);
+        return '' if $format_spec eq 'false' || $format_spec eq '0';
+        
+        # Unwrap nested array if present (ChordPro sometimes wraps format arrays)
+        if (ref($format_spec) eq 'ARRAY' && @$format_spec == 1 && ref($format_spec->[0]) eq 'ARRAY') {
+            $format_spec = $format_spec->[0];
+        }
+        
+        my @boxes;
+        my @positions = ('left', 'center', 'right');
+        
+        # Handle subtitle positioning (needs different margin-box names)
+        my @margin_box_positions = @positions;
+        if ($position eq 'subtitle') {
+            # For subtitle, we might want to use @top-left-corner, etc.
+            # For simplicity, use same as top but with different styling
+            $position = 'top';
+        }
+        
+        for my $i (0..2) {
+            my $content = ref($format_spec) eq 'ARRAY' ? $format_spec->[$i] : '';
+            next unless defined $content && $content ne '';
+            
+            my $box_name = "\@${position}-$positions[$i]";
+            my $css_content = $self->_format_content_string($content);
+            
+            # Generate margin box rule
+            push @boxes, qq{    $box_name {
+        content: $css_content;
+        font-size: 10pt;
+        color: #666;
+    }};
+        }
+        
+        return join("\n\n", @boxes);
+    }
+    
+    method _format_content_string($content) {
+        # Handle references (shouldn't happen, but be safe)
+        $content = '' if ref($content);
+        
+        # Handle empty content
+        return 'none' if !defined $content || $content eq '';
+        
+        # Parse metadata substitutions: %{title}, %{page}, %{artist}, etc.
+        my @parts;
+        
+        while ($content =~ /%\{([^}]+)\}/) {
+            my $pre = $`;
+            my $meta_key = $1;
+            $content = $';
+            
+            # Add literal text before metadata
+            push @parts, qq{"$pre"} if $pre ne '';
+            
+            # Add metadata reference
+            if ($meta_key eq 'page') {
+                push @parts, 'counter(page)';
+            }
+            elsif ($meta_key eq 'title') {
+                push @parts, 'string(song-title)';
+            }
+            elsif ($meta_key eq 'subtitle') {
+                push @parts, 'string(song-subtitle)';
+            }
+            elsif ($meta_key eq 'artist') {
+                push @parts, 'string(song-artist)';
+            }
+            else {
+                # Other metadata - use generic string
+                push @parts, qq{string(song-$meta_key)};
+            }
+        }
+        
+        # Add remaining literal text
+        push @parts, qq{"$content"} if $content ne '';
+        
+        # Return combined content
+        return @parts ? join(' ', @parts) : 'none';
     }
 }
 

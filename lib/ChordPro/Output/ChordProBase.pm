@@ -113,12 +113,24 @@ class ChordPro::Output::ChordProBase :abstract
         # Text elements
         return $self->handle_comment($elt)      if $type eq 'comment';
 
-        # Environment containers
+        # Environment containers (with body)
         return $self->handle_chorus($elt)       if $type eq 'chorus';
         return $self->handle_verse($elt)        if $type eq 'verse';
         return $self->handle_bridge($elt)       if $type eq 'bridge';
         return $self->handle_tab($elt)          if $type eq 'tab';
         return $self->handle_grid($elt)         if $type eq 'grid';
+        
+        # Environment start/end directives
+        return $self->handle_start_of_chorus($elt)  if $type eq 'start_of_chorus';
+        return $self->handle_end_of_chorus($elt)    if $type eq 'end_of_chorus';
+        return $self->handle_start_of_verse($elt)   if $type eq 'start_of_verse';
+        return $self->handle_end_of_verse($elt)     if $type eq 'end_of_verse';
+        return $self->handle_start_of_bridge($elt)  if $type eq 'start_of_bridge';
+        return $self->handle_end_of_bridge($elt)    if $type eq 'end_of_bridge';
+        return $self->handle_start_of_tab($elt)     if $type eq 'start_of_tab';
+        return $self->handle_end_of_tab($elt)       if $type eq 'end_of_tab';
+        return $self->handle_start_of_grid($elt)    if $type eq 'start_of_grid';
+        return $self->handle_end_of_grid($elt)      if $type eq 'end_of_grid';
 
         # Delegate-based elements (ABC, LilyPond, etc.)
         return $self->handle_delegate($elt)     if $type eq 'delegate';
@@ -137,7 +149,7 @@ class ChordPro::Output::ChordProBase :abstract
         return "" if $type eq '';
 
         # Unknown type
-        warn("Unknown element type: $type\n");
+        warn("Unknown element type: $type\n") if $type;
         return "";
     }
 
@@ -232,32 +244,32 @@ class ChordPro::Output::ChordProBase :abstract
     # Environment handlers
     method handle_start_of_chorus($elt) {
         $current_context = 'chorus';
-        return $self->render_chorus_begin($elt->{label});
+        return $self->render_section_begin('chorus', $elt->{label});
     }
 
     method handle_end_of_chorus($elt) {
-        $current_context = undef;
-        return $self->render_chorus_end();
+        $current_context = '';
+        return $self->render_section_end('chorus');
     }
 
     method handle_start_of_verse($elt) {
         $current_context = 'verse';
-        return $self->render_verse_begin($elt->{label});
+        return $self->render_section_begin('verse', $elt->{label});
     }
 
     method handle_end_of_verse($elt) {
-        $current_context = undef;
-        return $self->render_verse_end();
+        $current_context = '';
+        return $self->render_section_end('verse');
     }
 
     method handle_start_of_bridge($elt) {
         $current_context = 'bridge';
-        return $self->render_bridge_begin($elt->{label});
+        return $self->render_section_begin('bridge', $elt->{label});
     }
 
     method handle_end_of_bridge($elt) {
-        $current_context = undef;
-        return $self->render_bridge_end();
+        $current_context = '';
+        return $self->render_section_end('bridge');
     }
 
     method handle_start_of_tab($elt) {
