@@ -205,6 +205,9 @@ class ChordPro::Output::HTML5
     # =================================================================
 
     method generate_song($song) {
+        # Structurize the song to convert start_of/end_of directives into containers
+        $song->structurize;
+
         my $output = '';
 
         # Song container

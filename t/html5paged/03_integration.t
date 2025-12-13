@@ -62,7 +62,6 @@ my $paged = ChordPro::Output::HTML5Paged->new(
 );
 
 my $song = $s->{songs}[0];
-$song->structurize;
 
 # Generate full document to test headers/footers
 my $doc_begin = $paged->render_document_begin({ title => 'Test Songbook', songs => 1 });
@@ -93,7 +92,6 @@ EOD
 
 my $s2 = ChordPro::Songbook->new;
 $s2->parse_file(\$markup_song, { nosongline => 1 });
-$s2->{songs}[0]->structurize;
 
 my $markup_output = $paged->generate_song($s2->{songs}[0]);
 like($markup_output, qr/color:red.*Red Title/s, "Markup in title works with paged output");

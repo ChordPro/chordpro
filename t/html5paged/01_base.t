@@ -47,7 +47,6 @@ $s->parse_file(\$song_data, { nosongline => 1 });
 ok(scalar(@{$s->{songs}}) == 1, "Song parsed");
 
 my $song = $s->{songs}[0];
-$song->structurize;
 
 my $output = $paged->generate_song($song);
 ok($output, "HTML5Paged output generated");

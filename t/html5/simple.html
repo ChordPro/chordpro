@@ -14,8 +14,6 @@
 
     <style>
 
-
-
 /* ChordPro HTML5 Default Stylesheet */
 
 
@@ -164,6 +162,138 @@ body.chordpro-songbook {
 
 
 
+/* Chord Diagrams */
+
+.cp-chord-diagrams {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 20px;
+
+    margin: 1.5em 0;
+
+    padding: 1em;
+
+    background: #f8f8f8;
+
+    border: 1px solid #ddd;
+
+}
+
+
+
+.cp-chord-diagram {
+
+    display: inline-block;
+
+    margin: 0;
+
+}
+
+
+
+.cp-diagram-svg {
+
+    width: 4em;
+
+    height: auto;
+
+}
+
+
+
+.diagram-name {
+
+    font-family: var(--cp-font-chord);
+
+    font-size: 14px;
+
+    font-weight: bold;
+
+    fill: var(--cp-color-chord);
+
+}
+
+
+
+.diagram-line {
+
+    stroke: #333;
+
+    stroke-width: 1;
+
+    fill: none;
+
+}
+
+
+
+.diagram-nut {
+
+    stroke: #000;
+
+    stroke-width: 3;
+
+    fill: none;
+
+}
+
+
+
+.diagram-base {
+
+    font-size: 11px;
+
+    fill: #666;
+
+}
+
+
+
+.diagram-dot {
+
+    fill: #000;
+
+}
+
+
+
+.diagram-open {
+
+    fill: none;
+
+    stroke: #000;
+
+    stroke-width: 2;
+
+}
+
+
+
+.diagram-muted {
+
+    font-size: 16px;
+
+    font-weight: bold;
+
+    fill: #666;
+
+}
+
+
+
+.diagram-finger {
+
+    font-size: 10px;
+
+    fill: #666;
+
+}
+
+
+
 /* Songline - The Core Innovation */
 
 .cp-songline {
@@ -188,6 +318,18 @@ body.chordpro-songbook {
 
     align-items: flex-start;
 
+    vertical-align: bottom;
+
+}
+
+
+
+/* Spacing for chord-only pairs (chords with no lyrics) */
+
+.cp-chord-only {
+
+    margin-right: 0.5em;
+
 }
 
 
@@ -205,6 +347,8 @@ body.chordpro-songbook {
     line-height: 1.2;
 
     min-height: 1.2em;
+
+    height: 1.2em;
 
     padding-bottom: var(--cp-spacing-chord);
 
@@ -458,7 +602,145 @@ body.chordpro-songbook {
 
   <h1 class="cp-title">Simple Test Song</h1>
 
+  <div class="cp-chord-diagrams">
 
+    <div class="cp-chord-diagram">
+
+      <svg class="cp-diagram-svg" viewBox="0 0 110 127" xmlns="http://www.w3.org/2000/svg">
+
+        <text x="62.5" y="18" text-anchor="middle" class="diagram-name">C</text>
+
+        <line x1="25" y1="30" x2="100" y2="30" stroke="#000" stroke-width="3" class="diagram-nut"/>
+
+        <line x1="25" y1="48" x2="100" y2="48" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="25" y1="66" x2="100" y2="66" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="25" y1="84" x2="100" y2="84" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="25" y1="102" x2="100" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="25" y1="30" x2="25" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="40" y1="30" x2="40" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="55" y1="30" x2="55" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="70" y1="30" x2="70" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="85" y1="30" x2="85" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="100" y1="30" x2="100" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <text x="25" y="22" text-anchor="middle" class="diagram-muted">×</text>
+
+        <circle cx="40" cy="75" r="5" class="diagram-dot"/>
+
+        <circle cx="55" cy="57" r="5" class="diagram-dot"/>
+
+        <circle cx="70" cy="22" r="3" class="diagram-open"/>
+
+        <circle cx="85" cy="39" r="5" class="diagram-dot"/>
+
+        <circle cx="100" cy="22" r="3" class="diagram-open"/>
+
+      </svg>
+
+    </div>
+
+    <div class="cp-chord-diagram">
+
+      <svg class="cp-diagram-svg" viewBox="0 0 110 127" xmlns="http://www.w3.org/2000/svg">
+
+        <text x="62.5" y="18" text-anchor="middle" class="diagram-name">G</text>
+
+        <line x1="25" y1="30" x2="100" y2="30" stroke="#000" stroke-width="3" class="diagram-nut"/>
+
+        <line x1="25" y1="48" x2="100" y2="48" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="25" y1="66" x2="100" y2="66" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="25" y1="84" x2="100" y2="84" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="25" y1="102" x2="100" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="25" y1="30" x2="25" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="40" y1="30" x2="40" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="55" y1="30" x2="55" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="70" y1="30" x2="70" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="85" y1="30" x2="85" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="100" y1="30" x2="100" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <circle cx="25" cy="75" r="5" class="diagram-dot"/>
+
+        <circle cx="40" cy="57" r="5" class="diagram-dot"/>
+
+        <circle cx="55" cy="22" r="3" class="diagram-open"/>
+
+        <circle cx="70" cy="22" r="3" class="diagram-open"/>
+
+        <circle cx="85" cy="22" r="3" class="diagram-open"/>
+
+        <circle cx="100" cy="75" r="5" class="diagram-dot"/>
+
+      </svg>
+
+    </div>
+
+    <div class="cp-chord-diagram">
+
+      <svg class="cp-diagram-svg" viewBox="0 0 110 127" xmlns="http://www.w3.org/2000/svg">
+
+        <text x="62.5" y="18" text-anchor="middle" class="diagram-name">Am</text>
+
+        <line x1="25" y1="30" x2="100" y2="30" stroke="#000" stroke-width="3" class="diagram-nut"/>
+
+        <line x1="25" y1="48" x2="100" y2="48" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="25" y1="66" x2="100" y2="66" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="25" y1="84" x2="100" y2="84" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="25" y1="102" x2="100" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="25" y1="30" x2="25" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="40" y1="30" x2="40" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="55" y1="30" x2="55" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="70" y1="30" x2="70" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="85" y1="30" x2="85" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="100" y1="30" x2="100" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <text x="25" y="22" text-anchor="middle" class="diagram-muted">×</text>
+
+        <circle cx="40" cy="22" r="3" class="diagram-open"/>
+
+        <circle cx="55" cy="57" r="5" class="diagram-dot"/>
+
+        <circle cx="70" cy="57" r="5" class="diagram-dot"/>
+
+        <circle cx="85" cy="39" r="5" class="diagram-dot"/>
+
+        <circle cx="100" cy="22" r="3" class="diagram-open"/>
+
+      </svg>
+
+    </div>
+
+  </div>
+
+
+
+<div class="cp-verse">
 
 <div class="cp-songline">
 
@@ -507,6 +789,8 @@ body.chordpro-songbook {
   </span>
 
 </div>
+
+</div><!-- .cp-verse -->
 
 </div><!-- .cp-song -->
 

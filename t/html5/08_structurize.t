@@ -41,7 +41,7 @@ my $song = $s->{songs}[0];
 ok($song, "Song object created");
 
 # Before structurize is called, the song should have start_of_/end_of_ elements
-# After structurize (which is called in ChordPro.pm), they should be converted to containers
+# After structurize (which is called in the backend), they should be converted to containers
 $song->structurize;
 
 # Generate output

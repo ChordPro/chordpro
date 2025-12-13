@@ -38,10 +38,7 @@ ok(scalar(@{$s->{songs}}) == 1, "Song parsed");
 my $song = $s->{songs}[0];
 ok($song, "Song object created");
 
-# Structurize song (normally done by ChordPro.pm)
-$song->structurize;
-
-# Generate HTML5 output
+# Generate HTML5 output (structurize is done automatically in the backend)
 my $html5 = ChordPro::Output::HTML5->new(
     config => $config,
     options => { output => undef },
