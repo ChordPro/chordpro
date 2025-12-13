@@ -6,12 +6,12 @@
 		"args": { "VARIANT": "5" }
 	},
 	"runArgs": [ "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
-	"workspaceMount": "source=${localWorkspaceFolder}/../chordpro,target=/workspace,type=bind,consistency=cached",
+	"workspaceMount": "source=${localWorkspaceFolder}/,target=/workspace,type=bind,consistency=cached",
 	"workspaceFolder": "/workspace",
 	// Set *default* container specific settings.json values on container create.
 	"settings": {},
 	"mounts": [
-		"source=${localWorkspaceFolder}/../chordpro,target=/data,type=bind,consistency=cached"
+		"source=${localWorkspaceFolder}/,target=/data,type=bind,consistency=cached"
 	  ],
 	"remoteEnv": {
     	"PERL5LIB": "/workspace/lib", // Set chordpro lib dir

@@ -5,27 +5,32 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 3;
+use Test::More;
 
--d "t" && chdir "t";
-require "./00_basic.pl";
+use lib '../lib';
+use lib '../blib/lib';
 
 use_ok('ChordPro::Output::HTML5');
+use_ok('ChordPro::Song');
 
 # Create minimal config
-my $config = {
+$::config = {
     html5 => {
         styles => {
             embed => 1,
         },
     },
+    settings => {},
 };
+$::options = {};
 
-# Create minimal song structure
-my $song = {
+# Create proper song object
+my $song = bless {
     title => "Test Song",
     subtitle => ["A Simple Test"],
-    artist => ["Test Artist"],
+    meta => {
+        artist => ["Test Artist"],
+    },
     body => [
         {
             type => "songline",
@@ -41,12 +46,13 @@ my $song = {
             text => "This is a comment",
         },
     ],
-};
+    structure => "linear",
+}, 'ChordPro::Song';
 
 # Create backend instance
 my $backend = ChordPro::Output::HTML5->new(
-    config => $config,
-    options => {},
+    config => $::config,
+    options => $::options,
 );
 
 ok($backend, "HTML5 backend created");
@@ -54,14 +60,13 @@ ok($backend, "HTML5 backend created");
 # Generate output
 my $output = $backend->generate_song($song);
 
-ok($output && @$output > 0, "HTML5 backend generates output");
+ok($output && length($output) > 0, "HTML5 backend generates output");
 
 # Test output contains key elements
-my $html = join('', @$output);
-like($html, qr/<h1 class="cp-title">Test Song<\/h1>/, "Contains title");
-like($html, qr/<h2 class="cp-subtitle">A Simple Test<\/h2>/, "Contains subtitle");
-like($html, qr/class="cp-chord">C<\/span>/, "Contains chord");
-like($html, qr/class="cp-lyrics">Hel<\/span>/, "Contains lyrics");
-like($html, qr/class="cp-comment">This is a comment<\/div>/, "Contains comment");
+like($output, qr/<h1 class="cp-title">Test Song<\/h1>/, "Contains title");
+like($output, qr/<h2 class="cp-subtitle">A Simple Test<\/h2>/, "Contains subtitle");
+like($output, qr/class="cp-chord">C<\/span>/, "Contains chord");
+like($output, qr/class="cp-lyrics">Hel<\/span>/, "Contains lyrics");
+like($output, qr/class="cp-comment">This is a comment<\/div>/, "Contains comment");
 
 done_testing();
