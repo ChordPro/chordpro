@@ -250,6 +250,12 @@ class ChordPro::Output::HTML5
             $output .= qq{  </div>\n};
         }
 
+        # Chord diagrams (if not lyrics-only)
+        unless ($self->is_lyrics_only()) {
+            my $diagrams = $self->render_chord_diagrams($song);
+            $output .= $diagrams if $diagrams;
+        }
+
         # Process song body using base class dispatch
         if ($song->{body}) {
             foreach my $elt (@{$song->{body}}) {
@@ -309,17 +315,200 @@ class ChordPro::Output::HTML5
     }
 
     # =================================================================
+    # CHORD DIAGRAM RENDERING
+    # =================================================================
+
+    method render_chord_diagrams($song) {
+        my $cfg = $self->config // {};
+        my $diagrams_cfg = $cfg->{diagrams} // {};
+        
+        # Check if diagrams should be shown
+        my $show = $diagrams_cfg->{show} // 'all';
+        return '' if $show eq 'none';
+        
+        # Get list of chords to display
+        my @chord_names;
+        if ($song->{chords} && $song->{chords}->{chords}) {
+            @chord_names = @{$song->{chords}->{chords}};
+        } else {
+            return '';
+        }
+        
+        # Filter based on 'show' setting
+        my @chords_to_display;
+        my $suppress = $diagrams_cfg->{suppress} // [];
+        my %suppress = map { $_ => 1 } @$suppress;
+        
+        foreach my $chord_name (@chord_names) {
+            next if $suppress{$chord_name};
+            
+            my $info = $song->{chordsinfo}->{$chord_name};
+            next unless $info;
+            next unless $info->can('has_diagram') && $info->has_diagram;
+            
+            # Skip if show=user and chord is not user-defined
+            next if $show eq 'user' && !$info->{diagram};
+            
+            push @chords_to_display, { name => $chord_name, info => $info };
+        }
+        
+        return '' unless @chords_to_display;
+        
+        # Sort if requested
+        if ($diagrams_cfg->{sorted}) {
+            @chords_to_display = sort { 
+                ($a->{info}->{root_ord} // 0) <=> ($b->{info}->{root_ord} // 0)
+                || $a->{name} cmp $b->{name}
+            } @chords_to_display;
+        }
+        
+        # Generate HTML
+        my $output = qq{  <div class="cp-chord-diagrams">\n};
+        
+        foreach my $chord (@chords_to_display) {
+            $output .= $self->generate_chord_diagram_svg($chord->{name}, $chord->{info});
+        }
+        
+        $output .= qq{  </div>\n\n};
+        
+        return $output;
+    }
+
+    method generate_chord_diagram_svg($chord_name, $info) {
+        # Determine if this is a keyboard or string instrument
+        # Keyboards have kbkeys, strings have frets
+        my $has_keys = $info->can('kbkeys');
+        my $has_frets = $info->can('frets');
+        
+        # If has_frets method exists and returns an arrayref, it's a string instrument
+        if ($has_frets && defined($info->frets) && ref($info->frets) eq 'ARRAY') {
+            return $self->generate_string_diagram_svg($chord_name, $info);
+        }
+        # Otherwise if has kbkeys, it's a keyboard
+        elsif ($has_keys && defined($info->kbkeys)) {
+            return $self->generate_keyboard_diagram_svg($chord_name, $info);
+        }
+        
+        # Fallback to empty (shouldn't happen if has_diagram is true)
+        return '';
+    }
+
+    method generate_string_diagram_svg($chord_name, $info) {
+        my $frets = $info->frets // [];
+        return '' unless @$frets;
+        
+        my $fingers = $info->fingers // [];
+        my $base = $info->base // 1;
+        my $strings = scalar @$frets;
+        
+        # SVG dimensions
+        my $cell_width = 15;
+        my $cell_height = 18;
+        my $num_frets = 4;
+        my $margin_top = 30;
+        my $margin_bottom = 25;
+        my $margin_left = 25;
+        my $margin_right = 10;
+        
+        my $grid_width = ($strings - 1) * $cell_width;
+        my $grid_height = $num_frets * $cell_height;
+        
+        my $svg_width = $grid_width + $margin_left + $margin_right;
+        my $svg_height = $grid_height + $margin_top + $margin_bottom;
+        
+        my $escaped_name = $self->escape_text($chord_name);
+        
+        my $svg = qq{    <div class="cp-chord-diagram">\n};
+        $svg .= qq{      <svg class="cp-diagram-svg" viewBox="0 0 $svg_width $svg_height" xmlns="http://www.w3.org/2000/svg">\n};
+        
+        # Chord name
+        my $name_x = $margin_left + $grid_width / 2;
+        $svg .= qq{        <text x="$name_x" y="18" text-anchor="middle" class="diagram-name">$escaped_name</text>\n};
+        
+        # Draw grid
+        my $grid_x = $margin_left;
+        my $grid_y = $margin_top;
+        
+        # Horizontal lines (frets)
+        for my $i (0..$num_frets) {
+            my $y = $grid_y + $i * $cell_height;
+            my $x2 = $grid_x + $grid_width;
+            my $class = $i == 0 && $base == 1 ? "diagram-nut" : "diagram-line";
+            my $width = $i == 0 && $base == 1 ? 3 : 1;
+            my $stroke = $i == 0 && $base == 1 ? "#000" : "#333";
+            $svg .= qq{        <line x1="$grid_x" y1="$y" x2="$x2" y2="$y" stroke="$stroke" stroke-width="$width" class="$class"/>\n};
+        }
+        
+        # Vertical lines (strings)
+        for my $i (0..$strings-1) {
+            my $x = $grid_x + $i * $cell_width;
+            my $y2 = $grid_y + $grid_height;
+            $svg .= qq{        <line x1="$x" y1="$grid_y" x2="$x" y2="$y2" stroke="#333" stroke-width="1" class="diagram-line"/>\n};
+        }
+        
+        # Base fret indicator (if not on nut)
+        if ($base > 1) {
+            my $base_x = $grid_x - 15;
+            my $base_y = $grid_y + $cell_height / 2;
+            $svg .= qq{        <text x="$base_x" y="$base_y" text-anchor="end" class="diagram-base">${base}fr</text>\n};
+        }
+        
+        # Draw finger positions and open/muted markers
+        for my $i (0..$strings-1) {
+            my $fret = $frets->[$i];
+            my $x = $grid_x + $i * $cell_width;
+            
+            if ($fret < 0) {
+                # Muted string
+                my $marker_y = $grid_y - 8;
+                $svg .= qq{        <text x="$x" y="$marker_y" text-anchor="middle" class="diagram-muted">×</text>\n};
+            }
+            elsif ($fret == 0) {
+                # Open string
+                my $circle_y = $grid_y - 8;
+                $svg .= qq{        <circle cx="$x" cy="$circle_y" r="3" class="diagram-open"/>\n};
+            }
+            else {
+                # Finger position
+                my $dot_y = $grid_y + ($fret - 0.5) * $cell_height;
+                $svg .= qq{        <circle cx="$x" cy="$dot_y" r="5" class="diagram-dot"/>\n};
+                
+                # Finger number (if provided)
+                if ($fingers && defined $fingers->[$i] && $fingers->[$i] ne '-' && $fingers->[$i] =~ /\d/) {
+                    my $finger_y = $grid_y + $grid_height + 18;
+                    my $finger = $fingers->[$i];
+                    $svg .= qq{        <text x="$x" y="$finger_y" text-anchor="middle" class="diagram-finger">$finger</text>\n};
+                }
+            }
+        }
+        
+        $svg .= qq{      </svg>\n};
+        $svg .= qq{    </div>\n};
+        
+        return $svg;
+    }
+
+    method generate_keyboard_diagram_svg($chord_name, $info) {
+        # Keyboard diagram support (simplified for now)
+        # Full implementation would render piano keys
+        my $escaped_name = $self->escape_text($chord_name);
+        return qq{    <div class="cp-chord-diagram"><span class="diagram-name">$escaped_name</span> (keyboard)</div>\n};
+    }
+
+    # =================================================================
     # CSS GENERATION
     # =================================================================
 
     method generate_default_css() {
         my $css_vars = $self->_get_default_css_variables();
         
-        return q{
+        my $css = <<'END_CSS';
 /* ChordPro HTML5 Default Stylesheet */
 
 :root {
-} . $css_vars . q{
+END_CSS
+        $css .= $css_vars;
+        $css .= <<'END_CSS';
 }
 
 /* Body and Page */
@@ -365,6 +554,72 @@ body.chordpro-songbook {
 .cp-album {
     margin: 0.2em 0;
     color: #555;
+}
+
+/* Chord Diagrams */
+.cp-chord-diagrams {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin: 1.5em 0;
+    padding: 1em;
+    background: #f8f8f8;
+    border: 1px solid #ddd;
+}
+
+.cp-chord-diagram {
+    display: inline-block;
+    margin: 0;
+}
+
+.cp-diagram-svg {
+    width: 4em;
+    height: auto;
+}
+
+.diagram-name {
+    font-family: var(--cp-font-chord);
+    font-size: 14px;
+    font-weight: bold;
+    fill: var(--cp-color-chord);
+}
+
+.diagram-line {
+    stroke: #333;
+    stroke-width: 1;
+    fill: none;
+}
+
+.diagram-nut {
+    stroke: #000;
+    stroke-width: 3;
+    fill: none;
+}
+
+.diagram-base {
+    font-size: 11px;
+    fill: #666;
+}
+
+.diagram-dot {
+    fill: #000;
+}
+
+.diagram-open {
+    fill: none;
+    stroke: #000;
+    stroke-width: 2;
+}
+
+.diagram-muted {
+    font-size: 16px;
+    font-weight: bold;
+    fill: #666;
+}
+
+.diagram-finger {
+    font-size: 10px;
+    fill: #666;
 }
 
 /* Songline - The Core Innovation */
@@ -489,8 +744,8 @@ body.chordpro-songbook {
 }
 
 /* Print Styles */
-\\@media print {
-    \\@page {
+@media print {
+    @page {
         size: A4;
         margin: 2cm;
     }
@@ -515,7 +770,8 @@ body.chordpro-songbook {
         color: #000;
     }
 }
-};
+END_CSS
+        return $css;
     }
     
     method _get_default_css_variables() {

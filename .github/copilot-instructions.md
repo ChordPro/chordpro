@@ -100,6 +100,18 @@ perl -Ilib script/chordpro.pl --generate=HTML5 input.cho -o output.html
   ok(!differ("out/$out", "ref/$out"));
   ```
 
+### Testing HTML5 Backends
+- `generate_song()` returns song HTML only (no headers/CSS), `generate_songbook()` returns full document
+- For song-level tests, check for content presence rather than full document structure
+- Example test pattern:
+  ```perl
+  my $html = $backend->generate_song($song);
+  ok($html && length($html) > 0, "Output generated");
+  like($html, qr/expected-content/, "Contains expected content");
+  ```
+- Backend modules must handle both chord info as blessed objects (runtime) and plain hash refs (tests)
+- When testing inheritance (HTML5Paged from HTML5), verify inherited functionality is present without re-testing implementation details
+
 ### Chord System
 - **Multiple notation systems**: standard (C, D, E...), solfege (Do, Re, Mi...), Nashville (1, 2, 3...), Roman (I, II, III...)
 - Parser in `lib/ChordPro/Chords/Parser.pm` - understands transposition between systems
@@ -169,6 +181,19 @@ Songs are arrays of element hashes:
 3. **Chord transposition**: Song.pm handles it during parsing; backends receive transposed chords
 4. **Context management**: Song parser tracks context (`verse`, `chorus`, `tab`, `grid`); backends must respect it
 5. **Line info tracking**: `$config->{settings}->{lineinfo}` controls source line tracking in output
+6. **SVG rendering**: SVG `<line>` elements require explicit `stroke="#color"` attributes - CSS classes alone are insufficient for visibility
+7. **CSS sizing for HTML outputs**: Use `em` units (e.g., `width: 4em`) instead of fixed pixels for better scalability across different font sizes
+8. **Module flexibility**: When creating reusable modules, support both blessed objects and plain hash refs for maximum compatibility (check `ref($obj) eq 'HASH'` vs object methods)
+9. **HTML5Paged inheritance**: HTML5Paged extends HTML5 via Object::Pad's `:isa()` - changes to HTML5 automatically propagate. HTML5Paged's `generate_paged_css()` must include ALL CSS rules (it doesn't call parent's CSS generation)
+10. **Module organization**: Reusable output modules go in `lib/ChordPro/Output/ComponentName/`, NOT `lib/ChordPro/lib/` (Perl's @INC won't find them there)
 
 ## Recent Architectural Efforts
 The project is migrating from monolithic backends (PDF.pm - 2800 lines) to modular Object::Pad-based architecture. See `Design/ARCHITECTURE_COMPARISON.md` and `Design/HTML5_*.md` for detailed rationale. **Follow the Markdown.pm pattern for new work**, not PDF.pm.
+
+### Recent Additions (Dec 2025)
+- **SVG Chord Diagrams**: HTML5 and HTML5Paged backends now support inline SVG chord diagrams
+  - Implementation in `lib/ChordPro/Output/HTML5.pm` methods: `render_chord_diagrams()`, `generate_chord_diagram_svg()`
+  - Standalone reusable module: `lib/ChordPro/Output/ChordDiagram/SVG.pm`
+  - Diagrams sized at `4em` width for scalability with font size
+  - Respects config settings: `diagrams.show`, `diagrams.sorted`, `diagrams.suppress`
+  - Tests: `testing/145_chord_diagrams_svg.t`, `testing/146_html5_chord_diagrams.t`, `testing/147_html5paged_chord_diagrams.t`

@@ -314,7 +314,58 @@ body.chordpro-paged {
 .cp-empty {
     height: 0.6em;
 }
+/* Chord Diagrams */
+.cp-chord-diagrams {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1em;
+    margin: 1em 0;
+    page-break-inside: avoid;
+}
 
+.cp-chord-diagram {
+    display: inline-block;
+    margin: 0;
+}
+
+.cp-diagram-svg {
+    width: 4em;
+    height: auto;
+}
+
+.diagram-name {
+    font-family: var(--cp-font-chord);
+    font-size: 14px;
+    font-weight: bold;
+    fill: var(--cp-color-chord);
+}
+
+.diagram-fret-marker {
+    font-size: 12px;
+    fill: #666;
+}
+
+.diagram-finger {
+    font-size: 10px;
+    fill: #fff;
+    font-weight: bold;
+}
+
+.diagram-dot {
+    fill: #000;
+}
+
+.diagram-open {
+    stroke: #000;
+    fill: none;
+    stroke-width: 2;
+}
+
+.diagram-muted {
+    stroke: #000;
+    fill: none;
+    stroke-width: 2;
+}
 /* Screen preview styles */
 \@media screen {
     body.chordpro-paged {
