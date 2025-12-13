@@ -186,14 +186,58 @@ Songs are arrays of element hashes:
 8. **Module flexibility**: When creating reusable modules, support both blessed objects and plain hash refs for maximum compatibility (check `ref($obj) eq 'HASH'` vs object methods)
 9. **HTML5Paged inheritance**: HTML5Paged extends HTML5 via Object::Pad's `:isa()` - changes to HTML5 automatically propagate. HTML5Paged's `generate_paged_css()` must include ALL CSS rules (it doesn't call parent's CSS generation)
 10. **Module organization**: Reusable output modules go in `lib/ChordPro/Output/ComponentName/`, NOT `lib/ChordPro/lib/` (Perl's @INC won't find them there)
+11. **CRITICAL - Backend Structurization**: Never call `$song->structurize()` in `lib/ChordPro.pm` central dispatch - each backend must handle its own structurization needs. Some backends (ChordPro.pm output) require unstructured songs with `start_of_`/`end_of_` directives. Call `$song->structurize()` in backend's `generate_song()` method if needed (HTML5.pm does this, inherited by HTML5Paged.pm)
+12. **CRITICAL - Build After Changes**: After modifying Perl modules, always run `make` before testing. The `blib/` directory caches compiled code - tests will use old code until rebuilt. Test failures showing old behavior often mean you forgot to rebuild
+13. **Test Promotion Workflow**: Develop new tests in `testing/` directory, then move to production (`t/`) after verification. Use numbered prefixes matching test category (e.g., `t/html5paged/04_formats.t`)
+14. **CRITICAL - Song Metadata Access**: Metadata is stored in `$song->{meta}` hash, NOT at top level. Always use `$song->{meta}->{artist}` not `$song->{artist}`. Reference `lib/ChordPro/Output/ChordPro.pm` (lines 77-95) for canonical metadata access pattern. All metadata fields are arrayrefs, even single-value fields like album/duration - iterate or use `[0]` index
+15. **Object::Pad BUILD Blocks**: Field initialization requires BUILD blocks. Can't just declare `field $svg_generator;` and use it - must add `BUILD { $svg_generator = Module->new(...); }` for proper initialization. Object::Pad fields are NOT automatically initialized
+16. **Test Mock Objects**: Never create mock song objects with hardcoded structures in unit tests. Use real .cho files with proper parsing via `ChordPro::Song->new()->parse_file()`. Mock objects bypass critical initialization and don't match actual runtime structures
 
 ## Recent Architectural Efforts
 The project is migrating from monolithic backends (PDF.pm - 2800 lines) to modular Object::Pad-based architecture. See `Design/ARCHITECTURE_COMPARISON.md` and `Design/HTML5_*.md` for detailed rationale. **Follow the Markdown.pm pattern for new work**, not PDF.pm.
 
 ### Recent Additions (Dec 2025)
-- **SVG Chord Diagrams**: HTML5 and HTML5Paged backends now support inline SVG chord diagrams
-  - Implementation in `lib/ChordPro/Output/HTML5.pm` methods: `render_chord_diagrams()`, `generate_chord_diagram_svg()`
-  - Standalone reusable module: `lib/ChordPro/Output/ChordDiagram/SVG.pm`
-  - Diagrams sized at `4em` width for scalability with font size
-  - Respects config settings: `diagrams.show`, `diagrams.sorted`, `diagrams.suppress`
-  - Tests: `testing/145_chord_diagrams_svg.t`, `testing/146_html5_chord_diagrams.t`, `testing/147_html5paged_chord_diagrams.t`
+
+#### SVG Chord Diagrams
+HTML5 and HTML5Paged backends now support inline SVG chord diagrams:
+- Implementation in `lib/ChordPro/Output/HTML5.pm` methods: `render_chord_diagrams()`, `generate_chord_diagram_svg()`
+- Standalone reusable module: `lib/ChordPro/Output/ChordDiagram/SVG.pm`
+- Diagrams sized at `4em` width for scalability with font size
+- Respects config settings: `diagrams.show`, `diagrams.sorted`, `diagrams.suppress`
+- Tests: `testing/145_chord_diagrams_svg.t`, `testing/146_html5_chord_diagrams.t`, `testing/147_html5paged_chord_diagrams.t`
+- **Integration Pattern**: Use `field $svg_generator;` with `BUILD { $svg_generator = ChordPro::Output::ChordDiagram::SVG->new(escape_fn => sub { $self->escape_text(@_) }); }` in Object::Pad classes
+
+#### HTML5Paged Headers & Footers (Phase 3)
+Full headers/footers configuration support reusing PDF's `pdf.formats` config:
+- **Format Parsing**: `_generate_format_rules()` in `lib/ChordPro/Output/HTML5Paged.pm` parses format specs (e.g., `"%{title}||%{page}"`)
+- **CSS @page Margin Boxes**: Generates `@top-left`, `@bottom-center`, etc. with content from metadata
+- **Metadata via Data Attributes**: Song title/artist/album exposed as `data-title`, `data-artist`, etc. attributes on `<section class="song">` elements
+- **CSS string-set Pattern**: Must use `string-set: song-title attr(data-title);` NOT `content()` for metadata capture
+- **Even/Odd Pages**: Format variants (`first`, `title`, `even`, `odd`) with automatic left/right margin box swapping for even pages
+- **Three-Part Format**: Format strings split by `||` into left/center/right parts, mapped to appropriate margin boxes
+- Implementation: `generate_song()` override adds metadata attributes, `_generate_format_rules()` creates CSS
+- Tests: `t/html5paged/04_formats.t`, `05_even_odd.t`, `06_e2e.t` (50 tests total)
+- Config example:
+  ```json
+  {
+    "pdf": {
+      "formats": {
+        "default": {
+          "footer": ["", "%{page}", ""]
+        },
+        "title": {
+          "footer": ["%{title}", "%{page}", "%{artist}"]
+        }
+      }
+    }
+  }
+  ```
+
+#### Enhanced Metadata & Layout Directives (Dec 2025)
+Complete metadata and layout directive support in HTML5/HTML5Paged backends:
+- **Metadata Fields**: arranger, copyright, lyricist, duration now fully supported in ChordProBase, HTML5, HTML5Paged
+- **Layout Directives**: new_page, new_physical_page, column_break, columns implemented as CSS styling
+- **Access Pattern**: Must use `$song->{meta}->{field}` NOT `$song->{field}` - metadata lives in separate hash
+- **Array Iteration**: All metadata is stored as arrayrefs, even single values: `foreach my $val (@{$meta->{field}}) { ... }`
+- Reference implementation: `lib/ChordPro/Output/ChordPro.pm` lines 77-95 shows canonical metadata access
+- Tests: `t/75_html5.t`, `t/76_html5paged.t` validate backend functionality

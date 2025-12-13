@@ -113,6 +113,12 @@ class ChordPro::Output::ChordProBase :abstract
         # Text elements
         return $self->handle_comment($elt)      if $type eq 'comment';
 
+        # Additional metadata
+        return $self->handle_arranger($elt)     if $type eq 'arranger';
+        return $self->handle_copyright($elt)    if $type eq 'copyright';
+        return $self->handle_lyricist($elt)     if $type eq 'lyricist';
+        return $self->handle_duration($elt)     if $type eq 'duration';
+
         # Environment containers (with body)
         return $self->handle_chorus($elt)       if $type eq 'chorus';
         return $self->handle_verse($elt)        if $type eq 'verse';
@@ -202,6 +208,22 @@ class ChordPro::Output::ChordProBase :abstract
 
     method handle_capo($elt) {
         return $self->render_text("Capo: " . $elt->{value}, 'meta');
+    }
+
+    method handle_arranger($elt) {
+        return $self->render_text($elt->{value}, 'arranger');
+    }
+
+    method handle_copyright($elt) {
+        return $self->render_text($elt->{value}, 'copyright');
+    }
+
+    method handle_lyricist($elt) {
+        return $self->render_text($elt->{value}, 'lyricist');
+    }
+
+    method handle_duration($elt) {
+        return $self->render_text("Duration: " . $elt->{value}, 'meta');
     }
 
     # Formatting handlers

@@ -1,0 +1,42 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "perl",
+            "request": "launch",
+            "name": "Perl-Debug chordpro",
+            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/script/chordpro.pl", // "script/chordpro.pl",test.pl
+            "exec": "perl",
+            "execArgs": [],
+            "root": "${workspaceRoot}", 
+            "inc": ["${workspaceFolder}/lib/", "/workspaces/chordpro/lib/"],
+            "args": ["${workspaceFolder}/test_lilypond.cho", "--output=${workspaceFolder}/test.tex"],
+            "env": {},
+            "debugRaw": false,
+            "debugLog": false,
+            "stopOnEntry": true,
+            "sessions": "single"
+        },
+        {
+            "type": "perl",
+            "request": "launch",
+            "name": "Perl-Debug md debug test",
+            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/xtest.pl", // "script/chordpro.pl",test.pl
+            "exec": "perl",
+            "execArgs": [],
+            "root": "${workspaceRoot}", 
+            "inc": ["/workspace/lib/"],
+            "args": ["--no-default-configs","${workspaceFolder}/test_lilypond.cho", "--output=${workspaceFolder}/test.md"],
+            // "environment": [{ "PERL5LIB": "/workspace/lib/" }],
+            "debugRaw": false,
+            "debugLog": false,
+            "stopOnEntry": true,
+            "sessions": "single"
+        }
+    ]
+}

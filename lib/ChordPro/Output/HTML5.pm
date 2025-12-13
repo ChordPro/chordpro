@@ -17,9 +17,20 @@ use Ref::Util qw(is_ref);
 use Text::Layout;
 
 use ChordPro::Output::ChordProBase;
+use ChordPro::Output::ChordDiagram::SVG;
 
 class ChordPro::Output::HTML5
   :isa(ChordPro::Output::ChordProBase) {
+
+    # SVG diagram generator
+    field $svg_generator;
+
+    BUILD {
+        # Initialize SVG diagram generator with HTML escape function
+        $svg_generator = ChordPro::Output::ChordDiagram::SVG->new(
+            escape_fn => sub { $self->escape_text(@_) }
+        );
+    }
 
     # =================================================================
     # REQUIRED BASE CLASS METHODS - Document Structure
@@ -228,26 +239,58 @@ class ChordPro::Output::HTML5
         }
 
         # Metadata section
-        if ($song->{artist} || $song->{composer} || $song->{album}) {
+        my $meta = $song->{meta} || {};
+        if ($meta->{artist} || $meta->{composer} || $meta->{album} || $meta->{arranger} || 
+            $meta->{lyricist} || $meta->{copyright} || $meta->{duration}) {
             $output .= qq{  <div class="cp-metadata">\n};
 
-            if ($song->{artist}) {
-                foreach my $artist (@{$song->{artist}}) {
+            if ($meta->{artist}) {
+                foreach my $artist (@{$meta->{artist}}) {
                     my $processed = $self->process_text_with_markup($artist);
                     $output .= qq{    <div class="cp-artist">$processed</div>\n};
                 }
             }
 
-            if ($song->{composer}) {
-                foreach my $composer (@{$song->{composer}}) {
+            if ($meta->{composer}) {
+                foreach my $composer (@{$meta->{composer}}) {
                     my $processed = $self->process_text_with_markup($composer);
                     $output .= qq{    <div class="cp-composer">$processed</div>\n};
                 }
             }
 
-            if ($song->{album}) {
-                my $processed = $self->process_text_with_markup($song->{album});
-                $output .= qq{    <div class="cp-album">$processed</div>\n};
+            if ($meta->{lyricist}) {
+                foreach my $lyricist (@{$meta->{lyricist}}) {
+                    my $processed = $self->process_text_with_markup($lyricist);
+                    $output .= qq{    <div class="cp-lyricist">Lyrics: $processed</div>\n};
+                }
+            }
+
+            if ($meta->{arranger}) {
+                foreach my $arranger (@{$meta->{arranger}}) {
+                    my $processed = $self->process_text_with_markup($arranger);
+                    $output .= qq{    <div class="cp-arranger">Arranged by: $processed</div>\n};
+                }
+            }
+
+            if ($meta->{album}) {
+                foreach my $album (@{$meta->{album}}) {
+                    my $processed = $self->process_text_with_markup($album);
+                    $output .= qq{    <div class="cp-album">$processed</div>\n};
+                }
+            }
+
+            if ($meta->{copyright}) {
+                foreach my $copyright (@{$meta->{copyright}}) {
+                    my $processed = $self->process_text_with_markup($copyright);
+                    $output .= qq{    <div class="cp-copyright">© $processed</div>\n};
+                }
+            }
+
+            if ($meta->{duration}) {
+                foreach my $duration (@{$meta->{duration}}) {
+                    my $processed = $self->process_text_with_markup($duration);
+                    $output .= qq{    <div class="cp-duration">Duration: $processed</div>\n};
+                }
             }
 
             $output .= qq{  </div>\n};
@@ -273,7 +316,42 @@ class ChordPro::Output::HTML5
     }
 
     # =================================================================
-    # HTML-SPECIFIC OVERRIDES
+    # HTML-SPECIFIC OVERRIDES - Layout Directives
+    # =================================================================
+
+    # Override layout directive handlers for HTML
+    method handle_newpage($elt) {
+        return qq{<div style="page-break-before: always;"></div>\n};
+    }
+
+    method handle_new_page($elt) {
+        return $self->handle_newpage($elt);
+    }
+
+    method handle_new_physical_page($elt) {
+        # In HTML, physical page is same as logical page
+        return $self->handle_newpage($elt);
+    }
+
+    method handle_colb($elt) {
+        return qq{<div style="column-break-before: always;"></div>\n};
+    }
+
+    method handle_column_break($elt) {
+        return $self->handle_colb($elt);
+    }
+
+    method handle_columns($elt) {
+        my $num = $elt->{value} // 1;
+        if ($num > 1) {
+            return qq{<div style="column-count: $num;">\n};
+        } else {
+            return qq{</div><!-- end columns -->\n};
+        }
+    }
+
+    # =================================================================
+    # HTML-SPECIFIC OVERRIDES - Text Formatting
     # =================================================================
 
     # Override text formatting helpers
@@ -378,125 +456,15 @@ class ChordPro::Output::HTML5
     }
 
     method generate_chord_diagram_svg($chord_name, $info) {
-        # Determine if this is a keyboard or string instrument
-        # Keyboards have kbkeys, strings have frets
-        my $has_keys = $info->can('kbkeys');
-        my $has_frets = $info->can('frets');
+        # Use the ChordDiagram::SVG module
+        my $svg = $svg_generator->generate_diagram($chord_name, $info);
         
-        # If has_frets method exists and returns an arrayref, it's a string instrument
-        if ($has_frets && defined($info->frets) && ref($info->frets) eq 'ARRAY') {
-            return $self->generate_string_diagram_svg($chord_name, $info);
-        }
-        # Otherwise if has kbkeys, it's a keyboard
-        elsif ($has_keys && defined($info->kbkeys)) {
-            return $self->generate_keyboard_diagram_svg($chord_name, $info);
-        }
-        
-        # Fallback to empty (shouldn't happen if has_diagram is true)
+        # Wrap in a container div
+        return qq{    <div class="cp-chord-diagram">\n      $svg    </div>\n} if $svg;
         return '';
     }
 
-    method generate_string_diagram_svg($chord_name, $info) {
-        my $frets = $info->frets // [];
-        return '' unless @$frets;
-        
-        my $fingers = $info->fingers // [];
-        my $base = $info->base // 1;
-        my $strings = scalar @$frets;
-        
-        # SVG dimensions
-        my $cell_width = 15;
-        my $cell_height = 18;
-        my $num_frets = 4;
-        my $margin_top = 30;
-        my $margin_bottom = 25;
-        my $margin_left = 25;
-        my $margin_right = 10;
-        
-        my $grid_width = ($strings - 1) * $cell_width;
-        my $grid_height = $num_frets * $cell_height;
-        
-        my $svg_width = $grid_width + $margin_left + $margin_right;
-        my $svg_height = $grid_height + $margin_top + $margin_bottom;
-        
-        my $escaped_name = $self->escape_text($chord_name);
-        
-        my $svg = qq{    <div class="cp-chord-diagram">\n};
-        $svg .= qq{      <svg class="cp-diagram-svg" viewBox="0 0 $svg_width $svg_height" xmlns="http://www.w3.org/2000/svg">\n};
-        
-        # Chord name
-        my $name_x = $margin_left + $grid_width / 2;
-        $svg .= qq{        <text x="$name_x" y="18" text-anchor="middle" class="diagram-name">$escaped_name</text>\n};
-        
-        # Draw grid
-        my $grid_x = $margin_left;
-        my $grid_y = $margin_top;
-        
-        # Horizontal lines (frets)
-        for my $i (0..$num_frets) {
-            my $y = $grid_y + $i * $cell_height;
-            my $x2 = $grid_x + $grid_width;
-            my $class = $i == 0 && $base == 1 ? "diagram-nut" : "diagram-line";
-            my $width = $i == 0 && $base == 1 ? 3 : 1;
-            my $stroke = $i == 0 && $base == 1 ? "#000" : "#333";
-            $svg .= qq{        <line x1="$grid_x" y1="$y" x2="$x2" y2="$y" stroke="$stroke" stroke-width="$width" class="$class"/>\n};
-        }
-        
-        # Vertical lines (strings)
-        for my $i (0..$strings-1) {
-            my $x = $grid_x + $i * $cell_width;
-            my $y2 = $grid_y + $grid_height;
-            $svg .= qq{        <line x1="$x" y1="$grid_y" x2="$x" y2="$y2" stroke="#333" stroke-width="1" class="diagram-line"/>\n};
-        }
-        
-        # Base fret indicator (if not on nut)
-        if ($base > 1) {
-            my $base_x = $grid_x - 15;
-            my $base_y = $grid_y + $cell_height / 2;
-            $svg .= qq{        <text x="$base_x" y="$base_y" text-anchor="end" class="diagram-base">${base}fr</text>\n};
-        }
-        
-        # Draw finger positions and open/muted markers
-        for my $i (0..$strings-1) {
-            my $fret = $frets->[$i];
-            my $x = $grid_x + $i * $cell_width;
-            
-            if ($fret < 0) {
-                # Muted string
-                my $marker_y = $grid_y - 8;
-                $svg .= qq{        <text x="$x" y="$marker_y" text-anchor="middle" class="diagram-muted">×</text>\n};
-            }
-            elsif ($fret == 0) {
-                # Open string
-                my $circle_y = $grid_y - 8;
-                $svg .= qq{        <circle cx="$x" cy="$circle_y" r="3" class="diagram-open"/>\n};
-            }
-            else {
-                # Finger position
-                my $dot_y = $grid_y + ($fret - 0.5) * $cell_height;
-                $svg .= qq{        <circle cx="$x" cy="$dot_y" r="5" class="diagram-dot"/>\n};
-                
-                # Finger number (if provided)
-                if ($fingers && defined $fingers->[$i] && $fingers->[$i] ne '-' && $fingers->[$i] =~ /\d/) {
-                    my $finger_y = $grid_y + $grid_height + 18;
-                    my $finger = $fingers->[$i];
-                    $svg .= qq{        <text x="$x" y="$finger_y" text-anchor="middle" class="diagram-finger">$finger</text>\n};
-                }
-            }
-        }
-        
-        $svg .= qq{      </svg>\n};
-        $svg .= qq{    </div>\n};
-        
-        return $svg;
-    }
 
-    method generate_keyboard_diagram_svg($chord_name, $info) {
-        # Keyboard diagram support (simplified for now)
-        # Full implementation would render piano keys
-        my $escaped_name = $self->escape_text($chord_name);
-        return qq{    <div class="cp-chord-diagram"><span class="diagram-name">$escaped_name</span> (keyboard)</div>\n};
-    }
 
     # =================================================================
     # CSS GENERATION

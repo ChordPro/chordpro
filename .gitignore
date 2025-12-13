@@ -1,6 +1,10 @@
 .??*
-:*
 !.github/
+!.vscode/
+.vscode/*
+!.vscode/*.json
+!.devcontainer/
+:*
 *~
 \#.*#
 CPAN

@@ -1,0 +1,9 @@
+{
+    "perl-toolbox.syntax.includePaths": ["/workspace/lib/"],
+
+    "perl": {
+        "enable": true,
+        "logLevel": 0,
+        "perlInc": ["/workspace/lib/"]
+    }
+}

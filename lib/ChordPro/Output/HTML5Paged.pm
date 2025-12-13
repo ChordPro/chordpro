@@ -76,16 +76,42 @@ class ChordPro::Output::HTML5Paged
             $output =~ s/(<h2 class="cp-subtitle")/$1 data-subtitle="$escaped"/;
         }
         
-        if ($song->{artist} && @{$song->{artist}}) {
-            my $escaped = $self->escape_text($song->{artist}[0]);
+        my $meta = $song->{meta} || {};
+        
+        if ($meta->{artist} && @{$meta->{artist}}) {
+            my $escaped = $self->escape_text($meta->{artist}[0]);
             # Add data-artist attribute to first cp-artist element
             $output =~ s/(<div class="cp-artist")/$1 data-artist="$escaped"/;
         }
         
-        if ($song->{album}) {
-            my $escaped = $self->escape_text($song->{album});
+        if ($meta->{album} && @{$meta->{album}}) {
+            my $escaped = $self->escape_text($meta->{album}[0]);
             # Add data-album attribute to cp-album element
             $output =~ s/(<div class="cp-album")/$1 data-album="$escaped"/;
+        }
+        
+        if ($meta->{arranger} && @{$meta->{arranger}}) {
+            my $escaped = $self->escape_text($meta->{arranger}[0]);
+            # Add data-arranger attribute to first cp-arranger element
+            $output =~ s/(<div class="cp-arranger")/$1 data-arranger="$escaped"/;
+        }
+        
+        if ($meta->{lyricist} && @{$meta->{lyricist}}) {
+            my $escaped = $self->escape_text($meta->{lyricist}[0]);
+            # Add data-lyricist attribute to first cp-lyricist element
+            $output =~ s/(<div class="cp-lyricist")/$1 data-lyricist="$escaped"/;
+        }
+        
+        if ($meta->{copyright} && @{$meta->{copyright}}) {
+            my $escaped = $self->escape_text($meta->{copyright}[0]);
+            # Add data-copyright attribute to first cp-copyright element
+            $output =~ s/(<div class="cp-copyright")/$1 data-copyright="$escaped"/;
+        }
+        
+        if ($meta->{duration} && @{$meta->{duration}}) {
+            my $escaped = $self->escape_text($meta->{duration}[0]);
+            # Add data-duration attribute to cp-duration element
+            $output =~ s/(<div class="cp-duration")/$1 data-duration="$escaped"/;
         }
         
         return $output;
@@ -125,6 +151,16 @@ class ChordPro::Output::HTML5Paged
 
         return qq{
 /* ChordPro HTML5 with Paged.js Stylesheet */
+
+/* String-set for metadata attributes (for use in headers/footers) */
+.cp-title[data-title] { string-set: song-title attr(data-title); }
+.cp-subtitle[data-subtitle] { string-set: song-subtitle attr(data-subtitle); }
+.cp-artist[data-artist] { string-set: song-artist attr(data-artist); }
+.cp-album[data-album] { string-set: song-album attr(data-album); }
+.cp-arranger[data-arranger] { string-set: song-arranger attr(data-arranger); }
+.cp-lyricist[data-lyricist] { string-set: song-lyricist attr(data-lyricist); }
+.cp-copyright[data-copyright] { string-set: song-copyright attr(data-copyright); }
+.cp-duration[data-duration] { string-set: song-duration attr(data-duration); }
 
 /* Page Setup */
 \@page {
@@ -688,6 +724,21 @@ $boxes
             }
             elsif ($meta_key eq 'artist') {
                 push @parts, 'string(song-artist)';
+            }
+            elsif ($meta_key eq 'album') {
+                push @parts, 'string(song-album)';
+            }
+            elsif ($meta_key eq 'arranger') {
+                push @parts, 'string(song-arranger)';
+            }
+            elsif ($meta_key eq 'lyricist') {
+                push @parts, 'string(song-lyricist)';
+            }
+            elsif ($meta_key eq 'copyright') {
+                push @parts, 'string(song-copyright)';
+            }
+            elsif ($meta_key eq 'duration') {
+                push @parts, 'string(song-duration)';
             }
             else {
                 # Other metadata - use generic string
