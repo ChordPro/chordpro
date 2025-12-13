@@ -55,6 +55,43 @@ class ChordPro::Output::HTML5Paged
     }
 
     # =================================================================
+    # OVERRIDE SONG GENERATION TO ADD METADATA ATTRIBUTES
+    # =================================================================
+
+    method generate_song($song) {
+        # Call parent to get base HTML
+        my $output = $self->SUPER::generate_song($song);
+        
+        # Add metadata attributes for CSS string-set
+        # These allow @page margin boxes to access song metadata
+        if ($song->{title}) {
+            my $escaped = $self->escape_text($song->{title});
+            # Add data-title attribute to cp-title element
+            $output =~ s/(<h1 class="cp-title")/$1 data-title="$escaped"/;
+        }
+        
+        if ($song->{subtitle} && @{$song->{subtitle}}) {
+            my $escaped = $self->escape_text($song->{subtitle}[0]);
+            # Add data-subtitle attribute to first cp-subtitle element
+            $output =~ s/(<h2 class="cp-subtitle")/$1 data-subtitle="$escaped"/;
+        }
+        
+        if ($song->{artist} && @{$song->{artist}}) {
+            my $escaped = $self->escape_text($song->{artist}[0]);
+            # Add data-artist attribute to first cp-artist element
+            $output =~ s/(<div class="cp-artist")/$1 data-artist="$escaped"/;
+        }
+        
+        if ($song->{album}) {
+            my $escaped = $self->escape_text($song->{album});
+            # Add data-album attribute to cp-album element
+            $output =~ s/(<div class="cp-album")/$1 data-album="$escaped"/;
+        }
+        
+        return $output;
+    }
+
+    # =================================================================
     # PAGED.JS CSS GENERATION
     # =================================================================
 
@@ -152,9 +189,21 @@ body.chordpro-paged {
     page-break-before: avoid;
 }
 
-/* Set running header with song title */
-.cp-title {
-    string-set: song-title content();
+/* Set running headers/footers with song metadata using data attributes */
+.cp-title[data-title] {
+    string-set: song-title attr(data-title);
+}
+
+.cp-subtitle[data-subtitle] {
+    string-set: song-subtitle attr(data-subtitle);
+}
+
+.cp-artist[data-artist] {
+    string-set: song-artist attr(data-artist);
+}
+
+.cp-album[data-album] {
+    string-set: song-album attr(data-album);
 }
 
 /* Titles */
@@ -480,15 +529,44 @@ body.chordpro-paged {
         my @rules;
         
         # Generate rules for each format type
+        # Default format (applies to all pages unless overridden)
         push @rules, $self->_generate_format_rule('default', $formats->{default});
-        push @rules, $self->_generate_format_rule('title', $formats->{title});
+        
+        # Title page (first page of each song)
+        push @rules, $self->_generate_format_rule('title', $formats->{title}, 'title');
+        
+        # Very first page
         push @rules, $self->_generate_format_rule('first', $formats->{first}, ':first');
         
-        # Handle even page formats if they exist
-        push @rules, $self->_generate_format_rule('default-even', $formats->{'default-even'}, ':left')
-            if exists $formats->{'default-even'};
-        push @rules, $self->_generate_format_rule('title-even', $formats->{'title-even'})
-            if exists $formats->{'title-even'};
+        # Even pages (left in duplex printing)
+        # CSS :left selector applies to left-facing pages in duplex printing
+        if (exists $formats->{'default-even'}) {
+            push @rules, $self->_generate_format_rule('default-even', $formats->{'default-even'}, ':left');
+        }
+        
+        # Odd pages (right in duplex printing) 
+        # CSS :right selector applies to right-facing pages in duplex printing
+        if (exists $formats->{'default-odd'}) {
+            push @rules, $self->_generate_format_rule('default-odd', $formats->{'default-odd'}, ':right');
+        }
+        
+        # Title page even/odd variants
+        if (exists $formats->{'title-even'}) {
+            push @rules, $self->_generate_format_rule('title-even', $formats->{'title-even'}, 'title:left');
+        }
+        
+        if (exists $formats->{'title-odd'}) {
+            push @rules, $self->_generate_format_rule('title-odd', $formats->{'title-odd'}, 'title:right');
+        }
+        
+        # First page even/odd (though :first usually takes precedence)
+        if (exists $formats->{'first-even'}) {
+            push @rules, $self->_generate_format_rule('first-even', $formats->{'first-even'}, ':first:left');
+        }
+        
+        if (exists $formats->{'first-odd'}) {
+            push @rules, $self->_generate_format_rule('first-odd', $formats->{'first-odd'}, ':first:right');
+        }
         
         return join("\n\n", grep { $_ } @rules);
     }
@@ -548,6 +626,10 @@ $boxes
         my @boxes;
         my @positions = ('left', 'center', 'right');
         
+        # Check if this is an even-page format
+        # For even pages (:left in CSS), swap left and right content
+        my $is_even_page = ($format_name =~ /-even$/ || $format_name =~ /:left/);
+        
         # Handle subtitle positioning (needs different margin-box names)
         my @margin_box_positions = @positions;
         if ($position eq 'subtitle') {
@@ -557,7 +639,9 @@ $boxes
         }
         
         for my $i (0..2) {
-            my $content = ref($format_spec) eq 'ARRAY' ? $format_spec->[$i] : '';
+            # For even pages, swap left (0) and right (2) indices
+            my $content_idx = $is_even_page && ($i == 0 || $i == 2) ? 2 - $i : $i;
+            my $content = ref($format_spec) eq 'ARRAY' ? $format_spec->[$content_idx] : '';
             next unless defined $content && $content ne '';
             
             my $box_name = "\@${position}-$positions[$i]";
