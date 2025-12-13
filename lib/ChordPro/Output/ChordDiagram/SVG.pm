@@ -153,7 +153,7 @@ sub generate_string_diagram ( $self, $chord_name, $info ) {
         if ($fret < 0) {
             # Muted string
             my $marker_y = $grid_y - 8;
-            $svg .= qq{  <text x="$x" y="$marker_y" text-anchor="middle" class="diagram-muted">×</text>\n};
+            $svg .= qq{  <text x="$x" y="$marker_y" text-anchor="middle" class="diagram-muted">\x{00d7}</text>\n};
         }
         elsif ($fret == 0) {
             # Open string
