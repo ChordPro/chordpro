@@ -15,7 +15,9 @@ use Object::Pad;
 use utf8;
 use Ref::Util qw(is_ref);
 use Text::Layout;
+use Template;
 
+use ChordPro::Paths;
 use ChordPro::Output::ChordProBase;
 use ChordPro::Output::ChordDiagram::SVG;
 
@@ -24,12 +26,239 @@ class ChordPro::Output::HTML5
 
     # SVG diagram generator
     field $svg_generator;
+    
+    # Template engine for CSS generation
+    field $template_engine;
 
     BUILD {
         # Initialize SVG diagram generator with HTML escape function
         $svg_generator = ChordPro::Output::ChordDiagram::SVG->new(
             escape_fn => sub { $self->escape_text(@_) }
         );
+        
+        # Initialize Template::Toolkit (following LaTeX.pm pattern)
+        my $config = $self->config // {};
+        my $html5_cfg = eval { $config->{html5} } // {};
+        
+        my $template_path = CP->findres("templates");
+        unless ($template_path) {
+            # Fallback for tests - try relative paths
+            for my $path ("../lib/ChordPro/res/templates", "lib/ChordPro/res/templates", "../blib/lib/ChordPro/res/templates") {
+                if (-d $path) {
+                    $template_path = $path;
+                    last;
+                }
+            }
+        }
+        
+        my $include_path = eval { $html5_cfg->{template_include_path} } // [];
+        
+        $template_engine = Template->new({
+            INCLUDE_PATH => [
+                @$include_path,
+                $template_path,
+                $main::CHORDPRO_LIBRARY
+            ],
+            INTERPOLATE => 1,
+        }) || die "$Template::ERROR\n";
+    }
+
+    # =================================================================
+    # TEMPLATE PROCESSING HELPER
+    # =================================================================
+
+    method _process_template($template_name, $vars) {
+        my $output = '';
+        my $config = $self->config // {};
+        my $html5_cfg = eval { $config->{html5} } // {};
+        my $template = eval { $html5_cfg->{templates}->{$template_name} } 
+                       // "html5/$template_name.tt";
+        
+        $template_engine->process($template, $vars, \$output)
+            || die "Template error ($template_name): " . $template_engine->error();
+        
+        return $output;
+    }
+
+    # =================================================================
+    # TEMPLATE-BASED ELEMENT RENDERERS (LaTeX.pm pattern)
+    # =================================================================
+
+    method _render_songline_template($element) {
+        # Prepare chord-lyric pairs
+        my @pairs;
+        my $chords = $element->{chords} // [];
+        my $phrases = $element->{phrases} // [];
+        
+        for (my $i = 0; $i < @$phrases; $i++) {
+            my $chord = $chords->[$i];
+            my $chord_name = '';
+            if ($chord) {
+                if (ref($chord) eq 'HASH') {
+                    $chord_name = $chord->{name} // '';
+                } elsif (ref($chord) && $chord->can('chord_display')) {
+                    # ChordPro::Chords::Appearance object
+                    $chord_name = $chord->chord_display // '';
+                } elsif (ref($chord) && $chord->can('name')) {
+                    $chord_name = $chord->name // '';
+                } else {
+                    $chord_name = "$chord";  # Stringify
+                }
+            }
+            
+            my $lyrics = $phrases->[$i] // '';
+            my $is_chord_only = ($chord_name ne '' && $lyrics eq '');
+            
+            push @pairs, {
+                chord => $chord_name,
+                lyrics => $self->process_text_with_markup($lyrics),
+                is_chord_only => $is_chord_only,
+            };
+        }
+        
+        return $self->_process_template('songline', { pairs => \@pairs });
+    }
+
+    method _render_comment_template($element) {
+        return $self->_process_template('comment', {
+            text => $self->process_text_with_markup($element->{text} // ''),
+            italic => ($element->{type} eq 'comment_italic'),
+        });
+    }
+
+    method _render_image_template($element) {
+        my $opts = $element->{opts} // {};
+        return $self->_process_template('image', {
+            uri => $element->{uri} // '',
+            title => $element->{title} // '',
+            width => $opts->{width} // '',
+            height => $opts->{height} // '',
+            class => $opts->{class} // 'cp-image',
+        });
+    }
+
+    method render_gridline($element) {
+        my $tokens = $element->{tokens} // [];
+        my $margin = $element->{margin};
+        my $comment = $element->{comment};
+        
+        my $html = '<div class="cp-gridline">';
+        
+        # Render margin if present
+        if ($margin) {
+            my $margin_text = $margin->{chord} // $margin->{text} // '';
+            if (ref($margin_text) && $margin_text->can('chord_display')) {
+                $margin_text = $margin_text->chord_display;
+            } elsif (ref($margin_text) && $margin_text->can('name')) {
+                $margin_text = $margin_text->name;
+            }
+            $html .= '<span class="cp-grid-margin">' . $self->escape_text($margin_text) . '</span>';
+        }
+        
+        # Render tokens
+        $html .= '<span class="cp-grid-tokens">';
+        foreach my $token (@$tokens) {
+            my $class = $token->{class} // '';
+            my $text = '';
+            
+            if ($class eq 'chord') {
+                my $chord = $token->{chord};
+                if (ref($chord) eq 'HASH') {
+                    $text = $chord->{name} // '';
+                } elsif ($chord && $chord->can('chord_display')) {
+                    $text = $chord->chord_display;
+                } elsif ($chord && $chord->can('name')) {
+                    $text = $chord->name;
+                } else {
+                    $text = "$chord";
+                }
+            } else {
+                $text = $token->{symbol} // '';
+            }
+            
+            $html .= '<span class="cp-grid-' . $class . '">' . $self->escape_text($text) . '</span>';
+        }
+        $html .= '</span>';
+        
+        # Render comment if present
+        if ($comment) {
+            my $comment_text = $comment->{chord} // $comment->{text} // '';
+            if (ref($comment_text) && $comment_text->can('chord_display')) {
+                $comment_text = $comment_text->chord_display;
+            } elsif (ref($comment_text) && $comment_text->can('name')) {
+                $comment_text = $comment_text->name;
+            }
+            $html .= '<span class="cp-grid-comment">' . $self->escape_text($comment_text) . '</span>';
+        }
+        
+        $html .= '</div>';
+        return $html;
+    }
+
+    method _process_song_body($body) {
+        my $html = '';
+        
+        foreach my $element (@{$body}) {
+            my $type = $element->{type};
+            
+            # Dispatch to appropriate handler
+            if ($type eq 'songline') {
+                $html .= $self->_render_songline_template($element);
+            }
+            elsif ($type eq 'comment' || $type eq 'comment_italic') {
+                $html .= $self->_render_comment_template($element);
+            }
+            elsif ($type eq 'image') {
+                $html .= $self->_render_image_template($element);
+            }
+            elsif ($type eq 'empty') {
+                $html .= qq{<div class="cp-empty"></div>\n};
+            }
+            elsif ($type eq 'chorus') {
+                $html .= qq{<div class="cp-chorus">\n};
+                $html .= $self->_process_song_body($element->{body});
+                $html .= qq{</div>\n};
+            }
+            elsif ($type eq 'verse') {
+                $html .= qq{<div class="cp-verse">\n};
+                $html .= $self->_process_song_body($element->{body});
+                $html .= qq{</div>\n};
+            }
+            elsif ($type eq 'bridge') {
+                $html .= qq{<div class="cp-bridge">\n};
+                $html .= $self->_process_song_body($element->{body});
+                $html .= qq{</div>\n};
+            }
+            elsif ($type eq 'tab') {
+                $html .= qq{<div class="cp-tab">\n};
+                $html .= $self->_process_song_body($element->{body});
+                $html .= qq{</div>\n};
+            }
+            elsif ($type eq 'tabline') {
+                my $text = $self->escape_text($element->{text} // '');
+                $html .= qq{<div class="cp-tabline">$text</div>\n};
+            }
+            elsif ($type eq 'grid') {
+                $html .= qq{<div class="cp-grid">\n};
+                $html .= $self->_process_song_body($element->{body});
+                $html .= qq{</div>\n};
+            }
+            elsif ($type eq 'gridline') {
+                $html .= $self->render_gridline($element);
+            }
+            elsif ($type eq 'new_page' || $type eq 'newpage') {
+                $html .= qq{<div class="cp-new-page"></div>\n};
+            }
+            elsif ($type eq 'new_physical_page') {
+                $html .= qq{<div class="cp-new-physical-page"></div>\n};
+            }
+            elsif ($type eq 'colb' || $type eq 'column_break') {
+                $html .= qq{<div class="cp-column-break"></div>\n};
+            }
+            # Ignore other types (set, control, etc.)
+        }
+        
+        return $html;
     }
 
     # =================================================================
@@ -217,102 +446,49 @@ class ChordPro::Output::HTML5
 
     method generate_song($song) {
         # Structurize the song to convert start_of/end_of directives into containers
-        $song->structurize;
+        eval { $song->structurize } if $song->can('structurize');
 
-        my $output = '';
-
-        # Song container
-        $output .= qq{<div class="cp-song">\n};
-
-        # Title
-        if ($song->{title}) {
-            my $processed_title = $self->process_text_with_markup($song->{title});
-            $output .= qq{  <h1 class="cp-title">$processed_title</h1>\n};
-        }
-
-        # Subtitles
-        if ($song->{subtitle}) {
-            foreach my $subtitle (@{$song->{subtitle}}) {
-                my $processed = $self->process_text_with_markup($subtitle);
-                $output .= qq{  <h2 class="cp-subtitle">$processed</h2>\n};
+        # Process metadata with markup
+        my $meta = $song->{meta} // {};
+        my $processed_meta = {};
+        foreach my $key (keys %$meta) {
+            if (ref($meta->{$key}) eq 'ARRAY') {
+                $processed_meta->{$key} = [
+                    map { $self->process_text_with_markup($_) } @{$meta->{$key}}
+                ];
             }
         }
 
-        # Metadata section
-        my $meta = $song->{meta} || {};
-        if ($meta->{artist} || $meta->{composer} || $meta->{album} || $meta->{arranger} || 
-            $meta->{lyricist} || $meta->{copyright} || $meta->{duration}) {
-            $output .= qq{  <div class="cp-metadata">\n};
-
-            if ($meta->{artist}) {
-                foreach my $artist (@{$meta->{artist}}) {
-                    my $processed = $self->process_text_with_markup($artist);
-                    $output .= qq{    <div class="cp-artist">$processed</div>\n};
-                }
-            }
-
-            if ($meta->{composer}) {
-                foreach my $composer (@{$meta->{composer}}) {
-                    my $processed = $self->process_text_with_markup($composer);
-                    $output .= qq{    <div class="cp-composer">$processed</div>\n};
-                }
-            }
-
-            if ($meta->{lyricist}) {
-                foreach my $lyricist (@{$meta->{lyricist}}) {
-                    my $processed = $self->process_text_with_markup($lyricist);
-                    $output .= qq{    <div class="cp-lyricist">Lyrics: $processed</div>\n};
-                }
-            }
-
-            if ($meta->{arranger}) {
-                foreach my $arranger (@{$meta->{arranger}}) {
-                    my $processed = $self->process_text_with_markup($arranger);
-                    $output .= qq{    <div class="cp-arranger">Arranged by: $processed</div>\n};
-                }
-            }
-
-            if ($meta->{album}) {
-                foreach my $album (@{$meta->{album}}) {
-                    my $processed = $self->process_text_with_markup($album);
-                    $output .= qq{    <div class="cp-album">$processed</div>\n};
-                }
-            }
-
-            if ($meta->{copyright}) {
-                foreach my $copyright (@{$meta->{copyright}}) {
-                    my $processed = $self->process_text_with_markup($copyright);
-                    $output .= qq{    <div class="cp-copyright">© $processed</div>\n};
-                }
-            }
-
-            if ($meta->{duration}) {
-                foreach my $duration (@{$meta->{duration}}) {
-                    my $processed = $self->process_text_with_markup($duration);
-                    $output .= qq{    <div class="cp-duration">Duration: $processed</div>\n};
-                }
-            }
-
-            $output .= qq{  </div>\n};
-        }
-
-        # Chord diagrams (if not lyrics-only)
-        unless ($self->is_lyrics_only()) {
-            my $diagrams = $self->render_chord_diagrams($song);
-            $output .= $diagrams if $diagrams;
-        }
-
-        # Process song body using base class dispatch
+        # Process song body to HTML
+        my $body_html = '';
         if ($song->{body}) {
-            foreach my $elt (@{$song->{body}}) {
-                $output .= $self->dispatch_element($elt);
-            }
+            $body_html = $self->_process_song_body($song->{body});
         }
 
-        # Close song container
-        $output .= qq{</div><!-- .cp-song -->\n\n};
+        # Generate chord diagrams if present (unless lyrics-only)
+        my $chord_diagrams_html = '';
+        unless ($self->is_lyrics_only()) {
+            $chord_diagrams_html = $self->render_chord_diagrams($song);
+        }
 
-        return $output;
+        # Process title/subtitles with markup
+        my $processed_title = $song->{title} ? $self->process_text_with_markup($song->{title}) : '';
+        my @processed_subtitles = ();
+        if ($song->{subtitle}) {
+            @processed_subtitles = map { $self->process_text_with_markup($_) } @{$song->{subtitle}};
+        }
+
+        # Prepare template variables
+        my $vars = {
+            title => $processed_title,
+            subtitle => \@processed_subtitles,
+            meta => $processed_meta,
+            chord_diagrams_html => $chord_diagrams_html,
+            body_html => $body_html,
+        };
+
+        # Process song template
+        return $self->_process_template('song', $vars);
     }
 
     # =================================================================
@@ -443,336 +619,63 @@ class ChordPro::Output::HTML5
             } @chords_to_display;
         }
         
-        # Generate HTML
-        my $output = qq{  <div class="cp-chord-diagrams">\n};
-        
+        # Generate SVG diagrams
+        my @diagrams;
         foreach my $chord (@chords_to_display) {
-            $output .= $self->generate_chord_diagram_svg($chord->{name}, $chord->{info});
+            my $svg = $svg_generator->generate_diagram($chord->{name}, $chord->{info});
+            push @diagrams, $svg if $svg;
         }
         
-        $output .= qq{  </div>\n\n};
+        return '' unless @diagrams;
         
-        return $output;
+        # Use template to render
+        return $self->_process_template('chord_diagrams', { diagrams => \@diagrams });
     }
-
-    method generate_chord_diagram_svg($chord_name, $info) {
-        # Use the ChordDiagram::SVG module
-        my $svg = $svg_generator->generate_diagram($chord_name, $info);
-        
-        # Wrap in a container div
-        return qq{    <div class="cp-chord-diagram">\n      $svg    </div>\n} if $svg;
-        return '';
-    }
-
-
 
     # =================================================================
     # CSS GENERATION
     # =================================================================
 
     method generate_default_css() {
-        my $css_vars = $self->_get_default_css_variables();
+        my $config = $self->config // {};
+        my $html5_cfg = eval { $config->{html5} } // {};
         
-        my $css = <<'END_CSS';
-/* ChordPro HTML5 Default Stylesheet */
-
-:root {
-END_CSS
-        $css .= $css_vars;
-        $css .= <<'END_CSS';
-}
-
-/* Body and Page */
-body.chordpro-songbook {
-    font-family: var(--cp-font-text);
-    font-size: var(--cp-size-text);
-    color: var(--cp-color-text);
-    line-height: 1.4;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-/* Song Container */
-.cp-song {
-    margin-bottom: 3em;
-    page-break-after: always;
-}
-
-/* Titles */
-.cp-title {
-    font-size: var(--cp-size-title);
-    font-weight: bold;
-    margin: 0.5em 0;
-    color: var(--cp-color-text);
-}
-
-.cp-subtitle {
-    font-size: var(--cp-size-subtitle);
-    font-style: italic;
-    margin: 0.3em 0;
-    color: var(--cp-color-text);
-}
-
-/* Metadata */
-.cp-metadata {
-    margin: 1em 0;
-    font-size: 0.9em;
-}
-
-.cp-artist,
-.cp-composer,
-.cp-album {
-    margin: 0.2em 0;
-    color: #555;
-}
-
-/* Chord Diagrams */
-.cp-chord-diagrams {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    margin: 1.5em 0;
-    padding: 1em;
-    background: #f8f8f8;
-    border: 1px solid #ddd;
-}
-
-.cp-chord-diagram {
-    display: inline-block;
-    margin: 0;
-}
-
-.cp-diagram-svg {
-    width: 4em;
-    height: auto;
-}
-
-.diagram-name {
-    font-family: var(--cp-font-chord);
-    font-size: 14px;
-    font-weight: bold;
-    fill: var(--cp-color-chord);
-}
-
-.diagram-line {
-    stroke: #333;
-    stroke-width: 1;
-    fill: none;
-}
-
-.diagram-nut {
-    stroke: #000;
-    stroke-width: 3;
-    fill: none;
-}
-
-.diagram-base {
-    font-size: 11px;
-    fill: #666;
-}
-
-.diagram-dot {
-    fill: #000;
-}
-
-.diagram-open {
-    fill: none;
-    stroke: #000;
-    stroke-width: 2;
-}
-
-.diagram-muted {
-    font-size: 16px;
-    font-weight: bold;
-    fill: #666;
-}
-
-.diagram-finger {
-    font-size: 10px;
-    fill: #666;
-}
-
-/* Songline - The Core Innovation */
-.cp-songline {
-    display: flex;
-    flex-wrap: wrap;
-    margin-bottom: var(--cp-spacing-line);
-    line-height: 1.2;
-}
-
-.cp-chord-lyric-pair {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: flex-start;
-    vertical-align: bottom;
-}
-
-/* Spacing for chord-only pairs (chords with no lyrics) */
-.cp-chord-only {
-    margin-right: 0.5em;
-}
-
-.cp-chord {
-    font-family: var(--cp-font-chord);
-    font-size: var(--cp-size-chord);
-    color: var(--cp-color-chord);
-    font-weight: bold;
-    line-height: 1.2;
-    min-height: 1.2em;
-    height: 1.2em;
-    padding-bottom: var(--cp-spacing-chord);
-}
-
-.cp-chord-empty {
-    visibility: hidden;
-}
-
-.cp-lyrics {
-    font-family: var(--cp-font-text);
-    font-size: var(--cp-size-text);
-    white-space: pre;
-    line-height: 1.2;
-}
-
-/* Comments */
-.cp-comment {
-    font-size: var(--cp-size-comment);
-    color: var(--cp-color-comment);
-    margin: 0.5em 0;
-    font-style: italic;
-}
-
-.cp-comment-italic {
-    font-style: italic;
-}
-
-/* Chorus */
-.cp-chorus {
-    margin: var(--cp-spacing-verse) 0;
-    padding: 0.5em 0 0.5em 1em;
-    border-left: 3px solid var(--cp-color-chorus-border);
-    background: var(--cp-color-chorus-bg);
-}
-
-/* Verse */
-.cp-verse {
-    margin: var(--cp-spacing-verse) 0;
-}
-
-/* Bridge */
-.cp-bridge {
-    margin: var(--cp-spacing-verse) 0;
-    padding-left: 1em;
-    border-left: 2px dashed #999;
-}
-
-/* Tab */
-.cp-tab {
-    font-family: var(--cp-font-mono);
-    font-size: 0.9em;
-    white-space: pre;
-    background: #f9f9f9;
-    padding: 0.5em;
-    border: 1px solid #ddd;
-    margin: 1em 0;
-    overflow-x: auto;
-}
-
-.cp-tabline {
-    margin: 0;
-}
-
-/* Grid */
-.cp-grid {
-    font-family: var(--cp-font-mono);
-    margin: 1em 0;
-    background: #f9f9f9;
-    padding: 0.5em;
-    border: 1px solid #ddd;
-}
-
-.cp-gridline {
-    display: flex;
-    gap: 0.5em;
-    margin: 0.2em 0;
-}
-
-.cp-grid-chord {
-    font-family: var(--cp-font-chord);
-    color: var(--cp-color-chord);
-    font-weight: bold;
-    min-width: 3em;
-}
-
-.cp-grid-symbol {
-    color: #999;
-}
-
-/* Empty lines */
-.cp-empty {
-    height: 0.8em;
-}
-
-/* Print Styles */
-@media print {
-    @page {
-        size: A4;
-        margin: 2cm;
-    }
-
-    body.chordpro-songbook {
-        max-width: 100%;
-        padding: 0;
-    }
-
-    .cp-song {
-        page-break-after: always;
-        page-break-inside: avoid;
-    }
-
-    .cp-chorus,
-    .cp-verse,
-    .cp-bridge {
-        page-break-inside: avoid;
-    }
-
-    .cp-chord {
-        color: #000;
-    }
-}
-END_CSS
+        # Extract and clone CSS sub-configs to plain hashes (avoid restricted hash issues)
+        my $css_config = eval { $html5_cfg->{css} } // {};
+        my $colors_cfg = eval { $css_config->{colors} } // {};
+        my $fonts_cfg = eval { $css_config->{fonts} } // {};
+        my $sizes_cfg = eval { $css_config->{sizes} } // {};
+        my $spacing_cfg = eval { $css_config->{spacing} } // {};
+        
+        my $vars = {
+            # CSS customization from config
+            # Deep clone to plain hashes to avoid restricted hash issues in templates
+            colors => { %$colors_cfg },
+            fonts => { %$fonts_cfg },
+            sizes => { %$sizes_cfg },
+            spacing => { %$spacing_cfg },
+        };
+        
+        # Process CSS template
+        my $css = '';
+        my $template = eval { $html5_cfg->{templates}->{css} } // 'html5/base.tt';
+        
+        $template_engine->process($template, $vars, \$css)
+            || die "CSS Template error: " . $template_engine->error();
+        
+        # Append custom CSS if configured
+        if (my $custom_file = eval { $html5_cfg->{css}->{'custom-css-file'} }) {
+            if (-f $custom_file) {
+                open my $fh, '<:utf8', $custom_file or warn "Can't load custom CSS: $!";
+                if ($fh) {
+                    local $/;
+                    $css .= "\n\n/* User Custom CSS */\n" . <$fh>;
+                    close $fh;
+                }
+            }
+        }
+        
         return $css;
-    }
-    
-    method _get_default_css_variables() {
-        # Return default CSS variables
-        # TODO: Make this configurable from config file
-        return q{    /* Typography */
-    --cp-font-text: Georgia, serif;
-    --cp-font-chord: Arial, sans-serif;
-    --cp-font-mono: 'Courier New', monospace;
-
-    /* Font Sizes */
-    --cp-size-text: 12pt;
-    --cp-size-chord: 10pt;
-    --cp-size-title: 18pt;
-    --cp-size-subtitle: 14pt;
-    --cp-size-comment: 11pt;
-
-    /* Colors */
-    --cp-color-text: #000;
-    --cp-color-chord: #0066cc;
-    --cp-color-comment: #666;
-    --cp-color-highlight: #ff0;
-    --cp-color-chorus-bg: #f5f5f5;
-    --cp-color-chorus-border: #0066cc;
-
-    /* Spacing */
-    --cp-spacing-line: 0.3em;
-    --cp-spacing-verse: 1em;
-    --cp-spacing-chord: 0.2em;
-};
     }
 }
 
@@ -781,7 +684,7 @@ END_CSS
 # =================================================================
 
 # This sub is called by ChordPro as a class method.
-# It creates an instance and manually generates output (can't call inherited method due to name conflict).
+# It creates an instance and generates output using templates (following LaTeX.pm pattern).
 sub generate_songbook {
     my ( $pkg, $sb ) = @_;
 
@@ -791,26 +694,26 @@ sub generate_songbook {
         options => $main::options,
     );
 
-    # Manually implement what Base.generate_songbook does
-    # (We can't call the inherited method because the sub name conflicts)
-    my $output = '';
-
-    # Begin document
-    $output .= $backend->render_document_begin({
-        title => $sb->{title} // $sb->{songs}->[0]->{title} // 'Songbook',
-        songs => scalar(@{$sb->{songs}}),
-    });
-
-    # Process each song
-    foreach my $s (@{$sb->{songs}}) {
-        $output .= $backend->generate_song($s);
+    # Process each song (returns HTML strings)
+    my @songs_html;
+    foreach my $song ( @{$sb->{songs}} ) {
+        push @songs_html, $backend->generate_song($song);
     }
 
-    # End document
-    $output .= $backend->render_document_end();
+    # Generate CSS
+    my $css = $backend->generate_default_css();
+
+    # Prepare template variables
+    my $vars = {
+        title => $sb->{title} // $sb->{songs}->[0]->{title} // 'Songbook',
+        songs => \@songs_html,
+        css => $css,
+    };
+
+    # Process songbook template
+    my $output = $backend->_process_template('songbook', $vars);
 
     # Return as array ref of lines (ChordPro expects this format)
-    # Split on newlines and keep them attached
     return [ $output =~ /^.*\n?/gm ];
 }
 

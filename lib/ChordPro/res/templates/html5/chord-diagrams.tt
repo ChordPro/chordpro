@@ -1,0 +1,13 @@
+[%# ChordPro HTML5 Chord Diagrams Template
+    Variables:
+      - diagrams: Array of SVG strings
+%]
+[% IF diagrams && diagrams.size > 0 %]
+<div class="cp-chord-diagrams">
+[% FOREACH diagram IN diagrams %]
+  <div class="cp-chord-diagram">
+[% diagram %]
+  </div>
+[% END %]
+</div>
+[% END %]

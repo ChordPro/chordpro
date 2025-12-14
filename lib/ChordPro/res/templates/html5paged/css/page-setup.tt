@@ -1,0 +1,7 @@
+/* Page Setup */
+@page {
+    size: [% papersize %];
+    margin: [% margins %];
+}
+
+/* Page-specific rules are generated from config above */

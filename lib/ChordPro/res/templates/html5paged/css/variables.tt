@@ -1,0 +1,26 @@
+/* Root variables */
+:root {
+    /* Typography */
+    --cp-font-text: [% fonts.text || 'Georgia, serif' %];
+    --cp-font-chord: [% fonts.chord || 'Arial, sans-serif' %];
+    --cp-font-mono: [% fonts.mono || "'Courier New', monospace" %];
+
+    /* Font Sizes */
+    --cp-size-text: [% sizes.text || '11pt' %];
+    --cp-size-chord: [% sizes.chord || '9pt' %];
+    --cp-size-title: [% sizes.title || '16pt' %];
+    --cp-size-subtitle: [% sizes.subtitle || '13pt' %];
+    --cp-size-comment: [% sizes.comment || '10pt' %];
+
+    /* Colors */
+    --cp-color-text: [% colors.text || '#000' %];
+    --cp-color-chord: [% colors.chord || '#0066cc' %];
+    --cp-color-comment: [% colors.comment || '#666' %];
+    --cp-color-chorus-bg: [% colors.chorus_bg || '#f5f5f5' %];
+    --cp-color-chorus-border: [% colors.chorus_border || '#0066cc' %];
+
+    /* Spacing */
+    --cp-spacing-line: [% spacing.line || '0.2em' %];
+    --cp-spacing-verse: [% spacing.verse || '0.8em' %];
+    --cp-spacing-chord: [% spacing.chord || '0.15em' %];
+}

@@ -14,10 +14,53 @@ use v5.26;
 use Object::Pad;
 use utf8;
 
+use Template;
+use ChordPro::Paths;
 use ChordPro::Output::HTML5;
+use ChordPro::Output::HTML5Paged::FormatGenerator;
+
+our $CHORDPRO_LIBRARY;  # May be set externally
 
 class ChordPro::Output::HTML5Paged
   :isa(ChordPro::Output::HTML5) {
+
+    field $format_generator;
+    field $template_engine;
+    
+    BUILD {
+        # Initialize FormatGenerator for PDF format → CSS translation
+        $format_generator = ChordPro::Output::HTML5Paged::FormatGenerator->new(
+            config => $self->config,
+            options => $self->options,
+        );
+        
+        # Initialize Template::Toolkit (following LaTeX.pm pattern)
+        my $config = $self->config // {};
+        my $cfg = {};
+        if (exists $config->{html5} && ref($config->{html5}) eq 'HASH') {
+            $cfg = $config->{html5}->{paged} // {};
+        }
+        
+        my $template_path = CP->findres("templates");
+        unless ($template_path) {
+            # Fallback for tests - try relative paths
+            for my $path ("../lib/ChordPro/res/templates", "lib/ChordPro/res/templates", "../blib/lib/ChordPro/res/templates") {
+                if (-d $path) {
+                    $template_path = $path;
+                    last;
+                }
+            }
+        }
+        
+        $template_engine = Template->new({
+            INCLUDE_PATH => [
+                @{$cfg->{template_include_path} // []},
+                $template_path,
+                $CHORDPRO_LIBRARY
+            ],
+            INTERPOLATE => 1,
+        }) || die "$Template::ERROR\n";
+    }
 
     # =================================================================
     # OVERRIDE DOCUMENT STRUCTURE FOR PAGED.JS
@@ -127,18 +170,18 @@ class ChordPro::Output::HTML5Paged
         
         # Check for html5.paged config (may not exist in all configs)
         my $html5_paged = {};
-        if (exists $config->{html5} && ref($config->{html5}) eq 'HASH') {
-            $html5_paged = $config->{html5}->{paged} // {};
+        if (exists $config->{html5} && ref($config->{html5}) eq 'HASH' 
+            && exists $config->{html5}->{paged} && ref($config->{html5}->{paged}) eq 'HASH') {
+            $html5_paged = $config->{html5}->{paged};
         }
 
         # Get page setup configuration (html5.paged overrides pdf settings)
-        my $papersize = $html5_paged->{papersize} // $pdf->{papersize} // 'a4';
-        my $margintop = $html5_paged->{margintop} // $pdf->{margintop} // 80;
-        my $marginbottom = $html5_paged->{marginbottom} // $pdf->{marginbottom} // 40;
-        my $marginleft = $html5_paged->{marginleft} // $pdf->{marginleft} // 40;
-        my $marginright = $html5_paged->{marginright} // $pdf->{marginright} // 40;
-        my $headspace = $html5_paged->{headspace} // $pdf->{headspace} // 60;
-        my $footspace = $html5_paged->{footspace} // $pdf->{footspace} // 20;
+        # Use eval to safely access potentially restricted hash keys
+        my $papersize = eval { $html5_paged->{papersize} } // $pdf->{papersize} // 'a4';
+        my $margintop = eval { $html5_paged->{margintop} } // $pdf->{margintop} // 80;
+        my $marginbottom = eval { $html5_paged->{marginbottom} } // $pdf->{marginbottom} // 40;
+        my $marginleft = eval { $html5_paged->{marginleft} } // $pdf->{marginleft} // 40;
+        my $marginright = eval { $html5_paged->{marginright} } // $pdf->{marginright} // 40;
 
         # Convert papersize to CSS
         my $css_pagesize = $self->_format_papersize($papersize);
@@ -146,358 +189,55 @@ class ChordPro::Output::HTML5Paged
         # Convert margins to CSS (PDF uses pt, we convert to mm for paged.js)
         my $css_margins = $self->_format_margins($margintop, $marginright, $marginbottom, $marginleft);
         
-        # Generate format rules (headers/footers)
-        my $format_rules = $self->_generate_format_rules($pdf);
-
-        return qq{
-/* ChordPro HTML5 with Paged.js Stylesheet */
-
-/* String-set for metadata attributes (for use in headers/footers) */
-.cp-title[data-title] { string-set: song-title attr(data-title); }
-.cp-subtitle[data-subtitle] { string-set: song-subtitle attr(data-subtitle); }
-.cp-artist[data-artist] { string-set: song-artist attr(data-artist); }
-.cp-album[data-album] { string-set: song-album attr(data-album); }
-.cp-arranger[data-arranger] { string-set: song-arranger attr(data-arranger); }
-.cp-lyricist[data-lyricist] { string-set: song-lyricist attr(data-lyricist); }
-.cp-copyright[data-copyright] { string-set: song-copyright attr(data-copyright); }
-.cp-duration[data-duration] { string-set: song-duration attr(data-duration); }
-
-/* Page Setup */
-\@page {
-    size: $css_pagesize;
-    margin: $css_margins;
-}
-
-$format_rules
-
-/* Page-specific rules are generated from config above */
-
-/* Root variables */
-:root {
-    /* Typography */
-    --cp-font-text: Georgia, serif;
-    --cp-font-chord: Arial, sans-serif;
-    --cp-font-mono: 'Courier New', monospace;
-
-    /* Font Sizes */
-    --cp-size-text: 11pt;
-    --cp-size-chord: 9pt;
-    --cp-size-title: 16pt;
-    --cp-size-subtitle: 13pt;
-    --cp-size-comment: 10pt;
-
-    /* Colors */
-    --cp-color-text: #000;
-    --cp-color-chord: #0066cc;
-    --cp-color-comment: #666;
-    --cp-color-chorus-bg: #f5f5f5;
-    --cp-color-chorus-border: #0066cc;
-
-    /* Spacing */
-    --cp-spacing-line: 0.2em;
-    --cp-spacing-verse: 0.8em;
-    --cp-spacing-chord: 0.15em;
-}
-
-/* Body and container */
-body.chordpro-paged {
-    font-family: var(--cp-font-text);
-    font-size: var(--cp-size-text);
-    color: var(--cp-color-text);
-    line-height: 1.3;
-    margin: 0;
-    padding: 0;
-}
-
-.book-content {
-    width: 100%;
-}
-
-/* Song Container */
-.cp-song {
-    page: song;
-    page-break-before: always;
-    page-break-after: always;
-    margin-bottom: 2em;
-}
-
-.cp-song:first-child {
-    page-break-before: avoid;
-}
-
-/* Set running headers/footers with song metadata using data attributes */
-.cp-title[data-title] {
-    string-set: song-title attr(data-title);
-}
-
-.cp-subtitle[data-subtitle] {
-    string-set: song-subtitle attr(data-subtitle);
-}
-
-.cp-artist[data-artist] {
-    string-set: song-artist attr(data-artist);
-}
-
-.cp-album[data-album] {
-    string-set: song-album attr(data-album);
-}
-
-/* Titles */
-.cp-title {
-    font-size: var(--cp-size-title);
-    font-weight: bold;
-    margin: 0 0 0.5em 0;
-    color: var(--cp-color-text);
-    page-break-after: avoid;
-}
-
-.cp-subtitle {
-    font-size: var(--cp-size-subtitle);
-    font-style: italic;
-    margin: 0 0 0.3em 0;
-    color: var(--cp-color-text);
-    page-break-after: avoid;
-}
-
-/* Metadata */
-.cp-metadata {
-    margin: 0.8em 0 1.2em 0;
-    font-size: 0.9em;
-    page-break-after: avoid;
-}
-
-.cp-artist,
-.cp-composer,
-.cp-album {
-    margin: 0.2em 0;
-    color: #555;
-}
-
-/* Songline - Flexbox chord positioning */
-.cp-songline {
-    display: flex;
-    flex-wrap: wrap;
-    margin-bottom: var(--cp-spacing-line);
-    line-height: 1.2;
-    page-break-inside: avoid;
-}
-
-.cp-chord-lyric-pair {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: flex-start;
-    vertical-align: bottom;
-}
-
-/* Spacing for chord-only pairs (chords with no lyrics) */
-.cp-chord-only {
-    margin-right: 0.5em;
-}
-
-.cp-chord {
-    font-family: var(--cp-font-chord);
-    font-size: var(--cp-size-chord);
-    color: var(--cp-color-chord);
-    font-weight: bold;
-    line-height: 1.2;
-    min-height: 1.2em;
-    height: 1.2em;
-    padding-bottom: var(--cp-spacing-chord);
-}
-
-.cp-chord-empty {
-    visibility: hidden;
-}
-
-.cp-lyrics {
-    font-family: var(--cp-font-text);
-    font-size: var(--cp-size-text);
-    white-space: pre;
-    line-height: 1.2;
-}
-
-/* Comments */
-.cp-comment {
-    font-size: var(--cp-size-comment);
-    color: var(--cp-color-comment);
-    margin: 0.4em 0;
-    font-style: italic;
-    page-break-inside: avoid;
-}
-
-.cp-comment-italic {
-    font-style: italic;
-}
-
-/* Chorus */
-.cp-chorus {
-    margin: var(--cp-spacing-verse) 0;
-    padding: 0.4em 0 0.4em 1em;
-    border-left: 3px solid var(--cp-color-chorus-border);
-    background: var(--cp-color-chorus-bg);
-    page-break-inside: avoid;
-}
-
-/* Verse */
-.cp-verse {
-    margin: var(--cp-spacing-verse) 0;
-    page-break-inside: avoid;
-}
-
-/* Bridge */
-.cp-bridge {
-    margin: var(--cp-spacing-verse) 0;
-    padding-left: 1em;
-    border-left: 2px dashed #999;
-    page-break-inside: avoid;
-}
-
-/* Tab */
-.cp-tab {
-    font-family: var(--cp-font-mono);
-    font-size: 0.85em;
-    white-space: pre;
-    background: #f9f9f9;
-    padding: 0.4em;
-    border: 1px solid #ddd;
-    margin: 0.8em 0;
-    page-break-inside: avoid;
-}
-
-.cp-tabline {
-    margin: 0;
-}
-
-/* Grid */
-.cp-grid {
-    font-family: var(--cp-font-mono);
-    margin: 0.8em 0;
-    background: #f9f9f9;
-    padding: 0.4em;
-    border: 1px solid #ddd;
-    page-break-inside: avoid;
-}
-
-.cp-gridline {
-    display: flex;
-    gap: 0.5em;
-    margin: 0.2em 0;
-}
-
-.cp-grid-chord {
-    font-family: var(--cp-font-chord);
-    color: var(--cp-color-chord);
-    font-weight: bold;
-    min-width: 3em;
-}
-
-.cp-grid-symbol {
-    color: #999;
-}
-
-/* Empty lines */
-.cp-empty {
-    height: 0.6em;
-}
-/* Chord Diagrams */
-.cp-chord-diagrams {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1em;
-    margin: 1em 0;
-    page-break-inside: avoid;
-}
-
-.cp-chord-diagram {
-    display: inline-block;
-    margin: 0;
-}
-
-.cp-diagram-svg {
-    width: 4em;
-    height: auto;
-}
-
-.diagram-name {
-    font-family: var(--cp-font-chord);
-    font-size: 14px;
-    font-weight: bold;
-    fill: var(--cp-color-chord);
-}
-
-.diagram-fret-marker {
-    font-size: 12px;
-    fill: #666;
-}
-
-.diagram-finger {
-    font-size: 10px;
-    fill: #fff;
-    font-weight: bold;
-}
-
-.diagram-dot {
-    fill: #000;
-}
-
-.diagram-open {
-    stroke: #000;
-    fill: none;
-    stroke-width: 2;
-}
-
-.diagram-muted {
-    stroke: #000;
-    fill: none;
-    stroke-width: 2;
-}
-/* Screen preview styles */
-\@media screen {
-    body.chordpro-paged {
-        background: #525252;
-        padding: 20px;
-    }
-
-    .book-content {
-        background: white;
-        box-shadow: 0 0 10px rgba(0,0,0,0.3);
-        max-width: 210mm;
-        margin: 0 auto;
-        padding: 15mm 20mm;
-    }
-
-    .cp-song {
-        page-break-before: auto;
-        border-bottom: 1px dashed #ccc;
-        padding-bottom: 2em;
-    }
-
-    .cp-song:last-child {
-        border-bottom: none;
-    }
-}
-
-/* Print styles */
-\@media print {
-    body.chordpro-paged {
-        background: white;
-        padding: 0;
-    }
-
-    .book-content {
-        background: white;
-        box-shadow: none;
-        max-width: none;
-        margin: 0;
-        padding: 0;
-    }
-
-    /* Let paged.js handle page breaks */
-    .cp-song {
-        border-bottom: none;
-    }
-}
-};
+        # Generate format rules (headers/footers) via FormatGenerator
+        my $format_rules = $format_generator->generate_rules();
+        
+        # Collect template variables
+        # Clone config hashes to plain hashrefs to avoid restricted hash issues
+        my $css_config = eval { $html5_paged->{css} } // {};
+        
+        # Extract and clone CSS sub-configs to plain hashes
+        my $colors_cfg = eval { $css_config->{colors} } // {};
+        my $fonts_cfg = eval { $css_config->{fonts} } // {};
+        my $sizes_cfg = eval { $css_config->{sizes} } // {};
+        my $spacing_cfg = eval { $css_config->{spacing} } // {};
+        
+        my $vars = {
+            # Page setup
+            papersize => $css_pagesize,
+            margins => $css_margins,
+            
+            # Format rules from FormatGenerator
+            format_rules => $format_rules,
+            
+            # CSS customization from config (Phase 3)
+            # Deep clone to plain hashes to avoid restricted hash issues in templates
+            colors => { %$colors_cfg },
+            fonts => { %$fonts_cfg },
+            sizes => { %$sizes_cfg },
+            spacing => { %$spacing_cfg },
+        };
+        
+        # Process template
+        my $css = '';
+        my $template = $html5_paged->{templates}->{css} // 'html5paged/base.tt';
+        
+        $template_engine->process($template, $vars, \$css)
+            || die "Template error: " . $template_engine->error();
+        
+        # Append custom CSS if configured (Phase 3)
+        if (my $custom_file = eval { $html5_paged->{css}->{'custom-css-file'} }) {
+            if (-f $custom_file) {
+                open my $fh, '<:utf8', $custom_file or warn "Can't load custom CSS: $!";
+                if ($fh) {
+                    local $/;
+                    $css .= "\n\n/* User Custom CSS */\n" . <$fh>;
+                    close $fh;
+                }
+            }
+        }
+        
+        return $css;
     }
 
     # =================================================================
@@ -554,203 +294,6 @@ body.chordpro-paged {
     method _mm_to_pt($mm) {
         # 1 mm = 2.83465 pt
         return $mm * 2.83465;
-    }
-    
-    # =================================================================
-    # PHASE 3: HEADERS & FOOTERS CONFIGURATION
-    # =================================================================
-    
-    method _generate_format_rules($pdf) {
-        my $formats = $pdf->{formats} // {};
-        my @rules;
-        
-        # Generate rules for each format type
-        # Default format (applies to all pages unless overridden)
-        push @rules, $self->_generate_format_rule('default', $formats->{default});
-        
-        # Title page (first page of each song)
-        push @rules, $self->_generate_format_rule('title', $formats->{title}, 'title');
-        
-        # Very first page
-        push @rules, $self->_generate_format_rule('first', $formats->{first}, ':first');
-        
-        # Even pages (left in duplex printing)
-        # CSS :left selector applies to left-facing pages in duplex printing
-        if (exists $formats->{'default-even'}) {
-            push @rules, $self->_generate_format_rule('default-even', $formats->{'default-even'}, ':left');
-        }
-        
-        # Odd pages (right in duplex printing) 
-        # CSS :right selector applies to right-facing pages in duplex printing
-        if (exists $formats->{'default-odd'}) {
-            push @rules, $self->_generate_format_rule('default-odd', $formats->{'default-odd'}, ':right');
-        }
-        
-        # Title page even/odd variants
-        if (exists $formats->{'title-even'}) {
-            push @rules, $self->_generate_format_rule('title-even', $formats->{'title-even'}, 'title:left');
-        }
-        
-        if (exists $formats->{'title-odd'}) {
-            push @rules, $self->_generate_format_rule('title-odd', $formats->{'title-odd'}, 'title:right');
-        }
-        
-        # First page even/odd (though :first usually takes precedence)
-        if (exists $formats->{'first-even'}) {
-            push @rules, $self->_generate_format_rule('first-even', $formats->{'first-even'}, ':first:left');
-        }
-        
-        if (exists $formats->{'first-odd'}) {
-            push @rules, $self->_generate_format_rule('first-odd', $formats->{'first-odd'}, ':first:right');
-        }
-        
-        return join("\n\n", grep { $_ } @rules);
-    }
-    
-    method _generate_format_rule($format_name, $format_config, $page_selector=undef) {
-        return '' unless $format_config;
-        
-        # Determine page selector
-        my $selector = $page_selector // $format_name;
-        $selector = "\@page $selector" unless $selector =~ /^\@page/;
-        $selector = "\@page" if $format_name eq 'default' && !$page_selector;
-        
-        my @margin_boxes;
-        
-        # Process title (top)
-        if (exists $format_config->{title}) {
-            push @margin_boxes, $self->_generate_margin_boxes(
-                'top', $format_config->{title}, $format_name
-            );
-        }
-        
-        # Process subtitle (top, below title)
-        if (exists $format_config->{subtitle}) {
-            # Subtitle uses top boxes but with smaller font
-            push @margin_boxes, $self->_generate_margin_boxes(
-                'subtitle', $format_config->{subtitle}, $format_name
-            );
-        }
-        
-        # Process footer (bottom)
-        if (exists $format_config->{footer}) {
-            push @margin_boxes, $self->_generate_margin_boxes(
-                'bottom', $format_config->{footer}, $format_name
-            );
-        }
-        
-        return '' unless @margin_boxes;
-        
-        my $boxes = join("\n\n", grep { $_ } @margin_boxes);
-        
-        return qq{/* Format: $format_name */
-$selector {
-$boxes
-}};
-    }
-    
-    method _generate_margin_boxes($position, $format_spec, $format_name) {
-        # format_spec is either an array [left, center, right] or [[left, center, right]] or false
-        return '' if !$format_spec || (ref($format_spec) eq 'SCALAR' && !$$format_spec);
-        return '' if $format_spec eq 'false' || $format_spec eq '0';
-        
-        # Unwrap nested array if present (ChordPro sometimes wraps format arrays)
-        if (ref($format_spec) eq 'ARRAY' && @$format_spec == 1 && ref($format_spec->[0]) eq 'ARRAY') {
-            $format_spec = $format_spec->[0];
-        }
-        
-        my @boxes;
-        my @positions = ('left', 'center', 'right');
-        
-        # Check if this is an even-page format
-        # For even pages (:left in CSS), swap left and right content
-        my $is_even_page = ($format_name =~ /-even$/ || $format_name =~ /:left/);
-        
-        # Handle subtitle positioning (needs different margin-box names)
-        my @margin_box_positions = @positions;
-        if ($position eq 'subtitle') {
-            # For subtitle, we might want to use @top-left-corner, etc.
-            # For simplicity, use same as top but with different styling
-            $position = 'top';
-        }
-        
-        for my $i (0..2) {
-            # For even pages, swap left (0) and right (2) indices
-            my $content_idx = $is_even_page && ($i == 0 || $i == 2) ? 2 - $i : $i;
-            my $content = ref($format_spec) eq 'ARRAY' ? $format_spec->[$content_idx] : '';
-            next unless defined $content && $content ne '';
-            
-            my $box_name = "\@${position}-$positions[$i]";
-            my $css_content = $self->_format_content_string($content);
-            
-            # Generate margin box rule
-            push @boxes, qq{    $box_name {
-        content: $css_content;
-        font-size: 10pt;
-        color: #666;
-    }};
-        }
-        
-        return join("\n\n", @boxes);
-    }
-    
-    method _format_content_string($content) {
-        # Handle references (shouldn't happen, but be safe)
-        $content = '' if ref($content);
-        
-        # Handle empty content
-        return 'none' if !defined $content || $content eq '';
-        
-        # Parse metadata substitutions: %{title}, %{page}, %{artist}, etc.
-        my @parts;
-        
-        while ($content =~ /%\{([^}]+)\}/) {
-            my $pre = $`;
-            my $meta_key = $1;
-            $content = $';
-            
-            # Add literal text before metadata
-            push @parts, qq{"$pre"} if $pre ne '';
-            
-            # Add metadata reference
-            if ($meta_key eq 'page') {
-                push @parts, 'counter(page)';
-            }
-            elsif ($meta_key eq 'title') {
-                push @parts, 'string(song-title)';
-            }
-            elsif ($meta_key eq 'subtitle') {
-                push @parts, 'string(song-subtitle)';
-            }
-            elsif ($meta_key eq 'artist') {
-                push @parts, 'string(song-artist)';
-            }
-            elsif ($meta_key eq 'album') {
-                push @parts, 'string(song-album)';
-            }
-            elsif ($meta_key eq 'arranger') {
-                push @parts, 'string(song-arranger)';
-            }
-            elsif ($meta_key eq 'lyricist') {
-                push @parts, 'string(song-lyricist)';
-            }
-            elsif ($meta_key eq 'copyright') {
-                push @parts, 'string(song-copyright)';
-            }
-            elsif ($meta_key eq 'duration') {
-                push @parts, 'string(song-duration)';
-            }
-            else {
-                # Other metadata - use generic string
-                push @parts, qq{string(song-$meta_key)};
-            }
-        }
-        
-        # Add remaining literal text
-        push @parts, qq{"$content"} if $content ne '';
-        
-        # Return combined content
-        return @parts ? join(' ', @parts) : 'none';
     }
 }
 

@@ -192,6 +192,50 @@ Songs are arrays of element hashes:
 14. **CRITICAL - Song Metadata Access**: Metadata is stored in `$song->{meta}` hash, NOT at top level. Always use `$song->{meta}->{artist}` not `$song->{artist}`. Reference `lib/ChordPro/Output/ChordPro.pm` (lines 77-95) for canonical metadata access pattern. All metadata fields are arrayrefs, even single-value fields like album/duration - iterate or use `[0]` index
 15. **Object::Pad BUILD Blocks**: Field initialization requires BUILD blocks. Can't just declare `field $svg_generator;` and use it - must add `BUILD { $svg_generator = Module->new(...); }` for proper initialization. Object::Pad fields are NOT automatically initialized
 16. **Test Mock Objects**: Never create mock song objects with hardcoded structures in unit tests. Use real .cho files with proper parsing via `ChordPro::Song->new()->parse_file()`. Mock objects bypass critical initialization and don't match actual runtime structures
+17. **CRITICAL - Restricted Hash Handling**: JSON::Relaxed creates locked/restricted hashes in `$config`. Must handle carefully:
+   - Use `eval { $hash->{key} } // default` to safely access potentially non-existent keys
+   - Clone to plain hashes before passing to Template::Toolkit: `{ %$hashref }` or extract to temp vars first
+   - NEVER do `$template_vars->{colors} = $config->{css}->{colors} // {}` - the `// {}` returns empty restricted hash
+   - Correct pattern: `my $cfg = eval { $config->{css}->{colors} } // {}; $vars->{colors} = { %$cfg };`
+   - Errors like "Attempt to access disallowed key 'X' in a restricted hash" mean you passed restricted hash to template
+18. **Template::Toolkit Integration**: When adding template support (following LaTeX.pm pattern):
+   - MUST add config section with `template_include_path` array (e.g., `html5.paged.template_include_path`)
+   - Initialize in BUILD block: `$template_engine = Template->new({ INCLUDE_PATH => [...], INTERPOLATE => 1 })`
+   - Test environment needs fallback paths - `CP->findres("templates")` returns undef in tests from `t/` directory
+   - Template INCLUDE directives need full path relative to INCLUDE_PATH: `[% INCLUDE 'html5paged/base.tt' %]` NOT `[% INCLUDE 'base.tt' %]`
+   - Always run `make` after template changes - templates may be cached in `blib/`
+19. **Template Array Checks**: Template::Toolkit array checks must avoid numeric comparisons on empty values:
+   - **GOOD**: `[% IF subtitle.0 %]` (checks first element exists) or `[% IF meta.artist %]` (truthiness)
+   - **BAD**: `[% IF subtitle.size > 0 %]` or `[% IF meta.artist.size > 0 %]` (causes "Argument '' isn't numeric" warnings)
+   - Reason: Empty metadata arrays can contain empty strings, causing numeric comparison warnings
+   - Pattern applies to all metadata fields: artist, composer, subtitle, album, etc.
+20. **Chord Object Type Handling**: Chords appear as multiple types throughout rendering pipeline:
+   - **Hash refs** (parse-time): `{name => "C", ...}`
+   - **ChordPro::Chords::Appearance objects** (runtime): Use `->chord_display()` method
+   - **Generic chord objects**: Use `->name()` method
+   - **Standard pattern** (cascading checks with fallback):
+     ```perl
+     if (ref($chord) eq 'HASH') { $name = $chord->{name} }
+     elsif ($chord->can('chord_display')) { $name = $chord->chord_display }
+     elsif ($chord->can('name')) { $name = $chord->name }
+     else { $name = "$chord" }  # Stringify fallback
+     ```
+   - Apply this pattern in `render_songline`, `render_gridline`, and chord display code
+21. **Grid Element Structure**: Chord grids have specific element structure requiring specialized rendering:
+   - **Structure**: `{type => 'gridline', tokens => [], margin => {...}, comment => {...}}`
+   - **Tokens**: Array of `{class => 'chord'|'bar'|'repeat1'|'repeat2'|'slash'|'space', chord => ..., symbol => ...}`
+   - **Classes**: `bar` (|, ||, |., |:, :|, etc.), `chord`, `repeat1` (%), `repeat2` (%%), `slash` (/), `space` (.)
+   - **Margin**: Optional `{chord => ..., text => ...}` for left-side text/chords
+   - **Comment**: Optional `{chord => ..., text => ...}` for right-side comments
+   - Reference: `lib/ChordPro/Song.pm` lines 1037-1180 (`decompose_grid` method)
+   - Markdown backend example: `lib/ChordPro/Output/Markdown.pm` lines 221-227, 345-347
+22. **Template Organization**: Separate CSS templates from structural HTML templates for clarity:
+   - **Structure**: CSS templates in `templates/{backend}/css/` subdirectory
+   - **HTML5**: `lib/ChordPro/res/templates/html5/` (structural), `html5/css/` (styling)
+   - **HTML5Paged**: `lib/ChordPro/res/templates/html5paged/` (structural), `html5paged/css/` (styling)
+   - **Base template includes**: Reference css/ subdirectory: `[% INCLUDE 'html5/css/typography.tt' %]`
+   - **Config references**: Update template paths to include css/: `"html5/css/base.tt"` not `"html5/base.tt"`
+   - Users can distinguish template types by directory without inspecting file contents
 
 ## Recent Architectural Efforts
 The project is migrating from monolithic backends (PDF.pm - 2800 lines) to modular Object::Pad-based architecture. See `Design/ARCHITECTURE_COMPARISON.md` and `Design/HTML5_*.md` for detailed rationale. **Follow the Markdown.pm pattern for new work**, not PDF.pm.
@@ -241,3 +285,22 @@ Complete metadata and layout directive support in HTML5/HTML5Paged backends:
 - **Array Iteration**: All metadata is stored as arrayrefs, even single values: `foreach my $val (@{$meta->{field}}) { ... }`
 - Reference implementation: `lib/ChordPro/Output/ChordPro.pm` lines 77-95 shows canonical metadata access
 - Tests: `t/75_html5.t`, `t/76_html5paged.t` validate backend functionality
+#### Template::Toolkit Refactoring (HTML5/HTML5Paged - Dec 2025)
+Both HTML5 and HTML5Paged backends fully refactored to use Template::Toolkit (following LaTeX.pm pattern):
+- **Architecture**: Zero hardcoded HTML/CSS in backend code, all markup in separate template files
+- **Template Location**: 
+  - HTML5: `lib/ChordPro/res/templates/html5/` (structural: songbook.tt, song.tt, songline.tt, comment.tt, image.tt, chord-diagrams.tt)
+  - HTML5: `lib/ChordPro/res/templates/html5/css/` (styling: base.tt, typography.tt, songlines.tt, sections.tt, tab-grid.tt, chord-diagrams.tt, print-media.tt, body-page.tt, variables.tt)
+  - HTML5Paged: `lib/ChordPro/res/templates/html5paged/` (structural: songbook.tt, song.tt - inherits other HTML5 templates)
+  - HTML5Paged: `lib/ChordPro/res/templates/html5paged/css/` (styling: base.tt, string-set.tt, page-setup.tt, variables.tt, typography.tt, layout.tt, print-media.tt)
+- **Config Section**: `html5.templates.{css|songbook|song|songline|comment|image|chord_diagrams}`, `html5.paged.templates.{css|songbook|song}`
+- **Integration Pattern**: 
+  - Template helper: `_process_template($name, $vars)` method handles all template processing
+  - Element renderers: Individual methods for each type (`_render_songline_template`, `_render_comment_template`, `_render_image_template`)
+  - Dispatch pattern: `_process_song_body()` iterates elements, calls appropriate renderer (LaTeX.pm elt_handler pattern)
+  - Main methods: `generate_song()`, `generate_songbook()`, `render_chord_diagrams()` all template-driven
+- **Grid Rendering Exception**: `render_gridline()` uses direct HTML generation (grid token structure too complex/performance-sensitive for templates)
+- **Benefits**: Modular organization, user-customizable templates via config, easier maintenance, consistent pattern across backends
+- **Lessons**: Template array checks must use `.0` or truthiness (not `.size > 0`), chord objects require cascading type checks
+- Reference: `ai-docs/HTML5_TEMPLATE_MIGRATION_COMPLETE.md`, `ai-docs/complete_templates.md`
+- Tests: `t/75_html5.t` (11 tests), `t/76_html5paged.t` (11 tests), all 108 tests passing

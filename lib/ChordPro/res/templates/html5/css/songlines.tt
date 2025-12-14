@@ -1,0 +1,47 @@
+
+/* Songline - The Core Innovation */
+.cp-songline {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: var(--cp-spacing-line);
+    line-height: 1.2;
+}
+
+.cp-chord-lyric-pair {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    vertical-align: bottom;
+}
+
+/* Spacing for chord-only pairs (chords with no lyrics) */
+.cp-chord-only {
+    margin-right: 0.5em;
+}
+
+.cp-chord {
+    font-family: var(--cp-font-chord);
+    font-size: var(--cp-size-chord);
+    color: var(--cp-color-chord);
+    font-weight: bold;
+    line-height: 1.2;
+    min-height: 1.2em;
+    height: 1.2em;
+    padding-bottom: var(--cp-spacing-chord);
+}
+
+.cp-chord-empty {
+    visibility: hidden;
+}
+
+.cp-lyrics {
+    font-family: var(--cp-font-text);
+    font-size: var(--cp-size-text);
+    white-space: pre;
+    line-height: 1.2;
+}
+
+/* Empty lines */
+.cp-empty {
+    height: 0.8em;
+}

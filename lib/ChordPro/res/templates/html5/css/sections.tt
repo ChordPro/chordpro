@@ -1,0 +1,20 @@
+
+/* Chorus */
+.cp-chorus {
+    margin: var(--cp-spacing-verse) 0;
+    padding: 0.5em 0 0.5em 1em;
+    border-left: 3px solid var(--cp-color-chorus-border);
+    background: var(--cp-color-chorus-bg);
+}
+
+/* Verse */
+.cp-verse {
+    margin: var(--cp-spacing-verse) 0;
+}
+
+/* Bridge */
+.cp-bridge {
+    margin: var(--cp-spacing-verse) 0;
+    padding-left: 1em;
+    border-left: 2px dashed #999;
+}

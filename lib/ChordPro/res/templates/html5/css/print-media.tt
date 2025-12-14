@@ -1,0 +1,28 @@
+
+/* Print Styles */
+@media print {
+    @page {
+        size: A4;
+        margin: 2cm;
+    }
+
+    body.chordpro-songbook {
+        max-width: 100%;
+        padding: 0;
+    }
+
+    .cp-song {
+        page-break-after: always;
+        page-break-inside: avoid;
+    }
+
+    .cp-chorus,
+    .cp-verse,
+    .cp-bridge {
+        page-break-inside: avoid;
+    }
+
+    .cp-chord {
+        color: #000;
+    }
+}

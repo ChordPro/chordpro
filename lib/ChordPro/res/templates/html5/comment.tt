@@ -1,0 +1,6 @@
+[%# ChordPro HTML5 Comment Template
+    Variables:
+      - text: Comment text (pre-escaped HTML)
+      - italic: Boolean for italic style
+%]
+<div class="cp-comment[% IF italic %] cp-comment-italic[% END %]">[% text %]</div>

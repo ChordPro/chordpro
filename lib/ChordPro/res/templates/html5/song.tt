@@ -1,0 +1,72 @@
+[%# ChordPro HTML5 Song Template
+    Variables:
+      - title: Song title
+      - subtitle: Array of subtitles
+      - meta: Hash with artist, album, arranger, lyricist, copyright, duration, composer
+      - chord_diagrams_html: Pre-rendered chord diagrams section
+      - body_html: Pre-rendered song body content
+      - data_title, data_subtitle, data_artist, data_album, etc.: Metadata for CSS string-set
+%]
+<div class="cp-song">
+[% IF title %]
+    <h1 class="cp-title"[% IF data_title %] data-title="[% data_title | html %]"[% END %]>[% title | html %]</h1>
+[% END %]
+
+[% IF subtitle.0 %]
+[% FOREACH sub IN subtitle %]
+    <h2 class="cp-subtitle"[% IF loop.first && data_subtitle %] data-subtitle="[% data_subtitle | html %]"[% END %]>[% sub | html %]</h2>
+[% END %]
+[% END %]
+
+[% IF meta && (meta.artist || meta.composer || meta.album || meta.arranger || meta.lyricist || meta.copyright || meta.duration) %]
+<div class="cp-metadata">
+[% IF meta.artist.0 %]
+[% FOREACH artist IN meta.artist %]
+    <div class="cp-artist"[% IF loop.first && data_artist %] data-artist="[% data_artist | html %]"[% END %]>[% artist | html %]</div>
+[% END %]
+[% END %]
+
+[% IF meta.composer.0 %]
+[% FOREACH composer IN meta.composer %]
+    <div class="cp-composer">[% composer | html %]</div>
+[% END %]
+[% END %]
+
+[% IF meta.album.0 %]
+[% FOREACH album IN meta.album %]
+    <div class="cp-album"[% IF loop.first && data_album %] data-album="[% data_album | html %]"[% END %]>[% album | html %]</div>
+[% END %]
+[% END %]
+
+[% IF meta.arranger.0 %]
+[% FOREACH arranger IN meta.arranger %]
+    <div class="cp-arranger"[% IF loop.first && data_arranger %] data-arranger="[% data_arranger | html %]"[% END %]>[% arranger | html %]</div>
+[% END %]
+[% END %]
+
+[% IF meta.lyricist.0 %]
+[% FOREACH lyricist IN meta.lyricist %]
+    <div class="cp-lyricist"[% IF loop.first && data_lyricist %] data-lyricist="[% data_lyricist | html %]"[% END %]>[% lyricist | html %]</div>
+[% END %]
+[% END %]
+
+[% IF meta.copyright.0 %]
+[% FOREACH copyright IN meta.copyright %]
+    <div class="cp-copyright"[% IF loop.first && data_copyright %] data-copyright="[% data_copyright | html %]"[% END %]>[% copyright | html %]</div>
+[% END %]
+[% END %]
+
+[% IF meta.duration.0 %]
+[% FOREACH duration IN meta.duration %]
+    <div class="cp-duration"[% IF loop.first && data_duration %] data-duration="[% data_duration | html %]"[% END %]>[% duration | html %]</div>
+[% END %]
+[% END %]
+</div>
+[% END %]
+
+[% IF chord_diagrams_html %]
+[% chord_diagrams_html %]
+[% END %]
+
+[% body_html %]
+</div><!-- .cp-song -->

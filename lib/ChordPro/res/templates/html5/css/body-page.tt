@@ -1,0 +1,17 @@
+
+/* Body and Page */
+body.chordpro-songbook {
+    font-family: var(--cp-font-text);
+    font-size: var(--cp-size-text);
+    color: var(--cp-color-text);
+    line-height: 1.4;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Song Container */
+.cp-song {
+    margin-bottom: 3em;
+    page-break-after: always;
+}
