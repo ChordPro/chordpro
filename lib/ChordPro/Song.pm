@@ -1109,7 +1109,7 @@ sub decompose_grid {
 	    $_ = { symbol => $_, class => "bar" };
 	    $si = @$memchords if $memchords;
 	}
-	elsif ( /^\|(\d+)(>?)$/ ) {
+	elsif ( /^:?\|(\d+)(>?)$/ ) {
 	    $_ = { symbol => '|', volta => $1, class => "bar" };
 	    $_->{align} = 1 if $2;
 	}
