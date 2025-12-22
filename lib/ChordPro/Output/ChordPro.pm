@@ -475,6 +475,7 @@ sub gridline ( $song, $elt ) {
 	}
 	else {
 	    $line .= $_->{symbol};
+	    $line .= $_->{volta} if $_->{volta};
 	}
     }
 
