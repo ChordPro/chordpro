@@ -10,6 +10,9 @@
     - ChordPro output: Suppress key directive when transocding to a
       movable system.
 
+    - Edwin (@edwinjc) contributed instrument settings and chords for
+      the Andean [Charango](https://en.wikipedia.org/wiki/Charango). Thanks!
+
     !Bug Fixes
 
     - Fixed issue #315, #357, #512, #526 (thanks Merijn) #541, #580 and more.
