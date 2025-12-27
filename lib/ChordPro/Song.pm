@@ -2157,7 +2157,7 @@ sub dir_transpose {
 	    my $key = $m->{key}->[-1];
 	    my $xp = $xpose;
 	    $xp += $capo if $capo;
-	    my $xpk = $self->{chordsinfo}->{$key}->transpose($xp, $xp <=> 0);
+	    my $xpk = $self->{chordsinfo}->{$key}->transpose($xp);
 	    $self->{chordsinfo}->{$xpk->name} = $xpk;
 	    $m->{key_from} = [ $m->{key_actual}->[0] ];
 	    $m->{key_actual} = [ $xpk->name ];
@@ -2649,8 +2649,7 @@ sub parse_chord {
     if ( $xp && $info 
 	 && !( $xc && ( $xc eq "nashville" || $xc eq "roman" ) ) ) {
 	# For transpose/transcode, chord must be wellformed.
-	my $i = $info->transpose( $xp,
-				  $xpose_dir // $global_dir);
+	my $i = $info->transpose( $xp, $xpose_dir // $global_dir );
 	# Prevent self-references.
 	$i->{xp} = $info unless $i eq $info;
 	$info = $i;
