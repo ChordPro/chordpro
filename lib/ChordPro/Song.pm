@@ -20,6 +20,7 @@ use ChordPro::Chords::Appearance;
 use ChordPro::Chords::Parser;
 use ChordPro::Output::Common;
 use ChordPro::Utils;
+use ChordPro::Utils qw( parse_transpose );
 use ChordPro::Symbols qw( is_strum );
 
 use Carp;
@@ -27,7 +28,7 @@ use List::Util qw(any);
 use Storable qw(dclone);
 use feature 'state';
 use Text::ParseWords qw(quotewords);
-use Ref::Util qw( is_arrayref );
+use Ref::Util qw( is_arrayref is_hashref );
 
 # Parser context.
 my $def_context = "";
@@ -252,6 +253,14 @@ sub parse_song {
     while ( my ($k,$v) = each %{ $config->{delegates} } ) {
 	delete( $config->{delegates}->{$k} )
 	  if !$v || $v->{type} eq 'none';
+    }
+
+    # Parse transpose, if any.
+    unless ( is_hashref($config->{settings}->{transpose}) ) {
+	my $tr = parse_transpose($config->{settings}->{transpose}) //
+	  do_warn( "Invalid transpose \"", $config->{settings}->{transpose},
+		   "\" (ignored)");
+	$config->{settings}->{transpose} = $tr;
     }
 
     # And lock the config.
@@ -1453,9 +1462,9 @@ sub directive {
 	elsif ( exists $config->{delegates}->{$in_context} ) {
 	    my $d = $config->{delegates}->{$in_context};
 	    my %opts;
-	    if ( $xpose || $config->{settings}->{transpose} ) {
+	    if ( $xpose || $config->{settings}->{transpose}->{xp} ) {
 		$opts{transpose} =
-		  $xpose + ($config->{settings}->{transpose}//0 );
+		  $xpose + ($config->{settings}->{transpose}->{xp}//0 );
 	    }
 	    my $kv = parse_kv( $arg, "label" );
 	    delete $kv->{label} if ($kv->{label}//"") eq "";
@@ -2143,15 +2152,17 @@ sub dir_transpose {
 
     $propstack{transpose} //= [];
 
-    if ( $arg =~ /^([-+]?\d+)\s*$/ ) {
-	my $new = $1;
+    if ( $arg =~ /\S/ ) {
+	my $t = parse_transpose($arg) //
+	  do_warn("Invalid transpose: \"$arg\" (ignored)");
+	return unless $t;
 	push( @{ $propstack{transpose} }, [ $xpose, $xpose_dir ] );
 	my %a = ( type => "control",
 		  name => "transpose",
 		  previous => [ $xpose, $xpose_dir ]
 		);
-	$xpose += $new;
-	$xpose_dir = $new <=> 0;
+	$xpose += $t->{xp};
+	$xpose_dir = $t->{dir};
 	my $m = $self->{meta};
 	if ( $m->{key} ) {
 	    my $key = $m->{key}->[-1];
@@ -2584,6 +2595,7 @@ sub msg {
 
 sub do_warn {
     warn(msg(@_)."\n");
+    undef;
 }
 
 # Parse a chord.
@@ -2602,10 +2614,16 @@ sub parse_chord {
 
     warn("Parsing chord: \"$chord\"\n") if $debug;
     my $info;
-    my $xp = $xpose + $config->{settings}->{transpose};
-    $xp += $capo if $capo && $decapo;
+
+    my $xp = 0;
+    my $global_dir = 0;
+    if ( my $transpose = $config->{settings}->{transpose} ) {
+	$xp = $xpose + $transpose->{xp};
+	$xp += $capo if $capo && $decapo;
+	$global_dir = $transpose->{dir};
+    }
+
     my $xc = $config->{settings}->{transcode};
-    my $global_dir = $config->{settings}->{transpose} <=> 0;
     my $unk;
 
     # When called from {define} ignore xc/xp.

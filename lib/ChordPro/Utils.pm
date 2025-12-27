@@ -702,6 +702,15 @@ sub XP_FLAT()    { 2 }
 $EXPORT_TAGS{"xp"} = [ qw( XP_DEFAULT XP_FOLLOW XP_SHARP XP_FLAT ) ];
 push( @EXPORT_OK, @{ $EXPORT_TAGS{"xp"} } );
 
+sub parse_transpose( $xp ) {
+    return unless $xp =~ m;^([-+]?\d+)([s#♯fb♭]?)$;;
+
+    return { xp => $1,
+	     dir => $2 ? (($2 eq 's'|$2 eq '#'|$2 eq '♯') ? 1 : -1 ) : $1 <=> 0 };
+}
+
+push( @EXPORT_OK, "parse_transpose" );
+
 =cut
 
 1;

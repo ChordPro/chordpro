@@ -48,7 +48,8 @@ sub refresh {
 sub OnAccept {
     my ( $self, $event ) = @_;
     $state{xpose_enabled}     = $self->{cb_xpose}->IsChecked;
-    $state{xpose_semitones}   = $self->{sp_xpose}->GetValue;
+    $state{xpose_semitones}   = $self->{sp_xpose}->GetValue
+      * ( $self->{ch_xpose_dir}->GetSelection ? -1 : 1 );
     $state{xpose_accidentals} = $self->{ch_acc}->GetSelection;
     $event->Skip;
 }
@@ -62,7 +63,7 @@ sub OnCbTranspose {
     my ( $self, $event ) = @_;
     my $n = $self->{cb_xpose}->IsChecked;
     $self->{$_}->Enable($n)
-      for qw ( sp_xpose ch_acc );
+      for qw ( sp_xpose ch_xpose_dir ch_acc );
 }
 
 1;

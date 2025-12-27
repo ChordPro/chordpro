@@ -33,8 +33,6 @@ You can choose the desired behaviour from the dropdown list:
  * Sharps when transposing up, flats when transposing down
  * Always use sharps
  * Always use flats
- * Use the signature of the transposed key  
-   This is the most correct approach, but it requires the song to have a `{key}` directive.
 
 ## Custom Tasks
 
