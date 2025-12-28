@@ -108,11 +108,9 @@ sub abc2svg( $song, %args ) {
 	@{ $cfg->{preamble}//[] } );
 
     for ( keys(%{$elt->{opts}}) ) {
-
-	# Suppress meaningless transpositions. ChordPro uses them to enforce
-	# certain chord renderings.
 	next if $_ ne "transpose";
-	my $x = $elt->{opts}->{$_} % @{ $config->{notes}->{sharp} };
+	my $x = $elt->{opts}->{$_};
+	next unless $x;
 	unshift( @preamble, '%%transpose'." $x" );
     }
 
