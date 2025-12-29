@@ -252,6 +252,9 @@ ABCKIT     = abc2svg-fca05cd348
 # 1.22.18 + 'lm' and 'width' for grids
 ABCKIT     = abc2svg-9b12853f66
 
+# 1.22.34
+ABCKIT     = abc2svg-9e4ccff7c9
+
 .PHONY: abc
 
 abc :
@@ -259,6 +262,6 @@ abc :
 	perl ABC/build.pl --dest=${ABCDEST} ABC/${ABCKIT}.tar.gz 
 	cp -p ABC/README.FIRST ABC/cmdline.js ${ABCDEST}/
 	grep -v ${ABCDEST} MANIFEST > x
-	find ${ABCDEST} -type f -printf "%p\n" \
-	  | sort -u >> x
-	mv x MANIFEST
+	find ${ABCDEST} -type f -printf "%p\n" >> x
+	env LC_ALL=C sort -u x > MANIFEST
+	rm x

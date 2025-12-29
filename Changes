@@ -10,6 +10,8 @@
     - ChordPro output: Suppress key directive when transocding to a
       movable system.
 
+    - Update ABC to 1.22.34.
+
     - Edwin (@edwinjc) contributed instrument settings and chords for
       the Andean [Charango](https://en.wikipedia.org/wiki/Charango). Thanks!
 
