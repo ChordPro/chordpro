@@ -776,39 +776,48 @@ sub make_outlines {
 	    my $cur_let = "";
 	    my $cmp = Unicode::Collate->new;
 	    foreach my $let ( $cmp->sort( keys %lh )) {
+		my $prev_title = "";
 		foreach my $song ( @{$lh{$let}} ) {
 		    unless ( defined $cur_ol && ( $let eq $cur_let ) ) {
 			# Intermediate level autoline.
 			$cur_ol = $outline->outline;
 			$cur_ol->title($let);
 			$cur_let = $let;
+			$prev_title = "";
 		    }
+		    my $title = demarkup( fmt_subst( $song, $ctl->{line} ) );
+		    next if $title eq $prev_title;
 		    # Leaf outline.
 		    my $ol = $cur_ol->outline;
 		    # Display info.
-		    $ol->title( demarkup( fmt_subst( $song, $ctl->{line} ) ) );
+		    $ol->title($title);
 		    my $p = $song->{meta}->{tocpage};
 		    $p = $pdf->openpage( $p + $start ) unless ref($p);
 		    my $c = $ol->can("destination") // $ol->can("dest");
 		    $ol->$c($p);
+		    $prev_title = $title;
 		}
 	    }
 	}
 	else {
+	    my $prev_title = "";
 	    ####TODO: Why?
 	    if ( @$book == 1 && ref($book->[0]) eq 'ChordPro::Song' ) {
 		$book = [[ $book->[0] ]];
 	    }
 	    foreach my $b ( @$book ) {
 		my $song = $b->[-1];
+		my $title = demarkup( fmt_subst( $song, $ctl->{line} ) );
+		next if $title eq $prev_title;
 		# Leaf outline.
 		my $ol = $outline->outline;
 		# Display info.
-		$ol->title( demarkup( fmt_subst( $song, $ctl->{line} ) ) );
+		$ol->title($title); 
 		my $p = $song->{meta}->{tocpage};
 		$p = $pdf->openpage( $p + $start ) unless ref($p);
 		my $c = $ol->can("destination") // $ol->can("dest");
 		$ol->$c($p);
+		$prev_title = $title;
 	    }
 	}
     }

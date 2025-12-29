@@ -301,6 +301,7 @@ sub generate_songbook {
 	# The last song gets the ToC appended.
 	$song = pop(@songs);
 
+	my %prev;
 	if ( $ctl->{break} ) {
 	    my $prevbreak = "";
 	    $song->{body} //= [];
@@ -316,15 +317,21 @@ sub generate_songbook {
 			    context => "toc",
 			  } ) for 1..$nl;
 		}
+		my $title  = fmt_subst( $_->[-1], $tltpl );
+		my $pageno = fmt_subst( $_->[-1], $pgtpl );
+		%prev = () if $break ne $prevbreak;
 		push( @{ $song->{body} },
 		      { type    => "tocline",
 			context => "toc",
-			title   => fmt_subst( $_->[-1], $tltpl ),
+			title   => $title,
 			page    => $p,
-			pageno  => fmt_subst( $_->[-1], $pgtpl ),
+			pageno  => $pageno,
 			maybe break => ($break ne $prevbreak ? $break : undef),
-		      } );
+		      } )
+		  unless %prev && $prev{title} eq $title && $prev{pageno} eq $pageno;
 		$prevbreak = $break;
+		$prev{title} = $title;
+		$prev{pageno} = $pageno;
 	    }
 	}
 	else {

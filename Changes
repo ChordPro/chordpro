@@ -12,6 +12,8 @@
 
     - Update ABC to 1.22.34.
 
+    - Duplicate lines in tables of contents and outlines are now skipped.
+
     - Edwin (@edwinjc) contributed instrument settings and chords for
       the Andean [Charango](https://en.wikipedia.org/wiki/Charango). Thanks!
 
