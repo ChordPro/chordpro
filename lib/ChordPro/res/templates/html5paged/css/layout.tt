@@ -1,0 +1,179 @@
+/* Songline - Flexbox chord positioning */
+.cp-songline {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: var(--cp-spacing-line);
+    line-height: 1.2;
+    page-break-inside: avoid;
+}
+
+.cp-chord-lyric-pair {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    vertical-align: bottom;
+}
+
+/* Spacing for chord-only pairs (chords with no lyrics) */
+.cp-chord-only {
+    margin-right: 0.5em;
+}
+
+.cp-chord {
+    font-family: var(--cp-font-chord);
+    font-size: var(--cp-size-chord);
+    color: var(--cp-color-chord);
+    font-weight: bold;
+    line-height: 1.2;
+    min-height: 1.2em;
+    height: 1.2em;
+    padding-bottom: var(--cp-spacing-chord);
+}
+
+.cp-chord-empty {
+    visibility: hidden;
+}
+
+.cp-lyrics {
+    font-family: var(--cp-font-text);
+    font-size: var(--cp-size-text);
+    white-space: pre;
+    line-height: 1.2;
+}
+
+/* Comments */
+.cp-comment {
+    font-size: var(--cp-size-comment);
+    color: var(--cp-color-comment);
+    margin: 0.4em 0;
+    font-style: italic;
+    page-break-inside: avoid;
+}
+
+.cp-comment-italic {
+    font-style: italic;
+}
+
+/* Chorus */
+.cp-chorus {
+    margin: var(--cp-spacing-verse) 0;
+    padding: 0.4em 0 0.4em 1em;
+    border-left: 3px solid var(--cp-color-chorus-border);
+    background: var(--cp-color-chorus-bg);
+    page-break-inside: avoid;
+}
+
+/* Verse */
+.cp-verse {
+    margin: var(--cp-spacing-verse) 0;
+    page-break-inside: avoid;
+}
+
+/* Bridge */
+.cp-bridge {
+    margin: var(--cp-spacing-verse) 0;
+    padding-left: 1em;
+    border-left: 2px dashed #999;
+    page-break-inside: avoid;
+}
+
+/* Tab */
+.cp-tab {
+    font-family: var(--cp-font-mono);
+    font-size: 0.85em;
+    white-space: pre;
+    background: #f9f9f9;
+    padding: 0.4em;
+    border: 1px solid #ddd;
+    margin: 0.8em 0;
+    page-break-inside: avoid;
+}
+
+.cp-tabline {
+    margin: 0;
+}
+
+/* Grid */
+.cp-grid {
+    font-family: var(--cp-font-mono);
+    margin: 0.8em 0;
+    background: #f9f9f9;
+    padding: 0.4em;
+    border: 1px solid #ddd;
+    page-break-inside: avoid;
+}
+
+.cp-gridline {
+    display: flex;
+    gap: 0.5em;
+    margin: 0.2em 0;
+}
+
+.cp-grid-chord {
+    font-family: var(--cp-font-chord);
+    color: var(--cp-color-chord);
+    font-weight: bold;
+    min-width: 3em;
+}
+
+.cp-grid-symbol {
+    color: #999;
+}
+
+/* Empty lines */
+.cp-empty {
+    height: 0.6em;
+}
+
+/* Chord Diagrams */
+.cp-chord-diagrams {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1em;
+    margin: 1em 0;
+    page-break-inside: avoid;
+}
+
+.cp-chord-diagram {
+    display: inline-block;
+    margin: 0;
+}
+
+.cp-diagram-svg {
+    width: 4em;
+    height: auto;
+}
+
+.diagram-name {
+    font-family: var(--cp-font-chord);
+    font-size: 14px;
+    font-weight: bold;
+    fill: var(--cp-color-chord);
+}
+
+.diagram-fret-marker {
+    font-size: 12px;
+    fill: #666;
+}
+
+.diagram-finger {
+    font-size: 10px;
+    fill: #fff;
+    font-weight: bold;
+}
+
+.diagram-dot {
+    fill: #000;
+}
+
+.diagram-open {
+    stroke: #000;
+    fill: none;
+    stroke-width: 2;
+}
+
+.diagram-muted {
+    stroke: #000;
+    fill: none;
+    stroke-width: 2;
+}

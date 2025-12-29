@@ -1,6 +1,10 @@
 .??*
-:*
 !.github/
+!.vscode/
+.vscode/*
+!.vscode/*.json
+!.devcontainer/
+:*
 *~
 \#.*#
 CPAN
@@ -42,5 +46,10 @@ cava/
 ghstats/
 orig/
 testing/
+test-pages/
 tools/
 wiki/
+ai-docs/
+rrjson
+ttc
+lib/ChordPro/Config/Data.pm

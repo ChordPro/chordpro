@@ -1,0 +1,18 @@
+[% # ChordPro HTML5Paged Base Template
+   # This template assembles all CSS components for paged.js output
+%]
+/* ChordPro HTML5 with Paged.js Stylesheet */
+
+[% INCLUDE 'html5paged/css/string-set.tt' %]
+
+[% INCLUDE 'html5paged/css/page-setup.tt' %]
+
+[% format_rules %]
+
+[% INCLUDE 'html5paged/css/variables.tt' %]
+
+[% INCLUDE 'html5paged/css/typography.tt' %]
+
+[% INCLUDE 'html5paged/css/layout.tt' %]
+
+[% INCLUDE 'html5paged/css/print-media.tt' %]

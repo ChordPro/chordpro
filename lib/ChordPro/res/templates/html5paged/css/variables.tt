@@ -1,0 +1,59 @@
+/* Root variables */
+:root {
+    /* Typography */
+    --cp-font-text: [% fonts.text || 'Georgia, serif' %];
+    --cp-font-chord: [% fonts.chord || 'Arial, sans-serif' %];
+    --cp-font-mono: [% fonts.mono || "'Courier New', monospace" %];
+
+    /* Font Sizes */
+    --cp-size-text: [% sizes.text || '11pt' %];
+    --cp-size-chord: [% sizes.chord || '9pt' %];
+    --cp-size-title: [% sizes.title || '16pt' %];
+    --cp-size-subtitle: [% sizes.subtitle || '13pt' %];
+    --cp-size-comment: [% sizes.comment || '10pt' %];
+
+    /* Colors (Phase 3: user config) */
+    --cp-color-text: [% colors.text || '#000' %];
+    --cp-color-chord: [% colors.chord || '#0066cc' %];
+    --cp-color-comment: [% colors.comment || '#666' %];
+    --cp-color-chorus-bg: [% colors.chorus_bg || '#f5f5f5' %];
+    --cp-color-chorus-border: [% colors.chorus_border || '#0066cc' %];
+
+    /* Spacing (Phase 3: user config) */
+    --cp-spacing-line: [% spacing.line || '0.2em' %];
+    --cp-spacing-verse: [% spacing.verse || '0.8em' %];
+    --cp-spacing-chord: [% spacing.chord || '0.15em' %];
+
+    /* Phase 4: PDF Config Compatibility - Theme Colors */
+    [% IF theme %]
+    --theme-foreground: [% theme.foreground %];
+    --theme-foreground-medium: [% theme.item('foreground-medium') %];
+    --theme-foreground-light: [% theme.item('foreground-light') %];
+    --theme-background: [% theme.background %];
+    [% END %]
+
+    /* Phase 4: PDF Config Compatibility - Spacing Multipliers */
+    [% IF spacing %]
+    --spacing-title: [% spacing.title %];
+    --spacing-lyrics: [% spacing.lyrics %];
+    --spacing-chords: [% spacing.chords %];
+    --spacing-diagramchords: [% spacing.diagramchords %];
+    --spacing-grid: [% spacing.grid %];
+    --spacing-tab: [% spacing.tab %];
+    --spacing-toc: [% spacing.toc %];
+    --spacing-empty: [% spacing.empty %];
+    [% END %]
+
+    /* Phase 4: Chorus Styling */
+    [% IF chorus_styles %]
+    --chorus-indent: [% chorus_styles.indent %]pt;
+    --chorus-bar-offset: [% chorus_styles.bar_offset %]pt;
+    --chorus-bar-width: [% chorus_styles.bar_width %]pt;
+    --chorus-bar-color: [% chorus_styles.bar_color %];
+    [% END %]
+
+    /* Phase 4: Grid Styling */
+    [% IF grid_styles %]
+    --grid-symbols-color: [% grid_styles.symbols_color %];
+    --grid-volta-color: [% grid_styles.volta_color %];
+    [% END %]

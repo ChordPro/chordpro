@@ -1,0 +1,9 @@
+/* String-set for metadata attributes (for use in headers/footers) */
+.cp-title[data-title] { string-set: song-title attr(data-title); }
+.cp-subtitle[data-subtitle] { string-set: song-subtitle attr(data-subtitle); }
+.cp-artist[data-artist] { string-set: song-artist attr(data-artist); }
+.cp-album[data-album] { string-set: song-album attr(data-album); }
+.cp-arranger[data-arranger] { string-set: song-arranger attr(data-arranger); }
+.cp-lyricist[data-lyricist] { string-set: song-lyricist attr(data-lyricist); }
+.cp-copyright[data-copyright] { string-set: song-copyright attr(data-copyright); }
+.cp-duration[data-duration] { string-set: song-duration attr(data-duration); }

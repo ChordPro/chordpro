@@ -1,0 +1,21 @@
+/* Page Setup (Phase 4: includes headspace/footspace) */
+@page {
+    size: [% papersize %];
+    /* Base margins from config */
+    margin-top: [% margintop * 0.352778 %]mm;
+    margin-bottom: [% marginbottom * 0.352778 %]mm;
+    margin-left: [% marginleft * 0.352778 %]mm;
+    margin-right: [% marginright * 0.352778 %]mm;
+    
+    /* Header space reserved for @top-* margin boxes */
+    @top-center {
+        height: [% headspace * 0.352778 %]mm;
+    }
+    
+    /* Footer space reserved for @bottom-* margin boxes */
+    @bottom-center {
+        height: [% footspace * 0.352778 %]mm;
+    }
+}
+
+/* Page-specific rules are generated from config above */

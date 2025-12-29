@@ -1,0 +1,44 @@
+
+/* Titles */
+.cp-title {
+    font-size: var(--cp-size-title);
+    font-weight: bold;
+    margin: 0.5em 0;
+    color: var(--cp-color-text);
+}
+
+.cp-subtitle {
+    font-size: var(--cp-size-subtitle);
+    font-style: italic;
+    margin: 0.3em 0;
+    color: var(--cp-color-text);
+}
+
+/* Metadata */
+.cp-metadata {
+    margin: 1em 0;
+    font-size: 0.9em;
+}
+
+.cp-artist,
+.cp-composer,
+.cp-album,
+.cp-arranger,
+.cp-lyricist,
+.cp-copyright,
+.cp-duration {
+    margin: 0.2em 0;
+    color: #555;
+}
+
+/* Comments */
+.cp-comment {
+    font-size: var(--cp-size-comment);
+    color: var(--cp-color-comment);
+    margin: 0.5em 0;
+    font-style: italic;
+}
+
+.cp-comment-italic {
+    font-style: italic;
+}

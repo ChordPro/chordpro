@@ -1,0 +1,46 @@
+/* Screen preview styles */
+@media screen {
+    body.chordpro-paged {
+        background: #525252;
+        padding: 20px;
+    }
+
+    .book-content {
+        background: white;
+        box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        max-width: 210mm;
+        margin: 0 auto;
+        padding: 15mm 20mm;
+    }
+
+    .cp-song {
+        page-break-before: auto;
+        border-bottom: 1px dashed #ccc;
+        padding-bottom: 2em;
+    }
+
+    .cp-song:last-child {
+        border-bottom: none;
+    }
+}
+
+/* Print styles */
+@media print {
+    body.chordpro-paged {
+        background: white;
+        padding: 0;
+    }
+
+    .book-content {
+        background: white;
+        box-shadow: none;
+        max-width: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Let paged.js handle page breaks */
+    .cp-song {
+        border-bottom: none;
+    }
+}
