@@ -195,6 +195,186 @@ Configuration follows the same structure as PDF output:
 
 Diagrams are sized at `4em` width for scalability with font size changes.
 
+## PDF Config Compatibility
+
+Both HTML5 and HTML5Paged backends support PDF configuration options for smooth migration from PDF output. Configuration follows a hybrid precedence model:
+
+* **HTML5 backend**: `html5.*` overrides `pdf.*` overrides defaults
+* **HTML5Paged backend**: `html5.paged.*` overrides `pdf.*` overrides defaults
+
+This allows you to define settings once under `pdf` and have them work across all backends, with backend-specific overrides when needed.
+
+### Theme Colors
+
+Define a color theme that applies to all elements:
+
+    pdf {
+        theme {
+            foreground        : "#000000"  // Primary text
+            foreground-medium : "#444444"  // Medium emphasis
+            foreground-light  : "#888888"  // Light/subtle elements
+            background        : "#FFFFFF"  // Background color
+        }
+    }
+
+HTML5Paged can override specific colors:
+
+    html5.paged {
+        theme {
+            foreground : "#222222"  // Slightly lighter for screen
+        }
+    }
+
+Theme colors are exposed as CSS variables:
+* `--theme-foreground`
+* `--theme-foreground-medium`
+* `--theme-foreground-light`
+* `--theme-background`
+
+### Spacing Multipliers
+
+Control line spacing for different elements with multipliers applied to base line height:
+
+    pdf {
+        spacing {
+            title         : 1.2   // Title line height multiplier
+            lyrics        : 1.4   // Lyrics line height
+            chords        : 1.0   // Chord lines
+            diagramchords : 1.2   // Chord diagram labels
+            grid          : 1.5   // Grid sections
+            tab           : 1.2   // Tab sections
+            toc           : 1.4   // Table of contents
+            empty         : 1.0   // Empty lines
+        }
+    }
+
+HTML5Paged overrides for better screen readability:
+
+    html5.paged {
+        spacing {
+            lyrics : 1.6  // More generous spacing for web
+            title  : 1.5
+        }
+    }
+
+Spacing values are exposed as CSS variables:
+* `--spacing-title`, `--spacing-lyrics`, `--spacing-chords`, etc.
+
+Usage in CSS: `line-height: calc(var(--spacing-lyrics, 1.2) * 1em);`
+
+### Chorus Bar Styling
+
+Customize the visual indicator for chorus sections:
+
+    pdf {
+        chorus {
+            indent : 4         // Left margin in points
+            bar {
+                offset : 8     // Distance from left edge to content (pt)
+                width  : 2     // Bar thickness (pt)
+                color  : "#0066cc"  // Bar color (or "foreground")
+            }
+        }
+    }
+
+The `color` field accepts:
+* Hex colors: `"#0066cc"`
+* CSS color names: `"blue"`, `"red"`
+* Theme references: `"foreground"`, `"foreground-medium"`, `"foreground-light"`
+
+Set `bar.width` to `0` to disable the chorus bar and use default styling.
+
+CSS variables:
+* `--chorus-indent`
+* `--chorus-bar-offset`
+* `--chorus-bar-width`
+* `--chorus-bar-color`
+
+### Grid Color Styling
+
+Customize colors for grid sections (chord charts):
+
+    pdf {
+        grids {
+            symbols {
+                color : "#FF0000"  // Bar lines and symbols (|, ||, etc.)
+            }
+            volta {
+                color : "#00AA00"  // Volta brackets and repeat markers
+            }
+        }
+    }
+
+CSS variables:
+* `--grid-symbols-color`
+* `--grid-volta-color`
+
+Applied to `.cp-grid-bar`, `.cp-grid-repeat1`, `.cp-grid-repeat2`, and volta classes.
+
+### Header/Footer Spacing (HTML5Paged only)
+
+Control space reserved for headers and footers:
+
+    pdf {
+        headspace : 72  // Top margin space for headers (points)
+        footspace : 48  // Bottom margin space for footers (points)
+    }
+
+These values are added to the `@page` margin-top and margin-bottom CSS properties to ensure adequate space for header/footer content.
+
+### Example: Complete PDF-Compatible Config
+
+```json
+{
+  "pdf": {
+    "theme": {
+      "foreground": "#000000",
+      "foreground-medium": "#444444",
+      "foreground-light": "#999999",
+      "background": "#FFFFFF"
+    },
+    "spacing": {
+      "lyrics": 1.4,
+      "title": 1.2,
+      "chords": 1.0,
+      "grid": 1.5,
+      "tab": 1.2
+    },
+    "chorus": {
+      "indent": 4,
+      "bar": {
+        "offset": 8,
+        "width": 2,
+        "color": "#0066cc"
+      }
+    },
+    "grids": {
+      "symbols": { "color": "blue" },
+      "volta": { "color": "green" }
+    },
+    "headspace": 72,
+    "footspace": 48
+  },
+  "html5": {
+    "paged": {
+      "spacing": {
+        "lyrics": 1.6,
+        "title": 1.5
+      },
+      "theme": {
+        "foreground": "#222222"
+      }
+    }
+  }
+}
+```
+
+This configuration:
+* Defines PDF theme and spacing once for all backends
+* HTML5Paged overrides lyrics spacing (1.6 vs 1.4) for better screen readability
+* HTML5Paged overrides foreground color (#222222 vs #000000) for reduced eye strain
+* All other PDF settings inherited by HTML5Paged
+
 ## HTML5Paged: Paginated Output
 
 The HTML5Paged backend uses [Paged.js](https://pagedjs.org/), a JavaScript library that brings CSS Paged Media features to the browser, enabling professional print layouts with page headers, footers, and page numbers.
@@ -565,6 +745,36 @@ Complete HTML5 configuration structure:
     }
   },
   "pdf": {
+    "theme": {
+      "foreground": "#000000",
+      "foreground-medium": "#444444",
+      "foreground-light": "#888888",
+      "background": "#FFFFFF"
+    },
+    "spacing": {
+      "title": 1.2,
+      "lyrics": 1.2,
+      "chords": 1.2,
+      "diagramchords": 1.2,
+      "grid": 1.2,
+      "tab": 1.0,
+      "toc": 1.4,
+      "empty": 1.0
+    },
+    "chorus": {
+      "indent": 0,
+      "bar": {
+        "offset": 8,
+        "width": 1,
+        "color": "foreground"
+      }
+    },
+    "grids": {
+      "symbols": { "color": "blue" },
+      "volta": { "color": "blue" }
+    },
+    "headspace": 0,
+    "footspace": 0,
     "formats": {
       "default": {
         "title": ["", "", ""],

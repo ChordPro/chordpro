@@ -161,6 +161,100 @@ class ChordPro::Output::HTML5Paged
     }
 
     # =================================================================
+    # CONFIGURATION RESOLUTION (Phase 4)
+    # =================================================================
+
+    method _resolve_theme_colors() {
+        my $config = $self->config // {};
+        my $pdf_theme = eval { $config->{pdf}->{theme} } // {};
+        my $html_theme = eval { $config->{html5}->{paged}->{theme} } // {};
+        
+        # HTML5Paged overrides PDF, with fallback defaults
+        # Must use eval{} for each key access due to restricted hashes
+        my $fg = eval { $html_theme->{foreground} } // eval { $pdf_theme->{foreground} } // 'black';
+        my $fg_med = eval { $html_theme->{'foreground-medium'} } // eval { $pdf_theme->{'foreground-medium'} } // '#888';
+        my $fg_light = eval { $html_theme->{'foreground-light'} } // eval { $pdf_theme->{'foreground-light'} } // '#ddd';
+        my $bg = eval { $html_theme->{background} } // eval { $pdf_theme->{background} } // 'white';
+        
+        return {
+            foreground => $self->_convert_color_to_css($fg),
+            'foreground-medium' => $self->_convert_color_to_css($fg_med),
+            'foreground-light' => $self->_convert_color_to_css($fg_light),
+            background => $self->_convert_color_to_css($bg),
+        };
+    }
+
+    method _resolve_spacing() {
+        my $config = $self->config // {};
+        my $pdf_spacing = eval { $config->{pdf}->{spacing} } // {};
+        my $html_spacing = eval { $config->{html5}->{paged}->{spacing} } // {};
+        
+        # HTML5Paged overrides PDF, with fallback defaults
+        # Use eval{} for each key access due to restricted hashes
+        return {
+            title => eval { $html_spacing->{title} } // eval { $pdf_spacing->{title} } // 1.2,
+            lyrics => eval { $html_spacing->{lyrics} } // eval { $pdf_spacing->{lyrics} } // 1.2,
+            chords => eval { $html_spacing->{chords} } // eval { $pdf_spacing->{chords} } // 1.2,
+            diagramchords => eval { $html_spacing->{diagramchords} } // eval { $pdf_spacing->{diagramchords} } // 1.2,
+            grid => eval { $html_spacing->{grid} } // eval { $pdf_spacing->{grid} } // 1.2,
+            tab => eval { $html_spacing->{tab} } // eval { $pdf_spacing->{tab} } // 1,
+            toc => eval { $html_spacing->{toc} } // eval { $pdf_spacing->{toc} } // 1.4,
+            empty => eval { $html_spacing->{empty} } // eval { $pdf_spacing->{empty} } // 1,
+        };
+    }
+
+    method _resolve_chorus_styles() {
+        my $config = $self->config // {};
+        my $pdf_chorus = eval { $config->{pdf}->{chorus} } // {};
+        my $html_chorus = eval { $config->{html5}->{paged}->{chorus} } // {};
+        
+        my $pdf_bar = eval { $pdf_chorus->{bar} } // {};
+        my $html_bar = eval { $html_chorus->{bar} } // {};
+        
+        my $bar_color = eval { $html_bar->{color} } // eval { $pdf_bar->{color} } // 'foreground';
+        
+        # Resolve color references to theme colors
+        if ($bar_color eq 'foreground' || $bar_color eq 'foreground-medium' || $bar_color eq 'foreground-light') {
+            my $theme = $self->_resolve_theme_colors();
+            $bar_color = $theme->{$bar_color} // $theme->{foreground};
+        }
+        
+        return {
+            indent => eval { $html_chorus->{indent} } // eval { $pdf_chorus->{indent} } // 0,
+            bar_offset => eval { $html_bar->{offset} } // eval { $pdf_bar->{offset} } // 8,
+            bar_width => eval { $html_bar->{width} } // eval { $pdf_bar->{width} } // 1,
+            bar_color => $self->_convert_color_to_css($bar_color),
+        };
+    }
+
+    method _resolve_grid_styles() {
+        my $config = $self->config // {};
+        my $pdf_grids = eval { $config->{pdf}->{grids} } // {};
+        my $html_grids = eval { $config->{html5}->{paged}->{grids} } // {};
+        
+        my $pdf_symbols = eval { $pdf_grids->{symbols} } // {};
+        my $html_symbols = eval { $html_grids->{symbols} } // {};
+        
+        my $pdf_volta = eval { $pdf_grids->{volta} } // {};
+        my $html_volta = eval { $html_grids->{volta} } // {};
+        
+        return {
+            symbols_color => $self->_convert_color_to_css(
+                eval { $html_symbols->{color} } // eval { $pdf_symbols->{color} } // 'blue'
+            ),
+            volta_color => $self->_convert_color_to_css(
+                eval { $html_volta->{color} } // eval { $pdf_volta->{color} } // 'blue'
+            ),
+        };
+    }
+
+    method _convert_color_to_css($color) {
+        # Pass through: hex colors, CSS color names, rgb(), rgba(), etc.
+        # No conversion needed - CSS accepts most color formats
+        return $color;
+    }
+
+    # =================================================================
     # PAGED.JS CSS GENERATION
     # =================================================================
 
@@ -202,20 +296,41 @@ class ChordPro::Output::HTML5Paged
         my $sizes_cfg = eval { $css_config->{sizes} } // {};
         my $spacing_cfg = eval { $css_config->{spacing} } // {};
         
+        # Resolve PDF config → CSS (Phase 4)
+        my $theme = $self->_resolve_theme_colors();
+        my $spacing = $self->_resolve_spacing();
+        my $chorus_styles = $self->_resolve_chorus_styles();
+        my $grid_styles = $self->_resolve_grid_styles();
+        
+        # Header/footer spacing (Phase 4)
+        my $headspace = eval { $html5_paged->{headspace} } // $pdf->{headspace} // 60;
+        my $footspace = eval { $html5_paged->{footspace} } // $pdf->{footspace} // 20;
+        
         my $vars = {
             # Page setup
             papersize => $css_pagesize,
             margins => $css_margins,
+            margintop => $margintop,
+            marginbottom => $marginbottom,
+            marginleft => $marginleft,
+            marginright => $marginright,
+            headspace => $headspace,
+            footspace => $footspace,
             
             # Format rules from FormatGenerator
             format_rules => $format_rules,
+            
+            # Phase 4: PDF config compatibility
+            theme => $theme,
+            spacing => $spacing,
+            chorus_styles => $chorus_styles,
+            grid_styles => $grid_styles,
             
             # CSS customization from config (Phase 3)
             # Deep clone to plain hashes to avoid restricted hash issues in templates
             colors => { %$colors_cfg },
             fonts => { %$fonts_cfg },
             sizes => { %$sizes_cfg },
-            spacing => { %$spacing_cfg },
         };
         
         # Process template

@@ -1,10 +1,18 @@
 
-/* Chorus */
+/* Chorus (Phase 4: Supports pdf.chorus.bar.* config) */
 .cp-chorus {
     margin: var(--cp-spacing-verse) 0;
+    [% IF chorus_styles.bar_width > 0 %]
+    margin-left: var(--chorus-indent, 0);
+    padding: 0.5em 0 0.5em var(--chorus-bar-offset, 8pt);
+    border-left: var(--chorus-bar-width, 1pt) solid var(--chorus-bar-color, var(--cp-color-chorus-border));
+    background: var(--cp-color-chorus-bg);
+    [% ELSE %]
+    margin-left: var(--chorus-indent, 0);
     padding: 0.5em 0 0.5em 1em;
     border-left: 3px solid var(--cp-color-chorus-border);
     background: var(--cp-color-chorus-bg);
+    [% END %]
 }
 
 /* Verse */

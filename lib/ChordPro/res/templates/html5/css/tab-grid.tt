@@ -1,8 +1,9 @@
 
-/* Tab */
+/* Tab (Phase 4: Supports pdf.spacing.tab) */
 .cp-tab {
     font-family: var(--cp-font-mono);
     font-size: 0.9em;
+    line-height: calc(var(--spacing-tab, 1) * 1em);
     white-space: pre;
     background: #f9f9f9;
     padding: 0.5em;
@@ -15,9 +16,10 @@
     margin: 0;
 }
 
-/* Grid */
+/* Grid (Phase 4: Supports pdf.grids.symbols.color, pdf.spacing.grid) */
 .cp-grid {
     font-family: var(--cp-font-mono);
+    line-height: calc(var(--spacing-grid, 1.2) * 1em);
     margin: 1em 0;
     background: #f9f9f9;
     padding: 0.5em;
@@ -37,6 +39,13 @@
     min-width: 3em;
 }
 
+/* Phase 4: Grid symbols use pdf.grids.symbols.color */
 .cp-grid-symbol {
-    color: #999;
+    color: var(--grid-symbols-color, #999);
+}
+
+/* Phase 4: Volta brackets use pdf.grids.volta.color */
+.cp-grid-volta {
+    color: var(--grid-volta-color, blue);
+    font-weight: bold;
 }

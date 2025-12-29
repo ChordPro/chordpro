@@ -47,6 +47,7 @@ body.chordpro-paged {
     font-weight: bold;
     margin: 0 0 0.5em 0;
     color: var(--cp-color-text);
+    line-height: calc(var(--spacing-title, 1.2) * 1em);
     page-break-after: avoid;
 }
 
@@ -55,6 +56,7 @@ body.chordpro-paged {
     font-style: italic;
     margin: 0 0 0.3em 0;
     color: var(--cp-color-text);
+    line-height: calc(var(--spacing-title, 1.2) * 1em);
     page-break-after: avoid;
 }
 

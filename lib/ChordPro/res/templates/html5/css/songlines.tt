@@ -4,7 +4,7 @@
     display: flex;
     flex-wrap: wrap;
     margin-bottom: var(--cp-spacing-line);
-    line-height: 1.2;
+    line-height: calc(var(--spacing-lyrics, 1.2) * 1em);
 }
 
 .cp-chord-lyric-pair {
@@ -24,7 +24,7 @@
     font-size: var(--cp-size-chord);
     color: var(--cp-color-chord);
     font-weight: bold;
-    line-height: 1.2;
+    line-height: calc(var(--spacing-chords, 1.2) * 1em);
     min-height: 1.2em;
     height: 1.2em;
     padding-bottom: var(--cp-spacing-chord);
@@ -38,10 +38,10 @@
     font-family: var(--cp-font-text);
     font-size: var(--cp-size-text);
     white-space: pre;
-    line-height: 1.2;
+    line-height: calc(var(--spacing-lyrics, 1.2) * 1em);
 }
 
 /* Empty lines */
 .cp-empty {
-    height: 0.8em;
+    height: calc(var(--spacing-empty, 1) * 0.8em);
 }
