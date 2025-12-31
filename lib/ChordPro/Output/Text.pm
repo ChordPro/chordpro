@@ -116,7 +116,7 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "rechorus" ) {
-	    if ( $rechorus->{quote} ) {
+	    if ( $rechorus->{quote} && $elt->{chorus} ) {
 		unshift( @elts, @{ $elt->{chorus} } );
 	    }
 	    elsif ( $rechorus->{type} &&  $rechorus->{tag} ) {
