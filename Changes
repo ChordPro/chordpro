@@ -1,4 +1,8 @@
-6.090.0
+6.090.1 2026-01-03
+
+    - Emergency fix for illegal date in PDF.
+
+6.090.0 2025-10-31
 
     !Highlights
 
