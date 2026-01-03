@@ -109,20 +109,17 @@ sub pdf_date {
     my ( $t ) = @_;
     $t ||= $regtest ? $faketime : time;
 
-    use POSIX qw( strftime );
-    my $r;
-    if ( is_msw && $] < 5.040 ) {
-	# Work around a bug in older strftime.
-	my @tm = gmtime($t);
-	$r = sprintf( "%04d%02d%02d%02d%02d%02d+00'00'",
-		      1900+$tm[5], @tm[4,3,2,1,0] );
-    }
-    else {
-	$r = strftime( "%Y%m%d%H%M%S%z", localtime($t) );
-	# Don't use s///r to keep PERL_MIN_VERSION low.
-	$r =~ s/(..)$/'$1'/;	# +0100 -> +01'00'
-    }
-    $r;
+    my @tm = gmtime($t);
+
+    return sprintf(
+        "%04d%02d%02d%02d%02d%02d+00'00'",
+        1900 + $tm[5],
+        $tm[4] + 1,
+        $tm[3],
+        $tm[2],
+        $tm[1],
+        $tm[0],
+    );
 }
 
 sub wrap {
