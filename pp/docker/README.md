@@ -42,7 +42,6 @@ Docker:
 	  --volume "${HOME}/.config":"${HOME}/.config" \
 	  --volume "${HOME}/.local":"${HOME}/.local" \
 	  --volume "${HOME}/.cache":"${HOME}/.cache" \
-	  --volume "${HOME}/tmp":"${HOME}/tmp" \
 	  --volume "${HOME}":"${HOME}" \
 	  --workdir "`pwd`" \
 	  chordpro/chordpro:latest \
@@ -84,7 +83,6 @@ Docker:
 	  --volume "${HOME}/.config":"${HOME}/.config" \
 	  --volume "${HOME}/.local":"${HOME}/.local" \
 	  --volume "${HOME}/.cache":"${HOME}/.cache" \
-	  --volume "${HOME}/tmp":"${HOME}/tmp" \
 	  --volume "${HOME}":"${HOME}" \
 	  --workdir "`pwd`" \
 	  chordpro/chordpro:latest \
