@@ -24,7 +24,6 @@ _Use the Makefile_
 	  --volume "${HOME}/.config":"${HOME}/.config" \
 	  --volume "${HOME}/.local":"${HOME}/.local" \
 	  --volume "${HOME}/.cache":"${HOME}/.cache" \
-	  --volume "${HOME}/tmp":"${HOME}/tmp" \
 	  --volume "${HOME}":"${HOME}" \
 	  --workdir "`pwd`" \
 	  chordpro/chordpro:latest \
@@ -44,7 +43,6 @@ _Use the Makefile_
 	  --volume "${HOME}/.config":"${HOME}/.config" \
 	  --volume "${HOME}/.local":"${HOME}/.local" \
 	  --volume "${HOME}/.cache":"${HOME}/.cache" \
-	  --volume "${HOME}/tmp":"${HOME}/tmp" \
 	  --volume "${HOME}":"${HOME}" \
 	  --workdir "`pwd`" \
 	  chordpro/chordpro:latest \

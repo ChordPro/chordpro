@@ -18,7 +18,7 @@ prod :: prep
 	    Dockerfile > Dockerfile.tmp
 	${DOCKER} build ${BUILDARGS} --file Dockerfile.tmp \
 	    --target chordpro-prod \
-	    --tag chordpro/chordpro:${VERSION} \
+	    --tag chordpro/chordpro:v${VERSION} \
 	    --tag chordpro/chordpro:latest .
 
 dev :: prep
