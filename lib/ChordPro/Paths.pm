@@ -171,7 +171,7 @@ method is_absolute ( $p ) {
 
 method is_here ( $p ) {
     my ( $v, $d, $f ) = fn_splitpath($p);
-    $v eq '' && $d eq '';
+    $v eq '' && ( $d eq '' || $d =~ /^\.[\\\/]/ );
 }
 
 # Normalize - full path, forward slashes, ~ expanded.

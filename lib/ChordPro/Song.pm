@@ -1871,15 +1871,20 @@ sub dir_image {
     # If the image uri does not have a directory, look it up
     # next to the song, and then in the images folder of the
     # resources.
-    if ( $uri && CP->is_here($uri) ) {
-	my $found = CP->siblingres( $diag->{file}, $uri, class => "images" )
-	  || CP->siblingres( $diag->{file}, $uri, class => "icons" );
-	if ( $found ) {
-	    $uri = $found;
+    if ( $uri ) {
+	if ( CP->is_here($uri) ) {
+	    my $found = CP->siblingres( $diag->{file}, $uri, class => "images" )
+	      || CP->siblingres( $diag->{file}, $uri, class => "icons" );
+	    if ( $found ) {
+		$uri = $found;
+	    }
+	    else {
+		do_warn("Missing image for \"$uri\"");
+		return;
+	    }
 	}
 	else {
-	    do_warn("Missing image for \"$uri\"");
-	    return;
+	    $uri = expand_tilde($uri);
 	}
     }
 

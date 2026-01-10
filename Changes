@@ -10,6 +10,10 @@
     - ChordPro output: Suppress key directive when transocding to a
       movable system.
 
+    - Image files can now reside in folders next to the song.
+
+    - Image file names will now understand a leading `~`.
+
     - Update ABC to 1.22.34.
 
     - Duplicate lines in tables of contents and outlines are now skipped.
@@ -22,7 +26,11 @@
     - Fixed issue #315, #357, #512, #526 (thanks Merijn) #541, #580 and more.
     - Fixed issue #630.1.
 
-6.090.0
+6.090.1 2026-01-03
+
+    - Emergency fix for illegal date in PDF.
+
+6.090.0 2025-10-31
 
     !Highlights
 
