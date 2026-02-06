@@ -10,6 +10,7 @@ package ChordPro::Output::HTML;
 use strict;
 use warnings;
 use ChordPro::Files;
+use ChordPro::Paths;
 use ChordPro::Output::Common;
 use ChordPro::Utils qw();
 use Storable 'dclone';
@@ -19,17 +20,40 @@ sub generate_songbook {
 
     my @book;
     my $cfg = $::config->{html} // {};
-    $cfg->{styles}->{display} //= "chordpro.css";
-    $cfg->{styles}->{print} //= "chordpro_print.css";
+    $cfg->{styles}->{default} //= "chordpro.css";
+    $cfg->{styles}->{screen}  //= $cfg->{styles}->{display} // "";
+    $cfg->{styles}->{print}   //= "chordpro_print.css";
+
+    my %styles = %{ $cfg->{styles} };
+    my @styles = ( "default" );
+    for ( sort keys %styles ) {
+	next if /^(?:default|embed)$/ ;
+	next unless $styles{$_};
+	push( @styles, $_ );
+    }
 
     push( @book,
 	  '<html>',
 	  '<head>',
 	  '<meta charset="utf-8">' );
-    foreach ( sort keys %{ $cfg->{styles} } ) {
+
+    if ( delete $styles{embed} ) {
+	use File::LoadLines;
+ 	foreach my $class ( @styles ) {
+	    my $style = CP->findres( $styles{$class}, class => "styles" );
+	    next unless fs_test( 'rf', $style );
+	    my @lines = loadlines($style, { fail => 'hard' } );
+	    push( @book, "<style type=\"text/css\" ".
+		  ($class eq "default" ? "" : "media=\"$class\"").">",
+		  @lines, "</style>" );
+	    delete $styles{$class};
+	}
+    }
+    foreach ( @styles ) {
+	next unless $styles{$_};
 	push( @book,
-	      '<link rel="stylesheet" href="'.$cfg->{styles}->{$_}.'"'.
-	      ( $_ =~ /^(display|default)$/ ? "" : qq{ media="$_"} ).
+	      '<link rel="stylesheet" href="'.$styles{$_}.'"'.
+	      ( $_ =~ /^(default)$/ ? "" : qq{ media="$_"} ).
 	      '>' );
     }
     push( @book, '</head>',

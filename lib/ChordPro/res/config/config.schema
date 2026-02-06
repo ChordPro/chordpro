@@ -2702,10 +2702,25 @@
                   "type": "object",
                   "additionalProperties": false,
                   "properties": {
-                    "display": {
-                      "description": "Relative path to a CSS file to use for styling displayed HTML output (rather than printed).",
+                    "default": {
+                      "description": "Relative path to a CSS file to use for styling HTML output.",
                       "type": "string",
                       "default": "chordpro.css"
+                    },
+                    "display": {
+                      "description": "Legacy style for \"screen\".",
+                      "type": "string",
+                      "default": ""
+                    },
+                    "embed": {
+                      "description": "Embed the styles instead of linking to them.",
+                      "type": "boolean",
+                      "default": false
+                    },
+                    "screen": {
+                      "description": "Relative path to a CSS file to use for styling displayed HTML output on screen media.",
+                      "type": "string",
+                      "default": ""
                     },
                     "print": {
                       "description": "Relative path to a CSS file to use for styling printed HTML output.",

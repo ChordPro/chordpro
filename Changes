@@ -32,6 +32,10 @@
       This gives a performance improvement of over 10% when the
       guitar.json is converted to not relaxed.
 
+    - Change HTML style names to default, screen and print.
+
+    - Allow embedding of HTML styles (html.style.embed).
+
     !Internal
 
     - Move backend configurator(s) into a separate file.

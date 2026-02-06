@@ -1158,12 +1158,22 @@ chordpro {
 }
 
 // Settings for HTML output.
-// Styles for display and printing.
 html {
+    // The actual backend module.
     module: HTML
+
+    // Styles.
     styles {
-	display : chordpro.css
+	// Relative path to a CSS file to use for styling HTML output.
+	default : chordpro.css
+	// Relative path to a CSS file to use for styling displayed HTML output on screen media.
+	screen  : ""
+	// Relative path to a CSS file to use for styling printed HTML output.
 	print   : chordpro_print.css
+	// Embed the styles instead of linking to them.
+	embed   : false
+	// Legacy.
+	display : ""
     }
 }
 
