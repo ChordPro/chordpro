@@ -291,6 +291,8 @@ sub generate_song {
 	      "\n") if $config->{debug}->{spacing};
 	$x += $ps->{_indent};
 	$y -= $spreadimage if defined($spreadimage) && !ref($spreadimage);
+	# Prevent spread space on other pages (issue #640).
+	undef $spreadimage if $col == $ps->{columns}-1;
     };
 
     my $vsp_ignorefirst;
