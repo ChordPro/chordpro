@@ -47,6 +47,7 @@
     - Fixed issue #315, #357, #512, #526 (thanks Merijn) #541, #580 and more.
     - Fixed issue #630.1.
     - Fixed issue #636.
+    - Fixed issue #640 (col expands to colums instead of columns).
 
 6.090.1 2026-01-03
 
