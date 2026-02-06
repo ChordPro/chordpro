@@ -1168,13 +1168,13 @@
     
         // Styles.
         styles {
-    	// Default style.
+    	// Relative path to a CSS file to use for styling HTML output.
     	default : chordpro.css
-    	// Additional style for screen display.
+    	// Relative path to a CSS file to use for styling displayed HTML output on screen media.
     	screen  : ""
-    	// Additional style for printing.
+    	// Relative path to a CSS file to use for styling printed HTML output.
     	print   : chordpro_print.css
-    	// Embed the styles instead of linking.
+    	// Embed the styles instead of linking to them.
     	embed   : false
     	// Legacy.
     	display : ""
