@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Sun Mar 10 18:02:02 2024
 # Last Modified By: Johan Vromans
-# Last Modified On: Thu Jun 26 15:56:47 2025
-# Update Count    : 183
+# Last Modified On: Fri Feb  6 11:54:58 2026
+# Update Count    : 186
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -110,7 +110,7 @@ if ( $schema ) {
 }
 
 my $parser = JSON::Relaxed::Parser->new
-  ( booleans		  => 1,		# force default
+  ( booleans		  => [ $JSON::PP::false, $JSON::PP::true ],
     strict	          => $strict,
     prp		          => $prp,
     combined_keys	  => $combined_keys,

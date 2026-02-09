@@ -159,7 +159,18 @@ method pretokenize {
 	  qq< \\s+ > );		  # whitespace
 
     my $p = join( "|", @p );
+    # Improve less than 3%
+    # use Regexp::Assemble;
+    # my $re = Regexp::Assemble->new;
+    # for ( @p ) {
+    # 	s/ //g;
+    # }
+    # $re->add($_) for @p;
+    # my $p = $re->re;
 
+    # Improve less than 1%
+    #    $p =~ s/ //g;
+    #    @pretoks = split( m<($p)>so, $data );
     @pretoks = split( m< ( $p ) >sox, $data );
 
     # Remove empty strings.
@@ -240,7 +251,8 @@ method tokenize {
 	}
 
 	# Reserved characters.
-	elsif ( $self->is_reserved($pretok) ) {
+#	elsif ( $self->is_reserved($pretok) ) {
+	elsif ( $pretok =~ /[,:{}\[\]]/ ) {
 	    $self->addtok( $pretok, 'C', $offset );
 	    $offset += length($pretok);
 	    $uq_open = 0;
