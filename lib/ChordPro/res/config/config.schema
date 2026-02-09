@@ -869,7 +869,7 @@
             },
             "strict": {
               "default": true,
-              "description": "Chords parsing strategy.\nStrict (only known chords) or relaxed (anything that looks sane).",
+              "description": "More checks and warnings.",
               "type": "boolean"
             },
             "suppress-empty-chords": {

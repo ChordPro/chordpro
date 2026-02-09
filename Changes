@@ -36,6 +36,11 @@
 
     - Allow embedding of HTML styles (html.style.embed).
 
+    - With setting.strict: Issue a warning when a song does not
+      have have a valid key (e.g., is missing a {key} directive).
+
+    - Change default for settings.strict to false.
+
     !Internal
 
     - Move backend configurator(s) into a separate file.

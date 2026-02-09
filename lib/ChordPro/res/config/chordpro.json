@@ -34,8 +34,8 @@ include : [ guitar ]
 settings {
 
     // Chords parsing strategy.
-    // Strict (only known chords) or relaxed (anything that looks sane)
-    strict : true
+    // Strict (more checks and warnings).
+    strict : false
 
     // Obsolete.
     lineinfo : true

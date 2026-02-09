@@ -821,6 +821,11 @@ sub parse_song {
     	delete $self->{meta}->{cc};
     }
 
+    if ( $config->{settings}->{strict} && !$self->{meta}->{key}) {
+	do_warn( "Song is missing {key} directive" );
+    }
+
+
     if ( $diagrams =~ /^(user|all)$/ ) {
 	$self->{chords} =
 	  { type   => "diagrams",

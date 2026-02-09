@@ -29,9 +29,8 @@ of them can be changed from the command line.
 	// General settings, often changed by configs and command line.
 	settings {
 
-	  // Chords parsing strategy.
-	  // Strict (only known chords) or relaxed (anything that looks sane)
-	  strict : true
+	  // Strict (more checks and warnings)
+	  strict : false
 
 	  // Obsolete.
 	  lineinfo : true
