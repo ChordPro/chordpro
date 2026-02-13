@@ -42,11 +42,29 @@ sub can( $class, $method ) {
     return \&abc2svg;
 }
 
+my $backend;
+
+# Fetch a value for key $k from hash $h, with possible specialisation
+# for the current backend.
+# NOTE: This is a copy from Song.pm. Redo later.
+sub beo {
+    my ( $h, $k ) = @_;
+    if ( exists( $h->{$backend} )
+	 && exists( $h->{$backend}->{$k} )
+	 && defined( $h->{$backend}->{$k} ) ) {
+	return $h->{$backend}->{$k};
+    }
+    return '' unless exists($h->{$k}) && defined($h->{$k});
+    return $h->{$k};
+}
+
 # Default entry point.
 
 sub abc2svg( $song, %args ) {
 
     my $abc2svg = info();
+    $backend = lc $song->{generate};
+    my $cfg = { %{$config->{delegates}->{abc} } };
 
     if ( DEBUG() ) {
 	::dump($abc2svg);
@@ -54,7 +72,7 @@ sub abc2svg( $song, %args ) {
 
     state $cfg_checked;
     unless ( $cfg_checked++ ) {
-	if ( ($config->{delegates}{abc}{config} // "default") ne "default" ) {
+	if ( ( beo( $cfg, 'config' ) || "default" ) ne "default" ) {
 	    warn("ABC: delegates.abc.config is no longer used.\n");
 	    warn("ABC: Config \"default.abc\" will be loaded instead.\n")
 	      if !$abc2svg->{external} && fs_test( s => "default.abc" );
@@ -71,13 +89,12 @@ sub abc2svg( $song, %args ) {
     }
 
     state $td = File::Temp::tempdir( CLEANUP => !$config->{debug}->{abc} );
-    my $cfg = { %{$config->{delegates}->{abc} } };
 
     # External tools usually process a default.abc.
     warn("ABC: Using config \"default.abc\".\n")
       if index( $abc2svg->{method}, QUICKJSXS ) < 0 && fs_test( s => "default.abc" );
 
-    my $prep = make_preprocessor( $cfg->{preprocess} );
+    my $prep = make_preprocessor( beo( $cfg, 'preprocess' ) );
 
     # Prepare names for temporary files.
     state $imgcnt = 0;
@@ -105,7 +122,7 @@ sub abc2svg( $song, %args ) {
 	"%%stretchlast 0",
 	"%%trimsvg 1",
 	"%%staffsep 0",
-	@{ $cfg->{preamble}//[] } );
+	@{ beo( $cfg, 'preamble' ) || [] } );
 
     for ( keys(%{$elt->{opts}}) ) {
 	next if $_ ne "transpose";
@@ -159,7 +176,7 @@ sub abc2svg( $song, %args ) {
 	print $fd $_, "\n";
 	warn($_, "\n") if DEBUG > 1;
     }
-    for ( @{ $cfg->{postamble}//[] } ) {
+    for ( @{ beo( $cfg, 'postamble' ) || [] } ) {
 	print $fd $_, "\n";
 	warn($_, "\n") if DEBUG > 1;
     }

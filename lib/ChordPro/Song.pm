@@ -30,6 +30,8 @@ use feature 'state';
 use Text::ParseWords qw(quotewords);
 use Ref::Util qw( is_arrayref is_hashref );
 
+my $backend;			# backend tag
+
 # Parser context.
 my $def_context = "";
 my $in_context = $def_context;
@@ -126,10 +128,25 @@ sub is_gridstrum($) {
     $_[0] == 1 || $_[0] == 2;
 }
 
+# Fetch a value for key $k from hash $h, with possible specialisation
+# for the current backend.
+sub beo {
+    my ( $h, $k ) = @_;
+    if ( exists( $h->{$backend} )
+	 && exists( $h->{$backend}->{$k} )
+	 && defined( $h->{$backend}->{$k} ) ) {
+	return $h->{$backend}->{$k};
+    }
+    return '' unless exists($h->{$k}) && defined($h->{$k});
+    return $h->{$k};
+}
+
 sub parse_song {
     my ( $self, $lines, $linecnt, $meta, $defs ) = @_;
     die("OOPS! Wrong meta") unless ref($meta) eq 'HASH';
     local $config = dclone($config);
+
+    $backend = lc( $self->{generate} // "None" );
 
     warn("Processing song ", $diag->{file}, "...\n") if $options->{verbose};
     ::break();
@@ -252,7 +269,7 @@ sub parse_song {
     # Remove inactive delegates.
     while ( my ($k,$v) = each %{ $config->{delegates} } ) {
 	delete( $config->{delegates}->{$k} )
-	  if !$v || $v->{type} eq 'none';
+	  if !$v || beo( $v, 'type') eq 'none';
     }
 
     # Parse transpose, if any.
@@ -508,8 +525,8 @@ sub parse_song {
 		  { data => \@data,
 		    type    => "image",
 		    subtype => $type,
-		    module  => $config->{delegates}->{$type}->{module},
-		    handler => $config->{delegates}->{$type}->{handler},
+		    module  => beo( $config->{delegates}->{$type}, 'module' ),
+		    handler => beo( $config->{delegates}->{$type}, 'handler' ),
 		    opts    => $kv,
 		  };
 		if ( $config->{debug}->{images} ) {
@@ -552,9 +569,8 @@ sub parse_song {
 	    # Currently the ChordPro backend is the only one that
 	    # cares about comment lines.
 	    # Collect pre-title stuff separately.
-	    next unless exists $config->{lc $self->{generate}}
-	      && exists $config->{lc $self->{generate}}->{comments}
-	      && $config->{lc $self->{generate}}->{comments} eq "retain";
+	    next unless exists($config->{$backend})
+	      && beo( $config->{$backend}, 'comments') eq "retain";
 
 	    if ( exists $self->{title} || $fragment ) {
 		$self->add( type => "ignore", text => $_ );
@@ -581,7 +597,7 @@ sub parse_song {
 		# A subsequent {start_of_XXX} will open a new item
 
 		my $d = $config->{delegates}->{$in_context};
-		if ( $d->{type} eq "image" ) {
+		if ( beo( $d, 'type' ) eq "image" ) {
 		    local $_;
 		    my $a = pop( @{ $self->{body} } );
 		    my $id = $a->{id};
@@ -1351,7 +1367,7 @@ sub parse_directive {
 
     if ( $dir =~ /^start_of_(.*)/
 	 && exists $config->{delegates}->{$1}
-	 && $config->{delegates}->{$1}->{type} eq 'omit' ) {
+	 && beo( $config->{delegates}->{$1}, 'type' ) eq 'omit' ) {
 	return { name => $dir, arg => $arg, omit => 2 };
     }
 
@@ -1475,8 +1491,8 @@ sub directive {
 	    delete $kv->{label} if ($kv->{label}//"") eq "";
 	    $self->add( type     => "image",
 			subtype  => "delegate",
-			delegate => $d->{module},
-			handler  => $d->{handler},
+			delegate => beo( $d, 'module' ),
+			handler  => beo( $d, 'handler' ),
 			data     => [ ],
 			opts     => { %opts, %$kv },
 			exists($kv->{id}) ? ( id => $kv->{id} ) : (),
@@ -1939,8 +1955,8 @@ sub dir_image {
 	    my $d = $config->{delegates}->{$1};
 	    $a = { type      => "image",
 		   subtype   => "delegate",
-		   delegate  => $d->{module},
-		   handler   => $d->{handler},
+		   delegate  => beo( $d, 'module' ),
+		   handler   => beo( $d, 'handler' ),
 		   uri       => $uri,
 		 };
 	}

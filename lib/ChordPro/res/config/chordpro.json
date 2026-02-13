@@ -399,7 +399,8 @@ delegates {
 
         // No longer used -- ./default.abc will be used if program tool.
         config : default
-        preamble   : [
+        // Preamble (PDF backend only).
+        pdf.preamble   : [
             "%%textfont pdf.fonts.text"
             "%%vocalfont pdf.fonts.text"
             "%%gchordfont pdf.fonts.chord"
@@ -430,10 +431,9 @@ delegates {
 
     // Embedding Strums. EXPERIMENTAL
     strum {
-        type     : image
-        module   : Strum
-        handler  : strum2xo
-        preamble : []
+        type         : image
+        module       : Strum
+        pdf.handler  : strum2xo
     }
 
     // Embedding SVG.
@@ -447,7 +447,7 @@ delegates {
     textblock {
         type    : image
         module  : TextBlock
-        handler : txt2xform
+        pdf.handler : txt2xform
     }
 }
 
