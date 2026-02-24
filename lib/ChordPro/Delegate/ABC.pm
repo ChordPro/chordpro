@@ -110,18 +110,19 @@ sub abc2svg( $song, %args ) {
     # "%%stretchlast 0", only the final line is shorter.
     # Otherwise, you can have "%%trimsvg 1" as the last line of the tune.
     my @preamble =
-      ( "%%topspace 0",
-	"%%titlespace 0",
-	"%%musicspace 0",
-	"%%composerspace 0",
-	"%%infospace 0",
-	"%%textspace 0",
-	"%%leftmargin 0cm",
-	"%%rightmargin 0cm",
-	"%%stretchstaff 1",
-	"%%stretchlast 0",
-	"%%trimsvg 1",
-	"%%staffsep 0",
+      ( '%%topspace 0',
+	'%%titlespace 0',
+	'%%musicspace 0',
+	'%%composerspace 0',
+	'%%infospace 0',
+	'%%textspace 0',
+	'%%leftmargin 0cm',
+	'%%rightmargin 0cm',
+	'%%stretchstaff 1',
+	'%%stretchlast 0',
+	'%%trimsvg 1',
+	'%%staffsep 0',
+	$backend =~ /html/ ? ( '%%fullsvg 1' ) : (),
 	@{ beo( $cfg, 'preamble' ) || [] } );
 
     for ( keys(%{$elt->{opts}}) ) {
@@ -367,10 +368,6 @@ sub abc2svg( $song, %args ) {
 	if ( /^<\/svg/ && @lines && $lines[0] =~ /^<\/div/ ) {
 	    last;
 	}
-    }
-    if ( @data ) {
-	unshift( @data, "<div>" );
-	push( @data, "</div>" );
     }
 
     if ( DEBUG ) {
