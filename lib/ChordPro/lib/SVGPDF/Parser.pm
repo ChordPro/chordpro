@@ -187,8 +187,10 @@ method _parse ( $data, %params) {
 	      pop( @{$elem->{content}} );
 	}
     }
-    croak( "SVG Parser: Junk after end of document" )
-      if @{$elem->{content}} > 1;
+    for ( @{$elem->{content}} ) {
+	croak( "SVG Parser: Junk in or after end of document" )
+	  unless $_->{name} eq "svg";
+    }
     croak( "SVG Parser: No elements?" )
       if @{$elem->{content}} == 0 || $elem->{content}->[0]->{type} ne 'e';
 
