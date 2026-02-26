@@ -369,6 +369,10 @@ sub abc2svg( $song, %args ) {
 	    last;
 	}
     }
+    if ( @data ) {
+	unshift( @data, "<div>" );
+	push( @data, "</div>" );
+    }
 
     if ( DEBUG ) {
 	open( $fd, '>:utf8', $svg );
