@@ -755,6 +755,7 @@ sub parse_song {
     ::dump($self->{assets}, as => "Assets, Pass 1")
       if $config->{debug}->{assets} & 1;
     $self->dump(0) if $config->{debug}->{song} > 1;
+    ::dump($self->{body}) if $config->{debug}->{ops};
 
     if ( @labels ) {
 	$self->{labels} = [ @labels ];
@@ -1484,8 +1485,9 @@ sub directive {
 	    my $d = $config->{delegates}->{$in_context};
 	    my %opts;
 	    if ( $xpose || $config->{settings}->{transpose}->{xp} ) {
-		$opts{transpose} =
-		  $xpose + ($config->{settings}->{transpose}->{xp}//0 );
+		my $tr = { %{$config->{settings}->{transpose}} };
+		$tr->{xp} += $xpose;
+		$opts{transpose} = $tr;
 	    }
 	    my $kv = parse_kv( $arg, "label" );
 	    delete $kv->{label} if ($kv->{label}//"") eq "";

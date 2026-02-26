@@ -125,11 +125,11 @@ sub abc2svg( $song, %args ) {
 	$backend =~ /html/ ? ( '%%fullsvg 1' ) : (),
 	@{ beo( $cfg, 'preamble' ) || [] } );
 
-    for ( keys(%{$elt->{opts}}) ) {
-	next if $_ ne "transpose";
-	my $x = $elt->{opts}->{$_};
-	next unless $x;
-	unshift( @preamble, '%%transpose'." $x" );
+    if ( defined $elt->{opts}->{transpose} ) {
+	my $tr = $elt->{opts}->{transpose};
+	my $x = $tr->{xp};
+	$x %= @{ $config->{notes}->{sharp} } unless $tr->{forced};
+	unshift( @preamble, '%%transpose'." $x" ) if $x;
     }
 
     # Add mandatory field.
