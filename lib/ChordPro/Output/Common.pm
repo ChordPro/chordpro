@@ -367,7 +367,7 @@ sub mimedata {
     use MIME::Base64;
     # Emit as individual images.
     for my $img ( @img ) {
-	if ( $mimetype =~ /(text\/|\/svg) / ) {
+	if ( $mimetype =~ m;(text/|/svg); ) {
 	    $img = "data:$mimetype,". encode_percent($img);
 	    warn("mimedata: $mimetype, ", length($img), " bytes\n")
 	      if $config->{debug}->{images};
