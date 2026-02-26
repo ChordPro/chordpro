@@ -1807,6 +1807,7 @@ sub dir_image {
     my $chord;
     my $type;
     my %opts;
+    $DB::single=1;
     while ( my($k,$v) = each(%$res) ) {
 	if ( $k =~ /^(title)$/i && $v ne "" ) {
 	    $opts{lc($k)} = $v;
@@ -1904,8 +1905,8 @@ sub dir_image {
 		return;
 	    }
 	}
-	# Do not affect base64 data strings.
-	elsif ( $uri !~ /^data:/ ) {
+	# Do not affect URIs and base64 data strings.
+	elsif ( $uri !~ /^(data:|\w+:\/\/)/ ) {
 	    $uri = expand_tilde($uri);
 	}
     }
