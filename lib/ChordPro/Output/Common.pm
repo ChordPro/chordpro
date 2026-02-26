@@ -340,17 +340,17 @@ sub mimedata {
     }
 
     unless ( $mimetype =~ m;^(image|text)/.*; ) {
-	state %mimetypes =
-	  ( png  => 'image/png',
+	state $mimetypes =
+	  { png  => 'image/png',
 	    jpg  => 'image/jpeg',
 	    jpeg => 'image/jpeg',
 	    gif  => 'image/gif',
 	    svg  => 'image/svg+xml',
 	    css  => 'text/css',
-	  );
+	  };
 	Carp::croak( "Unhandled MIME type \"$mimetype\"" )
-	    unless $mimetypes{$mimetype};
-	$mimetype = $mimetypes{$mimetype};
+	    unless $mimetypes->{$mimetype};
+	$mimetype = $mimetypes->{$mimetype};
     }
 
     my @img;			# there can be more than one
