@@ -9,12 +9,14 @@ package ChordPro::Output::Common;
 
 use strict;
 use warnings;
+use feature qw( state );
 use ChordPro::Chords;
-use ChordPro::Utils qw( demarkup is_true );
+use ChordPro::Utils qw( demarkup is_true plural );
 use String::Interpolate::Named;
 use utf8;
 use POSIX qw(setlocale LC_TIME strftime);
 use Ref::Util qw( is_arrayref );
+use File::LoadLines ();
 
 use Exporter 'import';
 our @EXPORT;
@@ -308,5 +310,82 @@ sub prep_outlines {
     return \@book;
 }
 push( @EXPORT_OK, 'prep_outlines' );
+
+# Make a data: URI (string) from an external source.
+# This is mostly intended for images.
+# Since ABC generated SVG can contain multiple images, this function
+# can be called in list context to get all the images.
+# In scalar context, it returns the first (or only) image.
+
+sub encode_percent {
+    my ( $str ) = @_;
+    $str =~ s/([\:\/\?\#\[\]\@\!\$\&\'\"\(\)\*\+\,\;\=\%])
+	     /sprintf("%%%02X", ord($1))/egx;
+    $str;
+}
+
+sub mimedata {
+    my ( $src, $mimetype ) = @_;
+
+    warn( "mimedata: \"$src\"",
+	  $mimetype ? " $mimetype" : "",
+	  "\n" ) if $config->{debug}->{images};
+    my $data = File::LoadLines::loadblob($src);
+    if ( $mimetype ) {
+	$mimetype = lc $mimetype;
+    }
+    else {
+	$mimetype = ChordPro::Utils::_detect_image_format($data)
+	  || Carp::croak("Unrecognigned imge data in \"$src\"");
+    }
+
+    unless ( $mimetype =~ m;^(image|text)/.*; ) {
+	state %mimetypes =
+	  ( png  => 'image/png',
+	    jpg  => 'image/jpeg',
+	    jpeg => 'image/jpeg',
+	    gif  => 'image/gif',
+	    svg  => 'image/svg+xml',
+	    css  => 'text/css',
+	  );
+	Carp::croak( "Unhandled MIME type \"$mimetype\"" )
+	    unless $mimetypes{$mimetype};
+	$mimetype = $mimetypes{$mimetype};
+    }
+
+    my @img;			# there can be more than one
+    if ( $mimetype =~/svg/ ) {
+	# There may be several images. Split them.
+	@img = split( /\<\/svg\>[\n\r]*\<svg/, $data );
+	$img[$_] .= "</svg>" for 0..$#img-1;
+	$img[$_] = "<svg" . $img[$_] for 1..$#img;
+    }
+    else {
+	@img = ( $data );
+    }
+
+    use MIME::Base64;
+    # Emit as individual images.
+    for my $img ( @img ) {
+	if ( $mimetype =~ /(text\/|\/svg) / ) {
+	    $img = "data:$mimetype,". encode_percent($img);
+	    warn("mimedata: $mimetype, ", length($img), " bytes\n")
+	      if $config->{debug}->{images};
+	}
+	else {
+	    $img = "data:$mimetype;base64,". encode_base64( $img, '' );
+	    warn("mimedata: $mimetype, ", length($img), " bytes\n")
+	      if $config->{debug}->{images};
+	}
+	if ( @img > 1 ) {
+	    Carp::carp( "Warning: Ignoring ",
+			plural( @img-1, " excess SVG image" ));
+	}
+    	return $img[0] unless wantarray;
+    }
+    return @img;
+}
+
+push( @EXPORT_OK, "mimedata" );
 
 1;
