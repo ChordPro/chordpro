@@ -187,12 +187,15 @@ method _parse ( $data, %params) {
 	      pop( @{$elem->{content}} );
 	}
     }
-    for ( @{$elem->{content}} ) {
-	croak( "SVG Parser: Junk in or after end of document" )
-	  unless $_->{name} eq "svg";
-    }
     croak( "SVG Parser: No elements?" )
       if @{$elem->{content}} == 0 || $elem->{content}->[0]->{type} ne 'e';
+
+    # If multiple, they must be the same elements.
+    my $e = $elem->{content}->[0]->{name};
+    for ( @{$elem->{content}} ) {
+	croak( "SVG Parser: Junk in or after end of document" )
+	  unless $_->{name} eq $e;
+    }
 
     return $elem->{content};
 }
