@@ -709,9 +709,11 @@ push( @EXPORT_OK, @{ $EXPORT_TAGS{"xp"} } );
 
 sub parse_transpose( $xp ) {
     return unless $xp =~ m;^([-+]?\d+)([s#♯fb♭]?)$;;
-
-    return { xp => $1,
-	     dir => $2 ? (($2 eq 's'|$2 eq '#'|$2 eq '♯') ? 1 : -1 ) : $1 <=> 0 };
+    my $forced = ($2 eq 's'|$2 eq '#'|$2 eq '♯')
+      - ($2 eq 'f'|$2 eq 'b'|$2 eq '♭');
+    return { xp     => $1,
+	     forced => $forced,
+	     dir    => $forced || $1 <=> 0 };
 }
 
 push( @EXPORT_OK, "parse_transpose" );
