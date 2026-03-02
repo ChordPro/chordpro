@@ -17,6 +17,7 @@ use utf8;
 use POSIX qw(setlocale LC_TIME strftime);
 use Ref::Util qw( is_arrayref );
 use File::LoadLines ();
+use Encode qw( encode_utf8 );
 
 use Exporter 'import';
 our @EXPORT;
@@ -367,17 +368,18 @@ sub mimedata {
     use MIME::Base64;
     # Emit as individual images.
     for my $img ( @img ) {
-	if ( $mimetype =~ m;(text/|/svg); ) {
+	if ( $mimetype =~ m;(text/); ) {
 	    $img = "data:$mimetype,". encode_percent($img);
 	    warn("mimedata: $mimetype, ", length($img), " bytes\n")
 	      if $config->{debug}->{images};
 	}
 	else {
+	    $img = encode_utf8($img) if $mimetype =~ /svg/;
 	    $img = "data:$mimetype;base64,". encode_base64( $img, '' );
 	    warn("mimedata: $mimetype, ", length($img), " bytes\n")
 	      if $config->{debug}->{images};
 	}
-	if ( @img > 1 ) {
+	if ( @img > 1 && !wantarray ) {
 	    Carp::carp( "Warning: Ignoring ",
 			plural( @img-1, " excess SVG image" ));
 	}
