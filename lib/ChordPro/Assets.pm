@@ -264,4 +264,109 @@ sub prepare_asset( $id, $s, $pr ) {
 
 push( @EXPORT, 'prepare_asset' );
 
+# Font handler for SVG embedding.
+sub svg_fonthandler {
+    my ( $ps, $svg, %args ) = @_;
+    my ( $pdf, $style ) = @args{qw(pdf style)};
+
+    my $family = lc( $style->{'font-family'} );
+    my $stl    = lc( $style->{'font-style'}  // "normal" );
+    my $weight = lc( $style->{'font-weight'} // "normal" );
+    my $size   = $style->{'font-size'}       || 12;
+
+    # Font cache.
+    state $fc  = {};
+    my $key    = join( "|", $family, $stl, $weight );
+
+    # Clear cache when the PDF changes.
+    state $cf  = "";
+    if ( $cf ne $ps->{pr}->{pdf} ) {
+	$cf = $ps->{pr}->{pdf};
+	$fc = {};
+    }
+
+    # As a special case we handle fonts with 'names' like
+    # pdf.font.foo and map these to the corresponding font
+    # in the pdf.fonts structure.
+    if ( $family =~ /^pdf\.fonts\.(.*)/ ) {
+	my $try = $ps->{fonts}->{$1};
+	if ( $try ) {
+	    warn("SVG: Font $family found in config: ",
+		 $try->{_ff}, "\n")
+	      if $config->{debug}->{svg};
+	    # The font may change during the run, so we do not
+	    # cache it.
+	    return $try->{fd}->{font};
+	}
+    }
+
+    local *Text::Layout::FontConfig::_fallback = sub { 0 };
+
+    my $font = $fc->{$key} //= do {
+
+	my $t;
+	my $try =
+	  eval {
+	      $t = Text::Layout::FontConfig->find_font( $family, $stl, $weight );
+	      $t->get_font($ps->{pr}->{layout}->copy);
+	  };
+	if ( $try ) {
+	    warn("SVG: Font $key found in font config: ",
+		 $t->{loader_data},
+		 "\n")
+	      if $config->{debug}->{svg};
+	    $try;
+	}
+	else {
+	    return;
+	}
+    };
+
+    return $font;
+}
+
+# Text handler for SVG embedding.
+sub svg_texthandler {
+    my ( $ps, $svg, %args ) = @_;
+    my $xo    = delete($args{xo});
+    my $pdf   = delete($args{pdf});
+    my $style = delete($args{style});
+    my $text  = delete($args{text});
+    my %opts  = %args;
+
+    my @t = split( /([♯♭])/, $text );
+    if ( @t == 1 ) {
+	# Nothing special.
+	$svg->set_font( $xo, $style );
+	return $xo->text( $text, %opts );
+    }
+
+    my ( $font, $sz ) = $svg->root->fontmanager->find_font($style);
+    my $has_sharp = $font->glyphByUni(ord("♯")) ne ".notdef";
+    my $has_flat  = $font->glyphByUni(ord("♭")) ne ".notdef";
+    # For convenience we assume that either both are available, or missing.
+
+    if ( $has_sharp && $has_flat ) {
+	# Nothing special.
+	$xo->font( $font, $sz );
+	return $xo->text( $text, %opts );
+    }
+
+    # Replace the sharp and flat glyphs by glyps from the chordfingers font.
+    my $d = 0;
+    my $this = 0;
+    while ( @t ) {
+	my $text = shift(@t);
+	my $fs   = shift(@t);
+	$xo->font( $font, $sz ) unless $this eq $font;
+	$d += $xo->text($text);
+	$this = $font;
+	next unless $fs;
+	$xo->font( $ps->{fonts}->{chordprosymbols}->{fd}->{font}, $sz );
+	$this = 0;
+	$d += $xo->text( $fs eq '♭' ? '!' : '#' );
+    }
+    return $d;
+}
+
 1;
