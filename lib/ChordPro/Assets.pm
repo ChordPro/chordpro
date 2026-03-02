@@ -15,6 +15,7 @@ package ChordPro::Assets;
 use Exporter 'import';
 our @EXPORT;
 
+use ChordPro::Files;
 use ChordPro::Utils;
 use ChordPro::Output::SVG::Images;
 
@@ -83,7 +84,7 @@ sub prepare_asset( $id, $s, $pr ) {
 	      if $elt->{opts}->{width} && $elt->{opts}->{width} < $w;
 
 	    my $res = $hd->( $s, elt => $elt, pagewidth => $w );
-	    if ( 0&&$res ) {
+	    if ( $res ) {
 		$res->{opts} = { %{ $res->{opts} // {} },
 				 %{ $elt->{opts} // {} } };
 		warn( "Assets: Preparing delegate $delegate, handler ",
