@@ -269,7 +269,7 @@ sub parse_song {
     # Remove inactive delegates.
     while ( my ($k,$v) = each %{ $config->{delegates} } ) {
 	delete( $config->{delegates}->{$k} )
-	  if !$v || beo( $v, 'type') eq 'none';
+	  if !$v || (beo( $v, 'type')//'none') eq 'none';
     }
 
     # Parse transpose, if any.
