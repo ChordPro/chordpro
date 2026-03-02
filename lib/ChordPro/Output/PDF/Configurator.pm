@@ -15,7 +15,6 @@ sub configurator {
     # From here, we're mainly dealing with the PDF settings.
     my $pdf   = $cfg->{pdf};
 
-    $DB::single = 1;
     # Get PDF library.
     $pdfapi //= config_pdfapi( $pdf->{library} );
 
