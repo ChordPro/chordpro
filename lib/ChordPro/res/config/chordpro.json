@@ -431,7 +431,7 @@ delegates {
 
     // Embedding Strums. EXPERIMENTAL
     strum {
-        type         : image
+        pdf.type     : image
         module       : Strum
         pdf.handler  : strum2xo
     }
@@ -445,8 +445,8 @@ delegates {
 
     // Embedding textblock.
     textblock {
-        type    : image
-        module  : TextBlock
+        module      : TextBlock
+        pdf.type    : image
         pdf.handler : txt2xform
     }
 }

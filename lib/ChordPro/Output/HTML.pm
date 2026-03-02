@@ -13,6 +13,7 @@ use ChordPro::Files;
 use ChordPro::Paths;
 use ChordPro::Output::Common;
 use ChordPro::Utils qw();
+use ChordPro::Assets;
 use Storable 'dclone';
 
 sub generate_songbook {
@@ -81,6 +82,8 @@ sub generate_song {
     $config = dclone( $s->{config} // $::config );
     $lyrics_only  = $config->{settings}->{'lyrics-only'};
     $s->structurize;
+    prepare_assets($s);
+    $s->dump(0) if $config->{debug}->{song};
     $layout = Text::Layout::HTML->new;
     while ( my($k,$v) = each( %{$config->{markup}->{shortcodes}}) ) {
 	unless ( $layout->can("register_shortcode") ) {
@@ -155,6 +158,7 @@ sub generate_song {
 	    my @elts = @{$elt->{body}};
 	    while ( @elts ) {
 		my $e = shift(@elts);
+    $DB::single = 1;
 		if ( $e->{type} eq "empty" ) {
 		    push( @s, "<!-- ***SHOULD NOT HAPPEN*** -->" );
 		    next;
@@ -195,6 +199,35 @@ sub generate_song {
 		    push( @s, "" ) if $tidy;
 		    next;
 		}
+		if ( $e->{type} eq "image" ) {
+		    use ChordPro::Output::Common qw(mimedata);
+		    my @args;
+		    while ( my($k,$v) = each( %{ $elt->{opts} } ) ) {
+			push( @args, "$k=\"$v\"" );
+		    }
+		    # First shot code. Fortunately (not surprisingly :))
+		    # HTML understands most arguments.
+
+		    my $asset = $s->{assets}->{$e->{id}};
+		    use DDP; p $asset;
+		    $elt->{uri} //= $asset->{uri};
+		    my @images;
+		    if ( $s->{assets}->{$e->{id}}->{data} ) {
+			@images = mimedata( \join("\n",@{$asset->{data}}) );
+		    }
+		    else {
+			@images = mimedata($elt->{uri});
+		    }
+		    for ( @images ) {
+			push( @s,
+			      '<div class="' . $e->{type} . '">' .
+			      qq{<img src="$_" } .
+			      "@args" . "/>" .
+			      '</div>' );
+			push( @s, "" ) if $tidy;
+		    }
+		    next;
+	    }
 
 
 	    }
@@ -225,6 +258,7 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "image" ) {
+	    use ChordPro::Output::Common qw(mimedata);
 	    my @args;
 	    while ( my($k,$v) = each( %{ $elt->{opts} } ) ) {
 		push( @args, "$k=\"$v\"" );
@@ -232,15 +266,24 @@ sub generate_song {
 	    # First shot code. Fortunately (not surprisingly :))
 	    # HTML understands most arguments.
 
-	    if ( $elt->{type} eq "image" ) {
-		$elt->{uri} //= $s->{assets}->{$elt->{id}}->{uri};
+	    my $asset = $s->{assets}->{$elt->{id}};
+	    use DDP; p $asset;
+	    $elt->{uri} //= $asset->{uri};
+	    my @images;
+	    if ( $s->{assets}->{$elt->{id}}->{data} ) {
+		@images = mimedata( \$asset->{data} );
 	    }
-	    push( @s,
-		  '<div class="' . $elt->{type} . '">' .
-		  '<img src="' . $elt->{uri} . '" ' .
-		  "@args" . "/>" .
-		  '</div>' );
-	    push( @s, "" ) if $tidy;
+	    else {
+		@images = mimedata($elt->{uri});
+	    }
+	    for ( @images ) {
+		push( @s,
+		      '<div class="' . $elt->{type} . '">' .
+		      qq{<img src="$_" } .
+		      "@args" . "/>" .
+		      '</div>' );
+		push( @s, "" ) if $tidy;
+	    }
 	    next;
 	}
 
