@@ -18,8 +18,9 @@ our @EXPORT;
 use ChordPro::Files;
 use ChordPro::Utils;
 use ChordPro::Output::SVG::Images;
+use IO::String;
 
-sub prepare_assets( $s, $pr ) {
+sub prepare_assets( $s, $pr = undef ) {
 
     my %sa = %{$s->{assets}//{}} ;	# song assets
 
@@ -43,7 +44,8 @@ push( @EXPORT, 'prepare_assets' );
 
 sub prepare_asset( $id, $s, $pr ) {
 
-    my $ps = $s->{_ps} = $pr->{ps};		# for handlers TODO
+    my $ps;
+    $ps = $s->{_ps} = $pr->{ps} if $pr;
 
     # All elements generate zero or one display items, except for SVG images
     # than can result in a series of display items.
@@ -53,9 +55,9 @@ sub prepare_asset( $id, $s, $pr ) {
 #    warn("_MR = ", $ps->{_marginright}, ", _RM = ", $ps->{_rightmargin},
 #	 ", __RM = ", $ps->{__rightmargin}, "\n");
 #    my $pw = $ps->{__rightmargin} - $ps->{_marginleft};
-    my $pw = $ps->{_marginright} - $ps->{_marginleft};
-    my $cw = ( $pw - ( $ps->{columns} - 1 ) * $ps->{columnspace} ) /$ps->{columns}
-      - $ps->{_indent};
+    my $pw = $ps ? $ps->{_marginright} - $ps->{_marginleft} : 700;
+    my $cw = $ps ? ( $pw - ( $ps->{columns} - 1 ) * $ps->{columnspace} ) /$ps->{columns}
+      - $ps->{_indent} : 700;
 
     for my $elt ( $s->{assets}->{$id} ) {
 	# Already prepared, e.g. multi-pass songbook.
@@ -115,6 +117,8 @@ sub prepare_asset( $id, $s, $pr ) {
 		next;
 	    }
 	}
+
+	next unless $ps;
 
 	if ( $elt->{type} eq "image" && $elt->{subtype} eq "svg" ) {
 	    warn("Assets: Preparing SVG image\n") if $config->{debug}->{images};
