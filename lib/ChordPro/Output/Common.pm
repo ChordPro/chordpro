@@ -320,9 +320,8 @@ push( @EXPORT_OK, 'prep_outlines' );
 
 sub encode_percent {
     my ( $str ) = @_;
-    $str =~ s/([\:\/\?\#\[\]\@\!\$\&\'\"\(\)\*\+\,\;\=\%])
-	     /sprintf("%%%02X", ord($1))/egx;
-    $str;
+    require URI::Escape;
+    return URI::Escape::uri_escape_utf8($str);
 }
 
 sub mimedata {
@@ -368,7 +367,7 @@ sub mimedata {
     use MIME::Base64;
     # Emit as individual images.
     for my $img ( @img ) {
-	if ( $mimetype =~ m;(text/); ) {
+	if ( $mimetype =~ m;(text/|/svg); ) {
 	    $img = "data:$mimetype,". encode_percent($img);
 	    warn("mimedata: $mimetype, ", length($img), " bytes\n")
 	      if $config->{debug}->{images};

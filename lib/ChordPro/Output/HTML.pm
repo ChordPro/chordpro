@@ -205,17 +205,17 @@ sub generate_song {
 		    while ( my($k,$v) = each( %{ $elt->{opts} } ) ) {
 			push( @args, "$k=\"$v\"" );
 		    }
-		    # First shot code. Fortunately (not surprisingly :))
-		    # HTML understands most arguments.
 
 		    my $asset = $s->{assets}->{$e->{id}};
-		    use DDP; p $asset;
 		    $elt->{uri} //= $asset->{uri};
+
 		    my @images;
 		    if ( $s->{assets}->{$e->{id}}->{data} ) {
+			# mimedata will return one or more image sources.
 			@images = mimedata( \join("\n",@{$asset->{data}}) );
 		    }
 		    else {
+			# Presumably a single image source.
 			@images = mimedata($elt->{uri});
 		    }
 		    for ( @images ) {
@@ -227,9 +227,7 @@ sub generate_song {
 			push( @s, "" ) if $tidy;
 		    }
 		    next;
-	    }
-
-
+		}
 	    }
 	    push( @s, '</div>' );
 	    push( @s, "" ) if $tidy;
@@ -263,12 +261,10 @@ sub generate_song {
 	    while ( my($k,$v) = each( %{ $elt->{opts} } ) ) {
 		push( @args, "$k=\"$v\"" );
 	    }
-	    # First shot code. Fortunately (not surprisingly :))
-	    # HTML understands most arguments.
 
 	    my $asset = $s->{assets}->{$elt->{id}};
-	    use DDP; p $asset;
 	    $elt->{uri} //= $asset->{uri};
+
 	    my @images;
 	    if ( $s->{assets}->{$elt->{id}}->{data} ) {
 		@images = mimedata( \$asset->{data} );
