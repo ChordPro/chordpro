@@ -312,6 +312,19 @@ sub prep_outlines {
 }
 push( @EXPORT_OK, 'prep_outlines' );
 
+sub encode_html {
+    my $text = shift;
+    return "" unless defined $text;
+    $text =~ s/&/&amp;/g;
+    $text =~ s/</&lt;/g;
+    $text =~ s/>/&gt;/g;
+    $text =~ s/"/&quot;/g;
+    $text =~ s/'/&#39;/g;
+    $text;
+}
+
+push( @EXPORT_OK, 'encode_html' );
+
 # Make a data: URI (string) from an external source.
 # This is mostly intended for images.
 # Since ABC generated SVG can contain multiple images, this function
