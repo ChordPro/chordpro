@@ -445,9 +445,11 @@ delegates {
 
     // Embedding textblock.
     textblock {
-        module      : TextBlock
-        pdf.type    : image
-        pdf.handler : txt2xform
+        module       : TextBlock
+        pdf.type     : image
+        pdf.handler  : txt2xform
+        html.type    : html
+        html.handler : txt2html
     }
 }
 

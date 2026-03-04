@@ -1491,7 +1491,7 @@ sub directive {
 	    }
 	    my $kv = parse_kv( $arg, "label" );
 	    delete $kv->{label} if ($kv->{label}//"") eq "";
-	    $self->add( type     => "image",
+	    $self->add( type     => beo( $d, 'type' ),
 			subtype  => "delegate",
 			delegate => beo( $d, 'module' ),
 			handler  => beo( $d, 'handler' ),
