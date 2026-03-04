@@ -128,7 +128,14 @@ sub abc2svg( $song, %args ) {
     if ( defined $elt->{opts}->{transpose} ) {
 	my $tr = $elt->{opts}->{transpose};
 	my $x = $tr->{xp};
-	$x %= @{ $config->{notes}->{sharp} } unless $tr->{forced};
+	if ( $tr->{forced} ) {
+	    $x .= $tr->{forced} < 0 ? 'b'
+	      : $tr->{forced} > 0 ? '#' : ''
+	      if $x;
+	}
+	else {
+	    $x %= @{ $config->{notes}->{sharp} };
+	}
 	unshift( @preamble, '%%transpose'." $x" ) if $x;
     }
 
