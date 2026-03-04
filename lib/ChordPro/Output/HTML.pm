@@ -158,7 +158,6 @@ sub generate_song {
 	    my @elts = @{$elt->{body}};
 	    while ( @elts ) {
 		my $e = shift(@elts);
-    $DB::single = 1;
 		if ( $e->{type} eq "empty" ) {
 		    push( @s, "<!-- ***SHOULD NOT HAPPEN*** -->" );
 		    next;
@@ -228,6 +227,21 @@ sub generate_song {
 		    }
 		    next;
 		}
+
+		if ( $e->{type} eq "html" ) {
+		    my @args;
+		    while ( my($k,$v) = each( %{ $e->{opts} } ) ) {
+			push( @args, "$k=\"$v\"" );
+		    }
+		    use ChordPro::Delegate::TextBlock;
+		    my $pkg = 'ChordPro::Delegate::'. $e->{delegate};
+		    my $hnd = $e->{handler};
+		    warn("XXX pkg = \"$pkg\", hnd = \"$hnd\"\n");
+		    my $html = $pkg->can($hnd)->( $s, elt => $e );
+		    push( @s, '<div class="' . lc($hnd) . '">' . $html . '</div>' );
+		    push( @s, "" ) if $tidy;
+		    next;
+		}
 	    }
 	    push( @s, '</div>' );
 	    push( @s, "" ) if $tidy;
@@ -280,6 +294,20 @@ sub generate_song {
 		      '</div>' );
 		push( @s, "" ) if $tidy;
 	    }
+	    next;
+	}
+
+	if ( $elt->{type} eq "html" ) {
+	    my @args;
+	    while ( my($k,$v) = each( %{ $elt->{opts} } ) ) {
+		push( @args, "$k=\"$v\"" );
+	    }
+
+	    my $pkg = 'ChordPro::Delegate::'. $elt->{delegate};
+	    my $hnd = $elt->{handler};
+	    my $html = $pkg->can($hnd)->( $s, elt => $elt );
+	    push( @s, '<div class="' . lc($hnd) . '">' . $html . '</div>' );
+	    push( @s, "" ) if $tidy;
 	    next;
 	}
 
