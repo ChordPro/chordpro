@@ -102,11 +102,16 @@ LIB := lib/ChordPro
 RES := ${LIB}/res
 PODSELECT := podselect
 
-RESOURCES := wxg ${LIB}/Config/Data.pm ${RES}/config/chordpro.json
+RESOURCES := wxg ${LIB}/Config/Data.pm
+RESOURCES += ${RES}/config/chordpro.json ${RES}/config/guitar.json
 RESOURCES += ${RES}/pod/ChordPro.pod ${RES}/pod/Config.pod ${RES}/pod/A2Crd.pod
 RESOURCES += docs/assets/pub/config60.schema
 
 resources : ${RESOURCES}
+
+%.json : %.rjson
+	perl -Mlib=lib/ChordPro/lib script/rrjson.pl --json_xs --no-pretty $< > $@~
+	cmp $@ $@~ || mv $@~ $@
 
 ${LIB}/Config/Data.pm : ${RES}/config/chordpro.json
 	perl script/cfgboot.pl $< > $@~

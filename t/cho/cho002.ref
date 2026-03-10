@@ -8,5 +8,5 @@
 {comment: Key: D, Actual: D, From: }
 [D]Hi
 
-#{chord: D base-fret 1 frets N N 0 2 3 2}
-#{chord: E base-fret 1 frets 0 2 2 1 0 0}
+#{chord: D base-fret 1 frets N N 0 2 3 2 fingers x x x 1 3 2}
+#{chord: E base-fret 1 frets 0 2 2 1 0 0 fingers x 2 3 1 x x}
