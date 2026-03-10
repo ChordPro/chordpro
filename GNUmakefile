@@ -120,7 +120,7 @@ ${LIB}/Config/Data.pm : ${RES}/config/chordpro.json
 ${RES}/pod/ChordPro.pod : ${LIB}.pm
 	${PODSELECT} $< > $@
 
-${RES}/pod/Config.pod : ${RES}/config/chordpro.json
+${RES}/pod/Config.pod : ${RES}/config/chordpro.rjson
 	( echo "=head1 ChordPro Default Configuration"; \
 	  echo ""; \
 	  echo "=encoding UTF8"; \
