@@ -2,6 +2,9 @@
 
     !Highlights
 
+    - Updated the standard guitar chords with lots of new chords and
+      fingering information. Thanks to Russ Jones.
+
     - Added a new configuration setting `settings.wraplines` to
       control line wrapping. Enabled by default.
 
