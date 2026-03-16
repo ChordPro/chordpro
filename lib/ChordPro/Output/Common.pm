@@ -28,16 +28,6 @@ sub fmt_subst {
     my $res = "";
     my $m = { %{$s->{meta} || {} } };
 
-    # Derived item(s).
-    $m->{_key} = $m->{key} if exists $m->{key};
-    if ( $m->{key} && $m->{capo} && (my $capo = $m->{capo}->[-1]) ) {
-	####CHECK
-	$m->{_key} =
-	  [ map { ChordPro::Chords::transpose( $_, $capo ) }
-	    @{$m->{key}} ];
-    }
-    $m->{capo} = [] if $config->{settings}->{decapo};
-    $m->{key_actual} //= $m->{key};
     $m->{tuning} //= [ join(" ", ChordPro::Chords::get_tuning) ];
     # If config->{instrument} is missing, or null, the program abends with
     # Modification of a read-only value attempted.
@@ -63,6 +53,12 @@ sub fmt_subst {
 	$v = 1  if $v=~ /^(true|on)$/i;
 	$m->{"settings.$_"} = $v;
     }
+
+    # Legacy.
+    $m->{key_actual} = $m->{key_sound} // [];
+    # Modern.
+    $m->{'key.print'} = $m->{key_print} // [];
+    $m->{'key.sound'} = $m->{key_sound} // [];
 
     interpolate( { %$s, args => $m,
 		   separator => $config->{metadata}->{separator} },

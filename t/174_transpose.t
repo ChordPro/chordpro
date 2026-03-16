@@ -16,7 +16,7 @@ plan tests => 13;
 my $data1 = <<EOD;
 {title: Transpose}
 {key: D}
-{C:  |  D  |  %{key}  |  %{key_actual}  |  [D]   | }
+{C:  |  D  |  %{key.print}  |  %{key.sound}  |  [D]   | }
 EOD
 
 my @argv = ( "--no-default-configs",
@@ -68,18 +68,18 @@ my @xp = split(/[\n\r]+/, <<EOD);
 |  -  |  -  |  -  |  -  |  D  |  D  |  D  |  [D]  |
 |  -  |  -  |  2  |  f  |  D  |  D  |  E  |  [D]  |
 |  -  |  -  |  2  |  t  |  D  |  E  |  E  |  [E]  |
+|  -  |  2  |  -  |  -  |  D  |  E  |  E  |  [E]  |
 |  -  |  2  |  -  |  -  |  D  |  D  |  E  |  [E]  |
-|  -  |  2  |  -  |  -  |  D  |  D  |  E  |  [E]  |
-|  -  |  2  |  2  |  f  |  D  |  D  |  F# |  [E]  |
-|  -  |  2  |  2  |  t  |  D  |  E  |  F# |  [F#] |
+|  -  |  2  |  2  |  f  |  D  |  E  |  Gb |  [E]  |
+|  -  |  2  |  2  |  t  |  D  |  Gb |  Gb |  [F#] |
 |  2  |  -  |  -  |  -  |  D  |  E  |  E  |  [E]  |
 |  2  |  -  |  -  |  -  |  D  |  E  |  E  |  [E]  |
-|  2  |  -  |  2  |  f  |  D  |  E  |  F# |  [E]  |
-|  2  |  -  |  2  |  t  |  D  |  F# |  F# |  [F#] |
-|  2  |  2  |  -  |  -  |  D  |  E  |  F# |  [F#] |
-|  2  |  2  |  -  |  -  |  D  |  E  |  F# |  [F#] |
-|  2  |  2  |  2  |  f  |  D  |  E  |  G# |  [F#] |
-|  2  |  2  |  2  |  t  |  D  |  F# |  G# |  [G#] |
+|  2  |  -  |  2  |  f  |  D  |  E  |  Gb |  [E]  |
+|  2  |  -  |  2  |  t  |  D  |  Gb |  Gb |  [F#] |
+|  2  |  2  |  -  |  -  |  D  |  Gb |  Gb |  [F#] |
+|  2  |  2  |  -  |  -  |  D  |  E  |  Gb |  [F#] |
+|  2  |  2  |  2  |  f  |  D  |  Gb |  Ab |  [F#] |
+|  2  |  2  |  2  |  t  |  D  |  Ab |  Ab |  [G#] |
 EOD
 ok( @xp == 16, "Number of tests = 12" );
 

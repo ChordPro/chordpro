@@ -107,4 +107,3 @@ X%{head|x%{foo|ab|f%{}g}y}Y	XxfgyY
 
 # Transpose.
 %{key}		G
-%{_key}		G#

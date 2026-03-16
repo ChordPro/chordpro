@@ -127,7 +127,7 @@ $song = {
 		       'tempo' => [ '320', '220' ],
 		       'time' => [ '3/4', '4/4' ],
 		      },
-	    'chordsinfo' => { map { $_ => $_ } qw( F G A C ) },
+	    'chordsinfo' => { map { $_ => $_ } qw( F G A ), "A#" },
 	    'title' => 'Swing Low Sweet Chariot',
 	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear',

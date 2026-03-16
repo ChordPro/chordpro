@@ -1,5 +1,5 @@
 -- Title: Transpositions
--- Key is D, actual D
+-- Key is D, print D, sound D
 
 -- Start of chorus
       D          G    D
@@ -14,7 +14,7 @@ I looked over Jordan, and what did I see,
 Swing low, sweet chariot,
 -- End of chorus
 
--- Key is D, actual E, from D
+-- Key is D, print E, sound E
 
   E                       A          E
 I looked over Jordan, and what did I see,
@@ -24,7 +24,7 @@ I looked over Jordan, and what did I see,
 Swing low, sweet chariot,
 -- End of chorus
 
--- Key is D, actual F#, from E
+-- Key is D, print Gb, sound Gb
 
   F#                      B          F#
 I looked over Jordan, and what did I see,
@@ -34,7 +34,7 @@ I looked over Jordan, and what did I see,
 Swing low, sweet chariot,
 -- End of chorus
 
--- Key is D, actual E, from F#
+-- Key is D, print E, sound E
 
   E                       A          E
 I looked over Jordan, and what did I see,
@@ -44,7 +44,7 @@ I looked over Jordan, and what did I see,
 Swing low, sweet chariot,
 -- End of chorus
 
--- Key is D, actual D
+-- Key is D, print D, sound D
 
   D                       G          D
 I looked over Jordan, and what did I see,

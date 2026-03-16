@@ -1,11 +1,11 @@
 {title: Keys}
 {key: D}
-{comment: Key: , Actual: , From: }
-{comment: Key: D, Actual: D, From: }
+{comment: Key is }
+{comment: Key is D, print D, sound D}
 [D]Hi
-{comment: Key: D, Actual: E, From: D}
+{comment: Key is D, print E, sound E}
 [E]Hi
-{comment: Key: D, Actual: D, From: }
+{comment: Key is D, print D, sound D}
 [D]Hi
 
 #{chord: D base-fret 1 frets N N 0 2 3 2 fingers x x x 1 3 2}

@@ -18,6 +18,7 @@ use parent 'Exporter';
 our @EXPORT = qw( $config );
 
 use Test::More ();
+use Test::More::UTF8;
 
 use ChordPro::Files;
 use ChordPro::Config;
@@ -54,7 +55,8 @@ sub is_deeply {
 		}
 	    }
 	}
-	for ( qw( instrument user key_from key_actual chords numchords
+	for ( qw( instrument user _key key_actual key_sound key_print
+		  chords numchords
 		  _configversion bookmark
 	       ) ) {
 	    delete $got->{meta}->{$_} unless exists $expect->{meta}->{$_};

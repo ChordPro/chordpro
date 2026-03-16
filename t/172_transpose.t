@@ -6,6 +6,7 @@ use utf8;
 
 use ChordPro::Testing;
 use ChordPro::Songbook;
+use ChordPro::Chords::Transpose;
 
 plan tests => 3;
 
@@ -323,8 +324,8 @@ my $song = {
   meta => {
     songindex => 1,
     key => ['D'],
-#    key_actual => ['D'],
-#    key_from => ['E'],
+    key_print => ['D'],
+    key_sound => ['D'],
     title => [
       'Transpositions',
     ],

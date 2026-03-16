@@ -15,12 +15,12 @@ use warnings;
 use ChordPro;
 use ChordPro::Files;
 use ChordPro::Paths;
+use ChordPro::Utils;
 use ChordPro::Chords;
 use ChordPro::Chords::Appearance;
 use ChordPro::Chords::Parser;
+use ChordPro::Chords::Transpose;
 use ChordPro::Output::Common;
-use ChordPro::Utils;
-use ChordPro::Utils qw( parse_transpose );
 use ChordPro::Symbols qw( is_strum );
 
 use Carp;
@@ -41,18 +41,25 @@ my $grid_cells;			# also used for grilles?
 my $grid_type = 0;		# 0 = chords, 1,2 = strums
 my @grille;
 
-# Local transposition.
-my $xpose = 0;
-my $xpose_dir;
+# Transposition.
+# We have the following transpositions:
+# - outer, from cli or settings
+# - capo (if decapo this is just another transpose)
+# - inner, from transpose directives
+# outer and inner control the print
+# outer, inner and capo control the sound.
+# Transpositions are applied in the order inner, capo, outer.
+our $xpose;			# accumulated {transpose} directives.
+# This is the composite of {transpose} directives and CLI transpose.
 my $capo;
 
 # Used chords, in order of appearance.
+# Note that the key is not a chord.
 my @used_chords;
 
 # Chorus lines, if any.
 my @chorus;
-my $chorus_xpose = 0;
-my $chorus_xpose_dir = 0;
+my $chorus_xpose = 0;	# xpose_base when chorus was defined
 
 # Memorized chords.
 my $cctag;			# current cc name
@@ -88,9 +95,10 @@ my $assetid = "001";		# for assets
 sub new {
     my ( $pkg, $opts ) = @_;
 
+    # use Tie::Trace qw(watch); watch( $xpose, pkg => 'Song' );
+
     my $filesource = $opts->{filesource} || $opts->{_filesource};
 
-    $xpose = 0;
     $grid_arg = [ 4, 4, 1, 1, "" ];	# 1+4x4+1
     $in_context = $def_context;
     @used_chords = ();
@@ -101,6 +109,7 @@ sub new {
     @labels = ();
     @chorus = ();
     $capo = undef;
+    $xpose = parse_transpose(0);
     $xcmov = undef;
     upd_config();
 
@@ -117,6 +126,7 @@ sub new {
 }
 
 sub upd_config {
+    # These cannot be changed on the fly.
     $decapo    = $config->{settings}->{decapo};
     $lineinfo  = $config->{settings}->{lineinfo};
     $intervals = @{ $config->{notes}->{sharp} };
@@ -144,6 +154,7 @@ sub beo {
 sub parse_song {
     my ( $self, $lines, $linecnt, $meta, $defs ) = @_;
     die("OOPS! Wrong meta") unless ref($meta) eq 'HASH';
+
     local $config = dclone($config);
 
     $backend = lc( $self->{generate} // "None" );
@@ -252,7 +263,7 @@ sub parse_song {
 	prpadd2cfg( $config, %$defs );
     }
 
-    for ( qw( transpose transcode decapo lyrics-only ) ) {
+    for ( qw( transcode decapo lyrics-only ) ) {
 	next unless defined $options->{$_};
 	$config->{settings}->{$_} = $options->{$_};
     }
@@ -272,12 +283,15 @@ sub parse_song {
 	  if !$v || (beo( $v, 'type')//'none') eq 'none';
     }
 
-    # Parse transpose, if any.
-    unless ( is_hashref($config->{settings}->{transpose}) ) {
-	my $tr = parse_transpose($config->{settings}->{transpose}) //
-	  do_warn( "Invalid transpose \"", $config->{settings}->{transpose},
-		   "\" (ignored)");
-	$config->{settings}->{transpose} = $tr;
+    # Handle transpose (needs parsing unless cli).
+    if ( ref($config->{settings}->{transpose}) ) {
+	# From CLI; already parsed.
+    }
+    else {
+	my $t = parse_transpose( $config->{settings}->{transpose} );
+	die("Config error: invalid transpose value \"" .
+	    $config->{settings}->{transpose} . "\"\n" ) unless defined $t;
+	$config->{settings}->{transpose} = $t;
     }
 
     # And lock the config.
@@ -295,6 +309,7 @@ sub parse_song {
 	}
     }
 
+    $xpose = parse_transpose(0);
     $no_transpose = $options->{'no-transpose'};
     $no_substitute = $options->{'no-substitute'};
     my $fragment = $options->{fragment};
@@ -746,9 +761,6 @@ sub parse_song {
     do_warn("Unterminated context in song: $in_context")
       if $in_context;
 
-    # These don't make sense after processing. Or do they?
-    # delete $self->{meta}->{$_} for qw( key_actual key_from );
-
     warn("Processed song...\n") if $options->{verbose};
     $diag->{format} = "\"%f\": %m";
 
@@ -830,14 +842,6 @@ sub parse_song {
     	delete $self->{meta}->{cc};
     }
 
-    if ( %memchords ) {
-	::dump(\%memchords, as => "cc (atend)") if $config->{debug}->{chords};
-    }
-    else {
-	# Avoid clutter.
-    	delete $self->{meta}->{cc};
-    }
-
     if ( $config->{settings}->{strict} && !$self->{meta}->{key}) {
 	do_warn( "Song is missing {key} directive" );
     }
@@ -883,7 +887,6 @@ sub add {
     if ( $in_context eq "chorus" ) {
 	push( @chorus, { context => $in_context, @_ } );
 	$chorus_xpose = $xpose;
-	$chorus_xpose_dir = $xpose_dir;
     }
 }
 
@@ -1425,7 +1428,7 @@ sub directive {
 	    # warn("Skipping context: $in_context\n");
 	    return 1;
 	}
-	@chorus = (), $chorus_xpose = $chorus_xpose_dir = 0
+	@chorus = (), $chorus_xpose = parse_transpose(0)
 	  if $in_context eq "chorus";
 	undef $cctag;
 
@@ -1484,10 +1487,9 @@ sub directive {
 	elsif ( exists $config->{delegates}->{$in_context} ) {
 	    my $d = $config->{delegates}->{$in_context};
 	    my %opts;
-	    if ( $xpose || $config->{settings}->{transpose}->{xp} ) {
-		my $tr = { %{$config->{settings}->{transpose}} };
-		$tr->{xp} += $xpose;
-		$opts{transpose} = $tr;
+	    if ( $xpose ) {
+		...;
+		$opts{transpose} = transpose_print();
 	    }
 	    my $kv = parse_kv( $arg, "label" );
 	    delete $kv->{label} if ($kv->{label}//"") eq "";
@@ -1726,15 +1728,26 @@ sub dir_chorus {
 	  if $config->{settings}->{choruslabels};
     }
 
-    if ( $chorus_xpose != ( my $xp = $xpose ) ) {
-	$xp -= $chorus_xpose;
+    if ( $chorus_xpose ne $xpose ) {
+	# The chorus has already been transposed with chorus_xpose.
+	my $xp = do {
+	    local $xpose = $chorus_xpose;
+	    transpose_print()->invert;
+	};
+	my $t = transpose_print();
+	$xp += $t;
+	$xp->dir = $t->dir;
+	warn("XPOSE: chorus ", $chorus_xpose->_data_printer,
+	     " (", $xpose->_data_printer, ")",
+	     " ", $xp->_data_printer,
+	     "\n") if $config->{debug}->{xpose};
 	for ( @$chorus ) {
 	    if ( $_->{type} eq "songline" ) {
 		for ( @{ $_->{chords} } ) {
 		    next if $_ eq '';
 		    my $info = $self->{chordsinfo}->{$_->key};
 		    next if $info->is_annotation;
-		    $info = $info->transpose($xp, $xpose <=> 0) if $xp;
+		    $info = $info->transpose($xp) if $xp;
 		    $info = $info->new($info);
 		    $_ = ChordPro::Chords::Appearance->new
 		      ( key => $self->add_chord($info),
@@ -1809,7 +1822,7 @@ sub dir_image {
     my $chord;
     my $type;
     my %opts;
-    $DB::single=1;
+
     while ( my($k,$v) = each(%$res) ) {
 	if ( $k =~ /^(title)$/i && $v ne "" ) {
 	    $opts{lc($k)} = $v;
@@ -2036,28 +2049,52 @@ sub dir_meta {
 
 	    if ( $key eq "key" ) {
 		$val =~ s/[\[\]]//g;
+
+		# We do not want the key to be transposed!
+		my @save = ( $xpose, $capo );
+		( $xpose, $capo ) = ( parse_transpose(0), 0 );
 		my $info = do {
+		    local( $config->{settings}->{transpose} ) = parse_transpose(0);
 		    # When transcoding to nash/roman, parse_chord will
 		    # complain about a missing key. Fake one.
 		    local( $self->{meta}->{key} ) = [ '_dummy_' ];
 		    local( $self->{chordsinfo}->{_dummy_} ) = { root_ord => 0 };
 		    $self->parse_chord($val);
 		};
-		do_warn("Illegal key: \"$val\"\n"), next unless $info;
+		( $xpose, $capo ) = @save;;
+		do_warn("Invalid key: \"$val\"\n"), next
+		  unless $info && $info->is_key;
+
 		my $name = $info->name;
 		my $act = $name;
 		$info->{key} = $name
 		  unless $config->{settings}->{'enharmonic-transpose'};
 
-		if ( $capo ) {
-		    $act = $self->add_chord( $info->transpose($capo) );
-		    $name = $act if $decapo;
+		my $m = $self->{meta};
+		push( @{ $m->{key} }, $info->keyname );
+		push( @{ $m->{_key} }, $info->name );
+		if ( $xpose || $capo || $config->{settings}->{transpose} ) {
+		    my $key = $name;
+		    my $xpk = $self->{chordsinfo}->{$key};
+		    if ( $xpk ) {
+			my $info = $xpk->transpose( transpose_print() );
+			$self->{chordsinfo}->{$info->name} = $info;
+			$m->{key_print} = [ $info->keyname ];
+			$xpose->set_key($info);
+			$info = $xpk->transpose(transpose_sound());
+			$self->{chordsinfo}->{$info->name} = $info;
+			$m->{key_sound} = [ $info->keyname ];
+			transpose_debug( "key($val)", $m );
+		    }
+		    else {
+			warn("WHOAH! Key \"$key\" not found in chordsinfo");
+		    }
 		}
-
-		push( @{ $m->{key} }, $name );
-		$m->{key_actual} = [ $act ];
-#		    warn("XX key=$name act=$act capo=",
-#			 $capo//"<undef>"," decapo=$decapo\n");
+		else {
+		    $m->{key_print} = $m->{key_sound} = [ $m->{key}->[-1] ];
+		    $xpose->set_key($info);
+		    transpose_debug( "key($val)", $m );
+		}
 		return 1;
 	    }
 
@@ -2066,28 +2103,29 @@ sub dir_meta {
 		do_warn("Multiple capo settings may yield surprising results.")
 		  if exists $m->{capo};
 
-		$capo = $val || undef;
-		if ( $capo && $m->{key} ) {
-		    if ( $decapo ) {
-			my $key = $self->store_chord
-			  ($self->{chordsinfo}->{$m->{key}->[-1]}
-			   ->transpose($val));
-			$m->{key}->[-1] = $key;
-			$key = $self->store_chord
-			  ($self->{chordsinfo}->{$m->{key}->[-1]}
-			   ->transpose($xpose));
-			$m->{key_actual} = [ $key ];
+		if ( $val && $decapo ) {
+		    warn( "XPOSE: capo($val) -> transpose (decapo)\n" )
+		      if $config->{debug}->{xpose};;
+		    return $self->dir_transpose( "transpose", $val );
+		}
+
+		return 1 unless $val;
+		$capo = $val;
+		my $m = $self->{meta};
+		if ( $m->{key} ) {
+		    my $key = $m->{_key}->[-1];
+		    my $xpk = $self->{chordsinfo}->{$key};
+		    if ( $xpk ) {
+			my $info = $xpk->transpose(transpose_sound());
+			$self->{chordsinfo}->{$info->name} = $info;
+			$m->{key_sound} = [ $info->keyname ];
+			transpose_debug( "capo($val)", $m );;
 		    }
 		    else {
-			my $act = $m->{key_actual}->[-1];
-			$m->{key_from} = [ $act ];
-			my $key = $self->store_chord
-			  ($self->{chordsinfo}->{$act}->transpose($val));
-			$m->{key_actual} = [ $key ];
+			warn("WHOAH! Key \"$key\" not found in chordsinfo");
 		    }
 		}
 	    }
-
 	    elsif ( $key eq "duration" && $val ) {
 		$val = duration($val);
 	    }
@@ -2182,63 +2220,110 @@ sub dir_transpose {
 
     $propstack{transpose} //= [];
 
+    my %a = ( type => "control",
+	      name => "transpose",
+	      previous => $xpose,
+	    );
+
     if ( $arg =~ /\S/ ) {
 	my $t = parse_transpose($arg) //
 	  do_warn("Invalid transpose: \"$arg\" (ignored)");
 	return unless $t;
-	push( @{ $propstack{transpose} }, [ $xpose, $xpose_dir ] );
-	my %a = ( type => "control",
-		  name => "transpose",
-		  previous => [ $xpose, $xpose_dir ]
-		);
-	$xpose += $t->{xp};
-	$xpose_dir = $t->{dir};
+	push( @{ $propstack{transpose} }, $xpose );
+	$xpose += $t;
+
 	my $m = $self->{meta};
 	if ( $m->{key} ) {
-	    my $key = $m->{key}->[-1];
-	    my $xp = $xpose;
-	    $xp += $capo if $capo;
-	    my $xpk = $self->{chordsinfo}->{$key}->transpose($xp);
-	    $self->{chordsinfo}->{$xpk->name} = $xpk;
-	    $m->{key_from} = [ $m->{key_actual}->[0] ];
-	    $m->{key_actual} = [ $xpk->name ];
+	    my $key = $m->{_key}->[-1];
+	    my $xpk = $self->{chordsinfo}->{$key};
+	    if ( $xpk ) {
+		my $info = $xpk->transpose( transpose_print() );
+		$self->{chordsinfo}->{$info->name} = $info;
+		$m->{key_print} = [ $info->keyname ];
+		$xpose->set_key($info);
+		$info = $xpk->transpose(transpose_sound());
+		$self->{chordsinfo}->{$info->name} = $info;
+		$m->{key_sound} = [ $info->keyname ];
+		transpose_debug( "xp($arg)", $m );
+	    }
+	    else {
+		warn("WHOAH! Key \"$key\" not found in chordsinfo");
+	    }
 	}
-	$self->add( %a, value => $xpose, dir => $xpose_dir )
-	  if $no_transpose;
     }
     else {
-	my %a = ( type => "control",
-		  name => "transpose",
-		  previous => [ $xpose, $xpose_dir ]
-		);
 	my $m = $self->{meta};
-	my ( $new, $dir );
 	if ( @{ $propstack{transpose} } ) {
-	    ( $new, $dir ) = @{ pop( @{ $propstack{transpose} } ) };
+	    $xpose = pop( @{ $propstack{transpose} } );
 	}
 	else {
-	    $new = 0;
-	    $dir = $config->{settings}->{transpose} <=> 0;
+	    $xpose = parse_transpose(0);
 	}
-	$xpose = $new;
-	$xpose_dir = $dir;
+
 	if ( $m->{key} ) {
-	    $m->{key_from} = [ $m->{key_actual}->[0] ];
-	    my $xp = $xpose;
-	    $xp += $capo if $capo && $decapo;
-	    $m->{key_actual} =
-	      [ $self->{chordsinfo}->{$m->{key}->[-1]}->transpose($xp)->name ];
+	    my $key = $m->{_key}->[-1];
+	    my $xpk = $self->{chordsinfo}->{$key};
+	    if ( $xpk ) {
+		my $info = $xpk->transpose( transpose_print() );
+		$self->{chordsinfo}->{$info->name} = $info;
+		$m->{key_print} = [ $info->keyname ];
+		$xpose->set_key($info);
+		$info = $xpk->transpose(transpose_sound());
+		$self->{chordsinfo}->{$info->name} = $info;
+		$m->{key_sound} = [ $info->keyname ];
+		transpose_debug( "xp($arg)", $m );
+	    }
+	    else {
+		warn("WHOAH! Key \"$key\" not found in chordsinfo");
+	    }
 	}
-	if ( !@{ $propstack{transpose} } ) {
-	    delete $m->{$_} for qw( key_from );
-	}
-	$self->add( %a, value => $xpose, dir => $dir )
-	  if $no_transpose;
     }
+
+    $self->add( %a, value => $xpose )
+      if $no_transpose;
     return 1;
 }
 
 #### End of directive handlers ####
+
+sub transpose_sound {
+    my ( $only_print ) = @_;
+
+    my $xp =
+      # Use current.
+      $xpose
+      # Apply capo.
+      + ( $only_print ? 0 : $capo//0 )
+      # Apply global (cli, config) transpose.
+      + $config->{settings}->{transpose};
+
+    warn( "XPOSE: ",
+	  "base = ", $xpose->_data_printer, " ",
+	  ($only_print || !$capo) ? "" : "capo = $capo ",
+	  "outer = ", $config->{settings}->{transpose}->_data_printer, " ",
+	  $only_print ? "print = " : "sound = ", $xp->_data_printer,
+	  "\n") if $config->{debug}->{xpose};
+
+    return $xp;
+}
+
+sub transpose_print {
+    transpose_sound(1);
+}
+
+sub transpose_debug {
+    return unless $config->{debug}->{xpose};
+    my ( $tag, $m ) = @_;
+    my $xp = transpose_print();
+    warn( "XPOSE: $tag, ",
+	  "key = ",   $m->{key}->[-1],      ", ",
+	  "print = ", $m->{key_print}->[0], ", ",
+	  "sound = ", $m->{key_sound}->[0],
+	  " [ ", join( " ", $config->{settings}->{transpose},
+		       $xpose, $capo//0,
+		       $xp->key ? "\@" . $xp->key->keyname : () ),
+	  " ]\n" );
+}
 
 sub propset {
     my ( $self, $item, $prop, $value ) = @_;
@@ -2645,19 +2730,13 @@ sub parse_chord {
     warn("Parsing chord: \"$chord\"\n") if $debug;
     my $info;
 
-    my $xp = 0;
-    my $global_dir = 0;
-    if ( my $transpose = $config->{settings}->{transpose} ) {
-	$xp = $xpose + $transpose->{xp};
-	$xp += $capo if $capo && $decapo;
-	$global_dir = $transpose->{dir};
-    }
+    my $xp = transpose_print();
 
     my $xc = $config->{settings}->{transcode};
     my $unk;
 
     # When called from {define} ignore xc/xp.
-    $xc = $xp = '' if $def;
+    ( $xc, $xp ) = ( '', 0 ) if $def;
 
     $info = ChordPro::Chords::known_chord($chord);
     if ( $info ) {
@@ -2667,7 +2746,7 @@ sub parse_chord {
 	return ChordPro::Chord::NC->new( { name => $info->name } )
 	  if $info->is_nc
 	     && !( $info->{display} || $info->{format} );
-	$info->dump if $debug > 1;
+	$info->dump if $debug > 2;
     }
     else {
 	$info = ChordPro::Chords::parse_chord($chord);
@@ -2694,15 +2773,15 @@ sub parse_chord {
 	  if $xp || $xc || $config->{debug}->{chords};
     }
 
-    if ( $xp && $info 
+    if ( $xp && $info
 	 && !( $xc && ( $xc eq "nashville" || $xc eq "roman" ) ) ) {
 	# For transpose/transcode, chord must be wellformed.
-	my $i = $info->transpose( $xp, $xpose_dir // $global_dir );
+	my $i = $info->transpose($xp);
 	# Prevent self-references.
 	$i->{xp} = $info unless $i eq $info;
 	$info = $i;
-	warn( "Parsing chord: \"$chord\" transposed ",
-	      sprintf("%+d", $xp), " to \"",
+	warn( "Parsing chord: \"$chord\" transposed $xp (".
+	      $xp->_data_printer.") to \"",
 	      $info->name, "\"",
 	      ( $self->{meta}->{key} ? (" key ".$self->{meta}->{key}->[-1]) : ()),
 	      "\n" ) if $debug > 1;

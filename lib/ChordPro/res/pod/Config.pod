@@ -1288,6 +1288,7 @@
         spacing     : 0
         svg         : 0
         txtblk      : 0
+        xpose       : 0
         x1          : 0
         x2          : 0
         x3          : 0

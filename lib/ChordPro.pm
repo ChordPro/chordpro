@@ -8,6 +8,7 @@ use ChordPro::Logger;
 use ChordPro::Files;
 use ChordPro::Utils;
 use ChordPro::Chords;
+use ChordPro::Chords::Transpose;
 use ChordPro::Output::Common;
 
 # Single line for stupid tools.
@@ -977,10 +978,13 @@ sub app_setup {
 	$::options->{reference} = 1;
     }
 
-    if ( $ok ) {
-	if ( defined $clo->{transpose} ) {
-	    $ok = $clo->{transpose} =~ /^[-+]?(\d+)[sf]?$/
-	      && $1 <= 24;	# arb limit
+    if ( $ok && defined $clo->{transpose} ) {
+	if ( my $tr = parse_transpose($clo->{transpose}) ) {
+	    $clo->{transpose} = $tr;
+	}
+	else {
+	    warn("Invalid transpose value: ", $clo->{transpose}, "\n" );
+	    $ok = 0;
 	}
     }
 

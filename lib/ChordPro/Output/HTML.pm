@@ -263,7 +263,7 @@ sub generate_song {
 	    else {
 		push( @s,
 		      '<div class="' . $elt->{type} . '">' .
-		      '<span>' . nhtml($elt->{orig}) . '</span></div>' );
+		      '<span>' . nhtml(fmt_subst($s,$elt->{text})) . '</span></div>' );
 	    }
 	    push( @s, "" ) if $tidy;
 	    next;

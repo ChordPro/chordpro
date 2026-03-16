@@ -3,7 +3,7 @@
 use v5.26;
 use utf8;
 use Carp;
-use feature qw( signatures );
+use feature qw( signatures state);
 no warnings "experimental::signatures";
 
 # package ParserWatch;
@@ -821,6 +821,8 @@ sub name          {
 
 sub canon         { $_[0]->{name_canon} }
 sub root          { $_[0]->{root} }
+sub root_ord      { $_[0]->{root_ord} }
+sub root_mod      { $_[0]->{root_mod} }
 sub qual          { $_[0]->{qual} }
 sub ext           { $_[0]->{ext} }
 sub bass          { $_[0]->{bass} }
@@ -839,6 +841,70 @@ sub strings {
 sub kbkeys {
     return $_[0]->{keys} if $_[0]->{keys} && @{$_[0]->{keys}};
     $_[0]->{keys} = ChordPro::Chords::get_keys($_[0]);
+}
+
+# Valid keys may not have bass, ext and qual (unless minor).
+sub is_key {
+    defined $_[0]->{root_ord}
+      && !$_[0]->{ext}
+      && !$_[0]->{bass}
+      && ( !$_[0]->{qual} || $_[0]->is_key_minor );
+}
+
+sub is_key_minor {
+    $_[0]->{qual_canon} eq '-';
+}
+
+sub is_key_sharp {
+    my ( $self ) = @_;
+    my $r = $self->root_ord;
+    $r = ( $r - 3 ) % $self->strings if $self->is_key_minor;
+         $r == 11 # B
+      || $r ==  9 # A
+      || $r ==  7 # G
+      || $r ==  6 # F# (dual)
+      || $r ==  4 # E
+      || $r ==  2 # D
+      || $r ==  0 # C (neutral)
+    ;
+}
+
+sub is_key_flat {
+    my ( $self ) = @_;
+    my $r = $self->root_ord;
+    $r = ( $r - 3 ) % $self->strings if $self->is_key_minor;
+         $r == 10 # Bb
+      || $r ==  8 # Ab
+      || $r ==  6 # Gb (dual)
+      || $r ==  5 # F
+      || $r ==  3 # Eb
+      || $r ==  1 # Db
+      || $r ==  0 # C (neutral)
+    ;
+}
+
+# Some keys are not used since they would have too many sharps.
+sub is_key_toosharp {
+    my ( $self ) = @_;
+    my $r = $self->root_ord;
+    $r = ( $r - 3 ) % $self->strings if $self->is_key_minor;
+         $r == 10 # A#
+      || $r ==  8 # G#
+      || $r ==  6 # F# (technically acceptable, but convention is to use Gb)
+      || $r ==  3 # D#
+      || $r ==  1 # C#
+    ;
+}
+
+sub keyname {
+    my ( $k ) = @_;
+    if ( is_key_toosharp($k) ) {
+	return $k->{parser}->{nf_canon}->[$k->root_ord] .
+	  ( $k->{qual_canon} eq '-' ? "m" : "" );
+    }
+
+    return $k->{parser}->{ns_canon}->[$k->root_ord] .
+      ( $k->{qual_canon} eq '-' ? "m" : "" );
 }
 
 sub chord_display ( $self, $default ) {
@@ -890,7 +956,6 @@ sub fix_musicsyms ( $self, $str ) {
 
     my $sf = $::config->{settings}->{truesf};
     my $delta = $::config->{settings}->{maj7delta};
-    $DB::single = 1 if $str =~ />bb</;
     my @c = splitmarkup($str);
     my $res = '';
     push( @c, '' ) if @c % 2;
@@ -983,10 +1048,14 @@ sub agnostic ( $self ) {
 	  $self->{bass_ord} // () );
 }
 
-sub transpose ( $self, $xpose, $dir = 0 ) {
+sub transpose ( $self, $xpose ) {
     return $self unless $xpose;
+    Carp::confess("xpose is not a transpose object")
+	unless UNIVERSAL::isa( $xpose, "transpose" );
     return $self unless $self->is_chord;
-    $dir //= $xpose <=> 0;
+    $DB::single = 1;
+    my $dir = $xpose->dir;
+    $xpose = $xpose->xp;
 
     my $info = $self->clone;
     my $p = $self->{parser};
@@ -1091,6 +1160,12 @@ sub chord_display ( $self ) {
 	// "%{name}" );
 }
 
+# Key name.
+sub keyname( $k ) {
+    return $k->{parser}->root_canon( $k->{root_ord} ) .
+      ( $k->{qual_canon} eq '-' ? "m" : "" );
+}
+
 ################ Chord objects: Roman ################
 
 package ChordPro::Chord::Roman;
@@ -1116,6 +1191,11 @@ sub chord_display ( $self ) {
     $self->SUPER::chord_display
       ( $::config->{"chord-formats"}->{roman}
 	// "%{name}" );
+}
+
+# Key name.
+sub keyname( $k ) {
+    return $k->{parser}->root_canon( $k->{root_canon}, 0, $k->{qual_canon} eq '-' );
 }
 
 ################ Chord objects: Annotations ################
@@ -1242,7 +1322,7 @@ unless ( caller ) {
 	  for qw( common nashville roman );
 	print( " '", $info->agnostic, "' (agnostic)\n" );
 	print( "$_ =>" );
-	print( " ", $info->transpose($_)->canonical, " ($_)" ) for -2..2;
+	print( " ", $info->transpose(ChordPro::Chords::Transpose::parse_transpose($_))->canonical, " ($_)" ) for -2..2;
 	print( "\n" );
 #	my $clone = $info->clone;
 #	delete($clone->{parser});

@@ -145,6 +145,9 @@ method preview( $args, %opts ) {
 	elsif ( $state{xpose_accidentals} == XP_FLAT ) {
 	    $pfx = "f"
 	}
+	elsif ( $state{xpose_accidentals} == XP_KEY ) {
+	    $pfx = "k"
+	}
 	else {
 	    $pfx = "";
 	}

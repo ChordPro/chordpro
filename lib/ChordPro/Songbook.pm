@@ -60,7 +60,6 @@ sub parse_file {
 
     $opts //= {};
 
-    # Used by tests.
     for ( "transpose", "transcode" ) {
 	next unless exists $opts->{$_};
 	$config->{settings}->{$_} = $opts->{$_};

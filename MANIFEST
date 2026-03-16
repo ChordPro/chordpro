@@ -11,6 +11,7 @@ lib/ChordPro/Assets.pm
 lib/ChordPro/Chords.pm
 lib/ChordPro/Chords/Appearance.pm
 lib/ChordPro/Chords/Parser.pm
+lib/ChordPro/Chords/Transpose.pm
 lib/ChordPro/Config.pm
 lib/ChordPro/Config/Data.pm
 lib/ChordPro/Config/Properties.pm
@@ -293,6 +294,7 @@ t/172_transpose.t
 t/173_transpose.t
 t/174_transpose.t
 t/175_transpose.t
+t/176_transpose.t
 t/177_transcode.t
 t/178_transcode.t
 t/180_grids.t
