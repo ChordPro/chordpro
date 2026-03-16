@@ -33,6 +33,9 @@ You can choose the desired behaviour from the dropdown list:
  * Sharps when transposing up, flats when transposing down
  * Always use sharps
  * Always use flats
+ * Follow the key of the song  
+   Keys that have sharps in the signature
+   will use sharps, otherwise flats will be used
 
 ## Custom Tasks
 
