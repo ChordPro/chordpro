@@ -117,9 +117,10 @@ WriteMakefile
      },
      no_index => {
          file => [
-	    "lib/ChordPro/Songbook.pm",
+	    "lib/ChordPro/Assets.pm",
 	    "lib/ChordPro/Chords.pm",
 	    "lib/ChordPro/Config.pm",
+	    "lib/ChordPro/Songbook.pm",
 	    "lib/ChordPro/Testing.pm",
 	    "lib/ChordPro/Utils.pm",
 	    "lib/ChordPro/Version.pm",
