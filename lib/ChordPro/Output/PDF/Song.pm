@@ -1122,9 +1122,15 @@ sub generate_song {
 	    elsif ( $elt->{name} eq "context" ) {
 		$curctx = $elt->{value};
 	    }
-	    # Arbitrary config values.
+	    # Arbitrary pdf config values.
 	    elsif ( $elt->{name} =~ /^pdf\.(.+)/ ) {
 		prpadd2cfg( $ps, $1 => $elt->{value} );
+	    }
+	    # Arbitrary config values.
+	    elsif ( $elt->{name} =~ /^(.+)\.(.+)/ ) {
+		$config->unlock;
+		prpadd2cfg( $config, $elt->{name} => $elt->{value} );
+		$config->lock;
 	    }
 	    next;
 	}
@@ -1399,7 +1405,7 @@ sub songline {
 	}
 	my ( $text, $ex ) = wrapsimple( $pr, $t, $x, $ftext );
 	$pr->text( $text, $x, $ytext, $ftext );
-	my $wi = $pr->strwidth( $config->{settings}->{wrapindent}//"x" );
+	my $wi = $pr->strwidth( $config->{settings}->{wrapindent} );
 	return $ex ne ""
 	  ? { %$elt,
 	      indent => $wi,
@@ -1434,7 +1440,7 @@ sub songline {
 	my ( $text, $ex ) = wrapsimple( $pr, join( "", @phrases ),
 					$x, $ftext );
 	$pr->text( $text, $x, $ytext, $ftext );
-	my $wi = $pr->strwidth( $config->{settings}->{wrapindent}//"x" );
+	my $wi = $pr->strwidth( $config->{settings}->{wrapindent} );
 	return $ex ne ""
 	  ? { %$elt,
 	      indent => $wi,
@@ -2377,7 +2383,7 @@ sub wrap {
     my @rchords;
     my @rphrases;
     my $m = $pr->{ps}->{__rightmargin};
-    my $wi = $pr->strwidth( $config->{settings}->{wrapindent}//"x",
+    my $wi = $pr->strwidth( $config->{settings}->{wrapindent},
 			    $pr->{ps}->{fonts}->{text} );
     #warn("WRAP x=$x rm=$m w=", $m - $x, "\n");
 
