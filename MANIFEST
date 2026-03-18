@@ -146,6 +146,8 @@ lib/ChordPro/res/config/config.tmpl
 lib/ChordPro/res/config/dark.json
 lib/ChordPro/res/config/diagramsright.json
 lib/ChordPro/res/config/guitar-br.json
+lib/ChordPro/res/config/guitar-jazz.json
+lib/ChordPro/res/config/guitar-jazz.rjson
 lib/ChordPro/res/config/guitar-ly.json
 lib/ChordPro/res/config/guitar.json
 lib/ChordPro/res/config/guitar.rjson

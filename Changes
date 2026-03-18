@@ -7,6 +7,9 @@
     - Updated the standard guitar chords with lots of new chords and
       fingering information. Thanks to Russ Jones.
 
+    - Added another Russ Jones contribution: guitar-jazz with many
+      chords typically used in Jazzy music.
+
     - Added a new configuration setting `settings.wraplines` to
       control line wrapping. Enabled by default.
 
