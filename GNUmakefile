@@ -110,7 +110,8 @@ RESOURCES += docs/assets/pub/config60.schema
 resources : ${RESOURCES}
 
 %.json : %.rjson
-	perl -Mlib=lib/ChordPro/lib script/rrjson.pl --json_xs --no-pretty $< > $@~
+	perl -Mlib=lib/ChordPro/lib script/rrjson.pl --json_xs --no-pretty $< |\
+	perl -pe 's/"(-?\d+)"/$$1/g' > $@~
 	cmp $@ $@~ || mv $@~ $@
 
 ${LIB}/Config/Data.pm : ${RES}/config/chordpro.json
@@ -152,13 +153,15 @@ checkjson :
 	    */keyboard.json)    continue;; \
 	    */dark.json)        continue;; \
 	    */notes/*)          continue;; \
+	    */*.rjson)          continue;; \
 	    */*.tmpl)           continue;; \
 	    */*.schema)         continue;; \
 	  esac; \
-	  perl -Ilib/ChordPro/lib script/rrjson.pl --json $$i > .json/`basename $$i`; \
+	  perl -Ilib/ChordPro/lib script/rrjson.pl --json_xs $$i | \
+	  perl -pe 's/"(-?\d+)"/$$1/' > .json/`basename $$i`; \
 	  ${JSONVALIDATOR} ${JSONOPTS} -s .json/schema.json -d .json/`basename $$i`; \
 	done
-	rm -fr .json
+#	rm -fr .json
 
 # Experimental
 

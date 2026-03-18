@@ -229,6 +229,10 @@
             {
               "const": "omit",
               "title": "Ignores the section."
+            },
+            {
+              "const": "filter",
+              "title": "For filtering plugins."
             }
           ],
           "default": "image"
@@ -820,6 +824,11 @@
             },
             "enharmonic-transpose": {
               "description": "Force enharmonic when transposing (experimental).",
+              "type": "boolean",
+              "default": true
+            },
+            "fsharpkey": {
+              "description": "The key F# (6 sharps) is usually represented as its enharmonic equivalent Gb (6 flats). Set this to true if you want F sharp instead of G flat.",
               "type": "boolean",
               "default": true
             },
@@ -2873,13 +2882,19 @@
                   "type": "object",
                   "properties": {
                     "handler": {
-                      "const": "txt2xform"
+		      "anyOf" : [
+		      { "const": "txt2xform" },
+		      { "type": "string" }
+		      ]
                     },
                     "module": {
                       "const": "TextBlock"
                     },
                     "type": {
-                      "const": "image"
+		      "anyOf": [
+		      { "const": "image" },
+		      { "type" : "string" }
+		      ]
                     }
                   }
                 }
