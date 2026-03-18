@@ -1,5 +1,7 @@
 // supplement and corrections to guitar.json
 
+$schema : "https://chordpro.org/beta/resources/config.schema"
+
 config {
     type        : stylemod
     title       : "Guitar-Jazz"
