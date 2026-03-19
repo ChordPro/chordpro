@@ -1501,9 +1501,9 @@ sub directive {
 	elsif ( exists $config->{delegates}->{$in_context} ) {
 	    my $d = $config->{delegates}->{$in_context};
 	    my %opts;
-	    if ( $xpose ) {
-		...;
-		$opts{transpose} = transpose_print();
+	    my $xp = transpose_print();
+	    if ( $xp->xp ) {
+		$opts{transpose} = $xp;
 	    }
 	    my $kv = parse_kv( $arg, "label" );
 	    delete $kv->{label} if ($kv->{label}//"") eq "";

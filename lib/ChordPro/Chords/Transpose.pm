@@ -38,7 +38,7 @@ method as_string {
 }
 
 method for_abc {
-    $xp . ( "", "b" , "#", "?" )[$forced]; # breaks XP_ hiding
+    $xp . ( "", "#", "b" , "" )[$forced]; # breaks XP_ hiding
 }
 
 method invert {
