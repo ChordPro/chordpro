@@ -862,7 +862,7 @@ sub is_key_sharp {
          $r == 11 # B
       || $r ==  9 # A
       || $r ==  7 # G
-      || $r ==  6 # F# (dual)
+      || ( $r == 6 ? !!$::config->{settings}->{fsharpkey} : 0 ) # F# (dual)
       || $r ==  4 # E
       || $r ==  2 # D
       || $r ==  0 # C (neutral)
@@ -875,7 +875,7 @@ sub is_key_flat {
     $r = ( $r - 3 ) % $self->strings if $self->is_key_minor;
          $r == 10 # Bb
       || $r ==  8 # Ab
-      || $r ==  6 # Gb (dual)
+      || ( $r == 6 ? !$::config->{settings}->{fsharpkey} : 0 ) # Gb (dual)
       || $r ==  5 # F
       || $r ==  3 # Eb
       || $r ==  1 # Db
@@ -890,7 +890,7 @@ sub is_key_toosharp {
     $r = ( $r - 3 ) % $self->strings if $self->is_key_minor;
          $r == 10 # A#
       || $r ==  8 # G#
-      || $r ==  6 # F# (technically acceptable, but convention is to use Gb)
+      || ( $r == 6 ? !$::config->{settings}->{fsharpkey} : 0 ) # F# (dual)
       || $r ==  3 # D#
       || $r ==  1 # C#
     ;
