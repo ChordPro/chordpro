@@ -56,8 +56,18 @@ config.description : "User config settings for ChordPro."
 // Chords under the lyrics.
 # settings.chords-under : false
 
-// Transpose chords. 0 = no transpose.
+// Transpose the song by a number of semitones.
+// A positive number transposes up, a negative number transposes down.
+// An optional postfix of "s" or "f" can be used to enforce the use
+// of sharps resp. flats when a transposed chord requires accidentals.
+// A postfix of "k" will use the key signature to determine whether
+// flats or sharps are needed.
 # settings.transpose : 0
+
+// The key F# (6 sharps) is usually represented as its enharmonic
+// equivalent Gb (6 flats). Set this to true if you want F sharp
+// instead of G flat.
+# settings.fsharpkey : false
 
 // Force enharmonic when transposing (experimental).
 # settings.enharmonic-transpose : true
