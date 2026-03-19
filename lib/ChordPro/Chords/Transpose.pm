@@ -37,10 +37,6 @@ method as_string {
     $xp . ( "", "s", "f" , "k" )[$forced]; # breaks XP_ hiding
 }
 
-method for_abc {
-    $xp . ( "", "#", "b" , "" )[$forced]; # breaks XP_ hiding
-}
-
 method invert {
     transpose->new( xp => -$xp,
 		    forced => $forced,

@@ -129,7 +129,7 @@ sub abc2svg( $song, %args ) {
 	my $tr = $elt->{opts}->{transpose};
 	my $x;
 	if ( $tr->forced ) {
-	    $x = $tr->for_abc;
+	    $x = $tr->xp . ( $config->{settings}->{fsharpkey} ? "#" : "b" );
 	}
 	else {
 	    $x = $tr->xp % @{ $config->{notes}->{sharp} };
