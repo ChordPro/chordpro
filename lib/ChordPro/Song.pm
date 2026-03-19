@@ -672,6 +672,20 @@ sub parse_song {
 			}
 		    }
 		}
+		elsif ( beo( $d, 'type' ) eq "filter" ) {
+		    local $_;
+		    my $a = pop( @{ $self->{body} } );
+		    my $pkg = 'ChordPro::Delegate::' . $a->{delegate};
+		    eval "require $pkg" || warn($@);
+		    my $c = $pkg->can( $a->{handler} );
+		    my $res = $c->( $c, elt => $a );
+		    my @lines = @{$res->{data}};
+		    $skipcnt += @lines;
+		    unshift( @$lines, @lines );
+		    $in_context = $def_context;
+		    # Prevent context set.
+		    next;
+		}
 	    }
 	    else {
 		# Add to an open item.
