@@ -137,31 +137,9 @@ docs/assets/pub/config61.schema : ${RES}/config/config.schema
 # Verify JSON data
 
 CFGLIB := ${LIB}/res/config
-# JSONVALIDATOR = java -jar lib/jar/json-schema-validator-*-lib.jar
-# JSONOPTS := --brief
-# This requires npm install ajv-cli .
-JSONVALIDATOR = ajv --validate-formats=false
-JSONOPTS := --allowUnionTypes=true
 
 checkjson :
-	rm -fr .json
-	mkdir .json
-	cp -p ${CFGLIB}/config.schema .json/schema.json
-	for i in $(shell git ls-files ${CFGLIB}) ; \
-	do \
-	  case "$$i" in \
-	    */keyboard.json)    continue;; \
-	    */dark.json)        continue;; \
-	    */notes/*)          continue;; \
-	    */*.rjson)          continue;; \
-	    */*.tmpl)           continue;; \
-	    */*.schema)         continue;; \
-	  esac; \
-	  perl -Ilib/ChordPro/lib script/rrjson.pl --json_xs $$i | \
-	  perl -pe 's/"(-?\d+)"/$$1/' > .json/`basename $$i`; \
-	  ${JSONVALIDATOR} ${JSONOPTS} -s .json/schema.json -d .json/`basename $$i`; \
-	done
-#	rm -fr .json
+	make -C ${CFGLIB} checkjson
 
 # Experimental
 
