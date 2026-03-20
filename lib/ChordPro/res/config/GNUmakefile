@@ -14,10 +14,10 @@ checkjson :
 	rm -fr .json
 	mkdir .json
 	cp -p ${CFGLIB}/config.schema .json/schema.json
-	for i in $(shell git ls-files ${CFGLIB}) ; \
+	for i in $(shell git ls-files ) ; \
 	do \
 	  case "$$i" in \
-	    keyboard.json)    continue;; \
+	    GNUmakefile)      continue;; \
 	    dark.json)        continue;; \
 	    notes/*)          continue;; \
 	    *.rjson)          continue;; \

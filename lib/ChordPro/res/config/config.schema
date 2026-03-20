@@ -744,12 +744,13 @@
           "default": ""
         },
         "config": {
+          "type": "object",
           "description": "For GUI.",
           "properties": {
             "type": {
               "title": "The type of this config",
               "description": "One or more of `\"config\"`, `\"style\"`, `\"style_mod\"`, `\"instrument\"`, `\"task\"` ...",
-              "oneOf": [
+              "anyOf": [
                 { "const": "config",
                   "title": "This is a generic config file."
                 },
@@ -773,8 +774,7 @@
                   },
                   "minItems": 1
                 }  
-              ],
-              "enum": [ "config", "style", "stylemod", "instrument", "task " ]
+              ]
             },
             "title": {
               "description": "Title for menus, choices, if applicable.",
@@ -786,11 +786,15 @@
             },
             "exclude_id": {
               "description": "Exclusive control.\nIf multiple configs have the same exclude_id, only one will be used.",
-              "type": "string"
+              "type": ["boolean","string"]
             },
             "default": {
               "description": "True if this is the default config for a specific type.\nDo not use unless you know what you are doing!",
-              "type": "string"
+              "type": "boolean"
+            },
+            "omit": {
+              "description": "Do not show this config in the GUI.",
+              "type": "boolean"
             }
           },
           "additionalProperties": false
@@ -900,7 +904,6 @@
             "lineinfo": {
               "default": true,
               "description": "Obsolete.",
-              "obsolete": true,
               "type": "boolean"
             },
             "lyrics-only": {
@@ -960,7 +963,12 @@
               "default": 0,
               "description": "Transpose the song by a number of semitones.\nA positive number transposes up, a negative number transposes down.\nAn optional postfix of `\"s\"` or `\"f\"` can be used to enforce the use of sharps resp. flats when a transposed chord requires accidentals.\nA postfix of `\"k\"` will use the key signature to determine whether flats or sharps are needed.",
               "type": [ "number", "string" ],
-	      "pattern": "^[-+]?\\d+[sf]?$"
+              "pattern": "^[-+]?\\d+[sf]?$"
+            },
+            "transpose-key": {
+              "default": false,
+              "description": "Always apply `\"k\"` semantics if no other postfix was specified.",
+              "type": "boolean"
             },
             "truesf": {
               "default": false,
@@ -2513,12 +2521,12 @@
                     }
                   ]
                 },
-		"page_layout": {
-		  "description": "For future use.",
-		  "oneOf": [ { "type": "string"  },
-		  	     { "type": "boolean" } ],
+                "page_layout": {
+                  "description": "For future use.",
+                  "oneOf": [ { "type": "string"  },
+                             { "type": "boolean" } ],
                   "default": false
-		},
+                },
                 "papersize": {
                   "description": "Output paper size.\nThe size can be specified either as the name of a known page size, e.g. `\"a4`\", or as a 2-element list containing the width and height of the page in PDF units (DTP points, pt, 1/72 inch).",
                   "oneOf": [
@@ -2934,19 +2942,19 @@
                   "type": "object",
                   "properties": {
                     "handler": {
-		      "anyOf" : [
-		      { "const": "txt2xform" },
-		      { "type": "string" }
-		      ]
+                      "anyOf" : [
+                      { "const": "txt2xform" },
+                      { "type": "string" }
+                      ]
                     },
                     "module": {
                       "const": "TextBlock"
                     },
                     "type": {
-		      "anyOf": [
-		      { "const": "image" },
-		      { "type" : "string" }
-		      ]
+                      "anyOf": [
+                      { "const": "image" },
+                      { "type" : "string" }
+                      ]
                     }
                   }
                 }
@@ -3131,6 +3139,7 @@
       }
     },
     {
+      "type": "object",
       "properties": {
         "parser": {
           "$ref": "#/definitions/parserspec"

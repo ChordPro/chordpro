@@ -65,8 +65,17 @@ of them can be changed from the command line.
 	  // Chords under the lyrics.
 	  chords-under : false
 
-	  // Transpose chords.
+	  // Transpose the song by a number of semitones.
+	  // A positive number transposes up, a negative number transposes down.
+	  // An optional postfix of `"s"` or `"f"` can be used to enforce the use of sharps resp. flats when a transposed chord requires accidentals.
+	  // A postfix of `"k"` will use the key signature to determine whether flats or sharps are needed.
 	  transpose : 0
+
+	  // Always apply `"k"` semantics if no other postfix was specified.
+	  transpose-key: false
+
+	  // The key F# (6 sharps) is usually represented as its enharmonic equivalent Gb (6 flats). Set this to true if you want F sharp instead of G flat.
+	  fsharpkey : false
 
 	  // Force enharmonic when transposing (experimental).
 	  enharmonic-transpose: true

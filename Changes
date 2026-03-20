@@ -4,6 +4,8 @@
 
     - Reworked Keys and Transpositions.
 
+    - New config setting: settings.transpose-key and settings.fsharpkey.
+
     - Updated the standard guitar chords with lots of new chords and
       fingering information. Thanks to Russ Jones.
 

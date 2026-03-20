@@ -294,6 +294,18 @@ sub parse_song {
 	$config->{settings}->{transpose} = $t;
     }
 
+    # Enforce key transpose semantics unless otherwise specified.
+    if ( $config->{settings}->{'transpose-key'} ) {
+	for ( $config->{settings}->{transpose} ) {
+	    if ( $_ ) {
+		$_ = parse_transpose( $_ . "k" ) unless $_->forced;
+	    }
+	    else {
+		$_ = parse_transpose("0k");
+	    }
+	}
+    }
+
     # And lock the config.
     $config->lock;
 
