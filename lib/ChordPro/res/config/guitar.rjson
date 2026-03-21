@@ -1163,6 +1163,7 @@ chords : [
     { name : "G/D"         base :  1  frets : [ -1  -1   0   4   3   3 ] fingers : [ x  x  x  2  1  1 ] }
     { name : "G#/D#"       base :  4  frets : [ -1   3   3   2   1   1 ] fingers : [ x  3  4  2  1  1 ] }
     { name : "Ab/Eb"       base :  1  frets : [ -1   3   3   2   1   1 ] fingers : [ x  3  4  2  1  1 ] }
+    { name : "A/E"         base :  1  frets : [  0   0   2   2   2   0 ] fingers : [ x  x  1  2  3  x ] }
     { name : "A#/F"        base :  1  frets : [  1   1   3   3   3   1 ] fingers : [ 1  1  3  3  3  1 ] }
     { name : "Bb/F"        base :  1  frets : [  1   1   3   3   3   1 ] fingers : [ 1  1  3  3  3  1 ] }
     { name : "B/F#"        base :  1  frets : [  2   2   4   4   4   2 ] fingers : [ 1  1  3  3  3  1 ] }
