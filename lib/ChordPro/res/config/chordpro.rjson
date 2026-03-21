@@ -21,7 +21,7 @@ config {
 
     // True if this is the default config for a specific type.
     // Do not use unless you know what you are doing!
-    default: true
+    default : true
 }
 
 // A config file can specify a list of other config files that are to be processed **before** the contents of the current file. This makes it straightforward to create config files that extend existing config files.
@@ -78,10 +78,7 @@ settings {
     transpose : 0
 
     // Always apply `"k"` semantics if no other postfix was specified.
-    transpose-key: false
-
-    // The key F# (6 sharps) is usually represented as its enharmonic equivalent Gb (6 flats). Set this to true if you want F sharp instead of G flat.
-    fsharpkey : false
+    transpose-sf-key : false
 
     // Force enharmonic when transposing (experimental).
     enharmonic-transpose : true
@@ -248,6 +245,18 @@ notes {
     movable : false
 }
 
+// Key strategies.
+// ChordPro tries to follow ABC (abc2svg) as much as possible.
+keys {
+
+    // Replace keys with an excessive number of sharps by their more common enharmonic equivalents.
+    // See also `settings.transpose-sf-key`.
+    force-common : true
+
+    // The keys `C#` and `F#` are often used as is and not represented a enharmonic equivalent. Set this to true if you want `Db`/`Gb` instead of `C#`/`F#`.
+    flats : false
+}
+
 // User-defined chords.
 // This is an array of hashes, one for each chord.
 // See the docs for details.
@@ -274,9 +283,9 @@ diagrams {
 
     // Selection of chords to show.
     // Shows selected or all chord diagrams at end.
-    // `"all"`: shows all chords
-    // `"user"`: shows user defined chords only
-    // `"none"`: suppresses chords from being printed.
+    //  `"all"`: shows all chords
+    //  `"user"`: shows user defined chords only
+    //  `"none"`: suppresses chords from being printed.
     show : all
 
     // Sorts the diagrams by key. Default is order of appearance.
@@ -411,23 +420,23 @@ delegates {
     abc {
 
         // The result produced by the delegate handler.
-        type       : image
+        type : image
 
         // The name of the (perl) module that implements the delegate.
-        module     : ABC
+        module : ABC
 
         // The module's method to call.
         // Default handler uses `program` (if set), othewise embedded QuickJS or external QuickJS.
         handler : abc2svg
 
         // The program/command to execute.
-        program    : ""
+        program : ""
 
         // Obsolete.
         config : default
 
         // Specific settings for the PDF backend.
-        pdf.preamble   : [
+        pdf.preamble : [
             "%%textfont pdf.fonts.text"
             "%%vocalfont pdf.fonts.text"
             "%%gchordfont pdf.fonts.chord"
@@ -441,16 +450,16 @@ delegates {
     ly {
 
         // The result produced by the delegate handler.
-        type       : image
+        type : image
 
         // The name of the (perl) module that implements the delegate.
-        module     : Lilypond
+        module : Lilypond
 
         // The module's method to call.
-        handler    : ly2svg
+        handler : ly2svg
 
         // The program/command to execute.
-        program    : ""
+        program : ""
         config     : default
 
         // Input lines to prepend to the user data.
@@ -467,10 +476,10 @@ delegates {
     strum {
 
         // The result produced by the delegate handler.
-    	type         : none
+        type : none
 
         // The module's method to call.
-	handler      : none
+        handler : none
 
         // Specific settings for the PDF backend.
         pdf {
@@ -479,17 +488,17 @@ delegates {
         }
 
         // The name of the (perl) module that implements the delegate.
-        module       : Strum
+        module : Strum
     }
 
     // Embedding SVG.
     svg {
 
         // The result produced by the delegate handler.
-        type    : image
+        type : image
 
         // The name of the (perl) module that implements the delegate.
-        module  : SVG
+        module : SVG
 
         // The module's method to call.
         handler : svg2svg
@@ -499,13 +508,13 @@ delegates {
     textblock {
 
         // The result produced by the delegate handler.
-    	type         : none
+        type : none
 
         // The module's method to call.
-	handler      : none
+        handler : none
 
         // The name of the (perl) module that implements the delegate.
-        module       : TextBlock
+        module : TextBlock
 
         // Specific settings for the PDF backend.
         pdf {
@@ -804,7 +813,7 @@ pdf {
         show : true
 
         // Stretch grid lines vertically.
-	stretch : 0.825
+        stretch : 0.825
 
         // Properties of special symbols.
         symbols.color : blue
@@ -823,52 +832,52 @@ pdf {
     // New style page control.
     songbook {
 
-	// Dual (odd/even) pages when set to true.
-	// False means all pages will be the same (odd, right).
-	// With dual pages, all the parts of the songbook (covers,
-	// tables of contents, etc.) are always aligned to a right page.
-	dual-pages : true
+        // Dual (odd/even) pages when set to true.
+        // False means all pages will be the same (odd, right).
+        // With dual pages, all the parts of the songbook (covers,
+        // tables of contents, etc.) are always aligned to a right page.
+        dual-pages : true
 
-	// With dual pages, align individual tables of content
-	// to right pages by inserting a blank filler page.
-	// Values are true, false, or "song". In the latter case the
-	// pagealign settings for songs are used for the tables of contents.
-	align-tocs : true
+        // With dual pages, align individual tables of content
+        // to right pages by inserting a blank filler page.
+        // Values are true, false, or "song". In the latter case the
+        // pagealign settings for songs are used for the tables of contents.
+        align-tocs : true
 
-	// With dual pages, a true value aligns songs to right pages
-	// by inserting a blank filler page if necessary.
-	// If false, no alignment takes place, all pages follow
-	// each other.
-	align-songs : true
+        // With dual pages, a true value aligns songs to right pages
+        // by inserting a blank filler page if necessary.
+        // If false, no alignment takes place, all pages follow
+        // each other.
+        align-songs : true
 
-	// If true, all songs will start on left pages instead of right pages.
-	align-songs-spread : false
+        // If true, all songs will start on left pages instead of right pages.
+        align-songs-spread : false
 
-	// If true, the fill pages will have headings and footers
-	// as if they were part of the song.
-	align-songs-extend : false
+        // If true, the fill pages will have headings and footers
+        // as if they were part of the song.
+        align-songs-extend : false
 
         // Sort songs by `"title"` or `"subtitle"`.
-	// title    : sort pages alphabetically by title.
+        // title    : sort pages alphabetically by title.
         // subtitle : sort pages alphabetically by subtitle. If this is used together with title, only title is used.
         // Put a minus sign before title and/or subtitle to obtain descending order.
-	sort-songs : false
+        sort-songs : false
 
-	// If true, the order of the songs is adjusted to make the
-	// songbook as compact as possible, while each of the songs
-	// require minimal page turns.
-	// Note: this option requires extra processing time since
-	// the songbook has to be processed twice.
-	compact-songs : false
+        // If true, the order of the songs is adjusted to make the
+        // songbook as compact as possible, while each of the songs
+        // require minimal page turns.
+        // Note: this option requires extra processing time since
+        // the songbook has to be processed twice.
+        compact-songs : false
 
-	// PDF file to add as cover page(s).
-	cover : false
+        // PDF file to add as cover page(s).
+        cover : false
 
-	// PDF file to add as front matter.
-	front-matter : false
+        // PDF file to add as front matter.
+        front-matter : false
 
-	// PDF file to add as back matter.
-	back-matter : false
+        // PDF file to add as back matter.
+        back-matter : false
     }
 
     // Page formats.
@@ -1261,25 +1270,25 @@ chordpro {
 html {
 
     // The actual backend module.
-    module: HTML
+    module : HTML
 
     // Stylesheets for display and printing.
     styles {
 
-	// Relative path to a CSS file to use for styling HTML output.
-	default : chordpro.css
+        // Relative path to a CSS file to use for styling HTML output.
+        default : chordpro.css
 
-	// Relative path to a CSS file to use for styling displayed HTML output on screen media.
-	screen  : ""
+        // Relative path to a CSS file to use for styling displayed HTML output on screen media.
+        screen : ""
 
-	// Relative path to a CSS file to use for styling printed HTML output.
-	print   : chordpro_print.css
+        // Relative path to a CSS file to use for styling printed HTML output.
+        print : chordpro_print.css
 
-	// Embed the styles instead of linking to them.
-	embed   : false
+        // Embed the styles instead of linking to them.
+        embed : false
 
         // Legacy style for `"screen"`.
-	display : ""
+        display : ""
     }
 }
 
@@ -1368,7 +1377,7 @@ debug {
     runtimeinfo : 1
 
     // All debug settings are intended for development and debugging and are not useful for ChordPro users.
-    a2crd       : 0
+    a2crd : 0
     abc         : 0
     assets      : 0
     chords      : 0

@@ -859,13 +859,16 @@ sub is_key_sharp {
     my ( $self ) = @_;
     my $r = $self->root_ord;
     $r = ( $r - 3 ) % $self->strings if $self->is_key_minor;
-         $r == 11 # B
-      || $r ==  9 # A
-      || $r ==  7 # G
-      || ( $r == 6 ? !!$::config->{settings}->{fsharpkey} : 0 ) # F# (dual)
-      || $r ==  4 # E
-      || $r ==  2 # D
-      || $r ==  0 # C (neutral)
+
+    return
+           $r == 11 # B
+      ||   $r ==  9 # A
+      ||   $r ==  7 # G
+      || ( $r ==  6 ? !!$::config->{keys}->{flats} : 0 ) # F# (dual)
+      ||   $r ==  4 # E
+      ||   $r ==  2 # D
+      || ( $r ==  1 ? !!$::config->{keys}->{flats} : 0 ) # Db
+      ||   $r ==  0 # C (neutral)
     ;
 }
 
@@ -873,13 +876,15 @@ sub is_key_flat {
     my ( $self ) = @_;
     my $r = $self->root_ord;
     $r = ( $r - 3 ) % $self->strings if $self->is_key_minor;
-         $r == 10 # Bb
-      || $r ==  8 # Ab
-      || ( $r == 6 ? !$::config->{settings}->{fsharpkey} : 0 ) # Gb (dual)
-      || $r ==  5 # F
-      || $r ==  3 # Eb
-      || $r ==  1 # Db
-      || $r ==  0 # C (neutral)
+
+    return
+           $r == 10 # Bb
+      ||   $r ==  8 # Ab
+      || ( $r ==  6 ? !$::config->{keys}->{flats} : 0 ) # Gb (dual)
+      ||   $r ==  5 # F
+      ||   $r ==  3 # Eb
+      || ( $r ==  1 ? !$::config->{keys}->{flats} : 0 ) # Db
+      ||   $r ==  0 # C (neutral)
     ;
 }
 
@@ -888,16 +893,19 @@ sub is_key_toosharp {
     my ( $self ) = @_;
     my $r = $self->root_ord;
     $r = ( $r - 3 ) % $self->strings if $self->is_key_minor;
-         $r == 10 # A#
-      || $r ==  8 # G#
-      || ( $r == 6 ? !$::config->{settings}->{fsharpkey} : 0 ) # F# (dual)
-      || $r ==  3 # D#
-      || $r ==  1 # C#
+
+    return
+           $r == 10 # A#
+      ||   $r ==  8 # G#
+      || ( $r ==  6 ? !$::config->{keys}->{flats} : 0 ) # F# (acceptable)
+      ||   $r ==  3 # D#
+      || ( $r ==  1 ? !$::config->{keys}->{flats} : 0 ) # C# (acceptable)
     ;
 }
 
 sub keyname {
     my ( $k ) = @_;
+    return $k->name unless $::config->{keys}->{'force-common'};
     if ( is_key_toosharp($k) ) {
 	return $k->{parser}->{nf_canon}->[$k->root_ord] .
 	  ( $k->{qual_canon} eq '-' ? "m" : "" );

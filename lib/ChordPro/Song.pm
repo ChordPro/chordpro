@@ -295,7 +295,7 @@ sub parse_song {
     }
 
     # Enforce key transpose semantics unless otherwise specified.
-    if ( $config->{settings}->{'transpose-key'} ) {
+    if ( $config->{settings}->{'transpose-sf-key'} ) {
 	for ( $config->{settings}->{transpose} ) {
 	    if ( $_ ) {
 		$_ = parse_transpose( $_ . "k" ) unless $_->forced;

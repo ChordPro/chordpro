@@ -72,10 +72,7 @@ of them can be changed from the command line.
 	  transpose : 0
 
 	  // Always apply `"k"` semantics if no other postfix was specified.
-	  transpose-key: false
-
-	  // The key F# (6 sharps) is usually represented as its enharmonic equivalent Gb (6 flats). Set this to true if you want F sharp instead of G flat.
-	  fsharpkey : false
+	  transpose-sf-key: false
 
 	  // Force enharmonic when transposing (experimental).
 	  enharmonic-transpose: true
@@ -208,6 +205,20 @@ Setting the tuning to any value except `null` will discard all built-in chords!
 For keyboard, use
 
     tuning : [ 0 ]
+
+## Key strategies
+
+ChordPro tries to follow ABC (abv2svg) as much as possible.
+
+	keys {
+
+		// Replace keys with an excessive number of sharps by their more common enharmonic equivalents.
+		// See also `settings.transpose-sf-key`.
+		force-common : true
+
+		// The keys `C#` and `F#` are often used as is and not represented a enharmonic equivalent. Set this to true if you want `Db`/`Gb` instead of `C#`/`F#`.
+		flats : false
+	}
 
 ## User defined chords (string instruments)
 

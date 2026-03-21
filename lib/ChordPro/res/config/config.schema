@@ -873,6 +873,11 @@
               "description": "Eliminate capo by transposing chords.",
               "type": "boolean"
             },
+            "common-keys": {
+              "description": "Replace keys with more than 6 sharps or flats by their more common enharmonic equivalents.",
+              "type": "boolean",
+              "default": true
+            },
             "enharmonic-transpose": {
               "description": "Force enharmonic when transposing (experimental).",
               "type": "boolean",
@@ -965,7 +970,7 @@
               "type": [ "number", "string" ],
               "pattern": "^[-+]?\\d+[sf]?$"
             },
-            "transpose-key": {
+            "transpose-sf-key": {
               "default": false,
               "description": "Always apply `\"k\"` semantics if no other postfix was specified.",
               "type": "boolean"
@@ -1330,6 +1335,24 @@
             }
           }
         },
+	"keys": {
+	  "title": "Key strategies.",
+	  "description": "ChordPro tries to follow ABC (abc2svg) as much as possible.",
+	  "type": "object",
+	  "additionalProperties": false,
+	  "properties": {
+	    "flats": {
+	      "description": "The keys `C#` and `F#` are often used as is and not represented a enharmonic equivalent. Set this to true if you want `Db`/`Gb` instead of `C#`/`F#`.",
+	      "type": "boolean",
+	      "default": false
+	    },
+	    "force-common": {
+	      "description": "Replace keys with an excessive number of sharps by their more common enharmonic equivalents.\nSee also `settings.transpose-sf-key`.",
+	      "type": "boolean",
+	      "default": false
+	    }
+	  }
+	},
         "markup": {
           "description": "Settings for the markup processor.\nShortcodes allow user defined markup, e.g. <foo>...</foo>.\n```\nmarkup.shortcode {\n   heavy :  \"weight='bold' size='large'\"\n}\nEach occurrence of <heavy>...</heavy> will be replaced by\n<span weight='bold' size='large'>...</span>.\n```",
           "type": "object",
