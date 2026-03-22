@@ -7,7 +7,7 @@ use ChordPro::Testing;
 use ChordPro::Utils qw( :xp );
 use ChordPro::Chords::Transpose;
 
-plan tests => 5 * (10+13+1);
+plan tests => 5 * (10+14+4+1);
 
 use ChordPro::Song;
 my $s = ChordPro::Song->new;
@@ -52,12 +52,22 @@ t( " 1  1f 2f",  "1",   "1f",   2, -1,  XP_FLAT );
 t( " 1b 1# 2s",  "1b",  "1#",   2,  1,  XP_SHARP );
 t( " 1♯ 1♭ 2s",  "1♯",  "1♭",  2, -1,  XP_FLAT );
 
-# Flats.
-for ( qw( D E G A B ) ) {
+# Sharps.
+# Default behaviour is to enforce common notations (e.g. Bb instead of A#).
+# With an exception for C# and F#.
+for ( "C#", "Db", qw( D E ), "F#", "Gb", qw( G A B ) ) {
     t( " 0k$_ 0 0", "0k$_", "0", 0, 1, XP_KEY );
 }
-# Sharps.
-for ( qw( C Db Eb F F♯ Gb Ab Bb ) ) {
+{
+    local $::config->{keys}->{flats} = 1;
+    # Without exception for C# and F#.
+    for ( "C#", "Db", "F#", "Gb" ) {
+	t( " 0k$_ 0 0", "0k$_", "0", 0, -1, XP_KEY );
+    }
+}
+
+# Flats.
+for ( qw( C Eb F Ab Bb ) ) {
     t( " 0k$_ 0 0", "0k$_", "0k", 0, -1, XP_KEY );
 }
 

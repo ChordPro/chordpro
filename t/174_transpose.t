@@ -21,6 +21,7 @@ EOD
 
 my @argv = ( "--no-default-configs",
 	     "--generate", "Text",
+	     "--define", "keys.flats=1",
 	     "--backend-option", "expand=1" );
 
 sub test {
