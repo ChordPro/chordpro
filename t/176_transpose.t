@@ -55,7 +55,7 @@ t( " 1♯ 1♭ 2s",  "1♯",  "1♭",  2, -1,  XP_FLAT );
 # Sharps.
 # Default behaviour is to enforce common notations (e.g. Bb instead of A#).
 # With an exception for C# and F#.
-for ( "C#", "Db", qw( D E ), "F#", "Gb", qw( G A B ) ) {
+for ( qw( D E ), "F#", "Gb", qw( G A B ) ) {
     t( " 0k$_ 0 0", "0k$_", "0", 0, 1, XP_KEY );
 }
 {
@@ -67,7 +67,7 @@ for ( "C#", "Db", qw( D E ), "F#", "Gb", qw( G A B ) ) {
 }
 
 # Flats.
-for ( qw( C Eb F Ab Bb ) ) {
+for ( qw( C C# Db Eb F Ab Bb ) ) {
     t( " 0k$_ 0 0", "0k$_", "0k", 0, -1, XP_KEY );
 }
 

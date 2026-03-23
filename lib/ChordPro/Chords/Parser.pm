@@ -860,12 +860,13 @@ sub is_key_sharp {
     my $r = $self->root_ord;
     $r = ( $r - 3 ) % $self->strings if $self->is_key_minor;
 
-    if ( $r == 1 || $r == 6 || $r == 11 ) {	# C# F# B
-	return !$::config->{keys}->{flats};
-    }
+    return !$::config->{keys}->{flats}
+      if   $r ==  6
+      ;
 
     return
-           $r ==  9 # A
+           $r == 11 # B
+      ||   $r ==  9 # A
       ||   $r ==  7 # G
       ||   $r ==  4 # E
       ||   $r ==  2 # D
@@ -878,15 +879,16 @@ sub is_key_flat {
     my $r = $self->root_ord;
     $r = ( $r - 3 ) % $self->strings if $self->is_key_minor;
 
-    if ( $r == 1 || $r == 6 || $r == 11 ) {	# Db Gb Cb
-	return $::config->{keys}->{flats};
-    }
+    return $::config->{keys}->{flats}
+      if   $r ==  6
+      ;
 
     return
            $r == 10 # Bb
       ||   $r ==  8 # Ab
       ||   $r ==  5 # F
       ||   $r ==  3 # Eb
+      ||   $r ==  1 # Db
       ||   $r ==  0 # C (neutral)
     ;
 }
@@ -897,14 +899,15 @@ sub is_key_toosharp {
     my $r = $self->root_ord;
     $r = ( $r - 3 ) % $self->strings if $self->is_key_minor;
 
-    if ( $r == 1 || $r == 6 || $r == 11 ) {	# C# F# B
-	return $::config->{keys}->{flats};
-    }
+    return $::config->{keys}->{flats}
+      if   $r ==  6
+      ;
 
     return
            $r == 10 # A#
       ||   $r ==  8 # G#
       ||   $r ==  3 # D#
+      ||   $r ==  1 # C#
     ;
 }
 

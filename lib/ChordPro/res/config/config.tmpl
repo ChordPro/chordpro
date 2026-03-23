@@ -142,8 +142,13 @@ config.description : "User config settings for ChordPro."
 
 /**************** Key names ****************/
 
+// Replace keys with an excessive number of sharps by their more
+// common enharmonic equivalents.
+// See also `settings.transpose-sf-key`.
 # keys.force-common: true
 
+// The key `F#` is often used as is and not represented as an
+// enharmonic equivalent. Set this to true if you want `Gb` instead of `F#`.
 # keys.flats : false
 
 /**************** User defined chords (placeholder) ****************/
