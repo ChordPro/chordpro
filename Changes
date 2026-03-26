@@ -17,7 +17,7 @@
 
     - Chords in `{define}` and `{chord}` can now be transposable.
 
-    - ChordPro output: Suppress key directive when transocding to a
+    - ChordPro output: Suppress key directive when transcoding to a
       movable system.
 
     - Image files can now reside in folders next to the song.
