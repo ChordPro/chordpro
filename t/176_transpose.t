@@ -67,7 +67,7 @@ for ( qw( D E ), "F#", "Gb", qw( G A B ) ) {
 }
 
 # Flats.
-for ( qw( C C# Db Eb F Ab Bb ) ) {
+for ( qw( C ), "C#", qw( Db Eb F Ab Bb ) ) {
     t( " 0k$_ 0 0", "0k$_", "0k", 0, -1, XP_KEY );
 }
 
