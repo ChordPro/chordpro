@@ -216,9 +216,11 @@ ChordPro tries to follow ABC (abv2svg) as much as possible.
 		// See also `settings.transpose-sf-key`.
 		force-common : true
 
-		// The keys `C#` and `F#` are often used as is and not represented a enharmonic equivalent. Set this to true if you want `Db`/`Gb` instead of `C#`/`F#`.
+		// The key `F#` is often used as is and not represented as an enharmonic equivalent. Set this to true if you want `Gb` instead of `F#`.
 		flats : false
 	}
+
+For more information on keys and signatures, see this [Wikipedia article](https://en.wikipedia.org/wiki/Key_signature).
 
 ## User defined chords (string instruments)
 
