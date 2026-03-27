@@ -163,20 +163,27 @@ sub parse_song {
     ::break();
     my @configs;
     #
-    if ( $lines->[0] =~ /^##config:\s*json/ ) {
+    if ( $lines->[0] =~ /^##config:\s*(.*)/ ) {
 	my $cf = "";
 	shift(@$lines);
 	$$linecnt++;
-	while ( @$lines ) {
-	    if ( $lines->[0] =~ /^# (.*)/ ) {
-		$cf .= $1 . "\n";
-		shift(@$lines);
-		$$linecnt++;
-	    }
-	    else {
-		last;
+
+	if ( $1 eq "json" ) {
+	    while ( @$lines ) {
+		if ( $lines->[0] =~ /^# (.*)/ ) {
+		    $cf .= $1 . "\n";
+		    shift(@$lines);
+		    $$linecnt++;
+		}
+		else {
+		    last;
+		}
 	    }
 	}
+	else {
+	    $cf = "include: [ $1 ]";
+	}
+
 	if ( $cf ) {
 	    my $prename = "__PRECFG__";
 	    my $precfg = ChordPro::Config->new( json_load( $cf, $prename ) );
@@ -184,6 +191,7 @@ sub parse_song {
 	    push( @configs, $precfg->prep_configs($prename) );
 	}
     }
+
     # Load song-specific config, if any.
     if ( !$options->{nosongconfig} && $diag->{file} ) {
 	if ( $options->{verbose} ) {
