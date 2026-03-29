@@ -132,8 +132,6 @@ sub upd_config {
     $intervals = @{ $config->{notes}->{sharp} };
 }
 
-sub ::break() {}
-
 sub is_gridstrum($) {
     $_[0] == 1 || $_[0] == 2;
 }
@@ -160,15 +158,17 @@ sub parse_song {
     $backend = lc( $self->{generate} // "None" );
 
     warn("Processing song ", $diag->{file}, "...\n") if $options->{verbose};
-    ::break();
+
     my @configs;
-    #
-    if ( $lines->[0] =~ /^##config:\s*(.*)/ ) {
+
+    while ( $lines->[0] =~ /^##config:\s*(.*)/ ) {
 	my $cf = "";
 	shift(@$lines);
 	$$linecnt++;
 
-	if ( $1 eq "json" ) {
+	my $cfginc;
+
+	if ( $1 eq "json" || $1 eq "-" ) {
 	    while ( @$lines ) {
 		if ( $lines->[0] =~ /^# (.*)/ ) {
 		    $cf .= $1 . "\n";
@@ -182,6 +182,7 @@ sub parse_song {
 	}
 	else {
 	    $cf = "include: [ $1 ]";
+	    $cfginc++;
 	}
 
 	if ( $cf ) {
@@ -189,6 +190,7 @@ sub parse_song {
 	    my $precfg = ChordPro::Config->new( json_load( $cf, $prename ) );
 	    $precfg->precheck($prename);
 	    push( @configs, $precfg->prep_configs($prename) );
+	    pop( @configs ) if $cfginc;
 	}
     }
 
