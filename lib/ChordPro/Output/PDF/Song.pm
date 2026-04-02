@@ -1134,6 +1134,9 @@ sub generate_song {
 	    }
 	    next;
 	}
+	if ( $elt->{type} eq "meta" ) {
+	    next;
+	}
 	if ( $elt->{type} eq "ignore" ) {
 	    next;
 	}
