@@ -1,6 +1,6 @@
 {title: Keys}
-{key: D}
 {comment: Key is }
+{key: D}
 {comment: Key is D, print D, sound D}
 [D]Hi
 {comment: Key is D, print E, sound E}

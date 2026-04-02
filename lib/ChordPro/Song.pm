@@ -2131,6 +2131,8 @@ sub dir_meta {
 		    $xpose->set_key($info);
 		    transpose_debug( "key($val)", $m );
 		}
+		$self->add( type => "meta",
+			    key => "key", value => $m->{key_print} );
 		return 1;
 	    }
 

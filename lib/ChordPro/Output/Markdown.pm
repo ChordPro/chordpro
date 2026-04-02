@@ -331,6 +331,9 @@ sub elt_handler {
     my @lines;
 	my $last_type='';
     foreach my $elt (@{ $elts }) {
+	if ( $elt->{type} =~ /^(ignore|meta)$/ ) {
+	    next;
+	}
 		if (($elt->{type} eq 'verse') && ($last_type =~ /comment/)){ 
 			push(@lines, "");
 		}

@@ -47,6 +47,8 @@ isa_ok( $s->{songs}->[0], 'ChordPro::Song', "It's a song" );
 
 my $song = {
   body => [
+    { context => '', type => "meta",
+      key => "key", value => [ "D" ] },
     {
       context => '',
       type => 'empty',

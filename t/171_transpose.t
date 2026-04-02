@@ -45,6 +45,8 @@ my $song = {
 				     ]
 			},
 	    'body' => [
+		       { context => '', type => "meta",
+			 key => "key", value => [ "Bb" ] },
                        {
 			 'context' => '',
 			 'phrases' => [

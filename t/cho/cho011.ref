@@ -1,8 +1,8 @@
 {title: Transpose test}
-{key: D}
 {tempo: 80}
 {define: D/F# base-fret 1 frets N N 4 2 3 2}
 {define: E/G# base-fret 1 frets 4 2 2 1 0 0}
+{key: D}
 
 {start_of_verse label="verse 1"}
  [G]This is a [Bm]funky verse in [A]D    [D/F#]

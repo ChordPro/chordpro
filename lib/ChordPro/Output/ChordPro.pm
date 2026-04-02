@@ -89,17 +89,16 @@ sub generate_song ( $s ) {
 	# Known ones 'as is'.
 	my %used;
 	foreach my $k ( sort keys %{ $s->{meta} } ) {
-	    next if $k =~ /^(?:title|subtitle)$/;
+	    next if $k =~ /^(?:title|subtitle|key)$/;
 	    if ( $k =~ $re_meta ) {
 		$used{$k}++;
-		next if $k eq "key" && $movable;
 		push( @s, map { +"{$k: ".fq($_)."}" } @{ $s->{meta}->{$k} } );
 	    }
 	}
 	# Unknowns with meta prefix.
 	foreach my $k ( sort keys %{ $s->{meta} } ) {
 	    next if $used{$k};
-	    next if $k =~ /^(?:title|subtitle|songindex|key_.*|chords|numchords)$/;
+	    next if $k =~ /^(?:title|subtitle|songindex|key.*|chords|numchords)$/;
 	    next if $k =~ /^_/;
 	    next if $k =~ /\./;
 	    next if $k =~ /^bookmark/;
@@ -388,6 +387,14 @@ sub generate_song ( $s ) {
 	    if ( $elt->{name} =~ /^(\w+)-(size|color|font)/ ) {
 		my $t = "{$1$2: " . $elt->{value} . "}";
 		push( @s, $t ) unless $t =~ s/^\{\Kchorus/text/r eq $s[-1];
+	    }
+	    next;
+	}
+
+	if ( $elt->{type} eq "meta" ) {
+	    if ( $elt->{key} eq "key" ) {
+		next if $movable;
+		push( @s, "{key: " . $elt->{value}->[-1] . "}" );
 	    }
 	    next;
 	}

@@ -51,6 +51,8 @@ my $song = {
 	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear',
 	    'system' => 'common',
+	    'body' => [ { context => '', type => "meta",
+			  key => "key", value => [ "F" ] } ],
 	   };
 
 is_deeply( { %{ $s->{songs}->[0] } }, $song, "[meta meta] Song contents" );
@@ -133,6 +135,10 @@ $song = {
 	    'structure' => 'linear',
 	    'system' => 'common',
 	    'body' => [
+		       { context => '', type => "meta",
+			 key => "key", value => [ "F" ] },
+		       { context => '', type => "meta",
+			 key => "key", value => [ "G" ] },
 		       { context => '',
 			 orig => '%%',
 			 text => '%%',
@@ -184,6 +190,8 @@ $song = {
 	    'structure' => 'linear',
 	    'system' => 'common',
 	    'body' => [
+		       { context => '', type => "meta",
+			 key => "key", value => [ "G" ] },
 		       { context => '',
 			 orig => '%%',
 			 text => '%%',
@@ -237,6 +245,8 @@ $song = {
 	    'structure' => 'linear',
 	    'system' => 'common',
 	    'body' => [
+		       { context => '', type => "meta",
+			 key => "key", value => [ "G" ] },
 		       { context => '',
 			 orig => '%%',
 			 text => '%%',

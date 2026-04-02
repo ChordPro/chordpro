@@ -53,6 +53,8 @@ my $song = {
 				     ]
 			},
 	    'body' => [
+		       { context => '', type => "meta",
+			 key => "key", value => [ "D" ] },
                        {
 			 'context' => '',
 			 'phrases' => [
@@ -132,6 +134,8 @@ $song = {
 				     ]
 			},
 	    'body' => [
+		       { context => '', type => "meta",
+			 key => "key", value => [ "F" ] },
                        {
 			 'context' => '',
 			 'phrases' => [
