@@ -2,9 +2,9 @@
 
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
-# Last Modified By: 
-# Last Modified On: Thu Jan 30 11:52:08 2025
-# Update Count    : 23
+# Last Modified By: Johan Vromans
+# Last Modified On: Sat Apr  4 20:49:27 2026
+# Update Count    : 26
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -49,6 +49,8 @@ binmode STDOUT => ':utf8';
 
 ################ The Process ################
 
+use Alien::wxWidgets;
+
 die("Perl must be brewed!\n") unless $^X =~ /Cellar/;
 
 `$pkgconfig --version` =~ /\d+\.\d+/
@@ -58,6 +60,11 @@ die("Perl must be brewed!\n") unless $^X =~ /Cellar/;
 # libz seems to be standard.
 my @libs = qw( libpng16 libjpeg libtiff-4 liblzma
 	       libzstd libpcre2-32 );
+
+if ( Alien::wxWidgets->version >= 3.003 ) {
+    push( @libs, "webp" );
+}
+
 my %libs;
 
 if ( $checklibs ) {
@@ -94,8 +101,6 @@ sub checklibs() {
 }
 
 sub writepp($pp) {
-    require Alien::wxWidgets;
-    Alien::wxWidgets->import;
 
     my $fd;
     unless ( $pp eq "-" ) {
