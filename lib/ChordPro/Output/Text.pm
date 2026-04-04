@@ -246,9 +246,14 @@ sub songline {
 	$f = '[%s]' unless $f =~ /^[^%]*\%s[^%]*$/;
 	$f .= '%s';
 	foreach ( 0..$#{$elt->{chords}} ) {
-	    $t_line .= sprintf( $f,
-				$elt->{chords}->[$_] ? chord( $song, $elt->{chords}->[$_] ) : "",
-				$phrases[$_] );
+	    if ( $elt->{chords}->[$_] ) {
+		$t_line .= sprintf( $f,
+				    chord( $song, $elt->{chords}->[$_] ),
+				    $phrases[$_] );
+	    }
+	    else {
+		$t_line .= $phrases[$_];
+	    }
 	}
 	return ( $t_line );
     }
