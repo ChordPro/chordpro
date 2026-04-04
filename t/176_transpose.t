@@ -7,7 +7,7 @@ use ChordPro::Testing;
 use ChordPro::Utils qw( :xp );
 use ChordPro::Chords::Transpose;
 
-plan tests => 5 * (10+14+4+1);
+plan tests => 5 * (10+14+4+18+18+1);
 
 use ChordPro::Song;
 my $s = ChordPro::Song->new;
@@ -15,7 +15,7 @@ my $s = ChordPro::Song->new;
 sub t {
     my ( $id, $left, $right, $xp, $dir, $forced ) = @_;
     my $key;
-    if ( $left =~ /^(.+k)(.*)/ ) {
+    if ( $left =~ /^(.+[sfk])(.*)/ ) {
 	$key = $2;
 	$left = $1
     }
@@ -23,7 +23,7 @@ sub t {
     $l->set_key( $s->parse_chord($key) ) if $key;
     ok( defined $l, "$id: parse $left -> " . $l->_data_printer );
     $key = undef;
-    if ( $right =~ /^(.+k)(.*)/ ) {
+    if ( $right =~ /^(.+[sfk])(.*)/ ) {
 	$key = $2;
 	$right = $1
     }
@@ -54,21 +54,27 @@ t( " 1♯ 1♭ 2s",  "1♯",  "1♭",  2, -1,  XP_FLAT );
 
 # Sharps.
 # Default behaviour is to enforce common notations (e.g. Bb instead of A#).
-# With an exception for C# and F#.
+# With an exception for F# (depends on keys.flats).
 for ( qw( D E ), "F#", "Gb", qw( G A B ) ) {
-    t( " 0k$_ 0 0", "0k$_", "0", 0, 1, XP_KEY );
+    t( " 0k$_ 0 0 1", "0k$_",  "0",  0, 1, XP_KEY );
+    t( " 0s$_ 0k 0 1", "0s$_", "0k", 0, 1, XP_KEY );
+    t( " 0f$_ 0k 0 1", "0f$_", "0k", 0, 1, XP_KEY );
 }
 {
     local $::config->{keys}->{flats} = 1;
-    # Without exception for C# and F#.
+    # Without exception for F#.
     for ( "C#", "Db", "F#", "Gb" ) {
-	t( " 0k$_ 0 0", "0k$_", "0", 0, -1, XP_KEY );
+	t( " 0k$_ 0 0 -1", "0k$_", "0",  0, -1, XP_KEY );
+	t( " 0s$_ 0k 0 -1", "0s$_", "0k", 0, -1, XP_KEY );
+	t( " 0f$_ 0k 0 -1", "0f$_", "0k", 0, -1, XP_KEY );
     }
 }
 
 # Flats.
 for ( qw( C ), "C#", qw( Db Eb F Ab Bb ) ) {
-    t( " 0k$_ 0 0", "0k$_", "0k", 0, -1, XP_KEY );
+    t( " 0k$_ 0 0 -1",  "0k$_", "0",  0, -1, XP_KEY );
+    t( " 0s$_ 0k 0 -1", "0s$_", "0k", 0, -1, XP_KEY );
+    t( " 0f$_ 0k 0 -1", "0f$_", "0k", 0, -1, XP_KEY );
 }
 
 #
