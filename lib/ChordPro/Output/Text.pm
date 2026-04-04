@@ -42,11 +42,13 @@ sub upd_config {
 
 sub generate_song {
     my ( $s ) = @_;
+    $config = $s->{config};
 
     my $tidy      = $options->{'backend-option'}->{tidy};
     $single_space = $options->{'single-space'};
     upd_config();
 
+    $DB::single = 1;
     $s->structurize
       if ( $options->{'backend-option'}->{structure} // '' ) eq 'structured';
 
@@ -242,7 +244,7 @@ sub songline {
 	return ( "", join( " ", @phrases ) );
     }
 
-    if ( my $f = $::config->{settings}->{'inline-chords'} ) {
+    if ( my $f = $config->{settings}->{'inline-chords'} ) {
 	$f = '[%s]' unless $f =~ /^[^%]*\%s[^%]*$/;
 	$f .= '%s';
 	foreach ( 0..$#{$elt->{chords}} ) {
