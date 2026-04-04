@@ -241,7 +241,8 @@ sub songline {
     }
 
     unless ( $elt->{chords} ) {
-	return ( "", join( " ", @phrases ) );
+	return ( $config->{settings}->{'inline-chords'} ? () : "",
+		 join( " ", @phrases ) );
     }
 
     if ( my $f = $config->{settings}->{'inline-chords'} ) {
