@@ -37,6 +37,13 @@ method as_string {
     $xp . ( "", "s", "f" , "k" )[$forced]; # breaks XP_ hiding
 }
 
+method as_stringx {
+    my $res = $self->as_string;
+    $res .= $key->keyname if $forced == XP_KEY && defined $key;
+    $res .= ("-","","+")[$self->dir+1];
+    $res;
+}
+
 method invert {
     transpose->new( xp => -$xp,
 		    forced => $forced,
@@ -75,7 +82,7 @@ method add( $right, $swapped ) {
 	return $res;
     }
 
-    Carp::confess("XXX") unless defined($right);
+    Carp::confess("Can't happen") unless defined($right);
     return transpose->new
       ( xp     => $left->xp + $right,
 	dir    => $left->dir,
@@ -85,7 +92,7 @@ method add( $right, $swapped ) {
 }
 
 use overload
-  '""' => \&as_string,
+  '""' => \&as_stringx,
   'eq' => sub( $left, $right, $swapped ) { "$left" eq "$right" },
   'ne' => sub( $left, $right, $swapped ) { "$left" ne "$right" },
   '+'  => \&add,
