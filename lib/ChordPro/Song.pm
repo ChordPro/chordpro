@@ -916,12 +916,17 @@ sub parse_song {
 sub add {
     my $self = shift;
     return if $skip_context;
-    push( @{$self->{body}},
-	  { context => $in_context,
-	    $lineinfo ? ( line => $diag->{line} ) : (),
-	    @_ } );
+    my %args = @_;
+
+    # Later... Needs adjusting many tests.
+    # $args{np} //= 1 if $args{type} =~ /empty|ignore|meta|set/;
+
+    $args{line}    ||= $diag->{line} if $lineinfo;
+    $args{context} ||= $in_context;
+
+    push( @{$self->{body}}, \%args );
     if ( $in_context eq "chorus" ) {
-	push( @chorus, { context => $in_context, @_ } );
+	push( @chorus, { context => $in_context, %args } );
 	$chorus_xpose = $xpose;
     }
 }
@@ -2113,13 +2118,13 @@ sub dir_meta {
 		    my $key = $name;
 		    my $xpk = $self->{chordsinfo}->{$key};
 		    if ( $xpk ) {
-			my $info = $xpk->transpose( transpose_print() );
-			$self->{chordsinfo}->{$info->name} = $info;
-			$m->{key_print} = [ $info->keyname ];
-			$xpose->set_key($info);
-			$info = $xpk->transpose(transpose_sound());
-			$self->{chordsinfo}->{$info->name} = $info;
-			$m->{key_sound} = [ $info->keyname ];
+			my $info_p = $xpk->transpose( transpose_print() );
+			my $info_s = $xpk->transpose(transpose_sound());
+			$self->{chordsinfo}->{$info_p->name} = $info_p;
+			$self->{chordsinfo}->{$info_s->name} = $info_s;
+			$m->{key_print} = [ $info_p->keyname ];
+			$m->{key_sound} = [ $info_s->keyname ];
+			$xpose->set_key($info_p);
 			transpose_debug( "key($val)", $m );
 		    }
 		    else {
@@ -2275,13 +2280,13 @@ sub dir_transpose {
 	    my $key = $m->{_key}->[-1];
 	    my $xpk = $self->{chordsinfo}->{$key};
 	    if ( $xpk ) {
-		my $info = $xpk->transpose( transpose_print() );
-		$self->{chordsinfo}->{$info->name} = $info;
-		$m->{key_print} = [ $info->keyname ];
-		$xpose->set_key($info);
-		$info = $xpk->transpose(transpose_sound());
-		$self->{chordsinfo}->{$info->name} = $info;
-		$m->{key_sound} = [ $info->keyname ];
+		my $info_p = $xpk->transpose( transpose_print() );
+		my $info_s = $xpk->transpose(transpose_sound());
+		$self->{chordsinfo}->{$info_p->name} = $info_p;
+		$self->{chordsinfo}->{$info_s->name} = $info_s;
+		$m->{key_print} = [ $info_p->keyname ];
+		$m->{key_sound} = [ $info_s->keyname ];
+		$xpose->set_key($info_p);
 		transpose_debug( "xp($arg)", $m );
 	    }
 	    else {
@@ -2302,13 +2307,13 @@ sub dir_transpose {
 	    my $key = $m->{_key}->[-1];
 	    my $xpk = $self->{chordsinfo}->{$key};
 	    if ( $xpk ) {
-		my $info = $xpk->transpose( transpose_print() );
-		$self->{chordsinfo}->{$info->name} = $info;
-		$m->{key_print} = [ $info->keyname ];
-		$xpose->set_key($info);
-		$info = $xpk->transpose(transpose_sound());
-		$self->{chordsinfo}->{$info->name} = $info;
-		$m->{key_sound} = [ $info->keyname ];
+		my $info_p = $xpk->transpose( transpose_print() );
+		my $info_s = $xpk->transpose(transpose_sound());
+		$self->{chordsinfo}->{$info_p->name} = $info_p;
+		$self->{chordsinfo}->{$info_s->name} = $info_s;
+		$m->{key_print} = [ $info_p->keyname ];
+		$m->{key_sound} = [ $info_s->keyname ];
+		$xpose->set_key($info_p);
 		transpose_debug( "xp($arg)", $m );
 	    }
 	    else {
