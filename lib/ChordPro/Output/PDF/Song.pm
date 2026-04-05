@@ -681,7 +681,7 @@ sub generate_song {
 	    warn("***SHOULD NOT HAPPEN1***")
 	      if $s->{structure} eq "structured";
 	    if ( $vsp_ignorefirst ) {
-		if ( @elts && $elts[0]->{type} !~ /empty|ignore/ ) {
+		if ( @elts && $elts[0]->{type} !~ /empty|ignore|meta/ ) {
 		    $vsp_ignorefirst = 0;
 		}
 		next;
@@ -693,7 +693,7 @@ sub generate_song {
 	    next;
 	}
 
-	unless ( $elt->{type} =~ /^(?:control|set|ignore)$/ ) {
+	unless ( $elt->{type} =~ /^(?:control|set|ignore|meta)$/ ) {
 	    $vsp_ignorefirst = 0;
 	}
 
