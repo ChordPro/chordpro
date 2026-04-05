@@ -6,6 +6,8 @@ use Carp;
 use feature qw( signatures state);
 no warnings "experimental::signatures";
 
+our $config;
+
 # package ParserWatch;
 #
 # require Tie::Hash;
@@ -1069,7 +1071,6 @@ sub transpose ( $self, $xpose ) {
     Carp::confess("xpose is not a transpose object")
 	unless UNIVERSAL::isa( $xpose, "transpose" );
     return $self unless $self->is_chord;
-    $DB::single = 1;
     my $dir = $xpose->dir;
     $xpose = $xpose->xp;
 

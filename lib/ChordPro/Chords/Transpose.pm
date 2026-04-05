@@ -26,7 +26,6 @@ field $key    :accessor :param = undef;
 field $dir    :mutator :param = 0;
 
 method set_key($k) {
-    $DB::single = 1;
     $key = $k;
     if ( $forced >= XP_KEY ) {
 	$dir = $k->is_key_flat ? -1 : 1;
