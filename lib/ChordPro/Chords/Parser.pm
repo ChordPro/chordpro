@@ -857,32 +857,13 @@ sub is_key_minor {
     $_[0]->{qual_canon} eq '-';
 }
 
-sub is_key_sharp {
-    my ( $self ) = @_;
-    my $r = $self->root_ord;
-    $r = ( $r - 3 ) % $self->strings if $self->is_key_minor;
-
-    return !$::config->{keys}->{flats}
-      if   $r ==  6
-      ;
-
-    return
-           $r == 11 # B
-      ||   $r ==  9 # A
-      ||   $r ==  7 # G
-      ||   $r ==  4 # E
-      ||   $r ==  2 # D
-      ||   $r ==  0 # C (neutral)
-    ;
-}
-
 sub is_key_flat {
     my ( $self ) = @_;
     my $r = $self->root_ord;
     $r = ( $r - 3 ) % $self->strings if $self->is_key_minor;
 
     return $::config->{keys}->{flats}
-      if   $r ==  6
+      if   $r ==  6 # Gb
       ;
 
     return
@@ -891,7 +872,7 @@ sub is_key_flat {
       ||   $r ==  5 # F
       ||   $r ==  3 # Eb
       ||   $r ==  1 # Db
-      ||   $r ==  0 # C (neutral)
+#      ||   $r ==  0 # C (neutral)
     ;
 }
 
@@ -902,7 +883,7 @@ sub is_key_toosharp {
     $r = ( $r - 3 ) % $self->strings if $self->is_key_minor;
 
     return $::config->{keys}->{flats}
-      if   $r ==  6
+      if   $r ==  6 # F#
       ;
 
     return

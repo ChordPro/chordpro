@@ -5,77 +5,91 @@ use warnings;
 use utf8;
 use ChordPro::Testing;
 use ChordPro::Utils qw( :xp );
-use ChordPro::Chords::Transpose;
+use ChordPro::Chords::Transpose ();
 
-plan tests => 5 * (10+14+4+18+18+1);
+plan tests => 3 * ( 10+14+4+18+18+1+1);
 
 use ChordPro::Song;
 my $s = ChordPro::Song->new;
 
-sub t {
-    my ( $id, $left, $right, $xp, $dir, $forced ) = @_;
-    my $key;
-    if ( $left =~ /^(.+[sfk])(.*)/ ) {
-	$key = $2;
-	$left = $1
-    }
+our $config;
+
+sub test($$$) {
+    my ( $left, $right, $xp ) = @_;
+    my $id = "$left $right $xp";
     my $l = parse_transpose($left);
-    $l->set_key( $s->parse_chord($key) ) if $key;
     ok( defined $l, "$id: parse $left -> " . $l->_data_printer );
-    $key = undef;
-    if ( $right =~ /^(.+[sfk])(.*)/ ) {
-	$key = $2;
-	$right = $1
-    }
     my $r = parse_transpose($right);
-    $r->set_key( $s->parse_chord($key) ) if $key;
     ok( defined $r, "$id: parse $right -> " . $r->_data_printer  );
     my $res = $l + $r;
-    is( $res->xp,     $xp,     "$id: $res (xp " . $res->xp .     " <> $xp)" );
-    is( $res->dir,    $dir,    "$id: $res (dir " . $res->dir .    " <> $dir)" );
-    is( $res->forced, $forced, "$id: $res (forced " . $res->forced . " <> $forced)" );
+    is( "$res",     $xp,     "$id: $left $right $res <> $xp");
+}
+
+# Extended version of ChordPro::Chords::Transpose::parse_transpose.
+sub parse_transpose {
+    my ( $xp ) = @_;
+
+    return unless $xp =~ m;^([-+]?\d+)([s#♯fb♭k]?)\s*(.*)$;;
+
+    my $res = ChordPro::Chords::Transpose::parse_transpose($1.$2);
+    return unless defined $res;
+    $res->set_key( $s->parse_chord($3) ) if $3;
+
+    return $res;
 }
 
 # None.
-t( " 0  0 0",   "0",   "0",     0,  0,  XP_FOLLOW );
-t( " 1  0 1",   "1",   "0",     1,  1,  XP_FOLLOW );
-t( " 0  1 1",   "0",   "1",     1,  1,  XP_FOLLOW );
+test(   "0",   "0",   "0" );
+test(   "1",   "0",   "+1+" );
+test(   "0",   "1",   "+1+" );
 # Follows.
-t( " 1  1  2",   "1",   "1",    2,  1,  XP_FOLLOW );
+test(   "1",   "1",   "+2+" );
 # Implicit does not overrule implicit
-t( " 2 -1  1",   "2",  "-1",    1 , 1,  XP_FOLLOW );
-t( "-2  1 -1",   "-2",   "1",  -1, -1,  XP_FOLLOW );
+test(   "2",  "-1",    "+1+" );
+test(   "-2",   "1",  "-1-" );
 # Implicit does not overrule explicit.
-t( " 1f 1  2f",  "1f",  "1",    2, -1,  XP_FLAT );
+test(  "1f",  "1",    "+2f-" );
 # Explicit overrules implicit.
-t( " 1  1f 2f",  "1",   "1f",   2, -1,  XP_FLAT );
-t( " 1b 1# 2s",  "1b",  "1#",   2,  1,  XP_SHARP );
-t( " 1♯ 1♭ 2s",  "1♯",  "1♭",  2, -1,  XP_FLAT );
+test(  "1",   "1f",   "+2f-" );
+test(  "1b",  "1#",   "+2s+" );
+test(  "1♯",  "1♭",  "+2f-" );
 
 # Sharps.
 # Default behaviour is to enforce common notations (e.g. Bb instead of A#).
 # With an exception for F# (depends on keys.flats).
 for ( qw( D E ), "F#", "Gb", qw( G A B ) ) {
-    t( " 0k$_ 0 0 1", "0k$_",  "0",  0, 1, XP_KEY );
-    t( " 0s$_ 0k 0 1", "0s$_", "0k", 0, 1, XP_KEY );
-    t( " 0f$_ 0k 0 1", "0f$_", "0k", 0, 1, XP_KEY );
+    my $k = $_;
+    $k = "F#" if $k eq "Gb";
+    test( "0k$_",  "0",  "0k$k+" );
+    test( "0s$_",  "0k", "0k$k+" );
+    test( "0f$_",  "0k", "0k$k+" );
 }
 {
     local $::config->{keys}->{flats} = 1;
     # Without exception for F#.
     for ( "C#", "Db", "F#", "Gb" ) {
-	t( " 0k$_ 0 0 -1", "0k$_", "0",  0, -1, XP_KEY );
-	t( " 0s$_ 0k 0 -1", "0s$_", "0k", 0, -1, XP_KEY );
-	t( " 0f$_ 0k 0 -1", "0f$_", "0k", 0, -1, XP_KEY );
+	my $k = $_;
+	$k = "Db" if $k eq "C#";
+	$k = "Gb" if $k eq "F#";
+	test( "0k$_",  "0",  "0k$k-" );
+	test( "0s$_",  "0k", "0k$k-" );
+	test( "0f$_",  "0k", "0k$k-" );
     }
 }
 
 # Flats.
 for ( qw( C ), "C#", qw( Db Eb F Ab Bb ) ) {
-    t( " 0k$_ 0 0 -1",  "0k$_", "0",  0, -1, XP_KEY );
-    t( " 0s$_ 0k 0 -1", "0s$_", "0k", 0, -1, XP_KEY );
-    t( " 0f$_ 0k 0 -1", "0f$_", "0k", 0, -1, XP_KEY );
+    my $k = $_;
+    my $d = "-";
+    $k = "Db" if $k eq "C#";
+    $d = "+" if $k eq "C";
+    test( "0k$_",  "0",  "0k$k$d" );
+    test( "0s$_",  "0k", "0k$k$d" );
+    test( "0f$_",  "0k", "0k$k$d" );
 }
 
 #
-t( " 0  -4 -4",   "0",   "-4",    -4,  -1,  XP_FOLLOW );
+test(  0, -4, "-4-" );
+
+#$config->{keys}->{flats} = 1;
+test( "0 C", "+6k", "+6kC+" );

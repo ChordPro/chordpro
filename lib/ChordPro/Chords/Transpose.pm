@@ -33,12 +33,13 @@ method set_key($k) {
 }
 
 method as_string {
-    $xp . ( "", "s", "f" , "k" )[$forced]; # breaks XP_ hiding
+    ( $xp > 0 ? "+" : "" ) . $xp .
+      ( "", "s", "f" , "k" )[$forced]; # breaks XP_ hiding
 }
 
 method as_stringx {
     my $res = $self->as_string;
-    $res .= $key->keyname if $forced == XP_KEY && defined $key;
+    $res .= $key->keyname if defined $key;
     $res .= ("-","","+")[$self->dir+1];
     $res;
 }
@@ -98,10 +99,7 @@ use overload
   ;
 
 method _data_printer( $ddp = undef ) {
-    my $res = $self->as_string;
-    $res .= $key->keyname if $forced == XP_KEY && defined $key;
-    $res .= ("-","","+")[$self->dir+1];
-    $res;
+    $self->as_stringx;
 }
 
 package ChordPro::Chords::Transpose;

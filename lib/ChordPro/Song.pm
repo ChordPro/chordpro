@@ -2774,6 +2774,7 @@ sub parse_chord {
     my $info;
 
     my $xp = transpose_print();
+    $xp = 0 unless $xp->xp || $xp->forced;
 
     my $xc = $config->{settings}->{transcode};
     my $unk;
