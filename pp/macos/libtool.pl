@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Sat Apr  4 20:49:27 2026
-# Update Count    : 26
+# Last Modified On: Thu Apr  9 09:03:00 2026
+# Update Count    : 27
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -62,7 +62,7 @@ my @libs = qw( libpng16 libjpeg libtiff-4 liblzma
 	       libzstd libpcre2-32 );
 
 if ( Alien::wxWidgets->version >= 3.003 ) {
-    push( @libs, "webp" );
+    push( @libs, "webp", "webpdemux" );
 }
 
 my %libs;

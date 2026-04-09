@@ -44,7 +44,8 @@ sub relocate {
 	    system("install_name_tool", "-id", "$dst/$name", $lib);
 	}
 	else {
-	    if ( $arch ne "arm64") {
+	    # This once was needed... Now it gets in the way.
+	    if ( 0 and $arch ne "arm64") {
 	      $name =~ s/-[.0-9_]+\.dylib/-$lv.dylib/
 	        unless $name =~ m;libpcre2;;
 	    }
