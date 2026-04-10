@@ -1344,12 +1344,13 @@ sub runtime_info {
 		  } );
     };
 
-    if ( defined $Wx::VERSION ) {
+    eval {
+	require Wx;
 	no strict 'subs';
 	push( @p,
 	      { name => "wxPerl",    version => $dd->($Wx::VERSION)  },
 	      { name => "wxWidgets", version => $dd->($Wx::wxVERSION) } );
-    }
+    };
 
     local $SIG{__WARN__} = sub {};
     local $SIG{__DIE__} = sub {};
