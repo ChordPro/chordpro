@@ -28,7 +28,7 @@ relocate($_) for @ARGV;
 sub relocate {
     my ( $lib ) = @_;
 
-    next if $lib =~ m;/libperl.dylib$;; # dealt elsewhere
+    return if $lib =~ m;/libperl.dylib$;; # dealt elsewhere
     die("$lib: $!") unless -w $lib;
 
     my $odata = `otool -L "$lib"`;
@@ -44,11 +44,8 @@ sub relocate {
 	    system("install_name_tool", "-id", "$dst/$name", $lib);
 	}
 	else {
-	    # This once was needed... Now it gets in the way.
-	    if ( 0 and $arch ne "arm64") {
-	      $name =~ s/-[.0-9_]+\.dylib/-$lv.dylib/
-	        unless $name =~ m;libpcre2;;
-	    }
+	    $name =~ s/-[.0-9_]+\.dylib/-$lv.dylib/
+	      unless $name =~ m;libpcre2;;
 	    warn("+ install_name_tool -change \"$orig/$oname\" \"$dst/$name\" \"$lib\"\n")
 	      if $verbose;
 	    system("install_name_tool", "-change", "$orig/$oname", "$dst/$name", $lib);

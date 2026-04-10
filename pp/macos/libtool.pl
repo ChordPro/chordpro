@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Thu Apr  9 09:03:00 2026
-# Update Count    : 27
+# Last Modified On: Thu Apr  9 14:39:12 2026
+# Update Count    : 28
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -61,9 +61,8 @@ die("Perl must be brewed!\n") unless $^X =~ /Cellar/;
 my @libs = qw( libpng16 libjpeg libtiff-4 liblzma
 	       libzstd libpcre2-32 );
 
-if ( Alien::wxWidgets->version >= 3.003 ) {
-    push( @libs, "webp", "webpdemux" );
-}
+# This is for macOS only.
+push( @libs, "webp", "webpdemux" );
 
 my %libs;
 

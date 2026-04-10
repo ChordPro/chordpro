@@ -48,6 +48,10 @@ jobs:
 
       - name: Install cpanm
         run: brew install cpanm
+      - name: Install harfbuzz
+        run: brew install harfbuzz
+      - name: Install webp
+        run: brew install webp
 
       # Install wxWidgets 3.2.
       # This installs wx-config as wx-config-3.2, so fix that.

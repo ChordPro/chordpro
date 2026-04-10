@@ -23,7 +23,7 @@ chordpro : chordpro.pp ${COMMON}/chordpro.pp
 	${PP} --output=chordpro @chordpro.pp ${SCRIPT}/chordpro.pl
 
 wxchordpro : chordpro.pp ${COMMON}/chordpro.pp ${COMMON}/wxchordpro.pp
-	perl ../common/libtool.pl --output=wxchordpro.pp
+	perl libtool.pl --pp=wxchordpro.pp
 	${PP} --output=wxchordpro @wxchordpro.pp ${SCRIPT}/wxchordpro.pl
 
 clean ::
