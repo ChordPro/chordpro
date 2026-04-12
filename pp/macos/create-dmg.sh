@@ -355,6 +355,11 @@ sentinel_file="$SCRIPT_DIR/.this-is-the-create-dmg-repo"
 if [[ -f "$sentinel_file" ]]; then
 	# We're running from inside a repo
 	CDMG_SUPPORT_DIR="$SCRIPT_DIR/support"
+
+# !!!!CUSTOM!!!!
+elif [[ -d "create-dmg.d" ]]; then
+	CDMG_SUPPORT_DIR="$SCRIPT_DIR/create-dmg.d"
+
 else
 	# We're running inside an installed location
 	bin_dir="$SCRIPT_DIR"

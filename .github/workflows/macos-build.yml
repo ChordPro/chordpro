@@ -18,6 +18,11 @@ on:
       - macosbuild
 
 env:
+
+  # wxWidgets
+  WX:  3.2
+
+  # Alien::wxWidgets and wxPerl
   AWV: 0.72
   WXP: 3.009
 
@@ -42,32 +47,37 @@ jobs:
     steps:
 
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - run: perl -V
 
       - name: Install cpanm
         run: brew install cpanm
+
+      # Harfbuzz seems to be present on the runners. Better safe than sorry.
       - name: Install harfbuzz
         run: brew install harfbuzz
+
+      # Webp seems to be present on the Intel runners. Better safe than sorry.
       - name: Install webp
         run: brew install webp
 
-      # Install wxWidgets 3.2.
-      # This installs wx-config as wx-config-3.2, so fix that.
+      # Install wxWidgets
       - name: Set up wxWidgets
         run: |
-          brew install wxwidgets@3.2
-          sudo install `which wx-config-3.2` /usr/local/bin/wx-config
+          brew install wxwidgets@${{ env.WX }}
+
+      - name: Link wx-config, if needed
+        if: env.WX == '3.2'
+        run: |
+          sudo install `which wx-config-$WX` /usr/local/bin/wx-config
+
       - run: wx-config --version
 
-      # No use to proceed if we do not have all wx components.
-      - name: Check libraries
-        run: perl pp/macos/libtool.pl
-
-      - name: Install SSLeay
+      - name: Install SSLeay, ExtUtils::XSpp
         run: |
           cpanm Net::SSLeay --notest
+          cpanm ExtUtils::XSpp --notest
 
       - name: Install Alien::wxWidgets
         run: |
@@ -84,6 +94,10 @@ jobs:
           wx-config --version --release --version-full
           perl -MAlien::wxWidgets -e 'Alien::wxWidgets->libraries(qw(stc media webview propgrid ribbon aui xrc qa html))'
 
+      # No use to proceed if we do not have all wx components.
+      - name: Check libraries
+        run: perl pp/macos/libtool.pl
+
       - name: Install wxPerl
         run: |
           cpanm https://github.com/sciurius/wxPerl/releases/download/R$WXP/Wx-$WXP.tar.gz --notest || ( cat $HOME/.cpanm/build.log; false )
@@ -99,9 +113,9 @@ jobs:
           perl script/chordpro.pl --about
 
       - name: Build DMG
-        run: make -C pp/macos
+        run: make -C pp/macos WEBP=1
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           compression-level: 0
           name: Upload_DMG_macOS_${{ matrix.arch }}

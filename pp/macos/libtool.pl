@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Sep 15 15:59:04 1992
 # Last Modified By: Johan Vromans
-# Last Modified On: Thu Apr  9 14:39:12 2026
-# Update Count    : 28
+# Last Modified On: Sat Apr 11 21:51:55 2026
+# Update Count    : 38
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -28,6 +28,7 @@ my $checklibs;			# check libs
 my $writepp;			# write pp
 my $pkgconfig = "pkg-config";	# tool
 my $verbose = 1;		# verbose processing
+my $needwebp = 0;
 
 # Development options (not shown with -help).
 my $debug = 0;			# debugging
@@ -46,6 +47,7 @@ $trace |= ($debug || $test);
 
 binmode STDERR => ':utf8';
 binmode STDOUT => ':utf8';
+chomp( my $arch = `uname -m` );
 
 ################ The Process ################
 
@@ -61,8 +63,10 @@ die("Perl must be brewed!\n") unless $^X =~ /Cellar/;
 my @libs = qw( libpng16 libjpeg libtiff-4 liblzma
 	       libzstd libpcre2-32 );
 
-# This is for macOS only.
-push( @libs, "webp", "webpdemux" );
+if ( $needwebp ) {
+    push( @libs, "libwebp", "libwebpdemux" );
+    push( @libs, "libsharpyuv" ) if Alien::wxWidgets->version >= 3.003;
+}
 
 my %libs;
 
@@ -108,7 +112,6 @@ sub writepp($pp) {
 	select($fd);
     }
 
-    chomp( my $arch = `uname -m` );
     my $prefix = Alien::wxWidgets->prefix;
     my $wxversion = Alien::wxWidgets->version;
     $wxversion = sprintf("%d.%d", $wxversion =~ /^(\d+)\.(\d\d\d)/ );
@@ -181,6 +184,7 @@ sub app_options() {
 
     if ( !GetOptions( 'checklibs'	=> \$checklibs,
 		      'pp=s'		=> \$writepp,
+		      'needwebp'	=> \$needwebp,
 		      'pkgconfig=s'	=> \$pkgconfig,
 		      'ident'		=> \$ident,
 		      'verbose+'	=> \$verbose,

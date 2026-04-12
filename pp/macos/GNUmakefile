@@ -14,6 +14,7 @@ TARGET := wxchordpro
 PP     := perl ./pp.pl
 # Check if we build on Intel or ARM
 ARCH   := $(shell uname -m)
+WEBP   := 0
 
 default : dmg
 
@@ -23,7 +24,11 @@ chordpro : chordpro.pp ${COMMON}/chordpro.pp
 	${PP} --output=chordpro @chordpro.pp ${SCRIPT}/chordpro.pl
 
 wxchordpro : chordpro.pp ${COMMON}/chordpro.pp ${COMMON}/wxchordpro.pp
+ifeq (${WEBP},0)
 	perl libtool.pl --pp=wxchordpro.pp
+else
+	perl libtool.pl --needwebp --pp=wxchordpro.pp
+endif
 	${PP} --output=wxchordpro @wxchordpro.pp ${SCRIPT}/wxchordpro.pl
 
 clean ::
@@ -140,7 +145,7 @@ endif
 
 dmg1 :
 	rm -f ${DMGNAME}
-	bash ./create-dmg \
+	bash ./create-dmg.sh \
 		--volname "ChordPro ${VOLPFX} (${ARCHTYPE})" \
 		--volicon chordpro-dmg.icns \
 		--window-pos 200 120 \
