@@ -3,8 +3,8 @@
 # Author          : Johan Vromans
 # Created On      : Sun Mar 10 18:02:02 2024
 # Last Modified By: Johan Vromans
-# Last Modified On: Fri Feb  6 11:54:58 2026
-# Update Count    : 186
+# Last Modified On: Mon Apr 13 19:29:25 2026
+# Update Count    : 188
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -16,7 +16,37 @@ no warnings 'experimental::signatures';
 # Package name.
 my $my_package = 'JSON::Relaxed';
 # Program name and version.
-my ($my_name, $my_version) = qw( rrjson 0.02 );
+my ($my_name, $my_version) = qw( rrjson 0.04 );
+
+use FindBin;
+
+# @INC construction...
+# Standard paths are lib and lib/ChordPro/lib relative to the parent
+# of the script directory. This may fail if the ChordPro files are installed
+# in another directory than next to the script.
+# Directories in CHORDPRO_XLIBS follow, to augment the path.
+# For example, to add custom delegates.
+# Directories in CHORDPRO_XXLIBS are put in front, these can be used
+# to overrule standard modules. For example, to provide a patches
+# module to an installed kit. Caveat emptor.
+
+my @inc;
+BEGIN {
+  for my $lib ( "$FindBin::Bin/../lib", "$FindBin::Bin/../lib/ChordPro/lib", @INC ) {
+    next unless -d $lib;
+
+    # Is our main module here?
+    if ( -s "$lib/ChordPro.pm" ) {
+	# Add ChordPro libs.
+	push( @inc, $lib, "$lib/ChordPro/lib" );
+    }
+    else {
+	# Copy.
+	push( @inc, $lib );
+    }
+  }
+}
+use lib @inc;
 
 ################ Command line parameters ################
 
@@ -400,3 +430,60 @@ EndOfUsage
 EndOfUsage
     exit $exit if defined $exit && $exit != 0;
 }
+
+################ Documentation ################
+
+=head1 NAME
+
+rrjson - convert from/to miscellaneous JSON formats
+
+=head1 SYNOPSIS
+
+Usage: script/rrjson.pl [options] file
+
+  Inputs
+   --execute -e         args are JSON, not filenames
+   --schema=XXX         optional JSON schema
+
+  Output modes
+   --rrjson             pretty printed RRJSON output (default)
+   --rjson              pretty printed RJSON output
+   --json               JSON output
+   --json_xs            JSON_XS output
+   --yaml               YAML output
+   --toml               TOML output
+   --no-pretty          compact (non-pretty) output
+   --indent=N           indent for output
+   --order              retain order of hash keys
+   --dump               dump structure (Data::Printer)
+   --dumper             dump structure (Data::Dumper)
+
+  Parser options
+   --strict             see the docs
+
+  Miscellaneous
+   --ident              shows identification
+   --help               shows a brief help message and exits
+   --verbose            provides more verbose information
+   --quiet              runs as silently as possible
+
+=head1 OPTIONS
+
+See L<SYNOPSIS>.
+
+=head1 DESCRIPTION
+
+B<rrjson> will read the given file and output it in the format
+designated by one of the output modes, see L<SYNOPSIS>.
+
+Default output format is RRJSON; default output is standard output.
+
+If a schema is supplied, descriptions from the schema will be used to
+supply comments in the RRJSON output.
+
+=head1 NOTES
+
+This script is slightly different from the one shipped with the
+JSON::Relaxed package, but should be functionally equivalent.
+
+=cut

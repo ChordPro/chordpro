@@ -225,8 +225,8 @@ rrjson :
 	cp -p ${HOME}/src/JSON-Relaxed/lib/JSON/Relaxed/Parser.pm \
 	  ${HOME}/src/JSON-Relaxed/lib/JSON/Relaxed/ErrorCodes.pm \
 	  lib/ChordPro/lib/JSON/Relaxed/
-	cp -p ${HOME}/src/JSON-Relaxed/scripts/rrjson.pl \
-	  script/
+	diff ${HOME}/src/JSON-Relaxed/scripts/rrjson.pl \
+	  script/rrjson.pl
 
 ABCDEST    = ${RES}/abc/abc2svg
 
