@@ -4,8 +4,8 @@ $schema : "https://chordpro.org/beta/resources/config.schema"
 
 config {
     type        : stylemod
-    title       : "Guitar-Jazz"
-    description : "Over 350 chord variants typically used in Jazzy music."
+    title       : "Jazzy Chords"
+    description : "Over 350 chord name variants typically used in Jazzy music."
 }
 
 // first we need to enable "relaxed" chaordnames before defining the chords so they will transpose correctly
