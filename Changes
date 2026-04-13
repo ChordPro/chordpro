@@ -3,7 +3,7 @@
     !Highlights
 
     - Reworked Keys and Transpositions.
-      See https://www.chordpro.org/chordpro/beta/keys_and_transpositions .
+      See https://www.chordpro.org/beta/keys_and_transpositions/ .
 
     - New config setting: `keys.force-common` and `keys.sharps`.
 
