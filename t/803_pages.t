@@ -13,7 +13,7 @@ my $test = 1;
 
 BAIL_OUT("Missing out dir") unless -d "out";
 
-my $base = "out/80_pages.";
+my $base = "out/803_pages.";
 
 my $pdf = $base . "pdf";
 my $cho = $base . "cho";
@@ -57,6 +57,7 @@ EOD
 ok( close($fd), "Close $cho" );
 
 @ARGV = ( "--no-default-configs",
+	  "--define", "pdf.even-odd-pages=0",
 	  "--output", $pdf, "--csv",
 	  $cho );
 ::run();

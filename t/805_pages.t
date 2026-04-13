@@ -13,7 +13,7 @@ my $test = 1;
 
 BAIL_OUT("Missing out dir") unless -d "out";
 
-my $base = "out/86_pages.";
+my $base = "out/805_pages.";
 
 my $pdf = $base . "pdf";
 my $cho = $base . "cho";
@@ -82,7 +82,6 @@ ok( close($fd), "Close $cho" );
 
 @ARGV = ( "--no-default-configs",
 	  "--define", "pdf.csv.songsonly=0",
-	  "--define", "pdf.pagealign-songs=1",
 	  "--front-matter", $front,
 	  "--back-matter", $back,
 	  "--output", $pdf, "--csv",

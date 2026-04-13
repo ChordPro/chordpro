@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 8;
+use Test::More tests => 7;
 
 use ChordPro::Testing;
 
@@ -13,14 +13,13 @@ my $test = 1;
 
 BAIL_OUT("Missing out dir") unless -d "out";
 
-my $base = "out/88_pages.";
+my $base = "out/806_pages.";
 
 my $pdf = $base . "pdf";
 my $cho = $base . "cho";
 my $csv = $base . "csv";
 ( my $ref = $csv ) =~ s/out/ref/;
 
-my $cover = $base . "cover.pdf";
 my $front = $base . "front.pdf";
 my $back  = $base . "back.pdf";
 
@@ -44,15 +43,6 @@ $text->font( $p->corefont("Times-Roman"),100 );
 $text->translate( 297, 300 );
 $text->text( "BACK", align => "center" );
 $p->saveas($back);
-
-$p = $api->new( file => $cover );
-$page = $p->page;
-$page->mediabox("A4");
-$text = $page->text;
-$text->font( $p->corefont("Times-Roman"),100 );
-$text->translate( 297, 300 );
-$text->text( "COVER", align => "center" );
-$p->saveas($cover);
 
 our $options;
 
@@ -93,8 +83,6 @@ ok( close($fd), "Close $cho" );
 @ARGV = ( "--no-default-configs",
 	  "--define", "pdf.csv.songsonly=0",
 	  "--define", "pdf.pagealign-songs=1",
-	  "--define", "pdf.pagealign-songs-extend=1",
-	  "--cover", $cover,
 	  "--front-matter", $front,
 	  "--back-matter", $back,
 	  "--output", $pdf, "--csv",
@@ -102,7 +90,6 @@ ok( close($fd), "Close $cho" );
 ::run();
 
 ok( unlink($pdf),   "Removed PDF" );
-ok( unlink($cover), "Removed cover" );
 ok( unlink($front), "Removed front matter" );
 ok( unlink($back),  "Removed back matter" );
 

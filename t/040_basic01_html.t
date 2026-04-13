@@ -7,6 +7,6 @@ if ( -d "t" ) {
     $0 =~ s;(^|/)t/;$1;;
 }
 
-@::params = qw( 20 basic01 crd );
+@::params = qw( 040 basic01 html );
 
-require "./00_basic.pl";
+require "./000_basic.pl";

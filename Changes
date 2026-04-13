@@ -55,6 +55,8 @@
 
     - Move backend configurator(s) into a separate file.
 
+    - Renamed t tests to make room for new components.
+
     - Add (experimental) provisions for new HTML backend.
 
     !Bug Fixes
