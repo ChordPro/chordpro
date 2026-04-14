@@ -69,6 +69,7 @@
     - Fixed issue #630.1.
     - Fixed issue #636.
     - Fixed issue #640 (col expands to colums instead of columns).
+    - Fixed issue #647 (image scaling goes wrong with columns).
     - Several others.
 
 6.090.1 2026-01-03
