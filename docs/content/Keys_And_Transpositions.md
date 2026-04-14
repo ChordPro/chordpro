@@ -11,9 +11,9 @@ The song key, as set with a `{key:}` directive is now checked for being a valid 
 See this [Wikipedia article](https://en.wikipedia.org/wiki/Key_(music)) for an extensive description of musical keys and signatures.
 
 ChordPro considers keys as valid if there are at most five
-accidentals: `C`, `D♭`, `D`, `E♭`, `E`, `F`, `F♯/G♭`, `G`, `A`, `B♭`,
+sharp or flat accidentals: `C`, `D♭`, `D`, `E♭`, `E`, `F`, `F♯/G♭`, `G`, `A`, `B♭`,
 `B`, and their minor equivalents, `Am`, `B♭m`, `Bm`, and so on. The
-key `F♯/G♭` is dubious, since both the sharp form `F♯` and the flat
+key `F♯/G♭` is an exception, since both the sharp form `F♯` and the flat
 form `G♭` contain six accidentals. ChordPro will use `F#`, but see
 [customizations]({{< relref "Keys_And_Transpositions#customizations" >}}).
 
@@ -23,7 +23,7 @@ Sharp keys are acceptable but will be treated as the corresponding flat key, e.g
 
 Substitution variable `key` will always return the (possibly modified) key as set with the `{key:}` directive, regardless of capo and transpositions.
 
-The key will be modified to its common variant if there are more than five accidentals, i.e., `D♯` becomdes `E♭`. This behaviour can be disabled, see [customizations]({{< relref "Keys_And_Transpositions#customizations" >}}).
+The key will be modified to its common enharmonic variant if there are more than five accidentals, i.e., `D♯` becomdes `E♭`. This behaviour can be disabled, see [customizations]({{< relref "Keys_And_Transpositions#customizations" >}}).
 
 ## Transpositions
 
@@ -47,11 +47,11 @@ For example,
 {capo: 2}
 {transpose: 1}
 {key: C}
-# key = C, key.print = Db, key.sound = F
+# key = C, key.print = D♭, key.sound = E♭
 ````
 Note that `settings.decapo` and command line option `--decapo` effectively turn `{capo: 2}` into `{transpose: 2}`. `key.print` will now be equal to `key.sound`:
 ````
-# key = C, key.print = F, key.sound = F
+# key = C, key.print = E♭, key.sound = E♭
 ````
 
 ### Breaking changes (ChordPro 6.100)
@@ -75,7 +75,7 @@ New config variables:
 
 ### `keys.flats` (default: false)
 
-Use the sharp variant `F♯` for the dubious key `F♯/G♭`.
+Use the sharp enharmonic `F♯` for the key `F♯/G♭`.
 
 ### `keys.force-common` (default: true)
 
