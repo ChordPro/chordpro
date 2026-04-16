@@ -1825,14 +1825,24 @@ sub imageline {
 
     $x += $ox if defined $ox;
     $y -= $oy if defined $oy;
-    warn( sprintf("add_image x=%.1f y=%.1f w=%.1f h=%.1f scale=%.1f,%.1f,%.1f (%s x%+.1f y%+.1f) %s\n",
-		  $x, $y, $w, $h,
-		  $w/$img->width * $xtrascale,
-		  $h/$img->height * $xtrascale,
-		  $xtrascale,
-		  $anchor,
-		  $ox//0, $oy//0, $align,
-		 )) if $config->{debug}->{images};
+
+    if ( $config->{debug}->{images} ) {
+	my $s;
+	my $scale_x = $w/$img->width * $xtrascale;
+	my $scale_y = $h/$img->height * $xtrascale;
+	if ( abs( $scale_x - $scale_y ) < 0.01 ) {
+	    $s = sprintf( "%.2f", $scale_x );
+	}
+	else {
+	    $s = sprintf( "%.2f,%.2f", $scale_x, $scale_y );
+	}
+	warn( sprintf("add_image x=%.1f y=%.1f w=%.1f h=%.1f scale=%sx%.1f (%s x%+.1f y%+.1f) %s\n",
+		      $x, $y, $w, $h,
+		      $s, $xtrascale,
+		      $anchor,
+		      $ox//0, $oy//0, $align,
+		     ));
+    }
 
     $pr->add_object( $img, $x, $y,
 		     xscale => $w/$img->width * $xtrascale,

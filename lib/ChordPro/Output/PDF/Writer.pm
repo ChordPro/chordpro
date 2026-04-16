@@ -469,9 +469,17 @@ sub add_object {
     my $w = $o->width  * $scale_x;
     my $h = $o->height * $scale_y;
 
-    warn( sprintf("add_object x=%.1f y=%.1f w=%.1f h=%.1f scale=%.1f,%.1f %s\n",
-		  $x, $y, $w, $h, $scale_x, $scale_y, $ha,
-		 ) ) if $config->{debug}->{images};
+    if ( $config->{debug}->{images} ) {
+	my $s;
+	if ( abs( $scale_x - $scale_y ) < 0.01 ) {
+	    $s = sprintf( "%.2f", $scale_x );
+	}
+	else {
+	    $s = sprintf( "%.2f,%.2f", $scale_x, $scale_y );
+	}
+	warn( sprintf( "add_object x=%.1f y=%.1f w=%.1f h=%.1f scale=%s %s\n",
+		       $x, $y, $w, $h, $s, $ha, ) );
+    }
 
     $self->crosshairs( $x, $y, color => "lime" ) if $config->{debug}->{images};
     if ( $va eq "top" ) {
