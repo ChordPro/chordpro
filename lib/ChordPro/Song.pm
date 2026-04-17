@@ -2119,9 +2119,9 @@ sub dir_meta {
 		    my $xpk = $self->{chordsinfo}->{$key};
 		    if ( $xpk ) {
 			my $info_p = $xpk->transpose( transpose_print() );
-			my $info_s = $xpk->transpose(transpose_sound());
-			$self->{chordsinfo}->{$info_p->name} = $info_p;
-			$self->{chordsinfo}->{$info_s->name} = $info_s;
+			my $info_s = $xpk->transpose( transpose_sound() );
+			$self->{chordsinfo}->{$info_p->name} //= $info_p;
+			$self->{chordsinfo}->{$info_s->name} //= $info_s;
 			$m->{key_print} = [ $info_p->keyname ];
 			$m->{key_sound} = [ $info_s->keyname ];
 			$xpose->set_key($info_p);
@@ -2159,8 +2159,8 @@ sub dir_meta {
 		    my $key = $m->{_key}->[-1];
 		    my $xpk = $self->{chordsinfo}->{$key};
 		    if ( $xpk ) {
-			my $info = $xpk->transpose(transpose_sound());
-			$self->{chordsinfo}->{$info->name} = $info;
+			my $info = $xpk->transpose( transpose_sound() );
+			$self->{chordsinfo}->{$info->name} //= $info;
 			$m->{key_sound} = [ $info->keyname ];
 			transpose_debug( "capo($val)", $m );;
 		    }
@@ -2281,9 +2281,9 @@ sub dir_transpose {
 	    my $xpk = $self->{chordsinfo}->{$key};
 	    if ( $xpk ) {
 		my $info_p = $xpk->transpose( transpose_print() );
-		my $info_s = $xpk->transpose(transpose_sound());
-		$self->{chordsinfo}->{$info_p->name} = $info_p;
-		$self->{chordsinfo}->{$info_s->name} = $info_s;
+		my $info_s = $xpk->transpose( transpose_sound() );
+		$self->{chordsinfo}->{$info_p->name} //= $info_p;
+		$self->{chordsinfo}->{$info_s->name} //= $info_s;
 		$m->{key_print} = [ $info_p->keyname ];
 		$m->{key_sound} = [ $info_s->keyname ];
 		$xpose->set_key($info_p);
@@ -2308,9 +2308,9 @@ sub dir_transpose {
 	    my $xpk = $self->{chordsinfo}->{$key};
 	    if ( $xpk ) {
 		my $info_p = $xpk->transpose( transpose_print() );
-		my $info_s = $xpk->transpose(transpose_sound());
-		$self->{chordsinfo}->{$info_p->name} = $info_p;
-		$self->{chordsinfo}->{$info_s->name} = $info_s;
+		my $info_s = $xpk->transpose( transpose_sound() );
+		$self->{chordsinfo}->{$info_p->name} //= $info_p;
+		$self->{chordsinfo}->{$info_s->name} //= $info_s;
 		$m->{key_print} = [ $info_p->keyname ];
 		$m->{key_sound} = [ $info_s->keyname ];
 		$xpose->set_key($info_p);
