@@ -181,12 +181,32 @@ sub txt2xform( $self, %args ) {
       };
 }
 
+sub _esc( $text ) {
+    return "" unless defined $text;
+    $text =~ s/&/&amp;/g;
+    $text =~ s/</&lt;/g;
+    $text =~ s/>/&gt;/g;
+    $text =~ s/"/&quot;/g;
+    $text =~ s/'/&#39;/g;
+    $text;
+}
+
 sub txt2html( $self, %args ) {
     my $elt = $args{elt};
+    my $opts = { %{$elt->{opts}//{}} };
+    my $style = delete($opts->{textstyle}) // "text";
+    $style =~ s/[^\w-]//g;
 
-    require ChordPro::Output::Common;
-    my @lines = map { ChordPro::Output::Common::encode_html($_) } @{ $elt->{data} // [] };
-    return join( "<br/>\n", @lines );
+    my @lines = map { _esc($_) } @{ $elt->{data} // [] };
+    my $html = join( "<br/>\n", @lines );
+    my $classes = "cp-delegate cp-delegate-textblock";
+    $classes .= " cp-delegate-textblock-style-$style" if $style ne "";
+
+    return
+    { type => "html",
+	line => $elt->{line},
+	data => qq{<div class="$classes">$html</div>\n},
+    };
 }
 
 # Pre-scan.

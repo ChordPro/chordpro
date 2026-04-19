@@ -1,0 +1,607 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Implementation Plan Template v3.1
+
+  Usage:
+  - Each <item> represents a feature, bug, refactoring, or tech-debt
+  - Status flow: BACKLOG → PENDING → APPROVED → IN_PROGRESS → DONE | DENIED
+  - Items are sorted by priority and dependency
+  - Statistics are derived from items, not manually maintained
+
+  Conventions:
+  - IDs are unique integers across all items
+  - depends-on references other item IDs (comma-separated)
+  - parent attribute references the parent item ID for epics/sub-items
+  - All dates in ISO 8601 format (YYYY-MM-DD)
+
+  Complexity guide:
+  - S  = isolated change, single file, < 1 day
+  - M  = few files, clear scope, 1–3 days
+  - L  = cross-cutting, multiple components, 3–7 days
+  - XL = epic-level, requires decomposition into sub-items
+
+  Item types:
+  - feature      = deliverable capability
+  - bug          = code defect
+  - refactoring  = structural improvement without behavior change
+  - tech-debt    = known compromise to address
+  - security-item = security vulnerability or hardening task
+  - requirement  = raw user need; decomposed via /translate into epics/features
+  - epic         = XL grouping of features; has acceptance-criteria, no tasks
+  - enabler      = technical prerequisite mapped to a feature (mapped-to-feature attr)
+  - problem      = systemic/environmental issue (not a code defect)
+  - sprint       = lightweight grouping of 2-5 items (no PO gates); one active at a time
+
+  File layout (item-per-file format):
+  - overview-features-bugs.xml       = slim INDEX: <item-ref> per item + sprints/releases/blockers + changelog (last 30 entries)
+  - ai-docs/items/{NNNN}.xml         = full item content (one file per active item, zero-padded 4-digit ID e.g. 0014.xml)
+  - ai-docs/items/archive/{NNNN}.xml = archived items (moved here by /archive)
+
+  Index <item-ref> attributes (all items summarised in the index):
+    id, type, status, priority, title, branch, depends-on, parent, security, complexity
+    planned-files = space-separated project source file paths this item will MODIFY or DELETE
+                    (DA fills this during enrichment; /run reads it to build the conflict graph)
+
+  Legacy inline format (overview-features-bugs.xml with inline <item> elements) is still supported.
+  Run /update to migrate to item-per-file (backs up existing file first).
+
+  Status lifecycle (full):
+  PENDING ──→ APPROVED ──→ PLANNED ──→ IN_PROGRESS ──→ REVIEW ──→ DONE ──→ ARCHIVED
+     │                                                    │
+     └──→ DENIED                               FAILED ──→ IN_PROGRESS
+
+  Simple items may skip PLANNED and/or REVIEW when appropriate.
+-->
+<implementation-plan>
+
+  <!-- ================================================================== -->
+  <!-- PROJECT METADATA                                                    -->
+  <!-- ================================================================== -->
+  <metadata>
+    <title>Project Title</title>
+    <version>1.0</version>
+    <status>DRAFT|IN_PROGRESS|COMPLETED|ON_HOLD</status>
+    <created>2026-01-01</created>
+    <updated>2026-01-01</updated>
+    <owner>Name or Team</owner>
+    <repository>https://github.com/org/repo</repository>
+  </metadata>
+
+  <!-- ================================================================== -->
+  <!-- GOALS & SCOPE                                                       -->
+  <!-- ================================================================== -->
+  <goals>
+    <goal>What the project aims to achieve</goal>
+  </goals>
+  <scope>
+    <in-scope>What is included</in-scope>
+    <out-of-scope>What is explicitly excluded</out-of-scope>
+  </scope>
+
+  <!-- ================================================================== -->
+  <!-- ARCHITECTURE                                                        -->
+  <!-- ================================================================== -->
+  <architecture>
+    <description>Overall architecture description</description>
+
+    <patterns>
+      <pattern>e.g. MVC, Event-Driven, Microservices</pattern>
+    </patterns>
+
+    <system-requirements>
+      <!-- Runtime, OS, hardware prerequisites -->
+      <requirement>e.g. Node.js >= 20, Python >= 3.11</requirement>
+    </system-requirements>
+
+    <external-dependencies>
+      <!-- APIs, services, third-party tools -->
+      <dependency>e.g. Stripe API, PostgreSQL 16, Redis</dependency>
+    </external-dependencies>
+
+    <interfaces>
+      <interface type="inbound|outbound">Interface description</interface>
+    </interfaces>
+
+    <design-decisions>
+      <decision date="2026-01-01">Decision description and rationale</decision>
+    </design-decisions>
+  </architecture>
+
+  <!-- ================================================================== -->
+  <!-- ENVIRONMENTS (optional)                                             -->
+  <!-- ================================================================== -->
+  <environments>
+    <environment name="dev">Local development setup notes</environment>
+    <environment name="staging">Staging environment details</environment>
+    <environment name="prod">Production environment details</environment>
+  </environments>
+
+  <!-- ================================================================== -->
+  <!-- SECURITY                                                            -->
+  <!-- ================================================================== -->
+  <security>
+    <concern>
+      <threat>Threat description</threat>
+      <risk>LOW|MEDIUM|HIGH|CRITICAL</risk>
+      <vulnerability>Potential vulnerability</vulnerability>
+      <mitigation>How it is or will be addressed</mitigation>
+    </concern>
+  </security>
+
+  <!-- ================================================================== -->
+  <!-- MILESTONES (optional)                                               -->
+  <!-- ================================================================== -->
+  <milestones>
+    <milestone id="M1" target-date="2026-03-01">
+      <title>Milestone Name</title>
+      <items>1, 2, 3</items><!-- references item IDs -->
+    </milestone>
+  </milestones>
+
+  <!-- ================================================================== -->
+  <!-- ITEMS (features, bugs, refactoring, tech-debt)                      -->
+  <!-- Sort by: priority DESC, then dependency order                       -->
+  <!-- ================================================================== -->
+
+  <!--
+    Status lifecycle:
+
+    BACKLOG ──→ PENDING ──→ APPROVED ──→ IN_PROGRESS ──→ DONE
+                   │
+                   └──→ DENIED
+
+    <affected-files planned="true"> — DA fills during enrichment BEFORE implementation:
+      <file role="modify|create|delete|read" test="true|false">path</file>
+      role:  modify = existing file changed (HARD conflict signal)
+             create = new file (no conflict possible)
+             delete = file removed (HARD conflict signal)
+             read   = read-only dependency (no conflict)
+      test:  true = test file (soft conflict — additive changes, usually safe to parallel)
+      This block drives: (1) planned-files in <item-ref> for conflict-graph, (2) TST regression scope.
+
+    Rules for XL items (epics):
+      - MUST be decomposed into sub-items with parent="ID"
+      - The epic holds acceptance-criteria, risks, and scope — no tasks
+      - Sub-items hold tasks, verification, and results
+      - Epic status is derived from its children
+  -->
+
+  <!-- ================================================================== -->
+  <!-- EXAMPLE: Complex Feature (Epic with sub-items)                      -->
+  <!-- ================================================================== -->
+
+  <item id="10" type="feature" status="IN_PROGRESS" priority="CRITICAL" complexity="XL">
+    <title>User Authentication System</title>
+    <branch>feature/auth</branch>
+    <justification>Core security requirement for all protected routes</justification>
+    <depends-on></depends-on>
+
+    <!-- Acceptance criteria: define "done" for the epic as a whole -->
+    <acceptance-criteria>
+      <criterion id="AC1">Users can log in via Google and GitHub OAuth</criterion>
+      <criterion id="AC2">Sessions expire after 24h of inactivity</criterion>
+      <criterion id="AC3">Failed login attempts are rate-limited (max 5/min)</criterion>
+      <criterion id="AC4">All auth events are audit-logged</criterion>
+    </acceptance-criteria>
+
+    <risks>
+      <risk>OAuth provider outages could block all logins → implement fallback email/password flow</risk>
+      <risk>Token leakage via XSS → enforce HttpOnly + Secure cookies, add CSP headers</risk>
+    </risks>
+
+    <!-- No tasks here – tasks live in sub-items -->
+    <!-- No verification here – verification lives in sub-items -->
+    <!-- Result is derived from sub-item outcomes -->
+    <r>
+      <outcome></outcome>
+      <observations></observations>
+      <lessons-learned></lessons-learned>
+    </r>
+  </item>
+
+  <!-- Sub-item 1 of Epic 10 -->
+  <item id="11" type="feature" status="DONE" priority="CRITICAL" complexity="M" parent="10">
+    <title>OAuth2 Provider Integration (Google + GitHub)</title>
+    <branch>feature/auth</branch>
+    <justification>Implements AC1 of epic 10</justification>
+    <depends-on></depends-on>
+
+    <tasks>
+      <task id="11.1">Configure OAuth2 app credentials for Google and GitHub</task>
+      <task id="11.2">Implement OAuth callback handler with PKCE flow</task>
+      <task id="11.3">Map OAuth user profile to internal user model</task>
+    </tasks>
+
+    <verification>
+      <manual-steps>
+        <step order="1">Log in via Google – verify redirect and token creation</step>
+        <step order="2">Log in via GitHub – verify redirect and token creation</step>
+        <step order="3">Attempt login with revoked OAuth token – verify graceful error</step>
+      </manual-steps>
+      <tests>
+        <test type="integration">
+          <file>tests/auth/test_oauth_flow.py</file>
+          <description>End-to-end OAuth login with mocked provider</description>
+          <assertions>User created in DB, session token returned, redirect to dashboard</assertions>
+        </test>
+        <test type="unit">
+          <file>tests/auth/test_profile_mapping.py</file>
+          <description>OAuth profile to internal user model mapping</description>
+          <assertions>All required fields populated, missing optional fields default correctly</assertions>
+        </test>
+      </tests>
+    </verification>
+
+    <r>
+      <outcome>DONE</outcome>
+      <observations>GitHub OAuth requires extra scope for email access</observations>
+      <lessons-learned>Always request email scope explicitly – GitHub doesn't include it by default</lessons-learned>
+      <files>
+        <file>src/auth/oauth.py</file>
+        <file>src/auth/profile_mapper.py</file>
+        <file>config/oauth_providers.yaml</file>
+      </files>
+    </r>
+  </item>
+
+  <!-- Sub-item 2 of Epic 10 -->
+  <item id="12" type="feature" status="APPROVED" priority="HIGH" complexity="M" parent="10">
+    <title>Session Management &amp; Token Refresh</title>
+    <branch>feature/auth</branch>
+    <justification>Implements AC2 of epic 10</justification>
+    <depends-on>11</depends-on>
+
+    <tasks>
+      <task id="12.1">Implement JWT token issuance with 24h sliding expiry</task>
+      <task id="12.2">Add token refresh endpoint</task>
+      <task id="12.3">Implement session invalidation on logout</task>
+    </tasks>
+
+    <verification>
+      <tests>
+        <test type="unit">
+          <file>tests/auth/test_session.py</file>
+          <description>Token expiry and refresh logic</description>
+          <assertions>Expired tokens rejected, refreshed tokens valid, logout invalidates session</assertions>
+        </test>
+        <test type="human">
+          <description>Log in, wait 24h (or adjust expiry to 1min for test), verify auto-logout and re-auth prompt</description>
+        </test>
+      </tests>
+    </verification>
+
+    <r>
+      <outcome></outcome>
+      <files><file></file></files>
+    </r>
+  </item>
+
+  <!-- ================================================================== -->
+  <!-- EXAMPLE: Complex Bug with Analysis Phase                            -->
+  <!-- ================================================================== -->
+
+  <item id="20" type="bug" status="IN_PROGRESS" priority="CRITICAL" complexity="L" parent="10">
+    <title>Intermittent auth failures under load</title>
+    <justification>Affects ~5% of login attempts in production</justification>
+    <depends-on>11</depends-on>
+
+    <steps-to-reproduce>
+      <step order="1">Run load test with 500 concurrent users against /auth/login</step>
+      <step order="2">Observe 401 errors appearing in logs after ~2 minutes</step>
+      <step order="3">Errors disappear when concurrency drops below 100</step>
+    </steps-to-reproduce>
+    <expected-result>All valid sessions authenticate successfully regardless of load</expected-result>
+
+    <!--
+      Analysis: use for complex bugs that require investigation.
+      - List hypotheses with status OPEN → CONFIRMED | REJECTED
+      - Once root cause is identified, record it and define tasks
+    -->
+    <analysis>
+      <hypothesis id="H1" status="CONFIRMED">
+        Race condition in token cache: concurrent writes overwrite valid tokens
+      </hypothesis>
+      <hypothesis id="H2" status="REJECTED">
+        Connection pool exhaustion under concurrent requests (pool size verified sufficient)
+      </hypothesis>
+      <root-cause>H1 – confirmed via thread dump: two threads writing to token cache without synchronization</root-cause>
+      <affected-files>
+        <file>src/auth/token_cache.py</file>
+        <file>src/auth/session_manager.py</file>
+      </affected-files>
+    </analysis>
+
+    <tasks>
+      <task id="20.1">Add mutex lock to token cache write operations</task>
+      <task id="20.2">Add load test (500 concurrent) to CI pipeline as regression guard</task>
+    </tasks>
+
+    <verification>
+      <manual-steps>
+        <step order="1">Re-run load test with 500 concurrent users</step>
+        <step order="2">Verify zero 401 errors over 10-minute sustained load</step>
+      </manual-steps>
+      <tests>
+        <test type="integration">
+          <file>tests/auth/test_concurrent_auth.py</file>
+          <description>Concurrent authentication load test</description>
+          <assertions>0 auth failures at 500 concurrent users over 10 minutes</assertions>
+        </test>
+        <test type="unit">
+          <file>tests/auth/test_token_cache_threading.py</file>
+          <description>Thread-safety of token cache operations</description>
+          <assertions>No data corruption with 50 concurrent read/write threads</assertions>
+        </test>
+      </tests>
+    </verification>
+
+    <r>
+      <outcome></outcome>
+      <files><file></file></files>
+    </r>
+  </item>
+
+  <!-- ================================================================== -->
+  <!-- EXAMPLE: Simple Feature (no parent, straightforward)                -->
+  <!-- ================================================================== -->
+
+  <item id="30" type="feature" status="APPROVED" priority="MEDIUM" complexity="S">
+    <title>Add health check endpoint</title>
+    <branch>feature/healthcheck</branch>
+    <justification>Required for Kubernetes liveness probe</justification>
+    <depends-on></depends-on>
+
+    <!-- affected-files: DA fills during enrichment; drives conflict-graph in /run -->
+    <affected-files planned="true">
+      <file role="modify">src/app.py</file>
+      <file role="create">src/health.py</file>
+      <file role="create" test="true">tests/test_health.py</file>
+    </affected-files>
+
+    <tasks>
+      <task id="30.1">Create GET /health endpoint returning 200 + DB connectivity status</task>
+    </tasks>
+
+    <verification>
+      <tests>
+        <test type="unit">
+          <file>tests/test_health.py</file>
+          <description>Health endpoint returns correct status</description>
+          <assertions>Returns 200 with DB up, 503 with DB down</assertions>
+        </test>
+      </tests>
+    </verification>
+
+    <r>
+      <outcome></outcome>
+      <files><file></file></files>
+    </r>
+  </item>
+
+  <!-- ================================================================== -->
+  <!-- EXAMPLE: Denied item (minimal)                                      -->
+  <!-- ================================================================== -->
+
+  <item id="40" type="feature" status="DENIED" priority="LOW">
+    <title>Custom theme support</title>
+    <justification>Out of scope for MVP – revisit in v2.0</justification>
+  </item>
+
+  <!-- ================================================================== -->
+  <!-- EXAMPLE: REQUIREMENT → EPIC → FEATURE → ENABLER chain              -->
+  <!-- ================================================================== -->
+
+  <!-- Step 1: Raw user need (created via: /feature MyNeed -requirement) -->
+  <item id="50" type="requirement" status="APPROVED" priority="HIGH">
+    <title>Users must be able to export reports as PDF</title>
+    <justification>Requested by enterprise clients for compliance reporting</justification>
+  </item>
+
+  <!-- Step 2: EPIC decomposed from the requirement (via /translate 50) -->
+  <item id="51" type="epic" status="PENDING" priority="HIGH" complexity="XL">
+    <title>Report PDF Export</title>
+    <justification>Implements requirement 50</justification>
+    <depends-on>50</depends-on>
+    <acceptance-criteria>
+      <criterion id="AC1">PDF contains all visible report sections</criterion>
+      <criterion id="AC2">Export completes within 5 seconds for reports under 50 pages</criterion>
+      <criterion id="AC3">Export requires authentication; unauthorized requests are rejected</criterion>
+    </acceptance-criteria>
+    <risks>
+      <risk>PDF library licensing may conflict with project license – evaluate before committing</risk>
+    </risks>
+  </item>
+
+  <!-- Step 3: ENABLER – technical prerequisite for the feature -->
+  <item id="52" type="enabler" status="PENDING" priority="HIGH" complexity="M"
+        parent="51" mapped-to-feature="53">
+    <title>PDF rendering service setup</title>
+    <justification>Feature 53 requires a server-side PDF renderer</justification>
+    <depends-on>51</depends-on>
+    <technical-parameters>
+      <constraint>Isolated container execution for untrusted content</constraint>
+      <constraint>No external network access from renderer</constraint>
+      <pattern>Headless Chromium in sandbox mode</pattern>
+    </technical-parameters>
+    <security-impact>
+      <category>ACCESS</category>
+      <threat>Renderer executing untrusted HTML could escape sandbox</threat>
+      <mitigation>Sandboxed container + no-network policy + content sanitization</mitigation>
+    </security-impact>
+    <tasks>
+      <task id="52.1">Evaluate and select PDF rendering library</task>
+      <task id="52.2">Configure isolated container with no-network policy</task>
+      <task id="52.3">Create rendering wrapper with input sanitization</task>
+    </tasks>
+    <verification>
+      <tests>
+        <test type="integration">
+          <file>tests/pdf/test_renderer_security.py</file>
+          <description>Renderer sandbox isolation</description>
+          <assertions>Renderer cannot access filesystem or network; malformed HTML handled gracefully</assertions>
+        </test>
+      </tests>
+    </verification>
+    <r><outcome></outcome><files><file></file></files></r>
+  </item>
+
+  <!-- Step 4: FEATURE that depends on the enabler -->
+  <item id="53" type="feature" status="PENDING" priority="HIGH" complexity="M"
+        parent="51" security="true">
+    <title>PDF export endpoint</title>
+    <branch>feature/item-53-pdf-export-endpoint</branch>
+    <justification>Implements AC1, AC2, AC3 of epic 51</justification>
+    <depends-on>52</depends-on>
+    <capabilities>
+      <capability id="CAP-1" type="technical">PDF rendering engine integration</capability>
+      <capability id="CAP-2" type="infrastructure">Async export queue for large reports</capability>
+    </capabilities>
+    <technical-parameters>
+      <constraint>Server-side rendering only — no client-side PDF libs</constraint>
+      <nfr type="performance">p95 latency under 5s for 50-page reports</nfr>
+      <pattern>Queue-based async processing for large exports</pattern>
+    </technical-parameters>
+    <security-impact>
+      <category>AUTH</category>
+      <threat>Unauthenticated access to export endpoint could expose report data</threat>
+      <mitigation>Auth middleware on export route; per-report access control check</mitigation>
+    </security-impact>
+    <tasks>
+      <task id="53.1">Create export endpoint with auth middleware</task>
+      <task id="53.2">Integrate PDF renderer (enabler 52)</task>
+      <task id="53.3">Add async queue for large report exports</task>
+      <task id="53.4">Write unit and integration tests</task>
+    </tasks>
+    <verification>
+      <tests>
+        <test type="integration">
+          <file>tests/pdf/test_export_endpoint.py</file>
+          <description>PDF export end-to-end</description>
+          <assertions>Authenticated users get PDF; unauthenticated get 401; large reports handled async</assertions>
+        </test>
+      </tests>
+    </verification>
+    <workflow-log>
+      <!-- Auto-populated by /approve, /plan-impl, /start, /submit, /pass, /fail -->
+      <entry timestamp="" role="" action="" from-status="" to-status="" note="" />
+    </workflow-log>
+    <r><outcome></outcome><observations></observations><lessons-learned></lessons-learned><files><file></file></files></r>
+  </item>
+
+  <!-- ================================================================== -->
+  <!-- EXAMPLE: RELEASE item                                               -->
+  <!-- ================================================================== -->
+
+  <release id="REL-1" status="PLANNING" target-date="2026-04-01" type="MINOR">
+    <title>v2.4.0 – Report PDF Export</title>
+
+    <scope>
+      <item-ref id="51" type="epic" status="PENDING">Report PDF Export epic</item-ref>
+      <item-ref id="52" type="enabler" status="PENDING">PDF rendering service</item-ref>
+      <item-ref id="53" type="feature" status="PENDING">PDF export endpoint</item-ref>
+    </scope>
+
+    <gates>
+      <gate name="scope-freeze"     status="PENDING" date="" owner="PO" />
+      <gate name="code-complete"    status="PENDING" date="" owner="SM" />
+      <gate name="full-test-pass"   status="PENDING" date="" owner="TST" />
+      <gate name="release-approval" status="PENDING" date="" owner="PO" />
+    </gates>
+
+    <release-test>
+      <run date="" result="">
+        <total></total><passed></passed><failed></failed>
+      </run>
+    </release-test>
+
+    <changelog></changelog>
+  </release>
+
+  <!-- ================================================================== -->
+  <!-- EXAMPLE: SPRINT item (lightweight grouping, 2-5 items, no PO gate) -->
+  <!-- Created automatically by /implement with >= 2 APPROVED items, or   -->
+  <!-- manually via /sprint create. Closed via /sprint close.             -->
+  <!-- Only one SPRINT can be ACTIVE at a time.                           -->
+  <!-- ================================================================== -->
+
+  <sprint id="SPR-1" status="ACTIVE" type="SPRINT" started="2026-04-01">
+    <title>Sprint 1 – OAuth integration and session management</title>
+
+    <scope>
+      <item-ref id="11" type="feature" status="DONE">OAuth2 Provider Integration</item-ref>
+      <item-ref id="12" type="feature" status="IN_PROGRESS">Session Management &amp; Token Refresh</item-ref>
+    </scope>
+
+    <gates>
+      <gate name="code-complete"  status="PENDING" date="" owner="SM" />
+      <gate name="full-test-pass" status="PENDING" date="" owner="TST" />
+    </gates>
+
+    <release-test>
+      <run date="" result="">
+        <total></total><passed></passed><failed></failed>
+      </run>
+    </release-test>
+  </sprint>
+
+  <!-- ================================================================== -->
+  <!-- EXAMPLE: BLOCKER item                                               -->
+  <!-- ================================================================== -->
+
+  <blocker id="BLK-1" status="ACTIVE" severity="HIGH" raised-by="DEV" assigned-to="DA,SM">
+    <title>PDF library license incompatible with project</title>
+    <description>Selected library uses AGPL; conflicts with commercial distribution</description>
+    <blocks>
+      <item-ref id="52" />
+      <item-ref id="53" />
+    </blocks>
+    <resolution-plan>DA to evaluate alternative libraries (Puppeteer, WeasyPrint, wkhtmltopdf)</resolution-plan>
+    <resolved-date></resolved-date>
+    <resolution></resolution>
+  </blocker>
+
+  <!-- ================================================================== -->
+  <!-- EXAMPLE: INDEX FORMAT (overview-features-bugs.xml in item-per-file mode) -->
+  <!-- In item-per-file mode the main XML is a slim index; full item content  -->
+  <!-- lives in ai-docs/items/{NNNN}.xml. The index uses <item-ref> elements. -->
+  <!-- ================================================================== -->
+  <!--
+  <plan>
+    <metadata>
+      <title>Project Title</title>
+      <version>1.0</version>
+      <updated>2026-02-25</updated>
+      <next-id>31</next-id>
+      <done-since-last-fulltest>2</done-since-last-fulltest>
+      <last-fulltest-date>2026-02-10</last-fulltest-date>
+    </metadata>
+
+    <items>
+      <item-ref id="30" type="feature"  status="APPROVED"    priority="MEDIUM"
+                title="Add health check endpoint"  branch="feature/item-30-health-check"
+                depends-on=""  parent=""  complexity="S"
+                planned-files="src/app.py" />
+
+      <item-ref id="31" type="bug"      status="IN_PROGRESS" priority="HIGH"
+                title="Login fails with SSO + 2FA"  branch="bug/item-31-sso-login"
+                depends-on="30"  parent=""  complexity="S"
+                planned-files="src/auth/sso.py src/auth/mfa.py" />
+    </items>
+
+    <sprints /><releases /><blockers />
+
+    <changelog>
+      <entry date="2026-02-25">Item 30 APPROVED. Item 31 created PENDING → APPROVED.</entry>
+    </changelog>
+  </plan>
+  -->
+
+  <!-- ================================================================== -->
+  <!-- CHANGELOG – track plan evolution                                    -->
+  <!-- ================================================================== -->
+  <changelog>
+    <entry date="2026-01-01">v3.0 – Initial plan created</entry>
+    <entry date="2026-01-15">v3.1 – Added parent/child, acceptance-criteria, analysis, complexity</entry>
+  </changelog>
+
+</implementation-plan>

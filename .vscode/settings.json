@@ -1,0 +1,43 @@
+{
+    "perl-toolbox.syntax.includePaths": ["/workspace/lib/"],
+
+    "perl": {
+        "enable": true,
+        "logLevel": 0,
+        "perlInc": ["/workspace/lib/"]
+    },
+    "chat.tools.terminal.autoApprove": {
+        "mv": true,
+        "prove": true,
+        "cp": true,
+        "/^perl script/cfgboot\\.pl$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^perl script/cfgboot\\.pl lib/ChordPro/res/config/chordpro\\.json$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^set -x && prove -bv t/83_html5_delegate\\.t t/html5/09_bugfixes\\.t t/190_html5_bugfixes\\.t$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^perl script/chordpro\\.pl --generate=HTML5 --config=testing/myconfig_html5\\.json testing/lowlands\\.cho --output=testing/lowlands-1\\.html && python3 - <<'PY'\nimport re,base64,urllib\\.parse\np='testing/lowlands-1\\.html'\nhtml=open\\(p,encoding='utf-8'\\)\\.read\\(\\)\nuris=re\\.findall\\(r'src=\"\\(data:image/svg\\\\\\+xml\\[\\^\"\\\\s\\]\\+\\)\"',html\\)\nprint\\('svg_data_uri_count',len\\(uris\\)\\)\nfor i,u in enumerate\\(uris\\[:5\\],1\\):\n    print\\('uri',i,'prefix',u\\[:80\\]\\)\n    if ';base64,' in u:\n        payload=u\\.split\\(';base64,',1\\)\\[1\\]\n        raw=base64\\.b64decode\\(payload\\)\n        head=raw\\[:80\\]\\.decode\\('utf-8','replace'\\)\n        print\\('decoded_head',head\\.replace\\('\\\\n','\\\\\\\\n'\\)\\)\n    elif ',' in u:\n        payload=u\\.split\\(',',1\\)\\[1\\]\n        raw=urllib\\.parse\\.unquote_to_bytes\\(payload\\)\n        head=raw\\[:80\\]\\.decode\\('utf-8','replace'\\)\n        print\\('decoded_head',head\\.replace\\('\\\\n','\\\\\\\\n'\\)\\)\nPY$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^xmllint --noout ai-docs/overview-features-bugs\\.xml$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^python3 - <<'PY'\nimport xml\\.etree\\.ElementTree as ET\nET\\.parse\\('ai-docs/overview-features-bugs\\.xml'\\)\nprint\\('OK'\\)\nPY$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^cd /workspace && python3 ai-docs/plan_manager\\.py .*$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    },
+    "github.copilot.chat.codeGeneration.useInstructionFiles": true
+}

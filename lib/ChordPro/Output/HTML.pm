@@ -20,12 +20,26 @@ sub generate_songbook {
     my ( $self, $sb ) = @_;
 
     my @book;
-    my $cfg = $::config->{html} // {};
-    $cfg->{styles}->{default} //= "chordpro.css";
-    $cfg->{styles}->{screen}  //= $cfg->{styles}->{display} // "";
-    $cfg->{styles}->{print}   //= "chordpro_print.css";
+	# JSON::Relaxed may provide restricted hashes; clone to plain hashes before
+	# applying backend defaults.
+	my $cfg_src = $::config->{html} // {};
+	my $cfg = ref($cfg_src) eq 'HASH' ? { %{$cfg_src} } : {};
+	my $styles_src = eval { $cfg->{styles} } // {};
+	my %styles = ref($styles_src) eq 'HASH' ? %{$styles_src} : ();
 
-    my %styles = %{ $cfg->{styles} };
+	$styles{default} //= "chordpro.css";
+		my $legacy_display = delete $styles{display};
+		$styles{screen}  //= $legacy_display // "";
+	$styles{print}   //= "chordpro_print.css";
+
+		# Suppress duplicate links when a medium stylesheet resolves to default.
+		delete $styles{screen}
+			if defined($styles{screen})
+			&& ( $styles{screen} eq '' || $styles{screen} eq $styles{default} );
+		delete $styles{print}
+			if defined($styles{print})
+			&& ( $styles{print} eq '' || $styles{print} eq $styles{default} );
+
     my @styles = ( "default" );
     for ( sort keys %styles ) {
 	next if /^(?:default|embed)$/ ;

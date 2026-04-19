@@ -80,7 +80,7 @@ EOD
 
 ok( close($fd), "Close $cho" );
 
-@ARGV = ( "--no-default-configs",
+@ARGV = ( "--no-default-configs", "--no-userconfig", "--no-sysconfig",
 	  "--define", "pdf.csv.songsonly=0",
 	  "--define", "pdf.pagealign-songs=1",
 	  "--front-matter", $front,

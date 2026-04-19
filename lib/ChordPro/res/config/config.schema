@@ -242,6 +242,54 @@
           "type": "string",
           "default": "default"
         },
+        "pdf": {
+          "description": "Backend-specific delegate overrides for PDF output.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "module": {
+              "type": "string"
+            },
+            "handler": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": true
+        },
+        "html": {
+          "description": "Backend-specific delegate overrides for HTML output.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "module": {
+              "type": "string"
+            },
+            "handler": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": true
+        },
+        "html5": {
+          "description": "Backend-specific delegate overrides for HTML5 output.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "module": {
+              "type": "string"
+            },
+            "handler": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": true
+        },
         "config": {
           "type": "string",
           "default": "default"
@@ -415,8 +463,28 @@
               "title": "The handler method to produce SVG from ABC.",
               "type": "string",
               "default": "abc2svg",
-              "const": "abc2svg",
-              "description": "Default handler uses `program` (if set), othewise embedded QuickJS or external QuickJS."
+              "oneOf": [
+                {
+                  "const": "abc2svg",
+                  "title": "Default handler uses `program` (if set), othewise embedded QuickJS or external QuickJS."
+                },
+                {
+                  "const": "abc2svg_html",
+                  "title": "HTML/HTML5 alias of `abc2svg` with backend-specific dispatch."
+                },
+                {
+                  "const": "quickjs_xs",
+                  "title": "Uses embedded QuickJS only."
+                },
+                {
+                  "const": "quickjs_qjs",
+                  "title": "Uses external QuickJS only."
+                },
+                {
+                  "const": "quickjs",
+                  "title": "Uses internal or external QuickJS."
+                }
+              ]
             },
             "program": {
               "type": "string",
@@ -2828,6 +2896,92 @@
       }
     },
     {
+      "title": "HTML5 Output",
+      "type": "object",
+      "properties": {
+        "html5": {
+          "description": "Settings for HTML5 output.",
+          "type": "object",
+          "properties": {
+            "mode": {
+              "description": "HTML5 output mode.",
+              "type": "string",
+              "enum": ["responsive", "screen", "print", "paged"],
+              "default": "print"
+            },
+            "paged": {
+              "description": "Settings for paged HTML5 output.",
+              "type": "object",
+              "properties": {
+                "song": {
+                  "description": "Song pagination controls for paged output.",
+                  "type": "object",
+                  "properties": {
+                    "page-break": {
+                      "description": "Insert a page break before or after each song in paged output.",
+                      "type": "string",
+                      "enum": ["none", "before", "after", "both", "before-right", "before-left", "before-recto", "before-verso", "after-right", "after-left", "after-recto", "after-verso", "right", "left", "recto", "verso"],
+                      "default": "none"
+                    }
+                  }
+                },
+                "newpage": {
+                  "description": "Newpage pagination controls for paged output.",
+                  "type": "object",
+                  "properties": {
+                    "page-break": {
+                      "description": "Targeted page break for newpage directives in paged output.",
+                      "type": "string",
+                      "enum": ["page", "right", "left", "recto", "verso"],
+                      "default": "page"
+                    }
+                  }
+                },
+                "bundle": {
+                  "description": "Bundle output settings for paged HTML5 (folder output with external CSS).",
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "description": "Write paged HTML output as a folder bundle with externalized CSS.",
+                      "type": "boolean",
+                      "default": false
+                    },
+                    "mode": {
+                      "description": "Bundle template mode.",
+                      "type": "string",
+                      "enum": ["minimal"],
+                      "default": "minimal"
+                    },
+                    "html": {
+                      "description": "HTML file name inside the bundle folder.",
+                      "type": ["string", "null"],
+                      "default": null
+                    },
+                    "css": {
+                      "description": "CSS filenames for the bundle.",
+                      "type": "object",
+                      "properties": {
+                        "layout": {
+                          "description": "Layout CSS filename.",
+                          "type": "string",
+                          "default": "layout.css"
+                        },
+                        "content": {
+                          "description": "Content CSS filename.",
+                          "type": "string",
+                          "default": "content.css"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
       "title": "ChordPro Output",
       "type": "object",
       "properties": {
@@ -2860,6 +3014,12 @@
                 "type": "image",
                 "module": "ABC",
                 "handler": "abc2svg",
+                "html": {
+                  "handler": "abc2svg_html"
+                },
+                "html5": {
+                  "handler": "abc2svg_html"
+                },
                 "program": "",
                 "config": "default",
                 "preamble": [
@@ -2926,7 +3086,22 @@
                   }
                 }
               ],
-              "description": "Embedding Strums. EXPERIMENTAL"
+              "description": "Embedding Strums. EXPERIMENTAL",
+              "default": {
+                "type": "image",
+                "module": "Strum",
+                "handler": "strum2xo",
+                "pdf": {
+                  "handler": "strum2xo"
+                },
+                "html": {
+                  "handler": "strum2html"
+                },
+                "html5": {
+                  "handler": "strum2html"
+                },
+                "preamble": []
+              }
             },
             "svg": {
               "description": "Embedding SVG.",
@@ -2985,7 +3160,16 @@
               "default": {
                 "type": "image",
                 "module": "TextBlock",
-                "handler": "txt2xform"
+                "handler": "txt2xform",
+                "pdf": {
+                  "handler": "txt2xform"
+                },
+                "html": {
+                  "handler": "txt2html"
+                },
+                "html5": {
+                  "handler": "txt2html"
+                }
               }
             }
           },

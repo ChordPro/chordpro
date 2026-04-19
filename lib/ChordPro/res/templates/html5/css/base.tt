@@ -1,0 +1,17 @@
+[%# ChordPro HTML5 Default Stylesheet - Main Template %]
+
+[% INCLUDE 'html5/css/variables.tt' %]
+
+[% INCLUDE 'html5/css/body-page.tt' %]
+
+[% INCLUDE 'html5/css/typography.tt' %]
+
+[% INCLUDE 'html5/css/chord-diagrams.tt' %]
+
+[% INCLUDE 'html5/css/songlines.tt' %]
+
+[% INCLUDE 'html5/css/sections.tt' %]
+
+[% INCLUDE 'html5/css/tab-grid.tt' %]
+
+[% INCLUDE 'html5/css/print-media.tt' %]

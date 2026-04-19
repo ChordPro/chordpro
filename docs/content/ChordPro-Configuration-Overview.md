@@ -196,6 +196,37 @@ You can designate a stylemod to be used as a task as well with:
 config.type : [ stylemod task ]
 ````
 
+## Output backend selection
+
+ChordPro chooses the output backend based on the output file extension or the
+`--generate` option on the command line. For HTML output, the backend can be
+switched in configuration to use the modern HTML5 renderer without changing the
+file extension:
+
+````
+html.module : "HTML5"
+````
+
+By default, `.html` files use the legacy HTML backend for compatibility.
+
+## HTML5 print mode quick start
+
+HTML5 output uses the `html5` configuration tree. The `html5.mode` setting
+selects the layout mode; `print` (paged) is the default. Print-specific options
+live under `html5.paged` and inherit paper size and margins from `pdf.*` when
+they are not set.
+
+````
+html5 {
+  mode : "print"
+  paged {
+    papersize    : "a4"
+    margintop    : 80
+    marginbottom : 40
+  }
+}
+````
+
 ## Standard configuration files
 
 ChordPro tries to read several configuration files and combines their

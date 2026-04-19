@@ -1,0 +1,13 @@
+[%# ChordPro HTML5 Image Template
+    Variables:
+      - uri: Image URI/path
+      - title: Image title/alt text
+      - width: Optional width (pixels)
+      - height: Optional height (pixels)
+      - class: Optional CSS class
+      - container_class: Optional container class
+      - style: Optional inline style
+%]
+<div class="[% container_class | html %]">
+  <img src="[% uri | html %]" alt="[% title | html %]"[% IF width %] width="[% width %]"[% END %][% IF height %] height="[% height %]"[% END %][% IF class %] class="[% class %]"[% END %][% IF style %] style="[% style | html %]"[% END %]>
+</div>

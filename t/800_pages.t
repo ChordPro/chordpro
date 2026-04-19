@@ -56,7 +56,7 @@ EOD
 
 ok( close($fd), "Close $cho" );
 
-@ARGV = ( "--no-default-configs",
+@ARGV = ( "--no-default-configs", "--no-userconfig", "--no-sysconfig",
 	  "--output", $pdf, "--csv",
 	  $cho );
 ::run();

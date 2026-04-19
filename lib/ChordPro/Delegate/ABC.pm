@@ -38,6 +38,9 @@ sub can( $class, $method ) {
     if ( $method eq "options" ) {
 	return \&options;
     }
+	if ( $method eq "abc2svg_html" ) {
+	return \&abc2svg_html;
+	}
     # abc2svg handlers are sorted out by info().
     return \&abc2svg;
 }
@@ -49,7 +52,8 @@ my $backend;
 # NOTE: This is a copy from Song.pm. Redo later.
 sub beo {
     my ( $h, $k ) = @_;
-    if ( exists( $h->{$backend} )
+    if ( defined($backend)
+	 && exists( $h->{$backend} )
 	 && exists( $h->{$backend}->{$k} )
 	 && defined( $h->{$backend}->{$k} ) ) {
 	return $h->{$backend}->{$k};
@@ -62,9 +66,9 @@ sub beo {
 
 sub abc2svg( $song, %args ) {
 
-    my $abc2svg = info();
-    $backend = lc $song->{generate};
-    my $cfg = { %{$config->{delegates}->{abc} } };
+	my $abc2svg = info( $args{elt}->{handler} );
+	my $cfg = $abc2svg;
+    $backend = lc( $song->{generate} // "" );
 
     if ( DEBUG() ) {
 	::dump($abc2svg);
@@ -408,6 +412,10 @@ sub abc2svg( $song, %args ) {
 		    } };
 }
 
+sub abc2svg_html( $song, %args ) {
+	abc2svg( $song, %args );
+}
+
 sub have_xs {
     local $SIG{__WARN__} = sub {};
     state $ok;
@@ -425,9 +433,12 @@ sub slurp {
 
 # Determine the method to process the abc, and much more.
 sub info {
+	my ( $requested_handler ) = @_;
     state $info = { handler => "" };
     my $ctl = $::config->{delegates}->{abc};
-    my $handler = $ctl->{handler} // "abc2svg";
+	my $handler = $requested_handler // $ctl->{handler} // "abc2svg";
+	$handler = "abc2svg" if $handler eq "abc2svg_html"
+	                      || $handler eq "ChordPro::Delegate::ABC";
 
     # Use cached info, but allow handler change between songs.
     return $info if $handler eq $info->{handler};
