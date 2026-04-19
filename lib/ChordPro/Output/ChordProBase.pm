@@ -144,6 +144,7 @@ class ChordPro::Output::ChordProBase :abstract
 
         # Set directives (configuration changes)
         return $self->handle_set($elt)          if $type eq 'set';
+        return $self->handle_meta($elt)         if $type eq 'meta';
 
         # Diagrams
         return $self->handle_diagrams($elt)     if $type eq 'diagrams';
@@ -255,6 +256,12 @@ class ChordPro::Output::ChordProBase :abstract
     method handle_set($elt) {
         # Configuration directives don't produce output
         # Subclasses can override if they need special handling
+        return "";
+    }
+
+    method handle_meta($elt) {
+        # Metadata directives update song metadata; most backends don't render
+        # them as standalone body elements.
         return "";
     }
 

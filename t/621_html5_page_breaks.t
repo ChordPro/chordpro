@@ -13,7 +13,7 @@ use_ok('ChordPro');
 
 BAIL_OUT('Missing out dir') unless -d 'out';
 
-my $cho = 'out/94_html5_page_breaks.cho';
+my $cho = 'out/621_html5_page_breaks.cho';
 open my $cho_fh, '>:utf8', $cho or die "Cannot create $cho: $!";
 print {$cho_fh} <<'EOD';
 {title: Page Break One}
@@ -28,8 +28,8 @@ close $cho_fh;
 sub run_break_test {
     my ($label, $break_value, $expect_before, $expect_after) = @_;
 
-    my $out = "out/94_html5_page_breaks_${label}.html";
-    my $cfg = "out/94_html5_page_breaks_${label}.json";
+    my $out = "out/621_html5_page_breaks_${label}.html";
+    my $cfg = "out/621_html5_page_breaks_${label}.json";
 
     open my $cfg_fh, '>:utf8', $cfg or die "Cannot create $cfg: $!";
     print {$cfg_fh} qq|{

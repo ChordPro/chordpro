@@ -410,7 +410,9 @@ toc {
 }
 
 // Grid strum overrides.
-gridstrum.symbols {}
+gridstrum.symbols {
+    rest : ""
+}
 
 // Delegates.
 // Basically a delegate is a section `{start_of_XXX}` which content is collected and handled later by the delegate module.
@@ -434,6 +436,12 @@ delegates {
 
         // Obsolete.
         config : default
+
+        // Specific settings for the HTML backend.
+        html.handler : abc2svg_html
+
+        // Specific settings for the HTML5 backend.
+        html5.handler : abc2svg_html
 
         // Specific settings for the PDF backend.
         pdf.preamble : [
@@ -476,16 +484,25 @@ delegates {
     strum {
 
         // The result produced by the delegate handler.
-        type : none
+        type : image
 
         // The module's method to call.
-        handler : none
+        handler : strum2xo
 
         // Specific settings for the PDF backend.
         pdf {
             handler : strum2xo
             type    : image
         }
+
+        // Specific settings for the HTML backend.
+        html.handler : strum2html
+
+        // Specific settings for the HTML5 backend.
+        html5.handler : strum2html
+
+        // Input lines to prepend to the user data.
+        preamble : []
 
         // The name of the (perl) module that implements the delegate.
         module : Strum
@@ -508,10 +525,10 @@ delegates {
     textblock {
 
         // The result produced by the delegate handler.
-        type : none
+        type : image
 
         // The module's method to call.
-        handler : none
+        handler : txt2xform
 
         // The name of the (perl) module that implements the delegate.
         module : TextBlock
@@ -527,6 +544,9 @@ delegates {
             handler : txt2html
             type    : html
         }
+
+        // Specific settings for the HTML5 backend.
+        html5.handler : txt2html
     }
 }
 
@@ -1289,6 +1309,83 @@ html {
 
         // Legacy style for `"screen"`.
         display : ""
+    }
+}
+
+// Settings for HTML5 output.
+html5 {
+
+    // Optional book sections.
+    cover        : false
+    front-matter : false
+    back-matter  : false
+
+    // Output mode. Use `print`/`paged` for the paged HTML5 path.
+    mode : print
+
+    // HTML5-specific diagram settings.
+    diagrams.direction : vertical
+
+    // CSS customization hooks.
+    css {
+        colors  {}
+        fonts   {}
+        sizes   {}
+        spacing {}
+    }
+
+    // Include paths for templates.
+    template_include_path : []
+
+    // Templates for HTML5 generation.
+    templates {
+        songbook       : "html5/songbook.tt"
+        song           : "html5/song.tt"
+        songline       : "html5/songline.tt"
+        comment        : "html5/comment.tt"
+        image          : "html5/image.tt"
+        chord_diagrams : "html5/chord-diagrams.tt"
+        css            : "html5/css/base.tt"
+    }
+
+    // Settings for paged HTML5 output.
+    paged {
+        papersize    : null
+        margintop    : null
+        marginbottom : null
+        marginleft   : null
+        marginright  : null
+        headspace    : null
+        footspace    : null
+
+        song.page-break    : none
+        newpage.page-break : page
+
+        css {
+            colors  {}
+            fonts   {}
+            sizes   {}
+            spacing {}
+        }
+
+        template_include_path : []
+
+        templates {
+            songbook : "html5/paged/songbook.tt"
+            song     : "html5/paged/song.tt"
+            toc      : "html5/paged/toc.tt"
+            css      : "html5/paged/css/base.tt"
+        }
+
+        bundle {
+            enabled : false
+            mode    : minimal
+            html    : null
+            css {
+                layout  : "layout.css"
+                content : "content.css"
+            }
+        }
     }
 }
 

@@ -12,12 +12,12 @@ plan tests => 8;
 
 make_path('out');
 
-my $cover_file = 'out/99_cover.html';
-my $front_file = 'out/99_front.html';
-my $back_file = 'out/99_back.html';
-my $cho_file = 'out/99_html5_paged_sections.cho';
-my $cfg_file = 'out/99_html5_paged_sections.json';
-my $out_file = 'out/99_html5_paged_sections.html';
+my $cover_file = 'out/626_cover.html';
+my $front_file = 'out/626_front.html';
+my $back_file = 'out/626_back.html';
+my $cho_file = 'out/626_html5_paged_sections.cho';
+my $cfg_file = 'out/626_html5_paged_sections.json';
+my $out_file = 'out/626_html5_paged_sections.html';
 
 open my $cover_fh, '>:utf8', $cover_file or die "Cannot create $cover_file: $!";
 print {$cover_fh} "<h1>Cover</h1>";

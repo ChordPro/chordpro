@@ -314,7 +314,7 @@ t/180_grids.t
 t/190_outlines.t
 t/191_outlines.t
 t/192_outlines.t
-t/192_html5_chord_only_align.t
+t/631_html5_chord_only_align.t
 t/193_outlines.t
 t/194_outlines.t
 t/210_configs.t
@@ -352,7 +352,7 @@ t/85_pages.t
 t/86_pages.t
 t/87_pages.t
 t/90_pages.t
-t/94_html5_page_breaks.t
+t/621_html5_page_breaks.t
 t/a2crd/t001.cho
 t/a2crd/t001.crd
 t/a2crd/t002.cho

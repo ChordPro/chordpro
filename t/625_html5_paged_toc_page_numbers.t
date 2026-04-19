@@ -12,9 +12,9 @@ plan tests => 6;
 
 make_path('out');
 
-my $cho_file = 'out/98_html5_toc_numbers.cho';
-my $cfg_file = 'out/98_html5_toc_numbers.json';
-my $out_file = 'out/98_html5_toc_numbers.html';
+my $cho_file = 'out/625_html5_toc_numbers.cho';
+my $cfg_file = 'out/625_html5_toc_numbers.json';
+my $out_file = 'out/625_html5_toc_numbers.html';
 
 open my $cho_fh, '>:utf8', $cho_file or die "Cannot create $cho_file: $!";
 print {$cho_fh} <<'EOT';

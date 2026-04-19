@@ -415,8 +415,6 @@
     
     // Grid strum overrides.
     gridstrum.symbols {
-        // Override rest glyph (default: built-in Unicode quarter rest U+1D13D).
-        // Set to empty string "" to use the built-in default.
         rest : ""
     }
     
@@ -443,6 +441,12 @@
             // Obsolete.
             config : default
     
+            // Specific settings for the HTML backend.
+            html.handler : abc2svg_html
+    
+            // Specific settings for the HTML5 backend.
+            html5.handler : abc2svg_html
+    
             // Specific settings for the PDF backend.
             pdf.preamble : [
                 "%%textfont pdf.fonts.text"
@@ -452,9 +456,6 @@
     
             // Obsolete. Please use `parser.preprocess.env-...` instead.
             preprocess.abc : []
-    
-            html.handler  : abc2svg_html
-            html5.handler : abc2svg_html
         }
     
         // Embedding Lilypond.
@@ -485,14 +486,30 @@
     
         // Embedding Strums. EXPERIMENTAL
         strum {
-            type     : image
-            module   : Strum
-            handler  : strum2xo
+    
+            // The result produced by the delegate handler.
+            type : image
+    
+            // The module's method to call.
+            handler : strum2xo
+    
+            // Specific settings for the PDF backend.
+            pdf {
+                handler : strum2xo
+                type    : image
+            }
+    
+            // Specific settings for the HTML backend.
+            html.handler : strum2html
+    
+            // Specific settings for the HTML5 backend.
+            html5.handler : strum2html
+    
+            // Input lines to prepend to the user data.
             preamble : []
     
-            pdf.handler   : strum2xo
-            html.handler  : strum2html
-            html5.handler : strum2html
+            // The name of the (perl) module that implements the delegate.
+            module : Strum
         }
     
         // Embedding SVG.
@@ -510,12 +527,29 @@
     
         // Embedding textblock.
         textblock {
-            type    : image
-            module  : TextBlock
+    
+            // The result produced by the delegate handler.
+            type : image
+    
+            // The module's method to call.
             handler : txt2xform
     
-            pdf.handler   : txt2xform
-            html.handler  : txt2html
+            // The name of the (perl) module that implements the delegate.
+            module : TextBlock
+    
+            // Specific settings for the PDF backend.
+            pdf {
+                handler : txt2xform
+                type    : image
+            }
+    
+            // Specific settings for the HTML backend.
+            html {
+                handler : txt2html
+                type    : html
+            }
+    
+            // Specific settings for the HTML5 backend.
             html5.handler : txt2html
         }
     }
@@ -1258,121 +1292,103 @@
     
     // Settings for HTML output.
     html {
-        // Backend module selection for .html files: "HTML" (legacy) or "HTML5" (modern).
-        // When not specified, defaults to "HTML" for backward compatibility.
-        // Use this to opt-in to modern HTML5 output without changing file extension.
-        // This overrides the default backend after config is loaded.
-        module: HTML
+    
+        // The actual backend module.
+        module : HTML
     
         // Stylesheets for display and printing.
         styles {
     
-    // Settings for HTML5 backend.
+            // Relative path to a CSS file to use for styling HTML output.
+            default : chordpro.css
+    
+            // Relative path to a CSS file to use for styling displayed HTML output on screen media.
+            screen : ""
+    
+            // Relative path to a CSS file to use for styling printed HTML output.
+            print : chordpro_print.css
+    
+            // Embed the styles instead of linking to them.
+            embed : false
+    
+            // Legacy style for `"screen"`.
+            display : ""
+        }
+    }
+    
+    // Settings for HTML5 output.
     html5 {
+    
+        // Optional book sections.
+        cover        : false
+        front-matter : false
+        back-matter  : false
+    
+        // Output mode. Use `print`/`paged` for the paged HTML5 path.
+        mode : print
+    
+        // HTML5-specific diagram settings.
+        diagrams.direction : vertical
+    
+        // CSS customization hooks.
+        css {
+            colors  {}
+            fonts   {}
+            sizes   {}
+            spacing {}
+        }
     
         // Include paths for templates.
         template_include_path : []
     
-        // Songbook parts (HTML or image files).
-        // cover : "cover.html"
-        // front-matter : "front.html"
-        // back-matter : "back.html"
-        cover : false
-        front-matter : false
-        back-matter : false
-    
-        // Templates for HTML/CSS generation.
+        // Templates for HTML5 generation.
         templates {
-            // CSS template.
-            css : "html5/css/base.tt"
-    
-            // HTML templates.
-            songbook : "html5/songbook.tt"
-            song : "html5/song.tt"
-            comment : "html5/comment.tt"
-            image : "html5/image.tt"
-            songline : "html5/songline.tt"
+            songbook       : "html5/songbook.tt"
+            song           : "html5/song.tt"
+            songline       : "html5/songline.tt"
+            comment        : "html5/comment.tt"
+            image          : "html5/image.tt"
             chord_diagrams : "html5/chord-diagrams.tt"
+            css            : "html5/css/base.tt"
         }
     
-        // CSS customization.
-        css {
-            colors : {}
-            fonts : {}
-            sizes : {}
-            spacing : {}
-        }
-    
-        // Chord diagram layout overrides for HTML5 output.
-        diagrams {
-            // Layout direction for the chord diagram box when diagrams.show is "right".
-            // Values: "vertical" (stacked, default) or "horizontal" (side-by-side).
-            direction : "vertical"
-        }
-    
-        // Settings for paged output (with paged.js pagination).
+        // Settings for paged HTML5 output.
         paged {
-    
-            // Paper size for pagination (inherits from pdf.papersize if not set).
-            papersize : null
-    
-            // Page margins in points (inherits from pdf margins if not set).
-            margintop : null
+            papersize    : null
+            margintop    : null
             marginbottom : null
-            marginleft : null
-            marginright : null
+            marginleft   : null
+            marginright  : null
+            headspace    : null
+            footspace    : null
     
-            // Space for page titles and footers (inherits from pdf head/foot space).
-            headspace : null
-            footspace : null
+            song.page-break    : none
+            newpage.page-break : page
     
-            // Include paths for templates.
+            css {
+                colors  {}
+                fonts   {}
+                sizes   {}
+                spacing {}
+            }
+    
             template_include_path : []
     
-            // Templates for HTML/CSS generation.
             templates {
-                // CSS template.
-                css : "html5/paged/css/base.tt"
-                
-                // HTML templates (override html5 templates).
                 songbook : "html5/paged/songbook.tt"
-                song : "html5/paged/song.tt"
-                toc : "html5/paged/toc.tt"
+                song     : "html5/paged/song.tt"
+                toc      : "html5/paged/toc.tt"
+                css      : "html5/paged/css/base.tt"
             }
     
-            // Song pagination controls.
-            song {
-                // Page break before/after each song.
-                // Values: "none", "before", "after", "both".
-                // Targeted breaks: "before-right", "before-left", "before-recto", "before-verso",
-                //                  "after-right", "after-left", "after-recto", "after-verso",
-                //                  "right", "left", "recto", "verso" (aliases for before-*).
-                page-break : "none"
-            }
-    
-            // Newpage/new_physical_page pagination controls.
-            newpage {
-                // Targeted page break for {new_page}: "page", "right", "left", "recto", "verso".
-                page-break : "page"
-            }
-    
-            // Bundle output settings (externalized CSS and folder output).
             bundle {
                 enabled : false
-                mode : "minimal"
-                html : null
+                mode    : minimal
+                html    : null
                 css {
-                    layout : "layout.css"
+                    layout  : "layout.css"
                     content : "content.css"
                 }
-            }
-    
-            // CSS customization.
-            css {
-                colors : {}
-                fonts : {}
-                sizes : {}
-                spacing : {}
             }
         }
     }
@@ -1394,120 +1410,6 @@
     
             // Helper template to render images.
             image : image.tt
-        }
-    }
-    
-    // Settings for HTML5 (output) backends.
-    html5 {
-    
-        // Output mode: "responsive", "screen", "print" (paged.js).
-        // "print" mode enables pagination with paged.js for PDF-like output.
-        mode : "print"
-    
-        // Songbook parts (HTML or image files).
-        // cover : "cover.html"
-        // front-matter : "front.html"
-        // back-matter : "back.html"
-        cover : false
-        front-matter : false
-        back-matter : false
-    
-        // Include paths for templates.
-        template_include_path : []
-    
-        // Templates for HTML/CSS generation.
-        templates {
-            // CSS template.
-            css : "html5/css/base.tt"
-            
-            // HTML templates.
-            songbook : "html5/songbook.tt"
-            song : "html5/song.tt"
-            comment : "html5/comment.tt"
-            image : "html5/image.tt"
-            songline : "html5/songline.tt"
-            chord_diagrams : "html5/chord-diagrams.tt"
-        }
-    
-        // CSS customization.
-        css {
-            colors : {}
-            fonts : {}
-            sizes : {}
-            spacing : {}
-        }
-    
-        // Settings for paged output (with paged.js pagination).
-        paged {
-    
-            // Paper size for pagination (inherits from pdf.papersize if not set).
-            papersize : null
-    
-            // Page margins in points (inherits from pdf margins if not set).
-            margintop : null
-            marginbottom : null
-            marginleft : null
-            marginright : null
-    
-            // Space for page titles and footers (inherits from pdf head/foot space).
-            headspace : null
-            footspace : null
-    
-            // Include paths for templates.
-            template_include_path : []
-    
-            // Templates for HTML/CSS generation.
-            templates {
-                // CSS template.
-                css : "html5/paged/css/base.tt"
-                
-                // HTML templates (override html5 templates).
-                songbook : "html5/paged/songbook.tt"
-                song : "html5/paged/song.tt"
-                toc : "html5/paged/toc.tt"
-            }
-    
-            // Song pagination controls.
-            song {
-                // Page break before/after each song.
-                // Values: "none", "before", "after", "both".
-                // Targeted breaks: "before-right", "before-left", "before-recto", "before-verso",
-                //                  "after-right", "after-left", "after-recto", "after-verso",
-                //                  "right", "left", "recto", "verso" (aliases for before-*).
-                page-break : "none"
-            }
-    
-            // Newpage/new_physical_page pagination controls.
-            newpage {
-                // Targeted page break for {new_page}: "page", "right", "left", "recto", "verso".
-                page-break : "page"
-            }
-    
-            // Bundle output settings (externalized CSS and folder output).
-            bundle {
-                enabled : false
-                mode : "minimal"
-                html : null
-                css {
-                    layout : "layout.css"
-                    content : "content.css"
-                }
-            }
-    
-            // CSS customization.
-            css {
-                colors : {}
-                fonts : {}
-                sizes : {}
-                spacing : {}
-            }
-        }
-    
-        // Chord diagram layout overrides for HTML5 output.
-        diagrams {
-            // Layout direction for the chord diagram box when diagrams.show is "right".
-            // Values: "vertical" (stacked, default) or "horizontal" (side-by-side).
-            direction : "vertical"
         }
     }
     

@@ -12,9 +12,9 @@ plan tests => 5;
 
 make_path('out');
 
-my $cho_file = 'out/96_html5_paged_recto_verso.cho';
-my $cfg_file = 'out/96_html5_paged_recto_verso.json';
-my $out_file = 'out/96_html5_paged_recto_verso.html';
+my $cho_file = 'out/623_html5_paged_recto_verso.cho';
+my $cfg_file = 'out/623_html5_paged_recto_verso.json';
+my $out_file = 'out/623_html5_paged_recto_verso.html';
 
 open my $cho_fh, '>:utf8', $cho_file or die "Cannot create $cho_file: $!";
 print {$cho_fh} <<'EOT';

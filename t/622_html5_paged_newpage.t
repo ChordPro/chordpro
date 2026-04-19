@@ -12,9 +12,9 @@ plan tests => 3;
 
 make_path('out');
 
-my $cho_file = 'out/95_html5_paged_newpage.cho';
-my $cfg_file = 'out/95_html5_paged_newpage.json';
-my $out_file = 'out/95_html5_paged_newpage.html';
+my $cho_file = 'out/622_html5_paged_newpage.cho';
+my $cfg_file = 'out/622_html5_paged_newpage.json';
+my $out_file = 'out/622_html5_paged_newpage.html';
 
 open my $cho_fh, '>:utf8', $cho_file or die "Cannot create $cho_file: $!";
 print {$cho_fh} <<'EOT';

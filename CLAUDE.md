@@ -18,10 +18,6 @@ These directories keep AI-generated content separate from the main codebase unti
 
 Update this instructions when critical lessons are learned.
 
-## Implementation Plan Workflow
-
-**IMPORTANT:** Read `CLAUDE-implementation-plan-chapter.md` for the XML-based implementation plan workflow. All feature requests, bugs, and changes must be tracked in `ai-docs/overview-features-bugs.xml`.
-
 ## Build & Test
 
 ```bash

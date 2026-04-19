@@ -18,7 +18,7 @@
             "approve": true,
             "matchCommandLine": true
         },
-        "/^set -x && prove -bv t/83_html5_delegate\\.t t/html5/09_bugfixes\\.t t/190_html5_bugfixes\\.t$/": {
+        "/^set -x && prove -bv t/610_html5_delegate\\.t t/html5/09_bugfixes\\.t t/629_html5_bugfixes\\.t$/": {
             "approve": true,
             "matchCommandLine": true
         },

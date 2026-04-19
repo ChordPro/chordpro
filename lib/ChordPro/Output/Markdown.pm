@@ -285,6 +285,7 @@ class ChordPro::Output::Markdown
                 }
 
                 my $result = $self->dispatch_element($elt);
+                next unless defined $result;
                 if (is_arrayref($result)) {
                     push @output, @$result;
                 } else {
@@ -385,6 +386,12 @@ class ChordPro::Output::Markdown
         return "";
     }
 
+    method handle_meta($elt) {
+        # Markdown references song metadata via comment substitutions rather than
+        # rendering parser-emitted meta body elements directly.
+        return undef;
+    }
+
     method handle_diagrams($elt) {
         # Diagrams are handled in generate_song(), not in body
         return "";
@@ -408,7 +415,9 @@ class ChordPro::Output::Markdown
 
         if ($elt->{body}) {
             foreach my $child (@{$elt->{body}}) {
-                $output .= $self->dispatch_element($child);
+                my $result = $self->dispatch_element($child);
+                next unless defined $result;
+                $output .= $result;
             }
         }
 
@@ -421,7 +430,9 @@ class ChordPro::Output::Markdown
 
         if ($elt->{body}) {
             foreach my $child (@{$elt->{body}}) {
-                $output .= $self->dispatch_element($child);
+                my $result = $self->dispatch_element($child);
+                next unless defined $result;
+                $output .= $result;
             }
         }
 
@@ -436,6 +447,7 @@ class ChordPro::Output::Markdown
         if ($elt->{body}) {
             foreach my $child (@{$elt->{body}}) {
                 my $line = $self->dispatch_element($child);
+                next unless defined $line;
                 # Add tab prefix for tab content
                 $line =~ s/^/\t/mg;
                 $output .= $line;
@@ -451,7 +463,9 @@ class ChordPro::Output::Markdown
 
         if ($elt->{body}) {
             foreach my $child (@{$elt->{body}}) {
-                $output .= $self->dispatch_element($child);
+                my $result = $self->dispatch_element($child);
+                next unless defined $result;
+                $output .= $result;
             }
         }
 
