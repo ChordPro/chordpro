@@ -8,7 +8,7 @@ Released: 2026-04-21
 ### Highlights
 
 * Reworked Keys and Transpositions. See https://www.chordpro.org/chordpro/keys_and_transpositions/ .
-* New config setting: `keys.force-common` and `keys.sharps`.
+* New config setting: `keys.force-common` and `keys.flats`.
 * Updated the standard guitar chords with lots of new chords and fingering information. Thanks to Russ Jones.
 * Added another Russ Jones contribution: jazzy-chords with many chord names typically used in Jazzy music.
 * Added a new configuration setting `settings.wraplines` to control line wrapping. Enabled by default.
