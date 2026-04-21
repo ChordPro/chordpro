@@ -23,8 +23,8 @@ config.description : "User config settings for ChordPro."
 // General settings, often changed by configs and command line.
 
 // Chords parsing strategy.
-// Strict (only known chords) or relaxed (anything that looks sane)
-settings.strict : true
+// More checks and warnings.
+# settings.strict : false
 
 // Titles flush: default center.
 # settings.titles : center
@@ -56,8 +56,16 @@ settings.strict : true
 // Chords under the lyrics.
 # settings.chords-under : false
 
-// Transpose chords. 0 = no transpose.
+// Transpose the song by a number of semitones.
+// A positive number transposes up, a negative number transposes down.
+// An optional postfix of "s" or "f" can be used to enforce the use
+// of sharps resp. flats when a transposed chord requires accidentals.
+// A postfix of "k" will use the key signature to determine whether
+// flats or sharps are needed.
 # settings.transpose : 0
+
+// Always apply `"k"` semantics if no other postfix was specified.
+# settings.transpose-sf-key: false
 
 // Force enharmonic when transposing (experimental).
 # settings.enharmonic-transpose : true
@@ -89,6 +97,9 @@ settings.strict : true
 // Will fallback to the ChordProSymbols font if the selected chord font
 // does not have the glyphs.
 # maj7delta : false
+
+// Wrap long lines. This may trigger issue #355.
+# settings.wraplines : true
 
 // Indent for wrapped lines. Actual indent is the stringwidth.
 # settings.wrapindent : x
@@ -129,6 +140,16 @@ settings.strict : true
 // Full user name
 # user.fullname : ""
 
+/**************** Key names ****************/
+
+// Replace keys with an excessive number of sharps by their more
+// common enharmonic equivalents.
+// See also `settings.transpose-sf-key`.
+# keys.force-common: true
+
+// The key `F#` is often used as is and not represented as an
+// enharmonic equivalent. Set this to true if you want `Gb` instead of `F#`.
+# keys.flats : false
 
 /**************** User defined chords (placeholder) ****************/
 
@@ -355,9 +376,6 @@ settings.strict : true
 
 // Size of the fret dot, fraction of cell width.
 # pdf.diagrams.dotsize : 0.8
-
-// Thickness of bars, fraction of dot width.
-pdf.barwidth : 0.8
 
 // Thickness of bars, fraction of dot width.
 # pdf.diagrams.barwidth : 0.8

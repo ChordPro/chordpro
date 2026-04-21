@@ -181,6 +181,14 @@ sub txt2xform( $self, %args ) {
       };
 }
 
+sub txt2html( $self, %args ) {
+    my $elt = $args{elt};
+
+    require ChordPro::Output::Common;
+    my @lines = map { ChordPro::Output::Common::encode_html($_) } @{ $elt->{data} // [] };
+    return join( "<br/>\n", @lines );
+}
+
 # Pre-scan.
 sub options( $data ) { {} }
 

@@ -19,9 +19,23 @@ Choosing `More…` gives access to more possibilities.
 ![]({{< asset "images/chordpro-gui-tasks-p2.png" >}})
 
 An important difference is that now you can *combine* multiple
-settings. Also, you can transpose the song once, as opposed to the
-global setting for transpose that applies to all songs and all
-previews.
+settings.
+
+## Transpose
+
+If enabled, the song or all songs from the songbook will be transposed
+by the specified amount of semitones. For example, to transpose a song
+from key `C` to `D` requires two semitones.
+
+If you transpose `B` up two semitones the result can be either `C♯` or `D♭`.
+You can choose the desired behaviour from the dropdown list:
+
+ * Sharps when transposing up, flats when transposing down
+ * Always use sharps
+ * Always use flats
+ * Follow the key of the song  
+   Keys that have sharps in the signature
+   will use sharps, otherwise flats will be used
 
 ## Custom Tasks
 

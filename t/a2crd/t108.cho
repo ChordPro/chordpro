@@ -3,14 +3,14 @@
 {comment:#------------------------------------------------------------------------------##}
 {title: TTTTTTTTT (Some Artist )}
 {subtitle: ------------------------}
-{comment:The quick brown fox is still jumping}
-{comment:The quick brown fox is still jumping}
-{comment:The quick brown fox is still jumping}
-{comment:The quick brown fox is still jumping}
-{comment:The quick brown fox is still jumping}
-{comment:The quick brown fox is still jumping}
+{comment: The quick brown fox is still jumping}
+{comment: The quick brown fox is still jumping}
+{comment: The quick brown fox is still jumping}
+{comment: The quick brown fox is still jumping}
+{comment: The quick brown fox is still jumping}
+{comment: The quick brown fox is still jumping}
 
-{comment:Tablature, chords, Tablature with blank line after strum marks on 3 line tab}
+{comment: Tablature, chords, Tablature with blank line after strum marks on 3 line tab}
 
 {sot}
   F                F/B              Fm7              F/B
@@ -24,7 +24,7 @@ E ----------------|----------------|----------------|----------------|
 
 [F]  t tttt tt t[F/B]ttt  t  ttt tt ttt[Fm7]t[F/B]
 
-{comment:THREE LINE TAB:}
+{comment: THREE LINE TAB:}
 {sot}
   F                F/B              Fm7              F/B
 E ------------2-13|----------------|--------13=14---|12------1=2-----|
@@ -35,7 +35,7 @@ G ----------------|----------------|----------------|----------------|
 
 [F]More [C/B]lyrics
 
-{comment:Tablature, chords, Tablature no blank line after strum marks on 3 line tab}
+{comment: Tablature, chords, Tablature no blank line after strum marks on 3 line tab}
 
 {sot}
   F                F/B              Fm7              F/B
@@ -48,7 +48,7 @@ E ----------------|----------------|----------------|----------------|
 {eot}
 
 [F]  t tttt tt t[F/B]ttt  t  ttt tt ttt[Fm7]t[F/B]
-{comment:THREE LINE TAB:}
+{comment: THREE LINE TAB:}
 {sot}
   F                F/B              Fm7              F/B
 E ------------2-13|----------------|--------13=14---|12------1=2-----|

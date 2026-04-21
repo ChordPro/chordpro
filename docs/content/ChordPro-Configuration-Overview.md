@@ -246,9 +246,6 @@ In the examples below the symbol `~` denotes the user's home directory. Windows 
    steps 1 through 3, and then its song specific configuration file if
    it exists.
 
-   **Important** A song specific configuration file may **not**
-   contain an `"include"` or `"tuning"` item.
-
 ## How config files are combined
 
 The config files are processed in order, and their contents are

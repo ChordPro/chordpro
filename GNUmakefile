@@ -102,11 +102,18 @@ LIB := lib/ChordPro
 RES := ${LIB}/res
 PODSELECT := podselect
 
-RESOURCES := wxg ${LIB}/Config/Data.pm ${RES}/config/chordpro.json
+RESOURCES := wxg ${LIB}/Config/Data.pm
+RESOURCES += ${RES}/config/chordpro.json ${RES}/config/guitar.json
+RESOURCES += ${RES}/config/jazzy-chords.json
 RESOURCES += ${RES}/pod/ChordPro.pod ${RES}/pod/Config.pod ${RES}/pod/A2Crd.pod
 RESOURCES += docs/assets/pub/config60.schema
 
 resources : ${RESOURCES}
+
+%.json : %.rjson
+	perl -Mlib=lib/ChordPro/lib script/rrjson.pl --json_xs --no-pretty $< |\
+	perl -pe 's/"(-?\d+)"/$$1/g' > $@~
+	cmp $@ $@~ || mv $@~ $@
 
 ${LIB}/Config/Data.pm : ${RES}/config/chordpro.json
 	perl script/cfgboot.pl $< > $@~
@@ -115,7 +122,7 @@ ${LIB}/Config/Data.pm : ${RES}/config/chordpro.json
 ${RES}/pod/ChordPro.pod : ${LIB}.pm
 	${PODSELECT} $< > $@
 
-${RES}/pod/Config.pod : ${RES}/config/chordpro.json
+${RES}/pod/Config.pod : ${RES}/config/chordpro.rjson
 	( echo "=head1 ChordPro Default Configuration"; \
 	  echo ""; \
 	  echo "=encoding UTF8"; \
@@ -131,29 +138,9 @@ docs/assets/pub/config61.schema : ${RES}/config/config.schema
 # Verify JSON data
 
 CFGLIB := ${LIB}/res/config
-# JSONVALIDATOR = java -jar lib/jar/json-schema-validator-*-lib.jar
-# JSONOPTS := --brief
-# This requires npm install ajv-cli .
-JSONVALIDATOR = ajv --validate-formats=false
-JSONOPTS := 
 
 checkjson :
-	rm -fr .json
-	mkdir .json
-	cp -p ${CFGLIB}/config.schema .json/schema.json
-	for i in $(shell git ls-files ${CFGLIB}) ; \
-	do \
-	  case "$$i" in \
-	    */keyboard.json)    continue;; \
-	    */dark.json)        continue;; \
-	    */notes/*)          continue;; \
-	    */*.tmpl)           continue;; \
-	    */*.schema)         continue;; \
-	  esac; \
-	  perl -Ilib/ChordPro/lib script/rrjson.pl --json $$i > .json/`basename $$i`; \
-	  ${JSONVALIDATOR} ${JSONOPTS} -s .json/schema.json -d .json/`basename $$i`; \
-	done
-	rm -fr .json
+	make -C ${CFGLIB} checkjson
 
 # Experimental
 
@@ -166,8 +153,8 @@ _wkit :
 
 _wkiti :
 	cp ${WINDST}/pp/windows/ChordPro-Installer*.exe \
-	  ${HOME}/tmp/ChordPro-Installer-6-80-dev-msw-x64.exe
-	scp ${HOME}/tmp/ChordPro-Installer-6-80-dev-msw-x64.exe \
+	  ${HOME}/tmp/ChordPro-Installer-6-90-dev-msw-x64.exe
+	scp ${HOME}/tmp/ChordPro-Installer-6-90-dev-msw-x64.exe \
 	  chordpro-site:www/dl/
 
 _wkit_startvm :
@@ -240,8 +227,8 @@ rrjson :
 	cp -p ${HOME}/src/JSON-Relaxed/lib/JSON/Relaxed/Parser.pm \
 	  ${HOME}/src/JSON-Relaxed/lib/JSON/Relaxed/ErrorCodes.pm \
 	  lib/ChordPro/lib/JSON/Relaxed/
-	cp -p ${HOME}/src/JSON-Relaxed/scripts/rrjson.pl \
-	  script/
+	diff ${HOME}/src/JSON-Relaxed/scripts/rrjson.pl \
+	  script/rrjson.pl
 
 ABCDEST    = ${RES}/abc/abc2svg
 
@@ -254,6 +241,9 @@ ABCKIT     = abc2svg-fca05cd348
 # 1.22.18 + 'lm' and 'width' for grids
 ABCKIT     = abc2svg-9b12853f66
 
+# 1.22.34
+ABCKIT     = abc2svg-9e4ccff7c9
+
 .PHONY: abc
 
 abc :
@@ -261,6 +251,6 @@ abc :
 	perl ABC/build.pl --dest=${ABCDEST} ABC/${ABCKIT}.tar.gz 
 	cp -p ABC/README.FIRST ABC/cmdline.js ${ABCDEST}/
 	grep -v ${ABCDEST} MANIFEST > x
-	find ${ABCDEST} -type f -printf "%p\n" \
-	  | sort -u >> x
-	mv x MANIFEST
+	find ${ABCDEST} -type f -printf "%p\n" >> x
+	env LC_ALL=C sort -u x > MANIFEST
+	rm x

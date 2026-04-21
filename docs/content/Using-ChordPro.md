@@ -374,11 +374,21 @@ is in the key of `D` and transcoded to `nashville`, `D` becomes `1`,
 
 ### transpose
 
-`--transpose=`*N* (short: `-x`)
+`--transpose=`*NNX* (short: `-x`)
 
-Transposes all songs by _N_ semi-tones. Note that _N_ may be specified
-as `+`*N* to transpose upward, using sharps, or as `-`*N* to transpose
-downward, using flats.
+_NN_ must be a number in the range -24 .. +24, optionally followed by
+one of `s` or `f`.
+
+Transposes all songs by the given number of semi-tones.
+A positive number transposes up, a negative number transposes down.
+
+If a resultant chord name requires accidentals the postfix controls
+whether sharps or flats are used.
+
+* `s`: Always use sharps.
+* `f`: Always use flats.
+
+Without postfix transpose up uses sharps, transpose down uses flats. 
 
 See also the [transpose]({{< relref "Directives-transpose" >}}) directive.
 

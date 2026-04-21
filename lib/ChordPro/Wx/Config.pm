@@ -118,12 +118,6 @@ my %prefs =
    # Messages.
    msgsfont	   => 0,	# inital, later "Monospace 10" etc.
 
-   # Transpose.
-   enable_xpose => 0,
-   xpose_from   => 0,
-   xpose_to     => 0,
-   xpose_acc    => 0,
-
    # Transcode.
    enable_xcode	   => 0,
 

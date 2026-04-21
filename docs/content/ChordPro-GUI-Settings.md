@@ -83,17 +83,6 @@ Supported values include:
 
 **Only change this if your ChordPro songs are written using one of these notations.**
 
-### Transpose
-
-If enabled, transpose the song from a given key to a new key.
-
-If transposed chords need accidentals, you can choose the desired
-behaviour:
-
-* `Auto` (transpose up uses sharps, transpose down uses flats)
-* `Sharps` (always use sharps).
-* `Flats` (always use flats).
-
 ### Transcode to
 
 If enabled, ChordPro will transcode the song to another notation

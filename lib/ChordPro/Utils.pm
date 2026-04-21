@@ -12,6 +12,7 @@ use Ref::Util qw( is_arrayref is_hashref );
 use Exporter 'import';
 our @EXPORT;
 our @EXPORT_OK;
+our %EXPORT_TAGS;
 
 use ChordPro::Files;
 
@@ -272,45 +273,50 @@ push( @EXPORT, 'pv' );
 
 # Processing JSON.
 
+my $_json_xs;
+my $_json_rr;
+our $json_last;
+
 sub json_load( $json, $source = "<builtin>" ) {
-    my $info = json_parser();
-    if ( $info->{parser} eq "JSON::Relaxed" ) {
-	state $pp = JSON::Relaxed::Parser->new( croak_on_error => 0,
-						strict => 0,
-						prp => 1 );
-	my $data = $pp->decode($json."\n");
-	return $data unless $pp->is_error;
-	$source .= ": " if $source;
-	die("${source}JSON error: " . $pp->err_msg . "\n");
-    }
-    else {
-	state $pp = JSON::PP->new;
 
-	# Glue lines, so we have at lease some relaxation.
-	$json =~ s/"\s*\\\n\s*"//g;
+    # We have two JSON parsers: Relaxed and XS.
+    # Relaxed accepts a lot of relaxing extensions, but XS is much
+    # much faster. So fast, in fact, that trying XS first will be a
+    # win in many cases, and a neglectable overhead in the other
+    # cases.
 
-	$pp->relaxed if $info->{relaxed};
-	$pp->decode($json."\n");
-    }
+    state $jx = JSON::XS->new;
+    $jx->relaxed;
+
+    # Glue lines, so we have at lease some relaxation.
+    $json =~ s/"\s*\\\r?\n\s*"//g;
+
+    my $data;
+    $json_last = "xs";
+    eval { $data = $jx->decode($json."\n"); $_json_xs++ };
+    return $data if defined $data;
+
+    require JSON::Relaxed;
+    state $jr = JSON::Relaxed::Parser->new( croak_on_error => 0,
+					    strict => 0,
+					    prp => 1 );
+    $_json_rr++;
+    $json_last = "rr";
+    $data = $jr->decode($json."\n");
+    return $data unless $jr->is_error;
+    $source .= ": " if $source;
+    die("${source}JSON error: " . $jr->err_msg . "\n");
 }
 
-# JSON parser, what and how (also used by runtimeinfo().
-sub json_parser() {
-    my $relax = $ENV{CHORDPRO_JSON_RELAXED} // 2;
-    if ( $relax > 1 ) {
-	require JSON::Relaxed;
-	return { parser  => "JSON::Relaxed",
-		 version => $JSON::Relaxed::VERSION }
+sub json_stats( $reset = 0 ) {
+    my $res = { xs => $_json_xs//0, rr => $_json_rr//0 };
+    if ( $reset ) {
+	$$_json_xs = $_json_rr = 0;
     }
-    else {
-	require JSON::PP;
-	return { parser  => "JSON::PP",
-		 relaxed => $relax,
-		 version => $JSON::PP::VERSION }
-    }
+    return $res;
 }
 
-push( @EXPORT, qw(json_parser json_load) );
+push( @EXPORT, qw(json_load json_stats) );
 
 # Like prp2cfg, but updates.
 # Also allows array pre/append and JSON data.
@@ -691,6 +697,15 @@ sub detect_image_format( $test ) {
 
 push( @EXPORT_OK, "detect_image_format" );
 
-=cut
+# Transpose types
+
+sub XP_DEFAULT() { 0 }
+sub XP_FOLLOW()  { 0 }
+sub XP_SHARP()   { 1 }
+sub XP_FLAT()    { 2 }
+sub XP_KEY()     { 3 }
+
+$EXPORT_TAGS{"xp"} = [ qw( XP_DEFAULT XP_FOLLOW XP_SHARP XP_FLAT XP_KEY ) ];
+push( @EXPORT_OK, @{ $EXPORT_TAGS{"xp"} } );
 
 1;

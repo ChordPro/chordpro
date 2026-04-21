@@ -10,7 +10,6 @@ languageCode: en-GB
 
 disableKinds:
 - taxonomy
-- taxonomyTerm
 - RSS
 - sitemap
 

@@ -1,36 +1,36 @@
 {title: Author/Artist: some artist}
 {subtitle: Title: some title}
-{comment:Album: some album}
-{comment:Transcribed by: A person, february 2020}
-{comment:Email: person *AtSign* org.net}
+{comment: Album: some album}
+{comment: Transcribed by: A person, february 2020}
+{comment: Email: person *AtSign* org.net}
 
-{comment:The quick brown fox jumps over the lazy dog}
-{comment:The quick brown fox jumps over the lazy dog}
-{comment:The quick brown fox jumps over the lazy dog}
-{comment:The quick brown fox jumps over the lazy dog}
-{comment:The quick brown fox jumps over the lazy dog}
+{comment: The quick brown fox jumps over the lazy dog}
+{comment: The quick brown fox jumps over the lazy dog}
+{comment: The quick brown fox jumps over the lazy dog}
+{comment: The quick brown fox jumps over the lazy dog}
+{comment: The quick brown fox jumps over the lazy dog}
 
-{comment:Notation:}
+{comment: Notation:}
 
-{comment:b   bend note up.  This could be a full tone, half tone, or partial}
-{comment:    and could be done by hand or with floating wammy bar.  You decide...}
+{comment: b   bend note up.  This could be a full tone, half tone, or partial}
+{comment:     and could be done by hand or with floating wammy bar.  You decide...}
 
-{comment:r   release the previous bended note.  May be a fast or slow release...}
+{comment: r   release the previous bended note.  May be a fast or slow release...}
 
-{comment:/   slide up}
-{comment:\   opposite of /}
+{comment: /   slide up}
+{comment: \   opposite of /}
 
-{comment:h   hammer on}
+{comment: h   hammer on}
 
-{comment:^   usually means note applies to the specific }
+{comment: ^   usually means note applies to the specific }
 
-{comment:The quick brown fox jumps over the lazy dog}
-{comment:The quick brown fox jumps over the lazy dog}
-{comment:The quick brown fox jumps over the lazy dog}
-{comment:The quick brown fox jumps over the lazy dog}
-{comment:The quick brown fox jumps over the lazy dog}
+{comment: The quick brown fox jumps over the lazy dog}
+{comment: The quick brown fox jumps over the lazy dog}
+{comment: The quick brown fox jumps over the lazy dog}
+{comment: The quick brown fox jumps over the lazy dog}
+{comment: The quick brown fox jumps over the lazy dog}
 
-{comment:Tuning: 4/4}
+{comment: Tuning: 4/4}
 
 {sot}
 -|----------------|----------------4-|----------------|----------------|------

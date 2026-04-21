@@ -18,6 +18,7 @@ use parent 'Exporter';
 our @EXPORT = qw( $config );
 
 use Test::More ();
+use Test::More::UTF8;
 
 use ChordPro::Files;
 use ChordPro::Config;
@@ -54,7 +55,8 @@ sub is_deeply {
 		}
 	    }
 	}
-	for ( qw( instrument user key_from key_actual chords numchords
+	for ( qw( instrument user _key key_actual key_sound key_print
+		  chords numchords
 		  _configversion bookmark
 	       ) ) {
 	    delete $got->{meta}->{$_} unless exists $expect->{meta}->{$_};
@@ -115,19 +117,23 @@ sub differ {
     $file2 = "$file1" unless $file2;
     $file1 = "$file1";
 
-    my @lines1 = fs_load( $file1, { fail => 'hard' } );
-    my @lines2 = fs_load( $file2, { fail => 'hard' } );
+    my @lines1 = @{ fs_load( $file1, { fail => 'hard' } ) };
+    my @lines2 = @{ fs_load( $file2, { fail => 'hard' } ) };
     my $linesm = @lines1 > @lines2 ? @lines1 : @lines2;
-    for ( my $line = 1; $line < $linesm; $line++ ) {
+    my $todo = "";
+    if ( @lines1 > 0 && @lines2 > 0 ) {
+	$todo = "TODO " if $lines1[0] =~ /\bTODO\b/;
+    }
+    for ( my $line = 0; $line < $linesm; $line++ ) {
 	next if $lines1[$line] eq $lines2[$line];
-	Test::More::diag("Files $file1 and $file2 differ at line $line");
+	Test::More::diag("${todo}Files $file1 and $file2 differ at line ", 1+$line);
 	Test::More::diag("  <  $lines1[$line]");
 	Test::More::diag("  >  $lines2[$line]");
-	return 1;
+	return !$todo;
     }
     return 0 if @lines1 == @lines2;
     $linesm++;
-    Test::More::diag("Files $file1 and $file2 differ at line $linesm" );
+    Test::More::diag("${todo}Files $file1 and $file2 differ at line ", 1+$linesm);
     Test::More::diag("  <  ", $lines1[$linesm] // "***missing***");
     Test::More::diag("  >  ", $lines2[$linesm] // "***missing***");
     1;

@@ -27,6 +27,10 @@ e.g.](https://www.jazzguitar.be/blog/what-are-guitar-positions/))
 In practice, the term _fret_ is often used to indicate _position_, which is
 unfortunate. 
 
+The chord definition is not transposed or transcoded unless you write the
+chord name between chord brackets `[ ]`. In this case not other
+attributes may be specified.
+
 ![]({{< asset "images/fretpos.png" >}})
 
 In the left diagram the first (topmost) finger is in position 1, it

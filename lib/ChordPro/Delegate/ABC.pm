@@ -42,11 +42,29 @@ sub can( $class, $method ) {
     return \&abc2svg;
 }
 
+my $backend;
+
+# Fetch a value for key $k from hash $h, with possible specialisation
+# for the current backend.
+# NOTE: This is a copy from Song.pm. Redo later.
+sub beo {
+    my ( $h, $k ) = @_;
+    if ( exists( $h->{$backend} )
+	 && exists( $h->{$backend}->{$k} )
+	 && defined( $h->{$backend}->{$k} ) ) {
+	return $h->{$backend}->{$k};
+    }
+    return '' unless exists($h->{$k}) && defined($h->{$k});
+    return $h->{$k};
+}
+
 # Default entry point.
 
 sub abc2svg( $song, %args ) {
 
     my $abc2svg = info();
+    $backend = lc $song->{generate};
+    my $cfg = { %{$config->{delegates}->{abc} } };
 
     if ( DEBUG() ) {
 	::dump($abc2svg);
@@ -54,7 +72,7 @@ sub abc2svg( $song, %args ) {
 
     state $cfg_checked;
     unless ( $cfg_checked++ ) {
-	if ( ($config->{delegates}{abc}{config} // "default") ne "default" ) {
+	if ( ( beo( $cfg, 'config' ) || "default" ) ne "default" ) {
 	    warn("ABC: delegates.abc.config is no longer used.\n");
 	    warn("ABC: Config \"default.abc\" will be loaded instead.\n")
 	      if !$abc2svg->{external} && fs_test( s => "default.abc" );
@@ -71,13 +89,12 @@ sub abc2svg( $song, %args ) {
     }
 
     state $td = File::Temp::tempdir( CLEANUP => !$config->{debug}->{abc} );
-    my $cfg = { %{$config->{delegates}->{abc} } };
 
     # External tools usually process a default.abc.
     warn("ABC: Using config \"default.abc\".\n")
       if index( $abc2svg->{method}, QUICKJSXS ) < 0 && fs_test( s => "default.abc" );
 
-    my $prep = make_preprocessor( $cfg->{preprocess} );
+    my $prep = make_preprocessor( beo( $cfg, 'preprocess' ) );
 
     # Prepare names for temporary files.
     state $imgcnt = 0;
@@ -93,27 +110,31 @@ sub abc2svg( $song, %args ) {
     # "%%stretchlast 0", only the final line is shorter.
     # Otherwise, you can have "%%trimsvg 1" as the last line of the tune.
     my @preamble =
-      ( "%%topspace 0",
-	"%%titlespace 0",
-	"%%musicspace 0",
-	"%%composerspace 0",
-	"%%infospace 0",
-	"%%textspace 0",
-	"%%leftmargin 0cm",
-	"%%rightmargin 0cm",
-	"%%stretchstaff 1",
-	"%%stretchlast 0",
-	"%%trimsvg 1",
-	"%%staffsep 0",
-	@{ $cfg->{preamble}//[] } );
+      ( '%%topspace 0',
+	'%%titlespace 0',
+	'%%musicspace 0',
+	'%%composerspace 0',
+	'%%infospace 0',
+	'%%textspace 0',
+	'%%leftmargin 0cm',
+	'%%rightmargin 0cm',
+	'%%stretchstaff 1',
+	'%%stretchlast 0',
+	'%%trimsvg 1',
+	'%%staffsep 0',
+	$backend =~ /html/ ? ( '%%fullsvg 1' ) : (),
+	@{ beo( $cfg, 'preamble' ) || [] } );
 
-    for ( keys(%{$elt->{opts}}) ) {
-
-	# Suppress meaningless transpositions. ChordPro uses them to enforce
-	# certain chord renderings.
-	next if $_ ne "transpose";
-	my $x = $elt->{opts}->{$_} % @{ $config->{notes}->{sharp} };
-	unshift( @preamble, '%%transpose'." $x" );
+    if ( defined $elt->{opts}->{transpose} ) {
+	my $tr = $elt->{opts}->{transpose};
+	my $x;
+	if ( $tr->forced ) {
+	    $x = $tr->xp . ( $config->{keys}->{flats} ? "b" : "#" );
+	}
+	else {
+	    $x = $tr->xp % @{ $config->{notes}->{sharp} };
+	}
+	unshift( @preamble, '%%transpose'." $x" ) if $x;
     }
 
     # Add mandatory field.
@@ -161,7 +182,7 @@ sub abc2svg( $song, %args ) {
 	print $fd $_, "\n";
 	warn($_, "\n") if DEBUG > 1;
     }
-    for ( @{ $cfg->{postamble}//[] } ) {
+    for ( @{ beo( $cfg, 'postamble' ) || [] } ) {
 	print $fd $_, "\n";
 	warn($_, "\n") if DEBUG > 1;
     }
@@ -352,10 +373,6 @@ sub abc2svg( $song, %args ) {
 	if ( /^<\/svg/ && @lines && $lines[0] =~ /^<\/div/ ) {
 	    last;
 	}
-    }
-    if ( @data ) {
-	unshift( @data, "<div>" );
-	push( @data, "</div>" );
     }
 
     if ( DEBUG ) {

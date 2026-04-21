@@ -2,21 +2,21 @@
 {title:     A   Title Line  - by artist }
 {subtitle:     ----------------------------}
 
-{comment:    From the album "test test"    }
+{comment:     From the album "test test"    }
 
-{comment:    Transcribed by John Doe}
-{comment:    jdoe (at) gmail (dot) com}
-
-
-{comment:Some informational text here }
-{comment:More text text text}
-{comment:More text text text}
-
-{comment:/ = slide                 }
+{comment:     Transcribed by John Doe}
+{comment:     jdoe (at) gmail (dot) com}
 
 
-{comment:INTRO:}
-{comment:------}
+{comment: Some informational text here }
+{comment: More text text text}
+{comment: More text text text}
+
+{comment: / = slide                 }
+
+
+{comment: INTRO:}
+{comment: ------}
 
 {sot}
 E-----------------------------------------------------

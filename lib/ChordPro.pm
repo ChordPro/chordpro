@@ -8,6 +8,7 @@ use ChordPro::Logger;
 use ChordPro::Files;
 use ChordPro::Utils;
 use ChordPro::Chords;
+use ChordPro::Chords::Transpose;
 use ChordPro::Output::Common;
 
 # Single line for stupid tools.
@@ -178,15 +179,30 @@ sub chordpro {
     }
 
     $options->{generate} ||= "PDF";
+
+    # Register backend name and load its Configurator, if any.
     my $pkg = "ChordPro::Output::".$options->{generate};
+    $options->{backend} = $pkg;
+    eval "require $pkg"."::Configurator";
+    warn("Warning: No configurator for ", $options->{generate}, "\n$@")
+      if $options->{trace} && $@;
+
+    # One configurator to bind them all.
+    # This will also call the backend Configurator, if any.
+    use ChordPro::Config;
+    $config = ChordPro::Config::configurator({});
+
+    # Now load the real backend. Note that the actual module name
+    # may be changed by config.
+    if ( exists($config->{lc($options->{generate})})
+	 && exists($config->{lc($options->{generate})}->{module}) ) {
+	$options->{generate} = $config->{lc($options->{generate})}->{module};
+    }
+    $pkg = "ChordPro::Output::".$options->{generate};
     eval "require $pkg;";
     die("No backend for ", $options->{generate}, "\n$@") if $@;
     $options->{backend} = $pkg;
     $pkg->version if $options->{verbose} && $pkg->can("version");
-
-    # One configurator to bind them all.
-    use ChordPro::Config;
-    $config = ChordPro::Config::configurator({});
 
     # Parse the input(s).
     use ChordPro::Songbook;
@@ -234,7 +250,7 @@ sub chordpro {
 	}
 	for ( qw( filelist dir ) ) {
 	    next unless defined $opts{$_};
-	    $gopts{$_} = $opts{$_} eq "" ? undef : $opts{$_};
+	    $gopts{$_} = $opts{$_} eq "" ? undef : expand_tilde($opts{$_});
 	}
 	unless ( @w ) {
 	    progress( msg => $file ) if @ARGV > 1 && $file !~ /^--/;
@@ -328,6 +344,11 @@ sub chordpro {
 	    print( join( "\n", @$res ) );
 	}
 	# Don't close STDOUT!
+    }
+
+    if ( $options->{verbose} ) {
+	my $st = json_stats;
+	warn("JSON: xs = ", $st->{xs}, ", rr = ", $st->{rr}, "\n");
     }
 }
 
@@ -486,11 +507,16 @@ Includes a table of contents.
 By default a table of contents is included in the PDF output when
 it contains more than one song.
 
-=item B<--transpose=>I<N> (short: -x)
+=item B<--transpose=>I<XX> (short: -x)
 
-Transposes all songs by I<N> semi-tones. Note that I<N> may be
-specified as B<+>I<N> to transpose upward, using sharps, or as
-B<->I<N> to transpose downward, using flats.
+I<XX> must be a number in the range -24 .. +24, optionally followed by
+one of C<s>, or C<f>.
+
+Transposes all songs by the given number of semi-tones.
+A positive number transposes up, a negative number transposes down.
+
+If the resultant key requires accidentals the postfix controls whether
+sharps or flats are used. See the docs.
 
 =item B<--version> (short: B<-V>)
 
@@ -878,7 +904,7 @@ sub app_setup {
           "text-font|T=s",              # Sets text font
           "i" => sub { $clo->{toc} = 1 },
           "toc!",                       # Generates a table of contents
-          "transpose|x=i",              # Transposes by N semi-tones
+          "transpose|x=s",              # Transposes by N semi-tones
           "transcode|xc=s",             # Transcodes to another notation
           "user-chord-grids!",          # Do[esn't] print diagrams for user defined chords.
           "version|V" => \$version,     # Prints version and exits
@@ -950,6 +976,16 @@ sub app_setup {
 	$clo->{nodefaultconfigs} = 1;
 	$clo->{nosongconfig} = 1;
 	$::options->{reference} = 1;
+    }
+
+    if ( $ok && defined $clo->{transpose} ) {
+	if ( my $tr = parse_transpose($clo->{transpose}) ) {
+	    $clo->{transpose} = $tr;
+	}
+	else {
+	    warn("Invalid transpose value: ", $clo->{transpose}, "\n" );
+	    $ok = 0;
+	}
     }
 
     $clo->{trace} ||= $clo->{debug};
@@ -1308,12 +1344,13 @@ sub runtime_info {
 		  } );
     };
 
-    if ( defined $Wx::VERSION ) {
+    eval {
+	require Wx;
 	no strict 'subs';
 	push( @p,
 	      { name => "wxPerl",    version => $dd->($Wx::VERSION)  },
 	      { name => "wxWidgets", version => $dd->($Wx::wxVERSION) } );
-    }
+    };
 
     local $SIG{__WARN__} = sub {};
     local $SIG{__DIE__} = sub {};
@@ -1360,9 +1397,11 @@ sub runtime_info {
 	require JavaScript::QuickJS;
 	$vv->("JavaScript::QuickJS");
     };
-    my $i = json_parser();
-    $vv->( $i->{parser} );
-    $p[-1]->{relaxed} = "relaxed" if $i->{relaxed};
+
+    eval {
+	require JSON::Relaxed;
+	$vv->( "JSON::Relaxed" );
+    };
 
     eval {
 	require JSON::XS;

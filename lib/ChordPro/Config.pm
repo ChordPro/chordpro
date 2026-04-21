@@ -307,6 +307,7 @@ sub get_config ( $file ) {
     if ( $file =~ /\.json$/i ) {
         if ( my $lines = fs_load( $file, { split => 1, fail => "soft" } ) ) {
             my $new = json_load( join( "\n", @$lines, '' ), $file );
+	    warn("JSON: $file ($ChordPro::Utils::json_last)\n") if $verbose > 1;
             precheck( $new, $file );
             return __PACKAGE__->new($new);
         }

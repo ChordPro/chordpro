@@ -530,7 +530,13 @@ sub bogen {
 
     # always draw CW (dir=1)
     # note that start and end could be well out of +/-360 degree range
-    @points = _arctocurve($r,$r, 90+$alpha+$beta/2,90+$alpha-$beta/2, 1);
+    my $sweep1 = 90 + $alpha + $beta/2;
+    my $sweep2 = 90 + $alpha - $beta/2;
+    if (abs($sweep1*$r) < 0.001) {
+        # tiny angle force to 0
+        $sweep1 = 0;
+    }
+    @points = _arctocurve($r,$r, $sweep1,$sweep2, 1);
 
     if ($spf) {  # flip order of points for reverse arc
         my @pts = @points;

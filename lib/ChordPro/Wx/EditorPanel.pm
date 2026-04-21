@@ -180,9 +180,6 @@ method openfile( $file, $checked=0, $actual=undef ) {
     }
     $self->GetParent->SetTitle( $state{windowtitle} = $actual);
 
-    # Default is no transposing.
-    $preferences{xpose_from} = $preferences{xpose_to} = 0;
-    $preferences{xpose_acc} = 0;
     if ( $self->{sw_lr}->IsSplit ) {
 	$self->{sw_lr}->Unsplit(undef);
 	$self->previewtooltip;
@@ -248,8 +245,6 @@ method newfile( $file = undef ) {
     $state{windowtitle} = $title;
     $self->{l_status}->SetLabel($title);
     $self->{l_status}->SetToolTip($state{currentfile});
-    $preferences{xpose_from} = $preferences{xpose_to} = 0;
-    $preferences{xpose_acc} = 0;
     if ( $self->{sw_lr}->IsSplit ) {
 	$self->{sw_lr}->Unsplit(undef);
 	$self->previewtooltip;
@@ -692,6 +687,65 @@ method OnExternalEditor($event) {
 	# Clear selection and set insertion point.
 	$e->SetSelection( $pos, $pos );
 	$e->EmptyUndoBuffer;
+    }
+    unlink($file);
+
+    $e->SetModified($mod);
+    $e->SetFocus;
+}
+
+# Experimental.
+# This approach is a bit clumsy and prone to errors.
+method OnExternalEditorSync($event) {
+    my $editor = $ENV{VISUAL} // $ENV{EDITOR};
+    $self->alert( 0, "No external editor specified" ), return unless $editor;
+    my $e = $self->{t_editor};
+    my $pos = $e->GetCurrentPos;
+    my $mod = $e->IsModified;
+
+    # Save in temp file and call editor.
+    use File::Temp qw(tempfile);
+    ( undef, my $file ) = tempfile( SUFFIX => $preferences{chordproext},
+				    OPEN => 0 );
+    $e->SaveFile($file);
+    my @st = stat($file);
+    $self->log( 'I', "Running $editor on $file (" .
+		plural( $e->GetLineCount, " line" ) . ", " .
+		plural( $st[7], " byte" ) . ")" );
+
+    my $cmd = sprintf("%s %s", $editor, qquote($file) );
+    my $edit = Wx::Process::Open( $cmd );
+
+    unless ( $edit ) {
+	$self->log( 'I', "Cannot start editor");
+	return;
+    }
+
+    my $pid = $edit->GetPid;
+    $self->log( 'I', "Editor pid = $pid");
+
+    my $did;
+    while ( Wx::Process::Exists($pid) ) {
+	next if (stat($file))[7] == $st[7] && (stat(_))[9] == $st[9];
+	@st = stat(_);
+	$e->LoadFile($file);
+	$self->log( 'I', "Updated editor from $file (" .
+		    plural( $e->GetLineCount, " line" ) . ", " .
+		    plural( $st[7], " byte" ) . ")" );
+	$mod = 1;
+	# Clear selection and set insertion point.
+	$e->SetSelection( $pos, $pos );
+	$e->EmptyUndoBuffer;
+	$did++;
+    }
+    continue {
+	wxTheApp->Yield;
+	sleep(1);
+    }
+
+    if ( !$did && (stat($file))[7] == $st[7] && (stat(_))[9] == $st[9] ) {
+	$self->log( 'I', "Running $editor did not make changes" );
+	$self->alert( 0, "No changes from external editor" );
     }
     unlink($file);
 

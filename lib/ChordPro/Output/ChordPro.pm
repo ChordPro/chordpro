@@ -65,6 +65,7 @@ sub generate_song ( $s ) {
     my $seq  = $options->{'backend-option'}->{seq};
     my $expand = $options->{'backend-option'}->{expand};
     my $msp  = $variant eq "msp";
+    my $movable = ChordPro::Chords::Parser->get_parser($s->{system})->movable;
     upd_config();
 
     my @s;
@@ -88,16 +89,16 @@ sub generate_song ( $s ) {
 	# Known ones 'as is'.
 	my %used;
 	foreach my $k ( sort keys %{ $s->{meta} } ) {
-	    next if $k =~ /^(?:title|subtitle)$/;
+	    next if $k =~ /^(?:title|subtitle|key)$/;
 	    if ( $k =~ $re_meta ) {
-		push( @s, map { +"{$k: ".fq($_)."}" } @{ $s->{meta}->{$k} } );
 		$used{$k}++;
+		push( @s, map { +"{$k: ".fq($_)."}" } @{ $s->{meta}->{$k} } );
 	    }
 	}
 	# Unknowns with meta prefix.
 	foreach my $k ( sort keys %{ $s->{meta} } ) {
 	    next if $used{$k};
-	    next if $k =~ /^(?:title|subtitle|songindex|key_.*|chords|numchords)$/;
+	    next if $k =~ /^(?:title|subtitle|songindex|key.*|chords|numchords)$/;
 	    next if $k =~ /^_/;
 	    next if $k =~ /\./;
 	    next if $k =~ /^bookmark/;
@@ -390,6 +391,14 @@ sub generate_song ( $s ) {
 	    next;
 	}
 
+	if ( $elt->{type} eq "meta" ) {
+	    if ( $elt->{key} eq "key" ) {
+		next if $movable;
+		push( @s, "{key: " . $elt->{value}->[-1] . "}" );
+	    }
+	    next;
+	}
+
 	if ( $elt->{type} eq "ignore" ) {
 	    push( @s, $elt->{text} );
 	    next;
@@ -466,6 +475,11 @@ sub songline ( $song, $elt ) {
 sub gridline ( $song, $elt ) {
 
     my $line = "";
+
+    if ( $elt->{margin} ) {
+	$line .= fq( $elt->{margin}->{text} );
+    }
+
     for ( @{ $elt->{tokens} } ) {
 	$line .= " " if $line;
 	if ( $_->{class} eq "chord" ) {
@@ -473,6 +487,7 @@ sub gridline ( $song, $elt ) {
 	}
 	else {
 	    $line .= $_->{symbol};
+	    $line .= $_->{volta} if $_->{volta};
 	}
     }
 

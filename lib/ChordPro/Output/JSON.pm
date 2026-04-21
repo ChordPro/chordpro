@@ -5,6 +5,7 @@ package ChordPro::Output::JSON;
 use strict;
 use warnings;
 use JSON::PP;
+use Ref::Util qw( is_hashref is_arrayref );
 
 sub generate_songbook {
     my ( $self, $sb ) = @_;
@@ -13,17 +14,20 @@ sub generate_songbook {
     $pp->convert_blessed;
 
     *UNIVERSAL::TO_JSON = sub {
-        my $obj = "".$_[0];
-        return $obj =~ /=HASH\(/
+	if ( JSON::PP::is_bool($_[0]) ) {
+	    return $_[0] ? "true" : "false"
+	}
+        return is_hashref($_[0])
           ? { %{$_[0]} }
-            : $obj =~ /=ARRAY\(/
+            : is_arrayref($_[0])
               ? [ @{$_[0]} ]
-                : undef
+                : "OBJ($_[0])"
                   ;
     };
 
-    my $json = $pp->encode($sb);
-    [ split(/\n/, $json) ];
+    my $json = $pp->encode( { sb => $sb });
+
+    return [ split(/\n/, $json) ];
 }
 
 1;
