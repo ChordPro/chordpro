@@ -1,9 +1,9 @@
-6.099.0
+6.100.0 2026-04-21
 
     !Highlights
 
     - Reworked Keys and Transpositions.
-      See https://www.chordpro.org/beta/keys_and_transpositions/ .
+      See https://www.chordpro.org/chordpro/keys_and_transpositions/ .
 
     - New config setting: `keys.force-common` and `keys.sharps`.
 

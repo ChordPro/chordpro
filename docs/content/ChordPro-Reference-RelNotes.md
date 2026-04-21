@@ -1,13 +1,13 @@
 # Release info
 
-## 6.099.0
+## 6.100.0
 
-Under development
+Released: 2026-04-21
 
 
 ### Highlights
 
-* Reworked Keys and Transpositions. See https://www.chordpro.org/beta/keys_and_transpositions/ .
+* Reworked Keys and Transpositions. See https://www.chordpro.org/chordpro/keys_and_transpositions/ .
 * New config setting: `keys.force-common` and `keys.sharps`.
 * Updated the standard guitar chords with lots of new chords and fingering information. Thanks to Russ Jones.
 * Added another Russ Jones contribution: jazzy-chords with many chord names typically used in Jazzy music.
@@ -43,6 +43,8 @@ Under development
 * Fixed issue #630.1.
 * Fixed issue #636.
 * Fixed issue #640 (col expands to colums instead of columns).
+* Fixed issue #647 (image scaling goes wrong with columns).
+* Fixed issue #658.
 * Several others.
 
 ### Social and support
