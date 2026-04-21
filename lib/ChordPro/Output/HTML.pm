@@ -236,9 +236,9 @@ sub generate_song {
 		    use ChordPro::Delegate::TextBlock;
 		    my $pkg = 'ChordPro::Delegate::'. $e->{delegate};
 		    my $hnd = $e->{handler};
-		    warn("XXX pkg = \"$pkg\", hnd = \"$hnd\"\n");
-		    my $html = $pkg->can($hnd)->( $s, elt => $e );
-		    push( @s, '<div class="' . lc($hnd) . '">' . $html . '</div>' );
+		    my $res = $pkg->can($hnd)->( $s, elt => $e );
+		    push( @s, '<div class="' . lc($hnd) . '">' . $_ . '</div>' )
+		      for @{$res->{data}};
 		    push( @s, "" ) if $tidy;
 		    next;
 		}
