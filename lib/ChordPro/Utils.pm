@@ -311,7 +311,7 @@ sub json_load( $json, $source = "<builtin>" ) {
 sub json_stats( $reset = 0 ) {
     my $res = { xs => $_json_xs//0, rr => $_json_rr//0 };
     if ( $reset ) {
-	$$_json_xs = $_json_rr = 0;
+	$_json_xs = $_json_rr = 0;
     }
     return $res;
 }
