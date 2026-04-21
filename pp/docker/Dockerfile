@@ -20,6 +20,7 @@ RUN apt-get update && apt-get upgrade -y \
 	  libwxgtk3.2 \
 	  libwxgtk-media3.2 \
 	  libwxgtk-webview3.2 \
+	  libharfbuzz-dev \
 	  mupdf \
           cpanminus
 
