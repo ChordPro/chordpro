@@ -345,7 +345,7 @@ sub mimedata {
     }
     else {
 	$mimetype = ChordPro::Utils::_detect_image_format($data)
-	  || Carp::croak("Unrecognigned imge data in \"$src\"");
+	  || Carp::croak("Unrecognized imge data in \"$src\"");
     }
 
     unless ( $mimetype =~ m;^(image|text)/.*; ) {
