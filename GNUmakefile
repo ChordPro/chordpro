@@ -38,6 +38,7 @@ Makefile : Makefile.PL lib/ChordPro/Version.pm resources
 
 PERL := perl
 PROJECT := ChordPro
+VERSION := $(shell perl lib/ChordPro/Version.pm)
 RSYNC_ARGS := -rptgoDvHL
 
 STDMNF := MANIFEST MANIFEST.CPAN
@@ -153,9 +154,9 @@ _wkit :
 
 _wkiti :
 	cp ${WINDST}/pp/windows/ChordPro-Installer*.exe \
-	  ${HOME}/tmp/ChordPro-Installer-6-90-dev-msw-x64.exe
-	scp ${HOME}/tmp/ChordPro-Installer-6-90-dev-msw-x64.exe \
-	  chordpro-site:www/dl/
+	  ${HOME}/tmp/ChordPro-Installer-${VERSION}-dev-msw-x64.exe
+	scp ${HOME}/tmp/ChordPro-Installer-${VERSION}-dev-msw-x64.exe \
+	  chordpro-site:www/dl/ChordPro-Installer-dev-msw-x64.exe
 
 _wkit_startvm :
 	-VBoxManage startvm ${WINVM} --type headless
