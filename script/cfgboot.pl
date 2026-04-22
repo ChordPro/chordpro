@@ -5,8 +5,8 @@
 # Author          : Johan Vromans
 # Created On      : Mon Jun  3 08:14:35 2024
 # Last Modified By: Johan Vromans
-# Last Modified On: Fri Sep 26 20:45:43 2025
-# Update Count    : 56
+# Last Modified On: Wed Apr 22 08:38:34 2026
+# Update Count    : 64
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -22,7 +22,7 @@ use lib "$FindBin::Bin/../lib/ChordPro/lib";
 # Package name.
 my $my_package = 'ChordPro';
 # Program name and version.
-my ($my_name, $my_version) = qw( cfgboot 0.01 );
+my ($my_name, $my_version) = qw( cfgboot 1.02 );
 
 ################ Command line parameters ################
 
@@ -53,14 +53,17 @@ binmode STDERR => ':utf8';
 my $parser = JSON::Relaxed::Parser->new
   ( booleans => [ $Types::Serialiser::false, $Types::Serialiser::true ] );
 
-my $file = shift;
+my $json = "";
+# RJSON files can be concatenated.
+for my $file ( @ARGV ) {
+    my $opts = { split => 0, fail => "soft" };
+    $json .= loadlines( $file, $opts );
+    die( "$file: $opts->{error}\n") if $opts->{error};
+}
 
-my $opts = { split => 0, fail => "soft" };
-my $json = loadlines( $file, $opts );
-die( "$file: $opts->{error}\n") if $opts->{error};
 my $data = $parser->decode($json);
 if ( $parser->is_error ) {
-    warn( "$file: JSON error: ", $parser->err_msg, "\n" );
+    warn( "JSON error: ", $parser->err_msg, "\n" );
     next;
 }
 
@@ -113,13 +116,14 @@ sub app_options() {
 	 'verbose+'	=> \$verbose,
 	 'quiet'	=> sub { $verbose = 0 },
 	 'trace'	=> \$trace,
+	 'test'		=> \$test,
 	 'help|?'	=> \$help,
 	 'debug'	=> \$debug
        ) or $help) {
 	app_usage(2);
     }
     app_ident() if $ident;
-    app_usage(2) unless @ARGV == 1;
+    app_usage(2) unless @ARGV >= 1;
 }
 
 sub app_ident() {
@@ -130,7 +134,9 @@ sub app_ident() {
 sub app_usage( $exit ) {
     app_ident();
     print STDERR <<EndOfUsage;
-Usage: $0 [options] config.json
+Usage: $0 [options] config.json ...
+
+Creates a ChordPro::Config::Data module from RJSON input files.
 
    --output=XXX		optional output file
    --ident		shows identification
