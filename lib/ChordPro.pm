@@ -1344,16 +1344,16 @@ sub runtime_info {
 		  } );
     };
 
+    local $SIG{__WARN__} = sub {};
+    local $SIG{__DIE__} = sub {};
     eval {
 	require Wx;
 	no strict 'subs';
 	push( @p,
 	      { name => "wxPerl",    version => $dd->($Wx::VERSION)  },
 	      { name => "wxWidgets", version => $dd->($Wx::wxVERSION) } );
-    };
+    } if $ENV{DISPLAY};
 
-    local $SIG{__WARN__} = sub {};
-    local $SIG{__DIE__} = sub {};
     $vv->("Storable");
     $vv->("Object::Pad");
     eval {
