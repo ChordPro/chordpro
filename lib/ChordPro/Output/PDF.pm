@@ -94,10 +94,11 @@ sub generate_songbook {
 
     my $name = ::runtimeinfo("short");
     $name =~ s/version.*/regression testing/ if $regtest;
-    my %info = ( Title => $sb->{songs}->[0]->{meta}->{title}->[0],
+    my %info = ( Title => $options->{title} || $sb->{songs}->[0]->{meta}->{title}->[0],
 		 Creator => $name );
     while ( my ( $k, $v ) = each %{ $ps->{info} } ) {
 	next unless defined($v) && $v ne "";
+	next if $k eq "title" && $options->{title} && $k eq '%{title}';
 	$info{ucfirst($k)} = fmt_subst( $sb->{songs}->[0], $v );
     }
 

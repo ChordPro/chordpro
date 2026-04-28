@@ -31,6 +31,7 @@ PDF document properties.
     }
 
 Note that the context for substitutions is the first song.
+`info.title` will be set to the songbook title, if any.
 
 ## CSV
 

@@ -1,3 +1,12 @@
+6.xxx
+
+    - Change LICENSE to match Artistic 2.0.
+
+    - Eliminate warning when running without DISPLAY.
+
+    - Default PDF info 'title' to songbook title, if any.
+      As suggested by CodeShakingSheep.
+
 6.100.0 2026-04-21
 
     !Highlights
