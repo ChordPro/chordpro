@@ -24,6 +24,8 @@ my $test;
 ++$test; use_ok("ChordPro::Output::Text");
 ++$test; use_ok("ChordPro::Output::ChordPro");
 ++$test; use_ok("ChordPro::Output::HTML");
+++ $test; use_ok("ChordPro::Output::Base");
+++ $test; use_ok("ChordPro::Output::HTML5::FormatGenerator");
 ++$test; use_ok("ChordPro::Output::PDF");
 
 diag( "Testing ChordPro $ChordPro::VERSION, Perl $], $^X" );

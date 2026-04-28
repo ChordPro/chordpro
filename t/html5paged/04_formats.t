@@ -20,7 +20,10 @@ use_ok('ChordPro::Output::HTML5');
 
 my $config_basic = {
     %$config,
-    html5 => { mode => 'print' },
+    html5 => {
+        %{ $config->{html5} // {} },
+        mode => 'print',
+    },
     pdf => {
         papersize => 'a4',
         formats => {
@@ -77,7 +80,10 @@ like($css, qr/\@page :first/, "Has first page format");
 
 my $config_three_part = {
     %$config,
-    html5 => { mode => 'print' },
+    html5 => {
+        %{ $config->{html5} // {} },
+        mode => 'print',
+    },
     pdf => {
         formats => {
             default => {
@@ -106,7 +112,10 @@ like($css2, qr/\@bottom-right/, "Has right margin box");
 
 my $config_complex = {
     %$config,
-    html5 => { mode => 'print' },
+    html5 => {
+        %{ $config->{html5} // {} },
+        mode => 'print',
+    },
     pdf => {
         formats => {
             default => {
@@ -133,7 +142,10 @@ like($css3, qr/string\(song-subtitle\)/, "Subtitle metadata");
 
 my $config_empty = {
     %$config,
-    html5 => { mode => 'print' },
+    html5 => {
+        %{ $config->{html5} // {} },
+        mode => 'print',
+    },
     pdf => {
         formats => {
             first => {
@@ -175,7 +187,6 @@ $sb->parse_file(\$song_data, { nosongline => 1 });
 my $song = $sb->{songs}[0];
 
 # Generate HTML with song and check metadata is available
-my $html = $backend->generate_song($song);
+my $html = $backend->generate_song($song, 1);
 like($html, qr/data-title="My Test Song"/, "Song has title metadata attribute")
     or diag("HTML doesn't contain expected metadata");
-

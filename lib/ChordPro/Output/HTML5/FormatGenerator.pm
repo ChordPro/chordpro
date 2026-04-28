@@ -5,7 +5,7 @@ package main;
 our $config;
 our $options;
 
-package ChordPro::Output::HTML5Helper::FormatGenerator;
+package ChordPro::Output::HTML5::FormatGenerator;
 
 # PDF format → CSS @page rule translator for HTML5 backend
 # Extracts format parsing logic for reusability
@@ -14,7 +14,7 @@ use v5.26;
 use Object::Pad;
 use utf8;
 
-class ChordPro::Output::HTML5Helper::FormatGenerator {
+class ChordPro::Output::HTML5::FormatGenerator {
     field $config :param;
     field $options :param = {};
     
@@ -29,7 +29,7 @@ class ChordPro::Output::HTML5Helper::FormatGenerator {
     
     # Main entry point: generate all format rules from PDF config
     method generate_rules() {
-        my $pdf = $config->{pdf};
+        my $pdf = ref($config->{pdf}) eq 'HASH' ? $config->{pdf} : undef;
         return $self->_generate_format_rules($pdf);
     }
     
@@ -38,51 +38,53 @@ class ChordPro::Output::HTML5Helper::FormatGenerator {
     # =================================================================
     
     method _generate_format_rules($pdf) {
-        my $formats = $pdf->{formats};
+        my $formats = ref($pdf) eq 'HASH' && ref($pdf->{formats}) eq 'HASH'
+            ? { %{ $pdf->{formats} } }
+            : {};
         my @rules;
         
         # Generate rules for each format type
         # Default format (applies to all pages unless overridden)
-        push @rules, $self->_generate_format_rule('default', eval { $formats->{default} }, undef);
+        push @rules, $self->_generate_format_rule('default', $formats->{default}, undef);
         
         # Title page (first page of each song)
-        push @rules, $self->_generate_format_rule('title', eval { $formats->{title} }, 'title');
+        push @rules, $self->_generate_format_rule('title', $formats->{title}, 'title');
         
         # Very first page
-        push @rules, $self->_generate_format_rule('first', eval { $formats->{first} }, ':first');
+        push @rules, $self->_generate_format_rule('first', $formats->{first}, ':first');
         
         # Even pages (left in duplex printing)
         # CSS :left selector applies to left-facing pages in duplex printing
-        my $default_even = eval { $formats->{'default-even'} };
+        my $default_even = $formats->{'default-even'};
         if (defined $default_even) {
             push @rules, $self->_generate_format_rule('default-even', $default_even, ':left');
         }
         
         # Odd pages (right in duplex printing) 
         # CSS :right selector applies to right-facing pages in duplex printing
-        my $default_odd = eval { $formats->{'default-odd'} };
+        my $default_odd = $formats->{'default-odd'};
         if (defined $default_odd) {
             push @rules, $self->_generate_format_rule('default-odd', $default_odd, ':right');
         }
         
         # Title page even/odd variants
-        my $title_even = eval { $formats->{'title-even'} };
+        my $title_even = $formats->{'title-even'};
         if (defined $title_even) {
             push @rules, $self->_generate_format_rule('title-even', $title_even, 'title:left');
         }
         
-        my $title_odd = eval { $formats->{'title-odd'} };
+        my $title_odd = $formats->{'title-odd'};
         if (defined $title_odd) {
             push @rules, $self->_generate_format_rule('title-odd', $title_odd, 'title:right');
         }
         
         # First page even/odd (though :first usually takes precedence)
-        my $first_even = eval { $formats->{'first-even'} };
+        my $first_even = $formats->{'first-even'};
         if (defined $first_even) {
             push @rules, $self->_generate_format_rule('first-even', $first_even, ':first:left');
         }
         
-        my $first_odd = eval { $formats->{'first-odd'} };
+        my $first_odd = $formats->{'first-odd'};
         if (defined $first_odd) {
             push @rules, $self->_generate_format_rule('first-odd', $first_odd, ':first:right');
         }
@@ -158,13 +160,16 @@ $boxes
             $position = 'top';
         }
         
-        my $theme = $config->{pdf}->{theme};
+        my $pdf_cfg = ref($config->{pdf}) eq 'HASH' ? { %{ $config->{pdf} } } : {};
+        my $theme = ref($pdf_cfg->{theme}) eq 'HASH' ? { %{ $pdf_cfg->{theme} } } : {};
         my $color = $theme->{'foreground-medium'} // '#666';
 
-        my $paged_cfg = $config->{html5}->{paged};
-        my $font_size = eval { $paged_cfg->{'format-font-size'} }
-            // eval { $paged_cfg->{format_font_size} }
-            // eval { $config->{pdf}->{formats}->{'font-size'} }
+        my $html5_cfg = ref($config->{html5}) eq 'HASH' ? { %{ $config->{html5} } } : {};
+        my $paged_cfg = ref($html5_cfg->{paged}) eq 'HASH' ? { %{ $html5_cfg->{paged} } } : {};
+        my $formats_cfg = ref($pdf_cfg->{formats}) eq 'HASH' ? { %{ $pdf_cfg->{formats} } } : {};
+        my $font_size = $paged_cfg->{'format-font-size'}
+            // $paged_cfg->{format_font_size}
+            // $formats_cfg->{'font-size'}
             // '10pt';
 
         for my $i (0..2) {
@@ -251,13 +256,13 @@ $boxes
 
 =head1 NAME
 
-ChordPro::Output::HTML5Helper::FormatGenerator - PDF format to CSS @page translator
+ChordPro::Output::HTML5::FormatGenerator - PDF format to CSS @page translator
 
 =head1 SYNOPSIS
 
-    use ChordPro::Output::HTML5Helper::FormatGenerator;
+    use ChordPro::Output::HTML5::FormatGenerator;
     
-    my $generator = ChordPro::Output::HTML5Helper::FormatGenerator->new(
+    my $generator = ChordPro::Output::HTML5::FormatGenerator->new(
         config => $config,
         options => $options,
     );

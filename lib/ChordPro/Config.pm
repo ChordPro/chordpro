@@ -764,8 +764,6 @@ sub _augment ( $self, $hash, $path ) {
             || $path =~ /^(meta|gridstrum\.symbols)\./
             || $path =~ /^markup\.shortcodes\./
             || $path =~ /^delegates\./
-                        || $path =~ /^html5\.css\.(?:colors|fonts|sizes|spacing)\./
-                        || $path =~ /^html5\.paged\.css\.(?:colors|fonts|sizes|spacing)\./
             || $key =~ /^_/;
 
         # Hash -> Hash.
@@ -863,9 +861,7 @@ sub _reduce ( $self, $orig, $path ) {
             warn("Config reduce error: unknown item $path$key\n")
               unless exists $self->{$key}
                 || $key =~ /^_/
-                                || $path =~ /^pdf\/\.fonts\./
-                                || $path =~ /^html5\.css\.(?:colors|fonts|sizes|spacing)\./
-                                || $path =~ /^html5\.paged\.css\.(?:colors|fonts|sizes|spacing)\./;
+                                || $path =~ /^pdf\/\.fonts\./;
 
             unless ( exists $orig->{$key} ) {
                 warn("D: $path$key\n") if DEBUG;
@@ -1009,8 +1005,6 @@ sub hmerge( $left, $right, $path = "" ) {
             || $path =~ /^parser\.preprocess\./
             || $path =~ /^markup\.shortcodes\./
             || $path =~ /^debug\./
-                        || $path =~ /^html5\.css\.(?:colors|fonts|sizes|spacing)\./
-                        || $path =~ /^html5\.paged\.css\.(?:colors|fonts|sizes|spacing)\./
             || $key =~ /^_/;
 
         if ( ref($right->{$key}) eq 'HASH'

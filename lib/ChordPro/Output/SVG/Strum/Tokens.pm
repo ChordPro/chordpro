@@ -6,8 +6,8 @@ use warnings;
 use feature qw( signatures );
 no warnings "experimental::signatures";
 use utf8;
-use URI::Escape ();
 use ChordPro::Symbols qw( strum );
+use ChordPro::Output::Common qw( encode_html mimedata );
 use Exporter 'import';
 our @EXPORT_OK = qw( bar_unicode esc svg_to_data_uri chord_display_text strum_name normalize_grid_chord_parts strum_symbol_info );
 
@@ -20,13 +20,7 @@ use constant {
 };
 
 sub esc( $text ) {
-	return "" unless defined $text;
-	$text =~ s/&/&amp;/g;
-	$text =~ s/</&lt;/g;
-	$text =~ s/>/&gt;/g;
-	$text =~ s/"/&quot;/g;
-	$text =~ s/'/&#39;/g;
-	$text;
+	return encode_html($text);
 }
 
 sub bar_unicode( $symbol ) {
@@ -39,9 +33,7 @@ sub bar_unicode( $symbol ) {
 }
 
 sub svg_to_data_uri( $svg ) {
-	return "" unless defined($svg) && $svg ne '';
-	my $escaped = URI::Escape::uri_escape_utf8($svg);
-	return "data:image/svg+xml;charset=utf-8,$escaped";
+	return mimedata($svg);
 }
 
 sub chord_display_text( $chord ) {

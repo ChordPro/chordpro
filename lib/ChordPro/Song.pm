@@ -681,19 +681,6 @@ sub parse_song {
 			# Move to assets.
 			$self->{assets}->{$id} = $a;
 
-			# Named strum pattern storage (task 62.5).
-			if ( $in_context eq 'strum'
-			     && ($opts->{label}//"") ne "" ) {
-			    my $pat_label = $opts->{label};
-			    $self->{strum_patterns} //= {};
-			    $self->{strum_patterns}->{$pat_label} = {
-				id       => $id,
-				data     => $a->{data},
-				opts     => { %$opts },
-				time_sig => $opts->{time_sig},
-			    };
-			}
-
 			if ( $def ) {
 			    my $label = delete $a->{label};
 			    do_warn("Label \"$label\" ignored on non-displaying $in_context section\n")
@@ -1432,7 +1419,6 @@ my %directives = (
 		  no_grid	     => \&dir_no_grid,
 		  pagesize	     => \&dir_papersize,
 		  pagetype	     => \&dir_papersize,
-		  strum		     => \&dir_strum,
 		  start_of_bridge    => undef,
 		  start_of_chorus    => undef,
 		  start_of_grid	     => undef,
@@ -1543,65 +1529,6 @@ sub parse_directive {
     }
 
     return { name => $dir, arg => $arg, omit => 0 }
-}
-
-sub _parse_strum_tuplet {
-	my ($value) = @_;
-	return undef unless defined $value;
-	my $v = lc($value);
-	$v =~ s/^\[|\]$//g;
-	$v =~ s/^\s+|\s+$//g;
-	return 3 if $v eq "triplet";
-	return 5 if $v eq "quintuplet";
-	return $1 if $v =~ /^(\d+)$/;
-	return undef;
-}
-
-sub _normalize_strum_start_opts {
-	my ( $arg, $kv ) = @_;
-	my %opts = %{$kv // {}};
-	my $raw = $arg // "";
-	$raw =~ s/^\s+|\s+$//g;
-
-	# Canonical form: {start_of_strum: <time-signature> <label> [tuplet]}
-	if ( $raw ne '' && $raw !~ /\w\s*=/ ) {
-		if ( $raw =~ /^(\d+\s*\/\s*\d+)(?:\s+(.+))?$/ ) {
-			$opts{time_sig} //= $1;
-			$opts{time_sig} =~ s/\s+//g if defined $opts{time_sig};
-
-			my $tail = $2 // "";
-			$tail =~ s/^\s+|\s+$//g;
-			if ( $tail ne '' ) {
-				my @parts = split( /\s+/, $tail );
-				my $parsed_tuplet = _parse_strum_tuplet( $parts[-1] );
-				if ( defined $parsed_tuplet && !exists $opts{tuplet} ) {
-					$opts{tuplet} = $parsed_tuplet;
-					pop @parts;
-				}
-				my $label = join( ' ', @parts );
-				$opts{label} = $label if $label ne '' && !exists $opts{label};
-			}
-		}
-	}
-
-	# Compatibility: if label starts with a time-signature, split it out.
-	if ( exists $opts{label}
-		 && $opts{label} =~ /^(\d+\s*\/\s*\d+)\s+(.+)$/ ) {
-		$opts{time_sig} //= $1;
-		$opts{label} = $2;
-	}
-
-	# Support textual tuplet suffixes in label fallback forms.
-	if ( exists $opts{label}
-		 && $opts{label} =~ /^(.+?)\s+(triplet|quintuplet|\d+)$/i ) {
-		my $tuplet = _parse_strum_tuplet($2);
-		if ( defined($tuplet) ) {
-			$opts{tuplet} //= $tuplet;
-			$opts{label} = $1;
-		}
-	}
-
-	return \%opts;
 }
 
 # Process a selector.
@@ -1746,8 +1673,6 @@ sub directive {
 	    }
 	    my $kv = parse_kv( $arg, "label" );
 	    delete $kv->{label} if ($kv->{label}//"") eq "";
-	    $kv = _normalize_strum_start_opts( $arg, $kv )
-	      if $in_context eq 'strum';
 
 	    $self->add( type     => "image",
 			subtype  => "delegate",
@@ -2466,33 +2391,6 @@ sub dir_diagrams {	# AKA grid
 sub dir_grid {
     my ( $self, $dir, $arg ) = @_;
     $self->{settings}->{diagrams} = 1;
-    return 1;
-}
-
-sub dir_strum {
-    my ( $self, $dir, $arg ) = @_;
-    my $label = $arg;
-    $label =~ s/^\s+//;
-    $label =~ s/\s+$//;
-    unless ( $label ne '' ) {
-	do_warn("{strum} requires a label argument\n");
-	return 1;
-    }
-
-    my $patterns = $self->{strum_patterns} // {};
-    unless ( exists $patterns->{$label} ) {
-	do_warn("Unknown strum pattern: \"$label\"\n");
-	return 1;
-    }
-
-    my $pat = $patterns->{$label};
-    my $id  = $pat->{id};
-
-    # Emit the same image element as the original {start_of_strum}.
-    $self->add( type => "image",
-		opts => { %{$pat->{opts} // {}} },
-		id   => $id );
-
     return 1;
 }
 

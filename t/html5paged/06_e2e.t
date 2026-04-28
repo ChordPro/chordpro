@@ -20,7 +20,10 @@ use_ok('ChordPro::Output::HTML5');
 
 my $test_config = {
     %$config,
-    html5 => { mode => 'print' },
+    html5 => {
+        %{ $config->{html5} // {} },
+        mode => 'print',
+    },
     pdf => {
         papersize => 'a4',
         margintop => 80,
@@ -130,4 +133,3 @@ like($html, qr/data-title="Swing Low Sweet Chariot"/, "Second song has metadata 
 # =================================================================
 
 like($html, qr/string-set:\s*song-title\s+attr\(data-title\)/, "Has string-set for song-title");
-

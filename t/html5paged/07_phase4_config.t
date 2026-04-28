@@ -19,7 +19,13 @@ use_ok('ChordPro::Output::HTML5');
 # =============================================================================
 
 my $backend1 = ChordPro::Output::HTML5->new(
-    config => { %$config, html5 => { mode => 'print' } },
+    config => {
+        %$config,
+        html5 => {
+            %{ $config->{html5} // {} },
+            mode => 'print',
+        },
+    },
     options => { output => undef },
 );
 

@@ -15,13 +15,13 @@ use v5.26;
 use Object::Pad;
 use utf8;
 
-use ChordPro::Output::ChordProBase;
+use ChordPro::Output::Base;
 use ChordPro::Output::Common;
 use Text::Layout::Markdown;
 use Ref::Util qw(is_arrayref);
 
 class ChordPro::Output::Markdown
-  :isa(ChordPro::Output::ChordProBase) {
+  :isa(ChordPro::Output::Base) {
 
     # Markdown-specific fields
     field $text_layout;

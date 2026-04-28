@@ -1332,10 +1332,31 @@
     
         // CSS customization hooks.
         css {
-            colors  {}
-            fonts   {}
-            sizes   {}
-            spacing {}
+            colors {
+                text          : ""
+                chord         : ""
+                comment       : ""
+                highlight     : ""
+                chorus_bg     : ""
+                chorus_border : ""
+            }
+            fonts {
+                text  : ""
+                chord : ""
+                mono  : ""
+            }
+            sizes {
+                text     : ""
+                chord    : ""
+                title    : ""
+                subtitle : ""
+                comment  : ""
+            }
+            spacing {
+                line  : ""
+                verse : ""
+                chord : ""
+            }
         }
     
         // Include paths for templates.
@@ -1366,10 +1387,31 @@
             newpage.page-break : page
     
             css {
-                colors  {}
-                fonts   {}
-                sizes   {}
-                spacing {}
+                colors {
+                    text          : ""
+                    chord         : ""
+                    comment       : ""
+                    highlight     : ""
+                    chorus_bg     : ""
+                    chorus_border : ""
+                }
+                fonts {
+                    text  : ""
+                    chord : ""
+                    mono  : ""
+                }
+                sizes {
+                    text     : ""
+                    chord    : ""
+                    title    : ""
+                    subtitle : ""
+                    comment  : ""
+                }
+                spacing {
+                    line  : ""
+                    verse : ""
+                    chord : ""
+                }
             }
     
             template_include_path : []

@@ -2,173 +2,470 @@
 
 package ChordPro::Output::Base;
 
-# Base class for all ChordPro output backends.
-# Provides minimal language features that every backend must implement.
-# Subclasses specialize for specific output formats.
-
 use v5.26;
 use Object::Pad;
 use utf8;
 use Carp;
-use Ref::Util qw(is_hashref);
 
 class ChordPro::Output::Base :abstract {
 
-    # Configuration from ChordPro
     field $config :param :reader;
-
-    # Output options
     field $options :param :reader //= {};
-
-    # Current song being processed
     field $song :reader :writer;
+    field $current_context :reader;
+    field $lyrics_only :reader(is_lyrics_only);
+    field $single_space :reader(is_single_space);
 
-    # =================================================================
-    # ABSTRACT METHODS - Must be implemented by subclasses
-    # =================================================================
+    method render_document_begin($metadata);
+    method render_document_end();
+    method render_text($text, $style=undef);
+    method render_line_break();
+    method render_paragraph_break();
+    method render_section_begin($type, $label=undef);
+    method render_section_end($type);
+    method render_image($uri, $opts={});
+    method render_metadata($key, $value);
+    method render_chord($chord_obj);
+    method render_songline($phrases, $chords);
+    method render_grid_line($tokens);
+    method generate_song($s);
 
-    # Document structure
-    method render_document_begin :abstract ($metadata);
-
-    method render_document_end :abstract ();
-
-    # Text rendering
-    method render_text :abstract ($text, $style=undef);
-
-    method render_line_break :abstract ();
-
-    method render_paragraph_break :abstract ();
-
-    # Structural elements
-    method render_section_begin :abstract ($type, $label=undef);
-
-    method render_section_end :abstract ($type);
-
-    # Lists (optional - some backends may not support)
     method render_list_begin($ordered=0) {
-        return "";  # Default: no-op
+        return "";
     }
 
     method render_list_item($content) {
-        return $content;  # Default: just return content
+        return $content;
     }
 
     method render_list_end() {
-        return "";  # Default: no-op
+        return "";
     }
 
-    # Media
-    method render_image :abstract ($uri, $opts={});
-
-    # Metadata
-    method render_metadata :abstract ($key, $value);
-
-    # =================================================================
-    # OPTIONAL FEATURES - Backends declare capabilities
-    # =================================================================
-
     method supports_feature($feature_name) {
-        # Default: no special features
         return 0;
     }
 
-    # =================================================================
-    # HELPER METHODS - Provided to all subclasses
-    # =================================================================
-
-    method escape_text($text) {
-        # Default: no escaping
-        # Subclasses override for format-specific escaping
-        return $text;
+    method render_chorus_begin($label=undef) {
+        return $self->render_section_begin('chorus', $label);
     }
 
-    method format_text($text, $format={}) {
-        # Default: basic text formatting
-        # Subclasses can override for richer formatting
-        my $result = $text;
-
-        if ($format->{bold}) {
-            $result = $self->wrap_bold($result);
-        }
-        if ($format->{italic}) {
-            $result = $self->wrap_italic($result);
-        }
-        if ($format->{monospace}) {
-            $result = $self->wrap_monospace($result);
-        }
-
-        return $result;
+    method render_chorus_end() {
+        return $self->render_section_end('chorus');
     }
 
-    # Text formatting wrappers - override in subclasses
-    method wrap_bold($text) { return $text; }
-    method wrap_italic($text) { return $text; }
-    method wrap_monospace($text) { return $text; }
-
-    # =================================================================
-    # UTILITY METHODS
-    # =================================================================
-
-    # Helper to check if a config key exists
-    method config_has($key) {
-        my @parts = split(/\./, $key);
-        my $ref = $config;
-
-        foreach my $part (@parts) {
-            return 0 unless is_hashref($ref) && exists $ref->{$part};
-            $ref = $ref->{$part};
-        }
-
-        return 1;
+    method render_verse_begin($label=undef) {
+        return $self->render_section_begin('verse', $label);
     }
 
-    # Helper to get config value with default
-    method config_get($key, $default=undef) {
-        my @parts = split(/\./, $key);
-        my $ref = $config;
-
-        foreach my $part (@parts) {
-            return $default unless is_hashref($ref) && exists $ref->{$part};
-            $ref = $ref->{$part};
-        }
-
-        return $ref;
+    method render_verse_end() {
+        return $self->render_section_end('verse');
     }
 
-    # =================================================================
-    # LIFECYCLE METHODS
-    # =================================================================
+    method render_bridge_begin($label=undef) {
+        return $self->render_section_begin('bridge', $label);
+    }
+
+    method render_bridge_end() {
+        return $self->render_section_end('bridge');
+    }
+
+    method render_chord_diagram($chord_def) {
+        return "";
+    }
+
+    method render_tab_begin() {
+        return $self->render_section_begin('tab');
+    }
+
+    method render_tab_line($line) {
+        return $self->render_text($line, 'monospace');
+    }
+
+    method render_tab_end() {
+        return $self->render_section_end('tab');
+    }
+
+    method render_grid_begin() {
+        return $self->render_section_begin('grid');
+    }
+
+    method render_grid_end() {
+        return $self->render_section_end('grid');
+    }
 
     BUILD {
-        # Validate that we have required config
         croak("config parameter is required") unless defined $config;
+        $single_space = $options->{'single-space'} // 0;
+        $lyrics_only = $config->{settings}->{'lyrics-only'} // 0;
     }
 
-    # Entry point for generating a songbook
+    method dispatch_element($elt) {
+        my $type = $elt->{type};
+
+        return $self->handle_songline($elt)          if $type eq 'songline';
+        return $self->handle_tabline($elt)           if $type eq 'tabline';
+        return $self->handle_gridline($elt)          if $type eq 'gridline';
+        return $self->handle_empty($elt)             if $type eq 'empty';
+        return $self->handle_colb($elt)              if $type eq 'colb';
+        return $self->handle_newpage($elt)           if $type eq 'newpage';
+        return $self->handle_comment($elt)           if $type eq 'comment';
+        return $self->handle_arranger($elt)          if $type eq 'arranger';
+        return $self->handle_copyright($elt)         if $type eq 'copyright';
+        return $self->handle_lyricist($elt)          if $type eq 'lyricist';
+        return $self->handle_duration($elt)          if $type eq 'duration';
+        return $self->handle_chorus($elt)            if $type eq 'chorus';
+        return $self->handle_rechorus($elt)          if $type eq 'rechorus';
+        return $self->handle_verse($elt)             if $type eq 'verse';
+        return $self->handle_bridge($elt)            if $type eq 'bridge';
+        return $self->handle_tab($elt)               if $type eq 'tab';
+        return $self->handle_grid($elt)              if $type eq 'grid';
+        return $self->handle_start_of_chorus($elt)   if $type eq 'start_of_chorus';
+        return $self->handle_end_of_chorus($elt)     if $type eq 'end_of_chorus';
+        return $self->handle_start_of_verse($elt)    if $type eq 'start_of_verse';
+        return $self->handle_end_of_verse($elt)      if $type eq 'end_of_verse';
+        return $self->handle_start_of_bridge($elt)   if $type eq 'start_of_bridge';
+        return $self->handle_end_of_bridge($elt)     if $type eq 'end_of_bridge';
+        return $self->handle_start_of_tab($elt)      if $type eq 'start_of_tab';
+        return $self->handle_end_of_tab($elt)        if $type eq 'end_of_tab';
+        return $self->handle_start_of_grid($elt)     if $type eq 'start_of_grid';
+        return $self->handle_end_of_grid($elt)       if $type eq 'end_of_grid';
+        return $self->handle_delegate($elt)          if $type eq 'delegate';
+        return $self->handle_set($elt)               if $type eq 'set';
+        return $self->handle_meta($elt)              if $type eq 'meta';
+        return $self->handle_diagrams($elt)          if $type eq 'diagrams';
+        return $self->handle_comment_italic($elt)    if $type eq 'comment_italic';
+        return $self->handle_comment_box($elt)       if $type eq 'comment_box';
+
+        return "" if $type eq '';
+
+        warn("Unknown element type: $type\n") if $type;
+        return "";
+    }
+
+    method handle_title($elt) {
+        my $title = $elt->{value};
+        $self->render_metadata('title', $title);
+        return $self->render_section_begin('title', $title);
+    }
+
+    method handle_subtitle($elt) {
+        my $subtitle = $elt->{value};
+        $self->render_metadata('subtitle', $subtitle);
+        return $self->render_section_begin('subtitle', $subtitle);
+    }
+
+    method handle_artist($elt) {
+        my $artist = $elt->{value};
+        $self->render_metadata('artist', $artist);
+        return $self->render_text($artist, 'artist');
+    }
+
+    method handle_composer($elt) {
+        return $self->render_text($elt->{value}, 'composer');
+    }
+
+    method handle_album($elt) {
+        return $self->render_text($elt->{value}, 'album');
+    }
+
+    method handle_year($elt) {
+        return $self->render_text($elt->{value}, 'year');
+    }
+
+    method handle_key($elt) {
+        return $self->render_text("Key: " . $elt->{value}, 'meta');
+    }
+
+    method handle_time($elt) {
+        return $self->render_text("Time: " . $elt->{value}, 'meta');
+    }
+
+    method handle_tempo($elt) {
+        return $self->render_text("Tempo: " . $elt->{value}, 'meta');
+    }
+
+    method handle_capo($elt) {
+        return $self->render_text("Capo: " . $elt->{value}, 'meta');
+    }
+
+    method handle_arranger($elt) {
+        return $self->render_text($elt->{value}, 'arranger');
+    }
+
+    method handle_copyright($elt) {
+        return $self->render_text($elt->{value}, 'copyright');
+    }
+
+    method handle_lyricist($elt) {
+        return $self->render_text($elt->{value}, 'lyricist');
+    }
+
+    method handle_duration($elt) {
+        return $self->render_text("Duration: " . $elt->{value}, 'meta');
+    }
+
+    method handle_comment($elt) {
+        return $self->render_section_begin('comment')
+             . $self->render_text($elt->{text})
+             . $self->render_section_end('comment');
+    }
+
+    method handle_comment_italic($elt) {
+        return $self->render_section_begin('comment_italic')
+             . $self->render_text($elt->{text}, 'italic')
+             . $self->render_section_end('comment_italic');
+    }
+
+    method handle_comment_box($elt) {
+        return $self->render_section_begin('comment_box')
+             . $self->render_text($elt->{text})
+             . $self->render_section_end('comment_box');
+    }
+
+    method handle_highlight($elt) {
+        return $self->render_section_begin('highlight')
+             . $self->render_text($elt->{text})
+             . $self->render_section_end('highlight');
+    }
+
+    method handle_set($elt) {
+        return "";
+    }
+
+    method handle_meta($elt) {
+        return "";
+    }
+
+    method handle_diagrams($elt) {
+        return "";
+    }
+
+    method handle_start_of_chorus($elt) {
+        $current_context = 'chorus';
+        return $self->render_section_begin('chorus', $elt->{label});
+    }
+
+    method handle_end_of_chorus($elt) {
+        $current_context = '';
+        return $self->render_section_end('chorus');
+    }
+
+    method handle_start_of_verse($elt) {
+        $current_context = 'verse';
+        return $self->render_section_begin('verse', $elt->{label});
+    }
+
+    method handle_end_of_verse($elt) {
+        $current_context = '';
+        return $self->render_section_end('verse');
+    }
+
+    method handle_start_of_bridge($elt) {
+        $current_context = 'bridge';
+        return $self->render_section_begin('bridge', $elt->{label});
+    }
+
+    method handle_end_of_bridge($elt) {
+        $current_context = '';
+        return $self->render_section_end('bridge');
+    }
+
+    method handle_start_of_tab($elt) {
+        $current_context = 'tab';
+        return $self->render_tab_begin();
+    }
+
+    method handle_end_of_tab($elt) {
+        $current_context = undef;
+        return $self->render_tab_end();
+    }
+
+    method handle_start_of_grid($elt) {
+        $current_context = 'grid';
+        return $self->render_grid_begin();
+    }
+
+    method handle_end_of_grid($elt) {
+        $current_context = undef;
+        return $self->render_grid_end();
+    }
+
+    method handle_songline($elt) {
+        return $self->render_songline($elt->{phrases}, $elt->{chords});
+    }
+
+    method handle_tabline($elt) {
+        return $self->render_tab_line($elt->{text});
+    }
+
+    method handle_gridline($elt) {
+        return $self->render_grid_line($elt->{tokens});
+    }
+
+    method handle_empty($elt) {
+        return $self->render_paragraph_break();
+    }
+
+    method handle_colb($elt) {
+        return "";
+    }
+
+    method handle_newpage($elt) {
+        return "";
+    }
+
+    method handle_column_break($elt) {
+        return "";
+    }
+
+    method handle_columns($elt) {
+        return "";
+    }
+
+    method handle_new_page($elt) {
+        return "";
+    }
+
+    method handle_new_song($elt) {
+        return "";
+    }
+
+    method handle_image($elt) {
+        my $uri = $elt->{uri} // $elt->{id};
+        return $self->render_image($uri, $elt->{opts});
+    }
+
+    method handle_define($elt) {
+        return "";
+    }
+
+    method handle_chord($elt) {
+        return $self->render_chord($elt->{chord});
+    }
+
+    method handle_control($elt) {
+        if ($elt->{name} eq 'lyrics-only') {
+            $lyrics_only = $elt->{value} unless $lyrics_only > 1;
+        }
+        return "";
+    }
+
+    method handle_delegate($elt) {
+        return "";
+    }
+
+    method handle_chorus($elt) {
+        my $output = '';
+        $output .= $self->render_chorus_begin($elt->{label});
+        foreach my $e (@{$elt->{body}}) {
+            $output .= $self->dispatch_element($e);
+        }
+        $output .= $self->render_chorus_end();
+        return $output;
+    }
+
+    method handle_rechorus($elt) {
+        my $recall = $config->{pdf}->{chorus}->{recall}
+          // $config->{text}->{chorus}->{recall}
+          // $config->{chordpro}->{chorus}->{recall}
+          // {};
+        $recall = {} unless ref($recall) eq 'HASH';
+
+        my $quote = $recall->{quote} // 0;
+        my $tag = $recall->{tag};
+        $tag = 'Chorus' if !defined($tag) || $tag eq '';
+        my $type = $recall->{type} // '';
+        my $choruslike = $recall->{choruslike} // 0;
+
+        if ( $quote && $elt->{chorus} ) {
+            return $self->handle_chorus({ body => $elt->{chorus} });
+        }
+
+        my $output = '';
+        if ( $type && $tag ne '' ) {
+            if ( $type eq 'comment' ) {
+                $output = $self->handle_comment({ text => $tag });
+            }
+            elsif ( $type eq 'comment_italic' ) {
+                $output = $self->handle_comment_italic({ text => $tag });
+            }
+            elsif ( $type eq 'comment_box' ) {
+                $output = $self->handle_comment_box({ text => $tag });
+            }
+        }
+
+        if ( $output eq '' ) {
+            $output = $self->render_section_begin('rechorus')
+              . $self->render_text($tag)
+              . $self->render_section_end('rechorus');
+        }
+
+        if ( $choruslike ) {
+            return $self->render_section_begin('choruslike')
+              . $output
+              . $self->render_section_end('choruslike');
+        }
+
+        return $output;
+    }
+
+    method handle_verse($elt) {
+        my $output = '';
+        $output .= $self->render_verse_begin($elt->{label});
+        foreach my $e (@{$elt->{body}}) {
+            $output .= $self->dispatch_element($e);
+        }
+        $output .= $self->render_verse_end();
+        return $output;
+    }
+
+    method handle_bridge($elt) {
+        my $output = '';
+        $output .= $self->render_bridge_begin($elt->{label});
+        foreach my $e (@{$elt->{body}}) {
+            $output .= $self->dispatch_element($e);
+        }
+        $output .= $self->render_bridge_end();
+        return $output;
+    }
+
+    method handle_tab($elt) {
+        my $output = '';
+        $output .= $self->render_tab_begin();
+        foreach my $e (@{$elt->{body}}) {
+            $output .= $self->dispatch_element($e);
+        }
+        $output .= $self->render_tab_end();
+        return $output;
+    }
+
+    method handle_grid($elt) {
+        my $output = '';
+        $output .= $self->render_grid_begin();
+        foreach my $e (@{$elt->{body}}) {
+            $output .= $self->dispatch_element($e);
+        }
+        $output .= $self->render_grid_end();
+        return $output;
+    }
+
     method generate_songbook($songbook) {
         my $output = '';
 
-        # Begin document
         $output .= $self->render_document_begin({
             title => $songbook->{title} // 'Songbook',
             songs => scalar(@{$songbook->{songs}}),
         });
 
-        # Process each song
         foreach my $s (@{$songbook->{songs}}) {
             $song = $s;
             $output .= $self->generate_song($s);
         }
 
-        # End document
         $output .= $self->render_document_end();
 
         return [ $output =~ /^.*\n?/gm ];
-    }
-
-    # Entry point for generating a single song
-    method generate_song($s) {
-        croak("generate_song() must be implemented by subclass");
     }
 }
 
@@ -176,7 +473,7 @@ class ChordPro::Output::Base :abstract {
 
 =head1 NAME
 
-ChordPro::lib::OutputBase - Base class for ChordPro output backends
+ChordPro::Output::Base - Shared base class for ChordPro output backends
 
 =head1 SYNOPSIS
 
@@ -184,117 +481,27 @@ ChordPro::lib::OutputBase - Base class for ChordPro output backends
 
     use v5.26;
     use Object::Pad;
+    use ChordPro::Output::Base;
 
     class ChordPro::Output::MyFormat
-      :isa(ChordPro::lib::OutputBase) {
+      :isa(ChordPro::Output::Base) {
 
-        method render_text($text, $style=undef) {
-            return $self->escape_text($text);
-        }
-
-        method generate_song($song) {
-            my @output;
-            # ... generate output ...
-            return \@output;
-        }
+        method render_document_begin($metadata) { ... }
+        method render_document_end() { ... }
+        method render_text($text, $style=undef) { ... }
+        method render_line_break() { ... }
+        method render_paragraph_break() { ... }
+        method render_section_begin($type, $label=undef) { ... }
+        method render_section_end($type) { ... }
+        method render_image($uri, $opts={}) { ... }
+        method render_metadata($key, $value) { ... }
+        method render_chord($chord_obj) { ... }
+        method render_songline($phrases, $chords) { ... }
+        method render_grid_line($tokens) { ... }
+        method generate_song($song) { ... }
     }
 
 =head1 DESCRIPTION
 
-This is the base class for all ChordPro output backends. It provides:
-
-=over 4
-
-=item * Abstract interface that all backends must implement
-
-=item * Common helper methods for text processing
-
-=item * Configuration access utilities
-
-=item * Lifecycle management
-
-=back
-
-=head1 REQUIRED METHODS
-
-Subclasses must implement these methods:
-
-=over 4
-
-=item render_document_begin($metadata)
-
-Begin the output document with metadata.
-
-=item render_document_end()
-
-Close the output document.
-
-=item render_text($text, $style)
-
-Render plain or styled text.
-
-=item render_section_begin($type, $label)
-
-Begin a structural section (title, chorus, verse, etc).
-
-=item render_section_end($type)
-
-End a structural section.
-
-=item render_image($uri, $opts)
-
-Render an image with options.
-
-=item render_metadata($key, $value)
-
-Output metadata (title, artist, etc).
-
-=item generate_song($song)
-
-Generate output for a complete song.
-
-=back
-
-=head1 OPTIONAL METHODS
-
-These methods have default implementations:
-
-=over 4
-
-=item supports_feature($feature_name)
-
-Returns true if backend supports the named feature.
-
-=item escape_text($text)
-
-Escape text for the output format.
-
-=item format_text($text, $format)
-
-Apply text formatting (bold, italic, etc).
-
-=back
-
-=head1 HELPER METHODS
-
-=over 4
-
-=item config_get($key, $default)
-
-Get configuration value with dotted key notation.
-
-=item config_has($key)
-
-Check if configuration key exists.
-
-=item get_song()
-
-Get current song being processed.
-
-=back
-
-=head1 SEE ALSO
-
-L<ChordPro::Output::ChordProBase>, L<ChordPro::Output::HTML5>
-
-=cut
+This class provides the shared document lifecycle, directive dispatch, and
+ChordPro element handling used by the modern text-building backends.

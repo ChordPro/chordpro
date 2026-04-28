@@ -25,7 +25,6 @@ lib/ChordPro/Files.pm
 lib/ChordPro/Logger.pm
 lib/ChordPro/Output/ChordPro.pm
 lib/ChordPro/Output/Common.pm
-lib/ChordPro/Output/ChordDiagram/SVG.pm
 lib/ChordPro/Output/Debug.pm
 lib/ChordPro/Output/HTML.pm
 lib/ChordPro/Output/LaTeX.pm

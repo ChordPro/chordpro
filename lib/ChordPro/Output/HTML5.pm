@@ -28,14 +28,14 @@ use ChordPro::Files qw(fs_load fs_blob fs_open);
 use ChordPro::Assets qw(prepare_assets);
 use ChordPro::Delegate::Strum;
 use ChordPro::Output::SVG::Strum::Tokens qw(bar_unicode);
-use ChordPro::Output::ChordProBase;
+use ChordPro::Output::Base;
 use ChordPro::Output::SVG::ChordDiagram;
-use ChordPro::Output::HTML5Helper::FormatGenerator;
+use ChordPro::Output::HTML5::FormatGenerator;
 use ChordPro::Output::Common qw(prep_outlines fmt_subst);
 use ChordPro::Utils qw(expand_tilde is_true);
 
 class ChordPro::Output::HTML5
-  :isa(ChordPro::Output::ChordProBase) {
+  :isa(ChordPro::Output::Base) {
 
     # SVG diagram generator
     field $svg_generator;
@@ -53,16 +53,12 @@ class ChordPro::Output::HTML5
         # Initialize Template::Toolkit (following LaTeX.pm pattern)
         my $config = $self->config;
         
-        # Unlock config to access (following PDF.pm pattern)
-        $config->unlock;
         my $html5_cfg = $config->{html5};
         
         # Use findresdirs to get all template directories  
         # Make a copy of the array to avoid modifying config directly
         my $include_path = [ @{$html5_cfg->{template_include_path} // []} ];
         push( @$include_path, @{CP->findresdirs( "templates" )} );
-        
-        $config->lock;
         
         $template_engine = Template->new({
             INCLUDE_PATH => $include_path,
@@ -78,7 +74,6 @@ class ChordPro::Output::HTML5
         my $output = '';
         my $config = $self->config;
         
-        $config->unlock;
         my $html5_cfg = $config->{html5};
         
         # Handle paged template names
@@ -86,14 +81,12 @@ class ChordPro::Output::HTML5
         if ($template_name =~ /^paged_(.+)$/) {
             my $base_name = $1;
             # Try paged template first, fall back to regular
-            my $paged_cfg = eval { $html5_cfg->{paged} } // {};
-            $template = eval { $paged_cfg->{templates}->{$base_name} }
-                     // eval { $html5_cfg->{templates}->{$base_name} };
+            my $paged_cfg = $html5_cfg->{paged} // {};
+            $template = $paged_cfg->{templates}->{$base_name}
+                     // $html5_cfg->{templates}->{$base_name};
         } else {
-            $template = eval { $html5_cfg->{templates}->{$template_name} };
+            $template = $html5_cfg->{templates}->{$template_name};
         }
-        
-        $config->lock;
         
         unless (defined $template) {
             die "Template '$template_name' not found in config";
@@ -1217,6 +1210,14 @@ class ChordPro::Output::HTML5
 
         my $type = $res->{type} // '';
         if ($type eq 'html') {
+            if (ref($res->{data}) eq 'ARRAY') {
+                my @classes = ref($res->{classes}) eq 'ARRAY'
+                    ? @{ $res->{classes} }
+                    : ();
+                my $class_attr = @classes ? qq{ class="} . join(' ', @classes) . qq{"} : '';
+                my $html = join("<br/>\n", @{ $res->{data} });
+                return qq{<div${class_attr}>$html</div>\n};
+            }
             return $res->{data} // '';
         }
 
@@ -1331,6 +1332,23 @@ class ChordPro::Output::HTML5
 
     method render_document_begin($metadata) {
         my $title = $self->escape_text($metadata->{title} // 'ChordPro Songbook');
+        if ($self->_is_paged_mode()) {
+            return qq{<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ChordPro HTML5 Backend">
+    <title>$title</title>
+    <style>
+} . $self->generate_default_css(1) . qq{
+    </style>
+    <script src="https://unpkg.com/pagedjs@0.4.3/dist/paged.polyfill.js"></script>
+</head>
+<body class="chordpro-songbook chordpro-paged">
+    <div class="book-content">
+};
+        }
 
         return qq{<!DOCTYPE html>
 <html lang="en">
@@ -1348,6 +1366,13 @@ class ChordPro::Output::HTML5
     }
 
     method render_document_end() {
+        if ($self->_is_paged_mode()) {
+            return qq{    </div>
+</body>
+</html>
+};
+        }
+
         return qq{</body>
 </html>
 };
@@ -2089,7 +2114,7 @@ class ChordPro::Output::HTML5
                 // $pdf_cfg->{footspace}
                 // 20;
 
-            my $format_generator = ChordPro::Output::HTML5Helper::FormatGenerator->new(
+            my $format_generator = ChordPro::Output::HTML5::FormatGenerator->new(
                 config => $config,
                 options => $self->options,
             );
@@ -2251,6 +2276,10 @@ class ChordPro::Output::HTML5
     # =================================================================
     # CSS GENERATION
     # =================================================================
+
+    method generate_paged_css() {
+        return $self->generate_default_css(1);
+    }
 
     method generate_default_css($paged_mode = 0) {
         my $config = $self->config;
@@ -2639,7 +2668,7 @@ Key features:
 
 =head1 ARCHITECTURE
 
-This backend extends ChordPro::Output::ChordProBase which provides:
+This backend extends ChordPro::Output::Base which provides:
 
 =over 4
 
@@ -2695,7 +2724,7 @@ Users can override CSS variables:
 
 =head1 SEE ALSO
 
-L<ChordPro::Output::ChordProBase>, L<ChordPro::Output::Base>
+L<ChordPro::Output::Base>
 
 =head1 AUTHOR
 

@@ -9,13 +9,13 @@ Tests basic functionality from `ChordPro::Output::Base.pm`:
 - Object creation with config and options parameters
 - Reader methods: `config()`, `options()`, `song()`
 - Type checking for config (ChordPro::Config object)
-- Method availability: `config_has()`, `config_get()`, `generate_songbook()`
+- Method availability: `generate_songbook()`, shared directive dispatch, and backend state readers
 
 **Tests:** 12  
 **Status:** ✅ All passing
 
 ### 02_chordprobase.t
-Tests ChordPro-specific functionality from `ChordPro::Output::ChordProBase.pm`:
+Tests ChordPro-specific functionality now provided by `ChordPro::Output::Base.pm`:
 - Reader methods: `current_context()`, `is_lyrics_only()`, `is_single_space()`
 - Abstract method implementations: `render_chord()`, `render_songline()`, `render_grid_line()`
 - Element dispatch system: `dispatch_element()`
@@ -83,20 +83,16 @@ These tests require:
 
 ## Architecture Tested
 
-These tests validate the three-tier architecture:
+These tests validate the two-layer architecture:
 
 1. **Base Layer** (`ChordPro::Output::Base`)
-   - Configuration management
    - Abstract rendering methods
-   - Song state management
-
-2. **ChordPro Layer** (`ChordPro::Output::ChordProBase`)
-   - ChordPro-specific abstractions
+   - Shared ChordPro directive handling
    - Element dispatching
    - Context tracking (verse/chorus/etc.)
    - Handler methods for directives
 
-3. **Format Layer** (`ChordPro::Output::HTML5`)
+2. **Format Layer** (`ChordPro::Output::HTML5`)
    - Concrete HTML5 implementation
    - Flexbox chord positioning
    - CSS styling

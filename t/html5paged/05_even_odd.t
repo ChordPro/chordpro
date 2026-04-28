@@ -20,7 +20,10 @@ use_ok('ChordPro::Output::HTML5');
 
 my $config_even_odd = {
     %$config,
-    html5 => { mode => 'print' },
+    html5 => {
+        %{ $config->{html5} // {} },
+        mode => 'print',
+    },
     pdf => {
         papersize => 'a4',
         formats => {
@@ -67,7 +70,10 @@ like($css, qr/"Even Right"/, "Even right content present");
 
 my $config_with_odd = {
     %$config,
-    html5 => { mode => 'print' },
+    html5 => {
+        %{ $config->{html5} // {} },
+        mode => 'print',
+    },
     pdf => {
         formats => {
             'default-odd' => {
@@ -92,7 +98,10 @@ like($css2, qr/"Odd Center"/, "Odd page content present");
 
 my $config_title_variants = {
     %$config,
-    html5 => { mode => 'print' },
+    html5 => {
+        %{ $config->{html5} // {} },
+        mode => 'print',
+    },
     pdf => {
         formats => {
             'title' => {
@@ -114,4 +123,3 @@ my $css3 = $backend3->generate_paged_css();
 like($css3, qr/\@page title/, "Has title page format");
 like($css3, qr/\@page title:left/, "Has title:left format for even title pages");
 like($css3, qr/"Title Even (Left|Right)"/, "Title even page content present");
-

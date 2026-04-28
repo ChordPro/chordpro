@@ -15,8 +15,14 @@ use ChordPro::Testing;
 BEGIN { use_ok('ChordPro::Output::HTML5') };
 
 # Test 2: Can create instance with paged config
-# Modify the global $config to enable paged mode
-my $paged_config = { %$config, html5 => { mode => 'print' } };
+# Modify the global $config to enable paged mode without discarding defaults.
+my $paged_config = {
+    %$config,
+    html5 => {
+        %{ $config->{html5} // {} },
+        mode => 'print',
+    },
+};
 
 my $backend;
 eval {
@@ -29,8 +35,8 @@ diag("Error: $@") if $@;
 ok(!$@, 'Backend instantiation succeeds');
 isa_ok($backend, 'ChordPro::Output::HTML5', 'Backend is correct class');
 
-# Test 3: Backend extends ChordProBase
-isa_ok($backend, 'ChordPro::Output::ChordProBase', 'Backend extends ChordProBase');
+# Test 3: Backend extends shared output base
+isa_ok($backend, 'ChordPro::Output::Base', 'Backend extends Output::Base');
 
 # Test 4: Check paged.js script inclusion in document begin
 my $doc_begin = $backend->render_document_begin({ title => 'Test', songs => 1 });
@@ -46,7 +52,7 @@ like($doc_begin, qr/chordpro-paged/, 'Body has chordpro-paged class');
 # Test 7: Check @page rules in CSS
 my $css = $backend->generate_paged_css();
 like($css, qr/\@page/, 'CSS includes @page rules');
-like($css, qr/size:\s*A4/, 'CSS specifies A4 page size');
+like($css, qr/size:\s*a4/i, 'CSS specifies A4 page size');
 
 # Test 8: Check running header setup
 like($css, qr/string-set:\s*song-title/, 'CSS sets up string-set for running headers');

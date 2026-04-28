@@ -67,15 +67,31 @@ sub prepare_asset( $id, $s, $pr ) {
 
 	if ( $elt->{type} eq "image" && $elt->{subtype} eq "delegate" ) {
 	    my $delegate = $elt->{delegate};
+	    my $handler = $elt->{handler};
+	    # Backend name is used to apply backend-specific delegate overrides.
+	    my $backend = lc( $s->{generate} // "" );
 	    warn("Assets: Preparing delegate $delegate, handler ",
-		 $elt->{handler},
+		 $handler,
 		 ( map { " $_=" . $elt->{opts}->{$_} } keys(%{$elt->{opts}//{}})),
 		 "\n") if $config->{debug}->{images};
 
+	    # Delegate config can be keyed either lowercase or as given; support both.
+	    my $dcfg_src = $config->{delegates}->{lc($delegate)}
+	      // $config->{delegates}->{$delegate};
+	    # Clone config hashes before use to avoid mutating restricted/shared data.
+	    my $dcfg = ref($dcfg_src) eq 'HASH' ? { %$dcfg_src } : undef;
+	    # Optional per-backend config section (e.g. pdf/html/markdown).
+	    my $bcfg = ( $backend && $dcfg && ref($dcfg->{$backend}) eq 'HASH' )
+	      ? { %{ $dcfg->{$backend} } } : undef;
+	    # Per-backend handler override takes precedence over the element default.
+	    if ( $bcfg && $bcfg->{handler} ) {
+		$handler = $bcfg->{handler};
+	    }
+
 	    my $pkg = 'ChordPro::Delegate::' . $delegate;
 	    eval "require $pkg" || die($@);
-	    my $hd = $pkg->can($elt->{handler}) //
-	      die("Assets: Missing delegate handler ${pkg}::$elt->{handler}\n");
+	    my $hd = $pkg->can($handler) //
+	      die("Assets: Missing delegate handler ${pkg}::$handler\n");
 	    unless ( $elt->{data} ) {
 		$elt->{data} = fs_load( $elt->{uri}, { fail => 'hard' } );
 	    }
@@ -90,7 +106,7 @@ sub prepare_asset( $id, $s, $pr ) {
 		$res->{opts} = { %{ $res->{opts} // {} },
 				 %{ $elt->{opts} // {} } };
 		warn( "Assets: Preparing delegate $delegate, handler ",
-		      $elt->{handler}, " => ",
+		      $handler, " => ",
 		      $res->{type}, "/", $res->{subtype},
 		      ( map { " $_=" . $res->{opts}->{$_} } keys(%{$res->{opts}//{}})),
 		      " w=$w",

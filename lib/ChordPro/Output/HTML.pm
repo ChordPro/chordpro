@@ -88,6 +88,42 @@ my $single_space = 0;		# suppress chords line when empty
 my $lyrics_only = 0;		# suppress all chords lines
 my $layout;
 
+sub _delegate_handler {
+    my ( $delegate, $handler ) = @_;
+    return unless $delegate && $handler;
+
+    my $pkg = __PACKAGE__;
+    $pkg =~ s/::Output::\w+$/::Delegate::$delegate/;
+    eval "require $pkg" || die($@);
+
+    my $effective_handler = $handler;
+    my $cfg = $config->{delegates}->{lc($delegate)}
+      // $config->{delegates}->{$delegate};
+    if ( $cfg && $cfg->{html} && $cfg->{html}->{handler}
+	 && $pkg->can( $cfg->{html}->{handler} ) ) {
+	$effective_handler = $cfg->{html}->{handler};
+    }
+
+    my $hd = $pkg->can($effective_handler)
+      or die("HTML: Missing delegate handler ${pkg}::$effective_handler\n");
+
+    return ( $pkg, $hd );
+}
+
+sub _render_html_delegate_result {
+    my ( $e ) = @_;
+    return '' unless ref($e) eq 'HASH';
+
+    if ( ref($e->{data}) eq 'ARRAY' ) {
+	my @classes = ref($e->{classes}) eq 'ARRAY' ? @{ $e->{classes} } : ();
+	my $class_attr = @classes ? qq{ class="} . join( ' ', @classes ) . qq{"} : '';
+	my $html = join( "<br/>\n", @{ $e->{data} } );
+	return qq{<div$class_attr>$html</div>};
+    }
+
+    return $e->{data} // '';
+}
+
 sub generate_song {
     my ( $s ) = @_;
 
@@ -95,6 +131,7 @@ sub generate_song {
     $single_space = $::options->{'single-space'};
     $config = dclone( $s->{config} // $::config );
     $lyrics_only  = $config->{settings}->{'lyrics-only'};
+    $s->{generate} = "HTML";
     $s->structurize;
     prepare_assets($s);
     $s->dump(0) if $config->{debug}->{song};
@@ -195,14 +232,15 @@ sub generate_song {
 		if ( $e->{type} eq "delegate"
 		     && $e->{subtype} =~ /^image(?:-(\w+))?$/ ) {
 		    my $delegate = $1 // $e->{delegate};
-		    my $pkg = __PACKAGE__;
-		    $pkg =~ s/::Output::\w+$/::Delegate::$delegate/;
-		    eval "require $pkg" || die($@);
-		    my $hd = $pkg->can($e->{handler}) //
-		      die("HTML: Missing delegate handler ${pkg}::$e->{handler}\n");
-		    my $res = $hd->( $s, 0, $e );
+		    my ( $pkg, $hd ) = _delegate_handler( $delegate, $e->{handler} );
+		    my $res = $hd->( $s, elt => $e, pagewidth => 0 );
 		    next unless $res; # assume errors have been given
-		    unshift( @elts, @$res );
+		    if ( ref($res) eq "ARRAY" ) {
+			unshift( @elts, @$res );
+		    }
+		    else {
+			unshift( @elts, $res );
+		    }
 		    next;
 		}
 		if ( $e->{type} eq "svg" ) {
@@ -213,9 +251,41 @@ sub generate_song {
 		    next;
 		}
 		if ( $e->{type} eq "image" ) {
+		    if ( $e->{id} ) {
+			my $asset = $s->{assets}->{$e->{id}};
+			if ( $asset && ($asset->{type}//"") eq "html" ) {
+			    push( @s, _render_html_delegate_result($asset) );
+			    push( @s, "" ) if $tidy;
+			    next;
+			}
+		    }
+
+		    if ( $e->{id} ) {
+			my $asset = $s->{assets}->{$e->{id}};
+			if ( $asset && ($asset->{subtype}//"") eq "delegate" ) {
+			    my $prepared = { %$asset };
+			    $prepared->{opts} = {
+				%{ $asset->{opts} // {} },
+				%{ $e->{opts} // {} },
+			    };
+
+			    my ( $pkg, $hd ) =
+			      _delegate_handler( $prepared->{delegate}, $prepared->{handler} );
+			    my $res = $hd->( $s, elt => $prepared, pagewidth => 0 );
+			    next unless $res;
+			    if ( ref($res) eq "ARRAY" ) {
+				unshift( @elts, @$res );
+			    }
+			    else {
+				unshift( @elts, $res );
+			    }
+			    next;
+			}
+		    }
+
 		    use ChordPro::Output::Common qw(mimedata);
 		    my @args;
-		    while ( my($k,$v) = each( %{ $elt->{opts} } ) ) {
+		    while ( my($k,$v) = each( %{ $e->{opts} // {} } ) ) {
 			push( @args, "$k=\"$v\"" );
 		    }
 
@@ -243,16 +313,7 @@ sub generate_song {
 		}
 
 		if ( $e->{type} eq "html" ) {
-		    my @args;
-		    while ( my($k,$v) = each( %{ $e->{opts} } ) ) {
-			push( @args, "$k=\"$v\"" );
-		    }
-		    use ChordPro::Delegate::TextBlock;
-		    my $pkg = 'ChordPro::Delegate::'. $e->{delegate};
-		    my $hnd = $e->{handler};
-		    warn("XXX pkg = \"$pkg\", hnd = \"$hnd\"\n");
-		    my $html = $pkg->can($hnd)->( $s, elt => $e );
-		    push( @s, '<div class="' . lc($hnd) . '">' . $html . '</div>' );
+		    push( @s, _render_html_delegate_result($e) );
 		    push( @s, "" ) if $tidy;
 		    next;
 		}

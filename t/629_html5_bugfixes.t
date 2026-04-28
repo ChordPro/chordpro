@@ -17,7 +17,7 @@ use File::Temp qw(tempdir);
 use MIME::Base64 qw(encode_base64);
 use URI::Escape qw(uri_unescape);
 
-plan tests => 125;
+plan tests => 116;
 
 use_ok('ChordPro::Output::HTML5');
 
@@ -400,33 +400,6 @@ EOD
 }
 
 {
-    # Feature 58: standalone strum sections should parse/render for HTML5
-    my $song_data = <<'EOD';
-{title: Standalone Strum Section}
-{start_of_strum: label="Verse Groove"}
-dn up dn~up | dn~up
-{end_of_strum}
-EOD
-
-    my $s = ChordPro::Songbook->new;
-    $s->parse_file(\$song_data, { nosongline => 1 });
-    my $song = $s->{songs}[0];
-
-    my $output = $html5->generate_song($song);
-    like($output, qr/cp-delegate-strum-block/, "Feature 58: Standalone strum section renders HTML block");
-    like($output, qr/cp-standalone-strum-svg/, "Feature 58: Standalone strum section renders as SVG image");
-
-    my ($uri) = ($output =~ /<img(?=[^>]*class="[^"]*cp-standalone-strum-svg[^"]*")(?=[^>]*src="(data:image\/svg\+xml;charset=utf-8,[^"]+)")[^>]*>/);
-    ok($uri, "Bug 73: Standalone strum SVG data URI captured");
-    my $svg = uri_unescape($uri // '');
-    $svg =~ s/^data:image\/svg\+xml;charset=utf-8,//;
-    unlike($svg, qr/stroke-width="1\.1"[^>]*stroke-linecap="round"/,
-        "Bug 73: Standalone strum SVG no longer emits connector line primitives");
-    unlike($svg, qr/<(?:line|polygon|polyline|circle)\b/,
-        "Bug 76: Standalone Strum SVG primitives are text-only");
-}
-
-{
     # Bug 61 follow-up: leading ~ tokens must not create an extra geometry shift
     my $song_data = <<'EOD';
 {title: Leading Tilde Geometry}
@@ -511,30 +484,6 @@ EOD
     ok($us->{staccato}, "Bug 61: us sets staccato flag");
     ok(!$us->{muted}, "Bug 61: us is not treated as muted");
 
-    my $song_data = <<'EOD';
-{title: Strum Token Matrix}
-{start_of_strum}
-d+ +d da ad ua+ dx ux ds us da+ dx+ ux+ ds+ us+
-{end_of_strum}
-EOD
-
-    my $s = ChordPro::Songbook->new;
-    $s->parse_file(\$song_data, { nosongline => 1 });
-    my $song = $s->{songs}[0];
-    my $output = $html5->generate_song($song);
-
-    my ($uri) = ($output =~ /<img(?=[^>]*class="[^"]*cp-standalone-strum-svg[^"]*")(?=[^>]*src="(data:image\/svg\+xml;charset=utf-8,[^"]+)")[^>]*>/);
-    ok($uri, "Bug 61: Standalone strum SVG data URI captured for token matrix");
-
-    my $svg = uri_unescape($uri // '');
-    $svg =~ s/^data:image\/svg\+xml;charset=utf-8,//;
-
-    my $glyph_count = () = ($svg =~ /<text\b[^>]*font-size="14"[^>]*>/g);
-    cmp_ok($glyph_count, '>=', 12, "Bug 76: Token matrix renders dedicated strum glyph text nodes");
-    unlike($svg, qr/<text\b[^>]*font-size="9"[^>]*>&gt;<\/text>/,
-        "Bug 76: Accent overlay marker is not used when dedicated glyphs are mapped");
-    unlike($svg, qr/<text\b[^>]*font-size="8"[^>]*>•<\/text>|<text\b[^>]*font-size="9"[^>]*>×<\/text>/u,
-        "Bug 76: Staccato/muted overlay markers are not used when dedicated glyphs are mapped");
 }
 
 {
@@ -1002,9 +951,6 @@ subtest 'Bug 96: Plain dn/up use configurable default arrows, not symbol-table g
 |s dn~up dn~up dn up | dn~up dn~up dn up |
 {end_of_grid}
 
-{start_of_strum: label="Bug96 Groove"}
-dn up dn~up | dn up dn~up
-{end_of_strum}
 EOD
 
     my $s = ChordPro::Songbook->new;
@@ -1022,29 +968,6 @@ EOD
         "Bug 96: Full-grid plain dn/up no longer use symbol-table glyphs ↠/←");
     cmp_ok(scalar(() = ($grid_svg =~ /<text x="[0-9.]+" y="[0-9.]+" text-anchor="middle" font-size="14" fill="currentColor">[^<]+<\/text>/g)), '>=', 6,
         "Bug 96: Full-grid plain dn/up still render visible strum glyph text nodes");
-
-    my $song_data2 = <<'EOD2';
-{title: Plain Direction Standalone}
-{start_of_strum: label="Bug96 Groove"}
-dn up dn~up | dn up dn~up
-{end_of_strum}
-EOD2
-
-    my $s2 = ChordPro::Songbook->new;
-    $s2->parse_file(\$song_data2, { nosongline => 1 });
-    my $song2 = $s2->{songs}[0];
-    my $output2 = $html5->generate_song($song2);
-
-    my ($uri) = ($output2 =~ /(data:image\/svg\+xml;charset=utf-8,[^"]+)/);
-    ok($uri, "Bug 96: Standalone SVG data URI captured");
-
-    my $svg = uri_unescape($uri // '');
-    $svg =~ s/^data:image\/svg\+xml;charset=utf-8,//;
-
-    unlike($svg, qr/>↠<\/text>|>←<\/text>/u,
-        "Bug 96: Standalone plain dn/up no longer use symbol-table glyphs ↠/←");
-    cmp_ok(scalar(() = ($svg =~ /<text x="[0-9.]+" y="[0-9.]+" text-anchor="middle" font-size="14" fill="currentColor">[^<]+<\/text>/g)), '>=', 4,
-        "Bug 96: Standalone plain dn/up still render visible strum glyph text nodes");
 
     done_testing();
 };

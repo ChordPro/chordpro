@@ -7,9 +7,10 @@ use utf8;
 use ChordPro::Testing;
 use ChordPro::Songbook;
 
-plan tests => 12;
+plan tests => 14;
 
 use_ok('ChordPro::Output::HTML5');
+use_ok('ChordPro::Output::HTML5::FormatGenerator');
 
 # Create HTML5 backend
 my $paged = ChordPro::Output::HTML5->new(
@@ -20,13 +21,19 @@ ok($paged, "HTML5 object created");
 
 # Test that it inherits from HTML5
 isa_ok($paged, 'ChordPro::Output::HTML5', "Inherits from HTML5");
-isa_ok($paged, 'ChordPro::Output::ChordProBase', "Inherits from ChordProBase");
+isa_ok($paged, 'ChordPro::Output::Base', "Inherits from Output::Base");
 
-# Test Paged.js specific methods
-can_ok($paged, '_generate_format_rules');
-can_ok($paged, '_generate_format_rule');
-can_ok($paged, '_generate_margin_boxes');
-can_ok($paged, '_format_content_string');
+my $format_generator = ChordPro::Output::HTML5::FormatGenerator->new(
+    config => $config,
+    options => { output => undef },
+);
+ok($format_generator, "Format generator created");
+
+# Test Paged.js specific helper methods
+can_ok($format_generator, '_generate_format_rules');
+can_ok($format_generator, '_generate_format_rule');
+can_ok($format_generator, '_generate_margin_boxes');
+can_ok($format_generator, '_format_content_string');
 
 # Test that markup processing is inherited
 can_ok($paged, 'process_text_with_markup');
@@ -53,4 +60,3 @@ ok($output, "HTML5 output generated");
 
 # Test that output contains song content
 like($output, qr/<div class="cp-song"/, "Output contains song container");
-
