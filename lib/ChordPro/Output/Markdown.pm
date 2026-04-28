@@ -111,7 +111,7 @@ class ChordPro::Output::Markdown
             return "---------------  \n";
         }
         elsif ($type eq 'verse' || $type eq 'tab' || $type eq 'grid') {
-            return "\n";
+            return "";
         }
         elsif ($type eq 'comment' || $type eq 'comment_italic') {
             return "  \n";
@@ -279,6 +279,8 @@ class ChordPro::Output::Markdown
         # Process song body
         if ($song->{body}) {
             foreach my $elt (@{$song->{body}}) {
+                next if ($elt->{type} // '') eq '';
+
                 # Set chord prefix based on whether body has chords
                 if ($elt->{body} && ($elt->{type} eq 'verse' || $elt->{type} eq 'chorus')) {
                     $cp = $self->body_has_chords($elt->{body}) ? "\t" : "";
