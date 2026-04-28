@@ -21,6 +21,7 @@ no warnings qw( experimental::signatures );
 use ChordPro::Files;
 use ChordPro::Paths;
 use ChordPro::Utils;
+use ChordPro::Assets;
 
 #my $ps;
 
@@ -291,6 +292,8 @@ sub generate_song {
 	      "\n") if $config->{debug}->{spacing};
 	$x += $ps->{_indent};
 	$y -= $spreadimage if defined($spreadimage) && !ref($spreadimage);
+	# Prevent spread space on other pages (issue #640).
+	undef $spreadimage if $col == $ps->{columns}-1;
     };
 
     my $vsp_ignorefirst;
@@ -578,6 +581,7 @@ sub generate_song {
 
     my @elts;
     my $dbgop = sub {
+	return;
 	my ( $elts, $pb ) = @_;
 	$elts //= $elts[-1];
 	$elts = [ $elts ] unless is_arrayref($elts);
@@ -658,7 +662,7 @@ sub generate_song {
  	    $chorddiagrams->() unless $dctl->{show} eq "below";
 
 	    # Prepare the assets now we know the page width.
-	    prepare_assets( $s, $pr );
+	    $assets = prepare_assets( $s, $pr );
 
 	    # Spread image.
             if ( $spreadimage ) {
@@ -677,7 +681,7 @@ sub generate_song {
 	    warn("***SHOULD NOT HAPPEN1***")
 	      if $s->{structure} eq "structured";
 	    if ( $vsp_ignorefirst ) {
-		if ( @elts && $elts[0]->{type} !~ /empty|ignore/ ) {
+		if ( @elts && $elts[0]->{type} !~ /empty|ignore|meta/ ) {
 		    $vsp_ignorefirst = 0;
 		}
 		next;
@@ -689,7 +693,7 @@ sub generate_song {
 	    next;
 	}
 
-	unless ( $elt->{type} =~ /^(?:control|set|ignore)$/ ) {
+	unless ( $elt->{type} =~ /^(?:control|set|ignore|meta)$/ ) {
 	    $vsp_ignorefirst = 0;
 	}
 
@@ -1118,10 +1122,19 @@ sub generate_song {
 	    elsif ( $elt->{name} eq "context" ) {
 		$curctx = $elt->{value};
 	    }
-	    # Arbitrary config values.
+	    # Arbitrary pdf config values.
 	    elsif ( $elt->{name} =~ /^pdf\.(.+)/ ) {
 		prpadd2cfg( $ps, $1 => $elt->{value} );
 	    }
+	    # Arbitrary config values.
+	    elsif ( $elt->{name} =~ /^(.+)\.(.+)/ ) {
+		$config->unlock;
+		prpadd2cfg( $config, $elt->{name} => $elt->{value} );
+		$config->lock;
+	    }
+	    next;
+	}
+	if ( $elt->{type} eq "meta" ) {
 	    next;
 	}
 	if ( $elt->{type} eq "ignore" ) {
@@ -1395,7 +1408,7 @@ sub songline {
 	}
 	my ( $text, $ex ) = wrapsimple( $pr, $t, $x, $ftext );
 	$pr->text( $text, $x, $ytext, $ftext );
-	my $wi = $pr->strwidth( $config->{settings}->{wrapindent}//"x" );
+	my $wi = $pr->strwidth( $config->{settings}->{wrapindent} );
 	return $ex ne ""
 	  ? { %$elt,
 	      indent => $wi,
@@ -1430,7 +1443,7 @@ sub songline {
 	my ( $text, $ex ) = wrapsimple( $pr, join( "", @phrases ),
 					$x, $ftext );
 	$pr->text( $text, $x, $ytext, $ftext );
-	my $wi = $pr->strwidth( $config->{settings}->{wrapindent}//"x" );
+	my $wi = $pr->strwidth( $config->{settings}->{wrapindent} );
 	return $ex ne ""
 	  ? { %$elt,
 	      indent => $wi,
@@ -1744,7 +1757,7 @@ sub imageline {
     # reduced, e.g. due to a right column for chords.
     my $w_actual = $ps->{__rightmargin}-$ps->{_leftmargin}-$ps->{_indent};
     my $xtrascale = $w < $w_actual ? 1
-      : $w_actual / ( $ps->{_marginright}-$ps->{_leftmargin}-$ps->{_indent} );
+      : $w_actual / ( $ps->{__rightmargin}-$ps->{_leftmargin}-$ps->{_indent} );
 
     my ( $y, $spaceok ) = $gety->($anchor eq "float" ? $h*$xtrascale : 0);
     # y may have been changed by checkspace.
@@ -1805,7 +1818,7 @@ sub imageline {
 	      pv( ", _RM = ", $ps->{_rightmargin} ),
 	      pv( ", __RM = ", $ps->{__rightmargin} ),
 	      pv( ", XS = ", $xtrascale ),
-	      "\n") if 0;
+	      "\n") if 1;
     }
 
     $x += $ox if defined $ox;
@@ -2373,7 +2386,7 @@ sub wrap {
     my @rchords;
     my @rphrases;
     my $m = $pr->{ps}->{__rightmargin};
-    my $wi = $pr->strwidth( $config->{settings}->{wrapindent}//"x",
+    my $wi = $pr->strwidth( $config->{settings}->{wrapindent},
 			    $pr->{ps}->{fonts}->{text} );
     #warn("WRAP x=$x rm=$m w=", $m - $x, "\n");
 
@@ -2450,354 +2463,6 @@ sub wrapsimple {
     $font ||= $pr->{font};
     $pr->setfont($font);
     $pr->wrap( $text, $pr->{ps}->{__rightmargin} - $x );
-}
-
-sub prepare_assets {
-    my ( $s, $pr ) = @_;
-
-    my %sa = %{$s->{assets}//{}} ;	# song assets
-
-    warn("PDF: Preparing ", plural(scalar(keys %sa), " image"), "\n")
-      if $config->{debug}->{images} || $config->{debug}->{assets};
-
-    for my $id ( sort keys %sa ) {
-	prepare_asset( $id, $s, $pr );
-    }
-
-    warn("PDF: Preparing ", plural(scalar(keys %sa), " image"), ", done\n")
-      if $config->{debug}->{images} || $config->{debug}->{assets};
-    $assets = $s->{assets} || {};
-    ::dump( $assets, as => "Assets, Pass 2" )
-      if $config->{debug}->{assets} & 0x02;
-
-}
-
-sub prepare_asset {
-    my ( $id, $s, $pr ) = @_;
-
-    my $ps = $s->{_ps} = $pr->{ps};		# for handlers TODO
-
-    # All elements generate zero or one display items, except for SVG images
-    # than can result in a series of display items.
-    # So we first scan the list for SVG and delegate items and turn these
-    # into simple display items.
-
-#    warn("_MR = ", $ps->{_marginright}, ", _RM = ", $ps->{_rightmargin},
-#	 ", __RM = ", $ps->{__rightmargin}, "\n");
-#    my $pw = $ps->{__rightmargin} - $ps->{_marginleft};
-    my $pw = $ps->{_marginright} - $ps->{_marginleft};
-    my $cw = ( $pw - ( $ps->{columns} - 1 ) * $ps->{columnspace} ) /$ps->{columns}
-      - $ps->{_indent};
-
-    for my $elt ( $s->{assets}->{$id} ) {
-	# Already prepared, e.g. multi-pass songbook.
-	next if UNIVERSAL::can($elt->{data}, "width");
-
-	$elt->{subtype} //= "image" if $elt->{uri};
-
-	if ( $elt->{type} eq "image" && $elt->{subtype} eq "delegate" ) {
-	    my $delegate = $elt->{delegate};
-	    warn("PDF: Preparing delegate $delegate, handler ",
-		 $elt->{handler},
-		 ( map { " $_=" . $elt->{opts}->{$_} } keys(%{$elt->{opts}//{}})),
-		 "\n") if $config->{debug}->{images};
-
-	    my $pkg = __PACKAGE__;
-	    $pkg =~ s/::Output::[:\w]+$/::Delegate::$delegate/;
-	    eval "require $pkg" || die($@);
-	    my $hd = $pkg->can($elt->{handler}) //
-	      die("PDF: Missing delegate handler ${pkg}::$elt->{handler}\n");
-	    unless ( $elt->{data} ) {
-		$elt->{data} = fs_load( $elt->{uri}, { fail => 'hard' } );
-	    }
-
-	    # Determine actual width.
-	    my $w = defined($elt->{opts}->{spread}) ? $pw : $cw;
-	    $w = $elt->{opts}->{width}
-	      if $elt->{opts}->{width} && $elt->{opts}->{width} < $w;
-
-	    my $res = $hd->( $s, elt => $elt, pagewidth => $w );
-	    if ( $res ) {
-		$res->{opts} = { %{ $res->{opts} // {} },
-				 %{ $elt->{opts} // {} } };
-		warn( "PDF: Preparing delegate $delegate, handler ",
-		      $elt->{handler}, " => ",
-		      $res->{type}, "/", $res->{subtype},
-		      ( map { " $_=" . $res->{opts}->{$_} } keys(%{$res->{opts}//{}})),
-		      " w=$w",
-		      "\n" )
-		  if $config->{debug}->{images};
-		$s->{assets}->{$id} = $res;
-	    }
-	    else {
-		# Substitute alert image.
-		$s->{assets}->{$id} = $res =
-		  { type => "image",
-		    line => $elt->{line},
-		    subtype => "xform",
-		    data => TextLayoutImageElement::alert(60),
-		    opts => { %{$elt->{opts}//{}} } };
-	    }
-
-	    # If the delegate produced an image, continue processing.
-	    if ( $res && $res->{type} eq "image" ) {
-		$elt = $res;
-	    }
-	    else {
-		# Proceed to next asset.
-		next;
-	    }
-	}
-
-	if ( $elt->{type} eq "image" && $elt->{subtype} eq "svg" ) {
-	    warn("PDF: Preparing SVG image\n") if $config->{debug}->{images};
-	    require SVGPDF;
-	    SVGPDF->VERSION(0.080);
-
-	    # One or more?
-	    my $combine = ( !($elt->{opts}->{split}//1)
-			    || $elt->{opts}->{id}
-			    || defined($elt->{opts}->{spread}) )
-	      ? "stacked" : "none";
-	    my $sep = $elt->{opts}->{staffsep} || 0;
-
-	    # Note we need special font and text handlers.
-	    my $p = SVGPDF->new
-	      ( pdf  => $ps->{pr}->{pdf},
-		fc   => sub { svg_fonthandler( $ps, @_ ) },
-		tc   => sub { svg_texthandler( $ps, @_ ) },
-		atts => { debug   => $config->{debug}->{svg} > 1,
-			  verbose => $config->{debug}->{svg} // 0,
-			} );
-	    my $data = $elt->{data};
-	    my $o = $p->process( $data ? \join( "\n", @$data ) : $elt->{uri},
-				 combine => $combine,
-				 sep     => $sep,
-			       );
-	    warn( "PDF: Preparing SVG image => ",
-		  plural(0+@$o, " element"), ", combine=$combine\n")
-	      if $config->{debug}->{images};
-	    if ( ! @$o ) {
-		warn("Error in SVG embedding (no SVG objects found)\n");
-		next;
-	    }
-
-	    my $res =
-	    $s->{assets}->{$id} = {
-			type     => "image",
-			subtype  => "xform",
-			width    => $o->[0]->{width},
-			height   => $o->[0]->{height},
-			vwidth   => $o->[0]->{vwidth},
-			vheight  => $o->[0]->{vheight},
-			data     => $o->[0]->{xo},
-			opts     => { %{ $o->[0]->{opts}  // {} },
-				      %{ $s->{assets}->{$id}->{opts} // {} },
-				    },
-			sep      => $sep,
-		      };
-	    if ( @$o > 1 ) {
-		$res->{multi} = $o;
-	    }
-	    warn("Created asset $id (xform, ",
-		 $o->[0]->{vwidth}, "x", $o->[0]->{vheight}, ")",
-		 " scale=", $res->{opts}->{scale} || 1,
-		 " align=", $res->{opts}->{align}//"default",
-		 " sep=", $sep,
-		 " base=", $res->{opts}->{base}//"",
-		 "\n")
-	      if $config->{debug}->{images};
-	    next;
-	}
-
-	if ( $elt->{type} eq "image" && $elt->{subtype} eq "xform" ) {
-	    # Ready to go.
-	    next;
-	}
-
-	if ( $elt->{type} eq "image" ) {
-	    warn("PDF: Preparing $elt->{subtype} image\n") if $config->{debug}->{images};
-	    if ( ($elt->{uri}//"") =~ /^chord:(.+)/ ) {
-		my $chord = $1;
-		# Look it up.
-		my $info = $s->{chordsinfo}->{$chord}
-		  // ChordPro::Chords::known_chord($chord);
-		# If it is defined locally, merge.
-		for my $def ( @{ $s->{define} // [] } ) {
-		    next unless $def->{name} eq $chord;
-		    $info->{$_} = $def->{$_} for keys(%$def);
-		}
-		my $xo;
-		unless ( $info ) {
-		    warn("Unknown chord in asset: $1\n");
-		    $xo = TextLayoutImageElement::alert(20);
-		}
-		else {
-		    my $type = $elt->{opts}->{type} || $config->{instrument}->{type};
-		    my $p = ChordPro::Output::PDF::diagrammer($type);
-		    $xo = $p->diagram_xo($info);
-		}
-		my $res =
-		  $s->{assets}->{$id} = {
-					 type     => "image",
-					 subtype  => "xform",
-					 width    => $xo->width,
-					 height   => $xo->height,
-					 data     => $xo,
-					 maybe opts => $s->{assets}->{$id}->{opts},
-					};
-		warn("Created asset $id ($elt->{subtype}, ",
-		     $res->{width}, "x", $res->{height}, ")",
-		     map { " $_=" . $res->{opts}->{$_} } keys( %{$res->{opts}//{}} ),
-		     "\n")
-		  if $config->{debug}->{images};
-	    }
-	    else {
-		if ( $elt->{uri} && !$elt->{data} ) {
-		    $elt->{data} = fs_blob( $elt->{uri}, { fail => 'hard' } );
-		}
-		my $data = $elt->{data} ? IO::String->new($elt->{data}) : $elt->{uri};
-		my $img = $pr->{pdf}->image($data);
-		my $subtype = lc(ref($img) =~ s/^.*://r);
-		$subtype = "jpg" if $subtype eq "jpeg";
-		my $res =
-		  $s->{assets}->{$id} = {
-					 type     => "image",
-					 subtype  => $subtype,
-					 width    => $img->width,
-					 height   => $img->height,
-					 data     => $img,
-					 maybe opts => $s->{assets}->{$id}->{opts},
-					};
-		warn("Created asset $id ($elt->{subtype}, ",
-		     $res->{width}, "x", $res->{height}, ")",
-		     ( map { " $_=" . $res->{opts}->{$_} }
-		           keys( %{$res->{opts}//{}} ) ),
-		     "\n")
-		  if $config->{debug}->{images};
-	    }
-	}
-
-	next;
-
-	if ( $elt->{type} eq "image" && $elt->{opts}->{spread} ) {
-	    if ( $s->{spreadimage} ) {
-		warn("Ignoring superfluous spread image\n");
-	    }
-	    else {
-		$s->{spreadimage} = $elt;
-		warn("PDF: Preparing images, got spread image\n")
-		  if $config->{debug}->{images};
-		next;		# do not copy back
-	    }
-	}
-
-    }
-}
-
-# Font handler for SVG embedding.
-sub svg_fonthandler {
-    my ( $ps, $svg, %args ) = @_;
-    my ( $pdf, $style ) = @args{qw(pdf style)};
-
-    my $family = lc( $style->{'font-family'} );
-    my $stl    = lc( $style->{'font-style'}  // "normal" );
-    my $weight = lc( $style->{'font-weight'} // "normal" );
-    my $size   = $style->{'font-size'}       || 12;
-
-    # Font cache.
-    state $fc  = {};
-    my $key    = join( "|", $family, $stl, $weight );
-
-    # Clear cache when the PDF changes.
-    state $cf  = "";
-    if ( $cf ne $ps->{pr}->{pdf} ) {
-	$cf = $ps->{pr}->{pdf};
-	$fc = {};
-    }
-
-    # As a special case we handle fonts with 'names' like
-    # pdf.font.foo and map these to the corresponding font
-    # in the pdf.fonts structure.
-    if ( $family =~ /^pdf\.fonts\.(.*)/ ) {
-	my $try = $ps->{fonts}->{$1};
-	if ( $try ) {
-	    warn("SVG: Font $family found in config: ",
-		 $try->{_ff}, "\n")
-	      if $config->{debug}->{svg};
-	    # The font may change during the run, so we do not
-	    # cache it.
-	    return $try->{fd}->{font};
-	}
-    }
-
-    local *Text::Layout::FontConfig::_fallback = sub { 0 };
-
-    my $font = $fc->{$key} //= do {
-
-	my $t;
-	my $try =
-	  eval {
-	      $t = Text::Layout::FontConfig->find_font( $family, $stl, $weight );
-	      $t->get_font($ps->{pr}->{layout}->copy);
-	  };
-	if ( $try ) {
-	    warn("SVG: Font $key found in font config: ",
-		 $t->{loader_data},
-		 "\n")
-	      if $config->{debug}->{svg};
-	    $try;
-	}
-	else {
-	    return;
-	}
-    };
-
-    return $font;
-}
-
-# Text handler for SVG embedding.
-sub svg_texthandler {
-    my ( $ps, $svg, %args ) = @_;
-    my $xo    = delete($args{xo});
-    my $pdf   = delete($args{pdf});
-    my $style = delete($args{style});
-    my $text  = delete($args{text});
-    my %opts  = %args;
-
-    my @t = split( /([♯♭])/, $text );
-    if ( @t == 1 ) {
-	# Nothing special.
-	$svg->set_font( $xo, $style );
-	return $xo->text( $text, %opts );
-    }
-
-    my ( $font, $sz ) = $svg->root->fontmanager->find_font($style);
-    my $has_sharp = $font->glyphByUni(ord("♯")) ne ".notdef";
-    my $has_flat  = $font->glyphByUni(ord("♭")) ne ".notdef";
-    # For convenience we assume that either both are available, or missing.
-
-    if ( $has_sharp && $has_flat ) {
-	# Nothing special.
-	$xo->font( $font, $sz );
-	return $xo->text( $text, %opts );
-    }
-
-    # Replace the sharp and flat glyphs by glyps from the chordfingers font.
-    my $d = 0;
-    my $this = 0;
-    while ( @t ) {
-	my $text = shift(@t);
-	my $fs   = shift(@t);
-	$xo->font( $font, $sz ) unless $this eq $font;
-	$d += $xo->text($text);
-	$this = $font;
-	next unless $fs;
-	$xo->font( $ps->{fonts}->{chordprosymbols}->{fd}->{font}, $sz );
-	$this = 0;
-	$d += $xo->text( $fs eq '♭' ? '!' : '#' );
-    }
-    return $d;
 }
 
 1;

@@ -8,6 +8,7 @@ use ChordPro::Logger;
 use ChordPro::Files;
 use ChordPro::Utils;
 use ChordPro::Chords;
+use ChordPro::Chords::Transpose;
 use ChordPro::Output::Common;
 
 # Single line for stupid tools.
@@ -178,15 +179,30 @@ sub chordpro {
     }
 
     $options->{generate} ||= "PDF";
+
+    # Register backend name and load its Configurator, if any.
     my $pkg = "ChordPro::Output::".$options->{generate};
+    $options->{backend} = $pkg;
+    eval "require $pkg"."::Configurator";
+    warn("Warning: No configurator for ", $options->{generate}, "\n$@")
+      if $options->{trace} && $@;
+
+    # One configurator to bind them all.
+    # This will also call the backend Configurator, if any.
+    use ChordPro::Config;
+    $config = ChordPro::Config::configurator({});
+
+    # Now load the real backend. Note that the actual module name
+    # may be changed by config.
+    if ( exists($config->{lc($options->{generate})})
+	 && exists($config->{lc($options->{generate})}->{module}) ) {
+	$options->{generate} = $config->{lc($options->{generate})}->{module};
+    }
+    $pkg = "ChordPro::Output::".$options->{generate};
     eval "require $pkg;";
     die("No backend for ", $options->{generate}, "\n$@") if $@;
     $options->{backend} = $pkg;
     $pkg->version if $options->{verbose} && $pkg->can("version");
-
-    # One configurator to bind them all.
-    use ChordPro::Config;
-    $config = ChordPro::Config::configurator({});
 
     # Parse the input(s).
     use ChordPro::Songbook;
@@ -234,7 +250,7 @@ sub chordpro {
 	}
 	for ( qw( filelist dir ) ) {
 	    next unless defined $opts{$_};
-	    $gopts{$_} = $opts{$_} eq "" ? undef : $opts{$_};
+	    $gopts{$_} = $opts{$_} eq "" ? undef : expand_tilde($opts{$_});
 	}
 	unless ( @w ) {
 	    progress( msg => $file ) if @ARGV > 1 && $file !~ /^--/;
@@ -328,6 +344,11 @@ sub chordpro {
 	    print( join( "\n", @$res ) );
 	}
 	# Don't close STDOUT!
+    }
+
+    if ( $options->{verbose} ) {
+	my $st = json_stats;
+	warn("JSON: xs = ", $st->{xs}, ", rr = ", $st->{rr}, "\n");
     }
 }
 
@@ -957,10 +978,13 @@ sub app_setup {
 	$::options->{reference} = 1;
     }
 
-    if ( $ok ) {
-	if ( defined $clo->{transpose} ) {
-	    $ok = $clo->{transpose} =~ /^[-+]?(\d+)[sf]?$/
-	      && $1 <= 24;	# arb limit
+    if ( $ok && defined $clo->{transpose} ) {
+	if ( my $tr = parse_transpose($clo->{transpose}) ) {
+	    $clo->{transpose} = $tr;
+	}
+	else {
+	    warn("Invalid transpose value: ", $clo->{transpose}, "\n" );
+	    $ok = 0;
 	}
     }
 
@@ -1320,12 +1344,13 @@ sub runtime_info {
 		  } );
     };
 
-    if ( defined $Wx::VERSION ) {
+    eval {
+	require Wx;
 	no strict 'subs';
 	push( @p,
 	      { name => "wxPerl",    version => $dd->($Wx::VERSION)  },
 	      { name => "wxWidgets", version => $dd->($Wx::wxVERSION) } );
-    }
+    };
 
     local $SIG{__WARN__} = sub {};
     local $SIG{__DIE__} = sub {};
@@ -1372,9 +1397,11 @@ sub runtime_info {
 	require JavaScript::QuickJS;
 	$vv->("JavaScript::QuickJS");
     };
-    my $i = json_parser();
-    $vv->( $i->{parser} );
-    $p[-1]->{relaxed} = "relaxed" if $i->{relaxed};
+
+    eval {
+	require JSON::Relaxed;
+	$vv->( "JSON::Relaxed" );
+    };
 
     eval {
 	require JSON::XS;

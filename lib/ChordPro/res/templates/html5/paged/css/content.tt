@@ -1,0 +1,14 @@
+[%# Paged content stylesheet (fonts/typography/content) %]
+/* ChordPro HTML5 Paged Content */
+
+[% INCLUDE 'html5/css/variables.tt' %]
+
+[% INCLUDE 'html5/css/typography.tt' %]
+
+[% INCLUDE 'html5/css/chord-diagrams.tt' %]
+
+[% INCLUDE 'html5/css/sections.tt' %]
+
+[% INCLUDE 'html5/css/songlines.tt' %]
+
+[% INCLUDE 'html5/css/tab-grid.tt' %]

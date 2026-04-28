@@ -1,0 +1,5 @@
+{title: Keyboard Diagram Test}
+
+{define: C keys 0 4 7}
+
+[C]Keyboard line

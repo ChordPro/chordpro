@@ -10,26 +10,65 @@ package ChordPro::Output::HTML;
 use strict;
 use warnings;
 use ChordPro::Files;
+use ChordPro::Paths;
 use ChordPro::Output::Common;
 use ChordPro::Utils qw();
+use ChordPro::Assets;
 use Storable 'dclone';
 
 sub generate_songbook {
     my ( $self, $sb ) = @_;
 
     my @book;
-    my $cfg = $::config->{html} // {};
-    $cfg->{styles}->{display} //= "chordpro.css";
-    $cfg->{styles}->{print} //= "chordpro_print.css";
+	# JSON::Relaxed may provide restricted hashes; clone to plain hashes before
+	# applying backend defaults.
+	my $cfg_src = $::config->{html} // {};
+	my $cfg = ref($cfg_src) eq 'HASH' ? { %{$cfg_src} } : {};
+	my $styles_src = eval { $cfg->{styles} } // {};
+	my %styles = ref($styles_src) eq 'HASH' ? %{$styles_src} : ();
+
+	$styles{default} //= "chordpro.css";
+		my $legacy_display = delete $styles{display};
+		$styles{screen}  //= $legacy_display // "";
+	$styles{print}   //= "chordpro_print.css";
+
+		# Suppress duplicate links when a medium stylesheet resolves to default.
+		delete $styles{screen}
+			if defined($styles{screen})
+			&& ( $styles{screen} eq '' || $styles{screen} eq $styles{default} );
+		delete $styles{print}
+			if defined($styles{print})
+			&& ( $styles{print} eq '' || $styles{print} eq $styles{default} );
+
+    my @styles = ( "default" );
+    for ( sort keys %styles ) {
+	next if /^(?:default|embed)$/ ;
+	next unless $styles{$_};
+	push( @styles, $_ );
+    }
 
     push( @book,
 	  '<html>',
 	  '<head>',
 	  '<meta charset="utf-8">' );
-    foreach ( sort keys %{ $cfg->{styles} } ) {
+
+    if ( delete $styles{embed} ) {
+	use File::LoadLines;
+ 	foreach my $class ( @styles ) {
+	    my $style = CP->findres( $styles{$class}, class => "styles" );
+	    next unless fs_test( 'rf', $style );
+	    my @lines = loadlines($style, { fail => 'hard' } );
+	    push( @book, "<style type=\"text/css\" ".
+		  ($class eq "default" ? "" : "media=\"$class\"").">",
+		  @lines, "</style>" );
+	    delete $styles{$class};
+	}
+    }
+    foreach ( @styles ) {
+	next unless $styles{$_};
 	push( @book,
-	      '<link rel="stylesheet" href="'.$cfg->{styles}->{$_}.'"'.
-	      ( $_ =~ /^(display|default)$/ ? "" : qq{ media="$_"} ).
+	      '<link rel="stylesheet" href="'.$styles{$_}.'"'.
+	      ( $_ =~ /^(default)$/ ? "" : qq{ media="$_"} ).
 	      '>' );
     }
     push( @book, '</head>',
@@ -49,6 +88,42 @@ my $single_space = 0;		# suppress chords line when empty
 my $lyrics_only = 0;		# suppress all chords lines
 my $layout;
 
+sub _delegate_handler {
+    my ( $delegate, $handler ) = @_;
+    return unless $delegate && $handler;
+
+    my $pkg = __PACKAGE__;
+    $pkg =~ s/::Output::\w+$/::Delegate::$delegate/;
+    eval "require $pkg" || die($@);
+
+    my $effective_handler = $handler;
+    my $cfg = $config->{delegates}->{lc($delegate)}
+      // $config->{delegates}->{$delegate};
+    if ( $cfg && $cfg->{html} && $cfg->{html}->{handler}
+	 && $pkg->can( $cfg->{html}->{handler} ) ) {
+	$effective_handler = $cfg->{html}->{handler};
+    }
+
+    my $hd = $pkg->can($effective_handler)
+      or die("HTML: Missing delegate handler ${pkg}::$effective_handler\n");
+
+    return ( $pkg, $hd );
+}
+
+sub _render_html_delegate_result {
+    my ( $e ) = @_;
+    return '' unless ref($e) eq 'HASH';
+
+    if ( ref($e->{data}) eq 'ARRAY' ) {
+	my @classes = ref($e->{classes}) eq 'ARRAY' ? @{ $e->{classes} } : ();
+	my $class_attr = @classes ? qq{ class="} . join( ' ', @classes ) . qq{"} : '';
+	my $html = join( "<br/>\n", @{ $e->{data} } );
+	return qq{<div$class_attr>$html</div>};
+    }
+
+    return $e->{data} // '';
+}
+
 sub generate_song {
     my ( $s ) = @_;
 
@@ -56,7 +131,10 @@ sub generate_song {
     $single_space = $::options->{'single-space'};
     $config = dclone( $s->{config} // $::config );
     $lyrics_only  = $config->{settings}->{'lyrics-only'};
+    $s->{generate} = "HTML";
     $s->structurize;
+    prepare_assets($s);
+    $s->dump(0) if $config->{debug}->{song};
     $layout = Text::Layout::HTML->new;
     while ( my($k,$v) = each( %{$config->{markup}->{shortcodes}}) ) {
 	unless ( $layout->can("register_shortcode") ) {
@@ -154,14 +232,15 @@ sub generate_song {
 		if ( $e->{type} eq "delegate"
 		     && $e->{subtype} =~ /^image(?:-(\w+))?$/ ) {
 		    my $delegate = $1 // $e->{delegate};
-		    my $pkg = __PACKAGE__;
-		    $pkg =~ s/::Output::\w+$/::Delegate::$delegate/;
-		    eval "require $pkg" || die($@);
-		    my $hd = $pkg->can($e->{handler}) //
-		      die("HTML: Missing delegate handler ${pkg}::$e->{handler}\n");
-		    my $res = $hd->( $s, 0, $e );
+		    my ( $pkg, $hd ) = _delegate_handler( $delegate, $e->{handler} );
+		    my $res = $hd->( $s, elt => $e, pagewidth => 0 );
 		    next unless $res; # assume errors have been given
-		    unshift( @elts, @$res );
+		    if ( ref($res) eq "ARRAY" ) {
+			unshift( @elts, @$res );
+		    }
+		    else {
+			unshift( @elts, $res );
+		    }
 		    next;
 		}
 		if ( $e->{type} eq "svg" ) {
@@ -171,8 +250,73 @@ sub generate_song {
 		    push( @s, "" ) if $tidy;
 		    next;
 		}
+		if ( $e->{type} eq "image" ) {
+		    if ( $e->{id} ) {
+			my $asset = $s->{assets}->{$e->{id}};
+			if ( $asset && ($asset->{type}//"") eq "html" ) {
+			    push( @s, _render_html_delegate_result($asset) );
+			    push( @s, "" ) if $tidy;
+			    next;
+			}
+		    }
 
+		    if ( $e->{id} ) {
+			my $asset = $s->{assets}->{$e->{id}};
+			if ( $asset && ($asset->{subtype}//"") eq "delegate" ) {
+			    my $prepared = { %$asset };
+			    $prepared->{opts} = {
+				%{ $asset->{opts} // {} },
+				%{ $e->{opts} // {} },
+			    };
 
+			    my ( $pkg, $hd ) =
+			      _delegate_handler( $prepared->{delegate}, $prepared->{handler} );
+			    my $res = $hd->( $s, elt => $prepared, pagewidth => 0 );
+			    next unless $res;
+			    if ( ref($res) eq "ARRAY" ) {
+				unshift( @elts, @$res );
+			    }
+			    else {
+				unshift( @elts, $res );
+			    }
+			    next;
+			}
+		    }
+
+		    use ChordPro::Output::Common qw(mimedata);
+		    my @args;
+		    while ( my($k,$v) = each( %{ $e->{opts} // {} } ) ) {
+			push( @args, "$k=\"$v\"" );
+		    }
+
+		    my $asset = $s->{assets}->{$e->{id}};
+		    $elt->{uri} //= $asset->{uri};
+
+		    my @images;
+		    if ( $s->{assets}->{$e->{id}}->{data} ) {
+			# mimedata will return one or more image sources.
+			@images = mimedata( \join("\n",@{$asset->{data}}) );
+		    }
+		    else {
+			# Presumably a single image source.
+			@images = mimedata($elt->{uri});
+		    }
+		    for ( @images ) {
+			push( @s,
+			      '<div class="' . $e->{type} . '">' .
+			      qq{<img src="$_" } .
+			      "@args" . "/>" .
+			      '</div>' );
+			push( @s, "" ) if $tidy;
+		    }
+		    next;
+		}
+
+		if ( $e->{type} eq "html" ) {
+		    push( @s, _render_html_delegate_result($e) );
+		    push( @s, "" ) if $tidy;
+		    next;
+		}
 	    }
 	    push( @s, '</div>' );
 	    push( @s, "" ) if $tidy;
@@ -194,28 +338,50 @@ sub generate_song {
 	    else {
 		push( @s,
 		      '<div class="' . $elt->{type} . '">' .
-		      '<span>' . nhtml($elt->{orig}) . '</span></div>' );
+		      '<span>' . nhtml(fmt_subst($s,$elt->{text})) . '</span></div>' );
 	    }
 	    push( @s, "" ) if $tidy;
 	    next;
 	}
 
 	if ( $elt->{type} eq "image" ) {
+	    use ChordPro::Output::Common qw(mimedata);
 	    my @args;
 	    while ( my($k,$v) = each( %{ $elt->{opts} } ) ) {
 		push( @args, "$k=\"$v\"" );
 	    }
-	    # First shot code. Fortunately (not surprisingly :))
-	    # HTML understands most arguments.
 
-	    if ( $elt->{type} eq "image" ) {
-		$elt->{uri} //= $s->{assets}->{$elt->{id}}->{uri};
+	    my $asset = $s->{assets}->{$elt->{id}};
+	    $elt->{uri} //= $asset->{uri};
+
+	    my @images;
+	    if ( $s->{assets}->{$elt->{id}}->{data} ) {
+		@images = mimedata( \$asset->{data} );
 	    }
-	    push( @s,
-		  '<div class="' . $elt->{type} . '">' .
-		  '<img src="' . $elt->{uri} . '" ' .
-		  "@args" . "/>" .
-		  '</div>' );
+	    else {
+		@images = mimedata($elt->{uri});
+	    }
+	    for ( @images ) {
+		push( @s,
+		      '<div class="' . $elt->{type} . '">' .
+		      qq{<img src="$_" } .
+		      "@args" . "/>" .
+		      '</div>' );
+		push( @s, "" ) if $tidy;
+	    }
+	    next;
+	}
+
+	if ( $elt->{type} eq "html" ) {
+	    my @args;
+	    while ( my($k,$v) = each( %{ $elt->{opts} } ) ) {
+		push( @args, "$k=\"$v\"" );
+	    }
+
+	    my $pkg = 'ChordPro::Delegate::'. $elt->{delegate};
+	    my $hnd = $elt->{handler};
+	    my $html = $pkg->can($hnd)->( $s, elt => $elt );
+	    push( @s, '<div class="' . lc($hnd) . '">' . $html . '</div>' );
 	    push( @s, "" ) if $tidy;
 	    next;
 	}

@@ -1,0 +1,32 @@
+[%# ChordPro HTML5 Songbook Template
+    Variables:
+      - title: Songbook title
+      - songs: Array of song HTML strings
+      - css: Generated CSS string
+%]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ChordPro HTML5 Backend">
+    <title>[% title | html %]</title>
+    <style>
+[% css %]
+    </style>
+</head>
+<body class="chordpro-songbook">
+[% IF cover_html %]
+[% cover_html %]
+[% END %]
+[% IF front_matter_html %]
+[% front_matter_html %]
+[% END %]
+[% FOREACH song IN songs %]
+[% song %]
+[% END %]
+[% IF back_matter_html %]
+[% back_matter_html %]
+[% END %]
+</body>
+</html>

@@ -96,6 +96,11 @@ function abc_cmd(cmd, args, interp_name) {
 	abc2svg.abort = function(e) {
 		abc2svg.printErr('javascript error: ' + e.message +
 			'\nStack:\n'  + e.stack)
+		if (abc) {
+			abc.get_parse().state = 0	// force block flush
+			abc.blk_flush()
+			abc2svg.abc_end()
+		}
 		abc2svg.quit()
 	} // abort()
 

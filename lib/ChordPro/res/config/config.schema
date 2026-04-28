@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://json.schemastore.org/chordpro.json",
   "title": "Configuration for ChordPro",
-  "description": "A configuration file for ChordPro.\nSee ChordPro website for more details: https://www.chordpro.org/chordpro/chordpro-configuration-file/.\nThis is a really relaxed JSON document, see https://metacpan.org/pod/JSON::Relaxed#REALLY-RELAXED-EXTENSIONS",
+  "description": "See the ChordPro website for more details: https://www.chordpro.org/chordpro/chordpro-configuration-file/.\nThis is a really relaxed JSON document, see https://metacpan.org/pod/JSON::Relaxed#REALLY-RELAXED-EXTENSIONS",
   "definitions": {
     "backendspec": {
       "description": "Standard properties for backends.",
@@ -85,7 +85,7 @@
       "type": "object",
       "properties": {
         "show": {
-          "description": "Diagrams for all chords of the song can be shown at the `\"top\"`, `\"bottom\"` or `\"right\"` side of the first page, or `\"below\"` the last song line. Set to `false` to not show any diagrams.",
+          "description": "Diagrams for the chords of the song can be shown at the `\"top\"`, `\"bottom\"` or `\"right\"` side of the first page, or `\"below\"` the last song line. Set to `false` to not show any diagrams.",
           "oneOf": [
             {
               "type": "string"
@@ -215,7 +215,7 @@
           "default": "center"
         },
         "type": {
-          "description": "The result produced by the delegate handler.",
+          "title": "The result produced by the delegate handler.",
           "type": "string",
           "oneOf": [
             {
@@ -229,28 +229,80 @@
             {
               "const": "omit",
               "title": "Ignores the section."
+            },
+            {
+              "const": "filter",
+              "title": "For filtering plugins."
             }
           ],
           "default": "image"
         },
         "handler": {
+          "title": "The module's method to call.",
           "type": "string",
-          "description": "The entry point in the module.",
           "default": "default"
+        },
+        "pdf": {
+          "description": "Backend-specific delegate overrides for PDF output.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "module": {
+              "type": "string"
+            },
+            "handler": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": true
+        },
+        "html": {
+          "description": "Backend-specific delegate overrides for HTML output.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "module": {
+              "type": "string"
+            },
+            "handler": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": true
+        },
+        "html5": {
+          "description": "Backend-specific delegate overrides for HTML5 output.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "module": {
+              "type": "string"
+            },
+            "handler": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": true
         },
         "config": {
           "type": "string",
           "default": "default"
         },
         "preamble": {
-          "description": "Input lines to prepend to the user data",
+          "description": "Input lines to prepend to the user data.",
           "type": "array",
           "items": {
             "type": "string"
           }
         },
         "program": {
-          "description": "The program/command to execute.\nIt will be wrapped in quotes when used, so paths with spaces will work without issue.",
+          "description": "The program/command to execute.",
           "type": "string",
           "default": ""
         },
@@ -266,6 +318,12 @@
           "type": "boolean",
           "description": "If `true`, no delegation will be handled.",
           "default": false
+        },
+        "html": {
+          "description": "Specific settings for the HTML backend."
+        },
+        "pdf": {
+          "description": "Specific settings for the PDF backend."
         }
       }
     },
@@ -402,13 +460,17 @@
               "const": "ABC"
             },
             "handler": {
-              "description": "Please stick to the default unless you know what you are doing.\nUnless `program` is set, ChordPro will use QuickJS, either built-in or via an external QuickJS interpreter.",
+              "title": "The handler method to produce SVG from ABC.",
               "type": "string",
               "default": "abc2svg",
               "oneOf": [
                 {
                   "const": "abc2svg",
                   "title": "Default handler uses `program` (if set), othewise embedded QuickJS or external QuickJS."
+                },
+                {
+                  "const": "abc2svg_html",
+                  "title": "HTML/HTML5 alias of `abc2svg` with backend-specific dispatch."
                 },
                 {
                   "const": "quickjs_xs",
@@ -426,7 +488,7 @@
             },
             "program": {
               "type": "string",
-              "description": "The program to use if `handler` is `abc2svg`.\nThis program should take one argument, the ABC file, and write the SVG data to its standard output.",
+              "description": "The program to produce SVG from ABC.\nLeave empty to use the builtin QuickJS handler.",
               "default": ""
             },
             "type": {
@@ -434,7 +496,7 @@
             },
             "config": {
               "const": "default",
-              "description": "No longer used. `\"./default.abc\"` will be used if program tool.",
+              "description": "Obsolete.",
               "default": "default"
             },
             "preamble": {
@@ -556,6 +618,7 @@
       ]
     },
     "parserspec": {
+      "title": "Settings for the parser/preprocessor",
       "type": "object",
       "additionalProperties": false,
       "properties": {
@@ -566,6 +629,7 @@
         },
         "preprocess": {
           "type": "object",
+          "description": "Settings for the parser/preprocessor.\nFor selected lines, you can specify a series of \n{ \"target\" : \"xxx\", \"replace\" : \"yyy\" }\nEvery occurrence of \"xxx\" will be replaced by \"yyy\".\nUse \"pattern\" instead of \"target\" for regular expression replacement.\nUse wisely.",
           "additionalProperties": false,
           "properties": {
             "all": {
@@ -671,9 +735,7 @@
       }
     },
     "booleanInt": {
-      "description": "A boolean value represented as an integer, `0` for `false` and `1` for `true`.",
-      "type": "integer",
-      "enum": [0, 1]
+      "type": ["boolean","integer"]
     },
     "noteSystem": {
       "type": "string",
@@ -744,9 +806,70 @@
       "title": "Generic Part",
       "type": "object",
       "properties": {
+        "$schema": {
+          "description": "The schema for this config file.",
+          "type": "string",
+          "default": ""
+        },
+        "config": {
+          "type": "object",
+          "description": "For GUI.",
+          "properties": {
+            "type": {
+              "title": "The type of this config",
+              "description": "One or more of `\"config\"`, `\"style\"`, `\"style_mod\"`, `\"instrument\"`, `\"task\"` ...",
+              "anyOf": [
+                { "const": "config",
+                  "title": "This is a generic config file."
+                },
+                { "const": "style",
+                  "title": "A style definition."
+                },
+                { "const": "stylemod",
+                  "title": "A mdoification to an existing style."
+                },
+                { "const": "instrument",
+                  "title": "Definition of an instrument."
+                },
+                { "const": "task",
+                  "title": "A preview task."
+                },
+                { "type": "string"
+                },
+                { "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "minItems": 1
+                }  
+              ]
+            },
+            "title": {
+              "description": "Title for menus, choices, if applicable.",
+              "type": "string"
+            },
+            "description": {
+              "description": "Helpful descriptive text.",
+              "type": "string"
+            },
+            "exclude_id": {
+              "description": "Exclusive control.\nIf multiple configs have the same exclude_id, only one will be used.",
+              "type": ["boolean","string"]
+            },
+            "default": {
+              "description": "True if this is the default config for a specific type.\nDo not use unless you know what you are doing!",
+              "type": "boolean"
+            },
+            "omit": {
+              "description": "Do not show this config in the GUI.",
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
         "include": {
           "type": "array",
-          "description": "Includes are processed first, before the rest of the config file.\n\nA config file can specify a list of other config files that are to be processed *before* the contents of the current file. This makes it straightforward to create config files that extend existing config files.\n\"include\" takes a list of either filenames or preset names.\nIf a file name is not absolute, it is taken relative to the location of the including config file.",
+          "description": "A config file can specify a list of other config files that are to be processed **before** the contents of the current file. This makes it straightforward to create config files that extend existing config files.\n`\"include\"` takes a list of either filenames or preset names.\nIf a file name is not absolute, it is taken relative to the location of the including config file.",
           "items": {
             "type": "string"
           },
@@ -754,12 +877,12 @@
         },
         "settings": {
           "type": "object",
-          "description": "General settings, often changed by configs and command line.\n\nThese settings control global behaviour of the ChordPro program and can be changed by configs and command line.",
+          "description": "General settings control global behaviour of the ChordPro program and can be changed by configs and command line.",
           "additionalProperties": false,
           "properties": {
             "chordnames": {
               "default": "strict",
-              "description": "Strictness of parsing chord names.\n\nStrict (only known) or relaxed (anything that looks sane).",
+              "description": "Strictness of parsing chord names.\nValues are `\"strict\"` (only known chord forms) or `\"relaxed\"` (anything that looks sane).",
               "enum": ["relaxed", "strict"],
               "type": "string"
             },
@@ -780,7 +903,7 @@
             },
             "columns": {
               "default": 1,
-              "description": "Number of columns, default: 1.",
+              "description": "Either the number of columns, default: 1, or an array with column widths.",
               "examples": [2, ["*", "50%"], ["50%", "50%"], [0, 0]],
               "oneOf": [
                 {
@@ -811,15 +934,25 @@
                   "type": "array"
                 }
               ],
-              "title": "Columns"
+              "title": "Columns."
             },
             "decapo": {
               "default": false,
               "description": "Eliminate capo by transposing chords.",
               "type": "boolean"
             },
+            "common-keys": {
+              "description": "Replace keys with more than 6 sharps or flats by their more common enharmonic equivalents.",
+              "type": "boolean",
+              "default": true
+            },
             "enharmonic-transpose": {
               "description": "Force enharmonic when transposing (experimental).",
+              "type": "boolean",
+              "default": true
+            },
+            "fsharpkey": {
+              "description": "The key F# (6 sharps) is usually represented as its enharmonic equivalent Gb (6 flats). Set this to true if you want F sharp instead of G flat.",
               "type": "boolean",
               "default": true
             },
@@ -843,18 +976,17 @@
             },
             "lineinfo": {
               "default": true,
-              "description": "Obsolete. Add line info for backend diagnostics.",
+              "description": "Obsolete.",
               "type": "boolean"
             },
             "lyrics-only": {
               "default": false,
-              "description": "Suppress chords, only outputs lyrics.\nCommand line: `-l` (`--lyrics-only`)",
-              "title": "Suppress chords",
+              "description": "Suppress chords, only outputs lyrics.",
               "type": "boolean"
             },
             "maj7delta": {
               "default": false,
-              "description": "Substitute delta for maj7 in chord names.\nWill fallback to the ChordProSymbols font if the selected chord font doesn't have the glyphs.",
+              "description": "Substitute delta for maj7 in chord names.\nThis will fallback to the ChordProSymbols the selected chord font doesn't have the glyphs.",
               "type": "boolean"
             },
             "memorize": {
@@ -869,12 +1001,12 @@
             },
             "strict": {
               "default": true,
-              "description": "Chords parsing strategy.\nStrict (only known chords) or relaxed (anything that looks sane).",
+              "description": "Stricter checks and more warnings.",
               "type": "boolean"
             },
             "suppress-empty-chords": {
               "default": true,
-              "description": "Suppress empty chord lines.\nCommand line: `-a` (`--single-space`).",
+              "description": "Suppress empty chord lines.",
               "type": "boolean"
             },
             "suppress-empty-lyrics": {
@@ -884,7 +1016,7 @@
             },
             "titles": {
               "default": "center",
-              "description": "Titles flush.",
+              "description": "Titles flush.\nObsolete, use page headings/footers instead.",
               "enum": ["center", "left", "right"],
               "type": "string"
             },
@@ -902,13 +1034,18 @@
             },
             "transpose": {
               "default": 0,
-              "description": "Transpose the song by a number of semitones.\nA positive number transposes up, a negative number transposes down.\nAn optional postfix of \"s\" or \"f\" can be used to enforce the use of sharps resp. flats when a transposed chord requires accidentals.",
+              "description": "Transpose the song by a number of semitones.\nA positive number transposes up, a negative number transposes down.\nAn optional postfix of `\"s\"` or `\"f\"` can be used to enforce the use of sharps resp. flats when a transposed chord requires accidentals.\nA postfix of `\"k\"` will use the key signature to determine whether flats or sharps are needed.",
               "type": [ "number", "string" ],
-	      "pattern": "^[-+]?\\d+[sf]?$"
+              "pattern": "^[-+]?\\d+[sf]?$"
+            },
+            "transpose-sf-key": {
+              "default": false,
+              "description": "Always apply `\"k\"` semantics if no other postfix was specified.",
+              "type": "boolean"
             },
             "truesf": {
               "default": false,
-              "description": "Substitute Unicode sharp/flats in chord names.\nWill fallback to ChordProSymbols the font doesn't have the glyphs.",
+              "description": "Substitute Unicode sharp/flats in chord names.\nThis will fallback to the ChordProSymbols the selected chord font doesn't have the glyphs.",
               "type": "boolean"
             },
             "wrapindent": {
@@ -952,12 +1089,13 @@
         },
         "diagrams": {
           "type": "object",
-          "description": "Printing chord diagrams. Selects which chords to print at the end of the song.\nBy default, ChordPro will include diagrams for all known chords that have been used in a song.\nThe `suppress` list can be used to filter chords from showing diagrams, for example for chords that you consider trivial.\nNote: The type of diagram (string or keyboard) is determined by the value of `instrument.type`.",
+          "description": "Showing chord diagrams. Selects which chords to show at the end of the song.\nBy default, ChordPro will include diagrams for all known chords that have been used in a song.\nThe `suppress` list can be used to filter chords from showing diagrams, for example for chords that you consider trivial.\nNote: The type of diagram (string or keyboard) is determined by the value of `instrument.type`.",
           "additionalProperties": false,
           "properties": {
             "show": {
               "type": "string",
-              "description": "Which chords used in the song to print.",
+              "title": "Selection of chords to show.",
+              "description": "Shows selected or all chord diagrams at end.\n `\"all\"`: shows all chords\n `\"user\"`: shows user defined chords only\n `\"none\"`: suppresses chords from being printed.",
               "oneOf": [
                 {
                   "const": "all",
@@ -996,7 +1134,7 @@
         },
         "chords": {
           "type": "array",
-          "description": "User-defined chords.\nThis is an array of hashes, one for each chord.",
+          "description": "User-defined chords.\nThis is an array of hashes, one for each chord.\nSee the docs for details.",
           "default": [],
           "items": {
             "type": "object",
@@ -1157,7 +1295,7 @@
               },
               "fields": {
                 "type": "array",
-                "description": "The metadata for this table of contents. One or two items.\nThe ordering of the table.\nPrefix the sort key with `+` to force numeric sorting. Likewise, a `-` prefix reverses sort order.\nWhen you specify a metadata item that has multiple values they are split out in the table.\n`songindex` is a built-in metadata item that yields the sequence number of the song in the songbook. Sorting on `songindex` will produce the songs in songbook order.",
+                "description": "The metadata for this table of contents. One or two items.\nTo change the ordering of the table, prefix the sort key with `+` to force numeric sorting, or use a `-` prefix to reverse the sort order.\nWhen you specify a metadata item that has multiple values they are split out in the table.\n`songindex` is a built-in metadata item that yields the sequence number of the song in the songbook. Sorting on `songindex` will therefore produce the songs in songbook order.",
                 "items": {
                   "type": "string"
                 },
@@ -1228,7 +1366,7 @@
         },
         "diagnostics": {
           "type": "object",
-          "description": "When ChordPro detects errors while analyzing a song, it will use this format to show diagnostic messages.\nIn the format, `\"%f\"` will be replaced by the song file name, `\"%n\"` by the line number in the file where the error was detected, %m by the diagnostig message, and `\"%l\"` will be replaced by the original content of the line.\nNote you cannot use song metadata here.",
+          "description": "When ChordPro detects errors while analyzing a song, it will use this format description to show diagnostic messages.\nIn the format, `\"%f\"` will be replaced by the song file name, `\"%n\"` by the line number in the file where the error was detected, %m by the diagnostig message, and `\"%l\"` will be replaced by the original content of the line.\nNote you cannot use song metadata here.",
           "additionalProperties": false,
           "properties": {
             "format": {
@@ -1265,6 +1403,24 @@
             }
           }
         },
+	"keys": {
+	  "title": "Key strategies.",
+	  "description": "ChordPro tries to follow ABC (abc2svg) as much as possible.",
+	  "type": "object",
+	  "additionalProperties": false,
+	  "properties": {
+	    "flats": {
+	      "description": "The key `F#` is often used as is and not represented as an enharmonic equivalent. Set this to true if you want `Gb` instead of `F#`.",
+	      "type": "boolean",
+	      "default": false
+	    },
+	    "force-common": {
+	      "description": "Replace keys with an excessive number of sharps by their more common enharmonic equivalents.\nSee also `settings.transpose-sf-key`.",
+	      "type": "boolean",
+	      "default": false
+	    }
+	  }
+	},
         "markup": {
           "description": "Settings for the markup processor.\nShortcodes allow user defined markup, e.g. <foo>...</foo>.\n```\nmarkup.shortcode {\n   heavy :  \"weight='bold' size='large'\"\n}\nEach occurrence of <heavy>...</heavy> will be replaced by\n<span weight='bold' size='large'>...</span>.\n```",
           "type": "object",
@@ -1301,8 +1457,7 @@
           }
         },
         "metadata": {
-          "title": "Metadata",
-          "description": "Metadata.\nFor these keys you can use `{meta key ...}` as well as `{key ...}`.",
+          "title": "Metadata.",
           "type": "object",
           "additionalProperties": false,
           "properties": {
@@ -1336,7 +1491,7 @@
               ]
             },
             "separator": {
-              "description": "The separator is used to concatenate multiple values.\nTo concatenate multiple values when metadata are used in title fields.\nIf `autosplit` is `true`, the separator is also used to split values upon input.",
+              "description": "The separator is used to concatenate multiple values when metadata are used in title fields.\nIf `autosplit` is `true`, the separator is also used to split values upon input.",
               "type": "string",
               "default": "; "
             },
@@ -1348,7 +1503,7 @@
           }
         },
         "notes": {
-          "description": "Note (chord root) names.\nIn case of alternatives, the first one is used for output.\nNote that it is tempting to use real sharps and flats for output, but most fonts don't have the glyphs.",
+          "description": "Note (chord root) names.\nIn case of alternatives, the first one is used for output.\nNote that it is tempting to always use real sharps and flats for output, but many fonts don't have the glyphs.",
           "type": "object",
           "additionalProperties": false,
           "properties": {
@@ -1374,7 +1529,7 @@
         },
         "dates": {
           "type": "object",
-          "title": "Date formats",
+          "title": "Date formats.",
           "description": "Defines the date format used by the metadata value `today`.\nFormat is a `strftime` template, so the format string can use anything that `strftime` understands.",
           "properties": {
             "today": {
@@ -1392,7 +1547,7 @@
           }
         },
         "tuning": {
-          "description": "Definition of the strings for this instrument in scientific pitch notation.\nThis is usually set from an included instrument config.\nNote that string 1 is the highest string.\nIf tuning is not relevant to the instrument, setting the tuning to `[ 0 ]` flushes all existing definitions.",
+          "description": "Definition of the strings for this instrument in scientific pitch notation.\nThis is usually set from an included instrument config.\nNote that string 1 is the highest sounding string.\nIf tuning is not relevant to the instrument, setting the tuning to `[ 0 ]` flushes all existing definitions.",
           "type": "array",
           "items": {
             "type": "string",
@@ -1597,7 +1752,7 @@
                 },
                 "csv": {
                   "type": "object",
-                  "description": "CSV generation for MobileSheetsPro. May need adaptation for other tools.\nNote that the resultant file will conform to `RFC 4180` (standardized CSV file format).\nTo add fields with fixed values, use \"value\". See the example with name \"my_field\".",
+                  "description": "CSV generation for MobileSheetsPro. May need adaptation for other tools.\nNote that the resultant file will conform to RFC 4180 (standardized CSV file format).\nTo add fields with fixed values, use `\"value\"`. See the example with name `\"my_field\"`.",
                   "properties": {
                     "fields": {
                       "type": "array",
@@ -1708,7 +1863,7 @@
                   }
                 },
                 "diagrams": {
-                  "description": "Appearance of chord diagrams for string instruments.\nA chord diagram consists of a number of cells.\nThe horizontal number of cells depends on the number of strings.\nThe vertical number of cells is \"vcells\", which should be 4 or larger to accommodate most chords.",
+                  "description": "Appearance of chord diagrams for string instruments.\nA chord diagram consists of a number of cells.\nThe horizontal number of cells depends on the number of strings.\nThe vertical number of cells is `\"vcells\"`, which should be 4 or larger to accommodate most chords.",
                   "type": "object",
                   "$comment": "Due to use of `allOf` to allow reuse of shared structure, `additionalProperties` doesn't work properly to disallow any undefined properties. The correct keywork to use is `unevaluatedProperties`, but it is not supported until `JSON Schema Draft 2019-09`, which isn't widely supported yet. Eventually add `unevaluatedProperties: false`.",
                   "allOf": [
@@ -2220,7 +2375,7 @@
                   }
                 },
                 "head-first-only": {
-                  "description": "Heading on first page only, add the headspace to the other pages so they become larger.",
+                  "description": "Heading on first page only; the headspace is added to the other pages so they become larger.",
                   "type": "boolean",
                   "default": false
                 },
@@ -2325,12 +2480,12 @@
                   ]
                 },
                 "labels": {
-                  "description": "This opens a margin for margin labels.\nWhen `width` is set to a positive value, the lyrics and associated chords will be indented by this amount and section labels, if any, are printed.\nWhen `width` is set to `\"auto\"`, the song will indented automatically, but only if labels are actually used.\n`align` will control how the labels are aligned in the margin.",
+                  "description": "This opens a margin for margin labels.",
                   "type": "object",
                   "additionalProperties": false,
                   "properties": {
                     "align": {
-                      "description": "Alignment for the labels.",
+                      "description": "How the labels are aligned in the margin.",
                       "type": "string",
                       "default": "left",
                       "enum": ["left", "center", "right"]
@@ -2349,7 +2504,7 @@
                       "examples": ["auto"]
                     },
                     "comment": {
-                      "description": "Alternatively, render labels as comments.\nWhen `comment` is set to one of the suported comment types, the label will be printed as a comment before the section contents. The settings of `width` and `align` are ignored.",
+                      "description": "When `comment` is set to one of the suported comment types, the label will be printed as a comment before the section contents. The settings of `width` and `align` are ignored and no margin is opened.",
                       "type": "string",
                       "default": "",
                       "enum": ["", "comment", "comment_italic", "comment_box"]
@@ -2419,7 +2574,7 @@
                         "examples": ["%{title}%{artist| - %{}}"]
                       },
                       "letter": {
-                        "description": "Make letter level if more entries than this value.\nIf there are at least as many outline items with differing first letters than the amount specified here, an extra level of outlines (letter index) is created for easy navigation. A value of zero (`0`) disables this.",
+                        "description": "If there are at least as many outline items with differing first letters than the amount specified here, an extra level of outlines (letter index) is created for easy navigation. A value of zero (`0`) disables this.",
                         "type": "integer",
                         "default": 5
                       },
@@ -2457,14 +2612,14 @@
                     }
                   ]
                 },
-		"page_layout": {
-		  "description": "For future use.",
-		  "oneOf": [ { "type": "string"  },
-		  	     { "type": "boolean" } ],
+                "page_layout": {
+                  "description": "For future use.",
+                  "oneOf": [ { "type": "string"  },
+                             { "type": "boolean" } ],
                   "default": false
-		},
+                },
                 "papersize": {
-                  "description": "Output paper size.\nThe size can be specified either as the name of a known page size, e.g. \"a4\", or as a 2-element list containing the width and height of the page in PDF units (DTP points, pt, 1/72 inch).",
+                  "description": "Output paper size.\nThe size can be specified either as the name of a known page size, e.g. `\"a4`\", or as a 2-element list containing the width and height of the page in PDF units (DTP points, pt, 1/72 inch).",
                   "oneOf": [
                     {
                       "type": "string",
@@ -2673,7 +2828,7 @@
                   }
                 },
                 "titles-directive-ignore": {
-                  "description": "Traditionally, the `{titles}` directive was used to control titles flush. ChordPro has a much more powerful mechanism but this can conflict with legacy `{titles}` directives. If you use custom title formatting, setting `titles-directive-ignore` to a true makes ChordPro ignore the legacy directives.\nA `{titles: left}` directive may conflict with customized formats. Set to `true` to ignore the directive.",
+                  "description": "A `{titles: left}` directive may conflict with customized page heading/footer formats. Set this to `true` to have the directive ignores.",
                   "type": "boolean",
                   "default": false
                 }
@@ -2697,15 +2852,35 @@
             },
             {
               "properties": {
+                "module": {
+                  "description": "The actual backend module.",
+                  "type": "string",
+                  "default": "html"
+                },
                 "styles": {
                   "description": "Stylesheets for display and printing.",
                   "type": "object",
                   "additionalProperties": false,
                   "properties": {
-                    "display": {
-                      "description": "Relative path to a CSS file to use for styling displayed HTML output (rather than printed).",
+                    "default": {
+                      "description": "Relative path to a CSS file to use for styling HTML output.",
                       "type": "string",
                       "default": "chordpro.css"
+                    },
+                    "display": {
+                      "description": "Legacy style for `\"screen\"`.",
+                      "type": "string",
+                      "default": ""
+                    },
+                    "embed": {
+                      "description": "Embed the styles instead of linking to them.",
+                      "type": "boolean",
+                      "default": false
+                    },
+                    "screen": {
+                      "description": "Relative path to a CSS file to use for styling displayed HTML output on screen media.",
+                      "type": "string",
+                      "default": ""
                     },
                     "print": {
                       "description": "Relative path to a CSS file to use for styling printed HTML output.",
@@ -2717,6 +2892,92 @@
               }
             }
           ]
+        }
+      }
+    },
+    {
+      "title": "HTML5 Output",
+      "type": "object",
+      "properties": {
+        "html5": {
+          "description": "Settings for HTML5 output.",
+          "type": "object",
+          "properties": {
+            "mode": {
+              "description": "HTML5 output mode.",
+              "type": "string",
+              "enum": ["responsive", "screen", "print", "paged"],
+              "default": "print"
+            },
+            "paged": {
+              "description": "Settings for paged HTML5 output.",
+              "type": "object",
+              "properties": {
+                "song": {
+                  "description": "Song pagination controls for paged output.",
+                  "type": "object",
+                  "properties": {
+                    "page-break": {
+                      "description": "Insert a page break before or after each song in paged output.",
+                      "type": "string",
+                      "enum": ["none", "before", "after", "both", "before-right", "before-left", "before-recto", "before-verso", "after-right", "after-left", "after-recto", "after-verso", "right", "left", "recto", "verso"],
+                      "default": "none"
+                    }
+                  }
+                },
+                "newpage": {
+                  "description": "Newpage pagination controls for paged output.",
+                  "type": "object",
+                  "properties": {
+                    "page-break": {
+                      "description": "Targeted page break for newpage directives in paged output.",
+                      "type": "string",
+                      "enum": ["page", "right", "left", "recto", "verso"],
+                      "default": "page"
+                    }
+                  }
+                },
+                "bundle": {
+                  "description": "Bundle output settings for paged HTML5 (folder output with external CSS).",
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "description": "Write paged HTML output as a folder bundle with externalized CSS.",
+                      "type": "boolean",
+                      "default": false
+                    },
+                    "mode": {
+                      "description": "Bundle template mode.",
+                      "type": "string",
+                      "enum": ["minimal"],
+                      "default": "minimal"
+                    },
+                    "html": {
+                      "description": "HTML file name inside the bundle folder.",
+                      "type": ["string", "null"],
+                      "default": null
+                    },
+                    "css": {
+                      "description": "CSS filenames for the bundle.",
+                      "type": "object",
+                      "properties": {
+                        "layout": {
+                          "description": "Layout CSS filename.",
+                          "type": "string",
+                          "default": "layout.css"
+                        },
+                        "content": {
+                          "description": "Content CSS filename.",
+                          "type": "string",
+                          "default": "content.css"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -2748,11 +3009,17 @@
           "properties": {
             "abc": {
               "$ref": "#/definitions/abcDelegateFields",
-              "description": "Embedding ABC.\nChordPro will first try to find an abc2svg program in the executable path. If this is found it will be used to process the ABC data. The program will be executed with a single argument, the name of a file that contains the prepared ABC data, and it should produce the SVG image on standard output.\nAlternatively, if the QuickJS program qjs can be found in the executable path, ChordPro will use this internally to produce the SVG image.",
+              "description": "Embedding ABC.",
               "default": {
                 "type": "image",
                 "module": "ABC",
                 "handler": "abc2svg",
+                "html": {
+                  "handler": "abc2svg_html"
+                },
+                "html5": {
+                  "handler": "abc2svg_html"
+                },
                 "program": "",
                 "config": "default",
                 "preamble": [
@@ -2762,7 +3029,7 @@
                 ],
                 "preprocess": {
                   "abc": []
-                }
+                } 
               }
             },
             "grille": {
@@ -2819,7 +3086,22 @@
                   }
                 }
               ],
-              "description": "Embedding Strums. EXPERIMENTAL"
+              "description": "Embedding Strums. EXPERIMENTAL",
+              "default": {
+                "type": "image",
+                "module": "Strum",
+                "handler": "strum2xo",
+                "pdf": {
+                  "handler": "strum2xo"
+                },
+                "html": {
+                  "handler": "strum2html"
+                },
+                "html5": {
+                  "handler": "strum2html"
+                },
+                "preamble": []
+              }
             },
             "svg": {
               "description": "Embedding SVG.",
@@ -2858,13 +3140,19 @@
                   "type": "object",
                   "properties": {
                     "handler": {
-                      "const": "txt2xform"
+                      "anyOf" : [
+                      { "const": "txt2xform" },
+                      { "type": "string" }
+                      ]
                     },
                     "module": {
                       "const": "TextBlock"
                     },
                     "type": {
-                      "const": "image"
+                      "anyOf": [
+                      { "const": "image" },
+                      { "type" : "string" }
+                      ]
                     }
                   }
                 }
@@ -2872,7 +3160,16 @@
               "default": {
                 "type": "image",
                 "module": "TextBlock",
-                "handler": "txt2xform"
+                "handler": "txt2xform",
+                "pdf": {
+                  "handler": "txt2xform"
+                },
+                "html": {
+                  "handler": "txt2html"
+                },
+                "html5": {
+                  "handler": "txt2html"
+                }
               }
             }
           },
@@ -3030,7 +3327,8 @@
               "default": 8
             },
             "classifier": {
-              "description": "Analysis strategy.\nSeveral strategies to recognize chords and lyrics lines are implemented by classifiers.\nFeel free to choose the strategy that yields the best results for your date.",
+              "title": "Strategies to recognize chords and lyrics lines are implemented by classifiers.",
+              "description": "The default classifier is `\"pct_chords\"` and is based on the percentage of chords recognized.",
               "oneOf": [
                 {
                   "const": "pct_chords",
@@ -3048,13 +3346,10 @@
       }
     },
     {
-      "title": "Settings for the parser/preprocessor",
       "type": "object",
-      "description": "For selected lines, you can specify a series of `{ \"target\" : \"xxx\", \"replace\" : \"yyy\" }`.\nEvery occurrence of \"xxx\" will be replaced by \"yyy\".\nUse \"pattern\" instead of \"target\" for regular expression replacement.\nChordPro allows using Unicode escape sequence in the form `\\u`*XXXX*. In case you need more (or less) hexadecimal digits, you can use the following preprocessor directive to replace `\\u{`*XXXX*`}` (with an arbitrary number of hex digits) by the corresponding unicode character.\nUse wisely.",
       "properties": {
         "parser": {
-          "$ref": "#/definitions/parserspec",
-          "description": "Settings for the parser/preprocessor.\nFor selected lines, you can specify a series of \n{ \"target\" : \"xxx\", \"replace\" : \"yyy\" }\nEvery occurrence of \"xxx\" will be replaced by \"yyy\".\nUse \"pattern\" instead of \"target\" for regular expression replacement.\nUse wisely."
+          "$ref": "#/definitions/parserspec"
         }
       }
     },
@@ -3129,11 +3424,12 @@
       "type": "object",
       "properties": {
         "debug": {
-          "description": "Miscellaneous debug settings.",
+          "title": "Miscellaneous debug settings.\nA boolean value or an integer. `0` means `false` and nozero means `true`.",
           "type": "object",
           "properties": {
             "a2crd": {
               "$ref": "#/definitions/booleanInt",
+              "description": "All debug settings are intended for development and debugging and are not useful for ChordPro users.",
               "default": 0
             },
             "abc": {
@@ -3198,6 +3494,7 @@
             },
             "runtimeinfo": {
               "$ref": "#/definitions/booleanInt",
+              "description": "Insert extra debugging info into the generated PDF document.",
               "default": 1
             },
             "song": {

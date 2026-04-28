@@ -1,0 +1,42 @@
+{title: Swing Low Sweet Chariot}
+{subtitle: Traditional}
+{columns: 2}
+{titles: center}
+
+{start_of_chorus}
+Swing low, sweet chariot,
+Comin’ for to carry me home.
+Swing low, sweet chariot,
+Comin’ for to carry me home.
+{end_of_chorus}
+
+
+I looked over Jordan, and what did I see,
+     “Comin’ for to carry me home.”
+A band of angels comin’ after me,
+     Comin’ for to carry me home.               
+
+{new_page}
+{comment: Chorus}
+
+If you get there before I do,
+     Comin’ for to carry me home.
+Just tell my friends that I’m a comin’ too.
+     Comin’ for to carry me home.
+
+{column_break}
+{comment: Chorus}
+
+# Note the ' here will be changed into a decent apostrophe.
+I’m sometimes up and sometimes down,
+     Comin’ for to carry me home.
+But still my soul feels heavenly bound.
+     Comin’ for to carry me home.
+
+{comment: Chorus}
+{comment_italic: And a final chorus}
+
+#{chord: D base-fret 1 frets N N 0 2 3 2 fingers x x x 1 3 2}
+#{chord: G base-fret 1 frets 3 2 0 0 0 3 fingers 2 1 x x x 3}
+#{chord: A7 base-fret 1 frets N 0 2 0 2 0 fingers x x 2 x 3 x}
+#{chord: D7 base-fret 1 frets N N 0 2 1 2 fingers x x x 2 1 3}

@@ -1,4 +1,6 @@
 # define APP	"ChordPro"
+# define APPID	"ChordPro-Sm9oYW4gIFZyb21hbnMK-6"
+# define APPID	"{{F8D1018C-AAE3-45E6-9447-5997F512F932}"
 # define PUBLISHER "ChordPro.ORG"
 
 ; These are updated by the vfix program.
@@ -8,9 +10,9 @@
 # define BuildNum	27
 
 [Setup]
-ArchitecturesInstallIn64BitMode=x64 arm64 ia64
-ArchitecturesAllowed=x64 arm64 ia64
-AppID={{F8D1018C-AAE3-45E6-9447-5997F512F932}
+ArchitecturesInstallIn64BitMode=x64 arm64
+ArchitecturesAllowed=x64 arm64
+AppID={#APPID}
 AppName={#APP}
 AppVersion={#V_MAJ}.{#V_MIN}.{#V_AUX}.{#BuildNum}.0
 AppVerName={#APP} {#V_MAJ}.{#V_MIN}
@@ -61,3 +63,7 @@ Root: HKA; Subkey: "Software\Classes\Applications\wxchordpro.exe\SupportedTypes"
 
 [Messages]
 BeveledLabel=Perl Powered Software by Squirrel Consultancy
+
+[InstallDelete]
+Type: files; Name: "{app}\perl530.dll";
+Type: files; Name: "{app}\wx*32u*.dll";

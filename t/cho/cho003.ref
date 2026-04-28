@@ -4,6 +4,6 @@
 [Bb7] comes out as A#7
 [Bb] comes out as  A#
 
-#{chord: Bb6 base-fret 1 frets N N 3 3 3 3}
-#{chord: Bb7 base-fret 3 frets N N 1 1 1 2}
-#{chord: Bb base-fret 1 frets N 1 3 3 3 1}
+#{chord: Bb6 base-fret 1 frets N 1 3 3 3 3 fingers x 1 3 3 3 3}
+#{chord: Bb7 base-fret 3 frets N 1 3 1 3 1 fingers x 1 3 1 4 1}
+#{chord: Bb base-fret 1 frets N 1 3 3 3 1 fingers x 1 3 3 3 1}

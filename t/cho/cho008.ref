@@ -30,9 +30,9 @@ Arbitrary unknown (but understood) chord [Cosa](Dosa)
 #{chord: D' base-fret 5 frets 1 1 3 3 3 1}
 #{chord: D† base-fret 5 frets 1 1 3 3 3 1}
 #{chord: Dosa base-fret 5 frets 1 1 3 3 3 1}
-#{chord: A base-fret 1 frets N 0 2 2 2 0}
+#{chord: A base-fret 1 frets N 0 2 2 2 0 fingers x x 1 2 3 x}
 #{chord: C base-fret 3 frets 1 1 3 3 3 1}
 #{chord: C' base-fret 3 frets 1 1 3 3 3 1}
 #{chord: C† base-fret 3 frets 1 1 3 3 3 1}
 #{chord: Cosa base-fret 5 frets 1 1 3 3 3 1}
-#{chord: G base-fret 1 frets 3 2 0 0 0 3}
+#{chord: G base-fret 1 frets 3 2 0 0 0 3 fingers 2 1 x x x 3}

@@ -12,7 +12,9 @@ pp/macos/chordpro-dmg.icns
 pp/macos/chordpro-doc.icns
 pp/macos/chordpro.icns
 pp/macos/chordpro.pp
-pp/macos/create-dmg
+pp/macos/create-dmg.d/eula-resources-template.xml
+pp/macos/create-dmg.d/template.applescript
+pp/macos/create-dmg.sh
 pp/macos/dndhandler.swift
 pp/macos/Info.plist
 pp/macos/Install.zsh

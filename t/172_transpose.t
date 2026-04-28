@@ -6,6 +6,7 @@ use utf8;
 
 use ChordPro::Testing;
 use ChordPro::Songbook;
+use ChordPro::Chords::Transpose;
 
 plan tests => 3;
 
@@ -46,6 +47,8 @@ isa_ok( $s->{songs}->[0], 'ChordPro::Song', "It's a song" );
 
 my $song = {
   body => [
+    { context => '', type => "meta",
+      key => "key", value => [ "D" ] },
     {
       context => '',
       type => 'empty',
@@ -323,8 +326,8 @@ my $song = {
   meta => {
     songindex => 1,
     key => ['D'],
-#    key_actual => ['D'],
-#    key_from => ['E'],
+    key_print => ['D'],
+    key_sound => ['D'],
     title => [
       'Transpositions',
     ],

@@ -4,9 +4,9 @@
 
 # Author          : Johan Vromans
 # Created On      : Sun Feb 18 16:15:19 2024
-# Last Modified By: 
-# Last Modified On: Thu Mar 21 19:38:21 2024
-# Update Count    : 24
+# Last Modified By: Johan Vromans
+# Last Modified On: Mon Dec 29 10:02:11 2025
+# Update Count    : 27
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -117,6 +117,7 @@ for my $mod ( qw( modules/ambitus.js
 		  modules/combine.js
 		  modules/diag.js
 		  modules/equalbars.js
+		  modules/fit2box.js
 		  modules/gamelan.js
 		  modules/grid.js
 		  modules/grid2.js
@@ -126,14 +127,18 @@ for my $mod ( qw( modules/ambitus.js
 		  modules/mdnn.js
 		  modules/nns.js
 		  modules/MIDI.js
+		  modules/page.js
 		  modules/pedline.js
 		  modules/perc.js
+		  modules/wps.js
 		  modules/roman.js
 		  modules/soloffs.js
 		  modules/sth.js
+		  modules/swing.js
 		  modules/strtab.js
 		  modules/temper.js
 		  modules/tropt.js
+		  modules/tunhd.js
 	       ) ) {
 
     $mod =~ m;/(.*)\.js;;
@@ -165,6 +170,11 @@ for my $mod ( qw( COPYING.LESSER README.md tohtml.js ) ) {
     die( "$abcroot/$mod: $!\n" ) unless $data;
     warn("  adding $mod (", length($data), " bytes)...\n") if $verbose > 1;
     $data .= "\n" unless $data =~ /\n$/;
+
+    if ( $mod eq "tohtml.js" ) {
+	$data =~ s;\Qabc2svg.print('</html>')\E;//$&;;
+    }
+
     print $fd $data;
 
     $fd->close

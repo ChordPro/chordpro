@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="generator" content="ChordPro HTML5 Backend">
+
+    <title>Chorus Test</title>
+
+    <style>
+
+/* ChordPro HTML5 Default Stylesheet */
+
+
+
+:root {
+
+    /* Typography */
+
+    --cp-font-text: Georgia, serif;
+
+    --cp-font-chord: Arial, sans-serif;
+
+    --cp-font-mono: 'Courier New', monospace;
+
+
+
+    /* Font Sizes */
+
+    --cp-size-text: 12pt;
+
+    --cp-size-chord: 10pt;
+
+    --cp-size-title: 18pt;
+
+    --cp-size-subtitle: 14pt;
+
+    --cp-size-comment: 11pt;
+
+
+
+    /* Colors */
+
+    --cp-color-text: #000;
+
+    --cp-color-chord: #0066cc;
+
+    --cp-color-comment: #666;
+
+    --cp-color-highlight: #ff0;
+
+    --cp-color-chorus-bg: #f5f5f5;
+
+    --cp-color-chorus-border: #0066cc;
+
+
+
+    /* Spacing */
+
+    --cp-spacing-line: 0.3em;
+
+    --cp-spacing-verse: 1em;
+
+    --cp-spacing-chord: 0.2em;
+
+}
+
+
+
+/* Body and Page */
+
+body.chordpro-songbook {
+
+    font-family: var(--cp-font-text);
+
+    font-size: var(--cp-size-text);
+
+    color: var(--cp-color-text);
+
+    line-height: 1.4;
+
+    max-width: 800px;
+
+    margin: 0 auto;
+
+    padding: 20px;
+
+}
+
+
+
+/* Song Container */
+
+.cp-song {
+
+    margin-bottom: 3em;
+
+    page-break-after: always;
+
+}
+
+
+
+/* Titles */
+
+.cp-title {
+
+    font-size: var(--cp-size-title);
+
+    font-weight: bold;
+
+    margin: 0.5em 0;
+
+    color: var(--cp-color-text);
+
+}
+
+
+
+.cp-subtitle {
+
+    font-size: var(--cp-size-subtitle);
+
+    font-style: italic;
+
+    margin: 0.3em 0;
+
+    color: var(--cp-color-text);
+
+}
+
+
+
+/* Metadata */
+
+.cp-metadata {
+
+    margin: 1em 0;
+
+    font-size: 0.9em;
+
+}
+
+
+
+.cp-artist,
+
+.cp-composer,
+
+.cp-album {
+
+    margin: 0.2em 0;
+
+    color: #555;
+
+}
+
+
+
+/* Chord Diagrams */
+
+.cp-chord-diagrams {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 20px;
+
+    margin: 1.5em 0;
+
+    padding: 1em;
+
+    background: #f8f8f8;
+
+    border: 1px solid #ddd;
+
+}
+
+
+
+.cp-chord-diagram {
+
+    display: inline-block;
+
+    margin: 0;
+
+}
+
+
+
+.cp-diagram-svg {
+
+    width: 4em;
+
+    height: auto;
+
+}
+
+
+
+.diagram-name {
+
+    font-family: var(--cp-font-chord);
+
+    font-size: 14px;
+
+    font-weight: bold;
+
+    fill: var(--cp-color-chord);
+
+}
+
+
+
+.diagram-line {
+
+    stroke: #333;
+
+    stroke-width: 1;
+
+    fill: none;
+
+}
+
+
+
+.diagram-nut {
+
+    stroke: #000;
+
+    stroke-width: 3;
+
+    fill: none;
+
+}
+
+
+
+.diagram-base {
+
+    font-size: 11px;
+
+    fill: #666;
+
+}
+
+
+
+.diagram-dot {
+
+    fill: #000;
+
+}
+
+
+
+.diagram-open {
+
+    fill: none;
+
+    stroke: #000;
+
+    stroke-width: 2;
+
+}
+
+
+
+.diagram-muted {
+
+    font-size: 16px;
+
+    font-weight: bold;
+
+    fill: #666;
+
+}
+
+
+
+.diagram-finger {
+
+    font-size: 10px;
+
+    fill: #666;
+
+}
+
+
+
+/* Songline - The Core Innovation */
+
+.cp-songline {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    margin-bottom: var(--cp-spacing-line);
+
+    line-height: 1.2;
+
+}
+
+
+
+.cp-chord-lyric-pair {
+
+    display: inline-flex;
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    vertical-align: bottom;
+
+}
+
+
+
+/* Spacing for chord-only pairs (chords with no lyrics) */
+
+.cp-chord-only {
+
+    margin-right: 0.5em;
+
+}
+
+
+
+.cp-chord {
+
+    font-family: var(--cp-font-chord);
+
+    font-size: var(--cp-size-chord);
+
+    color: var(--cp-color-chord);
+
+    font-weight: bold;
+
+    line-height: 1.2;
+
+    min-height: 1.2em;
+
+    height: 1.2em;
+
+    padding-bottom: var(--cp-spacing-chord);
+
+}
+
+
+
+.cp-chord-empty {
+
+    visibility: hidden;
+
+}
+
+
+
+.cp-lyrics {
+
+    font-family: var(--cp-font-text);
+
+    font-size: var(--cp-size-text);
+
+    white-space: pre;
+
+    line-height: 1.2;
+
+}
+
+
+
+/* Comments */
+
+.cp-comment {
+
+    font-size: var(--cp-size-comment);
+
+    color: var(--cp-color-comment);
+
+    margin: 0.5em 0;
+
+    font-style: italic;
+
+}
+
+
+
+.cp-comment-italic {
+
+    font-style: italic;
+
+}
+
+
+
+/* Chorus */
+
+.cp-chorus {
+
+    margin: var(--cp-spacing-verse) 0;
+
+    padding: 0.5em 0 0.5em 1em;
+
+    border-left: 3px solid var(--cp-color-chorus-border);
+
+    background: var(--cp-color-chorus-bg);
+
+}
+
+
+
+/* Verse */
+
+.cp-verse {
+
+    margin: var(--cp-spacing-verse) 0;
+
+}
+
+
+
+/* Bridge */
+
+.cp-bridge {
+
+    margin: var(--cp-spacing-verse) 0;
+
+    padding-left: 1em;
+
+    border-left: 2px dashed #999;
+
+}
+
+
+
+/* Tab */
+
+.cp-tab {
+
+    font-family: var(--cp-font-mono);
+
+    font-size: 0.9em;
+
+    white-space: pre;
+
+    background: #f9f9f9;
+
+    padding: 0.5em;
+
+    border: 1px solid #ddd;
+
+    margin: 1em 0;
+
+    overflow-x: auto;
+
+}
+
+
+
+.cp-tabline {
+
+    margin: 0;
+
+}
+
+
+
+/* Grid */
+
+.cp-grid {
+
+    font-family: var(--cp-font-mono);
+
+    margin: 1em 0;
+
+    background: #f9f9f9;
+
+    padding: 0.5em;
+
+    border: 1px solid #ddd;
+
+}
+
+
+
+.cp-gridline {
+
+    display: flex;
+
+    gap: 0.5em;
+
+    margin: 0.2em 0;
+
+}
+
+
+
+.cp-grid-chord {
+
+    font-family: var(--cp-font-chord);
+
+    color: var(--cp-color-chord);
+
+    font-weight: bold;
+
+    min-width: 3em;
+
+}
+
+
+
+.cp-grid-symbol {
+
+    color: #999;
+
+}
+
+
+
+/* Empty lines */
+
+.cp-empty {
+
+    height: 0.8em;
+
+}
+
+
+
+/* Print Styles */
+
+@media print {
+
+    @page {
+
+        size: A4;
+
+        margin: 2cm;
+
+    }
+
+
+
+    body.chordpro-songbook {
+
+        max-width: 100%;
+
+        padding: 0;
+
+    }
+
+
+
+    .cp-song {
+
+        page-break-after: always;
+
+        page-break-inside: avoid;
+
+    }
+
+
+
+    .cp-chorus,
+
+    .cp-verse,
+
+    .cp-bridge {
+
+        page-break-inside: avoid;
+
+    }
+
+
+
+    .cp-chord {
+
+        color: #000;
+
+    }
+
+}
+
+
+
+    </style>
+
+</head>
+
+<body class="chordpro-songbook">
+
+<div class="cp-song">
+
+  <h1 class="cp-title">Chorus Test</h1>
+
+  <div class="cp-chord-diagrams">
+
+    <div class="cp-chord-diagram">
+
+      <svg class="cp-diagram-svg" viewBox="0 0 110 127" xmlns="http://www.w3.org/2000/svg">
+
+        <text x="62.5" y="18" text-anchor="middle" class="diagram-name">C</text>
+
+        <line x1="25" y1="30" x2="100" y2="30" stroke="#000" stroke-width="3" class="diagram-nut"/>
+
+        <line x1="25" y1="48" x2="100" y2="48" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="25" y1="66" x2="100" y2="66" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="25" y1="84" x2="100" y2="84" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="25" y1="102" x2="100" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="25" y1="30" x2="25" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="40" y1="30" x2="40" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="55" y1="30" x2="55" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="70" y1="30" x2="70" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="85" y1="30" x2="85" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="100" y1="30" x2="100" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <text x="25" y="22" text-anchor="middle" class="diagram-muted">×</text>
+
+        <circle cx="40" cy="75" r="5" class="diagram-dot"/>
+
+        <circle cx="55" cy="57" r="5" class="diagram-dot"/>
+
+        <circle cx="70" cy="22" r="3" class="diagram-open"/>
+
+        <circle cx="85" cy="39" r="5" class="diagram-dot"/>
+
+        <circle cx="100" cy="22" r="3" class="diagram-open"/>
+
+      </svg>
+
+    </div>
+
+    <div class="cp-chord-diagram">
+
+      <svg class="cp-diagram-svg" viewBox="0 0 110 127" xmlns="http://www.w3.org/2000/svg">
+
+        <text x="62.5" y="18" text-anchor="middle" class="diagram-name">G</text>
+
+        <line x1="25" y1="30" x2="100" y2="30" stroke="#000" stroke-width="3" class="diagram-nut"/>
+
+        <line x1="25" y1="48" x2="100" y2="48" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="25" y1="66" x2="100" y2="66" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="25" y1="84" x2="100" y2="84" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="25" y1="102" x2="100" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="25" y1="30" x2="25" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="40" y1="30" x2="40" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="55" y1="30" x2="55" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="70" y1="30" x2="70" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="85" y1="30" x2="85" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="100" y1="30" x2="100" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <circle cx="25" cy="75" r="5" class="diagram-dot"/>
+
+        <circle cx="40" cy="57" r="5" class="diagram-dot"/>
+
+        <circle cx="55" cy="22" r="3" class="diagram-open"/>
+
+        <circle cx="70" cy="22" r="3" class="diagram-open"/>
+
+        <circle cx="85" cy="22" r="3" class="diagram-open"/>
+
+        <circle cx="100" cy="75" r="5" class="diagram-dot"/>
+
+      </svg>
+
+    </div>
+
+    <div class="cp-chord-diagram">
+
+      <svg class="cp-diagram-svg" viewBox="0 0 110 127" xmlns="http://www.w3.org/2000/svg">
+
+        <text x="62.5" y="18" text-anchor="middle" class="diagram-name">Am</text>
+
+        <line x1="25" y1="30" x2="100" y2="30" stroke="#000" stroke-width="3" class="diagram-nut"/>
+
+        <line x1="25" y1="48" x2="100" y2="48" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="25" y1="66" x2="100" y2="66" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="25" y1="84" x2="100" y2="84" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="25" y1="102" x2="100" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="25" y1="30" x2="25" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="40" y1="30" x2="40" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="55" y1="30" x2="55" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="70" y1="30" x2="70" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="85" y1="30" x2="85" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="100" y1="30" x2="100" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <text x="25" y="22" text-anchor="middle" class="diagram-muted">×</text>
+
+        <circle cx="40" cy="22" r="3" class="diagram-open"/>
+
+        <circle cx="55" cy="57" r="5" class="diagram-dot"/>
+
+        <circle cx="70" cy="57" r="5" class="diagram-dot"/>
+
+        <circle cx="85" cy="39" r="5" class="diagram-dot"/>
+
+        <circle cx="100" cy="22" r="3" class="diagram-open"/>
+
+      </svg>
+
+    </div>
+
+    <div class="cp-chord-diagram">
+
+      <svg class="cp-diagram-svg" viewBox="0 0 110 127" xmlns="http://www.w3.org/2000/svg">
+
+        <text x="62.5" y="18" text-anchor="middle" class="diagram-name">F</text>
+
+        <line x1="25" y1="30" x2="100" y2="30" stroke="#000" stroke-width="3" class="diagram-nut"/>
+
+        <line x1="25" y1="48" x2="100" y2="48" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="25" y1="66" x2="100" y2="66" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="25" y1="84" x2="100" y2="84" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="25" y1="102" x2="100" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="25" y1="30" x2="25" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="40" y1="30" x2="40" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="55" y1="30" x2="55" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="70" y1="30" x2="70" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="85" y1="30" x2="85" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <line x1="100" y1="30" x2="100" y2="102" stroke="#333" stroke-width="1" class="diagram-line"/>
+
+        <circle cx="25" cy="39" r="5" class="diagram-dot"/>
+
+        <circle cx="40" cy="75" r="5" class="diagram-dot"/>
+
+        <circle cx="55" cy="75" r="5" class="diagram-dot"/>
+
+        <circle cx="70" cy="57" r="5" class="diagram-dot"/>
+
+        <circle cx="85" cy="39" r="5" class="diagram-dot"/>
+
+        <circle cx="100" cy="39" r="5" class="diagram-dot"/>
+
+      </svg>
+
+    </div>
+
+  </div>
+
+
+
+<div class="cp-verse">
+
+<div class="cp-songline">
+
+  <span class="cp-chord-lyric-pair">
+
+    <span class="cp-chord cp-chord-empty"></span>
+
+    <span class="cp-lyrics">This is a </span>
+
+  </span>
+
+  <span class="cp-chord-lyric-pair">
+
+    <span class="cp-chord">C</span>
+
+    <span class="cp-lyrics">verse with some </span>
+
+  </span>
+
+  <span class="cp-chord-lyric-pair">
+
+    <span class="cp-chord">G</span>
+
+    <span class="cp-lyrics">chords.</span>
+
+  </span>
+
+</div>
+
+<div class="cp-songline">
+
+  <span class="cp-chord-lyric-pair">
+
+    <span class="cp-chord cp-chord-empty"></span>
+
+    <span class="cp-lyrics">Second </span>
+
+  </span>
+
+  <span class="cp-chord-lyric-pair">
+
+    <span class="cp-chord">Am</span>
+
+    <span class="cp-lyrics">line of the verse</span>
+
+  </span>
+
+  <span class="cp-chord-lyric-pair">
+
+    <span class="cp-chord">F</span>
+
+    <span class="cp-lyrics">.</span>
+
+  </span>
+
+</div>
+
+</div><!-- .cp-verse -->
+
+<div class="cp-chorus">
+
+<div class="cp-songline">
+
+  <span class="cp-chord-lyric-pair">
+
+    <span class="cp-chord cp-chord-empty"></span>
+
+    <span class="cp-lyrics">This is the </span>
+
+  </span>
+
+  <span class="cp-chord-lyric-pair">
+
+    <span class="cp-chord">C</span>
+
+    <span class="cp-lyrics">chorus line</span>
+
+  </span>
+
+  <span class="cp-chord-lyric-pair">
+
+    <span class="cp-chord">G</span>
+
+    <span class="cp-lyrics">.</span>
+
+  </span>
+
+</div>
+
+<div class="cp-songline">
+
+  <span class="cp-chord-lyric-pair">
+
+    <span class="cp-chord cp-chord-empty"></span>
+
+    <span class="cp-lyrics">Another </span>
+
+  </span>
+
+  <span class="cp-chord-lyric-pair">
+
+    <span class="cp-chord">Am</span>
+
+    <span class="cp-lyrics">chorus line</span>
+
+  </span>
+
+  <span class="cp-chord-lyric-pair">
+
+    <span class="cp-chord">F</span>
+
+    <span class="cp-lyrics">.</span>
+
+  </span>
+
+</div>
+
+</div><!-- .cp-chorus -->
+
+<div class="cp-verse">
+
+<div class="cp-songline">
+
+  <span class="cp-chord-lyric-pair">
+
+    <span class="cp-chord cp-chord-empty"></span>
+
+    <span class="cp-lyrics">Second verse </span>
+
+  </span>
+
+  <span class="cp-chord-lyric-pair">
+
+    <span class="cp-chord">C</span>
+
+    <span class="cp-lyrics">here.</span>
+
+  </span>
+
+</div>
+
+</div><!-- .cp-verse -->
+
+</div><!-- .cp-song -->
+
+
+
+</body>
+
+</html>
+

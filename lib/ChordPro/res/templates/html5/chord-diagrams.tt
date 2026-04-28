@@ -1,0 +1,15 @@
+[%# ChordPro HTML5 Chord Diagrams Template
+    Variables:
+      - diagrams: Array of diagram HTML snippets (typically <img>)
+      - diagrams_align: alignment class suffix (left/center/right/spread)
+      - diagrams_direction: direction class suffix (vertical/horizontal), empty = CSS default
+%]
+[% IF diagrams && diagrams.size > 0 %]
+<div class="cp-chord-diagrams[% IF diagrams_align %] cp-chord-diagrams-align-[% diagrams_align | html %][% END %][% IF diagrams_direction %] cp-chord-diagrams-direction-[% diagrams_direction | html %][% END %]">
+[% FOREACH diagram IN diagrams %]
+  <div class="cp-chord-diagram">
+[% diagram %]
+  </div>
+[% END %]
+</div>
+[% END %]
