@@ -1,5 +1,19 @@
 # Release info
 
+## 6.101
+
+Released: 2026-04-30
+
+* Change LICENSE to match Artistic 2.0.
+* Eliminate warning when running without DISPLAY.
+* Default PDF info 'title' to songbook title, if any. As suggested by CodeShakingSheep.
+* Fix undefined subroutine crash when using `--text-font` et al.
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.  
+Please use the [issue tracker](https://github.com/ChordPro/chordpro/issues) for bugs reports.
+
 ## 6.100.0
 
 Released: 2026-04-21
@@ -46,11 +60,6 @@ Released: 2026-04-21
 * Fixed issue #647 (image scaling goes wrong with columns).
 * Fixed issue #658.
 * Several others.
-
-### Social and support
-
-[User community](https://groups.io/g/ChordPro) for feedback and help.  
-Please use the [issue tracker](https://github.com/ChordPro/chordpro/issues) for bugs reports.
 
 ## 6.090.1
 

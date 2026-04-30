@@ -5,7 +5,7 @@ name: Full Build on macOS
 #
 # git checkout -b macosbuild
 # edit lib/ChordPro/Version.pm
-# git commit --no-verify -m "Force macOS build." lib/ChordPro/Version.pm
+# git commit --no-verify --allow-empty -am "Force macOS build."
 # git push --set-upstream origin macosbuild
 #
 # git checkout dev

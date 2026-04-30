@@ -199,7 +199,7 @@ _akit :
 
 _akit_startvm :
 	-VBoxManage startvm ${LTSVM} --type headless
-	ssh ${LTSHOST} sudo ntpdate -b ntp.squirrel.nl
+	ssh ${LTSHOST} sudo ntpdate -t 20 -b ntp.squirrel.nl
 
 _akit_stopvm :
 	VBoxManage controlvm ${LTSVM} poweroff
