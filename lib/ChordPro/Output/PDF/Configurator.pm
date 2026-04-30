@@ -9,6 +9,8 @@ package ChordPro::Output::PDF;
 
 our $pdfapi;
 
+use ChordPro::Utils qw(is_corefont);
+
 sub configurator {
     my ( $cfg ) = @_;
 

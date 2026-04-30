@@ -1,3 +1,14 @@
+6.101 2026-04-30
+
+    - Change LICENSE to match Artistic 2.0.
+
+    - Eliminate warning when running without DISPLAY.
+
+    - Default PDF info 'title' to songbook title, if any.
+      As suggested by CodeShakingSheep.
+
+    - Fix undefined subroutine crash when using `--text-font` et al.
+
 6.100.0 2026-04-21
 
     !Highlights
@@ -5,7 +16,7 @@
     - Reworked Keys and Transpositions.
       See https://www.chordpro.org/chordpro/keys_and_transpositions/ .
 
-    - New config setting: `keys.force-common` and `keys.sharps`.
+    - New config setting: `keys.force-common` and `keys.flats`.
 
     - Updated the standard guitar chords with lots of new chords and
       fingering information. Thanks to Russ Jones.

@@ -201,12 +201,12 @@ sub generate_song {
 		if ( $e->{type} eq "image" ) {
 		    use ChordPro::Output::Common qw(mimedata);
 		    my @args;
-		    while ( my($k,$v) = each( %{ $elt->{opts} } ) ) {
+		    while ( my($k,$v) = each( %{ $e->{opts} } ) ) {
 			push( @args, "$k=\"$v\"" );
 		    }
 
 		    my $asset = $s->{assets}->{$e->{id}};
-		    $elt->{uri} //= $asset->{uri};
+		    $e->{uri} //= $asset->{uri};
 
 		    my @images;
 		    if ( $s->{assets}->{$e->{id}}->{data} ) {
@@ -215,7 +215,7 @@ sub generate_song {
 		    }
 		    else {
 			# Presumably a single image source.
-			@images = mimedata($elt->{uri});
+			@images = mimedata($e->{uri});
 		    }
 		    for ( @images ) {
 			push( @s,
@@ -236,9 +236,9 @@ sub generate_song {
 		    use ChordPro::Delegate::TextBlock;
 		    my $pkg = 'ChordPro::Delegate::'. $e->{delegate};
 		    my $hnd = $e->{handler};
-		    warn("XXX pkg = \"$pkg\", hnd = \"$hnd\"\n");
-		    my $html = $pkg->can($hnd)->( $s, elt => $e );
-		    push( @s, '<div class="' . lc($hnd) . '">' . $html . '</div>' );
+		    my $res = $pkg->can($hnd)->( $s, elt => $e );
+		    push( @s, '<div class="' . lc($hnd) . '">' . $_ . '</div>' )
+		      for @{$res->{data}};
 		    push( @s, "" ) if $tidy;
 		    next;
 		}

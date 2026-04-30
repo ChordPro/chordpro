@@ -48,7 +48,6 @@ sub generate_song {
     $single_space = $options->{'single-space'};
     upd_config();
 
-    $DB::single = 1;
     $s->structurize
       if ( $options->{'backend-option'}->{structure} // '' ) eq 'structured';
 

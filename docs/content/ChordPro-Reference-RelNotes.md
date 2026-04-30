@@ -1,5 +1,19 @@
 # Release info
 
+## 6.101
+
+Released: 2026-04-30
+
+* Change LICENSE to match Artistic 2.0.
+* Eliminate warning when running without DISPLAY.
+* Default PDF info 'title' to songbook title, if any. As suggested by CodeShakingSheep.
+* Fix undefined subroutine crash when using `--text-font` et al.
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.  
+Please use the [issue tracker](https://github.com/ChordPro/chordpro/issues) for bugs reports.
+
 ## 6.100.0
 
 Released: 2026-04-21
@@ -8,7 +22,7 @@ Released: 2026-04-21
 ### Highlights
 
 * Reworked Keys and Transpositions. See https://www.chordpro.org/chordpro/keys_and_transpositions/ .
-* New config setting: `keys.force-common` and `keys.sharps`.
+* New config setting: `keys.force-common` and `keys.flats`.
 * Updated the standard guitar chords with lots of new chords and fingering information. Thanks to Russ Jones.
 * Added another Russ Jones contribution: jazzy-chords with many chord names typically used in Jazzy music.
 * Added a new configuration setting `settings.wraplines` to control line wrapping. Enabled by default.
@@ -46,11 +60,6 @@ Released: 2026-04-21
 * Fixed issue #647 (image scaling goes wrong with columns).
 * Fixed issue #658.
 * Several others.
-
-### Social and support
-
-[User community](https://groups.io/g/ChordPro) for feedback and help.  
-Please use the [issue tracker](https://github.com/ChordPro/chordpro/issues) for bugs reports.
 
 ## 6.090.1
 
