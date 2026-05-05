@@ -1352,7 +1352,7 @@ sub runtime_info {
 	push( @p,
 	      { name => "wxPerl",    version => $dd->($Wx::VERSION)  },
 	      { name => "wxWidgets", version => $dd->($Wx::wxVERSION) } );
-    } if $ENV{DISPLAY};
+    } if $ENV{DISPLAY} || is_wx;
 
     $vv->("Storable");
     $vv->("Object::Pad");

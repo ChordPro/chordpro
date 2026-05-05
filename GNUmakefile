@@ -243,6 +243,9 @@ ABCKIT     = abc2svg-9b12853f66
 # 1.22.34
 ABCKIT     = abc2svg-9e4ccff7c9
 
+# 1.23.1
+ABCKIT     = abc2svg-ab567530ba
+
 .PHONY: abc
 
 abc :

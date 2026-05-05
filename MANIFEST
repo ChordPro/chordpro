@@ -146,13 +146,13 @@ lib/ChordPro/res/config/config.tmpl
 lib/ChordPro/res/config/dark.json
 lib/ChordPro/res/config/diagramsright.json
 lib/ChordPro/res/config/guitar-br.json
-lib/ChordPro/res/config/jazzy-chords.json
-lib/ChordPro/res/config/jazzy-chords.rjson
 lib/ChordPro/res/config/guitar-ly.json
 lib/ChordPro/res/config/guitar.json
 lib/ChordPro/res/config/guitar.rjson
 lib/ChordPro/res/config/guitar_latex.json
 lib/ChordPro/res/config/inline.json
+lib/ChordPro/res/config/jazzy-chords.json
+lib/ChordPro/res/config/jazzy-chords.rjson
 lib/ChordPro/res/config/keyboard.json
 lib/ChordPro/res/config/lyricsonly.json
 lib/ChordPro/res/config/mandolin-ly.json
