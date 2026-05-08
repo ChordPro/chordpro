@@ -231,6 +231,7 @@ method fetch_prefs() {
     $self->prefs2colours;
     $self->{cb_editorwrap}->SetValue($preferences{editorwrap});
     $self->{sp_editorwrap}->SetValue($preferences{editorwrapindent});
+    $self->{cb_livepreview}->SetValue($preferences{livepreview});
 
     # Messages.
     $self->{fp_messages}->SetSelectedFont( Wx::Font->new($preferences{msgsfont}) );
@@ -309,6 +310,7 @@ method store_prefs() {
     $self->colours2prefs;
     $preferences{editorwrap} = $self->{cb_editorwrap}->IsChecked;
     $preferences{editorwrapindent} = $self->{sp_editorwrap}->GetValue;
+    $preferences{livepreview} = $self->{cb_livepreview}->IsChecked;
 
     # Messages.
     $preferences{msgsfont} = $self->{fp_messages}->GetSelectedFont->GetNativeFontInfoDesc;
@@ -620,6 +622,10 @@ method OnEditorWrap( $event ) {
 method OnEditorWrapIndent( $event ) {
     $preferences{editorwrapindent} = $self->{sp_editorwrap}->GetValue;
     $self->{t_editor}->refresh;
+}
+
+method OnLivePreview( $event ) {
+    $preferences{livepreview} = $self->{cb_livepreview}->IsChecked;
 }
 
 method OnCbTmplFile($event) {

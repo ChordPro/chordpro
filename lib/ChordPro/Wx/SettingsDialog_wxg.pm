@@ -318,7 +318,11 @@ sub new {
     $self->{fp_tmplfile} = ChordPro::Wx::FileDirPickerCtrl->new($self->{nb_editor}, wxID_ANY, "", "Select a template for new songs", "ChordPro files (*.cho,*.crd,*.chopro,*.chord,*.chordpro,*.pro)|*.cho;*.crd;*.chopro;*.chord;*.chordpro;*.pro;*.txt");
     $self->{fp_tmplfile}->SetToolTip(_T("Template for new songs"));
     $self->{sizer_10}->Add($self->{fp_tmplfile}, Wx::GBPosition->new(4, 1), Wx::GBSpan->new(1, 1), wxEXPAND, 0);
-    
+
+    $self->{cb_livepreview} = Wx::CheckBox->new($self->{nb_editor}, wxID_ANY, _T("Live preview"));
+    $self->{cb_livepreview}->SetToolTip(_T("Automatically refresh the preview while editing"));
+    $self->{sizer_10}->Add($self->{cb_livepreview}, Wx::GBPosition->new(5, 0), Wx::GBSpan->new(1, 2), wxALIGN_CENTER_VERTICAL, 0);
+
     $self->{nb_messages} = Wx::Panel->new($self->{nb_preferences}, wxID_ANY);
     $self->{nb_preferences}->AddPage($self->{nb_messages}, _T("Messages"));
     
@@ -462,6 +466,7 @@ sub new {
     Wx::Event::EVT_COLOURPICKER_CHANGED($self, $self->{cp_annbg}->GetId, $self->can('OnColourAnnBGChanged'));
     Wx::Event::EVT_TEXT($self, $self->{t_prefext}->GetId, $self->can('OnPrefExtChanged'));
     Wx::Event::EVT_CHECKBOX($self, $self->{cb_tmplfile}->GetId, $self->can('OnCbTmplFile'));
+    Wx::Event::EVT_CHECKBOX($self, $self->{cb_livepreview}->GetId, $self->can('OnLivePreview'));
     Wx::Event::EVT_FONTPICKER_CHANGED($self, $self->{fp_messages}->GetId, $self->can('OnMessagesFontPickerChanged'));
     Wx::Event::EVT_CHECKBOX($self, $self->{cb_pdfviewer}->GetId, $self->can('OnPDFViewer'));
     Wx::Event::EVT_CHECKBOX($self, $self->{cb_htmlviewer}->GetId, $self->can('OnHTMLViewer'));
@@ -721,6 +726,15 @@ sub OnCbTmplFile {
     my ($self, $event) = @_;
     # wxGlade: ChordPro::Wx::SettingsDialog_wxg::OnCbTmplFile <event_handler>
     warn "Event handler (OnCbTmplFile) not implemented";
+    $event->Skip;
+    # end wxGlade
+}
+
+
+sub OnLivePreview {
+    my ($self, $event) = @_;
+    # wxGlade: ChordPro::Wx::SettingsDialog_wxg::OnLivePreview <event_handler>
+    warn "Event handler (OnLivePreview) not implemented";
     $event->Skip;
     # end wxGlade
 }
