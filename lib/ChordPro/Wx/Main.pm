@@ -419,27 +419,28 @@ method OnIdle($event) {
 	$f .= " (modified)" if $mod;
     }
     $f = "ChordPro — $f" if $state{windowtitle};
-    $self->SetTitle($f);
+    $self->SetTitle($f) unless $self->GetTitle eq $f;
 
     if ( $state{mode} eq "editor") {
 	my $t = $self->{p_editor}->{t_editor}->GetText;
 
 	if ( $t =~ /^\{\s*t(?:itle)?[: ]+([^\}]*)\}/m ) {
-	    $self->{p_editor}->{l_status}->SetLabel(demarkup($1));
+	    my $title = demarkup($1);
+	    my $l_status = $self->{p_editor}->{l_status};
+	    $l_status->SetLabel($title) unless $l_status->GetLabel eq $title;
 	}
+    }
 
-	if ( $state{editchanged}
-	     && $self->{p_editor}->{sw_lr}->IsSplit ) {
-
-	    if ( $state{have_webview}
-		 && $preferences{enable_htmlviewer} ) {
-		$self->{p_editor}->preview([]);
-		$state{editchanged} = 0;
-	    }
-	    else {
-		# Preview is no longer actual -- how to signal?
-	    }
+    if ( $state{editchanged} && $state{mode} eq "editor" ) {
+	my $panel = $self->{p_editor};
+	if ( $preferences{livepreview}
+	     && $state{have_webview}
+	     && !$preferences{enable_pdfviewer}
+	     && $panel->{sw_lr}->IsSplit ) {
+	    $panel->preview( [ $panel->preview_tasks_args ] );
+	    $state{editchanged} = 0;
 	}
+	# else: preview is stale; nothing to do.
     }
 
 }
@@ -555,6 +556,10 @@ method OnPreferences($event) {
     $state{panel}->update_preferences unless $state{mode} eq "initial";
 
     $self->setup_menubar;
+
+    # Style/config may have changed; mark the preview as stale so the
+    # OnIdle live-preview path picks it up.
+    $state{editchanged}++;
 }
 
 # On the recents list, click selects and displays the file name.

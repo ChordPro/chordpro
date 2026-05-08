@@ -36,6 +36,9 @@ BUILD {
     # Setup WebView, if possible.
     $self->setup_webview if $::options->{webview}//1;
 
+    # Inline "Preview Tasks" controls in the toolbar, left of Settings.
+    $self->setup_preview_tasks_bar;
+
     # Single pane.
     $self->unsplit;
 }
@@ -84,6 +87,7 @@ method refresh() {
     my $font = Wx::Font->new($preferences{msgsfont});
     $self->{t_messages}->SetFont($font);
     setup_messages_ctxmenu($self);
+    $self->refresh_preview_tasks_bar;
     $self->previewtooltip;
     $self->messagestooltip;
     $self->set_focus;

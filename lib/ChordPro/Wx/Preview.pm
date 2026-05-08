@@ -233,7 +233,10 @@ method preview( $args, %opts ) {
 	  for qw( chordpro.css chordpro_print.css );
     }
 
-    if ( !$preferences{enable_pdfviewer}
+    if ( $opts{noviewer} ) {
+	# Caller (e.g. Export to PDF) just wants the file generated.
+    }
+    elsif ( !$preferences{enable_pdfviewer}
 	 && $panel->{webview}->isa('Wx::WebView') ) {
 
 	for ( $panel ) {
@@ -244,7 +247,7 @@ method preview( $args, %opts ) {
 	    unless ( $_->{sw_lr}->IsSplit ) {
 		$_->{sw_lr}->SplitVertically ( $_->{p_left},
 					       $_->{p_right},
-					       $state{sash}{$_->panel."_lr"} // 0.5 );
+					       $state{sash}{$_->panel."_lr"} // 0 );
 	    }
 	}
 
@@ -254,8 +257,7 @@ method preview( $args, %opts ) {
 	    ( $panel, $panel->{webview}, $self->can("OnWebViewError") );
 
 	use URI::file;
-	my $wf = URI::file->new($preview_file);
-	$wf =~ s;///([A-Z]):/;///$1|/;;
+	my $wf = URI::file->new($preview_file)->as_string;
 	$self->log( 'I', "Preview " . substr($wf,0,128) );
 	$panel->{webview}->LoadURL($wf);
     }

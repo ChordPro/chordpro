@@ -890,6 +890,18 @@
                                                     </arguments>
                                                 </object>
                                             </object>
+                                            <object class="sizeritem">
+                                                <span>1, 2</span>
+                                                <border>0</border>
+                                                <flag>wxALIGN_CENTER_VERTICAL</flag>
+                                                <object class="wxCheckBox" name="cb_livepreview" base="EditCheckBox">
+                                                    <events>
+                                                        <handler event="EVT_CHECKBOX">OnLivePreview</handler>
+                                                    </events>
+                                                    <tooltip>Automatically refresh the preview while editing</tooltip>
+                                                    <label>Live preview</label>
+                                                </object>
+                                            </object>
                                         </object>
                                     </object>
                                 </object>
