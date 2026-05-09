@@ -146,7 +146,7 @@ method OnPreferences($event) {
 }
 
 method OnPreview($event) {		# for menu
-    $self->preview( [] );
+    $self->preview( [ $self->preview_tasks_args ] );
     $self->previewtooltip;
 }
 
@@ -157,78 +157,242 @@ method OnPreviewClose($event) {
 }
 
 method OnPreviewLyricsOnly($event) {
-    $self->preview( [ '--lyrics-only' ] );
-    $self->previewtooltip;
-}
-
-method OnPreviewMore($event) {
-
-    #               C      D      E  F      G      A        B C
-    state @xpmap = qw( 0 1  1 2 3  3 4  5 6  6 7 8  8 9 10 10 11 12 );
-    state @sfmap = qw( 0 7 -5 2 9 -3 4 -1 6 -6 1 8 -4 3 10 -2  5 0  );
-
-    unless ( $self->{d_render} ) {
-	require ChordPro::Wx::RenderDialog;
-	$self->{d_render} = ChordPro::Wx::RenderDialog->new
-	  ( $self, wxID_ANY, "Tasks" );
-	restorewinpos( $self->{d_render}, "render" );
-    }
-    else {
-	$self->{d_render} ->refresh;
-    }
-
-    my $d = $self->{d_render};
-    my $ret = $d->ShowModal;
-    return unless $ret == wxID_OK;
-
-    my @args;
-    if ( $d->{cb_task_no_diagrams}->IsChecked ) {
-	push( @args, "--no-chord-grids" );
-    }
-    if ( $d->{cb_task_lyrics_only}->IsChecked ) {
-	push( @args, "--lyrics-only",
-	      "--define=delegates.abc.omit=1",
-	      "--define=delegates.ly.omit=1" );
-    }
-    if ( $d->{cb_task_decapo}->IsChecked ) {
-	push( @args, "--decapo" );
-    }
-
-    # Transpose. See also Preview.pm.
-    $state{"xpose_$_"} ||= 0
-      for qw( enabled semitones accidentals );
-    if ( $state{xpose_enabled} ) {
-	my $pfx;
-	if ( $state{xpose_accidentals} == XP_SHARP ) {
-	    $pfx = "s"
-	}
-	elsif ( $state{xpose_accidentals} == XP_FLAT ) {
-	    $pfx = "f"
-	}
-	else {
-	    $pfx = "";
-	}
-	push( @ARGV, '--transpose', $state{xpose_semitones} . $pfx );
-    }
-
-    my $i = 0;
-    while ( exists $d->{"cb_customtask_$i"} ) {
-	if ( $d->{"cb_customtask_$i"}->IsChecked ) {
-	    push( @args, "--config",
-		  $state{presets}{tasks}{lc $d->{"cb_customtask_$i"}->GetLabel}->{file} );
-	}
-	$i++;
-    }
-    $self->preview( \@args  );
+    # Legacy menu shortcut: toggle the toolbar checkbox and preview.
+    $self->{cb_task_lyrics_only}->SetValue(1)
+      if $self->{cb_task_lyrics_only};
+    $self->preview( [ $self->preview_tasks_args ] );
     $self->previewtooltip;
 }
 
 method OnPreviewNoDiagrams($event) {
-    $self->preview( [ '--no-chord-grids' ] );
+    # Legacy menu shortcut: toggle the toolbar checkbox and preview.
+    $self->{cb_task_no_diagrams}->SetValue(1)
+      if $self->{cb_task_no_diagrams};
+    $self->preview( [ $self->preview_tasks_args ] );
     $self->previewtooltip;
 }
 
+# Build the inline "Preview Tasks" section in the panel toolbar,
+# inserted left of the Settings button. The section is enabled
+# only while the preview pane is showing.
+method setup_preview_tasks_bar() {
+    my $sz = $self->{sz_toolbar};
+    return unless $sz;
+
+    # Outer (vertical) sizer: title on top, controls row below.
+    my $outer = $self->{sz_preview_tasks} = Wx::BoxSizer->new(wxVERTICAL);
+
+    # ---- Section title ----
+    $self->{l_preview_tasks} = Wx::StaticText->new
+      ( $self, wxID_ANY, _T("Preview Tasks"),
+	wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL );
+    $self->{l_preview_tasks}->SetForegroundColour(Wx::Colour->new(0, 104, 217));
+    $self->{l_preview_tasks}->SetFont
+      ( Wx::Font->new( 10, wxFONTFAMILY_DEFAULT,
+		       wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, 0, "" ) );
+    $self->{l_preview_tasks}->SetToolTip
+      (_T("Options that apply to the preview"));
+    $outer->Add( $self->{l_preview_tasks}, 0,
+		 wxALIGN_CENTER_HORIZONTAL|wxBOTTOM, 2 );
+
+    # Inner (horizontal) sizer holds the actual task widgets.
+    my $tb = Wx::BoxSizer->new(wxHORIZONTAL);
+    $outer->Add( $tb, 0, wxEXPAND, 0 );
+
+    # ---- Transpose ----
+    $self->{l_xpose} = Wx::StaticText->new( $self, wxID_ANY, _T("Transpose") );
+    $self->{l_xpose}->SetToolTip
+      (_T("Transpose the song. Negative values transpose down."));
+    $tb->Add( $self->{l_xpose}, 0,
+	      wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT, 3 );
+
+    $self->{sp_xpose} = Wx::SpinCtrl->new
+      ( $self, wxID_ANY, "0", wxDefaultPosition, [ 65, -1 ],
+	wxSP_ARROW_KEYS, -12, 12, 0 );
+    $self->{sp_xpose}->SetToolTip
+      (_T("Number of semitones to transpose. Negative is down."));
+    $tb->Add( $self->{sp_xpose}, 0, wxALIGN_CENTER_VERTICAL, 0 );
+    Wx::Event::EVT_SPINCTRL( $self, $self->{sp_xpose}->GetId,
+			     $self->can("OnPreviewTaskChanged") );
+    Wx::Event::EVT_TEXT( $self, $self->{sp_xpose}->GetId,
+			 $self->can("OnPreviewTaskChanged") );
+
+    $self->{ch_acc} = Wx::Choice->new
+      ( $self, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+	[ _T("Auto"), _T("Sharps"), _T("Flats"), _T("Key") ] );
+    $self->{ch_acc}->SetSelection(0);
+    $self->{ch_acc}->SetToolTip(_T("Accidentals after transposing.\n".
+				   "Auto: sharps when up, flats when down.\n".
+				   "Key: use the song's transposed key."));
+    $tb->Add( $self->{ch_acc}, 0, wxALIGN_CENTER_VERTICAL|wxLEFT, 3 );
+    Wx::Event::EVT_CHOICE( $self, $self->{ch_acc}->GetId,
+			   $self->can("OnPreviewTaskChanged") );
+
+    $tb->Add( Wx::StaticLine->new( $self, wxID_ANY,
+				   wxDefaultPosition, [ -1, 22 ],
+				   wxLI_VERTICAL ),
+	      0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT, 6 );
+
+    # ---- Task checkboxes ----
+    $self->{cb_task_no_diagrams} = Wx::CheckBox->new
+      ( $self, wxID_ANY, _T("No diagrams") );
+    $self->{cb_task_no_diagrams}->SetToolTip(_T("Suppress the chord diagrams"));
+    $tb->Add( $self->{cb_task_no_diagrams}, 0,
+	      wxALIGN_CENTER_VERTICAL|wxRIGHT, 5 );
+    Wx::Event::EVT_CHECKBOX( $self, $self->{cb_task_no_diagrams}->GetId,
+			     $self->can("OnPreviewTaskChanged") );
+
+    $self->{cb_task_lyrics_only} = Wx::CheckBox->new
+      ( $self, wxID_ANY, _T("Lyrics only") );
+    $self->{cb_task_lyrics_only}->SetToolTip
+      (_T("Only lyrics (no chords, ABC, LilyPond, ...)"));
+    $tb->Add( $self->{cb_task_lyrics_only}, 0,
+	      wxALIGN_CENTER_VERTICAL|wxRIGHT, 5 );
+    Wx::Event::EVT_CHECKBOX( $self, $self->{cb_task_lyrics_only}->GetId,
+			     $self->can("OnPreviewTaskChanged") );
+
+    $self->{cb_task_decapo} = Wx::CheckBox->new
+      ( $self, wxID_ANY, _T("Decapo") );
+    $self->{cb_task_decapo}->SetToolTip
+      (_T("Show the chords as they sound, eliminating the need for a capo setting"));
+    $tb->Add( $self->{cb_task_decapo}, 0,
+	      wxALIGN_CENTER_VERTICAL|wxRIGHT, 5 );
+    Wx::Event::EVT_CHECKBOX( $self, $self->{cb_task_decapo}->GetId,
+			     $self->can("OnPreviewTaskChanged") );
+
+    # Placeholder for custom tasks; populated in refresh_preview_tasks_bar.
+    $self->{sz_customtasks_bar} = Wx::BoxSizer->new(wxHORIZONTAL);
+    $tb->Add( $self->{sz_customtasks_bar}, 0,
+	      wxALIGN_CENTER_VERTICAL, 0 );
+
+    # Final separator before the existing buttons.
+    $tb->Add( Wx::StaticLine->new( $self, wxID_ANY,
+				   wxDefaultPosition, [ -1, 22 ],
+				   wxLI_VERTICAL ),
+	      0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT, 6 );
+
+    # Insert the section in front of the Settings button.
+    # GetItemCount/GetItem aren't exposed on Wx::BoxSizer in this wxPerl;
+    # GetChildren returns a list (not an arrayref) of Wx::SizerItem, so
+    # collect it in list context.
+    my @items = $sz->GetChildren;
+    my $idx = scalar @items;	# default: append at end
+    for ( my $i = 0; $i < @items; $i++ ) {
+	my $w = eval { $items[$i]->GetWindow };
+	if ( $w && $w == $self->{bmp_preferences} ) {
+	    $idx = $i;
+	    last;
+	}
+    }
+    $sz->Insert( $idx, $outer, 0, wxALIGN_CENTER_VERTICAL, 0 );
+
+    # Initialize from saved state.
+    $state{"xpose_$_"} ||= 0
+      for qw( enabled semitones accidentals );
+    $self->{sp_xpose}->SetValue( $state{xpose_semitones} || 0 );
+    $self->{ch_acc}->SetSelection( $state{xpose_accidentals} || 0 );
+
+    $self->update_preview_tasks_state;
+}
+
+# (Re)populate the custom-tasks checkboxes. Safe to call when the
+# preset list has changed (e.g. on first refresh, or after Settings).
+method refresh_preview_tasks_bar() {
+    return unless $self->{sz_customtasks_bar};
+
+    # Drop existing custom checkboxes.
+    my $i = 0;
+    while ( my $cb = delete $self->{"cb_customtask_$i"} ) {
+	$self->{sz_customtasks_bar}->Detach($cb);
+	$cb->Destroy;
+	$i++;
+    }
+
+    my $tasks = $state{presets}{tasks};
+    if ( $tasks && %$tasks ) {
+	my $index = 0;
+	for my $task ( sort keys %$tasks ) {
+	    my $cb = Wx::CheckBox->new
+	      ( $self, wxID_ANY, $tasks->{$task}->{title} );
+	    $cb->SetToolTip(_T("Custom task: ").$tasks->{$task}->{title});
+	    $self->{"cb_customtask_$index"} = $cb;
+	    $self->{sz_customtasks_bar}->Add
+	      ( $cb, 0, wxALIGN_CENTER_VERTICAL|wxRIGHT, 5 );
+	    Wx::Event::EVT_CHECKBOX( $self, $cb->GetId,
+				     $self->can("OnPreviewTaskChanged") );
+	    $index++;
+	}
+    }
+    $self->{sz_toolbar}->Layout if $self->{sz_toolbar};
+    $self->update_preview_tasks_state;
+}
+
+# Enable/disable the entire preview-tasks section based on whether
+# the preview pane is currently showing.
+method update_preview_tasks_state() {
+    my $shown = $self->{sw_lr} && $self->{sw_lr}->IsSplit;
+    for my $name ( qw( l_preview_tasks
+		       l_xpose
+		       sp_xpose
+		       ch_acc
+		       cb_task_no_diagrams
+		       cb_task_lyrics_only
+		       cb_task_decapo ) ) {
+	$self->{$name}->Enable($shown) if $self->{$name};
+    }
+    my $i = 0;
+    while ( my $cb = $self->{"cb_customtask_$i"} ) {
+	$cb->Enable($shown);
+	$i++;
+    }
+}
+
+# Collect arguments from the toolbar controls. Also syncs the
+# transpose state into %state so Preview.pm picks it up.
+method preview_tasks_args() {
+    my @args;
+    return @args unless $self->{cb_task_no_diagrams}; # bar not built
+
+    push( @args, "--no-chord-grids" )
+      if $self->{cb_task_no_diagrams}->IsChecked;
+    push( @args, "--lyrics-only",
+		 "--define=delegates.abc.omit=1",
+		 "--define=delegates.ly.omit=1" )
+      if $self->{cb_task_lyrics_only}->IsChecked;
+    push( @args, "--decapo" )
+      if $self->{cb_task_decapo}->IsChecked;
+
+    my $i = 0;
+    while ( my $cb = $self->{"cb_customtask_$i"} ) {
+	if ( $cb->IsChecked ) {
+	    my $info = $state{presets}{tasks}{ lc $cb->GetLabel };
+	    push( @args, "--config", $info->{file} ) if $info;
+	}
+	$i++;
+    }
+
+    # Sync transpose state for Preview.pm. See also Preview.pm.
+    # Transpose is "enabled" iff the user picked a non-zero offset.
+    my $semi = $self->{sp_xpose}->GetValue;
+    $state{xpose_enabled}     = $semi ? 1 : 0;
+    $state{xpose_semitones}   = $semi;
+    $state{xpose_accidentals} = $self->{ch_acc}->GetSelection;
+
+    return @args;
+}
+
+# Bound to all Preview-Tasks toolbar widgets. Marks the preview as
+# stale so OnIdle picks it up if Live Preview is enabled and the
+# preview pane is open.
+method OnPreviewTaskChanged($event) {
+    $state{editchanged}++;
+}
+
 method OnPreviewSave($event) {
+    unless ( $self->prv && $self->prv->have_preview ) {
+	# Generate a preview on the fly, without launching a viewer.
+	$self->preview( [], noviewer => 1 );
+    }
     if ( $self->prv && $self->prv->have_preview ) {
 	return $self->prv->save;
     }
@@ -334,6 +498,7 @@ method previewtooltip() {
 	$self->{bmb_preview}->SetToolTip(_T("Generate and show a new preview"));
 	$mi->Check(0);
     }
+    $self->update_preview_tasks_state;
     $self->panel_focus;
 }
 

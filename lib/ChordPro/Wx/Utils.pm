@@ -192,14 +192,12 @@ sub setup_menubar( $self ) {
 	  ]
 	],
 	[ wxID_ANY, M_EDITOR|M_SONGBOOK, "Tasks",
-	  [ [ wxID_ANY, M_EDITOR|M_SONGBOOK, "Default Preview\tCtrl-P",
-	      "Preview with default formatting", "OnPreview" ],
+	  [ [ wxID_ANY, M_EDITOR|M_SONGBOOK, "Preview\tCtrl-P",
+	      "Generate the preview using the toolbar settings", "OnPreview" ],
 	    [ wxID_ANY, M_EDITOR|M_SONGBOOK, "No Chord Diagrams",
 	      "Preview without chord diagrams", "OnPreviewNoDiagrams" ],
 	    [ wxID_ANY, M_EDITOR|M_SONGBOOK, "Lyrics Only",
 	      "Preview with just the lyrics", "OnPreviewLyricsOnly" ],
-	    [ wxID_ANY, M_EDITOR|M_SONGBOOK, "More...",
-	      "Transpose, transcode, and more", "OnPreviewMore" ],
 	    [],
 	  ]
 	],

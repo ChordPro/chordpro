@@ -441,6 +441,9 @@ sub parse_song {
 		    $_ = shift(@a);
 		    unshift( @$lines, @a );
 		    $skipcnt += @a;
+		    if ( $config->{debug}->{echo} ) {
+			warn(sprintf("==[%3d]=> %s\n", $diag->{line}, $_ ) );
+		    }
 		}
 	    }
 	}

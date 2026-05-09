@@ -37,6 +37,9 @@ BUILD {
     # Setup WebView, if possible.
     $self->setup_webview if $::options->{webview}//1;
 
+    # Inline "Preview Tasks" controls in the toolbar, left of Settings.
+    $self->setup_preview_tasks_bar;
+
     # Single pane.
     $self->unsplit;
 
@@ -75,6 +78,7 @@ method refresh() {
     else {
 	$self->{bmp_songbook}->Show(0);
     }
+    $self->refresh_preview_tasks_bar;
     $self->{sz_toolbar}->Layout;
 
     my $mod = $self->{t_editor}->IsModified;

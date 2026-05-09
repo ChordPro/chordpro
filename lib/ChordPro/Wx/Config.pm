@@ -114,6 +114,7 @@ my %prefs =
 
    editorwrap       => 1,
    editorwrapindent => 2,
+   livepreview      => 0,
 
    # Messages.
    msgsfont	   => 0,	# inital, later "Monospace 10" etc.

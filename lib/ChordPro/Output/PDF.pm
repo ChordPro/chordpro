@@ -98,7 +98,7 @@ sub generate_songbook {
 		 Creator => $name );
     while ( my ( $k, $v ) = each %{ $ps->{info} } ) {
 	next unless defined($v) && $v ne "";
-	next if $k eq "title" && $options->{title} && $k eq '%{title}';
+	next if $k eq "title" && $options->{title} && $v eq '%{title}';
 	$info{ucfirst($k)} = fmt_subst( $sb->{songs}->[0], $v );
     }
 
