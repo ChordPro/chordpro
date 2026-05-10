@@ -431,8 +431,7 @@ method OnIdle($event) {
 	if ( $state{editchanged}
 	     && $self->{p_editor}->{sw_lr}->IsSplit ) {
 
-	    if ( $state{have_webview}
-		 && $preferences{enable_htmlviewer} ) {
+	    if ( $preferences{"live_preview_".$preferences{preview}} ) {
 		$self->{p_editor}->preview([]);
 		$state{editchanged} = 0;
 	    }

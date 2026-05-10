@@ -253,7 +253,8 @@ method fetch_prefs() {
     $self->{rb_preview_html}->SetValue($preferences{preview} eq "html");
     $self->{cb_live_preview_html}->SetValue($preferences{live_preview_html});
     $self->{rb_html_previewer}->SetSelection( $preferences{htmlviewer} eq "html5" );
-    
+    $self->{nb_previewer}->SetSelection($preferences{preview} eq "html");
+
     $self->enablecustom;
     $state{_prefs} = clone(\%preferences);
 

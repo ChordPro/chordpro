@@ -122,11 +122,16 @@ method preview( $args, %opts ) {
 	}
     }
 
+    if ( $preferences{htmlviewer} eq "html5" ) {
+	$haveconfig++;
+	push( @ARGV, "--config=html5" );
+    }
+
     push( @ARGV, '--noconfig' ) unless $haveconfig;
 
-    if ( $preferences{enable_htmlviewer} ) {
+    if ( $preferences{preview} eq "html" ) {
 	$preview_file = fn_catfile( $tmpdir, "preview.html" );
-	push( @ARGV, '--generate', "HTML" );
+	push( @ARGV, '--generate', uc($preferences{htmlviewer}) );
     }
     else {
 	$preview_file = fn_catfile( $tmpdir, "preview.pdf" );
@@ -227,10 +232,14 @@ method preview( $args, %opts ) {
     goto ERROR unless fs_test( e => $preview_file );
 
     $unsaved_preview = 1;
-    if ( $preferences{enable_htmlviewer} ) {
-	fs_copy( CP->findres( $_, class => "styles" ),
-		 fn_catfile( $tmpdir, $_ ) )
-	  for qw( chordpro.css chordpro_print.css );
+    if ( $preferences{preview} eq "html" ) {
+	if ( $preferences{htmlviewer} eq "html" ) {
+	    fs_copy( CP->findres( $_, class => "styles" ),
+		     fn_catfile( $tmpdir, $_ ) )
+	      for qw( chordpro.css chordpro_print.css );
+	}
+	elsif ( $preferences{htmlviewer} eq "html5" ) {
+	}
     }
 
     if ( !$preferences{enable_pdfviewer}
@@ -277,7 +286,7 @@ method preview( $args, %opts ) {
 	else {
 	    my $wxTheMimeTypesManager = Wx::MimeTypesManager->new;
 	    my $ft = $wxTheMimeTypesManager->GetFileTypeFromExtension
-	      ( $preferences{enable_htmlviewer} ? "html" : "pdf");
+	      ( $preferences{preview} );
 	    if ( $ft && ( my $cmd = $ft->GetOpenCommand($preview_file) ) ) {
 		Wx::ExecuteCommand($cmd);
 	    }
@@ -348,7 +357,7 @@ sub _makeurl {
 method save {
     return unless fs_test( s => $preview_file );
 
-    if ( $preferences{enable_htmlviewer} ) {
+    if ( $preferences{preview} eq "html" ) {
 	return $panel->{webview}->Print;
     }
 
