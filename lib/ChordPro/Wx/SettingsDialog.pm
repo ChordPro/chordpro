@@ -33,10 +33,10 @@ BUILD ( $parent, $id, $title ) {
 				 $self->{ch_stylemods}->can("OnMotion") );
 
     # Do not DeletePage until we're sure none of the widgets are referenced.
-    $self->{nb_preferences}->RemovePage(5) # HTML viewer
-      unless $preferences{expert};
-    $self->{nb_preferences}->RemovePage(4) # PDF viewer
-      unless $preferences{pdfviewer} || $preferences{enable_pdfviewer};
+#    $self->{nb_preferences}->RemovePage(5) # HTML viewer
+#      unless $preferences{expert};
+#    $self->{nb_preferences}->RemovePage(4) # PDF viewer
+#      unless $preferences{pdfviewer} || $preferences{enable_pdfviewer};
 
     unless ( has_appearance() ) {
 	$self->{ch_theme}->Delete(2); # Follow System
@@ -240,14 +240,20 @@ method fetch_prefs() {
     $self->OnCbTranscode(undef);
 
     # PDF Viewer.
+    $self->{rb_preview_pdf}->SetValue( $preferences{preview} eq "pdf" );
+    $self->{cb_live_preview_pdf}->SetValue($preferences{live_preview_pdf});
     $self->{cb_pdfviewer}->SetValue($preferences{enable_pdfviewer});
     $self->{t_pdfviewer}->SetValue($preferences{pdfviewer})
       if $preferences{pdfviewer};
     $self->{t_pdfviewer}->Enable($self->{cb_pdfviewer}->IsChecked);
+    $self->{cb_live_preview_pdf}->SetValue( $preferences{live_preview_pdf} );
+    $self->{cb_live_preview_pdf}->Enable( !$self->{cb_pdfviewer}->IsChecked );
 
     # HTML Viewer.
-    $self->{cb_htmlviewer}->SetValue($preferences{enable_htmlviewer});
-
+    $self->{rb_preview_html}->SetValue($preferences{preview} eq "html");
+    $self->{cb_live_preview_html}->SetValue($preferences{live_preview_html});
+    $self->{rb_html_previewer}->SetSelection( $preferences{htmlviewer} eq "html5" );
+    
     $self->enablecustom;
     $state{_prefs} = clone(\%preferences);
 
@@ -339,9 +345,19 @@ method store_prefs() {
     # PDF Viewer.
     $preferences{enable_pdfviewer} = $self->{cb_pdfviewer}->IsChecked;
     $preferences{pdfviewer} = $self->{t_pdfviewer}->GetValue;
+    $preferences{live_preview_pdf} = $self->{cb_live_preview_pdf}->IsChecked;
 
     # HTML Viewer.
-    $preferences{enable_htmlviewer} = $self->{cb_htmlviewer}->IsChecked;
+    $preferences{live_preview_html} = $self->{cb_live_preview_html}->IsChecked;
+    $preferences{htmlviewer} = "html"
+      if $self->{rb_html_previewer}->GetSelection == 0;
+    $preferences{htmlviewer} = "html5"
+      if $self->{rb_html_previewer}->GetSelection == 1;
+
+    $preferences{preview} = "pdf"
+      if $self->{rb_preview_pdf}->GetValue;
+    $preferences{preview} = "html"
+      if $self->{rb_preview_html}->GetValue;
 
     # use DDP; p %preferences, as => "Stored";
 }
@@ -646,9 +662,17 @@ method OnMessagesFontPickerChanged($event) {
 # Previewer.
 
 method OnPDFViewer($event) {
-    $self->{t_pdfviewer}->Enable( $self->{cb_pdfviewer}->GetValue );
+    my $t = $self->{cb_pdfviewer}->GetValue;
+    $self->{t_pdfviewer}->Enable($t);
+    $self->{cb_live_preview_pdf}->Enable(!$t);
 }
-method OnHTMLViewer($event) {
+
+method OnRbPreviewPDF($event) {
+    $self->{rb_preview_html}->SetValue(0);
+}
+
+method OnRbPreviewHTML($event) {
+    $self->{rb_preview_pdf}->SetValue(0);
 }
 
 # System

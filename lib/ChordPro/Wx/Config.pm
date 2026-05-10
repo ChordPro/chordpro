@@ -122,11 +122,15 @@ my %prefs =
    enable_xcode	   => 0,
 
    # PDF Viewer.
+   preview => "pdf",
+   live_preview_pdf => 0,
    enable_pdfviewer   => undef,
    pdfviewer   => "",
 
    # HTML Viewer.
-   enable_htmlviewer => undef,
+   # preview => "html",
+   live_preview_html => 0,
+   htmlviewer => "html",
 
    # Insert spec chars.
    enable_insert_symbols => 0,
@@ -310,7 +314,7 @@ method Load :common {
     }
 
     $preferences{enable_pdfviewer} //= 0;
-    $preferences{enable_htmlviewer} //= 0;
+    $preferences{preview} //= "pdf";
     $cb->Flush;
 
     # Collect from the environment.
