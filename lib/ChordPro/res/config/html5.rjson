@@ -1,0 +1,11 @@
+// Configuration for ChordPro.
+
+config {
+    type: stylemod
+    title: "Use HTML5 generator"
+    description: "Generate HTML using the new HTML5 backend."
+}
+
+// Select HTML5 backend.
+html.module: HTML5
+

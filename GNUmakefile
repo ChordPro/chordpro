@@ -256,3 +256,12 @@ abc :
 	find ${ABCDEST} -type f -printf "%p\n" >> x
 	env LC_ALL=C sort -u x > MANIFEST
 	rm x
+
+# TEMP
+XD = ../ChordPro-HTML5
+
+html5:
+	cp -pv {${XD}/,}lib/ChordPro/Output/HTML5.pm 
+	rsync -avHi {${XD}/,}lib/ChordPro/Output/HTML5/
+	rsync -avHi {${XD}/,}lib/ChordPro/Output/SVG/
+	rsync -avHi {${XD}/,}lib/ChordPro/res/templates/html5/
