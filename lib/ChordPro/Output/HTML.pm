@@ -281,7 +281,7 @@ sub generate_song {
 
 	    my @images;
 	    if ( $s->{assets}->{$elt->{id}}->{data} ) {
-		@images = mimedata( \$asset->{data} );
+		@images = mimedata( \join("\n",@{$asset->{data}}) );
 	    }
 	    else {
 		@images = mimedata($elt->{uri});
