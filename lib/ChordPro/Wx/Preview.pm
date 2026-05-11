@@ -122,11 +122,6 @@ method preview( $args, %opts ) {
 	}
     }
 
-    if ( $preferences{htmlviewer} eq "html5" ) {
-	$haveconfig++;
-	push( @ARGV, "--config=html5" );
-    }
-
     push( @ARGV, '--noconfig' ) unless $haveconfig;
 
     if ( $preferences{preview} eq "html" ) {
