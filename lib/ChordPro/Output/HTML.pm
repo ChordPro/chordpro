@@ -118,6 +118,13 @@ sub generate_song {
     push(@s, "") if $tidy;
 
     my @elts = @{$s->{body}};
+
+    if ( my $spreadimage = $s->{spreadimage} ) {
+	unshift( @elts, { context => "",
+			  id => $spreadimage->{id},
+			  type => "image" } );
+    }
+
     while ( @elts ) {
 	my $elt = shift(@elts);
 
