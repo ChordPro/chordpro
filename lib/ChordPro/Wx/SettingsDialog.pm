@@ -253,7 +253,6 @@ method fetch_prefs() {
     $self->{rb_preview_html}->SetValue($preferences{preview} eq "html");
     $self->{cb_live_preview_html}->SetValue($preferences{live_preview_html});
     $self->{rb_html_previewer}->SetSelection( $preferences{htmlviewer} eq "html5" );
-    $self->{nb_previewer}->SetSelection($preferences{preview} eq "html");
 
     $self->enablecustom;
     $state{_prefs} = clone(\%preferences);
@@ -666,14 +665,6 @@ method OnPDFViewer($event) {
     my $t = $self->{cb_pdfviewer}->GetValue;
     $self->{t_pdfviewer}->Enable($t);
     $self->{cb_live_preview_pdf}->Enable(!$t);
-}
-
-method OnRbPreviewPDF($event) {
-    $self->{rb_preview_html}->SetValue(0);
-}
-
-method OnRbPreviewHTML($event) {
-    $self->{rb_preview_pdf}->SetValue(0);
 }
 
 # System
