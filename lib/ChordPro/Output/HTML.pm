@@ -14,7 +14,9 @@ use ChordPro::Paths;
 use ChordPro::Output::Common;
 use ChordPro::Utils qw();
 use ChordPro::Assets;
+use ChordPro::Output::SVG::Strum::GridRenderer;
 use Storable 'dclone';
+use Encode qw( decode_utf8 );
 
 sub generate_songbook {
     my ( $self, $sb ) = @_;
@@ -125,6 +127,8 @@ sub generate_song {
 			  type => "image" } );
     }
 
+    my $gridcells = 16;
+
     while ( @elts ) {
 	my $elt = shift(@elts);
 
@@ -173,6 +177,22 @@ sub generate_song {
 		    push( @s, songline( $s, $e ) );
 		    next;
 		}
+		if ( $e->{type} eq "gridline" ) {
+		    my @grid;
+		    while ( $e->{type} eq "gridline" ) {
+			push( @grid, $e );
+			$e = shift(@elts);
+		    }
+		    my $svg = ChordPro::Output::SVG::Strum::GridRenderer::grid_block_svg
+		      ( rows => \@grid,
+			columns => $gridcells,
+		      );
+		    unshift( @elts, $e );
+		    unshift( @elts, { type => "svg",
+				      data => $svg,
+				      } );
+		    next;
+		}
 		if ( $e->{type} =~ /^comment(_\w+)?$/ ) {
 		    push( @s,
 			  '<div class="' . $e->{type} . '">' .
@@ -200,7 +220,7 @@ sub generate_song {
 		}
 		if ( $e->{type} eq "svg" ) {
 		    push( @s, '<div class="' . $e->{type} . '">' );
-		    push( @s, fs_load( $e->{uri} ) );
+		    push( @s, $e->{data} || fs_load( $e->{uri} ) );
 		    push( @s, "</div>" );
 		    push( @s, "" ) if $tidy;
 		    next;
@@ -322,6 +342,15 @@ sub generate_song {
 	    if ( $elt->{name} eq "lyrics-only" ) {
 		$lyrics_only = $elt->{value}
 		  unless $lyrics_only > 1;
+	    }
+	}
+
+	if ( $elt->{type} eq "set" ) {
+	    if ( $elt->{name} eq "gridparams" ) {
+		$gridcells = 0;
+		for ( @{ $elt->{value} } ) {
+		    $gridcells += $_;
+		}
 	    }
 	}
     }
