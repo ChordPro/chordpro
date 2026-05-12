@@ -265,3 +265,4 @@ html5:
 	rsync -avHi {${XD}/,}lib/ChordPro/Output/HTML5/
 	rsync -avHi {${XD}/,}lib/ChordPro/Output/SVG/
 	rsync -avHi {${XD}/,}lib/ChordPro/res/templates/html5/
+	patch -p0 -N < html5.patches
