@@ -69,6 +69,7 @@ These modules should be available as prebuilt packages:
 | `File::HomeDir` | `perl-File-HomeDir` | `libfile-homedir-perl` |
 | `Data::Printer` | `perl-Data-Printer` | `libdata-printer-perl` |
 | `Storable`      | `perl-Storable`     | `libstorable-perl`     |
+| `Ref::Util`     | `perl-Ref-Util`     | `libref-util-perl`     |
 | `Pod::Usage`    | `perl-Pod-Usage`    | `libpod-usage-perl`    |
 { .table .table-striped .table-bordered .table-sm }
 
