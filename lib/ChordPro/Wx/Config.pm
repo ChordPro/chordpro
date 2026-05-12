@@ -122,15 +122,16 @@ my %prefs =
    enable_xcode	   => 0,
 
    # PDF Viewer.
-   preview => "pdf",
-   live_preview_pdf => 0,
-   enable_pdfviewer   => undef,
-   pdfviewer   => "",
+   preview             => "pdf",
+   pdf_live_preview    => 0,
+   pdf_enable_viewer   => undef,
+   pdf_viewer          => "",
 
    # HTML Viewer.
-   # preview => "html",
-   live_preview_html => 0,
-   htmlviewer => "html",
+   # preview           => "html",
+   html_live_preview   => 0,
+   html_viewer         => "html",
+   html_export_preview => "pdf",
 
    # Insert spec chars.
    enable_insert_symbols => 0,
@@ -140,6 +141,12 @@ my %prefs =
    dumpstate	=> 0,
    expert	=> 0,
    advanced	=> 0,
+  );
+
+my %legacy_prefs =
+  (
+   pdfviewer        => "pdf_viewer",
+   enable_pdfviewer => "pdf_enable_viewer",
   );
 
 use constant MAXRECENTS => 10;
@@ -237,6 +244,12 @@ method Load :common {
 	    # printf STDERR ( "$group.$entry:\t%s\n", $value );
 	    if ( $group eq "preferences" ) {
 		my $o;
+
+		# Legacy names mapping.
+		if ( exists $legacy_prefs{$entry} ) {
+		    $entry = $legacy_prefs{$entry};
+		}
+
 		if ( exists $pp{$entry} ) {
 		    $o = delete $pp{$entry};
 		}
@@ -313,8 +326,9 @@ method Load :common {
 	}
     }
 
-    $preferences{enable_pdfviewer} //= 0;
+    $preferences{pdf_enable_viewer} //= 0;
     $preferences{preview} //= "pdf";
+    $preferences{html_export_preview} //= "pdf";
     $cb->Flush;
 
     # Collect from the environment.

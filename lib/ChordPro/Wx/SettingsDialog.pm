@@ -32,12 +32,6 @@ BUILD ( $parent, $id, $title ) {
     Wx::Event::EVT_MOTION( $self->{ch_stylemods},
 				 $self->{ch_stylemods}->can("OnMotion") );
 
-    # Do not DeletePage until we're sure none of the widgets are referenced.
-#    $self->{nb_preferences}->RemovePage(5) # HTML viewer
-#      unless $preferences{expert};
-#    $self->{nb_preferences}->RemovePage(4) # PDF viewer
-#      unless $preferences{pdfviewer} || $preferences{enable_pdfviewer};
-
     unless ( has_appearance() ) {
 	$self->{ch_theme}->Delete(2); # Follow System
     }
@@ -241,18 +235,19 @@ method fetch_prefs() {
 
     # PDF Viewer.
     $self->{rb_preview_pdf}->SetValue( $preferences{preview} eq "pdf" );
-    $self->{cb_live_preview_pdf}->SetValue($preferences{live_preview_pdf});
-    $self->{cb_pdfviewer}->SetValue($preferences{enable_pdfviewer});
-    $self->{t_pdfviewer}->SetValue($preferences{pdfviewer})
-      if $preferences{pdfviewer};
+    $self->{cb_live_preview_pdf}->SetValue($preferences{pdf_live_preview});
+    $self->{cb_pdfviewer}->SetValue($preferences{pdf_enable_viewer});
+    $self->{t_pdfviewer}->SetValue($preferences{pdf_viewer})
+      if $preferences{pdf_viewer};
     $self->{t_pdfviewer}->Enable($self->{cb_pdfviewer}->IsChecked);
-    $self->{cb_live_preview_pdf}->SetValue( $preferences{live_preview_pdf} );
+    $self->{cb_live_preview_pdf}->SetValue( $preferences{pdf_live_preview} );
     $self->{cb_live_preview_pdf}->Enable( !$self->{cb_pdfviewer}->IsChecked );
 
     # HTML Viewer.
     $self->{rb_preview_html}->SetValue($preferences{preview} eq "html");
-    $self->{cb_live_preview_html}->SetValue($preferences{live_preview_html});
-    $self->{rb_html_previewer}->SetSelection( $preferences{htmlviewer} eq "html5" );
+    $self->{cb_live_preview_html}->SetValue($preferences{html_live_preview});
+    $self->{rb_html_previewer}->SetSelection( $preferences{html_viewer} eq "html5" );
+    $self->{rb_html_exporter}->SetSelection( $preferences{html_export_preview} eq "pdf" );
 
     $self->enablecustom;
     $state{_prefs} = clone(\%preferences);
@@ -343,16 +338,20 @@ method store_prefs() {
     }
 
     # PDF Viewer.
-    $preferences{enable_pdfviewer} = $self->{cb_pdfviewer}->IsChecked;
-    $preferences{pdfviewer} = $self->{t_pdfviewer}->GetValue;
-    $preferences{live_preview_pdf} = $self->{cb_live_preview_pdf}->IsChecked;
+    $preferences{pdf_enable_viewer} = $self->{cb_pdfviewer}->IsChecked;
+    $preferences{pdf_viewer} = $self->{t_pdfviewer}->GetValue;
+    $preferences{pdf_live_preview} = $self->{cb_live_preview_pdf}->IsChecked;
 
     # HTML Viewer.
-    $preferences{live_preview_html} = $self->{cb_live_preview_html}->IsChecked;
-    $preferences{htmlviewer} = "html"
+    $preferences{html_live_preview} = $self->{cb_live_preview_html}->IsChecked;
+    $preferences{html_viewer} = "html"
       if $self->{rb_html_previewer}->GetSelection == 0;
-    $preferences{htmlviewer} = "html5"
+    $preferences{html_viewer} = "html5"
       if $self->{rb_html_previewer}->GetSelection == 1;
+    $preferences{html_export_preview} = "html"
+      if $self->{rb_html_exporter}->GetSelection == 0;
+    $preferences{html_export_preview} = "pdf"
+      if $self->{rb_html_exporter}->GetSelection == 1;
 
     $preferences{preview} = "pdf"
       if $self->{rb_preview_pdf}->GetValue;

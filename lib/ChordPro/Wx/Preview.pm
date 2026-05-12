@@ -126,7 +126,7 @@ method preview( $args, %opts ) {
 
     if ( $preferences{preview} eq "html" ) {
 	$preview_file = fn_catfile( $tmpdir, "preview.html" );
-	push( @ARGV, '--generate', uc($preferences{htmlviewer}) );
+	push( @ARGV, '--generate', uc($preferences{html_viewer}) );
     }
     else {
 	$preview_file = fn_catfile( $tmpdir, "preview.pdf" );
@@ -228,16 +228,16 @@ method preview( $args, %opts ) {
 
     $unsaved_preview = 1;
     if ( $preferences{preview} eq "html" ) {
-	if ( $preferences{htmlviewer} eq "html" ) {
+	if ( $preferences{html_viewer} eq "html" ) {
 	    fs_copy( CP->findres( $_, class => "styles" ),
 		     fn_catfile( $tmpdir, $_ ) )
 	      for qw( chordpro.css chordpro_print.css );
 	}
-	elsif ( $preferences{htmlviewer} eq "html5" ) {
+	elsif ( $preferences{html_viewer} eq "html5" ) {
 	}
     }
 
-    if ( !$preferences{enable_pdfviewer}
+    if ( !$preferences{pdf_enable_viewer}
 	 && $panel->{webview}->isa('Wx::WebView') ) {
 
 	for ( $panel ) {
@@ -266,7 +266,7 @@ method preview( $args, %opts ) {
     else {
 	$self->log( 'S', "Output generated, starting previewer");
 
-	if ( my $cmd = $preferences{pdfviewer} ) {
+	if ( my $cmd = $preferences{pdf_viewer} ) {
 	    if ( $cmd =~ s/\%f/$preview_file/g ) {
 	    }
 	    elsif ( $cmd =~ /\%u/ ) {
@@ -352,7 +352,8 @@ sub _makeurl {
 method save {
     return unless fs_test( s => $preview_file );
 
-    if ( $preferences{preview} eq "html" ) {
+    if ( $preferences{preview} eq "html"
+	 && $preferences{html_export_preview} eq "pdf" ) {
 	return $panel->{webview}->Print;
     }
 
@@ -361,14 +362,14 @@ method save {
 	$savefile = $state{currentfile} =~ s/\.\w+$//r;
     }
     if ( $state{mode} eq "sbexport" && $state{sbe_folder} ) {
-	$savefile = $state{sbe_folder} . ".pdf";
+	$savefile = $state{sbe_folder} . "." . $preferences{preview};
     }
 
     my $fd = Wx::FileDialog->new
       ( $panel,
 	_T("Choose output file"),
 	fn_dirname($savefile), fn_basename($savefile),
-	"*.pdf",
+	"*." . $preferences{preview},
 	0|wxFD_SAVE|wxFD_OVERWRITE_PROMPT );
     my $ret = $fd->ShowModal;
     my $fn = $fd->GetPath;

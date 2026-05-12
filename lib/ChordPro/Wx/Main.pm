@@ -431,7 +431,7 @@ method OnIdle($event) {
 	if ( $state{editchanged}
 	     && $self->{p_editor}->{sw_lr}->IsSplit ) {
 
-	    if ( $preferences{"live_preview_".$preferences{preview}} ) {
+	    if ( $preferences{"$preferences{preview}_live_preview"} ) {
 		$self->{p_editor}->preview([]);
 		$state{editchanged} = 0;
 	    }
