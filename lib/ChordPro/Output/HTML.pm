@@ -14,7 +14,6 @@ use ChordPro::Paths;
 use ChordPro::Output::Common;
 use ChordPro::Utils qw();
 use ChordPro::Assets;
-use ChordPro::Output::SVG::Strum::GridRenderer;
 use Storable 'dclone';
 use Encode qw( decode_utf8 );
 
@@ -183,14 +182,17 @@ sub generate_song {
 			push( @grid, $e );
 			$e = shift(@elts);
 		    }
-		    my $svg = ChordPro::Output::SVG::Strum::GridRenderer::grid_block_svg
-		      ( rows => \@grid,
-			columns => $gridcells,
-		      );
 		    unshift( @elts, $e );
-		    unshift( @elts, { type => "svg",
-				      data => $svg,
-				      } );
+		    eval {
+			require ChordPro::Output::SVG::Strum::GridRenderer;
+			my $svg = ChordPro::Output::SVG::Strum::GridRenderer::grid_block_svg
+			  ( rows => \@grid,
+			    columns => $gridcells,
+			  );
+			unshift( @elts, { type => "svg",
+					  data => $svg,
+					} );
+		    };
 		    next;
 		}
 		if ( $e->{type} =~ /^comment(_\w+)?$/ ) {
