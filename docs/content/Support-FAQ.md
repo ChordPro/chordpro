@@ -14,7 +14,7 @@ questions and answers here sometime soon.
 
 ### Installation
 
-* [ChordPro does not start (Miscrosoft Windows).]({{<
+* [ChordPro does not start (Microsoft Windows).]({{<
   relref "FAQ-Windows-startup" >}})
 
 ### Using ChordPro
