@@ -21,3 +21,17 @@ This is also an open source Perl distribution, but it needs some
 manual work to get everything going.
 
 _Citrus Perl_ and _ActiveState Perl_ are no longer supported.
+
+## ChordPro does not start
+
+Nothing happens when clicking the ChordPro desktop icon.
+
+Please try the following. 
+* Open a command (powershell) window
+* Find the location where you installed ChordPro. By default this is
+  one of
+  - `C:\Program Files\ChordPro.ORG\ChordPro`
+  - `C:\Program Files (x86)\ChordPro.ORG\ChordPro`
+* Type: `&'` _location_ `\xxchordpro.exe'`
+* Report the problem and the output on the [issue
+  tracker](https://github.com/ChordPro/chordpro/issues).

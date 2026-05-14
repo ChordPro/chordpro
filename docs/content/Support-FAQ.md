@@ -14,6 +14,9 @@ questions and answers here sometime soon.
 
 ### Installation
 
+* [ChordPro does not start (Miscrosoft Windows).]({{<
+  relref "FAQ-Windows-startup" >}})
+
 ### Using ChordPro
 
 * [How to get my fonts right?]({{< relref "Chordpro-Fonts" >}})
@@ -33,6 +36,9 @@ questions and answers here sometime soon.
 ### Using the ChordPro editor
 
 * [Why do I see `PU2` in my source?]({{< relref "faq-encoding" >}}).
+
+* [Everything seems to work, but it always uses an external preview tool.]({{<
+  relref "FAQ-previewer" >}})
 
 * [Preview does not show, and I get “Failed to get GBM device”]({{<
   relref "FAQ-webkitgtk" >}}).
