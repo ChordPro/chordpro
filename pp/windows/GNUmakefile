@@ -62,6 +62,7 @@ ppl : clean wxchordpro.exe unpack copy_coredll loaders
 unpack :
 	perl ..\pp2ppl.pl --quiet --dest=${DEST} wxchordpro.exe
 	copy "${ROOT}\script\chordpro.pl" ${DEST}\script\chordpro.pl
+	copy "${ROOT}\script\wxchordpro.pl" ${DEST}\script\xxchordpro.pl
 	copy "${ROOT}\lib\ChordPro\Config.pm" ${DEST}\lib\ChordPro\Config.pm 
 	copy ${DEST}\res\icons\*.ico ${DEST}
 	copy ${DEST}\res\icons\*.png ${DEST}
@@ -87,6 +88,7 @@ ${DEST}\wxchordpro.exe : ppl.c wxchordpro.rc
 	perl vfix.pl wxchordpro.rc
 	windres -I ${WXDIR}/include wxchordpro.rc ppl.o
 	${CC} -DUTF8 -mwindows -o ${DEST}\wxchordpro.exe ppl.c ppl.o
+	${CC} -DUTF8 -DDEBUG -mconsole -o ${DEST}\xxchordpro.exe ppl.c ppl.o
 
 ${DEST}\chordpro.exe : ppl.c chordpro.rc
 	perl vfix.pl chordpro.rc

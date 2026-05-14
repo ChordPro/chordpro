@@ -47,6 +47,7 @@ Source: "build\*"; DestDir: {app}; Flags: recursesubdirs createallsubdirs overwr
 
 [Icons]
 Name: {group}\{#APP}; Filename: {app}\wxchordpro.exe; Components: GUI; IconFilename: "{app}\chordpro.ico";
+Name: {group}\{#APP}; Filename: {app}\xxchordpro.exe; Components: GUI; IconFilename: "{app}\chordpro.ico";
 Name: "{group}\{cm:UninstallProgram,{#APP}}"; Filename: "{uninstallexe}"
 
 Name: "{commondesktop}\{#APP}"; Filename: "{app}\wxchordpro.exe"; Tasks: desktopicon\common; IconFilename: "{app}\chordpro.ico";
