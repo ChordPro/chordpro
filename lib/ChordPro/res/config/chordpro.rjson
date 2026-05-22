@@ -435,8 +435,12 @@ delegates {
         // Obsolete.
         config : default
 
-        // Specific settings for the PDF backend.
+        // Generic settings.
+        preamble : []
+
+	// Specific settings for the PDF backend. Append to generic.
         pdf.preamble : [
+	    append
             "%%textfont pdf.fonts.text"
             "%%vocalfont pdf.fonts.text"
             "%%gchordfont pdf.fonts.chord"
