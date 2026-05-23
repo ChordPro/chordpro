@@ -2102,6 +2102,7 @@ sub dir_meta {
 		    # When transcoding to nash/roman, parse_chord will
 		    # complain about a missing key. Fake one.
 		    local( $self->{meta}->{key} ) = [ '_dummy_' ];
+		    local( $self->{meta}->{_key} ) = [ '_dummy_' ];
 		    local( $self->{chordsinfo}->{_dummy_} ) = { root_ord => 0 };
 		    $self->parse_chord($val);
 		};
@@ -2864,8 +2865,9 @@ sub parse_chord {
 
     if ( $xc && $info ) {
 	my $key_ord;
-	$key_ord = $self->{chordsinfo}->{$self->{meta}->{key}->[-1]}->{root_ord}
-	  if $self->{meta}->{key};
+	$DB::single = 1;
+	$key_ord = $self->{chordsinfo}->{$self->{meta}->{_key}->[-1]}->{root_ord}
+	  if $self->{meta}->{_key};
 	if ( $xcmov && !defined $key_ord ) {
 	    do_warn("Warning: Transcoding to $xc without key may yield unexpected results\n");
 	    undef $xcmov;
