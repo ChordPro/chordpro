@@ -790,31 +790,11 @@ sub _augment ( $self, $hash, $path ) {
         }
 
         # Array -> Array.
-        elsif ( ref($hash->{$key}) eq 'ARRAY'
-                and ref($self->{$key}) eq 'ARRAY' ) {
+        elsif ( is_arrayref($hash->{$key}) && is_arrayref($self->{$key}) ) {
 
             # Arrays. Overwrite or append.
-            if ( @{$hash->{$key}} ) {
-                my @v = @{ $hash->{$key} };
-                if ( $v[0] eq "append" ) {
-                    shift(@v);
-                    # Append the rest.
-                    push( @{ $self->{$key} }, @v );
-                }
-                elsif ( $v[0] eq "prepend" ) {
-                    shift(@v);
-                    # Prepend the rest.
-                    unshift( @{ $self->{$key} }, @v );
-                }
-                else {
-                    # Overwrite.
-                    $self->{$key} = $hash->{$key};
-                }
-            }
-            else {
-                # Overwrite.
-                $self->{$key} = $hash->{$key};
-            }
+	    $self->{$key} = amerge( $self->{$key}, $hash->{$key} );
+
         }
 
         else {
@@ -985,80 +965,119 @@ sub _reduce ( $self, $orig, $path ) {
     return 'M';
 }
 
-sub hmerge( $left, $right, $path = "" ) {
+sub hmerge( $dest, $src, $path = "", $check = 1 ) {
 
     # Merge hashes. Right takes precedence.
-    # Based on Hash::Merge::Simple by Robert Krimen.
 
-    my %res = %$left;
+    my %res = %$dest;
 
-    for my $key ( keys(%$right) ) {
+    for my $key ( keys(%$src) ) {
 
-        warn("Config error: unknown item $path$key\n")
-          unless exists $res{$key}
-            || $path eq "pdf.fontconfig."
-            || $path =~ /^pdf\.(?:info|fonts)\./
-            || $path =~ /^pdf\.formats\.\w+-even\./
-            || ( $path =~ /^pdf\.formats\./ && $key =~ /\w+-even$/ )
-            || $path =~ /^(meta|gridstrum\.symbols)\./
-            || $path =~ /^delegates\./
-            || $path =~ /^parser\.preprocess\./
-            || $path =~ /^markup\.shortcodes\./
-            || $path =~ /^debug\./
-            || $key =~ /^_/;
+	if ( $check
+	     && !exists($res{$key})
+	     && $path ne "" 
+	     && $path !~ /^pdf\.(?:info|fonts)\./
+	     && $path !~ /^pdf\.formats\.\w+-even\./
+	     && $path !~ /^(meta|gridstrum\.symbols)\./
+	     && $path !~ /^delegates\./
+	     && $path !~ /^parser\.preprocess\./
+	     && $path !~ /^markup\.shortcodes\./
+	     && $path !~ /^debug\./
+	     && $path !~ /^pdf\.fontconfig\.$/
+	     && ( $path !~ /^pdf\.formats\./ || $key !~ /\w+-even$/ )
+	     && $key !~ /^_/ ) {
+	    warn("Config error: unknown item $path$key\n");
+	    $check = 0;
+	}
 
-        if ( ref($right->{$key}) eq 'HASH'
-             and
-             ref($res{$key}) eq 'HASH' ) {
-            # Hashes. Recurse.
-            $res{$key} = hmerge( $res{$key}, $right->{$key}, "$path$key." );
+        if ( is_hashref($res{$key}) ) {
+	    if ( is_hashref($src->{$key}) ) {
+		# Hashes. Recurse.
+		$res{$key} = hmerge( $res{$key}, $src->{$key},
+				     "$path$key.", $check );
+	    }
+	    elsif ( is_arrayref($src->{$key}) ) {
+	    }
+	    else {
+		# Scalar. Add/Replace.
+		$res{$key} = $src->{$key};
+	    }
         }
-        elsif ( ref($right->{$key}) eq 'ARRAY'
-                and
-                ref($res{$key}) eq 'ARRAY' ) {
-            warn("AMERGE $key: ",
-                 join(" ", map { qq{"$_"} } @{ $res{$key} }),
-                 " + ",
-                 join(" ", map { qq{"$_"} } @{ $right->{$key} }),
-                 " \n") if 0;
-            # Arrays. Overwrite or append.
-            if ( @{$right->{$key}} ) {
-                my @v = @{ $right->{$key} };
-                if ( $v[0] eq "append" ) {
-                    shift(@v);
-                    # Append the rest.
-                    warn("PRE: ",
-                         join(" ", map { qq{"$_"} } @{ $res{$key} }),
-                         " + ",
-                         join(" ", map { qq{"$_"} } @v),
-                         "\n") if 0;
-                    push( @{ $res{$key} }, @v );
-                    warn("POST: ",
-                         join(" ", map { qq{"$_"} } @{ $res{$key} }),
-                         "\n") if 0;
-                }
-                elsif ( $v[0] eq "prepend" ) {
-                    shift(@v);
-                    # Prepend the rest.
-                    unshift( @{ $res{$key} }, @v );
-                }
-                else {
-                    # Overwrite.
-                    $res{$key} = $right->{$key};
-                }
-            }
-            else {
-                # Overwrite.
-                $res{$key} = $right->{$key};
-            }
-        }
+	elsif ( is_arrayref($res{$key}) ) {
+	    if ( is_arrayref($src->{$key}) ) {
+		# Arrays. Overwrite or pre/append.
+		$res{$key} = amerge( $res{$key}, $src->{$key} );
+	    }
+	    else {
+		# Scalar. Append.
+		push( @{$res{$key}}, $src->{$key} );
+	    }
+	}
         else {
-            # Overwrite.
-            $res{$key} = $right->{$key};
+            # Replace.
+            $res{$key} = $src->{$key};
         }
     }
 
     return \%res;
+}
+
+sub amerge( $dest, $src ) {
+
+    # Merge arrays. Right takes precedence.
+    # DOES NOT MODIFY $dest.
+
+    my @res = @{ $dest // [] };
+
+    # This case will not occur when called from hmerge.
+    if ( is_hashref($src) && keys(%$src) == 1
+	 && (keys(%$src))[0] =~ /^([<>])?([-+]?\d+)?$/
+	 && defined( $1 // $2 ) ) {
+	my $prepost = $1 // '';
+	my $index = $2;
+	my $value = (values(%$src))[0];
+	if ( defined($index) ) {
+	    if ( $prepost eq '>' ) {
+		splice( @res, $index+1, 0, $value );
+	    }
+	    elsif ( $prepost eq '<' ) {
+		splice( @res, $index, 0, $value );
+	    }
+	    else {
+		$res[$index] = $value;
+	    }
+	}
+	elsif ( $prepost eq '>' ) {
+	    push( @res, $value );
+	}
+	elsif ( $prepost eq '<' ) {
+	    unshift( @res, $value );
+	}
+	return \@res;
+    }
+
+    $src = [ $src ] unless is_arrayref($src);
+
+    if ( @$src ) {
+	if ( $src->[0] eq "append" ) {
+	    push( @res, @{$src}[1..$#{$src}] );
+	}
+	elsif ( $src->[0] eq "prepend" ) {
+	    # Prepend the rest.
+	    unshift( @res, @{$src}[1..$#{$src}] );
+	}
+	else {
+	    # Overwrite.
+	    @res = @$src;
+	}
+    }
+    else {
+	# Is this correct? Maybe a merge with an empty array should just
+	# do nothing?
+	@res = @$src;		# overwrite
+    }
+
+    \@res;
 }
 
 sub clone ( $source ) {
