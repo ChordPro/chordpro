@@ -892,7 +892,8 @@ sub app_setup {
           "dump-chords-json" => sub { $dump_chords = 2},  # Dumps instrument defs (json).
           "even-pages-number-left|L",   # Even pages numbers on left
           "odd-pages-number-left",      # Odd pages numbers on left
-          "lyrics-only|l",              # Only prints lyrics
+          "lyrics-only|l"               # Only prints lyrics
+	      => sub { push(@{$clo->{config}}, "lyricsonly" ) },
           "G" => sub { $clo->{'chord-grids'} = 0 },
           "chord-grids!",               # En[dis]ables printing of chord diagrams
           "easy-chord-grids|g!",        # Do[esn't] print diagrams for built-in "easy" chords. Ignored.

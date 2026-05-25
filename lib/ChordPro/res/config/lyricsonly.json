@@ -12,3 +12,5 @@ settings {
     lyrics-only           : true
 }
 
+// So songs can adjust the content based on having chords or not.
+meta.lyricsonly : true
