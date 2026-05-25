@@ -43,35 +43,16 @@ sub can( $class, $method ) {
     return \&abc2svg;
 }
 
+use ChordPro::Utils qw( beo beo_set_backend );
 my $backend;
-
-# Fetch a value for key $k from hash $h, with possible specialisation
-# for the current backend.
-# NOTE: This is a copy from Song.pm. Redo later.
-sub beo {
-    my ( $hash, $key ) = @_;
-    Carp::confess("beo: not hash") unless is_hashref($hash);
-    my $res = $hash->{$key};
-    if ( is_hashref($hash->{$backend})
-	 && exists($hash->{$backend}->{$key})
-	 && defined($hash->{$backend}->{$key}) ) {
-	return $hash->{$backend}->{$key};
-    }
-    elsif ( $backend =~ /^html.+/
-	    && is_hashref($hash->{html})
-	    && exists($hash->{html}->{$key})
-	    && defined($hash->{html}->{$key}) ) {
-	return $hash->{html}->{$key};
-    }
-    return $res;
-}
 
 # Default entry point.
 
 sub abc2svg( $song, %args ) {
 
     my $abc2svg = info();
-    $backend = lc $song->{generate};
+    $backend = beo_set_backend( lc $song->{generate} );
+
     my $cfg = { %{$config->{delegates}->{abc} } };
 
     if ( DEBUG() ) {

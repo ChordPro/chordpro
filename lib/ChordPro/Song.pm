@@ -30,6 +30,7 @@ use feature 'state';
 use Text::ParseWords qw(quotewords);
 use Ref::Util qw( is_arrayref is_hashref );
 
+use ChordPro::Utils qw( beo beo_set_backend );
 my $backend;			# backend tag
 
 # Parser context.
@@ -136,26 +137,13 @@ sub is_gridstrum($) {
     $_[0] == 1 || $_[0] == 2;
 }
 
-# Fetch a value for key $k from hash $h, with possible specialisation
-# for the current backend.
-sub beo {
-    my ( $h, $k ) = @_;
-    if ( exists( $h->{$backend} )
-	 && exists( $h->{$backend}->{$k} )
-	 && defined( $h->{$backend}->{$k} ) ) {
-	return $h->{$backend}->{$k};
-    }
-    return '' unless exists($h->{$k}) && defined($h->{$k});
-    return $h->{$k};
-}
-
 sub parse_song {
     my ( $self, $lines, $linecnt, $meta, $defs ) = @_;
     die("OOPS! Wrong meta") unless ref($meta) eq 'HASH';
 
     local $config = dclone($config);
 
-    $backend = lc( $self->{generate} // "None" );
+    $backend = beo_set_backend( lc( $self->{generate} // "None" ) );
 
     warn("Processing song ", $diag->{file}, "...\n") if $options->{verbose};
 

@@ -708,4 +708,33 @@ sub XP_KEY()     { 3 }
 $EXPORT_TAGS{"xp"} = [ qw( XP_DEFAULT XP_FOLLOW XP_SHARP XP_FLAT XP_KEY ) ];
 push( @EXPORT_OK, @{ $EXPORT_TAGS{"xp"} } );
 
+{ my $backend;
+
+  sub beo_set_backend( $be ) { $backend = $be }
+
+  # Fetch a value for key $k from hash $h, with possible specialisation
+  # for the current backend.
+  sub beo ( $hash, $key ) {
+    Carp::confess("beo: not hash") unless is_hashref($hash);
+    my $res = '';
+    $res = $hash->{$key} if exists $hash->{$key};
+    return $res unless exists $hash->{$backend};
+
+    if ( is_hashref($hash->{$backend})
+	 && exists($hash->{$backend}->{$key})
+	 && defined($hash->{$backend}->{$key}) ) {
+	return $hash->{$backend}->{$key};
+    }
+    elsif ( $backend =~ /^html.+/
+	    && is_hashref($hash->{html})
+	    && exists($hash->{html}->{$key})
+	    && defined($hash->{html}->{$key}) ) {
+	return $hash->{html}->{$key};
+    }
+    return $res;
+  }
+}
+
+push( @EXPORT_OK, "beo", "beo_set_backend" );
+
 1;
