@@ -418,19 +418,25 @@
     
     // Delegates.
     // Basically a delegate is a section `{start_of_XXX}` which content is collected and handled later by the delegate module.
+    // Config settings for delegates can depend on the backend that is used to produce the output. See the ABC settings for examples.
+    
     delegates {
     
         // Embedding ABC.
         abc {
     
-            // The result produced by the delegate handler.
-            type : image
+            // The result produced by the delegate handler. Default is to ignore this section.
+    	type : ignore
     
-            // The name of the (perl) module that implements the delegate.
+    	// HTML and PDF can handle ABC sections as SVG images.
+    	html.type : image
+            pdf.type  : image
+    
+            // The name of the module that implements the delegate.
             module : ABC
     
             // The module's method to call.
-            // Default handler uses `program` (if set), othewise embedded QuickJS or external QuickJS.
+            // Default handler uses `program` (if set), otherwise embedded QuickJS or external QuickJS.
             handler : abc2svg
     
             // The program/command to execute.
@@ -475,10 +481,14 @@
         // Embedding Lilypond.
         ly {
     
-            // The result produced by the delegate handler.
-            type : image
+            // The result produced by the delegate handler. Default is to ignore this section.
+    	type : ignore
     
-            // The name of the (perl) module that implements the delegate.
+    	// HTML and PDF can handle Lilypond sections as SVG images.
+    	html.type : image
+            pdf.type  : image
+    
+            // The name of the module that implements the delegate.
             module : Lilypond
     
             // The module's method to call.
@@ -513,7 +523,7 @@
                 type    : image
             }
     
-            // The name of the (perl) module that implements the delegate.
+            // The name of the module that implements the delegate.
             module : Strum
         }
     

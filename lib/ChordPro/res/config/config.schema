@@ -63,6 +63,10 @@
             {
               "description": "Any named colour",
               "pattern": "^[-A-Za-z0-9]+$"
+            },
+            {
+              "description": "TBD",
+              "pattern": ""
             }
           ]
         }
@@ -260,7 +264,7 @@
         },
         "module": {
           "type": "string",
-          "description": "The name of the (perl) module that implements the delegate."
+          "description": "The name of the module that implements the delegate."
         },
         "preprocess": {
           "description": "Obsolete. Please use `parser.preprocess.env-...` instead.",
@@ -416,7 +420,7 @@
               "type": "string",
               "default": "abc2svg",
               "const": "abc2svg",
-              "description": "Default handler uses `program` (if set), othewise embedded QuickJS or external QuickJS."
+              "description": "Default handler uses `program` (if set), otherwise embedded QuickJS or external QuickJS."
             },
             "program": {
               "type": "string",
@@ -1369,7 +1373,6 @@
           "description": "Globally defined (added) meta data,\nThis is explicitly NOT intended for the metadata items above.\nDo NOT remove or change `_configversion`!",
           "type": "object",
           "additionalProperties": {
-            "type": "object"
           },
           "properties": {
             "_configversion": {
@@ -3195,7 +3198,7 @@
       "type": "object",
       "properties": {
         "delegates": {
-          "description": "Delegates.\nBasically a delegate is a section `{start_of_XXX}` which content is collected and handled later by the delegate module.",
+          "description": "Delegates.\nBasically a delegate is a section `{start_of_XXX}` which content is collected and handled later by the delegate module.\nConfig settings for delegates can depend on the backend that is used to produce the output. See the ABC settings for examples.",
           "type": "object",
           "properties": {
             "abc": {
