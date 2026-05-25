@@ -25,12 +25,7 @@ sub generate_songbook ( $self, $sb ) {
     return [] unless eval { $sb->{songs}->[0]->{body} };
 
     # Build regex for the known metadata items.
-    $re_meta = join( '|',
-		     map { quotemeta }
-		     "title", "subtitle",
-		     "artist", "composer", "lyricist", "arranger",
-		     "album", "copyright", "year",
-		     "key", "time", "tempo", "capo", "duration" );
+    $re_meta = join( '|', map { quotemeta } @{ $config->{metadata}->{keys} } );
     $re_meta = qr/^($re_meta)$/;
 
     my @book;
