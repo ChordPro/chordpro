@@ -24,6 +24,7 @@ use ChordPro::Files;
 use ChordPro::Paths;
 use ChordPro::Utils;
 use Text::ParseWords qw(shellwords);
+use Ref::Util qw( is_arrayref is_hashref );
 
 use constant { QUICKJS   => "QuickJS",
 	       QUICKJSXS => "QuickJS_XS" };
@@ -48,14 +49,21 @@ my $backend;
 # for the current backend.
 # NOTE: This is a copy from Song.pm. Redo later.
 sub beo {
-    my ( $h, $k ) = @_;
-    if ( exists( $h->{$backend} )
-	 && exists( $h->{$backend}->{$k} )
-	 && defined( $h->{$backend}->{$k} ) ) {
-	return $h->{$backend}->{$k};
+    my ( $hash, $key ) = @_;
+    Carp::confess("beo: not hash") unless is_hashref($hash);
+    my $res = $hash->{$key};
+    if ( is_hashref($hash->{$backend})
+	 && exists($hash->{$backend}->{$key})
+	 && defined($hash->{$backend}->{$key}) ) {
+	return $hash->{$backend}->{$key};
     }
-    return '' unless exists($h->{$k}) && defined($h->{$k});
-    return $h->{$k};
+    elsif ( $backend =~ /^html.+/
+	    && is_hashref($hash->{html})
+	    && exists($hash->{html}->{$key})
+	    && defined($hash->{html}->{$key}) ) {
+	return $hash->{html}->{$key};
+    }
+    return $res;
 }
 
 # Default entry point.
@@ -122,8 +130,22 @@ sub abc2svg( $song, %args ) {
 	'%%stretchlast 0',
 	'%%trimsvg 1',
 	'%%staffsep 0',
-	$backend =~ /html/ ? ( '%%fullsvg 1' ) : (),
-	@{ beo( $cfg, 'preamble' ) || [] } );
+      );
+
+    # Only override if there is actual content.
+    if ( is_arrayref($cfg->{preamble}) && @{$cfg->{preamble}} > 0 ) {
+	@preamble = @{$cfg->{preamble}};
+    }
+
+    if ( $backend =~ /^html.+/ ) {
+	push( @preamble, @{$cfg->{html}->{preamble}} )
+	  if is_arrayref(@{$cfg->{html}->{preamble}});
+	push( @preamble, @{$cfg->{$backend}->{preamble}} )
+	  if is_arrayref(@{$cfg->{$backend}->{preamble}});
+    }
+    elsif ( is_arrayref($cfg->{$backend}->{preamble}) ) {
+	push( @preamble, @{$cfg->{$backend}->{preamble}} );
+    }
 
     if ( defined $elt->{opts}->{transpose} ) {
 	my $tr = $elt->{opts}->{transpose};

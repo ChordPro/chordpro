@@ -439,16 +439,34 @@
             // Obsolete.
             config : default
     
-            // Generic settings.
-            preamble : []
+            // Generic ABC settings.
+    	// DO NOT CHANGE unless you know what you are doing!
+            preamble : [
+    	    "%%topspace 0"
+    	    "%%titlespace 0"
+    	    "%%musicspace 0"
+    	    "%%composerspace 0"
+    	    "%%infospace 0"
+    	    "%%textspace 0"
+    	    "%%leftmargin 0cm"
+    	    "%%rightmargin 0cm"
+    	    "%%stretchstaff 1"
+    	    "%%stretchlast 0"
+    	    "%%trimsvg 1"
+    	    "%%staffsep 0"
+    	]
     
-    	// Specific settings for the PDF backend. Append to generic.
+    	// Specific ABC settings for the PDF backend. Append to generic.
             pdf.preamble : [
-    	    append
                 "%%textfont pdf.fonts.text"
                 "%%vocalfont pdf.fonts.text"
                 "%%gchordfont pdf.fonts.chord"
             ]
+    
+    	// Specific ABC settings for the HTML backends. Append to generic.
+    	html.preamble : [
+    	    "%%fullsvg 1"
+    	]
     
             // Obsolete. Please use `parser.preprocess.env-...` instead.
             preprocess.abc : []
