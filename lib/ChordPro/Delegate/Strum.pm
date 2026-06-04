@@ -6,6 +6,7 @@ use warnings;
 use feature qw( signatures );
 no warnings "experimental::signatures";
 use utf8;
+use URI::Escape ();
 
 package ChordPro::Delegate::Strum;
 
@@ -39,6 +40,10 @@ delegate.strum {
 =cut
 
 use ChordPro::Utils qw(dimension maybe);
+use ChordPro::Output::SVG::Strum::Tokens;
+use ChordPro::Output::SVG::Strum::SVGPrimitives;
+use ChordPro::Output::SVG::Strum::StrumlineRenderer;
+use ChordPro::Output::SVG::Strum::GridRenderer;
 
 sub DEBUG() { $::config->{debug}->{x2} }
 
@@ -47,6 +52,12 @@ sub strum2xo( $song, %args ) {
     my $kv = { %{$elt->{opts}} };
     my $ps = $song->{_ps};
     my $pr = $ps->{pr};
+	unless ( $pr
+			 && $pr->{pdfgfx}
+			 && $pr->{pdfgfx}->{' apipage'}
+			 && $pr->{pdfgfx}->{' apipage'}->{' api'} ) {
+		return strum2html( $song, %args );
+	}
     my $bpm = 4;
     if ( ($song->{meta}->{time}->[0] // "4/4") =~ /^\s*(\d+)\s*\/\s*(\d+)\s*$/ ) { 
 	$bpm = $1;
@@ -101,6 +112,56 @@ sub strum2xo( $song, %args ) {
 		      maybe scale        => $scale,
 		      maybe design_scale => $design_scale,
 		    } };
+}
+
+*_esc                        = \&ChordPro::Output::SVG::Strum::Tokens::esc;
+*_bar_unicode                = \&ChordPro::Output::SVG::Strum::Tokens::bar_unicode;
+*_svg_to_data_uri            = \&ChordPro::Output::SVG::Strum::Tokens::svg_to_data_uri;
+*_chord_display_text         = \&ChordPro::Output::SVG::Strum::Tokens::chord_display_text;
+*_strum_name                 = \&ChordPro::Output::SVG::Strum::Tokens::strum_name;
+*_normalize_grid_chord_parts = \&ChordPro::Output::SVG::Strum::Tokens::normalize_grid_chord_parts;
+*strum_symbol_info           = \&ChordPro::Output::SVG::Strum::Tokens::strum_symbol_info;
+
+*_rest_glyph                 = \&ChordPro::Output::SVG::Strum::SVGPrimitives::rest_glyph;
+*_draw_rest_svg              = \&ChordPro::Output::SVG::Strum::SVGPrimitives::draw_rest_svg;
+*_draw_arrow_svg             = \&ChordPro::Output::SVG::Strum::SVGPrimitives::draw_arrow_svg;
+*_draw_bar_svg               = \&ChordPro::Output::SVG::Strum::SVGPrimitives::draw_bar_svg;
+*_draw_connector_svg         = \&ChordPro::Output::SVG::Strum::SVGPrimitives::draw_connector_svg;
+*_draw_pause_svg             = \&ChordPro::Output::SVG::Strum::SVGPrimitives::draw_pause_svg;
+
+*_strum_cells_from_text      = \&ChordPro::Output::SVG::Strum::StrumlineRenderer::strum_cells_from_text;
+*strumline_svg_from_text     = \&ChordPro::Output::SVG::Strum::StrumlineRenderer::strumline_svg_from_text;
+*strumline_svg               = \&ChordPro::Output::SVG::Strum::StrumlineRenderer::strumline_svg;
+*grid_block_svg              = \&ChordPro::Output::SVG::Strum::GridRenderer::grid_block_svg;
+
+sub strum2html( $song, %args ) {
+	my $elt = $args{elt};
+	my @data = grep { defined($_) && /\S/ } @{ $elt->{data} // [] };
+
+	my @imgs;
+	for my $line (@data) {
+		my $svg = strumline_svg_from_text(
+			text => $line,
+			show_bars => 1,
+		);
+		my $uri = _svg_to_data_uri($svg);
+		push @imgs, qq{<img class="cp-grid-strum-svg cp-standalone-strum-svg" src="} . _esc($uri) . qq{" alt="" />};
+	}
+
+	my $body = qq{<div class="cp-delegate cp-delegate-strum cp-delegate-strum-block">};
+	if (@imgs) {
+		$body .= join('', @imgs);
+	}
+	else {
+		$body .= qq{<span class="cp-strum-empty">(empty strum)</span>};
+	}
+	$body .= "</div>\n";
+
+	return {
+		type => "html",
+		line => $elt->{line},
+		data => $body,
+	};
 }
 
 # Pre-scan.

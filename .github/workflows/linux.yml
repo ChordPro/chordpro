@@ -22,9 +22,12 @@ jobs:
       - uses: actions/checkout@v2
       - name: perl -V
         run: perl -V
+      - name: Install HarfBuzz
+        run: |
+          apt-get update
+          apt-get install -y libharfbuzz-dev
       - name: Install Dependencies
         run: |
-            env INCHS=1 cpanm HarfBuzz::Shaper || cat ${HOME}/.cpanm/build.log
             cpanm --installdeps --notest .
       - name: Make and run tests
         run: |

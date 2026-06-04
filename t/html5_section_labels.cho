@@ -1,0 +1,7 @@
+{title Section Labels}
+{start_of_verse: Verse 1}
+[C]Verse line
+{end_of_verse}
+{start_of_chorus: Chorus}
+[F]Chorus line
+{end_of_chorus}

@@ -3,14 +3,14 @@
 =encoding UTF8
 
     // Configuration for ChordPro
-    // 
-    // This is a really relaxed JSON document, see
-    // https://metacpan.org/pod/JSON::Relaxed#REALLY-RELAXED-EXTENSIONS
+    // See the ChordPro website for more details: https://www.chordpro.org/chordpro/chordpro-configuration-file/.
+    // This is a really relaxed JSON document, see https://metacpan.org/pod/JSON::Relaxed#REALLY-RELAXED-EXTENSIONS
     
     // For GUI.
     config {
     
-        // Type of config: config, style, style_mod, instrument, task...
+        // The type of this config
+        // One or more of `"config"`, `"style"`, `"style_mod"`, `"instrument"`, `"task"` ...
         type : config
     
         // Title for menus, choices, if applicable.
@@ -21,57 +21,55 @@
     
         // Exclusive control.
         // If multiple configs have the same exclude_id, only one will be used.
-        exclude_id: false
+        exclude_id : false
     
         // True if this is the default config for a specific type.
         // Do not use unless you know what you are doing!
-        default: true
+        default : true
     }
     
-    // Includes are processed first, before the rest of
-    // the config file.
-    // 
-    // "include" takes a list of either filenames or preset names.
+    // A config file can specify a list of other config files that are to be processed **before** the contents of the current file. This makes it straightforward to create config files that extend existing config files.
+    // `"include"` takes a list of either filenames or preset names.
+    // If a file name is not absolute, it is taken relative to the location of the including config file.
     include : [ guitar ]
     
-    // General settings, often changed by configs and command line.
+    // General settings control global behaviour of the ChordPro program and can be changed by configs and command line.
     settings {
     
-        // Chords parsing strategy.
-        // Strict (only known chords) or relaxed (anything that looks sane)
-        strict : true
+        // Stricter checks and more warnings.
+        strict : false
     
         // Obsolete.
         lineinfo : true
     
-        // Titles flush: default center.
+        // Titles flush.
+        // Obsolete, use page headings/footers instead.
         titles : center
     
-        // Number of columns, default: 1.
+        // Columns.
+        // Either the number of columns, default: 1, or an array with column widths.
         columns : 1
     
         // Suppress empty chord lines.
-        // Command line: -a (--single-space).
         suppress-empty-chords : true
     
         // Suppress blank lyrics lines.
         suppress-empty-lyrics : true
     
-        // Suppress chords.
-        // Command line: -l (--lyrics-only)
+        // Suppress chords, only outputs lyrics.
         lyrics-only : false
     
         // Deprecated, Do not use.
         memorize : false
     
         // Chords inline instead of above.
-        // May be a string containing pretext %s posttext.
-        // Defaults to "[%s]" if set to a value that doesn't contain "%s".
+        // May be a string containing `pretext %s posttext`.
+        // Defaults to `"[%s]"` if set to a value that doesn't contain `"%s"`.
         inline-chords : false
     
-        // Same, for annotations. Ignored unless inline-chords is set.
-        // Must be a string containing pretext %s posttext.
-        // Default is "%s".
+        // Annotations inline instead of above. Ignored unless `inline-chords` is set.
+        // Must be a string containing pretext `%s` posttext.
+        // Default is `"%s"`.
         inline-annotations : %s
     
         // Chords under the lyrics.
@@ -79,9 +77,12 @@
     
         // Transpose the song by a number of semitones.
         // A positive number transposes up, a negative number transposes down.
-        // An optional postfix of "s" or "f" can be used to enforce the use
-        // of sharps resp. flats when a transposed chord requires accidentals.
+        // An optional postfix of `"s"` or `"f"` can be used to enforce the use of sharps resp. flats when a transposed chord requires accidentals.
+        // A postfix of `"k"` will use the key signature to determine whether flats or sharps are needed.
         transpose : 0
+    
+        // Always apply `"k"` semantics if no other postfix was specified.
+        transpose-sf-key : false
     
         // Force enharmonic when transposing (experimental).
         enharmonic-transpose : true
@@ -93,31 +94,31 @@
         decapo : false
     
         // Strictness of parsing chord names.
+        // Values are `"strict"` (only known chord forms) or `"relaxed"` (anything that looks sane).
         chordnames : strict
     
-        // Allow parsing of note names in [].
+        // Allow parsing of note names in `[]`.
         notenames : false
     
         // Always replace chords by their canonical form.
         chords-canonical : false
     
-        // If false, chorus labels are used as tags.
+        // If `false`, chorus labels are used as tags.
         choruslabels : true
     
         // Substitute Unicode sharp/flats in chord names.
-        // Will fallback to the ChordProSymbols font if the selected chord font
-        // doesn't have the glyphs.
+        // This will fallback to the ChordProSymbols the selected chord font doesn't have the glyphs.
         truesf : false
     
         // Substitute delta for maj7 in chord names.
-        // Will fallback to the ChordProSymbols font if the selected chord font
-        // doesn't have the glyphs.
+        // This will fallback to the ChordProSymbols the selected chord font doesn't have the glyphs.
         maj7delta : false
     
-        // Wrap long lines. This may trigger siiue #355.
+        // Wrap long lines. This may trigger issue #355.
         wraplines : true
     
-        // Indent for wrapped lines. Actual indent is the stringwidth.
+        // Indent for wrapped lines.
+        // Actual indent is the width of the provided string value.
         wrapindent : x
     
         // Consider text flowed.
@@ -125,11 +126,11 @@
     }
     
     // Metadata.
-    // For these keys you can use {meta key ...} as well as {key ...}.
-    // Important: "title" and "subtitle" must always be in this list.
     metadata {
     
-        // Known metadata items.
+        // The list of known metadata keys.
+        // For these keys you can use `{meta key …}` as well as `{key …}`.
+        // Important: `"title"` and `"subtitle"` must always be in this list.
         keys : [
             title
             subtitle
@@ -150,37 +151,40 @@
             year
         ]
     
-        // If strict, only the keys named here are allowed.
-        // Otherwise, {meta ...} will accept any key.
+        // If `true`, `{meta …}` will only accept the keys named here in the `keys` field.
+        // Otherwise, any key will be accepted.
         strict : true
     
-        // The separator is used to concatenate multiple values.
-        // If autosplit is true, the separator is also used to split
-        // values upon input.
+        // The separator is used to concatenate multiple values when metadata are used in title fields.
+        // If `autosplit` is `true`, the separator is also used to split values upon input.
         separator : "; "
     
         // Split data on separator.
+        // If enabled, metadata will be split on the separator to provide multiple values.
         autosplit : true
     }
     
     // Globally defined (added) meta data,
     // This is explicitly NOT intended for the metadata items above.
-    // Do NOT remove or change "_configversion"!
-    meta._configversion : "6.081"
+    // Do NOT remove or change `_configversion`!
+    meta._configversion : 6.081
     
     // Assets (placeholder).
     assets {}
     
-    // Date formats. Format is a strftime template.
+    // Date formats.
+    // Defines the date format used by the metadata value `today`.
+    // Format is a `strftime` template, so the format string can use anything that `strftime` understands.
     dates.today.format : "%A, %B %e, %Y"
     
-    // User settings. Actual values are usually set by a separate config file.
+    // User settings.
+    // These (optional) settings can be used to add user information.
     user {
     
         // Short user name.
         name : ""
     
-        // Full user name
+        // Full user name.
         fullname : ""
     }
     
@@ -195,55 +199,71 @@
         description : ""
     }
     
-    // Definition of the strings for this instrument.
+    // Definition of the strings for this instrument in scientific pitch notation.
     // This is usually set from an included instrument config.
-    // Note that string 1 is the highest string.
+    // Note that string 1 is the highest sounding string.
+    // If tuning is not relevant to the instrument, setting the tuning to `[ 0 ]` flushes all existing definitions.
     tuning : [ E2 A2 D3 G3 B3 E4 ]
     
     // Note (chord root) names.
     // In case of alternatives, the first one is used for output.
-    // Note that it is tempting to use real sharps and flats for output,
-    // but most fonts don't have the glyphs.
+    // Note that it is tempting to always use real sharps and flats for output, but many fonts don't have the glyphs.
     notes {
     
         // The note system used.
         system : common
     
-        // Note names, using sharps. \u266f is MUSICAL SYMBOL SHARP.
+        // Note names, using sharps. `\u266f` is MUSICAL SYMBOL SHARP.
         sharp : [
-            C   [ C# Cis "C\u266f" ]
-            D   [ D# Dis "D\u266f" ]
+            C
+            [ C# Cis "C\u266f" ]
+            D
+            [ D# Dis "D\u266f" ]
             E
-            F   [ F# Fis "F\u266f" ]
-            G   [ G# Gis "G\u266f" ]
-            A   [ A# Ais "A\u266f" ]
+            F
+            [ F# Fis "F\u266f" ]
+            G
+            [ G# Gis "G\u266f" ]
+            A
+            [ A# Ais "A\u266f" ]
             B
         ]
     
-        // Note names, using flats. \u266f is MUSICAL SYMBOL FLAT.
+        // Note names, using flats. `\u266d` is MUSICAL SYMBOL FLAT.
         flat : [
             C
-            [ Db    Des "D\u266d" ]   D
-            [ Eb Es Ees "E\u266d" ]   E
+            [ Db Des "D\u266d" ]
+            D
+            [ Eb Es Ees "E\u266d" ]
+            E
             F
-            [ Gb    Ges "G\u266d" ]   G
-            [ Ab As Aes "A\u266d" ]   A
-            [ Bb    Bes "B\u266d" ]   B
+            [ Gb Ges "G\u266d" ]
+            G
+            [ Ab As Aes "A\u266d" ]
+            A
+            [ Bb Bes "B\u266d" ]
+            B
         ]
     
-        // Movable means position independent (e.g. nashville).
+        // Movable means position independent (e.g. `nashville`).
         movable : false
     }
     
-    // User defined chords (placeholder).
+    // Key strategies.
+    // ChordPro tries to follow ABC (abc2svg) as much as possible.
+    keys {
+    
+        // Replace keys with an excessive number of sharps by their more common enharmonic equivalents.
+        // See also `settings.transpose-sf-key`.
+        force-common : true
+    
+        // The key `F#` is often used as is and not represented as an enharmonic equivalent. Set this to true if you want `Gb` instead of `F#`.
+        flats : false
+    }
+    
+    // User-defined chords.
     // This is an array of hashes, one for each chord.
-    // Each hash should contain the following fields:
-    //   "name":    name of the chord
-    //   "base":    base fret (optional, defaults to 1)
-    //   "frets":   the frets (optional, use 0 for an empty string,
-    //              and -1 or "x" for a muted string)
-    //   "fingers": finger positions (optional)
-    //   "display": (optional) can be used to change the way the chord is displayed
+    // See the docs for details.
     chords : []
     
     // Format to show chord names. May contain markup
@@ -259,27 +279,31 @@
         nashville : "%{root|%{}%{qual|<sup>%{}</sup>}%{ext|<sup>%{}</sup>}%{bass|/<sub>%{}</sub>}|%{name}}"
     }
     
-    // Selects which chords to print at the end of the song.
-    // Note that the type of diagram (strings, keyboard) is determined
-    // by the value of "instrument.type".
+    // Showing chord diagrams. Selects which chords to show at the end of the song.
+    // By default, ChordPro will include diagrams for all known chords that have been used in a song.
+    // The `suppress` list can be used to filter chords from showing diagrams, for example for chords that you consider trivial.
+    // Note: The type of diagram (string or keyboard) is determined by the value of `instrument.type`.
     diagrams {
     
+        // Selection of chords to show.
         // Shows selected or all chord diagrams at end.
-        // "all": shows all chords
-        // "user": shows user defined chords only
-        // "none": suppresses chords from being printed
+        //  `"all"`: shows all chords
+        //  `"user"`: shows user defined chords only
+        //  `"none"`: suppresses chords from being printed.
         show : all
     
         // Sorts the diagrams by key. Default is order of appearance.
         sorted : false
     
-        // Chords (names) that will not generate diagrams, e.g. if they
-        // are considered trivial.
+        // Chords (names) that will not generate diagrams, e.g. if they are considered trivial.
         suppress : []
     }
     
-    // Format for error messages.
-    diagnostics.format : '"%f", line %n, %m\n\t%l'
+    // When ChordPro detects errors while analyzing a song, it will use this format description to show diagnostic messages.
+    // In the format, `"%f"` will be replaced by the song file name, `"%n"` by the line number in the file where the error was detected, %m by the diagnostig message, and `"%l"` will be replaced by the original content of the line.
+    // Note you cannot use song metadata here.
+    diagnostics.format : '"%f", line %n, %m\n' \
+                         '\t%l'
     
     // Tables of contents.
     // An array of hashes each describing one table of contents.
@@ -289,25 +313,30 @@
             // An identifying name for this table of contents.
             name : table_of_contents
     
-            // The metadata for this toc. One or two items.
+            // The metadata for this table of contents. One or two items.
+            // To change the ordering of the table, prefix the sort key with `+` to force numeric sorting, or use a `-` prefix to reverse the sort order.
+            // When you specify a metadata item that has multiple values they are split out in the table.
+            // `songindex` is a built-in metadata item that yields the sequence number of the song in the songbook. Sorting on `songindex` will therefore produce the songs in songbook order.
             fields : [ songindex ]
     
-            // The label (title) for this toc.
+            // The label (title) for this table.
             label : "Table of Contents"
     
-            // The format for the toc lines.
+            // The format of the table's lines.
+            // You can use all song metadata.
             line : "%{title}"
     
-            // The format for the page numbers in the toc.
+            // The format for the page number in the table.
+            // You can use all song metadata.
             pageno : "%{page}"
     
             // For future use.
             fold : false
     
-            // Omit this toc.
+            // If `true`, this table is omitted.
             omit : false
     
-            // Template song for the toc.
+            // The template for this table.
             template : stdtoc
         }
         {
@@ -315,25 +344,30 @@
             // An identifying name for this table of contents.
             name : contents_by_title
     
-            // The metadata for this toc. One or two items.
+            // The metadata for this table of contents. One or two items.
+            // To change the ordering of the table, prefix the sort key with `+` to force numeric sorting, or use a `-` prefix to reverse the sort order.
+            // When you specify a metadata item that has multiple values they are split out in the table.
+            // `songindex` is a built-in metadata item that yields the sequence number of the song in the songbook. Sorting on `songindex` will therefore produce the songs in songbook order.
             fields : [ title artist ]
     
-            // The label (title) for this toc.
+            // The label (title) for this table.
             label : "Contents by Title"
     
-            // The format for the toc lines.
+            // The format of the table's lines.
+            // You can use all song metadata.
             line : "%{title}%{artist| - %{}}"
     
-            // The format for the page numbers in the toc.
+            // The format for the page number in the table.
+            // You can use all song metadata.
             pageno : "%{page}"
     
             // For future use.
             fold : false
     
-            // Omit this toc.
+            // If `true`, this table is omitted.
             omit : false
     
-            // Template song for the toc.
+            // The template for this table.
             template : stdtoc
         }
         {
@@ -341,33 +375,38 @@
             // An identifying name for this table of contents.
             name : contents_by_artist
     
-            // The metadata for this toc. One or two items.
+            // The metadata for this table of contents. One or two items.
+            // To change the ordering of the table, prefix the sort key with `+` to force numeric sorting, or use a `-` prefix to reverse the sort order.
+            // When you specify a metadata item that has multiple values they are split out in the table.
+            // `songindex` is a built-in metadata item that yields the sequence number of the song in the songbook. Sorting on `songindex` will therefore produce the songs in songbook order.
             fields : [ artist title ]
     
-            // The label (title) for this toc.
+            // The label (title) for this table.
             label : "Contents by Artist"
     
             // A break value to group toc entries with.
             break : "%{sortartist|%{}|%{artist}}"
     
-            // The format for the toc lines.
+            // The format of the table's lines.
+            // You can use all song metadata.
             line : "    %{title}"
     
-            // The format for the page numbers in the toc.
+            // The format for the page number in the table.
+            // You can use all song metadata.
             pageno : "%{page}"
     
             // For future use.
             fold : false
     
-            // Omit this toc.
+            // If `true`, this table is omitted.
             omit : true
     
-            // Template song for the toc.
+            // The template for this table.
             template : stdtoc
         }
     ]
     
-    // Table of Contents (obsolete, do not use).
+    // Deprecated. Table of Contents (obsolete, do not use).
     toc {
         title : "Table of Contents"
         line  : "%{title}"
@@ -375,94 +414,154 @@
     }
     
     // Grid strum overrides.
-    gridstrum.symbols {}
+    gridstrum.symbols {
+        rest : ""
+    }
     
     // Delegates.
-    // Basically a delegate is a section {start_of_XXX} which content is
-    // collected and handled later by the delegate module.
-    // Each delegate has at least the following fields:
-    // "type": "image", "none" or "omit".
-    //   type = "none" treats the section as a generic section,
-    //   type = "omit" ignores the section
-    // "module": the name of the module that implements the delegate
-    // "handler": the entry point in the module.
+    // Basically a delegate is a section `{start_of_XXX}` which content is collected and handled later by the delegate module.
     delegates {
     
         // Embedding ABC.
         abc {
-            type       : image
-            module     : ABC
     
-            // Default handler "abc2svg" uses program (if set),
-            // otherwise embedded QuickJS or external QuickJS.
-            // Handler "quickjs_xs" uses embedded QuickJS only.
-            // Handler "quickjs_qjs" uses external QuickJS only.
-            // Handler "quickjs" uses internal or external QuickJS.
+            // The result produced by the delegate handler.
+            type : image
+    
+            // The name of the (perl) module that implements the delegate.
+            module : ABC
+    
+            // The module's method to call.
+            // Default handler uses `program` (if set), othewise embedded QuickJS or external QuickJS.
             handler : abc2svg
-            program    : ""
     
-            // No longer used -- ./default.abc will be used if program tool.
+            // The program/command to execute.
+            program : ""
+    
+            // Obsolete.
             config : default
-            preamble   : [
+    
+            // Specific settings for the HTML backend.
+            html.handler : abc2svg_html
+    
+            // Specific settings for the HTML5 backend.
+            html5.handler : abc2svg_html
+    
+            // Specific settings for the PDF backend.
+            pdf.preamble : [
                 "%%textfont pdf.fonts.text"
                 "%%vocalfont pdf.fonts.text"
                 "%%gchordfont pdf.fonts.chord"
             ]
     
-            // Obsolete. Please use parser.preprocess.env-... instead.
+            // Obsolete. Please use `parser.preprocess.env-...` instead.
             preprocess.abc : []
         }
     
         // Embedding Lilypond.
         ly {
-            type       : image
-            module     : Lilypond
-            handler    : ly2svg
-            program    : ""
+    
+            // The result produced by the delegate handler.
+            type : image
+    
+            // The name of the (perl) module that implements the delegate.
+            module : Lilypond
+    
+            // The module's method to call.
+            handler : ly2svg
+    
+            // The program/command to execute.
+            program : ""
             config     : default
     
-            // The preamble is a list of lines inserted before the lilipond data,
-            // This is a good place to set the version and global customizations.
+            // Input lines to prepend to the user data.
             preamble : [
                 '\\version "2.21.0"'
                 "\\header { tagline = ##f }"
             ]
     
-            // Obsolete. Please use parser.preprocess.env-... instead.
+            // Obsolete. Please use `parser.preprocess.env-...` instead.
             preprocess.ly : []
         }
     
         // Embedding Strums. EXPERIMENTAL
         strum {
-            type     : image
-            module   : Strum
-            handler  : strum2xo
+    
+            // The result produced by the delegate handler.
+            type : image
+    
+            // The module's method to call.
+            handler : strum2xo
+    
+            // Specific settings for the PDF backend.
+            pdf {
+                handler : strum2xo
+                type    : image
+            }
+    
+            // Specific settings for the HTML backend.
+            html.handler : strum2html
+    
+            // Specific settings for the HTML5 backend.
+            html5.handler : strum2html
+    
+            // Input lines to prepend to the user data.
             preamble : []
+    
+            // The name of the (perl) module that implements the delegate.
+            module : Strum
         }
     
         // Embedding SVG.
         svg {
-            type    : image
-            module  : SVG
+    
+            // The result produced by the delegate handler.
+            type : image
+    
+            // The name of the (perl) module that implements the delegate.
+            module : SVG
+    
+            // The module's method to call.
             handler : svg2svg
         }
     
         // Embedding textblock.
         textblock {
-            type    : image
-            module  : TextBlock
+    
+            // The result produced by the delegate handler.
+            type : image
+    
+            // The module's method to call.
             handler : txt2xform
+    
+            // The name of the (perl) module that implements the delegate.
+            module : TextBlock
+    
+            // Specific settings for the PDF backend.
+            pdf {
+                handler : txt2xform
+                type    : image
+            }
+    
+            // Specific settings for the HTML backend.
+            html {
+                handler : txt2html
+                type    : html
+            }
+    
+            // Specific settings for the HTML5 backend.
+            html5.handler : txt2html
         }
     }
     
     // Settings for PDF output.
     pdf {
     
-        // Choose a PDF::API2 compatible library, or leave empty to
-        // have ChordPro choose one for you.
+        // Choose a `PDF::API2` compatible library, or leave empty to have ChordPro choose one for you.
         library : ""
     
-        // PDF Properties. Arbitrary key/values may be added.
+        // PDF Properties.
+        // Arbitrary key/values may be added.
         // Note that the context for substitutions is the first song.
         info {
     
@@ -479,13 +578,19 @@
             keywords : ""
         }
     
-        // Output paper size, e.g. "a4" or [595,842].
+        // Output paper size.
+        // The size can be specified either as the name of a known page size, e.g. `"a4`", or as a 2-element list containing the width and height of the page in PDF units (DTP points, pt, 1/72 inch).
         papersize : a4
     
         // For future use.
         page_layout : false
     
         // Theme
+        // These settings can be used to control the foreground and background colours of the PDF output.
+        // Valid values include colour names, full hex strings (`"#555555"`), or `"none"`.
+        // Background `"none"` or `"white"` means there will be no background colour added to the output.
+        // It may be useful to put your theme settings in a separate config file, together with additional settings that make up the theme.
+        // Other configuration settings that use colours can use `foreground`, `foreground-light`, `foreground-medium`, and `background` to refer to the colours defined in the theme.
         theme {
     
             // Foreground colour. Usually black.
@@ -502,12 +607,13 @@
         }
     
         // Distance between columns in multi-column mode.
+        // When output is produced in multiple columns, this is the space between the columns, in pt.
         columnspace : 20
     
-        // Page top margin, excluding headspace.
+        // Page top margin, excluding `headspace`.
         margintop : 80
     
-        // Page bottom margin, excluding footspace.
+        // Page bottom margin, excluding `footspace`.
         marginbottom : 40
     
         // Page left margin.
@@ -522,8 +628,7 @@
         // Space for page footers.
         footspace : 20
     
-        // Heading on first page only, add the headspace to
-        // the other pages so they become larger.
+        // Heading on first page only; the headspace is added to the other pages so they become larger.
         head-first-only : false
     
         // Baseline distances as a factor of the font size.
@@ -532,16 +637,16 @@
             // Spacing for page titles.
             title : 1.2
     
-            // Spacing for lyrics.
+            // Spacing between songlines (grouped chords + lyrics).
             lyrics : 1.2
     
-            // Spacing for chord names.
+            // Spacing between chords and lyrics in songlines.
             chords : 1.2
     
-            // Spacing for diagram chords.
+            // Spacing between the chord name and the diagram in chord diagrams.
             diagramchords : 1.2
     
-            // Spacing for grid lines.
+            // Spacing after each grid line.
             grid : 1.2
     
             // Spacing for tab lines.
@@ -551,24 +656,24 @@
             toc : 1.4
     
             // Spacing for empty (blank) lines.
-            // By setting this to a small value you get fine-grained control over
-            // the distance between song elements by adding empty lines.
+            // By setting this to a small value you get fine-grained control over the distance between song elements by adding empty lines.
             empty : 1
         }
     
         // Appearance of chorus.
         chorus {
     
-            // Indent of the chorus, not including bar.
+            // Indentation of the chorus, not including bar.
             indent : 0
     
-            // Appearance of side bar.
+            // Appearance of chorus side bar.
+            // Suppress by setting offset and/or width to zero (`0`).
             bar {
     
-                // Bar offset to the left of the text. Suppress when zero.
+                // Bar offset to the left of the text. Suppresses bar when zero (`0`).
                 offset : 8
     
-                // Bar width. Suppress when zero.
+                // Bar width. Suppress when zero (`0`).
                 width : 1
     
                 // Bar colour.
@@ -588,6 +693,7 @@
                 tag : Chorus
     
                 // Font for tag text.
+                // Possible values come from keys of `pdf.fonts`.
                 type : comment
     
                 // Quote the chorus.
@@ -598,46 +704,39 @@
         // This opens a margin for margin labels.
         labels {
     
-            // Margin width. Default is 0 (no margin labels).
-            // "auto" will automatically reserve a margin if labels are used.
+            // Margin width.
+            // `0` hides margin labels entirely. `"auto"` will automatically reserve a margin if labels are used.
             width : auto
     
-            // Alignment for the labels. Default is left.
+            // How the labels are aligned in the margin.
             align : left
     
-            // Alternatively, render labels as comments.
-            // Values are "comment", "comment_italic" and "comment_box".
+            // When `comment` is set to one of the suported comment types, the label will be printed as a comment before the section contents. The settings of `width` and `align` are ignored and no margin is opened.
             comment : ""
         }
     
-        // Alternative songlines with chords in a side column.
+        // This is an alternative style where the chords are placed in a separate column at the right of the lyrics. Chord changes are marked by underlining the lyrics.
+        // This style is enabled by setting to a nonzero value.
         // Value is the column position.
         chordscolumn : 0
     
-        // Value for Capo heading when using chordscolumn.
+        // Value for Capo heading when using `chordscolumn`.
+        // When a capo is set a heading indicating the current capo setting is added.
         capoheading : "%{capo|Capo: %{}}"
     
-        // A {titles: left} directive may conflict with customized formats.
-        // Set to true to ignore the directive.
+        // A `{titles: left}` directive may conflict with customized page heading/footer formats. Set this to `true` to have the directive ignores.
         titles-directive-ignore : false
     
         // Appearance of chord diagrams for string instruments.
         // A chord diagram consists of a number of cells.
-        // Cell dimensions are specified by "width" and "height".
         // The horizontal number of cells depends on the number of strings.
-        // The vertical number of cells is "vcells", which should
-        // be 4 or larger to accommodate most chords.
-        // The horizontal distance between diagrams is "hspace" cells.
-        // The vertical distance is "vspace" cells.
+        // The vertical number of cells is `"vcells"`, which should be 4 or larger to accommodate most chords.
         diagrams {
     
-            // Diagrams for all chords of the song can be shown at the
-            // "top", "bottom" or "right" side of the first page,
-            // or "below" the last song line.
+            // Diagrams for the chords of the song can be shown at the `"top"`, `"bottom"` or `"right"` side of the first page, or `"below"` the last song line. Set to `false` to not show any diagrams.
             show : bottom
     
-            // Alignment for "top", "bottom" and "below".
-            // Possible values are "left" (default), "right", "center" and "spread".
+            // Alignment for when `show` is set to `"top"`, `"bottom"` or `"below"`.
             align : left
     
             // Width of each diagram cell.
@@ -649,32 +748,33 @@
             // The number of frets shown.
             vcells : 4
     
-            // Thickness of the diagram lines as a fraction of 'width'.
+            // Thickness of the diagram lines as a fraction of `width`.
             linewidth : 0.1
     
-            // Thickness of the top nut, in 'linewidth'.
+            // Thickness of the top nut, in relation to `linewidth`.
             nutwidth : 5
     
             // Horizontal space between diagrams.
             hspace : 3.95
     
-            // Vertical space between diagrams.
+            // Vertical space between diagrams
             vspace : 3
     
-            // Size of the fret dot, fraction of cell width.
+            // Size of the fret dot, as a fraction of cell width.
             dotsize : 0.8
     
             // Style of bars, line or arc.
             barstyle : line
     
-            // Thickness of bars, fraction of dot width.
+            // Thickness of bars, as a fraction of dot width.
             barwidth : 0.8
     
             // Show finger settings, if available.
+            // `"below"` displays finger settings below the diagram, rather than in the finger dot.
             fingers : true
     
             // Text to show the fret base, if greater than one.
-            // "%s" will be replaced by the actual fret base number.
+            // `"%s"` will be replaced by the actual fret base number.
             fretbasetext : %s
     
             // Position for the fret base, left (default) or right.
@@ -683,17 +783,14 @@
     
         // Appearance of chord diagrams for keyboards.
         // A keyboard diagram consists of a number of keys.
-        // Dimensions are specified by "width" and "height".
-        // The horizontal distance between diagrams is "hspace" * "keys" * "width".
+        // Dimensions are specified by `width` and `height`.
+        // The horizontal distance between diagrams is `hspace * keys * width`.
         kbdiagrams {
     
-            // Diagrams for all chords of the song can be shown at the
-            // "top", "bottom" or "right" side of the first page,
-            // or "below" the last song line.
+            // Diagrams for the chords of the song can be shown at the `"top"`, `"bottom"` or `"right"` side of the first page, or `"below"` the last song line. Set to `false` to not show any diagrams.
             show : bottom
     
-            // Alignment for "top", "bottom" and "below".
-            // Possible values are "left" (default), "right", "center" and "spread".
+            // Alignment for when `show` is set to `"top"`, `"bottom"` or `"below"`.
             align : left
     
             // Width of a single (white) key.
@@ -705,13 +802,13 @@
             // The number of white keys shown.
             keys : 14
     
-            // The leftmost white key. Must be "C" or "F".
+            // The leftmost white key. Must be `"C"` or `"F"`.
             base : C
     
-            // Thickness of the diagram lines as a fraction of "width".
+            // Thickness of the diagram lines as a fraction of `width`.
             linewidth : 0.1
     
-            // Color of the 'pressed' keys.
+            // Color of the "pressed" keys.
             pressed : foreground-medium
     
             // Horizontal space between diagrams.
@@ -722,10 +819,11 @@
         }
     
         // Grid section lines.
-        // Suppress when "show" is false, e.g. for singers.
-        // The width and colour of the cell bar lines can be specified.
+        // Suppress when `show` is `false`, e.g. for singers.
         // Enable by setting the width to the desired width.
         grids {
+    
+            // The `width` and `color` of the cell bar lines.
             cellbar {
     
                 // Width of the cell bar.
@@ -738,10 +836,10 @@
             // Show grid context in output.
             show : true
     
-    	// Stretch the bar lines vertically.
-    	stretch : 0.825
+            // Stretch grid lines vertically.
+            stretch : 0.825
     
-            // Colour of special symbols.
+            // Properties of special symbols.
             symbols.color : blue
     
             // Properties of the volta.
@@ -758,170 +856,142 @@
         // New style page control.
         songbook {
     
-    	// Dual (odd/even) pages when set to true.
-    	// False means all pages will be the same (odd, right).
-    	// With dual pages, all the parts of the songbook (covers,
-    	// tables of contents, etc.) are always aligned to a right page.
-    	dual-pages : true
+            // Dual (odd/even) pages when set to true.
+            // False means all pages will be the same (odd, right).
+            // With dual pages, all the parts of the songbook (covers,
+            // tables of contents, etc.) are always aligned to a right page.
+            dual-pages : true
     
-    	// With dual pages, align individual tables of content
-    	// to right pages by inserting a blank filler page.
-    	// Values are true, false, or "song". In the latter case the
-    	// pagealign settings for songs are used for the tables of contents.
-    	align-tocs : true
+            // With dual pages, align individual tables of content
+            // to right pages by inserting a blank filler page.
+            // Values are true, false, or "song". In the latter case the
+            // pagealign settings for songs are used for the tables of contents.
+            align-tocs : true
     
-    	// With dual pages, a true value aligns songs to right pages
-    	// by inserting a blank filler page if necessary.
-    	// If false, no alignment takes place, all pages follow
-    	// each other.
-    	align-songs : true
+            // With dual pages, a true value aligns songs to right pages
+            // by inserting a blank filler page if necessary.
+            // If false, no alignment takes place, all pages follow
+            // each other.
+            align-songs : true
     
-    	// If true, all songs will start on left pages instead of right pages.
-    	align-songs-spread : false
+            // If true, all songs will start on left pages instead of right pages.
+            align-songs-spread : false
     
-    	// If true, the fill pages will have headings and footers
-    	// as if they were part of the song.
-    	align-songs-extend : false
+            // If true, the fill pages will have headings and footers
+            // as if they were part of the song.
+            align-songs-extend : false
     
-    	// Sort songs by "title" or "subtitle".
-    	// title    : sort pages alphabetically by title.
-    	// subtitle : sort pages alphabetically by subtitle. If this is
-    	//            used together with title, only title is used.
-    	// Put a minus sign before title and/or subtitle to obtain
-    	// descending order.
-    	sort-songs : false
+            // Sort songs by `"title"` or `"subtitle"`.
+            // title    : sort pages alphabetically by title.
+            // subtitle : sort pages alphabetically by subtitle. If this is used together with title, only title is used.
+            // Put a minus sign before title and/or subtitle to obtain descending order.
+            sort-songs : false
     
-    	// If true, the order of the songs is adjusted to make the
-    	// songbook as compact as possible, while each of the songs
-    	// require minimal page turns.
-    	// Note: this option requires extra processing time since
-    	// the songbook has to be processed twice.
-    	compact-songs : false
+            // If true, the order of the songs is adjusted to make the
+            // songbook as compact as possible, while each of the songs
+            // require minimal page turns.
+            // Note: this option requires extra processing time since
+            // the songbook has to be processed twice.
+            compact-songs : false
     
-    	// PDF file to add as cover page(s).
-    	cover : false
+            // PDF file to add as cover page(s).
+            cover : false
     
-    	// PDF file to add as front matter.
-    	front-matter : false
+            // PDF file to add as front matter.
+            front-matter : false
     
-    	// PDF file to add as back matter.
-    	back-matter : false
+            // PDF file to add as back matter.
+            back-matter : false
         }
     
-        // Legacy settings. These will be converted to new style page controls.
-        // However, if a config contains any new style page controls they
-        // will all be ignoredd.
-        /*
-        even-odd-pages  : true
-        pagealign-songs : true
-        sort-pages :      false
-        front-matter :    false
-        back-matter :     false
-        */
-    
-        // Formats.
-        // Pages have two title elements and one footer element. They also
-        // can have a page of an existing PDF file as underlay (background).
-        // Topmost is "title". It uses the "title" font as defined further below.
-        // Second is "subtitle". It uses the "subtitle" font.
-        // The "footer" uses the "footer" font.
-        // All elements can have three fields, that are placed to the left side,
-        // centered, and right side of the page.
-        // The contents of all fields is defined below. You can use metadata
-        // items in the fields as shown. By default, the "title" element shows the
-        // value of metadata item "title", centered on the page. Likewise
-        // "subtitle".
-        // NOTE: The "title" and "subtitle" page elements have the same names
-        // as the default metadata values which may be confusing. To show
-        // metadata item, e.g. "artist", add its value to one of the
-        // title/subtitle fields. Don't try to add an artist page element.
-        // 
-        // The left, center and right parts are for odd pages.
-        // On even pages, the left and right parts are swapped.
-        // It is possible to define distinct even page formats with "default-even",
-        // "title-even" and "first-even".
-        //    
-        // When a background document is specified, with odd/even printing,
-        // the 1st background page is used for left pages and
-        // the next page (if it exists) for right pages.
-        // For even/odd printing, the order is reversed.
+        // Page formats.
+        // Each of these page classes can have settings for a page title, subtitle, footer, and background. The settings inherit from `default` to `title` to `first`. So a `title` page has everything a `default` page has, and a `first` page has everything a `title` page has. `filler` pages are empty by default.
+        // All heading strings may contain references to metadata in the form %{name}, for example %{title}. The current page number can be obtained with %{page}, and the song index in the songbook with %{songindex}. For a complete description on how to use metadata in heading strings, see [here](https://chordpro.org/chordpro/chordpro-configuration-format-strings/).
+        // When even/odd page printing is selected, the left and right parts are swapped on even pages.
+        // By default, the "title" element shows the value of metadata item "title", centered on the page. Likewise "subtitle".
+        // NOTE: The "title" and "subtitle" page elements have the same names as the default metadata values which may be confusing. To show metadata item, e.g. "artist", add its value to one of the title/subtitle fields. Don't try to add an artist page element.
         formats {
     
-            // By default, a page has:
+            // Headers/footers/background for all pages that aren't first page of the output, of a song, or alignment pages.
             default {
     
-                // Three-part title format specification, left, center, right.
+                // Topmost title element.
+                // It uses the `fonts.title` font.
                 title : [ "" "" "" ]
     
-                // Three-part title format specification, left, center, right.
+                // Second title element.
+                // It uses the `fonts.subtitle` font.
                 subtitle : [ "" "" "" ]
     
-                // Three-part title format specification, left, center, right.
+                // It uses the `fonts.footer` font.
                 footer : [ "%{title}" "" "%{page}" ]
     
-                // Background page.
+                // Page background.
+                // This can be used to designate an existing PDF document to be used as the background of the output page. It has the form `filename` or `filename:page`. Page numbers count from one.
+                // If odd/even printing is in effect, the designated page number is used for left pages, and the next page (if it exists) for right pages.
                 background : ""
             }
     
-            // The first page of a song has:
+            // Headers/footers/background for the first page of a song.
             title {
     
-                // Three-part title format specification, left, center, right.
+                // Topmost title element.
+                // It uses the `fonts.title` font.
                 title : [ "" "%{title}" "" ]
     
-                // Three-part title format specification, left, center, right.
+                // Second title element.
+                // It uses the `fonts.subtitle` font.
                 subtitle : [ "" "%{subtitle}" "" ]
     
-                // Three-part title format specification, left, center, right.
+                // It uses the `fonts.footer` font.
                 footer : [ "" "" "%{page}" ]
     
-                // Background page.
+                // Page background.
+                // This can be used to designate an existing PDF document to be used as the background of the output page. It has the form `filename` or `filename:page`. Page numbers count from one.
+                // If odd/even printing is in effect, the designated page number is used for left pages, and the next page (if it exists) for right pages.
                 background : ""
             }
     
-            // The very first output page is slightly different:
+            // Headers/footers/background for the vefy first page of the output.
             first {
     
-                // Three-part title format specification, left, center, right.
+                // It uses the `fonts.footer` font.
                 footer : [ "" "" "" ]
     
-                // Background page.
+                // Page background.
+                // This can be used to designate an existing PDF document to be used as the background of the output page. It has the form `filename` or `filename:page`. Page numbers count from one.
+                // If odd/even printing is in effect, the designated page number is used for left pages, and the next page (if it exists) for right pages.
                 background : ""
             }
     
-            // Filler pages (for alignment) are empty by default.
+            // Headers/footers/background for all pages for alignment.
             filler.background : ""
         }
     
         // Split marker for syllables that are smaller than chord width.
-        // split-marker is a 3-part array: "start", "repeat", and "final".
-        // "final" is always printed, last.
-        // "start" is printed if there is enough room.
-        // "repeat" is printed repeatedly to fill the rest.
-        // If split-marker is a single string, this is "start".
+        // `split-marker` is a 3-part array: `start`, `repeat`, and `final`, or can be a single string representing `start`.
+        // `final` is always printed, last.
+        // `start` is printed if there is enough room.
+        // `repeat` is printed repeatedly to fill the rest.
+        // If `split-marker` is a single string, this is `start`.
         // All elements may be left empty strings.
         split-marker : [ "" "" "" ]
     
-        // Font families and properties.
-        // "fontconfig" maps members of font families to physical fonts.
-        // Optionally, additional properties of the fonts can be specified.
-        // Physical fonts can be the names of TrueType/OpenType fonts,
-        // or names of built-in fonts (corefonts).
-        // Relative filenames are looked up in the fontdir.
-        // For example:
-        // "fontdir" : [ "/usr/share/fonts/liberation", "/home/me/fonts" ]
+        // The `fontdir` setting can be used to add one or more private font directories to the font libraries. The private directories will be searched first.
         fontdir : []
     
         // Experimental: Remap corefonts to real truetype fonts.
-        // This requires a set of truetype fonts to be available in the
-        // fontdir under a well-defined name. See the docs.
-        // Fontsets currenly supported are "free" for the GNU Free Fonts,
-        // and "tex" for the Tex Gyre fonts.
-        // Value "false" inhibits remapping.
-        // Value "null" will have ChordPro look for the fonts itself.
+        // This requires a set of truetype fonts to be available in the `fontdir` under a well-defined name. See the docs.
+        // Fontsets currenly supported are `"free"` for the GNU Free Fonts, and `"tex"` for the Tex Gyre fonts.
+        // Value `false` inhibits remapping.
+        // Value `null` will have ChordPro look for the fonts itself.
         corefonts.remap : null
     
-        // The font families.
+        // Font families and properties.
+        // `fontconfig` maps members of font families to physical fonts.
+        // Optionally, additional properties of the fonts can be specified.
+        // Physical fonts can be the names of TrueType/OpenType fonts, or names of built-in fonts (`corefonts`).
+        // Relative filenames are looked up in the `fontdir`.
         fontconfig {
             serif {
                 ""         : Times-Roman
@@ -968,15 +1038,9 @@
             dingbats.          : ZapfDingbats
         }
     
-        // "fonts" maps output elements to fonts as defined in "fontconfig".
-        // The elements can have a background colour associated.
-        // Colours are "#RRGGBB" or predefined names like "black", "white",
-        // and lots of others.
-        // NOTE: In the built-in config we use only "name" since that can
-        // be overruled with user settings.
+        // `fonts` maps output elements to fonts as defined in `fontconfig`.
         // 
-        // Some element mappings can be specified, but need not since
-        // they default to other elements.
+        // Some element mappings can be specified, but it's not needed for all since they default to other elements:
         // subtitle       --> text
         // chorus         --> text
         // comment        --> text
@@ -992,37 +1056,37 @@
         // diagram_base   --> text (but at a small size)
         fonts {
     
-            // Font for typesetting titles.
+            // The font used for page titles.
             title : "Times-Bold 14"
     
-            // Font for typesetting lyrics.
+            // The font used for lyrics texts.
             text : "Times-Roman 12"
     
-            // Font for typesetting chord names.
+            // The font used for chords above the lyrics.
             chord : "Helvetica-Oblique 10"
     
             // Font for numbers in chord diagram dots.
-            // Color is for the numbers.
-            // Numbercolor is for the dots.
-            // Size doesn't matter unless diagrams.fingers = below.
+            // `color` is for the numbers.
+            // `numbercolor` is for the dots.
+            // `size` doesn't matter unless `diagrams.fingers` = `"below"`.
             chordfingers : "sans; numbercolor=background"
     
-            // Font for typesetting comment text.
+            // The font used for comments. If not set, falls back on the `text` font.
             comment : "Helvetica 12; background=foreground-light"
     
-            // Font for typesetting italised comment text.
+            // The font used for `comment_italic` directives. If not set, falls back on the `chord` font.
             comment_italic : "Helvetica-Oblique 12"
     
-            // Font for typesetting boxed comment text.
+            // The font used for `comment_box` directives. If not set, falls back on the `chord` font.
             comment_box : "Helvetica 12; frame=1"
     
-            // Font for typesetting tabs.
+            // The font used for the contents of tab environments.
             tab : "Courier 10"
     
-            // Font for typesetting the table of contents.
+            // The font used for the table of contents. If not set, falls back on the `text` font.
             toc : "Times-Roman 11"
     
-            // Font for typesetting grids.
+            // The font used for grid elements. If not set, falls back on the `chord` font.
             grid : "Helvetica 10"
     
             // Font for typesetting gridstrum symbols.
@@ -1033,8 +1097,7 @@
             grille : "Helvetica 10"
         }
     
-        // PDF outlines (index) can be used in most PDF viewers
-        // for quick navigation.
+        // PDF outlines (index) can be used in most PDF viewers for quick navigation.
         outlines : [
             {
     
@@ -1053,7 +1116,7 @@
                 // Initial display is collapsed.
                 collapse : false
     
-                // Make letter level if more entries than this value.
+                // If there are at least as many outline items with differing first letters than the amount specified here, an extra level of outlines (letter index) is created for easy navigation. A value of zero (`0`) disables this.
                 letter : 5
     
                 // For future use.
@@ -1076,7 +1139,7 @@
                 // Initial display is collapsed.
                 collapse : false
     
-                // Make letter level if more entries than this value.
+                // If there are at least as many outline items with differing first letters than the amount specified here, an extra level of outlines (letter index) is created for easy navigation. A value of zero (`0`) disables this.
                 letter : 5
     
                 // For future use.
@@ -1102,7 +1165,7 @@
                 // Initial display is collapsed.
                 collapse : true
     
-                // Make letter level if more entries than this value.
+                // If there are at least as many outline items with differing first letters than the amount specified here, an extra level of outlines (letter index) is created for easy navigation. A value of zero (`0`) disables this.
                 letter : 0
     
                 // For future use.
@@ -1115,23 +1178,87 @@
         showlayout : false
     
         // CSV generation for MobileSheetsPro. May need adaptation for other tools.
-        // Note that the resultant file will conform to RFC 4180.
-        // 
-        // Add "omit" : true to omit a field; to add fields with fixed
-        // values, use "value". See the entry with name "my_field".
+        // Note that the resultant file will conform to RFC 4180 (standardized CSV file format).
+        // To add fields with fixed values, use `"value"`. See the example with name `"my_field"`.
         csv {
     
             // The fields for the CSV.
             fields : [
-                { name : title         meta : title      }
-                { name : pages         meta : pagerange  }
-                { name : "sort title"  meta : sorttitle  }
-                { name : artists       meta : artist     }
-                { name : composers     meta : composer   }
-                { name : collections   meta : collection }
-                { name : keys          meta : key_actual }
-                { name : years         meta : year       }
-                { name : my_field     value : text       omit  : true}
+                {
+    
+                    // The field name in the exported CSV.
+                    name : title
+    
+                    // The metadata key to use as the value in the exported CSV.
+                    meta : title
+                }
+                {
+    
+                    // The field name in the exported CSV.
+                    name : pages
+    
+                    // The metadata key to use as the value in the exported CSV.
+                    meta : pagerange
+                }
+                {
+    
+                    // The field name in the exported CSV.
+                    name : "sort title"
+    
+                    // The metadata key to use as the value in the exported CSV.
+                    meta : sorttitle
+                }
+                {
+    
+                    // The field name in the exported CSV.
+                    name : artists
+    
+                    // The metadata key to use as the value in the exported CSV.
+                    meta : artist
+                }
+                {
+    
+                    // The field name in the exported CSV.
+                    name : composers
+    
+                    // The metadata key to use as the value in the exported CSV.
+                    meta : composer
+                }
+                {
+    
+                    // The field name in the exported CSV.
+                    name : collections
+    
+                    // The metadata key to use as the value in the exported CSV.
+                    meta : collection
+                }
+                {
+    
+                    // The field name in the exported CSV.
+                    name : keys
+    
+                    // The metadata key to use as the value in the exported CSV.
+                    meta : key_actual
+                }
+                {
+    
+                    // The field name in the exported CSV.
+                    name : years
+    
+                    // The metadata key to use as the value in the exported CSV.
+                    meta : year
+                }
+                {
+    
+                    // The field name in the exported CSV.
+                    name : my_field
+    
+                    // A static value in the exported CSV. If provided, overrides the value of the provided `meta` key.
+                    value : text
+    
+                    // `true` to omit a field.
+                    omit : true
+                }
             ]
     
             // Separator to join field values.
@@ -1140,7 +1267,7 @@
             // Separator to join meta values.
             vseparator : |
     
-            // Restrict CSV to song pages only (do not include matter pages)
+            // Restrict CSV to song pages only (do not include matter pages).
             songsonly : true
         }
     }
@@ -1151,8 +1278,8 @@
         // Appearance of chorus recall.
         // Default: print the tag using the type.
         // Alternatively quote the lines of the preceding chorus.
-        // If no tag+type or quote: use {chorus}.
-        // Note: Variant 'msp' always uses {chorus}.
+        // If no tag+type or quote: use `{chorus}`.
+        // Note: Variant 'msp' always uses `{chorus}`.
         chorus.recall {
             tag   : ""
             type  : ""
@@ -1164,10 +1291,148 @@
     }
     
     // Settings for HTML output.
-    // Styles for display and printing.
-    html.styles {
-        display : chordpro.css
-        print   : chordpro_print.css
+    html {
+    
+        // The actual backend module.
+        module : HTML
+    
+        // Stylesheets for display and printing.
+        styles {
+    
+            // Relative path to a CSS file to use for styling HTML output.
+            default : chordpro.css
+    
+            // Relative path to a CSS file to use for styling displayed HTML output on screen media.
+            screen : ""
+    
+            // Relative path to a CSS file to use for styling printed HTML output.
+            print : chordpro_print.css
+    
+            // Embed the styles instead of linking to them.
+            embed : false
+    
+            // Legacy style for `"screen"`.
+            display : ""
+        }
+    }
+    
+    // Settings for HTML5 output.
+    html5 {
+    
+        // Optional book sections.
+        cover        : false
+        front-matter : false
+        back-matter  : false
+    
+        // Output mode. Use `print`/`paged` for the paged HTML5 path.
+        mode : print
+    
+        // HTML5-specific diagram settings.
+        diagrams.direction : vertical
+    
+        // CSS customization hooks.
+        css {
+            colors {
+                text          : ""
+                chord         : ""
+                comment       : ""
+                highlight     : ""
+                chorus_bg     : ""
+                chorus_border : ""
+            }
+            fonts {
+                text  : ""
+                chord : ""
+                mono  : ""
+            }
+            sizes {
+                text     : ""
+                chord    : ""
+                title    : ""
+                subtitle : ""
+                comment  : ""
+            }
+            spacing {
+                line  : ""
+                verse : ""
+                chord : ""
+            }
+        }
+    
+        // Include paths for templates.
+        template_include_path : []
+    
+        // Templates for HTML5 generation.
+        templates {
+            songbook       : "html5/songbook.tt"
+            song           : "html5/song.tt"
+            songline       : "html5/songline.tt"
+            comment        : "html5/comment.tt"
+            image          : "html5/image.tt"
+            chord_diagrams : "html5/chord-diagrams.tt"
+            css            : "html5/css/base.tt"
+        }
+    
+        // Settings for paged HTML5 output.
+        paged {
+            papersize    : null
+            margintop    : null
+            marginbottom : null
+            marginleft   : null
+            marginright  : null
+            headspace    : null
+            footspace    : null
+    
+            song.page-break    : none
+            newpage.page-break : page
+    
+            css {
+                colors {
+                    text          : ""
+                    chord         : ""
+                    comment       : ""
+                    highlight     : ""
+                    chorus_bg     : ""
+                    chorus_border : ""
+                }
+                fonts {
+                    text  : ""
+                    chord : ""
+                    mono  : ""
+                }
+                sizes {
+                    text     : ""
+                    chord    : ""
+                    title    : ""
+                    subtitle : ""
+                    comment  : ""
+                }
+                spacing {
+                    line  : ""
+                    verse : ""
+                    chord : ""
+                }
+            }
+    
+            template_include_path : []
+    
+            templates {
+                songbook : "html5/paged/songbook.tt"
+                song     : "html5/paged/song.tt"
+                toc      : "html5/paged/toc.tt"
+                css      : "html5/paged/css/base.tt"
+            }
+    
+            bundle {
+                enabled : false
+                mode    : minimal
+                html    : null
+                css {
+                    layout  : "layout.css"
+                    content : "content.css"
+                }
+            }
+        }
     }
     
     // Settings for LaTeX backend.
@@ -1202,30 +1467,35 @@
     a2crd {
     
         // Treat leading lyrics lines as title/subtitle lines.
+        // The first non-empty, non-chord, non-directive lines are taken to be the song title and subtitle.
         infer-titles : true
     
-        // Analysis strategy.
+        // Strategies to recognize chords and lyrics lines are implemented by classifiers.
+        // The default classifier is `"pct_chords"` and is based on the percentage of chords recognized.
         classifier : pct_chords
     
-        // Tab stop width for tab expansion. Set to zero to disable.
+        // Tab stop width for tab expansion. Set to `0` to disable.
+        // Tabs in the input source are replaced by an appropriate amount of spaces.
         tabstop : 8
     }
     
     // Settings for the markup processor.
     // Shortcodes allow user defined markup, e.g. <foo>...</foo>.
+    // ```
     // markup.shortcode {
     //    heavy :  "weight='bold' size='large'"
     // }
     // Each occurrence of <heavy>...</heavy> will be replaced by
     // <span weight='bold' size='large'>...</span>.
+    // ```
     markup.shortcodes {}
     
-    // Settings for the parser.
+    // Settings for the parser/preprocessor
     parser {
     
         // For the exceptional case you need brackets [] in your lyrics or annotations.
         // These characters are replaced by normal brackets **after** chord analysis.
-        // E.g. parser.altbrackets: "«»"
+        // E.g. `parser.altbrackets: "«»"`
         // Use wisely. Better still, don't use this.
         altbrackets : null
     
@@ -1243,9 +1513,14 @@
     }
     
     // Miscellaneous debug settings.
+    // A boolean value or an integer. `0` means `false` and nozero means `true`.
     debug {
+    
+        // Insert extra debugging info into the generated PDF document.
         runtimeinfo : 1
-        a2crd       : 0
+    
+        // All debug settings are intended for development and debugging and are not useful for ChordPro users.
+        a2crd : 0
         abc         : 0
         assets      : 0
         chords      : 0
@@ -1270,7 +1545,11 @@
         spacing     : 0
         svg         : 0
         txtblk      : 0
+        xpose       : 0
         x1          : 0
         x2          : 0
         x3          : 0
     }
+    
+    // The schema for this config file.
+    $schema : "https://chordpro.org/beta/resources/config.schema"

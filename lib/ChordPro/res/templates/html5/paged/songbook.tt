@@ -1,0 +1,48 @@
+[%# ChordPro HTML5 Paged Output Songbook Template
+    Extends html5/songbook.tt with paged.js integration
+    Variables:
+      - title: Songbook title
+      - songs: Array of song HTML strings
+      - css: Generated CSS string
+%]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ChordPro HTML5 Backend (Paged Mode)">
+    <title>[% title | html %]</title>
+
+    <!-- Paged.js for pagination -->
+    <script src="https://unpkg.com/pagedjs@0.4.3/dist/paged.polyfill.js"></script>
+[% IF css_files.0 %]
+[% FOREACH css_file IN css_files %]
+    <link rel="stylesheet" href="[% css_file | html %]">
+[% END %]
+[% ELSE %]
+    <style>
+[% css %]
+    </style>
+[% END %]
+</head>
+<body class="chordpro-songbook chordpro-paged">
+    <div class="book-content">
+[% IF cover_html %]
+[% cover_html %]
+[% END %]
+[% IF front_matter_html %]
+[% front_matter_html %]
+[% END %]
+[% IF toc_html %]
+[% toc_html %]
+<div class="page-counter-reset" />
+[% END %]
+[% FOREACH song IN songs %]
+[% song %]
+[% END %]
+[% IF back_matter_html %]
+[% back_matter_html %]
+[% END %]
+    </div>
+</body>
+</html>

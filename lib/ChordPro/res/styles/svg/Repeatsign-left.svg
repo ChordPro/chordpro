@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.0"
+   width="46.132114"
+   height="100"
+   id="svg4468"
+   sodipodi:docname="Repeatsign-links.svg"
+   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="2.4231975"
+     inkscape:cx="73.663001"
+     inkscape:cy="98.836352"
+     inkscape:window-width="1920"
+     inkscape:window-height="991"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg4468" />
+  <defs
+     id="defs2" />
+  <g
+     id="g2"
+     transform="matrix(0.31347962,0,0,0.31347962,-1.1958298e-6,0)">
+    <path
+       d="m 111.62704,199.25 a 17.767208,17.767208 0 1 1 35.53441,0 17.767208,17.767208 0 1 1 -35.53441,0 z"
+       id="path1" />
+    <path
+       d="m 111.62704,119.74998 a 17.767208,17.767208 0 1 1 35.53441,0 17.767208,17.767208 0 1 1 -35.53441,0 z"
+       id="path2" />
+    <rect
+       width="16"
+       height="313.04129"
+       x="-88.000008"
+       y="-316.88611"
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect4500"
+       transform="scale(-1)" />
+    <rect
+       width="49"
+       height="319"
+       ry="2.5381727"
+       x="-49.000004"
+       y="-319"
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect4502"
+       transform="scale(-1)" />
+  </g>
+</svg>

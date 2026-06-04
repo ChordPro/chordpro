@@ -121,7 +121,7 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 		next;
 	    }
 
-	    if ( $t eq "|" ) {
+	    if ( $t eq "|" || $t eq ":|" ) {
 		if ( $token->{volta} ) {
 		    if ( $align ) {
 			$x = $align;
@@ -130,6 +130,9 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 		    $voltastart =
 		    pr_rptvolta( $x, $y, $lcr, $sz, $col, $pr, $token );
 		    $prevvoltastart ||= $x;
+		}
+		elsif ( $t eq ":|" ) {
+		    pr_rptend( $x, $y, $lcr, $sz, $col, $pr );
 		}
 		else {
 		    pr_barline( $x, $y, $lcr, $sz, $col, $pr );
@@ -140,9 +143,6 @@ sub gridline( $elt, $x, $y, $cellwidth, $barwidth, $margin, $ps, %opts ) {
 	    }
 	    elsif ( $t eq "|:" ) {
 		pr_rptstart( $x, $y, $lcr, $sz, $col, $pr );
-	    }
-	    elsif ( $t eq ":|" ) {
-		pr_rptend( $x, $y, $lcr, $sz, $col, $pr );
 	    }
 	    elsif ( $t eq ":|:" ) {
 		pr_rptendstart( $x, $y, $lcr, $sz, $col, $pr );
@@ -290,13 +290,17 @@ sub pr_rptvolta( $x, $y, $lcr, $sz, $symcol, $pr, $token ) {
     my $w = $sz / 10;		# glyph width = 3 * $w
     my $col = $pr->{ps}->{grids}->{volta}->{color};
     $x += $w if $lcr < 0;
+    if ( $token->{symbol} eq ":|" ) {
+	pr_rptend( $x, $y, $lcr, $sz, $col, $pr );
+    }
+    else {
+	pr_barline( $x, $y, 0, $sz, $col, $pr );
+    }
     my $ret = $x -= $w / 2;
-    $pr->vline( $x, yh($y,$sz,$pr), $w, $col );
-    $x += 2 * $w;
     my $font = $pr->{ps}->{fonts}->{grid};
     $pr->setfont($font);
     $pr->text( "<span color='$col'><sup>" . $token->{volta} . "</sup></span>",
-	       $x-$w/2, $y, $font );
+	       $x+$w, $y, $font );
     $ret;
 }
 

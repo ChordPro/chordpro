@@ -1,0 +1,174 @@
+
+/* Tab (Phase 4: Supports pdf.spacing.tab) */
+.cp-tab {
+    font-family: var(--cp-font-mono);
+    font-size: 0.9em;
+    line-height: calc(var(--spacing-tab, 1) * 1em);
+    white-space: pre;
+    background: #f9f9f9;
+    padding: 0.5em;
+    border: 1px solid #ddd;
+    margin: 1em 0;
+    overflow-x: auto;
+}
+
+.cp-tabline {
+    margin: 0;
+}
+
+/* Grid (Phase 4: Supports pdf.grids.symbols.color, pdf.spacing.grid) */
+.cp-grid {
+    font-family: var(--cp-font-mono);
+    line-height: calc(var(--spacing-grid, 1.2) * 1em);
+    margin: 1em 0;
+    background: #f9f9f9;
+    padding: 0.5em;
+    border: 1px solid #ddd;
+}
+
+.cp-gridline {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    column-gap: 0.5em;
+    align-items: center;
+    margin: 0.2em 0;
+}
+
+.cp-grid-tokens {
+    display: grid;
+    grid-template-columns: repeat(var(--cp-grid-cols, 1), minmax(0, 1fr));
+    column-gap: 0.35em;
+    align-items: center;
+}
+
+.cp-grid-token {
+    min-width: 0;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.cp-grid-token-bar {
+    justify-self: center;
+}
+
+.cp-grid-token-cell {
+    justify-self: stretch;
+}
+
+.cp-gridline-strum {
+    align-items: center;
+}
+
+.cp-gridline-strum-svg {
+    color: var(--cp-color-chord);
+}
+
+.cp-gridline-strum-svg .cp-grid-tokens {
+    display: block;
+}
+
+.cp-grid-strum-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.cp-gridline-fullsvg .cp-grid-tokens {
+    display: block;
+}
+
+.cp-grid-full-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.cp-delegate-strum-block {
+    display: grid;
+    row-gap: 0.35em;
+    margin: 0.4em 0;
+}
+
+.cp-standalone-strum-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.cp-gridline-strum .cp-grid-strum {
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+
+.cp-grid-chord {
+    font-family: var(--cp-font-chord);
+    color: var(--cp-color-chord);
+    font-weight: bold;
+    min-width: 0;
+}
+
+.cp-grid-bar-hidden {
+    visibility: hidden;
+}
+
+/* Phase 4: Grid symbols use pdf.grids.symbols.color */
+.cp-grid-symbol {
+    color: var(--grid-symbols-color, #999);
+}
+
+/* Phase 4: Volta brackets use pdf.grids.volta.color */
+.cp-grid-volta {
+    color: var(--grid-volta-color, blue);
+    font-weight: bold;
+    position: relative;
+    display: inline-block;
+    padding-top: 0.4em;
+    border-top: 2px solid var(--grid-volta-color, blue);
+    border-left: 2px solid var(--grid-volta-color, blue);
+}
+
+.cp-grid-volta::before {
+    content: attr(data-volta) ".";
+    position: absolute;
+    top: -0.2em;
+    left: 0.2em;
+    font-size: 0.75em;
+}
+
+/* Grid bar types */
+.cp-grid-bar {
+    font-weight: bold;
+}
+
+.cp-grid-bar-double {
+    letter-spacing: -0.05em;
+}
+
+.cp-grid-bar-repeat-start,
+.cp-grid-bar-repeat-end,
+.cp-grid-bar-repeat-both {
+    font-weight: bold;
+}
+
+.cp-grid-bar-end {
+    font-weight: bold;
+}
+
+/* Grid repeats and markers */
+.cp-grid-repeat {
+    font-weight: bold;
+}
+
+.cp-grid-repeat-anchor {
+    justify-self: center;
+    position: relative;
+    z-index: 1;
+}
+
+.cp-grid-repeat-span {
+    text-align: center;
+}
+
+.cp-grid-space {
+    opacity: 0.6;
+}

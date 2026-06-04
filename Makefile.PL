@@ -26,7 +26,6 @@ my $mv =
     'File::HomeDir'		   => 1.004,
     'IPC::Run3'			   => 0.049,
     'Image::Info'		   => 1.41,
-    'JSON::PP'			   => 2.27203,
     'JSON::XS'			   => 4.03,
     'JavaScript::QuickJS'	   => 0.18,
     'LWP::Protocol::https'	   => 6.14, # File::LoadLines
@@ -37,6 +36,7 @@ my $mv =
     'Ref::Util'			   => 0.204,
     'Scalar::Util'		   => 1.63,
     'Storable'			   => 3.08,
+    'Test::More::UTF8'		   => 0.05,
     'Unicode::Collate'		   => 1.31,
     'Unicode::Normalize'	   => 1.26,
   };
@@ -117,9 +117,10 @@ WriteMakefile
      },
      no_index => {
          file => [
-	    "lib/ChordPro/Songbook.pm",
+	    "lib/ChordPro/Assets.pm",
 	    "lib/ChordPro/Chords.pm",
 	    "lib/ChordPro/Config.pm",
+	    "lib/ChordPro/Songbook.pm",
 	    "lib/ChordPro/Testing.pm",
 	    "lib/ChordPro/Utils.pm",
 	    "lib/ChordPro/Version.pm",
@@ -143,15 +144,3 @@ WriteMakefile
 # Note about the no_index: CPAN and MetaCPAN have differing opinions
 # on how no_index must be interpreted, in particular in combination
 # with provides.
-
-sub MY::postamble {
-    return <<'MAKE_FRAG';
-config :: resources
-
-resources :: lib/ChordPro/Config/Data.pm
-
-lib/ChordPro/Config/Data.pm : lib/ChordPro/res/config/chordpro.json
-	perl script/cfgboot.pl $< -o $@
-
-MAKE_FRAG
-}

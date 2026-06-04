@@ -4,8 +4,8 @@
 
 # Author          : Johan Vromans
 # Last Modified By: Johan Vromans
-# Last Modified On: Wed Oct 29 15:38:14 2025
-# Update Count    : 105
+# Last Modified On: Mon Apr  6 15:08:48 2026
+# Update Count    : 107
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -133,12 +133,19 @@ my @aux;
 if ( is_msw ) {
     # None?
 }
-elsif ( is_macos ) {
-    @aux = qw( jpeg libpng16 tiff lzma zstd pcre2-32 );
-}
 else {
-    @aux = qw( deflate jbig jpeg libpng16.so.16 SDL2-2.0 tiff webp );
+    if ( is_macos ) {
+	@aux = qw( jpeg libpng16 tiff lzma zstd pcre2-32 );
+    }
+    else {
+	@aux = qw( deflate jbig jpeg libpng16.so.16 SDL2-2.0 tiff );
+    }
+
+    if ( Alien::wxWidgets->version >= 3.003 ) {
+	push( @aux, "webp" );
+    }
 }
+
 print("\n# Supporting libs\n");
 print("-l $_\n") for @aux;
 

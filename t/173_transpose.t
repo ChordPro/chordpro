@@ -6,6 +6,7 @@ use utf8;
 
 use ChordPro::Testing;
 use ChordPro::Songbook;
+use ChordPro::Chords::Transpose;
 
 plan tests => 3;
 
@@ -39,13 +40,15 @@ I [D]looked over Jordan, and [G]what did I [D]see,
 {chorus}
 EOD
 
-eval { $s->parse_file( \$data, { transpose => -10 } ) } or diag("$@");
+eval { $s->parse_file( \$data, { transpose => parse_transpose(-10) } ) } or diag("$@");
 
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 isa_ok( $s->{songs}->[0], 'ChordPro::Song', "It's a song" );
 
 my $song = {
   body => [
+    { context => '', type => "meta",
+      key => "key", value => [ "E" ] },
     {
       context => '',
       type => 'empty',
@@ -127,9 +130,9 @@ my $song = {
     {
       chords => [
         '',
-        'F#',
+        'Gb',
         'B',
-        'F#',
+        'Gb',
       ],
       context => '',
       phrases => [
@@ -145,9 +148,9 @@ my $song = {
         {
           chords => [
             '',
-            'F#',
+            'Gb',
             'B',
-            'F#',
+            'Gb',
           ],
           context => 'chorus',
           phrases => [
@@ -175,9 +178,9 @@ my $song = {
     {
       chords => [
         '',
-        'G#',
-        'C#',
-        'G#',
+        'Ab',
+        'Db',
+        'Ab',
       ],
       context => '',
       phrases => [
@@ -193,9 +196,9 @@ my $song = {
         {
           chords => [
             '',
-            'G#',
-            'C#',
-            'G#',
+            'Ab',
+            'Db',
+            'Ab',
           ],
           context => 'chorus',
           phrases => [
@@ -223,9 +226,9 @@ my $song = {
     {
       chords => [
         '',
-        'F#',
+        'Gb',
         'B',
-        'F#',
+        'Gb',
       ],
       context => '',
       phrases => [
@@ -241,9 +244,9 @@ my $song = {
         {
           chords => [
             '',
-            'F#',
+            'Gb',
             'B',
-            'F#',
+            'Gb',
           ],
           context => 'chorus',
           phrases => [
@@ -314,17 +317,17 @@ my $song = {
     },
   ],
   chords => {
-    chords => [ 'E', 'A', 'F#', 'B', 'G#', 'C#' ],
+    chords => [ 'E', 'A', 'Gb', 'B', 'Ab', 'Db' ],
     origin => 'song',
     show => 'all',
     type => 'diagrams'
   },
-  chordsinfo => { map { $_ => $_ } qw( E A B ), 'F#', 'C#', 'G#' },
+  chordsinfo => { map { $_ => $_ } qw( D E A B ), 'Gb', 'Db', 'Ab' },
   meta => {
     songindex => 1,
-    key => [
-      'E',
-    ],
+    key => [ 'D' ],
+    key_print => ['E'],
+    key_sound => ['E'],
     title => [
       'Transpositions',
     ],

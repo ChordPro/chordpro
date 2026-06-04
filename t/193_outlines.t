@@ -68,9 +68,6 @@ my $xp = [
         key => [
           'A',
         ],
-        key_actual => [
-          'Am',
-        ],
         songindex => 1,
         sorttitle => [
           'Fietspomp, De',
@@ -91,9 +88,6 @@ my $xp = [
 	chords => [
 	],
         key => [
-          'Am',
-        ],
-        key_actual => [
           'Am',
         ],
         numchords => [
@@ -120,9 +114,6 @@ my $xp = [
 	chords => [
 	],
         key => [
-          'C',
-        ],
-        key_actual => [
           'C',
         ],
         numchords => [
@@ -153,9 +144,6 @@ my $xp = [
         key => [
           'D',
         ],
-        key_actual => [
-          'D',
-        ],
         numchords => [
           0,
         ],
@@ -174,5 +162,8 @@ my $xp = [
 foreach ( @$res ) {
     delete $_->[1]->{meta}->{_configversion};
     delete $_->[1]->{meta}->{bookmark};
+    delete $_->[1]->{meta}->{_key};
+    delete $_->[1]->{meta}->{key_sound};
+    delete $_->[1]->{meta}->{key_print};
 }
 is_deeply( $res, $xp, "outlined");

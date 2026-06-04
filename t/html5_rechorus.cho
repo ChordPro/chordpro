@@ -1,0 +1,8 @@
+{title: Rechorus Sample}
+
+{start_of_chorus}
+[C]Chorus line one
+{end_of_chorus}
+
+Verse line
+{chorus}

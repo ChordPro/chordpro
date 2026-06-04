@@ -1,8 +1,64 @@
 # Release info
 
-## 6.090.0
+## 6.099.0
 
 Under development
+
+
+### Highlights
+
+* Reworked Keys and Transpositions. See https://www.chordpro.org/beta/keys_and_transpositions/ .
+* New config setting: `keys.force-common` and `keys.sharps`.
+* Updated the standard guitar chords with lots of new chords and fingering information. Thanks to Russ Jones.
+* Added another Russ Jones contribution: jazzy-chords with many chord names typically used in Jazzy music.
+* Added a new configuration setting `settings.wraplines` to control line wrapping. Enabled by default.
+* Chords in `{define}` and `{chord}` can now be transposable.
+* ChordPro output: Suppress key directive when transcoding to a movable system.
+* Image files can now reside in folders next to the song.
+* Image file names will now understand a leading `~`.
+
+### Other Changes
+
+* Update ABC to 1.22.34.
+* Duplicate lines in tables of contents and outlines are now skipped.
+* Edwin (@edwinjc) contributed instrument settings and chords for the Andean [Charango](https://en.wikipedia.org/wiki/Charango). Thanks!
+* Prevent "Error: : No such file or directory" when first starting GUI.
+* Fix mangling of data: URIs in {image}.
+* Change HTML style names to default, screen and print.
+* Allow embedding of HTML styles (`html.style.embed`).
+* With `setting.strict`: Issue a warning when a song does not have have a valid key (e.g., is missing a {key} directive).
+* Change default for `settings.strict` to false.
+
+### Internal
+
+* Move backend configurator(s) into a separate file.
+* Renamed t tests to make room for new components.
+* Eliminate JSON::PP (use XS instead). Try loading JSON with XS first. If that fails, use the much slower relaxed JSON parser. This gives a performance improvement of over 10% when the guitar.json is converted to not relaxed.
+* Add (experimental) provisions for new HTML backend.
+* Improve the macOS GitHub action. The installer kits for both Intel and ARM can now be built using a GitHub runner.
+
+### Bug Fixes
+
+* Fixed issue #315, #357, #512, #526 (thanks Merijn) #541, #580 and more.
+* Fixed issue #630.1.
+* Fixed issue #636.
+* Fixed issue #640 (col expands to colums instead of columns).
+* Several others.
+
+### Social and support
+
+[User community](https://groups.io/g/ChordPro) for feedback and help.  
+Please use the [issue tracker](https://github.com/ChordPro/chordpro/issues) for bugs reports.
+
+## 6.090.1
+
+Released: 2026-01-03
+
+* Emergency fix for illegal date in PDF.
+
+## 6.090.0
+
+Released: 2025-10-31
 
 
 ### Highlights
@@ -31,11 +87,6 @@ Under development
 * Remove colons from --define in docs and pod.
 * Fix issue 599.
 * Fix problem loading JSON files that end with a comment line that has no line ending.
-
-### Social and support
-
-[User community](https://groups.io/g/ChordPro) for feedback and help.  
-Please use the [issue tracker](https://github.com/ChordPro/chordpro/issues) for bugs reports.
 
 ## 6.080.1
 

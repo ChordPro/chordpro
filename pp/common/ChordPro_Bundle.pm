@@ -7,6 +7,7 @@ use ChordPro::Output::PDF;
 use ChordPro::Output::PDF::PDFWriter;
 use ChordPro::Output::PDF::StringDiagram;
 use ChordPro::Output::PDF::KeyboardDiagram;
+use ChordPro::Output::PDF::Configurator;
 use ChordPro::Output::Debug;
 use ChordPro::Output::ChordPro;
 use ChordPro::Output::Text;

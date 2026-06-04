@@ -1,0 +1,207 @@
+[%# Paged layout stylesheet (page structure and breaks) %]
+[% INCLUDE 'html5/paged/css/string-set.tt' %]
+
+[% INCLUDE 'html5/paged/css/page-setup.tt' %]
+
+[% format_rules %]
+
+/* Table of contents */
+section.cp-toc,
+section[data-type="toc"],
+.cp-toc {
+    margin: 1.5em 0 2em;
+    break-after: page;
+    page: toc;
+    
+}
+
+.cp-toc-title {
+    font-family: var(--cp-font-title);
+    font-size: var(--cp-size-title);
+    margin: 0 0 0.6em;
+}
+
+.cp-toc-entries {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3em;
+}
+
+.cp-toc-entry {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6em;
+    text-decoration: none;
+    color: inherit;
+}
+
+.cp-toc-text {
+    font-family: var(--cp-font-text);
+    font-size: var(--cp-size-text);
+}
+
+.cp-toc-dots {
+    flex: 1;
+    border-bottom: 1px dotted var(--cp-color-text);
+    transform: translateY(-0.2em);
+}
+
+.cp-toc-entry.cp-toc-page-target::after {
+    content: target-counter(attr(href), page);
+    font-family: var(--cp-font-text);
+    font-size: var(--cp-size-text);
+    min-width: 2em;
+    text-align: right;
+}
+
+.cp-toc-break {
+    font-weight: bold;
+    margin-top: 0.8em;
+}
+
+section.cp-toc + section.cp-song,
+.cp-toc + .cp-song {
+    break-before: page;
+}
+
+/* Song break classes */
+.cp-song.cp-page-break-before {
+    break-before: page;
+}
+
+.cp-song.cp-page-break-before-right {
+    break-before: right;
+}
+
+.cp-song.cp-page-break-before-left {
+    break-before: left;
+}
+
+.cp-song.cp-page-break-before-recto {
+    break-before: recto;
+}
+
+.cp-song.cp-page-break-before-verso {
+    break-before: verso;
+}
+
+.cp-song.cp-page-break-after {
+    break-after: page;
+    
+}
+
+.cp-song.cp-page-break-after-right {
+    break-after: right;
+    
+}
+
+.cp-song.cp-page-break-after-left {
+    break-after: left;
+    
+}
+
+.cp-song.cp-page-break-after-recto {
+    break-after: recto;
+    
+}
+
+.cp-song.cp-page-break-after-verso {
+    break-after: verso;
+    
+}
+
+.cp-new-page,
+.cp-new-physical-page,
+.cp-song-break {
+    break-before: page;
+    
+}
+
+.cp-song-break {
+    font-size: 0;
+    line-height: 0;
+    height: 0;
+    overflow: hidden;
+}
+
+.cp-new-page.cp-page-break-before-right,
+.cp-new-physical-page.cp-page-break-before-right,
+.cp-song-break.cp-page-break-before-right {
+    break-before: right;
+    
+}
+
+.cp-new-page.cp-page-break-before-left,
+.cp-new-physical-page.cp-page-break-before-left,
+.cp-song-break.cp-page-break-before-left {
+    break-before: left;
+    
+}
+
+.cp-new-page.cp-page-break-before-recto,
+.cp-new-physical-page.cp-page-break-before-recto,
+.cp-song-break.cp-page-break-before-recto {
+    break-before: recto;
+    
+}
+
+.cp-new-page.cp-page-break-before-verso,
+.cp-new-physical-page.cp-page-break-before-verso,
+.cp-song-break.cp-page-break-before-verso {
+    break-before: verso;
+    
+}
+
+/* Songbook parts */
+section.cp-cover,
+section[data-type="cover"],
+.cp-cover,
+section.cp-front-matter,
+section[data-type="frontmatter"],
+.cp-front-matter {
+    break-after: page;
+    
+    margin: 1.5em 0;
+}
+
+section.cp-back-matter,
+section[data-type="backmatter"],
+.cp-back-matter {
+    break-before: page;
+    
+    margin: 1.5em 0;
+}
+
+section.cp-cover,
+section[data-type="cover"],
+.cp-cover {
+    page: cover;
+}
+
+section.cp-front-matter,
+section[data-type="frontmatter"],
+.cp-front-matter {
+    page: frontmatter;
+}
+
+section.cp-back-matter,
+section[data-type="backmatter"],
+.cp-back-matter {
+    page: backmatter;
+}
+
+/* Paged-only keep-together rules */
+.cp-songline,
+.cp-comment,
+.cp-chorus,
+.cp-verse,
+.cp-bridge,
+.cp-tab,
+.cp-grid,
+.cp-image-container,
+.cp-chord-diagrams {
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+[% INCLUDE 'html5/paged/css/print-media.tt' %]

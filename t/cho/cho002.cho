@@ -1,11 +1,11 @@
 {title: Keys}
-{c: Key: %{key}, Actual: %{key_actual}, From: %{key_from}}
+{c: Key is %{key}%{key.print|, print %{}}%{key.sound|, sound %{}}}
 {key: D}
-{c: Key: %{key}, Actual: %{key_actual}, From: %{key_from}}
+{c: Key is %{key}%{key.print|, print %{}}%{key.sound|, sound %{}}}
 [D]Hi
 {transpose 2}
-{c: Key: %{key}, Actual: %{key_actual}, From: %{key_from}}
+{c: Key is %{key}%{key.print|, print %{}}%{key.sound|, sound %{}}}
 [D]Hi
 {transpose}
-{c: Key: %{key}, Actual: %{key_actual}, From: %{key_from}}
+{c: Key is %{key}%{key.print|, print %{}}%{key.sound|, sound %{}}}
 [D]Hi

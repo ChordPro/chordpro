@@ -57,6 +57,8 @@ my $song = {
 				     ]
 			},
 	    'body' => [
+		       { context => '', type => "meta", line => 2,
+			 key => "key", value => [ "Re" ] },
                        {
 			 'context' => '',
 			 'line' => 3,

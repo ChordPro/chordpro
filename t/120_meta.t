@@ -51,6 +51,8 @@ my $song = {
 	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear',
 	    'system' => 'common',
+	    'body' => [ { context => '', type => "meta",
+			  key => "key", value => [ "F" ] } ],
 	   };
 
 is_deeply( { %{ $s->{songs}->[0] } }, $song, "[meta meta] Song contents" );
@@ -127,12 +129,16 @@ $song = {
 		       'tempo' => [ '320', '220' ],
 		       'time' => [ '3/4', '4/4' ],
 		      },
-	    'chordsinfo' => { map { $_ => $_ } qw( F G A C ) },
+	    'chordsinfo' => { map { $_ => $_ } qw( F G A ), "A#" },
 	    'title' => 'Swing Low Sweet Chariot',
 	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear',
 	    'system' => 'common',
 	    'body' => [
+		       { context => '', type => "meta",
+			 key => "key", value => [ "F" ] },
+		       { context => '', type => "meta",
+			 key => "key", value => [ "G" ] },
 		       { context => '',
 			 orig => '%%',
 			 text => '%%',
@@ -184,6 +190,8 @@ $song = {
 	    'structure' => 'linear',
 	    'system' => 'common',
 	    'body' => [
+		       { context => '', type => "meta",
+			 key => "key", value => [ "G" ] },
 		       { context => '',
 			 orig => '%%',
 			 text => '%%',
@@ -237,6 +245,8 @@ $song = {
 	    'structure' => 'linear',
 	    'system' => 'common',
 	    'body' => [
+		       { context => '', type => "meta",
+			 key => "key", value => [ "G" ] },
 		       { context => '',
 			 orig => '%%',
 			 text => '%%',

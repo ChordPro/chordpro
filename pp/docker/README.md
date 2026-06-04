@@ -1,4 +1,4 @@
-# Docker
+# Podman and Docker
 
 ## Build
 
@@ -16,6 +16,24 @@ _Use the Makefile_
 
 ## Running chordpro
 
+Podman:
+
+	podman run --rm \
+	  --env HOME="${HOME}" \
+	  --env USER=${USER} \
+	  --user 0 \
+	  --volume /run/user/`id -u`:/run/user/`id -u` \
+	  --volume "${HOME}/.config":"${HOME}/.config" \
+	  --volume "${HOME}/.local":"${HOME}/.local" \
+	  --volume "${HOME}/.cache":"${HOME}/.cache" \
+	  --volume "${HOME}/tmp":"${HOME}/tmp" \
+	  --volume "${HOME}":"${HOME}" \
+	  --workdir "`pwd`" \
+	  docker.io chordpro/chordpro:latest \
+	  chordpro
+
+Docker:
+
 	docker run --rm \
 	  --env HOME="${HOME}" \
 	  --env USER=${USER} \
@@ -24,13 +42,34 @@ _Use the Makefile_
 	  --volume "${HOME}/.config":"${HOME}/.config" \
 	  --volume "${HOME}/.local":"${HOME}/.local" \
 	  --volume "${HOME}/.cache":"${HOME}/.cache" \
-	  --volume "${HOME}/tmp":"${HOME}/tmp" \
 	  --volume "${HOME}":"${HOME}" \
 	  --workdir "`pwd`" \
 	  chordpro/chordpro:latest \
 	  chordpro
 
 ## Running wxchordpro
+
+Podman:
+
+	podman run --rm \
+	  --env DISPLAY=${DISPLAY} \
+	  --env HOME="${HOME}" \
+	  --env USER=${USER} \
+	  --user 0 \
+	  --volume /dev/dri:/dev/dri \
+	  --volume /tmp/.X11-unix:/tmp/.X11-unix \
+	  --volume /run/user/`id -u`:/run/user/`id -u` \
+	  --volume "${HOME}/.Xauthority":"${HOME}/.Xauthority" \
+	  --volume "${HOME}/.config":"${HOME}/.config" \
+	  --volume "${HOME}/.local":"${HOME}/.local" \
+	  --volume "${HOME}/.cache":"${HOME}/.cache" \
+	  --volume "${HOME}/tmp":"${HOME}/tmp" \
+	  --volume "${HOME}":"${HOME}" \
+	  --workdir "`pwd`" \
+	  docker.io/chordpro/chordpro:latest \
+	  wxchordpro
+
+Docker:
 
 	docker run --rm \
 	  --env DISPLAY=${DISPLAY} \
@@ -44,7 +83,6 @@ _Use the Makefile_
 	  --volume "${HOME}/.config":"${HOME}/.config" \
 	  --volume "${HOME}/.local":"${HOME}/.local" \
 	  --volume "${HOME}/.cache":"${HOME}/.cache" \
-	  --volume "${HOME}/tmp":"${HOME}/tmp" \
 	  --volume "${HOME}":"${HOME}" \
 	  --workdir "`pwd`" \
 	  chordpro/chordpro:latest \

@@ -1,0 +1,1314 @@
+// ChordPro instrument definition.
+// Approximately 1000 chords defined for guitar, standard tuning:
+//    no chord
+//    major = 1 3 5
+//    minor = 1 b3 5
+//       min = minor
+//    augmented = 1 3 #5
+//       + = augmented
+//    diminished = 1 b3 b5
+//       0 = dim
+//       ⁰ = dim
+//       mb5 = dim
+//    power chord = 1 5
+//    6th = 1 3 5 6
+//    minor 6th = 1 b3 5 6
+//    major 7th = 1 3 5 7
+//       (maj7) alias for maj7
+//    dominant 7th = 1 3 5 b7
+//    minor 7th = 1 b3 5 b7
+//    minor major 7th = 1 b3 5 7
+//       mmaj7 alias for m(maj7)
+//    augmented 7th = 1 3 #5 b7
+//       7+ alias for +7
+//       aug7 alias for +7
+//    diminished 7th = 1 b3 b5 bb7
+//    m7b5 = half diminished = 1 b3 b5 b7
+//       m7(b5) alias for m7b5 half-diminished
+//       h alias for half-diminished
+//       ø symbol alias for half diminished
+//    dominant 7b5 = 1 3 b5 b7 (tritone chord has same notes, e.g. E7b5 = Bb7b5)
+//    sus2 = 1 2 5
+//    sus4 = 1 4 5
+//       sus alias for sus4
+//       4 alias for sus4    
+//    dominant 7th sus4 (same as 11th) = 1 4 5 b7
+//    add9 = 1 3 5 9
+//       (add9) alias for add9
+//       alias for sus9 
+//    minor add9 = 1 b3 5 9
+//    major 6(add9) = 1 3 5 6 9
+//       6add9 alias for 6(add9)
+//       6/9 alias for 6(add9)
+//       6(9) alias for 6(add9)
+//       69 alias for 6(add9)
+//    major 9th = 1 3 5 7 9
+//    dominant 9th = 1 3 5 b7 9
+//    minor 9th = 1 b3 5 b7 9
+//    sharp 9th = 1 3 5 b7 #9
+//    flat 9th = 1 3 5 b7 b9
+//    11th = 1 3 5 b7 11
+//    9(11) = 11th and 9th = 1 3 5 b7 9 11
+//       9/11 alias for 9(11)
+//       911 alias for 9(11)
+//    7#11th alias for 7b5
+//    minor 11th = 1 b3 5 7 11
+//    major 13th = 1 3 5 7 13
+//    dominant 13th = 1 3 5 b7 13
+//    flat 13th = 1 3 (5) b7 b13 = augmented 7th (b13 = #5)
+//    slash chords - chords with bass note other than the root
+//       slash - major over 2 (same as 11th)
+//       slash - major over 3
+//       slash - major over 4 = major 9th without 3
+//       slash - major over 5
+//       slash - major over dominant 7
+//       slash - major over major 7
+//       slash - major 7th over 2 = dominant 7/9/11/13
+//       slash - major 7th over 3
+//       slash - dominant 7th over 3
+//       slash - minor over minor 3
+//       slash - minor over 7
+//       slash - minor 7th over 7
+
+config {
+  type        : instrument
+  title       : Guitar
+  description : "Guitar, 6 strings, standard tuning, 1154 chords, with fingering."
+  default     : true
+}
+instrument {
+  description : "Guitar, 6 strings, standard tuning"
+  type        : guitar
+}
+tuning     : [ E2 A2 D3 G3 B3 E4 ]
+
+pdf.diagrams.vcells : 4
+
+chords : [
+// no chord
+    { name : "NC"          base :  1  frets : [ -1  -1  -1  -1  -1  -1 ] } 
+    { name : "N.C."        copy : "NC"      } 
+// major = 1 3 5
+    { name : "C"           base :  1  frets : [ -1   3   2   0   1   0 ] fingers : [ x  3  2  x  1  x ] } 
+    { name : "C#"          base :  1  frets : [ -1   4   3   1   2   1 ] fingers : [ x  4  3  1  2  1 ] }
+    { name : "Db"          copy : "C#"      } 
+    { name : "D"           base :  1  frets : [ -1  -1   0   2   3   2 ] fingers : [ x  x  x  1  3  2 ] } 
+    { name : "D#"          base :  3  frets : [ -1   4   3   1   2   1 ] fingers : [ x  4  3  1  2  1 ] }
+    { name : "Eb"          copy : "D#"      } 
+    { name : "E"           base :  1  frets : [  0   2   2   1   0   0 ] fingers : [ x  2  3  1  x  x ] } 
+    { name : "F"           base :  1  frets : [  1   3   3   2   1   1 ] fingers : [ 1  3  4  2  1  1 ] } 
+    { name : "F#"          base :  1  frets : [  2   4   4   3   2   2 ] fingers : [ 1  3  4  2  1  1 ] } 
+    { name : "Gb"          copy : "F#"      } 
+    { name : "G"           base :  1  frets : [  3   2   0   0   0   3 ] fingers : [ 2  1  x  x  x  3 ] } 
+    { name : "G#"          base :  4  frets : [  1   3   3   2   1   1 ] fingers : [ 1  3  4  2  1  1 ] } 
+    { name : "Ab"          copy : "G#"      } 
+    { name : "A"           base :  1  frets : [ -1   0   2   2   2   0 ] fingers : [ x  x  1  2  3  x ] } 
+    { name : "A#"          base :  1  frets : [ -1   1   3   3   3   1 ] fingers : [ x  1  3  3  3  1 ] } 
+    { name : "Bb"          copy : "A#"      } 
+    { name : "B"           base :  1  frets : [ -1   2   4   4   4   2 ] fingers : [ x  1  3  3  3  1 ] } 
+// minor = 1 b3 5
+    { name : "Cm"          base :  3  frets : [ -1   1   3   3   2   1 ] fingers : [ x  1  3  4  2  1 ] } 
+    { name : "C#m"         base :  1  frets : [ -1  -1   2   1   2   0 ] fingers : [ x  x  2  1  3  x ] } 
+    { name : "Dbm"         copy : "C#m"     } 
+    { name : "Dm"          base :  1  frets : [ -1  -1   0   2   3   1 ] fingers : [ x  x  x  2  3  1 ] } 
+    { name : "D#m"         base :  1  frets : [ -1  -1   4   3   4   2 ] fingers : [ x  x  3  2  4  1 ] } 
+    { name : "Ebm"         copy : "D#m"     } 
+    { name : "Em"          base :  1  frets : [  0   2   2   0   0   0 ] fingers : [ x  2  3  x  x  x ] } 
+    { name : "Fm"          base :  1  frets : [  1   3   3   1   1   1 ] fingers : [ 1  3  4  1  1  1 ] } 
+    { name : "F#m"         base :  1  frets : [  2   4   4   2   2   2 ] fingers : [ 1  3  4  1  1  1 ] } 
+    { name : "Gbm"         copy : "F#m"     } 
+    { name : "Gm"          base :  3  frets : [  1   3   3   1   1   1 ] fingers : [ 1  3  4  1  1  1 ] } 
+    { name : "G#m"         base :  4  frets : [  1   3   3   1   1   1 ] fingers : [ 1  3  4  1  1  1 ] } 
+    { name : "Abm"         copy : "G#m"     } 
+    { name : "Am"          base :  1  frets : [ -1   0   2   2   1   0 ] fingers : [ x  x  2  3  1  x ] } 
+    { name : "A#m"         base :  1  frets : [ -1   1   3   3   2   1 ] fingers : [ x  1  3  4  2  1 ] } 
+    { name : "Bbm"         copy : "A#m"     } 
+    { name : "Bm"          base :  1  frets : [ -1   2   4   4   3   2 ] fingers : [ x  1  3  4  2  1 ] } 
+// min = minor
+    { name : "Cmin"        copy : "Cm"      } 
+    { name : "C#min"       copy : "C#m"     } 
+    { name : "Dbmin"       copy : "Dbm"     } 
+    { name : "Dmin"        copy : "Dm"      } 
+    { name : "D#min"       copy : "D#m"     } 
+    { name : "Ebmin"       copy : "Ebm"     } 
+    { name : "Emin"        copy : "Em"      } 
+    { name : "Fmin"        copy : "Fm"      } 
+    { name : "F#min"       copy : "F#m"     } 
+    { name : "Gbmin"       copy : "Gbm"     } 
+    { name : "Gmin"        copy : "Gm"      } 
+    { name : "G#min"       copy : "G#m"     } 
+    { name : "Abmin"       copy : "Abm"     } 
+    { name : "Amin"        copy : "Am"      } 
+    { name : "A#min"       copy : "A#m"     } 
+    { name : "Bbmin"       copy : "Bbm"     } 
+    { name : "Bmin"        copy : "Bm"      } 
+// augmented = 1 3 #5
+    { name : "Caug"        base :  1  frets : [ -1  -1   2   1   1   0 ] fingers : [ x  x  3  1  2  x ] } 
+    { name : "C#aug"       base :  1  frets : [ -1  -1   3   2   2   1 ] fingers : [ x  x  4  2  3  1 ] } 
+    { name : "Dbaug"       copy : "C#aug"   } 
+    { name : "Daug"        base :  1  frets : [ -1  -1   0   3   3   2 ] fingers : [ x  x  x  2  3  1 ] } 
+    { name : "D#aug"       base :  1  frets : [ -1  -1   1   0   0   3 ] fingers : [ x  x  1  x  x  3 ] }
+    { name : "Ebaug"       copy : "D#aug"   } 
+    { name : "Eaug"        base :  1  frets : [ -1  -1   2   1   1   0 ] fingers : [ x  x  3  1  2  x ] } 
+    { name : "Faug"        base :  1  frets : [ -1  -1   3   2   2   1 ] fingers : [ x  x  4  2  3  1 ] } 
+    { name : "F#aug"       base :  1  frets : [ -1  -1   4   3   3   2 ] fingers : [ x  x  4  2  3  1 ] } 
+    { name : "Gbaug"       copy : "F#aug"   } 
+    { name : "Gaug"        base :  1  frets : [ -1  -1   1   0   0   3 ] fingers : [ x  x  1  x  x  3 ] }
+    { name : "G#aug"       base :  1  frets : [ -1  -1   2   1   1   0 ] fingers : [ x  x  3  1  2  x ] } 
+    { name : "Abaug"       copy : "G#aug"   } 
+    { name : "Aaug"        base :  1  frets : [ -1   0   3   2   2   1 ] fingers : [ x  x  4  2  3  1 ] } 
+    { name : "A#aug"       base :  1  frets : [ -1  -1   0   3   3   2 ] fingers : [ x  x  x  2  3  1 ] } 
+    { name : "Bbaug"       copy : "A#aug"   } 
+    { name : "Baug"        base :  1  frets : [ -1  -1   1   0   0   3 ] fingers : [ x  x  1  x  x  3 ] }
+// + = augmented
+    { name : "C+"          copy : "Caug"    } 
+    { name : "C#+"         copy : "C#aug"   } 
+    { name : "Db+"         copy : "Dbaug"   } 
+    { name : "D+"          copy : "Daug"    } 
+    { name : "D#+"         copy : "D#aug"   } 
+    { name : "Eb+"         copy : "Ebaug"   } 
+    { name : "E+"          copy : "Eaug"    } 
+    { name : "F+"          copy : "Faug"    } 
+    { name : "F#+"         copy : "F#aug"   } 
+    { name : "Gb+"         copy : "Gbaug"   } 
+    { name : "G+"          copy : "Gaug"    } 
+    { name : "G#+"         copy : "G#aug"   } 
+    { name : "Ab+"         copy : "Abaug"   } 
+    { name : "A+"          copy : "Aaug"    } 
+    { name : "A#+"         copy : "A#aug"   } 
+    { name : "Bb+"         copy : "Bbaug"   } 
+    { name : "B+"          copy : "Baug"    } 
+// diminished = 1 b3 b5
+    { name : "Cdim"        base :  3  frets : [ -1   1   2   3   2  -1 ] fingers : [ x  1  2  4  3  x ] } 
+    { name : "C#dim"       base :  4  frets : [ -1   1   2   3   2  -1 ] fingers : [ x  1  2  4  3  x ] }
+    { name : "Dbdim"       copy : "C#dim"   } 
+    { name : "Ddim"        base :  1  frets : [ -1  -1   0   1   3   1 ] fingers : [ x  x  x  1  3  2 ] } 
+    { name : "D#dim"       base :  6  frets : [ -1   1   2   3   2  -1 ] fingers : [ x  1  2  4  3  x ] }
+    { name : "Ebdim"       copy : "D#dim"   } 
+    { name : "Edim"        base :  1  frets : [  0   1   2   0  -1  -1 ] fingers : [ x  1  2  x  x  x ] } 
+    { name : "Fdim"        base :  1  frets : [ -1  -1   3   1   0   1 ] fingers : [ x  x  4  1  x  2 ] } 
+    { name : "F#dim"       base :  1  frets : [ -1  -1   4   2   1  -1 ] fingers : [ x  x  4  2  1  x ] }
+    { name : "Gbdim"       copy : "F#dim"   } 
+    { name : "Gdim"        base :  2  frets : [ -1  -1   4   2   1  -1 ] fingers : [ x  x  4  2  1  x ] }
+    { name : "G#dim"       base :  3  frets : [ -1  -1   4   2   1  -1 ] fingers : [ x  x  4  2  1  x ] }
+    { name : "Abdim"       copy : "G#dim"   } 
+    { name : "Adim"        base :  1  frets : [ -1   0   1   2   1  -1 ] fingers : [ x  x  1  3  2  x ] } 
+    { name : "A#dim"       base :  1  frets : [ -1   1   2   3   2   0 ] fingers : [ x  1  2  4  3  x ] } 
+    { name : "Bbdim"       copy : "A#dim"   } 
+    { name : "Bdim"        base :  1  frets : [ -1   2   3   4   3  -1 ] fingers : [ x  1  2  4  3  x ] } 
+// 0 = dim
+    { name : "C0"          copy : "Cdim"    } 
+    { name : "C#0"         copy : "C#dim"   } 
+    { name : "Db0"         copy : "Dbdim"   } 
+    { name : "D0"          copy : "Ddim"    } 
+    { name : "D#0"         copy : "D#dim"   } 
+    { name : "Eb0"         copy : "Ebdim"   } 
+    { name : "E0"          copy : "Edim"    } 
+    { name : "F0"          copy : "Fdim"    } 
+    { name : "F#0"         copy : "F#dim"   } 
+    { name : "Gb0"         copy : "Gbdim"   } 
+    { name : "G0"          copy : "Gdim"    } 
+    { name : "G#0"         copy : "G#dim"   } 
+    { name : "Ab0"         copy : "Abdim"   } 
+    { name : "A0"          copy : "Adim"    } 
+    { name : "A#0"         copy : "A#dim"   } 
+    { name : "Bb0"         copy : "Bbdim"   } 
+    { name : "B0"          copy : "Bdim"    } 
+// ⁰ = dim
+    { name : "C⁰"          copy : "Cdim"    } 
+    { name : "C#⁰"         copy : "C#dim"   } 
+    { name : "Db⁰"         copy : "Dbdim"   } 
+    { name : "D⁰"          copy : "Ddim"    } 
+    { name : "D#⁰"         copy : "D#dim"   } 
+    { name : "Eb⁰"         copy : "Ebdim"   } 
+    { name : "E⁰"          copy : "Edim"    } 
+    { name : "F⁰"          copy : "Fdim"    } 
+    { name : "F#⁰"         copy : "F#dim"   } 
+    { name : "Gb⁰"         copy : "Gbdim"   } 
+    { name : "G⁰"          copy : "Gdim"    } 
+    { name : "G#⁰"         copy : "G#dim"   } 
+    { name : "Ab⁰"         copy : "Abdim"   } 
+    { name : "A⁰"          copy : "Adim"    } 
+    { name : "A#⁰"         copy : "A#dim"   } 
+    { name : "Bb⁰"         copy : "Bbdim"   } 
+    { name : "B⁰"          copy : "Bdim"    } 
+// mb5 = dim
+    { name : "Cmb5"        copy : "Cdim"    } 
+    { name : "C#mb5"       copy : "C#dim"   } 
+    { name : "Dbmb5"       copy : "Dbdim"   } 
+    { name : "Dmb5"        copy : "Ddim"    } 
+    { name : "D#mb5"       copy : "D#dim"   } 
+    { name : "Ebmb5"       copy : "Ebdim"   } 
+    { name : "Emb5"        copy : "Edim"    } 
+    { name : "Fmb5"        copy : "Fdim"    } 
+    { name : "F#mb5"       copy : "F#dim"   } 
+    { name : "Gbmb5"       copy : "Gbdim"   } 
+    { name : "Gmb5"        copy : "Gdim"    } 
+    { name : "G#mb5"       copy : "G#dim"   } 
+    { name : "Abmb5"       copy : "Abdim"   } 
+    { name : "Amb5"        copy : "Adim"    } 
+    { name : "A#mb5"       copy : "A#dim"   } 
+    { name : "Bbmb5"       copy : "Bbdim"   } 
+    { name : "Bmb5"        copy : "Bdim"    } 
+// power chord = 1 5
+    { name : "C5"          base :  3  frets : [ -1   1   3   3  -1  -1 ] fingers : [ x  1  3  4  x  x ] }
+    { name : "C#5"         base :  4  frets : [ -1   1   3   3  -1  -1 ] fingers : [ x  1  3  4  x  x ] }
+    { name : "Db5"         base :  4  frets : [ -1   1   3   3  -1  -1 ] fingers : [ x  1  3  4  x  x ] }
+    { name : "D5"          base :  5  frets : [ -1   1   3   3  -1  -1 ] fingers : [ x  1  3  4  x  x ] }
+    { name : "D#5"         base :  6  frets : [ -1   1   3   3  -1  -1 ] fingers : [ x  1  3  4  x  x ] }
+    { name : "Eb5"         base :  6  frets : [ -1   1   3   3  -1  -1 ] fingers : [ x  1  3  4  x  x ] }
+    { name : "E5"          base :  1  frets : [  0   2   2   4   0   0 ] fingers : [ x  1  2  4  x  x ] }
+    { name : "F5"          base :  1  frets : [  1   3   3  -1  -1  -1 ] fingers : [ 1  3  4  x  x  x ] }
+    { name : "F#5"         base :  1  frets : [  2   4   4  -1  -1  -1 ] fingers : [ 1  3  4  x  x  x ] }
+    { name : "Gb5"         base :  1  frets : [  2   4   4  -1  -1  -1 ] fingers : [ 1  3  4  x  x  x ] }
+    { name : "G5"          base :  3  frets : [  1   3   3  -1  -1  -1 ] fingers : [ 1  3  4  x  x  x ] }
+    { name : "G#5"         base :  4  frets : [  1   3   3  -1  -1  -1 ] fingers : [ 1  3  4  x  x  x ] }
+    { name : "Ab5"         base :  4  frets : [  1   3   3  -1  -1  -1 ] fingers : [ 1  3  4  x  x  x ] }
+    { name : "A5"          base :  1  frets : [ -1   0   2   2  -1  -1 ] fingers : [ x  x  1  2  x  x ] }
+    { name : "A#5"         base :  1  frets : [ -1   1   3   3  -1  -1 ] fingers : [ x  1  3  4  x  x ] }
+    { name : "Bb5"         base :  1  frets : [ -1   1   3   3  -1  -1 ] fingers : [ x  1  3  4  x  x ] }
+    { name : "B5"          base :  1  frets : [ -1   2   4   4  -1  -1 ] fingers : [ x  1  3  4  x  x ] }
+// 6th = 1 3 5 6
+    { name : "C6"          base :  1  frets : [ -1   3   2   2   1   0 ] fingers : [ x  4  2  3  1  x ] } 
+    { name : "C#6"         base :  1  frets : [ -1   4   3   3   2  -1 ] fingers : [ x  4  2  3  1  x ] }
+    { name : "Db6"         base :  1  frets : [ -1   4   3   3   2  -1 ] fingers : [ x  4  2  3  1  x ] }
+    { name : "D6"          base :  1  frets : [ -1   0   0   2   0   2 ] fingers : [ x  x  x  1  x  2 ] } 
+    { name : "D#6"         base :  1  frets : [ -1   1   1   3   1   3 ] fingers : [ x  1  1  3  1  4 ] }
+    { name : "Eb6"         base :  1  frets : [ -1   1   1   3   1   3 ] fingers : [ x  1  1  3  1  4 ] }
+    { name : "E6"          base :  1  frets : [  0   2   2   1   2   0 ] fingers : [ x  2  3  1  4  x ] }
+    { name : "F6"          base :  1  frets : [ -1   3   3   2   3  -1 ] fingers : [ x  2  3  1  4  x ] } 
+    { name : "F#6"         base :  1  frets : [ -1   4   4   3   4  -1 ] fingers : [ x  2  3  1  4  x ] }
+    { name : "Gb6"         base :  1  frets : [ -1   4   4   3   4  -1 ] fingers : [ x  2  3  1  4  x ] }
+    { name : "G6"          base :  1  frets : [  3   2   0   0   0   0 ] fingers : [ 2  1  x  x  x  x ] }
+    { name : "G#6"         base :  4  frets : [  1  -1   3   2   3  -1 ] fingers : [ 1  x  3  2  4  x ] }
+    { name : "Ab6"         base :  1  frets : [  1  -1   3   2   3  -1 ] fingers : [ 1  x  3  2  4  x ] }
+    { name : "A6"          base :  1  frets : [ -1   0   2   2   2   2 ] fingers : [ x  x  1  1  1  1 ] }
+    { name : "A#6"         base :  1  frets : [ -1   1   3   3   3   3 ] fingers : [ x  1  3  3  3  3 ] }
+    { name : "Bb6"         base :  1  frets : [ -1   1   3   3   3   3 ] fingers : [ x  1  3  3  3  3 ] }
+    { name : "B6"          base :  1  frets : [ -1   2   4   4   4   4 ] fingers : [ x  1  3  3  3  3 ] }
+// minor 6th = 1 b3 5 6
+    { name : "Cm6"         base :  1  frets : [ -1   3  -1   2   4   3 ] fingers : [ x  1  x  2  4  3 ] }
+    { name : "C#m6"        base :  3  frets : [ -1   2  -1   1   3   2 ] fingers : [ x  1  x  2  4  3 ] }
+    { name : "Dbm6"        base :  3  frets : [ -1   2  -1   1   3   2 ] fingers : [ x  1  x  2  4  3 ] }
+    { name : "Dm6"         base :  1  frets : [ -1  -1   0   2   0   1 ] fingers : [ x  x  x  2  x  1 ] }
+    { name : "D#m6"        base :  1  frets : [ -1  -1   1   3   1   2 ] fingers : [ x  x  1  3  1  2 ] }
+    { name : "Ebm6"        base :  1  frets : [ -1  -1   1   3   1   2 ] fingers : [ x  x  1  3  1  2 ] }
+    { name : "Em6"         base :  1  frets : [  0   2   2   0   2   0 ] fingers : [ x  1  2  x  3  x ] } 
+    { name : "Fm6"         base :  1  frets : [  1  -1   0   1   1   1 ] fingers : [ x  x  x  1  1  1 ] }
+    { name : "F#m6"        base :  1  frets : [  2  -1   1   2   2   2 ] fingers : [ x  x  1  2  2  2 ] }
+    { name : "Gbm6"        copy : "F#m6"    } 
+    { name : "Gm6"         base :  1  frets : [  3  -1   2   3   3   3 ] fingers : [ 2  x  1  3  3  3 ] }
+    { name : "G#m6"        base :  1  frets : [  4  -1   3   4   4   4 ] fingers : [ 2  x  1  3  3  3 ] }
+    { name : "Abm6"        copy : "G#m6"    } 
+    { name : "Am6"         base :  1  frets : [ -1   0   2   2   1   2 ] fingers : [ x  x  2  3  1  4 ] } 
+    { name : "A#m6"        base :  5  frets : [  2  -1   1   2   2   2 ] fingers : [ x  x  1  2  2  2 ] }
+    { name : "Bbm6"        base :  5  frets : [  2  -1   1   2   2   2 ] fingers : [ x  x  1  2  2  2 ] }
+    { name : "Bm6"         base :  6  frets : [  2  -1   1   2   2   2 ] fingers : [ x  x  1  2  2  2 ] }
+// major 7th = 1 3 5 7
+    { name : "Cmaj7"       base :  1  frets : [ -1   3   2   0   0   0 ] fingers : [ x  3  2  x  x  x ] } 
+    { name : "C#maj7"      base :  1  frets : [ -1   4   3   1   1   1 ] fingers : [ x  4  3  1  1  1 ] } 
+    { name : "Dbmaj7"      copy : "C#maj7"  } 
+    { name : "Dmaj7"       base :  1  frets : [ -1  -1   0   2   2   2 ] fingers : [ x  x  x  1  1  1 ] } 
+    { name : "D#maj7"      base :  1  frets : [ -1  -1   1   3   3   3 ] fingers : [ x  x  1  3  3  3 ] } 
+    { name : "Ebmaj7"      copy : "D#maj7"  } 
+    { name : "Emaj7"       base :  1  frets : [  0   2   2   4   4   4 ] fingers : [ x  1  1  3  3  3 ] }
+    { name : "Fmaj7"       base :  1  frets : [  1   0   2   2   1   0 ] fingers : [ 1  x  3  4  2  x ] }
+    { name : "F#maj7"      base :  1  frets : [  2  -1   3   3   2  -1 ] fingers : [ 1  x  3  4  2  x ] }
+    { name : "Gbmaj7"      copy : "F#maj7"  } 
+    { name : "Gmaj7"       base :  1  frets : [  3   2   0   0   0   2 ] fingers : [ 3  2  x  x  x  1 ] }
+    { name : "G#maj7"      base :  4  frets : [  1  -1   2   2   1  -1 ] fingers : [ 1  x  3  4  2  x ] }
+    { name : "Abmaj7"      copy : "G#maj7"  } 
+    { name : "Amaj7"       base :  1  frets : [ -1   0   2   1   2   0 ] fingers : [ x  x  2  1  3  x ] } 
+    { name : "A#maj7"      base :  1  frets : [ -1   1   3   2   3   1 ] fingers : [ x  1  3  2  4  1 ] }
+    { name : "Bbmaj7"      copy : "A#maj7"  } 
+    { name : "Bmaj7"       base :  1  frets : [ -1   2   4   3   4   2 ] fingers : [ x  1  3  2  4  1 ] }
+// (maj7) alias for maj7
+    { name : "C(maj7)"     copy : "Cmaj7"   } 
+    { name : "C#(maj7)"    copy : "C#maj7"  } 
+    { name : "Db(maj7)"    copy : "Dbmaj7"  } 
+    { name : "D(maj7)"     copy : "Dmaj7"   } 
+    { name : "D#(maj7)"    copy : "D#maj7"  } 
+    { name : "Eb(maj7)"    copy : "Ebmaj7"  } 
+    { name : "E(maj7)"     copy : "Emaj7"   } 
+    { name : "F(maj7)"     copy : "Fmaj7"   } 
+    { name : "F#(maj7)"    copy : "F#maj7"  } 
+    { name : "Gb(maj7)"    copy : "Gbmaj7"  } 
+    { name : "G(maj7)"     copy : "Gmaj7"   } 
+    { name : "G#(maj7)"    copy : "G#maj7"  } 
+    { name : "Ab(maj7)"    copy : "Abmaj7"  } 
+    { name : "A(maj7)"     copy : "Amaj7"   } 
+    { name : "A#(maj7)"    copy : "A#maj7"  } 
+    { name : "Bb(maj7)"    copy : "Bbmaj7"  } 
+    { name : "B(maj7)"     copy : "Bmaj7"   } 
+// dominant 7th = 1 3 5 b7
+    { name : "C7"          base :  1  frets : [ -1   3   2   3   1   0 ] fingers : [ x  3  2  4  1  x ] }
+    { name : "C#7"         base :  1  frets : [ -1   4   3   4   2  -1 ] fingers : [ x  3  2  4  1  x ] }
+    { name : "Db7"         copy : "C#7"     } 
+    { name : "D7"          base :  1  frets : [ -1  -1   0   2   1   2 ] fingers : [ x  x  x  2  1  3 ] } 
+    { name : "D#7"         base :  1  frets : [ -1  -1   1   3   2   3 ] fingers : [ x  x  1  3  2  4 ] } 
+    { name : "Eb7"         copy : "D#7"     } 
+    { name : "E7"          base :  1  frets : [  0   2   0   1   0   0 ] fingers : [ x  2  x  1  x  x ] }
+    { name : "F7"          base :  1  frets : [  1   3   1   2   1   1 ] fingers : [ 1  3  1  2  1  1 ] } 
+    { name : "F#7"         base :  1  frets : [ -1  -1   4   3   2   0 ] fingers : [ x  x  3  2  1  x ] } 
+    { name : "Gb7"         copy : "F#7"     } 
+    { name : "G7"          base :  1  frets : [  3   2   0   0   0   1 ] fingers : [ 3  2  x  x  x  1 ] } 
+    { name : "G#7"         base :  4  frets : [  1   3   1   2   1   1 ] fingers : [ 1  3  1  2  1  1 ] }
+    { name : "Ab7"         copy : "G#7"     } 
+    { name : "A7"          base :  1  frets : [ -1   0   2   0   2   0 ] fingers : [ x  x  2  x  3  x ] } 
+    { name : "A#7"         base :  3  frets : [ -1   1   3   1   3   1 ] fingers : [ x  1  3  1  4  1 ] }
+    { name : "Bb7"         copy : "A#7"     } 
+    { name : "B7"          base :  1  frets : [ -1   2   1   2   0   2 ] fingers : [ x  1  3  1  4  1 ] } 
+// minor 7th = 1 b3 5 b7
+    { name : "Cm7"         base :  3  frets : [ -1   1   3   1   2   1 ] fingers : [ x  1  3  1  2  1 ] } 
+    { name : "C#m7"        base :  1  frets : [ -1   4   2   4   2   4 ] fingers : [ x  2  1  3  1  4 ] }
+    { name : "Dbm7"        copy : "C#m7"    } 
+    { name : "Dm7"         base :  1  frets : [ -1  -1   0   2   1   1 ] fingers : [ x  x  x  2  1  1 ] } 
+    { name : "D#m7"        base :  1  frets : [ -1  -1   1   3   2   2 ] fingers : [ x  x  1  4  2  3 ] } 
+    { name : "Ebm7"        copy : "D#m7"    } 
+    { name : "Em7"         base :  1  frets : [  0   2   2   0   3   0 ] fingers : [ x  1  2  x  3  x ] } 
+    { name : "Fm7"         base :  1  frets : [  1   3   1   1   1   1 ] fingers : [ 1  3  1  1  1  1 ] } 
+    { name : "F#m7"        base :  1  frets : [  2   0   2   2   2   0 ] fingers : [ 1  x  2  3  4  x ] } 
+    { name : "Gbm7"        copy : "F#m7"    } 
+    { name : "Gm7"         base :  3  frets : [  1   3   1   1   1   1 ] fingers : [ 1  3  1  1  1  1 ] } 
+    { name : "G#m7"        base :  4  frets : [  1  -1   1   1   1   1 ] fingers : [ 1  x  3  3  3  3 ] }
+    { name : "Abm7"        copy : "G#m7"    } 
+    { name : "Am7"         base :  1  frets : [ -1   0   2   2   1   3 ] fingers : [ x  x  2  3  1  4 ] } 
+    { name : "A#m7"        base :  1  frets : [ -1   1   3   1   2   1 ] fingers : [ x  1  3  1  2  1 ] } 
+    { name : "Bbm7"        copy : "A#m7"    } 
+    { name : "Bm7"         base :  2  frets : [ -1   1   3   1   2   1 ] fingers : [ x  1  3  1  2  1 ] } 
+// minor major 7th = 1 b3 5 7
+    { name : "Cm(maj7)"    base :  3  frets : [ -1   1   3   2   2   1 ] fingers : [ x  1  4  2  3  1 ] }
+    { name : "C#m(maj7)"   base :  4  frets : [ -1   1   3   2   2   1 ] fingers : [ x  1  4  2  3  1 ] }
+    { name : "Dbm(maj7)"   base :  4  frets : [ -1   1   3   2   2   1 ] fingers : [ x  1  4  3  2  1 ] }
+    { name : "Dm(maj7)"    base :  1  frets : [ -1  -1   0   2   2   1 ] fingers : [ x  x  x  2  3  1 ] }
+    { name : "D#m(maj7)"   base :  1  frets : [ -1  -1   1   3   3   2 ] fingers : [ x  x  1  3  4  2 ] }
+    { name : "Ebm(maj7)"   base :  1  frets : [ -1  -1   1   3   3   2 ] fingers : [ x  x  1  3  4  2 ] }
+    { name : "Em(maj7)"    base :  1  frets : [  0   2   1   0   0   0 ] fingers : [ x  2  1  x  x  x ] }
+    { name : "Fm(maj7)"    base :  1  frets : [  1   3   2   1   1   1 ] fingers : [ 1  3  2  1  1  1 ] }
+    { name : "F#m(maj7)"   base :  1  frets : [  2   4   3   2   2   2 ] fingers : [ 1  3  2  1  1  1 ] }
+    { name : "Gbm(maj7)"   base :  1  frets : [  2   4   3   2   2   2 ] fingers : [ 1  3  2  1  1  1 ] }
+    { name : "Gm(maj7)"    base :  3  frets : [  1   3   2   1   1   1 ] fingers : [ 1  3  2  1  1  1 ] }
+    { name : "G#m(maj7)"   base :  4  frets : [  1   3   2   1   1   1 ] fingers : [ 1  3  2  1  1  1 ] }
+    { name : "Abm(maj7)"   base :  4  frets : [  1   3   2   1   1   1 ] fingers : [ 1  3  2  1  1  1 ] }
+    { name : "Am(maj7)"    base :  1  frets : [ -1   0   2   1   1   0 ] fingers : [ x  x  3  1  2  x ] }
+    { name : "A#m(maj7)"   base :  1  frets : [ -1   1   3   2   2   1 ] fingers : [ x  1  4  2  3  1 ] }
+    { name : "Bbm(maj7)"   base :  1  frets : [ -1   1   3   2   2   1 ] fingers : [ x  1  4  2  3  1 ] }
+    { name : "Bm(maj7)"    base :  1  frets : [ -1   2   4   3   3   2 ] fingers : [ x  1  4  2  3  1 ] }
+// mmaj7 alias for m(maj7)
+    { name : "Cmmaj7"      copy :  "Cm(maj7)"    }
+    { name : "C#mmaj7"     copy :  "C#m(maj7)"   }
+    { name : "Dbmmaj7"     copy :  "Dbm(maj7)"   }
+    { name : "Dmmaj7"      copy :  "Dm(maj7)"    }
+    { name : "D#mmaj7"     copy :  "D#m(maj7)"   }
+    { name : "Ebmmaj7"     copy :  "Ebm(maj7)"   }
+    { name : "Emmaj7"      copy :  "Em(maj7)"    }
+    { name : "Fmmaj7"      copy :  "Fm(maj7)"    }
+    { name : "F#mmaj7"     copy :  "F#m(maj7)"   }
+    { name : "Gbmmaj7"     copy :  "Gbm(maj7)"   }
+    { name : "Gmmaj7"      copy :  "Gm(maj7)"    }
+    { name : "G#mmaj7"     copy :  "G#m(maj7)"   }
+    { name : "Abmmaj7"     copy :  "Abm(maj7)"   }
+    { name : "Ammaj7"      copy :  "Am(maj7)"    }
+    { name : "A#mmaj7"     copy :  "A#m(maj7)"   }
+    { name : "Bbmmaj7"     copy :  "Bbm(maj7)"   }
+    { name : "Bmmaj7"      copy :  "Bm(maj7)"    }
+// augmented 7th = 1 3 #5 b7
+    { name : "C+7"         base :  8 frets : [   1  -1   1   2   2   1 ] fingers : [ T  x  1  3  4  2 ] }
+    { name : "C#+7"        base :  9 frets : [   1  -1   1   2   2   1 ] fingers : [ T  x  1  3  4  2 ] }
+    { name : "Db+7"        base :  9 frets : [   1  -1   1   2   2   1 ] fingers : [ T  x  1  3  4  2 ] }
+    { name : "D+7"         base : 10 frets : [   1  -1   1   2   2   1 ] fingers : [ T  x  1  3  4  2 ] }
+    { name : "D#+7"        base : 11 frets : [   1  -1   1   2   2   1 ] fingers : [ T  x  1  3  4  2 ] }
+    { name : "Eb+7"        base : 11 frets : [   1  -1   1   2   2   1 ] fingers : [ T  x  1  3  4  2 ] }
+    { name : "E+7"         base :  1 frets : [   0  -1   0   1   1   0 ] fingers : [ T  x  1  3  4  2 ] }
+    { name : "F+7"         base :  1 frets : [   1  -1   1   2   2   1 ] fingers : [ T  x  1  3  4  2 ] }
+    { name : "F#+7"        base :  1 frets : [   2  -1   2   3   3   2 ] fingers : [ T  x  1  3  4  2 ] }
+    { name : "Gb+7"        base :  1 frets : [   2  -1   2   3   3   2 ] fingers : [ T  x  1  3  4  2 ] }
+    { name : "G+7"         base :  1 frets : [   3  -1   3   4   4   3 ] fingers : [ T  x  1  3  4  2 ] }
+    { name : "G#+7"        base :  4 frets : [   1  -1   1   2   2   1 ] fingers : [ T  x  1  3  4  2 ] }
+    { name : "Ab+7"        base :  4 frets : [   1  -1   1   2   2   1 ] fingers : [ T  x  1  3  4  2 ] }
+    { name : "A+7"         base :  5 frets : [   1  -1   1   2   2   1 ] fingers : [ T  x  1  3  4  2 ] }
+    { name : "A#+7"        base :  6 frets : [   1  -1   1   2   2   1 ] fingers : [ T  x  1  3  4  2 ] }
+    { name : "Bb+7"        base :  6 frets : [   1  -1   1   2   2   1 ] fingers : [ T  x  1  3  4  2 ] }
+    { name : "B+7"         base :  7 frets : [   1  -1   1   2   2   1 ] fingers : [ T  x  1  3  4  2 ] }
+// 7+ alias for +7
+    { name : "C7+"         copy :  "C+7"         }
+    { name : "C#7+"        copy :  "C#+7"        }
+    { name : "Db7+"        copy :  "Db+7"        }
+    { name : "D7+"         copy :  "D+7"         }
+    { name : "D#7+"        copy :  "D#+7"        }
+    { name : "Eb7+"        copy :  "Eb+7"        }
+    { name : "E7+"         copy :  "E+7"         }
+    { name : "F7+"         copy :  "F+7"         }
+    { name : "F#7+"        copy :  "F#+7"        }
+    { name : "Gb7+"        copy :  "Gb+7"        }
+    { name : "G7+"         copy :  "G+7"         }
+    { name : "G#7+"        copy :  "G#+7"        }
+    { name : "Ab7+"        copy :  "Ab+7"        }
+    { name : "A7+"         copy :  "A+7"         }
+    { name : "A#7+"        copy :  "A#+7"        }
+    { name : "Bb7+"        copy :  "Bb+7"        }
+    { name : "B7+"         copy :  "B+7"         }
+// aug7 alias for +7
+    { name : "Caug7"       copy :  "C+7"         }
+    { name : "C#aug7"      copy :  "C#+7"        }
+    { name : "Dbaug7"      copy :  "Db+7"        }
+    { name : "Daug7"       copy :  "D+7"         }
+    { name : "D#aug7"      copy :  "D#+7"        }
+    { name : "Ebaug7"      copy :  "Eb+7"        }
+    { name : "Eaug7"       copy :  "E+7"         }
+    { name : "Faug7"       copy :  "F+7"         }
+    { name : "F#aug7"      copy :  "F#+7"        }
+    { name : "Gbaug7"      copy :  "Gb+7"        }
+    { name : "Gaug7"       copy :  "G+7"         }
+    { name : "G#aug7"      copy :  "G#+7"        }
+    { name : "Abaug7"      copy :  "Ab+7"        }
+    { name : "Aaug7"       copy :  "A+7"         }
+    { name : "A#aug7"      copy :  "A#+7"        }
+    { name : "Bbaug7"      copy :  "Bb+7"        }
+    { name : "Baug7"       copy :  "B+7"         }
+// diminished 7th = 1 b3 b5 bb7
+    { name : "Cdim7"       base :  1  frets : [ -1   3   4   2   4  -1 ] fingers : [ x  2  3  1  4  x ] }
+    { name : "C#dim7"      base :  3  frets : [ -1   2   3   1   3  -1 ] fingers : [ x  2  3  1  4  x ] }
+    { name : "Dbdim7"      copy : "C#dim7"  } 
+    { name : "Ddim7"       base :  1  frets : [ -1  -1   0   1   0   1 ] fingers : [ x  x  x  1  x  2 ] } 
+    { name : "D#dim7"      base :  1  frets : [ -1  -1   1   2   1   2 ] fingers : [ x  x  1  3  2  4 ] } 
+    { name : "Ebdim7"      copy : "D#dim7"  } 
+    { name : "Edim7"       base :  1  frets : [ -1  -1   2   3   2   3 ] fingers : [ x  x  1  3  2  4 ] } 
+    { name : "Fdim7"       base :  1  frets : [  1  -1   0   1   0   1 ] fingers : [ x  x  x  1  x  2 ] }
+    { name : "F#dim7"      base :  1  frets : [  2  -1   1   2   1   2 ] fingers : [ 2  x  1  3  1  4 ] }
+    { name : "Gbdim7"      copy : "F#dim7"  } 
+    { name : "Gdim7"       base :  1  frets : [  3  -1   2   3   2   3 ] fingers : [ 2  x  1  3  1  4 ] }
+    { name : "G#dim7"      base :  1  frets : [  4  -1   3   4   3   4 ] fingers : [ 2  x  1  3  1  4 ] }
+    { name : "Abdim7"      copy : "G#dim7"  } 
+    { name : "Adim7"       base :  1  frets : [ -1   0   1   2   1   2 ] fingers : [ x  x  1  3  2  4 ] }
+    { name : "A#dim7"      base :  1  frets : [ -1   1   2   0   2   0 ] fingers : [ x  1  2  x  3  x ] }
+    { name : "Bbdim7"      copy : "A#dim7"  } 
+    { name : "Bdim7"       base :  1  frets : [ -1   2   3   1   3  -1 ] fingers : [ x  2  3  1  4  x ] }
+// m7b5 = half diminished = 1 b3 b5 b7
+    { name : "Cm7b5"       base :  1  frets : [ -1   3   4   3   4  -1 ] fingers : [ x  1  3  2  4  x ] }
+    { name : "C#m7b5"      base :  4  frets : [ -1   1   2   1   2  -1 ] fingers : [ x  1  3  2  4  x ] }
+    { name : "Dbm7b5"      base :  4  frets : [ -1   1   2   1   2  -1 ] fingers : [ x  1  3  2  4  x ] }
+    { name : "Dm7b5"       base :  1  frets : [ -1  -1   0   1   1   1 ] fingers : [ x  x  x  1  1  1 ] }
+    { name : "D#m7b5"      base :  1  frets : [ -1  -1   1   2   2   2 ] fingers : [ x  x  1  2  2  2 ] }
+    { name : "Ebm7b5"      base :  1  frets : [ -1  -1   1   2   2   2 ] fingers : [ x  x  1  2  2  2 ] }
+    { name : "Em7b5"       base :  1  frets : [  0   1   2   3   3   3 ] fingers : [ x  1  2  3  3  3 ] }
+    { name : "Fm7b5"       base :  1  frets : [ -1  -1   3   4   4   4 ] fingers : [ x  x  1  2  2  2 ] }
+    { name : "F#m7b5"      base :  1  frets : [  2  -1   2   2   1   0 ] fingers : [ 2  x  3  4  1  x ] }
+    { name : "Gbm7b5"      base :  1  frets : [  2  -1   2   2   1   0 ] fingers : [ 2  x  3  4  1  x ] }
+    { name : "Gm7b5"       base :  1  frets : [  3  -1   3   3   2  -1 ] fingers : [ 2  x  3  4  1  x ] }
+    { name : "G#m7b5"      base :  1  frets : [  4  -1   4   4   3  -1 ] fingers : [ 2  x  3  4  1  x ] }
+    { name : "Abm7b5"      base :  1  frets : [  4  -1   4   4   3  -1 ] fingers : [ 2  x  3  4  1  x ] }
+    { name : "Am7b5"       base :  1  frets : [ -1   0   1   0   1  -1 ] fingers : [ x  x  1  x  2  x ] }
+    { name : "A#m7b5"      base :  1  frets : [ -1   1   2   1   2  -1 ] fingers : [ x  1  3  2  4  x ] }
+    { name : "Bbm7b5"      base :  1  frets : [ -1   1   2   1   2  -1 ] fingers : [ x  1  3  2  4  x ] }
+    { name : "Bm7b5"       base :  1  frets : [ -1   2   3   2   3  -1 ] fingers : [ x  1  3  2  4  x ] }
+// m7(b5) alias for m7b5 half-diminished
+    { name : "Cm7(b5)"     copy : "Cm7b5"    }
+    { name : "C#m7(b5)"    copy : "C#m7b5"   }
+    { name : "Dbm7(b5)"    copy : "Dbm7b5"   }
+    { name : "Dm7(b5)"     copy : "Dm7b5"    }
+    { name : "D#m7(b5)"    copy : "D#m7b5"   }
+    { name : "Ebm7(b5)"    copy : "Ebm7b5"   }
+    { name : "Em7(b5)"     copy : "Em7b5"    }
+    { name : "Fm7(b5)"     copy : "Fm7b5"    }
+    { name : "F#m7(b5)"    copy : "F#m7b5"   }
+    { name : "Gbm7(b5)"    copy : "Gbm7b5"   }
+    { name : "Gm7(b5)"     copy : "Gm7b5"    }
+    { name : "G#m7(b5)"    copy : "G#m7b5"   }
+    { name : "Abm7(b5)"    copy : "Abm7b5"   }
+    { name : "Am7(b5)"     copy : "Am7b5"    }
+    { name : "A#m7(b5)"    copy : "A#m7b5"   }
+    { name : "Bbm7(b5)"    copy : "Bbm7b5"   }
+    { name : "Bm7(b5)"     copy : "Bm7b5"    }
+// h alias for half-diminished
+    { name : "Ch"          copy : "Cm7b5"    }
+    { name : "C#h"         copy : "C#m7b5"   }
+    { name : "Dbh"         copy : "Dbm7b5"   }
+    { name : "Dh"          copy : "Dm7b5"    }
+    { name : "D#h"         copy : "D#m7b5"   }
+    { name : "Ebh"         copy : "Ebm7b5"   }
+    { name : "Eh"          copy : "Em7b5"    }
+    { name : "Fh"          copy : "Fm7b5"    }
+    { name : "F#h"         copy : "F#m7b5"   }
+    { name : "Gbh"         copy : "Gbm7b5"   }
+    { name : "Gh"          copy : "Gm7b5"    }
+    { name : "G#h"         copy : "G#m7b5"   }
+    { name : "Abh"         copy : "Abm7b5"   }
+    { name : "Ah"          copy : "Am7b5"    }
+    { name : "A#h"         copy : "A#m7b5"   }
+    { name : "Bbh"         copy : "Bbm7b5"   }
+    { name : "Bh"          copy : "Bm7b5"    }
+// ø symbol alias for half diminished
+    { name : "Cø"          copy : "Cm7b5"    }
+    { name : "C#ø"         copy : "C#m7b5"   }
+    { name : "Dbø"         copy : "Dbm7b5"   }
+    { name : "Dø"          copy : "Dm7b5"    }
+    { name : "D#ø"         copy : "D#m7b5"   }
+    { name : "Ebø"         copy : "Ebm7b5"   }
+    { name : "Eø"          copy : "Em7b5"    }
+    { name : "Fø"          copy : "Fm7b5"    }
+    { name : "F#ø"         copy : "F#m7b5"   }
+    { name : "Gbø"         copy : "Gbm7b5"   }
+    { name : "Gø"          copy : "Gm7b5"    }
+    { name : "G#ø"         copy : "G#m7b5"   }
+    { name : "Abø"         copy : "Abm7b5"   }
+    { name : "Aø"          copy : "Am7b5"    }
+    { name : "A#ø"         copy : "A#m7b5"   }
+    { name : "Bbø"         copy : "Bbm7b5"   }
+    { name : "Bø"          copy : "Bm7b5"    }
+// dominant 7b5 = 1 3 b5 b7 (tritone chord has same notes, e.g. E7b5 = Bb7b5)
+    { name : "C7b5"        base :  3 frets : [  -1   1   2   1   3  -1 ] fingers : [ x  1  2  1  3  x ] }
+    { name : "C#7b5"       base :  4 frets : [  -1   1   2   1   3  -1 ] fingers : [ x  1  2  1  3  x ] }
+    { name : "Db7b5"       base :  4 frets : [  -1   1   2   1   3  -1 ] fingers : [ x  1  2  1  3  x ] }
+    { name : "D7b5"        base :  1 frets : [  -1  -1   0   1   1   2 ] fingers : [ x  x  x  1  2  3 ] }
+    { name : "D#7b5"       base :  1 frets : [  -1  -1   1   2   2   3 ] fingers : [ x  x  1  2  3  4 ] }
+    { name : "Eb7b5"       base :  1 frets : [  -1  -1   1   2   2   3 ] fingers : [ x  x  1  2  3  4 ] }
+    { name : "E7b5"        base :  1 frets : [  -1  -1   2   3   3   4 ] fingers : [ x  x  1  2  3  4 ] }
+    { name : "F7b5"        base :  3 frets : [  -1  -1   1   2   2   3 ] fingers : [ x  x  1  2  3  4 ] }
+    { name : "F#7b5"       base :  1 frets : [   2   3   2   3  -1  -1 ] fingers : [ 1  3  2  4  x  x ] }
+    { name : "Gb7b5"       base :  1 frets : [   2   3   2   3  -1  -1 ] fingers : [ 1  3  2  4  x  x ] }
+    { name : "G7b5"        base :  1 frets : [   3   4   3   4  -1  -1 ] fingers : [ 1  3  2  4  x  x ] }
+    { name : "G#7b5"       base :  4 frets : [   1   2   1   2  -1  -1 ] fingers : [ 1  3  2  4  x  x ] }
+    { name : "Ab7b5"       base :  4 frets : [   1   2   1   2  -1  -1 ] fingers : [ 1  3  2  4  x  x ] }
+    { name : "A7b5"        base :  1 frets : [  -1   0   1   0   2  -1 ] fingers : [ x  x  1  x  2  x ] }
+    { name : "A#7b5"       base :  1 frets : [  -1   1   2   1   3  -1 ] fingers : [ x  1  2  1  3  x ] }
+    { name : "Bb7b5"       base :  1 frets : [  -1   1   2   1   3  -1 ] fingers : [ x  1  2  1  3  x ] }
+    { name : "B7b5"        base :  1 frets : [  -1   2   3   2   4  -1 ] fingers : [ x  1  2  1  3  x ] }
+// sus2 = 1 2 5
+    { name : "Csus2"       base :  1  frets : [ -1   3   0   0   1  -1 ] fingers : [ x  3  x  x  1  x ] } 
+    { name : "C#sus2"      base :  4  frets : [ -1   1   3   3   1   1 ] fingers : [ x  1  3  3  1  1 ] }
+    { name : "Dbsus2"      base :  4  frets : [ -1   1   3   3   1   1 ] fingers : [ x  1  3  3  1  1 ] }
+    { name : "Dsus2"       base :  1  frets : [ -1  -1   0   2   3   0 ] fingers : [ x  x  x  1  3  x ] }
+    { name : "D#sus2"      base :  1  frets : [ -1   1   1   3   4   1 ] fingers : [ x  1  1  3  4  1 ] }
+    { name : "Ebsus2"      base :  1  frets : [ -1   1   1   3   4   1 ] fingers : [ x  1  1  3  4  1 ] }
+    { name : "Esus2"       base :  1  frets : [  0   2   4   4   0   0 ] fingers : [ x  1  3  4  x  x ] }
+    { name : "Fsus2"       base :  1  frets : [ -1   3   3   0   1   1 ] fingers : [ x  3  4  x  1  1 ] }
+    { name : "F#sus2"      base :  1  frets : [ -1   4   4   1  -1  -1 ] fingers : [ x  3  4  1  x  x ] }
+    { name : "Gbsus2"      base :  1  frets : [ -1   4   4   1  -1  -1 ] fingers : [ x  3  4  1  x  x ] }
+    { name : "Gsus2"       base :  1  frets : [  3  -1   0   2   3   3 ] fingers : [ 2  x  x  1  3  3 ] }
+    { name : "G#sus2"      base :  3  frets : [ -1   4   4   1  -1  -1 ] fingers : [ x  3  4  1  x  x ] }
+    { name : "Absus2"      base :  3  frets : [ -1   4   4   1  -1  -1 ] fingers : [ x  3  4  1  x  x ] }
+    { name : "Asus2"       base :  1  frets : [ -1   0   2   2   0   0 ] fingers : [ x  x  1  2  x  x ] }
+    { name : "A#sus2"      base :  1  frets : [ -1   1   3   3   1   1 ] fingers : [ x  1  3  3  1  1 ] }
+    { name : "Bbsus2"      base :  1  frets : [ -1   1   3   3   1   1 ] fingers : [ x  1  3  3  1  1 ] }
+    { name :  "Bsus2"      base :  1  frets : [ -1   2   4   4   2   2 ] fingers : [ x  1  3  3  1  1 ] }
+// sus4 = 1 4 5
+    { name : "Csus4"       base :  1  frets : [ -1   3   3   0   1   1 ] fingers : [ x  3  4  x  1  1 ] }
+    { name : "C#sus4"      base :  4  frets : [ -1  -1   3   3   4   1 ] fingers : [ x  x  2  3  4  1 ] } 
+    { name : "Dbsus4"      copy : "C#sus4"  } 
+    { name : "Dsus4"       base :  1  frets : [ -1  -1   0   2   3   3 ] fingers : [ x  x  x  1  3  4 ] } 
+    { name : "D#sus4"      base :  1  frets : [ -1  -1   1   3   4   4 ] fingers : [ x  x  1  2  3  4 ] } 
+    { name : "Ebsus4"      copy : "D#sus4"  } 
+    { name : "Esus4"       base :  1  frets : [  0   2   2   2   0   0 ] fingers : [ x  1  2  3  x  x ] } 
+    { name : "Fsus4"       base :  1  frets : [ -1  -1   3   3   1   1 ] fingers : [ x  x  3  4  1  1 ] } 
+    { name : "F#sus4"      base :  1  frets : [ -1  -1   4   4   2   2 ] fingers : [ x  x  3  4  1  1 ] } 
+    { name : "Gbsus4"      copy : "F#sus4"  } 
+    { name : "Gsus4"       base :  1  frets : [  3  -1   0   0   1   3 ] fingers : [ 2  x  x  x  1  3 ] }
+    { name : "G#sus4"      base :  4  frets : [  1   1   3   3   1   1 ] fingers : [ x  x  3  4  1  1 ] }
+    { name : "Absus4"      copy : "G#sus4"  } 
+    { name : "Asus4"       base :  1  frets : [ -1   0   2   2   3   0 ] fingers : [ x  x  1  2  3  x ] }
+    { name : "A#sus4"      base :  1  frets : [ -1   1   3   3   4  -1 ] fingers : [ x  1  3  3  4  x ] }
+    { name : "Bbsus4"      copy : "A#sus4"  } 
+    { name : "Bsus4"       base :  2  frets : [ -1   1   3   3   4  -1 ] fingers : [ x  1  3  3  4  x ] }
+// sus alias for sus4
+    { name : "Csus"        copy : "Csus4"   } 
+    { name : "C#sus"       copy : "C#sus4"  } 
+    { name : "Dbsus"       copy : "Dbsus4"  } 
+    { name : "Dsus"        copy : "Dsus4"   } 
+    { name : "D#sus"       copy : "D#sus4"  } 
+    { name : "Ebsus"       copy : "Ebsus4"  } 
+    { name : "Esus"        copy : "Esus4"   } 
+    { name : "Fsus"        copy : "Fsus4"   } 
+    { name : "F#sus"       copy : "F#sus4"  } 
+    { name : "Gbsus"       copy : "Gbsus4"  } 
+    { name : "Gsus"        copy : "Gsus4"   } 
+    { name : "G#sus"       copy : "G#sus4"  } 
+    { name : "Absus"       copy : "Absus4"  } 
+    { name : "Asus"        copy : "Asus4"   } 
+    { name : "A#sus"       copy : "A#sus4"  } 
+    { name : "Bbsus"       copy : "Bbsus4"  } 
+    { name : "Bsus"        copy : "Bsus4"   } 
+// 4 alias for sus4
+    { name : "C4"          copy : "Csus4"   } 
+    { name : "C#4"         copy : "C#sus4"  } 
+    { name : "Db4"         copy : "Dbsus4"  } 
+    { name : "D4"          copy : "Dsus4"   } 
+    { name : "D#4"         copy : "D#sus4"  } 
+    { name : "Eb4"         copy : "Ebsus4"  } 
+    { name : "E4"          copy : "Esus4"   } 
+    { name : "F4"          copy : "Fsus4"   } 
+    { name : "F#4"         copy : "F#sus4"  } 
+    { name : "Gb4"         copy : "Gbsus4"  } 
+    { name : "G4"          copy : "Gsus4"   } 
+    { name : "G#4"         copy : "G#sus4"  } 
+    { name : "Ab4"         copy : "Absus4"  } 
+    { name : "A4"          copy : "Asus4"   } 
+    { name : "A#4"         copy : "A#sus4"  } 
+    { name : "Bb4"         copy : "Bbsus4"  } 
+    { name : "B4"          copy : "Bsus4"   } 
+// dominant 7th sus4 (same as 11th) = 1 4 5 b7
+    { name : "C7sus4"      base :  1  frets : [ -1   3   3   3   1  -1 ] fingers : [ x  2  3  4  1  x ] }
+    { name : "C#7sus4"     base :  1  frets : [ -1   4   4   4   2  -1 ] fingers : [ x  2  3  4  1  x ] }
+    { name : "Db7sus4"     base :  1  frets : [ -1   4   4   4   2  -1 ] fingers : [ x  2  3  4  1  x ] }
+    { name : "D7sus4"      base :  1  frets : [ -1  -1   0   2   1   3 ] fingers : [ x  x  x  2  1  3 ] }
+    { name : "D#7sus4"     base :  1  frets : [ -1  -1   1   3   2   4 ] fingers : [ x  x  1  3  2  4 ] }
+    { name : "Eb7sus4"     base :  1  frets : [ -1  -1   1   3   2   4 ] fingers : [ x  x  1  3  2  4 ] }
+    { name : "E7sus4"      base :  1  frets : [  0   2   0   2   0   0 ] fingers : [ x  2  x  3  x  x ] }
+    { name : "F7sus4"      base :  1  frets : [  1   3   1   3   1   1 ] fingers : [ 1  3  1  4  1  1 ] }
+    { name : "F#7sus4"     base :  1  frets : [  2   4   2   4   2   2 ] fingers : [ 1  3  1  4  1  1 ] }
+    { name : "Gb7sus4"     base :  1  frets : [  2   4   2   4   2   2 ] fingers : [ 1  3  1  4  1  1 ] }
+    { name : "G7sus4"      base :  3  frets : [  1   3   1   3   1   1 ] fingers : [ 1  3  1  4  1  1 ] }
+    { name : "G#7sus4"     base :  4  frets : [  1   3   1   3   1   1 ] fingers : [ 1  3  1  4  1  1 ] }
+    { name : "Ab7sus4"     base :  4  frets : [  1   3   1   3   1   1 ] fingers : [ 1  3  1  4  1  1 ] }
+    { name : "A7sus4"      base :  1  frets : [ -1   0   2   0   3   0 ] fingers : [ x  x  2  x  3  x ] }
+    { name : "A#7sus4"     base :  1  frets : [ -1   1   3   1   4   1 ] fingers : [ x  1  3  1  4  1 ] }
+    { name : "Bb7sus4"     base :  1  frets : [ -1   1   3   1   4   1 ] fingers : [ x  1  3  1  4  1 ] }
+    { name : "B7sus4"      base :  1  frets : [ -1   2   2   2   0   2 ] fingers : [ x  1  2  3  x  4 ] }
+// add9 = 1 3 5 9
+    { name : "Cadd9"       base :  1  frets : [ -1   3   2   0   3   0 ] fingers : [ x  2  1  x  3  x ] } 
+    { name : "C#add9"      base :  3  frets : [ -1   2   1  -1   2   2 ] fingers : [ x  2  1  x  3  4 ] } 
+    { name : "Dbadd9"      base :  3  frets : [ -1   2   1  -1   2   2 ] fingers : [ x  2  1  x  3  4 ] }
+    { name : "Dadd9"       base :  4  frets : [ -1   2   1  -1   2   2 ] fingers : [ x  2  1  x  3  4 ] }
+    { name : "D#add9"      base :  5  frets : [ -1   2   1   0   2   2 ] fingers : [ x  2  1  x  3  4 ] }
+    { name : "Ebadd9"      base :  5  frets : [ -1   2   1   0   2   2 ] fingers : [ x  2  1  x  3  4 ] }
+    { name : "Eadd9"       base :  1  frets : [  0   2   2   1   0   2 ] fingers : [ x  2  3  1  x  4 ] }
+    { name : "Fadd9"       base :  1  frets : [ -1  -1   3   2   1   3 ] fingers : [ x  x  3  2  1  4 ] }
+    { name : "F#add9"      base :  1  frets : [ -1  -1   4   3   2   4 ] fingers : [ x  x  3  2  1  4 ] }
+    { name : "Gbadd9"      base :  1  frets : [ -1  -1   4   3   2   4 ] fingers : [ x  x  3  2  1  4 ] }
+    { name : "Gadd9"       base :  1  frets : [  3   2   0   2   0   3 ] fingers : [ 3  2  x  1  x  4 ] }
+    { name : "G#add9"      base :  4  frets : [ -1  -1   3   2   1   3 ] fingers : [ x  x  3  2  1  4 ] }
+    { name : "Abadd9"      base :  4  frets : [ -1  -1   3   2   1   3 ] fingers : [ x  x  3  2  1  4 ] }
+    { name : "Aadd9"       base :  1  frets : [ -1   0   2   4   2   0 ] fingers : [ x  x  1  4  2  x ] }
+    { name : "A#add9"      base :  1  frets : [ -1   1   0  -1   1   1 ] fingers : [ x  2  1  x  3  4 ] }
+    { name : "Bbadd9"      base :  1  frets : [ -1   1   0  -1   1   1 ] fingers : [ x  2  1  x  3  4 ] }
+    { name : "Badd9"       base :  1  frets : [ -1   2   1  -1   2   2 ] fingers : [ x  2  1  x  3  4 ] }
+// (add9) alias for add9
+    { name : "C(add9)"     copy : "Cadd9"    } 
+    { name : "C#(add9)"    copy : "C#add9"   } 
+    { name : "Db(add9)"    copy : "Dbadd9"   }
+    { name : "D(add9)"     copy : "Dadd9"    } 
+    { name : "D#(add9)"    copy : "D#add9"   }
+    { name : "Eb(add9)"    copy : "Ebadd9"   } 
+    { name : "E(add9)"     copy : "Eadd9"    }
+    { name : "F(add9)"     copy : "Fadd9"    } 
+    { name : "F#(add9)"    copy : "F#add9"   }
+    { name : "Gb(add9)"    copy : "Gbadd9"   }
+    { name : "G(add9)"     copy : "Gadd9"    } 
+    { name : "G#(add9)"    copy : "G#add9"   }
+    { name : "Ab(add9)"    copy : "Abadd9"   }
+    { name : "A(add9)"     copy : "Aadd9"    }
+    { name : "A#(add9)"    copy : "A#add9"   }
+    { name : "Bb(add9)"    copy : "Bbadd9"   }
+    { name : "B(add9)"     copy : "Badd9"    }
+ // sus9 alias for add9
+    { name : "Csus9"       copy : "Cadd9"    }
+    { name : "C#sus9"      copy : "C#add9"   }
+    { name : "Dbsus9"      copy : "Dbadd9"   }
+    { name : "Dsus9"       copy : "Dadd9"    }
+    { name : "D#sus9"      copy : "D#add9"   }
+    { name : "Ebsus9"      copy : "Ebadd9"   }
+    { name : "Esus9"       copy : "Eadd9"    }
+    { name : "Fsus9"       copy : "Fadd9"    }
+    { name : "F#sus9"      copy : "G#add9"   }
+    { name : "Gbsus9"      copy : "Gbadd9"   }
+    { name : "Gsus9"       copy : "Gadd9"    }
+    { name : "G#sus9"      copy : "G#add9"   }
+    { name : "Absus9"      copy : "Abadd9"   }
+    { name : "Asus9"       copy : "Aadd9"    }
+    { name : "A#sus9"      copy : "A#add9"   }
+    { name : "Bbsus9"      copy : "Bbadd9"   }
+    { name : "Bsus9"       copy : "Badd9"    }
+// (sus9) alias for add9 
+    { name : "C(sus9)"     copy : "Cadd9"    } 
+    { name : "C#(sus9)"    copy : "C#add9"   }
+    { name : "Db(sus9)"    copy : "Dbadd9"   }
+    { name : "D(sus9)"     copy : "Dadd9"    }
+    { name : "D#(sus9)"    copy : "D#add9"   }
+    { name : "Eb(sus9)"    copy : "Ebadd9"   }
+    { name : "E(sus9)"     copy : "Eadd9"    }
+    { name : "F(sus9)"     copy : "Fadd9"    }
+    { name : "F#(sus9)"    copy : "G#add9"   }
+    { name : "Gb(sus9)"    copy : "Gbadd9"   }
+    { name : "G(sus9)"     copy : "Gadd9"    }
+    { name : "G#(sus9)"    copy : "G#add9"   }
+    { name : "Ab(sus9)"    copy : "Abadd9"   }
+    { name : "A(sus9)"     copy : "Aadd9"    }
+    { name : "A#(sus9)"    copy : "A#add9"   }
+    { name : "Bb(sus9)"    copy : "Bbadd9"   }
+    { name : "B(sus9)"     copy : "Badd9"    }
+// minor add9 = 1 b3 5 9
+    { name : "Cm(add9)"    base :  1  frets : [ -1   3   1   0   3  -1 ] fingers : [ x  3  1  x  4  x ] }
+    { name : "C#m(add9)"   base :  1  frets : [ -1   4   2   1   4  -1 ] fingers : [ x  3  2  1  4  x ] }
+    { name : "Dbm(add9)"   base :  1  frets : [ -1   4   2   1   4  -1 ] fingers : [ x  3  2  1  4  x ] }
+    { name : "Dm(add9)"    base :  2  frets : [ -1   4   2   1   4  -1 ] fingers : [ x  3  2  1  4  x ] }
+    { name : "D#m(add9)"   base :  3  frets : [ -1   4   2   1   4  -1 ] fingers : [ x  3  2  1  4  x ] }
+    { name : "Ebm(add9)"   base :  3  frets : [ -1   4   2   1   4  -1 ] fingers : [ x  3  2  1  4  x ] }
+    { name : "Em(add9)"    base :  1  frets : [  0   2   2   0   0   2 ] fingers : [ x  1  2  x  x  3 ] }
+    { name : "Fm(add9)"    base :  1  frets : [ -1  -1   3   1   1   3 ] fingers : [ x  x  3  1  1  4 ] }
+    { name : "F#m(add9)"   base :  1  frets : [ -1  -1   4   2   2   4 ] fingers : [ x  x  3  1  1  4 ] }
+    { name : "Gbm(add9)"   base :  1  frets : [ -1  -1   4   2   2   4 ] fingers : [ x  x  3  1  1  4 ] }
+    { name : "Gm(add9)"    base :  3  frets : [ -1  -1   3   1   1   3 ] fingers : [ x  x  3  1  1  4 ] }
+    { name : "G#m(add9)"   base :  4  frets : [ -1  -1   3   1   1   3 ] fingers : [ x  x  3  1  1  4 ] }
+    { name : "Abm(add9)"   base :  4  frets : [ -1  -1   3   1   1   3 ] fingers : [ x  x  3  1  1  4 ] }
+    { name : "Am(add9)"    base :  1  frets : [ -1   0   2   4   1   0 ] fingers : [ x  x  2  4  1  x ] }
+    { name : "A#m(add9)"   base :  3  frets : [  4   2   1   3  -1  -1 ] fingers : [ 4  2  1  3  x  x ] }
+    { name : "Bbm(add9)"   base :  3  frets : [  4   2   1   3  -1  -1 ] fingers : [ 4  2  1  3  x  x ] }
+    { name : "Bm(add9)"    base :  4  frets : [  4   2   1   3  -1  -1 ] fingers : [ 4  2  1  3  x  x ] }
+// major 6(add9) = 1 3 5 6 9
+    { name : "C6(add9)"    base :  1  frets : [ -1   3   2   2   3   3 ] fingers : [ x  2  1  1  3  4 ] }
+    { name : "C#6(add9)"   base :  1  frets : [ -1   4   3   3   4   4 ] fingers : [ x  2  1  1  3  4 ] }
+    { name : "Db6(add9)"   base :  1  frets : [ -1   4   3   3   4   4 ] fingers : [ x  2  1  1  3  4 ] }
+    { name : "D6(add9)"    base :  4  frets : [ -1   2   1   1   2   2 ] fingers : [ x  2  1  1  3  4 ] }
+    { name : "D#6(add9)"   base :  5  frets : [ -1   2   1   1   2   2 ] fingers : [ x  2  1  1  3  4 ] }
+    { name : "Eb6(add9)"   base :  5  frets : [ -1   2   1   1   2   2 ] fingers : [ x  2  1  1  3  4 ] }
+    { name : "E6(add9)"    base :  6  frets : [ -1   2   1   1   2   2 ] fingers : [ x  2  1  1  3  4 ] }
+    { name : "F6(add9)"    base :  1  frets : [  1   0   0   0   1   1 ] fingers : [ 2  x  x  x  3  4 ] }
+    { name : "F#6(add9)"   base :  1  frets : [  2   1   1   1   2   2 ] fingers : [ 2  1  1  1  3  4 ] }
+    { name : "Gb6(add9)"   base :  1  frets : [  2   1   1   1   2   2 ] fingers : [ 2  1  1  1  3  4 ] }
+    { name : "G6(add9)"    base :  1  frets : [  3   2   2   2   3   3 ] fingers : [ 2  1  1  1  3  4 ] }
+    { name : "G#6(add9)"   base :  1  frets : [  4   3   3   3   4   4 ] fingers : [ 2  1  1  1  3  4 ] }
+    { name : "Ab6(add9)"   base :  1  frets : [  4   3   3   3   4   4 ] fingers : [ 2  1  1  1  3  4 ] }
+    { name : "A6(add9)"    base :  4  frets : [  2   1   1   1   2   2 ] fingers : [ 2  1  1  1  3  4 ] }
+    { name : "A#6(add9)"   base :  1  frets : [ -1   1   0   0   1   1 ] fingers : [ x  2  x  x  3  4 ] }
+    { name : "Bb6(add9)"   base :  1  frets : [ -1   1   0   0   1   1 ] fingers : [ x  2  x  x  3  4 ] }
+    { name : "B6(add9)"    base :  1  frets : [ -1   2   1   1   2   2 ] fingers : [ x  2  1  1  3  4 ] }
+// 6add9 alias for 6(add9)
+    { name : "C6add9"      copy : "C6(add9)" }
+    { name : "C#6add9"     copy : "C#6(add9)" }
+    { name : "Db6add9"     copy : "Db6(add9)" }
+    { name : "D6add9"      copy : "D6(add9)" }
+    { name : "D#6add9"     copy : "D#6(add9)" }
+    { name : "Eb6add9"     copy : "Eb6(add9)" }
+    { name : "E6add9"      copy : "E6(add9)"  }
+    { name : "F6add9"      copy : "F6(add9)"  }
+    { name : "F#6add9"     copy : "F#6(add9)" }
+    { name : "Gb6add9"     copy : "Gb6(add9)" }
+    { name : "G6add9"      copy : "G6(add9)"  }
+    { name : "G#6add9"     copy : "G#6(add9)" }
+    { name : "Ab6add9"     copy : "Ab6(add9)" }
+    { name : "A6add9"      copy : "A6(add9)"  }
+    { name : "A#6add9"     copy : "A#6(add9)" }
+    { name : "Bb6add9"     copy : "Bb6(add9)" }
+    { name : "B6add9"      copy : "B6(add9)"  }
+// 69 alias for 6(add9)
+    { name : "C69"         copy : "C6(add9)"  }
+    { name : "C#69"        copy : "C#6(add9)" }
+    { name : "Db69"        copy : "Db6(add9)" }
+    { name : "D69"         copy : "D6(add9)"  }
+    { name : "D#69"        copy : "D#6(add9)" }
+    { name : "Eb69"        copy : "Eb6(add9)" }
+    { name : "E69"         copy : "E6(add9)"  }
+    { name : "F69"         copy : "F6(add9)"  }
+    { name : "F#69"        copy : "F#6(add9)" }
+    { name : "Gb69"        copy : "Gb6(add9)" }
+    { name : "G69"         copy : "G6(add9)"  }
+    { name : "G#69"        copy : "G#6(add9)" }
+    { name : "Ab69"        copy : "Ab6(add9)" }
+    { name : "A69"         copy : "A6(add9)"  }
+    { name : "A#69"        copy : "A#6(add9)" }
+    { name : "Bb69"        copy : "Bb6(add9)" }
+    { name : "B69"         copy : "B6(add9)"  }
+// 6/9 alias for 6(add9)
+    { name : "C6/9"        copy : "C6(add9)"  }
+    { name : "C#6/9"       copy : "C#6(add9)" }
+    { name : "Db6/9"       copy : "Db6(add9)" }
+    { name : "D6/9"        copy : "D6(add9)"  }
+    { name : "D#6/9"       copy : "D#6(add9)" }
+    { name : "Eb6/9"       copy : "Eb6(add9)" }
+    { name : "E6/9"        copy : "E6(add9)"  }
+    { name : "F6/9"        copy : "F6(add9)"  }
+    { name : "F#6/9"       copy : "F#6(add9)" }
+    { name : "Gb6/9"       copy : "Gb6(add9)" }
+    { name : "G6/9"        copy : "G6(add9)"  }
+    { name : "G#6/9"       copy : "G#6(add9)" }
+    { name : "Ab6/9"       copy : "Ab6(add9)" }
+    { name : "A6/9"        copy : "A6(add9)"  }
+    { name : "A#6/9"       copy : "A#6(add9)" }
+    { name : "Bb6/9"       copy : "Bb6(add9)" }
+    { name : "B6/9"        copy : "B6(add9)"  }
+// 6(9) alias for 6(add9)
+    { name : "C6(9)"       copy : "C6(add9)"  }
+    { name : "C#6(9)"      copy : "C#6(add9)" }
+    { name : "Db6(9)"      copy : "Db6(add9)" }
+    { name : "D6(9)"       copy : "D6(add9)"  }
+    { name : "D#6(9)"      copy : "D#6(add9)" }
+    { name : "Eb6(9)"      copy : "Eb6(add9)" }
+    { name : "E6(9)"       copy : "E6(add9)"  }
+    { name : "F6(9)"       copy : "F6(add9)"  }
+    { name : "F#6(9)"      copy : "F#6(add9)" }
+    { name : "Gb6(9)"      copy : "Gb6(add9)" }
+    { name : "G6(9)"       copy : "G6(add9)"  }
+    { name : "G#6(9)"      copy : "G#6(add9)" }
+    { name : "Ab6(9)"      copy : "Ab6(add9)" }
+    { name : "A6(9)"       copy : "A6(add9)"  }
+    { name : "A#6(9)"      copy : "A#6(add9)" }
+    { name : "Bb6(9)"      copy : "Bb6(add9)" }
+    { name : "B6(9)"       copy : "B6(add9)"  }
+// major 9th = 1 3 5 7 9
+    { name : "Cmaj9"       base :  1  frets : [ -1   3   2   4   3  -1 ] fingers : [ x  2  1  4  3  x ] }
+    { name : "C#maj9"      base :  3  frets : [ -1   2   1   3   2  -1 ] fingers : [ x  2  1  4  3  x ] }
+    { name : "Dbmaj9"      base :  3  frets : [ -1   2   1   3   2  -1 ] fingers : [ x  2  1  4  3  x ] }
+    { name : "Dmaj9"       base :  4  frets : [ -1   2   1   3   2  -1 ] fingers : [ x  2  1  4  3  x ] }
+    { name : "D#maj9"      base :  5  frets : [ -1   2   1   3   2  -1 ] fingers : [ x  2  1  4  3  x ] }
+    { name : "Ebmaj9"      base :  5  frets : [ -1   2   1   3   2  -1 ] fingers : [ x  2  1  4  3  x ] }
+    { name : "Emaj9"       base :  6  frets : [ -1   2   1   3   2  -1 ] fingers : [ x  2  1  4  3  x ] }
+    { name : "Fmaj9"       base :  1  frets : [  1   0   2   0   1   0 ] fingers : [ 1  x  3  x  2  x ] }
+    { name : "F#maj9"      base :  1  frets : [  2   1   3   1  -1  -1 ] fingers : [ 2  1  4  3  x  x ] }
+    { name : "Gbmaj9"      base :  1  frets : [  2   1   3   1  -1  -1 ] fingers : [ 2  1  4  3  x  x ] }
+    { name : "Gmaj9"       base :  1  frets : [  3   2   4   2  -1  -1 ] fingers : [ 2  1  4  3  x  x ] }
+    { name : "G#maj9"      base :  3  frets : [  2   1   3   1  -1  -1 ] fingers : [ 2  1  4  3  x  x ] }
+    { name : "Abmaj9"      base :  3  frets : [  2   1   3   1  -1  -1 ] fingers : [ 2  1  4  3  x  x ] }
+    { name : "Amaj9"       base :  4  frets : [  2   1   3   1  -1  -1 ] fingers : [ 2  1  4  3  x  x ] }
+    { name : "A#maj9"      base :  1  frets : [ -1   1   0   2   1  -1 ] fingers : [ x  1  x  3  2  x ] }
+    { name : "Bbmaj9"      base :  1  frets : [ -1   1   0   2   1  -1 ] fingers : [ x  1  x  3  2  x ] }
+    { name : "Bmaj9"       base :  1  frets : [ -1   2   1   3   2  -1 ] fingers : [ x  2  1  4  3  x ] }
+// dominant 9th = 1 3 5 b7 9
+    { name : "C9"          base :  1  frets : [ -1   3   2   3   3   3 ] fingers : [ x  2  1  3  3  3 ] }
+    { name : "C#9"         base :  1  frets : [ -1   4   3   4   4   4 ] fingers : [ x  2  1  3  3  3 ] }
+    { name : "Db9"         base :  1  frets : [ -1   4   3   4   4   4 ] fingers : [ x  2  1  3  3  3 ] }
+    { name : "D9"          base :  4  frets : [ -1   2   1   2   2   2 ] fingers : [ x  2  1  3  3  3 ] }
+    { name : "D#9"         base :  1  frets : [ -1  -1   1   0   2   1 ] fingers : [ x  x  1  x  3  2 ] }
+    { name : "Eb9"         base :  1  frets : [ -1  -1   1   0   2   1 ] fingers : [ x  x  1  x  3  2 ] }
+    { name : "E9"          base :  1  frets : [  0   2   0   1   3   2 ] fingers : [ x  2  x  1  4  3 ] }
+    { name : "F9"          base :  1  frets : [ -1  -1   3   2   4   3 ] fingers : [ x  x  2  1  4  3 ] }
+    { name : "F#9"         base :  1  frets : [  2   1   2   1   2  -1 ] fingers : [ 2  1  3  1  4  x ] }
+    { name : "Gb9"         base :  1  frets : [  2   1   2   1   2  -1 ] fingers : [ 2  1  3  1  4  x ] }
+    { name : "G9"          base :  1  frets : [  3   2   3   2   3  -1 ] fingers : [ 2  1  3  1  4  x ] }
+    { name : "G#9"         base :  1  frets : [  4   3   4   3   4  -1 ] fingers : [ 2  1  3  1  4  x ] }
+    { name : "Ab9"         base :  1  frets : [  4   3   4   3   4  -1 ] fingers : [ 2  1  3  1  4  x ] }
+    { name : "A9"          base :  4  frets : [  2   1   2   1   2  -1 ] fingers : [ 2  1  3  1  4  x ] }
+    { name : "A#9"         base :  1  frets : [ -1   1   0   1   1   1 ] fingers : [ x  2  x  3  3  3 ] }
+    { name : "Bb9"         base :  1  frets : [ -1   1   0   1   1   1 ] fingers : [ x  2  x  3  3  3 ] }
+    { name : "B9"          base :  1  frets : [ -1   2   1   2   2   2 ] fingers : [ x  2  1  3  3  3 ] }
+// minor 9th = 1 b3 5 b7 9
+    { name : "Cm9"         base :  1  frets : [ -1   3   1   3   3   3 ] fingers : [ x  2  1  3  3  3 ] }
+    { name : "C#m9"        base :  1  frets : [ -1   4   2   4   4   4 ] fingers : [ x  2  1  3  3  3 ] }
+    { name : "Dbm9"        base :  1  frets : [ -1   4   2   4   4   4 ] fingers : [ x  2  1  3  3  3 ] }
+    { name : "Dm9"         base :  3  frets : [ -1   3   1   3   3   3 ] fingers : [ x  2  1  3  3  3 ] }
+    { name : "D#m9"        base :  4  frets : [ -1   3   1   3   3   3 ] fingers : [ x  2  1  3  3  3 ] }
+    { name : "Ebm9"        base :  4  frets : [ -1   3   1   3   3   3 ] fingers : [ x  2  1  3  3  3 ] }
+    { name : "Em9"         base :  5  frets : [  0   3   1   3   3   3 ] fingers : [ x  2  1  3  3  3 ] }
+    { name : "Fm9"         base :  1  frets : [  1  -1   1   1   1   3 ] fingers : [ 2  x  3  3  3  4 ] }
+    { name : "F#m9"        base :  1  frets : [  2   0   2   2   2   4 ] fingers : [ 2  x  3  3  3  4 ] }
+    { name : "Gbm9"        base :  1  frets : [  2   0   2   2   2   4 ] fingers : [ 2  x  3  3  3  4 ] }
+    { name : "Gm9"         base :  1  frets : [  3   1   3   2  -1  -1 ] fingers : [ 3  1  4  2  x  x ] }
+    { name : "G#m9"        base :  1  frets : [  4   2   4   3  -1  -1 ] fingers : [ 3  1  4  2  x  x ] }
+    { name : "Abm9"        base :  1  frets : [  4   2   4   3  -1  -1 ] fingers : [ 3  1  4  2  x  x ] }
+    { name : "Am9"         base :  5  frets : [ -1   0   1   1   1   3 ] fingers : [ x  x  1  1  1  3 ] }
+    { name : "A#m9"        base :  4  frets : [  3   1   3   2  -1  -1 ] fingers : [ 3  1  4  2  x  x ] }
+    { name : "Bbm9"        base :  4  frets : [  3   1   3   2  -1  -1 ] fingers : [ 3  1  4  2  x  x ] }
+    { name : "Bm9"         base :  1  frets : [ -1   2   0   2   2   2 ] fingers : [ x  2  x  3  3  3 ] }
+// sharp 9th = 1 3 5 b7 #9
+    { name : "C7#9"        base :  1  frets : [ -1   3   2   3   4  -1 ] fingers : [ x  2  1  3  4  x ] }
+    { name : "C#7#9"       base :  3  frets : [ -1   2   1   2   3  -1 ] fingers : [ x  2  1  3  4  x ] }
+    { name : "Db7#9"       base :  3  frets : [ -1   2   1   2   3  -1 ] fingers : [ x  2  1  3  4  x ] }
+    { name : "D7#9"        base :  4  frets : [ -1   2   1   2   3  -1 ] fingers : [ x  2  1  3  4  x ] }
+    { name : "D#7#9"       base :  1  frets : [ -1  -1   1   0   2   2 ] fingers : [ x  x  1  x  2  3 ] }
+    { name : "Eb7#9"       base :  1  frets : [ -1  -1   1   0   2   2 ] fingers : [ x  x  1  x  2  3 ] }
+    { name : "E7#9"        base :  1  frets : [ -1  -1   2   1   3   3 ] fingers : [ x  x  2  1  3  4 ] }
+    { name : "F7#9"        base :  1  frets : [ -1  -1   3   2   4   4 ] fingers : [ x  x  2  1  3  4 ] }
+    { name : "F#7#9"       base :  3  frets : [ -1  -1   2   1   3   3 ] fingers : [ x  x  2  1  3  4 ] }
+    { name : "Gb7#9"       base :  3  frets : [ -1  -1   2   1   3   3 ] fingers : [ x  x  2  1  3  4 ] }
+    { name : "G7#9"        base :  4  frets : [ -1  -1   2   1   3   3 ] fingers : [ x  x  2  1  3  4 ] }
+    { name : "G#7#9"       base :  5  frets : [ -1  -1   2   1   3   3 ] fingers : [ x  x  2  1  3  4 ] }
+    { name : "Ab7#9"       base :  5  frets : [ -1  -1   2   1   3   3 ] fingers : [ x  x  2  1  3  4 ] }
+    { name : "A7#9"        base :  6  frets : [ -1  -1   2   1   3   3 ] fingers : [ x  x  2  1  3  4 ] }
+    { name : "A#7#9"       base :  1  frets : [ -1   1   0   1   2  -1 ] fingers : [ x  1  x  2  3  x ] }
+    { name : "Bb7#9"       base :  1  frets : [ -1   1   0   1   2  -1 ] fingers : [ x  1  x  2  3  x ] }
+    { name : "B7#9"        base :  1  frets : [ -1   2   1   2   3  -1 ] fingers : [ x  2  1  3  4  x ] }
+// flat 9th = 1 3 5 b7 b9
+    { name : "C7b9"        base :  1  frets : [ -1   3   2   3   2  -1 ] fingers : [ x  2  1  3  1  x ] }
+    { name : "C#7b9"       base :  1  frets : [ -1   4   3   4   3  -1 ] fingers : [ x  2  1  3  1  x ] }
+    { name : "Db7b9"       base :  1  frets : [ -1   4   3   4   3  -1 ] fingers : [ x  2  1  3  1  x ] }
+    { name : "D7b9"        base :  4  frets : [ -1   2   1   2   1  -1 ] fingers : [ x  2  1  3  1  x ] }
+    { name : "D#7b9"       base :  1  frets : [ -1  -1   1   0   2   0 ] fingers : [ x  x  1  x  2  x ] }
+    { name : "Eb7b9"       base :  1  frets : [ -1  -1   1   0   2   0 ] fingers : [ x  x  1  x  2  x ] }
+    { name : "E7b9"        base :  1  frets : [ -1  -1   2   1   3   1 ] fingers : [ x  x  2  1  3  1 ] }
+    { name : "F7b9"        base :  1  frets : [ -1  -1   3   2   4   2 ] fingers : [ x  x  2  1  3  1 ] }
+    { name : "F#7b9"       base :  3  frets : [ -1  -1   2   1   3   1 ] fingers : [ x  x  2  1  3  1 ] }
+    { name : "Gb7b9"       base :  3  frets : [ -1  -1   2   1   3   1 ] fingers : [ x  x  2  1  3  1 ] }
+    { name : "G7b9"        base :  4  frets : [ -1  -1   2   1   3   1 ] fingers : [ x  x  2  1  3  1 ] }
+    { name : "G#7b9"       base :  5  frets : [ -1  -1   2   1   3   1 ] fingers : [ x  x  2  1  3  1 ] }
+    { name : "Ab7b9"       base :  5  frets : [ -1  -1   2   1   3   1 ] fingers : [ x  x  2  1  3  1 ] }
+    { name : "A7b9"        base :  3  frets : [  3   2   3   1  -1  -1 ] fingers : [ 3  2  4  1  x  x ] }
+    { name : "A#7b9"       base :  1  frets : [ -1   1   0   1   0  -1 ] fingers : [ x  1  x  2  x  x ] }
+    { name : "Bb7b9"       base :  1  frets : [ -1   1   0   1   0  -1 ] fingers : [ x  1  x  2  x  x ] }
+    { name : "B7b9"        base :  1  frets : [ -1   2   1   2   1  -1 ] fingers : [ x  2  1  3  1  x ] }
+// 11th = 1 3 5 b7 11
+    { name : "C11"         base :  1  frets : [ -1   3   3   3   1  -1 ] fingers : [ x  2  3  4  1  x ] }
+    { name : "C#11"        base :  1  frets : [ -1   4   4   4   2  -1 ] fingers : [ x  2  3  4  1  x ] }
+    { name : "Db11"        base :  1  frets : [ -1   4   4   4   2  -1 ] fingers : [ x  2  3  4  1  x ] }
+    { name : "D11"         base :  1  frets : [ -1  -1   0   2   1   3 ] fingers : [ x  x  x  2  1  3 ] }
+    { name : "D#11"        base :  1  frets : [ -1  -1   1   3   2   4 ] fingers : [ x  x  1  3  2  4 ] }
+    { name : "Eb11"        base :  1  frets : [ -1  -1   1   3   2   4 ] fingers : [ x  x  1  3  2  4 ] }
+    { name : "E11"         base :  1  frets : [  0   2   0   2   0   0 ] fingers : [ x  2  x  3  x  x ] }
+    { name : "F11"         base :  1  frets : [  1   3   1   3   1   1 ] fingers : [ 1  3  1  4  1  1 ] } 
+    { name : "F#11"        base :  1  frets : [  2   4   2   4   2   2 ] fingers : [ 1  3  1  4  1  1 ] }  
+    { name : "Gb11"        base :  1  frets : [  2   4   2   4   2   2 ] fingers : [ 1  3  1  4  1  1 ] }
+    { name : "G11"         base :  3  frets : [  1   3   1   3   1   1 ] fingers : [ 1  3  1  4  1  1 ] }
+    { name : "G#11"        base :  4  frets : [  1   3   1   3   1   1 ] fingers : [ 1  3  1  4  1  1 ] }
+    { name : "Ab11"        base :  4  frets : [  1   3   1   3   1   1 ] fingers : [ 1  3  1  4  1  1 ] }  
+    { name : "A11"         base :  1  frets : [ -1   0   2   0   3   0 ] fingers : [ x  x  1  x  3  x ] }
+    { name : "A#11"        base :  1  frets : [ -1   1   3   1   4   1 ] fingers : [ x  1  3  1  4  1 ] }
+    { name : "Bb11"        base :  1  frets : [ -1   1   3   1   4   1 ] fingers : [ x  1  3  1  4  1 ] }
+    { name : "B11"         base :  1  frets : [ -1   2   2   2   0   2 ] fingers : [ x  1  2  3  x  4 ] }
+// 9(11) = 11th and 9th = 1 3 5 b7 9 11
+    { name : "C9(11)"      base :  1  frets : [ -1   3   3   3   3  -1 ] fingers : [ x  1  1  1  1  x ] } 
+    { name : "C#9(11)"     base :  1  frets : [ -1   4   4   4   4  -1 ] fingers : [ x  1  1  1  1  x ] }
+    { name : "Db9(11)"     base :  1  frets : [ -1   4   4   4   4  -1 ] fingers : [ x  1  1  1  1  x ] }
+    { name : "D9(11)"      base :  1  frets : [ -1  -1   0   0   1   0 ] fingers : [ x  x  x  x  1  x ] }
+    { name : "D#9(11)"     base :  6  frets : [ -1   1   1   1   1  -1 ] fingers : [ x  1  1  1  1  x ] }
+    { name : "Eb9(11)"     base :  6  frets : [ -1   1   1   1   1  -1 ] fingers : [ x  1  1  1  1  x ] }
+    { name : "E9(11)"      base :  1  frets : [  0   2   2   2   3   2 ] fingers : [ x  1  1  1  2  1 ] }
+    { name : "F9(11)"      base :  1  frets : [ -1  -1   3   3   4   3 ] fingers : [ x  x  1  1  2  1 ] }
+    { name : "F#9(11)"     base :  1  frets : [  2   2   2   1   0   0 ] fingers : [ 2  3  4  1  x  x ] }
+    { name : "Gb9(11)"     base :  1  frets : [  2   2   2   1   0   0 ] fingers : [ 2  3  4  1  x  x ] }
+    { name : "G9(11)"      base :  1  frets : [  3  -1   3   2   1   1 ] fingers : [ 3  x  4  2  1  1 ] }
+    { name : "G#9(11)"     base :  1  frets : [  4  -1   4   3   2   2 ] fingers : [ 3  x  4  2  1  1 ] }
+    { name : "Ab9(11)"     base :  1  frets : [  4  -1   4   3   2   2 ] fingers : [ 3  x  4  2  1  1 ] }
+    { name : "A9(11)"      base :  3  frets : [  3  -1   3   2   1   1 ] fingers : [ 3  x  4  2  1  1 ] }
+    { name : "A#9(11)"     base :  4  frets : [  3  -1   3   2   1   1 ] fingers : [ 3  x  4  2  1  1 ] }
+    { name : "Bb9(11)"     base :  4  frets : [  3  -1   3   2   1   1 ] fingers : [ 3  x  4  2  1  1 ] }
+    { name : "B9(11)"      base :  5  frets : [  3  -1   3   2   1   1 ] fingers : [ 3  x  4  2  1  1 ] }
+// 9/11 alias for 9(11)
+    { name : "C9/11"       copy :  "C9(11)"  }
+    { name : "C#9/11"      copy :  "C#9(11)" }
+    { name : "Db9/11"      copy :  "Db9(11)" }
+    { name : "D9/11"       copy :  "D9(11)"  }
+    { name : "D#9/11"      copy :  "D#9(11)" }
+    { name : "Eb9/11"      copy :  "Eb9(11)" }
+    { name : "E9/11"       copy :  "E9(11)"  }
+    { name : "F9/11"       copy :  "F9(11)"  }
+    { name : "F#9/11"      copy :  "F#9(11)" }
+    { name : "Gb9/11"      copy :  "Gb9(11)" }
+    { name : "G9/11"       copy :  "G9(11)"  }
+    { name : "G#9/11"      copy :  "G#9(11)" }
+    { name : "Ab9/11"      copy :  "Ab9(11)" }
+    { name : "A9/11"       copy :  "A9(11)"  }
+    { name : "A#9/11"      copy :  "A#9(11)" }
+    { name : "Bb9/11"      copy :  "Bb9(11)" }
+    { name : "B9/11"       copy :  "B9(11)"  }
+// 911 alias for 9(11)
+    { name : "C911"        copy :  "C9(11)"  }
+    { name : "C#911"       copy :  "C#9(11)" }
+    { name : "Db911"       copy :  "Db9(11)" }
+    { name : "D911"        copy :  "D9(11)"  }
+    { name : "D#911"       copy :  "D#9(11)" }
+    { name : "Eb911"       copy :  "Eb9(11)" }
+    { name : "E911"        copy :  "E9(11)"  }
+    { name : "F911"        copy :  "F9(11)"  }
+    { name : "F#911"       copy :  "F#9(11)" }
+    { name : "Gb911"       copy :  "Gb9(11)" }
+    { name : "G911"        copy :  "G9(11)"  }
+    { name : "G#911"       copy :  "G#9(11)" }
+    { name : "Ab911"       copy :  "Ab9(11)" }
+    { name : "A911"        copy :  "A9(11)"  }
+    { name : "A#911"       copy :  "A#9(11)" }
+    { name : "Bb911"       copy :  "Bb9(11)" }
+    { name : "B911"        copy :  "B9(11)"  }
+// 7#11 alias for 7b5
+    { name : "C7#11"       copy :  "C7b5"    }
+    { name : "C#7#11"      copy :  "C#7b5"   }
+    { name : "Db7#11"      copy :  "Db7b5"   }
+    { name : "D7#11"       copy :  "D7b5"    }
+    { name : "D#7#11"      copy :  "D#7b5"   }
+    { name : "Eb7#11"      copy :  "Eb7b5"   }
+    { name : "E7#11"       copy :  "E7b5"    }
+    { name : "F7#11"       copy :  "F7b5"    }
+    { name : "F#7#11"      copy :  "F#7b5"   }
+    { name : "Gb7#11"      copy :  "Gb7b5"   }
+    { name : "G7#11"       copy :  "G7b5"    }
+    { name : "G#7#11"      copy :  "G#7b5"   }
+    { name : "Ab7#11"      copy :  "Ab7b5"   }
+    { name : "A7#11"       copy :  "A7b5"    }
+    { name : "A#7#11"      copy :  "A#7b5"   }
+    { name : "Bb7#11"      copy :  "Bb7b5"   }
+    { name : "B7#11"       copy :  "B7b5"    }
+// minor 11th = 1 b3 5 7 11
+    { name : "Cm11"        base :  1  frets : [ -1   3   1   3   1   1 ] fingers : [ x  3  1  4  1  1 ] }
+    { name : "C#m11"       base :  1  frets : [ -1   4   2   4   2   2 ] fingers : [ x  3  1  4  1  1 ] }
+    { name : "Dbm11"       base :  1  frets : [ -1   4   2   4   2   2 ] fingers : [ x  3  1  4  1  1 ] }
+    { name : "Dm11"        base :  3  frets : [ -1   3   1   3   1   1 ] fingers : [ x  3  1  4  1  1 ] }
+    { name : "D#m11"       base :  4  frets : [ -1   3   1   3   1   1 ] fingers : [ x  3  1  4  1  1 ] }
+    { name : "Ebm11"       base :  4  frets : [ -1   3   1   3   1   1 ] fingers : [ x  3  1  4  1  1 ] }
+    { name : "Em11"        base :  2  frets : [  0   1   0   0   0   4 ] fingers : [ x  1  x  x  x  4 ] }
+    { name : "Fm11"        base :  1  frets : [  1   3   1   3   1   1 ] fingers : [ 1  3  1  4  1  1 ] }
+    { name : "F#m11"       base :  1  frets : [  2   0   2   2   0   0 ] fingers : [ 1  x  2  3  x  x ] }
+    { name : "Gbm11"       base :  1  frets : [  2   0   2   2   0   0 ] fingers : [ 1  x  2  3  x  x ] }
+    { name : "Gm11"        base :  1  frets : [  3   1   3   3   1  -1 ] fingers : [ 2  1  3  4  1  x ] }
+    { name : "G#m11"       base :  1  frets : [  4   2   4   4   2  -1 ] fingers : [ 2  1  3  4  1  x ] }
+    { name : "Abm11"       base :  1  frets : [  4   2   4   4   2  -1 ] fingers : [ 2  1  3  4  1  x ] }
+    { name : "Am11"        base :  3  frets : [  3   1   3   3   1  -1 ] fingers : [ 2  1  3  4  1  x ] }
+    { name : "A#m11"       base :  4  frets : [  3   1   3   3   1  -1 ] fingers : [ 2  1  3  4  1  x ] }
+    { name : "Bbm11"       base :  4  frets : [  3   1   3   3   1  -1 ] fingers : [ 2  1  3  4  1  x ] }
+    { name : "Bm11"        base :  1  frets : [ -1   2   0   2   0   0 ] fingers : [ x  2  x  3  x  x ] }
+// major 13th = 1 3 5 7 13
+    { name : "Cmaj13"      base :  3  frets : [ -1   1  -1   2   3   3 ] fingers : [ x  1  x  2  3  4 ] }
+    { name : "C#maj13"     base :  4  frets : [ -1   1  -1   2   3   3 ] fingers : [ x  1  x  2  3  4 ] }
+    { name : "Dbmaj13"     base :  4  frets : [ -1   1  -1   2   3   3 ] fingers : [ x  1  x  2  3  4 ] }
+    { name : "Dmaj13"      base :  5  frets : [ -1   1  -1   2   3   3 ] fingers : [ x  1  x  2  3  4 ] }
+    { name : "D#maj13"     base :  6  frets : [ -1   1  -1   2   3   3 ] fingers : [ x  1  x  2  3  4 ] }
+    { name : "Ebmaj13"     base :  6  frets : [ -1   1  -1   2   3   3 ] fingers : [ x  1  x  2  3  4 ] }
+    { name : "Emaj13"      base :  7  frets : [  0   1  -1   2   3   3 ] fingers : [ x  1  x  2  3  4 ] }
+    { name : "Fmaj13"      base :  1  frets : [  1   0   2   2   3   0 ] fingers : [ 1  x  2  3  4  x ] }
+    { name : "F#maj13"     base :  1  frets : [  2  -1   3   3   4  -1 ] fingers : [ 1  x  2  3  4  x ] }
+    { name : "Gbmaj13"     base :  1  frets : [  2  -1   3   3   4  -1 ] fingers : [ 1  x  2  3  4  x ] }
+    { name : "Gmaj13"      base :  3  frets : [  1  -1   2   2   3  -1 ] fingers : [ 1  x  2  3  4  x ] }
+    { name : "G#maj13"     base :  4  frets : [  1  -1   2   2   3  -1 ] fingers : [ 1  x  2  3  4  x ] }
+    { name : "Abmaj13"     base :  4  frets : [  1  -1   2   2   3  -1 ] fingers : [ 1  x  2  3  4  x ] }
+    { name : "Amaj13"      base :  5  frets : [  1  -1   2   2   3  -1 ] fingers : [ 1  x  2  3  4  x ] }
+    { name : "A#maj13"     base :  1  frets : [ -1   1   0   2   3   3 ] fingers : [ x  1  x  2  3  4 ] }
+    { name : "Bbmaj13"     base :  1  frets : [ -1   1   0   2   3   3 ] fingers : [ x  1  x  2  3  4 ] }
+    { name : "Bmaj13"      base :  1  frets : [ -1   2  -1   3   4   4 ] fingers : [ x  1  x  2  3  4 ] }
+// dominant 13th = 1 3 5 b7 13
+    { name : "C13"         base :  2  frets : [ -1   2   1   2   4   4 ] fingers : [ x  2  1  3  4  4 ] }
+    { name : "C#13"        base :  3  frets : [ -1   2   1   2   4   4 ] fingers : [ x  2  1  3  4  4 ] }
+    { name : "Db13"        base :  3  frets : [ -1   2   1   2   4   4 ] fingers : [ x  2  1  3  4  4 ] }
+    { name : "D13"         base :  4  frets : [ -1   2   1   2   4   4 ] fingers : [ x  2  1  3  4  4 ] }
+    { name : "D#13"        base :  5  frets : [ -1   2   1   2   4   4 ] fingers : [ x  2  1  3  4  4 ] }
+    { name : "Eb13"        base :  5  frets : [ -1   2   1   2   4   4 ] fingers : [ x  2  1  3  4  4 ] }
+    { name : "E13"         base :  1  frets : [  0   2   0   1   2   0 ] fingers : [ x  2  x  1  3  x ] }
+    { name : "F13"         base :  1  frets : [  1  -1   1   2   3  -1 ] fingers : [ 1  x  2  3  3  x ] }
+    { name : "F#13"        base :  1  frets : [  2  -1   2   3   4  -1 ] fingers : [ 1  x  2  3  3  x ] }
+    { name : "Gb13"        base :  1  frets : [  2  -1   2   3   4  -1 ] fingers : [ 1  x  2  3  3  x ] }
+    { name : "G13"         base :  3  frets : [  1  -1   1   2   3  -1 ] fingers : [ 1  x  2  3  3  x ] }
+    { name : "G#13"        base :  4  frets : [  1  -1   1   2   3  -1 ] fingers : [ 1  x  2  3  3  x ] }
+    { name : "Ab13"        base :  4  frets : [  1  -1   1   2   3  -1 ] fingers : [ 1  x  2  3  3  x ] }
+    { name : "A13"         base :  5  frets : [ -1   0   2   0   2   2 ] fingers : [ x  x  1  x  2  3 ] }
+    { name : "A#13"        base :  1  frets : [ -1   1   0   1   3   3 ] fingers : [ x  1  x  2  3  4 ] }
+    { name : "Bb13"        base :  1  frets : [ -1   1   0   1   3   3 ] fingers : [ x  1  x  2  3  4 ] }
+    { name : "B13"         base :  1  frets : [ -1   2   1   2   4   4 ] fingers : [ x  2  1  3  4  4 ] }
+// flat 13th = 1 3 (5) b7 b13 = augmented 7th (b13 = #5)
+    { name : "C7b13"       copy :  "C+7"     }
+    { name : "C#7b13"      copy :  "C#+7"    }
+    { name : "Db7b13"      copy :  "Db+7"    }
+    { name : "D7b13"       copy :  "D+7"     }
+    { name : "D#7b13"      copy :  "D#+7"    }
+    { name : "Eb7b13"      copy :  "Eb+7"    }
+    { name : "E7b13"       copy :  "E+7"     }
+    { name : "F7b13"       copy :  "F+7"     }
+    { name : "F#7b13"      copy :  "F#+7"    }
+    { name : "Gb7b13"      copy :  "Gb+7"    }
+    { name : "G7b13"       copy :  "G+7"     }
+    { name : "G#7b13"      copy :  "G#+7"    }
+    { name : "Ab7b13"      copy :  "Ab+7"    }
+    { name : "A7b13"       copy :  "A+7"     }
+    { name : "A#7b13"      copy :  "A#+7"    }
+    { name : "Bb7b13"      copy :  "Bb+7"    }
+    { name : "B7b13"       copy :  "B+7"     }
+// slash chords - chords with bass note other than the root
+// slash - major over 2 (same as 11th)
+    { name : "C/D"         base :  1  frets : [ -1  -1   0   0   1   0 ] fingers : [ x  x  x  x  1  x ] }
+    { name : "C#/D#"       base :  6  frets : [ -1   1   1   1   1  -1 ] fingers : [ x  1  1  1  1  x ] }
+    { name : "Db/Eb"       base :  6  frets : [ -1   1   1   1   1  -1 ] fingers : [ x  1  1  1  1  x ] }
+    { name : "D/E"         base :  7  frets : [  0   1   1   1   1  -1 ] fingers : [ x  1  1  1  1  x ] }
+    { name : "D#/F"        base :  1  frets : [ -1  -1   3   3   4   3 ] fingers : [ x  x  1  1  2  1 ] }
+    { name : "Eb/F"        base :  1  frets : [ -1  -1   3   3   4   3 ] fingers : [ x  x  1  1  2  1 ] }
+    { name : "E/F#"        base :  1  frets : [  2   2   2   1   0   0 ] fingers : [ 2  3  4  1  x  x ] }
+    { name : "F/G"         base :  1  frets : [  3  -1   3   2   1   1 ] fingers : [ 3  x  4  2  1  1 ] }
+    { name : "F#/G#"       base :  1  frets : [  4  -1   4   3   2   2 ] fingers : [ 3  x  4  2  1  1 ] }
+    { name : "Gb/Ab"       base :  1  frets : [  4  -1   4   3   2   2 ] fingers : [ 3  x  4  2  1  1 ] }
+    { name : "G/A"         base :  3  frets : [  3  -1   3   2   1   1 ] fingers : [ 3  x  4  2  1  1 ] }
+    { name : "G#/A#"       base :  4  frets : [  3  -1   3   2   1   1 ] fingers : [ 3  x  4  2  1  1 ] }
+    { name : "Ab/Bb"       base :  4  frets : [  3  -1   3   2   1   1 ] fingers : [ 3  x  4  2  1  1 ] }
+    { name : "A/B"         base :  5  frets : [  3  -1   3   2   1  -1 ] fingers : [ 3  x  4  2  1  x ] }
+    { name : "A#/C"        base :  1  frets : [ -1   3   3   3   3  -1 ] fingers : [ x  1  1  1  1  x ] }
+    { name : "Bb/C"        base :  1  frets : [ -1   3   3   3   3  -1 ] fingers : [ x  1  1  1  1  x ] }
+    { name : "B/C#"        base :  1  frets : [ -1   4   4   4   4  -1 ] fingers : [ x  1  1  1  1  x ] }
+// slash - major over 3
+    { name : "C/E"         base :  1  frets : [  0   3   2   0   1   0 ] fingers : [ x  3  2  x  1  x ] }
+    { name : "C#/F"        base :  1  frets : [  1   4   3   1   2   1 ] fingers : [ 1  4  3  1  2  1 ] }
+    { name : "Db/F"        base :  1  frets : [  1   4   3   1   2   1 ] fingers : [ 1  4  3  1  2  1 ] }
+    { name : "D/F#"        base :  1  frets : [  2   0   0   2   3  -1 ] fingers : [ 1  x  x  2  3  x ] }
+    { name : "D#/G"        base :  1  frets : [  3   1   1   3   4  -1 ] fingers : [ 2  1  1  3  4  x ] }
+    { name : "Eb/G"        base :  1  frets : [  3   1   1   3   4  -1 ] fingers : [ 2  1  1  3  4  x ] }
+    { name : "E/G#"        base :  2  frets : [  3   1   1   3   4  -1 ] fingers : [ 2  1  1  3  4  x ] }
+    { name : "F/A"         base :  1  frets : [ -1   0   3   2   1   1 ] fingers : [ x  x  3  2  1  1 ] }
+    { name : "F#/A#"       base :  1  frets : [ -1   1   4   3   2   2 ] fingers : [ x  1  4  3  2  2 ] }
+    { name : "G/B"         base :  1  frets : [ -1   2   0   0   3  -1 ] fingers : [ x  1  x  x  3  x ] }
+    { name : "G#/C"        base :  1  frets : [ -1   3   1   1   1  -1 ] fingers : [ x  3  1  1  1  x ] }
+    { name : "Ab/C"        base :  1  frets : [ -1   3   1   1   1  -1 ] fingers : [ x  3  1  1  1  x ] }
+    { name : "A/C#"        base :  1  frets : [ -1   4   2   2   2   0 ] fingers : [ x  3  1  1  1  x ] }
+    { name : "Bb/D"        base :  3  frets : [ -1   3   1   1   1  -1 ] fingers : [ x  3  1  1  1  x ] }
+    { name : "B/D#"        base :  4  frets : [ -1   3   1   1   1  -1 ] fingers : [ x  3  1  1  1  x ] }
+// slash - major over 4 = major 9th without 3
+    { name : "C/F"         base :  1  frets : [  1   3   2   0   1   0 ] fingers : [ 1  4  3  x  2  x ] }
+    { name : "C#/F#"       base :  1  frets : [  2  -1   3   1   2   1 ] fingers : [ 2  x  4  1  3  1 ] }
+    { name : "Db/Gb"       base :  1  frets : [  2  -1   3   1   2   1 ] fingers : [ 2  x  4  1  3  1 ] }
+    { name : "D/G"         base :  1  frets : [  3  -1   4   2   3   2 ] fingers : [ 2  x  4  1  3  1 ] }
+    { name : "D#/G#"       base :  3  frets : [  2  -1   3   1   2   1 ] fingers : [ 2  x  4  1  3  1 ] }
+    { name : "Eb/Ab"       base :  3  frets : [  2  -1   3   1   2   1 ] fingers : [ 2  x  4  1  3  1 ] }
+    { name : "E/A"         base :  1  frets : [ -1   0   2   1   0   0 ] fingers : [ x  x  2  1  x  x ] }
+    { name : "F/Bb"        base :  1  frets : [ -1   1   3   2   1   1 ] fingers : [ x  1  3  2  1  1 ] }
+    { name : "F#/B"        base :  1  frets : [ -1   2   4   3   2   2 ] fingers : [ x  1  3  2  1  1 ] }
+    { name : "Gb/B"        base :  1  frets : [ -1   2   4   3   2   2 ] fingers : [ x  1  3  2  1  1 ] }
+    { name : "G/C"         base :  1  frets : [ -1   3   0   0   0   3 ] fingers : [ x  2  x  x  x  3 ] }
+    { name : "G#/C#"       base :  4  frets : [ -1   1   3   2   1   1 ] fingers : [ x  1  3  2  1  1 ] }
+    { name : "Ab/Db"       base :  4  frets : [ -1   1   3   2   1   1 ] fingers : [ x  1  3  2  1  1 ] }
+    { name : "A/D"         base :  5  frets : [ -1   1   3   2   1   1 ] fingers : [ x  1  3  2  1  1 ] }
+    { name : "A#/D#"       base :  1  frets : [ -1  -1   1   3   3   1 ] fingers : [ x  x  1  3  4  1 ] }
+    { name : "Bb/Eb"       base :  1  frets : [ -1  -1   1   3   3   1 ] fingers : [ x  x  1  3  4  1 ] }
+    { name : "B/E"         base :  1  frets : [  0   2   2   4   4   2 ] fingers : [ x  x  1  3  4  1 ] }
+// slash - major over 5
+    { name : "C/G"         base :  1  frets : [  3   3   2   0   1   0 ] fingers : [ 3  4  2  x  1  x ] }
+    { name : "C#/G#"       base :  4  frets : [  1   1   3   3   3   1 ] fingers : [ 1  1  3  3  3  1 ] }
+    { name : "Db/Ab"       base :  4  frets : [  1   1   3   3   3   1 ] fingers : [ 1  1  3  3  3  1 ] }
+    { name : "D/A"         base :  1  frets : [ -1   0   4   2   3   2 ] fingers : [ x  x  3  1  2  1 ] }
+    { name : "D#/A#"       base :  6  frets : [  1   1   3   3   3   1 ] fingers : [ 1  1  3  3  3  1 ] }
+    { name : "Eb/Bb"       base :  6  frets : [  1   1   3   3   3   1 ] fingers : [ 1  1  3  3  3  1 ] }
+    { name : "E/B"         base :  1  frets : [ -1   2   2   1   0   0 ] fingers : [ x  2  3  1  x  x ] }
+    { name : "F/C"         base :  1  frets : [ -1   3   3   2   1   1 ] fingers : [ x  3  4  2  1  1 ] }
+    { name : "F#/C#"       base :  1  frets : [ -1   4   4   3   2   2 ] fingers : [ x  3  4  2  1  1 ] }
+    { name : "Gb/Db"       base :  1  frets : [ -1   4   4   3   2   2 ] fingers : [ x  3  4  2  1  1 ] }
+    { name : "G/D"         base :  1  frets : [ -1  -1   0   4   3   3 ] fingers : [ x  x  x  2  1  1 ] }
+    { name : "G#/D#"       base :  4  frets : [ -1   3   3   2   1   1 ] fingers : [ x  3  4  2  1  1 ] }
+    { name : "Ab/Eb"       base :  1  frets : [ -1   3   3   2   1   1 ] fingers : [ x  3  4  2  1  1 ] }
+    { name : "A/E"         base :  1  frets : [  0   0   2   2   2   0 ] fingers : [ x  x  1  2  3  x ] }
+    { name : "A#/F"        base :  1  frets : [  1   1   3   3   3   1 ] fingers : [ 1  1  3  3  3  1 ] }
+    { name : "Bb/F"        base :  1  frets : [  1   1   3   3   3   1 ] fingers : [ 1  1  3  3  3  1 ] }
+    { name : "B/F#"        base :  1  frets : [  2   2   4   4   4   2 ] fingers : [ 1  1  3  3  3  1 ] }
+// slash - major over dominant 7
+    { name : "C/Bb"        base :  1  frets : [ -1   1   2   0   1   0 ] fingers : [ x  1  3  x  2  x ] }
+    { name : "C#/B"        base :  1  frets : [ -1   2   3   1   2   1 ] fingers : [ x  2  3  1  2  1 ] }
+    { name : "Db/B"        base :  1  frets : [ -1   2   3   1   2   1 ] fingers : [ x  2  3  1  2  1 ] }
+    { name : "D/C"         base :  1  frets : [ -1   3   4   2   3   2 ] fingers : [ x  2  3  1  2  1 ] }
+    { name : "D#/C#"       base :  3  frets : [ -1   2   3   1   2   1 ] fingers : [ x  2  3  1  2  1 ] }
+    { name : "Eb/Db"       base :  3  frets : [ -1   2   3   1   2   1 ] fingers : [ x  2  3  1  2  1 ] }
+    { name : "E/D"         base :  4  frets : [ -1   2   3   1   2   1 ] fingers : [ x  2  3  1  2  1 ] }
+    { name : "F/Eb"        base :  1  frets : [ -1  -1   1   2   1   1 ] fingers : [ x  x  1  2  1  1 ] }
+    { name : "F#/E"        base :  1  frets : [  0   4   4   3   2   2 ] fingers : [ x  3  4  2  1  1 ] }
+    { name : "Gb/E"        base :  1  frets : [  0   4   4   3   2   2 ] fingers : [ x  3  4  2  1  1 ] }
+    { name : "G/F"         base :  1  frets : [  1   2   0   0   0   3 ] fingers : [ 1  2  x  x  x  3 ] }
+    { name : "G#/F#"       base :  1  frets : [  2  -1   1   1   1  -1 ] fingers : [ 2  x  1  1  1  x ] }
+    { name : "Ab/Gb"       base :  1  frets : [  2  -1   1   1   1  -1 ] fingers : [ 2  x  1  1  1  x ] }
+    { name : "A/G"         base :  1  frets : [  3  -1   2   2   2   0 ] fingers : [ 2  x  1  1  1  x ] }
+    { name : "A#/G#"       base :  1  frets : [  4  -1   3   3   3  -1 ] fingers : [ 2  x  1  1  1  x ] }
+    { name : "Bb/Ab"       base :  1  frets : [  4  -1   3   3   3  -1 ] fingers : [ 2  x  1  1  1  x ] }
+    { name : "B/A"         base :  1  frets : [ -1   0   4   4   4   2 ] fingers : [ x  x  3  3  3  1 ] }
+// slash - major over major 7
+    { name : "C/B"         base :  1  frets : [ -1   2   2   0   1   0 ] fingers : [ x  2  3  x  1  x ] }
+    { name : "C#/C"        base :  1  frets : [ -1   3   3   1   2   1 ] fingers : [ x  3  4  1  2  1 ] }
+    { name : "Db/D"        base :  1  frets : [ -1   3   3   1   2   1 ] fingers : [ x  3  4  1  2  1 ] }
+    { name : "D/C#"        base :  1  frets : [ -1   4  -1   2   3   2 ] fingers : [ x  4  x  2  3  2 ] }
+    { name : "D#/D"        base :  1  frets : [ -1  -1   0   3   4   3 ] fingers : [ x  x  x  2  3  2 ] }
+    { name : "Eb/D"        base :  1  frets : [ -1  -1   0   3   4   3 ] fingers : [ x  x  x  2  3  2 ] }
+    { name : "E/D#"        base :  1  frets : [ -1  -1   1   1   0   0 ] fingers : [ x  x  1  2  x  x ] }
+    { name : "F/E"         base :  1  frets : [ -1  -1   2   2   1   1 ] fingers : [ x  x  2  3  1  1 ] }
+    { name : "F#/F"        base :  1  frets : [ -1  -1   3   3   2   2 ] fingers : [ x  x  2  3  1  1 ] }
+    { name : "Gb/F"        base :  1  frets : [ -1  -1   3   3   2   2 ] fingers : [ x  x  2  3  1  1 ] }
+    { name : "G/F#"        base :  1  frets : [  2   2   0   0   0   3 ] fingers : [ 1  2  x  x  x  3 ] }
+    { name : "G#/G"        base :  1  frets : [  3   3   1   1   1  -1 ] fingers : [ 3  4  1  1  1  x ] }
+    { name : "Ab/G"        base :  1  frets : [  3   3   1   1   1  -1 ] fingers : [ 3  4  1  1  1  x ] }
+    { name : "A/G#"        base :  1  frets : [  4   4   2   2   2  -1 ] fingers : [ 3  4  1  1  1  x ] }
+    { name : "Bb/A"        base :  1  frets : [ -1   0   3   3   3  -1 ] fingers : [ x  x  1  1  1  x ] }
+    { name : "B/A#"        base :  1  frets : [ -1   1   4   4   4  -1 ] fingers : [ x  1  3  3  3  x ] }
+// slash - major 7th over 2 = dominant 7/9/11/13
+    { name : "Cmaj7/D"     base :  5  frets : [ -1   1   1   1   1   3 ] fingers : [ x  1  1  1  1  3 ] }
+    { name : "C#maj7/D#"   base :  6  frets : [ -1   1   1   1   1   3 ] fingers : [ x  1  1  1  1  3 ] }
+    { name : "Dbmaj7/Eb"   base :  6  frets : [ -1   1   1   1   1   3 ] fingers : [ x  1  1  1  1  3 ] }
+    { name : "Dmaj7/E"     base :  1  frets : [  0   0   0   2   2   2 ] fingers : [ x  x  x  1  1  1 ] }
+    { name : "D#maj7/F"    base :  1  frets : [  1   1   1   3   3   3 ] fingers : [ 1  1  1  3  3  3 ] }
+    { name : "Ebmaj7/F"    base :  1  frets : [  1   1   1   3   3   3 ] fingers : [ 1  1  1  3  3  3 ] }
+    { name : "Emaj7/F#"    base :  1  frets : [  2   2   2   4   4   4 ] fingers : [ 1  1  1  3  3  3 ] }
+    { name : "Fmaj7/G"     base :  3  frets : [  1   1   1   3   3   3 ] fingers : [ 1  1  1  3  3  3 ] }
+    { name : "F#maj7/G#"   base :  4  frets : [  1   1   1   3   3   3 ] fingers : [ 1  1  1  3  3  3 ] }
+    { name : "Gbmaj7/Ab"   base :  4  frets : [  1   1   1   3   3   3 ] fingers : [ 1  1  1  3  3  3 ] }
+    { name : "Gmaj7/A"     base :  5  frets : [ -1   0   0   0   0   2 ] fingers : [ x  x  x  x  x  1 ] }
+    { name : "G#maj7/A#"   base :  1  frets : [ -1   1   1   1   1   3 ] fingers : [ 1  1  1  3  3  3 ] }
+    { name : "Abmaj7/Bb"   base :  1  frets : [ -1   1   1   1   1   3 ] fingers : [ 1  1  1  3  3  3 ] }
+    { name : "Amaj7/B"     base :  1  frets : [ -1   2   2   2   2   4 ] fingers : [ 1  1  1  3  3  3 ] }
+    { name : "A#maj7/C"    base :  3  frets : [ -1   1   1   1   1   3 ] fingers : [ 1  1  1  3  3  3 ] }
+    { name : "Bbmaj7/C"    base :  3  frets : [ -1   1   1   1   1   3 ] fingers : [ 1  1  1  3  3  3 ] }
+    { name : "Bmaj7/C#"    base :  4  frets : [ -1   1   1   1   1   3 ] fingers : [ 1  1  1  3  3  3 ] }
+// slash - major 7th over 3
+    { name : "Cmaj7/E"     base :  1  frets : [  0   3   2   0   0   0 ] fingers : [ x  3  2  x  x  x ] }
+    { name : "C#maj7/F"    base :  1  frets : [  1   4   3   1   1   1 ] fingers : [ 1  4  3  1  1  1 ] }
+    { name : "Dbmaj7/F"    base :  1  frets : [  1   4   3   1   1   1 ] fingers : [ 1  4  3  1  1  1 ] }
+    { name : "Dmaj7/F#"    base :  1  frets : [  2   0   0   2   2   2 ] fingers : [ 2  x  x  3  3  3 ] }
+    { name : "D#maj7/G"    base :  1  frets : [  3  -1   1   3   3   3 ] fingers : [ 1  x  1  3  3  3 ] }
+    { name : "Ebmaj7/G"    base :  1  frets : [  3  -1   1   3   3   3 ] fingers : [ 1  x  1  3  3  3 ] }
+    { name : "Emaj7/G#"    base :  1  frets : [  4  -1   2   4   4   4 ] fingers : [ 1  x  1  3  3  3 ] }
+    { name : "Fmaj7/A"     base :  1  frets : [ -1   0   3   2   1   0 ] fingers : [ x  x  3  2  1  x ] }
+    { name : "F#maj7/A#"   base :  4  frets : [  3  -1   1   3   3   3 ] fingers : [ 1  x  1  3  3  3 ] }
+    { name : "Gbmaj7/Bb"   base :  4  frets : [  3  -1   1   3   3   3 ] fingers : [ 1  x  1  3  3  3 ] }
+    { name : "Gmaj7/B"     base :  5  frets : [  3  -1   1   3   3   3 ] fingers : [ 1  x  1  3  3  3 ] }
+    { name : "G#maj7/C"    base :  6  frets : [  3  -1   1   3   3   3 ] fingers : [ 1  x  1  3  3  3 ] }
+    { name : "Abmaj7/C"    base :  6  frets : [  3  -1   1   3   3   3 ] fingers : [ 1  x  1  3  3  3 ] }
+    { name : "Amaj7/C#"    base :  4  frets : [ -1   1   4   3   2   1 ] fingers : [ x  1  4  3  2  1 ] }
+    { name : "A#maj7/D"    base :  5  frets : [ -1   1   4   3   2   1 ] fingers : [ x  1  4  3  2  1 ] }
+    { name : "Bbmaj7/D"    base :  5  frets : [ -1   1   4   3   2   1 ] fingers : [ x  1  4  3  2  1 ] }
+    { name : "Bmaj7/D#"    base :  4  frets : [ -1   3   1   1   1   3 ] fingers : [ x  3  1  1  1  4 ] }
+// slash - dominant 7th over 3
+    { name : "C7/E"        base :  5  frets : [ -1   3   4   1   1  -1 ] fingers : [ x  3  4  1  1  x ] }
+    { name : "C#7/F"       base :  6  frets : [ -1   3   4   1   1  -1 ] fingers : [ x  3  4  1  1  x ] }
+    { name : "Db7/F"       base :  6  frets : [ -1   3   4   1   1  -1 ] fingers : [ x  3  4  1  1  x ] }
+    { name : "D7/F#"       base :  1  frets : [  2   0   0   2   1  -1 ] fingers : [ 2  x  x  3  1  x ] }
+    { name : "D#7/G"       base :  1  frets : [  3   1   1   3   2  -1 ] fingers : [ 3  1  1  4  2  x ] }
+    { name : "Eb7/G"       base :  1  frets : [  3   1   1   3   2  -1 ] fingers : [ 3  1  1  4  2  x ] }
+    { name : "E7/G#"       base :  1  frets : [  4   2   2   4   3  -1 ] fingers : [ 3  1  1  4  2  x ] }
+    { name : "F7/A"        base :  3  frets : [  3   1   1   3   2  -1 ] fingers : [ 3  1  1  4  2  x ] }
+    { name : "F#7/A#"      base :  4  frets : [  3   1   1   3   2  -1 ] fingers : [ 3  1  1  4  2  x ] }
+    { name : "Gb7/Bb"      base :  4  frets : [  3   1   1   3   2  -1 ] fingers : [ 3  1  1  4  2  x ] }
+    { name : "G7/B"        base :  1  frets : [ -1   2   3   0   3   3 ] fingers : [ x  1  2  x  3  4 ] }
+    { name : "G#7/C"       base :  1  frets : [ -1   3   1   1   1   2 ] fingers : [ x  3  1  1  1  2 ] }
+    { name : "Ab7/C"       base :  1  frets : [ -1   3   1   1   1   2 ] fingers : [ x  3  1  1  1  2 ] }
+    { name : "A7/C#"       base :  1  frets : [ -1   4   2   2   2   3 ] fingers : [ x  3  1  1  1  2 ] }
+    { name : "A#7/D"       base :  3  frets : [ -1   3   1   1   1   2 ] fingers : [ x  3  1  1  1  2 ] }
+    { name : "Bb7/D"       base :  3  frets : [ -1   3   1   1   1   2 ] fingers : [ x  3  1  1  1  2 ] }
+    { name : "B7/D#"       base :  4  frets : [ -1   3   1   1   1   2 ] fingers : [ x  3  1  1  1  2 ] }
+// slash - minor over minor 3
+    { name : "Cm/Eb"       base :  4  frets : [ -1   3   2   2   1  -1 ] fingers : [ x  4  2  3  1  x ] }
+    { name : "C#m/E"       base :  1  frets : [ -1  -1   2   1   2   0 ] fingers : [ x  x  2  1  3  x ] }
+    { name : "Dbm/E"       base :  1  frets : [ -1  -1   2   1   2   0 ] fingers : [ x  x  2  1  3  x ] }
+    { name : "Dm/F"        base :  1  frets : [ -1  -1   3   2   3   1 ] fingers : [ x  x  3  2  4  1 ] }
+    { name : "D#m/F#"      base :  1  frets : [  2   1   1   3   4  -1 ] fingers : [ 2  1  1  3  4  x ] }
+    { name : "Ebm/Gb"      base :  1  frets : [  2   1   1   3   4  -1 ] fingers : [ 2  1  1  3  4  x ] }
+    { name : "Em/G"        base :  1  frets : [  3   2   2   0   0   0 ] fingers : [ 3  1  2  x  x  x ] }
+    { name : "Fm/Ab"       base :  3  frets : [  2   1   1   3   4  -1 ] fingers : [ 2  1  1  3  4  x ] }
+    { name : "F#m/A"       base :  4  frets : [  2   1   1   3   4  -1 ] fingers : [ 2  1  1  3  4  x ] }
+    { name : "Gbm/Bb"      base :  4  frets : [  2   1   1   3   4  -1 ] fingers : [ 2  1  1  3  4  x ] }
+    { name : "Gm/Bb"       base :  1  frets : [ -1   1   0   0   3  -1 ] fingers : [ x  1  x  x  3  x ] }
+    { name : "G#m/B"       base :  1  frets : [ -1   2   1   1   0  -1 ] fingers : [ x  3  1  2  x  x ] }
+    { name : "Abm/B"       base :  1  frets : [ -1   2   1   1   0  -1 ] fingers : [ x  3  1  2  x  x ] }
+    { name : "Am/C"        base :  1  frets : [ -1   3   2   2   1   0 ] fingers : [ x  4  2  3  1  x ] }
+    { name : "A#m/C#"      base :  1  frets : [ -1   4   3   3   2  -1 ] fingers : [ x  4  2  3  1  x ] }
+    { name : "Bbm/Db"      base :  1  frets : [ -1   4   3   3   2  -1 ] fingers : [ x  4  2  3  1  x ] }
+    { name : "Bm/D"        base :  1  frets : [ -1  -1   0   4   3   2 ] fingers : [ x  x  x  3  2  1 ] }
+// slash - minor over 7
+    { name : "Cm/Bb"       base :  4  frets : [  3  -1   2   2   1  -1 ] fingers : [ 4  x  2  3  1  x ] }
+    { name : "C#m/B"       base :  1  frets : [ -1   2   2   1   2   0 ] fingers : [ x  2  3  1  4  x ] }
+    { name : "Dbm/B"       base :  1  frets : [ -1   2   2   1   2   0 ] fingers : [ x  2  3  1  4  x ] }
+    { name : "Dm/C"        base :  1  frets : [ -1   3   0   2   3   1 ] fingers : [ x  3  x  2  1  1 ] }
+    { name : "D#m/C#"      base :  5  frets : [ -1   2   2   1   2  -1 ] fingers : [ x  2  3  1  4  x ] }
+    { name : "Ebm/Db"      base :  5  frets : [ -1   2   2   1   2  -1 ] fingers : [ x  2  3  1  4  x ] }
+    { name : "Em/D"        base :  1  frets : [ -1  -1   0   0   0   0 ] fingers : [ x  x  x  x  x  x ] }
+    { name : "Fm/Eb"       base :  1  frets : [ -1  -1   1   1   1   1 ] fingers : [ x  x  1  1  1  1 ] }
+    { name : "F#m/E"       base :  1  frets : [  0   4   4   2   2   2 ] fingers : [ x  3  4  1  1  1 ] }
+    { name : "Gbm/E"       base :  1  frets : [  0   4   4   2   2   2 ] fingers : [ x  3  4  1  1  1 ] }
+    { name : "Gm/F"        base :  1  frets : [  1  -1   3   3   3   3 ] fingers : [ x  x  1  1  1  1 ] }
+    { name : "G#m/F#"      base :  1  frets : [  2  -1   4   4   4   4 ] fingers : [ x  x  1  1  1  1 ] }
+    { name : "Abm/Gb"      base :  1  frets : [  2  -1   4   4   4   4 ] fingers : [ x  x  1  1  1  1 ] }
+    { name : "Am/G"        base :  1  frets : [  3  -1   2   2   1   0 ] fingers : [ 4  x  2  3  1  x ] }
+    { name : "A#m/G#"      base :  1  frets : [  4  -1   3   3   2  -1 ] fingers : [ 4  x  2  3  1  x ] }
+    { name : "Bbm/Ab"      base :  1  frets : [  4  -1   3   3   2  -1 ] fingers : [ 4  x  2  3  1  x ] }
+    { name : "Bm/A"        base :  1  frets : [ -1   0   4   4   3   2 ] fingers : [ x  x  3  4  2  1 ] }
+// slash - minor 7th over 7
+    { name : "Cm7/Bb"      copy :  "Cm/Bb"   }
+    { name : "C#m7/B"      copy :  "C#m/B"   }
+    { name : "Dbm7/B"      copy :  "Dbm/B"   }
+    { name : "Dm7/C"       copy :  "Dm/C"    }
+    { name : "D#m7/C#"     copy :  "D#m/C#"  }
+    { name : "Ebm7/Db"     copy :  "Ebm/Db"  }
+    { name : "Em7/D"       copy :  "Em/D"    }
+    { name : "Fm7/Eb"      copy :  "Fm/Eb"   }
+    { name : "F#m7/E"      copy :  "F#m/E"   }
+    { name : "Gbm7/E"      copy :  "F#m/E"   }
+    { name : "Gm7/F"       copy :  "Gm/F"    }
+    { name : "G#m7/F#"     copy :  "G#m/F#"  }
+    { name : "Abm7/Gb"     copy :  "G#m/F#"  }
+    { name : "Am7/G"       base :  1  frets : [ 3   -1   2   0   1   0 ] fingers : [ 3  x  2  x  1  x ] }
+    { name : "A#m7/G#"     copy :  "A#m/G#"  }
+    { name : "Bbm7/Ab"     copy :  "Bbm/Ab"  }
+    { name : "Bm7/A"       base :  1  frets : [ -1   0   4   2   3   2 ] fingers : [ x  x  3  1  2  1 ] }
+]
+

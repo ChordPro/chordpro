@@ -1,0 +1,119 @@
+
+/* Chorus (Phase 4: Supports pdf.chorus.bar.* config) */
+.cp-chorus {
+    margin: var(--cp-spacing-verse) 0;
+    [% IF chorus_styles.bar_width > 0 %]
+    margin-left: var(--chorus-indent, 0);
+    padding: 0.5em 0 0.5em var(--chorus-bar-offset, 8pt);
+    border-left: var(--chorus-bar-width, 1pt) solid var(--chorus-bar-color, var(--cp-color-chorus-border));
+    background: var(--cp-color-chorus-bg);
+    [% ELSE %]
+    margin-left: var(--chorus-indent, 0);
+    padding: 0.5em 0 0.5em 1em;
+    border-left: 3px solid var(--cp-color-chorus-border);
+    background: var(--cp-color-chorus-bg);
+    [% END %]
+}
+
+/* Chorus-like recall */
+.cp-choruslike {
+    margin: var(--cp-spacing-verse) 0;
+    [% IF chorus_styles.bar_width > 0 %]
+    margin-left: var(--chorus-indent, 0);
+    padding: 0.5em 0 0.5em var(--chorus-bar-offset, 8pt);
+    border-left: var(--chorus-bar-width, 1pt) solid var(--chorus-bar-color, var(--cp-color-chorus-border));
+    background: var(--cp-color-chorus-bg);
+    [% ELSE %]
+    margin-left: var(--chorus-indent, 0);
+    padding: 0.5em 0 0.5em 1em;
+    border-left: 3px solid var(--cp-color-chorus-border);
+    background: var(--cp-color-chorus-bg);
+    [% END %]
+}
+
+/* Verse */
+.cp-verse {
+    margin: var(--cp-spacing-verse) 0;
+}
+
+/* Bridge */
+.cp-bridge {
+    margin: var(--cp-spacing-verse) 0;
+    padding-left: 1em;
+    border-left: 2px dashed #999;
+}
+
+/* Section labels */
+.cp-verse[data-label]::before,
+.cp-chorus[data-label]::before,
+.cp-bridge[data-label]::before,
+.cp-tab[data-label]::before,
+.cp-grid[data-label]::before {
+    content: attr(data-label);
+    font-weight: bold;
+    font-size: 0.85em;
+    color: var(--cp-color-text, #000);
+    display: var(--cp-section-label-display, block);
+    margin-bottom: 0.2em;
+}
+
+/* Rechorus marker */
+.cp-rechorus {
+    margin: 0.4em 0;
+    font-style: italic;
+}
+
+/* Songbook parts */
+.cp-cover,
+.cp-front-matter {
+    break-after: page;
+    margin: 1.5em 0;
+}
+
+.cp-back-matter {
+    break-before: page;
+    margin: 1.5em 0;
+}
+
+.cp-new-page,
+.cp-new-physical-page {
+    break-before: page;
+}
+
+.cp-matter-image {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Inline images */
+.cp-image-container {
+    margin: 0.5em 0;
+}
+
+.cp-image {
+    max-width: 100%;
+    height: auto;
+}
+
+.cp-image-align-center {
+    text-align: center;
+}
+
+.cp-image-align-left {
+    float: left;
+    margin: 0 1em 0.5em 0;
+}
+
+.cp-image-align-right {
+    float: right;
+    margin: 0 0 0.5em 1em;
+}
+
+.cp-image-spread {
+    width: 100%;
+}
+
+.cp-image-spread .cp-image {
+    width: 100%;
+    height: auto;
+}

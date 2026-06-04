@@ -1,0 +1,133 @@
+name: ChordPro build for Microsoft Windows
+
+# Open a new branch 'mswbuild' and push this workflow to it.
+# Maybe adjust the version as well.
+#
+# git checkout -b mswbuild
+# edit lib/ChordPro/Version.pm
+# git commit --no-verify -m "Force Windows build." lib/ChordPro/Version.pm
+# git push --set-upstream origin mswbuild
+#
+# git checkout dev
+# git branch -D mswbuild
+# git push origin :mswbuild
+
+on:
+  push:
+    branches:
+      - mswbuild
+
+# Environment variables.
+env:
+
+  # Version of wxWidgets to install
+  WX:     3.2.9
+  WXDIR:  C:\wxWidgets-3.2.9
+
+  # Strawberry Perl version
+  PERL:   "5.42.0"
+  PERLDL: perl542
+  PV:     C:/hostedtoolcache/windows/strawberry-perl/5.42.0/x64/perl/site/lib
+
+  # Alien::wxWidgets and wxPerl
+  AWV:    0.73
+  WXV:    3.009
+
+  # Parallel build, Number of processors + 1.
+  JPARAM: -j5
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Perl
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          distribution: strawberry
+          perl-version: "${{ env.PERL }}"
+      - run: perl -V
+      - run: gcc --version
+      - run: cpanm ExtUtils::XSpp
+      - run: cpanm Net::SSLeay --notest
+
+      - name: Cache wxWidgets
+        id: cache-wxwidgets
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.WXDIR }}
+          key: wxWidgets-${{ env.WX }}-${{ runner.os }}
+
+      - name: Acquire and Build wxWidgets (if not cached)
+        if: steps.cache-wxwidgets.outputs.cache-hit != 'true'
+        run: |
+          mkdir ${{ env.WXDIR }}
+          Invoke-WebRequest -Uri "https://github.com/wxWidgets/wxWidgets/releases/download/v${{ env.WX }}/wxWidgets-${{ env.WX }}.7z" -OutFile "wxWidgets.7z"
+          7z x -o${{ env.WXDIR }} wxWidgets.7z
+          Invoke-WebRequest -Uri "https://globalcdn.nuget.org/packages/microsoft.web.webview2.1.0.2420.47.nupkg" -OutFile webview2.nupkg
+          mkdir "${{ env.WXDIR }}/3rdparty/webview2"
+          7z x "-o${{ env.WXDIR }}/3rdparty/webview2" -aoa webview2.nupkg
+          cd ${{ env.WXDIR }}/build/msw
+          gmake -f makefile.gcc SHELL=cmd.exe BUILD=release SHARED=1 setup_h
+          perl -pi -e 's/wxUSE_WEBVIEW_IE \K1/0/;' -e 's/wxUSE_WEBVIEW_EDGE \K0/1/;' ../../lib/gcc_dll/mswu/wx/setup.h
+          gmake -f makefile.gcc ${{ env.JPARAM }} SHELL=cmd.exe BUILD=release SHARED=1
+          # delete object files to decrease the cache size
+          rm -Recurse -Force ${{ env.WXDIR }}/build/msw/gcc_mswudll
+
+      - name: Add wxWidgets (PATH)
+        run: |
+          echo "${{ env.WXDIR }}\lib\gcc_dll" | Out-File -FilePath $Env:GITHUB_PATH -Encoding utf8 -Append
+        
+      - name: Add Alien::wxWidgets
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/sciurius/perl-Alien-wxWidgets/releases/download/R${{ env.AWV }}/Alien-wxWidgets-${{ env.AWV }}.tar.gz" -OutFile "AWV.tar.gz"
+          tar xf AWV.tar.gz
+          cd Alien-wxWidgets-${{ env.AWV }}
+          mkdir ${{ env.PV }}/Alien/wxWidgets/Config
+          copy lib/Alien/wxWidgets.pm ${{ env.PV }}/Alien
+          copy lib/Alien/wxWidgets/Utility.pm ${{ env.PV }}/Alien/wxWidgets
+          perl script/make_cfg.pl "--wxdir=${{ env.WXDIR }}" "--output=%{sitelib}/%{alien_config}"
+          cd ..
+          rm -Recurse -Force Alien-wxWidgets-${{ env.AWV }}
+          perl -MAlien::wxWidgets -E "say Alien::wxWidgets->prefix"
+
+      - name: Add wxPerl
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/sciurius/wxPerl/releases/download/R${{ env.WXV }}/Wx-${{ env.WXV }}.tar.gz" -OutFile "wxPerl.tar.gz"
+          tar xf wxPerl.tar.gz
+          cd Wx-${{ env.WXV }}
+          perl Makefile.PL
+          gmake ${{ env.JPARAM }}
+          perl -Mblib -MWx -E 'say $Wx::VERSION'
+          gmake install
+          cd ..
+          rm -Recurse -Force Wx-${{ env.WXV }}
+
+      - name: Test wxPerl
+        run: |
+          echo $Env:PATH
+          perl -MWx -E 'say join(q{ },$Wx::VERSION,$Wx::wxVERSION)'
+
+      - name: Build ChordPro
+        run: |
+          cpanm --installdeps .
+          perl Makefile.pl
+          gmake -f Makefile
+          perl script/chordpro --about
+
+      - name: Build ChordPro kit
+        run: |
+          cd pp/windows
+          copy ${{ env.WXDIR }}/3rdparty/webview2/runtimes/win-x64/native/WebView2Loader.dll .
+          gmake SHELL=cmd.exe WXDIR=${{ env.WXDIR }} PERL=perl542
+          cd ../..
+        
+      - name: Copy kit
+        uses: actions/upload-artifact@v4
+        with:
+          compression-level: 0
+          name: Upload_Windows_Kit
+          path: pp/windows/ChordPro-Installer*.exe

@@ -42,11 +42,13 @@ sub upd_config {
 
 sub generate_song {
     my ( $s ) = @_;
+    $config = $s->{config};
 
     my $tidy      = $options->{'backend-option'}->{tidy};
     $single_space = $options->{'single-space'};
     upd_config();
 
+    $DB::single = 1;
     $s->structurize
       if ( $options->{'backend-option'}->{structure} // '' ) eq 'structured';
 
@@ -116,7 +118,7 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "rechorus" ) {
-	    if ( $rechorus->{quote} ) {
+	    if ( $rechorus->{quote} && $elt->{chorus} ) {
 		unshift( @elts, @{ $elt->{chorus} } );
 	    }
 	    elsif ( $rechorus->{type} &&  $rechorus->{tag} ) {
@@ -239,16 +241,22 @@ sub songline {
     }
 
     unless ( $elt->{chords} ) {
-	return ( "", join( " ", @phrases ) );
+	return ( $config->{settings}->{'inline-chords'} ? () : "",
+		 join( " ", @phrases ) );
     }
 
-    if ( my $f = $::config->{settings}->{'inline-chords'} ) {
+    if ( my $f = $config->{settings}->{'inline-chords'} ) {
 	$f = '[%s]' unless $f =~ /^[^%]*\%s[^%]*$/;
 	$f .= '%s';
 	foreach ( 0..$#{$elt->{chords}} ) {
-	    $t_line .= sprintf( $f,
-				$elt->{chords}->[$_] ? chord( $song, $elt->{chords}->[$_] ) : "",
-				$phrases[$_] );
+	    if ( $elt->{chords}->[$_] ) {
+		$t_line .= sprintf( $f,
+				    chord( $song, $elt->{chords}->[$_] ),
+				    $phrases[$_] );
+	    }
+	    else {
+		$t_line .= $phrases[$_];
+	    }
 	}
 	return ( $t_line );
     }

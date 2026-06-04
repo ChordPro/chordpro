@@ -109,20 +109,17 @@ sub pdf_date {
     my ( $t ) = @_;
     $t ||= $regtest ? $faketime : time;
 
-    use POSIX qw( strftime );
-    my $r;
-    if ( is_msw && $] < 5.040 ) {
-	# Work around a bug in older strftime.
-	my @tm = gmtime($t);
-	$r = sprintf( "%04d%02d%02d%02d%02d%02d+00'00'",
-		      1900+$tm[5], @tm[4,3,2,1,0] );
-    }
-    else {
-	$r = strftime( "%Y%m%d%H%M%S%z", localtime($t) );
-	# Don't use s///r to keep PERL_MIN_VERSION low.
-	$r =~ s/(..)$/'$1'/;	# +0100 -> +01'00'
-    }
-    $r;
+    my @tm = gmtime($t);
+
+    return sprintf(
+        "%04d%02d%02d%02d%02d%02d+00'00'",
+        1900 + $tm[5],
+        $tm[4] + 1,
+        $tm[3],
+        $tm[2],
+        $tm[1],
+        $tm[0],
+    );
 }
 
 sub wrap {
@@ -776,39 +773,48 @@ sub make_outlines {
 	    my $cur_let = "";
 	    my $cmp = Unicode::Collate->new;
 	    foreach my $let ( $cmp->sort( keys %lh )) {
+		my $prev_title = "";
 		foreach my $song ( @{$lh{$let}} ) {
 		    unless ( defined $cur_ol && ( $let eq $cur_let ) ) {
 			# Intermediate level autoline.
 			$cur_ol = $outline->outline;
 			$cur_ol->title($let);
 			$cur_let = $let;
+			$prev_title = "";
 		    }
+		    my $title = demarkup( fmt_subst( $song, $ctl->{line} ) );
+		    next if $title eq $prev_title;
 		    # Leaf outline.
 		    my $ol = $cur_ol->outline;
 		    # Display info.
-		    $ol->title( demarkup( fmt_subst( $song, $ctl->{line} ) ) );
+		    $ol->title($title);
 		    my $p = $song->{meta}->{tocpage};
 		    $p = $pdf->openpage( $p + $start ) unless ref($p);
 		    my $c = $ol->can("destination") // $ol->can("dest");
 		    $ol->$c($p);
+		    $prev_title = $title;
 		}
 	    }
 	}
 	else {
+	    my $prev_title = "";
 	    ####TODO: Why?
 	    if ( @$book == 1 && ref($book->[0]) eq 'ChordPro::Song' ) {
 		$book = [[ $book->[0] ]];
 	    }
 	    foreach my $b ( @$book ) {
 		my $song = $b->[-1];
+		my $title = demarkup( fmt_subst( $song, $ctl->{line} ) );
+		next if $title eq $prev_title;
 		# Leaf outline.
 		my $ol = $outline->outline;
 		# Display info.
-		$ol->title( demarkup( fmt_subst( $song, $ctl->{line} ) ) );
+		$ol->title($title); 
 		my $p = $song->{meta}->{tocpage};
 		$p = $pdf->openpage( $p + $start ) unless ref($p);
 		my $c = $ol->can("destination") // $ol->can("dest");
 		$ol->$c($p);
+		$prev_title = $title;
 	    }
 	}
     }

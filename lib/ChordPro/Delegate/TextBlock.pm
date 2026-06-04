@@ -37,6 +37,7 @@ package ChordPro::Delegate::TextBlock;
 #  border:     Draw border around the image.
 
 use ChordPro::Utils;
+use ChordPro::Output::Common qw(encode_html);
 
 sub DEBUG() { $::config->{debug}->{txtblk} }
 
@@ -179,6 +180,23 @@ sub txt2xform( $self, %args ) {
 	height    => $height + 2*$padding,
 	opts      => { align => "left", %$opts },
       };
+}
+
+sub txt2html( $self, %args ) {
+    my $elt = $args{elt};
+    my $opts = { %{$elt->{opts}//{}} };
+    my $style = delete($opts->{textstyle}) // "text";
+    $style =~ s/[^\w-]//g;
+
+    my @classes = ("cp-delegate", "cp-delegate-textblock");
+    push( @classes, "cp-delegate-textblock-style-$style" ) if $style ne "";
+
+    return
+    { type => "html",
+	line => $elt->{line},
+	classes => \@classes,
+	data => [ map { encode_html($_) } @{ $elt->{data} // [] } ],
+    };
 }
 
 # Pre-scan.

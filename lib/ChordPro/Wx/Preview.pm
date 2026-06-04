@@ -95,7 +95,7 @@ method preview( $args, %opts ) {
 	}
     }
 
-    if ( $preferences{enable_configfile} ) {
+    if ( $preferences{enable_configfile} && $preferences{configfile} ) {
 	$haveconfig++;
 	push( @ARGV, '--config', $preferences{configfile} );
 
@@ -144,6 +144,9 @@ method preview( $args, %opts ) {
 	}
 	elsif ( $state{xpose_accidentals} == XP_FLAT ) {
 	    $pfx = "f"
+	}
+	elsif ( $state{xpose_accidentals} == XP_KEY ) {
+	    $pfx = "k"
 	}
 	else {
 	    $pfx = "";

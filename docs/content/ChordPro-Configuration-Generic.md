@@ -29,9 +29,8 @@ of them can be changed from the command line.
 	// General settings, often changed by configs and command line.
 	settings {
 
-	  // Chords parsing strategy.
-	  // Strict (only known chords) or relaxed (anything that looks sane)
-	  strict : true
+	  // Strict (more checks and warnings)
+	  strict : false
 
 	  // Obsolete.
 	  lineinfo : true
@@ -66,8 +65,14 @@ of them can be changed from the command line.
 	  // Chords under the lyrics.
 	  chords-under : false
 
-	  // Transpose chords.
+	  // Transpose the song by a number of semitones.
+	  // A positive number transposes up, a negative number transposes down.
+	  // An optional postfix of `"s"` or `"f"` can be used to enforce the use of sharps resp. flats when a transposed chord requires accidentals.
+	  // A postfix of `"k"` will use the key signature to determine whether flats or sharps are needed.
 	  transpose : 0
+
+	  // Always apply `"k"` semantics if no other postfix was specified.
+	  transpose-sf-key: false
 
 	  // Force enharmonic when transposing (experimental).
 	  enharmonic-transpose: true
@@ -200,6 +205,22 @@ Setting the tuning to any value except `null` will discard all built-in chords!
 For keyboard, use
 
     tuning : [ 0 ]
+
+## Key strategies
+
+ChordPro tries to follow ABC (abv2svg) as much as possible.
+
+	keys {
+
+		// Replace keys with an excessive number of sharps by their more common enharmonic equivalents.
+		// See also `settings.transpose-sf-key`.
+		force-common : true
+
+		// The key `F#` is often used as is and not represented as an enharmonic equivalent. Set this to true if you want `Gb` instead of `F#`.
+		flats : false
+	}
+
+For more information on keys and signatures, see this [Wikipedia article](https://en.wikipedia.org/wiki/Key_signature).
 
 ## User defined chords (string instruments)
 

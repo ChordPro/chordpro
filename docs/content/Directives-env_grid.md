@@ -86,8 +86,8 @@ The following bar line symbols are valid:
 * `|:` start repeat bar line
 * `:|` stop repeat bar line
 * `:|:` combined stop/start repeat bar line
-* `|1`, `|2`, etc, start of a volta
-* `|2>` start of a volta, align under the first volta of the previous line
+* `|1`, `:|2`, etc, start of a volta. The colon is optional.
+* `:|2>` start of a volta, align under the first volta of the previous line
 
 Each line should contain at least one bar line symbol. Everything
 before the first bar line will be put in the left margin, and

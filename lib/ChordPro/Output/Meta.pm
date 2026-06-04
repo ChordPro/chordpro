@@ -7,7 +7,6 @@ use Object::Pad;
 
 class ChordPro::Output::Meta;
 
-use JSON::PP;
 use ChordPro::Utils qw( qquote max );
 use Ref::Util qw(is_arrayref);
 

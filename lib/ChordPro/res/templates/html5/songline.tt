@@ -1,0 +1,16 @@
+[%# ChordPro HTML5 Songline Template
+    Variables:
+      - pairs: Array of { chord, lyrics, is_chord_only } hashes
+%]
+<div class="cp-songline[% UNLESS has_chords %] cp-lyrics-only[% END %]">
+[% IF has_chords %]
+[% FOREACH pair IN pairs %]
+  <span class="cp-chord-lyric-pair[% IF pair.is_chord_only %] cp-chord-only[% END %]">
+    <span class="[% pair.chord_class %][% UNLESS pair.chord %] cp-chord-empty[% END %]">[% pair.chord | html %]</span>
+    <span class="cp-lyrics">[% pair.lyrics %]</span>
+  </span>
+[% END %]
+[% ELSE %]
+  <span class="cp-lyrics">[% lyrics_text %]</span>
+[% END %]
+</div>

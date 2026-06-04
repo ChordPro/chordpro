@@ -6,6 +6,7 @@ use utf8;
 
 use ChordPro::Testing;
 use ChordPro::Songbook;
+use ChordPro::Chords::Transpose;
 
 plan tests => 6;
 
@@ -33,8 +34,8 @@ my $song = {
 	    'meta' => {
 		       'songindex' => 1,
 		       'key'   => [ 'D' ],
-#		       'key_from'   => [ 'D' ],
-#		       'key_actual'   => [ 'E' ],
+		       'key_sound'   => [ 'D' ],
+		       'key_print'   => [ 'D' ],
 		       'title' => [
 				   'Swing Low Sweet Chariot'
 				  ],
@@ -52,6 +53,8 @@ my $song = {
 				     ]
 			},
 	    'body' => [
+		       { context => '', type => "meta",
+			 key => "key", value => [ "D" ] },
                        {
 			 'context' => '',
 			 'phrases' => [
@@ -104,7 +107,7 @@ $data = <<EOD;
 I [D]looked over Jordan, [N.C.]and [G/B]what did I [D]see,
 EOD
 
-eval { $s->parse_file( \$data, { transpose => 3 } ) } or diag("$@");
+eval { $s->parse_file( \$data, { transpose => parse_transpose(3) } ) } or diag("$@");
 
 ok( scalar( @{ $s->{songs} } ) == 2, "One more song" );
 isa_ok( $s->{songs}->[1], 'ChordPro::Song', "It's a song" );
@@ -113,7 +116,9 @@ $song = {
 	    'settings' => {},
 	    'meta' => {
 		       'songindex' => 2,
-		       'key'   => [ 'F' ],
+		       'key'   => [ 'D' ],
+		       'key_print'   => [ 'F' ],
+		       'key_sound'   => [ 'F' ],
 		       'title' => [
 				   'Swing Low Sweet Chariot'
 				  ],
@@ -129,6 +134,8 @@ $song = {
 				     ]
 			},
 	    'body' => [
+		       { context => '', type => "meta",
+			 key => "key", value => [ "F" ] },
                        {
 			 'context' => '',
 			 'phrases' => [
@@ -148,7 +155,7 @@ $song = {
 			 'type' => 'songline'
 		       }
 		      ],
-	    'chordsinfo' => { map { $_ => $_ } qw( F ), 'A#/D', 'N.C.' },
+	    'chordsinfo' => { map { $_ => $_ } qw( D F ), 'A#/D', 'N.C.' },
 	    'source' => { file => "__STRING__", line => 1 },
 	    'structure' => 'linear',
 	    'system' => 'common',

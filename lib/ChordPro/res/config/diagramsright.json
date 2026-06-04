@@ -7,4 +7,4 @@ config {
     exclude_id  : diagramplacement
 }
 
-diagrams.show : none
+pdf.diagrams.show : right

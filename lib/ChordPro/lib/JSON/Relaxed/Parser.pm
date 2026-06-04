@@ -6,7 +6,7 @@ use utf8;
 
 package JSON::Relaxed::Parser;
 
-our $VERSION = "0.098";
+our $VERSION = "0.099";
 
 class JSON::Relaxed::Parser;
 
@@ -159,7 +159,18 @@ method pretokenize {
 	  qq< \\s+ > );		  # whitespace
 
     my $p = join( "|", @p );
+    # Improve less than 3%
+    # use Regexp::Assemble;
+    # my $re = Regexp::Assemble->new;
+    # for ( @p ) {
+    # 	s/ //g;
+    # }
+    # $re->add($_) for @p;
+    # my $p = $re->re;
 
+    # Improve less than 1%
+    #    $p =~ s/ //g;
+    #    @pretoks = split( m<($p)>so, $data );
     @pretoks = split( m< ( $p ) >sox, $data );
 
     # Remove empty strings.
@@ -240,7 +251,8 @@ method tokenize {
 	}
 
 	# Reserved characters.
-	elsif ( $self->is_reserved($pretok) ) {
+#	elsif ( $self->is_reserved($pretok) ) {
+	elsif ( $pretok =~ /[,:{}\[\]]/ ) {
 	    $self->addtok( $pretok, 'C', $offset );
 	    $offset += length($pretok);
 	    $uq_open = 0;
@@ -1132,8 +1144,6 @@ method _data_printer( $ddp ) {
 
 # This class distinguises booleans true and false from numeric 1 and 0.
 
-use JSON::PP ();
-
 package JSON::Boolean {
 
     sub as_perl( $self, %options ) { $self }
@@ -1144,9 +1154,6 @@ package JSON::Boolean {
 		 "0+"     => sub { ${$_[0]} },
 		 "bool"   => sub { !!${$_[0]} },
 		 fallback => 1;
-
-    # For JSON::PP export.
-    sub TO_JSON { ${$_[0]} ? $JSON::PP::true : $JSON::PP::false }
 
     # Boolean values.
     our $true  = do { bless \(my $dummy = 1) => __PACKAGE__ };
