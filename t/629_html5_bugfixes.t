@@ -366,8 +366,8 @@ EOD
             "Bug 56/57: Full-grid SVG includes multiple strum arrow glyph text nodes");
         like($grid_svg, qr/<use\b[^>]*href="#bar-[^"]*"[^>]*y="3\.00"[^>]*height="[0-9.]+"/,
          "Bug 56/57: Full-grid SVG includes barline bars (icon-based)");
-        like($grid_svg, qr/<svg\b[^>]*style="[^"]*font-family:[^"]*Noto Music/,
-            "Bug 71: Full-grid SVG root declares Unicode-capable font stack");
+        like($grid_svg, qr/<svg\b[^>]*style="[^"]*font-family:ChordProSymbols"/,
+            "Bug 71: Full-grid SVG root declares configured ChordProSymbols font");
 
         unlike($grid_svg, qr/<text\b[^>]*font-size="6"[^>]*>[𝄀𝄁𝄂𝄃𝄆𝄇]+<\/text>/u,
             "Bug 75: Full-grid SVG avoids duplicate legacy Unicode bar marker text nodes");

@@ -15,10 +15,28 @@ sub rest_glyph() {
 	return chr(0x1D13D);
 }
 
+sub _font_family_from_spec( $fontspec ) {
+	return '' unless defined $fontspec;
+	my $font = $fontspec;
+	$font =~ s/^\s+|\s+$//g;
+	$font =~ s/\s*;.*$//;
+	$font =~ s/\s+\d+(?:\.\d+)?$//;
+	return $font;
+}
+
 sub svg_font_stack() {
-	my $override = eval { $::config->{gridstrum}->{font_family} };
-	return $override if defined $override && $override ne '';
-	return 'Bravura Text, Bravura, Noto Music, Noto Sans Symbols 2, Noto Sans Symbols, Noto Sans, DejaVu Sans, Arial Unicode MS, sans-serif';
+	my $fontspec = eval { $::config->{pdf}->{fonts}->{gridstrum} };
+	if ( ref($fontspec) eq 'HASH' ) {
+		my $font = eval { _font_family_from_spec( $fontspec->{name} ) } // '';
+		return $font if $font ne '';
+		$font = eval { _font_family_from_spec( $fontspec->{description} ) } // '';
+		return $font if $font ne '';
+	}
+	elsif ( defined($fontspec) && !ref($fontspec) ) {
+		my $font = _font_family_from_spec($fontspec);
+		return $font if $font ne '';
+	}
+	return 'ChordProSymbols';
 }
 
 sub _strum_svg_decorations( %args ) {

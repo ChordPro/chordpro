@@ -6,30 +6,22 @@ use warnings;
 use feature qw( signatures );
 no warnings "experimental::signatures";
 use utf8;
-use ChordPro::Symbols qw( strum );
+use ChordPro::Symbols qw( strum symbol );
 use ChordPro::Output::Common qw( encode_html mimedata );
 use Exporter 'import';
 our @EXPORT_OK = qw( bar_unicode esc svg_to_data_uri chord_display_text strum_name normalize_grid_chord_parts strum_symbol_info );
-
-use constant {
-    MUSIC_BAR          => "\x{1D100}",  # MUSICAL SYMBOL SINGLE BARLINE
-    MUSIC_FINALBAR     => "\x{1D102}",  # MUSICAL SYMBOL FINAL BARLINE
-    MUSIC_DBLBAR       => "\x{1D103}",  # MUSICAL SYMBOL DOUBLE BARLINE
-    MUSIC_REPEAT_START => "\x{1D106}",  # MUSICAL SYMBOL REPEAT SIGN LEFT
-    MUSIC_REPEAT_END   => "\x{1D107}",  # MUSICAL SYMBOL REPEAT SIGN RIGHT
-};
 
 sub esc( $text ) {
 	return encode_html($text);
 }
 
 sub bar_unicode( $symbol ) {
-	return MUSIC_DBLBAR . MUSIC_FINALBAR     if $symbol eq '||';
-	return MUSIC_REPEAT_START                if $symbol eq '|:' || $symbol eq '{';
-	return MUSIC_REPEAT_END                  if $symbol eq ':|' || $symbol eq '}';
-	return MUSIC_REPEAT_END . MUSIC_REPEAT_START if $symbol eq ':|:' || $symbol eq '}{';
-	return MUSIC_FINALBAR                    if $symbol eq '|.';
-	return MUSIC_BAR;
+	return symbol('double-bar') . symbol('end-bar')        if $symbol eq '||';
+	return symbol('repeat-start')                          if $symbol eq '|:' || $symbol eq '{';
+	return symbol('repeat-end')                            if $symbol eq ':|' || $symbol eq '}';
+	return symbol('repeat-end') . symbol('repeat-start')   if $symbol eq ':|:' || $symbol eq '}{';
+	return symbol('end-bar')                               if $symbol eq '|.';
+	return symbol('bar');
 }
 
 sub svg_to_data_uri( $svg ) {
