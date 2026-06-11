@@ -4,6 +4,34 @@
   "title": "Configuration for ChordPro",
   "description": "See the ChordPro website for more details: https://www.chordpro.org/chordpro/chordpro-configuration-file/.\nThis is a really relaxed JSON document, see https://metacpan.org/pod/JSON::Relaxed#REALLY-RELAXED-EXTENSIONS",
   "definitions": {
+    "configType": {
+      "description": "Recognized types of config files.",
+      "oneOf": [
+        {
+          "const": "config",
+          "title": "This is a generic config file."
+        },
+        {
+          "const": "style",
+          "title": "A style definition."
+        },
+        {
+          "const": "stylemod",
+          "title": "A mdoification to an existing style."
+        },
+        {
+          "const": "instrument",
+          "title": "Definition of an instrument."
+        },
+        {
+          "const": "task",
+          "title": "A preview task."
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
     "backendspec": {
       "description": "Standard properties for backends.",
       "type": "object",
@@ -778,22 +806,8 @@
               "title": "The type of this config",
               "description": "One or more of `\"config\"`, `\"style\"`, `\"style_mod\"`, `\"instrument\"`, `\"task\"` ...",
               "anyOf": [
-                { "const": "config",
-                  "title": "This is a generic config file."
-                },
-                { "const": "style",
-                  "title": "A style definition."
-                },
-                { "const": "stylemod",
-                  "title": "A mdoification to an existing style."
-                },
-                { "const": "instrument",
-                  "title": "Definition of an instrument."
-                },
-                { "const": "task",
-                  "title": "A preview task."
-                },
-                { "type": "string"
+                {
+                  "$ref": "#/definitions/configType"
                 },
                 { "type": "array",
                   "items": {
