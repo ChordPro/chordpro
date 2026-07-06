@@ -1126,6 +1126,10 @@ sub generate_song {
 	    elsif ( $elt->{name} =~ /^pdf\.(.+)/ ) {
 		prpadd2cfg( $ps, $1 => $elt->{value} );
 	    }
+	    elsif ( $elt->{name} eq "columns" ) {
+		set_columns( $ps, $elt->{value} );
+		$spreadimage = $ps->{_top} - $y;
+	    }
 	    # Arbitrary config values.
 	    elsif ( $elt->{name} =~ /^(.+)\.(.+)/ ) {
 		$config->unlock;
