@@ -1126,10 +1126,22 @@ sub generate_song {
 	    elsif ( $elt->{name} =~ /^pdf\.(.+)/ ) {
 		prpadd2cfg( $ps, $1 => $elt->{value} );
 	    }
+
+	    # Placed columns change.
 	    elsif ( $elt->{name} eq "columns" ) {
 		set_columns( $ps, $elt->{value} );
+
+		# Right margin is adjusted at page/col break, but
+		# we're not breaking.
+		$ps->{__rightmargin} =
+		  $ps->{_leftmargin}
+		  + $ps->{columnoffsets}->[$col+1];
+		$ps->{__rightmargin} -= $ps->{columnspace}
+		  if $col < $ps->{columns}-1;
+
 		$spreadimage = $ps->{_top} - $y;
 	    }
+
 	    # Arbitrary config values.
 	    elsif ( $elt->{name} =~ /^(.+)\.(.+)/ ) {
 		$config->unlock;
