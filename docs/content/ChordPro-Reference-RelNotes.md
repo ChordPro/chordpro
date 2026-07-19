@@ -118,7 +118,7 @@ Released: 2025-08-18
 ### Highlights
 
 * Support for [strum patterns](https://www.chordpro.org/chordpro/directives-env_grid/#strums) in grids.
-* [Bookmarks](https://www.chordpro.org/chordpro/chordpro_markup/#bookmarks).
+* [Bookmarks](https://www.chordpro.org/chordpro/chordpro-markup/#bookmarks).
 * [Break items](https://www.chordpro.org/chordpro/table_of_contents/#break) in Table of Content lines.
 * [Improved control](https://www.chordpro.org/chordpro/chordpro-configuration-pdf/#songbook-pages) over page order and alignment.
 

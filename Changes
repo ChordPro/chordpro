@@ -158,6 +158,7 @@
     
 6.080.1	2025-08-28
 
+    - Remove experimental 'strum' section.
     - Reworded symbols insert dialog.
     - Re-enable (experimental) songbook loading.
     - Fix outlines sorting.
