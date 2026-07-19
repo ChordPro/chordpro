@@ -4,8 +4,8 @@
 
 # Author          : Johan Vromans
 # Last Modified By: Johan Vromans
-# Last Modified On: Mon Apr  6 15:08:48 2026
-# Update Count    : 107
+# Last Modified On: Fri Jul 17 07:36:31 2026
+# Update Count    : 108
 # Status          : Unknown, Use with caution!
 
 ################ Common stuff ################
@@ -138,7 +138,7 @@ else {
 	@aux = qw( jpeg libpng16 tiff lzma zstd pcre2-32 );
     }
     else {
-	@aux = qw( deflate jbig jpeg libpng16.so.16 SDL2-2.0 tiff );
+	@aux = qw( deflate jbig jpeg libpng16.so.16 SDL2-2.0 tiff Lerc );
     }
 
     if ( Alien::wxWidgets->version >= 3.003 ) {

@@ -1126,6 +1126,22 @@ sub generate_song {
 	    elsif ( $elt->{name} =~ /^pdf\.(.+)/ ) {
 		prpadd2cfg( $ps, $1 => $elt->{value} );
 	    }
+
+	    # Placed columns change.
+	    elsif ( $elt->{name} eq "columns" ) {
+		set_columns( $ps, $elt->{value} );
+
+		# Right margin is adjusted at page/col break, but
+		# we're not breaking.
+		$ps->{__rightmargin} =
+		  $ps->{_leftmargin}
+		  + $ps->{columnoffsets}->[$col+1];
+		$ps->{__rightmargin} -= $ps->{columnspace}
+		  if $col < $ps->{columns}-1;
+
+		$spreadimage = $ps->{_top} - $y;
+	    }
+
 	    # Arbitrary config values.
 	    elsif ( $elt->{name} =~ /^(.+)\.(.+)/ ) {
 		$config->unlock;
@@ -1631,6 +1647,16 @@ sub imageline {
     }
     my $width = $opts->{width};
     my $height = $opts->{height};
+
+    # VFILL: Try to use the rest of the page.
+    if ( $opts->{vfill} ) {
+	my $have = $gety->(0) - $ps->{_bottommargin};
+	my $scale = $have / $asset->{height};
+	$height = $have;
+	$width ||= $asset->{width};
+	$width *= $scale;
+    }
+
     my $avwidth  = $asset->{vwidth};
     my $avheight = $asset->{vheight};
     my $scalex = $asset->{opts}->{design_scale} || 1;
@@ -1715,6 +1741,8 @@ sub imageline {
 	$scalex *= $s[0];
 	$scaley *= $s[1];
     }
+    # If vfill, height is already maximal.
+    $scaley = 1 if $opts->{vfill};
 
     warn("Image scale: ", pv($scalex), " ", pv($scaley), "\n")
       if $config->{debug}->{images};

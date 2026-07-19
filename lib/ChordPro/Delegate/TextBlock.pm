@@ -187,7 +187,7 @@ sub txt2html( $self, %args ) {
     require ChordPro::Output::Common;
     my @lines = map { ChordPro::Output::Common::encode_html($_) } @{ $elt->{data} // [] };
     return { type => "html",
-	     data => [ join( "<br/>\n", @lines ) ]
+	     data => [ @lines ]
 	   };
 }
 

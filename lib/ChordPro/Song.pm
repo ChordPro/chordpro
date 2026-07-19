@@ -1797,6 +1797,9 @@ sub dir_image {
 		$opts{lc($k)} = $v;
 	    }
 	}
+	elsif ( $k =~ /^(vfill)$/i ) {
+	    $opts{lc($k)} = $v;
+	}
 	elsif ( $k =~ /^(src|uri)$/i && $v ne "" ) {
 	    $uri = $v;
 	}
