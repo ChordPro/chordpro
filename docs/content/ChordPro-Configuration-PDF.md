@@ -271,7 +271,7 @@ shown if `fingers` is true.
       dotsize  :  0.8,    // of a cell
       barstyle :  line    // or arc
       barwidth :  0.8,    // of a dot
-      fingers  :  true,   // show fingering if available (or "below")
+      fingers  :  true,   // show fingering if available (or below, bar_only, false)
       fretbasetext : %s   // Text to show the fret base
       fretbaseposition : left   // Position for the fret base
     },

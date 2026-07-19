@@ -126,3 +126,5 @@ chords : [
   { name : Bmaj7    frets : [ 3 3 2 2 ] }
   { name : B9       frets : [ 2 3 2 4 ] }
 ]
+
+pdf.diagrams.fingers : "bar_only"
