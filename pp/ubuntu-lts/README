@@ -1,9 +1,0 @@
-These are adapted files to build a statically linked appimage on an
-as-old-as-possible-but-still-supported Ubuntu LTS system.
-Currently, this means 22.04.
-
-See https://discourse.appimage.org/t/specify-required-glibc-version-in-appimage/2413/5.
-
-We'll use an official wxWidgets build, kindly provided by the CodeLite team.
-
-https://docs.codelite.org/wxWidgets/repo32/

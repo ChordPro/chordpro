@@ -1,8 +1,5 @@
 #! /bin/make -f
 
-# Windows 10, for Windows installer builds.
-WINVM := Win10ProClassic
-
 ################ Pass-through ################
 
 .PHONY : all
@@ -41,6 +38,7 @@ Makefile : Makefile.PL lib/ChordPro/Version.pm resources
 
 PERL := perl
 PROJECT := ChordPro
+VERSION := $(shell perl lib/ChordPro/Version.pm)
 RSYNC_ARGS := -rptgoDvHL
 
 STDMNF := MANIFEST MANIFEST.CPAN
@@ -52,14 +50,10 @@ to_tmp : resources
 	done
 
 # Windows 10, for Windows installer builds.
+WINVM  := Win10Pro
 WINDIR := /Users/Johan/Documents/${PROJECT}
-ifeq (${WINVM},Win10ProClassic)
-WIN    := w10c
-WINMNT := /mnt/c2
-else
 WIN    := w10
 WINMNT := /mnt/c
-endif
 WINDST := ${WINMNT}/${WINDIR}
 
 to_win : resources
@@ -109,7 +103,18 @@ LIB := lib/ChordPro
 RES := ${LIB}/res
 PODSELECT := podselect
 
-resources : wxg ${LIB}/Config/Data.pm ${RES}/config/chordpro.json ${RES}/pod/ChordPro.pod ${RES}/pod/Config.pod ${RES}/pod/A2Crd.pod docs/assets/pub/config60.schema
+RESOURCES := wxg ${LIB}/Config/Data.pm
+RESOURCES += ${RES}/config/chordpro.json ${RES}/config/guitar.json
+RESOURCES += ${RES}/config/jazzy-chords.json
+RESOURCES += ${RES}/pod/ChordPro.pod ${RES}/pod/Config.pod ${RES}/pod/A2Crd.pod
+RESOURCES += docs/assets/pub/config60.schema
+
+resources : ${RESOURCES}
+
+%.json : %.rjson
+	perl -Mlib=lib/ChordPro/lib script/rrjson.pl --json_xs --no-pretty $< |\
+	perl -pe 's/"(-?\d+)"/$$1/g' > $@~
+	cmp $@ $@~ || mv $@~ $@
 
 ${LIB}/Config/Data.pm : ${RES}/config/chordpro.json
 	perl script/cfgboot.pl $< > $@~
@@ -118,7 +123,7 @@ ${LIB}/Config/Data.pm : ${RES}/config/chordpro.json
 ${RES}/pod/ChordPro.pod : ${LIB}.pm
 	${PODSELECT} $< > $@
 
-${RES}/pod/Config.pod : ${RES}/config/chordpro.json
+${RES}/pod/Config.pod : ${RES}/config/chordpro.rjson
 	( echo "=head1 ChordPro Default Configuration"; \
 	  echo ""; \
 	  echo "=encoding UTF8"; \
@@ -134,33 +139,13 @@ docs/assets/pub/config61.schema : ${RES}/config/config.schema
 # Verify JSON data
 
 CFGLIB := ${LIB}/res/config
-# JSONVALIDATOR = java -jar lib/jar/json-schema-validator-*-lib.jar
-# JSONOPTS := --brief
-# This requires npm install ajv-cli .
-JSONVALIDATOR = ajv --validate-formats=false
-JSONOPTS := 
 
 checkjson :
-	rm -fr .json
-	mkdir .json
-	cp -p ${CFGLIB}/config.schema .json/schema.json
-	for i in $(shell git ls-files ${CFGLIB}) ; \
-	do \
-	  case "$$i" in \
-	    */keyboard.json)    continue;; \
-	    */dark.json)        continue;; \
-	    */notes/*)          continue;; \
-	    */*.tmpl)           continue;; \
-	    */*.schema)         continue;; \
-	  esac; \
-	  perl -Ilib/ChordPro/lib script/rrjson.pl --json $$i > .json/`basename $$i`; \
-	  ${JSONVALIDATOR} ${JSONOPTS} -s .json/schema.json -d .json/`basename $$i`; \
-	done
-	rm -fr .json
+	make -C ${CFGLIB} checkjson
 
 # Experimental
 
-wkit : _wkit1 _wkit _wkiti _wkit2
+wkit : _wkit_startvm _wkit _wkiti _wkit_stopvm
 
 _wkit :
 	${MAKE} to_win
@@ -169,38 +154,54 @@ _wkit :
 
 _wkiti :
 	cp ${WINDST}/pp/windows/ChordPro-Installer*.exe \
-	  ${HOME}/tmp/ChordPro-Installer-6-70-dev-msw-x64.exe
-	scp ${HOME}/tmp/ChordPro-Installer-6-70-dev-msw-x64.exe \
-	  chordpro-site:www/dl/
+	  ${HOME}/tmp/ChordPro-Installer-${VERSION}-dev-msw-x64.exe
+	scp ${HOME}/tmp/ChordPro-Installer-${VERSION}-dev-msw-x64.exe \
+	  chordpro-site:www/dl/ChordPro-Installer-dev-msw-x64.exe
 
-_wkit1 :
+_wkit_startvm :
 	-VBoxManage startvm ${WINVM} --type headless
 	sleep 10
 
-_wkit2 :
+_wkit_stopvm :
 	sleep 10
 	sudo umount ${WINMNT}
 	VBoxManage controlvm ${WINVM} poweroff
 	VBoxManage snapshot ${WINVM} restorecurrent
 
-LTS   := ubuntu-lts
-LTSVM := "Ubuntu 22.04 LTS"
+# Host must use .zshenv to set the correct path.
+MACVM := "MacOS"
 
-appimage : _akit1 _akit _akit2
+mkit : _mkit_startvm _mkit _mkit_stopvm
 
-#	rsync -avHi ./ ${LTSHOST}:ChordPro/ --exclude .git --exclude build --exclude docs
+_mkit :
+	${MAKE} to_mac
+	ssh ${MACHOST} make -C Documents/${PROJECT}/pp/macos
+	scp ${MACDST}/pp/macos/ChordPro-*.dmg ${HOME}/tmp/
+
+_mkit_startvm :
+	-VBoxManage startvm ${MACVM} --type headless
+	sleep 10
+
+_mkit_stopvm :
+	VBoxManage controlvm ${MACVM} poweroff
+	VBoxManage snapshot ${MACVM} restorecurrent
+
+LTS     := 22
+LTSHOST := ubuntu${LTS}
+LTSVM   := "Ubuntu ${LTS}.04 LTS"
+
+appimage : _akit_startvm _akit _akit_stopvm
 
 _akit :
-	${MAKE} to_mac MACHOST=${LTS}
-	ssh ${LTS} make -C Documents/ChordPro/pp/${LTS}
-	scp ${LTS}:Documents/ChordPro/pp/${LTS}/ChordPro-\*.AppImage ${HOME}/tmp/
+	${MAKE} to_mac MACHOST=${LTSHOST}
+	ssh ${LTSHOST} make -C Documents/ChordPro/pp/appimage
+	scp ${LTSHOST}:Documents/ChordPro/pp/appimage/ChordPro-\*.AppImage ${HOME}/tmp/
 
-_akit1 :
+_akit_startvm :
 	-VBoxManage startvm ${LTSVM} --type headless
-	ssh root@${LTS} apt-get install --quiet --yes ntpdate
-	ssh root@${LTS} ntpdate -b ntp.squirrel.nl
+	ssh ${LTSHOST} sudo ntpdate -t 20 -b ntp.squirrel.nl
 
-_akit2 :
+_akit_stopvm :
 	VBoxManage controlvm ${LTSVM} poweroff
 	VBoxManage snapshot ${LTSVM} restorecurrent
 
@@ -225,8 +226,8 @@ rrjson :
 	cp -p ${HOME}/src/JSON-Relaxed/lib/JSON/Relaxed/Parser.pm \
 	  ${HOME}/src/JSON-Relaxed/lib/JSON/Relaxed/ErrorCodes.pm \
 	  lib/ChordPro/lib/JSON/Relaxed/
-	cp -p ${HOME}/src/JSON-Relaxed/scripts/rrjson.pl \
-	  script/
+	diff ${HOME}/src/JSON-Relaxed/scripts/rrjson.pl \
+	  script/rrjson.pl
 
 ABCDEST    = ${RES}/abc/abc2svg
 
@@ -239,6 +240,12 @@ ABCKIT     = abc2svg-fca05cd348
 # 1.22.18 + 'lm' and 'width' for grids
 ABCKIT     = abc2svg-9b12853f66
 
+# 1.22.34
+ABCKIT     = abc2svg-9e4ccff7c9
+
+# 1.23.1
+ABCKIT     = abc2svg-ab567530ba
+
 .PHONY: abc
 
 abc :
@@ -246,6 +253,16 @@ abc :
 	perl ABC/build.pl --dest=${ABCDEST} ABC/${ABCKIT}.tar.gz 
 	cp -p ABC/README.FIRST ABC/cmdline.js ${ABCDEST}/
 	grep -v ${ABCDEST} MANIFEST > x
-	find ${ABCDEST} -type f -printf "%p\n" \
-	  | sort -u >> x
-	mv x MANIFEST
+	find ${ABCDEST} -type f -printf "%p\n" >> x
+	env LC_ALL=C sort -u x > MANIFEST
+	rm x
+
+# TEMP
+XD = ../ChordPro-HTML5
+
+html5:
+	cp -pv {${XD}/,}lib/ChordPro/Output/HTML5.pm 
+	rsync -avHi {${XD}/,}lib/ChordPro/Output/HTML5/
+	rsync -avHi {${XD}/,}lib/ChordPro/Output/SVG/
+	rsync -avHi {${XD}/,}lib/ChordPro/res/templates/html5/
+	patch -p0 -N < html5.patches
