@@ -221,7 +221,7 @@ method diagram_xo( $info ) {
     }
 
     my $fingers;
-    $fingers = $info->{fingers} if $fsh;
+    $fingers = $info->{fingers};
 
     # Bar detection.
     my $bar = {};
@@ -355,7 +355,7 @@ method diagram_xo( $info ) {
     }
 
     # Show the fingers, if any.
-    if ( $fingers && @$fingers ) {
+    if ( $fsh && $fingers && @$fingers ) {
 	my ( $font, $size );
 	$font = "chordfingers";
 	$size = $dot;
