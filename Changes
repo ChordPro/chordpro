@@ -9,6 +9,8 @@
 
     - Fix issue #668 (Wrong B7 fingering).
 
+    - Dalai Felinto fixed issue #683 (pdf.diagrams.fingers = false). Thanks!
+
 6.101 2026-04-30
 
     - Change LICENSE to match Artistic 2.0.
