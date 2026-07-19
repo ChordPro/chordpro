@@ -25,7 +25,7 @@ field $hc;			# cells, horizontal (= strings)
 field $dot;			# dot size, fraction of cell width
 field $bsz;			# barre size, fraction of dot
 field $bstyle;			# barre style ("line", "arc")
-field $fsh;			# show fingers (0, 1, "below", "bar_only")
+field $fsh;			# show fingers (0, 1, "below")
 field $fg;			# foreground color
 field $bg;			# background color
 field $fbp;			# fret base position ("left", "right")
@@ -355,7 +355,7 @@ method diagram_xo( $info ) {
     }
 
     # Show the fingers, if any.
-    if ( $fingers && @$fingers && $fsh ne "bar_only" ) {
+    if ( $fingers && @$fingers ) {
 	my ( $font, $size );
 	$font = "chordfingers";
 	$size = $dot;
