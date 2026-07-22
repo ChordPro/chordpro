@@ -812,7 +812,7 @@
                 {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/configTypeConsts"
+                    "$ref": "#/definitions/configType"
                   },
                   "minItems": 1
                 }
