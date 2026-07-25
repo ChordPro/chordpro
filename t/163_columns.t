@@ -39,6 +39,12 @@ my $song = {
 				   'Swing Low Sweet Chariot'
 				  ]
 		      },
+	    'body' => [
+		       { context => '',
+			 type => "set",
+			 name => "columns",
+			 value => 2 }
+		      ]
 	   };
 
 is_deeply( { %{ $s->{songs}->[0] } }, $song,

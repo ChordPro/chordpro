@@ -1,5 +1,10 @@
 6.xxx
 
+    - The `{columns}` directive is now effective from the point where
+      it is used. It can be specified multiple times in a song to
+      achieve different column settings for different parts of the
+      song.
+    
     - Config 'lyricsonly' now sets `meta.lyricsonly` as well.
 
     - Command line option `--lyrics-only` is now equivalent to

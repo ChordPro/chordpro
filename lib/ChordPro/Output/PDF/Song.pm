@@ -1129,17 +1129,19 @@ sub generate_song {
 
 	    # Placed columns change.
 	    elsif ( $elt->{name} eq "columns" ) {
+
+		$col = 0;
 		set_columns( $ps, $elt->{value} );
+		$x = $ps->{_leftmargin} + $ps->{_indent};
 
-		# Right margin is adjusted at page/col break, but
-		# we're not breaking.
-		$ps->{__rightmargin} =
-		  $ps->{_leftmargin}
-		  + $ps->{columnoffsets}->[$col+1];
-		$ps->{__rightmargin} -= $ps->{columnspace}
-		  if $col < $ps->{columns}-1;
-
-		$spreadimage = $ps->{_top} - $y;
+		if ( $elt->{value} == 1 ) {
+		    # Need this for the margin bar of chorus (?)
+		    $ps->{__leftmargin} = $ps->{_leftmargin} = $ps->{marginleft};
+		}
+		else {
+		    # Abuse spreadimage to have next column start 'here'.
+		    $spreadimage = $ps->{_top} - $y;
+		}
 	    }
 
 	    # Arbitrary config values.

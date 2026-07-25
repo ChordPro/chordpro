@@ -2211,6 +2211,7 @@ sub dir_columns {
 	do_warn("Invalid argument for columns directive: $arg (should be a number)\n");
 	return 1;
     }
+    $self->add( type => "set", name => "columns", value => $arg );
     # If there a column specifications in the config, retain them
     # if the number of columns match.
     unless( ref($config->{settings}->{columns}) eq 'ARRAY'

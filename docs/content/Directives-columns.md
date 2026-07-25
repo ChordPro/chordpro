@@ -9,7 +9,8 @@ Abbreviation: `col`.
 
 `{columns:` _ncol_ `}`
 
-This directives specifies that the song must be printed in _ncol_ columns.
+This directives specifies that the remainder of the song must be
+printed in _ncol_ columns.
 
 Example:
 
