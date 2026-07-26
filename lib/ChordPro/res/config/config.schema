@@ -6,7 +6,7 @@
   "definitions": {
     "configType": {
       "description": "Recognized types of config files.",
-      "oneOf": [
+      "anyOf": [
         {
           "const": "config",
           "title": "This is a generic config file."
