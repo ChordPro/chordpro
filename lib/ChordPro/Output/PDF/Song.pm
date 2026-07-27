@@ -1079,6 +1079,24 @@ sub generate_song {
 	    next;
 	}
 
+	# Placed columns change.
+	if ( $elt->{type} eq "columns" ) {
+
+	    $col = 0;
+	    set_columns( $ps, $elt->{value} );
+	    $x = $ps->{_leftmargin} + $ps->{_indent};
+
+	    if ( $elt->{value} == 1 ) {
+		# Need this for the margin bar of chorus (?)
+		$ps->{__leftmargin} = $ps->{_leftmargin} = $ps->{marginleft};
+	    }
+	    else {
+		# Abuse spreadimage to have next column start 'here'.
+		$spreadimage = $ps->{_top} - $y;
+	    }
+	    next;
+	}
+
 	if ( $elt->{type} eq "set" ) {
 	    if ( $elt->{name} eq "lyrics-only" ) {
 		$lyrics_only = is_true($elt->{value})
@@ -1125,23 +1143,6 @@ sub generate_song {
 	    # Arbitrary pdf config values.
 	    elsif ( $elt->{name} =~ /^pdf\.(.+)/ ) {
 		prpadd2cfg( $ps, $1 => $elt->{value} );
-	    }
-
-	    # Placed columns change.
-	    elsif ( $elt->{name} eq "columns" ) {
-
-		$col = 0;
-		set_columns( $ps, $elt->{value} );
-		$x = $ps->{_leftmargin} + $ps->{_indent};
-
-		if ( $elt->{value} == 1 ) {
-		    # Need this for the margin bar of chorus (?)
-		    $ps->{__leftmargin} = $ps->{_leftmargin} = $ps->{marginleft};
-		}
-		else {
-		    # Abuse spreadimage to have next column start 'here'.
-		    $spreadimage = $ps->{_top} - $y;
-		}
 	    }
 
 	    # Arbitrary config values.

@@ -41,8 +41,7 @@ my $song = {
 		      },
 	    'body' => [
 		       { context => '',
-			 type => "set",
-			 name => "columns",
+			 type => "columns",
 			 value => 2 }
 		      ]
 	   };
