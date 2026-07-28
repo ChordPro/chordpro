@@ -127,11 +127,12 @@ sub wrap {
 
     my $ex = "";
     my $sp = "";
-    #warn("TEXT: |$text| ($m)\n");
-    while ( $self->strwidth($text) > $m ) {
+    warn("TEXT: |$text| ($m)\n") if $config->{debug}->{wrap};
+    while ( ( my $sw = $self->strwidth($text) ) > $m ) {
+	warn("TRY:  |$text| ($sw > $m)\n") if $config->{debug}->{wrap};
 	my ( $l, $s, $r ) = $text =~ /^(.+)([-_,.:;\s])(.+)$/;
-	return ( $text, $ex ) unless defined $s;
-	#warn("WRAP: |$text| -> |$l|$s|$r$sp$ex|\n");
+	( $text, $ex ) = ( "", $text.$ex ), last unless defined $s;
+	warn("WRAP: |$text| -> |$l|$s|$r$sp$ex|\n") if $config->{debug}->{wrap};
 	if ( $s =~ /\S/ ) {
 	    $l .= $s;
 	    $s = "";
@@ -141,6 +142,7 @@ sub wrap {
 	$sp = $s;
     }
 
+    warn("RSLT: |$text|$ex|\n") if $config->{debug}->{wrap};
     return ( $text, $ex );
 }
 

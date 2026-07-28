@@ -2431,13 +2431,16 @@ sub wrap {
     my $m = $pr->{ps}->{__rightmargin};
     my $wi = $pr->strwidth( $config->{settings}->{wrapindent},
 			    $pr->{ps}->{fonts}->{text} );
-    #warn("WRAP x=$x rm=$m w=", $m - $x, "\n");
+    warn("WRAP x=$x rm=$m w=", $m - $x, "\n") if $config->{debug}->{wrap};
 
     while ( @chords ) {
 	my $chord  = shift(@chords);
 	my $phrase = shift(@phrases) // "";
 	my $ex = "";
-	#warn("wrap x=$x rm=$m w=", $m - $x, " ch=$chord, ph=$phrase\n");
+	warn("wrap x=$x rm=$m w=", $m - $x, " ch=",
+	     ref($chord) ? $chord->chord_display : "",
+	     ", ph=$phrase\n")
+	  if $config->{debug}->{wrap};
 
 	if ( @rchords && $chord ) {
 	    # Does the chord fit?
