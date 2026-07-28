@@ -4,6 +4,34 @@
   "title": "Configuration for ChordPro",
   "description": "See the ChordPro website for more details: https://www.chordpro.org/chordpro/chordpro-configuration-file/.\nThis is a really relaxed JSON document, see https://metacpan.org/pod/JSON::Relaxed#REALLY-RELAXED-EXTENSIONS",
   "definitions": {
+    "configType": {
+      "description": "Recognized types of config files.",
+      "anyOf": [
+        {
+          "const": "config",
+          "title": "This is a generic config file."
+        },
+        {
+          "const": "style",
+          "title": "A style definition."
+        },
+        {
+          "const": "stylemod",
+          "title": "A mdoification to an existing style."
+        },
+        {
+          "const": "instrument",
+          "title": "Definition of an instrument."
+        },
+        {
+          "const": "task",
+          "title": "A preview task."
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
     "backendspec": {
       "description": "Standard properties for backends.",
       "type": "object",
@@ -27,7 +55,7 @@
       ]
     },
     "colorspec": {
-      "description": "Colour specification.",
+      "title": "Colour specification.",
       "type": "string",
       "oneOf": [
         {
@@ -37,14 +65,14 @@
           "examples": ["#FFFFFF", "#393939"]
         },
         {
-          "title": "Named colour",
+          "description": "Named colour",
           "anyOf": [
             {
-              "description": "Shade of grey",
+              "title": "Shade of grey",
               "pattern": "^grey\\d{2}$"
             },
             {
-              "description": "Colour name",
+              "title": "Colour name",
               "enum": [
                 "red",
                 "green",
@@ -57,11 +85,11 @@
               ]
             },
             {
-              "description": "A lack of colour, transparent",
+              "title": "A lack of colour, transparent",
               "const": "none"
             },
             {
-              "description": "Any named colour",
+              "title": "Any named colour",
               "pattern": "^[-A-Za-z0-9]+$"
             },
             {
@@ -240,6 +268,29 @@
             }
           ],
           "default": "image"
+        },
+        "subtype": {
+          "description": "Type of the `image` produced. If not specified, it will be auto-detected.\nFor standard delegates, this is ignored, as they already know which type of image will be produced.\nFor cusotm delegates, this can be optionally specified if `type` is set to `\"image\"`.",
+          "oneOf": [
+            {
+              "title": "Equivalent to omitting `subtype` altogether.",
+              "enum": [false, ""]
+            },
+            {
+              "title": "A type of image.",
+              "enum": [
+                "jpg",
+                "jpeg",
+                "png",
+                "svg",
+                "gif",
+                "tiff",
+                "xbm",
+                "pbm",
+                "pnm"
+              ]
+            }
+          ]
         },
         "handler": {
           "title": "The module's method to call.",
@@ -678,39 +729,39 @@
       "oneOf": [
         {
           "const": "common",
-          "description": "C, D, E, F, G, A, B"
+          "title": "C, D, E, F, G, A, B"
         },
         {
           "const": "dutch",
-          "description": "same as `common`"
+          "title": "same as `common`"
         },
         {
           "const": "german",
-          "description": "C, … A, Ais/B, H"
+          "title": "C, … A, Ais/B, H"
         },
         {
           "const": "latin",
-          "description": "Do, Re, Mi, Fa, Sol, …"
+          "title": "Do, Re, Mi, Fa, Sol, …"
         },
         {
           "const": "nashville",
-          "description": "1, 2, 3, …"
+          "title": "1, 2, 3, …"
         },
         {
           "const": "roman",
-          "description": "I, II, III, …"
+          "title": "I, II, III, …"
         },
         {
           "const": "scandinavian",
-          "description": "C, … A, A#/Bb, H"
+          "title": "C, … A, A#/Bb, H"
         },
         {
           "const": "solfege",
-          "description": "same as `solfège`"
+          "title": "same as `solfège`"
         },
         {
           "const": "solfège",
-          "description": "Do, Re, Mi, Fa, So, …"
+          "title": "Do, Re, Mi, Fa, So, …"
         }
       ]
     },
@@ -755,29 +806,16 @@
               "title": "The type of this config",
               "description": "One or more of `\"config\"`, `\"style\"`, `\"style_mod\"`, `\"instrument\"`, `\"task\"` ...",
               "anyOf": [
-                { "const": "config",
-                  "title": "This is a generic config file."
+                {
+                  "$ref": "#/definitions/configType"
                 },
-                { "const": "style",
-                  "title": "A style definition."
-                },
-                { "const": "stylemod",
-                  "title": "A mdoification to an existing style."
-                },
-                { "const": "instrument",
-                  "title": "Definition of an instrument."
-                },
-                { "const": "task",
-                  "title": "A preview task."
-                },
-                { "type": "string"
-                },
-                { "type": "array",
+                {
+                  "type": "array",
                   "items": {
-                    "type": "string"
+                    "$ref": "#/definitions/configType"
                   },
                   "minItems": 1
-                }  
+                }
               ]
             },
             "title": {
@@ -958,13 +996,14 @@
             },
             "transcode": {
               "default": "",
-              "description": "Transcode chords.",
+              "description": "Transcode chords to a different notation system.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/noteSystem"
                 },
                 {
-                  "const": ""
+                  "const": "",
+                  "title": "Don't transcode chords."
                 }
               ]
             },
@@ -1132,12 +1171,13 @@
                         "items": {
                           "oneOf": [
                             {
-                              "const": "x",
-                              "title": "Muted string"
+                              "title": "Muted string",
+                              "enum": ["x", -1]
                             },
                             {
+                              "title": "Fret number. `0` for an empty/open string.",
                               "type": "integer",
-                              "minimum": -1
+                              "minimum": 0
                             }
                           ]
                         }
@@ -1148,15 +1188,13 @@
                         "items": {
                           "oneOf": [
                             {
+                              "description": "`\"x\"`, `\"N\"`, or a negative number indicates a string without finger information.",
                               "oneOf": [
                                 {
-                                  "type": "string",
-                                  "description": "`\"x\"` or `\"N\"` denotes a string without finger information",
                                   "enum": ["x", "N"]
                                 },
                                 {
                                   "type": "integer",
-                                  "description": "A negative number indicates a string without finger information.",
                                   "maximum": -1
                                 }
                               ]
@@ -1165,19 +1203,19 @@
                               "oneOf": [
                                 {
                                   "type": "integer",
+                                  "description": "Finger number",
                                   "minimum": 0,
                                   "maximum": 9
                                 },
                                 {
                                   "type": "string",
-                                  "pattern": "^[A-Z]$",
-                                  "not": {
-                                    "const": "N"
-                                  }
+                                  "description": "Finger letter",
+                                  "pattern": "^[A-MO-Z]$"
                                 }
                               ]
                             }
-                          ]
+                          ],
+                          "examples": [-1, "T"]
                         }
                       }
                     }
@@ -2644,7 +2682,7 @@
                       "default": false
                     },
                     "sort-songs": {
-                      "description": "Sort songs by `\"title\"` or `\"subtitle\"`.\ntitle    : sort pages alphabetically by title.\nsubtitle : sort pages alphabetically by subtitle. If this is used together with title, only title is used.\nPut a minus sign before title and/or subtitle to obtain descending order.",
+                      "description": "Sort songs by `\"title\"` or `\"subtitle\"`.\n`\"title\"`    : sort pages alphabetically by `title`.\n`\"subtitle\"` : sort pages alphabetically by `subtitle`. If this is used together with `\"title\"`, only `title` is used.\nPut a minus sign before `\"title\"` and/or `\"subtitle\"` to obtain descending order.",
                       "oneOf": [
                         {
                           "const": false
@@ -3364,19 +3402,19 @@
                     "oneOf": [
                       {
                         "const": "stdin",
-                        "description": "Pass data via standard input."
+                        "title": "Pass data via standard input."
                       },
                       {
                         "const": "argfile0",
-                        "description": "Use value `\"argfile0\"` to pass data via temporary file whose name is *prepended* to the command arguments."
+                        "title": "Use value `\"argfile0\"` to pass data via temporary file whose name is *prepended* to the command arguments."
                       },
                       {
-                        "pattern": "^argfileN?$",
-                        "description": "Use value `\"argfileN\"` or `\"argfile\"` to pass data via temporary file whose name is *appended* to the command arguments."
+                        "enum": ["argfileN", "argfile"],
+                        "title": "Use value `\"argfileN\"` or `\"argfile\"` to pass data via temporary file whose name is *appended* to the command arguments."
                       },
                       {
                         "enum": ["tmpfile1", "tmpfile2"],
-                        "description": "Alternatively, the name of one of the predefined temporary files (`%{tmpfile1}` and `%{tmpfile2}`) can be used. Do not forget to add this name to the command arguments."
+                        "title": "Alternatively, the name of one of the predefined temporary files (`%{tmpfile1}` and `%{tmpfile2}`) can be used. Do not forget to add this name to the command arguments."
                       }
                     ]
                   },
@@ -3386,11 +3424,11 @@
                     "oneOf": [
                       {
                         "const": "stdout",
-                        "description": "Collect results from standard output"
+                        "title": "Collect results from standard output"
                       },
                       {
                         "const": "%{tmpbase}.cropped.svg",
-                        "description": "Collect results from a temporary file.\nNote that lilypond will append `\".cropped.svg\"`, so we pass the base of the file names."
+                        "title": "Collect results from a temporary file.\nNote that lilypond will append `\".cropped.svg\"`, so we pass the base of the file names."
                       }
                     ]
                   },
