@@ -1,4 +1,4 @@
-# GNUmakefile for MS Windows + Strawberry Perl + wxWidgets 3.0.
+# GNUmakefile for MS Windows + Strawberry Perl + (custom) wxWidgets.
 
 # Needed for the environment settings.
 # .ONESHELL :
