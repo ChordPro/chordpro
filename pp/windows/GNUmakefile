@@ -10,7 +10,7 @@ RES    := ..\..\lib\ChordPro\res
 PP     := pp
 PLDIR  := C:\Strawberry
 WXDIR  := C:\wxWidgets-3.3.1
-PERL   := perl540
+PERL   := perl542
 
 all : ppl iss
 
