@@ -1590,7 +1590,7 @@
         x1          : 0
         x2          : 0
         x3          : 0
-        wrap	: 0
+        wrap        : 0
     }
     
     // The schema for this config file.
