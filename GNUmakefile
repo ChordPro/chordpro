@@ -186,20 +186,24 @@ _mkit_stopvm :
 	VBoxManage controlvm ${MACVM} poweroff
 	VBoxManage snapshot ${MACVM} restorecurrent
 
-LTS     := 22
+LTS     := 24
 LTSHOST := ubuntu${LTS}
 LTSVM   := "Ubuntu ${LTS}.04 LTS"
 
-appimage : _akit_startvm _akit _akit_stopvm
+appimage : _akit_startvm _akit _akit1 _akit_stopvm
 
 _akit :
 	${MAKE} to_mac MACHOST=${LTSHOST}
 	ssh ${LTSHOST} make -C Documents/ChordPro/pp/appimage
-	scp ${LTSHOST}:Documents/ChordPro/pp/appimage/ChordPro-\*.AppImage ${HOME}/tmp/
+	scp ${LTSHOST}:Documents/ChordPro/pp/appimage/ChordPro-\*.AppImage ${HOME}/tmp/ChordPro-${VERSION}-dev.AppImage
+
+_akit1 :
+	scp ${HOME}/tmp/ChordPro-${VERSION}-dev.AppImage \
+	  chordpro-site:www/dl/ChordPro-dev.AppImage
 
 _akit_startvm :
 	-VBoxManage startvm ${LTSVM} --type headless
-	ssh ${LTSHOST} sudo ntpdate -t 20 -b ntp.squirrel.nl
+	ssh ${LTSHOST} sudo ntpdate -t 60 -b ntp.squirrel.nl
 
 _akit_stopvm :
 	VBoxManage controlvm ${LTSVM} poweroff
