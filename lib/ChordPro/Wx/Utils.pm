@@ -187,7 +187,11 @@ sub setup_menubar( $self ) {
 	    [ wxID_ANY, M_EDITOR, "&Grid section",
 	      "Insert start/end of grid directive.", "OnInsertGrid" ],
 	    [],
-	    [ wxID_ANY, M_EDITOR, "Special symbol",
+	    [ wxID_ANY, M_EDITOR, "♯ Sharp symbol ",
+	      "Insert a sharp symbol.", "OnInsertSharpSymbol" ],
+	    [ wxID_ANY, M_EDITOR, "♭ Flat symbol ",
+	      "Insert a flat symbol.", "OnInsertFlatSymbol" ],
+	    [ wxID_ANY, M_EDITOR, "Special symbol...",
 	      "Insert a special symbol.", "OnInsertSymbol" ],
 	  ]
 	],

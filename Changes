@@ -10,6 +10,9 @@
     - Command line option `--lyrics-only` is now equivalent to
       `--config=lyricsonly`.
 
+    - In the GUI you can now insert sharp and flat symbols using the
+      Insert menu.
+
     - Update abc2svg to 1.23.1.
 
     - Fix issue #668 (Wrong B7 fingering).

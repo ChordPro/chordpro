@@ -500,6 +500,16 @@ method OnInsertSymbol($event) {
     }
 }
 
+method OnInsertFlatSymbol($event) {
+    my $ctrl = $self->{t_editor};
+    $ctrl->AddText("\x{266d}");
+}
+
+method OnInsertSharpSymbol($event) {
+    my $ctrl = $self->{t_editor};
+    $ctrl->AddText("\x{266f}");
+}
+
 method OnA2Crd($event) {
 
     my $ctrl = $self->{t_editor};
