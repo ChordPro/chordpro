@@ -242,7 +242,7 @@ sub set_tuning ( $cfg ) {
 
     # Get ordinals for tuning.
     my $p = ChordPro::Chords::Parser->get_parser("common");
-    $t_oct = keys %{ $p->{ns_tbl} };
+    $t_oct = scalar( @{$p->{ns_canon}} );
     for ( @tuning ) {
 	return "Invalid tuning (should be note + octave): $_"
 	  unless /(^.*?)(\d+)$/;	# split off octave
