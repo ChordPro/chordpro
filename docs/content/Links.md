@@ -16,6 +16,13 @@ description: "ChordPro related links"
   Searchable web site with a vast collection of ChordPro notated
   songs.
 
+* [BandBinder](https://bandbinder.app)  
+  BandBinder is for bands or solo musicians to keep charts, setlists and rehearsal notes.
+  It uses ChordPro format to render chords inline with lyrics and performance notes.
+  It can transpose on the fly and help you learn chord shapes for 7 instruments.
+  BandBinder publishes a ChordPro authoring guide, directive reference and examples at
+  [docs.bandbinder.app/chordpro](https://docs.bandbinder.app/chordpro/).
+
 * [Songsheet Generator](http://tenbyten.com/software/songsgen/index.php)  
   Songsheet Generator is an application which prints songsheets
   and songbooks for home, small group, or large group 
