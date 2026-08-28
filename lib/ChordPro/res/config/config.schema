@@ -569,17 +569,11 @@
     },
     "parserPreprocessingElement": {
       "type": "object",
-      "additionalProperties": false,
       "required": ["replace"],
       "properties": {
         "replace": {
           "type": "string",
           "description": "A string that replaces occurrences of `target`/`pattern`."
-        },
-        "flags": {
-          "type": "string",
-          "description": "Regular expression flags.",
-          "examples": ["g", "gi"]
         }
       },
       "oneOf": [
@@ -590,6 +584,12 @@
               "type": "string",
               "description": "A regular expression to search for and replace.",
               "format": "regex"
+            },
+            "flags": {
+              "type": "string",
+              "description": "Regular expression flags.",
+              "default": "g",
+              "examples": ["gi"]
             }
           }
         },
@@ -618,6 +618,14 @@
           "type": "object",
           "description": "Settings for the parser/preprocessor.\nFor selected lines, you can specify a series of \n{ \"target\" : \"xxx\", \"replace\" : \"yyy\" }\nEvery occurrence of \"xxx\" will be replaced by \"yyy\".\nUse \"pattern\" instead of \"target\" for regular expression replacement.\nUse wisely.",
           "additionalProperties": false,
+          "patternProperties": {
+            "^env-": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/parserPreprocessingElement"
+              }
+            }
+          },
           "properties": {
             "all": {
               "type": "array",
@@ -629,8 +637,7 @@
               "type": "array",
               "items": {
                 "type": "object",
-                "additionalProperties": false,
-                "anyOf": [
+                "allOf": [
                   {
                     "$ref": "#/definitions/parserPreprocessingElement"
                   },
