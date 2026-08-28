@@ -574,12 +574,6 @@
         "replace": {
           "type": "string",
           "description": "A string that replaces occurrences of `target`/`pattern`."
-        },
-        "flags": {
-          "type": "string",
-          "description": "Regular expression flags.",
-          "default": "g",
-          "examples": ["gi"]
         }
       },
       "oneOf": [
@@ -590,6 +584,12 @@
               "type": "string",
               "description": "A regular expression to search for and replace.",
               "format": "regex"
+            },
+            "flags": {
+              "type": "string",
+              "description": "Regular expression flags.",
+              "default": "g",
+              "examples": ["gi"]
             }
           }
         },
