@@ -579,7 +579,8 @@
         "flags": {
           "type": "string",
           "description": "Regular expression flags.",
-          "examples": ["g", "gi"]
+          "default": "g",
+          "examples": ["gi"]
         }
       },
       "oneOf": [
