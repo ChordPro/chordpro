@@ -13,6 +13,9 @@
     - In the GUI you can now insert sharp and flat symbols using the
       Insert menu.
 
+    - Saving a song in the GUI no longer discards the Undo history.
+      This requires wxPerl >= 3.
+
     - Update abc2svg to 1.23.1.
 
     - Fix issue #668 (Wrong B7 fingering).

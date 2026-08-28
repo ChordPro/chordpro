@@ -224,12 +224,10 @@ sub add_annotation( $self, $line, $message ) {
     $stc->AnnotationSetStyle( $line, $self->{astyle} );
 }
 
-unless ( __PACKAGE__->can("IsModified") ) {
+unless ( $Wx::VERSION >= 3 ) {
     *IsModified = sub($self) {
 	$self->{_modified} || $self->CanUndo;
     };
-}
-unless ( __PACKAGE__->can("DiscardEdits") ) {
     *DiscardEdits = sub($self) {
 	$self->EmptyUndoBuffer;
 	$self->{_modified} = 0;
@@ -241,7 +239,10 @@ sub SetModified( $self, $mod ) {
 	$self->{_modified} = 1;
     }
     else {
-	$self->DiscardEdits;
+	$self->{_modified} = 0;
+	# Legacy Wx does not have IsModified, so we do not have
+	# another choice than to discard the undo stack.
+	$Wx::VERSION >= 3 ? $self->SetSavePoint : $self->DiscardEdits;
     }
 }
 
