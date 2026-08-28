@@ -569,7 +569,6 @@
     },
     "parserPreprocessingElement": {
       "type": "object",
-      "additionalProperties": false,
       "required": ["replace"],
       "properties": {
         "replace": {
