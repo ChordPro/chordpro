@@ -38,7 +38,12 @@ lib/ChordPro/Output/PDF/KeyboardDiagram.pm
 lib/ChordPro/Output/PDF/Song.pm
 lib/ChordPro/Output/PDF/StringDiagram.pm
 lib/ChordPro/Output/PDF/Writer.pm
+lib/ChordPro/Output/SVG/ChordDiagram.pm
 lib/ChordPro/Output/SVG/Images.pm
+lib/ChordPro/Output/SVG/Strum/GridRenderer.pm
+lib/ChordPro/Output/SVG/Strum/SVGPrimitives.pm
+lib/ChordPro/Output/SVG/Strum/StrumlineRenderer.pm
+lib/ChordPro/Output/SVG/Strum/Tokens.pm
 lib/ChordPro/Output/Text.pm
 lib/ChordPro/Paths.pm
 lib/ChordPro/Song.pm

@@ -258,6 +258,8 @@ method Load :common {
 		    $cb->DeleteEntry($entry);
 		    next;
 		}
+		# Temporary disable html5 viewer.
+		$value = "html" if $entry eq "html_viewer";
 
 		# These are always returned as lists of hashes.
 		if ( $entry =~ m/^preset_(instruments|styles|stylemods|notations|tasks|xcodes)/ ) {
