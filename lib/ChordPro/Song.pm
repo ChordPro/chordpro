@@ -797,7 +797,7 @@ sub parse_song {
 		    if ( $recall_type eq "quote" ) {
 			if ( is_arrayref($recall{$ctx}) ) {
 			    unshift( @$lines, @{$recall{$ctx}} );
-			    $skipcnt += @{$recall{$dd->{arg}}};
+			    $skipcnt += @{$recall{$ctx}};
 			}
 		    }
 		    elsif ( $recall_type =~ /^comment(?:_italic|_block)?$/ ) {
