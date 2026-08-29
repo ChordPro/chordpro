@@ -412,6 +412,10 @@ toc {
 // Grid strum overrides.
 gridstrum.symbols {}
 
+// Sections.
+// Work in progress.
+section {}
+
 // Delegates.
 // Basically a delegate is a section `{start_of_XXX}` which content is collected and handled later by the delegate module.
 // Config settings for delegates can depend on the backend that is used to produce the output. See the ABC settings for examples.

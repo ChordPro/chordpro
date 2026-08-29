@@ -36,6 +36,7 @@ my $backend;			# backend tag
 # Parser context.
 my $def_context = "";
 my $in_context = $def_context;
+my $base_context;
 my $skip_context = 0;
 my $grid_arg;			# also used for grilles?
 my $grid_cells;			# also used for grilles?
@@ -136,6 +137,8 @@ sub upd_config {
 sub is_gridstrum($) {
     $_[0] == 1 || $_[0] == 2;
 }
+
+my %recall;
 
 sub parse_song {
     my ( $self, $lines, $linecnt, $meta, $defs ) = @_;
@@ -380,7 +383,9 @@ sub parse_song {
 	$re_chords = qr/(\[.*?\])/;
     }
 
+    my $section_postamble = [];
     my $skipcnt = 0;
+
     while ( @$lines ) {
 	if ( $skipcnt ) {
 	    $skipcnt--;
@@ -725,11 +730,96 @@ sub parse_song {
 		$prep->{directive}->($dir);
 		$config->{debug}->{pp} && warn("POST: {", $dir, "}\n");
 	    }
-	    $self->add( type => "ignore",
-			text => $_ )
-	      unless $self->directive($dir);
+
+	    my $ctx = $in_context; # save
+	    my $dd = $self->parse_directive($dir);
+	    if ( $self->directive($dd) ) {
+		if ( $self->is_section( $dd, "start" ) ) {
+		    if ( $in_context eq "section" ) {
+			my $ctx = $dd->{arg};
+			my $kv = {};
+			if ( $ctx =~/\w+=\w+/ ) {
+			    $kv = parse_kv($ctx);
+			    $base_context = $in_context = $kv->{section} || $kv->{name};
+			    if ( $kv->{label} ) {
+				$self->add( type => "set", name => "label",
+					    value => $kv->{label} );
+			    }
+			}
+		    }
+		    if ( exists($config->{section}->{$in_context})
+			 and my $c = $config->{section}->{$in_context} ) {
+			$section_postamble = [];
+			$c = { %$c };
+#			next unless "quote" eq (delete($c->{recall}) || "quote");
+			while ( my ( $k, $v ) = each %$c ) {
+			    next if $k eq "recall";
+			    unless ( $k =~ ($propitems_re.'(?:font|size|colou?r)') ) {
+				do_warn("Invalid section property for $in_context: $k (ignored)");
+				next;
+			    }
+			    unshift( @$lines, "{$k: $v}" );
+			    push( @$section_postamble, "{$k}" );
+			    $skipcnt++;
+			}
+		    }
+		    $recall{$in_context} = [];
+		}
+		elsif ( $self->is_section( $dd, "end" ) ) {
+		    if ( $ctx eq "section" && $base_context ) {
+			$ctx = $base_context;
+			undef $base_context;
+		    }
+		    if ( @$section_postamble ) {
+			unshift( @$lines, @$section_postamble );
+			$skipcnt += @$section_postamble;
+			push( @{$recall{$ctx}}, @$section_postamble );
+			$section_postamble = [];
+		    }
+		}
+		elsif ( $dd->{name} eq "recall" ) {
+		    my $ctx = $dd->{arg};
+		    my $kv = {};
+		    if ( $ctx =~/\w+=\w+/ ) {
+			$kv = parse_kv($ctx);
+			$ctx = $kv->{section};
+			if ( $kv->{label} ) {
+			    $self->add( type => "set", name => "label",
+					value => $kv->{label} );
+			}
+		    }
+		    my $recall_type = "quote";
+		    if ( exists($config->{section}->{$ctx})
+			 and my $c = $config->{section}->{$ctx} ) {
+			$c = { %$c };
+			$recall_type = $c->{recall};
+		    }
+		    if ( $recall_type eq "quote" ) {
+			if ( is_arrayref($recall{$ctx}) ) {
+			    unshift( @$lines, @{$recall{$ctx}} );
+			    $skipcnt += @{$recall{$dd->{arg}}};
+			}
+		    }
+		    elsif ( $recall_type =~ /^comment(?:_italic|_block)?$/ ) {
+			unshift( @$lines, "{$recall_type: " .
+				 ($kv->{title} // $ctx) . "}");
+			$skipcnt++;
+		    }
+		    else {
+			do_warn("Invalid section recall: $recall_type");
+		    }
+		}
+		else {
+		    push( @{$recall{$in_context}}, "{$dir}" );
+		}
+	    }
+	    else {
+		$self->add( type => "ignore", text => $_ );
+	    }
 	    next;
 	}
+
+	push( @{$recall{$in_context}}, $_ ) if $in_context;
 
 	if ( /\S/ && !$fragment && !exists $self->{title} ) {
 	    do_warn("Missing {title} -- prepare for surprising results");
@@ -1301,6 +1391,7 @@ my %directives = (
 		  no_grid	     => \&dir_no_grid,
 		  pagesize	     => \&dir_papersize,
 		  pagetype	     => \&dir_papersize,
+		  recall	     => sub { 1 },
 		  start_of_bridge    => undef,
 		  start_of_chorus    => undef,
 		  start_of_grid	     => undef,
@@ -1407,7 +1498,7 @@ sub parse_directive {
 	return { name => $dir, arg => $arg, omit => 2 };
     }
 
-    return { name => $dir, arg => $arg, omit => 0 }
+    return { name => $dir, arg => $arg, omit => 0, orig => $d }
 }
 
 # Process a selector.
@@ -1425,10 +1516,16 @@ sub selected {
     return $sel;
 }
 
-sub directive {
-    my ( $self, $d ) = @_;
+sub is_section {
+    my ( $self, $dd, $tag ) = @_;
+    $tag ||= "start";
+    return $1 if $dd->{name} =~ /^${tag}_of_(.+)/;
+    return;
+}
 
-    my $dd = $self->parse_directive($d);
+sub directive {
+    my ( $self, $dd ) = @_;
+
     return 1 if $dd->{omit} == 1;
 
     my $dir = $dd->{name};
@@ -1538,7 +1635,7 @@ sub directive {
 	elsif ( $arg ne "" ) {
 	    my $kv = parse_kv( $arg, "label" );
 	    my $label = delete $kv->{label};
-	    my $chords = delete $kv->{cc};
+	    my $chords = delete $kv->{cc} || delete($kv->{name});
 	    if ( %$kv ) {
 		# Assume a mistake.
 		do_warn("Garbage in start_of_$in_context: $arg (ignored)\n");
@@ -1598,7 +1695,7 @@ sub directive {
 	# Enabling this always would allow [^] to recall anyway.
 	# Feature?
 	if ( 1 || $config->{settings}->{memorize} ) {
-	    $memchords = ($memchords{$cctag//$in_context} //= []);
+	    $memchords = ($memchords{$cctag//$base_context//$in_context} //= []);
 	    $memcrdinx = 0;
 	    $memorizing = 0;
 	}
@@ -1699,6 +1796,7 @@ sub directive {
 	return 1;
     }
     # More private hacks.
+    my $d = $dd->{orig};
     if ( !$options->{reference} && $d =~ /^([-+])([-\w.]+)$/i ) {
 	if ( $2 eq "dumpmeta" ) {
 	    warn(::dump($self->{meta}));
@@ -1721,7 +1819,6 @@ sub directive {
 	$config->lock;
 
 	upd_config();
-
 	return 1;
     }
 
