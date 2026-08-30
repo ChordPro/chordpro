@@ -737,6 +737,11 @@ sub generate_song {
 
 	    my $indent = 0;
 
+	    if (exists $config->{section}->{$curctx} ) {
+		$indent = $pr->strwidth($config->{section}->{$curctx}->{indent},$ftext)
+		  if exists $config->{section}->{$curctx}->{indent};
+	    }
+
 	    # Handle decorations.
 
 	    if ( $elt->{context} eq "chorus" ) {
