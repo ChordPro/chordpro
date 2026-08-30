@@ -764,6 +764,7 @@ sub _augment ( $self, $hash, $path ) {
             || $path =~ /^(meta|gridstrum\.symbols)\./
             || $path =~ /^markup\.shortcodes\./
             || $path =~ /^delegates\./
+            || $path =~ /^section\./
             || $key =~ /^_/;
 
         # Hash -> Hash.
@@ -980,6 +981,7 @@ sub hmerge( $dest, $src, $path = "", $check = 1 ) {
 	     && $path !~ /^pdf\.formats\.\w+-even\./
 	     && $path !~ /^(meta|gridstrum\.symbols)\./
 	     && $path !~ /^delegates\./
+	     && $path !~ /^section\./
 	     && $path !~ /^parser\.preprocess\./
 	     && $path !~ /^markup\.shortcodes\./
 	     && $path !~ /^debug\./
