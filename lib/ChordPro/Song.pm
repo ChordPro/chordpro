@@ -34,10 +34,12 @@ use ChordPro::Utils qw( beo beo_set_backend );
 my $backend;			# backend tag
 
 # Parser context.
-my $def_context = "";
-my $in_context = $def_context;
-my $base_context;
+my $def_context = "";		# default context is empty
+my $in_context = $def_context;	# logical context
+my $dir_context;		# context from directive
 my $skip_context = 0;
+
+# Grids.
 my $grid_arg;			# also used for grilles?
 my $grid_cells;			# also used for grilles?
 my $grid_type = 0;		# 0 = chords, 1,2 = strums
@@ -735,16 +737,13 @@ sub parse_song {
 	    my $dd = $self->parse_directive($dir);
 	    if ( $self->directive($dd) ) {
 		if ( $self->is_section( $dd, "start" ) ) {
+		    $dir_context = $in_context;
 		    if ( $in_context eq "section" ) {
-			my $ctx = $dd->{arg};
-			my $kv = {};
-			if ( $ctx =~/\w+=\w+/ ) {
-			    $kv = parse_kv($ctx);
-			    $base_context = $in_context = $kv->{section} || $kv->{name};
-			    if ( $kv->{label} ) {
-				$self->add( type => "set", name => "label",
-					    value => $kv->{label} );
-			    }
+			my $kv = parse_kv( $dd->{arg}, "section" );
+			$in_context = $kv->{section} || $kv->{name};
+			if ( $kv->{label} ) {
+			    $self->add( type => "set", name => "label",
+					value => $kv->{label} );
 			}
 		    }
 		    if ( exists($config->{section}->{$in_context})
@@ -754,6 +753,7 @@ sub parse_song {
 #			next unless "quote" eq (delete($c->{recall}) || "quote");
 			while ( my ( $k, $v ) = each %$c ) {
 			    next if $k eq "recall";
+			    next if $k eq "indent";
 			    unless ( $k =~ ($propitems_re.'(?:font|size|colou?r)') ) {
 				do_warn("Invalid section property for $in_context: $k (ignored)");
 				next;
@@ -766,10 +766,10 @@ sub parse_song {
 		    $recall{$in_context} = [];
 		}
 		elsif ( $self->is_section( $dd, "end" ) ) {
-		    if ( $ctx eq "section" && $base_context ) {
-			$ctx = $base_context;
-			undef $base_context;
-		    }
+#		    if ( $ctx eq "section" && $dir_context ) {
+#			$ctx = $dir_context;
+#			undef $dir_context;
+#		    }
 		    if ( @$section_postamble ) {
 			unshift( @$lines, @$section_postamble );
 			$skipcnt += @$section_postamble;
@@ -778,16 +778,13 @@ sub parse_song {
 		    }
 		}
 		elsif ( $dd->{name} eq "recall" ) {
-		    my $ctx = $dd->{arg};
-		    my $kv = {};
-		    if ( $ctx =~/\w+=\w+/ ) {
-			$kv = parse_kv($ctx);
-			$ctx = $kv->{section};
-			if ( $kv->{label} ) {
-			    $self->add( type => "set", name => "label",
-					value => $kv->{label} );
-			}
+		    my $kv = parse_kv( $dd->{arg}, "section" );
+		    my $ctx = $kv->{section};
+		    if ( $kv->{label} ) {
+			$self->add( type => "set", name => "label",
+				    value => $kv->{label} );
 		    }
+
 		    my $recall_type = "quote";
 		    if ( exists($config->{section}->{$ctx})
 			 and my $c = $config->{section}->{$ctx} ) {
@@ -795,6 +792,13 @@ sub parse_song {
 			$recall_type = $c->{recall};
 		    }
 		    if ( $recall_type eq "quote" ) {
+			$in_context = $dir_context = $ctx;
+
+			$memchords = $memchords{$kv->{cctag}//$ctx};
+			$memcrdinx = 0;
+			$memorizing = 0;
+			unshift( @$lines, '{+recall-end}' );
+			$skipcnt++;
 			if ( is_arrayref($recall{$ctx}) ) {
 			    unshift( @$lines, @{$recall{$ctx}} );
 			    $skipcnt += @{$recall{$ctx}};
@@ -875,7 +879,7 @@ sub parse_song {
 	    push( @{ $self->{preamble} }, $_ );
 	}
     }
-    do_warn("Unterminated context in song: $in_context")
+    do_warn("Unterminated section in song: $in_context")
       if $in_context;
 
     warn("Processed song...\n") if $options->{verbose};
@@ -1150,7 +1154,7 @@ sub decompose {
 	}
 
 	# Recall memorized chords.
-	elsif ( $memchords && $in_context && $chord !~ /^\*/ ) {
+	elsif ( $memchords && ($in_context||$dir_context) && $chord !~ /^\*/ ) {
 	    if ( $memcrdinx == 0 && @$memchords == 0 ) {
 		do_warn("No chords memorized for $in_context");
 		push( @chords, $self->chord($chord) );
@@ -1695,7 +1699,7 @@ sub directive {
 	# Enabling this always would allow [^] to recall anyway.
 	# Feature?
 	if ( 1 || $config->{settings}->{memorize} ) {
-	    $memchords = ($memchords{$cctag//$base_context//$in_context} //= []);
+	    $memchords = ($memchords{$cctag//$in_context} //= []);
 	    $memcrdinx = 0;
 	    $memorizing = 0;
 	}
@@ -1704,7 +1708,7 @@ sub directive {
 
     if ( $dir =~ /^end_of_(\w+)$/ ) {
 	do_warn("Not in " . ucfirst($1) . " context\n")
-	  unless $in_context eq $1;
+	  unless $dir_context eq $1;
 	$grid_type = 0;
 	if ( $in_context eq "grille" && @grille > 1 ) {
 	    my $opts = shift(@grille);
@@ -1798,13 +1802,20 @@ sub directive {
     # More private hacks.
     my $d = $dd->{orig};
     if ( !$options->{reference} && $d =~ /^([-+])([-\w.]+)$/i ) {
-	if ( $2 eq "dumpmeta" ) {
+	my $ctl = $2;
+	my $value = $1;
+	if ( $ctl eq "recall-end" ) {
+	    $dir_context = $in_context = $def_context;
+	}
+	elsif ( $ctl eq "dumpmeta" ) {
 	    warn(::dump($self->{meta}));
 	}
-	$self->add( type => "set",
-		    name => $2,
-		    value => $1 eq "+" ? 1 : 0,
-		  );
+	else {
+	    $self->add( type => "set",
+			name => $ctl,
+			value => $value eq "+" ? 1 : 0,
+		      );
+	}
 	return 1;
     }
 
