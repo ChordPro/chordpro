@@ -184,6 +184,12 @@ sub parse_kvm ( @lines ) {
 
 push( @EXPORT, 'parse_kvm' );
 
+sub is_number( $arg ) {
+    ($arg//'') =~ /^[-+]?\d+(?:\.\d+)$/;
+}
+
+push( @EXPORT, 'is_number' );
+
 # Odd/even.
 
 sub is_odd( $arg ) {
@@ -714,24 +720,47 @@ push( @EXPORT_OK, @{ $EXPORT_TAGS{"xp"} } );
 
   # Fetch a value for key $k from hash $h, with possible specialisation
   # for the current backend.
+  # Hierarchy:
+  #    key.backend	if exists
+  #    key.default	if exists
+  #    ''		if key is hashref
+  #    backend.key	if exists
+  #    key		if exists and not hashref
+  #    ''
+  # Mixing will be confusing, so don't.
+
   sub beo ( $hash, $key ) {
     Carp::confess("beo: not hash") unless is_hashref($hash);
     my $res = '';
-    $res = $hash->{$key} if exists $hash->{$key};
-    return $res unless exists $hash->{$backend};
 
-    if ( is_hashref($hash->{$backend})
-	 && exists($hash->{$backend}->{$key})
-	 && defined($hash->{$backend}->{$key}) ) {
-	return $hash->{$backend}->{$key};
+    # Note: the hash is usually locked, so careful testing is required.
+
+    # backend.foo
+    if ( exists $hash->{$backend}
+	 && is_hashref($hash->{$backend})
+	 && exists($hash->{$backend}->{$key}) ) {
+	$res = $hash->{$backend}->{$key} // '';
     }
-    elsif ( $backend =~ /^html.+/
-	    && is_hashref($hash->{html})
-	    && exists($hash->{html}->{$key})
-	    && defined($hash->{html}->{$key}) ) {
-	return $hash->{html}->{$key};
+    # foo
+    elsif ( exists $hash->{$key} ) {
+	$res = $hash->{$key} // '';
     }
-    return $res;
+    return $res if $res eq '';
+
+    # foo.backend // foo.default
+    if ( is_hashref($res) ) {
+	if ( exists $res->{$backend} ) {
+	    $res = $res->{$backend};
+	}
+	elsif ( exists $res->{default} ) {
+	    $res = $res->{default};
+	}
+	else {
+	    $res = '';
+	}
+    }
+
+    return $res // '';
   }
 }
 

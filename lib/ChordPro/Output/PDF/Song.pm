@@ -12,6 +12,7 @@ package ChordPro::Output::PDF::Song;
 
 use Storable qw(dclone);
 use Ref::Util qw(is_hashref is_arrayref is_coderef);
+use ChordPro::Utils qw(is_number);
 use Carp;
 use feature 'state';
 use ChordPro::Output::Common qw( roman fmt_subst );
@@ -737,9 +738,11 @@ sub generate_song {
 
 	    my $indent = 0;
 
-	    if (exists $config->{section}->{$curctx} ) {
-		$indent = $pr->strwidth($config->{section}->{$curctx}->{indent},$ftext)
-		  if exists $config->{section}->{$curctx}->{indent};
+	    if ( exists $config->{section}->{$curctx}
+		 and exists $config->{section}->{$curctx}->{indent} ) {
+		$indent = $config->{section}->{$curctx}->{indent};
+		$indent = $pr->strwidth($indent,$ftext)
+		  unless is_number($indent);
 	    }
 
 	    # Handle decorations.
