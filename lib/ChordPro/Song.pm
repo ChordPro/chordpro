@@ -420,7 +420,13 @@ sub parse_song {
 	s/\t/ /g;
 
 	if ( $config->{debug}->{echo} ) {
-	    warn(sprintf("==[%3d]=> %s\n", $diag->{line}, $diag->{orig} ) );
+	    warn( sprintf( "==[%3d]=> %s%s\n",
+			   $diag->{line}, $diag->{orig},
+			   $config->{debug}->{echo} <= 1 ? ""
+			   : sprintf( "  [%s %s]",
+				      $dir_context||"<none>",
+				      $in_context||"<none>" ),
+			 ) );
 	}
 
 	for my $pp ( "all", "env-$in_context" ) {
@@ -770,6 +776,8 @@ sub parse_song {
 #			$ctx = $dir_context;
 #			undef $dir_context;
 #		    }
+		    unshift( @$lines, "{+section-end}" );
+		    $skipcnt++;
 		    if ( @$section_postamble ) {
 			unshift( @$lines, @$section_postamble );
 			$skipcnt += @$section_postamble;
@@ -785,19 +793,21 @@ sub parse_song {
 				    value => $kv->{label} );
 		    }
 
-		    my $recall_type = "quote";
-		    if ( exists($config->{section}->{$ctx})
+		    my $recall_type = $kv->{type};
+		    if ( !$kv->{type}
+			 and exists($config->{section}->{$ctx})
 			 and my $c = $config->{section}->{$ctx} ) {
 			$c = { %$c };
 			$recall_type = $c->{recall};
 		    }
+		    $recall_type ||= "quote";
 		    if ( $recall_type eq "quote" ) {
-			$in_context = $dir_context = $ctx;
+			$in_context = $ctx;
 
 			$memchords = $memchords{$kv->{cctag}//$ctx};
 			$memcrdinx = 0;
 			$memorizing = 0;
-			unshift( @$lines, '{+recall-end}' );
+			unshift( @$lines, '{+section-end}' );
 			$skipcnt++;
 			if ( is_arrayref($recall{$ctx}) ) {
 			    unshift( @$lines, @{$recall{$ctx}} );
@@ -810,7 +820,7 @@ sub parse_song {
 			$skipcnt++;
 		    }
 		    else {
-			do_warn("Invalid section recall: $recall_type");
+			do_warn("Invalid section recall type: $recall_type");
 		    }
 		}
 		else {
@@ -823,7 +833,7 @@ sub parse_song {
 	    next;
 	}
 
-	push( @{$recall{$in_context}}, $_ ) if $in_context;
+	push( @{$recall{$in_context}}, $_ ) if $in_context && $dir_context;
 
 	if ( /\S/ && !$fragment && !exists $self->{title} ) {
 	    do_warn("Missing {title} -- prepare for surprising results");
@@ -1804,7 +1814,7 @@ sub directive {
     if ( !$options->{reference} && $d =~ /^([-+])([-\w.]+)$/i ) {
 	my $ctl = $2;
 	my $value = $1;
-	if ( $ctl eq "recall-end" ) {
+	if ( $ctl eq "section-end" ) {
 	    $dir_context = $in_context = $def_context;
 	}
 	elsif ( $ctl eq "dumpmeta" ) {
