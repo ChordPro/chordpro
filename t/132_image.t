@@ -53,7 +53,7 @@ center=0
 # </svg>
 EOD
 
-eval { $s->parse_file(\$data) } or diag("$@");
+eval { $s->parse_file(\$data, { generate => "pdf" }) } or diag("$@");
 
 ok( scalar( @{ $s->{songs} } ) == 1, "One song" );
 isa_ok( $s->{songs}->[0], 'ChordPro::Song', "It's a song" );
@@ -77,13 +77,13 @@ my $song = {
 					      '<rect x="0" y="0" width="100%" height="100%" stroke="none" fill="red"/>',
 					      '</svg>'
 					     ],
-				   'handler' => 'svg2svg',
-				   'type' => 'image',
-				   'subtype' => 'svg',
+				   'handler' => 'process',
+				   'type' => 'svg',
+				   'subtype' => 'delegate',
 				   opts => { id => 'red',
 					     type => 'svg',
 					     'persist' => 1 },
-				   'module' => 'SVG'
+				   'delegate' => 'SVG'
 				  },
 			 'green' => {
 				     'delegate' => 'SVG',
@@ -97,13 +97,13 @@ my $song = {
 						'id' => 'green',
 						'center' => '0'
 					       },
-				     'type' => 'image',
-				     'handler' => 'svg2svg',
+				     'type' => 'svg',
+				     'handler' => 'process',
 				     'subtype' => 'delegate'
 				    },
 			 '_Image001' => {
-					 'handler' => 'svg2svg',
-					 'type' => 'image',
+					 'handler' => 'process',
+					 'type' => 'svg',
 					 'subtype' => 'delegate',
 					 'delegate' => 'SVG',
 					 'context' => 'svg',
