@@ -1,4 +1,4 @@
 # This file is generated. Do not edit!
 package ChordPro::Version;
-our $VERSION = "6.101_040";
+our $VERSION = "6.101_042";
 print "$VERSION\n" unless caller;

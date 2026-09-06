@@ -12,7 +12,7 @@ package ChordPro::Output::PDF::Song;
 
 use Storable qw(dclone);
 use Ref::Util qw(is_hashref is_arrayref is_coderef);
-use ChordPro::Utils qw(is_number);
+use ChordPro::Utils qw(is_number is_image);
 use Carp;
 use feature 'state';
 use ChordPro::Output::Common qw( roman fmt_subst );
@@ -921,7 +921,7 @@ sub generate_song {
 	    next;
 	}
 
-	if ( $elt->{type} eq "image" ) {
+	if ( is_image($elt->{type}) ) {
 	    next if defined $elt->{opts}->{spread};
 	    next if $elt->{opts}->{omit};
 

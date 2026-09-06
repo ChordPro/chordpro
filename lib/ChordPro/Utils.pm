@@ -652,6 +652,14 @@ sub propitems_re() {
 push( @EXPORT, "propitems_re" );
 push( @EXPORT_OK, "propitems" );
 
+# Image types.
+
+sub is_image( $type ) {
+    $type =~ /^(?:image|svg|pdf|xo)$/o;
+}
+
+push( @EXPORT_OK, "is_image" );
+
 # For debugging encoding problems.
 
 sub as( $s ) {
@@ -716,20 +724,19 @@ push( @EXPORT_OK, @{ $EXPORT_TAGS{"xp"} } );
 
 { my $backend;
 
-  sub beo_set_backend( $be ) { $backend = $be }
+  sub beo_backend( $be = undef ) {
+      return $backend unless defined $be;
+      $backend = $be;
+  }
 
   # Fetch a value for key $k from hash $h, with possible specialisation
   # for the current backend.
   # Hierarchy:
-  #    key.backend	if exists
-  #    key.default	if exists
-  #    ''		if key is hashref
   #    backend.key	if exists
-  #    key		if exists and not hashref
-  #    ''
-  # Mixing will be confusing, so don't.
+  #    key		if exists
+  #    $default
 
-  sub beo ( $hash, $key ) {
+  sub beo ( $hash, $key, $default = '' ) {
     Carp::confess("beo: not hash") unless is_hashref($hash);
     my $res = '';
 
@@ -739,31 +746,19 @@ push( @EXPORT_OK, @{ $EXPORT_TAGS{"xp"} } );
     if ( exists $hash->{$backend}
 	 && is_hashref($hash->{$backend})
 	 && exists($hash->{$backend}->{$key}) ) {
-	$res = $hash->{$backend}->{$key} // '';
+	return $hash->{$backend}->{$key};
     }
+
     # foo
-    elsif ( exists $hash->{$key} ) {
-	$res = $hash->{$key} // '';
-    }
-    return $res if $res eq '';
-
-    # foo.backend // foo.default
-    if ( is_hashref($res) ) {
-	if ( exists $res->{$backend} ) {
-	    $res = $res->{$backend};
-	}
-	elsif ( exists $res->{default} ) {
-	    $res = $res->{default};
-	}
-	else {
-	    $res = '';
-	}
+    if ( exists $hash->{$key} ) {
+	return $hash->{$key};
     }
 
-    return $res // '';
+    # No key, return default.
+    return $default;
   }
 }
 
-push( @EXPORT_OK, "beo", "beo_set_backend" );
+push( @EXPORT_OK, "beo", "beo_backend" );
 
 1;

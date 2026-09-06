@@ -15,7 +15,7 @@ use warnings;
 use ChordPro;
 use ChordPro::Files;
 use ChordPro::Paths;
-use ChordPro::Utils;
+use ChordPro::Utils qw( :DEFAULT is_image );
 use ChordPro::Chords;
 use ChordPro::Chords::Appearance;
 use ChordPro::Chords::Parser;
@@ -30,7 +30,7 @@ use feature 'state';
 use Text::ParseWords qw(quotewords);
 use Ref::Util qw( is_arrayref is_hashref );
 
-use ChordPro::Utils qw( beo beo_set_backend );
+use ChordPro::Utils qw( beo beo_backend );
 my $backend;			# backend tag
 
 # Parser context.
@@ -148,7 +148,7 @@ sub parse_song {
 
     local $config = dclone($config);
 
-    $backend = beo_set_backend( lc( $self->{generate} // "None" ) );
+    $backend = beo_backend( lc( $self->{generate} // "none" ) );
 
     warn("Processing song ", $diag->{file}, "...\n") if $options->{verbose};
 
@@ -562,13 +562,14 @@ sub parse_song {
 
 		# Store in assets.
 		$self->{assets} //= {};
+		my $d = $config->{delegates}->{$type};
 		$self->{assets}->{$id} =
-		  { data => \@data,
-		    type    => "image",
-		    subtype => $type,
-		    module  => beo( $config->{delegates}->{$type}, 'module' ),
-		    handler => beo( $config->{delegates}->{$type}, 'handler' ),
-		    opts    => $kv,
+		  { data     => \@data,
+		    type     => $type,
+		    subtype  => "delegate",
+		    delegate => beo( $d, 'module', ucfirst(beo_backend()) ),
+		    handler  => beo( $d, 'handler', "process" ),
+		    opts     => $kv,
 		  };
 		if ( $config->{debug}->{images} ) {
 		    warn("asset[$id] type=image/$type ",
@@ -638,7 +639,9 @@ sub parse_song {
 		# A subsequent {start_of_XXX} will open a new item
 
 		my $d = $config->{delegates}->{$in_context};
-		if ( beo( $d, 'type' ) eq "image" ) {
+		my $dtype = beo( $d, "type", "ignore" );
+
+		if ( is_image($dtype) ) {
 		    local $_;
 		    my $a = pop( @{ $self->{body} } );
 		    my $id = $a->{id};
@@ -698,7 +701,7 @@ sub parse_song {
 			}
 		    }
 		}
-		elsif ( beo( $d, 'type' ) eq "filter" ) {
+		elsif ( $dtype eq "filter" ) {
 		    local $_;
 		    my $a = pop( @{ $self->{body} } );
 		    my $pkg = 'ChordPro::Delegate::' . $a->{delegate};
@@ -1508,7 +1511,7 @@ sub parse_directive {
 
     if ( $dir =~ /^start_of_(.*)/
 	 && exists $config->{delegates}->{$1}
-	 && beo( $config->{delegates}->{$1}, 'type' ) eq 'omit' ) {
+	 && beo( $config->{delegates}->{$1}, "type", "ignore" ) eq 'omit' ) {
 	return { name => $dir, arg => $arg, omit => 2 };
     }
 
@@ -1636,10 +1639,10 @@ sub directive {
 	    }
 	    my $kv = parse_kv( $arg, "label" );
 	    delete $kv->{label} if ($kv->{label}//"") eq "";
-	    $self->add( type     => beo( $d, 'type' ),
+	    $self->add( type     => beo( $d, 'type', 'ignore' ),
 			subtype  => "delegate",
-			delegate => beo( $d, 'module' ),
-			handler  => beo( $d, 'handler' ),
+			delegate => beo( $d, 'module', ucfirst(beo_backend()) ),
+			handler  => beo( $d, 'handler', 'process' ),
 			data     => [ ],
 			opts     => { %opts, %$kv },
 			exists($kv->{id}) ? ( id => $kv->{id} ) : (),
@@ -2124,8 +2127,8 @@ sub dir_image {
 	    my $d = $config->{delegates}->{$1};
 	    $a = { type      => "image",
 		   subtype   => "delegate",
-		   delegate  => beo( $d, 'module' ),
-		   handler   => beo( $d, 'handler' ),
+		   delegate  => beo( $d, 'module', ucfirst(beo_backend()) ),
+		   handler   => beo( $d, 'handler', 'process' ),
 		   uri       => $uri,
 		 };
 	}

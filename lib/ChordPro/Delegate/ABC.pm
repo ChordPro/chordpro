@@ -43,7 +43,7 @@ sub can( $class, $method ) {
     return \&abc2svg;
 }
 
-use ChordPro::Utils qw( beo beo_set_backend );
+use ChordPro::Utils qw( beo beo_backend );
 my $backend;
 
 # Default entry point.
@@ -51,7 +51,7 @@ my $backend;
 sub abc2svg( $song, %args ) {
 
     my $abc2svg = info();
-    $backend = beo_set_backend( lc $song->{generate} );
+    $backend = beo_backend( lc $song->{generate} );
 
     my $cfg = { %{$config->{delegates}->{abc} } };
 

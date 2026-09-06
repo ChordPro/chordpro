@@ -16,7 +16,7 @@ use Exporter 'import';
 our @EXPORT;
 
 use ChordPro::Files;
-use ChordPro::Utils;
+use ChordPro::Utils qw( :DEFAULT is_image );
 use ChordPro::Output::SVG::Images;
 use IO::String;
 
@@ -65,7 +65,7 @@ sub prepare_asset( $id, $s, $pr ) {
 
 	$elt->{subtype} //= "image" if $elt->{uri};
 
-	if ( $elt->{type} eq "image" && $elt->{subtype} eq "delegate" ) {
+	if ( is_image($elt->{type}) && $elt->{subtype} eq "delegate" ) {
 	    my $delegate = $elt->{delegate};
 	    warn("Assets: Preparing delegate $delegate, handler ",
 		 $elt->{handler},
@@ -120,7 +120,7 @@ sub prepare_asset( $id, $s, $pr ) {
 
 	next unless $ps;
 
-	if ( $elt->{type} eq "image" && $elt->{subtype} eq "svg" ) {
+	if ( is_image($elt->{type}) && $elt->{subtype} eq "svg" ) {
 	    warn("Assets: Preparing SVG image\n") if $config->{debug}->{images};
 	    require SVGPDF;
 	    SVGPDF->VERSION(0.080);

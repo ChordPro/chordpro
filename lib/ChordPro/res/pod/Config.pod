@@ -418,6 +418,18 @@
     
     // Sections.
     // Work in progress.
+    //
+    // section {
+    //     bridge {
+    //         // all text/chord size/font/color are allowed.
+    //         textsize: 120%
+    //         textcolor: blue
+    //         chordcolour: red
+    //         // indent is a number, or otherwise the width of the string.
+    //         indent: mm
+    //     }
+    // }
+    
     section {}
     
     // Delegates.
@@ -429,12 +441,9 @@
         // Embedding ABC.
         abc {
     
-            // The result produced by the delegate handler. Default is to ignore this section.
-    	type : ignore
-    
-    	// HTML and PDF can handle ABC sections as SVG images.
-    	html.type : image
-            pdf.type  : image
+            // The result produced by the delegate handler. Default is to ignore this section. HTML and PDF can handle SVG images.
+    	pdf.type :  svg
+    	html.type : svg
     
             // The name of the module that implements the delegate.
             module : ABC
@@ -485,12 +494,9 @@
         // Embedding Lilypond.
         ly {
     
-            // The result produced by the delegate handler. Default is to ignore this section.
-    	type : ignore
-    
-    	// HTML and PDF can handle Lilypond sections as SVG images.
-    	html.type : image
-            pdf.type  : image
+            // The result produced by the delegate handler. Default is to ignore this section. HTML and PDF can handle SVG images.
+    	pdf.type :  svg
+    	html.type : svg
     
             // The name of the module that implements the delegate.
             module : Lilypond
@@ -515,58 +521,38 @@
         // Embedding Strums. EXPERIMENTAL
         strum {
     
-            // The result produced by the delegate handler.
-            type : none
+            // The result produced by the delegate handler. Default is to ignore this section. PDF can handle PDF (XO) images.
+    	pdf.type :  pdf
     
             // The module's method to call.
-            handler : none
+    	pdf.handler : strum2xo
     
-            // Specific settings for the PDF backend.
-            pdf {
-                handler : strum2xo
-                type    : image
-            }
-    
-            // The name of the module that implements the delegate.
-            module : Strum
         }
     
         // Embedding SVG.
         svg {
     
-            // The result produced by the delegate handler.
-            type : image
+            // The result produced by the delegate handler. Default is to ignore this section. HTML and PDF can handle SVG images.
+    	pdf.type :  svg
+    	html.type : svg
     
             // The name of the (perl) module that implements the delegate.
             module : SVG
-    
-            // The module's method to call.
-            handler : svg2svg
         }
     
         // Embedding textblock.
         textblock {
     
-            // The result produced by the delegate handler.
-            type : none
+            // The result produced by the delegate handler. Default is to ignore this section. HTML does native and PDF can handle SVG images.
+    	pdf.type :  svg
+    	html.type : html
     
             // The module's method to call.
-            handler : none
+    	pdf.handler :     txt2xform
+            html.handler :    txt2html
     
             // The name of the (perl) module that implements the delegate.
             module : TextBlock
-    
-            // Specific settings for the PDF backend.
-            pdf {
-                handler : txt2xform
-                type    : image
-            }
-    
-            // Specific settings for the HTML backend.
-            html {
-                handler : txt2html
-                type    : html
-            }
         }
     }
     

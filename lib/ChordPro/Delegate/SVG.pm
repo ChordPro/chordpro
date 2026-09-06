@@ -14,6 +14,11 @@ use ChordPro::Utils;
 sub DEBUG() { $::config->{debug}->{svg} }
 
 sub svg2svg( $self, %args ) {
+    warn("Delegate SVG: Please adjust your config.\n");
+    $self->process(%args);
+}
+
+sub process( $self, %args ) {
     my $elt = $args{elt};
 
     my @data = @{ $elt->{data} };
