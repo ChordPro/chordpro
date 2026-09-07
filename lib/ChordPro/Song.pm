@@ -763,6 +763,7 @@ sub parse_song {
 			while ( my ( $k, $v ) = each %$c ) {
 			    next if $k eq "recall";
 			    next if $k eq "indent";
+			    next if $k eq "bar";
 			    unless ( $k =~ ($propitems_re.'(?:font|size|colou?r)') ) {
 				do_warn("Invalid section property for $in_context: $k (ignored)");
 				next;
