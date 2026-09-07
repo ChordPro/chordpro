@@ -738,25 +738,48 @@ sub generate_song {
 
 	    my $indent = 0;
 
-	    if ( exists $config->{section}->{$curctx}
-		 and exists $config->{section}->{$curctx}->{indent} ) {
-		$indent = $config->{section}->{$curctx}->{indent};
-		$indent = $pr->strwidth($indent,$ftext)
-		  unless is_number($indent);
-	    }
-
 	    # Handle decorations.
 
-	    if ( $elt->{context} eq "chorus" ) {
+	    if ( exists $config->{section}->{$curctx} ) {
+		my $c = { %{$config->{section}->{$curctx}} };
+		if ( $c->{indent} ) {
+		    $indent = $c->{indent};
+		    $indent = $pr->strwidth($indent,$ftext)
+		      unless is_number($indent);
+		}
+		if ( $c->{bar} ) {
+		    my $c = { %{$c->{bar}} };
+		    if ( $c->{offset} && $c->{width} ) {
+			# Allow negative width to stretch to the right,
+			# but not too far...
+			my $cx = $ps->{__leftmargin} + $ps->{_indent}
+			  - $c->{offset}
+			  + $indent;
+			my $wmax = $ps->{__rightmargin} - $cx;
+			$cx -= $c->{width} / 2;
+			my $w = abs($c->{width});
+			if ( $w > $wmax ) {
+			    $cx += ($wmax - $w) / 2;
+			    $w = $wmax;
+			}
+			$pr->vline( $cx, $y, $vsp,
+				    $w,
+				    $c->{color}, 0 );
+		    }
+		}
+	    }
+
+	    elsif ( $elt->{context} eq "chorus" ) {
 		my $style = $ps->{chorus};
 		$indent = $style->{indent};
 		if ( $style->{bar}->{offset} && $style->{bar}->{width} ) {
 		    my $cx = $ps->{__leftmargin} + $ps->{_indent}
 		      - $style->{bar}->{offset}
-			+ $indent;
+		      - $style->{bar}->{width} / 2
+		      + $indent;
 		    $pr->vline( $cx, $y, $vsp,
 				$style->{bar}->{width},
-				$style->{bar}->{color} );
+				$style->{bar}->{color}, 0 );
 		}
 		$curctx = "chorus";
 		$i_tag = "" unless $config->{settings}->{choruslabels};

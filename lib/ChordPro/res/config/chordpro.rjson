@@ -423,6 +423,16 @@ gridstrum.symbols {}
 //         chordcolour: red
 //         // indent is a number, or otherwise the width of the string.
 //         indent: mm
+//         // Side bar, similar to chorus.
+//         bar {
+//             // Bar offset to the left of the text.
+//             // Suppresses bar when zero (default).
+//             offset : 5
+//             // Bar width. Suppress when zero (default).
+//             width :  3
+//             // Bar colour. Default is foreground colour.
+//             color :  lime
+//        }
 //     }
 // }
 
