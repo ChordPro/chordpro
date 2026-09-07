@@ -185,7 +185,7 @@ sub parse_kvm ( @lines ) {
 push( @EXPORT, 'parse_kvm' );
 
 sub is_number( $arg ) {
-    ($arg//'') =~ /^[-+]?\d+(?:\.\d+)$/;
+    ($arg//'') =~ /^[-+]?\d+(?:\.\d+)?$/;
 }
 
 push( @EXPORT, 'is_number' );
