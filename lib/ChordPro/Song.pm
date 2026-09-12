@@ -38,6 +38,7 @@ my $def_context = "";		# default context is empty
 my $in_context = $def_context;	# logical context
 my $dir_context;		# context from directive
 my $skip_context = 0;
+my @recalls;
 
 # Grids.
 my $grid_arg;			# also used for grilles?
@@ -138,6 +139,14 @@ sub upd_config {
 
 sub is_gridstrum($) {
     $_[0] == 1 || $_[0] == 2;
+}
+
+sub is_verbatim($) {
+    my ( $ctx ) = @_;
+    return 1 if $ctx eq "tab";
+    return unless exists $config->{section}->{$ctx};
+    return exists $config->{section}->{$ctx}->{verbatim}
+      && $config->{section}->{$ctx}->{verbatim};
 }
 
 my %recall;
@@ -630,6 +639,25 @@ sub parse_song {
 		next;
 	    }
 	}
+	elsif ( is_verbatim($in_context) ) {
+	    if ( $dir_context eq $in_context ) {
+		unless ( /^\s*\{\s*end_of_$in_context\s*}\s*$/ ) {
+		    $self->add( type => "tabline", text => $_ );
+		    next;
+		}
+	    }
+	    else {
+		if ( /^\s*\{\s*end_of_section[:\s]+$in_context\s*}\s*$/
+		     || /^\s*\{\s*end_of_section[:\s]+name=(["']?)$in_context\1\s*}\s*$/ ) {
+		    $_ = "{end_of_$in_context}";
+		    $dir_context = $in_context;
+		}
+		else {
+		    $self->add( type => "tabline", text => $_ );
+		    next;
+		}
+	    }
+	}
 
 	if ( exists $config->{delegates}->{$in_context} ) {
 	    # 'open' indicates open.
@@ -748,7 +776,7 @@ sub parse_song {
 		if ( $self->is_section( $dd, "start" ) ) {
 		    $dir_context = $in_context;
 		    if ( $in_context eq "section" ) {
-			my $kv = parse_kv( $dd->{arg}, "section" );
+			my $kv = parse_kv( $dd->{arg}, "label" );
 			$in_context = $kv->{section} || $kv->{name};
 			if ( $kv->{label} ) {
 			    $self->add( type => "set", name => "label",
@@ -764,6 +792,7 @@ sub parse_song {
 			    next if $k eq "recall";
 			    next if $k eq "indent";
 			    next if $k eq "bar";
+			    next if $k eq "verbatim";
 			    unless ( $k =~ ($propitems_re.'(?:font|size|colou?r)') ) {
 				do_warn("Invalid section property for $in_context: $k (ignored)");
 				next;
@@ -806,19 +835,20 @@ sub parse_song {
 		    }
 		    $recall_type ||= "quote";
 		    if ( $recall_type eq "quote" ) {
+			push( @recalls, [ $dir_context, $in_context ] );
 			$in_context = $ctx;
 
 			$memchords = $memchords{$kv->{cctag}//$ctx};
 			$memcrdinx = 0;
 			$memorizing = 0;
-			unshift( @$lines, '{+section-end}' );
+			unshift( @$lines, '{+section-pop}' );
 			$skipcnt++;
 			if ( is_arrayref($recall{$ctx}) ) {
 			    unshift( @$lines, @{$recall{$ctx}} );
 			    $skipcnt += @{$recall{$ctx}};
 			}
 		    }
-		    elsif ( $recall_type =~ /^comment(?:_italic|_block)?$/ ) {
+		    elsif ( $recall_type =~ /^comment(?:_italic|_box)?$/ ) {
 			unshift( @$lines, "{$recall_type: " .
 				 ($kv->{title} // $ctx) . "}");
 			$skipcnt++;
@@ -1022,6 +1052,7 @@ sub add {
 
     $args{line}    ||= $diag->{line} if $lineinfo;
     $args{context} ||= $in_context;
+    # $args{directive} ||= $dir_context;
 
     push( @{$self->{body}}, \%args );
     if ( $in_context eq "chorus" ) {
@@ -1459,7 +1490,7 @@ sub _directive_abbrevs { \%abbrevs }
 my $dirpat;
 
 sub parse_directive {
-    my ( $self, $d ) = @_;
+    my ( $self, $d, $defarg ) = @_;
 
     # Pattern for all recognized directives.
     unless ( $dirpat ) {
@@ -1493,17 +1524,20 @@ sub parse_directive {
     $dir =~ s/[: ]+$//;
     # $dir is the lowcase directive name.
     # $arg is the rest, if any.
+    my $r = { name => $dir, arg => $arg, orig => $d, omit => 0 };
+
+    # Parse arguments if there is a default target.
+    if ( $defarg ) {
+	$r->{args} = parse_kv( $arg, $defarg );
+    }
 
     # Check for xxx-yyy selectors.
     if ( $dir =~ /^($dirpat)-(.+)$/ ) {
 	$dir = $abbrevs{$1} // $1;
 	unless ( $self->selected($2) ) {
-	    if ( $dir =~ /^start_of_/ ) {
-		return { name => $dir, arg => $arg, omit => 2 };
-	    }
-	    else {
-		return { name => $dir, arg => $arg, omit => 1 };
-	    }
+	    $r->{name} = $dir;
+	    $r->{omit} = $dir =~ /^start_of_/ ? 2 : 1;
+	    return $r;
 	}
     }
     else {
@@ -1513,10 +1547,11 @@ sub parse_directive {
     if ( $dir =~ /^start_of_(.*)/
 	 && exists $config->{delegates}->{$1}
 	 && beo( $config->{delegates}->{$1}, "type", "ignore" ) eq 'omit' ) {
-	return { name => $dir, arg => $arg, omit => 2 };
+	$r->{omit} = 2;
     }
 
-    return { name => $dir, arg => $arg, omit => 0, orig => $d }
+    $r->{name} = $dir;
+    return $r;
 }
 
 # Process a selector.
@@ -1538,6 +1573,7 @@ sub is_section {
     my ( $self, $dd, $tag ) = @_;
     $tag ||= "start";
     return $1 if $dd->{name} =~ /^${tag}_of_(.+)/;
+    return $2 if $dd->{name} =~ /^${tag}_of_section[:\s]+.*\bname=(['"]?)(.+?)\1/;
     return;
 }
 
@@ -1818,7 +1854,16 @@ sub directive {
     if ( !$options->{reference} && $d =~ /^([-+])([-\w.]+)$/i ) {
 	my $ctl = $2;
 	my $value = $1;
-	if ( $ctl eq "section-end" ) {
+	if ( $ctl eq "section-pop" ) {
+	    if ( @recalls ) {
+		( $dir_context, $in_context ) = @{pop(@recalls)};
+	    }
+	    else {
+		warn("Empty recall stack?\n");
+		$dir_context = $in_context = $def_context;
+	    }
+	}
+	elsif ( $ctl eq "section-end" ) {
 	    $dir_context = $in_context = $def_context;
 	}
 	elsif ( $ctl eq "dumpmeta" ) {

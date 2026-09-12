@@ -14,7 +14,7 @@ use feature qw( signatures );
 no warnings "experimental::signatures";
 
 use ChordPro::Output::Common;
-use ChordPro::Utils qw( fq qquote demarkup is_true is_ttrue );
+use ChordPro::Utils qw( fq qquote demarkup is_true is_ttrue is_image );
 use Ref::Util qw( is_arrayref );
 
 my $re_meta;
@@ -160,7 +160,7 @@ sub generate_song ( $s ) {
 
 	if ( $elt->{context} ne $ctx ) {
 	    push(@s, "{end_of_$ctx}") if $ctx;
-	    $ctx = $elt->{context};
+	    $ctx = $elt->{context}; $DB::single = 1 if $ctx eq 'abc';
 	    if ( $ctx ) {
 
 		my $t = "{start_of_$ctx";
@@ -197,13 +197,15 @@ sub generate_song ( $s ) {
 		if ( $ctx =~ /^abc$/ ) {
 		    if ( $elt->{id} ) {
 			push( @s, @{$s->{assets}->{$elt->{id}}->{data}} );
-			next;
+		    }
+		    elsif ( $elt->{data} ) {
+			push( @s, @{$elt->{data}} );
 		    }
 		    else {
 			pop(@s);
 			$ctx = '';
-			next;
 		    }
+		    next;
 		}
 		elsif ( $ctx =~ /^textblock$/ ) {
 		    push( @s, @{$s->{assets}->{$elt->{id}}->{data}} );
@@ -331,7 +333,7 @@ sub generate_song ( $s ) {
 	    next;
 	}
 
-	if ( $elt->{type} eq "image" && !$msp ) {
+	if ( is_image($elt->{type}) && !$msp ) {
 	    my $uri = $s->{assets}->{$elt->{id}}->{uri};
 	    if ( $msp && $uri !~ /^id=/ ) {
 		$imgs{$uri} //= keys(%imgs);
