@@ -122,7 +122,7 @@ sub fs_find( $folder, $opts = {} ) {
 
     unless ( is_msw ) {
 	my $ufolder = $folder;
-	$ufolder = encode_utf8($folder) if utf8::is_utf8($folder);
+	$ufolder = encode_utf8($folder) unless utf8::is_utf8($folder);
 
 	use File::Find qw(find);
 	my @files;

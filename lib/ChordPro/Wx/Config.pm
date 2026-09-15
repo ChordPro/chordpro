@@ -467,7 +467,6 @@ sub setup_styles( $refresh = 0 ) {
 
 	foreach ( @$entries ) {
 	    my $file = fn_catfile( $cfglib, $_->{name} );
-#	    warn("try $file\n");
 	    next unless fs_test( s => $file );
 
 	    my $data = fs_blob( $file );
