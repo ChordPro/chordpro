@@ -61,6 +61,15 @@ my @allpages;
 
 use constant SIZE_ITEMS => [ qw( chord text chorus tab grid diagram
 				 toc title footer label ) ];
+sub refresh_settings {
+    for ( $::config->{settings} ) {
+	$suppress_empty_chordsline = $_->{'suppress-empty-chords'};
+	$suppress_empty_lyricsline = $_->{'suppress-empty-lyrics'};
+	$inlinechords = $_->{'inline-chords'};
+	$inlineannots = $_->{'inline-annotations'};
+	$chordsunder  = $_->{'chords-under'};
+    }
+}
 
 sub generate_song {
     my ( $s, $opts ) = @_;
@@ -103,11 +112,8 @@ sub generate_song {
     }
     $source = $s->{source};
 
-    $suppress_empty_chordsline = $::config->{settings}->{'suppress-empty-chords'};
-    $suppress_empty_lyricsline = $::config->{settings}->{'suppress-empty-lyrics'};
-    $inlinechords = $::config->{settings}->{'inline-chords'};
-    $inlineannots = $::config->{settings}->{'inline-annotations'};
-    $chordsunder  = $::config->{settings}->{'chords-under'};
+    refresh_settings();
+
     my $ps = $::config->clone->{pdf};
     $ps->{pr} = $pr;
     $pr->{ps} = $ps;
@@ -1181,6 +1187,7 @@ sub generate_song {
 		$config->unlock;
 		prpadd2cfg( $config, $elt->{name} => $elt->{value} );
 		$config->lock;
+		refresh_settings();
 	    }
 	    next;
 	}
