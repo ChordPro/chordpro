@@ -54,3 +54,8 @@ description: "ChordPro related links"
 
 * [Chord Provider](https://github.com/Desbeers/Chord-Provider)  
   Chord Provider is a native, open-source ChordPro file editor and viewer built specifically for macOS. The developer is a regular contributor to the official implementation.
+
+* [Strumfolio](https://strumfolio.com)  
+  Strumfolio is a browser-based ChordPro songbook and reader. It installs as a
+  progressive web app and works offline on any platform with a browser,
+  including iOS and iPadOS, with no installation and no app store.
