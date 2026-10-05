@@ -69,6 +69,11 @@ sub refresh_settings {
 	$inlineannots = $_->{'inline-annotations'};
 	$chordsunder  = $_->{'chords-under'};
     }
+    unless ( exists $::config->{debug}->{hwm} ) {
+	$::config->unlock;
+	$::config->{debug}->{hwm} = 0;
+	$::config->lock;
+    }
 }
 
 sub generate_song {
@@ -270,6 +275,7 @@ sub generate_song {
 
     my $col;
     my $spreadimage;
+    my $highwatermark;
 
     my $col_adjust = sub {
 	if ( $ps->{columns} <= 1 ) {
@@ -389,6 +395,8 @@ sub generate_song {
 	$x = $ps->{__leftmargin};
 	$y = $ps->{_margintop};
 	$y += $ps->{headspace} if $ps->{'head-first-only'} && $class == 2;
+	$highwatermark = $y;
+	warn("HWM: $highwatermark (initial)\n") if $::config->{debug}->{hwm};
 	$x += $ps->{_indent};
 	$ps->{_top} = $y;
 	$col = 0;
@@ -660,6 +668,8 @@ sub generate_song {
 	}
 
 	if ( $elt->{type} eq "colb" ) {
+	    $highwatermark = $y;
+	    warn("HWM: $highwatermark (after colb)\n") if $::config->{debug}->{hwm};
 	    $checkspace->(-1);
 	    next;
 	}
@@ -1124,12 +1134,18 @@ sub generate_song {
 	    $x = $ps->{_leftmargin} + $ps->{_indent};
 
 	    if ( $elt->{value} == 1 ) {
+		warn("HWM: $highwatermark (before columns change)\n") if $::config->{debug}->{hwm};
+		$y = min( $highwatermark, $y );
+		warn("HWM: $y (new y)\n") if $::config->{debug}->{hwm};
 		# Need this for the margin bar of chorus (?)
 		$ps->{__leftmargin} = $ps->{_leftmargin} = $ps->{marginleft};
 	    }
 	    else {
 		# Abuse spreadimage to have next column start 'here'.
-		$spreadimage = $ps->{_top} - $y;
+		warn("HWM: $highwatermark (before columns change)\n") if $::config->{debug}->{hwm};
+		$y = min( $highwatermark, $y );
+		$spreadimage = min( $highwatermark, $ps->{_top} - $y );
+		warn("HWM: $spreadimage (spreadimage)\n") if $::config->{debug}->{hwm};
 	    }
 	    next;
 	}
