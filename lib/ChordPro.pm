@@ -125,6 +125,11 @@ sub chordpro {
 	  if @ARGV;
 	return ChordPro::Config::convert_config( $options->{'convert-config'}, $of );
     }
+    if ( $options->{'convert-config-json'} ) {
+	die("\"--convert-config-json\" requires a single config file name\n")
+	  if @ARGV;
+	return ChordPro::Config::convert_config( $options->{'convert-config-json'}, $of, 1 );
+    }
 
     if ( defined($of) && $of ne "" ) {
         if ( $of =~ /\.pdf$/i ) {
@@ -749,6 +754,19 @@ alternative.
 
 All other options are ignored.
 
+=item B<--convert-config-json=>I<file>
+
+This option requires a single file name argument.
+
+The specified config file is loaded and immedeately written out in
+strict JSON format.
+After this, the program exits. B<No songs are processed.>
+
+Output goes to standard output unless `--output` is used to specify an
+alternative.
+
+All other options are ignored.
+
 =back
 
 =head2 Miscellaneous options
@@ -930,6 +948,7 @@ sub app_setup {
 	  'print-delta-config'    => \$deltacfg,
 	  'print-template-config' => \$tmplcfg,
 	  'convert-config=s',
+	  'convert-config-json=s',
 
 	  # This aborts option scanning.
 	  'reference|R'		 => sub { $reference++;
@@ -1132,6 +1151,7 @@ sub app_setup {
       unless $::__EMBEDDED__
       || $clo->{'dump-chords'}
       || $clo->{'convert-config'}
+      || $clo->{'convert-config-json'}
       || @ARGV;
 
     # Return result.

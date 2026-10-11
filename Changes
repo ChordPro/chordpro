@@ -10,6 +10,9 @@
     - Command line option `--lyrics-only` is now equivalent to
       `--config=lyricsonly`.
 
+    - Command line option `--convert-config-json` is similar to
+      `--convert-config` but will produce strict JSON formatted output.
+
     - In the GUI you can now insert sharp and flat symbols using the
       Insert menu.
 

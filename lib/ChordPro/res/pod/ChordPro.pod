@@ -432,6 +432,19 @@ alternative.
 
 All other options are ignored.
 
+=item B<--convert-config-json=>I<file>
+
+This option requires a single file name argument.
+
+The specified config file is loaded and immedeately written out in
+strict JSON format.
+After this, the program exits. B<No songs are processed.>
+
+Output goes to standard output unless `--output` is used to specify an
+alternative.
+
+All other options are ignored.
+
 =back
 
 =head2 Miscellaneous options

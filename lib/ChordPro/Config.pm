@@ -637,23 +637,27 @@ sub config_final ( %args ) {
 			    pretty => 1, schema => $schema );
 }
 
-sub convert_config ( $from, $to ) {
+sub convert_config ( $from, $to, $json = 0 ) {
     # This is a completely independent function.
 
     # Establish a key order retaining parser.
-    my $parser = JSON::Relaxed::Parser->new( key_order => 1 );
+    my $parser = JSON::Relaxed::Parser->new( key_order => !$json );
+    $parser->booleans = [ \1, \0 ] if $json;
 
     # First find and process the schema.
-    my $schema = CP->findres( "config.schema", class => "config" );
-    my $o = { split => 0, fail => 'soft' };
-    my $data = fs_load( $schema, $o );
-    die("$schema: ", $o->{error}, "\n") if $o->{error};
-    $schema = $parser->decode($data);
+    my $schema;
+    unless ( $json ) {
+	$schema = CP->findres( "config.schema", class => "config" );
+	my $o = { split => 0, fail => 'soft' };
+	my $data = fs_load( $schema, $o );
+	die("$schema: ", $o->{error}, "\n") if $o->{error};
+	$schema = $parser->decode($data);
+    }
 
     # Then load the config to be converted.
     my $new;
-    $o = { split => 1, fail => 'soft' };
-    $data = fs_load( $from, $o );
+    my $o = { split => 1, fail => 'soft' };
+    my $data = fs_load( $from, $o );
     die("Cannot open config $from [", $o->{error}, "]\n") if $o->{error};
     $data = join( "\n", @$data );
 
@@ -667,12 +671,20 @@ sub convert_config ( $from, $to ) {
 	$new = $parser->decode($data);
     }
 
-    # And re-encode it using the schema.
-    my $res = $parser->encode( data => $new, pretty => 1,
-			       nounicodeescapes => 1, schema => $schema );
-    # use DDP; p $res;
-    # Add trailer.
-    $res .= "\n// End of Config.\n";
+    my $res;
+
+    if ( $json ) {
+	require JSON::XS;
+	$res = JSON::XS->new->utf8->pretty->encode($new);
+    }
+    else {
+	# Re-encode it using the schema.
+	$res = $parser->encode( data => $new, pretty => 1,
+				nounicodeescapes => 1, schema => $schema );
+	# use DDP; p $res;
+	# Add trailer.
+	$res .= "\n// End of Config.\n";
+    }
 
     # Write if out.
     if ( $to && $to ne "-" ) {
