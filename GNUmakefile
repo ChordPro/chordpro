@@ -186,7 +186,7 @@ _mkit_stopvm :
 	VBoxManage controlvm ${MACVM} poweroff
 	VBoxManage snapshot ${MACVM} restorecurrent
 
-LTS     := 24
+LTS     := 26
 LTSHOST := ubuntu${LTS}
 LTSVM   := "Ubuntu ${LTS}.04 LTS"
 
