@@ -372,7 +372,7 @@ sub decode_fingering
 
 		    $chordpro .= "$rf" ;
 		} else {
-		    $chordpro .= '-' ;
+		    $chordpro .= "x" ;
 		}
 	    }
 

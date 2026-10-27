@@ -1,7 +1,7 @@
 {title: Chord Fingering diagrams}
 
-{define Ab base-fret 1 frets - - 1 1 1 -}
-{define Ab+ base-fret 1 frets - - 2 1 1 -}
+{define Ab base-fret 1 frets x x 1 1 1 x}
+{define Ab+ base-fret 1 frets x x 2 1 1 x}
 {define A(V) base-fret 5 frets 1 3 3 2 1 1}
 {define A+ base-fret 0 frets 0 0 3 2 2 0}
 {define A-9 base-fret 0 frets 0 0 2 3 2 0}
@@ -17,7 +17,7 @@
 {define A7/9+5 base-fret 0 frets 0 0 3 0 0 0}
 {define A7sus4 base-fret 0 frets 0 0 2 0 3 0}
 {define A9 base-fret 0 frets 0 0 2 2 0 0}
-{define Ab base-fret 1 frets - - 1 1 1 -}
+{define Ab base-fret 1 frets x x 1 1 1 x}
 {define Am+5 base-fret 0 frets 0 0 3 2 1 0}
 {define Am+7 base-fret 0 frets 0 0 0 2 1 1}
 {define Am7/6 base-fret 0 frets 0 0 4 0 1 0}
@@ -40,23 +40,23 @@ Am7 alt=002013
 BbM7 alt=003234
 {define B+ base-fret 0 frets 0 2 1 0 0 0}
 {define B7(II) base-fret 2 frets 1 1 3 1 3 1}
-{define B7/9 base-fret 1 frets - 2 1 2 2 -}
-{define B7sus4 base-fret 0 frets - 2 2 2 0 2}
+{define B7/9 base-fret 1 frets x 2 1 2 2 x}
+{define B7sus4 base-fret 0 frets x 2 2 2 0 2}
 {define Bm7-5 base-fret 0 frets 0 2 3 2 3 0}
 {define Bm7 base-fret 0 frets 0 0 4 4 3 2}
 {define Bm7sus4 base-fret 0 frets 0 0 4 4 3 0}
-{define BM7 base-fret 3 frets - - 2 1 2 -}
+{define BM7 base-fret 3 frets x x 2 1 2 x}
 {define Bm base-fret 2 frets 1 1 3 3 2 1}
 {define Bm7/E base-fret 0 frets 0 0 4 4 3 2}
 {define Bm9 base-fret 0 frets 2 2 0 2 2 2}
 {define C/B base-fret 0 frets 0 2 0 0 1 0}
-{define C6 base-fret 0 frets - 3 2 2 1 0}
+{define C6 base-fret 0 frets x 3 2 2 1 0}
 {comment: C7alt='xx2313}
 {define C7/9 base-fret 0 frets 0 3 2 3 3 0}
 {define C9 base-fret 0 frets 3 3 2 0 3 0}
 C alt=032013
 {define Cdim(IV) base-fret 0 frets 0 0 4 5 4 5}
-{define Cdim base-fret 1 frets - - 1 2 1 2}
+{define Cdim base-fret 1 frets x x 1 2 1 2}
 {define Cm(7) base-fret 0 frets 0 0 5 5 4 3}
 {define CM7/6 base-fret 0 frets 3 3 2 2 0 0}
 {define CM7/9 base-fret 0 frets 3 3 2 0 3 0}
@@ -65,17 +65,17 @@ C alt=032013
 {define Cm9 base-fret 0 frets 0 0 5 5 4 5}
 {define Cm base-fret 3 frets 1 1 3 3 2 1}
 {define Csus4 base-fret 0 frets 3 3 2 0 1 1}
-{define C#7 base-fret 0 frets - 4 3 4 0 4}
-{define C#7/G# base-fret 0 frets 4 - 3 4 0 4}
+{define C#7 base-fret 0 frets x 4 3 4 0 4}
+{define C#7/G# base-fret 0 frets 4 x 3 4 0 4}
 {define C#m7-5 base-fret 0 frets 0 4 5 4 5 0}
-{define C#m7 base-fret 4 frets - - 3 3 2 1}
-{define C#m7alt base-fret 0 frets - - 6 6 5 0}
+{define C#m7 base-fret 4 frets x x 3 3 2 1}
+{define C#m7alt base-fret 0 frets x x 6 6 5 0}
 {define C#m base-fret 4 frets 1 1 3 3 2 1}
 D alt=004235
 {define D+ base-fret 0 frets 0 0 0 3 3 2}
 {define D6/9 base-fret 0 frets 0 0 0 2 0 0}
 {define D6 base-fret 0 frets 0 0 0 2 0 2}
-{define D/F# base-fret 0 frets 2 0 0 2 - -}
+{define D/F# base-fret 0 frets 2 0 0 2 x x}
 {define D6sus4 base-fret 0 frets 0 2 0 0 3 2}
 {define D7+ base-fret 0 frets 0 0 0 3 1 2}
 {define D7-5 base-fret 0 frets 0 0 0 1 1 2}
@@ -92,9 +92,9 @@ D alt=004235
 {define DM7/9 base-fret 0 frets 0 0 2 2 0}
 {define Dm7sus4 base-fret 0 frets 0 0 0 2 1 3}
 {define Dsus4 base-fret 0 frets 0 0 0 2 3 3}
-{define Eb6 base-fret 1 frets - - 1 3 1 3}
-{define Eb base-fret 1 frets - - 1 3 4 3}
-{define EbM7 base-fret 1 frets - - 1 3 3 3}
+{define Eb6 base-fret 1 frets x x 1 3 1 3}
+{define Eb base-fret 1 frets x x 1 3 4 3}
+{define EbM7 base-fret 1 frets x x 1 3 3 3}
 {define E+7 base-fret 0 frets 0 2 1 1 0 0}
 {define E+ base-fret 0 frets 0 3 2 1 0 0}
 {define E-9 base-fret 0 frets 0 2 3 1 0 0}
@@ -123,8 +123,8 @@ Em6 alt=042000
 {define F7 base-fret 1 frets 1 3 1 2 1 1}
 {define F7/9 base-fret 1 frets 1 3 1 2 1 3}
 {define F7-9 base-fret 0 frets 0 3 4 2 4 0}
-{define Fdim(III) base-fret 3 frets - - 1 2 1 2}
-{define Fdim base-fret 0 frets - - 0 1 0 1}
+{define Fdim(III) base-fret 3 frets x x 1 2 1 2}
+{define Fdim base-fret 0 frets x x 0 1 0 1}
 {define Fm7/6 base-fret 1 frets 1 3 1 1 3 1}
 {define Fm7/9 base-fret 1 frets 1 3 1 1 1 3}
 {define FM7 base-fret 0 frets 0 3 3 2 1 0}
@@ -138,25 +138,25 @@ Em6 alt=042000
 {define F#malt base-fret 2 frets 1 3 3 1 1 4}
 {define F#m+7 base-fret 2 frets 1 3 3 1 1 3}
 {define G+7 base-fret 0 frets 3 2 0 0 0 2}
-{define G+ base-fret 0 frets - - 1 0 0 3}
+{define G+ base-fret 0 frets x x 1 0 0 3}
 {define G-9 base-fret 0 frets 3 2 0 0 0 4}
 {define G/F# base-fret 0 frets 2 2 0 0 0 3}
 {define G/B base-fret 0 frets 0 2 0 0 3 0}
-{define G5 base-fret 0 frets 3 2 0 0 3 -}
-{define G5/7 base-fret 0 frets 3 2 3 0 3 -}
+{define G5 base-fret 0 frets 3 2 0 0 3 x}
+{define G5/7 base-fret 0 frets 3 2 3 0 3 x}
 {define G6 base-fret 0 frets 3 2 0 0 0 0}
 {define G6/9 base-fret 0 frets 0 0 0 2 0 3}
-{define G7+5 base-fret 0 frets - - 1 0 0 1}
+{define G7+5 base-fret 0 frets x x 1 0 0 1}
 {define G7-9 base-fret 0 frets 0 5 6 4 6 0}
-{define G7+ base-fret 0 frets - - 1 0 0 1}
+{define G7+ base-fret 0 frets x x 1 0 0 1}
 {define G7/6 base-fret 0 frets 3 2 3 0 0 0}
 {define G7alt base-fret 0 frets 3 2 3 0 0 3}
 {define G9 base-fret 0 frets 3 0 0 2 0 3}
 {define G9 base-fret 0 frets 3 0 0 2 0 3}
-{define Gdim base-fret 2 frets - - 1 2 1 2}
+{define Gdim base-fret 2 frets x x 1 2 1 2}
 {define Gm6 base-fret 3 frets 1 3 3 1 3 1}
 {define GM7/6 base-fret 0 frets 3 2 4 0 0 0}
-{define GM7 base-fret 0 frets 3 2 4 0 0 -}
+{define GM7 base-fret 0 frets 3 2 4 0 0 x}
 {define Gm7 base-fret 3 frets 1 3 1 1 1 1}
 {define G#7 base-fret 4 frets 1 3 1 2 1 1}
 {define G#m7-5 base-fret 0 frets 0 4 5 3 6}
@@ -164,40 +164,40 @@ Em6 alt=042000
 {define G#m base-fret 4 frets 1 3 3 1 1 1}
 
 {define G base-fret 0 frets 3 2 0 0 3 3}
-{define Am7 base-fret 0 frets - 0 2 0 1 0}
-{define D9 base-fret 0 frets - - 0 2 1 0}
-{define D/F# base-fret 0 frets 2 0 0 2 3 -}
-{define D7 base-fret 0 frets - - 0 2 1 2}
-{define Dsus2 base-fret 0 frets - - 0 2 3 0}
+{define Am7 base-fret 0 frets x 0 2 0 1 0}
+{define D9 base-fret 0 frets x x 0 2 1 0}
+{define D/F# base-fret 0 frets 2 0 0 2 3 x}
+{define D7 base-fret 0 frets x x 0 2 1 2}
+{define Dsus2 base-fret 0 frets x x 0 2 3 0}
 {define Em base-fret 0 frets 0 2 2 0 0 0}
 {define F9 base-fret 1 frets 1 3 1 2 1 3}
-{define D4 base-fret 0 frets - - 0 2 3 3}
-{define D base-fret 0 frets - - 0 2 3 2}
+{define D4 base-fret 0 frets x x 0 2 3 3}
+{define D base-fret 0 frets x x 0 2 3 2}
 {define E base-fret 0 frets 0 2 2 1 0 0}
-{define C) base-fret 3 frets - 1 - - - -}
-{define C base-fret 0 frets - 3 2 0 1 0}
+{define C) base-fret 3 frets x 1 x x x x}
+{define C base-fret 0 frets x 3 2 0 1 0}
 {define E7 base-fret 0 frets 0 2 2 1 3 0}
-{define C/B) base-fret 2 frets - 1 - - - -}
-{define Bm7 base-fret 2 frets - 1 3 1 2 1}
-{define Am base-fret 0 frets - 0 2 2 1 0}
-{define C/A) base-fret 0 frets - 0 - - - -}
+{define C/B) base-fret 2 frets x 1 x x x x}
+{define Bm7 base-fret 2 frets x 1 3 1 2 1}
+{define Am base-fret 0 frets x 0 2 2 1 0}
+{define C/A) base-fret 0 frets x 0 x x x x}
 
 {define Em base-fret 0 frets 0 2 2 0 0 0}
-{define Em/C# base-fret 0 frets - 4 - 0 0 0}
-{define D/F# base-fret 0 frets 2 - 0 2 3 -}
-{define Dm/F base-fret 0 frets 1 - 0 2 3 -}
+{define Em/C# base-fret 0 frets x 4 x 0 0 0}
+{define D/F# base-fret 0 frets 2 x 0 2 3 x}
+{define Dm/F base-fret 0 frets 1 x 0 2 3 x}
 {define Esus base-fret 0 frets 0 2 2 2 0 0}
-{define Am7 base-fret 0 frets - 0 2 0 1 0}
-{define G/B base-fret 0 frets - 2 0 0 3 3}
-{define Cm6 base-fret 2 frets - 2 - 1 3 -}
+{define Am7 base-fret 0 frets x 0 2 0 1 0}
+{define G/B base-fret 0 frets x 2 0 0 3 3}
+{define Cm6 base-fret 2 frets x 2 x 1 3 x}
 
-{define A base-fret 0 frets - 0 2 2 2 0}
-{define Aadd2 base-fret 0 frets - 0 2 2 0 0}
-{define Amaj7 base-fret 0 frets - 0 2 1 2 0}
-{define A7 base-fret 0 frets - 0 2 0 2 0}
-{define D base-fret 0 frets - - 0 2 3 2}
-{define Dm base-fret 0 frets - - 0 2 3 1}
+{define A base-fret 0 frets x 0 2 2 2 0}
+{define Aadd2 base-fret 0 frets x 0 2 2 0 0}
+{define Amaj7 base-fret 0 frets x 0 2 1 2 0}
+{define A7 base-fret 0 frets x 0 2 0 2 0}
+{define D base-fret 0 frets x x 0 2 3 2}
+{define Dm base-fret 0 frets x x 0 2 3 1}
 {define E7sus4 base-fret 0 frets 0 2 0 2 0 0}
 {define E base-fret 0 frets 0 2 2 1 0 0}
-{define F+ base-fret 0 frets - 0 3 2 2 1}
+{define F+ base-fret 0 frets x 0 3 2 2 1}
 {define F#m base-fret 2 frets 1 3 3 1 1 1}

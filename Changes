@@ -23,6 +23,8 @@
 
     - Fix issue #668 (Wrong B7 fingering).
 
+    - Fix issue #711 (use x instead of hyphens for a2crd chords).
+
     - Dalai Felinto fixed issue #683 (pdf.diagrams.fingers = false). Thanks!
 
 6.101 2026-04-30

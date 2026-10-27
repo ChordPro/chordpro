@@ -56,10 +56,10 @@ E----------------------------------5--
 
                 EADGBE
 {define Em base-fret 0 frets 0 2 2 0 0 0}
-{define Em/C# base-fret 0 frets - 4 - 0 0 0}
-{define D/F# base-fret 0 frets 2 - 0 2 3 -}
-{define Dm/F base-fret 0 frets 1 - 0 2 3 -}
+{define Em/C# base-fret 0 frets x 4 x 0 0 0}
+{define D/F# base-fret 0 frets 2 x 0 2 3 x}
+{define Dm/F base-fret 0 frets 1 x 0 2 3 x}
 {define Esus base-fret 0 frets 0 2 2 2 0 0}
-{define Am7 base-fret 0 frets - 0 2 0 1 0}
-{define G/B base-fret 0 frets - 2 0 0 3 3}
-{define Cm6 base-fret 2 frets - 2 - 1 3 -}
+{define Am7 base-fret 0 frets x 0 2 0 1 0}
+{define G/B base-fret 0 frets x 2 0 0 3 3}
+{define Cm6 base-fret 2 frets x 2 x 1 3 x}
