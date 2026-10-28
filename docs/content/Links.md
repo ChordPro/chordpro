@@ -59,3 +59,7 @@ description: "ChordPro related links"
   Strumfolio is a browser-based ChordPro songbook and reader. It installs as a
   progressive web app and works offline on any platform with a browser,
   including iOS and iPadOS, with no installation and no app store.
+
+* [Setliner](https://setliner.com)  
+  Setliner is a chord chart and setlist app for gigging musicians, bands and worship teams. It imports and exports ChordPro and includes a ChordPro guide in the app, with a WYSIWYG preview.  
+  The app also transposes or adds a capo on the fly, and supports auto-scroll, foot-pedal page turns, team scheduling and other tools for musicians to practice. Songs are kept as files in a folder you choose, and the app works offline. Runs on Windows, macOS, Linux, Android and iOS.
