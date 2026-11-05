@@ -47,3 +47,8 @@ description: "ChordPro related links"
 
 * [Chord Provider](https://github.com/Desbeers/Chord-Provider)  
   Chord Provider is a native, open-source ChordPro file editor and viewer built specifically for macOS. The developer is a regular contributor to the official implementation.
+
+* [Fretlist](https://fretlist.com?rel=chordpro)
+  A ChordPro editor and viewer for chord sheets and setlists. Runs in the
+  browser on any platform, also offline. Not open source.
+  [Directive support](https://fretlist.com/docs/chordpro).
