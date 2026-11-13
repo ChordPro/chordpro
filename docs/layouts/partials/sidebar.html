@@ -1,38 +1,26 @@
 {{- $ctx := . -}}
-{{ $logo := resources.Get "images/chordpro-icon.png" }}
-
-<div class="bg-light border-right" id="sidebar-wrapper">
-    <div id="sidebar-logo">
-        <img src="{{ $logo.Permalink }}" />
-        <a href="{{ ref . "Home" }}">
-            ChordPro
-        </a>
-    </div>
-<div id="pagefindsearch" class=""></div>
-<script>
-    window.addEventListener('DOMContentLoaded', (event) => {
+<aside class="docs-nav" id="docs-nav" aria-label="Documentation">
+  <div class="docs-nav-in">
+    <div id="pagefindsearch" class="docs-search"></div>
+    <script>
+      window.addEventListener('DOMContentLoaded', () => {
+        if (!window.PagefindUI) return;
         new PagefindUI({ element: "#pagefindsearch",
-                         baseUrl: "{{ .Site.BaseURL|relURL }}/",
+                         baseUrl: "{{ .Site.BaseURL | relURL }}/",
                          showSubResults: true,
                          showImages: false });
-    });
-</script>
-
-{{ range .Site.Menus.sidebar -}}
-
-{{- if .HasChildren -}}
-<div class="sidebar-heading">{{ .Title | safeHTML }}</div>
-
-{{ with .Children }}
-<div class="list-group list-group-flush">
-{{ range . }}
-<a href="{{ relref $ctx .KeyName }}"
-   class="list-group-item list-group-item-action bg-light">{{- .Title | safeHTML -}}</a>
-{{- end }}
-</div>
-{{ end -}}
-{{ end }}
-
-{{ end }}
-
-</div>
+      });
+    </script>
+    {{- range .Site.Menus.sidebar }}
+    {{- if .HasChildren }}
+    <h2 class="docs-nav-h">{{ .Title | safeHTML }}</h2>
+    <ul>
+      {{- range .Children }}
+      {{- $href := relref $ctx .KeyName }}
+      <li><a href="{{ $href }}"{{ if eq $href $ctx.RelPermalink }} aria-current="page"{{ end }}>{{ .Title | safeHTML }}</a></li>
+      {{- end }}
+    </ul>
+    {{- end }}
+    {{- end }}
+  </div>
+</aside>

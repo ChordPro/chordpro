@@ -1,0 +1,21 @@
+{{- $ctx := . -}}
+{{- $base := "" -}}{{- with .File }}{{ $base = .BaseFileName }}{{ end -}}
+<a class="skip" href="#main">Skip to content</a>
+<header class="bar">
+  <a class="brand" href="{{ "" | absURL }}">
+    <img src="{{ (resources.Get "images/chordpro-icon.png").Permalink }}" alt="" width="28" height="28">
+    <span>ChordPro</span>
+  </a>
+  {{- if ne hugo.Environment "stable" }}
+  <a class="beta" href="{{ .Site.Params.stable }}">Beta docs. Stable site</a>
+  {{- end }}
+  <nav class="bar-nav" aria-label="Site">
+    <a href="{{ ref . "Home" }}"{{ if and (ne .Type "landing") (ne $base "ChordPro-Installation") }} aria-current="page"{{ end }}>Docs</a>
+    <a href="{{ ref . "ChordPro-Installation" }}"{{ if eq $base "ChordPro-Installation" }} aria-current="page"{{ end }}>Install</a>
+    <a href="https://groups.io/g/ChordPro">Forum</a>
+    <a href="{{ .Site.Params.link_github }}">GitHub</a>
+  </nav>
+  {{- if ne .Type "landing" }}
+  <button class="bar-menu" type="button" aria-controls="docs-nav" aria-expanded="false">Contents</button>
+  {{- end }}
+</header>

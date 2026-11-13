@@ -1,41 +1,122 @@
 <!DOCTYPE html>
 <html lang="{{ .Site.LanguageCode }}">
 {{ partial "head.html" . }}
-<body>
-    <div id="wrapper">
-        <div id="content" style="max-width:800px">
-            <div id="logo">
-                <img src="{{ (resources.Get "images/chordpro-icon.png").Permalink }}" alt="ChordPro icon">
-                <p>
-                    {{ .Site.Title }}
-                </p>
-            </div>
-            <p id="subtitle">
-                {{ .Params.Subtitle }}
-            </p>
-            <p id="statement">
-                {{ .Params.Description }}
-            </p>
-            {{- block "main" . }}{{- end }}
+{{- $ctx := . -}}
+{{- $v := getenv "CHORDPRO_VERSION" | default "6" -}}
+{{- $p := .Params -}}
+<body class="home">
+  {{ partial "header.html" . }}
+  <main id="main">
+
+    <section class="hero" aria-labelledby="hero-h">
+      <div class="hero-copy">
+        <h1 id="hero-h" class="lead" aria-label="{{ replaceRE `\[[^\]]*\]` "" $p.hero.line }}">
+          <span class="lead-set" aria-hidden="true">{{ partial "leadline.html" $p.hero.line }}</span>
+        </h1>
+        <div class="typed"><p class="typed-label">{{ $p.hero.typed_label }}</p><code class="cho">{{ partial "cholines.html" $p.hero.line }}</code></div>
+      </div>
+      <div class="hero-side">
+        <figure class="hero-media">
+          <video id="hero-video" data-bg autoplay muted loop playsinline preload="metadata"
+                 poster="{{ "video/shapes.jpg" | absURL }}" data-poster-m="{{ "video/shapes-m.jpg" | absURL }}"
+                 aria-label="{{ $p.hero.video_label }}">
+            <source src="{{ "video/shapes-1080.mp4" | absURL }}" type="video/mp4" media="(min-width: 900px)">
+            <source src="{{ "video/shapes-m.mp4" | absURL }}" type="video/mp4">
+          </video>
+          <button class="vid-toggle" type="button" data-video-toggle aria-controls="hero-video" data-pause="Pause the video" data-play="Play the video"><span aria-hidden="true"></span></button>
+        </figure>
+        <div class="hero-foot">
+          <p class="hero-sub">{{ $p.hero.sub }}</p>
+          <div class="hero-act">
+            <a class="btn" href="{{ ref . "ChordPro-Installation" }}">{{ $p.hero.cta }}</a>
+            <p class="hero-meta">{{ replace $p.hero.meta "{version}" $v }}</p>
+          </div>
         </div>
-    </div>
-    <div id="footer">
-        <div class="row">
-            <div class="column left-align">
-                <p>{{ .Params.Footer1 | markdownify }}</p>
-                <p>{{ .Params.Footer2 | markdownify }}</p>
-            </div>
-            <div class="column right-align">
-                <a href="{{ .Site.Params.link_github }}">
-                    <i class="fa fa-github"></i>
-                </a>
-                <a href="{{ .Site.Params.link_paypal }}">
-                    <i class="fa fa-paypal"></i>
-                </a>
-                <a href="{{ .Site.Params.link_coffee }}">
-                    <i class="fa fa-coffee"></i>
-                </a>
-            </div>
+      </div>
+    </section>
+
+    <section class="lift" aria-labelledby="lift-h" data-lift>
+      <div class="lift-pin">
+        <div class="lift-text">
+          <h2 id="lift-h">{{ $p.lift.headline }}</h2>
+          <ol class="lift-steps">
+            {{- range $i, $s := $p.lift.steps }}
+            <li data-step="{{ $i }}">{{ $s | markdownify }}</li>
+            {{- end }}
+          </ol>
         </div>
-    </div>
+        <div class="lift-stage">
+          <div class="lift-lines">
+            {{- range $p.lift.lines }}
+            <div class="lift-line">
+              <p class="lift-src" aria-hidden="true">{{ partial "cholines.html" . }}</p>
+              <p class="lift-set">{{ partial "leadline.html" . }}</p>
+            </div>
+            {{- end }}
+          </div>
+          {{- with resources.Get $p.lift.image }}
+          <figure class="lift-page">
+            <img src="{{ .Permalink }}" width="{{ .Width }}" height="{{ .Height }}" alt="{{ $p.lift.image_alt }}">
+          </figure>
+          {{- end }}
+        </div>
+      </div>
+    </section>
+
+    <section class="styles" aria-labelledby="styles-h" data-rail>
+      <div class="styles-pin">
+        <div class="styles-head">
+          <h2 id="styles-h">{{ $p.styles.headline }}</h2>
+          <p>{{ $p.styles.body }}</p>
+        </div>
+        <div class="styles-track" data-rail-track tabindex="0" role="region" aria-label="The same song in {{ len $p.styles.items }} styles">
+          {{- range $p.styles.items }}
+          {{- $item := . }}
+          {{- with resources.Get $item.image }}
+          <figure class="style-card">
+            <img src="{{ .Permalink }}" width="{{ .Width }}" height="{{ .Height }}" alt="Swing Low Sweet Chariot printed in the {{ $item.name }} style" loading="lazy">
+            <figcaption><strong>{{ $item.name }}</strong> {{ $item.caption }}</figcaption>
+          </figure>
+          {{- end }}
+          {{- end }}
+        </div>
+        <div class="rail-bar" aria-hidden="true"><span></span></div>
+      </div>
+    </section>
+
+    <section class="more" aria-labelledby="more-h">
+      {{- with resources.Get $p.more.image }}
+      <figure class="more-page" data-reveal>
+        <img src="{{ .Permalink }}" width="{{ .Width }}" height="{{ .Height }}" alt="{{ $p.more.image_alt }}">
+      </figure>
+      {{- end }}
+      <div class="more-text">
+        <h2 id="more-h">{{ $p.more.headline }}</h2>
+        <p class="more-body">{{ $p.more.body | markdownify }}</p>
+        <ul class="rows">
+          {{- range $p.more.features }}
+          <li><a href="{{ relref $ctx .link }}"><span class="row-t">{{ .title }}</span> <span class="row-d">{{ .text }}</span></a></li>
+          {{- end }}
+        </ul>
+      </div>
+    </section>
+
+    <section class="history" aria-labelledby="history-h">
+      <h2 id="history-h">{{ $p.history.headline }}</h2>
+      <p>{{ $p.history.body }} <a href="{{ relref . $p.history.link }}">Read the history</a></p>
+    </section>
+
+    <section class="download" aria-labelledby="download-h" id="download">
+      <h2 id="download-h">{{ replace $p.download.headline "{version}" $v }}</h2>
+      <ul class="dl">
+        {{- range $p.download.items }}
+        <li><a href="{{ relref $ctx .link }}"><span class="dl-os">{{ .os }}</span> <span class="dl-t">{{ .text }}</span> <span class="dl-go"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3v13m0 0-5-5m5 5 5-5M4 20h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"/></svg>Download</span></a></li>
+        {{- end }}
+      </ul>
+      <p class="dl-note"><a href="{{ relref . "ChordPro-Installation" }}">{{ $p.download.note }}</a></p>
+    </section>
+
+  </main>
+  {{ partial "footer.html" . }}
 </body>
+</html>

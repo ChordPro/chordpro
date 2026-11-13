@@ -1,0 +1,18 @@
+{{- /*
+  Sets a ChordPro lyric line the way ChordPro prints it: each [chord] is
+  lifted onto its own line above the syllable written after it.
+  Takes the line as written in a .cho file, e.g. "Swing [D]low, sweet [G]chari[D]ot,".
+*/ -}}
+{{- $parts := split . "[" -}}
+{{- range $i, $p := $parts -}}
+  {{- if eq $i 0 -}}{{ $p }}
+  {{- else -}}
+    {{- $cp := split $p "]" -}}
+    {{- $chord := index $cp 0 -}}
+    {{- $text := delimit (after 1 $cp) "]" -}}
+    {{- $syl := "" -}}
+    {{- with findRE `^\S+` $text 1 }}{{ $syl = index . 0 }}{{ end -}}
+    {{- $rest := strings.TrimPrefix $syl $text -}}
+    <span class="c"><span class="ch">{{ $chord }}</span><span class="sy">{{ with $syl }}{{ . }}{{ else }}&nbsp;{{ end }}</span></span>{{ $rest }}
+  {{- end -}}
+{{- end -}}

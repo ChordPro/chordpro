@@ -1,0 +1,12 @@
+{{- /*
+  Shows a ChordPro lyric line as it is typed, with the brackets marked so
+  the page can style and animate them.
+*/ -}}
+{{- $parts := split . "[" -}}
+{{- range $i, $p := $parts -}}
+  {{- if eq $i 0 -}}{{ $p }}
+  {{- else -}}
+    {{- $cp := split $p "]" -}}
+    <span class="sb">[</span><span class="ch">{{ index $cp 0 }}</span><span class="sb">]</span>{{ delimit (after 1 $cp) "]" }}
+  {{- end -}}
+{{- end -}}
