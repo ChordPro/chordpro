@@ -8,10 +8,11 @@
   {{- $desc := .Site.Params.description }}
   {{- with .Description }}{{ $desc = . }}{{ else }}{{ with .Summary }}{{ $desc = . | plainify | truncate 160 }}{{ end }}{{ end }}
   <meta name="description" content="{{ $desc }}">
-  <link rel="canonical" href="{{ .Permalink }}">
+  {{- $url := .Permalink }}{{ if eq .Type "landing" }}{{ $url = .Site.BaseURL }}{{ end }}
+  <link rel="canonical" href="{{ $url }}">
   <link rel="icon" type="image/png" href="{{ (resources.Get "images/chordpro-icon.png").Permalink }}">
   <meta name="theme-color" content="#f4f6f8">
-  {{ partial "opengraph.html" (dict "page" . "title" $title "desc" $desc) }}
+  {{ partial "opengraph.html" (dict "page" . "url" $url "title" $title "desc" $desc) }}
   {{- with .Site.Params.keywords }}
   <meta name="keywords" content="{{ . | safeHTMLAttr }}">
   {{- end }}
