@@ -10,7 +10,8 @@
   <meta name="description" content="{{ $desc }}">
   {{- $url := .Permalink }}{{ if eq .Type "landing" }}{{ $url = .Site.BaseURL }}{{ end }}
   <link rel="canonical" href="{{ $url }}">
-  <link rel="icon" type="image/png" href="{{ (resources.Get "images/chordpro-icon.png").Permalink }}">
+  <link rel="icon" type="image/png" sizes="192x192" href="{{ (resources.Get "images/chordpro-mark.png").Permalink }}">
+  <link rel="apple-touch-icon" href="{{ (resources.Get "images/chordpro-touch.png").Permalink }}">
   <meta name="theme-color" content="#f4f6f8">
   {{ partial "opengraph.html" (dict "page" . "url" $url "title" $title "desc" $desc) }}
   {{- with .Site.Params.keywords }}
