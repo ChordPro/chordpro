@@ -1,0 +1,34 @@
+{{- $ctx := . -}}
+{{- $home := .Site.GetPage "Landing" -}}
+<footer class="foot">
+  <div class="foot-support">
+    <h2>{{ $home.Params.support.headline }}</h2>
+    <p>{{ $home.Params.support.body }}</p>
+    <p class="foot-give">
+      <a class="btn-line" href="{{ .Site.Params.link_paypal }}">Donate with PayPal</a>
+      <a class="btn-line" href="{{ .Site.Params.link_coffee }}">Buy us a coffee on Ko-fi</a>
+    </p>
+  </div>
+  <div class="foot-docs-head">
+    <h2>{{ $home.Params.docs.headline }}</h2>
+    <p>{{ $home.Params.docs.body }}</p>
+  </div>
+  <nav class="foot-docs" aria-label="Documentation">
+    {{- range .Site.Menus.sidebar }}
+    {{- if .HasChildren }}
+    <div>
+      <h3>{{ .Title | safeHTML }}</h3>
+      <ul>
+        {{- range .Children }}
+        <li><a href="{{ relref $ctx .KeyName }}">{{ .Title | safeHTML }}</a></li>
+        {{- end }}
+      </ul>
+    </div>
+    {{- end }}
+    {{- end }}
+  </nav>
+  <div class="foot-line">
+    <p>{{ $home.Params.footer }}</p>
+    <p>ChordPro is free software under the Artistic License 2.0. <a href="{{ .Site.Params.link_github }}">Source on GitHub</a>.</p>
+  </div>
+</footer>

@@ -1,29 +1,36 @@
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="utf-8">
-  <title>{{ if not .IsHome }}{{ with .Title }}{{ . }} | {{ end }}{{ end }}{{ .Site.Title }}</title>
-  <link rel="icon" type="image/x-icon" href="{{ (resources.Get "images/chordpro-icon.png").Permalink }}">
-  <meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ with .Summary }}{{ . }}{{ else }}{{ .Site.Params.description }}{{end }}{{ end }} ">
-  {{ partial "opengraph.html" . }}
-  {{ template "_internal/twitter_cards.html" . }}
-  {{- with .Site.Params.keywords -}}
-    <meta name="keywords" content="{{ . | safeHTMLAttr }}">
-  {{- end -}}
-  {{ partial "head_bs4.html" . }}
-  {{ partial "head_fancybox.html" . }}
-  <link rel="stylesheet" href="{{ (resources.Get "css/site.css").Permalink }}">
-  <link rel="stylesheet" href="{{ (resources.Get "css/pagefind-ui.css").Permalink }}">
-  <!-- script src="pagefind/pagefind-ui.js"></script -->
-  <script src="{{ (resources.Get "js/pagefind-ui.js").Permalink }}"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {{- $title := .Site.Title }}
+  {{- if eq .Type "landing" }}{{ $title = printf "%s: %s" .Site.Title .Params.tagline }}
+  {{- else if not .IsHome }}{{ with .Title }}{{ $title = printf "%s | %s" . $.Site.Title }}{{ end }}{{ end }}
+  <title>{{ $title }}</title>
+  {{- $desc := .Site.Params.description }}
+  {{- with .Description }}{{ $desc = . }}{{ else }}{{ with .Summary }}{{ $desc = . | plainify | truncate 160 }}{{ end }}{{ end }}
+  <meta name="description" content="{{ $desc }}">
+  {{- $url := .Permalink }}{{ if eq .Type "landing" }}{{ $url = .Site.BaseURL }}{{ end }}
+  <link rel="canonical" href="{{ $url }}">
+  <link rel="icon" type="image/png" sizes="192x192" href="{{ (resources.Get "images/chordpro-mark.png").Permalink }}">
+  <link rel="apple-touch-icon" href="{{ (resources.Get "images/chordpro-touch.png").Permalink }}">
+  <meta name="theme-color" content="#f4f6f8">
+  {{ partial "opengraph.html" (dict "page" . "url" $url "title" $title "desc" $desc) }}
+  {{- with .Site.Params.keywords }}
+  <meta name="keywords" content="{{ . | safeHTMLAttr }}">
+  {{- end }}
+  <link rel="preload" href="{{ "fonts/ApfelGrotezk-Regular.woff2" | absURL }}" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{{ "fonts/ApfelGrotezk-Mittel.woff2" | absURL }}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{{ (resources.Get "css/chordpro.css").Permalink }}">
   {{- if eq .Type "landing" }}
-  <link rel="stylesheet" href="{{ (resources.Get "css/landing.css").Permalink }}">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  {{ end -}}
-  {{- if eq hugo.Environment "stable" }}
-  <style>
-      a.heading-anchor {
-          display: none;
-      }
-  </style>
-  {{ end -}}
+  <link rel="stylesheet" href="{{ (resources.Get "css/home.css").Permalink }}">
+  <script src="{{ (resources.Get "js/home.js").Permalink }}" defer></script>
+  <script src="{{ (resources.Get "js/bgvideo.js").Permalink }}" defer></script>
+  {{- else }}
+  <link rel="stylesheet" href="{{ (resources.Get "css/pagefind-ui.css").Permalink }}">
+  <link rel="stylesheet" href="{{ (resources.Get "css/jquery.fancybox.min.css").Permalink }}">
+  <script src="{{ (resources.Get "js/jquery.min.js").Permalink }}" defer></script>
+  <script src="{{ (resources.Get "js/jquery.fancybox.min.js").Permalink }}" defer></script>
+  <script src="{{ (resources.Get "js/pagefind-ui.js").Permalink }}"></script>
+  {{- end }}
+  <script src="{{ (resources.Get "js/site.js").Permalink }}" defer></script>
+  {{- partial "legacy.html" . }}
 </head>

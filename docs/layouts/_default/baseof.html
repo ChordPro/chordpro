@@ -1,33 +1,15 @@
 <!DOCTYPE html>
 <html lang="{{ .Site.LanguageCode }}">
 {{ partial "head.html" . }}
-<body>
-
-  <div class="container px-0" style="max-width:960px">
-
-    <div class="d-flex" id="wrapper" >
-
-      <!-- Sidebar -->
-      {{ partial "sidebar.html" . }}
-
-      <!-- Page Content -->
-      <div id="page-content-wrapper">
-
-	{{ partial "navbar.html" . }}
-
-	<div style="padding:15px">
-	  <main>
-	    {{- block "main" . }}{{- end }}
-	  </main>
-	</div>
-
-      </div>
-    </div>
+<body class="docs">
+  {{ partial "header.html" . }}
+  <div class="docs-shell">
+    {{ partial "sidebar.html" . }}
+    <main id="main" class="prose">
+      {{- block "main" . }}{{- end }}
+    </main>
   </div>
-
-  <!-- Menu Toggle Script -->
-  {{ partial "menutoggle.html" . }}
-
-  <!-- Search footer block -->
+  {{ partial "footer.html" . }}
   {{- block "footer" . }}{{- end }}
 </body>
+</html>
