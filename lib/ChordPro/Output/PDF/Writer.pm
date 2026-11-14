@@ -131,7 +131,7 @@ sub wrap {
     while ( ( my $sw = $self->strwidth($text) ) > $m ) {
 	warn("TRY:  |$text| ($sw > $m)\n") if $config->{debug}->{wrap};
 	my ( $l, $s, $r ) = $text =~ /^(.+)([-_,.:;\s])(.+)$/;
-	( $text, $ex ) = ( "", $text.$ex ), last unless defined $s;
+	( $text, $ex ) = ( $text.$ex, "" ), last unless defined $s;
 	warn("WRAP: |$text| -> |$l|$s|$r$sp$ex|\n") if $config->{debug}->{wrap};
 	if ( $s =~ /\S/ ) {
 	    $l .= $s;
