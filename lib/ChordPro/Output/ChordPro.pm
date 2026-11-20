@@ -85,7 +85,7 @@ sub generate_song ( $s ) {
 	my %used;
 	foreach my $k ( sort keys %{ $s->{meta} } ) {
 	    next if $k =~ /^(?:title|subtitle|key)$/;
-	    if ( $k =~ $re_meta ) {
+	    if ( !$msp && $k =~ $re_meta ) {
 		$used{$k}++;
 		push( @s, map { +"{$k: ".fq($_)."}" } @{ $s->{meta}->{$k} } );
 	    }
