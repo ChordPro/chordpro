@@ -70,7 +70,7 @@ of non-free ChordPro-aware tools on the ChordPro site.
 ## Commercial tools
 
 If your tool requires registration, a web site account, or licence
-fees, it will get included in the list of commercial ChordPro-aware
+fees, it will get included in the list of Paid ChordPro-aware
 tools on the ChordPro site.
 
 Pricing per year:
@@ -79,3 +79,6 @@ Pricing per year:
 * If your tool requires monthly or yearly subscription fees, 10 x the
   subscription costs per year.
 
+If there is a gratis version without too many restrictions, you may be
+admitted free of charge, but you are kindly encouraged to donate to
+ChordPro development.
