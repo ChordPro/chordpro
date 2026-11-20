@@ -5,6 +5,15 @@ description: "ChordPro related links"
 
 # ChordPro related links
 
+_Being included on this page is a privilege, not a right._
+
+{{< toc >}}
+
+## Official ChordPro links
+
+_ChordPro community version, freely available under the [Artistic License](https://opensource.org/license/Artistic-2.0)._
+
+
 * [Official ChordPro site](https://www.chordpro.org)  
   Contact us via [email](mailto:info@chordpro.org).
 
@@ -12,35 +21,14 @@ description: "ChordPro related links"
 
 * [ChordPro development on GitHub](https://github.com/chordpro/chordpro).
 
-* [Chordie.com](https://www.chordie.com)  
-  Searchable web site with a vast collection of ChordPro notated
-  songs.
+## Free tools that work with ChordPro songs
 
-* [BandBinder](https://bandbinder.app)  
-  BandBinder is for bands or solo musicians to keep charts, setlists and rehearsal notes.
-  It uses ChordPro format to render chords inline with lyrics and performance notes.
-  It can transpose on the fly and help you learn chord shapes for 7 instruments.
-  BandBinder publishes a ChordPro authoring guide, directive reference and examples at
-  [docs.bandbinder.app/chordpro](https://docs.bandbinder.app/chordpro/).
-
-* [Songsheet Generator](http://tenbyten.com/software/songsgen/index.php)  
-  Songsheet Generator is an application which prints songsheets
-  and songbooks for home, small group, or large group 
-  use. The program runs on Microsoft Windows (native .exe),
-  Mac OS X (Java-based native .app), and any platform that
-  supports Java 1.5 (.jar file).
+_These tools are free, as in speech. You can use them and the source
+is available under an Open Source licence._
 
 * [SongPress](https://www.skeed.it/songpress)  
   A simple but often effective editor with WYSIWYG capabilities. Runs
   on Windows and Linux.
-
-* [MobileSheetsPro](http://www.zubersoft.com/mobilesheets/)  
-  MobileSheetsPro is a music viewer for Android and Windows (and soon iOS). It
-  is aimed at musicians to replace the music papers and books. It
-  supports PDF documents, images and ChordPro files.
-
-* [OnSong](https://onsongapp.com/)  
-  OnSong is a MobileSheetsPro like app for Apple iOS.
 
 * [Emacs ChordPro mode](https://git.sr.ht/~breatheoutbreathein/chordpro-mode.el/)  
   Emacs major mode for editing ChordPro files. Available on [MELPA](https://melpa.org/#/chordpro-mode).
@@ -53,7 +41,35 @@ description: "ChordPro related links"
   your song will look like.
 
 * [Chord Provider](https://github.com/Desbeers/Chord-Provider)  
-  Chord Provider is a native, open-source ChordPro file editor and viewer built specifically for macOS. The developer is a regular contributor to the official implementation.
+  Chord Provider is a native, open-source ChordPro file editor and viewer built specifically for Linux.
+
+## Gratis tools that work with ChordPro songs
+
+_These tools are gratis, but not free. You can use them in a limited
+way and the source not available under an Open Source licence._
+
+* [Chordie.com](https://www.chordie.com)  
+  Searchable web site with a vast collection of ChordPro notated
+  songs.
+
+* [BandBinder](https://bandbinder.app)  
+  BandBinder is for bands or solo musicians to keep charts, setlists and
+  rehearsal notes. It uses ChordPro format to render chords inline
+  with lyrics and performance notes. It can transpose on the fly and
+  help you learn chord shapes for 7 instruments.
+
+## Paid tools that work with ChordPro songs
+
+_These tools require license and or subscription fees. Tools listed
+here participate in sponsoring ChordPro development._
+
+* [MobileSheetsPro](http://www.zubersoft.com/mobilesheets/)  
+  MobileSheetsPro is a music viewer for Android and Windows (and soon iOS). It
+  is aimed at musicians to replace the music papers and books. It
+  supports PDF documents, images and ChordPro files.
+
+* [OnSong](https://onsongapp.com/)  
+  OnSong is a MobileSheetsPro like app for Apple iOS.
 
 * [Strumfolio](https://strumfolio.com)  
   Strumfolio is a browser-based ChordPro songbook and reader. It installs as a
