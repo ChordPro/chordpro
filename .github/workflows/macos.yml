@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: perl -V
         run: perl -V
 
@@ -22,6 +22,7 @@ jobs:
       - name: Install Dependencies
         run: |
           cpanm HarfBuzz::Shaper@0.028
+          cpanm CHRISN/Net-SSLeay-1.97_01.tar.gz
           cpanm --installdeps --notest .
 
       - name: Make and run tests
