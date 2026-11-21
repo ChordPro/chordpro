@@ -1621,7 +1621,9 @@ sub songline {
 		my $xt1;
 		if ( $phrase =~ /^\s+$/ ) {
 		    $xt1 = $xt0 + length($phrase) * $pr->strwidth(" ",$ftext);
-#		    $xt1 = $pr->text( "n" x length($phrase), $xt0, $ytext, $ftext );
+		}
+		elsif ( $phrase =~ /^<strut\s+[^>]*>$/ ) {
+		    $xt1 = $xt0 + $pr->strwidth( $phrase, $ftext );
 		}
 		else {
 		    $xt1 = $pr->text( $phrase, $x, $ytext, $ftext );
@@ -2205,8 +2207,9 @@ sub text_vsp {
     }
     my $vsp = $layout->get_size->{height} * $ps->{spacing}->{lyrics};
     #warn("vsp $vsp \"", $layout->get_text, "\"\n");
-    # Calculate the vertical span of this line.
+    return $vsp if $vsp == 0;
 
+    # Calculate the vertical span of this line.
     _vsp( $elt->{context} eq "chorus" ? "chorus" : "text", $ps, "lyrics" );
 }
 
