@@ -59,10 +59,10 @@ way and the source not available under an Open Source licence._
   with lyrics and performance notes. It can transpose on the fly and
   help you learn chord shapes for 7 instruments.
 
-* [ChordPro editor](https://sonua.io/chordpro-editor): Free editor in
-  the browser. Paste chords over lyrics, transpose, switch to Nashville
-  numbers, and save a .cho file or a PDF. Nothing is uploaded. A Chrome
-  extension brings songs over from chord sites.
+* [ChordPro editor](https://sonua.io/chordpro-editor)  
+  Editor in the browser. Paste chords over lyrics, transpose,
+  switch to Nashville numbers, and save a .cho file or a PDF. Nothing
+  is uploaded. A Chrome extension brings songs over from chord sites.
 
 ## Paid tools that work with ChordPro songs
 
