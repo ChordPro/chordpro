@@ -5,7 +5,8 @@ description: "ChordPro related links"
 
 # ChordPro related links
 
-_Being included on this page is a privilege, not a right._
+_Being included on this page is a [privilege, not a right]({{< relref
+"Links_Guidelines" >}})._
 
 {{< toc >}}
 
