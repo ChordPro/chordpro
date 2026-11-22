@@ -1,118 +1,66 @@
 ---
 type: landing
-title: "Welcome to ChordPro!"
-subtitle: A simple text format for the notation of lyrics with chords
-description: The official site for the ChordPro file format and its reference implementation
-footer1: This is the official site for **ChordPro**
-footer2: The reference implementation of the open **ChordPro** format
+title: "ChordPro"
+tagline: "Chords in brackets, lead sheets in PDF"
+description: "Type your song in plain text and put each chord in square brackets. ChordPro, free and open source, turns it into a clean PDF to print or read on a screen."
+# Everything on the home page is in this file. Lines in square brackets are
+# set the way ChordPro prints them: each chord lands over the syllable after
+# it. {version} is replaced with the release being built.
+hero:
+  line: "[D]Brackets [G]lift your [A7]chords over the [D]words"
+  typed_label: "What you type"
+  sub: "Type your song in plain text and put each chord in square brackets. Our free app turns your text into a clean PDF to print or read on a screen."
+  cta: "Download ChordPro"
+  meta: "Version {version} under the Artistic License 2.0 for Windows, macOS, and Linux"
+  video_label: "A guitarist's hand moving between chord shapes"
+lift:
+  headline: "How a text file becomes a chart"
+  lines:
+    - "Swing [D]low, sweet [G]chari[D]ot,"
+    - "Comin’ for to carry me [A7]home."
+  steps:
+    - "Write a line like `Swing [D]low, sweet [G]chari[D]ot` in any text editor."
+    - "ChordPro reads the brackets and lifts each chord right on top of its word."
+    - "You get a PDF song sheet to print or read on a tablet."
+  image: "images/home/default.webp"
+  image_alt: "Swing Low Sweet Chariot as ChordPro prints it, with guitar chord diagrams above the lyrics and chords"
+styles:
+  headline: "One text file prints in many styles"
+  body: "You keep one plain text file for your song. Pick a built-in style to change the look or match what you play."
+  items:
+    - { name: "Default", image: "images/home/default.webp", caption: "Default page with guitar chords" }
+    - { name: "modern1", image: "images/home/modern1.webp", caption: "Clean layout in the modern style" }
+    - { name: "dark", image: "images/home/dark.webp", caption: "Dark page for tablet screens" }
+    - { name: "keyboard", image: "images/home/keyboard.webp", caption: "Song sheet with keyboard chords" }
+    - { name: "ukulele", image: "images/home/ukulele.webp", caption: "Song sheet with ukulele chords" }
+    - { name: "Nashville", image: "images/home/nashville.webp", caption: "Chords shown as Nashville numbers" }
+    - { name: "Roman", image: "images/home/roman.webp", caption: "Chords shown as Roman numerals" }
+more:
+  headline: "Tools for full sheets and songbooks"
+  body: "Put directives in curly braces like `{title: Swing Low Sweet Chariot}` or `{columns: 2}`. You can add chord diagrams for guitar, ukulele, mandolin, and keyboard."
+  image: "images/home/molly.webp"
+  image_alt: "Molly Malone as ChordPro prints it: guitar chord diagrams, the tune in staff notation from ABC, and two columns of verses"
+  features:
+    - { title: "Text markup", text: "Change how words look in your song with markup tags.", link: "ChordPro-Markup" }
+    - { title: "Custom note names", text: "Print chords as Nashville numbers, Roman numerals, or Do Re Mi, and set custom tunings.", link: "ChordPro-Configuration-Instrument" }
+    - { title: "Staff music", text: "Use ABC, a text format for sheet music, to print real staff notes inside your song.", link: "Directives-env_abc" }
+    - { title: "Whole songbooks", text: "Build a full book with a clickable table of contents. You can add a cover and a back page too.", link: "ChordPro-GUI-Songbook" }
+history:
+  headline: "It started at a tennis court"
+  body: "Martin Leclerc and Mario Dorion got to a tennis court 30 minutes early in June 1991 and made up this format. They put out a program called chord in 1992, and Johan Vromans took it on that same year. In 2015 our small team took over and wrote a new app."
+  link: "ChordPro-History"
+download:
+  headline: "Download ChordPro {version}"
+  items:
+    - { os: "Windows", text: "Get the ready-to-go download for Windows to use the app or command line.", link: "Install-Windows-Native" }
+    - { os: "macOS", text: "Get the ready-to-go download for macOS to use the app or command line.", link: "Install-MacOS-Native" }
+    - { os: "Linux", text: "Check for a package on Debian or Ubuntu, or use the one we build for Fedora.", link: "ChordPro-Install-on-Linux" }
+  note: "Read the setup guide for help on every system."
+docs:
+  headline: "Read the guides"
+  body: "Read our guides to get started and learn the format, or look up every setting."
+support:
+  headline: "Help pay for the site"
+  body: "ChordPro is free, and we ask for a small gift through PayPal or Ko-fi. Your gift pays for our web site and for our storage and bandwidth."
+footer: "This site is the home of the ChordPro file format and its free program."
 ---
-
-Here you can find all the information and tools you need to embrace this format to enhance your musical notations. **ChordPro** will help you to let your songs looks great so you just want to play them.
-
-{{< linkbutton >}}
-[Read more]({{< ref "Home" >}})
-{{< /linkbutton >}}
-
-[![Image]({{< asset "images/chordpro-gui-cli.png" >}})]({{< ref "Home" >}})
-
-{{< awesome_icon "fa-book" "Create Songbooks" >}}
-: Turn your **ChordPro** formatted songs into beautiful looking [songbooks]({{< ref "ChordPro-GUI-Songbook" >}}).
-
-{{< awesome_icon "fa-music" "Any Musical Purpose" >}}
-: Although initially intended for guitarists, **ChordPro** can be used for all kinds of musical purposes.
-
-{{< awesome_icon "fa-check-circle-o" "Popular Standard" >}}
-: **ChordPro** became a popular way to write lead sheets and many tools adopted its format.
-
-{{< awesome_icon "fa-file-text-o" "Simple Text Format" >}}
-: **ChordPro** is a simple text file format. Any text editor can be used to create and maintain them.
-
-# ChordPro examples
-
-Here you can see a couple of examples of what <strong>ChordPro</strong> can do for you with its powerful PDF creation:
-
-<div id="examples">
-
-{{< showpages
-"example-armenian"
-"example-background"
-"example-biscuit1"
-"example-mollymalone"
-"example-twelvedays"
-"example-biscuit2"
->}}
-
-</div>
-
-# A simple format but not *simple*
-
-While *simple* by nature, the reference implementation of **ChordPro** has very powerful features.
-
-{{< awesome_icon "fa-code" "Markup" >}}
-: It is possible to use markup in lyrics and other texts to change the way how these will be displayed.
-
-{{< awesome_icon "fa-exchange" "Custom Tunings and Notes" >}}
-: Not just C F G on a 6-string EADGBE tuned guitar. C D E or Do Re Mi? Nashville or Roman? **ChordPro** supports alternative tunings and note naming systems.
-
-{{< awesome_icon "fa-music" "Integrated ABC" >}}
-: Include fragments of musical scores with the integrated [ABC](https://abcnotation.com") support.
-
-<div id="about">
-
-# About ChordPro
-
-<div class="row">
-
-<div class="column">
-
-In 1992 Martin Leclerc and Mario Dorion developed a simple text file format to write lead sheets, songs with lyrics and chords, and a tool to create neatly printed lead sheets out of these text files. The tool was called *chord*, and the text files were called chord files. It soon became a popular way to write lead sheets and many users and tools adopted this format for similar purposes. For still unknown reasons people started calling the files *chordpro* files.
-
-{{< linkbutton >}}
-[Read more about its history]({{< ref "chordpro-history" >}})
-{{< /linkbutton >}}
-
-</div>
-
-<div class="column">
-
-## ChordPro.ORG
-
-In 2015 a small team of enthusiast **ChordPro** users took over the maintenance of the **ChordPro** standard from Martin and Mario and developed a new reference implementation with many new features and an easy to use graphical application.
-
-All is *Open Source* and contributions are always welcome!
-
-{{< linkbutton >}}
-[Contribute on Github]({{< param link_github >}})
-{{< /linkbutton >}}
-
-</div>
-
-</div>
-
-</div>
-
-<div id="support">
-
-# Support us
-
-<div class="row">
-
-<div class="column right-align">
-
-The **ChordPro** standard and reference implementation are free products. Free as in speech. However, web sites, storage and bandwidth cost real money. If you like **ChordPro**, please consider a small donation. We will appreciate it!
-
-</div>
-
-<div class="column left-align">
-
-[{{< awesome_icon "fa-paypal" "Paypal" >}}]({{< param link_paypal >}})
-
-[{{< awesome_icon "fa-coffee" "Buy a coffee" >}}]({{< param link_coffee >}})
-
-**Support us so we can support you!**
-
-</div>
-
-</div>
-
-</div>

@@ -1,0 +1,7 @@
+{{- /*
+  The static root pages (landing_stable.html, landing_beta.html) still load
+  two stylesheets and the small icon from this site. Nothing here links
+  them any more, so ask for their permalinks to keep Hugo publishing them.
+  Remove this partial once the root pages point at the new landing page.
+*/ -}}
+{{- $keep := slice (resources.Get "css/bootstrap4.min.css").Permalink (resources.Get "css/site.css").Permalink (resources.Get "images/chordpro-icon.png").Permalink -}}
