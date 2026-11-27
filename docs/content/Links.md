@@ -64,6 +64,12 @@ way and the source not available under an Open Source licence._
   switch to Nashville numbers, and save a .cho file or a PDF. Nothing
   is uploaded. A Chrome extension brings songs over from chord sites.
 
+* [Conversor a ChordPro](https://acordes.online/chordpro)  
+  Converter in the browser, in Spanish. Paste chords over lyrics to
+  get ChordPro, or turn ChordPro back into chords over lyrics.
+  Transpose, switch between C D E and Do Re Mi chord names, and save
+  a .cho file. Nothing is uploaded.
+
 ## Paid tools that work with ChordPro songs
 
 _These tools require license and or subscription fees. Tools listed
